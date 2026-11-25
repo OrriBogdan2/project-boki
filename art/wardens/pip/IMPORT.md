@@ -134,3 +134,12 @@ card shader is lambert, so the unlit wing side drew dark blue (splash/live wings
 `/home/boki/gens/hunter-round-1124/meeko/r8/tools/mat_rename.py IN OUT card-wing meshy_textured-wing` (JSON only, BIN byte-identical
 to round 7: round 6 body + clips, live sun/cloud). pip's `card` block in warden_look.json is back to main. The edge-on wing streak
 (same as live) is open: a card wing needs its own mesh node (shadow) and a toon floor in warden_card (colour) first.
+
+## 11-25 round 9: the sun and raincloud at full resolution, their faces drawn off the atlas again
+art-gate (run 0pOi) scored sun_cloud 2.5 (live too): black jagged face patches, a cube for the sun. Two causes, both from the
+native switch (e0c5e67730): (1) the decimation cut the companions to about a quarter (sun 480 -> 124 tris, cloud 620 -> 164,
+faces 32/34 -> 8/9 tris) and baked the calm cell into the face UVs (whole-atlas coordinates); (2) `WardenNative.dress` never made
+a `WardenMood`, so the `eyes-mood_*` faces wore the opaque toon and their clear texels drew black. Fix: the contract pip.glb's
+companion surfaces (same design, materials and atlas) fitted onto the native ones (`tools/art1/glb_companions_restore.py`,
+similarity ICP, fit error 0.6-0.7 cm mean; body, wings, skin and clips byte-identical to round 8), and the native path makes
+the mood for arts with atlas faces (Meeko only; Breaker's baked faces untouched). 79,973 -> 80,936 tris.
