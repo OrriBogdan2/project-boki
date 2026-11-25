@@ -25,7 +25,7 @@ var face := 0.0  # yaw the model looks toward
 var model: Node3D = null
 var mats: Array = []
 var flash_t := 0.0
-var flash_tint := Color.WHITE  # the hit flash's colour (a Hunter's own, set with the hit; white again once it ends)
+var flash_tint := Color.WHITE  # the hit flash's colour (a kit sets it with the hit; white again once the flash ends)
 var shell_t := 0.0  # s the body flash stays armour-coloured (Juice sets it on an armour hit or break)
 var freeze_t := 0.0  # visual hit-pause
 var burn_t := 0.0
@@ -444,15 +444,13 @@ func net_follow(dt: float) -> void:
 	vel = net_vel
 
 
-## Tints the body: the hit flash (white; the shell's cyan while shell_t runs), else the wash (Spirit Walk),
-## else the DoT tint (DotLook).
+## Tints the body: the hit flash (white or flash_tint; the shell's cyan while shell_t runs), else the wash
+## (Spirit Walk), else the DoT tint (DotLook).
 func show_flash(hit: float) -> void:
 	var f := hit
 	if f > PITCH_FLASH_MAX and m != null and m.has_meta("pitch_soft_flash"):
 		f = PITCH_FLASH_MAX  # pitch films: a body under steady fire must not read as a white ghost
-	var fc := SHELL_FLASH if shell_t > 0.0 else Color.WHITE
-	if shell_t <= 0.0 and hit > 0.0:
-		fc = flash_tint
+	var fc := SHELL_FLASH if shell_t > 0.0 else flash_tint
 	if f <= 0.0 and wash > 0.0:
 		f = wash
 		fc = wash_col
@@ -468,8 +466,6 @@ func show_flash(hit: float) -> void:
 		for mt in mats:
 			mt.set_shader_parameter("flash", f)
 			mt.set_shader_parameter("flash_color", fc)
-	if hit <= 0.0:
-		flash_tint = Color.WHITE
 
 
 func render(delta: float, alpha: float) -> void:
@@ -486,3 +482,5 @@ func render(delta: float, alpha: float) -> void:
 		position = _held
 	squash = maxf(0.0, squash - delta * 2.5)
 	show_flash(clampf(flash_t / FLASH_FADE, 0.0, 1.0))
+	if flash_t <= 0.0:
+		flash_tint = Color.WHITE
