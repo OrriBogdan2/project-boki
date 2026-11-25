@@ -568,7 +568,7 @@ func _life(home) -> void:
 	_started("boki_sleep")
 	life._nap(sleeper, "tired")
 	var naps := _started("boki_sleep")
-	var walk := maxf(float(life.R["spot_walk"]), BaseLife.PILE_WALK) + 3.0     # s: the walk to a nap spot or a pile
+	var walk := maxf(float(life.r_v["spot_walk"]), BaseLife.PILE_WALK) + 3.0     # s: the walk to a nap spot or a pile
 	for i in int(walk / 0.1):
 		_hear(sleeper)
 		life._tick(sleeper, 0.1)
