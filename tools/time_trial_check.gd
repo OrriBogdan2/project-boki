@@ -27,7 +27,7 @@ func run(main_node: Node) -> void:
 	Save.d["time_trial"] = {}
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(Match.arena_opts("gunslinger"))
+	m.start(Match.arena_opts("gunslinger"))
 	m.set_process(false)
 	var t: TimeTrial = m.arena.grounds.trial
 	_built(m, t)

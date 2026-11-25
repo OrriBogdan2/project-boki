@@ -640,7 +640,7 @@ func _breah() -> void:
 		"dunks %d vy %.1f" % [K.dunks, T.vel.y]
 	)
 	_dunk_no_knock(m, P, T, home, K, reset)
-	await _hop_glide(m, P, home, K, reset)
+	_hop_glide(m, P, home, K, reset)
 	_glide_slam(m, P, K, reset)
 	# ---- data pass: Landslide is 12s with one charge; Shardskin is the base passive
 	ok(
@@ -715,7 +715,7 @@ func _breah() -> void:
 		K.guard_punches == gp0 and K.shield_stacks == 0 and P.shield < 0.5, "shield %.1f" % P.shield
 	)
 	# ---- Rock Hop (item 111): the rocks, the chain, the crash, the rock rolling on
-	await _leap(m, P, T, home, K, reset)
+	_leap(m, P, T, home, K, reset)
 	# item 183: a charge in the air is the same Rock Hop as on the ground (its clip, its charge, its reach)
 	reset.call()
 	var hop_x := _first_hop_reach(m, P, false)
@@ -737,7 +737,7 @@ func _breah() -> void:
 	P.do_dash()
 	ok("anim: her long dash (no charge left) plays breah_exdash", K.anim_id == "breah_exdash")
 	step(m, 0.8)
-	await _dash_moves(m, P, T, home, K, reset)
+	_dash_moves(m, P, T, home, K, reset)
 	_air_dash_hold(m, P, K, reset)
 	_air_punch_steer(m, P, K, reset)
 	# ---- rank 3
@@ -1316,7 +1316,7 @@ func _leap(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Cal
 	var rock_first := [false]
 	aim_at(P, far)
 	var lands0 := K.leap_lands
-	await _chain_over(m, P, K, far, func(): if K.leap_lands > lands0 and K.landslides == rolls0: rock_first[0] = true)
+	_chain_over(m, P, K, far, func(): if K.leap_lands > lands0 and K.landslides == rolls0: rock_first[0] = true)
 	ok(
 		"crash: the last landing hits and shoves a foe beside it",
 		K.leap_hits == hits0 + 1 and dmg(T) >= float(dd["land_dmg"]) * 0.9,
@@ -1382,7 +1382,7 @@ func _leap(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Cal
 		"%s %d" % [hop2, K.boulders - b0]
 	)
 	# over the abyss, on rough ground, at the map's edge
-	await _hop_terrain(m, P, T, home, K, reset, reach)
+	_hop_terrain(m, P, T, home, K, reset, reach)
 
 func hop_rocks(m: Match) -> Array:
 	return m.verbs.walls.filter(func(w): return w.has("hop"))
