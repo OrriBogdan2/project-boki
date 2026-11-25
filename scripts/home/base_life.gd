@@ -20,13 +20,27 @@ extends RefCounted
 ## them has a Boki, its machine waits. home.gd asks choose() when a free Boki's think timer runs out, after its
 ## care and job picks; step() moves every machine on at 10 Hz. Tuning: content/rules/base_life.json.
 
-enum S { ROAM, EAT, NAP, PLAY, PLAY_WITH, WATCH, REACT, MENTOR, CHORE, LEAD, APPROACH, HAND_EAT, DONE }
+enum S { ROAM, EAT, NAP, PLAY, PLAY_WITH, WATCH, REACT, MENTOR, CHORE, LEAD, APPROACH, HAND_EAT, DONE, GREET }
 
 const NAMES := [
-	"Roam", "Eat", "Nap", "Play", "PlayWith", "Watch", "React", "Mentor", "Chore", "Lead", "Approach", "HandEat", "Done"
+	"Roam",
+	"Eat",
+	"Nap",
+	"Play",
+	"PlayWith",
+	"Watch",
+	"React",
+	"Mentor",
+	"Chore",
+	"Lead",
+	"Approach",
+	"HandEat",
+	"Done",
+	"Greet"
 ]
 const TABLE := {
-	S.ROAM: [S.EAT, S.NAP, S.PLAY, S.PLAY_WITH, S.WATCH, S.REACT, S.MENTOR, S.CHORE, S.LEAD, S.APPROACH],
+	S.ROAM: [S.EAT, S.NAP, S.PLAY, S.PLAY_WITH, S.WATCH, S.REACT, S.MENTOR, S.CHORE, S.LEAD, S.APPROACH, S.GREET],
+	S.GREET: [S.ROAM, S.NAP],  # you came back (BaseGreet): a look, or a run over
 	S.APPROACH: [S.HAND_EAT, S.DONE],  # your hand (BaseHandFeed): walks over, then eats or sniffs and leaves
 	S.HAND_EAT: [S.DONE],
 	S.DONE: [S.ROAM],
@@ -139,6 +153,8 @@ func machine(k: Dictionary) -> Fsm:
 		m.guard(S.PLAY_WITH, func(_from: int) -> bool: return _awake(k))
 		m.guard(S.CHORE, func(_from: int) -> bool: return k.has("life_chore"))
 		m.guard(S.APPROACH, func(_from: int) -> bool: return _awake(k) and not _taken(k))
+		m.guard(S.GREET, func(_from: int) -> bool: return _awake(k) and not _taken(k))
+		m.on_exit(S.GREET, func(_to: int) -> void: BaseGreet.end(k))
 		m.guard_from(S.NAP, S.ROAM, func() -> bool: return float(k.get("nap_t", 0.0)) <= 0.0)
 		m.on_enter(S.ROAM, func(_from: int) -> void: k["t"] = 0.0)
 		m.on_enter(S.PLAY, func(_from: int) -> void: _act("play", k))
@@ -309,8 +325,8 @@ func _tick(k: Dictionary, dt: float) -> void:
 		S.ROAM, S.MENTOR:
 			if k.has("eat"):
 				m.go(S.EAT, "feeder")
-			elif m.is_in(S.ROAM):
-				BaseRival.pass_by(self, k)
+			elif m.is_in(S.ROAM) and not BaseRival.pass_by(self, k):
+				BaseGreet.watch(self, k, dt)
 		S.EAT:
 			if k.has("life_eat"):
 				if not BaseFeed.tick(h, k, m.since) or m.since >= float(r_v["max"]["eat"]):
@@ -337,6 +353,8 @@ func _tick(k: Dictionary, dt: float) -> void:
 			hand.eat(k, m)
 		S.DONE:
 			hand.done(m)
+		S.GREET:
+			BaseGreet.tick(self, k, m)
 
 
 func _nap_tick(k: Dictionary, m: Fsm, dt: float) -> void:

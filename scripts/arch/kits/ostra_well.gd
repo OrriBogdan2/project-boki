@@ -141,7 +141,7 @@ func _open() -> void:
 	tick_left = 0.0
 	opens += 1
 	unlock(true, "ostra_well_snap")
-	k.vfx("well_open", center, null, {"r": radius})
+	k.vfx("well_open", center, null, {"r": radius, "life": float(xd()["time"])})
 
 func _tick_open(dt: float) -> void:
 	phase_t += dt
