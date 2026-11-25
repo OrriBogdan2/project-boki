@@ -100,7 +100,8 @@ plays today's clip, so nothing changes until a Hunter's clips land (`WardenNativ
 | `lmb` | a melee swing or a shot | `attack` |
 | `lmb_hold` | a charged swing (state `combo` -1) | `lmb`, then `attack` |
 | `rmb`, `e`, `r` | the kit move or cast of that slot (state `cast_slot` secondary, utility, ult; a kit move starting within `SLOT_CAST` of a cast takes its slot) | `attack` |
-| `hit` | one-shot when a stagger lands (state `hit_t` jumps back with `hit_k` at Oomph.HEAVY_FLINCH; a chip hit only leans) | the loop clip plays on |
+| `hit` | one-shot when a stagger lands (state `hit_t` jumps back with `hit_k` at Oomph.HEAVY_FLINCH; a chip hit only leans) and pushes the body against its facing (struck from the front) | the loop clip plays on |
+| `hit_back` | the same, when the hit pushes the body the way it faces (struck from behind); a Hunter with one of the two plays it for both | `hit` |
 | `land` | one-shot on a hard landing (`WardenClips.FEEL` landing >= `LAND_MIN`) | the loop clip |
 | `dash` | while the state `rolling` (a dash or kit rush) lasts | the air or ground clip |
 | `glide` | while `gliding` (loops) | `jump` |
@@ -132,6 +133,26 @@ spawns (the palm already at the eye, the push 0.07 s in), `as_cloak` a tuck then
 The fire leaves from `weapon_muzzle` on her right hand (the palm), which rides the posed bone. Checks:
 `--warden-native-check` (each row's clip, pose and hand-over), `--muzzle-check`; renders: `--clip-shots --warden=ashwick
 --states [--match] [--no-moves]` (`move_<id>_<stand|run>/`).
+
+## State clips (dash, glide, land, hit, hit_back, downed)
+All ten native Hunters map these six slots to the clips of `art/wardens/<art>/<art>_clips.glb`, built by
+`python3 tools/meshy/native_states.py OUT BASE_meshy.glb tools/meshy/native_states.json SRC_DIR <art>` (spec: Meshy
+library action id, kept second range, game seconds, per weight class; sources are one `animate` download per action id
+on one rig task, `/home/boki/meshy/anim-native-states-1123`). The clip file carries no mesh; translations scale by hips
+height. Timing is the source's number, not the motion's own length: land = `land_feel.json` drop seconds (light 0.24,
+medium 0.30, heavy 0.50), hit = the contract's stagger 0.42 s, downed = `HunterFall.STYLE` seconds (0.4/0.45/0.5, last
+frame held), dash = the kit's own dash time (`dash_s` per Hunter: hem 0.27, ryzz 0.24, sable 0.48, claire 0.45, gil 0.55,
+tarek 0.26, ostra 0.45, pip 0.23, kael 0.24, cinder 0.33; hold or teleport dashes play a 0.45 s burst, last frame held).
+The glide is one 0.4 s arms-out cut played there and back (1.2/1.5/1.8 s a loop by class).
+
+| Class | Dash | Glide | Land | Hit front | Hit back | Downed |
+|---|---|---|---|---|---|---|
+| light (hem, ryzz, sable, claire, gil) | Lean Forward Sprint | Jump with Arms and Legs Open | Jump with Arms Open (tail) | Face Punch Reaction | Hit in Back While Running | Shot and Fall Backward |
+| medium (tarek, ostra, pip) | Standard Forward Charge | same, slower | Dive Down and Land (tail) | Hit Reaction 1 | same | Falling Down |
+| heavy (kael, cinder) | Male Head-down Charge | same, slowest | Jump and Slam Back Down (tail) | Hit Reaction to Waist | same | Shot and Slow Fall Backward |
+
+`--clip-shots --warden=<art> --states [--bare-slots]` shoots idle, walk, run, jump, attack, crouch, then dash, glide,
+land, hit front, hit back and downed (`--bare-slots` drops the six slots: the before).
 
 ## Kit-move clips (data `kmoves`)
 A kit move (state `kmove`, the move's id) may have a clip of its own: `"kmoves": {kmove: {"clip": name, "hold_from": s,
