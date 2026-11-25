@@ -6,6 +6,8 @@ extends RefCounted
 
 const CHECKS := {
 	"--quill-mag-check": ["res://tools/quill_mag_check.gd", "quill_mag_check", null],  # Vex: low drum hits soft
+	# a Boki plate, glove wall or ice wall never hides the Hunter behind it; a rock does
+	"--barrier-sight-check": ["res://tools/barrier_sight_check.gd", "barrier_sight_check", null],
 	# Vex's Slipstep: one plain dash, no pips, no Second Wind
 	"--vex-dash-check": ["res://tools/vex_dash_check.gd", "vex_dash_check", null],
 	"--camps-check": ["res://tools/camps_check.gd", "camps_check", null],  # fixed camps and their XP
@@ -21,4 +23,5 @@ const CHECKS := {
 	# Vex's cross-ability interactions
 	"--gunslinger-combo-check": ["res://tools/archetype_check.gd", "archetype_check", null],
 	"--boss-check": ["res://tools/boss_check.gd", "boss_check", null],  # boss lairs: dial, wards, phases, the Rare Egg
+	"--bot-spacing-shots": ["res://tools/bot_spacing_shots.gd", "bot_spacing_shots", null],  # --shots-dir=<dir>, GPU
 }

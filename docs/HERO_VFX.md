@@ -189,6 +189,13 @@ asserts coverage of all 18 types, distinct colours and shapes, the budget and a 
 20261109-130430 (most read; Electric/Steel lost, Rock/Bug faint, so those four were enlarged/lengthened and Rock darkened).
 The sheet backdrop (glow zone, chests at top) hides Normal and Electric: judge those on open grass.
 
+### Hit colour
+A hit a Boki lands (an ability, a strike, whatever it hits: Hunter, mob or another Boki) flashes and sparks in its own
+type colour, the Field Book's (`DexView.type_col`): one lookup in `Juice.flash_col(target, p, by)`, no new effect. A hit
+by anything else keeps the old by-target colour (a Boki target rims in its type, a Hunter white). Crit gold and armour
+blue still win in `Fx.impact`. `--boki-type-hit-check` reads the flash and spark of three types; `--boki-type-hit-shots
+--shots-dir=<dir>` (GPU) draws six in one strip.
+
 ### Movement trail and capture pop
 
 `KinTypeTrail` (`scripts/match/kin_type_trail.gd`) gives every **moving** summoned or wild Boki a light trail in its
@@ -200,26 +207,39 @@ standing still, parked, knocked out, out of sight or over 45 m from the local pl
 uses the same type colour. `--kin-type-trail-check` asserts group coverage and the cut-offs; `--kin-type-trail-shots`
 (GPU) walks one Boki per type and pops them.
 
-| Type | Species | Colour | Accent | Before |
-|---|---|---|---|---|
-| Normal | 0 | cream | plain short puff | none |
-| Fire | 4 | orange | embers rise slowly | none |
-| Water | 0 | blue | droplets arc up and fall | none |
-| Grass | 4 | green | leaves drift down | none |
-| Spore | 3 | tan | big soft puffs float up | cue only |
-| Electric | 4 | yellow | thin fast zaps, all directions | none |
-| Ice | 4 | cyan | chunky shards fall | none |
-| Rock | 4 | brown | pebbles drop fast | none |
-| Psychic | 3 | violet | two slow ripples and rising motes | cue only |
-| Flying | 2 | sky white | wind streaks along the cast | none |
-| Dragon | 0 | indigo | embers and streaks rising | none |
-| Dark | 4 | deep violet | big slow smoke | none |
-| Poison | 3 | acid green | bubbles rise | cue only |
-| Bug | 4 | amber | many tiny dots, scattered | none |
-| Steel | 2 | silver | short thick glints along the cast | none |
-| Fairy | 3 | pink | small sparkles float up | cue only |
-| Crystal | 3 | teal | facets fan upward | cue only |
-| Sound | 3 | gold | three quick rings | cue only |
+### Boki type colours (what each Boki effect draws in)
+Types are labels (19 in the Bokidex, 16 themes in the game: `KinParts.THEMES`). Two colours show a Boki's type:
+its Bokidex colour (`DexView.type_col`: badge, hit numbers, garden cues) and its cast accent (`KinTypeFx.LOOKS`, from
+`BY_THEME`; the trail and capture pop use it too). The accent keeps the Bokidex colour's hue (shade tuned to read on
+grass). A stage of an ability draws in its **effect category** colour, never a theme colour (`KinRules.CAT_COLORS`:
+damage `#ff7a52`, control `#b48cff`, sustain `#6fe8a6`, utility `#ffd84a`), so colour keeps meaning the effect.
+Data check, 11-20: all 196 stages of every Boki's active, auto and merge ability draw one of those four, none the stock
+fallback; no ability data holds a colour of its own, so there was nothing to fix there. What did ignore the type
+was the accent: ten of 16 accents sat 40-177 degrees of hue away from the type's Bokidex colour (Venom acid green vs
+violet, Echo gold vs blue, Storm yellow vs blue-grey, Prism teal vs pink, Ghost violet vs mint, Stone brown vs grey,
+Titan silver vs tan, Fairy pink vs pale blue, Spore tan vs green, Tempest white vs teal); all ten now match.
+`--boki-type-colour-check` asserts (every stage inside its type's palette = Bokidex colour, accent, four category
+colours; every accent within 30 degrees of hue of its Bokidex colour unless grey); `--verbose` prints the stage colours
+per ability. Venom's violet is the control violet's neighbour: the accent stays at the Boki's feet, the effect stays
+above it. Strips: `--boki-anim-shots --shots-dir=<dir> --boki=<id>` (one Boki per type), `--kin-type-sheet`.
 
-Types that shared a look before: all of them (one category-coloured look). Types with no look of their own in the
-data: Normal, Water and Dragon have no species yet (accents ready). Merged forms (`KinMerge`) are not changed.
+| Type | Species | Bokidex colour | Accent | Effect colours its abilities and merge draw |
+|---|---|---|---|---|
+| venom | Nettlynx, Pipewurm, Vespyx | #b98cff | #b98cff | control, damage |
+| spore | Glomwort, Knotwyrm, Mycroll | #9ccf6a | #9ccf6a | control |
+| gravity | Anchorbill, Gravadillo, Lodestick | #8f8cff | #4a55ff | control, sustain, utility |
+| prism | Bubblisk, Mirrolin, Prismander | #ff9fd0 | #ff9fd0 | control, sustain |
+| lunar | Lanterloris, Lunowl, Selenfin | #cfdcff | #cfdcff | control, sustain |
+| echo | Echolop, Gongibbon, Thrumbird | #6fb6ff | #6fb6ff | control, sustain, utility |
+| ember | Anvilbrock, Bellowary, Chuggamus, Kindlewren | #ff7a3a | #ff6a1a | control, damage, sustain |
+| frost | Frigatee, Prowyak, Rimeshrew, Skateron | #a6eeff | #7fe4ff | control, damage, sustain |
+| storm | Barokat, Barrelmander, Boltstrich, Kestrike | #5f7fb8 | #5f7fb8 | control, utility |
+| stone | Buckleron, Effigeetle, Glintmole, Rampartoad | #a8b0c4 | #7a859f | control, damage, sustain, utility |
+| bloom | Crofthorn, Mossgrade, Soakybara, Terrasloth | #6fd86a | #55d84a | control, damage, sustain |
+| ghost | Snuffapi, Umbrathere | #bcebdf | #bcebdf | control, sustain, utility |
+| dark | Gloamshell, Zippelith | #4a4a9a | #5a3d86 | control, utility |
+| titan | Cairnhorn, Lockatara | #cbb48a | #cbb48a | control, damage, sustain |
+| swarm | Hivara, Marchleaf, Murmurling, Spirevark | #f2c24a | #f0b030 | control, sustain, utility |
+| tempest | Canvastross, Zephyrak | #6fe0cf | #6fe0cf | control, damage |
+
+Normal and Water accents (no species yet) keep their own colours. Merged forms (`KinMerge`) are not changed.
