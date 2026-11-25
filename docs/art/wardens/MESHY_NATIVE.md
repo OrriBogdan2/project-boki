@@ -99,6 +99,22 @@ plays today's clip.
 with at least 10 bones off Meshy's T-pose on the switch frame and after the crossfade; a charged swing takes `lmb`
 without `lmb_hold`; a synthetic clips file's clip lands on Meshy's bones and plays; every slot the data names has its clip.
 
+## Own clips for kit moves (Cinder)
+A Hunter whose kit moves Meshy's one Attack does not fit gets its own clips on Meshy's skeleton: a clips-only `.glb`
+(`art/wardens/<art>/<art>_clips.glb`, an animation file, never the model, read by clip name like the slots'), played by
+data `kmoves` (kit move id -> {clip, then, hold, upper}; WardenNativeMoves, the same rows as the kit-move clips below). They run on the kit's own clock (state `kmove`,
+`kmove_t`), so the pose lands on the frame the kit fires. An `upper` clip keys only torso, head and arms and lies over
+the legs' clip (walk, run, idle, the air) at a weight that rises in 0.08 s and falls in 0.2 s; any other row is a
+full-body clip on the main player. Data `own_casts` stops her casts and recoils playing Meshy's swing.
+Cinder (hands, no weapon: DECISIONS 11-07), written by `tools/meshy/cinder_native_clips.py` (numpy FK and two-bone IK on
+Meshy's node tree, no Blender): `as_lance` the pilot's 0.26 s spool then the 8 Hz-bucking hold from her right palm,
+`as_lance_end` the let-go, `as_aim` the 0.4 s cast sighting along the arm (held), `as_shot` the push on the frame the bolt
+spawns (the palm already at the eye, the push 0.07 s in), `as_cloak` a tuck then both arms flung wide by 0.04 s,
+`lw_jet` the take-off crouch and spring (0.22 s, the kit's lift) then the leaning flight loop, `lw_land` the light landing.
+The fire leaves from `weapon_muzzle` on her right hand (the palm), which rides the posed bone. Checks:
+`--warden-native-check` (each row's clip, pose and hand-over), `--muzzle-check`; renders: `--clip-shots --warden=ashwick
+--states [--match] [--no-moves]` (`move_<id>_<stand|run>/`).
+
 ## Kit-move clips (data `kmoves`)
 A kit move (state `kmove`, the move's id) may have a clip of its own: `"kmoves": {kmove: {"clip": name, "hold_from": s,
 "rate": x, "fade": s}}` (`WardenNativeMoves`). While the move lasts the clip is laid at the move's clock (`kmove_t`), so a
