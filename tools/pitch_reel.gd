@@ -29,6 +29,12 @@ const RAID_DUOS := 3  # shot 9: teams of two
 const ESCAPE_CHARGE_LEFT := 4.0  # s of the uplink's charge left when shot 10 starts
 const CLOCK_LEFT_S := 840.0  # s on the match clock when a stepped shot starts (1e9 reads as junk)
 const KIT_GAP_M := 4.5  # m between the Hunter and its foe in the kit shot (both well inside the frame)
+const FIT_HALF := Vector2(10.8, 6.4)  # half the ground (m) the default camera frames at zoom 1, inside the cut's 1.08 push
+const FIT_PAD_X := 1.6  # m kept beside a fighter
+const FIT_PAD_Z := 2.4  # m kept above and below (a Hunter stands ~2 m tall up the screen)
+const FIT_MAX := 1.0
+const FIT_FOLLOW := 9.0  # 1/s the fit focus eases
+const FIT_FAR_M := 22.0  # a fighter further off than this is not in the shot (parked for the intro, thrown far)
 const KIT_ZOOM := 0.85  # the kit shot's camera zoom (0.55 frames only ~8 m: the pair sat on its edges)
 # m: a foe that has walked further than this from the Hunter is put back at the fight (--reach=)
 const KIT_FOE_REACH := 7.0
@@ -42,6 +48,8 @@ const KO_TAIL_S := 1.5  # s shot 9 keeps playing after the Hunter dies (the enco
 
 var shot := 2
 var take := 1
+var fit_zoom := 0.0  # the eased zoom `--fit` holds so both fighters stay in frame (0: not started)
+var fit_at := Vector3.INF  # the eased focus `--fit` follows
 var hold_zoom := 0.0  # > 0: _step_frame holds the camera at this zoom (the kit shot)
 var hunter := Demo.DEFAULT_HUNTER
 var failed := false  # a shot that cannot be filmed on this build says so (fail()), and the take is dropped
@@ -293,13 +301,34 @@ func _escape() -> void:
 func _step_frame(at: Vector3) -> void:
 	_purge()
 	m.step(1.0 / FPS)
+	if hold_zoom > 0.0 and "--fit" in OS.get_cmdline_user_args():
+		at = _fit(at)
 	if hold_zoom > 0.0:
-		m.cam.user_zoom = hold_zoom  # (the match camera re-reads the wheel's zoom each frame)
-		m.cam.zoom = hold_zoom
-		m.cam.zoom_to = hold_zoom
+		var z := maxf(hold_zoom, fit_zoom)
+		m.cam.user_zoom = z  # (the match camera re-reads the wheel's zoom each frame)
+		m.cam.zoom = z
+		m.cam.zoom_to = z
 	m.cam.snap(at)
 	for h in m.hunters:
 		h.render(1.0 / FPS, 1.0)
+
+
+## `--fit`: the eased focus for `at`, and fit_zoom eased so every fighter still up is inside the frame with a margin
+## (the cut zooms in to 1.08 more). Pulls out fast, comes back in slowly.
+func _fit(at: Vector3) -> Vector3:
+	if fit_at == Vector3.INF or fit_at.distance_to(at) > 8.0:
+		fit_at = at
+	fit_at = fit_at.lerp(at, 1.0 - exp(-FIT_FOLLOW / FPS))
+	var want := hold_zoom
+	for h: Hunter in squad_a + squad_b:
+		if not is_instance_valid(h) or h.out or h.flat_dist(m.player) > FIT_FAR_M:
+			continue
+		want = maxf(want, (absf(h.pos.x - fit_at.x) + FIT_PAD_X) / FIT_HALF.x)
+		want = maxf(want, (absf(h.pos.z - fit_at.z) + FIT_PAD_Z) / FIT_HALF.y)
+	want = minf(want, FIT_MAX)
+	fit_zoom = want if fit_zoom <= 0.0 else lerpf(fit_zoom, want, 1.0 - exp(-(9.0 if want > fit_zoom else 1.2) / FPS))
+	m.set_meta("zoom_hold", fit_zoom)
+	return fit_at
 
 
 # ------------------------------------------------------------------ shot 7: the kit
@@ -382,7 +411,8 @@ func _arg(name: String, dflt: String) -> String:
 
 ## The ground nearest `p` (+ `--off=x,z` m) with solid ground `--room=` m all round (no map edge in the frame) and no
 ## hazard area (lava, static flats...) as near; with `--open=<m>` the clearest such spot in reach instead (fewest trees,
-## rocks, walls and tall-grass tiles within that many m: no canopy or grass hides the fight), nearest on a tie;
+## rocks, walls and tall-grass tiles within that many m: no canopy or grass hides the fight), nearest on a tie, only on
+## the ground `--biome=` / `--island=` name when given;
 ## `p` with the old KIT_ROOM_M rule when no spot that clear is within reach.
 func _roomy_ground(p: Vector3) -> Vector3:
 	var off := _arg("--off=", "0,0").split(",")
@@ -390,6 +420,8 @@ func _roomy_ground(p: Vector3) -> Vector3:
 	var room := int(_arg("--room=", str(KIT_ROOM_M)))
 	var reach := int(_arg("--search=", str(KIT_SEARCH_M)))
 	var open_m := int(_arg("--open=", "0"))
+	var biomes := _arg("--biome=", "").split(",", false)
+	var isles := _arg("--island=", "").split(",", false)
 	var best := Vector3.INF
 	var best_d := INF
 	var best_c := INF
@@ -400,6 +432,8 @@ func _roomy_ground(p: Vector3) -> Vector3:
 			var d := float(dx * dx + dz * dz)
 			if not (m.world.inb(x, z) and m.world.edge_dist(x, z, room) > room):
 				continue
+			if not _on_ground_of(x, z, biomes, isles):
+				continue
 			var c := _clutter(x, z, open_m) if open_m > 0 else 0.0
 			if (c < best_c or (c == best_c and d < best_d)) and not _hazard_near(x, z, room):
 				best = Vector3(x + 0.5, 0.0, z + 0.5)
@@ -407,10 +441,21 @@ func _roomy_ground(p: Vector3) -> Vector3:
 				best_c = c
 	print(
 		(
-			"PITCH_SPOT room=%d open=%d clutter=%s found=%s off=%.0f m"
-			% [room, open_m, best_c, best != Vector3.INF, sqrt(best_d)]
+			"PITCH_SPOT room=%d open=%d clutter=%s found=%s off=%.0f m at=%s biome=%s island=%s"
+			% [
+				room,
+				open_m,
+				best_c,
+				best != Vector3.INF,
+				sqrt(best_d),
+				best,
+				m.world.biome_at(best.x, best.z) if best != Vector3.INF else "-",
+				m.world.island_of(best.x, best.z) if best != Vector3.INF else -1
+			]
 		)
 	)
+	if best == Vector3.INF and not (biomes.is_empty() and isles.is_empty()):
+		fail("no roomy ground on --biome=%s --island=%s" % [biomes, isles])
 	if best != Vector3.INF:
 		return _ground(best)
 	for dz in range(-KIT_SEARCH_M, KIT_SEARCH_M + 1):
@@ -424,11 +469,20 @@ func _roomy_ground(p: Vector3) -> Vector3:
 	return _ground(best if best != Vector3.INF else p)
 
 
+## Whether (x, z) is on one of `biomes` (content/biomes ids; `--biome=`) and `isles` (island indexes; `--island=`); an
+## empty list allows every one.
+func _on_ground_of(x: int, z: int, biomes: PackedStringArray, isles: PackedStringArray) -> bool:
+	if not biomes.is_empty() and not m.world.biome_at(x + 0.5, z + 0.5) in biomes:
+		return false
+	return isles.is_empty() or str(m.world.island_of(x + 0.5, z + 0.5)) in isles
+
+
 ## How cluttered the ground within `r` m of (x, z) is: 3 a tree, rock or wall tile, 2 a void or other-terrace
 ## tile (a cliff or wall face hides the fight), 1 a tall-grass tile.
 func _clutter(x: int, z: int, r: int) -> float:
 	var w: World = m.world
 	var lv := w.level[w.idx(x, z)]
+	var isl := w.island[w.idx(x, z)]
 	var c := 0.0
 	for dz in range(-r, r + 1):
 		for dx in range(-r, r + 1):
@@ -437,9 +491,9 @@ func _clutter(x: int, z: int, r: int) -> float:
 			var i := w.idx(x + dx, z + dz)
 			if w.kind[i] == World.T_BLOCK:
 				c += 3.0
-			elif w.kind[i] == World.T_VOID or w.level[i] != lv:
+			elif w.kind[i] == World.T_VOID or w.level[i] != lv or w.island[i] != isl:
 				c += 2.0
-			elif w.bush.has(i):
+			elif w.bush.has(i) or w.paint.has(i) or w.props.has(i) or w.stairs.has(i):
 				c += 1.0
 	return c
 
