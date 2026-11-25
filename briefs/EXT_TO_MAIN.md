@@ -11294,3 +11294,4 @@ READY ext/stuck-integ-4303fcaa 6a8e22d06f (re-merge of 89a381f5ca onto current o
 READY ext/merge-lane-M7-1121 d15e4fd63b66a9fee6adb1e9a445dcce26286770 (PR #588: main merged, lobby redesign kept, shadow gate GREEN NEW-RED 0 at d6cadf681c, check.sh clean)
 READY ext/merge-lane-M4-1121 72918b075f2662002fc6fa31211fecc3428f75b5 (PR #571: main merged; only NEW-RED was --tutorial-dead-air-check, fixed and re-run 0 failures; check.sh clean)
 READY ext/merge-lane-N1-1122 0d779a9ea435cfea8cce4f48d7ffacaf6c460121 (PR #641: main merged, kit golden re-blessed; 8 gate reds are load flakes also red on clean main, see answer.md; check.sh clean)
+READY ext/stomp-prompt-declutter a1b0a88dfd (PR #819: main merged, check.sh clean, --stomp-check/--stomp-style-check/--stomp-break-sweep-check 0 fail)
