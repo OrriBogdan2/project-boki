@@ -25,7 +25,10 @@ from sfx_lib import N, mix, at, kick, click, crack, ring, bpf
 
 S.reseed(5603)
 HIT_DB = -18.0  # dB RMS: the level of the shared `hit` tick these replace
-TIER_DB = {"hit_light": -18.0, "hit_solid": -17.0}  # dB RMS: both inside the impact category (-16 dB +-3); the layer volumes are confirm_db
+TIER_DB = {
+    "hit_light": -18.0,
+    "hit_solid": -17.0,
+}  # dB RMS: both inside the impact category (-16 dB +-3); the layer volumes are confirm_db
 
 
 def gun(i):

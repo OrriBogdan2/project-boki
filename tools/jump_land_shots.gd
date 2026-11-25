@@ -18,6 +18,7 @@ const GLIDE_T := 0.6  # s of gliding at the canopy's sink before the ground
 
 var heavy := true  # --no-heavy-land: the plain terrace-drop crouch at every height (the "before")
 
+
 func run(main: Node) -> void:
 	tree = main.get_tree()
 	var out := ""
@@ -48,6 +49,7 @@ func run(main: Node) -> void:
 		await _hunter(String(id), out.path_join(String(id)), way)
 	print("JUMP_LAND_SHOTS_DONE")
 	tree.quit()
+
 
 ## m a way down falls: the terrace drop, the long drop, the plunge, else the kerb.
 static func fall_h(way: String) -> float:

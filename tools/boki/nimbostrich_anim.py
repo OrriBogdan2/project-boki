@@ -1,6 +1,7 @@
 """Nimbostrich's (Boltstrich's) own clips on the scan rig it shares with Glomwort (root, hips, spine, neck, head): a
 tall skittish ostrich that high-steps, snaps its neck round at every noise, sprints with its neck stretched flat
 out, and bristles with static before it casts."""
+
 import glomwort_anim
 from boki_clips import LOOK_UP, add, s, seq
 
@@ -114,14 +115,16 @@ def pet(t):
 
 
 CLIPS = dict(glomwort_anim.CLIPS)
-CLIPS.update({
-    "idle": (2.6, True, idle),
-    "walk": (0.8, True, walk),
-    "run": (0.4, True, run),
-    "hop": (0.9, True, leap),
-    "carry": (0.9, True, carry),
-    "pet": (2.2, True, pet),
-    "attack": (0.8, False, peck),
-    "ability": (1.5, False, charge_up),
-    "sleep": (4.0, True, sit),
-})
+CLIPS.update(
+    {
+        "idle": (2.6, True, idle),
+        "walk": (0.8, True, walk),
+        "run": (0.4, True, run),
+        "hop": (0.9, True, leap),
+        "carry": (0.9, True, carry),
+        "pet": (2.2, True, pet),
+        "attack": (0.8, False, peck),
+        "ability": (1.5, False, charge_up),
+        "sleep": (4.0, True, sit),
+    }
+)

@@ -215,6 +215,7 @@ func find(p2: Vector2) -> Dictionary:
 func label() -> String:
 	return "Play Fetch Cup (back %s)" % Save.active_kin().get("name", "your partner")
 
+
 func use() -> void:
 	var ks: Array = h.hrace.entrants()
 	if ks.size() < 2:

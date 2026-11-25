@@ -9,22 +9,31 @@ extends RefCounted
 
 const DT := 1.0 / 60.0
 const MOVES := ["lmb", "rmb", "e", "dash", "r"]
-const WATCH := 6.0              # s watched after each press (Stone Row, Hearthlight and the like end late)
-const HELD := 0.5               # s LMB and RMB stay down
-const CAST_S := 0.35            # s: a sound first heard before this (or before the first damage) is the cast
-const HIT_WINDOW := 0.1         # s: an own sound this close to the first damage is the hit's
-const QUIET := ["step", "grunt"]        # categories that are not an ability's
+const WATCH := 6.0  # s watched after each press (Stone Row, Hearthlight and the like end late)
+const HELD := 0.5  # s LMB and RMB stay down
+const CAST_S := 0.35  # s: a sound first heard before this (or before the first damage) is the cast
+const HIT_WINDOW := 0.1  # s: an own sound this close to the first damage is the hit's
+const QUIET := ["step", "grunt"]  # categories that are not an ability's
 ## arch -> [[the passive's proc, its sound, the file that names it]]; Lace's Red Thread (sight through cover and a
 ## wall climb) and the Boki bond have no proc moment.
 const PROCS := {
-	"ashwick": [["Ablaze", "as_ignite", "scripts/arch/kits/ashwick_kit.gd"],
-		["Flashover", "lw_blaze", "scripts/arch/kits/ashwick_kit.gd"]],
-	"bulwark": [["Guard gained", "bjorn_block", "scripts/arch/kits/bulwark_kit.gd"],
-		["Shield Slam", "pay_slam", "scripts/arch/kits/bulwark_kit.gd"]],
+	"ashwick":
+	[
+		["Ablaze", "as_ignite", "scripts/arch/kits/ashwick_kit.gd"],
+		["Flashover", "lw_blaze", "scripts/arch/kits/ashwick_kit.gd"]
+	],
+	"bulwark":
+	[
+		["Guard gained", "bjorn_block", "scripts/arch/kits/bulwark_kit.gd"],
+		["Shield Slam", "pay_slam", "scripts/arch/kits/bulwark_kit.gd"]
+	],
 	"dolm": [["Shardskin stack", "br_raise", "scripts/arch/kits/dolm_kit.gd"]],
 	"dredge": [["Salvage stack", "dredge_coin_jingle", "scripts/arch/kits/dredge_kit.gd"]],
-	"gil": [["Beached", "gil_beached", "content/vfx/gil.json"],
-		["Beached payoff", "pay_flashpoint", "scripts/arch/kits/gil_kit.gd"]],
+	"gil":
+	[
+		["Beached", "gil_beached", "content/vfx/gil.json"],
+		["Beached payoff", "pay_flashpoint", "scripts/arch/kits/gil_kit.gd"]
+	],
 	"gunslinger": [["Fever lit", "vn_stim", "scripts/arch/kits/gunslinger_kit.gd"]],
 	"juggernaut": [["Enraged", "juggernaut_enrage", "content/vfx/juggernaut.json"]],
 	"mage": [["Static full", "vv_static_full", "scripts/arch/kits/mage_kit.gd"]],
@@ -49,9 +58,11 @@ func run(main: Node, check_ok: Callable) -> void:
 		for mv: String in MOVES:
 			_row(arch, mv, own, _measure(arch, mv))
 		for p: Array in PROCS.get(arch, []):
-			var named := FileAccess.get_file_as_string("res://" + String(p[2])).contains("\"%s\"" % p[1])
-			var made := FileAccess.file_exists("res://audio/%s.wav" % p[1]) \
+			var named := FileAccess.get_file_as_string("res://" + String(p[2])).contains('"%s"' % p[1])
+			var made := (
+				FileAccess.file_exists("res://audio/%s.wav" % p[1])
 				or FileAccess.file_exists("res://audio/%s_1.wav" % p[1])
+			)
 			ok.call(named and made, "%s passive %s: %s is made and played from %s" % [arch, p[0], p[1], p[2]])
 
 
@@ -73,9 +84,10 @@ func _measure(arch: String, mv: String) -> Dictionary:
 	var hero: Hunter = r[1]
 	var dummy: Hunter = r[2]
 	var ally: Hunter = null
-	if arch == "tender":        # Hearth Call needs a mate to call
-		ally = m.make_hunter("A", hero.team, "medium", "Ally", "idle", {}, hero.pos + Vector3(-2.5, 0, 1.5),
-			{"arch": "none"})
+	if arch == "tender":  # Hearth Call needs a mate to call
+		ally = m.make_hunter(
+			"A", hero.team, "medium", "Ally", "idle", {}, hero.pos + Vector3(-2.5, 0, 1.5), {"arch": "none"}
+		)
 	for f in 20:
 		m.step(DT)
 	var hp := dummy.hp
@@ -129,8 +141,12 @@ func _row(arch: String, mv: String, own: Dictionary, r: Dictionary) -> void:
 			buckets["hit"].append(sname)
 		else:
 			buckets["end"].append(sname)
-	print("ABILITY | %s | %s | %s | %s | %s |" % [arch, mv, ", ".join(buckets["cast"]), ", ".join(buckets["hit"]),
-		", ".join(buckets["end"])])
+	print(
+		(
+			"ABILITY | %s | %s | %s | %s | %s |"
+			% [arch, mv, ", ".join(buckets["cast"]), ", ".join(buckets["hit"]), ", ".join(buckets["end"])]
+		)
+	)
 	ok.call(not first.is_empty(), "%s %s: heard in its own set (not silent, not only shared cues)" % [arch, mv])
 	if hit_ms >= 0:
 		ok.call(hit_heard, "%s %s: an own sound sits on its hit (%d ms)" % [arch, mv, hit_ms])

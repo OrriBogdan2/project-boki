@@ -31,7 +31,7 @@ var since_up := LINGER_S  # s since the last release (the hint lingers, then fad
 var watched_s := 0.0  # s since this was added
 var pressed_once := false  # any press seen: the hint is then the press's own
 var done := false
-var can_skip := true             # false: a tap still moves on, but a hold does nothing and no ring shows
+var can_skip := true  # false: a tap still moves on, but a hold does nothing and no ring shows
 
 
 func _init() -> void:
@@ -73,7 +73,7 @@ func _process(delta: float) -> void:
 		since_up += delta
 	var up := can_skip and (held != null or done or since_up < LINGER_S)
 	if can_skip and not pressed_once and watched_s >= HINT_AT and watched_s < HINT_AT + HINT_S:
-		up = true      # (nothing pressed yet: say what ends it)
+		up = true  # (nothing pressed yet: say what ends it)
 	modulate.a = move_toward(modulate.a, 1.0 if up else 0.0, delta / FADE_S)
 	if modulate.a > 0.0:
 		queue_redraw()
