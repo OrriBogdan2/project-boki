@@ -108,8 +108,9 @@ func _locket() -> void:
 		NestItems.wear("species", String(wearer["uid"]))
 		var line: Array = NestItems.preview_lines(p[0], p[1])
 		var baby: Dictionary = _egg(p[0], p[1], i)[1]
-		var named: bool = line.size() == 1 and line[0].contains(Data.KIN[wearer["species"]]["name"])
-		worn += int(baby["species"] == wearer["species"] and named)
+		var kind := Data.egg_species(String(wearer["species"]))      # (the wearer's line's first form: an egg's kind)
+		var named: bool = line.size() == 1 and line[0].contains(Data.KIN[kind]["name"])
+		worn += int(baby["species"] == kind and named)
 		used += 1 - int(Save.d["items"]["likeness_locket"])
 		_stock(0, 0, 0)
 		from_a += 1 if _egg(p[0], p[1], i)[1]["species"] == p[0]["species"] else 0
