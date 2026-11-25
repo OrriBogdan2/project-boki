@@ -11317,3 +11317,4 @@ READY ext/sfx-mantle-kick b448e79641920633442eecf78dbe93e26ba6b019 (mantle, wall
 READY ext/tut-hint-vitals-overlap a65b0bac524 (tutorial hint clear of vitals)
 READY ext/vfx-vex-nuke-rim 721da1ac9e3 (Vex Nuke end disc to a lit rim)
 READY ext/vfx-gil-soft-lanes 076cc9c469ec5971698d383f432042a52ecae9cd (Gil soft lanes)
+READY ext/sfx-four-snd3 93a178f4303c1a63eb4b9199af355c7509f74d96 (four Hunters' ability sounds layered)
