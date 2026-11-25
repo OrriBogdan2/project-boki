@@ -11306,3 +11306,4 @@ READY ext/anim-boki-own-clips-mms 3158eb5525 (bulk-rebase: origin/main merged in
 READY ext/merge-lane-M7-1121 fe0bfd301b (bulk-rebase: origin/main merged in mechanically, was d15e4fd63b; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/plate-status-declutter 8e96c6eb1b (PR #382: merged main; hud_plate = main's cached plate items + status row; plate-status 55/55, clarity 0 fail, hudref 4 fail vs 5 on main, health OK)
 READY ext/pitch-open-ground e801b8fc737cac67f9e3f0a8ce8f08e1fcb57e85 (pitch v18 clean+subs, 13 slots gated full-size, Mac ~/BokiShare)
+READY ext/merge-lane-n19h-1119 972800051f (PR #434: merged main; flash_tint takes main's kit-set tint; solos audio check follows main's knock_warn; targeted: come-look, modes, terrain-hazard, wisp-steal, sfx-set, summon-death, clarity, registry pass; hudref 4 fail vs 5 on main, match-audio 3 fail = main's 3; health OK)
