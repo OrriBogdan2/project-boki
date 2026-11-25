@@ -11314,3 +11314,4 @@ READY ext/stuck-integ-a56f6457 94c717eec7 (supersedes: ext/anim-native-stride ex
 READY ext/tut-zone-first-line 6286d26ab9 (first zone phase hint line)
 READY ext/stuck-integ-a56f6457 a7a5b7ccf0 (supersedes: ext/anim-native-move-states ext/anim-tenzo-motley-sable-gil-native ext/anim-sparkle-neve-meeko-native ext/merge-lane-M3-1121 ext/sfx-grimble-slug-hits + the 17 of 94c717eec7; native clip files packed into one <art>_clips.glb per Hunter (state + kit clips), origin/main merged 0 behind; health OK, registry 1003/0, warden-native 830/1 (Meeko mood-face toon from main #764), look-at/step-sync/tutorial-fight/muzzle/native-hitbox/flinch-layer/sfx-set 0 fail)
 READY ext/sfx-mantle-kick b448e79641920633442eecf78dbe93e26ba6b019 (mantle, wall kick and ledge sounds)
+READY ext/tut-hint-vitals-overlap a65b0bac524 (tutorial hint clear of vitals)
