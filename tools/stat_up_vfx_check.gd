@@ -25,6 +25,7 @@ class FakeGame:
 var bad := 0
 var main: Node
 var home
+var heard: Array = []      # every Sfx cue played since the check began
 
 func ok(cond: bool, what: String) -> void:
 	print("STATUP %s %s" % ["ok  " if cond else "FAIL", what])
@@ -54,6 +55,7 @@ func run(m: Node, mode: String = "check") -> void:
 	ok(glint != null and glint.glints.is_empty(), "two Boki arrive and nothing glints")
 	# 2. each stat on its own
 	var cols := {}
+	Sfx.played.connect(func(n, _at, _db, _p): heard.append(n))
 	for s in Care.STATS:
 		await _settle(glint)
 		Care.add_stat(rec, s, 1)
@@ -65,6 +67,8 @@ func run(m: Node, mode: String = "check") -> void:
 			"+1 %s: one glint on that Boki, icon %s in %s" % [s, StatGlint.ICON.get(s, "?"), col.to_html(false)])
 		cols[col.to_html()] = true
 	ok(cols.size() == 4, "the four stats glint in four different colours")
+	ok(heard.count("garden_chime_stat") == 4 and not heard.has("unlock"),
+		"four +1 gains, four soft stat chimes, no stock unlock (%s)" % [heard])
 	await _tips(glint, rec)
 	# 3. merging
 	await _settle(glint)
