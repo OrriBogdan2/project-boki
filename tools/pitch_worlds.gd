@@ -88,7 +88,7 @@ func hop_take(zone: String) -> void:
 	rig.mark("arrived")
 	await _wait(1.0)
 	await _walk(_resident_at(zone, 0), 1.9)
-	await _wait(1.5)
+	await _wait(3.0)
 
 
 ## Shots 12-15: the Hunter lands in the zone and walks up to its Boki while the view turns.
@@ -164,6 +164,9 @@ func _tidy() -> void:
 		return
 	c.day_t = DAY_T
 	c.talk_cd = 1e9  # no chatter bubbles
+	for k in c.kins:
+		if k.has("emote") and (k["emote"] as Label3D).text != "♥":
+			k["emote_t"] = 0.0  # no star, note or question mark over a Boki
 	_tick += 1
 	if _tick % 3 == 0:
 		for l in c.find_children("*", "Label3D", true, false):
