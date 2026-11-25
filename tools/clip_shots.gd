@@ -229,7 +229,7 @@ func _states(model: Node3D, fps: float, out: String, sub := "states") -> void:
 	for st in STATE_SHOTS:
 		var s: Dictionary = (st[1] as Dictionary).duplicate()
 		s["face"] = model.rotation.y
-		s["cast"] = 99.0  # (s since a cast: none; a native model's swing reads no hit from a state without the counters)
+		s["cast"] = 99.0  # no recent cast: a native swing needs the counters
 		model.set_meta(WardenClips.STATE, s)
 		for k in int(float(st[2]) * fps):
 			if st[0] == "attack":
