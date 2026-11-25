@@ -20,7 +20,9 @@ var result: Texture2D = null
 static func request(parent: Node, w: World, cb: Callable) -> void:
 	if DisplayServer.get_name() == "headless":
 		return
-	var data := _data(w)
+	# (under a match's loading screen the tile pass runs in slices: the Hud's match; the home map bake has none)
+	var mt = parent.get("m") if parent else null
+	var data: Array = await _data(w, mt if mt is Match else null)
 	var key := hash([data[0].get_data(), data[1].get_data(), data[2].get_data(), w.w, w.h])
 	if _cache.has(key):
 		cb.call(_cache[key])
@@ -65,7 +67,7 @@ func _process(_d: float) -> void:
 	queue_free()
 
 ## Per tile: [colour + land, height/path/trees/walls, sheer/lip/tall grass/bridge].
-static func _data(w: World) -> Array:
+static func _data(w: World, mt: Match = null) -> Array:
 	var n := w.w * w.h
 	var a := PackedByteArray(); a.resize(n * 4)
 	var b := PackedByteArray(); b.resize(n * 4)
@@ -77,7 +79,9 @@ static func _data(w: World) -> Array:
 	var tops: Array = []      # per island: its ground colour (the per-tile biome lookup is slow)
 	for ii in w.islands.size(): tops.append(Color(w._bio_of_island(ii)["top"]))
 	var top0 := Color(w.biome["top"])
+	var rows := w.w * 16
 	for i in n:
+		if mt != null and i % rows == 0: await mt._slice()      # (item 33)
 		var k := w.kind[i]
 		if k == World.T_VOID:
 			continue

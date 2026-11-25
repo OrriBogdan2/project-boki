@@ -447,12 +447,12 @@ func _start(o: Dictionary) -> void:
 	if BlightDir.enabled(opts) and big and world.layout_id != "tutorial":
 		# the Blight: Wardens on the islands from the start, Skitters later (scripts/match/blight_dir.gd)
 		blight = BlightDir.new(self)
-		blight.setup()
+		await blight.setup()
 	if rolling:
 		rolling.after_setup()      # the map as picked over as the session is old
 	if not (opts.get("duel", false) or opts.get("arena", false) or opts.get("tutorial", false)):
 		keys = KeyRun.new(self)
-		keys.setup()               # who carries the chest keys, and the Shrublings
+		await keys.setup()         # who carries the chest keys, and the Shrublings
 	await _slice()
 	_trim_shadows(self)
 	for list in [mobs, kins, chests, breaks, shrines, wpicks]:
