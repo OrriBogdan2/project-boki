@@ -21,7 +21,10 @@
   "uplink_fizzle": "cast",
   "uplink_sputter": "cast",
   "uplink_shut": "cast",
-  "uplink_lift": "cast"
+  "uplink_lift": "cast",
+  "heart_charged": "cast",
+  "tide_bite": "cast",
+  "lair_reseal": "cast"
  },
  "reach": {
   "heart_charge": 70,

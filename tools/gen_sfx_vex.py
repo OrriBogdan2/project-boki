@@ -391,9 +391,9 @@ def build():
     S.takes_cat("gunslinger_hurt", hurt, 3, "grunt")
     S.save_cat("gunslinger_down", down(), "grunt")
     S.save_cat("gunslinger_death", death(), "grunt")
-    S.save_cat("vn_coin_flip", coin_flip(), "cast")
-    # coin flip, then held fire (FireSfx): the rounds after a burst's first play these short takes; both are
-    # written last so the sounds above keep their noise (one seeded generator)
+    S.save_cat("vn_coin_flip", coin_flip(), "cast")  # last: the sounds above keep their random stream
+    # held fire (FireSfx): the rounds after a burst's first play these short takes; written last so the sounds
+    # above keep their noise (one seeded generator)
     S.takes_hold("vn_rifle_hold", rifle_hold, 3, "fire")
 
 

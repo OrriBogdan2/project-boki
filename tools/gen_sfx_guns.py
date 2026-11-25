@@ -99,7 +99,6 @@ S.takes_cat("gun_shotgun", shotgun, 2, "heavy_fire")
 S.takes_cat("gun_sniper", sniper, 1, "heavy_fire")
 S.takes_cat("gun_minigun", minigun, 3, "fire")
 S.save_cat("gun_minigun_spin", minigun_spin(), "cast")
-print("pickup gun and minigun shots written")
 
 
 # Hold takes (FireSfx plays <shot>_hold from the 2nd round of a held burst; the 1st keeps the full crack above).
@@ -121,5 +120,6 @@ def rifle_hold(i):
 
 
 S.takes_hold("gun_smg_hold", smg_hold, 3, "fire")
+S.takes_hold("smg_hold", stock_smg_hold, 3, "fire")
 S.takes_hold("gun_rifle_hold", rifle_hold, 3, "fire")
 print("pickup gun, minigun and hold takes written")
