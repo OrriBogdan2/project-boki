@@ -46,6 +46,7 @@ var _reach_cache := {}
 var trapped := ""                       # who the last refused keeps_paths would have shut in
 var _fence_sig := ""
 var _water_sig := ""
+var _bed_sig := ""                      # the crop beds' tiles the ground's grass was last grown round
 static var pending_toast := ""
 var popped := -1                       # uid of the deco just placed (its node gets the pop)
 var debug_m := Vector2.INF             # tooling: where the "mouse" is, for screenshots
@@ -388,8 +389,16 @@ func _apply_blockers() -> void:
 		if HubLayout.holds(lay, String(e["id"])): continue
 		for c in HomeLayout.deco_cells(e):
 			mark.call(c, "d:%d" % int(e["u"]), HomeLayout.blocks(String(e["id"])), HomeLayout.top_of(String(e["id"])))
-	for c in PlotBlocks.tiles(h._plot_spots((h._d()["plots"] as Array).size())):
+	var beds := PlotBlocks.tiles(h._plot_spots((h._d()["plots"] as Array).size()))
+	for c in beds:
 		mark.call(c, "", true)
+	var walled := func(c: Vector2i) -> bool:
+		return not w.inb(c.x, c.y) or w.kind[w.idx(c.x, c.y)] != World.T_GROUND
+	for c in PlotBlocks.pockets(beds, walled):
+		mark.call(c, "", true)
+	if not _bed_sig.is_empty() and str(beds) != _bed_sig:
+		mesh_t = 0.2      # a bed moved: the grass leaves its new tiles and comes back on the old ones
+	_bed_sig = str(beds)
 	for k in lay["water"]:
 		mark.call(HomeLayout.unkey(k), "w", false)      # (feelfix) ponds are water you can wade and swim in, not walls
 	_evict_feeders()
