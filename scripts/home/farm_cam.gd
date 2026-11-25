@@ -167,7 +167,11 @@ static func _in_prop(home: Node3D, p: Vector3, gap: float) -> bool:
 			continue
 		var at: Vector3 = home.spots[nm]
 		var box: Array = props[nm]
-		if absf(p.x - at.x) < float(box[0]) + gap and absf(p.z - at.z) < float(box[2]) + gap and p.y < float(box[1]) + gap:
+		if (
+			absf(p.x - at.x) < float(box[0]) + gap
+			and absf(p.z - at.z) < float(box[2]) + gap
+			and p.y < float(box[1]) + gap
+		):
 			return true
 	return false
 

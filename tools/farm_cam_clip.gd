@@ -2,9 +2,9 @@ extends RefCounted
 ## --farm-cam-clip [--clip-dir=farm_cam_clip]: film the farm's third-person view (FarmCam) on a made-up garden (never
 ## the real save): you walk with the real keys (W is away from the camera) to the garden beds, drag the view round,
 ## to a roaming Boki, to the house, then back up to a wall so the camera is pulled in. With --fc-games it films the
-## Boki minigames (Spark Volley, Fetch Cup, Kite Tow, Echo Steps) played from the third-person view instead. PNG frames (cam_NN_<what>.png)
-## and the movie (farm_cam.avi) go to <tree>/<clip-dir>. Like tools/farm_greet_clip.gd it re-runs itself as a child
-## Godot under the movie writer (GPU worker). Prints FCCLIP lines.
+## Boki minigames (Spark Volley, Fetch Cup, Kite Tow, Echo Steps) played from the third-person view
+## instead. PNG frames (cam_NN_<what>.png) and the movie (farm_cam.avi) go to <tree>/<clip-dir>. Like
+## tools/farm_greet_clip.gd it re-runs itself as a child Godot under the movie writer (GPU worker). Prints FCCLIP lines.
 
 const FPS := 30
 const SIZE := "1600x900"
@@ -15,8 +15,11 @@ const DEADLINE_S := 150.0  # s of film at most
 const BUILDINGS := [
 	["house", 33, 28, 0], ["crop_patch", 42, 31, 0], ["cook_pot", 36, 35, 0], ["market_stall", 44, 37, 0]
 ]  # id, x, z, turns
-const GAMES := [  # game member on Home, shots: s into the game, the key held (kite steering)
-	["hvolley", [1.0, 5.0], ""], ["hfetch", [1.0, 6.0], ""], ["hkite", [1.5, 4.0], "right"], ["hecho", [2.0, 9.0], ""]
+const GAMES := [  # member on Home, its fixture's name, shots (s into the game), the key held (kite steering)
+	["hvolley", "log_node", [1.0, 5.0], ""],
+	["hfetch", "mat", [1.0, 6.0], ""],
+	["hkite", "stand", [1.5, 4.0], "right"],
+	["hecho", "middle", [2.0, 9.0], ""]
 ]
 const GAME_FROM := Vector3(0.0, 0, 1.6)  # m south of a game's fixture: where you stand to start it
 const SPECS := [["cindle", "Ash", 95.0], ["burrlet", "Moss", 60.0], ["zapple", "Pip", 30.0]]  # species, name, trust
@@ -124,17 +127,16 @@ func _games() -> void:
 	for g in GAMES:
 		await _open_base()
 		var game: Object = h.get(g[0])
-		var fixture: Node3D = game.get("log_node") if g[0] == "hvolley" else game.get("mat") if g[0] == "hfetch" \
-				else game.get("stand") if g[0] == "hkite" else game.get("middle")
+		var fixture: Node3D = game.get(g[1])
 		h.ppos = fixture.position + GAME_FROM
 		h.player.position = h.ppos
 		h.cam.snap(h.ppos)
 		await _wait(1.2)
 		game.use()
 		var t := 0.0
-		for at in g[1]:
-			if g[2] != "":
-				Input.action_press(g[2])
+		for at in g[2]:
+			if g[3] != "":
+				Input.action_press(g[3])
 			await _wait(float(at) - t)
 			t = float(at)
 			await _shot(String(g[0]).substr(1) + "_%d" % int(at))

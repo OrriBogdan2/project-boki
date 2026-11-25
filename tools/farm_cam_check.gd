@@ -141,7 +141,10 @@ func _wall_part() -> void:
 	var rise_deg := rad_to_deg(asin((cam.global_position.y - aim.y) / near))
 	ok(
 		near > float(FarmCam.rules()["wall_min_m"]) - 0.3 and rise_deg > float(FarmCam.rules()["pitch_deg"]) + 10.0,
-		"the wall keeps it %.1f m away and tips the view up instead (%.0f deg, from %.0f)" % [near, rise_deg, float(FarmCam.rules()["pitch_deg"])]
+		(
+			"the wall keeps it %.1f m away and tips the view up instead (%.0f deg, from %.0f)"
+			% [near, rise_deg, float(FarmCam.rules()["pitch_deg"])]
+		)
 	)
 	var inside := false
 	var s := 0.0
@@ -182,7 +185,13 @@ func _prop_part() -> void:
 		while s <= dist:
 			through = through or FarmCam._in_prop(home, aim + (cam.global_position - aim).normalized() * s, 0.0)
 			s += 0.1
-		ok(not through, "the %s: nothing of the view is inside it (%.1f m back, camera z %.1f, it at %.1f)" % [nm, dist, cam.global_position.z, at.z])
+		ok(
+			not through,
+			(
+				"the %s: nothing of the view is inside it (%.1f m back, camera z %.1f, it at %.1f)"
+				% [nm, dist, cam.global_position.z, at.z]
+			)
+		)
 	home.ppos = HomeLayout.LANDING + Vector3(-6, 0, -3)
 	home.cam.snap(home.ppos)
 	await _settle(1.0)
