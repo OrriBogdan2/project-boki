@@ -250,11 +250,14 @@ func thief(a) -> void:
 	var wheel := k.anim_id
 	var pop := [0.0]  # an Array: a lambda can't assign a captured local
 	var live := {"before": 0, "mid": 0, "after": 0}  # steps her flip trail (data "flip") draws, by turn phase
+	var flipped := [0.0]  # how far the flip itself carried her: the run after it (keys held) is not the Cartwheel
 	a_x.step(
 		m,
 		0.55,
 		func():
 			pop[0] = maxf(pop[0], k.glint_pop)
+			if p_v.roll_t <= 0.0 and flipped[0] == 0.0:
+				flipped[0] = p_v.flat_dist(home)
 			var at: float = m.time - k.anim_at
 			var key := "after"
 			if at < FLIP_TURN[0]:
@@ -304,13 +307,13 @@ func thief(a) -> void:
 	a_x.ok(
 		"dancer dash: Vault cartwheels about 4.5m, speeds +18%, empowers",
 		(
-			absf(p_v.flat_dist(home) - far) < 0.6
+			absf(flipped[0] - far) < 0.6
 			and k.primed_t > 0.0
 			and k.speed_bonus() > 0.15
 			and p_v.dashes < d0 - 0.5
 			and wheel in ["thf_vault_l", "thf_vault_r"]
 		),
-		"moved %.1f primed %.2f anim %s" % [p_v.flat_dist(home), k.primed_t, wheel]
+		"flip %.1f (to 0.55 s %.1f) primed %.2f anim %s" % [flipped[0], p_v.flat_dist(home), k.primed_t, wheel]
 	)
 	var gold: Dictionary = AimKit.entry(p_v, "aim")
 	a_x.ok(
