@@ -5,6 +5,7 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	"--cc-measure-check": ["res://tools/cc_measure_check.gd", "cc_measure_check", null],
 	# a Boki plate, glove wall or ice wall never hides the Hunter behind it; a rock does
 	"--barrier-sight-check": ["res://tools/barrier_sight_check.gd", "barrier_sight_check", null],
 	# Vex's Slipstep: one plain dash, no pips, no Second Wind

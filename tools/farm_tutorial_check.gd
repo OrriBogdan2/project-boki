@@ -30,7 +30,7 @@ func _new_save(kin_count := 1) -> Dictionary:
 	var d := Save.fresh()
 	for i in kin_count:
 		var k := Save.new_kin(["zapple", "cindle"][i], ["Pip", "Ash"][i])
-		k["uid"] = "ftut%d" % i      # likes are seeded from the uid: a random one hates the tutorial's food
+		k["uid"] = "ftut%d" % i  # likes are seeded from the uid: a random one hates the tutorial's food
 		k["level"] = 5
 		Care.ensure(k)
 		d["roster"].append(k)
@@ -144,10 +144,9 @@ func _base_tutorial() -> void:
 		one_line = one_line and not FarmTutorial.hint_text(String(st["id"])).contains("{")
 	ok(one_line, "one banner line per step, no leftover tokens")
 	var last := FarmTutorial.hint_text("out")
-	var path_said: bool = last.contains("Wayseed") and last.contains("Boki that leans")
 	ok(
-		last.contains("Waystone") and path_said and not last.contains("\n"),
-		"the last hint: the Waystone, and its unlock path (a Wayseed and a Boki leaning that way) in one line"
+		last.contains("portal") and last.contains("Stay") and not last.contains("\n"),
+		"the last hint: the portal and Stay in one short line (the Waystone path is the hub's own hint)"
 	)
 	ok(FarmTutorial.current() == "meet", "it starts with meeting your Boki")
 	FarmTutorial.event("play")
@@ -923,12 +922,15 @@ func _build_spotlight() -> void:
 	for id in ["house", "hammer", "task"]:
 		FarmTutorial.mark(id)
 	FarmTutorial.detect()
-	ok(FarmTutorial.current() == "feed" and FarmTutorial.stage("feed") == "place",
-			"the trough step is up to place (%s)" % FarmTutorial.current())
+	ok(
+		FarmTutorial.current() == "feed" and FarmTutorial.stage("feed") == "place",
+		"the trough step is up to place (%s)" % FarmTutorial.current()
+	)
 	await _lights_build_tile(home, "feeder_trough", "trough")
 	home.queue_free()
 	await main.get_tree().process_frame
 	FarmSpotlight.reset()
+
 
 func _lights_build_tile(home, entry: String, what: String) -> void:
 	var hb: HomeBuild = home.hb
@@ -945,8 +947,10 @@ func _lights_build_tile(home, entry: String, what: String) -> void:
 	for b in hb.bar.find_children("*", "Button", true, false):
 		if b.get_meta("tab", "") == "Buildings" and not b.is_queued_for_deletion():
 			tab = b
-	ok(FarmSpotlight.showing() and FarmSpotlight.in_beat() and _lit(tab),
-			"%s step, build mode on another tab: the Buildings tab gets the spotlight beat" % what)
+	ok(
+		FarmSpotlight.showing() and FarmSpotlight.in_beat() and _lit(tab),
+		"%s step, build mode on another tab: the Buildings tab gets the spotlight beat" % what
+	)
 	hb.cat = "Buildings"
 	hb._build_bar()
 	await main.get_tree().process_frame
@@ -963,12 +967,14 @@ func _lights_build_tile(home, entry: String, what: String) -> void:
 	hb._drop_held()
 	hb.toggle()
 
+
 func _pick_entry(hb: HomeBuild, entry: String) -> void:
 	if entry.begins_with("feeder_"):
 		hb.take_feeder(entry.trim_prefix("feeder_"))
 	else:
 		hb.take(entry)
 	hb._build_bar()
+
 
 ## Is the spotlight's first cut-out round this control?
 func _lit(c: Control) -> bool:
@@ -977,10 +983,11 @@ func _lit(c: Control) -> bool:
 	var hole: Rect2 = FarmSpotlight._node._holes[0]
 	return hole.get_center().distance_to(c.get_global_rect().get_center()) < 2.0
 
+
 ## A Home with its interface built (its meshes build over a few frames; slower on a software rasterizer).
 func _ready_home():
 	var home = await main._hb_home()
-	var t0 := CheckClock.own_msec()      # the home builds its UI in frame slices: CPU work, not game time
+	var t0 := CheckClock.own_msec()  # the home builds its UI in frame slices: CPU work, not game time
 	while home.panel_host == null and CheckClock.own_msec() - t0 < 60000:
 		await main.get_tree().process_frame
 	home._close_panel()
