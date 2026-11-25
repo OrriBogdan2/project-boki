@@ -213,7 +213,7 @@ func _bot() -> void:
 		if i % 200 == 0:
 			await main.get_tree().process_frame
 	ok(GardenFirstDay.did("toy"), "bot: a Boki playing at the toy ticks 'toy'")
-	await _race(home)
+	_race(home)
 	_nap(home, a, b)
 	home._make_egg(a["rec"], b["rec"])
 	ok(GardenFirstDay.did("pair"), "bot: pairing two Boki ticks 'pair'")

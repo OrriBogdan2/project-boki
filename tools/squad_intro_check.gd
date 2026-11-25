@@ -74,7 +74,7 @@ func _deck_and_sounds(m: Match) -> void:
 	ok(loops.is_empty(), "the ride plays no looping engine or wind (%s)" % [loops])
 
 func _ranks_aboard() -> void:
-	var m := await _start(false)
+	var m := _start(false)
 	var p: Hunter = m.player
 	p.skill_pts = 2
 	ok(int(p.slot_lv["sec"]) == 0 and int(p.slot_lv["dash"]) == 0, "every ability starts locked")
@@ -103,7 +103,7 @@ func _ranks_aboard() -> void:
 func _start(intro: bool) -> Match:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1500.0, "seed": 4242, "squad_intro": intro})
+	m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1500.0, "seed": 4242, "squad_intro": intro})
 	m.set_process(false)
 	return m
 
@@ -124,7 +124,7 @@ func _key() -> InputEventKey:
 
 func _plays_out() -> void:
 	SquadIntro._last_lineup = ""
-	var m := await _start(true)
+	var m := _start(true)
 	ok(m.intro != null and m.intro.running(), "a real start plays the squad intro")
 	if m.intro == null:
 		m.queue_free()
@@ -174,7 +174,7 @@ func _plays_out() -> void:
 
 func _skips() -> void:
 	SquadIntro._last_lineup = ""
-	var m := await _start(true)
+	var m := _start(true)
 	if m.intro == null:
 		ok(false, "the intro plays for the skip case")
 		m.queue_free()
@@ -185,13 +185,13 @@ func _skips() -> void:
 	ok(m.hud.visible and m.hud.map_open(), "the skip opens the drop map")
 	m.queue_free()
 	await main.get_tree().process_frame
-	m = await _start(true)
+	m = _start(true)
 	var again := m.intro == null and is_equal_approx(m.skydrop.plan_len, DropSquad.PLAN_T)
 	ok(again, "the same lineup again is not shown twice")
 	m.queue_free()
 	await main.get_tree().process_frame
 	SquadIntro._last_lineup = ""
-	m = await _start(false)
+	m = _start(false)
 	ok(m.intro == null and m.hud.map_open(), "a match started by hand has no intro")
 	m.queue_free()
 	await main.get_tree().process_frame

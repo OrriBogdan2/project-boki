@@ -19,8 +19,8 @@ var wind_still := 0.0  # s into jug_lunge_wind where its pose holds (its hold_fr
 
 func run(a) -> void:
 	a_v = a
-	await clips()
-	await kit()
+	clips()
+	kit()
 
 
 # ------------------------------------------------------------------ the clips, offline

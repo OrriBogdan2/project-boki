@@ -60,7 +60,7 @@ func _phase(t: float) -> String:
 func _hunter(main: Node, arch: String) -> void:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(
+	m.start(
 		{
 			"training": true,
 			"teams": 2,
