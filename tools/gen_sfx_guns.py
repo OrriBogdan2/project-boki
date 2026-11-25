@@ -111,6 +111,15 @@ def smg_hold(i):
     return mix(click(0.002, 4000, 12000) * 1.4, body, snap, tail(0.06, 3200, 0.02) * 0.5)
 
 
+def stock_smg_hold(i):
+    # the minigun's weapon row names the stock 'smg' (sfx_combat.py): same voice as that shot, held
+    d = 0.12
+    body = kick(300 + 12 * i, 120, d, 0.006, 0.02, 2.4) * 0.5
+    snap = crack(d, 900, 5000 + 300 * i, 0.01) * 2.6
+    mid = crack(d, 250, 900, 0.016) * 2.0
+    return mix(click(0.003, 3000, 10000) * 1.6, body, snap, mid, tail(0.07, 2200, 0.025) * 0.7)
+
+
 def rifle_hold(i):
     d = 0.17
     body = kick(260 + 10 * i, 95, d, 0.01, 0.03, 2.6) * 0.6
