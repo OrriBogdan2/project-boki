@@ -520,6 +520,7 @@ archetypes/dredge.json:e.rank3_stun	0.2
 archetypes/dredge.json:e.stun	1.1
 archetypes/dredge.json:e.windup	0.38
 archetypes/dredge.json:gun.armor_k	0.66
+archetypes/dredge.json:plate_offset	3.06
 archetypes/dredge.json:rank_cd.dash[0]	1
 archetypes/dredge.json:rank_cd.dash[1]	0.8214
 archetypes/dredge.json:rank_cd.dash[2]	0.6429
@@ -639,7 +640,7 @@ archetypes/gil.json:passive.cd	8.0
 archetypes/gil.json:passive.need	3
 archetypes/gil.json:passive.stun	0.75
 archetypes/gil.json:passive.window	5.0
-archetypes/gil.json:plate_offset	2.69
+archetypes/gil.json:plate_offset	2.04
 archetypes/gil.json:resource.max	3
 archetypes/gil.json:rmb.bag.air	2
 archetypes/gil.json:rmb.bag.fire	2
@@ -831,7 +832,7 @@ archetypes/juggernaut.json:lmb.wave_size[1]	0.6
 archetypes/juggernaut.json:lmb.wave_speed	36.0
 archetypes/juggernaut.json:model_glow.emit	1.4
 archetypes/juggernaut.json:model_glow.strength	2.4
-archetypes/juggernaut.json:plate_offset	2.32
+archetypes/juggernaut.json:plate_offset	2.65
 archetypes/juggernaut.json:rank_cd.dash[0]	1
 archetypes/juggernaut.json:rank_cd.dash[1]	0.8462
 archetypes/juggernaut.json:rank_cd.dash[2]	0.6154
@@ -1266,7 +1267,7 @@ archetypes/tender.json:passive.lock	4.0
 archetypes/tender.json:passive.max	2
 archetypes/tender.json:passive.pick_r	1.1
 archetypes/tender.json:passive.pick_speed	0.6
-archetypes/tender.json:plate_offset	2.02
+archetypes/tender.json:plate_offset	1.73
 archetypes/tender.json:rank_cd.air[0]	1
 archetypes/tender.json:rank_cd.air[1]	0.8929
 archetypes/tender.json:rank_cd.air[2]	0.7857

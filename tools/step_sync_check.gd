@@ -22,8 +22,8 @@ const COUNT_LOOPS := 3  # loops counted
 const NO_FEET := ["ostra"]  # Motley hovers on his box: no feet, no steps (KMovesStone.HOVER_GAIT)
 const PLANT_BAND := 0.3  # x a foot's height range over its low: under this it is planted (tools/anim_audit.gd)
 const LIFT_BAND := 0.6  # x: over this it has lifted
-const NATIVE_SPEEDS := {"walk": [1.4, 2.6], "run": [3.2, 4.6], "crouch": [1.4]}  # state -> ground speeds heard (m/s)
-const RAMP := [[1.4, 2.0], [4.6, 2.0], [2.0, 2.0], [3.6, 2.0]]  # [m/s, s]: walk, run, walk, run
+const NATIVE_STATES := ["walk", "run", "crouch"]
+const RAMP_S := 2.0  # s on each leg of the walk, run, walk, run ramp
 
 var bad := 0
 var rows := 0
@@ -285,12 +285,13 @@ func _native(id: String, nat: WardenNative) -> void:
 	nat.set_process(false)
 	var plants := {}  # state -> {foot: [s into the clip]}
 	var data: Dictionary = nat.d.get("plants", {})
-	for state in NATIVE_SPEEDS:
+	for state in NATIVE_STATES:
 		plants[state] = _native_plants(nat, state)
 		_clip_row(id, state, plants[state], data.get(state, {}))
 	read[WardenGlb.art(id)] = {"native": plants}
-	for state in NATIVE_SPEEDS:
-		for speed in NATIVE_SPEEDS[state]:
+	var speeds := _native_speeds(nat.d)
+	for state in NATIVE_STATES:
+		for speed in speeds[state]:
 			_native_row(id, nat, state, speed, plants[state])
 	_ramp_row(id, nat)
 	_still_row(id, nat)
@@ -354,11 +355,25 @@ func _native_row(id: String, nat: WardenNative, state: String, speed: float, pl:
 	nat.root.set_meta(WardenClips.STATE, {})
 
 
+## The ground speeds heard per state (m/s), from the Hunter's own gait data (WardenNative: run from `run_from`, each
+## clip's rate set by `walk_mps` / `run_mps`): two walks under run_from, two runs over it, one crouch.
+func _native_speeds(d: Dictionary) -> Dictionary:
+	var walk := float(d.get("walk_mps", 1.4))
+	var run_from := float(d.get("run_from", 3.0))
+	var run := maxf(float(d.get("run_mps", 4.6)), run_from + 0.4)
+	return {
+		"walk": [walk, lerpf(walk, run_from, 0.75)],
+		"run": [run_from + 0.2, run],
+		"crouch": [float(d.get("crouch_mps", 1.4))],
+	}
+
+
 ## Walk, run, walk, run: the feet alternate across the hand-overs (a switch of clip never steps one foot twice).
 func _ramp_row(id: String, nat: WardenNative) -> void:
 	var heard := []
-	for leg in RAMP:
-		heard.append_array(_native_walk(nat, leg[0], false, leg[1]))
+	var sp := _native_speeds(nat.d)
+	for speed in [sp["walk"][0], sp["run"][1], sp["walk"][1], sp["run"][0]]:
+		heard.append_array(_native_walk(nat, speed, false, RAMP_S))
 	var alternate := heard.size() > 1
 	for i in heard.size() - 1:
 		alternate = alternate and heard[i][0] != heard[i + 1][0]
