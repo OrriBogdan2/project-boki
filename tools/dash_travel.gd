@@ -21,7 +21,16 @@ const POP_RATE := 30.0  # rad/s over the sim frames beside it, summed on JOINTS:
 const OWN := 0.5  # act_w from which the clip owns the body
 const MOVING := 1.0  # m/s: the body is going somewhere
 const FADE_IN := 0.12  # s from the press the loco may still show (WardenClips.FADE)
+const ENTRY_S := 0.25  # s from the travel's start: the clip may still be reaching its drive pose
+const TAIL_S := 0.1  # s before the travel's end: the recovery may begin on the curve's slow tail
+const HOLD_RATE := 20.0  # rad/s over the sim frames: past the entry the drive pose holds until the travel ends
+## Clip names of a cartwheel or whirl: the turn is the travel, so it has no drive pose to hold.
+const SPINS := ["vault_r", "vault_l", "vault_f", "vault_b", "vault_twist", "shift_whirl"]
 const AFTER_S := 0.6  # s after the travel the hand-over is watched
+## A clip whose strike is the stop (JuggernautKit.LUNGE_COIL_T): its fastest pose frame is within STRIKE_S of the
+## travel's end at any length.
+const STRIKE_AT_STOP := {"juggernaut": "lunge"}
+const STRIKE_S := 0.07  # s
 const FEET := [["foot.L", "shin.L"], ["foot.R", "shin.R"]]
 const JOINTS := ["root", "hips", "upper_arm.L", "upper_arm.R", "thigh.L", "thigh.R"]
 
@@ -54,7 +63,16 @@ func _rel(i: int, body: Vector3) -> Vector3:
 
 ## One frame: the clip on the body and what it does with the legs and the spine.
 func sample(p: Hunter, m: Match, step: float) -> Dictionary:
-	var e := {"clip": "", "act": 0.0, "up": 0.0, "kt": -1.0, "lean": 0.0, "slip": 0.0, "drift": 0.0, "dpose": 0.0}
+	var e := {
+		"clip": "",
+		"act": 0.0,
+		"up": 0.0,
+		"kt": -1.0,
+		"lean": 0.0,
+		"slip": 0.0,
+		"drift": 0.0,
+		"dpose": 0.0
+	}
 	var sync := p.model.get_node_or_null("Warden/Sync")
 	if sync != null and sync.get("clips") != null:
 		var c: WardenClips = sync.get("clips")
@@ -73,7 +91,9 @@ func sample(p: Hunter, m: Match, step: float) -> Dictionary:
 	e["drift"] = Vector2(h.x - hips0.x, h.z - hips0.z).length()
 	if head >= 0:
 		var up := _rel(head, body) - h
-		e["lean"] = rad_to_deg(atan2(Vector2(up.x, up.z).dot(Vector2(fwd.x, fwd.z)), maxf(up.y, 0.001)))
+		e["lean"] = rad_to_deg(
+			atan2(Vector2(up.x, up.z).dot(Vector2(fwd.x, fwd.z)), maxf(up.y, 0.001))
+		)
 	var foot_step := step  # (the first frame has no last one to step from: no slip)
 	var now: Array = []
 	for i in feet.size():
@@ -87,7 +107,9 @@ func sample(p: Hunter, m: Match, step: float) -> Dictionary:
 	var q: Array = []
 	var turned := 0.0
 	for i in joints.size():
-		var r: Quaternion = sk.get_bone_pose_rotation(joints[i]) if joints[i] >= 0 else Quaternion.IDENTITY
+		var r: Quaternion = (
+			sk.get_bone_pose_rotation(joints[i]) if joints[i] >= 0 else Quaternion.IDENTITY
+		)
 		q.append(r)
 		if not prev_q.is_empty():
 			turned += r.angle_to(prev_q[i])
@@ -143,6 +165,10 @@ static func judge(arch: String, fs: Array, trav: Array) -> Array:
 		lean_max = maxf(lean_max, float(e["lean"]))
 		if float(e["t"]) - press > FADE_IN and float(e["act"]) < OWN and float(e["up"]) < OWN:
 			early += dt
+	var hold := 0.0
+	for e: Dictionary in trav:
+		if float(e["t"]) - t0 > ENTRY_S and float(e["t"]) < t1 - TAIL_S:
+			hold = maxf(hold, _rate(e))
 	var ride := 0.0
 	var pop := 0.0
 	var pop_at := ""
@@ -162,7 +188,14 @@ static func judge(arch: String, fs: Array, trav: Array) -> Array:
 			pop_at = "%.2f s after, %s" % [t - t1, e["clip"]]
 	var about := (
 		"travel %.2f m in %.2f s (%s), lean %.0f deg peak / %.0f at the end, feet slip %.0f%%"
-		% [went, t1 - t0 + float(trav[0]["dt"]), str(clips.keys()), lean_max, lean_end, 100.0 * slip / maxf(went, 0.01)]
+		% [
+			went,
+			t1 - t0 + float(trav[0]["dt"]),
+			str(clips.keys()),
+			lean_max,
+			lean_end,
+			100.0 * slip / maxf(went, 0.01)
+		]
 	)
 	var ride_s: float = RIDE_S + float(AFTER.get(arch, 0.0))
 	out.append(
@@ -172,6 +205,49 @@ static func judge(arch: String, fs: Array, trav: Array) -> Array:
 			"run shown %.2f s of the travel (limit %.2f); %s" % [early, EARLY_S, about]
 		]
 	)
+	var spin := ""
+	for c: String in SPINS:
+		if clips.has(c):
+			spin = c
+	(
+		out
+		. append(
+			[
+				"the drive pose holds while it travels",
+				hold <= HOLD_RATE or spin != "",
+				(
+					"pose moved at most %.0f rad/s from %.2f s in to %.2f s before its end (limit %.0f%s)"
+					% [
+						hold,
+						ENTRY_S,
+						TAIL_S,
+						HOLD_RATE,
+						", none: %s spins" % spin if spin != "" else ""
+					]
+				)
+			]
+		)
+	)
+	var strike_clip: String = STRIKE_AT_STOP.get(arch, "")
+	if not clips.has(strike_clip):
+		strike_clip = ""
+	if strike_clip != "":
+		var fast := -1.0
+		var fast_at := t0
+		for e: Dictionary in fs:
+			if float(e["t"]) >= t0 and float(e["t"]) <= t1 + AFTER_S and _rate(e) > fast:
+				fast = _rate(e)
+				fast_at = float(e["t"])
+		out.append(
+			[
+				"the %s strike lands on the stop" % strike_clip,
+				absf(fast_at - t1) <= STRIKE_S,
+				(
+					"fastest pose frame %+.2f s from the travel's end (%.0f rad/s; limit %.2f)"
+					% [fast_at - t1, fast, STRIKE_S]
+				)
+			]
+		)
 	out.append(
 		[
 			"the dash pose hands over with the travel",
@@ -183,7 +259,10 @@ static func judge(arch: String, fs: Array, trav: Array) -> Array:
 		[
 			"no pop into the run",
 			pop <= POP_RATE,
-			"hand-over jerk %.0f rad/s (%s; limit %.0f)" % [pop, pop_at if pop_at != "" else "none", POP_RATE]
+			(
+				"hand-over jerk %.0f rad/s (%s; limit %.0f)"
+				% [pop, pop_at if pop_at != "" else "none", POP_RATE]
+			)
 		]
 	)
 	return out
