@@ -70,3 +70,6 @@ No mesh, skeleton nodes and ten clips, 30 fps, keyed from poses (no Meshy animat
 The skirt is welded (1.5 mm), gets a flipped red inner face (2 mm inset) and eight `SkirtSw*` billow bones on the Hips that swing the cloth out
 of the legs in every frame of every clip (radius margin 0.12 m = thigh radius; pivot 1.1 m). The stray unskinned Icosphere is gone.
 Build scripts and renders: /home/boki/gens/lace-face-dress-1123 (tools/build_b.py, tools/graft_head.py). Needs an owner visual check before it goes live.
+11-25 r20 (ext/lace-r13-slit): the body's crude thighs/knees and the r16/r18 thigh-liner tubes are replaced by Meshy porcelain doll legs
+(prim `leg-meshy` in Mesh_0, 9.7k tris, own 1024 texture `hem_meshy_leg20.jpg`; legs-only Meshy multi-image task from turnaround edits).
+Tools: tools/art1/hem_r20 (README). Renders: /home/boki/gens/hunter-round-1124/lace/r20. Needs an owner visual check before it goes live.
