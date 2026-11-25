@@ -1,4 +1,4 @@
-"""legfill18.py IN OUT [k=0.86 yt=0.75 yb=0.40]: inner porcelain leg tubes (thigh-liner material, its single porcelain texel)
+"""legfill18.py IN OUT [k=0.86 yt=0.75 yb=0.40 hp=handpts.npz hgap=0.006 rmin=0.35] (hp: carve the tube off hand/bow points, r16 rule): inner porcelain leg tubes (thigh-liner material, its single porcelain texel)
 inside the Meshy body's thighs/knees/boot tops, so the body's holes show porcelain, not the dark inside (hem.md D1 / D6).
 Rigid on UpLeg above y 0.60, blend to Leg over 0.60..0.54, rigid on Leg below. Body mesh bytes untouched; new prim in Mesh_0."""
 import sys
@@ -16,6 +16,7 @@ dom = np.array(names)[BJ[np.arange(len(BJ)), BW.argmax(1)]]
 lin = [p for p in j["meshes"][4]["primitives"] if j["materials"][p["material"]]["name"] == "thigh-liner"][0]
 uvw = acc(j, b, lin["attributes"]["TEXCOORD_0"])[0]
 NA = 40; ang = np.linspace(-np.pi, np.pi, NA, endpoint=False)
+HP = dict(np.load(O["hp"])) if "hp" in O else None
 K, YT, YB = F("k", 0.86), F("yt", 0.75), F("yb", 0.40)
 ys = np.round(np.arange(YT, YB - 1e-6, -0.015), 4)
 allV, allF, allJ, allW = [], [], [], []
@@ -36,10 +37,20 @@ for side in ("Left", "Right"):
         R = np.interp(np.arange(NA), np.arange(NA)[ok], R[ok], period=NA)
         R = np.minimum(R, np.median(R) * 1.2)
         for _ in range(2): R = (np.roll(R, 1) + 2 * R + np.roll(R, -1)) / 4
-        rings.append((c, R * K))
+        R = R * K
+        if HP is not None:
+            Qh = HP[side[0]][np.abs(HP[side[0]][:, 1] - y) < F("yw", 0.02)] if y >= 0.54 else np.zeros((0, 3))
+            if y < 0.62: Qh = np.vstack([Qh, HP[side[0] + "L"][np.abs(HP[side[0] + "L"][:, 1] - y) < F("yw", 0.02)]])
+            if len(Qh):
+                qa = np.arctan2(Qh[:, 2] - c[1], Qh[:, 0] - c[0]); qr = np.hypot(Qh[:, 0] - c[0], Qh[:, 2] - c[1])
+                da = np.abs((qa[None, :] - ang[:, None] + np.pi) % (2 * np.pi) - np.pi) < np.radians(F("aw", 20))
+                lim = np.where(da, qr[None, :], 9).min(1) - F("hgap", 0.006)
+                for _ in range(2): lim = np.minimum(lim, np.minimum(np.roll(lim, 1), np.roll(lim, -1)) + 0.004)
+                R = np.maximum(np.minimum(R, lim), R * F("rmin", 0.35))
+        rings.append((c, R))
     # smooth centres/radii along y
     C = np.array([r[0] for r in rings]); RR = np.array([r[1] for r in rings])
-    for _ in range(2):
+    for _ in range(0 if HP is not None else 2):
         C[1:-1] = (C[:-2] + 2 * C[1:-1] + C[2:]) / 4; RR[1:-1] = (RR[:-2] + 2 * RR[1:-1] + RR[2:]) / 4
     V = np.concatenate([np.stack([C[r, 0] + RR[r] * np.cos(ang), np.full(NA, ys[r]), C[r, 1] + RR[r] * np.sin(ang)], 1) for r in range(len(ys))])
     Fs = []
