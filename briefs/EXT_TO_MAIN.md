@@ -11300,3 +11300,4 @@ READY ext/parity-recheck-lace d733c2f6bc0d (origin/main 90a2d844de merged, 0 beh
 READY ext/p01-sfx-1118 31d9d81c91 (PR #307 hazard field sounds: merged main a8a0bc72a7, fixed lint-ratchet red in hazard_sfx.gd + gen_sfx python; tools/check.sh rc 0; shadow gate at 462ba3e752 NEW-RED 0)
 READY ext/farm-hunter-look-1125 90a701e579 (farm avatar is the Empty again; its cloth no longer black in the 3P farm view; beds solid, grass regrows when a patch moves; gate vs main NEW-RED 0)
 READY ext/merge-lane-n23d-1123 34db6c66df3d (PR #719: main merged, style/ruff ratchet fixed; shadow gate GREEN NEW-RED 0 at 1407fae878, 655 flags)
+READY ext/merge-lane-N1-1122 653c0989f9d0b3b6f3af0f4d32a24b8510982fe8 (PR #641: origin/main merged; only real conflict tools/base_life_check.gd, kept both the raising-leans part and main's left-alone part; 87 .uid add/add take main's; --check 0 fail, --base-life-check 0 fail, health --strict OK)
