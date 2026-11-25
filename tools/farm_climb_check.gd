@@ -71,7 +71,7 @@ func _island(main: Node, seed: int) -> void:
 		"seed %d: a running jump tops every face tried (%d of %d; missed at %s)"
 			% [seed, topped, faces.size(), str(missed)])
 	if not faces.is_empty():
-		ok(await _walk_off(hm, faces[0]), "seed %d: from the top you walk off it back onto the meadow" % seed)
+		ok(_walk_off(hm, faces[0]), "seed %d: from the top you walk off it back onto the meadow" % seed)
 	var shut := _shut_in(w, hb)
 	ok(shut.is_empty(),
 		"seed %d: a Boki reaches every open tile from the landing (%d shut in: %s)"

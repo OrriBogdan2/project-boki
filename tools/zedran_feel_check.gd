@@ -580,7 +580,7 @@ func dash_moves() -> void:
 	A.ok("jug dash moves: each fits its dash (keys cover the move, recovery at most 0.45s past it)",
 			g_len >= g_dash and g_len <= g_dash + 0.45 and a_len >= a_dash and a_len <= a_dash + 0.45,
 			"ground %.2f for %.2f, air %.2f for %.2f" % [g_len, g_dash, a_len, a_dash])
-	await _into_dash(m, P, K, r[4])
+	_into_dash(m, P, K, r[4])
 	await A.done(m)
 
 ## Shift during his moves, by the into_dash rows of content/dash_flow/juggernaut.json.
