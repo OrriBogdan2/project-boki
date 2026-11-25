@@ -73,3 +73,6 @@ Build scripts and renders: /home/boki/gens/lace-face-dress-1123 (tools/build_b.p
 11-25 r20 (ext/lace-r13-slit): the body's crude thighs/knees and the r16/r18 thigh-liner tubes are replaced by Meshy porcelain doll legs
 (prim `leg-meshy` in Mesh_0, 9.7k tris, own 1024 texture `hem_meshy_leg20.jpg`; legs-only Meshy multi-image task from turnaround edits).
 Tools: tools/art1/hem_r20 (README). Renders: /home/boki/gens/hunter-round-1124/lace/r20. Needs an owner visual check before it goes live.
+11-25 r23 (ext/lace-r13-slit): skirt-meshy gets COLOR_0 (ink room 0 on the inner layer and fray band), its inner-layer faces move to
+prim `skirt-lining23` (wine copy of the skirt texture, `hem_meshy_skirt_lining23.jpg`), the bow fist `body-hand17` gets ink room 0:
+no black ink blotches on the skirt / fist. Tools: tools/art1/hem_r23 (README). Needs an owner visual check before it goes live.
