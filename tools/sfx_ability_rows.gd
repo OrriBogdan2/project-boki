@@ -19,7 +19,7 @@ const QUIET := ["step", "grunt"]  # categories that are not an ability's
 const PROCS := {
 	"ashwick":
 	[
-		["Ablaze", "as_ignite", "scripts/arch/kits/ashwick_kit.gd"],
+		["Ablaze", "as_ignite", "content/rules/status_sfx.json"],  # StatusSfx plays it on any ignite
 		["Flashover", "lw_blaze", "scripts/arch/kits/ashwick_kit.gd"]
 	],
 	"bulwark":
