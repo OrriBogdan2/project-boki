@@ -98,12 +98,12 @@ func _bones(a: String) -> void:
 	m.free()
 
 
-## The head stands where the contract model's does (the same size in game).
+## The head stands where the contract model's does (the same size in game), times the Hunter's data "fit".
 func _height(a: String) -> void:
 	var nm := WardenGlb.art(a)
 	var old := (load("res://art/wardens/%s/%s.glb" % [nm, nm]) as PackedScene).instantiate() as Node3D
 	var osk := WardenGlb.skeleton(old)
-	var want := osk.get_bone_global_rest(osk.find_bone("head")).origin.y
+	var want := osk.get_bone_global_rest(osk.find_bone("head")).origin.y * float(WardenNative.entry(nm).get("fit", 1.0))
 	old.free()
 	var m := _model(a)
 	var glb := m.get_node("Warden") as Node3D
