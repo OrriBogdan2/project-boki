@@ -135,6 +135,16 @@ func toy_spots() -> Array:
 	return h.toys.toys().map(func(t): return t["pos"])
 
 
+## A hungry Boki asleep by day or playing with a friend leaves it for the snack just dropped in the bowl, so it
+## answers at once instead of after the nap (20-40 s) or the game (up to 40 s). Night sleepers sleep on till dawn.
+func hungry_wake(k: Dictionary) -> void:
+	var m := machine(k)
+	if m.is_in(S.NAP) and _awake(k):
+		k["nap_t"] = 0.0  # NAP -> ROAM is guarded on the nap being over
+	if m.is_in(S.NAP) or m.is_in(S.PLAY_WITH):
+		m.go(S.ROAM, "hungry")
+
+
 ## The Boki's machine (made the first time the base sees it).
 func machine(k: Dictionary) -> Fsm:
 	if not k.has("life"):
