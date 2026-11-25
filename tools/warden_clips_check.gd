@@ -19,12 +19,6 @@ const LEGS_TOL := 0.02          # rad: an air cast's leg bones off the plain fal
 const AIR_FRAMES := 20          # frames of each air cast checked
 ## Clips a Hunter's GLB carries that no kit move plays, with why they stay (the known-unused list). Each one is in the
 ## GLB, is mapped by no kmove, and is still held by the named user (so it can't rot into a silent orphan).
-## ostra flurry: authored for owner item 136's 8-card RMB flurry; DECISIONS 11-07 (parity first) put the source's Snap
-## back and no data/wiki/footage beat is a card volley, so no move plays it. The results stage holds it as his pose.
-const MOVELESS := {"ostra": {"flurry": "results_pose"}}
-
-## Clips a Hunter's GLB carries that no kit move plays, with why they stay (the known-unused list). Each one is in the
-## GLB, is mapped by no kmove, and is still held by the named user (so it can't rot into a silent orphan).
 ## The holder is a result beat (WardenBeats: warden_anim/<art>.json "beats"). Ostra's `flurry` (the card volley
 ## of item 136, no source beat) is in no beat (he wins with emote), so it is not listed: docs/DEBT.md.
 const MOVELESS := {}
