@@ -375,6 +375,7 @@ func skydive(p: Vector3, heading: float, alt: float, delta: float) -> void:
 	zoom_to = lerpf(SKYDIVE_ZOOM.x, SKYDIVE_ZOOM.y, clampf(alt / SKYDIVE_HIGH, 0.0, 1.0))
 	follow(p, delta, false)
 
+
 ## Eases the view onto `p`. stand_y: the height the body stands at (HunterMove.stand_y); the view's height
 ## follows that, not the body, so a jump or a fall never reads as moving forward or back on screen.
 func follow(p: Vector3, delta: float, mouse_lead := true, stand_y := INF) -> void:

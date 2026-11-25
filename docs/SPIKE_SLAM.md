@@ -10,12 +10,12 @@ Two separate things share the "knocked out of the sky" idea:
 - **Glider spike.** A gliding player whose glider is overheated (or who takes enough damage while gliding to
   reach overheat) and then takes damage from another player is spiked: killed outright over the abyss,
   stunned over land. Monsters drain the glider but don't spike. Some attacks fill the heat at once. We already
-  have this (`Hunter.hurt`, glider heat; docs/EXPEDITION_SPEC.md, docs/SUPERVIVE_DATA.md: 0.7s landing stun).
+  have this (`Hunter.hurt`, glider heat; docs/EXPEDITION_SPEC.md, the private reference data (reports repo, `sv/`): 0.7s landing stun).
 - **Dunk (slam).** A few abilities "stun and propel victims downward"; over the abyss they act like a spike.
   The wiki lists four, out of the whole roster: an ultimate, a fist slam ahead of the caster, a downward
   sword blow after a flip, and the greatsword hero's airborne strike. The sword blow's text: struck enemies
   are slammed downward and briefly Grounded; over the abyss also briefly stunned. A dunk's stun and its
-  downward force scale with the target's missing health (docs/SUPERVIVE_DATA.md, 0.35-1.0s).
+  downward force scale with the target's missing health (the private reference data (reports repo, `sv/`), 0.35-1.0s).
 - **Grounded**: cannot use movement abilities (dash, and anything flagged as movement).
 - **What never dunks**: basic attacks, dashes and other movement abilities, projectiles. Dunks are a short,
   deliberate list of heavy downward strikes, each on a cooldown with a readable wind-up or hook first.
@@ -27,11 +27,8 @@ Two separate things share the "knocked out of the sky" idea:
 Note: the reference's greatsword hero *does* slam with his airborne strike. Our Kael is our own, and the owner
 ruled his Meteor Drop a dive that must not slam; we apply that rule to every dive and leap.
 
-Sources: [wiki glossary (Spike, Dunk, Grounded)](https://supervive.wiki.gg/wiki/Glossary),
-[wiki: the duelist hero (Death Blow)](https://supervive.wiki.gg/wiki/Jin),
-[wiki: the greatsword hero](https://supervive.wiki.gg/wiki/Brall),
-[PCGamesN: the brawler reveal (slam on gliders)](https://www.pcgamesn.com/supervive/kingpin-reveal),
-[Deltia's gliding guide](https://deltiasgaming.com/?p=298691), and our own docs/SUPERVIVE_DATA.md.
+Sources: the reference's public wiki (glossary, the duelist and greatsword heroes), a brawler reveal article and a
+gliding guide; the links and our reference data are in the private reports repo (`sv/`).
 
 ## 2. Our design
 
