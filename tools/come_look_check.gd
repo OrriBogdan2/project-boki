@@ -151,8 +151,8 @@ func run(m: Node) -> void:
 	FarmChatter._look_t = 0.0
 	FarmChatter.tick(home, 0.01)
 	ok(ComeLook._looks.is_empty(), "the first look only learns who lives here: nobody comes")
-	await _newcomer(false)
-	await _newcomer(true)
+	_newcomer(false)
+	_newcomer(true)
 	# ------------------------------------------------ a new toy: the most curious bold Boki tries it first
 	var at := _open_spot()
 	_gather(at)
