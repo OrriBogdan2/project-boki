@@ -6,14 +6,30 @@ extends RefCounted
 ## <dir>/turntable/, with --flinch a hit mid-run in <dir>/flinch/ (--solid or --heavy: a harder hit), with --cc a stun,
 ## a root and Grounded standing in <dir>/cc_<state>/, with --cast a move pressed on the run (or standing,
 ## --cast-speed=0) in <dir>/cast_<kmove>/.
-## --states: the game states (STATE_SHOTS) one after another as the match hands them over, on any model (contract
-## clips or a Meshy-native one), <dir>/states/f###.png every 1/fps s. --contract: the contract model even for a
-## Meshy-native Hunter (the live look); --cam-y=<m>: the camera's height (eye level, knee level) looking at --at.
+## --states [--bare-slots: the state clips left out, the "before"]: the game states (STATE_SHOTS) one after another as
+## the match hands them over, on any model (contract clips or a Meshy-native one), <dir>/states/f###.png every 1/fps s;
+## a native Hunter with its own kit-move clips (data "kmoves") also gets each move, standing and (a layered one)
+## running, in <dir>/move_<id>_<stand|run>/ (--no-moves: the same moves without its own clips, Meshy's Attack for
+## each: the "before"). --contract: the contract model even for a Meshy-native Hunter (the live look); --cam-y=<m>: the
+## camera's height (eye level, knee level) looking at --at.
 ## --drop: every Hero in a row wearing the drop poses (WardenDropPose), <dir>/drop/<pose>_<view>.png.
 ## Needs a renderer. ffmpeg makes the GIFs and sheets.
 
 const ClipCheck := preload("res://tools/clip_check.gd")
 
+## --states on a Meshy-native Hunter then plays each clip slot its data names: [slot, the state that starts it]
+## (--attack-only first drops those clips: every move plays the one attack clip, the "before"; --before-after plays
+## each slot with its clip, then every slot with the attack clip: log lines SLOT then BEFORE).
+## The log line SLOT names its frames (a held slot, dash and glide, runs while its state does).
+const SLOT_SHOTS := [
+	["lmb", {"swing_n": 1}],
+	["lmb_hold", {"swing_n": 1, "combo": -1}],
+	["rmb", {"cast": 0.0, "cast_slot": "secondary"}],
+	["e", {"cast": 0.0, "cast_slot": "utility"}],
+	["r", {"cast": 0.0, "cast_slot": "ult"}],
+	["dash", {"rolling": true}],
+	["glide", {"gliding": true}],
+]
 ## --states: [state, the match's state for it (WardenClips.STATE), s it is held]
 const STATE_SHOTS := [
 	["idle", {"grounded": true}, 2.0],
@@ -22,6 +38,12 @@ const STATE_SHOTS := [
 	["jump", {"grounded": false, "vel": Vector3(0.0, 2.0, -4.0)}, 1.2],
 	["attack", {"grounded": true}, 1.6],
 	["crouch", {"grounded": true, "crouch": 1.0, "vel": Vector3(0.0, 0.0, -1.2)}, 1.5],
+	["dash", {"grounded": true, "rolling": true, "vel": Vector3(0.0, 0.0, -9.0)}, 0.8, "dash"],
+	["glide", {"grounded": false, "gliding": true, "vel": Vector3(0.0, -1.5, -6.0)}, 2.4],
+	["land", {"grounded": false, "vel": Vector3(0.0, -9.0, 0.0)}, 1.0, "land"],
+	["hit_front", {"grounded": true, "hit_t": 99.0, "hit_k": 3.0}, 1.0, "hit_front"],
+	["hit_back", {"grounded": true, "hit_t": 99.0, "hit_k": 3.0}, 1.0, "hit_back"],
+	["downed", {"grounded": true, "fall": 0.0}, 1.2, "downed"],
 ]
 ## --states --views=match,eye,knee: each view's [fov, camera, looks at]; the states go to <dir>/states_<view>/ (match:
 ## the game's angle on a long lens, team ring on; eye: a standing person's eyes; knee: from knee height, up at him)
@@ -30,6 +52,7 @@ const STATE_VIEWS := {
 	"eye": [30.0, Vector3(0.0, 1.6, 5.6), Vector3(0.0, 0.95, 0.0)],
 	"knee": [30.0, Vector3(0.0, 0.45, 5.6), Vector3(0.0, 0.95, 0.0)],
 }
+const MOVE_SHOT := 1.2  # s of the kit's clock each native kit move is filmed for
 var ground_col := Color("4f7a3e")
 var holder: Node3D
 var cam: Camera3D
@@ -221,10 +244,17 @@ func _states(model: Node3D, fps: float, out: String, sub := "states") -> void:
 	if poser == null:
 		poser = model.get_node("Warden/Sync")
 	poser.set_process(false)
+	if OS.get_cmdline_user_args().has("--bare-slots") and poser.get("plays") != null:  # (the "before": no state clips)
+		for sl in ["dash", "glide", "land", "hit", "hit_back", "downed"]:
+			(poser.get("plays") as Dictionary).erase(sl)
 	var clips: WardenClips = poser.get("clips")
 	var kmove := ""
 	if clips:
 		kmove = String((clips.d.get("kmoves", {}) as Dictionary).keys().front())
+	var native := poser as WardenNative
+	if native and OS.get_cmdline_user_args().has("--no-moves"):
+		native.moves = WardenNativeMoves.new(native.player, native.skel, {})  # (no rows: Meshy's swing for each)
+		native.own_casts = false
 	var i := 0
 	for st in STATE_SHOTS:
 		var s: Dictionary = (st[1] as Dictionary).duplicate()
@@ -236,11 +266,54 @@ func _states(model: Node3D, fps: float, out: String, sub := "states") -> void:
 				s["swing_n"] = 1
 				s["kmove"] = kmove
 				s["kmove_t"] = k / fps
+			if st.size() > 3:
+				_ramp(model, s, String(st[3]), k / fps)
 			poser.call("_process", 1.0 / fps)
 			await _grab(dir.path_join("f%03d.png" % i))
 			i += 1
+	model.set_meta(WardenClips.FEEL, Vector2.ZERO)
 	i = await _native_moves(model, poser, fps, dir, i)
 	print("STATES ", ", ".join(STATE_SHOTS.map(func(st): return "%s %.1fs" % [st[0], st[2]])))
+	if native and not (native.d.get("kmoves", {}) as Dictionary).is_empty():
+		await _native_move_dirs(model, native, fps, out)
+	if native:
+		await _slot_shots(native, model, fps, dir, i)
+
+
+## The kit moves a native Hunter has its own clips for (data "kmoves"), each pressed on the spot, an upper-body one
+## also on the run, held for MOVE_SHOT s of the kit's clock: <dir>/move_<id>_<stand|run>/f###.png.
+func _native_move_dirs(model: Node3D, native: WardenNative, fps: float, out: String) -> void:
+	for km in native.d.get("kmoves", {}):
+		var upper := bool(native.d["kmoves"][km].get("upper", false))
+		for pace in ["stand", "run"] if upper else ["stand"]:
+			var dir := out.path_join("move_%s_%s" % [km, pace])
+			DirAccess.make_dir_recursive_absolute(dir)
+			var s := {"grounded": true, "face": model.rotation.y, "kmove": km}
+			if pace == "run":
+				s["vel"] = Vector3(0.0, 0.0, -4.6)
+			model.set_meta(WardenClips.STATE, s)
+			for k in int(MOVE_SHOT * fps):
+				s["kmove_t"] = k / fps
+				native.call("_process", 1.0 / fps)
+				await _grab(dir.path_join("f%03d.png" % k))
+
+
+## The counters a state turns on mid-shot, as HunterAnim moves them (t: s into the state): a dash is on from the
+## start; a landing is 0.4 s of fall, then touchdown (squash 0.8); a hit lands 0.2 s in, on the face's front or back;
+## a knocked-down beat (HunterFall, the light class's 0.45 s) runs 0..1.
+func _ramp(model: Node3D, s: Dictionary, ramp: String, t: float) -> void:
+	var yaw := model.rotation.y
+	var ahead := Vector2(sin(yaw), cos(yaw))
+	match ramp:
+		"land":
+			s["grounded"] = t >= 0.4
+			s["vel"] = Vector3(0.0, -9.0 if t < 0.4 else 0.0, 0.0)
+			model.set_meta(WardenClips.FEEL, Vector2(0.8, 0.0) if t >= 0.4 else Vector2.ZERO)
+		"hit_front", "hit_back":
+			s["hit_t"] = t - 0.2 if t >= 0.2 else 99.0
+			s["hit_dir"] = -ahead if ramp == "hit_front" else ahead
+		"downed":
+			s["fall"] = minf(t / 0.45, 1.0)
 
 
 ## --states on a Meshy-native model, then each kit move it has a clip for (data "kmoves"), pressed standing: its clip's
@@ -249,8 +322,8 @@ func _native_moves(model: Node3D, poser: Node, fps: float, dir: String, i: int) 
 	var moves: WardenNativeMoves = poser.get("moves")
 	if moves == null:
 		return i
-	for km in moves.moves:
-		var mv: Dictionary = moves.moves[km]
+	for km in moves.rows:
+		var mv: Dictionary = moves.rows[km]
 		var len_s: float = poser.player.get_animation(String(poser.plays[WardenNativeMoves.KEY % km])).length
 		var hold := float(mv.get("hold_from", -1.0))
 		var secs: float = len_s if hold < 0.0 else hold + 1.5 * (len_s - hold)
@@ -263,6 +336,63 @@ func _native_moves(model: Node3D, poser: Node, fps: float, dir: String, i: int) 
 			poser.call("_process", 1.0 / fps)
 			await _grab(dir.path_join("f%03d.png" % i))
 			i += 1
+	return i
+
+
+## --states, native: each slot of data "clips" from SLOT_SHOTS pressed once on the stand (held slots run 1 s).
+func _slot_shots(native: WardenNative, model: Node3D, fps: float, dir: String, first: int) -> void:
+	var args := OS.get_cmdline_user_args()
+	var named: Array = (
+		SLOT_SHOTS.map(func(sl): return sl[0]).filter(func(sl): return (native.d["clips"] as Dictionary).has(sl))
+	)
+	var kept: Dictionary = native.plays.duplicate()
+	var next := first
+	for before in [false, true] if args.has("--before-after") else [args.has("--attack-only")]:
+		native.plays = kept.duplicate()
+		if before:  # (every move plays Meshy's one attack clip)
+			for slot: String in named:
+				native.plays.erase(slot)
+		next = await _slot_pass(native, model, fps, dir, next, named, "BEFORE" if before else "SLOT")
+
+
+## One pass over the slots: each pressed once on the stand; returns the next frame number.
+func _slot_pass(
+	native: WardenNative, model: Node3D, fps: float, dir: String, first: int, named: Array, label: String
+) -> int:
+	var i := first
+	var press := first  # (a swing counts up and the frame number only grows: every press is a new swing)
+	for sl in SLOT_SHOTS:
+		var slot: String = sl[0]
+		if not slot in named:
+			continue
+		var held := slot in ["dash", "glide"]
+		var s := {"grounded": true, "face": model.rotation.y}
+		model.set_meta(WardenClips.STATE, s)
+		for k in int(0.3 * fps):
+			native.call("_process", 1.0 / fps)
+		var from := i
+		var clip := String(native.plays.get(slot, native.plays["attack"]))
+		var length := (
+			1.0
+			if held
+			else (
+				native.player.get_animation(clip).length
+				/ (1.0 if native.plays.has(slot) else float(native.d.get("attack_rate", 1.0)))
+			)
+		)
+		for k in int((length + 0.4) * fps):
+			if k == 0 or held:
+				s.merge(sl[1], true)
+			if k == 0 and s.has("swing_n"):
+				press += 1
+			if s.has("swing_n"):
+				s["swing_n"] = press
+			if not held and k > 0 and s.has("cast"):
+				s["cast"] = 5.0
+			native.call("_process", 1.0 / fps)
+			await _grab(dir.path_join("f%03d.png" % i))
+			i += 1
+		print("%s %s f%03d-f%03d (clip %.2f s, every 1/%d s)" % [label, slot, from, i - 1, length, int(fps)])
 	return i
 
 

@@ -20,8 +20,6 @@ const CHECKS := {
 	"--home-build-check": ["res://tools/home_build_check.gd", "home_build_check", null],  # build mode at home
 	"--kit-parity-check": ["res://tools/kit_parity_check.gd", "kit_parity_check", null],
 	# first: it wraps the other flags on the line (a second launch of a bench or check)
-	"--warm-twice": ["res://tools/warm_twice.gd", "warm_twice", null],  # a second launch, for benches
-	"--boki-keys-check": ["res://tools/boki_keys_check.gd", "boki_keys_check", null],  # quick Boki command keys
 	"--heart-check": ["res://tools/heart_check.gd", "heart_check", null],  # the Heart early seat (0023, 0051)
 	# out: watch and switch teammates
 	"--spectate-check": ["res://tools/spectate_check.gd", "spectate_check", "check"],
@@ -640,7 +638,6 @@ const CHECKS := {
 	"--duel-ring-hint-check": ["res://tools/duel_ring_hint_check.gd", "duel_ring_hint_check", null],
 	"--duel-online-check": ["res://tools/duel_online_check.gd", "duel_online_check", null],  # 2 games, relay
 	"--motley-land-check": ["res://tools/motley_land_check.gd", "motley_land_check", null],  # Trade onto ledges
-	"--move-speed-check": ["res://tools/move_speed_check.gd", "move_speed_check", null],  # one walk speed
 	"--tutorial-hud-shots": ["res://tools/tutorial_hud_shots.gd", "tutorial_hud_shots", null],  # --shots-dir=<dir>
 	"--ult-ready-shots": ["res://tools/ult_ready_shots.gd", "ult_ready_shots", null],  # --shots-dir=<dir> (GPU)
 	"--tutorial-clean-check": ["res://tools/tutorial_clean_check.gd", "tutorial_clean_check", null],  # nothing random
@@ -1070,7 +1067,8 @@ static func run(main: Node, args: PackedStringArray) -> bool:
 	return true
 
 
-## The first registered check flag on the command line, "" if none (Settings uses it too).
+## The first registered check flag on the command line (legacy CHECKS plus tools/checks/*.gd), "" if none
+## (Settings uses it too, to keep a check's settings in a per-run file).
 static func flag_in(args: PackedStringArray) -> String:
 	var checks := all()
 	for flag in checks:

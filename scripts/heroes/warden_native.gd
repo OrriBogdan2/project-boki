@@ -21,8 +21,8 @@ const LOOPS := ["idle", "walk", "run", "crouch"]
 ## Clip slots data "clips" may add beside the six states; a missing one plays today's clip (MESHY_NATIVE.md).
 ## Swing and cast one-shots (the attack clip without them): lmb, lmb_hold (a charged swing), rmb, e, r (the kit's cast
 ## slots, MOVE_SLOTS). One-shots: hit, land. Held while the state lasts: dash, glide and stomp (these two loop), downed.
-const HIT_SLOTS := ["hit", "land"]
-const SLOTS := ["lmb", "lmb_hold", "rmb", "e", "r", "dash", "glide", "land", "hit", "downed", "stomp"]
+const HIT_SLOTS := ["hit", "hit_back", "land"]
+const SLOTS := ["lmb", "lmb_hold", "rmb", "e", "r", "dash", "glide", "land", "hit", "hit_back", "downed", "stomp"]
 const MOVE_SLOTS := {"secondary": "rmb", "utility": "e", "ult": "r"}  # the state's cast_slot -> its clip slot
 const SLOT_CAST := 0.5  # s: a kit move that starts this soon after a cast belongs to that cast's slot
 const LAND_MIN := 0.3  # a landing this hard (WardenClips.FEEL, 0..1) plays the land clip
@@ -56,6 +56,7 @@ var hit_prev := 99.0  # the state's s since a hit, last frame
 var land_prev := 0.0  # the state's landing squash, last frame
 ## The state counters last frame; cast -1: none read yet (the first state read is the baseline, no new hit)
 var last := {"kmove": "", "swing_n": 0, "cast": -1.0, "recoil": 0.0}
+var own_casts := false  # data "own_casts": her casts and shots are her own kit moves (kmoves rows), no Meshy Attack
 var followers: Array = []  # [orbit holder, Meshy bone]: the holder keeps the bone's move from its rest
 var orbits := WardenOrbits.new()  # the contract model's orbit props (Tenzo's seeing-stones) riding Meshy's bones
 ## The contract path's bone layers, laid over Meshy's clips on Meshy's bones (WardenSkeleton.find names them): the hit
@@ -72,8 +73,9 @@ var torso_off := Transform3D()  # that bone's frame -> the rig torso's, at rest 
 var mouth: Node3D  # the copied weapon_muzzle (on a bone, a part or the sun): where the Gun's Muzzle sits each frame
 var gunprop: WardenGunProp  # Grimble's one gun (data "holster"): hip at rest, hand while he aims
 var props: WardenProps  # the contract's parts Meshy's mesh lacks (data "props": Kael's sword, Cinder's heel jets)
-var moves: WardenNativeMoves  # the kit moves with a clip of their own (data "kmoves")
+var moves: WardenNativeMoves  # the kit moves with a clip of their own (data "kmoves": full-body or upper layer)
 var companions: WardenCompanions  # floating companions cut out of Meshy's body (Meeko's sun and cloud), or null
+var steps: WardenNativeSteps  # the footsteps, on the foot plants of Meshy's clips (data "plants")
 var mood: WardenMood  # the faces on those companions swap and blink (warden_anim/<art>.json "mood"), or null
 
 
@@ -130,7 +132,8 @@ static func dress(model: Node3D, arch: String, scene: PackedScene, lk := {}) -> 
 	model.set_meta(META, true)
 
 
-## The size that puts Meshy's head bone where the rig's head pivot rests: the contract model's head height.
+## The size that puts Meshy's head bone where the rig's head pivot rests: the contract model's head height (data "size"
+## then scales it where Meshy's body stands off the height chart, --native-hitbox-check).
 static func _fit(model: Node3D, sk: Skeleton3D) -> float:
 	var rest: Dictionary = model.get_meta("rig_rest", {})
 	var head := sk.find_bone("Head")
@@ -145,9 +148,10 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	process_priority = 10  # (after Match renders the hunters: HunterAnim.update)
 	player = glb.find_children("*", "AnimationPlayer", true, false)[0] as AnimationPlayer
 	plays = (d["clips"] as Dictionary).duplicate()
-	moves = WardenNativeMoves.new(player, d)
-	plays.merge(moves.clips())
 	skel = WardenGlb.skeleton(glb)
+	moves = WardenNativeMoves.new(player, skel, d)
+	own_casts = bool(d.get("own_casts", false))
+	plays.merge(moves.clips())
 	_borrow_clips()
 	for st in SLOTS + moves.clips().keys():  # (a slot whose clip is nowhere plays today's clip)
 		if plays.has(st) and not player.has_animation(String(plays[st])):
@@ -156,6 +160,7 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	for st in LOOPS + ["stomp", "glide"]:
 		if plays.has(st):
 			player.get_animation(String(plays[st])).loop_mode = Animation.LOOP_LINEAR
+	moves.ready(plays)
 	# (the clips advance in _process, then the layers go on top: WardenSync's order)
 	player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	if d.has("bones"):
@@ -181,7 +186,7 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 		skel.add_child(at)
 	gun = root.get_node_or_null("Rig/Torso/Aim/Gun") as Node3D
 	_add_orbits(glb)
-	var to_m := glb.transform * WardenGlb.model_xf(glb, skel)  # Meshy's skeleton -> the model
+	var to_m := _to_contract(glb)
 	props = WardenProps.carry(art_id, skel, to_m, d)
 	gunprop = WardenGunProp.make(model, skel, to_m, d.get("holster", {}))
 	_copy_anchors(glb)
@@ -189,6 +194,7 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	companions = WardenCompanions.detach(glb, skel, WardenClips.data(art_id), to_m.affine_inverse() * c_xf)
 	mouth = skel.find_child(WardenGlb.WEAPON_MUZZLE, true, false) as Node3D
 	model.set_meta(WardenClips.DEATH_T, 0.0)  # (the extract beat plays, WardenClips.leave_t; no death clip to hold)
+	steps = WardenNativeSteps.new(model, player, d.get("plants", {}))
 	_play("idle", 1.0)
 
 
@@ -204,10 +210,15 @@ func _process(dt: float) -> void:
 	attack_left -= dt
 	var one := _one_shot(s)
 	var xt := float(s.get("extract_t", -1.0))
+	var mv := moves.pick(String(s.get("kmove", "")), float(s.get("kmove_t", 0.0)), plays)  # (the kit's move)
+	if not mv.is_empty() and bool(mv["upper"]):
+		attack_left = 0.0  # (a Meshy swing still playing from before gives way to the arms' own clip)
+	if mv.is_empty() or bool(mv["upper"]):
+		moves.release()
 	if xt >= 0.0:  # the extract beat (WardenClips.leave_t): Meshy's crouch for the dip, then its jump for the take-off
 		_play("crouch" if xt < WardenClips.EXTRACT_DIP else "jump", 1.0)
-	elif moves.owns(s, plays):  # a kit move with its own clip (draw, release, Spirit Walk): laid at the move's clock
-		moves.play(s, plays, dt)
+	elif not mv.is_empty() and not bool(mv["upper"]):  # a kit move's own full-body clip, laid at the move's clock
+		moves.play(mv, dt)
 		attack_left = 0.0
 		cur = "kmove"
 	elif one != "":
@@ -218,6 +229,8 @@ func _process(dt: float) -> void:
 	var hips := WardenSkeleton.find(skel, "root")
 	skel.set_bone_pose_scale(hips, skel.get_bone_rest(hips).basis.get_scale())  # (Meshy keys no scale: no old squash)
 	player.advance(dt)
+	moves.lay(mv, dt)  # (an upper clip over the legs': Cinder's lance, aim, shot, cloak)
+	steps.step(cur if xt < 0.0 else "")
 	WardenClips.air_tilt(root, skel, hips)  # (the glider's bank, the dive's pitch)
 	# (the look-at lies under a clip that turns the head: the attack clip owns it, eased in and out like a body clip)
 	head_look.owned = move_toward(head_look.owned, 1.0 if attack_left > 0.0 else 0.0, dt / FADE)
@@ -331,14 +344,27 @@ func _held(s: Dictionary) -> String:
 ## another one is not played later.
 func _one_shot(s: Dictionary) -> String:
 	var swing := _swing(s)
-	var hit := _new_hit(float(s.get("hit_t", 99.0)))
-	var hurt := hit and float(s.get("hit_k", 1.0)) >= Oomph.HEAVY_FLINCH
+	var hurt := _new_hit(float(s.get("hit_t", 99.0))) and float(s.get("hit_k", 1.0)) >= Oomph.HEAVY_FLINCH
 	var landed := _landed()
-	if hurt and plays.has("hit") and (cur != "hit" or _fresh("hit")):  # (a hit cuts in on any swing)
-		return "hit"
+	var hit_slot := _hit_slot(s)
+	if hurt and hit_slot != "" and (cur != hit_slot or _fresh(hit_slot)):  # (a stagger cuts in on any swing)
+		return hit_slot
 	if swing != "":
 		return swing
 	return "land" if landed and plays.has("land") and _fresh("land") else ""
+
+
+## The slot a hit plays: `hit_back` when it pushes the body the way it faces (struck from behind), else `hit`; a
+## Hunter with only one of the two plays it for both.
+func _hit_slot(s: Dictionary) -> String:
+	var push: Vector2 = s.get("hit_dir", Vector2.ZERO)
+	var face := float(s.get("face", 0.0))
+	var back := push.dot(Vector2(sin(face), cos(face))) > 0.0
+	var want := "hit_back" if back else "hit"
+	if plays.has(want):
+		return want
+	var other := "hit" if back else "hit_back"
+	return other if plays.has(other) else ""
 
 
 func _new_hit(t: float) -> bool:
@@ -371,7 +397,8 @@ func _swing(s: Dictionary) -> String:
 	if float(last["cast"]) < 0.0:
 		last = now  # (the first state read is the baseline: counters a freshly dressed model finds are no new hit)
 		return ""
-	var move: bool = now["kmove"] != "" and now["kmove"] != last["kmove"]
+	# (a move with its own clip plays no Meshy swing)
+	var move: bool = now["kmove"] != "" and now["kmove"] != last["kmove"] and not moves.has_clip(now["kmove"], plays)
 	var melee: bool = now["swing_n"] > last["swing_n"]
 	var cast_new: bool = now["cast"] < last["cast"]
 	var shot: bool = now["recoil"] > last["recoil"]
@@ -385,6 +412,8 @@ func _swing(s: Dictionary) -> String:
 		slot = "lmb_hold" if melee and int(s.get("combo", 0)) < 0 else "lmb"
 	if not plays.has(slot):  # (an uncharged swing's slot stands in for a charged one's)
 		slot = "lmb" if slot == "lmb_hold" and plays.has("lmb") else "attack"
+	if own_casts and slot == "attack" and not (move or melee):
+		return ""  # (a hand caster's cast or shot with no slot clip plays no Meshy swing: data own_casts)
 	if not _fresh(slot):
 		return ""
 	attack_move = move or melee
@@ -396,9 +425,13 @@ func _fresh(st: String) -> bool:
 	return attack_left <= _clip_len(st) * (1.0 - ATTACK_AGAIN) / _shot_rate(st)
 
 
-## The play rate of a one-shot: data "attack_rate" for the swing and cast clips, 1 for a hit or a landing.
+## The play rate of a one-shot: data "attack_rate" for the attack clip, "slot_rate" (default the same) for the
+## slot clips of a move, 1 for a hit or a landing.
 func _shot_rate(st: String) -> float:
-	return 1.0 if st in HIT_SLOTS else float(d.get("attack_rate", 1.0))
+	if st in HIT_SLOTS:
+		return 1.0
+	var rate := float(d.get("attack_rate", 1.0))
+	return float(d.get("slot_rate", rate)) if st != "attack" else rate
 
 
 ## The loop's rate for this ground speed against the speed it was keyed at (data, m/s), clamped to the clip's range.
@@ -588,6 +621,14 @@ static func _read_orbit(art_name: String, orb: String) -> Array:
 	return out
 
 
+## Meshy's skeleton -> the model as the contract model is sized (the data "size" taken off): what the contract gives in
+## metres (parts, anchors, companions) then grows or shrinks with the body.
+func _to_contract(glb: Node3D) -> Transform3D:
+	var to_m := glb.transform * WardenGlb.model_xf(glb, skel)
+	var fit := float(d.get("size", 1.0))
+	return Transform3D(to_m.basis / fit, to_m.origin / fit)
+
+
 ## The contract model's anchor empties (anchor_*, weapon_muzzle*: the points the kits and VFX read, Cinder's palms,
 ## tail tip and heel jets, Kael's blade tip) that data "anchors" does not place. Each rides the Meshy bone that plays
 ## the part of its contract bone, or of the nearest ancestor bone Meshy has a stand-in for (WardenSkeleton.find).
@@ -596,7 +637,7 @@ static func _read_orbit(art_name: String, orb: String) -> Array:
 ## pauldron: the torso, whose rest the two models share) or on the nearest bone (a loose one) it keeps where it sits
 ## on the contract model.
 func _copy_anchors(glb: Node3D) -> void:
-	var to_m := glb.transform * WardenGlb.model_xf(glb, skel)  # Meshy's skeleton -> the model
+	var to_m := _to_contract(glb)
 	var inv := to_m.affine_inverse()
 	var k := 1.0 / maxf(to_m.basis.get_scale().y, 0.0001)  # metres -> Meshy's skeleton units
 	var have: Dictionary = d.get("anchors", {})

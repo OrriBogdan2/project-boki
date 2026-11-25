@@ -6,6 +6,8 @@ extends RefCounted
 ## Cheap by design: every pedestal shares one mesh and a few materials, a label only shows when you are close,
 ## and nothing here runs per-pedestal physics.
 
+const RING_GAP := 1.6  # [m] closest two pedestals on one ring may stand (the check wants 1.5)
+const RING_STEP := 2.0  # [m] between rings when a kind has more pedestals than one ring holds
 const ACT_R := 1.5  # [m] how close you stand to use a pedestal
 const SHOW_R := 6.5  # [m] a pedestal's name is drawn inside this
 const PED_GLOW := 0.3  # pedestal emission: a faint glow that keeps its colour under bloom (0.9 washed to white)
@@ -125,15 +127,20 @@ func build() -> void:
 	trial.build(_layer, self)
 
 
-## One ring of pedestals round a perch's middle, one per id of the kind.
+## Rings of pedestals round a perch's middle, one per id of the kind: the outer ring (radius r) takes as many as
+## fit RING_GAP apart, the rest go in rings RING_STEP closer in.
 func _ring(kind: String, c: Vector3, r: float) -> void:
 	var ids := ids_for(kind)
-	var n := ids.size()
-	for i in n:
-		var ang := -PI / 2.0 + TAU * float(i) / float(n)
-		var p := c + Vector3(cos(ang), 0, sin(ang)) * r
-		p.y = m.world.ground_at(p.x, p.z)
-		_pedestal(kind, String(ids[i]), p, c)
+	var done := 0
+	while done < ids.size() and r > RING_STEP:
+		var n := mini(ids.size() - done, int(TAU * r / RING_GAP))
+		for i in n:
+			var ang := -PI / 2.0 + TAU * float(i) / float(n)
+			var p := c + Vector3(cos(ang), 0, sin(ang)) * r
+			p.y = m.world.ground_at(p.x, p.z)
+			_pedestal(kind, String(ids[done + i]), p, c)
+		done += n
+		r -= RING_STEP
 
 
 func _mat(col: Color) -> StandardMaterial3D:
@@ -255,12 +262,18 @@ func use(i: int) -> void:
 	m.fx.ring(s["at"], 1.2, color_of(String(s["kind"]), id), 0.3)
 
 
-## Fill this item's stack. The belt has four slots: when they are all taken, the next one in turn is emptied.
+## Fill this item's stack. The belt has six slots (1 and 2 pinned to the tonic and the armor kit): when the slots this
+## item may use are all taken, the next one in turn is emptied.
 func _stock(id: String) -> void:
 	var p: Hunter = m.player
 	if UtilityBelt.room_for(p, id) <= 0 and UtilityBelt.count(p, id) <= 0:
-		p.belt[_belt_turn % UtilityBelt.SLOTS] = {}
-		_belt_turn += 1
+		var pin := UtilityBelt.fixed_slot(id)
+		for _k in UtilityBelt.SLOTS:
+			var k := _belt_turn % UtilityBelt.SLOTS
+			_belt_turn += 1
+			if (pin >= 0 and k == pin) or (pin < 0 and UtilityBelt.reserved_id(k) == ""):
+				p.belt[k] = {}
+				break
 	UtilityBelt.grant(p, id, UtilityBelt.room_for(p, id))
 
 

@@ -229,7 +229,7 @@ func _loading() -> void:
 	)
 	ok(
 		"the kit card's tile caps follow the bindings",
-		TILES.keys().all(func(k): return KitCard._cap(k) == Settings.key_cap(TILES[k]))
+		TILES.keys().all(func(k): return KitCard.key_cap(k) == Settings.key_cap(TILES[k]))
 	)
 	ok("no loading tip leaves a {token} unfilled", not texts.any(func(t): return String(t).contains("{")))
 	var moved := TipPick.render("{jump} {crouch} {interact} {util1}")

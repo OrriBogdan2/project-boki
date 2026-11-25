@@ -10,6 +10,11 @@ extends RefCounted
 
 const HEIGHT_TOL := 0.03  # share: the head stands this close to the contract model's head height
 const UPRIGHT := 0.25  # m, Meshy scale: the head stays this far over the hips in every state (a clip in a wrong frame)
+## m: the plate's bars hang 17 px under its anchor (0.52 m at the match camera), so under this they cover the head
+const PLATE_GAP_MIN := 0.55
+const PLATE_GAP_MAX := 0.85  # m: any more and the plate floats off its Hunter (the glider's bank rolls the head away)
+const PLATE_SAMPLES := 6  # poses read over a clip's cycle
+const PLATE_STEP_FRAMES := 8  # 30 fps frames between them
 const CONTRACT_BONES := ["hips", "upper_arm.L", "thigh.L"]
 const POSED_MIN := 10  # bones turned off Meshy's T-pose rest in a playing clip (the T-pose turns none)
 const TURNED := 0.03  # rad: a bone this far off its rest is posed
@@ -19,6 +24,32 @@ const STRING_PULL := 0.08  # m, Meshy scale: the string is drawn this far off th
 const STRING_BACK := 0.03  # and this near it a frame later
 ## Slot -> [state before, state that starts it, the clip today's game plays for it]. A cast's state names its cast
 ## slot, which HunterAnim's counters turn into a new cast (cast 5 -> 0).
+## Hand beats of the layered kit-move clips (_own_rows): [kit move, clip s from, clip s to, bone, out m, up m]
+const OWN_BEATS := {
+	"mage":
+	[
+		["mage_lmb_r", 0.0, 0.06, "RightHand", 0.2, -9.0],
+		["mage_lmb_l", 0.0, 0.06, "LeftHand", 0.1, -9.0],
+		["mage_rmb_hold", 0.0, 0.12, "RightHand", -9.0, 0.3],
+		["mage_rmb", 0.06, 0.16, "RightHand", 0.3, -9.0],
+		["mage_e", 0.0, 0.3, "LeftHand", -9.0, 0.5],
+	],
+	"rimewright":
+	[
+		["tm_dart_r", 0.0, 0.07, "RightHand", 0.1, -9.0],
+		["tm_dart_l", 0.0, 0.07, "LeftHand", 0.05, -9.0],
+		["tm_beam", 0.0, 0.04, "RightHand", 0.2, -9.0],
+		["tm_spear", 0.0, 0.1, "RightHand", 0.1, -9.0],
+		["tm_wall", 0.2, 0.24, "RightHand", 0.2, -9.0],
+	],
+	"tender":
+	[
+		["mm_shot_r", 0.0, 0.08, "RightHand", 0.1, -9.0],
+		["mm_shot_l", 0.0, 0.08, "LeftHand", 0.1, -9.0],
+		["mm_seed", 0.0, 0.12, "LeftHand", 0.08, -9.0],
+		["mm_call", 0.1, 0.2, "RightHand", -9.0, 0.5],
+	],
+}
 const SLOT_CASES := {
 	"lmb": [{"swing_n": 0}, {"swing_n": 1, "combo": 0}, "attack"],
 	"lmb_hold": [{"swing_n": 0}, {"swing_n": 1, "combo": -1}, "attack"],
@@ -28,7 +59,18 @@ const SLOT_CASES := {
 	"dash": [{}, {"rolling": true}, "idle"],
 	"glide": [{"grounded": false}, {"grounded": false, "gliding": true}, "jump"],
 	"land": [{}, {"feel": Vector2(0.8, 0.0)}, "idle"],
-	"hit": [{"hit_t": 99.0}, {"hit_t": 0.0, "hit_k": Oomph.HEAVY_FLINCH}, "idle"],  # (a stagger; a chip hit only leans)
+	"hit":
+	[
+		{"hit_t": 99.0},
+		{"hit_t": 0.0, "hit_k": Oomph.HEAVY_FLINCH, "face": 0.0, "hit_dir": Vector2(0.0, -1.0)},
+		"idle",
+	],
+	"hit_back":
+	[
+		{"hit_t": 99.0},
+		{"hit_t": 0.0, "hit_k": Oomph.HEAVY_FLINCH, "face": 0.0, "hit_dir": Vector2(0.0, 1.0)},
+		"idle",
+	],
 	"downed": [{}, {"fall": 0.5}, "idle"],
 	"stomp": [{}, {"stomp": 0.4}, "idle"],
 }
@@ -65,6 +107,7 @@ func run(main: Node) -> void:
 		_bones(a)
 		_height(a)
 		await _states(main, a)
+		_plate_gap(a)
 	print("WARDENNATIVE DONE %d checks, %d failed" % [n, bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -92,12 +135,13 @@ func _bones(a: String) -> void:
 	m.free()
 
 
-## The head stands where the contract model's does (the same size in game).
+## The head stands where the contract model's does (the same size in game), times the Hunter's data "size".
 func _height(a: String) -> void:
 	var nm := WardenGlb.art(a)
 	var old := (load("res://art/wardens/%s/%s.glb" % [nm, nm]) as PackedScene).instantiate() as Node3D
 	var osk := WardenGlb.skeleton(old)
-	var want := osk.get_bone_global_rest(osk.find_bone("head")).origin.y
+	var fit_x := float(WardenNative.entry(nm).get("size", 1.0))
+	var want := osk.get_bone_global_rest(osk.find_bone("head")).origin.y * fit_x
 	old.free()
 	var m := _model(a)
 	var glb := m.get_node("Warden") as Node3D
@@ -128,7 +172,7 @@ func _states(main: Node, a: String) -> void:
 		m.set_meta(WardenClips.STATE, {"cast": CALM_CAST}.merged(c[1], true))
 		await main.get_tree().process_frame
 		await main.get_tree().process_frame
-		var want := String(nat.plays[c[0]])
+		var want := String(nat.plays["lmb" if c[0] == "attack" and nat.plays.has("lmb") else c[0]])
 		var sk := nat.skel
 		var up := (
 			sk.get_bone_global_pose(sk.find_bone("Head")).origin.y
@@ -148,6 +192,7 @@ func _states(main: Node, a: String) -> void:
 	_crouch_arms(a, nat)
 	await _slots(main, a, m, nat)
 	await _kmoves(main, a, m, nat)
+	_moves(a, m, nat)
 	_only_meshy(a, m)
 	await _orbits(main, a, nat)
 	_drop_poses(a, m, nat)
@@ -239,6 +284,42 @@ func _orbits(main: Node, a: String, nat: WardenNative) -> void:
 		)
 
 
+## The plate floats a small, even gap over the highest drawn part of the model in the standing, running, crouching and
+## gliding poses, sampled over a cycle: never inside the head, never adrift above it.
+func _plate_gap(a: String) -> void:
+	var m := _model(a)
+	var nat := m.get_node("Warden/Native") as WardenNative
+	var gap := PlateGap.new(m)
+	var plate := HudPlate.arch_offset(a)
+	var cases := [
+		["idle", {"grounded": true}, Quaternion.IDENTITY],
+		["run", {"grounded": true, "vel": Vector3(0.0, 0.0, -4.6)}, Quaternion.IDENTITY],
+		["crouch", {"grounded": true, "crouch": 1.0}, Quaternion.IDENTITY],
+		[
+			"glide",
+			{"grounded": false, "gliding": true, "vel": Vector3(0.0, -1.0, -6.0)},
+			Quaternion(Vector3.BACK, HunterAnim.GLIDE_BANK)
+		],
+	]
+	for c in cases:
+		m.set_meta(WardenClips.STATE, c[1])
+		m.set_meta(HunterAnim.AIR_TILT, c[2])
+		var lo := INF
+		var hi := -INF
+		for i in PLATE_SAMPLES:
+			for f in PLATE_STEP_FRAMES:
+				nat._process(1.0 / 30.0)
+			var top := gap.top()
+			lo = minf(lo, plate - top)
+			hi = maxf(hi, plate - top)
+		print("PLATEGAP %s %s plate %.2f gap %.3f .. %.3f (%s)" % [a, c[0], plate, lo, hi, gap.tallest])
+		ok(
+			lo >= PLATE_GAP_MIN and (c[0] == "glide" or hi <= PLATE_GAP_MAX),
+			"%s: %s: the plate %.2f m up clears the %s by %.2f..%.2f m" % [a, c[0], plate, gap.tallest, lo, hi]
+		)
+	m.free()
+
+
 ## Plays state `s` for two frames (`calm` first, so the counters take it as their baseline) from a clean slate.
 func _feed(main: Node, nat: WardenNative, m: Node3D, calm: Dictionary, s: Dictionary) -> void:
 	nat.attack_left = 0.0
@@ -272,6 +353,15 @@ func _slots(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
 	var all_there: bool = named.all(func(sl): return nat.plays.has(sl))
 	ok(all_there, "%s: every clip slot the data names has its clip (%s)" % [a, named])
 	var pick := String(nat.d["clips"]["crouch"])  # (Meshy's clip no fallback plays)
+	for sl in named:  # (a Hunter's own clip: it plays on its move, posed, and ends within its length)
+		var own := String(nat.plays[sl])
+		await _feed(main, nat, m, SLOT_CASES[sl][0], SLOT_CASES[sl][1])
+		var posed := _turned(nat)
+		var len := nat.player.get_animation(own).length
+		ok(
+			nat.player.current_animation == own and posed >= POSED_MIN and len > 0.2,
+			"%s: slot %s plays its own clip %s (%.2f s, %d bones posed)" % [a, sl, own, len, posed]
+		)
 	for sl in SLOT_CASES:
 		var c: Array = SLOT_CASES[sl]
 		if not nat.plays.has(sl):
@@ -314,6 +404,9 @@ func _synthetic_clips(main: Node, a: String, m: Node3D, nat: WardenNative) -> vo
 	var sp := AnimationPlayer.new()
 	sp.add_animation_library(&"", lib)
 	src.add_child(sp)
+	var own_dash: Variant = nat.plays.get("dash")  # (a Hunter's own dash clip comes back below)
+	nat.player.stop()  # (the library changes while nothing plays: a clip fading out of a library edit crashes)
+	nat.cur = ""
 	nat.plays["dash"] = SYNTH
 	nat.borrow(src)
 	var got := nat.player.get_animation(SYNTH) if nat.player.has_animation(SYNTH) else null
@@ -329,9 +422,130 @@ func _synthetic_clips(main: Node, a: String, m: Node3D, nat: WardenNative) -> vo
 	var plays_it := nat.player.current_animation == SYNTH and _turned(nat) >= POSED_MIN
 	ok(plays_it, "%s: the slot plays the clips file's clip" % a)
 	nat.player.stop()  # (a clip removed while it plays errors on every advance)
+	nat.cur = ""
 	nat.player.get_animation_library(&"").remove_animation(SYNTH)
 	nat.plays.erase("dash")
+	if own_dash != null:
+		nat.plays["dash"] = own_dash
 	src.free()
+
+
+## The Hunter's own clips for its kit moves (data "kmoves", Cinder's hands): each plays instead of Meshy's one swing,
+## on the kit's clock, with its pose where the move says: the lance's hand held out ahead, the sighting hand up at the
+## eye, the push's palm ahead on the bolt's frame, the cloak's arms flung wide on the blast frame, the flight leaning
+## in with the take-off clip then the loop, the landing clip; an upper clip lets go once played out.
+func _moves(a: String, m: Node3D, nat: WardenNative) -> void:
+	_own_rows(a, m, nat)
+	if not nat.moves.rows.has("as_lance"):
+		return
+	var s := {"grounded": true}
+	m.set_meta(WardenClips.STATE, s)
+	var mv := nat.moves
+	var swing := String(nat.plays["attack"])
+	var before := _at(m, nat, s, "as_aim", 0.0)
+	var held := _at(m, nat, s, "as_lance", 0.6)
+	var own: bool = nat.player.current_animation != swing and mv.shown == "cn_u_lance_loop" and mv.weight >= 1.0
+	ok(own, "%s: the lance holds its own clip over Meshy's idle (no swing; %s)" % [a, mv.shown])
+	var reach: Vector3 = held["hand"]
+	ok(reach.z < -0.2 and reach.y > 0.8, "%s: the lance's hand is held out ahead (%s)" % [a, reach])
+	s["vel"] = Vector3(0.0, 0.0, -4.6)
+	var leg := nat.skel.find_bone("LeftUpLeg")
+	_at(m, nat, s, "as_lance", 0.6)
+	var stride := nat.skel.get_bone_pose_rotation(leg)
+	_at(m, nat, s, "as_lance", 0.7)
+	var running: bool = nat.player.current_animation == String(nat.plays["run"])
+	ok(
+		running and not stride.is_equal_approx(nat.skel.get_bone_pose_rotation(leg)),
+		"%s: the legs keep running under the lance (%s)" % [a, nat.player.current_animation]
+	)
+	s.erase("vel")
+	var sight := _at(m, nat, s, "as_aim", 0.35)
+	var up: float = sight["hand"].y - held["hand"].y
+	ok(up > 0.1, "%s: the sighting hand rises to the eye (%.2f m over the lance's)" % [a, up])
+	var fire := _at(m, nat, s, "as_shot", 0.0)
+	var push := _at(m, nat, s, "as_shot", 0.1)
+	var out_at: Vector3 = fire["muzzle"]
+	ok(out_at.z < -0.2 and out_at.y > 1.0, "%s: the bolt leaves her palm on its frame (%s)" % [a, out_at])
+	var from_z: float = fire["hand"].z
+	var to_z: float = push["hand"].z
+	ok(to_z < from_z - 0.03, "%s: the palm pushes on (%.2f to %.2f)" % [a, from_z, to_z])
+	var blast := _at(m, nat, s, "as_cloak", 0.05)
+	var span: float = blast["span"]
+	ok(span > before["span"] + 0.4, "%s: both arms wide on the blast frame (%.2f m across)" % [a, span])
+	_at(m, nat, s, "as_cloak", 1.0)
+	_at(m, nat, s, "as_cloak", 1.0)
+	ok(mv.weight <= 0.0, "%s: the cloak clip lets go once played out" % a)
+	_at(m, nat, s, "lw_jet", 0.1)
+	var clip := nat.player.current_animation
+	ok(clip == "cn_f_takeoff", "%s: Flue Flight takes off (%s)" % [a, clip])
+	var fly := _at(m, nat, s, "lw_jet", 0.9)
+	ok(nat.player.current_animation == "cn_f_fly", "%s: then the flight loop (%s)" % [a, nat.player.current_animation])
+	var lean: float = fly["lean"]
+	ok(lean > before["lean"] + 0.25, "%s: flying leans into it (head %.2f m ahead of the hips)" % [a, lean])
+	_at(m, nat, s, "lw_land", 0.1)
+	ok(nat.player.current_animation == "cn_f_land", "%s: the landing clip (%s)" % [a, nat.player.current_animation])
+	_at(m, nat, s, "", 0.0)
+	clip = nat.player.current_animation
+	ok(clip != "cn_f_land", "%s: back to the legs' own clip (%s)" % [a, clip])
+
+
+## Every layered row of a Hunter's own kit moves (data "kmoves", "upper") has its clip and lays it over the legs at full
+## weight, not the swing, and the hand lands where the move's beat says (OWN_BEATS): the bone has gone at least that far
+## ahead of the body (or off its chest) and up between the two clip times. Full-body rows: _kmoves.
+func _own_rows(a: String, m: Node3D, nat: WardenNative) -> void:
+	var s := {"grounded": true}
+	m.set_meta(WardenClips.STATE, s)
+	var mv := nat.moves
+	var swing := String(nat.plays["attack"])
+	for km in mv.rows:
+		if not bool(mv.rows[km].get("upper", false)):
+			continue
+		ok(mv.has_clip(km, nat.plays), "%s: kit move %s has its clip %s" % [a, km, mv.rows[km]["clip"]])
+		if not mv.has_clip(km, nat.plays):
+			continue
+		var clip := String(nat.plays[WardenNativeMoves.KEY % km])
+		_at(m, nat, s, km, nat.player.get_animation(clip).length * 0.5)
+		var laid: bool = mv.weight >= 1.0 and mv.shown == clip
+		ok(laid and nat.player.current_animation != swing, "%s: %s lays %s, not the swing" % [a, km, clip])
+	for b: Array in OWN_BEATS.get(a, []):
+		_at(m, nat, s, "", 0.0)
+		nat.player.seek(0.0, true)  # (the legs' idle from its start: the beat reads the same whatever row ran before)
+		_at(m, nat, s, b[0], b[1])
+		var from := _bone_in(m, nat, b[3])
+		var far_from := from.distance_to(_bone_in(m, nat, "Spine02"))
+		_at(m, nat, s, b[0], b[2])
+		var to := _bone_in(m, nat, b[3])
+		var off_chest := to.distance_to(_bone_in(m, nat, "Spine02")) - far_from
+		var out := maxf(from.z - to.z, off_chest)  # (ahead, or farther off the chest)
+		var up := to.y - from.y
+		ok(
+			out >= b[4] and up >= b[5],
+			"%s: %s %s goes %.2f m out, %.2f up (%s to %s s)" % [a, b[0], b[3], out, up, b[1], b[2]]
+		)
+	_at(m, nat, s, "", 0.0)
+	_at(m, nat, s, "", 0.0)
+
+
+## The state with kit move `km` `kt` s in, run on 0.1 s twice: the right hand, the muzzle (model frame: forward is -Z),
+## the hands' span and the head's lead over the hips.
+func _at(m: Node3D, nat: WardenNative, s: Dictionary, km: String, kt: float) -> Dictionary:
+	s["kmove"] = km
+	s["kmove_t"] = kt
+	nat.call("_process", 0.1)
+	nat.call("_process", 0.1)
+	var hand := m.to_local(nat.hand_position())
+	var left := _bone_in(m, nat, "LeftHand")
+	var head := _bone_in(m, nat, "Head")
+	var hips := _bone_in(m, nat, "Hips")
+	var out := {"hand": hand, "span": hand.distance_to(left), "lean": hips.z - head.z}
+	if nat.mouth:
+		out["muzzle"] = m.to_local(nat._now(nat.mouth))
+	return out
+
+
+## Meshy's bone `bone` this frame, in the model's frame.
+func _bone_in(m: Node3D, nat: WardenNative, bone: String) -> Vector3:
+	return m.to_local(nat.skel.global_transform * nat.skel.get_bone_global_pose(nat.skel.find_bone(bone)).origin)
 
 
 ## Each kit move the data gives a clip (data "kmoves"): the clip is there, plays on the move and is no T-pose; a hold
@@ -342,6 +556,8 @@ func _kmoves(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
 	var string_bi := nat.skel.find_bone("StringMid")
 	for km in kms:
 		var mv: Dictionary = kms[km]
+		if bool(mv.get("upper", false)):
+			continue  # (a layer over the legs' clip: _moves)
 		var clip := String(mv["clip"])
 		mv["fade"] = 0.0  # (the blend from the calm pose would be in every reading)
 		ok(
@@ -350,7 +566,7 @@ func _kmoves(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
 		)
 		var length := nat.player.get_animation(clip).length
 		var hold := float(mv.get("hold_from", -1.0))
-		await _feed(main, nat, m, {}, {"kmove": km, "kmove_t": 0.2})
+		await _feed(main, nat, m, {}, {"kmove": km, "kmove_t": minf(0.2, 0.5 * length)})  # (inside a short clip)
 		ok(nat.player.current_animation == clip and _turned(nat) >= POSED_MIN, "%s: %s plays %s" % [a, km, clip])
 		if hold >= 0.0:
 			var late := hold + 2.5 * (length - hold)

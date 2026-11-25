@@ -22,6 +22,7 @@ static var _pts_was := 0
 static var _lvl_was := 0
 static var _match_id := 0      # the match the two above count for: a new one starts from its own, quietly
 static var _hint_until := 0.0
+static var _hint_pass := -1    # the HudPanels.draws pass that already shows its fresh ALT+key hint: one at a time
 
 ## Once a panel redraw, before the ability row (HudPanels): a newly earned point starts the ALT+key hint
 ## and queues its chime (RankSfx), which plays once it's due.
@@ -78,7 +79,9 @@ static func plus(h, r: Rect2, id: String, slot: String, key: String) -> void:
 	beam(h, r, slot)
 	var glow := Color(1.0, 0.82, 0.48, 0.35 + 0.5 * pulse)
 	h._rounded(r.grow(2.0 + pulse * 3.0), Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 3, glow, 3)
-	if h.hover_id == id or t < _hint_until:
+	var fresh := t < _hint_until and _hint_pass != HudPanels.draws
+	if h.hover_id == id or fresh:
+		if fresh: _hint_pass = HudPanels.draws
 		_hint(h, Vector2(r.get_center().x, r.position.y - 14.0), "ALT+" + key)
 	var cp := Vector2(r.end.x - 3.0, r.position.y + 3.0)
 	var rad := PLUS_R + pulse * 1.5

@@ -1,19 +1,19 @@
 {
 	"groups": {
 		"vitals": {"from_match": 1, "what": "health, level and the XP bar"},
-		"abilities": {"from_match": 1, "what": "ability and weapon slots with their keys"},
+		"abilities": {"from_match": 1, "tut_from": "shoot", "what": "ability and weapon slots with their keys"},
 		"beat_clock": {"from_match": 4, "first": "beat", "what": "the match clock under the minimap, from the first Ways Out beat or the first kill"},
-		"summon_ring": {"from_match": 1, "what": "the Boki card and its summon ring"},
+		"summon_ring": {"from_match": 1, "tut_from": "gkey", "what": "the Boki card and its summon ring"},
 		"objective": {"from_match": 1, "what": "the minimap, waypoints and prompts"},
 		"seat_pips": {"from_match": 0, "first": "seat_open", "what": "the Ways Out strip, from the first open seat"},
-		"belt": {"from_match": 4, "first": "item_matters", "what": "the utility belt, from the first time a held item could be used"},
+		"belt": {"from_match": 4, "tut_from": "glove", "first": "item_matters", "what": "the utility belt, from the first time a held item could be used"},
 		"counters": {"from_match": 4, "what": "squads left, kills, knocks, gems"},
 		"feed": {"from_match": 4, "what": "the kill feed"},
 		"gear": {"from_match": 4, "what": "the gear panel"},
 		"squad": {"from_match": 4, "what": "squad frames"},
 		"perks": {"from_match": 4, "what": "the perk row"},
 		"weather": {"from_match": 4, "what": "the weather and sight chip"},
-		"belt_spare": {"from_match": 0, "what": "belt slots 3 and 4 while they are empty (a filled one always shows)"},
+		"belt_spare": {"from_match": 0, "what": "belt slots 3 to 6 while they are empty (a filled one always shows)"},
 		"ult_tiles": {"from_match": 0, "what": "the locked ultimate tiles (X, and the Fusion box) until level 6"},
 		"pace_tags": {"from_match": 4, "what": "ahead / behind pace tags (no widget yet)"},
 		"plate_colours": {"from_match": 4, "what": "squad-coloured names on overhead plates"}

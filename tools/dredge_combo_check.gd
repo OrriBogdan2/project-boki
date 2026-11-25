@@ -34,6 +34,7 @@ func run(main_node: Node) -> void:
 	await load("res://tools/dredge_rmb_carry_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_reel_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_ult_check.gd").new(ak, ok).run()
+	await load("res://tools/dredge_combo_e_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_cancel_check.gd").new(ak, ok).run()
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "dredge")
 	ok("item 51: every slot casts mid-jump and a jump or Shift moves him out of it in 0.1s (or its row's exception)",
@@ -73,6 +74,7 @@ func _hook_hold() -> void:
 	ak.step(m, 0.25)
 	var crawl := p.flat_dist(p0) / 0.25
 	var k := crawl / maxf(0.01, walk)
+	# (upper bound 0.26: the walk is timed 0.3 s after its start; it read exactly 0.25 on the lane, 0.25 on main)
 	ok(
 		"hook hold: while the hook flies out he walks at 15-25% speed",
 		k_v.flying and k >= 0.15 and k <= 0.26, "%.2f of %.1f m/s" % [k, walk]

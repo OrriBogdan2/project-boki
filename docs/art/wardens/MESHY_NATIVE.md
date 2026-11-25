@@ -31,10 +31,13 @@ contract (RIG_CONTRACT.md). The game adapts to Meshy: its bones are never rename
   clips at load) whose arm bones (every bone below Meshy's `LeftShoulder`/`RightShoulder`, data `arm_roots`) take
   the walk clip's keys, time-scaled to the crouch loop; hips, spine and legs keep Meshy's crouch.
 - Size: Meshy's head bone is scaled onto the rig's head pivot (the contract model's head height). Hit ring and
-  hitbox are the rig's, unchanged.
+  hitbox are the rig's, unchanged. Data `fit` then scales a body whose visible height stood over 10% off the owner's
+  height chart (hit_h, plus the headwear the chart allows over the head; drawn as a match draws it, x1.12): Kael 1.23,
+  Pip 0.79, Gil 0.69. The contract's parts, anchors and companions are placed as for the unfitted body and grow with
+  it (`WardenNative._to_contract`). The hitbox never changes: its numbers are parity rows.
 - Facing: Meshy faces +Z; the model is turned 180 deg to face -Z like every Hunter.
 - Anchors (`anchors`): `anchor_head_top`, `anchor_chest`, `anchor_gun_R` are BoneAttachment3D nodes on Meshy bones,
-  found by `WardenGlb.anchor`. The rig's Gun (aim and muzzle) rides Meshy's `RightHand` bone each frame.
+  found by `WardenGlb.anchor`. The nameplate does not read `anchor_head_top`: its height is the archetype's `plate_offset`, checked per Hunter by `--warden-native-check` (docs/HUD.d/1123-native-plate-height.md). The rig's Gun (aim and muzzle) rides Meshy's `RightHand` bone each frame.
 - Materials: Meshy's textures through the game's hero-toon pass (`WardenGlb._toon`, the same call as the contract
   models: painted shading, ink shell, match-zoom read, the Hunter's `warden_look.json` "painted" keys) and into meta
   `mats`, so hit flashes and team looks reach them. Meshy's material names (`head`, `body`, `Material_0`) are no toon
@@ -48,6 +51,11 @@ keep the armature Z up, so their Hips keys are carried into the rig's Y-up frame
 
 ## Checks
 `--warden-native-check` (switch, bones, facing, height, each state's clip, weapon hidden, anchors, toon surfaces,
+crouch arms, only Meshy's model draws (no rig mesh such as the Offhand), each data orbit rides its bone and turns);
+`--warden-glb-check` counts native Hunters apart.
+`--native-hitbox-check` measures each one's visible body (skinned vertices at idle, no weapon, orbits or companions)
+against hit_h and the hit ring and fails past 10% on height; `--native-hitbox-shots` draws each inside its hurtbox.
+Renders: `--clip-shots --warden=<arch> --states [--match]`.
 crouch arms, only Meshy's model draws (no rig mesh such as the Offhand), each data orbit rides its bone and turns,
 the drop poses hold --clip-check's bars); `--land-weight-check` measures every native Hunter's squash off the model
 (head height against the same frames unsquashed: depth and seconds within 10% of the contract numbers, feet on the
@@ -58,6 +66,16 @@ online-feel proxy at 100 ms each way, the other player's copy plays the same sta
 walk, run, air, attack, crouch, the extract beat) in order, at the same pace per state, with no stalled loop and no
 one-frame snap of the hand. A freshly dressed model reads its first filled state as the baseline (no phantom attack
 from old counters) and poses its idle at once (no rest T-pose frame).
+
+## Footsteps
+Steps sound on the plants of the Meshy feet you see, not on the hidden rig's stride (`HunterAnim` phase, which ran at
+another cadence than Meshy's walk: ~1.0 vs ~1.5 steps/s at walk speed, up to ~20 frames off a visible plant).
+`scripts/heroes/warden_native_steps.gd` (`WardenNativeSteps`) reads data `plants` {walk, run, crouch: {L, R: seconds
+into Meshy's clip}} and bumps the model's `WardenSteps.STEPS` as the contract path's `WardenSteps` does; `HunterAnim`
+hands it on as `stepped`. No `plants` entry (Motley hovers): the old stride. `--step-sync-check` has native rows per
+Hunter: the plants read off Meshy's `LeftFoot`/`RightFoot` in each clip, the data within one frame of them, every step
+heard at two walk, two run and a sneak speed within one frame after a plant of that foot, the feet alternating through
+a walk-run ramp, no step standing. Swap a clip and the check names the new plants to paste into the data.
 
 ## Weapons and orbit props
 Meshy's mesh carries the weapons (Sable's two pistols, Tenzo's one stone arm), so the rig's Gun and HunterAnim's
@@ -82,7 +100,8 @@ plays today's clip, so nothing changes until a Hunter's clips land (`WardenNativ
 | `lmb` | a melee swing or a shot | `attack` |
 | `lmb_hold` | a charged swing (state `combo` -1) | `lmb`, then `attack` |
 | `rmb`, `e`, `r` | the kit move or cast of that slot (state `cast_slot` secondary, utility, ult; a kit move starting within `SLOT_CAST` of a cast takes its slot) | `attack` |
-| `hit` | one-shot when a stagger lands (state `hit_t` jumps back with `hit_k` at Oomph.HEAVY_FLINCH; a chip hit only leans) | the loop clip plays on |
+| `hit` | one-shot when a stagger lands (state `hit_t` jumps back with `hit_k` at Oomph.HEAVY_FLINCH; a chip hit only leans) and pushes the body against its facing (struck from the front) | the loop clip plays on |
+| `hit_back` | the same, when the hit pushes the body the way it faces (struck from behind); a Hunter with one of the two plays it for both | `hit` |
 | `land` | one-shot on a hard landing (`WardenClips.FEEL` landing >= `LAND_MIN`) | the loop clip |
 | `dash` | while the state `rolling` (a dash or kit rush) lasts | the air or ground clip |
 | `glide` | while `gliding` (loops) | `jump` |
@@ -98,6 +117,64 @@ plays today's clip.
 `--warden-native-check` rows (per Hunter, per slot): the slot empty plays today's clip; the slot filled plays its clip
 with at least 10 bones off Meshy's T-pose on the switch frame and after the crossfade; a charged swing takes `lmb`
 without `lmb_hold`; a synthetic clips file's clip lands on Meshy's bones and plays; every slot the data names has its clip.
+
+## Own clips for kit moves (Cinder)
+A Hunter whose kit moves Meshy's one Attack does not fit gets its own clips on Meshy's skeleton: a clips-only `.glb`
+(`art/wardens/<art>/<art>_clips.glb`, an animation file, never the model, read by clip name like the slots'), played by
+data `kmoves` (kit move id -> {clip, then, hold, upper}; WardenNativeMoves, the same rows as the kit-move clips below). They run on the kit's own clock (state `kmove`,
+`kmove_t`), so the pose lands on the frame the kit fires. An `upper` clip keys only torso, head and arms and lies over
+the legs' clip (walk, run, idle, the air) at a weight that rises in 0.08 s and falls in 0.2 s; any other row is a
+full-body clip on the main player. Data `own_casts` stops her casts and recoils playing Meshy's swing.
+Cinder (hands, no weapon: DECISIONS 11-07), written by `tools/meshy/cinder_native_clips.py` (numpy FK and two-bone IK on
+Meshy's node tree, no Blender): `as_lance` the pilot's 0.26 s spool then the 8 Hz-bucking hold from her right palm,
+`as_lance_end` the let-go, `as_aim` the 0.4 s cast sighting along the arm (held), `as_shot` the push on the frame the bolt
+spawns (the palm already at the eye, the push 0.07 s in), `as_cloak` a tuck then both arms flung wide by 0.04 s,
+`lw_jet` the take-off crouch and spring (0.22 s, the kit's lift) then the leaning flight loop, `lw_land` the light landing.
+The fire leaves from `weapon_muzzle` on her right hand (the palm), which rides the posed bone. Checks:
+`--warden-native-check` (each row's clip, pose and hand-over), `--muzzle-check`; renders: `--clip-shots --warden=ashwick
+--states [--match] [--no-moves]` (`move_<id>_<stand|run>/`).
+
+### Sparkle, Neve and Meeko
+Their kit moves have their own clips too (`art/wardens/{ryzz,claire,pip}/<art>_clips.glb`, written by
+`tools/meshy/native_ability_clips.py`: Cinder's FK and two-bone IK, wrist targets in arm lengths so one pose reads on all
+three bodies, `own_casts` on). Beats are the kits' own (kmoves_vv.gd, kmoves_care.gd); the poses are ours. `sp_u_*`,
+`nv_u_*`, `mk_u_*` are layers over the legs; `*_f_*` own the body.
+- Sparkle: `mage_lmb_l/r` finger bolt (out at 0.06 s, wrist kicked at 0.09), `mage_rmb_hold` Storm Rod (side-on, rod hand
+  high, held) then `mage_rmb` the overarm throw (release 0.16), `mage_e` Skycall (arm sweeps out, flicks up by 0.3 s, held
+  raised in `sp_u_e_hold`) and `mage_e_snap`, Wirerun (`mage_dash` sprinter's crouch held, `mage_dash_go` flat streak,
+  `mage_dash_land`), Kitefall (`mage_x` crouch held, `mage_x_air` float, `mage_x_dive`, `mage_x_land`).
+- Neve: `tm_dart_r/l` one-hand flicks (0.07 s), `tm_dart_heavy` two-handed sling, `tm_beam` (skating: both hands driven
+  straight out), Cryo Spear `tm_spear_aim` (palms drawn in, held) then `tm_spear` a two-handed push (arms at full reach by
+  0.1 s, the lunge after them: a push, not a throw), `tm_wall` (0.2 s tell crouch, then both palms shoved out low),
+  Rimelock `tm_rime`, `tm_rime_carry` (skated in), `tm_rime_hold` (sealed crouch), `tm_rime_crash`, `tm_rime_break`.
+- Meeko: `mm_shot_r/l/emp` ember (fist to the hip, punch at 0.08 s), Burrseed `mm_seed_aim` (side-on, held) and
+  `mm_seed` (two-handed push at 0.12 s), Hearth Call `mm_call` (hand low, thrust high by 0.2 s), `mm_call_hold` (the
+  channel: one hand high, the other out, looped) and `mm_call_end`.
+  Hearthlight `mm_hearth` (arms up in a V forward of her head) and its recast `mm_toss`.
+`--warden-native-check` plays every layered row at half its clip (full weight, no swing) and holds the hand beats
+(OWN_BEATS: the bone's reach ahead or up between two clip times).
+
+## State clips (dash, glide, land, hit, hit_back, downed)
+All ten native Hunters map these six slots to the clips of `art/wardens/<art>/<art>_clips.glb`, built by
+`python3 tools/meshy/native_states.py OUT BASE_meshy.glb tools/meshy/native_states.json SRC_DIR <art>` (spec: Meshy
+library action id, kept second range, game seconds, per weight class; sources are one `animate` download per action id
+on one rig task, `/home/boki/meshy/anim-native-states-1123`). The clip file carries no mesh; translations scale by hips
+height. Timing is the source's number, not the motion's own length: land = `land_feel.json` drop seconds (light 0.24,
+medium 0.30, heavy 0.50), hit = the contract's stagger 0.42 s, downed = `HunterFall.STYLE` seconds (0.4/0.45/0.5, last
+frame held), dash = the kit's own dash time (`dash_s` per Hunter: hem 0.27, ryzz 0.24, sable 0.48, claire 0.45, gil 0.55,
+tarek 0.26, ostra 0.45, pip 0.23, kael 0.24, cinder 0.33; hold or teleport dashes play a 0.45 s burst, last frame held).
+The glide is one 0.4 s arms-out cut played there and back (1.2/1.5/1.8 s a loop by class).
+Sable's and Gil's `dash` slot keeps their own clip (`sable_vault` cartwheel, `gil_swim`, below); the generic `dash` cut
+stays in their file unused.
+
+| Class | Dash | Glide | Land | Hit front | Hit back | Downed |
+|---|---|---|---|---|---|---|
+| light (hem, ryzz, sable, claire, gil) | Lean Forward Sprint | Jump with Arms and Legs Open | Jump with Arms Open (tail) | Face Punch Reaction | Hit in Back While Running | Shot and Fall Backward |
+| medium (tarek, ostra, pip) | Standard Forward Charge | same, slower | Dive Down and Land (tail) | Hit Reaction 1 | same | Falling Down |
+| heavy (kael, cinder) | Male Head-down Charge | same, slowest | Jump and Slam Back Down (tail) | Hit Reaction to Waist | same | Shot and Slow Fall Backward |
+
+`--clip-shots --warden=<art> --states [--bare-slots]` shoots idle, walk, run, jump, attack, crouch, then dash, glide,
+land, hit front, hit back and downed (`--bare-slots` drops the six slots: the before).
 
 ## Kit-move clips (data `kmoves`)
 A kit move (state `kmove`, the move's id) may have a clip of its own: `"kmoves": {kmove: {"clip": name, "hold_from": s,
@@ -120,6 +197,22 @@ figure: the chest (`Spine02`, `WardenSkeleton.find "hips"`) takes 20% of the yaw
 yaw and pitch, the head the rest. It is off for the same states as the contract path, and under Meshy's Attack clip (which
 plays for any swing, cast or kit move): the layer eases out as that clip takes the body (`owned`, over `FADE`) and back in
 after it, so it does not fight a clip that already turns the head. `--look-at-check` runs it on every native Hunter.
+
+## Ability clips: Tenzo, Motley, Sable, Gil (`tools/meshy/ability_clips.py`)
+`python3 tools/meshy/ability_clips.py <tarek|ostra|sable|gil> [--sheet DIR]` writes `art/wardens/<art>/<art>_clips.glb`
+(skeleton and clips, no mesh) from poses keyed on Meshy's own skeleton (`clip_rig.py`: torso turns, two-bone arm and leg
+reaches, planted feet; nothing retargeted). Data `slot_rate` (1.0 for these four) plays the slot clips at the speed they
+were keyed; `attack_rate` stays for Meshy's own Attack clip. Contact frames sit where the kit fires (the contract
+clips' own, content/rules/warden_anim/<art>.json, and the kit's cast times):
+| Hunter | Slot: clip (length) | Contact |
+|---|---|---|
+| Tenzo | `lmb` throw (0.55 s), `lmb_hold` punch (0.6), `rmb` slam (1.4), `e` Stone Row (0.93), `r` Basalt Spine (1.4) | stone arm (Meshy's left): throw out 0.07 s, punch 0.05 s, smash 0.75 s; a glide slam plays the same `rmb` clip |
+| Motley | `lmb` orb (0.4), `lmb_hold` charged orb (0.5), `rmb` Snap (0.5), `e` Brimseed lob (0.8), `r` Nightwell (1.0) | orb 0.06 s, Snap 0.12 s, seed 0.25 s, Nightwell: locked cast ends on the palms driven down at 1.0 s, then free movement |
+| Sable | `lmb` dagger (0.45), `rmb` Bola (0.73), `e` Shadow Knife (0.47), `r` Encore (2.0), `dash` Vault cartwheel (0.48) | dagger 0.1 s, Bola one whirl then out at 0.24 s, knife 0.1 s, a blade every 0.2 s |
+| Gil | `lmb` thrust (0.32), `lmb_hold` Tide Lunge (0.5), `rmb` potion (0.45), `e` Riptide spin (2.0), `r` Tidal Wave ride (1.0), `dash` swim (0.55) | thrust 0.08 s, lunge 0.08 s, potion 0.15 s |
+Open: the clips play from their first frame on the press, so a held LMB shows Meshy's idle until the release; the
+three-hit chain and Sable's alternating hands use one clip each; Sable's cartwheel is always to her right.
+`--clip-shots --warden=<arch> --states` also plays each slot once (log lines `SLOT`).
 
 ## Not on the native path (yet)
 Death, stun, ledge, emote and clips for moves beyond the slots above (Meshy gave six); the contract's per-hunter extras (Tenzo's
