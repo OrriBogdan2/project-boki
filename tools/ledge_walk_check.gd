@@ -36,11 +36,11 @@ func _hero(arch: String) -> void:
 			W.level[W.idx(hx + dx, hz + dz)] = lv + TERRACES
 	var top := (lv + TERRACES) * World.LEVEL
 	var edge := hx + 1.0
-	await _walks(m, P, arch, "ledge", top, edge, hz)
+	_walks(m, P, arch, "ledge", top, edge, hz)
 	for dz in range(-4, 5):      # the same edge, now the rim of an island: the abyss beyond
 		for dx in range(1, 7):
 			W.kind[W.idx(hx + dx, hz + dz)] = World.T_VOID
-	await _walks(m, P, arch, "rim", top, edge, hz)
+	_walks(m, P, arch, "rim", top, edge, hz)
 	await done(m)
 
 func _walks(m: Match, P: Hunter, arch: String, edge_kind: String, top: float, edge: float, hz: int) -> void:
