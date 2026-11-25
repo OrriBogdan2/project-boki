@@ -529,9 +529,9 @@ func kit_lines(lines: Array, k: Kin) -> void:
 		lines.append([KinText.carry(k.ks), Color(KinRules.cat_color("sustain"), 0.9)])
 
 
-## the world hover card stays shut while recording, until the cursor rests 0.4 s, and all through a fight
+## the world hover card stays shut while recording, until the cursor rests 0.4 s, and while you or a squadmate fights (COMBAT_CLARITY, the rule Boki chatter follows)
 func world_tip_waits() -> bool:
-	return Record.clean() or _wh_still < 0.4 or h_v.in_fight()
+	return Record.clean() or _wh_still < 0.4 or not BokiChatter.calm(h_v.m)
 
 
 func draw_world_tip(sz: Vector2, p: Hunter) -> void:
@@ -776,6 +776,7 @@ func draw_world_tip(sz: Vector2, p: Hunter) -> void:
 	if pos.y + h2 > safe.end.y - 160.0:
 		pos.y = mp.y - h2 - 18
 	var box := Rect2(pos, Vector2(w, h2))
+	SafeArea.note_as("world_tip", box)  # (--clarity-shots counts it as "hud world_tip")
 	h_v._rounded(box, Color(0.05, 0.06, 0.09, 0.9), 10, Color(lines[0][1], 0.5), 2)
 	h_v._text(pos + Vector2(12, 24), String(lines[0][0]), 16, lines[0][1], h_v.big)
 	var y := pos.y + 34
