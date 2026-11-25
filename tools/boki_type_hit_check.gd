@@ -63,7 +63,8 @@ func _wild(sp: String, at: Vector3) -> Kin:
 	return m.spawn_wild(Save.new_kin(sp, "T"), at, false)
 
 
-## The colours of the hit `by` lands on `t`: [flash, last spark], both as the pools hold them.
+## The colours of the hit `by` lands on `t`: [flash, last spark], both as the pools hold them. A hit at power 1 or
+## more (an ability always) throws a second spark in the plain type colour, so the last spark is either shade.
 func _hit(t: Ent, by: Ent, o: Dictionary, dmg := 12.0) -> Array:
 	m.on_damage(t, by, dmg, o)
 	var fx := m.fx
@@ -87,7 +88,7 @@ func _check() -> void:
 		var r := _hit(foe, k, ability)
 		var glow := want.lerp(Color.WHITE, SPARK_WHITE)
 		var what := "%s (%s): flash %s spark %s" % [sp, SAMPLE[sp], r[0].to_html(false), r[1].to_html(false)]
-		ok(_near(r[0], want) and _near(r[1], glow), what)
+		ok(_near(r[0], want) and (_near(r[1], glow) or _near(r[1], want)), what)
 		ok(not _near(r[0], Juice.HIT_COL), "%s's hit is not the generic spark" % sp)
 		seen.append(r[0])
 	ok(
