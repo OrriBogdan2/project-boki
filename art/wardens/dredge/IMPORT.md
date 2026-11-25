@@ -21,6 +21,16 @@ gens/hunter-round-1124/grimble/PLAN-1124o.md): the r21 strap stopped under the a
 (the review's black tab and grey bands); it is now one closed leather band per side, shoulder blade to belt, snapped to the skin
 (3-10 mm) and skinned with the skin's own weights, its colour taken from the atlas belt. 22 skin slivers dropped, goo arm root
 flared over the socket dome, the dome's head weights moved to the shoulder.
+**Hook arm hangs (2026-11-23, ext/grimble-hook-1123):** the owner: "mostly issues with placement of the hook arm". The clips
+were keyed for a thin arm, but the goo arm and crescent run ~1 m from shoulder to hook tip, so their swing threw the crescent
+far out from his side: idle held it 20 deg out and 39 deg forward of the hips (stance 26/43, crouch_idle 46/62), and run_f
+trailed it up to 70 deg out and 82 deg back in model space. `tools/art1/glb_arm_hang.py` (no Blender, rotation keys only)
+slerps upper_arm.R, forearm.R and hand.R toward rest (0.7; run/walk 0.3/0.6/0.7) in the 28 idle, stance, crouch, hit, land,
+stun, shot, drink, flex, emote, downed, jump, fall, run and walk clips, then turns the shoulder->hook line 0.6 (run/walk
+0.65) of the way to straight down (0.15, -1, 0.1). Model space after: idle 7 deg out, 8 back; stance 7/7; run_f 14/25
+(swing 17..29). The reach, throw, reel, pullend, anchor, quake, lunge, pounce, dive, blast, ledge, mantle, glide, fusion,
+death, revive and stomp clips keep their keys. Mesh, weights and every other bone are unchanged (left hand, head, hips,
+feet: 0.000 m). Stretch: worst still 8.52 (ledge).
 
 **No floor puddle (2026-11-17, ext/grimble-puddle-1117):** the owner: "we can remove grimbles goo puddle if it helps.
 can just have it drip off him a bit on that arm". The puddle's vertices were split between `hook` and `foot.R`, so it tore into

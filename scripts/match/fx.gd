@@ -56,8 +56,10 @@ const NUM_POOL := 24  # floating numbers and words on screen at once (the oldest
 const NUM_OUTLINE := Color(0.05, 0.04, 0.08, 0.9)  # every number's dark outline ...
 const CRIT_OUTLINE := Color(0.42, 0.12, 0.0, 0.95)  # ... a crit's is a hot ember brown, and thicker
 
-## Font size by damage tier: [from this value up, size]. A crit adds CRIT_SIZE on top.
-const SIZE_TIERS := [[0.0, 34], [20.0, 40], [50.0, 48], [100.0, 58], [200.0, 70]]
+## Font size by damage tier: [from this damage up, size], on our health scale (a Hunter has 124 to 193): a dart or
+## a pellet the smallest, a rifle round or a slash 40, an ability hit 48, a heavy ability 58, an ult 70.
+## A crit adds CRIT_SIZE on top.
+const SIZE_TIERS := [[0.0, 34], [6.0, 40], [12.0, 48], [24.0, 58], [45.0, 70]]
 const CRIT_SIZE := 10
 const NUM_SCALE := [1.0, 1.0, 0.78, 0.62]  # size and outline by Num: a Boki's hits smaller, a tick's small
 
@@ -681,6 +683,8 @@ static func _num_size(v: float, crit: bool, small := false, kind := Num.HIT) -> 
 
 ## A short word that floats up (COMBO, an ability's name, BOND READY).
 func word(at: Vector3, txt: String, col: Color, big := false) -> void:
+	if get_parent() != null and get_parent().has_meta("pitch_no_foe_plates"):  # pitch-reel films: no game words
+		return
 	for n in nums:
 		var w: Label3D = n["node"]
 		if (

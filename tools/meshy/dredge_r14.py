@@ -54,8 +54,12 @@ def surface_points(pos, faces, step):
 def joints_weights(js, b, attrs):
     """(joints (N, 4), weights (N, 4)) of a primitive's attributes."""
     ja = js["accessors"][attrs["JOINTS_0"]]
-    joints = np.frombuffer(n.view_bytes(js, b, ja["bufferView"]), np.uint8 if ja["componentType"] == 5121 else np.uint16,
-                           ja["count"] * 4, ja.get("byteOffset", 0)).reshape(-1, 4)
+    joints = np.frombuffer(
+        n.view_bytes(js, b, ja["bufferView"]),
+        np.uint8 if ja["componentType"] == 5121 else np.uint16,
+        ja["count"] * 4,
+        ja.get("byteOffset", 0),
+    ).reshape(-1, 4)
     return joints, n.floats(js, b, attrs["WEIGHTS_0"])
 
 
@@ -79,7 +83,9 @@ def shell_obj(path, glb, part, seal, inset, vox, floor_y=None, y_max=None):
     if y_max is not None:  # only the part below y_max (the feet get a finer shell than the body)
         faces = faces[pos[faces].mean(1)[:, 1] < y_max]
     pts = surface_points(pos, faces, vox / 2)
-    if floor_y is not None:  # a trimmed part is open there: a plate over the section just above the cut closes it before the fill
+    if (
+        floor_y is not None
+    ):  # a trimmed part is open there: a plate over the section just above the cut closes it before the fill
         sec = pts[(pts[:, 1] >= floor_y) & (pts[:, 1] < floor_y + 0.12)][:, [0, 2]]
         lo2, st = sec.min(0), vox / 2
         grid = np.zeros(tuple(np.ceil((sec.max(0) - lo2) / st).astype(int) + 1), bool)
@@ -102,7 +108,7 @@ def shell_obj(path, glb, part, seal, inset, vox, floor_y=None, y_max=None):
                 corners = []
                 for da, db in ((0, 0), (1, 0), (1, 1), (0, 1)):
                     q = c.copy()
-                    q[axis] += (1 if sgn > 0 else 0)
+                    q[axis] += 1 if sgn > 0 else 0
                     q[(axis + 1) % 3] += da
                     q[(axis + 2) % 3] += db
                     k = tuple(q)
@@ -114,7 +120,13 @@ def shell_obj(path, glb, part, seal, inset, vox, floor_y=None, y_max=None):
     with open(path, "w") as fh:
         fh.writelines("v %f %f %f\n" % tuple(v) for v in verts)
         fh.writelines("f %d %d %d %d\n" % tuple(np.array(q) + 1) for q in quads)
-    return "%s shell: %d voxel faces, core %d voxels, sealed %d, surface %d" % (part, len(quads), int(core.sum()), int(solid.sum()), int(occ.sum()))
+    return "%s shell: %d voxel faces, core %d voxels, sealed %d, surface %d" % (
+        part,
+        len(quads),
+        int(core.sum()),
+        int(solid.sum()),
+        int(occ.sum()),
+    )
 
 
 def trim_pack(js, b, out, rig, y_cut):
@@ -126,14 +138,20 @@ def trim_pack(js, b, out, rig, y_cut):
     f = f[pos[f][:, :, 1].min(1) >= y_cut]
     size = np.bincount(dp.island_labels(pos, f))
     f = f[size[dp.island_labels(pos, f)] >= 100].astype(np.uint32)
-    js["accessors"].append({"bufferView": out.add_view(f.tobytes()), "componentType": 5125, "count": int(f.size), "type": "SCALAR"})
+    js["accessors"].append(
+        {"bufferView": out.add_view(f.tobytes()), "componentType": 5125, "count": int(f.size), "type": "SCALAR"}
+    )
     prim["indices"] = len(js["accessors"]) - 1
     return "%d pack triangles left" % len(f)
 
 
 STRAP_X, STRAP_W, STRAP_LIFT, STRAP_K = 0.17, 0.06, 0.006, 40  # K: skin vertices whose weights a row averages
-STRAP_CORE = np.array([1.5, -0.1])  # y, z: a point inside the torso the over-the-shoulder rays leave from (sagittal plane)
-STRAP_ARC = range(130, -1, -10)  # degrees from +z towards +y: from the back of the shoulder, over the crest, to the chest
+STRAP_CORE = np.array(
+    [1.5, -0.1]
+)  # y, z: a point inside the torso the over-the-shoulder rays leave from (sagittal plane)
+STRAP_ARC = range(
+    130, -1, -10
+)  # degrees from +z towards +y: from the back of the shoulder, over the crest, to the chest
 STRAP_DOWN = np.arange(1.46, 1.3, -0.04)  # y of the rays straight at the chest below the arc
 
 
@@ -166,7 +184,9 @@ def coin_image(size=256):
     ring = (np.abs(r - 0.78) < 0.05) | (np.abs(r - 0.28) < 0.12)
     px[:, : size // 2][ring[:, : size // 2]] = np.array([112, 70, 14], np.float32)
     px[:, : size // 2][(r > 0.93)[:, : size // 2]] = np.array([236, 178, 60], np.float32)
-    px[:, size // 2 :] = np.array([140, 92, 20], np.float32) * (0.85 + 0.15 * np.sin(xx[:, size // 2 :] * 1.1))[..., None]
+    px[:, size // 2 :] = (
+        np.array([140, 92, 20], np.float32) * (0.85 + 0.15 * np.sin(xx[:, size // 2 :] * 1.1))[..., None]
+    )
     return Image.fromarray(np.clip(px, 0, 255).astype(np.uint8))
 
 
@@ -236,7 +256,9 @@ def add_coin_stacks(js, b, out, rig, seed=14):
                 c = np.array([x, h[0], z]) + nrm * (COIN_T * (k + 0.5) - 0.002) + rng.normal(0, 0.003, 3)
                 p, nm, uv, f = coin_mesh(c, axis, rng.uniform(0, 6.28), COIN_R * rng.uniform(0.9, 1.1))
                 F += (f + len(P)).tolist()
-                P += p.tolist(); N += nm.tolist(); UV += uv.tolist()
+                P += p.tolist()
+                N += nm.tolist()
+                UV += uv.tolist()
     P, N, UV, F = (np.array(a, np.float32) for a in (P, N, UV, F))
     near = cKDTree(opos).query(P)[1]
     buf = io.BytesIO()
@@ -245,16 +267,28 @@ def add_coin_stacks(js, b, out, rig, seed=14):
     js["textures"].append({"source": len(js["images"]) - 1})
     mat = js["materials"][old["material"]]
     mat["pbrMetallicRoughness"]["baseColorTexture"] = {"index": len(js["textures"]) - 1}
-    attrs = {"POSITION": out.add_floats(P, "VEC3"), "NORMAL": out.add_floats(N, "VEC3"), "TEXCOORD_0": out.add_floats(UV, "VEC2"),
-             "WEIGHTS_0": out.add_floats(ow[near], "VEC4")}
+    attrs = {
+        "POSITION": out.add_floats(P, "VEC3"),
+        "NORMAL": out.add_floats(N, "VEC3"),
+        "TEXCOORD_0": out.add_floats(UV, "VEC2"),
+        "WEIGHTS_0": out.add_floats(ow[near], "VEC4"),
+    }
     if "COLOR_0" in oat:
         attrs["COLOR_0"] = out.add_floats(np.ones((len(P), 4), np.float32), "VEC4")
     js["accessors"][attrs["POSITION"]].update(min=P.min(0).tolist(), max=P.max(0).tolist())
-    js["accessors"].append({"bufferView": out.add_view(oj[near].astype(np.uint16).tobytes()), "componentType": 5123,
-                            "count": len(P), "type": "VEC4"})
+    js["accessors"].append(
+        {
+            "bufferView": out.add_view(oj[near].astype(np.uint16).tobytes()),
+            "componentType": 5123,
+            "count": len(P),
+            "type": "VEC4",
+        }
+    )
     attrs["JOINTS_0"] = len(js["accessors"]) - 1
     f = F.astype(np.uint32)
-    js["accessors"].append({"bufferView": out.add_view(f.tobytes()), "componentType": 5125, "count": int(f.size), "type": "SCALAR"})
+    js["accessors"].append(
+        {"bufferView": out.add_view(f.tobytes()), "componentType": 5125, "count": int(f.size), "type": "SCALAR"}
+    )
     old["attributes"], old["indices"] = attrs, len(js["accessors"]) - 1
     return "%d coin triangles" % len(F)
 
@@ -289,24 +323,38 @@ def add_ball(js, b, out, rig, spec):
         mat = dict(cj["materials"][p["material"]])
         tex = cj["textures"][mat["pbrMetallicRoughness"]["baseColorTexture"]["index"]]
         img = cj["images"][tex["source"]]
-        js["images"].append({"bufferView": out.add_view(bytes(n.view_bytes(cj, cb, img["bufferView"]))), "mimeType": img["mimeType"]})
+        js["images"].append(
+            {"bufferView": out.add_view(bytes(n.view_bytes(cj, cb, img["bufferView"]))), "mimeType": img["mimeType"]}
+        )
         js["textures"].append({"source": len(js["images"]) - 1})
         mat["name"] = "metal-ball" if "metal" in mat["name"] else mat["name"].replace("atlas", "ball")
-        mat["pbrMetallicRoughness"] = dict(mat["pbrMetallicRoughness"], baseColorTexture={"index": len(js["textures"]) - 1})
+        mat["pbrMetallicRoughness"] = dict(
+            mat["pbrMetallicRoughness"], baseColorTexture={"index": len(js["textures"]) - 1}
+        )
         js["materials"].append(mat)
         w = np.zeros((len(P), 4), np.float32)
         w[:, 0] = 1.0
-        attrs = {"POSITION": out.add_floats(P.astype(np.float32), "VEC3"), "NORMAL": out.add_floats(N, "VEC3"),
-                 "TEXCOORD_0": out.add_floats(UV, "VEC2"), "WEIGHTS_0": out.add_floats(w, "VEC4"),
-                 "COLOR_0": out.add_floats(np.ones((len(P), 4), np.float32), "VEC4")}
+        attrs = {
+            "POSITION": out.add_floats(P.astype(np.float32), "VEC3"),
+            "NORMAL": out.add_floats(N, "VEC3"),
+            "TEXCOORD_0": out.add_floats(UV, "VEC2"),
+            "WEIGHTS_0": out.add_floats(w, "VEC4"),
+            "COLOR_0": out.add_floats(np.ones((len(P), 4), np.float32), "VEC4"),
+        }
         js["accessors"][attrs["POSITION"]].update(min=P.min(0).tolist(), max=P.max(0).tolist())
         j = np.zeros((len(P), 4), np.uint16)
         j[:, 0] = spine
-        js["accessors"].append({"bufferView": out.add_view(j.tobytes()), "componentType": 5123, "count": len(P), "type": "VEC4"})
+        js["accessors"].append(
+            {"bufferView": out.add_view(j.tobytes()), "componentType": 5123, "count": len(P), "type": "VEC4"}
+        )
         attrs["JOINTS_0"] = len(js["accessors"]) - 1
         idx = inv.reshape(-1).astype(np.uint32)
-        js["accessors"].append({"bufferView": out.add_view(idx.tobytes()), "componentType": 5125, "count": int(idx.size), "type": "SCALAR"})
-        js["meshes"][0]["primitives"].append({"attributes": attrs, "indices": len(js["accessors"]) - 1, "material": len(js["materials"]) - 1})
+        js["accessors"].append(
+            {"bufferView": out.add_view(idx.tobytes()), "componentType": 5125, "count": int(idx.size), "type": "SCALAR"}
+        )
+        js["meshes"][0]["primitives"].append(
+            {"attributes": attrs, "indices": len(js["accessors"]) - 1, "material": len(js["materials"]) - 1}
+        )
         info.append("%s %d tris" % (mat["name"], len(f)))
     return "; ".join(info)
 
@@ -354,12 +402,19 @@ def add_straps(js, b, out, rig):
         rows = (len(P) - base) // 3
         for i in range(rows - 1):
             for j in range(2):
-                a0, a1, b0, b1 = (base + 3 * i + j, base + 3 * i + j + 1, base + 3 * (i + 1) + j, base + 3 * (i + 1) + j + 1)
+                a0, a1, b0, b1 = (
+                    base + 3 * i + j,
+                    base + 3 * i + j + 1,
+                    base + 3 * (i + 1) + j,
+                    base + 3 * (i + 1) + j + 1,
+                )
                 F += [(a0, b1, a1), (a0, b0, b1)]
     P, N, F = np.array(P, np.float32), np.array(N, np.float32), np.array(F, np.uint32)
     sj, sw = joints_weights(js, b, skin["attributes"])  # the strap moves with the skin under it, not with the spine
     ids = np.unique(dp.prim_faces(js, b, skin))
-    mid = P[1::3]  # a row of three shares the weights round its middle point: the ribbon cannot tear across or kink along
+    mid = P[
+        1::3
+    ]  # a row of three shares the weights round its middle point: the ribbon cannot tear across or kink along
     near = ids[cKDTree(sp[ids]).query(mid, k=STRAP_K)[1]]
     dn = rs.dense(sj[ids], sw[ids], len(rig.names))
     pos_in = {v: i for i, v in enumerate(ids)}
@@ -372,15 +427,36 @@ def add_straps(js, b, out, rig):
     leather_image().save(buf, "JPEG", quality=92)
     js["images"].append({"bufferView": out.add_view(buf.getvalue()), "mimeType": "image/jpeg"})
     js["textures"].append({"source": len(js["images"]) - 1})
-    js["materials"].append({"name": "strap-leather", "doubleSided": True, "pbrMetallicRoughness": {
-        "baseColorTexture": {"index": len(js["textures"]) - 1}, "metallicFactor": 0.0, "roughnessFactor": 0.8}})
-    attrs = {"POSITION": out.add_floats(P, "VEC3"), "NORMAL": out.add_floats(N, "VEC3"), "WEIGHTS_0": out.add_floats(wt, "VEC4"),
-             "TEXCOORD_0": out.add_floats(np.array(UV, np.float32), "VEC2")}
+    js["materials"].append(
+        {
+            "name": "strap-leather",
+            "doubleSided": True,
+            "pbrMetallicRoughness": {
+                "baseColorTexture": {"index": len(js["textures"]) - 1},
+                "metallicFactor": 0.0,
+                "roughnessFactor": 0.8,
+            },
+        }
+    )
+    attrs = {
+        "POSITION": out.add_floats(P, "VEC3"),
+        "NORMAL": out.add_floats(N, "VEC3"),
+        "WEIGHTS_0": out.add_floats(wt, "VEC4"),
+        "TEXCOORD_0": out.add_floats(np.array(UV, np.float32), "VEC2"),
+    }
     js["accessors"][attrs["POSITION"]].update(min=P.min(0).tolist(), max=P.max(0).tolist())
-    js["accessors"].append({"bufferView": out.add_view(jn.astype(np.uint16).tobytes()), "componentType": 5123,
-                            "count": len(P), "type": "VEC4"})
+    js["accessors"].append(
+        {
+            "bufferView": out.add_view(jn.astype(np.uint16).tobytes()),
+            "componentType": 5123,
+            "count": len(P),
+            "type": "VEC4",
+        }
+    )
     attrs["JOINTS_0"] = len(js["accessors"]) - 1
-    js["accessors"].append({"bufferView": out.add_view(F.tobytes()), "componentType": 5125, "count": int(F.size), "type": "SCALAR"})
+    js["accessors"].append(
+        {"bufferView": out.add_view(F.tobytes()), "componentType": 5125, "count": int(F.size), "type": "SCALAR"}
+    )
     prims.append({"attributes": attrs, "indices": len(js["accessors"]) - 1, "material": len(js["materials"]) - 1})
     return "%d strap triangles" % len(F)
 
@@ -432,17 +508,28 @@ def add_body_underlay(js, b, out, rig, under_paths):
         mat["pbrMetallicRoughness"].pop("metallicRoughnessTexture", None)
         mat["extras"] = {"under": True}
         js["materials"].append(mat)
-        attrs = {"POSITION": out.add_floats(flat, "VEC3"), "NORMAL": out.add_floats(vertex_normals(up, uf)[uf].reshape(-1, 3), "VEC3"),
-                 "TEXCOORD_0": out.add_floats(np.repeat(uv[tri_src], 3, axis=0), "VEC2"),
-                 "WEIGHTS_0": out.add_floats(weights[src], "VEC4")}
+        attrs = {
+            "POSITION": out.add_floats(flat, "VEC3"),
+            "NORMAL": out.add_floats(vertex_normals(up, uf)[uf].reshape(-1, 3), "VEC3"),
+            "TEXCOORD_0": out.add_floats(np.repeat(uv[tri_src], 3, axis=0), "VEC2"),
+            "WEIGHTS_0": out.add_floats(weights[src], "VEC4"),
+        }
         if "COLOR_0" in at0:
             attrs["COLOR_0"] = out.add_floats(n.floats(js, b, at0["COLOR_0"])[src], "VEC4")
         js["accessors"][attrs["POSITION"]].update(min=flat.min(0).tolist(), max=flat.max(0).tolist())
-        js["accessors"].append({"bufferView": out.add_view(joints[src].astype(np.uint16).tobytes()), "componentType": 5123,
-                                "count": len(flat), "type": "VEC4"})
+        js["accessors"].append(
+            {
+                "bufferView": out.add_view(joints[src].astype(np.uint16).tobytes()),
+                "componentType": 5123,
+                "count": len(flat),
+                "type": "VEC4",
+            }
+        )
         attrs["JOINTS_0"] = len(js["accessors"]) - 1
         f = np.arange(len(flat), dtype=np.uint32)
-        js["accessors"].append({"bufferView": out.add_view(f.tobytes()), "componentType": 5125, "count": int(f.size), "type": "SCALAR"})
+        js["accessors"].append(
+            {"bufferView": out.add_view(f.tobytes()), "componentType": 5125, "count": int(f.size), "type": "SCALAR"}
+        )
         prims.append({"attributes": attrs, "indices": len(js["accessors"]) - 1, "material": len(js["materials"]) - 1})
         info.append("%s shell %d tris" % (name, len(uf)))
     return "; ".join(info)
