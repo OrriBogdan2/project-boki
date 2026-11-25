@@ -10,9 +10,12 @@ const Trio := preload("res://tools/dmg_number_trio.gd")
 var main: Node
 var fails := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("DMGNUM %s %s" % ["PASS" if cond else "FAIL", what])
-	if not cond: fails += 1
+	if not cond:
+		fails += 1
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -35,8 +38,10 @@ func run(main_node: Node) -> void:
 	print("DMGNUM DONE, failures: %d" % fails)
 	main.get_tree().quit(1 if fails > 0 else 0)
 
+
 func _live(fx: Fx) -> Array:
 	return fx.nums.filter(func(n): return n["node"].visible)
+
 
 ## 10 burn-style ticks (a quarter second apart) through the real damage path.
 func _ticks(m: Match, fx: Fx, src: Hunter, foe: Hunter) -> void:
@@ -56,12 +61,19 @@ func _ticks(m: Match, fx: Fx, src: Hunter, foe: Hunter) -> void:
 	ok(_live(fx).size() == 2, "a different source and target gets its own label")
 	fx.nums.clear()
 
+
 func _sizes(fx: Fx) -> void:
 	var hit := Fx._num_size(30.0, false)
 	var crit := Fx._num_size(30.0, true)
 	ok(crit > hit, "a crit is larger than a normal hit (%d vs %d)" % [crit, hit])
-	var tiers := [5.0, 60.0, 250.0].map(func(v): return Fx._num_size(v, false))
+	var tiers := [5.0, 18.0, 45.0].map(func(v): return Fx._num_size(v, false))
 	ok(tiers[2] > tiers[1] and tiers[1] > tiers[0], "bigger hits are in bigger tiers %s" % [tiers])
+	# our scale (a Hunter has 124 to 193): a rifle round, an ability and an ult each read as their own size
+	var ours := [8.0, 18.0, 45.0].map(func(v): return Fx._num_size(v, false))
+	ok(
+		ours[0] > Fx._num_size(4.0, false) and ours[1] > ours[0] and ours[2] > ours[1],
+		"a round (8), an ability (18) and an ult (45) print at 3 sizes over a dart (4) %s" % [ours]
+	)
 	fx.nums.clear()
 	var at := Vector3(0, 1, 0)
 	fx.number(at, 10.0, Color.WHITE, false, "", "k")
@@ -72,6 +84,7 @@ func _sizes(fx: Fx) -> void:
 	fx.number(at, 5.0, Color.WHITE, false, "", "k")
 	ok(_live(fx).size() == 2, "a normal hit does not roll into a crit's number later")
 	fx.nums.clear()
+
 
 func _reticle(fx: Fx) -> void:
 	var r := Fx.RETICLE_CLEAR_PX
@@ -94,6 +107,7 @@ func _reticle(fx: Fx) -> void:
 	ok(gap >= r - 40.0, "a number aimed at the reticle spawns clear of it (%.0f px, minus jitter)" % gap)
 	fx.nums.clear()
 
+
 func _pool(fx: Fx) -> void:
 	var kids := fx.get_child_count()
 	fx.nums.clear()
@@ -102,6 +116,7 @@ func _pool(fx: Fx) -> void:
 	ok(fx.get_child_count() == kids, "numbers reuse the pool, no labels are created")
 	ok(_live(fx).size() <= Fx.NUM_POOL, "no more than %d live at once (%d)" % [Fx.NUM_POOL, _live(fx).size()])
 	fx.nums.clear()
+
 
 ## Three attackers on one dummy for Trio.SECS s: the most numbers over one spot in any frame.
 func _trio() -> void:
@@ -129,7 +144,12 @@ func _trio() -> void:
 		most = maxi(most, c)
 		over += 1 if c > Trio.MAX_OVERLAP else 0
 	ok((s["dummy"] as Hunter).hp < 1e6, "setup: the dummy took the hits")
-	ok(most <= Trio.MAX_OVERLAP, "trio focus %.0f s: at most %d numbers over one spot (%d; %d frames over)" % [
-		Trio.SECS, Trio.MAX_OVERLAP, most, over])
+	ok(
+		most <= Trio.MAX_OVERLAP,
+		(
+			"trio focus %.0f s: at most %d numbers over one spot (%d; %d frames over)"
+			% [Trio.SECS, Trio.MAX_OVERLAP, most, over]
+		)
+	)
 	fx.nums.clear()
 	m.queue_free()
