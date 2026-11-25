@@ -501,7 +501,9 @@ func _ult_cues() -> void:
 	var wired := press.contains("UltCue.cast(k)") and cue.contains('"ucast"')
 	wired = wired and match_src.contains('"ucast": UltCue.net_in')
 	ok(wired, "HeroUlt.press plays and sends the cue; the match plays others'")
-	ok(cue.count("m.sfx(") == 2 and cue.count(", DB)") == 2, "ally and rival tags play at the one level")
+	ok(cue.count("m.sfx(") == 2 and cue.count(", DB)") == 2 and cue.count("Sfx.play_foe(") == 2
+			and cue.count(", DB_FOE)") == 2 and UltCue.DB_FOE > UltCue.DB and AudioServer.get_bus_index("SFXFoe") >= 0,
+			"your team's cue and tag play at DB, a rival's the same sounds at DB_FOE (louder) on the SFXFoe bus")
 	var draw_src := FileAccess.get_file_as_string("res://scripts/match/aim/aim_draw.gd")
 	var tell_ok := Sfx.ensure("tell_foe") and Sfx.MIN_GAP.has("tell_foe") and TellCue.DB_BIG < UltCue.DB
 	tell_ok = tell_ok and draw_src.contains("TellCue.aim(")
