@@ -332,7 +332,7 @@ static func footstep(h: Hunter) -> void:
 	if m == null or m.world == null or not StepReach.heard(h):
 		return
 	var surf := StepSurface.at(m, h.pos)
-	StepReach.play(h, StepSurface.cue(h, surf), StepSurface.vol_db(h, surf, -13.0), StepSurface.vol_db(h, surf, -17.0))
+	StepReach.play(h, StepSurface.cue(h, surf), StepSurface.vol_db(h, -13.0), StepSurface.vol_db(h, -17.0))
 	HunterFoley.step(h)
 
 

@@ -491,6 +491,39 @@ func _steps(m: Match, p: Hunter) -> void:
 	Sfx.listener = p.pos
 	ok(not is_nan(own_near) and is_equal_approx(own_near, own_far),
 			"your own step plays at one level wherever the camera is (%.1f / %.1f dB)" % [own_near, own_far])
+	_step_weights(r, p)
+
+
+## One rival per weight class (archer light, dolm medium, ashwick heavy) steps: heavier is lower and louder,
+## on the foot's contact step and the surface step both. Motley (ostra) has no steps to weigh (gait < 0.5).
+func _step_weights(R: Hunter, P: Hunter) -> void:
+	var arch0 := R.arch
+	var got := {}
+	for a in ["archer", "dolm", "ashwick"]:
+		R.arch = a
+		got[a] = [_step_params(R, P, true), _step_params(R, P, false)]
+	R.arch = arch0
+	for i in 2:
+		var l: Vector2 = got["archer"][i]
+		var md: Vector2 = got["dolm"][i]
+		var hv: Vector2 = got["ashwick"][i]
+		var what := "contact" if i == 0 else "surface"
+		ok(l.x > md.x and md.x > hv.x, "%s step pitch: light %.2f > medium %.2f > heavy %.2f" % [what, l.x, md.x, hv.x])
+		ok(l.y < md.y and md.y < hv.y, "%s step level: light %.1f < medium %.1f < heavy %.1f dB" %
+				[what, l.y, md.y, hv.y])
+	ok(KMovesStone.gait("ostra") < 0.5, "Motley floats: no footsteps (gait %.1f)" % KMovesStone.gait("ostra"))
+
+
+## (pitch scale, dB) of one step of R, 10 m from P, from the Sfx.played signal.
+func _step_params(R: Hunter, P: Hunter, contact: bool) -> Vector2:
+	var out := [Vector2.ZERO]
+	var on := func(sname: String, _at, db: float, pitch: float):
+		if sname.contains("step"):
+			out[0] = Vector2(pitch, db)
+	Sfx.played.connect(on)
+	_step_db(R, P, 10.0, contact)
+	Sfx.played.disconnect(on)
+	return out[0]
 
 ## The level (dB) of one step of h placed `d` m from p_v along x (h == p_v: where p_v stands), NAN when nothing played.
 ## contact: the foot's plain step (StepReach.contact), else the surface step (Juice.footstep).
