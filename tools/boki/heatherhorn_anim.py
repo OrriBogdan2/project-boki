@@ -1,12 +1,13 @@
 """Heatherhorn's (Crofthorn's) own clips on the scan rig it shares with Glomwort (root, hips, spine, neck, head): a
 highland cow that carries a walled garden, so the back stays level and the plod is slow and stately; it sweeps its long
 horns sideways, bellows proudly with its chest out and, being stubborn, grazes whenever it likes."""
+
 import glomwort_anim
 from boki_clips import LOOK_UP, add, eat_ground, s, seq
 
 BONES = glomwort_anim.BONES
 HIDE_AT = glomwort_anim.HIDE_AT
-GRAZE = -0.32       # the head dropped to the grass (rx)
+GRAZE = -0.32  # the head dropped to the grass (rx)
 
 
 def plod(t, amp):
@@ -26,8 +27,12 @@ def idle(t):
     dip = seq(t, [(0, 0), (0.55, 0), (0.64, 1), (0.8, 1), (0.9, 0), (1, 0)])
     p = {"root_sc": (1 + 0.01 * br, 1 + 0.02 * br, 1 + 0.01 * br)}
     add(p, "spine", rx=-0.04 * dip)
-    add(p, "head", rx=LOOK_UP * 0.5 + 0.03 * br + (GRAZE - LOOK_UP * 0.5) * dip + 0.04 * dip * s(t, 6),
-        ry=0.12 * s(t, 1, 0.6) * (1 - dip))
+    add(
+        p,
+        "head",
+        rx=LOOK_UP * 0.5 + 0.03 * br + (GRAZE - LOOK_UP * 0.5) * dip + 0.04 * dip * s(t, 6),
+        ry=0.12 * s(t, 1, 0.6) * (1 - dip),
+    )
     return p
 
 
@@ -119,15 +124,17 @@ def pet(t):
 
 
 CLIPS = dict(glomwort_anim.CLIPS)
-CLIPS.update({
-    "idle": (4.0, True, idle),
-    "walk": (1.3, True, walk),
-    "run": (0.7, True, run),
-    "hop": (1.1, True, lumber_hop),
-    "carry": (1.4, True, carry),
-    "pet": (2.8, True, pet),
-    "attack": (1.1, False, sweep),
-    "ability": (1.8, False, bellow),
-    "sleep": (4.5, True, lie_down),
-    "eat": (2.4, True, graze),
-})
+CLIPS.update(
+    {
+        "idle": (4.0, True, idle),
+        "walk": (1.3, True, walk),
+        "run": (0.7, True, run),
+        "hop": (1.1, True, lumber_hop),
+        "carry": (1.4, True, carry),
+        "pet": (2.8, True, pet),
+        "attack": (1.1, False, sweep),
+        "ability": (1.8, False, bellow),
+        "sleep": (4.5, True, lie_down),
+        "eat": (2.4, True, graze),
+    }
+)
