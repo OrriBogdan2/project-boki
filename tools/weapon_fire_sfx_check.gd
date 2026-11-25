@@ -2,16 +2,16 @@ extends RefCounted
 ## --weapon-fire-sfx-check (briefs/SFX_AUDIT.md row 3): every Hunter's attack key and every pickup gun
 ## is fired on a training strip and the sounds it plays are recorded (Sfx.last_played). A Hunter's
 ## signature weapon may not play a stock weapon sound or a pickup gun's shot while it fires, the old
-## class weapons' JSON names a Hunter's own sound, and the five pickup guns each play their own shot.
+## class weapons' JSON names a Hunter's own sound, and the pickup guns (five, and the minigun) each play their own shot.
 
-## The guns a hunter without a Hunter kit picks from (Data.CLASSES weapon lists): each its own shot.
-const PICKUP_GUNS := ["smg", "rifle", "burst_rifle", "shotgun", "sniper"]
+## The guns a hunter without a Hunter kit picks from (Data.CLASSES weapon lists): each its own shot, the minigun too.
+const PICKUP_GUNS := ["smg", "rifle", "burst_rifle", "shotgun", "sniper", "minigun"]
 
 ## Signature-class weapons no current Hunter carries but a class list still offers: their JSON sound must be own too.
 const OLD_SIGNATURES := ["longsword", "twin_blades", "spellstaff"]
 
 ## The shared weapon sounds the audit found standing in for Hunters' own (SFX_AUDIT row 3).
-const STOCK := ["smg", "rifle", "shotgun", "sniper", "thump", "cleave", "swipe", "zap"]
+const STOCK := ["thump", "cleave", "swipe", "zap"]
 
 ## Hunters added after the audit whose weapon still plays a stock sound (own LMB sound owed: docs/DEBT.md).
 const OWED := ["gil"]
@@ -60,15 +60,20 @@ func run(main_node: Node) -> void:
 		var heard := _fire(m, m.player)
 		var own := String(Data.weapon_stats(wid)["sfx"])
 		ok("pickup %s plays its shot" % wid, own in heard, "heard %s" % [heard])
+		var spin := String(Data.weapon_stats(wid).get("spin_sfx", ""))
+		if wid == "minigun":
+			ok("the minigun plays its spin-up", not spin.is_empty() and spin in heard, "heard %s" % [heard])
 		shots[own] = FileAccess.get_md5("res://audio/%s.wav" % own)
 		await ak.done(m)
 	var files: Array = shots.values()
 	var unique := files.filter(func(h): return files.count(h) == 1)
 	ok(
-		"the 5 pickup guns have 5 different shots",
+		"the %d pickup guns have %d different shots" % [PICKUP_GUNS.size(), PICKUP_GUNS.size()],
 		shots.size() == PICKUP_GUNS.size() and unique.size() == shots.size(),
 		"%s" % [shots.keys()]
 	)
+	var stock_left := ["smg", "rifle", "shotgun", "sniper"].filter(func(w): return w in Sfx.NAMES)
+	ok("the old stock gun sounds are retired", stock_left.is_empty(), "left %s" % [stock_left])
 	print("WFSFX DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
