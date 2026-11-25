@@ -40,9 +40,13 @@ def rot_axis(axis, a):
     x, y, z = axis
     c, s = math.cos(a), math.sin(a)
     C = 1 - c
-    return np.array([[c + x * x * C, x * y * C - z * s, x * z * C + y * s],
-                     [y * x * C + z * s, c + y * y * C, y * z * C - x * s],
-                     [z * x * C - y * s, z * y * C + x * s, c + z * z * C]])
+    return np.array(
+        [
+            [c + x * x * C, x * y * C - z * s, x * z * C + y * s],
+            [y * x * C + z * s, c + y * y * C, y * z * C - x * s],
+            [z * x * C - y * s, z * y * C + x * s, c + z * z * C],
+        ]
+    )
 
 
 def rot_euler(e):
@@ -82,9 +86,13 @@ def quat(m):
 
 def mat(q):
     x, y, z, w = q
-    return np.array([[1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w)],
-                     [2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w)],
-                     [2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y)]])
+    return np.array(
+        [
+            [1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w)],
+            [2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w)],
+            [2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y)],
+        ]
+    )
 
 
 class Rig:
@@ -101,10 +109,12 @@ class Rig:
         self.t = [np.array(x.get("translation", [0, 0, 0]), float) for x in n]
         self.joints = self.j["skins"][0]["joints"]
         self.order = []  # parents first, from the armature
+
         def walk(i):
             self.order.append(i)
             for c in n[i].get("children", []):
                 walk(c)
+
         walk(self.idx["SmartRigArmature"])
         self.rest = self.fk({})
         self.hips_rest = self.t[self.idx["Hips"]].copy()
@@ -159,10 +169,25 @@ def two_bone(S, T, l1, l2, pole):
     return unit(E - S), unit(T - E)
 
 
-ARM = {"R": ("RightShoulder", "RightArm", "RightForeArm", "RightHand"), "L": ("LeftShoulder", "LeftArm", "LeftForeArm", "LeftHand")}
-LEG = {"R": ("RightUpLeg", "RightLeg", "RightFoot", "RightToeBase"), "L": ("LeftUpLeg", "LeftLeg", "LeftFoot", "LeftToeBase")}
+ARM = {
+    "R": ("RightShoulder", "RightArm", "RightForeArm", "RightHand"),
+    "L": ("LeftShoulder", "LeftArm", "LeftForeArm", "LeftHand"),
+}
+LEG = {
+    "R": ("RightUpLeg", "RightLeg", "RightFoot", "RightToeBase"),
+    "L": ("LeftUpLeg", "LeftLeg", "LeftFoot", "LeftToeBase"),
+}
 SPINE = ["Spine02", "Spine01", "Spine", "neck", "Head"]
-UPPER = SPINE + ["LeftShoulder", "LeftArm", "LeftForeArm", "LeftHand", "RightShoulder", "RightArm", "RightForeArm", "RightHand"]
+UPPER = SPINE + [
+    "LeftShoulder",
+    "LeftArm",
+    "LeftForeArm",
+    "LeftHand",
+    "RightShoulder",
+    "RightArm",
+    "RightForeArm",
+    "RightHand",
+]
 PIVOT_BONE = {"R": "RightHand", "L": "LeftHand"}
 
 
@@ -202,7 +227,7 @@ def mix(pa, pb, k):
     return {key: lerp(pa[key], pb[key], k) for key in pa}
 
 
-def solve(p, full, hips_lock=False):
+def solve(p, full):
     """The pose p as local rotations of every joint (full: legs and hips too). Returns ({node name: quat}, hips translation, globals)."""
     R = rig()
     cache = R.rest
@@ -267,7 +292,12 @@ def local_quats(g, nodes):
     return out
 
 
-EASE = {"lin": lambda u: u, "out": lambda u: 1 - (1 - u) ** 2, "in": lambda u: u * u, "sm": lambda u: u * u * (3 - 2 * u)}
+EASE = {
+    "lin": lambda u: u,
+    "out": lambda u: 1 - (1 - u) ** 2,
+    "in": lambda u: u * u,
+    "sm": lambda u: u * u * (3 - 2 * u),
+}
 
 
 def sample(keys, dur, loop=False):
@@ -302,8 +332,13 @@ def P(**kw):
 
 def lean(spine=0.0, twist=0.0, tilt=0.0, head=(0.0, 0.0, 0.0), neck=0.0):
     """Torso deltas spread over the spine chain, the head's own."""
-    k = {"e_Spine02": (spine * 0.3, twist * 0.2, tilt * 0.3), "e_Spine01": (spine * 0.3, twist * 0.3, tilt * 0.3),
-         "e_Spine": (spine * 0.4, twist * 0.5, tilt * 0.4), "e_neck": (neck, 0.0, 0.0), "e_Head": head}
+    k = {
+        "e_Spine02": (spine * 0.3, twist * 0.2, tilt * 0.3),
+        "e_Spine01": (spine * 0.3, twist * 0.3, tilt * 0.3),
+        "e_Spine": (spine * 0.4, twist * 0.5, tilt * 0.4),
+        "e_neck": (neck, 0.0, 0.0),
+        "e_Head": head,
+    }
     return k
 
 
@@ -314,62 +349,211 @@ def clips():
     out = {}
     # ---- LMB: the pilot's spool, then the hose held out from her right palm -----------------------------------
     # Right arm: elbow tucked at the hip, forearm out, palm forward at chest height; the left arm stays loose, bracing a little.
-    pole_back = (0.5, -0.8, -0.7)
-    spool = P(wR=(0.22, 1.18, 0.36), poleR=(0.5, -0.9, -0.5), handR=(0.0, 0.1, 1.0), wL=(0.30, 1.0, 0.1), poleL=(0.5, -0.8, -0.6), **lean(0.12, -0.2, 0.0, (-0.1, 0.1, 0.0)))
-    snap = P(reachR=0.4, wR=(0.16, 1.28, 0.58), poleR=(0.4, -0.9, -0.5), handR=(0.0, 0.15, 1.0), wL=(0.34, 0.98, 0.04), poleL=(0.5, -0.8, -0.6), **lean(0.06, -0.3, 0.0, (-0.05, 0.12, 0.0)))
-    kick = P(reachR=0.4, wR=(0.17, 1.26, 0.50), poleR=(0.4, -0.9, -0.5), handR=(0.0, 0.2, 1.0), wL=(0.34, 1.0, 0.02), poleL=(0.5, -0.8, -0.6), **lean(-0.04, -0.3, 0.0, (-0.08, 0.12, 0.0)))
-    held = P(reachR=0.4, wR=(0.16, 1.27, 0.54), poleR=(0.4, -0.9, -0.5), handR=(0.0, 0.17, 1.0), wL=(0.34, 0.99, 0.03), poleL=(0.5, -0.8, -0.6), **lean(0.02, -0.3, 0.0, (-0.07, 0.12, 0.0)))
-    buck = P(reachR=0.4, wR=(0.16, 1.30, 0.50), poleR=(0.4, -0.9, -0.5), handR=(0.0, 0.25, 1.0), wL=(0.34, 1.01, 0.01), poleL=(0.5, -0.8, -0.6), **lean(-0.04, -0.32, 0.0, (-0.06, 0.12, 0.0)))
+    spool = P(
+        wR=(0.22, 1.18, 0.36),
+        poleR=(0.5, -0.9, -0.5),
+        handR=(0.0, 0.1, 1.0),
+        wL=(0.30, 1.0, 0.1),
+        poleL=(0.5, -0.8, -0.6),
+        **lean(0.12, -0.2, 0.0, (-0.1, 0.1, 0.0)),
+    )
+    snap = P(
+        reachR=0.4,
+        wR=(0.16, 1.28, 0.58),
+        poleR=(0.4, -0.9, -0.5),
+        handR=(0.0, 0.15, 1.0),
+        wL=(0.34, 0.98, 0.04),
+        poleL=(0.5, -0.8, -0.6),
+        **lean(0.06, -0.3, 0.0, (-0.05, 0.12, 0.0)),
+    )
+    kick = P(
+        reachR=0.4,
+        wR=(0.17, 1.26, 0.50),
+        poleR=(0.4, -0.9, -0.5),
+        handR=(0.0, 0.2, 1.0),
+        wL=(0.34, 1.0, 0.02),
+        poleL=(0.5, -0.8, -0.6),
+        **lean(-0.04, -0.3, 0.0, (-0.08, 0.12, 0.0)),
+    )
+    held = P(
+        reachR=0.4,
+        wR=(0.16, 1.27, 0.54),
+        poleR=(0.4, -0.9, -0.5),
+        handR=(0.0, 0.17, 1.0),
+        wL=(0.34, 0.99, 0.03),
+        poleL=(0.5, -0.8, -0.6),
+        **lean(0.02, -0.3, 0.0, (-0.07, 0.12, 0.0)),
+    )
+    buck = P(
+        reachR=0.4,
+        wR=(0.16, 1.30, 0.50),
+        poleR=(0.4, -0.9, -0.5),
+        handR=(0.0, 0.25, 1.0),
+        wL=(0.34, 1.01, 0.01),
+        poleL=(0.5, -0.8, -0.6),
+        **lean(-0.04, -0.32, 0.0, (-0.06, 0.12, 0.0)),
+    )
     # (the clip starts 0.1 s into the key hold and the roar 0.2 s: the arm is out by 0.1 s, the kick is the roar)
-    out["cn_u_lance"] = (0.26, False, [(0.0, rest_pose(), "lin"), (0.05, spool, "out"), (0.1, snap, "out"), (0.16, kick, "out"), (0.26, held, "sm")])
+    out["cn_u_lance"] = (
+        0.26,
+        False,
+        [(0.0, rest_pose(), "lin"), (0.05, spool, "out"), (0.1, snap, "out"), (0.16, kick, "out"), (0.26, held, "sm")],
+    )
     # the hold (loops 0.5 s at 8 Hz-ish bucking, the same first and last pose)
-    out["cn_u_lance_loop"] = (0.5, True, [(0.0, held, "lin"), (0.0625, buck, "lin"), (0.125, held, "lin"), (0.1875, buck, "lin"), (0.25, held, "lin"),
-                                          (0.3125, buck, "lin"), (0.375, held, "lin"), (0.4375, buck, "lin"), (0.5, held, "lin")])
+    out["cn_u_lance_loop"] = (
+        0.5,
+        True,
+        [
+            (0.0, held, "lin"),
+            (0.0625, buck, "lin"),
+            (0.125, held, "lin"),
+            (0.1875, buck, "lin"),
+            (0.25, held, "lin"),
+            (0.3125, buck, "lin"),
+            (0.375, held, "lin"),
+            (0.4375, buck, "lin"),
+            (0.5, held, "lin"),
+        ],
+    )
     # let go: the arm drops back off the aim
-    out["cn_u_lance_end"] = (0.3, False, [(0.0, held, "lin"), (0.08, dict(snap, **{}), "out"), (0.3, rest_pose(), "sm")])
+    out["cn_u_lance_end"] = (
+        0.3,
+        False,
+        [(0.0, held, "lin"), (0.08, dict(snap, **{}), "out"), (0.3, rest_pose(), "sm")],
+    )
     # ---- RMB: the palm up to the eye, sighting along the arm (the cast's 0.4 s), then the push on the bolt frame --
-    aim0 = P(wR=(0.16, 1.40, 0.40), poleR=(0.5, -0.9, -0.4), handR=(0.0, 0.3, 1.0), wL=(0.30, 1.0, 0.12), poleL=(0.5, -0.8, -0.6), **lean(0.06, -0.3, 0.0, (0.0, 0.3, 0.0)))
-    aim1 = P(reachR=0.3, wR=(0.11, 1.56, 0.58), poleR=(0.5, -0.9, -0.3), handR=(0.0, 0.1, 1.0), wL=(0.30, 0.98, 0.10), poleL=(0.5, -0.8, -0.6), **lean(0.1, -0.34, 0.0, (0.05, 0.36, 0.0)))
+    aim0 = P(
+        wR=(0.16, 1.40, 0.40),
+        poleR=(0.5, -0.9, -0.4),
+        handR=(0.0, 0.3, 1.0),
+        wL=(0.30, 1.0, 0.12),
+        poleL=(0.5, -0.8, -0.6),
+        **lean(0.06, -0.3, 0.0, (0.0, 0.3, 0.0)),
+    )
+    aim1 = P(
+        reachR=0.3,
+        wR=(0.11, 1.56, 0.58),
+        poleR=(0.5, -0.9, -0.3),
+        handR=(0.0, 0.1, 1.0),
+        wL=(0.30, 0.98, 0.10),
+        poleL=(0.5, -0.8, -0.6),
+        **lean(0.1, -0.34, 0.0, (0.05, 0.36, 0.0)),
+    )
     out["cn_u_aim"] = (0.3, False, [(0.0, rest_pose(), "lin"), (0.1, aim0, "out"), (0.3, aim1, "sm")])
-    sh0 = P(reachR=0.3, wR=(0.11, 1.57, 0.60), poleR=(0.5, -0.9, -0.3), handR=(0.0, 0.1, 1.0), wL=(0.30, 0.98, 0.10), poleL=(0.5, -0.8, -0.6), **lean(0.1, -0.34, 0.0, (0.05, 0.36, 0.0)))
-    push = P(wR=(0.10, 1.62, 0.68), reachR=0.8, poleR=(0.5, -0.9, -0.2), handR=(0.0, 0.18, 1.0), wL=(0.32, 1.0, 0.04), poleL=(0.5, -0.8, -0.6), **lean(-0.12, -0.3, 0.0, (-0.1, 0.3, 0.0)))
-    out["cn_u_shot"] = (0.5, False, [(0.0, sh0, "lin"), (0.07, push, "out"), (0.16, dict(push, wR=(0.10, 1.62, 0.64)), "sm"), (0.32, dict(aim1, **lean(0.06, -0.2, 0.0, (0.0, 0.2, 0.0))), "sm"), (0.5, rest_pose(), "sm")])
+    sh0 = P(
+        reachR=0.3,
+        wR=(0.11, 1.57, 0.60),
+        poleR=(0.5, -0.9, -0.3),
+        handR=(0.0, 0.1, 1.0),
+        wL=(0.30, 0.98, 0.10),
+        poleL=(0.5, -0.8, -0.6),
+        **lean(0.1, -0.34, 0.0, (0.05, 0.36, 0.0)),
+    )
+    push = P(
+        wR=(0.10, 1.62, 0.68),
+        reachR=0.8,
+        poleR=(0.5, -0.9, -0.2),
+        handR=(0.0, 0.18, 1.0),
+        wL=(0.32, 1.0, 0.04),
+        poleL=(0.5, -0.8, -0.6),
+        **lean(-0.12, -0.3, 0.0, (-0.1, 0.3, 0.0)),
+    )
+    out["cn_u_shot"] = (
+        0.5,
+        False,
+        [
+            (0.0, sh0, "lin"),
+            (0.07, push, "out"),
+            (0.16, dict(push, wR=(0.10, 1.62, 0.64)), "sm"),
+            (0.32, dict(aim1, **lean(0.06, -0.2, 0.0, (0.0, 0.2, 0.0))), "sm"),
+            (0.5, rest_pose(), "sm"),
+        ],
+    )
     # ---- E, Furnace Cloak: a tuck for the blink, then everything flung wide on the blast frame ------------------
-    tuck = P(wR=(0.14, 1.20, 0.30), poleR=(0.6, -0.8, -0.3), handR=(0.0, 0.0, 1.0), wL=(0.14, 1.20, 0.30), poleL=(0.6, -0.8, -0.3), hips=(0.0, -0.02, 0.0), **lean(0.28, 0.0, 0.0, (0.05, 0.0, 0.0)))
-    wide = P(wR=(0.74, 1.54, 0.04), poleR=(0.1, -1.0, -0.3), handR=(1.0, 0.25, 0.0), twistR=0.0,
-             wL=(0.74, 1.54, 0.04), poleL=(0.1, -1.0, -0.3), handL=(1.0, 0.25, 0.0), **lean(-0.30, 0.0, 0.0, (-0.35, 0.0, 0.0)))
+    tuck = P(
+        wR=(0.14, 1.20, 0.30),
+        poleR=(0.6, -0.8, -0.3),
+        handR=(0.0, 0.0, 1.0),
+        wL=(0.14, 1.20, 0.30),
+        poleL=(0.6, -0.8, -0.3),
+        hips=(0.0, -0.02, 0.0),
+        **lean(0.28, 0.0, 0.0, (0.05, 0.0, 0.0)),
+    )
+    wide = P(
+        wR=(0.74, 1.54, 0.04),
+        poleR=(0.1, -1.0, -0.3),
+        handR=(1.0, 0.25, 0.0),
+        twistR=0.0,
+        wL=(0.74, 1.54, 0.04),
+        poleL=(0.1, -1.0, -0.3),
+        handL=(1.0, 0.25, 0.0),
+        **lean(-0.30, 0.0, 0.0, (-0.35, 0.0, 0.0)),
+    )
     # (the pose is 0 at the press: the blast frame is frame 1; the tuck is the 0.03 s before, folded into frame 0)
-    out["cn_u_cloak"] = (0.55, False, [(0.0, tuck, "lin"), (0.04, wide, "out"), (0.2, dict(wide, wR=(0.72, 1.52, 0.02), wL=(0.72, 1.52, 0.02)), "sm"), (0.55, rest_pose(), "sm")])
+    out["cn_u_cloak"] = (
+        0.55,
+        False,
+        [
+            (0.0, tuck, "lin"),
+            (0.04, wide, "out"),
+            (0.2, dict(wide, wR=(0.72, 1.52, 0.02), wL=(0.72, 1.52, 0.02)), "sm"),
+            (0.55, rest_pose(), "sm"),
+        ],
+    )
     return out
 
 
 def flights():
     """Full-body clips (every joint): Flue Flight's take-off, flight loop and landing."""
     out = {}
-    R = rig()
     rest = rest_pose()
     aR, aL = rest["aR"], rest["aL"]
-    arms_dn = dict(wR=(0.30, 0.95, -0.02), poleR=(0.6, -0.5, -0.8), wL=(0.30, 0.95, -0.02), poleL=(0.6, -0.5, -0.8))
     # take-off: down into a crouch as the ring bursts, then up on the two heel jets, leaning into it, arms back
-    crouch = P(hips=(0.0, -0.17, 0.02), hips_rot=(0.28, 0.0, 0.0), aR=(aR[0], aR[1], aR[2]), aL=(aL[0], aL[1], aL[2]),
-               wR=(0.26, 1.02, 0.24), poleR=(0.6, -0.6, -0.6), wL=(0.26, 1.02, 0.24), poleL=(0.6, -0.6, -0.6), **lean(0.1, 0.0, 0.0, (-0.15, 0.0, 0.0)))
+    crouch = P(
+        hips=(0.0, -0.17, 0.02),
+        hips_rot=(0.28, 0.0, 0.0),
+        aR=(aR[0], aR[1], aR[2]),
+        aL=(aL[0], aL[1], aL[2]),
+        wR=(0.26, 1.02, 0.24),
+        poleR=(0.6, -0.6, -0.6),
+        wL=(0.26, 1.02, 0.24),
+        poleL=(0.6, -0.6, -0.6),
+        **lean(0.1, 0.0, 0.0, (-0.15, 0.0, 0.0)),
+    )
     hip_pitch = 1.0  # radians the body leans into the flight (the contract's 0.62 + 0.28 hips)
+
     def fly(ph, a_back=0.0):
         hp = (hip_pitch + 0.06 * ph, 0.0, 0.08 * ph)
-        return P(hips=(0.0, 0.06 + 0.05 * ph, 0.06), hips_rot=hp,
-                 aR=(0.13, 0.80, -0.50 - 0.04 * a_back), aL=(0.12, 0.84 + 0.04 * a_back, -0.46), footR=(0.0, -0.45, -0.9), footL=(0.0, -0.45, -0.9),
-                 wR=(0.26, 1.22 + 0.2 * ph, -0.10), poleR=(0.7, 0.4, -0.2), wL=(0.28, 1.2 - 0.2 * ph, -0.08), poleL=(0.7, 0.4, -0.2),
-                 **lean(-0.15, 0.0, 0.0, (-0.55, 0.0, 0.0)))
+        return P(
+            hips=(0.0, 0.06 + 0.05 * ph, 0.06),
+            hips_rot=hp,
+            aR=(0.13, 0.80, -0.50 - 0.04 * a_back),
+            aL=(0.12, 0.84 + 0.04 * a_back, -0.46),
+            footR=(0.0, -0.45, -0.9),
+            footL=(0.0, -0.45, -0.9),
+            wR=(0.26, 1.22 + 0.2 * ph, -0.10),
+            poleR=(0.7, 0.4, -0.2),
+            wL=(0.28, 1.2 - 0.2 * ph, -0.08),
+            poleL=(0.7, 0.4, -0.2),
+            **lean(-0.15, 0.0, 0.0, (-0.55, 0.0, 0.0)),
+        )
+
     f0 = fly(0.0)
     f1 = fly(0.4, 0.5)
     f2 = fly(-0.3, 1.0)
-    f3 = fly(0.2, 0.0)
     # (the kit starts the clip 0.12 s in: it lands up and flying 0.1 s after the press, so the crouch is the first frame seen)
     out["cn_f_takeoff"] = (0.22, False, [(0.0, rest_pose(), "lin"), (0.12, crouch, "out"), (0.22, f0, "out")])
     out["cn_f_fly"] = (0.78, True, [(0.0, f0, "lin"), (0.23, f1, "lin"), (0.5, f2, "lin"), (0.78, f0, "lin")])
     fl0 = dict(f0, hips_rot=(0.4, 0.0, 0.0))
-    sq = P(hips=(0.0, -0.07, 0.0), hips_rot=(0.12, 0.0, 0.0), **lean(0.1, 0.0, 0.0, (-0.1, 0.0, 0.0)),
-           wR=(0.28, 1.0, 0.06), poleR=(0.6, -0.6, -0.6), wL=(0.28, 1.0, 0.06), poleL=(0.6, -0.6, -0.6))
+    sq = P(
+        hips=(0.0, -0.07, 0.0),
+        hips_rot=(0.12, 0.0, 0.0),
+        **lean(0.1, 0.0, 0.0, (-0.1, 0.0, 0.0)),
+        wR=(0.28, 1.0, 0.06),
+        poleR=(0.6, -0.6, -0.6),
+        wL=(0.28, 1.0, 0.06),
+        poleL=(0.6, -0.6, -0.6),
+    )
     out["cn_f_land"] = (0.25, False, [(0.0, fl0, "lin"), (0.07, sq, "out"), (0.25, rest_pose(), "sm")])
     return out
 
@@ -427,8 +611,18 @@ def build(out_path, shot=False):
         if shot:
             for f in (0, len(poses) // 2, len(poses) - 1):
                 over, g = solve(poses[f], full)
-                print(name, "t=%.2f" % times[f], "wristR(r,u,f)", np.round(R.pos(g, "RightHand") * [-1, 1, 1], 2), "wristL(-r)", np.round(R.pos(g, "LeftHand") * [-1, 1, 1], 2),
-                      "head", np.round(R.pos(g, "Head") * [-1, 1, 1], 2), "ankleR", np.round(R.pos(g, "RightFoot") * [-1, 1, 1], 2))
+                print(
+                    name,
+                    "t=%.2f" % times[f],
+                    "wristR(r,u,f)",
+                    np.round(R.pos(g, "RightHand") * [-1, 1, 1], 2),
+                    "wristL(-r)",
+                    np.round(R.pos(g, "LeftHand") * [-1, 1, 1], 2),
+                    "head",
+                    np.round(R.pos(g, "Head") * [-1, 1, 1], 2),
+                    "ankleR",
+                    np.round(R.pos(g, "RightFoot") * [-1, 1, 1], 2),
+                )
     j["buffers"] = [{"byteLength": len(bin_)}]
     G.write(out_path, j, bin_)
     print("wrote", out_path, [a["name"] for a in j["animations"]], os.path.getsize(out_path), "bytes")
