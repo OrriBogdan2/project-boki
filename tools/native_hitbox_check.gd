@@ -79,20 +79,28 @@ func measure(m: Node3D, a: String) -> Dictionary:
 	var cls: Dictionary = Data.CLASSES[Arch.weight(a)]
 	var hit_h := Arch.hit_h(a)
 	return {
-		"height": h, "feet": lo.y, "head": _bone_y(m, sk, "head"), "shoulder": sx1 - sx0, "reach": reach,
-		"width": hi.x - lo.x, "depth": hi.z - lo.z, "hit_h": hit_h,
+		"height": h,
+		"feet": lo.y,
+		"head": _bone_y(m, sk, "head"),
+		"shoulder": sx1 - sx0,
+		"reach": reach,
+		"width": hi.x - lo.x,
+		"depth": hi.z - lo.z,
+		"hit_h": hit_h,
 		"want": hit_h * float(chart.get("height_3d", chart["height"])) / float(chart["height"]),
 		"ring": Arch.hit_r(a, cls) + Match.HIT_SLACK,
 	}
 
 
 func row(a: String, r: Dictionary) -> String:
-	var body := "height %.2f | hit_h %.2f | want %.2f | %+.0f%% | head bone %.2f | feet %+.2f" % [
-		r.height, r.hit_h, r.want, 100.0 * (r.height / r.want - 1.0), r.head, r.feet
-	]
-	var ring := "shoulder %.2f | ring %.2f | reach %.2f | %+.0f%% | width %.2f | depth %.2f" % [
-		r.shoulder, 2.0 * r.ring, r.reach, 100.0 * (r.reach / r.ring - 1.0), r.width, r.depth
-	]
+	var body := (
+		"height %.2f | hit_h %.2f | want %.2f | %+.0f%% | head bone %.2f | feet %+.2f"
+		% [r.height, r.hit_h, r.want, 100.0 * (r.height / r.want - 1.0), r.head, r.feet]
+	)
+	var ring := (
+		"shoulder %.2f | ring %.2f | reach %.2f | %+.0f%% | width %.2f | depth %.2f"
+		% [r.shoulder, 2.0 * r.ring, r.reach, 100.0 * (r.reach / r.ring - 1.0), r.width, r.depth]
+	)
 	return "NATIVE_HITBOX %s | %s | %s" % [a, body, ring]
 
 
