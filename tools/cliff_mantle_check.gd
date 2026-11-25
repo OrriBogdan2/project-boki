@@ -76,7 +76,7 @@ func _tier(main: Node, tier: int) -> void:
 		await main.get_tree().process_frame
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": tier, "length": 1e9, "seed": 77 + tier, "no_drop": true})
+	m.start({"teams": 2, "squad": 1, "tier": tier, "length": 1e9, "seed": 77 + tier, "no_drop": true})
 	m.set_process(false)
 	w = m.world
 	print("CLIFF tier %d map %s (%dx%d)" % [tier, m.map_name, w.w, w.h])

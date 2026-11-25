@@ -31,7 +31,7 @@ func run(main: Node) -> void:
 	Save.d["tutorial"][KitDrill.SAVE_KEY] = true      # (no drill banner over the frame)
 	n_dummies = COLS * ROWS.size()
 	step_dt = FRAME_DT
-	await _spawn(main)
+	_spawn(main)
 	var fade = main.get("fade")
 	if fade != null: await fade.reveal(0.01)
 	for c in m.find_children("*", "CanvasLayer", true, false): (c as CanvasLayer).visible = false

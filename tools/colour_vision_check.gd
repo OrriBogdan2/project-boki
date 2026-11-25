@@ -43,7 +43,7 @@ func run(main: Node) -> void:
 	_palettes()
 	_copies()
 	_ways_tones()
-	await _users(main)
+	_users(main)
 	var pick: String = str(Settings.v[SideColor.KEY])
 	print("COLOURVISION DONE, palette %s, failures: %d" % [pick, bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -189,7 +189,7 @@ func _same(a: Color, b: Color) -> bool:
 func _users(main: Node) -> void:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
+	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
 	m.set_process(false)
 	for mb in m.mobs:
 		mb.dead = true

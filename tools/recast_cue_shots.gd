@@ -71,7 +71,7 @@ func run(main_node: Node) -> void:
 		_foe_state(P, T)
 		aim_at(P, T.pos + (Vector3(-1.5, 0, 1.5) if hero == "thief" else Vector3.ZERO))
 		RecastCheck.first(m, P, slot)
-		await _until(m, P, slot, 0.3)
+		_until(m, P, slot, 0.3)
 		await _grab("%s_%s_own" % [hero, slot])
 		await _as_foe(m, P, T, "%s_%s_foe" % [hero, slot])
 		await done(m)
@@ -81,7 +81,7 @@ func run(main_node: Node) -> void:
 	var P: Hunter = s[1]
 	aim_at(P, (s[2] as Hunter).pos)
 	P.ak.use_e()
-	await _until(m, P, "e", 0.0)
+	_until(m, P, "e", 0.0)
 	step(m, P.ak.e_t + 0.2)
 	await _grab("ostra_expired")
 	await done(m)
