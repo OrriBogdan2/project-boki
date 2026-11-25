@@ -17,4 +17,8 @@ const CHECKS := {
 	"--geo-shots": ["res://tools/geo_shots.gd", "geo_shots", null],
 	"--warden-native-check": ["res://tools/warden_native_check.gd", "warden_native_check", null],  # Meshy skeleton
 	"--live-audit": ["res://tools/live_audit.gd", "live_audit", null],  # Hunters as played, GPU renders
+	# Meeko's sun and cloud: clear of the posed body in every state; GPU shots (--shots-dir=<dir> [--eye=<m>])
+	"--meeko-companions-clip-check":
+	["res://tools/meeko_companions_clip_check.gd", "meeko_companions_clip_check", null],
+	"--meeko-companions-shots": ["res://tools/meeko_companions_shots.gd", "meeko_companions_shots", null],
 }
