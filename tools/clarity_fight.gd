@@ -23,6 +23,7 @@ const BUDGET := {
 	"icon": 0.0,  # no world icon (Sprite3D) on a Hunter
 	"hud grip_icons": 6.0,  # in a fight the glove row shows only the merge-ready glow
 	"ring merge_look": 0.0,  # a ground ring means gameplay: the merge look wears none
+	"hud world_tip": 0.0,  # no hover card (HudHover.draw_world_tip) while you or a squadmate fights
 }
 
 
