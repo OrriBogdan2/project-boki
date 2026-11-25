@@ -24,3 +24,10 @@ L=[(len(c),float(np.ptp(Pw[c][:,up])),float(np.ptp(Pw[c][:,0]))) for c in loops]
 print('tris',len(F),'boundary edges',len(bd),'loops',len(L))
 print('biggest',[tuple(round(x,3) for x in l) for l in L[:6]])
 small=[l for l in L if l[0]<200]; print('small loops (<200 edges):',len(small),' 8-200 edges:',sum(1 for l in small if l[0]>=8))
+# genus per connected component (closed shells): tunnels = holes through the cloth
+from scipy.sparse.csgraph import connected_components
+from scipy.sparse import coo_matrix
+n=len(Pw); A=coo_matrix((np.ones(len(u)),(u[:,0],u[:,1])),shape=(n,n)); nc,lab=connected_components(A,directed=False)
+used=np.unique(F); Vc=np.bincount(lab[used],minlength=nc); Ec=np.bincount(lab[u[:,0]],minlength=nc); Fc=np.bincount(lab[F[:,0]],minlength=nc)
+chi=Vc-Ec+Fc; big=Fc>=50; g=(2-chi[big])/2
+print('components(>=50 faces)',int(big.sum()),'total genus (tunnels)',int(g.sum()),'small comps',int((~big&(Fc>0)).sum()))

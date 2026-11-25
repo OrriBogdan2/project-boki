@@ -11,3 +11,5 @@ Shipped chain (from r20 glb 949ef89a):
    (geo_check Idle skirt>shin_R held 1.5 -> 0.7 cm), JOINTS/WEIGHTS 0+1 from the nearest old skirt vertex; own texture slot.
 4. `repack.py out.glb final.glb` (drops orphan bufferViews). Checks: tools/anim/geo_check.py PASS, hem_r11/partlock.py PASS,
    `loops.py GLB mesh prim` (open boundary loops), hem_r13/stretch4.py.
+5. `wsmooth.py in.glb out.glb 30 0.5` (r21b): Laplacian smoothing of the new skirt's 8-influence weights (waist 3 cm fixed). Skirt edges
+   >3x 1,816 -> 371 (r20 358), >1.3x 6,480 -> 5,126 (r20 6,218); geo PASS held 0.8. 60 iterations: >3x 253 but geo held 1.2 cm (FAIL).
