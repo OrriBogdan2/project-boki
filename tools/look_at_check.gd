@@ -10,27 +10,29 @@ extends RefCounted
 ## Never touches the save.
 
 const DT := 1.0 / 60.0
-const SWING := deg_to_rad(60.0)        # rad: the cursor swing of the task
-const WIDE := deg_to_rad(170.0)        # rad: a swing wider than the clamp
-const LEAD_MIN := deg_to_rad(8.0)      # rad: the least the head leads the body by on the 60 degree swing
-const WIDE_MIN := deg_to_rad(45.0)     # rad: and on the wide one
-const BONE_TOL := deg_to_rad(2.0)      # rad: the head bone's measured turn against the layer's figure
-const SETTLE := 30                     # frames standing before and after a swing
-const OFF_FRAMES := 4                  # frames: WardenLookAt.OFF_S at 60 Hz, rounded up
-const CLIP_MIN := 0.4                  # s: a kit clip long enough to take the whole body over
+const SWING := deg_to_rad(60.0)  # rad: the cursor swing of the task
+const WIDE := deg_to_rad(170.0)  # rad: a swing wider than the clamp
+const LEAD_MIN := deg_to_rad(8.0)  # rad: the least the head leads the body by on the 60 degree swing
+const WIDE_MIN := deg_to_rad(45.0)  # rad: and on the wide one
+const BONE_TOL := deg_to_rad(2.0)  # rad: the head bone's measured turn against the layer's figure
+const SETTLE := 30  # frames standing before and after a swing
+const OFF_FRAMES := 4  # frames: WardenLookAt.OFF_S at 60 Hz, rounded up
+const CLIP_MIN := 0.4  # s: a kit clip long enough to take the whole body over
 
 var bad := 0
 var holder: Node3D
-var sync: Node                 # the Hunter's model's driver: WardenGlb.Sync, or WardenNative on Meshy's skeleton
+var sync: Node  # the Hunter's model's driver: WardenGlb.Sync, or WardenNative on Meshy's skeleton
 var probe: Probe
-var skel: Skeleton3D           # the Hunter's own bones
-var face := 0.0                # rad: the body's facing, both twins
-var bone_err := 0.0            # rad: the worst the measured bone was off the layer's figure, this Hunter
+var skel: Skeleton3D  # the Hunter's own bones
+var face := 0.0  # rad: the body's facing, both twins
+var bone_err := 0.0  # rad: the worst the measured bone was off the layer's figure, this Hunter
+
 
 func ok(cond: bool, what: String) -> void:
 	print("LOOK %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
@@ -53,14 +55,17 @@ func run(main: Node) -> void:
 	print("LOOK_AT_CHECK_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 ## The layer with the head bone's pose kept from just before it turned it.
-class Probe extends WardenLookAt:
+class Probe:
+	extends WardenLookAt
 	var before := Basis.IDENTITY
 
 	func step(dt: float, clips: WardenClips) -> void:
 		if bone >= 0:
 			before = skel.get_bone_global_pose(bone).basis.orthonormalized()
 		super.step(dt, clips)
+
 
 ## The Hunter's model, stepped by hand, its look-at layer swapped for a Probe on the same bone.
 func _model(id: String) -> bool:
@@ -83,6 +88,7 @@ func _model(id: String) -> bool:
 	sync.head_look = probe
 	return true
 
+
 ## All of one Hunter's checks; returns 1 when it had a full-body kit clip to play.
 func _hunter(id: String) -> int:
 	if not _model(id):
@@ -103,6 +109,7 @@ func _hunter(id: String) -> int:
 	sync.root.queue_free()
 	return cast
 
+
 ## One frame on this state; `look` is the aim (ZERO: none).
 func _frame(look: Vector3, extra := {}) -> void:
 	var s := {"face": face, "grounded": true, "fired": 99.0, "cast": 99.0, "vel": Vector3.ZERO}
@@ -115,11 +122,14 @@ func _frame(look: Vector3, extra := {}) -> void:
 	bone_err = maxf(bone_err, absf(wrapf(got.x - _shown().x, -PI, PI)))
 	bone_err = maxf(bone_err, absf(got.y - _shown().y))
 
+
 func _aim(yaw: float, slope := 0.0) -> Vector3:
 	return Vector3(-sin(yaw), slope, -cos(yaw))
 
+
 func _shown() -> Vector2:
 	return probe.shown
+
 
 ## The head bone's turn over the frame's look-at, in the model's frame (rad: x about its up, + his left; y up).
 func _bone() -> Vector2:
@@ -128,13 +138,16 @@ func _bone() -> Vector2:
 	var fwd := (to_model * after * probe.before.inverse() * to_model.inverse()) * Vector3.FORWARD
 	return Vector2(atan2(-fwd.x, -fwd.z), asin(clampf(fwd.y, -1.0, 1.0)))
 
+
 func _bone_yaw() -> float:
 	return _bone().x
+
 
 ## Frames with the body still and the aim `off` rad from it.
 func _stand(off: float, frames: int, extra := {}, slope := 0.0) -> void:
 	for f in frames:
 		_frame(_aim(face + off, slope), extra)
+
 
 ## The cursor jumps `by` rad; the body turns to it as Hunter does. Returns the head's peak turn (rad, signed like
 ## `by`) and the furthest it looked past the aim (rad).
@@ -151,6 +164,7 @@ func _swing(by: float) -> Vector2:
 		past = maxf(past, head - left)
 	return Vector2(peak, past)
 
+
 func _swing_checks(id: String, by: float, lead: float, label: String) -> void:
 	var r := _swing(by)
 	var deg := rad_to_deg(r.x)
@@ -158,6 +172,7 @@ func _swing_checks(id: String, by: float, lead: float, label: String) -> void:
 	ok(r.x <= WardenLookAt.YAW_MAX + 0.0001, "%s: %s swing inside the clamp (peak %.1f deg)" % [id, label, deg])
 	ok(r.y <= 0.0001, "%s: %s swing, never past the aim (%.2f deg)" % [id, label, rad_to_deg(r.y)])
 	ok(_shown() == Vector2.ZERO, "%s: %s swing, at rest once the body has turned" % [id, label])
+
 
 ## An aim held off the body (a locked facing): followed to it in yaw, and to the clamp in yaw and pitch.
 func _hold_checks(id: String) -> void:
@@ -173,6 +188,7 @@ func _hold_checks(id: String) -> void:
 	_stand(0.0, SETTLE, {}, -0.2)
 	ok(absf(_shown().y + atan(0.2)) < 0.01, "%s: looks down a slope (%.1f deg)" % [id, rad_to_deg(_shown().y)])
 	_stand(0.0, SETTLE)
+
 
 ## A dash begun with the head turned: eased off inside OFF_S, then zero until the dash ends.
 func _dash_check(id: String) -> void:
@@ -193,11 +209,15 @@ func _dash_check(id: String) -> void:
 	ok(zero, "%s: zero through the dash from %d frames in (of %d)" % [id, OFF_FRAMES, frames])
 	_stand(0.0, SETTLE)
 
+
 ## A stun, an emote, no aim (a knock, a remote Hunter) and a full-body kit clip, each from a turned head.
 ## Returns 1 when the Hero had such a clip.
 func _off_checks(id: String) -> int:
-	for off in [["a stun", {"stun": true}, true], ["an emote", {"emote": "wave", "emote_t": 0.0}, true],
-			["no aim (a knock, a remote Hunter)", {}, false]]:
+	for off in [
+		["a stun", {"stun": true}, true],
+		["an emote", {"emote": "wave", "emote_t": 0.0}, true],
+		["no aim (a knock, a remote Hunter)", {}, false]
+	]:
 		_stand(SWING, SETTLE)
 		for f in OFF_FRAMES + 1:
 			_frame(_aim(face + SWING) if bool(off[2]) else Vector3.ZERO, off[1])
@@ -213,6 +233,7 @@ func _off_checks(id: String) -> int:
 	ok(_shown() == Vector2.ZERO, "%s: off under the full-body clip of %s" % [id, move])
 	return 1
 
+
 ## A kit move of this Hero keyed as a full-body clip that plays at least CLIP_MIN (its length over its rate; "" none).
 func _full_body_move() -> String:
 	if sync.clips == null:
@@ -226,15 +247,20 @@ func _full_body_move() -> String:
 			return String(id)
 	return ""
 
+
 ## A new swing on a native Hunter: Meshy's attack clip plays, and takes the head from the layer for as long as it runs.
 func _swing_clip() -> int:
 	sync.attack_left = 0.0
 	sync.last["swing_n"] = 0
 	_stand(SWING, SETTLE)
 	var turned := absf(_shown().x)
-	for f in ceili(CLIP_MIN / DT):
+	var f := 0
+	while f < ceili(CLIP_MIN / DT) and (f == 0 or sync.attack_left > DT):  # (an own swing clip may be shorter)
 		_frame(_aim(face + SWING), {"swing_n": 1})
-	ok(turned > 0.1 and _shown() == Vector2.ZERO,
-			"%s: off under Meshy's attack clip (turned %.0f deg before)" % [sync.art_id, rad_to_deg(turned)])
+		f += 1
+	ok(
+		turned > 0.1 and _shown() == Vector2.ZERO,
+		"%s: off under Meshy's attack clip (turned %.0f deg before)" % [sync.art_id, rad_to_deg(turned)]
+	)
 	_stand(0.0, SETTLE)
 	return 1
