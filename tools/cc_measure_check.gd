@@ -271,7 +271,7 @@ func _grimble() -> void:
 	pl.slot_lv["kin"] = 1
 	_reset(m, pl, tg, home, 8.0)
 	tap(m, pl)
-	_row("Grimble", "Hook reel", _watch(m, tg, 3.0, Callable(), pl), {"stun": 0.2, "self_gnd": [0.5, 3.0]})
+	_row("Grimble", "Hook reel", _watch(m, tg, 3.0, Callable(), pl), {"stun": 0.9, "self_gnd": [0.5, 3.0]})
 	await done(m)
 
 
