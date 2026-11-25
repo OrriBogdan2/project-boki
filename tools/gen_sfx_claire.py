@@ -125,6 +125,18 @@ def dart(i):
                g(kick(760 * p, 380, 0.08, 0.01, 0.025, 1.5), 0.35))
 
 
+def dart_hold(i):
+    """The dart for the 2nd shot on while held: the same glass flick and whoosh, a 0.11 s ring instead of 0.24 s."""
+    d = 0.11
+    p = [1.0, 1.07, 0.94, 1.12][i]
+    whoosh = bpf(noise(d), 1400, 4200) * env(N(d), 0.008, 0.03)
+    return mix(g(click(0.003, 2500, 6000, 0.0008), 0.5),
+               g(crystal(2350 * p, d, 0.035), 0.55),
+               g(pew(4200 * p, 1500, 0.04), 0.35),
+               g(whoosh, 0.5),
+               g(kick(760 * p, 380, 0.06, 0.008, 0.02, 1.5), 0.35))
+
+
 def beam(i):
     """The skating beam: a straighter, thicker ice bolt; a falling glass tone over a jet of frost."""
     d = 0.32
@@ -487,6 +499,8 @@ def build():
     S.save_loop(A + 'skate_glide', polish(skate_glide()), 'loop')
     S2.takes_cat(A + 'skate_carve', skate_carve, 3, 'dash')
     S.save_loop(A + 'skate_hiss', polish(skate_hiss()), 'loop')
+    # held darts (FireSfx): the short take for the 2nd shot on, written after everything above (same noise stream)
+    S.takes_hold('rime_shard_hold', lambda i: polish(dart_hold(i)), 3, 'fire')
 
 
 if __name__ == '__main__':
