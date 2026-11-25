@@ -68,6 +68,11 @@ NOT APPLIED on main (11-16 merge): the diagonal and re-baked back/side loops (wa
 
 Idle and stance rework (11-09, ported 11-17): `python3 tools/art1/glb_add_clips.py art/wardens/hem/hem.glb <old idle glb> idle,stance --drop-missing`; the old glb's `x_breath` track has no bone here and is dropped (docs/art/IDLE_AUDIT.md).
 
+Native bow clips (ext/anim-lace-native-clips, 11-23): `hem_clips.glb` is the animation-only file for her Meshy skeleton
+(`hem_meshy.glb`, untouched): `/home/boki/venv-img/bin/python3 tools/meshy/lace_clips.py art/wardens/hem/hem_clips.glb`.
+No mesh, skeleton nodes and ten clips, 30 fps, keyed from poses (no Meshy animation, no retarget). Mapped by `kmoves` in
+`content/rules/warden_native.json` (docs/art/wardens/MESHY_NATIVE.md).
+
 11-23 hem_meshy.glb (native path, ext/lace-face-dress-1123): the face, hood hair and bun of the body soup are replaced by a Meshy head
 (own skinned mesh `Head_new`, material `body-face`, 8k tris, grafted at the choker, weighted Head/neck) plus two hair pins (`Pins`, material `metal-pin`).
 The skirt is welded (1.5 mm), gets a flipped red inner face (2 mm inset) and eight `SkirtSw*` billow bones on the Hips that swing the cloth out
