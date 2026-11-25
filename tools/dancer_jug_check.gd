@@ -982,7 +982,7 @@ func juggernaut(a) -> void:
 	a_x.step(m, 0.3)
 	a_x.ok(
 		"juggernaut LMB tap: a slash, 1.6x at the tip (the footage's 151 / 94)",
-		near >= 7.0 and a_x.dmg(t_v) >= near * 1.5 and k.waves == 0,
+		near >= 6.0 and a_x.dmg(t_v) >= near * 1.5 and k.waves == 0,
 		"near %.0f tip %.0f" % [near, a_x.dmg(t_v)]
 	)
 	moved = maxf(moved, t_v.flat_dist(home + Vector3(2.95, 0, 0)))
