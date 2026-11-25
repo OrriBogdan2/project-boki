@@ -13,4 +13,5 @@ const CHECKS := {
 	"--utility-vfx-check": ["res://tools/utility_vfx_check.gd", "utility_vfx_check", null],
 	# --shots-dir=<dir>
 	"--utility-vfx-shots": ["res://tools/utility_vfx_shots.gd", "utility_vfx_shots", null],
+	"--tenzo-stone-shots": ["res://tools/tenzo_stone_shots.gd", "tenzo_stone_shots", null],  # GPU: Tenzo stone stills
 }

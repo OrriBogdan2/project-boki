@@ -32,6 +32,13 @@ set every Meshy batch-1 model was built with: no motion of its own); `proc` a cl
 one whose every pose sits within 3 deg of a pose idle passes through. Rows run worst first (most `missing`, then most
 `shared`, then the lowest Field Book number), and the five worst are written out as backlog lines.
 
+Mobs (`tools/anim_coverage_mobs.gd`): the seven common monsters through idle, walk, attack (the wind-up tell, plus
+the strike for a kind whose blow lasts), hit (the flinch layer) and death. None of the `art/mobs/*/*.glb` files carries an
+animation clip (checked 11-23: all twelve, bosses and Blight included, are skinned and static); `MobAnim`'s keyed tables
+move the pivots and `MobGlb` copies them onto the bones, so every cell is `proc`. `n/a` is an attack the kind never makes
+(glimmer, `attack: none`; it flees). A clip that ever appears in a mob .glb is printed as `UNMAPPED` by the check, since
+nothing plays a clip on a mob. Warden shares the brute tables (`MobAnim.base_kind`).
+
 Bind rows (v95 swaps, `tools/warden_states_check.gd`, run by `--warden-clips-check`): each Hunter's game .glb is
 driven through all 15 Hunter states plus the stun, the root and the knocked-down beat (18 in all), and fails on a T-pose (every contract bone within 2 deg of rest), a state that
 shows the idle pose, frozen legs in a walk, run or strafe (Motley has no legs: his hips), a clip track that names no
@@ -79,8 +86,6 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | glaciyak | shared | shared | shared | shared | shared | shared | proc | proc |
 | glomwort | shared | shared | shared | shared | shared | shared | proc | proc |
 | goliathite | shared | shared | shared | shared | shared | shared | proc | proc |
-| heatherhorn | shared | shared | shared | shared | shared | shared | proc | proc |
-| kilnbadger | shared | shared | shared | shared | shared | shared | proc | proc |
 | limpetor | shared | shared | shared | shared | shared | shared | proc | proc |
 | moonloris | shared | shared | shared | shared | shared | shared | proc | proc |
 | moundvark | shared | shared | shared | shared | shared | shared | proc | proc |
@@ -106,7 +111,9 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | caecilith | clip | clip | clip | clip | clip | clip | proc | proc |
 | glintmole | clip | clip | clip | clip | clip | clip | proc | proc |
 | gloamshell | clip | clip | clip | clip | clip | clip | proc | proc |
+| heatherhorn | clip | clip | clip | clip | clip | clip | proc | proc |
 | kestrike | clip | clip | clip | clip | clip | clip | proc | proc |
+| kilnbadger | clip | clip | clip | clip | clip | clip | proc | proc |
 | kindlewren | clip | clip | clip | clip | clip | clip | proc | proc |
 | lilybara | clip | clip | clip | clip | clip | clip | proc | proc |
 | lodestick | clip | clip | clip | clip | clip | clip | proc | proc |
@@ -128,6 +135,18 @@ Worst five, backlog-ready:
 - [anim] Boki floenatee (No. 13): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/floenatee_anim.py, rebuild the .glb, rerun --anim-coverage-check
 - [anim] Boki gibbelle (No. 14): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/gibbelle_anim.py, rebuild the .glb, rerun --anim-coverage-check
 - [anim] Boki glaciyak (No. 15): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/glaciyak_anim.py, rebuild the .glb, rerun --anim-coverage-check
+
+### Mobs
+
+| | idle | walk | attack | hit | death |
+|---|---|---|---|---|---|
+| skitter | proc | proc | proc | proc | proc |
+| spitter | proc | proc | proc | proc | proc |
+| brute | proc | proc | proc | proc | proc |
+| warden | proc | proc | proc | proc | proc |
+| bomber | proc | proc | proc | proc | proc |
+| sentinel | proc | proc | proc | proc | proc |
+| glimmer | proc | proc | n/a | proc | proc |
 <!-- table:end -->
 
 ## Gaps, worst first

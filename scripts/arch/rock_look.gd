@@ -13,7 +13,7 @@ const CRACK_A := 0.95  # a fresh rock's cracks' alpha (cool fades it; a reused r
 const CRUMBLE_T := 0.34  # s: a broken rock slumps into the ground
 const CRACK_COL := Color(KitLooks.RUNE_TEAL, CRACK_A)  # the ground cracks: the rune teal of his arm
 const RIM := 0.22
-const HEAT := 0.05                  # thin teal cracks, like the runes on his arm: the stone stays slate
+const HEAT := 0.12  # teal cracks like his arm runes, wide enough to read from the match camera
 # a Basalt Spine rock's ridge fin: one low spiked ridge that runs on from rock to rock, so the nine read as one
 # ridge. [x along the rock, height, half width at the foot]; both ends match so neighbours meet.
 const FIN_STATIONS := [[-0.7, 0.85, 0.34], [-0.38, 1.5, 0.3], [0.0, 1.0, 0.36], [0.38, 1.45, 0.3], [0.7, 0.85, 0.34]]
