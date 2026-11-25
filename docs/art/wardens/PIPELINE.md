@@ -666,6 +666,7 @@ already carry the fit's tuned landmarks, so each build keeps its old dense raw.
 ### Gil r7, 2026-11-24 (Meshy create for the dorsal fin and head crest; about 330 credits against a 250 cap, balance 1619 after)
 Seven kept image-to-3D creates (4 fin, 3 crest; more tries in `~/gens/hunter-round-1124/gil/r7/creates`), 30 credits each, from the r4 A_sheet back and side views. Placement only in Blender (`tools/art1/gil_fin_crest.py`: weld, cut to 1,100/900 tris, size, 1024 paint, ink alpha, weight 1.0 to one bone). Skinned tail verts: `glb_add_bone.py --from` takes the weight from named donor bones and `--behind` limits it to verts behind a Z. No retexture was run (credit cap).
 r9 (11-24) dropped those parts and `gil_fin_crest.py`: the 630-vert "strand island" r7 cut from skin-v95 was live's own dorsal fin, so the cut left a 95-edge hole down the coat back and the hips-weighted Meshy fin floated off it. Before cutting an island from a native mesh, run a hole check (open edges by welded position) and look at it from the side at the game camera.
+
 ### Sparkle native polish, 2026-11-24 (3 retexture tasks, 45 credits; balance 2470 before, 2425 after)
 Source `art/wardens/ryzz/ryzz_meshy.glb` uploaded (original UV, meshy-7), the turnaround's front, side and back views as styles:
 `01a20d07-7e55-75f5-aab0-8ae5f67bdf49` (front, side, back), `01a20d07-7e64-700e-8aaf-72a625addb7d` (back, front, side),
