@@ -101,3 +101,5 @@ Scripts: `/home/boki/gens/hunter-round-1124/kael/hair/scripts/` (`hairmask.py GL
   own padding) are graded to the kael_v2 turnaround's hair values: luminance median 212 -> 196, p5 177 -> 143,
   p95 242 -> 229, chroma kept (silver with grey strand shading as in the ref; game view clipped-white hair pixels
   20 % -> 0 %). `hair_grade.py r21.glb mask.npy Image_0.jpg`, then `set_image.py split.glb Image_0 Image_0.jpg OUT.glb`.
+
+**Sword-hand veins re-applied (2026-11-25, ext/kael-veins-1125, supersedes #861):** #861's v3 edit (RightHand-chain arm dark red with orange veins; off, leather arm lighter red with white veins) re-applied onto the current main `kael_meshy.glb`, which has since had the round-21 arm edit, the hair-mane split and the hair grade. Method: v3's `Image_0` texels (where v3 or the round-21 edit differ from the shared pre-edit base, masked, 3 px dilated and feathered) composited over main's current `Image_0`; main's hair-graded texels outside the arm mask stay as they are. Only buffer view 1 (`Image_0`) differs from main: accessors, meshes, skin, nodes, materials and all 49 clips are byte-identical.
