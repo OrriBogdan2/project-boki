@@ -4,7 +4,8 @@ extends RefCounted
 ## shows next to the armour readout (not in the message lane) and the badge pops; damage to a
 ## monster says nothing; it shows once per save (also after the save is written
 ## and read back); in a fight it waits for the next lull; the tutorial match and the "tips" setting keep it
-## quiet. Never touches the save file.
+## quiet. Its box sits clear of the LV / XP row and the HP number at 1280x720 and 1920x1080
+## (HUD size scales the whole block as one). Never touches the save file.
 
 var bad := 0
 
@@ -89,6 +90,7 @@ func run(main: Node) -> void:
 	ArmorHud.note(m.hud, Vector2.ZERO)
 	var held: Array = m.hud.get_meta("armor_note", [])
 	var kept: bool = not held.is_empty() and float(held[1]) >= m.time + m.hud.TIP_LIFE - 0.01
+	_clear_of_row(m.hud)
 	ok(kept, "in a fight the hint waits for the lull, its whole time kept")
 	m.player.hurt_at = -1e9
 	m.hud.reticle.dealt_at = -1e9
@@ -106,3 +108,20 @@ func run(main: Node) -> void:
 	m.queue_free()
 	print("ARMOUR HINT CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+
+## The hint's box ends above the LV / XP row at its tallest, so over the HP number too, wherever the block sits.
+## (HUD size scales the whole vitals group, hint included, about one corner: the gap scales with it.)
+func _clear_of_row(h) -> void:
+	for sz: Vector2 in [Vector2(1280, 720), Vector2(1920, 1080)]:
+		var pr := Rect2(h._hud_origin(sz), h.HUD_PORTRAIT)
+		var box := ArmorHud.note_rect(HudVitals.note_at(pr), ArmourHint.TEXT)
+		var row := HudVitals.level_row(pr)
+		ok(
+			not box.intersects(row),
+			(
+				"at %dx%d the hint box (y %d..%d) is over the LV / XP row (from y %d)"
+				% [sz.x, sz.y, box.position.y, box.end.y, row.position.y]
+			)
+		)
+		ok(box.end.y <= pr.position.y, "... and over the HP number (from y %d)" % pr.position.y)
