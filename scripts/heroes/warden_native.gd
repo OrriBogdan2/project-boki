@@ -4,7 +4,7 @@ extends Node
 ## Hunters switched on in content/rules/warden_native.json ("meshy_native") take this path; every other one keeps the
 ## contract model (WardenGlb, WardenSync, WardenClips) untouched. Meshy's bones are never renamed, retargeted or merged
 ## onto the contract: the clips play on them as Meshy keyed them; of the contract's procedural bone layers the springs
-## and look-at are not built, the drop pose and the landing squash are (on WardenSkeleton.find's stand-ins). The
+## are not built, the look-at, the drop pose and the landing squash are (on WardenSkeleton.find's stand-ins). The
 ## contract's anchor empties hang on Meshy's bones as BoneAttachment3D nodes (data "anchors"), and the weapon's aim
 ## node rides Meshy's hand bone. HunterAnim still runs
 ## on the hidden rig and hands over its state (WardenClips.STATE) each frame. The surfaces take the game's hero-toon
@@ -64,15 +64,18 @@ var orbits := WardenOrbits.new()  # the contract model's orbit props (Tenzo's se
 var flinch: WardenFlinch
 var wall: WardenWall
 var opener: WardenOpen
+var head_look: WardenLookAt  # the head (and a share of the neck and chest) turns to the aim ahead of the body
 var drop_pose: WardenDropPose
 var heart_w := 0.0  # how far the Heartspark carry (WardenCarry.hold_mote) holds the mote (as WardenClips.heart_w)
 var torso_bi := -1  # Meshy's bone standing in for the rig's torso (WardenSkeleton.find "hips": Spine02)
 var torso_off := Transform3D()  # that bone's frame -> the rig torso's, at rest (shown_torso)
 var mouth: Node3D  # the copied weapon_muzzle (on a bone, a part or the sun): where the Gun's Muzzle sits each frame
+var gunprop: WardenGunProp  # Grimble's one gun (data "holster"): hip at rest, hand while he aims
 var props: WardenProps  # the contract's parts Meshy's mesh lacks (data "props": Kael's sword, Cinder's heel jets)
 var moves: WardenNativeMoves  # the kit moves with a clip of their own (data "kmoves")
 var companions: WardenCompanions  # floating companions cut out of Meshy's body (Meeko's sun and cloud), or null
 var steps: WardenNativeSteps  # the footsteps, on the foot plants of Meshy's clips (data "plants")
+var mood: WardenMood  # the faces on those companions swap and blink (warden_anim/<art>.json "mood"), or null
 
 
 ## The art's entry in warden_native.json ({} when it has none).
@@ -103,7 +106,8 @@ static func dress(model: Node3D, arch: String, scene: PackedScene, lk := {}) -> 
 	glb.name = "Warden"
 	glb.rotation.y = PI  # (Meshy faces +Z; a Hunter's model faces -Z)
 	model.add_child(glb)
-	glb.scale = Vector3.ONE * _fit(model, WardenGlb.skeleton(glb))
+	# (data "size": x the head-pivot fit)
+	glb.scale = Vector3.ONE * _fit(model, WardenGlb.skeleton(glb)) * float(e.get("size", 1.0))
 	var nat := WardenNative.new()
 	nat.name = "Native"
 	nat.art_id = WardenGlb.art(arch)
@@ -120,6 +124,10 @@ static func dress(model: Node3D, arch: String, scene: PackedScene, lk := {}) -> 
 		var mats: Array = model.get_meta("mats", [])
 		mats.append_array(WardenGlb._toon(glb, lk, MantleLook.warden(arch), own, arch))
 		model.set_meta("mats", mats)
+	# (after the toon pass: the faces' atlas shader replaces its override)
+	nat.mood = WardenMood.make(model, glb, nat.skel, nat.art_id)
+	if nat.companions:
+		nat.companions.mood = nat.mood
 	model.set_meta(META, true)
 
 
@@ -156,6 +164,7 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	flinch = WardenFlinch.make(model, skel)
 	wall = WardenWall.make(model, skel)
 	opener = WardenOpen.make_on(model, skel)
+	head_look = WardenLookAt.make(model, skel, true)
 	drop_pose = WardenDropPose.make(model, skel)
 	if d.has("crouch_arms_from"):
 		plays["crouch"] = _arms_swapped("crouch", String(d["crouch_arms_from"]))
@@ -175,6 +184,7 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	_add_orbits(glb)
 	var to_m := glb.transform * WardenGlb.model_xf(glb, skel)  # Meshy's skeleton -> the model
 	props = WardenProps.carry(art_id, skel, to_m, d)
+	gunprop = WardenGunProp.make(model, skel, to_m, d.get("holster", {}))
 	_copy_anchors(glb)
 	var c_xf: Transform3D = contract(art_id).get("sk_m", Transform3D.IDENTITY)
 	companions = WardenCompanions.detach(glb, skel, WardenClips.data(art_id), to_m.affine_inverse() * c_xf)
@@ -212,6 +222,9 @@ func _process(dt: float) -> void:
 	player.advance(dt)
 	steps.step(cur if xt < 0.0 else "")
 	WardenClips.air_tilt(root, skel, hips)  # (the glider's bank, the dive's pitch)
+	# (the look-at lies under a clip that turns the head: the attack clip owns it, eased in and out like a body clip)
+	head_look.owned = move_toward(head_look.owned, 1.0 if attack_left > 0.0 else 0.0, dt / FADE)
+	head_look.step(dt, null)
 	_heart(bool(s.get("heart", false)) and attack_left <= 0.0 and not WardenCarry.owns(String(s.get("kmove", ""))), dt)
 	if opener:
 		opener.busy = attack_left > 0.0 and attack_move  # (as clips.busy: a kit move's clip owns the body)
@@ -225,8 +238,12 @@ func _process(dt: float) -> void:
 	var land: Vector2 = root.get_meta(WardenClips.FEEL, Vector2.ZERO)  # (HunterAnim's land_k by weight class)
 	WardenClips.lay_feel(root, skel, hips, land.x * WardenClips.LAND_SQUASH, 0.0)
 	props.step(dt, String(s.get("kmove", "")))
+	if gunprop:
+		gunprop.step()
 	if companions:
 		companions.step(dt)
+	if mood:
+		mood.step(dt)
 	if gun and gun.is_inside_tree() and hand >= 0:
 		gun.global_position = hand_position()
 		var mz := gun.get_node_or_null(^"Muzzle") as Node3D

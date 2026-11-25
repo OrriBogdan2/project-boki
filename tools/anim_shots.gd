@@ -9,7 +9,7 @@ extends "res://tools/clip_shots.gd"
 ## game's own locomotion hand-off at WALK_MPS, JOG_MPS and RUN_MPS, seen from the side with a scrolling floor, so a
 ## sliding foot slides against it), idle and atk1, atk2 (the keyed clip, forced); --aim-runs=60,130 adds run_aimN
 ## strips, running N degrees off the facing. --match-run: only strip run_match, the run as a match plays it (drawn at
-## Hunter.VIS_SCALE, at HunterMove.speed, MATCH_FPS frames a second: footage for an MP4).
+## Hunter.VIS_SCALE, at HunterMove.speed, MATCH_FPS frames a second: footage for an MP4; also a native Hunter's).
 ## Needs a renderer.
 
 const WALK_MPS := 2.2      # m/s: an analog-stick walk
@@ -97,10 +97,12 @@ func _hunter(id: String, dir: String, frames: int) -> void:
 		ring.visible = false
 	for k in 20:
 		await tree.process_frame
-	var sync := model.get_node("Warden/Sync")
+	var sync := model.get_node_or_null("Warden/Native")  # (a Meshy-native Hunter: only --match-run)
+	if sync == null:
+		sync = model.get_node("Warden/Sync")
 	sync.set_process(false)
 	var clips: WardenClips = sync.get("clips")
-	if clips == null:
+	if clips == null and not (match_run and sync is WardenNative):
 		model.queue_free()
 		return
 	model.rotation.y = SIDE_YAW
