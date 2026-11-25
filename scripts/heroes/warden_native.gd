@@ -132,7 +132,7 @@ static func dress(model: Node3D, arch: String, scene: PackedScene, lk := {}) -> 
 	model.set_meta(META, true)
 
 
-## The size that puts Meshy's head bone where the rig's head pivot rests: the contract model's head height (data "fit"
+## The size that puts Meshy's head bone where the rig's head pivot rests: the contract model's head height (data "size"
 ## then scales it where Meshy's body stands off the height chart, --native-hitbox-check).
 static func _fit(model: Node3D, sk: Skeleton3D) -> float:
 	var rest: Dictionary = model.get_meta("rig_rest", {})
@@ -621,11 +621,11 @@ static func _read_orbit(art_name: String, orb: String) -> Array:
 	return out
 
 
-## Meshy's skeleton -> the model as the contract model is sized (the data "fit" taken off): what the contract gives in
+## Meshy's skeleton -> the model as the contract model is sized (the data "size" taken off): what the contract gives in
 ## metres (parts, anchors, companions) then grows or shrinks with the body.
 func _to_contract(glb: Node3D) -> Transform3D:
 	var to_m := glb.transform * WardenGlb.model_xf(glb, skel)
-	var fit := float(d.get("fit", 1.0))
+	var fit := float(d.get("size", 1.0))
 	return Transform3D(to_m.basis / fit, to_m.origin / fit)
 
 
