@@ -297,8 +297,8 @@ func _native(id: String, nat: WardenNative) -> void:
 	_still_row(id, nat)
 
 
-## The ground speeds (m/s) a Hunter is heard at in `state`, from its own speeds in the data (walk_mps, run_from, run_mps,
-## crouch_mps: --foot-slide-check measures them per Hunter).
+## The ground speeds (m/s) a Hunter is heard at in `state`, from its own data (walk_mps, run_from, run_mps, crouch_mps:
+## --foot-slide-check measures them per Hunter).
 func _native_speeds(d: Dictionary, state: String) -> Array:
 	var from := float(d.get("run_from", 3.0))
 	match state:
