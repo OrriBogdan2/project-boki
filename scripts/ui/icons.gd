@@ -5,8 +5,9 @@ class_name Icons
 ## Coordinates are in a -1..1 box around the centre.
 
 const ART_DIR := "res://art/icons/"
-const SILHOUETTE_V := 0.2    # colour value (0-1): a darker `col` draws a painted icon as a silhouette (unowned items)
-static var _art := {}    # id -> CanvasTexture, or null when the id has no painted icon (looked up once per id)
+const SILHOUETTE_V := 0.2  # colour value (0-1): a darker `col` draws a painted icon as a silhouette (unowned items)
+static var _art := {}  # id -> CanvasTexture, or null when the id has no painted icon (looked up once per id)
+
 
 ## The painted icon for `id`, or null when only the vector glyph exists. Mipmapped, so it stays smooth
 ## when a 128 px icon is drawn at 14-20 px on a status tile.
@@ -21,7 +22,8 @@ static func art(id: String) -> Texture2D:
 		_art[id] = tex
 	return _art[id]
 
-static func draw(c: Control, id: String, at: Vector2, s: float, col: Color) -> void:
+
+static func draw(c: CanvasItem, id: String, at: Vector2, s: float, col: Color) -> void:
 	if not (is_finite(at.x) and is_finite(at.y)) or absf(at.x) > 8000.0 or absf(at.y) > 8000.0:
 		# (way off screen, e.g. a status icon over someone far below the camera: at that size small polygons lose their
 		# area to float rounding and error "triangulation failed")
@@ -35,16 +37,17 @@ static func draw(c: Control, id: String, at: Vector2, s: float, col: Color) -> v
 	var P := func(x: float, y: float) -> Vector2: return at + Vector2(x, y) * s
 	var L := func(pts: Array, width := -1.0) -> void:
 		var arr := PackedVector2Array()
-		for q in pts: arr.append(P.call(q[0], q[1]))
+		for q in pts:
+			arr.append(P.call(q[0], q[1]))
 		c.draw_polyline(arr, col, w if width < 0.0 else width, true)
 	var F := func(pts: Array, cc := col) -> void:
 		var arr := PackedVector2Array()
-		for q in pts: arr.append(P.call(q[0], q[1]))
+		for q in pts:
+			arr.append(P.call(q[0], q[1]))
 		c.draw_colored_polygon(arr, cc)
 	var A := func(x: float, y: float, r: float, a0: float, a1: float, width := -1.0) -> void:
 		c.draw_arc(P.call(x, y), r * s, a0, a1, 24, col, w if width < 0.0 else width, true)
-	var O := func(x: float, y: float, r: float, cc := col) -> void:
-		c.draw_circle(P.call(x, y), r * s, cc)
+	var O := func(x: float, y: float, r: float, cc := col) -> void: c.draw_circle(P.call(x, y), r * s, cc)
 	match id:
 		# ---- movement and items
 		"gem":
@@ -121,18 +124,28 @@ static func draw(c: Control, id: String, at: Vector2, s: float, col: Color) -> v
 			L.call([[0.2, -0.8], [0.55, -0.35]])
 			L.call([[0.5, -0.85], [0.7, -0.45]])
 		"heart":
-			F.call([[0.0, 0.7], [-0.65, 0.0], [-0.6, -0.45], [-0.3, -0.62], [0.0, -0.38], [0.3, -0.62], [0.6, -0.45],
-					[0.65, 0.0]])
-		"happy", "content", "sulky":     # a Boki's mood today (ZoneCards): a face, the mouth up, flat or down
+			F.call(
+				[
+					[0.0, 0.7],
+					[-0.65, 0.0],
+					[-0.6, -0.45],
+					[-0.3, -0.62],
+					[0.0, -0.38],
+					[0.3, -0.62],
+					[0.6, -0.45],
+					[0.65, 0.0]
+				]
+			)
+		"happy", "content", "sulky":  # a Boki's mood today (ZoneCards): a face, the mouth up, flat or down
 			O.call(0.0, 0.0, 0.85)
 			O.call(-0.3, -0.2, 0.13, Color(0, 0, 0, 0.8 * col.a))
 			O.call(0.3, -0.2, 0.13, Color(0, 0, 0, 0.8 * col.a))
 			var ink := Color(0, 0, 0, 0.8 * col.a)
 			if id == "content":
 				c.draw_line(P.call(-0.3, 0.3), P.call(0.3, 0.3), ink, w, true)
-			elif id == "happy":     # a smile: the lower arc of a circle above the mouth
+			elif id == "happy":  # a smile: the lower arc of a circle above the mouth
 				c.draw_arc(P.call(0.0, 0.1), 0.35 * s, 0.15 * PI, 0.85 * PI, 12, ink, w, true)
-			else:                   # a frown: the upper arc of a circle below it
+			else:  # a frown: the upper arc of a circle below it
 				c.draw_arc(P.call(0.0, 0.6), 0.35 * s, 1.15 * PI, 1.85 * PI, 12, ink, w, true)
 		"dash":
 			L.call([[-0.7, -0.6], [-0.1, 0.0], [-0.7, 0.6]])
@@ -159,30 +172,85 @@ static func draw(c: Control, id: String, at: Vector2, s: float, col: Color) -> v
 			L.call([[0.46, 0.54], [0.6, 0.4]])
 		"anvil":
 			# the armor kit: a little anvil (horn, face, waist, foot)
-			F.call([[-0.75, -0.35], [0.55, -0.35], [0.8, -0.2], [0.55, -0.05], [0.35, -0.05], [0.2, 0.2], [0.45, 0.5],
-					[0.45, 0.65], [-0.45, 0.65], [-0.45, 0.5], [-0.2, 0.2], [-0.35, -0.05], [-0.55, -0.05]])
+			F.call(
+				[
+					[-0.75, -0.35],
+					[0.55, -0.35],
+					[0.8, -0.2],
+					[0.55, -0.05],
+					[0.35, -0.05],
+					[0.2, 0.2],
+					[0.45, 0.5],
+					[0.45, 0.65],
+					[-0.45, 0.65],
+					[-0.45, 0.5],
+					[-0.2, 0.2],
+					[-0.35, -0.05],
+					[-0.55, -0.05]
+				]
+			)
 			F.call([[-0.75, -0.35], [0.55, -0.35], [0.5, -0.25], [-0.7, -0.25]], Color(1, 1, 1, 0.3 * col.a))
 		"recall":
 			A.call(0.0, 0.0, 0.6, -PI * 0.2, PI * 1.4)
 			F.call([[0.55, -0.55], [0.8, -0.05], [0.25, -0.1]])
 		# ---- weapons
 		"smg":
-			F.call([[-0.8, -0.2], [0.6, -0.2], [0.6, 0.05], [-0.1, 0.05], [-0.25, 0.6], [-0.5, 0.6], [-0.4, 0.05],
-					[-0.8, 0.05]])
+			F.call(
+				[
+					[-0.8, -0.2],
+					[0.6, -0.2],
+					[0.6, 0.05],
+					[-0.1, 0.05],
+					[-0.25, 0.6],
+					[-0.5, 0.6],
+					[-0.4, 0.05],
+					[-0.8, 0.05]
+				]
+			)
 		"rifle":
-			F.call([[-0.9, -0.15], [0.85, -0.15], [0.85, 0.05], [-0.2, 0.05], [-0.35, 0.5], [-0.6, 0.5], [-0.5, 0.05],
-					[-0.9, 0.05]])
+			F.call(
+				[
+					[-0.9, -0.15],
+					[0.85, -0.15],
+					[0.85, 0.05],
+					[-0.2, 0.05],
+					[-0.35, 0.5],
+					[-0.6, 0.5],
+					[-0.5, 0.05],
+					[-0.9, 0.05]
+				]
+			)
 		"sniper":
 			F.call([[-0.9, -0.1], [0.9, -0.1], [0.9, 0.08], [-0.9, 0.08]])
 			L.call([[-0.4, -0.3], [0.6, -0.3]], maxf(1.5, s * 0.08))
 			F.call([[-0.6, 0.08], [-0.4, 0.08], [-0.5, 0.5], [-0.7, 0.5]])
 		"burst_rifle":
-			F.call([[-0.7, -0.15], [0.3, -0.15], [0.3, 0.05], [-0.2, 0.05], [-0.3, 0.55], [-0.55, 0.55], [-0.45, 0.05],
-					[-0.7, 0.05]])
+			F.call(
+				[
+					[-0.7, -0.15],
+					[0.3, -0.15],
+					[0.3, 0.05],
+					[-0.2, 0.05],
+					[-0.3, 0.55],
+					[-0.55, 0.55],
+					[-0.45, 0.05],
+					[-0.7, 0.05]
+				]
+			)
 			L.call([[0.3, -0.05], [0.9, -0.05]], maxf(1.5, s * 0.06))
 		"shotgun":
-			F.call([[-0.9, -0.2], [0.8, -0.2], [0.8, 0.1], [-0.3, 0.1], [-0.5, 0.55], [-0.75, 0.55], [-0.6, 0.1],
-					[-0.9, 0.1]])
+			F.call(
+				[
+					[-0.9, -0.2],
+					[0.8, -0.2],
+					[0.8, 0.1],
+					[-0.3, 0.1],
+					[-0.5, 0.55],
+					[-0.75, 0.55],
+					[-0.6, 0.1],
+					[-0.9, 0.1]
+				]
+			)
 			L.call([[0.85, -0.45], [1.0, -0.6]], maxf(1.5, s * 0.05))
 			L.call([[0.85, 0.35], [1.0, 0.5]], maxf(1.5, s * 0.05))
 		"slugger":
@@ -191,8 +259,18 @@ static func draw(c: Control, id: String, at: Vector2, s: float, col: Color) -> v
 			F.call([[-0.3, 0.25], [-0.05, 0.25], [-0.15, 0.65], [-0.4, 0.65]])
 		"arc_bolts":
 			# Sable's bolts: a four-point chakram with a comet tail
-			F.call([[0.35, -0.75], [0.48, -0.32], [0.9, -0.2], [0.48, -0.08], [0.35, 0.35], [0.22, -0.08], [-0.2, -0.2],
-					[0.22, -0.32]])
+			F.call(
+				[
+					[0.35, -0.75],
+					[0.48, -0.32],
+					[0.9, -0.2],
+					[0.48, -0.08],
+					[0.35, 0.35],
+					[0.22, -0.08],
+					[-0.2, -0.2],
+					[0.22, -0.32]
+				]
+			)
 			L.call([[0.05, -0.05], [-0.85, 0.65]], maxf(1.5, s * 0.07))
 			L.call([[0.2, 0.15], [-0.6, 0.8]], maxf(1.5, s * 0.04))
 		"twin_blades":
@@ -220,13 +298,29 @@ static func draw(c: Control, id: String, at: Vector2, s: float, col: Color) -> v
 			A.call(0.0, -0.25, 0.75, PI * 0.15, PI * 0.85)
 			O.call(0.0, 0.0, 0.22)
 		"mend":
-			F.call([[-0.2, -0.75], [0.2, -0.75], [0.2, -0.2], [0.75, -0.2], [0.75, 0.2], [0.2, 0.2], [0.2, 0.75],
-					[-0.2, 0.75], [-0.2, 0.2], [-0.75, 0.2], [-0.75, -0.2], [-0.2, -0.2]])
+			F.call(
+				[
+					[-0.2, -0.75],
+					[0.2, -0.75],
+					[0.2, -0.2],
+					[0.75, -0.2],
+					[0.75, 0.2],
+					[0.2, 0.2],
+					[0.2, 0.75],
+					[-0.2, 0.75],
+					[-0.2, 0.2],
+					[-0.75, 0.2],
+					[-0.75, -0.2],
+					[-0.2, -0.2]
+				]
+			)
 		"fortify", "bulwark":
 			F.call([[0.0, -0.8], [0.7, -0.5], [0.6, 0.25], [0.0, 0.8], [-0.6, 0.25], [-0.7, -0.5]])
 			if id == "bulwark":
-				F.call([[0.0, -0.45], [0.38, -0.28], [0.32, 0.12], [0.0, 0.45], [-0.32, 0.12], [-0.38, -0.28]],
-						Color(0, 0, 0, 0.45))
+				F.call(
+					[[0.0, -0.45], [0.38, -0.28], [0.32, 0.12], [0.0, 0.45], [-0.32, 0.12], [-0.38, -0.28]],
+					Color(0, 0, 0, 0.45)
+				)
 		"blink":
 			L.call([[-0.8, 0.5], [-0.2, -0.1], [0.1, 0.3], [0.7, -0.4]])
 			F.call([[0.8, -0.6], [0.75, -0.1], [0.35, -0.45]])
@@ -240,8 +334,13 @@ static func draw(c: Control, id: String, at: Vector2, s: float, col: Color) -> v
 			O.call(0.0, 0.0, 0.18)
 			for i in 4:
 				var a := TAU * i / 4.0
-				F.call([[cos(a) * 0.62, sin(a) * 0.62], [cos(a + 0.5) * 0.95, sin(a + 0.5) * 0.95],
-						[cos(a + 0.7) * 0.6, sin(a + 0.7) * 0.6]])
+				F.call(
+					[
+						[cos(a) * 0.62, sin(a) * 0.62],
+						[cos(a + 0.5) * 0.95, sin(a + 0.5) * 0.95],
+						[cos(a + 0.7) * 0.6, sin(a + 0.7) * 0.6]
+					]
+				)
 		"trap":
 			A.call(0.0, 0.2, 0.6, PI, TAU)
 			L.call([[-0.75, 0.2], [0.75, 0.2]])
@@ -330,8 +429,18 @@ static func draw(c: Control, id: String, at: Vector2, s: float, col: Color) -> v
 			A.call(0.0, 0.0, 0.72, PI - 0.6, PI + 0.6)
 			O.call(0.0, 0.0, 0.16)
 		"pulse":
-			F.call([[-0.85, -0.14], [0.7, -0.14], [0.7, 0.1], [-0.15, 0.1], [-0.3, 0.55], [-0.55, 0.55], [-0.45, 0.1],
-					[-0.85, 0.1]])
+			F.call(
+				[
+					[-0.85, -0.14],
+					[0.7, -0.14],
+					[0.7, 0.1],
+					[-0.15, 0.1],
+					[-0.3, 0.55],
+					[-0.55, 0.55],
+					[-0.45, 0.1],
+					[-0.85, 0.1]
+				]
+			)
 			O.call(0.82, -0.02, 0.12)
 		# ---- right-click secondaries
 		"shadowstep":
@@ -385,8 +494,18 @@ static func draw(c: Control, id: String, at: Vector2, s: float, col: Color) -> v
 			A.call(0.0, 0.0, 0.55, PI * 0.1, PI * 0.9)
 			F.call([[-0.6, 0.35], [-0.75, -0.15], [-0.3, 0.0]])
 		"bond":
-			F.call([[0.0, 0.75], [-0.7, 0.0], [-0.55, -0.45], [-0.25, -0.6], [0.0, -0.35], [0.25, -0.6], [0.55, -0.45],
-					[0.7, 0.0]])
+			F.call(
+				[
+					[0.0, 0.75],
+					[-0.7, 0.0],
+					[-0.55, -0.45],
+					[-0.25, -0.6],
+					[0.0, -0.35],
+					[0.25, -0.6],
+					[0.55, -0.45],
+					[0.7, 0.0]
+				]
+			)
 		"blaze_mantle", "tidal_shell", "stormcoat":
 			# armor: a shield shape
 			F.call([[0.0, -0.8], [0.65, -0.55], [0.6, 0.15], [0.0, 0.8], [-0.6, 0.15], [-0.65, -0.55]])
@@ -402,7 +521,8 @@ static func draw(c: Control, id: String, at: Vector2, s: float, col: Color) -> v
 			L.call([[0.0, 0.4], [0.0, -0.6]])
 			L.call([[-0.3, -0.3], [0.0, -0.65], [0.3, -0.3]])
 		"gust_fan":
-			for i in 3: A.call(-0.4, 0.0, 0.3 + i * 0.22, -0.7, 0.7)
+			for i in 3:
+				A.call(-0.4, 0.0, 0.3 + i * 0.22, -0.7, 0.7)
 		"platform":
 			F.call([[-0.75, 0.1], [0.75, 0.1], [0.55, 0.4], [-0.55, 0.4]])
 			L.call([[-0.3, -0.2], [0.0, -0.6], [0.3, -0.2]])
@@ -411,8 +531,22 @@ static func draw(c: Control, id: String, at: Vector2, s: float, col: Color) -> v
 			O.call(0.25, 0.1, 0.38)
 			O.call(0.0, -0.25, 0.32)
 		"medkit":
-			F.call([[-0.2, -0.7], [0.2, -0.7], [0.2, -0.2], [0.7, -0.2], [0.7, 0.2], [0.2, 0.2], [0.2, 0.7],
-					[-0.2, 0.7], [-0.2, 0.2], [-0.7, 0.2], [-0.7, -0.2], [-0.2, -0.2]])
+			F.call(
+				[
+					[-0.2, -0.7],
+					[0.2, -0.7],
+					[0.2, -0.2],
+					[0.7, -0.2],
+					[0.7, 0.2],
+					[0.2, 0.2],
+					[0.2, 0.7],
+					[-0.2, 0.7],
+					[-0.2, 0.2],
+					[-0.7, 0.2],
+					[-0.7, -0.2],
+					[-0.2, -0.2]
+				]
+			)
 		"scanner":
 			A.call(0.0, 0.0, 0.65, 0.0, TAU)
 			A.call(0.0, 0.0, 0.3, 0.0, TAU)
@@ -440,16 +574,19 @@ static func draw(c: Control, id: String, at: Vector2, s: float, col: Color) -> v
 		_:
 			O.call(0.0, 0.0, 0.4)
 
+
 ## A Control that just shows one icon, for rows of chips and stat tiles.
-class Glyph extends Control:
+class Glyph:
+	extends Control
 	var id := ""
 	var col := Color.WHITE
+
 	func _init(icon_id := "", c := Color.WHITE, px := 18.0) -> void:
 		id = icon_id
 		col = c
 		custom_minimum_size = Vector2(px, px)
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
 		size_flags_vertical = Control.SIZE_SHRINK_CENTER
+
 	func _draw() -> void:
 		Icons.draw(self, id, size * 0.5, minf(size.x, size.y) * 0.5, col)
-
