@@ -28,6 +28,7 @@ var rig
 var h: Node = null  # the Home on screen now (it is a new one after every hop)
 var keep_say := false  # shot 17 keeps the Boki's bubble
 var _tick := 0
+var _frames := 0  # frames this take has run (Engine.get_frames_drawn stays 0 headless)
 
 
 func _init(r) -> void:
@@ -101,12 +102,12 @@ func zone_take(zone: String) -> void:
 	await _load(zone)
 	await _wait(1.0)
 	rig.mark(zone)
-	var t0 := Engine.get_frames_drawn()
+	var t0 := _frames
 	_orbit_start(1.4, 4.5)
 	for n in 4:  # walks up to its Boki one after the other (the nearest from where it stands)
 		await _walk(_resident_at(zone, n % 2), 1.9)
 		await _wait(0.5)
-	while Engine.get_frames_drawn() - t0 < int(ZONE_TAKE_S * FPS):
+	while _frames - t0 < int(ZONE_TAKE_S * FPS):
 		await _wait(0.5)
 
 
@@ -202,6 +203,9 @@ func _tidy() -> void:
 	var c: Node = rig.main.current
 	if not is_instance_valid(c) or c.get("ppos") == null:
 		return
+	_frames += 1
+	if _frames % 10 == 0 and c.get("farm_cam") != null and c.farm_cam.tip > 0.05:  # the view tipped up over a wall
+		print("PITCH_TIP frame=%d tip=%.2f at=%s" % [_frames, c.farm_cam.tip, c.ppos])
 	c.day_t = DAY_T
 	c.talk_cd = 1e9  # no chatter bubbles
 	for k in c.kins:
