@@ -766,11 +766,13 @@ func fire_rmb(c: Dictionary) -> void:
 		slam_w = {"t": float(rmb_def()["windup"]), "dir": h.aim_dir()}
 		play("jug_slam")                # keyed to the wind-up: the strike lands at 0.6s
 		vfx("slam_tell")
+		KitWindup.keep(self, "rmb", HeroVfx.of(m).last_voice)
 
 func _tick_slam(dt: float) -> void:
 	slam_w["t"] = float(slam_w["t"]) - dt
 	if h.stun_t > 0.0 or h.downed:
 		slam_w = {}          # interrupted
+		KitWindup.broken(self, "rmb")
 		return
 	# the short crimson strike cone ahead of him, filling as the wind-up runs (everyone sees it)
 	var sl: Dictionary = rmb_def()["slam"]
@@ -984,7 +986,6 @@ func _tick_tells() -> void:
 				"col": JuggernautDrop.AREA, "alpha": 0.7, "ticks": true})
 	if lmb_t > float(lmb_def()["tap"]):
 		var k := wave_k()
-		AimKit.circle(h, "wave", {"self": true, "r": 1.35, "fill": k, "col": WAVE_RED})
 		AimKit.charge(h, k, {"col": Color("ff6a4a")})
 
 ## During the Warchain's pull: a fiery spin around you that blights everyone it hits.

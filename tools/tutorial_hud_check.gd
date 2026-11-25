@@ -45,7 +45,8 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 
-func run(mn: Node) -> void:
+func run(mn: Node, _arch := "") -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	main = mn
 	Save.no_write = true
 	var fresh: Dictionary = Save.d.duplicate(true)
@@ -148,7 +149,7 @@ func _course() -> void:
 				chimed += 1
 			else:
 				stray += 1
-		if tu.step != before:
+		if tu.step != before and not TutorialHints.quiet(tu.id()):  # (a hint step has no banner, so no chime)
 			changes += 1
 		t += Match.DT
 		if tu.step != last:
@@ -196,7 +197,10 @@ func _course() -> void:
 	ok(key_label > 0 and key_loud == 0, "an interact step's card is the one prompt: the world label waits " + held)
 	ok(under == 0, "the hunter and the Boki are never under the banner (%d frames)" % under)
 	ok(worst < 45.0, "no step took more than 45s of plain play (%.0fs)" % worst)
-	var wide := texts.values().filter(func(x): return String(x).length() > MAX_LINE)
+	var wide := []
+	for sid in texts:
+		if not TutorialHints.quiet(String(sid)) and String(texts[sid]).length() > MAX_LINE:
+			wide.append(texts[sid])
 	ok(wide.is_empty(), "every banner line fits one short line (%s)" % str(wide))
 	var counts_ok: bool = String(counters.get("shoot", "")) == "0/2"
 	ok(counts_ok, "the panel counts hits and casts (%s)" % str(counters))
@@ -633,14 +637,14 @@ func _framing(arch: String) -> void:
 		var share := float(row[1]) / maxf(1.0, float(row[0]))
 		var px: Array = row[2]
 		px.sort()
-		var tall := "-" if px.is_empty() else "%.0f / %.0f" % [px[0], px[px.size() / 2]]
+		var tall := "-" if px.is_empty() else "%.0f / %.0f" % [px[0], px[int(px.size() / 2.0)]]
 		print("TUTHUD frame %s | %s | %.0f%% | %s" % [arch, sid, share * 100.0, tall])
 		if sid in Tutorial.WALK_LEAD:
 			ok(row[3], "%s %s: the place you walk to is on screen when you get there" % [arch, sid])
 		else:
 			ok(share >= ON_SHARE, "%s %s: its thing is on screen %.0f%% of the step" % [arch, sid, share * 100.0])
 		if not px.is_empty():
-			ok(float(px[px.size() / 2]) >= MIN_PX, "%s %s: drawn %s px tall" % [arch, sid, tall])
+			ok(float(px[int(px.size() / 2.0)]) >= MIN_PX, "%s %s: drawn %s px tall" % [arch, sid, tall])
 	ok(fm.player.extracted, arch + ": the framing run finishes the course")
 	fm.queue_free()
 

@@ -8,7 +8,8 @@ var panels: HudPanels
 var cursor: Control
 var big: Font = preload("res://fonts/LilitaOne-Regular.ttf")
 var body: Font = preload("res://fonts/Rubik.ttf")
-var reticle: Reticle        # the hit tick round the cursor (the reticle itself draws statically)
+var reticle: Reticle        # the hit tick's state: raised by every landed hit of yours (CombatBus), dealt_at for the fight budget
+var ret: ReticleHud         # draws the cursor reticle, its aim arcs and the hit tick from `reticle`
 var buffs := BuffStack.new()     # the stack of what is on you, right edge
 var score_mute := ScoreMute.new()     # the scoreboard's Mute chips
 var lowhp := LowHpCue.new()      # the low-health heartbeat and edge glow
@@ -43,6 +44,7 @@ const GOLD := Color("f2c84a")
 func setup(match_node: Match) -> void:
 	m = match_node
 	reticle = Reticle.new(m)
+	ret = ReticleHud.new(reticle)
 	layer = 5
 	Record.hide_in_cinema(self)      # recording mode with the HUD hidden
 	panels = HudPanels.make(self)       # the fixed panels, under c, redrawn 20 times a second
@@ -133,6 +135,7 @@ func _place_msgs() -> void:
 	loot.fight = msgs.fight
 	loot.visible = msgs.visible
 	msgs.top = HudScale.from_edge(HudStyle.safe_pad(c.size).y + 72.0)      # under the timer / Ways Out strip
+	msgs.top = DropHud.lane_top(m, m.player, msgs.top)      # and under the drop lines on the way down
 	if m.guide: msgs.top = maxf(msgs.top, m.guide.bottom(c.size))      # and under the first-match guide's line
 	if m.tut: TutorialHud.place_msgs(msgs, c.size)
 	else: TopStack.place(self)
@@ -229,7 +232,7 @@ func _arc(center: Vector2, radius: float, frac: float, col: Color, width := 3.0)
 
 func _fmt(t: float) -> String:
 	t = maxf(0.0, t)
-	return "%d:%02d" % [int(t) / 60, int(t) % 60]
+	return "%d:%02d" % [int(int(t) / 60.0), int(t) % 60]
 
 # ------------------------------------------------------------------ frame
 var hover_spots: Array = []     # [rect, id] for things on the HUD you can point at
@@ -658,10 +661,12 @@ func _draw_minimap(sz: Vector2) -> void:
 		c.draw_texture_rect_region(map_tex(), dest, map_region(tex_view))
 	if MapDetail.shows("hazard", hold, HazardMap.matters(m)):
 		HazardMap.draw(c, m, to_map, inner, mm_circ, HazardMap.MM_SHIELD)
+	MapNames.begin(inner)      # (place names give way to each other and to the train's line)
 	if MapDetail.shows("place", hold):
 		_draw_map_labels(w, inner, view, k, riding)
 	if m.skytrain and MapDetail.shows("train", hold, train_map.near(m.skytrain, m.player)):
 		train_map.draw(self, m.skytrain, inner, view, k, false)
+	MapNames.flush(c)
 	# your view cone, faintly
 	if vh and not riding:
 		var pp: Vector2 = to_map.call(vh.pos)
@@ -1285,7 +1290,8 @@ func _mate_state(h: Hunter) -> Array:
 			return ["DEAD", Color("8a8f9e"), Vector3.INF, ""]
 		var left := float(b.get("soul_until", 0.0)) - m.time
 		if left > 0.0:
-			return ["DEATHBOX", Color("ff6a5a"), b.get("pos", h.pos), "%d:%02d" % [int(left) / 60, int(left) % 60]]
+			return ["DEATHBOX", Color("ff6a5a"), b.get("pos", h.pos), "%d:%02d" % [int(int(left) / 60.0),
+					int(left) % 60]]
 		return ["DEAD", Color("8a8f9e"), b.get("pos", h.pos), ""]
 	if h.downed:
 		return ["WISP", Color("ffb36a"), h.pos, ""]
@@ -1474,8 +1480,8 @@ func _draw_squad_pings(p: Hunter) -> void:
 		_draw_waypoint(pg["pos"], PingInput.label(pg, p), Color(pg["col"], a), EdgeMarker.PRIO_LOW)
 	# a Boki's callout: a marker with what it spotted, fading after a few seconds
 	for pg in m.pings:
-		if not pg.has("kin") or int(pg.get("team", -1)) != p.team or m.tut != null:
-			continue      # (the tutorial has one marker: no Boki callout pins)
+		if not pg.has("kin") or int(pg.get("team", -1)) != p.team or m.tut != null or not BokiChatter.pin_shown(m):
+			continue      # (the tutorial has one marker: no Boki callout pins; none in a fight either)
 		var kk: Kin = pg["kin"] if is_instance_valid(pg["kin"]) else null
 		var a2 := clampf(float(pg.get("life", 5.0)) - float(pg["t"]), 0.0, 1.0) * clampf(float(pg["t"]) * 6.0, 0.0, 1.0)
 		var who := String(kk.rec.get("name", "Boki")) if kk and kk.owner_h != p else ""
@@ -1632,47 +1638,20 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 			_ctext(Vector2(sz.x * 0.5, sy + 38), String(st["hint"]), 13, Color(1, 1, 1, 0.85 * st["hint_a"]))
 
 func _draw_crosshair(p: Hunter) -> void:
-	var mp := c.get_local_mouse_position()
-	# the reticle (the player's style) opens with per-shot bloom and the minigun's spread
-	var spread := p.recoil * 4.0 + p.wbloom * 1.2
-	if p.wpn.has("tighten_from_deg") and p.spin > 0.0:
-		spread += lerpf(12.0, 0.0, clampf(p.spun_t / float(p.wpn.get("tighten_time", 1.5)), 0.0, 1.0))
-	Reticle.draw(c, mp, spread)
+	var mp := c.get_local_mouse_position() if ret.pin == Vector2.INF else ret.pin
+	ret.draw(c, p, mp, m.time)
 	if p.ak and p.ak.has_meter():
-		# the archetype resource as an arc hugging the crosshair
-		var rf := p.ak.res_frac()
-		var rc := p.ak.res_col()
-		c.draw_arc(mp, Reticle.RES_R, PI * 1.62, PI * 1.62 + PI * 0.76, 24, Color(0, 0, 0, 0.35), 3.0, true)
-		if rf > 0.0:
-			c.draw_arc(mp, Reticle.RES_R, PI * 1.62, PI * 1.62 + PI * 0.76 * rf, 24, Color(rc, 0.95 if p.ak.tell == "full" else 0.7), 3.0 if p.ak.tell == "full" else 2.0, true)
-		# the payoff is armed (FLASHPOINT, CALLED SHOT, SLAM): a pulsing word under the arc
+		# the payoff is armed (FLASHPOINT, CALLED SHOT, SLAM): a pulsing word under the resource arc
 		var rl := p.ak.ready_label()
-		if rl != "":
+		if rl != "" and not m.has_meta("pitch_no_foe_plates"):  # (pitch-reel fights: no game text)
 			var pk := 0.5 + 0.5 * sin(m.time * 9.0)
-			_ctext(mp + Vector2(0, Reticle.RES_R + 16.0), rl, 13, Color(rc.lightened(0.2), 0.75 + 0.25 * pk), big)
+			_ctext(mp + Vector2(0, Reticle.t("res_r") + 16.0), rl, 13, Color(p.ak.res_col().lightened(0.2), 0.75 + 0.25 * pk), big)
 	# aiming at a truce partner: a reminder before you break it
 	if m.truce and not m.truce.pacts.is_empty():
 		var ph: Hunter = m.truce.partner_at(p.inp["aim"], p.team)
 		if ph and not ph.unseen:
 			_flag(mp + Vector2(-58, 30), 0.7, Color("f4f1e6"))
 			_ctext(mp + Vector2(6, 36), "Truce with %s  ·  shooting breaks it" % ph.pname, 13, Color("f4f1e6"), big)
-	var ck := p.atk.charge_k()
-	if ck > 0.0:
-		# a sword's charge: fills, then flashes when it's ready to release
-		var full := ck >= 1.0
-		_arc(mp, Reticle.CHARGE_R, ck, Color("fff3b0") if not full or int(m.time * 10.0) % 2 == 0 else Color.WHITE, 4.0 if full else 3.0)
-	elif p.warm_t > 0.0:
-		_arc(mp, Reticle.CHARGE_R, 1.0 - p.warm_t / maxf(0.01, float(p.wpn.get("warmup", 0.6))), p.wpn["color"], 3.0)
-	elif p.wpn.has("spin_up") and p.spin > 0.0 and p.spin < 1.0:
-		_arc(mp, Reticle.CHARGE_R, p.spin, Color("ffb34d"), 3.0)
-	elif p.wpn.get("melee", false):
-		pass
-	else:
-		# ammo left, as a thin ring that empties as you fire
-		var af := float(p.ammo) / maxf(1.0, float(p.wpn["mag"]))
-		c.draw_arc(mp, Reticle.AMMO_R, PI * 0.62, PI * 0.62 + PI * 0.76, 24, Color(0, 0, 0, 0.35), 3.0, true)
-		c.draw_arc(mp, Reticle.AMMO_R, PI * 0.62, PI * 0.62 + PI * 0.76 * af, 24, Color(1, 1, 1, 0.75) if af > 0.25 else Color(HP_LOW, 0.9), 2.0, true)
-	reticle.draw_tick(c, mp)
 
 func _draw_downed(sz: Vector2, p: Hunter) -> void:
 	c.draw_rect(Rect2(Vector2.ZERO, sz), Color(0.3, 0.02, 0.02, 0.18))
@@ -1813,11 +1792,12 @@ func _draw_map_labels(w: World, inner: Rect2, view: Rect2, k: float, overview: b
 			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -8), pv + Vector2(6, 3), pv + Vector2(-6, 3)]), Color(0, 0, 0, 0.6))
 			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -6), pv + Vector2(4.5, 2), pv + Vector2(-4.5, 2)]), Color("9af0ff"))
 			if overview:
-				_ctext(pv + Vector2(0, 15), "%dm" % int(round(float(lb.get("height", 0.0)))), 10, Color("c8f6ff"))
+				var metres := "%dm" % int(round(float(lb.get("height", 0.0))))
+				MapNames.put(metres, pv + Vector2(0, 15), 10, Color("c8f6ff"), body)
 			continue
 		if String(lb["kind"]) == "lair":
 			if overview:
-				_ctext(pv + Vector2(0, 18), nm, 11, Color("ffe2b0"), big)
+				MapNames.put(nm, pv + Vector2(0, 18), 11, Color("ffe2b0"), big)
 			continue
 		if String(lb["kind"]) == "rail":
 			continue      # (the halts are TrainMap's, gated as the "train" kind)
@@ -1829,7 +1809,7 @@ func _draw_map_labels(w: World, inner: Rect2, view: Rect2, k: float, overview: b
 			if overview and not _region_names(w).has(nm):
 				continue      # (the whole map at this size: region names only, as the full map does)
 			var col := Color("ffd2f0") if String(lb.get("role", "")) == "heart" else INK
-			_ctext(pv + Vector2(0, 4), nm, 13 if overview else 11, col, big)
+			MapNames.put(nm, pv + Vector2(0, 4), 13 if overview else 11, col, big)
 
 # ------------------------------------------------------------------ the deathbox loot window
 ## Pressing interact at a deathbox opens LootWindow (what is in it beside what you carry); press interact
@@ -2059,9 +2039,6 @@ func _build_pack() -> void:
 	var sl := LoadoutPanel.fill(m, pc, v, func(): _build_pack())
 	if not p.caught.is_empty():
 		CaptureHud.pack_section(self, v, p, func(): _build_pack())       # the capsules in your box, with Release
-	var hint := UI.para(LoadoutPanel.HINT, 12)
-	hint.custom_minimum_size.x = LootHold.WIDTH - 28.0
-	v.add_child(hint)
 	add_child(pc)
 	pack_panel = pc
 	_fit_panel(pc, sl[0], sl[1])

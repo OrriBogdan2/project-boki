@@ -184,7 +184,7 @@
 				"sheen": 0.0,
 				"shade": 0.78,
 				"desat": 0.2,
-				"albedo": [0.72, 0.62, 0.56],
+				"albedo": [0.8, 0.8, 0.8],
 				"light_neutral": 1.0,
 				"rim_far": 0.0
 			},
@@ -206,6 +206,10 @@
 				"rim_amount": 0.2,
 				"desat": 0.3,
 				"far_lift": 0.2
+			},
+			"leather-body.001": {
+				"desat": 0.0,
+				"albedo": [0.3, 0.46, 0.8]
 			},
 			"glow": {
 				"glow": 1.8,
@@ -657,7 +661,7 @@
 		},
 		"lights": [
 			{
-				"anchor": "anchor_hang_lantern",
+				"anchor": "anchor_sun",
 				"colour": [
 					1.0,
 					0.74,
@@ -669,7 +673,7 @@
 		],
 		"halos": [
 			{
-				"anchor": "anchor_hang_lantern",
+				"anchor": "anchor_sun",
 				"color": [
 					1.0,
 					0.8,

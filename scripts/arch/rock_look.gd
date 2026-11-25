@@ -8,26 +8,31 @@ extends RefCounted
 ## The rules (collision, climbing, Net) stay in HeroZones and StoneStand.
 
 const TOP := HeroZones.ROCK_TOP
-const CRACK_T := 0.6                 # s: a fresh rock's ground cracks cool off
-const CRACK_A := 0.95                # a fresh rock's cracks' alpha (cool fades it; a reused rock gets it back)
-const CRUMBLE_T := 0.34              # s: a broken rock slumps into the ground
-const CRACK_COL := Color(KitLooks.RUNE_TEAL, CRACK_A)   # the ground cracks: the rune teal of his arm
+const CRACK_T := 0.6  # s: a fresh rock's ground cracks cool off
+const CRACK_A := 0.95  # a fresh rock's cracks' alpha (cool fades it; a reused rock gets it back)
+const CRUMBLE_T := 0.34  # s: a broken rock slumps into the ground
+const CRACK_COL := Color(KitLooks.RUNE_TEAL, CRACK_A)  # the ground cracks: the rune teal of his arm
 const RIM := 0.22
-const HEAT := 0.05                  # thin teal cracks, like the runes on his arm: the stone stays slate
-const RUMBLE_GAP := 0.09             # s: a ridge of rocks rumbles as one, not nine times over
+const HEAT := 0.12  # teal cracks like his arm runes, wide enough to read from the match camera
+const RUMBLE_GAP := 0.09  # s: a ridge of rocks rumbles as one, not nine times over
 const SIDES := 6
 # a crag's rings going up: [share of its height, share of its base radius]
 const TIERS := [[0.0, 1.0], [0.36, 0.84], [0.62, 0.72], [0.84, 0.56], [0.94, 0.4]]
 # [x, z, base radius, height under the top, lean]
 const COLS := [
-	[-0.3, 0.05, 0.44, 0.0, -0.06], [0.14, -0.14, 0.4, 0.28, 0.07], [0.42, 0.16, 0.32, -0.12, 0.1],
-	[-0.08, 0.27, 0.32, 0.8, -0.1], [0.58, -0.2, 0.24, 1.15, 0.16], [-0.58, -0.16, 0.26, 1.3, -0.16]
+	[-0.3, 0.05, 0.44, 0.0, -0.06],
+	[0.14, -0.14, 0.4, 0.28, 0.07],
+	[0.42, 0.16, 0.32, -0.12, 0.1],
+	[-0.08, 0.27, 0.32, 0.8, -0.1],
+	[0.58, -0.2, 0.24, 1.15, 0.16],
+	[-0.58, -0.16, 0.26, 1.3, -0.16]
 ]
 
 static var _rumble_at := -9.0
-static var _hush_until := -9.0       # match time: a caster that rumbles for its whole ridge (Basalt Spine) sets it
-static var _crags: Dictionary = {}   # column index -> [mesh, material], shared by every rock
-const SPARES := "rock_spares"        # the match's meta: rocks done with (crumbled, launched), hidden, for the next take
+static var _hush_until := -9.0  # match time: a caster that rumbles for its whole ridge (Basalt Spine) sets it
+static var _crags: Dictionary = {}  # column index -> [mesh, material], shared by every rock
+const SPARES := "rock_spares"  # the match's meta: rocks done with (crumbled, launched), hidden, for the next take
+
 
 ## A rock for HeroZones.rock under `m`: a spare one made fresh again, else built now. Spares are built at match
 ## load (prewarm: a Stone Row built 57 meshes in one frame, --first-cast-check) and come back through park.
@@ -42,6 +47,7 @@ static func take(m: Node) -> Node3D:
 	m.add_child(n)
 	return n
 
+
 ## `count` spare rocks under `m` (the loading screen's rehearsal).
 static func prewarm(m: Node, count: int) -> void:
 	for i in count - _spares(m).size():
@@ -49,15 +55,18 @@ static func prewarm(m: Node, count: int) -> void:
 		m.add_child(n)
 		park(n)
 
+
 ## A rock done with: hidden and kept for the next take under its match.
 static func park(n: Node3D) -> void:
 	n.visible = false
 	_spares(n.get_parent()).append(n)
 
+
 static func _spares(m: Node) -> Array:
 	if not m.has_meta(SPARES):
 		m.set_meta(SPARES, [])
 	return m.get_meta(SPARES)
+
 
 ## A spare rock as built: the columns standing where they stood, the shadow back, the cracks hot again.
 static func _fresh(n: Node3D) -> void:
@@ -75,6 +84,7 @@ static func _fresh(n: Node3D) -> void:
 			_stand(c as Node3D, i)
 			i += 1
 
+
 static func make() -> Node3D:
 	var n := Node3D.new()
 	_shadow(n)
@@ -88,17 +98,20 @@ static func make() -> Node3D:
 	_cracks(n)
 	return n
 
+
 ## Column `i` where it stands and leans as built.
 static func _stand(col: Node3D, i: int) -> void:
 	var c: Array = COLS[i]
 	col.position = Vector3(float(c[0]), 0, float(c[1]))
 	col.rotation = Vector3(float(c[4]) * 0.6, 0.0, float(c[4]))
 
+
 ## Stands the columns straight, so a low rock can be squashed without shearing them.
 static func upright(n: Node3D) -> void:
 	for c in n.get_children():
 		if c.name.begins_with("Col"):
 			(c as Node3D).rotation = Vector3.ZERO
+
 
 ## The soft ground shadow: from the match camera it plants the rock on the ground.
 static func _shadow(n: Node3D) -> void:
@@ -108,6 +121,7 @@ static func _shadow(n: Node3D) -> void:
 	)
 	s.name = "Shadow"
 	s.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+
 
 ## One crag, built once: rings of jittered points narrowing and wandering upward to a broken peak at its
 ## full height, flat-shaded, so the outline is jagged from above and from the side.
@@ -147,10 +161,11 @@ static func _crag(i: int) -> Array:
 			st.add_vertex(v)
 	st.generate_normals()
 	var mt := KitLooks.slate_mat(HEAT, float(i) * 1.7, RIM)
-	mt.set_shader_parameter("cap_col", KitLooks.SLATE_CAP)   # the sunlit upward faces: what the match camera sees most
+	mt.set_shader_parameter("cap_col", KitLooks.SLATE_CAP)  # the sunlit upward faces: what the match camera sees most
 	mt.set_shader_parameter("cap", 1.0)
 	_crags[i] = [st.commit(), mt]
 	return _crags[i]
+
 
 ## Thin glowing cracks in the ground at the rock's foot.
 static func _cracks(n: Node3D) -> void:
@@ -167,6 +182,7 @@ static func _cracks(n: Node3D) -> void:
 	for mi in cracks.get_children():
 		(mi as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
+
 ## The ground cracks at a fresh rock's foot cool and fade out.
 static func cool(n: Node3D) -> void:
 	var cracks := n.get_node_or_null("Cracks") as Node3D
@@ -178,15 +194,18 @@ static func cool(n: Node3D) -> void:
 		tw.tween_property(mat, "shader_parameter/color:a", 0.0, CRACK_T).set_ease(Tween.EASE_IN)
 	tw.chain().tween_callback(func(): cracks.visible = false)
 
+
 ## For the next `secs` rocks rising make no rumble of their own (the caster plays one for all of them).
 static func hush(m: Node, secs: float) -> void:
 	_hush_until = float(m.time) + secs
+
 
 ## A rock coming up: one short rumble (the debris and dust are its kit's HeroVfx move, content/vfx/dolm.json).
 static func rumble(m: Node, at: Vector3) -> void:
 	if float(m.time) >= _hush_until and absf(float(m.time) - _rumble_at) >= RUMBLE_GAP:
 		_rumble_at = float(m.time)
 		m.sfx("br_rumble", at, -3.0, 1.0)
+
 
 ## A rock broken or timed out (Verbs._break_wall's kx_end): it takes the node over, so the columns can snap,
 ## lean out and slump into the ground in a spray of chips, then waits as a spare. A launched rock leaves through

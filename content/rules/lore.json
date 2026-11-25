@@ -1,5 +1,6 @@
 {
-	"doc": "Lore data, synced to briefs/LORE_MASKS.md. Factions are lore only (voice lines, banter, key art, the wiki): squads in a match stay free-pick. A Hunter's story is its class file's \"personality\" (content/archetypes). relics: the found object that holds a fallen Hunter's self; status \"proposed\" is waiting for the owner's OK, so settling one is a one-line edit of that word. tools/gen_wiki.py writes the Lore page and docs/art/gen/stories from this file.",
+	"doc": "Lore data, synced to briefs/LORE_MASKS.md. Factions are lore only (voice lines, banter, key art, the wiki): squads in a match stay free-pick. A Hunter's story is its class file's \"personality\" (content/archetypes). relics: the found object that holds a fallen Hunter's self; status \"proposed\" is waiting for the owner's OK, so settling one is a one-line edit of that word. mask_line: the one line the first Relic moment (MaskMoment) shows, once, when your first Relic waits by your face. tools/gen_wiki.py writes the Lore page and docs/art/gen/stories from this file.",
+	"mask_line": "This Relic holds a fallen Hunter. Put it on, and you become them.",
 	"premise": [
 		"The Wyrm came, and stole our essence. In time, humans, beasts and skyfolk alike were born without faces. We became a new race: the Empty.",
 		"Our only salvation became the cursed fossils we once tried to destroy: Relics, each carrying the soul of a fallen Hunter of old.",

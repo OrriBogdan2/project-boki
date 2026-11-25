@@ -86,7 +86,7 @@ func run(main: Node) -> void:
 		var f: Image = frames[i]
 		f.convert(Image.FORMAT_RGB8)
 		f.resize(w, hh, Image.INTERPOLATE_BILINEAR)
-		strip.blit_rect(f, Rect2i(0, 0, w, hh), Vector2i((i % cols) * w, (i / cols) * hh))
+		strip.blit_rect(f, Rect2i(0, 0, w, hh), Vector2i((i % cols) * w, (int(i / float(cols))) * hh))
 	strip.save_png(dir.path_join("strip.png"))
 	var rib: String = mm.col.to_html(false) if is_instance_valid(mm) else "gone"
 	print("SHOWRINGSHOTS DONE %s %dx%d, show %.1f s, ribbon %s" % [dir, got.x, got.y, t, rib])
