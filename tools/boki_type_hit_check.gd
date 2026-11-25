@@ -23,7 +23,7 @@ const SHOT_FRAME := 2  # frames after the hit the strip is taken at (the flash h
 var bad := 0
 var main: Node
 var m: Match
-var P: Hunter
+var _p: Hunter
 
 
 func ok(cond: bool, what: String) -> void:
@@ -42,7 +42,7 @@ func run(root: Node, mode: String = "check") -> void:
 	for mb in m.mobs:
 		mb.queue_free()
 	m.mobs.clear()
-	P = m.player
+	_p = m.player
 	if mode == "shots":
 		await _shots()
 	else:
@@ -63,7 +63,8 @@ func _wild(sp: String, at: Vector3) -> Kin:
 	return m.spawn_wild(Save.new_kin(sp, "T"), at, false)
 
 
-## The colours of the hit `by` lands on `t`: [flash, last spark], both as the pools hold them.
+## The colours of the hit `by` lands on `t`: [flash, last spark], both as the pools hold them. A hit at power 1 or
+## more (an ability always) throws a second spark in the plain type colour, so the last spark is either shade.
 func _hit(t: Ent, by: Ent, o: Dictionary, dmg := 12.0) -> Array:
 	m.on_damage(t, by, dmg, o)
 	var fx := m.fx
@@ -81,28 +82,28 @@ func _near(a: Color, b: Color) -> bool:
 
 
 func _check() -> void:
-	var foe := _foe(P.pos + Vector3(4, 0, 0))
-	var mob := m.spawn_mob("skitter", P.pos + Vector3(0, 0, 4))
+	var foe := _foe(_p.pos + Vector3(4, 0, 0))
+	var mob := m.spawn_mob("skitter", _p.pos + Vector3(0, 0, 4))
 	var ability := {"src": "kin", "ab": "k1"}
 	var seen: Array = []
 	for sp in READ:
-		var k := _wild(sp, P.pos + Vector3(-4, 0, float(seen.size())))
+		var k := _wild(sp, _p.pos + Vector3(-4, 0, float(seen.size())))
 		var want := DexView.type_col(String(SAMPLE[sp]))
 		var r := _hit(foe, k, ability)
 		var glow := want.lerp(Color.WHITE, SPARK_WHITE)
 		var what := "%s (%s): flash %s spark %s" % [sp, SAMPLE[sp], r[0].to_html(false), r[1].to_html(false)]
-		ok(_near(r[0], want) and _near(r[1], glow), what)
+		ok(_near(r[0], want) and (_near(r[1], glow) or _near(r[1], want)), what)
 		ok(not _near(r[0], Juice.HIT_COL), "%s's hit is not the generic spark" % sp)
 		seen.append(r[0])
 	ok(
 		not _near(seen[0], seen[1]) and not _near(seen[1], seen[2]) and not _near(seen[0], seen[2]),
 		"the three types differ"
 	)
-	var k := _wild("cindowary", P.pos + Vector3(-4, 0, 4))
+	var k := _wild("cindowary", _p.pos + Vector3(-4, 0, 4))
 	var ember := DexView.type_col("ember")
 	ok(_near(_hit(mob, k, ability)[0], ember), "an ember Boki's hit on a mob is ember too")
 	ok(_near(_hit(foe, k, {"src": "kin"})[0], ember), "its plain strike (no ability) is ember")
-	ok(_near(_hit(foe, P, {"src": "primary"})[0], Juice.HIT_COL), "a Hunter's hit on a Hunter keeps the white flash")
+	ok(_near(_hit(foe, _p, {"src": "primary"})[0], Juice.HIT_COL), "a Hunter's hit on a Hunter keeps the white flash")
 	var grey := DexView.type_col("")
 	var missing: Array = []
 	for id in Data.KIN:
@@ -122,7 +123,7 @@ func _shots() -> void:
 		await fade.reveal(0.01)
 	if m.hud:
 		m.hud.visible = false
-	var home := P.pos
+	var home := _p.pos
 	var foes: Array = []
 	var kins: Array = []
 	var i := 0
