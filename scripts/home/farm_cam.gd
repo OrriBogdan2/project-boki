@@ -13,6 +13,8 @@ const MIN_BACK := 1.0  # m: the closest a wall may push the camera to you, whate
 const TIP_STEP := 0.087  # rad (5 deg) between the steeper angles tried when a wall is close behind
 const TIP_OUT := 1.5  # rad/s the extra tip eases off again once the wall is gone (it tips at once)
 const OUT_SPEED := 5.0  # m/s the camera backs out again once the wall is gone (it comes in at once)
+const EAVES_Y := 2.0  # m: above this height a roof or a crown reaches past the tile it stands on
+const EAVES_AT := [Vector2(0.8, 0.0), Vector2(-0.8, 0.0), Vector2(0.0, 0.8), Vector2(0.0, -0.8)]  # m: how far past
 const PAD_DEAD := 0.2  # right stick: ignored below this
 const PAD_SPEED := 2.4  # rad/s at full stick
 
@@ -155,7 +157,24 @@ static func _blocked(home: Node3D, p: Vector3, gap: float) -> bool:
 	var world: World = home.world
 	if world.ground_at(p.x, p.z) + gap > p.y or _in_prop(home, p, gap):
 		return true
-	return world.is_block(p.x, p.z) and _top(home, world.idx(int(floor(p.x)), int(floor(p.z)))) + gap > p.y
+	if _solid(home, p.x, p.z, p.y, gap, 0.0):
+		return true
+	if p.y < EAVES_Y:
+		return false
+	for o in EAVES_AT:
+		if _solid(home, p.x + o.x, p.z + o.y, p.y, gap, float(rules()["roof_m"])):
+			return true
+	return false
+
+
+## Is (x, y, z) inside a block's top? `tall_from` > 0: only a roof or crown (a block taller than that) counts.
+static func _solid(home: Node3D, x: float, z: float, y: float, gap: float, tall_from: float) -> bool:
+	var world: World = home.world
+	if not world.is_block(x, z):
+		return false
+	var i := world.idx(int(floor(x)), int(floor(z)))
+	var top := _top(home, i)
+	return top + gap > y and top - world.level[i] * World.LEVEL >= tall_from
 
 
 ## Is the point inside the portal ring or the glider rack? They stand off the tile grid, so they are boxes:

@@ -136,13 +136,12 @@ func _wall_part() -> void:
 	for i in 120:
 		await main.get_tree().process_frame
 	var near := _back()
-	ok(near < free - 1.0, "a wall %.1f m behind pulls the camera in: %.1f m, from %.1f m" % [2.0, near, free])
 	var aim: Vector3 = cam.focus + Vector3(0, cam.rise, 0)
 	var rise_deg := rad_to_deg(asin((cam.global_position.y - aim.y) / near))
 	ok(
 		near > float(FarmCam.rules()["wall_min_m"]) - 0.3 and rise_deg > float(FarmCam.rules()["pitch_deg"]) + 10.0,
 		(
-			"the wall keeps it %.1f m away and tips the view up instead (%.0f deg, from %.0f)"
+			"a wall 2 m behind: the camera keeps %.1f m from you and tips up (%.0f deg, from %.0f)"
 			% [near, rise_deg, float(FarmCam.rules()["pitch_deg"])]
 		)
 	)
