@@ -50,7 +50,7 @@ func rimewright() -> void:
 	_spear()
 	_wall()
 	_skate()
-	await _rime()
+	_rime()
 
 func _stream() -> void:
 	var r: Array = sc.setup("rimewright", 30.0)
