@@ -381,10 +381,8 @@ archetypes/dolm.json:lmb.boulder.splash	0.9
 archetypes/dolm.json:lmb.boulder.splash_k	0.5
 archetypes/dolm.json:lmb.full	0.9
 archetypes/dolm.json:lmb.punch.air_k	0.5
-archetypes/dolm.json:lmb.punch.dmg[0]	12.0
-archetypes/dolm.json:lmb.punch.dmg[1]	24.0
-archetypes/dolm.json:lmb.punch.kb[0]	6.0
-archetypes/dolm.json:lmb.punch.kb[1]	11.0
+archetypes/dolm.json:lmb.punch.dmg	10.6
+archetypes/dolm.json:lmb.punch.kb	10.0
 archetypes/dolm.json:lmb.punch.len	4.2
 archetypes/dolm.json:lmb.punch.rate	0.6
 archetypes/dolm.json:lmb.punch.step	0.9
