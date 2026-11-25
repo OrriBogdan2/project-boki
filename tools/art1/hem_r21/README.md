@@ -17,3 +17,6 @@ Shipped chain (from r20 glb 949ef89a):
    graft again with tex=TA2.jpg, wsmooth 30, then `swscale.py in.glb out.glb 0.4`: SkirtSw rotation keys slerped 40% of the way
    from rest (the r12/r13 keys were solved for a knee-length skirt; on a mid-calf hem the same tilt spread it into a tent).
    geo PASS held 0.7 (k 0.5: held 1.2 FAIL, k 0.6: 0.8). `bl_game.py`: Blender quick views at the match camera.
+7. r21d: `legfollow21.py in.glb out.glb hmax=0.7` (numpy port of hem_r10/legfollow.py, weights written in place) on the TA2+wsmooth glb,
+   then swscale 0.4 and repack. In-game attack/hit run the kmove clips from hem_clips.glb (arc_loose -> lace_loose), which have no
+   SkirtSw keys, so the left knee punched through the closed panel; the thigh share moves the panel with the knee in every clip.
