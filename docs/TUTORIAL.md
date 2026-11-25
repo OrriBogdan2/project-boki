@@ -310,3 +310,9 @@ The knock card is the one hint that shows more than once on purpose: once per ma
 `content/rules/knock_tip.json`) per save, counted in `knock_tip`. The check pins both.
 The first-summon line (`first_summon`, key once per save) is on `ext/tut-first-summon`, not on main; when it lands, add
 a wisp-ready trigger to `_play` so it is counted too.
+## Low-end PCs: the course at 30 fps and with stalls (`--tutorial-low-fps`)
+Every step runs on the match's fixed 60 Hz step (`Match.step`) and the garden on `FarmStep`, so a slow frame never skips
+a step. `--tutorial-check[=<arch>] --tutorial-low-fps` plays the course again on the Low preset in the game's own frame
+loop, at a 30 fps cap and at 60 fps with a 100 ms stall every 5th frame: same steps in order, none past 2x the
+fixed-step time + 5 s. `--farm-tutorial-check --tutorial-low-fps` does the same for the garden's five steps (meet, patch,
+eat, toy, out). Key taps surviving the same rates are `--low-fps-input-check`.

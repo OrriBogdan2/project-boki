@@ -83,16 +83,19 @@ func _close_step() -> void:
 	print("TUTPLAY step %s %.1f" % [step_id, step_s])
 	rows.append("%s %.1f" % [step_id, step_s])
 
+
 ## The Mask line is shown only at the put-on prompt: one label there, none on any other screen.
 func _before_act(what: String) -> void:
 	_count_line(what, 1 if what == "put the Relic on" else 0)
 
+
 func _count_line(where: String, want: int) -> void:
 	var line := String(Content.rules("lore")["mask_line"])
-	ok(line == "This Mask holds a fallen Hunter. Put it on, and you become them.", "the Mask line's words: " + line)
+	ok(line == "This Relic holds a fallen Hunter. Put it on, and you become them.", "the Mask line's words: " + line)
 	var n := _labels_with(tree.root, line)
 	line_seen += n
 	ok(n == want, "the Mask line shows %d time(s) before '%s', want %d" % [n, where, want])
+
 
 func _labels_with(node: Node, text: String) -> int:
 	var n := 1 if node is Label and (node as Label).text == text and (node as Label).is_visible_in_tree() else 0
