@@ -46,6 +46,7 @@ SPECS = {"cindle": ("vespyx", "vespyx_paint", "vespyx_anim"), "puddlet": ("prism
            for i in boki_scan.AUTO if boki_scan.AUTO[i] is boki_scan.BORROWED},
          "glaciyak": ("glomwort", "glomwort", "glaciyak_anim"),      # its own clips over the borrowed rig
          **{i: ("glomwort", "glomwort", i + "_anim") for i in ("squalltross", "threadwyrm", "tuatrune", "velvorm")},
+         **{i: ("glomwort", "glomwort", i + "_anim") for i in ("moundvark", "murmurling", "spatewader")},  # own clips
          "heatherhorn": ("glomwort", "glomwort", "heatherhorn_anim"),
          "kilnbadger": ("glomwort", "glomwort", "kilnbadger_anim"),
          "opalisk": ("glomwort", "glomwort", "opalisk_anim"),        # its own clips over the borrowed rig

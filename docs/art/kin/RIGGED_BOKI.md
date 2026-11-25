@@ -132,6 +132,15 @@ the actions for the module's `CLIPS` and exports again, body, face, skin and atl
 back identical), for a species whose raw Meshy model is not at hand. A full `build_boki.py` run gives the same clips.
 11-22: Prowyak has `auto_legs.py` legs (below), so reclip keeps its leg bones and planted-paw walk and run and re-keys
 only the other 11 clips, legs at rest (the module's lumbering walk/run would glide the paws and is not used).
+11-22: Spirevark (`moundvark`), Murmurling (`murmurling`) and Barrelmander (`spatewader`) have their own clips
+(`moundvark_anim.py`, `murmurling_anim.py`, `spatewader_anim.py`) on the borrowed Glomwort skeleton and the
+`auto_legs.py` legs: an aardvark that sniffs with its snout low, rakes and rears up to call its swarm; a starling that
+snaps its head about, darts and pecks, sings with its pipe tail up; a salamander that bends in S-curves with the barrel
+water sloshing behind. `reclip.py` re-keys everything but walk and run (the planted-paw trot stays), then
+`gait_layer.py` adds each module's `GAIT` body motion (head, neck, spine, hips, root rotations only) on top of those
+two, the legs untouched. Run both once, in that order, on a file whose walk and run are the plain trot (to redo, run
+`auto_legs.py` first). `--anim-coverage-check`: all six states of the three rows read `clip`.
+
 11-20: Crofthorn (`heatherhorn`) and Anvilbrock (`kilnbadger`) have their own clips (`heatherhorn_anim.py`,
 `kilnbadger_anim.py`) on the borrowed Glomwort skeleton: a cow's level-backed plod, horn sweep and proud bellow; a honey
 badger's low swagger, headbutt and ringing anvil. Their glbs were re-keyed with `tools/boki/reclip.py`. Then they got
