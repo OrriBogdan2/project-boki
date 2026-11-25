@@ -603,8 +603,8 @@ func run(m: Node) -> void:
 	_spots_part(home, center)
 	_rival_beat(home)
 	_play_sounds(home)
-	_axes_part(home)
 	_notice_part(home, center)
+	_axes_part(home)
 	_left_alone(home)
 	rules["base_mode"] = false
 	home.queue_free()
