@@ -46,7 +46,8 @@ func lay(dt: float) -> void:
 	if on:
 		t += dt * rate
 		on = t < clip.length
-	w = move_toward(w, 1.0 if on else 0.0, dt / (FADE_IN if on else FADE_OUT))
+	var fade := FADE_IN if on else FADE_OUT
+	w = move_toward(w, 1.0 if on else 0.0, dt / fade)
 	if w <= 0.0:
 		return
 	for tr in tracks():
