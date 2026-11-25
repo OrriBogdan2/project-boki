@@ -221,6 +221,8 @@ func _shots(main: Node) -> void:
 	for h in m.hunters:
 		if h != m.player:
 			h.ctrl = "idle"
+	main.get_window().size = VIEW  # (the shots are 1920x1080 whatever window the host opens)
+	await main.get_tree().process_frame
 	var vp := main.get_viewport()
 	for sh in SHOTS:
 		var hold := float(sh[1])
