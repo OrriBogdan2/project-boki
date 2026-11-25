@@ -231,11 +231,15 @@ func _box() -> void:
 	_fresh()
 	var p_h := m.player
 	var cap := Capture.box_cap()
-	ok(cap == int(Content.rules("capture")["carry_out"]) and cap == 1, "the carry-out slot holds %d (from content/rules/capture.json)" % cap)
+	ok(
+		cap == int(Content.rules("capture")["carry_out"]) and cap == 1,
+		"the carry-out slot holds %d (from content/rules/capture.json)" % cap
+	)
 	for i in cap:
 		p_h.caught.append(Save.new_kin("puddlet", "Filler%d" % i, 10 + i))
 	var k := wild()
-	ok(Capture.block_reason(p_h, k).contains("Carry-out full"), "a full carry-out slot blocks the scan (\"%s\")" % Capture.block_reason(p_h, k))
+	var why_not := Capture.block_reason(p_h, k)
+	ok(why_not.contains("Carry-out full"), "a full carry-out slot blocks the scan (\"%s\")" % why_not)
 	ok(CaptureHud.box_text(p_h) == "Carry-out 1/1", "the HUD shows the slot (%s)" % CaptureHud.box_text(p_h))
 	begin(p_h)
 	ok(not Capture.active(p_h) and Capture.state(p_h).is_empty(), "...holding the key does not start one")
