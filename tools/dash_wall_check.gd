@@ -50,7 +50,7 @@ var pen_steps := 0  # steps of the last _dash or _hold_into the body overlapped 
 
 
 func run(main: Node) -> void:
-	await _setup(main)
+	_setup(main)
 	var foe: Hunter = null
 	for h in m.hunters:
 		if h.team != P.team:

@@ -167,7 +167,7 @@ func run(main: Node) -> void:
 	Save.d = Save.fresh()
 	n_dummies = 4
 	step_dt = 1.0 / 60.0      # the game's own step: a 74 m/s bullet moves 1.2 m a step, not 3.7
-	await _spawn(main)
+	_spawn(main)
 	var only := ""
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--fine-hero="): only = String(a).substr(12)

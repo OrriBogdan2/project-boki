@@ -4,10 +4,10 @@ extends Node
 ## ability orb or an aura, drawn with shaders/glowball.gdshader, never bury a body. Within NEAR_R of a Hunter such
 ## a node is shrunk to at most MAX_SIZE across and drawn at NEAR_ALPHA; the node's own scale and look come back
 ## the frame it leaves. A smoke cloud's puffs (Models.gear_smoke: opaque grey spheres up to 2.6 m across) part
-## round a Hunter instead: a puff within PUFF_CLEAR of a body is hidden until it is clear again. Purely visual:
-## hit shapes, the effects' own logic and smoke's concealment (Match.in_smoke) never see it. Only Hunters the
-## player is shown count (a hidden foe in smoke opens no hole). A Hunter's own parts (its merge form, its pins)
-## are not capped.
+## round a Hunter instead: a puff within PUFF_CLEAR of a body, or over its box on screen, is hidden until it is
+## clear. Purely visual: hit shapes, the effects' own logic and smoke's concealment (Match.in_smoke) never see it.
+## Only Hunters the player is shown count (a hidden foe in smoke opens no hole). A Hunter's own parts (its merge
+## form, its pins) are not capped.
 
 const MAX_SIZE := 0.9  # m, widest a glow may be (axis-aligned, world) while within NEAR_R of a Hunter
 const NEAR_R := 2.2  # m, ground distance from a Hunter's feet that counts as near
@@ -41,9 +41,13 @@ func _process(dt: float) -> void:
 		_scan_in = RESCAN_S
 		_rescan()
 	var near: Array[Vector3] = []
+	var zones: Array[Rect2] = []  # the shown Hunters' screen boxes (HunterZone), for the smoke puffs
 	for h: Hunter in _match.hunters:
 		if not h.out and not h.unseen:
 			near.append(h.pos)
+			var z := HunterZone.rect_of(_match, h)
+			if z.has_area():
+				zones.append(z)
 	for mi in _glows:
 		if is_instance_valid(mi) and mi.is_visible_in_tree():
 			_apply(mi, near)
@@ -52,18 +56,27 @@ func _process(dt: float) -> void:
 		if is_instance_valid(n):
 			for puff in n.get_children():
 				if puff is MeshInstance3D:
-					_part(puff, near)
+					_part(puff, near, zones)
 
 
-## A smoke puff hides while a Hunter stands within its radius plus PUFF_CLEAR (ground distance).
-func _part(puff: MeshInstance3D, near: Array[Vector3]) -> void:
-	var r := puff.get_aabb().size.x * 0.5 * puff.global_transform.basis.get_scale().x + PUFF_CLEAR
+## A smoke puff hides while a Hunter stands within its radius plus PUFF_CLEAR (ground distance), or while its disc
+## on screen covers a Hunter's screen box (`zones`): the camera looks down at a slant, so a puff on its side of a
+## Hunter hides the body from metres away on the ground.
+func _part(puff: MeshInstance3D, near: Array[Vector3], zones: Array[Rect2]) -> void:
+	var rad := puff.get_aabb().size.x * 0.5 * puff.global_transform.basis.get_scale().x
+	var r := rad + PUFF_CLEAR
 	var c := puff.global_position
 	var open := false
 	for p in near:
 		if Vector2(c.x - p.x, c.z - p.z).length() < r:
 			open = true
 			break
+	var cam := _match.cam
+	if not open and not zones.is_empty() and cam and not cam.is_position_behind(c):
+		var sc := cam.unproject_position(c)
+		var sr := sc.distance_to(cam.unproject_position(c + cam.global_basis.x * rad))
+		var disc := Rect2(sc - Vector2(sr, sr), Vector2(sr, sr) * 2.0)
+		open = zones.any(func(z: Rect2) -> bool: return z.intersects(disc))
 	puff.visible = not open
 
 

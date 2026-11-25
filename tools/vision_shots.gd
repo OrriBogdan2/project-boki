@@ -40,7 +40,7 @@ func run(mn: Node) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 4, "squad": 1, "tier": 0, "length": 1500.0, "seed": 5101, "no_drop": true, "raid": raid,
+	m.start({"teams": 4, "squad": 1, "tier": 0, "length": 1500.0, "seed": 5101, "no_drop": true, "raid": raid,
 		"tut_test": true})
 	var fade = main.get("fade")
 	if fade != null:
