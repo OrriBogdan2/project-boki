@@ -7,7 +7,7 @@ extends RefCounted
 ## Prints UTIL ok/FAIL lines and "UTIL DONE, failures: N". Never touches the save file.
 
 var bad := 0
-var hazards := 0  # fields on the list before any item is used (the map's hazards)
+var ambient: Array = []  # the fields on the list before any item is used (the map's own hazards)
 var main: Node
 
 
@@ -27,25 +27,35 @@ func run(host: Node) -> void:
 	var rec := Save.new_kin("cindle", "Pip", 77)
 	Save.d["roster"] = [rec]
 	Save.d["active"] = rec["uid"]
-	var m := Match.new()
-	main.add_child(m)
-	m.start({"teams": 2, "squad": 1, "tier": 2, "length": 1e9, "seed": 9001, "no_drop": true, "raid": "clear"})
-	m.set_process(false)
-	var p_h: Hunter = m.player
-	var foe: Hunter = m.hunters.filter(func(x): return x != p_h)[0]
-	hazards = m.fields.list.size()  # the map's own hazard fields, there from the start
-	_banner(m, p_h, foe)
-	_skyfall(m, p_h, foe)
-	_blight(m, p_h, foe)
+	var m := _match(2)  # a duo: the banner's fall needs a knock first (a solo has none: you lose a life)
+	_banner(m, m.player, _rival(m))
+	m.queue_free()
+	m = _match(1)
+	_skyfall(m, m.player, _rival(m))
+	_blight(m, m.player, _rival(m))
 	print("UTIL DONE, failures: %d" % bad)
 	host.get_tree().quit(1 if bad > 0 else 0)
+
+
+func _match(squad: int) -> Match:
+	var m := Match.new()
+	main.add_child(m)
+	m.start({"teams": 2, "squad": squad, "tier": 2, "length": 1e9, "seed": 9001, "no_drop": true, "raid": "clear"})
+	m.set_process(false)
+	ambient = m.fields.list.duplicate()  # the map's own hazard fields, there from the start
+	return m
+
+
+func _rival(m: Match) -> Hunter:
+	return m.hunters.filter(func(x): return x.team != m.player.team)[0]
 
 
 ## The most seconds any field on the map has left (a fire patch or a blight patch is the longest one standing).
 func _longest(m: Match) -> float:
 	var best := 0.0
 	for f in m.fields.list:
-		best = maxf(best, float(f.get("t", 0.0)))
+		if not ambient.any(func(a): return is_same(a, f)):
+			best = maxf(best, float(f.get("t", 0.0)))
 	return best
 
 
@@ -100,7 +110,7 @@ func _skyfall(m: Match, p_h: Hunter, foe: Hunter) -> void:
 	ok(foe.hp >= foe.max_hp - 0.5, "...nothing lands for 5 s")
 	_steps(m, 1.0, foe)
 	ok(foe.downed or foe.out or foe.dead, "the blast knocks a full-health rival outright (hp %.0f)" % foe.hp)
-	ok(m.fields.list.size() > hazards, "then the ground burns (a fire patch)")
+	ok(_longest(m) > 0.0, "then the ground burns (a fire patch)")
 	var left := _longest(m)
 	ok(left > 2.0 and left <= 3.0, "...for 3 s (%.1f s left a beat in)" % left)
 
