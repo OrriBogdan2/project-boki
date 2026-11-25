@@ -360,7 +360,7 @@ func _draw_world_labels() -> void:
 	_draw_lair_labels()
 	_draw_truce_marks()
 	_draw_wisp_rings()
-	RecastCue.world(self, cam, m.player)      # two-step abilities: the recast marker and the combo badges on foes
+	RecastCue.world(self, cam, m.player)      # two-step abilities: the recast marker and the payoff burst
 	for h in m.hunters:
 		if h == m.player or h.out or h.extracted or not h.model or not (h.model.visible or HunterWisp.hides(h)) or h.unseen or HudPlate.hidden(m, h):
 			continue
@@ -393,10 +393,10 @@ func _draw_world_labels() -> void:
 		LabelCull.mark(mb)
 		LabelClash.claim(sp, LabelClash.BAR)
 		if mb.stagger_t > 0.0:
-			_ctext(sp + Vector2(0, -12), "STAGGERED", 18, Color("fff27a"), big)
-		elif mb.stag_open > 0.0:
-			var a := 0.75 + 0.25 * sin(m.time * 12.0)
-			_ctext(sp + Vector2(0, -12), "STAGGERABLE", 17, Color(0.85, 0.6, 1.0, a), big)
+			c.draw_arc(sp + Vector2(0, -16), 9.0, 0, TAU, 20, Color("fff27a"), 3.0, true)
+		elif mb.stag_open > 0.0:       # a pulsing purple ring: hit it with an ability now (no word)
+			var ring_r := 9.0 + 2.0 * sin(m.time * 12.0)
+			c.draw_arc(sp + Vector2(0, -16), ring_r, 0, TAU, 20, Color(0.85, 0.6, 1.0), 3.0, true)
 		# compact bar; rare and mutated monsters (mb.rarity, mb.mutations) wear a tinted frame and
 		# little icons for their mutations, and always show their bar
 		var rare: bool = int(mb.rarity) > 0 or not mb.mutations.is_empty()
@@ -425,7 +425,7 @@ func _draw_world_labels() -> void:
 			_bar(br, bfrac, Color("e0b0ff") if mb.stagger_t > 0.0 else Color("ff8a6a"))
 			if ct > bfrac:
 				c.draw_rect(Rect2(br.position + Vector2(bw * bfrac, 0), Vector2(bw * (ct - bfrac), 6)), Color(1.0, 0.95, 0.88, 0.8))
-			_status_row(sp + Vector2(0, 16), mb)
+			_status_row(sp + Vector2(0, 18), mb)
 	for k in m.kins:
 		if k.dead or not k.visible or k.state == "shoulder" or cam.is_position_behind(k.position):
 			continue
@@ -1360,19 +1360,10 @@ func _nameplate(sp: Vector2, h: Hunter) -> void:
 		# a bounty: a target over the plate and what knocking them is worth
 		bounty_marker(c, Vector2(sp.x, sp.y - 34), 1.15)
 		_ctext(Vector2(sp.x, sp.y - 48), "BOUNTY  ·  LV %d" % h.lvl, 11, Color("ffb64a"), big)
-	if not h.downed:
-		ComboMark.draw(c, Vector2(sp.x, sp.y - 34), m.player, h, m.time)
 
-## Little icons for what's happening to someone: stunned, rooted, slowed, burning, shielded, braced.
+## The status row (HudPlate.row) centred on `at`, under a monster's bar.
 func _status_row(at: Vector2, e: Ent) -> void:
-	var icons: Array = HudPlate.statuses(e)
-	var x := at.x - icons.size() * 8.0 + 8.0
-	for ic in icons:
-		c.draw_circle(Vector2(x, at.y), 7.0, Color(0.03, 0.03, 0.05, 0.85))
-		Icons.draw(c, String(ic[0]), Vector2(x, at.y), 4.2, ic[1])
-		if HudPlate.shows_time(float(ic[3])):
-			_ctext(Vector2(x, at.y + 17), "%.1f" % float(ic[3]), 10, ic[1], big)
-		x += 16.0
+	HudPlate.draw_row(c, at, plates.row(m.player, e, HudPlate.statuses(e)), true)
 
 ## Teammates you can't see on screen get an arrow at the screen edge (with distance, coloured by
 ## how they're doing; a dead teammate's deathbox in their squad colour while their soul can still be saved).
@@ -1640,12 +1631,6 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 func _draw_crosshair(p: Hunter) -> void:
 	var mp := c.get_local_mouse_position() if ret.pin == Vector2.INF else ret.pin
 	ret.draw(c, p, mp, m.time)
-	if p.ak and p.ak.has_meter():
-		# the payoff is armed (FLASHPOINT, CALLED SHOT, SLAM): a pulsing word under the resource arc
-		var rl := p.ak.ready_label()
-		if rl != "" and not m.has_meta("pitch_no_foe_plates"):  # (pitch-reel fights: no game text)
-			var pk := 0.5 + 0.5 * sin(m.time * 9.0)
-			_ctext(mp + Vector2(0, Reticle.t("res_r") + 16.0), rl, 13, Color(p.ak.res_col().lightened(0.2), 0.75 + 0.25 * pk), big)
 	# aiming at a truce partner: a reminder before you break it
 	if m.truce and not m.truce.pacts.is_empty():
 		var ph: Hunter = m.truce.partner_at(p.inp["aim"], p.team)
@@ -1757,13 +1742,11 @@ func _draw_overhead(p: Hunter) -> void:
 		var dc := sp + Vector2(-w * 0.5 - 16, 4)
 		c.draw_circle(dc, 11.0, Color(0.04, 0.04, 0.06, 0.75))
 		_arc(dc, 8.0, df, Color("8ff0a0"), 3.0)
-		_ctext(sp + Vector2(0, 33), "DRINKING", 11, Color("8ff0a0"), big)
 	if p.kit_t > 0.0:
 		var kf := 1.0 - p.kit_t / p.kit_len
 		var kc := sp + Vector2(-w * 0.5 - 16, 4)
 		c.draw_circle(kc, 11.0, Color(0.04, 0.04, 0.06, 0.75))
 		_arc(kc, 8.0, kf, ARMOR_COL, 3.0)
-		_ctext(sp + Vector2(0, 33), "REPAIRING", 11, ARMOR_COL, big)
 
 var train_map := TrainMap.new()      # the sky train on the minimap and the full map
 
