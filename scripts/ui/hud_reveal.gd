@@ -3,8 +3,9 @@ extends RefCounted
 ## Show only what is needed (DECISIONS 2026-11-08, design review 11-10 fix 8): each HUD group has a
 ## reveal stage in content/rules/hud_reveal.json. A group shows from its match number ("from_match"),
 ## or once its first event has happened ("first", remembered in Save.d.hud_reveal), or while Tab
-## (the scoreboard key) is held. Everything shows outside expeditions (duel, training, tutorial,
-## arena), with Settings "Show full HUD", and on saves from before the reveal (no "hud_reveal" key).
+## (the scoreboard key) is held. The tutorial reveals by step ("tut_from"). Everything else shows outside
+## expeditions (duel, training, arena), with Settings "Show full HUD", and on saves from before the
+## reveal (no "hud_reveal" key).
 ## Groups marked "every_match" (the kit card, your own numbers) count the save's expeditions in every match type
 ## instead. The only HUD reveal gate: HudGroups only counts what is on screen.
 ##   if HudReveal.on(m, "feed"): ...       # draw the group
@@ -30,6 +31,8 @@ static func match_no() -> int:
 static func on(m: Match, key: String) -> bool:
 	if groups().get(key, {}).get("every_match", false):
 		return reached(key)
+	if m.tut != null and not (Settings.get_v("hud_full") or Input.is_action_pressed("scores")):
+		return tut_on(m.tut, key)
 	if not staged(m) or Input.is_action_pressed("scores"):
 		return true
 	var seen: Dictionary = Save.d["hud_reveal"]
@@ -45,6 +48,13 @@ static func reached(key: String) -> bool:
 ## The staged groups (Tab, Show full HUD and the match type open them), not the every_match ones.
 static func staged_keys() -> Array:
 	return groups().keys().filter(func(k): return not groups()[k].get("every_match", false))
+
+
+## The tutorial's HUD grows with its steps: a group with a "tut_from" step id shows from that step on;
+## a group without one always shows.
+static func tut_on(tu: Tutorial, key: String) -> bool:
+	var from: String = groups().get(key, {}).get("tut_from", "")
+	return from == "" or tu.step >= Tutorial.step_index(from)
 
 ## Whether this match stages the HUD at all.
 static func staged(m: Match) -> bool:
