@@ -279,7 +279,8 @@ func _unreachable(m: Match, sid: String) -> String:
 ## current words only (Hunter, Relic, Fusion, Wisp), none of the retired ones.
 func _mask_line() -> void:
 	var line := String(Content.rules("lore").get("mask_line", ""))
-	ok(line == "This Relic holds a fallen Hunter. Put it on, and you become them.", "the Relic line's words: '%s'" % line)
+	var want := "This Relic holds a fallen Hunter. Put it on, and you become them."
+	ok(line == want, "the Relic line's words: '%s'" % line)
 	var short := line.length() > 0 and line.length() < 80 and "\n" not in line
 	ok(short, "the Relic line is one short line, no wall of text (%d chars)" % line.length())
 	var old_words := ["Warden", "Mantle", "Bearer", "Merge", "Unmasked"].filter(func(w): return line.contains(w))

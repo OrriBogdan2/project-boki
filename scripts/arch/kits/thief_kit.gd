@@ -893,7 +893,8 @@ func _stick(f: Ent, at: Vector3, on_wall := {}) -> void:
 	if f and rank("kin") >= 3:
 		h.dashes = h.max_dashes()           # Shadow Knife rank 3: a knife in a foe gives the Vault back
 		DashReset.cue(h)
-	vfx("knife_stick", at, null, {"foe": f != null, "r": float(ed["ring_r"])})  # (the arrival ring: source size, no hit area)
+	# the arrival ring: source size, no hit area
+	vfx("knife_stick", at, null, {"foe": f != null, "r": float(ed["ring_r"])})
 	m.sfx("thief_knife_stick" if f else "thief_knife_ground", at, -6.0, 1.0)
 
 ## The stuck dagger (a pooled look, everyone sees it); on your screen RecastCue's marker sits on it.
