@@ -79,4 +79,3 @@ static func send(boki: String) -> String:
 
 static func scan() -> String:
 	return "Hold %s to scan  ·  4s, rivals hear it  ·  extract to keep it" % Settings.key_cap("interact")
-
