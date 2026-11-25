@@ -21,8 +21,10 @@ const DROP_T := 0.8              # s: the shell is seen falling for the last par
 const DROP_H := 16.0             # m: where the shell is first seen above the disc
 const DISC_ALPHA := 0.45         # the countdown disc's share of AimKit's fill: its full fill and hot centre stack
                                  # to about 0.25 alpha at the centre (the zone rule, docs/VFX_QUALITY.md)
-const BURN_FILL_A := 3.0         # the burning patch's dark fill: AimShapes' quiet 0.18 telegraph fill x this (fades to
-                                 # half), so the patch reads as a dark disc on pale sand (source: dark disc, lit rim)
+# the burning patch's dark fill: AimShapes' 0.18 telegraph fill x this. Its two stacked discs give 0.25 at the
+# centre and about 0.5 by the rim at the start, halving as it burns: a soft inside under the lit rim, the foe
+# reads through it (zone rule, docs/VFX_QUALITY.md)
+const BURN_FILL_A := 0.8
 const BURN_DARK := Color(0.0086, 0.0194, 0.003)  # the charred floor, #17260a (Vex's green burnt near black) given
                                  # linear: the aim layer reads vertex colours as linear
 
