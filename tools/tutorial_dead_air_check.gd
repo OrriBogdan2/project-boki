@@ -84,7 +84,7 @@ func _calm(fresh: bool, dt: float, where: String, at: float) -> void:
 
 
 ## Whether the match tutorial shows the player something new this frame (the step or its line, the marker moving
-## on, the Boki leading, speaking or nagging).
+## on, the Boki leading, speaking or nagging, one more weapon hit landing on a monster).
 func _match_fresh(m: Match, tu: Tutorial) -> bool:
 	var line := "%d|%s|%s" % [tu.step, tu.text, tu.label]
 	var anchor: Vector3 = last.get("anchor", Vector3.INF)
@@ -97,9 +97,11 @@ func _match_fresh(m: Match, tu: Tutorial) -> bool:
 	var nags := tu.nag_t > 0.0
 	var fresh: bool = line != last.get("line", "") or moved or (comp != null and comp.leading())
 	fresh = fresh or (says and not last.get("says", false)) or (nags and not last.get("nags", false))
+	fresh = fresh or tu.hits > int(last.get("hits", 0))  # (a hit landing on a monster is its own feedback)
 	last["line"] = line
 	last["says"] = says
 	last["nags"] = nags
+	last["hits"] = tu.hits
 	last["sid"] = tu.id()
 	return fresh
 
