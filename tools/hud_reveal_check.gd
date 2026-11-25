@@ -88,8 +88,8 @@ func run(main: Node) -> void:
 		int(clk.get("from_match", 1)) == 4 and String(clk.get("first", "")) == "beat",
 		"the clock waits for the first beat"
 	)
-	# the in-group holdbacks (belt slots 3/4 while empty, the locked ultimate tiles until level 6) wait on a slot or a
-	# level, never a match number: hidden at match 1 and 4 alike, shown with Tab
+	# the in-group holdbacks (belt slots 3 to 6 while empty, the locked ultimate tiles until level 6) wait on a slot or
+	# a level, never a match number: hidden at match 1 and 4 alike, shown with Tab
 	for k in ["belt_spare", "ult_tiles"]:
 		ok(int(g[k].get("from_match", 1)) == 0 and not HudReveal.on(m, k), "%s waits for its slot or level" % k)
 	Input.action_press("scores")

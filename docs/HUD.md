@@ -437,7 +437,7 @@ Same behaviour: `--hud-reveal-check` section 6 asserts it at matches 1, 2, 3 and
 and the tutorial.
 
 ### Not fixed (suggestions, parity first)
-- Held back since 11-20 (`ext/hud-holdback`, `HudReveal` table): belt slots 3/4 while empty (`belt_spare`), the locked X tile and the
+- Held back since 11-20 (`ext/hud-holdback`, `HudReveal` table): belt slots 3 to 6 while empty (`belt_spare`), the locked X tile and the
   locked Merge (R) box until level 6 (`ult_tiles`); the Q/V glove slots and the gear row already draw nothing until a piece is worn
   (`GripHud._glove`, `GearPanel.worn_any`); the clock strip's Dusk/Sight chip is the `weather` group (from match 4). Tab and "Show full HUD"
   show them all. These hide tiles inside a block, so the group count (`HudGroups.on_screen`, folded by ext/ui-hud-groups-five: 5 at a
