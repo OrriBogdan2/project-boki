@@ -84,8 +84,8 @@ plays today's clip, so nothing changes until a Hunter's clips land (`WardenNativ
 | `rmb`, `e`, `r` | the kit move or cast of that slot (state `cast_slot` secondary, utility, ult; a kit move starting within `SLOT_CAST` of a cast takes its slot) | `attack` |
 | `hit` | one-shot when a stagger lands (state `hit_t` jumps back with `hit_k` at Oomph.HEAVY_FLINCH; a chip hit only leans) | the loop clip plays on |
 | `land` | one-shot on a hard landing (`WardenClips.FEEL` landing >= `LAND_MIN`) | the loop clip |
-| `dash` | while the state `rolling` (a dash or kit rush) lasts | the air or ground clip |
-| `glide` | while `gliding` (loops) | `jump` |
+| `dash` | while the state `rolling` (a dash or kit rush) lasts (blends in over 0.25 s) | the air or ground clip |
+| `glide` | while `gliding` (loops; opens at once, lets go over 0.2 s) | `jump` |
 | `downed` | while the knocked-down beat runs (`fall` >= 0; holds its last frame) | the loop clip |
 | `stomp` | while the stomp cycle runs (`stomp` >= 0; loops) | the loop clip |
 Swing, cast, `hit` and `land` are one-shots: they own the body for their length (a new one restarts a clip once 60% is
