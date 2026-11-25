@@ -99,6 +99,20 @@ plays today's clip.
 with at least 10 bones off Meshy's T-pose on the switch frame and after the crossfade; a charged swing takes `lmb`
 without `lmb_hold`; a synthetic clips file's clip lands on Meshy's bones and plays; every slot the data names has its clip.
 
+## Kit-move clips (data `kmoves`)
+A kit move (state `kmove`, the move's id) may have a clip of its own: `"kmoves": {kmove: {"clip": name, "hold_from": s,
+"rate": x, "fade": s}}` (`WardenNativeMoves`). While the move lasts the clip is laid at the move's clock (`kmove_t`), so a
+release move, which the kit starts at the frame the arrow leaves, shows its release on its first frames. `hold_from` loops
+the clip from there to its end for as long as the move lasts; the kit ends the draw move with the hold input, so the loop
+never shows without it. A move with no clip, or whose clip no file has, keeps the slot clips above. The clips come from
+`<art>_clips.glb` by name like the slots'. Lace's (`tools/meshy/lace_clips.py`, poses by limb direction on her skeleton,
+no retarget; the string follows the drawing hand on `StringMid`): `lace_draw`, `lace_over`, `lace_tap`, `lace_loose`,
+`lace_super`, `lace_heavy_wind`, `lace_heavy`, `lace_spirit`, `lace_ult`, `lace_ult_final`. The clips are the whole body
+(the contract's upper-body layer is not on this path): the feet of the draw and Spirit Walk clips do not follow the ground.
+`--warden-native-check` rows (per kit move): the clip is there, plays on the move and is no T-pose; a hold loop stays in
+`[hold_from, end]` while the move lasts and is gone when it ends; a release has the string drawn on its first frame and
+back on the bow a frame later.
+
 ## Not on the native path (yet)
 Death, stun, ledge, emote and clips for moves beyond the slots above (Meshy gave six); the contract's per-hunter extras (Tenzo's
 ground rings, Sparkle's blink, Sable's braid springs); 300k-tri meshes vs the 80k contract budget.

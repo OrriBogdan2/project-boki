@@ -350,6 +350,8 @@ func _clean_take() -> void:
 	m.chests.clear()
 	m.objective = null
 	m.set_meta("pitch_no_foe_plates", true)
+	m.set_meta("pitch_soft_flash", true)  # (Ent.show_flash: hits tint the body, never turn it white)
+	m.set_meta("pitch_no_chill_shell", true)  # (StatusLooks: no pale ice shell over a chilled body)
 	_crisp_shadows()
 
 
