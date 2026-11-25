@@ -42,6 +42,12 @@ const BRACKET_DEG := 56.0  # each bracket's arc
 ## reload sound (sfx-lib-1113) swaps in here.
 const RELOAD_SFX := "vn_cock"
 const E_RECOVER := 0.6  # s she is held after the beam: the source's recoil shove in 0.2 s, then a ~0.4 s
+const SLIDE_RATE := 1.25             # clip s per kit s of the dash clip (gunslinger_dash "rate" in vex.json)
+const SLIDE_LOOP_FROM := 0.367 / SLIDE_RATE    # kit s: the dash clip's slide loop (clip 0.367-0.5, three keys): a held
+const SLIDE_LOOP_T := 0.133 / SLIDE_RATE       # slide replays it from here, one period at a time (the drive pose), and
+                                               # she stands up (the clip's recovery) only once the slide ends
+const OVER := 2.0                    # s: older than any of her clips (the longest runs 1.07 s): a move aged this far
+                                     # is over to the clips (the kit's anim_id is read as long as it is set)
 # recovery (briefs/hero-ref/venator.md E 4 and 7: 0170, 556.6-556.8 s); the e clip
 # (1.07 s) + WardenClips.FADE_LOCO hands the body back on the same frame
 
@@ -149,12 +155,6 @@ func shows_charge_ball() -> bool:
 	return false  # the Palm Lance charges an ember orb at her open palm instead
 
 
-const SLIDE_RATE := 1.25             # clip s per kit s of the dash clip (gunslinger_dash "rate" in vex.json)
-const SLIDE_LOOP_FROM := 0.367 / SLIDE_RATE    # kit s: the dash clip's slide loop (clip 0.367-0.5, three keys): a held
-const SLIDE_LOOP_T := 0.133 / SLIDE_RATE       # slide replays it from here, one period at a time (the drive pose), and
-                                               # she stands up (the clip's recovery) only once the slide ends
-const OVER := 2.0                    # s: older than any of her clips (the longest runs 1.07 s): a move aged this far
-                                     # is over to the clips (the kit's anim_id is read as long as it is set)
 
 
 ## Walking out of the slide's stand-up once the skid has ended: the legs are hers again and the walk blends in
