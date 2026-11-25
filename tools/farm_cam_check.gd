@@ -62,6 +62,7 @@ func run(m: Node) -> void:
 	_keys_part()
 	await _wheel_part(r)
 	await _wall_part()
+	await _prop_part()
 	await _build_part()
 	await _flag_part()
 	r["third_person"] = on0
@@ -137,6 +138,11 @@ func _wall_part() -> void:
 	var near := _back()
 	ok(near < free - 1.0, "a wall %.1f m behind pulls the camera in: %.1f m, from %.1f m" % [2.0, near, free])
 	var aim: Vector3 = cam.focus + Vector3(0, cam.rise, 0)
+	var rise_deg := rad_to_deg(asin((cam.global_position.y - aim.y) / near))
+	ok(
+		near > float(FarmCam.rules()["wall_min_m"]) - 0.3 and rise_deg > float(FarmCam.rules()["pitch_deg"]) + 10.0,
+		"the wall keeps it %.1f m away and tips the view up instead (%.0f deg, from %.0f)" % [near, rise_deg, float(FarmCam.rules()["pitch_deg"])]
+	)
 	var inside := false
 	var s := 0.0
 	while s <= near:
@@ -157,6 +163,29 @@ func _wall_part() -> void:
 		if _back() > free - 0.05:
 			break
 	ok(_back() > free - 0.1, "the wall gone, it backs out to %.1f m again" % _back())
+
+
+## The portal ring and the glider rack stand off the tile grid: with one between you and the camera, the camera comes
+## in front of it (never inside it) rather than looking through it.
+func _prop_part() -> void:
+	var cam: CamRig = home.cam
+	for nm in ["portal", "rack"]:
+		var at: Vector3 = home.spots[nm]
+		home.ppos = at + Vector3(0.0, 0.0, -2.0)  # you stand north of it, the camera south
+		home.cam.snap(home.ppos)
+		for i in 90:
+			await main.get_tree().process_frame
+		var aim: Vector3 = cam.focus + Vector3(0, cam.rise, 0)
+		var through := false
+		var s := 0.0
+		var dist := _back()
+		while s <= dist:
+			through = through or FarmCam._in_prop(home, aim + (cam.global_position - aim).normalized() * s, 0.0)
+			s += 0.1
+		ok(not through, "the %s: nothing of the view is inside it (%.1f m back, camera z %.1f, it at %.1f)" % [nm, dist, cam.global_position.z, at.z])
+	home.ppos = HomeLayout.LANDING + Vector3(-6, 0, -3)
+	home.cam.snap(home.ppos)
+	await _settle(1.0)
 
 
 func _build_part() -> void:
