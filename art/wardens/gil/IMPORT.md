@@ -89,7 +89,7 @@ LMB, RMB, E + recast, X + leap, hit, death).
 - geo_check vs main: worst held 7.2 cm (Jump_Run forearm_L>torso; main 13.6). HAND L/R ok.
 
 ## Native model r10 (gil_meshy.glb)
-- Back fin colour: Meshy retexture (meshy-7, `--original-uv`) of live's back-fin island only (1,171 tris of skin-v95, extracted with its atlas UVs), ref = a Meshy image edit of the turnaround fin (coral membrane, blue rays). The result is pasted into the 4096 atlas inside that island's UV mask (dilated 3 px); every other texel and all vertex data, UVs and indices are unchanged (accessors byte-identical to r9). 8 variants tried (A-H); H picked.
+- Back fin colour: live's fin texels kept. A Meshy retexture of the fin island (8 variants, `r10/fin/`) rendered hot pink at game view (art-gate fin 3.5 vs live 5.5, GAME 5.3 vs live 5.6), so the atlas is the r9/live one again (r10b). Next try must match the turnaround's orange membrane + blue rays under game light before shipping.
 - Attack re-keyed on hand position (`hunter-round-1124/gil/r10/tools/handkey.py`, hips-local targets): wind-up hand at the right shoulder (y 0.41, 0.10-0.30 s), strike forward-down (0.40-0.55 s), follow-through to his left by 0.60 s, eased back to the original keys over 0.86-1.0 of the clip. Fish >= 0.03 m off head/hat, left arm and body in every frame (r9 had one -0.03 m frame).
 - run: bill kept forward (tip z 0.68-1.29) and the tip under the brim (tip y <= 0.71 hips-local, was up to 1.23 vertical across the face); hand path unchanged (within 3 cm).
 - Hit: the fish drops low by the right hip, bill forward-down (hand y 0.55 -> 0.15), not lifted overhead; forearm/hand >= 1.5 cm off the thigh/torso.
