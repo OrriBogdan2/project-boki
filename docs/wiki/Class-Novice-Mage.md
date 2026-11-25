@@ -19,7 +19,7 @@ throws whatever potion comes out of his bag next, and chains crowd control until
 1. **Left click** (Fencer): two quick swordfish thrusts and a longer lunge. Each steps you forward; the third
    slows.
 2. **RMB** (Grab Bag, two charges): throw the next potion from a shuffled bag (Thunder, Slime, Air, Fire, and
-   a rare Super Zeep). The HUD shows which one is next. Hold for 50% more range; in the air it drops at your feet.
+   a rare Geyser). The HUD shows which one is next. Hold for 50% more range; in the air it drops at your feet.
 3. **Shift** (Ground Swim): dive and swim about 6m under the ground. Surfacing next to foes knocks them up.
 4. **E** (Riptide): spin and hit everything around you. Press E again to send a waterspout down the line; the
    longer the spin, the wider and faster the spout.
