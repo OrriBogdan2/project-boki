@@ -341,10 +341,14 @@ footage can't settle the factor, ours is kept. Dashes and flights move the body 
 11. **Invulnerable means everything but the abyss:** a fall still counts; damage over time is blocked too.
 12. **The bond:** paid when the cleave lands on a rival hunter (a hit, a knock or a kill, the best of the cast) by
     `HeroUlt.landed`, which calls the main session's `KinBond.from_ult` once it exists; a miss or a monster pays nothing.
-13. **Open, the guard's edges (guard check, 11-12):** the guard ends at 0.65 s, so a hit in the 0.1 s strike or the
-    recovery lands in full (the source says 0.65 s of invulnerability, nothing after). Crowd control that does not go
-    through a hit (Dredge's reel, a wall slam from a knock before the guard) is not asserted either way; no source row
-    covers it.
+13. **The guard's edges (closed, Nov 20, `ext/kael-guard-edges`):** the source says 0.65 s of invulnerability and
+    nothing after, and main matches it, so no code changed. A shot one tick inside 0.65 s is blocked; a hit one tick
+    past it (the 0.1 s strike, then the 0.35 s recovery) lands in full: damage, stun and knock, no block counted, no
+    +20% on the strike. Crowd control that does not go through a hit has no source row, so main's behaviour stays and
+    is ours, now asserted: a pull (Grimble's reel) is refused only while the guard stands (`Blockers.body_stops`),
+    never in the strike or recovery; a wall slam from a knock that began before the guard, landing inside it, loses
+    its 10 damage to the guard but keeps its 0.9 s stun (the slam sets the stun outside the hit). Asserts:
+    `juggernaut X guard edge: ...` (six rows, in `tools/dj_ult_check.gd`).
 
 ## Small mechanics
 
@@ -487,7 +491,7 @@ clip through its strike).
 | `jug_wave` | the blast fires on release | 0.07 / 0.033 / 0.60 | lead 0.03: strike 0.037 | fixed; asserted |
 | `jug_slam` | 0.6 s wind-up, blade cocked low, then the strike [f155-158] | 0.60 / 0.583 / 1.13 | same | matches; asserted |
 | `jug_lunge_wind` (held) | lane grows 0.6-0.8 s to full [f121-127] | pose from the hold threshold (0.3), held from 0.45 | same | matches; asserted (never on a tap) |
-| `jug_lunge` | about 5 m in about 0.2 s, hit at the end [f127/146] | thrust 0.015 / 0.217 (arrival) / 0.27 at rate 2.2 | rate 2.2, lead -0.45: the coiled frame 0 holds through the travel, thrust 0.220, clip ends 0.48 | fixed; asserted |
+| `jug_lunge` | about 5 m in about 0.2 s, hit at the end [f127/146] | thrust 0.015 / 0.217 (arrival) / 0.27 at rate 2.2 | rate 2.2, lead -0.45: the coiled frame 0 holds through the travel, thrust 0.220, clip ends 0.48; a longer Lunge (full, perfect, a miss) holds the coil to its stop (`JuggernautKit.LUNGE_COIL_T`) | fixed; asserted |
 | `jug_meteor` (held hang, then the dive) | hang, then straight down [f263-288] | dive 0.22 / kit dive 0.083 | lead 0.14: dive 0.077 | fixed; asserted |
 | `jug_meteor_land` | impact cloud [f288], a 0.5 s rise | 0.15 / 0.000 / 0.50 | lead 0.13: impact 0.02 | fixed; asserted |
 | `jug_dash` | about 2 bh in 0.2 s, hit at the end [f387-401] | 0.156 / 0.233 / 0.27 at rate 1.6 | rate 1.6, lead -0.12: the first pose holds through the 0.07 s wind-up, strike 0.231, clip ends 0.34 (dash stops 0.42) | fixed; asserted |
@@ -601,7 +605,7 @@ The sword tip is the point that jumps: idle, rest stance and walk carry the blad
 | `jug_wave` | the blast fires on release | 0.07 / 0.033 / 0.60 | lead 0.03: strike 0.037 | fixed; asserted |
 | `jug_slam` | **3.43** weapon | **3.43** weapon | **2.67** weapon | **2.67** weapon | 0.10 / 0.16 | 0.30 / 0.40 |
 | `jug_lunge_wind` | **3.43** weapon | **3.08** weapon | **2.67** weapon | **3.33** weapon | 0.18 / 0.16 | 0.18 / 0.40 |
-| `jug_lunge` | about 5 m in about 0.2 s, hit at the end [f127/146] | thrust 0.015 / 0.217 (arrival) / 0.27 at rate 2.2 | rate 2.2, lead -0.45: the coiled frame 0 holds through the travel, thrust 0.220, clip ends 0.48 | fixed; asserted |
+| `jug_lunge` | about 5 m in about 0.2 s, hit at the end [f127/146] | thrust 0.015 / 0.217 (arrival) / 0.27 at rate 2.2 | rate 2.2, lead -0.45: the coiled frame 0 holds through the travel, thrust 0.220, clip ends 0.48; a longer Lunge (full, perfect, a miss) holds the coil to its stop (`JuggernautKit.LUNGE_COIL_T`) | fixed; asserted |
 | `jug_meteor` | **3.43** weapon | **3.15** weapon | **2.67** weapon | **1.64** weapon | 0.10 / 0.16 | 0.10 / 0.40 |
 | `jug_meteor_land` | impact cloud [f288], a 0.5 s rise | 0.15 / 0.000 / 0.50 | lead 0.13: impact 0.02 | fixed; asserted |
 | `jug_dash` | about 2 bh in 0.2 s, hit at the end [f387-401] | 0.156 / 0.233 / 0.27 at rate 1.6 | rate 1.6, lead -0.12: the first pose holds through the 0.07 s wind-up, strike 0.231, clip ends 0.34 (dash stops 0.42) | fixed; asserted |
