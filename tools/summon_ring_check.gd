@@ -24,7 +24,7 @@ func run(main: Node) -> void:
 	Econ.ensure()
 	m = Match.new()
 	main.add_child(m)
-	await m.start(
+	m.start(
 		{
 			"teams": 3,
 			"squad": 2,

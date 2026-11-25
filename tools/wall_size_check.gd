@@ -39,7 +39,7 @@ func _what(world: World, group: Array) -> String:
 func _match(label: String, opts: Dictionary, main: Node) -> void:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(opts)
+	m.start(opts)
 	m.set_process(false)
 	verdict(label, m.world)
 	m.queue_free()
