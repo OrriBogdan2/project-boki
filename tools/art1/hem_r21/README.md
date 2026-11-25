@@ -13,3 +13,7 @@ Shipped chain (from r20 glb 949ef89a):
    `loops.py GLB mesh prim` (open boundary loops), hem_r13/stretch4.py.
 5. `wsmooth.py in.glb out.glb 30 0.5` (r21b): Laplacian smoothing of the new skirt's 8-influence weights (waist 3 cm fixed). Skirt edges
    >3x 1,816 -> 371 (r20 358), >1.3x 6,480 -> 5,126 (r20 6,218); geo PASS held 0.8. 60 iterations: >3x 253 but geo held 1.2 cm (FAIL).
+6. r21c: TA (red text) read neon flat red at game view; re-textured TA2 with the exact r13 T1 prompt (median 88,9,27 vs T1 104,9,27);
+   graft again with tex=TA2.jpg, wsmooth 30, then `swscale.py in.glb out.glb 0.4`: SkirtSw rotation keys slerped 40% of the way
+   from rest (the r12/r13 keys were solved for a knee-length skirt; on a mid-calf hem the same tilt spread it into a tent).
+   geo PASS held 0.7 (k 0.5: held 1.2 FAIL, k 0.6: 0.8). `bl_game.py`: Blender quick views at the match camera.
