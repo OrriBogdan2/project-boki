@@ -9,15 +9,16 @@ extends RefCounted
 ## gapped and stacked like every one-shot).
 
 const PATH := "res://content/sfx/hazards.json"
-const MOVING := 1.0          # m/s of ground speed that counts as moving through (a skid)
+const MOVING := 1.0  # m/s of ground speed that counts as moving through (a skid)
 
 static var _play := {}
 
 var tz: TerrainHazards
-var beds := {}               # area index -> Vector3: where its bed sounds (its ground nearest the listener)
+var beds := {}  # area index -> Vector3: where its bed sounds (its ground nearest the listener)
 var scan_t := 0.0
-var widest := 0.0            # m: the furthest any bed carries (how far round the listener a scan looks)
-var warded := {}             # kind -> true once the player has heard the warded cue for it
+var widest := 0.0  # m: the furthest any bed carries (how far round the listener a scan looks)
+var warded := {}  # kind -> true once the player has heard the warded cue for it
+
 
 static func play_rules() -> Dictionary:
 	if _play.is_empty():
@@ -25,25 +26,29 @@ static func play_rules() -> Dictionary:
 		_play = parsed["play"] if parsed is Dictionary else {"kinds": {}}
 	return _play
 
+
 func _init(terrain: TerrainHazards) -> void:
 	tz = terrain
-	for K in play_rules()["kinds"].values():
-		widest = maxf(widest, _reach(String(K["bed"])))
+	for kd in play_rules()["kinds"].values():
+		widest = maxf(widest, _reach(String(kd["bed"])))
+
 
 static func _reach(sname: String) -> float:
 	return float(Sfx.sound_reach.get(sname, Sfx.hear_range))
 
+
 # ------------------------------------------------------------------ beds
 ## Every frame: re-find the nearest beds every bed_scan_s, and hold the ones that sound.
 func tick(dt: float) -> void:
-	var R := play_rules()
+	var rules := play_rules()
 	scan_t -= dt
 	if scan_t <= 0.0:
-		scan_t = float(R["bed_scan_s"])
+		scan_t = float(rules["bed_scan_s"])
 		scan(Sfx.listener)
 	for ai in beds:
-		var bed := String(R["kinds"][tz.areas[ai]["kind"]]["bed"])
-		Sfx.loop_hold("hazard_bed%d" % ai, bed, beds[ai], float(R["bed_db"]))
+		var bed := String(rules["kinds"][tz.areas[ai]["kind"]]["bed"])
+		Sfx.loop_hold("hazard_bed%d" % ai, bed, beds[ai], float(rules["bed_db"]))
+
 
 ## The beds that sound around p: each area's ground nearest p, if its bed carries that far; the nearest
 ## beds_max of them. Reads the tile lookup in a square round p (a few hundred reads, 4 times a second).
@@ -53,8 +58,8 @@ func scan(p: Vector3) -> void:
 	var cx := int(floor(p.x))
 	var cz := int(floor(p.z))
 	var r := int(ceil(widest))
-	var near := {}           # area index -> squared tiles to its nearest ground
-	var spot := {}           # area index -> that tile
+	var near := {}  # area index -> squared tiles to its nearest ground
+	var spot := {}  # area index -> that tile
 	for z in range(cz - r, cz + r + 1):
 		for x in range(cx - r, cx + r + 1):
 			if not w.inb(x, z):
@@ -75,36 +80,40 @@ func scan(p: Vector3) -> void:
 		var c: Vector2i = spot[a]
 		beds[a] = Vector3(c.x + 0.5, float(tz.areas[a]["y"]), c.y + 0.5)
 
+
 # ------------------------------------------------------------------ cues
 ## A hunter on hazard ground this frame (TerrainHazards._tick_hunter; st is its hazard state). entered: it
 ## has just stepped onto this area, so the first cue plays at once.
 func contact(h: Hunter, kind: String, safe: bool, st: Dictionary, entered: bool, dt: float) -> void:
-	var K: Dictionary = play_rules()["kinds"][kind]
-	if K.has("breath"):
-		_breath(h, K, safe, st)
-	var cue := String(K.get("contact", ""))
-	if safe or cue == "" or float(K["every_s"]) <= 0.0:
+	var kd: Dictionary = play_rules()["kinds"][kind]
+	if kd.has("breath"):
+		_breath(h, kd, safe, st)
+	var cue := String(kd.get("contact", ""))
+	if safe or cue == "" or float(kd["every_s"]) <= 0.0:
 		return
 	st["snd"] = 0.0 if entered else float(st.get("snd", 0.0)) - dt
 	if float(st["snd"]) > 0.0:
 		return
-	if not entered and K["moving"] and Vector2(h.vel.x, h.vel.z).length() < MOVING:
+	if not entered and kd["moving"] and Vector2(h.vel.x, h.vel.z).length() < MOVING:
 		return
-	st["snd"] = float(K["every_s"])
+	st["snd"] = float(kd["every_s"])
 	_cue(h, cue)
 
+
 ## A gasp once a dip, as the breath falls under breath_at of full (again only once it has come back over).
-func _breath(h: Hunter, K: Dictionary, safe: bool, st: Dictionary) -> void:
+func _breath(h: Hunter, kd: Dictionary, safe: bool, st: Dictionary) -> void:
 	var full := float(TerrainHazards.kind_def("deep_water")["effect"]["breath_s"])
-	if float(st["breath"]) >= float(K["breath_at"]) * full:
+	if float(st["breath"]) >= float(kd["breath_at"]) * full:
 		st.erase("gasp")
 	elif not safe and not st.has("gasp"):
 		st["gasp"] = true
-		_cue(h, String(K["breath"]))
+		_cue(h, String(kd["breath"]))
+
 
 ## The static flats' shock going through an unwarded hunter.
 func shock(h: Hunter) -> void:
 	_cue(h, String(play_rules()["kinds"]["static"]["contact"]))
+
 
 ## The player's Boki keeps this ground off them: a soft cue, the first time for each kind a match.
 func ward(h: Hunter, kind: String) -> void:
@@ -113,6 +122,7 @@ func ward(h: Hunter, kind: String) -> void:
 	warded[kind] = true
 	Sfx.play(String(play_rules()["warded"]), h.pos, float(play_rules()["warded_db"]))
 
+
 func _cue(h: Hunter, sname: String) -> void:
-	var R := play_rules()
-	Sfx.play(sname, h.pos, float(R["contact_db"]) + (0.0 if h == tz.m.player else float(R["others_db"])))
+	var rules := play_rules()
+	Sfx.play(sname, h.pos, float(rules["contact_db"]) + (0.0 if h == tz.m.player else float(rules["others_db"])))
