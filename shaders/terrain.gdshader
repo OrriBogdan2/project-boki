@@ -21,13 +21,21 @@ uniform sampler2D path_tex : filter_linear, repeat_disable;
 uniform bool use_biome = false;
 uniform float detail = 1.0;
 uniform float depth_k = 0.0;    // height cues (DepthCues): 0 off, 1 on
+uniform bool flat_ground = false;      // bench probe (--bench-flat-ground): the base colour, no noise
 uniform float paint2 = 1.0;     // the second art pass's larger painted structure (0 = off, --art1)
 #include "res://shaders/noise.gdshaderinc"
 #include "res://shaders/vis.gdshaderinc"
 varying vec3 wpos;
 varying vec3 wnorm;
 varying float style;
+varying float vdist;
+// How much fine ground detail a spot keeps: all of it up to 14 m from the camera, none past 36 m (the
+// brush streaks, dabs, speckles, clover and petals are sub-pixel or a blur out there; the big painted
+// patches, swathes and pools stay everywhere). Skips their noise reads, not only hides them.
+uniform vec2 detail_range = vec2(14.0, 36.0);   // m from the camera: full fine detail, none (bench: 1e6 = the old look)
+float detail_w() { return 1.0 - smoothstep(detail_range.x, detail_range.y, vdist); }
 void vertex() {
+	vdist = length((MODELVIEW_MATRIX * vec4(VERTEX, 1.0)).xyz);
 	wpos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	wnorm = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
 	style = UV.x;
@@ -41,14 +49,15 @@ float hgt(vec2 p) {
 // How much higher ground and blockers crowd around this spot (0 open .. 1 tucked in a corner).
 float contact(vec3 p) {
 	float occ = 0.0;
-	for (int i = 0; i < 8; i++) {
+	int stp = detail_w() > 0.5 ? 1 : 2;     // far from the camera 4 of the 8 directions do (the cue is soft there)
+	for (int i = 0; i < 8; i += stp) {
 		float a = float(i) * 0.785398 + 0.39;
 		vec2 d = vec2(cos(a), sin(a));
 		float h1 = hgt(p.xz + d * 0.55);
 		float h2 = hgt(p.xz + d * 1.15);
 		occ += clamp((h1 - p.y - 0.05) * 1.6, 0.0, 1.0) * 0.6 + clamp((h2 - p.y - 0.05) * 1.1, 0.0, 1.0) * 0.4;
 	}
-	occ = occ / 3.2;
+	occ = occ * float(stp) / 3.2;
 	return clamp(occ, 0.0, 1.0);
 }
 
@@ -56,10 +65,13 @@ vec3 ground(vec3 c) {
 	// soft patches of lighter and darker ground, then tiny speckles of light
 	float n = fbm3(wpos.xz * 0.22);
 	c *= 0.86 + n * 0.28;
-	float d = vnoise(wpos.xz * 1.6 + vec2(n * 3.0));
-	c = mix(c, c * vec3(1.08, 1.12, 0.92), smoothstep(0.55, 0.9, d) * 0.45);
-	float sp = vnoise(wpos.xz * 9.0);
-	c += vec3(0.05, 0.06, 0.02) * smoothstep(0.86, 0.98, sp);
+	float dw = detail_w();
+	if (dw > 0.0) {
+		float d = vnoise(wpos.xz * 1.6 + vec2(n * 3.0));
+		c = mix(c, c * vec3(1.08, 1.12, 0.92), smoothstep(0.55, 0.9, d) * 0.45 * dw);
+		float sp = vnoise(wpos.xz * 9.0);
+		c += vec3(0.05, 0.06, 0.02) * smoothstep(0.86, 0.98, sp) * dw;
+	}
 	return c;
 }
 
@@ -79,11 +91,14 @@ vec3 ground_rich(vec3 c, float n_in, out vec3 emit) {
 	emit = vec3(0.0);
 	int b = int(texture(biome_tex, wpos.xz / map_size).r * 8.0 + 0.5);
 	float path = texture(path_tex, wpos.xz / map_size).g;
-	float near_k = (1.0 - smoothstep(0.08, 0.3, fwidth(wpos.x))) * detail;
+	float dw = detail_w();
+	float near_k = (1.0 - smoothstep(0.08, 0.3, fwidth(wpos.x))) * detail * dw;
 	// brush strokes: soft directional streaks, as if the ground were painted with a wide brush
-	vec2 q = vec2(wpos.x * 0.8 + wpos.z * 0.6, -wpos.x * 0.6 + wpos.z * 0.8);
-	float stroke = vnoise(vec2(q.x * 0.7, q.y * 3.2)) * 0.6 + vnoise(vec2(q.x * 1.6, q.y * 7.0)) * 0.4;
-	c *= 0.95 + stroke * 0.1;
+	if (dw > 0.0) {
+		vec2 q = vec2(wpos.x * 0.8 + wpos.z * 0.6, -wpos.x * 0.6 + wpos.z * 0.8);
+		float stroke = vnoise(vec2(q.x * 0.7, q.y * 3.2)) * 0.6 + vnoise(vec2(q.x * 1.6, q.y * 7.0)) * 0.4;
+		c *= 1.0 + (stroke * 0.1 - 0.05) * dw;
+	}
 	// warm sunlit swathes and cool hollows
 	float sw = fbm3(wpos.xz * 0.09 + 11.0);
 	c = mix(c, c * vec3(1.1, 1.08, 0.88), smoothstep(0.55, 0.8, sw) * 0.6);
@@ -101,24 +116,32 @@ vec3 ground_rich(vec3 c, float n_in, out vec3 emit) {
 		c = mix(c, c * vec3(1.06, 1.02, 0.9), smoothstep(0.55, 0.8, hue) * 0.5 * paint2);
 		c = mix(c, c * vec3(0.92, 1.0, 1.08), smoothstep(0.45, 0.2, hue) * 0.5 * paint2);
 		// dappled mid-size brush dabs
-		float dab = vnoise(wpos.xz * 0.55 + vec2(vnoise(wpos.xz * 0.2) * 2.0));
-		c *= 1.0 + (dab - 0.5) * 0.14 * paint2;
+		if (dw > 0.0) {
+			float dab = vnoise(wpos.xz * 0.55 + vec2(vnoise(wpos.xz * 0.2) * 2.0));
+			c *= 1.0 + (dab - 0.5) * 0.14 * paint2 * dw;
+		}
 	}
 	float pick;
 	if (b == 0) {
 		// meadow: clover dabs and the odd tiny flower
-		float cl = smoothstep(0.62, 0.8, vnoise(wpos.xz * 2.6 + 3.0)) * smoothstep(0.4, 0.7, n_in);
-		c = mix(c, c * vec3(0.82, 1.05, 0.78), cl * 0.5);
-		float green = smoothstep(0.0, 0.08, c.g - max(c.r, c.b));
-		float d = cell_dot(wpos.xz, 2.2, 0.12, 1.0, pick) * step(0.86, pick) * (1.0 - path) * green;
-		c = mix(c, mix(vec3(1.0, 0.95, 0.6), vec3(1.0), step(0.93, pick)), d * near_k * 0.85);
+		if (dw > 0.0) {
+			float cl = smoothstep(0.62, 0.8, vnoise(wpos.xz * 2.6 + 3.0)) * smoothstep(0.4, 0.7, n_in);
+			c = mix(c, c * vec3(0.82, 1.05, 0.78), cl * 0.5 * dw);
+		}
+		if (near_k > 0.0) {
+			float green = smoothstep(0.0, 0.08, c.g - max(c.r, c.b));
+			float d = cell_dot(wpos.xz, 2.2, 0.12, 1.0, pick) * step(0.86, pick) * (1.0 - path) * green;
+			c = mix(c, mix(vec3(1.0, 0.95, 0.6), vec3(1.0), step(0.93, pick)), d * near_k * 0.85);
+		}
 	} else if (b == 1) {
 		// bloom: drifts of fallen petals, small and pink, thick in some places and absent in others
 		float drift = smoothstep(0.5, 0.75, fbm3(wpos.xz * 0.16 + 2.0));
-		vec2 pp = wpos.xz + vec2(vnoise(wpos.xz * 2.0)) * 0.3;
-		float d = cell_dot(vec2(pp.x * 0.7, pp.y), 3.4, 0.12, 5.0, pick) * step(0.2 + (1.0 - drift) * 0.7, pick);
-		float d2 = cell_dot(vec2(pp.y * 0.8, pp.x) + 3.3, 4.2, 0.1, 8.0, pick) * step(0.45 + (1.0 - drift) * 0.5, pick);
-		c = mix(c, mix(vec3(0.95, 0.5, 0.72), vec3(1.0, 0.78, 0.9), pick), max(d, d2) * near_k * 0.75);
+		if (near_k > 0.0) {
+			vec2 pp = wpos.xz + vec2(vnoise(wpos.xz * 2.0)) * 0.3;
+			float d = cell_dot(vec2(pp.x * 0.7, pp.y), 3.4, 0.12, 5.0, pick) * step(0.2 + (1.0 - drift) * 0.7, pick);
+			float d2 = cell_dot(vec2(pp.y * 0.8, pp.x) + 3.3, 4.2, 0.1, 8.0, pick) * step(0.45 + (1.0 - drift) * 0.5, pick);
+			c = mix(c, mix(vec3(0.95, 0.5, 0.72), vec3(1.0, 0.78, 0.9), pick), max(d, d2) * near_k * 0.75);
+		}
 		c = mix(c, c * vec3(1.12, 0.92, 1.02), drift * 0.3);
 	} else if (b == 2) {
 		// frost: snow drifts in soft ridges, blue on their lee side, sparkling on top
@@ -128,8 +151,10 @@ vec3 ground_rich(vec3 c, float n_in, out vec3 emit) {
 		float lee = smoothstep(0.35, 0.05, dr) * smoothstep(0.3, 0.6, dn);
 		c = mix(c, vec3(0.97, 0.99, 1.04), ridge * 0.7);
 		c = mix(c, c * vec3(0.78, 0.86, 1.04), lee * 0.5);
-		float sp = cell_dot(wpos.xz, 7.0, 0.1, 2.0, pick) * step(0.8, pick);
-		c += vec3(0.25) * sp * near_k * (0.5 + 0.5 * sin(TIME * 2.0 + pick * 30.0));
+		if (near_k > 0.0) {
+			float sp = cell_dot(wpos.xz, 7.0, 0.1, 2.0, pick) * step(0.8, pick);
+			c += vec3(0.25) * sp * near_k * (0.5 + 0.5 * sin(TIME * 2.0 + pick * 30.0));
+		}
 	} else if (b == 3) {
 		// ember: grey ash drifts and cracks that glow
 		float ash = smoothstep(0.5, 0.75, fbm3(wpos.xz * 0.35 + 4.0));
@@ -139,8 +164,10 @@ vec3 ground_rich(vec3 c, float n_in, out vec3 emit) {
 		crack *= smoothstep(0.45 + 0.1 * paint2, 0.7 + 0.08 * paint2, fbm3(wpos.xz * 0.2 + 9.0)) * (1.0 - path);
 		c = mix(c, vec3(0.16, 0.08, 0.06), crack * (0.8 - 0.25 * paint2));
 		emit = vec3(1.0, 0.42, 0.12) * crack * (0.75 + 0.25 * sin(TIME * 1.3 + wpos.x * 0.7 + wpos.z * 0.4)) * (1.0 - 0.4 * paint2);
-		float cin = cell_dot(wpos.xz, 4.0, 0.08, 4.0, pick) * step(0.82, pick);
-		c = mix(c, vec3(0.2, 0.14, 0.13), cin * near_k);
+		if (near_k > 0.0) {
+			float cin = cell_dot(wpos.xz, 4.0, 0.08, 4.0, pick) * step(0.82, pick);
+			c = mix(c, vec3(0.2, 0.14, 0.13), cin * near_k);
+		}
 	} else if (b == 4) {
 		// storm: slabs of cracked slate showing through the grass (irregular cells: the gap between
 		// the nearest and second-nearest scattered point)
@@ -175,9 +202,11 @@ vec3 ground_rich(vec3 c, float n_in, out vec3 emit) {
 		float mid = smoothstep(0.55, 0.95, path);
 		float edge = smoothstep(0.15, 0.4, path) * (1.0 - smoothstep(0.45, 0.7, path));
 		c *= 1.0 + mid * 0.08 - edge * 0.1;
-		float pb = cell_dot(wpos.xz, 4.5, 0.2, 6.0, pick) * step(0.7, pick) * smoothstep(0.3, 0.6, path);
-		vec3 stone = mix(vec3(0.62, 0.6, 0.6), vec3(0.8, 0.78, 0.74), pick);
-		c = mix(c, stone * mix(vec3(1.0), c * 1.6, 0.35), pb * near_k * 0.8);
+		if (near_k > 0.0) {
+			float pb = cell_dot(wpos.xz, 4.5, 0.2, 6.0, pick) * step(0.7, pick) * smoothstep(0.3, 0.6, path);
+			vec3 stone = mix(vec3(0.62, 0.6, 0.6), vec3(0.8, 0.78, 0.74), pick);
+			c = mix(c, stone * mix(vec3(1.0), c * 1.6, 0.35), pb * near_k * 0.8);
+		}
 	}
 	// the lip of a drop catches the light: a pale painted edge, then a darker band just inside
 	float here = hgt(wpos.xz);
@@ -245,7 +274,8 @@ void fragment() {
 	int st = int(style + 0.5);
 	vec3 gemit = vec3(0.0);
 	float up = wnorm.y;
-	if (st == 0) {
+	if (flat_ground) {
+	} else if (st == 0) {
 		if (up > 0.5) {
 			c = ground(c);
 		} else if (up > -0.5) {
