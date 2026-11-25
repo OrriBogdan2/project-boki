@@ -26,21 +26,24 @@ const STRING_BACK := 0.03  # and this near it a frame later
 ## slot, which HunterAnim's counters turn into a new cast (cast 5 -> 0).
 ## Hand beats of the layered kit-move clips (_own_rows): [kit move, clip s from, clip s to, bone, out m, up m]
 const OWN_BEATS := {
-	"mage": [
+	"mage":
+	[
 		["mage_lmb_r", 0.0, 0.06, "RightHand", 0.2, -9.0],
 		["mage_lmb_l", 0.0, 0.06, "LeftHand", 0.1, -9.0],
 		["mage_rmb_hold", 0.0, 0.12, "RightHand", -9.0, 0.3],
 		["mage_rmb", 0.06, 0.16, "RightHand", 0.3, -9.0],
 		["mage_e", 0.0, 0.3, "LeftHand", -9.0, 0.5],
 	],
-	"rimewright": [
+	"rimewright":
+	[
 		["tm_dart_r", 0.0, 0.07, "RightHand", 0.1, -9.0],
 		["tm_dart_l", 0.0, 0.07, "LeftHand", 0.05, -9.0],
 		["tm_beam", 0.0, 0.04, "RightHand", 0.2, -9.0],
 		["tm_spear", 0.0, 0.1, "RightHand", 0.1, -9.0],
 		["tm_wall", 0.2, 0.24, "RightHand", 0.2, -9.0],
 	],
-	"tender": [
+	"tender":
+	[
 		["mm_shot_r", 0.0, 0.08, "RightHand", 0.1, -9.0],
 		["mm_shot_l", 0.0, 0.08, "LeftHand", 0.1, -9.0],
 		["mm_seed", 0.0, 0.12, "LeftHand", 0.08, -9.0],
@@ -504,6 +507,8 @@ func _own_rows(a: String, m: Node3D, nat: WardenNative) -> void:
 		var laid: bool = mv.weight >= 1.0 and mv.shown == clip
 		ok(laid and nat.player.current_animation != swing, "%s: %s lays %s, not the swing" % [a, km, clip])
 	for b: Array in OWN_BEATS.get(a, []):
+		_at(m, nat, s, "", 0.0)
+		nat.player.seek(0.0, true)  # (the legs' idle from its start: the beat reads the same whatever row ran before)
 		_at(m, nat, s, b[0], b[1])
 		var from := _bone_in(m, nat, b[3])
 		var far_from := from.distance_to(_bone_in(m, nat, "Spine02"))
@@ -560,7 +565,7 @@ func _kmoves(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
 		)
 		var length := nat.player.get_animation(clip).length
 		var hold := float(mv.get("hold_from", -1.0))
-		await _feed(main, nat, m, {}, {"kmove": km, "kmove_t": 0.2})
+		await _feed(main, nat, m, {}, {"kmove": km, "kmove_t": minf(0.2, 0.5 * length)})  # (inside a short clip)
 		ok(nat.player.current_animation == clip and _turned(nat) >= POSED_MIN, "%s: %s plays %s" % [a, km, clip])
 		if hold >= 0.0:
 			var late := hold + 2.5 * (length - hold)
