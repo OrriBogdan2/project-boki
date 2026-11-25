@@ -321,10 +321,18 @@ func thief(a) -> void:
 		(
 			(gold.get("col", Color.WHITE) as Color).is_equal_approx(ThiefKit.EMP_LINE)
 			and float(gold.get("lw", 0.0)) >= 0.09
-			and float(gold.get("hot", 1.0)) == 0.0 and AimKit.shown(p_v, "aim_glow"))
-	a_x.ok("dancer HUD: dash dot while empowered",
-			k.dash_payoff_ready() and p_v.slot_info("dash").get("full", false)
-			and not p_v.slot_info("sec").get("full", false))
+			and float(gold.get("hot", 1.0)) == 0.0
+			and AimKit.shown(p_v, "aim_glow")
+		)
+	)
+	a_x.ok(
+		"dancer HUD: dash dot while empowered",
+		(
+			k.dash_payoff_ready()
+			and p_v.slot_info("dash").get("full", false)
+			and not p_v.slot_info("sec").get("full", false)
+		)
+	)
 	a_x.fresh(t_v)
 	a_x.aim_at(p_v, t_v.pos)
 	p_v.fire_cd = 0.0
