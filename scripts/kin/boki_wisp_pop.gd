@@ -8,6 +8,9 @@ extends Node3D
 ##   landing, the eyes open last.
 ##   Fold: the eyes close first, the Boki shrinks into a wisp where it stands, and the wisp zips up to the
 ##   shoulder (this node's origin).
+## The light is tinted by the Boki's type (DexView.type_col, the type colour table): the wisp's edge glow and
+## its sparkles go from its own glow colour to the type colour as it swells, and back as it settles (burst) or
+## as it zips home (fold). A fire summon flashes ember, a water one teal. Still no ring or extra light.
 ## Positions are relative to this node: the wisp's home is the origin, the Boki's feet land on `stand`.
 
 signal finished(out: bool)  # a play() ended; out = the Boki is out (not folded away)
@@ -29,15 +32,21 @@ const FOLD_SHRINK_FROM := 0.1
 const FOLD_SHRINK_TO := 0.6
 const FOLD_WISP_FROM := 0.2  # the wisp starts to swell where the Boki folds
 const FOLD_ZIP_FROM := 0.55  # then it zips up to the shoulder
-const BACK := 1.7  # overshoot of the Boki's growth
+const BACK := 1.7
+const TINT := 0.85  # how far the glow goes to the type colour at its fullest (0 none, 1 all)
+const FLASH := 0.6  # how far the whole wisp body goes to the tinted glow at the fullest
+const TINT_RISE := 0.2  # the tint is at full from here to TINT_HOLD, as fractions of DURATION
+const TINT_HOLD := 0.5  # overshoot of the Boki's growth
 
 var stand := Vector3.ZERO  # where the Boki's feet land, from the wisp's home
 var wisp_k := 1.0  # the wisp's resting size (the Model Room shows them bigger)
 var form_k := 1.0  # the Boki's size
+var type_col := Color.WHITE  # the Boki's type colour (DexView.type_col)
 var out := false  # the Boki is out (or bursting out)
 var wisp: Node3D
 var form: Node3D
 var _puppet: KinPuppet
+var _glow := Color.WHITE  # the wisp's own glow colour
 var _t := 0.0
 var _p := 0.0
 var _playing := false
@@ -46,6 +55,8 @@ var _playing := false
 func _init(species: String, rec := {}) -> void:
 	wisp = BokiWispLook.build(species, rec)
 	add_child(wisp)
+	type_col = DexView.type_col(DexView.type_of(species))
+	_glow = Shiny.col(species, rec, "glow")
 	form = Node3D.new()
 	form.name = "Form"
 	var boki := Models.kin(species, rec)
@@ -85,6 +96,29 @@ func pose(u: float, burst: bool) -> void:
 		_burst(u)
 	else:
 		_fold(u)
+	_tint(u, burst)
+
+
+## The glow colour at progress u: its own, lifted toward the type colour while the wisp is at its fullest.
+func glow_at(u: float, burst: bool) -> Color:
+	return _glow.lerp(type_col, TINT * _k(u, burst))
+
+
+## 0..1: how far the light is tinted at progress u.
+func _k(u: float, burst: bool) -> float:
+	return (
+		smoothstep(0.0, TINT_RISE, u) * (1.0 - smoothstep(TINT_HOLD, 1.0, u))
+		if burst
+		else smoothstep(FOLD_WISP_FROM, FOLD_ZIP_FROM, u) * (1.0 - smoothstep(FOLD_ZIP_FROM, 1.0, u))
+	)
+
+
+func _tint(u: float, burst: bool) -> void:
+	var c := glow_at(u, burst)
+	var body := wisp.get_node("Body") as GeometryInstance3D
+	body.set_instance_shader_parameter("rim_col", c)
+	body.set_instance_shader_parameter("flash", FLASH * _k(u, burst))
+	(wisp.get_node("Trail") as CPUParticles3D).color = c.lightened(BokiWispLook.TRAIL_LIGHTEN)
 
 
 func _burst(u: float) -> void:
