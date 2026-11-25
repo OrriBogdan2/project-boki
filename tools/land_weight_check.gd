@@ -170,7 +170,8 @@ func _native_run(a: String, squash: bool) -> Dictionary:
 	holder.add_child(m)
 	var nat := m.get_node("Warden/Native") as WardenNative
 	nat.set_process(false)
-	nat.plays.erase("land")  # (the land clip is its own motion, warden_native_check's; this measures the squash layer alone)
+	# (the land clip is its own motion, warden_native_check's; this measures the squash layer alone)
+	nat.plays.erase("land")
 	var sk := nat.skel
 	var bones := [sk.find_bone("Head"), WardenSkeleton.find(sk, "foot.L"), WardenSkeleton.find(sk, "foot.R")]
 	var an := HunterAnim.new(m, 1)

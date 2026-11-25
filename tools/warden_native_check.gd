@@ -28,8 +28,18 @@ const SLOT_CASES := {
 	"dash": [{}, {"rolling": true}, "idle"],
 	"glide": [{"grounded": false}, {"grounded": false, "gliding": true}, "jump"],
 	"land": [{}, {"feel": Vector2(0.8, 0.0)}, "idle"],
-	"hit": [{"hit_t": 99.0}, {"hit_t": 0.0, "hit_k": Oomph.HEAVY_FLINCH, "face": 0.0, "hit_dir": Vector2(0.0, -1.0)}, "idle"],
-	"hit_back": [{"hit_t": 99.0}, {"hit_t": 0.0, "hit_k": Oomph.HEAVY_FLINCH, "face": 0.0, "hit_dir": Vector2(0.0, 1.0)}, "idle"],
+	"hit":
+	[
+		{"hit_t": 99.0},
+		{"hit_t": 0.0, "hit_k": Oomph.HEAVY_FLINCH, "face": 0.0, "hit_dir": Vector2(0.0, -1.0)},
+		"idle",
+	],
+	"hit_back":
+	[
+		{"hit_t": 99.0},
+		{"hit_t": 0.0, "hit_k": Oomph.HEAVY_FLINCH, "face": 0.0, "hit_dir": Vector2(0.0, 1.0)},
+		"idle",
+	],
 	"downed": [{}, {"fall": 0.5}, "idle"],
 	"stomp": [{}, {"stomp": 0.4}, "idle"],
 }
