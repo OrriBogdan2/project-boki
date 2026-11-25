@@ -13,7 +13,10 @@ const UPRIGHT := 0.25  # m, Meshy scale: the head stays this far over the hips i
 const CONTRACT_BONES := ["hips", "upper_arm.L", "thigh.L"]
 const POSED_MIN := 10  # bones turned off Meshy's T-pose rest in a playing clip (the T-pose turns none)
 const TURNED := 0.03  # rad: a bone this far off its rest is posed
+const CALM_CAST := 99.0  # s since the last cast: Hunter._anim_state always sends "cast" (WardenNative baselines on it)
 const SYNTH := "Zz_Clip"  # the test clip a synthetic clips file carries
+const STRING_PULL := 0.08  # m, Meshy scale: the string is drawn this far off the bow at a release move's first frame
+const STRING_BACK := 0.03  # and this near it a frame later
 ## Slot -> [state before, state that starts it, the clip today's game plays for it]. A cast's state names its cast
 ## slot, which HunterAnim's counters turn into a new cast (cast 5 -> 0).
 const SLOT_CASES := {
@@ -120,8 +123,7 @@ func _states(main: Node, a: String) -> void:
 		["attack", {"cast": 99.0, "grounded": true, "swing_n": 1}],
 	]
 	for c in cases:
-		c[1]["cast"] = INF  # (a filled state: the idle case is the baseline the attack case's swing counts from)
-		m.set_meta(WardenClips.STATE, c[1])
+		m.set_meta(WardenClips.STATE, {"cast": CALM_CAST}.merged(c[1], true))
 		await main.get_tree().process_frame
 		await main.get_tree().process_frame
 		var want := String(nat.plays[c[0]])
@@ -143,6 +145,7 @@ func _states(main: Node, a: String) -> void:
 	_toon(a, m)
 	_crouch_arms(a, nat)
 	await _slots(main, a, m, nat)
+	await _kmoves(main, a, m, nat)
 	_only_meshy(a, m)
 	await _orbits(main, a, nat)
 	_drop_poses(a, m, nat)
@@ -241,7 +244,7 @@ func _feed(main: Node, nat: WardenNative, m: Node3D, calm: Dictionary, s: Dictio
 	nat.hit_prev = 99.0
 	nat.land_prev = 0.0
 	for st in [calm, s]:
-		var state := {"grounded": true, "cast": INF}  # (cast: the Hunter's state is filled; INF no cast yet)
+		var state := {"grounded": true, "cast": CALM_CAST}
 		state.merge(st, true)
 		m.set_meta(WardenClips.STATE, state)
 		m.set_meta(WardenClips.FEEL, state.get("feel", Vector2.ZERO))
@@ -323,6 +326,41 @@ func _synthetic_clips(main: Node, a: String, m: Node3D, nat: WardenNative) -> vo
 	await _feed(main, nat, m, {}, {"rolling": true})
 	var plays_it := nat.player.current_animation == SYNTH and _turned(nat) >= POSED_MIN
 	ok(plays_it, "%s: the slot plays the clips file's clip" % a)
+	nat.player.stop()  # (a clip removed while it plays errors on every advance)
 	nat.player.get_animation_library(&"").remove_animation(SYNTH)
 	nat.plays.erase("dash")
 	src.free()
+
+
+## Each kit move the data gives a clip (data "kmoves"): the clip is there, plays on the move and is no T-pose; a hold
+## loop stays inside [hold_from, end] while the move lasts and is gone the frame it ends; a release has the string
+## drawn on its first frame and back on the bow on the next (the arrow leaves within a frame of the kit's fire time).
+func _kmoves(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
+	var kms: Dictionary = nat.d.get("kmoves", {})
+	var string_bi := nat.skel.find_bone("StringMid")
+	for km in kms:
+		var mv: Dictionary = kms[km]
+		var clip := String(mv["clip"])
+		mv["fade"] = 0.0  # (the blend from the calm pose would be in every reading)
+		ok(
+			nat.plays.has("km:" + km) and nat.player.has_animation(clip),
+			"%s: kit move %s has its clip %s" % [a, km, clip]
+		)
+		var length := nat.player.get_animation(clip).length
+		var hold := float(mv.get("hold_from", -1.0))
+		await _feed(main, nat, m, {}, {"kmove": km, "kmove_t": 0.2})
+		ok(nat.player.current_animation == clip and _turned(nat) >= POSED_MIN, "%s: %s plays %s" % [a, km, clip])
+		if hold >= 0.0:
+			var late := hold + 2.5 * (length - hold)
+			await _feed(main, nat, m, {}, {"kmove": km, "kmove_t": late})
+			var pos := nat.player.current_animation_position
+			ok(pos >= hold - 0.05 and pos < length, "%s: %s holds in its loop (%.2f s of %.2f)" % [a, km, pos, length])
+			await _feed(main, nat, m, {}, {})
+			ok(nat.player.current_animation != clip, "%s: no %s once the move ends" % [a, km])
+		elif string_bi >= 0:
+			var pulls := []
+			for t in [0.0, 1.0 / 30.0]:
+				await _feed(main, nat, m, {}, {"kmove": km, "kmove_t": t})
+				var off := nat.skel.get_bone_pose_position(string_bi) - nat.skel.get_bone_rest(string_bi).origin
+				pulls.append(off.length())
+			ok(pulls[0] > STRING_PULL and pulls[1] < STRING_BACK, "%s: %s lets go within a frame (%s)" % [a, km, pulls])

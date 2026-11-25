@@ -35,6 +35,7 @@ const KIT_FOE_REACH := 7.0
 const KIT_ROOM_M := 10  # m of solid ground all round the kit fight (at a cliff edge both fell off)
 const KIT_LEASH_M := 3.0  # m the Hunter may stray from the fight's centre before it walks back (dashes)
 const KIT_SEARCH_M := 30  # m from the start the kit shot looks for that much room
+const SHADOW_M := 70.0  # m of sun shadow range in a take (_crisp_shadows)
 const DROP_PLAN_MAX_S := 25.0  # s shot 8 waits for the plan-your-drop screen to hand over to the drop
 const ESCAPE_TAIL_S := 2.5  # s of the ride out kept after the Hunter is extracted
 const KO_TAIL_S := 1.5  # s shot 9 keeps playing after the Hunter dies (the encoder cuts 1 s after the mark)
@@ -311,8 +312,7 @@ func _kit() -> void:
 	m.length = m.time + CLOCK_LEFT_S
 	var me := m.player
 	me.ctrl = "idle"
-	var off := _arg("--off=", "0,0").split(",")
-	var base := _roomy_ground(me.pos + Vector3(float(off[0]), 0, float(off[1])))
+	var base := _roomy_ground(me.pos)
 	me.pos = base
 	var foe_arch := String(Arch.ids()[(Arch.ids().find(hunter) + 3) % Arch.ids().size()])
 	foe_arch = _arg("--foe=", foe_arch)
@@ -326,9 +326,10 @@ func _kit() -> void:
 	var kz := float(_arg("--zoom=", str(KIT_ZOOM)))
 	m.set_meta("zoom_hold", kz)  # the match camera re-reads its zoom every frame; this holds it
 	hold_zoom = kz
-	m.objective = null  # no "Find a wild Boki" card under the minimap
-	m.set_meta("pitch_no_foe_plates", true)  # no numeral / BURNING plate over the foe (HudPlate.hidden)
+	_clean_take()
 	_zoom(kz)
+	if "--no-hud" in OS.get_cmdline_user_args():
+		Record.set_level(2)  # (the HUD bar sat over the Hunter in the low half of the frame)
 	mark("kit")
 	var t := 0.0
 	while t < SECS[7]:
@@ -340,6 +341,37 @@ func _kit() -> void:
 		t += 1.0 / FPS
 
 
+## No game text a take must not show: the locked chest's "needs a key" prompt (chests freed), tips, the objective card,
+## the numeral / BURNING plate over the foe (HudPlate.hidden).
+func _clean_take() -> void:
+	Settings.v["tips"] = false
+	for c in m.chests:
+		if is_instance_valid(c.get("node")):
+			(c["node"] as Node).queue_free()
+	m.chests.clear()
+	m.objective = null
+	m.set_meta("pitch_no_foe_plates", true)
+	m.set_meta("pitch_soft_flash", true)  # (Ent.show_flash: hits tint the body, never turn it white)
+	m.set_meta("pitch_no_chill_shell", true)  # (StatusLooks: no pale ice shell over a chilled body)
+	_crisp_shadows()
+
+
+## The recording build's shadows: the Ultra preset, then an 8k sun map with the softest filter over a sun range
+## cut to SHADOW_M (the top-down camera sees ~40 m; the preset's long range smeared it into stair-steps).
+func _crisp_shadows() -> void:
+	Settings.v["quality"] = "ultra"
+	Settings.apply("quality")
+	RenderingServer.directional_shadow_atlas_set_size(8192, true)
+	RenderingServer.directional_soft_shadow_filter_set_quality(RenderingServer.SHADOW_QUALITY_SOFT_ULTRA)
+	RenderingServer.positional_soft_shadow_filter_set_quality(RenderingServer.SHADOW_QUALITY_SOFT_ULTRA)
+	main.get_viewport().positional_shadow_atlas_size = 8192
+	for n in main.get_tree().root.find_children("*", "DirectionalLight3D", true, false):
+		var dl := n as DirectionalLight3D
+		if dl.shadow_enabled:
+			dl.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
+			dl.directional_shadow_max_distance = minf(dl.directional_shadow_max_distance, SHADOW_M)
+
+
 ## The value of the `--name=` user arg, else `dflt`.
 func _arg(name: String, dflt: String) -> String:
 	for a in OS.get_cmdline_user_args():
@@ -348,10 +380,39 @@ func _arg(name: String, dflt: String) -> String:
 	return dflt
 
 
-## The ground nearest `p` with no void within KIT_ROOM_M (`p` itself when there is none that roomy nearby).
+## The ground nearest `p` (+ `--off=x,z` m) with solid ground `--room=` m all round (no map edge in the frame) and no
+## hazard area (lava, static flats...) as near; with `--open=<m>` the clearest such spot in reach instead (fewest trees,
+## rocks, walls and tall-grass tiles within that many m: no canopy or grass hides the fight), nearest on a tie;
+## `p` with the old KIT_ROOM_M rule when no spot that clear is within reach.
 func _roomy_ground(p: Vector3) -> Vector3:
-	var best := p
+	var off := _arg("--off=", "0,0").split(",")
+	p += Vector3(float(off[0]), 0, float(off[1]))
+	var room := int(_arg("--room=", str(KIT_ROOM_M)))
+	var reach := int(_arg("--search=", str(KIT_SEARCH_M)))
+	var open_m := int(_arg("--open=", "0"))
+	var best := Vector3.INF
 	var best_d := INF
+	var best_c := INF
+	for dz in range(-reach, reach + 1, 2):
+		for dx in range(-reach, reach + 1, 2):
+			var x := int(p.x) + dx
+			var z := int(p.z) + dz
+			var d := float(dx * dx + dz * dz)
+			if not (m.world.inb(x, z) and m.world.edge_dist(x, z, room) > room):
+				continue
+			var c := _clutter(x, z, open_m) if open_m > 0 else 0.0
+			if (c < best_c or (c == best_c and d < best_d)) and not _hazard_near(x, z, room):
+				best = Vector3(x + 0.5, 0.0, z + 0.5)
+				best_d = d
+				best_c = c
+	print(
+		(
+			"PITCH_SPOT room=%d open=%d clutter=%s found=%s off=%.0f m"
+			% [room, open_m, best_c, best != Vector3.INF, sqrt(best_d)]
+		)
+	)
+	if best != Vector3.INF:
+		return _ground(best)
 	for dz in range(-KIT_SEARCH_M, KIT_SEARCH_M + 1):
 		for dx in range(-KIT_SEARCH_M, KIT_SEARCH_M + 1):
 			var x := int(p.x) + dx
@@ -360,7 +421,39 @@ func _roomy_ground(p: Vector3) -> Vector3:
 			if d < best_d and m.world.inb(x, z) and m.world.edge_dist(x, z, KIT_ROOM_M) > KIT_ROOM_M:
 				best = Vector3(x + 0.5, 0.0, z + 0.5)
 				best_d = d
-	return _ground(best)
+	return _ground(best if best != Vector3.INF else p)
+
+
+## How cluttered the ground within `r` m of (x, z) is: 3 a tree, rock or wall tile, 2 a void or other-terrace
+## tile (a cliff or wall face hides the fight), 1 a tall-grass tile.
+func _clutter(x: int, z: int, r: int) -> float:
+	var w: World = m.world
+	var lv := w.level[w.idx(x, z)]
+	var c := 0.0
+	for dz in range(-r, r + 1):
+		for dx in range(-r, r + 1):
+			if dx * dx + dz * dz > r * r or not w.inb(x + dx, z + dz):
+				continue
+			var i := w.idx(x + dx, z + dz)
+			if w.kind[i] == World.T_BLOCK:
+				c += 3.0
+			elif w.kind[i] == World.T_VOID or w.level[i] != lv:
+				c += 2.0
+			elif w.bush.has(i):
+				c += 1.0
+	return c
+
+
+## A terrain hazard area (TerrainHazards) on any tile within `r` m of (x, z) (sampled every 2 m).
+func _hazard_near(x: int, z: int, r: int) -> bool:
+	var tz := TerrainHazards.of(m)
+	if tz == null or tz.cell.is_empty():
+		return false
+	for dz in range(-r, r + 1, 2):
+		for dx in range(-r, r + 1, 2):
+			if dx * dx + dz * dz <= r * r and m.world.inb(x + dx, z + dz) and tz.cell[m.world.idx(x + dx, z + dz)] > 0:
+				return true
+	return false
 
 
 ## Aims at the foe, walks back when it strays from `base`, and presses: attack held for the first part of each

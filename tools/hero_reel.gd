@@ -25,35 +25,90 @@ const WALL_SEARCH_M := 110  # m round the start the wall spot is looked for
 const FLOOR_K := 0.12  # share of the foe's hp it cannot be brought under until the combo's last step
 const RECAST_AFTER_S := 0.8  # s after the first press a second R (Kitefall's strike) waits
 const ULT_AFTER_S := 2.5  # s watched after an ult (Kitefall and the like land late)
+const AGAIN_MAX := 2  # extra tries an "again" step (walks in like "in") gets when it misses
 const WALL_REACH_M := 2.6  # m behind the foe a wall must stand for the Storm Rod's stun
 const FAR_M := 70.0  # m the foe waits away during the intro
 const MOVES := ["left", "right", "up", "down"]
 ## [label key (slot), action, slot, hold s, range m, tag]. fire has no slot (checked by the foe's hp).
 const COMBOS := {
-	"mage": [["sec", "secondary", "sec", 0.35, 9.0, "wall"], ["fire", "fire", "", 1.7, 9.0, ""],
-		["dash", "dash", "dash", 0.2, 7.0, "through"], ["x", "hunter_ult", "x", 0.35, 8.0, ""],
-		["x", "hunter_ult", "x", 0.1, 20.0, "recast"]],
-	"thief": [["sec", "secondary", "sec", 0.3, 9.0, ""], ["dash", "dash", "dash", 0.2, 8.0, "in"],
-		["fire", "fire", "", 1.6, 3.5, ""], ["kin", "signature", "e", 0.3, 6.0, ""],
-		["x", "hunter_ult", "x", 0.3, 6.0, ""]],
-	"dolm": [["kin", "signature", "e", 0.3, 8.0, ""], ["sec", "secondary", "sec", 0.3, 8.0, ""],
-		["dash", "dash", "dash", 0.2, 6.0, "in"], ["x", "hunter_ult", "x", 0.3, 6.0, ""]],
-	"juggernaut": [["dash", "dash", "dash", 0.5, 9.0, "in"], ["kin", "signature", "e", 0.3, 7.0, ""],
-		["fire", "fire", "", 1.6, 3.0, ""], ["sec", "secondary", "sec", 0.3, 4.0, ""],
-		["x", "hunter_ult", "x", 0.3, 4.0, ""]],  # ends on Gilded Riposte (Fable edit 2)
-	"ashwick": [["dash", "dash", "dash", 0.2, 8.0, "in"], ["kin", "signature", "e", 0.3, 4.0, ""],
-		["fire", "fire", "", 1.8, 4.5, ""], ["sec", "secondary", "sec", 0.3, 8.0, ""]],
-	"tender": [["sec", "secondary", "sec", 0.3, 9.0, ""], ["fire", "fire", "", 1.6, 7.0, ""],
-		["dash", "dash", "dash", 0.2, 6.0, "in"], ["sec", "secondary", "sec", 0.3, 6.0, ""]],
-	"ostra": [["kin", "signature", "e", 0.3, 8.0, ""], ["sec", "secondary", "sec", 0.3, 8.0, ""],
-		["x", "hunter_ult", "x", 0.3, 8.0, ""], ["fire", "fire", "", 1.6, 5.0, ""]],
+	"mage":
+	[
+		["sec", "secondary", "sec", 0.35, 9.0, "wall"],
+		["fire", "fire", "", 1.7, 9.0, ""],
+		["dash", "dash", "dash", 0.2, 7.0, "through"],
+		["x", "hunter_ult", "x", 0.35, 8.0, ""],
+		["x", "hunter_ult", "x", 0.1, 20.0, "recast"]
+	],
+	"thief":
+	[
+		["sec", "secondary", "sec", 0.3, 9.0, ""],
+		["dash", "dash", "dash", 0.2, 8.0, "in"],
+		["fire", "fire", "", 1.6, 3.5, ""],
+		["kin", "signature", "e", 0.3, 6.0, ""],
+		["x", "hunter_ult", "x", 0.3, 6.0, ""]
+	],
+	"dolm":
+	[
+		["dash", "dash", "dash", 0.2, 11.0, "in"],
+		["fire", "fire", "", 1.2, 5.0, ""],
+		["kin", "signature", "e", 0.3, 5.5, ""],
+		["sec", "secondary", "sec", 0.45, 3.5, "again"],  # (Quakefall: full hold, close; a miss is slammed again)
+		["x", "hunter_ult", "x", 0.3, 5.5, ""]
+	],
+	"juggernaut":
+	[
+		["dash", "dash", "dash", 0.5, 9.0, "in"],
+		["fire", "fire", "", 1.6, 3.0, ""],
+		["kin", "signature", "e", 0.3, 7.0, ""],
+		["sec", "secondary", "sec", 0.3, 4.0, ""],
+		["x", "hunter_ult", "x", 0.3, 4.0, ""]
+	],
+	"ashwick":
+	[  # ends on Gilded Riposte (Fable edit 2)
+		["dash", "dash", "dash", 0.2, 8.0, "in"],
+		["kin", "signature", "e", 0.3, 4.0, ""],
+		["fire", "fire", "", 1.8, 4.5, ""],
+		["sec", "secondary", "sec", 0.3, 8.0, ""]
+	],
+	"tender":
+	[
+		["sec", "secondary", "sec", 0.3, 9.0, ""],
+		["fire", "fire", "", 1.6, 7.0, ""],
+		["dash", "dash", "dash", 0.2, 6.0, "in"],
+		["fire", "fire", "", 1.6, 6.0, ""]
+	],
+	"gunslinger":
+	[
+		["sec", "secondary", "sec", 0.3, 9.0, ""],
+		["fire", "fire", "", 1.6, 8.0, ""],
+		["dash", "dash", "dash", 0.2, 6.0, "in"],
+		["kin", "signature", "e", 0.3, 6.0, ""],
+		["x", "hunter_ult", "x", 0.3, 8.0, ""]
+	],
+	"ostra":
+	[  # Coin Blast, rifle fire, Slipstep, Palm Lance, Cinderfall
+		["kin", "signature", "e", 0.3, 8.0, ""],
+		["sec", "secondary", "sec", 0.3, 8.0, ""],
+		["x", "hunter_ult", "x", 0.3, 8.0, ""],
+		["fire", "fire", "", 1.6, 5.0, ""]
+	],
 	"gil": [["fire", "fire", "", 1.6, 3.0, ""]],  # portrait-only (crouch beat)
-	# same move for every hunter (learnings beat)
-	"learn": [["dash", "dash", "dash", 0.2, 8.0, "in"], ["fire", "fire", "", 2.0, 4.0, ""],
-		["sec", "secondary", "sec", 0.3, 8.0, ""], ["dash", "dash", "dash", 0.2, 6.0, "in"],
-		["fire", "fire", "", 2.0, 4.0, ""]],
-	"rimewright": [["fire", "fire", "", 1.6, 8.0, ""], ["kin", "signature", "e", 0.3, 7.0, ""],
-		["sec", "secondary", "sec", 0.3, 8.0, ""], ["x", "hunter_ult", "x", 0.3, 6.0, ""]],
+	"learn":
+	[
+		# same move for every hunter (learnings beat)
+		["dash", "dash", "dash", 0.2, 8.0, "in"],
+		["fire", "fire", "", 2.0, 4.0, ""],
+		["sec", "secondary", "sec", 0.3, 8.0, ""],
+		["dash", "dash", "dash", 0.2, 6.0, "in"],
+		["fire", "fire", "", 2.0, 4.0, ""]
+	],
+	"rimewright":
+	[
+		["fire", "fire", "", 1.6, 8.0, ""],
+		["kin", "signature", "e", 0.3, 7.0, ""],
+		["sec", "secondary", "sec", 0.3, 8.0, ""],
+		["x", "hunter_ult", "x", 0.3, 6.0, ""]
+	],
 }
 
 var hero_pass := "hud"
@@ -133,9 +188,22 @@ func play() -> void:
 func _start_hero(arch: String) -> void:
 	Save.d["first_guide"] = 99
 	Save.d["name"] = HeroTitle.base_name(arch)
-	var o := {"teams": 2, "squad": 3, "total": 1, "tier": 1, "seed": hero_seed, "length": 1e9, "no_drop": true,
-		"raid": "clear", "blight": false, "sim_keep": true, "demo_kin": "cindle", "demo_kin_lv": "8:95",
-		"bot_diff": diff, "boki_wisps": true}
+	var o := {
+		"teams": 2,
+		"squad": 3,
+		"total": 1,
+		"tier": 1,
+		"seed": hero_seed,
+		"length": 1e9,
+		"no_drop": true,
+		"raid": "clear",
+		"blight": false,
+		"sim_keep": true,
+		"demo_kin": "cindle",
+		"demo_kin_lv": "8:95",
+		"bot_diff": diff,
+		"boki_wisps": true
+	}
 	o.merge({"arch": arch, "cls": Arch.weight(arch), "weapon": Arch.signature(arch)}, true)
 	m = Match.new()
 	main.add_child(m)
@@ -153,11 +221,13 @@ func _start_hero(arch: String) -> void:
 
 func _hero() -> void:
 	await _start_hero(hunter)
+	_clean_take()
 	m.length = m.time + CLOCK_LEFT_S
 	var me := m.player
 	var foe_arch := foe_id
 	if not Arch.exists(foe_id):
-		foe_arch = "gunslinger" if hunter == "juggernaut" else "juggernaut"
+		# (never Kael by default: his ultimate form reads as a purple box on film)
+		foe_arch = "mage" if hunter == "gunslinger" else "gunslinger"
 	CombatBus.ability_used.connect(_on_cast)
 	var combo: Array = COMBOS.get(combo_key if combo_key != "" else hunter, [])
 	if combo.is_empty():
@@ -185,9 +255,17 @@ func _hero() -> void:
 	squad_b = [foe] + squad_b_extra
 	for h in squad_a + squad_b:
 		h.teleport(h.pos)
-	print("PITCH_HERO_INFO hunter=%s foe=%s seed=%d diff=%s bot_diff=%s lvl=%d pass=%s wall=%s" %
-			[hunter, foe_arch, hero_seed, diff, m.bot_diff, me.lvl, hero_pass, spot["wall"]])
-	_zoom(KIT_ZOOM)
+	print(
+		(
+			"PITCH_HERO_INFO hunter=%s foe=%s seed=%d diff=%s bot_diff=%s lvl=%d pass=%s wall=%s"
+			% [hunter, foe_arch, hero_seed, diff, m.bot_diff, me.lvl, hero_pass, spot["wall"]]
+		)
+	)
+	var hz := float(_arg("--zoom=", str(KIT_ZOOM)))
+	_zoom(hz)
+	if shot != PORT_SHOT and _arg("--zoom=", "") != "":
+		m.set_meta("zoom_hold", hz)  # the match camera re-reads its zoom every frame; this holds it
+		hold_zoom = hz
 	if shot == PORT_SHOT:
 		await _portrait(me)
 		return
@@ -256,13 +334,22 @@ func _arena(me: Hunter, combo: Array) -> Dictionary:
 				probe.pos = c
 				for d: Vector2 in dirs:
 					if KnockWall.behind(m, probe, d, WALL_REACH_M) and _open(c - Vector3(d.x, 0, d.y) * GAP_M):
-						m.hunters.erase(probe)
-						probe.queue_free()
+						_drop_probe(probe)
 						return {"me": _ground(c - Vector3(d.x, 0, d.y) * GAP_M), "foe": c, "wall": true, "dir": d}
 	print("PITCH_HERO_WALL none found within %d m" % WALL_SEARCH_M)
+	_drop_probe(probe)
+	return out
+
+
+## The wall probe leaves with its Boki (a kin left behind sims a freed owner: kin.gd _sim_shoulder errors).
+func _drop_probe(probe: Hunter) -> void:
+	var k_v: Kin = probe.kin
+	if k_v != null and is_instance_valid(k_v):
+		m.kins.erase(k_v)
+		k_v.queue_free()
+		probe.kin = null
 	m.hunters.erase(probe)
 	probe.queue_free()
-	return out
 
 
 func _open(p: Vector3) -> bool:
@@ -283,12 +370,12 @@ func _combo(me: Hunter, foe: Hunter, combo: Array, spot: Dictionary) -> void:
 	var hp0 := foe.hp
 	var charges0 := 0
 	var casts0 := 0
+	var tries := 0  # misses an "again" step has slammed again
 	var seen_down := false
 	var t := 0.0
 	var end_t := -1.0
 	var finish := false
 	var summoned := false
-	var sum_rel := -1.0
 	steps_log.clear()
 	while true:
 		_purge()
@@ -317,11 +404,7 @@ func _combo(me: Hunter, foe: Hunter, combo: Array, spot: Dictionary) -> void:
 			break
 		if summon_at >= 0.0 and t >= summon_at and not summoned:
 			summoned = true
-			_key("summon", true)
-			sum_rel = t + 0.15
-		if summoned and sum_rel > 0.0 and t >= sum_rel:
-			_key("summon", false)
-			sum_rel = -1.0
+			_summon_now(me, t)
 		var ms := Vector2.ZERO
 		if end_t < 0.0:
 			if idx >= combo.size():
@@ -355,7 +438,7 @@ func _combo(me: Hunter, foe: Hunter, combo: Array, spot: Dictionary) -> void:
 							idx += 1
 							wait_ready = 0.0
 					"hold":
-						ms = to.normalized() if String(st[5]) in ["in", "through"] else Vector2.ZERO
+						ms = to.normalized() if String(st[5]) in ["in", "through", "again"] else Vector2.ZERO
 						timer -= 1.0 / FPS
 						if timer <= 0.0:
 							_key(String(st[1]), false)
@@ -369,7 +452,15 @@ func _combo(me: Hunter, foe: Hunter, combo: Array, spot: Dictionary) -> void:
 						if timer <= 0.0:
 							var landed := foe.hp < hp0 - 0.5 or foe.stun_t > 0.0
 							_log(me, foe, st, idx, true, landed, hp0, charges0, casts.size() > casts0)
-							idx += 1
+							if not landed and String(st[5]) == "again" and tries < AGAIN_MAX:
+								tries += 1
+								# (staged: the charge is back for the retry)
+								if me.ak != null and String(st[2]) == "sec":
+									me.ak.cd["rmb"] = 0.0
+									me.ak.ch_rmb = float(me.ak.rmb_charges())
+							else:
+								idx += 1
+								tries = 0
 							phase = "approach"
 							wait_ready = -STEP_GAP_S
 		_move(ms)
@@ -380,13 +471,18 @@ func _combo(me: Hunter, foe: Hunter, combo: Array, spot: Dictionary) -> void:
 		await main.get_tree().process_frame
 		t += 1.0 / FPS
 		seen_down = seen_down or down
-	print("PITCH_HERO_RESULT hunter=%s kill=%s t=%.2f reseats=%d steps=%s casts=%s" % [
-		hunter, end_t >= 0.0, t, reseats, steps_log, casts])
+	print(
+		(
+			"PITCH_HERO_RESULT hunter=%s kill=%s t=%.2f reseats=%d steps=%s casts=%s"
+			% [hunter, end_t >= 0.0, t, reseats, steps_log, casts]
+		)
+	)
 
 
 ## One step's outcome: `fired` = the ability went on cooldown (or, for the basic attack, the foe lost hp).
-func _log(me: Hunter, foe: Hunter, st: Array, idx: int, pressed: bool, landed: bool, hp0: float, ch0: int,
-		cast: bool) -> void:
+func _log(
+	me: Hunter, foe: Hunter, st: Array, idx: int, pressed: bool, landed: bool, hp0: float, ch0: int, cast: bool
+) -> void:
 	var slot := String(st[2])
 	var info: Dictionary = me.slot_info(slot) if slot != "" else {}
 	var name := String(info.get("name", "Finger Guns / basic"))
@@ -395,14 +491,28 @@ func _log(me: Hunter, foe: Hunter, st: Array, idx: int, pressed: bool, landed: b
 		fired = foe.hp < hp0 - 0.5
 	elif pressed:
 		fired = cast or int(info.get("charges", 0)) < ch0 or not bool(info.get("ready", true))
-	print("PITCH_HERO_STEP %d %s (%s) fired=%s landed=%s foe_hp=%.0f" % [
-		idx + 1, name, String(st[1]), fired, landed, foe.hp])
-	var mark := "F" if fired else "-"
-	mark += "L" if landed else "-"
-	steps_log.append(name + ":" + mark)
+	print(
+		(
+			"PITCH_HERO_STEP %d %s (%s) fired=%s landed=%s foe_hp=%.0f movie_frame=%d"
+			% [idx + 1, name, String(st[1]), fired, landed, foe.hp, Engine.get_frames_drawn()]
+		)
+	)
+	var step_mark := "F" if fired else "-"
+	step_mark += "L" if landed else "-"
+	steps_log.append(name + ":" + step_mark)
 
 
 ## A real action press or release (Input.action_press is what a key down does inside the Input singleton).
+## The Summon press itself (KinSummon.press, as the match's fixed step does), logged with why it failed.
+func _summon_now(me: Hunter, t: float) -> void:
+	var k_v: Kin = me.kin
+	var cd_v := k_v.summon.cd if k_v != null and k_v.summon != null else -1.0
+	var why := "kin=%s wisp=%s cd=%.1f out=%s" % [k_v != null, k_v != null and k_v.wisp, cd_v, me.out]
+	if k_v != null and k_v.summon != null and k_v.wisp:
+		k_v.summon.cd = 0.0  # (a fresh take: the wisp is rested)
+	print("PITCH_SUMMON t=%.2f ok=%s %s" % [t, KinSummon.press(me), why])
+
+
 func _key(action: String, down: bool) -> void:
 	if down:
 		Input.action_press(action)
