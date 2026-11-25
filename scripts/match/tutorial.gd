@@ -324,7 +324,6 @@ func _finish(sid: String) -> void:
 	elif TutorialHints.settles(sid):
 		wait = 0.6  # (the Boki gets its lead on the next leg: no banner, no sting, only the pause)
 	if resumed:
-		camps.told = true  # (a resumed run saw the first camp's countdown: its camps come at once)
 		_restore()
 	_enter()
 
@@ -689,8 +688,6 @@ func goal(sid: String) -> Vector3:
 			var best := camps.nearest("sentinel" if sid == "hook" else "")
 			if best == null:
 				best = camps.nearest()
-			if best == null and not camps.coming.is_empty():
-				return camps.coming["at"]  # (the telegraphed camp: the marker holds on its ring)
 			return best.pos if best else camps.last_at  # (a camp felled with you on the edge respawns once you're back)
 		"wayout", "uplink", "defend", "extract":
 			var o := outpost()
