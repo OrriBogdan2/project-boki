@@ -67,7 +67,7 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | ryzz | clip | clip | clip | clip | proc | shared | clip | proc | shared | shared | shared | shared | shared | clip | shared | native: Meshy clips |
 | sable | clip | clip | clip | clip | proc | shared | clip | proc | shared | shared | shared | shared | shared | clip | shared | native: Meshy clips |
 | tarek | clip | clip | clip | clip | proc | shared | clip | proc | shared | shared | shared | shared | shared | clip | shared | native: Meshy clips |
-| vex | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |  |
+| vex | clip | clip | clip | clip | proc | shared | clip | proc | shared | shared | shared | shared | shared | clip | shared | native: Meshy clips |
 
 ### Starter Boki
 
