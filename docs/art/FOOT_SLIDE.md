@@ -275,3 +275,34 @@ read STEP -6.7 -> -5.3 -> -1.0 cm, worst slip 1.28 -> 1.12 -> 1.00, skate 0 -> 0
 run `foot_mps[1]`. Gil (main gave him Meeko's loco plants) now reads a STEP line: Meeko's run foot_mps 5.75 moved
 him -20.2 -> -16.6 cm and his worst slip 4.06 -> 2.65 m/s, but no rate plants clips retargeted onto gil.glb, so he
 is `STEP_OPEN` (prints OPEN, not FAIL) until his rig pass.
+
+## Native Hunters: per-Hunter stride (Nov 23, ext/anim-native-stride)
+
+Every Meshy-native Hunter (content/rules/warden_native.json) played its loops at the same `walk_mps` 1.4, `run_mps`
+4.6, `crouch_mps` 1.4 and `run_from` 3.0, whatever its legs and clips did. `--foot-slide-check` now also poses each
+native Hunter at the in-game size (`Hunter.VIS_SCALE`) holding walk (2.0 m/s), run (`HunterMove.speed`) and crouch
+(`sneak_speed` of it) and prints a NATIVE line: the loop's rate, the speed a planted foot sweeps at rate 1 ("loop":
+what `*_mps` should be) and how far a planted foot travels over the ground in one step (cm, + forward: the clip
+under-strides; same read as STEP). FAIL past 5 cm unless the loop is in `NATIVE_OPEN`.
+
+The loop speeds are measured, not guessed: each `*_mps` is that loop's planted-foot speed at rate 1; `run_from` is the
+middle of the gap between the walk's fastest rate (1.8 x `walk_mps`) and the run's slowest (0.6 x `run_mps`), where a
+rate clamp costs least. Slide per step, cm, before -> after (+ forward; the run rates of the stepping Hunters fall to 0.7 to 1.2 because the
+clips' strides are longer than the old data assumed, so the legs no longer race):
+
+| Hunter | walk (2.0 m/s) | run | crouch | rates after (walk/run/crouch) |
+|---|---|---|---|---|
+| Sparkle (`mage`) | -18.1 -> -0.3 | -36.9 -> +0.1 | -12.2 -> -0.1 | 0.96 / 0.69 / 1.32 |
+| Neve (`rimewright`) | -22.3 -> -0.3 | -22.6 -> -0.2 | -14.2 -> -0.5 | 1.10 / 0.83 / 1.57 |
+| Sable (`thief`) | -20.0 -> -0.2 | -17.7 -> -0.1 | -0.2 -> -0.2 | 1.14 / 0.89 / 1.80 |
+| Tenzo (`dolm`) | -12.9 -> +0.1 | -12.9 -> -0.0 | +2.5 -> +2.5 | 1.23 / 0.96 / 1.80 |
+| Cinder (`ashwick`) | -21.8 -> -0.7 | -18.0 -> +0.0 | -3.5 -> +0.0 | 1.12 / 0.89 / 1.69 |
+| Meeko (`tender`) | +35.2 -> +4.7 | +65.1 -> +38.4 | +25.7 -> +25.7 | 1.80 / 1.80 / 1.80 |
+| Lace (`archer`) | -33.8 -> -0.1 | -25.3 -> -0.2 | -15.3 -> -0.1 | 0.88 / 0.69 / 1.13 |
+| Kael (`juggernaut`) | -18.1 -> -0.2 | -19.9 -> +0.1 | -2.8 -> -0.1 | 1.16 / 0.87 / 1.71 |
+| Gil (`gil`) | -0.8 -> +0.2 | -4.3 -> +0.5 | +10.3 -> +10.3 | 1.38 / 1.04 / 1.80 |
+| Motley (`ostra`) | +6.0 -> -0.5 | +2.6 -> +0.2 | +15.1 -> +15.1 | 1.63 / 1.23 / 1.80 |
+
+Open (clip stride, not data): Meeko's trot sweeps only 0.4 to 0.8 m/s at rate 1, so even at the 1.8 rate cap she slides
+38 cm a step at her run; Gil's and Motley's sneak clips step too short for 2.7 m/s at the cap (10 and 15 cm). They print
+OPEN (`NATIVE_OPEN`) until their clips get a longer step.
