@@ -389,7 +389,9 @@ func _apply_blockers() -> void:
 		if HubLayout.holds(lay, String(e["id"])): continue
 		for c in HomeLayout.deco_cells(e):
 			mark.call(c, "d:%d" % int(e["u"]), HomeLayout.blocks(String(e["id"])), HomeLayout.top_of(String(e["id"])))
-	var beds := PlotBlocks.tiles(h._plot_spots((h._d()["plots"] as Array).size()))
+	var beds: Array[Vector2i] = []
+	if fs():      # (the classic farm's fixed beds are walked over: its Dash course runs across them)
+		beds = PlotBlocks.tiles(h._plot_spots((h._d()["plots"] as Array).size()))
 	for c in beds:
 		mark.call(c, "", true)
 	var walled := func(c: Vector2i) -> bool:
