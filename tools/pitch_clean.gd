@@ -4,19 +4,16 @@ extends RefCounted
 ## - frame(): every filmed frame, after the bodies are drawn, a fighter shows its own colours: no hit flash, burn
 ##   tint, crowd-control or cast tint (BodyTell), ult glow or side-colour rim (hero_toon), no x-ray or occlusion
 ##   overlay; no Boki wisp floats beside it and no AimKit telegraph line crosses it (they read as stray balls and
-##   white lines on film), no skyship passes overhead, and a hunter hidden from the player (bush, wall) leaves no
-##   DepthCues shadow disc on the ground (a dark blob with no body above it).
+##   white lines on film), no skyship passes overhead, and DepthCues lays no height-cue shadow disc: under a
+##   hunter in the air (vault, blink, jump) or a flying shot the disc sits on the ground far below where the body
+##   draws (the camera is tilted), so on film it read as a dark blob with nothing above it. Sun shadows stay.
 ## - clear_deco(): once, the map dressing (trees, rocks, pebbles, tall grass, camps, landmarks) near the fight spot
-##   goes; short grass and flowers stay so the ground still looks like the game. The cleared blocks stop casting
-##   sight shadows too (shaders/vis.gdshaderinc dims the ground behind a block: soft dark blobs with nothing there).
+##   goes; short grass and flowers stay so the ground still looks like the game. Only the look changes: the
+##   blocks still block sight, so the fight plays out as it would with the dressing there.
 
 const KEEP_DECO := ["Grass", "Flowers"]  # World._chunked labels left standing
-const XRAY_SHADERS := [
-	"res://shaders/occlusion_outline.gdshader", "res://shaders/kin_aura_xray.gdshader"
-]
-const BODY_OFF := {
-	"flash": 0.0, "ult_glow": 0.0, "side_rim": Color(0, 0, 0, 0), "tell": Color(0, 0, 0, 0)
-}
+const XRAY_SHADERS := ["res://shaders/occlusion_outline.gdshader", "res://shaders/kin_aura_xray.gdshader"]
+const BODY_OFF := {"flash": 0.0, "ult_glow": 0.0, "side_rim": Color(0, 0, 0, 0), "tell": Color(0, 0, 0, 0)}
 
 
 static func frame(m: Node) -> void:
@@ -35,10 +32,9 @@ static func frame(m: Node) -> void:
 		aim.visible = false
 	var cues := m.get_node_or_null("DepthCues")
 	if cues != null:
-		var discs: Dictionary = cues.get("_discs")
-		for h in discs:
-			var shown: bool = not h.unseen and h.model != null and h.model.is_visible_in_tree()
-			(discs[h] as Node3D).scale = Vector3.ONE if shown else Vector3.ZERO  # DepthCues moves it, never scales it
+		var discs: Array = (cues.get("_discs") as Dictionary).values() + cues.get("_shot_discs")
+		for d in discs:
+			(d as Node3D).scale = Vector3.ZERO  # DepthCues moves and shows it, never scales it
 	for s in m.ships + [m.ship]:
 		var sn: Variant = (s as Dictionary).get("node")
 		if is_instance_valid(sn) and sn is Node3D:
@@ -55,7 +51,6 @@ static func _drop_overlays(model: Node3D) -> void:
 
 ## Hides the dressing within `r` m (flat) of `at`; returns how many pieces went.
 static func clear_deco(m: Node, at: Vector3, r: float) -> int:
-	_clear_sight_blocks(m, at, r)
 	var deco: Node = m.world.get_node_or_null("Deco")
 	if deco == null:
 		return 0
@@ -67,19 +62,6 @@ static func clear_deco(m: Node, at: Vector3, r: float) -> int:
 			(c as Node3D).visible = false
 			n += 1
 	return n
-
-
-## Swaps in a sight-block map (World.vis_texture, 1 m cells) without the blocks within `r` of `at`, and marks it
-## sent so Match._update_vision keeps it.
-static func _clear_sight_blocks(m: Node, at: Vector3, r: float) -> void:
-	var img: Image = m.world.vis_texture().get_image()
-	for z in range(maxi(0, floori(at.z - r)), mini(img.get_height(), ceili(at.z + r))):
-		for x in range(maxi(0, floori(at.x - r)), mini(img.get_width(), ceili(at.x + r))):
-			if _flat(Vector3(x + 0.5, 0, z + 0.5), at) < r:
-				img.set_pixel(x, z, Color(0, 0, 0))
-	RenderingServer.global_shader_parameter_set("vis_blocks", ImageTexture.create_from_image(img))
-	RenderingServer.global_shader_parameter_set("vis_size", Vector2(m.world.w, m.world.h))
-	m.set("_vis_tex_done", true)
 
 
 ## Scales to nothing every instance of a batch within `r` of `at` (the batch's other instances stay).
