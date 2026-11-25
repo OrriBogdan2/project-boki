@@ -39,6 +39,7 @@ const STING_AT_S := 0.25  # s after the snap that the sting starts
 const HAND_BACK_S := 0.5  # s at the end that the camera eases back to the scene's own
 const READ_MIN_S := 3.0  # s: the least a line of the beat's text (whisper, name) stays on screen
 const READ_PER_CHAR_S := 0.075  # s per character (3 words a second), for a line too long to read in READ_MIN_S
+const WHISPER_TAIL_S := 0.1  # s the memories run past the whisper's reading time (its fade-in and a frame's rounding)
 const HOLD_SKIP_S := 1.0  # s of holding a click or interact that skips the rest (DECISIONS 11-11)
 const SOUNDS := {  # our own (tools/gen_mask_sfx.py), loaded with the script so the beat starts at once
 	"mask_swell": preload("res://audio/mask_swell.wav"),
@@ -114,7 +115,7 @@ func _ready() -> void:
 	if lens.size() != _frames.size():  # (fewer frames than the rules plan: the same time, shared out)
 		var each := float(lens.reduce(func(a, b): return a + float(b), 0.0)) / maxi(1, _frames.size())
 		lens = _frames.map(func(_f): return each)
-	var whisper_s := WHISPER_AT_S + read_s(_whisper())
+	var whisper_s := WHISPER_AT_S + read_s(_whisper()) + WHISPER_TAIL_S
 	var stretch := maxf(1.0, whisper_s / float(lens.reduce(func(a, b): return a + float(b), 0.0)))
 	_memory_lens = lens.map(func(s): return float(s) * stretch)
 	_reveal_s = maxf(float(_times["reveal_s"]), NAME_IN_S + read_s(HunterViewer.display_name(id)))
