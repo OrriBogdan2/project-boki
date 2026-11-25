@@ -38,13 +38,14 @@ func run(main: Node, what: String) -> void:
 	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "god": true})
 	p = m.player
 	m.set_process(false)
-	var r: Dictionary = CamWheel.rules()
+	var r: Dictionary = CamWheel.rules(true)
 	var lo := float(r["min"])
 	var hi := float(r["max"])
 	_spawn(hi)
 	_wheel_range(lo, hi, float(r["step"]))
 	_ctrl(hi)
 	_cap()
+	_arm(lo, hi, float(r["step"]))
 	_reach(hi)
 	m.queue_free()
 	print("CAM ZOOM CHECK DONE, failures: ", bad)
@@ -79,7 +80,7 @@ func _wheel_range(lo: float, hi: float, step: float) -> void:
 
 
 func _ctrl(hi: float) -> void:
-	var peak := CamWheel.ctrl_zoom()
+	var peak := CamWheel.ctrl_zoom(true)
 	var cap := CamWheel.cap()
 	ok(peak > hi and peak < cap, "Ctrl reaches %.2f: past max %.2f, under the cap %.2f" % [peak, hi, cap])
 	for wheel in [m.cam.user_zoom, hi]:
@@ -107,7 +108,7 @@ func _ctrl(hi: float) -> void:
 
 
 func _cap() -> void:
-	m.cam.user_zoom = CamWheel.far()
+	m.cam.user_zoom = CamWheel.far(true)
 	p.grounded = false
 	p.gliding = true
 	var z: float = m.cam.air_zoom(p, 60.0)
@@ -115,10 +116,52 @@ func _cap() -> void:
 	p.gliding = false
 
 
+## The data's arm: 20.2..30.2 m in four 2.5 m notches (34.2 m / 22.9 m of ground across), +5.81 m gliding, the abyss
+## ramp from 3.5 m deep, and a critically damped spring of omega 10 on the arm length.
+func _arm(lo: float, hi: float, step: float) -> void:
+	var wide := CamRig.style_across("default")
+	ok(absf(wide * hi - 34.17) < 0.1 and absf(wide * lo - 22.86) < 0.1,
+			"%.1f m across at the widest, %.1f m at the closest (34.2 / 22.9)" % [wide * hi, wide * lo])
+	ok(absf((hi - lo) / step - 4.0) < 0.01, "the wheel has four notches (%.2f)" % ((hi - lo) / step))
+	var cam: CamRig = m.cam
+	cam.user_zoom = hi
+	p.grounded = false
+	p.gliding = false
+	p.lip_y = 0.0
+	p.pos.y = 0.0
+	var still: float = cam.air_zoom(p, 0.0)
+	p.gliding = true
+	var glide_m: float = (cam.air_zoom(p, 0.0) - still) * cam.dist
+	p.gliding = false
+	ok(absf(glide_m - 6.45) < 0.01, "the glider adds %.2f m to the arm (the data's 5.81 m = 6.45 m of ours)" % glide_m)
+	var seen := []
+	for deep in [3.0, 3.5, 6.75, 10.0, 14.0]:
+		p.pos.y = -deep
+		seen.append(snappedf((cam.air_zoom(p, 0.0) - still) * cam.dist, 0.01))
+	ok(seen == [0.0, 0.56, 8.6, 16.65, 16.65], "the abyss adds %s m at 3 / 3.5 / 6.75 / 10 / 14 m deep" % [seen])
+	p.pos.y = 0.0
+	cam.zoom_omega = 10.0
+	cam.zoom = hi
+	cam.zoom_v = 0.0
+	cam.zoom_to = hi + 0.5
+	var at_half := 0.0
+	var overshoot := 0.0
+	for i in 120:
+		cam.follow(Vector3.ZERO, DT, false)
+		overshoot = maxf(overshoot, cam.zoom - cam.zoom_to)
+		if i == 29:
+			at_half = (cam.zoom - hi) / 0.5
+	ok(overshoot < 0.0001, "the arm spring never overshoots (%.5f)" % overshoot)
+	ok(absf(at_half - 0.96) < 0.01, "half a second in, the arm is %.0f%% there (critical spring, omega 10: 96%%)" % [at_half * 100.0])
+	cam.zoom_omega = 0.0
+	cam.zoom = hi
+	cam.zoom_to = hi
+
+
 func _reach(_hi: float) -> void:
 	var cam := m.cam
 	cam.snap(Vector3.ZERO)
-	cam.zoom = CamWheel.ctrl_zoom()
+	cam.zoom = CamWheel.ctrl_zoom(true)
 	cam._apply(Vector3.ZERO)
 	var size := cam.get_viewport().get_visible_rect().size
 	var far_m := 0.0

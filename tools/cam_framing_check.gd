@@ -7,10 +7,14 @@ extends RefCounted
 ##      home keeps the default view under it
 ##   3. the cursor lean: none inside the deadzone, never past its cap, and at full lean every way (16
 ##      directions, at the sneak, normal and close zooms) you stay on screen, feet and head
+##   3b. the default cursor pan (follow "pan", the target feel's data): the default setting, none inside the 0.1
+##      deadzone, 5.5 m at the side edge, 7.25 m up and 7.75 m down at their zoom's room (an ellipse), never off
+##      screen, and a critically damped spring that reaches it with no overshoot
 ##   4. the garden's Boki framing (HomeKinFrame): eased in 30% nearer over 0.3 s, you and the Boki on screen
 ##      at every wheel zoom up to its reach, and eased back when you walk off, it's too far or the card closes
 ## --cam-framing-shots (GPU, --shots-dir=<dir>): a live match at the default view, then the cursor held at
-## the screen's top and bottom edge while sneaking (the widest grounded zoom), one PNG each.
+## the screen's top and bottom edge while sneaking (the widest grounded zoom), then the parity views (the match's
+## own start zoom standing still with the cursor centred and at the right edge, and the glider's), one PNG each.
 
 const VIEW := Vector2i(1920, 1080)
 const HEAD := 2.0                    # m: the top of a medium hunter's head above its feet
@@ -21,7 +25,12 @@ const SHOTS := [
 	["framing_default", 1.0, Vector2(0.5, 0.5)],
 	["framing_sneak_lean_up", 1.45, Vector2(0.5, 0.01)],
 	["framing_sneak_lean_down", 1.45, Vector2(0.5, 0.99)],
+	["parity_still_centre", NO_HOLD, Vector2(0.5, 0.5)],
+	["parity_still_right", NO_HOLD, Vector2(0.99, 0.5)],
+	["parity_glide_centre", GLIDING, Vector2(0.5, 0.5)],
 ]
+const NO_HOLD := 0.0   # a shot's zoom: the match's own (the wheel's widest at the start)
+const GLIDING := -1.0  # a shot's zoom: the view the glider asks for (CamRig.air_zoom), standing on the ground
 
 var bad := 0
 
@@ -42,6 +51,7 @@ func run(main: Node, what: String) -> void:
 	_style(cam)
 	_source_style(cam)
 	_lean(cam)
+	_pan(cam)
 	_garden(cam)
 	vp.queue_free()
 	print("CAMFRAME CHECK DONE, failures: ", bad)
@@ -82,6 +92,45 @@ func _lean(cam: CamRig) -> void:
 		ok(worst >= 20.0, "zoom %.2f: at full lean every way you stay on screen (%.0f px to the nearest edge)"
 				% [z, worst])
 	cam.zoom = 1.0
+
+func _pan(cam: CamRig) -> void:
+	ok(Settings.DEFAULTS["cam_follow"] == "pan" and CamRig.follow_v.has("pan"), "the cursor pan is the default follow")
+	cam.use_style("default")
+	cam.follow_mode = "pan"
+	cam.snap(Vector3.ZERO)
+	cam.zoom = 1.0
+	var fm: Array = CamRig.follow_v["pan"]
+	var mid := Vector2(VIEW) * 0.5
+	ok(cam.cursor_pan(mid + Vector2(VIEW.x * 0.04, 0.0), Vector3.ZERO) == Vector3.ZERO, "pan: nothing inside the deadzone")
+	var side := cam.cursor_pan(Vector2(VIEW.x, mid.y), Vector3.ZERO)
+	ok(absf(side.x - 5.5) < 0.01 and absf(side.z) < 0.01, "pan: 5.5 m at the right edge (%.2f)" % side.x)
+	cam.zoom = 1.457
+	var up := cam.cursor_pan(Vector2(mid.x, 0.0), Vector3.ZERO)
+	var down := cam.cursor_pan(Vector2(mid.x, VIEW.y), Vector3.ZERO)
+	ok(up.z < -6.0 and up.z >= -7.25 - 0.001, "pan: %.2f m up at the top edge (7.25 at most, the screen's room)" % -up.z)
+	ok(down.z > 6.5 and down.z <= 7.75 + 0.001, "pan: %.2f m down at the bottom edge (7.75 at most)" % down.z)
+	for z in ZOOMS:
+		cam.zoom = z
+		var worst := 1e9
+		for i in 16:
+			var at := mid + Vector2.from_angle(TAU * i / 16.0) * mid * 1.2
+			cam.snap(cam.cursor_pan(at, Vector3.ZERO))
+			for pt in [Vector3.ZERO, Vector3(0, HEAD, 0)]:
+				var sp := cam.unproject_position(pt)
+				worst = minf(worst, minf(minf(sp.x, VIEW.x - sp.x), minf(sp.y, VIEW.y - sp.y)))
+		ok(worst >= 20.0, "pan: zoom %.2f, the cursor in every direction keeps you on screen (%.0f px)" % [z, worst])
+	cam.zoom = 1.0
+	cam.snap(Vector3.ZERO)
+	var want := cam.cursor_pan(cam.get_viewport().get_mouse_position(), Vector3.ZERO)  # (the viewport's own cursor)
+	var overshoot := 0.0
+	for i in 60:  # 0.5 s of follow(): a critical spring of omega 27.7 is within 1e-4 of the target
+		cam.follow(Vector3.ZERO, 1.0 / 60.0)
+		overshoot = maxf(overshoot, (cam.pan - want).dot(want.normalized()))
+	ok(want.length() > 1.0 and overshoot < 0.0001 and (cam.pan - want).length() < 0.01,
+			"pan: follow() settles on the %.1f m lean with no overshoot (%.4f)" % [want.length(), overshoot])
+	cam.pan = Vector3.ZERO
+	cam.pan_v = Vector3.ZERO
+	cam.follow_mode = "centred"
 
 func _source_style(cam: CamRig) -> void:
 	var src: Dictionary = CamRig.rules["source"]
@@ -174,7 +223,15 @@ func _shots(main: Node) -> void:
 			h.ctrl = "idle"
 	var vp := main.get_viewport()
 	for sh in SHOTS:
-		m.set_meta("zoom_hold", float(sh[1]))
+		var hold := float(sh[1])
+		if hold == GLIDING:
+			m.player.gliding = true
+			hold = m.cam.air_zoom(m.player, 0.0)
+			m.player.gliding = false
+		if hold == NO_HOLD:
+			m.remove_meta("zoom_hold")
+		else:
+			m.set_meta("zoom_hold", hold)
 		for i in 90:
 			vp.warp_mouse(vp.get_visible_rect().size * Vector2(sh[2]))
 			await main.get_tree().process_frame

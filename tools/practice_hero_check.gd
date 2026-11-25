@@ -112,7 +112,7 @@ func _area(main: Node, m: Match, area: String) -> void:
 	await _wheel(tree, MOUSE_BUTTON_WHEEL_DOWN)
 	ok(m.cam.user_zoom > zin, "%s: and out again (%.2f)" % [area, m.cam.user_zoom])
 	for i in 200: await _wheel(tree, MOUSE_BUTTON_WHEEL_DOWN)
-	ok(is_equal_approx(m.cam.user_zoom, CamWheel.far()), "%s: zoom stops at its limit (%.2f)" % [area, m.cam.user_zoom])
+	ok(is_equal_approx(m.cam.user_zoom, CamWheel.far(true)), "%s: zoom stops at its limit (%.2f)" % [area, m.cam.user_zoom])
 
 func _key(tree: SceneTree, action: String) -> void:
 	var ev := InputEventAction.new(); ev.action = action; ev.pressed = true
