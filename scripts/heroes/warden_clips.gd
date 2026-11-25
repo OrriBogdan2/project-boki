@@ -94,6 +94,9 @@ var was_glide := false
 var vy_prev := 0.0           # last step's vertical speed: the one he hits the ground with
 var land: Dictionary = {}    # the "land" tier in play ("hop" or "drop"), picked at touchdown
 var land_t := LAND_DONE
+var land_hold := 0.0         # s: how long the landing in play owns the body (standing or moving)
+var heavy_k := 0.0           # how heavy that landing is (HunterAnim.heavy_k); WardenHeavyLand deepens the crouch by it
+var heavy_deep := 0.0        # the Hero's "heavy" "deep": the most the crouch is pushed past the clip's (x its own)
 var climb_t := 0.0           # s since the ledge hang began (the "ledge" clip), or since the climb state ended
 var climb_was := ""          # "mantle" or "ledge" while the climb state runs; else the one that just ended
 var climb_live := false      # the state is still on
@@ -596,6 +599,7 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	var vel: Vector3 = s.get("vel", Vector3.ZERO)
 	var moving := Vector2(vel.x, vel.z).length() >= STILL
 	var hold := float(land.get("moving", land.get("dur", 0.0))) if moving else float(land.get("dur", 0.0))
+	land_hold = hold
 	if land_t < hold and bool(s.get("grounded", true)):
 		return {"clip": d["land"]["clip"], "t": land_t * float(land.get("rate", 1.0)), "w": float(land.get("w", 1.0)),
 				"fade": float(land.get("fade", FADE)), "out": float(land.get("out", FADE_LOCO))}
@@ -1068,6 +1072,11 @@ func _loco(s: Dictionary, dt: float) -> void:
 		if tier > 0 and d.has("land"):
 			land_t = 0.0
 			land = land_play(d["land"]["hop" if tier == 1 else "drop"], String(root.get_meta("cls", "medium")), tier)
+			heavy_k = HunterAnim.heavy_k(-vy_prev) if tier >= 2 else 0.0
+			var hv: Dictionary = d["land"].get("heavy", {})
+			heavy_deep = float(hv.get("deep", 0.0))
+			if heavy_k > 0.0 and hv.has("rate"):
+				land["rate"] = float(hv["rate"]) * (DIVE_SLOW if tier == 3 else 1.0)
 	was_air = not grounded
 	was_glide = gliding
 	vy_prev = vel.y
