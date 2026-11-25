@@ -109,6 +109,15 @@ than what shows: the head covers its rim. Past that the high cameras and `CamRig
 Palettes live at the top of each species' coat section (`PLUM`, `SHELL`...); tools held in the tail are Vespyx's `chop`
 and `mine` clips, and `boki_clips.chop_mouth` / `mine_mouth` are the mouth versions the others use.
 
+11-22: Spirevark (`moundvark`), Murmurling (`murmurling`) and Barrelmander (`spatewader`) have their own clips
+(`moundvark_anim.py`, `murmurling_anim.py`, `spatewader_anim.py`) on the borrowed Glomwort skeleton and the
+`auto_legs.py` legs: an aardvark that sniffs with its snout low, rakes and rears up to call its swarm; a starling that
+snaps its head about, darts and pecks, sings with its pipe tail up; a salamander that bends in S-curves with the barrel
+water sloshing behind. `reclip.py` re-keys everything but walk and run (the planted-paw trot stays), then
+`gait_layer.py` adds each module's `GAIT` body motion (head, neck, spine, hips, root rotations only) on top of those
+two, the legs untouched. Run both once, in that order, on a file whose walk and run are the plain trot (to redo, run
+`auto_legs.py` first). `--anim-coverage-check`: all six states of the three rows read `clip`.
+
 11-20: Buckleron (`limpetor`) and Lanterloris (`moonloris`) have their own clips (`limpetor_anim.py`, `moonloris_anim.py`)
 on the borrowed Glomwort skeleton: a limpet that creeps under a rocking shield, bashes it down and clamps to brace, and
 a slow loris that climbs hand over hand, freezes and snaps, and floats up with its lantern belly. Their glbs were
