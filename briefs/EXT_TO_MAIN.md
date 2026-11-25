@@ -11324,3 +11324,4 @@ READY ext/vfx-albert-faultline-rim 2f76705ff5ae8c854b1bf97d1d38a254b04cd50d (Alb
 READY ext/vfx-own-telegraph-quiet a0e905a0440 (own telegraphs quieter than threats)
 READY ext/vfx-own-telegraph-quiet 5562433b3b6 (own telegraphs quieter than threats)
 READY ext/stuck-integ-a56f6457 7c8ea3fe0a (supersedes a7a5b7ccf0; origin/main merged 0 behind: warden_native.gd one height key = main's data "size" (pip/kael/gil fit->size), Dredge plate_offset 3.06->3.23 for main's x1.09 Grimble; health --strict OK, --check OK, registry 1004/0, warden-native 830/1 (Meeko/tender mood-face toon, known from main #764), native-hitbox 24/1 (Grimble body 2.86 m vs chart 2.59, +10.4% vs 10% tol, from main's size 1.09: owner call, size or chart), look-at/step-sync/tutorial-fight/muzzle/flinch-layer/sfx-set/meeko-companions-clip/barrier-sight 0 fail)
+READY ext/vfx-rival-read 7c1cf946969ce3f793c41a3651149c311264d512 (rivals readable at Hunter size)
