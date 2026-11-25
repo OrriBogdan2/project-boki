@@ -289,7 +289,6 @@ func _items(m: Match) -> void:
 	var a := h.pos + Vector3(4, 0, 0)
 	var b := h.pos
 	h.pos = a
-	var tm := bot.team
 	bot.pos = b
 	bot.out = false
 	bot.downed = false

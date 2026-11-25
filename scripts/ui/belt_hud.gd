@@ -61,8 +61,8 @@ static func tip(p: Hunter, k: int) -> Array:
 		out.append(["Utility slot %d" % (k + 1), HudStyle.MUTED])
 		out.append(["Item  ·  %s" % key, HudStyle.MUTED, 12])
 		var pin := UtilityBelt.reserved_id(k)
-		var tip := PINNED_TIP % (UtilityBelt.name_of(pin).to_lower() + "s") if pin != "" else EMPTY_TIP
-		out.append([tip, HudStyle.INK, 14])
+		var hint := PINNED_TIP % (UtilityBelt.name_of(pin).to_lower() + "s") if pin != "" else EMPTY_TIP
+		out.append([hint, HudStyle.INK, 14])
 		return out
 	var id := String(s["id"])
 	var d := UtilityBelt.def(id)
