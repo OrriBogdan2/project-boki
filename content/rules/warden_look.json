@@ -630,14 +630,22 @@
 				"glow": 1.15
 			},
 			"card": {
-				"sheen": 0.2,
-				"glow": 1.6,
-				"irid": 0.06,
-				"sheen_color": [0.9, 0.92, 1.0],
-				"albedo": [0.62, 0.64, 0.72],
-				"alpha_k": 1.0,
-				"far_alpha": 1.0,
-				"far_edge": 1.4
+				"sheen": 0.5,
+				"glow": 0.9,
+				"irid": 0.12,
+				"sheen_color": [
+					1.0,
+					0.82,
+					0.7
+				],
+				"albedo": [
+					1.0,
+					0.86,
+					0.86
+				],
+				"alpha_k": 1.25,
+				"far_alpha": 1.9,
+				"far_edge": 0.6
 			},
 			"skin-face": {
 				"fres": 0.03,

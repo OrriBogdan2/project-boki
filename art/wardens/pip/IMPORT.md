@@ -126,3 +126,11 @@ wing texture byte-identical to round 6 (hash-checked). PR #764's bigger sun/clou
 (far_edge), which removes the pale streak the far wing drew down her back and tail (live has it too). pip's `card` look in
 warden_look.json: albedo [0.62, 0.64, 0.72] x glow 1.6 keeps both wing sides the texture's pale lavender (looks A-D in
 r7/shots: A peach under the warm sun, C/D dark blue on the unlit side). Cards cast no shadow, so the big wing shadow is gone.
+
+## 11-25 round 8: wings back on their own toon material (round 7's card rename undone)
+art-gate (run zD5g) failed round 7: no body shadow, wings off the splash. Cause: `WardenGlb._toon` turns cast_shadow OFF for the
+whole MeshInstance3D when any surface is a `card`, and Meeko's wings share the body mesh, so the body lost its shadow too; and the
+card shader is lambert, so the unlit wing side drew dark blue (splash/live wings are pale). Tool (job folder):
+`/home/boki/gens/hunter-round-1124/meeko/r8/tools/mat_rename.py IN OUT card-wing meshy_textured-wing` (JSON only, BIN byte-identical
+to round 7: round 6 body + clips, live sun/cloud). pip's `card` block in warden_look.json is back to main. The edge-on wing streak
+(same as live) is open: a card wing needs its own mesh node (shadow) and a toon floor in warden_card (colour) first.
