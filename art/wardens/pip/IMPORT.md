@@ -143,3 +143,9 @@ a `WardenMood`, so the `eyes-mood_*` faces wore the opaque toon and their clear 
 companion surfaces (same design, materials and atlas) fitted onto the native ones (`tools/art1/glb_companions_restore.py`,
 similarity ICP, fit error 0.6-0.7 cm mean; body, wings, skin and clips byte-identical to round 8), and the native path makes
 the mood for arts with atlas faces (Meeko only; Breaker's baked faces untouched). 79,973 -> 80,936 tris.
+
+Round 10 (11-25, keys only): Meshy's clips sank the planted foot under the floor (model origin = the ground; lowest foot
+median Idle -3.3 cm, Attack -7.6, min -12.3) and dragged the tail through it (Idle every frame, -8.4 cm; Attack half the tail,
+-32.6 cm). `tools/art1/glb_ground_clips.py` lifts Hips per key until the lowest foot is +0.3 cm in every clip, and pitches the
+tail root (Bone_013) up in Idle (14 deg max) and Attack (capped 35 deg; tail min -6.8 cm). walk/run tail left alone (pitching
+it pushed the cape hem into the R shin). Mesh, skin, textures byte-identical; geo_check and stretch same as round 9.
