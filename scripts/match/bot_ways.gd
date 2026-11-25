@@ -206,10 +206,9 @@ static func _around(m: Match, c: Vector3, h: Hunter, r: float) -> Vector3:
 # ------------------------------------------------------------------ the tide ring
 ## How far from the Heart a goal may lie: the ring RING_LOOK seconds on, less RING_KEEP (INF: no ring yet).
 static func safe_r(m: Match) -> float:
-	if m.heart == null or m.heart.site == Vector3.INF or m.sess_time() + RING_LOOK < Heart.r("tide_start_s"):
+	if m.heart == null or m.heart.site == Vector3.INF:
 		return INF
-	var k: float = m.heart.ways_scale
-	return Heart.ring_at(m.sess_time() + RING_LOOK, k) - RING_KEEP * k
+	return Heart.ring_in(m, RING_LOOK) - RING_KEEP * m.heart.ways_scale
 
 
 static func inside(m: Match, p: Vector3) -> bool:

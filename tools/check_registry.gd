@@ -674,6 +674,7 @@ const CHECKS := {
 	"--perkorb-check": ["res://tools/perkorb_check.gd", "perkorb_check", null],  # perk orbs, boss fan, weapon path
 	# Ways Out first-time hints
 	"--ways-hints-check": ["res://tools/ways_hints_check.gd", "ways_hints_check", null],
+	"--modes-check": ["res://tools/modes_check.gd", "modes_check", null],  # solos and the play space (0084)
 	"--tutorial-playtest-check": ["res://tools/tutorial_playtest_check.gd", "tutorial_playtest_check", null],
 	"--tutorial-playtest-shots": ["res://tools/tutorial_playtest_shots.gd", "tutorial_playtest_shots", null],  # GPU
 	"--tutorial-check": ["res://tools/tutorial_check.gd", "tutorial_check", null],  # =<arch>[:wisps]: any first Relic
