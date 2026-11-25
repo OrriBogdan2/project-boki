@@ -68,7 +68,11 @@ func _hit(t: Ent, by: Ent, o: Dictionary, dmg := 12.0) -> Array:
 	m.on_damage(t, by, dmg, o)
 	var fx := m.fx
 	var mi: MeshInstance3D = fx.flash_pool[(fx.fi - 1 + fx.flash_pool.size()) % fx.flash_pool.size()]
-	var spark: CPUParticles3D = fx.sparks[(fx.si - 1 + fx.sparks.size()) % fx.sparks.size()]
+	# Fx.impact throws the lightened spark first and, at power >= 1, a second back-kick in the plain colour after it:
+	# read the first (the one this check pins), however many followed.
+	var ability: bool = o.has("ab") and o.get("src", "") != "kin"
+	var n := 2 if Juice.impact_power(dmg, false, ability) >= 1.0 else 1
+	var spark: CPUParticles3D = fx.sparks[(fx.si - n + fx.sparks.size()) % fx.sparks.size()]
 	return [(mi.material_override as ShaderMaterial).get_shader_parameter("color"), spark.color]
 
 
