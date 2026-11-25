@@ -101,3 +101,19 @@ Scripts: `/home/boki/gens/hunter-round-1124/kael/hair/scripts/` (`hairmask.py GL
   own padding) are graded to the kael_v2 turnaround's hair values: luminance median 212 -> 196, p5 177 -> 143,
   p95 242 -> 229, chroma kept (silver with grey strand shading as in the ref; game view clipped-white hair pixels
   20 % -> 0 %). `hair_grade.py r21.glb mask.npy Image_0.jpg`, then `set_image.py split.glb Image_0 Image_0.jpg OUT.glb`.
+
+**Round 23 (2026-11-25, ext/kael-r23-veins-grip, plan /home/boki/gens/hunter-round-1124/kael/PLAN-1124o.md section 6):**
+- Arms (kael_meshy.glb Image_0, arm texels only; hair grade kept): round 21's veins read as neon paint (Meshy's own
+  forearm lines were recoloured orange; 1.6-texel hard lines at full saturation). Rebuilt from the pre-round-21 arm
+  texels: no orange on Meshy's lines, anti-aliased trunk + fine veins whose width tapers along each vein, ember core
+  (236,104,28) with a faint darker rim; off arm thin white veins. Sword arm median lum 32 vs off arm 122 (rule kept);
+  arm texels at full saturation 991 -> 0. `r23/edit13.py live_Image_0.jpg OUT.jpg W=2.2 Wf=1.0 fa=0.9 tap=0.25 va=1.0 kL=1.2`,
+  then `hair/scripts/set_image.py kael_meshy.glb Image_0 OUT.jpg OUT.glb`.
+- Sword (kael.glb prop): the grip ran along the fingers (74 deg off the knuckle line), so the blade pointed where the
+  fingers point (into the ground with the arm down) and the fist never closed on it. One rigid move in hand.R's bind
+  space (the hand.R anchors moved with it) puts the grip across the fist, 20 deg off the knuckle line, the fist 7 cm
+  under the guard: solved from `--live-audit --probe` (r23/grip/solve.py), applied by r23/grip/apply_grip.py.
+  Over idle/run/dash/jump/attack/hit: blade tip lowest -0.49 m -> +0.16 m, blade samples within 3 cm of the body
+  1036 -> 0, finger samples past the guard 5031 -> 414. Steel texels (neutral only): highlight roll-off, p95 lum 252 -> 216.
+  The contract model (kael.glb, native off) holds the sword the same new way.
+  Alternative not taken: warden_native.json "grip"/"turn" data (Gil's route); kept to the hunter's own files.
