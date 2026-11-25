@@ -31,7 +31,7 @@ func run(main: Node) -> void:
 	Settings.set_v("damage_numbers", true, false)
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 3, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
+	m.start({"teams": 3, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
 	m.set_process(false)
 	var you: Hunter = m.player
 	var rivals: Array[Hunter] = []
