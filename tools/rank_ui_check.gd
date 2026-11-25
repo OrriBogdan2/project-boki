@@ -28,7 +28,7 @@ func run(main_node: Node) -> void:
 	Econ.ensure()
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 21, "no_drop": true,
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 21, "no_drop": true,
 		"arch": "gunslinger", "cls": Arch.weight("gunslinger"), "weapon": Arch.signature("gunslinger")})
 	var p: Hunter = m.player
 	p.ctrl = "local"

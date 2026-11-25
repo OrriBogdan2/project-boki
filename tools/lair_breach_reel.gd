@@ -21,7 +21,7 @@ func run(main: Node) -> void:
 	var m := Match.new()
 	main.add_child(m)
 	# ("tut_test": the match reads no keys for you; this drives you, as the tutorial test does)
-	await m.start(
+	m.start(
 		{
 			"teams": 2,
 			"squad": 3,

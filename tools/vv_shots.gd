@@ -66,7 +66,7 @@ func _setup() -> void:
 	o.merge(extra_opts, true)
 	m = Match.new()
 	main.add_child(m)
-	await m.start(o)
+	m.start(o)
 	m.set_process(false)
 	HeroVfx.of(m).set_process(false)      # its looks run on the match's steps below, as at a steady 60 fps
 	P = m.player
