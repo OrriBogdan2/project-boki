@@ -7,15 +7,17 @@ extends RefCounted
 const MAX_LEN := 70
 
 
+## The glide is jump, then jump again (held) in the air: the second press is what the line says.
 static func move() -> String:
+	var fire := Settings.key_cap("fire")
 	return (
-		"Hold %s to shoot  ·  %s dashes  ·  %s again in the air to glide"
-		% [Settings.key_cap("fire"), Settings.key_cap("dash"), Settings.key_cap("jump")]
+		"Hold %s to shoot  ·  %s dashes  ·  jump, then %s again to glide"
+		% [fire, Settings.key_cap("dash"), Settings.key_cap("jump")]
 	)
 
 
 static func rings() -> String:
-	return "Glide through the glowing rings for a burst of speed"
+	return "Glide through the glowing rings between islands for a burst of speed."
 
 
 ## A hunter with a kit sends the Boki on the Boki key; the others use their E ability.
@@ -77,3 +79,8 @@ static func send(boki: String) -> String:
 
 static func scan() -> String:
 	return "Hold %s to scan  ·  4s, rivals hear it  ·  extract to keep it" % Settings.key_cap("interact")
+
+
+static func stagger(mob: String) -> String:
+	var keys := [Settings.key_cap("signature"), Settings.key_cap("ultimate"), Settings.key_cap("gear1")]
+	return "Purple ring on %s: use %s, %s or %s for a big stun." % ([mob] + keys)
