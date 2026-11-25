@@ -34,6 +34,13 @@ clip that holds one pose (no bone turns 2 deg; not sleep), or one whose every po
 passes through (`BokiClipCover`). Rows run worst first (most `missing`, then most
 `shared`, then the lowest Field Book number), and the five worst are written out as backlog lines.
 
+Mobs (`tools/anim_coverage_mobs.gd`): the seven common monsters through idle, walk, attack (the wind-up tell, plus
+the strike for a kind whose blow lasts), hit (the flinch layer) and death. None of the `art/mobs/*/*.glb` files carries an
+animation clip (checked 11-23: all twelve, bosses and Blight included, are skinned and static); `MobAnim`'s keyed tables
+move the pivots and `MobGlb` copies them onto the bones, so every cell is `proc`. `n/a` is an attack the kind never makes
+(glimmer, `attack: none`; it flees). A clip that ever appears in a mob .glb is printed as `UNMAPPED` by the check, since
+nothing plays a clip on a mob. Warden shares the brute tables (`MobAnim.base_kind`).
+
 Bind rows (v95 swaps, `tools/warden_states_check.gd`, run by `--warden-clips-check`): each Hunter's game .glb is
 driven through all 15 Hunter states plus the stun, the root and the knocked-down beat (18 in all), and fails on a T-pose (every contract bone within 2 deg of rest), a state that
 shows the idle pose, frozen legs in a walk, run or strafe (Motley has no legs: his hips), a clip track that names no
@@ -130,6 +137,18 @@ Worst five, backlog-ready:
 - [anim] Boki glomwort (No. 17): 0 missing (none), 8 on the shared clip set (idle, walk, run, attack, cast, hop, eat, sleep); author its own clips in tools/boki/glomwort_anim.py, rebuild the .glb, rerun --anim-coverage-check
 - [anim] Boki moundvark (No. 30): 0 missing (none), 8 on the shared clip set (idle, walk, run, attack, cast, hop, eat, sleep); author its own clips in tools/boki/moundvark_anim.py, rebuild the .glb, rerun --anim-coverage-check
 - [anim] Boki murmurling (No. 31): 0 missing (none), 8 on the shared clip set (idle, walk, run, attack, cast, hop, eat, sleep); author its own clips in tools/boki/murmurling_anim.py, rebuild the .glb, rerun --anim-coverage-check
+
+### Mobs
+
+| | idle | walk | attack | hit | death |
+|---|---|---|---|---|---|
+| skitter | proc | proc | proc | proc | proc |
+| spitter | proc | proc | proc | proc | proc |
+| brute | proc | proc | proc | proc | proc |
+| warden | proc | proc | proc | proc | proc |
+| bomber | proc | proc | proc | proc | proc |
+| sentinel | proc | proc | proc | proc | proc |
+| glimmer | proc | proc | n/a | proc | proc |
 <!-- table:end -->
 
 ## Gaps, worst first

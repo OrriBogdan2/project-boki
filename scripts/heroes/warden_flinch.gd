@@ -25,10 +25,15 @@ static func make(model: Node3D, sk: Skeleton3D) -> WardenFlinch:
 	f.bone = WardenSkeleton.find(sk, "hips")
 	return f
 
-## A new hit is the hit clock jumping back (the same test HunterAnim's own flinch uses).
+## A new hit is the hit clock jumping back (the same test HunterAnim's own flinch uses): `t` s since a hit now,
+## `prev` last frame.
+static func is_new_hit(t: float, prev: float) -> bool:
+	return t < prev - 0.02 or (t < 0.05 and prev > 0.2)
+
+
 func _kicked(s: Dictionary) -> bool:
 	var t := float(s.get("hit_t", 99.0))
-	var fresh := t < hit_prev - 0.02 or (t < 0.05 and hit_prev > 0.2)
+	var fresh := is_new_hit(t, hit_prev)
 	hit_prev = t
 	return fresh
 
