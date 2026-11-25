@@ -2169,10 +2169,10 @@ func _find_interact() -> void:
 		create_tween().tween_property(prompt_box, "modulate:a", 1.0, 0.12)
 	prompt_box.reset_size()
 	var vp := get_viewport().get_visible_rect().size
-	if on_kin:
-		CareLine.place(prompt_box, cam, (best["k"]["node"] as Node3D).global_position, vp)
-		return
 	var py_at := minf(vp.y - 110.0, (root_ui.get_node("Hints") as Control).global_position.y - prompt_box.size.y - 6.0)
+	if on_kin:
+		CareLine.place(prompt_box, cam, (best["k"]["node"] as Node3D).global_position, vp, py_at)
+		return
 	prompt_box.position = Vector2((vp.x - prompt_box.size.x) * 0.5, py_at)
 	_keep_off_hub(prompt_box)
 
