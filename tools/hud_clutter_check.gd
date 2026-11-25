@@ -153,6 +153,8 @@ func _scene(arch: String, moment: String, size: Vector2i, statuses: bool, shots:
 			)
 		for i in int(CAST_S / Match.DT):
 			m.step(Match.DT)
+		if not m.hud.in_fight():
+			m.player.hurt_at = m.time  # no hit landed (or the ult froze the clock): still a fight (god mode takes none)
 	m.hud.panels.queue_redraw()
 	await main.get_tree().process_frame
 	_hud = m.hud
@@ -163,6 +165,10 @@ func _scene(arch: String, moment: String, size: Vector2i, statuses: bool, shots:
 	var seen := await _record_draws()
 	var zone := HunterZone.rect(m)
 	var counts := _counts(m, seen)
+	var by_group: Array = []
+	for g: String in seen:
+		by_group.append("%s %d" % [g, (seen[g] as Array).size()])
+	print("HUDCLUTTER   %sdrawn panels by group: %s" % [tag, ", ".join(by_group)])
 	ok(
 		m.hud.in_fight(),
 		"%sthe HUD is judged in a fight (a hit given or taken within %d s)" % [tag, int(m.hud.MSG_FIGHT_S)]

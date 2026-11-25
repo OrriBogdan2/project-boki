@@ -133,7 +133,7 @@ footage can't settle the factor, ours is kept. Dashes and flights move the body 
 ## Body and movement (hero sheet: Body, scale and movement feel)
 - Scale ~0.98 of a medium to the top of the head (`--warden-model-check`), slim build kept; hit radius 0.392 (`body.hit_r`, docs/HITBOX_SIZE.md). The Warden model (concept sheet, `scripts/heroes/warden_archer.gd`) is long-legged with a smaller head: `body.legs` 1.62, `body.head` 0.72, `body.neck` 0.03, so `body.size` is 1.05.
 - Quick, short steps: stride rate `spd*2.9` (HunterAnim.STRIDE); the tall run stays.
-- Her dash after-image is her own: three green fletch streaks at hip, chest and shoulder height (PinFx.afterimage), not the shared ghost.
+- Her dash after-image is her own: the red chest and feet ribbons of `spirit_go` (content/vfx/archer.json), not the shared ghost.
 - Nameplate height: the shared 2.35 m fits at the new scale (ArchKit.plate_height, read by the HUD branch).
 
 ## Small mechanics (fine print; source, footage, ours)
@@ -319,7 +319,7 @@ What each slot does cast mid-jump (rising), mid-fall and out of a glide. Rule: t
 | Shift | rising or falling: the 4.2 m flick `pin_flick`, no charge spent. Out of a glide: the Spirit Walk roll `pin_roll`, spending a charge (`ex = use_ex and not gliding`) | the roll | closes, reopens after | the source has one Phase Walk and no air dash row; the flick is ours. Open: the glide case matches it, the jump and fall case does not |
 
 ## Engine notes
-- Kit: `scripts/arch/kits/archer_kit.gd` (wiring), `pin_draw.gd` (draw stages, reticle, perfect, overdraw), `pin_spirit.gd` (Spirit Walk), `pin_fx.gd` (pooled effects), `pin_needle.gd` (the Heavy Shot's held needle), `kit_shaders.gd` / `kit_meshes.gd` (our shaders and meshes), `scripts/match/pin_bjorn_weapons.gd` (the recurve bow model), `scripts/match/kmoves_pin_bjorn.gd` (moves). Data: `content/archetypes/archer.json`, `content/weapons/longbow.json` (`draw`, `overdraw_t`, `overdraw_k`, `quick_k`, `aim`).
+- Kit: `scripts/arch/kits/archer_kit.gd` (wiring), `pin_draw.gd` (draw stages, reticle, perfect, overdraw), `pin_spirit.gd` (Spirit Walk), `pin_fx.gd` (the pooled arrow bodies, spent arrows and Spirit Walk wash and tint; every other look is `content/vfx/archer.json`), `pin_needle.gd` (the Heavy Shot's held needle), `kit_shaders.gd` / `kit_meshes.gd` (our shaders and meshes), `scripts/match/pin_bjorn_weapons.gd` (the recurve bow model), `scripts/match/kmoves_pin_bjorn.gd` (moves). Data: `content/archetypes/archer.json`, `content/weapons/longbow.json` (`draw`, `overdraw_t`, `overdraw_k`, `quick_k`, `aim`).
 - Hunter hooks: `ArchKit.draw_rate()` scales the bow's draw; `draw_bonus(t)` sets `h.shot_aim` (AimMode: stage 1 cursor, stage 2 max) and the damage factor; `Hunter.spirit_t` makes `World.occupy(..., ghost)` and the block push-out skip rocks, trees and barriers.
 - Telegraphs are AimKit: `draw_rest` (line), `draw` (line to the cursor, then the thick max-range line), `draw_fill` (the bright fill), `draw_mark` (the one perfect-timing circle), `draw_tgt` (circle), `rmb_bar`, `e` (arc_wall, all, for the tell). Lace's draw uses no cursor states; only Heavy Shot uses `AimKit.charge`.
 - Sounds: `tools/gen_sfx_lisette.py` writes `audio/pin_*.wav` and `archer_*` (Sfx loads them on first use).
