@@ -23,8 +23,8 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	_kinds()
 	_source()
-	await _match(main)
-	await _zone(main)
+	_match(main)
+	_zone(main)
 	print("MINIMAP CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -63,7 +63,7 @@ func _source() -> void:
 func _match(main: Node) -> void:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
+	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
 	m.set_process(false)
 	var near := MapDetail.nearest_exit(m)
 	ok(not near.is_empty() and MapDetail.exit_matters(m, near), "the nearest exit matters")
@@ -114,7 +114,7 @@ func _key(m: Match) -> void:
 func _zone(main: Node) -> void:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "heart": true})
+	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "heart": true})
 	m.set_process(false)
 	var start := Heart.r("tide_start_s")
 	var held := start + Heart.r("tide_close_s")
