@@ -50,7 +50,7 @@ func run(main_node: Node) -> void:
 func _setup() -> void:
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 5, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
+	m.start({"teams": 2, "squad": 5, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
 	m.set_process(false)
 	P = m.player
 	fx = m.fx
@@ -122,7 +122,7 @@ func _trio(lines: Array) -> void:
 	m.queue_free()
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
+	m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
 	m.set_process(false)
 	P = m.player
 	fx = m.fx

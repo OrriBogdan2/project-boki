@@ -32,9 +32,12 @@ static func shut(k: Dictionary) -> bool:
 static func around(kins: Array, k: Dictionary, pos: Vector3, aim: Vector3, d: float) -> Vector3:
 	var to := Vector2(aim.x - pos.x, aim.z - pos.z)
 	var goal: Vector3 = k["goal"]
-	var near := kins.filter(func(o): return o != k and parked(o) and not o.has("indoors") \
-			and Vector2(o["pos"].x - pos.x, o["pos"].z - pos.z).length() < REACH \
-			and Vector2(o["pos"].x - goal.x, o["pos"].z - goal.z).length() > ERRAND)
+	var near: Array = []
+	for o in kins:  # (the cheap range test first: parked() is the dear one, and most Boki are far)
+		if o == k or Vector2(o["pos"].x - pos.x, o["pos"].z - pos.z).length_squared() >= REACH * REACH:
+			continue
+		if parked(o) and not o.has("indoors") and Vector2(o["pos"].x - goal.x, o["pos"].z - goal.z).length() > ERRAND:
+			near.append(o)
 	var anchor: Vector3 = k.get("avoid_at", Vector3.INF)
 	var still := float(k.get("avoid_t", 0.0)) + d
 	if to.length() <= 0.4 or anchor == Vector3.INF or Vector2(pos.x - anchor.x, pos.z - anchor.z).length() > PIN_DIST:
