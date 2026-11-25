@@ -176,6 +176,7 @@ func run(main: Node) -> void:
 	_cc_cues()
 	_inv_cues()
 	_steps(main)
+	preload("res://tools/sfx_climb_rows.gd").new().run(main, ok)
 	_rank_cues()
 	_barks()
 	_ambience()
