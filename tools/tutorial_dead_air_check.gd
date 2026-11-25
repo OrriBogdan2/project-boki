@@ -79,9 +79,9 @@ func _calm(fresh: bool, dt: float, where: String, at: float) -> void:
 
 
 ## Whether the match tutorial shows the player something new this frame (the step or its line, the marker moving
-## on, the Boki leading, speaking or nagging).
+## on, the Boki leading, speaking or nagging, the player landing hits or progress on the step).
 func _match_fresh(m: Match, tu: Tutorial) -> bool:
-	var line := "%d|%s|%s" % [tu.step, tu.text, tu.label]
+	var line := "%d|%s|%s|%d" % [tu.step, tu.text, tu.label, tu.got + tu.hits]
 	var anchor: Vector3 = last.get("anchor", Vector3.INF)
 	var moved := (tu.target == Vector3.INF) != (anchor == Vector3.INF)
 	moved = moved or (anchor != Vector3.INF and anchor.distance_to(tu.target) > MARKER_MOVE_M)
