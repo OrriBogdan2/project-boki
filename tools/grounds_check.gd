@@ -36,7 +36,10 @@ func run(main_node: Node) -> void:
 	var a: Arena = m.arena
 	var p: Hunter = m.player
 	var g: Grounds = a.grounds
-	ok("grounds built on the arena map", g != null and m.world.layout_id == "arena" and not g.stations.is_empty())
+	ok(
+		"grounds built on the arena map",
+		g != null and m.world.layout_id == "arena" and not g.stations.is_empty()
+	)
 	_map(m)
 	_fields(m)
 	_counts(g)
@@ -84,12 +87,20 @@ func _fields(m: Match) -> void:
 				break
 			flat += 1.0
 		shortest = minf(shortest, flat)
-	ok("two dash lanes, each 90 m of flat ground", lanes.size() == 2 and shortest >= 90.0, "shortest %.0f m" % shortest)
+	ok(
+		"two dash lanes, each 90 m of flat ground",
+		lanes.size() == 2 and shortest >= 90.0,
+		"shortest %.0f m" % shortest
+	)
 	var tiles := 0
 	for isl in w.islands:
 		if String(isl.get("id", "")) in ["floor", "bench"]:
 			tiles += (isl["cells"] as Array).size()
-	ok("open ground with the fields is at least 3x the old arena", tiles >= 3 * OLD_FLOOR_TILES, "%d tiles" % tiles)
+	ok(
+		"open ground with the fields is at least 3x the old arena",
+		tiles >= 3 * OLD_FLOOR_TILES,
+		"%d tiles" % tiles
+	)
 	var faces: Array = []
 	for z in [146.5, 150.5, 154.5, 158.5]:
 		faces.append(roundi(w.ground_at(48.5, z) / World.LEVEL))
@@ -106,7 +117,6 @@ func _fields(m: Match) -> void:
 	p_v.teleport(m.arena.home)
 	p_v.vel = Vector3.ZERO
 	p_v.inp["move"] = Vector2.ZERO
-
 
 
 ## Hold `move` until the player stands higher than the 6th terrace or `secs` pass; the highest ground reached.
@@ -147,14 +157,15 @@ func _rides(m: Match) -> void:
 		_settle(m, p, dir, 20.0)
 		var to := String(w.islands[l["to"]]["id"])
 		if w.island_id(p.pos.x, p.pos.z) != to:
-			bad.append("%s>%s (ended %.0f,%.0f)" % [w.islands[l["from"]]["id"], to, p.pos.x, p.pos.z])
+			bad.append(
+				"%s>%s (ended %.0f,%.0f)" % [w.islands[l["from"]]["id"], to, p.pos.x, p.pos.z]
+			)
 	var info := "%d routes %s" % [glides, " ".join(bad)]
 	ok("every glide route lands you on its island", bad.is_empty() and glides >= 5, info)
 	p.teleport(m.arena.home)
 	p.vel = Vector3.ZERO
 	p.inp["move"] = Vector2.ZERO
 	p.inp["glide"] = false
-
 
 
 ## Hold `move` (and the glider once airborne) until you are back on the ground, up to `secs`.
@@ -178,8 +189,16 @@ func _counts(g: Grounds) -> void:
 	ok("a pedestal per Hunter", by.get("arch", 0) == Arch.ids().size(), "%d" % by.get("arch", 0))
 	ok("a pedestal per Boki", by.get("kin", 0) == KinLib.kin_ids().size(), "%d" % by.get("kin", 0))
 	ok("a pedestal per gear piece", by.get("gear", 0) == Gear.ALL.size(), "%d" % by.get("gear", 0))
-	ok("a pedestal per belt item", by.get("item", 0) == UtilityBelt.stock_ids().size(), "%d" % by.get("item", 0))
-	ok("a bot spawner per Hunter (+ clear)", by.get("bot", 0) == Arch.ids().size() + 1, "%d" % by.get("bot", 0))
+	ok(
+		"a pedestal per belt item",
+		by.get("item", 0) == UtilityBelt.stock_ids().size(),
+		"%d" % by.get("item", 0)
+	)
+	ok(
+		"a bot spawner per Hunter (+ clear)",
+		by.get("bot", 0) == Arch.ids().size() + 1,
+		"%d" % by.get("bot", 0)
+	)
 
 
 ## Every pedestal stands on a perch (not in the void), apart from its neighbours, its name hidden from afar.
@@ -241,10 +260,17 @@ func _worn(p: Hunter, id: String) -> bool:
 
 func _duel_and_fall(m: Match, g: Grounds) -> void:
 	var p: Hunter = m.player
-	ok("duel pad on the floor", m.duel_pad != Vector3.INF and m.world.island_id(m.duel_pad.x, m.duel_pad.z) == "floor")
+	ok(
+		"duel pad on the floor",
+		m.duel_pad != Vector3.INF and m.world.island_id(m.duel_pad.x, m.duel_pad.z) == "floor"
+	)
 	p.teleport(Vector3(60, -20, 25))  # off the map
 	g.tick(DT)
-	ok("a faller is brought home", p.flat_dist(m.arena.home) < 1.0 and p.pos.y > -1.0, "at %s" % p.pos)
+	ok(
+		"a faller is brought home",
+		p.flat_dist(m.arena.home) < 1.0 and p.pos.y > -1.0,
+		"at %s" % p.pos
+	)
 
 
 ## First-time hints: each pedestal island and the dash lanes say one line (the live key caps, the Training Grounds'
@@ -289,10 +315,15 @@ func _hints(m: Match, g: Grounds) -> void:
 	var plain := lines.keys().all(
 		func(t):
 			return (
-				t.contains(Settings.key_cap("interact")) and not t.contains("Arena") and not t.contains("Training Area")
+				t.contains(Settings.key_cap("interact"))
+				and not t.contains("Arena")
+				and not t.contains("Training Area")
 			)
 	)
-	ok("six distinct lines with the live keys, no old names", lines.size() == spots.size() and plain)
+	ok(
+		"six distinct lines with the live keys, no old names",
+		lines.size() == spots.size() and plain
+	)
 	g.hints = GroundsHints.new(m)
 	m.hud.msgs.clear()
 	p.teleport(spots["arch"])
