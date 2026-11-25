@@ -12,7 +12,8 @@ flag are in `content/rules/camera.json` "farm": **`"third_person": false` puts t
 - **Walls:** the view is pulled in along itself so it never sits inside the ground, a building, a tree or a rock (the
   placed blocks under buildings are only 1.2 m tall for climbing, so `building_m` / `tree_m` say how tall they are to
   the camera), and backs out again at 5 m/s. Fences and benches are low and do not pull it.
-- **Back to top-down:** build mode and the training sessions blend to the Settings view over 0.8 s and back.
+- **Back to top-down:** build mode, the training sessions and a tutorial spotlight (it lights a Boki or building that
+  may be behind the camera) blend to the Settings view over 0.8 s and back.
 - **Not touched:** matches, the tutorial arena and expeditions (their `MatchCam` / `CamRig` use is unchanged; `lean_scale`
   stays 1, so bodies keep the match lean). The house interior (`interior.gd`) keeps its own top-down camera.
 

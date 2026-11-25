@@ -3,8 +3,8 @@ extends RefCounted
 ## The farm's close third-person view: behind you, low and near, turning with a right-drag or the right stick, and
 ## never inside the ground or a wall. Numbers and the one flag ("third_person": false puts the top-down view back
 ## everywhere) are in content/rules/camera.json "farm". It drives the home's CamRig (CamRig.pitch, lens, rise, yaw
-## and dist_mul) each frame; build mode and the minigames blend back to the top-down view the Settings camera has,
-## and a match never makes one (this class is the farm's own).
+## and dist_mul) each frame; build mode, the training sessions and a tutorial spotlight blend back to the top-down
+## view the Settings camera has, and a match never makes one (this class is the farm's own).
 
 const NEAR_THIRD := 0.2  # m: the lens's near plane close up (CamRig keeps 1.0 from above)
 const NEAR_TOP := 1.0  # m: CamRig's own near plane
@@ -41,7 +41,7 @@ func keys(mv: Vector2, cam: CamRig) -> Vector2:
 
 
 ## Once a frame, after the Settings camera and the distance multiplier are set: `free` is false while the farm wants
-## the top-down view (building, a training session).
+## the top-down view (building, a training session, a tutorial spotlight on something that may be behind you).
 func tick(cam: CamRig, delta: float, free: bool) -> void:
 	if not enabled():
 		return
