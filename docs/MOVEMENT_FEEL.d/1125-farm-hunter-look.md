@@ -7,7 +7,7 @@ light took the rest, so a slate-blue shroud came out at 20 to 45 of 255. `Shroud
 `CLOTH_VALUE` bright in the picked hue and lights it `CLOTH_FILL` of its own colour (`own_ambient`), so the cloak reads
 as the creator's swatch, folds and hood included. The house, the town and the creator draw the same model, so they match.
 
-Crop beds are solid: `PlotBlocks.tiles` (the tiles a 1.7 m bed covers by more than a hand's width) become blocked in
+Crop beds are solid on the farm-start island (the classic farm's fixed beds stay walk-over: its Dash course runs across them): `PlotBlocks.tiles` (the tiles a 1.7 m bed covers by more than a hand's width) become blocked in
 `HomeBuild._apply_blockers`, so you and the Boki walk round a bed and the grass scatter (which skips blocked tiles)
 leaves its soil bare; a tile walled in beside a bed is blocked too (`PlotBlocks.pockets`). When a crop patch moves, the
 ground meshes (and so the grass) are rebuilt a moment later, so the new soil is clear and the old spot grows grass again.
