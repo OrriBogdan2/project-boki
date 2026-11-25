@@ -47,7 +47,7 @@ func _start_dict() -> Dictionary:
 func _build(d: Dictionary) -> void:
 	var nm := Match.new()
 	main.add_child(nm)
-	await nm.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": SEED, "cls": "medium", "net": d})
+	nm.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": SEED, "cls": "medium", "net": d})
 	nm.set_process(false)
 	nm.skydrop.planning = false
 	m = nm

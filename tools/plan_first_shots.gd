@@ -24,7 +24,7 @@ func _shot(file: String, had: int, held: bool) -> void:
 	Save.d["first_guide"] = had
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242})
+	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242})
 	m.set_process(false)
 	var fade = main.get("fade")
 	if fade != null:
