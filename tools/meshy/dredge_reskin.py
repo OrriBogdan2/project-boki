@@ -44,7 +44,15 @@ LEGS_BELOW_HIP = ("LeftLeg", "LeftFoot", "LeftToeBase", "RightLeg", "RightFoot",
 ALL_LEGS = ("LeftUpLeg", "RightUpLeg") + LEGS_BELOW_HIP
 SPINE = ("Hips", "Spine02", "Spine01", "Spine")
 SPINE_Y = np.array([1.05, 1.17, 1.29, 1.40])  # rest height of those joints (m)
-STRETCH_CLIPS = (("Idle", 0.3), ("Attack", 0.1), ("Attack", 0.3), ("Attack", 0.5), ("run", 0.1), ("walk", 0.3), ("Jump_Run", 0.1))
+STRETCH_CLIPS = (
+    ("Idle", 0.3),
+    ("Attack", 0.1),
+    ("Attack", 0.3),
+    ("Attack", 0.5),
+    ("run", 0.1),
+    ("walk", 0.3),
+    ("Jump_Run", 0.1),
+)
 
 
 class Rig:
@@ -96,7 +104,9 @@ class Rig:
             if i not in world:
                 nd, o = js["nodes"][i], over.get(i, {})
                 m = np.eye(4)
-                m[:3, :3] = quat_mat(o.get("rotation", nd.get("rotation", [0, 0, 0, 1]))) * np.array(o.get("scale", nd.get("scale", [1, 1, 1])))
+                m[:3, :3] = quat_mat(o.get("rotation", nd.get("rotation", [0, 0, 0, 1]))) * np.array(
+                    o.get("scale", nd.get("scale", [1, 1, 1]))
+                )
                 m[:3, 3] = o.get("translation", nd.get("translation", [0, 0, 0]))
                 world[i] = wm(self.parent[i]) @ m if i in self.parent else m
             return world[i]
@@ -202,7 +212,9 @@ def goo_weights(rig5, rig3, tail_arm):
     known = arm.sum(1) > 0.05
     arm = arm / np.maximum(arm.sum(1, keepdims=True), 1e-9)
     arm[~known] = 0
-    arm = fill_unknown(arm, gw & ~known, wid[fg], np.arange(nw), True)  # unweighted goo (tail, puddle) takes its neighbours'
+    arm = fill_unknown(
+        arm, gw & ~known, wid[fg], np.arange(nw), True
+    )  # unweighted goo (tail, puddle) takes its neighbours'
     y = np.zeros(nw)
     y[wid] = pos[:, 1]
     t = np.clip((y - TAIL_Y0) / (TAIL_Y1 - TAIL_Y0), 0, 1)
@@ -282,25 +294,45 @@ def build(out_path, r5_path, r3_path, tail_arm):
     acc = {}
     for k, arr in attrs.items():
         if k == "JOINTS_0":
-            out.js["accessors"].append({"bufferView": out.add_view(arr.astype(np.uint16).tobytes()), "componentType": 5123, "count": len(arr), "type": "VEC4"})
+            out.js["accessors"].append(
+                {
+                    "bufferView": out.add_view(arr.astype(np.uint16).tobytes()),
+                    "componentType": 5123,
+                    "count": len(arr),
+                    "type": "VEC4",
+                }
+            )
             acc[k] = len(out.js["accessors"]) - 1
         else:
             acc[k] = out.add_floats(arr, {2: "VEC2", 3: "VEC3", 4: "VEC4"}[arr.shape[1]])
-    js["accessors"][acc["POSITION"]].update(min=attrs["POSITION"].min(0).tolist(), max=attrs["POSITION"].max(0).tolist())
+    js["accessors"][acc["POSITION"]].update(
+        min=attrs["POSITION"].min(0).tolist(), max=attrs["POSITION"].max(0).tolist()
+    )
     prims = js["meshes"][0]["primitives"]
     for p in prims[:2]:
         p["attributes"].update(acc)
     f_out = new_id[f_goo].astype(np.uint32)
-    js["accessors"].append({"bufferView": out.add_view(f_out.tobytes()), "componentType": 5125, "count": int(f_out.size), "type": "SCALAR"})
+    js["accessors"].append(
+        {"bufferView": out.add_view(f_out.tobytes()), "componentType": 5125, "count": int(f_out.size), "type": "SCALAR"}
+    )
     prims[1]["indices"] = len(js["accessors"]) - 1
     f_skin = np.concatenate([f_skin, lining_id[f_skin[lined]][:, ::-1]]).astype(np.uint32)
-    js["accessors"].append({"bufferView": out.add_view(f_skin.tobytes()), "componentType": 5125, "count": int(f_skin.size), "type": "SCALAR"})
+    js["accessors"].append(
+        {
+            "bufferView": out.add_view(f_skin.tobytes()),
+            "componentType": 5125,
+            "count": int(f_skin.size),
+            "type": "SCALAR",
+        }
+    )
     prims[0]["indices"] = len(js["accessors"]) - 1
     for p in prims:
         if js["materials"][p["material"]]["name"] in ("brass-pack", "leather-pack"):
             pj, pw = pack_weights(n.floats(js, b, p["attributes"]["POSITION"]), rig5.names)
             p["attributes"]["WEIGHTS_0"] = out.add_floats(pw, "VEC4")
-            js["accessors"].append({"bufferView": out.add_view(pj.tobytes()), "componentType": 5123, "count": len(pj), "type": "VEC4"})
+            js["accessors"].append(
+                {"bufferView": out.add_view(pj.tobytes()), "componentType": 5123, "count": len(pj), "type": "VEC4"}
+            )
             p["attributes"]["JOINTS_0"] = len(js["accessors"]) - 1
     gild_coins(js, b, out)
     shrink_coins(js, b, out)
@@ -323,7 +355,10 @@ def compact(out):
     acc = sorted(acc)
     amap = {o: i for i, o in enumerate(acc)}
     old_acc, old_views = js["accessors"], js["bufferViews"]
-    views = sorted({old_acc[i]["bufferView"] for i in acc} | {im["bufferView"] for im in js.get("images", []) if "bufferView" in im})
+    views = sorted(
+        {old_acc[i]["bufferView"] for i in acc}
+        | {im["bufferView"] for im in js.get("images", []) if "bufferView" in im}
+    )
     js["accessors"], js["bufferViews"], out.chunks, out.size = [old_acc[i] for i in acc], [], [], 0
     vmap = {}
     for v in views:

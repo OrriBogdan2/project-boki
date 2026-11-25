@@ -3,7 +3,7 @@
 import bpy
 import sys
 
-a = sys.argv[sys.argv.index("--") + 1:]
+a = sys.argv[sys.argv.index("--") + 1 :]
 vox, inset, tris = float(a[2]), float(a[3]), int(a[4])
 bpy.ops.wm.read_factory_settings(use_empty=True)
 bpy.ops.wm.obj_import(filepath=a[0])

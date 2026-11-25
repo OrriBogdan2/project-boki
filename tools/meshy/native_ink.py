@@ -68,18 +68,33 @@ def main(args):
                 wn = np.zeros_like(key)
                 np.add.at(wn, inv, nrm)
                 wn /= np.maximum(np.linalg.norm(wn, axis=1, keepdims=True), 1e-9)
-                np.savez(os.path.join(tmp, "in.npz"), P=key, N=wn, F=inv[idx], full=full, shut=float(opts.get("shut", "0.5")))
+                np.savez(
+                    os.path.join(tmp, "in.npz"), P=key, N=wn, F=inv[idx], full=full, shut=float(opts.get("shut", "0.5"))
+                )
                 script = os.path.join(tmp, "rays.py")
                 open(script, "w").write(RAYS)
-                subprocess.run([opts.get("blender", BLENDER), "-b", "--factory-startup", "--python", script, "--",
-                                os.path.join(tmp, "in.npz"), os.path.join(tmp, "room.npy")],
-                               check=True, stdout=subprocess.DEVNULL)
+                subprocess.run(
+                    [
+                        opts.get("blender", BLENDER),
+                        "-b",
+                        "--factory-startup",
+                        "--python",
+                        script,
+                        "--",
+                        os.path.join(tmp, "in.npz"),
+                        os.path.join(tmp, "room.npy"),
+                    ],
+                    check=True,
+                    stdout=subprocess.DEVNULL,
+                )
                 room = np.load(os.path.join(tmp, "room.npy"))[inv]
                 col = np.ones((len(pos), 4), np.float32)
                 col[:, 3] = room
                 prim["attributes"]["COLOR_0"] = out.add_floats(col, "VEC4")
-                print("%s: ink room, %d%% of vertices under a full line, %d%% under half"
-                      % (mesh.get("name", "mesh"), int(100 * (room < 0.999).mean()), int(100 * (room < 0.5).mean())))
+                print(
+                    "%s: ink room, %d%% of vertices under a full line, %d%% under half"
+                    % (mesh.get("name", "mesh"), int(100 * (room < 0.999).mean()), int(100 * (room < 0.5).mean()))
+                )
     if "slot" in opts:
         for m in js["materials"]:
             m["name"] = opts["slot"]
