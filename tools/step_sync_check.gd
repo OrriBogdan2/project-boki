@@ -22,8 +22,9 @@ const COUNT_LOOPS := 3  # loops counted
 const NO_FEET := ["ostra"]  # Motley hovers on his box: no feet, no steps (KMovesStone.HOVER_GAIT)
 const PLANT_BAND := 0.3  # x a foot's height range over its low: under this it is planted (tools/anim_audit.gd)
 const LIFT_BAND := 0.6  # x: over this it has lifted
-const NATIVE_SPEEDS := {"walk": [1.4, 2.6], "run": [3.2, 4.6], "crouch": [1.4]}  # state -> ground speeds heard (m/s)
-const RAMP := [[1.4, 2.0], [4.6, 2.0], [2.0, 2.0], [3.6, 2.0]]  # [m/s, s]: walk, run, walk, run
+const NATIVE_STATES := ["walk", "run", "crouch"]
+const SPEED_BAND := 0.1  # x run_from: the walk is heard just under it and the run just over it
+const RAMP_SECONDS := 2.0  # s each leg of the walk-run-walk-run ramp lasts
 
 var bad := 0
 var rows := 0
@@ -285,15 +286,27 @@ func _native(id: String, nat: WardenNative) -> void:
 	nat.set_process(false)
 	var plants := {}  # state -> {foot: [s into the clip]}
 	var data: Dictionary = nat.d.get("plants", {})
-	for state in NATIVE_SPEEDS:
+	for state in NATIVE_STATES:
 		plants[state] = _native_plants(nat, state)
 		_clip_row(id, state, plants[state], data.get(state, {}))
 	read[WardenGlb.art(id)] = {"native": plants}
-	for state in NATIVE_SPEEDS:
-		for speed in NATIVE_SPEEDS[state]:
+	for state in NATIVE_STATES:
+		for speed in _native_speeds(nat.d, state):
 			_native_row(id, nat, state, speed, plants[state])
 	_ramp_row(id, nat)
 	_still_row(id, nat)
+
+
+## The ground speeds (m/s) a Hunter is heard at in `state`, from its own speeds in the data (walk_mps, run_from, run_mps,
+## crouch_mps: --foot-slide-check measures them per Hunter).
+func _native_speeds(d: Dictionary, state: String) -> Array:
+	var from := float(d.get("run_from", 3.0))
+	match state:
+		"walk":
+			return [float(d.get("walk_mps", 1.4)), from * (1.0 - SPEED_BAND)]
+		"run":
+			return [from * (1.0 + SPEED_BAND), float(d.get("run_mps", 4.6))]
+	return [float(d.get("crouch_mps", 1.4))]
 
 
 ## Where each foot plants in the clip Meshy's `state` plays (s), read off Meshy's foot bones posed at every frame of it.
@@ -357,8 +370,11 @@ func _native_row(id: String, nat: WardenNative, state: String, speed: float, pl:
 ## Walk, run, walk, run: the feet alternate across the hand-overs (a switch of clip never steps one foot twice).
 func _ramp_row(id: String, nat: WardenNative) -> void:
 	var heard := []
-	for leg in RAMP:
-		heard.append_array(_native_walk(nat, leg[0], false, leg[1]))
+	var walk := float(nat.d.get("walk_mps", 1.4))
+	var run := float(nat.d.get("run_mps", 4.6))
+	var mid := float(nat.d.get("run_from", 3.0))
+	for speed in [walk, run, (walk + mid) * 0.5, (mid + run) * 0.5]:  # walk, run, walk, run
+		heard.append_array(_native_walk(nat, speed, false, RAMP_SECONDS))
 	var alternate := heard.size() > 1
 	for i in heard.size() - 1:
 		alternate = alternate and heard[i][0] != heard[i + 1][0]
