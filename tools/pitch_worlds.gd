@@ -81,12 +81,14 @@ func hop_take(zone: String) -> void:
 	_place(HubWaystone.HUB_AT + Vector3(0.0, 0.0, 8.0))
 	await _wait(0.8)
 	rig.mark("portal")
-	await _walk(HubWaystone.HUB_AT, 2.1)
+	await _walk(HubWaystone.HUB_AT, 3.2)
 	await _wait(0.3)
 	await _hop(zone)
 	rig.mark("arrived")
 	await _wait(1.0)
-	await _walk(_resident_at(zone), 2.0)
+	await _walk(_resident_at(zone, 0), 1.9)
+	await _wait(0.6)
+	await _walk(_resident_at(zone, 1), 1.9)
 	await _wait(1.5)
 
 
@@ -95,11 +97,11 @@ func zone_take(zone: String) -> void:
 	await _load(zone)
 	await _wait(1.0)
 	rig.mark(zone)
-	await _walk(_resident_at(zone, 0), 2.0)
-	await _wait(0.4)
-	_orbit_start(1.1, 3.0)
-	await _walk(_resident_at(zone, 1), 2.0)
-	await _wait(1.5)
+	_orbit_start(1.4, 4.5)
+	for n in 4:  # walks up to its Boki one after the other (the nearest from where it stands)
+		await _walk(_resident_at(zone, n % 2), 1.9)
+		await _wait(0.5)
+	await _wait(1.0)
 
 
 ## Shot 16: hub -> zone -> hub -> zone, each hop the moment you arrive.
@@ -108,12 +110,12 @@ func montage() -> void:
 	_place(HubWaystone.HUB_AT + Vector3(0.0, 0.0, 6.0))
 	await _wait(0.5)
 	rig.mark("montage")
-	await _walk(HubWaystone.HUB_AT, 2.1)
+	await _walk(HubWaystone.HUB_AT, 3.2)
 	await _hop("glasswater")
 	await _wait(0.9)
 	await _hop(GardenZones.HUB)
 	await _wait(0.4)
-	await _walk(HubWaystone.HUB_AT, 2.1)
+	await _walk(HubWaystone.HUB_AT, 3.2)
 	await _hop("ridge")
 	await _wait(1.8)
 
@@ -162,10 +164,10 @@ func _tidy() -> void:
 	c.day_t = DAY_T
 	c.talk_cd = 1e9  # no chatter bubbles
 	_tick += 1
-	if _tick % 3 == 0 and not keep_say:
+	if _tick % 3 == 0:
 		for l in c.find_children("*", "Label3D", true, false):
 			var t: String = (l as Label3D).text
-			if t.length() > 16 or t == "★":  # Boki bubbles, notice boards, the partner star: text in the frame
+			if (t.length() > 16 and not keep_say) or t == "★":  # Boki bubbles, notice boards, the partner star: text in the frame
 				(l as Label3D).visible = false
 	if c.get("ui") != null:
 		(c.ui as CanvasLayer).visible = false
