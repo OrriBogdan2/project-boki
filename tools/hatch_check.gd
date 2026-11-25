@@ -8,11 +8,11 @@ extends RefCounted
 ## Boki, a pick of Lace, Kael or Vex (HobOffer), then (MaskMoment) the chosen one's Relic drifts to you, "Put on the
 ## Relic" (the interact key) puts it on and you become that Hunter; a short look at their
 ## ability clips fits a 1280x720 screen (1920x1080 scales to the same layout). The beat from the last knock
-## to the Boki's card can be skipped with any key or click (HatchSkip): it lands on the same end state as
-## waiting, shows a small "Press any key" pill after 1.5 s, and saves the same Boki. A pair's egg appearing in
-## the Nesting Nook (NestReveal) gets one ring, one small sparkle in its type colour and one wobble. The naming
-## line (NameStep): a suggestion from the species name, the dice, Keep, a rude name refused, skipping keeps the
-## suggestion, save and load, and your first catch named on the results screen. Never touches the real save.
+## to the Boki's card moves on one beat per tap and skips on a 1 s hold (HoldSkip, as the prologue): it lands on
+## the same end state as waiting, and saves the same Boki. A pair's egg appearing in the Nesting Nook (NestReveal)
+## gets one ring, one small sparkle in its type colour and one wobble. The naming line (NameStep): a suggestion from
+## the species name, the dice, Keep, a rude name refused, skipping keeps the suggestion, save and load, and your first
+## catch named on the results screen. Never touches the real save.
 
 const MAX_FRAMES := 6000      # (a hang guard counted in frames, not seconds)
 var bad := 0
@@ -135,6 +135,7 @@ func run(m: Node) -> void:
 	twin.queue_free()
 	await _skip_row(tree, waited)
 	await _naming(tree)
+	await _hold_row(tree)
 	await _first_mask(tree)
 	await _name_card(tree)
 	_parents_row(tree)
@@ -151,46 +152,25 @@ func _end_state(rv: KinReveal) -> Dictionary:
 	}
 
 # ---------------------------------------------------------------- 2b. skipping the beat
-## From the last knock: the pill shows after 1.5 s, a key before it settles counts only after a moment,
-## then one key lands on the same end state as waiting (the Boki out and facing you, its card up and
-## ready to name) and the same Boki is saved. Skipping only cuts waiting: nothing is chosen for you.
+## From the last knock: a tap before SKIP_ARM_S counts for nothing; then one tap moves one beat (the egg opens and
+## the Boki is out), a second lands on the same end state as waiting (the Boki facing you, its card up and ready
+## to name) and the same Boki is saved. Skipping only cuts waiting: nothing is chosen for you.
 func _skip_row(tree: SceneTree, waited: Dictionary) -> void:
-	Save.d = Save.fresh()
-	Save.d["tutorial"] = {"intro": true}
-	Save.d["look"] = Unmasked.default_look()
-	var hx = load("res://scripts/ui/hatch.gd").new()
-	main.add_child(hx)
-	for i in 4: await tree.process_frame
-	hx._looks_good()
-	hx.chosen = 0
-	hx._start_hatch()
-	var sp: String = hx.egg_defs[0]["species"]
-	for i in hx.TAPS:
-		hx._tap_egg()
-	var frames := 0
-	while hx.stage != "hatching" and frames < MAX_FRAMES:
-		await tree.process_frame
-		frames += 1
-	ok(hx.stage == "hatching" and hx.skipper != null, "the hatch beat can be skipped (stage %s)" % hx.stage)
-	if hx.skipper == null:
-		hx.queue_free()
+	var hx = await _hatching(tree)
+	if hx == null:
 		return
-	var sk: HatchSkip = hx.skipper
-	ok(sk.pill.modulate.a < 0.01, "no pill in the first moments (alpha %.2f)" % sk.pill.modulate.a)
-	var press := InputEventKey.new()
-	press.keycode = KEY_SPACE
-	press.pressed = true
-	sk._input(press)
-	ok(hx.stage == "hatching" and hx.reveal == null, "a key in the first %.1f s skips nothing" % HatchSkip.ARM_AT)
-	frames = 0
-	while sk.t < HatchSkip.PILL_AT + 0.5 and frames < MAX_FRAMES:
-		await tree.process_frame
-		frames += 1
-	ok(sk.pill.modulate.a > 0.99 and hx.stage == "hatching", "the pill shows after %.1f s" % HatchSkip.PILL_AT)
-	ok(_texts(sk.pill).has("Press any key"), "and it says so")
-	sk._input(press)
+	var sp: String = hx.egg_defs[0]["species"]
+	ok(hx.hold_skip == null, "no skip ring in the first moments")
+	_tap(hx)
+	ok(hx.stage == "hatching" and hx.reveal == null, "a tap in the first %.1f s skips nothing" % hx.SKIP_ARM_S)
+	await _armed(tree, hx)
+	ok(hx.hold_skip != null and hx.stage == "hatching", "the ring is there after %.1f s" % hx.SKIP_ARM_S)
+	_tap(hx)
+	ok(hx.stage == "reveal" and hx.reveal != null and not hx.reveal.met,
+			"one tap: the egg is open, the Boki has not met you yet")
+	_tap(hx)
 	var rv := hx.reveal as KinReveal
-	ok(rv != null and rv.met and hx.stage == "reveal", "one key jumps to the Boki revealed, its card up")
+	ok(rv != null and rv.met and hx.stage == "reveal", "a second tap: the Boki revealed, its card up")
 	if rv == null:
 		hx.queue_free()
 		return
@@ -200,12 +180,12 @@ func _skip_row(tree: SceneTree, waited: Dictionary) -> void:
 	var cam_face := absf(wrapf(egg.kin_node.rotation.y - want, -PI, PI))
 	ok(cam_face < 0.25, "facing you (off by %.2f rad)" % cam_face)
 	await tree.process_frame
-	ok(not is_instance_valid(sk) or sk.is_queued_for_deletion(), "the pill is gone once the card is up")
+	ok(hx.hold_skip == null, "the ring is gone once the card is up")
 	var skipped := _end_state(rv)
 	ok(skipped == waited, "the same end state as waiting (%s vs %s)" % [skipped, waited])
 	ok(not rv.name_btn.disabled and hx.stage == "reveal", "it still waits for you to name it")
 	rv._go()
-	frames = 0
+	var frames := 0
 	while hx.stage != "name" and frames < MAX_FRAMES:
 		await tree.process_frame
 		frames += 1
@@ -267,6 +247,65 @@ func _naming(tree: SceneTree) -> void:
 		"your first catch is named on the results screen (%s)" % rec["name"])
 	results.queue_free()
 	await tree.process_frame
+
+
+## Holding a press HoldSkip.HOLD_S skips both beats at once (the prologue's input path): the ring fills first.
+func _hold_row(tree: SceneTree) -> void:
+	var hx = await _hatching(tree)
+	if hx == null:
+		return
+	await _armed(tree, hx)
+	var hs: HoldSkip = hx.hold_skip
+	hs.feed(_key(true))
+	hs._process(HoldSkip.HOLD_S * 0.5)
+	ok(hx.reveal == null and hs.held != null and not hs.done, "holding fills the ring, and skips nothing yet")
+	hs._process(HoldSkip.HOLD_S)
+	var rv := hx.reveal as KinReveal
+	ok(rv != null and rv.met and hx.stage == "reveal", "held %.1f s: straight to the Boki's card" % HoldSkip.HOLD_S)
+	await tree.process_frame
+	ok(hx.hold_skip == null, "and the ring is gone")
+	hx.queue_free()
+	for i in 3: await tree.process_frame
+
+## A new hatch scene knocked to the hatching beat (null if it never got there).
+func _hatching(tree: SceneTree):
+	Save.d = Save.fresh()
+	Save.d["tutorial"] = {"intro": true}
+	Save.d["look"] = Unmasked.default_look()
+	var hx = load("res://scripts/ui/hatch.gd").new()
+	main.add_child(hx)
+	for i in 4: await tree.process_frame
+	hx._looks_good()
+	hx.chosen = 0
+	hx._start_hatch()
+	for i in hx.TAPS:
+		hx._tap_egg()
+	ok(hx.title.text == hx.KNOCK_LINES[mini(hx.TAPS, hx.KNOCK_LINES.size() - 1)], "every knock runs to its end: the line moves on")
+	var frames := 0
+	while hx.stage != "hatching" and frames < MAX_FRAMES:
+		await tree.process_frame
+		frames += 1
+	ok(hx.stage == "hatching", "the hatch beat can be skipped (stage %s)" % hx.stage)
+	if hx.stage != "hatching":
+		hx.queue_free()
+		return null
+	return hx
+
+func _armed(tree: SceneTree, hx: Node) -> void:
+	var frames := 0
+	while hx.hold_skip == null and frames < MAX_FRAMES:
+		await tree.process_frame
+		frames += 1
+
+func _key(down: bool) -> InputEventKey:
+	var ev := InputEventKey.new()
+	ev.keycode = KEY_SPACE
+	ev.pressed = down
+	return ev
+
+func _tap(hx: Node) -> void:
+	hx._unhandled_input(_key(true))
+	hx._unhandled_input(_key(false))
 
 # ---------------------------------------------------------------- 3. the first Relic
 func _first_mask(tree: SceneTree) -> void:

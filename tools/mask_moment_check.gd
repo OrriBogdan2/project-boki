@@ -10,8 +10,8 @@ extends RefCounted
 ##      be skipped. The whisper and the name each stay on screen at least MaskBeat.read_s (3 s, or 75 ms a
 ##      character)
 ##   3. the farm's later Relic (the short cut) runs its planned time, its whisper and name up for their reading time
-##   4. the next time a press moves on one beat and holding it skips to the end (DECISIONS 11-11: click = next,
-##      hold = skip); the farm's short cut keeps the body you had
+##   4. the next time a tap moves on one beat and holding it HoldSkip.HOLD_S skips to the end (DECISIONS 11-11: click =
+##      next, hold = skip; the prologue's HoldSkip); the farm's short cut keeps the body you had
 ## With --shots-dir=<dir>: mask_beat_1_buildup, _2_rise, _3_black, _4_memory, _5_reveal, and one frame every
 ## 0.25 s from the black to the snap back, named with the beat's clock (mask_memory_<s>.png); a renderer is
 ## needed. --mask-id=<archetype> plays another Hunter's Relic (Vex's by default).
@@ -128,7 +128,7 @@ func _first_time() -> void:
 			_timed_frame(clock[0])
 	tree.process_frame.connect(tick)
 	await tree.process_frame
-	ok(not MaskBeat.seen() and beat.skip_hint == null and beat.cam.current and not beat.short,
+	ok(not MaskBeat.seen() and not beat.hold_skip.can_skip and beat.cam.current and not beat.short,
 			"the first time: no skip, its own camera, the full cut even on the farm")
 	ok(beat._frames.size() == beat._memory_lens.size() and beat._frames.size() >= 2,
 			"%d memory frames: %s" % [beat._frames.size(), str(beat._frames)])
@@ -155,12 +155,13 @@ func _first_time() -> void:
 	ok(beat.memory.texture != face and beat.whisper_line.text != "" and beat.memory.scale.x > 1.0
 			and beat.memory_prev.visible and beat.memory_prev.texture == face,
 			"a cross-fade to the next, pushing in, and the whisper: \"%s\"" % beat.whisper_line.text)
-	var press := InputEventAction.new()
-	press.action = "interact"
-	press.pressed = true
-	beat._unhandled_input(press)
+	_tap(beat)
+	beat._unhandled_input(_key(true))
+	beat.hold_skip._process(HoldSkip.HOLD_S * 1.5)
+	beat._unhandled_input(_key(false))
 	await tree.process_frame
-	ok(beat.phase == "memory" and beat._memory_i == 1, "a press during the memories changes nothing the first time")
+	ok(beat.phase == "memory" and beat._memory_i == 1 and beat.hold_skip.modulate.a == 0.0,
+			"a tap or a hold during the memories changes nothing the first time (and no ring shows)")
 	await _shot(tree, "mask_beat_4_memory")
 	await _until(tree, beat, "reveal")
 	ok(beat.black.color.a == 0.0 and beat._ripple != null, "the snap back: the world again, a ripple of light")
@@ -232,26 +233,32 @@ func _again() -> void:
 	var got := [null]
 	var beat := MaskBeat.play(parts[1], you, func(b): got[0] = b, false, true)
 	await tree.process_frame
-	var key := Settings.key_cap("interact")
-	ok(beat.skip_hint != null and _texts(beat.skip_hint).any(func(s): return String(s).contains(key)),
-			"seen before: a skip hint with the interact key")
-	var press := InputEventAction.new()
-	press.action = "interact"
-	press.pressed = true
-	beat._unhandled_input(press)
+	ok(beat.hold_skip.can_skip, "seen before: the hold-to-skip ring is on")
+	_tap(beat)
 	await tree.process_frame
 	ok(beat.phase == "black" and got[0] == null,
-			"a press moves on one beat, to the black (%s), and doesn't skip it all" % beat.phase)
-	Input.action_press("interact")
-	beat._unhandled_input(press)
+			"a tap moves on one beat, to the black (%s), and doesn't skip it all" % beat.phase)
+	_tap(beat)
 	await tree.process_frame
-	ok(beat.phase == "memory" and got[0] == null, "the next press: on to the memory")
-	await tree.create_timer(MaskBeat.HOLD_SKIP_S + 0.15).timeout
-	Input.action_release("interact")
+	ok(beat.phase == "memory" and got[0] == null, "the next tap: on to the memory")
+	beat._unhandled_input(_key(true))
+	beat.hold_skip._process(HoldSkip.HOLD_S * 0.5)
+	ok(got[0] == null and beat.hold_skip.held != null, "holding fills the ring and skips nothing yet")
+	beat.hold_skip._process(HoldSkip.HOLD_S)
 	ok(got[0] == you and is_instance_valid(you) and scene_cam.current,
-			"holding it skips the rest; the farm's cut keeps the body you had")
+			"holding it %.1f s skips the rest; the farm's cut keeps the body you had" % HoldSkip.HOLD_S)
 	host.queue_free()
 	await tree.process_frame
+
+func _key(down: bool) -> InputEventKey:
+	var ev := InputEventKey.new()
+	ev.keycode = KEY_SPACE
+	ev.pressed = down
+	return ev
+
+func _tap(beat: MaskBeat) -> void:
+	beat._unhandled_input(_key(true))
+	beat._unhandled_input(_key(false))
 
 ## The seconds the beat's phases add up to.
 func _planned_s(beat: MaskBeat) -> float:
