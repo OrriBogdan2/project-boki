@@ -74,7 +74,7 @@ func _disc_mesh() -> QuadMesh:
 ## The marker for `h`'s open recast on `at`: `action` is the InputMap action that triggers it, `left` / `total`
 ## the window in seconds. Does nothing for anyone but the local player.
 static func show_at(h: Hunter, action: String, at: Vector3, left: float, total: float, col: Color) -> void:
-	if h == null or h.m == null or not h.is_local():
+	if h == null or h.m == null or not h.is_local() or h.m.has_meta("pitch_no_foe_plates"):  # (pitch films: no key cap)
 		return
 	var node := h.m.get_node_or_null("RecastMarker") as RecastMarker
 	if node == null:

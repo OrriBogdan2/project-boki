@@ -272,3 +272,10 @@ The first camp of a run (`TutorialCamps.spawn`) does not appear at once: a ring 
 the world and on the minimap like the nest marker) count down `TELEGRAPH_T` (3 s) on the spots the monsters then stand on. No
 step ends and no camp is re-spawned while it counts (`alive()` counts it). Step order is unchanged; the fight beats take about
 3 s longer. `--tutorial-fight-check` asserts the marker shows for 3 s with no monster out, then the monsters stand on its spots.
+
+## Low-end PCs: the course at 30 fps and with stalls (`--tutorial-low-fps`)
+Every step runs on the match's fixed 60 Hz step (`Match.step`) and the garden on `FarmStep`, so a slow frame never skips
+a step. `--tutorial-check[=<arch>] --tutorial-low-fps` plays the course again on the Low preset in the game's own frame
+loop, at a 30 fps cap and at 60 fps with a 100 ms stall every 5th frame: same steps in order, none past 2x the
+fixed-step time + 5 s. `--farm-tutorial-check --tutorial-low-fps` does the same for the garden's five steps (meet, patch,
+eat, toy, out). Key taps surviving the same rates are `--low-fps-input-check`.
