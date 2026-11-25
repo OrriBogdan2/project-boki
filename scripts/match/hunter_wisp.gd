@@ -23,6 +23,7 @@ const ELIM_DIM := 0.2         # fraction of its colour the core keeps at the end
 const ELIM_FLICKER := Vector2(0.2, 0.4)   # the beat's span (0..1) in which the core shows the killer's colour
 const ELIM_SHRINK := 0.5      # fraction of its size the Wisp has left as it reaches the box
 const ELIM_BOX_FROM := 0.4    # fraction of its size the deathbox grows in from during the beat
+const STOMP_BOX_HOLD := 0.5   # fraction of the beat a stomped (executed) Wisp's box waits, hidden, before it pops up
 const BOX_TOP := 0.1          # m above the box's spot the Wisp sinks to (into it: the Wisp hovers low)
 
 ## Runs every render frame, before the hero's own basis is built: advances the state and poses the hero's
@@ -259,4 +260,8 @@ static func _pose_elim(h: Hunter, st: Dictionary) -> void:
 	(node.get_meta("mat") as ShaderMaterial).set_shader_parameter("core_col",
 			tint.darkened(1.0 - lerpf(1.0, ELIM_DIM, k)))
 	_set_glow(node, 1.0, lerpf(1.0, ELIM_DIM, k))
-	_box_scale(st, lerpf(ELIM_BOX_FROM, 1.0, _back(k)))
+	if h.get_meta("died_why", "") == "executed":
+		# the stomp's collapse: the box waits under the Wisp and pops up once it has gone down
+		_box_scale(st, maxf(_back(clampf((k - STOMP_BOX_HOLD) / (1.0 - STOMP_BOX_HOLD), 0.0, 1.0)), 0.01))
+	else:
+		_box_scale(st, lerpf(ELIM_BOX_FROM, 1.0, _back(k)))
