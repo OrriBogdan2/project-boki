@@ -665,3 +665,12 @@ Pip body `01a1c20d-dc11-75b4` (enhance on), `01a1c20d-dbac-712c` (off), head `01
 Vex body `01a1c20d-dbe6-747e`, `01a1c20d-dc12-71ff`, head `01a1c20d-db57-7423` (raws: ~/meshy/<name>/rvA, rvB). None was
 used: side by side with the shipped raws they read the same (no sharper face, hands or weapon), and the shipped raws
 already carry the fit's tuned landmarks, so each build keeps its old dense raw.
+
+### Sparkle native polish, 2026-11-24 (3 retexture tasks, 45 credits; balance 2470 before, 2425 after)
+Source `art/wardens/ryzz/ryzz_meshy.glb` uploaded (original UV, meshy-7), the turnaround's front, side and back views as styles:
+`01a20d07-7e55-75f5-aab0-8ae5f67bdf49` (front, side, back), `01a20d07-7e64-700e-8aaf-72a625addb7d` (back, front, side),
+`01a20d07-7e5f-77d8-99fe-5fa54a5d55a0` (front, back). Meshy merges the three prims into one 8192 atlas on the same mesh
+(79,979 tris, y scaled to -1..1). Remapped onto the live UVs by triangle centroid, the copper stays at the live level (value
+0.66-0.72 against the 0.45-0.62 band) and the boots at 0.27-0.30, so none was used; the shipped textures are masked grades
+(see `art/wardens/ryzz/IMPORT.md`, "Meshy-native model").
+

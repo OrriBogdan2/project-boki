@@ -1,6 +1,6 @@
 class_name WarnSfx
 extends RefCounted
-## Warning sounds nobody should miss (docs/AUDIO.md): a heartbeat under low health and the uplink lift's countdown tick.
+## Warning sounds nobody should miss (docs/AUDIO.md): a heartbeat under low health and the extraction countdown tick.
 
 const LOW_HP := 0.25  # share of max health under which the heartbeat runs
 const BEAT_S := Vector2(1.1, 0.6)  # s between beats at LOW_HP and at 0 health

@@ -65,7 +65,7 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | ryzz | clip | clip | clip | clip | proc | shared | clip | proc | shared | shared | shared | shared | shared | clip | shared | native: Meshy clips |
 | sable | clip | clip | clip | clip | proc | shared | clip | proc | shared | shared | shared | shared | shared | clip | shared | native: Meshy clips |
 | tarek | clip | clip | clip | clip | proc | shared | clip | proc | shared | shared | shared | shared | shared | clip | shared | native: Meshy clips |
-| vex | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |  |
+| vex | clip | clip | clip | clip | proc | shared | clip | proc | shared | shared | shared | shared | shared | clip | shared | native: Meshy clips |
 
 ### Starter Boki
 
@@ -86,8 +86,6 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | glaciyak | shared | shared | shared | shared | shared | shared | proc | proc |
 | glomwort | shared | shared | shared | shared | shared | shared | proc | proc |
 | goliathite | shared | shared | shared | shared | shared | shared | proc | proc |
-| limpetor | shared | shared | shared | shared | shared | shared | proc | proc |
-| moonloris | shared | shared | shared | shared | shared | shared | proc | proc |
 | moundvark | shared | shared | shared | shared | shared | shared | proc | proc |
 | murmurling | shared | shared | shared | shared | shared | shared | proc | proc |
 | nacrolin | shared | shared | shared | shared | shared | shared | proc | proc |
@@ -100,6 +98,8 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | tuatrune | shared | shared | shared | shared | shared | shared | proc | proc |
 | velvorm | shared | shared | shared | shared | shared | shared | proc | proc |
 | hoarheron | clip | shared | shared | shared | shared | shared | proc | proc |
+| limpetor | clip | shared | shared | clip | clip | clip | proc | proc |
+| moonloris | clip | shared | shared | clip | clip | clip | proc | proc |
 | nimbostrich | shared | clip | clip | shared | shared | shared | proc | proc |
 | orchisloth | shared | clip | clip | shared | shared | shared | proc | proc |
 | cindle | clip | clip | clip | clip | clip | clip | proc | proc |

@@ -17,9 +17,9 @@ const HEAT := 0.12  # teal cracks like his arm runes, wide enough to read from t
 # a Basalt Spine rock's ridge fin: one low spiked ridge that runs on from rock to rock, so the nine read as one
 # ridge. [x along the rock, height, half width at the foot]; both ends match so neighbours meet.
 const FIN_STATIONS := [[-0.7, 0.85, 0.34], [-0.38, 1.5, 0.3], [0.0, 1.0, 0.36], [0.38, 1.45, 0.3], [0.7, 0.85, 0.34]]
-const FIN_CRACK := CRACK_COL         # the fin's seam: the same rune teal as the ground cracks
-const FIN := "Ridge"                # the fin's node on every rock: shown for a Spine rock (ridge), else hidden
-const RUMBLE_GAP := 0.09             # s: a ridge of rocks rumbles as one, not nine times over
+const FIN_CRACK := CRACK_COL  # the fin's seam: the same rune teal as the ground cracks
+const FIN := "Ridge"  # the fin's node on every rock: shown for a Spine rock (ridge), else hidden
+const RUMBLE_GAP := 0.09  # s: a ridge of rocks rumbles as one, not nine times over
 const SIDES := 6
 # a crag's rings going up: [share of its height, share of its base radius]
 const TIERS := [[0.0, 1.0], [0.36, 0.84], [0.62, 0.72], [0.84, 0.56], [0.94, 0.4]]
@@ -83,8 +83,7 @@ static func _fresh(n: Node3D) -> void:
 		elif c.name == "Cracks":
 			(c as Node3D).visible = true
 			for mi in c.get_children():
-				((mi as MeshInstance3D).material_override as ShaderMaterial).set_shader_parameter(
-					"color", CRACK_COL)
+				((mi as MeshInstance3D).material_override as ShaderMaterial).set_shader_parameter("color", CRACK_COL)
 		elif c.name == FIN:
 			(c as Node3D).visible = false
 			(c as Node3D).position = Vector3.ZERO
@@ -121,15 +120,18 @@ static func upright(n: Node3D) -> void:
 		if c.name.begins_with("Col"):
 			(c as Node3D).rotation = Vector3.ZERO
 
+
 ## A rock of the Basalt Spine has an rid "<owner>.x<cast>.<n>" (BreahSpine._raise).
 static func is_ridge(rid: String) -> bool:
 	var parts := rid.split(".")
 	return parts.size() == 3 and parts[1].begins_with("x")
 
+
 ## Joins a Spine rock to its neighbours with its spiked fin and a glowing seam along its foot (the rock's
 ## collision is untouched); the crumble takes the fin down with the rock.
 static func ridge(n: Node3D) -> void:
 	(n.get_node(FIN) as Node3D).visible = true
+
 
 static func _make_fin(n: Node3D) -> void:
 	var fin := Node3D.new()
@@ -142,6 +144,7 @@ static func _make_fin(n: Node3D) -> void:
 			fin, Models.box(1.4, 0.012, 0.05), KitLooks.shade_mat(FIN_CRACK), Vector3(0, 0.04, side * 0.36)
 		)
 		seam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+
 
 static func _fin() -> Array:
 	if _crags.has(-1):
@@ -168,10 +171,14 @@ static func _fin() -> Array:
 	_crags[-1] = [st.commit(), mt]
 	return _crags[-1]
 
+
 ## The soft ground shadow: from the match camera it plants the rock on the ground.
 static func _shadow(n: Node3D) -> void:
 	var s := Models.part(
-		n, Models.cyl(1.0, 1.0, 0.01, 18), KitLooks.shade_mat(Color(0.02, 0.03, 0.05, 0.34)), Vector3(0.06, 0.03, 0.03),
+		n,
+		Models.cyl(1.0, 1.0, 0.01, 18),
+		KitLooks.shade_mat(Color(0.02, 0.03, 0.05, 0.34)),
+		Vector3(0.06, 0.03, 0.03),
 		Vector3(0.95, 1.0, 0.68)
 	)
 	s.name = "Shadow"
@@ -231,8 +238,12 @@ static func _cracks(n: Node3D) -> void:
 		var a := TAU * i / 7.0 + KitLooks.vis_rng.randf() * 0.4
 		var len_v := 0.35 + KitLooks.vis_rng.randf() * 0.45
 		Models.part(
-			cracks, Models.box(0.035, 0.012, len_v), KitLooks.shade_mat(CRACK_COL),
-			Vector3(cos(a), 0.04, sin(a)) * (0.55 + len_v * 0.5), Vector3.ONE, Vector3(0, -a + PI * 0.5, 0)
+			cracks,
+			Models.box(0.035, 0.012, len_v),
+			KitLooks.shade_mat(CRACK_COL),
+			Vector3(cos(a), 0.04, sin(a)) * (0.55 + len_v * 0.5),
+			Vector3.ONE,
+			Vector3(0, -a + PI * 0.5, 0)
 		)
 	for mi in cracks.get_children():
 		(mi as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF

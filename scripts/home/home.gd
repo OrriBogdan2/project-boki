@@ -1149,6 +1149,7 @@ func _see_through() -> void:
 	SeeThrough.update(cam, player.global_position, b)
 
 func _exit_tree() -> void:
+	RigPace.crowd = 0
 	ZoneLayout.leave()
 	SeeThrough.off()
 	Sfx.clear_amb_layers()
@@ -1400,6 +1401,7 @@ func _move_kin(d: float) -> void:
 	_separate_kin(d)
 	if life: life.step(d)
 	nap_sound.step(kins, d)
+	RigPace.crowd = kins.size()
 	for k in kins:
 		if k.get("busy", false):
 			fly.land(k)
@@ -5018,7 +5020,10 @@ func _separate_kin(d: float) -> void:
 			if j == i: continue
 			var b: Dictionary = act[j]
 			var diff := ap - Vector2(b["pos"].x, b["pos"].z)
-			var need := (_kin_r(a) + _kin_r(b)) * (life.pile(a, b) if life else 1.0)
+			var reach := _kin_r(a) + _kin_r(b)  # (the pile scale is under 1: nobody past this is pushed)
+			if diff.length_squared() >= reach * reach:
+				continue
+			var need := reach * (life.pile(a, b) if life else 1.0)
 			var dl := diff.length()
 			if dl < need:
 				if dl < 0.001: diff = Vector2.from_angle(float(i) * 2.4); dl = 0.001
