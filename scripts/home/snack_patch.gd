@@ -4,7 +4,8 @@ extends RefCounted
 ## exactly one patch (granted to storage if there is none, put down in the Garden tab). It ripens its zone's snacks
 ## (or the start garden's four and a rotating extra) and the season's snack (GardenSeasons) when that list lacks it,
 ## on a timer (content/rules/snack_patch.json), and walking over it picks them up for the pantry, to feed the lean
-## foods. Never sold, no seeds, no watering. The timer is the deco entry's "t" (unix seconds of the last pick).
+## foods. Never sold, no seeds. A Tide Boki waters it (BaseChore): it then ripens faster until the next pick.
+## The timer is the deco entry's "t" (unix seconds of the last pick), the watering its "wt".
 
 const ID := "snack_patch"
 
@@ -54,15 +55,36 @@ static func entry(d: Dictionary) -> Dictionary:
 	return {}
 
 static func ripe(e: Dictionary, now: float) -> bool:
-	return not e.is_empty() and now - float(e.get("t", now)) >= grow_secs()
+	return not e.is_empty() and now - float(e.get("t", now)) >= grow_secs(e)
 
-## Seconds the patch takes to ripen in the zone you are in (shorter with a Sunny patch, DecorComfort). A save's first
-## batch (Save.d snack_picks 0, the starter gift) takes first_grow_secs; saves without the counter are not new.
-static func grow_secs() -> float:
+## Seconds the patch takes to ripen in the zone you are in (shorter with a Sunny patch, DecorComfort, and with a
+## watered patch `e`: BaseChore's Tide chore). A save's first batch (Save.d snack_picks 0, the starter gift) takes
+## first_grow_secs; saves without the counter are not new.
+static func grow_secs(e := {}) -> float:
 	var base := float(rules()["grow_secs"])
 	if int(Save.d.get("snack_picks", 1)) <= 0:
 		base = minf(base, float(rules()["first_grow_secs"]))
-	return base * DecorComfort.value("bright", "grow", 1.0)
+	return base * DecorComfort.value("bright", "grow", 1.0) \
+		* (float(rules()["water_mult"]) if watered(e) else 1.0)
+
+## Watered since the last pick (the entry's "wt", unix seconds): a pick makes it dry again.
+static func watered(e: Dictionary) -> bool:
+	return e.has("wt") and e.has("t") and float(e["wt"]) >= float(e["t"])
+
+## A patch that is down, still growing and dry: what a Tide Boki walks to.
+static func dry(e: Dictionary, now: float) -> bool:
+	return not e.is_empty() and e.has("t") and not watered(e) and not ripe(e, now)
+
+static func water(e: Dictionary, now: float) -> void:
+	e["wt"] = now
+
+## The crunch a snack makes when picked: "crisp", "juicy", "hard" or "soft", by its lean type (pick_textures).
+static func texture(snack: String) -> String:
+	var type := Lean.key_of(snack)
+	for t in rules()["pick_textures"]:
+		if (rules()["pick_textures"][t] as Array).has(type):
+			return String(t)
+	return "crisp"
 
 ## Picks the ripe snacks into the pantry. Returns the snack ids picked ([] when not ripe).
 static func harvest(d: Dictionary, now: float) -> Array:
@@ -121,11 +143,14 @@ func tick(d: float) -> void:
 	if now_ripe != _ripe:
 		_ripe = now_ripe
 		h.hb.apply(false)          # redraws the patch in its new stage
+		if now_ripe and not _on_it(e):
+			GardenSfx.snack_ripe(HomeLayout.deco_center(e))
 	if now_ripe and _on_it(e):
 		var got := harvest(Save.d, now)
 		_ripe = false
 		h.hb.apply(false)
 		h._toast("Picked: " + ", ".join(got.map(func(s): return Care.food_name(s))))
+		GardenSfx.snack_pick(h, HomeLayout.deco_center(e), got)
 		h.fx.burst(HomeLayout.deco_center(e) + Vector3(0, 0.5, 0), Color("ffe08a"), 10, 1.5, 0.4)
 
 func _on_it(e: Dictionary) -> bool:
