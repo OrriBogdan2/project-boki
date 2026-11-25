@@ -17,8 +17,8 @@ contract (RIG_CONTRACT.md). The game adapts to Meshy: its bones are never rename
   content/rules/drop_poses.json) and the landing squash (WardenClips.lay_feel: HunterAnim's land_k by weight class,
   content/rules/land_feel.json, times WardenClips.LAND_SQUASH, on Meshy's `Hips` about the feet; the Hips scale goes
   back to rest each frame, as Meshy keys none). The clips advance by hand in `_process` (AnimationMixer manual mode),
-  then the layers. Still off: springs, look-at, the run-start lean, blink, moods. `WardenGlb.layers(model)` is the
-  layer node either way.
+  then the layers. The head's look-at (WardenLookAt, LOOK_AT.md) runs on `Head`, with `neck` and `Spine02` taking a
+  share. Still off: springs, the run-start lean, blink, moods. `WardenGlb.layers(model)` is the layer node either way.
 - Extract: the beat (`WardenClips.leave_t`, 0.7 s) plays Meshy's crouch for the dip, then its jump for the take-off.
 - Anchors from the contract `.glb` (every `anchor_*` and `weapon_muzzle*` data `anchors` does not place) ride the Meshy
   bone `find` names for their contract bone at the same offset from its head; one on a bone with no stand-in (a tail
@@ -128,6 +128,14 @@ no retarget; the string follows the drawing hand on `StringMid`): `lace_draw`, `
 `--warden-native-check` rows (per kit move): the clip is there, plays on the move and is no T-pose; a hold loop stays in
 `[hold_from, end]` while the move lasts and is gone when it ends; a release has the string drawn on its first frame and
 back on the bow a frame later.
+
+## Look-at on Meshy's bones
+`WardenLookAt.make(model, skel, true)`: the same layer, limits (70 deg yaw, 25 deg pitch) and smoothing as the contract path,
+laid after the clip and the air tilt. The turn is shared down Meshy's chain so the head's total turn is the contract's
+figure: the chest (`Spine02`, `WardenSkeleton.find "hips"`) takes 20% of the yaw, the neck (the head bone's parent) 30% of
+yaw and pitch, the head the rest. It is off for the same states as the contract path, and under Meshy's Attack clip (which
+plays for any swing, cast or kit move): the layer eases out as that clip takes the body (`owned`, over `FADE`) and back in
+after it, so it does not fight a clip that already turns the head. `--look-at-check` runs it on every native Hunter.
 
 ## Not on the native path (yet)
 Death, stun, ledge, emote and clips for moves beyond the slots above (Meshy gave six); the contract's per-hunter extras (Tenzo's

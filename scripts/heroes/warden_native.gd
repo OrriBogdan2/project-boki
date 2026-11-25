@@ -4,7 +4,7 @@ extends Node
 ## Hunters switched on in content/rules/warden_native.json ("meshy_native") take this path; every other one keeps the
 ## contract model (WardenGlb, WardenSync, WardenClips) untouched. Meshy's bones are never renamed, retargeted or merged
 ## onto the contract: the clips play on them as Meshy keyed them; of the contract's procedural bone layers the springs
-## and look-at are not built, the drop pose and the landing squash are (on WardenSkeleton.find's stand-ins). The
+## are not built, the look-at, the drop pose and the landing squash are (on WardenSkeleton.find's stand-ins). The
 ## contract's anchor empties hang on Meshy's bones as BoneAttachment3D nodes (data "anchors"), and the weapon's aim
 ## node rides Meshy's hand bone. HunterAnim still runs
 ## on the hidden rig and hands over its state (WardenClips.STATE) each frame. The surfaces take the game's hero-toon
@@ -65,6 +65,7 @@ var orbits := WardenOrbits.new()  # the contract model's orbit props (Tenzo's se
 var flinch: WardenFlinch
 var wall: WardenWall
 var opener: WardenOpen
+var head_look: WardenLookAt  # the head (and a share of the neck and chest) turns to the aim ahead of the body
 var drop_pose: WardenDropPose
 var heart_w := 0.0  # how far the Heartspark carry (WardenCarry.hold_mote) holds the mote (as WardenClips.heart_w)
 var torso_bi := -1  # Meshy's bone standing in for the rig's torso (WardenSkeleton.find "hips": Spine02)
@@ -158,6 +159,7 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	flinch = WardenFlinch.make(model, skel)
 	wall = WardenWall.make(model, skel)
 	opener = WardenOpen.make_on(model, skel)
+	head_look = WardenLookAt.make(model, skel, true)
 	drop_pose = WardenDropPose.make(model, skel)
 	if d.has("crouch_arms_from"):
 		plays["crouch"] = _arms_swapped("crouch", String(d["crouch_arms_from"]))
@@ -218,6 +220,9 @@ func _process(dt: float) -> void:
 	player.advance(dt)
 	moves.lay(mv, dt)  # (an upper clip over the legs': Cinder's lance, aim, shot, cloak)
 	WardenClips.air_tilt(root, skel, hips)  # (the glider's bank, the dive's pitch)
+	# (the look-at lies under a clip that turns the head: the attack clip owns it, eased in and out like a body clip)
+	head_look.owned = move_toward(head_look.owned, 1.0 if attack_left > 0.0 else 0.0, dt / FADE)
+	head_look.step(dt, null)
 	_heart(bool(s.get("heart", false)) and attack_left <= 0.0 and not WardenCarry.owns(String(s.get("kmove", ""))), dt)
 	if opener:
 		opener.busy = attack_left > 0.0 and attack_move  # (as clips.busy: a kit move's clip owns the body)

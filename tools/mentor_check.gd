@@ -56,7 +56,7 @@ func run(m: Node) -> void:
 	ok(not Work.can_work(elder), "a mentor takes no jobs")
 	ok(Mentor.pace(elder) < Mentor.pace(young), "a mentor walks slowly")
 	_gifts(elder, young, mate)
-	await _roundtrip(elder, young, mate)
+	_roundtrip(elder, young, mate)
 	await _base(elder, young, mate)
 	rules["base_mode"] = false
 	print("MENTOR DONE, failures: %d" % bad)
