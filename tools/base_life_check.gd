@@ -184,7 +184,7 @@ func _notice_part(home, center: Vector3) -> void:
 	var gap := BaseLife._dist(k, {"pos": home.ppos})
 	for _i in int(float(r["follow_s"]) / DT) + 6:
 		home._move_kin(DT)
-		if m.is_in(BaseLife.S.ROAM):
+		if not m.is_in(BaseLife.S.GREET):  # left the greeting (Roam may hand on to Play With at once)
 			break
 	var now := BaseLife._dist(k, {"pos": home.ppos})
 	ok(now < gap, "it followed you as you walked off (%.1f m gap, was %.1f)" % [now, gap])

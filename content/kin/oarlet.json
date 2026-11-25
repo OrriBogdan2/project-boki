@@ -1,0 +1,13 @@
+{
+	"grammar": 1,
+	"id": "oarlet",
+	"name": "Oarlet",
+	"theme": "tide",
+	"flavor": "Otter pup, tail a little paddle.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "oarlet",
+		"stage": 1
+	}
+}

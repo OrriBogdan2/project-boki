@@ -25,6 +25,7 @@ func run(main_node: Node) -> void:
 	await _all()
 	await _hook_hold()
 	await _slam_tell()
+	await _anchor_spike()
 	await _dash_moves()
 	await _glide_wins()
 	await _parity_gun()
@@ -1100,3 +1101,32 @@ func _parity_gun() -> void:
 		"%.2f / %.2f / %.2f" % [float(keys[1][0]), float(keys[-2][0]), float(keys[-1][0])]
 	)
 	await ak.done(m)
+
+
+## docs/SPIKE_SLAM.md: the ground Anchor Drop spikes a foe in the air (driven down).
+func _anchor_spike() -> void:
+	var r: Array = ak.setup("dredge", 6.0, "", true)
+	var m: Match = r[0]
+	var p_h: Hunter = r[1]
+	var t_h: Hunter = r[2]
+	var home: Vector3 = r[4]
+	var kit: DredgeKit = p_h.ak
+	t_h.teleport(home + Vector3(2.0, 1.2, 0))
+	ak.fresh(t_h)
+	ak.aim_at(p_h, home + Vector3(2.0, 0, 0))
+	kit.cd["e"] = 0.0
+	p_h.ak.use_e()
+	var t := 0.0
+	while kit.anchors == 0 and t < 1.0:
+		t_h.pos.y = home.y + 1.2      # held in the air until the slam frame
+		t_h.vel = Vector3.ZERO
+		t_h.grounded = false
+		m.step(ak.DT)
+		t += ak.DT
+	var vy := t_h.vel.y
+	for i in 6:      # the cone's hit lands within a few frames of the slam
+		m.step(ak.DT)
+		vy = minf(vy, t_h.vel.y)
+	# the data's 16 m/s, which a hunter's fall cap (HunterMove.fall_max, 12) clamps on its next tick
+	ok("anchor spike: the ground Anchor Drop drives a foe in the air down (at the fall cap at once)",
+		kit.anchors == 1 and vy <= -HunterMove.fall_max + 0.5, "anchors %d vy %.1f" % [kit.anchors, vy])

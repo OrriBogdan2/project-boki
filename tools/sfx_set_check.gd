@@ -167,6 +167,7 @@ func run(main: Node) -> void:
 	_strip_chime()
 	_chop_mine()
 	_rarity_stings()
+	_carry()
 	await _call_loop(main)
 	await _encore_loop(main)
 	_hostile()

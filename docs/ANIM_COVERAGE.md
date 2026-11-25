@@ -136,9 +136,9 @@ Worst five, backlog-ready:
 
 - [anim] Boki casquebill (No. 9): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/casquebill_anim.py, rebuild the .glb, rerun --anim-coverage-check
 - [anim] Boki duskapi (No. 11): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/duskapi_anim.py, rebuild the .glb, rerun --anim-coverage-check
-- [anim] Boki floenatee (No. 12): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/floenatee_anim.py, rebuild the .glb, rerun --anim-coverage-check
-- [anim] Boki gibbelle (No. 13): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/gibbelle_anim.py, rebuild the .glb, rerun --anim-coverage-check
-- [anim] Boki glaciyak (No. 14): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/glaciyak_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki floenatee (No. 13): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/floenatee_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki gibbelle (No. 14): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/gibbelle_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki glaciyak (No. 15): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/glaciyak_anim.py, rebuild the .glb, rerun --anim-coverage-check
 
 ### Mobs
 

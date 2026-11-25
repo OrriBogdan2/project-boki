@@ -1,0 +1,13 @@
+{
+	"grammar": 1,
+	"id": "fizzlet",
+	"name": "Fizzlet",
+	"theme": "storm",
+	"flavor": "Ostrich chick puffed with static fuzz.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "fizzlet",
+		"stage": 1
+	}
+}

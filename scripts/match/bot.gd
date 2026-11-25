@@ -388,6 +388,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		# or mid-drop)
 		var heal_ok: bool = h.grounded or (not h.gliding and not h.dropping and not h.over_void())
 		if heal_ok:
+			BotShop.think(m, h)
 			BotBelt.think(m, h, a, inp)  # tonic, armor kit and the rest of the belt (bot_belt.gd)
 		# swap a fainted kin out for the other one
 		if h.kin and (h.kin as Kin).state == "downed" and h.kin2 and (h.kin2 as Kin).hp > 0.0:
@@ -602,6 +603,7 @@ func _revive_plan(m: Match, h: Hunter) -> Dictionary:
 	# who's a threat: a rival on the wisp (blocks the revive), or anything hostile right next to us
 	var dz: Ent = null
 	var dd := 1e9
+	var cur = h.ai.get("tgt")  # (the one we are on keeps a TGT_KEEP lead: two at one range swapped every tick)
 	for st in best.get_meta("stompers", []):
 		if is_instance_valid(st) and not (st as Hunter).dead and not (st as Hunter).downed:
 			dz = st
@@ -618,16 +620,18 @@ func _revive_plan(m: Match, h: Hunter) -> Dictionary:
 			):
 				continue
 			var d := h.flat_dist(o)
-			if d < RV_DANGER and d < dd and absf(o.pos.y - h.pos.y) < 2.0:
+			var sc := d - (TGT_KEEP if o == cur else 0.0)
+			if d < RV_DANGER and sc < dd and absf(o.pos.y - h.pos.y) < 2.0:
 				dz = o
-				dd = d
+				dd = sc
 		for mb in m.mobs:
 			if mb.dead or (mb is Boss and (mb as Boss).dormant):
 				continue
 			var d := h.flat_dist(mb)
-			if d < RV_DANGER * 0.8 and d < dd and absf(mb.pos.y - h.pos.y) < 2.0 and mb.tgt == h:
+			var sc := d - (TGT_KEEP if mb == cur else 0.0)
+			if d < RV_DANGER * 0.8 and sc < dd and absf(mb.pos.y - h.pos.y) < 2.0 and mb.tgt == h:
 				dz = mb
-				dd = d
+				dd = sc
 	if dz:
 		plan["danger"] = dz
 	return plan
@@ -1080,6 +1084,11 @@ func _choose(m: Match, h: Hunter) -> void:
 		if og != Vector3.INF:
 			goal = og
 			gk = "orb"
+	if goal == Vector3.INF:
+		var sg := BotShop.goal(m, h)  # spare gems and a vendor close: go shopping
+		if not sg.is_empty():
+			goal = sg[0]
+			gk = String(sg[1])
 	# someone asked us to follow them (a Follow me emote from a teammate or truce partner)
 	if goal == Vector3.INF and a.has("follow"):
 		var fw: Dictionary = a["follow"]

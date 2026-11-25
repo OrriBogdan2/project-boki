@@ -512,7 +512,7 @@ func _ready_rest() -> void:
 				get_tree().create_timer(0.3).timeout.connect(func():
 					var before := sc.scroll_vertical
 					if "--no-keep-scroll" in dbg: set_meta("no_keep_scroll", true)
-					Save.d["exp_rolling"] = not Save.d.get("exp_rolling", false)
+					Save.d["exp_mode"] = "solos" if Data.saved_mode() == "trios" else "trios"
 					_open_expedition()
 					get_tree().create_timer(0.5).timeout.connect(func():
 						var sc2 := _panel_scroll()
@@ -1313,7 +1313,7 @@ func _move_player(d: float) -> void:
 			wedge_t = 0.0
 			unstick()
 	gh = _ground_h(ppos.x, ppos.z)
-	air = py > gh + 0.001 or pvy > 0.0
+	air = pvy > 0.0 or (py > gh + 0.001 and (air or not HunterMove.sticks(py - gh)))     # down a flight: still standing
 	# jump; in the air, a second press (or the glide key) opens the glider; holding Space never does
 	var over := py - gh if gh > World.VOID + 1.0 else INF
 	var jump := mover.jump(can_act and lfl.is_empty() and mover.pressed(&"jump")

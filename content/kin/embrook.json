@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "embrook",
+	"name": "Embrook",
+	"theme": "ember",
+	"type2": "tempest",
+	"flavor": "Rook with a coal-bed back and cinder wings.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "kindlewren",
+		"stage": 2,
+		"from": "kindlewren"
+	}
+}
