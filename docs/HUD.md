@@ -91,12 +91,14 @@ never from the kit:
 | tick | burn and poison ticks, or any hit flagged `tick` | 62% | the burn colour (`DotLook.COL`) | lower on the body; one number per second |
 
 Crits keep their colour, thick ember outline and bigger pop in the hit and Boki looks; armour keeps its colour.
+The size steps up with the damage (`Fx.SIZE_TIERS`, on our health scale since 11-24: a dart or a pellet 34 px, a rifle
+round or a slash 40, an ability hit 48, a heavy ability 58, an ult 70), so a big hit reads big next to the LMB.
 Numbers of different looks (or a heal, `Fx.Num.HEAL`) never add onto each other; a number on a Boki is
 smaller again (`Juice.BOKI_NUM_K`). All of them share one pool of `Fx.NUM_POOL` labels, so
 the draw cost doesn't grow with the sources. Numbers on one spot keep apart (`NumSpacing`): each frame a smaller
 number printed over a bigger one (same size: the newer over the older) slides sideways just clear of it, so a focused
 target's rolled hit, tick, heal and a tick floating off never pile up; at most 3 over one spot in a trio focus.
-Checks: `--number-looks-check`, `--dmg-number-check`; shots: `--dmg-number-shots` (GPU, `dmgnum_2_trio_crop`).
+Checks: `--number-looks-check`, `--dmg-number-check`; shots: `--dmg-number-shots` (GPU, `dmgnum_2_trio_crop`, `dmgnum_3_sizes`).
 
 ## Boki HUD: decision, state, gaps
 
