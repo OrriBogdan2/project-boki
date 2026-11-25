@@ -343,7 +343,8 @@ func _shroud() -> void:
 	ok(not wine.is_equal_approx(_coat(other)) and absf(wine.h - Unmasked.COLOURS[5].h) < 0.05,
 		"the shroud colour sets the cloth's colour")
 	var dark := _coat(_build({"unmasked": true, "shroud": 0, "colour": 2}))
-	ok(dark.v >= Shrouds.CLOTH_VALUE["body"] - 0.01, "a dark shroud colour is drawn no darker than the cloth's floor (%.2f)" % dark.v)
+	var floor_v: float = Shrouds.CLOTH_VALUE["body"]
+	ok(dark.v >= floor_v - 0.01, "a dark shroud colour is drawn no darker than the cloth's floor (%.2f)" % dark.v)
 	var hand := cloak.find_child("Hand", true, false)
 	var hand_void := false
 	for mi in hand.find_children("*", "MeshInstance3D", false, false):
