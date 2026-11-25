@@ -600,39 +600,39 @@ func _all() -> void:
 	if is_instance_valid(wall.get("node")): (wall["node"] as Node).queue_free()
 	# --- owner rule, placed walls: Tenzo's ridge (his rocks) and Albert's raised shield stop the Hand too
 	reset.call()
-	var rock: Dictionary = HeroZones.rock(m, T, home + Vector3(4.0, 0, 0), Vector2.RIGHT, "kit_rk", 4.0, 60.0, 9999.0)
-	dm0 = ak.dmg(T)
-	gw0 = K.grapples
-	_throw(m, P)
+	var rock: Dictionary = HeroZones.rock(m, t, home + Vector3(4.0, 0, 0), Vector2.RIGHT, "kit_rk", 4.0, 60.0, 9999.0)
+	dm0 = ak.dmg(t)
+	gw0 = k.grapples
+	_throw(m, p)
 	ok(
 		"Tenzo ridge: a rock of his stops the Deep Reach, no hook and no damage behind it",
-		not rock.is_empty() and K.pull.is_empty() and ak.dmg(T) <= dm0 and K.grapples == gw0,
-		"grapples +%d took %.1f" % [K.grapples - gw0, ak.dmg(T) - dm0]
+		not rock.is_empty() and k.pull.is_empty() and ak.dmg(t) <= dm0 and k.grapples == gw0,
+		"grapples +%d took %.1f" % [k.grapples - gw0, ak.dmg(t) - dm0]
 	)
 	m.verbs.walls.erase(rock)
 	if is_instance_valid(rock.get("node")): (rock["node"] as Node).queue_free()
 	reset.call()
 	var AL: Hunter = m.make_hunter(
-		"AL", T.team, "heavy", "Albert", "idle", {}, home + Vector3(4.0, 0, 0), {"arch": "bulwark"}
+		"AL", t.team, "heavy", "Albert", "idle", {}, home + Vector3(4.0, 0, 0), {"arch": "bulwark"}
 	)
 	AL.set_arch("bulwark")
 	AL.max_hp = 1e9
 	AL.hp = AL.max_hp
-	ak.aim_at(AL, P.pos)
+	ak.aim_at(AL, p.pos)
 	m.step(ak.DT)
 	(AL.ak as BulwarkKit)._raise()
-	dm0 = ak.dmg(T)
-	gw0 = K.grapples
-	_throw(m, P)
+	dm0 = ak.dmg(t)
+	gw0 = k.grapples
+	_throw(m, p)
 	ok(
 		"Albert shield: his raised aegis stops the Deep Reach, no hook and no damage behind it",
-		K.pull.is_empty() and ak.dmg(T) <= dm0 and K.grapples == gw0,
-		"grapples +%d took %.1f" % [K.grapples - gw0, ak.dmg(T) - dm0]
+		k.pull.is_empty() and ak.dmg(t) <= dm0 and k.grapples == gw0,
+		"grapples +%d took %.1f" % [k.grapples - gw0, ak.dmg(t) - dm0]
 	)
-	for w in m.verbs.walls.duplicate():
-		if w.get("by") == AL:
-			m.verbs.walls.erase(w)
-			if is_instance_valid(w.get("node")): (w["node"] as Node).queue_free()
+	for wl in m.verbs.walls.duplicate():
+		if wl.get("by") == AL:
+			m.verbs.walls.erase(wl)
+			if is_instance_valid(wl.get("node")): (wl["node"] as Node).queue_free()
 	AL.queue_free()
 	m.hunters.erase(AL)
 	m.step(ak.DT)
