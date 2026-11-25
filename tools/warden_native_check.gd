@@ -149,6 +149,7 @@ func _states(main: Node, a: String) -> void:
 	await _slots(main, a, m, nat)
 	await _upper(main, a, m, nat)
 	_twist(a, nat)
+	_blends(a)
 	await _kmoves(main, a, m, nat)
 	_only_meshy(a, m)
 	await _orbits(main, a, nat)
@@ -333,6 +334,17 @@ func _twist(a: String, nat: WardenNative) -> void:
 	)
 	nat.twist.step(1.0, {"vel": Vector3.ZERO, "face": 0.0}, true)
 	ok(absf(nat.twist.turn) < 0.01, "%s: standing, the legs face the aim again" % a)
+
+
+## The clip blends: the glide opens at once and lets go over 0.2 s, the dash comes in over 0.25 s, the rest 0.15 s.
+func _blends(a: String) -> void:
+	var got := [
+		WardenNative.blend_s("run", "glide"),
+		WardenNative.blend_s("glide", "run"),
+		WardenNative.blend_s("run", "dash"),
+		WardenNative.blend_s("run", "jump")
+	]
+	ok(got == [0.0, 0.2, 0.25, 0.15], "%s: blends glide in/out, dash in, other: %s" % [a, got])
 
 
 ## A clips file (made here: a skeleton under another node name, one clip named SYNTH) lends its clip to a slot.

@@ -14,6 +14,8 @@ const DATA_PATH := "res://content/rules/warden_native.json"
 const META := "meshy_native"  # root meta: this Hunter is drawn on Meshy's skeleton
 const STILL := 0.25  # m/s: below this he is standing
 const FADE := 0.15  # s: one clip into the next
+const GLIDE_OUT := 0.2  # s: the glide clip back into the next one (it opens at once)
+const DASH_IN := 0.25  # s: the dash clip over the body
 const RATE_MIN := 0.6  # the walk, run and sneak clips' slowest rate, of their keyed pace
 const RATE_MAX := 1.8  # and their fastest: a quicker stride keeps the feet nearer the ground speed
 const ATTACK_AGAIN := 0.6  # share of the attack clip after which a new hit starts it over
@@ -434,10 +436,20 @@ func _clip_len(st: String) -> float:
 	return player.get_animation(String(plays[st])).length
 
 
+## Seconds the clip of state `to` blends in over the one of state `from`: the glide opens at once and lets go slower,
+## the dash takes the body gradually, everything else FADE.
+static func blend_s(from: String, to: String) -> float:
+	if from == "glide":
+		return GLIDE_OUT
+	if to == "glide":
+		return 0.0
+	return DASH_IN if to == "dash" else FADE
+
+
 ## The game state's clip, crossfaded in when it changes (restart: a new attack plays it from the start).
 func _play(st: String, rate: float, restart := false) -> void:
 	if st != cur or restart:
-		player.play(String(plays[st]), FADE)
+		player.play(String(plays[st]), blend_s(cur, st))
 		if restart:
 			player.seek(0.0, true)
 		cur = st
