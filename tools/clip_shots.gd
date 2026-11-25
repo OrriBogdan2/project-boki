@@ -336,6 +336,7 @@ func _native_moves(model: Node3D, poser: Node, fps: float, dir: String, i: int) 
 			poser.call("_process", 1.0 / fps)
 			await _grab(dir.path_join("f%03d.png" % i))
 			i += 1
+	return i
 
 
 ## --states, native: each slot of data "clips" from SLOT_SHOTS pressed once on the stand (held slots run 1 s).
