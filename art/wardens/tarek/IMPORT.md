@@ -120,3 +120,21 @@ Scripts, specs, renders: /home/boki/gens/hunter-round-1124/tenzo/C/.
   [0.36, 0.9, 0.72], alpha 0.40, 0.30 m, depth_test on (a stone turned away only rims; depth_test off washed the cobalt
   rock teal: rejected). Halos unchanged. The screen-sized halos alone sat inside the brighter cobalt rock (round 27+)
   and only lifted it to light blue at the long-lens judge view.
+
+### Round 33 (2026-11-25, job 20261125-102228-a1): eyed seeing-stones, no bloom
+Owner on r32: the bloom puffs were flat mint discs wider than the stones that washed over the body, and the stones read
+as blank cups. So:
+- `warden_look.json` tarek: the r32 `bloom` block is gone (halos kept as live, px 5.5, now sitting on the eye).
+- `tarek.glb` mesh `eye_stone` (stone_0-2 share it) is now the Meshy eye-rock of job 20261120-053503-a6 (m4 retexture
+  pick, 5480 tris; game copy from ext/tenzo-eye-rocks-1120): cobalt cracked slate, almond eye with a slit pupil.
+  Turned 180 deg about Y (its eye faced +Z; the seeing-stone eye is -Z, warden_orbits._face), 0.17 m tall, material
+  `leather-eyerock` (base jpg + eye-only emission mask, embedded; Godot extracts `tarek_eyerock_{base,emit}.jpg`).
+  The new primitive, images and material are APPENDED: all 5306 old bufferViews are byte-identical (the old rock and
+  disc accessors are left unused). Not decimated: Blender collapse tore the UV seams; Godot's import LODs thin it at range.
+- Ring: stone_0-2 translations x/z x0.72, y +0.08 m (the front stone sits at the chest at the match camera, not on
+  the belly/bare hand). anchor_stones_0-2 moved onto the eye's front.
+- Look slot `leather-eyerock`: desat 0.45, albedo 1.2, emit 5.0 (the emission is a mask in dolm's model_glow teal, the
+  same teal as the arm runes).
+- Rejected: ring tilted 25/35 deg (front up) turns the back stones' eyes away (eye.camera median 0.78 -> 0.56/0.43);
+  ring x0.6 +0.2 m puts the front stone over the face.
+Tools: gens/hunter-round-1124/tenzo/G/scripts/{swap_rock,ring,slot,eyepitch}.py. Sheets: G/GAME_tenzo_r33_*.jpg.
