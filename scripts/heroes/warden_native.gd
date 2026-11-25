@@ -17,7 +17,7 @@ const FADE := 0.15  # s: one clip into the next
 const RATE_MIN := 0.6  # the walk, run and sneak clips' slowest rate, of their keyed pace
 const RATE_MAX := 1.8  # and their fastest: a quicker stride keeps the feet nearer the ground speed
 const ATTACK_AGAIN := 0.6  # share of the attack clip after which a new hit starts it over
-const LEGS_RUN := ["walk", "run", "crouch"]  # the states where the legs carry him: they turn to his way (WardenNativeTwist)
+const LEGS_RUN := ["walk", "run", "crouch"]  # the states where the legs carry him (they turn to his way)
 const LOOPS := ["idle", "walk", "run", "crouch"]
 ## Clip slots data "clips" may add beside the six states; a missing one plays today's clip (MESHY_NATIVE.md).
 ## Swing and cast one-shots (the attack clip without them): lmb, lmb_hold (a charged swing), rmb, e, r (the kit's cast
