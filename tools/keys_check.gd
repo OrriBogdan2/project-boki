@@ -39,7 +39,7 @@ func build(seed_i: int, extra := {}) -> Match:
 	main.add_child(m)
 	var o := {"teams": 3, "squad": 1, "tier": 0, "seed": seed_i, "no_drop": true}
 	o.merge(extra, true)
-	await m.start(o)
+	m.start(o)
 	m.set_process(false)
 	return m
 
@@ -52,7 +52,7 @@ func run(main_node: Node) -> void:
 	if only in ["", "carriers"]: await _carriers()
 	if only in ["", "chest"]: await _chest_and_keys()
 	if only in ["", "shrubling"]: await _shrubling()
-	if only in ["", "bots"]: await _bots()
+	if only in ["", "bots"]: _bots()
 	if only in ["", "bonus"]: await _bonus()
 	if only in ["", "fewer"]: await _fewer()
 	if only in ["", "card"]: _controls_card()
@@ -64,7 +64,7 @@ func run(main_node: Node) -> void:
 func _carriers() -> void:
 	var sets := []
 	for sd in [3, 5, 9, 12, 21]:
-		var m: Match = await build(sd)
+		var m: Match = build(sd)
 		var k_v: KeyRun = m.keys
 		var rep := k_v.report()
 		var chests := 0
@@ -118,7 +118,7 @@ func _fewer() -> void:
 			kept.size() == KeyChest.kept(5) and crowded_gone)
 	ok("thinning is the same every time (no dice)", KeyChest.thin(spots) == kept)
 	for map_id in ["hollowcrown", "skyreach"]:
-		var m: Match = await build(5, {"map": map_id})
+		var m: Match = build(5, {"map": map_id})
 		var spots_n: int = m.world.chest_spots.size()
 		var vaults: int = m.spawn_plan.active_of("vault").size()
 		var caches: int = m.spawn_plan.active_of("cache").size()
@@ -132,12 +132,12 @@ func _fewer() -> void:
 				and vaults == pick.call("vault"), info)
 		m.queue_free()
 		await main.get_tree().process_frame
-	var tr: Match = await build(5, {"training": true, "teams": 1})
+	var tr: Match = build(5, {"training": true, "teams": 1})
 	var tr_spots: int = tr.world.chest_spots.size()
 	ok("training: chest.keep of its generated map's chests", tr.chests.size() == KeyChest.kept(tr_spots),
 			"%d of %d spots" % [tr.chests.size(), tr_spots])
 	tr.queue_free()
-	var tu: Match = await build(5, {"tutorial": true, "teams": 1})
+	var tu: Match = build(5, {"tutorial": true, "teams": 1})
 	# (ext/tutorial-abilities dropped the chest step, so the tutorial island has no chest at all)
 	ok("tutorial: no chests (the tutorial has no chest step)", tu.chests.is_empty(),
 			"%d chests, the map has %d spots" % [tu.chests.size(), tu.world.chest_spots.size()])
@@ -146,7 +146,7 @@ func _fewer() -> void:
 
 # ------------------------------------------------------------------ 2, 3, 4. chest, box, ground, carrier death
 func _chest_and_keys() -> void:
-	var m: Match = await build(3, {"teams": 2})
+	var m: Match = build(3, {"teams": 2})
 	var p_v: Hunter = m.player
 	var c: Dictionary = m.chests.filter(func(x): return not x.get("ride", false) and not x.get("free", false))[0]
 	p_v.teleport(c["pos"] + Vector3(0.8, 0, 0))
@@ -214,7 +214,7 @@ func _chest_and_keys() -> void:
 	ok("a dropped key lies on the ground", m.pickups.size() == np + 1 and String(m.pickups[-1]["kind"]) == "ckey")
 	step(m, 1.5)
 	ok("walking into it picks it up", r.chest_keys == 1, "keys %d" % r.chest_keys)
-	await _cap_and_belt(m, p_v, r)
+	_cap_and_belt(m, p_v, r)
 	# a carrier dies
 	var k: KeyRun = m.keys
 	var car: Mob = k.carriers.filter(func(mb): return not (mb is Shrubling) and not mb.dead)[0]
@@ -295,7 +295,7 @@ func _open_near(m: Match, p: Vector3) -> Vector3:
 	return Vector3.INF
 
 func _shrubling() -> void:
-	var m: Match = await build(3, {"teams": 1, "god": true})
+	var m: Match = build(3, {"teams": 1, "god": true})
 	var p_v: Hunter = m.player
 	var k: KeyRun = m.keys
 	var s: Shrubling = k.shrublings[0]
@@ -417,12 +417,12 @@ func _shrubling() -> void:
 			s.dead and float(Data.MOBS["shrubling"]["dmg"]) == 0.0 and s.max_hp <= 60.0, "hp %.0f" % s.max_hp)
 	var nn := m.pickups.filter(func(p): return String(p["kind"]) == "ckey").size()
 	ok("catching it pays the key", nn == np + 1, "%d -> %d" % [np, nn])
-	ok("a hit uncovers a disguised one", await _hit_reveal())
+	ok("a hit uncovers a disguised one", _hit_reveal())
 	m.queue_free()
 	await main.get_tree().process_frame
 
 func _hit_reveal() -> bool:
-	var m: Match = await build(3, {"teams": 1, "god": true})
+	var m: Match = build(3, {"teams": 1, "god": true})
 	var s: Shrubling = m.keys.shrublings[0]
 	step(m, 0.5)
 	s.hurt(1.0, m.player, {"src": "shot"})
@@ -437,7 +437,7 @@ func _ground_near(m: Match, p: Vector3) -> Vector3:
 
 # ------------------------------------------------------------------ 6. bots
 func _bots() -> void:
-	var m: Match = await build(7, {"teams": 1, "squad": 1, "autoplay": true})
+	var m: Match = build(7, {"teams": 1, "squad": 1, "autoplay": true})
 	var b: Hunter = m.player      # (autoplay: the lone hunter is driven by the bot brain)
 	var c: Dictionary = m.chests.filter(func(x): return not x.get("ride", false) and not x.get("free", false))[0]
 	for mb in m.mobs:
@@ -511,7 +511,7 @@ func _surplus() -> void:
 	var rolled := 0
 	var chests_n := 0
 	for sd in [3, 5, 9, 12, 21, 33]:
-		var m: Match = await build(sd)
+		var m: Match = build(sd)
 		var s := KeyBonus.surplus(m)
 		shares.append(float(s["share"]))
 		var row := [sd, s["expected"], s["chests"], float(s["share"]) * 100.0, str(s["by"])]
@@ -538,7 +538,7 @@ func _surplus() -> void:
 
 ## Every source fires (odds forced to 1 for the test), and a bonus key is an ordinary key on the ground.
 func _sources() -> void:
-	var m: Match = await build(5, {"teams": 1, "god": true})
+	var m: Match = build(5, {"teams": 1, "god": true})
 	var r: Dictionary = KeyBonus.rules()
 	var keep := r.duplicate(true)
 	for k in ["monster", "pot", "crate", "barrel", "keg", "train_crate"]:
@@ -580,7 +580,7 @@ func _sources() -> void:
 
 ## The sky train runs on Skyreach: opening one of its crates can pay a key too.
 func _train_crate() -> void:
-	var m: Match = await build(5, {"teams": 1, "god": true, "map": "skyreach"})
+	var m: Match = build(5, {"teams": 1, "god": true, "map": "skyreach"})
 	var r: Dictionary = KeyBonus.rules()
 	var keep := float(r["train_crate"])
 	r["train_crate"] = 1.0

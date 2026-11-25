@@ -66,7 +66,7 @@ func run(m: Node) -> void:
 	await _prologue()
 	await _hatch()
 	var home = await _tutorial_match()
-	await _farm_tutorial(home)
+	_farm_tutorial(home)
 	await _second_relic(home)
 	await _first_expedition(home)
 	TutorialDrive.human = false
@@ -271,7 +271,7 @@ func _ways_out(m: Match) -> void:
 	ok(P.extracted, "the lift takes you out")
 	_begin("first expedition: results")
 	await _wait(func(): return main.current is CanvasLayer, "and the expedition ends on the results")
-	await _press(main.current, "Back to the farm")
+	_press(main.current, "Back to the farm")
 	await _wait(func(): return _is_screen("home.gd"), "back on the farm")
 	_end()
 

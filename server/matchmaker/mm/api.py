@@ -117,12 +117,12 @@ def make_server(core: Matchmaker, host: str, port: int, feedback_path: str = "/v
 
         def _reply(self, status: int, payload: dict) -> None:
             data = json.dumps(payload).encode()
+            log("http", method=self.command, path=self.path, status=status, client=self.client_address[0])
             self.send_response(status)
             self.send_header("Content-Type", "application/json")
             self.send_header("Content-Length", str(len(data)))
             self.end_headers()
             self.wfile.write(data)
-            log("http", method=self.command, path=self.path, status=status, client=self.client_address[0])
 
         def log_message(self, *_):
             pass   # the structured line in _reply replaces the default stderr log

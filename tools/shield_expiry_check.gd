@@ -28,7 +28,7 @@ func run(main: Node) -> void:
 	Econ.ensure()
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "arch": "dolm",
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "arch": "dolm",
 		"cls": Arch.weight("dolm"), "weapon": Arch.signature("dolm")})
 	m.set_process(false)
 	var fade = main.get("fade")

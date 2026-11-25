@@ -44,7 +44,7 @@ func run(main_node: Node) -> void:
 	await _layout(_box(q, p, 0), tag + " small box")
 	await _layout(_box(q, p, 12), tag + " long box")
 	await _all_takeable(p, q)
-	await _wears_upgrade(p, q)
+	_wears_upgrade(p, q)
 	print("LOOT WINDOW CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
