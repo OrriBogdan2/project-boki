@@ -19,6 +19,7 @@ extends ArchKit
 const LIME := Color("b8f03c")  # palette "main", her signature (Arch.color)
 const HOT := Color("eaffa8")  # palette "hot"
 const DEEP := Color("4f8a12")  # palette "deep"
+const FEVER_DB := -9.0  # dB: the stim as Fever lights, under a knock's -3
 const BRONZE := Color("b9732f")  # Cinderfall's shell (gunslinger_ult)
 const GOLD := Color("ffcf3f")  # her coin (unshaded: the toon light turns gold red-brown)
 const GOLD_DARK := Color("d99a1e")  # its struck faces
@@ -206,6 +207,8 @@ func gate_inputs() -> void:
 
 
 func add_fever(n := 1) -> void:
+	if res <= 0.0:
+		m.sfx("vn_stim", h.pos, FEVER_DB, 1.3)     # Hot Streak lights: the stim, quieter and higher than a knock's
 	res = minf(res_max(), res + float(n))
 	touch_res(float(res_def()["wait"]))
 
