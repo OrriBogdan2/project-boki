@@ -12,6 +12,7 @@
 		"gear": {"from_match": 4, "what": "the gear panel"},
 		"squad": {"from_match": 4, "what": "squad frames"},
 		"perks": {"from_match": 4, "what": "the perk row"},
+		"bonus_stats": {"from_match": 4, "what": "the bonus stat column under the status icons on the right edge"},
 		"weather": {"from_match": 4, "what": "the weather and sight chip"},
 		"belt_spare": {"from_match": 0, "what": "belt slots 3 and 4 while they are empty (a filled one always shows)"},
 		"ult_tiles": {"from_match": 0, "what": "the locked ultimate tiles (X, and the Fusion box) until level 6"},

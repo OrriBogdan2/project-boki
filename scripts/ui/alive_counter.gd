@@ -1,14 +1,20 @@
 class_name AliveCounter
-## Top right of the match HUD: how many squads and how many players are still in the match (a squad
-## icon and a number, a person icon and a number; solos show players only), and under it your own
-## kills, knocks and gems in a quieter row (held back for a new player:
-## HudGroups.own_numbers_shown). Never who is left. Drawn by Hud; the kill feed hangs under it.
+## The match HUD's counters. Top right: your own match numbers as one row, a small icon over its number for
+## knocks, kills, assists and damage dealt, a thin line under the icons, then your gems to the right (held back
+## for a new player: HudGroups.own_numbers_shown); the kill feed hangs under it. Right of the minimap: a small
+## stack of how many squads and how many players are still in the match (a squad icon and a number, a person icon
+## and a number; solos show players only). Never who is left. Drawn by Hud.
 
-const BIG_CELL := Vector2(78.0, 44.0)    # px, one big counter (icon + number)
-const BIG_PX := 26           # px, the big numbers
-const SMALL_CELL := Vector2(54.0, 26.0)  # px, one of your own numbers
-const SMALL_PX := 14         # px
-const GAP := 6.0             # px between the two rows
+const STAT_CELL := Vector2(38.0, 36.0)  # units (1280x720 layout), one of your numbers: icon over number
+const STAT_ICON_R := 6.5  # units, the small icons
+const STAT_PX := 12  # px, the numbers under them
+const GEM_W := 66.0  # units, the currency counter right of the four
+const GEM_PX := 16  # px
+const STACK_CELL := Vector2(52.0, 24.0)  # units, one of squads / players left (icon + number)
+const STACK_PX := 16  # px
+const STACK_GAP := 4.0  # units between the two
+const STACK_AT := 8.0  # units, right of the minimap
+
 
 ## Squads with at least one Hunter still in the match.
 static func squads_left(m: Match) -> int:
@@ -22,6 +28,7 @@ static func squads_left(m: Match) -> int:
 		mask >>= 1
 	return n
 
+
 ## Hunters (yours, rivals', bots) still in the match; a downed one counts until they are out.
 static func players_left(m: Match) -> int:
 	var n := 0
@@ -30,47 +37,69 @@ static func players_left(m: Match) -> int:
 			n += 1
 	return n
 
+
 ## Solo matches show players only: a count of squads that equals the count of players is noise.
 static func shows_squads(m: Match) -> bool:
 	return int(m.opts.get("squad", 1)) > 1
 
-## The two rows for a window of size `sz` with `big_cells` big counters: [big row, your own numbers row],
-## both hung from the top-right corner of the one screen-edge margin (HudStyle.safe_pad).
-static func rects(sz: Vector2, big_cells: int) -> Array[Rect2]:
-	var pad := HudStyle.safe_pad(sz)
-	var bw := BIG_CELL.x * big_cells
-	var r := Rect2(Vector2(sz.x - pad.x - bw, pad.y), Vector2(bw, BIG_CELL.y))
-	var sw := SMALL_CELL.x * 3.0      # kills, knocks, gems
-	return [r, Rect2(Vector2(sz.x - pad.x - sw, r.end.y + GAP), Vector2(sw, SMALL_CELL.y))]
 
-## Draws both rows; returns the y the kill feed starts at.
+## Your numbers row for a window of size `sz`: the four stats and the gem counter, hung from the top-right corner
+## of the HUD's edge margin (HudStyle.hud_pad).
+static func stats_rect(sz: Vector2) -> Rect2:
+	var pad := HudStyle.hud_pad(sz)
+	var w := STAT_CELL.x * 4.0 + GEM_W
+	return Rect2(Vector2(sz.x - pad.x - w, pad.y), Vector2(w, STAT_CELL.y))
+
+
+## Draws your numbers row; returns the y the kill feed starts at.
 static func draw(c: Control, m: Match) -> float:
+	var p: Hunter = m.player
+	if not HudGroups.own_numbers_shown(p, MapDetail.holding()):
+		return HudStyle.hud_pad(c.size).y  # a new player's zeros wait for the first kill, knock or gem (HudGroups)
+	var r := stats_rect(c.size)
+	SafeArea.note(r)
+	c.draw_style_box(HudStyle.box(HudStyle.SHADE, 8, Color(1, 1, 1, 0.16), 1), r)
 	var big := HudStyle.BIG
+	var mine := [
+		["burst", p.knocks, Color("ffd27a")],
+		["knock", p.kills, Color("ff9a8a")],
+		["bond", p.assists, Color("9fdcff")],
+		["claw", int(p.dmg_done), HudStyle.INK],
+	]
+	for i in mine.size():
+		var mid := r.position.x + STAT_CELL.x * (float(i) + 0.5)
+		Icons.draw(c, String(mine[i][0]), Vector2(mid, r.position.y + 10.0), STAT_ICON_R, Color(mine[i][2], 0.9))
+		HudStyle.ctext(c, Vector2(mid, r.position.y + 30.0), str(mine[i][1]), STAT_PX, mine[i][2], 3, big)
+	var row_w := STAT_CELL.x * 4.0
+	var line_y := r.position.y + 19.0
+	c.draw_line(
+		Vector2(r.position.x + 5.0, line_y), Vector2(r.position.x + row_w - 5.0, line_y), Color(1, 1, 1, 0.18), 1.0
+	)
+	c.draw_line(
+		Vector2(r.position.x + row_w, r.position.y + 7.0),
+		Vector2(r.position.x + row_w, r.end.y - 7.0),
+		Color(1, 1, 1, 0.16),
+		1.0
+	)
+	Icons.draw(c, "gem", Vector2(r.position.x + row_w + 14.0, r.get_center().y), 7.0, HudStyle.GOLD)
+	HudStyle.text(
+		c, Vector2(r.position.x + row_w + 25.0, r.get_center().y + 6.0), str(p.gems), GEM_PX, HudStyle.GOLD, 3, big
+	)
+	return r.end.y + 8.0
+
+
+## Squads left and players left, a vertical stack right of the minimap `mm` (a solo match: players only).
+static func draw_left(c: Control, m: Match, mm: Rect2) -> void:
+	var plain: bool = not (m.duel or m.tut or m.opts.get("arena", false) or m.opts.get("training", false))
+	if not (plain and HudReveal.on(m, "counters")) or m.player == null or m.player.riding or m.player.dropping:
+		return
 	var cells: Array = []
 	if shows_squads(m):
 		cells.append(["squad", str(squads_left(m))])
 	cells.append(["person", str(players_left(m))])
-	var rows := rects(c.size, cells.size())
-	var r: Rect2 = rows[0]
-	c.draw_style_box(HudStyle.box(HudStyle.SHADE, 10, Color(1, 1, 1, 0.16), 1), r)
 	for i in cells.size():
-		var x := r.position.x + BIG_CELL.x * i
-		Icons.draw(c, String(cells[i][0]), Vector2(x + 22, r.position.y + BIG_CELL.y * 0.5), 11.0, HudStyle.INK)
-		HudStyle.text(c, Vector2(x + 38, r.position.y + 31), String(cells[i][1]), BIG_PX, HudStyle.INK, 4, big)
-		if i > 0:
-			c.draw_line(Vector2(x, r.position.y + 8), Vector2(x, r.end.y - 8), Color(1, 1, 1, 0.16), 1.0)
-	var p: Hunter = m.player
-	if not HudGroups.own_numbers_shown(p, MapDetail.holding()):
-		return r.end.y + 10.0      # a new player's zeros wait for the first kill, knock or gem (HudGroups)
-	var kills := p.kills if p else 0
-	var knocks := p.knocks if p else 0
-	var gems := p.gems if p else 0
-	var mine := [["knock", kills, Color("ff9a8a")], ["burst", knocks, Color("ffd27a")], ["gem", gems, HudStyle.GOLD]]
-	var sr: Rect2 = rows[1]
-	c.draw_style_box(HudStyle.box(Color(0.05, 0.03, 0.08, 0.7), 8, Color(0, 0, 0, 0), 0), sr)
-	for i in mine.size():
-		var x := sr.position.x + SMALL_CELL.x * i
-		var at := Vector2(x + 14, sr.position.y + SMALL_CELL.y * 0.5)
-		Icons.draw(c, String(mine[i][0]), at, 6.0, Color(mine[i][2], 0.85))
-		HudStyle.text(c, Vector2(x + 24, sr.position.y + 19), str(mine[i][1]), SMALL_PX, mine[i][2], 3, big)
-	return sr.end.y + 10.0
+		var r := Rect2(mm.position + Vector2(mm.size.x + STACK_AT, (STACK_CELL.y + STACK_GAP) * i), STACK_CELL)
+		SafeArea.note(r)
+		c.draw_style_box(HudStyle.box(HudStyle.SHADE, 8, Color(1, 1, 1, 0.16), 1), r)
+		Icons.draw(c, String(cells[i][0]), r.position + Vector2(13.0, STACK_CELL.y * 0.5), 7.0, HudStyle.INK)
+		HudStyle.text(c, r.position + Vector2(26.0, 18.0), String(cells[i][1]), STACK_PX, HudStyle.INK, 4, HudStyle.BIG)

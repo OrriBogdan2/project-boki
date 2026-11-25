@@ -9,8 +9,8 @@ extends RefCounted
 const MAX_ICONS := 6
 const TILE := 36.0  # px, one icon
 const GAP := 6.0  # px between icons
-const EDGE := 14.0  # px from the screen's right edge
-const TOP := 250.0  # px from the top: under the counters and the kill feed
+const EDGE := SafeArea.MARGIN  # px from the screen's right edge (the HUD margin)
+const TOP := 290.0  # px from the top: under your numbers, the kill feed (4 rows) and the toast lane's first line
 const RING_W := 3.0  # px, the draining ring
 const CARD_PAD := 8.0  # px, inside the hover card
 
@@ -85,6 +85,13 @@ func active(h: Hunter) -> Array:
 	return out
 
 
+## The y just under what the last frame drew (TOP while the stack is empty): where the stat column starts.
+func bottom() -> float:
+	if shown.is_empty():
+		return HudScale.from_edge(TOP)
+	return (shown.back()["rect"] as Rect2).end.y + (16.0 if more > 0 else 0.0)
+
+
 ## Draws the stack down the right edge of a screen `sz` wide, under TOP.
 func draw(hud, p: Hunter, sz: Vector2) -> void:
 	shown = []
@@ -95,8 +102,8 @@ func draw(hud, p: Hunter, sz: Vector2) -> void:
 	var rows := active(p)
 	more = maxi(0, rows.size() - MAX_ICONS)
 	var c: CanvasItem = hud.c
-	var x := sz.x - EDGE - TILE
-	var y := TOP
+	var x := SafeArea.frame(sz).end.x - EDGE - TILE
+	var y := HudScale.from_edge(TOP)      # (below the feed and toasts as they are once the HUD has grown)
 	for r in rows.slice(0, MAX_ICONS):
 		var rect := Rect2(Vector2(x, y), Vector2(TILE, TILE))
 		_tile(c, rect, r)

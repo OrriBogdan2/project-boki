@@ -11,10 +11,10 @@ const NEW_PLAYER_MATCHES := 3      # expeditions a save has played before the wh
 static func new_player() -> bool:
 	return int(Save.d.get("matches", 0)) < NEW_PLAYER_MATCHES
 
-## Your own kills, knocks and gems (AliveCounter's quieter row): not before the first kill, knock or gem, or while
-## Tab / the map key is held. The squads/players left above it always show.
+## Your own numbers row (AliveCounter, top right): not before the first kill, knock or gem, or while Tab / the map
+## key is held or "Show full HUD" is on. The squads/players left stack beside the minimap always shows.
 static func own_numbers_shown(p: Hunter, hold: bool) -> bool:
-	return not new_player() or hold or (p != null and p.kills + p.knocks + p.gems > 0)
+	return not new_player() or hold or Settings.get_v("hud_full") or (p != null and p.kills + p.knocks + p.gems > 0)
 
 static func rules() -> Dictionary:
 	return Content.rules("hud_groups")

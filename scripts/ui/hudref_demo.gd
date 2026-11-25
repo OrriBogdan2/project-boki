@@ -29,6 +29,7 @@ static func tick(m) -> void:
 	if not m.has_meta("hudref_set"):
 		m.set_meta("hudref_set", true)
 		Settings.set_v("kin_chatter", "quiet", false)
+		Settings.set_v("hud_full", true, false)      # every staged HUD group on, for the picture (HudReveal)
 		if m.cam: m.cam.lead = 0.0
 		for mb in m.mobs:
 			mb.dead = true
@@ -133,6 +134,24 @@ static func _fight(m, P: Hunter) -> void:
 		if i % 4 == 2: h.armor = 0.0
 		i += 1
 	P.hp = P.max_hp * 0.4
+	_kit_out(m, P)
+
+## The fight picture's HUD groups that need something to show: your numbers, two perks, worn gear (the stat column)
+## and two lines in the kill feed.
+static func _kit_out(m, P: Hunter) -> void:
+	P.knocks = 3
+	P.kills = 1
+	P.assists = 2
+	P.dmg_done = 640.0
+	P.gems = 137
+	P.perks = ["quickhands", "secondwind"]
+	P.gear[1] = {"id": "power_core", "rar": 1}
+	P.gear[2] = {"id": "quilted_coat", "rar": 1}
+	P.gear[3] = {"id": "quickstep_boots", "rar": 1}
+	P.refresh_gear()
+	var foes: Array = m.hunters.filter(func(x): return x != P)
+	KillFeed.knock(m, foes[0], P, KillFeed.icon_of(P, {}))
+	KillFeed.knock(m, foes[1], foes[2], KillFeed.icon_of(foes[2], {}))
 
 ## Everything that pops up text at the same moment: an ally knocked, an even level, a hint and toasts.
 static func _busy(m, P: Hunter) -> void:

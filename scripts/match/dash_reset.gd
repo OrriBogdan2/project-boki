@@ -32,6 +32,7 @@ static func takedown(h: Hunter, victim: Hunter) -> void:
 	for mate in h.m.hunters:
 		var at = victim.hit_by.get(mate.get_instance_id())
 		if mate != h and mate.team == h.team and at != null and float(h.m.time) - float(at) <= ASSIST_WINDOW:
+			mate.assists += 1
 			_refresh(mate, "assist")
 
 ## The Second Wind perk: a hit that takes `h` from at least SECOND_WIND_HP of its health to under it
