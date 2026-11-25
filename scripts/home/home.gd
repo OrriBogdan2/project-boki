@@ -469,7 +469,7 @@ func _ready_rest() -> void:
 	ZoneAir.add(self)
 	_build_plots()
 	await _slice()
-	player = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], _weapon(), "", Unmasked.mask_look(), Arch.of_save())
+	player = _hunter_model()
 	add_child(player)
 	ppos = Vector3(38.0, 0, 34.5) if not fs else HomeLayout.LANDING
 	if spawn == "house":
@@ -3775,12 +3775,15 @@ func _open_hall() -> void:
 	v.add_child(kr)
 
 # ---- class and loadout
+## You, as in a match: your Hunter (Unmasked.mask_look), not the Empty the house and town show.
+func _hunter_model() -> Node3D:
+	return Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], _weapon(), "", Unmasked.mask_look(), Arch.of_save())
+
 func _refresh_player_model() -> void:
 	var at := player.position
 	var rot := player.rotation
 	player.queue_free()
-	var w := _weapon()
-	player = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], w, "", Unmasked.mask_look(), Arch.of_save())
+	player = _hunter_model()
 	player.position = at; player.rotation = rot
 	add_child(player)
 

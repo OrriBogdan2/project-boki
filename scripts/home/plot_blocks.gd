@@ -3,6 +3,7 @@ extends RefCounted
 ## The tiles a crop bed (Models.plot) fills, so you and the Boki walk round a bed and along it, never through it.
 ## HomeBuild._apply_blockers turns them solid like any placed block.
 
+const REACH := 2  # tiles from a bed's centre tile at which you can work it (its edge is a tile away)
 const HALF := 0.75  # m from a bed's centre: a tile it covers by more than a hand's width is blocked (the slab is 1.7 m)
 
 

@@ -263,7 +263,7 @@ func validate() -> Dictionary:
 	for t in _targets():
 		var ti := w.idx(int(floor(t.x)), int(floor(t.z)))
 		if w.inb(int(floor(t.x)), int(floor(t.z))) and w.island[ti] > 0 and not _isle_ok(ti): continue    # an isle you haven't bridged yet
-		if not _hit(seen, t): miss.append(t)
+		if not _hit_place(seen, t): miss.append(t)
 	return {"ok": open >= 850 and reached == open and miss.is_empty(), "open": open, "reached": reached, "missing": miss}
 
 ## After the home's fixed models are in: the decorations, fences and water, and the kin path grid.
@@ -873,11 +873,16 @@ func _targets(skip_b := "") -> Array:
 		out.append(Vector3(sg.x, 0, sg.y))
 	return out.filter(func(t): return (t as Vector3).x > -100.0)     # (farm-start fixtures not put down yet)
 
-func _hit(seen: PackedByteArray, p: Vector3) -> bool:
+## Is a place the island needs reachable: a bed from beside it (PlotBlocks.REACH tiles), the rest from the next tile.
+func _hit_place(seen: PackedByteArray, t: Vector3) -> bool:
+	var bed: bool = (h.plots + h.gh_plots).any(func(b): return b.position == t)
+	return _hit(seen, t, PlotBlocks.REACH if bed else 1)
+
+func _hit(seen: PackedByteArray, p: Vector3, reach := 1) -> bool:
 	var w: World = h.world
 	var cx := int(floor(p.x)); var cz := int(floor(p.z))
-	for dz in range(-1, 2):
-		for dx in range(-1, 2):
+	for dz in range(-reach, reach + 1):
+		for dx in range(-reach, reach + 1):
 			if w.inb(cx + dx, cz + dz) and seen[w.idx(cx + dx, cz + dz)] == 1:
 				return true
 	return false
@@ -897,7 +902,7 @@ func keeps_paths(free_cells: Array, solid_cells: Array, skip_b := "", door := Ve
 	if trapped != "":
 		return false
 	for t in _targets(skip_b):
-		if _hit(base, t) and not _hit(after, t):
+		if _hit_place(base, t) and not _hit_place(after, t):
 			return false
 	if door != Vector3.INF:
 		var w: World = h.world
