@@ -121,7 +121,8 @@ func _forward(yaw: float) -> Vector3:
 
 func _state(id: String, clip: String, yaw: float, t: float) -> Dictionary:
 	var fw := _forward(yaw)
-	var s := {"face": yaw, "grounded": true, "vel": Vector3.ZERO}
+	# ("cast": the game's Hunter._anim_state always fills it; without it WardenNative._swing never plays a swing)
+	var s := {"face": yaw, "grounded": true, "vel": Vector3.ZERO, "cast": INF}
 	match clip:
 		"run":
 			s["vel"] = fw * RUN_MPS
