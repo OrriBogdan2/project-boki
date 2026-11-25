@@ -11316,3 +11316,4 @@ READY ext/stuck-integ-a56f6457 a7a5b7ccf0 (supersedes: ext/anim-native-move-stat
 READY ext/sfx-mantle-kick b448e79641920633442eecf78dbe93e26ba6b019 (mantle, wall kick and ledge sounds)
 READY ext/tut-hint-vitals-overlap a65b0bac524 (tutorial hint clear of vitals)
 READY ext/vfx-vex-nuke-rim 721da1ac9e3 (Vex Nuke end disc to a lit rim)
+READY ext/vfx-gil-soft-lanes 076cc9c469ec5971698d383f432042a52ecae9cd (Gil soft lanes)
