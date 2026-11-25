@@ -98,6 +98,7 @@ var live_n := 0  # GPU particles alive (asked for) now
 var made := 0  # nodes made so far (tests: it stops growing once warm)
 var plays := {}  # (tests) move -> times played
 var scarves := HeroScarf.new(self)  # the cloth ends some Heroes trail (data "scarf")
+var zones := HeroVfxZone.new(self)  # remote hunters' kit zones (a move's data "zone", life on the message)
 
 # shader seeds only: a look never draws from the global randf the sim uses
 var _look_rng := RandomNumberGenerator.new()
@@ -233,22 +234,21 @@ func play(h: Hunter, move: String, at: Vector3, dir: Vector2, o := {}) -> void:
 	if rec.is_empty():
 		return
 	plays[move] = int(plays.get(move, 0)) + 1
-	if bool(rec.get("net", true)) and m.get("net_on") and not h.remote:
-		m.net_fx(
-			[
-				"hvfx",
-				h.nid,
-				move,
-				m._r(at.x),
-				m._r(at.y),
-				m._r(at.z),
-				snappedf(dir.x, 0.01),
-				snappedf(dir.y, 0.01),
-				snappedf(float(o.get("k", 0.0)), 0.01),
-				snappedf(float(o.get("len", 0.0)), 0.1),
-				snappedf(float(o.get("r", 0.0)), 0.1)
-			]
+	var zone := float(o.get("life", 0.0)) > 0.0  # a kit zone: it goes out even on a move kept off the net
+	if (zone or bool(rec.get("net", true))) and m.get("net_on") and not h.remote:
+		_send(h, move, at, dir, o, zone)
+	if h.remote and zone:
+		zones.put(
+			h,
+			String(o.get("zone", "")),
+			rec.get("zone", {}),
+			at,
+			float(o.get("zone_r", o.get("r", 1.0))),
+			float(o["life"]),
+			o.get("follow")
 		)
+		if not bool(rec.get("net", true)):
+			return
 	_sounds(rec, h, at, o)
 	var lod := lod_at(at)
 	if lod <= 0.0 or (h.unseen and h != m.get("player")):
@@ -263,19 +263,51 @@ func play(h: Hunter, move: String, at: Vector3, dir: Vector2, o := {}) -> void:
 			_layer(layer, h, at, dir, o, lod)
 
 
+## ["hvfx", nid, move, x, y, z, dir x, dir y, k, len, r] and, for a kit zone, [life, zone_r, follow nid, key].
+func _send(h: Hunter, move: String, at: Vector3, dir: Vector2, o: Dictionary, zone: bool) -> void:
+	var e := [
+		"hvfx",
+		h.nid,
+		move,
+		m._r(at.x),
+		m._r(at.y),
+		m._r(at.z),
+		snappedf(dir.x, 0.01),
+		snappedf(dir.y, 0.01),
+		snappedf(float(o.get("k", 0.0)), 0.01),
+		snappedf(float(o.get("len", 0.0)), 0.1),
+		snappedf(float(o.get("r", 0.0)), 0.1)
+	]
+	if zone:
+		var f: Variant = o.get("follow")
+		e.append_array(
+			[
+				snappedf(float(o["life"]), 0.01),
+				snappedf(float(o.get("zone_r", o.get("r", 1.0))), 0.01),
+				(f as Ent).nid if f is Ent else "",
+				String(o.get("zone", ""))
+			]
+		)
+	m.net_fx(e)
+
+
 ## The same moment arriving from another game (["fx", "hvfx", ...]: other players' games don't run this kit).
 func net_in(x: Array) -> void:
 	var who: Variant = m.ents_by_id.get(String(x[2]), null)
 	if who is Hunter and String(x[3]) == "armor_up":
 		tier_up(who, int(x[9]))
 	elif who is Hunter:
-		play(
-			who,
-			String(x[3]),
-			Vector3(x[4], x[5], x[6]),
-			Vector2(x[7], x[8]),
-			{"k": float(x[9]), "len": float(x[10]), "r": float(x[11])}
-		)
+		var o := {"k": float(x[9]), "len": float(x[10]), "r": float(x[11])}
+		if x.size() >= 16:
+			o.merge(
+				{
+					"life": float(x[12]),
+					"zone_r": float(x[13]),
+					"follow": m.ents_by_id.get(String(x[14])),
+					"zone": String(x[15])
+				}
+			)
+		play(who, String(x[3]), Vector3(x[4], x[5], x[6]), Vector2(x[7], x[8]), o)
 
 
 ## Armor went up a tier: one sheen in the new tier's colour sweeps up the body, for everyone to read (a rival just got
@@ -1033,6 +1065,7 @@ func _model_has(h: Hunter, node_name: String) -> bool:
 func _process(delta: float) -> void:
 	_tick_holds()
 	scarves.tick(delta)
+	zones.tick(delta)
 	for i in range(live.size() - 1, -1, -1):
 		var e: Dictionary = live[i]
 		e["t"] = float(e["t"]) + delta
