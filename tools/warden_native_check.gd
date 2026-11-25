@@ -24,6 +24,29 @@ const STRING_PULL := 0.08  # m, Meshy scale: the string is drawn this far off th
 const STRING_BACK := 0.03  # and this near it a frame later
 ## Slot -> [state before, state that starts it, the clip today's game plays for it]. A cast's state names its cast
 ## slot, which HunterAnim's counters turn into a new cast (cast 5 -> 0).
+## Hand beats of the layered kit-move clips (_own_rows): [kit move, clip s from, clip s to, bone, out m, up m]
+const OWN_BEATS := {
+	"mage": [
+		["mage_lmb_r", 0.0, 0.06, "RightHand", 0.2, -9.0],
+		["mage_lmb_l", 0.0, 0.06, "LeftHand", 0.1, -9.0],
+		["mage_rmb_hold", 0.0, 0.12, "RightHand", -9.0, 0.3],
+		["mage_rmb", 0.06, 0.16, "RightHand", 0.3, -9.0],
+		["mage_e", 0.0, 0.3, "LeftHand", -9.0, 0.5],
+	],
+	"rimewright": [
+		["tm_dart_r", 0.0, 0.07, "RightHand", 0.1, -9.0],
+		["tm_dart_l", 0.0, 0.07, "LeftHand", 0.05, -9.0],
+		["tm_beam", 0.0, 0.04, "RightHand", 0.2, -9.0],
+		["tm_spear", 0.0, 0.1, "RightHand", 0.1, -9.0],
+		["tm_wall", 0.2, 0.24, "RightHand", 0.2, -9.0],
+	],
+	"tender": [
+		["mm_shot_r", 0.0, 0.08, "RightHand", 0.1, -9.0],
+		["mm_shot_l", 0.0, 0.08, "LeftHand", 0.1, -9.0],
+		["mm_seed", 0.0, 0.12, "LeftHand", 0.08, -9.0],
+		["mm_call", 0.1, 0.2, "RightHand", -9.0, 0.5],
+	],
+}
 const SLOT_CASES := {
 	"lmb": [{"swing_n": 0}, {"swing_n": 1, "combo": 0}, "attack"],
 	"lmb_hold": [{"swing_n": 0}, {"swing_n": 1, "combo": -1}, "attack"],
@@ -408,6 +431,7 @@ func _synthetic_clips(main: Node, a: String, m: Node3D, nat: WardenNative) -> vo
 ## eye, the push's palm ahead on the bolt's frame, the cloak's arms flung wide on the blast frame, the flight leaning
 ## in with the take-off clip then the loop, the landing clip; an upper clip lets go once played out.
 func _moves(a: String, m: Node3D, nat: WardenNative) -> void:
+	_own_rows(a, m, nat)
 	if not nat.moves.rows.has("as_lance"):
 		return
 	var s := {"grounded": true}
@@ -459,6 +483,41 @@ func _moves(a: String, m: Node3D, nat: WardenNative) -> void:
 	_at(m, nat, s, "", 0.0)
 	clip = nat.player.current_animation
 	ok(clip != "cn_f_land", "%s: back to the legs' own clip (%s)" % [a, clip])
+
+
+## Every layered row of a Hunter's own kit moves (data "kmoves", "upper") has its clip and lays it over the legs at full
+## weight, not the swing, and the hand lands where the move's beat says (OWN_BEATS): the bone has gone at least that far
+## ahead of the body (or off its chest) and up between the two clip times. Full-body rows: _kmoves.
+func _own_rows(a: String, m: Node3D, nat: WardenNative) -> void:
+	var s := {"grounded": true}
+	m.set_meta(WardenClips.STATE, s)
+	var mv := nat.moves
+	var swing := String(nat.plays["attack"])
+	for km in mv.rows:
+		if not bool(mv.rows[km].get("upper", false)):
+			continue
+		ok(mv.has_clip(km, nat.plays), "%s: kit move %s has its clip %s" % [a, km, mv.rows[km]["clip"]])
+		if not mv.has_clip(km, nat.plays):
+			continue
+		var clip := String(nat.plays[WardenNativeMoves.KEY % km])
+		_at(m, nat, s, km, nat.player.get_animation(clip).length * 0.5)
+		var laid: bool = mv.weight >= 1.0 and mv.shown == clip
+		ok(laid and nat.player.current_animation != swing, "%s: %s lays %s, not the swing" % [a, km, clip])
+	for b: Array in OWN_BEATS.get(a, []):
+		_at(m, nat, s, b[0], b[1])
+		var from := _bone_in(m, nat, b[3])
+		var far_from := from.distance_to(_bone_in(m, nat, "Spine02"))
+		_at(m, nat, s, b[0], b[2])
+		var to := _bone_in(m, nat, b[3])
+		var off_chest := to.distance_to(_bone_in(m, nat, "Spine02")) - far_from
+		var out := maxf(from.z - to.z, off_chest)  # (ahead, or farther off the chest)
+		var up := to.y - from.y
+		ok(
+			out >= b[4] and up >= b[5],
+			"%s: %s %s goes %.2f m out, %.2f up (%s to %s s)" % [a, b[0], b[3], out, up, b[1], b[2]]
+		)
+	_at(m, nat, s, "", 0.0)
+	_at(m, nat, s, "", 0.0)
 
 
 ## The state with kit move `km` `kt` s in, run on 0.1 s twice: the right hand, the muzzle (model frame: forward is -Z),

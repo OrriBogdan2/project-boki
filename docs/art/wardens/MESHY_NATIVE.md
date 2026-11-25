@@ -134,6 +134,26 @@ The fire leaves from `weapon_muzzle` on her right hand (the palm), which rides t
 `--warden-native-check` (each row's clip, pose and hand-over), `--muzzle-check`; renders: `--clip-shots --warden=ashwick
 --states [--match] [--no-moves]` (`move_<id>_<stand|run>/`).
 
+### Sparkle, Neve and Meeko
+Their kit moves have their own clips too (`art/wardens/{ryzz,claire,pip}/<art>_clips.glb`, written by
+`tools/meshy/native_ability_clips.py`: Cinder's FK and two-bone IK, wrist targets in arm lengths so one pose reads on all
+three bodies, `own_casts` on). Beats are the kits' own (kmoves_vv.gd, kmoves_care.gd); the poses are ours. `sp_u_*`,
+`nv_u_*`, `mk_u_*` are layers over the legs; `*_f_*` own the body.
+- Sparkle: `mage_lmb_l/r` finger bolt (out at 0.06 s, wrist kicked at 0.09), `mage_rmb_hold` Storm Rod (side-on, rod hand
+  high, held) then `mage_rmb` the overarm throw (release 0.16), `mage_e` Skycall (arm sweeps out, flicks up by 0.3 s, held
+  raised in `sp_u_e_hold`) and `mage_e_snap`, Wirerun (`mage_dash` sprinter's crouch held, `mage_dash_go` flat streak,
+  `mage_dash_land`), Kitefall (`mage_x` crouch held, `mage_x_air` float, `mage_x_dive`, `mage_x_land`).
+- Neve: `tm_dart_r/l` one-hand flicks (0.07 s), `tm_dart_heavy` two-handed sling, `tm_beam` (skating: both hands driven
+  straight out), Cryo Spear `tm_spear_aim` (palms drawn in, held) then `tm_spear` a two-handed push (arms at full reach by
+  0.1 s, the lunge after them: a push, not a throw), `tm_wall` (0.2 s tell crouch, then both palms shoved out low),
+  Rimelock `tm_rime`, `tm_rime_carry` (skated in), `tm_rime_hold` (sealed crouch), `tm_rime_crash`, `tm_rime_break`.
+- Meeko: `mm_shot_r/l/emp` ember (fist to the hip, punch at 0.08 s), Burrseed `mm_seed_aim` (side-on, held) and
+  `mm_seed` (two-handed push at 0.12 s), Hearth Call `mm_call` (hand low, thrust high by 0.2 s), `mm_call_hold` (the
+  channel: one hand high, the other out, looped) and `mm_call_end`.
+  Hearthlight `mm_hearth` (arms up in a V forward of her head) and its recast `mm_toss`.
+`--warden-native-check` plays every layered row at half its clip (full weight, no swing) and holds the hand beats
+(OWN_BEATS: the bone's reach ahead or up between two clip times).
+
 ## State clips (dash, glide, land, hit, hit_back, downed)
 All ten native Hunters map these six slots to the clips of `art/wardens/<art>/<art>_clips.glb`, built by
 `python3 tools/meshy/native_states.py OUT BASE_meshy.glb tools/meshy/native_states.json SRC_DIR <art>` (spec: Meshy
