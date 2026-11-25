@@ -420,6 +420,8 @@ func _clean_take() -> void:
 	m.set_meta("pitch_no_foe_plates", true)
 	m.set_meta("pitch_soft_flash", true)  # (Ent.show_flash: hits tint the body, never turn it white)
 	m.set_meta("pitch_no_chill_shell", true)  # (StatusLooks: no pale ice shell over a chilled body)
+	if "--clean-look" in OS.get_cmdline_user_args():
+		Settings.v["damage_numbers"] = false  # (big hit numbers sat over the fighters; the kit shots never had them)
 	_crisp_shadows()
 
 
