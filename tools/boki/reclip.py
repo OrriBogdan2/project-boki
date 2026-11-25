@@ -41,14 +41,14 @@ def main():
     anim = build_boki.anim
     glb = os.path.join(build_boki.REPO, "art/kin", species, species + ".glb")
     bpy.ops.wm.read_factory_settings(use_empty=True)
-    bpy.context.scene.render.fps = 30       # the clips are keyed at 30 fps: the importer's 24 would re-time kept ones
+    bpy.context.scene.render.fps = 30  # the clips are keyed at 30 fps: the importer's 24 would re-time kept ones
     bpy.ops.import_scene.gltf(filepath=glb)
     arm = next(o for o in bpy.data.objects if o.type == "ARMATURE")
     extra = {b.name for b in arm.data.bones} - set(anim.BONES)
     assert set(anim.BONES) <= {b.name for b in arm.data.bones}, "the file's skeleton is not the module's"
     legs = {b + s for b in LEG_BONES.get(len(extra), ()) for s in (".L", ".R")}
     assert not extra or extra == legs, "unknown bones %s" % extra
-    keep = {"walk", "run"} if extra else set()      # auto_legs' trot: the module's walk and run would glide the paws
+    keep = {"walk", "run"} if extra else set()  # auto_legs' trot: the module's walk and run would glide the paws
     boki_rig.HIDE_AT.clear()
     boki_rig.HIDE_AT.update(hidden_props(arm))
     boki_rig.SCALED = set(getattr(anim, "SCALED", ()))

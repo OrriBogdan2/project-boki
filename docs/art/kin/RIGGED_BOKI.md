@@ -108,6 +108,15 @@ than what shows: the head covers its rim. Past that the high cameras and `CamRig
 Palettes live at the top of each species' coat section (`PLUM`, `SHELL`...); tools held in the tail are Vespyx's `chop`
 and `mine` clips, and `boki_clips.chop_mouth` / `mine_mouth` are the mouth versions the others use.
 
+11-20: Buckleron (`limpetor`) and Lanterloris (`moonloris`) have their own clips (`limpetor_anim.py`, `moonloris_anim.py`)
+on the borrowed Glomwort skeleton: a limpet that creeps under a rocking shield, bashes it down and clamps to brace, and
+a slow loris that climbs hand over hand, freezes and snaps, and floats up with its lantern belly. Their glbs were
+re-keyed with `tools/boki/reclip.py` (`blender -b --factory-startup --python tools/boki/reclip.py -- --species=<id>`):
+it reads the built .glb back, swaps the actions for the module's `CLIPS` and exports again, for a species whose raw Meshy
+model is not at hand.
+11-22: both have `auto_legs.py` legs (below), so reclip keeps the file's leg bones and its planted-paw walk and run
+and re-keys only the other 11 clips, legs at rest (the modules' own creep and climb walk/run glide the paws and are not
+used). A full rebuild with `build_boki.py` needs `auto_legs.py` again.
 11-20: Frigatee (`floenatee`), Gongibbon (`gibbelle`) and Prowyak (`glaciyak`) have their own clips (`floenatee_anim.py`,
 `gibbelle_anim.py`, `glaciyak_anim.py`) on the borrowed Glomwort skeleton: a seal's hump-and-haul and belly-flop, a gibbon's
 pendulum roll and bell clang, a yak's lumber, gore and ground slam. Their glbs were re-keyed with `tools/boki/reclip.py`
