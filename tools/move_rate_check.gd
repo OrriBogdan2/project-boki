@@ -11,8 +11,8 @@ extends "res://tools/move_feel_check.gd"
 ## Prints "MRATE <match|farm> <key> 30=.. 60=.. 144=.. ok|FAIL" and "MOVE RATE CHECK DONE, failures: N".
 
 const RATES := [30, 60, 144]
-const GRACE_STEPS := 12  # press delays tried for each jump grace, one sim step apart (to 0.2 s)
-const DROP_M := 1.0  # m: the buffer trial's fall (every press in its last 0.2 s counts as "about to land")
+const GRACE_STEPS := 18  # press delays tried for each jump grace, one sim step apart (to 0.3 s)
+const DROP_M := 3.0  # m: the buffer trial's fall: the 0.25 s coyote ends before the last 0.3 s of it
 const LIFT_M := 3.0  # m: how far the coyote trial's ground drops away
 ## key: [allowed difference from the 60 fps value, unit]. A drawn frame holds 2 steps at 30 fps, so whatever
 ## is read "after N seconds of frames" may be a step or two of running apart; the arcs themselves are exact.
