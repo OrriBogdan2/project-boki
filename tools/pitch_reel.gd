@@ -130,7 +130,7 @@ func play() -> void:
 			await _loot()
 		10:
 			await _escape()
-		11, 12, 13, 14, 15, 16, 17:
+		11, 12, 13, 14, 15, 16, 17, 18:
 			await load("res://tools/pitch_worlds.gd").new(self).play(shot)
 
 

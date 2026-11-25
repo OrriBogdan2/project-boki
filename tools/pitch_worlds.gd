@@ -7,6 +7,9 @@ const FPS := 60
 const DAY_T := 0.45  # farm clock: mid-morning all film long
 const LEG_S := 6.0  # s at most to a goal
 const ZONE_TAKE_S := 8.0  # s a zone's walk lasts at least
+## the side the walk up to the Waystone comes from: 30 deg east of south keeps the view level (straight from the south
+## the Expeditions ring stands behind the camera and the view tips top-down; probe shot 18)
+const STONE_SIDE := Vector3(0.5, 0.0, 0.866)
 const ZONES := ["glasswater", "cinderstep", "hushwood", "ridge"]
 const ZONE_OF_SHOT := {12: "glasswater", 13: "cinderstep", 14: "hushwood", 15: "ridge"}
 ## species, name, the lean type the zone loves
@@ -41,6 +44,8 @@ func play(shot: int) -> void:
 			await montage()
 		17:
 			await ask_take()
+		18:
+			await probe()
 		_:
 			await zone_take(String(ZONE_OF_SHOT[shot]))
 
@@ -79,7 +84,7 @@ func _save() -> void:
 ## Shot 11: the Hunter walks up to the Waystone and steps in; the stone lights, the ink wipes, `zone` is there.
 func hop_take(zone: String) -> void:
 	await _load(GardenZones.HUB)
-	_place(HubWaystone.HUB_AT + Vector3(0.0, 0.0, 8.0))
+	_place(HubWaystone.HUB_AT + STONE_SIDE * 8.0)
 	await _wait(0.8)
 	rig.mark("portal")
 	await _walk(HubWaystone.HUB_AT, 3.2)
@@ -108,13 +113,14 @@ func zone_take(zone: String) -> void:
 ## Shot 16: hub -> zone -> hub -> zone, each hop the moment you arrive.
 func montage() -> void:
 	await _load(GardenZones.HUB)
-	_place(HubWaystone.HUB_AT + Vector3(0.0, 0.0, 6.0))
+	_place(HubWaystone.HUB_AT + STONE_SIDE * 6.0)
 	await _wait(0.5)
 	rig.mark("montage")
 	await _walk(HubWaystone.HUB_AT, 3.2)
 	await _hop("glasswater")
 	await _wait(0.9)
 	await _hop(GardenZones.HUB)
+	_place(HubWaystone.HUB_AT + STONE_SIDE * 5.0)  # (under the ink: lands on the clear side)
 	await _wait(0.4)
 	await _walk(HubWaystone.HUB_AT, 3.2)
 	await _hop("ridge")
@@ -135,6 +141,40 @@ func ask_take() -> void:
 	rig.mark("ask")
 	await _walk(h.hway.pad["pos"], 3.0)
 	await _wait(6.0)
+
+
+## Shot 18 (headless, no film): from which side the walk up to the Waystone keeps the view level (the farm view
+## tips top-down when a wall stands right behind it), and which zone Boki stand clear of water.
+func probe() -> void:
+	await _load(GardenZones.HUB)
+	for i in [1, 11]:
+		var a := TAU * float(i) / 12.0
+		for r in [6.0, 9.0]:
+			_place(HubWaystone.HUB_AT + Vector3(sin(a), 0.0, cos(a)) * r)
+			await _wait(0.5)
+			var top := 0.0
+			var n := 0
+			var goal := HubWaystone.HUB_AT
+			while n < 6 * FPS and Vector2(goal.x - h.ppos.x, goal.z - h.ppos.z).length() > 1.6:
+				var way := Vector2(goal.x - h.ppos.x, goal.z - h.ppos.z).normalized().rotated(h.cam.yaw)
+				_keys(way)
+				await rig.main.get_tree().process_frame
+				top = maxf(top, h.farm_cam.tip)
+				n += 1
+			_keys(Vector2.ZERO)
+			print("PROBE hub dir=%d r=%.0f tip_max=%.2f end=%.1f yaw=%.2f" % [i, r, top,
+				Vector2(goal.x - h.ppos.x, goal.z - h.ppos.z).length(), h.cam.yaw])
+	for z in ZONES:
+		await _load(z)
+		await _wait(2.0)
+		print("PROBE zone=%s me=%s" % [z, h.ppos])
+		for k in h.kins:
+			if GardenZones.zone_of(k["rec"]) != z:
+				continue
+			var p: Vector3 = (k["node"] as Node3D).global_position
+			var c := FarmWater.nearest(Save.d, Vector2(p.x, p.z))
+			var wet := Vector2(c.x + 0.5, c.y + 0.5).distance_to(Vector2(p.x, p.z)) if c.x >= 0 else 99.0
+			print("PROBE   %s at %s water_m=%.1f dist=%.1f" % [k["rec"]["name"], p, wet, p.distance_to(h.ppos)])
 
 
 # ------------------------------------------------------------------ moving about
@@ -171,7 +211,11 @@ func _tidy() -> void:
 	if _tick % 3 == 0:
 		for l in c.find_children("*", "Label3D", true, false):
 			var t: String = (l as Label3D).text
-			if (t.length() > 16 and not keep_say) or (not t.is_empty() and t.unicode_at(0) > 0x2000 and t != "♥"):  # Boki bubbles, notice boards, the partner star: text in the frame
+			var cam: Camera3D = rig.main.get_viewport().get_camera_3d()
+			var close := cam != null and (l as Label3D).global_position.distance_to(cam.global_position) < 6.0
+			if t != "♥" and not (keep_say and t.length() > 16):  # every word or glyph over the world (signs, names, bubbles)
+				(l as Label3D).visible = false
+			elif t == "♥" and close:  # a heart right at the lens fills the frame
 				(l as Label3D).visible = false
 	if c.get("ui") != null:
 		(c.ui as CanvasLayer).visible = false
@@ -205,13 +249,20 @@ func _hop(zone: String) -> void:
 
 ## The nth Boki living in `zone` (not the partner), where it stands now.
 func _resident_at(zone: String, n := 0) -> Vector3:
-	var out: Array = h.kins.filter(func(k): return GardenZones.zone_of(k["rec"]) == zone and not k.has("indoors"))
+	var out: Array = h.kins.filter(func(k): return GardenZones.zone_of(k["rec"]) == zone and not k.has("indoors") \
+		and _dry((k["node"] as Node3D).global_position))
 	if out.is_empty():
 		return h.ppos + Vector3(0, 0, -4)
 	var me: Vector3 = h.ppos
 	out.sort_custom(func(a, b): return (a["node"] as Node3D).global_position.distance_to(me) \
 		< (b["node"] as Node3D).global_position.distance_to(me))
 	return (out[mini(n, out.size() - 1)]["node"] as Node3D).global_position
+
+
+## Not standing in or right beside the pond (the Hunter would wade in after it).
+func _dry(p: Vector3) -> bool:
+	var c := FarmWater.nearest(Save.d, Vector2(p.x, p.z))
+	return c.x < 0 or Vector2(c.x + 0.5, c.y + 0.5).distance_to(Vector2(p.x, p.z)) > 2.5
 
 
 ## Walks to within `near` m of `goal` (xz) with the real keys, each frame turned into the view's own terms.
