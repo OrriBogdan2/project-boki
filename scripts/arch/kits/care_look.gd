@@ -112,13 +112,13 @@ func _build(kind: String) -> Node3D:
 	match kind:
 		"ember":
 			# a comet to follow at the match camera (source: Moon Shot, a bright head with a long trail): a 0.7 m
-			# gold teardrop with a near-white core, an ember halo and a 0.8 m wide, 3.4 m long gold tail (her hurts are
-			# embers, content/vfx/tender.json; her heals are leaf green)
+			# leaf-green teardrop (palette leaf_lit) with a pale-green hot core, a leaf halo and a 0.8 m wide,
+			# 3.4 m long leaf tail; her hurts stay told from heals by the amber sparks it sheds (tender.json)
 			var head := Models.sphere(0.34, 12)
-			_off(Models.part(n, head, orb_mat(Color("ffd27a", 1.0)), Vector3.ZERO, Vector3(1, 1, 1.8)))
-			_off(Models.part(n, Models.sphere(0.2, 8), orb_mat(Color("fff6dc", 1.0)), Vector3(0, 0, -0.1)))
-			_off(Models.part(n, Models.sphere(0.6, 10), orb_mat(Color("ffb45a", 0.5)), Vector3.ZERO))
-			_tail(n, 0.8, 3.4, Color("ffe0a0", 1.0))
+			_off(Models.part(n, head, orb_mat(Color("8fe88a", 1.0)), Vector3.ZERO, Vector3(1, 1, 1.8)))
+			_off(Models.part(n, Models.sphere(0.2, 8), orb_mat(Color("efffe4", 1.0)), Vector3(0, 0, -0.1)))
+			_off(Models.part(n, Models.sphere(0.6, 10), orb_mat(Color("5fdc6a", 0.5)), Vector3.ZERO))
+			_tail(n, 0.8, 3.4, Color("b4f7a8", 1.0))
 		"burr":
 			# a spiky green burr that tumbles, a fluff halo and a pale seed-down tail
 			var sp := Node3D.new()
@@ -381,9 +381,10 @@ func impact(kind: String, at: Vector3, s: Dictionary) -> void:
 	var back := Vector3(-d2.x, 0.4, -d2.y)
 	match kind:
 		"ember":
-			m.fx.flash(at, Color("fff0c0"), 0.6, 0.07)
-			m.fx.spark(at, back, Color("ffd27a"), 8, 6.0, 70.0, 0.25, 6.0)
-			burst("star", at, {"col": Color("ff8c32"), "rim": Color("fff0c8"), "r": 0.8, "dur": 0.22})
+			m.fx.flash(at, Color("efffe4"), 0.6, 0.07)             # hot core, pale leaf (palette leaf_hot)
+			m.fx.spark(at, back, Color("b4f7a8"), 6, 6.0, 70.0, 0.25, 6.0)    # leaf_lit debris
+			m.fx.spark(at, back, Color("ffb45a"), 3, 5.0, 60.0, 0.22, 9.0)    # amber ember debris: the hurt tell
+			burst("star", at, {"col": Color("5fdc6a"), "rim": Color("efffe4"), "r": 0.8, "dur": 0.22})
 		"shard":
 			m.fx.flash(at, Color("9af0ff"), 0.5, 0.06)
 			m.fx.spark(at, back, Color("6fd8f0"), 7, 7.0, 80.0, 0.22, 12.0, 0.9)
