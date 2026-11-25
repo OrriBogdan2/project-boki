@@ -22,6 +22,7 @@ script, so a change to a shape, colour or clip is an edit and a rebuild:
 | `tools/boki/boki_grown.py`, `boki_tools.py` | Evo's mutations and the tools, placed from each species' anchors |
 | `tools/boki/*_fusion.py`, `build_fusion.py`, `scripts/match/boki_fusion.gd` | Fusion parts on the Hunter's torso |
 | `tools/boki/face.py` | Eye domes, lids, brows, mouth: one vertex grid, one blend shape per expression |
+| `tools/boki/face_refit.py` | Moves a built glb's Face (eyes, lids, brows, mouth) onto the painted eyes of its coat, in the glb itself (`EYES` row per species, read off a front orthographic bind-pose render of the coat with props and parts hidden); `AXIS`, `FACING`, `REWEIGHT`, `MOUTH` rows for off-centre faces; prints the FRAME `"head"` row and the Face-to-coat nearest-vertex median in mm (8 to 12 is good). Run once on a freshly built glb |
 | `tools/boki/boki_clips.py`, `*_anim.py` | Shared clips, then each species' skeleton and own clips |
 | `tools/boki/boki_rig.py`, `build_boki.py` | Armature, weights from the primitives, sampling, .glb export |
 | `tools/boki/boki_scan.py`, `boki_meshy.py`, `pose_shots.py` | A body from a Meshy model of the sheet on the same rig (Kestrike, Cairnback, Gongibbon `gibbelle`, Effigeetle `goliathite`, Skateron `hoarheron`, Frigatee `floenatee`): `MESHY_BOKI_RECIPE.md` |

@@ -38,7 +38,9 @@ float sigil(vec2 uv, float r, float a) {
 		float spokes = smoothstep(0.012, 0.0, r * abs(sin((a + jag) * 5.5)) / 5.5);
 		float forks = smoothstep(0.008, 0.0, r * abs(sin((a - jag * 2.0) * 11.0)) / 11.0) * step(0.45, r);
 		float rings = smoothstep(0.03, 0.0, abs(fract(r * 3.2 + jag) - 0.5)) * step(0.4, abs(sin(a * 7.0 + r * 9.0)));
-		return (spokes + forks * 0.7 + rings * 0.6) * (0.25 + 1.6 * crack) * step(0.12, r);
+		// the cracks live in the outer band only (clear in the middle) and stay thin lines, not a sheet
+		float outer_only = smoothstep(0.45, 0.85, r);
+		return min((spokes + forks * 0.7 + rings * 0.6) * (0.25 + 1.6 * crack), 0.7) * outer_only * step(0.12, r);
 	}
 	// thorns: little triangles on an inner ring
 	float th = pow(abs(cos(a * 6.0)), 6.0);
@@ -59,6 +61,10 @@ void fragment() {
 	vec2 ruv = vec2(cos(a), sin(a)) * r;
 	float edge = smoothstep(1.0 - rim_w - 0.03, 1.0 - rim_w, r) * (1.0 - smoothstep(0.97, 1.0, r)) * (1.0 + 1.5 * flash);
 	float body = fill * (0.18 + 0.22 * r * r);
+	if (pattern > 3.5 && pattern < 4.5) {
+		// Rimelock rink: a clear middle, the veil gathering toward a lit rim (centre alpha = fill * 0.04 * 1.6)
+		body = fill * (0.04 + 0.5 * r * r * r * r);
+	}
 	float sw = 0.0;
 	if (sweep >= 0.0) {
 		body *= step(r, sweep) * 0.8 + 0.2;
