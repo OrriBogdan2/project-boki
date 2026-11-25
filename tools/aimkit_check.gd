@@ -23,6 +23,7 @@ func run(main_node: Node) -> void:
 	main = main_node
 	ak = load("res://tools/archetype_check.gd").new()
 	_disc_rim()
+	_sector_rows()
 	ak.main = main
 	var shots := ""
 	for a in OS.get_cmdline_user_args():
@@ -500,6 +501,46 @@ func _aim_slot(m: Match, P: Hunter, key: String, slot: String) -> void:
 				ok("reach %s: Quick cast off, R holds to aim" % key, AimReach.holds(P.ak, "x"))
 			m.aim_hold = "signature" if slot == "e" else "hunter_ult"
 			m._update_indicators(1.0)
+
+
+## A sector over uneven ground is the same triangles as building every ring on its own (AimGeo.quad looks up all
+## four corners): each ring's inner row, carried on from the ring before, is the very points it would look up.
+func _sector_rows() -> void:
+	var w := World.new()
+	w.w = 32
+	w.h = 32
+	w.kind.resize(32 * 32)
+	w.level.resize(32 * 32)
+	for i in 32 * 32:
+		w.kind[i] = World.T_VOID if i % 29 == 0 else World.T_GROUND
+		w.level[i] = (i * 7) % 3
+	var g := AimGeo.new()
+	g.world = w
+	var want := AimGeo.new()
+	want.world = w
+	var ctr := Vector2(15.3, 16.7)
+	var r0 := 1.5
+	var r1 := 8.0
+	g.sector(ctr, r0, r1, 0.2, 2.6, Color.RED, Color.BLUE)
+	var segs := clampi(int(r1 * absf(2.6 - 0.2) / 0.5), 8, 48)
+	var rings := maxi(1, int(ceil((r1 - r0) / (AimGeo.STEP * 1.5))))
+	for j in rings:
+		var ra := lerpf(r0, r1, float(j) / rings)
+		var rb := lerpf(r0, r1, float(j + 1) / rings)
+		var ca := Color.RED.lerp(Color.BLUE, float(j) / rings)
+		var cb := Color.RED.lerp(Color.BLUE, float(j + 1) / rings)
+		for i in segs:
+			var t0 := lerpf(0.2, 2.6, float(i) / segs)
+			var t1 := lerpf(0.2, 2.6, float(i + 1) / segs)
+			var e0 := Vector2(cos(t0), sin(t0))
+			var e1 := Vector2(cos(t1), sin(t1))
+			want.quad(ctr + e0 * ra, ctr + e1 * ra, ctr + e1 * rb, ctr + e0 * rb, ca, cb)
+	var heights := {}
+	for p in g.v:
+		heights[snappedf(p.y, 0.01)] = true
+	ok("geo: a sector's rings are the ones quad builds ring by ring", g.v == want.v and g.c == want.c,
+			"%d vs %d vertices, %d heights" % [g.v.size(), want.v.size(), heights.size()])
+	w.free()
 
 ## A disc's rim vertices sit on the angle grid (segs steps round), every ring cut at the same angles.
 func _disc_rim() -> void:
