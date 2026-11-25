@@ -8,7 +8,7 @@ extends ArchKit
 ## potion effects on one foe inside 5s Beach them. Every number lives in the JSON.
 
 const TELE_A := 1.3                  # his telegraphs are areas foes dodge: a touch stronger than an aim line
-const SOFT_A := 1.2                  # the soft lanes' alpha: the inside stays at 0.1 or less (AimShapes soft, VFX_QUALITY zone rule)
+const SOFT_A := 1.2                  # soft lanes: inside alpha 0.1 or less (zone rule)
 const TELE_LW := 0.1                 # m, their rim
 const THRUSTS := ["gil_thrust_1", "gil_thrust_2", "gil_lunge"]   # KMovesGil, one per chain step
 const BUFFER := 0.2             # s a click during a thrust's recovery waits to thrust next
@@ -144,7 +144,8 @@ func _tide_tick(dt: float) -> void:
 	var td: Dictionary = lmb_def()["tide"]
 	var reach := float(td["reach"])
 	AimKit.lane(h, "lmb", {"len": float(td["dist"][1]) + reach, "len0": float(td["dist"][0]) + reach,
-			"width": float(td["w"]), "k": k, "fill": k, "col": col_of(lmb_def()), "col_full": res_col(), "soft": true})
+			"width": float(td["w"]), "k": k, "fill": k, "col": col_of(lmb_def()), "col_full": res_col(),
+			"soft": true})
 	AimKit.charge(h, k, {"col": col_of(lmb_def()), "col2": res_col()})
 	HeroVfx.of(m).hold(h, "tide_charge", k)
 	if k >= 1.0 and was < 1.0:
