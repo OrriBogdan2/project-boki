@@ -87,3 +87,11 @@ LMB, RMB, E + recast, X + leap, hit, death).
 - Attack: RightArm/ForeArm/Hand re-keyed (`hunter-round-1124/gil/r9/tools/attacksweep.py`, `fadeback.py`): wind-up over the right shoulder at 0.30, bill sweeps past the front at 0.47, follow-through to his left at 0.58, eased back to the original keys over 0.80-0.95 (no pop into Idle).
 - Right-arm clearance (`r7/tools/rightfish.py`, SIDE=Right) on run, Jump_Run, Hit and Idle. Closest fish-to-body min, before -> after: run -0.009 -> 0.007 m, Jump_Run -0.007 -> 0.021, Hit -0.010 -> 0.033, Idle 0.030 -> 0.040. Fish-to-head min: Attack 0.038, Hit 0.039.
 - geo_check vs main: worst held 7.2 cm (Jump_Run forearm_L>torso; main 13.6). HAND L/R ok.
+
+## Native model r10 (gil_meshy.glb)
+- Back fin colour: Meshy retexture (meshy-7, `--original-uv`) of live's back-fin island only (1,171 tris of skin-v95, extracted with its atlas UVs), ref = a Meshy image edit of the turnaround fin (coral membrane, blue rays). The result is pasted into the 4096 atlas inside that island's UV mask (dilated 3 px); every other texel and all vertex data, UVs and indices are unchanged (accessors byte-identical to r9). 8 variants tried (A-H); H picked.
+- Attack re-keyed on hand position (`hunter-round-1124/gil/r10/tools/handkey.py`, hips-local targets): wind-up hand at the right shoulder (y 0.41, 0.10-0.30 s), strike forward-down (0.40-0.55 s), follow-through to his left by 0.60 s, eased back to the original keys over 0.86-1.0 of the clip. Fish >= 0.03 m off head/hat, left arm and body in every frame (r9 had one -0.03 m frame).
+- run: bill kept forward (tip z 0.68-1.29) and the tip under the brim (tip y <= 0.71 hips-local, was up to 1.23 vertical across the face); hand path unchanged (within 3 cm).
+- Hit: the fish drops low by the right hip, bill forward-down (hand y 0.55 -> 0.15), not lifted overhead; forearm/hand >= 1.5 cm off the thigh/torso.
+- Idle/walk: LeftArm in (hand x 0.44 -> 0.38 Idle, 0.41 -> 0.34 walk).
+- geo_check vs main: held worst 6.8 cm (main 13.4), clipped frames 61 (main 159, r9 59). Attack clip pairs drop (upper_arm_R>thigh_R 4.8 cm gone); Hit has none.
