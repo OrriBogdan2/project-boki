@@ -269,6 +269,7 @@ const T := {
 	],
 	# the source_scale test camera (off by default; bands from camera.json "source")
 	"source_view_across_m": ["~", [35.0, 39.0], "m", "ground across: the source's ~37 m"],
+	"dash_back_on_cursor_deg": ["<=", 5.0, "deg", "worst body angle off the cursor after a dash (home in 0.1 s)"],
 	"source_hunter_screen_pct": ["~", [8.3, 9.3], "%", "as hunter_screen_pct: the source's 90-100 px of 1080"],
 	"source_hunter_feet_below_pct": ["~", [1.5, 5.0], "%", "as hunter_feet_below_pct"],
 }
@@ -588,6 +589,7 @@ func run(main: Node) -> void:
 	_overheat()  # after every timed row: its ~9 s of level glide would move them
 	load("res://tools/move_feel_estimates.gd").run(self)  # overheat burn, spike plunge, pad launch ([?] rows)
 	load("res://tools/move_feel_turn.gd").new(self).run()  # every kit's 180 stick flip at a run (~30 s, late too)
+	load("res://tools/move_feel_dash_turn.gd").new(self).run()  # every kit's body and LMB through a dash
 	load("res://tools/move_feel_hunters.gd").new(self).run()  # the movement review rows, every kit (late too)
 	await _no_fall_carry(main)  # it frees the match
 	await load("res://tools/move_one_profile_check.gd").new(self, main).run()  # one profile in every mode
@@ -1531,6 +1533,7 @@ func _dash_curves() -> void:
 	for id in ["gunslinger", "juggernaut", "archer", "bulwark", "thief", "dredge", "mage", "ashwick"]:
 		p_v.reclass(Arch.weight(id), id)
 		m._later.clear()  # (the last kit's delayed hit, Albert's spin on arrival, must not fire on this kit)
+		_steps(30)  # a swapped kit settles first: Sable's Cartwheel ends on touching ground if it starts aloft
 		_reset(flat + Vector3(-3.0, 0, 0))
 		p_v.inp["move"] = Vector2(1, 0)
 		p_v.inp["dash"] = true
@@ -2007,7 +2010,7 @@ func _kill_y() -> float:
 	if p_v.has_method("abyss_kill_y"):
 		return p_v.call("abyss_kill_y")
 	var fl: float = w.abyss_floor(p_v.pos.x, p_v.pos.z, p_v.last_gy)
-	return fl - (Hunter.ABYSS_GLIDE_ROOM if p_v.gliding and p_v.glide_fuel > 0.001 else 0.0)
+	return fl - (HunterFeel.abyss_glide_room if p_v.gliding and p_v.glide_fuel > 0.001 else 0.0)
 
 
 func _abyss_depths(g: Vector3, d: Vector2) -> void:
@@ -2484,9 +2487,9 @@ func _drop() -> void:
 	for i in 60:
 		p_v.inp["move"] = Vector2(1, 0)
 		m.step(DT)
-		if tvy < 0.0 and -p_v.vel.y >= 0.9 * Hunter.DIVE_FALL:
+		if tvy < 0.0 and -p_v.vel.y >= 0.9 * HunterFeel.dive_fall:
 			tvy = (i + 1) * DT
-		if tst < 0.0 and p_v.vel.x >= 0.9 * Hunter.DIVE_SPEED:
+		if tst < 0.0 and p_v.vel.x >= 0.9 * HunterFeel.dive_speed:
 			tst = (i + 1) * DT
 		if not p_v.diving:
 			break
@@ -2498,7 +2501,7 @@ func _drop() -> void:
 	p_v.diving = true
 	p_v.gliding = true
 	p_v.glide_k = 1.0
-	p_v.vel = Vector3(0, -Hunter.DIVE_FALL, 0)
+	p_v.vel = Vector3(0, -HunterFeel.dive_fall, 0)
 	_steps(5)
 	p_v.inp["jump"] = true
 	var fd := -1
@@ -2507,7 +2510,7 @@ func _drop() -> void:
 		m.step(DT)
 		if fd < 0 and not p_v.diving:
 			fd = i + 1
-		if ts < 0.0 and not p_v.diving and absf(-p_v.vel.y - Hunter.DROP_FALL) <= 0.1 * Hunter.DROP_FALL:
+		if ts < 0.0 and not p_v.diving and absf(-p_v.vel.y - HunterFeel.drop_fall) <= 0.1 * HunterFeel.drop_fall:
 			ts = (i + 1) * DT
 	rec("drop_deploy_frames", fd)
 	rec("drop_deploy_settle_t", ts if ts > 0.0 else 9.0)
@@ -2518,7 +2521,7 @@ func _drop() -> void:
 	for i in 60:
 		p_v.inp["move"] = Vector2(0, 1)
 		m.step(DT)
-		if tg < 0.0 and p_v.vel.z >= 0.9 * Hunter.DROP_SPEED:
+		if tg < 0.0 and p_v.vel.z >= 0.9 * HunterFeel.drop_speed:
 			tg = (i + 1) * DT
 	rec("drop_glide_steer_t", tg if tg > 0.0 else 9.0)
 	# land and move off straight away
@@ -2526,7 +2529,7 @@ func _drop() -> void:
 	p_v.dropping = true
 	p_v.diving = false
 	p_v.gliding = true
-	p_v.vel = Vector3(0, -Hunter.DROP_FALL, 0)
+	p_v.vel = Vector3(0, -HunterFeel.drop_fall, 0)
 	var landed := false
 	for i in 120:
 		m.step(DT)
