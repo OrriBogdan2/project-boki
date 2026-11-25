@@ -7,7 +7,7 @@
 	"weight": "heavy",
 	"body": {"size": 1.273, "legs": 1.5, "torso": 0.95, "shoulder": 0.9, "build": 1.0, "neck": -0.16, "hit_r": 0.458, "hit_h": 2.56, "body_r": 0.452},
 	"color": "#ffc832",
-	"plate_offset": 3.06,
+	"plate_offset": 3.23,
 	"fantasy": "The Scrap King. Hooks you in with his bone-hook arm, drops a hoard on you, and grows with every knock.",
 	"howto": ["Play: close-range brawler; hook foes in, slam them.", "Combo: {secondary} hooks a foe, then {signature} slams them: a sure stun.", "Avoid: shooting or casting mid-reel; only {dash} works."],
 	"silhouette": "the hunched grey frame, the purple bone-hook arm and the hoard of chests, barrels and bells on his back",

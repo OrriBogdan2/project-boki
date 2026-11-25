@@ -520,7 +520,7 @@ archetypes/dredge.json:e.rank3_stun	0.2
 archetypes/dredge.json:e.stun	1.1
 archetypes/dredge.json:e.windup	0.38
 archetypes/dredge.json:gun.armor_k	0.66
-archetypes/dredge.json:plate_offset	3.06
+archetypes/dredge.json:plate_offset	3.23
 archetypes/dredge.json:rank_cd.dash[0]	1
 archetypes/dredge.json:rank_cd.dash[1]	0.8214
 archetypes/dredge.json:rank_cd.dash[2]	0.6429
