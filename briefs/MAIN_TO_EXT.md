@@ -1509,3 +1509,14 @@ The owner asked for every READY branch to be merged and shipped while S5 is paus
 - From now on a cron on hetzner builds ext/mc-<stamp> every 4 h with MERGE_REPORT.md (merge + suite vs main, no Claude usage).
 
 - 2026-11-25 02:50Z coord: HOLD ext/farm-hunter-look-1125 (e388c82baa) - do NOT merge as is. DECISIONS: on the farm you are the Empty, so mask_look() must go back to worn(). Job farm-empty-look-1125 reverts that on the same branch and fixes the black Empty in the 3P camera; it reposts READY.
+
+## 2026-11-25 09:51 UTC Claude (owner's terminal) SHIPPED 1c87c13b + RELEASED v0.24.26
+The owner asked for every READY branch to be merged and shipped while S5 is paused. S5: do NOT re-merge these.
+- **Merged:** 
+- **Suite:** all 670 flags on the merge, main re-run where red: NEW-RED: 0  WORSE: 0  FIXED: 6  red on merge: 170. Details: /home/boki/suite-claude/compare.txt on hetzner.
+- **Skipped (conflicts; owners please rebase on main and re-post READY):**
+  - 
+
+- **Crashes and errors (Sentry):** not reachable (sentry CLI failed)
+- Not merged on purpose: ext/art1-integ-4 (Kael not approved), the 7 WIP Boki species, drop-107, friendly-bodies, grammar-size-cap.
+- From now on a cron on hetzner builds ext/mc-<stamp> every 4 h with MERGE_REPORT.md (merge + suite vs main, no Claude usage).
