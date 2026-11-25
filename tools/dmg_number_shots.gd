@@ -9,6 +9,8 @@ extends RefCounted
 ##     as the reference (b)
 ##   dmgnum_2_trio    you and two teammates focus one dummy (tools/dmg_number_trio.gd), 2.3 s in, and
 ##   dmgnum_2_trio_crop  the 480x360 around the dummy; prints the most numbers over one spot per frame
+##   dmgnum_3_sizes   (taken before the trio) three rivals, 4 frames after a rifle round (8), an ability hit (18)
+##                    and an ult (45) from you: the size each prints at and its impact flash
 ## <dir>/captions.txt gets "file: caption" per file.
 
 const DT := 1.0 / 60.0
@@ -39,6 +41,7 @@ func run(main_node: Node) -> void:
 			_take("dmgnum_0_ticks", lines, "Mid-fight: five rivals taking ticks, reticle on the nearest")
 	_take("dmgnum_1_end", lines, "After two seconds of ticks, a crit and a heavy hit")
 	await _kinds(lines)
+	await _sizes(lines)
 	await _trio(lines)
 	var cap := FileAccess.open(dir.path_join("captions.txt"), FileAccess.WRITE)
 	for l in lines:
@@ -86,6 +89,21 @@ func _tick(f: int) -> void:
 	if f == 60:
 		foes[1].hurt(40.0, P, {"src": "shot", "crit": true})
 		foes[2].hurt(240.0, P, {"src": "shot"})
+
+
+## One hit of each size from you on three rivals, the frame 4 frames later (numbers popped, flashes up).
+func _sizes(lines: Array) -> void:
+	fx.nums.clear()
+	for l in fx.num_pool:
+		l.visible = false
+	for k in 40:
+		await _frame()
+	foes[0].hurt(8.0, P, {"src": "shot"})
+	foes[1].hurt(18.0, P, {"src": "abil", "ab": "utility"})
+	foes[2].hurt(45.0, P, {"src": "abil", "ab": "ult"})
+	for k in 4:
+		await _frame()
+	_take("dmgnum_3_sizes", lines, "A rifle round (8), an ability hit (18) and an ult (45) from you, 4 frames on")
 
 
 func _frame() -> void:
