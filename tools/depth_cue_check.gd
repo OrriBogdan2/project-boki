@@ -21,7 +21,7 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	Econ.ensure()
-	await _check_match(main)
+	_check_match(main)
 	Settings.set_v("depth_cues", false, false)
 	ok(DepthCues.k() == 0.0 and DepthCues.abyss_dim() == 1.0, "setting off: no terrain cues, abyss not dimmed")
 	Settings.set_v("depth_cues", true, false)
@@ -32,7 +32,7 @@ func _check_match(main: Node) -> void:
 	Settings.set_v("depth_cues", true, false)
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
 	m.set_process(false)
 	var dc: DepthCues = m.get_node_or_null("DepthCues")
 	ok(dc != null, "the DepthCues node is in the match")
