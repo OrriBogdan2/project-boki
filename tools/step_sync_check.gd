@@ -10,6 +10,10 @@ extends RefCounted
 ##    plant of the same foot, and the steps count the plants (one at most off, where the counted laps start and end);
 ##  - per pair of neighbouring run loops, the blend halfway: the feet alternate and the steps count the plants (no
 ##    double step at a blend, no missing step on a strafe).
+## A Meshy-native Hunter (WardenNative: no hidden-rig ring) has native rows instead, for its walk, run and sneak clips
+## (WardenNativeSteps): the plants read off Meshy's foot bones in the clip, the data "plants" within one frame of
+## them, every step heard at a walk and a run speed within one frame after a plant of that foot (the steps count the
+## plants), the feet alternating through a walk-run-walk ramp, and no step standing still.
 ## Run: godot --headless -- --step-sync-check [--wardens=archer,dolm] [--plants-json=<file>: the plants read].
 
 const DT := 1.0 / 60.0  # s: one game frame
@@ -18,6 +22,8 @@ const COUNT_LOOPS := 3  # loops counted
 const NO_FEET := ["ostra"]  # Motley hovers on his box: no feet, no steps (KMovesStone.HOVER_GAIT)
 const PLANT_BAND := 0.3  # x a foot's height range over its low: under this it is planted (tools/anim_audit.gd)
 const LIFT_BAND := 0.6  # x: over this it has lifted
+const NATIVE_SPEEDS := {"walk": [1.4, 2.6], "run": [3.2, 4.6], "crouch": [1.4]}  # state -> ground speeds heard (m/s)
+const RAMP := [[1.4, 2.0], [4.6, 2.0], [2.0, 2.0], [3.6, 2.0]]  # [m/s, s]: walk, run, walk, run
 
 var bad := 0
 var rows := 0
@@ -57,6 +63,11 @@ func _hero(main: Node, id: String) -> void:
 	holder.add_child(m)
 	for k in 5:
 		await main.get_tree().process_frame
+	var nat := m.get_node_or_null("Warden/Native") as WardenNative
+	if nat:
+		_native(id, nat)
+		m.free()
+		return
 	var sync := m.get_node_or_null("Warden/Sync")
 	var clips: WardenClips = sync.get("clips") if sync else null
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
@@ -119,6 +130,12 @@ func _plants(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String) -> Di
 		for f in 2:
 			ys[f].append(_ankle(sk, "LR"[f]))
 	clips.force = {}
+	return _touchdowns(ys, length)
+
+
+## The touchdowns of both feet from their heights over the clip's frames `ys` ([[L], [R]]): see _plants.
+func _touchdowns(ys: Array, length: float) -> Dictionary:
+	var n: int = ys[0].size()
 	var out := {}
 	for f in 2:
 		var lo: float = ys[f].min()
@@ -258,6 +275,101 @@ func _blend_row(id: String, m: Node3D, sync: Node, clips: WardenClips, a: Array,
 		% [id, a[1], b[1], heard.size(), want, "yes" if gap >= 2.0 else "no"]
 	)
 	ok(per_loop > 0 and absf(heard.size() - want) <= 1 and gap >= 2.0, msg)
+
+
+## The rows of a Meshy-native Hunter (see the header): `nat` plays Meshy's clips, its steps read their foot plants.
+func _native(id: String, nat: WardenNative) -> void:
+	if WardenSkeleton.find(nat.skel, "foot.L") < 0:
+		print("skip %s: no feet" % id)
+		return
+	nat.set_process(false)
+	var plants := {}  # state -> {foot: [s into the clip]}
+	var data: Dictionary = nat.d.get("plants", {})
+	for state in NATIVE_SPEEDS:
+		plants[state] = _native_plants(nat, state)
+		_clip_row(id, state, plants[state], data.get(state, {}))
+	read[WardenGlb.art(id)] = {"native": plants}
+	for state in NATIVE_SPEEDS:
+		for speed in NATIVE_SPEEDS[state]:
+			_native_row(id, nat, state, speed, plants[state])
+	_ramp_row(id, nat)
+	_still_row(id, nat)
+
+
+## Where each foot plants in the clip Meshy's `state` plays (s), read off Meshy's foot bones posed at every frame of it.
+func _native_plants(nat: WardenNative, state: String) -> Dictionary:
+	var clip := String(nat.plays[state])
+	var length := nat.player.get_animation(clip).length
+	var n := maxi(int(round(length / DT)), 2)
+	var ys := [[], []]
+	nat.player.play(clip, 0.0)
+	for k in n:
+		nat.player.seek(length * k / n, true)
+		nat.player.advance(0.0)
+		for f in 2:
+			ys[f].append(_foot_y(nat.skel, "LR"[f]))
+	return _touchdowns(ys, length)
+
+
+## The foot bone's height (m): Meshy's own foot bone (the ankle).
+func _foot_y(sk: Skeleton3D, foot: String) -> float:
+	return (sk.global_transform * sk.get_bone_global_pose(WardenSkeleton.find(sk, "foot." + foot))).origin.y
+
+
+## `seconds` of the Hunter moving at `speed` (m/s) on the ground (crouched or not); the steps heard: [foot, s into the
+## clip, the clip's rate].
+func _native_walk(nat: WardenNative, speed: float, sneak: bool, seconds: float) -> Array:
+	var state := {"vel": Vector3(0, 0, -speed), "grounded": true, "crouch": 1.0 if sneak else 0.0}
+	nat.root.set_meta(WardenClips.STATE, state)
+	var heard := []
+	for k in int(seconds / DT):
+		var n := nat.steps.count
+		nat._process(DT)
+		if nat.steps.count > n:
+			heard.append([nat.steps.side, nat.player.current_animation_position, nat.player.speed_scale])
+	return heard
+
+
+func _native_row(id: String, nat: WardenNative, state: String, speed: float, pl: Dictionary) -> void:
+	var length := nat.player.get_animation(String(nat.plays[state])).length
+	var sneak := state == "crouch"
+	_native_walk(nat, speed, sneak, 1.0)  # (settle: the clip and its rate)
+	var heard := _native_walk(nat, speed, sneak, COUNT_LOOPS * length / maxf(nat.player.speed_scale, 0.01))
+	var worst := 0.0
+	var off := 0
+	for st in heard:
+		var near := INF
+		for t in pl[st[0]]:
+			var d := absf(float(st[1]) - float(t))
+			near = minf(near, minf(d, length - d))
+		var frames := near / (DT * float(st[2]))
+		worst = maxf(worst, frames)
+		off += 1 if frames > 1.0 else 0
+	var want: int = COUNT_LOOPS * (pl["L"].size() + pl["R"].size())
+	var msg := (
+		"%-10s native %-6s at %.1f m/s: %d steps for %d plants, worst %.2f frames off"
+		% [id, state, speed, heard.size(), want, worst]
+	)
+	ok(off == 0 and want > 0 and absf(heard.size() - want) <= 1 and nat.cur == state, msg)
+	nat.root.set_meta(WardenClips.STATE, {})
+
+
+## Walk, run, walk, run: the feet alternate across the hand-overs (a switch of clip never steps one foot twice).
+func _ramp_row(id: String, nat: WardenNative) -> void:
+	var heard := []
+	for leg in RAMP:
+		heard.append_array(_native_walk(nat, leg[0], false, leg[1]))
+	var alternate := heard.size() > 1
+	for i in heard.size() - 1:
+		alternate = alternate and heard[i][0] != heard[i + 1][0]
+	ok(alternate, "%-10s native walk-run ramp: %d steps, the feet alternate: %s" % [id, heard.size(), alternate])
+	nat.root.set_meta(WardenClips.STATE, {})
+
+
+func _still_row(id: String, nat: WardenNative) -> void:
+	var heard := _native_walk(nat, 0.0, false, 2.0)
+	ok(heard.is_empty(), "%-10s native standing: %d steps" % [id, heard.size()])
+	nat.root.set_meta(WardenClips.STATE, {})
 
 
 func _ts(a: Array) -> String:
