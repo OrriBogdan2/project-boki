@@ -304,10 +304,10 @@ def slug_fly():
 
 def shot_tail():
     """The blunderbuss's tail under its boom: loose scrap rattling away downrange, a low rumble dying."""
-    d = 0.6
+    d = 0.62
     rattle = lpf(grains(0.45, 45, 700, 3200, 0.002, 0.006, fall=0.14), 4000)
     rumble = lpf(noise(0.4), 220) * env(N(0.4), 0.03, 0.15)
-    return TZ.fade_out(mix(at(rattle * 0.7, 0.06), at(rumble * 0.5, 0.05), pad(np.zeros(1), d)), 0.08)
+    return TZ.fade_out(mix(at(rattle * 0.7, 0.08), at(rumble * 0.5, 0.07), pad(np.zeros(1), d)), 0.08)
 
 
 def rock_fly():
