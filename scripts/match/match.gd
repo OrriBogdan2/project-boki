@@ -2442,7 +2442,7 @@ func sees(team_i: int, p: Vector3, crouched := false, revealed := false) -> bool
 			continue
 		if not revealed and rel.normalized().dot(h.aim_dir()) < VIEW_COS:
 			continue
-		if world.los(h.pos, p, h.pos.y + 1.1) or world.los(h.pos, p + Vector3(0, 0.6, 0), h.pos.y + 1.6):
+		if world.los(h.pos, p, h.pos.y + 1.1, true) or world.los(h.pos, p + Vector3(0, 0.6, 0), h.pos.y + 1.6, true):
 			return true
 	return false
 
