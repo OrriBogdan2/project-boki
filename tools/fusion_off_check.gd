@@ -1,9 +1,12 @@
 extends RefCounted
-## --fusion-off-check: Fusion (X) is off by default (docs/decisions/0159). Prints PASS/FAIL lines.
+## --fusion-off-check: there is no fusion in the game (docs/decisions/0159); `fusion_enabled` is a dev
+## flag, off. Prints PASS/FAIL lines.
 ##   1. the flag: content/rules/merge_forms.json ships `fusion_enabled` false
 ##   2. off: X, the bot's merge call, the Boki's leap and a full bond meter start nothing; the meter never fills;
 ##      no hunter in a bot match merges; the Boki-ability tip, loading tips, words, cards, controls and the
-##      keybind list (X stays reserved in the input map) say nothing about it; the tutorial never has Fusion steps
+##      keybind list and Training checklist say nothing about it; the Fusion action has no key (X is free, a saved
+##      key stays unbound); the tutorial never has Fusion steps; 60 s of a bot match with Boki wisps, the old X input,
+##      R and C pressed through every wisp state: 0 fusions, bots included, and the C summon still bursts and folds
 ##   3. on: the same calls start a Fusion, and the same screens show it again
 
 var bad := 0
@@ -18,7 +21,7 @@ func ok(cond: bool, what: String) -> void:
 
 
 func _flag(on: bool) -> void:
-	Content.rules("merge_forms")["fusion_enabled"] = on
+	MergeForm.set_enabled(on)
 
 
 func _match(opts: Dictionary) -> Match:
@@ -98,8 +101,18 @@ func _off() -> void:
 	p.skill_pts = 3
 	p.lvl = 9
 	ok(not p.can_level("ult"), "off: no skill point can go into the Fusion slot")
-	ok(InputMap.has_action("ultimate") and not Settings.slots("ultimate").is_empty(), "off: X stays reserved")
+	ok(
+		InputMap.action_get_events("ultimate").is_empty() and Settings.slots("ultimate") == ["", ""],
+		"off: the Fusion action has no key (%s)" % str(Settings.slots("ultimate"))
+	)
+	Settings.v["keys"]["ultimate"] = ["key:%d" % KEY_X]
+	Settings.fusion_key()
+	ok(InputMap.action_get_events("ultimate").is_empty(), "off: a Fusion key saved by an older build is not bound")
+	Settings.v["keys"].erase("ultimate")
+	ok(not _match_action_on(KEY_X), "off: X does nothing in a match (no match action holds it)")
+	ok(not _drill_has_fusion(), "off: the Training checklist has no Fusion row")
 	_off_match()
+	_off_wisps()
 	_off_text()
 	_off_tutorial()
 
@@ -116,6 +129,60 @@ func _off_match() -> void:
 		m.step(Match.DT)
 		seen += m.hunters.filter(func(h): return not h.merge_st.is_empty()).size()
 	ok(seen == 0 and int(m.kstat["ult"]) == 0, "off: 20s of a bot match with full meters, nobody fused (%d)" % seen)
+
+
+## 60 s of a 4-hunter bot match with Boki wisps on: every step the old X input (inp.ult) and every 0.25 s R, with
+## full meters and the slot open for everyone; C every 2.5 s (its cooldown cleared), so the wisp goes out, is sent
+## back, folds and comes out again while X and R mash.
+func _off_wisps() -> void:
+	_match({"training": false, "teams": 4, "squad": 1, "length": 600.0, "no_drop": true, "boki_wisps": true,
+			"arch": "bulwark"})
+	var p := m.player
+	var fused := 0
+	var states := {}
+	var summons := 0
+	var was_out := false
+	for i in int(60.0 / Match.DT):
+		for h in m.hunters:
+			h.slot_lv["ult"] = 1
+			h.ult = 1.0
+			h.lvl = maxi(h.lvl, int(Hunter.ULT_AT[0]))
+		p.inp["ult"] = true
+		if i % 15 == 0:
+			if p.ak: p.ak.cd["r"] = 0.0
+			HunterKeys.ult_pressed(p)
+		if i % 150 == 75:
+			if p.kin and (p.kin as Kin).summon: (p.kin as Kin).summon.cd = 0.0      # (cycle faster than its cooldown)
+			KinSummon.press(p)
+		m.step(Match.DT)
+		var k: Kin = p.kin
+		if k:
+			var out := k.summon != null and k.summon.out()
+			states["wisp" if k.wisp else k.state] = true
+			if out and not was_out: summons += 1
+			was_out = out
+		for h in m.hunters:
+			var hk = h.kin
+			if not h.merge_st.is_empty() or (hk != null and is_instance_valid(hk) and (hk as Kin).state == "fused"):
+				fused += 1
+	var merges := int(m.kstat["ult"])
+	print("FUSIONOFF wisps 60s: fusion frames %d, merges %d, player Boki states %s, summons %d"
+			% [fused, merges, str(states.keys()), summons])
+	ok(fused == 0 and merges == 0, "off: 60 s of X, R and C with wisps and bots, 0 fusions (%d frames)" % fused)
+	ok(states.has("wisp") and states.has("active") and summons >= 2, "off: C still summons the wisp (%d)" % summons)
+
+
+func _drill_has_fusion() -> bool:
+	return TrainDrill.rows().any(func(t): return String(t[2]) == "ultimate")
+
+
+## Does any match action hold this physical key?
+func _match_action_on(code: int) -> bool:
+	for a in Settings.MATCH_ONLY + ["fire", "secondary", "signature", "dash", "jump", "throw", "interact", "gear1"]:
+		for e in InputMap.action_get_events(a):
+			if e is InputEventKey and (e as InputEventKey).physical_keycode == code:
+				return true
+	return false
 
 
 func _off_text() -> void:
@@ -177,6 +244,8 @@ func _on() -> void:
 	)
 	ok(KitCard.card_slots("bulwark").has("r") and ClassCard.kit_tip("bulwark").contains("Fusion"), "on: cards show it")
 	ok(_controls_text().contains("ultimate") and _has_action_row("ultimate"), "on: controls and keybinds list it")
+	ok(Settings.slots("ultimate")[0] == "key:%d" % KEY_X, "on: the dev flag gives Fusion its X key back")
+	ok(_drill_has_fusion(), "on: the Training checklist has its Fusion row")
 	var tu := _tutorial()
 	ok(not tu.applies("pick_ult") and not tu.applies("ult"), "on: the tutorial still skips Fusion (11-18)")
 	var tut_tips := {}
