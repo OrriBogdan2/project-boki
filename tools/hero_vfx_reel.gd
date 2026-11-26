@@ -77,7 +77,8 @@ func run(main_node: Node) -> void:
 	P.lvl = 6
 	for slot in P.slot_lv:
 		P.slot_lv[slot] = 3
-	for part: String in (parts() if only == "" or only in parts() else [only]):  # (--reel-only may name a part kept off the reel)
+	# (--reel-only may name a part kept off the reel)
+	for part: String in (parts() if only == "" or only in parts() else [only]):
 		if only != "" and part != only:
 			continue
 		print("REEL_MARK %d %s" % [Engine.get_frames_drawn(), part])
