@@ -1,5 +1,6 @@
 extends "res://tools/clip_shots.gd"
-## --native-upper-shots --shots-dir=<dir> [--size=480] [--ids=a,b] [--mode=swing|left|right|back] [--view=match|eye] [--zoom=1.0]: each native Hunter
+## --native-upper-shots --shots-dir=<dir> [--size=480] [--ids=a,b] [--mode=swing|left|right|back] [--view=match|eye]
+## [--zoom=1.0]: each native Hunter
 ## running at 4.6 m/s, a frame every 1/30 s to 1.2 s: <dir>/<id>/f###.png. swing: a side view, a swing pressed 0.3 s in.
 ## left, right (strafe) and back: aim -Z (up the screen at --view=match, the game's angle), moving -X, +X, +Z. --view=
 ## match (default) or eye (a front three-quarter view at eye level). Needs a renderer. Left, right and back also write
