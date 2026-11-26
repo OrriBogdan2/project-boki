@@ -124,7 +124,8 @@ func _skips(tree: SceneTree) -> void:
 	var held := 0.8
 	while is_instance_valid(pr) and not pr.done and held < 3.0:      # (a skip frees it)
 		await tree.process_frame
-		if pr.done:      # (the frame that skips builds the hatch: its length is the build, not the hold)
+		# (the frame that skips builds the hatch: its length is the build, not the hold)
+		if not is_instance_valid(pr) or pr.done:
 			break
 		held += tree.root.get_process_delta_time()
 	for i in 300:
