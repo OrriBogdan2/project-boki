@@ -5,6 +5,8 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	"--move-speed-check": ["res://tools/move_speed_check.gd", "move_speed_check", null],  # run, walk, crouch per Hunter
+	"--mob-fsm-check": ["res://tools/mob_fsm_check.gd", "mob_fsm_check", null],  # monster + boss machines (M9)
 	"--utility-parity-check": ["res://tools/utility_parity_check.gd", "utility_parity_check", null],  # belt vs source
 	# a Boki plate, glove wall or ice wall never hides the Hunter behind it; a rock does
 	"--barrier-sight-check": ["res://tools/barrier_sight_check.gd", "barrier_sight_check", null],
@@ -24,6 +26,10 @@ const CHECKS := {
 	"--mage-combo-check": ["res://tools/archetype_check.gd", "archetype_check", null],
 	# Vex's cross-ability interactions
 	"--gunslinger-combo-check": ["res://tools/archetype_check.gd", "archetype_check", null],
+	# Meshy-native Hunters: visible body vs hit_h / hit ring
+	"--native-hitbox-check": ["res://tools/native_hitbox_check.gd", "native_hitbox_check", null],
+	"--native-hitbox-shots": ["res://tools/native_hitbox_shots.gd", "native_hitbox_shots", null],
 	"--boss-check": ["res://tools/boss_check.gd", "boss_check", null],  # boss lairs: dial, wards, phases, the Rare Egg
 	"--bot-spacing-shots": ["res://tools/bot_spacing_shots.gd", "bot_spacing_shots", null],  # --shots-dir=<dir>, GPU
+	"--stolen-extract-check": ["res://tools/stolen_extract_check.gd", "stolen_extract_check", null],  # extract, saves
 }
