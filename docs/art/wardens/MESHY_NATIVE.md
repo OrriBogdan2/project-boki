@@ -160,7 +160,7 @@ after it, so it does not fight a clip that already turns the head. `--look-at-ch
 
 ## Not on the native path (yet)
 Death, stun, ledge, emote and clips for moves beyond the slots above (Meshy gave six); the contract's per-hunter extras (Tenzo's
-ground rings, Sparkle's blink, Sable's braid springs); 300k-tri meshes vs the 80k contract budget.
+ground rings, Sparkle's blink, Sable's braid springs; loose parts only through data "springs" below); 300k-tri meshes vs the 80k contract budget.
 
 ## Sable: hybrid rig (Meshy rig, scripted weight fixes)
 `art/wardens/sable/sable_meshy.glb`: 78,000 tris (master decimated BEFORE rigging, budget 80k), Meshy's 42 bones with
@@ -235,3 +235,32 @@ chain out in the attack): geo_check held pairs over 1 cm 33 -> 0. `warden_native
 
 Grimble has no hit clip: a hit is the Hips flinch spring (WardenFlinch) over the playing clip.
 The gun's hip is data (`holster.hip.pos`, x +0.17 = his left, where the gauntlet draws it).
+
+## Loose parts: spring chains on Meshy's bones (data "springs", pilot: Sable's coat tails)
+A hunter's loose parts (tails, coat tails, skirts, capes) used to ride the clip's keys. `WardenNative` now builds `WardenSprings`
+chains on Meshy's own bones when the hunter's entry in `content/rules/warden_native.json` has `"springs": [{"bones": [root ..
+tip], "hang": true, "floor": m}]` (no key = clip keys only, as before). The root's parent carries it; the tip bone rides its
+parent; the others are a rope in world space (momentum, pull to the rest shape, link lengths kept: `WardenSprings.step`).
+`hang` pulls toward straight down from the root, `floor` keeps the joints that many metres over the ground. The layer runs
+after the clip and the other bone layers and before the props. ON for Sable only: her two chains Bone_009 .. 007 and
+Bone_013 .. 011 (no Blender change: Meshy's rig already has them and the weights carry the coat tails and moth wings).
+`--warden-native-check` asserts the chain count per hunter, the stream-back in a run and the link lengths;
+`--native-springs-shots --warden=thief [--no-springs]` films run, turn, lunge and stop at the match camera and eye level.
+Proof: `/home/boki/gens/native-springs-1126/` (sheets sable_coat_springs_*.jpg, MP4, raw frames).
+Seen: in the deep lunge and the stop the tails hang down and stay inside the silhouette (the clip's baked keys fan them out
+over the thighs); in a run they trail more; at the match camera (fov 8, 66 deg down) the change is too small to read.
+Known gaps: no leg collision (a back leg can pass through a tail), both tails can drift to the same side in a turn.
+
+### Plan: Cinder tail, Lace skirt, Kael cape (not built; glbs untouched)
+1. Cinder tail: bones Bone_016 (child of Hips) -> Bone_006, 11 bones, already weighted; the tail lies out on the floor. A
+   rest-shape chain (no `hang`), `floor` on. Needs one new thing in WardenSprings: push-out from the thigh and shin joints
+   (data "avoid": [bone names], radius) so the tail stops passing through the legs; measure it with a check that samples every
+   joint against the leg capsules in run, lunge and stop.
+2. Lace skirt: `hem_meshy.glb` has eight single bones SkirtSw0..7 round the Hips, no chains. Either add a 2-bone hem
+   chain under each in Blender (rig step, weights split by height; no visible change) and hang them with `floor` plus the
+   same leg push-out, or add a one-bone "swing" mode (spring on the bone's rotation). Check first whether her lace_* clips key
+   SkirtSw (a spring would fight keys); then lower the clip's weight on them.
+3. Kael cape: `kael_meshy.glb` has no cape bones (the cape rides Spine and the shoulders). Add three chains of three bones
+   under Spine02 in Blender (rig step), re-weight the cape's vertices down the chain, hang them with a back plane so they do
+   not enter the body. Check that no job is rigging Kael's sword or clips (ext/anim-kael-native-clips).
+Order: Cinder (no glb change), Lace, Kael. Each: flag in the data, the same shots tool, a check line per hunter.

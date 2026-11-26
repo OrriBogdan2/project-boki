@@ -3,8 +3,9 @@ extends Node
 ## A Hunter drawn on Meshy's own skeleton and playing Meshy's own clips (docs/art/wardens/MESHY_NATIVE.md). Only the
 ## Hunters switched on in content/rules/warden_native.json ("meshy_native") take this path; every other one keeps the
 ## contract model (WardenGlb, WardenSync, WardenClips) untouched. Meshy's bones are never renamed, retargeted or merged
-## onto the contract: the clips play on them as Meshy keyed them; of the contract's procedural bone layers the springs
-## are not built, the look-at, the drop pose and the landing squash are (on WardenSkeleton.find's stand-ins). The
+## onto the contract: the clips play on them as Meshy keyed them; of the contract's procedural bone layers the look-at,
+## the drop pose and the landing squash are built (on WardenSkeleton.find's stand-ins), and the springs only where data
+## "springs" names Meshy's own bones for a chain (Sable's coat tails: WardenSprings.setup_named). The
 ## contract's anchor empties hang on Meshy's bones as BoneAttachment3D nodes (data "anchors"), and the weapon's aim
 ## node rides Meshy's hand bone. HunterAnim still runs
 ## on the hidden rig and hands over its state (WardenClips.STATE) each frame. The surfaces take the game's hero-toon
@@ -72,6 +73,7 @@ var torso_bi := -1  # Meshy's bone standing in for the rig's torso (WardenSkelet
 var torso_off := Transform3D()  # that bone's frame -> the rig torso's, at rest (shown_torso)
 var mouth: Node3D  # the copied weapon_muzzle (on a bone, a part or the sun): where the Gun's Muzzle sits each frame
 var gunprop: WardenGunProp  # Grimble's one gun (data "holster"): hip at rest, hand while he aims
+var springs := WardenSprings.new()  # loose parts (data "springs": Sable's coat tails) swinging on Meshy's bones
 var props: WardenProps  # the contract's parts Meshy's mesh lacks (data "props": Kael's sword, Cinder's heel jets)
 var upper: WardenNativeUpper  # a swing or cast over the running legs (the torso and arms only)
 var moves: WardenNativeMoves  # the kit moves with a clip of their own (data "kmoves": full-body or upper layer)
@@ -167,6 +169,7 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	if d.has("bones"):
 		skel.set_meta(WardenSkeleton.BONE_MAP, d["bones"])
+	springs.setup_named(skel, d.get("springs", []))
 	flinch = WardenFlinch.make(model, skel)
 	wall = WardenWall.make(model, skel)
 	opener = WardenOpen.make_on(model, skel)
@@ -255,6 +258,7 @@ func _process(dt: float) -> void:
 		drop_pose.step(dt)
 	var land: Vector2 = root.get_meta(WardenClips.FEEL, Vector2.ZERO)  # (HunterAnim's land_k by weight class)
 	WardenClips.lay_feel(root, skel, hips, land.x * WardenClips.LAND_SQUASH, 0.0)
+	springs.step(dt)
 	props.step(dt, String(s.get("kmove", "")))
 	if gunprop:
 		gunprop.step()

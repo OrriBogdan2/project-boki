@@ -19,6 +19,9 @@ const CALM_CAST := 99.0  # s since the last cast: Hunter._anim_state always send
 const SYNTH := "Zz_Clip"  # the test clip a synthetic clips file carries
 const STRING_PULL := 0.08  # m, Meshy scale: the string is drawn this far off the bow at a release move's first frame
 const STRING_BACK := 0.03  # and this near it a frame later
+const RUN_STEP := 0.1  # m per frame the model runs (6 m/s) in the springs case
+const TRAIL_MIN := 0.04  # m: a coat tail's tip streams this much farther back in the run than at a stand
+const LINK_TOL := 0.02  # share: a spring chain's links keep their rest lengths
 ## Slot -> [state before, state that starts it, the clip today's game plays for it]. A cast's state names its cast
 ## slot, which HunterAnim's counters turn into a new cast (cast 5 -> 0).
 const SLOT_CASES := {
@@ -161,7 +164,43 @@ func _states(main: Node, a: String) -> void:
 	_only_meshy(a, m)
 	await _orbits(main, a, nat)
 	_drop_poses(a, m, nat)
+	_springs(a, m, nat)
 	m.free()
+
+
+## Data "springs" builds its chains on Meshy's own bones and no other Hunter's: Sable's coat tails stream back in a
+## run (the tip farther behind the hips than standing) and keep their links' lengths.
+func _springs(a: String, m: Node3D, nat: WardenNative) -> void:
+	var want := (WardenNative.entry(WardenGlb.art(a)).get("springs", []) as Array).size()
+	ok(nat.springs.chains.size() == want, "%s: %d spring chains (data names %d)" % [a, nat.springs.chains.size(), want])
+	if want == 0:
+		return
+	nat.set_process(false)
+	var ids: Array = nat.springs.chains[0]["ids"]
+	var tip := int(ids[ids.size() - 2])
+	var back: Array = []
+	for run_mps in [0.0, RUN_STEP]:
+		m.set_meta(WardenClips.STATE, {"cast": CALM_CAST, "grounded": true, "vel": Vector3(0.0, 0.0, -run_mps * 60.0)})
+		for k in 90:
+			m.position.z -= run_mps
+			nat._process(1.0 / 60.0)
+		var hips := nat.skel.global_transform * nat.skel.get_bone_global_pose(int(ids[0])).origin
+		var tail := nat.skel.global_transform * nat.skel.get_bone_global_pose(tip).origin
+		back.append(tail.z - hips.z)
+	ok(
+		back[1] > back[0] + TRAIL_MIN,
+		"%s: the coat tail streams back in a run (%.2f m, standing %.2f m)" % [a, back[1], back[0]]
+	)
+	var worst := 0.0
+	for j in ids.size() - 2:
+		var rest := nat.skel.get_bone_global_rest(int(ids[j + 1])).origin.distance_to(
+			nat.skel.get_bone_global_rest(int(ids[j])).origin
+		)
+		var now := nat.skel.get_bone_global_pose(int(ids[j + 1])).origin.distance_to(
+			nat.skel.get_bone_global_pose(int(ids[j])).origin
+		)
+		worst = maxf(worst, absf(now / rest - 1.0))
+	ok(worst < LINK_TOL, "%s: the coat tail keeps its link lengths (off by %.1f%%)" % [a, worst * 100.0])
 
 
 ## The drop's shared poses (WardenDropPose) on Meshy's bones, held to the contract Heroes' bars (--clip-check's
