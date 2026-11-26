@@ -89,6 +89,14 @@ func _wedge_rule() -> void:
 		src.contains("const float VIS_NEAR = %s;" % near_s),
 		"the shader lights the near circle (%s m)" % near_s
 	)
+	# owner 11-26: no line where sight meets the fog: >= 2 m fades and a crease-free union, never max()
+	var soft := (
+		src.contains("const float VIS_SOFT = 1.4;")
+		and src.contains("const float VIS_NEAR_SOFT = 1.0;")
+		and src.contains("return vis_union(near_v, cone);")
+		and not src.contains("lit = max(lit,")
+	)
+	ok(soft, "the fog's edges are 2 m+ soft fades with no crease (no line behind you)")
 
 
 ## A ground point `deg` off the aim direction `a` (radians), `d` metres from the player; INF if not open ground at

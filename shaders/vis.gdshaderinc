@@ -1,7 +1,7 @@
 // Sight: everyone on your team lights up a small circle around them and a wide wedge in front of them
 // (where they aim) out to their range; a rival who gave herself away lights a soft circle of her own. Walls and high ground cast sight shadows. Everything outside
 // what your team can see is a slight dark fog (a little dimmer, partly grey, never tinted), so the lit space
-// reads at a glance; the cone's sides are a soft fade, not a line. Set from Match; the numbers
+// reads at a glance; every edge of the lit space is a wide soft fade, never a line (owner 11-17, 11-26). Set from Match; the numbers
 // are measured from the owner's reference in docs/specs/VISION_LOOK.md.
 global uniform float vis_on;
 global uniform vec3 vis_focus;
@@ -25,7 +25,12 @@ global uniform vec3 vis_reveal2;
 const float VIS_COS = 0.7071;          // cos of half the cone: 90 degrees wide (Match.VIEW_COS, the same rule)
 const float VIS_NEAR = 2.0;           // m: the circle all round you that is always lit (Match.NEAR_SENSE)
 const float VIS_REVEAL_R = 2.0;        // m: lit round a revealed rival, soft to +0.6 (~10% of the screen across, as measured)
-const float VIS_SOFT = 1.6;            // m: the lit cone fades out over this much inside its sides (a soft edge, no line)
+const float VIS_SOFT = 1.4;            // m each side of the cone's sides: it fades over 2.8 m, half lit on the rule's edge
+const float VIS_NEAR_SOFT = 1.0;       // m each side of VIS_NEAR: the circle behind you fades over 2 m, not a 0.6 m ring
+
+// Two lit shares together without a crease: max() leaves a kink where the circle meets the cone's fade, which reads
+// as a line behind you (owner 11-26); this is smooth and is still 1 wherever either is.
+float vis_union(float a, float b) { return 1.0 - (1.0 - a) * (1.0 - b); }
 
 // Metres from the wedge's nearer side, along the ground: negative inside the wedge, positive outside.
 float vis_side(vec2 d, float dist, vec2 dir) {
@@ -38,11 +43,11 @@ float vis_side(vec2 d, float dist, vec2 dir) {
 float vis_one(vec2 eye, vec2 dir, float range, float scout, vec2 wp, int max_steps) {
 	vec2 d = wp - eye;
 	float dist = length(d);
-	float near_v = 1.0 - smoothstep(VIS_NEAR, VIS_NEAR + 0.6, dist);
+	float near_v = 1.0 - smoothstep(VIS_NEAR - VIS_NEAR_SOFT, VIS_NEAR + VIS_NEAR_SOFT, dist);
 	if (near_v >= 1.0) { return 1.0; }
 	float c = dot(d / max(dist, 0.001), dir);
 	float reach = range * (1.0 + scout * smoothstep(vis_scout.y - 0.006, vis_scout.y + 0.006, c));
-	float cone = (1.0 - smoothstep(-VIS_SOFT, 0.0, vis_side(d, dist, dir))) * (1.0 - smoothstep(reach - 2.5, reach + 0.5, dist));
+	float cone = (1.0 - smoothstep(-VIS_SOFT, VIS_SOFT, vis_side(d, dist, dir))) * (1.0 - smoothstep(reach - 2.5, reach + 0.5, dist));
 	if (cone > 0.001) {
 		// sight shadows: march toward the point through a smoothed map of what blocks sight
 		float steps = clamp(floor(dist / 0.4), 1.0, float(max_steps));
@@ -58,7 +63,7 @@ float vis_one(vec2 eye, vec2 dir, float range, float scout, vec2 wp, int max_ste
 		}
 		cone *= 1.0 - occ;
 	}
-	return max(near_v, cone);
+	return vis_union(near_v, cone);
 }
 
 // A revealed rival's own soft circle (RevealLight): no sight shadows, it is her light, not your view.
@@ -69,12 +74,12 @@ float vis_reveal(vec3 r, vec2 wp) {
 float vis_fog(vec3 wp) {
 	if (vis_on < 0.5) { return 0.0; }
 	float lit = vis_one(vis_focus.xz, vis_dir, vis_range, vis_scout.x, wp.xz, 60);
-	if (lit < 0.999 && vis_allies > 0.5) { lit = max(lit, vis_one(vis_ally0.xy, vis_ally0.zw, vis_ally_range, 0.0, wp.xz, 28)); }
-	if (lit < 0.999 && vis_allies > 1.5) { lit = max(lit, vis_one(vis_ally1.xy, vis_ally1.zw, vis_ally_range, 0.0, wp.xz, 28)); }
-	if (lit < 0.999 && vis_allies > 2.5) { lit = max(lit, vis_one(vis_ally2.xy, vis_ally2.zw, vis_ally_range, 0.0, wp.xz, 28)); }
-	if (lit < 0.999 && vis_reveals > 0.5) { lit = max(lit, vis_reveal(vis_reveal0, wp.xz)); }
-	if (lit < 0.999 && vis_reveals > 1.5) { lit = max(lit, vis_reveal(vis_reveal1, wp.xz)); }
-	if (lit < 0.999 && vis_reveals > 2.5) { lit = max(lit, vis_reveal(vis_reveal2, wp.xz)); }
+	if (lit < 0.999 && vis_allies > 0.5) { lit = vis_union(lit, vis_one(vis_ally0.xy, vis_ally0.zw, vis_ally_range, 0.0, wp.xz, 28)); }
+	if (lit < 0.999 && vis_allies > 1.5) { lit = vis_union(lit, vis_one(vis_ally1.xy, vis_ally1.zw, vis_ally_range, 0.0, wp.xz, 28)); }
+	if (lit < 0.999 && vis_allies > 2.5) { lit = vis_union(lit, vis_one(vis_ally2.xy, vis_ally2.zw, vis_ally_range, 0.0, wp.xz, 28)); }
+	if (lit < 0.999 && vis_reveals > 0.5) { lit = vis_union(lit, vis_reveal(vis_reveal0, wp.xz)); }
+	if (lit < 0.999 && vis_reveals > 1.5) { lit = vis_union(lit, vis_reveal(vis_reveal1, wp.xz)); }
+	if (lit < 0.999 && vis_reveals > 2.5) { lit = vis_union(lit, vis_reveal(vis_reveal2, wp.xz)); }
 	return 1.0 - lit;
 }
 
