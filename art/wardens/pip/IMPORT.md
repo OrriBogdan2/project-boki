@@ -185,3 +185,20 @@ Idle(0)/Attack(4)/Jump_Run(13)/Crouch_Walk_with_Torch(520) + the rig's walk/run.
 14k wings); wings back on Spine02 as `meshy_textured-wing` (no ink), main's sun/cloud surfaces copied in
 (`tools/art1/glb_copy_prims.py`); tail and satchel weights moved off the legs onto Hips and smoothed; arm/leg key offsets
 per clip and the Attack hands cap (margin 0.15). Raw files and scripts: ~/meshy/meeko_r12_1125, ~/gens/hunter-round-1124/meeko/r12.
+
+## 11-26 round 13 (ext/meeko-body-1124): tail on its own bone, closed legs, live's wings (draft, owner check pending)
+r12's tail hung rigid on Hips to the ground right behind the legs, and its surface was fused to the leg backs (every
+leg swing went into it, 8-14 cm). Meshy's part split of the same model ("wings, tail", task 01a21593-b33d-76d6-bb71-b6123eb21d7f,
+~/meshy/meeko_r13_1126/sp_wt) gives a closed body and a closed tail on r12's atlas and UVs. Blender only fits them into the
+rig's frame and decimates (52k body, 8k tail; r13/tools/bl_parts_fit.py). Then, with no Blender:
+
+    python3 tools/art1/glb_drop_mats.py R12.glb A.glb meshy_textured-wing
+    python3 tools/art1/glb_copy_prims.py B.glb A.glb MAIN.glb --mats=meshy_textured-wing --bone=Spine02 --scale=auto
+    python3 tools/art1/glb_swap_body_parts.py B.glb C.glb --parts body.glb --rigid tail.glb=Hips --exclude rigt_tail.npz
+    python3 tools/art1/glb_tail_bone.py C.glb pip_meshy.glb --weights tail_rigid.npz --head 0.003,0.60,-0.07 \
+        --pitch 55 --pitch-clip Attack=80,Jump_Run=75 --yaw 12 --reach 0.002 --smooth 0
+
+Wings = main's large iridescent wings (r12's were half-size violet), scaled by body height onto Spine02. Body weights come
+from r12 (nearest 4, tail verts not used; leg backs relaxed in from their neighbours). Meshy's cut caps (UVs on one atlas
+point = flat light patches on the leg backs) take the UV of the nearest real fur. The tail is rigid on a new Tail bone
+under Hips, turned back/up in every clip. Plan + proof: /home/boki/gens/hunter-round-1124/meeko/PLAN-1124o.md §17.
