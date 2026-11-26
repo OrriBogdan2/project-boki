@@ -11418,3 +11418,4 @@ READY ext/anim-blend-times-1125 f0c1c5a5dd15d8eb2b25fb84b8e0ed9be6e55818 (merged
 READY ext/main-red-hudref-1126 9c22fbfe0eac75340acc87c7779b7940a2ebf459 (fix --hudref-check: toast rail under the feed as drawn at 130% HUD size)
 READY ext/main-red-audio-1126 a70edf410fbfa95df108a96982c7ddbd9f980fd5 (fix --match-audio-check: strain after catch, rescue check un-wisps the Boki)
 READY ext/stuck-integ-e4d11822 be72256420 (supersedes its own 5bd81cfd30 line; origin/main merged in, only conflict scripts/match/boki_rig.gd INK_MIN_PX comment wrap, main's one-liner kept; 0 behind main; import 0 err, health --strict OK, --check/registry/hud-reveal/sfx-set/step-sync/dmg-number/time-trial/hit-shape/farm-cam/dredge-combo/fall-parity rc 0)
+READY ext/testzone-dummies-1126 0e1d8a345e9 (dummies lose HP, knocked down at 0, respawn on mark)
