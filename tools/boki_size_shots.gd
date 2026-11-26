@@ -7,9 +7,9 @@ extends "res://tools/vv_shots.gd"
 
 const SPECIES := ["cindle", "burrlet", "puddlet", "heatherhorn"]
 const GAP := 1.7
-const EYE_FOV := 30.0  # degrees: the eye-level camera's vertical lens
-const EYE_DIST := 12.0  # m from the row
-const EYE_HEIGHT := 0.3  # m above the ground: a Boki's own eye height
+const EYE_FOV := 40.0  # degrees: the eye-level camera's vertical lens
+const EYE_DIST := 6.5  # m from the row
+const EYE_HEIGHT := 0.35  # m above the ground: a Boki's own eye height
 
 
 func run(main_node: Node) -> void:
@@ -30,7 +30,9 @@ func run(main_node: Node) -> void:
 	for i in SPECIES.size():
 		var rec := Save.new_kin(String(SPECIES[i]), "", 7)
 		(rec["dna"] as Dictionary)["size"] = 0.0
-		ks.append(m.spawn_wild(rec, home + Vector3(GAP * (i + 1), 0, 0.0), true))
+		var k := m.spawn_wild(rec, home + Vector3(GAP * (i + 1), 0, 0.0))
+		k.speed = 0.0  # stays where it stands, idling
+		ks.append(k)
 	cam_at = home + Vector3(GAP * 2.0, 0, 0)
 	await _go(1.0, Callable(), [], 3.0)
 	for k in ks:
@@ -90,7 +92,7 @@ func _row(who: String, node: Node3D, cam: Camera3D, data_cm: float) -> Dictionar
 	}
 
 
-## A camera on the ground facing the row from the front, the HUD hidden: size.png's row seen at the Boki's own height.
+## A camera at a Boki's own height facing the row from the front, the HUD hidden, the grass hidden.
 func _eye_level(row_mid: Vector3) -> void:
 	var eye := Camera3D.new()
 	main.add_child(eye)
@@ -98,6 +100,9 @@ func _eye_level(row_mid: Vector3) -> void:
 	eye.global_position = row_mid + Vector3(0, EYE_HEIGHT, EYE_DIST)
 	eye.look_at(row_mid + Vector3(0, EYE_HEIGHT, 0))
 	eye.make_current()
+	for n in main.find_children("*", "MultiMeshInstance3D", true, false):  # (tall grass would hide the row)
+		if n.name.begins_with("Grass") or n.name.begins_with("Bushes") or n.name.begins_with("Flowers"):
+			(n as Node3D).visible = false
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join("eye.png"))
