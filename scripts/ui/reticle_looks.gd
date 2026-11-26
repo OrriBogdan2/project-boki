@@ -40,7 +40,7 @@ static func strokes(c: CanvasItem, at: Vector2, look: String, ring: float, k: fl
 			c.draw_arc(at, ring, -PI * 0.38, PI * 0.38, 10, col, w * 1.35, true)
 			var tick := at + Vector2(0, -ring - 0.6 * k)
 			var wing := Vector2(1.8 * k, -2.4 * k)
-			_poly(c, PackedVector2Array([tick + Vector2(-wing.x, wing.y), tick, tick + wing]), col, w)
+			c.draw_polyline(PackedVector2Array([tick + Vector2(-wing.x, wing.y), tick, tick + wing]), col, w, true)
 		"coin":
 			c.draw_arc(at, ring, 0.0, TAU, 28, col, w, true)
 			for i in 4:
@@ -74,7 +74,7 @@ static func strokes(c: CanvasItem, at: Vector2, look: String, ring: float, k: fl
 				var corner: Vector2 = at + d * s
 				var arm := 2.6 * k
 				var pts := PackedVector2Array([corner - Vector2(d.x * arm, 0), corner, corner - Vector2(0, d.y * arm)])
-				_poly(c, pts, col, w)
+				c.draw_polyline(pts, col, w, true)
 		"harlequin":
 			_ring_poly(c, at, ring + 2.0 * k, 4, -PI * 0.5, col, w)
 		"fin":
@@ -82,16 +82,7 @@ static func strokes(c: CanvasItem, at: Vector2, look: String, ring: float, k: fl
 			c.draw_arc(at, ring, top + 0.15, top + TAU - 0.75, 24, col, w, true)
 			var fin := PackedVector2Array([at + _polar(top - 0.75, ring), at + Vector2(2.8 * k, -ring - 2.6 * k)])
 			fin.append(at + _polar(top + 0.15, ring))
-			_poly(c, fin, col, w)
-
-
-## A polyline of separate segments with round joins: draw_polyline mitres a sharp corner into a long spike (Gil's fin
-## tip, Kael's blade wings, Sable's brackets), which the wider dark edge pass made a stray tick past the shape.
-static func _poly(c: CanvasItem, pts: PackedVector2Array, col: Color, w: float) -> void:
-	c.draw_circle(pts[0], w * 0.5, col)
-	for i in pts.size() - 1:
-		c.draw_line(pts[i], pts[i + 1], col, w, true)
-		c.draw_circle(pts[i + 1], w * 0.5, col)
+			c.draw_polyline(fin, col, w, true)
 
 
 static func _polar(a: float, r: float) -> Vector2:
@@ -103,7 +94,7 @@ static func _ring_poly(c: CanvasItem, at: Vector2, r: float, n: int, rot: float,
 	var pts := PackedVector2Array()
 	for i in n + 1:
 		pts.append(at + _polar(rot + TAU * i / float(n), r))
-	_poly(c, pts, col, w)
+	c.draw_polyline(pts, col, w, true)
 
 
 ## A closed 4-point star: points on `r`, waist corners on `waist`.
@@ -112,7 +103,7 @@ static func _star(c: CanvasItem, at: Vector2, r: float, waist: float, col: Color
 	for i in 9:
 		var a := -PI * 0.5 + i * PI * 0.25
 		pts.append(at + _polar(a, r if i % 2 == 0 else waist))
-	_poly(c, pts, col, w)
+	c.draw_polyline(pts, col, w, true)
 
 
 ## A drop hanging point up: most of the ring round the bottom, closing in a tip above it.
@@ -122,4 +113,4 @@ static func _drop(c: CanvasItem, at: Vector2, ring: float, k: float, col: Color,
 	for i in 15:
 		pts.append(at + _polar(lerpf(-PI * 0.5 + 0.75, PI * 1.5 - 0.75, i / 14.0), ring))
 	pts.append(tip)
-	_poly(c, pts, col, w)
+	c.draw_polyline(pts, col, w, true)
