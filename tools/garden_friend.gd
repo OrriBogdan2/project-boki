@@ -1,7 +1,7 @@
 extends RefCounted
 ## --garden-friend --gf-mode=<faces|reel> [--gf-dir=<dir>] [--gf-species=a,b,c,d]: clean friend-pitch footage of the farm
 ## (private film tool, not shipped). faces: front close-up of every Boki on main, for the eye check. reel: the garden
-## in its close third-person view, golden hour, the finished Sable as the hunter, no HUD, 1600x900 at 30 fps; the child
+## in its close third-person view, golden hour, Motley (ostra, the best in-game model) as the hunter, no HUD, 1600x900 at 30 fps; the child
 ## run (under the movie writer) prints "GF TAKE <start_s> <end_s>" and saves the stills.
 
 const Shots := preload("res://tools/boki_rig_shots.gd")
@@ -55,6 +55,10 @@ func run(main_node: Node) -> void:
 	_make_save()
 	main.get_tree().create_timer(DEADLINE_S).timeout.connect(main.get_tree().quit.bind(1))
 	await _open()
+	if "--gf-probe" in OS.get_cmdline_user_args():
+		_probe()
+		main.get_tree().quit()
+		return
 	await _film()
 	print("GF DONE")
 	main.get_tree().quit()
@@ -141,7 +145,7 @@ func _make_save() -> void:
 func _open() -> void:
 	var fr: Dictionary = CamRig.rules["farm"]
 	fr["dist_min"] = 3.0
-	fr["dist_max"] = 4.8
+	fr["dist_max"] = 11.0
 	fr["rise"] = 0.85
 	h = load("res://scripts/home/home.gd").new()
 	h.set("zone", "")
@@ -158,6 +162,7 @@ func _open() -> void:
 		await main.fade.reveal(0.01)
 	h.day_t = DAY_T
 	_dress_hunter()
+	_tidy_scene()
 	RenderingServer.frame_pre_draw.connect(_hide_marks)
 	await _wait(1.0)
 
@@ -190,10 +195,68 @@ func _hide_marks() -> void:
 		var mi := q as MeshInstance3D
 		if mi.mesh is QuadMesh or String(mi.name).begins_with("orbit_cards") or String(mi.name).begins_with("Halo"):
 			mi.visible = false
+	for k in h.kins:  # the DNA tufts, tail tufts and birthmarks (plain sphere parts of each Boki's unique look)
+		for part in (k["node"] as Node3D).find_children("*", "MeshInstance3D", true, false):
+			if String(part.name) in _DNA_PARTS:
+				(part as MeshInstance3D).visible = false
 	for pt in h.find_children("*", "GPUParticles3D", true, false):
 		(pt as GPUParticles3D).visible = false
 	for pt in h.find_children("*", "CPUParticles3D", true, false):
 		(pt as CPUParticles3D).visible = false
+
+
+const _DNA_PARTS := ["Tuft", "TailTuft", "Birthmark"]
+const _CLEAR_MARGIN := 0.45  # m of bare ground kept round a bed or building (grass blades are wide)
+
+
+## Film only: no crops (the game's crop models are plain primitives), the sun's shadow sharpened.
+func _tidy_scene() -> void:
+	for pl in h.plots:
+		(pl.get_node("Crop") as Node3D).visible = false
+	RenderingServer.directional_shadow_atlas_set_size(16384, true)
+	RenderingServer.directional_soft_shadow_filter_set_quality(RenderingServer.SHADOW_QUALITY_SOFT_ULTRA)
+	var sun := h.sun_l as DirectionalLight3D
+	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
+	sun.directional_shadow_max_distance = 24.0
+	sun.directional_shadow_split_1 = 0.08
+	sun.directional_shadow_split_2 = 0.2
+	sun.directional_shadow_split_3 = 0.5
+	sun.shadow_blur = 2.0
+	sun.shadow_normal_bias = 1.5
+	_clear_grass()
+
+
+func _clear_grass() -> void:
+	var rects: Array[Rect2] = []
+	for pl in h.plots:
+		var c: Vector3 = (pl as Node3D).position
+		rects.append(Rect2(c.x - 0.85 - _CLEAR_MARGIN, c.z - 0.85 - _CLEAR_MARGIN, 1.7 + 2.0 * _CLEAR_MARGIN, 1.7 + 2.0 * _CLEAR_MARGIN))
+	for e in (HomeLayout.ensure(Save.d)["deco"] as Array):
+		var sz := HomeLayout.size_of(String(e["id"]), int(e.get("r", 0)))
+		var c := HomeLayout.deco_center(e)
+		rects.append(Rect2(c.x - sz.x * 0.5 - _CLEAR_MARGIN, c.z - sz.y * 0.5 - _CLEAR_MARGIN, sz.x + 2.0 * _CLEAR_MARGIN, sz.y + 2.0 * _CLEAR_MARGIN))
+	var cleared := 0
+	if "--gf-probe" in OS.get_cmdline_user_args():
+		print("GF rects %s plots=%d" % [str(rects), h.plots.size()])
+	for n in h.find_children("*", "MultiMeshInstance3D", true, false):
+		var mmi := n as MultiMeshInstance3D
+		if mmi.multimesh == null or mmi.multimesh.transform_format != MultiMesh.TRANSFORM_3D:
+			continue
+		var nm := String(mmi.name)
+		if "--gf-probe" in OS.get_cmdline_user_args():
+			print("GF mmi %s n=%d first=%s" % [nm, mmi.multimesh.instance_count, str(mmi.global_transform * mmi.multimesh.get_instance_transform(0).origin)])
+		if not (nm.begins_with("Grass") or nm.begins_with("Flowers") or nm.begins_with("Pebbles") or nm.begins_with("Bushes")):
+			continue
+		var mm := mmi.multimesh
+		for i in mm.instance_count:
+			var t := mm.get_instance_transform(i)
+			var o := mmi.global_transform * t.origin
+			for r in rects:
+				if r.has_point(Vector2(o.x, o.z)):
+					mm.set_instance_transform(i, Transform3D(Basis.from_scale(Vector3.ZERO), t.origin))
+					cleared += 1
+					break
+	print("GF grass cleared %d" % cleared)
 
 
 func _wait(secs: float) -> void:
@@ -201,12 +264,20 @@ func _wait(secs: float) -> void:
 		await main.get_tree().process_frame
 		_frames += 1
 		h.day_t = DAY_T
+		if face_all:
+			for j in h.kins.size():
+				(h.kins[j]["node"] as Node3D).rotation.y = _face_yaw + [0.3, -0.2, 0.2, -0.3][j]
+		if face_cam != -1:
+			(h.kins[face_cam]["node"] as Node3D).rotation.y = _face_yaw
 		if drift != 0.0:
 			h.farm_cam.yaw += drift / FPS
 		if _zoom_goal >= 0.0:
 			h.cam.zoom_to = move_toward(h.cam.zoom_to, _zoom_goal, _zoom_rate / FPS)
 
 
+var face_all := false
+var face_cam := -1  # a Boki held turned toward the lens (its close-up)
+var _face_yaw := 0.0
 var drift := 0.0  # rad/s the view turns on its own
 var _zoom_goal := -1.0
 var _zoom_rate := 0.0  # wheel units/s toward _zoom_goal
@@ -260,7 +331,20 @@ func _ease_zoom(to: float, secs: float) -> void:
 	_zoom_rate = absf(to - float(h.cam.zoom_to)) / secs
 
 
+func _dbg(tag: String) -> void:
+	var line := "GF DBG %s player=%s" % [tag, str(h.player.global_position)]
+	for k in h.kins:
+		var n := k["node"] as Node3D
+		line += " | %s %s vis=%s sc=%s" % [k["rec"]["species"], str(n.global_position), n.is_visible_in_tree(), str(n.scale)]
+	var cam := main.get_viewport().get_camera_3d()
+	line += " || cam=%s fov=%.1f" % [str(cam.global_position), cam.fov]
+	for k in h.kins:
+		line += " %s" % str(cam.unproject_position((k["node"] as Node3D).global_position))
+	print(line)
+
+
 func _still(name: String) -> void:
+	_dbg(name)
 	await RenderingServer.frame_post_draw
 	var img := main.get_viewport().get_texture().get_image()
 	img.save_png(dir.path_join(name))
@@ -268,7 +352,7 @@ func _still(name: String) -> void:
 
 
 # ------------------------------------------------------------------ the shots
-## A framed view: lens (deg), pitch (deg, 29+ keeps the far island edge out of frame), the view's yaw turn and zoom.
+## A framed view: lens (deg), pitch (deg, half the lens + 8 keeps the far island edge out of frame), the view's yaw turn and zoom.
 func _view(fov: float, pitch_deg: float, zoom: float) -> void:
 	CamRig.rules["farm"]["fov"] = fov
 	h.farm_cam.pitch = deg_to_rad(pitch_deg)
@@ -290,45 +374,146 @@ func _stills(tag: String, n: int, gap: float) -> void:
 		await _still("raw_%s_%d.png" % [tag, i])
 
 
+func _probe() -> void:
+	for i in h.kins.size():
+		var n := (h.kins[i]["node"] as Node3D)
+		print("GF PROBE kin %d %s children=%d" % [i, species[i], n.get_child_count()])
+		for c in n.find_children("*", "Node3D", true, false):
+			var line := "GF PROBE   %s [%s] vis=%s" % [n.get_path_to(c), c.get_class(), (c as Node3D).visible]
+			if c is MeshInstance3D:
+				var mi := c as MeshInstance3D
+				var m := mi.mesh
+				line += " mesh=%s %s mat=%s ov=%s aabb=%s" % [m.get_class() if m else "-", m.resource_path if m else "", mi.get_active_material(0).get_class() if m and mi.get_active_material(0) else "-", mi.material_override.get_class() if mi.material_override else "-", mi.get_aabb().size]
+			print(line)
+
+
+## The hunter stands at `at` turned 3/4 to a camera that sits `cam_dir` (a ground direction) away from him,
+## facing `turn` rad off the camera line; the four Boki are placed by `_row` in the camera's own frame.
+func _front(at: Vector3, cam_dir: Vector2, turn: float) -> void:
+	_stand(at, at + Vector3(-cam_dir.x, 0, -cam_dir.y) * 8.0, false)  # camera behind a hunter facing away from it
+	var to_cam := cam_dir.normalized().rotated(turn)
+	h.pface = atan2(-to_cam.x, -to_cam.y)
+	h.player.rotation.y = h.pface
+
+
+## Boki at `rel` = (across, toward camera) metres from the hunter, in the camera's frame.
+func _row(at: Vector3, cam_dir: Vector2, rel: Array) -> void:
+	var fwd := cam_dir.normalized()
+	var side := Vector2(-fwd.y, fwd.x)
+	for i in rel.size():
+		var r: Vector2 = rel[i]
+		var o := side * r.x + fwd * r.y
+		_put(i, at + Vector3(o.x, 0, o.y))
+		var k: Dictionary = h.kins[i]
+		k.erase("job")
+
+
+## A close-up of Boki `i` alone: the hunter's spot (and body, hidden) is where the Boki stands, so the view frames it.
+func _closeup(i: int, spot: Vector3, cd: Vector2, turn: float) -> void:
+	_front(spot, cd, 0.0)
+	h.player.visible = false
+	_view([30.0, 28.0, 26.0, 28.0][i], 27.0, 0.12)
+	CamRig.rules["farm"]["rise"] = 0.3  # the view looks low, so a knee-high Boki sits mid-frame
+	for j in h.kins.size():
+		_put(j, spot + (Vector3.ZERO if j == i else Vector3(-30 - j, 0, -30)))
+		h.kins[j].erase("job")
+	var to_cam := cd.normalized().rotated(turn)
+	_face_yaw = atan2(-to_cam.x, -to_cam.y)
+	face_cam = i
+
+
+## The open spot for the film: least trees, rocks or edge in the strip the lens looks across (8 m west to 3 m east).
+func _clear_spot(near: Vector3) -> Vector3:
+	var best := near
+	var best_n := 99999
+	for cx in range(int(near.x) - 8, int(near.x) + 9):
+		for cz in range(int(near.z) - 8, int(near.z) + 9):
+			var n := 0
+			for sx in range(cx - 9, cx + 5):
+				for sz in range(cz - 4, cz + 5):
+					if h.world.is_block(sx + 0.5, sz + 0.5) or h.world.is_void(sx + 0.5, sz + 0.5):
+						n += 1
+			n = n * 10 + int(Vector2(cx - near.x, cz - near.z).length())
+			if n < best_n:
+				best_n = n
+				best = Vector3(cx + 0.5, 0, cz + 0.5)
+	print("GF spot %s score %d" % [str(best), best_n])
+	return best
+
+
+func _mark(name: String) -> void:
+	print("GF SHOT %s %.3f" % [name, float(Engine.get_frames_drawn()) / FPS])
+
+
 func _film() -> void:
-	var from := Vector3(36.5, 0, 28.8)
-	# shot 1 (wide): the hunter walks east toward the beds, the Bokis ahead and to the sides, the garden leads
-	_stand(from, from + Vector3(8, 0, 0.0), false)
-	_view(36.0, 28.0, 0.7)
-	_group(from, [Vector3(9.0, 0, -2.4), Vector3(3.4, 0, -2.2), Vector3(4.4, 0, 2.2), Vector3(5.6, 0, 1.7)])
-	await _wait(0.8)
+	var H := _clear_spot(Vector3(56.0, 0, 29.0))
+	var cd := Vector2(-1.0, 0.35).normalized()  # the camera sits west, a little south: looking east over open meadow
+	# shot 1 (wide): the meadow, hunter in 3/4 front, the four Boki round him
+	_mark("wide_1")
+	_front(H, cd, 0.6)
+	CamRig.rules["farm"]["rise"] = 0.7
+	_view(34.0, 31.0, 0.3)
+	_row(H, cd, [Vector2(-1.9, -0.5), Vector2(-0.8, 1.2), Vector2(0.6, 1.3), Vector2(1.7, 0.7)])  # the fox (0) back, its tail-tip glow small
+	await _wait(1.2)
 	_take_from = float(_frames) / FPS
-	await _walk(Vector3(40.0, 0, 28.8), 5.0)
-	await _stills("s1", 3, 0.5)
-	# shot 2 (mid, hard cut): the view turns slowly round the hunter's back and the group in front of him
-	var m2 := Vector3(38.5, 0, 30.6)
-	_stand(m2, m2 + Vector3(8, 0, 0.0), false)
-	_view(36.0, 28.0, 0.5)
-	h.farm_cam.yaw -= 0.5
-	_group(m2, [Vector3(9.0, 0, 1.6), Vector3(3.2, 0, -2.4), Vector3(3.6, 0, 2.2), Vector3(5.2, 0, -0.4)])
-	drift = 0.1
-	await _wait(0.5)
-	await _stills("s2", 8, 0.75)
-	drift = 0.0
-	# shot 3 (Boki hero, hard cut): two Bokis between the lens and the hunter, close and readable
-	var m3 := Vector3(37.5, 0, 28.2)
-	_stand(m3, m3 + Vector3(8, 0, 0.0), true)
-	_view(32.0, 27.0, 1.0)
-	h.farm_cam.yaw += 0.1
-	_group(m3, [Vector3(9.0, 0, 2.0), Vector3(-1.6, 0, -0.7), Vector3(-2.0, 0, 1.0), Vector3(3.5, 0, -2.2)])
-	drift = -0.04
+	_ease_zoom(CamWheel.near() + 0.2 * (CamWheel.far() - CamWheel.near()), 4.5)
+	await _stills("w", 3, 1.5)
+	if "--gf-quick" in OS.get_cmdline_user_args():
+		return
+	# shot 2 (hunter, hard cut): 3/4 face, the view turned off the trees; he walks a few steps toward the lens
+	_mark("hunter")
+	_front(H, cd, -0.25)
+	_view(21.0, 25.0, 0.45)
+	h.farm_cam.yaw += 0.45
+	_row(H, cd, [Vector2(-9, 14), Vector2(-9, 15), Vector2(9, 14), Vector2(9, 15)])
+	await _wait(0.8)
+	await _still("raw_h_0.png")
 	await _wait(0.4)
-	await _stills("s3", 7, 0.6)
-	drift = 0.0
-	# shot 4 (hunter from behind): he walks away toward the beds, Bokis ahead
-	var f4 := Vector3(37.0, 0, 30.2)
-	_stand(f4, f4 + Vector3(8, 0, 0.0), true)
-	_view(38.0, 27.0, 0.3)
-	_group(f4, [Vector3(8.0, 0, 3.0), Vector3(3.6, 0, -2.6), Vector3(4.6, 0, 2.5), Vector3(6.2, 0, 0.0)])
+	var fd := Vector2(-sin(h.pface), -cos(h.pface))  # the way he faces, on the ground
+	for _i in 30:
+		_keys(fd * 0.3)
+		await _wait(1.0 / FPS)
+		if _i == 15:
+			await _still("raw_h_walk.png")
+	_keys(Vector2.ZERO)
+	await _wait(0.6)
+	await _still("raw_h_1.png")
+	# shot 2b (the four Boki in a row, hunter out of the picture, all turned to the lens)
+	_mark("bokis")
+	CamRig.rules["farm"]["rise"] = 0.4
+	_front(H, cd, 0.0)
+	h.player.visible = false
+	_view(28.0, 28.0, 0.4)
+	_row(H, cd, [Vector2(-1.8, 1.6), Vector2(-0.6, 1.6), Vector2(0.6, 1.6), Vector2(1.8, 1.6)])
+	face_all = true
+	_face_yaw = atan2(-cd.x, -cd.y)
+	await _wait(0.6)
+	await _stills("r", 3, 0.7)
+	face_all = false
+	h.player.visible = true
+	CamRig.rules["farm"]["rise"] = 0.85
+	# shot 3 (Boki close-ups, hard cuts): each one alone, 3/4 to the lens, upright
+	var spot := H + Vector3(cd.x, 0, cd.y) * 2.5
+	for i in 4:
+		_mark("closeup_%d" % i)
+		_closeup(i, spot, cd, [0.35, -0.3, 0.3, -0.35][i])
+		await _wait(0.5)
+		await _stills("c%d" % i, 2, 0.6)
+	face_cam = -1
+	h.player.visible = true
+	CamRig.rules["farm"]["rise"] = 0.85
+	# shot 4 (wide again, slow turn)
+	_mark("wide_2")
+	_front(H, cd, 0.6)
+	_view(34.0, 31.0, 0.26)
+	_row(H, cd, [Vector2(1.9, -0.4), Vector2(0.6, 1.1), Vector2(-0.7, 1.0), Vector2(-1.8, 0.6)])
+	h.farm_cam.yaw += 0.7
+	drift = -0.12
 	await _wait(0.4)
-	await _walk(Vector3(43.0, 0, 29.8), 4.5)
-	await _stills("s4", 3, 0.4)
-	print("GF TAKE %.2f %.2f" % [_take_from, float(_frames) / FPS - 0.2])
+	await _stills("w2", 4, 1.0)
+	drift = 0.0
+	_mark("end")
+	print("GF TAKE %.2f %.2f" % [_take_from, float(Engine.get_frames_drawn()) / FPS])
 
 
 func _record() -> void:
