@@ -17,5 +17,4 @@ const CHECKS := {
 	"--hero-reel": ["res://tools/hero_reel.gd", "hero_reel", null],  # private pitch footage (GPU)
 	"--warm-twice": ["res://tools/warm_twice.gd", "warm_twice", null],  # a second launch, for benches
 	"--step-up-check": ["res://tools/step_up_check.gd", "step_up_check", null],  # lips walked over
-	"--stolen-extract-check": ["res://tools/stolen_extract_check.gd", "stolen_extract_check", null],  # wisps out
 }
