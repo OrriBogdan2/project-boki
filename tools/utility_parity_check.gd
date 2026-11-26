@@ -7,7 +7,7 @@ extends RefCounted
 ## Prints UTIL ok/FAIL lines and "UTIL DONE, failures: N". Never touches the save file.
 
 var bad := 0
-var ambient: Array = []  # the fields on the list before any item is used (the map's own hazards)
+var hazards := 0  # fields on the list before any item is used (the map's hazards)
 var main: Node
 
 
@@ -20,6 +20,7 @@ func ok(cond: bool, what: String) -> void:
 func run(host: Node) -> void:
 	main = host
 	Save.no_write = true
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	Save.d = Save.fresh()
 	Econ.ensure()
 	Save.d["tutorial"]["hatched"] = true
@@ -27,35 +28,25 @@ func run(host: Node) -> void:
 	var rec := Save.new_kin("cindle", "Pip", 77)
 	Save.d["roster"] = [rec]
 	Save.d["active"] = rec["uid"]
-	var m := _match(2)  # a duo: the banner's fall needs a knock first (a solo has none: you lose a life)
-	_banner(m, m.player, _rival(m))
-	m.queue_free()
-	m = _match(1)
-	_skyfall(m, m.player, _rival(m))
-	_blight(m, m.player, _rival(m))
-	print("UTIL DONE, failures: %d" % bad)
-	host.get_tree().quit(1 if bad > 0 else 0)
-
-
-func _match(squad: int) -> Match:
 	var m := Match.new()
 	main.add_child(m)
-	m.start({"teams": 2, "squad": squad, "tier": 2, "length": 1e9, "seed": 9001, "no_drop": true, "raid": "clear"})
+	m.start({"teams": 2, "squad": 1, "tier": 2, "length": 1e9, "seed": 9001, "no_drop": true, "raid": "clear"})
 	m.set_process(false)
-	ambient = m.fields.list.duplicate()  # the map's own hazard fields, there from the start
-	return m
-
-
-func _rival(m: Match) -> Hunter:
-	return m.hunters.filter(func(x): return x.team != m.player.team)[0]
+	var pl: Hunter = m.player
+	var foe: Hunter = m.hunters.filter(func(x): return x != pl)[0]
+	hazards = m.fields.list.size()  # the map's own hazard fields, there from the start
+	_banner(m, pl, foe)
+	_skyfall(m, pl, foe)
+	_blight(m, pl, foe)
+	print("UTIL DONE, failures: %d" % bad)
+	host.get_tree().quit(1 if bad > 0 else 0)
 
 
 ## The most seconds any field on the map has left (a fire patch or a blight patch is the longest one standing).
 func _longest(m: Match) -> float:
 	var best := 0.0
 	for f in m.fields.list:
-		if not ambient.any(func(a): return is_same(a, f)):
-			best = maxf(best, float(f.get("t", 0.0)))
+		best = maxf(best, float(f.get("t", 0.0)))
 	return best
 
 
@@ -69,53 +60,53 @@ func _steps(m: Match, secs: float, stay: Hunter = null) -> void:
 		m.step(Match.DT)
 
 
-func _banner(m: Match, p_h: Hunter, foe: Hunter) -> void:
-	p_h.belt = UtilityBelt.empty()
-	UtilityBelt.grant(p_h, "bounty_banner", 1)
-	p_h.lives = 3
+func _banner(m: Match, pl: Hunter, foe: Hunter) -> void:
+	pl.belt = UtilityBelt.empty()
+	UtilityBelt.grant(pl, "bounty_banner", 1)
+	pl.lives = 3
 	foe.gems = 0
 	var gems0 := foe.gems
-	ok(UtilityBelt.use_id(p_h, "bounty_banner"), "a Bounty Banner starts")
+	ok(UtilityBelt.use_id(pl, "bounty_banner"), "a Bounty Banner starts")
 	_steps(m, 1.0)
-	ok(p_h.reveal_t > 100.0 and bool(m.get_meta("banner_%d" % p_h.team, false)), "...and shows you to everyone")
-	p_h.hurt(p_h.hp + p_h.armor + 50.0, foe, {"src": "shot"})
-	ok(p_h.downed or p_h.out, "a rival knocks you under it")
+	ok(pl.reveal_t > 100.0 and bool(m.get_meta("banner_%d" % pl.team, false)), "...and shows you to everyone")
+	pl.hurt(pl.hp + pl.armor + 50.0, foe, {"src": "shot"})
+	ok(pl.downed or pl.out, "a rival knocks you under it")
 	_steps(m, 1.0)
-	ok(p_h.out and p_h.lives == 3, "...and you go straight out: no wisp, no spare life spent")
+	ok(pl.out and pl.lives == 3, "...and you go straight out: no wisp, no spare life spent")
 	ok(
 		foe.gems == gems0 + int(UtilityBelt.def("bounty_banner").get("reward", 0)),
 		"the knocker pockets the bounty (%d gems)" % (foe.gems - gems0)
 	)
-	ok(not bool(m.get_meta("banner_%d" % p_h.team, false)), "the banner is over, the squad may raise another")
+	ok(not bool(m.get_meta("banner_%d" % pl.team, false)), "the banner is over, the squad may raise another")
 
 
-func _skyfall(m: Match, p_h: Hunter, foe: Hunter) -> void:
-	p_h.out = false
-	p_h.downed = false
-	p_h.dead = false
-	p_h.hp = p_h.max_hp
-	p_h.armor = p_h.max_armor
+func _skyfall(m: Match, pl: Hunter, foe: Hunter) -> void:
+	pl.out = false
+	pl.downed = false
+	pl.dead = false
+	pl.hp = pl.max_hp
+	pl.armor = pl.max_armor
 	foe.out = false
 	foe.downed = false
 	foe.dead = false
 	foe.hp = foe.max_hp
 	foe.armor = foe.max_armor
 	foe.inv_t = 0.0
-	p_h.belt = UtilityBelt.empty()
-	UtilityBelt.grant(p_h, "skyfall_charge", 1)
-	foe.teleport(p_h.pos + Vector3(6.0, 0, 0))
-	p_h.inp["aim"] = foe.pos
-	ok(UtilityBelt.use_id(p_h, "skyfall_charge"), "a Skyfall Charge is called")
+	pl.belt = UtilityBelt.empty()
+	UtilityBelt.grant(pl, "skyfall_charge", 1)
+	foe.teleport(pl.pos + Vector3(6.0, 0, 0))
+	pl.inp["aim"] = foe.pos
+	ok(UtilityBelt.use_id(pl, "skyfall_charge"), "a Skyfall Charge is called")
 	_steps(m, 4.5, foe)
 	ok(foe.hp >= foe.max_hp - 0.5, "...nothing lands for 5 s")
 	_steps(m, 1.0, foe)
 	ok(foe.downed or foe.out or foe.dead, "the blast knocks a full-health rival outright (hp %.0f)" % foe.hp)
-	ok(_longest(m) > 0.0, "then the ground burns (a fire patch)")
+	ok(m.fields.list.size() > hazards, "then the ground burns (a fire patch)")
 	var left := _longest(m)
 	ok(left > 2.0 and left <= 3.0, "...for 3 s (%.1f s left a beat in)" % left)
 
 
-func _blight(m: Match, p_h: Hunter, foe: Hunter) -> void:
+func _blight(m: Match, pl: Hunter, foe: Hunter) -> void:
 	# the thrower lands first: the Skyfall test can leave it above the ground the patch lies on
 	_steps(m, 3.0, foe)
 	foe.out = false
@@ -124,11 +115,11 @@ func _blight(m: Match, p_h: Hunter, foe: Hunter) -> void:
 	foe.hp = foe.max_hp
 	foe.armor = foe.max_armor
 	foe.blight_t = 0.0
-	p_h.belt = UtilityBelt.empty()
-	UtilityBelt.grant(p_h, "blight_flask", 1)
-	foe.teleport(p_h.pos + Vector3(4.0, 0, 0))
-	p_h.inp["aim"] = foe.pos
-	ok(UtilityBelt.use_id(p_h, "blight_flask"), "a Blight Flask is thrown")
+	pl.belt = UtilityBelt.empty()
+	UtilityBelt.grant(pl, "blight_flask", 1)
+	foe.teleport(pl.pos + Vector3(4.0, 0, 0))
+	pl.inp["aim"] = foe.pos
+	ok(UtilityBelt.use_id(pl, "blight_flask"), "a Blight Flask is thrown")
 	_steps(m, 2.5, foe)
 	ok(
 		foe.blight_t > 0.0 and foe.hp + foe.armor < foe.max_hp + foe.max_armor,

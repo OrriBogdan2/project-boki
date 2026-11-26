@@ -121,8 +121,8 @@ func _stock() -> void:
 	ok("every belt item but the Revive Ember is on sale somewhere", missing.is_empty(), str(missing))
 	var same := true
 	for t in themes:
-		var first := str(ShopStock.stock_of(String(t)))
-		if first != str(ShopStock.stock_of(String(t))):
+		var again := str(ShopStock.stock_of(String(t)))
+		if str(ShopStock.stock_of(String(t))) != again:
 			same = false
 	ok("the stock reads the same every time", same)
 

@@ -20,12 +20,9 @@ extends RefCounted
 const DRINK_HEAL := 0.4         # of max health, for a drink with no number of its own
 const MEND_HP := 40.0
 const MEND_ARMOR := 20.0
-
-## Spring pad launch (content/rules/hunter_move.json "jump_pad", both [?]: no source number). A pad item's own
-## "lift" and "push" (UtilityMore._pad) replace these two for that pad.
-static var pad_vy: float = MoveRules.data()["jump_pad"]["vy"]  # m/s up: ~9.8 m apex, ~2.3 s aloft
-static var pad_min_hv: float = MoveRules.data()["jump_pad"]["min_hv"]  # m/s on, at least (toward your aim)
-
+## Spring pad launch (content/rules/hunter_move.json "jump_pad", both [?]: no source number).
+static var PAD_VY: float = MoveRules.data()["jump_pad"]["vy"]  # m/s up: ~9.8 m apex, ~2.3 s aloft
+static var PAD_MIN_HV: float = MoveRules.data()["jump_pad"]["min_hv"]  # m/s on, at least (toward your aim)
 
 ## One number of an item's "channel" data (time s, move = speed multiplier while channelling, heal hp).
 static func channel(id: String, key: String) -> float:
@@ -94,7 +91,7 @@ static func start(h: Hunter, i: int, id: String) -> bool:
 			m.fx.ring(h.pos, minf(rng, 40.0), Color(col, 0.6), 0.8)
 			m.sfx("ping", h.pos, 0.0, 0.8)
 		"pad", "field", "pilfer", "lamp", "ember":
-			UtilityMore.start(h, id, d)
+			UtilityMore.start(h, d)
 		_:
 			Effects.run((d.get("effects", []) as Array).duplicate(true), h,
 					{"slot": "utility", "ability": id, "level": 1})
@@ -123,14 +120,17 @@ static func repair_frac(h: Hunter) -> float:
 	var r: Array = UtilityBelt.def("armor_kit").get("repair", [1.0])
 	return float(r[clampi(h.armor_tier, 0, r.size() - 1)])
 
-## Spring pad: up at `lift` (pad_vy), on with the speed you brought (at least `push`, pad_min_hv). A dash ends
-## here and its speed carries ([wiki] dashing into a jump pad keeps the forward momentum); in the arc your keys
-## steer as in any jump (HunterMove.air_steer) and the glider stays shut until you open it.
-static func pad_launch(h: Hunter, push: float = -1.0, lift: float = -1.0) -> void:
+## Spring pad: up at PAD_VY, on with the speed you brought (at least PAD_MIN_HV). A dash ends here and
+## its speed carries ([wiki] dashing into a jump pad keeps the forward momentum); in the arc your keys steer
+## as in any jump (HunterMove.air_steer) and the glider stays shut until you open it. A pad item may
+## carry its own "lift" / "push" (Gust Fan); the Spring pad's numbers are content/rules/hunter_move.json.
+static func pad_launch(h: Hunter, vy: float = -1.0, min_hv: float = -1.0) -> void:
+	vy = vy if vy >= 0.0 else PAD_VY
+	min_hv = min_hv if min_hv >= 0.0 else PAD_MIN_HV
 	var hv := Vector2(h.vel.x, h.vel.z)
 	var d: Vector2 = hv.normalized() if hv.length() > 0.5 else h.aim_dir()
-	hv = d * maxf(hv.length(), pad_min_hv if push < 0.0 else push)
-	h.vel = Vector3(hv.x, pad_vy if lift < 0.0 else lift, hv.y)
+	hv = d * maxf(hv.length(), min_hv)
+	h.vel = Vector3(hv.x, vy, hv.y)
 	h.roll_t = 0.0
 	h.grounded = false
 	h.glide_cd = 0.0

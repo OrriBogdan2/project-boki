@@ -8,7 +8,7 @@ extends RefCounted
 var bad := 0
 var main: Node
 var m: Match
-var p_h: Hunter
+var pl: Hunter
 
 
 func ok(cond: bool, what: String) -> void:
@@ -31,10 +31,10 @@ func run(host: Node) -> void:
 	main.add_child(m)
 	m.start({"teams": 2, "squad": 1, "tier": 2, "length": 1e9, "seed": 9001, "no_drop": true, "raid": "clear"})
 	m.set_process(false)
-	p_h = m.player
+	pl = m.player
 	for h in m.hunters:
-		if h != p_h:
-			h.teleport(p_h.pos + Vector3(-40.0, 0, 0))
+		if h != pl:
+			h.teleport(pl.pos + Vector3(-40.0, 0, 0))
 	await _skyfall()
 	await _blight()
 	await _gate()
@@ -51,18 +51,18 @@ func _looks(prefix: String) -> Array:
 
 ## Uses `id`, aimed along the first free direction, with a fresh belt and a healthy caster.
 func _use(id: String) -> bool:
-	p_h.out = false
-	p_h.downed = false
-	p_h.dead = false
-	p_h.hp = p_h.max_hp
-	p_h.belt = UtilityBelt.empty()
-	UtilityBelt.grant(p_h, id, 1)
+	pl.out = false
+	pl.downed = false
+	pl.dead = false
+	pl.hp = pl.max_hp
+	pl.belt = UtilityBelt.empty()
+	UtilityBelt.grant(pl, id, 1)
 	for k in 8:
 		var dir := Vector3.RIGHT.rotated(Vector3.UP, TAU * float(k) / 8.0)
-		p_h.inp["aim"] = p_h.pos + dir * 20.0
-		if UtilityMore._spot(p_h, 9.0) != p_h.pos:
+		pl.inp["aim"] = pl.pos + dir * 20.0
+		if UtilityMore._spot(pl, 9.0) != pl.pos:
 			break
-	return UtilityBelt.use_id(p_h, id)
+	return UtilityBelt.use_id(pl, id)
 
 
 func _steps(secs: float) -> void:
