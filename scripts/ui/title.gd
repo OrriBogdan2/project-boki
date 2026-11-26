@@ -7,8 +7,13 @@ extends Node
 var t := 0.0
 var logo: Control
 var menu_col: VBoxContainer
+var main_btn: Button
 var stung := false
+var admin_pop: Control         # the owner's corner popover (Test Zone, Demo Match), null without AdminGate
 
+const LOGO_H := 150.0                 # the logo's floor; it grows into the column's spare height
+const LOGO_SHORT_H := 80.0            # on a window under SHORT_WIN tall, so Quit stays on screen
+const SHORT_WIN := 600.0
 const DISCORD := "https://discord.gg/nbeBaU7xt"        # the playtest server (never expires)
 
 func _ready() -> void:
@@ -70,43 +75,38 @@ func _build_ui() -> void:
 	lt.texture = load("res://art/brand/logo_wordmark.png")
 	lt.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	lt.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT
-	lt.custom_minimum_size = Vector2(500, 90 if Overlay.admin_allowed() else 150)      # shrinks on a short window (and gives its room to the owner's Test Zone row); the list below never leaves it
+	lt.custom_minimum_size = Vector2(500, LOGO_H)     # the same for everyone (_fit_logo: only a short window shrinks it)
 	lt.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	lt.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	logo = lt
 	logo.name = "Logo"
 	col.add_child(logo)
+	_fit_logo()
+	get_viewport().size_changed.connect(_fit_logo)
 	# no tagline under the logo
 	var has: bool = not Save.d["roster"].is_empty()
-	col.add_child(UI.spacer(12 if has else 30))     # (with a save the menu has one more row: Demo match)
-	# the one big button: carry on where you left off, or start a new story
+	col.add_child(UI.spacer(30))
+	# the one big button: carry on where you left off (into the world), or start a new story
 	var b1 := _menu_main(("Continue" if has else "New Game"), _continue if has else func(): Game.goto("prologue"))
 	col.add_child(b1)
+	main_btn = b1
 	# no subtext under the main button
-	col.add_child(UI.spacer(6 if has else 18))
+	col.add_child(UI.spacer(18))
+	# owner 11-26: a short list. Party folds into Play with Friends, Save Files and Help sit on the Settings
+	# page, Play with Your Boki is gone (the minigames are in the garden), and the owner's Test Zone and
+	# Demo Match live on a small chip in the corner (_admin_chip)
 	var items: Array = []
 	# the Training Grounds (the farm opens the same one): every kit against dummies and a sparring bot, no save needed
 	var hunter := Arch.of_save() if has else ""
 	items.append(["Training Grounds", func(): Game.start_match(Match.arena_opts(hunter)), "knock"])
-	if Overlay.admin_allowed():
-		items.append(["Test Zone", TestZone.start, "gear"])     # the owner's sandbox (AdminGate)
-	if has:
-		# one click to a match made for filming: Duos with a bot squadmate who leads the drop to a boss lair
-		# next to an uplink, clear weather, no Blight, the usual rivals (Match.demo_opts)
-		items.append(["Demo Match", func(): Game.start_match(Match.demo_opts()), "updraft"])
-	if has:
-		items.append(["Play with Your Boki", func(): Game.goto("home", {"play_hub": true}), "bond"])
-	if Net.available():
-		items.append(["Play with Friends", func(): Game.goto("lobby", {}), "bond"])
-	if Net.mm.addr != "":
-		items.append(["Party", func(): Game.goto("party", {}), "bond"])
-	items.append(["Save Files", func(): Overlay.ctx = "title"; Overlay.open_saves(), "satchel"])
+	if Net.available() or Net.mm.addr != "":
+		items.append(["Play with Friends", _friends, "bond"])
 	items.append(["Settings", func(): Overlay.ctx = "title"; Overlay.open_settings(), "gear"])
-	items.append(["Help", _open_words, "info"])
 	if not OS.has_feature("web"):
 		items.append(["Quit", func(): RateCard.gate(Overlay.root, get_tree().quit), "close"])
 	for it in items:
 		col.add_child(_menu_item(String(it[0]), it[1], String(it[2])))
+	_wrap_focus()
 	var i := 0
 	for ch in col.get_children():
 		if ch == logo: continue
@@ -143,11 +143,76 @@ func _build_ui() -> void:
 	keys.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	keys.offset_right = -28; keys.offset_top = -44; keys.offset_bottom = -16
 	root.add_child(keys)
+	if Overlay.admin_allowed():
+		_admin_chip(root, has)
 	b1.grab_focus()
 
-func _open_words() -> void:
-	Overlay.ctx = "title"
-	Overlay.open_words()
+func _fit_logo() -> void:
+	var short := get_viewport().get_visible_rect().size.y < SHORT_WIN
+	logo.custom_minimum_size.y = LOGO_SHORT_H if short else LOGO_H
+
+## Play with Friends: back to the party when one is up, else the lobby; the party screen when only the
+## matchmaker is there (the lobby leads to the party too).
+func _friends() -> void:
+	var party_up: bool = Net.party != null and Net.party.state != Party.State.NONE
+	if party_up or not Net.available():
+		Game.goto("party", {})
+	else:
+		Game.goto("lobby", {"from": "title"})
+
+## Up and down walk the menu and wrap at the ends (W/S, arrows, a d-pad).
+func _wrap_focus() -> void:
+	var btns: Array = menu_col.get_children().filter(func(c): return c is Button)
+	for i in btns.size():
+		var b: Button = btns[i]
+		var prev: Button = btns[(i - 1 + btns.size()) % btns.size()]
+		var nxt: Button = btns[(i + 1) % btns.size()]
+		b.focus_neighbor_top = b.get_path_to(prev)
+		b.focus_previous = b.focus_neighbor_top
+		b.focus_neighbor_bottom = b.get_path_to(nxt)
+		b.focus_next = b.focus_neighbor_bottom
+		b.focus_neighbor_left = b.get_path_to(b)
+		b.focus_neighbor_right = b.focus_neighbor_left
+
+## The owner's corner chip (AdminGate only): a small gear above the build line that opens a tiny
+## popover with the Test Zone and (with a save) the Demo Match. Off the menu, so the list stays short.
+func _admin_chip(root: Control, has_save: bool) -> void:
+	var pop := UI.glass(8, 10)
+	pop.name = "AdminPop"
+	pop.visible = false
+	pop.mouse_filter = Control.MOUSE_FILTER_STOP
+	pop.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	pop.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	pop.offset_left = 28
+	pop.offset_bottom = -92
+	var pv := UI.vbox(4)
+	pop.add_child(pv)
+	pv.add_child(UI.label("OWNER", 11, Color("e9b48a"), UI.caps))
+	pv.add_child(UI.ghost("Test Zone", TestZone.start, 170, "gear"))
+	if has_save:
+		# one click to a match made for filming: Duos with a bot squadmate who leads the drop to a boss lair
+		# next to an uplink, clear weather, no Blight, the usual rivals (Match.demo_opts)
+		pv.add_child(UI.ghost("Demo Match", func(): Game.start_match(Match.demo_opts()), 170, "updraft"))
+	var toggle := func():
+		pop.visible = not pop.visible
+		var to: Control = pv.get_child(1) if pop.visible else main_btn
+		to.grab_focus()
+	var chip := UI.icon_button("gear", toggle, "Owner tools", 14.0)
+	chip.name = "AdminChip"
+	chip.focus_mode = Control.FOCUS_CLICK      # the menu's up/down never lands on it
+	chip.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	chip.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	chip.offset_left = 24
+	chip.offset_bottom = -48
+	root.add_child(chip)
+	root.add_child(pop)
+	admin_pop = pop
+
+## The owner's popover entries (empty when the chip is not there): read by --title-check.
+func admin_labels() -> Array:
+	if admin_pop == null:
+		return []
+	return admin_pop.find_children("*", "Button", true, false).map(func(b): return String((b as Button).text))
 
 ## The menu's item labels in order (the main button first): read by --title-check.
 func menu_labels() -> Array:
@@ -163,11 +228,18 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not (event is InputEventKey and event.pressed and not event.echo):
 		return
 	var k := (event as InputEventKey).physical_keycode
+	if k == KEY_ESCAPE and admin_pop and admin_pop.visible:
+		admin_pop.visible = false
+		main_btn.grab_focus.call_deferred()
+		get_viewport().set_input_as_handled()
+		return
 	if k != KEY_W and k != KEY_S:
 		return
 	var f := get_viewport().gui_get_focus_owner()
 	if f == null:
 		return
+	if admin_pop and admin_pop.is_ancestor_of(f):
+		return      # (the popover is two buttons: the arrows move there, W/S stay off the menu)
 	var nxt := f.find_prev_valid_focus() if k == KEY_W else f.find_next_valid_focus()
 	if nxt:
 		nxt.grab_focus()
