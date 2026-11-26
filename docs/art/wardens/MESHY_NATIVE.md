@@ -31,7 +31,10 @@ contract (RIG_CONTRACT.md). The game adapts to Meshy: its bones are never rename
   clips at load) whose arm bones (every bone below Meshy's `LeftShoulder`/`RightShoulder`, data `arm_roots`) take
   the walk clip's keys, time-scaled to the crouch loop; hips, spine and legs keep Meshy's crouch.
 - Size: Meshy's head bone is scaled onto the rig's head pivot (the contract model's head height). Hit ring and
-  hitbox are the rig's, unchanged.
+  hitbox are the rig's, unchanged. Data `size` (as Dredge's 1.09) then scales a body whose visible height stood over
+  10% off the owner's height chart (hit_h, plus the headwear the chart allows over the head; drawn as a match draws it, x1.12): Kael 1.2,
+  Pip 0.79, Gil 0.69. The contract's parts, anchors and companions are placed as for the unfitted body and grow with
+  it (`WardenNative._to_contract`). The hitbox never changes: its numbers are parity rows.
 - Facing: Meshy faces +Z; the model is turned 180 deg to face -Z like every Hunter.
 - Anchors (`anchors`): `anchor_head_top`, `anchor_chest`, `anchor_gun_R` are BoneAttachment3D nodes on Meshy bones,
   found by `WardenGlb.anchor`. The rig's Gun (aim and muzzle) rides Meshy's `RightHand` bone each frame.
@@ -48,6 +51,11 @@ keep the armature Z up, so their Hips keys are carried into the rig's Y-up frame
 
 ## Checks
 `--warden-native-check` (switch, bones, facing, height, each state's clip, weapon hidden, anchors, toon surfaces,
+crouch arms, only Meshy's model draws (no rig mesh such as the Offhand), each data orbit rides its bone and turns);
+`--warden-glb-check` counts native Hunters apart.
+`--native-hitbox-check` measures each one's visible body (skinned vertices at idle, no weapon, orbits or companions)
+against hit_h and the hit ring and fails past 10% on height; `--native-hitbox-shots` draws each inside its hurtbox.
+Renders: `--clip-shots --warden=<arch> --states [--match]`.
 crouch arms, only Meshy's model draws (no rig mesh such as the Offhand), each data orbit rides its bone and turns,
 the drop poses hold --clip-check's bars); `--land-weight-check` measures every native Hunter's squash off the model
 (head height against the same frames unsquashed: depth and seconds within 10% of the contract numbers, feet on the
