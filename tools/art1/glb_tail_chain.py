@@ -4,7 +4,8 @@ made it a horizontal club. The chain lets the tail droop from the root, sweep ba
 Each tail vertex gets a parameter u = geodesic distance over the (welded) tail surface from the bone head, 0 at the root,
 1 at the tip. Two child bones (NAME1, NAME2) sit at the tail's centreline at u = --joints; the weight ramps across each
 joint over +-(--blend) in u, so there is no step. Every clip is re-keyed on the three bones: a pitch about the lateral axis
-(+ = back and up) per bone (--pitch ROOT,MID,TIP, per clip with --pitch-clip Attack=35/20/30,...), a root yaw (--yaw)
+(+ = back and up) per bone (--pitch ROOT,MID,TIP, per clip with --pitch-clip Attack=35/20/30,...; an optional 4th value
+RUN=15/0/45/30 sets that clip's root yaw), a root yaw (--yaw)
 and a side sway that lags down the chain (--sway DEG,SECONDS; the period is fitted to a whole number per clip so loops
 stay seamless). Where a frame still brings the tail within --gap m of a shin/foot or under --ground m, the root pitch
 rises in 5 degree steps (up to --cap) for that frame, then the lift is eased over neighbouring frames.
@@ -167,10 +168,11 @@ def keys(a, j, b, P, full, tail, pi, ti, new, pinv, heads):
         length = max(float(times.max()), 1e-3)
         period = length / max(1, round(length / sper))
         pitch = per.get(an["name"], base)
+        yaw = pitch[3] if len(pitch) > 3 else a.yaw  # optional 4th value: this clip's root yaw
         sway = [sdeg * (1 + 0.5 * k) * np.sin(2 * np.pi * times / period - 0.9 * k) for k in range(3)]
 
         def local(k, f, extra):
-            qw = qmul(qaxis(up, sway[k][f] + (a.yaw if k == 0 else 0)), qaxis(lat, pitch[k] + (extra if k == 0 else 0)))
+            qw = qmul(qaxis(up, sway[k][f] + (yaw if k == 0 else 0)), qaxis(lat, pitch[k] + (extra if k == 0 else 0)))
             return qmul(pinv, qw) if k == 0 else qw
 
         S = rig.skin_mats(an, times.astype(float))
@@ -198,7 +200,7 @@ def keys(a, j, b, P, full, tail, pi, ti, new, pinv, heads):
             oi = add_acc(j, b, q, 5126, "VEC4")
             an["samplers"].append({"input": ti_, "output": oi, "interpolation": "LINEAR"})
             an["channels"].append({"sampler": len(an["samplers"]) - 1, "target": {"node": node, "path": "rotation"}})
-        print("clip %s: %d keys, pitch %s, lift max %.0f mean %.1f" % (an["name"], n, pitch, lift.max(), lift.mean()))
+        print("clip %s: %d keys, pitch %s yaw %.0f, lift max %.0f mean %.1f" % (an["name"], n, pitch[:3], yaw, lift.max(), lift.mean()))
 
 
 if __name__ == "__main__":
