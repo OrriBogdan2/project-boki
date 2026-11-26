@@ -24,6 +24,7 @@ text is rare. Our looks stay ours: the signature colour is the body of every eff
 | less text | `Fx.word` | one floating word at a spot at a time (`WORD_ROOM` 3 m, `WORD_HOLD` 0.6 s), smaller (28 / 40 px) |
 | less text: Boki | `BokiChatter.heard`, `Match.on_kin_ability` | while you or a squadmate fights (`BokiChatter.calm`) only your own Boki's speech bubble is drawn and no callout pin ("Behind you! · 3m"; `--clarity-shots` prints `CLARITYCHATTER n/20`, 0 is the rule); a Boki's ability name floats over your own Boki only (others' read from their looks) |
 | less text: hover cards | `HudHover.draw_world_tip` | the card about a monster, Boki or Hunter under a resting cursor ("Lace / The Red Stitch", "Boki: Prismander") is not drawn while you or a squadmate fights (`BokiChatter.calm`): in a fight the cursor rests on whoever you aim at. `--clarity-check` budget `hud world_tip` 0 |
+| less text: waypoints | `Hud._draw_waypoint`, `ObjectiveTracker.world` | while you or a squadmate fights (`BokiChatter.calm`) a world waypoint ("Wild Boki  ·  49m", an objective, a ping) is a bare pin, or a bare edge arrow when off screen: no words mid-field. They return when the fight ends. `--clarity-check` counts the `waypoint_text` rects the HUD notes: 0 in a fight, more than 0 out of one |
 
 ## Ground order (11-12): a melee is not one disc
 A ground ring means gameplay, so in a pile the draw order and strength are one rule (`SideColor.ORDER_*`, a material's

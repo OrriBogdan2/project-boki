@@ -13,6 +13,7 @@ const ARCH_CHECK := preload("res://tools/archetype_check.gd")
 const ClarityFight := preload("res://tools/clarity_fight.gd")
 const DT := 1.0 / 60.0
 const FIGHT_FRAMES := 10
+const WAYPOINT_AHEAD := 4.0  # m beside the player the check's waypoint stands: on screen, in the middle of the field
 
 var bad := 0
 
@@ -99,6 +100,7 @@ func run(main: Node) -> void:
 	m.queue_free()
 	await main.get_tree().process_frame
 	await _fight_budget(main)
+	await _waypoint_words(main)
 	print("CLARITY done, %d failures" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -132,6 +134,36 @@ func _sable_hit(main: Node) -> void:
 	target.render(DT, 1.0)
 	ok(_same(target.flash_tint, Color.WHITE), "the tint is white again once the flash ends")
 	m.queue_free()
+
+
+## A world waypoint in the middle of the field: its words ("Your ping  ·  5m") are drawn out of a fight and none are
+## in one (a bare pin); both come back once the fight is over. Counted by the "waypoint_text" rects the HUD notes.
+func _waypoint_words(main: Node) -> void:
+	var words := func(m: Match) -> int:
+		SafeArea.seen.clear()
+		SafeArea.recording = true
+		m.hud.c.queue_redraw()
+		m.hud.panels.queue_redraw()
+		await main.get_tree().process_frame
+		SafeArea.recording = false
+		return (SafeArea.seen.get("waypoint_text", []) as Array).size()
+	var check := func(m: Match, _i: int) -> void:
+		var p: Hunter = m.player
+		p.hurt_at = -99.0
+		for h: Hunter in m.hunters:
+			h.combat_at = -99.0
+		m.hud.reticle.dealt_at = -99.0
+		var at := p.pos + Vector3(WAYPOINT_AHEAD, 0, 0)
+		m.pings.append({"pos": at, "by": p, "team": p.team, "col": Color.WHITE, "t": 0.0, "life": 1e9})
+		var calm: int = await words.call(m)
+		ok(calm > 0, "no fight: the mid-field waypoint carries its words (%d)" % calm)
+		p.combat_at = m.time
+		var fight: int = await words.call(m)
+		ok(fight == 0, "in a fight: waypoint text inside the field is gone (%d, was %d)" % [fight, calm])
+		p.combat_at = -99.0
+		ok(await words.call(m) > 0, "the fight is over: the waypoint words come back")
+	var fm: Match = await ClarityFight.play(main, ClarityFight.FIGHTS[0], 1, check)
+	fm.queue_free()
 
 
 ## The first ClarityFight fight: each BUDGET entry's element-Hunter pairs a frame, on average, within its budget.
