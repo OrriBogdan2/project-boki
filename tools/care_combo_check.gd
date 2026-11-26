@@ -760,9 +760,9 @@ func _skate_ice() -> void:
 	)
 
 
-## Owner 23:55: Celeste's darts home in toward the END of their flight, also while she skates. A dart keeps its
-## launch heading through its first third, then turns in (wpn.home_from 0.35 to home_full 0.7 of its flight);
-## a skating beam aimed 1.5 m off a foe still curves onto it late.
+## Owner 11-26 (over 23:55's late-only turn): a dart eases into one smooth curve onto the foe, as the reference's do:
+## its pull builds over wpn.home_ramp, so it turns less over the first third of the way than over the rest; a
+## skating beam aimed 1.5 m off a foe still curves onto it.
 func _late_homing() -> void:
 	var r: Array = sc.setup("rimewright", 30.0)
 	var m: Match = r[0]
@@ -793,8 +793,8 @@ func _late_homing() -> void:
 		else:
 			turned_late = maxf(turned_late, turned)
 	ok(
-		"tm LMB: a dart flies out straight (the first third of the way under 1 deg of turn), then curves in late",
-		turned_early < 1.0 and turned_late > 5.0,
+		"tm LMB: a dart eases into its curve (the first third of the way under 5 deg of turn), then curves in",
+		turned_early < 5.0 and turned_late > 5.0 and turned_late > turned_early,
 		"early %.1f deg, late %.1f deg" % [turned_early, turned_late]
 	)
 	await _free(m)
@@ -1948,8 +1948,8 @@ func rimewright() -> void:
 	var tap := "".join(dmgs.slice(tap_n).map(func(d): return "H" if float(d) > base_dmg * 1.5 else "p"))
 	ok("tm LMB: a tap is a burst too: one plain dart, then the 3 large ones", tap == "pHHH", tap)
 	ok(
-		"tm LMB: darts come out slowly (16 m/s), a little off the aim to alternating sides",
-		float(P.wpn["speed"]) <= 18.0 and not bows.is_empty() and float(bows[0]) > 5.0 and float(bows[0]) < 15.0,
+		"tm LMB: darts fly at the reference's 19.75 m/s (slow beside a 32-40 m/s shot), a little off the aim",
+		float(P.wpn["speed"]) <= 21.0 and not bows.is_empty() and float(bows[0]) > 3.0 and float(bows[0]) < 15.0,
 		"first bow %.0f deg" % (float(bows[0]) if not bows.is_empty() else 0.0)
 	)
 	step(m, 0.8)

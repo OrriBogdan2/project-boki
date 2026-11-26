@@ -178,7 +178,8 @@ func _shiv() -> void:
 	await ac.done(m)
 
 
-## Celeste (rimewright, Neve): her darts bend onto the foe at the cursor only; a foe elsewhere pulls on nothing.
+## Celeste (rimewright, Neve): her darts bend onto a foe near the cursor line only; a foe elsewhere pulls on nothing
+## (owner 11-26: the reference's cone, docs/heroes/rimewright.md LMB).
 func _celeste() -> void:
 	var r: Array = ac.setup("rimewright", 8.0)
 	var m: Match = r[0]
@@ -209,9 +210,9 @@ func _celeste() -> void:
 		"ends %.2f m apart" % alone.distance_to(at_cursor)
 	)
 	ok(
-		"celeste: the homing is weak (turn <= 8 rad/s, cursor reach <= 2.5 m, no free acquire)",
-		float(wd["turn"]) <= 8.0 and float(wd["cursor_r"]) <= 2.5 and not wd.has("acquire"),
-		str(wd["turn"])
+		"celeste: only a foe near the cursor line pulls (acquire cone <= 20 deg, pull <= 70 m/s^2)",
+		float(wd["acquire_deg"]) <= 20.0 and float(wd["home_accel"]) <= 70.0,
+		"%s deg, %s m/s^2" % [wd["acquire_deg"], wd["home_accel"]]
 	)
 	await ac.done(m)
 
@@ -221,6 +222,10 @@ func _dart_end(m: Match, p: Hunter, k: RimewrightKit) -> Vector3:
 	for d in k.darts:
 		m.shots.erase(d["s"])
 	k.darts.clear()
+	var wait := 0.0
+	while k.fire_wait() > 0.0 and wait < 2.0:  # (the last tap's 0.5 s barrage pause: a tap inside it would wait)
+		m.step(DT)
+		wait += DT
 	p.fire_cd = 0.0
 	p.inp["fire"] = true
 	m.step(DT)
