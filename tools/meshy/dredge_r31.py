@@ -6,6 +6,8 @@
                                                           sees) faces Meshy's front (+z)
   dredge_r31.py --pack-tex OUT.glb IN.glb MESHY.glb       the retextured pack's base colour (same UVs) in place of the
                                                           pack image (only pack-meshy uses it); nothing else changes
+  dredge_r31.py --backing OUT.glb IN.glb [--ring N]       r32: a reversed-winding backing under every fold zone of the
+                                                          skin/dome/goo (see backing()), ink off on the folds
   dredge_r31.py --relax OUT.glb IN.glb [--goo] [--knee] [--target X] [--passes N]
                                                           skin weights blended toward their neighbours (r28's relax
                                                           loop) only where edges stretch past --target in any clip:
@@ -32,7 +34,7 @@ import numpy as np
 from PIL import Image
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from dredge_r29 import acc, add_view, compact, load, meshy_part, write  # noqa: E402
+from dredge_r29 import acc, add_acc, add_view, compact, load, meshy_part, write  # noqa: E402
 from dredge_r28 import _report, g, glb_add_clips, skin_relax, weld  # noqa: E402
 
 PACK = "pack-meshy"
@@ -157,12 +159,98 @@ def relax(o):
     glb_add_clips.write(o.out, j, bin_)
 
 
+# --open only here: the goo-side shoulder, neck and ear (review D1 notches, Attack f80-84); the Meshy skin has ~11.8k open
+# edges all over (cuts), and backing/un-inking them everywhere would thin the outline on the whole body. Rest pose, m.
+OPEN_BOX = ((-0.60, 1.15, -0.50), (0.05, 1.95, 0.50))
+FOLD_MATS = ("skin-native", "skin-native-dome", "skin-goo")  # the skinned body surfaces that fold in clips
+
+
+def _folds(js, b, pr, pz):
+    """Which triangles of primitive pr fold over (face away from where their rest normal goes) in any clip pose."""
+    P = acc(js, b, pr["attributes"]["POSITION"]).astype(float)
+    J = acc(js, b, pr["attributes"]["JOINTS_0"]).astype(int)
+    W = acc(js, b, pr["attributes"]["WEIGHTS_0"]).astype(float)
+    W /= np.maximum(W.sum(1, keepdims=True), 1e-9)  # the game sums the 4 slots
+    F = acc(js, b, pr["indices"]).reshape(-1, 3).astype(np.int64)
+    n0 = np.cross(P[F[:, 1]] - P[F[:, 0]], P[F[:, 2]] - P[F[:, 0]])
+    ok = np.linalg.norm(n0, axis=1) > 1e-10
+    vh = np.c_[P, np.ones(len(P))]
+    flip = np.zeros(len(F), bool)
+    for _, M in pz:
+        m = np.einsum("nk,nkij->nij", W, M[J])
+        p = np.einsum("nij,nj->ni", m[:, :3], vh)
+        n1 = np.cross(p[F[:, 1]] - p[F[:, 0]], p[F[:, 2]] - p[F[:, 0]])
+        ne = np.einsum("nij,nj->ni", m[:, :3, :3][F].mean(1), n0)
+        flip |= ok & ((n1 * ne).sum(1) < 0)
+    return F, flip
+
+
+def _open_verts(js, b, prs):
+    """Per primitive, its vertices on an open edge of the body surface they make together (welded by position, so a
+    seam between two primitives or a UV split is not open)."""
+    Ps = [acc(js, b, pr["attributes"]["POSITION"]) for pr in prs]
+    _, inv = np.unique(np.round(np.concatenate(Ps) / 1e-4).astype(np.int64), axis=0, return_inverse=True)
+    inv = inv.ravel()
+    off = np.cumsum([0] + [len(P) for P in Ps])
+    G = np.concatenate([inv[off[k] + acc(js, b, pr["indices"]).reshape(-1, 3).astype(np.int64)] for k, pr in enumerate(prs)])
+    E = np.sort(np.concatenate([G[:, [0, 1]], G[:, [1, 2]], G[:, [2, 0]]]), 1)
+    u, c = np.unique(E, axis=0, return_counts=True)
+    hot = np.zeros(inv.max() + 1, bool)
+    hot[u[c == 1].ravel()] = True
+    lo, hi = map(np.array, OPEN_BOX)
+    return [hot[inv[off[k]:off[k + 1]]] & ((Ps[k] >= lo) & (Ps[k] <= hi)).all(1) for k in range(len(prs))]
+
+
+def backing(o):
+    """Review D1 (black see-through notches at the goo root, Attack) and D2 (black crescent on the raised knee, jump):
+    where the skin folds over in a pose, its triangles turn away from the camera, the toon pass culls them (the game's
+    hero shader is cull_back whatever the glb says) and the ink shell (cull_front, grown along the normal) draws its
+    dark inside through the hole. Each fold zone (folded triangles + RING rings) gets a backing: the same triangles
+    with the winding reversed, in the same material and on the same vertices (weights, UVs, normals), so a folded
+    face shows the skin's texture instead of the ink; the backing and the folded originals carry no ink room
+    (COLOR.a 0: outline.gdshader discards there; --ink-off: the folded originals too). Unfolded, a backing triangle faces inward and is culled: no change."""
+    js, b = glb_add_clips.read(o.inp)
+    pz, _ = g.poses(js, b, js["skins"][0])
+    prims = js["meshes"][0]["primitives"]
+    whole = set(o.whole.split(",")) if o.whole else set()
+    todo = [(pi, pr) for pi, pr in enumerate(prims) if "COLOR_0" in pr["attributes"]
+            and js["materials"][pr["material"]]["name"] in set(FOLD_MATS) | whole]
+    opn = _open_verts(js, b, [pr for _, pr in todo]) if o.open else [None] * len(todo)
+    for (pi, pr), ov in zip(todo, opn):
+        mat = js["materials"][pr["material"]]["name"]
+        F, flip = _folds(js, b, pr, pz)
+        zone = flip.copy() if mat not in whole else np.ones(len(F), bool)
+        if ov is not None:
+            zone |= ov[F].any(1)  # (--open: a triangle on an open edge: seen from inside through the gap)
+        for _ in range(o.ring):
+            hot = np.zeros(F.max() + 1, bool)
+            hot[F[zone].ravel()] = True
+            zone |= hot[F].any(1)
+        C = acc(js, b, pr["attributes"]["COLOR_0"]).astype(np.float32)
+        Cb = C.copy()
+        Cb[:, 3] = 0.0
+        Co = C.copy()
+        if o.ink_off:
+            Co[np.unique(F[flip].ravel()), 3] = 0.0  # the folded originals: no ink shell over the fold
+        if ov is not None:
+            Co[ov, 3] = 0.0  # (the shell's flap past an open edge)
+        pr["attributes"] = dict(pr["attributes"], COLOR_0=add_acc(js, b, Co, 5126, "VEC4"))
+        bk = dict(pr, attributes=dict(pr["attributes"], COLOR_0=add_acc(js, b, Cb, 5126, "VEC4")),
+                  indices=add_acc(js, b, F[zone][:, [0, 2, 1]].astype(np.uint32).ravel(), 5125, "SCALAR", 34963))
+        prims.append(bk)
+        print("prim %d %s: %d tris, %d fold in a clip, %s open verts, backing %d" % (
+            pi, mat, len(F), flip.sum(), "-" if ov is None else ov.sum(), zone.sum()))
+    js["buffers"][0]["byteLength"] = len(b)
+    glb_add_clips.write(o.out, js, b)
+
+
 def main():
     ap = argparse.ArgumentParser()
     grp = ap.add_mutually_exclusive_group(required=True)
     grp.add_argument("--pack-export", action="store_true")
     grp.add_argument("--pack-tex", action="store_true")
     grp.add_argument("--relax", action="store_true")
+    grp.add_argument("--backing", action="store_true")
     ap.add_argument("out")
     ap.add_argument("inp")
     ap.add_argument("meshy", nargs="?")
@@ -172,8 +260,12 @@ def main():
     ap.add_argument("--knee", action="store_true")
     ap.add_argument("--target", type=float, default=3.0, help="x rest length: masked edges over this relax")
     ap.add_argument("--passes", type=int, default=60)
+    ap.add_argument("--ink-off", action="store_true", help="--backing: no ink room on the folded originals either")
+    ap.add_argument("--whole", default="", help="--backing: materials backed all over (comma list)")
+    ap.add_argument("--open", action="store_true", help="--backing: also back triangles on open edges, no ink there")
+    ap.add_argument("--ring", type=int, default=1, help="--backing: rings of triangles round each fold")
     o = ap.parse_args()
-    (pack_export if o.pack_export else pack_tex if o.pack_tex else relax)(o)
+    (pack_export if o.pack_export else pack_tex if o.pack_tex else backing if o.backing else relax)(o)
 
 
 if __name__ == "__main__":
