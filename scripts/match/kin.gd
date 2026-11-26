@@ -115,6 +115,7 @@ var tp_n := 0  # teleports so far (the "tp" meta; BokiRig ignores the jump as sp
 var home_h: Hunter = null  # its own hunter; owner_h is its carrier while its wisp is stolen (KinSteal)
 var loose_t := 0.0  # s its wisp floats loose, free to grab (KinSteal)
 var stolen_summoned := false  # a thief used its one summon this match (KinSteal)
+var proc: KinWispProc = null  # its carried passive acting, heard (KinWispProc)
 var back_home := false  # its loose wisp went back to its downed hunter, who keeps it this time (KinSteal)
 static var XRAY: Shader = preload("res://shaders/kin_aura_xray.gdshader")
 
@@ -288,8 +289,6 @@ func slot_open(_slot: String) -> bool:
 
 ## Can its abilities and ultimate be used right now?
 func ready_to_fight() -> bool:
-	if wisp:
-		return false  # (a wisp casts nothing: KinWisp)
 	return not dead and rest_t <= 0.0 and state not in ["downed", "wisp", "bench", "wild", "dazed", "away"]
 
 
@@ -485,6 +484,8 @@ func use_ability(slot: String, p: Vector3, auto := false) -> bool:
 		if merged or not KinExec.moves_caster(def):
 			_cast(slot, p, auto, owner_h, pw * (1.0 if merged else 0.85))
 			return true
+		if wisp:
+			return false  # a wisp lends no dash, leap or blink (it never moves you): summon it for those
 		KinFollow.drop_beside(self)
 	if state in ["returning", "flying_home"]:
 		state = "active"
