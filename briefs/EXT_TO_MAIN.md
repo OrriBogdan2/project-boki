@@ -11362,3 +11362,4 @@ READY ext/merge-lane-N3-1122 02d987aadf (PR #670: main d16fa75f08 merged; combat
 READY ext/anim-native-move-states 5e6dac60b7 (PR #877: main d16fa75f08 merged clean; only *_clips.glb anim files; land-weight 0 fail, warden-native 2 reds = main)
 READY ext/stuck-integ-8fc48065 520c0dbc2d (PR #891: main d16fa75f08 merged clean; match-repeat +362/match twice vs main +388/+392, so no branch leak; 7 new checks green)
 READY ext/mc-integ-f1-1118 34954a99bd (PR #313: origin/main merged again, 0 behind, no conflicts; fixed prologue_check freed-pr script error; --check 0 fail, health --strict OK, roster/summon-death/save-compat/old-saves/prologue/mode-boki/nest-items/demo/garden-visitor 0 fail; evo-check ink-drops red same as main)
+READY ext/p16-port-1118 beddc086f141 (PR #334: main merged; squad chat in match, Net.VERSION 0.24.29 kept; squad-chat-check 0 fails)
