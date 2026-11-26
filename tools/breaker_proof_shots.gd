@@ -1,12 +1,15 @@
 extends RefCounted
-## --breaker-proof-shots --shots-dir=<dir>: on-screen proof for Breaker's fidelity rows. chain_*.png: a real arena
-## throw at the match camera, the chain from his wrist to the flying hammer. fish_*.png: the anglerfish close up:
-## walking (bob), a blocked hit (shiver), the ult (flare); prints how far it moved. Needs a renderer.
+## --breaker-proof-shots --shots-dir=<dir> [--parts=chain,fish,guard,ult]: on-screen proof for Breaker's fidelity
+## rows. chain_*.png: a real arena throw at the match camera, the chain from his wrist to the flying hammer.
+## fish_*.png: the anglerfish close up: walking (bob), a blocked hit (shiver), the ult (flare); prints how far it
+## moved. guard_*.png: the aegis raised (his wooden shield up) at the match camera and close up. ult_*.png: the
+## Faultline wind-up, slam and eruption at the match camera. Needs a renderer.
 
 const DT := 1.0 / 60.0
 const STRIP := 6
 
 var out := ""
+var parts := ["chain", "fish", "guard", "ult"]
 
 func _grab(main: Node, nm: String) -> void:
 	await RenderingServer.frame_post_draw
@@ -16,12 +19,22 @@ func run(main: Node) -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="):
 			out = a.substr(12)
+		elif a.begins_with("--parts="):
+			parts = Array(a.substr(8).split(","))
 	DirAccess.make_dir_recursive_absolute(out)
 	Save.no_write = true
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
-	await _chain(main)
-	await _fish(main)
+	if "chain" in parts:
+		await _chain(main)
+	if "fish" in parts:
+		await _fish(main)
+	if "guard" in parts:
+		await _guard(main)
+	if "ult" in parts:
+		await _ult(main)
+	if "pose" in parts:
+		await _pose(main)
 	print("BREAKER_PROOF_DONE")
 	main.get_tree().quit()
 
@@ -87,3 +100,103 @@ func _fish(main: Node) -> void:
 	await _grab(main, "fish_flare.png")
 	model.set_meta(WardenMood.FLARE, false)
 	holder.queue_free()
+
+
+## One match step, then his pose as the match's frame draws it (Match._process is off: Hunter.render poses him).
+func _tick(main: Node, m: Match) -> void:
+	m.step(DT)
+	(m.player as Hunter).render(DT, 1.0)
+	await main.get_tree().process_frame
+
+
+func _arena(main: Node) -> Match:
+	var m := Match.new()
+	main.add_child(m)
+	m.start(Match.arena_opts("bulwark"))
+	m.set_process(false)
+	if m.hud:
+		m.hud.visible = false
+	return m
+
+
+## The aegis held toward the screen's right and toward the camera at the match camera, then close up from his front
+## left with and without the raised shield arm (WardenArmRaise), the wall shown and hidden.
+func _guard(main: Node) -> void:
+	var m := _arena(main)
+	var P: Hunter = m.player
+	for aim in [Vector3(7, 0, 0), Vector3(2, 0, 7)]:
+		P.inp["aim"] = P.pos + aim
+		P.inp["sec_hold"] = true
+		P.ak.press_rmb()
+		for i in 40:
+			P.inp["sec_hold"] = true
+			await _tick(main, m)
+		await _grab(main, "guard_match_%s.png" % ("side" if aim.z == 0.0 else "front"))
+	var cam := Camera3D.new()
+	m.add_child(cam)
+	cam.fov = 34.0
+	var fwd := Vector3(P.aim_dir().x, 0, P.aim_dir().y)
+	cam.look_at_from_position(P.pos + fwd * 5.5 + fwd.cross(Vector3.UP) * 2.0 + Vector3(0, 2.2, 0),
+		P.pos + Vector3(0, 1.1, 0), Vector3.UP)
+	cam.current = true
+	var clips := (P.model.get_node("Warden/Sync") as WardenGlb.Sync).clips
+	var raise := clips.arm_raise
+	var aegis := (P.ak as BulwarkKit).fx.aegis
+	for k in ["raised", "clip"]:
+		clips.arm_raise = raise if k == "raised" else null
+		for i in 6:
+			P.inp["sec_hold"] = true
+			await _tick(main, m)
+		await _grab(main, "guard_close_%s.png" % k)
+		aegis.visible = false
+		await _grab(main, "guard_close_%s_nowall.png" % k)
+	clips.arm_raise = raise
+	P.inp["sec_hold"] = false
+	m.queue_free()
+	await main.get_tree().process_frame
+
+
+## Faultline toward the screen's right: the wind-up, the slam and the eruption, timed from the press.
+func _ult(main: Node) -> void:
+	var m := _arena(main)
+	var P: Hunter = m.player
+	P.lvl = 6
+	P.ak.cd["x"] = 0.0
+	P.inp["aim"] = P.pos + Vector3(7, 0, 2)
+	HunterKeys.ult_pressed(P)
+	var shots := {12: "ult_wind", 27: "ult_slam", 36: "ult_erupt", 54: "ult_late"}
+	for i in 60:
+		await _tick(main, m)
+		if shots.has(i):
+			await _grab(main, "%s.png" % shots[i])
+	m.queue_free()
+	await main.get_tree().process_frame
+
+
+func _pose(main: Node) -> void:
+	var m := _arena(main)
+	var P: Hunter = m.player
+	P.inp["aim"] = P.pos + Vector3(0, 0, 7)
+	for i in 30:
+		await _tick(main, m)
+	_bones(P, "idle")
+	P.inp["sec_hold"] = true
+	P.ak.press_rmb()
+	for i in 40:
+		P.inp["sec_hold"] = true
+		await _tick(main, m)
+	_bones(P, "guard")
+	m.queue_free()
+
+
+func _bones(P: Hunter, tag: String) -> void:
+	var sk := WardenGlb.skeleton(P.model.get_node("Warden"))
+	var inv := P.model.global_transform.affine_inverse() * sk.global_transform
+	for b in ["chest", "upper_arm.L", "forearm.L", "hand.L", "x_shield", "head"]:
+		var bi := WardenSkeleton.find(sk, b)
+		if bi < 0:
+			continue
+		var g := sk.get_bone_global_pose(bi)
+		print("POSE %s %s pos %s sk %s basis %s" % [tag, b, (inv * g.origin).snapped(Vector3.ONE * 0.01),
+			g.origin.snapped(Vector3.ONE * 0.01), g.basis.get_euler() * 57.3])
+	print("POSE sk-to-model %s" % inv)
