@@ -11423,3 +11423,4 @@ READY ext/boki-size-follow-data-1125 0e89931dea21b5fa104f1be89b60d73d2ccf1fd1 (B
 READY ext/jumppad-momentum-1126 78b2869516 (map jump pads carry entry momentum: side dash +10.4 m/s sideways, landing clamped to target island terrace; --launch-arc-check map_* 8/8)
 READY ext/boki-size-follow-data-1125 0e89931dea21b5fa104f1be89b60d73d2ccf1fd1 (merged origin/main 64a217d8fb, only conflict tools/checks/boki.gd kept both flag pairs; kin-size, boki-react, wild-boki-states, garden-day checks 0 failures; boki-rig-check 27 Tuft reds + flaky flier-up row = same on main; health --strict red only tutorial_dead_air_check long_line = same on main)
 READY ext/title-menu-slim-1126 5ad2dc61a56 (title slim menu: big button + 4 rows, owner chip popover, Save Files/Help in Settings)
+READY ext/tenzo-rmb-air-1126 d3302c44d2 (Tenzo RMB air press: arc onto the cursor spot clamped 3m, wall/terrace aware, abyss plunge kept; --tenzo-rmb-air-check 12 cases, main 9 fail -> 0)
