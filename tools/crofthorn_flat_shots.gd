@@ -65,21 +65,20 @@ func run(main_node: Node) -> void:
 	main.get_viewport().size = full
 	var base: Vector3 = await _stage_cam()
 	var spacing := 1.0 if cam_mode == "farm" else 1.3
-	for i in species.size():
-		var node: Node3D = _spawn(["boki", species[i]], base)
-		node.rotation.y = PI + (0.0 if i % 2 == 0 else 0.35)  # (the export faces -Z: PI turns it to the camera)
-		nodes.append(node)
-	var croft: Node3D = nodes[species.find(CROFT)]
 	var tag := cam_mode + ("_close" if close else "")
 	for pass_i in passes:
 		var state: String = pass_i[0]
-		if pass_i[1] is Dictionary and not (pass_i[1] as Dictionary).is_empty():
-			_apply_look(croft, pass_i[1])
 		for si in spots.size():
-			var spot := await _move_to(si, base, spacing)
-			await _settle(1.0 if si > 0 or state == "before" else 1.6)
+			_clear_row()
+			var spot := await _move_to(si, base)
+			await _settle(0.8)
+			_last_empty = main.get_viewport().get_texture().get_image()  # (the spot without the row)
+			_spawn_row(spot, spacing)
+			var croft: Node3D = nodes[species.find(CROFT)]
+			if not (pass_i[1] as Dictionary).is_empty():
+				_apply_look(croft, pass_i[1])
+			await _settle(1.2)
 			if not tele_only:
-				_last_empty = await _empty_frame()
 				_shoot(tag, state, si)
 			if cam_mode == "farm" or si == 0:
 				await _tele(state, si)
@@ -103,8 +102,8 @@ func _stage_cam() -> Vector3:
 	return spot
 
 
-## The row stands at spots[si] (the farm: the third-person camera moves with it; the match: one spot only).
-func _move_to(si: int, base: Vector3, spacing: float) -> Vector3:
+## The camera on spots[si] (the farm: the third-person camera moves there; the match: one spot only).
+func _move_to(si: int, base: Vector3) -> Vector3:
 	var spot := base
 	if cam_mode == "farm":
 		spot = farm.world.free_spot_near(Vector3(spots[si].x, 0, spots[si].y), [], 0.8)
@@ -113,23 +112,21 @@ func _move_to(si: int, base: Vector3, spacing: float) -> Vector3:
 		farm.cam.snap(farm.ppos)
 		if tele_cam != null:
 			tele_cam.current = false
-	for i in nodes.size():
-		(nodes[i] as Node3D).position = spot + Vector3((i - (nodes.size() - 1) * 0.5) * spacing, 0, 0)
 	return spot
 
 
-## The scene with the models hidden: what a model's own pixels are measured against.
-func _empty_frame() -> Image:
-	var at: Array = []
-	for n in nodes:  # (moved, not hidden: the rig switches its own visibility back on)
-		at.append((n as Node3D).position)
-		(n as Node3D).position += Vector3(0, -80, 0)
-	await _settle(0.15)
-	var img := main.get_viewport().get_texture().get_image()
-	for i in nodes.size():
-		(nodes[i] as Node3D).position = at[i]
-	await _settle(0.15)
-	return img
+func _spawn_row(spot: Vector3, spacing: float) -> void:
+	for i in species.size():
+		var at := spot + Vector3((i - (species.size() - 1) * 0.5) * spacing, 0, 0)
+		var node: Node3D = _spawn(["boki", species[i]], at)
+		node.rotation.y = PI + (0.0 if i % 2 == 0 else 0.35)  # (the export faces -Z: PI turns it to the camera)
+		nodes.append(node)
+
+
+func _clear_row() -> void:
+	for n in nodes:
+		(n as Node3D).queue_free()
+	nodes.clear()
 
 
 func _shoot(tag: String, state: String, si: int) -> void:
@@ -151,7 +148,9 @@ func _tele(state: String, si: int) -> void:
 		tele_cam.look_at(g, Vector3.UP)
 		tele_cam.current = true
 		await _settle(0.3)
-		main.get_viewport().get_texture().get_image().save_png(dir.path_join("tele_%s_s%d_%s.png" % [view, si, state]))
+		main.get_viewport().get_texture().get_image().save_png(
+			dir.path_join("tele_%s_s%d_%s.png" % [view, si, state])
+		)
 	tele_cam.current = false
 	await _settle(0.1)
 
@@ -173,8 +172,12 @@ func _apply_look(node: Node, look: Dictionary) -> void:
 	for mi in node.find_children("*", "MeshInstance3D", true, false):
 		for s in (mi as MeshInstance3D).get_surface_override_material_count():
 			var mat := (mi as MeshInstance3D).get_active_material(s)
-			if mat is ShaderMaterial and (mat as ShaderMaterial).get_shader_parameter("use_tex") == true:
-				var coat := String((mat as ShaderMaterial).get_shader_parameter("albedo_tex").resource_path).contains("atlas")
+			if (
+				mat is ShaderMaterial
+				and (mat as ShaderMaterial).get_shader_parameter("use_tex") == true
+			):
+				var tex: Texture2D = (mat as ShaderMaterial).get_shader_parameter("albedo_tex")
+				var coat := tex.resource_path.contains("atlas")
 				for k in look:
 					if coat or not String(k).begins_with("albedo_flat"):
 						(mat as ShaderMaterial).set_shader_parameter(k, look[k])
@@ -215,7 +218,13 @@ func _measure(tag: String, state: String, si: int, img: Image) -> void:
 						nearest = j
 				if nearest != i or mask[y * w + x] == 0:
 					continue
-				if mask[y * w + x - 2] == 0 or mask[y * w + x + 2] == 0 or mask[(y - 2) * w + x] == 0 or mask[(y + 2) * w + x] == 0:
+				var at := y * w + x
+				if (
+					mask[at - 2] == 0
+					or mask[at + 2] == 0
+					or mask[at - 2 * w] == 0
+					or mask[at + 2 * w] == 0
+				):
 					continue
 				var col := img.get_pixel(x, y)
 				lums.append(col.get_luminance())
@@ -228,9 +237,9 @@ func _measure(tag: String, state: String, si: int, img: Image) -> void:
 		var var_sum := 0.0
 		for l in lums:
 			var_sum += (float(l) - mean) * (float(l) - mean)
-		rows.append(
-			"%s\t%s\t%d\t%s\t%.3f\t%.3f\t%.3f\t%d" % [tag, state, si, species[i], sqrt(var_sum / n), mean, sat / n, lums.size()]
-		)
+		var std := sqrt(var_sum / n)
+		var row := [tag, state, si, species[i], std, mean, sat / n, lums.size()]
+		rows.append("%s\t%s\t%d\t%s\t%.3f\t%.3f\t%.3f\t%d" % row)
 
 
 var _last_empty: Image

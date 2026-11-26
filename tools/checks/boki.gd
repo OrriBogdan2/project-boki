@@ -6,7 +6,7 @@ extends RefCounted
 
 const CHECKS := {
 	"--toon-lineup-farm-shots": ["res://tools/toon_lineup_farm_shots.gd", "toon_lineup_farm_shots", null],
-	"--crofthorn-flat-shots": ["res://tools/crofthorn_flat_shots.gd", "crofthorn_flat_shots", null],  # --cam=farm|combat
+	"--crofthorn-flat-shots": ["res://tools/crofthorn_flat_shots.gd", "crofthorn_flat_shots", null],
 	"--toon-lineup-shots": ["res://tools/toon_lineup_shots.gd", "toon_lineup_shots", null],  # lineup, match cam
 	"--toon-consistency-check": ["res://tools/toon_consistency_check.gd", "toon_consistency_check", null],  # toon look
 	"--boki-everywhere-check": ["res://tools/boki_everywhere_check.gd", "boki_everywhere_check", null],  # Boki in .pck
