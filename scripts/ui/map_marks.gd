@@ -11,13 +11,16 @@ const LOOT := Color("f2c84a")
 const TRAVEL := Color("45d3e8")
 const OBJECTIVE := Color("f2f4ff")
 const MAP_NEAR_M := 45.0  # m: a thing this close is on the minimap without Tab (MapDetail "thing")
+const ZOOMED_K := 1.45  # the full map zoomed this far past fit shows the chests (as FullMap shows small names)
 const NEAR_M := 16.0  # m: inside this a thing gets its ground ring and name
 const FADE_M := 6.0  # m: the ring and name fade out over the last FADE_M of NEAR_M
 const RING_PTS := 20
 const RING_R := {"camp": 5.0, "shop": 2.2, "chest": 1.7, "shrine": 1.9, "pad": 1.6}
 const WORDS := {"camp": "Monster camp", "chest": "Chest", "shrine": "Shrine: a power-up", "pad": "Jump pad"}
 const CAT := {"camp": ENEMY, "shop": LOOT, "chest": LOOT, "shrine": OBJECTIVE, "pad": TRAVEL}
+const NAMELESS := ["shop", "pad"]  # they carry their own name in the world
 const HUNTER_CLEAR_PX := 70.0  # px: a name never sits within this of the hunter
+const NAME_PX := 13
 
 static var _rows: Array = []  # {id, pos, src}: rebuilt when the match, or what it holds, changes
 static var _owner := 0
@@ -98,12 +101,13 @@ static func minimap(hud, to_map: Callable, on_map: Callable, hold: bool) -> void
 			badge(hud, String(row["id"]), pv, MapDetail.ICON_R / 1.35, row["src"])
 
 
-## The full map: the same badges, a little bigger.
+## The full map: the same badges, a little bigger. A map holds dozens of chests, so they show only zoomed in.
 static func full_map(fm: FullMap) -> void:
 	var m: Match = fm.m
 	var s := clampf(4.0 + fm.k() * 0.5, 5.5, 9.0)
+	var zoomed: bool = fm.k() >= ZOOMED_K * fm.rect.size.x / m.world.w
 	for row in rows(m):
-		if not live(m, row):
+		if not live(m, row) or (row["id"] == "chest" and not zoomed):
 			continue
 		var pv := fm.to_screen(row["pos"])
 		if fm.rect.grow(-s).has_point(pv):
@@ -111,7 +115,7 @@ static func full_map(fm: FullMap) -> void:
 
 
 ## In the world, within NEAR_M of the hunter: a ground ring in the category colour and the thing's name over it
-## (pads already carry their own sign, and the name skips the hunter's own spot on the screen).
+## (shops and pads already carry their own sign, and a name skips the hunter's own spot on the screen).
 static func world(hud) -> void:
 	var m: Match = hud.m
 	var p: Hunter = m.player
@@ -128,8 +132,10 @@ static func world(hud) -> void:
 		var col := Color(CAT[id], clampf((NEAR_M - d) / FADE_M, 0.0, 1.0) * 0.9)
 		_ring_at(hud, cam, at, RING_R[id], col)
 		var lp := cam.unproject_position(at + Vector3(0, 2.6, 0))
-		if id != "pad" and lp.distance_to(me) > HUNTER_CLEAR_PX:
-			hud._ctext(lp, String(row["name"]), 13, col, hud.big)
+		if not id in NAMELESS and lp.distance_to(me) > HUNTER_CLEAR_PX:
+			var w := TextCache.width(hud.big, String(row["name"]), NAME_PX)
+			hud._rounded(Rect2(lp + Vector2(-w * 0.5 - 6.0, -NAME_PX), Vector2(w + 12.0, NAME_PX + 8.0)), Color(0.04, 0.05, 0.08, 0.7 * col.a), 6)
+			hud._ctext(lp, String(row["name"]), NAME_PX, col, hud.big)
 
 
 static func _ring_at(hud, cam: Camera3D, at: Vector3, r: float, col: Color) -> void:

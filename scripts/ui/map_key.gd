@@ -16,7 +16,7 @@ const ICON_X := 16.0      # px from the panel's left edge to the icon's centre
 
 ## Every kind, in the order the key lists it: [id, word].
 const KINDS := [
-	["squad", "Squad"], ["boki", "Boki"], ["camp", "Camp"], ["shop", "Shop"], ["chest", "Chest"], ["shrine", "Shrine"],
+	["squad", "Squad"], ["boki", "Boki"], ["camp", "Camp"], ["shop", "Shop"], ["chest", "Chest (zoom)"], ["shrine", "Shrine"],
 	["pad", "Jump pad"], ["exit", "Extract"], ["way", "Way out"], ["hot", "Hot"], ["stop", "Stop"],
 ]
 
