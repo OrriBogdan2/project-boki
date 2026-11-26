@@ -548,8 +548,8 @@ func _draw_top(sz: Vector2) -> void:
 	if m.opts.get("arena", false):
 		return        # the Arena draws its own key line and meter (scripts/match/arena.gd)
 	if m.opts.get("training", false):
-		if Record.clean():
-			return      # (recording: no training banner or checklist)
+		if Record.clean() or m.opts.get("test_zone", false):
+			return      # (recording, and the Test Zone: no training banner or checklist, a clean HUD)
 		var rr := Rect2(Vector2(sz.x * 0.5 - 220, 12), Vector2(440, 54))
 		_panel(rr, Color(0.06, 0.07, 0.1, 0.88), 12)
 		_ctext(Vector2(sz.x * 0.5, 34), "TRAINING GROUNDS", 12, Color("8fe3c8"))

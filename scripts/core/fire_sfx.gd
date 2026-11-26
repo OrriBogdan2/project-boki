@@ -6,15 +6,14 @@ extends RefCounted
 ## - the first shot of a burst is the weapon's base take at full level and with no pitch jitter: the crack
 ##   that says "it started"; a gap over BURST_GAP_S makes the next shot a first shot again;
 ## - the rest play the weapon's short hold takes (HOLD_SUFFIX: `<shot>_hold`, 0.11-0.17 s: the same voice with
-##   a 60 ms tail instead of the full report) in turn, with a small pitch and volume jitter, HOLD_DB under the
-##   first. A weapon with no hold file goes round its other full takes instead (never the same one twice in a
-##   row, Sfx.STACK_DB under the first);
+##   a 60 ms tail instead of the full report) in turn, with a small pitch jitter (Sfx.play adds a volume jitter),
+##   HOLD_DB under the first. A weapon with no hold file goes round its other full takes instead (never the same
+##   one twice in a row, Sfx.STACK_DB under the first);
 ## - one emitter keeps at most VOICES takes sounding; a shot that would be the next one is dropped, so a long
 ##   hold costs VOICES pool voices per Hunter whatever the rate (a squad of four: 12, the SFX bus budget).
 const HELD_RATE := 0.15  # s a round: under this a weapon is held fire (content/weapons/*.json primary.rate)
 const BURST_GAP_S := 0.3  # s of quiet that ends a burst
 const VOICES := 3  # takes of one emitter sounding at once
-const JITTER_DB := 1.0  # dB: the volume of the other shots varies by up to this much either way
 const HOLD_SUFFIX := "_hold"  # a weapon's short hold take is `<shot sound>_hold` (+ `_1`..`_4`)
 const HOLD_DB := 1.0  # dB the hold takes sit under the first shot (the full takes sit Sfx.STACK_DB under)
 const END_PAD_S := 0.06  # s a pool voice keeps playing past its file (the mixer's buffer)
@@ -58,9 +57,8 @@ static func shot(who: int, sname: String, pos, vol_db: float, rate: float, now :
 	if first:
 		Sfx.play(sname, pos, vol_db, 0.0, 1.0, 0.0, false, take)
 	else:
-		var jitter := Sfx.rng.randf_range(-JITTER_DB, JITTER_DB)
 		var under := HOLD_DB if held else Sfx.STACK_DB
-		Sfx.play(snd, pos, vol_db - under + jitter, JITTER_PITCH, 1.0, 0.0, false, take)
+		Sfx.play(snd, pos, vol_db - under, JITTER_PITCH, 1.0, 0.0, false, take)
 
 
 static func _prune(now: int) -> void:
