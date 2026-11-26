@@ -14,7 +14,7 @@
 	"howto": ["Play: mid-range lightning; stack Static, then run through.", "Combo: 3 bolts plus {secondary}, then {dash} through them.", "Avoid: dashing through a foe under 4 Static."],
 	"silhouette": "the copper rod mast and kite pennant on the back",
 	"hint": {"lmb": "Hold {fire} for bolts; each hit adds a Static", "rmb": "Hold {secondary} to summon a rod, release to throw it", "e": "Press {signature}, drag, release: lightning pulls foes in", "dash": "Tap {dash} to zap, hold to charge a longer Wirerun"},
-	"card": {"role_word": "Skirmisher", "loop": "Ranged lightning skirmisher: charge one foe to 4 Static, then Wirerun through them.", "dash": "Tap for a short zap, hold to charge a longer streak.", "passive": "Hits stack Static; the 4th calls a sky bolt.", "rmb": "Throw a copper rod: knocks back, adds Static, stuns on walls.", "e": "Drop a circle; 0.8s later lightning drags foes inside and grounds them.", "x": "Launch up, then strike down at your cursor, adding Static to everyone near.", "weapons": {"coilcaster": "Finger bolts every 0.65s; each hit adds 1 Static."}, "chips": {"dash": ["18.3 dmg"], "rmb": ["16-26.7 dmg"], "e": ["19.4 dmg"], "x": ["9 dmg"]}},
+	"card": {"role_word": "Skirmisher", "loop": "Ranged lightning skirmisher: charge one foe to 4 Static, then Wirerun through them.", "dash": "Tap for a short zap, hold to charge a longer streak.", "passive": "Hits stack Static; the 4th calls a sky bolt.", "rmb": "Throw a copper rod: knocks back, adds Static, stuns on walls.", "e": "Drop a circle; 0.8s later lightning drags foes inside and grounds them.", "x": "Launch up, then strike down at your cursor; the enemy you hit spreads its Static + 1 to everyone near.", "weapons": {"coilcaster": "Finger bolts every 0.65s; each hit adds 1 Static."}, "chips": {"dash": ["18.3 dmg"], "rmb": ["16-26.7 dmg"], "e": ["19.4 dmg"], "x": ["9 dmg"]}},
 	"signature": "coilcaster",
 	"resource": {
 		"id": "sparks",
@@ -148,7 +148,8 @@
 		"push": 0.0,
 		"lift": 0.0,
 		"stacks": 1,
-				"desc": "Crouch, then launch straight up and hang in the air, invulnerable, while a gold ring (8 body heights) shows where you can come down. Press again or attack to strike down as a bolt at your cursor inside the ring; with no second press you come down there by yourself after 2s. Everyone within 2.7m of the landing takes 9 and gains 1 Static, and if any of them has Static, all of them take the highest count among them first (lightning arcs between them). Landing it on an enemy hunter fills your Boki bond."
+		"spread_add": 1,
+				"desc": "Crouch, then launch straight up and hang in the air, invulnerable, while a gold ring (8 body heights) shows where you can come down. Press again or attack to strike down as a bolt at your cursor inside the ring; with no second press you come down there by yourself after 2s. Everyone within 2.7m of the landing takes 9. The enemy you land on (the one with the most Static) gains 1 Static, and lightning jumps from them to everyone else in the circle, giving each one more Static than that enemy had: 3 gives +4, 0 gives +1 (up to 4). Landing it on an enemy hunter fills your Boki bond."
 	},
 	"order": [
 		"sec",

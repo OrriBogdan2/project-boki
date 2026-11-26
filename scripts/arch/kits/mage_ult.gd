@@ -6,8 +6,8 @@ extends RefCounted
 ## launches straight up and hangs there invulnerable while a pink range ring on a dark band shows round the
 ## take-off spot, a gold crown at the cursor, and the camera pulls back. Press again (X or the attack key) to
 ## come down as a bolt at the cursor, clamped inside the ring; with no second press she comes down there by
-## herself when the hover runs out. The strike hurts, knocks back and adds Static to everyone round the landing
-## spot, and pink lightning crackles at her feet for a moment after.
+## herself when the hover runs out. The strike hurts and knocks back everyone round the landing spot; the foe it
+## lands on gains Static and spreads its own Static + 1 to the rest, and pink lightning crackles at her feet after.
 
 const CROUCH := "crouch"
 const RISE := "rise"
@@ -327,9 +327,9 @@ func _strike() -> void:
 	kit.m.later(0.55, kit.gum.blow)      # (once she is back on her feet)
 	_strike_fx(at, r)
 	var struck := kit.foes_in(at, r)
-	var shared := _highest_static(struck)
-	# (found before the ult's stack lands: that lifts the stacked foe past the count, and the arc lost its source)
-	var source: Ent = _static_source(struck, shared)
+	var source := _static_source(struck, at)
+	# (read before the ult's own stack lands on the source: the spread carries what it had when she hit)
+	var spread := kit.spark_n(source) + int(xd["spread_add"]) if source != null else 0
 	var dmg := float(xd["dmg"]) * power()
 	for f in struck:
 		var away := Vector2(f.pos.x - at.x, f.pos.z - at.z)
@@ -337,31 +337,31 @@ func _strike() -> void:
 		var o := {"src": "abil", "ab": "ult", "tags": ["ult", "kitefall"], "kb": away * float(xd["push"])}
 		o["lift"] = float(xd["lift"])
 		f.hurt(dmg, h, o)
-		_share_static(f, shared, source)
-		kit.add_spark(f, int(xd["stacks"]))
+		if f == source:
+			kit.add_spark(f, int(xd["stacks"]))
+		else:
+			_spread_static(f, spread, source)
 		HeroUlt.landed(kit, f)
 	hits += struck.size()
 	last = {"at": at, "hits": struck.size()}
 
-func _highest_static(struck: Array) -> int:
-	var best := 0
+## The foe the strike lands on: the one with the most Static, the nearest to the landing on a tie (with no
+## Static anywhere, simply the nearest).
+func _static_source(struck: Array, at: Vector3) -> Ent:
+	var best: Ent = null
+	var best_d := INF
 	for f in struck:
-		best = maxi(best, kit.spark_n(f))
+		var d := Vector2(f.pos.x - at.x, f.pos.z - at.z).length()
+		var lead := 0 if best == null else kit.spark_n(f) - kit.spark_n(best)
+		if best == null or lead > 0 or (lead == 0 and d < best_d):
+			best = f
+			best_d = d
 	return best
 
-func _static_source(struck: Array, shared: int) -> Ent:
-	for f in struck:
-		if shared > 0 and kit.spark_n(f) == shared:
-			return f
-	return null
-
-## Thunderstorm: when the strike hits a foe carrying Static, every foe it hits is raised to the highest count
-## among them (before the ult's own stack), with lightning arcing from the stacked foe to each.
-func _share_static(f: Ent, shared: int, source: Ent) -> void:
-	var have := kit.spark_n(f)
-	if shared <= have or source == null:
-		return
-	kit.add_spark(f, shared - have)
+## Owner ruling 11-26: every other foe the strike hits gains the source's Static + spread_add (3 -> +4, 0 -> +1),
+## capped at the max, with lightning arcing from the source to each.
+func _spread_static(f: Ent, spread: int, source: Ent) -> void:
+	kit.add_spark(f, spread)
 	spreads += 1
 	var chest := Vector3(0, 1.0, 0)
 	kit.vfx("x_spread", source.position + chest, null, {"to": f.position + chest})
