@@ -8,6 +8,7 @@ extends "res://tools/hero_pair_check.gd"
 
 const BURST := preload("res://tools/ult_burst.gd")
 
+
 ## Every ult assertion; returns when done (the caller prints the totals).
 func ult(main_node: Node) -> void:
 	main = main_node
@@ -17,6 +18,7 @@ func ult(main_node: Node) -> void:
 	await _guards()
 	await _walkway()
 	await _burst()
+
 
 ## The pair check's strip and dummy, with a Boki ready at her side (the bond only fills with one).
 func setup_ult(arch: String, dist: float, abyss := 0) -> Array:
@@ -30,6 +32,7 @@ func setup_ult(arch: String, dist: float, abyss := 0) -> Array:
 	kin.brain.think_t = 1e9
 	return r
 
+
 ## The bond this hunter's current ult cast has paid (KinBond keeps it on the hunter by cast id).
 func paid(p: Hunter) -> float:
 	var c: Dictionary = p.get_meta("bond_cast", {})
@@ -37,12 +40,14 @@ func paid(p: Hunter) -> float:
 		return 0.0
 	return float(c.get("got", 0.0))
 
+
 func _press(m: Match, p: Hunter, at: Vector3, hold_down: bool) -> void:
 	p.ak.cd["x"] = 0.0
 	aim_at(p, at)
 	p.inp["x_down"] = hold_down
 	HunterKeys.ult_pressed(p)
 	m.step(DT)
+
 
 func _cast_and_rise() -> void:
 	var r := setup_ult("dolm", 9.0)
@@ -63,32 +68,46 @@ func _cast_and_rise() -> void:
 		Sfx.last_played.erase(n)
 	_press(m, p_v, home + Vector3(7, 0, 0), false)
 	var released := m.time
-	ok("ult: one X press is one cast", int(p_v.used.get("x", 0)) == 1 and s.casts == 1,
-			"used %s" % str(p_v.used.get("x")))
+	ok(
+		"ult: one X press is one cast",
+		int(p_v.used.get("x", 0)) == 1 and s.casts == 1,
+		"used %s" % str(p_v.used.get("x"))
+	)
 	m.step(DT)
 	var cd_now := float(k.cd["x"])
 	ok(
 		"ult cast: a tap casts at once, the slam move plays, its own cooldown starts (45s)",
-		s.phase == "tell" and k.anim_id == "breah_spine" and absf(cd_now - 45.0) < 0.2, "cd %.1f" % cd_now
+		s.phase == "tell" and k.anim_id == "breah_spine" and absf(cd_now - 45.0) < 0.2,
+		"cd %.1f" % cd_now
 	)
 	var crack: Dictionary = AimKit.entry(p_v, "x_cracks")
 	var across: bool = absf(s.axis.dot(Vector2(1, 0))) < 0.05
 	var at_cursor: bool = Vector2(s.center.x - home.x - 7.0, s.center.z - home.z).length() < 0.2
 	ok(
 		"ult telegraph: the cracks show to everyone, at the cursor, across the aim, 21m, bent 25 degrees",
-		bool(crack.get("all", false)) and at_cursor and across and absf(float(crack.get("len", 0.0)) - 21.0) < 0.1
-			and absf(rad_to_deg(float(crack.get("bend", 0.0))) - 25.0) < 0.1,
+		(
+			bool(crack.get("all", false))
+			and at_cursor
+			and across
+			and absf(float(crack.get("len", 0.0)) - 21.0) < 0.1
+			and absf(rad_to_deg(float(crack.get("bend", 0.0))) - 25.0) < 0.1
+		),
 		"axis %s" % str(s.axis)
 	)
 	step(m, 0.3)
 	var roll_keys := Sfx.loops.keys().filter(func(key): return String(key).begins_with("spine_roll_"))
-	ok("ult sound: cracks at the release, then one rumble in two voices (a half each), none per rock",
+	ok(
+		"ult sound: cracks at the release, then one rumble in two voices (a half each), none per rock",
 		Sfx.last_played.has("br_crack") and roll_keys.size() == 2 and not Sfx.last_played.has("br_rumble"),
-		"voices %d, rumble played one-shot %s" % [roll_keys.size(), str(Sfx.last_played.has("br_rumble"))])
+		"voices %d, rumble played one-shot %s" % [roll_keys.size(), str(Sfx.last_played.has("br_rumble"))]
+	)
 	step(m, 0.7)
 	roll_keys = Sfx.loops.keys().filter(func(key): return String(key).begins_with("spine_roll_"))
-	ok("ult sound: the rumble ends with the eruption and one heavy crack lands",
-		roll_keys.is_empty() and Sfx.last_played.has("br_slam"), "voices %d" % roll_keys.size())
+	ok(
+		"ult sound: the rumble ends with the eruption and one heavy crack lands",
+		roll_keys.is_empty() and Sfx.last_played.has("br_slam"),
+		"voices %d" % roll_keys.size()
+	)
 	var first := s.first_rise_t - released
 	ok("ult beats: the first rock rises 0.2s after the release (the cracks)", absf(first - 0.2) < 0.05, "%.2f" % first)
 	var ult_rocks := rocks(m).filter(func(w): return w.has("ult"))
@@ -104,17 +123,14 @@ func _cast_and_rise() -> void:
 		k.rocks_up() == 0,
 		"pips %d" % k.rocks_up()
 	)
-	ok(
-		"ult bond: nothing when it catches nobody",
-		paid(p_v) == paid0,
-		"paid %.2f" % (paid(p_v) - paid0)
-	)
+	ok("ult bond: nothing when it catches nobody", paid(p_v) == paid0, "paid %.2f" % (paid(p_v) - paid0))
 	HunterKeys.ult_pressed(p_v)
 	ok("ult: the cooldown denies a new cast", s.casts == 1, "casts %d" % s.casts)
 	var newest: float = ult_rocks.map(func(w): return float(w["t"])).max()
 	var life := newest + m.time - s.last_rise_t
 	ok("ult: the rocks stand 7s", absf(life - 7.0) < 0.1, "%.2f" % life)
 	await done(m)
+
 
 func _drag_slow_shove() -> void:
 	var r := setup_ult("dolm", 6.0)
@@ -158,6 +174,7 @@ func _drag_slow_shove() -> void:
 	ok("ult bond: paid once per cast, nothing more while it stands", paid(p) == paid0)
 	await done(m)
 
+
 ## Each frame, every ground ring in the fx pool bar the ones at his own feet (the full-resource pulse, not this cast's):
 ## on a rock's spot, radius the rise's slow_r (the hit's reach).
 func _audit_rings(m: Match, s: BreahSpine, audit: Dictionary) -> void:
@@ -172,6 +189,7 @@ func _audit_rings(m: Match, s: BreahSpine, audit: Dictionary) -> void:
 		if not on_rock or absf(float(rg["r"]) - reach) > 0.001:
 			audit["bad"] = int(audit["bad"]) + 1
 
+
 func _punch_and_bond() -> void:
 	var r := setup_ult("dolm", 16.0)
 	var m: Match = r[0]
@@ -184,17 +202,26 @@ func _punch_and_bond() -> void:
 	ok("ult beats: the rocks rise from the centre outward over 0.8s", absf(spread - 0.8) < 0.05, "%.2f" % spread)
 	var n_up := rocks(m).filter(func(w): return w.has("ult")).size()
 	ok("ult: 15 rocks over 21m on open ground", n_up == 15, "rocks %d" % n_up)
+	var joined := true
+	for w in rocks(m).filter(func(w): return w.has("ult")):
+		joined = joined and ((w["node"] as Node3D).get_node(RockLook.FIN) as Node3D).visible
+	ok("spine parity: every rock wears the ridge fin that joins it to the next, one ridge not nine rocks", joined)
 	var rd := k.rock_def()
 	var shape_ok := true
 	for w in rocks(m).filter(func(w): return w.has("ult")):
 		var mid := k.rock_mid(w)
 		var span: Vector2 = (w["b"] as Vector2) - (w["a"] as Vector2)
-		var off_line := absf(mid.z - k.spine.center.z)      # the arc sets the ends back, never more than its sag
-		shape_ok = shape_ok and bool(w["rock"]) and String(w["rid"]).begins_with(k.rid_owner()) and absf(
-			float(w["len"]) - float(rd["len"])
-		) < 0.01 and float(w["th"]) == HeroZones.ROCK_TH and float(w["top"]) == HeroZones.ROCK_TOP and absf(
-			span.normalized().dot(k.spine.axis)
-		) > cos(deg_to_rad(13.0)) and off_line < 1.25
+		var off_line := absf(mid.z - k.spine.center.z)  # the arc sets the ends back, never more than its sag
+		shape_ok = (
+			shape_ok
+			and bool(w["rock"])
+			and String(w["rid"]).begins_with(k.rid_owner())
+			and absf(float(w["len"]) - float(rd["len"])) < 0.01
+			and float(w["th"]) == HeroZones.ROCK_TH
+			and float(w["top"]) == HeroZones.ROCK_TOP
+			and absf(span.normalized().dot(k.spine.axis)) > cos(deg_to_rad(13.0))
+			and off_line < 1.25
+		)
 	ok(
 		"spine (item 15): real rocks, Stone Row's own (length, top, thickness), lying along the line, one rock deep",
 		shape_ok and HeroZones.ROCK_TH * 2.0 < 1.0
@@ -215,11 +242,7 @@ func _punch_and_bond() -> void:
 		dmg(t) > 10.0 and dmg(t) <= cap + 0.5,
 		"dmg %.1f" % dmg(t)
 	)
-	ok(
-		"ult bond: a ridge rock into a hunter is a land",
-		paid(p) - paid0 > 0.0,
-		"paid %.2f" % (paid(p) - paid0)
-	)
+	ok("ult bond: a ridge rock into a hunter is a land", paid(p) - paid0 > 0.0, "paid %.2f" % (paid(p) - paid0))
 	# after the 4s window its rocks no longer fill the bond
 	step(m, float(k.x_def()["time"]))
 	fresh(t)
@@ -235,6 +258,7 @@ func _punch_and_bond() -> void:
 	)
 	await done(m)
 
+
 ## A ridge laid along the aim (+x) from just behind her toward a target 16m out, its far end well short of it.
 func _ridge_along(m: Match, p: Hunter, home: Vector3) -> void:
 	for w in m.verbs.walls.duplicate():
@@ -246,12 +270,14 @@ func _ridge_along(m: Match, p: Hunter, home: Vector3) -> void:
 	p.inp["x_down"] = false
 	step(m, 1.15)
 
+
 func _punch(m: Match, p: Hunter, t: Hunter) -> void:
 	aim_at(p, t.pos)
 	p.fire_cd = 0.0
 	step(m, 0.95, func(): p.inp["fire"] = true)
 	p.inp["fire"] = false
 	m.step(DT)
+
 
 func _guards() -> void:
 	var r := setup_ult("dolm", 6.0)
@@ -282,6 +308,7 @@ func _guards() -> void:
 	ok("ult aim: past 11m the centre is clamped and a held still cursor stays across", reach <= 11.05 and still_across)
 	await done(m)
 
+
 ## The ridge on open ground (laid along +x, bowing away from her): a shallow arc about 25 degrees in all,
 ## its ends set back toward her, spanning its 21m (the footage's 12 bh reticle, hero-ref/breah.md f0579).
 func _arc_and_width(m: Match, k: DolmKit) -> void:
@@ -296,7 +323,7 @@ func _arc_and_width(m: Match, k: DolmKit) -> void:
 	var first: Vector2 = (ult_rocks[0]["b"] as Vector2) - (ult_rocks[0]["a"] as Vector2)
 	var last: Vector2 = (ult_rocks[-1]["b"] as Vector2) - (ult_rocks[-1]["a"] as Vector2)
 	var bend := rad_to_deg(absf(first.angle_to(last)))
-	var set_back := 99.0       # how far the ends sit back from the centre toward her (m)
+	var set_back := 99.0  # how far the ends sit back from the centre toward her (m)
 	for w in [ult_rocks[0], ult_rocks[-1]]:
 		var p := k.rock_mid(w)
 		set_back = minf(set_back, -Vector2(p.x - c.x, p.z - c.z).dot(n))
@@ -308,8 +335,10 @@ func _arc_and_width(m: Match, k: DolmKit) -> void:
 	)
 	ok(
 		"spine width: the end rocks sit about 21m apart (20-21.5)",
-		extent > 20.0 and extent < 21.5, "extent %.1f" % extent
+		extent > 20.0 and extent < 21.5,
+		"extent %.1f" % extent
 	)
+
 
 ## Over the abyss the rocks are ground: Tenzo and a foe land on the ridge and stand on it (no fall, no abyss
 ## sink, nothing taken), walk along it, and fall as normal once the rocks crumble.
@@ -327,7 +356,8 @@ func _walkway() -> void:
 	var gap := rocks(m).filter(func(w): return m.world.is_void(k.rock_mid(w).x, k.rock_mid(w).z))
 	ok(
 		"spine walkway: the whole ridge is laid over the abyss, none refused",
-		gap.size() == 15 and k.spine.casts == 1, "over the gap %d" % gap.size()
+		gap.size() == 15 and k.spine.casts == 1,
+		"over the gap %d" % gap.size()
 	)
 	var mid := k.rock_mid(gap[0])
 	var top := mid.y + HeroZones.ROCK_TOP
@@ -346,14 +376,16 @@ func _walkway() -> void:
 	)
 	ok(
 		"spine walkway: a foe dropped onto the ridge stands on it too",
-		stands.call(t), "y %.2f top %.2f g%d void%d" % [t.pos.y, top, int(t.grounded), int(t.over_void())]
+		stands.call(t),
+		"y %.2f top %.2f g%d void%d" % [t.pos.y, top, int(t.grounded), int(t.over_void())]
 	)
 	var z0 := p.pos.z
 	step(m, 0.6, func(): p.inp["move"] = Vector2(0, 1))
 	p.inp["move"] = Vector2.ZERO
 	ok(
 		"spine walkway: Tenzo walks along the ridge over the abyss and stays on it",
-		stands.call(p) and p.pos.z - z0 > 1.0, "moved %.2f y %.2f" % [p.pos.z - z0, p.pos.y]
+		stands.call(p) and p.pos.z - z0 > 1.0,
+		"moved %.2f y %.2f" % [p.pos.z - z0, p.pos.y]
 	)
 	step(m, 8.0)
 	ok(
@@ -362,6 +394,7 @@ func _walkway() -> void:
 		"rocks %d y %.2f g%d" % [rocks(m).size(), p.pos.y, int(p.grounded)]
 	)
 	await done(m)
+
 
 ## Burst cap: the ridge, a full punch launching it into a light hunter, then straight into the merge and the
 ## merged form's ultimate, leaves that hunter standing.
@@ -374,7 +407,7 @@ func _burst() -> void:
 		_ridge_along(m, p, home)
 		_punch(m, p, t)
 		step(m, 0.8)
-		t.teleport(p.pos + Vector3(2.5, 0, 0))      # the merge closes in: its ultimate must reach the target
+		t.teleport(p.pos + Vector3(2.5, 0, 0))  # the merge closes in: its ultimate must reach the target
 	var out: Dictionary = await BURST.run(ac, "dolm", 16.0, land)
 	var real_burst: bool = float(out["ult"]) > 10.0 and float(out["total"]) > float(out["ult"])
 	var standing: bool = bool(out["merged"]) and bool(out["alive"]) and real_burst
