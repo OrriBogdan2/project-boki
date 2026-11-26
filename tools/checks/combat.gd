@@ -10,6 +10,8 @@ const CHECKS := {
 	"--utility-parity-check": ["res://tools/utility_parity_check.gd", "utility_parity_check", null],  # belt vs source
 	# a Boki plate, glove wall or ice wall never hides the Hunter behind it; a rock does
 	"--barrier-sight-check": ["res://tools/barrier_sight_check.gd", "barrier_sight_check", null],
+	# Sparkle's Kitefall spreads the landed-on foe's Static + 1 to the rest (owner 11-26)
+	"--sparkle-r-spread-check": ["res://tools/sparkle_r_spread_check.gd", "sparkle_r_spread_check", null],
 	# Vex's Slipstep: one plain dash, no pips, no Second Wind
 	"--vex-dash-check": ["res://tools/vex_dash_check.gd", "vex_dash_check", null],
 	"--camps-check": ["res://tools/camps_check.gd", "camps_check", null],  # fixed camps and their XP
