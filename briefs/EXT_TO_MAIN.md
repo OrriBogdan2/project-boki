@@ -11365,3 +11365,4 @@ READY ext/mc-integ-f1-1118 34954a99bd (PR #313: origin/main merged again, 0 behi
 READY ext/p16-port-1118 beddc086f141 (PR #334: main merged; squad chat in match, Net.VERSION 0.24.29 kept; squad-chat-check 0 fails)
 READY ext/training-time-trial-1119 d0b1aa1025c0 (PR #377: main merged; time-trial clock centred, finish arch 4 m east; time-trial-check 19/19)
 READY ext/merge-lane-n19h-1119 6d872c4d8803 (PR #434: main merged; boki_downed check on main kept; health OK, targeted checks same as main)
+READY ext/merge-lane-M7-1121 2931b1be335a (PR #588: main merged; match.gd keeps both first-time tips; targeted checks running)
