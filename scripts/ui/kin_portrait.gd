@@ -51,12 +51,7 @@ static func tex(rec: Dictionary, tree: SceneTree) -> Texture2D:
 	vp.msaa_3d = Viewport.MSAA_2X
 	vp.render_target_update_mode = SubViewport.UPDATE_ONCE
 	var env := WorldEnvironment.new()
-	var e := Environment.new()
-	e.background_mode = Environment.BG_CLEAR_COLOR
-	e.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	e.ambient_light_color = Color("8a93b8")
-	e.ambient_light_energy = 0.95
-	env.environment = e
+	env.environment = Look.card_environment()
 	vp.add_child(env)
 	var key_l := DirectionalLight3D.new()
 	key_l.rotation_degrees = Vector3(-30, 200, 0)
