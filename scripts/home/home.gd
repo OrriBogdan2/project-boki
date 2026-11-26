@@ -72,6 +72,7 @@ var hlantern: LanternMatch = null   # Lantern Match's glowcap ring (lantern_matc
 var hecon: HomeEcon = null       # the armory, feeders, starving, graveyard and Soul Shrine (home_econ.gd)
 var water := HomeWater.new(self)      # the ponds you wade and swim in (home_water.gd)
 var photo: HomePhoto = null         # photo mode (home_photo.gd)
+var farm_cam := FarmCam.new()       # the close third-person view (farm_cam.gd)
 var carry := HomeCarry.new(self)      # lifting and leading a Boki (home_carry.gd)
 var hold: ItemHold                    # an item in your hand and its preview card (item_hold.gd)
 var wade := BokiWade.new(self)        # Boki in the water: slower, ripples, paddling (boki_wade.gd)
@@ -1090,9 +1091,11 @@ func _process(delta: float) -> void:
 	crouch_look.tick(cam, crouch_grounded, panel_open == "" and train.is_empty() and not building_now and not chat_open)
 	kin_frame.tick(d, ppos, panel_open != "", cam.zoom_to)
 	cam.dist_mul *= kin_frame.closer()
+	farm_cam.tick(cam, d, not building_now and train.is_empty() and not FarmSpotlight.showing(), games)
 	var focus := kin_frame.frame(Vector3(ppos.x + mover.lag.x, minf(py + mover.lag.y, 0.0), ppos.z + mover.lag.z))
-	var lean := panel_open == "" and train.is_empty() and not kin_frame.framing()
+	var lean := panel_open == "" and train.is_empty() and not kin_frame.framing() and not farm_cam.third()
 	cam.follow(hob.chat.frame(focus) if hob else focus, d, lean)
+	farm_cam.keep_clear(cam, self, d)
 	_see_through()
 	_abyss_tint(d)
 	_find_interact()
@@ -1239,6 +1242,7 @@ func _move_player(d: float) -> void:
 	if can_act:
 		mv = Vector2(Input.get_axis("left", "right"), Input.get_axis("up", "down"))
 		if mv.length() > 1.0: mv = mv.normalized()
+		mv = farm_cam.keys(mv, cam)
 	var dg := _dodge()
 	dash.charges = minf(dash.charges, float(dg["charges"]))      # a class with fewer dashes takes the extra
 	dash.tick(d, float(dg["charges"]), float(dg["cd"]))
@@ -1370,7 +1374,8 @@ func _move_player(d: float) -> void:
 	# face the mouse; with the mouse outside the window, face where you're walking
 	var vp := get_viewport()
 	var mp := vp.get_mouse_position()
-	var aim_ok := panel_open == "" and Rect2(Vector2.ZERO, vp.get_visible_rect().size).has_point(mp)
+	var aim_ok := panel_open == "" and not farm_cam.third()
+	aim_ok = aim_ok and Rect2(Vector2.ZERO, vp.get_visible_rect().size).has_point(mp)
 	var want := pface
 	if aim_ok:
 		var aim := cam.mouse_on_plane(0.9)
@@ -2169,8 +2174,7 @@ func _find_interact() -> void:
 		create_tween().tween_property(prompt_box, "modulate:a", 1.0, 0.12)
 	prompt_box.reset_size()
 	var vp := get_viewport().get_visible_rect().size
-	if on_kin:
-		CareLine.place(prompt_box, cam, (best["k"]["node"] as Node3D).global_position, vp)
+	if on_kin and CareLine.place(prompt_box, cam, (best["k"]["node"] as Node3D).global_position, vp):
 		return
 	var py_at := minf(vp.y - 110.0, (root_ui.get_node("Hints") as Control).global_position.y - prompt_box.size.y - 6.0)
 	prompt_box.position = Vector2((vp.x - prompt_box.size.x) * 0.5, py_at)
@@ -2356,6 +2360,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	if photo and photo.active:
 		if photo.input(event):
 			get_viewport().set_input_as_handled()
+		return
+	if farm_cam.input(event):
+		get_viewport().set_input_as_handled()      # a right-drag turns the view
 		return
 	if hb and hb.active and panel_open == "" and not Overlay.is_open():
 		if hb.input(event):
@@ -3245,6 +3252,7 @@ func _open_kin(rec: Dictionary) -> void:
 			var ln := Evo.lean(rec)
 			if String(ln[0]) != "":
 				var lean_t := "Its meals lean it %s: %d%%" % [Lean.face(ln[0])["name"], int(100.0 * float(ln[1]))]
+				lean_t += Lean.size_note(rec)
 				c1.add_child(UI.label(lean_t, UI.T_SMALL, Lean.face(ln[0])["tint"]))
 			EvoPathView.block(rec, c1, func(): _open_kin(rec))
 			var tot := 0.0
@@ -3517,9 +3525,7 @@ func _start_match() -> void:
 		if not (kk as Dictionary).is_empty() and KinBox.is_boxed(kk): KinBox.bring_out(kk)
 	Save.d["cls"] = Data.class_of_save()
 	Save.save_game()
-	# about 20 hunters a match, whatever the squad size (your squadmates are bots)
-	var o := {"teams": int(ceil(Data.MATCH_PLAYERS / 3.0)), "squad": 3}
-	o["total"] = Data.MATCH_PLAYERS
+	var o := Data.mode_opts(Data.saved_mode())      # trios or solos: its squads and hunters (bots fill)
 	if raid_squad > 0:
 		o = HeartRaid.opts(raid_squad, HeartRaidPick.difficulty)      # Heart Raid: one squad, no rivals
 	o["tier"] = exp_tier

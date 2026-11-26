@@ -71,70 +71,70 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 
 | | idle | walk | run | attack | hit | death | jump | land | glide | dash | cast | stomp |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| burrlet | clip | clip | clip | clip | proc | proc | clip | proc | proc | proc | clip | missing |
-| cindle | clip | clip | clip | clip | proc | proc | clip | proc | proc | proc | clip | missing |
-| puddlet | clip | clip | clip | clip | proc | proc | clip | proc | proc | proc | clip | missing |
+| burrlet | clip | clip | clip | clip | proc | proc | clip | proc | clip | proc | clip | missing |
+| cindle | clip | clip | clip | clip | proc | proc | clip | proc | clip | proc | clip | missing |
+| puddlet | clip | clip | clip | clip | proc | proc | clip | proc | clip | proc | clip | missing |
 
 ### Boki garden states
 
 | | idle | walk | run | attack | cast | hop | eat | sleep |
 |---|---|---|---|---|---|---|---|---|
-| casquebill | shared | shared | shared | shared | shared | shared | proc | proc |
-| duskapi | shared | shared | shared | shared | shared | shared | proc | proc |
-| floenatee | shared | shared | shared | shared | shared | shared | proc | proc |
-| gibbelle | shared | shared | shared | shared | shared | shared | proc | proc |
-| glaciyak | shared | shared | shared | shared | shared | shared | proc | proc |
-| glomwort | shared | shared | shared | shared | shared | shared | proc | proc |
-| goliathite | shared | shared | shared | shared | shared | shared | proc | proc |
-| moundvark | shared | shared | shared | shared | shared | shared | proc | proc |
-| murmurling | shared | shared | shared | shared | shared | shared | proc | proc |
-| nacrolin | shared | shared | shared | shared | shared | shared | proc | proc |
-| opalisk | shared | shared | shared | shared | shared | shared | proc | proc |
-| scaldamus | shared | shared | shared | shared | shared | shared | proc | proc |
-| sentrikat | shared | shared | shared | shared | shared | shared | proc | proc |
-| spatewader | shared | shared | shared | shared | shared | shared | proc | proc |
-| squalltross | shared | shared | shared | shared | shared | shared | proc | proc |
-| threadwyrm | shared | shared | shared | shared | shared | shared | proc | proc |
-| tuatrune | shared | shared | shared | shared | shared | shared | proc | proc |
-| velvorm | shared | shared | shared | shared | shared | shared | proc | proc |
-| hoarheron | clip | shared | shared | shared | shared | shared | proc | proc |
-| nimbostrich | shared | clip | clip | shared | shared | shared | proc | proc |
-| orchisloth | shared | clip | clip | shared | shared | shared | proc | proc |
-| limpetor | clip | shared | shared | clip | clip | clip | proc | proc |
-| moonloris | clip | shared | shared | clip | clip | clip | proc | proc |
-| cindle | clip | clip | clip | clip | clip | clip | proc | proc |
-| puddlet | clip | clip | clip | clip | clip | clip | proc | proc |
-| burrlet | clip | clip | clip | clip | clip | clip | proc | proc |
-| zapple | clip | clip | clip | clip | clip | clip | proc | proc |
-| pebbit | clip | clip | clip | clip | clip | clip | proc | proc |
-| wisplet | clip | clip | clip | clip | clip | clip | proc | proc |
-| caecilith | clip | clip | clip | clip | clip | clip | proc | proc |
-| glintmole | clip | clip | clip | clip | clip | clip | proc | proc |
-| gloamshell | clip | clip | clip | clip | clip | clip | proc | proc |
-| heatherhorn | clip | clip | clip | clip | clip | clip | proc | proc |
-| kestrike | clip | clip | clip | clip | clip | clip | proc | proc |
-| kilnbadger | clip | clip | clip | clip | clip | clip | proc | proc |
-| kindlewren | clip | clip | clip | clip | clip | clip | proc | proc |
-| lilybara | clip | clip | clip | clip | clip | clip | proc | proc |
-| lodestick | clip | clip | clip | clip | clip | clip | proc | proc |
-| marchleaf | clip | clip | clip | clip | clip | clip | proc | proc |
-| mossgrade | clip | clip | clip | clip | clip | clip | proc | proc |
-| nettlynx | clip | clip | clip | clip | clip | clip | proc | proc |
-| rimeshrew | clip | clip | clip | clip | clip | clip | proc | proc |
-| selenfin | clip | clip | clip | clip | clip | clip | proc | proc |
-| thrumbird | clip | clip | clip | clip | clip | clip | proc | proc |
-| umbrathere | clip | clip | clip | clip | clip | clip | proc | proc |
-| cairnback | clip | clip | clip | clip | clip | clip | proc | proc |
-| hivara | clip | clip | clip | clip | clip | clip | proc | proc |
-| zephyrak | clip | clip | clip | clip | clip | clip | proc | proc |
+| casquebill | shared | shared | shared | shared | shared | shared | shared | proc |
+| duskapi | shared | shared | shared | shared | shared | shared | shared | proc |
+| gibbelle | shared | shared | shared | shared | shared | shared | shared | proc |
+| glaciyak | shared | shared | shared | shared | shared | shared | shared | proc |
+| glomwort | shared | shared | shared | shared | shared | shared | shared | proc |
+| floenatee | clip | shared | shared | shared | shared | shared | shared | proc |
+| hoarheron | clip | shared | shared | shared | shared | shared | shared | proc |
+| limpetor | clip | shared | shared | clip | clip | clip | shared | proc |
+| opalisk | clip | shared | shared | clip | clip | clip | shared | proc |
+| scaldamus | clip | shared | shared | clip | clip | clip | clip | proc |
+| moonloris | clip | clip | clip | clip | clip | clip | shared | proc |
+| orchisloth | clip | clip | clip | clip | clip | clip | shared | proc |
+| threadwyrm | clip | clip | clip | clip | clip | clip | shared | proc |
+| velvorm | clip | clip | clip | clip | clip | clip | shared | proc |
+| cindle | clip | clip | clip | clip | clip | clip | clip | proc |
+| puddlet | clip | clip | clip | clip | clip | clip | clip | proc |
+| burrlet | clip | clip | clip | clip | clip | clip | clip | clip |
+| zapple | clip | clip | clip | clip | clip | clip | clip | proc |
+| pebbit | clip | clip | clip | clip | clip | clip | clip | clip |
+| wisplet | clip | clip | clip | clip | clip | clip | clip | proc |
+| caecilith | clip | clip | clip | clip | clip | clip | clip | proc |
+| glintmole | clip | clip | clip | clip | clip | clip | clip | proc |
+| gloamshell | clip | clip | clip | clip | clip | clip | clip | proc |
+| goliathite | clip | clip | clip | clip | clip | clip | clip | proc |
+| heatherhorn | clip | clip | clip | clip | clip | clip | clip | proc |
+| kestrike | clip | clip | clip | clip | clip | clip | clip | proc |
+| kilnbadger | clip | clip | clip | clip | clip | clip | clip | proc |
+| kindlewren | clip | clip | clip | clip | clip | clip | clip | proc |
+| lilybara | clip | clip | clip | clip | clip | clip | clip | clip |
+| lodestick | clip | clip | clip | clip | clip | clip | clip | proc |
+| marchleaf | clip | clip | clip | clip | clip | clip | clip | clip |
+| mossgrade | clip | clip | clip | clip | clip | clip | clip | clip |
+| moundvark | clip | clip | clip | clip | clip | clip | clip | proc |
+| murmurling | clip | clip | clip | clip | clip | clip | clip | proc |
+| nacrolin | clip | clip | clip | clip | clip | clip | clip | proc |
+| nettlynx | clip | clip | clip | clip | clip | clip | clip | proc |
+| nimbostrich | clip | clip | clip | clip | clip | clip | clip | proc |
+| rimeshrew | clip | clip | clip | clip | clip | clip | clip | proc |
+| selenfin | clip | clip | clip | clip | clip | clip | clip | clip |
+| sentrikat | clip | clip | clip | clip | clip | clip | clip | clip |
+| spatewader | clip | clip | clip | clip | clip | clip | clip | proc |
+| squalltross | clip | clip | clip | clip | clip | clip | clip | proc |
+| thrumbird | clip | clip | clip | clip | clip | clip | clip | proc |
+| tuatrune | clip | clip | clip | clip | clip | clip | clip | proc |
+| umbrathere | clip | clip | clip | clip | clip | clip | clip | proc |
+| cairnback | clip | clip | clip | clip | clip | clip | clip | proc |
+| hivara | clip | clip | clip | clip | clip | clip | clip | clip |
+| zephyrak | clip | clip | clip | clip | clip | clip | clip | proc |
 
 Worst five, backlog-ready:
 
-- [anim] Boki casquebill (No. 9): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/casquebill_anim.py, rebuild the .glb, rerun --anim-coverage-check
-- [anim] Boki duskapi (No. 11): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/duskapi_anim.py, rebuild the .glb, rerun --anim-coverage-check
-- [anim] Boki floenatee (No. 12): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/floenatee_anim.py, rebuild the .glb, rerun --anim-coverage-check
-- [anim] Boki gibbelle (No. 13): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/gibbelle_anim.py, rebuild the .glb, rerun --anim-coverage-check
-- [anim] Boki glaciyak (No. 14): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/glaciyak_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki casquebill (No. 9): 0 missing (none), 7 on the shared clip set (idle, walk, run, attack, cast, hop, eat); author its own clips in tools/boki/casquebill_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki duskapi (No. 11): 0 missing (none), 7 on the shared clip set (idle, walk, run, attack, cast, hop, eat); author its own clips in tools/boki/duskapi_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki gibbelle (No. 13): 0 missing (none), 7 on the shared clip set (idle, walk, run, attack, cast, hop, eat); author its own clips in tools/boki/gibbelle_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki glaciyak (No. 14): 0 missing (none), 7 on the shared clip set (idle, walk, run, attack, cast, hop, eat); author its own clips in tools/boki/glaciyak_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki glomwort (No. 17): 0 missing (none), 7 on the shared clip set (idle, walk, run, attack, cast, hop, eat); author its own clips in tools/boki/glomwort_anim.py, rebuild the .glb, rerun --anim-coverage-check
 
 ### Mobs
 

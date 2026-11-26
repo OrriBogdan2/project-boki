@@ -72,6 +72,8 @@ Data-only options (`breed_options` in content/rules/garden_xp.json, read by the 
 
 Even the best option is 4 to 6 hours of play to a first egg. A 30 minute egg needs both a far larger XP rate and a
 Grown level near 2 (roughly 10x the XP, or a Nook that takes Youngling kin); that is a design call.
+Food shapes the body too (`Lean.size`, `content/rules/lean.json` `size`): at full lean a heavy type (Rock, Dragon, Steel) swells up to 15% and a light one (Bug, Flying, Fairy) slims up to 15%, in step with the tint, by lean strength. `Evo.dress` applies it as the model's `evo_scale`; the Boki card's lean line says it (", 8% bigger"). `--feed-check` feeds ten meals each way; `--lean-shots --foods=pebblenut,sapjelly --meals=10` shows it.
+
 ## Base-only breeding
 
 Hold a shaping item (Hold on it in the bag) and walk up to a Boki, or point at its row in the Boki's feed menu:
@@ -105,7 +107,7 @@ the feed menu with the exact preview. The use writes the Boki card's journal lin
 | Budget of 240 full, day (where it fills) | 7 to 30 | Never trivial |
 | Stat total on day 30 | 216 to 240 | Even five minutes a day nearly fills it |
 | Gems a day | 43 to 300 | At least a weekly Wayseed (300 / 7) so home-only players reach every zone; at most one a day |
-| Joy, mean over a visit | 50 to 90 | Above sulky, never always full |
+| Joy, mean over a visit | 40 to 90 | Above the whistle's sulky joy (25), never always full (toys give 3 joy since the farm joy tune) |
 
 Before (the stack as it stood) and after, per player (before / after):
 
@@ -229,7 +231,9 @@ friend's five: the higher total wins 10 gems (a tie pays nothing), paid once per
 and only friends who landed something are listed. Tuning: `derby` in `content/rules/glint_fishing.json`; `--glint-fishing-check`.
 Default taken: no save version bump, because both keys are optional and read with a default (old saves load as is). The
 alternative was a migration that seeds an empty list. Without the store (a desktop build) the rock starts a solo session.
+
 **XP pace pass (ext/garden-xp-pace).** GARDEN_FIRST_HOUR item 6: care 5 to 15, drill 1 to 2, play 3 to 5, win 5 to 8, curve 50 to 30 x level (first_win stays 60). `--garden-pace-check`: garden-only first form 123 to 28 min (runs 76 to 27, ratio 1.63 to 1.02: the farm now pays about as well as a 12 min run); Grown 669 to 190 min, first egg 1346 to 386 min of one sitting. That sitting model pays care once and plays no garden games, so it overstates a daily player's wait: `tools/garden_sim.py` now prints the first egg day (the visitor as the second Boki, its own care each day, all XP once the starter is Grown; friends and its care minute not charged, so about a day early). Home only 20 min a day (player home20): Lv 8 day 7 to 3, first egg day 12 to 6. Home only 5 min: Lv 8 14 to 7, egg 24 to 11. Default taken: care 15 + curve 30 (a week for the 20 min player even with the uncharged day). Alternatives tried: care 10 + curve 35 (egg day 8), care 15 alone or curve 30 alone (day 7, no margin), first_win 80 (day 7).
+
 ## What raising shows (audit 2026-11-20, `ext/farm-raise-shapes`)
 
 Every food and care input and what the player can see of it today:

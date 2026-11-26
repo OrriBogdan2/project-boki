@@ -20,6 +20,7 @@ func ok(cond: bool, what: String) -> void:
 
 
 func run(main: Node) -> void:
+	BokiRig.face_overlay = true  # the poses' faces are read off the kept overlay's blend shapes
 	_picker()
 	for id in RigCheck.SPECIES_LIST:
 		await _species(main, id)

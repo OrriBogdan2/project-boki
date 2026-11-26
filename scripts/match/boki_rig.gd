@@ -855,6 +855,7 @@ const STRIDE := {
 	"zapple": [1.02, 1.97],
 	"hivara": [0.34, 0.76],
 	"glomwort": [1.50, 2.90],
+	"goliathite": [1.50, 2.90],
 	"kestrike": [0.33, 0.70],
 	"kindlewren": [0.49, 0.88],
 	"lodestick": [0.46, 1.62],
@@ -872,14 +873,14 @@ const STRIDE := {
 	"tuatrune": [0.33, 1.35],
 	"moonloris": [0.35, 1.41],
 	"scaldamus": [0.34, 1.36],
-	"spatewader": [0.32, 1.34],
+	"spatewader": [0.31, 1.41],
 	"orchisloth": [0.33, 1.35],
 	"limpetor": [0.30, 1.25],
 	"opalisk": [0.30, 1.24],
-	"nimbostrich": [0.30, 1.22],
+	"nimbostrich": [0.34, 1.73],
 	"sentrikat": [0.34, 1.33],
-	"nacrolin": [0.34, 1.34],
-	"murmurling": [0.29, 1.17],
+	"nacrolin": [0.33, 1.59],
+	"murmurling": [0.26, 1.73],
 	"squalltross": [0.29, 1.17],
 }
 
@@ -1051,6 +1052,10 @@ const SWAY_RATE := 4.0  # rad/s of the knocked-out sway
 const SHIVER_RATE := 45.0  # rad/s
 
 static var enabled := true
+## The face overlay (tools/boki/face.py: eye domes, lids, brows, mouth) on top of the coat, for every species. Off (the
+## default): a species wears it only while it is in content/rules/boki_eyes.json (no painted eyes of its own yet) and
+## the others drop the Face mesh at load; on brings the old face and expressions back for all.
+static var face_overlay := false
 
 ## How deep a body's baked normal map cuts (a Meshy body has one, docs/art/kin/MESHY_BOKI_RECIPE.md); 0 leaves it out.
 static var normal_k := 1.0
@@ -1114,6 +1119,12 @@ var _gait_w := 0.0  # how far the planted timing is blended in
 ## True when this species has a rigged model.
 static func has(kin_id: String) -> bool:
 	return enabled and FRAME.has(kin_id) and ResourceLoader.exists(PATH % [kin_id, kin_id])
+
+
+## True when this species wears the face overlay: all of them with `face_overlay`, else the ones whose coat has no
+## painted eyes yet (content/rules/boki_eyes.json).
+static func uses_overlay(kin_id: String) -> bool:
+	return face_overlay or (Content.rules("boki_eyes")["overlay_species"] as Array).has(kin_id)
 
 
 ## A Water type (wade.json "swim", by its species' theme): it swims level in deep water instead of paddling.
@@ -1532,6 +1543,8 @@ func _clip_face() -> String:
 
 
 func _face_step(dt: float) -> void:
+	if face == null:
+		return
 	set_face(_clip_face())
 	_blink_t -= dt
 	if _blink_t <= 0.0:
@@ -1568,6 +1581,9 @@ func _dress(c: Dictionary, mats: Array) -> void:
 		var inst := mi as MeshInstance3D
 		inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 		if inst.get_blend_shape_count() > 0 or inst.mesh.get_blend_shape_count() > 0:
+			if not uses_overlay(species):
+				inst.free()
+				continue
 			face = inst
 			inst.lod_bias = FACE_LOD_BIAS
 			for i in inst.mesh.get_blend_shape_count():

@@ -32,8 +32,14 @@ static func grey(row: Control, rows: Array) -> void:
 			(row.get_child(i) as CanvasItem).modulate.a = GREY_A
 
 
-## Puts `box` over the world point `at`, kept on screen; hides it when `at` is behind the camera.
-static func place(box: Control, cam: Camera3D, at: Vector3, vp: Vector2) -> void:
+## Puts `box` over the world point `at`, kept inside the safe area; hides it when `at` is behind the camera.
+## False when the line would leave the safe area's top (the farm's close third-person view puts a Boki's head
+## near the top edge, over the Boki card): the caller then shows it in the prompt slot instead.
+static func place(box: Control, cam: Camera3D, at: Vector3, vp: Vector2) -> bool:
 	box.visible = box.visible and not cam.is_position_behind(at)
 	var p := cam.unproject_position(at + Vector3.UP * LINE_M) - Vector2(box.size.x * 0.5, box.size.y)
-	box.position = p.clamp(Vector2.ZERO, (vp - box.size).max(Vector2.ZERO))
+	var safe := SafeArea.inner(vp)
+	if p.y < safe.position.y:
+		return false
+	box.position = p.clamp(safe.position, (safe.end - box.size).max(safe.position))
+	return true

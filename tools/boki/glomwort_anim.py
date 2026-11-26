@@ -1,4 +1,7 @@
-"""Glomwort's skeleton and its clips: a blob that oozes on its pseudopods and jiggles behind every move."""
+"""Glomwort's skeleton and its clips. The scan has no weighted lobes or puffballs (boki_scan.py drops the puffs and merges
+the lobes into root), so the whole body moves as one wet mass: root squash and stretch, with the spine, neck and head
+riding it. A slime mold is curious (0.95) and creeps: it surges, feels ahead with its head, and never stands still.
+Other scans borrow this rig (BONES); their own clips live in <id>_anim.py."""
 import boki_clips
 import glomwort
 from boki_clips import SHARED, add, chop_mouth, eat_ground, mine_mouth, s, seq
@@ -32,39 +35,26 @@ def _bones():
 BONES = _bones()
 
 
-def jiggle(p, t, rate, amp):
-    """The puffballs wobble on their stems a beat behind the body."""
-    for i in range(len(PUFFS)):
-        add(p, "puff%d" % i, rx=amp * s(t, rate, 0.15 + i * 0.2), rz=amp * 0.8 * s(t, rate, 0.4 + i * 0.27))
-
-
-def ripple(p, t, rate, amp):
-    """A wave runs round the rim: each lobe reaches and curls in turn."""
-    for i in range(LOBES):
-        add(p, "lobe%d" % i, rx=amp * s(t, rate, -i / LOBES))
-
-
 def ooze(t, reach, lean):
-    """It moves by surging: stretches forward, then the back catches up, the face riding on top."""
+    """It moves by surging: stretches forward, then the back catches up, the head feeling the way ahead."""
     p = {}
     w = s(t, 1)
     p["root_sc"] = (1 - 0.04 * w * reach, 1 - 0.07 * w * reach, 1 + 0.1 * w * reach)
-    p["root_at"] = (0, 0.0, -0.025 * w * reach)
-    add(p, "spine", rx=-lean + 0.05 * s(t, 1, 0.1) * reach)
-    add(p, "hips", rx=0.05 * s(t, 1, 0.3) * reach)
-    add(p, "head", rx=boki_clips.LOOK_UP * 0.5 + 0.06 * s(t, 1, 0.2) * reach)
-    ripple(p, t, 1, 0.3 * reach)
-    jiggle(p, t, 1, 0.12 * reach)
+    add(p, "spine", rx=-lean + 0.06 * s(t, 1, 0.1) * reach)
+    add(p, "hips", rx=0.06 * s(t, 1, 0.3) * reach)
+    add(p, "neck", ry=0.1 * s(t, 1, 0.5) * reach)
+    add(p, "head", rx=boki_clips.LOOK_UP * 0.5 + 0.07 * s(t, 1, 0.2) * reach, ry=0.18 * s(t, 1, 0.5) * reach)
     return p
 
 
 def idle(t):
+    """Never still: a slow swell, and its head sweeps left then right to feel out what is nearby."""
     p = {}
     br = s(t, 2)
-    p["root_sc"] = (1 + 0.025 * br, 1 - 0.035 * br, 1 + 0.025 * br)
-    add(p, "head", rx=boki_clips.LOOK_UP * 0.5 + 0.04 * s(t, 1, 0.2), ry=0.1 * s(t, 1))
-    ripple(p, t, 1, 0.12)
-    jiggle(p, t, 2, 0.06)
+    feel = seq(t, [(0, 0), (0.2, 1), (0.4, 0.2), (0.6, -1), (0.8, -0.2), (1, 0)])
+    p["root_sc"] = (1 + 0.03 * br + 0.02 * feel, 1 - 0.04 * br, 1 + 0.03 * br - 0.02 * feel)
+    add(p, "spine", rx=0.03 * s(t, 1, 0.2), ry=0.1 * feel)
+    add(p, "head", rx=boki_clips.LOOK_UP * 0.5 + 0.05 * s(t, 1, 0.2), ry=0.3 * feel)
     return p
 
 
@@ -81,22 +71,22 @@ def carry(t):
 
 
 def hop(t):
-    p = SHARED["hop"][2](t)
-    up = max(seq(t, [(0, 0), (0.3, 0.2), (0.48, 1), (0.66, 0.2), (1, 0)]), 0)
-    jiggle(p, t, 3, 0.15 + 0.2 * up)
-    ripple(p, t, 2, 0.4 * up)
+    """A springy bounce: squashes flat, shoots up stretched tall, splats on landing."""
+    air = seq(t, [(0, 0), (0.22, -0.8), (0.4, 0.5), (0.55, 1), (0.72, 0.3), (0.82, -1), (1, 0)])
+    up = max(air, 0)
+    down = max(-air, 0)
+    p = {"root_at": (0, 0.14 * up, 0)}
+    p["root_sc"] = (1 + 0.2 * down - 0.08 * up, 1 - 0.28 * down + 0.2 * up, 1 + 0.2 * down - 0.08 * up)
+    add(p, "spine", rx=0.12 * up - 0.1 * down)
+    add(p, "head", rx=boki_clips.LOOK_UP * 0.5 + 0.2 * up - 0.1 * down)
     return p
 
 
 def puddle(t):
-    """Sleep: melts into a puddle, the puffballs drooping, a slow breath."""
+    """Sleep: melts into a puddle, the head sunk in, a slow breath."""
     br = s(t, 1)
     p = {"root_sc": (1.14 + br * 0.02, 0.72 + br * 0.03, 1.12 + br * 0.02), "root_at": (0, 0, 0)}
     add(p, "head", rx=-0.15)
-    for i in range(len(PUFFS)):
-        add(p, "puff%d" % i, rx=0.25, rz=(0.3 if i == 0 else -0.25))
-    for i in range(LOBES):
-        add(p, "lobe%d" % i, rx=-0.25)
     return p
 
 
@@ -110,21 +100,19 @@ def slap(t):
     p["root_at"] = (0, 0, 0.03 * up - 0.06 * down)
     add(p, "spine", rx=0.25 * up - 0.3 * down)
     add(p, "head", rx=0.2 * up - 0.1 * down)
-    jiggle(p, t, 3, 0.25)
-    ripple(p, t, 2, 0.3)
     return p
 
 
 def ability(t):
-    """Its E: squeezes down, the puffballs swell and shudder, then everything bursts up and settles."""
+    """Its E: squeezes down, swells and shudders as the spores build, then bursts up and settles."""
     p = {}
     sq = seq(t, [(0, 0), (0.35, 1), (0.5, -1), (0.65, -0.2), (1, 0)])
+    shudder = seq(t, [(0, 0), (0.1, 0), (0.3, 1), (0.42, 1), (0.5, 0)])
     down = max(sq, 0)
     up = max(-sq, 0)
     p["root_sc"] = (1 + 0.12 * down - 0.05 * up, 1 - 0.2 * down + 0.16 * up, 1 + 0.12 * down - 0.05 * up)
+    add(p, "root", rz=0.05 * shudder * s(t, 9))
     add(p, "head", rx=-0.1 * down + 0.25 * up)
-    jiggle(p, t, 9, 0.12 * down + 0.3 * up)
-    ripple(p, t, 3, 0.35)
     return p
 
 
@@ -132,7 +120,6 @@ def pet(t):
     p = SHARED["pet"][2](t)
     lean = 0.5 + 0.5 * s(t, 1)
     p["root_sc"] = (1 + 0.04 * lean, 1 - 0.06 * lean, 1 + 0.04 * lean)
-    jiggle(p, t, 3, 0.08)
     return p
 
 
@@ -141,7 +128,6 @@ def eat(t):
     p = eat_ground(t)
     add(p, "spine", rx=-0.3)
     p["root_sc"] = (1, 1 - 0.06 * (0.5 + 0.5 * s(t, 3)), 1 + 0.06)
-    jiggle(p, t, 3, 0.08)
     return p
 
 

@@ -37,6 +37,7 @@ func _back() -> float:
 func _start() -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
+	FarmCam.rules()["third_person"] = false  # (these rows are the top-down view's; --farm-cam-check has the other)
 	home = await main._hb_home()
 	home.ppos = HomeLayout.LANDING + Vector3(-6, 0, -3)
 	home.py = 0.0
