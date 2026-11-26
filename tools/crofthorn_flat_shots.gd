@@ -8,7 +8,6 @@ extends "res://tools/toon_lineup_farm_shots.gd"
 ## the same scene. <dir>/coat_stats_<cam>.tsv: luminance std-dev, mean luminance and saturation of each model's own
 ## pixels (edge pixels left out). Needs a renderer (jobq submit --needs gpu).
 
-const BEFORE_LOOK := {"desat": 0.0, "dark_lift": 0.07, "albedo_flat": 0.0, "albedo_flat_gain": 1.0}
 const TELE_FOV := 30.0
 const TELE_VIEWS := {"front": Vector3(0.55, 0.5, 1.0), "back": Vector3(-0.5, 0.95, -0.85)}
 const CROFT := "heatherhorn"
@@ -168,21 +167,6 @@ func _spawn(row: Array, at: Vector3) -> Node3D:
 	if combat_owner != null:
 		return combat_owner._spawn(row, at)
 	return super._spawn(row, at)
-
-
-func _apply_look(node: Node, look: Dictionary) -> void:
-	for mi in node.find_children("*", "MeshInstance3D", true, false):
-		for s in (mi as MeshInstance3D).get_surface_override_material_count():
-			var mat := (mi as MeshInstance3D).get_active_material(s)
-			if (
-				mat is ShaderMaterial
-				and (mat as ShaderMaterial).get_shader_parameter("use_tex") == true
-			):
-				var tex: Texture2D = (mat as ShaderMaterial).get_shader_parameter("albedo_tex")
-				var coat := tex.resource_path.contains("atlas")
-				for k in look:
-					if coat or not String(k).begins_with("albedo_flat"):
-						(mat as ShaderMaterial).set_shader_parameter(k, look[k])
 
 
 ## Each model's own pixels, found against the frame with the models hidden (self.empty), a pixel belonging to the
