@@ -18,6 +18,7 @@ extends RefCounted
 ## Reads the match, never changes it.
 
 const RULES_PATH := "res://content/rules/region_ambience.json"
+
 ## Beds this adds (audio/amb_<name>.ogg); --sfx-set-check asserts the files exist.
 const BEDS := ["meadow", "cliffs", "water", "gust", "rain", "blight"]
 const BED_OF_STYLE := {

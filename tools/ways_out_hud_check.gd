@@ -42,32 +42,43 @@ func run(main: Node) -> void:
 	m.time = 30.0
 	var sd := WaysOutHud.seats(m)
 	var names := sd.map(func(d): return d["name"])
-	ok(names == ["LAIR", "HEART", "UPLINK", "FINAL"],
-		"four pips: Lair, Heart, Uplink, Final")
-	ok(_st(m, 0) == st.LOCKED and is_equal_approx(float(sd[0]["t"]), float(q["lair_open_s"]) - m.sess_time()),
-		"the Lair is locked, counting down to lair_open_s")
+	ok(names == ["LAIR", "HEART", "UPLINK", "FINAL"], "four pips: Lair, Heart, Uplink, Final")
+	ok(
+		_st(m, 0) == st.LOCKED and is_equal_approx(float(sd[0]["t"]), float(q["lair_open_s"]) - m.sess_time()),
+		"the Lair is locked, counting down to lair_open_s"
+	)
 	var ready_in: float = Heart.r("wake_s") + Heart.r("charge_s") - m.sess_time()
-	ok(_st(m, 1) == st.LOCKED and is_equal_approx(float(sd[1]["t"]), ready_in),
-		"the early Heart seat is locked until wake + charge")
+	ok(
+		_st(m, 1) == st.LOCKED and is_equal_approx(float(sd[1]["t"]), ready_in),
+		"the early Heart seat is locked until wake + charge"
+	)
 	var final_in: float = Heart.r("final_s") - m.sess_time()
-	ok(_st(m, 2) == st.LOCKED and _st(m, 3) == st.LOCKED and is_equal_approx(float(sd[3]["t"]), final_in),
-		"the Uplink and the Final are locked; the Final counts to final_s")
+	ok(
+		_st(m, 2) == st.LOCKED and _st(m, 3) == st.LOCKED and is_equal_approx(float(sd[3]["t"]), final_in),
+		"the Uplink and the Final are locked; the Final counts to final_s"
+	)
 	# ---------------------------------------------------------------- 2. the Heart's early seat
 	h_v._force(Heart.S.CHARGING, "test")
 	h_v.charge = 25.0
-	ok(_st(m, 1) == st.LOCKED and is_equal_approx(float(WaysOutHud.seats(m)[1]["t"]), Heart.r("charge_s") - 25.0),
-		"charging: locked, counting the charge left")
+	ok(
+		_st(m, 1) == st.LOCKED and is_equal_approx(float(WaysOutHud.seats(m)[1]["t"]), Heart.r("charge_s") - 25.0),
+		"charging: locked, counting the charge left"
+	)
 	h_v.charge = Heart.r("charge_s")
 	h_v._force(Heart.S.READY, "charged")
 	ok(_st(m, 1) == st.OPEN, "the spark is ready: the pip is open")
 	h_v.carrier = m.player
 	h_v._force(Heart.S.CARRIED, "test")
-	ok(_st(m, 1) == st.USE and int(WaysOutHud.seats(m)[1]["team"]) == m.player.team,
-		"carried: in use, in the carrier's squad")
+	ok(
+		_st(m, 1) == st.USE and int(WaysOutHud.seats(m)[1]["team"]) == m.player.team,
+		"carried: in use, in the carrier's squad"
+	)
 	h_v.carrier = null
 	h_v.early_team = m.player.team
-	ok(_st(m, 1) == st.TAKEN and int(WaysOutHud.seats(m)[1]["team"]) == m.player.team,
-		"left by the Gate: taken, by that squad")
+	ok(
+		_st(m, 1) == st.TAKEN and int(WaysOutHud.seats(m)[1]["team"]) == m.player.team,
+		"left by the Gate: taken, by that squad"
+	)
 	# ---------------------------------------------------------------- 3. the quest pips
 	h_v.early_team = -1
 	m.time = float(q["lair_open_s"]) + 1.0 - m.sess_t0
@@ -86,29 +97,35 @@ func run(main: Node) -> void:
 	l["locked"] = true
 	l["sealed_in"] = [foe]
 	qs.tick(0.0)
-	ok(_st(m, 0) == st.USE and int(WaysOutHud.seats(m)[0]["team"]) == foe.team,
-		"a squad sealed in with a boss: the Lair is in use, in their colour")
+	ok(
+		_st(m, 0) == st.USE and int(WaysOutHud.seats(m)[0]["team"]) == foe.team,
+		"a squad sealed in with a boss: the Lair is in use, in their colour"
+	)
 	l["state"] = "cleared"
 	l["won_by"] = foe.team
 	l["victory"] = true
 	qs.tick(0.0)
 	l["sealed_in"] = []
 	l["flown"] = []
-	ok(_st(m, 0) == st.TAKEN and int(WaysOutHud.seats(m)[0]["team"]) == foe.team,
-		"the boss down: the Lair is taken by that squad, and stays taken once they have flown and landed")
+	ok(
+		_st(m, 0) == st.TAKEN and int(WaysOutHud.seats(m)[0]["team"]) == foe.team,
+		"the boss down: the Lair is taken by that squad, and stays taken once they have flown and landed"
+	)
 	m.time = float(q["uplink_open_s"]) + 1.0 - m.sess_t0
 	qs.tick(0.0)
 	x["state"] = "charging"
 	x["team"] = m.player.team
 	qs.tick(0.0)
-	ok(_st(m, 2) == st.USE and int(WaysOutHud.seats(m)[2]["team"]) == m.player.team,
-		"an outpost charging: the Uplink is in use")
+	ok(
+		_st(m, 2) == st.USE and int(WaysOutHud.seats(m)[2]["team"]) == m.player.team,
+		"an outpost charging: the Uplink is in use"
+	)
 	x["state"] = "open"
 	qs.tick(0.0)
 	x["state"] = "closed"
 	x["taken"] = true
 	ok(_st(m, 2) == st.TAKEN, "the lift ridden and shut: the Uplink stays taken")
-	qs.uplink._force(QuestSeat.S.OPEN, "test")      # (unused again, for the shut row)
+	qs.uplink._force(QuestSeat.S.OPEN, "test")  # (unused again, for the shut row)
 	x["state"] = "idle"
 	x["team"] = -1
 	x.erase("taken")
@@ -121,8 +138,10 @@ func run(main: Node) -> void:
 	ok(_st(m, 3) == st.OPEN, "the Heart ring is open")
 	h_v.final_team = foe.team
 	h_v.final_prog = 0.3
-	ok(_st(m, 3) == st.USE and int(WaysOutHud.seats(m)[3]["team"]) == foe.team,
-		"a squad filling the ring: in use, in their colour")
+	ok(
+		_st(m, 3) == st.USE and int(WaysOutHud.seats(m)[3]["team"]) == foe.team,
+		"a squad filling the ring: in use, in their colour"
+	)
 	h_v._force(Heart.S.DONE, "test")
 	ok(_st(m, 3) == st.TAKEN, "the ring is full: taken")
 	# ---------------------------------------------------------------- 6. the Gate prompt
@@ -132,8 +151,10 @@ func run(main: Node) -> void:
 		"only the carrier's leave prompt is drawn by the strip")
 	ok(Heart.r("gate_hold_s") == 4.0, "the Gate hold is 4 s (rules)")
 	h_v.state = Heart.S.WAITING
-	ok(WaysOutHud.stay_line(m) == "Stay and the Heart opens at 10:00.",
-		"the line under the prompt names the final seat's time (%s)" % WaysOutHud.stay_line(m))
+	ok(
+		WaysOutHud.stay_line(m) == "Stay and the Heart opens at 10:00.",
+		"the line under the prompt names the final seat's time (%s)" % WaysOutHud.stay_line(m)
+	)
 	h_v.state = Heart.S.FINAL
 	ok(WaysOutHud.stay_line(m).begins_with("Stay and hold the Heart ring"), "once the ring is open the line says so")
 	m.player.teleport(h_v.gate)
@@ -186,12 +207,16 @@ func _tracker(main: Node, m: Match) -> void:
 	x["prog"] = 0.4
 	qs.uplink._force(QuestSeat.S.IN_USE, "check", p.team)
 	var on_it := QuestTracker.seat_of(m, p.team) == qs.uplink
-	ok(on_it and is_equal_approx(QuestTracker.progress(m, qs.uplink), 0.4),
-		"your squad charging the Uplink: the tracker is the Uplink and reads its charge")
+	ok(
+		on_it and is_equal_approx(QuestTracker.progress(m, qs.uplink), 0.4),
+		"your squad charging the Uplink: the tracker is the Uplink and reads its charge"
+	)
 	var far := "%d m" % roundi(p.flat_dist(x["pos"]))
 	var nums := QuestTracker.numbers(m, qs.uplink, QuestTracker.rival_seat(m, p.team))
-	ok(QuestTracker.rival_seat(m, p.team) == null and nums == "40%  ·  " + far,
-		"no rival on a quest seat: no rival bar; the numbers are your charge and the distance (%s)" % nums)
+	ok(
+		QuestTracker.rival_seat(m, p.team) == null and nums == "40%  ·  " + far,
+		"no rival on a quest seat: no rival bar; the numbers are your charge and the distance (%s)" % nums
+	)
 	r = await _tracker_rect(main, m)
 	var strip: Rect2 = SafeArea.seen.get("ways_strip", [Rect2()])[0]
 	ok(r.has_area() and r.position.y >= strip.end.y and r.end.y <= m.hud.msgs.top,
@@ -199,8 +224,10 @@ func _tracker(main: Node, m: Match) -> void:
 	b.hp = b.max_hp * 0.7
 	qs.lair._force(QuestSeat.S.IN_USE, "check", foe.team)
 	nums = QuestTracker.numbers(m, qs.uplink, QuestTracker.rival_seat(m, p.team))
-	ok(QuestTracker.rival_seat(m, p.team) == qs.lair and nums == "40%  ·  rival 30%  ·  " + far,
-		"a rival sealed in the Sealed Lair: the rival bar is the boss's health taken off (%s)" % nums)
+	ok(
+		QuestTracker.rival_seat(m, p.team) == qs.lair and nums == "40%  ·  rival 30%  ·  " + far,
+		"a rival sealed in the Sealed Lair: the rival bar is the boss's health taken off (%s)" % nums
+	)
 	qs.uplink._force(QuestSeat.S.IN_USE, "check", foe.team)
 	r = await _tracker_rect(main, m)
 	ok(QuestTracker.seat_of(m, p.team) == null and not r.has_area(), "a rival took the Uplink: no tracker")

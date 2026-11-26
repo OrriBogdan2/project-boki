@@ -64,7 +64,8 @@ func _curve(main: Node) -> void:
 	var b: BlightDir = m.blight
 	ok(b != null, "a real expedition has the Blight")
 	if b == null:
-		m.queue_free(); return
+		m.queue_free()
+		return
 	var w := m.world
 	# an island of each danger
 	var isl := {}
@@ -77,19 +78,29 @@ func _curve(main: Node) -> void:
 	var p_core: Vector3 = b._rand_ground(int(isl.get(2, 0)))
 	var team: int = m.player.team
 	b.land_at[team] = m.time
-	var l0_out := b.level(p_out, team); var l0_core := b.level(p_core, team)
+	var l0_out := b.level(p_out, team)
+	var l0_core := b.level(p_core, team)
 	b.land_at[team] = m.time - 120.0
 	var l2 := b.level(p_core, team)
 	b.land_at[team] = m.time - 600.0
-	var l10_out := b.level(p_out, team); var l10_core := b.level(p_core, team)
-	print("BLIGHT levels: landing outer %.2f core %.2f, 2 min core %.2f, 10 min outer %.2f core %.2f" % [l0_out, l0_core, l2, l10_out, l10_core])
+	var l10_out := b.level(p_out, team)
+	var l10_core := b.level(p_core, team)
+	print(
+		(
+			"BLIGHT levels: landing outer %.2f core %.2f, 2 min core %.2f, 10 min outer %.2f core %.2f"
+			% [l0_out, l0_core, l2, l10_out, l10_core]
+		)
+	)
 	ok(l0_out < l0_core and l10_out < l10_core, "outer islands are safer than the core")
 	ok(l0_core < l2 and l2 < l10_core, "it ramps with the squad's time on the islands")
 	ok(l0_core <= 0.2, "at landing it's weak everywhere (core %.2f)" % l0_core)
 	# per squad: a squad that just landed gets the soft start while another is ten minutes in
 	var other := (team + 1) % 3
 	b.land_at[other] = m.time
-	ok(b.level(p_core, other) < b.level(p_core, team) * 0.3, "per squad: a late squad starts soft (%.2f vs %.2f)" % [b.level(p_core, other), b.level(p_core, team)])
+	ok(
+		b.level(p_core, other) < b.level(p_core, team) * 0.3,
+		"per squad: a late squad starts soft (%.2f vs %.2f)" % [b.level(p_core, other), b.level(p_core, team)]
+	)
 	# early numbers: die fast, hit soft
 	var sk: Dictionary = Data.MOBS["bl_skitter"]
 	var e_hp := float(sk["hp"]) * BlightDir.hp_k(l0_core)
@@ -111,9 +122,13 @@ func _curve(main: Node) -> void:
 	var bc: BlightDir = mc.blight
 	bc.land_at[mc.player.team] = mc.time - 300.0
 	var pn: Vector3 = bn._rand_ground(int(isl.get(1, 0)))
-	print("BLIGHT raid: night %.2f vs clear %.2f at 5 min" % [bn.level(pn, mn.player.team), bc.level(pn, mc.player.team)])
+	print(
+		"BLIGHT raid: night %.2f vs clear %.2f at 5 min" % [bn.level(pn, mn.player.team), bc.level(pn, mc.player.team)]
+	)
 	ok(bn.level(pn, mn.player.team) > bc.level(pn, mc.player.team), "night makes the Blight stronger")
-	mn.queue_free(); mc.queue_free()
+	mn.queue_free()
+	mc.queue_free()
+
 
 # ------------------------------------------------------------------ 2. where they are
 func _spawns(main: Node) -> void:
@@ -128,7 +143,12 @@ func _spawns(main: Node) -> void:
 		var dg := clampi(int((w.islands[w.island_of(b.pos.x, b.pos.z)] as Dictionary).get("danger", 0)), 0, 2)
 		per[dg][0] += 1
 	var avg := func(d): return float(per[d][0]) / maxf(1.0, float(per[d][1]))
-	print("BLIGHT wardens %d: per island outer %.2f mid %.2f core %.2f" % [b_v.wardens.size(), avg.call(0), avg.call(1), avg.call(2)])
+	print(
+		(
+			"BLIGHT wardens %d: per island outer %.2f mid %.2f core %.2f"
+			% [b_v.wardens.size(), avg.call(0), avg.call(1), avg.call(2)]
+		)
+	)
 	ok(b_v.wardens.size() >= 3, "Wardens stand on the islands from the start")
 	ok(avg.call(0) < avg.call(2), "fewer Wardens on the outer islands than in the core")
 	ok(b_v.skitters_alive() == 0, "no Skitters at the start")
@@ -146,10 +166,20 @@ func _spawns(main: Node) -> void:
 	for n in b_v.nests.list:
 		far = far and p.flat_dist(n["pos"]) > 30.0
 	var n0 := b_v.spawned
-	_run(m, 30.0, func():
-		if int(m.time * 60.0) % 20 == 0: m.note_sound(p, p.pos, "boom")
-		p.hp = p.max_hp)
-	print("BLIGHT 30 s of blasts late in a run, %s every nest: %d Skitter(s)" % ["away from" if far else "near", b_v.spawned - n0])
+	_run(
+		m,
+		30.0,
+		func():
+			if int(m.time * 60.0) % 20 == 0:
+				m.note_sound(p, p.pos, "boom")
+			p.hp = p.max_hp
+	)
+	print(
+		(
+			"BLIGHT 30 s of blasts late in a run, %s every nest: %d Skitter(s)"
+			% ["away from" if far else "near", b_v.spawned - n0]
+		)
+	)
 	ok(not far or b_v.spawned == n0, "noise away from any nest draws no Skitters (they only come from nests)")
 	m.queue_free()
 
@@ -161,12 +191,13 @@ func _noise_and_fights(main: Node) -> void:
 	var p := m.player
 	var base := _open_spot(m, m.world.spawns[0])
 	p.teleport(base)
-	b.land_at[p.team] = m.time - 50.0        # a minute in: early
+	b.land_at[p.team] = m.time - 50.0  # a minute in: early
 	var l := b.level(p.pos, p.team)
 	# noise: a Skitter 13 tiles off hears a shot and comes to look; one 40 off doesn't
 	var near_s := b.spawn("bl_skitter", _open_spot(m, base + Vector3(13, 0, 0), 4.0), l)
 	var far_s := b.spawn("bl_skitter", _open_spot(m, base + Vector3(-40, 0, 6), 10.0), l)
-	near_s.post = near_s.pos; far_s.post = far_s.pos
+	near_s.post = near_s.pos
+	far_s.post = far_s.pos
 	var d0 := near_s.flat_dist(p)
 	m.note_sound(p, p.pos + Vector3(1, 0, 0), "shot")
 	ok(near_s.heard != Vector3.INF, "a Skitter in earshot heard the shot")
@@ -178,7 +209,8 @@ func _noise_and_fights(main: Node) -> void:
 	far_s.burrow()
 	# an early Skitter against a level-1 hunter: you win, and it barely scratches you
 	p.crouch = false
-	p.hp = p.max_hp; p.armor = p.max_armor
+	p.hp = p.max_hp
+	p.armor = p.max_armor
 	near_s.teleport(p.pos + Vector3(3.5, 0, 0))
 	near_s.aggro(p, "check")
 	ok(p.lvl <= 1, "the hunter is level %d" % p.lvl)
@@ -187,16 +219,24 @@ func _noise_and_fights(main: Node) -> void:
 		p.inp["aim"] = near_s.pos + Vector3(0, 0.5, 0)
 		p.inp["aim_y"] = near_s.pos.y + 0.5
 		p.inp["fire"] = true
-		m.step(Match.DT); t += Match.DT
+		m.step(Match.DT)
+		t += Match.DT
 	p.inp["fire"] = false
 	var lost := (p.max_hp - p.hp) + (p.max_armor - p.armor)
-	print("BLIGHT level-1 hunter vs an early Skitter: dead=%s after %.1fs, the hunter lost %.0f health+armor" % [near_s.dead, t, lost])
+	print(
+		(
+			"BLIGHT level-1 hunter vs an early Skitter: dead=%s after %.1fs, the hunter lost %.0f health+armor"
+			% [near_s.dead, t, lost]
+		)
+	)
 	ok(near_s.dead, "a level-1 hunter kills an early Skitter")
 	ok(lost < p.max_hp * 0.25, "and keeps most of their health")
 	# fleeing: an early Skitter can't keep up with a running hunter and gives up
-	p.hp = p.max_hp; p.armor = p.max_armor
+	p.hp = p.max_hp
+	p.armor = p.max_armor
 	var runner := b.spawn("bl_skitter", _open_spot(m, p.pos + Vector3(2.5, 0, 0), 3.0), l)
 	runner.aggro(p, "check")
+	runner.chase_from = runner.pos
 	# run along open ground away from it
 	var away := (Vector2(p.pos.x, p.pos.z) - Vector2(runner.pos.x, runner.pos.z)).normalized()
 	t = 0.0
@@ -206,12 +246,19 @@ func _noise_and_fights(main: Node) -> void:
 		# steer round the edge: if the way ahead is open sky, turn along the island
 		var ahead := p.pos + Vector3(mv.x, 0, mv.y) * 2.0
 		if m.world.is_void(ahead.x, ahead.z) or m.world.is_block(ahead.x, ahead.z):
-			away = away.rotated(0.9); mv = away
+			away = away.rotated(0.9)
+			mv = away
 		p.inp["move"] = mv
 		p.inp["aim"] = p.pos + Vector3(mv.x, 0.9, mv.y) * 3.0
-		m.step(Match.DT); t += Match.DT
+		m.step(Match.DT)
+		t += Match.DT
 	p.inp["move"] = Vector2.ZERO
-	print("BLIGHT fleeing an early Skitter: it gave up after %.1fs (target %s, %.1f tiles), the hunter lost %.0f" % [t, str(runner.tgt), runner.flat_dist(p), hp0 - p.hp - p.armor])
+	print(
+		(
+			"BLIGHT fleeing an early Skitter: it gave up after %.1fs (target %s, %.1f tiles), the hunter lost %.0f"
+			% [t, str(runner.tgt), runner.flat_dist(p), hp0 - p.hp - p.armor]
+		)
+	)
 	ok(runner.tgt == null or runner.flat_dist(p) > 8.0, "a level-1 hunter can outrun an early Skitter")
 	ok(hp0 - p.hp - p.armor < p.max_hp * 0.3, "... without losing much")
 	# idle ones far from everyone burrow away (if the chase above ended with the Skitter off an edge,
@@ -225,7 +272,8 @@ func _noise_and_fights(main: Node) -> void:
 	var far_spot := _open_spot(m, m.world.spawns[-1], 10.0)
 	runner.teleport(far_spot)
 	for o in m.hunters:
-		if o.flat_dist(runner) < 32.0: o.teleport(base)
+		if o.flat_dist(runner) < 32.0:
+			o.teleport(base)
 	if p.flat_dist(runner) < 32.0:
 		ok(true, "(burrow: the spots are too close on this map, skipped)")
 	else:
@@ -235,7 +283,8 @@ func _noise_and_fights(main: Node) -> void:
 		ok(runner.dead and runner.gone, "an idle Skitter far from everyone burrows away")
 	# the network: a Blight's snapshot carries its light, alert and strength, and builds a Blight
 	var wd := b.spawn("bl_warden", _open_spot(m, base + Vector3(-6, 0, 0), 4.0), 0.5)
-	wd.cone_a = 1.25; wd.spot = 0.4
+	wd.cone_a = 1.25
+	wd.spot = 0.4
 	var it: Array = m._ser(wd)
 	ok(it.size() >= 21 and is_equal_approx(float(it[17]), 1.25) and String(it[9]) == "bl_warden", "a Warden's snapshot carries its light and state (%d fields)" % it.size())
 	var it2 := it.duplicate()
@@ -258,7 +307,7 @@ func _warden(main: Node) -> void:
 	var wspot := _open_spot(m, base + Vector3(5.5, 0, 0), 3.0)
 	var w := b_v.spawn("bl_warden", wspot, b_v.level(wspot, p.team))
 	w.post = w.pos
-	w.sweep_amp = 0.0          # (the light holds where the test points it)
+	w.sweep_amp = 0.0  # (the light holds where the test points it)
 	# pointing away: you aren't spotted
 	w.sweep0 = atan2(base.x - w.pos.x, base.z - w.pos.z) + PI
 	_run(m, 0.6, func(): w.sweep0 = atan2(p.pos.x - w.pos.x, p.pos.z - w.pos.z) + PI)
@@ -270,8 +319,10 @@ func _warden(main: Node) -> void:
 	while t < 4.0 and b_v.shrieks == 0:
 		w.sweep0 = atan2(p.pos.x - w.pos.x, p.pos.z - w.pos.z)
 		w.cone_a = w.sweep0
-		m.step(Match.DT); t += Match.DT
-		if w.spot > 0.0 and spotted_t < 0.0: spotted_t = t
+		m.step(Match.DT)
+		t += Match.DT
+		if w.spot > 0.0 and spotted_t < 0.0:
+			spotted_t = t
 	print("BLIGHT Warden (lvl %.2f): shrieked after %.2fs in its light (%d shriek)" % [w.lvl, t, b_v.shrieks])
 	ok(b_v.shrieks == 1, "standing in a Warden's light makes it shriek")
 	ok(t > 0.6, "... after a moment to get out (%.2fs)" % t)
@@ -288,19 +339,29 @@ func _warden(main: Node) -> void:
 	ok(b_v.spawned == sh0, "late on, a shriek still makes no Skitters of its own")
 	# crouching just past the shortened reach: not spotted
 	for b in b_v.alive():
-		if b != w: (b as Blight).burrow()
+		if b != w:
+			(b as Blight).burrow()
 	w.calm("check")
+	w.spot = 0.0
+	w.shriek_cd = 0.0
 	var sh1 := b_v.shrieks
 	var side := Vector2(p.pos.x - w.pos.x, p.pos.z - w.pos.z).normalized()
 	var cpos := w.pos + Vector3(side.x, 0, side.y) * (w.cone_len() * 0.8)
 	if not m.world.is_void(cpos.x, cpos.z) and not m.world.is_block(cpos.x, cpos.z):
 		p.teleport(Vector3(cpos.x, m.world.ground_at(cpos.x, cpos.z), cpos.z))
 		p.crouch = true
-		_run(m, 1.5, func():
-			p.crouch = true; p.inp["crouch"] = true
-			w.sweep0 = atan2(p.pos.x - w.pos.x, p.pos.z - w.pos.z); w.cone_a = w.sweep0)
+		_run(
+			m,
+			1.5,
+			func():
+				p.crouch = true
+				p.inp["crouch"] = true
+				w.sweep0 = atan2(p.pos.x - w.pos.x, p.pos.z - w.pos.z)
+				w.cone_a = w.sweep0
+		)
 		ok(b_v.shrieks == sh1 and w.spot < 0.05, "sneaking at the edge of the light keeps you unseen")
-		p.crouch = false; p.inp["crouch"] = false
+		p.crouch = false
+		p.inp["crouch"] = false
 	m.queue_free()
 
 # ------------------------------------------------------------------ 5. bots
@@ -312,7 +373,8 @@ func _bots(main: Node) -> void:
 	var bot: Hunter = null
 	for o in m.hunters:
 		if o.ctrl == "idle" and o != p and o.team != p.team:
-			bot = o; break
+			bot = o
+			break
 	ok(bot != null, "found a bot")
 	if bot == null:
 		m.queue_free(); return
@@ -337,7 +399,8 @@ func _bots(main: Node) -> void:
 	ok(s1.dead or s2.dead, "the bot fights back")
 	ok(not bot.out and not bot.downed, "and isn't knocked by early Blight")
 	# a hurt bot with nothing to drink backs away from the Blight
-	bot.hp = bot.max_hp * 0.2; bot.tonics = 0
+	bot.hp = bot.max_hp * 0.2
+	bot.tonics = 0
 	var s3 := b.spawn("bl_skitter", _open_spot(m, bot.pos + Vector3(5, 0, 0), 3.0), l)
 	s3.cd = 99.0
 	var fl: Vector3 = Bot.new()._blight_flee(m, bot)
@@ -383,8 +446,12 @@ func _tide(main: Node) -> void:
 	var ar0 := p.armor
 	_run(m, float(rl["tide_tick_s"]) * 2.0 + 0.1)
 	var lost := hp0 - p.hp
-	print("BLIGHT tide live: outside %s, lost %.2f health in two ticks, armor %.0f -> %.0f"
-		% [outside, lost, ar0, p.armor])
+	print(
+		(
+			"BLIGHT tide live: outside %s, lost %.2f health in two ticks, armor %.0f -> %.0f"
+			% [outside, lost, ar0, p.armor]
+		)
+	)
 	var two_ticks := absf(lost - Heart.tide_dmg(2) * 2.0) < 0.5
 	ok(outside and two_ticks and p.armor == ar0, "outside the ring: the stage's damage a tick, past armor")
 	p.teleport(m.world.free_spot_near(h.site, [], 1.0, 0.45, 6.0))
@@ -405,8 +472,10 @@ func _end_phase(m: Match) -> void:
 	ok(is_equal_approx(Heart.tick_dmg(m), top), "at the last close a tick is the last stage's (%.1f)" % top)
 	m.time = end_t + float(rl["end_close_s"]) - m.sess_t0
 	var end_dmg := Heart.tick_dmg(m)
-	ok(is_equal_approx(end_dmg, top * float(rl["end_dmg_k"])),
-		"once the end close is done a tick is end_dmg_k times that (%.1f)" % end_dmg)
+	ok(
+		is_equal_approx(end_dmg, top * float(rl["end_dmg_k"])),
+		"once the end close is done a tick is end_dmg_k times that (%.1f)" % end_dmg
+	)
 	var b: Hunter = m.hunters.filter(func(o): return o != m.player)[0]
 	var rival: Hunter = m.hunters.filter(func(o): return o.team != b.team)[0]
 	var site: Vector3 = m.heart.site
@@ -422,8 +491,12 @@ func _end_phase(m: Match) -> void:
 		var dh0 := b.down_hp
 		_run(m, float(rl["tide_tick_s"]) + 0.1)
 		var lost := dh0 - b.down_hp if not b.out else dh0
-		print("BLIGHT end phase, %s: a downed Hunter out in the Blight (%s) lost %.1f down health in a tick (tick %.1f)"
-			% [c[0], outside, lost, Heart.tick_dmg(m)])
+		print(
+			(
+				"BLIGHT end phase, %s: a downed Hunter out in the Blight (%s) lost %.1f down health in a tick (tick %.1f)"
+				% [c[0], outside, lost, Heart.tick_dmg(m)]
+			)
+		)
 		if c[0] == "downed by the Blight":
 			var worn := b.out or lost >= Heart.tick_dmg(m)
 			ok(outside and worn, "in the end phase the Blight wears down those it downed (%.1f)" % lost)

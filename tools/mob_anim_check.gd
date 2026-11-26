@@ -117,6 +117,7 @@ func _windup(m: Match, k: String) -> void:
 	var lean := (mb.model.get_node("Body") as Node3D).rotation.x
 	ok(lean > 0.1, "%s: the wind-up lean shows on the body (%.3f rad, want > 0.1)" % [k, lean])
 
+
 ## The legs follow the ground: a walking monster's gait advances one stride per STRIDE_M walked whatever its
 ## speed, stands still when it stops, and a hit shows on the body without leaving the walk.
 func _gait(m: Match, k: String) -> void:

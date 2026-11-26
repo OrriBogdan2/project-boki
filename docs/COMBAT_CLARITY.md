@@ -140,6 +140,28 @@ on its side of a Hunter still buried the body: the "pink sphere clusters" over a
 disc on screen covers a shown Hunter's box (`HunterZone.rect_of`). Concealment (`Match.in_smoke`) is untouched.
 `--fx-hunter-cap-check` holds it (a puff 3.6 m off on the ground, between the camera and the Hunter, parts).
 
+## Rivals read at Hunter size (11-25)
+A rival was a red silhouette: `hero_toon`'s `side_rim` took every pixel with `nv < 0.55` (about a third of a Hunter, and
+all of a thin limb, at full strength with emission), and the nameplate (100 px wide) was ~2.5x the body's pixels.
+Now `side_rim` is a screen-width edge (`SIDE_RIM_PX` 1.6 px, from `nv / (2 * fwidth(nv))`, emission x0.8) and
+`HudStyle.PLATE_W` is 76 (was 100). A ground rim in a dark side hue was tried and dropped: it made `--hudref-check`'s
+armour-crack step fail. The ownership ring is a thin band (0.16x the body's pixels) and as wide as the body: left as
+is, it is the hit circle.
+`--clarity-shots` prints `CLARITYREAD` (`tools/clarity_read.gd`): means per shown Hunter over the bot 3v3 frames (1080p
+pixels): body, nameplate, ring band, ring width vs body width, and the share of a rival's body pixels within 0.12 of
+the same body drawn with `side_rim` off ("kept"). It saves `read<f>_<i>_on/off.png` and `clarity_read.tsv`.
+GPU runs (rp workers), before (origin/main b7258e5, 2 runs) -> after (this branch's shader and plate; 4 runs, the last
+one the committed tree, the three before it also had the dropped ground-rim hue):
+| | before | after |
+|---|---|---|
+| rival colours kept | 52.6%, 55.6% | 72.8% (committed); 62.8%, 60.4%, 56.7% (variant) |
+| nameplate px (x body) | 11841 (2.5), 10508 (2.4) | 8893 (1.7); 6989 (1.6), 9425 (2.0), 9825 (2.0) |
+| CLARITYCONTRAST (rim on vs off) | +29%, +42% | +39% (committed); +65%, +39%, +39% |
+| ring band px / ring width vs body | ~606 / x1.0 | ~608 / x1.0 |
+The bot fight is not repeatable (the same seed gives a different fight), so each run has different frames; the
+nameplate px count also depends on how many plates overlap. Kael and Cinder are red by nature and barely change;
+Vex (lime) keeps her body with a thin red edge: `docs/shots/vfx-rival-read/rival_bodies.png` (columns are different
+rivals; rows: before own colours, before as played, after own colours, after as played; the after rows are the variant run with the dropped ground-rim hue).
 ## Own and ally telegraphs are a faint rim, a rival's is the strong one (11-25, baseline problem 8)
 The baseline (`coord/focus-1122`, problem 8) had a red zigzag and a hatched striped lane round the player: the zigzag is
 Lace's laced AimKit lane (`lace`: Heavy Shot bar, Hail Wall arc), the stripes are `telegraph.gdshader`'s hatching and
