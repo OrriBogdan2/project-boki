@@ -10,7 +10,7 @@ extends RefCounted
 
 const DT := 1.0 / 60.0
 const RUN_CAP := 120.0  # [s] a scripted run that takes longer has got stuck
-const HUNTER_BOX := Vector2(160, 240)  # [px] the hunter's nominal screen box (HunterZone needs a running camera)
+const HUNTER_BOX := Vector2(160, 170)  # [px] the hunter and its plate, mid-screen (HunterZone needs a running camera)
 const DASH_AT := 3.0  # [m] the scripted run dashes this far before a dash gate
 
 var main: Node
@@ -215,13 +215,14 @@ func _layout(m: Match, t: TimeTrial) -> void:
 			"banner": m.arena.hint.get_global_rect(),
 			"meter": m.arena.meter.get_global_rect(),
 			"practice bar": Practice.of(m).bar.get_global_rect(),
+			"kit drill": _kit_panel(m),
 			"hunter": Rect2(vs * 0.5 - HUNTER_BOX * 0.5, HUNTER_BOX),  # (the camera keeps the hunter mid-screen)
 		}
 		for i in m.hud.msgs.rects().size():
 			others["toast %d" % i] = m.hud.msgs.rects()[i]
 		var mine := {"clock": t.clock.get_global_rect(), "prompt": g.prompt.get_global_rect()}
 		var real := others.values().all(func(r: Rect2): return r.has_area())
-		ok("every reserved rect is real at %dx%d" % [sz.x, sz.y], real and others.size() == 8, str(others))
+		ok("every reserved rect is real at %dx%d" % [sz.x, sz.y], real and others.size() == 9, str(others))
 		var clash := []
 		for a_k in mine:
 			for b_k in others:
@@ -245,3 +246,11 @@ func _signs(m: Match) -> void:
 	var spawn := " ".join(PackedStringArray(bot)).replace("\n", " ").contains("press %s to spawn a sparring bot" % key)
 	ok("one sign per station kind", texts.size() == Grounds.SIGNS.size(), str(texts.size()))
 	ok("the bot pen's sign says what it is for and how to spawn a bot", bot.size() == 1 and spawn, str(bot))
+
+
+## The kit drill's banner (a top-centre panel the Training Grounds always shows), through its `_panel` field.
+func _kit_panel(m: Match) -> Rect2:
+	for ch in Practice.of(m).get_children():
+		if ch is KitDrill:
+			return (ch.get("_panel") as Control).get_global_rect()
+	return Rect2()

@@ -9,7 +9,7 @@ extends RefCounted
 
 const ACT_R := 1.5  # [m] how close you stand to use a pedestal
 const SHOW_R := 14.0  # [m] a pedestal's name is drawn inside this
-const PROMPT_Y := 196.0  # [px] the pedestal prompt's top: under the trial clock (TimeTrial.CLOCK_Y), clear of the HUD
+const PROMPT_Y := 230.0  # [px] the pedestal prompt's top: under the trial clock (TimeTrial.CLOCK_Y), clear of the HUD
 const PROMPT_W := 560.0  # [px] its width (centred)
 const SIGN_LIFT := 6.0  # [m] a station's sign hangs this far over the island's middle
 ## Per station kind: the sign's title, what it is for, how a pedestal is used (`%s` is the interact key's cap).
@@ -265,7 +265,9 @@ func tick(dt: float) -> void:
 		prompt.visible = best >= 0
 		if best >= 0:
 			var sd: Dictionary = stations[best]
-			prompt.text = "%s   ·   %s" % [name_of(String(sd["kind"]), String(sd["id"])), Settings.key_cap("interact")]
+			var spawns := String(sd["kind"]) == "bot" and String(sd["id"]) != "clear"
+			var key := Settings.key_cap("interact") + (" to spawn" if spawns else "")
+			prompt.text = "%s   ·   %s" % [name_of(String(sd["kind"]), String(sd["id"])), key]
 			prompt.add_theme_color_override("font_color", color_of(String(sd["kind"]), String(sd["id"])).lightened(0.3))
 	if best >= 0 and Input.is_action_just_pressed("interact") and not m.paused and not p.downed:
 		use(best)
