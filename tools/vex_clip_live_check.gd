@@ -75,7 +75,7 @@ func _air_dash(m: Match, pl: Hunter, home: Vector3) -> void:
 	pl.inp["move"] = Vector2.ZERO
 	pl.teleport(home)
 	for f in 60:
-		_frame(m, [pl])           # (standing still again: the next move plays full-body)
+		_frame(m, [pl])  # (standing still again: the next move plays full-body)
 	ok(seen.has("dash_ex") and not seen.has("dash"), "an air dash rolls, no skid (clips %s)" % str(seen.keys()))
 	ok(after_land != "dash_ex", "the roll gives way once she lands (clip after: %s)" % after_land)
 
