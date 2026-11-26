@@ -11414,3 +11414,4 @@ READY ext/feel-fight-cpu-top3 721b673499b230cd0339be4795ad9e1618ff0909 (3v3 figh
 READY ext/wisp-default-1126 4ddc0550b5 (Boki wisp + C summon for every player: a saved off no longer gives the walking Boki; C no longer also fires Sic; --wisp-default-check fails on old)
 READY ext/parity-recheck-vex b5c9f52202a (Vex parity re-check)
 READY ext/boki-size-follow-data-1125 e46aedd089 (Boki size A: the 8 gate-red checks fixed, 3 real check fixes + 5 stale-class-cache reds green after fresh import)
+READY ext/anim-blend-times-1125 f0c1c5a5dd15d8eb2b25fb84b8e0ed9be6e55818 (merged origin/main fad508b31c; only conflict warden_native.gd: kept main's steps.step and the branch's twist.step; --check 0, warden-native/warden-clips/clip/land-weight checks equal main (native 1 red tender toon, clips 3, clip-check 44 same as main), health --strict red only tutorial_dead_air_check long_line = same on main; PR #987 stays DRAFT)
