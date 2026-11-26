@@ -215,6 +215,11 @@
 				"desat": 0.0,
 				"albedo": [0.3, 0.46, 0.8]
 			},
+			"leather-eyerock": {
+				"desat": 0.7,
+				"albedo": [1.35, 1.35, 1.35],
+				"emit": 2.0
+			},
 			"glow": {
 				"glow": 1.8,
 				"fres": 0.0,
@@ -222,11 +227,7 @@
 				"far_lift": 0.1
 			}
 		},
-		"halos": [
-			{"anchor": "anchor_stones_0", "color": [0.36, 0.9, 0.72], "strength": 3.4, "px": 5.5, "near_d": 7.0, "far_d": 14.0},
-			{"anchor": "anchor_stones_1", "color": [0.36, 0.9, 0.72], "strength": 3.4, "px": 5.5, "near_d": 7.0, "far_d": 14.0},
-			{"anchor": "anchor_stones_2", "color": [0.36, 0.9, 0.72], "strength": 3.4, "px": 5.5, "near_d": 7.0, "far_d": 14.0}
-		]
+		"ink": {"min_px": 1.0}
 	},
 	"breaker": {
 		"no_ink": ["moss", "brass", "scan"],
