@@ -15,6 +15,8 @@ const CHECKS := {
 	"--stretch-7-check": ["res://tools/stretch_check.gd", "stretch_check", "gil"],
 	# GPU: posed hunter clip frames, --geo-dir= --shots-dir=
 	"--geo-shots": ["res://tools/geo_shots.gd", "geo_shots", null],
+	# GPU: every native Hunter held in a game state
+	"--anim-state-shots": ["res://tools/anim_state_shots.gd", "anim_state_shots", null],
 	"--native-upper-shots": ["res://tools/native_upper_shots.gd", "native_upper_shots", null],
 	"--warden-native-check": ["res://tools/warden_native_check.gd", "warden_native_check", null],  # Meshy skeleton
 	"--native-springs-shots": ["res://tools/native_springs_shots.gd", "native_springs_shots", null],
