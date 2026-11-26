@@ -40,7 +40,10 @@ func _cast_w(h: Hunter) -> float:
 	var c: WardenClips = sync.get("clips")
 	if c:
 		return c.up_w + c.act_w
-	return 1.0 if sync.get("cur") == "attack" else 0.0
+	var mv: WardenNativeMoves = sync.get("moves")
+	if mv and mv.upper_on:  # (own_casts: her cast is a kmoves row on the upper layer, not Meshy's Attack)
+		return (sync.get("upper") as WardenNativeUpper).w
+	return 1.0 if sync.get("cur") == "attack" or (mv and mv.cur != "") else 0.0
 
 func run(main: Node) -> void:
 	Save.no_write = true

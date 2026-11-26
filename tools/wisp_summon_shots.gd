@@ -67,9 +67,7 @@ func _shot(m: Match, name_v: String) -> void:
 	var s := k.summon
 	var ring: bool = k.get_node_or_null(SummonRing.NAME) != null
 	print(
-		(
-			"SHOT %s wisp=%s state=%s window=%.1f cd=%.1f perks=%s summon_ring=%s"
-			% [name_v, k.wisp, k.state, s.left, s.cd, m.player.kin_carry_on(), ring]
-		)
+		"SHOT %s wisp=%s state=%s window=%.1f cd=%.1f perks=%s summon_ring=%s"
+		% [name_v, k.wisp, k.state, s.left, s.cd, m.player.kin_carry_on(), ring]
 	)
 	tree.root.get_viewport().get_texture().get_image().save_png(dir.path_join(name_v + ".png"))
