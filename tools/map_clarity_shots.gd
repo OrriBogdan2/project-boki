@@ -1,10 +1,10 @@
 extends RefCounted
 ## --map-clarity-shots --shots-dir=<dir> [--view=WxH]: how readable is each thing on the map? One game-view frame per
-## interactable (the player 8 m off, the default match camera), then the minimap as it plays, the minimap with Tab
+## interactable (the player 5 m off, the default match camera), then the minimap as it plays, the minimap with Tab
 ## held and the full map (M). GPU run under xvfb. <dir>/captions.txt gets "file: caption" per file.
 
 const DT := 1.0 / 60.0
-const STAND_OFF := Vector3(0, 0, 8)  # m: where the player stands from a thing, south of it (toward the camera)
+const STAND_OFF := Vector3(0, 0, 5)  # m: where the player stands from a thing, south of it (toward the camera)
 
 var main: Node
 var m: Match
@@ -61,7 +61,10 @@ func run(main_node: Node) -> void:
 	for l in lines:
 		f.store_line(l)
 	f.close()
-	print("MAPCLARITYSHOTS %d in %s" % [lines.size(), dir])
+	var kinds := {}
+	for r in MapMarks.rows(m):
+		kinds[r["id"]] = int(kinds.get(r["id"], 0)) + 1
+	print("MAPCLARITYSHOTS %d in %s, things %s" % [lines.size(), dir, kinds])
 	main.get_tree().quit(0)
 
 

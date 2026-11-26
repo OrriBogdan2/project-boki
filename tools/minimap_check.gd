@@ -10,7 +10,9 @@ extends RefCounted
 ## Never touches the save.
 
 const EXPECT_DEFAULT := ["you", "squad", "boki", "exit", "blight", "ping"]
-const GATED_FILES := ["res://scripts/ui/hud.gd", "res://scripts/ui/revive_hud.gd", "res://scripts/ui/nest_map.gd"]
+const GATED_FILES := [
+	"res://scripts/ui/hud.gd", "res://scripts/ui/revive_hud.gd", "res://scripts/ui/nest_map.gd", "res://scripts/ui/map_marks.gd",
+]
 
 var bad := 0
 
@@ -76,7 +78,18 @@ func _match(main: Node) -> void:
 		ok(not MapDetail.lair_matters(m, L), "a dormant lair waits for a hold")
 		L["state"] = "awake"
 		ok(MapDetail.lair_matters(m, L), "an awake lair shows by itself")
+	_things(m)
 	_key(m)
+
+## Camps, shops, chests, shrines and pads: one registry, one colour per category, each live kind in the key.
+func _things(m: Match) -> void:
+	var rows := MapMarks.rows(m)
+	ok(not rows.is_empty() and rows.all(func(r): return r["id"] in MapMarks.CAT), "things: %d rows, each with a category" % rows.size())
+	var cats := [MapMarks.ENEMY, MapMarks.LOOT, MapMarks.TRAVEL, MapMarks.OBJECTIVE]
+	ok(cats.all(func(c): return cats.count(c) == 1), "the four category colours are different")
+	var tm := TrainMap.new()
+	var in_key: bool = MapMarks.CAT.keys().all(func(id): return (id in MapKey.kinds(m, tm)) == not MapMarks.first(m, id).is_empty())
+	ok(in_key, "a kind of thing is in the key exactly when one is live")
 
 func _key(m: Match) -> void:
 	var tm := TrainMap.new()

@@ -3,14 +3,14 @@ extends RefCounted
 ## What the minimap shows (the rule: only what's needed now). On the ground it
 ## carries the DEFAULT icon kinds; every DETAIL kind appears while you hold Tab or the map key, while you
 ## ride in (the whole map is the plan), or once it matters (an awake lair, a scouted cache, a lit
-## beacon, the nearest exit). The full map (FullMap) always shows everything. Team colours are kept.
+## beacon, the nearest exit, a camp, shop, chest, shrine or pad within MapMarks.MAP_NEAR_M). The full map (FullMap) always shows everything. Team colours are kept.
 ## tools/minimap_check.gd counts these lists, so a new minimap icon has to pick a kind here.
 
 const ICON_R := 5.5           # px: the one size rule, the outer radius of every minimap icon
 const DEFAULT := ["you", "squad", "boki", "exit", "blight", "ping"]
 const DETAIL := [
 	"place", "hazard", "train", "hot_zone", "far_exit", "lair", "cache", "beacon", "rival_box", "ship", "bounty",
-	"ally", "nest",
+	"ally", "nest", "thing",
 ]
 
 ## Holding Tab (the scoreboard key) or the map key.
