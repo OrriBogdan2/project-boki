@@ -40,7 +40,9 @@ static func strokes(c: CanvasItem, at: Vector2, look: String, ring: float, k: fl
 			c.draw_arc(at, ring, -PI * 0.38, PI * 0.38, 10, col, w * 1.35, true)
 			var tick := at + Vector2(0, -ring - 0.6 * k)
 			var wing := Vector2(1.8 * k, -2.4 * k)
-			c.draw_polyline(PackedVector2Array([tick + Vector2(-wing.x, wing.y), tick, tick + wing]), col, w, true)
+			# (two lines, not a polyline: its sharp corner mitred into a dark spike past the apex on light ground)
+			c.draw_line(tick + Vector2(-wing.x, wing.y), tick, col, w, true)
+			c.draw_line(tick, tick + wing, col, w, true)
 		"coin":
 			c.draw_arc(at, ring, 0.0, TAU, 28, col, w, true)
 			for i in 4:
