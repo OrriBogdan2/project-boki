@@ -70,7 +70,7 @@ static func start(h: Hunter, to: Hunter) -> void:
 		return
 	h.base_t = CHANNEL_S
 	h.base_to = to
-	h.base_tele = m.fx.telegraph_circle(to.pos, TELE_R, Color(MINT, 0.9))
+	h.base_tele = m.fx.telegraph_circle(to.pos, TELE_R, Color(MINT, 0.9), SideColor.order(m, h))
 	h._ab_feedback("base", "cast")
 	m.sfx("portal", h.pos, -6.0, 1.2)
 	if h.is_local() and m.hud:

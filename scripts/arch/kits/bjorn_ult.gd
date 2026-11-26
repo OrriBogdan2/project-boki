@@ -13,16 +13,20 @@ extends Node3D
 ## The landing is the impact: a hit-stop for him (his own screen never shakes, item 50), a shake for players near,
 ## a dust ring, rock debris, a cracked-ground decal and a sub-heavy quake under the slam.
 ##
-## Look (pooled): one outlined lane over the whole reach with a lightning crack down its middle that glows
-## brighter through the wind-up (the parity reel: a tall outlined rectangle with a crack), gold light
-## flooding the near cell on the slam, a streak racing down the lane, a bright column of light erupting in
-## each cell, then the crack left as a flickering ember scar. A foe the fissure stuns gets the stun stars.
+## Look (pooled): one soft lane over the whole reach (lit rails over a faint inside, never a solid fill: the
+## zone rule in docs/VFX_QUALITY.md) with a lightning crack down its middle that glows brighter through the
+## wind-up, a faint gold flash in the near cell on the slam, a streak racing down the lane,
+## a bright column of light erupting in each cell, then the crack left as a flickering ember scar. A foe the
+## fissure stuns gets the stun stars.
 ## Bond: every hunter it hits goes to HeroUlt.landed; the best event of the cast pays.
 
 const EMBER := Color("ff9a3a")
 const MAX_CELLS := 6           # pooled eruption columns
 const COLUMN_H := 4.5          # m, how high an eruption column stands at its peak
 const COLUMN_T := 0.9          # s an eruption column lives
+const FLOOD_POWER := 0.8       # the slam's flash on the near cell ("panel" shader: inside under alpha 0.25)
+const COLUMN_POWER := 1.0      # each eruption column's lit shell (same shader, same cap)
+const SEAM_POWER := 0.9        # each erupting cell's lit outline (same shader, same cap)
 const CRACK_BREADTH := 1.0     # m the crack mesh is stretched across the lane (its kinks and width are in the mesh)
 
 ## The hop's shape, as shares of "windup": a short hop, hammer overhead, a hang, then the slam
@@ -211,7 +215,7 @@ func _telegraph() -> void:
 	if phase == "wind":
 		done = clampf(t / float(xd().get("windup", 0.4)), 0.0, 1.0)
 	AimKit.lane(h, "x", {"from": origin, "dir": dir, "len": trail_len(), "width": float(xd().get("width", 5.5)),
-		"all": true, "col2": AimKit.hero_col(h), "fill": done, "hot": done * 0.6, "lw": 0.14, "alpha": 1.6,
+		"all": true, "col2": AimKit.hero_col(h), "fill": done, "hot": done * 0.6, "lw": 0.14, "soft": true,
 		"dur": 0.15})
 	AimKit.entry(h, "x")["y"] = _trail_y(origin + Vector3(dir.x, 0, dir.y) * trail_len() * 0.5)
 
@@ -363,7 +367,7 @@ func _process(delta_in: float) -> void:
 	if _flood_t > 0.0:
 		_flood_t -= delta
 		_flood.visible = _flood_t > 0.0
-		KitShaders.param(_flood, "power", 2.0 * clampf(_flood_t / 0.3, 0.0, 1.0))
+		KitShaders.param(_flood, "power", FLOOD_POWER * clampf(_flood_t / 0.3, 0.0, 1.0))
 	if _streak_t > 0.0:
 		_streak_t -= delta
 		var total := maxf(0.05, float(xd().get("cell_t", 0.15)) * cells.size() + float(xd().get("lead", 0.2)))
@@ -409,6 +413,6 @@ func _tick_slabs(delta: float) -> void:
 		column.global_position = at
 		column.rotation = Vector3(0, atan2(-dir.y, dir.x), 0)
 		column.scale = Vector3(cell_len() * 0.5, COLUMN_H * rise, w * 0.5)
-		KitShaders.param(column, "power", 2.4 * clampf(left / 0.6, 0.0, 1.0))
+		KitShaders.param(column, "power", COLUMN_POWER * clampf(left / 0.6, 0.0, 1.0))
 		_place_flat(seam, at + Vector3(0, 0.1, 0), Vector2(cell_len() * 0.95, w * 0.85))
-		KitShaders.param(seam, "power", 2.2 * left)
+		KitShaders.param(seam, "power", SEAM_POWER * left)

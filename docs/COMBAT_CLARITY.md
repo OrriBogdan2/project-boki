@@ -139,3 +139,19 @@ Hunter's feet on the ground (`FxHunterCap._part`, radius + `PUFF_CLEAR`). The ca
 on its side of a Hunter still buried the body: the "pink sphere clusters" over a fight. A puff now also hides while its
 disc on screen covers a shown Hunter's box (`HunterZone.rect_of`). Concealment (`Match.in_smoke`) is untouched.
 `--fx-hunter-cap-check` holds it (a puff 3.6 m off on the ground, between the camera and the Hunter, parts).
+
+## Own and ally telegraphs are a faint rim, a rival's is the strong one (11-25, baseline problem 8)
+The baseline (`coord/focus-1122`, problem 8) had a red zigzag and a hatched striped lane round the player: the zigzag is
+Lace's laced AimKit lane (`lace`: Heavy Shot bar, Hail Wall arc), the stripes are `telegraph.gdshader`'s hatching and
+fill on your own charge ring, casts and ground warnings. One rule, by the side tier (`SideColor.order`):
+| viewer sees | Fx telegraph (`telegraph.gdshader`, `quiet`) | AimKit shape (`AimShapes.for_viewer`) |
+|---|---|---|
+| your own or an ally's | `quiet` 1: no hatching, no inner glow, `QUIET_A` 0.4 of the alpha | plain lane or wall: no lace crossing, no chevrons, `QUIET_A` 0.5 of the alpha |
+| a rival's, a monster's or a boss's | unchanged, rim lit more (hot 0.6) | lit to `FOE_HOT` 0.3: a brighter, thicker rim in the foe colour (`SideColor.fx`) |
+`Fx.telegraph_circle` / `telegraph_rect` now default to the rival tier (a monster's or tutorial warning is a threat);
+yours pass `SideColor.order(m, hunter)`. Hit shapes, radii and timings are untouched: the lead stays as in
+`docs/TELEGRAPH_LEAD.md` (`--telegraph-lead-check` 64 checks, 0 failures). `--clarity-check` holds both halves.
+`--clarity-shots` (GPU rp3g / rp2g, bot 3v3, 20 frames, same bots both runs) tags a quiet telegraph in its tally:
+Fx telegraph element-Hunter pairs 8 loud -> 3 loud + 5 quiet; elements over a Hunter per frame 119.1 -> 114.8; AimKit
+shapes over Hunters unchanged at 6 pairs but plain for yours. Stills: `docs/shots/combat-own-telegraph-quiet/` (before
+over after).
