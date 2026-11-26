@@ -9,6 +9,7 @@ extends "res://tools/new_player_flow_check.gd"
 ## waits by your face, and on no other screen of the run.
 
 const STEP_LIMIT_S := 40.0  # s of game time one step may take (the flow check's own limit is 45)
+const BOKI_ACT_S := 2.0  # s of game time from the summon line to the Boki standing out of its wisp
 const TIME_SCALE := 4.0  # prologue, hatch and Relic screens wait out real-time tweens (33 s); game time unchanged
 
 const STARTERS := {"Lace": "archer", "Kael": "juggernaut", "Vex": "gunslinger"}  # the tutorial's starter pick
@@ -18,6 +19,10 @@ var step_s := 0.0
 var rows: Array = []
 var stalled := false
 var line_seen := 0
+var boki_lines := {}  # every distinct tutorial line (banner or plain line) that names the Boki key
+var press_t := -1.0  # game time the summon step began (its line is up)
+var out_t := -1.0  # game time the Boki came out of its wisp in that step
+var acted_t := -1.0  # game time it first went at a monster
 
 
 func run(m: Node) -> void:
@@ -43,6 +48,17 @@ func run(m: Node) -> void:
 	_end()
 	_took("course", t0)
 	ok(line_seen == 1, "the Mask line shows exactly once, at the first Relic (%d times)" % line_seen)
+	ok(boki_lines.size() == 1, "the Boki key is taught in one line, once: %s" % str(boki_lines.keys()))
+	ok(
+		out_t >= 0.0 and out_t - press_t <= BOKI_ACT_S,
+		"the Boki is out %.1f s after the line (<= %.0f s)" % [out_t - press_t, BOKI_ACT_S]
+	)
+	print(
+		(
+			"TUTPLAY the Boki goes at a monster %.1f s after it is out (-1: it did not)"
+			% (acted_t - out_t if acted_t >= 0.0 else -1.0)
+		)
+	)
 	Engine.time_scale = 1.0
 	if not stalled:
 		await _garden()
@@ -76,6 +92,7 @@ func _course_tick(m: Match) -> void:
 		step_id = id
 		step_s = 0.0
 	step_s += Match.DT
+	_boki_beat(m, id)
 	if step_s > STEP_LIMIT_S:
 		stalled = true
 		ok(false, "step '%s' did not finish in %.0f s (stuck at game time %.0f s)" % [id, STEP_LIMIT_S, m.time])
@@ -83,6 +100,26 @@ func _course_tick(m: Match) -> void:
 		print("TUTPLAY STEPS: " + ", ".join(rows))
 		print("TUTPLAY DONE, failures: %d" % bad)
 		tree.quit(1)
+
+
+## The Boki beat: which lines name the Boki key, and how soon the Boki stands out once the summon line is up.
+func _boki_beat(m: Match, id: String) -> void:
+	var k: Kin = m.player.kin
+	if k == null:
+		return
+	var cap := Settings.key_cap("summon" if m.tut.sm.active() else "throw")
+	var re := RegEx.create_from_string("\\b%s\\b" % cap)
+	for txt: String in [m.tut.text, m.tut.detail]:
+		if re.search(txt) != null:
+			boki_lines[txt] = true
+	if id != "summon":
+		return
+	if press_t < 0.0:
+		press_t = m.time
+	if out_t < 0.0 and not k.wisp and k.state == "active":
+		out_t = m.time
+	elif out_t >= 0.0 and acted_t < 0.0 and (k.target != null or k.st_hits + k.st_skills > 0):
+		acted_t = m.time
 
 
 ## Wall-clock seconds since the start, by phase: where a slow (loaded) box spends the suite's 1200 s.
