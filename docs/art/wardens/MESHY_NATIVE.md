@@ -26,12 +26,25 @@ contract (RIG_CONTRACT.md). The game adapts to Meshy: its bones are never rename
 - HunterAnim still poses the hidden rig and hands over its state (`WardenClips.STATE`); the AnimationPlayer plays:
   idle `Idle`, walk `walk`, run `run`, air `Jump_Run`, any new swing/cast/kit move `Attack` (or its clip slot below), crouch
   `Crouch_Walk_with_Torch` (rate follows ground speed; standing still holds the crouch pose).
+- Own move clips (data `clip_files` + `kmoves`, 11-23, Kael first): a clips-only file beside the model
+  (`art/wardens/<art>/<art>_clips.glb`, the rig's nodes with no mesh; WardenClipFile adds its clips to Meshy's library
+  by bone name) holds clips keyed on Meshy's skeleton, and `kmoves` (WardenNativeMoves, see Kit-move clips) maps a kit move (`kmove`) to one: `clip`, `fade` (a clip with no
+  `hold_from` stays on its last pose while the kit holds the move), and for the check `hit` (the kit's hit second) with
+  `peak` (`speed`, `low`, `reach`: how the clip's hit pose is measured). The clip's clock is the kit's (`kmove_t`),
+  so its hit pose lands on the kit's hit. A move with no entry still plays `Attack`. Kael's are made by
+  `python3 -I tools/art1/kael_native_clips.py` (poses as body-frame numbers: hips, chest, feet, sword hand and blade
+  direction, solved with two-bone IK by `tools/art1/meshy_rig.py`; the blade runs along the right hand bone). Timing and
+  poses: docs/heroes/juggernaut.md "Native clips". `--warden-native-check` sweeps each clip and asserts the hit pose
+  within one frame of the kit's hit; `--clip-shots --states` presses each mapped move.
 - Crouch arms (`crouch_arms_from`): Meshy's only crouch holds a torch out in front, which read in game as Sable's
   pistol and Tenzo's stone arm floating off the body. The crouch plays a copy (`<clip>_arms`, added beside Meshy's
   clips at load) whose arm bones (every bone below Meshy's `LeftShoulder`/`RightShoulder`, data `arm_roots`) take
   the walk clip's keys, time-scaled to the crouch loop; hips, spine and legs keep Meshy's crouch.
 - Size: Meshy's head bone is scaled onto the rig's head pivot (the contract model's head height). Hit ring and
-  hitbox are the rig's, unchanged.
+  hitbox are the rig's, unchanged. Data `size` (as Dredge's 1.09) then scales a body whose visible height stood over
+  10% off the owner's height chart (hit_h, plus the headwear the chart allows over the head; drawn as a match draws it, x1.12): Kael 1.2,
+  Pip 0.79, Gil 0.69. The contract's parts, anchors and companions are placed as for the unfitted body and grow with
+  it (`WardenNative._to_contract`). The hitbox never changes: its numbers are parity rows.
 - Facing: Meshy faces +Z; the model is turned 180 deg to face -Z like every Hunter.
 - Anchors (`anchors`): `anchor_head_top`, `anchor_chest`, `anchor_gun_R` are BoneAttachment3D nodes on Meshy bones,
   found by `WardenGlb.anchor`. The rig's Gun (aim and muzzle) rides Meshy's `RightHand` bone each frame.
@@ -48,6 +61,11 @@ keep the armature Z up, so their Hips keys are carried into the rig's Y-up frame
 
 ## Checks
 `--warden-native-check` (switch, bones, facing, height, each state's clip, weapon hidden, anchors, toon surfaces,
+crouch arms, only Meshy's model draws (no rig mesh such as the Offhand), each data orbit rides its bone and turns);
+`--warden-glb-check` counts native Hunters apart.
+`--native-hitbox-check` measures each one's visible body (skinned vertices at idle, no weapon, orbits or companions)
+against hit_h and the hit ring and fails past 10% on height; `--native-hitbox-shots` draws each inside its hurtbox.
+Renders: `--clip-shots --warden=<arch> --states [--match]`.
 crouch arms, only Meshy's model draws (no rig mesh such as the Offhand), each data orbit rides its bone and turns,
 the drop poses hold --clip-check's bars); `--land-weight-check` measures every native Hunter's squash off the model
 (head height against the same frames unsquashed: depth and seconds within 10% of the contract numbers, feet on the
@@ -89,7 +107,10 @@ plays today's clip, so nothing changes until a Hunter's clips land (`WardenNativ
 | `downed` | while the knocked-down beat runs (`fall` >= 0; holds its last frame) | the loop clip |
 | `stomp` | while the stomp cycle runs (`stomp` >= 0; loops) | the loop clip |
 Swing, cast, `hit` and `land` are one-shots: they own the body for their length (a new one restarts a clip once 60% is
-played) and play at `attack_rate`, `hit` and `land` at 1. A hit wins over a swing, a swing over a landing.
+played) and play at `attack_rate`, `hit` and `land` at 1.
+A swing or cast while he moves on the ground, or is in the air, plays on the torso and arms only (`WardenNativeUpper`: Spine02
+and every bone above it, eased in 0.1 s and out 0.16 s) over the running legs; standing on the ground it owns the body as
+above, and `hit` and `land` always do. A hit wins over a swing, a swing over a landing.
 A clip may come from an animation-only file `art/wardens/<art>/<art>_clips.glb`, packed with `native_pack.py` onto the
 same skeleton (Y-up Hips as in the main file). Clips the data names that Meshy's own file lacks are looked up there by
 clip name, their tracks laid on this skeleton's bones by bone name (tracks of a bone it lacks are dropped), and added

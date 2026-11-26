@@ -72,6 +72,7 @@ var torso_off := Transform3D()  # that bone's frame -> the rig torso's, at rest 
 var mouth: Node3D  # the copied weapon_muzzle (on a bone, a part or the sun): where the Gun's Muzzle sits each frame
 var gunprop: WardenGunProp  # Grimble's one gun (data "holster"): hip at rest, hand while he aims
 var props: WardenProps  # the contract's parts Meshy's mesh lacks (data "props": Kael's sword, Cinder's heel jets)
+var upper: WardenNativeUpper  # a swing or cast over the running legs (the torso and arms only)
 var moves: WardenNativeMoves  # the kit moves with a clip of their own (data "kmoves")
 var companions: WardenCompanions  # floating companions cut out of Meshy's body (Meeko's sun and cloud), or null
 var mood: WardenMood  # the faces on those companions swap and blink (warden_anim/<art>.json "mood"), or null
@@ -105,7 +106,6 @@ static func dress(model: Node3D, arch: String, scene: PackedScene, lk := {}) -> 
 	glb.name = "Warden"
 	glb.rotation.y = PI  # (Meshy faces +Z; a Hunter's model faces -Z)
 	model.add_child(glb)
-	# (data "size": x the head-pivot fit)
 	glb.scale = Vector3.ONE * _fit(model, WardenGlb.skeleton(glb)) * float(e.get("size", 1.0))
 	var nat := WardenNative.new()
 	nat.name = "Native"
@@ -130,7 +130,8 @@ static func dress(model: Node3D, arch: String, scene: PackedScene, lk := {}) -> 
 	model.set_meta(META, true)
 
 
-## The size that puts Meshy's head bone where the rig's head pivot rests: the contract model's head height.
+## The size that puts Meshy's head bone where the rig's head pivot rests: the contract model's head height (data "size"
+## then scales it where Meshy's body stands off the height chart, --native-hitbox-check).
 static func _fit(model: Node3D, sk: Skeleton3D) -> float:
 	var rest: Dictionary = model.get_meta("rig_rest", {})
 	var head := sk.find_bone("Head")
@@ -145,6 +146,9 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	process_priority = 10  # (after Match renders the hunters: HunterAnim.update)
 	player = glb.find_children("*", "AnimationPlayer", true, false)[0] as AnimationPlayer
 	plays = (d["clips"] as Dictionary).duplicate()
+	if d.has("clip_files"):  # (clips-only files: Hero moves keyed on Meshy's skeleton, beside the .glb)
+		var lib_name := player.find_animation_library(player.get_animation(String(plays["idle"])))
+		WardenClipFile.add(player.get_animation_library(lib_name), glb, WardenGlb.skeleton(glb), d["clip_files"])
 	moves = WardenNativeMoves.new(player, d)
 	plays.merge(moves.clips())
 	skel = WardenGlb.skeleton(glb)
@@ -169,6 +173,7 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 		plays["crouch"] = _arms_swapped("crouch", String(d["crouch_arms_from"]))
 	hand = skel.find_bone(String(d.get("hand", "RightHand")))
 	torso_bi = WardenSkeleton.find(skel, "hips")
+	upper = WardenNativeUpper.make(skel, torso_bi)
 	var rest: Dictionary = model.get_meta("rig_rest", {})
 	if torso_bi >= 0 and rest.has("hips"):
 		var at_rest := WardenGlb.model_xf(model, skel) * skel.get_bone_global_rest(torso_bi)
@@ -181,7 +186,7 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 		skel.add_child(at)
 	gun = root.get_node_or_null("Rig/Torso/Aim/Gun") as Node3D
 	_add_orbits(glb)
-	var to_m := glb.transform * WardenGlb.model_xf(glb, skel)  # Meshy's skeleton -> the model
+	var to_m := _to_contract(glb)
 	props = WardenProps.carry(art_id, skel, to_m, d)
 	gunprop = WardenGunProp.make(model, skel, to_m, d.get("holster", {}))
 	_copy_anchors(glb)
@@ -207,17 +212,24 @@ func _process(dt: float) -> void:
 	if xt >= 0.0:  # the extract beat (WardenClips.leave_t): Meshy's crouch for the dip, then its jump for the take-off
 		_play("crouch" if xt < WardenClips.EXTRACT_DIP else "jump", 1.0)
 	elif moves.owns(s, plays):  # a kit move with its own clip (draw, release, Spirit Walk): laid at the move's clock
+		upper.stop()
 		moves.play(s, plays, dt)
 		attack_left = 0.0
 		cur = "kmove"
 	elif one != "":
 		attack_left = _clip_len(one) / _shot_rate(one)
-		_play(one, _shot_rate(one), true)
-	elif attack_left <= 0.0:
+		if _over_legs(one, s):
+			upper.play(player.get_animation(String(plays[one])), _shot_rate(one))
+			_loco(s)
+		else:
+			upper.stop()
+			_play(one, _shot_rate(one), true)
+	elif attack_left <= 0.0 or upper.on:
 		_loco(s)
 	var hips := WardenSkeleton.find(skel, "root")
 	skel.set_bone_pose_scale(hips, skel.get_bone_rest(hips).basis.get_scale())  # (Meshy keys no scale: no old squash)
 	player.advance(dt)
+	upper.lay(dt)
 	WardenClips.air_tilt(root, skel, hips)  # (the glider's bank, the dive's pitch)
 	# (the look-at lies under a clip that turns the head: the attack clip owns it, eased in and out like a body clip)
 	head_look.owned = move_toward(head_look.owned, 1.0 if attack_left > 0.0 else 0.0, dt / FADE)
@@ -339,6 +351,15 @@ func _one_shot(s: Dictionary) -> String:
 	if swing != "":
 		return swing
 	return "land" if landed and plays.has("land") and _fresh("land") else ""
+
+
+## Whether a new one-shot plays on the upper body over the loop clips: a swing or cast while he moves or is in the air
+## (standing on the ground it owns the whole body; a stagger or a landing always does).
+func _over_legs(st: String, s: Dictionary) -> bool:
+	if st in HIT_SLOTS:
+		return false
+	var vel: Vector3 = s.get("vel", Vector3.ZERO)
+	return not bool(s.get("grounded", true)) or Vector2(vel.x, vel.z).length() >= STILL
 
 
 func _new_hit(t: float) -> bool:
@@ -588,6 +609,14 @@ static func _read_orbit(art_name: String, orb: String) -> Array:
 	return out
 
 
+## Meshy's skeleton -> the model as the contract model is sized (the data "size" taken off): what the contract gives in
+## metres (parts, anchors, companions) then grows or shrinks with the body.
+func _to_contract(glb: Node3D) -> Transform3D:
+	var to_m := glb.transform * WardenGlb.model_xf(glb, skel)
+	var size := float(d.get("size", 1.0))
+	return Transform3D(to_m.basis / size, to_m.origin / size)
+
+
 ## The contract model's anchor empties (anchor_*, weapon_muzzle*: the points the kits and VFX read, Cinder's palms,
 ## tail tip and heel jets, Kael's blade tip) that data "anchors" does not place. Each rides the Meshy bone that plays
 ## the part of its contract bone, or of the nearest ancestor bone Meshy has a stand-in for (WardenSkeleton.find).
@@ -596,7 +625,7 @@ static func _read_orbit(art_name: String, orb: String) -> Array:
 ## pauldron: the torso, whose rest the two models share) or on the nearest bone (a loose one) it keeps where it sits
 ## on the contract model.
 func _copy_anchors(glb: Node3D) -> void:
-	var to_m := glb.transform * WardenGlb.model_xf(glb, skel)  # Meshy's skeleton -> the model
+	var to_m := _to_contract(glb)
 	var inv := to_m.affine_inverse()
 	var k := 1.0 / maxf(to_m.basis.get_scale().y, 0.0001)  # metres -> Meshy's skeleton units
 	var have: Dictionary = d.get("anchors", {})

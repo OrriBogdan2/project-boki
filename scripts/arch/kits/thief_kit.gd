@@ -52,6 +52,7 @@ var mark_gap := {}             # target id -> time of its last Mark from us
 var pips := {}                 # target instance id -> {node, t: Ent}: the Mark pips over their head
 var pip_spare: Array = []      # pip rings whose Marks ran out, hidden, for the next target (none made mid-fight)
 var pip_mats: Array[ShaderMaterial] = []    # [lit, unlit]: every diamond wears one of the two
+var knife_sd := {}             # the thrown knife's shot while it flies (its whirr, thief_knife_fly, follows it)
 var knife := {}                # the stuck Shadow Knife: {target, pos, dir} (+ wall, u, s, dy, side: stuck in a barrier)
 var bola_cast := {}            # the Bola winding up, lane showing: {t}
 var bola := {}                 # the Bola in flight: {pos, dir, left, first, bounces, stg}
@@ -267,9 +268,6 @@ func res_text() -> String:
 func dash_payoff_ready() -> bool:
 	return primed_t > 0.0
 
-func ready_label() -> String:
-	return "EMPOWERED  ·  land it to reset Vault" if primed_t > 0.0 else ""
-
 func _tick(dt: float) -> void:
 	haste_t = maxf(0.0, haste_t - dt)
 	if primed_t > 0.0:
@@ -289,6 +287,8 @@ func _tick(dt: float) -> void:
 	quick.tick(dt)
 	_tick_landing()
 	_tick_wrapped(dt)
+	if not knife_sd.is_empty() and not HeroSfx.fly(m, h, "thief_knife_fly", knife_sd):
+		knife_sd = {}
 	_tick_knife()
 	_tick_glint(dt)
 	_tick_aim_line()
@@ -453,6 +453,7 @@ func _bolt() -> void:
 	else:
 		# the spinning chakram heads a short cel tracer (bolt_trail: dark edge, violet body, hot core, about the
 		# source's comet length); the quick run after a Vault keeps the cartwheel's pale lilac in her hands
+		m.sfx("thief_bolt_tail", h.pos, -6.0 if h.is_local() else -9.0)     # the zip's shimmer, after the weapon's cast
 		var head := fx().ride(sd, "chakram", BOLT_COL, GHOST if came_quick else BOLT_COL, 0.0)
 		HeroVfx.of(m).trail(h, "bolt_trail", head)
 		if came_quick:
@@ -851,16 +852,6 @@ func recast_window() -> Dictionary:
 		w["auto"] = true
 	return w
 
-## RecastCue's badge: your Marks on each foe; gold while the empowered bolt is ready to cash them in.
-func combo_marks(out: Array) -> void:
-	super(out)
-	for f in m.foes_of(h.team):
-		var mk: Dictionary = f.get_meta("marks", {}) if f.has_meta("marks") else {}
-		var e: Array = mk.get(h.nid, [0, 0.0])
-		if int(e[0]) > 0 and float(e[1]) > 0.0:
-			var dur := float(res_def().get("dur", 4.0))
-			out.append(RecastCue.mark(f, int(e[0]), float(e[1]), dur, primed_t > 0.0))
-
 func cast_e() -> bool:
 	play("thf_knife")
 	m.later(KNIFE_RELEASE_S, func():     # spun into a side-arm throw, released on the key pose
@@ -885,6 +876,7 @@ func _throw_knife() -> void:
 			if knife.is_empty() and e == null: _stick_ground(at, _why == "wall", land)}))
 	if m.shots.size() > n0 and m.shots[-1]["by"] == h:
 		fx().ride(m.shots[-1], "dagger", col_of(ed), Color("b890ff"), 1.6, 0.26)
+		knife_sd = m.shots[-1]
 	vfx("knife_throw", h.pos + Vector3(h.aim_dir().x * 0.6, 1.1, h.aim_dir().y * 0.6))
 	m.sfx("dj_knife_throw", h.pos, -3.0, 1.0)
 	m.sfx("thief_knife_whisk", h.pos, -6.0 if h.is_local() else -9.0)     # the blade spinning away
