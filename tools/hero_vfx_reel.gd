@@ -310,13 +310,13 @@ func _juggernaut_lunge() -> void:
 ## (the coil holds to the stop, then the thrust; JuggernautKit.LUNGE_COIL_T).
 func _juggernaut_lunge_far() -> void:
 	await _reset(3.0, 6.0)
-	var K: JuggernautKit = P.ak
+	var kit: JuggernautKit = P.ak
 	var far := P.pos + Vector3(12.0, 0, 0)
-	var go := 0.1 + K.rmb_charge_full() + 0.05
+	var go := 0.1 + kit.rmb_charge_full() + 0.05
 	var lunge := func(t: float):
 		if _at(t, 0.1):
 			P.inp["sec_hold"] = true
-			K.press_rmb()
+			kit.press_rmb()
 		if t >= go:
 			P.inp["sec_hold"] = false
 		_aim(far)
