@@ -1,8 +1,8 @@
 class_name KinSize
 extends RefCounted
-## How tall a rigged Boki stands on screen: its species' size (content/kin/<id>.json size.cm) times M_PER_CM, whatever
-## the glb's own scale. The rig measures the mesh at build (height), and its Flex is scaled by fit() so every Meshy model
-## lands at its data height; the kin's own roll (Unique, Evo growth, Mutations) multiplies on top, as before.
+## How tall a rigged Boki stands on screen: its species' size (content/kin/<id>.json size.cm) times M_PER_CM,
+## whatever the glb's own scale. The rig measures the mesh at build (height) and its Flex is scaled by fit(), so every
+## Meshy model lands at its data height; the kin's own roll (Unique, Evo growth, Mutations) multiplies on top.
 
 ## World metres a Boki of 1 cm stands, at root scale 1. The match and, times Home's FARM_BOKI_SCALE, the farm draw it.
 const M_PER_CM := 0.014
