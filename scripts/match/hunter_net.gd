@@ -2,13 +2,12 @@ class_name HunterNet
 extends RefCounted
 ## Extra hunter fields in the "st" snapshot that the HUD shows to everyone: the run level, so every
 ## player sees every hunter's level on their overhead plate (HudPlate.level_badge) and the badge
-## pulses when it goes up; Meeko's Hearth Call target and seconds left, so the ally shows the
-## protection bar (ChannelBar); the Boki slots in use (claimed, stolen: Capture.slots), so a teammate's kin
-## can point at a hunter with room; the seconds of resurrection sickness left (its status icon); Grimble's reaching
-## arm (DredgeKit.net_reach), which only the caster's kit runs; and the move its body makes on hazard ground
-## (HazardMoves: swimming, no footing on ice), which only its owner can tell. Appended as a tagged tail at the very
-## end of the hunter row (after KinNet's fields) so it never shifts anything already there; a row without it is
-## ignored.
+## pulses when it goes up; the Boki slots in use (claimed, stolen: Capture.slots), so a teammate's kin can point at a
+## hunter with room; the seconds of resurrection sickness left (its status icon); Meeko's Hearth Call target and
+## seconds left, so the ally shows the protection bar (ChannelBar); Grimble's reaching arm (DredgeKit.net_reach),
+## which only the caster's kit runs; and the move its body makes on hazard ground (HazardMoves: swimming, no footing
+## on ice), which only its owner can tell. Appended as a tagged tail at the very end of the hunter row (after
+## KinNet's fields) so it never shifts anything already there; a row without it is ignored.
 
 const TAG := "lv"
 const SLOT_TAG := "sl"  # then the claimed and the stolen Boki in the slots (Capture.slots)
@@ -27,15 +26,16 @@ static func extra(h: Hunter) -> Array:
 	var reach: Array = (h.ak as DredgeKit).net_reach() if h.ak is DredgeKit else []
 	var left := snappedf(maxf(0.0, ch[1]), 0.05)
 	var sick := snappedf(h.sick_t, 0.1)
-	var head := [TAG, h.lvl, SLOT_TAG, slots[0], slots[1], SICK_TAG, sick]
-	return head + [CHAN_TAG, ch[0], left, REACH_TAG, reach, MOVE_TAG, HazardMoves.of(h)]
+	var slot_part := [SLOT_TAG, slots[0], slots[1]]
+	var sick_part := [SICK_TAG, sick]
+	var tail := [CHAN_TAG, ch[0], left, REACH_TAG, reach, MOVE_TAG, HazardMoves.of(h)]
+	return [TAG, h.lvl] + slot_part + sick_part + tail
 
 
 static func apply(h: Hunter, it: Array) -> void:
 	var i := it.size() - TAIL
-	if i < 0 or it[i] != TAG or it[i + 2] != SLOT_TAG or it[i + 5] != SICK_TAG or it[i + 7] != CHAN_TAG:
-		return
-	if it[i + 10] != REACH_TAG or it[i + 12] != MOVE_TAG:
+	var tags_ok: bool = i >= 0 and it[i] == TAG and it[i + 2] == SLOT_TAG and it[i + 5] == SICK_TAG
+	if not tags_ok or it[i + 7] != CHAN_TAG or it[i + 10] != REACH_TAG or it[i + 12] != MOVE_TAG:
 		return
 	h.lvl = maxi(1, int(it[i + 1]))
 	h.set_meta("slots", [int(it[i + 3]), int(it[i + 4])])
