@@ -117,7 +117,7 @@ static func full_map(fm: FullMap) -> void:
 
 
 ## In the world, within NEAR_M of the hunter: a ground ring in the category colour and the thing's name over it
-## (shops and pads already carry their own sign, and a name skips the hunter's own spot on the screen).
+## (a camp's beside its ring; shops and pads already carry their own sign; a name skips the hunter's own spot).
 static func world(hud) -> void:
 	var m: Match = hud.m
 	var p: Hunter = m.player
@@ -133,15 +133,29 @@ static func world(hud) -> void:
 		var id := String(row["id"])
 		var col := Color(CAT[id], clampf((NEAR_M - d) / FADE_M, 0.0, 1.0) * 0.9)
 		_ring_at(hud, cam, at, RING_R[id], col)
-		var lp := cam.unproject_position(at + Vector3(0, 2.6, 0))
-		if not id in NAMELESS and lp.distance_to(me) > HUNTER_CLEAR_PX:
-			var w := TextCache.width(hud.big, String(row["name"]), NAME_PX)
+		if id in NAMELESS:
+			continue
+		var w := TextCache.width(hud.big, String(row["name"]), NAME_PX)
+		var lp := _name_spot(cam, at, id, w, me)
+		if lp.distance_to(me) > HUNTER_CLEAR_PX:
 			hud._rounded(
 				Rect2(lp + Vector2(-w * 0.5 - 6.0, -NAME_PX), Vector2(w + 12.0, NAME_PX + 8.0)),
 				Color(0.04, 0.05, 0.08, 0.7 * col.a),
 				6
 			)
 			hud._ctext(lp, String(row["name"]), NAME_PX, col, hud.big)
+
+
+## Over the thing; a camp's name goes beside its ring, on the side away from the hunter, clear of the monsters'
+## own nameplates over the ring.
+static func _name_spot(cam: Camera3D, at: Vector3, id: String, w: float, me: Vector2) -> Vector2:
+	if id != "camp":
+		return cam.unproject_position(at + Vector3(0, 2.6, 0))
+	var left := cam.unproject_position(at - Vector3(RING_R[id], 0, 0))
+	var right := cam.unproject_position(at + Vector3(RING_R[id], 0, 0))
+	if absf(left.x - me.x) > absf(right.x - me.x):
+		return left - Vector2(w * 0.5 + 12.0, 0)
+	return right + Vector2(w * 0.5 + 12.0, 0)
 
 
 static func _ring_at(hud, cam: Camera3D, at: Vector3, r: float, col: Color) -> void:
