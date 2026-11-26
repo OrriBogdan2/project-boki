@@ -571,9 +571,8 @@ func _e_numbers() -> void:
 	ok("numbers E: the spin clip winds up with the fill (3x as fast near 2 s, its ramp is the 2 s spin)",
 		rate1 > rate0 * 2.8 and float(spin["ramp"][2]) == float(K.e_def()["spin_t"]), "%.4f -> %.4f" % [rate0, rate1])
 	var spout := {}
-	step(m, 0.2, func():
-		seen["freeze"] = maxf(seen["freeze"], m.hitstop)
-		if spout.is_empty() and not K.spouts.is_empty(): spout.merge(K.spouts[0]))
+	step(m, 0.2, func(): if spout.is_empty() and not K.spouts.is_empty(): spout.merge(K.spouts[0]))
+	seen["freeze"] = maxf(seen["freeze"], m.hitstop)       # (headless, a hold never runs down: this is the most)
 	ok("numbers E: no screen shake: no freeze frame and no camera shake from the spin or the spout",
 		float(seen["freeze"]) == 0.0 and Shake._started == shake_at and dmg(T) > 10.0,
 		"freeze %.3f s, dmg %.1f" % [seen["freeze"], dmg(T)])
