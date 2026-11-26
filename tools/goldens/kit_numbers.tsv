@@ -853,6 +853,7 @@ archetypes/juggernaut.json:resource.dash_haste	0.12
 archetypes/juggernaut.json:resource.decay	9.0
 archetypes/juggernaut.json:resource.enraged_dmg	0.15
 archetypes/juggernaut.json:resource.enraged_t	6.0
+archetypes/juggernaut.json:resource.gauge	true
 archetypes/juggernaut.json:resource.heal_creep	0.2
 archetypes/juggernaut.json:resource.heal_knock	0.2
 archetypes/juggernaut.json:resource.max	100
@@ -1086,6 +1087,7 @@ archetypes/ostra.json:rank_dmg.sec[0]	1
 archetypes/ostra.json:rank_dmg.sec[1]	1.2
 archetypes/ostra.json:rank_dmg.sec[2]	1.4
 archetypes/ostra.json:resource.drain	12.0
+archetypes/ostra.json:resource.gauge	true
 archetypes/ostra.json:resource.hunter_k	10.0
 archetypes/ostra.json:resource.max	100
 archetypes/ostra.json:resource.per_dmg	0.045
