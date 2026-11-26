@@ -99,9 +99,9 @@ static func points(model: Node3D, posed := false) -> PackedVector3Array:
 	return pts
 
 
-## Every vertex of `mi` as `skel` poses it now, through `to` (`mi`'s own space to the caller's; skinning poses in it). Godot's own
-## bake_mesh_from_current_skeleton_pose fails headless ("skin registered with a valid skeleton"), so: linear blend
-## skinning, each vertex the weighted sum of its bones' global pose times their bind pose.
+## Every vertex of `mi` as `skel` poses it now, through `to` (`mi`'s own space to the caller's; skinning poses in
+## it). Godot's own bake_mesh_from_current_skeleton_pose fails headless ("skin registered with a valid skeleton"),
+## so: linear blend skinning, each vertex the weighted sum of its bones' global pose times their bind pose.
 static func skinned(mi: MeshInstance3D, skel: Skeleton3D, to: Transform3D) -> PackedVector3Array:
 	var out := PackedVector3Array()
 	var binds: Array[Transform3D] = []

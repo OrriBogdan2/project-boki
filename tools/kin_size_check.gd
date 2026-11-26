@@ -92,14 +92,14 @@ func run(m: Node) -> void:
 		if _print_table:
 			print(
 				(
-					"KIN_SIZE_ROW %s data %.0f cm, bind box %.0f x %.0f x %.0f cm, idle read %.0f cm (57: %.0f, 20: %.0f)"
+					"KIN_SIZE_ROW %s data %.0f cm, bind box %.0f x %.0f x %.0f cm, idle read %.0f cm (%.0f, %.0f)"
 					% [id, cm, box.x * 100, box.y * 100, box.z * 100, _mean(at) * 100, at[0] * 100, at[1] * 100]
 				)
 			)
 		rig.get_parent().get_parent().get_parent().queue_free()
 	if write:
 		var f := FileAccess.open(OUT, FileAccess.WRITE)
-		var doc := "Each rigged Boki's read (m, at fit 1) in its idle pose: KinSize.READS. Written by --kin-size-check --write."
+		var doc := "Each rigged Boki's idle read (m, at fit 1): KinSize.READS. Written by --kin-size-check --write."
 		f.store_string(JSON.stringify({"doc": doc, "reads": idle}, "\t", true) + "\n")
 		f.close()
 		print("KIN_SIZE wrote %d reads to %s" % [idle.size(), OUT])
@@ -122,7 +122,7 @@ func run(m: Node) -> void:
 		(rec["dna"] as Dictionary)["size"] = 0.0
 		var rig := _build(stage, id, rec)
 		var root := rig.get_parent().get_parent().get_parent() as Node3D
-		root.scale = root.scale * farm_scale  # Home draws a Boki at its own scale times FARM_BOKI_SCALE, the same for each
+		root.scale = root.scale * farm_scale  # Home: its own scale times FARM_BOKI_SCALE, the same for each
 		farm[id] = _reads(rig)
 		root.queue_free()
 	_close(farm, "on the farm")

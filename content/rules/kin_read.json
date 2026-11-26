@@ -1,5 +1,5 @@
 {
-	"doc": "Each rigged Boki's read (m, at fit 1) in its idle pose: KinSize.READS. Written by --kin-size-check --write.",
+	"doc": "Each rigged Boki's idle read (m, at fit 1): KinSize.READS. Written by --kin-size-check --write.",
 	"reads": {
 		"burrlet": 0.3411,
 		"caecilith": 0.3105,
