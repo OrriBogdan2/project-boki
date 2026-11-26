@@ -6,6 +6,7 @@ extends RefCounted
 
 const CHECKS := {
 	"--passive-gauge-shots": ["res://tools/passive_gauge_shots.gd", "passive_gauge_shots", null],
+	"--map-clarity-shots": ["res://tools/map_clarity_shots.gd", "map_clarity_shots", null],  # GPU, --shots-dir=<dir>
 	"--shops-check": ["res://tools/shops_check.gd", "shops_check", null],  # in-match shops, the map legend
 	"--reticle-hunters-shots": ["res://tools/reticle_shots.gd", "reticle_shots", "hunters"],
 	"--ghost-visible-check": ["res://tools/ghost_visible_check.gd", "ghost_visible_check", "check"],
