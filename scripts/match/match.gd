@@ -5348,6 +5348,7 @@ func _tips() -> void:
 	ult_hint.tick(self)
 	tips_live = true
 	_tip("move", TipText.move())
+	if _tip_t > CamWheel.HINT_AFTER_S: CamWheel.hint(self)
 	var ways := WaysHints.due(self)
 	if not ways.is_empty(): _tip(ways[0], ways[1])
 	var belt_tip := belt_tips.next(player)
