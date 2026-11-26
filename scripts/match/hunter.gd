@@ -8,9 +8,9 @@ const H_GRAV := 14.7             # m/s^2 [game data] DefaultGravityZ -1470 uu/s^
 # ---- movement feel (movefeel, Oct 31 2026): every value and its source is in docs/MOVEMENT_FEEL.md,
 # measured by --move-feel-check. Snappy first: input acts the step it arrives, falls hit the
 # footage depth, the glider opens and steers at once and keeps the momentum you bring into it.
-# m/s: [game data] JumpZVelocity is 7.5 (1.9m up); ours stops ~1.5m up so jump + mantle still tops
-# out under four terraces (the wall kick's job) on our 0.8m terraces
-const JUMP_V := 6.8
+# m/s: [game data] JumpZVelocity 750 uu/s, 1.91m up; jump + mantle still tops out under four terraces
+# (HunterMove.ledge_reach: the wall kick's job)
+const JUMP_V := 7.5
 # one-step presses, cleared after each sim step
 const PRESS_KEYS := ["dash", "jump", "sig", "util1", "util2", "util3", "util4", "util5", "util6", "ult", "sec",
 		"gear1", "gear2", "skill", "swap"]
@@ -2076,7 +2076,7 @@ func _try_ledge_grab(dt: float) -> void:
 	var w: World = m.world
 	var mv: Vector2 = inp["move"]
 	var reach := 0.0
-	var max_rise := HunterFeel.mantle_reach + (HunterFeel.tall_climb_extra if HunterMove.climbs_tall(self) else 0.0)
+	var max_rise := HunterMove.ledge_reach(self)
 	if grounded:
 		# as in Supervive, walking into a wall doesn't climb it: jump, and you mantle at the top.
 		# Bots still lean their way up so their paths work.

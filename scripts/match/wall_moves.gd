@@ -13,7 +13,7 @@ extends RefCounted
 
 const RULES_PATH := "res://content/rules/wall_kick.json"
 const KICK_RISE := 0.8  # m of extra jump height: one terrace (World.LEVEL)
-const HOP_CLIMB_CAP := 1.6  # m above the take-off ground a hop may still start (a plain jump's apex)
+const HOP_CLIMB_CAP := 1.95  # m above the take-off ground a hop may still start (a plain jump's 1.91m apex)
 const FACE_REACH := 0.4  # m past the body a wall you face (not touching) still answers a hop
 const FACE_RISE := 0.5  # m of ground above your feet that counts as a wall to hop on
 const KICK_PRESS := 0.4  # keys this far into the wall (dot, ~66 degrees) climb it
@@ -127,8 +127,8 @@ static func stopped(h: Hunter, v: float) -> float:
 func hit(h: Hunter, hit_v: Vector2, wall_top: float) -> void:
 	if h.grounded or h.gliding or h.remote or h.dropping or h.mantling() or h.m.time - h.kb_t < BOUNCE_KNOCK_QUIET:
 		return
-	var ramming := h.roll_t > 0.0 and not h.shove.is_empty()      # (a shove outlives the dash: only its run is a ram)
-	if wall_top - h.pos.y <= HunterFeel.mantle_reach or ramming or not h.charge.is_empty():
+	var ramming := h.roll_t > 0.0 and not h.shove.is_empty()  # (a shove outlives the dash: only its run is a ram)
+	if wall_top - h.pos.y <= HunterMove.ledge_reach(h) or ramming or not h.charge.is_empty():
 		return
 	var into := -hit_v.dot(h.wall_n)
 	if into < BOUNCE_MIN_INTO or into > hit_v.length() * cos(deg_to_rad(BOUNCE_HEAD_ON_DEG)):
