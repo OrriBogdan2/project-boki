@@ -28,6 +28,8 @@ const LOOK_LABEL_W := 130.0  # px: the row labels' column on the swatch sheet
 const LOOK_ZOOM := 3.6  # the swatch sheet draws each reticle this many times its size
 const LOOK_ROWS := [["dark ground", "1b1f1c"], ["light ground", "ece6cc"], ["grass", "5f8f4a"]]  # [label, ground]
 const PROOF_AT := Vector2(0.6, 0.5)  # the proof's cursor: mid-screen, just off the Hunter the camera follows
+const PROOF_SCAN := 600  # world units each way the meadow search covers, in steps of PROOF_STEP
+const PROOF_STEP := 6
 const PROOF_RES := Vector2i(1920, 1080)  # the full-screen proof frames
 const TILES_PER_SHEET := 6  # Hunters on one contact sheet (rows of 3)
 const TILE_W := 640  # px: one tile of the contact sheet
@@ -176,6 +178,7 @@ func _proof() -> void:
 	Settings.set_v("tips", false)
 	_pin_reticle()
 	main.get_viewport().gui_disable_input = true
+	m.player.teleport(_meadow_spot())
 	var tiles := []
 	for id in Arch.ids():
 		m.player.reclass(Arch.weight(String(id)), String(id), Arch.signature(String(id)))
@@ -201,6 +204,21 @@ func _proof() -> void:
 		var sheet := await _compose(size, _draw_tiles.bind(chunk))
 		sheet.save_png(dir.path_join("reticle_looks_1126b_sheet%d.png" % (part + 1)))
 	print("RETICLESHOTS proof sheets done")
+
+
+## A free spot well inside a meadow island (the match's plain grass), the first found on a coarse scan.
+func _meadow_spot() -> Vector3:
+	var w := m.world
+	for x in range(-PROOF_SCAN, PROOF_SCAN, PROOF_STEP):
+		for z in range(-PROOF_SCAN, PROOF_SCAN, PROOF_STEP):
+			var inside := true
+			for d in [Vector2.ZERO, Vector2(12, 0), Vector2(-12, 0), Vector2(0, 12), Vector2(0, -12)]:
+				var q := Vector2(x, z) + d
+				inside = inside and not w.is_void(q.x, q.y) and w.biome_at(q.x, q.y) == "meadow"
+			if inside:
+				return w.free_spot_near(Vector3(x, w.ground_at(x, z), z), [], 1.0, 0.5, 4.0)
+	push_error("RETICLESHOTS no meadow spot found")
+	return m.player.pos
 
 
 ## Holds the fire action and the weapon's bloom, so the frame shows the reticle in use.
