@@ -23,6 +23,7 @@ const CLOSE_UP := 12.0          # 1/s: how fast the cards below slide up when on
 const WIDE := 0.45              # of the screen width: the widest a card gets before its line wraps
 const FIGHT_SHOWN := 1          # lines on show at most while the player is in a fight
 const FIGHT_LIFE := 2.0         # s: the longest a line lives in a fight (a hint's own life aside)
+const PX_CAP := 512             # measured world-label texts kept (label_rect)
 
 var top := 100.0                ## px from the top of the screen where the column starts
 var right_edge := 0.0           ## 0: the column is centred; else its right edge, in px
@@ -36,6 +37,7 @@ var hold := false:              ## true: nothing but URGENT comes in (the tutori
 		_promote()
 var _shown: Array[Dictionary] = []
 var _waiting: Array[Dictionary] = []
+static var _px := {}            # [font id, text, wrap px, font size] -> that text's size in px (label_rect)
 
 func _init() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -120,11 +122,18 @@ static func yield_label(lbl: Label3D, cam: Camera3D, rects: Array[Rect2], delta:
 	lbl.modulate.a = 1.0 - lbl.transparency            # (the outline ignores transparency on some renderers)
 	lbl.outline_modulate.a = 1.0 - lbl.transparency
 
-## A billboarded Label3D's box on screen, in px, from its text and font (centred on its position).
+## A billboarded Label3D's box on screen, in px, from its text and font (centred on its position). The text's size
+## is measured once per text, font, size and wrap (PX_CAP kept): every world label asks every frame (LabelSpacing).
 static func label_rect(lbl: Label3D, cam: Camera3D) -> Rect2:
 	var f: Font = lbl.font if lbl.font else ThemeDB.fallback_font
 	var wrap_px := lbl.width if lbl.autowrap_mode != TextServer.AUTOWRAP_OFF else -1.0
-	var px := f.get_multiline_string_size(lbl.text, HORIZONTAL_ALIGNMENT_CENTER, wrap_px, lbl.font_size)
+	var key := [f.get_instance_id(), lbl.text, wrap_px, lbl.font_size]
+	var px: Vector2 = _px.get(key, Vector2.INF)
+	if px == Vector2.INF:
+		if _px.size() >= PX_CAP:
+			_px.clear()
+		px = f.get_multiline_string_size(lbl.text, HORIZONTAL_ALIGNMENT_CENTER, wrap_px, lbl.font_size)
+		_px[key] = px
 	var half := px * lbl.pixel_size * lbl.global_basis.get_scale().x * 0.5
 	var b := cam.global_basis
 	var o := lbl.global_position
