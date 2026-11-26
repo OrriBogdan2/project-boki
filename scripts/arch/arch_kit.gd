@@ -90,6 +90,9 @@ func res_def() -> Dictionary: return d.get("resource", {})
 func res_max() -> float: return float(res_def().get("max", 100.0))
 ## false when the passive has no meter (Red Thread)
 func has_meter() -> bool: return String(res_def().get("kind", "")) != "none"
+## Does the passive draw a fill-up gauge on the HUD (the bar under health and the reticle arc)? Data: "gauge": true on the
+## resource block, for a passive that fills and pays off when full (Rage, Swell). Fever, stacks and foe marks have none.
+func has_gauge() -> bool: return bool(res_def().get("gauge", false))
 func res_col() -> Color: return Color(String(res_def().get("col", "#ffffff")))
 func col_of(sd: Dictionary) -> Color: return Color(String(sd.get("col", "#ffffff")))
 

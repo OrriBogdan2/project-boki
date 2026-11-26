@@ -27,6 +27,8 @@ static func poll(h: Hunter, dt: float, blocked: bool) -> String:
 		h.inp["g_fired"] = true  # swallow the rest of this press: no tap on release
 		h.inp.erase("wheel")
 		return ""
+	if Input.is_action_just_pressed("summon") and KinWisp.mode(h.m):
+		h.inp["g_fired"] = true  # (C is the Summon key and the Boki key: with wisps the press is the summon, no Sic)
 	var down := Input.is_action_pressed("throw")
 	var t := float(h.inp.get("g_t", 0.0))
 	var out := ""
@@ -161,8 +163,7 @@ static func order(h: Hunter, id: String) -> bool:
 			"follow": "at your side"
 		}
 		say(h, "%s: %s" % [k.rec.get("name", "Your Boki"), what[id]], k.sp["color"])
-		var mood := "alert" if id in ["guard", "chase"] else "happy"
-		h.m.sfx(KinVoice.cue(k.species, mood), k.pos, -8.0, Unique.voice(k.rec))
+		KinAck.say(k, id)
 	return ok
 
 

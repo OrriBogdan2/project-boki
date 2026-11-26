@@ -5,7 +5,7 @@
 		"heavy"
 	],
 	"primary": {
-		"dmg": 2.0,
+		"dmg": 3.5,
 		"pellets": 7,
 		"fan_deg": 6.0,
 		"rate": 0.5,
