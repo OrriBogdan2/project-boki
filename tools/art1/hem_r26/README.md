@@ -9,3 +9,6 @@ centred -40 deg) faces the camera in idle/attack; r25 closed it only in Attack, 
   Jump_Run gets run's 0.7; list Crouch before walk). Idle 1.2 (variant p) shut the signature idle slit to a sliver at eye level.
 - `seethru.py GLB`: share of the skirt's game-camera hull (below the waist) where the ground shows through (all body prims as
   occluders), mean/max over clip frames and model yaw -45/0/45. Live bell 0.009; r25 0.109; r26 0.089 (Attack 0.063 -> 0.039).
+- r27 (2026-11-26, plan PLAN-1124o.md r27): same tool from r25, `clo=Crouch:1.4,Jump_Run:0.3,Idle:1.8,walk:1.8,run:1.0,*:1.8
+  band1=30 sy0=0.92 sy1=0.66`. Idle/walk closed like Attack (game view sees no slit V); Jump_Run/run closed less (r26's 0.5/0.7
+  pushed the knee through the slit edge, 4.8 cm). seethru Idle 0.066 -> 0.043, mean 0.089 -> 0.078; poke22 Jump_Run 4.8 -> 1.3 cm.
