@@ -100,6 +100,8 @@ func _stage_cam() -> Vector3:
 	var spot: Vector3 = await inner._stage()
 	world = inner.world
 	combat_owner = inner
+	for layer in main.find_children("*", "CanvasLayer", true, false):  # (the drill card, hotbar and tips)
+		(layer as CanvasLayer).visible = false
 	return spot
 
 
