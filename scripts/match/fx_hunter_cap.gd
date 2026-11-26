@@ -23,6 +23,7 @@ var _match: Match
 var _glows: Array[MeshInstance3D] = []
 var _fresh: Array = []  # mesh nodes that entered the match since the last look
 var _scan_in := 0.0
+var _box := AABB()  # the shown Hunters' feet, grown by NEAR_R: a glow outside it is near none of them
 var _held := {}  # instance id -> true: the glows now capped or dimmed (any other far one needs nothing)
 
 
@@ -49,6 +50,11 @@ func _process(dt: float) -> void:
 			var z := HunterZone.rect_of(_match, h)
 			if z.has_area():
 				zones.append(z)
+	if not near.is_empty():
+		_box = AABB(near[0], Vector3.ZERO)
+		for p in near:
+			_box = _box.expand(p)
+		_box = _box.grow(NEAR_R)
 	for mi in _glows:
 		if is_instance_valid(mi) and mi.is_visible_in_tree():
 			_apply(mi, near)
@@ -116,12 +122,13 @@ func _in_hunter(n: Node) -> bool:
 func _apply(mi: MeshInstance3D, near: Array[Vector3]) -> void:
 	var c := mi.global_position
 	var close := false
-	for p in near:
-		var dx := c.x - p.x
-		var dz := c.z - p.z
-		if dx * dx + dz * dz < NEAR_R * NEAR_R and absf(c.y - p.y) < NEAR_R:
-			close = true
-			break
+	if _box.has_point(c):
+		for p in near:
+			var dx := c.x - p.x
+			var dz := c.z - p.z
+			if dx * dx + dz * dz < NEAR_R * NEAR_R and absf(c.y - p.y) < NEAR_R:
+				close = true
+				break
 	var id := mi.get_instance_id()
 	if not close and not _held.has(id):
 		return  # (as it was left: full size, full alpha)
