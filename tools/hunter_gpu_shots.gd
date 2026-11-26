@@ -1,15 +1,16 @@
 extends "res://tools/gameplay_media.gd"
-## --hunter-gpu-shots --heroes=<arch ids> --shots-dir=<dir>: each Hunter alone in a real match (Dusk Isles, seed 5),
+## --hunter-gpu-shots --heroes=<arch ids> --shots-dir=<dir> [--size=1920x1080]: each Hunter alone in a real match (Dusk Isles, seed 5),
 ## under the match camera, as <dir>/<hero>_<shot>.png: match (idle, the camera's default zoom), zoom (idle, closer)
 ## and run (moving, closer). Needs a renderer (jobq --needs gpu). --face: idle hunters aim at the camera;
 ## --raid=day (RaidLook) shoots in the overcast day instead of the clear evening.
 
-const SIZE := Vector2i(1600, 900)  # px of each shot
+const SIZE := Vector2i(1600, 900)  # px of each shot (--size=WxH)
 const SETTLE := 1.5  # s of idle before a shot
 const RUN_SECS := 1.2  # s of run before the run shot
 const ZOOM_CLOSE := 0.5  # camera zoom of the closer shots
 const FACE_CAM := Vector3(0, 0.9, 3.0)  # --face: idle hunter aims toward the camera
 var face := false
+var size := SIZE
 var variants: Array = []  # --set=<name>:<param>=<v>,... shader overrides; shots <hero>_<name>_<shot>
 
 
@@ -23,11 +24,14 @@ func run(main_node: Node) -> void:
 			face = true
 		if String(a).begins_with("--set="):
 			_add_variant(String(a).substr(6))
+		if String(a).begins_with("--size="):
+			var wh := String(a).get_slice("=", 1)
+			size = Vector2i(int(wh.get_slice("x", 0)), int(wh.get_slice("x", 1)))
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
 	if variants.is_empty():
 		variants.append(["", {}])
-	main.get_window().size = SIZE
+	main.get_window().size = size
 	DirAccess.make_dir_recursive_absolute(dir)
 	Save.no_write = true
 	Settings.v["tips"] = false
