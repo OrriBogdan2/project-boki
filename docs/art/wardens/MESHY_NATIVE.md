@@ -67,6 +67,16 @@ walk, run, air, attack, crouch, the extract beat) in order, at the same pace per
 one-frame snap of the hand. A freshly dressed model reads its first filled state as the baseline (no phantom attack
 from old counters) and poses its idle at once (no rest T-pose frame).
 
+## Footsteps
+Steps sound on the plants of the Meshy feet you see, not on the hidden rig's stride (`HunterAnim` phase, which ran at
+another cadence than Meshy's walk: ~1.0 vs ~1.5 steps/s at walk speed, up to ~20 frames off a visible plant).
+`scripts/heroes/warden_native_steps.gd` (`WardenNativeSteps`) reads data `plants` {walk, run, crouch: {L, R: seconds
+into Meshy's clip}} and bumps the model's `WardenSteps.STEPS` as the contract path's `WardenSteps` does; `HunterAnim`
+hands it on as `stepped`. No `plants` entry (Motley hovers): the old stride. `--step-sync-check` has native rows per
+Hunter: the plants read off Meshy's `LeftFoot`/`RightFoot` in each clip, the data within one frame of them, every step
+heard at two walk, two run and a sneak speed within one frame after a plant of that foot, the feet alternating through
+a walk-run ramp, no step standing. Swap a clip and the check names the new plants to paste into the data.
+
 ## Weapons and orbit props
 Meshy's mesh carries the weapons (Sable's two pistols, Tenzo's one stone arm), so the rig's Gun and HunterAnim's
 Offhand (the twin hold's left piece, the fist hold's second gauntlet) stay hidden: shown, they floated beside the body
