@@ -5,6 +5,8 @@ extends RefCounted
 ## a plain dictionary kept their meshes for the whole session (--match-repeat-check). Every MeshCache is swept
 ## as a match starts: a key no build has asked for since the start of the match before last goes. A shape every
 ## match asks for again (a Hunter's own parts) never ages out, so no build redoes it.
+## A cache made with MeshCache.new(false) holds other things on the same terms (value()/hold()): a species' clips,
+## its paws, its .glb, which every new species in a match added for good (--match-repeat-check).
 
 const IDLE_SWEEPS := 2          # sweeps (match starts) in a row a key went unasked before it goes
 
@@ -13,8 +15,10 @@ static var _lock := Mutex.new()  # PreviewBuild's worker fills these while the m
 
 var _meshes := {}               # key -> Mesh
 var _idle := {}                 # key -> sweeps in a row since a build last asked for it
+var _counted := true            # meshes: entries() counts them
 
-func _init() -> void:
+func _init(meshes := true) -> void:
+	_counted = meshes
 	_all.append(self)
 
 func has(key: Variant) -> bool:
@@ -31,7 +35,7 @@ func mesh(key: Variant) -> Mesh:
 	_lock.unlock()
 	return m
 
-func put(key: Variant, m: Mesh) -> void:
+func put(key: Variant, m: Variant) -> void:   # a Mesh (any value in a new(false) cache)
 	_lock.lock()
 	_meshes[key] = m
 	_idle.erase(key)
@@ -57,12 +61,32 @@ func keep(key: Variant, m: Mesh) -> Mesh:
 	_lock.unlock()
 	return held
 
+## The value held for key counted as asked for, or null (a cache of other things than meshes: new(false)).
+func value(key: Variant) -> Variant:
+	_lock.lock()
+	var v: Variant = _meshes.get(key)
+	if v != null:
+		_idle.erase(key)
+	_lock.unlock()
+	return v
+
+## Stores v under key unless another thread stored one first; returns the value the cache holds (keep(), any value).
+func hold(key: Variant, v: Variant) -> Variant:
+	_lock.lock()
+	if not _meshes.has(key):
+		_meshes[key] = v
+	_idle.erase(key)
+	var held: Variant = _meshes[key]
+	_lock.unlock()
+	return held
+
 ## Meshes held over every cache (--match-repeat-check reads it).
 static func entries() -> int:
 	var n := 0
 	_lock.lock()
 	for c in _all:
-		n += c._meshes.size()
+		if c._counted:
+			n += c._meshes.size()
 	_lock.unlock()
 	return n
 
