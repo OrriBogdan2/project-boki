@@ -10,33 +10,45 @@ extends RefCounted
 ## --video instead: a state tour per --boki id (idle, a stroll, a run at its match speed, stop, attack, hit, faint,
 ## revive, a trot), side view over the floor bars, one jpg a 1/30 s in <dir>/<id>_<tag>/NNNN.jpg for
 ## `ffmpeg -framerate 30 -i %04d.jpg` (jobq returns the out dir, not a movie).
+## --clips instead (a contact sheet per --boki id): one row a clip (CLIP_ROWS), FRAMES poses evenly across its loop at
+## a three-quarter front view, played in place; <dir>/<id>_clips_<tag>.png.
 ## For a before strip, run the same tool on the old tree. Needs a renderer.
 
 const Shots := preload("res://tools/boki_rig_shots.gd")
 const DT := 1.0 / 30.0
 const WARM_S := 0.8
-const WANDER := 2.4             # m/s: a home wander (home.gd); the second row is the species' match speed
+const WANDER := 2.4  # m/s: a home wander (home.gd); the second row is the species' match speed
 const FRAMES := 8
-const FRAME_S := 0.1             # s between the frames of a strip
+const CLIP_ROWS := ["idle", "walk", "run", "attack", "cast", "hop", "sleep"]
+const CLIP_CAM := Vector3(0.75, 0.45, -1.15)  # m from the Boki: its front quarter, a little above
+const CLIP_BACK := {"tuatrune": 1.2, "threadwyrm": 1.5, "velvorm": 2.0}  # x CLIP_CAM, for a bigger body
+const FRAME_S := 0.1  # s between the frames of a strip
 const PX := 256
-const POST_SPACING := 0.4        # m between floor posts
+const POST_SPACING := 0.4  # m between floor posts
 const POST_COUNT := 60
 const SEAM_FRAMES := 10
-const SEAM_PX := 224             # crop around the Boki at the garden camera, of a 1920x1080 view
+const SEAM_PX := 224  # crop around the Boki at the garden camera, of a 1920x1080 view
 const BRED_PX := 640
-const BRED_GAP := 0.9            # m between the three Boki of a --bred still
+const BRED_GAP := 0.9  # m between the three Boki of a --bred still
 const BRED_SEED := 7
-const STROLL := 1.5              # m/s: the audit's idle-to-walk speed (boki_anim_audit HOME_SPEEDS[0])
+const STROLL := 1.5  # m/s: the audit's idle-to-walk speed (boki_anim_audit HOME_SPEEDS[0])
 const VIDEO_PX := Vector2i(960, 540)
-const VIDEO_CAM := Vector3(2.6, 0.4, 0.0)    # m from the Boki, to its side
-const TROT := 3.0                # m/s: the tour's last leg, a speed between the stroll and the run
+const VIDEO_CAM := Vector3(2.6, 0.4, 0.0)  # m from the Boki, to its side
+const TROT := 3.0  # m/s: the tour's last leg, a speed between the stroll and the run
 ## The state tour: label, seconds, move speed (-1: the species' match speed), the metas the game sets for it.
 const TOUR := [
-	{"s": "idle", "t": 1.2}, {"s": "walk 1.5 m/s", "t": 2.0, "v": STROLL}, {"s": "run", "t": 1.8, "v": -1.0},
-	{"s": "stop", "t": 1.0}, {"s": "attack", "t": 1.0, "metas": {"kstate": "attack"}}, {"s": "idle", "t": 0.4},
-	{"s": "hit", "t": 0.8, "hit": true}, {"s": "faint", "t": 1.6, "metas": {"kdown": true}},
-	{"s": "revive", "t": 1.4}, {"s": "trot 3 m/s", "t": 1.0, "v": TROT},
+	{"s": "idle", "t": 1.2},
+	{"s": "walk 1.5 m/s", "t": 2.0, "v": STROLL},
+	{"s": "run", "t": 1.8, "v": -1.0},
+	{"s": "stop", "t": 1.0},
+	{"s": "attack", "t": 1.0, "metas": {"kstate": "attack"}},
+	{"s": "idle", "t": 0.4},
+	{"s": "hit", "t": 0.8, "hit": true},
+	{"s": "faint", "t": 1.6, "metas": {"kdown": true}},
+	{"s": "revive", "t": 1.4},
+	{"s": "trot 3 m/s", "t": 1.0, "v": TROT},
 ]
+
 
 func run(main: Node) -> void:
 	var out := ""
@@ -45,13 +57,22 @@ func run(main: Node) -> void:
 	var seams: Array = []
 	var bred: Array = []
 	var video := false
+	var clips := false
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--bred="): bred = Array(a.substr(7).split(",", false))
-		if a.begins_with("--seam="): seams = Array(a.substr(7).split(",", false))
-		if a.begins_with("--shots-dir="): out = a.substr(12)
-		if a.begins_with("--boki="): ids = Array(a.substr(7).split(",", false))
-		if a == "--video": video = true
-		if a.begins_with("--tag="): tag = a.substr(6)
+		if a.begins_with("--bred="):
+			bred = Array(a.substr(7).split(",", false))
+		if a.begins_with("--seam="):
+			seams = Array(a.substr(7).split(",", false))
+		if a.begins_with("--shots-dir="):
+			out = a.substr(12)
+		if a.begins_with("--boki="):
+			ids = Array(a.substr(7).split(",", false))
+		if a == "--video":
+			video = true
+		if a == "--clips":
+			clips = true
+		if a.begins_with("--tag="):
+			tag = a.substr(6)
 	DirAccess.make_dir_recursive_absolute(out)
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
@@ -68,6 +89,13 @@ func run(main: Node) -> void:
 			var what := String(seams[mini(i, seams.size() - 1)])
 			var row: Image = await _seam(shots, String(ids[i]), what)
 			row.save_png(out.path_join("%s_%s_%s.png" % [ids[i], what, tag]))
+		print("BOKI_ANIM_SHOTS_DONE ", ids.size())
+		main.get_tree().quit()
+		return
+	if clips:
+		for id in ids:
+			var sheet: Image = await _clips(shots, String(id))
+			sheet.save_png(out.path_join("%s_clips_%s.png" % [id, tag]))
 		print("BOKI_ANIM_SHOTS_DONE ", ids.size())
 		main.get_tree().quit()
 		return
@@ -93,6 +121,7 @@ func run(main: Node) -> void:
 	print("BOKI_ANIM_SHOTS_DONE ", ids.size())
 	main.get_tree().quit()
 
+
 func _posts(vp: SubViewport) -> void:
 	var mat := Models.toon(Color("1c2a14"), false)
 	for i in POST_COUNT:
@@ -103,6 +132,7 @@ func _posts(vp: SubViewport) -> void:
 		post.material_override = mat
 		post.position = Vector3(0, 0.011, -i * POST_SPACING + 2.0)
 		vp.add_child(post)
+
 
 func _row(vp: SubViewport, cam: Camera3D, id: String, v: float, sheet: Image, row: int) -> void:
 	var k := Shots.rigged_kin(id)
@@ -126,6 +156,7 @@ func _row(vp: SubViewport, cam: Camera3D, id: String, v: float, sheet: Image, ro
 			sheet.blit_rect(img, Rect2i(0, 0, PX, PX), Vector2i((int(f / float(steps))) * PX, row * PX))
 	k.queue_free()
 
+
 ## Parent a, parent b and their seeded hatchling in a line, side view, standing still.
 func _bred(shots: Shots, parents: Array) -> Image:
 	var a := Save.new_kin(String(parents[0]), "A", BRED_SEED)
@@ -133,8 +164,19 @@ func _bred(shots: Shots, parents: Array) -> Image:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = BRED_SEED
 	var kid := Care.breed(a, b, rng, String(parents[0]))
-	print("BRED a=%s b=%s kid=%s mark=%s accent=%s gifts=%s" % [a["dna"]["mark"], b["dna"]["mark"], kid["species"],
-		kid["dna"]["mark"], kid["dna"].get("accent", "-"), kid["gifts"]])
+	print(
+		(
+			"BRED a=%s b=%s kid=%s mark=%s accent=%s gifts=%s"
+			% [
+				a["dna"]["mark"],
+				b["dna"]["mark"],
+				kid["species"],
+				kid["dna"]["mark"],
+				kid["dna"].get("accent", "-"),
+				kid["gifts"]
+			]
+		)
+	)
 	var vp: SubViewport = shots._stage(Vector2i(BRED_PX * 3, BRED_PX))
 	var cam := Camera3D.new()
 	vp.add_child(cam)
@@ -160,6 +202,42 @@ func _bred(shots: Shots, parents: Array) -> Image:
 	img.convert(Image.FORMAT_RGBA8)
 	vp.queue_free()
 	return img
+
+
+## A contact sheet of the rig's clips: a row each, FRAMES poses evenly across the loop, front quarter.
+func _clips(shots: Shots, id: String) -> Image:
+	var vp: SubViewport = shots._stage(Vector2i(PX, PX))
+	var cam := Camera3D.new()
+	vp.add_child(cam)
+	cam.make_current()
+	cam.fov = 26.0
+	var label := Label.new()
+	label.add_theme_font_size_override("font_size", 20)
+	vp.add_child(label)
+	var k := Shots.rigged_kin(id)
+	vp.add_child(k)
+	k.position = Vector3.ZERO
+	cam.position = CLIP_CAM * float(CLIP_BACK.get(id, 1.0))
+	cam.look_at(Vector3(0, 0.3, 0))
+	var rig := k.get_node("Body/Flex/BokiRig") as BokiRig
+	rig.set_process(false)
+	rig.player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
+	var sheet := Image.create(PX * FRAMES, PX * CLIP_ROWS.size(), false, Image.FORMAT_RGBA8)
+	for row in CLIP_ROWS.size():
+		var clip: String = CLIP_ROWS[row]
+		label.text = "%s %s" % [id, clip]
+		rig.clip = ""
+		rig.set_clip(clip, 0.0)
+		var dur := rig.player.get_animation(clip).length
+		for f in FRAMES:
+			rig.player.seek(dur * f / float(FRAMES), true)
+			rig.advance(0.0)
+			var img: Image = await shots._grab(vp)
+			img.convert(Image.FORMAT_RGBA8)
+			sheet.blit_rect(img, Rect2i(0, 0, PX, PX), Vector2i(f * PX, row * PX))
+	vp.queue_free()
+	return sheet
+
 
 ## One row at the garden camera (Shots' farm close-up): frames DT apart across `what`'s wrap, or the set-off.
 func _seam(shots: Shots, id: String, what: String) -> Image:
@@ -201,6 +279,7 @@ func _seam(shots: Shots, id: String, what: String) -> Image:
 		sheet.blit_rect(img, Rect2i(at, Vector2i(SEAM_PX, SEAM_PX)), Vector2i((i - lead) * SEAM_PX, 0))
 	vp.queue_free()
 	return sheet
+
 
 ## The TOUR as jpg frames in `dir`: the Boki moves through the live BokiRig (clip, rate and blends from what it does).
 func _video(shots: Shots, id: String, dir: String) -> void:
