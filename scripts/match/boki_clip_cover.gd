@@ -9,12 +9,13 @@ const NEAR_IDLE_DEG := 3.0  # every pose within this of a pose idle passes throu
 const SAMPLES := 16
 
 
-## Does `clip` move (a sleep clip may hold its pose) and leave the idle pose?
-static func passes(clip: Animation, idle: Animation, sleeping := false) -> bool:
+## Does `clip` move and leave the idle pose? A sleep clip that holds one pose fails too: the built nap breathes,
+## and every clip a Boki plays must move (--boki-anim-audit).
+static func passes(clip: Animation, idle: Animation) -> bool:
 	if clip == null:
 		return false
 	var smp := sample(clip)
-	return (sleeping or motion(smp) >= STILL_DEG) and off_idle(smp, sample(idle)) > NEAR_IDLE_DEG
+	return motion(smp) >= STILL_DEG and off_idle(smp, sample(idle)) > NEAR_IDLE_DEG
 
 
 ## bone -> [Quaternion at SAMPLES even steps over the clip], rotation tracks only.

@@ -42,7 +42,7 @@ static func _build(species: String, player: AnimationPlayer, skel: Skeleton3D) -
 	var pose := BokiHomePoses.new(names, species)
 	var il := idle.length
 	var out := {}
-	var own_sleep := BokiClipCover.passes(sleep, idle, true)
+	var own_sleep := BokiClipCover.passes(sleep, idle)
 	pose.curl = 0.0 if own_sleep else 1.0
 	out["settle"] = _clip(skel, pose, "settle", idle, sleep, SETTLE_SECS)
 	out["wake"] = _clip(skel, pose, "wake", sleep, idle, WAKE_SECS)
