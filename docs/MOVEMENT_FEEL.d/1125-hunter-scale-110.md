@@ -24,3 +24,6 @@ prints each body's height in px at 1920x1080, with the plate's gap over the head
 archetypes it prints, at the old size ("main"), at the rule's size ("now") and with the clearance ("fixed"), the px
 between the plate's bottom and the model's top (the world-height column) and between it and the drawn silhouette's top.
 The shots hide the match's aim line and message cards, and stand on the arena's own floor.
+Measured 11-25 (jobq 20261125-231836-28993, same spot, same pose, px at 1080p): Kael 117 -> 127, Vex 120 -> 133,
+Sparkle 126 -> 144 (her hair spikes swing a little with the size). Stun stars, the vulnerable sparks, the glider's heat
+smoke and a shoulder Boki's speech bubble also read their metres times `match_hunter_scale`.

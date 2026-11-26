@@ -2,10 +2,10 @@ extends "res://tools/gameplay_media.gd"
 ## --hunter-scale-shots --shots-dir=<dir> [--hero=arch,arch]: each hero standing on the same open ground, shot at the
 ## old match size (Hunter.VIS_SCALE 1.12) and at the camera.json match_hunter_scale, as <dir>/<hero>_<before|after>.png
 ## (no HUD) and <hero>_<before|after>_hud.png (with the overhead plate). Prints a HSCALE row per hero: on-screen
-## body height in px (feet to the top of the head), the model scale, and the hit radius (must not change).
+## body height in px at 1080p (feet to the top of the head), the model scale, and the hit radius (must not change).
 ## --gaps (no renderer needed): every archetype, at the old and the new size, prints a GAP row with the model's top
-## (back props too) over the feet in m and the px between the bottom of its own plate and of a rival's plate and
-## that top
+## (back props too) over the feet in m and the px (at 1080p) between the bottom of its own plate and of a rival's
+## plate and that top
 ## (negative: the plate covers the model). Needs a renderer for the shots (jobq --needs gpu); 1920x1080 so the px read
 ## against a 1080p reference.
 
@@ -105,21 +105,22 @@ func _gaps(after: float, heroes_arg := []) -> void:
 			var fixed: bool = pass_name == "fixed"
 			var own := 2.7 * float(p.cdat["scale"])
 			var rival := HudPlate.plate_offset(p)
+			var k := float(SIZE.y) / main.get_viewport().get_visible_rect().size.y  # viewport px to 1080p px
 			if fixed:
 				own = HudPlate.up(p, own)
 				rival = HudPlate.up(p, rival)
 			print(
 				(
-					"GAP %s %s: top %.2f m (top_h %.3f), plate over it: own %.0f px, rival %.0f px (silhouette %.0f, %.0f)"
+					"GAP %s %s: top %.2f m (top_h %.3f), plate over it: own %.0f px, rival %.0f px (silh. %.0f, %.0f)"
 					% [
 						hero,
 						pass_name,
 						up,
 						up / p.vis_k,
-						column - _screen_y(p, own * CamRig.match_hunter_scale) - PLATE_H,
-						column - _screen_y(p, rival * CamRig.match_hunter_scale) - PLATE_H,
-						_top(p.model) - _screen_y(p, own * CamRig.match_hunter_scale) - PLATE_H,
-						_top(p.model) - _screen_y(p, rival * CamRig.match_hunter_scale) - PLATE_H
+						(column - _screen_y(p, own * CamRig.match_hunter_scale) - PLATE_H) * k,
+						(column - _screen_y(p, rival * CamRig.match_hunter_scale) - PLATE_H) * k,
+						(_top(p.model) - _screen_y(p, own * CamRig.match_hunter_scale) - PLATE_H) * k,
+						(_top(p.model) - _screen_y(p, rival * CamRig.match_hunter_scale) - PLATE_H) * k
 					]
 				)
 			)
@@ -181,10 +182,12 @@ func _shot(hero: String, pass_name: String) -> void:
 	var top := _top(p.model)
 	var up := HudPlate.up(p, 2.7 * float(p.cdat["scale"])) * CamRig.match_hunter_scale
 	var plate := m.cam.unproject_position(p.position + m.cam.char_lean() * Vector3(0, up, 0))
+	# the viewport keeps the project's 1280x720 and the window shows it at 1920x1080: px are read at 1080p
+	var k := float(SIZE.y) / main.get_viewport().get_visible_rect().size.y
 	print(
 		(
 			"HSCALE %s %s: %.0f px tall, model scale %.3f, hit radius %.3f, plate anchor %.0f px over the head"
-			% [hero, pass_name, feet.y - top, p.vis_k, p.hit_radius(), top - plate.y]
+			% [hero, pass_name, (feet.y - top) * k, p.vis_k, p.hit_radius(), (top - plate.y) * k]
 		)
 	)
 
