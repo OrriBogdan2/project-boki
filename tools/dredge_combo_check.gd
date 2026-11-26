@@ -1196,26 +1196,29 @@ func _parity_gun() -> void:
 func _anchor_spike() -> void:
 	var r: Array = ak.setup("dredge", 6.0, "", true)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[2]
+	var pl: Hunter = r[1]
+	var tg: Hunter = r[2]
 	var home: Vector3 = r[4]
-	var K: DredgeKit = P.ak
-	T.teleport(home + Vector3(2.0, 1.2, 0))
-	ak.fresh(T)
-	ak.aim_at(P, home + Vector3(2.0, 0, 0))
-	K.cd["e"] = 0.0
-	P.ak.use_e()
+	var kit: DredgeKit = pl.ak
+	tg.teleport(home + Vector3(2.0, 1.2, 0))
+	ak.fresh(tg)
+	ak.aim_at(pl, home + Vector3(2.0, 0, 0))
+	kit.cd["e"] = 0.0
+	pl.ak.use_e()
 	var t := 0.0
-	while K.anchors == 0 and t < 1.0:
-		T.pos.y = home.y + 1.2      # held in the air until the slam frame
-		T.vel = Vector3.ZERO
-		T.grounded = false
+	while kit.anchors == 0 and t < 1.0:
+		tg.pos.y = home.y + 1.2  # held in the air until the slam frame
+		tg.vel = Vector3.ZERO
+		tg.grounded = false
 		m.step(ak.DT)
 		t += ak.DT
-	var vy := T.vel.y
-	for i in 6:      # the cone's hit lands within a few frames of the slam
+	var vy := tg.vel.y
+	for i in 6:  # the cone's hit lands within a few frames of the slam
 		m.step(ak.DT)
-		vy = minf(vy, T.vel.y)
+		vy = minf(vy, tg.vel.y)
 	# the data's 16 m/s, which a hunter's fall cap (HunterMove.fall_max, 12) clamps on its next tick
-	ok("anchor spike: the ground Anchor Drop drives a foe in the air down (at the fall cap at once)",
-		K.anchors == 1 and vy <= -HunterMove.fall_max + 0.5, "anchors %d vy %.1f" % [K.anchors, vy])
+	ok(
+		"anchor spike: the ground Anchor Drop drives a foe in the air down (at the fall cap at once)",
+		kit.anchors == 1 and vy <= -HunterMove.fall_max + 0.5,
+		"anchors %d vy %.1f" % [kit.anchors, vy]
+	)

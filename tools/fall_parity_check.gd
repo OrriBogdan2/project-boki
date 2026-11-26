@@ -31,6 +31,8 @@ const SLIDE_TOL := 0.05  # m a stop after a landing or on a flight may slide pas
 const VIEW_TOL := 0.1  # m (ground-equivalent) the view may drift after a 10 m landing (it was ~0.7)
 const LANE := Rect2i(-6, -2, 11, 5)  # tiles round the drop spot the runs cross (the held fall starts 5.3 m back)
 
+var m: Match
+var h: Hunter
 var bad := 0
 var arcs := {}  # mode -> [air steps, apex m] of the running jump
 
@@ -99,8 +101,6 @@ func _unlay(w: World, old: Array) -> void:
 
 
 # ---------------------------------------------------------------- the match modes (one Hunter._physics)
-var m: Match
-var h: Hunter
 
 
 func _reset(at: Vector3, v: Vector3, standing: bool) -> void:
@@ -224,7 +224,7 @@ func _match_mode(main: Node, mode: String) -> void:
 	await main.get_tree().process_frame
 
 
-func _jump(mode: String, at: Vector3, run: float) -> void:
+func _jump(mode: String, at: Vector3, _run: float) -> void:
 	_reset(at + Vector3(-3.5, 0, 0), Vector3.ZERO, true)
 	h.inp["move"] = Vector2(1, 0)
 	for i in 20:

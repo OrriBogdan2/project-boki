@@ -154,6 +154,7 @@ const SLIDE_LOOP_T := 0.133 / SLIDE_RATE  # slide replays it from here, one peri
 const OVER := 2.0  # s: older than any of her clips (the longest runs 1.07 s): a move aged this far
 # is over to the clips (the kit's anim_id is read as long as it is set)
 
+
 ## Walking out of the slide's stand-up once the skid has ended: the legs are hers again and the walk blends in
 ## (WardenClips.FADE_LOCO) in place of the clip's stand-still pose, the source's Ghost walking off.
 ## (Clearing anim_id would not do: the published anim state keeps the last kmove until another move plays.)
@@ -833,13 +834,14 @@ func _fire_needle() -> void:
 	var ed := e_def()
 	var d := h.aim_dir()
 	var a := _muzzle(d)
-	var L := float(ed["range"])
-	L = minf(L, Blockers.cut(m.verbs.walls, a, a + Vector3(d.x, 0, d.y) * L, h.team, "pierce"))  # placed walls stop it
+	var reach := float(ed["range"])
+	# placed walls stop it
+	reach = minf(reach, Blockers.cut(m.verbs.walls, a, a + Vector3(d.x, 0, d.y) * reach, h.team, "pierce"))
 	needle_dir = d
 	# a taut needle of light (deep body, white-hot core, sparks shed along it) out of her open palm to where the
 	# measured line ends, a bloom on the palm, recoil smoke round her
 	var palm := palm_at()
-	var to := a + Vector3(d.x, 0, d.y) * L - palm
+	var to := a + Vector3(d.x, 0, d.y) * reach - palm
 	last_beam = palm
 	vfx("e_fire", palm, Vector2(to.x, to.z).normalized(), {"len": Vector2(to.x, to.z).length(), "r": beam_width()})
 	h.impulse(-d * float(ed.get("recoil", 6.0)))  # the recoil shoves her back a step
@@ -851,7 +853,7 @@ func _fire_needle() -> void:
 			continue
 		var v := Vector2(f.pos.x - h.pos.x, f.pos.z - h.pos.z)
 		var along := v.dot(d)
-		if along < 0.0 or along > L + f.r:
+		if along < 0.0 or along > reach + f.r:
 			continue
 		if absf(v.cross(d)) > float(ed["width"]) + f.r:
 			continue

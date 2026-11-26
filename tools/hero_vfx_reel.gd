@@ -78,7 +78,7 @@ func run(main_node: Node) -> void:
 	for slot in P.slot_lv:
 		P.slot_lv[slot] = 3
 	# (--reel-only may name a part kept off the reel)
-	for part: String in (parts() if only == "" or only in parts() else [only]):
+	for part: String in parts() if only == "" or only in parts() else [only]:
 		if only != "" and part != only:
 			continue
 		print("REEL_MARK %d %s" % [Engine.get_frames_drawn(), part])
@@ -89,6 +89,7 @@ func run(main_node: Node) -> void:
 	_write_captions()
 	print("REEL_DONE %d in %s" % [lines.size(), dir])
 	main.get_tree().quit(0)
+
 
 ## --reel-movie: this reel again as a child Godot under the movie writer at a fixed 60 fps. The movie is as big as
 ## the project's viewport setting, so the child gets MOVIE_SIZE from a temporary override.cfg.
@@ -110,6 +111,7 @@ func _record_movie() -> void:
 		if line.begins_with("REEL_") or line.contains("ERROR"):
 			print(line)
 	main.get_tree().quit(rc)
+
 
 ## (the match's own step is off here, so the ears and the detail share follow from this)
 func _go(secs: float, each := Callable(), marks: Array = [], lead := 3.5) -> void:
@@ -346,10 +348,10 @@ func _juggernaut_wave() -> void:
 
 func _juggernaut_slam() -> void:
 	await _reset(3.2)
-	var K: JuggernautKit = P.ak
+	var kit: JuggernautKit = P.ak
 	var slam := func(t: float):
 		if _at(t, 0.1):
-			K.press_rmb()
+			kit.press_rmb()
 		_aim(T.pos)
 	await _go(
 		2.5,
