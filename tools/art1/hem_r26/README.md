@@ -5,6 +5,7 @@ through any front gap leaves through the open hem 10-15 cm later and hits the gr
 centred -40 deg) faces the camera in idle/attack; r25 closed it only in Attack, by 16 deg, and only below y 0.60 (a tear hole stayed above).
 - `slitclose.py` (post-pass on the shipped r25 glb + clips; mesh, textures, non-slit weights and all other keys untouched):
   extra closing yaw on the SkirtSlitA/B keys per clip; band1/sy0/sy1 rebuild the slit weights with sway25's formula.
-  Shipped: `clo=Idle:1.2,walk:1.2,Crouch:1.0,run:0.7,Jump_Run:0.5,*:1.8 band1=30 sy0=0.92 sy1=0.66` (r25: 0.60..0.86, closed 1.0 in Attack/kits only).
+  Shipped: `clo=Crouch:1.0,Idle:0.7,walk:0.7,run:0.7,Jump_Run:0.5,*:1.8 band1=30 sy0=0.92 sy1=0.66` (first substring match wins:
+  Jump_Run gets run's 0.7; list Crouch before walk). Idle 1.2 (variant p) shut the signature idle slit to a sliver at eye level.
 - `seethru.py GLB`: share of the skirt's game-camera hull (below the waist) where the ground shows through (all body prims as
-  occluders), mean/max over clip frames and model yaw -45/0/45. Live bell 0.009; r25 0.109; r26 0.083.
+  occluders), mean/max over clip frames and model yaw -45/0/45. Live bell 0.009; r25 0.109; r26 0.089 (Attack 0.063 -> 0.039).
