@@ -278,7 +278,9 @@ func run(main: Node) -> void:
 			% [BEGIN, _table(HUNTER_COLS, hunters), _table(BOKI_COLS, bokis), _table(Garden.COLS, ranked)]
 		)
 		+ "Worst five, backlog-ready:\n\n%s" % Garden.backlog(garden, 5)
-		+ "\n### Mobs\n\n" + _table(Mobs.COLS, Mobs.rows()) + END
+		+ "\n### Mobs\n\n"
+		+ _table(Mobs.COLS, Mobs.rows())
+		+ END
 	)
 	var old := FileAccess.get_file_as_string(DOC)
 	var a := old.find(BEGIN)

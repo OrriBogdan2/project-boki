@@ -10,16 +10,19 @@ extends RefCounted
 var bad := 0
 const EXPEDITION := {"teams": 10, "squad": 2, "tier": 0}
 
+
 func ok(cond: bool, what: String) -> void:
 	print("PREMATCH %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
 	var d := Save.fresh()
 	d["name"] = "Tester"
 	d["arch"] = "gunslinger"
-	var c := ClassUnlock.fresh()                    # two Hunters open, the rest still shut
+	var c := ClassUnlock.fresh()  # two Hunters open, the rest still shut
 	c["picks"] = ["gunslinger"]
 	c["open"] = ["gunslinger", "bulwark"]
 	d["classes"] = c
@@ -36,6 +39,7 @@ func run(main: Node) -> void:
 	print("PREMATCH DONE, failures: %d" % bad)
 	main.get_tree().quit()
 
+
 func _turns() -> void:
 	var o := {"teams": 10, "squad": 3, "tier": 0, "seed": 7}
 	Prematch.deal_mates(o)
@@ -48,7 +52,7 @@ func _turns() -> void:
 	pm.tick(0.01)
 	ok(pm.turn == 0 and pm.my_turn() and pm.squad[0]["you"], "offline you pick first")
 	ok(pm.turn_left == Prematch.TURN and Prematch.TURN == 10.0, "a turn is 10 seconds")
-	o["mates"][0]["arch"] = "bulwark"               # a bot dealt the Hunter you are about to take
+	o["mates"][0]["arch"] = "bulwark"  # a bot dealt the Hunter you are about to take
 	pm.squad[1]["deal"] = "bulwark"
 	ok(pm.choose("bulwark") and pm.pick == "bulwark", "an open Hunter can be picked on your turn")
 	var shut := Arch.ids().filter(func(a): return not ClassUnlock.is_open(a))
@@ -64,7 +68,8 @@ func _turns() -> void:
 	ok(pm.taken_by("gunslinger") == "Tester", "a taken Hunter names who took it")
 	var goes := 0
 	for i in 400:
-		if pm.tick(0.01): goes += 1
+		if pm.tick(0.01):
+			goes += 1
 	ok(goes == 1, "after the lock hold the match loads, exactly once (%d)" % goes)
 	var lo := pm.launch_opts()
 	var mates_kept: bool = lo["mates"].map(func(m): return m["arch"]) == archs.slice(1)
@@ -75,6 +80,7 @@ func _turns() -> void:
 	idle.tick(Prematch.TURN + 0.01)
 	var auto_ok := idle.locked and ClassUnlock.is_open(idle.pick)
 	ok(auto_ok, "a turn that runs out gives you a random open Hunter (%s)" % idle.pick)
+
 
 ## A save's first lobby: on your turn the note says what 0:00 does, then that the squad sees the pick; once.
 func _first_lobby() -> void:
@@ -92,13 +98,14 @@ func _first_lobby() -> void:
 	var again := Prematch.new(o.duplicate(true))
 	again.tick(0.01)
 	ok(not again.first and again.teach_line() == "", "second lobby: the usual note, teach shown once per save")
-	Save.d["tutorial"].erase("first_lobby")         # the screen check below runs as a first lobby again
+	Save.d["tutorial"].erase("first_lobby")  # the screen check below runs as a first lobby again
 	var old := Save.fresh()
 	old.erase("tutorial")
 	var keep := Save.d
 	Save.d = old
 	ok(Prematch.first_lobby(), "an older save with no tutorial flag sees the first-lobby teach once")
 	Save.d = keep
+
 
 ## Online: three on your squad, one rival who mirrors a pick. Peer "2" is you.
 func _online() -> void:
@@ -170,6 +177,7 @@ func _online() -> void:
 	Net.me = was_me
 	Net.peers = was_peers
 
+
 func _bot_fill() -> void:
 	var taken := ["gunslinger", "ostra", "tender"]
 	var got := Arch.pick_for("medium", "b7|99", taken)
@@ -177,10 +185,12 @@ func _bot_fill() -> void:
 	var unchanged := Arch.pick_for("medium", "b7|99") == Arch.pick("medium", _seeded("b7|99"))
 	ok(unchanged, "with nothing taken the pick is unchanged")
 
+
 func _seeded(key: String) -> RandomNumberGenerator:
 	var r := RandomNumberGenerator.new()
 	r.seed = hash(key)
 	return r
+
 
 func _toggle() -> void:
 	var was: Variant = Settings.v.get("lobby_enabled")
@@ -195,8 +205,11 @@ func _toggle() -> void:
 		o[k] = true
 		ok(not Prematch.wanted(o), "%s never gets the lobby" % k)
 	ok(not Prematch.wanted({"teams": 1, "squad": 1}), "a one-team match (training) never gets the lobby")
-	if was == null: Settings.v.erase("lobby_enabled")
-	else: Settings.v["lobby_enabled"] = was
+	if was == null:
+		Settings.v.erase("lobby_enabled")
+	else:
+		Settings.v["lobby_enabled"] = was
+
 
 func _squad() -> void:
 	var o := EXPEDITION.duplicate()
@@ -212,6 +225,7 @@ func _squad() -> void:
 	var you_first: bool = sq.size() == 2 and sq[0]["you"] and sq[0]["arch"] == "gunslinger" and not sq[1]["you"]
 	ok(you_first, "the loading screen's squad is you first, then your mate")
 
+
 func _chat_and_voice() -> void:
 	ok(Prematch.clean_chat("  push north\nnow  ") == "push north now", "a chat line is trimmed and one line")
 	var capped := Prematch.clean_chat("x".repeat(500)).length()
@@ -223,6 +237,7 @@ func _chat_and_voice() -> void:
 	v.transport = func(on: bool): seen.append(on)
 	v.set_talking(false)
 	ok(v.available() and seen == [false] and not v.talking, "a transport gets push-to-talk changes")
+
 
 func _screen(main: Node) -> void:
 	var o := EXPEDITION.duplicate()
@@ -255,10 +270,11 @@ func _screen(main: Node) -> void:
 	_ticks(view)
 	var shots := ""
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--shots-dir="): shots = a.substr(12)
+		if a.begins_with("--shots-dir="):
+			shots = a.substr(12)
 	if shots != "":
 		if main.fade != null:
-			main.fade.reveal(0.05)      # (the boot splash would cover the screenshot)
+			main.fade.reveal(0.05)  # (the boot splash would cover the screenshot)
 		view.pm.tick(3.4)
 		view._choose("bulwark")
 		for i in 30:
@@ -280,19 +296,22 @@ func _screen(main: Node) -> void:
 	ok(staged, "your pick stands on the stage beside the grid, striking its lock-in pose")
 	var fits: Array = load("res://tools/prematch_shots.gd").new().outside(view, Rect2(Vector2.ZERO, view.size))
 	ok(fits.is_empty(), "with the stage up every element still sits inside the safe margin (%s)" % [fits.slice(0, 2)])
-	view.pm.squad[1]["bot"] = false      # a human mate picks next: your turn ends and the screen says what locked in
+	view.pm.squad[1]["bot"] = false  # a human mate picks next: your turn ends and the screen says what locked in
 	view.pm.tick(Prematch.TURN + 0.01)
 	view._tick_label()
 	var said: String = view.note_label.text
-	ok(said.begins_with("Time's up: ") and said.contains(HunterViewer.display_name("bulwark")),
-			"your turn ends while the squad still picks: the note says your Hunter locked in (%s)" % said)
-	view.pm.tick(Prematch.TURN + Prematch.GRACE + 0.01)      # (the mate's pick never arrives: picked for)
+	ok(
+		said.begins_with("Time's up: ") and said.contains(HunterViewer.display_name("bulwark")),
+		"your turn ends while the squad still picks: the note says your Hunter locked in (%s)" % said
+	)
+	view.pm.tick(Prematch.TURN + Prematch.GRACE + 0.01)  # (the mate's pick never arrives: picked for)
 	view._tick_label()
 	ok(view.pm.locked and view.caption.text == "PICKS LOCKED", "once the squad has picked the banner says so")
 	var note: String = view.note_label.text
 	ok(note.contains("locked in") and note.contains(HunterViewer.display_name("bulwark")), "the note names the pick")
 	view.set_process(false)
 	view.queue_free()
+
 
 ## The countdown ticks (a click, once a second) from TICK_FROM on your own turn only, and throbs below PULSE_FROM.
 func _ticks(view: Control) -> void:
@@ -313,6 +332,7 @@ func _ticks(view: Control) -> void:
 	view.pm.turn_left = Prematch.TURN
 	view._tick_label()
 
+
 ## The big view: your pick (your saved Hunter before a pick) with its name and one icon per ability; the hovered
 ## roster tile's Hunter while the mouse is on it, and your pick again after.
 func _hero(view: Control) -> void:
@@ -326,9 +346,12 @@ func _hero(view: Control) -> void:
 	card.mouse_exited.emit()
 	var back: String = view.shown_hunter()
 	var want_ak: String = pick if pick != "" else Arch.of_save()
-	ok(start == want_ak and hovered == other and named and back == start,
-			"the big view: your pick, the hovered tile's Hunter on hover (%s, %s, %s)" % [start, hovered, back])
+	ok(
+		start == want_ak and hovered == other and named and back == start,
+		"the big view: your pick, the hovered tile's Hunter on hover (%s, %s, %s)" % [start, hovered, back]
+	)
 	ok(view.ability_row.get_child_count() == KitCard.slots_of(start).size(), "one icon per ability under the name")
+
 
 ## Lock in: shut before a pick, live once you have one, and it ends your turn at once with that pick.
 func _lock_in(view: Control) -> void:
@@ -343,6 +366,7 @@ func _lock_in(view: Control) -> void:
 	view._choose("bulwark")
 	ok(not view.lock_btn.disabled and view.lock_btn.text == "Lock in", "with a pick on your turn the button is live")
 
+
 ## Roster tiles are the portrait alone (stats, how to play and quests on hover); shut ones are dim with a padlock;
 ## the voice button waits for a human squadmate.
 func _declutter(view: Control) -> void:
@@ -353,7 +377,8 @@ func _declutter(view: Control) -> void:
 		var ak: String = card.get_meta("arch")
 		var chip: Node = card.find_child("StartHere", false, false)
 		var labels: Array = card.find_children("*", "Label", true, false).filter(
-				func(l): return chip == null or not chip.is_ancestor_of(l))
+			func(l): return chip == null or not chip.is_ancestor_of(l)
+		)
 		var lock: bool = card.find_children("*", "Control", true, false).any(func(c): return c.get_script() == padlock)
 		var shut := not ClassUnlock.is_open(ak)
 		open += 0 if shut else 1
@@ -371,8 +396,11 @@ func _declutter(view: Control) -> void:
 	var timer_box: Rect2 = view.timer_label.get_global_rect()
 	var up_top := timer_box.end.y < win.y * 0.4 and absf(timer_box.get_center().x - win.x * 0.5) < 2.0
 	var big: bool = view.timer_label.get_theme_font_size("font_size") >= view.DIGITS_MIN
-	ok(view.grid.get_child_count() >= 13 and up_top and big,
-			"13+ Hunters fit and the countdown stays big, top centre (%s)" % [timer_box])
+	ok(
+		view.grid.get_child_count() >= 13 and up_top and big,
+		"13+ Hunters fit and the countdown stays big, top centre (%s)" % [timer_box]
+	)
+
 
 ## The lock-in pose: every Hunter whose model has clips names one of them, it runs 1-1.5 s once and the Hunter is back
 ## on its idle, and choosing again mid-pose restarts it from the top.
@@ -396,7 +424,7 @@ func _lockin(main: Node) -> void:
 		var clips: WardenClips = sync.get("clips") if sync != null else null
 		var lk: Dictionary = WardenClips.data(art).get("lockin", {})
 		var clip := String(lk.get("clip", ""))
-		if clips == null or lk.is_empty():      # no lock-in pose (Gil borrows Meeko's clips): it stands on its idle
+		if clips == null or lk.is_empty():  # no lock-in pose (Gil borrows Meeko's clips): it stands on its idle
 			ok(lk.is_empty(), "%s: a model without a lock-in pose names none" % ak)
 			continue
 		var has_clip := clips != null and clips.lib.has_animation(clip)
@@ -408,7 +436,7 @@ func _lockin(main: Node) -> void:
 		stage.play_lockin()
 		for _i in 10:
 			stage.tick(0.05)
-		stage.play_lockin()      # chosen again half-way: from the top
+		stage.play_lockin()  # chosen again half-way: from the top
 		ok(stage.lockin_t == 0.0, "%s: choosing again restarts the pose" % ak)
 		var posed := 0.0
 		for _i in 100:
@@ -424,6 +452,7 @@ func _lockin(main: Node) -> void:
 			stage.tick(0.05)
 		ok(clips.act_w == 0.0, "%s: settled fully into its idle 0.6 s after" % ak)
 	stage.queue_free()
+
 
 ## The three starters wear a "Start here" stamp on both pickers until one match is played (a stamp over the card,
 ## not a line of text); it picks nothing for you.
@@ -448,6 +477,7 @@ func _start_here(view: Control) -> void:
 	Save.d["matches"] = 0
 	view._fill_hunters()
 	ok(gone, "after one match no card says Start here")
+
 
 func _tagged(grid: Node) -> Array:
 	var cards: Array = grid.get_children().filter(func(c): return not c.is_queued_for_deletion())

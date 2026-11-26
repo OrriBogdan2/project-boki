@@ -89,6 +89,7 @@ func run(main_node: Node) -> void:
 	print("REEL_DONE %d in %s" % [lines.size(), dir])
 	main.get_tree().quit(0)
 
+
 ## --reel-movie: this reel again as a child Godot under the movie writer at a fixed 60 fps. The movie is as big as
 ## the project's viewport setting, so the child gets MOVIE_SIZE from a temporary override.cfg.
 func _record_movie() -> void:
@@ -109,6 +110,7 @@ func _record_movie() -> void:
 		if line.begins_with("REEL_") or line.contains("ERROR"):
 			print(line)
 	main.get_tree().quit(rc)
+
 
 ## (the match's own step is off here, so the ears and the detail share follow from this)
 func _go(secs: float, each := Callable(), marks: Array = [], lead := 3.5) -> void:

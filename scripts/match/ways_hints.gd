@@ -5,6 +5,7 @@ extends RefCounted
 ## it in the message lane. Each shows once per save: Match._tip keeps the seen ones in Save.d["tutorial"]
 ## as "ways_<id>". Texts: content/rules/heart.json "hints".
 
+
 ## The hint due now as [save key, text], or [] for none (no Heart in this match, or nothing new).
 static func due(m: Match) -> Array:
 	if m.heart == null:
@@ -15,6 +16,7 @@ static func due(m: Match) -> Array:
 		if not id.begins_with("_") and not seen.get("ways_" + id, false) and _now(m, id):
 			return ["ways_" + id, hints[id]]
 	return []
+
 
 static func _now(m: Match, id: String) -> bool:
 	match id:

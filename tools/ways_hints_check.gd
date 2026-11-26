@@ -8,9 +8,12 @@ var bad := 0
 var main: Node
 var m: Match
 
+
 func ok(cond: bool, what: String) -> void:
 	print("WAYSHINT %s %s" % ["PASS" if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(mn: Node) -> void:
 	main = mn
@@ -25,6 +28,7 @@ func run(mn: Node) -> void:
 	print("WAYSHINT DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _match(o: Dictionary) -> Match:
 	if m:
 		m.queue_free()
@@ -33,24 +37,29 @@ func _match(o: Dictionary) -> Match:
 	m.start(o)
 	m.set_process(false)
 	m.player.dropping = false
-	m.player.riding = false      # (landed: the ship has dropped everyone)
+	m.player.riding = false  # (landed: the ship has dropped everyone)
 	if m.exits.seats:
 		m.exits.seats.build()
 	return m
 
+
 func _real() -> Dictionary:
 	return {"teams": 2, "squad": 1, "tier": 0, "length": 1000.0, "seed": 4242, "demo_kin": "cindle"}
+
 
 func _lane_has(text: String) -> bool:
 	var lane: MsgLane = m.hud.msgs
 	return lane._shown.any(func(e): return e["text"] == text) or lane._waiting.any(func(e): return e["text"] == text)
 
+
 func _text(id: String) -> String:
 	return String(Heart.rules()["hints"][id])
+
 
 func _shows(id: String) -> bool:
 	m._tips()
 	return _lane_has(_text(id)) and bool(Save.d["tutorial"].get("ways_" + id, false))
+
 
 func _moments() -> void:
 	_match(_real())
@@ -69,12 +78,14 @@ func _moments() -> void:
 	m._tips()
 	ok(m.hud.msgs.count() == n and WaysHints.due(m).is_empty(), "each shows once")
 
+
 func _again() -> void:
 	_match(_real())
 	m.time = Heart.r("tide_start_s") + 1.0
 	m.exits.seats.lair._force(QuestSeat.S.OPEN, "check")
 	m.heart._force(Heart.S.CHARGING, "check")
 	ok(WaysHints.due(m).is_empty(), "the next match: all three seen, none again (once per save)")
+
 
 func _quiet() -> void:
 	for id in ["tide", "quest", "heart"]:
@@ -88,6 +99,7 @@ func _quiet() -> void:
 	Settings.set_v("tips", true, false)
 	_match({"tutorial": true, "teams": 1, "squad": 1, "seed": 4242})
 	ok(m.heart == null and WaysHints.due(m).is_empty(), "the tutorial (no Heart): none")
+
 
 func _fit() -> void:
 	var widest := 1280.0 * MsgLane.WIDE

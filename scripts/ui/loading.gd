@@ -8,38 +8,39 @@ extends CanvasLayer
 signal shown
 
 ## What's being worked on, set by whoever builds the match (Main.show_screen, Match): shown by the spinner.
-const FADE_IN_T := 0.15     # s the screen takes to fade in before the build starts
-const FADE_OUT_T := 0.2     # s it takes to fade out when there is no ink to cover it
-const COVER_T := 0.1        # s the ink takes to cover it once the match is ready
-const FILL_T := 0.05        # s the bar takes to run full once the match is ready (inside COVER_T)
-const REVEAL_T := 0.2       # s the ink takes to sweep off the match (the match is already running)
+const FADE_IN_T := 0.15  # s the screen takes to fade in before the build starts
+const FADE_OUT_T := 0.2  # s it takes to fade out when there is no ink to cover it
+const COVER_T := 0.1  # s the ink takes to cover it once the match is ready
+const FILL_T := 0.05  # s the bar takes to run full once the match is ready (inside COVER_T)
+const REVEAL_T := 0.2  # s the ink takes to sweep off the match (the match is already running)
 const STAGES := {"map": "Building the map", "spawn": "Spawning", "graphics": "Preparing graphics", "ready": "Ready"}
-const MARGIN_FRAC := 0.05   # the screen's edge margin as a fraction of its height
-const TITLE_FRAC := 0.055   # the map name's size as a fraction of the screen height
-const FACE_FRAC := 0.09     # a squad portrait's side as a fraction of the screen height
-const TIP_W := 900.0        # px, the widest the tip runs before it wraps
-const SHADE := Color(0.05, 0.035, 0.08)    # the dark the splash fades into under the text
+const MARGIN_FRAC := 0.05  # the screen's edge margin as a fraction of its height
+const TITLE_FRAC := 0.055  # the map name's size as a fraction of the screen height
+const FACE_FRAC := 0.09  # a squad portrait's side as a fraction of the screen height
+const TIP_W := 900.0  # px, the widest the tip runs before it wraps
+const SHADE := Color(0.05, 0.035, 0.08)  # the dark the splash fades into under the text
 
 const BAR_MIN_SPEED := 0.9  # bar share per second, at least, so it never sits still while the load works
-const BAR_CATCH_UP := 6.0   # the bar closes this many times its gap per second (eases out into each stage)
+const BAR_CATCH_UP := 6.0  # the bar closes this many times its gap per second (eases out into each stage)
 
 var c: Control
 var t := 0.0
-var prog := 0.0          # what the bar shows
-var want := 0.0          # where the bar is heading
-var fill_speed := 0.0    # bar share per second once the match is ready: the rest of the bar while the screen goes
+var prog := 0.0  # what the bar shows
+var want := 0.0  # where the bar is heading
+var fill_speed := 0.0  # bar share per second once the match is ready: the rest of the bar while the screen goes
 var fade := 0.0
 var leaving := false
-var title := ""          # the map's name (the tutorial's and training's own names)
-var mode_line := ""      # tier, squad size, count and raid condition ("" off expeditions)
+var title := ""  # the map's name (the tutorial's and training's own names)
+var mode_line := ""  # tier, squad size, count and raid condition ("" off expeditions)
 var tip := ""
-var party: Array = []    # your squad, [{name, arch, you}] (Prematch.squad_of)
-var arch := ""           # the Hunter whose splash fills the screen
-var splash_path := ""    # that splash's file ("" when the Hunter has none)
-var splash: Texture2D    # your Hunter's splash art (null if it has none)
+var party: Array = []  # your squad, [{name, arch, you}] (Prematch.squad_of)
+var arch := ""  # the Hunter whose splash fills the screen
+var splash_path := ""  # that splash's file ("" when the Hunter has none)
+var splash: Texture2D  # your Hunter's splash art (null if it has none)
 var shade_tex: GradientTexture2D
 var stage_label := "Building the map"
-var spin_draws := 0      # frames the spinner has drawn (--load-check: one per frame means it never stalled)
+var spin_draws := 0  # frames the spinner has drawn (--load-check: one per frame means it never stalled)
+
 
 func setup(opts: Dictionary) -> void:
 	layer = 45
@@ -73,6 +74,7 @@ func setup(opts: Dictionary) -> void:
 	c.draw.connect(_draw)
 	add_child(c)
 
+
 ## The mode line: tier, squad size, how many (solo lobbies count hunters, squad lobbies squads), online,
 ## a rolling session, and the raid condition this expedition rolled.
 func _mode(opts: Dictionary, tier_name: String) -> String:
@@ -89,6 +91,7 @@ func _mode(opts: Dictionary, tier_name: String) -> String:
 		parts.append(String(RaidLook.NAMES.get(raid, raid)))
 	return "  ·  ".join(parts)
 
+
 func _process(delta: float) -> void:
 	t += delta
 	if leaving:
@@ -103,16 +106,19 @@ func _process(delta: float) -> void:
 	prog = move_toward(prog, want, delta * maxf(fill_speed, maxf(BAR_MIN_SPEED, (want - prog) * BAR_CATCH_UP)))
 	c.queue_redraw()
 
+
 ## A real load stage reached (0..1 of the whole load): the bar's target only ever moves forward, so a
 ## stage reporting less than an earlier one changes nothing.
 func advance(frac: float) -> void:
 	want = maxf(want, clampf(frac, 0.0, 1.0))
+
 
 ## Move the bar to a stage (0..1) and wait until it gets there.
 func step(frac: float) -> void:
 	advance(frac)
 	while prog < want - 0.01 and is_inside_tree():
 		await get_tree().process_frame
+
 
 ## The match is built and drawn: the screen goes at once, with nothing to wait out (playtest 11-09:
 ## players were held on a full bar). The bar runs the rest of the way while the ink covers it, so it
@@ -130,9 +136,11 @@ func finish() -> void:
 		return
 	leaving = true
 
+
 ## Names the stage under the spinner (a key of STAGES).
 func set_stage(key: String) -> void:
 	stage_label = String(STAGES.get(key, key))
+
 
 ## Bottom up: the tip, the bar with its stage and percent, then the map name and mode line on the left
 ## and the squad on the right, all over the splash fading to dark below.
@@ -147,16 +155,36 @@ func _draw() -> void:
 	var m := maxf(24.0, sz.y * MARGIN_FRAC)
 	var tw := minf(TIP_W, sz.x - 2.0 * m)
 	var tip_h := UI.body.get_multiline_string_size(tip, HORIZONTAL_ALIGNMENT_CENTER, tw, 15, 2).y
-	c.draw_multiline_string(UI.body, Vector2(sz.x * 0.5 - tw * 0.5, sz.y - m - tip_h + 15.0), tip,
-		HORIZONTAL_ALIGNMENT_CENTER, tw, 15, 2, Color(UI.MUTED, a))
+	c.draw_multiline_string(
+		UI.body,
+		Vector2(sz.x * 0.5 - tw * 0.5, sz.y - m - tip_h + 15.0),
+		tip,
+		HORIZONTAL_ALIGNMENT_CENTER,
+		tw,
+		15,
+		2,
+		Color(UI.MUTED, a)
+	)
 	var br := Rect2(m, sz.y - m - tip_h - 22.0, sz.x - 2.0 * m, 6)
 	var af := snappedf(a, 0.1)
 	UI.draw_bar(c, br, prog if prog > 0.01 else 0.0, Color(UI.ACCENT, af), Color(1, 1, 1, af * 0.12), 3)
 	_spinner(Vector2(br.position.x + 7.0, br.position.y - 15.0), a)
-	_text(Vector2(br.position.x + 22.0, br.position.y - 10), stage_label + "…", UI.semi, 13, Color(UI.INK, a * 0.8),
-		HORIZONTAL_ALIGNMENT_LEFT)
-	_text(Vector2(br.end.x, br.position.y - 10), "%d%%" % int(prog * 100.0), UI.semi, 13, Color(UI.INK, a * 0.55),
-		HORIZONTAL_ALIGNMENT_RIGHT)
+	_text(
+		Vector2(br.position.x + 22.0, br.position.y - 10),
+		stage_label + "…",
+		UI.semi,
+		13,
+		Color(UI.INK, a * 0.8),
+		HORIZONTAL_ALIGNMENT_LEFT
+	)
+	_text(
+		Vector2(br.end.x, br.position.y - 10),
+		"%d%%" % int(prog * 100.0),
+		UI.semi,
+		13,
+		Color(UI.INK, a * 0.55),
+		HORIZONTAL_ALIGNMENT_RIGHT
+	)
 	var base := br.position.y - 44.0
 	if mode_line != "":
 		_text(Vector2(m, base), mode_line, UI.semi, 16, Color(UI.TEAL, a), HORIZONTAL_ALIGNMENT_LEFT)
@@ -165,10 +193,11 @@ func _draw() -> void:
 	_text(Vector2(m, base), title, UI.big, title_px, Color(UI.INK, a), HORIZONTAL_ALIGNMENT_LEFT)
 	_squad_row(Vector2(sz.x - m, br.position.y - 62.0), clampf(sz.y * FACE_FRAC, 64.0, 100.0), a)
 
+
 ## Your squad's portraits with their names under them, right-aligned to `p` (the names' baseline).
 func _squad_row(p: Vector2, px: float, a: float) -> void:
 	if party.size() < 2:
-		return      # (solos: nobody to drop with)
+		return  # (solos: nobody to drop with)
 	var gap := 18.0
 	var x := p.x - party.size() * px - (party.size() - 1) * gap
 	for mate in party:
@@ -179,6 +208,7 @@ func _squad_row(p: Vector2, px: float, a: float) -> void:
 		_text(Vector2(x + px * 0.5, p.y), String(mate["name"]), UI.semi, 14, Color(col, a * 0.9))
 		x += px + gap
 
+
 ## A ring with a turning arc that grows and shrinks as it goes round: moves every frame, so a
 ## stalled frame shows at once.
 func _spinner(p: Vector2, a: float) -> void:
@@ -188,6 +218,7 @@ func _spinner(p: Vector2, a: float) -> void:
 	var head := t * TAU * 1.15
 	var span := lerpf(0.5, 3.6, 0.5 + 0.5 * sin(t * 2.6))
 	c.draw_arc(p, r, head - span, head, 24, Color(UI.ACCENT, a), 2.5, true)
+
 
 ## One line of text with a soft drop shadow, centred on (or starting/ending at) `pos.x`.
 func _text(pos: Vector2, s: String, f: Font, size: int, col: Color, al := HORIZONTAL_ALIGNMENT_CENTER) -> void:

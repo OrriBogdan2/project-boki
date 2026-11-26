@@ -5,16 +5,20 @@ class_name Lean
 ## show on the head within a meal or two (mark), and the next form grows the type's part (grow_part).
 ## With it off, Evo.eat keeps the four affinities and nothing here runs.
 
+
 static func rules() -> Dictionary:
 	return Content.rules("lean")
 
+
 static func on() -> bool:
 	return FarmUnlocks.base_mode()
+
 
 ## The type a meal of food f leans a Boki to: "" when it has none (Normal food never leans).
 static func key_of(f: String) -> String:
 	var t := String(rules()["foods"].get(f, ""))
 	return t if (rules()["types"].get(t, {}) as Dictionary).has("tint") else ""
+
 
 ## {name, tint} of a lean key: a type, or (before base_mode) an Evo affinity.
 static func face(key: String) -> Dictionary:
@@ -23,11 +27,13 @@ static func face(key: String) -> Dictionary:
 		return Evo.AFF[key]
 	return {"name": t["name"], "tint": Color(String(t["tint"]))}
 
+
 ## The body size its lean has grown to, as a multiplier (1.0 for none): the type's size at full lean, scaled by
 ## the lean's strength. Heavy types swell and light ones slim (content/rules/lean.json `size`). Evo.dress applies it.
 static func size(rec: Dictionary) -> float:
 	var ln := Evo.lean(rec)
 	return 1.0 + float(rules()["types"].get(String(ln[0]), {}).get("size", 0.0)) * float(ln[1])
+
 
 ## The Boki card's ending for the lean line: ", 8% bigger" or ", 5% slimmer" ("" under 1%).
 static func size_note(rec: Dictionary) -> String:
@@ -37,9 +43,11 @@ static func size_note(rec: Dictionary) -> String:
 	var way := "bigger" if pct > 0 else "slimmer"
 	return ", %d%% %s" % [absi(pct), way]
 
-const MARK_SIZE := 0.2         # fleck radius, as a share of the head's size (head bone to its crown and brow)
-const MARK_SPREAD := 0.5       # how far the flecks fan out across the brow, the same share
-const MARK_RISE := 0.08        # how far out of the head their centres sit: half showing, none floating
+
+const MARK_SIZE := 0.2  # fleck radius, as a share of the head's size (head bone to its crown and brow)
+const MARK_SPREAD := 0.5  # how far the flecks fan out across the brow, the same share
+const MARK_RISE := 0.08  # how far out of the head their centres sit: half showing, none floating
+
 
 ## Flecks of the lean's colour on the head; more as the lean grows (strength 0..1). On a rig they sit on the upper
 ## brow, between where a grown crest and a third eye go (the part_crest and part_third_eye rest points), clear of
@@ -51,6 +59,7 @@ static func flecks(rec: Dictionary) -> int:
 	if not on() or String(ln[0]) == "":
 		return 0
 	return clampi(ceili(float(ln[1]) * int(rules()["marks"])), 1, int(rules()["marks"]))
+
 
 ## `n` flecks of the lean's colour over the head (flecks()).
 static func mark(flex: Node3D, key: String, n: int) -> void:
@@ -77,6 +86,7 @@ static func mark(flex: Node3D, key: String, n: int) -> void:
 		var at := head.origin + (lift + Vector3.RIGHT * sin(a) * MARK_SPREAD) * head_size
 		var fleck := Models.sphere(MARK_SIZE * head_size, 6)
 		Models.part(hold, fleck, mat, head.affine_inverse() * at, Vector3.ONE, Vector3.ZERO, "LeanMark%d" % i)
+
 
 ## At a form: the part its lean has earned (a first one, or the same part one size bigger). Returns the
 ## part id, "" when base_mode is off or the lean is too weak.

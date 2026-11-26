@@ -5,17 +5,21 @@ extends RefCounted
 ## graphics warm-up stages in order, and is full when the screen leaves.
 
 const LOADING := "res://scripts/ui/loading.gd"
-const TIMEOUT_S := 240.0       # a real load that takes longer than this is hung
-const MAX_STEP := 0.25         # the most the bar may move in one frame (of a frame under HITCH_S)
-const HITCH_S := 0.2           # a longer frame may carry the bar further: the load itself stalled
-const REAL_LOAD := {"teams": 6, "squad": 1, "tier": 0, "seed": 7, "autoplay": true, "probe": true,
-	"god": true, "plan_t": 3.0}
+const TIMEOUT_S := 240.0  # a real load that takes longer than this is hung
+const MAX_STEP := 0.25  # the most the bar may move in one frame (of a frame under HITCH_S)
+const HITCH_S := 0.2  # a longer frame may carry the bar further: the load itself stalled
+const REAL_LOAD := {
+	"teams": 6, "squad": 1, "tier": 0, "seed": 7, "autoplay": true, "probe": true, "god": true, "plan_t": 3.0
+}
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("LOADING %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -29,6 +33,7 @@ func run(main: Node) -> void:
 	await _real_load(main)
 	print("LOADING DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 ## Every Hunter: a splash that loads, a tip (none about the Blight when it is off), the map's name and mode line.
 func _hunters() -> void:
@@ -47,6 +52,7 @@ func _hunters() -> void:
 		calm.setup({"teams": 10, "squad": 3, "tier": 0, "arch": ak, "blight": false})
 		ok(calm.tip != "" and not calm.tip.contains("Blight"), "%s: no Blight tip when the Blight is off" % ak)
 		calm.free()
+
 
 ## With --shots-dir=<dir> [--size=WxH]: the screen for a trio mid-load, as <dir>/loading_<W>x<H>.png.
 func _shots(main: Node) -> void:
@@ -75,6 +81,7 @@ func _shots(main: Node) -> void:
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join("loading_%dx%d.png" % [win.x, win.y]))
 	ld.queue_free()
 
+
 func _screen(main: Node) -> Node:
 	for ch in main.get_children():
 		var sc = ch.get_script()
@@ -82,13 +89,14 @@ func _screen(main: Node) -> Node:
 			return ch
 	return null
 
+
 ## A real load: the bar's target and what it shows, every frame the screen is up.
 func _real_load(main: Node) -> void:
 	var opts := REAL_LOAD.duplicate()
 	opts["arch"] = "mage"
 	main.show_screen("match", opts)
 	var tree := main.get_tree()
-	var shown: Array = []          # [prog, want, frame seconds, stage] per frame
+	var shown: Array = []  # [prog, want, frame seconds, stage] per frame
 	var stages: Array = []
 	var waited := 0.0
 	while waited < TIMEOUT_S:
@@ -98,7 +106,8 @@ func _real_load(main: Node) -> void:
 		var ld := _screen(main)
 		if ld:
 			shown.append([float(ld.prog), float(ld.want), dt, String(ld.stage_label)])
-			if stages.is_empty() or stages[-1] != String(ld.stage_label): stages.append(String(ld.stage_label))
+			if stages.is_empty() or stages[-1] != String(ld.stage_label):
+				stages.append(String(ld.stage_label))
 		elif not shown.is_empty() and main.current is Match and (main.current as Match).is_processing():
 			break
 	if main.current is Match:
@@ -109,8 +118,10 @@ func _real_load(main: Node) -> void:
 	var jumps := 0
 	var want_back := 0
 	for i in range(1, shown.size()):
-		if shown[i][0] < shown[i - 1][0]: back += 1
-		if shown[i][1] < shown[i - 1][1]: want_back += 1
+		if shown[i][0] < shown[i - 1][0]:
+			back += 1
+		if shown[i][1] < shown[i - 1][1]:
+			want_back += 1
 		if shown[i][0] - shown[i - 1][0] > MAX_STEP and shown[i][2] < HITCH_S:
 			jumps += 1
 			var at := [i, shown[i][3], shown[i - 1][0], shown[i][0], shown[i][2]]
@@ -125,7 +136,8 @@ func _real_load(main: Node) -> void:
 	var order_ok := true
 	for s in stages:
 		var k := names.find(s)
-		if k < at: order_ok = false
+		if k < at:
+			order_ok = false
 		at = maxi(at, k)
 	# headless has nothing to warm up (Match.warm_up returns at once), so its graphics stage never shows
 	var warm_seen := stages.has("Preparing graphics") or DisplayServer.get_name() == "headless"

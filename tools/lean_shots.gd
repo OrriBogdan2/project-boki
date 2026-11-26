@@ -5,21 +5,27 @@ extends "res://tools/boki_rig_shots.gd"
 ## grows at a form (Lean.grow_part) on this body. <dir>/lean_<species>.png
 ## is one row, lean.png all rows stacked. Needs a renderer.
 
-const SPECIES := ["cindle", "puddlet", "burrlet", "zephyrak", "caecilith", "cairnback", "kestrike", "selenfin",
-	"hivara", "gloamshell"]
+const SPECIES := [
+	"cindle", "puddlet", "burrlet", "zephyrak", "caecilith", "cairnback", "kestrike", "selenfin", "hivara", "gloamshell"
+]
 const FOODS := ["emberberry", "tidebloom", "sunroot"]
-const SHOT_ENLARGE := 3      # crop scale-up (nearest), so a fleck a few pixels wide reads on the sheet
+const SHOT_ENLARGE := 3  # crop scale-up (nearest), so a fleck a few pixels wide reads on the sheet
+
 
 func run(m: Node) -> void:
 	main = m
 	var all: Array = SPECIES
 	var foods: Array = FOODS
-	var meals := 3          # snacks of one food per Boki
+	var meals := 3  # snacks of one food per Boki
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--shots-dir="): out = a.substr(12)
-		if a.begins_with("--species="): all = Array(a.substr(10).split(","))
-		if a.begins_with("--foods="): foods = Array(a.substr(8).split(","))
-		if a.begins_with("--meals="): meals = int(a.substr(8))
+		if a.begins_with("--shots-dir="):
+			out = a.substr(12)
+		if a.begins_with("--species="):
+			all = Array(a.substr(10).split(","))
+		if a.begins_with("--foods="):
+			foods = Array(a.substr(8).split(","))
+		if a.begins_with("--meals="):
+			meals = int(a.substr(8))
 	DirAccess.make_dir_recursive_absolute(out)
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
@@ -35,12 +41,13 @@ func run(m: Node) -> void:
 	print("LEAN_SHOTS_DONE")
 	main.get_tree().quit()
 
+
 ## The records of one row: fresh, fed each food, then each of those at its form.
 func _recs(sp: String, foods: Array, meals: int) -> Array:
 	var fed: Array = []
 	for f in foods:
 		var rec := Save.new_kin(sp, "Lean", 7)
-		Evo.ensure(rec)      # food with no affinity never does
+		Evo.ensure(rec)  # food with no affinity never does
 		for n in meals:
 			Evo.eat(rec, String(f))
 		fed.append(rec)
@@ -50,6 +57,7 @@ func _recs(sp: String, foods: Array, meals: int) -> Array:
 		Lean.grow_part(grown)
 		formed.append(grown)
 	return [Save.new_kin(sp, "Lean", 7)] + fed + formed
+
 
 func _row(sp: String, foods: Array, meals: int) -> Image:
 	var recs := _recs(sp, foods, meals)
