@@ -9,6 +9,8 @@ const LIFT := 0.06  # m above the ground (no z-fighting with the terrain)
 const STEP := 0.7  # m: long ribbons are cut this fine so they follow terraces and stairs
 const MAX_DY := 1.5  # m: ground further than this from the base height is ignored (walls, pits)
 
+static var keep_points := true  # (off only for tools/perf/aim_ab.gd: the cost without the kept points)
+
 var v := PackedVector3Array()
 var c := PackedColorArray()
 var world: World = null
@@ -16,7 +18,6 @@ var base_y := 0.0
 # The ground points of every ring and sector the last rebuild drew, by shape: a telegraph that holds still keeps its
 # points while only its colours move, so a repeat copies them in one call instead of looking each one up again (the
 # same vertices, the same colour formulas). Dropped whenever the ground changes (ground_key).
-static var keep_points := true  # (off only for tools/perf/aim_ab.gd: the cost without the kept points)
 var _pts_last := {}
 var _pts_now := {}
 var _ground := 0
