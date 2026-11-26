@@ -11373,3 +11373,4 @@ READY ext/revive-sickness-lamp 99f270f94f (main merged, lamp/shops from main kep
 READY ext/merge-lane-N2-1122 fb4696948122520332433c99e87be6063d729ef7 (main 21455b16c6 merged: arena.json + ui.gd conflicts resolved, 21 targeted checks equal main)
 READY ext/stuck-integ-1afe8a57 c7f7e7f9d7 (PR #609: merged origin/main 21455b16c6; Controls.md main rows, dex_view keeps type_chip+SILHOUETTE, Net.VERSION main 0.24.29; 35 targeted flags no new red vs main)
 READY ext/anim-blend-times-1125 ef5b1c07b0 (PR #987 stays DRAFT: merged origin/main 21455b16c6 clean; warden-native/clips/clip/land-weight checks same as main)
+READY ext/farm-3p-fix2-1125 badfa801ce2dcf12d7618dbc72d5676986c0cbb8 (farm 3P follow-up to #938, merged with main f63f66d83d; camera.json keeps farm + pan blocks; --farm-cam-check, --camera-frame-check, --cam-framing-check, --check 0; --cam-zoom-check 1 = same on main)
