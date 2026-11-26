@@ -43,7 +43,7 @@ func run(main: Node) -> void:
 	_palettes()
 	_copies()
 	_ways_tones()
-	await _users(main)
+	_users(main)
 	var pick: String = str(Settings.v[SideColor.KEY])
 	print("COLOURVISION DONE, palette %s, failures: %d" % [pick, bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -51,7 +51,7 @@ func run(main: Node) -> void:
 
 # ------------------------------------------------------------------ 1. the settings file
 func _loaded(main: Node, cf: ConfigFile) -> String:
-	cf.save(Settings.PATH)
+	cf.save(Settings.path)
 	var fresh: Node = load("res://scripts/core/settings.gd").new()
 	main.add_child(fresh)
 	for i in 2:
@@ -64,7 +64,7 @@ func _loaded(main: Node, cf: ConfigFile) -> String:
 
 func _settings_file(main: Node) -> void:
 	var keep := ConfigFile.new()
-	var had := keep.load(Settings.PATH) == OK
+	var had := keep.load(Settings.path) == OK
 	var old := ConfigFile.new()
 	old.set_value("s", "music", 0.42)
 	old.set_value("s", "reduce_flashes", true)
@@ -80,9 +80,9 @@ func _settings_file(main: Node) -> void:
 		got = await _loaded(main, pick)
 		ok("the '%s' pick is kept" % id, got == id)
 	if had:
-		keep.save(Settings.PATH)
+		keep.save(Settings.path)
 	else:
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(Settings.PATH))
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(Settings.path))
 
 
 # ------------------------------------------------------------------ 2. the palettes
@@ -189,7 +189,7 @@ func _same(a: Color, b: Color) -> bool:
 func _users(main: Node) -> void:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
+	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
 	m.set_process(false)
 	for mb in m.mobs:
 		mb.dead = true

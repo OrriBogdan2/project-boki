@@ -4,7 +4,7 @@ New sections go in `docs/MOVEMENT_FEEL.d/`, one file per change (docs/DOC_FRAGME
 
 The owner's note (Oct 31 2026): dropping, gliding and moving felt sloppy. The reference is the bar: snappy and responsive, especially the glide, and Shift into a glide should give you more momentum.
 
-Every target below is checked by `--move-feel-check` (`tools/move_feel_check.gd`). The check drives the real match step with scripted inputs. It counts fixed 60 Hz simulation steps, never wall-clock time, so a loaded machine can't skew it. It never touches the save.
+Every target below is checked by `--move-feel-check` (`tools/move_feel_check.gd`). The check drives the real match step with scripted inputs. It counts fixed 60 Hz simulation steps, never wall-clock time, so a loaded machine can't skew it. It never touches the save. `--fps-feel-check` steps the same moves at 1/30, 1/60 and 1/144 s and holds jump apex and glide sink within 3% of each other (dash and knock rows print only, docs/DEBT.md; docs/decisions/0170).
 
 ```
 XDG_DATA_HOME=<scratch> godot --headless --path . -- --move-feel-check
@@ -12,7 +12,7 @@ XDG_DATA_HOME=<scratch> godot --headless --path . -- --move-feel-check
 
 It prints one `MFEEL <key> = <value> target <op> <target> ok|FAIL (source)` line per measurement and ends with `MOVE FEEL CHECK DONE, failures: N`.
 
-Frame rate must not change the feel: `--fps-parity-check` (`tools/fps_parity_check.gd`) plays one input script (dash, jump, glide 2 s, hold LMB 3 s, cast E) for Vex, Kael, Cinder and Sparkle through the real `Match._process` at 30, 60 and 144 fps and at 60 fps with 20 ms hitches, and asserts dash length, jump apex, glide reach, end position, swings/shots/flame ticks and the E cooldown end agree within 2% (and that sim time keeps pace with the frames drawn). The physics step is fixed at 60 Hz; only the camera and animation read the frame time.
+Frame rate must not change the feel: `--fps-parity-check` (`tools/fps_parity_check.gd`) plays one input script (dash, jump, glide 2 s, hold LMB 3 s, cast E) for Vex, Kael, Cinder and Sparkle through the real `Match._process` at 30, 60, 144 and 240 fps and at 60 fps with 20 ms hitches, and asserts dash length, jump apex, glide reach, end position, swings/shots/flame ticks and the E cooldown end agree within 2% (and that sim time keeps pace with the frames drawn). The physics step is fixed at 60 Hz; only the camera and animation read the frame time. Its `PRESS` rows then drive the real keys (`Input.action_press`, `Match._gather_input`, the fixed steps) for Vex at 60, 144 and 240 fps, the press landing at every phase of the 60 Hz tick and let go a frame later, and assert LMB, RMB, E, R, Shift and Space each give exactly one action (the glide key, a hold, is tapped for 3 ticks and opens the glider once). Found 2026-11-19: at 144 and 240 fps a click that came and went between two fixed steps was lost (LMB 0 shots in 2 of 3 phases at 144, 3 of 4 at 240); `FireTap` now latches every fresh press for its step. The other keys latch in `Match.pending_input` and were already exact.
 
 Source tags follow sv/FEEL.md / sv/DATA.md:
 
@@ -69,6 +69,8 @@ defaults aren't cited, since the data names no field for these windows.
 | ground_stop_dist | 0.10m | 0.43m | 0.31–0.47m | [game data] UE's walking brake slides 0.28–0.39m drawn at 30–144 fps (MOVEMENT_PARITY.md §1), at our 5.28 m/s run (the source's 4.55 x body_scale 1.16, decision 0061) |
 | ground_reverse_t (180 degrees) | 0.150s | 0.117s | <= 0.12s | [spec] crisp |
 | ground_turn90_t | 0.100s | 0.083s | <= 0.09s | [spec] crisp |
+| speed light / medium / heavy | 5.2 / 5.0 / 4.73 | 5.28 (each weight's first hunter; 5.16-5.63 across all) | 5.1-5.7 | [game data] MoveSpeed x `body_scale` 1.16 (decision 0061); the same in an expedition, the Training Grounds and on the farm; each hunter's run, half-tilt walk and crouch (0.5x) are also timed over 2 s against the JSON (`--move-speed-check`) |
+| haste_two_bonus_x (haste 0.35 + kin buff 0.15, speed / plain run) | 1.55x (multiplied) | 1.50x | 1.49–1.51x | [game data] one MoveSpeed attribute: bonuses add (decision 0054) |
 | speed light / medium / heavy | 5.2 / 5.0 / 4.73 | 5.28 (each weight's first hunter; 5.16-5.63 across all) | 5.1-5.7 | [game data] MoveSpeed x `body_scale` 1.16 (decision 0061); the same in an expedition, the Training Grounds and on the farm (`--move-speed-check`) |
 | haste_two_bonus_x (haste 0.35 + kin buff 0.15, speed / plain run) | 1.55x (multiplied) | 1.50x | 1.49–1.51x | [game data] one MoveSpeed attribute: bonuses add (decision 0054); measured from a 4.0 m/s run, since 1.5 x our 5.28 m/s run clips at the 7.0 m/s cap |
 | haste_bonus_slow_x (haste 0.35 under a 40% slow) | 0.81x | 0.81x | 0.80–0.82x | the slow multiplies the hasted total |
@@ -1270,6 +1272,69 @@ Tenzo's Rock Hop chain too): held height at most 1 step, the exit at least 0.75x
 own fitted curve if lower: Vex, Kael and Lace bleed off through run speed, decision 0025), glider within 2 steps,
 no ground pose after the end, an air dash on the next press, and no Rock Hop crash in the air. Motley's Trade (a lob,
 no travel of his own) must set him down below the edge.
+
+## Ability ranges on screen (`--range-screen-check`, `tools/range_screen_check.gd`)
+
+Does each slot's end at max range stay on screen with the match camera (`default` style)?
+The check puts each of the 12 Hunters at the screen's centre (the camera focus: feet a little below it), takes
+every slot's longest range from its data (LMB the weapon's `range`; RMB, E, R, dash the largest range-like number
+in the slot; Cinder's flight is `speed` x `time`), aims up, down, left and right at that range on the ground and
+projects the end through the camera at the start view (`camera.json` zoom max, the widest) and the wheel's closest
+zoom (min), at 1280x720, 1920x1080, 2560x1080 and 1024x768. An end closer than 20 px to the edge (`CamRig.on_screen`)
+counts as off. **No range was changed (source data) and no indicator was clamped wrong**: the cursor-placed shapes
+end at the cursor, which is always on screen, and the fixed lanes are drawn at their full data length. Ways are spelled out (up, down, left, right);
+`-` none. Each cell is "start view / closest zoom". The check fails when a Hunter has
+no rows, or when a range up to 18 m has its end off screen left or right at 1920x1080 at the start view.
+
+| Hunter | Slot | Reach m (data) | 1280x720 | 1920x1080 | 2560x1080 | 1024x768 | Lean, 1920x1080 start view |
+|---|---|---|---|---|---|---|---|
+| Lace | lmb | 12.0 (weapon longbow) | down / up down left right | down / up down left right | up down / up down left right | - / up down left right | down |
+| Lace | rmb | 14.0 (rmb.pin.range) | up down / up down left right | up down / up down left right | up down / up down left right | down / up down left right | up down |
+| Lace | e | 10.8 (e.reach) | down / up down left right | down / up down left right | up down / up down left right | - / up down left right | down |
+| Lace | x | 18.0 (x.range) | up down / up down left right | up down / up down left right | up down / up down left right | down / up down left right | up down |
+| Kael | lmb | 14.0 (lmb.wave_range[1]) | up down / up down left right | up down / up down left right | up down / up down left right | down / up down left right | up down |
+| Kael | rmb | 6.3 (rmb.lunge.dist[1]) | - / up down | - / up down | - / up down | - / down | - |
+| Kael | e | 24.0 (e.tether_max) | up down left right / up down left right | up down left right / up down left right | up down left right / up down left right | up down left right / up down left right | up down left right |
+| Vex | lmb | 11.0 (weapon quill_rifle) | down / up down left right | down / up down left right | up down / up down left right | - / up down left right | down |
+| Vex | rmb | 10.5 (rmb.burr.range) | down / up down left right | down / up down left right | up down / up down left right | - / up down left right | down |
+| Vex | e | 18.0 (e.range) | up down / up down left right | up down / up down left right | up down / up down left right | down / up down left right | up down |
+| Vex | x | 14.0 (x.range) | up down / up down left right | up down / up down left right | up down / up down left right | down / up down left right | up down |
+| Albert | lmb | 14.0 (lmb.rope.max_len) | up down / up down left right | up down / up down left right | up down / up down left right | down / up down left right | up down |
+| Neve | lmb | 10.0 (weapon hoar_fan) | down / up down left right | down / up down left right | down / up down left right | - / up down left right | down |
+| Neve | rmb | 12.0 (rmb.lance.range) | down / up down left right | down / up down left right | up down / up down left right | - / up down left right | down |
+| Neve | e | 16.2 (e.travel) | up down / up down left right | up down / up down left right | up down / up down left right | down / up down left right | up down |
+| Cinder | lmb | 6.1 (weapon flamethrower) | - / up down | - / up down | - / up down | - / down | - |
+| Cinder | rmb | 14.0 (rmb.range) | up down / up down left right | up down / up down left right | up down / up down left right | down / up down left right | up down |
+| Cinder | dash | 6.8 (dash.air_dist) | - / up down left right | - / up down | - / up down | - / down left right | - |
+| Cinder | x | 22.7 (flight speed x time) | up down left right / up down left right | up down left right / up down left right | up down left right / up down left right | up down left right / up down left right | up down left right |
+| Tenzo | lmb | 11.0 (weapon rubble_fists) | down / up down left right | down / up down left right | up down / up down left right | - / up down left right | down |
+| Tenzo | x | 21.0 (x.len) | up down left right / up down left right | up down left right / up down left right | up down left right / up down left right | up down left right / up down left right | up down left right |
+| Tenzo | dash | 6.0 (dash.rock_range) | - / up down | - / up down | - / up down | - / down | - |
+| Sparkle | lmb | 13.0 (weapon coilcaster) | down / up down left right | down / up down left right | up down / up down left right | down / up down left right | down |
+| Sparkle | rmb | 13.0 (rmb.coil.range) | down / up down left right | down / up down left right | up down / up down left right | down / up down left right | down |
+| Sparkle | e | 11.0 (e.reach) | down / up down left right | down / up down left right | up down / up down left right | - / up down left right | down |
+| Sparkle | x | 14.4 (x.range) | up down / up down left right | up down / up down left right | up down / up down left right | down / up down left right | up down |
+| Sparkle | dash | 10.5 (dash.dist[1]) | down / up down left right | down / up down left right | up down / up down left right | - / up down left right | down |
+| Grimble | lmb | 6.3 (weapon shotgun) | - / up down | - / up down | - / up down | - / down | - |
+| Grimble | rmb | 11.5 (rmb.range) | down / up down left right | down / up down left right | up down / up down left right | - / up down left right | down |
+| Grimble | x | 5.9 (x.range) | - / up down | - / up down | - / up down | - / down | - |
+| Meeko | lmb | 13.5 (weapon lantern_crook) | up down / up down left right | down / up down left right | up down / up down left right | down / up down left right | down |
+| Meeko | rmb | 14.0 (rmb.seed.range) | up down / up down left right | up down / up down left right | up down / up down left right | down / up down left right | up down |
+| Meeko | e | 9.0 (e.reach) | - / up down left right | - / up down left right | down / up down left right | - / up down left right | - |
+| Meeko | x | 12.6 (x.range) | down / up down left right | down / up down left right | up down / up down left right | down / up down left right | down |
+| Meeko | dash | 10.5 (dash.air.dist) | down / up down left right | down / up down left right | up down / up down left right | - / up down left right | down |
+| Sable | lmb | 8.5 (weapon arc_bolts) | - / up down left right | - / up down left right | down / up down left right | - / up down left right | - |
+| Sable | rmb | 7.0 (rmb.bola.range) | - / up down left right | - / up down left right | - / up down left right | - / down left right | - |
+| Sable | e | 15.0 (e.range) | up down / up down left right | up down / up down left right | up down / up down left right | down / up down left right | up down |
+| Sable | x | 5.4 (x.reach) | - / up down | - / up down | - / up down | - / down | - |
+| Motley | lmb | 12.2 (weapon tether_lantern) | down / up down left right | down / up down left right | up down / up down left right | - / up down left right | down |
+| Motley | rmb | 13.0 (rmb.snap.range) | down / up down left right | down / up down left right | up down / up down left right | down / up down left right | down |
+| Motley | e | 9.0 (e.reach) | - / up down left right | - / up down left right | down / up down left right | - / up down left right | - |
+| Motley | x | 10.0 (x.range) | down / up down left right | down / up down left right | down / up down left right | - / up down left right | down |
+| Motley | dash | 12.0 (dash.reach) | down / up down left right | down / up down left right | up down / up down left right | - / up down left right | down |
+
+"Lean" is the same end with the view leaned toward it as the cursor held there makes it (`CamRig.lean_to`).
+The table is regenerated from the check's `RANGESCREEN row` lines (11-20: on the camera as main has it).
 
 ## Not touched
 

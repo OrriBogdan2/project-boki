@@ -61,7 +61,7 @@ Rank = how likely a new player stops, quits or learns the wrong thing. Each line
 3. **The tutorial blocks the thing it just asked for.** "Place a toy" came after "Feed it", but while Feed is open the Boki stays in the
    Lead state and ignores the toy for up to 10 minutes (here 579 s). Owner: `scripts/home/base_tut_lead.gd`,
    `scripts/home/base_life.gd` (line 220), `content/rules/farm_tutorial.json` base steps. *Proposal: free the toy step from the feed step
-   (free_order) or let the Boki play while the step is `watch`.*
+   (free_order) or let the Boki play while the step is `watch`.* **Fixed on ext/tut-garden-toy-free:** `BaseTutLead.tick` lets the led Boki go to a placed toy while "patch" or "eat" is open (once per Boki, then the lead resumes). `--garden-first-day-check` has a phase with the tutorial on and Feed open: before the fix your Boki never played in 240 s of farm time (the old 579 s was only its end), after it plays at the toy in 12 s (limit 60 s).
 4. **The next zone depends on the calendar, not the hour.** The Wayseed is on the Drift Trader one real day in three
    (`market.json black_market wayseed_days 3`, price 110). On a day without it the second key cannot be had for up to 3 days, however well
    you play; the farm day is 5 minutes, so "day 3" in the pace check is three calendar days. The hub hint says only "A dark stone needs two
@@ -85,6 +85,8 @@ Rank = how likely a new player stops, quits or learns the wrong thing. Each line
    in the Garden tab at 0 gems and is not mentioned by any step, yet it is the only food source that keeps the Boki fed and leans it toward
    a zone. Owner: `content/rules/farm_tutorial.json base steps`, `scripts/home/farm_task_guide.gd`. *Proposal: add a "Plant the snack
    patch" step before "Feed it".*
+   *Done on `ext/garden-free-toy-hint`: the toy step's line names both tabs (Play ball with its price, Snack patch free) and the two tiles glow green in
+   the Build bar while that step is open (`marks` in the step; `hl` on the entry). The ball is not free: it costs 12 of the 200 starting gems.*
    **Fixed (ext/farm-tut-patch-step):** the base tutorial is now five steps: meet, **Plant the snack patch** (build bar, Garden tab,
    the patch tile lit by the spotlight like the trough tile in the farm tutorial), feed, toy, head out. The step ticks when the patch
    is down (or the Boki has already been fed); the Boki stays at your side for it. `farm_task_guide.gd` is the farm path's job

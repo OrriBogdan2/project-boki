@@ -65,7 +65,7 @@ func run(main_node: Node) -> void:
 		["Vex Burr Charge -> Vex Burr Charge", _hit(Vector2(1, 0) * vex, 2.0), _hit(side * vex, 2.0)],
 	]
 	for p in pairs:
-		var solo: Vector3 = await _solo(m, p_v, t, open, p[2])
+		var solo: Vector3 = _solo(m, p_v, t, open, p[2])
 		var chain: Dictionary = await _chain(m, p_v, t, open, p[1], p[2])
 		var into: Dictionary = await _chain(m, p_v, t, walled, p[1], p[2])
 		var want: Vector2 = p[2]["kb"]
@@ -101,7 +101,7 @@ func run(main_node: Node) -> void:
 				into["stun"]
 			]
 		)
-	await _reel_takes_over(m, p_v, t, open, reel, _hit(side * sparkle, -1.0))
+	_reel_takes_over(m, p_v, t, open, reel, _hit(side * sparkle, -1.0))
 	await _lockout(m, p_v, t, walled, _hit(Vector2(1, 0) * vex, 2.0), _hit(side * vex, 2.0))
 	await _stale_wallstun(m, p_v, t, walled, _hit(Vector2(1, 0) * kael, -1.0), _hit(side * albert, 2.5))
 	print("KNOCKCHAIN TABLE | pair | after 2nd knock (m) | 2nd knock alone (m) | 1st knock's carry (m) | wall stun |")
