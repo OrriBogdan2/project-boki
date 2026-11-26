@@ -1979,7 +1979,11 @@ func _fold_for_action() -> void:
 func _interrupt_consume() -> void:
 	if drink_t <= 0.0 and kit_t <= 0.0 and not box_reviving():
 		return
-	UtilityUse.spill(self)
+	if drink_t > 0.0 or kit_t > 0.0:
+		UtilityUse.spill(self)
+	else:
+		m.fx.burst(pos + Vector3(0, 1.3, 0), Color("ff7a4a"), 10, 3.0, 0.35, 8.0)
+		m.sfx("crit", pos, -4.0, 0.7)
 	BoxRevive.cancel(self)
 
 ## Hold jump while falling to open the glider. It folds when you land, let go, dash, are stunned or spiked.
@@ -2802,6 +2806,7 @@ func render(delta: float, alpha: float) -> void:
 		if grounded and spd > 4.0:     # (running: the surface's step and little puffs of dust, on the plant)
 			m.fx.dust(pos, 2)
 			Juice.footstep(self)
+	if posed: HazardMoveSfx.play(self)
 	if posed and anim.slammed and not downed:
 		# a heavy coming down hard: a ring of dust where they land
 		m.fx.dust(pos, 12)
