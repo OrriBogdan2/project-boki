@@ -3,5 +3,24 @@
 	"chip_k": 0.8,
 	"frac_k": 9.0,
 	"knock_k": 0.06,
-	"light": 0.35
+	"light": 0.35,
+	"hit_slow": {
+		"doc": "The slow when you are hit by a rival (Oomph.react, reference tuning; hits from monsters never slow, so PvE lethality is unchanged). big: one hit of at least big_frac of max health (or a heavy, payoff or stun hit) staggers: speed x big_mult for big_s, x big_repeat_mult if the last big hit was within repeat_s. small: hit damage adds up and resets after sum_reset_s without a hit; once it reaches small_frac of max health you are slowed x small_mult for small_s (x small_mult_armor for small_s_armor while you have armour left), then no new small slow for small_cd_s. The strongest slow still wins (Ent). floor_ms: a hit slow never takes the base walk under this (m/s, the reference value x body_scale); a Hunter already slower is not slowed. last_alive_small/big: added to the multiplier for the last one up on a squad (LastAlive), at most last_alive_cap. small_frac keeps the reference's small/big ratio (150/400) on our big_frac.",
+		"big_frac": 0.12,
+		"big_mult": 0.575,
+		"big_repeat_mult": 0.5,
+		"repeat_s": 1.0,
+		"big_s": 0.45,
+		"small_frac": 0.045,
+		"sum_reset_s": 0.75,
+		"small_mult": 0.675,
+		"small_s": 0.35,
+		"small_mult_armor": 0.75,
+		"small_s_armor": 0.3,
+		"small_cd_s": 2.5,
+		"floor_ms": 2.73,
+		"last_alive_small": 0.075,
+		"last_alive_big": 0.1,
+		"last_alive_cap": 0.85
+	}
 }

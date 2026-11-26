@@ -47,7 +47,67 @@ func run(main: Node) -> void:
 		is_equal_approx(w_chip, want) and rises,
 		"layer weight rises with strength: chip %.2f < solid %.2f < stagger 1.0" % [w_chip, w_solid]
 	)
+	_hit_slow(m, target, by)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+
+## The slow when hit (hit_flinch.json hit_slow): a big hit, a quick second big hit, small hits adding up
+## (with and without armour), the small cooldown, the sum reset, the walking floor, and no slow from monsters.
+func _hit_slow(m: Match, t: Hunter, by: Hunter) -> void:
+	var hs: Dictionary = Oomph.rules()["hit_slow"]
+	var mh := t.max_hp
+	var fl := float(hs["floor_ms"]) / t.base_speed
+	t.armor = 0.0
+	m.time = 100.0
+	_slow_hit(m, t, by, mh * 0.2, 0.0)
+	var k := 1.0 - t.slow_k
+	ok(
+		is_equal_approx(k, maxf(float(hs["big_mult"]), fl)) and is_equal_approx(t.slow_t, float(hs["big_s"])),
+		"a big hit slows x%.3f for %.2f s" % [k, t.slow_t]
+	)
+	_slow_hit(m, t, by, mh * 0.2, 0.5)
+	k = 1.0 - t.slow_k
+	ok(
+		is_equal_approx(k, maxf(float(hs["big_repeat_mult"]), fl)),
+		"a second big hit within 1 s: x%.3f (floor x%.3f)" % [k, fl]
+	)
+	ok(
+		fl > float(hs["big_repeat_mult"]),
+		"the walking floor holds the repeat slow above x%.2f" % float(hs["big_repeat_mult"])
+	)
+	m.time = 200.0
+	_slow_hit(m, t, by, mh * 0.03, 0.0)
+	ok(t.slow_t <= 0.0, "one small hit under the sum does not slow")
+	_slow_hit(m, t, by, mh * 0.03, 0.3)
+	k = 1.0 - t.slow_k
+	ok(
+		is_equal_approx(k, float(hs["small_mult"])) and is_equal_approx(t.slow_t, float(hs["small_s"])),
+		"small hits adding up slow x%.3f for %.2f s" % [k, t.slow_t]
+	)
+	_slow_hit(m, t, by, mh * 0.06, 0.5)
+	ok(t.slow_t <= 0.0, "no new small slow inside the cooldown")
+	m.time = 300.0
+	_slow_hit(m, t, by, mh * 0.03, 0.0)
+	_slow_hit(m, t, by, mh * 0.03, 1.0)
+	ok(t.slow_t <= 0.0, "the sum resets after a pause")
+	t.armor = 10.0
+	_slow_hit(m, t, by, mh * 0.03, 0.2)
+	k = 1.0 - t.slow_k
+	ok(
+		is_equal_approx(k, float(hs["small_mult_armor"])) and is_equal_approx(t.slow_t, float(hs["small_s_armor"])),
+		"with armour: x%.3f for %.2f s" % [k, t.slow_t]
+	)
+	m.time = 400.0
+	_slow_hit(m, t, null, mh * 0.2, 0.0, {"src": "mob"})
+	ok(t.slow_t <= 0.0, "a monster's big hit does not slow")
+
+
+## Advances the clock by `dt`, clears the current slow and lands a hit.
+func _slow_hit(m: Match, t: Hunter, by: Hunter, d: float, dt: float, o := {}) -> void:
+	m.time += dt
+	t.slow_t = 0.0
+	t.slow_k = 0.0
+	Oomph.react(m, t, by, d, o)
 
 
 ## Lands a hit of `d` and returns the flinch strength it set.
