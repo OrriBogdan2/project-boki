@@ -253,7 +253,7 @@ func bjorn() -> void:
 		"%s %s move %.2f" % [K.ult.phase, K.anim_id, K.move_k()])
 	var c0 := AimKit.entry(P, "x")
 	var lane_len := float(xd["cells"]) * float(xd["cell_len"])
-	ok("bjorn ult telegraph: one outlined lane (the gameplay box, cells x cell_len by width) for everyone, with its crack",
+	ok("bjorn ult telegraph: one outlined lane (the gameplay box: cells x cell_len by width) for all, with its crack",
 		AimKit.shown(P, "x") and bool(c0.get("all", false)) and absf(float(c0.get("len", 0.0)) - lane_len) < 0.01
 			and absf(float(c0.get("width", 0.0)) - float(xd["width"])) < 0.01 and K.ult._crack.visible,
 		str(c0.keys()))

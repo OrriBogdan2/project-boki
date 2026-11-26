@@ -30,7 +30,7 @@ func _ult_hop() -> void:
 	var width := float(xd["width"])
 	var length := float(xd["cells"]) * float(xd["cell_len"])
 	ok(
-		"albert ult: the lane is shorter and at least 25% wider (owner 11-26; telegraph and hits read the one width)",
+		"albert ult: the lane is shorter and at least 25% wider, the owner's 11-26 ask (telegraph and hits: one width)",
 		width >= OLD_WIDTH * 1.25 and length < OLD_LEN,
 		"%.1f x %.1f -> %.1f x %.1f m" % [OLD_LEN, OLD_WIDTH, length, width]
 	)
@@ -62,7 +62,7 @@ func _ult_hop() -> void:
 		if end_at < 0.0 and k.ult.phase == "":
 			end_at = t
 	ok(
-		"albert ult: rooted no more than 0.45 s and done within 0.95 s of the press (owner 11-26: was 0.6 + hit-stop, 1.4)",
+		"albert ult: rooted at most 0.45 s, done within 0.95 s of the press (before 11-26: 0.6 s + hit-stop, 1.4 s)",
 		free_at > 0.0 and free_at <= 0.45 + 1.5 * DT and end_at > 0.0 and end_at <= 0.95 + 1.5 * DT,
 		"root %.2f s, done %.2f s, lane %.1f x %.1f m" % [free_at, end_at, length, width]
 	)
