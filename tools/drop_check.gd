@@ -83,6 +83,28 @@ func _plan() -> void:
 	var later := await _plan_groups(2)
 	ok(later.size() == 5, "a later match keeps today's five groups (%d)" % later.size())
 
+## The ride is a map screen (RideView): the drop map stays up after the ship sets off and the 3D view is off behind
+## it (once the warm-up has drawn); the launch closes the map and turns the 3D view back on.
+func _ride_view() -> void:
+	_start({"squad": 3})
+	m.set_process(false)
+	var map: FullMap = m.hud.full_map
+	var vp := m.get_viewport()
+	m.warmed = true
+	RideView.tick(m, map)
+	ok(map.is_open and vp.disable_3d, "ride view: planning, the map is up and the 3D view is off")
+	m.skydrop.planning = false
+	RideView.tick(m, map)
+	ok(map.is_open and vp.disable_3d, "ride view: the ship has set off, the map stays and 3D stays off")
+	m.warmed = false
+	RideView.tick(m, map)
+	ok(not vp.disable_3d, "ride view: 3D is never switched off before the warm-up has run")
+	m.warmed = true
+	m.ship_jump(m.player)
+	RideView.tick(m, map)
+	ok(not map.is_open and not vp.disable_3d, "ride view: the launch closes the map and the 3D view is back")
+	vp.disable_3d = false
+
 ## A flat training arena with the player `h` metres up, dropping (diving) with the glider open.
 func _arena(h: float) -> Hunter:
 	_start({"training": true, "teams": 2, "no_drop": true, "length": 1e9, "weapon": "rifle", "cls": "medium"})
@@ -328,6 +350,7 @@ func run(mn: Node) -> void:
 	_rocket_pull()
 	_rocket_land()
 	await _plan()
+	_ride_view()
 	for steer in [Vector2.ZERO, Vector2(1, 0)]:
 		_start({})
 		var hid := _hidden_chests()

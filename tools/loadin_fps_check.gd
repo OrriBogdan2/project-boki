@@ -13,6 +13,7 @@ extends Node
 const MIN_FPS := 30.0  # no frame after the loading screen runs slower than this
 const AVG_FPS := 60.0  # the average over the look window
 const BURST_NODES := 400  # nodes one frame may add after the loading screen (headless-safe spawn limit)
+const LAND_S := 2.0  # s after touchdown that count as the landing hitch window
 const SOFTWARE_RES := Vector2i(640, 360)
 
 var out_path := ""
@@ -23,7 +24,7 @@ var look_s := 30.0
 var advisory := false
 var headless := false
 var software := false
-var frames: Array = []  # wall ms, loading 1/0, draws, objs, nodes, phys, proc, mem, vram, steps, cpu ms, marks
+var frames: Array = []  # wall ms, loading 1/0, draws, objs, nodes, phys, proc, mem, vram, steps, cpu ms, marks, phase
 var loading_ms := 0.0
 var last_us := 0
 var t0_us := 0
@@ -33,6 +34,7 @@ var steps_total := 0  # sim steps taken after the screen
 var last_time := -1.0  # Match.time last frame
 var sole_reads0 := 0  # BootSole.reads when the screen went
 var last_cpu := 0.0  # cpu_ms() at the last frame
+var land_t := -1.0  # Match.time the player touched down (-1: not yet)
 
 
 ## The calling thread's CPU time so far in ms (Linux schedstat; -1 elsewhere). A shared box stretches a frame's wall
@@ -124,6 +126,7 @@ func _process(_delta: float) -> void:
 			steps,
 			cpu,
 			step.strip_edges(),
+			_phase(cur) if shown_us > 0 else "load",
 		]
 	)
 	if shown_us > 0 and (now - shown_us) / 1e6 >= look_s:
@@ -131,6 +134,27 @@ func _process(_delta: float) -> void:
 	elif (now - t0_us) / 1e6 > 300.0:
 		print("LOADIN stuck: no match after 300 s")
 		get_tree().quit(1)
+
+
+## Where the player is in the drop, for the per-phase table: plan (ship waits), ride (aboard), rocket, fall (free fall
+## and glider), land (the 2 s after touchdown), ground.
+func _phase(cur: Node) -> String:
+	if not cur is Match or (cur as Match).player == null:
+		return "load"
+	var m := cur as Match
+	var p := m.player
+	if m.skydrop != null and m.skydrop.planning:
+		return "plan"
+	if p.rocket != null:
+		return "rocket"
+	if p.riding:
+		return "ride"
+	if p.dropping:
+		land_t = -1.0
+		return "fall"
+	if land_t < 0.0:
+		land_t = m.time
+	return "land" if m.time - land_t < LAND_S else "ground"
 
 
 func _judged() -> Array:
@@ -148,6 +172,42 @@ func _top(prof: Dictionary, n: int) -> String:
 	var ks := prof.keys()
 	ks.sort_custom(func(a, b): return prof[a] > prof[b])
 	return ", ".join(ks.slice(0, 22).map(func(k): return "%s %.2f" % [k, float(prof[k]) / 1000.0 / n]))
+
+
+## One line per drop phase: frames, avg / p99 / worst ms, draws, objects, main-thread cpu, peak memory.
+func _phase_lines(j: Array) -> Array:
+	var lines: Array = []
+	for ph in ["load", "plan", "ride", "rocket", "fall", "land", "ground"]:
+		var fs := j.filter(func(f): return f[12] == ph)
+		if fs.is_empty():
+			continue
+		var ms: Array = fs.map(func(f): return float(f[0]))
+		var sum := 0.0
+		var draws := 0.0
+		var objs := 0.0
+		var cpu := 0.0
+		var mem := 0.0
+		for f in fs:
+			sum += float(f[0])
+			draws += float(f[2])
+			objs += float(f[3])
+			cpu += float(f[10])
+			mem = maxf(mem, float(f[7]))
+		ms.sort()
+		var n := float(fs.size())
+		var pf := "LOADIN phase %-6s %4d frames  avg %.1f ms  p99 %.1f  worst %.1f  draws %.0f  obj %.0f"
+		pf += "  cpu %.1f  mem peak %.0f MB"
+		lines.append(pf % [ph, fs.size(), sum / n, _pct(ms, 0.99), _pct(ms, 1.0), draws / n, objs / n, cpu / n, mem])
+	return lines
+
+
+## The build steps' own times (PerfLog marks) from the Play press to the first drawn frame, in order.
+func _load_steps() -> String:
+	var parts: Array = []
+	for mk in PerfLog.between(t0_us, shown_us):
+		if float(mk[2]) >= 20.0:
+			parts.append("%s %.0f" % [mk[1], mk[2]])
+	return ", ".join(parts)
 
 
 func _finish() -> void:
@@ -198,6 +258,8 @@ func _finish() -> void:
 		"LOADIN main-thread cpu a frame (other jobs cannot stretch it): avg %.1f ms, p50 %.1f, p99 %.1f, max %.1f"
 		% [cpu_sum / maxi(cpus.size(), 1), _pct(cpus, 0.5), _pct(cpus, 0.99), _pct(cpus, 1.0)]
 	)
+	lines.append_array(_phase_lines(frames))
+	lines.append("LOADIN load steps (ms): " + _load_steps())
 	var per_frame := float(steps_total) / maxi(w.size(), 1)
 	var sf2 := "LOADIN sim steps %d in %d frames (%.1f a frame; 1.0 is real time)"
 	lines.append(sf2 % [steps_total, w.size(), per_frame])
@@ -238,7 +300,7 @@ func _finish() -> void:
 	if csv_path != "":
 		var fc := FileAccess.open(csv_path, FileAccess.WRITE)
 		if fc:
-			fc.store_line("ms,loading,draws,objects,nodes,phys_ms,proc_ms,mem_mb,vram_mb,sim_steps,cpu_ms,marks")
+			fc.store_line("ms,loading,draws,objects,nodes,phys_ms,proc_ms,mem_mb,vram_mb,sim_steps,cpu_ms,marks,phase")
 			for f in frames:
-				fc.store_line("%.2f,%d,%d,%d,%d,%.2f,%.2f,%.0f,%.0f,%d,%.2f,%s" % f)
+				fc.store_line("%.2f,%d,%d,%d,%d,%.2f,%.2f,%.0f,%.0f,%d,%.2f,%s,%s" % f)
 	get_tree().quit(0 if fails == 0 or advisory else 1)

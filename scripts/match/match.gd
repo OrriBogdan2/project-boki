@@ -54,6 +54,7 @@ var camps: Camps = Camps.new(self)     # the map's fixed monster camps (see Camp
 var lairs: Lairs = null     # boss lairs: sealed arenas, their bosses and Rare Eggs (see Lairs)
 var mate_look: MateLook = null   # F1-F3: look at a teammate
 var truce: Truce = null     # emotes and truces between squads (see Truce)
+var warmed := false  # the loading screen's warm-up has drawn everything once (RideView may switch 3D off)
 var skydrop: DropSquad = null  # the planning phase before the ship sets off: drop leaders, formations (DropSquad)
 var spawn_plan: SpawnPlan = null   # which of the map's candidate spawns are live this match (see SpawnPlan)
 var time := 0.0
@@ -225,6 +226,7 @@ func warm_up(progress := Callable()) -> void:
 		h.ak.warm_fx(Vector3(0, -600, 0))      # the kits' effect pools, filled deep under the map
 	SpanLooks.of(self).warm()      # bridge slabs and platform pads (a frost glove's first bridge: 8-10 ms)
 	await WarmUp.new(self).run(progress)
+	warmed = true
 
 ## Tooling (--perf-bench --bench-probe): microseconds per section of step(), summed while prof_on.
 static var prof_on := false

@@ -185,6 +185,8 @@ func draw(sz: Vector2) -> void:
 			hint += "  ·  press an ability key to unlock it"
 		hud._ctext(Vector2(sz.x * 0.5, 40), "PLAN YOUR DROP", 30, GOLD, hud.big)
 		hud._ctext(Vector2(sz.x * 0.5, 64), hint, 15, INK)
+	elif RideView.aboard(m):
+		RideView.header(hud, sz)
 	else:
 		hud._ctext(Vector2(sz.x * 0.5, 44), _map_title(), 28, INK, hud.big)
 		hud._ctext(Vector2(sz.x * 0.5, 66), "Click to ping  ·  right click takes your ping down  ·  wheel zooms  ·  %s closes" % Settings.key_cap("map"), 13, MUTED)
