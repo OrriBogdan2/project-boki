@@ -92,6 +92,9 @@ func _foe(f: Hunter, i: int, dt: float) -> void:
 	f.reveal_t = maxf(f.reveal_t, 0.3)       # (always in sight: nothing hides in a sparring ring)
 	if f.downed:
 		f.down_hp = Data.MATCH["down_hp"]      # (never finished: a respawn would land it outside the ring)
+		for h: Hunter in m.hunters:
+			if not h.stomp.is_empty() and h.stomp["o"] == f:
+				Life.end_stomp(m, h, "spar")      # (a stomp executes whatever down_hp is left: none here)
 		_down_t[f] = float(_down_t.get(f, 0.0)) + dt
 		if float(_down_t[f]) >= float(tu.cfg["knock_hold"]):
 			_back_up(f, i)
