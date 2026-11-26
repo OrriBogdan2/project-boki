@@ -9,6 +9,7 @@ extends Node
 const NAME := "Practice"
 const LEFT_PAD := 560          # px, the bar starts right of the HUD's portrait and ability row
 const BOTTOM_PAD := 8          # px, under the bar
+const TEST_ZONE_PAD := 150     # px, under the Test Zone's bar: above the carried-Boki and weapon cards (y 612+)
 
 var m: Match
 var bar: PanelContainer = null
@@ -72,17 +73,26 @@ func _build_bar() -> void:
 	_layer.add_child(root)
 	var mc := MarginContainer.new()
 	mc.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	mc.add_theme_constant_override("margin_left", LEFT_PAD)
-	mc.add_theme_constant_override("margin_bottom", BOTTOM_PAD)
 	root.add_child(mc)
 	bar = HubBar.build(items(), func(cb: Callable, _id: String): cb.call(), bar_btns)
 	bar.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	bar.size_flags_vertical = Control.SIZE_SHRINK_END
 	mc.add_child(bar)
-	mc.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE, Control.PRESET_MODE_MINSIZE)
+	mc.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT, Control.PRESET_MODE_MINSIZE)
+	mc.offset_left += LEFT_PAD          # the box is just the bar's own rectangle, not a full-width strip
+	mc.offset_right += LEFT_PAD
+	var pad := TEST_ZONE_PAD if m.opts.get("test_zone", false) else BOTTOM_PAD
+	mc.offset_top -= pad
+	mc.offset_bottom -= pad
 	mc.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	show_bar(m.arena == null or m.arena.tools)      # (the Test Zone starts with the tools off)
 	if m.hud:
 		m.hud.ui_extra.append(bar)       # the mouse is over UI here: no shooting, the pointer shows
+
+## Shows or hides the bar and the full-width box it sits in (a hidden bar leaves no empty strip to collide with).
+func show_bar(on: bool) -> void:
+	bar.visible = on
+	bar.get_parent().visible = on
 
 ## Ends the practice session and goes back (the bar's Leave and the Esc menu's).
 static func leave(match_node: Match, extracted: bool) -> void:
