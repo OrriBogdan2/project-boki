@@ -15,6 +15,7 @@ extends ArchKit
 
 const COBALT := Color("3a7cff")         # Tenzo's signature (docs/VFX_QUALITY.md): every look of his kit is this blue
 const LANE_COL := Color("d8ecff")       # the punch lane: pale ice white, as bright as an aim reticle
+const SHARD_DB := -8.0         # dB: the plating sound of a Shardskin stack, under a punch
 const ROCK_STEP_OFF := 1.0     # m: from atop a rock, Stone Row measures from the ground this far ahead
 
 var lmb_t := -1.0              # how long the attack key has been down (-1: not pressed)
@@ -691,6 +692,7 @@ func guard_stack() -> void:
 	ShieldSrc.give(h, float(gd["shield"]) * shield_stacks, ShieldSrc.MOLTEN)
 	h.shield_t = float(gd["t"])
 	h.shield_kind = "molten"
+	m.sfx("br_raise", h.pos, SHARD_DB, 1.3)     # Shardskin: a stack of stone plating
 	vfx("guard_up")
 	h.shield_kind = "molten"
 

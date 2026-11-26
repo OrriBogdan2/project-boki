@@ -23,6 +23,7 @@ const BRONZE := Color("b9732f")  # Cinderfall's shell (gunslinger_ult)
 const GOLD := Color("ffcf3f")  # her coin (unshaded: the toon light turns gold red-brown)
 const GOLD_DARK := Color("d99a1e")  # its struck faces
 const DUD_DUST := Color("6b4a2e")  # a dud Burr Charge's dull dust puff where its lane ended
+const FEVER_DB := -9.0  # dB: the stim as Fever lights, under a knock's -3
 const DAZE_PINK := Color("ff4fb0")  # palette "daze": the Daze's own colour, so its bonus is not a plain crit
 const GUN_MUZZLE := ^"Rig/Torso/Aim/Gun/Muzzle"  # on her model this sits on the rifle's mouth
 const DAZE_NUM_LIFT := 2.1  # m over a foe's feet: the "+N" floats above its hit number
@@ -60,15 +61,16 @@ var needle_dir := Vector2.ZERO  # tests: the line the last Longneedle fired alon
 var wall_slams := 0
 var last_dash_kind := ""
 var last_shot := 0
-var flicks := 0                # tests: coins flicked from her hand
-var last_flick := Vector3.ZERO # tests: where the last one left
+var flicks := 0  # tests: coins flicked from her hand
+var last_flick := Vector3.ZERO  # tests: where the last one left
 var last_beam := Vector3.ZERO  # tests: where the last beam was drawn from
-var refill_part := 0.0         # rounds the resting drum has part-refilled
-var dry := false               # the drum ran dry: no round until it is full again
-var round_at := -9.0           # match time of her last rifle round (the firing brackets)
-var ult: GunslingerUlt         # Cinderfall, her ultimate on X
-var commit_end := 0.0          # match time her committed recovery ends (E after the beam)
-var x_wind_end := 0.0          # match time the ult's short wind-up ends (GunslingerUlt.WINDUP): slowed, never rooted
+var refill_part := 0.0  # rounds the resting drum has part-refilled
+var dry := false  # the drum ran dry: no round until it is full again
+var round_at := -9.0  # match time of her last rifle round (the firing brackets)
+var ult: GunslingerUlt  # Cinderfall, her ultimate on X
+var commit_end := 0.0  # match time her committed recovery ends (E after the beam)
+var x_wind_end := 0.0  # match time the ult's short wind-up ends (GunslingerUlt.WINDUP): slowed, never rooted
+
 
 func _setup() -> void:
 	ult = GunslingerUlt.new(self)
@@ -186,10 +188,12 @@ func move_k() -> float:
 func fire_ok() -> bool:
 	return not dry and commit_left() <= 0.0
 
+
 ## The ult's wind-up left (s): she walks slowed; the rifle, jump, Shift and abilities all still go (a held LMB
 ## string goes on through the tap, the cancel rows' "both").
 func x_wind_left() -> float:
 	return maxf(0.0, x_wind_end - float(m.time))
+
 
 ## The source's recovery (E_RECOVER): she stands, and no ability, jump or Shift goes.
 ## A press in the last Loco.press_buffer waits for the end (DashFlow.cc_left); one before it is dropped.
@@ -208,6 +212,8 @@ func gate_inputs() -> void:
 
 
 func add_fever(n := 1) -> void:
+	if res <= 0.0:
+		m.sfx("vn_stim", h.pos, FEVER_DB, 1.3)  # Hot Streak lights: the stim, quieter and higher than a knock's
 	res = minf(res_max(), res + float(n))
 	touch_res(float(res_def()["wait"]))
 
@@ -330,11 +336,13 @@ func _tick_mag(dt: float) -> void:
 	refill_part -= float(add)
 	h.ammo = mini(mag, h.ammo + add)
 
+
 ## How far a round's damage has decayed toward the rifle's sustained floor: 0 at full damage, 1 once the string is
 ## past its first ten rounds. The shot, trail and hit looks (content/vfx/gunslinger.json) shrink by it ("size_k").
 func _faded(sus_k: float) -> float:
 	var loss := float(h.wpn.get("sustain_loss", 0.0))
 	return clampf((1.0 - sus_k) / loss, 0.0, 1.0) if loss > 0.0 else 0.0
+
 
 ## The decay of the round landing now: a hit does not carry its round's sus_k, so this reads the string's count
 ## (a round or two ahead at most).
@@ -342,8 +350,11 @@ func _faded_now() -> float:
 	var rounds := float(h.wpn.get("sustain_rounds", 10))
 	return minf(1.0, float(h.sus_n) / rounds) if rounds > 0.0 else 0.0
 
+
 # ------------------------------------------------------------------ dash: Slipstep
-func single_dash() -> bool: return true
+func single_dash() -> bool:
+	return true
+
 
 func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
