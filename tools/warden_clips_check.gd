@@ -61,8 +61,9 @@ func _moveless_clips() -> void:
 	for id in MOVELESS:
 		var cfg := WardenClips.data(String(id))
 		var hid := String(id)
-		var m := Models.hunter(Arch.weight(hid), Data.TEAM_COLORS[0], Arch.signature(hid), "",
-			PlayerLook.neutral(), hid)
+		var m := Models.hunter(
+			Arch.weight(hid), Data.TEAM_COLORS[0], Arch.signature(hid), "", PlayerLook.neutral(), hid
+		)
 		holder.add_child(m)
 		var w := m.get_node_or_null("Warden")
 		var clips: WardenClips = (w.get_node("Sync") as WardenGlb.Sync).clips if w else null
@@ -76,8 +77,11 @@ func _moveless_clips() -> void:
 				if String((cfg["kmoves"][k] as Dictionary)["clip"]) == clip:
 					played_by.append(k)
 			ok(played_by.is_empty(), "%s: no kmove plays %s any more (%s)" % [id, clip, str(played_by)])
-			ok(String((poses.get(id, {}) as Dictionary).get("clip", "")) == clip,
-				"%s: %s is still his results pose (%s), else cut it from the list" % [id, clip, MOVELESS[id][clip]])
+			ok(
+				String((poses.get(id, {}) as Dictionary).get("clip", "")) == clip,
+				"%s: %s is still his results pose (%s), else cut it from the list" % [id, clip, MOVELESS[id][clip]]
+			)
+
 
 func _hunter(art_name: String, id: String, prefix: String) -> void:
 	var cfg := WardenClips.data(art_name)
@@ -351,6 +355,7 @@ func _mood(m: Node3D, sync: WardenGlb.Sync, sk: Skeleton3D, art_name: String) ->
 	ok(float((md.lure[0] as ShaderMaterial).get_shader_parameter("glow")) > rest_glow * 2.0, "the ult flares the lure")
 	m.set_meta(WardenMood.FLARE, false)
 	md.step(1.0)
+
 
 ## Owner 11-18: the porthole smiles (face A) by default and shows the old angry paint in a fight (he swung, cast or
 ## was hit in the last combat_t s) or a move; the swap is a texture already loaded, never a load mid-match.

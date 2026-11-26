@@ -901,7 +901,8 @@ const RUN_SPEED := 2.2  # m/s: from here it gallops (a walk clip sped up past MA
 const MAX_CADENCE := 6.0  # step cycles/s a gait may be sped up to: small animals gallop at 6-8, past it blurs
 const INK_WIDTH := 0.0011  # the outline per metre of camera distance
 const INK_FAR_THIN := 0.5
-const INK_MIN_PX := 0.4  # no line thinner than this many drawn pixels: at 150-180 px tall it broke into specks (as the hunters')
+## No line thinner than this many drawn pixels: at 150-180 px tall it broke into specks (as the hunters').
+const INK_MIN_PX := 0.4
 
 ## Softer than the Hunters' painted look (WardenGlb.PAINTED): fur, not armour, and no wash-out at the match zoom.
 const COAT_LOOK := {"far_lift": 0.12, "fres": 0.55, "top_light": 0.45, "rim_amount": 0.25}

@@ -38,7 +38,7 @@ func run(main_node: Node) -> void:
 	m.hud.toggle_pack()
 	await _frames(8)
 	var win := main.get_window().size
-	var tag := "%dx%d" % [win.x, win.y]      # the real window: the UI scales, so the canvas height says 720 at 1440
+	var tag := "%dx%d" % [win.x, win.y]  # the real window: the UI scales, so the canvas height says 720 at 1440
 	if OS.get_cmdline_user_args().has("--inv-drag"):
 		await _drag_reel(m)
 		print("INVSHOTS drag reel: %d frames in %s" % [reel, dir.path_join("drag")])

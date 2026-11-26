@@ -613,8 +613,11 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	if beats.has(bt):
 		var b: Dictionary = beats[bt]
 		var length := lib.get_animation(String(b["clip"])).length
-		return {"clip": b["clip"], "t": WardenBeats.time_of(length, float(b["loop_from"]), float(s.get("beat_t", 0.0))),
-				"upper": b["upper"]}
+		return {
+			"clip": b["clip"],
+			"t": WardenBeats.time_of(length, float(b["loop_from"]), float(s.get("beat_t", 0.0))),
+			"upper": b["upper"]
+		}
 	var em := String(s.get("emote", ""))
 	if em != "" and st.has("emote"):
 		var clip := String((d.get("emotes", {}) as Dictionary).get(em, st["emote"]))
@@ -638,8 +641,13 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	var hold := float(land.get("moving", land.get("dur", 0.0))) if moving else float(land.get("dur", 0.0))
 	land_hold = hold
 	if land_t < hold and bool(s.get("grounded", true)):
-		return {"clip": d["land"]["clip"], "t": land_t * float(land.get("rate", 1.0)), "w": float(land.get("w", 1.0)),
-				"fade": float(land.get("fade", FADE)), "out": float(land.get("out", FADE_LOCO))}
+		return {
+			"clip": d["land"]["clip"],
+			"t": land_t * float(land.get("rate", 1.0)),
+			"w": float(land.get("w", 1.0)),
+			"fade": float(land.get("fade", FADE)),
+			"out": float(land.get("out", FADE_LOCO))
+		}
 	var hit := float(s.get("hit_t", 99.0))
 	var hd: Dictionary = st.get("hit", {})
 	# (a chip hit is only WardenFlinch's lean over the body; the hit clip is a stagger's)
@@ -889,7 +897,7 @@ func step(dt: float) -> void:
 	tree.advance(dt)
 	_ease_start(dt)
 	var loco_k := (1.0 - act_w) * (1.0 - air_w) * (1.0 - crouch_w) * (1.0 if _moving(s) else 0.0)
-	loco_k *= 1.0 - proc_w     # (a swim is the rig's: no stride or arm swing over it)
+	loco_k *= 1.0 - proc_w  # (a swim is the rig's: no stride or arm swing over it)
 	var stand_k := (1.0 - act_w) * (1.0 - up_w) * (1.0 - air_w) * (1.0 - one_w) * (0.0 if _moving(s) else 1.0)
 	gait.apply(dt, loco_k, loco_k * (1.0 - up_w), stand_k)
 	steps.step(loco_k > 0.5 and bool(s.get("grounded", true)), loco_pos)
@@ -983,6 +991,7 @@ func feel(dt: float, squash: bool) -> void:
 	var kl := k * (1.0 - up_w)  # (a move that owns the upper body keeps its own posture: no lean over it)
 	var sq := f.x * LAND_SQUASH * k if squash else 0.0
 	lay_feel(root, skel, bi, sq, lean * kl)
+
 
 ## Flattens the body `sq` of its height (widening by 0.6 of that) and tips it `lean` rad forward, about the skeleton's
 ## origin (the feet: every Hero's armature stands on it), by bone `bi` and all below it. WardenNative's squash too.

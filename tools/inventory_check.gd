@@ -199,8 +199,10 @@ func _sizes(main: Node, m: Match, p: Hunter) -> void:
 		ok(listed, "%s: the backpack list %s is on screen" % [tag, pane])
 		ok(
 			slots["worn"] == 4 and slots["belt"] == UtilityBelt.SLOTS and slots["pack"] >= 6 and stray.is_empty(),
-			"%s: 4 worn, %d belt, %d pack slots on screen, clickable %s"
-			% [tag, UtilityBelt.SLOTS, slots["pack"], stray.slice(0, 3)]
+			(
+				"%s: 4 worn, %d belt, %d pack slots on screen, clickable %s"
+				% [tag, UtilityBelt.SLOTS, slots["pack"], stray.slice(0, 3)]
+			)
 		)
 		var orbs: HFlowContainer = pc.find_children("*", "HFlowContainer", true, false)[0]
 		var shown := orbs.get_child_count()
@@ -217,11 +219,17 @@ func _on_screen(vs: Vector2, at: Vector2) -> bool:
 ## A full pack (6 of 6) at 720p: every line shows without scrolling, one line each, inside the window.
 func _full_pack(main: Node, m: Match, p: Hunter) -> void:
 	var keep := p.pack.duplicate()
-	p.pack = [Loot.gear("vest", 3), Loot.gear("blink", 2), Loot.gear("windstep_boots", 1), Loot.valuable("kin_idol"),
-		Loot.valuable("sky_pearl"), Loot.valuable("old_coin")]
+	p.pack = [
+		Loot.gear("vest", 3),
+		Loot.gear("blink", 2),
+		Loot.gear("windstep_boots", 1),
+		Loot.valuable("kin_idol"),
+		Loot.valuable("sky_pearl"),
+		Loot.valuable("old_coin")
+	]
 	var was := main.get_window().size
 	var scale_was = Settings.v.get("ui_scale", 1.0)
-	Settings.v["ui_scale"] = 1.0         # the host's own size setting must not change the answer
+	Settings.v["ui_scale"] = 1.0  # the host's own size setting must not change the answer
 	main.get_window().size = Vector2i(1280, 720)
 	var lp := await _reopen(main, m)
 	await _frames(main, 3)
@@ -230,8 +238,10 @@ func _full_pack(main: Node, m: Match, p: Hunter) -> void:
 	var sc: ScrollContainer = m.hud.pack_panel.find_children("*", "ScrollContainer", true, false)[0]
 	var shown := sc.get_global_rect()
 	var rows: Array = lp._pack_rows
-	ok(rows.size() == 6 and rows.all(func(r): return shown.encloses((r as Control).get_global_rect().grow(-1.0))),
-		"a full pack: all 6 lines show without scrolling (list %s)" % [shown])
+	ok(
+		rows.size() == 6 and rows.all(func(r): return shown.encloses((r as Control).get_global_rect().grow(-1.0))),
+		"a full pack: all 6 lines show without scrolling (list %s)" % [shown]
+	)
 	ok(rows.all(func(r): return (r as Control).size.y <= LoadoutPanel.ROW_H + 1.0), "each pack line is one line high")
 	ok(win.encloses(shown) and m.hud.pack_panel.get_viewport_rect().encloses(win), "the list and window stay on screen")
 	p.pack = keep

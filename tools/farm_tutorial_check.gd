@@ -70,7 +70,7 @@ func run(m: Node, mode := "") -> void:
 			await load("res://tools/farm_hob_shots.gd").new().run(m, String(a).substr(17))
 			return
 	ok(FarmUnlocks.base_mode(), "base_mode is on in the shipped rules")
-	FarmUnlocks.rules()["base_mode"] = false      # sections 1-4 are the old farm's Hob and twelve steps
+	FarmUnlocks.rules()["base_mode"] = false  # sections 1-4 are the old farm's Hob and twelve steps
 	_hob_rules()
 	_tutorial_rules()
 	_tracker_rules()
@@ -108,8 +108,9 @@ func _base_mode() -> void:
 	ok(not home.hmk.tabs().has("Exchange"), "on: no Exchange tab")
 	var wild: Array = (home.hb.wild_t as Dictionary).keys()
 	var w: World = home.world
-	var tree_at := Vector2.ZERO if wild.is_empty() else Vector2(int(wild[0]) % w.w + 0.5,
-			int(int(wild[0]) / float(w.w)) + 0.5)
+	var tree_at := (
+		Vector2.ZERO if wild.is_empty() else Vector2(int(wild[0]) % w.w + 0.5, int(int(wild[0]) / float(w.w)) + 0.5)
+	)
 	ok(home.hg.find(tree_at).is_empty(), "on: wild trees and boulders are not choppable")
 	home.hw.scan()
 	var econ_kinds := ["chop", "break", "log", "ore", "carry", "stock"]
@@ -673,7 +674,7 @@ func _tracker_rules() -> void:
 	var src_at: Array = rows.map(func(r): return GoalTracker.SOURCE_ORDER.find(r["source"]))
 	ok(src_at.all(func(i): return i >= 0), "every row comes from a known source")
 	var cap_was: int = GoalTracker.cfg()["max"]
-	GoalTracker.cfg()["max"] = 99      # (the card shows three: the per-source rules are read off the whole list)
+	GoalTracker.cfg()["max"] = 99  # (the card shows three: the per-source rules are read off the whole list)
 	rows = GoalTracker.lines()
 	GoalTracker.cfg()["max"] = cap_was
 	var counts := {}
