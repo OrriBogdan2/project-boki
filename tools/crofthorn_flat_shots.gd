@@ -21,6 +21,7 @@ var spots: Array = [Vector2(56.0, 29.0)]
 var nodes: Array = []
 var combat_owner = null
 var tele_cam: Camera3D
+var base_cam: Camera3D  # the scene's own camera, put back after a close camera
 var rows: Array = []
 var tele_only := false
 var passes: Array = [["after", {}], ["before", BEFORE_LOOK]]  # name, Crofthorn coat uniforms put over the game's
@@ -110,8 +111,6 @@ func _move_to(si: int, base: Vector3) -> Vector3:
 		farm.ppos = spot + Vector3(0, 0, 2.4)
 		farm.player.position = farm.ppos
 		farm.cam.snap(farm.ppos)
-		if tele_cam != null:
-			tele_cam.current = false
 	return spot
 
 
@@ -138,6 +137,7 @@ func _shoot(tag: String, state: String, si: int) -> void:
 func _tele(state: String, si: int) -> void:
 	var croft: Node3D = nodes[species.find(CROFT)]
 	if tele_cam == null:
+		base_cam = main.get_viewport().get_camera_3d()
 		tele_cam = Camera3D.new()
 		tele_cam.fov = TELE_FOV
 		tele_cam.near = 0.05
@@ -151,7 +151,7 @@ func _tele(state: String, si: int) -> void:
 		main.get_viewport().get_texture().get_image().save_png(
 			dir.path_join("tele_%s_s%d_%s.png" % [view, si, state])
 		)
-	tele_cam.current = false
+	base_cam.current = true
 	await _settle(0.1)
 
 
