@@ -7,6 +7,7 @@ extends RefCounted
 const STILL_DEG := 2.0  # no bone turns more than this over the clip: it holds one pose
 const NEAR_IDLE_DEG := 3.0  # every pose within this of a pose idle passes through: it shows idle
 const SAMPLES := 16
+const HELD := 3  # samples a turn must reach to count (motion)
 
 
 ## Does `clip` move and leave the idle pose? A sleep clip that holds one pose fails too: the built nap breathes,
@@ -31,12 +32,16 @@ static func sample(a: Animation) -> Dictionary:
 	return out
 
 
-## The largest turn (deg) of any bone away from its first key.
+## The largest turn (deg) of any bone away from its first key that it holds over HELD samples: one stray key (a
+## spike in a still clip, as kilnbadger's sleep at 3.5 s) is not motion.
 static func motion(smp: Dictionary) -> float:
 	var top := 0.0
 	for b in smp:
+		var turns: Array = []
 		for q in smp[b]:
-			top = maxf(top, rad_to_deg((q as Quaternion).angle_to(smp[b][0])))
+			turns.append(rad_to_deg((q as Quaternion).angle_to(smp[b][0])))
+		turns.sort()
+		top = maxf(top, turns[maxi(turns.size() - HELD, 0)])
 	return top
 
 

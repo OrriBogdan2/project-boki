@@ -55,8 +55,10 @@ static func rows(main: Node) -> Dictionary:
 	return out
 
 
+## The clip moves (BokiClipCover.motion; a held sleep pose fails like any clip: the game then builds the nap) and
+## leaves idle.
 static func _passes(state: String, st: Array) -> bool:
-	return st[0] and (state == "sleep" or float(st[1]) >= BokiClipCover.STILL_DEG) and (state == "idle" or st[2])
+	return st[0] and float(st[1]) >= BokiClipCover.STILL_DEG and (state == "idle" or st[2])
 
 
 static func _cell(state: String, st: Array, sigs: Dictionary) -> String:
