@@ -4559,6 +4559,7 @@ func _extract(h: Hunter, how := "", where := "") -> void:
 		if opts.get("tut_test", false):
 			print("TUT DONE extracted by %s at %s, t=%.1f" % [how, where, time])
 			get_tree().create_timer(0.5).timeout.connect(func(): get_tree().quit())
+	KinSteal.on_extract(self, h)
 	_check_last()
 
 func _update_rules(dt: float) -> void:
@@ -5055,7 +5056,6 @@ func _net_ev(x, from: String) -> void:
 				"ucast": UltCue.net_in(self, x)       # an ultimate went off in another game
 				"hcast": HostileCue.net_in(self, x)   # a rival's E or R went off in another game
 				"snd": SfxCast.net_in(self, x)        # a sound a Hunter of another game made
-				"whop": WallMoves.scuff(self, Vector3(x[2], x[3], x[4]), float(x[5]))      # a wall hop (item 149)
 		"xp": KillXp.net_in(self, x)
 		"stomp": Life.net_stomp(self, x)      # a stomp began or ended in another game
 		"knock":
