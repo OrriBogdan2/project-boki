@@ -21,16 +21,44 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ART = os.path.join(ROOT, "art", "wardens")
 GAPS = os.path.join(ROOT, "tools", "anim_coverage_gaps.json")
-STATES = ["idle", "idle_combat", "walk", "run", "jump", "fall", "land", "glide", "dash",
-          "lmb", "rmb", "e", "r", "hit", "down", "revive"]
+STATES = [
+    "idle",
+    "idle_combat",
+    "walk",
+    "run",
+    "jump",
+    "fall",
+    "land",
+    "glide",
+    "dash",
+    "lmb",
+    "rmb",
+    "e",
+    "r",
+    "hit",
+    "down",
+    "revive",
+]
 BAD = ("WRONG", "MISSING")
 # kit move ids by slot for the Hunters whose kit moves have their own clips (data "kmoves")
-WEAPON_OUT_IDLE = {"gil", "vex"}  # idle holds the weapon out front (stills 11-26): it needs a casual idle and a combat one
+WEAPON_OUT_IDLE = {
+    "gil",
+    "vex",
+}  # idle holds the weapon out front (stills 11-26): it needs a casual idle and a combat one
 KMOVE_SLOTS = {
-    "hem": {"lmb": ["arc_draw", "arc_over", "arc_tap", "arc_loose", "arc_perfect", "arc_over_loose", "arc_super"],
-            "rmb": ["arc_heavy_wind", "arc_heavy"], "r": ["pin_ult_loose", "pin_ult_final"], "dash": ["pin_roll", "pin_walk"]},
-    "kael": {"lmb": ["jug_slash_r", "jug_slash_l", "jug_wave_wind", "jug_wave"], "rmb": ["jug_slam"],
-             "e": ["jug_chain", "jug_reel"], "r": ["jug_guard", "jug_riposte", "jug_ult_recover"], "dash": []},
+    "hem": {
+        "lmb": ["arc_draw", "arc_over", "arc_tap", "arc_loose", "arc_perfect", "arc_over_loose", "arc_super"],
+        "rmb": ["arc_heavy_wind", "arc_heavy"],
+        "r": ["pin_ult_loose", "pin_ult_final"],
+        "dash": ["pin_roll", "pin_walk"],
+    },
+    "kael": {
+        "lmb": ["jug_slash_r", "jug_slash_l", "jug_wave_wind", "jug_wave"],
+        "rmb": ["jug_slam"],
+        "e": ["jug_chain", "jug_reel"],
+        "r": ["jug_guard", "jug_riposte", "jug_ult_recover"],
+        "dash": [],
+    },
 }
 
 
@@ -69,13 +97,17 @@ def native_cells(art, d):
     return {
         "idle": "WRONG" if out else "clip" if own("idle") else "MISSING",
         "idle_combat": "clip" if own("idle_combat") else "MISSING" if out else "shared",  # (shared: idle holds it low)
-        "walk": "clip" if own("walk") else "MISSING", "run": "clip" if own("run") else "MISSING",
+        "walk": "clip" if own("walk") else "MISSING",
+        "run": "clip" if own("run") else "MISSING",
         "jump": "clip" if own("jump") else "MISSING",
         "fall": "clip" if own("fall") else "shared",
         "land": "clip" if own("land") else "proc",
         "glide": "clip" if own("glide") else "WRONG",
         "dash": move("dash", "WRONG"),
-        "lmb": move("lmb"), "rmb": move("rmb"), "e": move("e"), "r": move("r"),
+        "lmb": move("lmb"),
+        "rmb": move("rmb"),
+        "e": move("e"),
+        "r": move("r"),
         "hit": "clip" if own("hit") else "proc",
         "down": "clip" if own("downed") else "WRONG",
         "revive": "clip" if own("revive") else "shared",  # (the crouch pose held, warden_native.gd _loco)
@@ -96,14 +128,21 @@ def contract_cells(art):
         return "clip" if any(k.startswith(prefix) for k in km) else "shared"
 
     return {
-        "idle": has("idle"), "idle_combat": has(d.get("loco", {}).get("stance", "stance")),
-        "walk": has("walk_f"), "run": has("run_f"), "jump": has(air.get("rise", "")),
-        "fall": has(air.get("fall", "")), "land": has(d.get("land", {}).get("clip", "")),
+        "idle": has("idle"),
+        "idle_combat": has(d.get("loco", {}).get("stance", "stance")),
+        "walk": has("walk_f"),
+        "run": has("run_f"),
+        "jump": has(air.get("rise", "")),
+        "fall": has(air.get("fall", "")),
+        "land": has(d.get("land", {}).get("clip", "")),
         "glide": has(air.get("glide", "")),
         "dash": "clip" if any(v.get("dash") for v in km.values()) else "WRONG",
-        "lmb": slot("bul_throw"), "rmb": slot("bul_guard"), "e": "clip" if "e_mend" in have else "shared",
+        "lmb": slot("bul_throw"),
+        "rmb": slot("bul_guard"),
+        "e": "clip" if "e_mend" in have else "shared",
         "r": "clip" if "x_slam" in have else "shared",
-        "hit": has(st.get("hit", {}).get("front", "")), "down": has(st.get("dead", "")),
+        "hit": has(st.get("hit", {}).get("front", "")),
+        "down": has(st.get("dead", "")),
         "revive": has(st.get("reviving", "")),
     }
 
@@ -131,7 +170,9 @@ def table(rows, md):
         lines = ["| " + " | ".join(["hunter"] + STATES) + " |", "|" + "---|" * (len(STATES) + 1)]
     for a, cells in rows.items():
         row = [cells[s] for s in STATES]
-        lines.append(("| " + " | ".join([a] + row) + " |") if md else sep.join(["%-8s" % a] + ["%-11s" % c for c in row]))
+        lines.append(
+            ("| " + " | ".join([a] + row) + " |") if md else sep.join(["%-8s" % a] + ["%-11s" % c for c in row])
+        )
     return "\n".join(lines)
 
 
@@ -143,7 +184,10 @@ def main():
     new = [g for g in now if g not in known]
     if "--check" in args:
         if new:
-            print("ANIM COVERAGE FAIL: gaps not in tools/anim_coverage_gaps.json (give the state a clip): " + ", ".join(new))
+            print(
+                "ANIM COVERAGE FAIL: gaps not in tools/anim_coverage_gaps.json (give the state a clip): "
+                + ", ".join(new)
+            )
             sys.exit(1)
         print("ANIM COVERAGE OK: %d gaps (listed %d)" % (len(now), len(known)))
         return
@@ -152,7 +196,14 @@ def main():
             print("refusing: new gaps " + ", ".join(new))
             sys.exit(1)
         with open(GAPS, "w", encoding="utf-8") as f:
-            json.dump({"doc": "Gap cells (WRONG or MISSING) of tools/anim_coverage.py; the list may only shrink.", "gaps": now}, f, indent=1)
+            json.dump(
+                {
+                    "doc": "Gap cells (WRONG or MISSING) of tools/anim_coverage.py; the list may only shrink.",
+                    "gaps": now,
+                },
+                f,
+                indent=1,
+            )
             f.write("\n")
         print("gap list now %d cells" % len(now))
         return

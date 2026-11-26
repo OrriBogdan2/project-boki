@@ -4,7 +4,6 @@ extends "res://tools/clip_shots.gd"
 ## <dir>/<id>/<state>.png (--yaw= turns the model). Needs a renderer. States: STATES below.
 
 const DT := 1.0 / 30.0
-var yaw := 90.0  # deg: the model's turn (--yaw=)
 const SECS := 0.8  # s a state is held before its frame ("jump@0.3" holds that state 0.3 s)
 const IDS := [
 	"mage",
@@ -30,6 +29,8 @@ const STATES := {
 	"down": {"fall": 0.6},
 	"revive": {"reviving": true},
 }
+
+var yaw := 90.0  # deg: the model's turn (--yaw=)
 
 
 func run(main: Node) -> void:
