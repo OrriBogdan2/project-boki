@@ -1,12 +1,14 @@
 extends RefCounted
 ## --gil-swim-spin-shots --shots-dir=<dir>: Gil's Ground Swim and Riptide in a real Match, one PNG a frame (needs a
-## renderer). swim_*: a swim started east with the keys turned north at 0.1 s (the steer, the waist-deep crawl, the
-## wake along the curve, the surfacing), close up and at the gameplay camera. spin_early_* / spin_late_*: four
+## renderer). swim_close_* / swim_game_*: a swim started east with the keys turned north at 0.1 s (the steer, the
+## waist-deep crawl, the wake along the curve, the surfacing), close up and at the gameplay camera; swim_side_*: a
+## straight swim east seen low from the side (the ground line at his waist). spin_early_* / spin_late_*: four
 ## frames in a row 0.25 s and 1.75 s into the spin, so the turn per frame shows the wind-up.
 
 const DT := 1.0 / 60.0
 const SWIM_AT := [0.05, 0.12, 0.2, 0.28, 0.36, 0.46, 0.6, 0.85]  # s after the dash press
 const CLOSE := 0.38  # the close-up camera's distance, a share of the gameplay one
+const SIDE_PITCH := 14.0  # deg: the side view's camera, low over the ground
 
 var main: Node
 var out := ""
@@ -28,12 +30,18 @@ func run(main_node: Node) -> void:
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	_clear_view(m, p)
+	# only these steps run the match: its own frame loop would add the GPU's slow frames (and the real keys) and
+	# strobe the spin
+	m.paused = true
 	var home := p.pos
-	for view in ["close", "game"]:
-		m.cam.dist_mul = CLOSE if view == "close" else 1.0
+	var pitch := m.cam.pitch
+	for view in ["close", "game", "side"]:
+		m.cam.dist_mul = 1.0 if view == "game" else CLOSE
+		m.cam.pitch = deg_to_rad(SIDE_PITCH) if view == "side" else pitch
 		p.teleport(home)
 		await _swim(m, p, view)
 	m.cam.dist_mul = CLOSE
+	m.cam.pitch = pitch
 	p.teleport(home)
 	await _spin(m, p)
 	print("GIL_SWIM_SPIN_SHOTS_DONE")
@@ -52,7 +60,7 @@ func _swim(m: Match, p: Hunter, view: String) -> void:
 	var shot := 0
 	for want in SWIM_AT:
 		while t < float(want):
-			if t >= 0.1:
+			if t >= 0.1 and view != "side":
 				p.inp["move"] = Vector2(0, -1)  # north, up the screen
 			await _step(m, p)
 			t += DT
