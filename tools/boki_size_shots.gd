@@ -6,10 +6,12 @@ extends "res://tools/vv_shots.gd"
 ## what it covers at the game camera: bbox px (w, h) and the area px of its silhouette (convex hull of the mesh).
 
 const SPECIES := ["cindle", "burrlet", "puddlet", "heatherhorn"]
-const GAP := 1.7
+const GAP := 2.2
 const EYE_FOV := 40.0  # degrees: the eye-level camera's vertical lens
 const EYE_DIST := 6.5  # m from the row
 const EYE_HEIGHT := 0.35  # m above the ground: a Boki's own eye height
+const STAGGER := 1.3  # m every second Boki stands nearer the camera, so the name plates do not overlap
+const FACE := Vector3(0.8, 0, 0.6)  # the way they face: three quarters on to the camera, not away from it
 
 
 func run(main_node: Node) -> void:
@@ -23,6 +25,7 @@ func run(main_node: Node) -> void:
 			view = Vector2i(int(arg.get_slice("x", 0).substr(7)), int(arg.get_slice("x", 1)))
 	DirAccess.make_dir_recursive_absolute(dir)
 	main.get_window().size = view
+	extra_opts = {"arena": false, "training": false}  # a real expedition frame, not the practice drill
 	await _setup()
 	m.cam.user_zoom = CamWheel.near(true)
 	T.teleport(home + Vector3(-30, 0, 30))
@@ -30,13 +33,14 @@ func run(main_node: Node) -> void:
 	for i in SPECIES.size():
 		var rec := Save.new_kin(String(SPECIES[i]), "", 7)
 		(rec["dna"] as Dictionary)["size"] = 0.0
-		var k := m.spawn_wild(rec, home + Vector3(GAP * (i + 1), 0, 0.0))
+		var k := m.spawn_wild(rec, home + Vector3(GAP * (i + 1), 0, STAGGER * (i % 2)))
 		k.speed = 0.0  # stays where it stands, idling
 		ks.append(k)
 	cam_at = home + Vector3(GAP * 2.0, 0, 0)
 	await _go(1.0, Callable(), [], 3.0)
 	for k in ks:
 		k.teleport(k.home)
+		k.face = atan2(-FACE.x, -FACE.z)
 	await _go(0.5, Callable(), [], 3.0)
 	await main.get_tree().process_frame
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join("game.png"))

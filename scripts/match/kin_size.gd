@@ -6,8 +6,10 @@ extends RefCounted
 ## the mesh at build (extent) and its Flex is scaled by fit(), so Meshy models of any proportion land at the same
 ## look; the kin's own roll (Unique, Evo growth, Mutations) multiplies on top.
 
-## World metres a Boki of 1 cm stands, at root scale 1. The match and, times Home's FARM_BOKI_SCALE, the farm draw it.
-const M_PER_CM := 0.014
+## The one display scale for every rigged Boki: world metres per data cm, at root scale 1. Data cm stay the truth for
+## how big one is next to another; this only sets how big they all stand next to a hunter (a 28 cm starter is 0.81 m
+## long, about 1200 px at the game camera). The match and, times Home's FARM_BOKI_SCALE, the farm draw it.
+const M_PER_CM := 0.029
 
 static var _sizes := {}  # species -> the Vector3 box of its model, measured at the first fit
 

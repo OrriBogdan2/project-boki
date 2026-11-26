@@ -143,8 +143,8 @@ that keeps a planted paw closest to the ground most of the stance. `_pick_clip` 
 
 ## How big it is (`KinSize`)
 
-A rigged Boki's size is its data: `content/kin/<id>.json` `size.cm` x `KinSize.M_PER_CM` (0.014 m per cm) is the
-longest side of its body (width, height or length), at root scale 1, whatever the glb's own size. The game camera looks
+A rigged Boki's size is its data: `content/kin/<id>.json` `size.cm` x `KinSize.M_PER_CM` (`M_PER_CM` m per cm) is the
+longest side of its body (width, height or length), at root scale 1, whatever the glb's own size. `M_PER_CM` (now 0.029 m) is the one display scale for every Boki: data cm keep the ratios, the factor sets how big they all stand next to a hunter (a 28 cm starter is 0.81 m, about 1200 px at the game camera). The game camera looks
 down, so the footprint decides how big a Boki reads: equal heights made a long, low Prismander look far bigger than a
 tall Vespyx. `BokiRig.build` measures the glb's meshes (`KinSize.extent`, the bind-pose box, ears and horns included),
 scales Flex by `fit` = target / measured and stores it as the root meta `fit`; `BokiRig` and `KinPuppet` multiply
