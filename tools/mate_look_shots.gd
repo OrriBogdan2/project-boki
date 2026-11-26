@@ -40,7 +40,7 @@ func run(main_node: Node) -> void:
 	Econ.ensure()
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 4, "tier": 0, "seed": 77, "no_drop": true, "god": true, "length": 1e9})
+	m.start({"teams": 2, "squad": 4, "tier": 0, "seed": 77, "no_drop": true, "god": true, "length": 1e9})
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)

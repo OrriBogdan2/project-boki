@@ -2,7 +2,8 @@ extends RefCounted
 ## --vision-shots --shots-dir=<dir> [--fixed-fps 30]: the sight wedge at the match camera with the HUD. You stand
 ## aiming (a rival ahead with a plate, a crouched rival ahead with none, a rival behind you hidden), sweep your aim
 ## so the wedge turns over the one behind, crouch, then stand while the one behind shoots at you (revealed in her own
-## lit circle) and stops (it fades), then you hold the far look: <dir>/f0000.jpg... every frame from SETTLE, plus
+## lit circle) and stops (it fades), then you hold the far look (--raid=<condition>, default clear):
+## <dir>/f0000.jpg... every frame from SETTLE, plus
 ## stand.png, crouch.png, reveal.png and scout.png. Run on a real GPU (jobq --needs gpu); docs/specs/VISION_LOOK.md.
 
 const SPAWN_WAIT := 30   # frames before placing anyone (the match puts you on the map)
@@ -20,6 +21,7 @@ const SHOOTER := 2        # the rival behind you: shoots in the reveal part
 
 var main: Node
 var dir := "user://vision_shots"
+var raid := "clear"       # --raid=<condition>: the weather to shoot (RaidLook.CONDITIONS)
 
 func _save(file: String) -> void:
 	var img := main.get_viewport().get_texture().get_image()
@@ -34,10 +36,11 @@ func run(mn: Node) -> void:
 	Game.god = true                     # nobody knocks the shot out
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="): dir = String(a).substr(12)
+		if String(a).begins_with("--raid="): raid = String(a).substr(7)
 	DirAccess.make_dir_recursive_absolute(dir)
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 4, "squad": 1, "tier": 0, "length": 1500.0, "seed": 5101, "no_drop": true, "raid": "clear",
+	m.start({"teams": 4, "squad": 1, "tier": 0, "length": 1500.0, "seed": 5101, "no_drop": true, "raid": raid,
 		"tut_test": true})
 	var fade = main.get("fade")
 	if fade != null:

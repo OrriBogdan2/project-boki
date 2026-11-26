@@ -2,7 +2,7 @@
 swordfish, throwing whatever bottle comes out of the bag, swimming through the ground.
 
     cd tools && python3 gen_sfx_gil.py      (then: python3 gen_sfx_dash.py, godot --headless --import)
-    cd tools && python3 gen_sfx_gil.py bar  (only gil_tide_hit and gil_slime_dry)
+    cd tools && python3 gen_sfx_gil.py bar  (only gil_tide_hit, gil_slime_dry, gil_spout_hit, gil_tide_lunge)
 
 Signatures: the swordfish thrust (gil_thrust) and the Beached flop (gil_beached). Everything is water,
 glass and a small wet body: thin blade swishes with a fin flick, glass that breaks five ways (one per
@@ -10,11 +10,13 @@ potion), bubbles, spray and surf. Every sound is levelled to its category (docs/
 kit's old stock sounds (swipe, throw, boom, whoosh, unlock, ab_ready, click) stays in his kit.
 Original synthesis, no samples.
 """
+
 import os, sys
 import numpy as np
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sfx_lib as S
-from sfx_lib import N, T, noise, lpf, hpf, bpf, env, mix, at, kick, click, crack, sub, grains, shape, soft_in
+from sfx_lib import N, T, noise, lpf, bpf, env, mix, at, kick, click, crack, sub, grains, shape, soft_in
 
 S.reseed(5153)
 
@@ -36,7 +38,7 @@ def sweep_noise(d, f0, f1, width=0.35):
     out = np.zeros(n)
     src = noise(d)
     for fc in np.geomspace(120, 9000, 18):
-        g = np.exp(-((np.log(fc) - lf) / width) ** 2)
+        g = np.exp(-(((np.log(fc) - lf) / width) ** 2))
         if g.max() < 0.02:
             continue
         out += bpf(src, fc * 0.8, fc * 1.25) * g
@@ -56,7 +58,7 @@ def bubbles(d, count, lo, hi, g=0.4):
     for _ in range(count):
         t0 = S.rng.uniform(0.0, d * 0.8)
         out = mix(out, at(bubble(S.rng.uniform(lo, hi), S.rng.uniform(0.03, 0.08)) * S.rng.uniform(0.4, 1.0) * g, t0))
-    return out[:N(d)]
+    return out[: N(d)]
 
 
 def spray(d, lo=2500, hi=9000, decay=0.12):
@@ -72,7 +74,7 @@ def glass(d, base=2600, shards=9):
         f = base * S.rng.uniform(0.8, 2.6)
         pin = S.ring((f, f * 2.41, f * 3.93), 0.25, (0.06, 0.04, 0.025), (0.3, 0.15, 0.08))
         out = mix(out, at(pin * S.rng.uniform(0.4, 1.0), S.rng.uniform(0.0, d * 0.5)))
-    return mix(snap, out[:N(d)])
+    return mix(snap, out[: N(d)])
 
 
 def wet_slap(d=0.16, lo=300, hi=2600):
@@ -85,7 +87,7 @@ def wet_slap(d=0.16, lo=300, hi=2600):
 # ------------------------------------------------------------------ LMB: Fencer (the swordfish)
 def thrust(i):
     """A rapier thrust: a thin fast swish with a fin flick off the swordfish's tail."""
-    d = 0.24
+    _d = 0.24
     swish = sweep_noise(0.16, 2200 + 200 * i, 5200, 0.3) * shape(0.16, 0.025, 0.03, 0.1) * 1.2
     zing = S.sweep(3100 + 140 * i, 4200, 0.1) * env(N(0.1), 0.004, 0.03) * 0.06
     flick = at(bpf(noise(0.05), 700, 2400) * env(N(0.05), 0.002, 0.012) * 0.5, 0.11)
@@ -94,19 +96,22 @@ def thrust(i):
 
 def thrust_hit():
     """The swordfish's bill lands: a pointed tock, a short wet stab and a few drops."""
-    d = 0.3
+    _d = 0.3
     tip = mix(click(0.003, 3000, 9000) * 1.2, crack(0.12, 900, 5000, 0.014) * 1.5)
-    stab = mix(kick(260, 120, 0.18, 0.01, 0.03, 2.0) * 0.6,
-               bpf(noise(0.1), 500, 2200) * env(N(0.1), 0.002, 0.025) * 0.8)
+    stab = mix(
+        kick(260, 120, 0.18, 0.01, 0.03, 2.0) * 0.6, bpf(noise(0.1), 500, 2200) * env(N(0.1), 0.002, 0.025) * 0.8
+    )
     return mix(tip, stab, at(spray(0.18, 2500, 7000, 0.05) * 0.4, 0.01))
 
 
 # ------------------------------------------------------------------ RMB: Grab Bag
 def toss(i):
     """A bottle out of the bag: glass knocking in the bag, then the bottle flung end over end."""
-    d = 0.4
-    knock = mix(S.chime(1900 + 120 * i, 0.12, 0.04, ((1.0, 1.0), (2.7, 0.4))) * 0.5,
-                at(S.chime(2300 + 90 * i, 0.1, 0.03, ((1.0, 1.0), (2.9, 0.3))) * 0.35, 0.03))
+    _d = 0.4
+    knock = mix(
+        S.chime(1900 + 120 * i, 0.12, 0.04, ((1.0, 1.0), (2.7, 0.4))) * 0.5,
+        at(S.chime(2300 + 90 * i, 0.1, 0.03, ((1.0, 1.0), (2.9, 0.3))) * 0.35, 0.03),
+    )
     fling = sweep_noise(0.26, 700, 2600, 0.35) * shape(0.26, 0.04, 0.04, 0.18) * 0.9
     slosh = lpf(noise(0.2), 900) * slow(0.2, 25, 0.8) * shape(0.2, 0.02, 0.05, 0.13) * 0.4
     return soft_in(mix(knock, at(fling, 0.05), at(slosh, 0.06)))
@@ -148,11 +153,15 @@ def pop_fire():
 
 
 def pop_zeep():
-    """Super Zeep (the rare one): a fizzing fuse, then a big frothy blast and a fountain of bubbles."""
-    d = 1.1
+    """Geyser (the rare one): a fizzing fuse, then a big frothy blast and a fountain of bubbles."""
+    _d = 1.1
     fizz = S.hiss(0.12, 3000, 9000, 0.02, 0.05) * 0.4
-    blast = mix(click(0.005, 1800, 7000) * 1.1, kick(120, 36, 0.9, 0.04, 0.18, 3.0) * 0.9,
-                sub(60, 30, 0.9, 0.2) * 0.5, lpf(noise(0.5), 2200) * env(N(0.5), 0.004, 0.12) * 1.6)
+    blast = mix(
+        click(0.005, 1800, 7000) * 1.1,
+        kick(120, 36, 0.9, 0.04, 0.18, 3.0) * 0.9,
+        sub(60, 30, 0.9, 0.2) * 0.5,
+        lpf(noise(0.5), 2200) * env(N(0.5), 0.004, 0.12) * 1.6,
+    )
     froth = bubbles(0.9, 22, 300, 1500, 0.4)
     return mix(fizz, at(glass(0.8, 2500, 12), 0.1), at(blast, 0.1), at(froth, 0.18), at(spray(0.6) * 0.6, 0.12))
 
@@ -168,9 +177,10 @@ def beached():
 # ------------------------------------------------------------------ Shift: Ground Swim
 def dash(i):
     """Diving into the ground: an earthy splash, and the fin rushing off under the surface."""
-    d = 0.45
-    dive = mix(lpf(noise(0.18), 1400) * env(N(0.18), 0.004, 0.05) * 1.4,
-               kick(160 + 10 * i, 70, 0.2, 0.02, 0.04, 1.5) * 0.5)
+    _d = 0.45
+    dive = mix(
+        lpf(noise(0.18), 1400) * env(N(0.18), 0.004, 0.05) * 1.4, kick(160 + 10 * i, 70, 0.2, 0.02, 0.04, 1.5) * 0.5
+    )
     rush = sweep_noise(0.36, 400 + 40 * i, 1500, 0.4) * shape(0.36, 0.03, 0.08, 0.24) * 0.9
     splash = spray(0.2, 2000, 6000, 0.05) * 0.5
     return mix(dive, at(splash, 0.005), at(rush, 0.04), at(bubbles(0.35, 4, 250, 600, 0.3), 0.08))
@@ -178,7 +188,7 @@ def dash(i):
 
 def surface():
     """Bursting up out of the ground: a deep plop, a column of spray, foes thrown up."""
-    d = 0.7
+    _d = 0.7
     plop = mix(kick(140, 50, 0.4, 0.03, 0.08, 2.4) * 0.8, sub(70, 40, 0.4, 0.08) * 0.35)
     up = sweep_noise(0.4, 500, 3200, 0.4) * shape(0.4, 0.01, 0.06, 0.3) * 1.1
     return mix(plop, up, at(spray(0.55, 2500, 9000, 0.18) * 0.8, 0.02), at(bubbles(0.5, 6, 300, 900, 0.35), 0.05))
@@ -239,16 +249,18 @@ def step(surface_name, i):
     d = 0.2
     heel = kick(170 + 10 * i, 95, d, 0.006, 0.016, 1.4) * 0.4
     slap = bpf(noise(0.05), 500, 2600) * env(N(0.05), 0.001, 0.01) * 0.6
-    if surface_name == 'grass':
+    if surface_name == "grass":
         tex = bpf(noise(d), 700, 3500) * env(N(d), 0.004, 0.03) * 0.6
         slap *= 0.5
-    elif surface_name == 'stone':
+    elif surface_name == "stone":
         tex = mix(click(0.002, 2000, 6000) * 0.5, crack(d, 900, 3800, 0.008) * 0.8)
-    elif surface_name == 'wood':
+    elif surface_name == "wood":
         tex = mix(S.ring((240 + 9 * i, 520 + 14 * i), d, (0.04, 0.025), (0.4, 0.2)), crack(d, 500, 2000, 0.01) * 0.5)
     else:
-        tex = mix(grains(0.1, 500, 700, 2600, 0.002, 0.005, fall=0.04) * 0.7,
-                  lpf(noise(d), 1500) * env(N(d), 0.006, 0.03) * 0.5)
+        tex = mix(
+            grains(0.1, 500, 700, 2600, 0.002, 0.005, fall=0.04) * 0.7,
+            lpf(noise(d), 1500) * env(N(d), 0.006, 0.03) * 0.5,
+        )
         slap *= 0.4
     drip = at(bubble(1100 + 90 * i, 0.03) * 0.08, 0.04) if i % 2 == 1 else np.zeros(1)
     return soft_in(mix(heel, slap, tex, drip))
@@ -262,7 +274,7 @@ def gvoice(d, *args, **kw):
 
 
 def hurt(i):
-    v = ('uh', 'ah', 'eh', 'uh')[i]
+    v = ("uh", "ah", "eh", "uh")[i]
     f0 = (290, 270, 310, 280)[i]
     yelp = gvoice(0.2 + 0.03 * (i % 2), f0, f0 * 0.75, v, breath=0.25, rasp=0.12, scale=1.2, a=0.008)
     return mix(yelp, at(bubble(700 + 40 * i, 0.05) * 0.12, 0.2))
@@ -270,40 +282,40 @@ def hurt(i):
 
 def down():
     """Knocked down: a falling 'oof', then a few dazed gulps for air."""
-    oof = gvoice(0.55, 280, 170, 'uh', breath=0.3, rasp=0.2, vib=0.02, scale=1.18, a=0.015)
-    gulps = mix(*[at(gvoice(0.08, 240, 300, 'mm', breath=0.5, scale=1.2, a=0.005) * 0.4, 0.12 * k) for k in range(3)])
+    oof = gvoice(0.55, 280, 170, "uh", breath=0.3, rasp=0.2, vib=0.02, scale=1.18, a=0.015)
+    gulps = mix(*[at(gvoice(0.08, 240, 300, "mm", breath=0.5, scale=1.2, a=0.005) * 0.4, 0.12 * k) for k in range(3)])
     return mix(oof, at(gulps, 0.6))
 
 
 def death():
     """A long falling cry that ends in a trail of bubbles."""
-    cry = gvoice(0.85, 320, 140, 'ah', breath=0.3, rasp=0.25, vib=0.03, scale=1.18, a=0.015)
+    cry = gvoice(0.85, 320, 140, "ah", breath=0.3, rasp=0.25, vib=0.03, scale=1.18, a=0.015)
     return mix(cry, at(bubbles(0.7, 10, 250, 900, 0.25), 0.55))
 
 
 def build():
-    S.takes_cat('gil_thrust', thrust, 3, 'fire')
-    S.save_cat('gil_thrust_hit', thrust_hit(), 'impact')
-    S.takes_cat('gil_toss', toss, 3, 'cast')
-    S.save_cat('gil_pop_thunder', pop_thunder(), 'impact')
-    S.save_cat('gil_pop_slime', pop_slime(), 'impact')
-    S.save_cat('gil_pop_air', pop_air(), 'impact')
-    S.save_cat('gil_pop_fire', pop_fire(), 'impact')
-    S.save_cat('gil_pop_zeep', pop_zeep(), 'impact')
-    S.save_cat('gil_beached', beached(), 'signature')
-    S.takes_cat('gil_dash', dash, 3, 'dash')
-    S.save_cat('gil_surface', surface(), 'impact')
-    S.takes_cat('gil_spin', spin, 3, 'cast')
-    S.save_cat('gil_spout', spout(), 'cast')
-    S.save_cat('gil_wave', wave(), 'cast')
-    S.save_cat('gil_wave_land', wave_land(), 'impact')
-    S.save_cat('gil_recast_open', recast_open(), 'ui')
-    S.save_cat('gil_recast_tick', recast_tick(), 'ui')
-    for s in ('grass', 'stone', 'wood', 'snow'):
-        S.takes_cat('gil_step_' + s, lambda i, s=s: step(s, i), 3, 'step')
-    S.takes_cat('gil_hurt', hurt, 3, 'grunt')
-    S.save_cat('gil_down', down(), 'grunt')
-    S.save_cat('gil_death', death(), 'grunt')
+    S.takes_cat("gil_thrust", thrust, 3, "fire")
+    S.save_cat("gil_thrust_hit", thrust_hit(), "impact")
+    S.takes_cat("gil_toss", toss, 3, "cast")
+    S.save_cat("gil_pop_thunder", pop_thunder(), "impact")
+    S.save_cat("gil_pop_slime", pop_slime(), "impact")
+    S.save_cat("gil_pop_air", pop_air(), "impact")
+    S.save_cat("gil_pop_fire", pop_fire(), "impact")
+    S.save_cat("gil_pop_zeep", pop_zeep(), "impact")
+    S.save_cat("gil_beached", beached(), "signature")
+    S.takes_cat("gil_dash", dash, 3, "dash")
+    S.save_cat("gil_surface", surface(), "impact")
+    S.takes_cat("gil_spin", spin, 3, "cast")
+    S.save_cat("gil_spout", spout(), "cast")
+    S.save_cat("gil_wave", wave(), "cast")
+    S.save_cat("gil_wave_land", wave_land(), "impact")
+    S.save_cat("gil_recast_open", recast_open(), "ui")
+    S.save_cat("gil_recast_tick", recast_tick(), "ui")
+    for s in ("grass", "stone", "wood", "snow"):
+        S.takes_cat("gil_step_" + s, lambda i, s=s: step(s, i), 3, "step")
+    S.takes_cat("gil_hurt", hurt, 3, "grunt")
+    S.save_cat("gil_down", down(), "grunt")
+    S.save_cat("gil_death", death(), "grunt")
 
 
 # ------------------------------------------------------------------ the bar pass (11-20): Tide's hit, the slime's end
@@ -320,18 +332,41 @@ def slime_dry():
     """The slime puddle drying up: a slow sticky suck draining away, the last fat bubbles popping slower."""
     suck = lpf(noise(0.6), 700) * slow(0.6, 18, 0.8) * shape(0.6, 0.06, 0.1, 0.4) * 1.1
     gulp = at(S.sweep(220, 90, 0.3) * env(N(0.3), 0.02, 0.12) * 0.25, 0.25)
-    pops = ((300, 0.08, 0.5), (240, 0.3, 0.4), (190, 0.58, 0.3))      # (Hz, s, gain): slower and lower
+    pops = ((300, 0.08, 0.5), (240, 0.3, 0.4), (190, 0.58, 0.3))  # (Hz, s, gain): slower and lower
     last = mix(*[at(bubble(f, 0.09, 1.3) * g, t0) for f, t0, g in pops])
     return S.pad(mix(suck, gulp, last), 0.8)
+
+
+def spout_hit():
+    """A waterspout catching a foe: the column punches up under it (a wet slap, a rising rush as it lifts),
+    then bursts into spray and bubbles (lighter and brighter than the Tide's thump, which drives forward)."""
+    d = 0.7
+    slap = mix(wet_slap(0.2, 250, 2200) * 0.9, kick(140, 60, 0.3, 0.01, 0.06, 1.8) * 0.5)
+    lift = sweep_noise(0.45, 300, 2200, 0.4) * shape(0.45, 0.03, 0.15, 0.27) * 0.8
+    burst = at(spray(0.45, 2500, 9000, 0.14) * 0.6, 0.12)
+    return S.pad(mix(slap, at(lift, 0.02), burst, at(bubbles(0.4, 6, 350, 900, 0.25), 0.15)), d)
+
+
+def tide_lunge():
+    """Riptide Lunge leaves (LMB held, released): a small water wall shoved aside as the bill streaks forward,
+    a thin blade zing rising with it and spray trailing (his dash's dive, but a thrust, not a plunge)."""
+    _d = 0.5
+    shove = mix(lpf(noise(0.14), 1200) * env(N(0.14), 0.004, 0.04) * 1.2, kick(170, 70, 0.18, 0.01, 0.04, 1.6) * 0.5)
+    rush = sweep_noise(0.34, 500, 3000, 0.35) * shape(0.34, 0.02, 0.1, 0.22) * 0.9
+    zing = at(S.sweep(1500, 3200, 0.2) * env(N(0.2), 0.004, 0.08) * 0.12, 0.03)
+    return soft_in(mix(shove, at(rush, 0.02), zing, at(spray(0.3, 2200, 8000, 0.08) * 0.4, 0.05)))
 
 
 def build_bar():
     """Only the bar pass's files (a full run re-rolls every other file's noise)."""
     S.reseed(5154)
-    S.save_cat('gil_tide_hit', tide_hit(), 'impact')
-    S.save_cat('gil_slime_dry', slime_dry(), 'cast')
+    S.save_cat("gil_tide_hit", tide_hit(), "impact")
+    S.save_cat("gil_slime_dry", slime_dry(), "cast")
+    S.reseed(5155)
+    S.save_cat("gil_spout_hit", spout_hit(), "impact")
+    S.save_cat("gil_tide_lunge", tide_lunge(), "dash")
 
 
-if __name__ == '__main__':
-    build_bar() if sys.argv[1:] == ['bar'] else build()
-    print('gen_sfx_gil: done')
+if __name__ == "__main__":
+    build_bar() if sys.argv[1:] == ["bar"] else build()
+    print("gen_sfx_gil: done")

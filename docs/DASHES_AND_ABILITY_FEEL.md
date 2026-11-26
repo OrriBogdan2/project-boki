@@ -291,7 +291,11 @@ and context-targeted. Six different inputs, so no two archetype dashes play alik
 - Every dash has a start pose of at least 0.05s (an animation, not a delay on movement) and a unique
   sound per archetype. The kin's rider adds a theme sweetener.
 - Wind-down: no glider for 0.12s after a ground dash ends, as the reference did. Dash → jump is unchanged.
-- Dash buffer (0.18s), rush cancels and the glide → dash → glide chains stay as built (KINFALL_CLASSES.md).
+- One press window for abilities: `press_buffer` in content/rules/tuning.json (0.15s, owner 11-08 "recasts
+  buffered ~0.15s"). An ability pressed that early still goes: held past a dash's end while the hunter can't
+  act, before a two-step's recast arms, before a stun, root or Grounded ends. A kit that needs another window
+  keeps a per-kit override with its source. `--dash-flow-check` asserts 0.1s early goes and 0.2s early doesn't
+  for all three. (The Shift buffer reads the same window; the jump buffer, 0.12s, is a movement press, not this window.)
 - Distances never grow with rank (ABILITIES.md rule). Ranks cut the recharge only.
 - Protection stays short: at most 0.16s, or partial (shots only, front only). No full-invulnerability dash.
 
@@ -316,7 +320,7 @@ protection. Those belong to the archetype and weight class.
 
 > **Retired (owner decision 2026-11-05, item 129; DECISIONS.md):** Boki dash riders are removed. Dashes are purely the hero's own; a Boki acts only through its own abilities. Kept for history only. `--boki-dash-check` asserts no Boki changes a dash.
 
-Riders today (content/kin_v2):
+Riders today (content/kin):
 
 - **Vespyx** Venom Trail: `on_pass` damage 3, poison 12, blight 3s.
 - **Gravadillo** Gravity Wake: `on_end` burst 3.5m, pull 8.
@@ -531,7 +535,10 @@ Every hit has one of three weights (`ImpactWeight`, numbers in `content/rules/im
 - A Hunter's hit takes its ability's weight from the rules' `hunters` table (arch -> lmb / rmb / dash / e / x,
   or a kit's own hit tag such as Tenzo's `rock`). The hit's `ab` tag names the ability; an untagged shot is the
   LMB. `--impact-weight-check` asserts every damaging ability of all 13 Hunters has a weight.
-- A payoff (`payoff`, `spiked`, `exploit`) lands one weight heavier. Anything else (a Boki, a monster, the world)
+- A summoned Boki's hit takes the rules' `boki` tier: its basic bite is light, a tagged hit (its ability, the throw,
+  the recall) is solid. Hits it takes, the Boki shield and the Merge shell use the same hold and flash numbers;
+  no Boki file sets its own freeze or flash (`--impact-weight-check` §9 and its `HITFEEL boki` row).
+- A payoff (`payoff`, `spiked`, `exploit`) lands one weight heavier. Anything else (a monster, the world)
   is light, or solid when it stuns, roots, lifts, knocks 8+ m/s or deals 8%+ of max HP.
 - No weight: ticks (`tick`, burns, falls, heat), monster hits, and slow-only touches under the solid line.
 - Heavy stays under one 10 fps frame (100ms), the longest hold in the reference footage.
@@ -570,7 +577,7 @@ their tier's 120 ms); the Bulwark ult's quake shook the players near it 0.8 (now
 him with its own 0.09 s outside the per-body cap (now the heavy hold through `Feel.hold`); the other ults' 0.6
 literals read the heavy tier; a Boki's big burst went through the cause-less world shake (now it names the Boki,
 and `Shake` treats your own Boki as you, so it never shakes its owner; an enemy Boki's burst near you still does).
-Left: the Meteor Drop's lighter 0.35 shake for bystanders (its hit still shakes the struck player heavy).
+The Meteor Drop's bystander shake is gone (11-23: landings shake no one; its hit still shakes the struck player heavy).
 `--impact-weight-check` 7-8 assert the tiers per slot (explained exceptions in `TIER_OK`) and that no kit file
 sets its own hit-stop, flash or shake number.
 
@@ -578,7 +585,7 @@ sets its own hit-stop, flash or shake number.
   tier (multi-hit rule). Echoes (`repeat`) use half.
 - Projectiles never freeze the attacker (Capcom). Melee freezes both, and the victim shakes along the
   hit direction (Sakurai). The shake starts big and shrinks.
-- Cap: 110ms in any 0.5s per player.
+- Cap: 110ms in any 0.5s per player. Every offline global freeze (`Match.freeze_frame`: hits, parries, armor breaks, the ult moment) spends the same budget, charged only for the time it adds to a freeze already running (`--impact-weight-check`).
 - A press inside the freeze is never lost: it acts on the first step after it, as if made then (Shift,
   Space, E and R latch in `pending_input`; an LMB tap is held by DashFlow's press buffer). `--hitstop-input-check`.
 - The spike tier is a bit longer than REFERENCE-era Kinfall's current max of 75ms. It's still short
@@ -601,13 +608,15 @@ flash, losing a life 0.6 s ×0.35 + red flash, a perfect dodge 0.25 s ×0.4, a b
 
 ### 5.5 Camera: almost no shake (owner rule, replaces the old table)
 
-Your own abilities, dashes, landings and hits never shake or kick your camera: impact reads through
+Your own abilities (your Boki's and your Fuse's too), dashes, landings and hits never shake or kick your
+camera: impact reads through
 hit-stop, flashes, sparks, debris, sound and the target's reaction. The only shake left is a big thing
 that happens TO you (a boss slam, a heavy ult or landing on or near you), through one door,
 `Shake.incoming_big(m, at, power, cause)` (scripts/match/shake.gd): at most 0.15 s, falling off over 14 m,
 never for whoever caused it, scaled by Settings "Screen shake" (0-100%, default 30%; 0 = off), at most one
 started per 0.5s in a team fight. A heavy hit (5.4) on you is one such big thing.
-`--shake-check` asserts it for all 12 hunters. HUD hurt-direction indicators carry the "from where".
+Every shake is a hit class in `content/rules/shake.json` (power, duration, falloff per class, against the source:
+docs/MOVEMENT_FEEL.d/1123-shake-table.md). `--shake-check` asserts it for all 12 hunters, your Boki and every table row. HUD hurt-direction indicators carry the "from where".
 
 ### 5.6 Sound layering
 

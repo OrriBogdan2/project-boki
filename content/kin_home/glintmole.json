@@ -1,0 +1,14 @@
+{
+	"id": "glintmole",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/glintmole.json.",
+	"shiny": {
+		"color": "#575f49",
+		"belly": "#b0e2e3",
+		"glow": "#deffa8"
+	},
+	"work": {
+		"stone": 3,
+		"timber": 2,
+		"haul": 1
+	}
+}

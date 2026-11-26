@@ -13,7 +13,8 @@ extends RefCounted
 ## in KEEP_RATE of them, and that no face is topped by nobody.
 ## Double-high ground (4 terraces, 3.2m: LAYOUT_RULES' wall tier) is never reached by jumping alone, a
 ## dash included: only a glide (or a launch, an ability, the abyss) gets you up it.
-## With --verbose prints every try. Never touches the save.
+## With --verbose prints every try. The registry runs one flag per tier (--cliff-mantle-<tier>-check, the shard's
+## arg) so each stays under the gate's 300 s cap. Never touches the save.
 
 const DT := Match.DT
 const HEROES := ["thief", "gunslinger", "juggernaut", "mage", "dredge"]
@@ -40,12 +41,13 @@ func ok(cond: bool, what: String) -> void:
 	if not cond:
 		bad += 1
 
-func run(main: Node) -> void:
+func run(main: Node, only_tier := -1) -> void:
 	Save.no_write = true
 	verbose = "--verbose" in OS.get_cmdline_user_args()
 	heights = load("res://tools/mantle_heights.gd").new(self)
 	for tier in [0, 1]:
-		await _tier(main, tier)
+		if only_tier in [-1, tier]:
+			await _tier(main, tier)
 	heights.report()
 	var keys := stats.keys()
 	keys.sort()
@@ -74,7 +76,7 @@ func _tier(main: Node, tier: int) -> void:
 		await main.get_tree().process_frame
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": tier, "length": 1e9, "seed": 77 + tier, "no_drop": true})
+	m.start({"teams": 2, "squad": 1, "tier": tier, "length": 1e9, "seed": 77 + tier, "no_drop": true})
 	m.set_process(false)
 	w = m.world
 	print("CLIFF tier %d map %s (%dx%d)" % [tier, m.map_name, w.w, w.h])

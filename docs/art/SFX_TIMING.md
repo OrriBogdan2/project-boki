@@ -34,9 +34,10 @@ sound of the Hero's set (content/sfx/<arch>.json) is timed.
 ## Right where they play (KNOWN in the check)
 
 Sounds past 50 ms of every event of their move: a sound on its own event (travel time or a delayed effect: Lace E
-rain, Cinder R jet landing, Vex grenade thunk and nuke, Kael heal, Motley seed press, Meeko chime, Grimble coin
-jingle, Tenzo punch and Basalt Spine end, Gil's bottle toss on the throw (a bottle is not a shot, so no release is
-seen) and his Tidal Wave landing (the wave breaking as he jumps off, about 1 s after its hit)) or a clip that lands early or late, listed for an anim pass: Cinder
+rain, Cinder R jet landing, Vex grenade thunk, nuke and (on her Meshy-native model, which has no coin-flick clip, so no strike is seen) coin flip, Kael heal, Motley seed press, Meeko chime, Grimble coin
+jingle, Tenzo punch and Basalt Spine end, Grimble's hand letting go dr_let_go at the end of the reel and
+the Broadside's end dr_blast_end after its last wave, Gil's bottle toss on the throw (a bottle is not a shot, so no release is
+seen), his zeep bottle pop (one of the random pops; played on the pop, its file swells in over its first 100 ms) and his Tidal Wave landing (the wave breaking as he jumps off, about 1 s after its hit)) or a clip that lands early or late, listed for an anim pass: Cinder
 LMB-hold lw_roar (-100), Neve E rime_wall (-67), Sparkle R vv_ult_rise (-67), and the ready pings jug_ting and
 dolm_rock_crunch (played from the arch's ready cue, not a strike).
 

@@ -85,8 +85,9 @@ func _build_ui() -> void:
 	# no subtext under the main button
 	col.add_child(UI.spacer(6 if has else 18))
 	var items: Array = []
-	# the Training Grounds: every archetype's kit against dummies and a sparring bot, no save needed
-	items.append(["Training Grounds", func(): Game.start_match(Match.arena_opts()), "knock"])
+	# the Training Grounds (the farm opens the same one): every kit against dummies and a sparring bot, no save needed
+	var hunter := Arch.of_save() if has else ""
+	items.append(["Training Grounds", func(): Game.start_match(Match.arena_opts(hunter)), "knock"])
 	if Overlay.admin_allowed():
 		items.append(["Test Zone", TestZone.start, "gear"])     # the owner's sandbox (AdminGate)
 	if has:
@@ -195,6 +196,7 @@ func _menu_item(text: String, cb: Callable, icon := "") -> Button:
 	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	b.custom_minimum_size.x = 300
+	b.set_meta(UI.SFX_META, true)
 	b.pressed.connect(func(): Sfx.play("click"); cb.call())
 	b.focus_entered.connect(func(): Sfx.play("hover", null, -12.0, 0.05))
 	_lit_on_focus(b, "MenuItem")

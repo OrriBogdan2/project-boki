@@ -20,18 +20,18 @@ func run(main_node: Node) -> void:
 	Econ.ensure()
 	_prompt_gone()
 	_pool()
-	await _drops()
-	await _fan()
-	await _sync()
-	await _growth()
-	await _bots()
+	_drops()
+	_fan()
+	_sync()
+	_growth()
+	_bots()
 	print("PERKORB DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
 func _start(arch: String, seed_: int, teams := 1) -> Match:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": teams, "squad": 1, "tier": 0, "length": 1e9, "seed": seed_, "no_drop": true, "arch": arch, "cls": Arch.weight(arch)})
+	m.start({"teams": teams, "squad": 1, "tier": 0, "length": 1e9, "seed": seed_, "no_drop": true, "arch": arch, "cls": Arch.weight(arch)})
 	m.set_process(false)
 	return m
 
@@ -77,7 +77,7 @@ func _pool() -> void:
 
 # ------------------------------------------------------------------ 3. drops from chests, shrines, bosses
 func _drops() -> void:
-	var m := await _start("gunslinger", 11)
+	var m := _start("gunslinger", 11)
 	var P: Hunter = m.player
 	var before := PerkOrbs.list(m).size()
 	ok("a fresh match has no orbs on the ground", before == 0)
@@ -134,6 +134,8 @@ func _drops() -> void:
 			for k in (g.get("stats", {}) as Dictionary):
 				if not is_equal_approx(float(Data.PERKS[id]["stats"].get(k, 0.0)), float(g["stats"][k])): same = false
 			ok("perk %s has the kit's numbers" % id, same, str(g.get("stats", {})))
+	P.perks.clear()    # a hunter holds 5 perks at most (PerkOrbs.slots): start these five from an empty row
+	P.refresh_gear()
 	var cap0: int = P.pack_cap
 	var gm0 := PerkOrbs.gem_mult(P)
 	var s0: float = P.gear_stat("sight") + P.gear_stat("reload") + P.gear_stat("tonic")
@@ -146,7 +148,7 @@ func _drops() -> void:
 
 # ------------------------------------------------------------------ 4. fan: fade for you only
 func _fan() -> void:
-	var m := await _start("gunslinger", 12, 2)
+	var m := _start("gunslinger", 12, 2)
 	var P: Hunter = m.player
 	var T: Hunter = null
 	for h in m.hunters:
@@ -180,8 +182,8 @@ func _fan() -> void:
 
 # ------------------------------------------------------------------ 5. sync
 func _sync() -> void:
-	var a := await _start("gunslinger", 13, 2)
-	var b := await _start("gunslinger", 13, 2)
+	var a := _start("gunslinger", 13, 2)
+	var b := _start("gunslinger", 13, 2)
 	Net.out_events.clear()
 	a.net_on = true
 	var fanned := PerkOrbs.drop(a, "boss", a.player.pos + Vector3(0, 0, -6), 3, a.player)
@@ -229,7 +231,7 @@ func _sync() -> void:
 	var joined: Array = Net.out_events.duplicate()
 	var all_odrop: bool = joined.all(func(e): return e[0] == "odrop")
 	ok("a new player makes the host re-send the live orbs", joined.size() == 3 and all_odrop, str(joined.size()))
-	var c := await _start("gunslinger", 13, 2)
+	var c := _start("gunslinger", 13, 2)
 	for e in joined:
 		c._net_ev(JSON.parse_string(JSON.stringify(e)), "host")
 	var seen: Array = PerkOrbs.list(c).map(func(q): return q["id"])
@@ -252,7 +254,7 @@ func _sync() -> void:
 # ------------------------------------------------------------------ 6. level growth
 func _growth() -> void:
 	# ability power reaches ability damage, and the growth survives a class change
-	var m3 := await _start("gunslinger", 23)
+	var m3 := _start("gunslinger", 23)
 	var A: Hunter = m3.player
 	var p1: float = A.ak.power("sec") if A.ak else 1.0
 	A.gain_xp(float(Hunter.XP_TO[5]) - A.xp + 0.5)      # to level 6
@@ -265,7 +267,7 @@ func _growth() -> void:
 
 # ------------------------------------------------------------------ 7. bots
 func _bots() -> void:
-	var m := await _start("gunslinger", 31, 2)
+	var m := _start("gunslinger", 31, 2)
 	var P: Hunter = m.player
 	var bot: Hunter = null
 	for h in m.hunters:

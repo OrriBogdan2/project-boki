@@ -5,26 +5,33 @@ extends RefCounted
 ## text carries a key letter; every {slot.field} number token points at a real number in the same JSON.
 ## Prints ABTEXT ok/FAIL, never touches the save.
 
-var bad := 0
-var main: Node
-const KEY_WORD := "\\b(LMB|RMB|MMB|Shift|Space|Ctrl)\\b|\\b[EQRFXCVZ]\\b"      # a key named in words, in a text
+const KEY_WORD := "\\b(LMB|RMB|MMB|Shift|Space|Ctrl)\\b|\\b[EQRFXCVZ]\\b"  # a key named in words, in a text
+
 ## Not ability text: the personality (story), "howto" (ClassCard fills its {action} tokens itself)
 ## and the design sources.
 const SKIP := ["personality", "howto", "src", "source", "sources"]
 const NUMBER := "\\d+(?:\\.\\d+)?"
+
 ## Where the slots sit in the HUD (Hunter.slot_info) and in the card.
 const HUD_SLOT := {"dash": "dash", "rmb": "sec", "e": "k1", "x": "x", "r": "r"}
-const REBOUND := {"dash": KEY_J, "secondary": KEY_K, "signature": KEY_L, "fire": KEY_N,
-		"hunter_ult": KEY_M, "ultimate": KEY_B}
+const REBOUND := {
+	"dash": KEY_J, "secondary": KEY_K, "signature": KEY_L, "fire": KEY_N, "hunter_ult": KEY_M, "ultimate": KEY_B
+}
+
+var bad := 0
+var main: Node
+
 
 func ok(cond: bool, what: String) -> void:
 	print("ABTEXT %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
 
+
 func _numbers(t: String) -> Array:
 	var re := RegEx.create_from_string(NUMBER)
 	return re.search_all(t).map(func(m): return float(m.get_string()))
+
 
 ## Every string in an archetype's ability JSON (but the SKIP keys).
 func _texts(o: Variant, out: Array) -> Array:
@@ -39,6 +46,7 @@ func _texts(o: Variant, out: Array) -> Array:
 		out.append(o)
 	return out
 
+
 func _leaves(o: Variant, out: Array) -> Array:
 	if o is Dictionary:
 		for k in o:
@@ -50,6 +58,7 @@ func _leaves(o: Variant, out: Array) -> Array:
 		out.append(float(o))
 	return out
 
+
 func _rebind() -> Dictionary:
 	var saved := {}
 	for a in REBOUND:
@@ -60,11 +69,13 @@ func _rebind() -> Dictionary:
 		InputMap.action_add_event(a, e)
 	return saved
 
+
 func _restore(saved: Dictionary) -> void:
 	for a in saved:
 		InputMap.action_erase_events(a)
 		for e in saved[a]:
 			InputMap.action_add_event(a, e)
+
 
 ## The data and its tokens: no key letter in a text, every token resolves, every one-line text keeps to
 ## the numbers its slot's full text and JSON give.
@@ -101,6 +112,7 @@ func _data(a: String) -> void:
 		var stray: Array = _numbers(AbilityText.line(a, slot)).filter(func(n): return not n in allowed)
 		ok(stray.is_empty(), "%s %s: the one line's numbers are in the full text or the JSON %s" % [a, slot, stray])
 
+
 func _rendered(a: String) -> void:
 	var saved := _rebind()
 	var all := ""
@@ -117,17 +129,18 @@ func _rendered(a: String) -> void:
 	var left := "" if hit == null else " ('%s')" % hit.get_string()
 	ok(hit == null, "%s: rebound to J K L N M B, no key letter is left in any ability text%s" % [a, left])
 
+
 ## The card, the viewer, the HUD slot and tooltip and the E hint against the helper, with the real HUD.
 func _contexts(m: Match, a: String) -> void:
-	var P: Hunter = m.player
-	P.reclass(Arch.weight(a), a, Arch.signature(a))
-	P.unlock_all()
-	P.lvl = 6
+	var p: Hunter = m.player
+	p.reclass(Arch.weight(a), a, Arch.signature(a))
+	p.unlock_all()
+	p.lvl = 6
 	for slot in ["dash", "rmb", "e", "x", "r"]:
 		if not Arch.def(a).has(slot):
 			continue
 		var card := KitCard.slot_text(a, slot)
-		var hud := P.slot_info(HUD_SLOT[slot])
+		var hud := p.slot_info(HUD_SLOT[slot])
 		var tag := "%s %s" % [a, slot]
 		var nm := AbilityText.name_of(a, slot)
 		var same: bool = nm != "" and nm == hud["name"] and nm == HunterViewer.slot_info(a, slot)["name"]
@@ -141,11 +154,11 @@ func _contexts(m: Match, a: String) -> void:
 			from_helper = from_helper and hud["desc"] == AbilityText.full(a, slot)
 			ok(from_helper, "%s: the card line and the HUD description come from the helper" % tag)
 		if slot != "x":
-			var tip: Array = m.hud.hover.arch_tip(HUD_SLOT[slot], P)
+			var tip: Array = m.hud.hover.arch_tip(HUD_SLOT[slot], p)
 			var tip_text := "\n".join(tip.map(func(l): return String(l[0])))
 			var tip_ok: bool = String(tip[0][0]) == nm and tip_text.contains(AbilityText.full(a, slot))
 			ok(tip_ok, "%s: the HUD tooltip heads with the name and carries the full text" % tag)
-	var hint := TutorialText.ability_tip(P)
+	var hint := TutorialText.ability_tip(p)
 	var hint_ok: bool = hint.contains(AbilityText.name_of(a, "e")) and hint.contains(AbilityText.line(a, "e").right(24))
 	ok(hint_ok, "%s: the E hint is the helper's name and line" % a)
 	var passive := KitCard.slot_text(a, "passive")
@@ -153,14 +166,26 @@ func _contexts(m: Match, a: String) -> void:
 	passive_ok = passive_ok and passive["detail"][0][1] == AbilityText.full(a, "passive")
 	ok(passive_ok, "%s: the passive is the helper's too" % a)
 
+
 func run(main_node: Node) -> void:
 	main = main_node
 	Save.no_write = true
 	Save.d = Save.fresh()
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 12, "no_drop": true, "arch": "thief",
-		"cls": Arch.weight("thief"), "weapon": Arch.signature("thief")})
+	m.start(
+		{
+			"teams": 2,
+			"squad": 1,
+			"tier": 0,
+			"length": 1e9,
+			"seed": 12,
+			"no_drop": true,
+			"arch": "thief",
+			"cls": Arch.weight("thief"),
+			"weapon": Arch.signature("thief")
+		}
+	)
 	m.set_process(false)
 	m.player.ctrl = "local"
 	ok(Arch.ORDER.size() == 13, "thirteen kits")

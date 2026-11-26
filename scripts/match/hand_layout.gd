@@ -20,8 +20,8 @@ static func stamp_ramp(w: World, R: Dictionary, ii: int) -> void:
 	var at := Vector2i(int(R["at"][0]), int(R["at"][1]))
 	for k in (lv1 - lv0) * run:
 		var stair := k % run == 0
-		var lv := lv0 + k / run + (0 if stair else 1)
-		for s in range(-(wd / 2), wd - wd / 2):
+		var lv := lv0 + int(k / float(run)) + (0 if stair else 1)
+		for s in range(-(int(wd / 2.0)), wd - int(wd / 2.0)):
 			var q := at + d * k + side * s
 			if not w.inb(q.x, q.y) or w.kind[w.idx(q.x, q.y)] == World.T_VOID:
 				continue
@@ -33,7 +33,7 @@ static func stamp_ramp(w: World, R: Dictionary, ii: int) -> void:
 			else: w.authored_stairs.erase(i)
 
 ## A hand-made layout's places, exactly where it lists them (World.hand): landings, chests, camps,
-## wild Boki, breakables, weapons, the shrine, Warden posts and trap spots. Nothing is rolled here.
+## wild Boki, breakables, weapons, the shrine, vendors, Warden posts and trap spots. Nothing is rolled here.
 static func place_spots(w: World, defs: Array) -> void:
 	w.shrine_spots.clear(); w.break_spots.clear(); w.weapon_spots.clear()
 	w.heart_spot = Vector3.INF
@@ -69,6 +69,10 @@ static func place_spots(w: World, defs: Array) -> void:
 		if D.has("shrine"):
 			var q: Vector3 = at.call(D["shrine"])
 			if q != Vector3.INF: w.shrine_spots.append(q)
+		w.islands[ii]["shops"] = []
+		for p in D.get("shops", []):
+			var q: Vector3 = at.call(p)
+			if q != Vector3.INF: w.islands[ii]["shops"].append({"pos": q, "theme": String(p[2])})
 		for p in D.get("wardens", []):
 			var q: Vector3 = at.call(p)
 			if q != Vector3.INF: w.warden_posts.append({"pos": q, "island": ii})

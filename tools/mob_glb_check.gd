@@ -44,7 +44,7 @@ func _one(main: Node, kind: String) -> void:
 	for mi in body.find_children("*", "MeshInstance3D", true, false):
 		var m := mi as MeshInstance3D
 		if m.is_ancestor_of(f._skel) or f._skel.is_ancestor_of(m):
-			tris += m.mesh.get_faces().size() / 3
+			tris += int(m.mesh.get_faces().size() / 3.0)
 			measured = measured or (m.get_meta("extras", {}) as Dictionary).has("band")
 		elif m.is_visible_in_tree() and not _kept(m, body, kind):
 			stray += 1

@@ -19,6 +19,19 @@
 	"spot_reach_doc": "m: the farthest nap spot a Boki about to nap walks to; past it, or with every spot taken, it naps where it stands.",
 	"tired_at": 25.0,
 	"tired_at_doc": "energy need below which a Boki naps by day.",
+	"greet_at": 0.15,
+	"greet_at_doc": "the least liking (bond, plus the parent weight) at which a roaming Boki waves hello to one close by: Boki that get on greet before they are friends (friend_at).",
+	"greet_chance": 0.9,
+	"greet_chance_doc": "chance a roaming Boki that chooses waves hello when a Boki it likes (greet_at) is close by (a heart).",
+	"doze": 0.06,
+	"doze_pile": 0.5,
+	"doze_doc": "chance, each time a roaming Boki chooses by day, that it lies down for a nap although it is not tired; doze_pile is added while a Boki it does not dislike (pile_at) naps within pile_reach m, so the nap becomes a pile.",
+	"doze_rest": 60.0,
+	"doze_rest_doc": "s after a Boki wakes before it may doze again, so one nap does not set off a chain of piles.",
+	"pile_reach": 12.0,
+	"pile_reach_doc": "m: how far away a Boki about to nap looks for a napping one to lie beside (the walk is PILE_WALK s at most).",
+	"pile_at": 0.0,
+	"pile_at_doc": "the least liking (bond, plus the parent weight) for a dozing Boki (one that is not tired) to lie beside a napping one, and for napping side by side to grow a bond: Boki that have hardly met huddle too, which is how they become friends; rivals do not make up asleep.",
 	"near": 6.0,
 	"near_doc": "m within which another Boki counts as close: a play mate, a rival to stare at, a pile to join.",
 	"pile": 0.35,
@@ -61,7 +74,8 @@
 		"hint_far_m": 25.0,
 		"hint_away_s": 10.0,
 		"hint_lift_px": 52.0,
-		"hint_text": "Whistle to call your partner"
+		"hint_text": "Whistle to call your partner",
+		"happy_at": 0.5
 	},
 	"hand": {
 		"slot_m": 0.9,
@@ -73,6 +87,21 @@
 		"done_s": 0.8,
 		"trust": 2.0
 	},
+	"notice": {
+		"near_m": 5.0,
+		"far_m": 10.0,
+		"away_s": 25.0,
+		"chance": 0.25,
+		"rank_chance": 0.15,
+		"cling_chance": 0.4,
+		"run_rank": 2,
+		"look_s": 2.5,
+		"slot_m": 1.4,
+		"reach_m": 0.8,
+		"follow_s": 4.0,
+		"give_up_s": 8.0
+	},
+	"notice_doc": "a Boki notices you coming back (scripts/home/base_greet.gd): a roaming Boki that had you more than far_m m away for away_s s and sees you within near_m m rolls chance + rank_chance x its bond rank (Care.BONDS index, 0 Wary to 4 Soulbound) + cling_chance x its cling (personality, 0.08 to 0.5). On a hit it looks at you for look_s s; from bond rank run_rank (2, Close) it runs to a spot slot_m m from you (reach_m m of slack), then follows you at its walk for follow_s s, giving up after give_up_s s in all. One roll per return.",
 	"hand_doc": "feeding from your hand (scripts/home/base_hand_feed.gd): slot_m m from you where a Boki stops to eat, arrive_m m of slack on it; a shy Boki (trust under whistle.shy_trust) stops shy_stop_m m away the first time and comes the whole way when asked again within shy_window_s s; give_up_s s of walking before it drops the offer; eat_s s of eating at your hand, done_s s to enjoy it; trust points a hand-fed Boki gains.",
 	"whistle_doc": "the whistle (scripts/home/base_whistle.gd): hold_s s the key is held before the nearest other Boki is called as well as your partner; a Boki with joy need under sulky_joy or trust under shy_trust only looks over (a droop and a head turn), waits wait_s s and walks over at sulky_pace of the call run; an answering Boki first makes a beat: perk_s s, plus up to turn_s s to turn to face you (so one already facing you loses only perk_s); slot_m m from you where an answering Boki stops; pace is the run speed scale at no eagerness and at full eagerness (trust 60%, condition 40%), on the farm's 4.4 m/s call run; give_up_s s before an answer that has not arrived is dropped; the hint_* keys are the one-time whistle line (scripts/home/whistle_hint.gd): shown once the partner has been over hint_far_m m away, or out of sight, for hint_away_s s; hint_lift_px px above the screen's bottom edge (over the key row); hint_text beside the key cap. happy_at is the eagerness from which a called Boki answers happy, under it unsure."
 }

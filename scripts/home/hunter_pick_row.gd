@@ -51,7 +51,7 @@ static func _card(home: Node, id: String, cur: String) -> PanelContainer:
 	col.add_child(UI.label(role_of(id), UI.T_SMALL, UI.MUTED if open else UI.FAINT))
 	if not open:
 		card.tooltip_text = ClassUnlock.requirement(id)
-	ClassCard.add_start_chip(card, id)
+	ClassCard.add_start_chip(card, id, col)
 	return card
 
 ## The portrait; locked, it is grey with a lock on it.

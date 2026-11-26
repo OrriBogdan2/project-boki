@@ -147,12 +147,8 @@ static func migrate(data: Dictionary) -> Array:
 	# the notice
 	var lines: Array = []
 	if n_armor + n_kit + moved.size() + plvl + old_keys > 0 or had_g1:
-		lines.append(
-			(
-				"Everyone now drops into matches with the same gear. You keep your gloves and boots, "
-				+ "and nothing was deleted."
-			)
-		)
+		lines.append("Everyone starts matches with the same gear.")
+		lines.append("You keep your gloves and boots. Nothing was deleted.")
 		if n_armor + n_kit > 0:
 			lines.append(
 				(
@@ -174,14 +170,14 @@ static func migrate(data: Dictionary) -> Array:
 				bits.append("%s x%d" % [id.replace("_", " "), moved[id]])
 			lines.append("Utility charges in your stash: %s." % ", ".join(bits))
 		if plvl > 0:
-			var pack_line := "Your backpack upgrade is now a %s to bring (lost if you go down)" % Backpacks.label(plvl)
+			lines.append("Your backpack upgrade is now a %s to bring." % Backpacks.label(plvl))
+			lines.append("It is lost if you go down.")
 			if refund[0] > 0:
-				pack_line += "; the smaller upgrades refunded: %d gems, %d scrap" % [refund[0], refund[1]]
-			lines.append(pack_line + ".")
+				lines.append("Smaller upgrades refunded: %d gems, %d scrap." % [refund[0], refund[1]])
 		if old_keys > 0:
 			lines.append(
 				(
-					"%d Rift Key%s refunded: %d gems (keys are found in matches now)."
+					"%d Rift Key%s refunded: %d gems. Keys drop in matches now."
 					% [old_keys, "" if old_keys == 1 else "s", old_keys * RIFT_KEY_PRICE]
 				)
 			)
@@ -189,9 +185,10 @@ static func migrate(data: Dictionary) -> Array:
 			lines.append("  " + String(listed[i]))
 		if listed.size() > MAX_LISTED:
 			lines.append("  and %d more" % (listed.size() - MAX_LISTED))
-		var still := " (your passive glove is still there)" if had_g1 else ""
-		var second := "New: a second glove slot on %s. " % Gloves.key_cap(1)
-		lines.append(second + "Pick a glove for it in the gear shed%s." % still)
+		lines.append("New: a second glove slot on %s." % Gloves.key_cap(1))
+		lines.append("Pick a glove for it in the gear shed.")
+		if had_g1:
+			lines.append("Your passive glove is still there.")
 		lines.append("Armor and perks are found in the match now.")
 	data["equal_notice"] = lines
 	return lines
