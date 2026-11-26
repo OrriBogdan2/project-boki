@@ -24,6 +24,7 @@ func run(main_node: Node) -> void:
 	ak = load("res://tools/archetype_check.gd").new()
 	_disc_rim()
 	_sector_rows()
+	_laid_reuse()
 	ak.main = main
 	var shots := ""
 	for a in OS.get_cmdline_user_args():
@@ -540,6 +541,34 @@ func _sector_rows() -> void:
 		heights[snappedf(p.y, 0.01)] = true
 	ok("geo: a sector's rings are the ones quad builds ring by ring", g.v == want.v and g.c == want.c,
 			"%d vs %d vertices, %d heights" % [g.v.size(), want.v.size(), heights.size()])
+	w.free()
+
+## Shapes kept in place over frames (AimGeo.laid) are the very vertices and colours a fresh build makes, as their
+## colours change.
+func _laid_reuse() -> void:
+	var w := World.new()
+	w.w = 32
+	w.h = 32
+	w.kind.resize(32 * 32)
+	w.level.resize(32 * 32)
+	for i in 32 * 32:
+		w.kind[i] = World.T_VOID if i % 29 == 0 else World.T_GROUND
+		w.level[i] = (i * 7) % 3
+	var g := AimGeo.new()
+	g.world = w
+	var same := true
+	for col: Color in [Color(1, 0, 0, 0.3), Color(0, 0, 1, 0.8), Color(0.2, 0.9, 0.1, 0.5)]:
+		var f := AimGeo.new()
+		f.world = w
+		g.reset()
+		for gg: AimGeo in [g, f]:
+			gg.at_height(1.0)
+			gg.disc(Vector2(15.3, 16.7), 6.0, col, Color.WHITE)
+			gg.sector(Vector2(15.3, 16.7), 1.5, 8.0, 0.2, 2.6, col, Color.BLUE)
+			gg.ring(Vector2(12.1, 14.2), 4.0, 0.3, Color.GREEN, 0.5, 2.0, col)
+		same = same and g.v == f.v and g.c == f.c
+	ok("geo: a shape kept over frames is the same triangles as a fresh build", same and g.laid.size() == 3,
+			"%d laid" % g.laid.size())
 	w.free()
 
 ## A disc's rim vertices sit on the angle grid (segs steps round), every ring cut at the same angles.
