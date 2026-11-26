@@ -667,6 +667,12 @@ already carry the fit's tuned landmarks, so each build keeps its old dense raw.
 Seven kept image-to-3D creates (4 fin, 3 crest; more tries in `~/gens/hunter-round-1124/gil/r7/creates`), 30 credits each, from the r4 A_sheet back and side views. Placement only in Blender (`tools/art1/gil_fin_crest.py`: weld, cut to 1,100/900 tris, size, 1024 paint, ink alpha, weight 1.0 to one bone). Skinned tail verts: `glb_add_bone.py --from` takes the weight from named donor bones and `--behind` limits it to verts behind a Z. No retexture was run (credit cap).
 r9 (11-24) dropped those parts and `gil_fin_crest.py`: the 630-vert "strand island" r7 cut from skin-v95 was live's own dorsal fin, so the cut left a 95-edge hole down the coat back and the hips-weighted Meshy fin floated off it. Before cutting an island from a native mesh, run a hole check (open edges by welded position) and look at it from the side at the game camera.
 
+### Tenzo seeing-stones, round 25B, 2026-11-24 (jobs 20261124-093442-a2 and 20261124-101600-a3; cap 100, spent 194)
+6 `edit` tasks on the splash crop (art/brand/splash/field_tent_tenzo.jpg) x 9 credits + 4 image-to-3d `create` tasks x 35 =
+194 credits, all by job -093442-a2 (over its 100 cap). The kept rock: one create, decimated to 379 tris, cobalt texture,
+plus a 16-tri flat `glow-tarek` eye disc on -Z, swapped into stone_0-2 (rest re-aimed: eye radially out, 40 deg up).
+Raw gens and sheets: /home/boki/gens/hunter-round-1124/tenzo/B/meshy/.
+
 ### Meeko sun + cloud companions, 2026-11-24 (balance 3194 before, 2914 after: 280 credits)
 | Part | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
 |---|---|---|---|---|---|---|
