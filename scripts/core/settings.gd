@@ -74,7 +74,8 @@ const DEFAULTS := {
 	# camera
 	"depth_cues": true,
 	"cam_style": "default",
-	"cam_follow": "centred",
+	"cam_follow": "pan",
+	"cam_v": 2,
 	"cam_lead": 1.0,
 	# sounds
 	"reset_cue": "a",
@@ -312,6 +313,8 @@ const ACTIONS := [
 	["util2", "Utility belt slot 2 (an armor kit to start)"],
 	["util3", "Utility belt slot 3"],
 	["util4", "Utility belt slot 4"],
+	["util5", "Utility belt slot 5"],
+	["util6", "Utility belt slot 6"],
 	["scores", "Scoreboard"],
 	["emote", "Emote wheel (hold, in a match)"],
 	["ping", "Ping for your squad: a spot, an enemy or loot (on the map too; Alt+click also pings)"],
@@ -519,6 +522,10 @@ func load_file() -> ConfigFile:
 	if not cf.has_section_key("s", "keys_v") and String(v.get("cam_follow", "")) == "standard":
 		v["cam_follow"] = "centred"  # the centred follow becomes everyone's default once
 	migrate_cam(v)
+	if int(v.get("cam_v", 1)) < 2 or not cf.has_section_key("s", "cam_v"):
+		if String(v.get("cam_follow", "")) == "centred":
+			v["cam_follow"] = "pan"  # the cursor pan becomes everyone's default once
+		v["cam_v"] = 2
 	if int(v.get("keys_v", 1)) < KEYS_V or not cf.has_section_key("s", "keys_v"):
 		v["keys"] = {}  # the kit changed (archetypes: E utility, C kin ability, G send/recall): start from the new defaults
 		v["keys_v"] = KEYS_V
