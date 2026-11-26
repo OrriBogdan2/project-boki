@@ -77,11 +77,14 @@ func _real_flow(main: Node, hx: Node) -> void:
 		hx._tap_egg()
 	var frames := 0
 	while hx.reveal == null and frames < 1800:
-		if hx.skipper != null and hx.skipper.t > HatchSkip.PILL_AT + 0.2:
-			var press := InputEventKey.new()
-			press.keycode = KEY_SPACE
-			press.pressed = true
-			hx.skipper._input(press)
+		if hx.hold_skip != null:
+			var tap := InputEventKey.new()
+			tap.keycode = KEY_SPACE
+			tap.pressed = true
+			hx.hold_skip.feed(tap)
+			var up := tap.duplicate() as InputEventKey
+			up.pressed = false
+			hx.hold_skip.feed(up)
 		await tree.process_frame
 		frames += 1
 	var rv: KinReveal = hx.reveal

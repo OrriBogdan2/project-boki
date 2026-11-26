@@ -1125,8 +1125,15 @@ func _abyss() -> void:
 			"...gliding: whoosh, then the catch %s" % [glide]
 		)
 		var hot := _walk(am, p, rim, true, true)
+		# the strain loop starts as the lift turns upward (vel.y > 0), a few frames before the catch
+		# sting (vel.y > CATCH_VY), so only the whoosh is first and the order of the other two is free
 		ok(
-			hot.find("abyss_catch") == 1 and hot.has("strain"),
+			(
+				hot.find("abyss_whoosh") == 0
+				and hot.has("abyss_catch")
+				and hot.has("strain")
+				and not hot.has("abyss_fallout")
+			),
 			"...an overheated glider lifting: the catch and the strain loop %s" % [hot]
 		)
 		_teammate(am, other, rim)

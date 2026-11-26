@@ -56,11 +56,11 @@ static func scan() -> String:
 
 
 static func stagger(mob: String) -> String:
-	var keys := [Settings.key_cap("signature"), Settings.key_cap("ultimate"), Settings.key_cap("gear1")]
+	var keys := ["secondary", "signature", "hunter_ult", "gear1"].map(func(a: String): return Settings.key_cap(a))
 	return (
 		(
-			"A purple ring means %s can be staggered. Hit it with an ability (%s, %s or %s) for a big hit, a long "
-			+ "stun and your cooldown back."
+			"A purple ring means %s can be staggered. Hit it with an ability (%s, %s, %s or %s) for a big hit, a "
+			+ "long stun and your cooldown back."
 		)
 		% ([mob] + keys)
 	)
