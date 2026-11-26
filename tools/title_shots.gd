@@ -29,7 +29,8 @@ func run(m: Node) -> void:
 			Save.d["active"] = k["uid"]
 		for admin in [true, false]:
 			Record.level = 0 if admin else 1
-			var tag := "%s_%s" % ["save" if saved else "fresh", "admin" if admin else "player"]
+			var who := "admin" if admin else "player"
+			var tag := ("save_" if saved else "fresh_") + who
 			main.show_screen("title", {})
 			await _shot(tag, 3.0)
 			var ts: Node = main.screen_node()

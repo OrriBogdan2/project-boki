@@ -70,7 +70,9 @@ func _pass() -> void:
 		var news: Control = ts.find_child("News", true, false)
 		var nr := news.get_global_rect()
 		var clear: bool = not pop.get_global_rect().intersects(nr) and not chip.get_global_rect().intersects(nr)
-		ok(pop.visible and clear, "the chip opens its popover, clear of the News chip")
+		var pr: Rect2 = pop.get_global_rect()
+		var menu_clear: bool = not _menu_buttons(ts).any(func(b): return b.get_global_rect().intersects(pr))
+		ok(pop.visible and clear and menu_clear, "the chip opens its popover, clear of the News chip and the menu")
 		chip.pressed.emit()
 		await main.get_tree().process_frame
 		var back_home: bool = ts.get_viewport().gui_get_focus_owner() == ts.main_btn

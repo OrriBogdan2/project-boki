@@ -57,7 +57,8 @@ func _ready() -> void:
 		modes.add_child(b)
 	v.add_child(track)
 	v.add_child(UI.para("Empty spots are filled with bots, up to 4 squads (Heart Raid: one squad of 4 against the waves, the first 4 ready; press it again for Hard or Nightmare). Whoever presses Start hosts the match and runs the monsters, so keep the game open and in front."))
-	if Net.mm.addr != "":      # the title's Play with Friends leads here; a party (invite code, expeditions) is one step on
+	# the title's Play with Friends leads here; a party (invite code, expeditions) is one step on
+	if Net.mm.addr != "":
 		UI.footer_left(v).add_child(UI.ghost("Party", func(): Game.goto("party", {}), 0, "bond"))
 	ready_btn = UI.button("I'm ready", _toggle_ready, 160, "check")
 	UI.footer(v).add_child(ready_btn)
@@ -79,7 +80,8 @@ func _unhandled_input(e: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		_back()
 
-## Back to the farm (or the title, when it came from there), or from the duel line back to the Training Grounds.
+## Back to the farm (or the title, when it came from there), or from the duel line back to the
+## Training Grounds.
 func _back() -> void:
 	if duel:
 		Game.start_match(Match.arena_opts())

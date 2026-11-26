@@ -819,7 +819,6 @@ const CHECKS := {
 	"--expedition-shots": ["res://tools/expedition_shots.gd", "expedition_shots", null],  # --expedition-shots=<dir>
 	"--expedition-trim-shots": ["res://tools/expedition_trim_shots.gd", "expedition_trim_shots", null],  # --shots-dir
 	"--void-ui-shots": ["res://tools/void_ui_shots.gd", "void_ui_shots", null],  # --void-ui-shots=<dir>
-	"--title-shots": ["res://tools/title_shots.gd", "title_shots", null],  # GPU, --title-shots=<dir>: title before/after
 	"--market-shots": ["res://tools/market_shots.gd", "market_shots", null],  # --market-shots=<dir>
 	"--displace-net-check": ["res://tools/displace_net_check.gd", "displace_net_check", null],  # 2 games, relay
 	# 2 games, relay: a raid client's boss top bar

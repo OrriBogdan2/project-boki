@@ -175,7 +175,8 @@ func _wrap_focus() -> void:
 		b.focus_neighbor_right = b.focus_neighbor_left
 
 ## The owner's corner chip (AdminGate only): a small gear above the build line that opens a tiny
-## popover with the Test Zone and (with a save) the Demo Match. Off the menu, so the list stays short.
+## one-row popover right of the menu column with the Test Zone and (with a save) the Demo Match.
+## Off the menu, so the list stays short.
 func _admin_chip(root: Control, has_save: bool) -> void:
 	var pop := UI.glass(8, 10)
 	pop.name = "AdminPop"
@@ -183,18 +184,20 @@ func _admin_chip(root: Control, has_save: bool) -> void:
 	pop.mouse_filter = Control.MOUSE_FILTER_STOP
 	pop.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	pop.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	pop.offset_left = 28
-	pop.offset_bottom = -92
-	var pv := UI.vbox(4)
+	pop.offset_bottom = -48    # (a row level with the chip; it opens right of the menu column: toggle)
+	var pv := UI.hbox(6)
 	pop.add_child(pv)
-	pv.add_child(UI.label("OWNER", 11, Color("e9b48a"), UI.caps))
-	pv.add_child(UI.ghost("Test Zone", TestZone.start, 170, "gear"))
+	var tag := UI.label("OWNER", 11, Color("e9b48a"), UI.caps)
+	tag.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	pv.add_child(tag)
+	pv.add_child(UI.ghost("Test Zone", TestZone.start, 0, "gear"))
 	if has_save:
 		# one click to a match made for filming: Duos with a bot squadmate who leads the drop to a boss lair
 		# next to an uplink, clear weather, no Blight, the usual rivals (Match.demo_opts)
-		pv.add_child(UI.ghost("Demo Match", func(): Game.start_match(Match.demo_opts()), 170, "updraft"))
+		pv.add_child(UI.ghost("Demo Match", func(): Game.start_match(Match.demo_opts()), 0, "updraft"))
 	var toggle := func():
 		pop.visible = not pop.visible
+		pop.offset_left = main_btn.get_global_rect().end.x - root.get_global_rect().position.x + 24.0
 		var to: Control = pv.get_child(1) if pop.visible else main_btn
 		to.grab_focus()
 	var chip := UI.icon_button("gear", toggle, "Owner tools", 14.0)
