@@ -239,7 +239,7 @@ func _record(res: String) -> void:
 	var rc := OS.execute(OS.get_executable_path(), args, out, true)
 	DirAccess.remove_absolute(cfg)
 	for line in (String(out[0]) if out.size() > 0 else "").split("\n"):
-		if line.begins_with("MEDIA_") or line.contains("ERROR"):
+		if line.begins_with("MEDIA_") or line.begins_with("CLIP_PREFLIGHT") or line.contains("ERROR"):
 			print(line)
 	print("MEDIA_CHILD rc=%d" % rc)
 	main.get_tree().quit(rc)
