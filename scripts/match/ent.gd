@@ -46,6 +46,7 @@ var vuln_t := 0.0  # a vulnerable mark: takes vuln_k more damage (never above Ki
 var vuln_k := 0.0
 var dr := {}  # diminishing returns on crowd control: kind -> [applications, last time]
 var dr_stun := false  # the running stun counts toward the immunity that follows it
+var cc_guard_t := 0.0  # s left of the protection after a revive: stuns, roots and slows don't land (Life.R)
 var cc_immune_t := 0.0  # just came out of a stun: stuns and roots don't land (KinRules.STUN_IMMUNE)
 var marks := {}  # combo setups on this body: combo id -> {team, owner, until, window}
 var squash := 0.0  # landing / hit squash for the model
@@ -213,6 +214,11 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 		for st0 in ["slow", "root", "stun"]:
 			if opts.has(st0):
 				opts[st0] = float(opts[st0]) * cc_k
+	# just back from the dead (Life.bring_back): no stun, root or slow lands for a few seconds
+	if cc_guard_t > 0.0:
+		opts = opts.duplicate()
+		for st2 in ["slow", "root", "stun"]:
+			opts.erase(st2)
 	# crowd control from abilities ("dr" in opts) has diminishing returns per target (KinRules)
 	var use_dr := bool(opts.get("dr", false))
 	if use_dr:
@@ -394,6 +400,8 @@ func tick_status(dt: float) -> void:
 		root_t -= dt
 	if cc_immune_t > 0.0:
 		cc_immune_t -= dt
+	if cc_guard_t > 0.0:
+		cc_guard_t -= dt
 	if vuln_t > 0.0:
 		vuln_t -= dt
 	if stun_t > 0.0:

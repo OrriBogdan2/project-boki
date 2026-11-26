@@ -952,7 +952,7 @@ func _owners() -> void:
 		var cam := main.get_viewport().get_camera_3d()
 		var box := gi.global_transform * gi.get_aabb()
 		if cam and not cam.is_position_in_frustum(box.get_center()) and not cam.is_position_in_frustum(box.position):
-			continue      # (a rough cull: the draws are what the camera sees)
+			continue  # (a rough cull: the draws are what the camera sees)
 		var passes := 0
 		for si in mesh.get_surface_count():
 			var mat: Material = gi.material_override if gi.material_override else mesh.surface_get_material(si)

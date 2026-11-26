@@ -5,6 +5,7 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	"--clip-preflight-check": ["res://tools/clip_preflight_check.gd", "clip_preflight_check", null],  # film preflight
 	"--registry-check": ["res://tools/registry_check.gd", "registry_check", null],  # the registry holds together
 	"--intro-deck-check": ["res://tools/intro_deck_check.gd", "intro_deck_check", null],
 	"--tester-feedback-check": ["res://tools/tester_feedback_check.gd", "tester_feedback_check", null],  # tester 11-19

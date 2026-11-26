@@ -48,6 +48,7 @@ func focus() -> void:
 	box.grab_focus()
 	box.select_all()
 
+
 ## A new suggestion, into the box.
 func reroll() -> void:
 	suggestion = KinNames.suggest(_species, _rng)
