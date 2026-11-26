@@ -41,6 +41,6 @@ static func hidden_rival(m: Match) -> bool:
 			continue
 		if m.world.in_bush(h.pos.x, h.pos.z) or m.in_smoke(h.pos):
 			continue
-		if m.world.los(p.pos, h.pos, p.pos.y + 1.1):
+		if m.world.los(p.pos, h.pos, p.pos.y + 1.1, true):
 			return true
 	return false

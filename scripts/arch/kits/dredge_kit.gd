@@ -64,6 +64,7 @@ var barge_met := {}             # foes the barge has already flashed on (instanc
 var stop_t := 0.0               # the barge under way; when it ends he stops, keeping almost none of its speed
 var next_barge := -9.0          # the short gap between barges in a run
 var ball_open_at := -9.0        # when the ball opens (dr_lunge_out): the last shove's end, else the gap and a grace on
+var slug_sd := {}               # the last slug fired while it flies (its whistle, dr_slug_fly, follows it)
 var shot_seen := 0              # the last weapon volley the kit dressed
 var armor_shreds := 0           # (tests) hits that shredded armor
 var broadside: DredgeBlast      # X, Brass Broadside (its charge and waves are a hold: broadside.blast)
@@ -244,6 +245,8 @@ func _drop_holds() -> void:
 ## streaks that hang as brass dots where they stop). One aim line lies on the ground from his body out to the
 ## slug range, drawn per frame toward the cursor; the whole volley flies in a tight group along it.
 func _tick_gun() -> void:
+	if not slug_sd.is_empty() and not HeroSfx.fly(m, h, "dr_slug_fly", slug_sd):
+		slug_sd = {}
 	if h.wid != "shotgun":
 		return
 	if h.shot_n != shot_seen:
@@ -257,6 +260,9 @@ func _tick_gun() -> void:
 
 func _dress_volley() -> void:
 	play("dr_shot")
+	m.sfx("dr_shot_tail", h.pos, -6.0 if h.is_local() else -9.0)     # scrap rattling away after the boom
+	if m.shots.size() > 0 and m.shots[-1]["by"] == h:
+		slug_sd = m.shots[-1]
 	var d2 := h.aim_dir()
 	var mz := ShotOrigin.muzzle_at(h, h.wpn["muzzle"], d2)      # the blunderbuss's mouth, where the slugs start too
 	vfx("shot", mz, d2)
@@ -374,6 +380,7 @@ func _launch_hook() -> void:
 		hook_sd = m.shots[-1]
 		# the hook pierces terrain: rocks, props and cliff faces
 		(hook_sd["x"] as Dictionary)["pierce_terrain"] = true
+		(hook_sd["x"] as Dictionary)["block_class"] = "reach"      # (Blockers: a placed ridge or shield stops it)
 
 ## The hook in flight: his arm stretched out to it. It also
 ## catches an ally in its path (reeled in to safety) and scoops up any wisp (downed hunter) it passes.
@@ -618,8 +625,8 @@ func _foe_at_feet() -> bool:
 func slam_tell(k: float) -> Dictionary:
 	var ed := e_def()
 	return {
-		"dir": slam_dir, "len": float(ed["radius"]), "deg": float(ed["angle"]), "outline": true,
-		"all": true, "col": anchor_col(), "alpha": 1.8, "hot": 0.5 * k
+		"dir": slam_dir, "len": float(ed["radius"]), "deg": float(ed["angle"]), "soft": true, "fill": k,
+		"all": true, "col": HeroVfx.of(m).color(h, "gold"), "hot": 0.5 * k
 	}
 
 ## The slam: his fist into the ground in front, on this frame: the cone's damage and stun, cracks, dust and a
@@ -641,7 +648,7 @@ func _anchor() -> void:
 	var fist := ground(h.pos + Vector3(dd.x, 0, dd.y) * 1.1)
 	vfx("anchor_slam", ground(h.pos), dd, {"r": float(ed["radius"])})
 	m.fx.burst(fist + Vector3(0, 0.2, 0), Color("c8b8a0"), 18, 5.0, 0.45, 10.0, 1.3, Vector3(dd.x, 0.8, dd.y), 70.0)
-	AimKit.cone(h, "e_hit", slam_tell(1.0).merged({"dur": 0.2, "alpha": 0.7}, true))
+	AimKit.cone(h, "e_hit", slam_tell(1.0).merged({"dur": 0.2, "hot": 1.0}, true))
 	m.later(0.06, _anchor_dust.bind(at))
 	m.sfx("dr_anchor", h.pos, -1.0, 1.0)
 	if not h.grounded and not over_void and not h.gliding:

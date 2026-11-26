@@ -32,7 +32,7 @@ func run(main: Node) -> void:
 
 
 func _flight(main: Node, dir: String) -> void:
-	var m := await _start(main, "ashwick", dir)
+	var m := _start(main, "ashwick", dir)
 	var h: Hunter = m.player
 	h.lvl = 6
 	var sync := _sync(h)

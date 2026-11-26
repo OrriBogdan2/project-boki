@@ -23,6 +23,7 @@ extends ArchKit
 ##   to it through a chain of afterimages, or you step there when it runs out.
 
 const HAND_OFF := 0.28         # m: a bolt leaves this far to the side, alternating hands
+const FLASH_HIT := 0.12        # s: the struck body's flash (Ent.hurt's own): 3 frames full, then a fade
 const BOLT_COL := Color("9a5cff")
 const BOLT_CORE := Color("e6d8ff")
 const FIZZLE := Color("8e48ff")    # a bolt running out at the cursor: a violet puff
@@ -51,6 +52,7 @@ var mark_gap := {}             # target id -> time of its last Mark from us
 var pips := {}                 # target instance id -> {node, t: Ent}: the Mark pips over their head
 var pip_spare: Array = []      # pip rings whose Marks ran out, hidden, for the next target (none made mid-fight)
 var pip_mats: Array[ShaderMaterial] = []    # [lit, unlit]: every diamond wears one of the two
+var knife_sd := {}             # the thrown knife's shot while it flies (its whirr, thief_knife_fly, follows it)
 var knife := {}                # the stuck Shadow Knife: {target, pos, dir} (+ wall, u, s, dy, side: stuck in a barrier)
 var bola_cast := {}            # the Bola winding up, lane showing: {t}
 var bola := {}                 # the Bola in flight: {pos, dir, left, first, bounces, stg}
@@ -288,6 +290,8 @@ func _tick(dt: float) -> void:
 	quick.tick(dt)
 	_tick_landing()
 	_tick_wrapped(dt)
+	if not knife_sd.is_empty() and not HeroSfx.fly(m, h, "thief_knife_fly", knife_sd):
+		knife_sd = {}
 	_tick_knife()
 	_tick_glint(dt)
 	_tick_aim_line()
@@ -452,6 +456,7 @@ func _bolt() -> void:
 	else:
 		# the spinning chakram heads a short cel tracer (bolt_trail: dark edge, violet body, hot core, about the
 		# source's comet length); the quick run after a Vault keeps the cartwheel's pale lilac in her hands
+		m.sfx("thief_bolt_tail", h.pos, -6.0 if h.is_local() else -9.0)     # the zip's shimmer, after the weapon's cast
 		var head := fx().ride(sd, "chakram", BOLT_COL, GHOST if came_quick else BOLT_COL, 0.0)
 		HeroVfx.of(m).trail(h, "bolt_trail", head)
 		if came_quick:
@@ -467,6 +472,9 @@ func _bolt_end(s: Dictionary, at: Vector3, e: Ent, why: String, emp: bool) -> vo
 	last_bolt_end = at
 	primed_on = e if emp else null
 	if emp: chain.bolt_ended()
+	if e != null:
+		e.flash_tint = Arch.color(id)      # the struck body flashes in her colour
+		e.flash_t = maxf(e.flash_t, FLASH_HIT)
 	if e != null and emp:
 		fx().star(at, Color("d8c0ff"), 1.5, 0.24)
 		m.fx.spark(at, Vector3.UP, EMP_PALE, 14, 11.0, 70.0)
@@ -881,6 +889,7 @@ func _throw_knife() -> void:
 			if knife.is_empty() and e == null: _stick_ground(at, _why == "wall", land)}))
 	if m.shots.size() > n0 and m.shots[-1]["by"] == h:
 		fx().ride(m.shots[-1], "dagger", col_of(ed), Color("b890ff"), 1.6, 0.26)
+		knife_sd = m.shots[-1]
 	vfx("knife_throw", h.pos + Vector3(h.aim_dir().x * 0.6, 1.1, h.aim_dir().y * 0.6))
 	m.sfx("dj_knife_throw", h.pos, -3.0, 1.0)
 	m.sfx("thief_knife_whisk", h.pos, -6.0 if h.is_local() else -9.0)     # the blade spinning away

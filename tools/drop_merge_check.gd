@@ -23,9 +23,9 @@ func run(main_node: Node, part := "gate") -> void:
 	Save.d = Save.fresh()
 	Econ.ensure()
 	if part == "gate":
-		await _piles()
+		_piles()
 	else:
-		await _audit([5, 10])
+		_audit([5, 10])
 	print("DROPMERGE DONE, failures: %d" % fails)
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -33,7 +33,7 @@ func run(main_node: Node, part := "gate") -> void:
 func _match(teams: int, squad: int, seed_: int) -> Match:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": teams, "squad": squad, "tier": 0, "length": 1e9, "seed": seed_, "no_drop": true})
+	m.start({"teams": teams, "squad": squad, "tier": 0, "length": 1e9, "seed": seed_, "no_drop": true})
 	m.set_process(false)
 	return m
 
@@ -47,7 +47,7 @@ func _total(m: Match, kind: String, key := "") -> int:
 
 
 func _piles() -> void:
-	var m := await _match(1, 1, 31)
+	var m := _match(1, 1, 31)
 	var P: Hunter = m.player
 	m.pickups.clear()
 	var base := Vector3(P.pos.x + 30.0, P.pos.y + 5.0, P.pos.z)  # away from the player: nothing is grabbed
@@ -102,7 +102,7 @@ func _piles() -> void:
 
 
 func _audit(minutes: Array) -> void:
-	var m := await _match(15, 2, 41)
+	var m := _match(15, 2, 41)
 	var bots := m.hunters.size() - 1
 	for minute in minutes:
 		while m.time < minute * 60.0:
