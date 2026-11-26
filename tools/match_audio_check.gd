@@ -731,7 +731,7 @@ func _carry(m: Match, p_v: Hunter) -> void:
 		first and Sfx.last_played.has("carry_swap_in") and not Sfx.last_played.has("swap"),
 		"swap: the outgoing Boki's chirp, then the incoming one's (%s)" % [Sfx.last_played.keys()]
 	)
-	var R: Hunter = m.hunters.filter(func(x): return x.team != p_v.team)[0]
+	var foe: Hunter = m.hunters.filter(func(x): return x.team != p_v.team)[0]
 	var rec := {"species": p_v.kin.species, "uid": "carry_check", "name": "Check"}
 	Sfx.listener = p_v.pos
 	var got := _from_box(m, p_v, p_v, rec)
@@ -748,7 +748,7 @@ func _carry(m: Match, p_v: Hunter) -> void:
 			Sfx.last_played.has("carry_claim") and p_v.caught.size() == 1,
 			"claim: a scan that lands locks in (%s)" % [Sfx.last_played.keys()]
 		)
-	got = _from_box(m, p_v, R, rec)
+	got = _from_box(m, p_v, foe, rec)
 	ok(got == ["carry_take"], "steal: taking from a rival's box plays the sly take (%s)" % [got])
 	Sfx.last_played.clear()
 	foe.pos = p_v.pos + Vector3(60, 0, 0)
@@ -764,7 +764,7 @@ func _carry(m: Match, p_v: Hunter) -> void:
 			Sfx.last_played.has("carry_take") == hears,
 			"steal: a squad %.0f m from the thief %s the take" % [d, "hears" if hears else "does not hear"]
 		)
-	R.pos = p_v.pos + Vector3(2, 0, 0)
+	foe.pos = p_v.pos + Vector3(2, 0, 0)
 	Sfx.last_played.clear()
 	Sfx.recent.erase("carry_take")
 	for i in 3:
