@@ -10,17 +10,17 @@ extends RefCounted
 ## Then in a real match, owned, rival and wild Boki each get the "hit" meta from Ent.hurt, and a burn tick does not.
 ## Prints BOKIREACT PASS/FAIL lines. No renderer.
 
-const READ_T := 0.1          # s: a hit must read by then
-const MIN_READ := 0.03       # share of the Boki's height its farthest point has moved by READ_T
-const SETTLED := 0.25        # the jolt is over when it is back under this share of its peak
-const RUN_S := 1.2           # s followed after a hit
+const READ_T := 0.1  # s: a hit must read by then
+const MIN_READ := 0.03  # share of the Boki's height its farthest point has moved by READ_T
+const SETTLED := 0.25  # the jolt is over when it is back under this share of its peak
+const RUN_S := 1.2  # s followed after a hit
 const STEP := 1.0 / 60.0
-const MAX_PART := 0.2        # share of height a part or bone may leave its place in Flex space
-const MIN_SCALE := 0.65      # Flex stays inside these scales
+const MAX_PART := 0.2  # share of height a part or bone may leave its place in Flex space
+const MIN_SCALE := 0.65  # Flex stays inside these scales
 const MAX_SCALE := 1.35
-const MIN_SQUASH := 0.015    # a landing must shorten Flex by this share
-const MIN_LEAN := 0.04       # a dash must pitch Flex forward by this much (rad)
-const CHIP := 0.05           # share of max health: a chip hit, and a big one
+const MIN_SQUASH := 0.015  # a landing must shorten Flex by this share
+const MIN_LEAN := 0.04  # a dash must pitch Flex forward by this much (rad)
+const CHIP := 0.05  # share of max health: a chip hit, and a big one
 const BIG := 0.35
 ## Settle time a Boki of each weight should show (s). Light under mass 1.0, medium under 1.6, then heavy.
 const WEIGHT := {"light": [0.14, 0.30], "medium": [0.18, 0.38], "heavy": [0.24, 0.45]}
@@ -31,10 +31,12 @@ const PLANS := {"quad": "cindle", "biped": "zapple", "flyer": "wisplet", "serpen
 var bad := 0
 var holder: Node3D
 
+
 func ok(cond: bool, what: String) -> void:
 	print("BOKIREACT %s %s" % ["PASS" if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
@@ -46,7 +48,7 @@ func run(main: Node) -> void:
 		for weight in MASS:
 			await _case(main, "%s %s" % [plan, weight], String(PLANS[plan]), weight, float(MASS[weight]))
 	BokiRig.enabled = true
-	BokiIdle.config()["gap_s"] = [1.0e6, 1.0e6]      # no idle fidget: it would move the hit Boki and its control apart
+	BokiIdle.config()["gap_s"] = [1.0e6, 1.0e6]  # no idle fidget: it would move the hit Boki and its control apart
 	for id in boki_species():
 		var mass := KinLib.kin(id).mass
 		await _case(main, "rigged %s" % id, id, weight_of(mass), mass)
@@ -54,10 +56,12 @@ func run(main: Node) -> void:
 	print("BOKIREACT DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func weight_of(mass: float) -> String:
 	if mass < 1.0:
 		return "light"
 	return "medium" if mass < 1.6 else "heavy"
+
 
 ## Every species with a rigged model.
 func boki_species() -> Array:
@@ -67,6 +71,7 @@ func boki_species() -> Array:
 			ids.append(id)
 	ids.sort()
 	return ids
+
 
 ## One model with its drivers, stepped by hand.
 class Subject:
@@ -119,9 +124,10 @@ class Subject:
 			first = false
 		return bb
 
+
 func _case(main: Node, label: String, species: String, weight: String, mass: float) -> void:
 	var a := Subject.new(species, holder)
-	var ctl := Subject.new(species, holder)       # the same Boki left alone: its idle motion is not the hit's
+	var ctl := Subject.new(species, holder)  # the same Boki left alone: its idle motion is not the hit's
 	await main.get_tree().process_frame
 	ctl.pup.phase = a.pup.phase
 	ok((a.rig != null) == BokiRig.enabled, "%s: %s body" % [label, "rigged" if a.rig else "primitive"])
@@ -129,9 +135,21 @@ func _case(main: Node, label: String, species: String, weight: String, mass: flo
 	var chip := _hit(a, ctl, box, Vector3(0, 0, 1), CHIP, mass)
 	var big := _hit(a, ctl, box, Vector3(1, 0, 0), BIG, mass)
 	var band: Array = WEIGHT[weight]
-	print("BOKIREACT %-18s h %.2f m mass %.1f | chip %.3f %.2f s | big %.3f %.2f s | part %.3f" % [
-		label, box.size.y, mass, chip["read"], chip["settle"], big["read"], big["settle"],
-		maxf(chip["part"], big["part"])])
+	print(
+		(
+			"BOKIREACT %-18s h %.2f m mass %.1f | chip %.3f %.2f s | big %.3f %.2f s | part %.3f"
+			% [
+				label,
+				box.size.y,
+				mass,
+				chip["read"],
+				chip["settle"],
+				big["read"],
+				big["settle"],
+				maxf(chip["part"], big["part"])
+			]
+		)
+	)
 	ok(chip["read"] >= MIN_READ, "%s: a chip hit moves %.3f of its height by %.1f s" % [label, chip["read"], READ_T])
 	ok(big["read"] >= MIN_READ, "%s: a big hit moves %.3f of its height by %.1f s" % [label, big["read"], READ_T])
 	ok(big["peak"] > chip["peak"], "%s: a big hit moves farther (%.3f vs %.3f m)" % [label, big["peak"], chip["peak"]])
@@ -146,6 +164,7 @@ func _case(main: Node, label: String, species: String, weight: String, mass: flo
 	a.k.queue_free()
 	ctl.k.queue_free()
 
+
 ## A landing squashes the resting model within READ_T and leaves it in shape.
 func _land(a: Subject, mass: float, label: String) -> void:
 	for i in int(RUN_S / STEP):
@@ -159,6 +178,7 @@ func _land(a: Subject, mass: float, label: String) -> void:
 	var shaped := low <= 1.0 - MIN_SQUASH and low >= MIN_SCALE
 	ok(shaped, "%s: a landing squashes it to %.2f within %.1f s" % [label, low, READ_T])
 
+
 ## A dash leans the resting model forward (Flex pitch toward its facing) within READ_T and leaves it in shape.
 func _dash(a: Subject, mass: float, label: String) -> void:
 	for i in int(RUN_S / STEP):
@@ -170,6 +190,7 @@ func _dash(a: Subject, mass: float, label: String) -> void:
 		lean = maxf(lean, -a.flex.rotation.x)
 	ok(lean >= MIN_LEAN, "%s: a dash leans it forward %.3f rad within %.1f s" % [label, lean, READ_T])
 
+
 ## The control rig picks the same random idle as `a` (BokiIdle's fidgets, blinks, looks), so only the hit differs.
 func _twin(a: Subject, ctl: Subject) -> void:
 	if a.rig == null:
@@ -178,6 +199,7 @@ func _twin(a: Subject, ctl: Subject) -> void:
 	ctl.rig._idle._gap = a.rig._idle._gap
 	for v in ["_blink_t", "_look_t", "_look", "_look_to"]:
 		ctl.rig.set(v, a.rig.get(v))
+
 
 ## One hit on a resting model `a`, followed for RUN_S against `ctl`. Returns read (share of height at READ_T), peak (m),
 ## settle (s), part (worst share of height a part or bone left its place) and Flex's scale range.
@@ -213,9 +235,11 @@ func _hit(a: Subject, ctl: Subject, box: AABB, push: Vector3, frac: float, mass:
 			r["settle"] = float(s[0])
 	return r
 
+
 ## How far apart a spot on the hit model and the same spot on the control are, in the world.
 func _gap(a: Subject, ctl: Subject, spot: Vector3) -> float:
 	return a.flex.to_global(spot).distance_to(ctl.flex.to_global(spot))
+
 
 # ------------------------------------------------------------------ in a match
 ## Owned, rival and wild Boki take the hit through Ent.hurt; a burn tick is not a hit.
@@ -252,6 +276,7 @@ func _in_match(main: Node) -> void:
 		k.hurt(2.0, p, {"src": "burn", "tick": true})
 		ok(_count(k) == before + 1, "match: a burn tick on a %s Boki is not a hit" % who)
 	m.queue_free()
+
 
 func _count(k: Kin) -> int:
 	return int((k.model.get_meta("hit", {"n": 0}) as Dictionary)["n"])
