@@ -155,6 +155,7 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | tuatrune | shared | clip | clip | shared | shared | shared | proc | proc |
 | scaldamus | clip | shared | shared | clip | clip | clip | proc | proc |
 | sentrikat | clip | shared | shared | clip | clip | clip | proc | proc |
+| spatewader | shared | clip | clip | shared | shared | shared | proc | proc |
 | cindle | clip | clip | clip | clip | clip | clip | proc | proc |
 | puddlet | clip | clip | clip | clip | clip | clip | proc | proc |
 | burrlet | clip | clip | clip | clip | clip | clip | proc | proc |
@@ -180,8 +181,12 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | rimeshrew | clip | clip | clip | clip | clip | clip | proc | proc |
 | selenfin | clip | clip | clip | clip | clip | clip | proc | proc |
 | spatewader | clip | clip | clip | clip | clip | clip | proc | proc |
+| squalltross | clip | clip | clip | clip | clip | clip | proc | proc |
+| threadwyrm | clip | clip | clip | clip | clip | clip | proc | proc |
 | thrumbird | clip | clip | clip | clip | clip | clip | proc | proc |
+| tuatrune | clip | clip | clip | clip | clip | clip | proc | proc |
 | umbrathere | clip | clip | clip | clip | clip | clip | proc | proc |
+| velvorm | clip | clip | clip | clip | clip | clip | proc | proc |
 | cairnback | clip | clip | clip | clip | clip | clip | proc | proc |
 | hivara | clip | clip | clip | clip | clip | clip | proc | proc |
 | zephyrak | clip | clip | clip | clip | clip | clip | proc | proc |
@@ -255,16 +260,10 @@ Worst five, backlog-ready:
    marks them `"dash": true`. Cinder's ram and poof (`leap`, `hop`) and Lace's roll and flick (`roll`, `flick`) are
    clips, re-keyed to their felt dashes (KIT_PARITY 'Felt dash per kit'); claire, kael, ryzz, sable, tarek and vex key
    theirs too.
-4. **23 of 48 rigged Boki play one shared clip set** for idle, walk, run, attack, cast and hop (the Meshy batch-1
-   marks them `"dash": true`. Cinder's ram and poof (`leap`, `hop`) and Lace's roll and flick (`roll`, `flick`) carry the
-   same mark, so both cells read `clip`; claire, kael, ryzz, sable, tarek and vex key theirs too.
-4. **25 of 48 rigged Boki play one shared clip set** for idle, walk, run, attack, cast and hop (the Meshy batch-1
-   models, 9116769e95: casquebill to velvorm in the table; hoarheron has its own idle only). Nothing is `missing` on
-   any Boki, but the shared set is the same wobble on a heron, an okapi and a rope wyrm. Glomwort (its clips re-targeted
-   onto the scan, which has no lobes or puffballs to move) and goliathite now play their own. Eat and
-   sleep play each species' baked clip (the generic set on the shared Boki); the built munch and nap are the fallback.
-   any Boki (scaldamus and sentrikat left it 11-20), but the shared set is the same wobble on a heron, an okapi and a
-   rope wyrm. That includes glomwort,
-   whose `glomwort_anim.py` clips the batch-1 model replaced (docs/art/kin/RIGGED_BOKI.md still lists them). Eat and
-   sleep are `proc` on every Boki (munch and nap built from idle and sleep); the baked `eat` clip is never played.
+4. **NN of 48 rigged Boki play one shared clip set** for idle, walk, run, attack, cast and hop (the Meshy batch-1
+   models, 9116769e95: casquebill to velvorm in the table, less those with their own clips since the boki-own-clips
+   and `ext/anim-boki-own-clips-sttv` passes; hoarheron has its own idle only). Nothing is `missing` on any Boki, but
+   the shared set is the same wobble on a heron, an okapi and a rope wyrm. Glomwort (its clips re-targeted onto the
+   scan, which has no lobes or puffballs to move) and goliathite play their own. Eat and sleep play each species'
+   baked clip (the generic set on the shared Boki); the built munch and nap are the fallback.
 5. Hunter death clips are mostly unseen while the Wisp stands in for a death (DEBT: downed Wisp).
