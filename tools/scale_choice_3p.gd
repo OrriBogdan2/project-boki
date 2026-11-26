@@ -72,12 +72,12 @@ func _each(_t: float) -> void:
 	for i in ks.size():
 		var k: Node = ks[i]
 		k.teleport(home + Vector3(XS[i], 0, ZS[i]))
-		k.ring.visible = false  # the type cue's quad would count in the height
 		k.face = atan2(-0.8 * SIDE[i], -0.6)  # 3/4 to the camera (as boki_size_shots), the pairs mirrored
 		for n in [k] + k.find_children("*", "Node3D", true, false):
 			if n.has_meta("fit"):
 				n.set_meta("fit", fits[i] * mult)
 		k.render(DT, 1.0)  # (the match's own render pass is off here, so the turn would not show)
+		k.ring.visible = false  # the type cue's ring under it: not part of the Boki (render() shows it again)
 	P.face = PI
 
 func _foot(cam: Camera3D, n: Node3D) -> Array:
