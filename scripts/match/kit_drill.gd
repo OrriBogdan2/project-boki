@@ -14,6 +14,7 @@ const SLICE := ["gunslinger", "juggernaut", "archer", "ashwick"]
 const SLOTS := ["lmb", "rmb", "e", "x", "dash"]      # "x" is the hunter ultimate (R)
 const ACTIONS := {"lmb": "fire", "rmb": "secondary", "e": "signature", "x": "hunter_ult", "dash": "dash"}
 const PANEL_Y := 24.0  # px from the top: the drill panel, centred
+const PANEL_W := 580.0  # px: its text column, narrow enough to sit between the minimap and the frame-rate readout
 const HOLD_S := 0.4            # s: how long a "hold" step wants the key down
 const DONE_S := 2.0            # s: the closing line stays up
 const GOLD := Color("f2c84a")
@@ -170,8 +171,8 @@ func build_ui() -> void:
 	top.add_theme_constant_override("separation", 12)
 	rows.add_child(top)
 	_key = _label(top, Color.WHITE, 26)
-	_line = _label(top, GOLD, 22)
-	_call = _label(rows, Color.WHITE, 20)
+	_line = _label(top, GOLD, 22, PANEL_W - 90.0)
+	_call = _label(rows, Color.WHITE, 20, PANEL_W)
 	var bottom := HBoxContainer.new()
 	rows.add_child(bottom)
 	_count = _label(bottom, MINT, 16)
@@ -184,8 +185,11 @@ func build_ui() -> void:
 	if m.hud:
 		m.hud.ui_extra.append(skip)       # the mouse is over UI here: no shooting, the pointer shows
 
-func _label(parent: Node, col: Color, px: int) -> Label:
+func _label(parent: Node, col: Color, px: int, wrap_w := 0.0) -> Label:
 	var l := Label.new()
+	if wrap_w > 0.0:
+		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		l.custom_minimum_size.x = wrap_w
 	l.add_theme_color_override("font_color", col)
 	l.add_theme_font_size_override("font_size", px)
 	parent.add_child(l)

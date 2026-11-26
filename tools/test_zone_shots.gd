@@ -169,9 +169,18 @@ func _zone(size: Vector2i) -> void:
 	m.arena.open_menu()
 	await _stage(m, "menu", size)
 	m.arena.close_menu()
-	await _popups(m, size)
+	m.arena.set_arch(recast_hero())
+	await _popups(m, size, "zone")
 	m.queue_free()
 	await main.get_tree().process_frame
+
+
+## A Hunter with a two-step ability, so the Two-step drill has something to show.
+static func recast_hero() -> String:
+	for a: String in Arch.ids():
+		if not RecastDrill.slots(a).is_empty():
+			return a
+	return ""
 
 
 ## Opens (or closes) one popup of the practice stations: the parity bench, the Two-step drill, a toast, and the
@@ -194,12 +203,12 @@ static func station(m: Match, id: String, on: bool) -> void:
 
 
 ## Each practice station's popup on its own, over the tools.
-func _popups(m: Match, size: Vector2i) -> void:
+func _popups(m: Match, size: Vector2i, zone: String) -> void:
 	for id: String in STATIONS:
 		if id == "drills" and Practice.of(m).drills == null:
 			continue
 		station(m, id, true)
-		await _stage(m, id, size)
+		await _stage(m, "%s-%s" % [zone, id], size)
 		station(m, id, false)
 
 
@@ -207,12 +216,12 @@ func _popups(m: Match, size: Vector2i) -> void:
 func _grounds(size: Vector2i) -> void:
 	var m := Match.new()
 	main.add_child(m)
-	m.start(Match.arena_opts("gunslinger"))
+	m.start(Match.arena_opts(recast_hero()))
 	if main.fade != null:
 		await main.fade.reveal(0.01)
 	main.set("current", m)
-	await _stage(m, "grounds", size)
-	await _popups(m, size)
+	await _stage(m, "grounds-entered", size)
+	await _popups(m, size, "grounds")
 	m.queue_free()
 	await main.get_tree().process_frame
 
