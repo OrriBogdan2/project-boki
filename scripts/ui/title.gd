@@ -1,5 +1,5 @@
 extends Node
-## Title screen: the painted splashes (TitleBackdrop) under the logo, the menu as torn strips on the
+## Title screen: the live Boki play pen (PlayPen) under the logo, the menu as torn strips on the
 ## left (one big button, then the rest; no subtext), the build at the bottom, the playtest chip.
 ##
 ## Tooling: --title-check runs tools/title_check.gd.
@@ -32,14 +32,13 @@ func _build_ui() -> void:
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.name = "TitleUI"
 	ui.add_child(root)
-	root.add_child(TitleBackdrop.new())
-	root.add_child(VoidSpecks.new())       # void specks drifting over the key art
+	root.add_child(preload("res://scenes/title/play_pen.tscn").instantiate())
 	# a dark wash on the left so the menu reads over the scene, and a vignette with a little
 	# letterbox weight top and bottom
 	var shade := TextureRect.new()
 	var gt := GradientTexture2D.new()
 	var gr := Gradient.new()
-	gr.set_color(0, Color(0.03, 0.03, 0.05, 0.86)); gr.set_color(1, Color(0.03, 0.03, 0.05, 0.0))
+	gr.set_color(0, Color(0.1, 0.07, 0.06, 0.7)); gr.set_color(1, Color(0.03, 0.03, 0.05, 0.0))
 	gr.set_offset(0, 0.25); gr.set_offset(1, 1.0)
 	gt.gradient = gr; gt.fill_from = Vector2(0, 0); gt.fill_to = Vector2(1, 0); gt.width = 256; gt.height = 4
 	shade.texture = gt
@@ -50,7 +49,7 @@ func _build_ui() -> void:
 	root.add_child(shade)
 	var vig := TextureRect.new()
 	var vt := GradientTexture2D.new(); var vg := Gradient.new()
-	vg.set_color(0, Color(0, 0, 0, 0.0)); vg.set_color(1, Color(0.02, 0.015, 0.03, 0.62)); vg.set_offset(0, 0.5); vg.set_offset(1, 1.0)
+	vg.set_color(0, Color(0, 0, 0, 0.0)); vg.set_color(1, Color(0.1, 0.07, 0.06, 0.4)); vg.set_offset(0, 0.5); vg.set_offset(1, 1.0)
 	vt.gradient = vg; vt.fill = GradientTexture2D.FILL_RADIAL; vt.fill_from = Vector2(0.55, 0.45); vt.fill_to = Vector2(1.1, 1.1); vt.width = 128; vt.height = 128
 	vig.texture = vt; vig.stretch_mode = TextureRect.STRETCH_SCALE
 	vig.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

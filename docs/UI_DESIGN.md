@@ -12,7 +12,7 @@ Floating glass (`UI.glass`, `UI.GLASS`) is a brighter violet so it stays purple 
 and the Goals card also light the neon edge. Section headers are pink spaced caps (`UI.PINK`), state
 tags (`UI.tag`) are tilted rubber stamps, `UI.badge` is a jagged black badge, and a Boki's page shows a
 `VoidPortrait` (starfield, teal cracks). A new Boki's reveal card is the theme panel with its name on a
-parchment tab and its type as a stamp. `VoidSpecks` drift over the title's key art. The in-match HUD
+parchment tab and its type as a stamp. The title is a live Boki play pen (`PlayPen`, scenes/title/play_pen.tscn). The in-match HUD
 only takes the palette and edges and stays minimal.
 
 ## 1. Audit (October 2026, before this pass)
