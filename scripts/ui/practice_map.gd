@@ -1,7 +1,7 @@
 class_name PracticeMap
 extends RefCounted
 ## The practice tools on the full map (M) in the Training Grounds, the Arena and the Test Zone: the dummies and
-## the sparring bot as red rings, the stations as small diamonds, and a legend card with a row for each kind
+## the sparring bot as red rings, the stations as small diamonds (one per perch), and a legend card with a row for each kind
 ## that is really there. Called by FullMap (the map and its legend).
 
 const RING_R := 6.0  # px: a dummy's or the bot's ring
@@ -41,9 +41,12 @@ static func full_map(fm: FullMap) -> void:
 	if m.arena == null:
 		return
 	var c: Control = fm.hud.c
+	var seen := {}
 	for st in _stations(m):
-		var pv: Vector2 = fm.to_screen(st["at"])
-		if fm.rect.grow(-4.0).has_point(pv):
+		var mid: Vector3 = st["c"]
+		var pv: Vector2 = fm.to_screen(mid)
+		if not seen.has(mid) and fm.rect.grow(-4.0).has_point(pv):
+			seen[mid] = true      # (a perch's pedestals ring its middle: one diamond for the perch)
 			_diamond(c, pv, Grounds.color_of(st["kind"], st["id"]))
 	for h in _targets(m):
 		var pv: Vector2 = fm.to_screen(h.pos)
