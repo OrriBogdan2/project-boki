@@ -34,7 +34,6 @@ const CUT_HOLD := 0.4  # s a stun that cuts a wind-up holds it, at the least
 const WALL_HOLD := 1.0  # s stunned by a knock into a wall or rock
 const STAGGER_DMG := 2.5  # damage multiplier while a monster is staggered (below)
 const AMBLE_M := 3.0  # m from its camp it ambles while calm; a RETURN is home inside this
-const STAGGER_DMG := 2.5
 static var watched: WeakRef = null  # the monster the local player last hit: the F7 readout shows its machine
 
 var mkind := "skitter"
