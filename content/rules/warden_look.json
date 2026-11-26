@@ -177,7 +177,7 @@
 		]
 	},
 	"tarek": {
-		"painted": {"rim_far": 0.3, "rim_far_color": [0.36, 0.9, 0.72], "far_smooth": 1.0},
+		"painted": {"rim_far": 0.3, "rim_far_color": [0.36, 0.9, 0.72], "far_smooth": 1.0, "far_lift": 0.08},
 		"far_hide": ["shard_", "ground_rings"],
 		"slots": {
 			"skin": {
@@ -216,7 +216,7 @@
 				"albedo": [0.3, 0.46, 0.8]
 			},
 			"leather-eyerock": {
-				"desat": 0.7,
+				"desat": 0.15,
 				"albedo": [1.35, 1.35, 1.35],
 				"emit": 2.0
 			},
