@@ -14,6 +14,7 @@ const ARCH_CHECK := preload("res://tools/archetype_check.gd")
 const ClarityFight := preload("res://tools/clarity_fight.gd")
 const DT := 1.0 / 60.0
 const FIGHT_FRAMES := 10
+const MIN_SIDE_GAP := 0.5  # RGB distance (0-1) between two sides' colours that reads as different at a glance
 
 var bad := 0
 
@@ -31,7 +32,7 @@ func run(main: Node) -> void:
 	_sable_hit(main)
 	var m := Match.new()
 	main.add_child(m)
-	m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
+	m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "demo_kin": "cindle"})
 	m.set_process(false)
 	for mb in m.mobs:
 		mb.dead = true
@@ -61,6 +62,7 @@ func run(main: Node) -> void:
 		var edge := SideRings.edge_of(h)
 		var edge_ok := edge.a == 0.0 if h == p else (_same(edge, want) and edge.a > 0.5)
 		ok(edge_ok, "%s's body edge: %s (%s)" % [h.pname, "none on yours" if h == p else _side(m, h), edge])
+	_boki_owner(m, p, ally, foes[0])
 	_side_fx(m, p, ally, foes[0])
 	_body_tell(m, foes[0])
 	_boki_text(m, p, ally, foes[0])
@@ -197,6 +199,32 @@ func _cc_plate(m: Match, a: Hunter, b: Hunter) -> void:
 		var ms := _icon(mob, "status_stunned")
 		ok(ms.size() == 1 and absf(float(ms[0][3]) - 1.2) < 0.01, "a stunned monster: STUNNED icon, 1.2 s left")
 		mob.stun_t = 0.0
+
+
+## Whose Boki is it, walking or riding as a wisp: the ring and the wisp's rim are the owner's side colour, and your
+## own, a teammate's and a rival's are three clearly different colours (--wisp-read-shots measures it on screen).
+func _boki_owner(m: Match, p: Hunter, ally: Hunter, foe: Hunter) -> void:
+	var rims: Array = []
+	for h: Hunter in [p, ally, foe]:
+		var k: Kin = h.kin
+		if k == null:
+			ok(false, "%s has a Boki to read" % h.pname)
+			continue
+		var was := k.state
+		KinWisp.set_wisp(k, true)
+		k.state = "shoulder"
+		KinWisp.render(k)
+		var rim: Color = (k.model.get_node("Body") as GeometryInstance3D).get_instance_shader_parameter("rim_col")
+		rims.append(rim)
+		ok(_same(rim, SideColor.of(m, h)), "%s's wisp rim is the %s colour" % [h.pname, _side(m, h)])
+		KinWisp.set_wisp(k, false)
+		k.state = was
+		k.ring.visible = true
+	for i in rims.size():
+		var a: Color = rims[i]
+		var b: Color = rims[(i + 1) % rims.size()]
+		var gap := Vector3(a.r - b.r, a.g - b.g, a.b - b.b).length()
+		ok(gap > MIN_SIDE_GAP, "own, ally and rival Boki read three ways (gap %.2f)" % gap)
 
 
 ## Other people's looks lean to their side: yours as made, a teammate's cooler, a rival's toward the hostile red.

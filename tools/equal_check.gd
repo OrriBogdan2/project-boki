@@ -237,8 +237,20 @@ func _belt() -> void:
 	ok(p_v.kit_t > 0.0 and is_equal_approx(UtilityUse.channel_move(p_v), 0.45),
 			"key 2 starts an armor repair (slow while it runs)")
 	p_v.inv_t = 0.0
+	Sfx.cue_log = []
 	p_v.hurt(5.0, null, {"src": "shot"})
 	ok(p_v.kit_t <= 0.0 and p_v.armor_kits == 2, "a hit spills it and nothing is spent")
+	ok(_cued("belt_fumble"), "...and the kit's plates clatter (belt_fumble)")
+	p_v.hp = p_v.max_hp * 0.5
+	p_v.inp["util1"] = true
+	m.step(Match.DT)
+	ok(p_v.drink_t > 0.0, "a second drink starts")
+	p_v.stun_t = 1.0
+	m.step(Match.DT)
+	ok(p_v.drink_t <= 0.0 and p_v.tonics == 2 and _cued("belt_spill"),
+			"a stun spills it with the tonic's splash (belt_spill), nothing spent")
+	p_v.stun_t = 0.0
+	Sfx.cue_log = null
 	p_v.inv_t = 99.0
 	p_v.inp["util2"] = true
 	m.step(Match.DT)
@@ -424,6 +436,13 @@ func _armor_up_rival(m: Match, p_v: Hunter, b: Hunter) -> void:
 	b.armor_gain(5000.0)
 	m._armor_up(b)
 	ok(int(Sfx.last_played.get("armor_up", -1000)) == far0, "a tier-up out of earshot is not played")
+
+## True when `sname` was asked of Sfx since `Sfx.cue_log` was last reset and its sound loads.
+func _cued(sname: String) -> bool:
+	for c in Sfx.cue_log:
+		if c[0] == sname and c[2]:
+			return true
+	return false
 
 ## The pitch the pool voice playing `sname` was started at (0 if none).
 func _cue_pitch(sname: String) -> float:

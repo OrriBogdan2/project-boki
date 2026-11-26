@@ -21,6 +21,7 @@ extends RefCounted
 ## On the save: rec["bonds"] = {uid: -1..1} (missing = 0, so old saves need no migration).
 
 const POST_OFF := Vector3(2.2, 0, 0.4)      # m from the Training post to the race post
+const LOOP_MARGIN := 1.0                   # m a building keeps off the loop (loop_rect)
 const LOOP_OFF := Vector3(0.9, 0, -0.6)     # m from the race post to the loop's start line
 const CLIMB_H := 0.7                         # m, the top of the climb
 const JUMP_H := 0.6                          # m, the top of the jump's arc
@@ -99,6 +100,16 @@ static func loop_points() -> Array:
 		for q in s["pts"]:
 			out.append(line + Vector3(q[0], 0.0, q[1]))
 	return out
+
+## The ground the loop covers (tiles), with a lane's margin: what a building must stay off. Empty without a post.
+static func loop_rect() -> Rect2:
+	var pts := loop_points()
+	if pts.is_empty():
+		return Rect2()
+	var box := Rect2(pts[0].x, pts[0].z, 0.0, 0.0)
+	for q in pts:
+		box = box.expand(Vector2(q.x, q.z))
+	return box.grow(LOOP_MARGIN)
 
 static func lap() -> float:
 	var out := 0.0

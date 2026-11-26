@@ -86,7 +86,7 @@ static func draw(h, sz: Vector2, p: Hunter) -> void:
 			c.draw_rect(Rect2(ar.position, Vector2(ar.size.x * af, ar.size.y)), acol)
 	ArmorHud.bar(h, x0, ar.position.y - 3, w, p)  # progress to the next armour tier, a hairline above the strip
 	var cc_y := hr.end.y + 4
-	if p.ak and p.ak.has_meter():
+	if p.ak and p.ak.has_gauge():
 		h._draw_res_bar(x0, cc_y, w, p)
 		cc_y += 12.0
 	SelfCcLine.draw(c, Vector2(x0, cc_y), w, p)

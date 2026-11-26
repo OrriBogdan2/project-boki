@@ -107,6 +107,7 @@ func run(main_node: Node) -> void:
 	await _hover(other, "another player's")
 	other.remote = false
 	await _loudness(m)
+	_regions(m, p_v)
 	# the weather bed (AmbBeds) is up, and the end-of-match fade below takes it away with the rest
 	m.music_dir.beds.tick(m, p_v)
 	ok(Sfx.amb_layers.has("gust"), "the match's weather bed starts (amb layers: %s)" % str(Sfx.amb_layers.keys()))
@@ -129,6 +130,102 @@ func run(main_node: Node) -> void:
 	main.get_tree().quit(1 if fails > 0 else 0)
 
 
+## Region ambience (content/rules/region_ambience.json, docs/AUDIO.md): every region the layout makes has a
+## bed from the library; the bed plays in its region; crossing a border crossfades over 3-4 s; the Blight
+## quietens the place beds.
+func _regions(m: Match, p_v: Hunter) -> void:
+	var lay := World.load_layout("hollowcrown")
+	var rules := AmbBeds.rules()
+	var ids := []
+	var isl := {}
+	for r in lay.get("regions", []):
+		ids.append(String(r["id"]))
+		var bed := AmbBeds.bed_of_region(String(r["id"]))
+		var file := bed != "" and ResourceLoader.exists("res://audio/amb_%s.ogg" % bed)
+		ok(file, "region %s plays bed amb_%s (file there)" % [r["id"], bed])
+		for i in r["islands"]:
+			isl[String(i)] = String(r["id"])
+	var n_reg: int = m.world.regions.size()
+	ok(ids.size() == 9 and n_reg == ids.size(), "the world has the layout's %d regions (%d)" % [ids.size(), n_reg])
+	var stale: Array = rules["beds"].keys().filter(func(k): return not k in ids)
+	ok(stale.is_empty(), "the map has no region the layout does not make %s" % str(stale))
+	var beds := AmbBeds.new()
+	var wrong := []
+	for d in lay["islands"]:
+		var rid: String = isl[String(d["id"])]
+		var at := Vector3(float(d["poi"][0]) + 0.5, 0.0, float(d["poi"][1]) + 0.5)
+		if m.world.island_of(at.x, at.z) < 0:
+			continue  # a lagoon or a hole at the point of interest: nothing to stand on
+		p_v.pos = at
+		var lv := beds.place_levels(m, p_v)
+		var top := ""
+		for b in lv:
+			if b != "water" and (top == "" or float(lv[b]) > float(lv[top])):
+				top = b
+		if top != AmbBeds.bed_of_region(rid) or float(lv[top]) < 0.5:
+			wrong.append("%s:%s" % [d["id"], top])
+	ok(wrong.is_empty(), "standing in each region its own bed is loudest %s" % str(wrong))
+	# the crossfade: from the Crown out to Larkhollow, the beds trade places over fade_s
+	var fade := float(rules["fade_s"])
+	ok(fade >= 3.0 and fade <= 4.0, "the border crossfade is 3-4 s (%.1f s)" % fade)
+	var a: String = AmbBeds.bed_of_region("crown")
+	var b: String = AmbBeds.bed_of_region("lark")
+	Sfx.clear_amb_layers(0.01)
+	var lark: Dictionary = (lay["islands"] as Array).filter(func(d): return d["id"] == "lark")[0]
+	var crown: Dictionary = (lay["islands"] as Array).filter(func(d): return d["id"] == "crown")[0]
+	p_v.pos = Vector3(float(crown["poi"][0]) + 0.5, 0.0, float(crown["poi"][1]) + 0.5)
+	beds.tick(m, p_v)
+	for i in int(fade * 8):
+		Sfx._process(0.125)
+	var full := db_to_linear(-12.0)
+	ok(
+		_lin(a) > 0.45 * full and _lin(b) == 0.0,
+		"Crown bed %s up, Larkhollow's %s not (%.2f / %.2f)" % [a, b, _lin(a) / full, _lin(b) / full]
+	)
+	var before := _lin(a)
+	p_v.pos = Vector3(float(lark["poi"][0]) + 0.5, 0.0, float(lark["poi"][1]) + 0.5)
+	beds.tick(m, p_v)
+	for i in int(fade * 4):
+		Sfx._process(0.125)
+	var mid_a := _lin(a)
+	var mid_b := _lin(b)
+	ok(
+		mid_a > 0.0 and mid_a < before and mid_b > 0.0,
+		"mid-fade both sound (%s %.2f -> %.2f, %s %.2f)" % [a, before / full, mid_a / full, b, mid_b / full]
+	)
+	for i in int(fade * 4) + 2:
+		Sfx._process(0.125)
+	ok(
+		not Sfx.amb_layers.has(a) and _lin(b) > 0.45 * full,
+		"after %.1f s the old bed is gone and the new one is up (%s %.2f)" % [fade, b, _lin(b) / full]
+	)
+	# the Blight: past the tide ring the place beds are quieter, at the Heart they are not
+	var own_heart := m.heart == null  # (this check's match has no clock, so no Heart: give it one for the tide)
+	if own_heart:
+		m.heart = Heart.new(m)
+		m.heart.setup(lay)
+	var t_was := m.time
+	m.time = maxf(m.time, Heart.r("tide_start_s") + 1.0 - m.sess_t0)  # the tide is up
+	if m.heart != null:
+		var site: Vector3 = m.heart.site
+		var near := Vector3(site.x, 0.0, site.z)
+		var far := near + Vector3(Heart.tide_r(m) + 60.0, 0.0, 0.0)
+		var k_in := AmbBeds.blight_share(m, near)
+		var k_out := AmbBeds.blight_share(m, far)
+		var quiet: bool = k_in == 1.0 and absf(k_out - float(rules["blight_k"])) < 0.01 and k_out < 0.5
+		ok(quiet, "in the Blight the place beds drop to %.2f of their level (%.2f at the Heart)" % [k_out, k_in])
+	else:
+		ok(false, "setup: the match has a Heart to read the Blight tide from")
+	m.time = t_was
+	if own_heart:
+		m.heart = null
+	Sfx.clear_amb_layers(0.01)
+
+
+func _lin(bed: String) -> float:
+	return db_to_linear((Sfx.amb_layers[bed]["p"] as AudioStreamPlayer).volume_db) if Sfx.amb_layers.has(bed) else 0.0
+
+
 func _ult_chime(m: Match, p_v: Hunter) -> void:
 	var mate: Hunter = null
 	var rival: Hunter = null
@@ -143,8 +240,8 @@ func _ult_chime(m: Match, p_v: Hunter) -> void:
 	)
 	if mate == null or rival == null or p_v.ak == null:
 		return
-	p_v.ctrl = "local"          # (a bot could cast it the step it's back; you hold no keys here)
-	p_v.ak.cd["e"] = 99.0       # (E's own tick is _e_tick's; kept out of the R rows)
+	p_v.ctrl = "local"  # (a bot could cast it the step it's back; you hold no keys here)
+	p_v.ak.cd["e"] = 99.0  # (E's own tick is _e_tick's; kept out of the R rows)
 	var fresh := UltReadyCue.new()
 	for h in [p_v, mate, rival]:
 		h.lvl = maxi(h.lvl, int(Hunter.ULT_AT[0]))
@@ -169,7 +266,7 @@ func _ult_chime(m: Match, p_v: Hunter) -> void:
 	var e_down := cue.e_plays
 	m.knock(p_v, rival, {})
 	p_v.ak.cd["x"] = 0.3
-	p_v.ak.cd["e"] = 0.3        # (E back while you're down too: _e_tick checks it stayed quiet)
+	p_v.ak.cd["e"] = 0.3  # (E back while you're down too: _e_tick checks it stayed quiet)
 	_step(m, 0.6)
 	ok(p_v.downed and HeroUlt.ready(p_v.ak) and cue.plays == before + 1, "back while you're down: no chime yet")
 	m.revive_hunter(p_v, mate)
@@ -181,17 +278,20 @@ func _ult_chime(m: Match, p_v: Hunter) -> void:
 	_step(m, 0.1)
 	var want := UltReadyCue.VOL_DB + UltReadyCue.UNDER_CALLOUT_DB
 	var under := Sfx.players.filter(func(p): return p.playing and p.stream == Sfx.streams[UltReadyCue.SOUND])
-	ok(cue.plays == before + 3 and under.any(func(p): return is_equal_approx(p.volume_db, want)),
-		"right after a kill callout it plays %.0f dB down" % UltReadyCue.UNDER_CALLOUT_DB)
+	ok(
+		cue.plays == before + 3 and under.any(func(p): return is_equal_approx(p.volume_db, want)),
+		"right after a kill callout it plays %.0f dB down" % UltReadyCue.UNDER_CALLOUT_DB
+	)
 	_e_tick(m, p_v, e_down)
 	p_v.ctrl = "bot"
+
 
 ## Your E back: an E that came back while you were down (_ult_chime's knock) stays quiet once you're up; its own
 ## tick once; with R back the same step, R first and E at least GAP later.
 func _e_tick(m: Match, p_v: Hunter, e_down: int) -> void:
 	var cue: UltReadyCue = m.ult_cue
 	p_v.ak.cd["x"] = 99.0
-	_step(m, UltReadyCue.MUTE_BACK + 0.2)     # (past the revive above)
+	_step(m, UltReadyCue.MUTE_BACK + 0.2)  # (past the revive above)
 	ok(cue.e_plays == e_down, "an E back while you're down stays quiet when you're up (%d)" % (cue.e_plays - e_down))
 	p_v.ak.cd["e"] = 99.0
 	_step(m, 0.1)
@@ -207,6 +307,8 @@ func _e_tick(m: Match, p_v: Hunter, e_down: int) -> void:
 	ok(cue.plays == r0 + 1 and cue.e_plays == e0 + 1, "E and R back together: R first, E waits")
 	_step(m, 0.3)
 	ok(cue.e_plays == e0 + 2, "...then E, %.1f s on" % UltReadyCue.GAP)
+
+
 ## A hit on a shield plays that material's thunk, the hit that takes the last of it plays its crack and clears the
 ## material; a rival's shield is heard only near, yours always; the shield running out clears the material too.
 func _shields(m: Match, p: Hunter) -> void:
@@ -250,8 +352,21 @@ func _ult_cues(m: Match, p: Hunter) -> void:
 	Sfx.listener = p.pos
 	r.pos = p.pos + Vector3(40, 0, 0)
 	Sfx.last_played.clear()
+	var dbs := {}
+	var grab := func(sname: String, _at, db: float, _pt: float): dbs[sname] = db
+	Sfx.played.connect(grab)
+	for pl in Sfx.players:
+		pl.stop()
+	var terrain: World = Sfx.occlusion.world  # the bus is the point here: open ground, nothing muffles it
+	Sfx.occlusion.world = null
 	UltCue.cast(r.ak)
+	Sfx.occlusion.world = terrain
+	var foe_voices := Sfx.players.filter(func(pl): return pl.playing and pl.bus == &"SFXFoe").size()
 	var heard := Sfx.last_played.has(r.arch + "_ult_cue") and Sfx.last_played.has("ult_tag_foe")
+	ok(
+		foe_voices == 2 and dbs.get(r.arch + "_ult_cue") == UltCue.DB_FOE and dbs.get("ult_tag_foe") == UltCue.DB_FOE,
+		"a rival's ultimate cue and tag play on the SFXFoe bus at DB_FOE (%d voices)" % foe_voices
+	)
 	ok(
 		heard and not Sfx.last_played.has("ult_tag_ally"),
 		"a rival's ultimate 40 m away is heard, with the rival tag (%s)" % [Sfx.last_played.keys()]
@@ -261,9 +376,21 @@ func _ult_cues(m: Match, p: Hunter) -> void:
 	UltCue.cast(r.ak)
 	ok(Sfx.last_played.is_empty(), "...and 70 m away it is out of earshot")
 	Sfx.last_played.clear()
+	dbs.clear()
+	for pl in Sfx.players:
+		pl.stop()
 	UltCue.cast(p.ak)
+	Sfx.played.disconnect(grab)
 	heard = Sfx.last_played.has("ult_tag_ally") and Sfx.last_played.has(p.arch + "_ult_cue")
 	ok(heard, "your own team's cue has the ally tag")
+	ok(
+		(
+			dbs.get("ult_tag_ally") == UltCue.DB
+			and UltCue.DB_FOE > UltCue.DB
+			and Sfx.players.filter(func(pl): return pl.playing and pl.bus == &"SFXFoe").is_empty()
+		),
+		"...at UltCue.DB, under a rival's, on the plain SFX buses"
+	)
 
 
 ## Each kind of sound plays on its own bus, set up in one place (SfxMix.BUSES).
@@ -447,6 +574,41 @@ func _steps(m: Match, p: Hunter) -> void:
 		not is_nan(own_near) and is_equal_approx(own_near, own_far),
 		"your own step plays at one level wherever the camera is (%.1f / %.1f dB)" % [own_near, own_far]
 	)
+	_step_weights(r, p)
+
+
+## One rival per weight class (archer light, dolm medium, ashwick heavy) steps: heavier is lower and louder,
+## on the foot's contact step and the surface step both. Motley (ostra) has no steps to weigh (gait < 0.5).
+func _step_weights(r: Hunter, p: Hunter) -> void:
+	var arch0 := r.arch
+	var got := {}
+	for a in ["archer", "dolm", "ashwick"]:
+		r.arch = a
+		got[a] = [_step_params(r, p, true), _step_params(r, p, false)]
+	r.arch = arch0
+	for i in 2:
+		var l: Vector2 = got["archer"][i]
+		var md: Vector2 = got["dolm"][i]
+		var hv: Vector2 = got["ashwick"][i]
+		var what := "contact" if i == 0 else "surface"
+		ok(l.x > md.x and md.x > hv.x, "%s step pitch: light %.2f > medium %.2f > heavy %.2f" % [what, l.x, md.x, hv.x])
+		ok(
+			l.y < md.y and md.y < hv.y,
+			"%s step level: light %.1f < medium %.1f < heavy %.1f dB" % [what, l.y, md.y, hv.y]
+		)
+	ok(KMovesStone.gait("ostra") < 0.5, "Motley floats: no footsteps (gait %.1f)" % KMovesStone.gait("ostra"))
+
+
+## (pitch scale, dB) of one step of r, 10 m from p, from the Sfx.played signal.
+func _step_params(r: Hunter, p: Hunter, contact: bool) -> Vector2:
+	var out := [Vector2.ZERO]
+	var on := func(sname: String, _at, db: float, pitch: float):
+		if sname.contains("step"):
+			out[0] = Vector2(pitch, db)
+	Sfx.played.connect(on)
+	_step_db(r, p, 10.0, contact)
+	Sfx.played.disconnect(on)
+	return out[0]
 
 
 ## The level (dB) of one step of h placed `d` m from p_v along x (h == p_v: where p_v stands), NAN when nothing played.
@@ -625,7 +787,7 @@ func _from_box(m: Match, h: Hunter, dropper: Hunter, rec: Dictionary) -> Array:
 	}
 	Life.take_item(m, h, b, {"key": "caught", "i": 0})
 	h.caught.clear()
-	return Sfx.last_played.keys().filter(func(n): return String(n).begins_with("carry_"))
+	return Sfx.last_played.keys().filter(func(nm): return String(nm).begins_with("carry_"))
 
 
 ## Walks one hunter's glider through open, fast glide, dive, overheat and fold, setting the state a

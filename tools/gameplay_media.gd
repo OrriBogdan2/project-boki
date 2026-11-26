@@ -318,7 +318,7 @@ func _go(secs: float, each: Callable, cam_to: Callable, follow := false) -> void
 		_purge()
 		if Overlay.is_open():
 			Overlay.close()  # a key pressed on the worker's own screen (Esc) must not pause the take
-		each.call(t)
+		await each.call(t)
 		for _i in 2:
 			m.step(STEP)
 		if follow:
