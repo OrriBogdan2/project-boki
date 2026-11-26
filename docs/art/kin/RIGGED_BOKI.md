@@ -143,7 +143,7 @@ that keeps a planted paw closest to the ground most of the stance. `_pick_clip` 
 
 ## How big it is (`KinSize`)
 
-A rigged Boki's size is its data: `content/kin/<id>.json` `size.cm` x `KinSize.M_PER_CM` (0.029 m per cm) x
+A rigged Boki's size is its data: `content/kin/<id>.json` `size.cm` x `KinSize.M_PER_CM` (0.03625 m per cm) x
 `KinSize.READ_SHARE` (0.54) is how big it *reads*, at root scale 1, whatever the glb's own size. A Boki's read is the
 square root of the area its silhouette covers on screen (the convex hull of its mesh) in its idle pose, averaged over
 four turns and over both views it is seen from: the match camera's 57 degrees and the farm third-person camera's 20

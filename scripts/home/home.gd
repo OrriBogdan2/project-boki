@@ -1160,7 +1160,7 @@ func _exit_tree() -> void:
 ## Boki on the farm are drawn bigger than in a match: the farm's camera sits much further back than the
 ## expedition's (HOME_ACROSS_REF framing at zoom 1.2), and at match size a Boki was a speck beside your hunter there.
 ## Presentation only (no hitboxes). One scale for all, so the active companion is no bigger than the others.
-const FARM_BOKI_SCALE := KinSize.FARM_M_PER_CM / KinSize.M_PER_CM  # 1.53 at the current M_PER_CM
+const FARM_BOKI_SCALE := KinSize.FARM_M_PER_CM / KinSize.M_PER_CM  # 1.22 at the current M_PER_CM
 
 var climb := {}                # (unused since the ledge float; kept for anything that clears it)
 ## Floating up a ledge, as in a match (Hunter._ledge_float): {lip, n (into the wall), t, at, g0}.
