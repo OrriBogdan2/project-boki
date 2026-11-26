@@ -145,3 +145,13 @@ Scripts: `/home/boki/gens/hunter-round-1124/kael/hair/scripts/` (`hairmask.py GL
   (`s_round=200 s_along=6 kL=2.2 tap=0.1 wc=255,250,248 Lb=228,104,108`), composited only inside the off-arm mask
   (`r25/work/comp.py`; maps rebuilt with `rast4.py` from the pre-round-21 glb since amaps.npz was not on this host). White vein
   coverage 0.4 % -> 9 %, off-arm median lum 122 -> 143 (sword arm 32 untouched). Geometry, skin, clips, emission map unchanged.
+
+**Round 26 (2026-11-26, ext/kael-r25, scripts /home/boki/gens/hunter-round-1124/kael/r26/):**
+- Ink room 0 on red-cloth verts (kael_meshy.glb COLOR_0 alpha only): texel colour r>55, r>1.7g, r>1.5b at the vert's UV,
+  arm capsules (7.5 cm round shoulder-elbow-wrist-fingertip) excluded: 15,653 verts (`r26/cloth0.py`). Ink slits inside red
+  cloth per 1000 red px (all clips x 4 yaws): eye 2.99 -> 1.34, knee 2.90 -> 1.46 vs round 25 (live 4.51 / 4.55).
+- warden_look.json kael: the three crimson glow sprites on anchor_arm_up/elbow/fore are gone; warden_anchors.json binds
+  them to upper_arm.L / forearm.L = the OFF arm (sword is on hand.R), so they hazed the light arm. Blade steel calmer
+  (slots.metal top_light 0.3, fres 0.35, sheen 0): near-white px per frame eye 38 -> 5, knee 30 -> 7 vs round 25.
+- Tried and dropped: painted rim_far 0.2 / top_light 0.55 / fres 0.8 / desat 0.08 (median red 182 -> 174 only, not visible).
+  The neon red is the albedo under the sun: needs a colour pass on the cape/arm texels (Meshy), not shader params.
