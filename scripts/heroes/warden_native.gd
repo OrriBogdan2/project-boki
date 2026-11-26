@@ -81,6 +81,7 @@ var twist := WardenNativeTwist.new()  # the legs turned to the way he goes, the 
 var upper: WardenNativeUpper  # a swing or cast over the running legs (the torso and arms only)
 var moves: WardenNativeMoves  # the kit moves with a clip of their own (data "kmoves")
 var companions: WardenCompanions  # floating companions cut out of Meshy's body (Meeko's sun and cloud), or null
+var steps: WardenNativeSteps  # the footsteps, on the foot plants of Meshy's clips (data "plants")
 var mood: WardenMood  # the faces on those companions swap and blink (warden_anim/<art>.json "mood"), or null
 
 
@@ -204,6 +205,7 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	companions = WardenCompanions.detach(glb, skel, WardenClips.data(art_id), to_m.affine_inverse() * c_xf)
 	mouth = skel.find_child(WardenGlb.WEAPON_MUZZLE, true, false) as Node3D
 	model.set_meta(WardenClips.DEATH_T, 0.0)  # (the extract beat plays, WardenClips.leave_t; no death clip to hold)
+	steps = WardenNativeSteps.new(model, player, d.get("plants", {}))
 	_play("idle", 1.0)
 
 
@@ -241,6 +243,7 @@ func _process(dt: float) -> void:
 	player.advance(dt)
 	upper.lay(dt)
 	twist.step(dt, s, cur in LEGS_RUN)
+	steps.step(cur if xt < 0.0 else "")
 	WardenClips.air_tilt(root, skel, hips)  # (the glider's bank, the dive's pitch)
 	# (the look-at lies under a clip that turns the head: the attack clip owns it, eased in and out like a body clip)
 	head_look.owned = move_toward(head_look.owned, 1.0 if attack_left > 0.0 else 0.0, dt / FADE)
