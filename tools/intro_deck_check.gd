@@ -7,21 +7,23 @@ extends RefCounted
 ##     the world; the ship sails over the void for the whole ride) stays quiet.
 ## Prints a table row per Hunter: DECK <id> <min> <max> m (sole over the deck), and the loops heard.
 
-const FRAMES := 150            # 2.5 s: the plan's first beats (every rider has struck a pose by then)
-const WARM := 30               # frames before measuring: the lift eases in (Hunter.render)
-const EVERY := 6               # frames between two measurements
-const DIP := 0.02              # m: a sole may sit this far under the deck (a boot's own give, not a sunk foot)
-const FLOAT := 0.06            # m: ...or this far over it
-const QUIET := 0.05            # an ambience layer under this is not heard
-const QUIET_DB := -45.0        # dB: a held loop under this (a far wall's hum) is not heard
+const FRAMES := 150  # 2.5 s: the plan's first beats (every rider has struck a pose by then)
+const WARM := 30  # frames before measuring: the lift eases in (Hunter.render)
+const EVERY := 6  # frames between two measurements
+const DIP := 0.02  # m: a sole may sit this far under the deck (a boot's own give, not a sunk foot)
+const FLOAT := 0.06  # m: ...or this far over it
+const QUIET := 0.05  # an ambience layer under this is not heard
+const QUIET_DB := -45.0  # dB: a held loop under this (a far wall's hum) is not heard
 
 var bad := 0
 var main: Node
+
 
 func ok(cond: bool, what: String) -> void:
 	print("DECK %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func _start(id: String) -> Match:
 	SquadIntro._last_lineup = ""
@@ -33,6 +35,7 @@ func _start(id: String) -> Match:
 	m.start(o)
 	m.set_process(false)
 	return m
+
 
 ## One frame as the game draws it: the sim step, the intro, every rider's body (lean, scale, clips).
 func _frame(m: Match) -> void:
@@ -46,6 +49,7 @@ func _frame(m: Match) -> void:
 		if sync:
 			sync.set_process(false)
 			sync._process(Match.DT)
+
 
 func _feet(id: String) -> void:
 	var m := await _start(id)
@@ -69,8 +73,9 @@ func _feet(id: String) -> void:
 	m.queue_free()
 	await main.get_tree().process_frame
 
+
 ## What is heard over the ship, `secs` into the plan and again on the ride: no held loop, no abyss howl.
-func _sounds(m: Match, when: String) -> void:
+func _sounds(_m: Match, when: String) -> void:
 	var heard: Array = []
 	for k in Sfx.loops:
 		if (Sfx.loops[k]["p"] as AudioStreamPlayer).volume_db > QUIET_DB:
@@ -78,6 +83,7 @@ func _sounds(m: Match, when: String) -> void:
 	var abyss := float(Sfx.amb_layers.get("abyss", {}).get("want", 0.0))
 	var what := "%s: no loop or abyss howl aboard (loops %s, abyss %.2f)" % [when, heard, abyss]
 	ok(heard.is_empty() and abyss < QUIET, what)
+
 
 ## The whole of a match start as the player hears it: the intro, the plan, the sail.
 func _ride() -> void:
@@ -92,6 +98,7 @@ func _ride() -> void:
 	_sounds(m, "ride")
 	m.queue_free()
 	await main.get_tree().process_frame
+
 
 func run(mn: Node, _arg = null) -> void:
 	main = mn
