@@ -320,6 +320,7 @@ func _reach() -> void:
 	var msg2 := "the lookout's whole rim is sheer, so a jump alone never mantles it (%d rim tiles, %d open)"
 	ok(rim[0] > 0 and rim[1] == 0, msg2 % rim)
 
+
 ## [rim tiles, rim tiles that are not sheer]: the tiles at the lookout's height with a drop of over a metre beside them.
 func _lookout_rim(top: Vector3) -> Array:
 	var rim := 0

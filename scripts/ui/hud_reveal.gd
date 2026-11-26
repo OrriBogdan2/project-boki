@@ -37,14 +37,17 @@ static func on(m: Match, key: String) -> bool:
 		return true
 	return reached(key)
 
+
 ## Whether the save has played up to the group's from_match (0: never by the match number alone).
 static func reached(key: String) -> bool:
 	var from := int(groups().get(key, {}).get("from_match", 1))
 	return from > 0 and match_no() >= from
 
+
 ## The staged groups (Tab, Show full HUD and the match type open them), not the every_match ones.
 static func staged_keys() -> Array:
 	return groups().keys().filter(func(k): return not groups()[k].get("every_match", false))
+
 
 ## Whether this match stages the HUD at all.
 static func staged(m: Match) -> bool:
@@ -60,24 +63,35 @@ static func see(key: String) -> void:
 	if Save.d.has("hud_reveal"):
 		Save.d["hud_reveal"][key] = true
 
+
 ## A new player in a staged match (before newcomer_goal's match): ExtractGoal points them only at the newcomer seats.
 static func newcomer(m: Match) -> bool:
 	return staged(m) and not reached("newcomer_goal")
+
 
 ## Your own kills, knocks and gems (AliveCounter's quieter row): before own_numbers' match, not before the first
 ## kill, knock or gem, or while Tab / the map key is held (`hold`). The squads/players left above it always show.
 static func own_numbers_shown(p: Hunter, hold: bool) -> bool:
 	return reached("own_numbers") or hold or (p != null and p.kills + p.knocks + p.gems > 0)
 
+
 ## Does this player get the button card at all (Settings tips, not a recording, not the tutorial, alive)? Before
 ## kit_card's match a player has the slots and their keys and the words on hover; the training room keeps the card.
 static func kit_wanted(hud, p: Hunter) -> bool:
-	return Settings.get_v("tips") and not Record.clean() and not hud.m.opts.get("tutorial", false) \
-			and not p.out and not hud.guide_hidden and (reached("kit_card") or hud.m.opts.get("training", false))
+	return (
+		Settings.get_v("tips")
+		and not Record.clean()
+		and not hud.m.opts.get("tutorial", false)
+		and not p.out
+		and not hud.guide_hidden
+		and (reached("kit_card") or hud.m.opts.get("training", false))
+	)
+
 
 ## Seconds after landing the kit card stays up (Hud._draw_kit); the training room keeps it.
 static func kit_s(m: Match) -> float:
 	return float(groups()["kit_card"]["show_s"]) if not m.opts.get("training", false) else 1e9
+
 
 ## True once the Ways Out strip has something to tell: a seat is open, in use, taken or lost, or one opens within
 ## seat_pips' lead_s. Always for a player who is out (the "Ways out left" line is theirs). Every match type.

@@ -34,6 +34,9 @@ const LANE := Rect2i(-6, -2, 11, 5)  # tiles round the drop spot the runs cross 
 var bad := 0
 var arcs := {}  # mode -> [air steps, apex m] of the running jump
 
+var m: Match
+var h: Hunter
+
 
 func ok(cond: bool, what: String) -> void:
 	print("FCHECK %s %s" % ["ok  " if cond else "FAIL", what])
@@ -99,8 +102,6 @@ func _unlay(w: World, old: Array) -> void:
 
 
 # ---------------------------------------------------------------- the match modes (one Hunter._physics)
-var m: Match
-var h: Hunter
 
 
 func _reset(at: Vector3, v: Vector3, standing: bool) -> void:
@@ -194,7 +195,7 @@ func _match_mode(main: Node, mode: String) -> void:
 	if at == Vector3.INF:
 		m.queue_free()
 		return
-	var run := h.base_speed
+	var spd := h.base_speed
 	for up in [3.0, 10.0]:
 		_reset(at + Vector3(0, up, 0), Vector3.ZERO, false)
 		var start := _flat()
@@ -208,7 +209,7 @@ func _match_mode(main: Node, mode: String) -> void:
 				r[4] < VIEW_TOL,
 				"%s: the view settles on landing from 10 m (drifts %.2f m after touchdown)" % [mode, r[4]]
 			)
-		_reset(at + Vector3(-run * sqrt(2.0 * up / Hunter.H_GRAV), up, 0), Vector3(run, 0, 0), false)
+		_reset(at + Vector3(-spd * sqrt(2.0 * up / Hunter.H_GRAV), up, 0), Vector3(spd, 0, 0), false)
 		h.inp["move"] = Vector2(1, 0)
 		r = _fall(true)
 		ok(
@@ -218,13 +219,13 @@ func _match_mode(main: Node, mode: String) -> void:
 				% [mode, up, r[1], r[2], r[3], HunterMove.slide(r[2])]
 			)
 		)
-	_jump(mode, at, run)
-	_flight(mode, at, run)
+	_jump(mode, at, spd)
+	_flight(mode, at, spd)
 	m.queue_free()
 	await main.get_tree().process_frame
 
 
-func _jump(mode: String, at: Vector3, run: float) -> void:
+func _jump(mode: String, at: Vector3, _run: float) -> void:
 	_reset(at + Vector3(-3.5, 0, 0), Vector3.ZERO, true)
 	h.inp["move"] = Vector2(1, 0)
 	for i in 20:
@@ -256,7 +257,7 @@ func _jump(mode: String, at: Vector3, run: float) -> void:
 
 
 ## Down the test flight from its plateau, letting go on the flight: no air steps, a flat let-go's stop.
-func _flight(mode: String, at: Vector3, run: float) -> void:
+func _flight(mode: String, at: Vector3, spd: float) -> void:
 	var old := _lay_flight(m.world, at)
 	_reset(Vector3(at.x + 3.5, at.y + World.LEVEL, at.z), Vector3.ZERO, true)
 	h.inp["move"] = Vector2(-1, 0)
@@ -272,10 +273,10 @@ func _flight(mode: String, at: Vector3, run: float) -> void:
 	var slid := _flat().distance_to(let_go) if let_go != Vector2.INF else 99.0
 	_unlay(m.world, old)
 	ok(
-		airs == 0 and slid <= HunterMove.slide(run) + SLIDE_TOL,
+		airs == 0 and slid <= HunterMove.slide(spd) + SLIDE_TOL,
 		(
 			"%s: down a flight the feet stay on it (%d air steps) and a let-go stops in %.2f m (flat: %.2f)"
-			% [mode, airs, slid, HunterMove.slide(run)]
+			% [mode, airs, slid, HunterMove.slide(spd)]
 		)
 	)
 
@@ -313,7 +314,7 @@ func _farm(main: Node) -> void:
 	if at == Vector3.INF:
 		hm.queue_free()
 		return
-	var run := HunterMove.speed(String(Save.d.get("arch", "")))
+	var spd := HunterMove.speed(String(Save.d.get("arch", "")))
 	var put := func(p: Vector3, v: Vector3, up: float) -> void:
 		hm.ppos = Vector3(p.x, 0, p.z)
 		hm.py = p.y + up
@@ -385,10 +386,10 @@ func _farm(main: Node) -> void:
 	_unlay(w, old)
 	_press(Vector2.ZERO)
 	ok(
-		airs == 0 and slid <= HunterMove.slide(run) + SLIDE_TOL,
+		airs == 0 and slid <= HunterMove.slide(spd) + SLIDE_TOL,
 		(
 			"farm: down a flight the feet stay on it (%d air steps) and a let-go stops in %.2f m (flat: %.2f)"
-			% [airs, slid, HunterMove.slide(run)]
+			% [airs, slid, HunterMove.slide(spd)]
 		)
 	)
 	hm.queue_free()

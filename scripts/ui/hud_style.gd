@@ -62,6 +62,22 @@ const KEY_FS := 12             # key label size
 const SAFE_FRAC := 0.05
 const KEY_REACH := 10.0        # px a key pill hangs below its slot: the weapon card keeps that clear above the margin
 
+## The one table of floating-number kinds: what a number counted, its colour, its size against a plain hit
+## (Fx.NUM_SCALE) and whether it wears the crit outline. Fx draws from it; --dmg-number-check reads it.
+## Every pair must differ by colour or size, readable at match zoom.
+const NUM_STYLE := {
+	"hit": {"col": HIT, "k": 1.0, "crit": false},
+	"armour": {"col": HIT_ARMOR, "k": 1.0, "crit": false},
+	"crit": {"col": CRIT, "k": 1.0, "crit": true},
+	"crit_armour": {"col": CRIT_ARMOR, "k": 1.0, "crit": true},
+	"empowered": {"col": NUM_EMPOWERED, "k": 1.12, "crit": false},
+	"shield": {"col": NUM_SHIELD, "k": 0.85, "crit": false},
+	"shell": {"col": NUM_SHELL, "k": 0.85, "crit": false},
+	"heal": {"col": HEAL, "k": 1.0, "crit": false},
+	"hurt": {"col": HURT, "k": 1.0, "crit": false},
+}
+static var _italic: FontVariation
+static var _boxes := {}
 ## The margin on each side for a window of size `sz` (x for left and right, y for top and bottom).
 static func safe_pad(sz: Vector2) -> Vector2:
 	return (sz * SAFE_FRAC).round()
@@ -189,24 +205,9 @@ static func dmg_col(
 	if armor_hit: return HIT_ARMOR
 	return NUM_EMPOWERED if empowered else plain
 
-## The one table of floating-number kinds: what a number counted, its colour, its size against a plain hit
-## (Fx.NUM_SCALE) and whether it wears the crit outline. Fx draws from it; --dmg-number-check reads it.
-## Every pair must differ by colour or size, readable at match zoom.
-const NUM_STYLE := {
-	"hit": {"col": HIT, "k": 1.0, "crit": false},
-	"armour": {"col": HIT_ARMOR, "k": 1.0, "crit": false},
-	"crit": {"col": CRIT, "k": 1.0, "crit": true},
-	"crit_armour": {"col": CRIT_ARMOR, "k": 1.0, "crit": true},
-	"empowered": {"col": NUM_EMPOWERED, "k": 1.12, "crit": false},
-	"shield": {"col": NUM_SHIELD, "k": 0.85, "crit": false},
-	"shell": {"col": NUM_SHELL, "k": 0.85, "crit": false},
-	"heal": {"col": HEAL, "k": 1.0, "crit": false},
-	"hurt": {"col": HURT, "k": 1.0, "crit": false},
-}
 static func num_style(kind: String) -> Dictionary:
 	return NUM_STYLE[kind]
 
-static var _italic: FontVariation
 ## BIG slanted into a bold italic (the knock banners' words, the squad rows' KNOCKED / DEAD tags).
 static func big_italic() -> Font:
 	if _italic == null:
@@ -216,7 +217,6 @@ static func big_italic() -> Font:
 	return _italic
 
 # style boxes are made once per look and reused (dozens of frames are drawn every frame)
-static var _boxes := {}
 ## A cached rounded style box (bg, corner radius, border colour and width): for widgets drawing their own shapes.
 static func box(bg: Color, rad: int, border: Color, bw: int) -> StyleBoxFlat:
 	var key := [bg, rad, border, bw]

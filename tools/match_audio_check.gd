@@ -24,14 +24,15 @@ extends RefCounted
 ## thief and a squad nearby but not across the map, and one take per burst (MIN_GAP).
 ## And a broken cast's wind-up sound ends within 0.1 s, one interrupt per kit (tools/match_audio_interrupts.gd).
 
-var main: Node
-var fails := 0
-var n := 0
 const SETTLE := 4.0  # s: longer than the slowest match fade (the score's stems, 1.2s)
 const LOUD_S := 12.0  # s of autoplay match the bus meters are read over
 const REPEAT_GAP_MS := 200  # ms of real time between two chimes: past Sfx.STACK_MS, so not stacked
 const WALK_S := 8.0  # s: the longest an abyss walk is run
 const ABYSS_NAMES := ["abyss_whoosh", "abyss_catch", "abyss_fallout"]
+
+var main: Node
+var fails := 0
+var n := 0
 
 
 func ok(cond: bool, what: String) -> void:
