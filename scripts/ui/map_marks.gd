@@ -155,13 +155,14 @@ static func _ground(hud, p: Hunter, at: Vector3, id: String, base: Color, word: 
 		hud._ctext(lp, word, NAME_PX, col, hud.big)
 
 
-## Over the thing; a camp's name goes beside its ring, clear of the monsters' own nameplates over the ring, on
-## the side with more room on the screen (the camera keeps the hunter mid-screen; HUD panels sit on the edges).
+## Over the thing; a camp's name goes beside the near half of its ring (+z faces the camera), clear of the
+## monsters' own nameplates and of the HUD panels in the screen's top corners, on the side with more room.
 static func _name_spot(cam: Camera3D, at: Vector3, id: String, w: float) -> Vector2:
 	if id != "camp":
 		return cam.unproject_position(at + Vector3(0, 2.6, 0))
-	var left := cam.unproject_position(at - Vector3(RING_R[id], 0, 0))
-	var right := cam.unproject_position(at + Vector3(RING_R[id], 0, 0))
+	var r: float = RING_R[id] * 0.7
+	var left := cam.unproject_position(at + Vector3(-r, 0, r))
+	var right := cam.unproject_position(at + Vector3(r, 0, r))
 	if left.x > cam.get_viewport().get_visible_rect().size.x - right.x:
 		return left - Vector2(w * 0.5 + 12.0, 0)
 	return right + Vector2(w * 0.5 + 12.0, 0)
