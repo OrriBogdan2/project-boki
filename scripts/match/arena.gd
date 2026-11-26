@@ -7,7 +7,7 @@ extends RefCounted
 ## - practice dummies (real hunters, so Marks, carries, wall slams and every ability work on them):
 ##   one that stands and watches you, one that strafes, a heavy one by a pillar to slam into; each
 ##   shows its damage per second, last hit and total over its head; it loses HP like a foe, is knocked
-##   down at 0 and stands back up on its mark at full HP after content/rules/practice_dummies.json's respawn_s
+##   down at 0 and stands on its mark at full HP after respawn_s (content/rules/practice_dummies.json)
 ## - the dodge drill: the strafer throws slow telegraphed shots until you dash clear of three (DodgeDrill)
 ## - a sparring bot you can switch Off / Idle / Moving / Fighting (N), and give any archetype
 ## - a reset (Backspace; X is the hero ultimate), cooldowns off (O: dash, RMB, E, R and the glove), the ultimate unlocked (U)
@@ -24,7 +24,8 @@ const TEAM := 7
 var m: Match
 var layout := "arena"          # "arena" (its own map) | "practice" (the training island)
 var home := Vector3.ZERO       # where you start (and reset to)
-var dummies: Array = []        # {h: Hunter, kind, at, label: Label3D, hits: [[t, d]], total, last, quiet, down_t (secs since it was knocked down, -1 up)}
+# {h: Hunter, kind, at, label: Label3D, hits: [[t, d]], total, last, quiet, down_t: secs knocked down (-1 = up)}
+var dummies: Array = []
 var drill: DodgeDrill = null
 var bot: Hunter = null
 var bot_mode := "off"
@@ -121,7 +122,10 @@ func _spawn_dummies() -> void:
 		lb.font = UI.big
 		lb.position = Vector3(0, 3.4, 0)
 		d_v.add_child(lb)
-		dummies.append({"h": d_v, "kind": sp[0], "at": at, "label": lb, "hits": [], "total": 0.0, "last": 0.0, "quiet": 0.0, "down_t": -1.0})
+		dummies.append({
+			"h": d_v, "kind": sp[0], "at": at, "label": lb, "hits": [], "total": 0.0, "last": 0.0, "quiet": 0.0,
+			"down_t": -1.0,
+		})
 
 func _on_hit(by, t, d, _tags) -> void:
 	var credit = by
@@ -261,12 +265,19 @@ func _respawn_dummy(dm: Dictionary) -> void:
 	var d_v: Hunter = dm["h"]
 	if d_v.downed:
 		m.revive_hunter(d_v, null)
-	d_v.hp = DUMMY_HP; d_v.armor = 0.0; d_v.vel = Vector3.ZERO
-	d_v.stun_t = 0.0; d_v.root_t = 0.0; d_v.slow_t = 0.0; d_v.burn_t = 0.0
-	d_v.inv_t = 0.0; d_v.down_hp = 0.0
+	d_v.hp = DUMMY_HP
+	d_v.armor = 0.0
+	d_v.vel = Vector3.ZERO
+	d_v.stun_t = 0.0
+	d_v.root_t = 0.0
+	d_v.slow_t = 0.0
+	d_v.burn_t = 0.0
+	d_v.inv_t = 0.0
+	d_v.down_hp = 0.0
 	d_v.teleport(dm["at"])
 	d_v.set_meta("marks", {})
-	dm["down_t"] = -1.0; dm["quiet"] = 0.0
+	dm["down_t"] = -1.0
+	dm["quiet"] = 0.0
 	m.fx.ring(d_v.pos, 1.6, Color("9ee2a0"), 0.4)
 
 ## Back to your marks: you, the dummies and the bot, all healed, cooldowns and resources cleared.

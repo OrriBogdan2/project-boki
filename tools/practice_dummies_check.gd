@@ -27,7 +27,10 @@ func run(main_node: Node) -> void:
 	main = main_node
 	var zone := TestZone.opts()
 	zone["weapon"] = "rifle"
-	var grounds := {"training": true, "practice": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true}
+	var grounds := {
+		"training": true, "practice": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242,
+		"no_drop": true,
+	}
 	for case in [["Test Zone", zone], ["Training Grounds", grounds]]:
 		await _zone(String(case[0]), case[1])
 	print("PDUMMYCHECK DONE, failures: %d" % fails)
@@ -35,7 +38,8 @@ func run(main_node: Node) -> void:
 
 
 func _zone(label: String, opts: Dictionary) -> void:
-	Game.god = (label == "Test Zone")      # (the owner plays the Test Zone with god mode on: it must not touch the dummies)
+	# (the owner plays the Test Zone with god mode on: it must not touch the dummies)
+	Game.god = label == "Test Zone"
 	var m := Match.new()
 	main.add_child(m)
 	m.start(opts.duplicate())
@@ -44,7 +48,8 @@ func _zone(label: String, opts: Dictionary) -> void:
 	var A: Arena = m.arena
 	var R := Content.rules("practice_dummies")
 	var rs := float(R["respawn_s"])
-	ok("%s: three dummies, respawn_s in the rules" % label, A.dummies.size() == 3 and rs > 0.0, "respawn_s %.1f" % rs)
+	var three := A.dummies.size() == 3 and rs > 0.0
+	ok("%s: three dummies, respawn_s in the rules" % label, three, "respawn_s %.1f" % rs)
 	var dm: Dictionary = A.dummies[0]
 	var D: Hunter = dm["h"]
 	var at: Vector3 = dm["at"]
@@ -66,7 +71,8 @@ func _zone(label: String, opts: Dictionary) -> void:
 		P.ak.press_rmb()
 	step(m, 1.0)
 	printerr("PDUMMYCHECK %s: after abilities hp %.0f -> %.0f" % [label, hp1, D.hp])
-	ok("%s: HP does not climb back while it is being hit" % label, D.hp <= hp1 + 0.1, "%.0f -> %.0f" % [hp1, D.hp])
+	var kept := D.hp <= hp1 + 0.1
+	ok("%s: HP does not climb back while it is being hit" % label, kept, "%.0f -> %.0f" % [hp1, D.hp])
 	# hit it to 0
 	var total0 := float(dm["total"])
 	D.hurt(Arena.DUMMY_HP * 2.0, P, {"src": "shot"})
@@ -78,16 +84,20 @@ func _zone(label: String, opts: Dictionary) -> void:
 	step(m, rs - 1.0)
 	ok("%s: still down before respawn_s" % label, D.downed and D.hp <= 0.0, "hp %.0f" % D.hp)
 	step(m, 1.3)
-	ok("%s: respawned alive at full HP" % label, not D.downed and not D.out and is_equal_approx(D.hp, D.max_hp), "hp %.0f/%.0f" % [D.hp, D.max_hp])
-	ok("%s: respawned on its own spot" % label, D.pos.distance_to(at) < 0.5, "%.2f m from its mark" % D.pos.distance_to(at))
-	ok("%s: DPS label keeps its total" % label, float(dm["total"]) > total0 and String((dm["label"] as Label3D).text).begins_with("DPS"), (dm["label"] as Label3D).text)
+	var full := not D.downed and not D.out and is_equal_approx(D.hp, D.max_hp)
+	ok("%s: respawned alive at full HP" % label, full, "hp %.0f/%.0f" % [D.hp, D.max_hp])
+	var far := D.pos.distance_to(at)
+	ok("%s: respawned on its own spot" % label, far < 0.5, "%.2f m from its mark" % far)
+	var txt: String = (dm["label"] as Label3D).text
+	ok("%s: DPS label keeps its total" % label, float(dm["total"]) > total0 and txt.begins_with("DPS"), txt)
 	# and it can be killed again
 	D.hurt(Arena.DUMMY_HP * 2.0, P, {"src": "shot"})
 	step(m, 0.1)
 	ok("%s: it can be knocked down again" % label, D.downed)
 	# Reset dummies mid-down
 	A.reset()
-	ok("%s: Reset dummies stands it up at full HP" % label, not D.downed and D.hp >= Arena.DUMMY_HP - 0.1 and D.pos.distance_to(at) < 0.5)
+	var back := not D.downed and D.hp >= Arena.DUMMY_HP - 0.1 and D.pos.distance_to(at) < 0.5
+	ok("%s: Reset dummies stands it up at full HP" % label, back)
 	step(m, rs + 1.0)
 	ok("%s: no respawn left pending after Reset" % label, not D.downed and D.hp >= Arena.DUMMY_HP - 0.1)
 	m.queue_free()
