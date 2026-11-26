@@ -2188,7 +2188,7 @@ func _try_ledge_grab(dt: float) -> void:
 	grap_cd = HunterFeel.ledge_cd
 	push_t = 0.0
 	roll_t = 0.0
-	m.sfx("grab", pos, -8.0, 1.2)
+	ClimbSfx.play(self, ClimbSfx.GRAB)
 	m.on_ledge_grab(self)
 
 ## (ledge rise) One step of rising up a ledge: sets vel.y and returns true while it lasts. Your
@@ -2218,6 +2218,7 @@ func _ledge_rise(dt: float, mv: Vector2) -> bool:
 	if left <= 0.0 or on_top:
 		# over the lip: a small pop, carried toward your keys
 		lfloat = {}
+		ClimbSfx.play(self, ClimbSfx.MANTLE)
 		vel.y = HunterFeel.lrise_pop
 		var hv := Vector2(vel.x, vel.z)
 		if mv.length() > 0.3:
@@ -2804,6 +2805,7 @@ func render(delta: float, alpha: float) -> void:
 		if grounded and spd > 4.0:     # (running: the surface's step and little puffs of dust, on the plant)
 			m.fx.dust(pos, 2)
 			Juice.footstep(self)
+	if posed: HazardMoveSfx.play(self)
 	if posed and anim.slammed and not downed:
 		# a heavy coming down hard: a ring of dust where they land
 		m.fx.dust(pos, 12)
