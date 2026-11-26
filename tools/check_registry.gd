@@ -563,6 +563,8 @@ const CHECKS := {
 	"--vespyx-places-check": ["res://tools/vespyx_places_check.gd", "vespyx_places_check", null],  # Vespyx everywhere
 	"--boki-swim-shots": ["res://tools/boki_swim_shots.gd", "boki_swim_shots", null],  # Boki afloat in 1 m of water
 	"--boki-fly-shots": ["res://tools/boki_fly_shots.gd", "boki_fly_shots", null],  # fliers hover, glide, flare
+	"--scale-choice-3p": ["res://tools/scale_choice_3p.gd", "scale_choice_3p", null],
+	"--scale-choice-farm": ["res://tools/scale_choice_farm.gd", "scale_choice_farm", null],
 	"--vv-shots": ["res://tools/vv_shots.gd", "vv_shots", null],  # Sparkle / Vex screenshots
 	"--breah-shots": ["res://tools/breah_shots.gd", "breah_shots", null],  # Tarek review screenshots
 	"--loot-full-check": ["res://tools/loot_full_check.gd", "loot_full_check", null],  # full-inventory looting
