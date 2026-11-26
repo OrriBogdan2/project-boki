@@ -20,8 +20,6 @@ const CHECKS := {
 	"--home-build-check": ["res://tools/home_build_check.gd", "home_build_check", null],  # build mode at home
 	"--kit-parity-check": ["res://tools/kit_parity_check.gd", "kit_parity_check", null],
 	# first: it wraps the other flags on the line (a second launch of a bench or check)
-	"--warm-twice": ["res://tools/warm_twice.gd", "warm_twice", null],  # a second launch, for benches
-	"--boki-keys-check": ["res://tools/boki_keys_check.gd", "boki_keys_check", null],  # quick Boki command keys
 	"--heart-check": ["res://tools/heart_check.gd", "heart_check", null],  # the Heart early seat (0023, 0051)
 	# out: watch and switch teammates
 	"--spectate-check": ["res://tools/spectate_check.gd", "spectate_check", "check"],
@@ -315,8 +313,6 @@ const CHECKS := {
 	"--heal-read-check": ["res://tools/heal_read_check.gd", "heal_read_check", null],  # every heal: one read
 	"--results-ways-check": ["res://tools/results_ways_check.gd", "results_ways_check", null],  # 0051 results
 	"--results-five-check": ["res://tools/results_five_check.gd", "results_five_check", "check"],
-	"--results-boki-line-check": ["res://tools/results_boki_line_check.gd", "results_boki_line_check", "check"],
-	"--results-boki-line-shots": ["res://tools/results_boki_line_check.gd", "results_boki_line_check", "shots"],
 	"--results-five-shots": ["res://tools/results_five_check.gd", "results_five_check", "shots"],
 	"--kill-reset-check": ["res://tools/kill_reset_check.gd", "kill_reset_check", null],
 	"--xp-cue-check": ["res://tools/xp_cue_check.gd", "xp_cue_check", null],  # kill XP tick, steal stings
@@ -379,7 +375,7 @@ const CHECKS := {
 	"--cast-into-cast-check": ["res://tools/cast_into_cast_check.gd", "cast_into_cast_check", null],
 	# dash -> ability rows, in four shards (each under the gate's 300 s cap)
 	"--dash-flow-1-check":
-		["res://tools/dash_flow_shard_check.gd", "dash_flow_check", "archer,juggernaut,gunslinger,bulwark"],
+	["res://tools/dash_flow_shard_check.gd", "dash_flow_check", "archer,juggernaut,gunslinger,bulwark"],
 	"--dash-flow-2-check": ["res://tools/dash_flow_shard_check.gd", "dash_flow_check", "rimewright,ashwick,dolm"],
 	"--dash-flow-3-check": ["res://tools/dash_flow_shard_check.gd", "dash_flow_check", "mage,dredge,tender"],
 	"--dash-flow-4-check": ["res://tools/dash_flow_shard_check.gd", "dash_flow_check", "thief,ostra,gil"],
@@ -640,7 +636,6 @@ const CHECKS := {
 	"--duel-ring-hint-check": ["res://tools/duel_ring_hint_check.gd", "duel_ring_hint_check", null],
 	"--duel-online-check": ["res://tools/duel_online_check.gd", "duel_online_check", null],  # 2 games, relay
 	"--motley-land-check": ["res://tools/motley_land_check.gd", "motley_land_check", null],  # Trade onto ledges
-	"--move-speed-check": ["res://tools/move_speed_check.gd", "move_speed_check", null],  # one walk speed
 	"--tutorial-hud-shots": ["res://tools/tutorial_hud_shots.gd", "tutorial_hud_shots", null],  # --shots-dir=<dir>
 	"--ult-ready-shots": ["res://tools/ult_ready_shots.gd", "ult_ready_shots", null],  # --shots-dir=<dir> (GPU)
 	"--tutorial-clean-check": ["res://tools/tutorial_clean_check.gd", "tutorial_clean_check", null],  # nothing random
@@ -648,8 +643,6 @@ const CHECKS := {
 	# the first two Extractions' guide
 	# the sight wedge first-time hint
 	"--first-time-hint-check": ["res://tools/first_time_hint_check.gd", "first_time_hint_check", null],
-	# every first-time hint shows once per save: three matches with a save and load between
-	"--hint-once-check": ["res://tools/hint_once_check.gd", "hint_once_check", null],
 	"--first-objective-shots": ["res://tools/first_objective_shots.gd", "first_objective_shots", null],
 	"--first-objective-check": ["res://tools/first_objective_check.gd", "first_objective_check", null],
 	"--first-match-guide-check": ["res://tools/first_match_guide_check.gd", "first_match_guide_check", null],
@@ -827,7 +820,7 @@ const CHECKS := {
 	"--online-feel-1-check": ["res://tools/online_feel_check.gd", "online_feel_check", "gunslinger"],
 	"--online-feel-2-check": ["res://tools/online_feel_check.gd", "online_feel_check", "juggernaut"],
 	"--online-feel-3-check": ["res://tools/online_feel_check.gd", "online_feel_check", "rimewright"],
-	"--online-feel-guest": ["res://tools/online_feel_check.gd", "online_feel_check", ""],     # second game, not gated
+	"--online-feel-guest": ["res://tools/online_feel_check.gd", "online_feel_check", ""],  # second game, not gated
 	"--online-feel-check": ["res://tools/online_feel_check.gd", "online_feel_check", null],  # 2 games, 100 ms delay
 	"--lagcomp-check": ["res://tools/lagcomp_check.gd", "lagcomp_check", null],  # 2 games, lag relay
 	"--ally-cc-check": ["res://tools/ally_cc_check.gd", "ally_cc_check", null],  # no ally moved or given a status
@@ -1072,7 +1065,8 @@ static func run(main: Node, args: PackedStringArray) -> bool:
 	return true
 
 
-## The first registered check flag on the command line, "" if none (Settings uses it too).
+## The first registered check flag on the command line (legacy CHECKS plus tools/checks/*.gd), "" if none
+## (Settings uses it too, to keep a check's settings in a per-run file).
 static func flag_in(args: PackedStringArray) -> String:
 	var checks := all()
 	for flag in checks:

@@ -1613,7 +1613,7 @@ func squad_ping(h: Hunter, p: Vector3, from_net := false, kind := "", foe: Hunte
 	PingInput.make_room(self, h)
 	pings.append({"pos": p, "col": PingInput.color(kind), "t": 0.0, "by": h, "team": h.team,
 		"life": PingInput.life(kind), "kind": kind, "foe": foe})
-	if player and h.team == player.team:
+	if player and h.team == player.team and Life.has_mates(self, h):
 		sfx("ping", null, -6.0, 1.15)
 	if net_on and not from_net:
 		net_event(["sping", h.nid, p.x, p.y, p.z, kind, foe.nid if foe else ""])
@@ -1662,7 +1662,7 @@ func kin_ping(k: Kin, p: Vector3, col: Color, label: String) -> Dictionary:
 			pings.erase(pg); break
 	var pg := {"pos": p, "col": col, "t": 0.0, "life": 5.0, "kin": k, "label": label, "team": k.team}
 	pings.append(pg)
-	if k.owner_h == player or (player and k.team == player.team):
+	if (k.owner_h == player or (player and k.team == player.team)) and Life.has_mates(self, player):
 		sfx("ping", null, -9.0, 1.3)
 	return pg
 
@@ -2674,6 +2674,7 @@ func _update_shots(dt: float) -> void:
 				p.y = float(sx["y0"]) + float(sx["dy"]) * clampf(trav / float(sx["dyd"]), 0.0, 1.0)
 			# domes stop shots fired at them from outside
 			if _dome_blocks(s, p):
+				s["prop"] = true
 				_shot_end(s, p, null)
 				hit = true; break
 			var gp := world.ground_at(p.x, p.z)      # terrain and rocks
@@ -2710,6 +2711,7 @@ func _update_shots(dt: float) -> void:
 			if not bh.is_empty():
 				if not s["x"].get("cos", false) and not s["x"].has("boom") and not s["x"].get("mob", false):
 					brk.hit(bh, s["by"])
+				s["prop"] = true
 				_shot_end(s, p, null)
 				hit = true; break
 			for e in near:
@@ -2855,6 +2857,7 @@ func _shot_end(s: Dictionary, at: Vector3, e: Ent, why := "") -> void:
 		s["node"].visible = false
 	if e == null:
 		MissFx.shot_ended(self, s, at, why)
+	MissFx.shot_landed(self, s, at, e, why)
 	if why == "caught" and String(fxx.get("src", "")) == "abil":
 		AbilityFx.caught(self, s["by"], s["col"])
 	elif e == null and String(fxx.get("src", "")) == "abil" and not fxx.get("cos", false):
@@ -4982,12 +4985,8 @@ func _net_apply(e: Ent, it: Array, t_owner := -1.0) -> void:
 		"m":
 			var mb: Mob = e
 			mb.face = it[5]; mb.hp = it[6]; mb.max_hp = it[7]
-			var st: int = int(it[8])
-			if st >= 0 and st < MOB_STATES.size():
-				if mb.st == "idle" and st == 1: MobNotice.woke(mb)
-				mb.st = MOB_STATES[st]
+			mb.follow(int(it[8]), it[12])
 			mb.atk_dir = Vector2(it[10], it[11])
-			mb.st_t = it[12]
 			mb.net_vel = Vector3(it[13], 0, it[14])
 			if it.size() > 16:
 				mb.stag_open = float(it[15]); mb.stagger_t = float(it[16])
@@ -5377,6 +5376,8 @@ func _tips() -> void:
 	var k: Kin = player.kin
 	if k == null:
 		return
+	var summon_tip := TipText.summon(k)
+	if summon_tip != "": _tip("first_summon", summon_tip)
 	var proc_tip := KinWispProc.tip(k)      # its carry passive just acted: name it once
 	if proc_tip != "": _tip("proc", proc_tip)
 	if k.state == "active":

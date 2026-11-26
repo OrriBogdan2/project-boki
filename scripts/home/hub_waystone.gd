@@ -78,6 +78,7 @@ func attune(id: String) -> void:
 	if here() == GardenZones.HUB:
 		node.queue_free()
 		place()
+	FarmTutorial.event("wake")
 	Save.save_game()
 	h._toast("%s planted the Wayseed: %s is awake" % [r["founder"]["name"], z["name"]])
 

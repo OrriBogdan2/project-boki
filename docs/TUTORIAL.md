@@ -6,7 +6,7 @@ drivers. It is **advisory**: it prints one `TUTT` row per step and only a stall 
 playtest. DECISIONS 2026-11-08 ask for a match tutorial of about 8 steps and a garden one of 4 to 5, one banner line each, with a
 visible Skip; the tables show how far the line is from that (section 5).
 
-**Gate check (absolute, not advisory):** `--tutorial-playthrough-check` (`tools/tutorial_playthrough_check.gd`) plays prologue, hatch, starter pick and the whole course on a fresh save, then the whole garden (farm) tutorial with the dead-air check's farm player (12 steps, house hammered, crop picked), prints a `TUTPLAY` row (step, game seconds) per step, and fails if any step takes over 40 s of game time or the course does not reach the lift and results. About 20-90 s wall headless (21 s on rpg7, 88 s on a gpu worker, 2026-11-20): the hatch and Relic screens run at 4x speed, game time unchanged. It is listed in `tools/gate_absolute.txt`: the gate (`ops/regate-bot/suite_speed.py`, `ops/suite-load-gate/suite-fast.sh`) runs every flag there on every PR and reports a red on the PR side as NEW-RED even when main is red too, so it must stay green on main. The starter is Vex; `-- --starter=archer|juggernaut|gunslinger` plays it as Lace or Kael (2026-11-23, 3 runs each: Lace 86-90 s, Vex 85-93 s, Kael 106-118 s of course time, no step over 21 s but Kael's `sec`/`kin` at 9-19 s). Lace used to fall off the pack camp's edge and restart the step: TutorialDrive's stuck-hop fired on the first stride after a long wait (`pack_wait`).
+**Gate check (absolute, not advisory):** `--tutorial-playthrough-check` (`tools/tutorial_playthrough_check.gd`) plays prologue, hatch, starter pick and the whole course on a fresh save, then the whole garden (farm) tutorial with the dead-air check's farm player (12 steps, house hammered, crop picked), prints a `TUTPLAY` row (step, game seconds) per step, and fails if any step takes over 40 s of game time or the course does not reach the lift and results. About 20-90 s wall headless (21 s on rpg7, 88 s on a gpu worker, 2026-11-20): the hatch and Relic screens run at 4x speed, game time unchanged. It is listed in `tools/gate_absolute.txt`: the gate (`ops/regate-bot/suite_speed.py`, `ops/suite-load-gate/suite-fast.sh`) runs every flag there on every PR and reports a red on the PR side as NEW-RED even when main is red too, so it must stay green on main. The starter is Vex; `-- --starter=archer|juggernaut|gunslinger` plays it as Lace or Kael (2026-11-23, 3 runs each: Lace 86-90 s, Vex 85-93 s, Kael 106-118 s of course time, no step over 21 s but Kael's `sec`/`kin` at 9-19 s). Lace used to fall off the pack camp's edge and restart the step: TutorialDrive's stuck-hop fired on the first stride after a long wait (`pack_wait`). `--fps=30|60|144` caps the frame rate and plays the course on the match's own frame loop (one driver call per drawn frame, held through that frame's sim steps); `--window=WxH` sets the window (default 1280x720). Waits use `CheckClock`, not the wall clock.
 
 Columns: **Time** is sim seconds of the instant-reacting `TutorialDrive` (no reading, no misses; screens: wall seconds; farm and
 garden: the driver ticks them off at once, so n/a). **Read s** = words / 3.5 + 0.45 s, the pace of `docs/TUTORIAL_PACE.md` (add it to
@@ -136,14 +136,19 @@ on "there is a skiff to take" (the known skiff red, `docs/GATE_0245.md`), so no 
 3. Done: `kin` and `ult` no longer nag and take 1 to 7 s (section 2, the slowest three).
 4. `glove` stalled for the whole 900 s course in 2 of 9 runs (not seen on the repeat); it needs a seeded repro. Seen again on the slowest-three branch (1 of 3 baseline timing runs, 2 of 8 fight-check starter runs after; the same
    in both), and a trace caught the bot walking off the bridge into the void on the way to the glove. Separately, `--tutorial-fight-check`
-   sometimes reports "missing kick": the bot can reach the lookout without a wall kick (2 of 8 runs).
+   sometimes reported "missing kick": the bot reached the lookout without a wall kick (2 of 8 runs). Done 2026-11-22
+   (`ext/tutorial-wall-kick-step`): the lookout cannot be made kick-only by its shape (a plain jump into the 2.4 m cliff
+   climbed it with a ledge catch for all three starters, 16 of 16 tries; marking the cliff sheer stopped that but left a
+   kick nothing to finish with, and an air dash or glide into the face still snapped to the top), so the `wallkick` step
+   itself now needs a kick: it ends when you stand on the lookout and have kicked during the step. The test bot walks off
+   and kicks again if it got up without one (`--tutorial-fight-check` puts it on top with no kick and asserts the step stays open).
    2026-11-20 (`ext/tut-glove-stall`): the glove stall did not come back on main: 24 of 24 `--tutorial-playthrough-check`
    runs passed, glove 5.7 to 7.3 s, no void fall in the 8 traced runs. What did stall, every time, was `--tutorial-fight-check`'s second and third
    starters, stuck on `land` for the whole course: the first starter left its beat in the save, and the resume went to
    `TutorialResume.OUTPOST_START`, "goexit", a step the Ways Out course no longer has, so it fell back to step 0 and
    landing resumed again for ever. A player who quit after `wayout`, `uplink` or `defend` and pressed Continue was
    locked there the same way. Now it resumes at `wayout`. `--tutorial-resume-check` checks that every beat resumes past the landing
-   (3 FAIL before, 0 after), and the fight check starts each starter from the top (11 FAIL -> 3, the 3 left are "missing kick" for all three, now 3 of 3).
+   (3 FAIL before, 0 after), and the fight check starts each starter from the top (11 FAIL -> 3, the 3 left were "missing kick" for all three; gone, see above).
 5. Taking a second Relic from Hob (juggernaut) and then starting an expedition played as the saved pick of the tutorial Relic
    (`gunslinger`): the flow check's own `Arch.of_save()` says it, unverified by hand.
 6. The farm tutorial is 11 steps and 219 words (decision: 4 to 5); take `ext/tut-garden-no-gather`.
@@ -260,6 +265,8 @@ The owner's first-match playtest on the PC build, and what each fix is:
   6 m from the player on the lookout, walked at him and jammed against its cliff, and the Boki fought them on its own
   first, so a G tap read as "call back" and never counted. A send now registers for any launch, a leap that lands within
   `SEND_R` of a monster, or the Boki on one; a tutorial Boki never refuses a send (`Kin.consider_throw`).
+- **The Climb step (`wallkick`)** ends on the lookout only after a wall kick this step (`seen["kick"]`), so a jump that
+  catches the ledge does not skip it.
 - **The lookout (`crouch`).** `Tutorial.on_lookout` counts the whole top and its rim (`LOOKOUT_R`, `LOOKOUT_DROP`); the
   check crouches at all four far edges and at the foot of the cliff.
 - **The marker never covers its label.** `EdgeMarker._label_at` seats a label clear of its arrow by the label's own

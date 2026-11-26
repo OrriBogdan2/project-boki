@@ -17,6 +17,7 @@ const DROP_S := 90.0      # s of game time the opening drop may take
 const SIM_STALL_S := 45.0      # s of game time one tutorial step may take (as --tutorial-hud-check)
 const HINT_MAX := 120      # characters: the longest farm tutorial hint (the fresh-run log found three of 138-147)
 const COURSE_S := 900.0      # s of game time the whole tutorial course may take
+const COURSE_WALL_S := 300.0      # s of CheckClock time the frame-loop course may take (~100 s typical)
 
 var bad := 0
 var main: Node
@@ -25,6 +26,7 @@ var stage_name := ""
 var stage_start := 0
 var starter := "gunslinger"      # the Hunter taken on the starter pick
 var timings: Array = []
+var frame_loop := false      # the course runs on the match's own frames (a drive per drawn frame)
 
 func ok(cond: bool, what: String) -> void:
 	print("NPF %s %s" % ["ok  " if cond else "FAIL", what])
@@ -56,26 +58,26 @@ func run(m: Node) -> void:
 func _begin(stage: String) -> void:
 	_end()
 	stage_name = stage
-	stage_start = Time.get_ticks_msec()
+	stage_start = CheckClock.own_msec()
 
 func _end() -> void:
 	if stage_name != "":
-		timings.append("%s %.1f" % [stage_name, (Time.get_ticks_msec() - stage_start) / 1000.0])
+		timings.append("%s %.1f" % [stage_name, (CheckClock.own_msec() - stage_start) / 1000.0])
 	stage_name = ""
 
 ## Waits for `cond` (frames at a time) up to `secs` of GAME time (the frame deltas the game itself ran on, so a
 ## loaded box that caps the sim's frame step is not a stall); a real freeze still ends at WALL_FACTOR x `secs`
 ## of real time. A miss is a stall.
 func _wait(cond: Callable, what: String, secs := STALL_S) -> bool:
-	var t0 := Time.get_ticks_msec()
+	var t0 := CheckClock.own_msec()
 	var game_s := 0.0
-	while not cond.call() and game_s < secs and Time.get_ticks_msec() - t0 < int(secs * WALL_FACTOR * 1000.0):
+	while not cond.call() and game_s < secs and CheckClock.own_msec() - t0 < int(secs * WALL_FACTOR * 1000.0):
 		await tree.process_frame
 		game_s += tree.root.get_process_delta_time()
 	var got: bool = cond.call()
 	if not got:
 		print("NPF STALLED in '%s' on screen %s" % [stage_name, main.current])
-	ok(got, "%s (%.1f s, %.1f s of game time)" % [what, (Time.get_ticks_msec() - t0) / 1000.0, game_s])
+	ok(got, "%s (%.1f s, %.1f s of game time)" % [what, (CheckClock.own_msec() - t0) / 1000.0, game_s])
 	if not got:
 		_end()
 		print("NPF TIMES (s): " + ", ".join(timings))
@@ -227,7 +229,8 @@ func _tutorial_match():
 	_begin("tutorial match: load")
 	await _wait(_match_running, "'Tutorial' opens the tutorial match")
 	var m: Match = main.current
-	m.set_process(false)
+	m.set_process(frame_loop)
+	m.opts["duo_test"] = frame_loop      # (the match reads no keys: the driver's inputs stay for every step of a frame)
 	ok(bool(m.opts.get("tutorial", false)), "it is the tutorial course")
 	_begin("tutorial match: course")
 	var t := 0.0
@@ -235,13 +238,22 @@ func _tutorial_match():
 	var last := -1
 	var worst := 0.0
 	var seen := {}
+	var last_time := m.time
+	var wall0 := CheckClock.own_msec()
 	while t < COURSE_S and not m.player.extracted:
+		if frame_loop and CheckClock.own_msec() - wall0 > int(COURSE_WALL_S * 1000.0):
+			break
 		TutorialDrive.drive(m)
-		m.step(Match.DT)
+		if frame_loop:
+			await tree.process_frame
+		else:
+			m.step(Match.DT)
+		var dt := m.time - last_time      # (a drawn frame runs none, one or several sim steps)
+		last_time = m.time
 		_course_tick(m)
-		t += Match.DT
+		t += dt
 		_sim_tick(m, t)
-		step_t += Match.DT
+		step_t += dt
 		if m.tut.step != last:
 			last = m.tut.step
 			seen[m.tut.id()] = true

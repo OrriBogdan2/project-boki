@@ -222,6 +222,7 @@ func run(main_node: Node) -> void:
 	_check_safe(hud)
 	await _frames(m, hud, p)
 	await _hud_size(m)
+	await _solos()
 	_done()
 
 ## 10. One screen-edge margin (HudStyle.SAFE_FRAC): every block the HUD registered for hover this frame, the minimap,
@@ -533,9 +534,9 @@ func _channel(m: Match, hud, p: Hunter) -> void:
 	await hud.panels.draw
 	ok(ChannelBar.shown.has(m_v.nid), "another machine: the snapshot's target and seconds left bring it back")
 	var bare := row.duplicate()
-	# the tail's channel target and seconds left (not its last two fields: the hazard move rides after them)
-	bare[bare.size() - HunterNet.TAIL + 6] = ""
-	bare[bare.size() - HunterNet.TAIL + 7] = 0.0
+	# the tail's channel target and seconds left (the slots and sickness seconds come before, the hazard move after)
+	bare[bare.size() - HunterNet.TAIL + 8] = ""
+	bare[bare.size() - HunterNet.TAIL + 9] = 0.0
 	m._net_apply(m_v, bare)
 	await hud.panels.draw
 	ok(ChannelBar.shown.is_empty(), "a snapshot with no channel: the bar is gone")
@@ -657,6 +658,44 @@ func _hud_size(demo: Match) -> void:
 	if had_obj == null: Save.d["tutorial"].erase(FirstObjective.KEY)
 	else: Save.d["tutorial"][FirstObjective.KEY] = had_obj
 	main.get_tree().root.size = Vector2i(1280, 720)
+
+func _spot(hud, id: String) -> bool:
+	return hud.hover_spots.any(func(x): return String(x[1]) == id)
+
+## 9. A solos match with the real HUD: nothing of the squad shows, and the same HUD still draws the rest.
+func _solos() -> void:
+	var m := Match.new()
+	main.add_child(m)
+	var opts := HudRefDemo.opts("--hudref-demo=plates")
+	opts.merge({"tier": 0, "length": 1e9, "seed": 5, "arch": "thief", "cls": Arch.weight("thief"),
+		"weapon": Arch.signature("thief")})
+	opts.merge({"teams": 20, "squad": 1, "total": 20}, true)      # solos: 20 hunters, each their own squad
+	opts["teams"] = 6       # (a few rivals, the demo's row of them, not the whole 20)
+	m.start(opts)
+	var hud = m.hud
+	await frames_until(m, 1.0)
+	var pl: Hunter = m.player
+	await hud.panels.draw
+	ok(not Life.has_mates(m, pl) and m.hunters.size() > 3, "solos: %d hunters, none on your squad" % m.hunters.size())
+	ok(TeamBoki.shown.is_empty() and hud.mates.last.is_empty(),
+		"solos: no squad row, Boki icon or squad watch on the left")
+	ok(_spot(hud, "vitals") and not _spot(hud, "base"),
+		"solos: the vitals block is there, the base-to-a-teammate badge is not")
+	var rivals: Array = m.hunters.filter(func(x): return x != pl)
+	m.knock(rivals[0], pl, {})
+	await hud.panels.draw
+	ok(hud.mates.lines.is_empty() and hud.mates.last.is_empty(), "solos: a rival going down raises no squad line")
+	var fm: FullMap = hud.full_map
+	fm.open()
+	await hud.panels.draw
+	ok(fm.side_rows == 0, "solos: the full map has no squad panel")
+	rivals[1].team = pl.team       # the same HUD with a squadmate: every squad piece comes back
+	await hud.panels.draw
+	ok(fm.side_rows == 2 and _spot(hud, "base"),
+		"a squadmate joins: the map's squad panel (%d rows) and the base badge show" % fm.side_rows)
+	fm.close()
+	m.queue_free()
+	await main.get_tree().process_frame
 
 ## 10. the kill feed (KillFeed): a knock, a finish, a Boki's kill and a monster's knock as rows with faces and the
 ## icon of what did it, a text plate for the rest; at most four, yours outlined, fading, and seen again in the

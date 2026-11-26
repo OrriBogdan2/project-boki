@@ -7,8 +7,11 @@ extends RefCounted
 ##   slam  a hit that drives the glider down at slam_min m/s or more (a dunk: Displace.spike), whatever
 ##         the heat; the glider is left overheated
 ## Stuns, knock-ups and knockbacks don't spike by themselves: their damage heats the glider like any hit.
+## A few downward strikes also spike any foe in the air, gliding or not (docs/SPIKE_SLAM.md): the ability's
+## data carries a `spike` block, {"bonus": extra damage share, "vy": m/s down}, read through dunks().
 ## Numbers: content/rules/hunter_move.json "glide_spike".
 
+const AIR_GAP := 0.35  # m: a body this far over its ground (or gliding) is in the air for a spike block
 static var _r: Dictionary = MoveRules.data()["glide_spike"]
 static var land_stun: float = _r["land_stun"]
 static var land_dmg: float = _r["land_dmg"]
@@ -18,6 +21,7 @@ static var keep_hv: float = _r["keep_hv"]
 static var reopen_cd: float = _r["reopen_cd"]
 static var slam_min: float = _r["slam_min"]
 static var cool_by: float = _r["cool_by"]
+
 
 ## A heat spike: the glider folds, the body plunges and is stunned in the air.
 static func shoot_down(h: Hunter) -> void:
@@ -31,6 +35,7 @@ static func shoot_down(h: Hunter) -> void:
 	if h.is_local() and h.m.hud:
 		h.m.hud.toast_small("GLIDER SHOT DOWN", Color("ff9a5a"))
 
+
 ## A slam on a body this game owns: it falls at least `vy` (negative) fast, and a glider driven down at
 ## slam_min or more is spiked (its heat goes full).
 static func slam(e: Ent, vy: float) -> void:
@@ -39,10 +44,21 @@ static func slam(e: Ent, vy: float) -> void:
 		shoot_down(e as Hunter)
 	e.vel.y = minf(e.vel.y, vy)
 
+
 ## True when a slam down at `vy` spikes this body: a glider (not in the opening drop) driven down at
 ## slam_min or more. Read on any game (the snapshot carries `gliding`), so the caster can credit it.
 static func spikes(e: Ent, vy: float) -> bool:
 	return e is Hunter and (e as Hunter).gliding and not (e as Hunter).dropping and -vy >= slam_min
+
+
+## True when a strike carrying the spike block `sp` dunks `f`: the block is set and `f` is in the air. The
+## caller adds the bonus, keeps the hit from lifting, and after the hit drives it down: Displace.spike(f, -vy).
+## Dives, leaps and dashes pass {} (docs/SPIKE_SLAM.md: the caster's body travelling to the hit never spikes).
+static func dunks(f: Ent, sp: Dictionary) -> bool:
+	if sp.is_empty() or f.grounded:
+		return false
+	return (f is Hunter and (f as Hunter).gliding) or f.pos.y > f.ground() + AIR_GAP
+
 
 ## The spiker's reward [wiki]: a gliding Hunter's own glider cools, and the spike counts in its (or its
 ## Boki's owner's) stats.
@@ -53,6 +69,7 @@ static func credit(by: Ent) -> void:
 		(by as Hunter).add_stat("spikes")
 	elif by is Kin and (by as Kin).owner_h:
 		(by as Kin).owner_h.add_stat("spikes")
+
 
 ## A spiked body touches the ground: the landing stun and the extra damage.
 static func land(h: Hunter) -> void:

@@ -137,19 +137,30 @@ static func pad_launch(h: Hunter, vy: float = -1.0, min_hv: float = -1.0) -> voi
 
 ## Every step: a drink or repair in progress runs down, then spends its charge. Knocked out of it
 ## (down, stunned, rolling, gliding) and it spills with nothing used.
+## A drink or repair that did not finish: nothing is used up, and everyone sees and hears it spill.
+## Its cue: the tonic splashes out ("belt_spill"), the kit's plates clatter ("belt_fumble"; content/sfx/belt.json).
+static func spill(h: Hunter) -> void:
+	var cue := "belt_spill" if h.drink_t > 0.0 else "belt_fumble"
+	h.drink_t = 0.0
+	h.kit_t = 0.0
+	h.m.fx.burst(h.pos + Vector3(0, 1.3, 0), Color("ff7a4a"), 10, 3.0, 0.35, 8.0)
+	h.m.sfx(cue, h.pos, -2.0)
+
+
 static func tick(h: Hunter, dt: float) -> void:
 	if h.beat_t > 0.0:
 		var spilled: bool = h.downed or h.stun_t > 0.0 or h.roll_t > 0.0 or h.gliding or h.out
 		h.beat_t = 0.0 if spilled else maxf(0.0, h.beat_t - dt)
 	if h.drink_t > 0.0:
 		if h.downed or h.stun_t > 0.0 or h.roll_t > 0.0 or h.gliding or h.out:
-			h.drink_t = 0.0
+			spill(h)
 		else:
 			h.drink_t -= dt
 			if h.drink_t <= 0.0:
 				h.drink_t = 0.0
 				var dd := UtilityBelt.def(h.drink_id)
 				if UtilityBelt.take(h, h.drink_id, 1) > 0:
+					h.blight_t = 0.0  # the tonic washes out anti-heal first, so the heal is whole
 					var amount := heal_of(h, h.drink_id)
 					if amount > 0.0:
 						h.heal(amount * (1.0 + 0.4 * float(h.perk_n("remedy")) + h.gear_stat("tonic")))
@@ -158,7 +169,7 @@ static func tick(h: Hunter, dt: float) -> void:
 					h.m.fx.burst(h.pos + Vector3(0, 1.2, 0), Color(dd.get("col", Color("8ff0a0"))), 14, 2.5, 0.5, -3.0)
 	if h.kit_t > 0.0:
 		if h.downed or h.stun_t > 0.0 or h.roll_t > 0.0 or h.gliding or h.out:
-			h.kit_t = 0.0
+			spill(h)
 		else:
 			h.kit_t -= dt
 			if h.kit_t <= 0.0:

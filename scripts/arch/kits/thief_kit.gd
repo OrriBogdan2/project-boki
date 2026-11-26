@@ -910,6 +910,7 @@ func _stick(f: Ent, at: Vector3, on_wall := {}) -> void:
 		DashReset.cue(h)
 	vfx("knife_stick", at, null, {"foe": f != null})
 	m.sfx("thief_knife_stick" if f else "thief_knife_ground", at, -6.0, 1.0)
+	net_ring(at, float(ed["ring_r"]), col_of(ed))  # the source arrival circle: 1.5 bh (2.7 m) in radius, no hit area
 
 ## The stuck dagger (a pooled look, everyone sees it); on your screen RecastCue's marker sits on it.
 func _tick_knife() -> void:

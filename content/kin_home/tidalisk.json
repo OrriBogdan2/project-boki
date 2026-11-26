@@ -1,0 +1,14 @@
+{
+	"id": "tidalisk",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/tidalisk.json.",
+	"work": {
+		"craft": 2,
+		"mend": 1,
+		"tide": 3
+	},
+	"shiny": {
+		"belly": "#ace494",
+		"color": "#6c453c",
+		"glow": "#ff9659"
+	}
+}

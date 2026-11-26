@@ -5,7 +5,7 @@ Usage: python3 tools/health.py [--strict]
 Prints file sizes, god-file budgets, duplicate content folders, dynamic calls, checks registered inline
 in main.gd, and docs/DEBT.md entries. Exit code 1 only when --strict and a god-file budget is exceeded
 (ship.sh runs it in strict mode so god files can't grow); also on two decision notes sharing a number, the style ratchet and on a sound off its category's
-loudness (tools/sfx_loudness.py --check). Budgets ratchet: lower them as files get split.
+loudness (tools/sfx_loudness.py --check) and on a kit number that drifted from tools/goldens/kit_numbers.tsv. Budgets ratchet: lower them as files get split.
 """
 import os, re, subprocess, sys
 
@@ -107,6 +107,22 @@ def main():
     print((loud.stdout or loud.stderr).rstrip())
     if loud.returncode:
         bad.append("sfx loudness (docs/AUDIO.md)")
+    gold = subprocess.run([sys.executable, os.path.join(ROOT, "tools", "kit_number_golden.py"), "--check"], capture_output=True, text=True)
+    print((gold.stdout or gold.stderr).rstrip())
+    if gold.returncode:
+        bad.append("kit number golden (docs/ARCHETYPES.md)")
+    tracked = set(subprocess.run(["git", "-C", ROOT, "ls-files"], capture_output=True, text=True).stdout.split("\n"))
+    def _ignored(p):  # Godot skips folders holding .gdignore, so it makes no .uid there
+        d = os.path.dirname(os.path.join(ROOT, p))
+        while len(d) > len(ROOT):
+            if os.path.exists(os.path.join(d, ".gdignore")):
+                return True
+            d = os.path.dirname(d)
+        return False
+    no_uid = [p for p in files if p + ".uid" not in tracked and not _ignored(p)]
+    if no_uid:
+        print("Scripts without a committed .uid (run godot --headless --import, git add the .gd.uid): " + ", ".join(no_uid[:10]))
+        bad.append("missing .gd.uid files")
     reg = subprocess.run([sys.executable, os.path.join(ROOT, "tools", "registry_lint.py")], capture_output=True, text=True)
     print((reg.stdout or reg.stderr).rstrip())
     if reg.returncode:
