@@ -178,23 +178,6 @@ func _spawn(row: Array, at: Vector3) -> Node3D:
 	return super._spawn(row, at)
 
 
-## A Boki's painted-coat materials (the atlas) with these shader uniforms put over the game's; albedo_flat* only on
-## the atlas, so the face and eyes keep their texture.
-func _apply_look(node: Node, look: Dictionary) -> void:
-	for mi in node.find_children("*", "MeshInstance3D", true, false):
-		for s in (mi as MeshInstance3D).get_surface_override_material_count():
-			var mat := (mi as MeshInstance3D).get_active_material(s)
-			if (
-				mat is ShaderMaterial
-				and (mat as ShaderMaterial).get_shader_parameter("use_tex") == true
-			):
-				var tex: Texture2D = (mat as ShaderMaterial).get_shader_parameter("albedo_tex")
-				var coat := tex.resource_path.contains("atlas")
-				for k in look:
-					if coat or not String(k).begins_with("albedo_flat"):
-						(mat as ShaderMaterial).set_shader_parameter(k, look[k])
-
-
 ## Each model's own pixels, found against the frame with the models hidden (self.empty), a pixel belonging to the
 ## nearest model; a pixel with a background pixel two steps away is an edge or an ink line and is left out.
 func _measure(tag: String, state: String, si: int, img: Image) -> void:

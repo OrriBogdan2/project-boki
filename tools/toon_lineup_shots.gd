@@ -3,6 +3,7 @@ extends "res://tools/vv_shots.gd"
 ## draws, one after another on the same spot under the same light at the match camera, in a real match
 ## --ab=<species>:<atlas png/webp> adds that species again, right after itself, with the given coat atlas (an old one):
 ## a before/after in the same run and frame, row id <species>_ab (separate runs drift by up to 0.09 luminance).
+## --ab-plain drops the species' own coat override from that row too (the live look before the override).
 ## --turn=<deg> turns every model about its up axis (90: its side to the camera, where a baked top light shows most).
 ## (jobq submit --needs gpu). Writes <dir>/lineup_<id>.png (crop round the model), <dir>/lineup_sheet.png (all of
 ## them, labelled, darkest rendered model first) and <dir>/lineup_stats.tsv (rendered luminance of the model's own
@@ -15,6 +16,14 @@ var crop_px := Vector2i(170, 170)  # px of the screen round the model, drawn at 
 var zoom := 2.5
 var ids: Array = []
 var world: Node3D  # what the models are added to: the match, or the farm
+## The shared coat look's values for what a species' own "coat" override changes (WardenGlb.PAINTED dark_lift).
+const PLAIN_LOOK := {
+	"desat": 0.0,
+	"dark_lift": 0.07,
+	"albedo_flat": 0.0,
+	"albedo_flat_gain": 1.0,
+	"albedo_flat_contrast": 1.0
+}
 var ab := PackedStringArray()  # --ab: [species, atlas path]
 var turn := 0.0  # --turn, degrees
 
@@ -97,7 +106,9 @@ func _spawn(row: Array, at: Vector3) -> Node3D:
 	else:
 		var arch := String(row[1])
 		var look := PlayerLook.neutral()
-		node = Models.hunter(Arch.weight(arch), Data.TEAM_COLORS[0], Arch.signature(arch), "", look, arch)
+		node = Models.hunter(
+			Arch.weight(arch), Data.TEAM_COLORS[0], Arch.signature(arch), "", look, arch
+		)
 	node.position = at
 	node.rotation.y = deg_to_rad(turn)
 	world.add_child(node)
@@ -117,7 +128,28 @@ func _swap_atlas(node: Node3D, path: String) -> void:
 	img.generate_mipmaps()
 	for n in node.find_children("*", "", true, false):
 		if n is BokiRig and (n as BokiRig)._coat != null:
-			(n as BokiRig)._coat.set_shader_parameter("albedo_tex", ImageTexture.create_from_image(img))
+			(n as BokiRig)._coat.set_shader_parameter(
+				"albedo_tex", ImageTexture.create_from_image(img)
+			)
+	if "--ab-plain" in OS.get_cmdline_user_args():  # (the old atlas as the shared look drew it, no coat override)
+		_apply_look(node, PLAIN_LOOK)
+
+
+## A Boki's painted-coat materials (the atlas) with these shader uniforms put over the game's; albedo_flat* only on
+## the atlas, so the face and eyes keep their texture.
+func _apply_look(node: Node, look: Dictionary) -> void:
+	for mi in node.find_children("*", "MeshInstance3D", true, false):
+		for s in (mi as MeshInstance3D).get_surface_override_material_count():
+			var mat := (mi as MeshInstance3D).get_active_material(s)
+			if (
+				mat is ShaderMaterial
+				and (mat as ShaderMaterial).get_shader_parameter("use_tex") == true
+			):
+				var tex: Texture2D = (mat as ShaderMaterial).get_shader_parameter("albedo_tex")
+				var coat := tex.resource_path.contains("atlas")
+				for k in look:
+					if coat or not String(k).begins_with("albedo_flat"):
+						(mat as ShaderMaterial).set_shader_parameter(k, look[k])
 
 
 ## The model's own pixels in a window round `at` (not the empty spot, and not the ground darkened by its shadow: a
@@ -141,7 +173,9 @@ func _model_stats(img: Image, empty: Image, at: Vector3) -> Dictionary:
 			var b := empty.get_pixel(x, y)
 			var la := maxf(a.get_luminance(), 0.001)
 			var lb := maxf(b.get_luminance(), 0.001)
-			var hue_shift := Vector3(a.r / la - b.r / lb, a.g / la - b.g / lb, a.b / la - b.b / lb).length()
+			var hue_shift := (
+				Vector3(a.r / la - b.r / lb, a.g / la - b.g / lb, a.b / la - b.b / lb).length()
+			)
 			if hue_shift > DIFF_MIN:
 				sum += la
 				lums.append(la)
@@ -174,9 +208,15 @@ func _write(shots: Array) -> void:
 	for i in shots.size():
 		var crop: Image = shots[i][1]
 		crop.convert(Image.FORMAT_RGB8)  # blit_rect between formats draws nothing
-		sheet.blit_rect(crop, Rect2i(Vector2i.ZERO, crop.get_size()), Vector2i((i % COLS) * w, int(i / COLS) * h))
+		sheet.blit_rect(
+			crop,
+			Rect2i(Vector2i.ZERO, crop.get_size()),
+			Vector2i((i % COLS) * w, int(i / COLS) * h)
+		)
 		var st: Dictionary = shots[i][2]
-		var row := [shots[i][0][0], _label(shots[i][0]), st["lum"], st["sat"], st["n"], st["p10"], st["p90"]]
+		var row := [
+			shots[i][0][0], _label(shots[i][0]), st["lum"], st["sat"], st["n"], st["p10"], st["p90"]
+		]
 		f.store_line("%s\t%s\t%.3f\t%.3f\t%d\t%.3f\t%.3f" % row)
 	f.close()
 	sheet.save_png(dir.path_join("lineup_sheet.png"))
