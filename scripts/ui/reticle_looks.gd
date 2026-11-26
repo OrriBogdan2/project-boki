@@ -85,12 +85,13 @@ static func strokes(c: CanvasItem, at: Vector2, look: String, ring: float, k: fl
 			_poly(c, fin, col, w)
 
 
-## A polyline with round joins: the wider dark edge pass of a sharp corner would otherwise poke a mitre spike out
-## past the coloured stroke (a stray dark tick at Kael's blade, Sable's brackets, Gil's fin).
+## A polyline of separate segments with round joins: draw_polyline mitres a sharp corner into a long spike (Gil's fin
+## tip, Kael's blade wings, Sable's brackets), which the wider dark edge pass made a stray tick past the shape.
 static func _poly(c: CanvasItem, pts: PackedVector2Array, col: Color, w: float) -> void:
-	c.draw_polyline(pts, col, w, true)
-	for p in pts:
-		c.draw_circle(p, w * 0.5, col)
+	c.draw_circle(pts[0], w * 0.5, col)
+	for i in pts.size() - 1:
+		c.draw_line(pts[i], pts[i + 1], col, w, true)
+		c.draw_circle(pts[i + 1], w * 0.5, col)
 
 
 static func _polar(a: float, r: float) -> Vector2:
