@@ -1,11 +1,13 @@
 extends "res://tools/gameplay_media.gd"
 ## --wisp-read-shots --shots-dir=<dir> [--size=1920x1080]: can you read the Boki wisps in a fight?
 ## A 3v3 (clip 1's squads, FIGHT) at the match camera with every Boki riding as a wisp (the boki_wisps setting on).
+## Then OWNERREAD / OWNERCASE lines (BokiOwnerRead): can you tell your own, an ally's and a rival's Boki apart?
 ## Saves <dir>/fight_<n>.png (SHOT_AT seconds in) and prints WISPREAD lines: the share of a Hunter's body (a screen
 ## rectangle) the wisps hid, its own owner's and everyone else's, and the wisps' size on screen.
 ## Needs a renderer (jobq --needs gpu). Never touches the save.
 
-const SHOT_AT := [1.5, 3.0, 4.5, 6.0]  # s into the fight
+const BokiOwnerRead := preload("res://tools/boki_owner_read.gd")
+const SHOT_AT := [0.3, 1.5, 3.0, 4.5, 6.0]  # s into the fight
 const FIGHT_SECS := 6.5
 const HUNTER_H := 1.8  # m: a Hunter's body, for its screen rectangle
 const HUNTER_W := 0.9  # m
@@ -16,6 +18,7 @@ var frames := 0
 var draws := 0.0  # summed draw calls per frame
 var wisps := 0
 var sizes: Array = []  # px across of every wisp every frame
+var reads: Array = []  # BokiOwnerRead rows of every shot
 
 
 func run(main_node: Node) -> void:
@@ -48,7 +51,22 @@ func run(main_node: Node) -> void:
 			% [frames, wisps, float(sizes[int(sizes.size() / 2.0)]), hid, draws / maxf(1.0, float(frames))]
 		)
 	)
+	_owner_cases()
 	main.get_tree().quit(0)
+
+
+## Per role and form over every shot: pass when BokiOwnerRead.MIN_CASE of that case's Boki-frames read.
+func _owner_cases() -> void:
+	var cases := {}  # "role form" -> [rows, failed rows]
+	for r: Dictionary in reads:
+		var c: Array = cases.get_or_add("%s %s" % [r["role"], r["form"]], [0, 0])
+		c[0] += 1
+		c[1] += 0 if BokiOwnerRead.passes(r) else 1
+	for key in cases:
+		var c: Array = cases[key]
+		var read: int = c[0] - c[1]
+		var verdict := "pass" if float(read) >= BokiOwnerRead.MIN_CASE * float(c[0]) else "FAIL"
+		print("OWNERCASE %s: %s (%d of %d Boki-frames read)" % [key, verdict, read, c[0]])
 
 
 func _fight_shots() -> void:
@@ -90,10 +108,10 @@ func _fight_shots() -> void:
 				img.save_png(dir.path_join("fight_%d.png" % n))
 				print("WISPREAD image %d x %d, x%.2f" % [img.get_width(), img.get_height(), _px_k()])
 				print("WISPREAD shot %d at t=%.1f" % [n, t])
-				for k in m.kins:
-					if k.wisp and k.state == "shoulder":
-						var at := m.cam.unproject_position(k.global_position) * _px_k()
-						print("WISPAT %d %s team=%d %d %d" % [n, k.species, k.owner_h.team, at.x, at.y]),
+				for r: Dictionary in await BokiOwnerRead.frame(m):
+					r["shot"] = n
+					reads.append(r)
+					print("OWNERREAD shot=%d %s" % [n, BokiOwnerRead.describe(r)]),
 		func(_t: float): return _centre(squad_a_v + squad_b_v)
 	)
 

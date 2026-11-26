@@ -28,7 +28,11 @@ static func _static_init() -> void:
 
 
 static func _field(o: Object, f: String) -> float:
-	return float(o.get(f)) if o != null and f in o else 0.0
+	if o == null or f == "":
+		return 0.0
+	if o.has_method(f):  # (a kit's count can be a method: Tenzo's rocks_up)
+		return float(o.call(f))
+	return float(o.get(f)) if f in o else 0.0
 
 
 ## [value, seconds left] of one row for this hunter ([0, 0] when it does not apply).
