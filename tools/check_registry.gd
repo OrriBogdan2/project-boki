@@ -557,6 +557,7 @@ const CHECKS := {
 	"--inventory-check": ["res://tools/inventory_check.gd", "inventory_check", null],  # in-match inventory
 	"--inv-shots": ["res://tools/inv_shots.gd", "inv_shots", null],  # --shots-dir=<dir>, --resolution
 	"--loot-full-shots": ["res://tools/loot_full_shots.gd", "loot_full_shots", null],  # --shots-dir=<dir>
+	"--garden-friend": ["res://tools/garden_friend.gd", "garden_friend", null],  # private friend-pitch film
 	"--boki-cost": ["res://tools/boki_cost.gd", "boki_cost", null],  # draw cost of sets of rigged Bokis
 	"--boki-rig-shots": ["res://tools/boki_rig_shots.gd", "boki_rig_shots", null],  # rigged Boki review sheets
 	"--fish-watch-shots": ["res://tools/fish_watch_shots.gd", "fish_watch_shots", null],
