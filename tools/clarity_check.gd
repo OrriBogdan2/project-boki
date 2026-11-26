@@ -65,6 +65,7 @@ func run(main: Node) -> void:
 	_body_tell(m, foes[0])
 	_boki_text(m, p, ally, foes[0])
 	_melee_stack(m, p, ally, foes)
+	_quiet_own(m, p, ally, foes[0])
 	# ---------------------------------------------------------------- 2. the downed teammate
 	ally.teleport(p.pos + Vector3(8.0, 0, 0))  # nobody in reach to pick them up: the bleed-out runs
 	for f: Hunter in foes:
@@ -273,6 +274,30 @@ func _prio(n: Node3D) -> int:
 
 func _alpha(n: Node3D) -> float:
 	return (n.material_override as ShaderMaterial).get_shader_parameter("color").a
+
+
+## Yours and a teammate's telegraphs are a faint rim (no hatching, no lace crossing), a rival's the strong one: the
+## same warning on the ground (Fx) and as an AimKit laced lane (docs/COMBAT_CLARITY.md, "Own telegraphs are quiet").
+func _quiet_own(m: Match, p: Hunter, ally: Hunter, foe: Hunter) -> void:
+	var quiet := func(by: Hunter) -> float:
+		var n := _tele(m, by, p.pos)
+		var q: float = (n.material_override as ShaderMaterial).get_shader_parameter("quiet")
+		m.fx.end_telegraph(n)
+		return q
+	ok(quiet.call(p) == 1.0 and quiet.call(ally) == 1.0, "your and a teammate's ground telegraph is quiet")
+	ok(quiet.call(foe) == 0.0, "a rival's ground telegraph is the strong one")
+	var verts := func(by: Hunter, lace: bool) -> int:
+		AimKit.lane(by, "lace", {"all": true, "len": 6.0, "width": 0.5, "fill": 0.8, "lace": lace, "chevrons": 2})
+		var d := AimKit.layer(m)
+		d.rebuild()
+		var n: int = d.geo.v.size()
+		AimKit.clear(by)
+		return n
+	var own: int = verts.call(p, true)
+	var foe_laced: int = verts.call(foe, true)
+	var foe_plain: int = verts.call(foe, false)
+	ok(own < foe_laced, "AimKit: your laced lane is drawn plain (%d vertices, a rival's %d)" % [own, foe_laced])
+	ok(own < foe_plain, "AimKit: your lane has no chevrons (%d vertices, a rival's plain %d)" % [own, foe_plain])
 
 
 ## AimKit draws a rival's telegraph in its own surface after yours.
