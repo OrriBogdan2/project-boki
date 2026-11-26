@@ -31,3 +31,4 @@ Without arch (procedural on purpose or by lack of data):
 - `mask_moment.gd`: you, unmasked, shown with your own face.
 - `look_locker.gd`: the look editor edits the procedural body's face and hair.
 - `prologue.gd`: the sky crowd of class dummies.
+- Every model on the same cel-shade (gate, ranges, Crofthorn): [TOON_CONSISTENCY.md](TOON_CONSISTENCY.md).

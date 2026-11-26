@@ -1,0 +1,66 @@
+{
+	"shaders": [
+		"toon.gdshader",
+		"hero_toon.gdshader",
+		"boki_eye.gdshader",
+		"kin_aura.gdshader",
+		"marker_ring.gdshader",
+		"outline.gdshader",
+		"warden_halo.gdshader",
+		"warden_mood_atlas.gdshader",
+		"glowball.gdshader",
+		"molten_rock.gdshader",
+		"care_ice.gdshader",
+		"hero_flame.gdshader",
+		"void_glass.gdshader",
+		"(fx)"
+	],
+	"look_keys": [
+		"ramp",
+		"shade",
+		"sky_ao",
+		"sss",
+		"self_shadow"
+	],
+	"look": {
+		"boki": {
+			"ramp": 2.6,
+			"shade": 0.86,
+			"sky_ao": 0.12,
+			"sss": 0.0,
+			"self_shadow": 0.0
+		},
+		"hunter": {
+			"ramp": 2.6,
+			"sky_ao": 0.12,
+			"sss": 0.0,
+			"self_shadow": 0.0
+		}
+	},
+	"range": {
+		"boki": {
+			"mean": [
+				0.1,
+				0.45
+			],
+			"shade": 0.42,
+			"sat": 0.5
+		},
+		"hunter": {
+			"mean": [
+				0.05,
+				0.55
+			],
+			"shade": 0.45,
+			"sat": 0.68,
+			"floor": [
+				0.8,
+				0.95
+			]
+		}
+	},
+	"waived": {
+		"hunter:bulwark": "owner: the Bulwark's hunter job; content/rules/warden_look.json breaker.no_ink lists the body's 'scan' tag, so its body has no ink shell: drop 'scan' from it (or the owner confirms an inkless body)",
+		"hunter:ostra": "owner: the Ostra's hunter job; content/rules/warden_look.json ostra.painted.shade is 0.6 (the others 0.8-0.95, the Boki 0.86), a darker shadow floor: set it to 0.82"
+	}
+}
