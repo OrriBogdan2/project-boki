@@ -454,10 +454,13 @@ func _film() -> void:
 	CamRig.rules["farm"]["rise"] = 0.7
 	_view(34.0, 31.0, 0.3)
 	_row(H, cd, [Vector2(-1.9, -0.5), Vector2(-0.8, 1.2), Vector2(0.6, 1.3), Vector2(1.7, 0.7)])  # the fox (0) back, its tail-tip glow small
+	face_all = true  # all four turned to the lens: the fox's tail-tip glow stays small behind it
+	_face_yaw = atan2(-cd.x, -cd.y)
 	await _wait(1.2)
 	_take_from = float(_frames) / FPS
 	_ease_zoom(CamWheel.near() + 0.2 * (CamWheel.far() - CamWheel.near()), 4.5)
 	await _stills("w", 3, 1.5)
+	face_all = false
 	if "--gf-quick" in OS.get_cmdline_user_args():
 		return
 	# shot 2 (hunter, hard cut): 3/4 face, the view turned off the trees; he walks a few steps toward the lens
@@ -509,9 +512,12 @@ func _film() -> void:
 	_row(H, cd, [Vector2(1.9, -0.4), Vector2(0.6, 1.1), Vector2(-0.7, 1.0), Vector2(-1.8, 0.6)])
 	h.farm_cam.yaw += 0.7
 	drift = -0.12
+	face_all = true
+	_face_yaw = atan2(-cd.x, -cd.y)
 	await _wait(0.4)
 	await _stills("w2", 4, 1.0)
 	drift = 0.0
+	face_all = false
 	_mark("end")
 	print("GF TAKE %.2f %.2f" % [_take_from, float(Engine.get_frames_drawn()) / FPS])
 
