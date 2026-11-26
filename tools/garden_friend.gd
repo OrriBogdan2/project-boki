@@ -352,7 +352,7 @@ func _still(name: String) -> void:
 
 
 # ------------------------------------------------------------------ the shots
-## A framed view: lens (deg), pitch (deg, 29+ keeps the far island edge out of frame), the view's yaw turn and zoom.
+## A framed view: lens (deg), pitch (deg, half the lens + 8 keeps the far island edge out of frame), the view's yaw turn and zoom.
 func _view(fov: float, pitch_deg: float, zoom: float) -> void:
 	CamRig.rules["farm"]["fov"] = fov
 	h.farm_cam.pitch = deg_to_rad(pitch_deg)
@@ -412,8 +412,8 @@ func _row(at: Vector3, cam_dir: Vector2, rel: Array) -> void:
 func _closeup(i: int, spot: Vector3, cd: Vector2, turn: float) -> void:
 	_front(spot, cd, 0.0)
 	h.player.visible = false
-	_view([30.0, 28.0, 26.0, 28.0][i], 23.0, 0.12)
-	CamRig.rules["farm"]["rise"] = 0.3  # the view looks low, so a knee-high Boki sits mid-frame
+	_view([24.0, 22.0, 21.0, 22.0][i], 19.0, 0.12)
+	CamRig.rules["farm"]["rise"] = 0.65  # the steeper view looks a little higher, so a knee-high Boki sits mid-frame
 	for j in h.kins.size():
 		_put(j, spot + (Vector3.ZERO if j == i else Vector3(-30 - j, 0, -30)))
 		h.kins[j].erase("job")
@@ -452,8 +452,8 @@ func _film() -> void:
 	_mark("wide_1")
 	_front(H, cd, 0.6)
 	CamRig.rules["farm"]["rise"] = 0.7
-	_view(34.0, 26.0, 0.32)
-	_row(H, cd, [Vector2(-1.8, 0.8), Vector2(-0.6, 1.2), Vector2(0.7, 1.1), Vector2(1.8, 0.7)])
+	_view(34.0, 31.0, 0.3)
+	_row(H, cd, [Vector2(-1.9, -0.5), Vector2(-0.8, 1.2), Vector2(0.6, 1.3), Vector2(1.7, 0.7)])  # the fox (0) back, its tail-tip glow small
 	await _wait(1.2)
 	_take_from = float(_frames) / FPS
 	_ease_zoom(CamWheel.near() + 0.2 * (CamWheel.far() - CamWheel.near()), 4.5)
@@ -463,7 +463,7 @@ func _film() -> void:
 	# shot 2 (hunter, hard cut): 3/4 face, the view turned off the trees; he walks a few steps toward the lens
 	_mark("hunter")
 	_front(H, cd, -0.25)
-	_view(21.0, 20.0, 0.45)
+	_view(21.0, 25.0, 0.45)
 	h.farm_cam.yaw += 0.45
 	_row(H, cd, [Vector2(-9, 14), Vector2(-9, 15), Vector2(9, 14), Vector2(9, 15)])
 	await _wait(0.8)
@@ -483,8 +483,8 @@ func _film() -> void:
 	CamRig.rules["farm"]["rise"] = 0.4
 	_front(H, cd, 0.0)
 	h.player.visible = false
-	_view(28.0, 23.0, 0.4)
-	_row(H, cd, [Vector2(-1.8, 1.6), Vector2(-0.6, 1.6), Vector2(0.6, 1.6), Vector2(1.8, 1.6)])
+	_view(28.0, 26.0, 0.5)
+	_row(H, cd, [Vector2(-0.9, 1.6), Vector2(0.05, 1.6), Vector2(1.0, 1.6), Vector2(1.95, 1.6)]  # +x is screen left)
 	face_all = true
 	_face_yaw = atan2(-cd.x, -cd.y)
 	await _wait(0.6)
@@ -505,8 +505,8 @@ func _film() -> void:
 	# shot 4 (wide again, slow turn)
 	_mark("wide_2")
 	_front(H, cd, 0.6)
-	_view(34.0, 26.0, 0.28)
-	_row(H, cd, [Vector2(1.8, 0.7), Vector2(0.6, 1.1), Vector2(-0.7, 1.0), Vector2(-1.8, 0.6)])
+	_view(34.0, 31.0, 0.26)
+	_row(H, cd, [Vector2(1.9, -0.4), Vector2(0.6, 1.1), Vector2(-0.7, 1.0), Vector2(-1.8, 0.6)])
 	h.farm_cam.yaw += 0.7
 	drift = -0.12
 	await _wait(0.4)
