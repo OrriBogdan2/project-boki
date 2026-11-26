@@ -298,6 +298,9 @@ const FRAME := {
 		"tail_tip": Vector3(0, 0.26, 0.231),
 		"tip_bone": "hips",
 		"hip": 0.232,
+		# the most vivid atlas of the 47 (saturation 0.54, the median is 0.30) with dark brown flecks: the shared coat
+		# look deepens it to a heavy rust, so its paint is trimmed toward the other Boki's range
+		"coat": {"desat": 0.3, "dark_lift": 0.2},
 		"marks":
 		{
 			"left flank": Vector3(-0.0654, 0.267, 0.0477),
