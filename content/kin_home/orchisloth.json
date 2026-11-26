@@ -1,0 +1,14 @@
+{
+	"id": "orchisloth",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/orchisloth.json.",
+	"shiny": {
+		"color": "#68939c",
+		"belly": "#c0dfe8",
+		"glow": "#9affc1"
+	},
+	"work": {
+		"bloom": 3,
+		"forage": 2,
+		"mend": 1
+	}
+}

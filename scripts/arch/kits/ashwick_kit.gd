@@ -9,7 +9,8 @@ extends ArchKit
 ##   A burning foe takes more from the stream and the cinder (ignite_bonus), and the stream chips its health.
 ## - LMB, Torch Lance: hold for a stream of fire from her hand (a gold pilot flame first); the stream keeps its own
 ##   velocity so a sweep bends it, narrow at the palm and billowing at the end.
-## - RMB, Cinder Shot: hold to aim down a lane, release: a cinder that always flies its full 14m;
+## - RMB, Cinder Shot: a cast. The press shows the lane with a flash in her palm and starts the cooldown; the
+##   cinder leaves 0.4s later (footage f0073 > f0075) and always flies its full 14m;
 ##   it slows the foe and sets it Ablaze; on a burning foe it upgrades and spreads. Rank 3: a second charge.
 ## - Shift, Soot Ram: two charges of a short head-first dash toward the cursor that STOPS on the
 ##   first foe with a fiery impact and shoves it; rank 3: more damage, a speed boost and a shield on a hit.
@@ -31,6 +32,8 @@ const DRAG_T := 0.45                   # s the cloak pulls a foe in for (at pull
 const TONGUE_EVERY := 2                # flame ticks between two tongues licking off the stream
 const LICK_EVERY := 3                  # flame ticks between two scorches where the stream's end licks the ground
 const CLOAK_POSE_T := 0.3             # s the Furnace Cloak flare holds her hand up off the aim (as_cloak: wide to 0.26)
+const GLOW_STEP := 0.05               # s between two palm glow puffs (each lives ~0.14 s: they overlap)
+const GLOW_HOT := 0.7                 # cast fraction where a white-hot bloom joins the glow
 const CRACKS_PEAK := 4.0               # her magma cracks' emission while the fire runs (rest: the toon's 2.2)
 const CRACKS_FADE := 0.5               # s back to rest when it stops
 const CLOAK_RING_T := 0.18            # s the ring at the cloak's exact radius shows on the press
@@ -52,7 +55,9 @@ var was_held := false
 var hose_paused := false        # the lance held through a dash: the stream is out, it roars again as the dash ends
 var ember_t := 0.0
 var bash := {}                  # hold: the Soot Ram under way {t, dir, hit}
-var aiming := false             # hold: Cinder Shot held (the lane shows)
+var glow_t := 0.0                # the cast time (s) of the last palm glow puff while Cinder Shot casts
+var aiming := false             # hold: Cinder Shot casting (the lane shows; the cinder leaves at cast_t)
+var cast_t := 0.0               # s since the Cinder Shot press (the cast; the cinder leaves at rmb.cast)
 var fx: LDFx
 var nozzle_at: Node3D           # the Gun's Muzzle, kept on her casting palm by the model (Sync.apply_blade)
 var lmb_key_was := false         # the LMB key last step: only a press in the flight ticks, not a hold carried in
@@ -74,14 +79,13 @@ func rd() -> Dictionary: return res_def()
 func lmbd() -> Dictionary: return d.get("lmb", {})
 func res_text() -> String: return "%d" % int(_best_char())
 func res_frac() -> float: return clampf(_best_char() / res_max(), 0.0, 1.0)
-func ready_label() -> String: return "FLASHOVER" if not ignites.is_empty() else ""
 
 func _setup() -> void:
 	fx = LDFx.of(m)
 	jet = AshwickJet.new(self)
 
 func warm_fx(at: Vector3) -> void:
-	fx.prewarm(at, [])
+	fx.prewarm(at)
 
 func _best_char() -> float:
 	var b := 0.0
@@ -156,12 +160,12 @@ func _ignite(f: Ent, lvl: int, was: int) -> void:
 		f.burn_t = maxf(f.burn_t, float(rd()["ignite_t"]))
 		f.burn_dps = dps
 		f.burn_by = h
+	StatusSfx.ignite(f, h, float(rd()["ignite_t"]))
 	if lvl == 2 and was < 2:
 		_flashover_fx(f)
 		_stoke_pose()
 	elif was == 0:
 		vfx("ablaze", f.pos)
-		m.sfx("as_ignite", f.pos, -3.0, 1.0)
 
 ## The Flashover payoff: the word, a column of fire on the foe (content/vfx "flashover"), the blaze and the HUD
 ## flash; the shared payoff's rings stay out of Cinder's fire.
@@ -210,6 +214,7 @@ func _tick(dt: float) -> void:
 		hose.step(m.world, dt)
 		_hose_look()
 	if not bash.is_empty(): _tick_bash(dt)
+	if aiming: _tick_shot_cast(dt)
 	jet.tick(dt)
 	KMovesPair.air_moves(self, "lw_jump", "lw_land")
 	if h.shield_t > 0.0 and h.shield > 0.5 and st.get("shield_on", false):
@@ -237,14 +242,14 @@ func _shield_swirls() -> void:
 
 ## The pilot flame in her palm, embers over a heavily charred foe, and the burn stage over each burning
 ## Boki: one flame pip for Ablaze, three and a glow for Flashover (sheet gap 4b). A rival Hunter's burn
-## stage is the ComboMark tag over their plate instead (combo_read).
+## stage is the plate status row instead (combo_read).
 func _tick_tells(dt: float) -> void:
 	var vis := tells_visible()
 	var flamer_up: bool = anim_id == "as_cloak" and m.time - anim_at < CLOAK_POSE_T      # swung up on its strap
 	# the pilot shows only in the lance's spool-up (idle in her bare palm it reads as a stray orb); Flue Flight
 	# never spools (the lance is out), so the pilot is out with it
 	var spooling := was_held and spool < float(lmbd()["spool"])
-	if vis and spooling and not h.downed and not KinMerge.active(h) and not flamer_up:
+	if vis and spooling and not h.downed and not flamer_up:
 		var fl := 0.85 + 0.15 * sin(m.time * 37.0)
 		fx.place("pilot%d" % h.get_instance_id(), "pilot", tip(), PILOT_COL, PILOT_CORE, 0.88 * fl)
 	else:
@@ -279,7 +284,7 @@ func _tick_tells(dt: float) -> void:
 				0.75 + 0.08 * sin(m.time * 9.0)
 			)
 
-## The burn on `f`, for the ComboMark tag: Ablaze is 1 pip of 2, Flashover 2; the ring is the burn left.
+## The burn on `f`, for the status row (HudPlate.row): Ablaze is 1 pip of 2, Flashover 2; the ring is the burn left.
 func combo_read(f: Ent) -> Dictionary:
 	var lvl := burning(f)
 	if lvl == 0:
@@ -296,7 +301,7 @@ func pips_on(f: Ent) -> int:
 		if fx.shown("pip%d_%d" % [key, i]): n += 1
 	return n
 
-## A Boki merge ends the hose, a bash mid-flight and the Cinder Shot lane, with nothing fired.
+## A Boki merge ends the hose, a bash mid-flight and the Cinder Shot cast, with nothing fired.
 func _drop_holds() -> void:
 	hose.clear()
 	if fx: fx.flame_off("hose%d" % h.get_instance_id())
@@ -306,6 +311,7 @@ func _drop_holds() -> void:
 	flame_acc = 0.0
 	h.mel_hold = 0.0
 	bash = {}
+	if aiming: AimKit.hide(h, "rmb")
 	aiming = false
 	jet.drop()
 
@@ -341,12 +347,10 @@ func lmb_override(held: bool, dt: float) -> bool:
 		return true
 	if h.wid != "flamethrower":
 		return false
-	# a merge ends the roar: holding the key on must not relight it
-	var merging := KinMerge.transforming(h) or KinMerge.active(h)
-	if held and was_held and not merging and flow.pauses_hold("lmb"):
+	if held and was_held and flow.pauses_hold("lmb"):
 		_pause_hose()
 		return true
-	if not held or not h.atk.can_fire() or merging or (relight_t > 0.0 and not was_held):
+	if not held or not h.atk.can_fire() or (relight_t > 0.0 and not was_held):
 		if was_held:
 			play("as_lance_end")           # (a key let go in a dash too: the pose never outlasts the key)
 		if was_held and not hose_paused:
@@ -442,22 +446,55 @@ func _stream_looks() -> void:
 	if live.size() < 4:
 		return
 	if flame_ticks % TONGUE_EVERY == 0:
-		var mid: Dictionary = live[live.size() / 2]
+		var mid: Dictionary = live[int(live.size() / 2.0)]
 		var v: Vector3 = mid["v"]
 		vfx("lance_tongue", ground(mid["p"]), Vector2(v.x, v.z).normalized())
 	if flame_ticks % LICK_EVERY == 0:
 		vfx("lance_lick", ground(live[0]["p"]))
 
 # ------------------------------------------------------------------ RMB: Cinder Shot
-## Held: a thin white lane of the shot's full, fixed length (the cursor distance doesn't matter), her casting hand
-## drawn back.
-func rmb_hold_tick(t: float) -> void:
-	if KinMerge.active(h) or not rmb_ready():
+## Her palms glow while Cinder Shot casts: puffs at the cast fraction (size, heat), a white-hot bloom near the end.
+func _palm_glow(t: float) -> void:
+	if t >= glow_t and t - glow_t < GLOW_STEP:
+		return          # (t restarts from 0 on a new cast: glow_t is then ahead of it)
+	glow_t = t
+	var k := clampf(t / maxf(float(rmb_def()["cast"]), 0.01), 0.0, 1.0)
+	vfx("palm_charge", null, null, {"k": k, "hot": k >= GLOW_HOT})
+
+## The press (a cast, footage f0073-f0075 / f0102-f0104 / f0128-f0130: two frames of lane every time, then the
+## cinder): the charge and the cooldown go now, with a flash in her palm and the lane; the cinder leaves at rmb.cast.
+func fire_rmb(c: Dictionary) -> void:
+	c["variant"] = "tap"
+	last_variant = "tap"
+	if aiming or not spend_rmb():
 		return
-	if not aiming:
-		aiming = true
-	if not jet.running(): play_hold("as_aim", t)       # (flying, the flight pose stays)
-	HeroVfx.of(m).hold(h, "shot_aim")
+	aiming = true
+	cast_t = 0.0
+	glow_t = 0.0
+	if not jet.running(): play_hold("as_aim", 0.0)
+	vfx("shot_cast")
+	_shot_lane()
+
+## Casting: a thin white lane of the shot's full, fixed length that follows the aim (the cursor distance doesn't
+## matter), her casting hand drawn back. A stun, a knock-down or the flight ends it with nothing fired.
+func _tick_shot_cast(dt: float) -> void:
+	if busy() or jet.running():
+		aiming = false
+		AimKit.hide(h, "rmb")
+		if not jet.running(): play("")
+		return
+	cast_t += dt
+	if cast_t < float(rmb_def()["cast"]) - 0.0001:
+		play_hold("as_aim", cast_t)
+		HeroVfx.of(m).hold(h, "shot_aim")
+		_palm_glow(cast_t)
+		_shot_lane()
+		return
+	aiming = false
+	AimKit.hide(h, "rmb")
+	_loose_shot()
+
+func _shot_lane() -> void:
 	var rdf := rmb_def()
 	var ln := AimMode.dist(h, float(rdf["range"]), AimMode.MAX)
 	AimKit.lane(
@@ -465,15 +502,9 @@ func rmb_hold_tick(t: float) -> void:
 				"alpha": 0.9, "tip": true}
 	)
 
-func fire_rmb(c: Dictionary) -> void:
-	c["variant"] = "tap"
-	last_variant = "tap"
-	var was_aiming := aiming
-	aiming = false
-	AimKit.hide(h, "rmb")
-	if not spend_rmb():
-		if was_aiming: play("")
-		return
+func rmb_winding() -> bool: return aiming
+
+func _loose_shot() -> void:
 	var rdf := rmb_def()
 	if not jet.running(): play("as_shot")
 	var amt := float(rdf["dmg"])
@@ -723,18 +754,6 @@ func recast_window() -> Dictionary:
 	var t := float(x_def()["time"])
 	return RecastCue.window("x", float(jet.flight["t"]), t, h.pos, true, true)
 
-## RecastCue's badge: Char on each foe; gold once it's Ablaze, where the next ignite is the Flashover.
-func combo_marks(out: Array) -> void:
-	super(out)
-	var ttl := float(rd()["expire"])
-	for key in chars:
-		var c: Dictionary = chars[key]
-		if not is_instance_valid(c["e"]) or (c["e"] as Ent).dead:
-			continue
-		var lvl := burning(c["e"])
-		var left: float = ttl - (m.time - float(c["t"]))
-		if left > 0.0 or lvl > 0:
-			out.append(RecastCue.mark(c["e"], int(c["n"]), maxf(0.0, left), ttl, lvl == 1))
 ## In the flight (a roll) only E works (item 66: AshwickJet.lock_inputs).
 func fires_in_dash() -> bool: return jet.running() or super.fires_in_dash()
 func aims_in_dash() -> bool: return not jet.running() and super.aims_in_dash()

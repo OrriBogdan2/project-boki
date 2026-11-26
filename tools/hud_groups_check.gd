@@ -4,16 +4,20 @@ extends RefCounted
 ##   1. the Ways Out strip is deferred (a newcomer) at the landing and the first fight, and revealed once a seat
 ##      is within ways_out_lead_s of opening, is open, or you are out
 ##   2. at the Heart unlock and the exit race it is one group, and the Gate prompt is the one prompt, not a second
+##   2b. a save's first expedition holds the clock/status strip back until the first Ways Out beat or kill
 ##   3. each moment's count equals the pinned one: 0.24.5 adds at most the one strip, only where it is needed.
-##      The blocks that were already there put every moment over the owner's 5 (docs/UI_FIRST15.md): that gap is
-##      printed, and filed in docs/DEBT.md for the declutter jobs. The check plays a fresh save (a new player), so
+##      The landing is at the owner's 5; the counters, glider ring and belt are folded in until they matter (rule 5).
+##      The later moments add the toasts, the prompt and the strip. The check plays a fresh save (a new player), so
 ##      the "Your kit" card is not at the landing (rule 4)
 ##   4. a save under HudGroups.NEW_PLAYER_MATCHES expeditions: no kit card (the training room keeps it), and your own
 ##      kills/knocks/gems row waits for the first kill, knock or gem or Tab; a veteran sees both as before
+##   5. the glider ring only while you glide or the meter is not full; the belt only once a held item could be used
+##      (then the save keeps it); the counters follow HudReveal ("counters", from the 4th expedition)
 ## --hud-groups-check never touches the save. tools/hud_groups_shots.gd takes the pictures of the same moments.
 
 const MOMENTS := ["landing", "fight", "heart", "race"]
-const COUNTS := {"landing": 9, "fight": 11, "heart": 12, "race": 12}      # groups, strip included where it shows
+const COUNTS := {"landing": 5, "fight": 7, "heart": 8, "race": 8}      # groups, strip included where it shows
+const CLOCK := {"landing": 0, "fight": 0, "heart": 1, "race": 1}           # the clock strip: first beat or kill
 const STRIP := {"landing": 0, "fight": 0, "heart": 1, "race": 1}           # of which the Ways Out strip
 
 var bad := 0
@@ -29,7 +33,7 @@ static func make_match(main: Node) -> Match:
 	Econ.ensure()
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 4, "squad": 1, "tier": 0, "seed": 77, "no_drop": true, "heart": true, "god": true,
+	m.start({"teams": 4, "squad": 1, "tier": 0, "seed": 77, "no_drop": true, "heart": true, "god": true,
 		"length": 1e9})
 	m.set_process(false)
 	for h in m.hunters:
@@ -67,7 +71,7 @@ static func on_screen_has(hud, id: String) -> bool:
 	return HudGroups.on_screen(hud).has(id)
 
 func run(main: Node) -> void:
-	var m: Match = await make_match(main)
+	var m: Match = make_match(main)
 	var hud := m.hud
 	var q: Dictionary = Heart.rules()["quest"]
 	var lead: float = HudGroups.rules()["ways_out_lead_s"]
@@ -79,6 +83,8 @@ func run(main: Node) -> void:
 		print("HUDGROUPS   %s: %d groups (budget %d): %s" % [id, g.size(), HudGroups.rules()["budget"], ", ".join(g)])
 		ok(g.size() == int(COUNTS[id]), "%s: %d groups" % [id, COUNTS[id]])
 		ok(g.count("ways_out") == int(STRIP[id]), "%s: the Ways Out strip %s" % [id, "shows" if STRIP[id] else "waits"])
+		ok(HudGroups.clock_shown(m) == bool(CLOCK[id]),
+			"%s: the clock strip %s" % [id, "shows" if CLOCK[id] else "waits"])
 		ok(g.count("prompt") <= 1, "%s: one prompt at most" % id)
 	# 1. the reveal rule
 	m.interact = {}
@@ -91,6 +97,23 @@ func run(main: Node) -> void:
 	m.player.out = true
 	ok(HudGroups.ways_out_shown(m), "out of the match: the strip (and the Ways out left line) is yours")
 	m.player.out = false
+	# 5. what folds in until it matters (the beats above made the save remember the clock)
+	Save.d["hud_reveal"].erase("beat_clock")
+	set_moment(m, "landing")
+	var p0: Hunter = m.player
+	ok(not on_screen_has(hud, "glider") and not on_screen_has(hud, "belt") and not on_screen_has(hud, "counters"),
+		"landing: no glider ring, belt or counters")
+	p0.gliding = true
+	ok(on_screen_has(hud, "glider"), "gliding: the glider ring")
+	p0.gliding = false
+	p0.hp = p0.max_hp * 0.5
+	ok(on_screen_has(hud, "belt") and BeltHud.shown(m, p0, true), "hurt with a tonic held: the belt")
+	p0.hp = p0.max_hp
+	ok(on_screen_has(hud, "belt"), "healed again: this save keeps the belt")
+	Save.d["hud_reveal"].erase("belt")
+	Save.d["matches"] = 3
+	ok(on_screen_has(hud, "belt") and on_screen_has(hud, "counters"), "4th expedition: belt and counters back")
+	Save.d["matches"] = 0
 	# 4. what a new player's HUD holds back
 	var p: Hunter = m.player
 	set_moment(m, "landing")

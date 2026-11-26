@@ -31,6 +31,24 @@
 		]
 	},
 	"loco": {
+		"plants": {
+			"run_b": {"L": [0.383], "R": [0.05]},
+			"run_bl": {"L": [0.4], "R": [0.05]},
+			"run_br": {"L": [0.383], "R": [0.05]},
+			"run_f": {"L": [0.183], "R": [0.5]},
+			"run_fl": {"L": [0.05], "R": [0.383]},
+			"run_fr": {"L": [0.05], "R": [0.383]},
+			"run_l": {"L": [0.317], "R": [0.617]},
+			"run_r": {"L": [0.3], "R": [0.017]},
+			"walk_b": {"L": [0.267, 0.65], "R": [0.1, 0.483]},
+			"walk_bl": {"L": [0.25], "R": [0.483]},
+			"walk_br": {"L": [0.283, 0.65], "R": [0.067, 0.45]},
+			"walk_f": {"L": [0.233], "R": [0.6]},
+			"walk_fl": {"L": [0.083, 0.467], "R": [0.283, 0.65]},
+			"walk_fr": {"L": [0.083, 0.467], "R": [0.283, 0.65]},
+			"walk_l": {"L": [0.083, 0.45], "R": [0.3, 0.667]},
+			"walk_r": {"L": [0.1, 0.483], "R": [0.267, 0.65]}
+		},
 		"idle": "idle",
 		"stance": "stance",
 		"stance_after": 4.0,
@@ -55,13 +73,13 @@
 			"br": "run_br"
 		},
 		"walk_speed": 2.0,
-		"run_speed": 4.85, "cycle_s": 0.5, "stride": [1.35, 1.55], "bob_m": [0.02, 0.03], "foot_mps": [2.1, 3.65], "arm_swing": {"L": 0.5}
+		"run_speed": 4.85, "cycle_s": 0.5, "stride": [1.35, 1.55], "bob_m": [0.02, 0.03], "foot_mps": [2.1, 3.65], "foot_lock": [0.0, 1.0], "arm_swing": {"L": 0.5}
 	},
 	"air": {
 		"rise": "jump",
 		"fall": "fall",
 		"glide": "glide",
-		"dive": "dive"
+		"dive": "dive", "fade_out": 0.25
 	},
 	"land": {"clip": "land", "hop": {"w": 0.6, "rate": 1.4, "dur": 0.24, "moving": 0.1}, "drop": {"rate": 1.0, "dur": 0.4, "moving": 0.13}},
 	"kmoves": {
@@ -80,14 +98,17 @@
 			"upper": "moving",
 			"hold_from": 0.2,
 			"air_legs": true
-		},
+		, "fade_out": 0.6},
 		"bul_smash": {
 			"clip": "lmb_slam",
-			"air_legs": true
+			"air_legs": true,
+			"fade": 0.04,
+			"time": [[0, 0.1], [0.1, 0.117], [0.5, 0.23]],
+			"blend_out": 0.38
 		},
 		"bul_launch": {
 			"clip": "lmb_launch"
-		},
+		, "fade_out": 0.6},
 		"bul_guard": {
 			"clip": "rmb_guard",
 			"upper": "moving",
@@ -97,10 +118,7 @@
 		"bul_break": {
 			"clip": "guard_break",
 			"upper": true
-		},
-		"bul_armed": {
-			"clip": "guard_armed",
-			"upper": true
+		, "fade_out": 0.6
 		},
 		"bul_whirl": {"dash": true, 
 			"clip": "shift_whirl"
@@ -118,10 +136,6 @@
 			"clip": "crush",
 			"upper": true
 		},
-		"bul_slamshield": {
-			"clip": "shield_slam",
-			"lead": 0.25
-		},
 		"bul_mend": {
 			"clip": "e_mend",
 			"upper": "moving",
@@ -133,7 +147,10 @@
 		},
 		"bul_ult_slam": {
 			"clip": "x_slam",
-			"upper": "moving"
+			"upper": "moving",
+			"fade": 0.04,
+			"time": [[0, 0.1], [0.1, 0.15], [0.6, 0.3]],
+			"blend_out": 0.4
 		},
 		"mf_xform": {
 			"clip": "fuse"
@@ -160,10 +177,12 @@
 	"carry_stow": ["x_weapon", "x_shield"],
 	"carry_fwd": 1.35,
 	"emotes": {"truce": "g_flag", "accept": "g_pump", "follow": "g_beckon", "thanks": "g_nod", "wave": "g_wave", "laugh": "g_laugh", "gg": "g_salute", "refuse": "g_cross"},
+	"summon_call": {"call": "g_call_slam_r", "recall": "g_recall_r"},
 	"turn": {"dur": 0.34, "lift": 0.36},
 	"cc": {"pull": 0.22, "tug_hz": 0.8, "twist": 0.05, "bow": 0.2},
 	"procedural": [
-		"base"
+		"base",
+		"swim"
 	],
 	"upper": [
 		"hips",
@@ -189,6 +208,15 @@
 		"emote": "happy",
 		"hit": "angry",
 		"hit_t": 1.2,
+		"combat": "angry",
+		"combat_t": 4.0,
+		"tex_faces": {
+			"eyes-v95": {
+				"angry": "res://art/wardens/breaker/breaker_v95_angry.jpg",
+				"determined": "res://art/wardens/breaker/breaker_v95_angry.jpg",
+				"sad": "res://art/wardens/breaker/breaker_v95_angry.jpg"
+			}
+		},
 		"companion": "x_fish",
 		"lure": "lure",
 		"flare_kmoves": [
@@ -204,12 +232,10 @@
 			"bul_guard": "determined",
 			"bul_whirl": "angry",
 			"bul_charge": "determined",
-			"bul_slamshield": "angry",
 			"bul_mend": "happy",
 			"bul_ult_wind": "angry",
 			"bul_ult_slam": "angry",
-			"bul_break": "sad",
-			"bul_armed": "happy"
+			"bul_break": "sad"
 		}
 	},
 	"offset_bones": [
@@ -225,6 +251,24 @@
 		},
 		"in": "crouch_in",
 		"out": "crouch_out",
-		"speed": 1.65
-	}
+		"speed": 1.65,
+		"plants": {"crouch_b": {"L": [0.3], "R": [0.0]}, "crouch_f": {"L": [0.3], "R": [0.25]}, "crouch_l": {"L": [0.283], "R": [0.583]}, "crouch_r": {"L": [0.283], "R": [0.583]}}
+	},
+	"beats": {"win": {"clip": "emote"}, "lose": {"clip": "downed"}},
+	"cancels": [
+		["bul_smash_wind", 0.5, "bul_guard"],
+		["bul_smash_wind", 0.5, "bul_mend"],
+		["bul_smash_wind", 0.5, "bul_ult_wind"],
+		["bul_smash_wind", 0.5, "glide"],
+		["bul_smash_wind", 0.5, ""],
+		["bul_smash_wind", 0.5, "bul_smash"],
+		["bul_guard", 0.5, "bul_ult_wind"],
+		["bul_guard", 0.5, ""],
+		["bul_guard", 0.5, "bul_mend"],
+		["bul_ult_wind", 0.3, "stun"],
+		["bul_launch", 0.2, ""],
+		["bul_charge", 0.2, "bul_ult_wind"],
+		["bul_lumber", 0.2, "bul_ult_wind"],
+		["bul_throw", 0.1, "bul_recall"]
+	]
 }

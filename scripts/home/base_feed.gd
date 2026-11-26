@@ -3,11 +3,15 @@ extends RefCounted
 ## A hungry base Boki feeds itself (briefs/design/GARDEN.md section 2: bowls and snacks, never a penalty). A
 ## feeder with food comes first (HomeEcon.feed_goal, k["eat"]), then a feeding bowl you filled (FeedBowl);
 ## with none to eat from it picks the ripe snack patch and eats one snack (the rest go to your pantry), or
-## fetches a snack from the pantry at the house door. BaseLife runs the walk in its Eat state through tick()
+## fetches a snack from the pantry at the house door. With none of those it walks to a wild tree on its island
+## and eats the zone's fruit (a lesser meal: it fills, but builds no trust and no lean), so a garden left alone
+## never ends with every Boki pinned at the hungry floor. BaseLife runs the walk in its Eat state through tick()
 ## (k["life_eat"] = {from, food, at}, a bowl's own fields on top); every meal goes through meal() (Care.feed),
 ## so the journal, the lean (Evo.eat) and the care day see it like any other.
 
 const AT := 1.2            # m: close enough to the patch or the door to eat
+const WILD_FILL := 20.0    # food (0..100) a wild fruit gives; Care.feed's snack is 28+, so your food stays better
+const WILD_JOY := 3.0      # joy a wild fruit gives (a hand-fed snack gives 6+)
 const WALK := 35.0         # s it walks for a snack before it gives up (Eat's cap in base_life.json is 40)
 
 ## Sets off for food if there is any: true when it did (k["eat"] or k["life_eat"] is set).
@@ -26,9 +30,13 @@ static func pick(h, k: Dictionary) -> bool:
 		k["life_eat"] = {"from": "patch", "food": "", "at": HomeLayout.deco_center(e)}
 	else:
 		var f := pantry(rec)
-		if f == "":
+		var tree := _tree_spot(h, k) if f == "" else Vector3.INF
+		if f == "" and tree == Vector3.INF:
 			return false
-		k["life_eat"] = {"from": "pantry", "food": f, "at": door(h)}
+		if f == "":
+			k["life_eat"] = {"from": "tree", "food": "", "at": tree}
+		else:
+			k["life_eat"] = {"from": "pantry", "food": f, "at": door(h)}
 	k["goal"] = k["life_eat"]["at"]
 	k.erase("stare")
 	return true
@@ -68,6 +76,11 @@ static func tick(h, k: Dictionary, since: float) -> bool:
 		return true
 	var rec: Dictionary = k["rec"]
 	var food := String(e["food"])
+	if String(e["from"]) == "tree":
+		k.erase("life_eat")
+		k["t"] = randf_range(1.0, 2.0)
+		_wild_meal(h, k)
+		return false
 	if String(e["from"]) == "patch":
 		var got := SnackPatch.harvest(Save.d, Time.get_unix_time_from_system())
 		food = _choose(rec, got)
@@ -84,6 +97,37 @@ static func tick(h, k: Dictionary, since: float) -> bool:
 				% [rec["name"], Care.food_name(food).to_lower()])
 	return false
 
+## An open tile beside the nearest wild tree on the Boki's island, or Vector3.INF when there is none.
+static func _tree_spot(h, k: Dictionary) -> Vector3:
+	var w: World = h.world
+	var pos: Vector3 = k["pos"]
+	var isle: int = w.island_of(pos.x, pos.z)
+	var best := Vector3.INF
+	var best_d := INF
+	for i in h.hb.wild_t:
+		if h.hb.wild_t[i] != "tree":
+			continue
+		var at := Vector3(i % w.w + 0.5, 0.0, int(i / float(w.w)) + 0.5)
+		var d := Vector2(at.x - pos.x, at.z - pos.z).length()
+		if d < best_d and w.island_of(at.x, at.z) == isle:
+			var spot: Vector3 = h.hg.beside(i, pos)
+			if spot != Vector3.INF:
+				best = spot
+				best_d = d
+	return best
+
+## It eats a wild fruit: the zone's snack it likes, for food and a little joy only (no trust, no lean, no pantry).
+static func _wild_meal(h, k: Dictionary) -> void:
+	var rec: Dictionary = k["rec"]
+	var fruit := _choose(rec, SnackPatch.snacks(Save.d))
+	if fruit == "":
+		h._emote(k, "?")
+		return
+	Care.change(rec, "food", WILD_FILL)
+	Care.change(rec, "joy", WILD_JOY)
+	HomeVoice.say(rec, "boki_eat", k["pos"])
+	h._emote(k, "♪")
+
 ## It eats `food` (already out of the pantry or the bowl): Care.feed (the lean through Evo.eat), its emote and
 ## the first day's mark. Care.feed's result.
 static func meal(h, k: Dictionary, food: String) -> Dictionary:
@@ -91,6 +135,7 @@ static func meal(h, k: Dictionary, food: String) -> Dictionary:
 	if not res.get("ok", false):
 		h._emote(k, "?")
 		return res
+	HomeVoice.say(k["rec"], "boki_eat", k["pos"])      # one bite cue per meal (a patch, the pantry or a bowl)
 	h._emote(k, "♥" if res.get("love", false) else "♪")
 	GardenFirstDay.mark("feed", h)
 	return res

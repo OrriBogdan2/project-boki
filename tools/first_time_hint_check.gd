@@ -3,9 +3,12 @@ extends RefCounted
 ##   1. a rival hidden only by the wedge (behind you, in range, clear line) counts; one in front or in the near
 ##      circle does not (you see it)
 ##   2. a fast swing of the aim counts, a slow turn does not
-##   3. through Match._tips: shown once on the hint lane, remembered in the save, never with tips off or in the
+##   3. the zone's first-phase warning says its line once per save, never with tips off
+##   4. through Match._tips: shown once on the hint lane, remembered in the save, never with tips off or in the
 ##      tutorial course; the line is short and plain (no key names)
 
+const SEED0 := 5101  # the first match seed tried for a spawn with open ground round the player
+const SEEDS := 8  # seeds tried before giving up
 const SIDE_M := 8.0  # m: where the probe rival stands (outside the near circle, inside the view range)
 const NEAR_M := 1.5  # m: inside the near circle (NEAR_SENSE 2.0)
 const LINE_MAX := 52  # characters: one line on the hint lane
@@ -25,19 +28,30 @@ func run(main: Node) -> void:
 	Save.d = Save.fresh()
 	Econ.ensure()
 	Settings.v["tips"] = true
-	var m := Match.new()
-	main.add_child(m)
-	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 5101, "no_drop": true, "raid": "clear"})
-	m.set_process(false)
-	for h in m.hunters:
-		h.ctrl = "idle"
+	# the probe needs open ground round the player's spawn: the first seed of SEEDS that gives it (a seed's
+	# spawn is a sim roll: it moved when the looks left the sim's RNG, 11-21)
+	var m: Match = null
+	var a := INF
+	var sd := SEED0
+	while a == INF and sd < SEED0 + SEEDS:
+		if m != null:
+			main.remove_child(m)
+			m.free()
+		m = Match.new()
+		main.add_child(m)
+		m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": sd, "no_drop": true, "raid": "clear"})
+		m.set_process(false)
+		for h in m.hunters:
+			h.ctrl = "idle"
+		a = _open_angle(m)
+		sd += 1
 	var rival: Hunter = m.hunters.filter(func(h): return h.team != m.player.team)[0]
-	var a := _open_angle(m)
-	ok(a != INF, "found open ground in front of and behind the player")
+	ok(a != INF, "found open ground in front of and behind the player (seed %d, %d tried)" % [sd - 1, sd - SEED0])
 	if a != INF:
 		_hidden(m, rival, a)
 		_turns(m)
 		_said(m, rival, a)
+		_zone(m)
 	m.queue_free()
 	print("FTHINT DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
@@ -134,5 +148,33 @@ func _said(m: Match, rival: Hunter, a: float) -> void:
 	ok(plain, "one short plain line ('%s')" % txt)
 
 
-func _on_lane(m: Match) -> bool:
-	return m.hud.msgs.texts().has(VisionHint.TEXT)
+## The closing zone's first warning shows ShrinkZone.HINT_TEXT once per save, and not with tips off.
+func _zone(m: Match) -> void:
+	var seen: Dictionary = Save.d["tutorial"]
+	seen.erase(ShrinkZone.HINT_KEY)
+	m.hud.msgs.clear()
+	var z := ShrinkZone.new(m)
+	m.time = z.t0[1] - float(ShrinkZone.rules()["warn_s"]) + 1.0
+	m.tips_live = false
+	z._warn()
+	ok(not _on_lane(m, ShrinkZone.HINT_TEXT) and not seen.has(ShrinkZone.HINT_KEY), "zone: with tips off no line")
+	z.told = 0
+	m.tips_live = true
+	z._warn()
+	ok(_on_lane(m, ShrinkZone.HINT_TEXT) and bool(seen.get(ShrinkZone.HINT_KEY, false)), "zone: first warning says it")
+	m.hud.msgs.clear()
+	z.told = 0
+	z._warn()
+	ok(not _on_lane(m, ShrinkZone.HINT_TEXT), "zone: and only once")
+	z.k = 1
+	z.told = 1
+	seen.erase(ShrinkZone.HINT_KEY)
+	m.time = z.t0[2] - 1.0
+	z._warn()
+	ok(not _on_lane(m, ShrinkZone.HINT_TEXT), "zone: a later phase's warning does not")
+	var txt := ShrinkZone.HINT_TEXT
+	ok(txt.length() <= LINE_MAX and not txt.contains("%"), "zone: one short plain line ('%s')" % txt)
+
+
+func _on_lane(m: Match, text := VisionHint.TEXT) -> bool:
+	return m.hud.msgs.texts().has(text)

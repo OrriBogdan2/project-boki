@@ -44,6 +44,7 @@ func run(main: Node) -> void:
 	east = _solid_dir()
 	_table()
 	_press()
+	_perks()
 	_killed()
 	_net()
 	_leash_rules()
@@ -110,6 +111,40 @@ func _press() -> void:
 	ok(not KinSummon.press(p) and k.wisp, "press: refused while it rests")
 	var cap := Settings.key_cap("summon")
 	ok(cap != "", "press: the Summon key has a cap for the prompts (%s)" % cap)
+
+
+## The perks rule: on while it rides with you, off for the whole window and the shrink, on again once it folds in.
+func _perks() -> void:
+	var stat := "damage_reduction"
+	var kept: Array = k.ks.carry_passives
+	k.ks.carry_passives = [{"stat": stat, "amount": 0.1, "category": "defence"}]
+	_frames(0.1)
+	var on := p.owner_stat(stat)
+	ok(p.kin_carry_on() and on > 0.0, "perks: on while it rides as a wisp (%.2f)" % on)
+	k.summon.cd = 0.0
+	ok(KinSummon.press(p) and not k.wisp, "perks: the summon is out")
+	var off_all := true
+	for _i in int((k.summon.dur - 0.5) / 0.25):
+		_frames(0.25)
+		off_all = off_all and not p.kin_carry_on() and p.owner_stat(stat) == 0.0
+	ok(off_all and k.summon.left > 0.0, "perks: fully off for the whole summon window")
+	KinSummon.press(p)
+	_frames(KinSummon.SHRINK_S * 0.5)
+	var shrinking := k.summon.shrink > 0.0 and not p.kin_carry_on() and p.owner_stat(stat) == 0.0
+	ok(shrinking, "perks: still off while it shrinks")
+	_frames(KinSummon.SHRINK_S)
+	ok(k.wisp and p.kin_carry_on() and p.owner_stat(stat) > 0.0, "perks: back on once it folds in")
+	k.summon.cd = 0.0
+	KinSummon.press(p)
+	_frames(k.summon.dur + KinSummon.SHRINK_S * 0.5)
+	ok(k.summon.shrink > 0.0 and p.owner_stat(stat) == 0.0, "perks: off in the shrink after the window times out")
+	_frames(KinSummon.SHRINK_S)
+	ok(p.owner_stat(stat) > 0.0, "perks: on again after a timed-out window")
+	k.summon.cd = 0.0
+	var line := KinSummon.perk_line()
+	var plain := line.contains(Settings.key_cap("summon")) and line.contains("no perks while it is out")
+	ok(plain, "perks: one plain line: '%s'" % line)
+	k.ks.carry_passives = kept
 
 
 func _mob() -> Ent:
@@ -204,13 +239,16 @@ func _chase() -> void:
 	k.teleport(p.pos + east * (lsh - 2.0))
 	var far := 0.0
 	var turned := false
+	var flew := -99  # the last frame it was flying: a rush ability flight and its landing are not the walk
 	for i in 360:
 		foe.pos = p.pos + stay
 		foe.prev = foe.pos
 		m.step(DT)
 		if i == int(RUSH_S * 60) + 20:  # (the rush flew it home: back to the edge, the walk is measured)
 			k.teleport(p.pos + east * (lsh - 2.0))
-		if i > RUSH_S * 60 + 20:
+		if k.state in ["flying", "flying_home"]:
+			flew = i
+		if i > RUSH_S * 60 + 20 and i - flew > 10:
 			far = maxf(far, k.flat_dist(p))
 		turned = turned or k.state == "returning"
 	ok(far > lsh - 1.5, "chase: it walks out to a foe at the edge of the leash (%.1f m of %.1f)" % [far, lsh])

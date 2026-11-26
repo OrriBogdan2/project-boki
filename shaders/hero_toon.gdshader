@@ -110,10 +110,11 @@ uniform float far_clamp = 0.0;
 uniform float far_rim_soft = 0.0;
 uniform float far_glow = 0.0;
 // Who and what, on the body (docs/COMBAT_CLARITY.md): side_rim is a band round the silhouette in the viewer's
-// side colour (SideColor: an ally cool blue, a rival hostile red; alpha 0 = none, your own body), outside the
-// signature band. tell tints the body (BodyTell): a crowd control's colour pulsing tell_hz times a second while it
-// lasts, or the Hunter's signature colour fading after a cast (rgb the colour, a the strength).
+// side colour (SideColor: an ally cool blue, a rival hostile red; alpha 0 = none, your own body), a pixel or two
+// wide so the body keeps its own colours. tell tints the body (BodyTell): a crowd control's colour pulsing tell_hz
+// times a second while it lasts, or the Hunter's signature colour fading after a cast (rgb the colour, a the strength).
 uniform vec4 side_rim : source_color = vec4(0.0);
+const float SIDE_RIM_PX = 1.6;     // px of silhouette the side colour fades out over
 uniform vec4 tell : source_color = vec4(0.0);
 uniform float tell_hz = 0.0;
 // Imported low-poly models carry each corner's averaged (smooth) normal in TANGENT (Assets.mesh).
@@ -136,9 +137,15 @@ uniform float emit_flicker = 0.0;
 // the emission layer's colour (WardenGlb, the archetype's "model_glow" core; alpha 0: the layer's own painted colour):
 // the layer is then a mask, and its texels' paint takes the colour too, so the glow can change without a rebake (Sparkle)
 uniform vec4 emit_tint : source_color = vec4(1.0, 1.0, 1.0, 0.0);
+// a curse's char (a warden_look slot's): the skin round the emission layer's cracks (its mip char_reach, a blurred
+// mask) and the red-painted curse skin turn to char_col by char_k, unlit by the hot key, so only the cracks glow (Kael)
+uniform float char_k = 0.0;
+uniform float char_reach = 3.0;
+uniform vec4 char_col : source_color = vec4(0.03, 0.02, 0.02, 1.0);
 #include "res://shaders/noise.gdshaderinc"
 #include "res://shaders/vis.gdshaderinc"
 #include "res://shaders/canopy_heat.gdshaderinc"
+#include "res://shaders/hit_flash.gdshaderinc"
 // The distance at which the match camera's 32 degree lens sees things this size on screen: the far_* terms' measure
 // (abs: the projection's y is flipped when drawing into a texture; an orthographic camera: its view height / 0.57)
 float match_d(vec3 v, mat4 proj) {
@@ -184,6 +191,15 @@ void fragment() {
 	vec3 emit_c = vec3(0.0);
 	if (use_emit) {
 		emit_c = texture(emit_tex, UV).rgb;
+		if (char_k > 0.0 && use_tex) {
+			vec3 near = textureLod(emit_tex, UV, char_reach).rgb;
+			float crack = smoothstep(0.004, 0.14, max(near.r, max(near.g, near.b)));
+			vec3 tx = texture(albedo_tex, UV).rgb;
+			float curse = smoothstep(0.12, 0.3, tx.r - max(tx.g, tx.b));
+			float charred = char_k * max(crack, curse);
+			c = mix(c, char_col.rgb, charred);
+			heat *= 1.0 - charred;      // (the char does not glow: only the emission layer's cracks do)
+		}
 		if (emit_tint.a > 0.0) {
 			float ek = max(emit_c.r, max(emit_c.g, emit_c.b));
 			// (a yellow piece keeps its own colour: Sparkle's hazard bands glow faintly as painted)
@@ -269,7 +285,7 @@ void fragment() {
 	vec3 fcol = mix(fres_color.rgb, min(c * 1.7 + vec3(0.12), vec3(1.4)), fres_tint);
 	float up = smoothstep(0.35, 0.95, wnorm.y);
 	if (ambient_cut > 0.0) { AO = 1.0 - ambient_cut; }
-	EMISSION = canopy_glow(ember) * (1.0 - fog) + flash_color.rgb * flash * 0.9 + c * glow * heat + c * own_ambient * (1.0 - fog)
+	EMISSION = canopy_glow(ember) * (1.0 - fog) + hit_flash_glow(c, flash_color.rgb, flash) + c * glow * heat + c * own_ambient * (1.0 - fog)
 		+ rim_color.rgb * rim * rim_amount * 0.12 * (1.0 - fog)
 		+ fcol * fr * fres * 0.55 + c * up * top_light * 0.18 * (1.0 - fog)
 		+ rim_far_color.rgb * fr * rim_far * far_k;
@@ -306,11 +322,13 @@ void fragment() {
 			+ (gf - gc) * step(0.0001, glow);
 	}
 	if (side_rim.a > 0.0) {
-		// (a band, not a hairline: a Hunter is ~40 px tall at the match camera)
-		float sw = fwidth(nv) * 1.5;
-		float se = smoothstep(0.45 - sw, 0.72 + sw, 1.0 - nv) * side_rim.a * (1.0 - fog) * (1.0 - flash);
+		// a screen-width edge, not a share of the body: nv / (2 * fwidth(nv)) is the pixel distance to the silhouette
+		// on a smooth surface, so the body keeps its own colours inside the rim (the old nv > 0.55 cut recoloured
+		// ~half of a rival).
+		float edge_px = nv / (2.0 * max(fwidth(nv), 0.0001));
+		float se = (1.0 - smoothstep(0.0, SIDE_RIM_PX, edge_px)) * side_rim.a * (1.0 - fog) * (1.0 - flash);
 		ALBEDO = mix(ALBEDO, side_rim.rgb, se * 0.9);
-		EMISSION += side_rim.rgb * se;
+		EMISSION += side_rim.rgb * se * 0.8;
 	}
 	if (tell.a > 0.0) {
 		float tk = tell.a * (tell_hz > 0.0 ? 0.6 + 0.4 * sin(TIME * tell_hz * 6.2832) : 1.0);

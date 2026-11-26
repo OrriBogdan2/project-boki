@@ -22,6 +22,8 @@ func ok(name: String, cond: bool, info := "") -> void:
 func run(main_node: Node) -> void:
 	main = main_node
 	ak = load("res://tools/archetype_check.gd").new()
+	_disc_rim()
+	_sector_rows()
 	ak.main = main
 	var shots := ""
 	for a in OS.get_cmdline_user_args():
@@ -65,6 +67,9 @@ func _shot_dist(m: Match, P: Hunter) -> float:
 		var mz: Vector3 = s["muzzle"]
 		var st: Vector3 = s["start"]
 		lead = Vector2(mz.x - st.x, mz.z - st.z).length()
+		if (s["x"] as Dictionary).has("hand"):
+			# the drawn muzzle is the hand (ShotOrigin.draw_from); the sim still launches 0.6 m ahead of the body
+			lead = 0.6
 	return float(s["life0"]) * (s["vel"] as Vector2).length() - lead
 
 func _aim_modes(m: Match, P: Hunter, _T: Hunter) -> void:
@@ -280,26 +285,36 @@ func _unlike(a: Dictionary, b: Dictionary) -> String:
 			return "%s: %s vs %s" % [k, x, y]
 	return ""
 
-## "soft" lanes and cones: the inside stays at or under AimShapes.SOFT_A even fully filled; the rim is lit.
+## "soft" lanes, cones and circles: the inside stays at or under AimShapes.SOFT_A even fully filled; the rim is lit.
 func _soft(P: Hunter) -> void:
 	AimKit.lane(P, "soft_lane", {"len": 7.0, "width": 2.2, "k": 1.0, "fill": 1.0, "soft": true, "tip": true})
 	AimKit.cone(P, "soft_cone", {"len": 4.0, "deg": 70.0, "inner": 0.0, "fill": 1.0, "soft": true, "all": true})
 	var lane := measure(AimKit.entry(P, "soft_lane"), 0.6, 1.08)
 	var cone := measure(AimKit.entry(P, "soft_cone"), 0.6, 3.98)
+	AimKit.circle(P, "soft_circle", {"r": 4.0, "band": 0.25, "alpha": 2.0, "soft": true, "all": true})
+	var circle := measure(AimKit.entry(P, "soft_circle"), 0.0, 3.9)
 	ok("soft lane: inside <= %.2f at the centre, rim lit (%.2f / %.2f)" % [AimShapes.SOFT_A, lane[0], lane[1]],
 			lane[0] > 0.0 and lane[0] <= AimShapes.SOFT_A + 0.001 and lane[1] >= 0.5)
 	ok("soft cone: inside <= %.2f at the centre, arc lit (%.2f / %.2f)" % [AimShapes.SOFT_A, cone[0], cone[1]],
 			cone[0] > 0.0 and cone[0] <= AimShapes.SOFT_A + 0.001 and cone[1] >= 0.5)
+	ok("soft circle: inside <= %.2f at the centre even at alpha 2, rim lit (%.2f / %.2f)"
+			% [AimShapes.SOFT_A, circle[0], circle[1]],
+			circle[0] > 0.0 and circle[0] <= AimShapes.SOFT_A + 0.001 and circle[1] >= 0.5)
 	AimKit.hide(P, "soft_lane")
 	AimKit.hide(P, "soft_cone")
+	AimKit.hide(P, "soft_circle")
 
 ## [the drawn alpha at the shape's centre line `at` of the way along it, the alpha `edge` m out from the
-## middle] for a lane or cone entry `e` (its sideways edge for a lane, along the aim for a cone).
+## middle] for a lane or cone entry `e` (its sideways edge for a lane, along the aim for a cone); for a circle,
+## [the alpha at its centre, the alpha `edge` m out from it].
 static func measure(e: Dictionary, at: float, edge: float) -> Array:
 	if e.is_empty():
 		return [-1.0, -1.0]
 	var g := AimGeo.new()
 	AimShapes.build(g, e)
+	if e["kind"] == "circle":
+		var c: Vector2 = e["at"]
+		return [alpha_at(g, c), alpha_at(g, c + Vector2(edge, 0.0))]
 	var o: Vector2 = e["from"]
 	var u: Vector2 = e["dir"]
 	var mid := o + u * float(e["len"]) * at
@@ -402,20 +417,15 @@ func _cleanup(m: Match, P: Hunter) -> void:
 	var r := AimKit.reticle(P)
 	ok("drop_holds: every telegraph goes (dur ones too)", IDS.all(func(i): return not AimKit.shown(P, i)) and not AimKit.shown(P, "long") and L.built == 0)
 	ok("drop_holds: and the cursor states", r["charge"] < 0.0 and float(r["perfect"]) == 0.0 and float(r["flare"]) == 0.0)
-	# however a merge starts (KinMerge calls the kit's own _drop_holds on some paths), a merged hunter shows nothing
+	# a merge no longer hides anything (docs/decisions/0100): a merged or merging hunter's telegraphs and cursor states show like any other
 	_all_shapes(P, 0.5, P)
-	AimKit.circle(P, "long", {"dur": 5.0})
 	AimKit.charge(P, 0.7)
 	P.merge_st = {"phase": "xform"}
 	L.rebuild(); L.tick_reticle(0.0)
-	var none: bool = IDS.all(func(i): return not AimKit.shown(P, i)) and not AimKit.shown(P, "long") and L.built == 0 and AimKit.reticle(P)["charge"] < 0.0
 	AimKit.lane(P, "lane"); AimKit.perfect(P)
 	L.rebuild()
-	ok("merge: a merging hunter's telegraphs and cursor states go, and new ones don't show", none and not AimKit.shown(P, "lane") and float(AimKit.reticle(P)["perfect"]) == 0.0 and L.entries.is_empty())
+	ok("merge: a merging hunter's telegraphs and cursor states still show", AimKit.shown(P, "lane") and float(AimKit.reticle(P)["perfect"]) > 0.0 and AimKit.reticle(P)["charge"] >= 0.0)
 	P.merge_st = {}
-	# the base kit runs drop_holds every step while merged (ArchKit.tick); every kit's override runs first
-	var src := FileAccess.get_file_as_string("res://scripts/arch/arch_kit.gd")
-	ok("drop_holds: ArchKit's own merge paths call drop_holds, not _drop_holds", src.count("\t\tdrop_holds()") >= 2 and not src.contains("\t\t_drop_holds()"))
 
 ## Every ground-target slot ("ground" in content/archetypes) and the id of its landing mark: "<slot>_spot" is
 ## the held-key preview (Quick cast off, Match.aim_hold); the others are the kit's own aim hold.
@@ -491,3 +501,59 @@ func _aim_slot(m: Match, P: Hunter, key: String, slot: String) -> void:
 				ok("reach %s: Quick cast off, R holds to aim" % key, AimReach.holds(P.ak, "x"))
 			m.aim_hold = "signature" if slot == "e" else "hunter_ult"
 			m._update_indicators(1.0)
+
+
+## A sector over uneven ground is the same triangles as building every ring on its own (AimGeo.quad looks up all
+## four corners): each ring's inner row, carried on from the ring before, is the very points it would look up.
+func _sector_rows() -> void:
+	var w := World.new()
+	w.w = 32
+	w.h = 32
+	w.kind.resize(32 * 32)
+	w.level.resize(32 * 32)
+	for i in 32 * 32:
+		w.kind[i] = World.T_VOID if i % 29 == 0 else World.T_GROUND
+		w.level[i] = (i * 7) % 3
+	var g := AimGeo.new()
+	g.world = w
+	var want := AimGeo.new()
+	want.world = w
+	var ctr := Vector2(15.3, 16.7)
+	var r0 := 1.5
+	var r1 := 8.0
+	g.sector(ctr, r0, r1, 0.2, 2.6, Color.RED, Color.BLUE)
+	var segs := clampi(int(r1 * absf(2.6 - 0.2) / 0.5), 8, 48)
+	var rings := maxi(1, int(ceil((r1 - r0) / (AimGeo.STEP * 1.5))))
+	for j in rings:
+		var ra := lerpf(r0, r1, float(j) / rings)
+		var rb := lerpf(r0, r1, float(j + 1) / rings)
+		var ca := Color.RED.lerp(Color.BLUE, float(j) / rings)
+		var cb := Color.RED.lerp(Color.BLUE, float(j + 1) / rings)
+		for i in segs:
+			var t0 := lerpf(0.2, 2.6, float(i) / segs)
+			var t1 := lerpf(0.2, 2.6, float(i + 1) / segs)
+			var e0 := Vector2(cos(t0), sin(t0))
+			var e1 := Vector2(cos(t1), sin(t1))
+			want.quad(ctr + e0 * ra, ctr + e1 * ra, ctr + e1 * rb, ctr + e0 * rb, ca, cb)
+	var heights := {}
+	for p in g.v:
+		heights[snappedf(p.y, 0.01)] = true
+	ok("geo: a sector's rings are the ones quad builds ring by ring", g.v == want.v and g.c == want.c,
+			"%d vs %d vertices, %d heights" % [g.v.size(), want.v.size(), heights.size()])
+	w.free()
+
+## A disc's rim vertices sit on the angle grid (segs steps round), every ring cut at the same angles.
+func _disc_rim() -> void:
+	var g := AimGeo.new()
+	var ctr := Vector2(3.0, 4.0)
+	g.disc(ctr, 6.0, Color.WHITE)
+	var rim := 0
+	var on_grid := true
+	for p in g.v:
+		var q := Vector2(p.x, p.z) - ctr
+		if absf(q.length() - 6.0) < 0.001:
+			rim += 1
+			var steps := (fposmod(q.angle(), TAU) / TAU) * 48.0
+			on_grid = on_grid and absf(steps - roundf(steps)) < 0.001
+	ok("geo: a 6 m disc is 6 rings of 48 steps (1584 vertices)", g.v.size() == 1584, str(g.v.size()))
+	ok("geo: its rim vertices sit on the 48-step angle grid", rim > 0 and on_grid, "%d on the rim" % rim)

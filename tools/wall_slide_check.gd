@@ -29,7 +29,7 @@ var rock_spot := Vector3.ZERO
 
 
 func run(main: Node) -> void:
-	await _setup(main)
+	_setup(main)
 	open_spot = _flat_spot(9.0)
 	rock_spot = _flat_spot(6.0)
 	var walls: Array = [_cliff()] + _corners()
@@ -65,7 +65,7 @@ func _setup(main: Node) -> void:
 	Save.d = Save.fresh()
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 3, "squad": 2, "tier": 0, "length": 1e9, "seed": 3, "no_drop": true, "god": true})
+	m.start({"teams": 3, "squad": 2, "tier": 0, "length": 1e9, "seed": 3, "no_drop": true, "god": true})
 	m.set_process(false)
 	w = m.world
 	for mb in m.mobs:
