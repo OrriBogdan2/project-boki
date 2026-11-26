@@ -1,16 +1,19 @@
 extends RefCounted
 ## --kin-size-check: a rigged Boki is as big as its data says (KinSize). Every species with a model, built the way the
-## farm and the match build it (Models.kin), reads (KinSize.read: the root of its silhouette's area at the match's and
-## the farm's pitch) within TOLERANCE of size.cm times M_PER_CM times READ_SHARE; the starters read close at each
-## camera on its own, at the match and at the farm's scale, and Heatherhorn reads bigger than all of them.
-## --table prints each.
+## farm and the match build it (Models.kin) and held in its idle pose, reads (KinSize.read: the root of its silhouette's
+## area at the match's and the farm's pitch) within TOLERANCE of size.cm x M_PER_CM x READ_SHARE; KinSize.READS (the
+## idle reads the game fits by) is up to date; the starters read close at each camera on its own, in a match and at
+## the farm's scale, and Heatherhorn reads bigger than all of them. --table prints each. --write measures every
+## species' idle read and writes content/rules/kin_read.json (run it after a model swap; the check names it).
 
 const TOLERANCE := 0.05  # the share a species' measured read may differ from its data read
+const STALE := 0.02  # the share a species' KinSize.READS entry may differ from its model's idle read
 const STARTERS := ["cindle", "puddlet", "burrlet"]
 const READ_SPREAD := 1.12  # at each camera, the starter reading biggest reads at most this many times the least
 const BIG := "heatherhorn"
 const BIG_OVER := 1.5  # Heatherhorn reads at least this many times the biggest starter
 const FAR := 2.0  # the most a species' longest side may differ from its data length (an outlier model to look at)
+const OUT := "res://content/rules/kin_read.json"
 
 var bad := 0
 var _print_table := false
@@ -22,35 +25,26 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 
-## The metre size of the box round the meshes under `root`, in the world.
-func _box(root: Node3D) -> Vector3:
-	var all := AABB()
-	var first := true
-	for n in root.find_children("*", "MeshInstance3D", true, false):
-		var mi := n as MeshInstance3D
-		var b := mi.global_transform * mi.get_aabb()
-		all = b if first else all.merge(b)
-		first = false
-	return all.size
+## A Boki built as the game builds it, under `stage`, its rig held at the start of its idle clip (no frame has run, so
+## that is its pose; KinSize.READS was measured the same way).
+func _build(stage: Node3D, id: String, rec: Dictionary) -> BokiRig:
+	var k := Models.kin(id, rec)
+	stage.add_child(k)
+	var rig := k.get_node("Body/Flex/BokiRig") as BokiRig
+	rig.player.seek(0.0, true)
+	return rig
 
 
-## The world points of the meshes under `root` (every vertex KinSize.read would sample).
-func _pts(root: Node3D) -> PackedVector3Array:
-	var pts := PackedVector3Array()
-	for n in root.find_children("*", "MeshInstance3D", true, false):
-		var mi := n as MeshInstance3D
-		for si in mi.mesh.get_surface_count():
-			for v in mi.mesh.surface_get_arrays(si)[Mesh.ARRAY_VERTEX] as PackedVector3Array:
-				pts.append(mi.global_transform * v)
-	return pts
+## The m a built Boki reads as in the world from each of KinSize.PITCHES (its model's idle read times its world scale).
+func _reads(rig: BokiRig) -> Array:
+	var pts := KinSize.points(rig.model, true)
+	var scale := rig.model.global_basis.get_scale().x
+	return KinSize.PITCHES.map(func(p: float) -> float: return KinSize.read_at(pts, p) * scale)
 
 
-## The m a built Boki reads as from one pitch (degrees): the root of its yaw-averaged silhouette area.
-func _read_at(pts: PackedVector3Array, pitch: float) -> float:
-	var area := 0.0
-	for i in KinSize.YAWS:
-		area += KinSize.cover(pts, deg_to_rad(pitch), PI * float(i) / KinSize.YAWS)
-	return sqrt(area / KinSize.YAWS)
+## The two reads' geometric mean: KinSize.read's.
+func _mean(at: Array) -> float:
+	return sqrt(float(at[0]) * float(at[1]))
 
 
 ## Whether the starters' reads (id -> [read per pitch]) sit within READ_SPREAD at every pitch; `where` names the view.
@@ -69,37 +63,52 @@ func _close(reads: Dictionary, where: String) -> void:
 
 func run(m: Node) -> void:
 	Save.no_write = true
+	var write := false
 	for a in OS.get_cmdline_user_args():
 		_print_table = _print_table or a == "--table"
+		write = write or a == "--write"
 	var stage := Node3D.new()
 	m.add_child(stage)
+	var known: Dictionary = Content.rules(KinSize.READS).get("reads", {})
+	var idle := {}
 	var reads := {}
 	var worst := 0.0
 	var far := 1.0
+	var stale: Array[String] = []
 	for id in Data.KIN:
 		if not BokiRig.has(id):
 			continue
-		var k := Models.kin(id, {})
-		stage.add_child(k)
-		var mdl := (k.get_node("Body/Flex/BokiRig") as BokiRig).model
-		var pts := _pts(mdl)
-		var at: Array = KinSize.PITCHES.map(func(p: float) -> float: return _read_at(pts, p))
-		var got := sqrt(float(at[0]) * float(at[1]))
+		var rig := _build(stage, id, {})
+		idle[id] = snappedf(KinSize.read(rig.model, true), 0.0001)  # in the model's own space, as fit() takes it
+		if not known.has(id) or absf(float(known[id]) / float(idle[id]) - 1.0) > STALE:
+			stale.append(id)
+		var at := _reads(rig)
 		var cm := float(Unique.base_size(id)["cm"])
-		var box := _box(mdl)
+		var box := KinSize.box(rig.model) * rig.model.global_basis.get_scale().x
 		var longest := box[box.max_axis_index()] / (cm * KinSize.M_PER_CM)
 		reads[id] = at
-		worst = maxf(worst, absf(got / (cm * KinSize.M_PER_CM * KinSize.READ_SHARE) - 1.0))
+		worst = maxf(worst, absf(_mean(at) / (cm * KinSize.M_PER_CM * KinSize.READ_SHARE) - 1.0))
 		far = maxf(far, maxf(longest, 1.0 / longest))
 		if _print_table:
 			print(
 				(
-					"KIN_SIZE_ROW %s data %.0f cm, box %.0f x %.0f x %.0f cm, read %.0f cm (57: %.0f, 20: %.0f)"
-					% [id, cm, box.x * 100, box.y * 100, box.z * 100, got * 100, at[0] * 100, at[1] * 100]
+					"KIN_SIZE_ROW %s data %.0f cm, bind box %.0f x %.0f x %.0f cm, idle read %.0f cm (57: %.0f, 20: %.0f)"
+					% [id, cm, box.x * 100, box.y * 100, box.z * 100, _mean(at) * 100, at[0] * 100, at[1] * 100]
 				)
 			)
-		k.queue_free()
+		rig.get_parent().get_parent().get_parent().queue_free()
+	if write:
+		var f := FileAccess.open(OUT, FileAccess.WRITE)
+		var doc := "Each rigged Boki's read (m, at fit 1) in its idle pose: KinSize.READS. Written by --kin-size-check --write."
+		f.store_string(JSON.stringify({"doc": doc, "reads": idle}, "\t", true) + "\n")
+		f.close()
+		print("KIN_SIZE wrote %d reads to %s" % [idle.size(), OUT])
+		stale.clear()
 	ok(reads.size() >= 40, "%d species with a model measured" % reads.size())
+	ok(
+		stale.is_empty(),
+		"KinSize.READS matches every model's idle read (stale: %s; run --kin-size-check --write)" % [stale]
+	)
 	ok(
 		worst <= TOLERANCE,
 		"every species reads within %d%% of its data size (worst %.1f%%)" % [TOLERANCE * 100.0, worst * 100.0]
@@ -111,24 +120,20 @@ func run(m: Node) -> void:
 	for id in STARTERS:
 		var rec := Save.new_kin(id, "", 7)  # a fresh hatchling, the way the farm draws one (its evo scale)
 		(rec["dna"] as Dictionary)["size"] = 0.0
-		var k := Models.kin(id, rec)
-		stage.add_child(k)
-		k.scale = k.scale * farm_scale  # Home draws a Boki at its own scale times FARM_BOKI_SCALE, the same for each
-		var pts := _pts((k.get_node("Body/Flex/BokiRig") as BokiRig).model)
-		farm[id] = KinSize.PITCHES.map(func(p: float) -> float: return _read_at(pts, p))
-		k.queue_free()
+		var rig := _build(stage, id, rec)
+		var root := rig.get_parent().get_parent().get_parent() as Node3D
+		root.scale = root.scale * farm_scale  # Home draws a Boki at its own scale times FARM_BOKI_SCALE, the same for each
+		farm[id] = _reads(rig)
+		root.queue_free()
 	_close(farm, "on the farm")
 	var biggest := 0.0
 	for id in STARTERS:
-		biggest = maxf(biggest, sqrt(float(reads[id][0]) * float(reads[id][1])))
-	var big := sqrt(float(reads[BIG][0]) * float(reads[BIG][1]))
+		biggest = maxf(biggest, _mean(reads[id]))
+	var big := _mean(reads[BIG])
 	ok(
 		big >= biggest * BIG_OVER,
 		"Heatherhorn reads bigger than every starter (%.0f cm against %.0f)" % [big * 100.0, biggest * 100.0]
 	)
-	var t0 := Time.get_ticks_usec()
-	KinSize.read((Models.kin(BIG, {}).get_node("Body/Flex/BokiRig") as BokiRig).model)
-	print("KIN_SIZE_TIME read of one model %.1f ms" % ((Time.get_ticks_usec() - t0) / 1000.0))
 	stage.queue_free()
 	print("KIN_SIZE_DONE bad=%d" % bad)
 	m.get_tree().quit(1 if bad > 0 else 0)
