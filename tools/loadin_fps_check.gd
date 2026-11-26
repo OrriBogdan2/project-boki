@@ -24,7 +24,7 @@ var look_s := 30.0
 var advisory := false
 var headless := false
 var software := false
-var frames: Array = []  # wall ms, loading 1/0, draws, objs, nodes, phys, proc, mem, vram, steps, cpu ms, marks, phase
+var frames: Array = []  # wall ms, loading 1/0, draws, objs, nodes, phys, proc, mem, vram, steps, cpu ms, marks, phase, 3D off 1/0
 var loading_ms := 0.0
 var last_us := 0
 var t0_us := 0
@@ -127,6 +127,7 @@ func _process(_delta: float) -> void:
 			cpu,
 			step.strip_edges(),
 			_phase(cur) if shown_us > 0 else "load",
+			1 if get_viewport().disable_3d else 0,
 		]
 	)
 	if shown_us > 0 and (now - shown_us) / 1e6 >= look_s:
@@ -187,7 +188,9 @@ func _phase_lines(j: Array) -> Array:
 		var objs := 0.0
 		var cpu := 0.0
 		var mem := 0.0
+		var off := 0
 		for f in fs:
+			off += int(f[13])
 			sum += float(f[0])
 			draws += float(f[2])
 			objs += float(f[3])
@@ -196,8 +199,8 @@ func _phase_lines(j: Array) -> Array:
 		ms.sort()
 		var n := float(fs.size())
 		var pf := "LOADIN phase %-6s %4d frames  avg %.1f ms  p99 %.1f  worst %.1f  draws %.0f  obj %.0f"
-		pf += "  cpu %.1f  mem peak %.0f MB"
-		lines.append(pf % [ph, fs.size(), sum / n, _pct(ms, 0.99), _pct(ms, 1.0), draws / n, objs / n, cpu / n, mem])
+		pf += "  cpu %.1f  mem peak %.0f MB  3D off %d"
+		lines.append(pf % [ph, fs.size(), sum / n, _pct(ms, 0.99), _pct(ms, 1.0), draws / n, objs / n, cpu / n, mem, off])
 	return lines
 
 
@@ -300,7 +303,7 @@ func _finish() -> void:
 	if csv_path != "":
 		var fc := FileAccess.open(csv_path, FileAccess.WRITE)
 		if fc:
-			fc.store_line("ms,loading,draws,objects,nodes,phys_ms,proc_ms,mem_mb,vram_mb,sim_steps,cpu_ms,marks,phase")
+			fc.store_line("ms,loading,draws,objects,nodes,phys_ms,proc_ms,mem_mb,vram_mb,sim_steps,cpu_ms,marks,phase,off3d")
 			for f in frames:
-				fc.store_line("%.2f,%d,%d,%d,%d,%.2f,%.2f,%.0f,%.0f,%d,%.2f,%s,%s" % f)
+				fc.store_line("%.2f,%d,%d,%d,%d,%.2f,%.2f,%.0f,%.0f,%d,%.2f,%s,%s,%d" % f)
 	get_tree().quit(0 if fails == 0 or advisory else 1)
