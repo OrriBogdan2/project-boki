@@ -393,9 +393,9 @@ Measured in the match by `tools/dredge_timing_check.gd` (run by `--dredge-combo-
 | Brass Broadside | 1.1 charge, waves 0.6 apart | 1.1 / 0.6 | same (asserted in `dredge_ult_check.gd`, run by `--dredge-combo-check`) | none |
 | Pounce, dive, quake, jump, flex, reel end | no footage timing | clip = kit | same | none |
 ## Animation timing (Nov 10: parity pass against the 5 fps footage; 10 fps for the ult)
-Measured in a live match through `WardenClips` (dredge.glb clips seeked to the kit's move clock, `kmove_t`; blend in
-0.1 s, back to the legs 0.16 s) by `tools/dredge_anim_time_check.gd`, which runs inside `--dredge-combo-check` and
-asserts every row below. A clip's "hit" is read off the GLB: the frame its pose stops moving after its fastest swing.
+Measured on the contract rig through `WardenClips` (dredge.glb clips seeked to the kit's move clock, `kmove_t`; blend in
+0.1 s, back to the legs 0.16 s). The measuring tool is retired: Grimble is Meshy-native on main (`WardenNative`, no
+`Warden/Sync` to seek), so the rows below are the last measurement, not a live check. A clip's "hit" is read off the GLB: the frame its pose stops moving after its fastest swing.
 Source times from briefs/hero-ref/dredge.md (one frame = 0.2 s; the ult 0.1 s).
 
 | Move | Source (s) | Ours before (start / hit / end) | Ours after | Status |
