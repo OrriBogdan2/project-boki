@@ -27,6 +27,16 @@ func new_mind(rng: RandomNumberGenerator, skill: float, diff := {}) -> Dictionar
 	}
 
 
+## The aim error's pity (reference tuning): it grows with the share of health the target has lost, by the
+## difficulty's PITY (keyed by Data.BOT_DIFF name), so a badly hurt player is harder to finish off.
+const PITY := {"Easy": 1.0, "Medium": 1.5, "Hard": 0.5, "Expert": 0.0}
+
+
+static func pity_k(a: Dictionary, tgt: Ent) -> float:
+	var lost := 1.0 - clampf(tgt.hp / maxf(1.0, tgt.max_hp), 0.0, 1.0)
+	return 1.0 + float(PITY.get(String((a.get("diff", {}) as Dictionary).get("name", "")), 0.0)) * lost
+
+
 const ARRIVE_R := 1.5  # bots ease off and stop turning this close to where they're going
 const GOAL_KEEP := 4.0  # metres of extra reach for a goal we're already heading to
 const GOAL_STICK := 5.0  # seconds a bot sticks to a goal before it may flip back to the last one
@@ -267,7 +277,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			a["aim_t"] = randf_range(0.7, 1.3)
 			a["aim_goal"] = Vector2(randf_range(-1, 1), randf_range(-1, 1)) * (1.15 - a["skill"]) * 1.6
 		a["aim_err"] = (a["aim_err"] as Vector2).lerp(a.get("aim_goal", Vector2.ZERO), 1.0 - exp(-3.0 * dt))
-		var aim: Vector2 = Vector2(tgt.pos.x, tgt.pos.z) + lead + a["aim_err"]
+		var aim: Vector2 = Vector2(tgt.pos.x, tgt.pos.z) + lead + a["aim_err"] * pity_k(a, tgt)
 		inp["aim"] = Vector3(aim.x, tgt.hit_y() + 0.9, aim.y)
 		inp["aim_y"] = tgt.hit_y()  # someone below a lip: their balloon, not their body
 		var los := los_to(m, h, tgt, dt)
