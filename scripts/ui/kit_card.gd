@@ -430,17 +430,8 @@ static func infusion_lines(a: String, ks: KinSpec) -> Array:
 		var f := Arch.fill(
 			sd.get("sockets", {}), inf, slot, String(sd.get("delivery", "projectile" if slot == "rmb" else "burst"))
 		)
-		var notes: Array = (
-			(f.get("notes", []) as Array)
-			. filter(func(x): return not String(x).contains("fallback"))
-			. map(
-				func(x):
-					var s := String(x)
-					for pre in ["ctrl add: ", "hit: ", "guard: ", "util: ", "mod: "]:
-						s = s.replace(pre, "+")
-					return s.replace("ctrl swap: ", "→ ")
-			)
-		)
+		var kept := (f.get("notes", []) as Array).filter(func(x): return not String(x).contains("fallback"))
+		var notes: Array = kept.map(_note_text)
 		var txt := ", ".join(notes.slice(0, 2)) if not notes.is_empty() else "+10% power"
 		out.append("%s: %s" % [String(sd.get("name", slot)), txt])
 	return out
@@ -788,3 +779,11 @@ class KitPreview:
 			if hit:
 				draw_arc(foe, R * 2.0, 0, TAU, 16, Color(1, 1, 1, 0.7), 2.0, true)
 		draw_circle(me, R, white)
+
+
+## A fill note as the card words it: the socket prefixes become "+", a control swap an arrow.
+static func _note_text(x: Variant) -> String:
+	var s := String(x)
+	for pre in ["ctrl add: ", "hit: ", "guard: ", "util: ", "mod: "]:
+		s = s.replace(pre, "+")
+	return s.replace("ctrl swap: ", "→ ")
