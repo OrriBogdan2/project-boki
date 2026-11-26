@@ -4,9 +4,9 @@ extends "res://tools/toon_lineup_farm_shots.gd"
 ## the match camera. Per spot it writes the whole frame at native size (1920x1080 unless --fullres, no resize):
 ## <dir>/<cam>[_close]_s<i>_{after,before}.png, plus two close cameras on Crofthorn (3/4 front and 3/4 from behind, the
 ## spine) as <dir>/tele_{front,back}_s<i>_{after,before}.png, rendered by a real camera 1.1 m away, not a crop.
-## "after" is the game's look; "before" puts Crofthorn's coat overrides back to the shared defaults (BEFORE_LOOK) on
-## the same scene. <dir>/coat_stats_<cam>.tsv: luminance std-dev, mean luminance and saturation of each model's own
-## pixels (edge pixels left out). Needs a renderer (jobq submit --needs gpu).
+## "after" is the game's look; "before" (--before-atlas=<file>) draws the coat atlas the game had before, with no
+## override. <dir>/coat_stats_<cam>.tsv: luminance std-dev, mean luminance and saturation of each model's own pixels
+## (edge pixels left out). Needs a renderer (jobq submit --needs gpu).
 
 const TELE_FOV := 30.0
 const TELE_VIEWS := {"front": Vector3(0.55, 0.5, 1.0), "back": Vector3(-0.5, 0.95, -0.85)}
@@ -23,7 +23,8 @@ var tele_cam: Camera3D
 var base_cam: Camera3D  # the scene's own camera, put back after a close camera
 var rows: Array = []
 var tele_only := false
-var passes: Array = [["after", {}], ["before", BEFORE_LOOK]]  # name, Crofthorn coat uniforms put over the game's
+# name, Crofthorn coat uniforms put over the game's ("_atlas": a coat atlas to draw)
+var passes: Array = [["after", {}]]
 
 
 func run(main_node: Node) -> void:
@@ -55,9 +56,13 @@ func run(main_node: Node) -> void:
 					"albedo_flat_contrast": float(f[3]),
 					"desat": float(f[4]),
 					"dark_lift": float(f[5]),
-					"albedo_flat_gain": float(f[6])
+					"albedo_flat_gain": float(f[6]),
+					"albedo_flat_key": Vector3(0.72, 0.165, 0.116),
+					"albedo_flat_key_width": 0.1
 				}
 				passes.append([f[0], look])
+		if String(a).begins_with("--before-atlas="):  # the coat atlas the game had before (a file under res://)
+			passes.append(["before", {"_atlas": String(a).substr(15)}])
 		if String(a) == "--tele-only":
 			tele_only = true
 	DirAccess.make_dir_recursive_absolute(dir)
@@ -75,8 +80,12 @@ func run(main_node: Node) -> void:
 			_last_empty = main.get_viewport().get_texture().get_image()  # (the spot without the row)
 			_spawn_row(spot, spacing)
 			var croft: Node3D = nodes[species.find(CROFT)]
-			if not (pass_i[1] as Dictionary).is_empty():
-				_apply_look(croft, pass_i[1])
+			var look: Dictionary = (pass_i[1] as Dictionary).duplicate()
+			if look.has("_atlas"):
+				_swap_atlas(croft, String(look["_atlas"]))
+				look.erase("_atlas")
+			if not look.is_empty():
+				_apply_look(croft, look)
 			await _settle(1.2)
 			if not tele_only:
 				_shoot(tag, state, si)
@@ -167,6 +176,23 @@ func _spawn(row: Array, at: Vector3) -> Node3D:
 	if combat_owner != null:
 		return combat_owner._spawn(row, at)
 	return super._spawn(row, at)
+
+
+## A Boki's painted-coat materials (the atlas) with these shader uniforms put over the game's; albedo_flat* only on
+## the atlas, so the face and eyes keep their texture.
+func _apply_look(node: Node, look: Dictionary) -> void:
+	for mi in node.find_children("*", "MeshInstance3D", true, false):
+		for s in (mi as MeshInstance3D).get_surface_override_material_count():
+			var mat := (mi as MeshInstance3D).get_active_material(s)
+			if (
+				mat is ShaderMaterial
+				and (mat as ShaderMaterial).get_shader_parameter("use_tex") == true
+			):
+				var tex: Texture2D = (mat as ShaderMaterial).get_shader_parameter("albedo_tex")
+				var coat := tex.resource_path.contains("atlas")
+				for k in look:
+					if coat or not String(k).begins_with("albedo_flat"):
+						(mat as ShaderMaterial).set_shader_parameter(k, look[k])
 
 
 ## Each model's own pixels, found against the frame with the models hidden (self.empty), a pixel belonging to the
