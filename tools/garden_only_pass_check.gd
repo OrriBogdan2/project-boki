@@ -11,7 +11,7 @@ const NAG := "\\b(expeditions?|extract\\w*|matches|raids?|skiff|Hunters?|lairs?)
 const MATCH_SOURCES := ["unlock", "mastery"]
 ## Nags that wait for a design call (docs/GARDEN.md, open questions) or are a choice, not a push.
 ## Each is a part of the "where: line" text.
-const ALLOWED_NAGS := ["Goals row (unlock)", "head out, or press Stay"]
+const ALLOWED_NAGS := ["Goals row (unlock)", "Goals row (mastery)", "head out, or press Stay"]
 
 var nag_rx := RegEx.create_from_string("(?i)" + NAG)
 var goals_seen := {}  # Goals row text -> source, every row the card showed

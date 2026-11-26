@@ -216,6 +216,11 @@ func label() -> String:
 	return "Play Fetch Cup (back %s)" % Save.active_kin().get("name", "your partner")
 
 
+## True while a round is on (GardenMusic ducks the music for it).
+func playing() -> bool:
+	return run != null
+
+
 func use() -> void:
 	var ks: Array = h.hrace.entrants()
 	if ks.size() < 2:
@@ -235,11 +240,6 @@ func use() -> void:
 	cue = GardenCues.VolleyCue.new(h)
 	_place()
 	GardenSfx.countdown(h, mat.position)
-
-
-## True while a round is on (GardenMusic ducks the music for it).
-func playing() -> bool:
-	return run != null
 
 
 ## A press: true when the round took it.

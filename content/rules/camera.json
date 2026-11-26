@@ -13,7 +13,30 @@
 		"lean": [1.4, 0.42, 7.5, 6.0, false],
 		"standard": [0.2, 0.8, 6.0, 7.0, true],
 		"dynamic": [0.1, 0.9, 10.0, 10.0, false],
+		"pan": [0.1, 0.9, 7.25, 27.69, true],
 		"locked": [0.0, 0.0, 0.0, 0.0, false]
+	},
+	"farm": {
+		"doc": "The farm's close third-person view (FarmCam, scripts/home/farm_cam.gd). third_person: false puts the top-down Settings view back in the farm, nothing else to change. pitch_deg: degrees down from level (a right-drag tips it between pitch_min_deg and pitch_max_deg). dist_min..dist_max: metres behind the aim point at the mouse wheel's closest and widest (look_out: the most Ctrl's wide look may go past the widest, as a share of that range). fov: the vertical lens, rise: metres above your feet the view aims at. orbit_per_px: radians a right-drag turns per pixel. wall_gap: metres the camera keeps off the ground and walls (it is pulled in along the view); building_m and tree_m: how tall a building and a tree count as for that (the placed block under them is only as high as you can climb). blend_s: seconds to turn between this view and the top-down one (build mode and the training sessions use that).",
+		"third_person": true,
+		"pitch_deg": 20.0,
+		"pitch_min_deg": 8.0,
+		"pitch_max_deg": 42.0,
+		"dist_min": 3.5,
+		"dist_max": 5.5,
+		"look_out": 2.0,
+		"fov": 50.0,
+		"rise": 1.3,
+		"orbit_per_px": 0.006,
+		"wall_gap": 0.35,
+		"building_m": 4.5,
+		"tree_m": 4.0,
+		"blend_s": 0.8
+	},
+	"pan": {
+		"doc": "The default cursor pan (follow 'pan'), numbers from the target feel's data: deadzone 0.1 and maxzone 0.9 of the half-screen, quadratic easing, 100% pan distance. Its follow row is [deadzone, maxzone, up m, spring omega rad/s, quadratic]: up = how far the view slides with the cursor at the top edge; omega = sqrt(766.7), the critically damped spring of spring power 5 (constant lerp(100, 1600, (power - 1) / 9)). side_m: the same at the left or right edge; down_m: at the bottom edge. The slide is an ellipse of those three reaches and never takes you or your plate off screen (CamRig._cast_room). The data's hysteresis band (0.225 / 0.325) has no stated meaning here and is not used.",
+		"side_m": 5.5,
+		"down_m": 7.75
 	},
 	"frame_aspect": 1.7778,
 	"trail": {
@@ -24,12 +47,21 @@
 		"cut_speed": 90.0
 	},
 	"zoom": {
-		"doc": "The match camera's zoom (CamWheel, scripts/match/cam_wheel.gd), as a factor on the style's distance. The view starts at max (the widest the wheel allows, 36.8 m back and about 37 m of ground across: the source's 35-39 m) at spawn and after a respawn; the mouse wheel steps it by step per notch between min (close) and max. Holding Ctrl (Sneak) eases the view out to max x ctrl, past the wheel's range, and back on release. cap: the widest the view ever goes, with the glider and height stacked on top.",
+		"doc": "The wheel's zoom (CamWheel, scripts/match/cam_wheel.gd), as a factor on the style's distance. min/max/step/ctrl are the farm's (the farm camera is untouched). match: the match's own range, from the target feel's data. Its camera arm runs 20.2..30.2 m in 4 notches of 2.5 m (a 59 degree HORIZONTAL lens, 35.3 vertical at 16:9: 34.2 m of ground across at the widest, 22.9 m at the closest). Ours is a 32 degree vertical lens 23 m back: 1.0196 m of ground per metre back, the data's is 1.1315 per metre of arm, so 1 m of the data's arm is 1.1098 m of ours and the factors are 20.2 / 1.1098 / 23 -> min, 30.2 x 1.1098 / 23 -> max (1.4572), 2.5 x 1.1098 / 23 -> step. The view starts at max (spawn and respawn); the wheel steps it by step per notch between min and max. ctrl: holding Ctrl (Sneak) eases the view to max x ctrl, kept at the old 2.24x (51.5 m back) so the scouting look reaches as far as it did. glide_m: metres added to the distance under the glider (the data's +5.81 m of arm = 6.45 m of ours). abyss: below the lip of the map the arm grows from add_from_m at from_m deep to add_to_m at to_m deep and stays there (the data's +0.5..+15 m over 3.5..10 m = x1.1098), off for falls shorter than from_m. omega: rad/s of the critically damped spring the arm length follows (the match only; the farm eases its zoom as before). cap: the widest the view ever goes, with the glider and height stacked on top.",
 		"min": 0.55,
 		"max": 1.6,
 		"step": 0.1,
 		"ctrl": 1.4,
-		"cap": 2.4
+		"cap": 2.4,
+		"match": {
+			"min": 0.9748,
+			"max": 1.4572,
+			"step": 0.1206,
+			"ctrl": 1.5372,
+			"glide_m": 6.45,
+			"abyss": {"from_m": 3.5, "to_m": 10.0, "add_from_m": 0.555, "add_to_m": 16.65},
+			"omega": 10.0
+		}
 	},
 	"lean_edge_m": 1.5,
 	"pose_far_m": 40.0,
@@ -40,7 +72,8 @@
 		"feet_below_pct": [3.0, 4.0],
 		"ahead_per_behind": [1.46, 1.62],
 		"side_per_ahead": [1.25, 1.35],
-		"across_m": [35.0, 39.0],
+		"across_m": [34.0, 39.0],
+		"across_note": "34.0 is the target feel data (34.2 m: a 30.2 m arm at a 59 degree horizontal lens); the footage read 35-39 m",
 		"hunter_screen_pct": [8.3, 9.3]
 	}
 }

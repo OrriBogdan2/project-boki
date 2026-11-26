@@ -16,6 +16,7 @@ const SEED := 11
 const FRAMES := 6              # frames in the GPU strip
 const MARK_STEPS := 20         # steps per stage of the marks test: longer than a mark takes to fade (BokiWake.FADE_S)
 const WALK := Vector3(0, 0, -1.2)      # m/s: a wading walk along the stream's crossing
+const CROSS_X := HomeLayout.LANDING.x + 4.0  # m: crossing column, east of the portal (the market is north-west)
 
 var bad := 0
 var main: Node
@@ -73,7 +74,7 @@ func _step(k: Dictionary, goal: Vector3) -> float:
 
 func _cross(zc: int) -> void:
 	var k := _kin(0)
-	var x := HomeLayout.LANDING.x
+	var x := CROSS_X
 	_only(0, Vector3(x, 0, zc + 5.0))
 	var dry := 0.0
 	var shallow := 0.0
@@ -115,7 +116,7 @@ func _paddling(k: Dictionary) -> bool:
 
 func _fire(zc: int) -> void:
 	var k := _kin(1)
-	_only(1, Vector3(HomeLayout.LANDING.x, 0, zc + 0.5))
+	_only(1, Vector3(CROSS_X, 0, zc + 0.5))
 	var deep: bool = home.water.depth(k["pos"].x, k["pos"].z) == 2
 	ok(deep and home.wade.kind(k["rec"]) == "fire", "a Kilnbadger (Fire) in the deep middle")
 	var t := 0.0
@@ -130,10 +131,10 @@ func _fire(zc: int) -> void:
 func _paddle(zc: int) -> void:
 	var k := _kin(2)
 	BokiWade.rules()["linger_chance"] = 1.0
-	_only(2, Vector3(HomeLayout.LANDING.x, 0, zc + 3.0))
+	_only(2, Vector3(CROSS_X, 0, zc + 3.0))
 	Care.change(k["rec"], "joy", -40.0)
 	var joy0 := Care.need(k["rec"], "joy")
-	var far := Vector3(HomeLayout.LANDING.x, 0, zc - 5.0)
+	var far := Vector3(CROSS_X, 0, zc - 5.0)
 	var lingered := 0.0
 	var played := false
 	for i in 300:
@@ -159,7 +160,7 @@ func _marks(zc: int) -> void:
 	var nodes: int = home.find_children("BokiWake", "MultiMeshInstance3D", false, false).size()
 	ok(drawn == 5 and nodes == 1 and home.fx.rings.size() == rings0,
 		"one MultiMesh draws all %d marks (%d nodes, %d Fx rings made)" % [drawn, nodes, home.fx.rings.size() - rings0])
-	var x := int(HomeLayout.LANDING.x)
+	var x := int(CROSS_X)
 	var in_stream := marks.mask.get_pixelv(Vector2i(x, zc) - marks.mask_origin).r
 	var on_bank := marks.mask.get_pixelv(Vector2i(x, zc + 2) - marks.mask_origin).r
 	ok(in_stream > 0.5 and on_bank < 0.5, "the marks keep to the water: the stream is in their mask, its bank is not")
@@ -179,7 +180,7 @@ func _marks(zc: int) -> void:
 ## MARK_STEPS steps with the Boki listed in `wet` in the stream (the rest on its bank), those in `walking` moving;
 ## returns [Boki with a ring showing, Boki with a V showing].
 func _mark_stage(zc: int, wet: Array, walking: Array) -> Array:
-	var x := HomeLayout.LANDING.x
+	var x := CROSS_X
 	for i in MARK_STEPS:
 		for j in home.kins.size():
 			var k := _kin(j)
@@ -213,7 +214,7 @@ func _body_sizes(zc: int) -> void:
 
 ## Six frames of the three Boki at the stream, one image across. Needs a rendering display (jobq --needs gpu).
 func _strip(dir: String, zc: int) -> void:
-	var x := HomeLayout.LANDING.x
+	var x := CROSS_X
 	_only(0, Vector3(x - 5.0, 0, zc + 0.5))
 	_only(1, Vector3(x + 0.5, 0, zc + 0.5))
 	_only(2, Vector3(x + 2.5, 0, zc + 3.0))
@@ -256,7 +257,7 @@ func run(m: Node) -> void:
 	home.set_process(false)
 	home.life = null
 	var zc := _stream()
-	var x := HomeLayout.LANDING.x
+	var x := CROSS_X
 	ok(home.water.depth(x, zc) == 2 and home.water.depth(x, zc + 1.0) == 1, "a stream: deep middle, shallow edges")
 	_cross(zc)
 	_fire(zc)
