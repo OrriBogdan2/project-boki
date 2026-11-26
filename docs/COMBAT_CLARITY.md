@@ -177,3 +177,20 @@ yours pass `SideColor.order(m, hunter)`. Hit shapes, radii and timings are untou
 Fx telegraph element-Hunter pairs 8 loud -> 3 loud + 5 quiet; elements over a Hunter per frame 119.1 -> 114.8; AimKit
 shapes over Hunters unchanged at 6 pairs but plain for yours. Stills: `docs/shots/combat-own-telegraph-quiet/` (before
 over after).
+
+## Boki ownership read (2026-11-26)
+
+Can you tell your own Boki, a teammate's and a rival's apart at match zoom? `--wisp-read-shots` (GPU) plays the bot 3v3 on the
+Hollow Crown with every Boki riding as a wisp (bots summon them as the fight goes, so walking Boki show too) and, on five
+frames, `BokiOwnerRead` draws each Boki's mark alone, with and without it: a wisp's side-coloured rim or a walking Boki's
+ring. Per Boki it prints `OWNERREAD`: the mark's pixels at 1080p, the share painted in the right `SideColor` (you, ally,
+rival) and the share still changing the played frame. A Boki reads when the mark is 40 px or more, 70% or more right
+and 50% or more visible; a case (role x wisp or walking) passes at 80% of its Boki-frames (`OWNERCASE`).
+- Colour: right on 97 to 100% of every mark pixel, in every case (wisp rim and ring). Own, ally and rival are three
+  colours apart (`--clarity-check`, `_boki_owner`: the rim is the side colour for all three, RGB gap 0.6 or more).
+- Visible: the weak spot, 25 to 60% on some frames, from what lies over the Boki and not from its colour: your own
+  wisp behind your HUD or the status icons of your plate (see `docs/shots/wisp-owner-read/`), a rival's behind its
+  nameplate or a big body. The thin ring (SideRings.THIN) and the rim were left as they are: more weight would add to the
+  clutter the budget above holds down, and the cover is the plate's and the HUD's, not the mark's.
+- One transient has no side colour: the 0.25 s burst and fold of a summon (`BokiWispPop`) tints its rim to the Boki's
+  glow and type, so a Boki mid-pop reads as no one's (rim 9 to 10% right on those frames).

@@ -1980,7 +1980,11 @@ func _fold_for_action() -> void:
 func _interrupt_consume() -> void:
 	if drink_t <= 0.0 and kit_t <= 0.0 and not box_reviving():
 		return
-	UtilityUse.spill(self)
+	if drink_t > 0.0 or kit_t > 0.0:
+		UtilityUse.spill(self)
+	else:
+		m.fx.burst(pos + Vector3(0, 1.3, 0), Color("ff7a4a"), 10, 3.0, 0.35, 8.0)
+		m.sfx("crit", pos, -4.0, 0.7)
 	BoxRevive.cancel(self)
 
 ## Hold jump while falling to open the glider. It folds when you land, let go, dash, are stunned or spiked.
