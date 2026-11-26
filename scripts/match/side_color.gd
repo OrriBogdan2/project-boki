@@ -39,7 +39,8 @@ const PALETTES := {
 		"beam_locked": Color("6f7a9c"),
 		"beam_dark": Color("3a3a44"),
 		"beam_lost": Color("2c1638"),
-		"mates": [Color("ffd23f"), Color("5fd0ff"), Color("8ff0a0"), Color("ff9be8"), Color("ffa25f")]
+		"mates": [Color("ffd23f"), Color("5fd0ff"), Color("8ff0a0"), Color("ff9be8"), Color("ffa25f")],
+		"plate_mate": Color("ffd23f")  # the overhead plates' health for you and your squad (HudStyle.plate_fill)
 	},
 	"red_green":
 	{

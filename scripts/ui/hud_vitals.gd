@@ -44,10 +44,10 @@ static func draw(h, sz: Vector2, p: Hunter) -> void:
 	h.hover_spots.append([Rect2(Vector2(x0, y0 - 20), Vector2(w, 52)), "vitals"])
 	# the numbers: health big, max small; armour and its tier on the right
 	var hp_col := HudStyle.hp_fill(SideColor.you(), frac, h.m.time)
-	var hp_txt := str(int(ceil(p.hp)))
+	var hp_txt := HudStyle.num(ceili(p.hp))
 	HudStyle.text(c, Vector2(x0, y0 + 1), hp_txt, 26, HudStyle.INK if frac >= 0.3 else hp_col)
 	var hw := TextCache.width(HudStyle.BIG, hp_txt, 26)
-	var max_txt := "/ %d" % int(p.max_hp)
+	var max_txt := "/ " + HudStyle.num(int(p.max_hp))
 	HudStyle.text(c, Vector2(x0 + hw + 4, y0 + 1), max_txt, 14, HudStyle.MUTED)
 	if p.armor > 0.5:
 		var at := "%d" % int(ceil(p.armor))

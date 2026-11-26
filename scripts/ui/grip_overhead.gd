@@ -5,7 +5,7 @@ extends RefCounted
 ##   their Boki's type badge (in the type colour; a soft glow when their bond meter is full: a
 ##   Merge is coming. A deliberate tell, kept subtle). In a fight (MusicDir.fight_on) only that glowing badge is
 ##   drawn: the row was on every Hunter in 20 of 20 --clarity-shots fight frames (docs/COMBAT_CLARITY.md).
-## Drawn with the nameplate (Hud._nameplate) in the row HudPlate leaves free under every plate
+## Drawn with the nameplate (Hud._nameplate) in the row HudPlate leaves free over every plate's name
 ## (HudStyle.PLATE_ICON_ROW), so it moves and hides with it. Remote hunters' gloves, cooldowns and
 ## bond come over the net (GripNet). Look: HudStyle.
 
