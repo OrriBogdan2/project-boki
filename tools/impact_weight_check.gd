@@ -15,6 +15,9 @@ extends RefCounted
 ##   8. every freeze of your game, whoever asks (Match.freeze_frame: an armor break, a parry, a Boki's strike),
 ##      shares that cap, and one asked while another runs costs only the time it adds.
 ##   9. no kit file sets its own hit-stop, body flash or shake number: they come from the tiers.
+##  10. a summoned Boki hits and is hit on the same tiers: its basic bite is light, its ability (a tagged hit, the
+##      throw, the recall) solid, each holds the struck body and flashes it by the tier's numbers, and no Boki
+##      file (scripts/kin, scripts/match/kin*.gd) sets its own freeze or flash number. One HITFEEL boki row.
 ## Reuses the dash-flow check's training match and slot presses. Never touches the save.
 
 const SLOTS := ["lmb", "rmb", "e", "x", "dash"]
@@ -86,6 +89,7 @@ func run(main: Node) -> void:
 	_named()
 	_kit_tags()
 	_kit_literals()
+	_boki_literals()
 	CombatBus.hit_landed.connect(_on_hit)
 	for hero in Arch.ORDER:
 		var m: Match = flow._match(main, hero)
@@ -95,6 +99,7 @@ func run(main: Node) -> void:
 	var m2: Match = flow._match(main, Arch.ORDER[0])
 	_holds(m2)
 	_stacking(m2)
+	_boki(m2)
 	m2.queue_free()
 	_table()
 	print("IMPACT DONE, failures: %d" % bad)
@@ -429,10 +434,11 @@ func _stacking(m: Match) -> void:
 		f.free()
 	t.free()
 
+
 ## Three 0.07 s freezes of your game, each drained before the next as the running game does: the first in full, all
 ## three within the cap. Then one asked twice on the same step holds it once and costs once: the next gets the rest.
 func _freezes(m: Match, cap_s: float) -> void:
-	const ASK := 0.07               # s: a parry's freeze (combat/verbs.gd)
+	const ASK := 0.07  # s: a parry's freeze (combat/verbs.gd)
 	m.time += 2.0
 	var got: Array[float] = []
 	for i in 3:
@@ -441,9 +447,13 @@ func _freezes(m: Match, cap_s: float) -> void:
 		got.append(m.hitstop)
 		m.time += 0.05
 	var total := got[0] + got[1] + got[2]
-	ok(is_equal_approx(got[0], ASK) and total <= cap_s + 0.0001,
-		"three %.0f ms freezes inside %.2f s hold your game %.0f ms in all (cap %d): %s"
-			% [ASK * 1000.0, ImpactWeight.cap("hitstop_window_s"), total * 1000.0, int(cap_s * 1000.0), str(got)])
+	ok(
+		is_equal_approx(got[0], ASK) and total <= cap_s + 0.0001,
+		(
+			"three %.0f ms freezes inside %.2f s hold your game %.0f ms in all (cap %d): %s"
+			% [ASK * 1000.0, ImpactWeight.cap("hitstop_window_s"), total * 1000.0, int(cap_s * 1000.0), str(got)]
+		)
+	)
 	m.time += 2.0
 	m.hitstop = 0.0
 	m.freeze_frame(ASK)
@@ -451,10 +461,18 @@ func _freezes(m: Match, cap_s: float) -> void:
 	var twice := m.hitstop
 	m.hitstop = 0.0
 	m.freeze_frame(ASK)
-	ok(is_equal_approx(twice, ASK) and is_equal_approx(m.hitstop, cap_s - ASK),
-		"a %.0f ms freeze asked twice on one step holds %.0f ms and costs that once: the next gets %.0f ms (want %.0f)"
-			% [ASK * 1000.0, twice * 1000.0, m.hitstop * 1000.0, (cap_s - ASK) * 1000.0])
+	ok(
+		is_equal_approx(twice, ASK) and is_equal_approx(m.hitstop, cap_s - ASK),
+		(
+			(
+				"a %.0f ms freeze asked twice on one step holds %.0f ms and costs that once: "
+				+ "the next gets %.0f ms (want %.0f)"
+			)
+			% [ASK * 1000.0, twice * 1000.0, m.hitstop * 1000.0, (cap_s - ASK) * 1000.0]
+		)
+	)
 	m.hitstop = 0.0
+
 
 ## A free-standing body for direct Feel calls (no match tree).
 func _body(arch: String, at: Vector3) -> Hunter:
@@ -463,3 +481,55 @@ func _body(arch: String, at: Vector3) -> Hunter:
 	b.max_hp = 145.0
 	b.pos = at
 	return b
+
+
+## 9: no Boki file sets its own freeze_frame or body flash number (the tiers' hold_s / flash_s are the only source).
+func _boki_literals() -> void:
+	var rx := RegEx.create_from_string("freeze_frame\\([0-9.]+\\)|\\bflash_t = [0-9.]+")
+	var files := []
+	for dir in ["res://scripts/kin", "res://scripts/match"]:
+		for f in DirAccess.get_files_at(dir):
+			if f.ends_with(".gd") and (dir.ends_with("kin") or f.begins_with("kin")):
+				files.append("%s/%s" % [dir, f])
+	var strays := []
+	for path in files:
+		for hit in rx.search_all(FileAccess.get_file_as_string(path)):
+			strays.append("%s:%s" % [path.get_file(), hit.get_string()])
+	ok(strays.is_empty(), "no Boki file sets its own freeze or flash number (%d files): %s" % [files.size(), strays])
+
+
+## 9: a Boki's hit on a foe and a hit it takes, on the tiers (basic light, ability solid), away from the player.
+func _boki(m: Match) -> void:
+	var k := Kin.new()
+	k.max_hp = 60.0
+	k.pos = Vector3(40, 0, 40)
+	var foe := _body("", Vector3(46, 0, 40))
+	var row := {
+		"basic": {"src": "kin"},
+		"ability": {"src": "kin", "ab": "k1"},
+		"throw": {"src": "throw", "ab": "throw"},
+	}
+	var cells := []
+	for kind in row:
+		var want := ImpactWeight.of_boki(kind != "basic")
+		for dir in ["deals", "takes"]:
+			m.time += 1.0
+			foe.freeze_t = 0.0
+			k.freeze_t = 0.0
+			var by: Ent = k if dir == "deals" else foe
+			var to: Ent = foe if dir == "deals" else k
+			var got := Feel.hitstop(m, by, to, 2.0, row[kind])
+			var held: float = to.freeze_t
+			var wants := want if dir == "deals" else "light"
+			ok(
+				got == wants and is_equal_approx(held, ImpactWeight.hold_s(wants)),
+				"a Boki %s %s hit is '%s' (want '%s'), holds %.0f ms" % [kind, dir, got, wants, held * 1000.0]
+			)
+		cells.append("%s %s (%d ms)" % [kind, want, roundi(ImpactWeight.hold_s(want) * 1000.0)])
+	ok(
+		is_equal_approx(ImpactWeight.flash_s(""), ImpactWeight.flash_s("light")),
+		"a Boki hit flashes the body %.0f ms, the light tier's" % (ImpactWeight.flash_s("") * 1000.0)
+	)
+	print("HITFEEL boki | %s | flash %d ms" % [" | ".join(cells), roundi(ImpactWeight.flash_s("") * 1000.0)])
+	k.free()
+	foe.free()

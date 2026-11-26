@@ -74,7 +74,7 @@ What the in-game kit card (K) says.
 
 ### Abilities in full
 
-**Hoarfrost (passive).** Your damaging abilities Chill foes for 4s (a Chilled foe shows frost). Eight darts on the same foe Shatter them: a starburst of ice spikes, 60 damage to everyone within 2.4m. Knocking a Chilled hunter, or felling a Chilled monster, Shatters them 0.4s later: 37 damage to everyone within 3m, plus Chill.
+**Hoarfrost (passive).** Your damaging abilities Chill foes for 4s (a Chilled foe shows frost). Eight darts on the same foe Shatter them: a starburst of ice spikes, 54 damage to everyone within 2.4m. Knocking a Chilled hunter, or felling a Chilled monster, Shatters them 0.4s later: 37 damage to everyone within 3m, plus Chill.
 
 **Skate (dash, Shift, 13s cooldown).** Hold the dash key to skate at 10.5 m/s where you move, for up to 1.6s, carving wide curves with the move keys; you carry on over ledges. Let go and you glide to a stop; stopping early gives back a share of the cooldown. While skating your darts fly as fast, thick beams that hit twice as hard. Press it in the air (jumping, falling or gliding) and you skate through the air at once on a thin ribbon of ice, sinking only gently, so it carries you well over a gap; landing mid-skate carries straight on along the ground.
 
@@ -95,6 +95,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | cooldown 10.2s -> 8.7s, damage +15%. | cooldown 10.2s -> 7.2s, damage +30%; the detonation hits 45% harder. |
 | Dash (Shift) | recharge 13s -> 11.5s. | recharge 13s -> 10s; a Skate over the Abyss lays ice underfoot that holds for 5s. |
 | E | cooldown 17s -> 14.9s. | cooldown 17s -> 12.8s; the wall is 40 points tougher. |
+| R (ultimate) | Rimelock cooldown 80s -> 70s, damage 18 -> 25.2. The Fusion lasts 30% longer. | Rimelock cooldown 80s -> 60s, damage 18 -> 25.2. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > Glove (Q).
 

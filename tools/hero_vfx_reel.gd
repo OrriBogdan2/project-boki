@@ -7,6 +7,8 @@ extends "res://tools/combo51_shots.gd"
 ## Run it under the movie writer so the looks run on the fixed step and the real mix is recorded:
 ##   xvfb-run -a godot --rendering-driver opengl3 --resolution 1280x720 --path . --fixed-fps 60 \
 ##       --write-movie <dir>/reel.avi -- --hero-vfx-reel --shots-dir=<dir>
+## --reel-movie runs the reel as a child Godot under the movie writer and leaves <dir>/<hero>.avi with the real mix
+## (the GPU workers pass only the arguments after "--", so the engine's --write-movie cannot be given to them).
 ## --reel-frames also saves every drawn frame as <dir>/frames/NNNNN.jpg (FRAME_W wide), for a clip made off the
 ## box (jobq's GPU worker returns the out dir, not a movie): ffmpeg -framerate 60 -i <dir>/frames/%05d.jpg ...
 
@@ -19,12 +21,15 @@ const GENERIC := ["lmb", "hold", "rmb", "dash", "e", "r", "tierup", "armour"]
 const GAP := 0.7               # s of quiet between parts
 const SHEET_CROP := Vector2i(440, 300)    # px of each sheet frame
 const WIDE_CROP := Vector2i(640, 300)     # ... for a bow's long shots
-const LMB_RANGE := {"gunslinger": 8.0}    # m to the dummy in the LMB parts, for rounds to show in flight (else 3.3)
+## m to the dummy in the LMB parts, for rounds to show in flight (else 3.3)
+const LMB_RANGE := {"gunslinger": 8.0, "mage": 8.0}
 ## LMB sheet times for a round that flies in ~0.1 s (74 m/s over 8 m): a frame per step of the first flight.
 const LMB_TIMES_DEFAULT := [0.05, 0.1, 0.18, 0.3, 0.55, 0.62, 0.7, 1.0, 1.6]
-const LMB_TIMES := {"gunslinger": [0.033, 0.05, 0.067, 0.083, 0.1, 0.117, 0.133, 0.55, 0.62]}
+const LMB_TIMES := {"gunslinger": [0.033, 0.05, 0.067, 0.083, 0.1, 0.117, 0.133, 0.55, 0.62],
+	"mage": [0.06, 0.09, 0.12, 0.15, 0.18, 0.21, 0.25, 0.55, 0.62]}
 const FAN_CROP := Vector2i(900, 440)      # ... for Grimble's 5.9 m fan and the bodies in it
 const FRAME_W := 1280                     # px wide, each --reel-frames frame
+const MOVIE_SIZE := Vector2i(1280, 720)   # px, the --reel-movie video
 
 var only := ""
 var frame_dir := ""            # --reel-frames: where each drawn frame goes
@@ -49,6 +54,9 @@ func run(main_node: Node) -> void:
 			only = arg.substr(12)
 		if arg == "--reel-frames":
 			frame_dir = "frames"
+	if "--reel-movie" in OS.get_cmdline_user_args() and not "--reel-child" in OS.get_cmdline_user_args():
+		_record_movie()
+		return
 	var own := "res://tools/vfx_reel/%s.gd" % who
 	if get_script().resource_path != own and ResourceLoader.exists(own):
 		await load(own).new().run(main_node)
@@ -64,8 +72,8 @@ func run(main_node: Node) -> void:
 	P.lvl = 6
 	for slot in P.slot_lv:
 		P.slot_lv[slot] = 3
-	for part: String in parts():
-		if only != "" and part != only:
+	for part: String in (parts() if only == "" or only in parts() else [only]):     # (--reel-only may name a
+		if only != "" and part != only:                                                # part kept off the reel)
 			continue
 		print("REEL_MARK %d %s" % [Engine.get_frames_drawn(), part])
 		P.ak.res = 0.0              # (each part starts cool: Rage from the last one would go off in this one)
@@ -75,6 +83,27 @@ func run(main_node: Node) -> void:
 	_write_captions()
 	print("REEL_DONE %d in %s" % [lines.size(), dir])
 	main.get_tree().quit(0)
+
+## --reel-movie: this reel again as a child Godot under the movie writer at a fixed 60 fps. The movie is as big as
+## the project's viewport setting, so the child gets MOVIE_SIZE from a temporary override.cfg.
+func _record_movie() -> void:
+	var cfg := ProjectSettings.globalize_path("res://override.cfg")
+	var f := FileAccess.open(cfg, FileAccess.WRITE)
+	f.store_string("[display]\n\nwindow/size/viewport_width=%d\n" % MOVIE_SIZE.x)
+	f.store_string("window/size/viewport_height=%d\n\n[editor]\n\nmovie_writer/mjpeg_quality=0.9\n" % MOVIE_SIZE.y)
+	f.close()
+	var args := ["--path", ProjectSettings.globalize_path("res://"), "--rendering-driver", "opengl3"]
+	args.append_array(["--audio-driver", "Dummy", "--position", "30000,30000", "--fixed-fps", "60"])
+	args.append_array(["--write-movie", dir.path_join(who + ".avi"), "--"])
+	args.append_array(OS.get_cmdline_user_args())
+	args.append("--reel-child")
+	var out := []
+	var rc := OS.execute(OS.get_executable_path(), args, out, true)
+	DirAccess.remove_absolute(cfg)
+	for line in (String(out[0]) if out.size() > 0 else "").split("\n"):
+		if line.begins_with("REEL_") or line.contains("ERROR"):
+			print(line)
+	main.get_tree().quit(rc)
 
 ## (the match's own step is off here, so the ears and the detail share follow from this)
 func _go(secs: float, each := Callable(), marks: Array = [], lead := 3.5) -> void:
@@ -275,6 +304,37 @@ func _juggernaut_lunge() -> void:
 			"RMB hold, Lunge: charging (the lane is AimKit's), full flash at the blade, the fling "
 			+ "with its mesh trails, the impact, the scorched line",
 			[0.5, 0.9, 1.2, 1.32, 1.4, 1.48, 1.6, 1.9, 2.6]), 3.0)
+	await _go(GAP)
+
+## (--reel-only=lunge_far) a perfect Lunge down a lane with nothing in it: the whole 7.6 m at the match camera
+## (the coil holds to the stop, then the thrust; JuggernautKit.LUNGE_COIL_T).
+func _juggernaut_lunge_far() -> void:
+	await _reset(3.0, 6.0)
+	var kit: JuggernautKit = P.ak
+	var far := P.pos + Vector3(12.0, 0, 0)
+	var go := 0.1 + kit.rmb_charge_full() + 0.05
+	var lunge := func(t: float):
+		if _at(t, 0.1):
+			P.inp["sec_hold"] = true
+			kit.press_rmb()
+		if t >= go:
+			P.inp["sec_hold"] = false
+		_aim(far)
+	await _go(2.4, lunge, [], 2.5)
+	await _go(GAP)
+
+## Vex's Slipstep held 0.9 s down a lane with nothing in it: the slide's whole length at the match camera.
+func _gunslinger_dash() -> void:
+	await _reset(14.0)
+	var slide := func(t: float):
+		if _at(t, 0.15):
+			P.inp["move"] = Vector2(1, 0)
+			P.do_dash()
+		P.inp["dash_down"] = t > 0.15 and t < 1.05
+		if t > 0.3:
+			P.inp["move"] = Vector2.ZERO
+		_aim(T.pos)
+	await _go(2.4, slide, [], 2.5)
 	await _go(GAP)
 
 func _juggernaut_drop() -> void:

@@ -13,6 +13,15 @@ const CHECKS := {
 	"--stretch-5-check": ["res://tools/stretch_check.gd", "stretch_check", "archer,mage"],
 	"--stretch-6-check": ["res://tools/stretch_check.gd", "stretch_check", "dolm,ostra"],
 	"--stretch-7-check": ["res://tools/stretch_check.gd", "stretch_check", "gil"],
+	# GPU: posed hunter clip frames, --geo-dir= --shots-dir=
+	"--geo-shots": ["res://tools/geo_shots.gd", "geo_shots", null],
+	"--native-upper-shots": ["res://tools/native_upper_shots.gd", "native_upper_shots", null],
 	"--warden-native-check": ["res://tools/warden_native_check.gd", "warden_native_check", null],  # Meshy skeleton
+	"--native-springs-shots": ["res://tools/native_springs_shots.gd", "native_springs_shots", null],
+	"--tenzo-press-strip": ["res://tools/tenzo_press_strip.gd", "tenzo_press_strip", null],  # Tenzo LMB press frames
 	"--live-audit": ["res://tools/live_audit.gd", "live_audit", null],  # Hunters as played, GPU renders
+	# Meeko's sun and cloud: clear of the posed body in every state; GPU shots (--shots-dir=<dir> [--eye=<m>])
+	"--meeko-companions-clip-check":
+	["res://tools/meeko_companions_clip_check.gd", "meeko_companions_clip_check", null],
+	"--meeko-companions-shots": ["res://tools/meeko_companions_shots.gd", "meeko_companions_shots", null],
 }

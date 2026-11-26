@@ -22,14 +22,14 @@ def main(src, name, img, out):
     hit = [i for i in j["images"] if i.get("name") == name]
     if len(hit) != 1:
         sys.exit("glb_image_swap: %d images named %s" % (len(hit), name))
-    target = hit[0]["bufferView"]
+    write(j, binary, hit[0]["bufferView"], open(img, "rb").read(), out)
+
+
+def write(j, binary, target, img_bytes, out):
+    """The glb with buffer view `target` holding img_bytes (the views repacked in order)."""
     new = bytearray()
     for k, v in enumerate(j["bufferViews"]):
-        data = (
-            open(img, "rb").read()
-            if k == target
-            else binary[v.get("byteOffset", 0) : v.get("byteOffset", 0) + v["byteLength"]]
-        )
+        data = img_bytes if k == target else binary[v.get("byteOffset", 0) : v.get("byteOffset", 0) + v["byteLength"]]
         new += b"\0" * (-len(new) % 4)
         v["byteOffset"] = len(new)
         v["byteLength"] = len(data)

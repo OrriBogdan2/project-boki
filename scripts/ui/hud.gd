@@ -135,6 +135,7 @@ func _place_msgs() -> void:
 	loot.fight = msgs.fight
 	loot.visible = msgs.visible
 	msgs.top = HudScale.from_edge(HudStyle.safe_pad(c.size).y + 72.0)      # under the timer / Ways Out strip
+	msgs.top = DropHud.lane_top(m, m.player, msgs.top)      # and under the drop lines on the way down
 	if m.guide: msgs.top = maxf(msgs.top, m.guide.bottom(c.size))      # and under the first-match guide's line
 	if m.tut: TutorialHud.place_msgs(msgs, c.size)
 	else: TopStack.place(self)
@@ -296,7 +297,7 @@ func _draw_parts() -> void:
 	lowhp.draw_edge(c, sz)
 	if flash_t > 0.0:
 		c.draw_rect(Rect2(Vector2.ZERO, sz), Color(flash_col, flash_col.a * flash_t * (0.3 if Settings.get_v("reduce_flashes") else 1.0)))
-	if p and (p.out or p.downed) and m.killcam_text != "":
+	if p and p.out and m.killcam_text != "":      # (a downed Hunter's card already says who and with what)
 		_ctext(Vector2(sz.x * 0.5, maxf(sz.y * 0.22, msgs.bottom() + 30.0)), m.killcam_text, 22, Color("ff9a8a"), big)
 	for dk in BokiHud.squad_downed(m):
 		BokiHud.downed_arrow(self, dk, sz)
@@ -357,9 +358,10 @@ func _draw_world_labels() -> void:
 	ObjectiveTracker.world(self)      # the first expedition's next step: a pin, or an arrow at the screen edge
 	_draw_exit_labels()
 	_draw_lair_labels()
+	CampMark.world(self)
 	_draw_truce_marks()
 	_draw_wisp_rings()
-	RecastCue.world(self, cam, m.player)      # two-step abilities: the recast marker and the combo badges on foes
+	RecastCue.world(self, cam, m.player)      # two-step abilities: the recast marker and the payoff burst
 	for h in m.hunters:
 		if h == m.player or h.out or h.extracted or not h.model or not (h.model.visible or HunterWisp.hides(h)) or h.unseen or HudPlate.hidden(m, h):
 			continue
@@ -392,10 +394,10 @@ func _draw_world_labels() -> void:
 		LabelCull.mark(mb)
 		LabelClash.claim(sp, LabelClash.BAR)
 		if mb.stagger_t > 0.0:
-			_ctext(sp + Vector2(0, -12), "STAGGERED", 18, Color("fff27a"), big)
-		elif mb.stag_open > 0.0:
-			var a := 0.75 + 0.25 * sin(m.time * 12.0)
-			_ctext(sp + Vector2(0, -12), "STAGGERABLE", 17, Color(0.85, 0.6, 1.0, a), big)
+			c.draw_arc(sp + Vector2(0, -16), 9.0, 0, TAU, 20, Color("fff27a"), 3.0, true)
+		elif mb.stag_open > 0.0:       # a pulsing purple ring: hit it with an ability now (no word)
+			var ring_r := 9.0 + 2.0 * sin(m.time * 12.0)
+			c.draw_arc(sp + Vector2(0, -16), ring_r, 0, TAU, 20, Color(0.85, 0.6, 1.0), 3.0, true)
 		# compact bar; rare and mutated monsters (mb.rarity, mb.mutations) wear a tinted frame and
 		# little icons for their mutations, and always show their bar
 		var rare: bool = int(mb.rarity) > 0 or not mb.mutations.is_empty()
@@ -424,7 +426,7 @@ func _draw_world_labels() -> void:
 			_bar(br, bfrac, Color("e0b0ff") if mb.stagger_t > 0.0 else Color("ff8a6a"))
 			if ct > bfrac:
 				c.draw_rect(Rect2(br.position + Vector2(bw * bfrac, 0), Vector2(bw * (ct - bfrac), 6)), Color(1.0, 0.95, 0.88, 0.8))
-			_status_row(sp + Vector2(0, 16), mb)
+			_status_row(sp + Vector2(0, 18), mb)
 	for k in m.kins:
 		if k.dead or not k.visible or k.state == "shoulder" or cam.is_position_behind(k.position):
 			continue
@@ -660,10 +662,12 @@ func _draw_minimap(sz: Vector2) -> void:
 		c.draw_texture_rect_region(map_tex(), dest, map_region(tex_view))
 	if MapDetail.shows("hazard", hold, HazardMap.matters(m)):
 		HazardMap.draw(c, m, to_map, inner, mm_circ, HazardMap.MM_SHIELD)
+	MapNames.begin(inner)      # (place names give way to each other and to the train's line)
 	if MapDetail.shows("place", hold):
 		_draw_map_labels(w, inner, view, k, riding)
 	if m.skytrain and MapDetail.shows("train", hold, train_map.near(m.skytrain, m.player)):
 		train_map.draw(self, m.skytrain, inner, view, k, false)
+	MapNames.flush(c)
 	# your view cone, faintly
 	if vh and not riding:
 		var pp: Vector2 = to_map.call(vh.pos)
@@ -686,6 +690,7 @@ func _draw_minimap(sz: Vector2) -> void:
 	if m.biomes and MapDetail.shows("hot_zone", hold): m.biomes.hot.minimap(self, to_map, on_map)
 	HeartHud.minimap(self, inner, to_map, on_map)
 	NestMap.minimap(self, to_map, on_map, hold)
+	CampMark.minimap(self, to_map, on_map)
 	WaysOutMap.minimap(self, inner, to_map, on_map)
 	if m.zone: m.zone.minimap(self, to_map, on_map)
 	if m.spawn_plan and full_map and m.player:
@@ -1357,19 +1362,10 @@ func _nameplate(sp: Vector2, h: Hunter) -> void:
 		# a bounty: a target over the plate and what knocking them is worth
 		bounty_marker(c, Vector2(sp.x, sp.y - 34), 1.15)
 		_ctext(Vector2(sp.x, sp.y - 48), "BOUNTY  ·  LV %d" % h.lvl, 11, Color("ffb64a"), big)
-	if not h.downed:
-		ComboMark.draw(c, Vector2(sp.x, sp.y - 34), m.player, h, m.time)
 
-## Little icons for what's happening to someone: stunned, rooted, slowed, burning, shielded, braced.
+## The status row (HudPlate.row) centred on `at`, under a monster's bar.
 func _status_row(at: Vector2, e: Ent) -> void:
-	var icons: Array = HudPlate.statuses(e)
-	var x := at.x - icons.size() * 8.0 + 8.0
-	for ic in icons:
-		c.draw_circle(Vector2(x, at.y), 7.0, Color(0.03, 0.03, 0.05, 0.85))
-		Icons.draw(c, String(ic[0]), Vector2(x, at.y), 4.2, ic[1])
-		if HudPlate.shows_time(float(ic[3])):
-			_ctext(Vector2(x, at.y + 17), "%.1f" % float(ic[3]), 10, ic[1], big)
-		x += 16.0
+	HudPlate.draw_row(c, at, plates.row(m.player, e, HudPlate.statuses(e)), true)
 
 ## Teammates you can't see on screen get an arrow at the screen edge (with distance, coloured by
 ## how they're doing; a dead teammate's deathbox in their squad colour while their soul can still be saved).
@@ -1637,12 +1633,6 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 func _draw_crosshair(p: Hunter) -> void:
 	var mp := c.get_local_mouse_position() if ret.pin == Vector2.INF else ret.pin
 	ret.draw(c, p, mp, m.time)
-	if p.ak and p.ak.has_meter():
-		# the payoff is armed (FLASHPOINT, CALLED SHOT, SLAM): a pulsing word under the resource arc
-		var rl := p.ak.ready_label()
-		if rl != "":
-			var pk := 0.5 + 0.5 * sin(m.time * 9.0)
-			_ctext(mp + Vector2(0, Reticle.t("res_r") + 16.0), rl, 13, Color(p.ak.res_col().lightened(0.2), 0.75 + 0.25 * pk), big)
 	# aiming at a truce partner: a reminder before you break it
 	if m.truce and not m.truce.pacts.is_empty():
 		var ph: Hunter = m.truce.partner_at(p.inp["aim"], p.team)
@@ -1672,7 +1662,7 @@ func _draw_downed(sz: Vector2, p: Hunter) -> void:
 			_ctext(Vector2(sz.x * 0.5, sz.y * 0.32 + 84), "%s is reviving you  %d%%" % [(revs[0] as Hunter).pname, int(p.revive * 100.0)], 15, GOOD, big)
 	if Settings.get_v("tips") and not Record.clean():
 		var tip_v := TipPick.for_downed(p, m.time, m.opts.get("blight", true), m.tut == null and m.duo == null)
-		c.draw_multiline_string(body, Vector2(sz.x * 0.5 - 280.0, sz.y * 0.32 + 118.0), "TIP  ·  " + tip_v,
+		c.draw_multiline_string(body, Vector2(sz.x * 0.5 - 280.0, sz.y * 0.32 - 64.0), "TIP  ·  " + tip_v,
 			HORIZONTAL_ALIGNMENT_CENTER, 560.0, 14, 2, MUTED)
 
 ## Dead, but your team's still in it.
@@ -1750,17 +1740,15 @@ func _draw_overhead(p: Hunter) -> void:
 		_ctext(sp + Vector2(-w * 0.5 - 30, 8), "%dm" % int(round(alt)), 13, Color("bfe6ff"), big)
 		c.draw_colored_polygon(PackedVector2Array([sp + Vector2(-w * 0.5 - 30, -10), sp + Vector2(-w * 0.5 - 35, -3), sp + Vector2(-w * 0.5 - 25, -3)]), Color("bfe6ff"))
 	if p.drink_t > 0.0:
-		var df := 1.0 - p.drink_t / UtilityUse.channel("tonic", "time")
+		var df := 1.0 - p.drink_t / p.drink_len
 		var dc := sp + Vector2(-w * 0.5 - 16, 4)
 		c.draw_circle(dc, 11.0, Color(0.04, 0.04, 0.06, 0.75))
 		_arc(dc, 8.0, df, Color("8ff0a0"), 3.0)
-		_ctext(sp + Vector2(0, 33), "DRINKING", 11, Color("8ff0a0"), big)
 	if p.kit_t > 0.0:
-		var kf := 1.0 - p.kit_t / UtilityUse.channel("armor_kit", "time")
+		var kf := 1.0 - p.kit_t / p.kit_len
 		var kc := sp + Vector2(-w * 0.5 - 16, 4)
 		c.draw_circle(kc, 11.0, Color(0.04, 0.04, 0.06, 0.75))
 		_arc(kc, 8.0, kf, ARMOR_COL, 3.0)
-		_ctext(sp + Vector2(0, 33), "REPAIRING", 11, ARMOR_COL, big)
 
 var train_map := TrainMap.new()      # the sky train on the minimap and the full map
 
@@ -1789,11 +1777,12 @@ func _draw_map_labels(w: World, inner: Rect2, view: Rect2, k: float, overview: b
 			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -8), pv + Vector2(6, 3), pv + Vector2(-6, 3)]), Color(0, 0, 0, 0.6))
 			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -6), pv + Vector2(4.5, 2), pv + Vector2(-4.5, 2)]), Color("9af0ff"))
 			if overview:
-				_ctext(pv + Vector2(0, 15), "%dm" % int(round(float(lb.get("height", 0.0)))), 10, Color("c8f6ff"))
+				var metres := "%dm" % int(round(float(lb.get("height", 0.0))))
+				MapNames.put(metres, pv + Vector2(0, 15), 10, Color("c8f6ff"), body)
 			continue
 		if String(lb["kind"]) == "lair":
 			if overview:
-				_ctext(pv + Vector2(0, 18), nm, 11, Color("ffe2b0"), big)
+				MapNames.put(nm, pv + Vector2(0, 18), 11, Color("ffe2b0"), big)
 			continue
 		if String(lb["kind"]) == "rail":
 			continue      # (the halts are TrainMap's, gated as the "train" kind)
@@ -1805,7 +1794,7 @@ func _draw_map_labels(w: World, inner: Rect2, view: Rect2, k: float, overview: b
 			if overview and not _region_names(w).has(nm):
 				continue      # (the whole map at this size: region names only, as the full map does)
 			var col := Color("ffd2f0") if String(lb.get("role", "")) == "heart" else INK
-			_ctext(pv + Vector2(0, 4), nm, 13 if overview else 11, col, big)
+			MapNames.put(nm, pv + Vector2(0, 4), 13 if overview else 11, col, big)
 
 # ------------------------------------------------------------------ the deathbox loot window
 ## Pressing interact at a deathbox opens LootWindow (what is in it beside what you carry); press interact

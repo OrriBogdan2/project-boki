@@ -114,7 +114,7 @@ func _farm() -> void:
 func _glide() -> void:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
+	m.start({"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)

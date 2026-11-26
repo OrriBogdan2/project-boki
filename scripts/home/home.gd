@@ -72,6 +72,7 @@ var hlantern: LanternMatch = null   # Lantern Match's glowcap ring (lantern_matc
 var hecon: HomeEcon = null       # the armory, feeders, starving, graveyard and Soul Shrine (home_econ.gd)
 var water := HomeWater.new(self)      # the ponds you wade and swim in (home_water.gd)
 var photo: HomePhoto = null         # photo mode (home_photo.gd)
+var farm_cam := FarmCam.new()       # the close third-person view (farm_cam.gd)
 var carry := HomeCarry.new(self)      # lifting and leading a Boki (home_carry.gd)
 var hold: ItemHold                    # an item in your hand and its preview card (item_hold.gd)
 var wade := BokiWade.new(self)        # Boki in the water: slower, ripples, paddling (boki_wade.gd)
@@ -351,13 +352,14 @@ func _sync_fixtures() -> void:
 ## Challenge House goes up, each on open ground near the portal (move them wherever you like).
 ## Returns true if any went up.
 func _fs_arrivals() -> bool:
-	if int(Save.d.get("matches", 0)) < 1:
-		return false
+	var fought: bool = int(Save.d.get("matches", 0)) >= 1
 	var any := false
 	var put: Array = []
 	var w: World = world
+	var loop := BaseRace.loop_rect()      # the race loop stays clear
 	for b in ["board", "ransom"]:
-		if HomeLayout.placed(b, _d()) or not _has_b(b):
+		var early: bool = b == "ransom" and FarmUnlocks.base_mode()  # the Ransom board stands before a first fight
+		if HomeLayout.placed(b, _d()) or not _has_b(b) or (not fought and not early):
 			continue
 		var item := {"kind": "b", "id": b, "r": 0, "from": 0}
 		var best := Vector2i(-1, -1); var bd := 1e9
@@ -366,7 +368,9 @@ func _fs_arrivals() -> bool:
 				var dd := Vector2(x - HomeLayout.LANDING.x, z - HomeLayout.LANDING.z).length()
 				if dd < 5.0 or dd > 16.0 or dd >= bd: continue
 				if not w.inb(x, z) or w.island[w.idx(x, z)] != 0: continue
-				if hb.fits(item, HomeLayout.cells_of(HomeLayout.rect_at(b, x, z, 0))): best = Vector2i(x, z); bd = dd
+				var rc := HomeLayout.rect_at(b, x, z, 0)
+				var tiles := Rect2(rc[0], rc[1], rc[2] - rc[0] + 1, rc[3] - rc[1] + 1)
+				if not tiles.intersects(loop) and hb.fits(item, HomeLayout.cells_of(rc)): best = Vector2i(x, z); bd = dd
 		if best.x >= 0:
 			HomeLayout.of(_d())["b"][b] = {"x": best.x, "z": best.y, "r": 0}
 			hb._apply_blockers()
@@ -1087,9 +1091,11 @@ func _process(delta: float) -> void:
 	crouch_look.tick(cam, crouch_grounded, panel_open == "" and train.is_empty() and not building_now and not chat_open)
 	kin_frame.tick(d, ppos, panel_open != "", cam.zoom_to)
 	cam.dist_mul *= kin_frame.closer()
+	farm_cam.tick(cam, d, not building_now and train.is_empty() and not FarmSpotlight.showing())
 	var focus := kin_frame.frame(Vector3(ppos.x + mover.lag.x, minf(py + mover.lag.y, 0.0), ppos.z + mover.lag.z))
-	var lean := panel_open == "" and train.is_empty() and not kin_frame.framing()
+	var lean := panel_open == "" and train.is_empty() and not kin_frame.framing() and not farm_cam.third()
 	cam.follow(hob.chat.frame(focus) if hob else focus, d, lean)
+	farm_cam.keep_clear(cam, self, d)
 	_see_through()
 	_abyss_tint(d)
 	_find_interact()
@@ -1149,6 +1155,7 @@ func _see_through() -> void:
 	SeeThrough.update(cam, player.global_position, b)
 
 func _exit_tree() -> void:
+	RigPace.crowd = 0
 	ZoneLayout.leave()
 	SeeThrough.off()
 	Sfx.clear_amb_layers()
@@ -1235,6 +1242,7 @@ func _move_player(d: float) -> void:
 	if can_act:
 		mv = Vector2(Input.get_axis("left", "right"), Input.get_axis("up", "down"))
 		if mv.length() > 1.0: mv = mv.normalized()
+		mv = farm_cam.keys(mv, cam)
 	var dg := _dodge()
 	dash.charges = minf(dash.charges, float(dg["charges"]))      # a class with fewer dashes takes the extra
 	dash.tick(d, float(dg["charges"]), float(dg["cd"]))
@@ -1349,7 +1357,7 @@ func _move_player(d: float) -> void:
 			pvy = 0.0
 			gliding = false
 			Sfx.step(null, -16.0)
-		elif py < FALL_RESPAWN or (gh <= World.VOID + 1.0 and py < world.abyss_floor(ppos.x, ppos.z) - Hunter.ABYSS_EXTRA - (Hunter.ABYSS_GLIDE_ROOM if gliding else 0.0)):
+		elif py < FALL_RESPAWN or (gh <= World.VOID + 1.0 and py < _abyss_kill_y()):
 			_respawn_safe()
 	else:
 		py = gh
@@ -1366,7 +1374,8 @@ func _move_player(d: float) -> void:
 	# face the mouse; with the mouse outside the window, face where you're walking
 	var vp := get_viewport()
 	var mp := vp.get_mouse_position()
-	var aim_ok := panel_open == "" and Rect2(Vector2.ZERO, vp.get_visible_rect().size).has_point(mp)
+	var aim_ok := panel_open == "" and not farm_cam.third()
+	aim_ok = aim_ok and Rect2(Vector2.ZERO, vp.get_visible_rect().size).has_point(mp)
 	var want := pface
 	if aim_ok:
 		var aim := cam.mouse_on_plane(0.9)
@@ -1400,6 +1409,7 @@ func _move_kin(d: float) -> void:
 	_separate_kin(d)
 	if life: life.step(d)
 	nap_sound.step(kins, d)
+	RigPace.crowd = kins.size()
 	for k in kins:
 		if k.get("busy", false):
 			fly.land(k)
@@ -1618,12 +1628,12 @@ func _mantle(x: float, z: float, top: float, air: bool) -> bool:
 
 ## One step of rising up a ledge (the match's Hunter._ledge_rise): sets pvy while it lasts and
 ## returns true; false once it's over (moved off the face, dashed, glided, or timed out). A jump
-## near the top (Hunter.LRISE_WINDOW) flings you higher and faster toward your keys.
+## near the top (HunterFeel.lrise_window) flings you higher and faster toward your keys.
 func _ledge_float(d: float, mv: Vector2) -> bool:
 	lfl["t"] = float(lfl["t"]) + d
 	var n: Vector2 = lfl["n"]
 	var glide_now := Input.is_action_pressed("glide")
-	var off := (Vector2(ppos.x, ppos.z) - (lfl["at"] as Vector2)).dot(-n) > Hunter.LRISE_OFF
+	var off := (Vector2(ppos.x, ppos.z) - (lfl["at"] as Vector2)).dot(-n) > HunterFeel.lrise_off
 	if off or gliding or dash_t > 0.0 or float(lfl["t"]) > 1.2 or Vector2(ppos.x, ppos.z).distance_to(lfl["at"]) > 2.0 			or (glide_now and mover.pressed(&"glide")):
 		lfl = {}
 		return false
@@ -1631,18 +1641,18 @@ func _ledge_float(d: float, mv: Vector2) -> bool:
 	var dir: Vector2 = mv.normalized() if mv.length() > 0.3 else n
 	if mover.pressed(&"jump") and panel_open == "":
 		# the fling: strong in the window near the top, weaker before it
-		var timed := left <= Hunter.LRISE_WINDOW
+		var timed := left <= HunterFeel.lrise_window
 		lfl = {}
 		var hv := Vector2(pvel.x, pvel.z)
-		var spd := Hunter.FLING_SPEED if timed else walk_speed()
+		var spd := HunterFeel.fling_speed if timed else walk_speed()
 		if hv.dot(dir) < spd: hv += dir * (spd - hv.dot(dir))
 		pvel = Vector3(hv.x, 0, hv.y)
-		pvy = sqrt(2.0 * GRAV * (maxf(0.0, left) + (Hunter.FLING_HEIGHT if timed else Hunter.FLING_EARLY_HEIGHT)))
+		pvy = sqrt(2.0 * GRAV * (maxf(0.0, left) + (HunterFeel.fling_height if timed else HunterFeel.fling_early_height)))
 		Sfx.play("whoosh" if timed else "jump", null, -8.0, 0.1, 1.3)
 		return true
 	if left <= 0.0:
 		lfl = {}
-		pvy = Hunter.LRISE_POP
+		pvy = HunterFeel.lrise_pop
 		if mv.length() > 0.3:
 			var hv := Vector2(pvel.x, pvel.z)
 			var run := walk_speed()
@@ -1650,7 +1660,7 @@ func _ledge_float(d: float, mv: Vector2) -> bool:
 			if mv.normalized().dot(n) > 0.15 and hv.dot(n) < run * 0.6: hv += n * (run * 0.6 - hv.dot(n))
 			pvel = Vector3(hv.x, 0, hv.y)
 	else:
-		pvy = HunterMove.rise_vy(pvy, left, 1.0, Hunter.LRISE_SPEED, d)
+		pvy = HunterMove.rise_vy(pvy, left, 1.0, HunterFeel.lrise_speed, d)
 	return true
 
 ## The pull-up over a rim (the match's mantle): straight up the face, then forward over the lip.
@@ -1690,7 +1700,7 @@ func _abyss_tint(d: float) -> void:
 	var want := 0.0
 	if world.is_void(ppos.x, ppos.z) and climb.is_empty() and pvy <= ABYSS_FX.RISE_OFF:     # (rising back up: no tint)
 		var top := _abyss_lip() - 0.5
-		var kill: float = world.abyss_floor(ppos.x, ppos.z) - Hunter.ABYSS_EXTRA - (Hunter.ABYSS_GLIDE_ROOM if gliding else 0.0)
+		var kill: float = _abyss_kill_y()
 		want = ABYSS_FX.danger_depth(top - py, top - kill)
 	abyss_k = lerpf(abyss_k, want, 1.0 - exp(-(12.0 if want > abyss_k else 9.0) * d))     # in fast, out over a few frames
 	if abyss_fx == null and abyss_k > 0.004:
@@ -2351,6 +2361,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	if photo and photo.active:
 		if photo.input(event):
 			get_viewport().set_input_as_handled()
+		return
+	if farm_cam.input(event):
+		get_viewport().set_input_as_handled()      # a right-drag turns the view
 		return
 	if hb and hb.active and panel_open == "" and not Overlay.is_open():
 		if hb.input(event):
@@ -3104,6 +3117,7 @@ func _kin_match_rows(rec: Dictionary, c2: Control, compact: bool) -> void:
 		ab_row.call(Settings.key_caps("ultimate"), "Fusion: " + ud.display_name, " ".join(KinText.merge(ud, kspec != null and kspec.carry_style == "mount")), Color("ffd84a").lerp(UI.INK, 0.3))
 	if kspec == null:
 		return
+	c2.add_child(DexView.summon_row(String(rec["species"])))
 	var lines: Array = [[KinText.carry(kspec), KinRules.cat_color("sustain").lerp(UI.INK, 0.35)]]
 	var ob := KinText.owner_bonus(KinLib.owner_bonus(kspec, rec))
 	if ob != "": lines.append(["Owner bonus while it's your Boki: " + ob, Color("ffd84a").lerp(UI.INK, 0.35)])
@@ -3253,7 +3267,7 @@ func _open_kin(rec: Dictionary) -> void:
 				c1.add_child(UI.kv("Parents", "%s and %s" % [rec["parents"][0], rec["parents"][1]]))
 	# looking after it: the care actions as one row, Feed first
 	var ft := UI.footer(v)
-	var fl := UI.hbox(4)
+	var fl := UI.hbox(8)
 	v.add_child(UI.spacer(2))
 	var roles := UI.hbox(6)
 	roles.add_child(UI.label("Role", UI.T_SMALL, UI.FAINT))
@@ -5019,7 +5033,10 @@ func _separate_kin(d: float) -> void:
 			if j == i: continue
 			var b: Dictionary = act[j]
 			var diff := ap - Vector2(b["pos"].x, b["pos"].z)
-			var need := (_kin_r(a) + _kin_r(b)) * (life.pile(a, b) if life else 1.0)
+			var reach := _kin_r(a) + _kin_r(b)  # (the pile scale is under 1: nobody past this is pushed)
+			if diff.length_squared() >= reach * reach:
+				continue
+			var need := reach * (life.pile(a, b) if life else 1.0)
 			var dl := diff.length()
 			if dl < need:
 				if dl < 0.001: diff = Vector2.from_angle(float(i) * 2.4); dl = 0.001
@@ -5172,3 +5189,8 @@ func _econ_tests(dbg) -> void:
 				player.position = ppos; cam.snap(ppos)
 			if "--shrine-open" in dbg: hecon.open_shrine()
 			elif "--grave-open" in dbg: hecon.open_grave(Econ.graves()[Econ.graves().size() - 1]))
+
+
+## Height below which a hunter over the void counts as fallen (gliding adds HunterFeel.abyss_glide_room).
+func _abyss_kill_y() -> float:
+	return world.abyss_floor(ppos.x, ppos.z) - HunterFeel.abyss_extra - (HunterFeel.abyss_glide_room if gliding else 0.0)

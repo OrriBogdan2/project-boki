@@ -168,7 +168,7 @@ func _setup() -> void:
 			"arch": who, "cls": Arch.weight(who), "weapon": Arch.signature(who)}
 	m = Match.new()
 	main.add_child(m)
-	await m.start(o)
+	m.start(o)
 	m.set_process(false)
 	HeroVfx.of(m).set_process(false)      # (ticked by _go's steps, as in vv_shots)
 	P = m.player

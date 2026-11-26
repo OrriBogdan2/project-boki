@@ -27,7 +27,8 @@
 			{"p": "flare", "at": "finger_r", "delay": 0.06, "size": 0.75, "life": 0.08, "unless": "left", "c": "main", "c2": "hot", "c3": "deep"}
 		]},
 		"lmb_trail": {"net": false, "end": "lmb_end", "fx": [
-			{"p": "ribbon", "size": 1.0, "life": 2.0, "tail": 0.14, "wave": 0.1, "soft": true, "head": 0.7, "c": "main", "c2": "hot", "c3": "deep"}
+			{"p": "ribbon", "streak": true, "size": 0.75, "life": 2.0, "tail": 0.05, "head": 0.5, "head_len": 1.6, "c": "main", "c2": "white", "c3": "deep"},
+			{"p": "ribbon", "streak": true, "size": 0.2, "life": 2.0, "tail": 0.045, "c": "white", "c2": "white", "c3": "hot"}
 		]},
 		"lmb_end": {"net": false, "fx": [
 			{"p": "ember", "n": 4, "way": "back", "lift": 0.3, "speed": 6.0, "spread": 0.45, "drag": 2.0, "life": 0.12,
@@ -131,16 +132,16 @@
 			{"p": "bolt", "size": 0.2, "life": 0.05, "c": "core", "c2": "hot", "c3": "deep"}
 		]},
 		"e_count": {"fx": [
-			{"p": "scorch", "shape": "pool", "size": "r", "life": "t", "c": "core", "c2": "hot", "c3": "dusk"},
-			{"p": "skirt", "size": 0.4, "from": 3.0, "tall": 3.5, "life": "t2", "c": "hot", "c2": "white", "c3": "main"}
+			{"p": "scorch", "shape": "pool", "band": 0.2, "size": "r", "life": "t", "c": "core", "c2": "hot", "c3": "main"},
+			{"p": "skirt", "size": 0.28, "from": 1.2, "tall": 3.5, "life": "t2", "c": "core", "c2": "main", "c3": "deep"}
 		]},
 		"e_strike": {"fx": [
 			{"p": "bolt", "y": 9.0, "fwd": 0.3, "to": "here", "to_y": 0.1, "jag": 0.5, "size": 1.0, "life": 0.22, "c": "main", "c2": "hot", "c3": "deep"},
 			{"p": "bolt", "y": 9.0, "fwd": -0.4, "to": "here", "to_y": 0.1, "jag": 0.5, "size": 0.75, "life": 0.22, "c": "main", "c2": "hot", "c3": "deep"},
 			{"p": "bolt", "y": 9.0, "to": "here", "to_y": 0.1, "jag": 0.5, "size": 0.5, "life": 0.22, "c": "main", "c2": "hot", "c3": "deep"},
 			{"p": "ring", "size": "r", "life": 0.35, "c": "core", "c2": "hot", "c3": "deep"},
-			{"p": "scorch", "shape": "disc", "size": "r", "size_x": 0.9, "life": 0.45, "c": "char", "c2": "core", "c3": "rose"},
-			{"p": "flare", "y": 1.0, "size": 1.8, "life": 0.12, "c": "core", "c2": "hot", "c3": "deep"},
+			{"p": "scorch", "shape": "pool", "band": 0.2, "size": "r", "life": 0.45, "c": "core", "c2": "hot", "c3": "main"},
+			{"p": "flare", "y": 1.0, "size": 1.2, "life": 0.12, "c": "hot", "c2": "hot", "c3": "core"},
 			{"p": "ribbon", "at": "hand_l", "life": 0.12, "tail": 0.12, "size": 0.24, "c": "main", "c2": "hot", "c3": "deep"}
 		]},
 

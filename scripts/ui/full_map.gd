@@ -206,6 +206,7 @@ func draw(sz: Vector2) -> void:
 	if m.exits:
 		ExitMark.full_map(self)
 	hud.mm_circ = saved
+	ShopLegend.markers(self, c)
 	_spawns(c, team, kk)
 	ReviveHud.full_map(self)
 	if m.biomes:
@@ -237,12 +238,16 @@ func draw(sz: Vector2) -> void:
 
 ## The one line of a plain plan, on the map's foot: the jump key, and the key that brings the rest back.
 func _plain_hint(sz: Vector2) -> void:
+	hud._rounded(_plain_pill(sz), Color(0.04, 0.05, 0.08, 0.88), 10)
+	hud._ctext(Vector2(sz.x * 0.5, rect.end.y - 24), _plain_line(), 16, INK, hud.big)
+
+func _plain_line() -> String:
 	var keys := [Settings.key_cap("jump"), Settings.key_cap("scores")]
-	var line := "Press %s to jump  ·  hold %s for the legend and ways out" % keys
-	var w: float = hud.big.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x + 32.0
-	var pill := Rect2(Vector2(sz.x * 0.5 - w * 0.5, rect.end.y - 46), Vector2(w, 34))
-	hud._rounded(pill, Color(0.04, 0.05, 0.08, 0.88), 10)
-	hud._ctext(Vector2(sz.x * 0.5, rect.end.y - 24), line, 16, INK, hud.big)
+	return "Press %s to jump  ·  hold %s for the legend and ways out" % keys
+
+func _plain_pill(sz: Vector2) -> Rect2:
+	var w: float = hud.big.get_string_size(_plain_line(), HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x + 32.0
+	return Rect2(Vector2(sz.x * 0.5 - w * 0.5, rect.end.y - 46), Vector2(w, 34))
 
 ## Shrines: a small pale-green obelisk, dimmed once someone has used it.
 func _shrines(c: Control, kk: float) -> void:
@@ -367,12 +372,15 @@ func _label_rect(txt: String, at: Vector2, px: int) -> Rect2:
 ## word, the hot zone's caption: they draw at their spot, forced).
 func _obstacles() -> void:
 	_spots.clear()
+	if plain_plan():
+		_taken.append(_plain_pill(hud.c.size))
 	if m.spawn_plan:
 		for cnd in m.spawn_plan.cands:
 			_spots.append(to_screen(cnd["pos"]))
 	if m.exits:
 		for x in m.exits.list:
 			_spots.append(to_screen(x["pos"]))
+			_taken.append(ExitMark.pill_box(self, x))
 	if m.heart:
 		var at := WaysOutMap.sites(m)
 		var sd := WaysOutHud.seats(m)
@@ -718,7 +726,7 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 			hud._text(Vector2(r2.position.x + 48, row_y + 5), "Revive beacon (your squad back)", 12, INK)
 
 ## Left of the map: your squad, who leads the drop, and the keys for it.
-func _side(c: Control, _sz: Vector2) -> void:
+func _side(c: Control, sz: Vector2) -> void:
 	var p: Hunter = m.player
 	if p == null:
 		return
@@ -729,6 +737,9 @@ func _side(c: Control, _sz: Vector2) -> void:
 	var squad: Array = m.hunters.filter(func(x): return x.team == p.team)
 	var in_drop: bool = p.riding or p.dropping
 	var r := Rect2(Vector2(x0, rect.position.y), Vector2(wv, 48 + squad.size() * 44 + (118 if in_drop else 40)))
+	var lr := ShopLegend.place(m, x0, wv, r.end.y)
+	if lr.end.y < sz.y - 10:
+		ShopLegend.draw(self, c, lr)
 	hud._rounded(r, Color(0.04, 0.05, 0.08, 0.88), 12)
 	hud._text(r.position + Vector2(14, 26), "YOUR SQUAD", 16, GOLD, hud.big)
 	var y := r.position.y + 50.0

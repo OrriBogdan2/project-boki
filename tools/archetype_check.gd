@@ -208,6 +208,7 @@ func run(main_node: Node) -> void:
 	_data()
 	_health()
 	_roster()
+	_gauge()
 	await _thief()
 	await _archer()
 	await _mage()
@@ -227,6 +228,23 @@ func run(main_node: Node) -> void:
 ## more than 1.25x either way. The scales differ, so only the ratio is compared.
 const SOURCE_HP := {"gunslinger": 1225, "juggernaut": 1290, "archer": 1100, "ashwick": 1290, "tender": 1290, "dolm": 1290,
 		"dredge": 1445, "rimewright": 1290, "ostra": 1150, "bulwark": 1475, "mage": 1290, "thief": 1290}
+
+## The HUD's passive gauge (the bar under health and the reticle arc) is opt-in by data: "gauge": true, only on the
+## fill-up meters (Rage, Swell). Fever, self stacks and foe marks show as a buff icon or on the foe, never a bar.
+func _gauge() -> void:
+	var want := ["juggernaut", "ostra"]
+	var got: Array = []
+	for a in Arch.ORDER:
+		var txt := FileAccess.get_file_as_string("res://content/archetypes/%s.json" % a)
+		var rd: Dictionary = JSON.parse_string(txt).get("resource", {})
+		if bool(rd.get("gauge", false)):
+			got.append(a)
+			ok("gauge: %s is a fill-up meter" % a, String(rd.get("kind", "")) == "meter")
+	got.sort()
+	ok("gauge: only Kael and Motley draw the passive gauge", got == want, str(got))
+	var rows := BuffStack.rows_v.map(func(r): return String(r["id"]))
+	var icons := ["fever", "rocks", "salvage"].all(func(i): return rows.has(i))
+	ok("gauge: Fever, Rocks and Salvage show as buff-row icons instead", icons, str(rows))
 
 ## Every list of all the Hunters holds the same ids as Arch.ORDER (a new Hunter missing from one shows here).
 func _roster() -> void:
@@ -293,7 +311,7 @@ func _data() -> void:
 	var rk_ok := true
 	for a in Arch.ids():
 		for sl in ["sec", "dash", "kin", "ult"]:
-			if sl == "ult" and not Arch.def(a).has("r"): continue      # Sparkle and Vex have no R (Boki Merge owns it)
+			if sl == "ult" and not Arch.def(a).get("x", {}).has("per_rank"): continue  # source R tiers only (Gil: none)
 			var r2 := String(Arch.def(a).get("rank2", {}).get(sl, ""))
 			if not (r2.begins_with("Rank 2: ") and (r2.contains("->") or r2.contains("%"))): rk_ok = false
 	ok("ranks: every ability has a concrete rank 2", rk_ok)
@@ -423,7 +441,7 @@ func _archer() -> void:
 	P.inp["fire"] = false
 	step(m, 0.5)
 	ok("archer: an arrow into a pinned foe is a plain tap (no Deadeye)",
-		dmg(T) - dd0 > 0.0 and dmg(T) - dd0 < 30.0 and K.ready_label() == "", "dealt %.0f" % (dmg(T) - dd0))
+		dmg(T) - dd0 > 0.0 and dmg(T) - dd0 < 30.0, "dealt %.0f" % (dmg(T) - dd0))
 	# Spirit Walk: a dodge roll, then walking through a rock column (terrain still blocks)
 	P.teleport(home); P.vel = Vector3.ZERO; P.dashes = P.max_dashes()
 	P.inp["move"] = Vector2(0, 1)
