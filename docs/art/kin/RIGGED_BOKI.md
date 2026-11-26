@@ -141,16 +141,20 @@ that keeps a planted paw closest to the ground most of the stance. `_pick_clip` 
 `MAX_CADENCE` cycles/s. A new or re-keyed species: run `--boki-anim-audit`, copy the printed "measured" numbers into
 `STRIDE`.
 
-## How tall it stands (`KinSize`)
+## How big it is (`KinSize`)
 
-A rigged Boki's on-screen height is its data: `content/kin/<id>.json` `size.cm` x `KinSize.M_PER_CM` (0.014 m per cm), at
-root scale 1, whatever the glb's own size. `BokiRig.build` measures the glb's meshes (`KinSize.height`, the bind-pose
-bounds, ears and horns included), scales Flex by `fit` = target / measured and stores it as the root meta `fit`;
-`BokiRig` and `KinPuppet` multiply Flex's pose scale by it. A new Meshy model needs no size tuning: set its `size.cm`.
-The kin's own roll (Unique, Evo growth, Mutations) and the farm's `FARM_BOKI_SCALE` multiply on top, as before.
-`--kin-size-check` measures every species with a model and asserts each stands within 10% of its data, the starters
-(Vespyx 30, Prismander 28, Mycroll 27 cm) stand close together and Heatherhorn (70 cm) stands over them. The portrait
-(`KinPortrait`) divides the fit out: its fixed frame was cut for the glb's own size.
+A rigged Boki's size is its data: `content/kin/<id>.json` `size.cm` x `KinSize.M_PER_CM` (0.014 m per cm) is the
+longest side of its body (width, height or length), at root scale 1, whatever the glb's own size. The game camera looks
+down, so the footprint decides how big a Boki reads: equal heights made a long, low Prismander look far bigger than a
+tall Vespyx. `BokiRig.build` measures the glb's meshes (`KinSize.extent`, the bind-pose box, ears and horns included),
+scales Flex by `fit` = target / measured and stores it as the root meta `fit`; `BokiRig` and `KinPuppet` multiply
+Flex's pose scale by it. A new Meshy model needs no size tuning: set its `size.cm`. The kin's own roll (Unique, Evo
+growth, Mutations) and the farm's `FARM_BOKI_SCALE` multiply on top, as before.
+`--kin-size-check` measures every species with a model and asserts each longest side is within 10% of its data, the
+starters (Vespyx 30, Prismander 28, Mycroll 27 cm) have footprints within 1.2x and Heatherhorn (70 cm) is bigger than
+them. `--boki-size-shots` renders the proof (the HUD frame, the game camera, an eye-level camera) and writes each
+one's measured box and the area it covers on screen. The portrait (`KinPortrait`) divides the fit out: its fixed frame
+was cut for the glb's own size.
 
 ## Attack contact
 
