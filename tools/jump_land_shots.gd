@@ -16,7 +16,7 @@ const GLIDE_T := 0.6  # s of gliding at the canopy's sink before the ground
 
 func run(main: Node) -> void:
 	tree = main.get_tree()
-	WardenNative.contract_only = true  # (the hand-keyed clips on the contract rig; Meshy-native Hunters: --land-weight-shots)
+	WardenNative.contract_only = true  # (contract clips; native: --land-weight-shots)
 	var out := ""
 	var ids: Array = Arch.ORDER.duplicate()
 	var way := "jump"
