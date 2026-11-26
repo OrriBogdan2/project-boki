@@ -11372,3 +11372,4 @@ READY ext/stuck-integ-c70a5076 0806a8b706 (supersedes: ext/anim-native-move-stat
 READY ext/revive-sickness-lamp 99f270f94f (main merged, lamp/shops from main kept, sickness status + spill cues ported, Net 0.24.30)
 READY ext/merge-lane-N2-1122 fb4696948122520332433c99e87be6063d729ef7 (main 21455b16c6 merged: arena.json + ui.gd conflicts resolved, 21 targeted checks equal main)
 READY ext/stuck-integ-1afe8a57 c7f7e7f9d7 (PR #609: merged origin/main 21455b16c6; Controls.md main rows, dex_view keeps type_chip+SILHOUETTE, Net.VERSION main 0.24.29; 35 targeted flags no new red vs main)
+READY ext/anim-blend-times-1125 ef5b1c07b0 (PR #987 stays DRAFT: merged origin/main 21455b16c6 clean; warden-native/clips/clip/land-weight checks same as main)
