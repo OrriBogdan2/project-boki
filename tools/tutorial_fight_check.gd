@@ -16,7 +16,8 @@ const FIGHT_STEPS := ["sec", "shoot", "gkey", "kin", "hook"]
 const USED := ["sec", "fire", "dash", "kick", "boki", "kin", "glove"]
 ## What each starter's first fight line says.
 const HINT_WORD := {"archer": "draw", "juggernaut": "step in", "gunslinger": "shoot"}
-const FIGHT_MIN := 9.0        # s: the fight beats together, bot-driven, per starter (Lace and Vex take 16-20 s; the gunslinger 10.7 s after the TTK pass)
+## FIGHT_MIN: Lace and Vex take 16-20 s; the gunslinger 10.7 s after the 11-24 TTK pass.
+const FIGHT_MIN := 9.0        # s: the fight beats together, bot-driven, per starter
 const FIGHT_MAX := 70.0       # (six camps since 0.24.4: the bot's melee juggernaut walks to each, 52-61 s)
 const DAMAGE_MAX := 60.0      # hp taken over the fight beats (of 100)
 
