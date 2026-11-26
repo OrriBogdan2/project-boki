@@ -1,6 +1,7 @@
 """Grimble (dredge) native model, round 29 (plan: gens/hunter-round-1124/grimble/PLAN-1124o.md section 12).
 
   dredge_r29.py --goo OUT IN MESHY.glb [--width M] [--keep-horns] [--bendy-horns] [--top Y]
+                [--section] [--root-skin A,B] [--extend M] [--horn-prim]   (round 30, PLAN-1124o.md section 13)
 
 The goo arm is the weakest region (art-gate 4.0: "thin tube, detached from the shoulder, loose claws, torn end"; the
 turnaround's goo arm is a thick twisted mass with drips and cream horns, as wide as the torso). A Meshy goo arm
@@ -15,6 +16,16 @@ turnaround's goo arm is a thick twisted mass with drips and cream horns, as wide
     material skin-goo keeps its name (warden_look's desat / no_ink lines still apply).
   - the Meshy horns are rigid: each cream patch takes its root's weights (no bending / flattening in Attack).
   - horns: the old leather-horn prims are dropped when the Meshy arm carries its own horns (--keep-horns keeps them).
+Round 30 (review of r29b: goo root torn in Attack, goo sheet over the thigh, goo short, horns flat lavender blades):
+  - --section: weights by arc position, not per vertex: each new vertex takes the mean weights of the old goo's slab at
+    its arc length (2 cm bins, smoothed), so a cross-section moves as one piece (r29b's nearest-vertex copy sheared the
+    2x thicker section between RightArm / RightForeArm / GooTail: 54.8x stretch in Attack).
+  - --root-skin A,B: goo within A m of the top takes the nearest shoulder skin's weights (skin-native, r28's relaxed
+    shoulder), faded to the goo weights by B m: the root rides the shoulder instead of tearing off it.
+  - --extend M: the centreline runs M m past the old tip (same tangent bent toward straight down); past the old tip the
+    weights are the tip's. The turnaround's goo pools at the foot; r29b stopped at mid-thigh.
+  - --horn-prim: the cream horn faces become their own primitive, material leather-horn (leather slot: ink shell, low
+    desat) on the same texture, so they read as solid bone instead of skin-goo lavender.
 Every other primitive, the skin, bones and clips are untouched. numpy + scipy + PIL.
 """
 
@@ -170,7 +181,75 @@ def fit(MP, cl, s, width, horn_side, cream):
     down = np.array([0.0, -1.0, 0.0])
     for i in range(len(MP)):
         out[i] = base[i] + rot_to(down, tan[i]) @ (k * off[i])
-    return out, k
+    return out, k, h
+
+
+def extend(cl, s, m):
+    """The centreline continued m metres past its tip: the last tangent bent toward straight down, 2.5 cm steps."""
+    t = cl[-1] - cl[-2]
+    t /= np.linalg.norm(t)
+    pts, p = [], cl[-1].copy()
+    n = max(2, int(round(m / 0.025)))
+    for i in range(n):
+        f = (i + 1) / n
+        d = (1 - f) * t + f * np.array([0.0, -1.0, 0.0])
+        p = p + d / np.linalg.norm(d) * (m / n)
+        pts.append(p.copy())
+    c = np.vstack([cl, pts])
+    return c, np.r_[0, np.cumsum(np.linalg.norm(np.diff(c, axis=0), axis=1))]
+
+
+def section_weights(P, dense, cl, s, h):
+    """Mean dense weights of the old goo's slab at each arc length h (old verts projected on the centreline, 2 cm
+    bins, empty bins filled from neighbours, smoothed along the length)."""
+    fine = np.linspace(0, s[-1], 400)
+    pts = np.c_[[np.interp(fine, s, cl[:, i]) for i in range(3)]].T
+    _, j = cKDTree(pts).query(P)
+    ho = fine[j]
+    bins = np.arange(0, s[-1] + 0.02, 0.02)
+    bi = np.clip(np.digitize(ho, bins) - 1, 0, len(bins) - 1)
+    acc_w = np.zeros((len(bins), dense.shape[1]))
+    cnt = np.bincount(bi, minlength=len(bins)).astype(float)
+    np.add.at(acc_w, bi, dense)
+    have = cnt > 0
+    acc_w[have] /= cnt[have, None]
+    idx = np.arange(len(bins))
+    for c in range(dense.shape[1]):
+        acc_w[:, c] = np.interp(idx, idx[have], acc_w[have, c])
+    for _ in range(3):
+        acc_w[1:-1] = 0.25 * acc_w[:-2] + 0.5 * acc_w[1:-1] + 0.25 * acc_w[2:]
+    mid = bins + 0.01
+    out = np.stack([np.interp(h, mid, acc_w[:, c]) for c in range(dense.shape[1])], 1)
+    out /= np.maximum(out.sum(1, keepdims=True), 1e-9)
+    print("section weights: %d slabs over %.2f m (old goo projected)" % (have.sum(), s[-1]))
+    return out
+
+
+def root_skin(js, b, nb, NP, nd, h, a, z):
+    """Goo within a m of arc from the top takes the mean weights of its 6 nearest skin-native vertices, faded back
+    to nd by z m."""
+    SP, SD = [], []
+    for p in js["meshes"][0]["primitives"]:
+        if js["materials"][p["material"]]["name"] != "skin-native":
+            continue
+        q = acc(js, b, p["attributes"]["POSITION"]).astype(float)
+        J = acc(js, b, p["attributes"]["JOINTS_0"]).astype(int)
+        W = acc(js, b, p["attributes"]["WEIGHTS_0"]).astype(float)
+        dn = np.zeros((len(q), nb))
+        np.add.at(dn, (np.repeat(np.arange(len(q)), J.shape[1]), J.ravel()), W.ravel())
+        SP.append(q)
+        SD.append(dn)
+    SP, SD = np.concatenate(SP), np.concatenate(SD)
+    f = np.clip((z - h) / (z - a), 0, 1)
+    m = f > 0
+    d, idx = cKDTree(SP).query(NP[m], NEAR)
+    wgt = 1.0 / np.maximum(d, 1e-3)
+    sk = (SD[idx] * wgt[..., None]).sum(1) / wgt.sum(1, keepdims=True)
+    out = nd.copy()
+    out[m] = f[m, None] * sk + (1 - f[m, None]) * nd[m]
+    print("root skin: %d goo verts blended to shoulder skin weights (full to %.2f m, none past %.2f m), mean skin dist %.3f m"
+          % (m.sum(), a, z, d[:, 0].mean()))
+    return out
 
 
 def vnormals(P, F):
@@ -264,7 +343,10 @@ def goo(o):
     # the thicker goo would brush the goo-side thigh in run: its path moves out (-x) by --push below the shoulder
     cl[:, 0] -= o.push * np.clip((1.45 - cl[:, 1]) / 0.25, 0, 1)
     s = np.r_[0, np.cumsum(np.linalg.norm(np.diff(cl, axis=0), axis=1))]
-    NP, k = fit(MP, cl, s, o.width, side, cream)
+    s_old = s[-1]
+    if o.extend > 0:
+        cl, s = extend(cl, s, o.extend)
+    NP, k, h = fit(MP, cl, s, o.width, side, cream)
     print("centreline %d pts, length %.2f m, top %s tip %s; lateral scale %.3f" % (
         len(cl), s[-1], np.round(cl[0], 2), np.round(cl[-1], 2), k))
     for y in np.arange(1.6, 0.3, -0.2):
@@ -276,6 +358,11 @@ def goo(o):
     d, idx = cKDTree(P).query(NP, NEAR)
     wgt = 1.0 / np.maximum(d, 1e-3)
     nd = (dense[idx] * wgt[..., None]).sum(1) / wgt.sum(1, keepdims=True)
+    if o.section:
+        nd = section_weights(P, dense, cl, s, np.minimum(h, s_old))
+    if o.root_skin:
+        a, z = (float(x) for x in o.root_skin.split(","))
+        nd = root_skin(js, b, nb, NP, nd, h, a, z)
     if not o.bendy_horns:
         nd = rigid_horns(NP, F, cream, nd)
     top4 = np.argsort(-nd, axis=1)[:, :4]
@@ -293,12 +380,21 @@ def goo(o):
         "JOINTS_0": add_acc(js, b, top4.astype(np.uint16), 5123, "VEC4", 34962),
     }
     pr["attributes"] = attrs
-    pr["indices"] = add_acc(js, b, F.astype(np.uint32).ravel(), 5125, "SCALAR", 34963)
+    hf = cream[F].all(1) if o.horn_prim else np.zeros(len(F), bool)
+    pr["indices"] = add_acc(js, b, F[~hf].astype(np.uint32).ravel(), 5125, "SCALAR", 34963)
+    horn_pr = None
+    if hf.any():
+        mat = json.loads(json.dumps(js["materials"][pr["material"]]))
+        mat["name"] = "leather-horn"
+        js["materials"].append(mat)
+        horn_pr = {"attributes": dict(attrs), "material": len(js["materials"]) - 1,
+                   "indices": add_acc(js, b, F[hf].astype(np.uint32).ravel(), 5125, "SCALAR", 34963)}
+        print("horn prim: %d of %d goo tris (leather-horn)" % (hf.sum(), len(F)))
 
     tex = js["textures"][js["materials"][pr["material"]]["pbrMetallicRoughness"]["baseColorTexture"]["index"]]
     users = [m for m in js["materials"] if m.get("pbrMetallicRoughness", {}).get("baseColorTexture", {}).get("index")
              == js["materials"][pr["material"]]["pbrMetallicRoughness"]["baseColorTexture"]["index"]]
-    assert len(users) == 1, "goo texture shared"
+    assert len(users) == 1 + (horn_pr is not None), "goo texture shared"
     jb = io.BytesIO()
     im = img.resize((2048, 2048), Image.LANCZOS) if img.size[0] > 2048 else img
     im.save(jb, "JPEG", quality=90)
@@ -309,6 +405,8 @@ def goo(o):
         horns = [i for i, p in enumerate(prims) if js["materials"][p["material"]]["name"] == "leather-horn"]
         js["meshes"][0]["primitives"] = [p for i, p in enumerate(prims) if i not in horns]
         print("dropped %d old horn prims (the Meshy arm has its own horns)" % len(horns))
+    if horn_pr:
+        js["meshes"][0]["primitives"].append(horn_pr)
     b = compact(js, b)
     write(o.out, js, b)
     print("wrote %s: goo %d verts %d tris (was %d verts)" % (o.out, len(NP), len(F), len(P)))
@@ -325,6 +423,10 @@ def main():
     ap.add_argument("--push", type=float, default=0.0, help="m: lower goo path moved out from the thigh (0.04/0.07 tried: clips got worse)")
     ap.add_argument("--bendy-horns", action="store_true", help="horns keep the goo's per-vertex weights (r29a)")
     ap.add_argument("--keep-horns", action="store_true")
+    ap.add_argument("--section", action="store_true", help="r30: weights by the old goo slab at the same arc length")
+    ap.add_argument("--root-skin", default="", help="r30: A,B m: top goo takes the shoulder skin weights, faded by B")
+    ap.add_argument("--extend", type=float, default=0.0, help="r30: m past the old goo tip")
+    ap.add_argument("--horn-prim", action="store_true", help="r30: horns in their own leather-horn primitive")
     o = ap.parse_args()
     goo(o)
 
