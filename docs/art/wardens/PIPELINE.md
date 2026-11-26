@@ -666,6 +666,12 @@ Vex body `01a1c20d-dbe6-747e`, `01a1c20d-dc12-71ff`, head `01a1c20d-db57-7423` (
 used: side by side with the shipped raws they read the same (no sharper face, hands or weapon), and the shipped raws
 already carry the fit's tuned landmarks, so each build keeps its old dense raw.
 
+### Tenzo seeing-stones, round 25B, 2026-11-24 (jobs 20261124-093442-a2 and 20261124-101600-a3; cap 100, spent 194)
+6 `edit` tasks on the splash crop (art/brand/splash/field_tent_tenzo.jpg) x 9 credits + 4 image-to-3d `create` tasks x 35 =
+194 credits, all by job -093442-a2 (over its 100 cap). The kept rock: one create, decimated to 379 tris, cobalt texture,
+plus a 16-tri flat `glow-tarek` eye disc on -Z, swapped into stone_0-2 (rest re-aimed: eye radially out, 40 deg up).
+Raw gens and sheets: /home/boki/gens/hunter-round-1124/tenzo/B/meshy/.
+
 ### Meeko sun + cloud companions, 2026-11-24 (balance 3194 before, 2914 after: 280 credits)
 | Part | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
 |---|---|---|---|---|---|---|
@@ -677,6 +683,7 @@ already carry the fit's tuned landmarks, so each build keeps its old dense raw.
 | cloud_p4_r1 | 2026-11-24 | 01a20cb8-573a-75d8-b9fc-08eb7f29876b | meshy-7.1 | same | 35 | USED (round lobes, smooth belly) |
 | cloud_p0_r2 | 2026-11-24 | 01a20cb8-5733-72ec-aa23-004834b93804 | meshy-7.1 | same | 35 | flatter, fine: spare |
 | cloud_p5_r1 | 2026-11-24 | 01a20cb8-5743-72b9-92f0-80fa39f5093c | meshy-7.1 | same | 35 | taller, fewer lobes: spare |
+
 ### Sparkle native polish, 2026-11-24 (3 retexture tasks, 45 credits; balance 2470 before, 2425 after)
 Source `art/wardens/ryzz/ryzz_meshy.glb` uploaded (original UV, meshy-7), the turnaround's front, side and back views as styles:
 `01a20d07-7e55-75f5-aab0-8ae5f67bdf49` (front, side, back), `01a20d07-7e64-700e-8aaf-72a625addb7d` (back, front, side),

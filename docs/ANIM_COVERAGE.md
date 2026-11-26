@@ -55,7 +55,7 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | breaker | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |  |
 | cinder | clip | clip | clip | clip | proc | shared | clip | proc | shared | shared | shared | shared | shared | clip | shared | native: Meshy clips |
 | claire | clip | clip | clip | clip | proc | shared | clip | proc | shared | shared | shared | shared | shared | clip | shared | native: Meshy clips |
-| dredge | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip | clip |  |
+| dredge | clip | clip | clip | clip | proc | shared | clip | proc | shared | shared | shared | shared | shared | clip | shared | native: Meshy clips |
 | emote_gestures | proc | proc | proc | proc | proc | missing | proc | proc | proc | proc | proc | proc | proc | proc | proc |  |
 | gil | clip | clip | clip | clip | proc | shared | clip | proc | proc | proc | proc | proc | shared | clip | proc | native: Meshy clips |
 | hem | clip | clip | clip | clip | proc | shared | clip | proc | shared | shared | shared | shared | shared | clip | shared | native: Meshy clips |
@@ -98,11 +98,11 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | threadwyrm | shared | shared | shared | shared | shared | shared | proc | proc |
 | velvorm | shared | shared | shared | shared | shared | shared | proc | proc |
 | hoarheron | clip | shared | shared | shared | shared | shared | proc | proc |
-| limpetor | clip | shared | shared | clip | clip | clip | proc | proc |
-| moonloris | clip | shared | shared | clip | clip | clip | proc | proc |
 | nimbostrich | shared | clip | clip | shared | shared | shared | proc | proc |
 | orchisloth | shared | clip | clip | shared | shared | shared | proc | proc |
 | tuatrune | shared | clip | clip | shared | shared | shared | proc | proc |
+| limpetor | clip | shared | shared | clip | clip | clip | proc | proc |
+| moonloris | clip | shared | shared | clip | clip | clip | proc | proc |
 | cindle | clip | clip | clip | clip | clip | clip | proc | proc |
 | puddlet | clip | clip | clip | clip | clip | clip | proc | proc |
 | burrlet | clip | clip | clip | clip | clip | clip | proc | proc |
