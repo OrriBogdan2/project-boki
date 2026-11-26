@@ -7,17 +7,19 @@ extends RefCounted
 ## hunter wears a ring on the ground (1.5-50 m up; gold for you, blue for a teammate, red for an enemy;
 ## content/rules/depth_cues.json). With the setting off the terrain and cloud cues read as off. Never touches the save.
 
-const SHOTS := 120              # shots in the air at once for the cost test (the pool holds 160)
-const SHOT_LIFT := 1.5          # m above the ground the test shots fly
-const BUDGET_US := 2000.0       # us per frame for all discs (hunters + SHOTS shots), a generous headless bound
-const FRAMES := 30              # frames averaged for the cost
+const SHOTS := 120  # shots in the air at once for the cost test (the pool holds 160)
+const SHOT_LIFT := 1.5  # m above the ground the test shots fly
+const BUDGET_US := 2000.0  # us per frame for all discs (hunters + SHOTS shots), a generous headless bound
+const FRAMES := 30  # frames averaged for the cost
 
 var bad := 0
+
 
 func ok(cond: bool, what: String) -> void:
 	print("DEPTHCUECHECK %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -29,6 +31,7 @@ func run(main: Node) -> void:
 	Settings.set_v("depth_cues", true, false)
 	print("DEPTHCUECHECK done, %d failures" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 func _check_match(main: Node) -> void:
 	Settings.set_v("depth_cues", true, false)
@@ -47,6 +50,7 @@ func _check_match(main: Node) -> void:
 	_check_shot_discs(m, dc)
 	m.queue_free()
 
+
 func _find_material(root: Node, shader_file: String) -> ShaderMaterial:
 	if root is GeometryInstance3D:
 		var mat := (root as GeometryInstance3D).material_override as ShaderMaterial
@@ -58,8 +62,10 @@ func _find_material(root: Node, shader_file: String) -> ShaderMaterial:
 			return found
 	return null
 
+
 func _on_ground(disc: MeshInstance3D, ground_y: float) -> bool:
 	return absf(disc.global_position.y - (ground_y + DepthCues.LIFT)) < 0.001
+
 
 func _check_ledge_light(m: Match) -> void:
 	var terrain := _find_material(m.world, "terrain.gdshader")
@@ -74,10 +80,12 @@ func _check_ledge_light(m: Match) -> void:
 				ledges += 1
 	ok(ledges > 0, "the map has ground ending in a drop for the light to catch (%d tiles)" % ledges)
 
+
 func _check_abyss(m: Match) -> void:
 	var clouds := _find_material(m.world, "clouds.gdshader")
 	var dim := float(clouds.get_shader_parameter("abyss_dim")) if clouds != null else 1.0
 	ok(is_equal_approx(dim, DepthCues.ABYSS_DIM), "abyss cloud sea is dimmed to %.2f" % DepthCues.ABYSS_DIM)
+
 
 func _check_hunter_discs(m: Match, dc: DepthCues) -> void:
 	dc._process(0.0)
@@ -92,6 +100,7 @@ func _check_hunter_discs(m: Match, dc: DepthCues) -> void:
 		var y := m.world.ground_at(h.global_position.x, h.global_position.z)
 		ok(_on_ground(disc, y), "hunter %d's disc lies on the ground (y %.2f)" % [i, y])
 	ok(live > 0, "at least one hunter's disc is visible on the ground")
+
 
 func _check_shot_discs(m: Match, dc: DepthCues) -> void:
 	var P: Hunter = m.player
@@ -115,11 +124,13 @@ func _check_shot_discs(m: Match, dc: DepthCues) -> void:
 	dc._process(0.0)
 	ok(dc._shot_discs.all(func(d): return not d.visible), "shot discs hide when the shots are gone")
 
+
 ## Lifts hunter `h` `up` m above the ground it stands over and lays the cues once.
 func _lift(m: Match, dc: DepthCues, h: Hunter, up: float) -> void:
 	var y := m.world.ground_at(h.global_position.x, h.global_position.z)
 	h.global_position.y = y + up
 	dc._process(0.0)
+
 
 func _check_height(m: Match, dc: DepthCues) -> void:
 	var rules := Content.rules("depth_cues")

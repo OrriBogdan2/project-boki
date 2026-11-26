@@ -2,14 +2,16 @@ extends RefCounted
 ## --anti-heal-check: Anti-Heal (blight) leaves 30% of every heal (content/rules/combat.json
 ## anti_heal_cut 0.7), and a heal with no Anti-Heal on is whole. Headless; never touches the save.
 
-const HEAL := 20.0   # hp of the test heal
+const HEAL := 20.0  # hp of the test heal
 
 var bad := 0
+
 
 func ok(cond: bool, what: String) -> void:
 	print("ANTIHEAL %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
