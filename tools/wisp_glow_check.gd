@@ -1,8 +1,8 @@
 extends RefCounted
-## --wisp-glow-check [--shots-dir=<dir>]: both wisps (the Hunter Wisp, WispLook, and a Boki wisp, BokiWispLook)
+## --wisp-glow-check [--compat] [--shots-dir=<dir>]: both wisps (the Hunter Wisp, WispLook, and a Boki wisp, BokiWispLook)
 ## are drawn in a real viewport on a dark ground and must glow: the brightest pixel on the body is near white and
-## the body's mean is well above the ground, never a dark blob. Run it under each renderer (Forward+ and
-## --rendering-method gl_compatibility; the web build uses Compatibility). Needs a GPU renderer: headless draws
+## the body's mean is well above the ground, never a dark blob. Run it under each renderer (--compat
+## re-runs it in a child game on Compatibility, which the web build uses). Needs a GPU renderer: headless draws
 ## nothing, so the check says SKIP there. Prints WISPGLOW PASS/FAIL/SKIP.
 
 const GROUND := Color(0.1, 0.11, 0.1)
@@ -18,6 +18,15 @@ func run(main: Node) -> void:
 	if DisplayServer.get_name() == "headless":
 		print("WISPGLOW SKIP (headless draws nothing)")
 		main.get_tree().quit(0)
+		return
+	if "--compat" in OS.get_cmdline_user_args() and Look.full_renderer():
+		var args := ["--path", ProjectSettings.globalize_path("res://"), "--rendering-method", "gl_compatibility"]
+		args.append_array(["--rendering-driver", "opengl3", "--audio-driver", "Dummy", "--"])
+		args.append_array(Array(OS.get_cmdline_user_args()).filter(func(a): return a != "--compat"))
+		var out := []
+		var code := OS.execute(OS.get_executable_path(), args, out, true)
+		print("".join(out).strip_edges())
+		main.get_tree().quit(code)
 		return
 	var dir := ""
 	for a in OS.get_cmdline_user_args():
