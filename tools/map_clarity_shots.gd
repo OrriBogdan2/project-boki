@@ -84,7 +84,7 @@ func _targets() -> Array:
 	if not m.beacons.is_empty():
 		out.append({"id": "beacon", "pos": m.beacons[0]["pos"]})
 	if m.lairs != null and not m.lairs.list.is_empty():
-		out.append({"id": "boss_lair", "pos": m.lairs.list[0]["pos"]})
+		out.append({"id": "boss_lair", "pos": m.lairs.list[0]["c"]})
 	return out
 
 
