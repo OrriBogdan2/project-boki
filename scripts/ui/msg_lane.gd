@@ -25,6 +25,7 @@ const FIGHT_SHOWN := 1          # lines on show at most while the player is in a
 const FIGHT_LIFE := 2.0         # s: the longest a line lives in a fight (a hint's own life aside)
 const PX_CAP := 512             # measured world-label texts kept (label_rect)
 
+static var _px := {}            # [font id, text, wrap px, font size] -> that text's size in px (label_rect)
 var top := 100.0                ## px from the top of the screen where the column starts
 var right_edge := 0.0           ## 0: the column is centred; else its right edge, in px
 var max_w := 0.0                ## px: the widest a card gets (the tutorial's column); 0: WIDE of the screen
@@ -37,7 +38,6 @@ var hold := false:              ## true: nothing but URGENT comes in (the tutori
 		_promote()
 var _shown: Array[Dictionary] = []
 var _waiting: Array[Dictionary] = []
-static var _px := {}            # [font id, text, wrap px, font size] -> that text's size in px (label_rect)
 
 func _init() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -112,13 +112,13 @@ func bottom() -> float:
 static func yield_label(lbl: Label3D, cam: Camera3D, rects: Array[Rect2], delta: float) -> void:
 	yield_at(lbl, cam, rects, delta)
 
-## yield_label, returning the label's box on screen (at Vector2.INF when it is hidden or behind the camera).
-static func yield_at(lbl: Label3D, cam: Camera3D, rects: Array[Rect2], delta: float) -> Rect2:
+## yield_label (`over`: its rects), returning the label's box on screen (at Vector2.INF when it is hidden or behind the camera).
+static func yield_at(lbl: Label3D, cam: Camera3D, over: Array[Rect2], delta: float) -> Rect2:
 	var mine := Rect2(Vector2.INF, Vector2.ZERO)
 	var want := 0.0
 	if lbl.is_visible_in_tree() and not cam.is_position_behind(lbl.global_position):
 		mine = label_rect(lbl, cam)
-		for r in rects:
+		for r in over:
 			if r.intersects(mine):
 				want = 1.0
 				break

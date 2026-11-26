@@ -9,7 +9,7 @@ static var _tracy: Object = ClassDB.instantiate(&"TracyProfiler") if ClassDB.cla
 static var on := _tracy != null
 static var sums := false
 static var us := {}
-static var _open: Array = []      # [zone, start usec] pairs, innermost last
+static var _open: Array = []  # [zone, start usec] pairs, innermost last
 
 
 static func begin(zone: String) -> void:
@@ -31,4 +31,4 @@ static func end() -> void:
 static func frame() -> void:
 	if on:
 		_tracy.frame_mark()
-	_open.clear()      # (a zone left open by an early return never leaks into the next frame)
+	_open.clear()  # (a zone left open by an early return never leaks into the next frame)

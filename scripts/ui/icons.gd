@@ -5,9 +5,9 @@ class_name Icons
 ## Coordinates are in a -1..1 box around the centre.
 
 const ART_DIR := "res://art/icons/"
+const VEC_CAP := 1024  # recorded vector glyphs (id, size, colour) kept before the cache starts over
 const SILHOUETTE_V := 0.2  # colour value (0-1): a darker `col` draws a painted icon as a silhouette (unowned items)
 static var _art := {}  # id -> CanvasTexture, or null when the id has no painted icon (looked up once per id)
-const VEC_CAP := 1024  # recorded vector glyphs (id, size, colour) kept before the cache starts over
 static var _vec := {}  # [id, size, colour] -> Rec: a glyph's draw calls, built once (the HUD draws hundreds a second)
 
 
