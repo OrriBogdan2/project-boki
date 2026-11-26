@@ -89,7 +89,7 @@ func _arena_spot(p: Vector3) -> Vector3:
 ## One GAP row per archetype and size: "main" is the size before this rule, "now" the rule's.
 func _gaps(after: float, heroes_arg := []) -> void:
 	var base := CamRig.match_hunter_scale
-	for hero in (heroes_arg if not heroes_arg.is_empty() else Arch.ids()):
+	for hero in heroes_arg if not heroes_arg.is_empty() else Arch.ids():
 		await _start(hero, "cindle")
 		for h in m.hunters:
 			h.out = h != m.player
@@ -109,17 +109,19 @@ func _gaps(after: float, heroes_arg := []) -> void:
 				own = HudPlate.up(p, own)
 				rival = HudPlate.up(p, rival)
 			print(
-				"GAP %s %s: top %.2f m (top_h %.3f), plate over it: own %.0f px, rival %.0f px (silhouette %.0f, %.0f)"
-				% [
-					hero,
-					pass_name,
-					up,
-					up / p.vis_k,
-					column - _screen_y(p, own * CamRig.match_hunter_scale) - PLATE_H,
-					column - _screen_y(p, rival * CamRig.match_hunter_scale) - PLATE_H,
-					_top(p.model) - _screen_y(p, own * CamRig.match_hunter_scale) - PLATE_H,
-					_top(p.model) - _screen_y(p, rival * CamRig.match_hunter_scale) - PLATE_H
-				]
+				(
+					"GAP %s %s: top %.2f m (top_h %.3f), plate over it: own %.0f px, rival %.0f px (silhouette %.0f, %.0f)"
+					% [
+						hero,
+						pass_name,
+						up,
+						up / p.vis_k,
+						column - _screen_y(p, own * CamRig.match_hunter_scale) - PLATE_H,
+						column - _screen_y(p, rival * CamRig.match_hunter_scale) - PLATE_H,
+						_top(p.model) - _screen_y(p, own * CamRig.match_hunter_scale) - PLATE_H,
+						_top(p.model) - _screen_y(p, rival * CamRig.match_hunter_scale) - PLATE_H
+					]
+				)
 			)
 		m.queue_free()
 	CamRig.match_hunter_scale = base
