@@ -22,5 +22,7 @@ const CHECKS := {
 	# Vex's cross-ability interactions
 	"--gunslinger-combo-check": ["res://tools/archetype_check.gd", "archetype_check", null],
 	"--boss-check": ["res://tools/boss_check.gd", "boss_check", null],  # boss lairs: dial, wards, phases, the Rare Egg
+	# Anti-Heal leaves 30% of a heal (content/rules/combat.json)
+	"--anti-heal-check": ["res://tools/anti_heal_check.gd", "anti_heal_check", null],
 	"--bot-spacing-shots": ["res://tools/bot_spacing_shots.gd", "bot_spacing_shots", null],  # --shots-dir=<dir>, GPU
 }
