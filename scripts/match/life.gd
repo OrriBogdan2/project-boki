@@ -29,6 +29,7 @@ const R := {
 	"loot_time": 1.0,           # [design] bots: hold interact to take everything from a box (you get a loot window)
 	"sickness_time": 12.0,      # [patch 1.0] resurrection sickness
 	"sickness_dmg": 0.75,       # [patch 1.0] -25% damage dealt
+	"cc_guard": 3.0,            # [reference tuning] s after a revive or beacon return that no stun, root or slow lands
 }
 
 const BOX_BODY := Color("5a5560")     # Models.deathbox's body before its owner tint
@@ -579,6 +580,7 @@ static func bring_back(m: Match, o: Hunter, at: Vector3, hp_frac: float, sick: b
 	o.inv_t = 1.5
 	o.vel = Vector3.ZERO
 	o.stun_t = 0.0
+	o.cc_guard_t = R["cc_guard"]
 	o.grap = {}; o.pad = {}; o.charge = {}; o.roll_t = 0.0
 	o.gliding = false; o.glide_fuel = 1.0
 	o.sick_t = R["sickness_time"] if sick else 0.0
