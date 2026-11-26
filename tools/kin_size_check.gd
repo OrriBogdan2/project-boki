@@ -1,15 +1,16 @@
 extends RefCounted
 ## --kin-size-check: a rigged Boki is as big as its data says (KinSize). Every species with a model, built the way the
-## farm and the match build it (Models.kin), has a longest side within 10% of size.cm times KinSize.M_PER_CM; the
-## starters cover close areas at the game camera and Heatherhorn is bigger than all of them. --table prints each.
+## farm and the match build it (Models.kin), reads (KinSize.read: the root of its silhouette's area at the match's and
+## the farm's pitch) within TOLERANCE of size.cm times M_PER_CM times READ_SHARE; the starters read close at each
+## camera on its own, at the match and at the farm's scale, and Heatherhorn reads bigger than all of them.
+## --table prints each.
 
-const TOLERANCE := 0.1  # the share a species' measured height may differ from its data height
+const TOLERANCE := 0.05  # the share a species' measured read may differ from its data read
 const STARTERS := ["cindle", "puddlet", "burrlet"]
-const VIEW_PITCH := deg_to_rad(57.0)  # the match camera's pitch (CamRig.pitch)
-const VIEW_YAWS := 4  # turns of the model (evenly round) the covered area is averaged over
-const COVER_SPREAD := 1.15  # the starter covering most of the screen covers at most this many times the least
+const READ_SPREAD := 1.12  # at each camera, the starter reading biggest reads at most this many times the least
 const BIG := "heatherhorn"
-const BIG_OVER := 1.5  # Heatherhorn stands at least this many times the tallest starter
+const BIG_OVER := 1.5  # Heatherhorn reads at least this many times the biggest starter
+const FAR := 2.0  # the most a species' longest side may differ from its data length (an outlier model to look at)
 
 var bad := 0
 var _print_table := false
@@ -33,25 +34,37 @@ func _box(root: Node3D) -> Vector3:
 	return all.size
 
 
-## The area (m2) the meshes under `root` cover at the game camera: the hull of every vertex seen from VIEW_PITCH,
-## averaged over VIEW_YAWS turns.
-func _cover(root: Node3D) -> float:
-	var total := 0.0
-	for i in VIEW_YAWS:
-		var turn := Basis(Vector3.UP, PI * float(i) / VIEW_YAWS)
-		var pts := PackedVector2Array()
-		for n in root.find_children("*", "MeshInstance3D", true, false):
-			var mi := n as MeshInstance3D
-			if mi.mesh is ArrayMesh:
-				for v in mi.mesh.get_faces():
-					var w := turn * (mi.global_transform * v)
-					pts.append(Vector2(w.x, w.y * cos(VIEW_PITCH) - w.z * sin(VIEW_PITCH)))
-		var hull := Geometry2D.convex_hull(pts)
-		var area := 0.0
-		for j in hull.size() - 1:
-			area += hull[j].x * hull[j + 1].y - hull[j + 1].x * hull[j].y
-		total += absf(area) * 0.5
-	return total / VIEW_YAWS
+## The world points of the meshes under `root` (every vertex KinSize.read would sample).
+func _pts(root: Node3D) -> PackedVector3Array:
+	var pts := PackedVector3Array()
+	for n in root.find_children("*", "MeshInstance3D", true, false):
+		var mi := n as MeshInstance3D
+		for si in mi.mesh.get_surface_count():
+			for v in (mi.mesh.surface_get_arrays(si)[Mesh.ARRAY_VERTEX] as PackedVector3Array):
+				pts.append(mi.global_transform * v)
+	return pts
+
+
+## The m a built Boki reads as from one pitch (degrees): the root of its yaw-averaged silhouette area.
+func _read_at(pts: PackedVector3Array, pitch: float) -> float:
+	var area := 0.0
+	for i in KinSize.YAWS:
+		area += KinSize.cover(pts, deg_to_rad(pitch), PI * float(i) / KinSize.YAWS)
+	return sqrt(area / KinSize.YAWS)
+
+
+## Whether the starters' reads (id -> [read per pitch]) sit within READ_SPREAD at every pitch; `where` names the view.
+func _close(reads: Dictionary, where: String) -> void:
+	for p in KinSize.PITCHES.size():
+		var most := 0.0
+		var least := INF
+		for id in STARTERS:
+			most = maxf(most, float(reads[id][p]))
+			least = minf(least, float(reads[id][p]))
+		ok(
+			most / least < READ_SPREAD,
+			"%s, from %.0f degrees the starters read within %.2fx" % [where, KinSize.PITCHES[p], most / least]
+		)
 
 
 func run(m: Node) -> void:
@@ -60,75 +73,56 @@ func run(m: Node) -> void:
 		_print_table = _print_table or a == "--table"
 	var stage := Node3D.new()
 	m.add_child(stage)
-	var seen := {}
-	var covers := {}
+	var reads := {}
 	var worst := 0.0
+	var far := 1.0
 	for id in Data.KIN:
 		if not BokiRig.has(id):
 			continue
 		var k := Models.kin(id, {})
 		stage.add_child(k)
-		var box := _box((k.get_node("Body/Flex/BokiRig") as BokiRig).model)
-		var longest := box[box.max_axis_index()]
+		var mdl := (k.get_node("Body/Flex/BokiRig") as BokiRig).model
+		var pts := _pts(mdl)
+		var at: Array = KinSize.PITCHES.map(func(p: float) -> float: return _read_at(pts, p))
+		var got := sqrt(float(at[0]) * float(at[1]))
 		var cm := float(Unique.base_size(id)["cm"])
-		seen[id] = box
-		if id in STARTERS:
-			covers[id] = _cover((k.get_node("Body/Flex/BokiRig") as BokiRig).model)
-		worst = maxf(worst, absf(longest / (cm * KinSize.M_PER_CM) - 1.0))
+		var box := _box(mdl)
+		var longest := box[box.max_axis_index()] / (cm * KinSize.M_PER_CM)
+		reads[id] = at
+		worst = maxf(worst, absf(got / (cm * KinSize.M_PER_CM * KinSize.READ_SHARE) - 1.0))
+		far = maxf(far, maxf(longest, 1.0 / longest))
 		if _print_table:
 			print(
 				(
-					"KIN_SIZE_ROW %s data %.0f cm, box %.0f x %.0f x %.0f cm"
-					% [id, cm, box.x * 100, box.y * 100, box.z * 100]
+					"KIN_SIZE_ROW %s data %.0f cm, box %.0f x %.0f x %.0f cm, read %.0f cm (57: %.0f, 20: %.0f)"
+					% [id, cm, box.x * 100, box.y * 100, box.z * 100, got * 100, at[0] * 100, at[1] * 100]
 				)
 			)
 		k.queue_free()
-	ok(seen.size() >= 40, "%d species with a model measured" % seen.size())
-	ok(
-		worst <= TOLERANCE,
-		(
-			"every species' longest side is within %d%% of its data size (worst %.1f%%)"
-			% [TOLERANCE * 100.0, worst * 100.0]
-		)
-	)
-	var most := 0.0
-	var least := INF
-	var longest_starter := 0.0
-	for id in STARTERS:
-		most = maxf(most, float(covers[id]))
-		least = minf(least, float(covers[id]))
-		var box: Vector3 = seen[id]
-		longest_starter = maxf(longest_starter, box[box.max_axis_index()])
-	ok(
-		most / least < COVER_SPREAD,
-		"the starters cover close areas at the game camera (%.0f to %.0f cm2)" % [least * 1e4, most * 1e4]
-	)
+	ok(reads.size() >= 40, "%d species with a model measured" % reads.size())
+	ok(worst <= TOLERANCE, "every species reads within %d%% of its data size (worst %.1f%%)" % [TOLERANCE * 100.0, worst * 100.0])
+	ok(far <= FAR, "every species' longest side is within %.1fx of its data length (worst %.2fx)" % [FAR, far])
+	_close(reads, "in a match")
 	var farm_scale := float(load("res://scripts/home/home.gd").get_script_constant_map()["FARM_BOKI_SCALE"])
-	var farm_most := 0.0
-	var farm_least := INF
+	var farm := {}
 	for id in STARTERS:
 		var rec := Save.new_kin(id, "", 7)  # a fresh hatchling, the way the farm draws one (its evo scale)
 		(rec["dna"] as Dictionary)["size"] = 0.0
 		var k := Models.kin(id, rec)
 		stage.add_child(k)
 		k.scale = k.scale * farm_scale  # Home draws a Boki at its own scale times FARM_BOKI_SCALE, the same for each
-		var cover := _cover((k.get_node("Body/Flex/BokiRig") as BokiRig).model)
-		farm_most = maxf(farm_most, cover)
-		farm_least = minf(farm_least, cover)
+		var pts := _pts((k.get_node("Body/Flex/BokiRig") as BokiRig).model)
+		farm[id] = KinSize.PITCHES.map(func(p: float) -> float: return _read_at(pts, p))
 		k.queue_free()
-	ok(
-		farm_most / farm_least < COVER_SPREAD,
-		"on the farm the starters cover areas within %.2fx" % (farm_most / farm_least)
-	)
-	var heather: Vector3 = seen[BIG]
-	var heather_longest := heather[heather.max_axis_index()]
-	ok(
-		heather_longest >= longest_starter * BIG_OVER,
-		(
-			"Heatherhorn is bigger than every starter (%.0f cm against %.0f)"
-			% [heather_longest * 100.0, longest_starter * 100.0]
-		)
-	)
+	_close(farm, "on the farm")
+	var biggest := 0.0
+	for id in STARTERS:
+		biggest = maxf(biggest, sqrt(float(reads[id][0]) * float(reads[id][1])))
+	var big := sqrt(float(reads[BIG][0]) * float(reads[BIG][1]))
+	ok(big >= biggest * BIG_OVER, "Heatherhorn reads bigger than every starter (%.0f cm against %.0f)" % [big * 100.0, biggest * 100.0])
+	var t0 := Time.get_ticks_usec()
+	KinSize.read((Models.kin(BIG, {}).get_node("Body/Flex/BokiRig") as BokiRig).model)
+	print("KIN_SIZE_TIME read of one model %.1f ms" % ((Time.get_ticks_usec() - t0) / 1000.0))
 	stage.queue_free()
 	print("KIN_SIZE_DONE bad=%d" % bad)
 	m.get_tree().quit(1 if bad > 0 else 0)

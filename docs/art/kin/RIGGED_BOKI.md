@@ -143,17 +143,22 @@ that keeps a planted paw closest to the ground most of the stance. `_pick_clip` 
 
 ## How big it is (`KinSize`)
 
-A rigged Boki's size is its data: `content/kin/<id>.json` `size.cm` x `KinSize.M_PER_CM` (`M_PER_CM` m per cm) is the
-longest side of its body (width, height or length), at root scale 1, whatever the glb's own size. `M_PER_CM` (now 0.029 m) is the one display scale for every Boki: data cm keep the ratios, the factor sets how big they all stand next to a hunter (a 28 cm starter is 0.81 m, about 1200 px at the game camera). The game camera looks
-down, so the footprint decides how big a Boki reads: equal heights made a long, low Prismander look far bigger than a
-tall Vespyx. `BokiRig.build` measures the glb's meshes (`KinSize.extent`, the bind-pose box, ears and horns included),
-scales Flex by `fit` = target / measured and stores it as the root meta `fit`; `BokiRig` and `KinPuppet` multiply
-Flex's pose scale by it. A new Meshy model needs no size tuning: set its `size.cm`. The kin's own roll (Unique, Evo
-growth, Mutations) and the farm's `FARM_BOKI_SCALE` multiply on top, as before.
-`--kin-size-check` measures every species with a model and asserts each longest side is within 10% of its data, the
-three starters (Vespyx, Prismander, Mycroll, 28 cm each) cover areas within 1.15x at the game camera (the hull of the
-mesh seen from its 57 degree pitch, averaged over four turns) and Heatherhorn (70 cm) is bigger than them. The starters'
-cm are not the 30/28/27 asked first: at those the silhouettes differed by 1.33x; 28 each gives 1.07x. `--boki-size-shots` renders the proof (the HUD frame, the game camera, an eye-level camera) and writes each
+A rigged Boki's size is its data: `content/kin/<id>.json` `size.cm` x `KinSize.M_PER_CM` (now 0.029 m per cm) x
+`KinSize.READ_SHARE` (0.66) is how big it *reads*, at root scale 1, whatever the glb's own size. A Boki's read is the
+square root of the area its silhouette covers on screen (the convex hull of its mesh), averaged over four turns and over
+both views it is seen from: the match camera's 57 degrees and the farm third-person camera's 20 degrees (a geometric
+mean, so neither view outweighs the other). The longest side alone did not do it: a tall, narrow Vespyx and a low, long
+Prismander of the same length read 1.2x apart from the farm's low view (the owner saw ~2x on the 11-26 farm sheet, with
+the then 17% active-companion bonus on top). `BokiRig.build` measures the glb once per species (`KinSize.read`: only the
+corners of each mesh's 3D convex hull, exact and ~10 ms), scales Flex by `fit` = target / read and stores it as the
+root meta `fit`; `BokiRig` and `KinPuppet` multiply Flex's pose scale by it. A new Meshy model needs no size tuning:
+set its `size.cm`. The kin's own roll (Unique, Evo growth, Mutations) and the farm's one `FARM_BOKI_SCALE` (the same
+for every Boki, the active companion included) multiply on top.
+`--kin-size-check` measures every species with a model and asserts each reads within 5% of its data, no longest side
+is more than 2x off its data length (an outlier model to look at), the three starters (Vespyx, Prismander, Mycroll,
+28 cm each) read within 1.12x of each other from each pitch on its own, in a match and at the farm's scale (now 1.09x
+at both), and Heatherhorn (70 cm) reads at least 1.5x the biggest starter (now 2.5x). The starters' cm are not the
+30/28/27 asked first: at those the silhouettes differed by 1.33x. `--boki-size-shots` renders the proof (the HUD frame, the game camera, an eye-level camera) and writes each
 one's measured box and the area it covers on screen. The portrait (`KinPortrait`) divides the fit out: its fixed frame
 was cut for the glb's own size.
 
