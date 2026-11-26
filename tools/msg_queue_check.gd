@@ -4,7 +4,7 @@ extends RefCounted
 ##   2. a repeat merges into the line on show or waiting ("Ember  x3") instead of a second card
 ##   3. a waiting important line goes before a waiting small one; a small one that waits too long goes
 ##   4. while held (the tutorial banner) nothing new shows; it comes in when the hold lifts
-##   5. in a fight fewer lines show (FIGHT_SHOWN) and none lives past FIGHT_LIFE unless it asked to;
+##   5. in a fight only an urgent line shows (FIGHT_SHOWN), the rest wait for it to end;
 ##      the match HUD counts a hit you land as a fight, not only one you take
 ##   6. the match HUD's toast, toast_small, tip and level_up and the farm's UI.toast all use a lane
 ##   7. a world label under a card fades back
@@ -122,13 +122,9 @@ func _fight(host: Control) -> void:
 	for t in ["a", "b"]:
 		lane.push(t, Color.WHITE, MsgLane.HIGH)
 	lane.push("hint", Color.WHITE, MsgLane.NORMAL, 6.0)
-	ok(lane.texts().size() == MsgLane.FIGHT_SHOWN,
-		"a fight: %d lines at most (%d)" % [MsgLane.FIGHT_SHOWN, lane.texts().size()])
-	lane._process(MsgLane.FIGHT_LIFE + 0.05)
-	ok(not lane.texts().has("a"), "a fight: a line goes after %.1fs" % MsgLane.FIGHT_LIFE)
-	lane._process(MsgLane.FIGHT_LIFE + 0.05)
-	lane._process(MsgLane.FIGHT_LIFE + 0.05)
-	ok(lane.texts().has("hint"), "a fight: a hint keeps its own life (%s)" % str(lane.texts()))
+	ok(lane.texts().is_empty() and lane.waiting() == 3, "a fight: everything but urgent waits (%s)" % str(lane.texts()))
+	lane.push("down", Color.WHITE, MsgLane.URGENT)
+	ok(lane.texts().size() == MsgLane.FIGHT_SHOWN, "a fight: an urgent line shows (%s)" % str(lane.texts()))
 	lane.clear()
 	lane.fight = false
 

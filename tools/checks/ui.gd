@@ -5,6 +5,7 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	"--combat-calm-check": ["res://tools/combat_calm_check.gd", "combat_calm_check", null],  # fight HUD queue
 	"--passive-gauge-shots": ["res://tools/passive_gauge_shots.gd", "passive_gauge_shots", null],
 	"--shops-check": ["res://tools/shops_check.gd", "shops_check", null],  # in-match shops, the map legend
 	"--reticle-hunters-shots": ["res://tools/reticle_shots.gd", "reticle_shots", "hunters"],

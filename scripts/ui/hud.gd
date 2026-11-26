@@ -161,7 +161,7 @@ func tip(text: String, near := "", life := TIP_LIFE) -> void:
 	else: msgs.push(text, TIP_COL, MsgLane.NORMAL, life)
 const TIP_COL := Color("f3e6c8")
 const TIP_LIFE := 6.0      # s a hint stays up
-const MSG_FIGHT_S := 4.0   # s after you last took or landed a hit that the HUD keeps to its fight budget
+const MSG_FIGHT_S := 3.0   # s after you last took or landed a hit that the HUD keeps to its fight budget
 const KIT_FADE_S := 0.35   # s the kit panel takes to fade out or back
 
 ## The fight budget is on (you took or landed a hit lately): the message lane shrinks, the kit panel hides.
@@ -449,8 +449,10 @@ func _draw_world_labels() -> void:
 	_draw_ground_tags(cam)
 
 ## Gear and tunings on the ground: name and rarity when you're close enough to care. Tags that would overlap one
-## already drawn this frame step up above it, so a few drops side by side stay readable.
+## already drawn this frame step up above it, so a few drops side by side stay readable. None in a fight.
 func _draw_ground_tags(cam: Camera3D) -> void:
+	if in_fight():
+		return      # a loot name is not worth reading mid-fight
 	var pp: Vector3 = m.player.pos if m.player else cam.focus
 	var tags: Array = []
 	for wp in m.wpicks:
@@ -1260,6 +1262,8 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 	# card only (BokiHud), not again beside the belt
 	BeltHud.draw(self, p, r.end.x - s, y)
 	GripHud.draw(self, p, r)
+	if in_fight():
+		return      # the loot counters (seeds, gems, pack) wait the fight out: ammo and the slots stay
 	# what you're carrying home, as a counter
 	var seeds := 0
 	for sd in p.seeds: seeds += int(p.seeds[sd])

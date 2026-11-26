@@ -125,7 +125,7 @@ func _lane_budget(m: Match) -> void:
 	for t in ["one", "two", "three"]:
 		lane.push(t, Color.WHITE)
 	lane._process(0.1)
-	ok(lane.texts().size() == 2 and MsgLane.MAX_SHOWN == 2, "at most 2 cards on show (%d)" % lane.texts().size())
+	ok(lane.texts().size() == 1 and lane.max_shown == 1, "a match shows one card at a time (%d)" % lane.texts().size())
 	lane.clear()
 	lane.push("big", Color.WHITE)
 	lane.push("small", Color.WHITE, MsgLane.LOW)
@@ -141,9 +141,9 @@ func _lane_budget(m: Match) -> void:
 	lane.push("small", Color.WHITE, MsgLane.LOW)
 	ok(lane.count() == 0, "in a fight a small line is dropped outright")
 	lane.push("one", Color.WHITE)
-	lane.push("two", Color.WHITE)
+	lane.push("two", Color.WHITE, MsgLane.URGENT)
 	lane._process(0.1)
-	ok(lane.texts().size() == 1 and MsgLane.FIGHT_SHOWN == 1, "in a fight one card at most (%d)" % lane.texts().size())
+	ok(lane.texts() == ["two"], "in a fight only the urgent card shows (%s)" % str(lane.texts()))
 	lane.clear()
 	lane.fight = false
 
