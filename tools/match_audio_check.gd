@@ -50,6 +50,7 @@ func ok(cond: bool, what: String) -> void:
 
 func run(main_node: Node) -> void:
 	main = main_node
+	Sfx.play_jitter_db = 0.0  # levels are compared exactly
 	Save.d["music"] = Save.d.get("music", [])
 	await _abyss()
 	Game.goto(
