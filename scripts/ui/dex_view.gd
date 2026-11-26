@@ -31,6 +31,7 @@ const TYPES := {
 	"frost": {"name": "Frost", "col": Color("a6eeff"), "ink": Color("2a5a7a")},
 	"bloom": {"name": "Bloom", "col": Color("6fd86a")},
 	"storm": {"name": "Storm", "col": Color("5f7fb8")},
+	"wild": {"name": "Normal", "col": Color("e8d9a8")},
 }
 const SILHOUETTE := Color(0.05, 0.06, 0.1, 0.92)       # a Boki you haven't met, drawn as a dark shape
 const TILE := Vector2(106, 132)
