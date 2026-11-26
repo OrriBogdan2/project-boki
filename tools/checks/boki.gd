@@ -10,6 +10,7 @@ const CHECKS := {
 	"--bot-summon-check": ["res://tools/bot_summon_check.gd", "bot_summon_check", null],  # bots press Summon
 	"--kin-size-check": ["res://tools/kin_size_check.gd", "kin_size_check", null],  # Boki stand at their data height
 	"--boki-size-shots": ["res://tools/boki_size_shots.gd", "boki_size_shots", null],  # px heights, hero + 4 Boki
+	"--farm-3d-sizes": ["res://tools/farm_3d_sizes.gd", "farm_3d_sizes", null],  # real farm, 5 hunters + 4 Boki, 3 stills
 	"--wisp-default-check": ["res://tools/wisp_default_check.gd", "wisp_default_check", null],  # wisps + C for all
 	"--wisp-summon-shots": ["res://tools/wisp_summon_shots.gd", "wisp_summon_shots", null],  # --shots-dir=<dir>
 	"--summon-end-sfx-check": ["res://tools/summon_end_sfx_check.gd", "summon_end_sfx_check", null],  # end warning
