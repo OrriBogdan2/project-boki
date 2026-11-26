@@ -70,7 +70,7 @@ const FRAME := {
 	},
 	"threadwyrm":
 	{
-		"head": Vector3(0, 0.357, -0.0958),
+		"head": Vector3(0.113, 0.066, -0.150),
 		"top": 0.464,
 		"carry": Vector3(0, 0.517, 0.0491),
 		"ear_tip": Vector3(0.0602, 0.464, 0.0443),
@@ -444,7 +444,7 @@ const FRAME := {
 	},
 	"zephyrak":
 	{
-		"head": Vector3(0, 0.248, -0.0989),
+		"head": Vector3(-0.0275, 0.336, -0.118),
 		"top": 0.341,
 		"carry": Vector3(0, 0.248, 0.00952),
 		"ear_tip": Vector3(0.0786, 0.284, -0.0313),
@@ -582,7 +582,7 @@ const FRAME := {
 	},
 	"caecilith":
 	{
-		"head": Vector3(0, 0.328, -0.146),
+		"head": Vector3(0, 0.405, -0.161),
 		"top": 0.381,
 		"carry": Vector3(0, 0.152, 0.0473),
 		"ear_tip": Vector3(0.0413, 0.369, -0.0734),
@@ -787,7 +787,7 @@ const FRAME := {
 	},
 	"thrumbird":
 	{
-		"head": Vector3(0, 0.557, -0.0858),
+		"head": Vector3(0, 0.347, -0.010),
 		"top": 0.631,
 		"carry": Vector3(0, 0.192, -0.019),
 		"ear_tip": Vector3(0.0119, 0.411, 0.0451),
@@ -866,8 +866,8 @@ const STRIDE := {
 	"umbrathere": [0.25, 0.60],
 	"duskapi": [0.36, 1.43],
 	"glaciyak": [0.35, 1.43],
-	"heatherhorn": [0.35, 1.43],
-	"kilnbadger": [0.34, 1.41],
+	"heatherhorn": [0.24, 1.20],
+	"kilnbadger": [0.39, 1.84],
 	"moundvark": [0.34, 1.41],
 	"tuatrune": [0.33, 1.35],
 	"moonloris": [0.35, 1.41],
@@ -1251,6 +1251,12 @@ func _process(dt: float) -> void:
 		return
 	if not root.is_visible_in_tree():
 		return
+	# a crowded home (RigPace.crowd): the whole step, scripts and skeleton, runs every other frame with the time held
+	var crowded := pace.every == 1 and RigPace.crowd > RigPace.crowd_from
+	if crowded:
+		dt = pace.step(dt, RigPace.is_lead(get_viewport(), root.global_position))
+		if dt <= 0.0:
+			return
 	_flinch.update(root, dt)
 	_water = float(root.get_meta("kwater", 0.0))
 	if _water > 0.0:
@@ -1258,7 +1264,7 @@ func _process(dt: float) -> void:
 	_keep_flex(dt)
 	_track_speed(dt)
 	_pick_clip(dt)
-	var t := pace.step(dt)
+	var t := dt if crowded else pace.step(dt)
 	if t > 0.0:
 		_face_step(t)
 		advance(t)

@@ -13,6 +13,10 @@ const R_AFTER := 0.6  # s from a wave's E to its R
 const SAMPLE := 4  # frames between particle counts (it walks the whole tree)
 const KIT_SECS := 4.0  # s a kit's E and R are watched for
 const RING := 5.0  # m from the camp's middle to the Hunters
+const PEAK_AT := 19.5  # s into the camp: 0.9 s after the fourth wave's R, the scene inventory at an FX peak
+const QUIET_AT := 23.5  # s into the camp: the same inventory in the quiet before the run ends
+const FightScene := preload("res://tools/perf/fight_scene.gd")
+const GroundAb := preload("res://tools/perf/ground_ab.gd")
 
 var bench  # the PerfBench: frames are logged and summed by it
 var m: Match
@@ -28,6 +32,10 @@ var t_post := 0
 var t_phys := 0
 var stamp_us := {}  # RenderingDevice timestamp name -> us of CPU from it to the next one (the draw, split)
 var stamp_frame := -1
+var ab: GroundAb  # (--bench-ab-ground: the ground and sea variants, alternating inside one run)
+var stamp_frames := 0  # stamp sets read
+var stamp_gpu_us := {}  # timestamp name -> us of GPU from it to the next one (the draw's steps)
+var stamp_cpu_us := {}  # the same on the render thread's clock
 var draws: Array = []  # [pre, post] us of the last few draws
 var taken_us := {}  # script file -> us spent in those _process calls
 
@@ -63,21 +71,13 @@ func run() -> Array:
 	main.get_tree().node_added.connect(
 		func(n: Node):
 			if counting:
-				var k := "%s:%s<%s" % [n.get_class(), String(n.name).rstrip("0123456789@"), _owner_name(n)]
+				var k := "%s:%s<%s" % [n.get_class(), String(n.name).rstrip("0123456789@"), FightScene.owner_name(n)]
 				made[k] = int(made.get(k, 0)) + 1
 	)
 	await _each_kit()
 	var fl: Array = await _camp()
 	_report()
 	return fl
-
-
-## Who made a node: the nearest ancestor with a name of its own (pooled and made nodes are mostly unnamed).
-static func _owner_name(n: Node) -> String:
-	var up := n.get_parent()
-	while up != null and String(up.name).begins_with("@"):
-		up = up.get_parent()
-	return String(up.name).rstrip("0123456789@") if up != null else ""
 
 
 func _step(n: int) -> void:
@@ -192,10 +192,54 @@ func _camp() -> Array:
 		for l in bench.main.get_tree().root.find_children("*", "Light3D", true, false):
 			(l as Light3D).shadow_enabled = false
 		print("BENCH fight shadows off")
+	if "--bench-nofx" in OS.get_cmdline_user_args():  # (a probe: what the effects cost the draw)
+		m.fx.visible = false
+		HeroVfx.of(m).visible = false
+		print("BENCH fight fx off")
+	if "--bench-noink" in OS.get_cmdline_user_args():  # (a probe: what the Hunters' ink outlines cost the draw)
+		for h: Hunter in m.hunters:
+			for shell in WardenMerge.inks(h.model) if h.model else []:
+				(shell as Node3D).visible = false
+			for n in h.model.find_children("*", "MeshInstance3D", true, false) if h.model else []:
+				var mi := n as MeshInstance3D
+				for si in mi.get_surface_override_material_count():
+					if mi.get_surface_override_material(si):
+						mi.get_surface_override_material(si).next_pass = null
+		print("BENCH fight ink off")
+	if "--bench-nopost" in OS.get_cmdline_user_args():  # (a probe: what glow and FXAA cost the draw)
+		for we in bench.main.get_tree().root.find_children("*", "WorldEnvironment", true, false):
+			(we as WorldEnvironment).environment.glow_enabled = false
+		bench.main.get_viewport().screen_space_aa = Viewport.SCREEN_SPACE_AA_DISABLED
+		print("BENCH fight post off")
+	if "--bench-flat-ground" in OS.get_cmdline_user_args():  # (a probe: what the terrain's noise costs the GPU)
+		for n in bench.main.get_tree().root.find_children("*", "MeshInstance3D", true, false):
+			var tm := (n as MeshInstance3D).material_override as ShaderMaterial
+			if tm and tm.shader and tm.shader.resource_path.ends_with("terrain.gdshader"):
+				tm.set_shader_parameter("flat_ground", true)
+		print("BENCH fight ground flat")
+	if "--bench-nosea" in OS.get_cmdline_user_args():  # (a probe: what the cloud-sea plane costs the GPU)
+		for n in m.world.find_children("*", "MeshInstance3D", false, false):
+			var sm := (n as MeshInstance3D).material_override as ShaderMaterial
+			if sm and sm.shader and sm.shader.resource_path.ends_with("clouds.gdshader"):
+				(n as MeshInstance3D).visible = false
+		print("BENCH fight sea off")
+	if "--bench-ab-ground" in OS.get_cmdline_user_args():  # (old, cut, flat, no sea: 45 frames each)
+		ab = GroundAb.new(bench.main.get_tree().root, m.world)
+	if "--bench-nohud" in OS.get_cmdline_user_args():  # (a probe: what the HUD's canvas costs the draw)
+		m.hud.visible = false
+		print("BENCH fight hud off")
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--bench-3d-scale="):  # (a probe: the 3D at this scale of the window, so a small window
+			bench.main.get_viewport().scaling_3d_scale = float(a.substr(17))  # draws 1080p with a small copy)
+			print("BENCH fight 3d scale %.2f" % bench.main.get_viewport().scaling_3d_scale)
+		if a.begins_with("--bench-lod="):  # (a probe: mesh LODs picked at this many px of edge, 2 at medium)
+			bench.main.get_viewport().mesh_lod_threshold = float(a.substr(12))
+			print("BENCH fight lod threshold %.1f px" % bench.main.get_viewport().mesh_lod_threshold)
 	RenderingServer.frame_pre_draw.connect(_on_pre_draw)
 	RenderingServer.frame_post_draw.connect(_on_post_draw)
 	bench.main.get_tree().physics_frame.connect(_on_physics)
 	var fl: Array = []
+	var scene := FightScene.new()
 	var last := Time.get_ticks_usec()
 	var f := 0
 	while f < int(SECS * 60.0):
@@ -207,6 +251,8 @@ func _camp() -> Array:
 				h.ak.use_e()
 			if wave_f == int(R_AFTER * 60.0):
 				h.ak.use_r()
+		if ab:
+			ab.frame(f)
 		var t0 := Time.get_ticks_usec()
 		await _step(1)
 		var now := Time.get_ticks_usec()
@@ -215,6 +261,10 @@ func _camp() -> Array:
 		if f % SAMPLE == 0:
 			_sample(f / 60.0)
 			last = Time.get_ticks_usec()  # (the particle count walks the tree: it stays out of the frame times)
+		if f == int(PEAK_AT * 60.0) or f == int(QUIET_AT * 60.0):
+			var tag := "peak" if f < QUIET_AT * 60.0 else "quiet"
+			scene.report(bench.main.get_tree().root, m, bench.main.get_viewport(), tag)
+			last = Time.get_ticks_usec()  # (so does the inventory)
 		f += 1
 	counting = false
 	Match.prof_on = false
@@ -224,6 +274,10 @@ func _camp() -> Array:
 	_print_sections(taken_us, "node _process", fl.size())
 	_print_sections(phase_us, "engine wait", fl.size())
 	_print_sections(stamp_us, "draw stamps (cpu)", fl.size())
+	_print_sections(stamp_gpu_us, "draw steps (gpu, each renderer stamp to the next)", stamp_frames, 40)
+	_print_sections(stamp_cpu_us, "draw steps (cpu, the same)", stamp_frames, 40)
+	if ab:
+		ab.report()
 	_print_casters()
 	_give_back()
 	return fl
@@ -260,7 +314,7 @@ func _print_casters() -> void:
 	for n in bench.main.get_tree().root.find_children("*", "GeometryInstance3D", true, false):
 		var g := n as GeometryInstance3D
 		if g.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF and g.is_visible_in_tree():
-			var k := "%s<%s" % [g.get_class(), _owner_name(g)]
+			var k := "%s<%s" % [g.get_class(), FightScene.owner_name(g)]
 			by[k] = int(by.get(k, 0)) + 1000  # (_print_sections prints thousandths)
 	_print_sections(by, "shadow casters (count)", 1)
 
@@ -285,6 +339,7 @@ func _add_stamps() -> void:
 	if rd == null or rd.get_captured_timestamps_count() < 2 or rd.get_captured_timestamps_frame() == stamp_frame:
 		return
 	stamp_frame = rd.get_captured_timestamps_frame()
+	_add_steps(rd)
 	var first := rd.get_captured_timestamp_cpu_time(0)
 	var last := rd.get_captured_timestamp_cpu_time(rd.get_captured_timestamps_count() - 1)
 	for d in draws:
@@ -294,6 +349,27 @@ func _add_stamps() -> void:
 			stamp_us["after viewports"] = int(stamp_us.get("after viewports", 0)) + d[1] - last
 			stamp_us["(frames matched)"] = int(stamp_us.get("(frames matched)", 0)) + 1000
 			return
+
+
+## The draw's steps from the renderer's own stamps: GPU and CPU us from each stamp to the next, by the stamp's name,
+## and the whole span. Without the engine's --gpu-profile flag only the viewport's own begin and end stamps exist;
+## with it the passes show (shadows, opaque, transparent, post, canvas). The GPU clock reads in ns on Vulkan.
+func _add_steps(rd: RenderingDevice) -> void:
+	stamp_frames += 1
+	var n := rd.get_captured_timestamps_count()
+	for i in n - 1:
+		var k := rd.get_captured_timestamp_name(i)
+		var gpu := int((rd.get_captured_timestamp_gpu_time(i + 1) - rd.get_captured_timestamp_gpu_time(i)) / 1000.0)
+		var cpu := rd.get_captured_timestamp_cpu_time(i + 1) - rd.get_captured_timestamp_cpu_time(i)
+		stamp_gpu_us[k] = int(stamp_gpu_us.get(k, 0)) + gpu
+		stamp_cpu_us[k] = int(stamp_cpu_us.get(k, 0)) + cpu
+	var whole := "(first to last stamp)"
+	var gpu_all := int((rd.get_captured_timestamp_gpu_time(n - 1) - rd.get_captured_timestamp_gpu_time(0)) / 1000.0)
+	var cpu_all := rd.get_captured_timestamp_cpu_time(n - 1) - rd.get_captured_timestamp_cpu_time(0)
+	stamp_gpu_us[whole] = int(stamp_gpu_us.get(whole, 0)) + gpu_all
+	if ab:
+		ab.add_gpu(gpu_all)
+	stamp_cpu_us[whole] = int(stamp_cpu_us.get(whole, 0)) + cpu_all
 
 
 func _on_physics() -> void:
@@ -313,10 +389,10 @@ func _give_back() -> void:
 
 
 ## The costliest sections of the match step or visuals, ms per frame (Match._prof labels).
-static func _print_sections(by: Dictionary, what: String, frames: int) -> void:
+static func _print_sections(by: Dictionary, what: String, frames: int, limit := 12) -> void:
 	var ks := by.keys()
 	ks.sort_custom(func(a, b): return by[a] > by[b])
-	var per := ks.slice(0, 12).map(func(k): return "%s %.2f" % [k, by[k] / 1000.0 / frames])
+	var per := ks.slice(0, limit).map(func(k): return "%s %.2f" % [k, by[k] / 1000.0 / maxi(frames, 1)])
 	print("BENCH fight %s sections (ms per frame): %s" % [what, ", ".join(per)])
 
 

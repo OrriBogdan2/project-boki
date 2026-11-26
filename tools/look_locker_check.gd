@@ -46,7 +46,7 @@ func run(main_node: Node, mode: String) -> void:
 	_hood()
 	_props()
 	await _gliders()
-	await _zoom_and_turn()
+	_zoom_and_turn()
 	hx._looks_good()
 	await _frames(2)
 	ok(

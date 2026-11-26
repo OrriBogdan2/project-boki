@@ -3,10 +3,12 @@ extends RefCounted
 ## strip per Hunter (look_at_<name>.png): the cursor swings SWING degrees across the camera and the body turns to it
 ## as in a match; the columns are the frames in FRAMES after the swing (60 Hz). Top row: no look-at (the head turns
 ## with the body, as a block). Bottom row: the layer on (the head is on the aim first, the body catches up).
-## captions.txt gets one line per file. Needs a renderer.
+## captions.txt gets one line per file. Needs a renderer. The first four are contract-path Hunters; the others are the
+## Meshy-native Hunters (WardenNative: head, neck, chest of Meshy's skeleton), one strip each (look_at_n_<name>.png).
 
 const DT := 1.0 / 60.0
 const HUNTERS := {"gunslinger": "Vex", "archer": "Lace", "juggernaut": "Kael", "mage": "Sparkle"}
+const NATIVE := true                   # also one strip per Hunter on Meshy's own skeleton (every one the data has on)
 const FRAMES := [0, 1, 2, 4, 6, 8]     # frames after the cursor's swing, one column each
 const SWING := deg_to_rad(150.0)       # rad: the swing, centred on the camera
 const SETTLE := 90                     # frames standing before it
@@ -30,16 +32,27 @@ func run(main: Node) -> void:
 	if main.get("fade") != null:
 		await main.fade.reveal(0.01)      # the boot splash stays up until it is gone (else the first strip is the logo)
 	_stage(main)
+	var strips := {}
 	for id in HUNTERS:
+		strips[id] = [false, String(HUNTERS[id])]
+	if NATIVE:
+		for id in Arch.ids():
+			if WardenNative.on(String(id)):
+				strips[id + "#n"] = [true, "n_" + String(id)]
+	for key in strips:
+		var id := String(key).trim_suffix("#n")
+		var native: bool = strips[key][0]
+		WardenNative.contract_only = not native
 		var rows: Array = []
 		for looking in [false, true]:
-			_row(String(id), looking)
+			_row(id, looking)
 			rows.append(await _grab())
 			_clear()
-		var file := "look_at_%s.png" % String(HUNTERS[id]).to_lower()
+		var file := "look_at_%s.png" % String(strips[key][1]).to_lower()
 		_stack(rows).save_png(out.path_join(file))
-		caps.append("%s: %s, a %d degree cursor swing; columns: frames %s after it (60 Hz); top: before (no "
-				% [file, HUNTERS[id], roundi(rad_to_deg(SWING)), str(FRAMES)] + "look-at), bottom: after")
+		var where := " on Meshy's skeleton" if native else ""
+		caps.append("%s: %s%s, a %d degree cursor swing; columns: frames %s after it (60 Hz); top: before (no "
+				% [file, strips[key][1], where, roundi(rad_to_deg(SWING)), str(FRAMES)] + "look-at), bottom: after")
 	var f := FileAccess.open(out.path_join("captions.txt"), FileAccess.WRITE)
 	f.store_string("\n".join(caps) + "\n")
 	f.close()
@@ -78,7 +91,9 @@ func _row(id: String, looking: bool) -> void:
 		h.position = Vector3((i - (FRAMES.size() - 1) * 0.5) * GAP, 0, 0)
 		holder.add_child(h)
 		shown.append(h)
-		var sync := h.get_node_or_null("Warden/Sync") as WardenGlb.Sync
+		var sync := h.get_node_or_null("Warden/Sync")
+		if sync == null:
+			sync = h.get_node_or_null("Warden/Native")
 		if sync:
 			sync.set_process(false)
 		var anim := HunterAnim.new(h)
@@ -89,7 +104,7 @@ func _row(id: String, looking: bool) -> void:
 			face = rotate_toward(face, PI + SWING * 0.5, HunterMove.turn_rate * DT)
 			_pose(h, anim, sync, face, PI + SWING * 0.5, looking)
 
-func _pose(h: Node3D, anim: HunterAnim, sync: WardenGlb.Sync, face: float, aim_yaw: float, looking: bool) -> void:
+func _pose(h: Node3D, anim: HunterAnim, sync: Node, face: float, aim_yaw: float, looking: bool) -> void:
 	var s := {"fired": 99.0, "face": face, "grounded": true}
 	if looking:
 		s[WardenLookAt.LOOK] = Vector3(-sin(aim_yaw), 0.0, -cos(aim_yaw))
