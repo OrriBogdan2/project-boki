@@ -11367,3 +11367,4 @@ READY ext/training-time-trial-1119 d0b1aa1025c0 (PR #377: main merged; time-tria
 READY ext/merge-lane-n19h-1119 6d872c4d8803 (PR #434: main merged; boki_downed check on main kept; health OK, targeted checks same as main)
 READY ext/merge-lane-M7-1121 2931b1be335a (PR #588: main merged; match.gd keeps both first-time tips; targeted checks running)
 READY ext/merge-lane-n23c-1123 b174475e343e (PR #710: main merged; utility belt files taken from main (PR #273 newer); health OK)
+READY ext/merge-lane-n23c-1123 d025f33e8bcd (PR #710: re-added no_heart to terrain-hazard-check (merge had dropped it; 63 checks 0 fails); glide-hold red same as main)
