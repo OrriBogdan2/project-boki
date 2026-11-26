@@ -319,7 +319,7 @@ func _upper(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
 
 
 ## Strafing right while facing ahead turns the legs a quarter turn to the way he goes and leaves the torso where it
-## was (the aim); standing, nothing turns.
+## was (the aim); back-pedalling, the legs face the aim and run backwards; standing, nothing turns.
 func _twist(a: String, nat: WardenNative) -> void:
 	var sk := nat.skel
 	var hips_before := sk.get_bone_global_pose(nat.twist.hips).basis.get_rotation_quaternion()

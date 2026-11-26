@@ -3,10 +3,9 @@ extends "res://tools/clip_shots.gd"
 ## [--zoom=1.0]: each native Hunter
 ## running at 4.6 m/s, a frame every 1/30 s to 1.2 s: <dir>/<id>/f###.png. swing: a side view, a swing pressed 0.3 s in.
 ## left, right (strafe) and back: aim -Z (up the screen at --view=match, the game's angle), moving -X, +X, +Z. --view=
-## match (default) or eye (a front three-quarter view at eye level). Needs a renderer. Left, right and back also write
-## <dir>/<id>/feet.tsv (each foot's world position per frame) and print FOOTLOG: how fast the planted foot (the lower
-## one) goes along his travel, as a share of the ground speed: -1 is a foot fixed to the ground, 0 slides on the spot
-## and above 0 slides the way he goes.
+## match (default) or eye (a front three-quarter view at eye level). Prints STRIDE <id> <cos>: the median cosine of the
+## lower foot's sweep (against the body) to the way he goes; 1 = the legs step along it, 0 = side-on, -1 = backwards
+## to it. Needs a renderer.
 
 const DT := 1.0 / 30.0
 const PRESS := 0.3  # s into the run the swing starts
@@ -73,17 +72,14 @@ func _hunter(id: String, dir: String) -> void:
 	var poser := model.get_node("Warden/Native")
 	poser.set_process(false)
 	DirAccess.make_dir_recursive_absolute(dir)
-	var feet := PackedStringArray(["frame\tfoot\tx\ty\tz"])
-	var run_dir: Vector3 = (MODES[mode][0] as Vector3).normalized()
-	var skel: Skeleton3D = poser.get("skel")
-	var foot_bones: Array = [WardenSkeleton.find(skel, "foot.L"), WardenSkeleton.find(skel, "foot.R")]
-	var last: Array = [Vector3.ZERO, Vector3.ZERO]
-	var planted_v := 0.0
-	var planted_n := 0
 	var base := {"grounded": true, "face": model.rotation.y, "cast": 99.0, "vel": MODES[mode][0]}
 	for k in 20:
 		model.set_meta(WardenClips.STATE, base)
 		poser.call("_process", DT)
+	var sk: Skeleton3D = poser.get("skel")
+	var feet := [WardenSkeleton.find(sk, "foot.L"), WardenSkeleton.find(sk, "foot.R")]
+	var prev := []
+	var strides := []
 	for i in int(SECS / DT):
 		var s := base.duplicate()
 		if mode == "swing" and i * DT >= PRESS:
@@ -92,25 +88,15 @@ func _hunter(id: String, dir: String) -> void:
 			s["cast"] = 0.0
 		model.set_meta(WardenClips.STATE, s)
 		poser.call("_process", DT)
+		var now := feet.map(func(b: int) -> Vector3: return sk.global_transform * sk.get_bone_global_pose(b).origin)
+		if prev.size() == 2:
+			var lo := 0 if now[0].y < now[1].y else 1
+			var sweep := Vector2(prev[lo].x - now[lo].x, prev[lo].z - now[lo].z)
+			if sweep.length() > 0.002:
+				strides.append(sweep.normalized().dot(Vector2(MODES[mode][0].x, MODES[mode][0].z).normalized()))
+		prev = now
 		await _grab(dir.path_join("f%03d.png" % i))
-		var pos: Array = []
-		for b in foot_bones:
-			pos.append(skel.global_transform * skel.get_bone_global_pose(b).origin)
-		for k in 2:
-			feet.append("%d\t%s\t%.4f\t%.4f\t%.4f" % [i, "LR"[k], pos[k].x, pos[k].y, pos[k].z])
-		if i > 0 and mode != "swing":
-			var k: int = 0 if pos[0].y < pos[1].y else 1  # (the lower foot is the planted one)
-			planted_v += ((pos[k] - last[k]) as Vector3).dot(run_dir) / DT
-			planted_n += 1
-		last = pos
-	if mode != "swing":
-		var f := FileAccess.open(dir.path_join("feet.tsv"), FileAccess.WRITE)
-		f.store_string("\n".join(feet) + "\n")
-		print(
-			(
-				"FOOTLOG %s %s planted foot along travel %.2f of ground speed"
-				% [dir.get_file(), mode, planted_v / planted_n / RUN]
-			)
-		)
+	strides.sort()
+	print("STRIDE %s %.2f" % [id, strides[strides.size() / 2]])
 	model.queue_free()
 	await tree.process_frame
