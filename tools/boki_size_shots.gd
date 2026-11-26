@@ -8,7 +8,7 @@ extends "res://tools/vv_shots.gd"
 const SPECIES := ["cindle", "burrlet", "puddlet", "heatherhorn"]
 const GAP := 2.2
 const EYE_FOV := 40.0  # degrees: the eye-level camera's vertical lens
-const EYE_DIST := 6.5  # m from the row
+const EYE_DIST := 10.0  # m from the row
 const EYE_HEIGHT := 0.35  # m above the ground: a Boki's own eye height
 const STAGGER := 1.3  # m every second Boki stands nearer the camera, so the name plates do not overlap
 const FACE := Vector3(0.8, 0, 0.6)  # the way they face: three quarters on to the camera, not away from it
@@ -37,11 +37,13 @@ func run(main_node: Node) -> void:
 		k.speed = 0.0  # stays where it stands, idling
 		ks.append(k)
 	cam_at = home + Vector3(GAP * 2.0, 0, 0)
-	await _go(1.0, Callable(), [], 3.0)
+	var turn := func(_t: float) -> void:
+		for k in ks:
+			k.face = atan2(-FACE.x, -FACE.z)
+	await _go(1.0, turn, [], 3.0)
 	for k in ks:
 		k.teleport(k.home)
-		k.face = atan2(-FACE.x, -FACE.z)
-	await _go(0.5, Callable(), [], 3.0)
+	await _go(0.5, turn, [], 3.0)
 	await main.get_tree().process_frame
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join("game.png"))
 	_hide_ui()
@@ -103,6 +105,7 @@ func _row(player: String, node: Node3D, cam: Camera3D, data_cm: float, species :
 		"data_cm": data_cm,
 		"px": [bbox.size.x, bbox.size.y],
 		"area_px": absf(area) * 0.5,
+		"face_deg": rad_to_deg(float(node.get("face"))),
 	}
 
 
