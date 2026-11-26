@@ -67,6 +67,7 @@ func _apply(i: int) -> void:
 ## The pictures: variant k is set at k * 3 and saved at k * 3 + 2 (the frame shown is the one drawn after the set).
 func _shot(k: int) -> void:
 	since = 0  # (these frames stay out of the GPU averages)
+	root.get_tree().paused = k < 11  # (the fight holds still, so the four pictures show the same frame)
 	if k % 3 == 0:
 		_apply(k / 3)
 	elif k % 3 == 2:
