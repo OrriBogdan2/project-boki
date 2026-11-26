@@ -16,11 +16,13 @@ var moves: Dictionary
 var cur := ""  # the move playing now ("" none)
 var prev_t := 0.0  # its clock last frame (a clock that goes back is the same move again)
 var bodied := false  # a "body" move moved the root last frame (it goes home once the move ends)
+var size := 1.0  # Meshy's body against the rig's (data "size"): the keyed lift, in the rig's metres, scales with it
 
 
 func _init(p: AnimationPlayer, data: Dictionary) -> void:
 	player = p
 	moves = data.get("kmoves", {})
+	size = float(data.get("size", 1.0))
 
 
 ## The clips by their plays key: {"km:arc_draw": clip name}.
@@ -51,8 +53,8 @@ func play(s: Dictionary, plays: Dictionary, dt: float) -> void:
 	player.seek(maxf(at(m, t, player.get_animation(clip).length) - dt, 0.0), false)
 
 
-## The root of the Meshy model (`glb`, turned PI to face -Z) under a "body" move: down by its keyed lift, turned by
-## its spin. Call every frame after the clips advance; a frame with no such move puts the root back once.
+## The root of the Meshy model (`glb`, turned PI to face -Z) under a "body" move: down by its keyed lift (times size),
+## turned by its spin. Call every frame after the clips advance; a frame with no such move puts the root back once.
 func pose(s: Dictionary, glb: Node3D) -> void:
 	var km := String(s.get("kmove", ""))
 	if not (moves.has(km) and bool(moves[km].get("body", false))):
@@ -62,7 +64,7 @@ func pose(s: Dictionary, glb: Node3D) -> void:
 			bodied = false
 		return
 	var k := HunterAnim.km_sample(km, float(s.get("kmove_t", 0.0)))
-	glb.position.y = float(k.get("lift", 0.0))
+	glb.position.y = float(k.get("lift", 0.0)) * size
 	glb.rotation.y = PI + float(k.get("fy", 0.0))
 	bodied = true
 

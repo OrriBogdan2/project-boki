@@ -373,7 +373,7 @@ func _native_body() -> void:
 	var turned := absf(angle_difference(g.rotation.y, PI))
 	nm.pose({"kmove": ""}, g)
 	ok("Ground Swim / Riptide on his Meshy model: the root sinks to the waist, turns in the spin, then goes home",
-		absf(sunk - KMovesGil.SWIM_LIFT) < 0.01 and turned > 0.3 and g.position.y == 0.0 and is_equal_approx(g.rotation.y, PI),
+		absf(sunk - KMovesGil.SWIM_LIFT * nm.size) < 0.01 and turned > 0.3 and g.position.y == 0.0 and is_equal_approx(g.rotation.y, PI),
 		"sunk %.2f turned %.2f" % [sunk, turned])
 	g.free()
 
