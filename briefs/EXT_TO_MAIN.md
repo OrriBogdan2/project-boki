@@ -11412,3 +11412,4 @@ READY ext/stuck-integ-e4d11822 d426d52070 (supersedes: stuck-integ-dcde0252 boki
 READY ext/stuck-integ-e4d11822 5bd81cfd30 (supersedes: its own d426d52070 line; stuck-integ-dcde0252 boki-own-clips-g farm-boki-react-loot farm-garden-day-replay farm-hunter-look-1125 farm-tut-ends hudreveal-fold merge-lane-n19h-1119 p10-port-1118 sfx-hit-tier-confirm sfx-native-steps train-auto-1124-1907-b912-2 training-time-trial-1119 ui-dmg-number-kinds; now 0 behind main 015086ed42)
 READY ext/feel-fight-cpu-top3 721b673499b230cd0339be4795ad9e1618ff0909 (3v3 fight script cost cut)
 READY ext/wisp-default-1126 4ddc0550b5 (Boki wisp + C summon for every player: a saved off no longer gives the walking Boki; C no longer also fires Sic; --wisp-default-check fails on old)
+READY ext/parity-recheck-vex b5c9f52202a (Vex parity re-check)
