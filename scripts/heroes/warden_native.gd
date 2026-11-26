@@ -441,7 +441,7 @@ func _play(st: String, rate: float, restart := false) -> void:
 		if restart:
 			player.seek(0.0, true)
 		cur = st
-	player.speed_scale = rate
+	player.speed_scale = rate * (twist.dir if st in LEGS_RUN else 1.0)  # (the legs run backwards when he backs off)
 
 
 ## Meshy's model carries its weapons in the mesh (Sable's two pistols, Tenzo's one stone arm): the rig's procedural
