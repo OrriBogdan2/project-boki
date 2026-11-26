@@ -327,14 +327,6 @@ def ready_e(i):
     return finish(room(pluck(NOTE['C6'], 0.2, 0.05, 0.6), 0.35), 4600)
 
 
-def broken(i):
-    """A cast broken under you (a stun in a wind-up): a dry snap and a short pluck that sags flat, over in 0.2 s."""
-    snap = bpf(noise(0.018), 2600, 5200) * env(N(0.018), 0.0008, 0.005)
-    sag = S.sweep(NOTE['E5'], NOTE['E5'] * 0.82, 0.16) * env(N(0.16), 0.002, 0.045)
-    thud = 0.35 * pluck(NOTE['C4'], 0.12, 0.03, 0.2)
-    return finish(room(mix(0.8 * snap, at(0.55 * sag, 0.012), thud), 0.25), 4200)
-
-
 # ---------------------------------------------------------------- the creator and the clan screens
 def dice(i):
     """A little rattle: five wood ticks tumbling down in pitch, then a soft settle."""
