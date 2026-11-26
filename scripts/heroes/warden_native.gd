@@ -57,7 +57,7 @@ var hit_prev := 99.0  # the state's s since a hit, last frame
 var land_prev := 0.0  # the state's landing squash, last frame
 ## The state counters last frame; cast -1: none read yet (the first state read is the baseline, no new hit)
 var last := {"kmove": "", "swing_n": 0, "cast": -1.0, "recoil": 0.0}
-var pose_held_t := 0.0  # s of frames SimLod.pose_every held (WardenGlb.POSE_HELD), stepped at the next posed frame
+var pose_held_t := 0.0  # s held by SimLod.pose_every (WardenGlb.POSE_HELD), stepped at the next posed frame
 var followers: Array = []  # [orbit holder, Meshy bone]: the holder keeps the bone's move from its rest
 var orbits := WardenOrbits.new()  # the contract model's orbit props (Tenzo's seeing-stones) riding Meshy's bones
 ## The contract path's bone layers, laid over Meshy's clips on Meshy's bones (WardenSkeleton.find names them): the hit
@@ -210,7 +210,7 @@ func _ready() -> void:
 func _process(dt: float) -> void:
 	_hide_rig_weapon()
 	if int(root.get_meta(WardenGlb.POSE_HELD, -1)) == Engine.get_process_frames():
-		pose_held_t += dt  # SimLod.pose_every held this Hunter's pose (as WardenSync): the next posed frame catches the time up
+		pose_held_t += dt  # SimLod.pose_every held the pose (as WardenSync): the next posed frame catches it up
 		_place_gun()  # (the body still moves under it)
 		return
 	dt += pose_held_t

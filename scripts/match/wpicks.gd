@@ -3,7 +3,8 @@ extends RefCounted
 ## Weapon, gear and tuning pickups lying on the ground (Match.wpicks): their spin and bob, and who walks
 ## over one. Only those near the local player are animated: nobody sees the rest turn, and each turn
 ## moves a node tree (a 2x match holds dozens; animating them all cost as much as the hunters' steps).
-const ANIM_M := 70.0        # m (flat) from the local player: past the match camera's view
+const ANIM_M := 70.0  # m (flat) from the local player: past the match camera's view
+
 
 static func update(m: Match, dt: float) -> void:
 	var me: Hunter = m.player

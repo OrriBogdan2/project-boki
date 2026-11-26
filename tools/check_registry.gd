@@ -248,7 +248,6 @@ const CHECKS := {
 	"--perf-overlay-check": ["res://tools/perf_overlay_check.gd", "perf_overlay_check", null],
 	"--prof-check": ["res://tools/prof_check.gd", "prof_check", null],  # Tracy hooks, docs/PERF.md
 	"--perf-throttle-check": ["res://tools/perf_throttle_check.gd", "perf_throttle_check", null],
-	"--native-pose-hold-check": ["res://tools/native_pose_hold_check.gd", "native_pose_hold_check", null],  # SimLod pose hold
 	"--kin-target-check": ["res://tools/kin_target_check.gd", "kin_target_check", null],  # pick_target's rule
 	# boss wake, phase and defeat cues
 	"--boss-sfx-check": ["res://tools/boss_sfx_check.gd", "boss_sfx_check", null],

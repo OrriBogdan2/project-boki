@@ -5,6 +5,8 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	# a Meshy-native rig holds its clips on frames SimLod skipped the pose
+	"--native-pose-hold-check": ["res://tools/native_pose_hold_check.gd", "native_pose_hold_check", null],
 	# no clip stretches a skinned edge past 1.3x
 	"--stretch-1-check": ["res://tools/stretch_check.gd", "stretch_check", "bulwark,gunslinger"],
 	"--stretch-2-check": ["res://tools/stretch_check.gd", "stretch_check", "rimewright,dredge"],
