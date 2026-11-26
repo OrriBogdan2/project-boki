@@ -153,7 +153,7 @@ makes it louder:
 | R before 6 | padlock + small "LV 6" above | a **big "6" in the slot's centre** over the padlock. At level 5 the slot fills with progress to 6 (a vertical gold fill). At 6 it flashes and reads "UNLOCK" |
 | R at 6-8 | rank pips | rank pip 1/2 plus a small "9" corner tag for the next rank |
 | enemy level | — | a small level badge at the left end of every enemy nameplate (with a gold rim once they're 6+ and their R is unlocked) |
-| resource | — | the archetype resource arc at the crosshair and a bar under the health bar (§3.2) |
+| resource | — | the archetype resource. With `"gauge": true` (fill-up meters: Rage, Swell) it draws the arc at the crosshair and a thin bar under the health bar (§3.2); other kinds show as a buff icon (Fever, Rocks, Salvage) or on the foe (marks) |
 | bond | kin card on the portrait corner | the kin card's ring is the bond meter. When full, the R slot gets a **kin-coloured rim** (§5) |
 
 ---
