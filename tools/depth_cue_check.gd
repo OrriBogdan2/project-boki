@@ -147,7 +147,8 @@ func _check_height(m: Match, dc: DepthCues) -> void:
 	_lift(m, dc, p, 0.0)
 	var disc: MeshInstance3D = dc._discs[p]
 	var stand_fade := float(disc.get_instance_shader_parameter("fade"))
-	ok(stand_fade == 1.0 and not dc._rings.has(p), "standing: full shadow, no ring")
+	var stand_ring: MeshInstance3D = dc._rings.get(p)  # (made by an earlier lift, hidden again once it stands)
+	ok(stand_fade == 1.0 and (stand_ring == null or not stand_ring.visible), "standing: full shadow, no ring")
 	_lift(m, dc, p, 6.0)
 	var ring: MeshInstance3D = dc._rings.get(p)
 	var fade := float(disc.get_instance_shader_parameter("fade"))
