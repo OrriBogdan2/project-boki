@@ -512,7 +512,7 @@ func _ready_rest() -> void:
 				get_tree().create_timer(0.3).timeout.connect(func():
 					var before := sc.scroll_vertical
 					if "--no-keep-scroll" in dbg: set_meta("no_keep_scroll", true)
-					Save.d["exp_rolling"] = not Save.d.get("exp_rolling", false)
+					Save.d["exp_mode"] = "solos" if Data.saved_mode() == "trios" else "trios"
 					_open_expedition()
 					get_tree().create_timer(0.5).timeout.connect(func():
 						var sc2 := _panel_scroll()

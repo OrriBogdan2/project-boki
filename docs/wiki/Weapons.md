@@ -88,7 +88,7 @@ Found as glowing perk orbs during an expedition: walk into one to take it. Chest
 | Featherfall | Your glider lasts 60% longer. | 1 |
 | Scavenger | Gems you pick up are worth 25% more. | 2 |
 | Tough Skin | +15 max health, healed right away. | 3 |
-| Overcharge | Your bond ultimate charges 30% faster. | 1 |
+| Overcharge | Your bond meter fills 30% faster. | 1 |
 | Keen Edge | 8% more damage. | 3 |
 | Fleet Foot | 6% faster on foot. | 2 |
 | Plating | +20 max armor. | 2 |
