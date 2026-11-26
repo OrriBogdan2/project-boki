@@ -235,6 +235,9 @@ func hit(target_nid: String, d: Array) -> void:
 func event(e: Array) -> void:
 	out_events.append(e)
 
+## A squad chat line ({"t": text}) to the match room; SquadChat keeps it only when the sender is on its team.
+func chat(d: Dictionary) -> void:
+	_emit("chat", d)
 
 func _emit(topic: String, d) -> void:
 	if enet:
