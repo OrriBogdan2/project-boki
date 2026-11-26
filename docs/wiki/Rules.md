@@ -755,9 +755,10 @@ What Boki say (BokiLines, docs/BOKI_TALK.md). tuning: max_words = the most words
 
 | Setting | Value |
 |---|---|
-| _doc | perk_line: the one plain line on the Field Book card and the Boki tooltip (%s = the Summon key); card_lines: [from s, text], the plain line on the Field Book and Boki cards for a window of at least that many s (the last one reached). The Boki summon (KinSummon, decisions 0039, 0044, 0045): killed_cd_mult = cooldown x after a rival hunter kills it (a monster's kill counts as a rival's if a rival hurt it in the last rival_window_s s), home_speed = m/s the wisp flies home, reveal_s = s its owner shows to the killer squad; [window s, cooldown s] by the species' ai.role and body.size (briefs/boki-art/WISP_DESIGN_OPEN.md Q1). Uptime = window / (window + cooldown) stays in uptime_band. |
+| _doc | perk_line: the one plain line on the Field Book card and the Boki tooltip (%s = the Summon key); card_lines: [from s, text], the plain line on the Field Book and Boki cards for a window of at least that many s (the last one reached). The Boki summon (KinSummon, decisions 0039, 0044, 0045): killed_cd_mult = cooldown x after a rival hunter kills it (a monster's kill counts as a rival's if a rival hurt it in the last rival_window_s s), home_speed = m/s the wisp flies home, reveal_s = s its owner shows to the killer squad; [window s, cooldown s] by the species' ai.role and body.size (briefs/boki-art/WISP_DESIGN_OPEN.md Q1), unless species has an entry for its id: times [window s, cooldown s] and why (one line from its dex identity), which wins (DECISIONS 2026-11-09 wisps: each Boki has its own). Uptime = window / (window + cooldown) stays in uptime_band. |
 | table | {"bruiser": {"small": [8, 60], "medium": [10, 65], "large": [12, 70]}, "skirmisher": {"small": [7, 55], "medium": [9, 60], "large": [11, 65]}, "trickster": {"small": [8, 55], "medium": [10, 60], "large": [12, 65]}, "controller": {"small": [11, 65], "medium": [13, 70], "large": [15, 75]}, "tank": {"small": [14, 75], "medium": [16, 80], "large": [18, 85]}, "support": {"small": [16, 80], "medium": [18, 85], "large": [20, 90]}} |
 | fallback | [10, 60] |
+| species | {"cindle": {"times": [7, 58], "why": "Its venom keeps eating after the sting, so a short, sharp burst and a long wait."}, "puddlet": {"times": [20, 90], "why": "Its crystal shields and beams guard the squad, so it stays out the longest and rests long."}, "burrlet": {"times": [12, 65], "why": "Its spore clouds need time to set and root, so a middling window."}, "ermink": {"times": [10, 60], "why": "A blank-slate stoat that can grow into any of five lines, so it sits in the middle."}, "cairnback": {"times": [22, 95], "why": "A tortoise that carries its cairn, so it holds the line long and steady."}, "hivara": {"times": [9, 50], "why": "Its swarm and mantis blades strike fast and return soon, so a short window and a quick turnaround."}, "zephyrak": {"times": [6, 45], "why": "A swift sky serpent that flashes in and out, so the shortest window and the quickest return."}} |
 | card_lines | [[0, "Short summon, strong"], [13, "Long summon, steady"]] |
 | perk_line | Perks while it rides with you. Summon it (%s) for a few seconds: no perks while it is out. |
 | uptime_band | [0.09, 0.2] |
@@ -1251,7 +1252,7 @@ The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Sho
 | exit_none | Go to an exit and hold %F to leave |
 | dive_open_s | 1.5 |
 | dive_height | 15 |
-| lines | [["chest", "Loot a chest: stand next to it and hold %F", 25.0], ["rank", "Rank up %N: press %R", 20.0], ["send", "Send %s at a monster: tap %T", 20.0], ["zone", "Stay in the blue ring on your minimap: outside it you lose health over time", 14.0], ["wall", "You are outside the zone and losing health: run for the blue ring", 12.0], ["mates", "Hold %B to pick a teammate, release to teleport. Takes 5 s; taking damage cancels it.", 14.0], ["blight", "The Blight is closing in: time to wrap up", 12.0], ["exit", "Head for the %X badge on your map: %H", 40.0], ["dive", "Gliding: hold %C to dive", 12.0]] |
+| lines | [["chest", "Loot a chest: stand next to it and hold %F", 25.0], ["rank", "Rank up %N: press %R", 20.0], ["send", "Send %s at a monster: tap %T", 20.0], ["zone", "Stay in the blue ring on your minimap: outside it you lose health over time", 14.0], ["wall", "You are outside the zone and losing health: run for the blue ring", 12.0], ["mates", "Hold %B to pick a teammate, release to teleport. Takes 5.5 s; moving or taking damage cancels it.", 14.0], ["blight", "The Blight is closing in: time to wrap up", 12.0], ["exit", "Head for the %X badge on your map: %H", 40.0], ["dive", "Gliding: hold %C to dive", 12.0]] |
 
 ## first_objective (`content/rules/first_objective.json`)
 
@@ -2258,6 +2259,77 @@ Ground pickup reach (scripts/match/pickup_reach.gd, docs/PICKUP_REACH.md). Each 
 | beacon_hear_m | 120 |
 | _beacon_hear_m | how far the beacon's alarm loop carries; the notice itself reaches every player on the map |
 
+## settings_help (`content/rules/settings_help.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _about | One plain line per Settings option, under 80 characters once {action} keys are filled in. Shown in the line at the bottom of the Settings panel while the option is hovered or focused. Keyed by setting name; rows with no setting use their label; every key bind shares 'bind'. |
+| quality | Sets how good the game looks. Lower turns off shadows and effects |
+| fullscreen | Fills the whole screen instead of a window |
+| ui_scale | Makes menus and the HUD bigger or smaller. Applies when you let go |
+| master | The loudness of everything. Turn it down to quiet the game |
+| Your name | The name other hunters and your Boki call you |
+| damage_numbers | Shows a number where each of your hits lands |
+| tips | Shows short hints about what is around you on expeditions |
+| reticle_shape | The look of the aim marker in the middle of your aim |
+| reticle_size | Makes the aim marker bigger or smaller |
+| reticle_col | The aim marker's colour. Yellow stands out most on busy ground |
+| reticle_alpha | How see-through the aim marker is |
+| reticle_outline | Adds a dark edge so the aim marker shows over bright effects |
+| kin_chatter | How often your Boki speaks. Quiet: danger only. Chatty: everything |
+| boki_wisps | Your Boki rides at your shoulder as a wisp. Off: it walks beside you |
+| lobby_enabled | Admin: a 30 second lobby before each expedition. Off: straight to loading |
+| mod_mode | Admin: everything unlocked, free building and god mode |
+| cast_on_press | Abilities fire when you press. Off: hold to aim, let go to cast |
+| dash_to_cursor | Dashes go toward the cursor. Off: toward the way you are moving |
+| crouch_toggle | Tap the sneak key to start and stop. Off: hold it down |
+| move_readout | Shows speed and movement numbers on screen ({move_readout} toggles it) |
+| cursor_confine | Keeps the mouse cursor inside the window during a fight |
+| bind | Click a key box, then press the new key. Esc cancels, x clears it |
+| cam_style | How high the camera sits and how wide it sees |
+| cam_follow | Whether the camera stays on you or slides toward where you aim |
+| cam_lead | How far the camera slides toward the cursor |
+| music | The loudness of the music |
+| sfx | The loudness of shots, hits, steps and abilities |
+| voices | The loudness of hunters, Boki and monsters calling out |
+| ambience | The loudness of wind, rain and the sea |
+| ui_sounds | The loudness of menu clicks, tabs and pop-ups |
+| soundtrack | Picks the music for everywhere. A track chosen below wins |
+| music_shuffle | Each screen and expedition plays a different soundtrack |
+| track_menu | The music on the title screen and menus |
+| track_base | The music at your home base |
+| track_calm | The music while an expedition is quiet |
+| track_tense | The music when danger is close |
+| track_final | The music for the last part of an expedition |
+| track_boss | The music for boss fights |
+| track_victory | The music on the victory screen |
+| track_training | The music in the Training Grounds |
+| reset_cue | The sound for a kill that resets your cooldowns |
+| ult_ready_cue | Plays a chime when your ultimate ({hunter_ult}) is ready again |
+| hunter_barks | Your Hunter calls out ultimate ready, low health and knocks |
+| low_hp_pulse | A soft heartbeat that speeds up as you near going down |
+| mute_unfocused | Silences the game while you are in another window |
+| Try other sounds | Opens a page to hear and pick other sounds |
+| vsync | Stops screen tearing. Can add a little delay to your controls |
+| max_fps | Stops the game drawing faster than this. Lower uses less power |
+| msaa | Smooths jagged edges. Higher looks cleaner but slows the game down |
+| shadows | Draws shadows under things. Off: turns off shadows, runs faster |
+| show_fps | Shows the frame rate top right. The overlay costs a little speed |
+| text_size | Makes the words in menus and the HUD bigger or smaller |
+| hud_scale | Makes the in-expedition HUD bigger or smaller |
+| hud_full | Shows every HUD panel from your first expedition |
+| depth_cues | Shades cliffs and puts a shadow under each hunter to show height |
+| colour_vision | Swaps the colours that tell you, your squad and rivals apart |
+| screen_shake | How much big hits on you shake the view. 0 turns it off |
+| reduce_flashes | Softer full-screen flashes when you are hit or level up |
+| rec_level | Hides tips and debug text for filming ({record} cycles it in a match) |
+| demo_weather | The weather in your next offline match |
+| demo_blight | Whether the Blight spreads in your next offline match |
+| demo_fresh | How long bots leave you alone after you land |
+| demo_all_masks | Every Relic can be picked offline. Your unlocks stay the same |
+
 ## sfx_levels (`content/rules/sfx_levels.json`)
 
 
@@ -2615,8 +2687,8 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 | quiet | ["points", "pick_sec", "pick_dash", "pick_kin", "pick_ult", "exdash", "wallkick", "crouch", "pack", "glove", "hook", "ranks", "wayout", "uplink", "defend", "ult"] |
 | hint | {"points": "1 ability point per level", "pick_sec": "Unlocked %A (%K)", "pick_dash": "Level 2: unlocked %A (%K)", "pick_kin": "Level 3: unlocked %A (%K)", "pick_ult": "Unlocked %A (%K)"} |
 | steps | [["land", "Walk down to the meadow (%K)"], ["shoot", "Shoot the monsters down (%K)"], ["points", "You have 1 ability point to spend"], ["pick_sec", "Press %K to unlock %A"], ["sec", "Use %A (%K) on the monsters"], ["pick_dash", "Press %K to unlock %A"], ["dash", "Dash across the gap (%K)"], ["exdash", "Jump, then dash (%K) in mid-air"], ["glide", "Jump, then HOLD %J to glide"], ["wallkick", "Jump (%J) at the cliff, then again"], ["crouch", "Stand on top and hold %K to crouch"], ["gkey", "Press %K to send %s at the monsters"], ["summon", "Press %M to summon %s"], ["pack", "Beat the pack, and summon when the ring is bright"], ["pick_kin", "Press %K to unlock %A"], ["kin", "Use %A (%K) on the monster row"], ["glove", "Grab the glove (%K)"], ["hook", "Press %K to hook the Sentinel to you"], ["ranks", "Spend your spare points (%K)"], ["wayout", "Few ways out: walk to the outpost"], ["uplink", "Press %K at the uplink mast"], ["defend", "Defend the outpost: stay in the circle"], ["extract", "Step into the light to leave"]] |
-| detail | {"points": "Monsters give XP; every level earns one more point.", "pick_sec": "%L", "pick_dash": "%L", "glide": "Jump, then press %J again in the air to open your glider.", "pick_kin": "%L", "shoot": "%L", "shoot_draw": "Hold the button to draw the bow, let go to loose. A longer draw hits harder.", "shoot_melee": "Walk up close and tap to swing. Hold to charge a wave.", "wallkick": "A jump against a wall kicks you up it.", "crouch": "Crouching shows what lies far ahead.", "gkey": "%T sends %s at a monster; tap again to recall %s.", "summon": "%s fights for %D seconds; your perks are off meanwhile", "summon_warn": "Almost time. %s is getting tired.", "summon_back": "Back to a light. %s rests now.", "summon_knocked": "%s got beaten and flew back to you. It needs a longer rest.", "pack": "A dim light means %s rests (%B seconds); bright means ready", "glove": "Gloves need no points; %Q uses this one.", "hook": "It shoots from afar, and your glove drags it to your feet.", "ranks": "Ranks make an ability stronger: %R, or click a gold +.", "wayout": "A match has few ways out; this one is at the outpost.", "uplink": "Stay in the circle, or the capture slips back.", "defend": "Stay in the circle, or the capture slips back.", "kin": "They stand in a row: line them up, then use it."} |
-| alt | {"sec_hold": "Tap, then hold %K, to use %A", "summon_out": "%s is out for %D seconds", "summon_rest": "%s is resting", "summon_early": "That calls it back early: let it stay", "pack_wait": "Wait for the bright ring, then press %M", "shoot_draw": "Hold %K to draw, let go to loose", "shoot_melee": "Step in and swing at them (%K)"} |
+| detail | {"points": "Monsters give XP; every level earns one more point.", "pick_sec": "%L", "pick_dash": "%L", "glide": "Jump, then press %J again in the air to open your glider.", "pick_kin": "%L", "shoot": "%L", "shoot_draw": "Hold the button to draw the bow, let go to loose. A longer draw hits harder.", "shoot_melee": "Walk up close and tap to swing. Hold to charge a wave.", "wallkick": "A jump against a wall kicks you up it.", "crouch": "Crouching shows what lies far ahead.", "gkey": "%s fights on its own, with its own abilities.", "summon": "%s fights for %D seconds; your perks are off meanwhile", "summon_warn": "Almost time. %s is getting tired.", "summon_back": "Back to a light. %s rests now.", "summon_knocked": "%s got beaten and flew back to you. It needs a longer rest.", "pack": "A dim light means %s rests (%B seconds); bright means ready", "glove": "Gloves need no points; %Q uses this one.", "hook": "It shoots from afar, and your glove drags it to your feet.", "ranks": "Ranks make an ability stronger: %R, or click a gold +.", "wayout": "A match has few ways out; this one is at the outpost.", "uplink": "Stay in the circle, or the capture slips back.", "defend": "Stay in the circle, or the capture slips back.", "kin": "They stand in a row: line them up, then use it."} |
+| alt | {"sec_hold": "Tap, then hold %K, to use %A", "summon_out": "%s is out for %D seconds", "summon_rest": "%s is resting", "summon_early": "That calls it back early: let it stay", "pack_wait": "Wait for the bright ring", "shoot_draw": "Hold %K to draw, let go to loose", "shoot_melee": "Step in and swing at them (%K)"} |
 | retry | {"default": "Back at your last stop. Try again", "dash": "Back at your last stop. Dash from the glowing pad", "exdash": "Back at your last stop. Jump from the pad, then dash", "glide": "Back at your last stop. Jump, press %J again to glide", "sec": "Back at your last stop. Use %A away from the edge", "shoot": "Back at your last stop. Fight with solid ground behind you", "gkey": "Back at your last stop. Tap %T and let %s go in first", "summon": "Back at your last stop. Press %M and let %s out first", "pack": "Back at your last stop. Fight with solid ground behind you", "kin": "Back at your last stop. Line them up, then use %A", "hook": "Back at your last stop. Hook the Sentinel with %Q from afar"} |
 | need | {} |
 | cds | 0.25 |
