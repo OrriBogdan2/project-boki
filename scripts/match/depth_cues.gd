@@ -10,7 +10,7 @@ const DISC := 2.0       # m, shadow disc diameter at the feet (a hunter's body i
 const LIFT := 0.04      # m, above the ground so the disc does not z-fight
 const ABYSS_DIM := 0.55 # brightness of the abyss clouds relative to normal
 const AIR_MIN := 0.25   # m a hunter must be above the ground for its disc to show (a standing hunter has none)
-const STRENGTH := 0.5   # darkest alpha at the centre of the disc (0.75 read as a black spot on the web build's pale ground)
+const STRENGTH := 0.5   # darkest alpha at the centre of the disc (any darker reads as a black spot)
 const SHOT_DISC := 0.9  # m, shadow disc diameter under a shot (they are small, so the disc is too)
 const SHOT_STRENGTH := 0.4 # darkest alpha at the centre of a shot's disc (fainter than a hunter's)
 

@@ -1,7 +1,8 @@
 extends RefCounted
 ## --depth-cue-check: the height cues of briefs/CAMERA_DEPTH.md exist and stay cheap. Headless, no
 ## renderer: a live match has the ledge-light terrain shader (depth_k on, with ledges for it to light),
-## the dimmed abyss clouds, a shadow disc on the ground under every airborne hunter (none while it stands) and under every flying shot
+## the dimmed abyss clouds, a shadow disc on the ground under every airborne hunter (none while it stands)
+## and under every flying shot
 ## (at the ground's height, hidden over the void), and a per-frame cost within budget with no new
 ## nodes once warmed up. With the setting off the terrain and cloud cues read as off. Never touches the save.
 

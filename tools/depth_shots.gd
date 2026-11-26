@@ -102,14 +102,15 @@ func _run_compat_child() -> void:
 func _air_shots() -> void:
 	main.get_window().size = Vector2i(1920, 1080)
 	var w := m.world
-	var tile: Vector2i = _find(func(x, z, _d): return w.level[w.idx(x, z)] == w.level[w.idx(int(w.w / 2.0), int(w.h / 2.0))])[0]
+	var tile: Vector2i = _find(func(_x, _z, _d): return true)[0]
 	P.teleport(Vector3(tile.x + 0.5, w.ground_at(tile.x + 0.5, tile.y + 0.5), tile.y + 0.5))
 	await _settle()
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join(prefix + "air_a_stand.png"))
 	P.do_jump()
 	await _settle(JUMP_WAIT)
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join(prefix + "air_b_jump.png"))
-	print("AIRSHOTS %s grounded=%s height=%.2f" % [arch, P.grounded, P.global_position.y - w.ground_at(P.pos.x, P.pos.z)])
+	var up := P.global_position.y - w.ground_at(P.pos.x, P.pos.z)
+	print("AIRSHOTS %s grounded=%s height=%.2f" % [arch, P.grounded, up])
 
 func _settle(secs := SETTLE) -> void:
 	var t := 0.0
@@ -120,10 +121,14 @@ func _settle(secs := SETTLE) -> void:
 		for h in m.hunters: h.render(DT, 1.0)
 		await main.get_tree().process_frame
 
+func _cls() -> String:
+	return Arch.weight(arch) if arch != "" else Data.class_of_save()
+
 func _setup() -> void:
 	m = Match.new()
 	main.add_child(m)
-	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": seed_v, "no_drop": true, "arch": arch, "cls": Arch.weight(arch) if arch != "" else Data.class_of_save()})
+	var opts := {"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": seed_v, "no_drop": true}
+	m.start(opts.merged({"arch": arch, "cls": _cls()}))
 	m.set_process(false)
 	P = m.player
 	for mb in m.mobs: mb.queue_free()
