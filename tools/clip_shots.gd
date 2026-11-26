@@ -231,7 +231,7 @@ func _states(model: Node3D, fps: float, out: String, sub := "states") -> void:
 		kmove = String((clips.d.get("kmoves", {}) as Dictionary).keys().front())
 	var native := poser as WardenNative
 	if native and OS.get_cmdline_user_args().has("--no-moves"):
-		native.moves = WardenNativeMoves.new(native.player, native.skel, {})  # (no rows: Meshy's swing for each)
+		native.moves = WardenNativeMoves.new(native.player, {})  # (no rows: Meshy's swing for each)
 		native.own_casts = false
 	var i := 0
 	for st in STATE_SHOTS:

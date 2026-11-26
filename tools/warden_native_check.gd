@@ -147,6 +147,7 @@ func _states(main: Node, a: String) -> void:
 	_toon(a, m)
 	_crouch_arms(a, nat)
 	await _slots(main, a, m, nat)
+	await _upper(main, a, m, nat)
 	await _kmoves(main, a, m, nat)
 	_moves(a, m, nat)
 	_only_meshy(a, m)
@@ -298,6 +299,25 @@ func _slots(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
 	await _synthetic_clips(main, a, m, nat)
 
 
+## A swing while he runs plays on the upper body (the run clip stays the playing one, the layer owns the arms); on the
+## spot the attack clip owns the whole body.
+func _upper(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
+	var run := {"vel": Vector3(0.0, 0.0, -4.6)}
+	await _feed(main, nat, m, run, run.merged({"swing_n": 1, "combo": 0}, true))
+	var run_clip := String(nat.plays["run"])
+	ok(
+		nat.player.current_animation == run_clip,
+		"%s: a swing on the run keeps the run clip (%s)" % [a, nat.player.current_animation]
+	)
+	var n_tracks := nat.upper.tracks().size()
+	ok(nat.upper.on and nat.upper.w > 0.0 and n_tracks >= 5, "%s: ...and %d upper-body tracks play it" % [a, n_tracks])
+	await _feed(main, nat, m, {}, {"swing_n": 1, "combo": 0})
+	ok(
+		not nat.upper.on and nat.player.current_animation == String(nat.plays["attack"]),
+		"%s: a swing standing owns the body" % a
+	)
+
+
 ## A clips file (made here: a skeleton under another node name, one clip named SYNTH) lends its clip to a slot.
 func _synthetic_clips(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
 	var src := Node3D.new()
@@ -344,12 +364,11 @@ func _moves(a: String, m: Node3D, nat: WardenNative) -> void:
 		return
 	var s := {"grounded": true}
 	m.set_meta(WardenClips.STATE, s)
-	var mv := nat.moves
 	var swing := String(nat.plays["attack"])
 	var before := _at(m, nat, s, "as_aim", 0.0)
 	var held := _at(m, nat, s, "as_lance", 0.6)
-	var own: bool = nat.player.current_animation != swing and mv.shown == "cn_u_lance_loop" and mv.weight >= 1.0
-	ok(own, "%s: the lance holds its own clip over Meshy's idle (no swing; %s)" % [a, mv.shown])
+	var own: bool = nat.player.current_animation != swing and nat.upper.clip == nat.player.get_animation("cn_u_lance_loop") and nat.upper.w >= 1.0
+	ok(own, "%s: the lance holds its own clip over Meshy's idle (no swing; weight %.2f)" % [a, nat.upper.w])
 	var reach: Vector3 = held["hand"]
 	ok(reach.z < -0.2 and reach.y > 0.8, "%s: the lance's hand is held out ahead (%s)" % [a, reach])
 	s["vel"] = Vector3(0.0, 0.0, -4.6)
@@ -378,7 +397,7 @@ func _moves(a: String, m: Node3D, nat: WardenNative) -> void:
 	ok(span > before["span"] + 0.4, "%s: both arms wide on the blast frame (%.2f m across)" % [a, span])
 	_at(m, nat, s, "as_cloak", 1.0)
 	_at(m, nat, s, "as_cloak", 1.0)
-	ok(mv.weight <= 0.0, "%s: the cloak clip lets go once played out" % a)
+	ok(nat.upper.w <= 0.0, "%s: the cloak clip lets go once played out" % a)
 	_at(m, nat, s, "lw_jet", 0.1)
 	var clip := nat.player.current_animation
 	ok(clip == "cn_f_takeoff", "%s: Flue Flight takes off (%s)" % [a, clip])
