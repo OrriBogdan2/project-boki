@@ -498,7 +498,7 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 	if downed:
 		return Life.wisp_hit(self, by, dmg, opts)
 	var d_in := d
-	d = MergeShell.absorb(self, d, opts)         # a merged form's shell takes the hit first (docs/decisions/0003)
+	d = MergeShell.absorb(self, d, opts, by)         # a merged form's shell takes the hit first (docs/decisions/0003)
 	var shelled := false
 	if d <= 0.0:
 		if d_in <= 0.0:
@@ -509,10 +509,10 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 		var a := minf(shield, d)
 		shield -= a; d -= a
 		ShieldSfx.hit(self, a)
+		SoakNumber.at(self, by, a, HudStyle.NUM_SHIELD)       # what the shield took, in its own look
 		if shield <= 0.0: shield_kind = ""
 		if d <= 0.0:
 			flash_t = 0.06
-			m.fx.number(pos + Vector3(0, 1.6, 0), a, Color("cfe8ff"), false)
 			return 0.0
 	if drink_t > 0.0 or kit_t > 0.0 or box_reviving():
 		d *= CONSUME_VULN
@@ -538,6 +538,7 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 		# your kin's owner shield soaks last; a fully soaked hit still counts as a hit (truces, interrupts)
 		var ks0 := minf(kin_shield, d)
 		kin_shield -= ks0
+		SoakNumber.at(self, by, ks0, HudStyle.NUM_SHIELD)
 		d = maxf(0.01, d - ks0)
 		opts["soaked"] = ks0
 	return d
@@ -1842,7 +1843,7 @@ func _physics(dt: float) -> void:
 		g = minf(g, pos.y + HunterFeel.spirit_climb * dt)
 		grounded = true
 		vel.y = 0.0
-	var keep: float = 0.05 + m.world.stair_slope(x0, z0, pos.x, pos.z)      # m of drop kept on foot (stairs: the slope)
+	var keep: float = HunterMove.step_down + m.world.stair_slope(x0, z0, pos.x, pos.z)  # m kept on foot (stairs: slope)
 	if grounded and g < pos.y - keep:
 		grounded = false
 		vel.y = minf(vel.y, 0.0)

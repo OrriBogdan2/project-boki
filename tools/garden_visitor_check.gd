@@ -155,7 +155,8 @@ func _intro_part() -> void:
 		home.ppos = mine["pos"] + Vector3(-2, 0, 0)
 		wild["pos"] = mine["pos"] + Vector3(9, 0, 0)
 		return leading.call()
-	await _step(40.0, behind)
+	# (40 s of leading, after the toy trip the partner may be on: its play ends within the rules' max)
+	await _step(40.0 + float(Content.rules("base_life")["max"]["play"]), behind)
 	ok(leading.call(), "your partner leads to it")
 	var gap: float = (wild["pos"] - mine["pos"]).length()
 	await _step(4.0)
@@ -240,7 +241,8 @@ func _egg_part() -> void:
 	ok(GardenVisitor.rec().is_empty() and _wild().is_empty() and Save.d["roster"].size() == roster,
 		"with no room it left and did not join")
 	var egg: Dictionary = (Incubator.shelf() + Incubator.eggs()).back() if Incubator.count() > eggs else {}
-	ok(Incubator.count() == eggs + 1 and egg.get("sp") == sp, "it left an egg of its kind (%s)" % sp)
+	# (an egg is its line's first form, Data.egg_species: a visiting Glombulus leaves its first form's egg)
+	ok(Incubator.count() == eggs + 1 and egg.get("sp") == Data.egg_species(sp), "it left an egg of its kind (%s)" % sp)
 	ok(CareJournal.arrival().any(func(l): return "left a" in l and "Egg" in l), "the away card says it left an egg")
 	var from: Dictionary = egg.get("visitor", {})
 	var told: bool = from.get("sp") == sp and from.get("zone") == "bramblebank" and int(from.get("day", 0)) >= 1
