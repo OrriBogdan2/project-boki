@@ -116,7 +116,7 @@
 		"play": "Roots foes with spores. Curious."
 	},
 	"size": {
-		"cm": 22,
+		"cm": 27,
 		"kg": 1.6,
 		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
 	}

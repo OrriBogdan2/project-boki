@@ -51,7 +51,7 @@ static func tex(rec: Dictionary, tree: SceneTree) -> Texture2D:
 	var mdl := Models.kin(String(rec["species"]), rec)
 	# the picture shows its shape, not its size: Giant and Tiny are framed the same
 	var s := maxf(0.4, mdl.scale.y)
-	mdl.scale = Vector3.ONE
+	mdl.scale = Vector3.ONE / float(mdl.get_meta("fit", 1.0))      # (the fixed frame was cut for the glb's own size)
 	for ch in mdl.get_children():
 		if ch is CPUParticles3D or ch is GPUParticles3D: (ch as Node3D).visible = false
 	vp.add_child(mdl)

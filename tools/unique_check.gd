@@ -94,7 +94,8 @@ func run(m: Node) -> void:
 	var big := Save.new_kin("cindle", "Big", 1); big["dna"]["size"] = 2.6
 	var small := Save.new_kin("cindle", "Small", 2); small["dna"]["size"] = -2.6
 	var bi := Unique.size_info(big); var si := Unique.size_info(small)
-	ok(String(bi["tag"]) == "XL" and String(si["tag"]) == "XS" and float(bi["cm"]) > 38.0 and float(si["cm"]) < 30.0, "sizes in cm and tags: big %.1f cm %s, small %.1f cm %s" % [bi["cm"], bi["tag"], si["cm"], si["tag"]])
+	var base_cm := float(Unique.base_size("cindle")["cm"])
+	ok(String(bi["tag"]) == "XL" and String(si["tag"]) == "XS" and float(bi["cm"]) > 1.1 * base_cm and float(si["cm"]) < 0.9 * base_cm, "sizes in cm and tags: big %.1f cm %s, small %.1f cm %s" % [bi["cm"], bi["tag"], si["cm"], si["tag"]])
 	var giant := big.duplicate(true); giant["mutations"] = ["giant"]
 	ok(Unique.size_info(giant)["cm"] > float(bi["cm"]) * 1.3, "Giant still sits on top as the extreme tier (%.1f cm)" % Unique.size_info(giant)["cm"])
 	# ---------------------------------------------------------------- 3. inheritance
