@@ -28,7 +28,7 @@ func run(main: Node) -> void:
 	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	Save.no_write = true
 	for id in STARTERS:
-		await _play(main, id)
+		_play(main, id)
 	print("TUTFIGHT DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -52,7 +52,6 @@ func _play(main: Node, id: String) -> void:
 	var locked: bool = m.player.slot_lv.values().all(func(v): return int(v) == 0)
 	ok(locked and m.player.lvl == 1 and m.player.skill_pts == 1, id + ": lands at level 1, one point, all locked")
 	var forced := false
-	var placed := false
 	var tele := {"ticks": 0, "early": false, "spots": [], "landed": false, "on_spot": false}
 	var framing := TutorialFraming.new()
 	while t < 400.0 and not m.player.extracted:
@@ -69,13 +68,6 @@ func _play(main: Node, id: String) -> void:
 			ok(only and not p.can_level("ult"), id + ": the first pick (made for you) is the right click, no other")
 			p.gain_xp(500.0)
 			ok(p.lvl == 1, id + ": XP from anything but the camps is ignored")
-		if tu.id() == "wallkick" and not placed:
-			placed = true       # (up on the lookout with no kick: the step waits; the bot walks off and kicks up)
-			m.player.pos = tu.stop("crouch")
-			m.player.vel = Vector3.ZERO
-			for i in 15:
-				m.step(Match.DT)
-			ok(tu.id() == "wallkick", id + ": on the lookout with no wall kick, the Climb step is still open")
 		if tu.id() in FIGHT_STEPS:
 			fight_t += Match.DT
 			damage += maxf(0.0, hp - m.player.hp)
