@@ -131,3 +131,17 @@ Scripts: `/home/boki/gens/hunter-round-1124/kael/hair/scripts/` (`hairmask.py GL
   read at eye/knee view without the round-21 neon slab. No emission on the off arm's white veins (the juggernaut
   emit_tint would turn them crimson). Re-run: `emit13.py live_Image_0.jpg emit.jpg <r23 args> K=2.0`, then
   `r24/add_emit.py IN.glb Material_0 emit.jpg OUT.glb`, then native_ink.py.
+
+**Round 25 (2026-11-26, ext/kael-r25, scripts /home/boki/gens/hunter-round-1124/kael/r25/):**
+- Sword seat (kael.glb prop, rigid move in hand.R's bind space like round 23): grip angle off the knuckle line 20 -> 5 deg
+  (`r25/solve25b.py probe.json` grid over th/ps, `r25/mkX.py probe.json 5 0 0.07 X25.npz`, then round 23's
+  `apply_grip.py kael.glb probe.json X25.npz OUT.glb`; probe from `--live-audit --wardens=juggernaut --probe`). Over every
+  idle/run/dash/jump/attack/hit frame: blade tip lowest in idle/jump/hit +0.13 -> +0.38 m, attack swing frames where the blade
+  is foreshortened at the game camera (any yaw) 29 % -> 18 %. The grip stays across the fist.
+  Not possible by orientation alone: the hand is over the head in the swing, so the bloom (next) handles the smear.
+- Blade bloom (content/rules/warden_look.json kael "bloom"): depth_test true, alpha 0.2/0.24 -> 0.14/0.16, size 0.24/0.16 ->
+  0.2/0.14, from 0.3 -> 0.4 of the blade: the white smear over the head in Attack f2 and the glow column drawn over the floor.
+- Off arm (kael_meshy.glb Image_0, off-arm texels only): round 23's edit13.py with a denser vein field for the off arm
+  (`s_round=200 s_along=6 kL=2.2 tap=0.1 wc=255,250,248 Lb=228,104,108`), composited only inside the off-arm mask
+  (`r25/work/comp.py`; maps rebuilt with `rast4.py` from the pre-round-21 glb since amaps.npz was not on this host). White vein
+  coverage 0.4 % -> 9 %, off-arm median lum 122 -> 143 (sword arm 32 untouched). Geometry, skin, clips, emission map unchanged.
