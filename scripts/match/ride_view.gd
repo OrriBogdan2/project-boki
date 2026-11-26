@@ -38,7 +38,7 @@ static func tick(m: Match, map: FullMap) -> void:
 	var waiting := aboard(m)
 	if map.is_open and map.auto and not waiting:
 		map.close()
-	var off: bool = m.warmed and map.is_open and waiting and m.intro == null
+	var off: bool = m.warmed and map.is_open and waiting and not (m.intro != null and m.intro.running())
 	var vp := m.get_viewport()
 	if vp.disable_3d != off:
 		vp.disable_3d = off
