@@ -4,7 +4,8 @@ extends RefCounted
 ##   1. all 12 hunters cast LMB / RMB / E / X / Q, dash, air dash, land from a height, all with a dummy in front to
 ##      hit: the caster's camera gets zero shake (Cam.shake_total never moves);
 ##   2. a boss slam on top of you shakes at most Shake.MAX_SECS (0.15 s), at the Screen shake slider's scale;
-##   3. the slider at 0 means no shake at all, and the default is 30%;
+##   3. the slider at 0 means no shake at all (all 12 hunters cast everything while an enemy hits them with heavy
+##      hits, ults and slams: the camera's offset is exactly zero every step), and the default is 30%;
 ##   3b. your own Fuse and your Boki's landing strike and blast don't shake your camera (a wild Boki's blast does);
 ##   4. a scripted 60 s fight (a hunter casting its whole kit at a bot) stays under FIGHT_BUDGET seconds of shake;
 ##   5. the table (content/rules/shake.json): every row's source and power, the hit tiers read it, every Shake call
@@ -36,6 +37,11 @@ func run(main: Node) -> void:
 	for hero in Arch.ORDER:
 		var m: Match = flow._match(main, hero)
 		_self_shake(m, hero)
+		m.queue_free()
+		await main.get_tree().process_frame
+	for hero in Arch.ORDER:
+		var m: Match = flow._match(main, hero)
+		_enemy_hits_at_zero(m, hero)
 		m.queue_free()
 		await main.get_tree().process_frame
 	await _own_boki(main)
@@ -97,6 +103,44 @@ func _self_shake(m: Match, hero: String) -> void:
 	ok(worst <= 0.0, "%s: %s put %.3f s of shake on the caster's camera" % [hero, ", ".join(did), worst])
 	ok(absf(m.cam.shake_amp) <= 0.0, "%s: no shake left running" % hero)
 	ok(casts >= 3, "%s: the script really cast (%d abilities went off)" % [hero, casts])
+
+## The slider at 0: every slot, dash and landing of one hunter while an enemy lands a heavy hit, an ult's shake and a
+## boss slam on it each time. The view's offset (Cam.shake_off) must be exactly zero on every step.
+func _enemy_hits_at_zero(m: Match, hero: String) -> void:
+	var h: Hunter = flow.hunter
+	Settings.v["screen_shake"] = 0.0
+	var foe: Hunter = null
+	var worst := 0.0
+	var t0 := _shake_of(m)
+	for slot in SLOTS + ["dash", "landing"]:
+		flow._ready_up(m)
+		_dummy(m)
+		for o in m.hunters:
+			if o != h:
+				foe = o
+		if slot == "dash":
+			h.inp["move"] = Vector2(0, -1)
+			h.inp["dash"] = true
+		elif slot == "landing":
+			h.pos += Vector3(0, 12, 0)
+			h.grounded = false
+		else:
+			flow._press(slot)
+		for i in 60:
+			if i % 15 == 0:
+				h.hp = h.max_hp
+				h.hurt(30.0, foe, {"src": "abil", "heavy": true, "tags": ["ult"]})
+				Shake.big(m, h.pos, "ult", foe)
+				Shake.big(m, h.pos, "boss_slam_wide")
+			m.step(Match.DT)
+			h.inp["dash"] = false
+			worst = maxf(worst, m.cam.shake_off.length())
+	var still := worst == 0.0 and _shake_of(m) == t0
+	ok(still, "%s: slider 0 + enemy hits: view offset %.4f, shake %.3f s" % [hero, worst, _shake_of(m) - t0])
+	if hero == Arch.ORDER[0]:
+		Settings.v["screen_shake"] = 0.3
+		ok(Shake.incoming_big(m, h.pos, 1.0, foe) > 0.0, "(control) the same enemy hit shakes at the default 30%")
+		_still(m)
 
 ## Your own Fuse and your Boki's landing strike and blast: big moments, but yours, so your camera stays still. The
 ## same blast from a wild Boki (no owner) still shakes it, so a still camera is the cause's doing. Each reads the
@@ -232,7 +276,7 @@ func _callers() -> void:
 	var calls := {}  # class -> {file: true}
 	var big_rx := RegEx.create_from_string("Shake\\.big\\(([^\\n]*)")
 	var name_rx := RegEx.create_from_string('"(\\w+)"(?!\\])')  # a quoted name, not a key (l_v["c"])
-	var door_rx := RegEx.create_from_string("Shake\\.incoming_big\\(|cam\\.rumble\\(")
+	var door_rx := RegEx.create_from_string("Shake\\.incoming_big\\(|cam\\.rumble\\(|cam\\.punch\\(|shake_(amp|left) =")
 	var files: Array = []
 	_gd_files("res://scripts", files)
 	var strays := []

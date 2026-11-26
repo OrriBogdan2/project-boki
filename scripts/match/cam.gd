@@ -86,6 +86,7 @@ var target: Node3D = null
 var shake_amp := 0.0  # a shake in progress (see Shake: only big hits on you)
 var shake_left := 0.0
 var shake_total := 0.0  # seconds of shake run so far (the shake check reads it)
+var shake_off := Vector3.ZERO  # m: the offset the last frame put on the view (zero unless a shake runs)
 var zoom := 1.0
 var zoom_to := 1.0
 var user_zoom: float = CamWheel.far(true)  # the mouse wheel (CamWheel), widest at the start; times the match's zoom
@@ -222,11 +223,6 @@ func snap(p: Vector3) -> void:
 ## A brief pull-back that eases in fast and settles over ~0.6s (speed bursts).
 func pull_back(a: float) -> void:
 	pull = maxf(pull, a)
-
-
-## No-op: camera punches are gone (item 50). Kept only so the reserved merge files, which still call it, compile.
-func punch(_a: float) -> void:
-	pass
 
 
 ## Asked each step of an aimed cast: push out by `zoom_k` and frame the line of `reach` metres along `dir`.
@@ -453,15 +449,15 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 	top = move_toward(top, top_to, delta * (0.9 if top_to < top else 2.0))
 	chase = move_toward(chase, chase_to, delta * 0.7)
 	yaw = lerp_angle(yaw, yaw_to, minf(1.0, delta * 1.6))
-	var shake := Vector3.ZERO
+	shake_off = Vector3.ZERO
 	if shake_left > 0.0:
 		var s := shake_amp * float(rr[4])
-		shake = Vector3(Sfx.rng.randf_range(-s, s), Sfx.rng.randf_range(-s, s) * 0.5, Sfx.rng.randf_range(-s, s))
+		shake_off = Vector3(Sfx.rng.randf_range(-s, s), Sfx.rng.randf_range(-s, s) * 0.5, Sfx.rng.randf_range(-s, s))
 		shake_total += minf(delta, shake_left)
 		shake_left = maxf(0.0, shake_left - delta)
 		if shake_left <= 0.0:
 			shake_amp = 0.0
-	_apply(shake)
+	_apply(shake_off)
 	Sfx.listener = focus
 
 
