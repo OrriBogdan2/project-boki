@@ -17,6 +17,8 @@ const CHECKS := {
 	"--ult-rank-check": ["res://tools/ult_rank_check.gd", "ult_rank_check", null],
 	# the Arena, training's practice tools, the kit card
 	"--arena-check": ["res://tools/arena_check.gd", "arena_check", null],
+	# practice dummies lose HP, are knocked down at 0 and respawn on their mark (Test Zone, Training Grounds)
+	"--practice-dummies-check": ["res://tools/practice_dummies_check.gd", "practice_dummies_check", null],
 	# every archetype kit, controls, locks, infusion, feel
 	"--archetype-check": ["res://tools/archetype_check.gd", "archetype_check", null],
 	"--kit-combo-check": ["res://tools/archetype_check.gd", "archetype_check", null],  # (same tool: the combo section)
