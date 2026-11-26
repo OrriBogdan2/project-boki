@@ -153,6 +153,8 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | nimbostrich | shared | clip | clip | shared | shared | shared | proc | proc |
 | orchisloth | shared | clip | clip | shared | shared | shared | proc | proc |
 | tuatrune | shared | clip | clip | shared | shared | shared | proc | proc |
+| scaldamus | clip | shared | shared | clip | clip | clip | proc | proc |
+| sentrikat | clip | shared | shared | clip | clip | clip | proc | proc |
 | cindle | clip | clip | clip | clip | clip | clip | proc | proc |
 | puddlet | clip | clip | clip | clip | clip | clip | proc | proc |
 | burrlet | clip | clip | clip | clip | clip | clip | proc | proc |
@@ -261,4 +263,8 @@ Worst five, backlog-ready:
    any Boki, but the shared set is the same wobble on a heron, an okapi and a rope wyrm. Glomwort (its clips re-targeted
    onto the scan, which has no lobes or puffballs to move) and goliathite now play their own. Eat and
    sleep play each species' baked clip (the generic set on the shared Boki); the built munch and nap are the fallback.
+   any Boki (scaldamus and sentrikat left it 11-20), but the shared set is the same wobble on a heron, an okapi and a
+   rope wyrm. That includes glomwort,
+   whose `glomwort_anim.py` clips the batch-1 model replaced (docs/art/kin/RIGGED_BOKI.md still lists them). Eat and
+   sleep are `proc` on every Boki (munch and nap built from idle and sleep); the baked `eat` clip is never played.
 5. Hunter death clips are mostly unseen while the Wisp stands in for a death (DEBT: downed Wisp).
