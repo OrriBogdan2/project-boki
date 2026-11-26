@@ -9,6 +9,7 @@ const ISLAND_SEED := 11
 const DAY_T := 0.72
 const DEADLINE_S := 900.0
 const COLS := [["v5", 1.0], ["x15", 1.5], ["x20", 2.0]]
+const TURN := [0.75, 0.75, -0.75, -0.75]  # 3/4 to the camera, each turned toward the middle
 
 var main: Node
 var h
@@ -62,7 +63,7 @@ func run(main_node: Node) -> void:
 	_front(spot)
 	h.player.visible = true
 	face_yaw = PI
-	_row(spot, cd, [Vector2(3.6, -2.4), Vector2(1.4, -2.4), Vector2(-1.4, -2.4), Vector2(-3.6, -2.4)])
+	_row(spot, cd, [Vector2(4.2, -2.5), Vector2(1.8, -2.5), Vector2(-1.8, -2.5), Vector2(-4.3, -2.5)])
 	await _wait(2.5)
 	for k in h.kins:
 		fits.append(float((k["node"] as Node3D).get_meta("fit", 1.0)))
@@ -73,12 +74,12 @@ func run(main_node: Node) -> void:
 		await RenderingServer.frame_post_draw
 		main.get_viewport().get_texture().get_image().save_png(dir.path_join("A_%s.png" % c[0]))
 		var cam := main.get_viewport().get_camera_3d()
-		var rows := {"hunter": _stands(h.player), "foot_px": {}}
+		var rows := {"hunter": _rest(h.player), "hunter_scale": h.player.global_basis.y.length(), "foot_px": {}}
 		var p := cam.unproject_position(h.player.global_position)
 		rows["foot_px"]["hunter"] = [p.x, p.y]
 		for j in h.kins.size():
 			var n := h.kins[j]["node"] as Node3D
-			rows[species[j]] = _stands(n)
+			rows[species[j]] = _rest(n.find_child("Rig", true, false))
 			var q := cam.unproject_position(n.global_position)
 			rows["foot_px"][species[j]] = [q.x, q.y]
 		out["cols"][c[0]] = rows
@@ -88,18 +89,10 @@ func run(main_node: Node) -> void:
 	f.close()
 	main.get_tree().quit()
 
-## Visible mesh height (cm) of a node, ground to top.
-func _stands(node: Node3D) -> float:
-	var lo := INF
-	var hi := -INF
-	for n in node.find_children("*", "MeshInstance3D", true, false):
-		var mi := n as MeshInstance3D
-		if not mi.is_visible_in_tree() or mi.mesh == null:
-			continue
-		var b := mi.global_transform * mi.get_aabb()
-		lo = minf(lo, b.position.y)
-		hi = maxf(hi, b.end.y)
-	return (hi - lo) * 100.0
+## Standing height (cm) of a model as drawn: its bind-pose box (KinSize.box, so no idle pose or hop moves it) times its
+## world scale; scale_choice_3p.gd measures the match row the same way.
+func _rest(model: Node3D) -> float:
+	return KinSize.box(model).y * model.global_basis.y.length() * 100.0
 
 func _wait(secs: float) -> void:
 	for _i in maxi(1, roundi(secs * FPS)):
@@ -107,7 +100,6 @@ func _wait(secs: float) -> void:
 		h.day_t = DAY_T
 		for j in h.kins.size():
 			var n := h.kins[j]["node"] as Node3D
-			n.rotation.y = face_yaw + [0.3, -0.2, 0.2, -0.3][j]
 			if not fits.is_empty():
 				n.set_meta("fit", fits[j] * mult)
 			h.kins[j]["hop"] = 0.0
@@ -118,6 +110,7 @@ func _make_save() -> void:
 	for i in species.size():
 		var rec := Save.new_kin(species[i], names[i], 700 + i)
 		rec["uid"] = "ks%d" % i
+		_average(rec["dna"])  # an average one of its species, the same body as in the match row
 		rec["trust"] = 95.0
 		for need in Care.NEEDS:
 			rec["needs"][need] = 95.0
@@ -134,6 +127,12 @@ func _make_save() -> void:
 func _hide_marks() -> void:
 	if not is_instance_valid(h):
 		return
+	# after Home's own pose: every Boki 3/4 to the camera at the non-active farm size (0.9 x FARM_BOKI_SCALE), so no
+	# one is drawn bigger for being the active one and the rows differ by one known factor
+	for j in h.kins.size():
+		var n := h.kins[j]["node"] as Node3D
+		n.rotation.y = face_yaw + TURN[j]
+		n.scale = Vector3.ONE * 0.9 * float(n.get_meta("evo_scale", 1.0)) * h.FARM_BOKI_SCALE
 	h.ui.visible = false
 	for l in h.find_children("*", "Label3D", true, false):
 		(l as Label3D).visible = false
@@ -186,3 +185,11 @@ func _clear_spot(near: Vector3) -> Vector3:
 				best = Vector3(cx + 0.5, 0, cz + 0.5)
 	return best
 
+
+
+## An average one: no size roll, girth and every proportion at 1 (the match row's tool does the same).
+static func _average(dna: Dictionary) -> void:
+	dna["size"] = 0.0
+	dna["girth"] = 1.0
+	for pr in Unique.PROPS:
+		dna[pr] = 1.0

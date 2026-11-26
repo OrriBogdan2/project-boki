@@ -5,6 +5,7 @@ extends "res://tools/vv_shots.gd"
 const SPECIES := ["cindle", "burrlet", "puddlet", "heatherhorn"]
 const XS := [-4.0, -1.6, 1.6, 4.0]
 const ZS := [2.5, 2.5, 2.5, 2.5]
+const SIDE := [1.0, 1.0, -1.0, -1.0]
 const COLS := [["v5", 1.0], ["x15", 1.5], ["x20", 2.0]]
 var ks: Array = []
 var fits: Array = []
@@ -27,7 +28,7 @@ func run(main_node: Node) -> void:
 	T.teleport(home + Vector3(-30, 0, 30))
 	for i in SPECIES.size():
 		var rec := Save.new_kin(String(SPECIES[i]), "", 7)
-		(rec["dna"] as Dictionary)["size"] = 0.0
+		_average(rec["dna"])  # an average one, the same body as in the farm row
 		var k := m.spawn_wild(rec, home + Vector3(XS[i], 0, ZS[i]))
 		k.speed = 0.0
 		ks.append(k)
@@ -45,9 +46,9 @@ func run(main_node: Node) -> void:
 		await main.get_tree().process_frame
 		await main.get_tree().process_frame
 		main.get_viewport().get_texture().get_image().save_png(dir.path_join("B_%s.png" % c[0]))
-		var rows := {"hunter": _tall(P)}
+		var rows := {"hunter": _rest(P.model), "hunter_scale": (P.model as Node3D).global_basis.y.length()}
 		for i in ks.size():
-			rows[SPECIES[i]] = _tall(ks[i])
+			rows[SPECIES[i]] = _rest(ks[i].find_child("Rig", true, false))
 		var cam := main.get_viewport().get_camera_3d()
 		rows["foot_px"] = {"hunter": _foot(cam, P)}
 		for i in ks.size():
@@ -72,28 +73,21 @@ func _each(_t: float) -> void:
 		var k: Node = ks[i]
 		k.teleport(home + Vector3(XS[i], 0, ZS[i]))
 		k.ring.visible = false  # the type cue's quad would count in the height
-		k.face = PI + [0.3, -0.2, 0.2, -0.3][i]
+		k.face = atan2(-0.8 * SIDE[i], -0.6)  # 3/4 to the camera (as boki_size_shots), the pairs mirrored
 		for n in [k] + k.find_children("*", "Node3D", true, false):
 			if n.has_meta("fit"):
 				n.set_meta("fit", fits[i] * mult)
+		k.render(DT, 1.0)  # (the match's own render pass is off here, so the turn would not show)
 	P.face = PI
 
 func _foot(cam: Camera3D, n: Node3D) -> Array:
 	var p := cam.unproject_position(n.global_position)
 	return [p.x, p.y]
 
-## Visible mesh height (cm) of a node, ground to top.
-func _tall(node: Node3D) -> float:
-	var lo := INF
-	var hi := -INF
-	for n in node.find_children("*", "MeshInstance3D", true, false):
-		var mi := n as MeshInstance3D
-		if not mi.is_visible_in_tree() or mi.mesh == null:
-			continue
-		var b := mi.global_transform * mi.get_aabb()
-		lo = minf(lo, b.position.y)
-		hi = maxf(hi, b.end.y)
-	return (hi - lo) * 100.0
+## Standing height (cm) of a model as drawn: its bind-pose box (KinSize.box, so no idle pose, lean or bob moves it) times
+## its world scale. The farm row's tool measures the same way, so the two rows' numbers are one metric.
+func _rest(model: Node3D) -> float:
+	return KinSize.box(model).y * model.global_basis.y.length() * 100.0
 
 ## Every 2D layer and top-level control off, so the frame is the world alone.
 func _hide_ui() -> void:
@@ -107,3 +101,11 @@ func _hide_ui() -> void:
 	for n in main.get_children():
 		if n is Control:
 			(n as Control).visible = false
+
+
+## An average one: no size roll, girth and every proportion at 1 (as scale_choice_farm.gd).
+static func _average(dna: Dictionary) -> void:
+	dna["size"] = 0.0
+	dna["girth"] = 1.0
+	for pr in Unique.PROPS:
+		dna[pr] = 1.0
