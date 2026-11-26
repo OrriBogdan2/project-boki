@@ -1613,7 +1613,7 @@ func squad_ping(h: Hunter, p: Vector3, from_net := false, kind := "", foe: Hunte
 	PingInput.make_room(self, h)
 	pings.append({"pos": p, "col": PingInput.color(kind), "t": 0.0, "by": h, "team": h.team,
 		"life": PingInput.life(kind), "kind": kind, "foe": foe})
-	if player and h.team == player.team:
+	if player and h.team == player.team and Life.has_mates(self, h):
 		sfx("ping", null, -6.0, 1.15)
 	if net_on and not from_net:
 		net_event(["sping", h.nid, p.x, p.y, p.z, kind, foe.nid if foe else ""])
@@ -1662,7 +1662,7 @@ func kin_ping(k: Kin, p: Vector3, col: Color, label: String) -> Dictionary:
 			pings.erase(pg); break
 	var pg := {"pos": p, "col": col, "t": 0.0, "life": 5.0, "kin": k, "label": label, "team": k.team}
 	pings.append(pg)
-	if k.owner_h == player or (player and k.team == player.team):
+	if (k.owner_h == player or (player and k.team == player.team)) and Life.has_mates(self, player):
 		sfx("ping", null, -9.0, 1.3)
 	return pg
 
@@ -4265,6 +4265,7 @@ func _catch(h: Hunter, k: Kin) -> void:
 	k.visible = false
 	var rec: Dictionary = k.rec.duplicate(true)
 	rec["caught_at"] = where_at(k.pos)       # provenance: where it was caught (Save.register)
+	rec["caught_at"]["hunter"] = HeroTitle.base_name(h.arch)      # and who carried it out
 	if k.lost_from != "":
 		# someone's lost kin: it keeps who it is, and we remember who has it now
 		rec["lost_from"] = k.lost_from

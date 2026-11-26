@@ -43,6 +43,7 @@ func ok(cond: bool, what: String) -> void:
 
 func run(main_node: Node) -> void:
 	main = main_node
+	await _solos()
 	Save.d["music"] = Save.d.get("music", [])
 	await _abyss()
 	Game.goto(
@@ -75,18 +76,30 @@ func run(main_node: Node) -> void:
 	k.fly = {}
 	k.go_down()
 	_step(m, 0.4)
-	ok(k.rescue_on and Sfx.loop_on(key), "a rescue under way has its hum (rescue_on %s)" % k.rescue_on)
+	ok(
+		k.rescue_on and Sfx.loop_on(key),
+		"a rescue under way has its hum (rescue_on %s)" % k.rescue_on
+	)
 	# the owner stops ticking mid-channel (frozen, or its node gone): the held loop stops by itself
 	await main.get_tree().create_timer(0.5).timeout
-	ok(not Sfx.loop_on(key), "a held loop nobody asks for any more stops within %d ms" % Sfx.HOLD_MS)
+	ok(
+		not Sfx.loop_on(key),
+		"a held loop nobody asks for any more stops within %d ms" % Sfx.HOLD_MS
+	)
 	_step(m, 0.2)
 	ok(k.rescue_on and Sfx.loop_on(key), "...and comes back while the rescue goes on")
 	# the old leak: a looping file through the one-shot pool plays once now
 	Sfx.play("revive_hum", p_v.pos)
 	var once := Sfx.players.filter(func(p): return p.playing and Sfx.loops_forever(p.stream))
-	ok(once.is_empty(), "a one-shot of a looping file does not loop (%d looping pool voices)" % once.size())
+	ok(
+		once.is_empty(),
+		"a one-shot of a looping file does not loop (%d looping pool voices)" % once.size()
+	)
 	Sfx.loop_start("boxhum_check", "revive_hum", p_v.pos)  # (as a deathbox revive does, keyed)
-	ok(Sfx.match_voices() >= 2, "setup: the match has several voices going (%d)" % Sfx.match_voices())
+	ok(
+		Sfx.match_voices() >= 2,
+		"setup: the match has several voices going (%d)" % Sfx.match_voices()
+	)
 	_shields(m, p_v)
 	_barks(m, p_v)
 	await _ult_chime(m, p_v)
@@ -110,7 +123,10 @@ func run(main_node: Node) -> void:
 	_regions(m, p_v)
 	# the weather bed (AmbBeds) is up, and the end-of-match fade below takes it away with the rest
 	m.music_dir.beds.tick(m, p_v)
-	ok(Sfx.amb_layers.has("gust"), "the match's weather bed starts (amb layers: %s)" % str(Sfx.amb_layers.keys()))
+	ok(
+		Sfx.amb_layers.has("gust"),
+		"the match's weather bed starts (amb layers: %s)" % str(Sfx.amb_layers.keys())
+	)
 	# extract mid-channel and go home
 	m.result = {"extracted": true, "why": "extract"}
 	m._finish()
@@ -146,7 +162,10 @@ func _regions(m: Match, p_v: Hunter) -> void:
 		for i in r["islands"]:
 			isl[String(i)] = String(r["id"])
 	var n_reg: int = m.world.regions.size()
-	ok(ids.size() == 9 and n_reg == ids.size(), "the world has the layout's %d regions (%d)" % [ids.size(), n_reg])
+	ok(
+		ids.size() == 9 and n_reg == ids.size(),
+		"the world has the layout's %d regions (%d)" % [ids.size(), n_reg]
+	)
 	var stale: Array = rules["beds"].keys().filter(func(k): return not k in ids)
 	ok(stale.is_empty(), "the map has no region the layout does not make %s" % str(stale))
 	var beds := AmbBeds.new()
@@ -180,7 +199,10 @@ func _regions(m: Match, p_v: Hunter) -> void:
 	var full := db_to_linear(-12.0)
 	ok(
 		_lin(a) > 0.45 * full and _lin(b) == 0.0,
-		"Crown bed %s up, Larkhollow's %s not (%.2f / %.2f)" % [a, b, _lin(a) / full, _lin(b) / full]
+		(
+			"Crown bed %s up, Larkhollow's %s not (%.2f / %.2f)"
+			% [a, b, _lin(a) / full, _lin(b) / full]
+		)
 	)
 	var before := _lin(a)
 	p_v.pos = Vector3(float(lark["poi"][0]) + 0.5, 0.0, float(lark["poi"][1]) + 0.5)
@@ -191,13 +213,19 @@ func _regions(m: Match, p_v: Hunter) -> void:
 	var mid_b := _lin(b)
 	ok(
 		mid_a > 0.0 and mid_a < before and mid_b > 0.0,
-		"mid-fade both sound (%s %.2f -> %.2f, %s %.2f)" % [a, before / full, mid_a / full, b, mid_b / full]
+		(
+			"mid-fade both sound (%s %.2f -> %.2f, %s %.2f)"
+			% [a, before / full, mid_a / full, b, mid_b / full]
+		)
 	)
 	for i in int(fade * 4) + 2:
 		Sfx._process(0.125)
 	ok(
 		not Sfx.amb_layers.has(a) and _lin(b) > 0.45 * full,
-		"after %.1f s the old bed is gone and the new one is up (%s %.2f)" % [fade, b, _lin(b) / full]
+		(
+			"after %.1f s the old bed is gone and the new one is up (%s %.2f)"
+			% [fade, b, _lin(b) / full]
+		)
 	)
 	# the Blight: past the tide ring the place beds are quieter, at the Heart they are not
 	var own_heart := m.heart == null  # (this check's match has no clock, so no Heart: give it one for the tide)
@@ -212,8 +240,16 @@ func _regions(m: Match, p_v: Hunter) -> void:
 		var far := near + Vector3(Heart.tide_r(m) + 60.0, 0.0, 0.0)
 		var k_in := AmbBeds.blight_share(m, near)
 		var k_out := AmbBeds.blight_share(m, far)
-		var quiet: bool = k_in == 1.0 and absf(k_out - float(rules["blight_k"])) < 0.01 and k_out < 0.5
-		ok(quiet, "in the Blight the place beds drop to %.2f of their level (%.2f at the Heart)" % [k_out, k_in])
+		var quiet: bool = (
+			k_in == 1.0 and absf(k_out - float(rules["blight_k"])) < 0.01 and k_out < 0.5
+		)
+		ok(
+			quiet,
+			(
+				"in the Blight the place beds drop to %.2f of their level (%.2f at the Heart)"
+				% [k_out, k_in]
+			)
+		)
 	else:
 		ok(false, "setup: the match has a Heart to read the Blight tide from")
 	m.time = t_was
@@ -223,7 +259,11 @@ func _regions(m: Match, p_v: Hunter) -> void:
 
 
 func _lin(bed: String) -> float:
-	return db_to_linear((Sfx.amb_layers[bed]["p"] as AudioStreamPlayer).volume_db) if Sfx.amb_layers.has(bed) else 0.0
+	return (
+		db_to_linear((Sfx.amb_layers[bed]["p"] as AudioStreamPlayer).volume_db)
+		if Sfx.amb_layers.has(bed)
+		else 0.0
+	)
 
 
 func _ult_chime(m: Match, p_v: Hunter) -> void:
@@ -268,7 +308,10 @@ func _ult_chime(m: Match, p_v: Hunter) -> void:
 	p_v.ak.cd["x"] = 0.3
 	p_v.ak.cd["e"] = 0.3  # (E back while you're down too: _e_tick checks it stayed quiet)
 	_step(m, 0.6)
-	ok(p_v.downed and HeroUlt.ready(p_v.ak) and cue.plays == before + 1, "back while you're down: no chime yet")
+	ok(
+		p_v.downed and HeroUlt.ready(p_v.ak) and cue.plays == before + 1,
+		"back while you're down: no chime yet"
+	)
 	m.revive_hunter(p_v, mate)
 	_step(m, 0.1)
 	ok(cue.plays == before + 2, "...it plays once you're up (%d)" % (cue.plays - before))
@@ -277,7 +320,9 @@ func _ult_chime(m: Match, p_v: Hunter) -> void:
 	p_v.ak.cd["x"] = 0.05
 	_step(m, 0.1)
 	var want := UltReadyCue.VOL_DB + UltReadyCue.UNDER_CALLOUT_DB
-	var under := Sfx.players.filter(func(p): return p.playing and p.stream == Sfx.streams[UltReadyCue.SOUND])
+	var under := Sfx.players.filter(
+		func(p): return p.playing and p.stream == Sfx.streams[UltReadyCue.SOUND]
+	)
 	ok(
 		cue.plays == before + 3 and under.any(func(p): return is_equal_approx(p.volume_db, want)),
 		"right after a kill callout it plays %.0f dB down" % UltReadyCue.UNDER_CALLOUT_DB
@@ -292,7 +337,10 @@ func _e_tick(m: Match, p_v: Hunter, e_down: int) -> void:
 	var cue: UltReadyCue = m.ult_cue
 	p_v.ak.cd["x"] = 99.0
 	_step(m, UltReadyCue.MUTE_BACK + 0.2)  # (past the revive above)
-	ok(cue.e_plays == e_down, "an E back while you're down stays quiet when you're up (%d)" % (cue.e_plays - e_down))
+	ok(
+		cue.e_plays == e_down,
+		"an E back while you're down stays quiet when you're up (%d)" % (cue.e_plays - e_down)
+	)
 	p_v.ak.cd["e"] = 99.0
 	_step(m, 0.1)
 	var e0 := cue.e_plays
@@ -323,8 +371,13 @@ func _shields(m: Match, p: Hunter) -> void:
 			ok(Sfx.ensure(cue), "%s is a sound on file" % cue)
 			Sfx.last_played.clear()
 			p.hurt(10.0 if part == "hit" else 40.0, r, {})
-			var shield_cues := Sfx.last_played.keys().filter(func(k): return k.begins_with("shield_"))
-			ok(shield_cues == [cue], "your %s shield: a hit plays %s (%s)" % [kind, cue, shield_cues])
+			var shield_cues := Sfx.last_played.keys().filter(
+				func(k): return k.begins_with("shield_")
+			)
+			ok(
+				shield_cues == [cue],
+				"your %s shield: a hit plays %s (%s)" % [kind, cue, shield_cues]
+			)
 		ok(p.shield_kind == "" and p.shield <= 0.0, "...and the break clears the material")
 	Sfx.listener = p.pos
 	r.shield = 30.0
@@ -364,7 +417,11 @@ func _ult_cues(m: Match, p: Hunter) -> void:
 	var foe_voices := Sfx.players.filter(func(pl): return pl.playing and pl.bus == &"SFXFoe").size()
 	var heard := Sfx.last_played.has(r.arch + "_ult_cue") and Sfx.last_played.has("ult_tag_foe")
 	ok(
-		foe_voices == 2 and dbs.get(r.arch + "_ult_cue") == UltCue.DB_FOE and dbs.get("ult_tag_foe") == UltCue.DB_FOE,
+		(
+			foe_voices == 2
+			and dbs.get(r.arch + "_ult_cue") == UltCue.DB_FOE
+			and dbs.get("ult_tag_foe") == UltCue.DB_FOE
+		),
 		"a rival's ultimate cue and tag play on the SFXFoe bus at DB_FOE (%d voices)" % foe_voices
 	)
 	ok(
@@ -399,11 +456,26 @@ func _buses() -> void:
 		var bi := AudioServer.get_bus_index(bn)
 		var to := StringName(SfxMix.BUSES[bn])
 		ok(bi > 0 and AudioServer.get_bus_send(bi) == to, "bus %s sends to %s" % [bn, to])
-	var want := {"kin_happy": "Boki", "click": "UI", "ashwick_hurt": "Voice", "v_brute": "Voice", "rifle": "SFX"}
+	var want := {
+		"kin_happy": "Boki",
+		"click": "UI",
+		"ashwick_hurt": "Voice",
+		"v_brute": "Voice",
+		"rifle": "SFX"
+	}
 	for sname in want:
-		ok(Sfx.mix.bus_for(sname, false, false) == StringName(want[sname]), "%s plays on %s" % [sname, want[sname]])
-	ok(Sfx.mix.bus_for("kin_happy", false, true) == &"SFXFar", "a far sound of any kind is low-passed")
-	ok(Sfx.mix.bus_for("kin_happy", true, true) == &"SFXMuffled", "...and one behind terrain through the muffled one")
+		ok(
+			Sfx.mix.bus_for(sname, false, false) == StringName(want[sname]),
+			"%s plays on %s" % [sname, want[sname]]
+		)
+	ok(
+		Sfx.mix.bus_for("kin_happy", false, true) == &"SFXFar",
+		"a far sound of any kind is low-passed"
+	)
+	ok(
+		Sfx.mix.bus_for("kin_happy", true, true) == &"SFXMuffled",
+		"...and one behind terrain through the muffled one"
+	)
 
 
 ## A rival's ult tag dips Music and Ambience together by about 6 dB, and they are back within the recovery;
@@ -413,15 +485,23 @@ func _big_event_duck(p: Hunter) -> void:
 	Sfx.last_played.clear()
 	Sfx.play("ult_tag_foe", p.pos)
 	await main.get_tree().create_timer(float(r["in_s"]) + 0.1).timeout
-	var amb_fx := AudioServer.get_bus_effect(AudioServer.get_bus_index("Ambience"), 0) as AudioEffectAmplify
+	var amb_fx := (
+		AudioServer.get_bus_effect(AudioServer.get_bus_index("Ambience"), 0) as AudioEffectAmplify
+	)
 	var dip := Sfx.mix.event_db()
 	ok(
 		dip <= -5.0 and dip >= -7.0 and is_equal_approx(amb_fx.volume_db, dip),
-		"a rival's ult dips Music and Ambience about 6 dB (%.1f / %.1f dB)" % [dip, amb_fx.volume_db]
+		(
+			"a rival's ult dips Music and Ambience about 6 dB (%.1f / %.1f dB)"
+			% [dip, amb_fx.volume_db]
+		)
 	)
 	await main.get_tree().create_timer(float(r["hold_s"]) + float(r["recover_s"]) + 0.1).timeout
 	var back := Sfx.mix.event_db()
-	ok(back > -0.2 and amb_fx.volume_db > -0.2, "...and they are back after %.1f s (%.2f dB)" % [r["recover_s"], back])
+	ok(
+		back > -0.2 and amb_fx.volume_db > -0.2,
+		"...and they are back after %.1f s (%.2f dB)" % [r["recover_s"], back]
+	)
 	Sfx.play("ult_tag_ally", p.pos)
 	await main.get_tree().create_timer(0.2).timeout
 	ok(Sfx.mix.event_db() > -0.2, "your own team's ult tag does not dip them")
@@ -438,14 +518,19 @@ func _muffle(m: Match, p: Hunter) -> void:
 	p.downed = true
 	await _muffle_step(m, SfxMix.MUFFLE_HZ[room.DOWN], SfxMix.MUFFLE_DB[room.DOWN], "downed")
 	ok(
-		Sfx.mix.bus_for("ping", false, false) == &"UI" and Sfx.mix.bus_for("ping", false, false) != &"SFX",
+		(
+			Sfx.mix.bus_for("ping", false, false) == &"UI"
+			and Sfx.mix.bus_for("ping", false, false) != &"SFX"
+		),
 		"pings go through the UI bus, so the muffle skips them"
 	)
 	p.downed = false
 	await _muffle_step(m, SfxMix.MUFFLE_HZ[room.OFF], SfxMix.MUFFLE_DB[room.OFF], "revived")
 	p.hp = 1.0
 	p.armor = 0.0
-	await _muffle_step(m, SfxMix.MUFFLE_HZ[room.LOW_HP], SfxMix.MUFFLE_DB[room.LOW_HP], "under the low-health line")
+	await _muffle_step(
+		m, SfxMix.MUFFLE_HZ[room.LOW_HP], SfxMix.MUFFLE_DB[room.LOW_HP], "under the low-health line"
+	)
 	p.hp = p.max_hp
 	p.armor = p.max_armor
 	await _muffle_step(m, SfxMix.MUFFLE_HZ[room.OFF], SfxMix.MUFFLE_DB[room.OFF], "healed")
@@ -474,7 +559,8 @@ func _loudness(m: Match) -> void:
 		for bn in names:
 			var bi := AudioServer.get_bus_index(bn)
 			var pk := maxf(
-				AudioServer.get_bus_peak_volume_left_db(bi, 0), AudioServer.get_bus_peak_volume_right_db(bi, 0)
+				AudioServer.get_bus_peak_volume_left_db(bi, 0),
+				AudioServer.get_bus_peak_volume_right_db(bi, 0)
 			)
 			top[bn] = maxf(float(top.get(bn, -200.0)), pk)
 			sum[bn] = float(sum.get(bn, 0.0)) + db_to_linear(pk)
@@ -483,7 +569,10 @@ func _loudness(m: Match) -> void:
 		var mean := linear_to_db(maxf(sum[bn] / frames, 1e-10))
 		print("MATCHAUDIO BUS %-8s max %6.1f dBFS  mean %6.1f dBFS" % [bn, top[bn], mean])
 	var peak := float(top["Master"])
-	ok(peak <= 0.0, "a match capture (%.0f s) stays under full scale on the master (%.1f dBFS)" % [LOUD_S, peak])
+	ok(
+		peak <= 0.0,
+		"a match capture (%.0f s) stays under full scale on the master (%.1f dBFS)" % [LOUD_S, peak]
+	)
 
 
 func _tell_cues(m: Match, p: Hunter) -> void:
@@ -494,7 +583,10 @@ func _tell_cues(m: Match, p: Hunter) -> void:
 	var circle := func(who: Hunter, r: float) -> bool:
 		AimKit.clear(who)
 		return _tell(func(): AimKit.circle(who, "tell_check", {"at": spot, "r": r, "all": true}))
-	ok(circle.call(r_v, 1.0), "a rival's circle 40 m off, landing 3 m from you, is heard where it lands")
+	ok(
+		circle.call(r_v, 1.0),
+		"a rival's circle 40 m off, landing 3 m from you, is heard where it lands"
+	)
 	var small := _last_voice()
 	circle.call(r_v, 4.0)
 	var big := _last_voice()
@@ -506,15 +598,27 @@ func _tell_cues(m: Match, p: Hunter) -> void:
 		)
 	)
 	AimKit.clear(r_v)
-	var lane := {"from": p.pos + Vector3(-30, 0, 0), "dir": Vector2(1, 0), "len": 60.0, "width": 2.0, "all": true}
-	ok(_tell(func(): AimKit.lane(r_v, "tell_lane", lane)), "a rival's lane is heard at its middle (starting 30 m off)")
+	var lane := {
+		"from": p.pos + Vector3(-30, 0, 0),
+		"dir": Vector2(1, 0),
+		"len": 60.0,
+		"width": 2.0,
+		"all": true
+	}
+	ok(
+		_tell(func(): AimKit.lane(r_v, "tell_lane", lane)),
+		"a rival's lane is heard at its middle (starting 30 m off)"
+	)
 	AimKit.clear(r_v)
 	ok(circle.call(r_v, 2.0), "a rival's AimKit area everyone sees is heard when it starts")
 	ok(
 		not _tell(func(): AimKit.circle(r_v, "tell_check", {"at": spot, "r": 2.0, "all": true})),
 		"...and not again while the kit refreshes it"
 	)
-	ok(not _tell(func(): AimKit.lane(r_v, "tell_aim", {"from": spot, "len": 4.0})), "a rival's own-aim lane is silent")
+	ok(
+		not _tell(func(): AimKit.lane(r_v, "tell_aim", {"from": spot, "len": 4.0})),
+		"a rival's own-aim lane is silent"
+	)
 	ok(
 		not _tell(func(): AimKit.circle(r_v, "x_check", {"at": spot, "r": 2.0, "all": true})),
 		"a rival's ultimate area is silent (UltCue has it)"
@@ -546,7 +650,10 @@ func _steps(m: Match, p: Hunter) -> void:
 	Sfx.listener = p.pos
 	ok(
 		not is_nan(_step_db(r, p, 15.0, true)) and not is_nan(_step_db(r, p, 15.0, false)),
-		"a rival's footsteps (contact and surface) are heard 15 m away, seen or not (unseen %s)" % r.unseen
+		(
+			"a rival's footsteps (contact and surface) are heard 15 m away, seen or not (unseen %s)"
+			% r.unseen
+		)
 	)
 	ok(
 		is_nan(_step_db(r, p, far, true)) and is_nan(_step_db(r, p, far, false)),
@@ -555,8 +662,15 @@ func _steps(m: Match, p: Hunter) -> void:
 	r.crouch = true
 	var sneak := StepReach.reach(r)
 	ok(
-		sneak < StepReach.RIVAL_M and is_nan(_step_db(r, p, 15.0, true)) and is_nan(_step_db(r, p, 15.0, false)),
-		"a sneaking rival's steps carry %.0f m, not %.0f m: not heard 15 m away" % [sneak, StepReach.RIVAL_M]
+		(
+			sneak < StepReach.RIVAL_M
+			and is_nan(_step_db(r, p, 15.0, true))
+			and is_nan(_step_db(r, p, 15.0, false))
+		),
+		(
+			"a sneaking rival's steps carry %.0f m, not %.0f m: not heard 15 m away"
+			% [sneak, StepReach.RIVAL_M]
+		)
 	)
 	ok(not is_nan(_step_db(r, p, sneak - 2.0, true)), "...but heard %.0f m away" % (sneak - 2.0))
 	r.crouch = false
@@ -565,14 +679,20 @@ func _steps(m: Match, p: Hunter) -> void:
 	r.team = p.team
 	var mate := _step_db(r, p, 10.0, true)
 	r.team = team
-	ok(mate < rival - 3.0, "a teammate's step 10 m away is quieter than a rival's (%.1f vs %.1f dB)" % [mate, rival])
+	ok(
+		mate < rival - 3.0,
+		"a teammate's step 10 m away is quieter than a rival's (%.1f vs %.1f dB)" % [mate, rival]
+	)
 	var own_near := _step_db(p, p, 0.0, true)
 	Sfx.listener = p.pos + Vector3(15, 0, 0)
 	var own_far := _step_db(p, p, 0.0, true)
 	Sfx.listener = p.pos
 	ok(
 		not is_nan(own_near) and is_equal_approx(own_near, own_far),
-		"your own step plays at one level wherever the camera is (%.1f / %.1f dB)" % [own_near, own_far]
+		(
+			"your own step plays at one level wherever the camera is (%.1f / %.1f dB)"
+			% [own_near, own_far]
+		)
 	)
 	_step_weights(r, p)
 
@@ -591,12 +711,18 @@ func _step_weights(r: Hunter, p: Hunter) -> void:
 		var md: Vector2 = got["dolm"][i]
 		var hv: Vector2 = got["ashwick"][i]
 		var what := "contact" if i == 0 else "surface"
-		ok(l.x > md.x and md.x > hv.x, "%s step pitch: light %.2f > medium %.2f > heavy %.2f" % [what, l.x, md.x, hv.x])
+		ok(
+			l.x > md.x and md.x > hv.x,
+			"%s step pitch: light %.2f > medium %.2f > heavy %.2f" % [what, l.x, md.x, hv.x]
+		)
 		ok(
 			l.y < md.y and md.y < hv.y,
 			"%s step level: light %.1f < medium %.1f < heavy %.1f dB" % [what, l.y, md.y, hv.y]
 		)
-	ok(KMovesStone.gait("ostra") < 0.5, "Motley floats: no footsteps (gait %.1f)" % KMovesStone.gait("ostra"))
+	ok(
+		KMovesStone.gait("ostra") < 0.5,
+		"Motley floats: no footsteps (gait %.1f)" % KMovesStone.gait("ostra")
+	)
 
 
 ## (pitch scale, dB) of one step of r, 10 m from p, from the Sfx.played signal.
@@ -662,7 +788,10 @@ func _barks(m: Match, p: Hunter) -> void:
 	KinNet.on_event(m, ["kcmd", "down", p.kin.nid, p.pos.x, p.pos.y, p.pos.z, ""])
 	heard = Sfx.last_played.has(bark_of.call(p, "boki"))
 	ok(b.plays.has(["boki", p.nid]) and heard, "your Boki down: you call it")
-	ok(b.plays.back() == ["alert", p.nid] and Sfx.last_played.has(HunterBarks.ALERT), "...and hear the UI alert")
+	ok(
+		b.plays.back() == ["alert", p.nid] and Sfx.last_played.has(HunterBarks.ALERT),
+		"...and hear the UI alert"
+	)
 	ok(Sfx.last_played.has("boki_downed"), "...and its own cry at the spot")
 	Sfx.last_played.clear()
 	m.time += 1.0
@@ -675,8 +804,12 @@ func _barks(m: Match, p: Hunter) -> void:
 	ok(Sfx.last_played.has("boki_downed"), "...but the cry still sounds")
 	m.time += HunterBarks.ALERT_GAP_S
 	b.boki_down(m, p.kin)
-	ok(b.plays.count(["alert", p.nid]) == n_alerts + 1, "a down after the gap: the alert sounds again")
-	var voiced := func(x): return x.team != p.team and x.ak != null and Sfx.ensure(bark_of.call(x, "boki"))
+	ok(
+		b.plays.count(["alert", p.nid]) == n_alerts + 1,
+		"a down after the gap: the alert sounds again"
+	)
+	var voiced := func(x):
+		return x.team != p.team and x.ak != null and Sfx.ensure(bark_of.call(x, "boki"))
 	var other: Hunter = m.hunters.filter(voiced)[0]
 	var team := other.team
 	var theirs := Kin.new()
@@ -688,15 +821,27 @@ func _barks(m: Match, p: Hunter) -> void:
 	other.team = p.team
 	Sfx.last_played.clear()
 	b.boki_down(m, theirs)
-	ok(b.plays.back() == ["tick", other.nid] and Sfx.last_played.has(HunterBarks.TICK), "a teammate's Boki: a tick")
 	ok(
-		not Sfx.last_played.has(bark_of.call(other, "boki")) and not Sfx.last_played.has(HunterBarks.ALERT),
+		b.plays.back() == ["tick", other.nid] and Sfx.last_played.has(HunterBarks.TICK),
+		"a teammate's Boki: a tick"
+	)
+	ok(
+		(
+			not Sfx.last_played.has(bark_of.call(other, "boki"))
+			and not Sfx.last_played.has(HunterBarks.ALERT)
+		),
 		"...no call, no alert"
 	)
-	ok(HunterBarks.TICK_DB <= HunterBarks.ALERT_DB - 6.0, "...and the tick is well under your own alert")
+	ok(
+		HunterBarks.TICK_DB <= HunterBarks.ALERT_DB - 6.0,
+		"...and the tick is well under your own alert"
+	)
 	var up := Sfx.last_played.size()
 	KinNet.on_event(m, ["kcmd", "scoop", p.kin.nid, p.pos.x, p.pos.y, p.pos.z, ""])
-	ok(Sfx.last_played.has("boki_revive"), "your Boki back up: the soft revive cue (%d cues before)" % up)
+	ok(
+		Sfx.last_played.has("boki_revive"),
+		"your Boki back up: the soft revive cue (%d cues before)" % up
+	)
 	Settings.v["hunter_barks"] = false
 	m.time += HunterBarks.COOLDOWN_S + 0.1
 	before = b.plays.size()
@@ -711,7 +856,9 @@ func _barks(m: Match, p: Hunter) -> void:
 ## Carry 2 in, 1 out: the swap key, a claim and a steal, through the real paths (Hunter.swap_kin, Life.take_item,
 ## KinTrack.register, which every game runs for a catch online).
 func _carry(m: Match, p_v: Hunter) -> void:
-	var pairs := m.hunters.filter(func(x): return x != p_v and not x.out and x.kin and not x.kin.dead)
+	var pairs := m.hunters.filter(
+		func(x): return x != p_v and not x.out and x.kin and not x.kin.dead
+	)
 	if not pairs.is_empty() and (pairs[0].kin2 == null or pairs[0].kin2.dead):
 		# main retired two Boki at the start (Match.TWO_KIN): a second one comes back out of a box (give_kin)
 		var r2: Dictionary = (pairs[0].kin.rec as Dictionary).duplicate()
@@ -720,23 +867,24 @@ func _carry(m: Match, p_v: Hunter) -> void:
 	ok(not pairs.is_empty() and pairs[0].kin2 != null, "setup: a bot carries two Boki")
 	if pairs.is_empty():
 		return
-	var B: Hunter = pairs[0]
-	Sfx.listener = B.pos
+	var wisp: Hunter = pairs[0]
+	Sfx.listener = wisp.pos
 	Sfx.last_played.clear()
-	B.swap_kin(true)
+	wisp.swap_kin(true)
 	var first := Sfx.last_played.has("carry_swap_out") and not Sfx.last_played.has("carry_swap_in")
 	await main.get_tree().create_timer(CarrySfx.SWAP_GAP_S + 0.1).timeout
 	ok(
 		first and Sfx.last_played.has("carry_swap_in") and not Sfx.last_played.has("swap"),
 		"swap: the outgoing Boki's chirp, then the incoming one's (%s)" % [Sfx.last_played.keys()]
 	)
-	var R: Hunter = m.hunters.filter(func(x): return x.team != p_v.team)[0]
+	var foe: Hunter = m.hunters.filter(func(x): return x.team != p_v.team)[0]
 	var rec := {"species": p_v.kin.species, "uid": "carry_check", "name": "Check"}
 	Sfx.listener = p_v.pos
 	var got := _from_box(m, p_v, p_v, rec)
 	ok(got == ["carry_claim"], "claim: a capsule from a box of your own team locks in (%s)" % [got])
 	var wild := m.kins.filter(
-		func(k): return is_instance_valid(k) and k.owner_h == null and not k.dead and k.lost_from == ""
+		func(k):
+			return is_instance_valid(k) and k.owner_h == null and not k.dead and k.lost_from == ""
 	)
 	ok(not wild.is_empty(), "setup: a wild Boki to claim")
 	if not wild.is_empty():
@@ -747,29 +895,38 @@ func _carry(m: Match, p_v: Hunter) -> void:
 			Sfx.last_played.has("carry_claim") and p_v.caught.size() == 1,
 			"claim: a scan that lands locks in (%s)" % [Sfx.last_played.keys()]
 		)
-	got = _from_box(m, p_v, R, rec)
+	got = _from_box(m, p_v, foe, rec)
 	ok(got == ["carry_take"], "steal: taking from a rival's box plays the sly take (%s)" % [got])
 	Sfx.last_played.clear()
-	R.pos = p_v.pos + Vector3(60, 0, 0)
-	KinTrack.register(R, rec, p_v)
+	foe.pos = p_v.pos + Vector3(60, 0, 0)
+	KinTrack.register(foe, rec, p_v)
 	got = Sfx.last_played.keys()
-	ok(got == ["carry_stolen"], "steal: the owner hears the sting, flat, 60 m from the thief (%s)" % [got])
+	ok(
+		got == ["carry_stolen"],
+		"steal: the owner hears the sting, flat, 60 m from the thief (%s)" % [got]
+	)
 	for d in [25.0, 40.0]:
-		R.pos = p_v.pos + Vector3(d, 0, 0)
+		foe.pos = p_v.pos + Vector3(d, 0, 0)
 		Sfx.last_played.clear()
-		CarrySfx.stolen(m, R, B)
+		CarrySfx.stolen(m, foe, wisp)
 		var hears: bool = d < float(Sfx.sound_reach["carry_take"])
 		ok(
 			Sfx.last_played.has("carry_take") == hears,
-			"steal: a squad %.0f m from the thief %s the take" % [d, "hears" if hears else "does not hear"]
+			(
+				"steal: a squad %.0f m from the thief %s the take"
+				% [d, "hears" if hears else "does not hear"]
+			)
 		)
-	R.pos = p_v.pos + Vector3(2, 0, 0)
+	foe.pos = p_v.pos + Vector3(2, 0, 0)
 	Sfx.last_played.clear()
 	Sfx.recent.erase("carry_take")
 	for i in 3:
-		CarrySfx.stolen(m, R, B)
-	ok((Sfx.recent.get("carry_take", []) as Array).size() == 1, "voice cap: three takes at once play one")
-	R.remove_meta(KinTrack.META)
+		CarrySfx.stolen(m, foe, wisp)
+	ok(
+		(Sfx.recent.get("carry_take", []) as Array).size() == 1,
+		"voice cap: three takes at once play one"
+	)
+	foe.remove_meta(KinTrack.META)
 
 
 ## Takes `rec` out of a box `dropper` left and returns the carry cues it played.
@@ -829,8 +986,14 @@ func _glider(h: Hunter, who: String) -> void:
 	g.tick(h)
 	var near := float(Sfx.loops[hiss]["vol"]) if Sfx.loop_on(hiss) else 0.0
 	var swelled := faint != 0.0 and near > faint
-	ok(h.remote or swelled, "%s glider: the heat hiss swells toward overheat (%.1f -> %.1f dB)" % [who, faint, near])
-	ok(not h.remote or not Sfx.loop_on(hiss), "another player's glider: no heat hiss (the heat is not synced)")
+	ok(
+		h.remote or swelled,
+		"%s glider: the heat hiss swells toward overheat (%.1f -> %.1f dB)" % [who, faint, near]
+	)
+	ok(
+		not h.remote or not Sfx.loop_on(hiss),
+		"another player's glider: no heat hiss (the heat is not synced)"
+	)
 	h.glide_fuel = 0.0
 	g.net_hot = true
 	_once(g, h, "glider_crackle", who + " glider: overheating plays the crackle once")
@@ -945,12 +1108,20 @@ func _abyss() -> void:
 	if not rim.is_empty():
 		var jump := _walk(am, p, rim, false, false)
 		ok(
-			jump.find("abyss_whoosh") == 0 and jump.has("abyss_fallout") and not jump.has("abyss_catch"),
+			(
+				jump.find("abyss_whoosh") == 0
+				and jump.has("abyss_fallout")
+				and not jump.has("abyss_catch")
+			),
 			"a walk off the rim: whoosh, then the fall-out %s" % [jump]
 		)
 		var glide := _walk(am, p, rim, true, false)
 		ok(
-			glide.find("abyss_whoosh") == 0 and glide.find("abyss_catch") == 1 and not glide.has("abyss_fallout"),
+			(
+				glide.find("abyss_whoosh") == 0
+				and glide.find("abyss_catch") == 1
+				and not glide.has("abyss_fallout")
+			),
 			"...gliding: whoosh, then the catch %s" % [glide]
 		)
 		var hot := _walk(am, p, rim, true, true)
@@ -985,7 +1156,10 @@ func _walk(am: Match, p: Hunter, rim: Dictionary, glide: bool, cold: bool) -> Ar
 	var key := "abyss_strain%d" % p.get_instance_id()
 	var t := 0.0
 	var done := func() -> bool:
-		return heard.has("abyss_fallout") or (heard.has("abyss_catch") and (not cold or heard.has("strain")))
+		return (
+			heard.has("abyss_fallout")
+			or (heard.has("abyss_catch") and (not cold or heard.has("strain")))
+		)
 	while t < WALK_S and not done.call():
 		p.inp["move"] = dv
 		if glide and heard.has("abyss_whoosh"):
@@ -1033,9 +1207,15 @@ func _teammate(_am: Match, o: Hunter, rim: Dictionary) -> void:
 	o.remote = false
 	ok(
 		heard["whoosh 5"] and not heard["whoosh 36"],
-		"a teammate's whoosh is positional: heard at 5 m, not at 36 m (past the 30 m hearing range) %s" % [heard]
+		(
+			"a teammate's whoosh is positional: heard at 5 m, not at 36 m (past the 30 m hearing range) %s"
+			% [heard]
+		)
 	)
-	ok(heard["fallout 30"] and not heard["fallout 60"], "...their fall-out carries further: heard at 30 m, not at 60 m")
+	ok(
+		heard["fallout 30"] and not heard["fallout 60"],
+		"...their fall-out carries further: heard at 30 m, not at 60 m"
+	)
 
 
 ## A lipped rim: {lip: the lip's edge (x, z), dir: out over the void, y: the island's height there};
@@ -1065,3 +1245,53 @@ func _void(w: World, x: int, z: int, d: Vector2i, from: int, to: int) -> bool:
 		if w.kind[w.idx(x + d.x * k, z + d.y * k)] != World.T_VOID:
 			return false
 	return true
+
+
+# ---------------------------------------------------------------- solos
+func _solos() -> void:
+	var opts := {
+		"autoplay": true,
+		"tier": 0,
+		"length": 1e9,
+		"seed": 77,
+		"no_drop": true,
+		"demo_kin": "cindle"
+	}
+	opts["squad"] = 1  # solos: every hunter is their own squad
+	opts["teams"] = 4
+	Game.goto("match", opts)
+	for i in 6:
+		await main.get_tree().process_frame
+	var m: Match = main.current
+	m.set_process(false)
+	var pl: Hunter = m.player
+	var rivals: Array = m.hunters.filter(func(x): return x != pl)
+	ok(
+		not Life.has_mates(m, pl) and not rivals.is_empty(),
+		"solos: %d rivals, nobody on your squad" % rivals.size()
+	)
+	Sfx.last_played.clear()
+	for kind in ["", "enemy", "loot"]:
+		m.squad_ping(pl, pl.pos + Vector3(5, 0, 0), true, kind)
+	m.hud.mates.track(m.hud, pl, 0.1)
+	m.knock(rivals[0], pl, {})
+	_step(m, 0.5)
+	m.hud.mates.track(m.hud, pl, 0.1)
+	ok(
+		not Sfx.last_played.has("ping") and m.hud.mates.lines.is_empty(),
+		"solos: your ping and a rival down make no squad cue (%s)" % [Sfx.last_played.keys()]
+	)
+	m.kin_ping(pl.kin, pl.pos, Color.WHITE, "x")
+	ok(not Sfx.last_played.has("ping"), "solos: your Boki's callout marker is silent too")
+	rivals[1].team = pl.team
+	Sfx.last_played.clear()
+	m.squad_ping(pl, pl.pos + Vector3(5, 0, 0), true)
+	m.hud.mates.track(m.hud, pl, 0.1)
+	var warns := int(Sfx.cue_plays.get("knock_warn", 0))
+	m.knock(rivals[1], rivals[0], {})
+	_step(m, 0.5)
+	m.hud.mates.track(m.hud, pl, 0.1)
+	ok(
+		Sfx.last_played.has("ping") and int(Sfx.cue_plays.get("knock_warn", 0)) == warns + 1,
+		"...with a squadmate the ping and 'teammate down' sound (%s)" % [Sfx.last_played.keys()]
+	)
