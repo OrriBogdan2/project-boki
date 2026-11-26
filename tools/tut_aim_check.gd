@@ -58,6 +58,7 @@ func _start(main: Node, hero: String) -> Match:
 	m.player.gliding = false
 	m.player.teleport(tu.stop("land"))
 	var at := Tutorial.steps().map(func(s): return s[0]).find(TutorialAim.STEP)
+	tu.camps.told = true  # (main: the first camp is telegraphed for 3 s; this check judges the cast)
 	tu._skip_to(at)
 	tu._enter()
 	for i in 10:
@@ -81,20 +82,21 @@ func _cast(m: Match, at_group: bool) -> void:
 	for i in int(JUDGE_S / Match.DT):
 		p.inp["aim"] = mb.pos if at_group else p.pos + away * 6.0
 		m.step(Match.DT)
-		for j in held.size():
+		for j in mini(held.size(), tu.camps.ledger.size()):  # (a kill or a retry can shorten the ledger)
 			(tu.camps.ledger[j]["mb"] as Mob).teleport(held[j])
 		if tu.aim.hit or tu.aim.misses > misses:
 			break
 
 
 ## The first way out of `at` (from `way`, turning in 45 degree steps) whose ground `dist` off is level with the
-## group's: on a step above it a thrown E (Kael's Warchain) bites the step's lip instead of the group.
+## group's and sees it (World.los): on a step above it, or past a block, a thrown E (Kael's Warchain) bites the
+## lip or the block instead of the group.
 func _level_way(m: Match, at: Vector3, way: Vector3, dist: float) -> Vector3:
 	var g0: float = m.world.ground_at(at.x, at.z)
 	for k in 8:
 		var w := way.rotated(Vector3.UP, k * PI / 4.0)
 		var q := at + w * dist
-		if absf(float(m.world.ground_at(q.x, q.z)) - g0) < 0.5:
+		if absf(float(m.world.ground_at(q.x, q.z)) - g0) < 0.5 and m.world.los(q, at, g0 + 1.0):
 			return w
 	return way
 
