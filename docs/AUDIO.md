@@ -811,6 +811,7 @@ All match sounds go through `Sfx._distance_db`; the numbers live in one place at
 | 31 | silent | silent |
 
 `--sfx-set-check` section 10 asserts it: a cue at the screen edge is above -12 dB on the clear bus, one 10 m past it is at least 4 dB quieter but present, one at 31 m is silent.
+
 ## Terrain hazards (`content/sfx/hazards.json`, `tools/gen_sfx_hazards.py`)
 `scripts/match/hazard_sfx.gd` (`TerrainHazards.audio`) plays them for the bodies this game owns; the levels, cadences and names are the set's `play` block.
 - **Beds**: one quiet loop per area kind (`hazard_bed_lava|water|ice|static|bramble`), held with `Sfx.loop_hold` at the area's ground nearest the listener, so it swells as you near the edge (reach 10-16 m) and sits round you inside. Every 0.25 s a scan of the tile lookup round the listener picks the nearest `beds_max` (2) areas in reach; the others stop.
@@ -820,3 +821,6 @@ All match sounds go through `Sfx._distance_db`; the numbers live in one place at
 
 ## Solos are quiet of squad cues
 With nobody on your squad (`Life.has_mates` false: the Solos mode) the squad's sounds stay off: your own squad ping (`Match.squad_ping`), your Boki's callout ping (`Match.kin_ping`; its bark still plays), and the pick-turn tick in the lobby (`PrematchView`, squad of one). The teammate down/back/eliminated cues (`MateAlerts`) and the mate-revive cues already need a teammate. `--match-audio-check` starts a solos match and asserts none of them fire, then the same events with a squadmate do.
+
+## Boki wisp cues
+- Boki wisp cues (Boki wisps setting): a carried passive acting (heal, shield soak, damage bonus on a shot, run boost) gives one quiet chirp from the wisp in its species' voice (`KinWispProc`: your wisp -20 dB, a rival's -26 dB before distance, ducked 8 dB under an ability cast, at most one per 0.8 s per wisp, small bodies pitched higher); `--wisp-proc-check`. The summon's end gives two soft rising notes of the same voice 2 s before the window ends (`KinSummon.warn`, yours -8 dB in the ear, others -20 dB positional) and the summon coming back plays `ab_ready` at -4 dB; `--summon-end-sfx-check`. A killed summon and a wisp breaking loose say `boki_downed` (-4 dB) where they fell; `--summon-death-check`.

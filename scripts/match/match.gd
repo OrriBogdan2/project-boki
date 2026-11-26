@@ -5379,6 +5379,8 @@ func _tips() -> void:
 	var k: Kin = player.kin
 	if k == null:
 		return
+	var proc_tip := KinWispProc.tip(k)      # its carry passive just acted: name it once
+	if proc_tip != "": _tip("proc", proc_tip)
 	if k.state == "active":
 		var a1 := k.runner.def_of("k1")
 		_tip("skill", TipText.skill(k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability"))
