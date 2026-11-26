@@ -5,6 +5,7 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	"--passive-gauge-shots": ["res://tools/passive_gauge_shots.gd", "passive_gauge_shots", null],
 	"--results-boki-line-check": ["res://tools/results_boki_line_check.gd", "results_boki_line_check", "check"],
 	"--results-boki-line-shots": ["res://tools/results_boki_line_check.gd", "results_boki_line_check", "shots"],
 	"--modes-check": ["res://tools/modes_check.gd", "modes_check", null],  # trios / solos (decision 0084)

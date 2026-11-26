@@ -121,6 +121,7 @@ func _match_fresh(m: Match, tu: Tutorial) -> bool:
 func _match(who: String, arch: String) -> void:
 	_reset()
 	seed(11)
+	BokiLines.reset()  # (the farm before talked on the wall clock: what it left must not shift this course's lines)
 	var m := Match.new()
 	main.add_child(m)
 	m.start(
