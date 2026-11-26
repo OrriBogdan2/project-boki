@@ -21,7 +21,7 @@ func at(m: Match, sess: float) -> void:
 
 
 func run(main: Node) -> void:
-	var m: Match = await HUD_CHECK.make_match(main)
+	var m: Match = HUD_CHECK.make_match(main)
 	var q: Dictionary = Heart.rules()["quest"]
 	at(m, 30.0)
 	ok(ExtractGoal.pick(m, false) == 0, "veteran, 0:30: the Lair opens first")

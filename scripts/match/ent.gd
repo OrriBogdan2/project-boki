@@ -4,6 +4,7 @@ extends Node3D
 ## The simulation writes `pos`; the visual node is moved toward it every rendered frame.
 
 const GRAV := 30.0
+const PITCH_FLASH_MAX := 0.25  # the hit flash's cap in pitch-reel films (Match meta "pitch_soft_flash")
 const FLASH_FADE := 0.07  # s: a hit's 0.12 s flash holds full white for its first 0.05 s (3 frames), then fades
 const SHELL_FLASH := Color(0.62, 0.86, 1.0)  # the armour's flash on the body: the HUD's cyan strip
 
@@ -24,6 +25,7 @@ var face := 0.0  # yaw the model looks toward
 var model: Node3D = null
 var mats: Array = []
 var flash_t := 0.0
+var flash_tint := Color.WHITE  # the hit flash's colour (a kit sets it with the hit; white again once the flash ends)
 var shell_t := 0.0  # s the body flash stays armour-coloured (Juice sets it on an armour hit or break)
 var freeze_t := 0.0  # visual hit-pause
 var burn_t := 0.0
@@ -44,6 +46,7 @@ var vuln_t := 0.0  # a vulnerable mark: takes vuln_k more damage (never above Ki
 var vuln_k := 0.0
 var dr := {}  # diminishing returns on crowd control: kind -> [applications, last time]
 var dr_stun := false  # the running stun counts toward the immunity that follows it
+var cc_guard_t := 0.0  # s left of the protection after a revive: stuns, roots and slows don't land (Life.R)
 var cc_immune_t := 0.0  # just came out of a stun: stuns and roots don't land (KinRules.STUN_IMMUNE)
 var marks := {}  # combo setups on this body: combo id -> {team, owner, until, window}
 var squash := 0.0  # landing / hit squash for the model
@@ -210,6 +213,11 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 		for st0 in ["slow", "root", "stun"]:
 			if opts.has(st0):
 				opts[st0] = float(opts[st0]) * cc_k
+	# just back from the dead (Life.bring_back): no stun, root or slow lands for a few seconds
+	if cc_guard_t > 0.0:
+		opts = opts.duplicate()
+		for st2 in ["slow", "root", "stun"]:
+			opts.erase(st2)
 	# crowd control from abilities ("dr" in opts) has diminishing returns per target (KinRules)
 	var use_dr := bool(opts.get("dr", false))
 	if use_dr:
@@ -391,6 +399,8 @@ func tick_status(dt: float) -> void:
 		root_t -= dt
 	if cc_immune_t > 0.0:
 		cc_immune_t -= dt
+	if cc_guard_t > 0.0:
+		cc_guard_t -= dt
 	if vuln_t > 0.0:
 		vuln_t -= dt
 	if stun_t > 0.0:
@@ -442,11 +452,13 @@ func net_follow(dt: float) -> void:
 	vel = net_vel
 
 
-## Tints the body: the hit flash (white; the shell's cyan while shell_t runs), else the wash (Spirit Walk),
-## else the DoT tint (DotLook).
+## Tints the body: the hit flash (white or flash_tint; the shell's cyan while shell_t runs), else the wash
+## (Spirit Walk), else the DoT tint (DotLook).
 func show_flash(hit: float) -> void:
 	var f := hit
-	var fc := SHELL_FLASH if shell_t > 0.0 else Color.WHITE
+	if f > PITCH_FLASH_MAX and m != null and m.has_meta("pitch_soft_flash"):
+		f = PITCH_FLASH_MAX  # pitch films: a body under steady fire must not read as a white ghost
+	var fc := SHELL_FLASH if shell_t > 0.0 else flash_tint
 	if f <= 0.0 and wash > 0.0:
 		f = wash
 		fc = wash_col
@@ -478,3 +490,5 @@ func render(delta: float, alpha: float) -> void:
 		position = _held
 	squash = maxf(0.0, squash - delta * 2.5)
 	show_flash(clampf(flash_t / FLASH_FADE, 0.0, 1.0))
+	if flash_t <= 0.0:
+		flash_tint = Color.WHITE

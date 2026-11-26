@@ -34,8 +34,8 @@ func run(main_node: Node) -> void:
 	Save.no_write = true
 	_table()
 	_picking()
-	await _match_counts()
-	await _crouch_hint()
+	_match_counts()
+	_crouch_hint()
 	print("TIPSCHECK DONE, failures: %d" % bad)
 	main.get_tree().quit()
 
@@ -121,7 +121,7 @@ func _match_counts() -> void:
 	_fresh()
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "seed": 7, "no_drop": true, "length": 1e9})
+	m.start({"teams": 2, "squad": 1, "tier": 0, "seed": 7, "no_drop": true, "length": 1e9})
 	m.set_process(false)
 	var p: Hunter = m.player
 	var k: Kin = m.give_kin(p, Save.new_kin("zapple"))
@@ -161,7 +161,7 @@ func _crouch_hint() -> void:
 	)
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "seed": 7, "no_drop": true, "length": 1e9})
+	m.start({"teams": 2, "squad": 1, "tier": 0, "seed": 7, "no_drop": true, "length": 1e9})
 	m.set_process(false)
 	var p: Hunter = m.player
 	var camp: Mob = m.spawn_mob("skitter", p.pos + Vector3(300, 0, 300))
@@ -169,15 +169,16 @@ func _crouch_hint() -> void:
 	ok(hint != null, "a new save's real match has the hint")
 	for mb: Mob in m.mobs:
 		if mb != camp:
-			mb.st = "chase"  # only the camp under test counts as quiet
+			mb.aggro(p, "check")  # only the camp under test counts as quiet
 	p.pos = camp.pos + Vector3(CrouchHint.NEAR + 30.0, 0, 0)
 	hint.tick(0.6)
 	ok(hint.line == "", "far from every camp: no line")
-	camp.st = "chase"
+	camp.aggro(p, "check")
 	p.pos = camp.pos + Vector3(8, 0, 0)
 	hint.tick(0.6)
 	ok(hint.line == "" and not Save.d["tutorial"].get("crouch_hint", false), "an alerted camp: no line, nothing spent")
-	camp.st = "idle"
+	camp._go(Mob.S.CHASE, "check")  # (NOTICE has no way to IDLE)
+	camp.calm("check")
 	hint.tick(0.6)
 	ok(
 		hint.line == said and Save.d["tutorial"].get("crouch_hint", false),

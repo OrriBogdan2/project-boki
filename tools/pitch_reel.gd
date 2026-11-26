@@ -29,17 +29,32 @@ const RAID_DUOS := 3  # shot 9: teams of two
 const ESCAPE_CHARGE_LEFT := 4.0  # s of the uplink's charge left when shot 10 starts
 const CLOCK_LEFT_S := 840.0  # s on the match clock when a stepped shot starts (1e9 reads as junk)
 const KIT_GAP_M := 4.5  # m between the Hunter and its foe in the kit shot (both well inside the frame)
+# half the ground (m) the default camera frames at zoom 1, inside the cut's 1.08 push
+const FIT_HALF := Vector2(10.8, 6.4)
+const FIT_PAD_X := 1.6  # m kept beside a fighter
+const FIT_PAD_Z := 2.4  # m kept above and below (a Hunter stands ~2 m tall up the screen)
+const FIT_MAX := 1.0  # (--fit-max=<zoom>)
+const FIT_FOLLOW := 9.0  # 1/s the fit focus eases
+const FIT_FAR_M := 22.0  # a fighter further off than this is not in the shot (parked for the intro, thrown far)
 const KIT_ZOOM := 0.85  # the kit shot's camera zoom (0.55 frames only ~8 m: the pair sat on its edges)
-const KIT_FOE_REACH := 7.0  # m: a foe that has walked further than this from the Hunter is put back at the fight
+# m: a foe that has walked further than this from the Hunter is put back at the fight (--reach=)
+const KIT_FOE_REACH := 7.0
 const KIT_ROOM_M := 10  # m of solid ground all round the kit fight (at a cliff edge both fell off)
 const KIT_LEASH_M := 3.0  # m the Hunter may stray from the fight's centre before it walks back (dashes)
 const KIT_SEARCH_M := 30  # m from the start the kit shot looks for that much room
+const PitchClean := preload("res://tools/pitch_clean.gd")
+const Preflight := preload("res://tools/clip_preflight.gd")
+const SHADOW_M := 70.0  # m of sun shadow range in a take (_crisp_shadows)
 const DROP_PLAN_MAX_S := 25.0  # s shot 8 waits for the plan-your-drop screen to hand over to the drop
 const ESCAPE_TAIL_S := 2.5  # s of the ride out kept after the Hunter is extracted
 const KO_TAIL_S := 1.5  # s shot 9 keeps playing after the Hunter dies (the encoder cuts 1 s after the mark)
 
 var shot := 2
 var take := 1
+var fit_zoom := 0.0  # the eased zoom `--fit` holds so both fighters stay in frame (0: not started)
+var fit_at := Vector3.INF  # the eased focus `--fit` follows
+var spot_at := Vector3.INF  # the spot _roomy_ground picked (`--leash` keeps the fight on it)
+var hold_zoom := 0.0  # > 0: _step_frame holds the camera at this zoom (the kit shot)
 var hunter := Demo.DEFAULT_HUNTER
 var failed := false  # a shot that cannot be filmed on this build says so (fail()), and the take is dropped
 var marks := {}  # part -> the frame it started on (mark())
@@ -176,7 +191,7 @@ func _film_one(s: int, k: int) -> int:
 	var marks_text := String(out[0]) if out.size() > 0 else ""
 	for line in marks_text.split("\n"):
 		marks.store_line(line)
-		if line.begins_with("PITCH_") or line.contains("ERROR"):
+		if line.begins_with("PITCH_") or line.begins_with("CLIP_PREFLIGHT") or line.contains("ERROR"):
 			print(stem, " ", line)
 	marks.close()
 	var ok := keeps_movie(rc, marks_text) and FileAccess.file_exists(movie)
@@ -207,6 +222,8 @@ func fail(why: String) -> void:
 
 ## The frame a part starts on, for the encoder.
 func mark(what: String) -> void:
+	if marks.is_empty() and "--pitch-child" in OS.get_cmdline_user_args():  # (not --pitch-check: it must not quit)
+		Preflight.enforce(main, 1, "pitch_shot%d" % shot, shot == 6)  # staged: models and overlays checked once
 	marks[what] = Engine.get_frames_drawn()
 	print("PITCH_MARK %s movie_frame=%d" % [what, Engine.get_frames_drawn()])
 
@@ -290,9 +307,69 @@ func _escape() -> void:
 func _step_frame(at: Vector3) -> void:
 	_purge()
 	m.step(1.0 / FPS)
+	_leash()
+	if hold_zoom > 0.0 and "--fit" in OS.get_cmdline_user_args():
+		at = _fit(at) + Vector3(0, 0, float(_arg("--lift=", "0")))  # (+z: up the screen, clear of the HUD bar)
+	if hold_zoom > 0.0:
+		var z := maxf(hold_zoom, fit_zoom)
+		m.cam.user_zoom = z  # (the match camera re-reads the wheel's zoom each frame)
+		m.cam.zoom = z
+		m.cam.zoom_to = z
 	m.cam.snap(at)
 	for h in m.hunters:
 		h.render(1.0 / FPS, 1.0)
+	if "--clean-look" in OS.get_cmdline_user_args():
+		PitchClean.frame(m)
+
+
+## `--leash=<m>`: no fighter leaves the circle that wide round the spot `_roomy_ground` picked (a bot that kites would
+## run the fight off the open ground); one further off than FIT_FAR_M is parked, not fighting. `--pair=<m>` then keeps
+## every fighter within that many m of the pair's middle (a kiting bot pulled the camera out).
+func _leash() -> void:
+	var r := float(_arg("--leash=", "0"))
+	if r <= 0.0 or spot_at == Vector3.INF:
+		return
+	var near: Array[Hunter] = []
+	for h: Hunter in squad_a + squad_b:
+		if is_instance_valid(h) and not h.out and h.flat_dist(m.player) < FIT_FAR_M:
+			near.append(h)
+	for h in near:
+		h.pos = _clamp_to(h.pos, spot_at, r)
+	var pair := float(_arg("--pair=", "0"))
+	if pair > 0.0 and near.size() > 1:
+		var mid := Vector3.ZERO
+		for h in near:
+			mid += h.pos / near.size()
+		for h in near:
+			h.pos = _clamp_to(h.pos, mid, pair)
+
+
+## `p` moved flat onto the circle `r` m round `c` when it is outside it.
+func _clamp_to(p: Vector3, c: Vector3, r: float) -> Vector3:
+	var d := Vector2(p.x - c.x, p.z - c.z)
+	if d.length() <= r:
+		return p
+	d = d.normalized() * r
+	return Vector3(c.x + d.x, p.y, c.z + d.y)
+
+
+## `--fit`: the eased focus for `at`, and fit_zoom eased so every fighter still up is inside the frame with a margin
+## (the cut zooms in to 1.08 more). Pulls out fast, comes back in slowly.
+func _fit(at: Vector3) -> Vector3:
+	if fit_at == Vector3.INF or fit_at.distance_to(at) > 8.0:
+		fit_at = at
+	fit_at = fit_at.lerp(at, 1.0 - exp(-FIT_FOLLOW / FPS))
+	var want := hold_zoom
+	for h: Hunter in squad_a + squad_b:
+		if not is_instance_valid(h) or h.out or h.flat_dist(m.player) > FIT_FAR_M:
+			continue
+		want = maxf(want, (absf(h.pos.x - fit_at.x) + FIT_PAD_X) / FIT_HALF.x)
+		want = maxf(want, (absf(h.pos.z - fit_at.z) + FIT_PAD_Z) / FIT_HALF.y)
+	want = minf(want, float(_arg("--fit-max=", str(FIT_MAX))))
+	var rate := 9.0 if want > fit_zoom else 1.2
+	fit_zoom = want if fit_zoom <= 0.0 else lerpf(fit_zoom, want, 1.0 - exp(-rate / FPS))
+	m.set_meta("zoom_hold", fit_zoom)
+	return fit_at
 
 
 # ------------------------------------------------------------------ shot 7: the kit
@@ -300,6 +377,7 @@ func _step_frame(at: Vector3) -> void:
 ## Stepped by hand at 1/60 s a frame (the base clips' way) so the abilities land on the rota exactly.
 func _kit() -> void:
 	Save.d["first_guide"] = 99
+	Settings.v["damage_numbers"] = false
 	await _start(hunter, "cindle")
 	m.length = m.time + CLOCK_LEFT_S
 	var me := m.player
@@ -307,27 +385,126 @@ func _kit() -> void:
 	var base := _roomy_ground(me.pos)
 	me.pos = base
 	var foe_arch := String(Arch.ids()[(Arch.ids().find(hunter) + 3) % Arch.ids().size()])
-	var foe := _hunter("b0", 1, foe_arch, "pebbit", _ground(base + Vector3(KIT_GAP_M, 0, 0)))
+	foe_arch = _arg("--foe=", foe_arch)
+	var gap := float(_arg("--gap=", str(KIT_GAP_M)))
+	var foe := _hunter("b0", 1, foe_arch, "pebbit", _ground(base + Vector3(gap, 0, 0)))
 	foe.ai = m.bot_brain.new_mind(m.rng, KIT_FOE_SKILL, m.bot_cfg)
 	squad_a = [me]
 	squad_b = [foe]
 	for h in squad_a + squad_b:
 		h.teleport(h.pos)
-	_zoom(KIT_ZOOM)
+	var kz := float(_arg("--zoom=", str(KIT_ZOOM)))
+	m.set_meta("zoom_hold", kz)  # the match camera re-reads its zoom every frame; this holds it
+	hold_zoom = kz
+	_clean_take()
+	_zoom(kz)
+	if "--no-hud" in OS.get_cmdline_user_args():
+		Record.set_level(2)  # (the HUD bar sat over the Hunter in the low half of the frame)
 	mark("kit")
 	var t := 0.0
 	while t < SECS[7]:
 		_purge()
+		m.hud.msgs.clear()
 		_kit_press(t, me, foe, base)
 		_step_frame(me.pos.lerp(foe.pos, 0.5))
 		await main.get_tree().process_frame
 		t += 1.0 / FPS
 
 
-## The ground nearest `p` with no void within KIT_ROOM_M (`p` itself when there is none that roomy nearby).
+## No game text a take must not show: the locked chest's "needs a key" prompt (chests freed), tips, the objective card,
+## the numeral / BURNING plate over the foe (HudPlate.hidden).
+func _clean_take() -> void:
+	Settings.v["tips"] = false
+	for c in m.chests:
+		if is_instance_valid(c.get("node")):
+			(c["node"] as Node).queue_free()
+	m.chests.clear()
+	m.objective = null
+	m.set_meta("pitch_no_foe_plates", true)
+	m.set_meta("pitch_soft_flash", true)  # (Ent.show_flash: hits tint the body, never turn it white)
+	m.set_meta("pitch_no_chill_shell", true)  # (StatusLooks: no pale ice shell over a chilled body)
+	if "--clean-look" in OS.get_cmdline_user_args():
+		Settings.v["damage_numbers"] = false  # (big hit numbers sat over the fighters; the kit shots never had them)
+	_crisp_shadows()
+
+
+## The recording build's shadows: the Ultra preset, then an 8k sun map with the softest filter over a sun range
+## cut to SHADOW_M (the top-down camera sees ~40 m; the preset's long range smeared it into stair-steps).
+func _crisp_shadows() -> void:
+	Settings.v["quality"] = "ultra"
+	Settings.apply("quality")
+	RenderingServer.directional_shadow_atlas_set_size(8192, true)
+	RenderingServer.directional_soft_shadow_filter_set_quality(RenderingServer.SHADOW_QUALITY_SOFT_ULTRA)
+	RenderingServer.positional_soft_shadow_filter_set_quality(RenderingServer.SHADOW_QUALITY_SOFT_ULTRA)
+	main.get_viewport().positional_shadow_atlas_size = 8192
+	for n in main.get_tree().root.find_children("*", "DirectionalLight3D", true, false):
+		var dl := n as DirectionalLight3D
+		if dl.shadow_enabled:
+			dl.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
+			dl.directional_shadow_max_distance = minf(dl.directional_shadow_max_distance, SHADOW_M)
+
+
+## The value of the `--name=` user arg, else `dflt`.
+func _arg(name: String, dflt: String) -> String:
+	for a in OS.get_cmdline_user_args():
+		if String(a).begins_with(name):
+			return String(a).substr(name.length())
+	return dflt
+
+
+## The ground nearest `p` (+ `--off=x,z` m) with solid ground `--room=` m all round (no map edge in the frame) and no
+## hazard area (lava, static flats...) as near; with `--open=<m>` the clearest such spot in reach instead (fewest trees,
+## rocks, walls and tall-grass tiles within that many m: no canopy or grass hides the fight), nearest on a tie, only on
+## the ground `--biome=` / `--island=` name when given;
+## `p` with the old KIT_ROOM_M rule when no spot that clear is within reach.
 func _roomy_ground(p: Vector3) -> Vector3:
-	var best := p
+	var off := _arg("--off=", "0,0").split(",")
+	p += Vector3(float(off[0]), 0, float(off[1]))
+	var room := int(_arg("--room=", str(KIT_ROOM_M)))
+	var reach := int(_arg("--search=", str(KIT_SEARCH_M)))
+	var open_m := int(_arg("--open=", "0"))
+	var biomes := _arg("--biome=", "").split(",", false)
+	var isles := _arg("--island=", "").split(",", false)
+	var best := Vector3.INF
 	var best_d := INF
+	var best_c := INF
+	for dz in range(-reach, reach + 1, 2):
+		for dx in range(-reach, reach + 1, 2):
+			var x := int(p.x) + dx
+			var z := int(p.z) + dz
+			var d := float(dx * dx + dz * dz)
+			if not (m.world.inb(x, z) and m.world.edge_dist(x, z, room) > room):
+				continue
+			if not _on_ground_of(x, z, biomes, isles):
+				continue
+			var c := _clutter(x, z, open_m) if open_m > 0 else 0.0
+			if (c < best_c or (c == best_c and d < best_d)) and not _hazard_near(x, z, room):
+				best = Vector3(x + 0.5, 0.0, z + 0.5)
+				best_d = d
+				best_c = c
+	print(
+		(
+			"PITCH_SPOT room=%d open=%d clutter=%s found=%s off=%.0f m at=%s biome=%s island=%s"
+			% [
+				room,
+				open_m,
+				best_c,
+				best != Vector3.INF,
+				sqrt(best_d),
+				best,
+				m.world.biome_at(best.x, best.z) if best != Vector3.INF else "-",
+				m.world.island_of(best.x, best.z) if best != Vector3.INF else -1
+			]
+		)
+	)
+	if best == Vector3.INF and not (biomes.is_empty() and isles.is_empty()):
+		fail("no roomy ground on --biome=%s --island=%s" % [biomes, isles])
+	if best != Vector3.INF:
+		spot_at = best
+		var clear := float(_arg("--clear=", "0"))  # m of map dressing hidden round the fight (PitchClean)
+		if clear > 0.0:
+			print("PITCH_CLEAR r=%.0f hidden=%d" % [clear, PitchClean.clear_deco(m, best, clear)])
+		return _ground(best)
 	for dz in range(-KIT_SEARCH_M, KIT_SEARCH_M + 1):
 		for dx in range(-KIT_SEARCH_M, KIT_SEARCH_M + 1):
 			var x := int(p.x) + dx
@@ -336,7 +513,48 @@ func _roomy_ground(p: Vector3) -> Vector3:
 			if d < best_d and m.world.inb(x, z) and m.world.edge_dist(x, z, KIT_ROOM_M) > KIT_ROOM_M:
 				best = Vector3(x + 0.5, 0.0, z + 0.5)
 				best_d = d
-	return _ground(best)
+	return _ground(best if best != Vector3.INF else p)
+
+
+## Whether (x, z) is on one of `biomes` (content/biomes ids; `--biome=`) and `isles` (island indexes; `--island=`); an
+## empty list allows every one.
+func _on_ground_of(x: int, z: int, biomes: PackedStringArray, isles: PackedStringArray) -> bool:
+	if not biomes.is_empty() and not m.world.biome_at(x + 0.5, z + 0.5) in biomes:
+		return false
+	return isles.is_empty() or str(m.world.island_of(x + 0.5, z + 0.5)) in isles
+
+
+## How cluttered the ground within `r` m of (x, z) is: 3 a tree, rock or wall tile, 2 a void or other-terrace
+## tile (a cliff or wall face hides the fight), 1 a tall-grass tile.
+func _clutter(x: int, z: int, r: int) -> float:
+	var w: World = m.world
+	var lv := w.level[w.idx(x, z)]
+	var isl := w.island[w.idx(x, z)]
+	var c := 0.0
+	for dz in range(-r, r + 1):
+		for dx in range(-r, r + 1):
+			if dx * dx + dz * dz > r * r or not w.inb(x + dx, z + dz):
+				continue
+			var i := w.idx(x + dx, z + dz)
+			if w.kind[i] == World.T_BLOCK:
+				c += 3.0
+			elif w.kind[i] == World.T_VOID or w.level[i] != lv or w.island[i] != isl:
+				c += 2.0
+			elif w.bush.has(i) or w.paint.has(i) or w.props.has(i) or w.stairs.has(i):
+				c += 1.0
+	return c
+
+
+## A terrain hazard area (TerrainHazards) on any tile within `r` m of (x, z) (sampled every 2 m).
+func _hazard_near(x: int, z: int, r: int) -> bool:
+	var tz := TerrainHazards.of(m)
+	if tz == null or tz.cell.is_empty():
+		return false
+	for dz in range(-r, r + 1, 2):
+		for dx in range(-r, r + 1, 2):
+			if dx * dx + dz * dz <= r * r and m.world.inb(x + dx, z + dz) and tz.cell[m.world.idx(x + dx, z + dz)] > 0:
+				return true
+	return false
 
 
 ## Aims at the foe, walks back when it strays from `base`, and presses: attack held for the first part of each
@@ -344,8 +562,9 @@ func _roomy_ground(p: Vector3) -> Vector3:
 func _kit_press(t: float, me: Hunter, foe: Hunter, base: Vector3) -> void:
 	me.hp = me.max_hp  # neither of them goes down or walks off: the shot is about the kit
 	foe.hp = foe.max_hp
-	if me.flat_dist(foe) > KIT_FOE_REACH:
-		foe.teleport(_ground(me.pos + (foe.pos - me.pos).normalized() * KIT_GAP_M))
+	var reach := float(_arg("--reach=", str(KIT_FOE_REACH)))
+	if me.flat_dist(foe) > reach:
+		foe.teleport(_ground(me.pos + (foe.pos - me.pos).normalized() * minf(KIT_GAP_M, reach)))
 	me.inp["aim"] = foe.pos + Vector3(0, 0.9, 0)
 	var back := Vector2(base.x - me.pos.x, base.z - me.pos.z)
 	me.inp["move"] = back.normalized() if back.length() > KIT_LEASH_M else Vector2.ZERO

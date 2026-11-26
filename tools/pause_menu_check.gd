@@ -59,7 +59,7 @@ func run(mn: Node) -> void:
 		o.merge(matches[area][0], true)
 		var m := Match.new()
 		main.add_child(m)
-		await m.start(o)
+		m.start(o)
 		m.set_process(false)
 		for i in 5:
 			await tree.process_frame
