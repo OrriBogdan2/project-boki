@@ -85,6 +85,10 @@ func _toys() -> void:
 	ok(_toy_stat(a) == a0 + 2, "12 min away trains 2 points at a quarter rate (got %d)" % (_toy_stat(a) - a0))
 	var b0 := _toy_stat(b)
 	GardenAway.arrive(now - 72.0 * HOUR, now)
+	ok(_toy_stat(b) - b0 == 1, "same day: the toys' day cap (3) leaves 1 of the 3 points (got %d)" % (_toy_stat(b) - b0))
+	var next_day := now + 2.0 * 86400.0       # a new farm day: the toys' day cap starts over
+	b0 = _toy_stat(b)
+	GardenAway.arrive(next_day - 72.0 * HOUR, next_day)
 	var toy_cap := int(GardenAway.rules()["toy_cap"])
 	ok(_toy_stat(b) - b0 == toy_cap, "72 h trains the %d points a Boki can get, no more" % toy_cap)
 	var cap := Care.stat_cap(b)
