@@ -2350,7 +2350,7 @@ func on_wild_dazed(k: Kin) -> void:
 func on_stag_open(mb: Mob) -> void:
 	if player and not player.out and player.flat_dist(mb) < 14.0:
 		MobSfx.stagger_open(self, mb)
-		_tip("stagger", TipText.stagger(String(mb.md["name"])))
+		_tip("stagger", TipText.stagger())
 
 ## Someone landed an ability in a stagger window. Runs where the monster lives (the host online).
 var stag_n := 0
@@ -4265,6 +4265,7 @@ func _catch(h: Hunter, k: Kin) -> void:
 	k.visible = false
 	var rec: Dictionary = k.rec.duplicate(true)
 	rec["caught_at"] = where_at(k.pos)       # provenance: where it was caught (Save.register)
+	rec["caught_at"]["hunter"] = HeroTitle.base_name(h.arch)      # and who carried it out
 	if k.lost_from != "":
 		# someone's lost kin: it keeps who it is, and we remember who has it now
 		rec["lost_from"] = k.lost_from
@@ -4285,7 +4286,7 @@ func _catch(h: Hunter, k: Kin) -> void:
 		net_event(["caught", k.nid, h.nid, rec, (k.lost_owner as Hunter).nid if k.lost_owner is Hunter else ""])
 	KinTrack.on_caught(self, h, k, rec)
 	if h == player:
-		add_feed("%s is in your box (%d/%d). Extract to bring it home." % [Data.KIN[k.species]["name"], h.caught.size(), Capture.box_cap()])
+		Capture.announce(self, h, rec)
 		if player.kin and player.kin.state != "downed":
 			BokiChatter.say(self, player.kin, "caught")
 
@@ -5255,7 +5256,7 @@ func _net_ev(x, from: String) -> void:
 			if player and String(x[2]) == player.nid and typeof(x[3]) == TYPE_DICTIONARY:
 				var rec: Dictionary = x[3]
 				player.caught.append(rec)
-				add_feed("%s is in your box (%d/%d). Extract to bring it home." % [Data.KIN.get(String(rec.get("species", "cindle")), Data.KIN["cindle"])["name"], mini(player.caught.size(), Capture.box_cap()), Capture.box_cap()])
+				Capture.announce(self, player, rec)
 			var cap = ents_by_id.get(String(x[2]), null)
 			var own = ents_by_id.get(String(x[4]), null) if x.size() > 4 else null
 			if cap is Hunter and own is Hunter and typeof(x[3]) == TYPE_DICTIONARY:
@@ -5366,11 +5367,13 @@ func _tips() -> void:
 	var hunter_tip := hunter_hints.next(self)
 	if hunter_tip: _tip(hunter_tip[0], hunter_tip[1])
 	if player.gliding and player.glide_fuel <= 0.001 and player.over_void():
-		_tip("overheat_lift", "Your glider is burning but still lifts. Keep holding %s." % Settings.key_cap("jump"))
+		_tip("overheat_lift", TipText.overheat_lift())
 	var heart_tip := heart.tip_for(player) if heart else []
 	if heart_tip: _tip(heart_tip[0], heart_tip[1])
 	var ex := ExpeditionTips.next(self)
 	if ex: _tip(ex[0], ex[1])
+	var carry := CarryHints.swap(self)
+	if carry: _tip(carry[0], carry[1])
 	var k: Kin = player.kin
 	if k == null:
 		return
@@ -5378,11 +5381,11 @@ func _tips() -> void:
 	if proc_tip != "": _tip("proc", proc_tip)
 	if k.state == "active":
 		var a1 := k.runner.def_of("k1")
-		_tip("skill", "Stun a foe with %s's %s, then shoot it: combo" % [k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability"])
+		_tip("skill", TipText.skill(k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability"))
 	FirstCapture.tick(self)   # the first-capture hint (its own key-cap text) replaces the old "catch" scan tip
 	if exits and not interact.is_empty() and interact["kind"] == "exit":
-		_tip("exit_uplink", "Start the uplink, hold the outpost, then take the lift")
-	if player.downed: _tip("down", "Down  ·  a trusting Boki may pick you up")
+		_tip("exit_uplink", TipText.exit_uplink())
+	if player.downed: _tip("down", TipText.down())
 
 # ------------------------------------------------------------------ aim indicators
 # ---- ability previews: hold E, R or Q to see the reach and where it lands
