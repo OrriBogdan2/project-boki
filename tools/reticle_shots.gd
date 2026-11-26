@@ -7,7 +7,7 @@ extends RefCounted
 ##   --reticle-looks-shots: every Hunter's own look (ReticleLooks) at rest at 4x on dark, light and grass swatch
 ##     rows with row labels, one column per hunter (reticle_looks_1126b_swatches.png)
 ##   --reticle-proof-shots: for the owner, on a real GPU at 1920x1080 (set --resolution): every Hunter's full frame
-##     at rest and firing over the Training Area's grass, and contact sheets of 3 tiles a row with a 2x zoom
+##     at rest and firing over the match's grass, and contact sheets of 3 tiles a row with a 2x zoom
 ##   --ping-shots: your ping on an enemy (red, "Enemy") and a teammate's loot ping off screen (edge arrow),
 ##     with the minimap
 ##   --hit-marker-shots: the hit tick on a landed hit and the knock tick, each full frame and 3x crop
@@ -27,6 +27,7 @@ const LOOK_CELL := 96.0  # px: one look's tile on the swatch sheet
 const LOOK_LABEL_W := 130.0  # px: the row labels' column on the swatch sheet
 const LOOK_ZOOM := 3.6  # the swatch sheet draws each reticle this many times its size
 const LOOK_ROWS := [["dark ground", "1b1f1c"], ["light ground", "ece6cc"], ["grass", "5f8f4a"]]  # [label, ground]
+const PROOF_AT := Vector2(0.6, 0.5)  # the proof's cursor: mid-screen, just off the Hunter the camera follows
 const PROOF_RES := Vector2i(1920, 1080)  # the full-screen proof frames
 const TILES_PER_SHEET := 6  # Hunters on one contact sheet (rows of 3)
 const TILE_W := 640  # px: one tile of the contact sheet
@@ -57,12 +58,11 @@ func run(main_node: Node, what: String) -> void:
 		main.get_tree().quit(0)
 		return
 	if what == "proof":
-		cursor_at = Vector2(0.5, 0.5)
-		Save.d["tutorial"][KitDrill.SAVE_KEY] = true  # (its card would cover the top of every frame)
+		cursor_at = PROOF_AT
 	m = Match.new()
 	main.add_child(m)
 	var opts := {"teams": 2, "squad": 2, "tier": 0, "length": 1500.0, "seed": 4242, "no_drop": true}
-	if what == "hunters" or what == "proof":
+	if what == "hunters":
 		opts = Match.arena_opts()
 	m.start(opts)
 	await _reveal()
@@ -78,7 +78,6 @@ func run(main_node: Node, what: String) -> void:
 	elif what == "hunters":
 		await _hunters()
 	elif what == "proof":
-		m.arena.layer.visible = false  # (the practice hint and the DPS meter)
 		await _proof()
 	elif what == "hit":
 		await _hits()
@@ -169,7 +168,7 @@ func _draw_looks(cv: Control) -> void:
 		cv.draw_string(font, name_at, label, HORIZONTAL_ALIGNMENT_CENTER, LOOK_CELL, 13, Arch.color(id).lightened(0.3))
 
 
-## Every Hunter in the Training Area at the default match camera, 1920x1080 on a real GPU: the reticle mid-screen over
+## Every Hunter in a normal match at the default match camera, 1920x1080 on a real GPU: the reticle mid-screen over
 ## grass at rest and then firing (the fire action held, bloom open). Each full frame is saved
 ## (reticle_looks_1126b_<id>_rest.png, _fire.png) and then the contact sheets, TILES_PER_SHEET Hunters each.
 func _proof() -> void:
@@ -179,10 +178,8 @@ func _proof() -> void:
 	main.get_viewport().gui_disable_input = true
 	var tiles := []
 	for id in Arch.ids():
-		m.arena.set_arch(String(id), Arch.signature(String(id)))
-		for pn in m.hud.ui_extra:
-			if pn is Control:
-				pn.visible = false
+		m.player.reclass(Arch.weight(String(id)), String(id), Arch.signature(String(id)))
+		Match._trim_shadows(m.player)
 		await main.get_tree().create_timer(2.5).timeout
 		var rest := await _frame(12)
 		var fire := await _frame(12, _hold_fire)
