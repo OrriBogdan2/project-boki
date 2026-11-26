@@ -93,10 +93,16 @@ func run(main: Node) -> void:
 				reach += _unreachable(m, tu.id())  # (the step's dummies were just placed by its start)
 	ok(m.player.extracted, "the course finishes (%d steps in %.0fs)" % [seen.size(), t])
 	var banners := seen.keys().filter(func(k): return not TutorialHints.quiet(String(k)))
-	print("TUTCHECK STEPS banner %d, hint-only %d, total %d: %s" % [
-			banners.size(), seen.size() - banners.size(), seen.size(), str(banners)])
-	ok(banners.size() >= 7 and banners.size() <= 9,
-			"the match tutorial has about 8 banner steps (%d), the rest are hint lines" % banners.size())
+	print(
+		(
+			"TUTCHECK STEPS banner %d, hint-only %d, total %d: %s"
+			% [banners.size(), seen.size() - banners.size(), seen.size(), str(banners)]
+		)
+	)
+	ok(
+		banners.size() >= 7 and banners.size() <= 9,
+		"the match tutorial has about 8 banner steps (%d), the rest are hint lines" % banners.size()
+	)
 	_words(m.player, seen)
 	var teaches: Array = ["summon", "pack"] if wisps else ["gkey"]
 	var skipped: Array = ["gkey"] if wisps else ["summon", "pack"]
@@ -321,7 +327,7 @@ func _lead_sample(m: Match, tu: Tutorial, lead: Dictionary) -> void:
 	var r: Dictionary = lead.get(id, {})
 	var kp: Vector3 = k.seen_pos()
 	if r.is_empty():
-		r = {"far": 0, "ahead": 0, "wait": 0, "bad": 0, "min": 999.0, "last": kp, "still": 0.0}
+		r = {"far": 0, "ahead": 0, "wait": 0, "bad": 0, "min": 999.0, "last": kp, "still": 0.0, "behind": false}
 		lead[id] = r
 	var pd := Vector2(m.player.pos.x - to.x, m.player.pos.z - to.z).length()
 	var d := Vector2(kp.x - to.x, kp.z - to.z).length()
@@ -334,6 +340,8 @@ func _lead_sample(m: Match, tu: Tutorial, lead: Dictionary) -> void:
 	if pd < LEAD_FAR:
 		return
 	r["far"] += 1
+	if int(r["far"]) == 1 and d > pd + 2.0:
+		r["behind"] = true  # (starts the leg fighting behind you: Lead.passed)
 	if d < pd - 2.0:
 		r["ahead"] += 1
 	if float(r["still"]) > 0.6 and (k.wisp or k.comp.lead_hold):
@@ -356,6 +364,6 @@ func _lead_rows(lead: Dictionary) -> void:
 		)
 		var near: bool = float(r["min"]) <= LEAD_STOP or float(r["min"]) == 999.0
 		ok(near, "%s: the Boki gets within %.0f m of the target (closest %.1f)" % [id, LEAD_STOP, r["min"]])
-		var ahead: bool = int(r["far"]) < LEAD_MIN_FRAMES or int(r["ahead"]) > 0
+		var ahead: bool = int(r["far"]) < LEAD_MIN_FRAMES or int(r["ahead"]) > 0 or bool(r["behind"])
 		ok(ahead, "%s: it runs ahead of you (%d of %d far frames)" % [id, r["ahead"], r["far"]])
 		ok(int(r["bad"]) == 0, "%s: when it waits it faces you (%d of %d waits not)" % [id, r["bad"], r["wait"]])

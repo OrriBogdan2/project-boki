@@ -64,6 +64,7 @@ var barge_met := {}             # foes the barge has already flashed on (instanc
 var stop_t := 0.0               # the barge under way; when it ends he stops, keeping almost none of its speed
 var next_barge := -9.0          # the short gap between barges in a run
 var ball_open_at := -9.0        # when the ball opens (dr_lunge_out): the last shove's end, else the gap and a grace on
+var slug_sd := {}               # the last slug fired while it flies (its whistle, dr_slug_fly, follows it)
 var shot_seen := 0              # the last weapon volley the kit dressed
 var armor_shreds := 0           # (tests) hits that shredded armor
 var broadside: DredgeBlast      # X, Brass Broadside (its charge and waves are a hold: broadside.blast)
@@ -88,7 +89,6 @@ func _setup() -> void:
 
 func res_text() -> String: return "%d" % int(res)
 func res_frac() -> float: return clampf(res / res_max(), 0.0, 1.0)
-func ready_label() -> String: return "SALVAGE" if res >= res_max() else ""
 func rd() -> Dictionary: return res_def()
 ## Seafoam, his palette's "anchor" (content/vfx/dredge.json): the Anchor's telegraph rims stand off yellow-green grass.
 func anchor_col() -> Color: return HeroVfx.of(m).color(h, "anchor")
@@ -244,6 +244,8 @@ func _drop_holds() -> void:
 ## streaks that hang as brass dots where they stop). One aim line lies on the ground from his body out to the
 ## slug range, drawn per frame toward the cursor; the whole volley flies in a tight group along it.
 func _tick_gun() -> void:
+	if not slug_sd.is_empty() and not HeroSfx.fly(m, h, "dr_slug_fly", slug_sd):
+		slug_sd = {}
 	if h.wid != "shotgun":
 		return
 	if h.shot_n != shot_seen:
@@ -257,6 +259,9 @@ func _tick_gun() -> void:
 
 func _dress_volley() -> void:
 	play("dr_shot")
+	m.sfx("dr_shot_tail", h.pos, -6.0 if h.is_local() else -9.0)     # scrap rattling away after the boom
+	if m.shots.size() > 0 and m.shots[-1]["by"] == h:
+		slug_sd = m.shots[-1]
 	var d2 := h.aim_dir()
 	var mz := ShotOrigin.muzzle_at(h, h.wpn["muzzle"], d2)      # the blunderbuss's mouth, where the slugs start too
 	vfx("shot", mz, d2)
@@ -374,6 +379,7 @@ func _launch_hook() -> void:
 		hook_sd = m.shots[-1]
 		# the hook pierces terrain: rocks, props and cliff faces
 		(hook_sd["x"] as Dictionary)["pierce_terrain"] = true
+		(hook_sd["x"] as Dictionary)["block_class"] = "reach"      # (Blockers: a placed ridge or shield stops it)
 
 ## The hook in flight: his arm stretched out to it. It also
 ## catches an ally in its path (reeled in to safety) and scoops up any wisp (downed hunter) it passes.

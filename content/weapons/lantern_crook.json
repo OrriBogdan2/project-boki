@@ -5,7 +5,7 @@
 		"medium"
 	],
 	"primary": {
-		"dmg": 8.0,
+		"dmg": 6.0,
 		"rate": 0.4,
 		"speed": 30,
 		"kb": 1.0,

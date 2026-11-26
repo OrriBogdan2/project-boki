@@ -16,23 +16,25 @@ extends RefCounted
 ## Lines: LAGCOMP ok|FAIL <what>, LAGCOMP row <case> <numbers>; the guest prints LAGCOMP guest pid=<pid>.
 
 const DT := 1.0 / 60.0
-const START_S := 240.0        # s for the guest to come up and build its match
-const SHOOTER_RTT_MS := 100   # ms the relay adds to the shooter's round trip
-const TARGET_RTT_MS := 150    # ms the relay adds to the target's round trip
-const FF_CAP_S := 0.15        # s: the most a copy is fast-forwarded in the copy+ff column
-const RANGE := 12.0           # m between the shooter and the strafe lane
-const STRAFE_X := 5.0         # m: the target turns back at this far either side of the lane's middle
-const HOLD_S := {"archer": 1.25, "mage": 1.1}   # s of RMB hold: past the full draw (1.1) / the rod (1.0)
-const VOLLEYS := 12           # Heavy Shots and Storm Rods per case
-const RIFLE_S := 6.0          # s of LMB held for Vex's case
+const START_S := 240.0  # s for the guest to come up and build its match
+const SHOOTER_RTT_MS := 100  # ms the relay adds to the shooter's round trip
+const TARGET_RTT_MS := 150  # ms the relay adds to the target's round trip
+const FF_CAP_S := 0.15  # s: the most a copy is fast-forwarded in the copy+ff column
+const RANGE := 12.0  # m between the shooter and the strafe lane
+const STRAFE_X := 5.0  # m: the target turns back at this far either side of the lane's middle
+const HOLD_S := {"archer": 1.25, "mage": 1.1}  # s of RMB hold: past the full draw (1.1) / the rod (1.0)
+const VOLLEYS := 12  # Heavy Shots and Storm Rods per case
+const RIFLE_S := 6.0  # s of LMB held for Vex's case
 const DN := preload("res://tools/displace_net_check.gd")
 const CASES := [["Vex LMB", "gunslinger"], ["Lace Heavy Shot", "archer"], ["Sparkle RMB", "mage"]]
 
+
 ## The relay on a slow line: each peer's packets wait half its added round trip in, and half out.
-class LagRelay extends RelayServer:
-	var rtt := {}                 # peer id -> added round trip (ms), the first peer is the shooter
-	var wire: Array = []          # [due msec, peer id, bytes or message, inbound, fast]
-	var due_last := {}            # [peer id, inbound, fast] -> due of its last queued packet (order kept)
+class LagRelay:
+	extends RelayServer
+	var rtt := {}  # peer id -> added round trip (ms), the first peer is the shooter
+	var wire: Array = []  # [due msec, peer id, bytes or message, inbound, fast]
+	var due_last := {}  # [peer id, inbound, fast] -> due of its last queued packet (order kept)
 
 	func _half(id: int) -> int:
 		if not rtt.has(id):
@@ -64,28 +66,32 @@ class LagRelay extends RelayServer:
 				super._send(x[1], x[2], x[4])
 		wire = keep
 
+
 var main: Node
 var bad := 0
-var dn                         # the --displace-net-check helper that builds the shared match
+var dn  # the --displace-net-check helper that builds the shared match
 var m: Match = null
 var stop := false
 var guest_pid := 0
 var dir := ""
 var rng := RandomNumberGenerator.new()
-var shots: Array = []          # host: [wall s, sid] of each shot the shooter fires
-var hits: Array = []           # host: wall s of each hit on the shooter's screen; guest: of each applied hit
-var path: Array = []           # guest: [wall s, x, z] of its own body each frame
-var copies: Array = []         # guest: [wall s, x, z, vx, vz, life, r] of each copy of the shooter's shots
+var shots: Array = []  # host: [wall s, sid] of each shot the shooter fires
+var hits: Array = []  # host: wall s of each hit on the shooter's screen; guest: of each applied hit
+var path: Array = []  # guest: [wall s, x, z] of its own body each frame
+var copies: Array = []  # guest: [wall s, x, z, vx, vz, life, r] of each copy of the shooter's shots
 var seen_sid := {}
 var dumped := false
-var turn_t := 0.0              # guest: s until the strafe turns
-var shot_mps := 0.0            # host: speed of the shooter's last shot (m/s), for the lead
-var seen_at := Vector3.INF     # host: the target's drawn position last frame
-var drawn_v := Vector3.ZERO    # host: its drawn velocity, smoothed
+var turn_t := 0.0  # guest: s until the strafe turns
+var shot_mps := 0.0  # host: speed of the shooter's last shot (m/s), for the lead
+var seen_at := Vector3.INF  # host: the target's drawn position last frame
+var drawn_v := Vector3.ZERO  # host: its drawn velocity, smoothed
+
 
 func ok(cond: bool, what: String, info := "") -> void:
 	print("LAGCOMP %s %s  %s" % ["ok  " if cond else "FAIL", what, info])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -95,15 +101,19 @@ func run(main_node: Node) -> void:
 	dn.main = main
 	var guest := false
 	for a in OS.get_cmdline_user_args():
-		if a == "--lagcomp-check=guest": guest = true
-		if a.begins_with("--lc-port="): dn.port = int(a.substr(10))
-		if a.begins_with("--lc-dir="): dir = a.substr(9)   # the guest writes its record where its host reads it
+		if a == "--lagcomp-check=guest":
+			guest = true
+		if a.begins_with("--lc-port="):
+			dn.port = int(a.substr(10))
+		if a.begins_with("--lc-dir="):
+			dir = a.substr(9)  # the guest writes its record where its host reads it
 	Net.message.connect(_on_msg)
 	CombatBus.hit_landed.connect(_on_hit)
 	if guest:
 		await _guest()
 	else:
 		await _host()
+
 
 # ------------------------------------------------------------------ the shooter (and the relay)
 func _host() -> void:
@@ -118,44 +128,61 @@ func _host() -> void:
 	ok(relay.start(PackedStringArray(["--port=%d" % dn.port])) == OK, "the lag relay listens on %d" % dn.port)
 	CheckChild.hold(relay.peer, START_S)
 	ok(await dn._connect(), "the shooter is on the relay")
-	guest_pid = CheckChild.start("--lagcomp-check=guest --lc-port=%d '--lc-dir=%s'" % [dn.port, dir],
-			dir.path_join("guest.log"))
+	guest_pid = CheckChild.start(
+		"--lagcomp-check=guest --lc-port=%d '--lc-dir=%s'" % [dn.port, dir], dir.path_join("guest.log")
+	)
 	var other := ""
 	var t0 := Time.get_ticks_msec()
 	while other == "" and Time.get_ticks_msec() - t0 < START_S * 1000.0:
 		await main.get_tree().create_timer(0.5).timeout
 		for id in Net.peers:
-			if String(id) != Net.me: other = String(id)
+			if String(id) != Net.me:
+				other = String(id)
 	ok(other != "", "the target joins the relay")
 	if other == "":
 		return _finish()
-	var d := {"mid": "lc%d" % dn.port, "seed": DN.SEED, "host": Net.me, "teams": 2, "squad": 1, "tier": 0, "roster": [
-		{"peer": Net.me, "team": 0, "name": "Shooter", "cls": "medium", "weapon": "", "kin": {}},
-		{"peer": other, "team": 1, "name": "Target", "cls": "medium", "weapon": "", "kin": {}}]}
+	var d := {
+		"mid": "lc%d" % dn.port,
+		"seed": DN.SEED,
+		"host": Net.me,
+		"teams": 2,
+		"squad": 1,
+		"tier": 0,
+		"roster":
+		[
+			{"peer": Net.me, "team": 0, "name": "Shooter", "cls": "medium", "weapon": "", "kin": {}},
+			{"peer": other, "team": 1, "name": "Target", "cls": "medium", "weapon": "", "kin": {}}
+		]
+	}
 	Net.lobby_emit("lc", {"c": "start", "d": d})
 	await dn._build(d)
 	m = dn.m
-	var G: Hunter = null
+	var g: Hunter = null
 	var t1 := Time.get_ticks_msec()
-	while (G == null or G.net_t < 0.0) and Time.get_ticks_msec() - t1 < START_S * 1000.0:
+	while (g == null or g.net_t < 0.0) and Time.get_ticks_msec() - t1 < START_S * 1000.0:
 		await _host_run(0.2, null)
-		G = m.ents_by_id.get("P" + other, null)
-	ok(G != null, "the target's game is sending")
-	if G == null:
+		g = m.ents_by_id.get("P" + other, null)
+	ok(g != null, "the target's game is sending")
+	if g == null:
 		return _finish()
 	await _host_run(2.0, null)
-	print("LAGCOMP line: shooter +%d ms round trip, target +%d ms; ff cap %d ms" % [
-		SHOOTER_RTT_MS, TARGET_RTT_MS, int(FF_CAP_S * 1000.0)])
+	print(
+		(
+			"LAGCOMP line: shooter +%d ms round trip, target +%d ms; ff cap %d ms"
+			% [SHOOTER_RTT_MS, TARGET_RTT_MS, int(FF_CAP_S * 1000.0)]
+		)
+	)
 	print("LAGCOMP row case             shots  shooter  applied  lost  copy  copy+ff  mean age ms")
 	for c in CASES:
-		await _case(G, String(c[0]), String(c[1]))
+		await _case(g, String(c[0]), String(c[1]))
 	_finish()
 
+
 ## One weapon: the target strafes, the shooter fires, then both records are compared.
-func _case(G: Hunter, what: String, arch: String) -> void:
+func _case(g: Hunter, what: String, arch: String) -> void:
 	dn._kit(arch)
-	var P := m.player
-	P.teleport(dn.home + Vector3(0, 0, RANGE * 0.5))
+	var p := m.player
+	p.teleport(dn.home + Vector3(0, 0, RANGE * 0.5))
 	shots.clear()
 	hits.clear()
 	seen_sid.clear()
@@ -163,42 +190,46 @@ func _case(G: Hunter, what: String, arch: String) -> void:
 	shot_mps = 0.0
 	seen_at = Vector3.INF
 	Net.lobby_emit("lc", {"c": "strafe", "at": _lane()})
-	await _host_run(1.5, G)
+	await _host_run(1.5, g)
 	if arch == "gunslinger":
-		P.inp["fire"] = true
-		await _host_run(RIFLE_S, G)
-		P.inp["fire"] = false
+		p.inp["fire"] = true
+		await _host_run(RIFLE_S, g)
+		p.inp["fire"] = false
 	else:
 		for i in VOLLEYS:
-			for k in P.ak.cd: P.ak.cd[k] = 0.0
-			P.ak.ch_rmb = float(P.ak.rmb_charges())   # a charge each volley (else every other press is denied)
-			P.inp["sec_hold"] = true
-			P.ak.press_rmb()
-			await _host_run(float(HOLD_S[arch]), G)
-			P.inp["sec_hold"] = false
-			await _host_run(0.9, G)
-	await _host_run(1.0, G)
+			for k in p.ak.cd:
+				p.ak.cd[k] = 0.0
+			p.ak.ch_rmb = float(p.ak.rmb_charges())  # a charge each volley (else every other press is denied)
+			p.inp["sec_hold"] = true
+			p.ak.press_rmb()
+			await _host_run(float(HOLD_S[arch]), g)
+			p.inp["sec_hold"] = false
+			await _host_run(0.9, g)
+	await _host_run(1.0, g)
 	DirAccess.remove_absolute(dir.path_join("target.json"))
 	Net.lobby_emit("lc", {"c": "dump"})
 	var t0 := Time.get_ticks_msec()
 	while not dumped and Time.get_ticks_msec() - t0 < 20000:
-		await _host_run(0.1, G)
+		await _host_run(0.1, g)
 	ok(dumped, "%s: the target wrote its record" % what)
 	if dumped:
 		_report(what, JSON.parse_string(FileAccess.get_file_as_string(dir.path_join("target.json"))))
+
 
 func _lane() -> Array:
 	var c: Vector3 = dn.home + Vector3(0, 0, -RANGE * 0.5)
 	return [c.x, c.y, c.z]
 
-func _host_run(secs: float, G: Hunter) -> void:
+
+func _host_run(secs: float, g: Hunter) -> void:
 	var t := 0.0
 	while t < secs - 0.0001:
-		for mb in m.mobs: mb.queue_free()
+		for mb in m.mobs:
+			mb.queue_free()
 		m.mobs.clear()
-		if G:
-			m.player.inp["aim"] = _lead(G) + Vector3(0, 0.9, 0)
-			m.player.inp["aim_y"] = G.pos.y
+		if g:
+			m.player.inp["aim"] = _lead(g) + Vector3(0, 0.9, 0)
+			m.player.inp["aim_y"] = g.pos.y
 		m.step(DT)
 		t += DT
 		for s in m.shots:
@@ -208,11 +239,12 @@ func _host_run(secs: float, G: Hunter) -> void:
 				shots.append([Time.get_unix_time_from_system(), s["sid"]])
 		await main.get_tree().process_frame
 
+
 ## Where to aim: the drawn body led by its drawn velocity over the last shot's flight, as a player would, so
 ## enough shots hit on the shooter's screen for the comparison to mean something (a dead-on aim at a strafing
 ## body hit 0 to 3 of 6). What the shooter's screen calls a hit is still the only thing compared.
-func _lead(G: Hunter) -> Vector3:
-	var p := G.pos
+func _lead(g: Hunter) -> Vector3:
+	var p := g.pos
 	if seen_at != Vector3.INF:
 		drawn_v = drawn_v.lerp((p - seen_at) / DT, 0.3)
 	seen_at = p
@@ -220,6 +252,7 @@ func _lead(G: Hunter) -> Vector3:
 		return p
 	var t := m.player.pos.distance_to(p) / shot_mps
 	return p + Vector3(drawn_v.x, 0.0, drawn_v.z) * t
+
 
 func _on_hit(by: Node, target: Node, _amount: float, _tags: Array) -> void:
 	if m == null or not (target is Hunter):
@@ -229,6 +262,7 @@ func _on_hit(by: Node, target: Node, _amount: float, _tags: Array) -> void:
 	var target_took := not Net.is_host() and mine and by is Hunter and by != m.player
 	if shooter_saw or target_took:
 		hits.append(Time.get_unix_time_from_system())
+
 
 ## A table row. A volley weapon (one shot a press) counts a shot as hit once, whatever it set off after.
 func _report(what: String, rec) -> void:
@@ -248,15 +282,37 @@ func _report(what: String, rec) -> void:
 		var cp: Array = cps[i]
 		var age := float(cp[0]) - float(shots[i][0])
 		age_sum += age
-		if _copy_hits(cp, rec["path"], float(rec["r"]), 0.0): n_copy += 1
-		if _copy_hits(cp, rec["path"], float(rec["r"]), clampf(age, 0.0, FF_CAP_S)): n_ff += 1
-	print("LAGCOMP row %-16s %5d  %7d  %7d  %4d  %4d  %7d  %11.0f" % [
-		what, shots.size(), n_shooter, n_applied, n_shooter - n_applied, n_copy, n_ff, 1000.0 * age_sum / maxf(1.0, n)])
-	ok(shots.size() > 0 and cps.size() == shots.size(), "%s: every shot reaches the target's game" % what,
-		"%d fired, %d copies" % [shots.size(), cps.size()])
+		if _copy_hits(cp, rec["path"], float(rec["r"]), 0.0):
+			n_copy += 1
+		if _copy_hits(cp, rec["path"], float(rec["r"]), clampf(age, 0.0, FF_CAP_S)):
+			n_ff += 1
+	print(
+		(
+			"LAGCOMP row %-16s %5d  %7d  %7d  %4d  %4d  %7d  %11.0f"
+			% [
+				what,
+				shots.size(),
+				n_shooter,
+				n_applied,
+				n_shooter - n_applied,
+				n_copy,
+				n_ff,
+				1000.0 * age_sum / maxf(1.0, n)
+			]
+		)
+	)
+	ok(
+		shots.size() > 0 and cps.size() == shots.size(),
+		"%s: every shot reaches the target's game" % what,
+		"%d fired, %d copies" % [shots.size(), cps.size()]
+	)
 	ok(n_shooter > 0, "%s: some shots hit on the shooter's screen" % what, "%d" % n_shooter)
-	ok(n_applied == n_shooter, "%s: every hit on the shooter's screen lands on the target's game" % what,
-		"%d of %d" % [n_applied, n_shooter])
+	ok(
+		n_applied == n_shooter,
+		"%s: every hit on the shooter's screen lands on the target's game" % what,
+		"%d of %d" % [n_applied, n_shooter]
+	)
+
 
 ## Hits grouped by shot: in a volley case each shot's window holds at most one hit.
 func _per_shot(ws: Array, volley: bool) -> int:
@@ -272,6 +328,7 @@ func _per_shot(ws: Array, volley: bool) -> int:
 				break
 	return n
 
+
 ## Whether a copy, flown from where and when it arrived (ff s ahead), passes over the target's true body.
 static func _copy_hits(cp: Array, pth: Array, body_r: float, ff: float) -> bool:
 	var w0 := float(cp[0])
@@ -285,6 +342,7 @@ static func _copy_hits(cp: Array, pth: Array, body_r: float, ff: float) -> bool:
 			return true
 	return false
 
+
 func _finish() -> void:
 	Net.lobby_emit("lc", {"c": "done"})
 	await main.get_tree().create_timer(1.0).timeout
@@ -292,6 +350,7 @@ func _finish() -> void:
 		OS.kill(guest_pid)
 	print("LAGCOMP DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 # ------------------------------------------------------------------ the target
 func _guest() -> void:
@@ -305,7 +364,8 @@ func _guest() -> void:
 	while m == null and not stop and Time.get_ticks_msec() - t0 < START_S * 1000.0:
 		await main.get_tree().create_timer(0.2).timeout
 	while m != null and not stop and Time.get_ticks_msec() - t0 < 900000:
-		for mb in m.mobs: mb.queue_free()
+		for mb in m.mobs:
+			mb.queue_free()
 		m.mobs.clear()
 		_strafe()
 		m.step(DT)
@@ -313,18 +373,20 @@ func _guest() -> void:
 		await main.get_tree().process_frame
 	main.get_tree().quit(0)
 
+
 ## Left and right along the lane, turning at random, and back at its ends; never dies.
 func _strafe() -> void:
-	var P := m.player
-	P.hp = P.max_hp
-	var mv: Vector2 = P.inp["move"]
+	var p := m.player
+	p.hp = p.max_hp
+	var mv: Vector2 = p.inp["move"]
 	if mv == Vector2.ZERO:
 		return
 	turn_t -= DT
-	var off := P.pos.x - float(_lane()[0])
+	var off := p.pos.x - float(_lane()[0])
 	if turn_t <= 0.0 or (off > STRAFE_X and mv.x > 0.0) or (off < -STRAFE_X and mv.x < 0.0):
-		P.inp["move"] = Vector2(-signf(mv.x), 0)
+		p.inp["move"] = Vector2(-signf(mv.x), 0)
 		turn_t = rng.randf_range(0.3, 0.7)
+
 
 func _record() -> void:
 	var w := Time.get_unix_time_from_system()
@@ -334,6 +396,7 @@ func _record() -> void:
 			seen_sid[s["sid"]] = true
 			var v: Vector2 = s["vel"]
 			copies.append([w, s["pos"].x, s["pos"].z, v.x, v.y, s["life"], s["r"]])
+
 
 func _on_msg(topic: String, data, _from: String) -> void:
 	if typeof(data) != TYPE_DICTIONARY:
@@ -360,4 +423,5 @@ func _on_msg(topic: String, data, _from: String) -> void:
 			f.store_string(JSON.stringify({"path": path, "copies": copies, "hits": hits, "r": m.player.r}))
 			f.close()
 			Net.lobby_emit("lc_r", {"n": copies.size()})
-		"done": stop = true
+		"done":
+			stop = true
