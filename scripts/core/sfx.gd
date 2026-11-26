@@ -3,6 +3,11 @@ extends Node
 ## from the camera focus, and far ones are also muffled (they go through a low-passed bus), so a fight
 ## across the map stays soft. The buses, their effects and the ducks are in SfxMix (scripts/core/sfx_mix.gd).
 
+## A one-shot started: where (null for UI), its dB before distance and pitch. SfxCast and the audio checks listen.
+signal played(sname: String, at: Variant, vol_db: float, pitch: float)
+
+signal stung(which: String)  # a sting started ("extract", "out", "last", "home")
+
 const NAMES := [
 	"splash",
 	"swim",
@@ -144,11 +149,15 @@ const NAMES := [
 	"keg_fuse",
 	"keg_blast",
 ]
+
 const POOL := 24
+
 const SAMPLE := "ping"  # the sound play_sample() puts through a bus
+
 ## The squad cues (you or a squadmate downs or finishes a rival, or a squadmate is downed): one dedicated
 ## voice, so footsteps and the combat crowd never steal it, and no gap or stack cap thins it.
 const CUES := ["knock_confirm", "knock_warn", "elim_confirm"]
+
 ## Sounds that only exist as several takes (monster voices, little pops); one is picked at random.
 const VOICES := [
 	"v_skitter",
@@ -173,6 +182,7 @@ const VOICES := [
 	"step_metal_medium",
 	"step_metal_heavy"
 ]
+
 ## The shortest gap before the same sound can play again, so a crowd doesn't machine-gun it.
 const MIN_GAP := {
 	"carry_swap_out": 200,
@@ -234,73 +244,181 @@ const MIN_GAP := {
 	"boki_eat": 150,
 	"boki_sleep": 400,
 }
+
 ## On top of that, at most STACK_MAX of one sound start within STACK_MS, each extra one a little quieter.
 const STACK_MAX := 3
+
 ## A Boki type's impact ki_<type> is the take set of its cast cue k_<type> (BokiImpact), with its own gap and cap.
 const IMPACT_PREFIX := "ki_"
+
 const IMPACT_PREFIX_OF := "k_"
+
 const IMPACT_GAP := 90
+
 const STACK_MS := 90
+
 const STACK_DB := 3.5
+
 const SAME_CAP := 5  # one sound sounding in this many pool voices at once; a rival's wind-up cue is exempt
-## dB your own held fire drops while a rival's wind-up or ult cue sounds, so the warning cuts through it
-## (docs/AUDIO.md, enemy priority); the duck lasts as long as the cue, and 0 turns the rule off
-var fire_duck_db := -4.0
-var _fire_duck_until := 0
-var _fire_names := {}  # held-fire sounds FireSfx has played: always ducked
+
 const REPEAT_MS := 400  # a sound of yours started again within this is repeating (hit confirms, hurt spam): ducked too
-var _you_last := {}  # sound -> ms one of yours last started
-var _you_rep := {}  # sound -> its last start of yours was a repeat (within REPEAT_MS of the one before)
+
 ## The explosion category: the generic blast sounds (a Boki's burst or rider, an area hit, an ability blast) sit
 ## this far under every call's own level, so a blast reads as a thump in the mix rather than the loudest thing
 ## on screen. BLAST_PEAK_DB is the agreed ceiling for a blast's file peak plus this gain (checked in
 ## --tender-combo-check).
 const BLAST := ["boom", "ab_blast", "ab_slam"]
+
 const BLAST_DB := -7.0
+
 const BLAST_PEAK_DB := -6.0
+
 ## Distance falloff, sized to the match view (the target camera, ~37 m across, so ~18.5 m to the side edge): what you
 ## can see you can hear. Full volume within NEAR metres, then a gentle roll-off (SPREAD is the metres per
 ## doubling-ish step: 1 + (d - NEAR) / SPREAD); muffled beyond FAR (just past the side edge); silent past hear_range
 ## (30 m: ~10 m off screen, fading from 0.7 of it). Docs: AUDIO.md "Falloff".
 const NEAR := 5.5
+
 const SPREAD := 8.0
+
 const FAR := 19.0
+
+const CUT_FADE := 0.05  # s: a cut sound fades this fast, so it doesn't click (a broken cast)
+
+const LAYER_DB := -9.0  # a stem at full, the same level a single track plays at
+
+const LAYER_IN := 1.2  # seconds to fade a stem in, and out
+
+const LAYER_OUT := 3.0
+
+const LAYER_UNDER := 0.5  # seconds a stem takes to fall away while a sting plays over it
+
+const STING_DB := -6.0
+
+const STING_CUT := 0.15  # seconds: a sting still ringing when its scene ends fades this fast
+
+const AMB_FADE := 2.5
+
+const MATCH_BEDS := ["abyss", "ruins"]  # MusicDir's beds; other amb_layers are the farm's
+
+## The "reset" cue (a dash or ability is back): the variant picked in Settings > Gameplay (a, b or c),
+## synthesized by tools/gen_reset_sfx.py. A UI sound for the one who got it, so it carries no position.
+const RESET_CUES := ["a", "b", "c"]
+
+const RESET_CUE_DB := -3.0  # dB: bright, so it sits a little under the combat sounds' level
+
+## A loop that lasts only while its owner keeps asking for it, once per tick (a Boki rescue's hum): if the
+## calls stop (the channel ends any way, or its node is freed mid-channel) it stops within HOLD_MS.
+const HOLD_MS := 250
+
+## dB your own held fire drops while a rival's wind-up or ult cue sounds, so the warning cuts through it
+## (docs/AUDIO.md, enemy priority); the duck lasts as long as the cue, and 0 turns the rule off
+var fire_duck_db := -4.0
+
 ## Sounds behind terrain (see SfxOcclusion) go through the SFXMuffled bus (SfxMix.OCCLUDED_HZ / OCCLUDED_DB).
 var occlusion := SfxOcclusion.new()
+
 var skip: Array = []  # sounds left out for now (ArchKit.run_own: the shared cast sounds under a Hero's own)
+
 var last_take := {}
+
 var recent := {}  # sound -> start times (ms) still inside the stacking window
 
 var streams := {}
+
 var players: Array[AudioStreamPlayer] = []
+
 var next := 0
+
 var voices := SfxVoices.new(POOL)  # who keeps a voice when the pool or the loops are full
+
 ## A handle (from play) names one sound on one pool voice: starts * POOL + the voice, so a handle to a sound
 ## that has ended, its voice gone on to another, cuts nothing.
 var starts := PackedInt32Array()  # per pool voice: how many sounds it has started
-var _cut_tw: Array[Tween] = []  # per pool voice: its fade-out under way (cut)
-const CUT_FADE := 0.05  # s: a cut sound fades this fast, so it doesn't click (a broken cast)
+
 var cue_voice: AudioStreamPlayer
+
 var cue_plays := {}  # cue name -> times played (--knock-sfx-check)
+
 var listener := Vector3.ZERO  # set by the camera each frame
+
 var hear_range := 30.0  # m: silent beyond this (a sound's own "reach" overrides it)
+
 var sound_reach := {}  # sound -> metres it carries, past hear_range (content/sfx/<group>.json "reach")
+
 ## sound -> dB added in play, so an old file off its category sits level (sfx_levels.json "gain_db")
 var sound_gain := {}
+
 var last_played := {}
+
 var foe_next := false  # play_foe is playing: _bus_for sends the voice to SFXFoe
+
 ## --sfx-silence-audit only (null = off): play() and loop_start() append [name, pos, found].
 var cue_log = null
+
 var rng := RandomNumberGenerator.new()
 
-## A one-shot started: where (null for UI), its dB before distance and pitch. SfxCast and the audio checks listen.
-signal played(sname: String, at: Variant, vol_db: float, pitch: float)
 var music: Array[AudioStreamPlayer] = []  # two players so tracks can crossfade
+
 var music_i := 0
+
 var music_name := ""
+
 var amb: AudioStreamPlayer
+
 var amb_name := ""
+
 var mix: SfxMix
+
+## Crossfades to another music track ("home", "match", "title"), or to silence with "".
+var music_lock := ""
+
+# ------------------------------------------------------------------ layered music
+## The expedition's score is four stems of one piece (tools/compose.py LAYERS), all playing in step;
+## what's happening decides how loud each is (scripts/match/music_dir.gd sets the levels).
+var layers := {}  # stem -> AudioStreamPlayer
+
+var layer_want := {}  # stem -> 0..1
+
+## Extra ambience beds on top of the main one (wind over the abyss, ruins, the garden's time-of-day
+## and pond beds), each faded to a level by where you are; created on first use, freed once faded
+## to nothing, stopped together by clear_amb_layers.
+var amb_layers := {}  # name -> {p, want, fade}  (fade: seconds from silent to full)
+
+## Looping sounds that last as long as something goes on (a deathbox revive's hum): started, moved
+## and re-pitched, and stopped by key. Each has its own voice outside the pool, with the same
+## distance falloff as play() but its own reach (reach > 0 overrides hear_range).
+var loops := {}  # key -> {p: AudioStreamPlayer, pos, vol, reach, bus}
+
+var _fire_duck_until := 0
+
+var _fire_names := {}  # held-fire sounds FireSfx has played: always ducked
+
+var _you_last := {}  # sound -> ms one of yours last started
+
+var _you_rep := {}  # sound -> its last start of yours was a repeat (within REPEAT_MS of the one before)
+
+var _cut_tw: Array[Tween] = []  # per pool voice: its fade-out under way (cut)
+
+## Starts loading tracks on a worker thread ("music_match", "amb_match"), e.g. while a loading
+## screen comes up, so starting them later doesn't read and parse the file on the main thread.
+var _prefetched := {}
+
+var _music_tw: Tween  # a track picked in the music list plays until cleared
+
+var _sting_p: AudioStreamPlayer
+
+var _step_i := 0
+
+## A pool voice is never reused while it plays, so a looping file sent through play() would sound
+## forever, past the match and into the farm: owner item 103, the Boki rescue's revive_hum. One-shots
+## get a copy of a looping file that plays once; a sound that should last goes through loop_hold.
+var _once_of := {}
+
+## A kit sound not in NAMES (each hero branch adds its own, e.g. pin_* and bjorn_*): loaded from
+## audio/<name>.wav (and its takes <name>_1..4.wav) the first time it plays, so new kit sounds need no
+## edit to the shared list.
+var _lazy_miss := {}
 
 
 func _ready() -> void:
@@ -372,11 +490,6 @@ static func slider_db(v: float) -> float:
 	return linear_to_db(maxf(v * v, 0.0001))
 
 
-## Starts loading tracks on a worker thread ("music_match", "amb_match"), e.g. while a loading
-## screen comes up, so starting them later doesn't read and parse the file on the main thread.
-var _prefetched := {}
-
-
 func prefetch(names: Array) -> void:
 	for n in names:
 		var path := "res://audio/%s.ogg" % n
@@ -396,11 +509,6 @@ func _loop_stream(path: String) -> AudioStream:
 	if st is AudioStreamOggVorbis:
 		st.loop = true
 	return st
-
-
-## Crossfades to another music track ("home", "match", "title"), or to silence with "".
-var music_lock := ""
-var _music_tw: Tween  # a track picked in the music list plays until cleared
 
 
 func play_music(name: String, fade := 1.5) -> void:
@@ -450,21 +558,6 @@ func play_ambience(name: String) -> void:
 ## Softens the music for a moment, e.g. under a big slow-motion beat (eased, never a sudden drop).
 func duck(seconds: float, depth_db := -8.0) -> void:
 	mix.duck(seconds, depth_db)
-
-
-# ------------------------------------------------------------------ layered music
-## The expedition's score is four stems of one piece (tools/compose.py LAYERS), all playing in step;
-## what's happening decides how loud each is (scripts/match/music_dir.gd sets the levels).
-var layers := {}  # stem -> AudioStreamPlayer
-var layer_want := {}  # stem -> 0..1
-const LAYER_DB := -9.0  # a stem at full, the same level a single track plays at
-const LAYER_IN := 1.2  # seconds to fade a stem in, and out
-const LAYER_OUT := 3.0
-const LAYER_UNDER := 0.5  # seconds a stem takes to fall away while a sting plays over it
-const STING_DB := -6.0
-const STING_CUT := 0.15  # seconds: a sting still ringing when its scene ends fades this fast
-signal stung(which: String)  # a sting started ("extract", "out", "last", "home")
-var _sting_p: AudioStreamPlayer
 
 
 ## A short musical sting (audio/sting_<name>.ogg, tools/compose.py) over the score, one at a time:
@@ -575,14 +668,6 @@ func _stop_layers(fade: float) -> void:
 	layer_want = {}
 
 
-## Extra ambience beds on top of the main one (wind over the abyss, ruins, the garden's time-of-day
-## and pond beds), each faded to a level by where you are; created on first use, freed once faded
-## to nothing, stopped together by clear_amb_layers.
-var amb_layers := {}  # name -> {p, want, fade}  (fade: seconds from silent to full)
-const AMB_FADE := 2.5
-const MATCH_BEDS := ["abyss", "ruins"]  # MusicDir's beds; other amb_layers are the farm's
-
-
 func amb_layer(name: String, level: float, fade_s := AMB_FADE) -> void:
 	if not amb_layers.has(name):
 		if level <= 0.001 or not ResourceLoader.exists("res://audio/amb_%s.ogg" % name):
@@ -632,9 +717,6 @@ func _process(delta: float) -> void:
 		var rate := db_to_linear(LAYER_DB) * delta / secs
 		cur = move_toward(cur, tgt, rate)
 		p.volume_db = linear_to_db(maxf(cur, 0.0001))
-
-
-var _step_i := 0
 
 
 ## A plain footstep (three takes in turn). reach: metres it carries, 0 for hear_range (see StepReach).
@@ -907,12 +989,6 @@ func play_toward(sname: String, at: Vector3, vol_db: float, far_db: float, far_m
 	p.play()
 
 
-## A pool voice is never reused while it plays, so a looping file sent through play() would sound
-## forever, past the match and into the farm: owner item 103, the Boki rescue's revive_hum. One-shots
-## get a copy of a looping file that plays once; a sound that should last goes through loop_hold.
-var _once_of := {}
-
-
 func _once(st: AudioStream) -> AudioStream:
 	if not loops_forever(st):
 		return st
@@ -927,21 +1003,9 @@ static func loops_forever(st: AudioStream) -> bool:
 	return st is AudioStreamWAV and (st as AudioStreamWAV).loop_mode != AudioStreamWAV.LOOP_DISABLED
 
 
-## The "reset" cue (a dash or ability is back): the variant picked in Settings > Gameplay (a, b or c),
-## synthesized by tools/gen_reset_sfx.py. A UI sound for the one who got it, so it carries no position.
-const RESET_CUES := ["a", "b", "c"]
-const RESET_CUE_DB := -3.0  # dB: bright, so it sits a little under the combat sounds' level
-
-
 func play_reset_cue(vol_db := RESET_CUE_DB) -> void:
 	var v := String(Settings.get_v("reset_cue"))
 	play("reset_" + (v if v in RESET_CUES else "a"), null, vol_db, 0.0)
-
-
-## Looping sounds that last as long as something goes on (a deathbox revive's hum): started, moved
-## and re-pitched, and stopped by key. Each has its own voice outside the pool, with the same
-## distance falloff as play() but its own reach (reach > 0 overrides hear_range).
-var loops := {}  # key -> {p: AudioStreamPlayer, pos, vol, reach, bus}
 
 
 ## bus: "SFX", or "Music" for a bed that sits under the score and ducks with it (LastAlive).
@@ -991,11 +1055,6 @@ func loop_stop(key: String) -> void:
 		var tw := p.create_tween()
 		tw.tween_property(p, "volume_db", -60.0, 0.12)
 		tw.tween_callback(p.queue_free)
-
-
-## A loop that lasts only while its owner keeps asking for it, once per tick (a Boki rescue's hum): if the
-## calls stop (the channel ends any way, or its node is freed mid-channel) it stops within HOLD_MS.
-const HOLD_MS := 250
 
 
 func loop_hold(key: String, sname: String, pos = null, vol_db := 0.0, pitch := 1.0, bus := "SFX") -> void:
@@ -1050,12 +1109,6 @@ func play_stream(st: AudioStream, pos = null, vol_db := 0.0, pitch_var := 0.05) 
 	p.volume_db = v
 	p.pitch_scale = 1.0 + rng.randf_range(-pitch_var, pitch_var)
 	p.play()
-
-
-## A kit sound not in NAMES (each hero branch adds its own, e.g. pin_* and bjorn_*): loaded from
-## audio/<name>.wav (and its takes <name>_1..4.wav) the first time it plays, so new kit sounds need no
-## edit to the shared list.
-var _lazy_miss := {}
 
 
 func _lazy(sname: String) -> bool:
