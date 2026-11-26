@@ -600,6 +600,7 @@ func _spawn_pads_and_exits() -> void:
 	training.setup(self)
 	lairs = Lairs.new()
 	lairs.setup(self)
+	CycleBreak.watch(self, hunters)    # the helpers' cycles (--match-repeat-check)
 
 func make_hunter(id: String, team: int, cls: String, pname: String, ctrl: String, kin_rec: Dictionary, at: Vector3, kit := {}, kin_rec2 := {}) -> Hunter:
 	var h := Hunter.new()
