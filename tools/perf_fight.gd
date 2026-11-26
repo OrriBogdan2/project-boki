@@ -184,6 +184,8 @@ func _camp() -> Array:
 	engine_us = 0
 	Match.vprof.clear()
 	Match.prof_on = true
+	Prof.us.clear()
+	Prof.sums = true  # (the Prof zones, HUD draw ones among them: BENCH fight zones)
 	_take_process(bench.main.get_tree().root)
 	if "--bench-novsync" in OS.get_cmdline_user_args():
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)  # (after Settings applied the player's)
@@ -228,6 +230,9 @@ func _camp() -> Array:
 	if "--bench-nohud" in OS.get_cmdline_user_args():  # (a probe: what the HUD's canvas costs the draw)
 		m.hud.visible = false
 		print("BENCH fight hud off")
+	if "--bench-nopanels" in OS.get_cmdline_user_args():  # (a probe: the fixed panels' share of the HUD)
+		m.hud.panels.visible = false
+		print("BENCH fight panels off")
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--bench-3d-scale="):  # (a probe: the 3D at this scale of the window, so a small window
 			bench.main.get_viewport().scaling_3d_scale = float(a.substr(17))  # draws 1080p with a small copy)
@@ -268,11 +273,13 @@ func _camp() -> Array:
 		f += 1
 	counting = false
 	Match.prof_on = false
+	Prof.sums = false
 	print("BENCH fight engine wait (not Match code): %.2f ms per frame" % (engine_us / 1000.0 / fl.size()))
 	_print_sections(Match.prof, "step", fl.size())
 	_print_sections(Match.vprof, "visual", fl.size())
 	_print_sections(taken_us, "node _process", fl.size())
 	_print_sections(phase_us, "engine wait", fl.size())
+	_print_sections(Prof.us, "zones (Prof, nested ones inside their parent too)", fl.size(), 24)
 	_print_sections(stamp_us, "draw stamps (cpu)", fl.size())
 	_print_sections(stamp_gpu_us, "draw steps (gpu, each renderer stamp to the next)", stamp_frames, 40)
 	_print_sections(stamp_cpu_us, "draw steps (cpu, the same)", stamp_frames, 40)
