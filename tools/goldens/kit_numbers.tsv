@@ -508,9 +508,6 @@ archetypes/dredge.json:e.angle	110.0
 archetypes/dredge.json:e.cooldown	7.0
 archetypes/dredge.json:e.dive	28.0
 archetypes/dredge.json:e.dmg	25.0
-archetypes/dredge.json:e.hop	1.8
-archetypes/dredge.json:e.hop_from	0.14
-archetypes/dredge.json:e.hop_t	0.2
 archetypes/dredge.json:e.quake_r	3.2
 archetypes/dredge.json:e.radius	3.0
 archetypes/dredge.json:e.rank3_stun	0.2
@@ -539,6 +536,7 @@ archetypes/dredge.json:resource.back_k	0.5
 archetypes/dredge.json:resource.heal_knock	0.16
 archetypes/dredge.json:resource.max	10
 archetypes/dredge.json:resource.per_stack	0.025
+archetypes/dredge.json:rmb.arrive_stun	0.9
 archetypes/dredge.json:rmb.charges	1
 archetypes/dredge.json:rmb.cooldown	12.0
 archetypes/dredge.json:rmb.dmg	6.0
@@ -577,7 +575,7 @@ archetypes/gil.json:body.hit_h	1.38
 archetypes/gil.json:body.hit_r	0.375
 archetypes/gil.json:body.legs	1.03
 archetypes/gil.json:body.shoulder	1.14
-archetypes/gil.json:body.size	1.391
+archetypes/gil.json:body.size	1.265
 archetypes/gil.json:body.torso	1.0
 archetypes/gil.json:dash.cd	8.0
 archetypes/gil.json:dash.dist	4.5
@@ -635,7 +633,7 @@ archetypes/gil.json:passive.cd	8.0
 archetypes/gil.json:passive.need	3
 archetypes/gil.json:passive.stun	0.75
 archetypes/gil.json:passive.window	5.0
-archetypes/gil.json:plate_offset	2.1
+archetypes/gil.json:plate_offset	1.91
 archetypes/gil.json:resource.max	3
 archetypes/gil.json:rmb.bag.air	2
 archetypes/gil.json:rmb.bag.fire	2
@@ -779,7 +777,7 @@ archetypes/juggernaut.json:body.hit_h	2.15
 archetypes/juggernaut.json:body.hit_r	0.429
 archetypes/juggernaut.json:body.legs	2.05
 archetypes/juggernaut.json:body.neck	-0.012
-archetypes/juggernaut.json:body.size	0.825
+archetypes/juggernaut.json:body.size	0.953
 archetypes/juggernaut.json:dash.cd	10.4
 archetypes/juggernaut.json:dash.dist	4.5
 archetypes/juggernaut.json:dash.dodge_rage	15.0
@@ -827,7 +825,7 @@ archetypes/juggernaut.json:lmb.wave_size[1]	0.6
 archetypes/juggernaut.json:lmb.wave_speed	36.0
 archetypes/juggernaut.json:model_glow.emit	1.4
 archetypes/juggernaut.json:model_glow.strength	2.4
-archetypes/juggernaut.json:plate_offset	2.26
+archetypes/juggernaut.json:plate_offset	2.61
 archetypes/juggernaut.json:rank_cd.dash[0]	1
 archetypes/juggernaut.json:rank_cd.dash[1]	0.8462
 archetypes/juggernaut.json:rank_cd.dash[2]	0.6154
@@ -851,6 +849,7 @@ archetypes/juggernaut.json:resource.dash_haste	0.12
 archetypes/juggernaut.json:resource.decay	9.0
 archetypes/juggernaut.json:resource.enraged_dmg	0.15
 archetypes/juggernaut.json:resource.enraged_t	6.0
+archetypes/juggernaut.json:resource.gauge	true
 archetypes/juggernaut.json:resource.heal_creep	0.2
 archetypes/juggernaut.json:resource.heal_knock	0.2
 archetypes/juggernaut.json:resource.max	100
@@ -1084,6 +1083,7 @@ archetypes/ostra.json:rank_dmg.sec[0]	1
 archetypes/ostra.json:rank_dmg.sec[1]	1.2
 archetypes/ostra.json:rank_dmg.sec[2]	1.4
 archetypes/ostra.json:resource.drain	12.0
+archetypes/ostra.json:resource.gauge	true
 archetypes/ostra.json:resource.hunter_k	10.0
 archetypes/ostra.json:resource.max	100
 archetypes/ostra.json:resource.per_dmg	0.045
