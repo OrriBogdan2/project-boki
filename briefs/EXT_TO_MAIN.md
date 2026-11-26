@@ -11342,3 +11342,4 @@ READY ext/merge-lane-M3-1121 249d6a4482 (PR #569 merged with main b3650243de; Ru
 READY ext/p10-port-1118 98d0d2c592 (PR #328 merged with main b3650243de; Rules.md regenerated, range-screen check registered once; targeted flags: only main's 4 glide-hold reds)
 READY ext/sfx-native-steps c8fcce787eb7c1523efd0246d0471abcbb328cb4 (PR #864 re-merged onto main b3650243de: upper.lay + steps.step both kept, Tarek crouch plant re-read; --step-sync-check 0 fail)
 READY ext/combat-native-hitbox-fit 112af80561c8a5104414cb3996c10d8f59c4591d (PR #858 re-merged onto main b3650243de: main orbits, Dredge size 1.025 fixes main red --warden-native-check dredge head; --native-hitbox-check 24/0)
+READY ext/plate-status-declutter b97e13c8b4fc6d63e4fad990a27dcaf62b3c95f4 (PR #382 merged with main b3650243de, clean merge; plate-status/clarity/recast/hudref/hero-vfx/vision/status/combo checks equal main's reds, 0 new; check.sh --changed OK)
