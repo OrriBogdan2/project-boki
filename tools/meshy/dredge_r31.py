@@ -40,14 +40,14 @@ from dredge_r28 import _report, g, glb_add_clips, skin_relax, weld  # noqa: E402
 PACK = "pack-meshy"
 
 
-def pack_prims(js):
-    return [p for p in js["meshes"][0]["primitives"] if js["materials"][p["material"]]["name"] == PACK]
+def pack_prims(js, mat=PACK):
+    return [p for p in js["meshes"][0]["primitives"] if js["materials"][p["material"]]["name"] == mat]
 
 
 def pack_export(o):
     js, b = load(o.inp)
     P, N, UV, F = [], [], [], []
-    for pr in pack_prims(js):
+    for pr in pack_prims(js, o.mat):
         F.append(acc(js, b, pr["indices"]).reshape(-1, 3).astype(np.uint32) + sum(len(q) for q in P))
         P.append(acc(js, b, pr["attributes"]["POSITION"]).astype(np.float32))
         N.append(acc(js, b, pr["attributes"]["NORMAL"]).astype(np.float32))
@@ -81,12 +81,12 @@ def pack_export(o):
 
 def pack_tex(o):
     js, b = load(o.inp)
-    prims = pack_prims(js)
+    prims = pack_prims(js, o.mat)
     tex = {js["materials"][p["material"]]["pbrMetallicRoughness"]["baseColorTexture"]["index"] for p in prims}
     assert len(tex) == 1, "pack prims use more than one texture"
     t = tex.pop()
     users = [m for m in js["materials"] if m.get("pbrMetallicRoughness", {}).get("baseColorTexture", {}).get("index") == t]
-    assert all(m["name"] == PACK for m in users), "pack texture shared with another material"
+    assert all(m["name"] == o.mat for m in users), "pack texture shared with another material"
     _, _, _, img = meshy_part(o.meshy)
     old = js["images"][js["textures"][t]["source"]]
     v = js["bufferViews"][old["bufferView"]]
@@ -185,7 +185,7 @@ def _folds(js, b, pr, pz):
     return F, flip
 
 
-def _open_verts(js, b, prs):
+def _open_verts(js, b, prs, box=True):
     """Per primitive, its vertices on an open edge of the body surface they make together (welded by position, so a
     seam between two primitives or a UV split is not open)."""
     Ps = [acc(js, b, pr["attributes"]["POSITION"]) for pr in prs]
@@ -197,7 +197,7 @@ def _open_verts(js, b, prs):
     u, c = np.unique(E, axis=0, return_counts=True)
     hot = np.zeros(inv.max() + 1, bool)
     hot[u[c == 1].ravel()] = True
-    lo, hi = map(np.array, OPEN_BOX)
+    lo, hi = map(np.array, OPEN_BOX) if box else (np.full(3, -np.inf), np.full(3, np.inf))
     return [hot[inv[off[k]:off[k + 1]]] & ((Ps[k] >= lo) & (Ps[k] <= hi)).all(1) for k in range(len(prs))]
 
 
@@ -244,6 +244,75 @@ def backing(o):
     glb_add_clips.write(o.out, js, b)
 
 
+def _qmul(a, b):
+    """Quaternion product a*b, glTF order (x, y, z, w), rows broadcast."""
+    ax, ay, az, aw = np.moveaxis(np.asarray(a, float), -1, 0)
+    bx, by, bz, bw = np.moveaxis(np.asarray(b, float), -1, 0)
+    return np.stack([aw * bx + ax * bw + ay * bz - az * by, aw * by - ax * bz + ay * bw + az * bx,
+                     aw * bz + ax * by - ay * bx + az * bw, aw * bw - ax * bx - ay * by - az * bz], -1)
+
+
+def abduct(o):
+    """r33, review D1 (the thick goo arm's inner edge held 2.4 cm inside the right thigh through the run loop, f0/f20):
+    the goo shoulder (Meshy RightArm) turned DEG further out from the body, about the rest pose's forward axis (+z), in
+    the named clips only. Key k: q' = Qp^-1 * R * Qp * q, Qp = the parent chain's rest rotation. No mesh or weight
+    changes (r29's mesh push made the clips worse)."""
+    js, b = glb_add_clips.read(o.inp)
+    nodes = js["nodes"]
+    bone = next(i for i, n in enumerate(nodes) if n.get("name") == o.bone)
+    parent = {c: i for i, n in enumerate(nodes) for c in n.get("children", [])}
+    qp, i = np.r_[0.0, 0.0, 0.0, 1.0], bone
+    while i in parent:
+        i = parent[i]
+        qp = _qmul(nodes[i].get("rotation", [0, 0, 0, 1]), qp)
+    h = np.radians(-o.abduct) / 2  # (the goo arm hangs on the -x side: out = negative turn about +z)
+    q = _qmul(_qmul(qp * np.r_[-1, -1, -1, 1], np.r_[0.0, 0.0, np.sin(h), np.cos(h)]), qp)
+    for an in js["animations"]:
+        if an["name"] not in o.clips.split(","):
+            continue
+        for ch in an["channels"]:
+            if ch["target"].get("node") == bone and ch["target"]["path"] == "rotation":
+                sm = an["samplers"][ch["sampler"]]
+                k = _qmul(q, acc(js, b, sm["output"]).astype(float)).astype(np.float32)
+                sm["output"] = add_acc(js, b, k, 5126, "VEC4")
+                print("%s: %s %d rotation keys turned %.1f deg out" % (an["name"], o.bone, len(k), o.abduct))
+    b = compact(js, b)
+    js["buffers"][0]["byteLength"] = len(b)
+    glb_add_clips.write(o.out, js, b)
+
+
+PACK_LOW, PACK_BACK = 1.42, -0.34  # m, rest: the pack's base band and its face against Grimble's back
+
+
+def pack_ink(o):
+    """r33, review D2/D4 (black wedge under the pack base in crouch, black square in the pack bottom in Attack): the
+    pack prims carry no COLOR_0, so the ink shell runs at full room on the base and the face against the back; seen
+    from below or behind its dark back face shows past the edge, and through the open rim the culled inside shows
+    the shell. Ink room 0 on the base band (y < PACK_LOW) and the back-facing side (z > PACK_BACK), and a
+    reversed-winding backing (same vertices) there and on the open rim, so a gap shows pack wood instead of ink."""
+    js, b = glb_add_clips.read(o.inp)
+    prims = js["meshes"][0]["primitives"]
+    for pi, pr in enumerate(list(prims)):
+        if js["materials"][pr["material"]]["name"] != PACK:
+            continue
+        P = acc(js, b, pr["attributes"]["POSITION"]).astype(float)
+        F = acc(js, b, pr["indices"]).reshape(-1, 3).astype(np.int64)
+        low = (P[:, 1] < PACK_LOW) | (P[:, 2] > PACK_BACK)
+        ov = _open_verts(js, b, [pr], box=False)[0]
+        C = np.ones((len(P), 4), np.float32)
+        C[low | ov, 3] = 0.0
+        pr["attributes"] = dict(pr["attributes"], COLOR_0=add_acc(js, b, C, 5126, "VEC4"))
+        zone = (low | ov)[F].any(1)
+        Cb = C.copy()
+        Cb[:, 3] = 0.0  # (the backing's own shell, coincident with the pack face, would z-fight black)
+        prims.append(dict(pr, attributes=dict(pr["attributes"], COLOR_0=add_acc(js, b, Cb, 5126, "VEC4")), indices=add_acc(js, b, F[zone][:, [0, 2, 1]].astype(np.uint32).ravel(), 5125,
+                                               "SCALAR", 34963)))
+        print("prim %d %s: %d tris, ink off on %d verts (%d open), backing %d" % (pi, PACK, len(F), (low | ov).sum(),
+                                                                                ov.sum(), zone.sum()))
+    js["buffers"][0]["byteLength"] = len(b)
+    glb_add_clips.write(o.out, js, b)
+
+
 def main():
     ap = argparse.ArgumentParser()
     grp = ap.add_mutually_exclusive_group(required=True)
@@ -251,6 +320,8 @@ def main():
     grp.add_argument("--pack-tex", action="store_true")
     grp.add_argument("--relax", action="store_true")
     grp.add_argument("--backing", action="store_true")
+    grp.add_argument("--abduct", type=float, help="r33: deg the goo shoulder turns out in --clips")
+    grp.add_argument("--pack-ink", action="store_true", help="r33: no ink + backing on the pack base and open rim")
     ap.add_argument("out")
     ap.add_argument("inp")
     ap.add_argument("meshy", nargs="?")
@@ -264,8 +335,13 @@ def main():
     ap.add_argument("--whole", default="", help="--backing: materials backed all over (comma list)")
     ap.add_argument("--open", action="store_true", help="--backing: also back triangles on open edges, no ink there")
     ap.add_argument("--ring", type=int, default=1, help="--backing: rings of triangles round each fold")
+    ap.add_argument("--mat", default=PACK, help="--pack-export/--pack-tex: the material (r33: metal-fist)")
+    ap.add_argument("--clips", default="run", help="--abduct: comma list of clips")
+    ap.add_argument("--bone", default="RightArm", help="--abduct: the goo shoulder (Meshy Right = goo side)")
     o = ap.parse_args()
-    (pack_export if o.pack_export else pack_tex if o.pack_tex else backing if o.backing else relax)(o)
+    stages = (("pack_export", pack_export), ("pack_tex", pack_tex), ("backing", backing), ("pack_ink", pack_ink))
+    run = next((f for k, f in stages if getattr(o, k)), abduct if o.abduct is not None else relax)
+    run(o)
 
 
 if __name__ == "__main__":
