@@ -45,6 +45,7 @@ func start() -> void:
 	if talking() or not is_instance_valid(hob.node):
 		return
 	var h = hob.h
+	_ensure_look()
 	var first := not bool(FarmBuilder.state().get("met", false))
 	var ids := FarmBuilder.draw_up()
 	FarmTutorial.event("hob")
@@ -177,11 +178,15 @@ func _screen_clear(shown: bool) -> void:
 		label.modulate.a = 1.0 if shown else 0.0
 
 # ------------------------------------------------------------------ every frame
-func tick(dt: float) -> void:
-	var h = hob.h
+## The camera look node is made on first use (a talk can open before the first tick).
+func _ensure_look() -> void:
 	if look == null:
 		look = CamLook.new()
-		h.add_child(look)
+		hob.h.add_child(look)
+
+func tick(dt: float) -> void:
+	var h = hob.h
+	_ensure_look()
 	look.watching = busy()
 	_lock_while_moving(h)
 	if talking():
