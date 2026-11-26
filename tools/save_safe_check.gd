@@ -28,7 +28,7 @@ func run(main_node: Node) -> void:
 	Save.load_game()
 	ok(String(Save.d.get("name", "")) == "Keeper", "a clean save loads back", String(Save.d.get("name", "")))
 	var full := FileAccess.get_file_as_string(p)
-	_write(p, full.substr(0, full.length() / 2))
+	_write(p, full.substr(0, int(full.length() / 2.0)))
 	Save.load_game()
 	var got := String(Save.d.get("name", ""))
 	ok(got in ["Keeper", "Older"], "a save cut short mid-write loads the last whole one", got)

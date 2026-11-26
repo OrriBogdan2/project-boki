@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dk8s5xbs7gq55"
-path="res://.godot/imported/orchisloth_orchisloth_normal.webp-50d61d292583af9ff8dfc8d83d734cd9.ctex"
+path.bptc="res://.godot/imported/orchisloth_orchisloth_normal.webp-50d61d292583af9ff8dfc8d83d734cd9.bptc.ctex"
+path.astc="res://.godot/imported/orchisloth_orchisloth_normal.webp-50d61d292583af9ff8dfc8d83d734cd9.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "7076c0920ecb85319df7511f90a48363"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/orchisloth/orchisloth_orchisloth_normal.webp"
-dest_files=["res://.godot/imported/orchisloth_orchisloth_normal.webp-50d61d292583af9ff8dfc8d83d734cd9.ctex"]
+dest_files=["res://.godot/imported/orchisloth_orchisloth_normal.webp-50d61d292583af9ff8dfc8d83d734cd9.bptc.ctex", "res://.godot/imported/orchisloth_orchisloth_normal.webp-50d61d292583af9ff8dfc8d83d734cd9.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

@@ -1,5 +1,16 @@
 # Grimble, the Scrap King (id and files stay `dredge`): import note, v2 (the owner's locked redesign, 2026-11-07)
 
+**Hook arm hangs (2026-11-23, ext/grimble-hook-1123):** the owner: "mostly issues with placement of the hook arm". The clips
+were keyed for a thin arm, but the goo arm and crescent run ~1 m from shoulder to hook tip, so their swing threw the crescent
+far out from his side: idle held it 20 deg out and 39 deg forward of the hips (stance 26/43, crouch_idle 46/62), and run_f
+trailed it up to 70 deg out and 82 deg back in model space. `tools/art1/glb_arm_hang.py` (no Blender, rotation keys only)
+slerps upper_arm.R, forearm.R and hand.R toward rest (0.7; run/walk 0.3/0.6/0.7) in the 28 idle, stance, crouch, hit, land,
+stun, shot, drink, flex, emote, downed, jump, fall, run and walk clips, then turns the shoulder->hook line 0.6 (run/walk
+0.65) of the way to straight down (0.15, -1, 0.1). Model space after: idle 7 deg out, 8 back; stance 7/7; run_f 14/25
+(swing 17..29). The reach, throw, reel, pullend, anchor, quake, lunge, pounce, dive, blast, ledge, mantle, glide, fusion,
+death, revive and stomp clips keep their keys. Mesh, weights and every other bone are unchanged (left hand, head, hips,
+feet: 0.000 m). Stretch: worst still 8.52 (ledge).
+
 **No floor puddle (2026-11-17, ext/grimble-puddle-1117):** the owner: "we can remove grimbles goo puddle if it helps.
 can just have it drip off him a bit on that arm". The puddle's vertices were split between `hook` and `foot.R`, so it tore into
 dark spikes when the arm moved. The master is now the 11-17 gun-hand pick minus the puddle
@@ -39,7 +50,8 @@ with everything (14.9k). One 2048 atlas, 6 slots: skin, cloth, leather, metal, b
     ~/meshy/grimble_v2/build.sh source                   # grimble_source.py -> grimble_art1.py -> grimble_clips.py; INSTALL=1 copies the glb here
 
 - **Art:** briefs/art-refs/grimble_v2/ (ext/agent-briefs): grimble_v2_turnaround.jpg (FINAL) and grimble_v2_master_sheet.jpg; index.md's
-  "Canon notes for 3D and animation" win. No nose or nostrils; a three-lens brass loupe over his right eye; the left eye a smug squint.
+  "Canon notes for 3D and animation" win, except the face: the owner's 11-09 turnaround gives him a short flat snub nose with two
+  nostrils. A three-lens brass loupe over his right eye; the left eye a smug squint.
 - **Scan fit (grimble_source.py):** the limbs keep the scan's spread and lean and take the rig's joint heights (moved onto the rig's narrow
   arms and wide hips, the hook hung through his right leg). Past a bone's ends the scan keeps its own scale, so the hook and the gauntlet
   keep their shape. The hunch stays: the head and neck keep the scan's lean ahead of the hips, and all of the head rides `head`.
@@ -48,7 +60,8 @@ with everything (14.9k). One 2048 atlas, 6 slots: skin, cloth, leather, metal, b
   anchor_claw and anchor_hook_tip sit on its tip. The Abyssal Hand is this arm: while it is out, `WardenReach` (data `reach`) lays upper_arm.R and forearm.R on the line to the hook and stretches forearm.R, so the hand and everything on `hook` (the slime hand, the crescent) sit at the tip (owner playtest 11-11).
   collapses to the wrist and the stretched arm grows from there; it is back when the arm snaps back.
 - **Left hand:** the scan's gauntlet, rigid on hand.L; fingers.L, fingers2.L and thumb.L stay for the clips, unweighted. anchor_fist on its knuckles.
-- **Face (grimble_paint.scan_face):** the scan's blurred paint fixed: a heavy lid over the left eye (the squint), silver scrap-metal teeth,
+- **Face (grimble_paint.scan_face):** the snub nose is sculpted (grimble_sculpt nose(), rigid on `head`, painted with the face's
+  own scan skin and two dark nostrils, grimble_paint.nose). The scan's blurred paint fixed: a heavy lid over the left eye (the squint), silver scrap-metal teeth,
   the gold tooth, purple gums. The loupe is scripted (sculpt monocle(), three glowing lens discs, the gold chain on spring_hangmono).
 - **Veins:** found on the atlas by contrast (more purple than the skin round them) and painted VEIN_KEY; warden_look's skin paint_glow keys
   on that colour, so they glow. Bone spurs are the scan's. The sludge drips and puddles are not geometry.

@@ -40,7 +40,9 @@ func ok(cond: bool, what: String) -> void:
 
 
 func run(main: Node) -> void:
+	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	Save.no_write = true
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	for arch in Arch.ORDER:
 		await _hunter(main, String(arch))
 	print("BANK DONE, failures: ", bad)
@@ -58,7 +60,7 @@ func _phase(t: float) -> String:
 func _hunter(main: Node, arch: String) -> void:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(
+	m.start(
 		{
 			"training": true,
 			"teams": 2,
@@ -85,7 +87,7 @@ func _hunter(main: Node, arch: String) -> void:
 	for i in 20:
 		m.step(Match.DT)
 	h.teleport(h.pos + Vector3(0, HEIGHT, 0))
-	var sync := h.model.get_node_or_null("Warden/Sync") as WardenGlb.Sync
+	var sync := WardenGlb.layers(h.model)  # (the contract's Sync, or a Meshy-native model's Native)
 	if sync:
 		sync.set_process(false)
 	var k := h.kin as Kin
@@ -118,7 +120,7 @@ func _hunter(main: Node, arch: String) -> void:
 		m.step(Match.DT)
 		h.render(Match.DT, 1.0)
 		if sync:
-			sync._process(Match.DT)
+			sync.call(&"_process", Match.DT)
 		if k:
 			k.render(Match.DT, 1.0)
 		var bank := rad_to_deg(h.anim.glide_bank)

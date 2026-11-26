@@ -23,7 +23,7 @@ func run(main: Node) -> void:
 	main.add_child(m)
 	var who := arch if arch != "" else "juggernaut"
 	# (the Hero's own class and weapon: a Hero of another class than the save's would not take)
-	await m.start({"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true,
+	m.start({"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true,
 		"arch": who, "cls": Arch.weight(who), "weapon": Arch.signature(who)})
 	m.set_process(false)
 	var fade = main.get("fade")
@@ -47,7 +47,7 @@ func run(main: Node) -> void:
 	m.cam.snap(P.pos + Vector3(0, 0, GAP * (rows - 1) * 0.5 - 2.0))
 	Sfx.listener = P.pos
 	for i in moves.size():
-		var at := base + Vector3(GAP * (i % PER_ROW), 0, GAP * (i / PER_ROW))
+		var at := base + Vector3(GAP * (i % PER_ROW), 0, GAP * (int(i / float(PER_ROW))))
 		V.play(P, String(moves[i]), at, Vector2(1, 0), {"r": 1.6, "len": 2.6, "w": 1.0, "k": 1.0,
 			"to": at + Vector3(2.4, 1.0, 0.0)})
 	print("GALLERY moves: %s" % ", ".join(moves))

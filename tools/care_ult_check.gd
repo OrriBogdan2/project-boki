@@ -338,14 +338,21 @@ func rimewright() -> void:
 	var disc_sm := ((K.ulk().held["rink"]["n"] as Node3D).get_node("Disc") as MeshInstance3D).material_override
 	var flash1 := float((disc_sm as ShaderMaterial).get_shader_parameter("flash"))
 	ok("tm X: the opening flash is short (gone by %.1f s)" % UltLook.RINK_PULSE_T, flash1 < 0.01, "%.2f" % flash1)
-	# care_disc's body alpha at the centre is fill * 0.18 * 1.6; the zone rule caps it at 0.25 (docs/VFX_QUALITY.md)
+	# the rink body alpha at the centre is fill * 0.04 * 1.6 (care_disc); the zone rule caps it at 0.25
 	var rink_max := UltLook.RINK_FILL * 2.0
 	var disc := (K.ulk().held["rink"]["n"] as Node3D).get_node("Disc") as MeshInstance3D
 	var live := float((disc.material_override as ShaderMaterial).get_shader_parameter("fill"))
 	ok("tm X: the rink is a lit rim over a soft inside (no screen-wide cyan), even near the crash",
-			rink_max * 0.18 * 1.6 <= 0.25 and live <= rink_max + 0.001, "fill %.2f (max %.2f)" % [live, rink_max])
+			rink_max * 0.04 * 1.6 <= 0.25 and live <= rink_max + 0.001, "fill %.2f (max %.2f)" % [live, rink_max])
 	ok("tm X: no damage before the crash", T.hp >= h0 - 6.0, "-%.0f" % (h0 - T.hp))
-	step(m, float(xd["hold"]) - 2.2)     # 2.35 s stepped so far: look 0.15 s after the crash
+	var ch0 := K.ch_rmb
+	P.inp["sec"] = true
+	step(m, 0.05)
+	P.inp["sec"] = false
+	step(m, 0.3)
+	ok("tm X: RMB in the shell is refused: no charge spent, no spear (item 65; the Cast into cast table)",
+		absf(K.ch_rmb - ch0) < 0.001 and K.throw_t < 0.0, "charges %.2f -> %.2f" % [ch0, K.ch_rmb])
+	step(m, float(xd["hold"]) - 2.55)   # 2.7 s stepped so far with the 0.35 s RMB press: look 0.15 s after the crash
 	ok("tm X: it cracks open by itself at 3.3 s: damage and an ice-block stun", K.rime.is_empty()
 		and int(K.stats["crashes"]) == 1 and h0 - T.hp > float(xd["dmg"]) * K.power("ult") * 0.95 and T.stun_t > 0.4,
 		"dmg %.0f stun %.2f" % [h0 - T.hp, T.stun_t])

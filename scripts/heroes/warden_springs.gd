@@ -8,24 +8,25 @@ extends RefCounted
 ## swings out of a turn and settles when she stands. The last bone is the tip (no skin of its own).
 
 const PREFIX := "spring_"
-const PULL := 0.2           # the share of the way back to the rest shape per 1/60 s, at the root
-const PULL_TIP := 0.07      # and at the tip
-const DAMP := 0.84          # the velocity kept per 1/60 s
-const WIND := 0.09          # m: how far a scarf tail's tip ripples at rest
-const FLOOR_CHAIN := PREFIX + "scarftail_tail"     # a tail lies on the ground, not through it (the feet's height)
-const FLOOR_UP := 0.04      # m its joints stay over the model's origin
-const FOLD := 0.75          # radians a folded wing tips back about the side axis through its root
-const TUCK := 0.8           # and turns in behind the back about the vertical
-const FLARE := 1.15         # radians a flared wing swings out to her side about the front-back axis
-const RAISE := 2.4          # radians a hanging wing (Sable's moth wings) swings back and up about the side axis
-							# through its root when raised: tip up and leaning back, clear of the coat and braid
-const SPREAD := 0.45        # and then out to her side about the front-back axis (the open V of a moth's wings)
+const PULL := 0.2  # the share of the way back to the rest shape per 1/60 s, at the root
+const PULL_TIP := 0.07  # and at the tip
+const DAMP := 0.84  # the velocity kept per 1/60 s
+const WIND := 0.09  # m: how far a scarf tail's tip ripples at rest
+const FLOOR_CHAIN := PREFIX + "scarftail_tail"  # a tail lies on the ground, not through it (the feet's height)
+const FLOOR_UP := 0.04  # m its joints stay over the model's origin
+const FOLD := 0.75  # radians a folded wing tips back about the side axis through its root
+const TUCK := 0.8  # and turns in behind the back about the vertical
+const FLARE := 1.15  # radians a flared wing swings out to her side about the front-back axis
+const RAISE := 2.4  # radians a hanging wing (Sable's moth wings) swings back and up about the side axis
+# through its root when raised: tip up and leaning back, clear of the coat and braid
+const SPREAD := 0.45  # and then out to her side about the front-back axis (the open V of a moth's wings)
 var skel: Skeleton3D
-var chains: Array = []      # {ids: bone indices root -> tip, pts, prev: joint positions (world), wing}
-var fold := 0.0             # wing chains folded (1) or flared, a hanging one raised (-1) (WardenGlb.WING_FOLD)
+var chains: Array = []  # {ids: bone indices root -> tip, pts, prev: joint positions (world), wing}
+var fold := 0.0  # wing chains folded (1) or flared, a hanging one raised (-1) (WardenGlb.WING_FOLD)
 var wind_t := 0.0
-var calm := false           # no ripple (a check measuring how a chain settles)
-var still := false          # no ripple: a statue pose (data "still": Claire's Rimelock)
+var calm := false  # no ripple (a check measuring how a chain settles)
+var still := false  # no ripple: a statue pose (data "still": Claire's Rimelock)
+
 
 func setup(skeleton: Skeleton3D) -> void:
 	skel = skeleton
@@ -45,14 +46,42 @@ func setup(skeleton: Skeleton3D) -> void:
 			# (a "hang" chain, spring_hang<name>_<i>: a chain or rope whose rest shape is straight down from its
 			# root, not riding its parent: Kael's Warchain hangs from his fist whichever way the arm points;
 			# a "wing" chain folds back while the Warden skates, WING_FOLD)
-			chains.append({"ids": ids, "pts": PackedVector3Array(), "prev": PackedVector3Array(),
-				"hang": skel.get_bone_name(bi).begins_with(PREFIX + "hang"),
-				"wing": skel.get_bone_name(bi).begins_with(PREFIX + "wing"),
-				"wind": skel.get_bone_name(bi).begins_with(PREFIX + "scarftail"),
-				"floor": skel.get_bone_name(bi).begins_with(FLOOR_CHAIN)})
+			var nm := skel.get_bone_name(bi)
+			chains.append(
+				_chain(
+					ids,
+					{
+						"hang": nm.begins_with(PREFIX + "hang"),
+						"wing": nm.begins_with(PREFIX + "wing"),
+						"wind": nm.begins_with(PREFIX + "scarftail"),
+						"floor": FLOOR_UP if nm.begins_with(FLOOR_CHAIN) else 0.0
+					}
+				)
+			)
+
+
+## Chains on bones that carry no spring_ name (a Meshy skeleton's own coat bones, WardenNative data "springs"):
+## each {"bones": [names root -> tip], "hang": bool, "floor": m its joints stay over the model's origin}. The tip
+## rides its parent; the others swing.
+func setup_named(skeleton: Skeleton3D, specs: Array) -> void:
+	skel = skeleton
+	for spec: Dictionary in specs:
+		var ids: Array = Array(spec["bones"]).map(func(n): return skel.find_bone(String(n)))
+		if ids.size() >= 2 and not ids.has(-1):
+			chains.append(_chain(ids, {"hang": bool(spec.get("hang", false)), "floor": float(spec.get("floor", 0.0))}))
+
+
+func _chain(ids: Array, flags: Dictionary) -> Dictionary:
+	var ch := {"ids": ids, "pts": PackedVector3Array(), "prev": PackedVector3Array()}
+	for k in ["hang", "wing", "wind"]:
+		ch[k] = bool(flags.get(k, false))
+	ch["floor"] = float(flags.get("floor", 0.0))  # m over the model's origin (0: no floor)
+	return ch
+
 
 func _spring(bi: int) -> bool:
 	return skel.get_bone_name(bi).begins_with(PREFIX)
+
 
 func step(dt: float) -> void:
 	if chains.is_empty() or not skel.is_inside_tree():
@@ -81,9 +110,10 @@ func step(dt: float) -> void:
 				turn = Transform3D(Basis(Vector3.RIGHT, up * FOLD * fold) * tip_in, Vector3.ZERO)
 			elif up > 0.0:
 				turn = Transform3D(Basis(Vector3.BACK, up * out * FLARE * fold), Vector3.ZERO)
-			else:      # (a hanging wing raises: back past horizontal, then out; WardenWings)
-				turn = Transform3D(Basis(Vector3.BACK, out * SPREAD * fold) * Basis(Vector3.RIGHT, RAISE * fold),
-						Vector3.ZERO)
+			else:  # (a hanging wing raises: back past horizontal, then out; WardenWings)
+				turn = Transform3D(
+					Basis(Vector3.BACK, out * SPREAD * fold) * Basis(Vector3.RIGHT, RAISE * fold), Vector3.ZERO
+				)
 			turn = Transform3D(Basis.IDENTITY, r0.origin) * turn * Transform3D(Basis.IDENTITY, -r0.origin)
 		for bi in ids:
 			var r: Transform3D = turn * base * skel.get_bone_global_rest(int(bi))
@@ -98,12 +128,11 @@ func step(dt: float) -> void:
 				want[i] += xf.basis * ripple * WIND * u * u
 		if ch["hang"]:
 			for i in range(1, n):
-				var seg := (xf * (rest[i] as Transform3D).origin).distance_to(
-						xf * (rest[i - 1] as Transform3D).origin)
+				var seg := (xf * (rest[i] as Transform3D).origin).distance_to(xf * (rest[i - 1] as Transform3D).origin)
 				want[i] = want[i - 1] + Vector3.DOWN * seg
 		var pts: PackedVector3Array = ch["pts"]
 		var prev: PackedVector3Array = ch["prev"]
-		if pts.size() != n or pts[0].distance_to(want[0]) > 1.5:      # (the first frame, or a teleport)
+		if pts.size() != n or pts[0].distance_to(want[0]) > 1.5:  # (the first frame, or a teleport)
 			pts = want.duplicate()
 			prev = want.duplicate()
 		for i in range(1, n):
@@ -113,7 +142,7 @@ func step(dt: float) -> void:
 			p += v
 			var pull := lerpf(PULL, PULL_TIP, float(i) / float(n - 1))
 			if bool(ch["wing"]) and fold < -0.3:
-				pull = lerpf(pull, 1.0, 0.85)      # (flared through a flip: the wing turns with her, no twist)
+				pull = lerpf(pull, 1.0, 0.85)  # (flared through a flip: the wing turns with her, no twist)
 			pts[i] = p.lerp(want[i], 1.0 - pow(1.0 - pull, k))
 		pts[0] = want[0]
 		prev[0] = want[0]
@@ -121,21 +150,21 @@ func step(dt: float) -> void:
 			var d := pts[i] - pts[i - 1]
 			var ln := want[i].distance_to(want[i - 1])
 			pts[i] = pts[i - 1] + d.normalized() * ln if d.length() > 1e-5 else want[i]
-			if ch["floor"]:
-				pts[i].y = maxf(pts[i].y, xf.origin.y + FLOOR_UP)
+			if float(ch["floor"]) > 0.0:
+				pts[i].y = maxf(pts[i].y, xf.origin.y + float(ch["floor"]))
 		ch["pts"] = pts
 		ch["prev"] = prev
 		for j in n - 1:
 			var r: Transform3D = rest[j]
 			var a := inv * pts[j]
 			var from := ((rest[j + 1] as Transform3D).origin - r.origin).normalized()
-			if ch.get("own_rest", false):       # (data "hang_own_rest": the fist's turn doesn't twist it edge on)
+			if ch.get("own_rest", false):  # (data "hang_own_rest": the fist's turn doesn't twist it edge on)
 				r = skel.get_bone_global_rest(int(ids[j]))
 				from = (skel.get_bone_global_rest(int(ids[j + 1])).origin - r.origin).normalized()
 			var to := (inv * pts[j + 1] - a).normalized()
 			var c := from.dot(to)
 			var q := Quaternion.IDENTITY
-			if c <= -0.999:      # (a chain flipped end for end: Quaternion(from, to) has no answer there)
+			if c <= -0.999:  # (a chain flipped end for end: Quaternion(from, to) has no answer there)
 				var side := Vector3.RIGHT if absf(from.x) < 0.9 else Vector3.FORWARD
 				q = Quaternion(from.cross(side).normalized(), PI)
 			elif c < 0.99999:

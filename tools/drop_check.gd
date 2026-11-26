@@ -64,7 +64,7 @@ func _plan_groups(had: int, held := false) -> PackedStringArray:
 	if m: m.queue_free()
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242})
+	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242})
 	m.set_process(false)
 	for i in 3:
 		m.step(Match.DT)
@@ -126,7 +126,8 @@ func _steering() -> void:
 		prev = hv
 		tmax = maxf(tmax, hv.length())
 	ok(snap <= Loco.air_accel + 1.0, "dive steering ramps (peak %.1f m/s^2)" % snap)
-	ok(tmax > Hunter.DROP_SPEED * 1.4 and tmax <= Hunter.DIVE_SPEED + 0.1, "the dive tops out at %.1f m/s" % tmax)
+	ok(tmax > HunterFeel.drop_speed * 1.4 and tmax <= HunterFeel.dive_speed + 0.1,
+			"the dive tops out at %.1f m/s" % tmax)
 	P.inp["move"] = Vector2.ZERO
 	m.step(Match.DT)
 	var left := Vector2(P.vel.x, P.vel.z).length()
@@ -224,12 +225,12 @@ func _rocket_steer() -> void:
 			_keys(P, mv, false, false)
 			m.step(Match.DT)
 			t += Match.DT
-			var want := Loco.air_step(hv0, mv, Hunter.DIVE_SPEED, Match.DT)
+			var want := Loco.air_step(hv0, mv, HunterFeel.dive_speed, Match.DT)
 			worst = maxf(worst, want.distance_to(Vector2(P.vel.x, P.vel.z)))
 			if mv.x < 0.0 and turn_t < 0.0 and P.vel.x < 0.0:
 				turn_t = t - 0.6
 	ok(P.diving and worst < 0.01,
-			"free-fall steering is Loco.air_step at %.0f m/s (worst step off by %.3f m/s)" % [Hunter.DIVE_SPEED, worst])
+			"free-fall steering is Loco.air_step at %.0f m/s (worst off by %.3f m/s)" % [HunterFeel.dive_speed, worst])
 	ok(turn_t > 0.0 and turn_t < 0.5, "counter-steer turns the fall around in %.2f s" % turn_t)
 
 ## A fresh press pulls the glider wherever you are; Space or the glide key held from before never does.

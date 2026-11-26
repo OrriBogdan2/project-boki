@@ -6,14 +6,20 @@ extends RefCounted
 const GOAL_COL := Color("ffd27a")
 
 ## A "Start here" stamp in the card's top-right corner for a starter (ClassUnlock.start_here), over the card
-## rather than a line in it.
-static func add_start_chip(card: PanelContainer, id: String) -> void:
+## rather than a line in it. At a big Text size the stamp would cover the name, so with `col` (the card's text
+## column) it takes the top line of that column instead.
+static func add_start_chip(card: PanelContainer, id: String, col: Container = null) -> void:
 	if not ClassUnlock.start_here(id):
 		return
 	var chip := UI.tag("Start here", UI.GOLD)
 	chip.name = "StartHere"
-	chip.size_flags_horizontal = Control.SIZE_SHRINK_END
 	chip.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	if col != null and UI.text_k > 1.0:
+		chip.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		col.add_child(chip)
+		col.move_child(chip, 0)
+		return
+	chip.size_flags_horizontal = Control.SIZE_SHRINK_END
 	card.add_child(chip)
 
 ## The Hunter's portrait, `px` square: its Warden's painted face (Portraits.Pic), or with `body` its
@@ -53,10 +59,11 @@ static func challenge_block(id: String, width := 190.0) -> VBoxContainer:
 	row.add_child(UI.label("%d/%d" % [int(gp["have"]), int(gp["need"])], 12, UI.MUTED))
 	v.add_child(row)
 	var needed := ClassUnlock.open_needed(id)
-	var tier_line := "%s challenge" % ClassUnlock.tier(id).capitalize()
+	var tier_line := ("%s challenge" % ClassUnlock.tier(id).capitalize()) if ClassUnlock.tier(id) != "" else ""
 	if needed > ClassUnlock.open_ids().size():
-		tier_line += "  ·  opens once %d Relics are open" % needed
-	v.add_child(UI.label(tier_line, 12, UI.MUTED))
+		tier_line += "%sopens once %d Relics are open" % ["  ·  " if tier_line != "" else "", needed]
+	if tier_line != "":
+		v.add_child(UI.label(tier_line, 12, UI.MUTED))
 	return v
 
 ## A Hunter's mastery: its level, then each goal with its counter and the cosmetic it gives. Tagged
@@ -97,7 +104,6 @@ static func _mastery_row(id: String, i: int, width: float) -> Control:
 	if done:
 		reward_label.add_theme_font_override("font", UI.semi)
 	row.add_child(reward_label)
-	row.tooltip_text = "%s\nReward: %s%s" % [String(g["text"]), reward, " (earned)" if done else ""]
 	return row
 
 ## A Hunter's kit in one tooltip: name, dash, passive, right click, signature, and fusion while it is on.

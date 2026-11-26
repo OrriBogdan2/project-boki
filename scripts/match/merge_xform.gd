@@ -36,7 +36,7 @@ static func contact(h: Hunter, form: Dictionary) -> void:
 	pop_fx(m, h.pos, form)
 	m.sfx(String(sn["xform"]), h.pos, SOUND_RANGE_DB, float(sn["pitch"]))
 	m.sfx("ult", h.pos, SOUND_RANGE_DB - 2.0, float(sn["pitch"]))
-	Shake.incoming_big(m, h.pos, 0.7, h)
+	Shake.big(m, h.pos, "fuse", h)
 	if h.is_local() and m.cam:
 		m.cam.punch(0.14)
 		if m.hud:
@@ -70,7 +70,7 @@ static func separate(h: Hunter, form: Dictionary, why: String) -> void:
 		m.fx.burst(h.pos + Vector3(0, 1.0, 0), col, 30, 7.0, 0.6)
 		m.fx.spark(h.pos + Vector3(0, 1.0, 0), Vector3.UP, Color(col).lerp(Color.WHITE, 0.4), 20, 9.0, 180.0, 0.45, 8.0, 1.2)
 		m.sfx("armor_break", h.pos, 2.0, 0.9)
-		Shake.incoming_big(m, h.pos, 0.5, h)
+		Shake.big(m, h.pos, "fuse_shell_break", h)
 	else:
 		m.fx.burst(h.pos + Vector3(0, 1.0, 0), col, 18, 5.0, 0.5)
 		m.sfx(end_cue(why), h.pos, -2.0)
@@ -167,7 +167,7 @@ static func on_remote_look(h: Hunter, form: Dictionary) -> void:
 	var sn := _snd(form)
 	pop_fx(m, h.pos, form)
 	m.sfx(String(sn["xform"]), h.pos, SOUND_RANGE_DB, float(sn["pitch"]))
-	Shake.incoming_big(m, h.pos, 0.4, h)
+	Shake.big(m, h.pos, "fuse", h)
 
 ## A remote hunter's cast ("mcast" event): the tell and the hit, drawn here. extra = "slot|x|z|radius|seconds".
 static func on_cast(m: Match, h: Hunter, at: Vector3, extra: String) -> void:
@@ -185,7 +185,7 @@ static func on_cast(m: Match, h: Hunter, at: Vector3, extra: String) -> void:
 			if not MergeSfx.play(h, "cast"):
 				m.sfx("warn", h.pos, -2.0, 0.7)
 			if rad > 0.5:
-				var tele: Node3D = m.fx.telegraph_circle(tgt, rad, Color(col, 0.9))
+				var tele: Node3D = m.fx.telegraph_circle(tgt, rad, Color(col, 0.9), SideColor.order(m, h))
 				var tw := tele.create_tween()
 				tw.tween_method(func(k: float): if is_instance_valid(tele): m.fx.telegraph_progress(tele, k), 0.0, 1.0, maxf(0.3, secs * 0.6))
 				tw.tween_callback(func(): if is_instance_valid(tele): m.fx.end_telegraph(tele))

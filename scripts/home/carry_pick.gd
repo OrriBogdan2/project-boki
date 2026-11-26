@@ -1,6 +1,6 @@
 class_name CarryPick
 extends RefCounted
-## Home side of the carry rule (docs/decisions/0061-carry-pick.md): at the expedition portal you pick
+## Home side of the carry rule (docs/decisions/0146-carry-pick.md): at the expedition portal you pick
 ## a lead Boki (Save "active") and an optional second (Save "active2", empty unless you pick one).
 ## One selectable Boki means you go with one. Cards show the carry passive in one plain line, and say
 ## so when both Boki give the same passive, because it counts once.
@@ -93,6 +93,7 @@ static func card(label_t: String, rec: Dictionary, key: String, on_change: Calla
 		sl.autowrap_mode = TextServer.AUTOWRAP_OFF
 		info.add_child(sl)
 		card.tooltip_text = "%s\nTrust %d" % [passive_line(rec), int(rec["trust"])]
+		HazardCounter.add_row(info, String(rec["species"]))
 		if note != "": info.add_child(UI.label(note, 12, UI.GOOD))
 	row.add_child(info)
 	var next_b := UI.icon_button("next", func(): go.call(1), "Next Boki", 12.0)

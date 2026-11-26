@@ -71,9 +71,11 @@ var air_cast := false        # this play of the move has been in the air ("air_l
 var cur := ""                # the clip on the live channel
 var chan := 0                # which channel is live, 0 or 1
 var xf := 0.0                # the crossfade between the channels (0: channel a)
+var cur_t := -1.0            # s the live channel's clip was last seeked to (-1: it plays on its own)
 var cur_u := ""              # the clip on the live upper-body channel
 var chan_u := 0              # which upper-body channel is live, 0 or 1
 var xf_u := 0.0              # the crossfade between the upper-body channels (0: channel ua)
+var cur_ut := -1.0           # s the live upper-body clip was last seeked to
 var act_w := 0.0             # how much the action owns the body
 var act_out := FADE_LOCO     # s the action takes to let go of the body (longer after a lock-in pose)
 var up_w := 0.0              # how much it owns the upper body only
@@ -84,6 +86,7 @@ var proc_w := 1.0            # how much of the procedural rig is shown
 var busy := false            # the state asks for more than standing or moving this step: a clip or the rig
 var rise_w := 0.0
 var loco_pos := Vector2.ZERO
+var loco_goal := Vector2.ZERO    # where loco_pos is easing to (the velocity against the facing)
 var still_t := 0.0
 var stance_w := 0.0
 var was_air := false
@@ -96,6 +99,7 @@ var climb_was := ""          # "mantle" or "ledge" while the climb state runs; e
 var climb_live := false      # the state is still on
 var hit_seen := 99.0
 var last_emote := ""
+var beats := {}              # "beats": the win, lose and board beats the .glb can play (WardenBeats)
 var head_turn := 0.0         # rad the root (the legs) is turned toward his heading
 var torso_turn := 0.0        # rad the hips (the torso) turn with it: all of it for a "heading" move, none on the aim
 var twist_on := false        # "loco.aim_twist": the legs run the way he goes, the torso stays on the aim
@@ -107,7 +111,10 @@ var root_bi := -1            # the root bone: the heading and HunterAnim's air t
 var lean := 0.0              # rad the root is tipped forward (FEEL)
 var force := {}              # a tool's pick ({clip, t}): skips the state (tools/clip_shots.gd)
 var gait: WardenGait         # the stride and arm swing laid over the walk and run (scripts/heroes/warden_gait.gd)
+var look_y := 0.0            # the model's own scale (Models.hunter's "look_scale"), read on the first move
 var free_arm: WardenFreeArm  # the arm a move leaves unused hangs loose (scripts/heroes/warden_free_arm.gd)
+var steps: WardenSteps       # the feet planting, for the footsteps (scripts/heroes/warden_steps.gd)
+var crouch_steps: WardenSteps  # the same for the crouch layer's sneak ring (null: no crouch)
 var cc: WardenCc             # a rooted torso's strain and a Grounded head's bow (scripts/heroes/warden_cc.gd)
 var out_fade := FADE_LOCO    # s the last action takes to hand back to the legs
 var reach: WardenReach       # an arm a kit stretches out to a point (scripts/heroes/warden_reach.gd), or null
@@ -169,11 +176,11 @@ static func make(model: Node3D, glb: Node3D, sk: Skeleton3D, art_name: String) -
 		return null
 	var players: Array = glb.find_children("*", "AnimationPlayer", true, false)
 	var own: AnimationLibrary = _first_lib(players[0]) if not players.is_empty() else null
-	var lib := own if own else _borrow(String(dd.get("clips_from", "")), sk)
-	if lib == null:
+	var lib_v := own if own else _borrow(String(dd.get("clips_from", "")), sk)
+	if lib_v == null:
 		return null
 	var c := WardenClips.new()
-	if not c._setup(model, glb, sk, dd, lib):
+	if not c._setup(model, glb, sk, dd, lib_v):
 		return null
 	c.stride = WardenStride.make(model, sk, art_name)
 	return c
@@ -222,6 +229,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, clips: A
 	root_bi = WardenSkeleton.find(sk, "root")
 	d = dd
 	lib = clips
+	WardenClipFile.add(lib, glb, sk, d.get("clip_files", []))
 	WardenDerive.add(lib, d.get("derive", {}))
 	var contract: Array = []
 	for b in WardenGlb.BONES:
@@ -242,6 +250,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, clips: A
 		_retime_run(float(d["loco"]["run_cycle"]))
 	WardenGestures.add(lib, sk, glb, (d.get("emotes", {}) as Dictionary).values() \
 			+ (d.get("summon_call", {}) as Dictionary).values())
+	beats = WardenBeats.build(lib, d.get("beats", {}))
 	tree = AnimationTree.new()
 	tree.name = "Clips"
 	glb.add_child(tree)
@@ -259,6 +268,11 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, clips: A
 			cycle if cycle > 0.0 else lib.get_animation(String(lc["run"]["f"])).length,
 			"hips" in d.get("offset_bones", []))
 	free_arm = WardenFreeArm.new(sk, lib, String(d["loco"]["idle"]), d.get("free_arm", {}))
+	var ring: AnimationNodeBlendSpace2D = (tree.tree_root as AnimationNodeBlendTree).get_node("loco")
+	steps = WardenSteps.new(model, tree, ring, lc.get("plants", {}), lib)
+	if d.has("crouch"):
+		var sneak: AnimationNodeBlendSpace2D = (tree.tree_root as AnimationNodeBlendTree).get_node("crouch_loco")
+		crouch_steps = WardenSteps.new(model, tree, sneak, d["crouch"].get("plants", {}), lib, "crouch_loco")
 	cc = WardenCc.new(sk, d.get("cc", {}))
 	reach = WardenReach.make(sk, d)
 	_setup_out()
@@ -314,8 +328,8 @@ func _out(dt: float) -> void:
 			skel.set_bone_pose_scale(b[0], b[1])
 		elif not out:
 			skel.set_bone_pose_scale(b[0], b[1] * k)
-	var busy := act_w > 0.5 or up_w > 0.5
-	out_w = move_toward(out_w, 1.0 if out and not busy else 0.0, OUT_RATE * dt)
+	var busy_v := act_w > 0.5 or up_w > 0.5
+	out_w = move_toward(out_w, 1.0 if out and not busy_v else 0.0, OUT_RATE * dt)
 	if out_w > 0.0:
 		for b in out_pose:
 			var bi := int(b[0])
@@ -543,6 +557,8 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	# (a stomp / a drink runs on the game's clock: the clip is as long as the cycle / the drink, seeked by its phase)
 	for k in ["stomp", "drink"]:
 		var ph := float(s.get(k, -1.0))
+		if ph >= 0.0 and k == "stomp" and not bool(s.get("stomp_own", true)):
+			return {"proc": true}     # a worn stomp style plays on the rig (StompLook)
 		if ph >= 0.0 and st.has(k):
 			var clip := String(st[k])
 			var vel: Vector3 = s.get("vel", Vector3.ZERO)
@@ -553,6 +569,12 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	var lock := float(s.get("lockin_t", -1.0))
 	if lock >= 0.0 and d.has("lockin"):
 		return _lockin_at(lock)
+	var bt := String(s.get("beat", ""))
+	if beats.has(bt):
+		var b: Dictionary = beats[bt]
+		var length := lib.get_animation(String(b["clip"])).length
+		return {"clip": b["clip"], "t": WardenBeats.time_of(length, float(b["loop_from"]), float(s.get("beat_t", 0.0))),
+				"upper": b["upper"]}
 	var em := String(s.get("emote", ""))
 	if em != "" and st.has("emote"):
 		var clip := String((d.get("emotes", {}) as Dictionary).get(em, st["emote"]))
@@ -563,11 +585,11 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 			var vel: Vector3 = s.get("vel", Vector3.ZERO)
 			var moving := Vector2(vel.x, vel.z).length() >= STILL
 			return {"clip": clip, "t": et, "upper": moving or clip.begins_with(WardenGestures.PREFIX)}
-	var call := String((d.get("summon_call", {}) as Dictionary).get(String(s.get("call", "")), ""))
+	var call_v := String((d.get("summon_call", {}) as Dictionary).get(String(s.get("call", "")), ""))
 	var call_t := float(s.get("call_t", 99.0))
-	if lib.has_animation(call) and call_t < lib.get_animation(call).length:
-		return {"clip": call, "t": call_t, "upper": true}  # (KinSummon's call/recall: arms only, legs and aim carry on)
-	land_t += dt
+	if lib.has_animation(call_v) and call_t < lib.get_animation(call_v).length:
+		return {"clip": call_v, "t": call_t,
+				"upper": true}  # (KinSummon's call/recall: arms only, legs and aim carry on)
 	# (the tier HunterAnim.land_tier picked at touchdown: "moving": how long the landing owns the body while he runs
 	# on, so the legs are back on the run before the standing absorb would end; "rate": the clip's speed, a quicker
 	# absorb from the same keys; "w": how much of the land pose shows, the hop's small dip from the drop's full crouch)
@@ -575,7 +597,8 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	var moving := Vector2(vel.x, vel.z).length() >= STILL
 	var hold := float(land.get("moving", land.get("dur", 0.0))) if moving else float(land.get("dur", 0.0))
 	if land_t < hold and bool(s.get("grounded", true)):
-		return {"clip": d["land"]["clip"], "t": land_t * float(land.get("rate", 1.0)), "w": float(land.get("w", 1.0))}
+		return {"clip": d["land"]["clip"], "t": land_t * float(land.get("rate", 1.0)), "w": float(land.get("w", 1.0)),
+				"fade": float(land.get("fade", FADE)), "out": float(land.get("out", FADE_LOCO))}
 	var hit := float(s.get("hit_t", 99.0))
 	var hd: Dictionary = st.get("hit", {})
 	# (a chip hit is only WardenFlinch's lean over the body; the hit clip is a stagger's)
@@ -688,10 +711,12 @@ func _move_clip(km: String, mv: Dictionary, s: Dictionary) -> Dictionary:
 	# to the move's end: no planted stance mid-air, no snap into it on the landing)
 	if bool(mv.get("air_legs", false)) and air_cast:
 		up = true
-	var pick := {"clip": clip, "t": tt, "upper": up, "heading": bool(mv.get("heading", false)),
+	var pick := {
+			"clip": clip, "t": tt, "upper": up, "hold": mv.has("hold_from"), "heading": bool(mv.get("heading", false)),
 			"fade": float(mv.get("fade", FADE)), "out": float(mv.get("fade_out", FADE_LOCO)),
 			"legs_heading": bool(mv.get("legs_heading", false)),
-			"turn_max": float(mv.get("turn_max", HEADING_MAX)), "heading_off": float(mv.get("heading_off", 0.0))}
+			"turn_max": float(mv.get("turn_max", HEADING_MAX)), "heading_off": float(mv.get("heading_off", 0.0))
+	}
 	# ("blend_out": s before the clip's end over which the body goes back to the legs while the clip plays on)
 	var back := float(mv.get("blend_out", 0.0))
 	if back > 0.0 and left <= back:
@@ -710,8 +735,15 @@ static func _time_map(mv: Dictionary, tt: float) -> float:
 			return lerpf(float(pts[i - 1][1]), float(pts[i][1]), k)
 	return float(pts[-1][1])
 
+## The channel a clip takes on one layer: the live one's other when the live one shows, the live one itself when it
+## is the one fading out, so a cancel inside the last fade never snaps a half-shown pose.
+static func _take(live: int, crossfade: float) -> int:
+	var shown := crossfade if live == 1 else 1.0 - crossfade
+	return 1 - live if shown >= 0.5 else live
+
 func step(dt: float) -> void:
 	var s: Dictionary = root.get_meta(STATE, {})
+	land_t += dt          # (ticks under a move too: a landing a move covered is over, not owed)
 	var want := force
 	if want.is_empty():
 		want = _pick(s, dt) if not s.is_empty() else {"proc": true}
@@ -730,29 +762,33 @@ func step(dt: float) -> void:
 		up_w = move_toward(up_w, 0.0, dt / FADE_LOCO)
 	elif not proc and bool(want.get("upper", false)):
 		var clip_u := String(want["clip"])
-		if clip_u != cur_u:
+		var tu := float(want.get("t", 0.0))
+		if clip_u != cur_u or (tu < cur_ut - 0.001 and not bool(want.get("hold", false))):      # (or a recast)
 			cur_u = clip_u
-			chan_u = 1 - chan_u
+			chan_u = 1 - chan_u if up_w <= 0.0 else _take(chan_u, xf_u)
 			_node("anim_u" + "ab"[chan_u]).animation = clip_u
 			if up_w <= 0.0:
 				xf_u = float(chan_u)     # (from the legs: no old clip to fade out of)
-		_p("seek_u%s/seek_request" % "ab"[chan_u], float(want.get("t", 0.0)))
+		cur_ut = tu
+		_p("seek_u%s/seek_request" % "ab"[chan_u], tu)
 		out_fade = float(want.get("out", FADE_LOCO))
 		var back_u := float(want.get("blend_out", 0.0))
+		# (an upper move under a full one starts at the full one's weight: the legs' arm swing never shows between)
 		up_w = move_toward(up_w, 0.0, dt / back_u) if back_u > 0.0 else \
-				move_toward(up_w, 1.0, dt / float(want.get("fade", FADE)))
+				move_toward(maxf(up_w, act_w), 1.0, dt / float(want.get("fade", FADE)))
 		act_w = move_toward(act_w, 0.0, dt / FADE_LOCO)
 	elif not proc and want.has("clip"):
 		var clip := String(want["clip"])
 		var tt := float(want.get("t", -1.0))
-		if clip != cur:
+		if clip != cur or (tt >= 0.0 and tt < cur_t - 0.001 and not bool(want.get("hold", false))):   # (or a recast)
 			cur = clip
-			chan = 1 - chan
+			chan = 1 - chan if act_w <= 0.0 else _take(chan, xf)
 			var ch := "a" if chan == 0 else "b"
 			_node("anim_" + ch).animation = clip
 			_p("seek_%s/seek_request" % ch, maxf(tt, 0.0))
 			if act_w <= 0.0:
 				xf = float(chan)      # (none of the last whole-body move shows: no fade from its stale pose)
+		cur_t = tt
 		var live := "a" if chan == 0 else "b"
 		if tt >= 0.0:
 			_p("seek_%s/seek_request" % live, tt)
@@ -760,9 +796,15 @@ func step(dt: float) -> void:
 		else:
 			_p("rate_%s/scale" % live, 1.0)
 		var back := float(want.get("blend_out", 0.0))
-		act_w = move_toward(act_w, 0.0, dt / back) if back > 0.0 else \
-				move_toward(act_w, float(want.get("w", 1.0)), dt / float(want.get("fade", FADE)))
-		up_w = move_toward(up_w, 0.0, dt / FADE)
+		if back > 0.0:
+			act_w = move_toward(act_w, 0.0, dt / back)
+			up_w = move_toward(up_w, 0.0, dt / FADE)
+		else:
+			act_w = move_toward(act_w, float(want.get("w", 1.0)), dt / float(want.get("fade", FADE)))
+			if act_w >= 1.0:      # (a full move hides the upper one and drops it once it owns the body)
+				up_w = 0.0
+			else:
+				up_w = move_toward(up_w, 0.0, dt / FADE)
 		out_fade = float(want.get("out", FADE_LOCO))
 	else:
 		# (a lock-in settles slower)
@@ -778,6 +820,7 @@ func step(dt: float) -> void:
 	_p("act_u/blend_amount", xf_u)
 	_p("upper/blend_amount", up_w)
 	_p("flinch/add_amount", flinch_w)
+	_p("flinch_delta/sub_amount", 1.0)  # (Sub2 defaults to 0)
 	_p("full/blend_amount", act_w)
 	_loco(s, dt)
 	if d.has("crouch"):
@@ -785,8 +828,13 @@ func step(dt: float) -> void:
 	tree.advance(dt)
 	_ease_start(dt)
 	var loco_k := (1.0 - act_w) * (1.0 - air_w) * (1.0 - crouch_w) * (1.0 if _moving(s) else 0.0)
+	loco_k *= 1.0 - proc_w     # (a swim is the rig's: no stride or arm swing over it)
 	var stand_k := (1.0 - act_w) * (1.0 - up_w) * (1.0 - air_w) * (1.0 - one_w) * (0.0 if _moving(s) else 1.0)
 	gait.apply(dt, loco_k, loco_k * (1.0 - up_w), stand_k)
+	steps.step(loco_k > 0.5 and bool(s.get("grounded", true)), loco_pos)
+	if crouch_steps:
+		var sneak_k := (1.0 - act_w) * (1.0 - air_w) * crouch_w * (1.0 - one_w) * (1.0 if _moving(s) else 0.0)
+		crouch_steps.step(sneak_k > 0.5 and bool(s.get("grounded", true)), crouch_pos)
 	if d.has("recoil"):
 		_recoil(s, dt)
 	cc.apply(dt, bool(s.get("rooted", false)) and want.is_empty(), bool(s.get("gnd", false)) and not proc)
@@ -867,15 +915,20 @@ func feel(dt: float, squash: bool) -> void:
 	var k := 1.0 - proc_w
 	var kl := k * (1.0 - up_w)      # (a move that owns the upper body keeps its own posture: no lean over it)
 	var sq := f.x * LAND_SQUASH * k if squash else 0.0
-	if bi < 0 or (sq < 0.001 and absf(lean * kl) < 0.001):
+	lay_feel(root, skel, bi, sq, lean * kl)
+
+## Flattens the body `sq` of its height (widening by 0.6 of that) and tips it `lean` rad forward, about the skeleton's
+## origin (the feet: every Hero's armature stands on it), by bone `bi` and all below it. WardenNative's squash too.
+static func lay_feel(model: Node3D, sk: Skeleton3D, bi: int, sq: float, lean: float) -> void:
+	if bi < 0 or (sq < 0.001 and absf(lean) < 0.001):
 		return
 	# (in the skeleton's space: his up and right, whichever way the .glb was built)
-	var inv := skel.global_basis.inverse()
-	var up := (inv * root.global_basis.y).normalized()
+	var inv := sk.global_basis.inverse()
+	var up := (inv * model.global_basis.y).normalized()
 	var flat := Basis.from_scale(Vector3.ONE * (1.0 + sq * 0.6))
 	var squashed := Basis(flat.x - up * up.x * sq * 1.6, flat.y - up * up.y * sq * 1.6, flat.z - up * up.z * sq * 1.6)
-	var tip := Basis((inv * root.global_basis.x).normalized(), -lean * kl)
-	skel.set_bone_global_pose(bi, Transform3D(tip * squashed, Vector3.ZERO) * skel.get_bone_global_pose(bi))
+	var tip := Basis((inv * model.global_basis.x).normalized(), -lean)
+	sk.set_bone_global_pose(bi, Transform3D(tip * squashed, Vector3.ZERO) * sk.get_bone_global_pose(bi))
 
 ## A move keyed "heading" leans where he is going, not where he faces (the Warchain's haul): the root turns toward
 ## his velocity on top of the clip, so the clip's lean follows it. "turn_max" lifts the limit (a dash clip that
@@ -897,7 +950,8 @@ func _turn_to_heading(s: Dictionary, want: Dictionary, legs_only: bool, dt: floa
 		legs_only = true
 		twisting = true
 		goal = twist_goal * (1.0 - act_w) * (1.0 - air_w) * (1.0 - crouch_w)
-		if twist_goal != 0.0 and air_w <= 0.0:      # (in the air the body turns with the rig: glide bank)
+		# (in the air the body turns with the rig: glide bank; through a reversal the legs turn with the run)
+		if twist_goal != 0.0 and air_w <= 0.0 and stride.turn_t < 0.0:
 			# running: the legs hold their way while the aim swings, but never twist him past the limit
 			var held := head_turn - wrapf(face - twist_face, -PI, PI)
 			head_turn = clampf(held, minf(head_turn, -twist_max), maxf(head_turn, twist_max))
@@ -931,13 +985,17 @@ func _aim_twist(flat: Vector2, face: float, k: float) -> Vector2:
 ## HunterAnim's air tilt (the dive's pitch, the glider's bank: the root's AIR_TILT) turns the clip's whole body about
 ## the rig's hips as it turns the rig, so the glider and a Boki riding on the rig stay on the body you see.
 func _air_tilt() -> void:
-	var q: Quaternion = root.get_meta(HunterAnim.AIR_TILT, Quaternion.IDENTITY)
-	if root_bi < 0 or q.is_equal_approx(Quaternion.IDENTITY):
+	air_tilt(root, skel, root_bi)
+
+## The air tilt on any skeleton's root bone `bi` (a Meshy-native model's too: WardenNative), after its clip posed it.
+static func air_tilt(model: Node3D, sk: Skeleton3D, bi: int) -> void:
+	var q: Quaternion = model.get_meta(HunterAnim.AIR_TILT, Quaternion.IDENTITY)
+	if bi < 0 or q.is_equal_approx(Quaternion.IDENTITY):
 		return
 	var b := Basis(q)
-	var to_skel := skel.global_transform.affine_inverse() * root.global_transform
-	var turn := to_skel * Transform3D(b, HunterAnim.BODY_C - b * HunterAnim.BODY_C) * to_skel.affine_inverse()
-	skel.set_bone_global_pose(root_bi, turn * skel.get_bone_global_pose(root_bi))
+	var to_skel := sk.global_transform.affine_inverse() * model.global_transform
+	var turn_v := to_skel * Transform3D(b, HunterAnim.BODY_C - b * HunterAnim.BODY_C) * to_skel.affine_inverse()
+	sk.set_bone_global_pose(bi, turn_v * sk.get_bone_global_pose(bi))
 
 func _moving(s: Dictionary) -> bool:
 	var vel: Vector3 = _vel(s)
@@ -967,12 +1025,19 @@ func _loco(s: Dictionary, dt: float) -> void:
 	var goal := Vector2(dir.dot(rt), dir.dot(fw)) * k
 	if twist_on:
 		goal = _aim_twist(flat, face, k)
+	loco_goal = goal
 	loco_pos = _ease(loco_pos, goal, 12.0, dt)
 	_p("loco/blend_position", loco_pos)
+	gait.footing(dt, s.get("footing", {}))
 	var ring := _walk_ring()
 	var out := loco_pos.length()
 	var moving := _out_of_idle(out, ring, goal.length(), spd)
-	_p("loco_rate/scale", gait.plan(spd, lc, loco_pos, clampf((out - ring) / (1.0 - ring), 0.0, 1.0), moving))
+	# ("foot_mps" is read on the model at its own scale; a match draws it bigger (Hunter.VIS_SCALE, Kael's grow),
+	# and a bigger stride covers that much more ground a cycle, so the rate takes the speed at the model's scale)
+	if look_y <= 0.0:
+		look_y = float(root.get_meta("look_scale", root.scale.y))
+	var body_mps := spd * look_y / maxf(absf(root.scale.y), 0.01)
+	_p("loco_rate/scale", gait.plan(body_mps, lc, loco_pos, clampf((out - ring) / (1.0 - ring), 0.0, 1.0), moving))
 	if spd >= STILL and still_t >= SET_OFF_STILL:
 		_set_off()
 	still_t = still_t + dt if spd < STILL and act_w <= 0.0 else 0.0
@@ -980,8 +1045,17 @@ func _loco(s: Dictionary, dt: float) -> void:
 	_p("stance_w/blend_amount", stance_w)
 	var grounded := bool(s.get("grounded", true))
 	var gliding := bool(s.get("gliding", false)) or bool(s.get("diving", false))
-	air_w = move_toward(air_w, 0.0 if grounded else 1.0, dt / AIR_FADE)
-	glide_w = move_toward(glide_w, 1.0 if gliding else 0.0, dt / AIR_FADE)
+	# (data "air": {"fade_out": s}: the fall and glide poses let go of the body this slowly on touchdown, for a Hunter
+	# whose air pose is far from his landing's: `--cast-pop-check` POPDEG)
+	var air_out := float((d["air"] as Dictionary).get("fade_out", AIR_FADE))
+	var air_fade := air_out if grounded else AIR_FADE
+	var glide_fade := AIR_FADE if gliding else air_out
+	air_w = move_toward(air_w, 0.0 if grounded else 1.0, dt / air_fade)
+	# (a move cast out of the glider: the glide pose holds while the move fades in over it, and goes to the fall pose
+	# under the move, so the arms make one motion, glider to cast, not glider to fall to cast)
+	var owned := maxf(act_w, up_w)
+	if owned <= 0.0 or owned >= 1.0 or gliding:
+		glide_w = move_toward(glide_w, 1.0 if gliding else 0.0, dt / glide_fade)
 	rise_w = move_toward(rise_w, 1.0 if vel.y > 0.5 else 0.0, dt / AIR_FADE)
 	_p("air/blend_amount", air_w)
 	_p("glide_w/blend_amount", glide_w)
@@ -993,13 +1067,29 @@ func _loco(s: Dictionary, dt: float) -> void:
 		var tier := HunterAnim.land_tier(-vy_prev, was_glide)
 		if tier > 0 and d.has("land"):
 			land_t = 0.0
-			land = d["land"]["hop" if tier == 1 else "drop"]
-			if tier == 3:
-				land = land.duplicate()
-				land["rate"] = float(land.get("rate", 1.0)) * DIVE_SLOW
+			land = land_play(d["land"]["hop" if tier == 1 else "drop"], String(root.get_meta("cls", "medium")), tier)
 	was_air = not grounded
 	was_glide = gliding
 	vy_prev = vel.y
+
+## The land clip's tier as it plays for a weight class: a footage cell of content/rules/land_feel.json ("clip")
+## holds it for the squash's own seconds, the same keys at the speed that fits them in; else the Hero's own data
+## (the dive: the drop's, DIVE_SLOW slower).
+static func land_play(base: Dictionary, cls: String, tier: int) -> Dictionary:
+	var feel_v := Content.rules("land_feel").get(cls, {}) as Dictionary
+	var way := feel_v.get(["hop", "hop", "drop", "dive"][tier], {}) as Dictionary
+	var out := base.duplicate()
+	if not bool(way.get("clip", false)):
+		if tier == 3:
+			out["rate"] = float(base.get("rate", 1.0)) * DIVE_SLOW
+		return out
+	var s := float(way["s"])
+	var k := float(base.get("dur", s)) / s
+	out["dur"] = s
+	out["rate"] = float(base.get("rate", 1.0)) * k
+	if base.has("moving"):
+		out["moving"] = minf(float(base["moving"]) / k, s)
+	return out
 
 ## Setting off from a stand (docs/art/ANIM_QUALITY_AUDIT.md, first-pose gaps): the walk and run start at the phase
 ## nearest the idle, and the "start_blend" bones keep the pose they stood in, to ease into the clips after the advance.

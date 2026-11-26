@@ -5,7 +5,7 @@ extends RefCounted
 ## carrying you, and the same with a jump in the rise's fling window), each from straight in to 80 degrees
 ## off the face. For every approach that tops the ledge it follows the next EXIT_S seconds and asserts the
 ## fastest you go is at most MantleCarry.exit_cap (a little forward flow, never a launch; a fling at most
-## its own Hunter.FLING_SPEED), that the rise doesn't slide you on along the face (RISE_SLIDE), and that you
+## its own HunterFeel.fling_speed), that the rise doesn't slide you on along the face (RISE_SLIDE), and that you
 ## never jump further than the speed you're going (no push out of the wall). Prints "MFLING ok|FAIL ..."
 ## lines, the worst approaches, and "MFLING DONE, failures: N". Never touches the save.
 
@@ -32,7 +32,7 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
 	m.set_process(false)
 	w = m.world
 	for i in 10:
@@ -81,7 +81,7 @@ func _report() -> void:
 			print("MFLING pushed: %s %.2fm in one step" % [r["what"], r["jump"]])
 	var what := "%s, in at %.1f" % [worst.get("what", "-"), worst.get("vin", 0.0)]
 	print("MFLING %d topped approaches; fastest exit %.1f m/s (%s), cap %.1f (fling %.1f)" % [
-		rows.size(), worst.get("vmax", 0.0), what, cap, maxf(cap, Hunter.FLING_SPEED)])
+		rows.size(), worst.get("vmax", 0.0), what, cap, maxf(cap, HunterFeel.fling_speed)])
 	print("MFLING longest flight %.1fm; longest slide %.1fm" % [flown, slide])
 	ok(rows.size() >= 80, "most approaches top the ledge (%d)" % rows.size())
 	ok(fast == 0, "no exit faster than %.1f m/s, from any angle or speed (%d over)" % [cap, fast])
@@ -177,7 +177,7 @@ func _try(wall: Dictionary, mode: String, ang: float, fly_speed: float) -> Dicti
 	var lead := float(leads[mode])
 	var speed := h.base_speed
 	if mode == "glide":
-		speed = Hunter.GLIDE_SPEED
+		speed = HunterMove.glide_cruise
 	elif mode.begins_with("fly"):
 		speed = fly_speed
 	var hit := face - n * (h.r + 0.05)
@@ -199,7 +199,7 @@ func _try(wall: Dictionary, mode: String, ang: float, fly_speed: float) -> Dicti
 	var flung := false
 	var cap := MantleCarry.exit_cap(h)
 	if mode == "fly_fling":
-		cap = maxf(cap, Hunter.FLING_SPEED)
+		cap = maxf(cap, HunterFeel.fling_speed)
 	var res := {"vin": 0.0, "vmax": 0.0, "cap": cap, "flown": 0.0, "slide": 0.0, "jump": 0.0}
 	var from := Vector2.ZERO
 	var at := Vector2.ZERO
@@ -215,7 +215,7 @@ func _try(wall: Dictionary, mode: String, ang: float, fly_speed: float) -> Dicti
 		var p0 := Vector2(h.pos.x, h.pos.z)
 		var v0 := Vector2(h.vel.x, h.vel.z).length()
 		if h.inp["jump"] and not h.lfloat.is_empty():
-			v0 = maxf(v0, Hunter.FLING_SPEED)      # the fling sets its speed inside this step
+			v0 = maxf(v0, HunterFeel.fling_speed)      # the fling sets its speed inside this step
 		m.step(DT)
 		t += DT
 		var hv := Vector2(h.vel.x, h.vel.z).length()

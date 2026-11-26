@@ -7,16 +7,18 @@ extends RefCounted
 ## and on the move no item touches the legs). Keys open a lock and an ember needs someone to wake, so
 ## those start their beat directly. Never touches the save.
 
-const TOL := 2.0 * Match.DT    # the beat may be this far off the cast (frame rounding)
-const SPACE := 16.0            # m between two plays' spots (Skyfall's blast is 6 m, a wall 6 m long)
-const RUN_SPEED := 4.0         # m/s: a running hunter, well over UtilityPose.STILL
+const TOL := 2.0 * Match.DT  # the beat may be this far off the cast (frame rounding)
+const SPACE := 16.0  # m between two plays' spots (Skyfall's blast is 6 m, a wall 6 m long)
+const RUN_SPEED := 4.0  # m/s: a running hunter, well over UtilityPose.STILL
 
 var bad := 0
+
 
 func ok(cond: bool, what: String) -> void:
 	if not cond:
 		print("UPCHECK FAIL ", what)
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -37,16 +39,17 @@ func run(main: Node) -> void:
 	var played := 0
 	for hero in Arch.ids():
 		var m := _match(main)
-		var P: Hunter = m.player
-		P.set_arch(String(hero))
+		var p: Hunter = m.player
+		p.set_arch(String(hero))
 		var used: Array[Vector3] = []
 		for id in UtilityBelt.ids():
-			_play(m, P, String(hero), String(id), used)
+			_play(m, p, String(hero), String(id), used)
 			played += 1
 		main.remove_child(m)
 		m.queue_free()
 	print("UTILITY POSE CHECK DONE, %d plays, failures: %d" % [played, bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 ## A quiet match of idle hunters, no monsters: one per Hunter, so nothing an earlier Hunter left behind
 ## (a fuse still burning, a zone, a gate about to swap) lands on the next.
@@ -55,14 +58,18 @@ func _match(main: Node) -> Match:
 	main.add_child(m)
 	m.start({"teams": 3, "squad": 2, "tier": 0, "length": 1e9, "seed": 41, "no_drop": true, "god": true})
 	m.set_process(false)
-	for mb in m.mobs: mb.queue_free()
+	for mb in m.mobs:
+		mb.queue_free()
 	m.mobs.clear()
-	for k in m.kins: k.queue_free()      # a rival Boki's bite would stun the Hunter mid-move
+	for k in m.kins:
+		k.queue_free()  # a rival Boki's bite would stun the Hunter mid-move
 	m.kins.clear()
-	if m.biomes: m.biomes.hazards.clear()      # as would a lightning rod
+	if m.biomes:
+		m.biomes.hazards.clear()  # as would a lightning rod
 	for h in m.hunters:
 		h.ctrl = "idle"
 	return m
+
 
 ## Open ground at least SPACE from every earlier play of this match (their pads, walls and blasts).
 func _fresh_ground(m: Match, used: Array[Vector3]) -> Vector3:
@@ -74,40 +81,41 @@ func _fresh_ground(m: Match, used: Array[Vector3]) -> Vector3:
 	used.append(at)
 	return at
 
-func _play(m: Match, P: Hunter, hero: String, id: String, used: Array[Vector3]) -> void:
+
+func _play(m: Match, p_v: Hunter, hero: String, id: String, used: Array[Vector3]) -> void:
 	var tag := "%s/%s" % [hero, id]
 	var mv := UtilityPose.move_of(id)
 	var cast := UtilityPose.cast_time(id)
-	UtilityBelt.clear(P)
-	P.beat_t = 0.0
-	P.hp = P.max_hp * 0.5
-	P.armor = 0.0
-	P.teleport(_fresh_ground(m, used))
-	P.vel = Vector3.ZERO
+	UtilityBelt.clear(p_v)
+	p_v.beat_t = 0.0
+	p_v.hp = p_v.max_hp * 0.5
+	p_v.armor = 0.0
+	p_v.teleport(_fresh_ground(m, used))
+	p_v.vel = Vector3.ZERO
 	m.step(Match.DT)
-	m.remove_meta("banner_%d" % P.team)      # one banner per squad at a time; each play is a fresh one
-	if UtilityBelt.is_key(id) or not UtilityUse.can_use(P, id):
-		UtilityPose.start(P, id)
+	m.remove_meta("banner_%d" % p_v.team)  # one banner per squad at a time; each play is a fresh one
+	if UtilityBelt.is_key(id) or not UtilityUse.can_use(p_v, id):
+		UtilityPose.start(p_v, id)
 	else:
-		UtilityBelt.grant(P, id, 1)
-		ok(UtilityBelt.use_id(P, id), tag + " starts")
+		UtilityBelt.grant(p_v, id, 1)
+		ok(UtilityBelt.use_id(p_v, id), tag + " starts")
 	var steps := 0
 	var crouched := 0.0
 	var run_crouch := 0.0
 	var kind_ok := true
-	var heal_hp := UtilityUse.channel(id, "heal") if UtilityUse.use_of(id) == "drink" else 0.0
+	var heal_hp := UtilityUse.heal_of(p_v, id) if UtilityUse.use_of(id) == "drink" else 0.0
 	while steps < int(cast / Match.DT) + 20:
-		P._anim_state(0.0)
-		var s := P.anim_s
+		p_v._anim_state(0.0)
+		var s := p_v.anim_s
 		var p := maxf(float(s["drink"]), float(s["util"]))
 		if p < 0.0:
 			break
 		kind_ok = kind_ok and (float(s["drink"]) >= 0.0 if mv == "drink" else String(s["util_move"]) == mv)
 		crouched = maxf(crouched, float(s["crouch"]))
-		P.vel = Vector3(RUN_SPEED, 0.0, 0.0)      # the same frame on the move: the legs stay the gait's
-		P._anim_state(0.0)
-		run_crouch = maxf(run_crouch, float(P.anim_s["crouch"]) - P.crouch_k)
-		P.vel = Vector3.ZERO
+		p_v.vel = Vector3(RUN_SPEED, 0.0, 0.0)  # the same frame on the move: the legs stay the gait's
+		p_v._anim_state(0.0)
+		run_crouch = maxf(run_crouch, float(p_v.anim_s["crouch"]) - p_v.crouch_k)
+		p_v.vel = Vector3.ZERO
 		m.step(Match.DT)
 		steps += 1
 	ok(kind_ok, tag + " plays the " + mv + " state")
@@ -115,5 +123,7 @@ func _play(m: Match, P: Hunter, hero: String, id: String, used: Array[Vector3]) 
 	ok(mv != "place" or crouched > 0.6, tag + " crouches to place")
 	ok(run_crouch < 0.01, tag + " leaves the legs free on the move")
 	match UtilityUse.use_of(id):
-		"drink": ok(heal_hp <= 0.0 or P.hp > P.max_hp * 0.5, tag + " heals when the drink lands")
-		"repair": ok(P.armor >= P.max_armor - 0.5, tag + " repairs when the kit lands")
+		"drink":
+			ok(heal_hp <= 0.0 or p_v.hp > p_v.max_hp * 0.5, tag + " heals when the drink lands")
+		"repair":
+			ok(p_v.armor >= p_v.max_armor * UtilityUse.repair_frac(p_v) - 0.5, tag + " repairs when the kit lands")

@@ -7,7 +7,10 @@
 	"field": {"col": "ember", "rim": "ember_lit", "vine": "ember", "fill": 0.3, "a": 0.9, "band": 0.14,
 		"motes_every": 0.3},
 	"hearth_disc": {"fill": 0.5, "thrown_fill": 0.38},
+	"fire_from": {"rmb": "hand_r"},
 	"anchors": {
+		"hand_r": {"bone": "hand.R", "off": [0.0, 0.08, 0.0], "body": [0.18, 0.72, 0.5]},
+		"hand_l": {"bone": "hand.L", "off": [0.0, 0.08, 0.0], "body": [-0.18, 0.72, 0.5]},
 		"lantern": {"nodes": ["anchor_hang_lantern"], "bone": "hand.R", "off": [0.0, 0.25, 0.0], "body": [0.3, 0.55, 0.3]},
 		"chest": {"nodes": ["anchor_chest"], "bone": "hips", "off": [0.0, 0.36, -0.1], "body": [0.0, 0.85, 0.1]},
 		"feet": {"body": [0.0, 0.15, 0.0]}
@@ -19,14 +22,24 @@
 			{"p": "star", "y": 0.6, "n": 5, "shape": "disc", "radius": 0.35, "speed": 1.1, "spread": 0.3, "grav": -0.4,
 				"curl": 1.5, "life": 1.2, "size": 0.12, "c": "mint", "c2": "leaf_hot", "near": true}
 		]},
+		"ready": {"net": false, "fx": [
+			{"p": "flare", "size": 0.5, "grow": 1.2, "life": 0.1, "c": "ember", "c2": "ember_hot", "c3": "ember_lit"},
+			{"p": "star", "n": 5, "way": "fwd", "speed": 0.8, "spread": 1.5, "drag": 2.0, "life": 0.35, "size": 0.08, "c": "ember", "c2": "ember_hot"}
+		]},
 		"cast": {"net": false, "fx": [
-			{"p": "flare", "size": 0.28, "size_k": 1.0, "grow": 1.0, "life": 0.08, "c": "ember_lit", "c2": "ember_hot",
-				"c3": "ember"},
-			{"p": "ember", "n": 4, "way": "fwd", "speed": 3.0, "spread": 0.35, "drag": 2.0, "grav": 6.0, "life": 0.3,
+			{"p": "flare", "size": 0.28, "size_k": 1.0, "grow": 1.0, "life": 0.08, "c": "leaf_lit", "c2": "leaf_hot",
+				"c3": "leaf"},
+			{"p": "star", "n": 5, "way": "fwd", "speed": 3.0, "spread": 0.5, "drag": 2.0, "life": 0.35, "size": 0.1,
+				"c": "leaf_lit", "c2": "leaf_hot"},
+			{"p": "ember", "n": 3, "way": "fwd", "speed": 3.0, "spread": 0.35, "drag": 2.0, "grav": 6.0, "life": 0.3,
 				"size": 0.08, "c": "ember", "c2": "ember_hot"}
 		]},
+		"ember_hit": {"net": false, "fx": [
+			{"p": "chunk", "y": 0.1, "way": "back", "lift": 0.6, "n": 8, "speed": 4.5, "spread": 0.6, "grav": 14.0, "drag": 0.3, "life": 0.55, "size": 0.09, "radius": 0.3, "c": "leaf"},
+			{"p": "ember", "y": 0.1, "way": "back", "lift": 0.5, "n": 14, "speed": 6.0, "spread": 0.7, "grav": 6.0, "life": 0.45, "size": 0.05, "radius": 0.3, "c": "ember", "c2": "ember_hot"}
+		]},
 		"cast_trail": {"fx": [
-			{"p": "ribbon", "size": 0.4, "life": 2.0, "tail": 0.26, "c": "ember_lit", "c2": "ember_hot", "c3": "ember"}
+			{"p": "ribbon", "size": 0.4, "life": 2.0, "tail": 0.26, "c": "leaf_lit", "c2": "leaf_hot", "c3": "leaf"}
 		]},
 		"kindled": {"fx": [
 			{"p": "flare", "y": 1.0, "size": 0.8, "grow": 1.1, "life": 0.12, "c": "ember", "c2": "ember_hot",
@@ -56,13 +69,13 @@
 				"size": 0.09, "c": "ember", "c2": "ember_hot"}
 		]},
 		"seed_trail": {"fx": [
-			{"p": "ribbon", "size": 0.4, "life": 2.0, "tail": 0.22, "c": "ember_lit", "c2": "ember_hot", "c3": "ember"}
+			{"p": "ribbon", "size": 0.4, "life": 2.0, "tail": 0.22, "c": "leaf_lit", "c2": "leaf_hot", "c3": "leaf"}
 		]},
 		"seed_stick": {"fx": [
 			{"p": "ember", "y": 1.4, "n": 10, "speed": 2.5, "spread": 0.6, "drag": 1.0, "grav": 9.0, "life": 0.4,
 				"size": 0.1, "c": "ember", "c2": "ember_hot"}
 		]},
-		"seed_field": {"net": false, "fx": [
+		"seed_field": {"net": false, "zone": {"rim": "ember_lit", "in": "ember"}, "fx": [
 			{"p": "ember", "y": 0.9, "n": 3, "shape": "arc", "arc": 360, "w": 0.15, "radius": "r", "radius_x": 0.95,
 				"speed": 0.4, "spread": 0.2, "grav": 4.0, "life": 0.45, "size": 0.08, "c": "ember", "c2": "ember_hot"}
 		]},
@@ -109,6 +122,9 @@
 		"call": {"fx": [
 			{"p": "flare", "at": "lantern", "size": 1.5, "grow": 1.3, "life": 0.3, "c": "leaf_lit", "c2": "leaf_hot",
 				"c3": "leaf"},
+			{"p": "ring", "size": "r", "size_x": 1.11, "life": 0.9, "c": "leaf_lit", "c2": "leaf_hot", "c3": "mint"},
+			{"p": "vortex", "size": "r", "size_x": 0.5, "spin": 0.4, "grow": 1.05, "life": 1.0, "c": "leaf_lit", "c2": "leaf_hot", "c3": "mint"},
+			{"p": "star", "y": 0.2, "n": 24, "shape": "arc", "arc": 360, "w": 0.2, "radius": "r", "radius_x": 0.95, "speed": 1.4, "spread": 0.3, "grav": -0.8, "drag": 1.5, "life": 1.0, "size": 0.14, "c": "leaf_lit", "c2": "leaf_hot"},
 			{"p": "star", "at": "lantern", "n": 12, "speed": 2.5, "spread": 0.8, "drag": 2.0, "grav": -0.5, "life": 0.8,
 				"size": 0.14, "c": "leaf_lit", "c2": "leaf_hot"}
 		]},

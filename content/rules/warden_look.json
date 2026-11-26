@@ -1,5 +1,5 @@
 {
-	"doc": "A Warden 3D model's own shading over the shared painted look (WardenGlb.look), keyed by the model's art name (art/wardens/<art>/<art>.glb; a design variant has its own key). painted: hero_toon.gdshader parameters on all of its surfaces, set after WardenGlb.PAINTED. slots: the same per toon slot (skin, hair, cloth, leather, metal, eyes, glow), after painted. Colours are [r, g, b]. A model without an entry keeps the shared look. Useful keys: rim_far and rim_far_color (a rim in the Hunter's signature colour at the match camera), top_light (surfaces facing up lift), fres and fres_tint (the coloured rim; 1 = lightened own colour), far_lift (brighter and richer at the match camera), shade and shadow_tint (the shadow floor and its tint), sheen, glow (emission x the painted colour), light_neutral_warm (how much of the hue it takes out of warm lights; WardenGlb.PAINTED 0.8 so the amber sun leaves no red cast, 1 for none at all). halos: glow discs of a constant size on screen on the model's anchors (a lens a pixel wide at the match camera): anchor, color, strength, px (radius on screen), near and far (m: none this close, full from there; close-ups keep the lens itself). albedo: a colour multiplier on the slot's atlas, applied on top of the player's colour pick (it never replaces the pick). Match zoom (the shared far_* look, WardenGlb.PAINTED; set these per model only to tune it): far_fres (the pale fresnel's share left at the match camera, 0.35), far_spec (gloss, sheen and the lights' rims there, 0), far_clamp (stray texels pulled to their coarser mip, 0.8), far_rim_soft (1: rim_far is a broad saturated band in rim_far_color; keep rim_far 0.25-0.35), far_glow (whatever glows a step brighter there, 0.6). no_ink: material tags or slots drawn without the ink shell (e.g. [\"gum\", \"crossbow\"]). ink: the model's own ink shell, far_thin (0.8), far_cut (0.55: gone from ~13.5 m; 0 keeps it), color. glow_shell: the glow slot's halo at the match camera (glow_px 1.4 screen px, glow_k 1.3, glow_near 7, glow_far 14 m, glow_col; {\"glow_px\": 0} for none). A card slot's far keys (shaders/warden_card.gdshader, under slots.card): far_sheen 0, far_edge 1, far_alpha 1.35. the same per toon slot (skin, hair, cloth, leather, metal, brass, eyes, glow), after painted; a \"<slot>-<tag>\" key (hair-braid: the woven braids) after its slot. paint_glow, paint_glow_color and paint_glow_width: texels of that painted colour glow (a skin's tattoos at night). weapon_scale: a size multiplier on the held .glb weapon; weapon_offset: [x, y, z] metres that move it in the Gun's space (seats the grip in the hand: Lace's bow).",
+	"doc": "A Warden 3D model's own shading over the shared painted look (WardenGlb.look), keyed by the model's art name (art/wardens/<art>/<art>.glb; a design variant has its own key). painted: hero_toon.gdshader parameters on all of its surfaces, set after WardenGlb.PAINTED. slots: the same per toon slot (skin, hair, cloth, leather, metal, eyes, glow), after painted. Colours are [r, g, b]. A model without an entry keeps the shared look. Useful keys: rim_far and rim_far_color (a rim in the Hunter's signature colour at the match camera), top_light (surfaces facing up lift), fres and fres_tint (the coloured rim; 1 = lightened own colour), far_lift (brighter and richer at the match camera), shade and shadow_tint (the shadow floor and its tint), sheen, glow (emission x the painted colour), light_neutral_warm (how much of the hue it takes out of warm lights; WardenGlb.PAINTED 0.8 so the amber sun leaves no red cast, 1 for none at all). halos: glow discs of a constant size on screen on the model's anchors (a lens a pixel wide at the match camera): anchor, color, strength, px (radius on screen), near and far (m: none this close, full from there; close-ups keep the lens itself). albedo: a colour multiplier on the slot's atlas, applied on top of the player's colour pick (it never replaces the pick). Match zoom (the shared far_* look, WardenGlb.PAINTED; set these per model only to tune it): far_fres (the pale fresnel's share left at the match camera, 0.35), far_spec (gloss, sheen and the lights' rims there, 0), far_clamp (stray texels pulled to their coarser mip, 0.8), far_rim_soft (1: rim_far is a broad saturated band in rim_far_color; keep rim_far 0.25-0.35), far_glow (whatever glows a step brighter there, 0.6). no_ink: material tags or slots drawn without the ink shell (e.g. [\"gum\", \"crossbow\"]). ink: the model's own ink shell, far_thin (0.8), far_cut (0.55: gone from ~13.5 m; 0 keeps it), color. glow_shell: the glow slot's halo at the match camera (glow_px 1.4 screen px, glow_k 1.3, glow_near 7, glow_far 14 m, glow_col; {\"glow_px\": 0} for none). A card slot's far keys (shaders/warden_card.gdshader, under slots.card): far_sheen 0, far_edge 1, far_alpha 1.35. the same per toon slot (skin, hair, cloth, leather, metal, brass, eyes, glow), after painted; a \"<slot>-<tag>\" key (hair-braid: the woven braids) after its slot. char_k, char_reach and char_col: the skin round the emission layer's cracks (its mip char_reach) turns to char_col by char_k, so only the cracks glow (Kael's char). paint_glow, paint_glow_color and paint_glow_width: texels of that painted colour glow (a skin's tattoos at night). weapon_scale: a size multiplier on the held .glb weapon; weapon_offset: [x, y, z] metres that move it in the Gun's space (seats the grip in the hand: Lace's bow).",
 	"vex": {
 		"painted": {
 			"rim_far": 0.35,
@@ -9,7 +9,11 @@
 				0.55
 			]
 		},
+		"no_ink": ["ngun", "narm", "nring"],
 		"slots": {
+			"nbody": {"rim_far": 0.0, "fres": 0.0, "far_lift": 0.0, "sss": 0.0, "light_neutral_warm": 1.0, "desat": 0.15},
+			"ngun": {"rim_far": 0.0, "fres": 0.0, "far_lift": 0.1, "sss": 0.0, "light_neutral_warm": 1.0, "desat": 0.3},
+			"narm": {"rim_far": 0.0, "fres": 0.0, "far_lift": 0.1, "sss": 0.0, "light_neutral_warm": 1.0, "desat": 0.3},
 			"skin": {
 				"top_light": 0.45,
 				"fres": 0.2,
@@ -55,6 +59,7 @@
 			}
 		}
 	},
+	"ryzz_nogum": {"hide_bones": ["gum"]},
 	"ryzz": {
 		"painted": {"rim_far": 0.3, "rim_far_color": [1.0, 0.3, 0.72]},
 		"slots": {
@@ -183,7 +188,7 @@
 				"sheen": 0.0,
 				"shade": 0.78,
 				"desat": 0.2,
-				"albedo": [0.72, 0.62, 0.56],
+				"albedo": [0.8, 0.8, 0.8],
 				"light_neutral": 1.0,
 				"rim_far": 0.0
 			},
@@ -206,6 +211,15 @@
 				"desat": 0.3,
 				"far_lift": 0.2
 			},
+			"leather-body.001": {
+				"desat": 0.0,
+				"albedo": [0.3, 0.46, 0.8]
+			},
+			"leather-eyerock": {
+				"desat": 0.7,
+				"albedo": [1.35, 1.35, 1.35],
+				"emit": 2.0
+			},
 			"glow": {
 				"glow": 1.8,
 				"fres": 0.0,
@@ -213,11 +227,7 @@
 				"far_lift": 0.1
 			}
 		},
-		"halos": [
-			{"anchor": "anchor_stones_0", "color": [0.36, 0.9, 0.72], "strength": 3.4, "px": 5.5, "near_d": 7.0, "far_d": 14.0},
-			{"anchor": "anchor_stones_1", "color": [0.36, 0.9, 0.72], "strength": 3.4, "px": 5.5, "near_d": 7.0, "far_d": 14.0},
-			{"anchor": "anchor_stones_2", "color": [0.36, 0.9, 0.72], "strength": 3.4, "px": 5.5, "near_d": 7.0, "far_d": 14.0}
-		]
+		"ink": {"min_px": 1.0}
 	},
 	"breaker": {
 		"no_ink": ["moss", "brass", "scan"],
@@ -480,7 +490,10 @@
 					0.8,
 					0.84,
 					0.98
-				]
+				],
+				"char_k": 0.92,
+				"char_reach": 4.5,
+				"char_col": [0.05, 0.02, 0.025]
 			},
 			"cloth": {
 				"fres": 0.6,
@@ -540,17 +553,17 @@
 			},
 			{
 				"at": "anchor_arm_up",
-				"color": [1.0, 0.16, 0.22, 0.2],
+				"color": [0.88, 0.04, 0.12, 0.2],
 				"size": 0.2
 			},
 			{
 				"at": "anchor_arm_elbow",
-				"color": [1.0, 0.16, 0.22, 0.16],
+				"color": [0.88, 0.04, 0.12, 0.16],
 				"size": 0.16
 			},
 			{
 				"at": "anchor_arm_fore",
-				"color": [1.0, 0.16, 0.22, 0.16],
+				"color": [0.88, 0.04, 0.12, 0.16],
 				"size": 0.16
 			}
 		]
@@ -559,6 +572,9 @@
 		"painted": {"gloss": 0.0, "sheen": 0.0, "desat": 0.1, "top_light": 0.12, "rim_far": 0.3, "rim_far_color": [0.72, 0.95, 0.72]},
 		"slots": {
 			"skin": {"top_light": 0.4, "fres": 0.3, "rim_amount": 0.2, "far_lift": 0.15, "sheen": 0.0, "shade": 0.82, "albedo": [0.92, 0.92, 0.96], "light_neutral": 1.0, "rim_far": 0.0, "paint_glow": 0.9, "paint_glow_color": [0.65, 0.28, 0.94], "paint_glow_width": 0.12},
+			"skin-native": {"desat": 0.48, "far_lift": 0.0, "albedo": [0.88, 0.88, 0.9]},
+			"skin-goo": {"desat": 0.48, "far_lift": 0.0, "albedo": [0.88, 0.88, 0.9]},
+			"brass-coin": {"desat": 0.42, "far_lift": 0.0, "albedo": [0.95, 1.04, 0.8]}, "pack-meshy": {"desat": 0.5, "far_lift": 0.0, "albedo": [0.9, 0.86, 0.8], "rim_far": 0.0}, "pack-under": {"desat": 0.3, "far_lift": 0.0}, "strap-leather": {"desat": 0.2, "far_lift": 0.0}, "metal-fist": {"far_lift": 0.0, "top_light": 0.4, "fres": 0.3, "albedo": [1.0, 0.95, 0.96]},
 			"leather": {"top_light": 0.55, "fres": 0.4, "far_lift": 0.2, "desat": 0.2, "albedo": [1.0, 0.98, 0.95]},
 			"metal": {"top_light": 0.55, "fres": 0.5, "far_lift": 0.2},
 			"glow": {"glow": 1.0, "desat": 0.0, "rim_far": 0.0, "shade": 1.0}
@@ -568,7 +584,7 @@
 			{"anchor": "anchor_lamp_r", "color": [1.0, 0.78, 0.3], "strength": 1.6, "px": 2.6, "near_d": 7.0, "far_d": 14.0}
 		],
 		"closeup": {"fov": 36.0, "up": -0.3},
-		"no_ink": ["glass"]
+		"no_ink": ["glass", "goo", "skin-goo"]
 	},
 	"gil": {"painted": {"far_lift": 0.0}},
 	"pip": {
@@ -635,6 +651,24 @@
 				"far_alpha": 1.9,
 				"far_edge": 0.6
 			},
+			"cloth-cloud": {
+				"light_neutral_warm": 1.0,
+				"light_neutral": 0.6,
+				"shadow_tint": [0.80, 0.74, 0.96],
+				"shade": 0.92,
+				"far_lift": 0.0,
+				"top_light": 0.2,
+				"glow": 0.08,
+				"albedo": [0.95, 0.93, 0.91, 1.0]
+			},
+			"glow-sun": {
+				"glow": 0.15,
+				"far_glow": 0.0,
+				"far_lift": 0.0,
+				"top_light": 0.0,
+				"light_tint": [1.0, 0.76, 1.3],
+				"albedo": [0.95, 1.0, 1.05, 1.0]
+			},
 			"skin-face": {
 				"fres": 0.03,
 				"top_light": 0.1,
@@ -653,25 +687,17 @@
 		},
 		"lights": [
 			{
-				"anchor": "anchor_hang_lantern",
-				"colour": [
-					1.0,
-					0.74,
-					0.36
-				],
+				"anchor": "anchor_sun",
+				"colour": [1.0, 0.86, 0.62],
 				"energy": 1.2,
 				"range": 1.6
 			}
 		],
 		"halos": [
 			{
-				"anchor": "anchor_hang_lantern",
-				"color": [
-					1.0,
-					0.8,
-					0.44
-				],
-				"strength": 2.4,
+				"anchor": "anchor_sun",
+				"color": [1.0, 0.72, 0.40],
+				"strength": 1.2,
 				"px": 7.0,
 				"near_d": 7.0,
 				"far_d": 14.0
@@ -701,6 +727,7 @@
 				"far_d": 14.0
 			}
 		],
+		"no_ink": ["cloud", "wing"],
 		"ink": {
 			"far_thin": 1.0,
 			"color": [
