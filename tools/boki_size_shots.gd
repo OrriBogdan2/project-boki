@@ -52,7 +52,10 @@ func run(main_node: Node) -> void:
 		out["rows"].append(
 			_row(KinLib.kin(String(k.species)).display_name, k, cam, float(Unique.base_size(k.species)["cm"]))
 		)
-	await _eye_level(Vector3(home.x + GAP * 2.0, home.y, home.z))
+	var nodes: Array = [P] + ks
+	var eye_feet: Array = await _eye_level(Vector3(home.x + GAP * 2.0, home.y, home.z), nodes)
+	for i in nodes.size():
+		out["rows"][i]["eye_foot"] = [eye_feet[i].x, eye_feet[i].y]
 	var f := FileAccess.open(dir.path_join("size.json"), FileAccess.WRITE)
 	f.store_string(JSON.stringify(out))
 	f.close()
@@ -60,7 +63,7 @@ func run(main_node: Node) -> void:
 	main.get_tree().quit(0)
 
 
-func _row(who: String, node: Node3D, cam: Camera3D, data_cm: float) -> Dictionary:
+func _row(who: String, node: Node3D, cam: Camera3D, data_cm: float, species := "") -> Dictionary:
 	var lo := Vector3(INF, INF, INF)
 	var hi := -lo
 	var pts := PackedVector2Array()
@@ -84,6 +87,7 @@ func _row(who: String, node: Node3D, cam: Camera3D, data_cm: float) -> Dictionar
 		bbox = bbox.expand(p)
 	return {
 		"who": who,
+		"species": species,
 		"foot": [foot.x, foot.y],
 		"box_cm": [box.x, box.y, box.z],
 		"data_cm": data_cm,
@@ -93,7 +97,7 @@ func _row(who: String, node: Node3D, cam: Camera3D, data_cm: float) -> Dictionar
 
 
 ## A camera at a Boki's own height facing the row from the front, the HUD hidden, the grass hidden.
-func _eye_level(row_mid: Vector3) -> void:
+func _eye_level(row_mid: Vector3, nodes: Array) -> Array:
 	var eye := Camera3D.new()
 	main.add_child(eye)
 	eye.fov = EYE_FOV
@@ -106,6 +110,7 @@ func _eye_level(row_mid: Vector3) -> void:
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join("eye.png"))
+	return nodes.map(func(n: Node3D) -> Vector2: return eye.unproject_position(n.global_position))
 
 
 ## Every 2D layer and top-level control off, so the frame is the world alone.
