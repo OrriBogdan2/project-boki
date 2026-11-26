@@ -11335,3 +11335,5 @@ READY ext/cam-parity-1125 dca40c2ed1 (camera parity: default cursor pan, data zo
 READY ext/hunter-scale-110-1125 adac55c0eb8c93dde1ab70d597a15d13f446e4e2 (match Hunters x1.10 visual scale via camera.json match_hunter_scale; plates, native stride follow; px Kael 78->85, Vex 80->88, Sparkle 84->96)
 READY ext/hud-passive-gauge-1125 05f6720395 (supersedes d33e72c5eb; origin/main merged in, 0 behind; hud_vitals.gd conflict was comment spacing only, kept has_gauge(); --check 0, health --strict OK, archetype-check gauge 4/4 PASS, other 12 fails identical to main)
 READY ext/hunter-scale-110-1125 07778350b69e (match Hunters x1.10 visual; Kael 117->127, Vex 120->133, Sparkle 126->144 px@1080p)
+READY ext/anim-boki-own-clips-mms add9d21d61 (bulk-rebase: origin/main merged in mechanically, was 3158eb5525; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/stuck-integ-fb8a2ad6 86e4bf6dab (bulk-rebase: origin/main merged in mechanically, was 044dfb6eac; union 1 gen 0 files; the branch's own READY checks still apply)
