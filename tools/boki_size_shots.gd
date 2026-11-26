@@ -41,6 +41,7 @@ func run(main_node: Node) -> void:
 		for k in ks:
 			k.face = atan2(-FACE.x, -FACE.z)
 			k.render(DT, 1.0)  # (the match's own render pass is off here)
+			k.ring.visible = false  # the type cue's quad would count in the covered area
 	await _go(1.0, turn, [], 3.0)
 	for k in ks:
 		k.teleport(k.home)
