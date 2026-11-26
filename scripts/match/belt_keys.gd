@@ -55,17 +55,11 @@ static func sync(h) -> void:
 				h.belt[i] = {}
 			continue
 		if i < 0:
-			i = _empty_slot(h)
+			i = UtilityBelt.free_slot(h, id)
 			if i < 0:
 				continue      # (a full belt: the pickup gates keep this from happening)
 			h.belt[i] = {"id": id, "n": 0, "cd": 0.0}
 		h.belt[i]["n"] = n
-
-static func _empty_slot(h) -> int:
-	for k in UtilityBelt.SLOTS:
-		if (h.belt[k] as Dictionary).is_empty():
-			return k
-	return -1
 
 # ------------------------------------------------------------------ pressing a key's slot
 ## Beside a locked chest: open it (the lock spends the key). Elsewhere: ping the nearest one.
@@ -124,8 +118,8 @@ static func swap(h, i: int) -> bool:
 		return false
 	var p := blocked_pickup(h)
 	var s: Dictionary = h.belt[i]
-	if p.is_empty() or s.is_empty():
-		return false
+	if p.is_empty() or s.is_empty() or UtilityBelt.reserved_id(i) != "":
+		return false       # (a key never takes the tonic's or the armor kit's slot)
 	var old_id := String(s["id"])
 	if is_key(old_id):
 		for k in take(h, old_id, held(h, old_id)):
@@ -165,13 +159,13 @@ static func _prompt(m, h, id: String) -> void:
 	var line := "Belt full  ·  %s-%s swaps" % [first, last]
 	m.hud.toast_small(line, UtilityBelt.col_of(id))
 
-## The belt slot worth least (price times charges), never a key. -1 when every slot holds a key.
+## The open belt slot worth least (price times charges), never a key or a pinned slot. -1 when every slot holds a key.
 static func _cheapest_slot(h) -> int:
 	var best := -1
 	var best_v := INF
 	for i in UtilityBelt.SLOTS:
 		var s: Dictionary = h.belt[i]
-		if s.is_empty() or is_key(String(s["id"])):
+		if s.is_empty() or is_key(String(s["id"])) or UtilityBelt.reserved_id(i) != "":
 			continue
 		var worth := float(UtilityBelt.price_of(String(s["id"])) * int(s["n"]))
 		if worth < best_v:
