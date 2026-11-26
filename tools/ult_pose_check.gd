@@ -23,6 +23,7 @@ const LOCK := {
 
 func run(main_node: Node) -> void:
 	main = main_node
+	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	Save.no_write = true
 	for id in Arch.ids():
 		if WardenClips.data(WardenGlb.art(String(id))).has("loco"):     # (Gil has no clips and no R)
