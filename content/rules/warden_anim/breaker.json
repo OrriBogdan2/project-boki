@@ -19,6 +19,13 @@
 		"tip": "weapon_muzzle"
 	},
 	"weapon_bone": "x_weapon",
+	"arm_raise": {
+		"doc": "owner 11-26: the aegis shows his own wooden shield pulled up in front of his chest (rmb_guard keys it at his hip)",
+		"clips": ["rmb_guard"],
+		"bones": ["upper_arm.L", "forearm.L", "hand.L"],
+		"hand": [0.25, -0.1, -0.33],
+		"pole": [-1.0, -0.3, 0.2]
+	},
 	"weapon_out": {
 		"clip": "arm_free",
 		"bones": [
