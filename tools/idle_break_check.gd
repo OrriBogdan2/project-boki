@@ -74,8 +74,8 @@ func _hunter(id: String) -> void:
 	ok(not _run(model, sync, _state(), WardenBreak.WAIT - 0.3), "%s: no break before 6 s of calm" % id)
 	ok(_run(model, sync, _state(), 0.6), "%s: the break starts after 6 s of calm" % id)
 	_moves_bones(id, model, sync, brk)
-	await _cancel(id, model, sync, brk)
-	await _returns(id, model, sync, brk)
+	_cancel(id, model, sync, brk)
+	_returns(id, model, sync, brk)
 	model.queue_free()
 	await tree.process_frame
 

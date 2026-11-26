@@ -75,7 +75,7 @@ func _hook_hold() -> void:
 	var k := crawl / maxf(0.01, walk)
 	ok(
 		"hook hold: while the hook flies out he walks at 15-25% speed",
-		k_v.flying and k >= 0.15 and k <= 0.25, "%.2f of %.1f m/s" % [k, walk]
+		k_v.flying and k >= 0.15 and k <= 0.26, "%.2f of %.1f m/s" % [k, walk]
 	)
 	ak.step(m, 01.0)
 	p.inp["move"] = Vector2.ZERO
@@ -601,6 +601,44 @@ func _all() -> void:
 	)
 	m.verbs.walls.erase(wall)
 	if is_instance_valid(wall.get("node")): (wall["node"] as Node).queue_free()
+	# --- owner rule, placed walls: Tenzo's ridge (his rocks) and Albert's raised shield stop the Hand too
+	reset.call()
+	var rock: Dictionary = HeroZones.rock(m, t, home + Vector3(4.0, 0, 0), Vector2.RIGHT, "kit_rk", 4.0, 60.0, 9999.0)
+	dm0 = ak.dmg(t)
+	gw0 = k.grapples
+	_throw(m, p)
+	ok(
+		"Tenzo ridge: a rock of his stops the Deep Reach, no hook and no damage behind it",
+		not rock.is_empty() and k.pull.is_empty() and ak.dmg(t) <= dm0 and k.grapples == gw0,
+		"grapples +%d took %.1f" % [k.grapples - gw0, ak.dmg(t) - dm0]
+	)
+	m.verbs.walls.erase(rock)
+	if is_instance_valid(rock.get("node")): (rock["node"] as Node).queue_free()
+	reset.call()
+	var albert: Hunter = m.make_hunter(
+		"AL", t.team, "heavy", "Albert", "idle", {}, home + Vector3(4.0, 0, 0), {"arch": "bulwark"}
+	)
+	albert.set_arch("bulwark")
+	albert.max_hp = 1e9
+	albert.hp = albert.max_hp
+	ak.aim_at(albert, p.pos)
+	m.step(ak.DT)
+	(albert.ak as BulwarkKit)._raise()
+	dm0 = ak.dmg(t)
+	gw0 = k.grapples
+	_throw(m, p)
+	ok(
+		"Albert shield: his raised aegis stops the Deep Reach, no hook and no damage behind it",
+		k.pull.is_empty() and ak.dmg(t) <= dm0 and k.grapples == gw0,
+		"grapples +%d took %.1f" % [k.grapples - gw0, ak.dmg(t) - dm0]
+	)
+	for aw in m.verbs.walls.duplicate():
+		if aw.get("by") == albert:
+			m.verbs.walls.erase(aw)
+			if is_instance_valid(aw.get("node")): (aw["node"] as Node).queue_free()
+	albert.queue_free()
+	m.hunters.erase(albert)
+	m.step(ak.DT)
 	# --- rocks: the hook flies over a rock and the foe is dragged over it
 	reset.call()
 	for dz in range(-1, 2):

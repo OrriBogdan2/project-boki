@@ -32,11 +32,17 @@
   "mage_step_stone": "step",
   "mage_step_wood": "step",
   "mage_step_snow": "step",
+  "mage_hit_rmb": "impact",
+  "mage_hit_e": "impact",
+  "mage_hit_dash": "impact",
+  "mage_hit_r": "impact",
+  "mage_bolt_fly": "loop",
+  "mage_bolt_tail": "cast",
   "mage_hurt": "grunt",
   "mage_down": "grunt",
   "mage_death": "grunt"
  },
- "loops": ["vv_ult_hum"],
+ "loops": ["vv_ult_hum", "mage_bolt_fly"],
  "signature": [
   "mage_zap",
   "mage_bubble_pop"
@@ -62,5 +68,12 @@
  "kit_files": [
   "mage_sky.gd",
   "mage_ult.gd"
- ]
+ ],
+ "bar": {
+  "lmb": {"ab": "lmb", "cast": "vv_bolt", "travel": "mage_bolt_fly", "hit": "mage_hit", "end": ""},
+  "rmb": {"ab": "utility", "cast": "vv_rod_throw", "travel": "", "hit": "mage_hit_rmb", "end": "mage_rod_fizzle"},
+  "e": {"ab": "k1", "cast": "vv_sky_place", "travel": "vv_sky_count", "hit": "mage_hit_e", "end": "vv_sky_strike"},
+  "shift": {"ab": "dodge", "cast": "vv_surge_charge", "travel": "vv_surge_go", "hit": "mage_hit_dash", "end": ""},
+  "r": {"ab": "ult", "cast": "vv_ult_charge", "travel": "vv_ult_hum", "hit": "mage_hit_r", "end": "vv_ult_slam"}
+ }
 }
