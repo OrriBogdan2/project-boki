@@ -340,8 +340,8 @@ func _slots(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
 ## A swing while he runs plays on the upper body (the run clip stays the playing one, the layer owns the arms); on the
 ## spot the attack clip owns the whole body.
 func _upper(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
-	var run := {"vel": Vector3(0.0, 0.0, -4.6)}
-	await _feed(main, nat, m, run, run.merged({"swing_n": 1, "combo": 0}, true))
+	var run_in := {"vel": Vector3(0.0, 0.0, -4.6)}
+	await _feed(main, nat, m, run_in, run_in.merged({"swing_n": 1, "combo": 0}, true))
 	var run_clip := String(nat.plays["run"])
 	ok(
 		nat.player.current_animation == run_clip,
