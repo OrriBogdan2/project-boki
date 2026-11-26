@@ -141,7 +141,7 @@ func _judge(screen: String, win: Vector2i, groups: Dictionary, sz: Vector2, root
 func _hud() -> void:
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 4, "squad": 3, "tier": 0, "length": 1500.0, "seed": 7, "demo_kin": "cindle"})
+	m.start({"teams": 4, "squad": 3, "tier": 0, "length": 1500.0, "seed": 7, "demo_kin": "cindle"})
 	m.set_process(false)
 	main.current = m  # (the pause menu reads its options; the next screen frees it)
 	for line in ["Kael knocked Ryzz down", "Team 3 is out", "Ember revived Pip"]:

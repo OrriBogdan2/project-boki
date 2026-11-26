@@ -518,7 +518,7 @@ func _report(a: String, kind: String, key: String, meas: Dictionary, cont: Dicti
 func run(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
-	await _spawn(main)
+	_spawn(main)
 	var t0 := CheckClock.own_msec()
 	var only := ""  # (--hero=<arch>: one hunter only, for a quick look)
 	for arg in OS.get_cmdline_user_args():

@@ -96,7 +96,7 @@ var ult_cue := UltReadyCue.new()   # the chime when your R is back
 var barks := HunterBarks.new()     # your Hunter's voice callouts, and your squad's "Boki down"
 var collapse_warned := false
 var rng := RandomNumberGenerator.new()
-var pending_input := {"dash": false, "jump": false, "sig": false, "util1": false, "util2": false, "util3": false, "util4": false, "throw": false, "skill": false, "ult": false, "sec": false, "gear1": false, "gear2": false, "swap": false}
+var pending_input := {"dash": false, "jump": false, "sig": false, "util1": false, "util2": false, "util3": false, "util4": false, "util5": false, "util6": false, "throw": false, "skill": false, "ult": false, "sec": false, "gear1": false, "gear2": false, "swap": false}
 var zones: Array = []      # hero areas: dome, sanctuary, well
 var fields: Fields = null  # patches made by kin abilities (Thorn Patch)
 var verbs: Verbs = null    # walls, reflect windows, tethers, traps, bridges and yanks left by abilities
@@ -392,6 +392,7 @@ func _start(o: Dictionary) -> void:
 	await _stage("build.mobs")
 	if not opts.get("duel", false) and not opts.get("arena", false):
 		await _spawn_chests()
+		Shops.build(self)
 	await _stage("build.chests")
 	if not world.train_route.is_empty() and not opts.get("duel", false) and not opts.get("arena", false):
 		skytrain = SkyTrain.new()
@@ -1330,20 +1331,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 			Gear.cast_sfx(self, gid, h.pos, "jump", -2.0, 1.3)
 
 func _update_gear_fx(dt: float) -> void:
-	for gp in gpads.duplicate():
-		gp["t"] = float(gp["t"]) - dt
-		if float(gp["t"]) <= 0.0:
-			(gp["node"] as Node3D).queue_free(); gpads.erase(gp); continue
-		var top: Node3D = (gp["node"] as Node3D).get_node_or_null("Top")
-		if top: top.scale = Vector3.ONE * (1.0 + sin(time * 6.0) * 0.06)
-		for h in hunters:
-			if h.out or h.downed or h.remote or not h.grounded:
-				continue
-			if h.flat_dist(gp["pos"]) < 0.8 and absf(h.pos.y - float(gp["pos"].y)) < 0.6 and float(gp["cd"].get(h.nid, -9.0)) < time:
-				gp["cd"][h.nid] = time + 1.0
-				UtilityUse.pad_launch(h)
-				fx.burst(gp["pos"] + Vector3(0, 0.3, 0), Color("8ff0c8"), 16, 5.0, 0.4, -2.0)
-				sfx("jump", h.pos, -2.0, 0.8)
+	UtilityMore.pads(self, dt)
 	for sm in smokes.duplicate():
 		sm["t"] = float(sm["t"]) - dt
 		var n: Node3D = sm["node"]
@@ -2413,7 +2401,7 @@ func on_wall_slam(e: Ent, dir: Vector2) -> void:
 ## sight, tall grass hides you from anyone outside it, and crouching shrinks both distances.
 ## Firing or getting hit gives you away to anyone with a clear line, whichever way they face.
 const VIEW_RANGE := 24.0
-const VIEW_COS := 0.5          # 120 degrees wide (cos of half; vis.gdshaderinc VIS_COS draws the same cone)
+const VIEW_COS := 0.7071       # 90 degrees wide (cos of half; vis.gdshaderinc VIS_COS draws the same cone)
 const NEAR_SENSE := 2.0        # m all round you, half for a crouched target (vis.gdshaderinc VIS_NEAR)
 
 func can_see(team_i: int, target: Hunter) -> bool:
@@ -2440,7 +2428,7 @@ func sees(team_i: int, p: Vector3, crouched := false, revealed := false) -> bool
 			continue
 		if not revealed and rel.normalized().dot(h.aim_dir()) < VIEW_COS:
 			continue
-		if world.los(h.pos, p, h.pos.y + 1.1) or world.los(h.pos, p + Vector3(0, 0.6, 0), h.pos.y + 1.6):
+		if world.los(h.pos, p, h.pos.y + 1.1, true) or world.los(h.pos, p + Vector3(0, 0.6, 0), h.pos.y + 1.6, true):
 			return true
 	return false
 
@@ -3248,8 +3236,8 @@ func _gather_input() -> void:
 	# ability and kin swap are retired)
 	BaseWheel.poll(player, get_process_delta_time(), paused or map_up or duel != null or opts.get("arena", false))
 	var slot_of := {"dash": "dash", "secondary": "sec", "signature": "kin", "ultimate": "ult"}      # (gloves don't rank)
-	for a in [["dash", "dash"], ["jump", "jump"], ["signature", "sig"], ["util1", "util1"], ["util2", "util2"], ["util3", "util3"], ["util4", "util4"], ["ultimate", "ult"], ["secondary", "sec"], ["gear1", "gear1"], ["gear2", "gear2"]]:
-		if a[0] in ["util2", "util3", "util4"] and arena != null:
+	for a in [["dash", "dash"], ["jump", "jump"], ["signature", "sig"], ["util1", "util1"], ["util2", "util2"], ["util3", "util3"], ["util4", "util4"], ["util5", "util5"], ["util6", "util6"], ["ultimate", "ult"], ["secondary", "sec"], ["gear1", "gear1"], ["gear2", "gear2"]]:
+		if a[0] in ["util2", "util3", "util4", "util5", "util6"] and arena != null:
 			continue       # the Arena's 2-7 swap archetypes (and nothing wears out there)
 		if a[0] == "ultimate" and not MergeForm.enabled():
 			continue       # Fusion is off: X is reserved and does nothing
@@ -3764,7 +3752,7 @@ func step(dt: float) -> void:
 		_abyss_demo(String(opts["abyss_demo"]))
 	if player and not player.out:
 		BaseWheel.apply_pick(player)
-		for k in ["dash", "jump", "sig", "util1", "util2", "util3", "util4", "ult", "sec", "gear1", "gear2", "skill", "swap"]:
+		for k in ["dash", "jump", "sig", "util1", "util2", "util3", "util4", "util5", "util6", "ult", "sec", "gear1", "gear2", "skill", "swap"]:
 			if pending_input.get(k, false):
 				player.inp[k] = true
 				pending_input[k] = false
@@ -3832,6 +3820,7 @@ func step(dt: float) -> void:
 	BeltKeys.tick(self)      # a full belt beside a key: the swap prompt (bots make room)
 	Wpicks.update(self, dt)
 	PerkOrbs.update(self, dt)
+	Shops.update(self, dt)
 	_update_gear_fx(dt)
 	_update_pads(dt)
 	_prof("pickups")
@@ -4124,8 +4113,7 @@ func _update_interact(dt: float) -> void:
 						best = {"kind": "revive", "ent": o, "label": "An enemy is standing on %s: revive blocked. Knock them off!" % o.pname, "col": Color("ff6a5a")}
 					else:
 						best = {"kind": "revive", "ent": o, "label": "Reviving %s  ·  stay on the wisp" % o.pname, "col": Color("9ee2a0")}
-			elif not o.remote:
-				best = {"kind": "finish", "ent": o, "label": "Hold %s to stomp %s  (you'll be locked in)" % [Settings.key_cap("interact"), o.pname], "col": Color("ff8a6a")}
+		best = StompTarget.prompt(self, h, best)
 		if not want or best.get("kind", "") != "finish":
 			h.finish_t = 0.0
 		# 1b. deathboxes: bring a teammate back while their soul is there, or take everything
@@ -4178,6 +4166,8 @@ func _update_interact(dt: float) -> void:
 				if not sh["used"] and h.flat_dist(sh["pos"]) < 1.8:
 					best = {"kind": "shrine", "shrine": sh, "label": "Hold " + Settings.key_cap("interact") + " to pray: heal, a blessing and a perk"}
 					break
+		if best.is_empty() and h == player:
+			best = Shops.prompt(self, h)
 		# 5. the exits: start an uplink
 		if exits:
 			# (using an exit beats picking up a weapon or opening a chest that happens to be there)
@@ -4210,6 +4200,10 @@ func _update_interact(dt: float) -> void:
 				h.finish_t += dt
 				if h.finish_t >= Life.R["stomp_commit"]:
 					Life.start_stomp(self, h, o)
+			"shop":
+				if not h.swap_hold:
+					h.swap_hold = true
+					Shops.use(self, h, best)
 			"loot" when h == player and hud:
 				# press to open the box's loot window; press again (with it open) to smart loot
 				if not bool(h.get_meta("loot_hold", false)):
@@ -5064,6 +5058,7 @@ func _net_ev(x, from: String) -> void:
 				"snd": SfxCast.net_in(self, x)        # a sound a Hunter of another game made
 				"whop": WallMoves.scuff(self, Vector3(x[2], x[3], x[4]), float(x[5]))      # a wall hop (item 149)
 		"xp": KillXp.net_in(self, x)
+		"stomp": Life.net_stomp(self, x)      # a stomp began or ended in another game
 		"knock":
 			who = ents_by_id.get(String(x[1]), null)
 			var by: Ent = ents_by_id.get(String(x[2]), null)
@@ -5214,6 +5209,8 @@ func _net_ev(x, from: String) -> void:
 				elif String(x[2]) == "gear" and Gear.ALL.has(String(x[7])): spawn_gear(String(x[7]), int(x[3]), wat, String(x[1]), false)
 		"odrop", "otake":
 			PerkOrbs.on_net(self, x)
+		"sbuy", "sgot", "sno":
+			Shops.on_net(self, x)
 		"wtake":
 			for wp in wpicks:
 				if wp["id"] == String(x[1]):
@@ -5377,6 +5374,8 @@ func _tips() -> void:
 	var k: Kin = player.kin
 	if k == null:
 		return
+	var proc_tip := KinWispProc.tip(k)      # its carry passive just acted: name it once
+	if proc_tip != "": _tip("proc", proc_tip)
 	if k.state == "active":
 		var a1 := k.runner.def_of("k1")
 		_tip("skill", "Stun a foe with %s's %s, then shoot it: combo" % [k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability"])
@@ -5587,7 +5586,7 @@ func _update_aim(alpha: float) -> void:
 	var to_max := String(p.wpn.get("aim", "")) == "max"
 	var dist := float(p.wpn["range"]) if to_max else minf(d.length(), float(p.wpn["range"]))
 	if dist > 0.6:
-		var dir := d.normalized()
+		var dir := p.aim_dir()      # the vision cone's centre (vis_dir), so the line always runs down it
 		var y := at.y + 0.95 * float(p.cdat["scale"])
 		var a := Vector3(at.x + dir.x * 0.6, y, at.z + dir.y * 0.6)
 		var b := Vector3(at.x + dir.x * dist, y, at.z + dir.y * dist)

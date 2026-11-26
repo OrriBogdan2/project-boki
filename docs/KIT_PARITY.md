@@ -9,7 +9,8 @@ PARITY FIRST audit (briefs/DECISIONS.md 2026-11-07, briefs/PRIORITIES.md step 2)
 Everything else in the tables below that says open, pending or branch ready was closed on main or is an owner call; closed rows now carry their commit.
 - **Cooldowns below source** (gap 10, 0.48x to 0.85x): owner call; ext/parity-cooldowns, ext/cooldown-parity-verify and ext/grimble-parity-verify are not merged.
 - **Air control** (gap 3): owner kept real-match air control over the source 0.015.
-- **Kael RMB into Shift turn limit** (patch 05.02.25): ext/kael-rmb-dash-turn is not merged.
+- **Kael RMB into Shift turn limit** (patch 05.02.25): `ext/kael-rmb-dash-turn` is not merged (and no longer on origin); the turn lock is not built.
+- **Time to knock, Vex and Kael** (`--ttk-check`, 11-23): Vex LMB 5.47 s against 2.48 (2.20x), combo 2.72 against 1.92 (1.41x) and 2.38 against 1.76 (1.35x); Kael LMB 8.47 s against 12.95 (0.65x), combo 4.78 against 7.70 (0.62x) and 3.18 against 7.00 (0.45x). Not changed here (no number changes); the share cut written for Kael in `4df7d9a186` never reached the JSON. Detail: docs/KIT_PARITY.d/1123-vex-kael-recheck.md.
 - **Unsourced `[?]` rows** (dash-flow rows, several RMB/R ranges, Kael tether 24 m, Warchain leash 24 m, Sable pair stun, Tenzo rock slows, Sparkle E slide): not determinable from the footage or data; ours stands.
 - Closed on 2026-11-20: Lace Spirit Walk ledges (`40f7865d8`, on main), Albert guard meter / Shield Slam (`b2e942eb4`, on main), Kael lunge length 4.5 to 5.4 m (`4ea2625c13`, ext/kael-lunge-length-rebased-rebased, `e738af1ca7`), Sable Cartwheel curve.
 
@@ -21,7 +22,7 @@ class's, `ArchKit.dash_charges`). **Vex**'s Slipstep is one charge too (a medium
 Cinder (Felix dash 2, RMB +1), Neve (Cryo Spear 2) match; Gil has no source. Vex's rifle falloff (100% to 50% over ten rounds, a pause starts over) now also thins the tracer, flash and impact (`content/vfx/gunslinger.json` `size_k`); her Longneedle yaw lock is 30 deg/s. Table: coord/reports/charges-sv-1116.md.
 
 ## Ultimate ranks vs the source (ult-ranks-source, 2026-11-19)
-Source: briefs/supervive-data/supervive_kits.md (ext/agent-briefs), "R has II/III only" (line 4); owner 11-18: ultimates
+Source: the reference kit data (ext/agent-briefs), "R has II/III only" (line 4); owner 11-18: ultimates
 rank with level, R rank 3 at level 10 (decision 0022 option 2). Ours: `x.per_rank` in content/archetypes/<id>.json, read
 by `HeroUlt.ranked` through `ArchKit.x_def()`; rank text `rank2.ult` / `rank_next.ult` (the R hover and the rank pick).
 Cooldown steps = source seconds x our base / source base (0.5 s); damage steps = the source's % of our base. Before: every
@@ -76,7 +77,7 @@ Every row the 0.24.4 re-audit left open, branch ready or `[?]` was re-read again
 | Meeko | RMB flare, E reach, ground dash curve `[?]` | **owner** | not determinable (ext/ranges-source-rest 94f95257f; ext/dash-curve-meeko 54b40997f: no ground dash in the clip) |
 | Grimble | E Grounds the foe | **done** `ext/parity-no-riders-grimble-tenzo` 7b130d5c7 (in main) | ext/w0246-combat-b-wip |
 | Grimble | E angle 110 `[?]` | **owner** | not determinable: the source hit is a box, not a sector (ext/parity-ranges-rest) |
-| Tenzo | Punch damage and knock scale with charge | **done** `ext/parity-no-riders-grimble-tenzo` | ext/w0246-combat-b-wip only (flat 10.6 / kb 10) |
+| Tenzo | Punch damage and knock scale with charge | **done** `ext/parity-no-riders-grimble-tenzo` 7b130d5c7 (11-09), undone by the 11-14/15 merges of ext/review-design-1110 and ext/rename-guin-1112 (stale copy of the line), **re-landed** `ext/parity-recheck-tenzo-sparkle` | flat 10.6 / kb 10 |
 | Tenzo | Rock slow 30% .8 s, Rock Hop crash slow 1.5 s | **owner** | ext/parity-tenzo-rock-slows 44040c047 (no line) removes them, but docs/heroes/dolm.md cites the patch 2.00 notes "punched rocks slow 0.8 s" against the CC table; owner confirms before it merges |
 | Tenzo | Ridge 12 m vs 18-21.6 | **done** `ext/parity-tenzo-ridge` f5f84aef1 | no line (re-measured, f0579) |
 | Neve | RMB range, E slide max `[?]` | **owner** | not determinable; zone 2.2 and burst 2.7 pinned by ext/ranges-source-rest (no line) |
@@ -128,12 +129,15 @@ Every row below marked differ, missing or `[?]`, and the top-20 table, was re-re
 | Albert | Invented Guard meter and Shield Slam (gap 15, owner 11-07 said cut), Shield Slam stun 0.6 s | branch ready: ext/parity-bulwark-guardcut b2e942eb4 |
 | Albert | RMB aegis/bash routing `[?]` | branch ready: ext/combat-albert-aegis-input 91c3dba10 |
 | Albert | Crushing Blow stun removed; R cd 40 vs 50 | none / ext/cooldown-parity-verify |
+| Meeko | Empowered +40% range and Hearthlight self_k 0.33 are ours (source silent); R cd 46 vs 60 | branch ready: ext/parity-no-riders-meeko 0d6177875; ext/cooldown-parity-verify |
+| Grimble | E Grounds the foe (ours); RMB 12 vs 18, E 7 vs 12, R 21 vs 36 (0.58x to 0.67x) | branch ready: ext/parity-no-riders-grimble-tenzo 7b130d5c7; ext/cooldown-parity-verify |
+| Tenzo | Rock slow 30% 0.8 s and Rock Hop crash slow 1.5 s (ours) | the slows have no branch (owner) |
 | Meeko | Empowered +40% range and Hearthlight self_k 0.33 are ours (source silent); R cd 46 vs 60 | **in main** (0d6177875 is an ancestor of origin/main, re-checked 2026-11-23: no `self_k`, no Empowered refund; the owner re-set Empowered to 1.25x range and x1.5 size on 11-17, `5ce4816037`); R cd: ext/cooldown-parity-verify (owner, gap 10) |
 | Grimble | E Grounds the foe (ours); RMB 12 vs 18, E 7 vs 12, R 21 vs 36 (0.58x to 0.67x) | E Grounded **in main** (7b130d5c7 is an ancestor of origin/main, re-checked 2026-11-23); cooldowns: ext/cooldown-parity-verify (owner, gap 10) |
 | Tenzo | Punch charge scaling (ours); rock slow 30% 0.8 s and Rock Hop crash slow 1.5 s (ours) | grimble-tenzo branch covers the punch; the slows have no branch |
 | Neve | E cd 17 vs 20 (gap 10) | ext/cooldown-parity-verify |
 | Motley | E fizzle 10 s (ours); orb slow 10% (wiki) vs 6% (card read); "floats" `[?]` (the body hovers 0.3 m, a gameplay float not traced) | none; the slow is an owner call |
-| Sparkle | RMB cd 8 vs 10, R 42 vs 60; Skycall circle 1.5 / slide 3.4 kept on purpose `[?]` | ext/cooldown-parity-verify |
+| Sparkle | RMB cd 8 vs 10, R 42 vs 60; Skycall slide 3.4 kept (owner item 9b); the circle is 1.8 (7a40610b7) | ext/cooldown-parity-verify |
 | Sable | RMB cd 7 vs 13, R 24 vs 50, E 15 vs 28 (level 1); pair stun 0.9 vs ~1.8 s (owner pacing) | ext/cooldown-parity-verify |
 | All | Dash curves not decoded (`dash_exit_run` 1.0 stands in) `[?]`; a glide dive held to the ground does not land at the glide sink | branch ready: ext/glide-dive-land e4081da34 |
 **Still open:** superseded by the 0.24.5 re-read at the top.
@@ -180,17 +184,11 @@ Source = `sv/briefs/kits.md` (the tooltips carry no range numbers, so only the B
 | Vex | RMB range, cone, lane | 10.5, 6 m at 100, 0.72 | 5-6 bh (9-10.8), 3.5 bh at 100, 0.4 bh | match |
 | Vex | E range, beam width | 18, 1.8 | 10+ bh (18+), beam 0.5 bh (0.9) | range match; width differs (owner item 68 widened it) |
 | Vex | R range, disc | 14, 3.4 | clamp not seen, 1.8-2 bh (3.2-3.6) | disc match; range **Not determinable**: Mini Nuke frames f29-f45 (dummy ~5 bh = 9 m away) and f95-f111 (empty ground) land at the cursor, and no cast was made at the cursor's maximum, so 14 stays |
-| Kael | RMB slam reach, angle | 4.0, 70 | 2.4 bh (4.3), a lane not a cone | reach match; angle **Not determinable**: the one slam (frames 0154-0158) hit a dummy dead centre at 2.4 bh, no foe off-centre, so neither a cone nor a lane can be told apart; 70 stays |
-| Kael | RMB lunge length | 4.5 to 7.5 | 5 flat (4.1-5.8) | differ (owner: release flings far) |
-| Kael | RMB air slam disc, reach | **2.2** (was 2.6), 5 | 1.2 bh (2.16), cursor to ~5 | **fixed** |
-| Vex | E range, beam width | 18, 1.8 | 10+ bh (18+), beam 0.5 bh (0.9) | range match; width differs (owner item 68 widened it) · **owner** |
-| Vex | R range, disc | 14, 3.4 | clamp not seen, 1.8-2 bh (3.2-3.6) | disc match; range [?] · **open** [?] |
-| Kael | RMB slam reach, angle | 4.0, 70 | 2.4 bh (4.3), a lane not a cone | match; angle [?] · **open** [?] |
-| Kael | RMB lunge length | 4.5 to 7.5 | 5 flat (4.1-5.8) | differ (owner: release flings far) · **owner** |
-| Kael | RMB air slam disc, reach | 2.4, 0.8 m ahead (straight drop; was 2.2 at the cursor) | 1.2 bh (2.16), cursor to ~5 | differ · **owner** (11-10 down slam, ext/jugg-downslam); the check still pins 2.2 ±0.22 (see the re-audit) |
+| Kael | RMB slam reach, width | 4.3, 0.72 | 2.4 bh (4.3), a lane 0.4 bh (0.72) wide, not a cone | match (lane, `ext/parity-kael-slam-lane` 704b7636e; pinned in kit_parity.json `slam.len` and `slam.width`); the old 70 degrees is gone |
+| Kael | RMB lunge length | 4.5 to 5.4 (`dist` [5.3, 6.35] x 0.85 dash feel), perfect release 6.5 | 5 flat (4.1-5.8), 2.5 to 3 bh | match (`4ea2625c13`, 11-20; DECISIONS 11-11 short lunge); the perfect release stays owner |
+| Kael | RMB air slam disc, reach | 2.4, 0.8 m ahead (straight drop; was 2.2 at the cursor) | 1.2 bh (2.16), cursor to ~5 | differ · **owner** (11-10 down slam, `ext/jugg-downslam`); `rmb.drop.radius` is pinned at 2.4 in kit_parity.json (the 2.2 pin went with the owner's change) |
 | Kael | RMB chain spin radius | **2.2** (was 2.6) | 1.2 bh (2.16) | **fixed** |
 | Kael | E range, tether max | 13, 24 | 7 bh (12.6), max not determinable (no clip pays out past the throw; 0305-0320: at most 5-6 bh, let go before a limit) | range match; tether max **not determinable**, 24 m ours (clips: docs/heroes/juggernaut.md "Tether length") |
-| Kael | E range, tether max | 13, 24 | 7 bh (12.6), max not seen | range match; tether [?] (owner Warchain note) · **open** [?] (ext/kael-chain-length re-checked, no data) |
 | Kael | R strip | 3.6 x 1.8 | 1.5-2 bh x 1 bh (2.7-3.6 x 1.8) | match |
 | Lace | RMB range | 14 | grows with the charge, max not seen | [?] |
 | Lace | E arc, reach | 120, **10.8** (was 9) | 120, wall centred on the cursor at 4.5 bh (0457) and 6 bh (10.8, 0498) | arc match; **fixed** to the 0498 floor (9 m could not place that wall; the cap itself is not seen); locked in kit_parity.json |
@@ -221,9 +219,9 @@ Source = `sv/briefs/kits.md` (the tooltips carry no range numbers, so only the B
 | Vex | RMB range, cone, lane | 10.5, 6 m at 100, 0.72 | 5-6 bh (9-10.8), 3.5 bh at 100, 0.4 bh | match | still match (10.5, 6 m at 100, .72) |
 | Vex | E range, beam width | 18, 1.8 | 10+ bh (18+), beam 0.5 bh (0.9) | range match; width differs (owner item 68 widened it) | still as noted (18; width 0.9 each side = 1.8) |
 | Vex | R range, disc | 14, 3.4 | clamp not seen, 1.8-2 bh (3.2-3.6) | disc match; range [?] | still match (14, 3.4) |
-| Kael | RMB slam reach, angle | 4.0, 70 | 2.4 bh (4.3), a lane not a cone | match; angle [?] | still match (4.0, 70) |
-| Kael | RMB lunge length | 4.5 to 7.5 | 5 flat (4.1-5.8) | differ (owner: release flings far) | still differ (owner) |
-| Kael | RMB air slam disc, reach | **2.2** (was 2.6), 5 | 1.2 bh (2.16), cursor to ~5 | **fixed** | **regressed (data)**: radius 2.4 m, centred 0.8 m ahead (owner's down slam 0a97eddab); source 2.16 is +11%. Owner call, backlog line |
+| Kael | RMB slam reach, angle | 4.0, 70 | 2.4 bh (4.3), a lane not a cone | match; angle [?] | 11-23: now a lane, len 4.3, width 0.72 (`ext/parity-kael-slam-lane`); the 70 is gone |
+| Kael | RMB lunge length | 4.5 to 7.5 | 5 flat (4.1-5.8) | differ (owner: release flings far) | 11-23: 4.5 to 5.4 m, match (`4ea2625c13`); perfect release 6.5 stays owner |
+| Kael | RMB air slam disc, reach | **2.2** (was 2.6), 5 | 1.2 bh (2.16), cursor to ~5 | **fixed** | 11-23: owner's down slam, 2.4 m 0.8 m ahead (`0a97eddab`); the pin is now 2.4, not a regression |
 | Kael | RMB chain spin radius | **2.2** (was 2.6) | 1.2 bh (2.16) | **fixed** | still fixed (2.2) |
 | Kael | E range, tether max | 13, 24 | 7 bh (12.6), max not seen | range match; tether [?] (owner Warchain note) | still (13, 24) |
 | Kael | R strip | 3.6 x 1.8 | 1.5-2 bh x 1 bh (2.7-3.6 x 1.8) | match | still match (3.6 x 1.8) |
@@ -259,7 +257,7 @@ Source = `sv/briefs/kits.md` (the tooltips carry no range numbers, so only the B
 | Albert | E zone radius | **2.3** (was 3.5) | green disc 1.3 h (2.34) | **fixed** |
 | Albert | R lane | 16 x 4.5 | 9 bh x 2.5 bh (16.2 x 4.5) | match |
 | Sparkle | RMB range | 13 | 7.5 bh (13.5) | match |
-| Sparkle | E radius, reach, slide | 1.5, 11, 3.4 | circle ~2 bh across (radius 1.8), -, ~4 bh (7.2) | differ 17% and 53%, kept: mage.md set 1.5 as the hit on purpose; [?] · **owner** |
+| Sparkle | E radius, reach, slide | 1.8 (was 1.5, 7a40610b7 11-11), 11, 3.4 | circle ~2 bh across (radius 1.8), -, ~4 bh (7.2) | radius match; slide differs 53%, kept (owner item 9b) · **owner** |
 | Sparkle | R radius, range | 2.7, 14.4 | ring 1.5 bh (2.7), 8 bh | match |
 | Sable | RMB range, lane | 7 + 3.8, **1.8 wide** (was 1.4) | lane 5.5-6 bh (9.9-10.8), 1 bh wide (1.8) | **fixed** (width) |
 | Sable | E range | **16.2** (was 14) | no-target dagger landed about 9 bh out (16.2) | **fixed**: 14 could not reach the landing seen; 16.2 is the least range that does, max not seen |
@@ -268,7 +266,7 @@ Source = `sv/briefs/kits.md` (the tooltips carry no range numbers, so only the B
 
 Second pass (2026-11-11): the open Meeko, Grimble, Neve, Motley, Albert and Sable rows above are settled or marked not determinable from the hero-ref sheet measures (the frames behind them, 1 bh = 1.8 m); settled numbers are locked in `content/rules/kit_parity.json`.
 
-Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner item 68), Cinder flight (owner item 20), Sparkle Skycall circle (deliberate). Ideas of ours stay out of the build.
+Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner item 68), Cinder flight (owner item 20), Sparkle Skycall slide (owner item 9b). Ideas of ours stay out of the build.
 
 ## Hit shapes in game: Vex, Kael, Lace, Cinder (main 88b06b9e7, 2026-11-12)
 
@@ -350,7 +348,7 @@ Same method as the slice section above (`--hit-shape-fine`, rows for the eight a
 | LMB hold, punch | len 4.2, width 1.8 | reach 4.6 (4.2 net), lane 2.6 (1.8 net) | lane about 2.5 bh x 1 bh (4.5 x 1.8) | match (-7% length) |
 | RMB Quakefall | reach 1.6, radius 3.82 tap / 4.5 hold | tap: reach 5.7 (1.6 + 3.82 + 0.4 = 5.8), width 7.9 | 2.5 bh (4.5) | match (hold not scanned) |
 | E Stone Row | dist 3.4, row gap 3.6 | rocks, hurts nobody: not measured | 2 bh ahead (3.6), span 3 bh (5.4) | content match |
-| R Basalt Spine | range 11, len 12, 9 rocks | damage seen only at 12.4 to 12.6 m (a rock rising under the dummy); the ridge is not a lane this method can scan | 10-12 bh long (18-21.6) | differ about 40%, kept (f2b60dc70); ridge shape not measured |
+| R Basalt Spine | range 11, len 21, 15 rocks | damage seen only at 12.4 to 12.6 m (a rock rising under the dummy); the ridge is not a lane this method can scan | 10-12 bh long (18-21.6) | match (9034ef0dac, 11-11); ridge shape not measured |
 
 **Sparkle** (`mage`, source Joule)
 
@@ -358,7 +356,7 @@ Same method as the slice section above (`--hit-shape-fine`, rows for the eight a
 |---|---|---|---|---|
 | LMB bolt | range 13.0 | reach 17.6 (16.1 x 1.24 + 0.6 + step); base 14.2 | always max range, 7.5 bh (13.5) | match |
 | RMB Storm Rod (hold) | range 13.0 | reach 15.0 (13 + 0.6 + 0.9 step + 0.4) | 7.5 bh (13.5) | match |
-| E Skycall | reach 11.0, radius 1.5 | circle centre 11.0, radius 1.5; asserted | circle about 2 bh across (radius 1.8), reach not seen | game = content; radius -17% to source, kept (mage.md); reach [?] |
+| E Skycall | reach 11.0, radius 1.8 | circle centre 11.0, radius 1.8; asserted | circle about 2 bh across (radius 1.8), reach not seen | game = content, radius match (7a40610b7); reach [?] |
 | R Kitefall | range 14.4, radius 2.7 | centre 14.35, radius 2.65; asserted | ring 1.5 bh (2.7), range 8 bh (14.4) | match |
 
 **Grimble** (`dredge`, source Kingpin)
@@ -405,70 +403,34 @@ Same method as the slice section above (`--hit-shape-fine`, rows for the eight a
 
 ## Vex (`gunslinger`, source ref-gunslinger) · slice Warden
 
+Re-read 2026-11-23 on main dae69e1c59; the dated tables below this one (ranges, hit shapes, CC, knocks, casting) are earlier snapshots. What moved is in `docs/KIT_PARITY.d/1123-vex-kael-recheck.md`.
+
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
-| LMB | Hold; 30 rounds, rapid refill when idle, first 10 rounds stronger [D] | Cadence 0.08 (~12 rounds/s: measured 12.0 hits/s in a magazine by `--ttk-matrix-check`, 9.6/s over a whole string with the ~1.3 s refill gap; `quill_rifle` is Vex's weapon, no rate multiplier; docs/WEAPON_FIRING_DATA.md; was 0.12 until f1faa19908, fun audit 11-11), mag 30, refill 40/s after 0.35 s, 10-round sustain, no fire slow | match |
-| RMB | Sticky grenade, wall cone knock, Daze; lane on hold [D,F] | Launcher shot, cd 6.5/9 (footage 5.4) | differ (owner, item 112) |
-| LMB | Hold; 30 rounds, rapid refill when idle, first 10 rounds stronger [D] | Cadence 0.08 (~12 rounds/s: measured 12.0 hits/s in a magazine by `--ttk-matrix-check`, 9.6/s over a whole string with the ~1.3 s refill gap; `quill_rifle` is Vex's weapon, no rate multiplier; docs/WEAPON_FIRING_DATA.md; was 0.12 until f1faa19908, fun audit 11-11), mag 30, refill 40/s after 0.35 s, 10-round sustain, no fire slow | match |
-| RMB | Sticky grenade, wall cone knock, Daze; lane on hold [D,F] | Launcher shot, cd 6.5/9 (footage 5.4) | differ (owner, item 112) · **owner**; cd **open** (gap 10) |
+| LMB | Hold; 30 rounds, rapid refill when idle, first 10 rounds stronger [D] | Quill Rifle: cadence 0.08 (~12 rounds/s: measured 12.0 hits/s in a magazine by `--ttk-matrix-check`, 9.6/s over a whole string with the ~1.3 s refill gap; `quill_rifle` is Vex's weapon, no rate multiplier; docs/WEAPON_FIRING_DATA.md; 0.12 until the fun audit 11-11), 6 a round, mag 30, refill 40/s after 0.35 s, 10-round sustain to 50%, no fire slow; Dazed foes take +76% (`rattle_k`) | match |
+| RMB | Sticky grenade, wall cone knock, Daze; lane on hold [D,F] | Coin Blast, a tap and a coin toss from her free hand (owner item 112, 11-17): hit 22 and Daze 1.4 s, on a wall a 6 m 100 degree cone, 16, shove 11, stun 0.7 s; cd 6.5 (footage 5.4, data 9) | differ (owner, item 112); cd **open** (gap 10, owner) |
 | Q | none | glove | ours |
-| E | 0.6 s cast standing, beam pierces terrain, recoil, -20% cd on hit [D,F] | Charge 0.6, dmg 24 (the source's 0.157 of a target; 36 until 11-11), recoil 6, range 18, shave 20%/30%, linger 0.75, cd 11.5/12 | match |
-| R | Target zone, ~1.6 s delay, 3 s fire + Slow, 55 s [D,F]; 59/s on a 203 impact [D], ticks ~0.5 s [F] | Delay 1.6, 3 s zone, 6 ticks 0.5 s apart, 3.5 each on a 24 impact (0.146 a tick vs 0.145), slow 30%, cd 42/55 | match; cd 0.76x (gap 10) |
-| E | 0.6 s cast standing, beam pierces terrain, recoil, -20% cd on hit [D,F] | Charge 0.6, recoil 6, range 18, shave 20%/30%, linger 0.75, cd 11.5/12 | match |
-| R | Target zone, ~1.6 s delay, 3 s fire + Slow, 55 s [D,F]; 59/s on a 203 impact [D], ticks ~0.5 s [F] | Delay 1.6, 3 s zone, 6 ticks 0.5 s apart, 3.5 each on a 24 impact (0.146 a tick vs 0.145), slow 30%, cd 42/55 | match; cd 0.76x (gap 10) · cd **open** (branch ready: ext/cooldown-parity-verify) |
-| Dash | Press or hold longer, fires through, knock resets, 11.5 s (F 7.5) | Tap 4.8 m/.45 s (F 4.8/.47), off the dash feel; hold 7 m at +40% cd, 8.5 s, all rows `fire`, sourced 15/15 | match |
-| Passive | +6% omnivamp 3.5 s on ability hit [D] | 6%, 3.5 s, 1 stack; Dazed +76% rifle (the source's +39 on 51; the ours-only pause of the string's falloff on a Dazed foe is gone) | match |
-| Anim | Footage poses | 7 moves, all on `vex.glb` clips (36) | match on coverage |
-| Slot | Source | Ours | Verdict | 0.24.4 main (11-12) |
-|---|---|---|---|---|
-| LMB | Hold; 30 rounds, rapid refill when idle, first 10 rounds stronger [D] | Cadence 0.12 (now 0.08, f1faa19908), mag 30, refill 40/s after 0.35 s, 10-round sustain, no fire slow | match | still done (rate .12, mag 30, refill .35 s at 40/s; combo check 126 PASS) |
-| RMB | Sticky grenade, wall cone knock, Daze; lane on hold [D,F] | Launcher shot, cd 6.5/9 (footage 5.4) | differ (owner, item 112) | still differ (owner, item 112); cd 6.5 unchanged |
-| Q | none | glove | ours | ours |
-| E | 0.6 s cast standing, beam pierces terrain, recoil, -20% cd on hit [D,F] | Charge 0.6, recoil 6, range 18, shave 20%/30%, linger 0.75, cd 11.5/12 | match | still done (charge .6, range 18, width 0.9 each side = 1.8, shave .2/.3, cd 11.5) |
-| R | Target zone, ~1.6 s delay, 3 s fire + Slow, 55 s [D,F] | Delay 1.6, 3 s zone, slow 30%, cd 42/55 | match; cd 0.76x (gap 10) | still done (delay 1.6, zone 3 s, slow 30%, cd 42) |
-| Dash | Press or hold longer, fires through, knock resets, 11.5 s (F 7.5) | Tap 4.8 m/.45 s (F 4.8/.47), off the dash feel; hold 7 m at +40% cd, 8.5 s, all rows `fire`, sourced 15/15 | match | still done (4.8 m/.45 s, hold 7 m, cd 8.5; 15/15 dash-flow rows `fire`, all sourced; Ghost speed curve fitted d2adc51b) |
-| Passive | +6% omnivamp 3.5 s on ability hit [D] | 6%, 3.5 s, 1 stack; Dazed +90% rifle | match | still done (6%, 3.5 s) |
-| Anim | Footage poses | 7 moves, all on `vex.glb` clips (36) | match on coverage | still done (`vex.glb` 36 clips) |
-
-**0.24.5 mark:** unchanged on ext/integ-ways-out-0245; every row holds. Gap 10 cds (R 42, RMB 6.5) still **open**: ext/cooldown-parity-verify not landed. R range 14 `[?]` and the hold-dash length `[?]` unchanged.
+| E | 0.6 s cast standing, beam pierces terrain, recoil, -20% cd on hit [D,F] | Palm Lance, from her open palm: charge 0.6, 24 damage (36 until 11-11), +20% on a Dazed foe, recoil 6, range 18, width 1.8 (0.9 each side, owner item 68), held 0.6 s after the beam (`E_RECOVER`), yaw lock 30 deg/s, shave 20% / 30%, cd 11.5 | match; width 2x the source (owner) |
+| R | Target zone, ~1.6 s delay, 3 s fire + Slow, 55 s [D,F]; 59/s on a 203 impact [D], ticks ~0.5 s [F] | Cinderfall: delay 1.6, 24 impact (+50% in the 1.2 m centre), 3 s zone, 6 ticks of 3.5 every 0.5 s (0.146 of the impact a tick vs 0.145), slow 30%, range 14, radius 3.4; she keeps walking (0.25 s wind-up at 70% walk, owner 11-17), cd 42 | match; cd 0.76x (gap 10, owner); range 14 `[?]` |
+| Dash | Press or hold longer, fires through, knock resets, 11.5 s (F 7.5) | Slipstep: one charge (the source has one), tap 4.8 m / .45 s off the dash feel, hold 7 m at +40% cd, cd 8.5, every dash row `fire`; rank 3 +25% speed for 2 s when a slide ends | match; hold length `[?]` |
+| Passive | +6% omnivamp 3.5 s on ability hit [D] | Hot Streak: a knock gives Slipstep back; an ability that lands lights Fever, one flat 6% for 3.5 s; Dazed +76% rifle | match |
+| Anim | Footage poses | 8 moves in `warden_anim/vex.json`; `vex.glb` 41 clips and `vex_cast_clips.glb` 2 (`coin_flick`, `palm_cast`) | match on coverage |
 
 ## Kael (`juggernaut`, source Brall; was Zedran) · slice Warden
 
+Re-read 2026-11-23 on main dae69e1c59, same note as Vex above.
+
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
-| LMB | Press combo; hold ranged fireblast [D] | Cadence .34, hold .22-.95, wave 36 m/s, arc 175, reach 3.1 | match; dash→LMB `fire` |
-| RMB | Context: Slam, Lunge, air Slam, chain Spin; 2.5 s [D] | cd 2.0, hold .3, perfect release, over-head pose | match in shape; overhead/perfect differ (owner) |
-| Air RMB | Own 9 s slot [D]; cursor disc [F] | `drop` cd 7.2, cursor marker | match; 0.8x cd |
-| LMB | Press combo; hold ranged fireblast [D] | Cadence .34, hold .22-.95, wave 36 m/s, arc 175, reach 3.1 | match; dash→LMB buffers (gap 9) · **done** `ext/parity-dashlmb` (main): `buffer` kept, sourced (Flame Step is itself the attack) |
-| RMB | Context: Slam, Lunge, air Slam, chain Spin; 2.5 s [D] | cd 2.0, hold .3, perfect release, over-head pose | match in shape; overhead/perfect differ (owner) · **owner** |
-| Air RMB | Own 9 s slot [D]; cursor disc [F] | `drop` cd 7.2; now a straight down slam, 2.4 m hit 0.8 m ahead | differ · **owner** (11-10, `ext/jugg-downslam`); cd 0.8x **open** (gap 10) |
-| Air RMB | Own 9 s slot [D]; cursor disc [F] | `drop` cd 7.2, straight down slam r 2.4 hit 0.8 m ahead (owner 11-10) | match; 0.8x cd; radius pinned at the owner 2.4 in kit_parity.json |
+| LMB | Press combo; hold ranged fireblast [D] | Cadence .34, 8 a slash (tip 1.6x), arc 175, reach 3.1; hold .22 to .95 throws the Searing Wave: 12 to 20, range 7 to 14, 36 m/s, burns 4 s, no slow, no knock (owner 11-11); walks at 55% while it charges | match; dash→LMB `buffer` (sourced: Flame Step is the attack) |
+| RMB | Context: Slam, Lunge, air Slam, chain Spin; 2.5 s [D] | cd 2.0, hold .3; tap Finishing Slam 26 on a 4.3 x 0.72 m lane (push 6, +50% under 35%, sweet spot +40%); hold Lunge 14 to 20, travels 4.5 to 5.4 m, walk 80% while charging, perfect release +20%, a miss doubles the cd; no knock on the Lunge or the Haul Slam (owner 11-20) | match in shape; perfect release differs (owner) |
+| Air RMB | Own 9 s slot [D]; cursor disc [F] | Meteor Drop: a straight down slam, 18 in a 2.4 m circle centred 0.8 m ahead, core 1.2 m +50%, down .45 s, core stun .8 s, cd 7.2 (4.8 at rank 3) | differ · **owner** (11-10 `ext/jugg-downslam`); cd 0.8x **open** (gap 10) |
 | Q | none | glove | ours |
-| E | Tether, reactivate to self-pull, 16 s [D] | Impulse 22 m/s, sling, steer, tether 24 m (ours), cd 12.8 | match in model (owner); source throw ~12.6 m (7 bh, a floor), leash **not determinable** (0305-0320 shows none; no clip pays the chain out past its throw, 11-11; 24 m kept); pull 22.5 m/s and throw 31.5 m/s are parity rows; the states per frame: see "Warchain states" |
-| R | Invulnerable, strike back, heal, kill resets, 45 s [D] | Riposte: guard .65, strike .1, recover .35, heal, cd 36 | match in shape; kill reset `[?]` |
-| E | Tether, reactivate to self-pull, 16 s [D] | Impulse 22 m/s, sling, steer, tether 24 m (ours), cd 12.8 | match in model (owner); source throw ~12.6 m (7 bh, a floor), leash `[?]` (no data, no frame shows one; 24 m kept) |
-| R | Invulnerable, strike back, heal, kill resets, 45 s [D] | Riposte: guard .65, strike .1, recover .35, heal, cd 36 | match; kill reset settled: a hunter taken down by the cleave (docs/KNOCK_RESETS.md) |
-| Dash | Dash attack, charges, 13 s [D] | 0.07 s dip, then 4.5 m/.17 s raw (owner 113.8), ×.85/×1.15 feel: felt 3.8 m/.2 s (F ~2 bh/.2 s), 2 charges, cd 10.4 | differ (owner) |
-| E | Tether, reactivate to self-pull, 16 s [D] | Impulse 22 m/s, sling, steer, tether 24 m (ours), cd 12.8 | match in model (owner); source throw ~12.6 m (7 bh, a floor), leash `[?]` (no data, no frame shows one; 24 m kept) · **open** [?] |
-| R | Invulnerable, strike back, heal, kill resets, 45 s [D] | Riposte: guard .65, strike .1, recover .35, heal, cd 36 | match in shape; kill reset `[?]` · kill reset **done** `ext/kael-ult-reset-rebased-rebased` (through HeroUlt, asserted); cd 0.8x **open** (gap 10) |
-| Dash | Dash attack, charges, 13 s [D] | 0.07 s dip, then 4.5 m/.17 s raw (owner 113.8), ×.85/×1.15 feel: felt 3.8 m/.2 s (F ~2 bh/.2 s), 2 charges, cd 10.4 | differ (owner) · **owner** |
-| Passive | Damage empowers; heal on knock [D] | Rage, Enrage 6 s, heal_knock .2 | match in shape |
-| Anim | Full set | 20 moves, all on `kael.glb` clips (49), map `warden_anim/kael.json` | match on coverage (gap 1 closed) |
-| Anim | Full set | 49 clips on `kael.glb` (v1 retargeted, 3419a661a), 21 moves in `warden_anim/kael.json` | match on coverage (gap 1 closed); clips retargeted, not authored for this body |
-| Anim | Full set | **20 moves. `kael.glb` has 0 clips and no `warden_anim/kael.json`: stays on procedural HunterAnim** | **missing** (gap 1) · **done** `ext/kael-v2-model` (main): `kael.glb` has 49 clips, `warden_anim/kael.json` maps them |
-| Slot | Source | Ours | Verdict | 0.24.4 main (11-12) |
-|---|---|---|---|---|
-| LMB | Press combo; hold ranged fireblast [D] | Cadence .34, hold .22-.95, wave 36 m/s, arc 175, reach 3.1 | match; dash→LMB buffers (gap 9) | still done (.34, .22-.95, wave 36, arc 175, reach 3.1); gap 9 open: dash-flow rows 3 `buffer`, 4 `cancel` |
-| RMB | Context: Slam, Lunge, air Slam, chain Spin; 2.5 s [D] | cd 2.0, hold .3, perfect release, over-head pose | match in shape; overhead/perfect differ (owner) | still done in shape (cd 2.0, hold .3, slam 4.0 at 70) |
-| Air RMB | Own 9 s slot [D]; cursor disc [F] | `drop` cd 7.2, cursor marker | match; 0.8x cd | changed by the owner (0a97eddab, adc81b267): Meteor Drop is a straight-down slam, 2.4 m circle 0.8 m ahead, knock-down .45 s, core stun .8 s, cd 7.2; no cursor marker, no ring slow. Not a regression |
-| Q | none | glove | ours | ours |
-| E | Tether, reactivate to self-pull, 16 s [D] | Impulse 22 m/s, sling, steer, tether 24 m (ours), cd 12.8 | match in model (owner); source throw ~12.6 m (7 bh, a floor), leash `[?]` (no data, no frame shows one; 24 m kept) | still done (13 m, tether 24, cd 12.8) |
-| R | Invulnerable, strike back, heal, kill resets, 45 s [D] | Riposte: guard .65, strike .1, recover .35, heal, cd 36 | match in shape; kill reset `[?]` | still done (guard .65, strike .1, recover .35, heal .8, cd 36) |
-| Dash | Dash attack, charges, 13 s [D] | 0.07 s dip, then 4.5 m/.17 s raw (owner 113.8), ×.85/×1.15 feel: felt 3.8 m/.2 s (F ~2 bh/.2 s), 2 charges, cd 10.4 | differ (owner) | still differ (owner); .07 dip, 4.5 m/.17 s, x.85/x1.15 unchanged, curve fitted d2adc51b; felt-dash rows pass |
-| Passive | Damage empowers; heal on knock [D] | Rage, Enrage 6 s, heal_knock .2 | match in shape | still done (Enrage 6 s, heal_knock .2) |
-| Anim | Full set | **20 moves. `kael.glb` has 0 clips and no `warden_anim/kael.json`: stays on procedural HunterAnim** | **missing** (gap 1) | **closed**: `kael.glb` 49 clips, `warden_anim/kael.json` (a4e410361); gap 1 done |
-
-**0.24.5 mark:** unchanged on ext/integ-ways-out-0245; every row holds. Air RMB 7.2 / R 36 (gap 10) still **open** (ext/cooldown-parity-verify not landed); ext/ttk-kael not landed. Riders (wave slow 30%, lunge stun .35, Haul stun .25-.6) and leash 24 m `[?]` unchanged; drop disc 2.4 still at the check's edge.
+| E | Tether, reactivate to self-pull, 16 s [D] | Warchain: throw 13 m at 32 m/s, 6 damage, holds 5 s, pays out to 24 m (ours), pull 22 m/s with sling and steer, cd 12.8 (11.2 and 8 at ranks 2 and 3) | match in model (owner); source throw ~12.6 m (a floor), leash `[?]` (24 m kept) |
+| R | Invulnerable, strike back, heal, kill resets, 45 s [D] | Gilded Riposte (key R): guard .65, strike .1, recover .35, 43 damage, heal 80%, cd 36; resets on a hunter taken down or any living foe it kills | match in shape; cd 0.8x **open** (gap 10) |
+| Dash | Dash attack, charges, 13 s [D] | Rampage: 0.07 s dip, then 4.5 m / .17 s raw (owner 113.8), x.85 / x1.15 feel: felt 3.8 m / .2 s, 2 charges (a third at rank 2), 9 along it and 18 at the tip, no knock, cd 10.4 | differ (owner) |
+| Passive | Damage empowers; heal on knock [D] | Rage: full bar is Enraged 6 s (+15% damage, +12% dash recharge, +20% cooldown speed); a knock heals 20% | match in shape |
+| Anim | Full set | 22 moves in `warden_anim/kael.json`, all on `kael.glb` clips (54) | match on coverage |
 
 ## Lace (`archer`, source Myth; was Hem) · slice Warden
 
@@ -508,30 +470,6 @@ Same method as the slice section above (`--hit-shape-fine`, rows for the eight a
 | Passive | Fog vision of injured; tall-ledge climb [D] | Red Thread 22 m; **Focus/Deadeye invented** | differ (gap 5); owner question open | **closed** (ffa20b0f7): Focus/Deadeye cut, Red Thread 22 m kept; gap 5 done |
 | Anim | Footage poses | 18 moves, all on `hem.glb` (48) | match on coverage | still done (`hem.glb` 48 clips) |
 | Flow | Silent on shooting in the walk [F] | Dash→LMB buffers; 8 of 17 rows unsourced | gap 9 | gap 9 closed for Hem (4e788af65): 11 `fire` rows; 8 of 17 rows still unsourced `[?]` (open) |
-| Slot | Source | Ours | Verdict | Re-check 2026-11-10 (ext/release-integ-0244-fix ec3c9dafb, Training Area) |
-|---|---|---|---|---|
-| LMB | Hold; 30 rounds, rapid refill when idle, first 10 rounds stronger [D] | Cadence 0.12, mag 30, refill 40/s after 0.35 s, 10-round sustain, no fire slow | match | A round every 0.13 s held (0.12 on the clock, frame-rounded), first 0.07 s after the press; 6.0, 5.7, 5.4, 5.1 on the first hits, 3.0 by round 10; 82 dmg in 3 s. **match** |
-| RMB | Sticky grenade, wall cone knock, Daze; lane on hold [D,F] | Launcher shot, cd 6.5/9 (footage 5.4) | differ (owner, item 112) | 22 dmg + Dazed, lands 0.20 s after the press at 6 m, cd 6.5 s; wall cone 16 + shove, fuse 0.9 s (combo check). Named Coin Blast and flicked from her free hand since 11-17 (gap A closed). **match, rename missing** |
-| Q | none | glove | ours | not measured (ours) |
-| E | 0.6 s cast standing, beam pierces terrain, recoil, -20% cd on hit [D,F] | Charge 0.6, recoil 6, range 18, shave 20%/30%, linger 0.75, cd 11.5/12 | match | Beam at 0.63 s, 36 dmg (+20% on Dazed, passes a wall), cd 11.5 s, shave 20%/30%. Still fires from the rifle: owner 11-08 Palm Lance (palm origin) not on this branch (gap A). **match, palm missing** |
-| R | Target zone, ~1.6 s delay, 3 s fire + Slow, 55 s [D,F] | Delay 1.6, 3 s zone, slow 30%, cd 42/55 | match; cd 0.76x (gap 10) | Impact 1.62 s after the press (24, 36 in the core), then 3.5 per tick, 6 ticks 0.5 s apart over 3 s (21), cd 42 s. **match** |
-| Dash | Press or hold longer, fires through, knock resets, 11.5 s (F 7.5) | Tap 4.8 m/.45 s (F 4.8/.47), off the dash feel; hold 7 m at +40% cd, 8.5 s, all rows `fire`, sourced 15/15 | match | Tap 4.85 m, 98% by 0.43 s (data 4.8/.45); hold 10.3 m in 0.82 s: the 0.18 s skid then the 7 m slide, charge cost 1.4 (gap B); 8.5 s per charge. Fires through both; dash-flow rows 0 fail. **match; hold is skid + 7 m** |
-| Passive | +6% omnivamp 3.5 s on ability hit [D] | 6%, 3.5 s, 1 stack; Dazed +90% rifle | match | 6% for 3.5 s, one stack; Dazed +90% rifle, all PASS in the combo check. **match** |
-| Anim | Footage poses | 7 moves, all on `vex.glb` clips (36) | match on coverage | Clip on within 0.03 s (LMB), 0.10 s (RMB); move lengths RMB 0.5, dash 0.87 (legs back 1.30 on a hold), E 1.07, R 0.60 s; all PASS. **match** |
-
-## Kael (`juggernaut`, source Brall; was Zedran) · slice Warden
-
-| Slot | Source | Ours | Verdict | Re-check 2026-11-10 (ext/release-integ-0244-fix ec3c9dafb, Training Area) |
-|---|---|---|---|---|
-| LMB | Press combo; hold ranged fireblast [D] | Cadence .34, hold .22-.95, wave 36 m/s, arc 175, reach 3.1 | match; dash→LMB buffers (gap 9) | Taps swing every 0.35 to 0.40 s at 0.1 s press steps (0.34 s rate, 3 slashes in 1 s PASS), 8 then 12.8 per slash; hold 0.5 s lets go a wave of 15.3 (12 to 20 by hold), 20 at full 0.95 s, the wave flies 36 m/s (0.15 s to 6 m); held 3 s it never fires. **match** |
-| RMB | Context: Slam, Lunge, air Slam, chain Spin; 2.5 s [D] | cd 2.0, hold .3, perfect release, over-head pose | match in shape; overhead/perfect differ (owner) | Slam 26 lands 0.72 s after a tap (0.6 wind-up); Lunge 16 at hold 0.45 s, 20 at 0.8 s and over; cd 2.0 s. Held 5 s it never fires, blade over the head, a flash each second; release on the flash flings 7.8 m against 6.6 m (+18%, owner note). **match** |
-| Air RMB | Own 9 s slot [D]; cursor disc [F] | `drop` cd 7.2, cursor marker | match; 0.8x cd | Air row PASS (airborne after a chain launch = Meteor Drop); cd 7.2 s in the data, disc 2.2 m. **match** |
-| Q | none | glove | ours | not measured (ours) |
-| E | Tether, reactivate to self-pull, 16 s [D] | Impulse 22 m/s, sling, steer, tether 24 m (ours), cd 12.8 | match in model (owner); source throw ~12.6 m (7 bh, a floor), leash `[?]` (no data, no frame shows one; 24 m kept) | Hook 8 dmg 0.28 s after the press at 10 m (32 m/s), cd 12.8 s from the cast; recast hauls 9.4 m, within 2 m of the foe 0.37 s later (22 m/s); holds 5 s, pays out to 24.06 m and holds taut, a strafe or a look bends the pull 2.9 m aside, backing away slings 24.5 m/s (owner Warchain note PASS). **match** |
-| R | Invulnerable, strike back, heal, kill resets, 45 s [D] | Riposte: guard .65, strike .1, recover .35, heal, cd 36 | match in shape; kill reset `[?]` | Guard 0.65 + strike 0.1: 43 dmg at 0.77 s, cd 36 s (source 45). **match; cd 0.8x** |
-| Dash | Dash attack, charges, 13 s [D] | 0.07 s dip, then 4.5 m/.17 s raw (owner 113.8), ×.85/×1.15 feel: felt 3.8 m/.2 s (F ~2 bh/.2 s), 2 charges, cd 10.4 | differ (owner) | 4.14 m in 0.35 s (0.07 dip, 3.1 m by 0.2 s: 3.8 m felt plus 0.35 m exit carry); 2 charges, a charge back every 10.4 s; hold = tap. dash-flow rows 0 fail. **match** |
-| Passive | Damage empowers; heal on knock [D] | Rage, Enrage 6 s, heal_knock .2 | match in shape | Damage fills Rage, full = Enraged +15%, ability and dash haste (combo check PASS). **match** |
-| Anim | Full set | **20 moves. `kael.glb` has 0 clips and no `warden_anim/kael.json`: stays on procedural HunterAnim** | **missing** (gap 1) | Still `kael.glb` 0 clips (gap 1 below). **missing** |
 
 ## Lace (`archer`, source Myth; was Hem) · slice Warden
 
@@ -553,14 +491,12 @@ Same method as the slice section above (`--hit-shape-fine`, rows for the eight a
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
-| LMB | Hold, hose, ignite, % HP vs Ignited [D,F] | Hose stream (`ashwick_hose.gd`), range 7, .35 relight, no fuel; 31/s = 258 x 154/1285 (docs/TTK.md frame; Flashover bonus sized by `--ttk-check`) | match |
 | RMB | Bolt + Slow, upgrades Ignite, 9 s [D] | Range 14, slow 30%, cd 7, +1 charge at rank 3; 13 dmg = 106 x 154/1285 | match; 0.78x cd · cd **open** (gap 10) |
-| LMB | Hold, hose, ignite, % HP vs Ignited [D,F] | Hose stream (`ashwick_hose.gd`), range 6.1, .35 relight, no fuel | match |
-| RMB | Bolt + Slow, upgrades Ignite, 9 s [D] | Range 14, slow 30%, cd 7, +1 charge at rank 3 | match; 0.78x cd · cd **open** (gap 10) |
+| LMB | Hold, hose, ignite, % HP vs Ignited [D,F] | Hose stream (`ashwick_hose.gd`), range 6.1, .35 relight, no fuel; 31/s = 258 x 154/1285 (docs/TTK.md frame; Flashover bonus sized by `--ttk-check`) | match |
 | Q | none | glove | ours |
 | E | Spin pull, shield per foe, knock resets, 13 s; ~.2 s arm fling [D,F] | Instant, r 4.5, pull 14 m/s, cd 10.5; 9 dmg = 76.8/106 x the bolt 13 | differ (owner item 11); damage ratio match · **owner** |
 | R | Fly forward, burning ground + Slow, 45 s [D] | 12.6 m/s, 1.8 s, trail 5.2 s, slow 30%, cd 36; carpet 4.5/s (source 239.2/s would be 28.7) | owner: burst cap (SERVER_UPDATE6) holds the carpet at 4.5/s; 0.8x cd · cd **open** (gap 10) |
-| Dash | ~3.4 m/.33 s, stops on first foe, 2 charges [D,F] | 3.4 m/.33 s (F), air poof 6.8 m/.28 s, off the dash feel; stops on foe, 2 charges; 18 dmg = 150.4/106 x the bolt 13, tier IV +5 (+40) | match |
+| Dash | ~3.4 m/.33 s, stops on first foe, 2 charges [D,F] | 3.4 m/.33 s (F), air poof 3.4 m/.28 s (owner 11-17, 720fde43e), off the dash feel; stops on foe, 2 charges; 18 dmg = 150.4/106 x the bolt 13, tier IV +5 (+40) | match |
 | Passive | Ignite levels, bonus dmg [D] | Flashover 1/2, `ignite_bonus`, heal_knock .16 (wiki only) | match |
 | Anim | Footage poses | 12 moves, all on `cinder.glb` (41) | match on coverage |
 | Slot | Source | Ours | Verdict | 0.24.4 main (11-12) |
@@ -623,22 +559,17 @@ PARITY FIRST (DECISIONS 2026-11-07). Source: `the reference kit notes on the bri
 
 ## Tenzo (`dolm`, source Tetra; was Tarek)
 
-**0.24.5:** dolm-combo 172/0. Ally hop stands; cooldowns 11, 12.5, 45, 12 already match the source. Open: rock and Rock Hop slows, punch charge scaling (ext/parity-tenzo-rock-slows, ext/parity-no-riders-grimble-tenzo).
+**Re-checked 11-23 on main 5a246f9696 (dolm-combo, `--card-numbers-check`):** cooldowns 11, 12.5, 45, 12 match the source; the punch is flat again (see `docs/KIT_PARITY.d/1123-tenzo-sparkle-recheck.md`).
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
-| LMB | Tap boulder; hold punch launches rocks, .6 s [D] | Boulder .6, punch .7/.6 | match |
+| LMB | Tap boulder; hold punch launches rocks, .6 s [D] | Boulder .6 s (9, 20 m/s, 11 m); punch .6 s, flat 10.6 and knock 10 (199 vs the 169 boulder), no charge scaling | match |
 | RMB | Hold slam, centre stun, jump to leap, 11 s [D] | hold .2, cd 11, glide slam built | match |
 | Q | none | glove | ours |
-| E | Three rocks, allies hop by jumping, ~12.5 s [D] | Rock wall, cd 12.5; allies hop it by jumping (owner 23:55, `StoneStand`) | match (gap 14 closed) |
-| E | Three rocks, allies hop by jumping, ~12.5 s [D] | Rock wall, cd 12.5; allies hop by jumping (eb93c5b62), bots too (618098895) | match (gap 14 closed) |
-| R | Tap wall, hold drag angle, Slows, 45 s [D] | 15 rocks over 21 m, drag, cd 45, slow data present | differ (owner item 15 said rocks only) |
-| Dash | Landslide: dash, launches rock, ~12 s [D] | Rock Hop: 3 hops of 2.8 m/.26 s raw ×.85/×1.15 = 2.4 m/.3 s, cd 12 | differ (owner item 111) |
-| Passive | Punching rocks grants Shield [D] | Built; charge scaling ours | match |
-| E | Three rocks, allies hop by jumping, ~12.5 s [D] | Rock wall, cd 12.5; **no ally hop** | missing: ally hop (gap 14) · **done** `ext/tenzo-ally-hop`: an ally clears a teammate's rock (bots hop at once), asserted |
-| R | Tap wall, hold drag angle, Slows, 45 s [D] | 15 rocks over 21 m, drag, cd 45, slow data present | differ (owner item 15 said rocks only) · **owner** |
-| Dash | Landslide: dash, launches rock, ~12 s [D] | Rock Hop: 3 hops of 2.8 m/.26 s raw ×.85/×1.15 = 2.4 m/.3 s, cd 12 | differ (owner item 111) · **owner** |
-| Passive | Punching rocks grants Shield [D] | Built; charge scaling ours | match · charge scaling **open** (branch ready: ext/parity-no-riders-grimble-tenzo) |
+| E | Three rocks, allies hop by jumping, ~12.5 s [D] | Rock wall, cd 12.5; an ally in the air is lifted over a teammate's rock (`StoneStand._ally_hop`, eb93c5b62; bots too, 618098895), foes stay blocked | match (gap 14 closed) |
+| R | Tap wall, hold drag angle, Slows, 45 s [D] | 15 rocks over 21 m, drag, cd 45, slow 35% 1.0 s | differ (owner item 15 said rocks only) · **owner** |
+| Dash | Landslide: dash, launches rock, ~12 s [D] | Rock Hop: 3 hops of 2.8 m/.26 s raw x.85/x1.15 = 2.4 m/.3 s, cd 12; rolling rock slow 30% 1.5 s | differ (owner item 111) · **owner** |
+| Passive | Punching rocks grants Shield [D] | Shardskin 18, 4 stacks, 6 s, one per punch; the punch is flat | match |
 | Anim | Footage poses | 17 moves, all on `tarek.glb` (48) | match on coverage |
 
 ## Grimble (`dredge`, source ref-dredge)
@@ -663,6 +594,20 @@ PARITY FIRST (DECISIONS 2026-11-07). Source: `the reference kit notes on the bri
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
+| LMB | Hold, semi-homing, 3 heavy at end of burst, 0.5 s barrage cd [D]; one uniform stream while held [F] | Hold = one burst of plain darts (0.18 s), 3 large on the let-go, 0.5 s pause; skating: beams, semi-homing, 2x damage | match (burst); skating darts 2x (wiki, `dash.skate_dart_dmg_k`; footage 1.6x, no data number); skating beams semi-homing (owner, gap 16 done) |
+| LMB | Hold, semi-homing, 3 heavy at end [D] | 4 plain + 3 large darts; they leave along the aim, then curve onto the foe at the cursor over 35 to 70% of the flight. **Skating beams home the same way** after leaving straight on the aim | match; gap 16 closed `e5c73480c` (bend assert pending `ext/parity-neve-skate-home` 9b65ea7f1) |
+| RMB | Spear + delayed blast, 2 charges, 12 s [D] | Ice Spear: pushed out to the cursor (12 m), 18 dmg, 2.2 m slow zone 35%, bursts 22 (= 190/156 x hit 18) at 1.8 s, 2 charges, cd 10.2 | differ (owner: push-like release); 0.85x cd |
+| Q | none | glove | ours |
+| E | Wall pushes, recast freezes, 20 s [D] | Rink Wall: 0.2 s tell, slides 4.5 to 16.2 m, grows 1.8 to 4.5 m, 70 HP, E again freezes 6 s, cd 17 | match; 0.85x cd |
+| R | Invulnerable zone 3.5 s, explode, stun, cancel, 80 s [D] | Rimelock: hold 3.5, skate carry .8 (owner), 40 dmg + 0.75 s stun, early recast cancels, cd 80 | match |
+| Dash | Hold, release stops, 13 s; ice islands over the abyss [D] | Skate 11.5 m/s (F 10 to 11), up to 1.6 s, early-release refund .6 (owner), ice ribbon in the air, cd 13 | match; refund owner |
+| Passive | Chill 4 s, shatter on knock [D] | Hoarfrost: Chill 4 s, 8 darts shatter, knock shatters. **Chill slow removed; Shatter burst slow removed** | match; closed `3bcb50eca`, Shatter slow `f6c93c7a59` |
+| Anim | Footage poses | 19 moves plus the fusion move, all on `claire.glb` (49 clips); v2 model `59ac7b48d` | match on coverage |
+| Body | 1.1 to 1.15 [F] | size 1.014 (1.56 m, owner height chart `4538174a8`) | differ (owner) |
+| LMB | Hold, semi-homing, 3 heavy at end [D] | 4 plain + 3 large; straight while skating | match; skate tracking owner question (gap 16) · **done** `ext/parity-neve-skate-home`, `ext/neve-dart-homing`: late homing while skating, asserted |
+| RMB | Spear + delayed blast, 2 charges, 12 s [D] | Push-like emerge (owner), 2 charges, cd 10.2; detonation 22 = 190/156 x hit 18 | differ (owner) · **owner** |
+| LMB | Hold, semi-homing, 3 heavy at end [D] | 4 plain + 3 large; straight, 2x damage while skating | match; skating darts 2x (wiki, `dash.skate_dart_dmg_k`; footage 1.6x, no data number); skate tracking owner question (gap 16) |
+| RMB | Spear + delayed blast, 2 charges, 12 s [D] | Push-like emerge (owner), 2 charges, cd 10.2 | differ (owner) |
 | LMB | Hold, semi-homing, 3 heavy at end of burst, 0.5 s barrage cd [D]; one uniform stream while held [F] | Hold = one burst of plain darts (0.18 s, 4 dmg), 3 large on the let-go (x2 damage), 0.5 s pause; darts leave along the aim and curve onto the foe at the cursor over 35 to 70% of the flight; skating: beams (x2 damage, `dash.skate_dart_dmg_k`) that home the same way; a tap the burst cannot take yet is buffered (`b53f5b0328`, 11-22) | match; skating x2 is the wiki's number (footage 1.6x, no data number) |
 | RMB | Spear + delayed blast, 2 charges, 12 s [D] | Ice Spear: pushed out to the cursor (12 m, 18 m/s), 18 dmg, 2.2 m slow zone 35%, bursts 22 in 2.7 m at 1.8 s (= 190/156 x the hit), 2 charges, cd 10.2 | differ (owner: push-like release); 0.85x cd (gap 10, owner row) |
 | Q | none | glove | ours |
@@ -715,32 +660,20 @@ PARITY FIRST (DECISIONS 2026-11-07). Source: `the reference kit notes on the bri
 | Passive | Wall knock Stuns [D] | Crushed: 1.0 s stun and 8 damage on a knock into a wall (walls only). **No Guard meter and no Shield Slam**: cut again 11-20 (`4ce1bd2953`, owner 11-07), `--kit-parity-check` fails if either returns | match |
 | Anim | Footage poses | 17 moves plus the fusion move, all on `breaker.glb` (48 clips) | match on coverage |
 
-## Sparkle (`mage`, source Joule)
 ## Sparkle (`mage`, source Joule; was Ryzz)
 
-**0.24.5:** mage-combo 143/0. Dash to LMB stands. Open: cooldowns RMB 8, E 10.5, R 42 vs 10, 12, 60 (ext/cooldown-parity-verify); Skycall radius 1.5 (ext/parity-skycall-size).
+**Re-checked 11-23 on main 5a246f9696 (mage-combo, `--card-numbers-check`):** damage is the source's share of the target (docs/TTK.md; 83386bb77c 11-11, Kitefall 9 by 4b3b15186f 11-16); Skycall circle is 1.8 (7a40610b7 11-11). See `docs/KIT_PARITY.d/1123-tenzo-sparkle-recheck.md`.
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
-| LMB | Bolt + Static, F .8 s [D,F] | Coilcaster: 12 dmg every .648 s, 13 m, stops on first foe, 1 Static | differ (owner items 70, 116) |
-| RMB | Hold/release, knock, orb, 10 s [D] | Storm Rod: hold 1.0 (tap .33), 18 to 30 dmg, knock, stun on wall .8, 1 Static, charge orb, cd 8 | match; 0.8x cd |
-| LMB | Bolt + Static, F .8 s [D,F] | .648, range 13, no pierce | differ (owner items 70, 116) · **owner** |
-| RMB | Hold/release, knock, orb, 10 s [D] | Hold 1.0, cd 8 | match; 0.8x cd · cd **open** (gap 10) |
+| LMB | Bolt + Static, F .8 s [D,F] | Coilcaster: 9 dmg every .648 s, 13 m, stops on first foe, 1 Static | differ (owner items 70, 116) · **owner** |
+| RMB | Hold/release, knock, orb, 10 s [D] | Storm Rod: hold 1.0 (tap .33), 16 to 26.7 dmg, knock 4.4-6.6, stun on wall .8, charge orb, no Static, self-slow 18% while held (adf6eb2112), cd 8 | match; 0.8x cd · cd **open** (gap 10) |
 | Q | none | glove | ours |
-| E | Press, or hold + drag aim, 12 s, 1 Static [D] | Skycall: delay .8, 20 dmg, slide 3.4, drag built, 1 Static, cd 10.5 | match; 0.88x cd |
-| R | Launch, recast, crash, spreads Static, 60 s [D] | Kitefall: hover 1.7, crash 22, spread built, cd 42 | match; 0.7x cd |
-| Dash | Press or hold, pass dmg, reset on 4 Static, 9 s [D] | Wirerun 40 m/s vs ~32 (owner), lane 7.5 to 13 m, dmg 20, Blowout reset, cd 8 | differ (owner) |
+| E | Press, or hold + drag aim, 12 s, 1 Static [D] | Skycall: delay .8, 19.4 dmg, circle 1.8 m, slide 3.4 (owner item 9b), drag built, 1 Static, cd 10.5 | match; 0.88x cd; slide **owner** |
+| R | Launch, recast, crash, spreads Static, 60 s [D] | Kitefall: hover 1.7, crash 9 (72 of 1285 x 154), radius 2.7, range 14.4, no knock, spread built, cd 42 | match; 0.7x cd · cd **open** (gap 10) |
+| Dash | Press or hold, pass dmg, reset on 4 Static, 9 s [D] | Lane 6.02-10.48 m at 43 m/s (owner item 70, cut 11-10, +7.5% 11-11), time x1.15 feel (felt ~35 m/s vs ~32), dmg 18.3 (Surge 153), Blowout reset, cd 8 | differ (owner) · **owner** |
 | Passive | Static, 4 stacks [D] | Static 4 stacks, 4.5 s, orb pickup resets Wirerun (items 71, 74) | match |
 | Anim | Footage poses | 16 moves plus the fusion move, all on `ryzz.glb` (45 clips); v2 model `6355dee78` | match on coverage |
-| Flow | Silent | Dash→LMB fires mid-dash (closed `4e788af65`); X row `[?]` | match; X unsourced |
-| E | Press, or hold + drag aim, 12 s, 1 Static [D] | Drag built, delay .8, stacks 1, cd 10.5 | match |
-| R | Launch, recast, crash, spreads Static, 60 s [D] | Hover 1.7, spread built, cd 42 | match; 0.7x cd |
-| Dash | Press or hold, pass dmg, reset on 4 Static, 9 s [D] | Lane 6.02-10.48 m at 43 m/s (owner item 70, cut 11-10, +7.5% 11-11), time ×1.15 feel (felt ~35 m/s vs ~32), dmg 20, Blowout reset, cd 8 | differ (owner) |
-| R | Launch, recast, crash, spreads Static, 60 s [D] | Hover 1.7, spread built, cd 42 | match; 0.7x cd · cd **open** (gap 10) |
-| Dash | Press or hold, pass dmg, reset on 4 Static, 9 s [D] | Lane 7.5-13 m at 40 m/s (owner), time ×1.15 feel (felt ~35 m/s vs ~32), dmg 20, Blowout reset, cd 8 | differ (owner) · **owner** |
-| Passive | Static, 4 stacks [D] | Built, orb reset closed by owner | match |
-| Anim | Footage poses | 16 moves, all on `ryzz.glb` (45) | match on coverage |
-| Flow | Silent | Dash→LMB `fire`, X buffer | gap 9 closed for LMB |
 | Flow | Silent | Dash→LMB, X buffer | gap 9 · **done** `ext/parity-dashlmb` (main): LMB fires mid-dash; 5 rows unsourced **open** [?] |
 
 ## Sable (`thief`, source ref-thief)
@@ -852,7 +785,7 @@ belongs to the class kits, which no Hunter uses, so it is left out. Gil has no s
 | Cinder | Spark Leap hit (`dash.kb`) | 7 | 2.01 m | Pyro Pounce: "dmg + knockback" [D]; no read of the target's flight [F] | match | `[?]` |
 | Cinder | Spark Leap self-recoil (`dash.recoil`, a set speed, not a knock) | 3.5 m/s | not run through the knock curve | about 1 bh (1.8 m) back in 0.1 s (linwick.md) [F] | match (footage) | `[?]` |
 | Meeko | none (lantern shot `lantern_crook.kb`) | 1.0 | nudge | Elluna: no knock in the kit [D] | match | n/a |
-| Tenzo | Quake Punch (`lmb.punch.kb`, tap to full) | 6-11, lift 2.0 | 1.70-4.43 m | "launching enemies" [D]; about 3 bh (5.4 m) into a pillar (breah.md 0122) [F] | match | `[?]` (F: 5.4 m, ours full 82%) |
+| Tenzo | Quake Punch (`lmb.punch.kb`, flat) | 10, lift 2.0 | about 3.8 m (between the kb 8 and 11 rows) | "launching enemies" [D]; about 3 bh (5.4 m) into a pillar (breah.md 0122) [F] | match | `[?]` (F: 5.4 m, ours 70%) |
 | Tenzo | Boulder (tap, `lmb.boulder.kb`) | 1.5 | nudge | "TAP to throw a boulder", no knock [D] | match (nudge) | n/a |
 | Tenzo | Rock hit (`rock.kb`) / rock splash (4.0 in code) | 5 / 4 | 1.15 m / 0.76 m | punched rocks are "launched", no knock on a foe they hit [D] | `[?]` | n/a |
 | Tenzo | Rock Hop hit (`dash.kb`) / shove (`dash.shove_kb`) | 8, lift 2.0 / 3.5 | 2.52 m / 0.62 m | Landslide: "launching a rock", no knock [D]; shoves the enemy out over the Abyss, no distance (breah.md 141) [F] | `[?]` | `[?]` |
@@ -951,6 +884,8 @@ wave charge, Slam wind-up and Meteor recovery, Lace's draw and Heavy Shot hold, 
 | Vex | 4.8 m/.45 s tap | 4.7 m/.33 s (2/3 hold, patch notes) | F tap | ×1 | 4.8 m/.45 s | 4.7 m/.33 s |
 | Kael | 4.5 m/.17 s (+.07 dip) | class long dash | no (owner 113.8) | ×.85/×1.15 | 3.8 m/.2 s | ×feel |
 | Lace | 3.0 m/.27 s roll | 5.0 m/.22 s flick (light long dash) | F roll | ×1, speed ×0.7 (owner item 9) | 3.0 m/.39 s | 5.0 m/.22 s |
+| Cinder | 3.4 m/.33 s | 3.4 m/.28 s poof (was 6.8 m) | F | ×1 | 3.4 m/.33 s | 3.4 m/.28 s (owner 11-17: was 6.8 m, twice as far) |
+| Meeko | 3.6 m/.2 s | 13.3 m/.95 s glide | F | ×1 | 3.6 m/.2 s | 13.3 m/.95 s |
 | Cinder | 3.4 m/.33 s | 6.8 m/.28 s | F | ×1 | 3.4 m/.33 s | 3.4 m/.28 s (owner 11-17: was 6.8 m, twice as far) |
 | Meeko | 3.15 m/.23 s | 10.5 m/.95 s glide (footage 3.6 m/.2 s and 13.3 m/.95 s, shortened and slowed by the owner 11-11, `2f8b11c58c`) | F, then owner | ×1 | 3.15 m/.23 s | 10.5 m/.95 s |
 | Tenzo | 2.8 m/.26 s hop | class long dash | no (owner item 111) | ×.85/×1.15 | 2.4 m/.3 s | ×feel |
@@ -1287,3 +1222,6 @@ Why a cast: the lane always lasts exactly two frames, and the slot goes on coold
 held shot in the same source only goes on cooldown at the release. Full reading: docs/heroes/ashwick.md "RMB: cast or
 hold". Assumed `[?]`: the lane follows the aim through the cast; a stun drops the cast with the charge spent.
 
+## Stomp break sweep (`--stomp-break-sweep-check`)
+
+Every slot (LMB, RMB, E, R, Shift) of all 13 kits is cast at a bot that is mid-stomp (3 m away, key tapped, plus a table of pinned casts). The stomp must break if and only if a hard CC (stun, root, Ground, pull, knock or launch) had landed by then, and the wisp must live; a slow, Daze or plain damage never breaks it. No row breaks the rule on main. The pinned casts are the check's `EXPECT` list. Not reached by a generic tap (so not pinned): Ostra's and Gil's R, Gunslinger's R and Sable's E slow, Pip's delayed Burrseed root, and every wall stun.
