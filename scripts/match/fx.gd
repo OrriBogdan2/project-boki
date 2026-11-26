@@ -56,8 +56,10 @@ const NUM_POOL := 24  # floating numbers and words on screen at once (the oldest
 const NUM_OUTLINE := Color(0.05, 0.04, 0.08, 0.9)  # every number's dark outline ...
 const CRIT_OUTLINE := Color(0.42, 0.12, 0.0, 0.95)  # ... a crit's is a hot ember brown, and thicker
 
-## Font size by damage tier: [from this value up, size]. A crit adds CRIT_SIZE on top.
-const SIZE_TIERS := [[0.0, 34], [20.0, 40], [50.0, 48], [100.0, 58], [200.0, 70]]
+## Font size by damage tier: [from this damage up, size], on our health scale (a Hunter has 124 to 193): a dart or
+## a pellet the smallest, a rifle round or a slash 40, an ability hit 48, a heavy ability 58, an ult 70.
+## A crit adds CRIT_SIZE on top.
+const SIZE_TIERS := [[0.0, 34], [6.0, 40], [12.0, 48], [24.0, 58], [45.0, 70]]
 const CRIT_SIZE := 10
 const NUM_SCALE := [1.0, 1.0, 0.78, 0.62]  # size and outline by Num: a Boki's hits smaller, a tick's small
 
@@ -858,6 +860,7 @@ func _tele_mesh(col: Color, shape: int, order: int) -> MeshInstance3D:
 	mat.shader = TELEGRAPH
 	mat.set_shader_parameter("color", col)
 	mat.set_shader_parameter("shape", shape)
+	mat.set_shader_parameter("quiet", 1.0 if order < SideColor.ORDER_FOE else 0.0)  # yours and allies': a faint rim
 	mi.material_override = mat
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(mi)
@@ -865,7 +868,7 @@ func _tele_mesh(col: Color, shape: int, order: int) -> MeshInstance3D:
 	return mi
 
 
-func telegraph_circle(at: Vector3, radius: float, col: Color, order := 0) -> Node3D:
+func telegraph_circle(at: Vector3, radius: float, col: Color, order := SideColor.ORDER_FOE) -> Node3D:
 	var mi := _tele_mesh(col, 0, order)
 	mi.mesh = Models.flat_quad(radius * 2.0)
 	mi.set_meta("r", radius)
@@ -873,7 +876,9 @@ func telegraph_circle(at: Vector3, radius: float, col: Color, order := 0) -> Nod
 	return mi
 
 
-func telegraph_rect(at: Vector3, d: Vector2, length: float, width: float, col: Color, order := 0) -> Node3D:
+func telegraph_rect(
+	at: Vector3, d: Vector2, length: float, width: float, col: Color, order := SideColor.ORDER_FOE
+) -> Node3D:
 	var mi := _tele_mesh(col, 1, order)
 	var pm := PlaneMesh.new()
 	pm.size = Vector2(width, length)

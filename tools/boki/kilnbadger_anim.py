@@ -1,12 +1,13 @@
 """Kilnbadger's (Anvilbrock's) own clips on the scan rig it shares with Glomwort (root, hips, spine, neck, head): a
 honey badger that stays low and swaggers like it is looking for a fight, headbutts with the red-hot anvil on its back
 ringing behind it, and bristles up and rings the whole anvil as its ability."""
+
 import glomwort_anim
 from boki_clips import LOOK_UP, add, eat_ground, s, seq
 
 BONES = glomwort_anim.BONES
 HIDE_AT = glomwort_anim.HIDE_AT
-HEAD_LOW = -0.14    # the head carried lower than a Boki looks up from (rx): a glare from under the brow
+HEAD_LOW = -0.14  # the head carried lower than a Boki looks up from (rx): a glare from under the brow
 
 
 def ring(p, t, rate, amp):
@@ -133,15 +134,17 @@ def pet(t):
 
 
 CLIPS = dict(glomwort_anim.CLIPS)
-CLIPS.update({
-    "idle": (3.0, True, idle),
-    "walk": (0.8, True, walk),
-    "run": (0.44, True, run),
-    "hop": (0.85, True, stomp_hop),
-    "carry": (0.9, True, carry),
-    "pet": (2.0, True, pet),
-    "attack": (0.8, False, headbutt),
-    "ability": (1.4, False, clang),
-    "sleep": (4.0, True, sulk),
-    "eat": (1.8, True, gnash),
-})
+CLIPS.update(
+    {
+        "idle": (3.0, True, idle),
+        "walk": (0.8, True, walk),
+        "run": (0.44, True, run),
+        "hop": (0.85, True, stomp_hop),
+        "carry": (0.9, True, carry),
+        "pet": (2.0, True, pet),
+        "attack": (0.8, False, headbutt),
+        "ability": (1.4, False, clang),
+        "sleep": (4.0, True, sulk),
+        "eat": (1.8, True, gnash),
+    }
+)

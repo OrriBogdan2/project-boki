@@ -437,6 +437,8 @@ func _clear_inp() -> void:
 		"util2",
 		"util3",
 		"util4",
+		"util5",
+		"util6",
 		"gear1",
 		"gear2",
 		"glide",
@@ -1533,6 +1535,7 @@ func _dash_curves() -> void:
 	for id in ["gunslinger", "juggernaut", "archer", "bulwark", "thief", "dredge", "mage", "ashwick"]:
 		p_v.reclass(Arch.weight(id), id)
 		m._later.clear()  # (the last kit's delayed hit, Albert's spin on arrival, must not fire on this kit)
+		_steps(30)  # a swapped kit settles first: Sable's Cartwheel ends on touching ground if it starts aloft
 		_reset(flat + Vector3(-3.0, 0, 0))
 		p_v.inp["move"] = Vector2(1, 0)
 		p_v.inp["dash"] = true

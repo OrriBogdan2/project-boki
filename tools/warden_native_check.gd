@@ -33,7 +33,7 @@ const SLOT_CASES := {
 	"dash": [{}, {"rolling": true}, "idle"],
 	"glide": [{"grounded": false}, {"grounded": false, "gliding": true}, "jump"],
 	"land": [{}, {"feel": Vector2(0.8, 0.0)}, "idle"],
-	"hit": [{"hit_t": 99.0}, {"hit_t": 0.0}, "idle"],
+	"hit": [{"hit_t": 99.0}, {"hit_t": 0.0, "hit_k": Oomph.HEAVY_FLINCH}, "idle"],  # (a stagger; a chip hit only leans)
 	"downed": [{}, {"fall": 0.5}, "idle"],
 	"stomp": [{}, {"stomp": 0.4}, "idle"],
 }
@@ -120,9 +120,11 @@ func _states(main: Node, a: String) -> void:
 	# (every state carries "cast" like Hunter._anim_state's: without it WardenNative reads the state
 	# as not yet filled and ignores the swing; the idle case is the first read, the baseline
 	# the attack's swing_n 1 is counted against)
+	# (the walk at 1.5 m/s, or half the speed this Hunter's walk hands over to the run: Meeko's is under 1.5)
+	var walk := minf(1.5, 0.5 * float(WardenNative.entry(WardenGlb.art(a)).get("run_from", 3.0)))
 	var cases := [
 		["idle", {"cast": 99.0, "grounded": true}],
-		["walk", {"cast": 99.0, "grounded": true, "vel": Vector3(0.0, 0.0, -1.5)}],
+		["walk", {"cast": 99.0, "grounded": true, "vel": Vector3(0.0, 0.0, -walk)}],
 		["run", {"cast": 99.0, "grounded": true, "vel": Vector3(0.0, 0.0, -4.6)}],
 		["jump", {"cast": 99.0, "grounded": false, "vel": Vector3(0.0, 3.0, -4.0)}],
 		["crouch", {"cast": 99.0, "grounded": true, "crouch": 1.0}],
@@ -151,6 +153,7 @@ func _states(main: Node, a: String) -> void:
 	_toon(a, m)
 	_crouch_arms(a, nat)
 	await _slots(main, a, m, nat)
+	await _upper(main, a, m, nat)
 	await _kmoves(main, a, m, nat)
 	_only_meshy(a, m)
 	await _orbits(main, a, nat)
@@ -335,6 +338,25 @@ func _slots(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
 	ok(nat.player.current_animation == pick, "%s: a charged swing takes lmb without lmb_hold" % a)
 	nat.plays.erase("lmb")
 	await _synthetic_clips(main, a, m, nat)
+
+
+## A swing while he runs plays on the upper body (the run clip stays the playing one, the layer owns the arms); on the
+## spot the attack clip owns the whole body.
+func _upper(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
+	var run_in := {"vel": Vector3(0.0, 0.0, -4.6)}
+	await _feed(main, nat, m, run_in, run_in.merged({"swing_n": 1, "combo": 0}, true))
+	var run_clip := String(nat.plays["run"])
+	ok(
+		nat.player.current_animation == run_clip,
+		"%s: a swing on the run keeps the run clip (%s)" % [a, nat.player.current_animation]
+	)
+	var n_tracks := nat.upper.tracks().size()
+	ok(nat.upper.on and nat.upper.w > 0.0 and n_tracks >= 5, "%s: ...and %d upper-body tracks play it" % [a, n_tracks])
+	await _feed(main, nat, m, {}, {"swing_n": 1, "combo": 0})
+	ok(
+		not nat.upper.on and nat.player.current_animation == String(nat.plays["attack"]),
+		"%s: a swing standing owns the body" % a
+	)
 
 
 ## A clips file (made here: a skeleton under another node name, one clip named SYNTH) lends its clip to a slot.

@@ -59,7 +59,7 @@ func _setup() -> void:
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--raid="):
 			opts["raid"] = String(a).substr(7)
-	await m.start(opts)
+	m.start(opts)
 	m.set_process(false)
 	P = m.player
 	for mb in m.mobs:
