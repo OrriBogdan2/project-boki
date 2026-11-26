@@ -185,7 +185,7 @@ static func on_cast(m: Match, h: Hunter, at: Vector3, extra: String) -> void:
 			if not MergeSfx.play(h, "cast"):
 				m.sfx("warn", h.pos, -2.0, 0.7)
 			if rad > 0.5:
-				var tele: Node3D = m.fx.telegraph_circle(tgt, rad, Color(col, 0.9))
+				var tele: Node3D = m.fx.telegraph_circle(tgt, rad, Color(col, 0.9), SideColor.order(m, h))
 				var tw := tele.create_tween()
 				tw.tween_method(func(k: float): if is_instance_valid(tele): m.fx.telegraph_progress(tele, k), 0.0, 1.0, maxf(0.3, secs * 0.6))
 				tw.tween_callback(func(): if is_instance_valid(tele): m.fx.end_telegraph(tele))
