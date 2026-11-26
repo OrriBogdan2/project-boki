@@ -6,7 +6,6 @@ extends RefCounted
 
 const CHECKS := {
 	"--bond-pace-check": ["res://tools/bond_pace_check.gd", "bond_pace_check", null],  # FARM_LOOP: bond pace, taper
-	"--stolen-extract-check": ["res://tools/stolen_extract_check.gd", "stolen_extract_check", null],  # extract, saves
 	"--care-prompt-check": ["res://tools/care_prompt_check.gd", "care_prompt_check", null],  # the care line over a Boki
 	"--farm-cam-check": ["res://tools/farm_cam_check.gd", "farm_cam_check", null],  # the farm third-person view
 	"--farm-cam-clip": ["res://tools/farm_cam_clip.gd", "farm_cam_clip", null],  # GPU film: the third-person view
