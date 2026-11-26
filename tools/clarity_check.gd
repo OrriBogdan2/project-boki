@@ -9,24 +9,28 @@ extends RefCounted
 ## Boki's lines are drawn, and a Boki's ability name floats over your own Boki only. What sits on the Hunters in a bot
 ## 3v3 of the slice Hunters (ClarityFight, 10 frames) stays within ClarityFight.BUDGET.
 
+const ARCH_CHECK := preload("res://tools/archetype_check.gd")
 const ClarityFight := preload("res://tools/clarity_fight.gd")
 const DT := 1.0 / 60.0
 const FIGHT_FRAMES := 10
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("CLARITY %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
 
+
 func run(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	Econ.ensure()
+	_sable_hit(main)
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
+	m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
 	m.set_process(false)
 	for mb in m.mobs:
 		mb.dead = true
@@ -36,8 +40,10 @@ func run(main: Node) -> void:
 	var foes: Array = []
 	for h in m.hunters:
 		h.ctrl = "idle"
-		if h != p and h.team == p.team: ally = h
-		elif h.team != p.team: foes.append(h)
+		if h != p and h.team == p.team:
+			ally = h
+		elif h.team != p.team:
+			foes.append(h)
 	ok(ally != null and foes.size() == 3, "a 3v3: a teammate, three rivals")
 	_run(m, 0.2)
 	# ---------------------------------------------------------------- 1. the colour rule
@@ -58,11 +64,13 @@ func run(main: Node) -> void:
 	_body_tell(m, foes[0])
 	_boki_text(m, p, ally, foes[0])
 	_melee_stack(m, p, ally, foes)
+	_quiet_own(m, p, ally, foes[0])
 	# ---------------------------------------------------------------- 2. the downed teammate
-	ally.teleport(p.pos + Vector3(8.0, 0, 0))        # nobody in reach to pick them up: the bleed-out runs
+	ally.teleport(p.pos + Vector3(8.0, 0, 0))  # nobody in reach to pick them up: the bleed-out runs
 	for f: Hunter in foes:
 		f.teleport(p.pos + Vector3(-12.0, 0, 0))
-	if ally.kin: (ally.kin as Kin).stow()
+	if ally.kin:
+		(ally.kin as Kin).stow()
 	m.knock(ally, foes[0], {})
 	var f0 := DownedMarks.bleed_frac(ally)
 	_run(m, 1.0)
@@ -71,9 +79,11 @@ func run(main: Node) -> void:
 	var k: Kin = ally.kin
 	ok(k != null, "the downed teammate has a Boki")
 	if k:
-		ok(k.state != KinWispForm.STATE,
-				"a Boki on the shoulder at the knock is no guardian: it stays put (%s)" % k.state)
-		k.state = KinWispForm.STATE            # (a guardian's ride: summoned at the knock)
+		ok(
+			k.state != KinWispForm.STATE,
+			"a Boki on the shoulder at the knock is no guardian: it stays put (%s)" % k.state
+		)
+		k.state = KinWispForm.STATE  # (a guardian's ride: summoned at the knock)
 		ok(BokiMarks.status(k) == "", "its Boki rides on it as a wisp: no icon over it")
 		k.state = "downed"
 		ok(BokiMarks.status(k) == "knock", "a Boki down too shows the knock")
@@ -91,6 +101,38 @@ func run(main: Node) -> void:
 	await _fight_budget(main)
 	print("CLARITY done, %d failures" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+
+## Sable's crossbow hits read on the struck body: it flashes in her colour for the hit's 3 full frames, then the
+## flash is white again for the next Hunter's hit.
+func _sable_hit(main: Node) -> void:
+	var a := ARCH_CHECK.new()
+	a.main = main
+	var r: Array = a.setup("thief", 6.0)
+	var m: Match = r[0]
+	var shooter: Hunter = r[1]
+	var target: Hunter = r[2]
+	var want := Arch.color("thief")
+	shooter.fire_cd = 0.0
+	var tinted := false
+	var shown := Color.BLACK
+	var t := 0.0
+	while t < 1.2 and not tinted:
+		shooter.inp["fire"] = true
+		a.step(m, DT)
+		target.render(DT, 1.0)
+		tinted = target.flash_t > 0.0 and _same(target.flash_tint, want)
+		if tinted and not target.mats.is_empty():
+			shown = target.mats[0].get_shader_parameter("flash_color")
+		t += DT
+	shooter.inp["fire"] = false
+	ok(tinted, "Sable's bolt hit: the struck body's flash is her colour")
+	ok(_same(shown, want), "... and the shader draws it (%s)" % shown)
+	a.step(m, 0.3)
+	target.render(DT, 1.0)
+	ok(_same(target.flash_tint, Color.WHITE), "the tint is white again once the flash ends")
+	m.queue_free()
+
 
 ## The first ClarityFight fight: each BUDGET entry's element-Hunter pairs a frame, on average, within its budget.
 func _fight_budget(main: Node) -> void:
@@ -143,14 +185,16 @@ func _cc_plate(m: Match, a: Hunter, b: Hunter) -> void:
 	ok(HudPlate.statuses(a).is_empty(), "all over: the row is gone")
 	var mob: Ent = null
 	for mb in m.mobs:
-		if not mb.dead: mob = mb
+		if not mb.dead:
+			mob = mb
 	if mob == null:
 		mob = m.spawn_mob("skitter", a.pos + Vector3(4, 0, 0))
-	if mob:   # the monster plate draws the same row (hud._status_row)
+	if mob:  # the monster plate draws the same row (hud._status_row)
 		mob.stun_t = 1.2
 		var ms := _icon(mob, "status_stunned")
 		ok(ms.size() == 1 and absf(float(ms[0][3]) - 1.2) < 0.01, "a stunned monster: STUNNED icon, 1.2 s left")
 		mob.stun_t = 0.0
+
 
 ## Other people's looks lean to their side: yours as made, a teammate's cooler, a rival's toward the hostile red.
 func _side_fx(m: Match, p: Hunter, ally: Hunter, foe: Hunter) -> void:
@@ -163,6 +207,7 @@ func _side_fx(m: Match, p: Hunter, ally: Hunter, foe: Hunter) -> void:
 	var look := Oomph.shot_look(m, foe, c, 0.2)
 	var halo := SideColor.fx(m, foe, (look[0] as Color).lightened(0.2))
 	ok(_same(look[2], halo), "a rival's shot carries the hostile halo")
+
 
 ## A 3v3 melee, every Boki out, all of them piled on one spot: ownership rings are thin and sit under every cast, a
 ## rival's telegraph on top of yours on top of a teammate's, one full-strength fill under a body, and the rings
@@ -214,15 +259,43 @@ func _melee_stack(m: Match, p: Hunter, ally: Hunter, foes: Array) -> void:
 	ground.call()
 	ok(is_equal_approx(SideRings.shown(rings[0]).a, full_a), "the ring is back at full strength with the ground clear")
 
+
 func _tele(m: Match, by: Hunter, at: Vector3) -> Node3D:
 	var col := Color(SideColor.fx(m, by, Color.CYAN), 0.9)
 	return m.fx.telegraph_circle(at, 3.0, col, SideColor.order(m, by))
 
+
 func _prio(n: Node3D) -> int:
 	return (n.material_override as ShaderMaterial).render_priority
 
+
 func _alpha(n: Node3D) -> float:
 	return (n.material_override as ShaderMaterial).get_shader_parameter("color").a
+
+
+## Yours and a teammate's telegraphs are a faint rim (no hatching, no lace crossing), a rival's the strong one: the
+## same warning on the ground (Fx) and as an AimKit laced lane (docs/COMBAT_CLARITY.md, "Own telegraphs are quiet").
+func _quiet_own(m: Match, p: Hunter, ally: Hunter, foe: Hunter) -> void:
+	var quiet := func(by: Hunter) -> float:
+		var n := _tele(m, by, p.pos)
+		var q: float = (n.material_override as ShaderMaterial).get_shader_parameter("quiet")
+		m.fx.end_telegraph(n)
+		return q
+	ok(quiet.call(p) == 1.0 and quiet.call(ally) == 1.0, "your and a teammate's ground telegraph is quiet")
+	ok(quiet.call(foe) == 0.0, "a rival's ground telegraph is the strong one")
+	var verts := func(by: Hunter, lace: bool) -> int:
+		AimKit.lane(by, "lace", {"all": true, "len": 6.0, "width": 0.5, "fill": 0.8, "lace": lace, "chevrons": 2})
+		var d := AimKit.layer(m)
+		d.rebuild()
+		var n: int = d.geo.v.size()
+		AimKit.clear(by)
+		return n
+	var own: int = verts.call(p, true)
+	var foe_laced: int = verts.call(foe, true)
+	var foe_plain: int = verts.call(foe, false)
+	ok(own < foe_laced, "AimKit: your laced lane is drawn plain (%d vertices, a rival's %d)" % [own, foe_laced])
+	ok(own < foe_plain, "AimKit: your lane has no chevrons (%d vertices, a rival's plain %d)" % [own, foe_plain])
+
 
 ## AimKit draws a rival's telegraph in its own surface after yours.
 func _aim_order(m: Match, p: Hunter, foe: Hunter) -> void:
@@ -237,12 +310,13 @@ func _aim_order(m: Match, p: Hunter, foe: Hunter) -> void:
 	AimKit.clear(p)
 	AimKit.clear(foe)
 
+
 ## Crowd control on a body, on the body: its look (StatusLooks) shows while it lasts, the tint pulses its colour, all
 ## gone after;
 ## a cast glints the caster in their signature colour and fades.
 func _body_tell(m: Match, f: Hunter) -> void:
 	var looks := StatusLooks.of(m)
-	Sfx.listener = f.pos      # (StatusLooks draws near the camera focus only)
+	Sfx.listener = f.pos  # (StatusLooks draws near the camera focus only)
 	f.stun_t = 1.0
 	_run(m, 0.1)
 	ok(looks.showing(f, "stun"), "a stunned body spins the stars")
@@ -264,11 +338,14 @@ func _body_tell(m: Match, f: Hunter) -> void:
 	var rings0: int = m.fx.radial
 	f.cast_at = m.time
 	_run(m, DT)
-	ok(_same(BodyTell.tint_of(f), Arch.color(f.arch)) and BodyTell.tint_of(f).a > 0.5,
-		"a cast glints the caster in their colour")
+	ok(
+		_same(BodyTell.tint_of(f), Arch.color(f.arch)) and BodyTell.tint_of(f).a > 0.5,
+		"a cast glints the caster in their colour"
+	)
 	ok(m.fx.radial > rings0, "... and rings their feet")
 	_run(m, BodyTell.GLINT_T)
 	ok(BodyTell.tint_of(f).a == 0.0, "the glint fades")
+
 
 ## Boki text over a fight: every Boki's line is drawn out of a fight, only your own in one; an ability name floats
 ## over your own Boki, not a rival's.
@@ -283,7 +360,7 @@ func _boki_text(m: Match, p: Hunter, ally: Hunter, foe: Hunter) -> void:
 	p.combat_at = m.time
 	ok(BokiChatter.heard(m, mine), "in a fight: your own Boki's line is drawn")
 	ok(not BokiChatter.heard(m, foe.kin) and not BokiChatter.heard(m, ally.kin), "... the others' are not")
-	ok(not BokiChatter.calm(m), "in a fight: no Boki callout pins (\"Behind you!\") over the field")
+	ok(not BokiChatter.calm(m), 'in a fight: no Boki callout pins ("Behind you!") over the field')
 	p.combat_at = -99.0
 	ok(BokiChatter.calm(m), "no fight: callout pins are drawn")
 	ally.combat_at = m.time
@@ -292,8 +369,7 @@ func _boki_text(m: Match, p: Hunter, ally: Hunter, foe: Hunter) -> void:
 	for k: Kin in [mine, foe.kin]:
 		k.unseen = false
 		k.teleport(p.pos + Vector3(6.0 if k == mine else -6.0, 0, 0))
-	var words := func():
-		return m.fx.nums.filter(func(n): return n.get("word", false) and float(n["t"]) == 0.0).size()
+	var words := func(): return m.fx.nums.filter(func(n): return n.get("word", false) and float(n["t"]) == 0.0).size()
 	var w0: int = words.call()
 	m.on_kin_ability(foe.kin, (foe.kin as Kin).runner.def_of("k1"), false)
 	ok(words.call() == w0, "a rival's Boki casting: no name over it")
@@ -301,15 +377,19 @@ func _boki_text(m: Match, p: Hunter, ally: Hunter, foe: Hunter) -> void:
 	ok(words.call() == w0 + 1, "your own Boki casting: its name floats")
 	mine.stow()
 
+
 func _icon(e: Ent, icon: String) -> Array:
 	return HudPlate.statuses(e).filter(func(x): return x[0] == icon)
+
 
 func _run(m: Match, secs: float) -> void:
 	var t := 0.0
 	while t < secs:
 		m.step(DT)
-		for h in m.hunters: h.render(DT, 1.0)
+		for h in m.hunters:
+			h.render(DT, 1.0)
 		t += DT
+
 
 ## The Boki BokiMarks would tether, by the same rule it draws with (every Boki stood away from its Hunter).
 func _tethered(m: Match) -> Array:
@@ -318,15 +398,17 @@ func _tethered(m: Match) -> Array:
 		var h: Hunter = k.owner_h
 		if h == null:
 			continue
-		if k.state != KinWispForm.STATE:       # (a downed Hunter's Boki stays in its wisp form)
+		if k.state != KinWispForm.STATE:  # (a downed Hunter's Boki stays in its wisp form)
 			k.state = "active"
 			k.teleport(h.pos + Vector3(3.0, 0, 0))
 		if BokiMarks.tethers(m, k):
 			out.append(k)
 	return out
 
+
 func _same(a: Color, b: Color) -> bool:
 	return absf(a.r - b.r) + absf(a.g - b.g) + absf(a.b - b.b) < 0.01
+
 
 func _side(m: Match, h: Hunter) -> String:
 	if h == m.player:

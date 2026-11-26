@@ -20,7 +20,7 @@ func _grab(file: String, frames := 8) -> void:
 func _start(no_drop: bool) -> void:
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 6, "squad": 3, "tier": 0, "seed": 77, "no_drop": no_drop, "autoplay": no_drop})
+	m.start({"teams": 6, "squad": 3, "tier": 0, "seed": 77, "no_drop": no_drop, "autoplay": no_drop})
 	m.set_process(false)
 	var fade = main.get("fade")
 	if fade != null:
