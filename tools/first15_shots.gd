@@ -117,7 +117,7 @@ func _front() -> void:
 func _tutorial() -> void:
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0})
+	m.start({"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0})
 	m.set_process(false)
 	await _wait(0.5)
 	await _shot("tutorial_intro")
@@ -176,7 +176,7 @@ func _first_match() -> void:
 	m = Match.new()
 	main.add_child(m)
 	main.current = m      # (the pause menu reads the screen's options from Main's current screen)
-	await m.start({"teams": Data.MATCH_PLAYERS, "squad": 1, "total": Data.MATCH_PLAYERS, "tier": 0, "seed": 7})
+	m.start({"teams": Data.MATCH_PLAYERS, "squad": 1, "total": Data.MATCH_PLAYERS, "tier": 0, "seed": 7})
 	m.set_process(false)
 	if main.fade:
 		await main.fade.reveal(0.01)      # (this part never went through show_screen, which lifts the cover)

@@ -32,9 +32,9 @@ func run(combo_check: RefCounted, archetype_check: RefCounted) -> void:
 	K = P.ak
 	_park()
 	_item_70()
-	await _item_71()
-	await _item_73()
-	await _item_74()
+	_item_71()
+	_item_73()
+	_item_74()
 	await ac.done(m)
 
 func _park() -> void:
