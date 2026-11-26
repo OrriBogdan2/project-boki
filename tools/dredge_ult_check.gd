@@ -188,7 +188,7 @@ func _charge_and_waves() -> void:
 		"ult payoff: at 4.6m fewer slugs land (a shotgun fan, not a wall)",
 		hits.size() == 2 and int(hits[0]) > 0 and int(hits[0]) < 6, str(hits)
 	)
-	await _reel_combo(m, p, t_v, home)
+	_reel_combo(m, p, t_v, home)
 	await ak.done(m)
 
 ## The Broadside's slugs are Explosive (source): they break a crate and a pot and light a keg in the fan.
