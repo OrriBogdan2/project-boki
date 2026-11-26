@@ -174,7 +174,8 @@ func _plates_clear_tops(m: Match) -> void:
 		var gap := _screen_y(m, feet, top) - _screen_y(m, feet, up) - 17.0  # px: the plate hangs 17 px under its anchor
 		worst = minf(worst, gap)
 	ok(missing.is_empty(), "every archetype has body.top_h in its data (missing: %s)" % str(missing))
-	ok(worst >= 0.0, "a plate's bottom clears the tallest point of all %d archetypes (worst %.0f px)" % [Arch.ids().size(), worst])
+	var msg := "a plate's bottom clears the tallest point of all %d archetypes (worst %.0f px)"
+	ok(worst >= 0.0, msg % [Arch.ids().size(), worst])
 
 
 func _screen_y(m: Match, feet: Vector3, up: float) -> float:

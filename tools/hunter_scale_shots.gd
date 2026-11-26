@@ -4,7 +4,8 @@ extends "res://tools/gameplay_media.gd"
 ## (no HUD) and <hero>_<before|after>_hud.png (with the overhead plate). Prints a HSCALE row per hero: on-screen
 ## body height in px (feet to the top of the head), the model scale, and the hit radius (must not change).
 ## --gaps (no renderer needed): every archetype, at the old and the new size, prints a GAP row with the model's top
-## (back props too) over the feet in m and the px between the bottom of its own plate and of a rival's plate and that top
+## (back props too) over the feet in m and the px between the bottom of its own plate and of a rival's plate and
+## that top
 ## (negative: the plate covers the model). Needs a renderer for the shots (jobq --needs gpu); 1920x1080 so the px read
 ## against a 1080p reference.
 
