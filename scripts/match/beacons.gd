@@ -8,7 +8,8 @@ extends RefCounted
 ## the direction and a pulsing marker on the world, the minimap and the full map for every player
 ## (ReviveHud) until it goes off or its squad steps away.
 ## Online, the game that owns the Hunter on the beacon runs it and tells the others with the "bcn"
-## event: [i, team, "lit" | "out" | "used"]; each game brings back the dead Hunters it owns.
+## event: [i, team, "lit" | "out" | "used"] or [i, -1, "lamp", x, y, z] for a beacon set down mid-match
+## (Hearth Lamp, Revive Ember); each game brings back the dead Hunters it owns.
 
 const RADIUS := 2.2              # metres: stand this close to light it
 const COUNT := 6                 # beacons per map (fewer if the islands are small)
@@ -41,11 +42,29 @@ static func place(m: Match) -> void:
 				spots.append(p)
 				break
 	for p in spots:
-		var n := Models.revive_beacon()
-		n.position = p
-		m.add_child(n)
-		m.beacons.append({"pos": p, "used": false, "prog": 0.0, "team": -1, "node": n, "contested": false,
-			"lit": false, "lit_team": -1, "lit_at": 0.0, "lit_net": false})
+		_add(m, p)
+
+static func _add(m: Match, p: Vector3) -> void:
+	var n := Models.revive_beacon()
+	n.position = p
+	m.add_child(n)
+	m.beacons.append({"pos": p, "used": false, "prog": 0.0, "team": -1, "node": n, "contested": false,
+		"lit": false, "lit_team": -1, "lit_at": 0.0, "lit_net": false})
+
+## A beacon set down mid-match (Hearth Lamp). Online, the others stand the same one up ("lamp").
+static func lamp(m: Match, at: Vector3, net := false) -> void:
+	_add(m, at)
+	m.fx.ring(at, 3.0, COL, 0.6)
+	m.sfx("unlock", at, -4.0, 1.2)
+	if not net:
+		m.net_event(["bcn", m.beacons.size() - 1, -1, "lamp", at.x, at.y, at.z])
+
+## A beacon that goes off at once for a team (Revive Ember, a Bounty Banner kept).
+static func pop(m: Match, at: Vector3, team: int) -> void:
+	lamp(m, at)
+	var i := m.beacons.size() - 1
+	m.net_event(["bcn", i, team, "used"])
+	_use(m, m.beacons[i], team)
 
 static func _clear(m: Match, spots: Array, p: Vector3) -> bool:
 	for s in spots:
@@ -101,6 +120,10 @@ static func net_in(m: Match, x: Array) -> void:
 	if x.size() < 4:
 		return
 	var i := int(x[1])
+	if String(x[3]) == "lamp" and x.size() >= 7:
+		if i == m.beacons.size():
+			lamp(m, Vector3(float(x[4]), float(x[5]), float(x[6])), true)
+		return
 	if i < 0 or i >= m.beacons.size() or m.beacons[i]["used"]:
 		return
 	var bc: Dictionary = m.beacons[i]

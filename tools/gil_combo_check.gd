@@ -230,7 +230,7 @@ func _puddle() -> void:
 	var quad := (node.get_child(1) as MeshInstance3D).mesh as PlaneMesh
 	var flare: Color = rim.get_shader_parameter("color")
 	ok("Slime: the rim sits on the puddle's radius and flares white as it lands",
-		absf(quad.size.x - 2.0 * float(vd["puddle_r"])) < 0.01 and flare.a > GilKit.PUDDLE_RIM_A + 0.05
+		absf(quad.size.x - 2.0 * float(vd["puddle_r"])) < 0.01 and flare.a > HeroVfxZone.RIM_A + 0.05
 			and flare.r > sig.r + 0.05,
 		"quad %.2f m, flare %s" % [quad.size.x, flare])
 	fresh(T)
@@ -240,7 +240,7 @@ func _puddle() -> void:
 	var steady: Color = rim.get_shader_parameter("color")
 	var in_col: Color = inside.get_shader_parameter("color")
 	ok("Slime: then a steady rim in Gil's colour over a faint inside in the slime's (0.25 alpha or less)",
-		Color(steady, 1.0).is_equal_approx(sig) and absf(steady.a - GilKit.PUDDLE_RIM_A) < 0.01
+		Color(steady, 1.0).is_equal_approx(sig) and absf(steady.a - HeroVfxZone.RIM_A) < 0.01
 			and Color(in_col, 1.0).is_equal_approx(K.col_of(vd)) and in_col.a * 0.3 <= 0.25,
 		"rim %s inside %s" % [steady, in_col])
 	var at: Vector3 = pd["at"]
@@ -248,10 +248,10 @@ func _puddle() -> void:
 	var on_it := func(rg: Dictionary) -> bool:
 		return absf(float(rg["r"]) - r) < 0.05 and (rg["node"] as Node3D).global_position.distance_to(at) < 0.5
 	var strobe := false
-	while float(pd["left"]) > GilKit.PUDDLE_FADE * 0.5:
+	while float(pd["left"]) > HeroVfxZone.FADE * 0.5:
 		step(m, DT)
 		strobe = strobe or m.fx.rings.any(on_it)
-	var mid: float = (rim.get_shader_parameter("color") as Color).a / GilKit.PUDDLE_RIM_A
+	var mid: float = (rim.get_shader_parameter("color") as Color).a / HeroVfxZone.RIM_A
 	ok("Slime: no rings strobe over it, and it fades on an ease-out curve as the slow ends (a quarter left halfway)",
 		not strobe and absf(mid - 0.25) < 0.05, "%.3f of its glow halfway through the fade" % mid)
 	step(m, 0.3)

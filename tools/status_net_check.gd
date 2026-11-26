@@ -77,7 +77,7 @@ func _host() -> void:
 		]
 	}
 	Net.lobby_emit("dn", {"c": "start", "d": d})
-	await _build(d)
+	_build(d)
 	var g: Hunter = m.ents_by_id.get("P" + other, null)
 	var t1 := CheckClock.own_msec(guest_pid)
 	while (

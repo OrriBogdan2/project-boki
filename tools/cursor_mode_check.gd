@@ -28,7 +28,7 @@ func _start(main: Node, extra: Dictionary) -> Match:
 	o.merge(extra, true)
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(o)
+	m.start(o)
 	m.set_process(false)
 	await main.get_tree().process_frame
 	return m
