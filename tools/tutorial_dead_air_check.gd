@@ -98,9 +98,11 @@ func _match_fresh(m: Match, tu: Tutorial) -> bool:
 	var nags := tu.nag_t > 0.0
 	var fresh: bool = line != last.get("line", "") or moved or (comp != null and comp.leading())
 	fresh = fresh or (says and not last.get("says", false)) or (nags and not last.get("nags", false))
+	fresh = fresh or tu.hits > int(last.get("hits", 0))  # (a hit landing on a monster is its own feedback)
 	last["line"] = line
 	last["says"] = says
 	last["nags"] = nags
+	last["hits"] = tu.hits
 	last["sid"] = tu.id()
 	return fresh
 
