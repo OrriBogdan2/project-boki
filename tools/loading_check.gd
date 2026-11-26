@@ -114,8 +114,10 @@ func _real_load(main: Node) -> void:
 	for i in range(1, shown.size()):
 		if shown[i][0] < shown[i - 1][0]: back += 1
 		if shown[i][1] < shown[i - 1][1]: want_back += 1
-		# a sample is taken before that frame's _process: the step into sample i ran in frame i - 1
-		if shown[i][0] - shown[i - 1][0] > MAX_STEP and shown[i - 1][2] < HITCH_S:
+		# a sample is taken before that frame's _process: the step into sample i ran in frame i - 1; the Ready stage
+		# runs the rest of the bar full inside FILL_T by design, so a frame longer than that carries it all
+		var ready: bool = shown[i][3] == "Ready"
+		if shown[i][0] - shown[i - 1][0] > MAX_STEP and shown[i - 1][2] < HITCH_S and not ready:
 			jumps += 1
 			var at := [i, shown[i][3], shown[i - 1][0], shown[i][0], shown[i - 1][2]]
 			print("LOADING jump at frame %d (%s): %.2f -> %.2f in %.3f s" % at)
