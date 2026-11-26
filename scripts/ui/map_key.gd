@@ -20,6 +20,7 @@ const KINDS := [
 	["squad", "Squad"],
 	["boki", "Boki"],
 	["camp", "Camp"],
+	["nest", "Blight nest"],
 	["shop", "Shop"],
 	["chest", "Chest (zoom)"],
 	["shrine", "Shrine"],
@@ -70,6 +71,8 @@ static func _shown(m: Match, id: String, tm: TrainMap) -> bool:
 			return WaysOutMap.sites(m).any(func(v: Vector3): return v != Vector3.INF)
 		"hot":
 			return m.biomes != null and not m.biomes.hot.zone.is_empty()
+		"nest":
+			return m.blight != null and not m.blight.nests.list.is_empty()
 		"camp", "shop", "chest", "shrine", "pad":
 			return not MapMarks.first(m, id).is_empty()
 		_:
@@ -128,6 +131,8 @@ static func _glyph(fm: FullMap, id: String, at: Vector2) -> void:
 			var k := BokiHud.mapped_kin(m)
 			c.draw_circle(at, MapDetail.ICON_R, Color(0, 0, 0, 0.6))
 			Icons.draw(c, "paw", at, MapDetail.ICON_R * 0.8, Color(k.sp.get("glow", k.sp["color"])))
+		"nest":
+			NestMap.glyph(c, at, 6.5)
 		"exit":
 			ExitMark.glyph(c, at, 6.5, ExitMark.SAMPLE, 0.0)
 		"way":
