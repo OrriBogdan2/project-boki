@@ -124,7 +124,8 @@ const T := {
 	"coyote_jump_300ms": ["<=", 0.0, "yes", "ran off a rim, jump 0.30s later: past the coyote, no jump [game data]"],
 	"buffer_jump_050ms": [">=", 1.0, "yes", "jump 0.05s before landing goes off on landing: 0.12s buffer [est]"],
 	"buffer_jump_100ms": [">=", 1.0, "yes", "jump 0.10s before landing goes off on landing: 0.12s buffer [est]"],
-	"buffer_jump_150ms": ["<=", 0.0, "yes", "jump 0.15s before landing (3m): past the buffer, no jump [est]"],
+	"buffer_jump_150ms":
+	[">=", 1.0, "yes", "[game data] jump 0.15s before landing (3m), ~1.25m up: under land_buffer_h, kept"],
 	"freefall_1s_depth": ["~", [6.8, 8.0], "m", "[game data] gravity 1470 uu/s2, cap 1200 uu/s: 7.1m"],
 	"abyss_fall_vy_deep": ["~", [10.0, 10.8], "m/s", "[game data] AbyssFallSlowSpeedLimit 12 to 10 m/s"],
 	"abyss_fall_t": [">=", 1.8, "s", "[game data] off the lip to AbyssHeight (17.5m) in ~2s"],
@@ -133,7 +134,7 @@ const T := {
 	"glide_open_hold_s": ["<=", 0.12, "s", "tap/hold split for Space; a tap is ~0.1s"],
 	"glide_open_button_frames": ["<=", 1.0, "frames", "dedicated glide button: no tap/hold ambiguity"],
 	"glide_catch_t": ["<=", 0.20, "s", "[guide] opens 'instantly'; the catch rate is ours (max locked)"],
-	"glide_start_vy": ["~", [0.85, 1.4], "m/s", "[game data] GlideStartFallSpeedMin: opened rising, it falls"],
+	"glide_start_vy": ["~", [-2.5, -1.5], "m/s", "[game data] opened rising ~0.6m up: keeps up to 2.5 m/s of the rise"],
 	"glide_speed": ["~", [7.31, 8.93], "m/s", "[game data] settled glide 700 uu/s x body_scale 1.16 +-10%"],
 	"glide_sink": ["~", [1.24, 1.26], "m/s", "[game data] GlideMinZVelocity -125 uu/s"],
 	"glide_overheat_s": ["~", [8.95, 9.05], "s", "hunter_move.json glide_heat_s (owner 11-02 over footage)"],
@@ -984,7 +985,7 @@ func _glide() -> void:
 	_reset(flat)
 	p_v.inp["jump"] = true
 	m.step(DT)
-	_steps(3)
+	_steps(6)  # (past glide_floor_rise: lower, a rising glider can't open)
 	var rise := p_v.vel.y
 	p_v.inp["jump"] = true
 	p_v.inp["glide"] = true

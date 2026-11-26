@@ -6,8 +6,8 @@ extends "res://tools/move_feel_check.gd"
 ## source's band: UE's walking brake drawn at 30 to 144 fps), the jump's apex and air time, a dash (press to its
 ## end, run speed held), and the two jump
 ## graces (coyote: the latest press after the ground goes that still jumps; buffer: the earliest press before
-## a landing that still jumps). Every number has to agree with its 60 fps value, and the graces with their
-## data rows (content/rules/hunter_move.json).
+## a landing that still jumps, the fall through the last land_buffer_h). Every number has to agree with its 60 fps
+## value, and the graces with their data rows (content/rules/hunter_move.json).
 ## Prints "MRATE <match|farm> <key> 30=.. 60=.. 144=.. ok|FAIL" and "MOVE RATE CHECK DONE, failures: N".
 
 const RATES := [30, 60, 144]
@@ -274,7 +274,10 @@ func _trials(where: String) -> void:
 		var inside := got_v.values().all(func(x: float) -> bool: return x >= band.x and x <= band.y)
 		var line := "%s stop from %.2f m/s 30=%.3f 60=%.3f 144=%.3f m in the source's %.3f-%.3f (%s)"
 		_ok(inside, line % [where, v, got_v[30], got_v[60], got_v[144], band.x, band.y, ", ".join(speeds[v])])
-	for g in [["coyote", HunterMove.coyote_s], ["buffer", HunterMove.jump_buffer_s]]:
+	# a press inside the landing buffer's height is kept to the landing: the buffer is the time the last
+	# land_buffer_h of the DROP_M fall takes (never under jump_buffer_s)
+	var fall_t := sqrt(2.0 * DROP_M / Hunter.H_GRAV) - sqrt(2.0 * (DROP_M - HunterMove.land_buffer_h) / Hunter.H_GRAV)
+	for g in [["coyote", HunterMove.coyote_s], ["buffer", maxf(HunterMove.jump_buffer_s, fall_t)]]:
 		var v60: float = got[g[0]][60]
 		var what := "%s %s at 60 fps %.3f s is its data row %.2f s" % [where, g[0], v60, g[1]]
 		_ok(absf(v60 - float(g[1])) <= 2.0 * DT, what)
