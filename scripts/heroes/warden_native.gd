@@ -17,6 +17,7 @@ const STILL := 0.25  # m/s: below this he is standing
 const FADE := 0.15  # s: one clip into the next
 const RATE_MIN := 0.6  # the walk, run and sneak clips' slowest rate, of their keyed pace
 const RATE_MAX := 1.8  # and their fastest: a quicker stride keeps the feet nearer the ground speed
+const LEAD_FADE := 0.05  # s: a basic attack that starts mid-clip (data "lmb_lead") blends in this fast
 const ATTACK_AGAIN := 0.6  # share of the attack clip after which a new hit starts it over
 const LOOPS := ["idle", "walk", "run", "crouch"]
 ## Clip slots data "clips" may add beside the six states; a missing one plays today's clip (MESHY_NATIVE.md).
@@ -52,6 +53,7 @@ var built := 0  # the rig weapon last hidden (instance id): Hunter.equip rebuild
 var built_off := 0  # and the rig's Offhand last hidden (instance id)
 var cur := ""  # the game state playing ("idle", "walk", ...)
 var attack_left := 0.0  # s the clip of a swing, cast, hit or landing still owns the body
+var attack_lead := 0.0  # s of the one-shot's clip its start skips: the clip's strike lands as the shot leaves
 var attack_move := false  # it was started by a kit move or a swing (not a cast or a shot): the open reach waits
 var hit_prev := 99.0  # the state's s since a hit, last frame
 var land_prev := 0.0  # the state's landing squash, last frame
@@ -222,13 +224,14 @@ func _process(dt: float) -> void:
 		attack_left = 0.0
 		cur = "kmove"
 	elif one != "":
-		attack_left = _clip_len(one) / _shot_rate(one)
+		var lead := 0.0 if one in HIT_SLOTS else attack_lead
+		attack_left = (_clip_len(one) - lead) / _shot_rate(one)
 		if _over_legs(one, s):
-			upper.play(player.get_animation(String(plays[one])), _shot_rate(one))
+			upper.play(player.get_animation(String(plays[one])), _shot_rate(one), lead)
 			_loco(s)
 		else:
 			upper.stop()
-			_play(one, _shot_rate(one), true)
+			_play(one, _shot_rate(one), true, lead)
 	elif attack_left <= 0.0 or upper.on:
 		_loco(s)
 	var hips := WardenSkeleton.find(skel, "root")
@@ -416,7 +419,15 @@ func _swing(s: Dictionary) -> String:
 	if not _fresh(slot):
 		return ""
 	attack_move = move or melee
+	attack_lead = _lead(slot, "shot" if melee or shot else String(now["kmove"]))
 	return slot
+
+
+## Where in the clip a basic attack starts (s): data "lmb_lead" by what started it ("shot": a swing or a shot, or the
+## kit move's name). The kit lets the round go as the swing is pressed, so the clip begins at its wind-up's end and its
+## strike frame lands with the round (tools/lmb_anim_sync_check.gd) instead of half a second after it.
+func _lead(slot: String, what: String) -> float:
+	return float((d.get("lmb_lead", {}) as Dictionary).get(what, 0.0)) if slot == "lmb" or slot == "attack" else 0.0
 
 
 ## Whether a clip may start now: nothing plays over the body, or the clip before it is past ATTACK_AGAIN of its length.
@@ -439,11 +450,11 @@ func _clip_len(st: String) -> float:
 
 
 ## The game state's clip, crossfaded in when it changes (restart: a new attack plays it from the start).
-func _play(st: String, rate: float, restart := false) -> void:
+func _play(st: String, rate: float, restart := false, from := 0.0) -> void:
 	if st != cur or restart:
-		player.play(String(plays[st]), FADE)
+		player.play(String(plays[st]), LEAD_FADE if from > 0.0 else FADE)
 		if restart:
-			player.seek(0.0, true)
+			player.seek(from, true)
 		cur = st
 	player.speed_scale = rate
 
