@@ -11,6 +11,7 @@ static func update(m: Match, delta: float, alpha: float) -> void:
 	var cam: CamRig = m.cam
 	var player: Hunter = m.player
 	cam.follow_mode = String(Settings.get_v("cam_follow"))
+	cam.zoom_omega = float(CamWheel.rules(true)["omega"])
 	var sty := String(Settings.get_v("cam_style"))
 	if sty != m.cam_style:
 		m.cam_style = sty
