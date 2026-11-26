@@ -5,6 +5,7 @@
 # yawed into the slit and pulled `inset` m inside the outer skirt, on its own primitive (material `mat`, existing skirt texture).
 # Weights: per vertex, blend of the nearest outer-skirt vertex on each slit side (A = da<0, B = da>=0) by angular position across
 # the panel, so it spans the slit like a membrane between the two edges. Top `fade` m: panel vertices pulled further inside.
+# vpow=P (r28 B): V-shaped godet instead of a rectangle (the rectangle showed a hard horizontal top edge at eye level).
 # Nothing else changes (mesh, textures, other prims, clips byte-identical).
 import sys,numpy as np
 sys.path.insert(0,'tools/anim'); sys.path.insert(0,'tools/art1/hem_r17'); import geo_check as g, glbio
@@ -21,7 +22,9 @@ Jx=np.c_[A('JOINTS_0'),A('JOINTS_1')].astype(int); Wx=np.c_[A('WEIGHTS_0'),A('WE
 ang=lambda X: np.degrees(np.arctan2(X[:,0]-hc[0],X[:,2]-hc[2]))
 wrap=lambda d: (d+180)%360-180
 va=ang(P); cen=P[F].mean(1); ca=ang(cen)
-sel=(np.abs(wrap(ca-(gapc+rot)))<=hw)&(cen[:,1]<ytop)
+ybot=P[:,1].min(); vp=f('vpow',0)      # vpow>0: V-shaped godet, half width hw*((ytop-y)/(ytop-ybot))^vpow (no straight top edge)
+hwy=hw*np.clip((ytop-cen[:,1])/(ytop-ybot),0,1)**vp if vp>0 else hw
+sel=(np.abs(wrap(ca-(gapc+rot)))<=hwy)&(cen[:,1]<ytop)
 Fs=F[sel]; vid,inv=np.unique(Fs,return_inverse=True); Fn=inv.reshape(-1,3)
 d=np.radians(-rot); c,s=np.cos(d),np.sin(d); R=np.array([[c,0,s],[0,1,0],[-s,0,c]])
 Q=(P[vid]-hc)@R.T+hc; Nn=N[vid]@R.T
