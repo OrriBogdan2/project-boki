@@ -37,7 +37,7 @@ func run(main_node: Node) -> void:
 	Econ.ensure()
 	m = Match.new()
 	main.add_child(m)
-	await m.start(
+	m.start(
 		{
 			"teams": 3,
 			"squad": 1,
@@ -69,14 +69,14 @@ func run(main_node: Node) -> void:
 	var q: Dictionary = Heart.rules()["quest"]
 	for id in SideColor.ORDER:
 		Settings.v[SideColor.KEY] = id
-		await _state_a(p, rival, x, h_v, q)
+		_state_a(p, rival, x, h_v, q)
 		focus = x["pos"] + Vector3(0, 1.5, 3.0)
 		p.teleport(m.world.free_spot_near(x["pos"] + Vector3(14, 0, 10), [], 1.0, 0.45, 6.0))
 		await _grab("%s_a_uplink_rival" % id)
 		m.hud.full_map.open()
 		await _grab("%s_a_full_map" % id)
 		m.hud.full_map.close()
-		await _state_b(p, rival, x, h_v, q)
+		_state_b(p, rival, x, h_v, q)
 		await _grab("%s_b_uplink_ours" % id)
 		focus = h_v.site + Vector3(0, 1.5, 3.0)
 		p.teleport(m.world.free_spot_near(h_v.site + Vector3(14, 0, 10), [], 1.0, 0.45, 6.0))

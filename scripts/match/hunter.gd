@@ -11,55 +11,17 @@ const H_GRAV := 14.7             # m/s^2 [game data] DefaultGravityZ -1470 uu/s^
 # m/s: [game data] JumpZVelocity is 7.5 (1.9m up); ours stops ~1.5m up so jump + mantle still tops
 # out under four terraces (the wall kick's job) on our 0.8m terraces
 const JUMP_V := 6.8
-const SPIRIT_CLIMB := 14.0       # m/s a Spirit Walk rises up a ledge face (Phase Walk goes through raised terrain)
 # one-step presses, cleared after each sim step
-const PRESS_KEYS := ["dash", "jump", "sig", "util1", "util2", "util3", "util4", "ult", "sec", "gear1", "gear2", "skill",
-		"swap"]
+const PRESS_KEYS := ["dash", "jump", "sig", "util1", "util2", "util3", "util4", "util5", "util6", "ult", "sec",
+		"gear1", "gear2", "skill", "swap"]
 # [input key, skill slot, feedback slot]: a press on a slot with no point is refused
 const SLOT_GATES := [["dash", "dash", "dash"], ["sec", "sec", "sec"], ["sig", "kin", "k1"], ["ult", "ult", "r"]]
-const GROUND_ACCEL := 90.0       # [spec] near-instant: top speed in ~0.055s (was 70)
 const AIR_ACCEL := 40.0          # a ledge rise steers crisply (a jump steers by Loco.air_step)
-const AIR_DECEL := 9.0           # let go on a ledge rise and you mostly stop
-const AIR_OVERSPEED := 3.0       # but momentum above run speed (a dash, a pad) still carries
-const GLIDE_GRAV := 14.0
-const GLIDE_ENGAGE := 0.1        # scripted input only (checks, demos): hold glide this long in the air and it opens. A player's keys never hold-open it (glide_press_only)
-                                 # (the dedicated glide button, Mouse 5, opens it at once)
-## The abyss lift [wiki: "a rapid upward impulse to ground level, then a rapid deceleration"], scaled
-## by how deep you are (owner: "pull you up faster based on how low in the abyss you are"): a gentle
-## lift just under the lip, a hard surge from deep down. See abyss_lift_vy (the match and home both use it).
-const ABYSS_LIFT := 22.0         # [est] upward pull (m/s^2) just under the lip...
-const ABYSS_LIFT_PER_M := 7.0    # [est] ...plus this per metre deeper (10m down: 92 m/s^2)
-const ABYSS_LIFT_MAX := 5.0      # [est] fastest climb just under the lip...
-const ABYSS_LIFT_MAX_PER_M := 1.1  # [est] ...plus this per metre deeper (12m down: ~18 m/s; item 63: ~30% under the old ~25)
-const ABYSS_LIFT_CAP := 18.2     # item 63: the deepest climb is 30% softer than the old 26
-const ABYSS_BRAKE_DIST := 2.5    # ...that brakes near ground level (let go just before to keep the height)
-const ABYSS_BRAKE := 60.0
-const ABYSS_LIP_VY := 4.5        # [est] m/s still rising as the lift reaches the lip: it bounces up past it
-const ABYSS_BRAKE_GAIN := 3.5    # (movefeel) rise speed per metre left in the brake zone (was 2: the last metre crawled)
-const MANTLE_REACH := 1.5        # [game data] MantleSuctionUpwardsForceHeightMax: a lip this far above you pulls you up
-const TALL_CLIMB_EXTRA := 0.9     # m: Archer and Juggernaut also climb double-high ledges ([game data] bCanWallJump)
-const MANTLE_REACH_ABYSS := 4.5  # below an island's lip over the abyss, its side catches you this far down (movefeel: was 3.5)
-                                 # (a bit past the normal ledge reach); deeper you slide down the face
-const WALL_CATCH_REACH := 0.75   # (movefeel) over the abyss below a lip, a wall this far from your side catches you (elsewhere 0.4)
-const ABYSS_GLIDE_ROOM := 1.5    # a glider with heat left (lifting you out) gets this much more room
+## The ledge, abyss, glide, drop, dive and landing numbers live in HunterFeel (tuning.json "feel", owner 11-08).
 const EX_DASH_CD := 12.5         # the long dash: in the air, or with the short one on cooldown
 const DASH_SPEED := 19.0      # m/s: the base dash (owner: 23 felt too fast); 19 x 0.19s = 3.6m
 const DASH_TIME := 0.19       # s
 const DASH_REGEN := 2.2
-const LEDGE_REACH := 2.8
-const LEDGE_CD := 0.45
-const FLOAT_SPEED := 12.0
-const GLIDE_FALL := 1.7
-# The opening drop, battle-royale style: a fast skydive you steer freely, then the glider opens by
-# itself near the ground (or earlier on jump) for a slower, floatier last stretch.
-const DIVE_FALL := 13.0        # [est] a punchy skydive (was 11)
-const DIVE_SPEED := 14.0       # m/s, top flat speed in the dive (DropFeel)
-const DROP_FALL := 4.2
-const DROP_SPEED := 8.0        # m/s, top flat speed under the open glider
-const DIVE_VY_RATE := 7.0      # the dive reaches its fall speed in ~0.3s (was 4)
-const DROP_VY_RATE := 9.0      # the canopy settles to its sink in ~0.2s after it opens (was 4)
-const DEPLOY_POP := -1.6       # the canopy catching: your fall checks to this, then settles to DROP_FALL
-const DEPLOY_H := 8.0         # the glider opens by itself this high above the ground
 ## Armor, as in Supervive: it takes its tier's share off every hit (ARMOR_TIERS) for as long as it
 ## has durability left; what gets through hurts your health and wears the durability down by the same
 ## amount. Neither comes back on its own: tonics heal and armor kits repair (the utility belt, 1 to 4).
@@ -73,10 +35,10 @@ var wid := "rifle"
 var wpn: Dictionary = {}
 var ctrl := "bot"             # local | bot | remote
 var inp := {"move": Vector2.ZERO, "aim": Vector3.ZERO, "fire": false, "dash": false, "jump": false,
-	"throw": false, "skill": false, "sig": false, "interact": false, "util1": false, "util2": false, "util3": false, "util4": false, "glide": false, "glide_press_only": false, "ult": false,
+	"throw": false, "skill": false, "sig": false, "interact": false, "util1": false, "util2": false, "util3": false, "util4": false, "util5": false, "util6": false, "glide": false, "glide_press_only": false, "ult": false,
 	"sec": false, "sec_hold": false, "crouch": false, "scout": false, "gear1": false, "gear2": false, "swap": false}
 var base_speed := 5.4
-var ground_accel := GROUND_ACCEL     # per hunter (HunterMove)
+var ground_accel := HunterFeel.ground_accel     # per hunter (HunterMove)
 var ammo := 12
 var fire_cd := 0.0
 var dash := DashState.new()    # charges and the long dash cooldown, the garden avatar's too
@@ -847,25 +809,22 @@ func do_jump() -> void:
 ## "it only really cools on the ground"); after a close you fall like any jump (Loco.air_step: the glide's
 ## extra over run speed bleeds off), so skilled taps (short lifts out of the abyss, coasting the gaps) cover
 ## more ground per heat than holding. Numbers in docs/MOVEMENT_FEEL.md; measured by --move-feel-check (feather_*).
-const FEATHER_KEEP := 0.6      # [est] seconds after a glider close that count as just off it (ledges, wall shove)
-const FEATHER_MIN := 0.05      # [est] the glider reopens with this much heat room left (was 0.15)
-const FEATHER_TAP := 0.3       # [est] an abyss lift's quick first seconds, heating at HunterMove.lift_tap_heat
 var glide_off_t := 9.0         # seconds since the glider closed in the air (9 = long ago / on the ground)
 var lift_t := 0.0              # seconds of the current abyss lift (feathering taps stay in the cheap part)
 
 ## The glider's vertical speed this step below an island's lip over the abyss, `depth` metres under
-## it: it pulls you up harder and faster the deeper you are (ABYSS_LIFT*), then brakes into the last
-## ABYSS_BRAKE_DIST so you arrive at ground level (let go just before to carry the climb up as height).
+## it: it pulls you up harder and faster the deeper you are (HunterFeel.abyss_lift*), then brakes into the last
+## HunterFeel.abyss_brake_dist so you arrive at ground level (let go just before to carry the climb up as height).
 ## Shared by Hunter (matches, the --training ground) and Home (the farm).
 static func abyss_lift_vy(vy: float, depth: float, dt: float, k := 1.0) -> float:
-	if depth > ABYSS_BRAKE_DIST:
-		var acc := (ABYSS_LIFT + ABYSS_LIFT_PER_M * depth) * k
-		var top := minf(ABYSS_LIFT_MAX + ABYSS_LIFT_MAX_PER_M * depth, ABYSS_LIFT_CAP) * k
+	if depth > HunterFeel.abyss_brake_dist:
+		var acc := (HunterFeel.abyss_lift + HunterFeel.abyss_lift_per_m * depth) * k
+		var top := minf(HunterFeel.abyss_lift_max + HunterFeel.abyss_lift_max_per_m * depth, HunterFeel.abyss_lift_cap) * k
 		# a fall is caught at once (the canopy bites), then the climb builds
 		if vy < 0.0:
 			vy = move_toward(vy, 0.0, (acc + Loco.glide_catch) * dt)
 		return minf(vy + acc * dt, maxf(top, vy))
-	return move_toward(vy, maxf(depth * ABYSS_BRAKE_GAIN, ABYSS_LIP_VY), ABYSS_BRAKE * dt)
+	return move_toward(vy, maxf(depth * HunterFeel.abyss_brake_gain, HunterFeel.abyss_lip_vy), HunterFeel.abyss_brake * dt)
 
 ## Real keys only open the glider with a fresh press in the air (a second Space, or the glide button). Opening uses
 ## the press up, so a fold (heal, dash, a knock) stays shut until a new press; release or landing clears it too.
@@ -1088,6 +1047,7 @@ func dash_with(e: Dictionary) -> void:
 	fly_t = 0.0
 	if wpn.get("bloom_dash_reset", false): wbloom = 0.0
 	m.sfx(HeroSfx.dash_name(self), pos, -4.0, 0.8 if not shove.is_empty() else 1.0)
+	HunterFoley.dash(self)
 	if not (ak and ak.own_dash_trail()):
 		m.fx.dash_trail(self)          # the shared puff and ring; a kit with its own trail draws no ring
 
@@ -1378,9 +1338,12 @@ func heal(n: float) -> void:
 ## are open to hits (CONSUME_VULN). Dashing, getting stunned or going down spills it (you keep the item).
 ## The belt and what each item does: UtilityBelt, UtilityUse.
 var drink_t := 0.0
+var drink_id := "tonic"        # which belt drink is being drunk, and how long it takes (UtilityUse, the item's "time")
+var drink_len := 1.0
 var kit_t := 0.0
 var beat_id := ""              # the instant belt item whose body beat is playing (UtilityPose)
 var beat_t := 0.0
+var kit_len := 1.6             # how long the armor kit takes (its "time"; both lengths are set when a use starts)
 var vuln_fx_t := 0.0            # paces the pulsing "vulnerable" tell while drinking or repairing
 var finish_t := 0.0             # holding interact over a downed enemy (until the stomp commits)
 var stomp: Dictionary = {}      # committed stomp on an enemy wisp: {o, t, hits} (see Life)
@@ -1432,7 +1395,8 @@ func sim(dt: float) -> void:
 			if ctrl == "local" and inp["jump"] and not m.skydrop.detach(self):
 				m.ship_jump(self)
 			_glide_btn_held = inp.get("glide_btn", false)      # a glide key held aboard is no press out there
-			for k in ["jump", "dash", "sig", "util1", "util2", "util3", "util4", "ult", "fire", "skill", "swap"]:
+			for k in ["jump", "dash", "sig", "util1", "util2", "util3", "util4", "util5", "util6", "ult", "fire",
+					"skill", "swap"]:
 				inp[k] = false
 		return
 	tick_status(dt)
@@ -1494,8 +1458,8 @@ func sim(dt: float) -> void:
 		BoxRevive.guard_inputs(self)
 	# mid-stomp you're committed: none of your own buttons do anything until it ends
 	if not stomp.is_empty():
-		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "util1", "util2", "util3", "util4",
-				"gear1", "gear2", "fire", "throw", "kin_ab"]:
+		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "util1", "util2", "util3", "util4", "util5",
+				"util6", "gear1", "gear2", "fire", "throw", "kin_ab"]:
 			inp[kk] = false
 		inp["move"] = Vector2.ZERO
 	# inputs
@@ -1708,7 +1672,7 @@ func _physics(dt: float) -> void:
 			else:
 				hv = HunterMove.brake(hv, grip, dt)
 		elif not lfloat.is_empty():
-			hv = Loco.accel_to(hv, mv * spd, AIR_ACCEL, AIR_DECEL, AIR_OVERSPEED, dt)
+			hv = Loco.accel_to(hv, mv * spd, AIR_ACCEL, HunterFeel.air_decel, HunterFeel.air_overspeed, dt)
 		else:
 			hv = Loco.air_step(hv, mv, spd, dt)     # strong WASD air control (owner 11-08), the farm's too
 	hv = dash_glide.step(self, Vector2(vel.x, vel.z), hv, dt)
@@ -1727,9 +1691,10 @@ func _physics(dt: float) -> void:
 		vel.y = abyss_lift_vy(vel.y, lip_y - pos.y, dt, 1.0 if glide_fuel > 0.001 else HunterMove.overheat_lift)
 		glide_lift.hang_t = GlideLift.HANG_T
 	elif gliding:
-		var sink := (DIVE_FALL if diving else DROP_FALL) if dropping else HunterMove.glide_sink
+		var sink := (HunterFeel.dive_fall if diving else HunterFeel.drop_fall) if dropping else HunterMove.glide_sink
 		if dropping:
-			vel.y = DropFeel.fall_vy(vel.y, sink, DIVE_VY_RATE if diving else DROP_VY_RATE, pos.y - ground(), dt)
+			var vy_rate := HunterFeel.dive_vy_rate if diving else HunterFeel.drop_vy_rate
+			vel.y = DropFeel.fall_vy(vel.y, sink, vy_rate, pos.y - ground(), dt)
 		elif glide_dive.on:
 			vel.y = glide_lift.build(self, glide_dive.fall_vy(vel.y, dt), sink)
 		else:
@@ -1874,7 +1839,7 @@ func _physics(dt: float) -> void:
 	var g := ground()
 	if spirit_t > 0.0 and g > pos.y + World.STEP:
 		# Phase Walk into a ledge face: she climbs it (no wall stops her), and walking off the top drops her
-		g = minf(g, pos.y + SPIRIT_CLIMB * dt)
+		g = minf(g, pos.y + HunterFeel.spirit_climb * dt)
 		grounded = true
 		vel.y = 0.0
 	var keep: float = 0.05 + m.world.stair_slope(x0, z0, pos.x, pos.z)      # m of drop kept on foot (stairs: the slope)
@@ -1950,14 +1915,13 @@ func _in_abyss() -> bool:
 	return pos.y < -40.0 or pos.y < abyss_kill_y()
 
 ## (movefeel) The point of no return under you: below this you're lost to the abyss. World.ABYSS_DEPTH
-## (6m, shared with monsters and the home island) plus ABYSS_EXTRA for hunters, so there's real room to
-## recover with the glider, an updraft or a ledge float; a glider with heat left gets ABYSS_GLIDE_ROOM
+## (6m, shared with monsters and the home island) plus HunterFeel.abyss_extra for hunters, so there's real room to
+## recover with the glider, an updraft or a ledge float; a glider with heat left gets HunterFeel.abyss_glide_room
 ## more. The HUD's abyss danger reads this (AbyssFx.danger).
-const ABYSS_EXTRA := 11.5         # [game data] AbyssHeight: lost 17.5m under ground level (with World.ABYSS_DEPTH)
 func abyss_kill_y() -> float:
-	var fl: float = m.world.abyss_floor(pos.x, pos.z, last_gy) - ABYSS_EXTRA
+	var fl: float = m.world.abyss_floor(pos.x, pos.z, last_gy) - HunterFeel.abyss_extra
 	if gliding and glide_fuel > 0.001:
-		fl -= ABYSS_GLIDE_ROOM
+		fl -= HunterFeel.abyss_glide_room
 	return fl
 
 ## Islands are solid all the way down: if anything (a pull, a drag, a shove) has left you inside an
@@ -1969,7 +1933,7 @@ func _unclip() -> void:
 	var g: float = w.ground_at(pos.x, pos.z)
 	if g <= World.VOID + 1.0 or pos.y > g - 1.25 or ground() != g:
 		return
-	if g - pos.y <= MANTLE_REACH_ABYSS and not w.is_block(pos.x, pos.z):
+	if g - pos.y <= HunterFeel.mantle_reach_abyss and not w.is_block(pos.x, pos.z):
 		pos.y = g
 		vel.y = 0.0
 		grounded = true
@@ -1996,8 +1960,8 @@ func _deploy() -> void:
 		return
 	diving = false
 	glide_k = 0.0
-	# (movefeel) the canopy bites: your fall checks hard (DEPLOY_POP), then settles to the drop's sink
-	vel.y = maxf(vel.y, DEPLOY_POP)
+	# (movefeel) the canopy bites: your fall checks hard (HunterFeel.deploy_pop), then settles to the drop's sink
+	vel.y = maxf(vel.y, HunterFeel.deploy_pop)
 	m.sfx("glide", pos, -2.0)
 	glider_sfx("open")
 
@@ -2033,7 +1997,7 @@ func _update_glide(dt: float) -> void:
 		if diving:
 			var void_below: bool = m.world.is_void(pos.x, pos.z)
 			var above: float = pos.y - (World.VOID if void_below else m.world.ground_at(pos.x, pos.z))
-			if (not void_below and above < DEPLOY_H) or (void_below and pos.y < 7.0) or pull:
+			if (not void_below and above < HunterFeel.deploy_h) or (void_below and pos.y < 7.0) or pull:
 				_deploy()
 		if pos.y < -1.5:
 			dropping = false
@@ -2080,14 +2044,14 @@ func _update_glide(dt: float) -> void:
 			# [footage] ~1s of lift burns a quarter; (feathering) a short tap's impulse costs less
 			var lifting := below_lip and lip_y - pos.y > 0.3 and vel.y > 0.0
 			lift_t = lift_t + dt if lifting else 0.0
-			var lift_k := HunterMove.lift_tap_heat if lift_t <= FEATHER_TAP else HunterMove.lift_heat
+			var lift_k := HunterMove.lift_tap_heat if lift_t <= HunterFeel.feather_tap else HunterMove.lift_heat
 			var hk := (lift_k if lifting else 1.0) * (2.0 if hit_heat_t > 0.0 else 1.0)
 			glide_fuel = maxf(0.0, glide_fuel - dt * hk / (glide_max * (1.0 + gear_stat("heat"))))
 		if not dropping:
 			stats["glide_t"] = float(stats.get("glide_t", 0.0)) + dt
 	elif btn_down and not was_btn and _dash_into_glide():
 		_open_glider()
-	elif want and can and hold_opens and loco.can(Loco.S.GLIDING) and air_t >= (0.0 if btn_down else GLIDE_ENGAGE) \
+	elif want and can and hold_opens and loco.can(Loco.S.GLIDING) and air_t >= (0.0 if btn_down else HunterFeel.glide_engage) \
 			and jump_at != m.time and not AirLimits.glide_locked(self):      # (the press that jumped is not also a glide press)
 		# a fresh press in the air opened it (_glide_armed) and it is still held, or a pad's auto-glide, or scripted
 		# input: the glider opens. Space held since the jump never gets here (glide_press_only)
@@ -2111,7 +2075,7 @@ func _try_ledge_grab(dt: float) -> void:
 	var w: World = m.world
 	var mv: Vector2 = inp["move"]
 	var reach := 0.0
-	var max_rise := MANTLE_REACH + (TALL_CLIMB_EXTRA if HunterMove.climbs_tall(self) else 0.0)
+	var max_rise := HunterFeel.mantle_reach + (HunterFeel.tall_climb_extra if HunterMove.climbs_tall(self) else 0.0)
 	if grounded:
 		# as in Supervive, walking into a wall doesn't climb it: jump, and you mantle at the top.
 		# Bots still lean their way up so their paths work.
@@ -2137,7 +2101,7 @@ func _try_ledge_grab(dt: float) -> void:
 		# no magnet: you have to be below the edge, right up against the cliff, and pushing into it
 		# (or, over the abyss, thrown into its side: the shove counts as the push)
 		if mv.length() < 0.3:
-			var shoved := over_void() or gliding or glide_off_t < FEATHER_KEEP     # thrown or glided into the face
+			var shoved := over_void() or gliding or glide_off_t < HunterFeel.feather_keep     # thrown or glided into the face
 			if shoved and wall_hit_v.length() >= 2.0:
 				mv = wall_hit_v.normalized()
 			elif carry_v >= MantleCarry.PUSH_SPEED:
@@ -2154,11 +2118,11 @@ func _try_ledge_grab(dt: float) -> void:
 		if w.inb(fi.x, fi.y) and w.sheer.has(w.idx(fi.x, fi.y)) and w.ground_at(fr.x, fr.y) > pos.y + World.STEP:
 			return
 	if not grounded and void_here and last_gy - pos.y > 0.3:
-		max_rise = MANTLE_REACH_ABYSS      # deep in the abyss, any island wall you touch springs you back up
+		max_rise = HunterFeel.mantle_reach_abyss      # deep in the abyss, any island wall you touch springs you back up
 		# (movefeel) and a wall a short step away catches you too: falling at full speed just off a
 		# face while steering along it used to slip past (wall-hug check: 15 of 40 at 3m down)
-		reach = hull_r() + WALL_CATCH_REACH
-		var sr := hull_r() + WALL_CATCH_REACH + 0.6
+		reach = hull_r() + HunterFeel.wall_catch_reach
+		var sr := hull_r() + HunterFeel.wall_catch_reach + 0.6
 		for sz in range(int(floor(pos.z - sr)), int(floor(pos.z + sr)) + 1):
 			for sx in range(int(floor(pos.x - sr)), int(floor(pos.x + sr)) + 1):
 				if w.inb(sx, sz) and w.sheer.has(w.idx(sx, sz)):
@@ -2196,7 +2160,7 @@ func _try_ledge_grab(dt: float) -> void:
 				if absi(x - int(floor(pos.x))) + absi(z - int(floor(pos.z))) > 1:
 					continue
 				var stepping_back := gz <= last_gy + World.STEP \
-						and (dz > MANTLE_REACH or not GlideLift.airborne_long(self))
+						and (dz > HunterFeel.mantle_reach or not GlideLift.airborne_long(self))
 				if stepping_back or (toward.dot(mv) <= 0.0 and toward.dot(Vector2(vel.x, vel.z)) <= 0.0):
 					continue
 			if d < bd and d < reach:
@@ -2217,10 +2181,10 @@ func _try_ledge_grab(dt: float) -> void:
 		"dash_vy": MantleCarry.dash_rise(self),               # a dash hands over: its speed takes you up the face
 		"max_t": HunterMove.rise_time(float(best["gz"]) - pos.y) * (1.35 if downed else 1.0) + 0.3}
 	if grounded:
-		vel.y = maxf(vel.y, LRISE_MIN)     # walking into it: under way at once
+		vel.y = maxf(vel.y, HunterFeel.lrise_min)     # walking into it: under way at once
 	grounded = false
 	grap = {}
-	grap_cd = LEDGE_CD
+	grap_cd = HunterFeel.ledge_cd
 	push_t = 0.0
 	roll_t = 0.0
 	m.sfx("grab", pos, -8.0, 1.2)
@@ -2232,14 +2196,6 @@ func _try_ledge_grab(dt: float) -> void:
 ## Over the top you pop up a little toward your keys. Moving off the face, a fresh glide press, a stun or a
 ## knock end it. A press in the rise goes by its mantle row (DashFlow); a jump flings you (_ledge_fling).
 const LRISE_PUSH := MantleCarry.APPROACH_DOT     # home.gd's ledge rise reads this (keys this far into the wall)
-const LRISE_SPEED := 14.0      # [footage] the fastest rise from deep in the abyss (HunterMove.rise_vy)
-const LRISE_MIN := 4.0         # [est] up speed walking into a ledge starts its rise with
-const LRISE_POP := 2.6         # [est] up speed as you clear the lip with no jump (a ~0.25m pop)
-const LRISE_OFF := 0.9         # moved this far out from the face: you've let go
-const LRISE_WINDOW := 0.6      # [est] the fling window: the last this-many metres below the top (~0.12s)
-const FLING_HEIGHT := 0.9     # [est] a fling timed in the window peaks this high over the top...
-const FLING_SPEED := 7.5       # [est] ...going this fast toward your keys (run speed is ~5)
-const FLING_EARLY_HEIGHT := 0.2  # [est] a jump before the window: only just over the top, at run speed
 func _ledge_rise(dt: float, mv: Vector2) -> bool:
 	var lf := lfloat
 	lf["t"] = float(lf["t"]) + dt
@@ -2247,7 +2203,7 @@ func _ledge_rise(dt: float, mv: Vector2) -> bool:
 	var glide_now: bool = inp.get("glide", false)
 	if not glide_now:
 		lf["g0"] = false
-	var off := (Vector2(pos.x, pos.z) - (lf["at"] as Vector2)).dot(-n) > LRISE_OFF
+	var off := (Vector2(pos.x, pos.z) - (lf["at"] as Vector2)).dot(-n) > HunterFeel.lrise_off
 	# (a teleport; or you've slid along past the end of the face, so there's nothing beside you to rise up)
 	var drift := Vector2(pos.x, pos.z).distance_to(lf.get("last", Vector2(pos.x, pos.z))) > 1.5 or not _face_near(float(lf["lip"]))
 	lf["last"] = Vector2(pos.x, pos.z)
@@ -2261,7 +2217,7 @@ func _ledge_rise(dt: float, mv: Vector2) -> bool:
 	if left <= 0.0 or on_top:
 		# over the lip: a small pop, carried toward your keys
 		lfloat = {}
-		vel.y = LRISE_POP
+		vel.y = HunterFeel.lrise_pop
 		var hv := Vector2(vel.x, vel.z)
 		if mv.length() > 0.3:
 			var d := mv.normalized()
@@ -2278,18 +2234,19 @@ func _ledge_rise(dt: float, mv: Vector2) -> bool:
 		vel.x = hv.x; vel.z = hv.y
 		mantle_cd = 0.3
 		return true
-	if not bool(lf["win"]) and left <= LRISE_WINDOW:
+	if not bool(lf["win"]) and left <= HunterFeel.lrise_window:
 		# the fling window opens: a tick, so the timing reads
 		lf["win"] = true
 		if is_local():
 			m.sfx("click", pos, -8.0, 1.6)
-	vel.y = maxf(HunterMove.rise_vy(vel.y, left, 0.75 if downed else 1.0, LRISE_SPEED, dt), float(lf["dash_vy"]))
+	var rise := HunterMove.rise_vy(vel.y, left, 0.75 if downed else 1.0, HunterFeel.lrise_speed, dt)
+	vel.y = maxf(rise, float(lf["dash_vy"]))
 	return true
 
 ## Is there ground at the ledge's height within reach of your side (the face you're rising up)?
 func _face_near(lip: float) -> bool:
 	var w: World = m.world
-	var rr := r + WALL_CATCH_REACH + 0.2
+	var rr := r + HunterFeel.wall_catch_reach + 0.2
 	for z in range(int(floor(pos.z - rr)), int(floor(pos.z + rr)) + 1):
 		for x in range(int(floor(pos.x - rr)), int(floor(pos.x + rr)) + 1):
 			if not w.inb(x, z) or w.kind[w.idx(x, z)] != World.T_GROUND:
@@ -2315,12 +2272,12 @@ func _ledge_fling() -> void:
 	var d: Vector2 = mvv.normalized() if mvv.length() > 0.3 else (lf["n"] as Vector2)
 	var hv := Vector2(vel.x, vel.z)
 	var timed: bool = lf.get("win", false)
-	var spd := FLING_SPEED if timed else base_speed
+	var spd := HunterFeel.fling_speed if timed else base_speed
 	hv = MantleCarry.fling(self, hv, d, spd)
 	vel.x = hv.x; vel.z = hv.y
-	# up speed to peak FLING_HEIGHT (or FLING_EARLY_HEIGHT) over the top from wherever you are on the face
+	# up speed to peak fling_height (or fling_early_height) over the top from wherever you are on the face
 	var left := maxf(0.0, float(lf["lip"]) + 0.12 - pos.y)
-	vel.y = sqrt(2.0 * H_GRAV * (left + (FLING_HEIGHT if timed else FLING_EARLY_HEIGHT)))
+	vel.y = sqrt(2.0 * H_GRAV * (left + (HunterFeel.fling_height if timed else HunterFeel.fling_early_height)))
 	mantle_cd = 0.3
 	air_t = 0.0        # (held Space opens the glider a beat later, as after any jump)
 	stats["flings"] = int(stats.get("flings", 0)) + (1 if timed else 0)
@@ -2333,7 +2290,7 @@ func _ledge_fling() -> void:
 func _grapple(dt: float) -> void:
 	grap["t"] += dt
 	var tz: float = grap["gz"] + 0.5
-	var rise := clampf(tz - pos.y, -FLOAT_SPEED * dt, FLOAT_SPEED * dt)
+	var rise := clampf(tz - pos.y, -HunterFeel.float_speed * dt, HunterFeel.float_speed * dt)
 	pos.y += rise
 	var hd := Vector2(grap["ex"] - pos.x, grap["ez"] - pos.z)
 	var hs := 11.0 * dt
@@ -2363,11 +2320,11 @@ var gear_cd: Array = [0.0, 0.0, 0.0, 0.0]
 
 # ---- run levels: like Supervive, you start each run at level 1 with one skill point and every
 # ability locked. XP comes from knocks and lair bosses, never from time or from damage; each level gives a
-# point to unlock or strengthen an ability. The ultimate opens at level 6 (rank 2 at 9).
+# point to unlock or strengthen an ability. The ultimate opens at level 6 (rank 2 at 9, rank 3 at 10).
 const XP_TO := [0.0, 70.0, 170.0, 300.0, 460.0, 650.0, 870.0, 1120.0, 1400.0, 1710.0]   # total XP to reach level i+1
 const SLOTS := ["sec", "dash", "kin", "ult"]                  # the hero's own abilities; gloves never rank (Gloves)
-const SLOT_MAX := {"sec": 3, "dash": 3, "kin": 3, "ult": 2}
-const ULT_AT := [6, 9]
+const SLOT_MAX := {"sec": 3, "dash": 3, "kin": 3, "ult": 3}
+const ULT_AT := [6, 9, 10]  # run level each R rank opens at (0022)
 var lvl := 1
 var xp := 0.0
 var skill_pts := 1
@@ -2429,11 +2386,11 @@ func level_slot(slot: String) -> bool:
 func _bot_spend() -> void:
 	var order := ["sec", "dash", "kin", "sec", "kin", "dash", "sec", "kin", "dash"]
 	if ak:
-		# the archetype's recommended order (ARCHETYPES §6), which skips the R until it opens (and
-		# any "gear" left in it: gloves don't rank)
+		# the archetype's recommended order (ARCHETYPES §6) without the R (ranks 1-2 as they open, rank 3 once
+		# every slot is rank 2) or any "gear" left in it (gloves don't rank)
 		order = (ak.d.get("order", []) as Array).filter(func(x): return x != "ult" and SLOT_MAX.has(x)) + ["kin", "dash", "sec"]
 	while skill_pts > 0:
-		if can_level("ult"):
+		if can_level("ult") and (int(slot_lv["ult"]) < 2 or SLOTS.all(func(s): return int(slot_lv[s]) >= 2)):
 			level_slot("ult"); continue
 		var done := false
 		# follow the order as a list of ranks (sec 1, dash 1, kin 1, gear 1, sec 2, ...), so every slot

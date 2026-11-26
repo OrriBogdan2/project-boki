@@ -45,6 +45,7 @@ var wall_stuns := 0
 var guard_punches := 0         # punches that launched a rock of ours and gave a Shardskin stack
 var rocks_made := 0
 var row_heard_t := -1.0       # s (m.time): when a Stone Row's rise was last heard
+var rock_sd := {}               # the last punched rock while it flies (its tumble, br_rock_fly, follows it)
 var boulder_sd := {}           # the thrown boulder in flight: its tumble (br_boulder_fly) follows it
 var sight_pings := 0
 var landslides := 0            # Rock Hop's last rocks that rolled on
@@ -155,6 +156,7 @@ func _fire_rock(start: Vector3, dir: Vector2, dmg: float, src: String, skin: Str
 		}
 	)
 	HeroVfx.of(m).trail(h, "rock_trail", KitLooks.of(m).skin(m.shots[-1], skin))
+	rock_sd = m.shots[-1]
 	m.sfx("br_launch", start, -3.0, 1.0)
 
 ## Where a launched rock ends: it bursts, shreds and slows what it caught and splashes whoever is next
@@ -228,6 +230,8 @@ func _tick(dt: float) -> void:
 	slam.tick(dt)
 	spine.tick(dt)
 	_tick_sight(dt)
+	if not rock_sd.is_empty() and not HeroSfx.fly(m, h, "br_rock_fly", rock_sd):
+		rock_sd = {}
 	if not boulder_sd.is_empty():
 		Sfx.loop_hold(_fly_key(), "br_boulder_fly", boulder_sd["pos"], -8.0, 1.0)
 
@@ -450,6 +454,7 @@ func _boulder_fly() -> void:
 	HeroVfx.of(m).trail(h, "rock_trail", KitLooks.of(m).skin(m.shots[-1], "boulder"))
 	boulder_sd = m.shots[-1]
 	m.sfx("br_throw", h.pos, -3.0, 1.0)
+	m.sfx("br_throw_tail", h.pos, -6.0 if h.is_local() else -9.0)     # stone grinding after the heave
 	vfx("boulder_throw", start, dir)
 	Juice.shot(h, start, dir)
 
@@ -494,8 +499,8 @@ func _punch(k: float) -> void:
 		hv = HunterMove.push(Vector2(h.vel.x, h.vel.z), dir, stepv * float(pd["air_k"]))
 	h.vel.x = hv.x
 	h.vel.z = hv.y
-	var dmg: float = lerpf(float(pd["dmg"][0]), float(pd["dmg"][1]), k) * m.dmg_mult(h)
-	var kb := lerpf(float(pd["kb"][0]), float(pd["kb"][1]), k)
+	var dmg: float = float(pd["dmg"]) * m.dmg_mult(h)
+	var kb := float(pd["kb"])
 	vfx("punch", h.pos, dir, {"len": float(pd["len"]), "k": k})
 	m.sfx("br_punch", h.pos, -1.0, 1.0)
 	var swept := sweep_rocks(dir)

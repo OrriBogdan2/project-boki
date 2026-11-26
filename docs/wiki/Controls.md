@@ -21,7 +21,7 @@ your Boki in a match; **R** turns a piece in build mode and reloads in a match.
 | R | Reload (it also reloads on its own after a short idle) |
 | X | Your hunter's own ultimate (from level 6; no hero has one yet) |
 | T | Fuse with your Boki (level 6, full bond meter). Press T again to fire the form's ultimate and release: a 3s afterglow (faster, with a small shield) and your Boki rests 6s beside you |
-| C | Your Boki's own ability: it hops off, casts and hops back |
+| C | Summon: your Boki bursts out of its wisp into the fight for a short window; C again sends it back (Boki wisps setting) |
 | G | Tap: Sic your Boki at the cursor, or Call it back if it is away. Hold: the order wheel (Chase, Guard, Return, Follow) |
 | Middle mouse or Alt+click | Ping for your squad: on an enemy hunter a red "Enemy" ping that follows them for 4 s, on loot a gold "Loot" ping, anywhere else a white spot. Two pings each: a third drops your oldest. With the map open, or while dropping in, it pings the point under the cursor |
 | F | Use: open, pick up, scan a knocked-out wild Boki (hold), revive a teammate, loot a deathbox, finish a downed rival |
@@ -71,6 +71,8 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | 2 | Utility belt slot 2 (an armor kit to start) | `util2` | yes |
 | 3 | Utility belt slot 3 | `util3` | yes |
 | 4 | Utility belt slot 4 | `util4` | yes |
+| 5 | Utility belt slot 5 | `util5` | yes |
+| 6 | Utility belt slot 6 | `util6` | yes |
 | Q | Glove 1 | `gear1` | yes |
 | V / Mouse 4 | Glove 2 (in a match; at home it plays fetch) | `gear2` | yes |
 | Ctrl | Sneak | `crouch` | yes |

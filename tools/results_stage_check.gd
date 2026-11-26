@@ -81,6 +81,7 @@ func _roster() -> void:
 	for h: Hunter in hunters:
 		h.free()
 
+
 ## Every Hunter whose GLB has clips has a win and a lose beat among them. A GLB without clips has no
 ## beats: HunterAnim poses its rig, and the stage stands it in its idle.
 func _beats_exist() -> void:

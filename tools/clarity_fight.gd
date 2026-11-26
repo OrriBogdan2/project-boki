@@ -23,6 +23,7 @@ const BUDGET := {
 	"icon": 0.0,  # no world icon (Sprite3D) on a Hunter
 	"hud grip_icons": 6.0,  # in a fight the glove row shows only the merge-ready glow
 	"ring merge_look": 0.0,  # a ground ring means gameplay: the merge look wears none
+	"hud world_tip": 0.0,  # no hover card (HudHover.draw_world_tip) while you or a squadmate fights
 }
 
 
@@ -50,7 +51,7 @@ static func play(main: Node, archs: Array, frames: int, on_frame: Callable) -> M
 		"demo_kin_lv": "8:95"
 	}
 	o.merge({"arch": archs[0], "cls": Arch.weight(archs[0]), "weapon": Arch.signature(archs[0])}, true)
-	await m.start(o)
+	m.start(o)
 	m.set_process(false)
 	var fade = main.get("fade")
 	if fade != null:
@@ -82,11 +83,13 @@ static func play(main: Node, archs: Array, frames: int, on_frame: Callable) -> M
 		m.step(DT)
 		for h in m.hunters:
 			h.render(DT, 1.0)
+		OcclusionOutline.for_match(m)  # the outline and ground rim, as Match._process (off here) puts them on
 		m.cam.snap(_centre(m))
 		await main.get_tree().process_frame
 		t += DT
 		if t >= next:
-			p.combat_at = m.time  # the bots wander off for seconds at a time (and differently each run): a counted frame is a fight frame
+			# the bots wander off for seconds at a time (and differently each run): a counted frame is a fight frame
+			p.combat_at = m.time
 			SafeArea.seen.clear()  # the HUD's drawn marks (plates, icons, badges) are recorded for tally()
 			SafeArea.recording = true
 			BokiChatter.drawn = 0  # fight-time Boki text the HUD draws this frame
@@ -214,5 +217,7 @@ static func _what(v: VisualInstance3D) -> String:
 		var sh := ""
 		if mat is ShaderMaterial and mat.shader:
 			sh = (mat as ShaderMaterial).shader.resource_path.get_file()
+			if (mat as ShaderMaterial).get_shader_parameter("quiet") == 1.0:
+				sh += " quiet"  # a faint own or ally telegraph (Fx._tele_mesh): not a loud mark on the Hunter
 		w += " <%s %s>" % [mi.mesh.get_class(), sh]
 	return w
