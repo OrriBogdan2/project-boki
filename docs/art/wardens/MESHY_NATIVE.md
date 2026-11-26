@@ -47,7 +47,7 @@ contract (RIG_CONTRACT.md). The game adapts to Meshy: its bones are never rename
   it (`WardenNative._to_contract`). The hitbox never changes: its numbers are parity rows.
 - Facing: Meshy faces +Z; the model is turned 180 deg to face -Z like every Hunter.
 - Anchors (`anchors`): `anchor_head_top`, `anchor_chest`, `anchor_gun_R` are BoneAttachment3D nodes on Meshy bones,
-  found by `WardenGlb.anchor`. The nameplate does not read `anchor_head_top`: its height is the archetype's `plate_offset`, checked per Hunter by `--warden-native-check` (docs/HUD.d/1123-native-plate-height.md). The rig's Gun (aim and muzzle) rides Meshy's `RightHand` bone each frame.
+  found by `WardenGlb.anchor`. The rig's Gun (aim and muzzle) rides Meshy's `RightHand` bone each frame.
 - Materials: Meshy's textures through the game's hero-toon pass (`WardenGlb._toon`, the same call as the contract
   models: painted shading, ink shell, match-zoom read, the Hunter's `warden_look.json` "painted" keys) and into meta
   `mats`, so hit flashes and team looks reach them. Meshy's material names (`head`, `body`, `Material_0`) are no toon
