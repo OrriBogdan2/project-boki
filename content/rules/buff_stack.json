@@ -1,5 +1,5 @@
 {
- "_doc": "Rows of the HUD buff stack (scripts/ui/buff_stack.gd), in draw order. on: hunter (field on the Hunter), kit (field on the archetype kit, only when `arch` is the hero), buff (a kin buff in Hunter.kbuffs: amount, time left), owner (how many Boki owner passives apply). time: field holding the seconds left (draws the draining ring; it is also the active test when there is no value). value: field that must be above 0 for the row to show. stacks: show floor(value) as the count. src: the source named on the hover card.",
+ "_doc": "Rows of the HUD buff stack (scripts/ui/buff_stack.gd), in draw order. on: hunter (field on the Hunter), kit (field on the archetype kit, only when `arch` is the hero), buff (a kin buff in Hunter.kbuffs: amount, time left), owner (how many Boki owner passives apply). time: field holding the seconds left (draws the draining ring; it is also the active test when there is no value). value: field (or no-argument kit method) that must be above 0 for the row to show. stacks: show floor(value) as the count. src: the source named on the hover card.",
  "rows": [
   {"id": "swift", "name": "Swift", "src": "A hunter ability", "icon": "dash", "col": "ffd76a", "time": "haste_t"},
   {"id": "vault", "name": "Vault", "src": "Your hunter's kit", "icon": "dash", "col": "ffd76a", "on": "kit", "arch": "thief", "time": "haste_t"},
@@ -11,6 +11,8 @@
   {"id": "enraged", "name": "Enraged", "src": "Your hunter's kit", "icon": "haymaker", "col": "ff5a4a", "on": "kit", "arch": "juggernaut", "time": "enraged_t"},
   {"id": "swollen", "name": "Swollen", "src": "Your hunter's kit", "icon": "dome", "col": "ff9ad0", "on": "kit", "arch": "ostra", "time": "swollen_t"},
   {"id": "fever", "name": "Fever: heals from damage", "src": "Your hunter's kit", "icon": "heart", "col": "ff9a5c", "on": "kit", "arch": "gunslinger", "value": "res", "time": "res_wait", "stacks": true},
+  {"id": "rocks", "name": "Rocks standing", "src": "Your hunter's kit", "icon": "wall", "col": "9ad0ff", "on": "kit", "arch": "dolm", "value": "rocks_up", "stacks": true},
+  {"id": "salvage", "name": "Salvage", "src": "Your hunter's kit", "icon": "satchel", "col": "e0b040", "on": "kit", "arch": "dredge", "value": "res", "stacks": true},
   {"id": "kin_speed", "name": "Boki: faster", "src": "Your Boki", "icon": "breeze", "col": "9ae8ff", "on": "buff", "value": "move_speed"},
   {"id": "kin_damage", "name": "Boki: more damage", "src": "Your Boki", "icon": "cleave", "col": "ff9a5a", "on": "buff", "value": "damage"},
   {"id": "kin_rate", "name": "Boki: faster fire", "src": "Your Boki", "icon": "barrage", "col": "ffd76a", "on": "buff", "value": "fire_rate"},

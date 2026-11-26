@@ -58,7 +58,7 @@ func _foes(kind_s: String, n: int) -> Array:
 		if l["state"] == "sealed":
 			m.lairs.open(l, m.player, "dial")
 		var b: Boss = l["boss_mob"]
-		b.dormant = false
+		b.set_asleep(false)
 		b.stagger_t = 0.0
 		return [b]
 	var at := p.pos + Vector3(0, 0, -3.0)

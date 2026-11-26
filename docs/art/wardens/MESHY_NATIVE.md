@@ -26,12 +26,25 @@ contract (RIG_CONTRACT.md). The game adapts to Meshy: its bones are never rename
 - HunterAnim still poses the hidden rig and hands over its state (`WardenClips.STATE`); the AnimationPlayer plays:
   idle `Idle`, walk `walk`, run `run`, air `Jump_Run`, any new swing/cast/kit move `Attack` (or its clip slot below), crouch
   `Crouch_Walk_with_Torch` (rate follows ground speed; standing still holds the crouch pose).
+- Own move clips (data `clip_files` + `kmoves`, 11-23, Kael first): a clips-only file beside the model
+  (`art/wardens/<art>/<art>_clips.glb`, the rig's nodes with no mesh; WardenClipFile adds its clips to Meshy's library
+  by bone name) holds clips keyed on Meshy's skeleton, and `kmoves` (WardenNativeMoves, see Kit-move clips) maps a kit move (`kmove`) to one: `clip`, `fade` (a clip with no
+  `hold_from` stays on its last pose while the kit holds the move), and for the check `hit` (the kit's hit second) with
+  `peak` (`speed`, `low`, `reach`: how the clip's hit pose is measured). The clip's clock is the kit's (`kmove_t`),
+  so its hit pose lands on the kit's hit. A move with no entry still plays `Attack`. Kael's are made by
+  `python3 -I tools/art1/kael_native_clips.py` (poses as body-frame numbers: hips, chest, feet, sword hand and blade
+  direction, solved with two-bone IK by `tools/art1/meshy_rig.py`; the blade runs along the right hand bone). Timing and
+  poses: docs/heroes/juggernaut.md "Native clips". `--warden-native-check` sweeps each clip and asserts the hit pose
+  within one frame of the kit's hit; `--clip-shots --states` presses each mapped move.
 - Crouch arms (`crouch_arms_from`): Meshy's only crouch holds a torch out in front, which read in game as Sable's
   pistol and Tenzo's stone arm floating off the body. The crouch plays a copy (`<clip>_arms`, added beside Meshy's
   clips at load) whose arm bones (every bone below Meshy's `LeftShoulder`/`RightShoulder`, data `arm_roots`) take
   the walk clip's keys, time-scaled to the crouch loop; hips, spine and legs keep Meshy's crouch.
 - Size: Meshy's head bone is scaled onto the rig's head pivot (the contract model's head height). Hit ring and
-  hitbox are the rig's, unchanged.
+  hitbox are the rig's, unchanged. Data `size` (as Dredge's 1.09) then scales a body whose visible height stood over
+  10% off the owner's height chart (hit_h, plus the headwear the chart allows over the head; drawn as a match draws it, x1.12): Kael 1.2,
+  Pip 0.79, Gil 0.69. The contract's parts, anchors and companions are placed as for the unfitted body and grow with
+  it (`WardenNative._to_contract`). The hitbox never changes: its numbers are parity rows.
 - Facing: Meshy faces +Z; the model is turned 180 deg to face -Z like every Hunter.
 - Anchors (`anchors`): `anchor_head_top`, `anchor_chest`, `anchor_gun_R` are BoneAttachment3D nodes on Meshy bones,
   found by `WardenGlb.anchor`. The rig's Gun (aim and muzzle) rides Meshy's `RightHand` bone each frame.
@@ -48,6 +61,11 @@ keep the armature Z up, so their Hips keys are carried into the rig's Y-up frame
 
 ## Checks
 `--warden-native-check` (switch, bones, facing, height, each state's clip, weapon hidden, anchors, toon surfaces,
+crouch arms, only Meshy's model draws (no rig mesh such as the Offhand), each data orbit rides its bone and turns);
+`--warden-glb-check` counts native Hunters apart.
+`--native-hitbox-check` measures each one's visible body (skinned vertices at idle, no weapon, orbits or companions)
+against hit_h and the hit ring and fails past 10% on height; `--native-hitbox-shots` draws each inside its hurtbox.
+Renders: `--clip-shots --warden=<arch> --states [--match]`.
 crouch arms, only Meshy's model draws (no rig mesh such as the Offhand), each data orbit rides its bone and turns,
 the drop poses hold --clip-check's bars); `--land-weight-check` measures every native Hunter's squash off the model
 (head height against the same frames unsquashed: depth and seconds within 10% of the contract numbers, feet on the
@@ -89,7 +107,10 @@ plays today's clip, so nothing changes until a Hunter's clips land (`WardenNativ
 | `downed` | while the knocked-down beat runs (`fall` >= 0; holds its last frame) | the loop clip |
 | `stomp` | while the stomp cycle runs (`stomp` >= 0; loops) | the loop clip |
 Swing, cast, `hit` and `land` are one-shots: they own the body for their length (a new one restarts a clip once 60% is
-played) and play at `attack_rate`, `hit` and `land` at 1. A hit wins over a swing, a swing over a landing.
+played) and play at `attack_rate`, `hit` and `land` at 1.
+A swing or cast while he moves on the ground, or is in the air, plays on the torso and arms only (`WardenNativeUpper`: Spine02
+and every bone above it, eased in 0.1 s and out 0.16 s) over the running legs; standing on the ground it owns the body as
+above, and `hit` and `land` always do. A hit wins over a swing, a swing over a landing.
 A clip may come from an animation-only file `art/wardens/<art>/<art>_clips.glb`, packed with `native_pack.py` onto the
 same skeleton (Y-up Hips as in the main file). Clips the data names that Meshy's own file lacks are looked up there by
 clip name, their tracks laid on this skeleton's bones by bone name (tracks of a bone it lacks are dropped), and added
@@ -140,3 +161,61 @@ grafts it back into the rigged file by material name (`graft.py`: Meshy's node t
 as Meshy made them; only the vertex data is replaced) and packs it with `native_pack.py` (2048 atlas, 1024 maps). The
 Sable weight fixes are not applied to these. Tenzo rides `orbit_stones`, Motley `orbit_cards`, both on `Head`.
 Every state plays one of the six clips (the same map as Sable's), so none can T-pose.
+
+## Grimble (dredge): goo arm, pack, coin cap (r7), tail chain and cleanup (r8), right leg and lean (r10)
+`art/wardens/dredge/dredge_meshy.glb` (skin-native, skin-goo, hoard pack, coin cap) is the r5 body re-skinned by
+`tools/meshy/dredge_reskin.py OUT R5 R3 [tail_arm]` (`--stretch FILE.glb` lists edges stretched >3x and over 6 cm).
+- Goo: one mesh, no cuts (r6 cut it at 0.8 m, which left floating pieces). Own vertex copies, Meshy's weights without
+  any leg bone, one weight per welded position (UV seams used to tear), a blend from the arm chain (above 0.9 m) to
+  the hips (below 0.3 m; `tail_arm` is the share of arm motion its end keeps), so the tail stays near the floor.
+- Skin: the shin Meshy fused the goo to carries no arm weight. The skin around its holes (they show black ink hull
+  once the goo moves off them) gets an inside-out lining 4 mm behind it, on the same bones.
+- Pack: rigid on the spine. Coin cap: texture hue-shifted orange to gold, 0.7x about the skull.
+Longest goo edge over Idle/Attack/run/walk/jump: 0.16 m idle, 0.20 run, 0.26 Attack at 0.5 s (1366 edges >3x and over
+6 cm there; r6 35 but cut in pieces); skin 0.22 m (as r6).
+r8, `tools/meshy/dredge_post.py OUT IN` on the r7 body (IN = the r7 glb, never the file it wrote; `--islands FILE` counts):
+- Islands: a body piece (skin, goo, leather pack) of under 1000 triangles that touches no other (1 mm) is deleted,
+  so the loose pink chunk and the torn shards are gone (skin and goo are one island each; the brass fittings and the
+  coin pile are many small pieces on purpose). The pale crescent Meshy fused to the right heel (skin triangles of
+  the goo's pale texture in a box beside the shin, 1197 triangles) is deleted too.
+- Tail chain: GooTail0..3 under `RightHand`, the goo below the hand weighted along them by height (it bends, never
+  shears against the hips). Each clip gets baked rotation keys for them: the first follows the hand, the rest keep
+  their rest direction (they hang) and take 60/50/50 % of the bone above's turn with a lag. Goo edges over 3x and
+  6 cm: Attack 0.5 s 113 (r7 1366), run 16, idle 0.
+- Attack: the head and upper-spine bend of Meshy's lunge is cut to 35 % (Spine02, Spine01, neck, Head keys).
+r10 (same tool):
+- Right leg: Meshy fused dark spiky shards into the right instep and layered torn flaps up the shin (the right leg
+  had 4x the left's triangles at the knee). Below 0.62 m it is replaced by a mirror copy of the clean left leg
+  (x flipped, Left* bones swapped for Right*, fitted to the thigh). Both legs are two shells 4 mm apart; each shell
+  is welded to its own along a flat seam (rims onto the copy's cross-section, copy rim vertices onto the thigh's rim
+  edges), relaxed, and the inner shell near the seam wears the outer's texture. Skin stays 1 island.
+- Attack: the lean that the Hips still pitched in (Head over Spine02, 38 deg at the slam, idle 10) past 12 deg is
+  cut by 60 % with a counter-turn of Spine02 about the side axis: peak 21 deg, legs keep their plant.
+- Goo: the arm-to-tail blend runs from 1.35 m (was 1.15): Attack 0.5 s 33 long edges (r9 109), run 0 (16).
+r11 (`dredge_post.py --r11 OUT IN_R10 PACK`, PACK = Meshy image-to-3D of the turnaround's hoard with the top chest open, decimated to
+14k tris in Blender, export only): the goo's tail chain keeps the forearm's twist (swing-only bones met the forearm's twist in the
+blend zone and the tube collapsed to a ribbon; flat clusters at Attack 0.5 s 31 -> 5, stretched edges 49 -> 0), head/spine weights on the
+goo move to RightArm, the open shoulder socket gets a dome (it showed as a black patch once the arm swung), and the hoard pack
+replaces the leather bedroll (rigid on the spine).
+
+r12 (`--r12`): the tail chain re-baked so a swung tail gathers (GooTail0 scale, GooTail1..3 translation per clip).
+r13/r13b (`--r13`): skin weights welded, the goo puddle trimmed, rim caps on the open goo/shoulder rims (simple cycles wound like
+their rims), faces below 1.2 m wound to their normals, the pack retextured, leather straps added (no ink room).
+r14 (`dredge_r14.py`): mesh rebuilt on the r13b glb (liner shell, 3-across strap rows); r16b `--ball` put the contract's junk ball
+rigid on Spine02. r15 (`--r15`): the goo arm's swing calmed in run/walk/jump. r16 (`--r16`): Idle stands on the walk's neutral
+frame, the jump/glide pose is held. r17 (`--r17`): the goo arm hangs at its bind abduction (+HANG_OUT), the chain follows less.
+r18 (`--r18 OUT IN ARM`): the fat goo is replaced by a slim Meshy arm (image-to-3D of the turnaround crop, 24k tris).
+r19 (`--r19`): socket dome UVs from the left shoulder, strap rows lifted off the skin, the liner cut under the dome.
+r20 (`--r20`): the dome reshaped on the mirrored left torso with its own baked texture; the right strap mirrored from the left.
+r21 (`--r21`, `--r21-graft OUT IN FIST ROD`, `--r21-keys`; build script in gens/hunter-round-1124/grimble/r21/build_r21.sh):
+the second junk ball copy dropped; every primitive keeps only the vertices its triangles use (the pre-r18 goo's ~80k
+orphan vertices were what geo_check measured as a 16 cm "tail" clip); strap UVs inside the stitch lines and weights on
+Spine02/Spine01/shoulders only, strap ink on; dome colour matched to the body round it; skin S -0.10 V +0.07 and goo hue -5
+(eye-level medians skin S 0.54 -> 0.40, goo H 322 -> ~296; turnaround 0.38 / 301). A Meshy gauntlet fist (image-to-3D of an
+edit of the turnaround crops, 6k tris after Blender decimate) replaces the r20 fist, its cuff ring blended onto LeftForeArm
+(geo_check hand_L sep 0.13 -> 0.23); a Meshy knobbed rod (1.5k tris) stands in the pack on his left, rigid on the pack's bone.
+Keys: per-key clearance eases (gauntlet arm out up to 15 deg, run/walk knees toward rest, run arm swing toward rest, goo
+chain out in the attack): geo_check held pairs over 1 cm 33 -> 0. `warden_native.json` size 1.025: the head joint within 3 % of the contract's (--warden-native-check; 1.09 gave body_h 2.42 but the head +9 %).
+
+Grimble has no hit clip: a hit is the Hips flinch spring (WardenFlinch) over the playing clip.
+The gun's hip is data (`holster.hip.pos`, x +0.17 = his left, where the gauntlet draws it).

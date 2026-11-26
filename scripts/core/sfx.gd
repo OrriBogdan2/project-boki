@@ -287,11 +287,12 @@ const CUT_FADE := 0.05  # s: a cut sound fades this fast, so it doesn't click (a
 var cue_voice: AudioStreamPlayer
 var cue_plays := {}  # cue name -> times played (--knock-sfx-check)
 var listener := Vector3.ZERO  # set by the camera each frame
-var hear_range := 30.0     # m: silent beyond this (a sound's own "reach" overrides it)
+var hear_range := 30.0  # m: silent beyond this (a sound's own "reach" overrides it)
 var sound_reach := {}  # sound -> metres it carries, past hear_range (content/sfx/<group>.json "reach")
 ## sound -> dB added in play, so an old file off its category sits level (sfx_levels.json "gain_db")
 var sound_gain := {}
 var last_played := {}
+var foe_next := false  # play_foe is playing: _bus_for sends the voice to SFXFoe
 ## --sfx-silence-audit only (null = off): play() and loop_start() append [name, pos, found].
 var cue_log = null
 var rng := RandomNumberGenerator.new()
@@ -346,6 +347,7 @@ func _ready() -> void:
 	add_child(cue_voice)
 	SfxPicks.load_locked()
 
+
 ## Each sound set's categories (they pick the bus, SfxMix.learn) and its heavy sounds that carry further than
 ## hear_range (a gatling you hear coming), under "reach" (metres). Past FAR they still go through the muffled
 ## bus, so what carries is the low end.
@@ -365,6 +367,7 @@ func set_bus(bus_name: String, v: float) -> void:
 	var i := AudioServer.get_bus_index(bus_name)
 	if i >= 0:
 		AudioServer.set_bus_volume_db(i, slider_db(v))
+
 
 ## A volume slider's bus level. The gain is the slider squared, so the slider follows loudness: 50% is
 ## about half as loud (-12 dB) and 0 is silent. (Gain = slider made 50% only -6 dB, and a slider seemed
@@ -430,7 +433,7 @@ func play_music(name: String, fade := 1.5) -> void:
 		nw.volume_db = -40.0
 		nw.play()
 		tw.tween_property(nw, "volume_db", -9.0, fade).set_trans(Tween.TRANS_SINE)
-	tw.chain().tween_callback(old.stop)      # after both fades: chained before the fade-in, it waited for the fade-out
+	tw.chain().tween_callback(old.stop)  # after both fades: chained before the fade-in, it waited for the fade-out
 
 
 func play_ambience(name: String) -> void:
@@ -579,11 +582,12 @@ func _stop_layers(fade: float) -> void:
 ## Extra ambience beds on top of the main one (wind over the abyss, ruins, the garden's time-of-day
 ## and pond beds), each faded to a level by where you are; created on first use, freed once faded
 ## to nothing, stopped together by clear_amb_layers.
-var amb_layers := {}  # name -> {p, want}
+var amb_layers := {}  # name -> {p, want, fade}  (fade: seconds from silent to full)
+const AMB_FADE := 2.5
 const MATCH_BEDS := ["abyss", "ruins"]  # MusicDir's beds; other amb_layers are the farm's
 
 
-func amb_layer(name: String, level: float) -> void:
+func amb_layer(name: String, level: float, fade_s := AMB_FADE) -> void:
 	if not amb_layers.has(name):
 		if level <= 0.001 or not ResourceLoader.exists("res://audio/amb_%s.ogg" % name):
 			return
@@ -593,8 +597,9 @@ func amb_layer(name: String, level: float) -> void:
 		p.volume_db = -60.0
 		add_child(p)
 		p.play()
-		amb_layers[name] = {"p": p, "want": 0.0}
+		amb_layers[name] = {"p": p, "want": 0.0, "fade": fade_s}
 	amb_layers[name]["want"] = clampf(level, 0.0, 1.0)
+	amb_layers[name]["fade"] = maxf(fade_s, 0.05)
 
 
 func clear_amb_layers(fade := 1.0) -> void:
@@ -613,7 +618,8 @@ func _process(delta: float) -> void:
 	for n in amb_layers.keys():
 		var ap: AudioStreamPlayer = amb_layers[n]["p"]
 		var full := db_to_linear(-12.0)
-		var ac := move_toward(db_to_linear(ap.volume_db), float(amb_layers[n]["want"]) * full, full * delta / 2.5)
+		var amount: float = full * delta / float(amb_layers[n].get("fade", AMB_FADE))
+		var ac := move_toward(db_to_linear(ap.volume_db), float(amb_layers[n]["want"]) * full, amount)
 		ap.volume_db = linear_to_db(maxf(ac, 0.0001))
 		if ac <= 0.0001 and float(amb_layers[n]["want"]) <= 0.0:
 			ap.queue_free()
@@ -636,9 +642,9 @@ var _step_i := 0
 
 
 ## A plain footstep (three takes in turn). reach: metres it carries, 0 for hear_range (see StepReach).
-func step(pos = null, vol := -16.0, reach := 0.0) -> void:
+func step(pos = null, vol := -16.0, reach := 0.0, pitch := 1.0) -> void:
 	_step_i = (_step_i + 1) % 3
-	play("step%d" % _step_i, pos, vol, 0.12, 1.0, reach)
+	play("step%d" % _step_i, pos, vol, 0.12, pitch, reach)
 
 
 func has(sname: String) -> bool:
@@ -658,6 +664,7 @@ func _distance_db(pos, reach := 0.0) -> float:
 	var edge := 1.0 - smoothstep(hr * 0.7, hr, dist)
 	return db + linear_to_db(maxf(edge, 0.001))
 
+
 ## How many pool voices are playing right now: a fight is many at once (the low-health heartbeat ducks under it).
 func busy_voices() -> int:
 	var n := 0
@@ -665,6 +672,7 @@ func busy_voices() -> int:
 		if p.playing:
 			n += 1
 	return n
+
 
 ## The pool voice for a sound of rank rk (SfxVoices.pick: a free one, else the farthest sound ranked below it), or
 ## null when it gets none.
@@ -683,14 +691,25 @@ func _voice(pos, rk: float, sname: String) -> AudioStreamPlayer:
 	p.bus = _bus_for(pos, sname)
 	return p
 
+
 ## Which bus a sound at pos plays on: muffled behind terrain, low-passed when far, else its own kind's bus
 ## (SfxMix.bus_for). No position (a cue for you alone): its kind's bus, never muffled.
 func _bus_for(pos, sname := "") -> StringName:
+	if foe_next and pos != null and not occlusion.blocked(pos, listener):
+		return &"SFXFoe"
 	if pos == null:
 		return mix.bus_for(sname, false, false)
 	var muffled: bool = occlusion.blocked(pos, listener)
 	var far: bool = Vector2(pos.x - listener.x, pos.z - listener.z).length() > FAR
 	return mix.bus_for(sname, muffled, far)
+
+
+## An enemy's ultimate cue (UltCue): the same sound as `play`, on the SFXFoe bus (SFX's compressor, no far
+## low-pass, so it carries out to its reach) unless terrain muffles it. A teammate's goes through `play`.
+func play_foe(sname: String, pos: Vector3, vol_db := 0.0) -> void:
+	foe_next = true
+	play(sname, pos, vol_db)
+	foe_next = false
 
 
 ## Settings > Audio: a short sound through one bus when its slider is let go, to hear the new level.
@@ -707,6 +726,7 @@ func play_sample(bus_name: String) -> void:
 	p.pitch_scale = 1.0
 	p.play()
 
+
 ## Fades out the sound `handle` names (from play) if its voice still plays it: a wind-up whose cast was broken.
 func cut(handle: int, fade := CUT_FADE) -> void:
 	if not sounding(handle):
@@ -717,10 +737,12 @@ func cut(handle: int, fade := CUT_FADE) -> void:
 	tw.tween_callback(p.stop)
 	_cut_tw[handle % POOL] = tw
 
+
 ## Whether the sound `handle` names (from play) is still playing.
 func sounding(handle: int) -> bool:
 	var i := handle % POOL
 	return handle >= 0 and handle == starts[i] * POOL + i and players[i].playing
+
 
 ## pos: world position, or null for UI sounds. Repeats of one sound within 30ms are merged, and a
 ## burst of the same sound is capped and stacked quieter. reach: metres this call carries (0: the sound's own
@@ -728,16 +750,10 @@ func sounding(handle: int) -> bool:
 ## keeps it as it keeps your other sounds (SfxVoices). take: a given take of a sound that has several (FireSfx
 ## round-robins them), else a random one that isn't the last. Returns a handle for cut, -1 when nothing played.
 func play(
-	sname: String,
-	pos = null,
-	vol_db := 0.0,
-	pitch_var := 0.07,
-	pitch := 1.0,
-	reach := 0.0,
-	mine := false,
-	take := -1
+	sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 1.0, reach := 0.0, mine := false, take := -1
 ) -> int:
-	if cue_log != null: cue_log.append([sname, pos, not sname in skip and ensure(sname)])
+	if cue_log != null:
+		cue_log.append([sname, pos, not sname in skip and ensure(sname)])
 	if sname in skip or (not streams.has(sname) and not _lazy(sname)):
 		return -1
 	if sname in CUES:
@@ -751,7 +767,8 @@ func play(
 	var gap: int = 260 if sname.begins_with("v_") else int(MIN_GAP.get(sname, SfxKits.MIN_GAP.get(sname, 30)))
 	if sname.contains("step_"):
 		gap = 25  # footsteps: several people can walk at once
-	if sname.begins_with(IMPACT_PREFIX): gap = IMPACT_GAP
+	if sname.begins_with(IMPACT_PREFIX):
+		gap = IMPACT_GAP
 	var rk := voices.rank_of(pos, listener, mine)
 	if now - int(last_played.get(sname, -1000)) < gap:
 		voices.cut.emit(sname, rk, &"gap")
@@ -928,15 +945,18 @@ func play_reset_cue(vol_db := RESET_CUE_DB) -> void:
 ## Looping sounds that last as long as something goes on (a deathbox revive's hum): started, moved
 ## and re-pitched, and stopped by key. Each has its own voice outside the pool, with the same
 ## distance falloff as play() but its own reach (reach > 0 overrides hear_range).
-var loops := {}               # key -> {p: AudioStreamPlayer, pos, vol, reach, bus}
+var loops := {}  # key -> {p: AudioStreamPlayer, pos, vol, reach, bus}
+
 
 ## bus: "SFX", or "Music" for a bed that sits under the score and ducks with it (LastAlive).
 func loop_start(key: String, sname: String, pos = null, vol_db := 0.0, reach := 0.0, bus := "SFX") -> void:
 	if loops.has(key):
 		return
-	if cue_log != null: cue_log.append([sname, pos, ensure(sname)])
+	if cue_log != null:
+		cue_log.append([sname, pos, ensure(sname)])
 	var st = streams.get(sname) if ensure(sname) else null
-	if st is Array: st = (st as Array)[0]
+	if st is Array:
+		st = (st as Array)[0]
 	var p := AudioStreamPlayer.new()
 	p.bus = bus
 	add_child(p)
@@ -959,10 +979,10 @@ func loop_start(key: String, sname: String, pos = null, vol_db := 0.0, reach := 
 func loop_set(key: String, pos = null, pitch := 1.0) -> void:
 	if not loops.has(key):
 		return
-	var L: Dictionary = loops[key]
-	L["pos"] = pos
-	(L["p"] as AudioStreamPlayer).pitch_scale = maxf(0.05, pitch)
-	_loop_level(L)
+	var lp: Dictionary = loops[key]
+	lp["pos"] = pos
+	(lp["p"] as AudioStreamPlayer).pitch_scale = maxf(0.05, pitch)
+	_loop_level(lp)
 
 
 func loop_stop(key: String) -> void:
@@ -980,6 +1000,8 @@ func loop_stop(key: String) -> void:
 ## A loop that lasts only while its owner keeps asking for it, once per tick (a Boki rescue's hum): if the
 ## calls stop (the channel ends any way, or its node is freed mid-channel) it stops within HOLD_MS.
 const HOLD_MS := 250
+
+
 func loop_hold(key: String, sname: String, pos = null, vol_db := 0.0, pitch := 1.0, bus := "SFX") -> void:
 	loop_start(key, sname, pos, vol_db, 0.0, bus)
 	loops[key]["vol"] = vol_db
@@ -998,16 +1020,16 @@ func loop_on(key: String) -> bool:
 	return loops.has(key)
 
 
-func _loop_level(L: Dictionary) -> void:
-	var p: AudioStreamPlayer = L["p"]
-	var v := float(L["vol"]) + _distance_db(L["pos"], float(L["reach"]))
+func _loop_level(lp: Dictionary) -> void:
+	var p: AudioStreamPlayer = lp["p"]
+	var v := float(lp["vol"]) + _distance_db(lp["pos"], float(lp["reach"]))
 	v = -80.0 if is_nan(v) else v
 	# Set only on a change: each set on a playing voice queues new bus details in the AudioServer, and a
 	# loop held every step (LastAlive's bed) piled up enough to stall a headless check's exit for minutes.
 	if absf(p.volume_db - v) > 0.01:
 		p.volume_db = v
 	# A bed on another bus (LastAlive's on Music) stays there so it ducks with the score.
-	var bus: StringName = _bus_for(L["pos"], L["sound"]) if String(L["bus"]) == "SFX" else StringName(L["bus"])
+	var bus: StringName = _bus_for(lp["pos"], lp["sound"]) if String(lp["bus"]) == "SFX" else StringName(lp["bus"])
 	if p.bus != bus:
 		p.bus = bus
 
@@ -1057,6 +1079,7 @@ func _lazy(sname: String) -> bool:
 	streams[sname] = takes[0] if takes.size() == 1 else takes
 	return true
 
+
 ## How many takes a sound has (0 when it has no file).
 func take_count(sname: String) -> int:
 	if not ensure(sname):
@@ -1064,12 +1087,14 @@ func take_count(sname: String) -> int:
 	var st = streams[sname]
 	return (st as Array).size() if st is Array else 1
 
+
 ## Seconds one take of a sound sounds for.
 func take_len(sname: String, take: int) -> float:
 	var st = streams[sname]
 	if st is Array:
 		st = (st as Array)[take % (st as Array).size()]
 	return (st as AudioStream).get_length()
+
 
 ## Whether a sound exists (loading it on first ask, as play does).
 func ensure(sname: String) -> bool:

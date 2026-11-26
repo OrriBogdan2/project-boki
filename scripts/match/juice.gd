@@ -41,10 +41,13 @@ const ARMOR_UP_OWN_DB := -4.0  # dB: your own Hunter's tier-up (the fuller cue, 
 const ARMOR_UP_NEAR_DB := -8.0  # dB: a rival's (or mate's) tier-up; Sfx.play adds the distance falloff
 
 
-## The flash colour of a hit by what it struck: a Boki rims in its type colour (the Field Book's, not
-## the damage category's), so a squad fight tells a Boki from its Hunter; a Hunter keeps the white
-## (or, on you, the hot) flash; mobs and the rest keep theirs.
-static func flash_col(target: Ent, p: Hunter) -> Color:
+## The flash and spark colour of a hit: a Boki's own hit lands in its type colour (the Field Book's), whatever it
+## strikes, so a fire Boki's is ember and a tempest one teal; otherwise by what it struck: a Boki rims in its type
+## colour, so a squad fight tells a Boki from its Hunter; a Hunter keeps the white (or, on you, the hot) flash; mobs
+## and the rest keep theirs.
+static func flash_col(target: Ent, p: Hunter, by: Ent = null) -> Color:
+	if by is Kin:
+		return DexView.type_col(String((by as Kin).sp.get("type", "")))
 	if target is Kin:
 		return DexView.type_col(DexView.type_of((target as Kin).species))
 	return HURT_COL if target == p else HIT_COL
@@ -92,7 +95,7 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 		return
 	var credit := _credit(by)
 	var mine := credit == p or target == p
-	var col := flash_col(target, p)
+	var col := flash_col(target, p, by)
 	var ability := o.has("ab") and src != "kin"
 	var power := impact_power(d, mine, ability)
 	m.fx.impact(at, dir, col, power, crit, armor)
@@ -332,7 +335,7 @@ static func footstep(h: Hunter) -> void:
 	if m == null or m.world == null or not StepReach.heard(h):
 		return
 	var surf := StepSurface.at(m, h.pos)
-	StepReach.play(h, StepSurface.cue(h, surf), StepSurface.vol_db(h, surf, -13.0), StepSurface.vol_db(h, surf, -17.0))
+	StepReach.play(h, StepSurface.cue(h, surf), StepSurface.vol_db(h, -13.0), StepSurface.vol_db(h, -17.0))
 	HunterFoley.step(h)
 
 

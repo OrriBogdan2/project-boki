@@ -13,6 +13,7 @@ const ARCH_CHECK := preload("res://tools/archetype_check.gd")
 const ClarityFight := preload("res://tools/clarity_fight.gd")
 const DT := 1.0 / 60.0
 const FIGHT_FRAMES := 10
+const MIN_SIDE_GAP := 0.5  # RGB distance (0-1) between two sides' colours that reads as different at a glance
 
 var bad := 0
 
@@ -30,7 +31,7 @@ func run(main: Node) -> void:
 	_sable_hit(main)
 	var m := Match.new()
 	main.add_child(m)
-	m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
+	m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "demo_kin": "cindle"})
 	m.set_process(false)
 	for mb in m.mobs:
 		mb.dead = true
@@ -60,10 +61,12 @@ func run(main: Node) -> void:
 		var edge := SideRings.edge_of(h)
 		var edge_ok := edge.a == 0.0 if h == p else (_same(edge, want) and edge.a > 0.5)
 		ok(edge_ok, "%s's body edge: %s (%s)" % [h.pname, "none on yours" if h == p else _side(m, h), edge])
+	_boki_owner(m, p, ally, foes[0])
 	_side_fx(m, p, ally, foes[0])
 	_body_tell(m, foes[0])
 	_boki_text(m, p, ally, foes[0])
 	_melee_stack(m, p, ally, foes)
+	_quiet_own(m, p, ally, foes[0])
 	# ---------------------------------------------------------------- 2. the downed teammate
 	ally.teleport(p.pos + Vector3(8.0, 0, 0))  # nobody in reach to pick them up: the bleed-out runs
 	for f: Hunter in foes:
@@ -195,6 +198,32 @@ func _cc_plate(m: Match, a: Hunter, b: Hunter) -> void:
 		mob.stun_t = 0.0
 
 
+## Whose Boki is it, walking or riding as a wisp: the ring and the wisp's rim are the owner's side colour, and your
+## own, a teammate's and a rival's are three clearly different colours (--wisp-read-shots measures it on screen).
+func _boki_owner(m: Match, p: Hunter, ally: Hunter, foe: Hunter) -> void:
+	var rims: Array = []
+	for h: Hunter in [p, ally, foe]:
+		var k: Kin = h.kin
+		if k == null:
+			ok(false, "%s has a Boki to read" % h.pname)
+			continue
+		var was := k.state
+		KinWisp.set_wisp(k, true)
+		k.state = "shoulder"
+		KinWisp.render(k)
+		var rim: Color = (k.model.get_node("Body") as GeometryInstance3D).get_instance_shader_parameter("rim_col")
+		rims.append(rim)
+		ok(_same(rim, SideColor.of(m, h)), "%s's wisp rim is the %s colour" % [h.pname, _side(m, h)])
+		KinWisp.set_wisp(k, false)
+		k.state = was
+		k.ring.visible = true
+	for i in rims.size():
+		var a: Color = rims[i]
+		var b: Color = rims[(i + 1) % rims.size()]
+		var gap := Vector3(a.r - b.r, a.g - b.g, a.b - b.b).length()
+		ok(gap > MIN_SIDE_GAP, "own, ally and rival Boki read three ways (gap %.2f)" % gap)
+
+
 ## Other people's looks lean to their side: yours as made, a teammate's cooler, a rival's toward the hostile red.
 func _side_fx(m: Match, p: Hunter, ally: Hunter, foe: Hunter) -> void:
 	var c := Color("ffc832")
@@ -270,6 +299,30 @@ func _prio(n: Node3D) -> int:
 
 func _alpha(n: Node3D) -> float:
 	return (n.material_override as ShaderMaterial).get_shader_parameter("color").a
+
+
+## Yours and a teammate's telegraphs are a faint rim (no hatching, no lace crossing), a rival's the strong one: the
+## same warning on the ground (Fx) and as an AimKit laced lane (docs/COMBAT_CLARITY.md, "Own telegraphs are quiet").
+func _quiet_own(m: Match, p: Hunter, ally: Hunter, foe: Hunter) -> void:
+	var quiet := func(by: Hunter) -> float:
+		var n := _tele(m, by, p.pos)
+		var q: float = (n.material_override as ShaderMaterial).get_shader_parameter("quiet")
+		m.fx.end_telegraph(n)
+		return q
+	ok(quiet.call(p) == 1.0 and quiet.call(ally) == 1.0, "your and a teammate's ground telegraph is quiet")
+	ok(quiet.call(foe) == 0.0, "a rival's ground telegraph is the strong one")
+	var verts := func(by: Hunter, lace: bool) -> int:
+		AimKit.lane(by, "lace", {"all": true, "len": 6.0, "width": 0.5, "fill": 0.8, "lace": lace, "chevrons": 2})
+		var d := AimKit.layer(m)
+		d.rebuild()
+		var n: int = d.geo.v.size()
+		AimKit.clear(by)
+		return n
+	var own: int = verts.call(p, true)
+	var foe_laced: int = verts.call(foe, true)
+	var foe_plain: int = verts.call(foe, false)
+	ok(own < foe_laced, "AimKit: your laced lane is drawn plain (%d vertices, a rival's %d)" % [own, foe_laced])
+	ok(own < foe_plain, "AimKit: your lane has no chevrons (%d vertices, a rival's plain %d)" % [own, foe_plain])
 
 
 ## AimKit draws a rival's telegraph in its own surface after yours.
