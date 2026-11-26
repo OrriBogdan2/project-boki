@@ -76,7 +76,6 @@ func keep_clear(cam: CamRig, home: Node3D, delta: float) -> void:
 		return
 	way /= full
 	var gap := float(rules()["wall_gap"])
-	var world: World = home.world
 	var clear := full
 	var s := MIN_BACK
 	while s <= full:
