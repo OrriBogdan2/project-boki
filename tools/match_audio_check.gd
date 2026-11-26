@@ -78,6 +78,7 @@ func run(main_node: Node) -> void:
 	var key := "rescue%d" % k.get_instance_id()
 	# the Boki goes down beside you and you run into it: the rescue's hum starts and follows the carry
 	k.pos = p_v.pos + Vector3(0.6, 0, 0)
+	KinWisp.set_wisp(k, false)  # (out, not a wisp: KinWisp.ride stows a downed wisp)
 	k.state = "active"
 	k.fly = {}
 	k.go_down()
