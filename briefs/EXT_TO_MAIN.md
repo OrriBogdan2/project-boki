@@ -11354,3 +11354,4 @@ READY ext/stuck-integ-8fc48065 c08cd0f9de (PR #891 merged with main abd06d606b: 
 READY ext/merge-lane-N2-1122 1b51cb9588677c2a90b13a2f2ec37bd0f62b0ffe (PR #642 bundle merged with main abd06d606b; 2 conflicts fixed; targeted checks no new red)
 READY ext/merge-lane-n23a-1123 f70cb58349b3ddfed8b935679eec47b73382ee04 (PR #697 bundle merged with main abd06d606b; kin.gd conflict fixed; targeted checks no new red)
 READY ext/merge-lane-conflict-a-1124 00cbf5afebef77d6621f8971948b756a336ce67b (PR #845 bundle merged with main abd06d606b; Cinder upper clips ported onto main WardenNativeUpper; no new red)
+READY ext/mantle-port-a aa873f8f09 (PR #135: main merged, dredge_anim_time_check dropped because Grimble is Meshy-native; 31 targeted flags, reds equal main except ostra swim-stroke row in --clip-check)
