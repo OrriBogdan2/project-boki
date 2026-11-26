@@ -1,14 +1,18 @@
 extends RefCounted
 ## --test-zone-shots [--shots-dir=<dir>] [--sizes=WxH,..]: the owner's Test Zone as a player sees it (run under a
 ## renderer, GPU for the owner sheet): just entered, its page open, a monster and a Boki partner spawned, a fight
-## with a dummy, and the L practice menu. Each stage saves <dir>/tz_<stage>_<W>x<H>.png and prints
+## with a dummy, the Practice tools switched on, and the L practice menu. Each stage saves
+## <dir>/tz_<stage>_<W>x<H>.png and prints
 ## TZSHOT lines: every pair of HUD groups that overlap (SafeArea) and every group over your Hunter (HunterZone).
-## `overlaps` is also what --test-zone-check holds to zero.
+## `overlaps` is also what --test-zone-check holds to zero. The Test Zone page and the L menu are modals over a
+## dimmed or blurred screen, so they are shot but not counted: the HUD behind them is judged in the stages around them.
 
 const SIZES := [Vector2i(1920, 1080), Vector2i(2560, 1440)]
 const SETTLE_FRAMES := 12  # frames after a stage change (HUD slide-ins, toasts) before it is judged
+const SETTLE_MAX := 300  # frames at most to wait for the camera to stop easing (it drifts after a resize or a teleport)
+const SETTLE_PX := 0.5  # the Hunter's screen box moved less than this between frames: the camera has settled
 const FIGHT_S := 2.0  # s of match time with a dummy hit every 0.5 s before the fight shot
-const OWN_DRAWN := ["plate", "grip_icons"]  # your overhead plate and the grip icons on it: part of your own Hunter, by design
+const OWN_DRAWN := ["plate", "grip_icons"]  # your own plate and its grip icons: part of your Hunter, by design
 const DUMMY_GAP := 4.0  # m between you and the dummy in the fight stage
 
 var main: Node
@@ -16,29 +20,55 @@ var dir := ""
 
 
 ## The HUD groups on screen: the HUD's own, the practice tools' layer, drawn panels and toasts (name -> Rects).
-static func groups(m: Match, overlay_open: bool) -> Dictionary:
+static func groups(m: Match) -> Dictionary:
 	var sz := Vector2(m.hud.c.size)
-	var out := SafeArea.groups_of(m.hud, sz)
-	if m.arena and m.arena.layer:
-		out.merge(SafeArea.groups_of(m.arena.layer, sz))
+	var out := {}
+	# every layer of the match: the HUD, the Arena's key line and meter, the Practice bar, the kit drill banner
+	var layers: Array = m.find_children("*", "CanvasLayer", true, false)
+	if not layers.has(m.hud):
+		layers.append(m.hud)
+	for layer: CanvasLayer in layers:
+		if layer == m.arena.menu_layer:
+			continue      # the L menu is a modal on a dimmed screen: it is drawn over the HUD on purpose
+		var found := SafeArea.groups_of(layer, sz)
+		for g: String in found:
+			out["%s/%s" % [layer.name, g]] = found[g]
 	for g: String in SafeArea.seen:
 		if g not in OWN_DRAWN:
 			out["drawn " + g] = SafeArea.seen[g]
-	if overlay_open:
-		out.merge(SafeArea.groups_of(Overlay.host, sz))
 	return out
 
 
 ## "<a> overlaps <b>" lines for the groups, and each group that sits on your Hunter.
-static func overlaps(m: Match, overlay_open: bool) -> Array:
-	var gs := groups(m, overlay_open)
+static func overlaps(m: Match) -> Array:
+	var gs := groups(m)
 	var found: Array = SafeArea.problems(gs, Vector2(m.hud.c.size)).filter(func(p): return " overlaps " in String(p))
 	var zone := HunterZone.rect(m)
 	for g: String in gs:
 		for r: Rect2 in gs[g]:
-			if zone.has_area() and r.intersects(zone) and not g.begins_with("Overlay"):
+			if zone.has_area() and r.intersects(zone):
 				found.append("%s %s covers your Hunter %s" % [g, r, zone])
 	return found
+
+
+static func _still(a: Rect2, b: Rect2) -> bool:
+	return a.position.distance_to(b.position) < SETTLE_PX and a.size.distance_to(b.size) < SETTLE_PX
+
+
+## Lets the HUD and the camera settle (slide-ins, toasts, the view easing onto your Hunter), recording what it draws,
+## and returns overlaps().
+static func judge(tree: SceneTree, m: Match) -> Array:
+	SafeArea.recording = true
+	var last := HunterZone.rect(m)
+	var i := 0
+	while i < SETTLE_FRAMES or (i < SETTLE_MAX and not _still(last, HunterZone.rect(m))):
+		last = HunterZone.rect(m)
+		SafeArea.seen.clear()
+		m.hud.panels.queue_redraw()
+		await tree.process_frame
+		i += 1
+	SafeArea.recording = false
+	return overlaps(m)
 
 
 func run(main_node: Node) -> void:
@@ -75,38 +105,36 @@ func _zone(size: Vector2i) -> void:
 	if main.fade != null:
 		await main.fade.reveal(0.01)
 	main.set("current", m)
-	await _stage(m, "entered", size, false)
+	await _stage(m, "entered", size)
 	Overlay.open_test_zone()
-	await _stage(m, "page", size, true)
+	await _stage(m, "page", size)
 	Overlay.close()
 	TestZone.spawn_mob(m, String(Data.MOBS.keys()[0]))
 	m.arena.set_kin("cindle")
-	await _stage(m, "spawned", size, false)
+	await _stage(m, "spawned", size)
 	var dm: Hunter = m.arena.dummies[0]["h"]
 	dm.teleport(m.player.pos - Vector3(sin(m.player.face), 0.0, cos(m.player.face)) * DUMMY_GAP)
 	for i in int(FIGHT_S / Match.DT):
 		m.step(Match.DT)
 		if i % 30 == 0:
 			dm.hurt(80.0, m.player)
-	await _stage(m, "fight", size, false)
+	await _stage(m, "fight", size)
+	if m.arena.has_method("set_tools"):      # (the old Test Zone had no such switch: its tools were always on)
+		m.arena.set_tools(true)
+	await _stage(m, "tools", size)
 	m.arena.open_menu()
-	await _stage(m, "menu", size, true)
+	await _stage(m, "menu", size)
 	m.arena.close_menu()
 	m.queue_free()
 	await main.get_tree().process_frame
 
 
-func _stage(m: Match, stage: String, size: Vector2i, overlay_open: bool) -> void:
-	SafeArea.recording = true
-	for i in SETTLE_FRAMES:
-		SafeArea.seen.clear()
-		m.hud.panels.queue_redraw()
-		await main.get_tree().process_frame
-	SafeArea.recording = false
+func _stage(m: Match, stage: String, size: Vector2i) -> void:
+	var found: Array = await judge(main.get_tree(), m)
 	var tag := "%s %dx%d" % [stage, size.x, size.y]
-	var found := overlaps(m, overlay_open or m.arena.menu_layer != null)
 	print("TZSHOT %s: %d overlaps (window %s, HUD %s)" % [tag, found.size(), main.get_window().size, m.hud.c.size])
 	for f in found:
 		print("TZSHOT   %s | %s" % [tag, f])
 	if dir != "":
-		main.get_viewport().get_texture().get_image().save_png(dir.path_join("tz_%s_%dx%d.png" % [stage, size.x, size.y]))
+		var file := "tz_%s_%dx%d.png" % [stage, size.x, size.y]
+		main.get_viewport().get_texture().get_image().save_png(dir.path_join(file))
