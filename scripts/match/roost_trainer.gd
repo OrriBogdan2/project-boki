@@ -139,7 +139,7 @@ func _line_for(p: Hunter) -> String:
 			return "1/3  Press %s: your Boki bursts out of its wisp for a short while" % Settings.key_cap("summon")
 		1:
 			var g := Settings.key_cap("throw")
-			return "2/3  Knock out the wild Boki. Yours fights alone: %s sends it at the cursor, hold %s: orders" % [g, g]
+			return "2/3  Knock out the wild one. Yours fights alone: %s sends it, hold %s: orders" % [g, g]
 		2:
 			return "3/3  It is knocked out: hold %s beside it to scan and capture it" % Settings.key_cap("interact")
 	return ""
