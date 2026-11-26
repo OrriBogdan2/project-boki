@@ -172,7 +172,9 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | mossgrade | clip | clip | clip | clip | clip | clip | proc | proc |
 | moundvark | clip | clip | clip | clip | clip | clip | proc | proc |
 | murmurling | clip | clip | clip | clip | clip | clip | proc | proc |
+| nacrolin | clip | clip | clip | clip | clip | clip | proc | proc |
 | nettlynx | clip | clip | clip | clip | clip | clip | proc | proc |
+| nimbostrich | clip | clip | clip | clip | clip | clip | proc | proc |
 | rimeshrew | clip | clip | clip | clip | clip | clip | proc | proc |
 | selenfin | clip | clip | clip | clip | clip | clip | proc | proc |
 | spatewader | clip | clip | clip | clip | clip | clip | proc | proc |
