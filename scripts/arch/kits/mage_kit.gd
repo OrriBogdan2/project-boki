@@ -42,6 +42,7 @@ var reset_dash_boost := false  # a reset armed the next Wirerun: further, charge
 var reset_boost_t := 0.0       # s left on it
 var slams := 0
 var orb_bursts := 0
+var lmb_sd := {}                # the last finger bolt while it flies (its crackle, mage_bolt_fly, follows it)
 var lmb_n := 0                 # finger bolts fired (left, right, left...)
 var last_shot := 0
 var last_dash_kind := ""
@@ -288,6 +289,8 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 ## A new finger bolt left the hand: alternate hands (the bolt starts at that hand), a twist, a crackle
 ## at the fingertip; the round becomes a jagged bolt with a spark impact (content/vfx/mage.json).
 func _tick_lmb() -> void:
+	if not lmb_sd.is_empty() and not HeroSfx.fly(m, h, "mage_bolt_fly", lmb_sd):
+		lmb_sd = {}
 	var idle := wire.is_empty() and not rmb_down and run_t <= 0.0 and not ult.busy()
 	if h.is_local() and idle and not h.downed:
 		# the aim line runs through the cursor out to full range, an arrow tick at its end (always up)
@@ -318,6 +321,8 @@ func _tick_lmb() -> void:
 	sd["prev"] = p
 	sd["start"] = p
 	play("mage_lmb_l" if left else "mage_lmb_r")
+	lmb_sd = sd
+	m.sfx("mage_bolt_tail", p, -6.0 if h.is_local() else -9.0)     # sparks pattering after the snap
 	# a thrust from the shoulder to the fingertip, the hand's swoosh, then (at the release key) the fingertip
 	# crackles; a jagged bolt rides the round and splinters back where it ends
 	vfx("lmb", null, null, {"left": left})
