@@ -59,8 +59,8 @@ func run(main_node: Node) -> void:
 		m.cam.dist_mul = 0.3
 		m.cam.snap(c)
 		var img := await _grab("hair_%d_close.png" % pick)
-		var at := Vector2i(Vector2(img.get_size()) / 2.0) + Vector2i(0,
-				int(img.get_height() / 14.0))  # (the camera leads her a little)
+		# (the camera leads her a little)
+		var at := Vector2i(Vector2(img.get_size()) / 2.0) + Vector2i(0, int(img.get_height() / 14.0))
 		var half := int(img.get_height() / 7.0)
 		var r := Rect2i(Vector2i(at) - Vector2i(half, half), Vector2i(half * 2, half * 2)).intersection(
 			Rect2i(Vector2i.ZERO, img.get_size())

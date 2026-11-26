@@ -19,7 +19,7 @@ Every dash and ability charge count read against the tooltips [D]: all match but
 dash charges; Oath's Spin Dash has 1, so `bulwark.json` `dash.charges` is 1 (a kit's `dash.charges` now overrides the
 class's, `ArchKit.dash_charges`). **Vex**'s Slipstep is one charge too (a medium class has one already; the row locks it). **Grimble** keeps 3 (owner, Kingpin has 1 + an air slot); it moved from
 `DredgeKit.extra_dashes()` to `dredge.json` `dash.charges`. Tenzo (Tetra +1 at an upgrade), Kael (Brall +1 at tier II),
-Cinder (Felix dash 2, RMB +1), Neve (Cryo Spear 2) match; Gil has no source. Vex's rifle falloff (100% to 50% over ten rounds, a pause starts over) now also thins the tracer, flash and impact (`content/vfx/gunslinger.json` `size_k`); her Longneedle yaw lock is 30 deg/s. Table: coord/reports/charges-sv-1116.md.
+Cinder (Felix dash 2, RMB +1), Neve (Cryo Spear 2) match; Gil has no source. Vex's rifle falloff (100% to 50% over ten rounds, a pause starts over; to 80% since 11-24) now also thins the tracer, flash and impact (`content/vfx/gunslinger.json` `size_k`); her Longneedle yaw lock is 30 deg/s. Table: coord/reports/charges-sv-1116.md.
 
 ## Ultimate ranks vs the source (ult-ranks-source, 2026-11-19)
 Source: the reference kit data (ext/agent-briefs), "R has II/III only" (line 4); owner 11-18: ultimates
@@ -400,11 +400,11 @@ Same method as the slice section above (`--hit-shape-fine`, rows for the eight a
 
 ## Vex (`gunslinger`, source ref-gunslinger) · slice Warden
 
-Re-read 2026-11-23 on main dae69e1c59; the dated tables below this one (ranges, hit shapes, CC, knocks, casting) are earlier snapshots. What moved is in `docs/KIT_PARITY.d/1123-vex-kael-recheck.md`.
+Re-read 2026-11-26 on main fad508b31c9; the dated tables below this one (ranges, hit shapes, CC, knocks, casting) are earlier snapshots. What moved is in `docs/KIT_PARITY.d/1126-vex-recheck.md` (and, to 11-23, `1123-vex-kael-recheck.md`).
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
-| LMB | Hold; 30 rounds, rapid refill when idle, first 10 rounds stronger [D] | Quill Rifle: cadence 0.08 (~12 rounds/s: measured 12.0 hits/s in a magazine by `--ttk-matrix-check`, 9.6/s over a whole string with the ~1.3 s refill gap; `quill_rifle` is Vex's weapon, no rate multiplier; docs/WEAPON_FIRING_DATA.md; 0.12 until the fun audit 11-11), 6 a round, mag 30, refill 40/s after 0.35 s, 10-round sustain to 50%, no fire slow; Dazed foes take +76% (`rattle_k`) | match |
+| LMB | Hold; 30 rounds, rapid refill when idle, first 10 rounds stronger [D] | Quill Rifle: cadence 0.08 (~12 rounds/s: measured 12.0 hits/s in a magazine by `--ttk-matrix-check`, 9.6/s over a whole string with the ~1.3 s refill gap; `quill_rifle` is Vex's weapon, no rate multiplier; docs/WEAPON_FIRING_DATA.md; 0.12 until the fun audit 11-11), 8 a round (6 until 11-24, `8495f5a6b8`, owner playtest), mag 30, refill 40/s after 0.35 s, 10-round sustain to 80% (50% until 11-24; the source's is 50%), no fire slow; Dazed foes take +76% (`rattle_k`) | match in shape; round and decay differ (owner 11-24) |
 | RMB | Sticky grenade, wall cone knock, Daze; lane on hold [D,F] | Coin Blast, a tap and a coin toss from her free hand (owner item 112, 11-17): hit 22 and Daze 1.4 s, on a wall a 6 m 100 degree cone, 16, shove 11, stun 0.7 s; cd 6.5 (footage 5.4, data 9) | differ (owner, item 112); cd **open** (gap 10, owner) |
 | Q | none | glove | ours |
 | E | 0.6 s cast standing, beam pierces terrain, recoil, -20% cd on hit [D,F] | Palm Lance, from her open palm: charge 0.6, 24 damage (36 until 11-11), +20% on a Dazed foe, recoil 6, range 18, width 1.8 (0.9 each side, owner item 68), held 0.6 s after the beam (`E_RECOVER`), yaw lock 30 deg/s, shave 20% / 30%, cd 11.5 | match; width 2x the source (owner) |
@@ -616,7 +616,7 @@ PARITY FIRST (DECISIONS 2026-11-07). Source: `the reference kit notes on the bri
 | E | Wall pushes, recast freezes, 20 s [D] | Rink Wall: 0.2 s tell, slides 4.5 to 16.2 m, grows 1.8 to 4.5 m, **200 HP** (owner 11-08), E again freezes 6 s, cd 17 | match; 0.85x cd (gap 10, owner row) |
 | R | Invulnerable Slowing zone 3.5 s with periodic Shatter stacks, explode, stun, cancel, 80 s [D] | Rimelock: hold **3.3** (footage 3.2 to 3.4), flat 35% slow (no ramp), skate carry .8 x1.05 (owner 11-08), rink **7.47 m** (4 bh +15% owner 11-08, then -10% owner 11-11; was written 8.3 here), crash **18** = 155/156 x the spear hit + 0.75 s stun, cd 80 | match; radius and carry owner; periodic Shatter stacks not built (no period in [D]) |
 | Dash | Hold, release stops, 13 s; ice islands over the abyss [D] | Skate 10.5 m/s (F 10 to 11, the mean), ramp 0.12 s (11-20), up to 1.6 s, early-release refund .6 (owner), ice ribbon in the air, cd 13 | match; refund owner |
-| Passive | Chill 4 s, shatter on knock [D] | Hoarfrost: Chill 4 s with no slow, 8 darts Shatter (60 in 2.4 m), a knock on a Chilled foe Shatters 0.4 s later (37 in 3 m) | match |
+| Passive | Chill 4 s, shatter on knock [D] | Hoarfrost: Chill 4 s with no slow, 8 darts Shatter (54 in 2.4 m; 60 until the 11-24 TTK fix), a knock on a Chilled foe Shatters 0.4 s later (37 in 3 m) | match |
 | Anim | Footage poses | 19 moves plus the fusion move, all on `claire.glb` (49 clips) | match on coverage |
 | Body | 1.1 to 1.15 [F] | size 1.11 (head tops follow the height chart, `3a50a38abb`) | differ (owner) |
 

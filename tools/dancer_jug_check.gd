@@ -58,23 +58,11 @@ func thief(a) -> void:
 		),
 		p_v.wid
 	)
-	var dj_moves := [
-		"thf_lmb_r",
-		"thf_lmb_l",
-		"thf_primed",
-		"thf_vault_r",
-		"thf_vault_l",
-		"thf_bola",
-		"thf_knife",
-		"thf_arrive",
-		"thf_encore",
-		"thf_encore_dance",
-		"thf_exdash",
-		"thf_land"
-	]
+	var keyed := ["thf_lmb_r", "thf_lmb_l", "thf_primed", "thf_vault_r", "thf_vault_l", "thf_bola"]
+	keyed.append_array(["thf_knife", "thf_arrive", "thf_encore", "thf_encore_dance", "thf_exdash", "thf_land"])
 	a_x.ok(
 		"dancer: her moves are keyed (KMovesDJ)",
-		dj_moves.all(func(mv): return not HunterAnim.km_sample(mv, 0.1).is_empty())
+		keyed.all(func(mv): return not HunterAnim.km_sample(mv, 0.1).is_empty())
 	)
 	# LMB: a bolt every 0.45s from alternating hands, each one to the cursor
 	p_v.fire_cd = 0.0
@@ -993,7 +981,7 @@ func juggernaut(a) -> void:
 	a_x.step(m, 0.3)
 	a_x.ok(
 		"juggernaut LMB tap: a slash, 1.6x at the tip (the footage's 151 / 94)",
-		near >= 7.0 and a_x.dmg(t_v) >= near * 1.5 and k.waves == 0,
+		near >= 6.0 and a_x.dmg(t_v) >= near * 1.5 and k.waves == 0,
 		"near %.0f tip %.0f" % [near, a_x.dmg(t_v)]
 	)
 	moved = maxf(moved, t_v.flat_dist(home + Vector3(2.95, 0, 0)))

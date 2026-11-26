@@ -180,6 +180,7 @@ func run(main: Node) -> void:
 	_inv_cues()
 	_steps(main)
 	_slug_hits(main)
+	preload("res://tools/sfx_climb_rows.gd").new().run(main, ok)
 	_rank_cues()
 	_barks()
 	_ambience()

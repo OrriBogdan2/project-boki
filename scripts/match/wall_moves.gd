@@ -2,15 +2,14 @@ class_name WallMoves
 extends RefCounted
 ## A hunter's wall kick and wall bounce (one instance per hunter, hooked from Hunter).
 ## Kick (item 149, the reference's wall dance): in the air touching or facing a wall, a jump hops you off it,
-## again and again, no glider and no cooldown, with a stone scuff everyone near hears. Keys into the wall or
-## none add KICK_RISE of height to the jump you are on; keys away push you off it. Each kick in a row without
-## touching the ground keeps less of that rise and push (content/rules/wall_kick.json, decision 0158). A hop
-## only starts up to HOP_CLIMB_CAP above where you took off, so a four-terrace wall is climbable with a
-## mantle on top and a five-terrace one stays sheer however long you dance. Near a wall a capped press does
-## nothing (it never opens the glider: the glide button still does). Bounce: hitting a wall at an angle with
-## speed in the air (a dash, a boosted jump) rebounds you off it; head-on you just stop, as ever, and a jump
-## there kicks. Slide: the glider never bounces or stops dead
-## on a wall, see stopped().
+## again and again, no glider and no cooldown, with a plant-and-push sound (ClimbSfx) everyone near hears. Keys
+## into the wall or none add KICK_RISE of height to the jump you are on; keys away push you off it. Each kick
+## in a row without touching the ground keeps less of that rise and push (content/rules/wall_kick.json,
+## decision 0158). A hop only starts up to HOP_CLIMB_CAP above where you took off, so a four-terrace wall is
+## climbable with a mantle on top and a five-terrace one stays sheer however long you dance. Near a wall a
+## capped press does nothing (it never opens the glider: the glide button still does). Bounce: hitting a wall
+## at an angle with speed in the air (a dash, a boosted jump) rebounds you off it; head-on you just stop, as
+## ever, and a jump there kicks. Slide: the glider never bounces or stops dead on a wall, see stopped().
 
 const RULES_PATH := "res://content/rules/wall_kick.json"
 const KICK_RISE := 0.8  # m of extra jump height: one terrace (World.LEVEL)
@@ -23,11 +22,6 @@ const KICK_KEYS_MIN := 0.3  # stick deflection that counts as pressing a directi
 const KICK_PUSH := 7.5  # m/s away from the wall for a push-off
 const KICK_SLIDE_KEEP := 0.6  # share of the speed along the wall a push-off keeps
 const KICK_PUSH_JUMP := 0.9  # share of JUMP_V a push-off jumps with
-const KICK_VOL := -5.0  # dB: the scuff
-const KICK_PITCH_MIN := 0.85  # each hop's scuff a little different
-const KICK_PITCH_MAX := 1.2
-const BOUNCE_VOL := -6.0  # dB
-const BOUNCE_PITCH := 1.5
 const BOUNCE_KEEP := 0.85  # share of the speed that survives the rebound
 const BOUNCE_HEAD_ON_DEG := 20.0  # closer than this to the wall's normal it doesn't bounce
 const BOUNCE_MIN_INTO := 4.0  # m/s into the wall: a walking-speed jump brushing a wall doesn't ricochet
@@ -98,17 +92,10 @@ func try_kick(h: Hunter) -> bool:
 	# no glider until the rise is done, so a held jump keeps the kick's height
 	h.glide_cd = maxf(h.glide_cd, h.vel.y / Hunter.H_GRAV)
 	h.stats["wall_kicks"] = int(h.stats.get("wall_kicks", 0)) + 1
-	var pitch := randf_range(KICK_PITCH_MIN, KICK_PITCH_MAX)
-	scuff(h.m, h.pos, pitch)
-	h.m.net_fx(["whop", Match._r(h.pos.x), Match._r(h.pos.y), Match._r(h.pos.z), snappedf(pitch, 0.01)])
+	scuffs += 1
+	ClimbSfx.play(h, ClimbSfx.KICK)
 	h.m.fx.dust(_fx_at(h), KICK_DUST)
 	return true
-
-
-## The hop's sound: a footstep on stone, at `pitch`. Played in every game (Match "fx" "whop").
-static func scuff(m: Match, at: Vector3, pitch: float) -> void:
-	scuffs += 1
-	m.sfx("step_stone", at, KICK_VOL, pitch)
 
 
 ## Touching a wall (the last 0.2 s), or facing one (keys, else your aim) within FACE_REACH: sets wall_n to its normal.
@@ -157,7 +144,7 @@ func hit(h: Hunter, hit_v: Vector2, wall_top: float) -> void:
 		_rebound = out
 		_rebound_speed = out.length()
 	_met_wall(h)
-	h.m.sfx("land", h.pos, BOUNCE_VOL, BOUNCE_PITCH)
+	ClimbSfx.play(h, ClimbSfx.KICK)
 	h.m.fx.dust(h.pos, BOUNCE_DUST)
 
 

@@ -595,11 +595,6 @@ func _tab_gameplay(v: VBoxContainer) -> void:
 	_group(v, "Boki")
 	var talk := [["quiet", "Quiet"], ["normal", "Normal"], ["chatty", "Chatty"]]
 	_choice(v, "How much your Boki talks", "kin_chatter", talk, Callable(), "Quiet: only danger. Chatty: all of it")
-	var wisp_hint := (
-		"In expeditions your Boki rides as a little wisp at your shoulder, its carry bonus always on. "
-		+ "Off: it walks beside you"
-	)
-	_toggle(v, "Boki ride as wisps", "boki_wisps", wisp_hint)
 	if admin_allowed():
 		_group(v, "Admin")
 		_toggle(v, "Pre-match lobby", "lobby_enabled", "The 30 s lobby before each expedition. Off: plain loading")
