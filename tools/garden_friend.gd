@@ -172,12 +172,6 @@ func _dress_hunter() -> void:
 	h.player.rotation = rot
 	h.add_child(h.player)
 	print("GF hunter arch=%s glb=%s" % [HUNTER_ARCH, WardenGlb.ART.get(HUNTER_ARCH, "?")])
-	for n in h.player.find_children("*", "", true, false):
-		if n is MeshInstance3D or n is GPUParticles3D or n is CPUParticles3D or n is OmniLight3D or n is Sprite3D or n is Label3D:
-			var m := ""
-			if n is MeshInstance3D and (n as MeshInstance3D).mesh != null:
-				m = "%s/%s" % [(n as MeshInstance3D).mesh.get_class(), (n as MeshInstance3D).mesh.resource_name]
-			print("GF NODE %s [%s] %s vis=%s" % [h.player.get_path_to(n), n.get_class(), m, n.visible])
 
 
 ## Before each frame is drawn: no words, no billboard icon (hearts, z, work marks, name tags), no UI layer.
@@ -192,6 +186,10 @@ func _hide_marks() -> void:
 		(l as Label3D).visible = false
 	for sp in h.find_children("*", "Sprite3D", true, false):
 		(sp as Sprite3D).visible = false
+	for q in h.player.find_children("*", "MeshInstance3D", true, false):  # the hunter's glow haze quads and orbiting cards
+		var mi := q as MeshInstance3D
+		if mi.mesh is QuadMesh or String(mi.name).begins_with("orbit_cards") or String(mi.name).begins_with("Halo"):
+			mi.visible = false
 	for pt in h.find_children("*", "GPUParticles3D", true, false):
 		(pt as GPUParticles3D).visible = false
 	for pt in h.find_children("*", "CPUParticles3D", true, false):
@@ -296,37 +294,37 @@ func _film() -> void:
 	var from := Vector3(36.5, 0, 28.8)
 	# shot 1 (wide): the hunter walks east toward the beds, the Bokis ahead and to the sides, the garden leads
 	_stand(from, from + Vector3(8, 0, 0.0), false)
-	_view(46.0, 27.0, 0.5)
-	_group(from, [Vector3(3.4, 0, -2.6), Vector3(4.6, 0, 2.2), Vector3(2.4, 0, 3.4), Vector3(6.5, 0, -0.6)])
+	_view(36.0, 28.0, 0.7)
+	_group(from, [Vector3(9.0, 0, -2.4), Vector3(3.4, 0, -2.2), Vector3(4.4, 0, 2.2), Vector3(5.6, 0, 1.7)])
 	await _wait(0.8)
 	_take_from = float(_frames) / FPS
-	await _walk(Vector3(40.5, 0, 28.8), 5.0)
+	await _walk(Vector3(40.0, 0, 28.8), 5.0)
 	await _stills("s1", 3, 0.5)
 	# shot 2 (mid, hard cut): the view turns slowly round the hunter's back and the group in front of him
-	var m2 := MEAD + Vector3(1.0, 0, -3.0)
-	_stand(m2, m2 + Vector3(1, 0, -0.1), false)
-	_view(42.0, 27.0, 0.45)
-	h.farm_cam.yaw -= 0.7
-	_group(m2, [Vector3(2.8, 0, -2.4), Vector3(2.4, 0, 2.2), Vector3(4.0, 0, 0.3), Vector3(-0.5, 0, 3.6)])
-	drift = 0.12
+	var m2 := Vector3(38.5, 0, 30.6)
+	_stand(m2, m2 + Vector3(8, 0, 0.0), false)
+	_view(36.0, 28.0, 0.5)
+	h.farm_cam.yaw -= 0.5
+	_group(m2, [Vector3(9.0, 0, 1.6), Vector3(3.2, 0, -2.4), Vector3(3.6, 0, 2.2), Vector3(5.2, 0, -0.4)])
+	drift = 0.1
 	await _wait(0.5)
 	await _stills("s2", 8, 0.75)
 	drift = 0.0
-	# shot 3 (Boki hero, hard cut): two Bokis between the lens and the hunter, close and readable, hunter soft behind
-	_stand(m2, m2 + Vector3(1, 0, 0.0), true)
-	var at := h.ppos as Vector3
-	_view(36.0, 24.0, 0.1)
-	h.farm_cam.yaw += 0.3
-	_group(at, [Vector3(4.5, 0, -3.0), Vector3(-1.2, 0, 0.9), Vector3(-0.7, 0, -1.2), Vector3(4.2, 0, 3.4)])
-	drift = -0.05
+	# shot 3 (Boki hero, hard cut): two Bokis between the lens and the hunter, close and readable
+	var m3 := Vector3(37.5, 0, 28.2)
+	_stand(m3, m3 + Vector3(8, 0, 0.0), true)
+	_view(32.0, 27.0, 1.0)
+	h.farm_cam.yaw += 0.1
+	_group(m3, [Vector3(9.0, 0, 2.0), Vector3(-1.6, 0, -0.7), Vector3(-2.0, 0, 1.0), Vector3(3.5, 0, -2.2)])
+	drift = -0.04
 	await _wait(0.4)
 	await _stills("s3", 7, 0.6)
 	drift = 0.0
 	# shot 4 (hunter from behind): he walks away toward the beds, Bokis ahead
 	var f4 := Vector3(37.0, 0, 30.2)
 	_stand(f4, f4 + Vector3(8, 0, 0.0), true)
-	_view(40.0, 26.0, 0.3)
-	_group(f4, [Vector3(5.0, 0, -2.8), Vector3(3.6, 0, 2.5), Vector3(5.4, 0, 3.4), Vector3(7.0, 0, 0.6)])
+	_view(38.0, 27.0, 0.3)
+	_group(f4, [Vector3(8.0, 0, 3.0), Vector3(3.6, 0, -2.6), Vector3(4.6, 0, 2.5), Vector3(6.2, 0, 0.0)])
 	await _wait(0.4)
 	await _walk(Vector3(43.0, 0, 29.8), 4.5)
 	await _stills("s4", 3, 0.4)
