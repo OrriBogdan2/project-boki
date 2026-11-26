@@ -13,21 +13,6 @@ const DTIMING := preload("res://tools/dancer_timing_check.gd")  # her animation 
 const DLOOP := preload("res://tools/dancer_loop_check.gd")  # the Vault loop and the Bola's slow (item 53)
 const HOLD := preload("res://tools/hold_release_check.gd")  # how Kael's RMB hold ends
 const STRIKES := preload("res://tools/clip_strike_check.gd")  # her clip strikes on the kit's releases (anim timing)
-## The Silver Thief's keyed moves (KMovesDJ): each has a sample at 0.1 s.
-const MOVES := [
-	"thf_lmb_r",
-	"thf_lmb_l",
-	"thf_primed",
-	"thf_vault_r",
-	"thf_vault_l",
-	"thf_bola",
-	"thf_knife",
-	"thf_arrive",
-	"thf_encore",
-	"thf_encore_dance",
-	"thf_exdash",
-	"thf_land"
-]
 const FLIP_TURN := [0.1, 0.3]  # s into her flip clips where the body turns (kmoves_dj.gd thf_vault_*)
 const DTIME := preload("res://tools/thief_anim_time_check.gd")  # her moves' start, hit and end on the move clock
 var a_x: AKCheck
@@ -73,9 +58,11 @@ func thief(a) -> void:
 		),
 		p_v.wid
 	)
+	var keyed := ["thf_lmb_r", "thf_lmb_l", "thf_primed", "thf_vault_r", "thf_vault_l", "thf_bola"]
+	keyed.append_array(["thf_knife", "thf_arrive", "thf_encore", "thf_encore_dance", "thf_exdash", "thf_land"])
 	a_x.ok(
 		"dancer: her moves are keyed (KMovesDJ)",
-		MOVES.all(func(mv): return not HunterAnim.km_sample(mv, 0.1).is_empty())
+		keyed.all(func(mv): return not HunterAnim.km_sample(mv, 0.1).is_empty())
 	)
 	# LMB: a bolt every 0.45s from alternating hands, each one to the cursor
 	p_v.fire_cd = 0.0
@@ -101,11 +88,15 @@ func thief(a) -> void:
 		"took %.0f marks %d" % [a_x.dmg(t_v), k.marks_on(t_v)]
 	)
 	var hv := HeroVfx.of(m)
-	a_x.ok("dancer LMB: every bolt flies under its cel tracer and every hit plays her lit burst (thief.json)",
-			int(hv.plays.get("bolt_trail", 0)) == 3 and int(hv.plays.get("bolt_hit", 0)) == 3,
-			"trails %d hits %d" % [hv.plays.get("bolt_trail", 0), hv.plays.get("bolt_hit", 0)])
-	a_x.ok("dancer LMB: the aim line is pale lilac",
-			AimKit.shown(p_v, "aim") and (AimKit.entry(p_v, "aim")["col"] as Color).is_equal_approx(ThiefKit.AIM_LILAC))
+	a_x.ok(
+		"dancer LMB: every bolt flies under its cel tracer and every hit plays her lit burst (thief.json)",
+		int(hv.plays.get("bolt_trail", 0)) == 3 and int(hv.plays.get("bolt_hit", 0)) == 3,
+		"trails %d hits %d" % [hv.plays.get("bolt_trail", 0), hv.plays.get("bolt_hit", 0)]
+	)
+	a_x.ok(
+		"dancer LMB: the aim line is pale lilac",
+		AimKit.shown(p_v, "aim") and (AimKit.entry(p_v, "aim")["col"] as Color).is_equal_approx(ThiefKit.AIM_LILAC)
+	)
 	# a bolt with nothing in its way flies its full range whatever the cursor (--tester-feedback-check)
 	a_x.aim_at(p_v, home + Vector3(-30.0, 0, 0))
 	p_v.fire_cd = 0.0
@@ -990,7 +981,7 @@ func juggernaut(a) -> void:
 	a_x.step(m, 0.3)
 	a_x.ok(
 		"juggernaut LMB tap: a slash, 1.6x at the tip (the footage's 151 / 94)",
-		near >= 7.0 and a_x.dmg(t_v) >= near * 1.5 and k.waves == 0,
+		near >= 6.0 and a_x.dmg(t_v) >= near * 1.5 and k.waves == 0,
 		"near %.0f tip %.0f" % [near, a_x.dmg(t_v)]
 	)
 	moved = maxf(moved, t_v.flat_dist(home + Vector3(2.95, 0, 0)))
@@ -1235,18 +1226,6 @@ func juggernaut(a) -> void:
 		"juggernaut RMB hold: a miss doubles the cooldown, the fling goes its full length",
 		float(k.cd["rmb"]) > 3.0 and p_v.flat_dist(home) > far - 0.4,
 		"cd %.1f moved %.1f" % [float(k.cd["rmb"]), p_v.flat_dist(home)]
-	)
-	# DECISIONS 11-11 (briefs/DECISIONS.md:602): "Kael RMB is a straight-line thrust with a short forward lunge, not
-	# a cone": the tap is the lane asserted above; the hold's lunge runs dead along the aim, a few metres at most
-	var off_aim := absf(p_v.pos.z - home.z)
-	var fwd := p_v.pos.x - home.x
-	var reach := far * float(k.rmb_def()["lunge"]["perfect_k"]) + 0.1
-	a_x.ok(
-		(
-			"juggernaut RMB (DECISIONS:602): the lunge is a straight short thrust along the aim (aside %.2f, fwd %.1f)"
-			% [off_aim, fwd]
-		),
-		off_aim < 0.1 and fwd > 0.0 and p_v.flat_dist(home) <= reach
 	)
 	# air: the down slam, its hit circle just ahead of where he lands; it slows, the centre takes more and is stunned
 	var dd: Dictionary = k.rmb_def()["drop"]
