@@ -4,12 +4,14 @@ extends RefCounted
 ## - The opening drop (skyship or tutorial) is steering only: the glide heading and the dive. No dash, jump,
 ##   ability, glove, belt item, weapon or Boki throw until you land; the HUD greys the slots meanwhile. Space
 ##   only deploys the canopy out of the dive.
-## - The glider never opens during an ability or attack animation (a wind-up, a hold, a cast, a dash, a kit
-##   move's recovery). Held glide opens it the moment the animation ends, with the speed it left you, so the
-##   momentum carries into the glide. A move that travels (a dash, a Lunge) ends with its travel, and a kit's
-##   Shift move (a skate) is the dash's, so the glider takes the burst the step it ends (--move-feel-check
-##   dashglide_reopen_frames, --airdash-glide-check). A jump off the ground ends the move it left (a slam's
-##   recovery doesn't hold the glider shut after you jump out of it). An open glider is never folded by this rule.
+## - The glider never opens during an ability or attack's own action (a wind-up, a hold, a cast, a dash). A fresh
+##   glide press (a second Space, tapped or held, kept Loco.press_buffer) cuts a kit move's recovery pose short
+##   (end_move) and opens it at once, so no LMB or ability eats it; held glide opens it the moment the action ends,
+##   with the speed it left you, so the momentum carries into the glide. A move that travels (a dash, a Lunge)
+##   ends with its travel, and a kit's Shift move (a skate) is the dash's, so the glider takes the burst the step it
+##   ends (--move-feel-check dashglide_reopen_frames, --airdash-glide-check). A jump off the ground ends the move
+##   it left (a slam's recovery doesn't hold the glider shut after you jump out of it). An open glider is never
+##   folded by this rule.
 
 ## Every press the drop ignores (move, aim and glide stay: they steer).
 const TRAVEL_JOIN_S := 0.05      # s: a kit move started this close after a travel or Shift press is that move's
@@ -39,18 +41,23 @@ static func fold_at_touchdown(h: Hunter, dt: float) -> void:
 		h.glide_dive.on = false
 		h.m.fx.dust(h.pos, 5)
 
-## True while an ability or attack animation runs, so the glider can't open yet.
+## True while an ability or attack keeps the glider shut: its own action or its recovery pose, which a fresh glide
+## press (armed) cuts short.
 static func glide_locked(h: Hunter) -> bool:
+	return hard_locked(h) or (h.ak != null and move_running(h.ak, h) and not h.glide_armed())
+
+## True while the action itself runs (a wind-up, a hold, a cast, a dash): a glide press waits for its end.
+static func hard_locked(h: Hunter) -> bool:
 	if h.roll_t > 0.0 or not h.charge.is_empty():
 		return true
 	var k: ArchKit = h.ak
-	if k == null:
-		return false
-	if k.rmb_down or k.dash_t >= 0.0 or not k.chg.is_empty() or not k.fuse.is_empty():
-		return true
-	if k.cast_locked() or k.locks_glide():
-		return true
-	return move_running(k, h)
+	return k != null and (k.rmb_down or k.dash_t >= 0.0 or not k.chg.is_empty() or not k.fuse.is_empty() \
+		or k.cast_locked() or k.locks_glide())
+
+## A fresh glide press ends a kit move's recovery pose: the shot or cast it played for is already out.
+static func end_move(h: Hunter) -> void:
+	if h.ak != null and move_running(h.ak, h):
+		h.ak.anim_id = ""
 
 ## A kit move still inside its keys. A held move (a hold pose) counts only through the hold itself above,
 ## so a pose left on its last key never blocks the glider; nor does a landing or arrival pose ("land": true:
