@@ -11,8 +11,9 @@ extends ArchKit
 ## everyone in it along the cone (toward you), hurting and Dazing them too. At the lane's end on no foe and no wall
 ## it is a dud: a puff and nothing else. The rifle does +76% to a Dazed foe, in big
 ## gold numbers, and the string doesn't decay on them. Slipstep goes where you move and you keep
-## shooting. Palm Lance: stand still while the line narrows, the aim turning only so fast, then a long beam
-## through walls. A knock gives Slipstep back (Hot Streak); abilities that land add a little lifesteal (Fever).
+## shooting. Palm Lance: planted a beat, then a slow walk while the line narrows, the aim turning only so fast,
+## then a long beam through walls. A knock gives Slipstep back (Hot Streak); abilities that land add a little
+## lifesteal (Fever).
 
 # Her green fire: the slots of content/vfx/gunslinger.json's palette that the telegraphs and the charge's mesh
 # use; every effect is a recipe in that file (HeroVfx, docs/HERO_VFX.md).
@@ -42,9 +43,6 @@ const BRACKET_DEG := 56.0  # each bracket's arc
 ## The drum's reload cue, once as it runs dry. A stand-in for now: the rifle-cock take from her set; a library
 ## reload sound (sfx-lib-1113) swaps in here.
 const RELOAD_SFX := "vn_cock"
-const E_RECOVER := 0.6  # s she is held after the beam: the source's recoil shove in 0.2 s, then a ~0.4 s
-# recovery (briefs/hero-ref/venator.md E 4 and 7: 0170, 556.6-556.8 s); the e clip
-# (1.07 s) + WardenClips.FADE_LOCO hands the body back on the same frame
 
 var slide := {}  # {t, held, dir} while a Slipstep runs
 var burrs: Array = []  # Burr Charges in flight or stuck: {pos, dir, t, node, fuse, fuse0, range, out, y0}
@@ -68,7 +66,6 @@ var refill_part := 0.0  # rounds the resting drum has part-refilled
 var dry := false  # the drum ran dry: no round until it is full again
 var round_at := -9.0  # match time of her last rifle round (the firing brackets)
 var ult: GunslingerUlt  # Cinderfall, her ultimate on X
-var commit_end := 0.0  # match time her committed recovery ends (E after the beam)
 var x_wind_end := 0.0  # match time the ult's short wind-up ends (GunslingerUlt.WINDUP): slowed, never rooted
 
 
@@ -175,37 +172,23 @@ func teardown() -> void:
 
 
 func move_k() -> float:
-	if commit_left() > 0.0:
+	# E: planted for the e row's launch s while the palm comes up (the owner's rule: a self-lock lasts only as long
+	# as the launch), then the charge walks at its self_slow; the beam neither shoves nor holds her
+	if not needle.is_empty() and float(needle["t"]) < float(e_def()["launch"]):
 		return 0.0
 	var k := 1.0 - float(e_def()["self_slow"]) if not needle.is_empty() else 1.0
 	return k * GunslingerUlt.WINDUP_MOVE if x_wind_left() > 0.0 else k
 
 
-## The rifle can't fire while a dry drum refills (_tick_mag), nor in a committed recovery.
+## The rifle can't fire while a dry drum refills (_tick_mag).
 func fire_ok() -> bool:
-	return not dry and commit_left() <= 0.0
+	return not dry
 
 
 ## The ult's wind-up left (s): she walks slowed; the rifle, jump, Shift and abilities all still go (a held LMB
 ## string goes on through the tap, the cancel rows' "both").
 func x_wind_left() -> float:
 	return maxf(0.0, x_wind_end - float(m.time))
-
-
-## The source's recovery (E_RECOVER): she stands, and no ability, jump or Shift goes.
-## A press in the last Loco.press_buffer waits for the end (DashFlow.cc_left); one before it is dropped.
-func commit_left() -> float:
-	return maxf(0.0, commit_end - float(m.time))
-
-
-func busy() -> bool:
-	return super.busy() or commit_left() > 0.0
-
-
-func gate_inputs() -> void:
-	if commit_left() > Loco.press_buffer:
-		h.inp["dash"] = false
-		h.inp["jump"] = false
 
 
 func add_fever(n := 1) -> void:
@@ -837,13 +820,11 @@ func _fire_needle() -> void:
 	L = minf(L, Blockers.cut(m.verbs.walls, a, a + Vector3(d.x, 0, d.y) * L, h.team, "pierce"))  # placed walls stop it
 	needle_dir = d
 	# a taut needle of light (deep body, white-hot core, sparks shed along it) out of her open palm to where the
-	# measured line ends, a bloom on the palm, recoil smoke round her
+	# measured line ends, a bloom on the palm, smoke round her
 	var palm := palm_at()
 	var to := a + Vector3(d.x, 0, d.y) * L - palm
 	last_beam = palm
 	vfx("e_fire", palm, Vector2(to.x, to.z).normalized(), {"len": Vector2(to.x, to.z).length(), "r": beam_width()})
-	h.impulse(-d * float(ed.get("recoil", 6.0)))  # the recoil shoves her back a step
-	commit_end = float(m.time) + E_RECOVER
 	var hits := 0
 	var dmg0: float = float(ed["dmg"]) * power("kin")
 	for f in m.foes_of(h.team):

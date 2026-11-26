@@ -749,7 +749,6 @@ func _gunslinger_needle_aim(m: Match, P: Hunter, K: GunslingerKit, home: Vector3
 	var east := Vector2(1, 0)
 	var charge := func(aim_from: Vector3, aim_to: Vector3, mid: float) -> Array:
 		K.cd["e"] = 0.0
-		K.commit_end = 0.0           # (the last cast's recovery: each probe is a fresh cast)
 		P.teleport(home)
 		ac.step(m, 0.1)
 		ac.aim_at(P, home + aim_from)
@@ -774,7 +773,6 @@ func _gunslinger_needle_aim(m: Match, P: Hunter, K: GunslingerKit, home: Vector3
 	var cam: CamRig = m.cam
 	var push := func(at_m: float) -> Array:
 		K.cd["e"] = 0.0
-		K.commit_end = 0.0           # (the last cast's recovery: each probe is a fresh cast)
 		P.teleport(home)
 		ac.step(m, 0.1)
 		ac.aim_at(P, home + Vector3(at_m, 0, 0))
@@ -971,7 +969,7 @@ func _gunslinger() -> void:
 		_unwall(m, home + Vector3(9.5, 0, z))
 	for z in [1, 2]:
 		_unwall(m, home + Vector3(5.5, 0, z))
-	# 5. Longneedle: stand still, a full-width line narrowing over 0.6s, the beam at 0.6, recoil back a step
+	# 5. Longneedle: planted for the launch, a full-width line narrowing over 0.6s, the beam at 0.6, no shove back
 	ac.fresh(T)
 	KitStatus.clear_rattled(T)
 	T.teleport(home + Vector3(8, 0, 0))
@@ -982,8 +980,10 @@ func _gunslinger() -> void:
 	P.ak.use_e()
 	ac.step(m, 0.05)
 	var w1: float = float(AimKit.entry(P, "e").get("width", 0.0))
-	ok("Longneedle: you stand still to charge", K.move_k() <= 0.001)
+	ok("Longneedle: planted for the launch", K.move_k() <= 0.001)
 	ac.step(m, 0.45)
+	ok("Longneedle: after the launch she walks the charge, slowed",
+			is_equal_approx(K.move_k(), 1.0 - float(K.e_def()["self_slow"])), "%.2f" % K.move_k())
 	var w2: float = float(AimKit.entry(P, "e").get("width", 0.0))
 	ok("Longneedle: the line narrows over the cast (18m)",
 			w1 > 0.8 and w2 < w1 * 0.4 and absf(float(AimKit.entry(P, "e").get("len", 0.0)) - 18.0) < 0.01,
@@ -994,7 +994,7 @@ func _gunslinger() -> void:
 	var px := P.pos.x
 	ac.step(m, 0.4)
 	ok("Longneedle: fires at 0.6s", ac.dmg(T) >= 20.0, "took %.0f" % ac.dmg(T))
-	ok("Longneedle: the recoil shoves you back", P.pos.x < px - 0.4, "%.2f" % (P.pos.x - px))
+	ok("Longneedle: the beam never shoves you back", absf(P.pos.x - px) < 0.05, "%.2f" % (P.pos.x - px))
 	_gunslinger_beam_look(HeroVfx.of(m), K)
 	ok("Longneedle hit takes 20% off its cooldown (not 30% before rank 3)",
 			float(K.cd["e"]) < 8.9 and float(K.cd["e"]) > 7.7, "%.2f" % float(K.cd["e"]))
@@ -1002,7 +1002,6 @@ func _gunslinger() -> void:
 	ac.fresh(T)
 	KitStatus.apply(T, "rat", 4.0)
 	K.cd["e"] = 0.0
-	K.commit_end = 0.0
 	P.teleport(home)
 	ac.step(m, 0.1)
 	ac.aim_at(P, T.pos)
@@ -1016,7 +1015,6 @@ func _gunslinger() -> void:
 	ac.step(m, 0.1)
 	for zz in [-1, 0, 1]: _wall(m, home + Vector3(2.5, 0, zz))
 	K.cd["e"] = 0.0
-	K.commit_end = 0.0
 	ac.aim_at(P, T.pos)
 	P.ak.use_e()
 	ac.step(m, 0.9)
@@ -1124,7 +1122,7 @@ func _gunslinger() -> void:
 		P.dashes = P.max_dashes()
 		P.inp["move"] = Vector2(0, 1)
 		P.do_dash())
-	ac.air_steers(m, P, home, "Longneedle's recoil", func():
+	ac.air_steers(m, P, home, "Longneedle", func():
 		K.cd["e"] = 0.0
 		P.ak.use_e()
 		ac.step(m, 0.7))

@@ -8,8 +8,6 @@ const DT := 1.0 / 60.0
 const BLEND_IN := 0.12       # s: a move owns the body by this (WardenClips.FADE 0.1 + a frame)
 const BACK_SLACK := 2 * DT   # s past a clip's end and its blend-out (warden_anim "fade_out") the legs are back
 const SLIDE_UP := 0.62       # s: the dash clip's stand-up key (tools/art1/vex_clips.py): the skid ends before it
-const BEND := 0.25           # m: the most a walk key bends the Longneedle's recoil shove (Hunter knock_steer);
-                             # walking the hold would be ~2 m
 const CLIP_TOL := 0.04       # s: the GLB samples its clips at 30 fps, so a length can sit a frame long
 var c_v                        # the combo check (ok, ac)
 
@@ -200,31 +198,43 @@ func _slide(m: Match, p: Hunter, k: GunslingerKit, home: Vector3) -> void:
 			"skid %.2f clip at %.2f (peak %.2f, %d wraps) out %.2f" % [r["hit"], r["at"], clock.max(), wraps, r["out"]])
 	_settle(m, p, home, 0.8)
 
-## E: the beam on the clip's fire key (0.63 s), then the source's recovery: held E_RECOVER (0.6 s) after it, the
-## recoil shove still carrying her back. Walking and an RMB press early in the hold do nothing; an RMB press in its
-## last Loco.press_buffer goes as it lifts, on the frame the clip hands the body back. Then she walks off on her legs.
+## E: the beam on the clip's fire key (0.63 s). She is planted only for the e row's launch (the owner's rule), then
+## walks the charge slowed (self_slow) under the upper-body cast; the beam neither shoves her back nor holds her.
 func _needle(m: Match, p: Hunter, k: GunslingerKit, t: Hunter, home: Vector3) -> void:
 	c_v.ac.fresh(t)
 	t.teleport(home + Vector3(8.0, 0, 0))
 	_settle(m, p, home, 0.2)
 	c_v.ac.aim_at(p, t.pos)
 	k.cd["e"] = 0.0
-	k.cd["rmb"] = 0.0
-	k.ch_rmb = 2.0
+	var ed := k.e_def()
 	var hits0 := k.needle_hits
-	var u0 := int(p.used.get("utility", 0))
 	var rec := {}
-	var probe := _lock_probe(p, 0.7, [["sec", 0.75], ["sec", 1.12]], 1.15, 1.45, rec,
-			func() -> bool: return int(p.used.get("utility", 0)) > u0)
+	var x0 := p.pos.x
+	var walk := {}
+	var wp := _walk_probe(p, 0.0, float(ed["launch"]) + 0.1, walk)
+	var probe := func(tt: float) -> void:
+		wp.call(tt)
+		if not rec.has("launch") and tt >= float(ed["launch"]) * 0.5:
+			rec["launch"] = Vector2(p.vel.x, p.vel.z).length()
+		if not rec.has("free") and tt >= float(ed["charge"]) + 0.2:
+			rec["free"] = Vector2(p.vel.x, p.vel.z).length()
+			rec["back"] = x0 - p.pos.x
 	k.use_e()
 	var r := _time(m, p, k, "gunslinger_e", 1.6, func() -> bool: return k.needle_hits > hits0, probe)
-	var lift := float(r["hit"]) + GunslingerKit.E_RECOVER
-	c_v.ok("Vex timing E: the beam fires at 0.63 s on the clip's fire key, the clip hands back as the hold lifts",
+	p.inp["move"] = Vector2.ZERO
+	c_v.ok("Vex timing E: the beam fires at 0.63 s on the clip's fire key, the clip plays and hands back",
 			absf(float(r["hit"]) - 0.63) <= DT * 2 and absf(float(r["at"]) - 0.63) <= DT * 2
-			and absf(float(r["len"]) - 1.05) < CLIP_TOL and absf(float(r["out"]) - lift) <= DT * 1.5,
-			"hit %.2f len %.2f out %.2f lift %.2f" % [r["hit"], r["len"], r["out"], lift])
-	_lock_lines("E", "0.6 s after the beam (venator.md E 4: 0.2 s shove + ~0.4 s recovery)", lift,
-			int(p.used.get("utility", 0)) - u0, rec)
+			and absf(float(r["len"]) - 1.05) < CLIP_TOL and float(r["out"]) > float(r["len"])
+			and float(r["out"]) < float(r["len"]) + _back(p, "gunslinger_e"),
+			"hit %.2f len %.2f out %.2f" % [r["hit"], r["len"], r["out"]])
+	var run_v := p.base_speed
+	c_v.ok("Vex timing E: planted for the launch, then the legs walk the charge, slowed",
+			float(rec.get("launch", 9.0)) < 0.3 and _legs_walk(walk)
+			and float(walk.get("speed", 0.0)) < run_v * (1.0 - float(ed["self_slow"])) + 0.3,
+			"launch %.2f m/s, " % rec.get("launch", -1.0) + _walk_line("charge", walk) + " (run %.1f)" % run_v)
+	c_v.ok("Vex timing E: after the beam she runs at full speed, never shoved back",
+			float(rec.get("free", 0.0)) > run_v * 0.9 and float(rec.get("back", 9.0)) < 0.05,
+			"%.2f m/s, %.2f m back along the beam" % [rec.get("free", 0.0), rec.get("back", -1.0)])
 	_settle(m, p, home, 0.5)
 
 ## R: the barrel comes up over 0.1 s and the shot leaves on its kick key (0.14 s), not at the press: the source's
@@ -270,38 +280,6 @@ func _nuke(m: Match, p: Hunter, k: GunslingerKit, home: Vector3) -> void:
 			"jump_at %.2f t0 %.2f" % [p.jump_at, j0])
 	_settle(m, p, home, 2.0)
 	k.ult.shells.clear()
-
-## Walks from `from` s after the press and presses each [key, at] for one step; reads her speed and how far she
-## has gone along the walk key at `held_at` (inside the hold) and `free_at` (after it), and when `went` first turns
-## true (the press that waited went).
-func _lock_probe(p_v: Hunter, from: float, presses: Array, held_at: float, free_at: float, rec: Dictionary,
-		went: Callable) -> Callable:
-	return func(t: float) -> void:
-		p_v.inp["move"] = Vector2(0, 1) if t >= from else Vector2.ZERO
-		for p in presses:
-			p_v.inp[p[0]] = absf(t - float(p[1])) < DT * 0.5
-		if not rec.has("went") and went.call():
-			rec["went"] = t
-		if not rec.has("p0"):
-			rec["p0"] = p_v.pos
-		for probe in [["held", held_at], ["free", free_at]]:
-			if t >= float(probe[1]) and not rec.has(probe[0]):
-				rec[probe[0]] = {"speed": Vector2(p_v.vel.x, p_v.vel.z).length(), "full": _clips(p_v).act_w,
-						"z": absf(p_v.pos.z - (rec["p0"] as Vector3).z)}
-
-## The hold's lines: she does not walk in it (no step along the walk key, across the recoil), the early press is
-## dropped and the late one goes on the frame the hold lifts, and after it she walks.
-func _lock_lines(move: String, what: String, lift: float, went: int, rec: Dictionary) -> void:
-	var held: Dictionary = rec.get("held", {})
-	var after: Dictionary = rec.get("free", {})
-	c_v.ok("Vex timing %s: held %s, walking does not move her" % [move, what],
-			float(held.get("z", 1.0)) < BEND and float(held.get("speed", 9.0)) < 0.6,
-			"held: %.2f m/s, %.2f m along the walk" % [held.get("speed", -1.0), held.get("z", -1.0)])
-	c_v.ok("Vex timing %s: a press early in the hold is dropped, one in its last 0.15 s goes as it lifts" % move,
-			went == 1 and absf(float(rec.get("went", -1.0)) - lift) <= DT * 1.5,
-			"went %d, at %.2f (lift %.2f)" % [went, rec.get("went", -1.0), lift])
-	c_v.ok("Vex timing %s: after the hold she walks" % move, float(after.get("speed", 0.0)) > 1.0,
-			"free: %.2f m/s" % after.get("speed", 0.0))
 
 ## The knock cue: a 0.6 s upper-body beat (no source frames: the footage shows no knock).
 func _knock(m: Match, p: Hunter, k: GunslingerKit, t: Hunter, _home: Vector3) -> void:
