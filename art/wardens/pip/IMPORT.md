@@ -202,3 +202,10 @@ Wings = main's large iridescent wings (r12's were half-size violet), scaled by b
 from r12 (nearest 4, tail verts not used; leg backs relaxed in from their neighbours). Meshy's cut caps (UVs on one atlas
 point = flat light patches on the leg backs) take the UV of the nearest real fur. The tail is rigid on a new Tail bone
 under Hips, turned back/up in every clip. Plan + proof: /home/boki/gens/hunter-round-1124/meeko/PLAN-1124o.md §17.
+
+Round 14 (11-26): the rigid Tail became a 3-bone chain (Tail -> Tail1 -> Tail2, split by geodesic distance along the
+tail), so it droops to the ground behind the legs and curls its cream tip up like the turnaround, sways with a lag down
+the chain, and only lifts in the frames where a shin/foot would come within 3.5 cm:
+    python3 tools/art1/glb_tail_chain.py r13.glb pip_meshy.glb --gap 0.035 \
+        --pitch-clip run=35/-10/45,Jump_Run=10/25/35,Attack=15/25/30
+Plan + proof: /home/boki/gens/hunter-round-1124/meeko/PLAN-1124o.md §18.
