@@ -1,7 +1,7 @@
 extends "res://tools/gameplay_media.gd"
-## --hunter-gpu-shots --heroes=<arch ids> --shots-dir=<dir> [--size=1920x1080]: each Hunter alone in a real match (Dusk Isles, seed 5),
-## under the match camera, as <dir>/<hero>_<shot>.png: match (idle, the camera's default zoom), zoom (idle, closer)
-## and run (moving, closer). Needs a renderer (jobq --needs gpu). --face: idle hunters aim at the camera;
+## --hunter-gpu-shots --heroes=<arch ids> --shots-dir=<dir> [--size=WxH]: each Hunter alone in a real match (Dusk Isles,
+## seed 5), under the match camera, as <dir>/<hero>_<shot>.png: match (idle, the default zoom), zoom (idle,
+## closer) and run (moving, closer). Needs a renderer (jobq --needs gpu). --face: idle hunters aim at the camera;
 ## --raid=day (RaidLook) shoots in the overcast day instead of the clear evening.
 
 const SIZE := Vector2i(1600, 900)  # px of each shot (--size=WxH)
