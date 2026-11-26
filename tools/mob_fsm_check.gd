@@ -157,7 +157,9 @@ func _skitter() -> void:
 	ok(sk.fsm.is_in(Mob.S.STUNNED) and sk.tele == null and sk.st == "recover",
 		"a stun in the wind-up cuts it: %s, tell %s, shows as %s" % [sk.fsm.state_name(), str(sk.tele), sk.st])
 	var calm := [true]
-	var no_wind := func(): if sk.fsm.is_in(Mob.S.WINDUP) and sk.stun_t > 0.0: calm[0] = false
+	var no_wind := func():
+		if sk.fsm.is_in(Mob.S.WINDUP) and sk.stun_t > 0.0:
+			calm[0] = false
 	_until(func(): return not sk.fsm.is_in(Mob.S.STUNNED), 2.0, no_wind)
 	var held := _span(sk.fsm, "windup>stunned", "stunned>chase")
 	ok(_near(held, Mob.CUT_HOLD), "a 0.2s stun cutting a wind-up holds it %.2fs (CUT_HOLD %.2f)" % [held, Mob.CUT_HOLD])

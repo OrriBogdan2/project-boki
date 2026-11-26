@@ -15,7 +15,23 @@ LOOK = LOOK_UP * 0.5
 def idle(t):
     """A bird's fidget: the head freezes, snaps round to look, freezes again and tilts, the chest puffing and the
     pipe tail twitching up between looks."""
-    look = seq(t, [(0, 0), (0.12, 0), (0.16, 1), (0.34, 1), (0.38, -0.8), (0.58, -0.8), (0.62, 0), (0.8, 0), (0.84, 0.5), (0.92, 0.5), (0.96, 0), (1, 0)])
+    look = seq(
+        t,
+        [
+            (0, 0),
+            (0.12, 0),
+            (0.16, 1),
+            (0.34, 1),
+            (0.38, -0.8),
+            (0.58, -0.8),
+            (0.62, 0),
+            (0.8, 0),
+            (0.84, 0.5),
+            (0.92, 0.5),
+            (0.96, 0),
+            (1, 0),
+        ],
+    )
     twitch = seq(t, [(0.7, 0), (0.73, 1), (0.78, 0), (0.81, 0.6), (0.86, 0), (1, 0)])
     br = s(t, 2)
     p = {"root_at": (0, 0.004 * br, 0), "root_sc": (1 + 0.025 * br, 1 + 0.03 * br, 1 + 0.02 * br)}

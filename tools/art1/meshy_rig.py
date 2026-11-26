@@ -120,7 +120,7 @@ class Rig:
             k = max(i for i, x in enumerate(times) if x <= t) if t >= times[0] else 0
             k2 = min(k + 1, len(times) - 1)
             f = 0.0 if k2 == k else (t - times[k]) / (times[k2] - times[k])
-            v0, v1 = vals[k * n:(k + 1) * n], vals[k2 * n:(k2 + 1) * n]
+            v0, v1 = vals[k * n : (k + 1) * n], vals[k2 * n : (k2 + 1) * n]
             if path == "rotation":
                 rots[nm] = slerp(tuple(v0), tuple(v1), f)
             else:

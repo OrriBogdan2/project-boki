@@ -82,20 +82,32 @@ func _case(trough: bool) -> void:
 		await main.get_tree().process_frame
 	Save.d["items"]["kibble"] = 0
 	home._open_feed(k)
-	ok(_feed_buttons(home.panel_host).is_empty() and _says_nothing(home.panel_host), "%s: no food says so" % tag)
+	ok(
+		_feed_buttons(home.panel_host).is_empty() and _says_nothing(home.panel_host),
+		"%s: no food says so" % tag
+	)
 	var ask := Exchange.best("kibble", "sell")
 	var r := Exchange.post("buy", "kibble", 2, ask)
-	ok(r["ok"] and int(r["filled"]) == 2 and Econ.pantry("kibble") == 2, "%s: bought 2 kibble from the market" % tag)
+	ok(
+		r["ok"] and int(r["filled"]) == 2 and Econ.pantry("kibble") == 2,
+		"%s: bought 2 kibble from the market" % tag
+	)
 	home._open_feed(k)
 	await main.get_tree().process_frame  # the previous panel is only queue_freed: let it go first
 	var btns := _feed_buttons(home.panel_host)
-	ok(btns.size() == 1 and not _says_nothing(home.panel_host), "%s: the panel offers the kibble" % tag)
+	ok(
+		btns.size() == 1 and not _says_nothing(home.panel_host),
+		"%s: the panel offers the kibble" % tag
+	)
 	ok(home.hecon.refuse_reason() != "", "%s: too weak to go while starving" % tag)
 	var food0 := Care.need(k, "food")
 	if btns.size() == 1:
 		(btns[0] as Button).pressed.emit()
 	var food1 := Care.need(k, "food")
-	ok(Econ.pantry("kibble") == 1 and food1 > food0, "%s: feeding eats a kibble, food %d -> %d" % [tag, food0, food1])
+	ok(
+		Econ.pantry("kibble") == 1 and food1 > food0,
+		"%s: feeding eats a kibble, food %d -> %d" % [tag, food0, food1]
+	)
 	ok(home.hecon.refuse_reason() == "", "%s: it can go on an expedition again" % tag)
 	await _long_starved(home, k, tag)
 	home.queue_free()
@@ -109,7 +121,10 @@ func _long_starved(home: Node, k: Dictionary, tag: String) -> void:
 	k["starve"] = 40.0 * 3600.0
 	home.exp_tier = int(KinLoss.rules()["loss_min_tier"])  # a risky tier: the confirm panel opens, no match starts
 	home._confirm_start()
-	ok(home.panel_open == "Too hungry to go", "%s: 40 h starved, empty belly: the expedition says too hungry" % tag)
+	ok(
+		home.panel_open == "Too hungry to go",
+		"%s: 40 h starved, empty belly: the expedition says too hungry" % tag
+	)
 	ok(home.hecon.refuse_reason().contains("one meal"), "%s: the message says what to do" % tag)
 	home._open_feed(k)
 	await home.get_tree().process_frame
@@ -118,11 +133,17 @@ func _long_starved(home: Node, k: Dictionary, tag: String) -> void:
 	if btns.size() == 1:
 		(btns[0] as Button).pressed.emit()
 	var clock := Care.starve_h(k)
-	ok(clock > Care.STARVE["refuse"], "%s: after the meal the starve clock is still %.1f h" % [tag, clock])
+	ok(
+		clock > Care.STARVE["refuse"],
+		"%s: after the meal the starve clock is still %.1f h" % [tag, clock]
+	)
 	ok(Care.need(k, "food") > 20.0, "%s: the food bar shows fed (%d)" % [tag, Care.need(k, "food")])
 	ok(home.hecon.refuse_reason() == "", "%s: one meal and the 40 h starved kin can go" % tag)
 	home._confirm_start()
-	ok(home.panel_open != "Too hungry to go", "%s: the expedition path no longer says too hungry" % tag)
+	ok(
+		home.panel_open != "Too hungry to go",
+		"%s: the expedition path no longer says too hungry" % tag
+	)
 	k["needs"]["food"] = 0.0
 	ok(home.hecon.refuse_reason() != "", "%s: an empty belly again is refused again" % tag)
 
@@ -177,7 +198,9 @@ func _bowl() -> void:
 	}
 	var ks := {}
 	for k in home.kins:
-		for key in ["indoors", "leap", "exiting", "going_in", "called_t", "busy", "eat", "nap_go", "job"]:
+		for key in [
+			"indoors", "leap", "exiting", "going_in", "called_t", "busy", "eat", "nap_go", "job"
+		]:
 			k.erase(key)
 		k["nap_t"] = 0.0
 		k["t"] = 3.0
@@ -187,11 +210,18 @@ func _bowl() -> void:
 	ok(ks.size() == 4 and home.hb.nodes.has(990002), "bowl: home puts the bowl and four Boki out")
 	for _i in 20:
 		home._move_kin(STEP)
-	ok(home.kins.all(func(k): return FeedBowl.phase(k) == ""), "bowl: nobody heads for an empty bowl")
+	ok(
+		home.kins.all(func(k): return FeedBowl.phase(k) == ""),
+		"bowl: nobody heads for an empty bowl"
+	)
 	for _i in 3:
 		FeedBowl.drop(home, bowl)
 	ok(
-		FeedBowl.snacks(bowl).size() == 3 and Econ.pantry("emberberry") == 2 and not FeedBowl.drop(home, bowl),
+		(
+			FeedBowl.snacks(bowl).size() == 3
+			and Econ.pantry("emberberry") == 2
+			and not FeedBowl.drop(home, bowl)
+		),
 		"bowl: three snacks come out of the pantry and the bowl takes no more"
 	)
 	var food0 := {}
@@ -220,7 +250,11 @@ func _bowl() -> void:
 			if not (k["life"] as Fsm).is_in(BaseLife.S.EAT):
 				outside_eat += 1
 		for nm in ks:
-			if not ate.has(nm) and nm != "Full" and Care.need(ks[nm]["rec"], "food") > float(food0[nm]) + 10.0:
+			if (
+				not ate.has(nm)
+				and nm != "Full"
+				and Care.need(ks[nm]["rec"], "food") > float(food0[nm]) + 10.0
+			):
 				ate[nm] = snappedf(t, 0.05)
 		peak = maxi(peak, eaters)
 		if int(t / STEP) % 100 == 0:
@@ -228,16 +262,24 @@ func _bowl() -> void:
 	print("FEED  bowl: ate at %s, phases seen %s" % [str(ate), ", ".join(seen.keys())])
 	var in_time: bool = ate.values().all(func(s): return s <= BOWL_LIMIT)
 	ok(ate.size() == 3 and in_time, "bowl: all three hungry Boki eat within %d s" % int(BOWL_LIMIT))
-	ok(ate.size() == 3 and ate["Shy"] > ate["Bold"] and ate["Shy"] > ate["Greedy"], "bowl: the timid one eats last")
+	ok(
+		ate.size() == 3 and ate["Shy"] > ate["Bold"] and ate["Shy"] > ate["Greedy"],
+		"bowl: the timid one eats last"
+	)
 	ok(peak == 1, "bowl: one at the bowl at a time")
 	ok(outside_eat == 0, "bowl: every visit is BaseLife's Eat state (one machine)")
 	ok(seen.has("Bold:huff") or seen.has("Greedy:huff"), "bowl: the rivals huff at the bowl")
-	var calm: bool = not seen.has("Shy:huff") and not seen.keys().any(func(s): return s.begins_with("Full:"))
+	var calm: bool = (
+		not seen.has("Shy:huff") and not seen.keys().any(func(s): return s.begins_with("Full:"))
+	)
 	var empty: bool = FeedBowl.snacks(bowl).is_empty()
 	ok(calm and empty, "bowl: the timid one picks no fight, the full one stays out, bowl empty")
 	var leaned := ks.keys().filter(func(nm): return _lean_sum(ks[nm]["rec"]) > float(lean0[nm]))
 	var who := ", ".join(leaned)
-	ok(leaned.size() == 3 and not leaned.has("Full"), "bowl: each Boki that ate leans (Evo.eat) (%s)" % who)
+	ok(
+		leaned.size() == 3 and not leaned.has("Full"),
+		"bowl: each Boki that ate leans (Evo.eat) (%s)" % who
+	)
 	ok(home.kins.all(func(k): return FeedBowl.phase(k) == ""), "bowl: everyone is done at the bowl")
 	rules["base_mode"] = false
 	home.queue_free()
@@ -289,15 +331,24 @@ func _hand_cases() -> void:
 		var hand: BaseHandFeed = home.life.hand
 		var fsm: Fsm = home.life.machine(e)
 		fsm.go(BaseLife.S.ROAM, "check")
-		ok(BaseHandFeed.hint() == "Hold %s to feed" % Settings.key_cap("interact"), "prompt text names the use key")
+		ok(
+			BaseHandFeed.hint() == "Hold %s to feed" % Settings.key_cap("interact"),
+			"prompt text names the use key"
+		)
 		ok(not hand.offer(e), "%s: no snack selected, the hold does not feed" % who)
 		hand.cycle()
-		ok(hand.snack == SNACK and hand.pairs([]).size() == 1, "%s: Q selects the snack and the prompt shows it" % who)
+		ok(
+			hand.snack == SNACK and hand.pairs([]).size() == 1,
+			"%s: Q selects the snack and the prompt shows it" % who
+		)
 		var joy0 := Care.need(k, "joy")
 		var food0 := Care.need(k, "food")
 		var trust0 := float(k["trust"])
 		var lean0 := _lean(k)
-		ok(hand.offer(e) and fsm.is_in(BaseLife.S.APPROACH), "%s: the held use key sends it to your hand" % who)
+		ok(
+			hand.offer(e) and fsm.is_in(BaseLife.S.APPROACH),
+			"%s: the held use key sends it to your hand" % who
+		)
 		var ate_at := -1.0
 		var t := 0.0
 		while t < 6.0:
@@ -311,7 +362,10 @@ func _hand_cases() -> void:
 					ate_at > 0.0 and ate_at <= HAND_WITHIN,
 					"trusting: ate from the hand in %.2f s (limit %.0f)" % [ate_at, HAND_WITHIN]
 				)
-				ok(Econ.pantry(SNACK) == 1, "trusting: the snack was used once (%d left)" % Econ.pantry(SNACK))
+				ok(
+					Econ.pantry(SNACK) == 1,
+					"trusting: the snack was used once (%d left)" % Econ.pantry(SNACK)
+				)
 				ok(
 					Care.need(k, "food") > food0 and Care.need(k, "joy") > joy0,
 					(
@@ -320,11 +374,23 @@ func _hand_cases() -> void:
 					)
 				)
 				ok(float(k["trust"]) > trust0, "trusting: trust went up")
-				ok(_lean(k) > lean0, "trusting: the snack's own lean built (%.1f -> %.1f)" % [lean0, _lean(k)])
-				ok(fsm.is_in(BaseLife.S.ROAM) and not e.has("hand"), "trusting: back to its day, the hand is empty")
+				ok(
+					_lean(k) > lean0,
+					"trusting: the snack's own lean built (%.1f -> %.1f)" % [lean0, _lean(k)]
+				)
+				ok(
+					fsm.is_in(BaseLife.S.ROAM) and not e.has("hand"),
+					"trusting: back to its day, the hand is empty"
+				)
 			"shy":
-				ok(Econ.pantry(SNACK) == 2 and float(k["trust"]) == trust0, "shy: the first try is a hesitant look")
-				ok(not fsm.is_in(BaseLife.S.EAT) and e.has("hand_shy"), "shy: it remembers being asked")
+				ok(
+					Econ.pantry(SNACK) == 2 and float(k["trust"]) == trust0,
+					"shy: the first try is a hesitant look"
+				)
+				ok(
+					not fsm.is_in(BaseLife.S.EAT) and e.has("hand_shy"),
+					"shy: it remembers being asked"
+				)
 				hand.offer(e)
 				_run(home, 6.0)
 				ok(
@@ -342,11 +408,16 @@ func _hand_cases() -> void:
 		await main.get_tree().process_frame
 	rules["base_mode"] = false
 
+
 func _tint(root: Node3D) -> Color:
-	return ((root.get_meta("mats", []) as Array)[0] as ShaderMaterial).get_shader_parameter("albedo")
+	return ((root.get_meta("mats", []) as Array)[0] as ShaderMaterial).get_shader_parameter(
+		"albedo"
+	)
+
 
 func _gap(a: Color, b: Color) -> float:
 	return Vector3(a.r - b.r, a.g - b.g, a.b - b.b).length()
+
 
 ## Ten meals each way through Care.feed: size and tint follow the lean meal by meal.
 func _shapes() -> void:
@@ -357,10 +428,10 @@ func _shapes() -> void:
 	var sizes := {}
 	for who in [heavy, light]:
 		var rec := _bowl_boki("puddlet", String(who["type"]), 0.5, 5.0)
-		rec["level"] = 5      # past the hatchling size, so the model's size is the lean's alone
+		rec["level"] = 5  # past the hatchling size, so the model's size is the lean's alone
 		var plain := Models.kin("puddlet", rec)
 		var base_tint := _tint(plain)
-		var own := float(plain.get_meta("evo_scale", 1.0))      # its own height roll (Unique), before any meal
+		var own := float(plain.get_meta("evo_scale", 1.0))  # its own height roll (Unique), before any meal
 		var seq: Array = []
 		for i in 10:
 			rec["needs"]["food"] = 5.0
@@ -371,16 +442,34 @@ func _shapes() -> void:
 		var goal: Color = Lean.face(String(who["type"]))["tint"]
 		var t := String(who["type"])
 		var at_end := float(model.get_meta("evo_scale", 1.0)) / own
-		ok(is_equal_approx(float(seq[9]), want) and is_equal_approx(at_end, want),
-			"%s: ten %s meals, size lean %.2f on the model (type says %.2f)" % [t, who["food"], seq[9], want])
+		ok(
+			is_equal_approx(float(seq[9]), want) and is_equal_approx(at_end, want),
+			(
+				"%s: ten %s meals, size lean %.2f on the model (type says %.2f)"
+				% [t, who["food"], seq[9], want]
+			)
+		)
 		var step := [absf(seq[0] - 1.0), absf(seq[1] - 1.0), absf(seq[2] - 1.0), absf(seq[3] - 1.0)]
-		ok(step[0] > 0.0 and step[0] < step[1] and step[1] < step[2] and step[2] < step[3],
-			"%s: it grows gradually (%.3f, %.3f, %.3f, then %.3f)" % [t, seq[0], seq[1], seq[2], seq[3]])
-		ok(_gap(_tint(model), goal) < _gap(base_tint, goal), "%s: the body tint moved toward %s" % [t, t])
-		ok(Lean.size_note(rec).ends_with("bigger" if want > 1.0 else "slimmer"),
-			"%s: card says '%s'" % [t, Lean.size_note(rec)])
+		ok(
+			step[0] > 0.0 and step[0] < step[1] and step[1] < step[2] and step[2] < step[3],
+			(
+				"%s: it grows gradually (%.3f, %.3f, %.3f, then %.3f)"
+				% [t, seq[0], seq[1], seq[2], seq[3]]
+			)
+		)
+		ok(
+			_gap(_tint(model), goal) < _gap(base_tint, goal),
+			"%s: the body tint moved toward %s" % [t, t]
+		)
+		ok(
+			Lean.size_note(rec).ends_with("bigger" if want > 1.0 else "slimmer"),
+			"%s: card says '%s'" % [t, Lean.size_note(rec)]
+		)
 		sizes[who["type"]] = float(model.get_meta("evo_scale", 1.0)) / own
 		plain.free()
 		model.free()
-	ok(sizes["rock"] > 1.0 and sizes["bug"] < 1.0, "heavy and light meals pull the same Boki opposite ways")
+	ok(
+		sizes["rock"] > 1.0 and sizes["bug"] < 1.0,
+		"heavy and light meals pull the same Boki opposite ways"
+	)
 	Content.rules("farm_build")["base_mode"] = false

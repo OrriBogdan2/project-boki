@@ -50,8 +50,6 @@ var st_t: float:  # s left in the timed state (the wind-up's fill, the lunge, a 
 		return _net_left if remote else maxf(0.0, span - fsm.since)
 	set(_v):
 		push_error("Mob.st_t is read-only: the machine owns it")
-var _net_st := "idle"  # a proxy's state and the time left in it, from the host's snapshot (follow)
-var _net_left := 0.0
 var tgt: Ent = null
 var camp := Vector3.ZERO
 var atk_dir := Vector2.ZERO
@@ -80,6 +78,8 @@ var win_cried := false  # the kill window's cry sounded here (StealReel)
 var win_reeled := false  # the kill window's reel already happened (StealReel)
 var stag_ring: MeshInstance3D = null
 var stag_stars: Node3D = null  # a treasure kin slips away if nobody hurts it for a while
+var _net_st := "idle"  # a proxy's state and the time left in it, from the host's snapshot (follow)
+var _net_left := 0.0
 
 
 func init_mob(match_node: Node, id: String, k: String, at: Vector3, tier := 1.0) -> void:

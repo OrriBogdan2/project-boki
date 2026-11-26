@@ -45,9 +45,11 @@ static func rules() -> Dictionary:
 		_rules = JSON.parse_string(FileAccess.get_file_as_string(RULES_PATH))
 	return _rules
 
+
 ## The bed a region plays (its id as in the layout's regions), "" for none.
 static func bed_of_region(region_id: String) -> String:
 	return String(rules()["beds"].get(region_id, ""))
+
 
 ## The bed of the region this island belongs to ("" off a map with regions or for a region with no bed).
 static func bed_of_island(w: World, island_id: String) -> String:
@@ -56,18 +58,22 @@ static func bed_of_island(w: World, island_id: String) -> String:
 			return bed_of_region(String((r as Dictionary).get("id", "")))
 	return ""
 
+
 ## 1 outside the Blight's tide ring, falling to blight_k forty metres inside it: the place beds' share.
 static func blight_share(m: Match, p: Vector3) -> float:
 	if m.heart == null:
 		return 1.0
 	return lerpf(1.0, float(rules()["blight_k"]), Heart.tide_out(m, p))
 
+
 ## Every place bed's level 0..1 at the player, by the nine-sample vote: bed -> level.
 func place_levels(m: Match, p: Hunter) -> Dictionary:
 	var w: World = m.world
 	var votes := {}
-	for b in BED_OF_STYLE.values(): votes[b] = 0.0
-	for b in rules()["beds"].values(): votes[b] = 0.0
+	for b in BED_OF_STYLE.values():
+		votes[b] = 0.0
+	for b in rules()["beds"].values():
+		votes[b] = 0.0
 	var water := 0.0
 	for k in RING_N + 1:
 		var wt := CENTRE_W
@@ -92,13 +98,16 @@ func place_levels(m: Match, p: Hunter) -> Dictionary:
 	var total := RING_N + CENTRE_W
 	var k := blight_share(m, p.pos)
 	var out := {"water": water / total * k}
-	for b in votes: out[b] = float(votes[b]) / total * k
+	for b in votes:
+		out[b] = float(votes[b]) / total * k
 	return out
+
 
 func tick(m: Match, p: Hunter) -> void:
 	var fade := float(rules()["fade_s"])
 	var lv := place_levels(m, p)
-	for b in lv: Sfx.amb_layer(b, lv[b], fade)
+	for b in lv:
+		Sfx.amb_layer(b, lv[b], fade)
 	Sfx.amb_layer("gust", float(GUST.get(m.raid, 0.0)))
 	Sfx.amb_layer("rain", float(RAIN.get(m.raid, 0.0)))
 	Sfx.amb_layer("blight", rumble(m, p))
