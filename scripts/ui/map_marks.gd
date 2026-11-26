@@ -29,7 +29,9 @@ static var _ring := PackedVector2Array()
 
 ## Every camp, shop, chest, shrine and pad of the match: {id, pos: Vector3, src: Dictionary, name: String}.
 static func rows(m: Match) -> Array:
-	var count: int = m.camps.list.size() + Shops.list(m).size() + m.chests.size() + m.shrines.size() + m.world.pads.size()
+	var count: int = (
+		m.camps.list.size() + Shops.list(m).size() + m.chests.size() + m.shrines.size() + m.world.pads.size()
+	)
 	if _owner != m.get_instance_id() or _rows.size() != count:
 		_owner = m.get_instance_id()
 		_rows.clear()
@@ -134,7 +136,11 @@ static func world(hud) -> void:
 		var lp := cam.unproject_position(at + Vector3(0, 2.6, 0))
 		if not id in NAMELESS and lp.distance_to(me) > HUNTER_CLEAR_PX:
 			var w := TextCache.width(hud.big, String(row["name"]), NAME_PX)
-			hud._rounded(Rect2(lp + Vector2(-w * 0.5 - 6.0, -NAME_PX), Vector2(w + 12.0, NAME_PX + 8.0)), Color(0.04, 0.05, 0.08, 0.7 * col.a), 6)
+			hud._rounded(
+				Rect2(lp + Vector2(-w * 0.5 - 6.0, -NAME_PX), Vector2(w + 12.0, NAME_PX + 8.0)),
+				Color(0.04, 0.05, 0.08, 0.7 * col.a),
+				6
+			)
 			hud._ctext(lp, String(row["name"]), NAME_PX, col, hud.big)
 
 
