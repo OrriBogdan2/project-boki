@@ -73,6 +73,8 @@ func _setup_input() -> void:
 	_key("util2", [KEY_2])                    # utility belt slot 2 (an armor kit to start)
 	_key("util3", [KEY_3])                    # utility belt slot 3
 	_key("util4", [KEY_4])                    # utility belt slot 4
+	_key("util5", [KEY_5])                    # utility belt slot 5
+	_key("util6", [KEY_6])                    # utility belt slot 6
 	_key("gear1", [KEY_Q])                    # glove 1 (Q)
 	_key("gear2", [KEY_V], MOUSE_BUTTON_XBUTTON1)  # glove 2: V (shares it with play at home) or Mouse 4
 	_key("crouch", [KEY_CTRL])                # sneak: slower, quieter, and you see further
@@ -89,7 +91,6 @@ func _setup_input() -> void:
 	_key("glide", [], MOUSE_BUTTON_XBUTTON2)  # press Mouse 5 (the front side button) in the air and hold to glide, like a second Space press; never jumps
 	_key("hunter_ult", [KEY_R])               # the hunter's own ultimate (level 6, see ArchKit.cast_ult)
 	_key("ultimate", [KEY_X])                 # Fuse with your Boki (level 6, a full bond meter); X again releases
-	_key("summon", [KEY_C])                   # Boki wisps: your wisp out as the full Boki (KinSummon)
 	_key("util1", [KEY_1])                    # utility belt slot 1 (a tonic to start)
 	_key("scores", [KEY_TAB])
 	_key("menu", [KEY_ESCAPE])
