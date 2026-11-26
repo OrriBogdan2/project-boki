@@ -4,9 +4,9 @@ extends RefCounted
 ## "boki_wisps" setting on, a hunter's Boki rides as a small wisp (BokiWispLook) orbiting them at shoulder
 ## height instead of walking beside them. It is carried by order the whole time, so its carry passives are
 ## always on; it takes no orders, throws or hits, and its AI (KinTactics, KinCompanion, the walking state
-## machine) does not tick. When it is left behind (its hunter goes out in a risky match) it turns back into
-## the walking Boki and the old rules run. The summon out of the wisp: KinSummon; stealing: KinSteal. The ult
-## waits on WISP_DESIGN_OPEN.md.
+## machine) does not tick. Its ability goes off through you (the carried rule) and R merges it (KinSummon.fuse,
+## decision 0038). When it is left behind (its hunter goes out in a risky match) it turns back into the walking
+## Boki and the old rules run. The summon out of the wisp: KinSummon; stealing: KinSteal.
 ## Online: the kin snapshot carries the flag (KinNet), so other games show the wisp too.
 
 const SHOULDER_Y := 1.45  # m above the hunter's feet when their rig has no shoulder bone
@@ -45,6 +45,7 @@ static func set_wisp(k: Kin, on: bool) -> void:
 ## A merge ended (KinMerge.end): the Boki is a wisp on its hunter's shoulder again, its summon cooldown as it was.
 static func rewisp(k: Kin) -> void:
 	set_wisp(k, true)
+	k.giant = {}  # (a mount's giant form ends with the merge: merge_out does not run for a wisp)
 	k.stow()
 	k.scale = Vector3.ONE
 
@@ -97,4 +98,5 @@ static func render(k: Kin) -> bool:
 	k.model.scale = Vector3.ONE * KinWispForm.SIZE
 	BokiWispLook.side(k.model, SideColor.of(k.m, k))
 	BokiWispLook.pose(k.model, k.m.time)
+	KinWispProc.watch(k)
 	return true
