@@ -120,3 +120,11 @@ LMB, RMB, E + recast, X + leap, hit, death).
 - geo_check same as r12: worst 7.2 cm, 110 frames, held 76, held worst 6.8 (main 13.6 / 159 / 97 / 13.4); hands ok. glbstretch spike frames: Attack 2/22, Idle 0/60, walk 2/15 (as r12); Jump_Run and Crouch equal main or 1 frame under.
 - art-gate neutral, 5 match sheets: GAME 6.6 vs live 4.9, FAIL (7.0 bar).
 - Open: the coat and fin crumple in the back-view attack wind-up (0.0-0.3 s). Damping spine/shoulder/neck/leg keys does not help (`r13/tools/atkdamp.py`: folds 2209 -> 2095 at best); it needs new coat weights around the shoulders. Also pale grey coat patches, dark satchel, teal face.
+
+## Native model r16 (gil_meshy.glb), 2026-11-26
+- Coat normals only: r14/r15 bent the cloth normals up (coat Ny mean +0.32..+0.39 vs geometric ~0; live ~0). In crouch the forward-tilted skirt then faced the key/top light and read silver (review T1). Below the waist the stored normals go back to the welded geometric normals, full at y<0.75 m, fading out by 0.90 m (`hunter-round-1124/gil/r16/tools/nflat.py`). Skirt Ny mean +0.32 -> -0.02.
+- The chest/shoulders keep the up-bend: flattening them too (N2) let the shader's fresnel grey the upper back at the match camera (art-gate 6.4).
+- Nothing else changed: positions, UVs, weights, atlas (r15 jpg, byte-identical) and animations equal r15. geo_check / stretch unchanged.
+- Dark Meshy re-textures from the 11-19 turnaround (8 gens, `r16/tex/gen_log.tsv`) rendered flat grey under hero_toon (low-saturation near-black) or lost the dots/trim; none used.
+- art-gate neutral, 3-row sheets (new|r15|live), 5 match sheets: GAME 6.8, r15 6.7, live 4.6. 7.0 bar not met.
+- Open: face and fish mouth hidden under the brim at the match camera (5.5), grey fresnel patch on the back-left coat at top-down, flat charcoal brim.
