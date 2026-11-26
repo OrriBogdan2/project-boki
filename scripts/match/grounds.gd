@@ -258,12 +258,18 @@ func use(i: int) -> void:
 	m.fx.ring(s["at"], 1.2, color_of(String(s["kind"]), id), 0.3)
 
 
-## Fill this item's stack. The belt has four slots: when they are all taken, the next one in turn is emptied.
+## Fill this item's stack. The belt has six slots (1 and 2 pinned to the tonic and the armor kit): when the slots this
+## item may use are all taken, the next one in turn is emptied.
 func _stock(id: String) -> void:
 	var p: Hunter = m.player
 	if UtilityBelt.room_for(p, id) <= 0 and UtilityBelt.count(p, id) <= 0:
-		p.belt[_belt_turn % UtilityBelt.SLOTS] = {}
-		_belt_turn += 1
+		var pin := UtilityBelt.fixed_slot(id)
+		for _k in UtilityBelt.SLOTS:
+			var k := _belt_turn % UtilityBelt.SLOTS
+			_belt_turn += 1
+			if (pin >= 0 and k == pin) or (pin < 0 and UtilityBelt.reserved_id(k) == ""):
+				p.belt[k] = {}
+				break
 	UtilityBelt.grant(p, id, UtilityBelt.room_for(p, id))
 
 

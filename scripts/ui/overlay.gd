@@ -623,6 +623,8 @@ func _tab_controls(v: VBoxContainer) -> void:
 					"util2",
 					"util3",
 					"util4",
+					"util5",
+					"util6",
 					"base",
 				]
 				+ KinKeys.ids()
