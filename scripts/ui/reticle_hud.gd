@@ -7,19 +7,23 @@ extends RefCounted
 ## a dark edge under every one, the Hunter's accent on the dot and arcs. Numbers: content/rules/tuning.json
 ## "reticle". The AimKit cursor states are AimReticle.
 
-var rt: Reticle               # the hit tick's state (the HUD's)
-var pin := Vector2.INF        # review tools: draw here (HUD canvas px) instead of at the mouse
-var _full := false             # the charge arc was full last frame
-var _flare_at := -99.0         # when it last reached full (m.time)
+var rt: Reticle  # the hit tick's state (the HUD's)
+var pin := Vector2.INF  # review tools: draw here (HUD canvas px) instead of at the mouse
+var _full := false  # the charge arc was full last frame
+var _flare_at := -99.0  # when it last reached full (m.time)
+
 
 static func _t(key: String) -> float:
 	return Reticle.t(key)
 
+
 static func _tc(key: String) -> Color:
 	return Reticle.tc(key)
 
+
 func _init(reticle: Reticle) -> void:
 	rt = reticle
+
 
 ## Draws the reticle and its states at `at` on `c` for the player `p`; `time` is the match clock.
 func draw(c: CanvasItem, p: Hunter, at: Vector2, time: float) -> void:
@@ -30,13 +34,14 @@ func draw(c: CanvasItem, p: Hunter, at: Vector2, time: float) -> void:
 	var hc := _hit_color()
 	var k := rt.tick_k()
 	Reticle.draw(c, at, spread, accent, Color(hc, k * _t("hit_ring_flash")))
-	if p.ak and p.ak.has_meter():
+	if p.ak and p.ak.has_gauge():
 		var rc := p.ak.res_col()
 		var full := p.ak.tell == "full"
 		_arc(c, at, _t("res_r"), PI * 1.62, PI * 0.76, p.ak.res_frac(), rc, 0.95 if full else 0.7, full)
 	_states(c, p, at, time, accent)
 	if rt.tick_t > 0.0:
 		_hit(c, at, spread, hc, k)
+
 
 ## The charge, warm-up, spin-up or ammo arc (one at a time).
 func _states(c: CanvasItem, p: Hunter, at: Vector2, time: float, accent: Color) -> void:
@@ -67,13 +72,16 @@ func _states(c: CanvasItem, p: Hunter, at: Vector2, time: float, accent: Color) 
 		_arc(c, at, _t("ammo_r"), PI * 0.62, PI * 0.76, af, col, alpha, false)
 	_full = ck >= 1.0
 
+
 ## One arc of `span` radians from `from` with its dark track and the fraction `frac` filled in `col`.
-func _arc(c: CanvasItem, at: Vector2, r: float, from: float, span: float, frac: float,
-		col: Color, a: float, bold: bool) -> void:
+func _arc(
+	c: CanvasItem, at: Vector2, r: float, from: float, span: float, frac: float, col: Color, a: float, bold: bool
+) -> void:
 	var w := _t("arc_w_full") if bold else _t("arc_w")
 	c.draw_arc(at, r, from, from + span, 32, Color(0, 0, 0, _t("track_a")), _t("arc_w") + 1.6, true)
 	if frac > 0.0:
 		c.draw_arc(at, r, from, from + span * clampf(frac, 0.0, 1.0), 32, Color(col, a), w, true)
+
 
 ## The ring that snaps out when a charge reaches full (out-cubic, fading).
 func _flare(c: CanvasItem, at: Vector2, r: float, time: float, accent: Color) -> void:
@@ -84,10 +92,12 @@ func _flare(c: CanvasItem, at: Vector2, r: float, time: float, accent: Color) ->
 	var col := Color(accent.lightened(0.5), 0.9 * (1.0 - u))
 	c.draw_arc(at, r + 1.5 + e * _t("flare_grow"), 0.0, TAU, 32, col, _t("arc_w"), true)
 
+
 func _hit_color() -> Color:
 	if rt.tick_armor:
 		return _tc("col_armor_crit" if rt.tick_crit else "col_armor")
 	return _tc("col_crit" if rt.tick_crit else "col_hit")
+
 
 ## The hit tick: four thin strokes leave the ring on the diagonals, snapping out and settling; a crit's or a
 ## knock's are longer and bolder with a pulse ring. `k` runs 1 -> 0 over the hit.
