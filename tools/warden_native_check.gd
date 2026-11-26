@@ -320,7 +320,7 @@ func _upper(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
 
 
 ## Strafing right while facing ahead turns the legs a quarter turn to the way he goes and leaves the torso where it
-## was (the aim); standing, nothing turns.
+## was (the aim); back-pedalling, the legs face the aim and run backwards; standing, nothing turns.
 func _twist(a: String, nat: WardenNative) -> void:
 	var sk := nat.skel
 	var hips_before := sk.get_bone_global_pose(nat.twist.hips).basis.get_rotation_quaternion()
@@ -334,6 +334,24 @@ func _twist(a: String, nat: WardenNative) -> void:
 	)
 	nat.twist.step(1.0, {"vel": Vector3.ZERO, "face": 0.0}, true)
 	ok(absf(nat.twist.turn) < 0.01, "%s: standing, the legs face the aim again" % a)
+	_back(a, nat.twist)
+
+
+## Backing off (more than 120 deg off the aim) runs the clip in reverse with the legs straight under the torso, from
+## either side and at exactly 180 deg; between 110 and 130 deg it keeps the way it was going (no flicker).
+func _back(a: String, tw: WardenNativeTwist) -> void:
+	var reverse: Array = []
+	for deg in [90.0, 125.0, 180.0, 115.0, 105.0, -125.0, -180.0]:
+		var v := Vector3(-sin(deg_to_rad(deg)), 0.0, -cos(deg_to_rad(deg))) * 4.6
+		tw.step(1.0, {"vel": v, "face": 0.0}, true)
+		reverse.append(tw.dir < 0.0)
+	ok(
+		reverse == [false, false, true, true, false, false, true],
+		"%s: reverse past 130 deg, forwards inside 110: %s" % [a, reverse]
+	)
+	ok(absf(tw.turn) < 0.01, "%s: dead behind the aim, no hip twist (%.3f rad)" % [a, tw.turn])
+	tw.step(1.0, {"vel": Vector3.ZERO, "face": 0.0}, true)
+	ok(tw.dir > 0.99, "%s: standing, the clip plays forwards again" % a)
 
 
 ## The clip blends: the glide opens at once and lets go over 0.2 s, the dash comes in over 0.25 s, the rest 0.15 s.

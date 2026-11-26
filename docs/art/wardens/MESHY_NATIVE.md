@@ -136,8 +136,11 @@ contact-band smoothing, coat chains hung by gravity with floor and thigh collisi
 raw Meshy rig 100% Attack, 93% Jump, 100% Crouch, 89% run, 67% walk; this file 0% in all six clips.
 Game states with no Meshy clip (fall, land, glide, climb, mantle, hit, emote, aim twist) play the nearest of the six.
 Strafing and back-pedalling: Meshy has one forward run, so `WardenNativeTwist` turns the hips to the way he goes (the torso bone takes
-the turn back, so the body stays on the aim) up to `WardenClips.TWIST_MAX` (~96 deg). Past it the legs hold at the limit: no backward
-run clip exists to turn round to.
+the turn back, so the body stays on the aim) up to `WardenClips.TWIST_MAX` (~96 deg). More than 120 deg off the aim (it reverses at 130
+and goes forwards again inside 110: no flicker at the edge) the run clip plays in reverse instead, the rate keeping its stride matched to the
+ground speed, and the legs turn only by what is left to dead behind the aim (none at 180 deg, from either side). The clip's direction
+(`WardenNativeTwist.dir`) eases between +1 and -1, so the crossing is a blend. `--native-upper-shots --mode=back` prints STRIDE (the planted foot's
+sweep against his travel, 1 = along it, -1 = backwards to it).
 
 ## Native hunter pack (Sparkle, Tenzo, Cinder, Kael, Motley, Meeko)
 Their rigged Meshy files carry 300k-tri meshes. `tools/meshy/native_hunters/pack.sh <art> <rigged.glb> <decimated.glb> [clip glbs]`
