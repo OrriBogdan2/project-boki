@@ -10,7 +10,10 @@ extends RefCounted
 
 ## Shape id -> its name in Settings.
 const SHAPES := [
-	["default", "Hunter's own"], ["dot", "Dot"], ["circle", "Small circle"], ["cross", "Cross"],
+	["default", "Hunter's own"],
+	["dot", "Dot"],
+	["circle", "Small circle"],
+	["cross", "Cross"],
 	["circle_dot", "Circle and dot"],
 ]
 ## Colour id -> [its name in Settings, the colour]. "hunter" is the Hunter's accent on the look, dot and arcs
@@ -28,18 +31,20 @@ const TUNING_PATH := "res://content/rules/tuning.json"
 static var _tune: Dictionary = {}
 
 var m: Match
-var tick_t := 0.0          # s left on the hit tick showing (ReticleHud draws it)
-var tick_knock := false    # the hit knocked a Hunter down: the strong tick
-var tick_crit := false     # it was a crit (gold)
-var tick_armor := false    # it landed on armour (pale)
-var ticks := 0             # ticks raised (read by --hit-marker-check)
-var dealt_at := -9.0       # match time your last hit (or your Boki's) landed
+var tick_t := 0.0  # s left on the hit tick showing (ReticleHud draws it)
+var tick_knock := false  # the hit knocked a Hunter down: the strong tick
+var tick_crit := false  # it was a crit (gold)
+var tick_armor := false  # it landed on armour (pale)
+var ticks := 0  # ticks raised (read by --hit-marker-check)
+var dealt_at := -9.0  # match time your last hit (or your Boki's) landed
+
 
 ## Listens on the shared damage path (CombatBus.hit_landed), so every weapon and ability raises it.
 func _init(match_node: Match = null) -> void:
 	m = match_node
 	if m:
 		CombatBus.hit_landed.connect(_on_hit)
+
 
 ## `dealt_at` notes any hit you or your Boki land on a foe (the message lane's fight budget); the tick
 ## itself shows only for hits you land yourself. Misses never reach here; zone (damage-over-time) ticks,
@@ -57,6 +62,7 @@ func _on_hit(by: Node, target: Node, amount: float, tags: Array) -> void:
 	# (a remote body's hp drops on its owner's game: this hit knocks it if it covers what's left)
 	raise(target is Hunter and not (target as Hunter).downed and e.hp <= (amount if e.remote else 0.0))
 
+
 ## Starts one tick (`knock`: the strong one). The match then says what kind of hit it was (`flavour`).
 func raise(knock: bool) -> void:
 	tick_knock = knock
@@ -65,17 +71,21 @@ func raise(knock: bool) -> void:
 	tick_t = t("hit_knock_s") if knock else t("hit_s")
 	ticks += 1
 
+
 ## The hit that raised the tick was a crit and/or on armour (Match.on_damage, on_armor_break). Never starts a tick.
 func flavour(crit: bool, armor: bool) -> void:
 	tick_crit = tick_crit or crit
 	tick_armor = tick_armor or armor
 
+
 func tick(delta: float) -> void:
 	tick_t = maxf(0.0, tick_t - delta)
+
 
 ## 1 -> 0 over the tick showing (0 when none).
 func tick_k() -> float:
 	return clampf(tick_t / t("hit_knock_s" if tick_knock else "hit_s"), 0.0, 1.0)
+
 
 ## The reticle's numbers (tuning.json "reticle"), read once.
 static func tune() -> Dictionary:
@@ -84,23 +94,28 @@ static func tune() -> Dictionary:
 		_tune = (parsed as Dictionary).get("reticle", {}) if typeof(parsed) == TYPE_DICTIONARY else {}
 	return _tune
 
+
 ## One tuning number.
 static func t(key: String) -> float:
 	return float(tune()[key])
+
 
 ## One tuning colour (a hex string).
 static func tc(key: String) -> Color:
 	return Color(String(tune()[key]))
 
+
 ## The accent for the dot and the aim arcs of a Hunter: its own colour for the "hunter" setting, else the chosen colour.
 static func accent(arch_id: String) -> Color:
 	if Settings.get_v("reticle_col") == "hunter":
 		return Arch.color(arch_id)
-	return (style()["col"] as Color)
+	return style()["col"] as Color
+
 
 ## The swatch colour of a colour id in Settings; "hunter" shows the colour of the Hunter you play.
 static func swatch(id: String) -> Color:
 	return Arch.color(String(Save.d.get("arch", ""))) if id == "hunter" else COLORS[id][1]
+
 
 ## A Hunter's own look id (content/archetypes/<id>.json "reticle"), or "" for the plain broken ring.
 static func look_of(arch_id: String) -> String:
@@ -119,6 +134,7 @@ static func style() -> Dictionary:
 		"outline": bool(Settings.get_v("reticle_outline")),
 		"hunter": col_id == "hunter",
 	}
+
 
 ## Draws the reticle at `at` on `c`. `spread` (px) opens the ring or cross with weapon bloom; `accent` is the
 ## Hunter's colour (used when the colour setting is "hunter"); `flash` (alpha = strength) tints the ring on a hit;

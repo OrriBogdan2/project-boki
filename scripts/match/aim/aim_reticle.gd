@@ -5,25 +5,29 @@ extends Control
 ## - full-charge flare: on reaching full, a ring that snaps out and fades plus a 4-point glint (0.28 s);
 ## - perfect-window star: a gold 4-point star with a soft ring, held for one footage frame (0.12 s).
 
-const R := 26.0           # px: the charge ring's radius, outside the HUD's ammo and resource arcs (Reticle "res_r")
-const R_BODY := 44.0      # px: the ring round the hunter instead (charge "at": "body"), clear of the model
-const FLARE_T := 0.28     # s: the full-charge flare
-const PERFECT_T := 0.12   # s: the perfect-window star (one 5 fps footage frame, enough to register)
+const R := 26.0  # px: the charge ring's radius, outside the HUD's ammo and resource arcs (Reticle "res_r")
+const R_BODY := 44.0  # px: the ring round the hunter instead (charge "at": "body"), clear of the model
+const FLARE_T := 0.28  # s: the full-charge flare
+const PERFECT_T := 0.12  # s: the perfect-window star (one 5 fps footage frame, enough to register)
 
 var d: AimDraw
+
 
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+
 
 ## Where the cursor is on screen: the mouse in live play, the aim point projected when a tool drives
 ## the match (checks and screenshots step it by hand).
 func cursor(h: Hunter) -> Vector2:
 	return _project(h.inp.get("aim", h.pos), d.m.is_processing())
 
+
 ## Where the body ring sits: the hunter's middle on screen.
 func body(h: Hunter) -> Vector2:
 	return _project(h.pos + Vector3(0, 0.9, 0), false)
+
 
 func _project(a: Vector3, live_mouse: bool) -> Vector2:
 	if live_mouse:
@@ -32,6 +36,7 @@ func _project(a: Vector3, live_mouse: bool) -> Vector2:
 	if cam == null or cam.is_position_behind(a):
 		return Vector2(-999, -999)
 	return cam.unproject_position(a)
+
 
 func _draw() -> void:
 	var me = d.m.get("player")
@@ -51,8 +56,8 @@ func _draw() -> void:
 			Reticle.arc(self, mp, rr, -PI * 0.5, -PI * 0.5 + TAU * minf(1.0, k), fill, w)
 	var ft := float(r["flare"])
 	if ft > 0.0:
-		var t := 1.0 - ft / FLARE_T            # 0 -> 1 over the flare
-		var e := 1.0 - pow(1.0 - t, 3.0)        # out-cubic
+		var t := 1.0 - ft / FLARE_T  # 0 -> 1 over the flare
+		var e := 1.0 - pow(1.0 - t, 3.0)  # out-cubic
 		var fc: Color = r["fcol"]
 		var ring := Color(fc.lerp(Color.WHITE, 0.5), 0.9 * (1.0 - t))
 		draw_arc(mp, rr + 4.0 + e * 16.0, 0.0, TAU, 40, ring, Reticle.t("arc_w"), true)
@@ -60,11 +65,12 @@ func _draw() -> void:
 	var pt := float(r["perfect"])
 	if pt > 0.0:
 		var pc: Color = r["pcol"]
-		var a := 1.0                            # a flash: full strength for its whole (short) life, then gone
+		var a := 1.0  # a flash: full strength for its whole (short) life, then gone
 		draw_circle(mp, 20.0, Color(pc, 0.18 * a))
 		draw_arc(mp, 20.0, 0.0, TAU, 40, Color(pc, 0.7 * a), Reticle.t("arc_w"), true)
 		_star(mp, 23.0, Color(0.1, 0.06, 0.0, 0.35 * a), 0.0, 1.5)
 		_star(mp, 20.0, Color(pc.lerp(Color.WHITE, 0.25), a), 0.0)
+
 
 ## A 4-point star (a glint) of radius s.
 func _star(c: Vector2, s: float, col: Color, rot := 0.0, waist_k := 1.0) -> void:

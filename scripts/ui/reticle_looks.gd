@@ -84,6 +84,7 @@ static func strokes(c: CanvasItem, at: Vector2, look: String, ring: float, k: fl
 			fin.append(at + _polar(top + 0.15, ring))
 			c.draw_polyline(fin, col, w, true)
 
+
 static func _polar(a: float, r: float) -> Vector2:
 	return Vector2(cos(a), sin(a)) * r
 

@@ -14,19 +14,23 @@ extends RefCounted
 const STYLES := [
 	["reticle_default", {}],
 	["reticle_cross_yellow", {"reticle_shape": "cross", "reticle_col": "yellow", "reticle_size": 1.4}],
-	["reticle_circle_dot_cyan",
-		{"reticle_shape": "circle_dot", "reticle_col": "cyan", "reticle_alpha": 0.8, "reticle_outline": false}],
+	[
+		"reticle_circle_dot_cyan",
+		{"reticle_shape": "circle_dot", "reticle_col": "cyan", "reticle_alpha": 0.8, "reticle_outline": false}
+	],
 ]
-const AT := Vector2(0.62, 0.42)      # where the cursor rests, as a fraction of the window
-const CROP := Vector2i(160, 110)     # px round the cursor, scaled 3x
-const LOOK_CELL := 96.0              # px: one look's tile on the looks sheet
-const LOOK_ZOOM := 4.0               # the looks sheet draws each reticle this many times its size
-const LOOK_ROWS := [["dark ground", "1b1f1c", 0.0, 0.0], ["bright ground", "ece6cc", 0.0, 0.0],
-	["bloom + hit", "5f8f4a", 4.0, 0.85]]   # [label, ground, bloom px, hit flash strength]
+const AT := Vector2(0.62, 0.42)  # where the cursor rests, as a fraction of the window
+const CROP := Vector2i(160, 110)  # px round the cursor, scaled 3x
+const LOOK_CELL := 96.0  # px: one look's tile on the looks sheet
+const LOOK_ZOOM := 4.0  # the looks sheet draws each reticle this many times its size
+const LOOK_ROWS := [
+	["dark ground", "1b1f1c", 0.0, 0.0], ["bright ground", "ece6cc", 0.0, 0.0], ["bloom + hit", "5f8f4a", 4.0, 0.85]
+]  # [label, ground, bloom px, hit flash strength]
 
 var main: Node
 var m: Match
 var dir := "user://shots"
+
 
 func run(main_node: Node, what: String) -> void:
 	main = main_node
@@ -64,6 +68,7 @@ func run(main_node: Node, what: String) -> void:
 		await _reticles()
 	main.get_tree().quit(0)
 
+
 func _reticles() -> void:
 	for st in STYLES:
 		Settings.reset_all()
@@ -72,20 +77,21 @@ func _reticles() -> void:
 		_save(await _frame(), String(st[0]))
 		print("RETICLESHOTS %s" % st[0])
 
+
 ## Each Hunter, picked in the Training Area: rest, bloom, hit, crit; one strip per hunter and the cursor
 ## full frame of the first. The hit tick is raised on the HUD's Reticle the way a landed hit does, held up to the shot.
 func _hunters() -> void:
 	Settings.reset_all()
 	Settings.set_v("tips", false)
 	_pin_reticle()
-	main.get_viewport().gui_disable_input = true      # (no tooltip pops up under the real cursor)
+	main.get_viewport().gui_disable_input = true  # (no tooltip pops up under the real cursor)
 	var strip_w := CROP.x * 3 * 4
 	for id in Arch.ids():
 		m.arena.set_arch(String(id), Arch.signature(String(id)))
-		for pn in m.hud.ui_extra:      # (the practice bar: its tooltips and its hide-the-reticle hover follow
-			if pn is Control:          # a desktop worker's real cursor, wherever that rests)
+		for pn in m.hud.ui_extra:  # (the practice bar: its tooltips and its hide-the-reticle hover follow
+			if pn is Control:  # a desktop worker's real cursor, wherever that rests)
 				pn.visible = false
-		await main.get_tree().create_timer(2.5).timeout      # (the swap's kit card fades out first)
+		await main.get_tree().create_timer(2.5).timeout  # (the swap's kit card fades out first)
 		var tiles := []
 		for st in ["rest", "bloom", "hit", "crit"]:
 			# (the state is held every frame up to the shot: a 0.14 s flash or a decaying bloom would be gone
@@ -104,6 +110,7 @@ func _hunters() -> void:
 			strip.blit_rect(tiles[i], Rect2i(Vector2i.ZERO, tiles[i].get_size()), Vector2i(i * CROP.x * 3, 0))
 		strip.save_png(dir.path_join("hunter_%s.png" % id))
 		print("RETICLESHOTS hunter_%s" % id)
+
 
 ## Lifts the screen fade from start-up, which still covers the view.
 func _reveal() -> void:
@@ -148,6 +155,7 @@ func _draw_looks(cv: Control) -> void:
 		var label := String(Arch.def(id).get("base_name", id))
 		cv.draw_string(font, name_at, label, HORIZONTAL_ALIGNMENT_CENTER, LOOK_CELL, 13, Arch.color(id).lightened(0.3))
 
+
 ## The tick a landed hit raises and the knock one (the rival's hp at 0 for that frame), slowed to
 ## a twentieth so the shot lands while it shows.
 func _hits() -> void:
@@ -166,6 +174,7 @@ func _hits() -> void:
 		Engine.time_scale = 1.0
 		print("HITSHOTS %s" % row[0])
 
+
 func _save(img: Image, file: String) -> void:
 	img.save_png(dir.path_join(file + ".png"))
 	var c := Vector2i(Vector2(img.get_size()) * AT)
@@ -173,14 +182,15 @@ func _save(img: Image, file: String) -> void:
 	crop.resize(CROP.x * 3, CROP.y * 3, Image.INTERPOLATE_NEAREST)
 	crop.save_png(dir.path_join(file + "_zoom.png"))
 
+
 func _pings() -> void:
 	var P := m.player
-	Settings.set_v("tips", false)      # (the kit card and tips would cover the markers)
+	Settings.set_v("tips", false)  # (the kit card and tips would cover the markers)
 	var foe: Hunter = m.hunters.filter(func(h): return h.team != P.team)[0]
 	var mate: Hunter = m.hunters.filter(func(h): return h != P and h.team == P.team)[0]
 	foe.teleport(_level_spot(P.pos, [Vector3(-5, 0, 3), Vector3(-3, 0, 5), Vector3(0, 0, 5), Vector3(-5, 0, -2)]))
 	mate.teleport(m.world.free_spot_near(P.pos + Vector3(3, 0, 4), [], 1.0, 0.5, 8.0))
-	foe.reveal_t = 30.0      # (in plain sight whatever the grass and your view cone)
+	foe.reveal_t = 30.0  # (in plain sight whatever the grass and your view cone)
 	await _frame()
 	var kind := PingInput.place_world(m, m.cam.unproject_position(foe.pos + Vector3(0, 0.9, 0)))
 	print("PINGSHOTS on the rival: %s" % kind)
@@ -192,6 +202,7 @@ func _pings() -> void:
 	img.save_png(dir.path_join("ping_enemy_and_loot.png"))
 	print("PINGSHOTS ping_enemy_and_loot")
 
+
 ## The first of `offsets` from `at` on the same ground level (a rival placed off a ledge falls out of sight).
 func _level_spot(at: Vector3, offsets: Array) -> Vector3:
 	for off in offsets:
@@ -200,12 +211,14 @@ func _level_spot(at: Vector3, offsets: Array) -> Vector3:
 			return p
 	return at + offsets[0]
 
+
 ## Pins the HUD reticle at AT (a desktop worker's real cursor may not take the warp, and wherever it sits
 ## the HUD would draw there, under whatever panel covers it). Older HUDs without the pin keep the mouse.
 func _pin_reticle() -> void:
 	if "ret" in m.hud and "pin" in m.hud.ret:
 		var at := main.get_viewport().get_visible_rect().size * AT
 		m.hud.ret.pin = m.hud.c.get_global_transform_with_canvas().affine_inverse() * at
+
 
 ## Where the HUD drew the reticle, in image pixels (the pin or the HUD canvas's mouse, through the canvas
 ## transform, scaled to the image size).
@@ -218,6 +231,7 @@ func _cursor_px(img: Image) -> Vector2i:
 	var px := at * Vector2(img.get_size()) / vp.get_visible_rect().size
 	var half := Vector2(CROP) / 2.0
 	return Vector2i(px.clamp(half, Vector2(img.get_size()) - half))
+
 
 ## A few frames with the cursor held at AT, then the frame as an image.
 func _frame(frames := 20, hold := Callable()) -> Image:
