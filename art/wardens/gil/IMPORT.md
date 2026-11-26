@@ -128,3 +128,10 @@ LMB, RMB, E + recast, X + leap, hit, death).
 - Dark Meshy re-textures from the 11-19 turnaround (8 gens, `r16/tex/gen_log.tsv`) rendered flat grey under hero_toon (low-saturation near-black) or lost the dots/trim; none used.
 - art-gate neutral, 3-row sheets (new|r15|live), 5 match sheets: GAME 6.8, r15 6.7, live 4.6. 7.0 bar not met.
 - Open: face and fish mouth hidden under the brim at the match camera (5.5), grey fresnel patch on the back-left coat at top-down, flat charcoal brim.
+
+## Dorsal fan prop r19 (gil.glb + warden_native.json), 2026-11-26
+- Why: since r9 dropped r7's Meshy fin/crest props, rounds r10-r18 only re-textured or re-weighted live's thin strip fin; fin/fin_head stayed 6.2-6.5.
+- gil.glb = r7's (blob 0ecf9d95b2: Meshy create parts `skin-fin-back` + `skin-crest` on main's contract body), with the fin texture (image 2 only) recoloured from red-orange to the turnaround's pale peach membrane and light-blue rays (`hunter-round-1124/gil/r19/tools/fintex.py`). The import extracts the three embedded textures as gil_Image_0*.jpg.
+- warden_native.json: `skin-fin-back` hangs on hips -> Spine02, nothing cut from gil_meshy.glb (no open edges; live's strip stays inside the fan). Grip pins the fan root (part [-0.001, 0.412, 0.337]) onto the coat back at nape-to-mid-back height (bone [0.001, 0.221, -0.161]); scale [1, 1, 0.7] flattens its depth about the root. r7's own seat floated the fan 0.13 m off the coat and up to the brim. The crest is not hung (it floated behind the head and is not in the turnaround).
+- gil_meshy.glb unchanged from r18, so geo_check = r18: worst 12.0 cm, held worst 5.6 (live 13.6 / 13.4); hands ok.
+- art-gate (3-row match sheets, new | r18 | live): GAME 7.8, r18 7.5, live 5.2, PASS. fin 6.5 -> 7.4, fin_head 6.2 -> 6.8.
