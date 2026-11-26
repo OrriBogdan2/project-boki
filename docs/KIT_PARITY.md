@@ -59,6 +59,7 @@ Every row the 0.24.4 re-audit left open, branch ready or `[?]` was re-read again
 | Kael | `rmb.drop.radius` pinned 2.2, data 2.4 (owner) | **done** `ext/parity-kael-drop-pin` baa8eadd1 | no line |
 | Kael | RMB lunge 4.5 to 7.5 vs 5 flat | **done** `ext/kael-open-rows` | travels 4.5 to 5.4 m (JSON [5.3, 6.35] x0.85 feel; DECISIONS 11-11 short lunge); docs/heroes/juggernaut.md "Open rows closed, Nov 20" |
 | Kael | Riposte reset on a kill `[?]` | **done** `ext/kael-open-rows` | the data's "killing a living enemy": a hunter taken down or a monster killed (footage f99-f101 dummy); dash, pull exits: same section |
+| Kael | Riposte guard edges (item 13): 0.65 s invulnerable, then strike and recovery | **done** `ext/kael-guard-edges` | no code change, main already matches the 0.65 s data window; asserted: a hit one tick past the guard (strike 0.1 s, recovery 0.35 s) lands in full. No source row for crowd control that is not a hit, so main's stays and is ours: a pull is refused only in the guard; a wall slam from an earlier knock loses its 10 damage in the guard but keeps its stun; docs/heroes/juggernaut.md item 13 |
 | Lace | E reach 9 vs 10.8 | **done** `ext/lace-ranges-source` e026ace6b | no line; ext/parity-ranges-slice b0fae9f8e pins the same 10.8: merge one |
 | Lace | RMB range 14, R range 18 / width .5 `[?]` | **owner** | not determinable (ext/parity-ranges-slice); ours stands |
 | Lace | Spirit Walk ending inside a ledge | **done** `ext/combat-lace-spirit-ledges-rebased` 40f7865d8 | ext/w0246-combat-a |
@@ -614,7 +615,7 @@ PARITY FIRST (DECISIONS 2026-11-07). Source: `the reference kit notes on the bri
 | E | Wall pushes, recast freezes, 20 s [D] | Rink Wall: 0.2 s tell, slides 4.5 to 16.2 m, grows 1.8 to 4.5 m, **200 HP** (owner 11-08), E again freezes 6 s, cd 17 | match; 0.85x cd (gap 10, owner row) |
 | R | Invulnerable Slowing zone 3.5 s with periodic Shatter stacks, explode, stun, cancel, 80 s [D] | Rimelock: hold **3.3** (footage 3.2 to 3.4), flat 35% slow (no ramp), skate carry .8 x1.05 (owner 11-08), rink **7.47 m** (4 bh +15% owner 11-08, then -10% owner 11-11; was written 8.3 here), crash **18** = 155/156 x the spear hit + 0.75 s stun, cd 80 | match; radius and carry owner; periodic Shatter stacks not built (no period in [D]) |
 | Dash | Hold, release stops, 13 s; ice islands over the abyss [D] | Skate 10.5 m/s (F 10 to 11, the mean), ramp 0.12 s (11-20), up to 1.6 s, early-release refund .6 (owner), ice ribbon in the air, cd 13 | match; refund owner |
-| Passive | Chill 4 s, shatter on knock [D] | Hoarfrost: Chill 4 s with no slow, 8 darts Shatter (60 in 2.4 m), a knock on a Chilled foe Shatters 0.4 s later (37 in 3 m) | match |
+| Passive | Chill 4 s, shatter on knock [D] | Hoarfrost: Chill 4 s with no slow, 8 darts Shatter (54 in 2.4 m; 60 until the 11-24 TTK fix), a knock on a Chilled foe Shatters 0.4 s later (37 in 3 m) | match |
 | Anim | Footage poses | 19 moves plus the fusion move, all on `claire.glb` (49 clips) | match on coverage |
 | Body | 1.1 to 1.15 [F] | size 1.11 (head tops follow the height chart, `3a50a38abb`) | differ (owner) |
 

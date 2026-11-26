@@ -2,10 +2,10 @@ extends "res://tools/archetype_check.gd"
 ## --recast-cue-check: every two-step ability reports its open recast to RecastCue (DECISIONS 2026-11-08 "two-step
 ## abilities must be obvious and in your face"): after the first step the kit's recast_window() names the slot,
 ## a time left and a total, the world spot for the marker, and the local hunter's cue state carries it (so the slot
-## pulse, "<KEY> AGAIN" and the ring draw; the world marker and foe badge are rings, no text: DECISIONS
-## 2026-11-11). Then: a timed window that runs out leaves "EXPIRED", an early
-## press is buffered (~0.15s) into the window, and the marks/stacks/Daze reach the foe badges. Last the split: the
-## kit's own world copy of that state hides on the owner's screen (the badge carries it) and shows to everyone else.
+## pulse, "<KEY> AGAIN" and the ring draw; the world marker is a ring, no text: DECISIONS 2026-11-11). Then: a
+## timed window that runs out leaves "EXPIRED", an early press is buffered (~0.15s) into the window. Last the split:
+## the kit's own world copy of a foe's state hides on the owner's screen (the plate status row carries it, see
+## --plate-status-check) and shows to everyone else.
 
 ## A stand-in for the HUD: its canvas, and every text a cue draws is recorded.
 class StubHud extends Node:
@@ -43,7 +43,6 @@ func run(main_node: Node) -> void:
 	await _hint()
 	await _expired()
 	await _buffered()
-	await _badges()
 	await _payoffs()
 	await _world_plain()
 	await _split()
@@ -156,25 +155,6 @@ func _buffered() -> void:
 	ok("ostra e: an early press is buffered into the window", held and popped, "held %s popped %s" % [held, popped])
 	await done(m)
 
-## Marks/stacks/Daze reach the badge list with a time left: Thief Marks, Vex's Daze, Sparkle's Sparks.
-func _badges() -> void:
-	for hero in ["thief", "gunslinger", "mage"]:
-		var s := setup(hero, 6.0)
-		var m: Match = s[0]
-		var p: Hunter = s[1]
-		var t: Hunter = s[2]
-		match hero:
-			"thief": (p.ak as ThiefKit).add_mark(t, 2, true)
-			"gunslinger": (p.ak as GunslingerKit).daze(t, 2.0)
-			"mage": (p.ak as MageKit).sparks[t.get_instance_id()] = {"e": t, "n": 2, "t": 3.0}
-		m.step(DT)
-		var marks: Array = p.ak.cue.get("marks", [])
-		var mine := marks.filter(func(mk): return mk["e"] == t and float(mk["left"]) > 0.0 and float(mk["total"]) > 0.0)
-		ok("%s: the foe's badge shows its mark and time left" % hero, mine.size() == 1, str(mine))
-		if hero == "gunslinger" and mine.size() == 1:
-			var ring := float(mine[0]["total"])
-			ok("gunslinger: the Daze badge reads KitStatus's timer", is_equal_approx(ring, 2.0), str(ring))
-		await done(m)
 
 # ------------------------------------------------------------------ the payoff sounds
 ## [hero, payoff, its own sound]: Vex's rifle has none but the shared combo chime (every payoff plays it).
@@ -327,30 +307,27 @@ func _lace_pin(s: Array) -> void:
 	_listen(m, 1.3, hold_v)
 	p.inp["sec_hold"] = false
 
-## The world marker and the foe badge draw no key and no word: only a count may show (DECISIONS 2026-11-11).
+## The world marker draws no key and no word (DECISIONS 2026-11-11).
 func _world_plain() -> void:
 	var h := StubHud.new()
 	main.add_child(h)
 	h.add_child(h.c)
 	var open := RecastCue.window("e", 2.0, 3.0, Vector3.ZERO)
 	var late := RecastCue.window("e", 0.3, 3.0, Vector3.ZERO, false)
-	var mk := RecastCue.mark(null, 0, 2.0, 3.0, false)
-	var counted := RecastCue.mark(null, 3, 2.0, 3.0, true)
 	h.c.draw.connect(func():
 		RecastCue._marker(h, Vector2(50, 50), open, Color.WHITE)
-		RecastCue._marker(h, Vector2(50, 50), late, Color.WHITE)
-		RecastCue._badge(h, Vector2(100, 50), mk, Color.WHITE)
-		RecastCue._badge(h, Vector2(100, 50), counted, Color.WHITE))
+		RecastCue._marker(h, Vector2(50, 50), late, Color.WHITE))
 	h.c.queue_redraw()
 	for i in 3:
 		await main.get_tree().process_frame
-	ok("world marker and badge: no key letter, no word (only the count 3)", h.texts == ["3"], str(h.texts))
+	ok("world marker: no key letter, no word", h.texts.is_empty(), str(h.texts))
 	h.queue_free()
 
-## On the owner's screen the badge carries the foe's state, so the kit's world copy of it hides there: Sable's Mark
-## pips, Sparkle's Static marker (its count and pips, the Live ring when full; the sparks on the body stay). Seen by
-## anyone else (the same kit not local) the world art shows. Neve has no badge: her ice shards in the foe are the one
-## read for everyone (--neve-feel-check).
+## On the owner's screen the plate status row carries the foe's state, so the kit's world copy of it hides there:
+## Sable's Mark pips, Sparkle's Static marker (its count and pips, the Live ring when full; the sparks on the body
+## stay). Seen by anyone else (the same kit not local) the world art shows. Neve has no world copy: her ice shards in
+## the foe are the one read for everyone (--neve-feel-check).
+
 func _split() -> void:
 	for hero in ["thief", "mage"]:
 		var s := setup(hero, 6.0)
@@ -362,10 +339,11 @@ func _split() -> void:
 			"thief": (p.ak as ThiefKit).add_mark(t, 3, true)
 			"mage": (p.ak as MageKit).sparks[key] = {"e": t, "n": int(p.ak.res_def()["max"]), "t": 3.0}
 		m.step(DT)
-		var badge := (p.ak.cue.get("marks", []) as Array).any(func(mk): return mk["e"] == t)
-		ok("%s: the owner reads the foe's badge, the kit's world copy hides" % hero, badge and not _world_art(m, p, t),
-				"badge %s art %s" % [badge, _world_art(m, p, t)])
+		var read := not p.ak.combo_read(t).is_empty()
+		ok("%s: the owner reads the foe's state, the kit's world copy hides" % hero, read and not _world_art(m, p, t),
+				"read %s art %s" % [read, _world_art(m, p, t)])
 		p.ctrl = "idle"
+
 		m.step(DT)
 		ok("%s: anyone else sees the kit's world art on the foe" % hero, _world_art(m, p, t))
 		await done(m)
