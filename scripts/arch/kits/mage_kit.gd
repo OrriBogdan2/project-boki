@@ -16,7 +16,7 @@ const COPPER := Color("e08a46")
 const DEEP_PINK := Color("e0148c")   # the aim kit whitens its accent: this lands as a rich hot pink
 const PINK_WHITE := Color("ffc4ea")   # the lightning body: pink-white (DECISIONS 11-08; was teal)
 const FINGER_SIDE := 0.11            # m: where a pointing fingertip is at the release: off her centre...
-const FINGER_AHEAD := 0.3            # ... and ahead of where a round starts
+const FINGER_AHEAD := 0.3            # ... and ahead of where a round starts (x match_hunter_scale)
 const MARK_LIFT := 0.5               # m the Static marker sits above the HP bar
 const RMB_KEY := 0.06               # s into the rmb clip: the throw (tools/art1/ryzz_clips.py)
 const ECHO_GAP := 0.045              # s between her after-images on the Wirerun and the air dash
@@ -297,9 +297,10 @@ func _tick_lmb() -> void:
 	var d := h.aim_dir()
 	# (from the fingertip of the hand that fires: the arm is still coming up, so where that fingertip will be. The round
 	# has already flown a tick from the old muzzle: it gets that time back, so her reach stays what it was)
-	var side := Vector3(-d.y, 0, d.x) * (-FINGER_SIDE if left else FINGER_SIDE)
+	var drawn := CamRig.match_hunter_scale
+	var side := Vector3(-d.y, 0, d.x) * (-FINGER_SIDE if left else FINGER_SIDE) * drawn
 	var was_at: Vector3 = sd["pos"]
-	var p := Vector3(h.pos.x, was_at.y, h.pos.z) + side + Vector3(d.x, 0, d.y) * FINGER_AHEAD
+	var p := Vector3(h.pos.x, was_at.y, h.pos.z) + side + Vector3(d.x, 0, d.y) * FINGER_AHEAD * drawn
 	var speed := (sd["vel"] as Vector2).length()
 	if speed > 0.1:
 		sd["life"] = float(sd["life"]) + Vector2(was_at.x - p.x, was_at.z - p.z).length() / speed
