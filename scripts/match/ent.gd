@@ -190,7 +190,9 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 		opts = io[1]
 		if dmg <= 0.0:
 			return 0.0
+	var soak0 := SoakNumber.before(self)
 	var d := _mitigate(dmg, by, opts)
+	SoakNumber.after(self, by, soak0, opts)
 	if d <= 0.0:
 		return 0.0
 	hp -= d

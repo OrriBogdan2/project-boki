@@ -31,7 +31,8 @@ static func view(h: Hunter) -> Vector2:
 ## Hunter._mitigate: the hit goes into the shell first. Returns what is left for the rest of the defences (0 while it holds).
 ## Falls and heat go through (as they do past a kin shield). A hit the shell took still counts as a hit
 ## (truces, extraction interrupts): the caller gets opts["soaked"] and a token 0.01 instead of nothing.
-static func absorb(h: Hunter, d: float, opts := {}, by: Ent = null) -> float:
+## opts["shell_soaked"] is what the shell took, for its floating number (SoakNumber.after, called by Ent.hurt).
+static func absorb(h: Hunter, d: float, opts := {}) -> float:
 	if h.merge_st.is_empty() or float(h.merge_st.get("shell", 0.0)) <= 0.0 or d <= 0.0:
 		return d
 	if opts.get("src", "") in ["fall", "heat"]:
@@ -42,8 +43,8 @@ static func absorb(h: Hunter, d: float, opts := {}, by: Ent = null) -> float:
 	st["shell"] = sh - a
 	h.flash_t = ImpactWeight.flash_s("")
 	opts["soaked"] = a
+	opts["shell_soaked"] = a
 	var col: Color = (st["form"] as Dictionary)["glow"]
-	SoakNumber.at(h, by, a, HudStyle.NUM_SHELL)
 	h.m.fx.burst(h.pos + Vector3(0, 1.0, 0), col, 3, 2.5, 0.25)
 	if float(st["shell"]) <= 0.0:
 		KinMerge.end(h, "shell")
