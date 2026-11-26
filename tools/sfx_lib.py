@@ -69,6 +69,15 @@ def save_loop(name, x, cat, xfade=0.06):
         w.writeframes((np.clip(x, -1, 1) * 32767).astype(np.int16).tobytes())
 
 
+HOLD_PEAK_DB = -3.5   # a held-fire hold take peaks well under the first shot's ceiling (docs/AUDIO.md, FireSfx)
+
+
+def takes_hold(name, fn, n, cat):
+    """A short hold take of a held-fire weapon (FireSfx plays <shot>_hold from the 2nd round of a burst on):
+    name.wav plus name_1..n.wav at the category's loudness, peak capped at HOLD_PEAK_DB."""
+    C.takes(name, fn, n, rms_db=CATS[cat], peak_db=HOLD_PEAK_DB)
+
+
 def takes_cat(name, fn, n, cat):
     """name.wav plus name_1..n.wav, each fn(i) (Sfx plays a different take each time)."""
     C.takes(name, fn, n, rms_db=CATS[cat], peak_db=PEAK_DB)
@@ -108,13 +117,13 @@ def sweep(f0, f1, d, shape='sin', curve=1.0):
     return np.sin(ph)
 
 
-def sweep_noise(d, f0, f1, width=0.4):
-    """Noise whose band glides f0 -> f1 (a rush of air): a bank of bands from 150 Hz to 8 kHz, each one
-    sounding while the glide is within `width` (natural-log Hz) of it."""
+def sweep_noise(d, f0, f1, width=0.4, lo=150, hi=8000, bands=18):
+    """Noise whose band glides f0 -> f1 (a rush of air): a bank of `bands` bands from `lo` to `hi` Hz
+    (default 150 Hz to 8 kHz), each one sounding while the glide is within `width` (natural-log Hz) of it."""
     n = N(d); u = np.arange(n) / max(1, n - 1)
     lf = np.log(f0) + (np.log(f1) - np.log(f0)) * u
     out = np.zeros(n); src = noise(d)
-    for fc in np.geomspace(150, 8000, 18):
+    for fc in np.geomspace(lo, hi, bands):
         g = np.exp(-((np.log(fc) - lf) / width) ** 2)
         if g.max() < 0.02:
             continue

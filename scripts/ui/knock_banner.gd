@@ -111,7 +111,7 @@ func knocked(viewer: Hunter, h: Hunter, credit: Ent) -> void:
 	set_process(true)
 	queue_redraw()
 	if now == "ally":
-		Sfx.play("warn", null, -4.0, 0.0, 0.8)
+		Sfx.play("knock_warn", null, -4.0, 0.0)
 	else:
 		Sfx.play("knock_confirm", null, -6.0)
 
