@@ -397,6 +397,9 @@ func lmb_override(held: bool, dt: float) -> bool:
 				return true
 			lmb_t = 0.0
 		lmb_t += dt
+		# the gauntlet draws back from HOLD_POSE_T into the hold (source 0118: cocked on the hold's first frame), not
+		# at the tap window; the lane, glow and charge still wait for it, and a tap's release throws as before
+		if lmb_t <= float(ld["tap"]): play_hold("breah_wind", lmb_t)
 		if lmb_t > float(ld["tap"]):
 			var k := punch_k()
 			h.mel_hold = k

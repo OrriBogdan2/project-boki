@@ -44,14 +44,14 @@ var disengaged := false  # an explicit Follow / Call back in a fight: it stays a
 var path: Array = []  # its A* path (KinPath), recomputed on path_t
 var path_goal := Vector2i.ZERO
 var path_t := 0.0
-var path_searches := 0          # A* searches it has run (a check counts them)
-var stuck_t := 0.0                # seconds without progress (KinFollow.watch_stuck)
-var guard_side := 1.0             # a big Boki on the Return order: the flank it guards (+1 right, -1 left)
-var beside := false               # ...and it is at that flank now (state "shoulder", not on you)
-var curl := 0.0                   # drawn curled up on your back (1) or on its feet (0), eased by KinCurl
-var curl_rel := Vector3.ZERO      # where it was last drawn off you, from your model (KinCurl's hop starts there)
-var steady_t := 0.0               # carried by traversal: seconds you have been steady on the ground
-var gap_at := -9.0                # when need_carry last searched for a way across, and what it found
+var path_searches := 0  # A* searches it has run (a check counts them)
+var stuck_t := 0.0  # seconds without progress (KinFollow.watch_stuck)
+var guard_side := 1.0  # a big Boki on the Return order: the flank it guards (+1 right, -1 left)
+var beside := false  # ...and it is at that flank now (state "shoulder", not on you)
+var curl := 0.0  # drawn curled up on your back (1) or on its feet (0), eased by KinCurl
+var curl_rel := Vector3.ZERO  # where it was last drawn off you, from your model (KinCurl's hop starts there)
+var steady_t := 0.0  # carried by traversal: seconds you have been steady on the ground
+var gap_at := -9.0  # when need_carry last searched for a way across, and what it found
 var gap_v := false
 var rng := RandomNumberGenerator.new()  # its own seeded stream (init_kin): decisions never shift other systems' rolls
 var marked := {}  # foe nid -> m.time until which your hits on it fill the bond meter faster (Bond.on_hit)
@@ -319,7 +319,7 @@ func danger_at(p: Vector3) -> float:
 ## The owner asks it to jump into a fight. Returns "go", "hesitate" or "refuse".
 func consider_throw(p: Vector3) -> String:
 	if trust >= 90.0 or m.tut != null:
-		return "go"          # soulbound, or in the tutorial: it goes wherever you send it
+		return "go"  # soulbound, or in the tutorial: it goes wherever you send it
 	var danger := danger_at(p)
 	var c := courage()
 	if danger > c + 1.1:
@@ -526,6 +526,7 @@ func _cast(slot: String, p: Vector3, auto: bool, caster: Ent, pw: float, chain: 
 		cast_do = _release.bind(slot, p, auto, caster, pw, chain)
 	else:
 		_release(slot, p, auto, caster, pw, chain)
+
 
 func _release(slot: String, p: Vector3, auto: bool, caster: Ent, pw: float, chain: Array) -> void:
 	var def := runner.def_of(slot)
@@ -852,7 +853,7 @@ func bubble_at() -> Vector3:
 func seen_pos() -> Vector3:
 	if state == "shoulder" and owner_h and not beside:
 		if wisp and comp and comp.lead_pos != Vector3.INF:
-			return comp.lead_pos + Vector3(0, 1.5, 0)      # (a wisp leading the tutorial floats out ahead)
+			return comp.lead_pos + Vector3(0, 1.5, 0)  # (a wisp leading the tutorial floats out ahead)
 		return owner_h.pos + Vector3(0, 1.5, 0)
 	return pos
 
@@ -1384,7 +1385,7 @@ func render(delta: float, alpha: float) -> void:
 		return
 	if on_you and owner_h and owner_h.model and carry_style() != "shoulder":
 		if carry_style() == "mount":
-			KinCurl.back(self, body, delta)       # a mount curled up into a ball on your back while you glide
+			KinCurl.back(self, body, delta)  # a mount curled up into a ball on your back while you glide
 			return
 		# perched on the pack
 		global_position = WardenGlb.shown_torso(owner_h.model) * Vector3(0, 0.92, 0.3)
@@ -1434,7 +1435,7 @@ func render(delta: float, alpha: float) -> void:
 		body.rotation.x += delta * 14.0
 	if state == "active":
 		_render_attention(delta, body)
-	KinCurl.ground(self, body, delta)      # down off your back to your flank: eased
+	KinCurl.ground(self, body, delta)  # down off your back to your flank: eased
 	_render_demo()
 	Capture.dissolve(self)
 	KinDowned.scoop_pose(self)

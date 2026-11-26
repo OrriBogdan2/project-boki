@@ -20,40 +20,64 @@ var bad := 0
 var m: Match
 var main: Node
 var tags_seen: Dictionary = {}
-var keep: Array = []       # the mobs a case spawned itself; any others the world makes are cleared each step
-var heard := {}            # sound -> match steps it started on (_tally)
+var keep: Array = []  # the mobs a case spawned itself; any others the world makes are cleared each step
+var heard := {}  # sound -> match steps it started on (_tally)
+
 
 func ok(cond: bool, what: String) -> void:
 	print("BOKISYS %s %s" % ["PASS" if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func _on_hit(_a: Node, _t: Node, _amt: float, tags: Array) -> void:
 	for t in tags:
 		tags_seen[String(t)] = int(tags_seen.get(String(t), 0)) + 1
 
+
 func _fresh(species := "cindle", wisps := false) -> Match:
-	if m: m.queue_free()
+	if m:
+		m.queue_free()
 	m = Match.new()
 	main.add_child(m)
-	m.start({"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242,
-		"no_drop": true, "demo_kin": species, "weapon": "rifle", "cls": "medium", "boki_wisps": wisps})
+	m.start(
+		{
+			"training": true,
+			"teams": 2,
+			"squad": 1,
+			"tier": 0,
+			"length": 1e9,
+			"seed": 4242,
+			"no_drop": true,
+			"demo_kin": species,
+			"weapon": "rifle",
+			"cls": "medium",
+			"boki_wisps": wisps
+		}
+	)
 	m.set_process(false)
-	seed(4242)      # the Boki's random choices should not depend on how many rolls building the map took
-	for mb in m.mobs: mb.queue_free()
+	seed(4242)  # the Boki's random choices should not depend on how many rolls building the map took
+	for mb in m.mobs:
+		mb.queue_free()
 	m.mobs.clear()
 	var p_v: Hunter = m.player
 	var w = m.world
-	var hx := int(floor(p_v.pos.x)); var hz := int(floor(p_v.pos.z))
+	var hx := int(floor(p_v.pos.x))
+	var hz := int(floor(p_v.pos.z))
 	var hi: int = w.idx(hx, hz)
 	var lv: int = int(w.level[hi]) if w.kind[hi] != World.T_VOID else 0
 	for dz in range(-20, 21):
 		for dx in range(-30, 41):
-			if not w.inb(hx + dx, hz + dz): continue
+			if not w.inb(hx + dx, hz + dz):
+				continue
 			var i: int = w.idx(hx + dx, hz + dz)
 			w.kind[i] = World.T_GROUND
 			w.level[i] = lv
 			w.island[i] = w.island[hi]
-			w.stairs.erase(i); w.walls.erase(i); w.props.erase(i); w.bush.erase(i)
+			w.stairs.erase(i)
+			w.walls.erase(i)
+			w.props.erase(i)
+			w.bush.erase(i)
 	p_v.teleport(Vector3(hx + 0.5, lv * World.LEVEL, hz + 0.5))
 	p_v.vel = Vector3.ZERO
 	for t in ["bravery", "loyalty", "temper", "curiosity"]:
@@ -64,7 +88,7 @@ func _fresh(species := "cindle", wisps := false) -> Match:
 	if r:
 		r.ctrl = "idle"
 		r.teleport(Vector3(p_v.pos.x + 38.0, p_v.pos.y, p_v.pos.z + 18.0))
-		if r.kin:      # (its random Boki, e.g. a pouncing nettlynx, would shove the carrier: this check is about yours)
+		if r.kin:  # (its random Boki, e.g. a pouncing nettlynx, would shove the carrier: this check is about yours)
 			r.kin.dead = true
 			m.kins.erase(r.kin)
 			r.kin.queue_free()
@@ -76,11 +100,13 @@ func _fresh(species := "cindle", wisps := false) -> Match:
 	tags_seen = {}
 	return m
 
+
 func _clear_mobs() -> void:
 	for mb in m.mobs.duplicate():
 		if not keep.has(mb):
 			m.mobs.erase(mb)
 			mb.queue_free()
+
 
 ## Metres per second over 0.3s of walking right, after half a second to get up to speed.
 func _walk_speed(p_v: Hunter) -> float:
@@ -91,18 +117,23 @@ func _walk_speed(p_v: Hunter) -> float:
 	p_v.inp["move"] = Vector2.ZERO
 	return Vector2(p_v.pos.x - p0.x, p_v.pos.z - p0.z).length() / 0.3
 
+
 func rival() -> Hunter:
 	for h in m.hunters:
 		if h.team != m.player.team:
 			return h
 	return null
 
+
 func run_for(secs: float, each := Callable()) -> void:
 	var t := 0.0
 	while t < secs:
-		if each.is_valid(): each.call()
+		if each.is_valid():
+			each.call()
 		_clear_mobs()
-		m.step(Match.DT); t += Match.DT
+		m.step(Match.DT)
+		t += Match.DT
+
 
 ## Counts which of `names` started since the last call into `heard`, one a step at most. It clears Sfx's own last
 ## start: the steps run faster than real time, so the real-time MIN_GAP would hide a repeat.
@@ -113,14 +144,18 @@ func _tally(names: Array) -> void:
 			Sfx.last_played.erase(n)
 			Sfx.recent.erase(n)
 
+
 ## A fresh count of `names`, heard from where the player stands.
 func _listen(names: Array) -> void:
 	Sfx.listener = m.player.pos
 	_tally(names)
 	heard.clear()
 
+
 func aim_at(p_v: Hunter, p: Vector3) -> void:
-	p_v.inp["aim"] = p + Vector3(0, 0.9, 0); p_v.inp["aim_y"] = p.y
+	p_v.inp["aim"] = p + Vector3(0, 0.9, 0)
+	p_v.inp["aim_y"] = p.y
+
 
 func mob_at(kind: String, at: Vector3) -> Mob:
 	var mb := m.spawn_mob(kind, at)
@@ -128,20 +163,38 @@ func mob_at(kind: String, at: Vector3) -> Mob:
 	keep.append(mb)
 	return mb
 
+
 func run(mn: Node) -> void:
 	main = mn
 	Save.no_write = true
 	CombatBus.hit_landed.connect(_on_hit)
 	var only := ""
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--bokisys-only="): only = a.substr(15)
-	for part in ["poll", "throw", "recall", "modes", "acks", "cast_c", "wind_up", "downed", "no_steal", "merge", "leap",
-			"surge", "wisp_merge", "snap", "net"]:
+		if a.begins_with("--bokisys-only="):
+			only = a.substr(15)
+	for part in [
+		"poll",
+		"throw",
+		"recall",
+		"modes",
+		"acks",
+		"cast_c",
+		"wind_up",
+		"downed",
+		"no_steal",
+		"merge",
+		"leap",
+		"surge",
+		"wisp_merge",
+		"snap",
+		"net"
+	]:
 		if only == "" or only.split(",").has(part):
 			call("_" + part)
 	CombatBus.hit_landed.disconnect(_on_hit)
 	print("BOKISYS DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 # ------------------------------------------------------------------ 1. G: tap and hold
 func _poll() -> void:
@@ -159,11 +212,19 @@ func _poll() -> void:
 	var got := ""
 	for i in 12:
 		var x := KinCommand.poll(p_v, 0.05, false)
-		if x != "": got = x
+		if x != "":
+			got = x
 	var opened := KinWheel.is_open(p_v)
 	Input.action_release("throw")
 	var after := KinCommand.poll(p_v, 0.016, false)
-	ok(got == "" and opened and after == "" and not KinWheel.is_open(p_v), "a long press opens the wheel, and its release is not also a tap (tap '%s', open %s, then '%s')" % [got, opened, after])
+	ok(
+		got == "" and opened and after == "" and not KinWheel.is_open(p_v),
+		(
+			"a long press opens the wheel, and its release is not also a tap (tap '%s', open %s, then '%s')"
+			% [got, opened, after]
+		)
+	)
+
 
 # ------------------------------------------------------------------ 1. throw: the landing staggers
 func _throw() -> void:
@@ -175,21 +236,34 @@ func _throw() -> void:
 	# a foe just to the side of the landing spot, out of the flight path itself
 	var mb := mob_at("skitter", land + Vector3(0, 0, 1.6))
 	var stunned := false
-	var landed_d := -1.0          # how far from you it was the moment it landed (it then walks back to your side under Follow)
-	var after_fly := ""           # the state it was in the first step after the throw ended: the landing itself
+	var landed_d := -1.0  # how far from you it was the moment it landed (it then walks back to your side under Follow)
+	var after_fly := ""  # the state it was in the first step after the throw ended: the landing itself
 	aim_at(p_v, land)
 	KinCommand.tap(p_v)
 	ok(k.state == "flying", "G tap throws the Boki from the shoulder (state %s)" % k.state)
 	for i in 70:
 		_clear_mobs()
 		m.step(Match.DT)
-		if is_instance_valid(mb) and mb.stun_t > 0.0: stunned = true
-		if after_fly == "" and k.state != "flying": after_fly = k.state
-		if landed_d < 0.0 and k.state == "active": landed_d = k.flat_dist(p_v)
-	ok(int(tags_seen.get("land", 0)) >= 1, "the landing hits what it lands near (land hits %d)" % int(tags_seen.get("land", 0)))
+		if is_instance_valid(mb) and mb.stun_t > 0.0:
+			stunned = true
+		if after_fly == "" and k.state != "flying":
+			after_fly = k.state
+		if landed_d < 0.0 and k.state == "active":
+			landed_d = k.flat_dist(p_v)
+	ok(
+		int(tags_seen.get("land", 0)) >= 1,
+		"the landing hits what it lands near (land hits %d)" % int(tags_seen.get("land", 0))
+	)
 	ok(stunned, "...and briefly stuns it")
 	# (later it may be off on a skill of its own, a rush or a leap, so the end state says nothing: the landing step does)
-	ok(after_fly == "active" and landed_d > 4.0, "the Boki lands out where it was sent (%.1fm), and is out in the world (landing state %s)" % [landed_d, after_fly])
+	ok(
+		after_fly == "active" and landed_d > 4.0,
+		(
+			"the Boki lands out where it was sent (%.1fm), and is out in the world (landing state %s)"
+			% [landed_d, after_fly]
+		)
+	)
+
 
 # ------------------------------------------------------------------ 2. recall: hits along the path
 func _recall() -> void:
@@ -197,19 +271,36 @@ func _recall() -> void:
 	var p_v := m.player
 	var k: Kin = p_v.kin
 	# far beyond the recall range: the tap does not call it
-	k.pos = p_v.pos + Vector3(40.0, 0, 0); k.state = "active"; k.fly = {}; k.hold_at = Vector3.INF
+	k.pos = p_v.pos + Vector3(40.0, 0, 0)
+	k.state = "active"
+	k.fly = {}
+	k.hold_at = Vector3.INF
 	KinCommand.tap(p_v)
 	ok(k.state == "active", "recall only works within its range (40m: %s)" % k.state)
-	k.pos = p_v.pos + Vector3(10.0, 0, 0); k.state = "active"; k.fly = {}; k.hold_at = Vector3.INF
+	k.pos = p_v.pos + Vector3(10.0, 0, 0)
+	k.state = "active"
+	k.fly = {}
+	k.hold_at = Vector3.INF
 	var mb := mob_at("skitter", p_v.pos + Vector3(5.0, 0, 0.2))
 	var hp0 := mb.hp
 	KinCommand.tap(p_v)
 	ok(k.state == "flying_home", "G tap with the Boki away calls it back (state %s)" % k.state)
 	var landed_d := [-1.0]
-	run_for(1.2, func():
-		if float(landed_d[0]) < 0.0 and k.state == "active": landed_d[0] = k.flat_dist(p_v))
-	ok(k.state == "active" and float(landed_d[0]) >= 0.0 and float(landed_d[0]) < 3.5, "it leaps back to your side, not onto the shoulder (state %s, %.1fm at landing)" % [k.state, float(landed_d[0])])
-	ok(int(tags_seen.get("recall", 0)) >= 1 and (not is_instance_valid(mb) or mb.hp < hp0), "the leap home hit what was on its path (recall hits %d)" % int(tags_seen.get("recall", 0)))
+	run_for(
+		1.2,
+		func():
+			if float(landed_d[0]) < 0.0 and k.state == "active":
+				landed_d[0] = k.flat_dist(p_v)
+	)
+	ok(
+		k.state == "active" and float(landed_d[0]) >= 0.0 and float(landed_d[0]) < 3.5,
+		"it leaps back to your side, not onto the shoulder (state %s, %.1fm at landing)" % [k.state, float(landed_d[0])]
+	)
+	ok(
+		int(tags_seen.get("recall", 0)) >= 1 and (not is_instance_valid(mb) or mb.hp < hp0),
+		"the leap home hit what was on its path (recall hits %d)" % int(tags_seen.get("recall", 0))
+	)
+
 
 # ------------------------------------------------------------------ 3. Guard and Follow
 func _modes() -> void:
@@ -220,15 +311,31 @@ func _modes() -> void:
 	aim_at(p_v, p_v.pos + Vector3(7.0, 0, 0))
 	KinCommand.tap(p_v)
 	run_for(1.0)
-	ok(k.cmd == "follow" and k.hold_at == Vector3.INF, "a Boki sent out from the shoulder is out beside you (follow), not guarding")
-	ok(KinCommand.order(p_v, "guard") and k.cmd == "guard" and k.hold_at != Vector3.INF, "the Guard order holds where it stands")
+	ok(
+		k.cmd == "follow" and k.hold_at == Vector3.INF,
+		"a Boki sent out from the shoulder is out beside you (follow), not guarding"
+	)
+	ok(
+		KinCommand.order(p_v, "guard") and k.cmd == "guard" and k.hold_at != Vector3.INF,
+		"the Guard order holds where it stands"
+	)
 	var spot := k.pos
 	p_v.teleport(p_v.pos + Vector3(0, 0, 12.0))
 	run_for(2.0)
-	ok(k.state == "active" and k.flat_dist(p_v) > 7.0 and Vector2(k.pos.x - spot.x, k.pos.z - spot.z).length() < 3.0, "guard: it stays by its spot while you move off (%.1fm from it, %.1fm from you, %s)" % [Vector2(k.pos.x - spot.x, k.pos.z - spot.z).length(), k.flat_dist(p_v), k.state])
-	ok(KinCommand.order(p_v, "follow") and k.cmd == "follow" and k.hold_at == Vector3.INF, "the Follow order releases the spot")
+	ok(
+		k.state == "active" and k.flat_dist(p_v) > 7.0 and Vector2(k.pos.x - spot.x, k.pos.z - spot.z).length() < 3.0,
+		(
+			"guard: it stays by its spot while you move off (%.1fm from it, %.1fm from you, %s)"
+			% [Vector2(k.pos.x - spot.x, k.pos.z - spot.z).length(), k.flat_dist(p_v), k.state]
+		)
+	)
+	ok(
+		KinCommand.order(p_v, "follow") and k.cmd == "follow" and k.hold_at == Vector3.INF,
+		"the Follow order releases the spot"
+	)
 	run_for(3.0)
 	ok(k.flat_dist(p_v) < 5.5, "follow: it comes back to your side (%.1fm away, %s)" % [k.flat_dist(p_v), k.state])
+
 
 # ------------------------------------------------------------------ 3b. the Boki answers a command
 ## The species cries the log holds since entry `from`.
@@ -237,10 +344,12 @@ func _cries(from: int, species: String) -> Array:
 		return String(e[0]).contains("_" + species + "_") or String(e[0]).begins_with("kin_")
 	return Sfx.cue_log.slice(from).filter(mine)
 
+
 ## Passes if exactly one cry of `mood` sounded since entry `from`.
 func _one_cry(from: int, k: Kin, mood: String, what: String) -> void:
 	var cries := _cries(from, k.species)
 	ok(cries.size() == 1 and cries[0][0] == KinVoice.cue(k.species, mood), "%s: one %s cry (%s)" % [what, mood, cries])
+
 
 ## One command, one cry: send, recall and the four orders each sound once in the owner's species voice; a second
 ## command inside KinAck.GAP_S stays quiet; a rival's Boki is never heard, a teammate's only in earshot.
@@ -275,7 +384,7 @@ func _acks() -> void:
 	ok(k.state == "flying_home", "setup: a tap with the Boki away calls it back")
 	_one_cry(at, k, "happy", "recall")
 	var rv := rival()
-	var rk := Kin.new()      # a bare Boki: KinAck reads only its match, species, record, owner, team and spot
+	var rk := Kin.new()  # a bare Boki: KinAck reads only its match, species, record, owner, team and spot
 	rk.m = m
 	rk.species = k.species
 	rk.rec = k.rec
@@ -291,6 +400,7 @@ func _acks() -> void:
 	rk.free()
 	Sfx.cue_log = null
 
+
 # ------------------------------------------------------------------ 4. the Boki's own ability
 func _cast_c() -> void:
 	_fresh()
@@ -301,7 +411,10 @@ func _cast_c() -> void:
 	aim_at(p_v, p_v.pos + Vector3(5.0, 0, 0))
 	var went := KinCommand.cast_c(p_v)
 	m.step(Match.DT)
-	ok(went and not k.runner.is_ready("k1") and k.state == "shoulder", "the ability on the shoulder: cast through you, it stays put (state %s)" % k.state)
+	ok(
+		went and not k.runner.is_ready("k1") and k.state == "shoulder",
+		"the ability on the shoulder: cast through you, it stays put (state %s)" % k.state
+	)
 	_fresh()
 	p_v = m.player
 	k = p_v.kin
@@ -311,7 +424,14 @@ func _cast_c() -> void:
 	var at := k.pos
 	var out := KinCommand.cast_c(p_v)
 	m.step(Match.DT)
-	ok(out and not k.runner.is_ready("k1") and k.state != "shoulder" and k.pos.distance_to(at) < 3.0, "the ability with the Boki out: cast from where it stands, it does not come back (state %s, moved %.1fm)" % [k.state, k.pos.distance_to(at)])
+	ok(
+		out and not k.runner.is_ready("k1") and k.state != "shoulder" and k.pos.distance_to(at) < 3.0,
+		(
+			"the ability with the Boki out: cast from where it stands, it does not come back (state %s, moved %.1fm)"
+			% [k.state, k.pos.distance_to(at)]
+		)
+	)
+
 
 # ------------------------------------------------------------------ 4b. the wind-up before the release frame
 func _wind_up() -> void:
@@ -331,6 +451,7 @@ func _wind_up() -> void:
 	run_for(0.1)
 	ok(k.st_skills == skills + 1 and not k.cast_do.is_valid(), "...and let go on it")
 
+
 # ------------------------------------------------------------------ 5. downed
 func _downed() -> void:
 	_fresh()
@@ -339,10 +460,15 @@ func _downed() -> void:
 	var origin := p_v.pos
 	var spot := p_v.pos + Vector3(9.0, 0, 0)
 	var cues := ["boki_downed", "boki_revive"]
-	k.pos = spot; k.state = "active"; k.fly = {}
+	k.pos = spot
+	k.state = "active"
+	k.fly = {}
 	_listen(cues)
 	k.go_down()
-	ok(k.state == "downed" and k.down_total >= 14.9 and k.down_total <= 20.1, "a Boki that goes down is down for 15-20s (%.1fs)" % k.down_total)
+	ok(
+		k.state == "downed" and k.down_total >= 14.9 and k.down_total <= 20.1,
+		"a Boki that goes down is down for 15-20s (%.1fs)" % k.down_total
+	)
 	run_for(1.5, _tally.bind(cues))
 	ok(k.state == "downed" and Vector2(k.pos.x - spot.x, k.pos.z - spot.z).length() < 1.0, "it stays where it fell")
 	ok(not KinCommand.cast_c(p_v), "no ability cast while down")
@@ -351,21 +477,31 @@ func _downed() -> void:
 	# rescue by touch
 	p_v.teleport(Vector3(spot.x, spot.y, spot.z))
 	run_for(0.25, _tally.bind(cues))
-	ok(k.state == "downed" and k.rescue_t > 0.0 and k.rescue_on, "running into it starts the rescue (%.2fs, no key)" % k.rescue_t)
+	ok(
+		k.state == "downed" and k.rescue_t > 0.0 and k.rescue_on,
+		"running into it starts the rescue (%.2fs, no key)" % k.rescue_t
+	)
 	ok(float(KinDowned.rules()["rescue_s"]) == 3.5, "the rescue takes 3.5s (data: rescue_s)")
 	run_for(1.5, _tally.bind(cues))
 	ok(k.state == "downed" and k.rescue_t > 1.0, "...it is not a scoop: 1.7s in it is still going (%.2fs)" % k.rescue_t)
 	run_for(2.2, _tally.bind(cues))
 	_tally(cues)
-	ok(k.state != "downed" and k.hp >= k.max_hp * 0.55, "...and at 3.5s it is back with a good chunk of health (%s, %.0f%%)" % [k.state, 100.0 * k.hp / k.max_hp])
-	ok(heard == {"boki_downed": 1, "boki_revive": 1},
-			"...one boki_downed as it went down, one boki_revive as you got it back (%s)" % [heard])
+	ok(
+		k.state != "downed" and k.hp >= k.max_hp * 0.55,
+		"...and at 3.5s it is back with a good chunk of health (%s, %.0f%%)" % [k.state, 100.0 * k.hp / k.max_hp]
+	)
+	ok(
+		heard == {"boki_downed": 1, "boki_revive": 1},
+		"...one boki_downed as it went down, one boki_revive as you got it back (%s)" % [heard]
+	)
 	# you carry it while it fills: walking at 90%, nothing fires, no jump or glide (Shift or interact puts it down);
 	# hard crowd control or a launch drops it
 	p_v.teleport(origin)
 	var plain := _walk_speed(p_v)
 	p_v.teleport(origin)
-	k.pos = origin + Vector3(9.0, 0, 0); k.state = "active"; k.fly = {}
+	k.pos = origin + Vector3(9.0, 0, 0)
+	k.state = "active"
+	k.fly = {}
 	k.go_down()
 	p_v.teleport(Vector3(k.pos.x, k.pos.y, k.pos.z))
 	run_for(1.5)
@@ -378,7 +514,14 @@ func _downed() -> void:
 		"...you walk at 0.9x while carrying (%.2f vs %.2f m/s)" % [carried, plain]
 	)
 	var x0 := p_v.pos.x
-	run_for(0.3, func(): p_v.inp["move"] = Vector2(1, 0); p_v.inp["fire"] = true; p_v.inp["jump"] = true; p_v.inp["sec_hold"] = true)
+	run_for(
+		0.3,
+		func():
+			p_v.inp["move"] = Vector2(1, 0)
+			p_v.inp["fire"] = true
+			p_v.inp["jump"] = true
+			p_v.inp["sec_hold"] = true
+	)
 	for key in ["move", "fire", "jump", "sec_hold"]:
 		p_v.inp[key] = Vector2.ZERO if key == "move" else false
 	ok(p_v.pos.x - x0 > 0.5, "...you can walk while you do it (moved %.2fm)" % (p_v.pos.x - x0))
@@ -392,7 +535,7 @@ func _downed() -> void:
 	ok(k.rescue_on, "...plain damage does not break it")
 	var rv := rival()
 	for i in 6:
-		p_v.hurt(3.0, rv, {"src": "shot", "kb": Vector2(2.5, 0.0)})          # (bullets: damage and a small shove)
+		p_v.hurt(3.0, rv, {"src": "shot", "kb": Vector2(2.5, 0.0)})  # (bullets: damage and a small shove)
 		run_for(0.1)
 	ok(
 		k.rescue_on and k.rescue_t > 1.5,
@@ -420,11 +563,17 @@ func _downed() -> void:
 	ok(k.rescue_on and not KinDowned.contested(k), "setup: a rescue under way with nobody near")
 	var held2 := k.rescue_t
 	run_for(0.5, func(): rv.teleport(Vector3(k.pos.x + 0.8, k.pos.y, k.pos.z)))
-	ok(KinDowned.contested(k) and k.rescue_t <= held2 + 0.05, "an enemy on the Boki pauses the progress (%.2fs -> %.2fs)" % [held2, k.rescue_t])
+	ok(
+		KinDowned.contested(k) and k.rescue_t <= held2 + 0.05,
+		"an enemy on the Boki pauses the progress (%.2fs -> %.2fs)" % [held2, k.rescue_t]
+	)
 	k.rescue_on = false
 	k.rescue_t = 0.0
 	run_for(1.0, func(): rv.teleport(Vector3(k.pos.x + 0.8, k.pos.y, k.pos.z)))
-	ok(not k.rescue_on and k.rescue_t == 0.0 and k.state == "downed", "...and while they stand there you cannot start picking it up")
+	ok(
+		not k.rescue_on and k.rescue_t == 0.0 and k.state == "downed",
+		"...and while they stand there you cannot start picking it up"
+	)
 	run_for(0.5, func(): rv.teleport(Vector3(k.pos.x + 30.0, k.pos.y, k.pos.z)))
 	ok(k.rescue_on, "...once they leave, you can")
 	p_v.inp["dash"] = true
@@ -451,11 +600,14 @@ func _downed() -> void:
 	ok(k.rescue_on, "...interact does")
 	foe.teleport(Vector3(k.pos.x + 30.0, k.pos.y, k.pos.z))
 	k.rescue_on = false
-	k.state = "active"; k.fly = {}
+	k.state = "active"
+	k.fly = {}
 	k.go_down()
 
 	# self-recovery
-	k.pos = p_v.pos + Vector3(9.0, 0, 0); k.state = "active"; k.fly = {}
+	k.pos = p_v.pos + Vector3(9.0, 0, 0)
+	k.state = "active"
+	k.fly = {}
 	_listen(cues)
 	k.go_down()
 	var t_total := k.down_total
@@ -463,13 +615,24 @@ func _downed() -> void:
 	ok(k.state == "downed", "alone, it is still down just before its time")
 	run_for(2.0, _tally.bind(cues))
 	_tally(cues)
-	ok(k.state != "downed" and k.hp > 0.0 and k.hp <= k.max_hp * 0.3, "it comes round on its own at low health (%s, %.0f%%)" % [k.state, 100.0 * k.hp / k.max_hp])
-	ok(heard == {"boki_downed": 1, "boki_revive": 1},
-			"...one boki_downed and one boki_revive, nothing in the %.0fs between (%s)" % [t_total, heard])
+	ok(
+		k.state != "downed" and k.hp > 0.0 and k.hp <= k.max_hp * 0.3,
+		"it comes round on its own at low health (%s, %.0f%%)" % [k.state, 100.0 * k.hp / k.max_hp]
+	)
+	ok(
+		heard == {"boki_downed": 1, "boki_revive": 1},
+		"...one boki_downed and one boki_revive, nothing in the %.0fs between (%s)" % [t_total, heard]
+	)
 	# a fall into the abyss: only the timer
-	k.pos = p_v.pos + Vector3(9.0, 0, 0); k.state = "active"; k.fly = {}
+	k.pos = p_v.pos + Vector3(9.0, 0, 0)
+	k.state = "active"
+	k.fly = {}
 	k.go_down(true)
-	ok(k.state == "downed" and k.down_void and not KinDowned.rescuable(k), "a Boki that fell into the abyss can only wait out the timer")
+	ok(
+		k.state == "downed" and k.down_void and not KinDowned.rescuable(k),
+		"a Boki that fell into the abyss can only wait out the timer"
+	)
+
 
 # ------------------------------------------------------------------ 6. nobody takes it
 func _no_steal() -> void:
@@ -478,16 +641,22 @@ func _no_steal() -> void:
 	var k: Kin = p_v.kin
 	var r := rival()
 	var spot := p_v.pos + Vector3(10.0, 0, 6.0)
-	k.pos = spot; k.state = "active"; k.fly = {}
+	k.pos = spot
+	k.state = "active"
+	k.fly = {}
 	k.go_down()
 	r.teleport(Vector3(spot.x + 0.3, spot.y, spot.z))
 	r.inp["interact"] = true
 	var owner := k.owner_h
 	run_for(4.0, func(): r.inp["interact"] = true)
-	ok(k.state == "downed" and k.owner_h == owner and k.owner_h == p_v, "a rival standing on it, holding interact, takes nothing")
+	ok(
+		k.state == "downed" and k.owner_h == owner and k.owner_h == p_v,
+		"a rival standing on it, holding interact, takes nothing"
+	)
 	var dealt := k.hurt(50.0, r, {})
 	ok(dealt == 0.0 and k.hp <= 0.0, "...and cannot hurt it")
 	ok(not BokiHud.squad_downed(m).is_empty() and r.team != k.team, "(it is still yours)")
+
 
 # ------------------------------------------------------------------ 7. the Merge
 func _merge() -> void:
@@ -502,7 +671,10 @@ func _merge() -> void:
 	var pressed := KinMerge.press(p_v)
 	ok(pressed and KinMerge.active(p_v) and p_v.ult < 0.25, "R merges and spends the meter (bond %.2f)" % p_v.ult)
 	var form: Dictionary = p_v.merge_st.get("form", {})
-	ok(not form.is_empty() and String(form.get("name", "")) != "", "the merge has a form: a look and a name, no tiers (%s)" % String(form.get("name", "?")))
+	ok(
+		not form.is_empty() and String(form.get("name", "")) != "",
+		"the merge has a form: a look and a name, no tiers (%s)" % String(form.get("name", "?"))
+	)
 	var looks := {}
 	for sp in ["cindle", "puddlet", "mossel"]:
 		if not Data.KIN.has(sp):
@@ -514,7 +686,14 @@ func _merge() -> void:
 		if KinMerge.press(q):
 			var f: Dictionary = q.merge_st.get("form", {})
 			looks[sp] = "%s/%s" % [f.get("style", "?"), f.get("word", "?")]
-	ok(looks.size() >= 2 and looks.values().size() > 0 and (looks.values() as Array).any(func(v): return v != looks.values()[0]), "different Boki types merge into different looks %s" % [looks])
+	ok(
+		(
+			looks.size() >= 2
+			and looks.values().size() > 0
+			and (looks.values() as Array).any(func(v): return v != looks.values()[0])
+		),
+		"different Boki types merge into different looks %s" % [looks]
+	)
 	# the ability changes: every ability is faster for the merge's length, whatever the class
 	_fresh()
 	m.player.kin.stow()
@@ -524,7 +703,10 @@ func _merge() -> void:
 	_listen(fuse)
 	KinMerge.press(m.player)
 	_tally(fuse)
-	ok(_cdr(m.player) > base_cdr, "merged: your abilities cool down faster (cooldown stat %.2f -> %.2f)" % [base_cdr, _cdr(m.player)])
+	ok(
+		_cdr(m.player) > base_cdr,
+		"merged: your abilities cool down faster (cooldown stat %.2f -> %.2f)" % [base_cdr, _cdr(m.player)]
+	)
 	var torso: Node3D = m.player.model.get_node_or_null("Rig/Torso") if m.player.model else null
 	# (the silhouette pops in when the Boki lands in you, 0.45s into the transformation)
 	run_for(float(MergeForm.data()["xform_s"]) + 0.1, _tally.bind(fuse))
@@ -532,15 +714,28 @@ func _merge() -> void:
 		ok(torso.get_node_or_null(MergeLook.PARTS_NAME) != null, "merged: the form's silhouette parts ride the torso")
 	run_for(float(m.player.merge_st.get("T", 10.0)) + float(MergeForm.data()["xform_s"]) + 1.0, _tally.bind(fuse))
 	_tally(fuse)
-	ok(heard == {fuse[0]: 1, "boki_fuse_tired": 1},
-			"the Fusion plays %s once as it starts and boki_fuse_tired once as it runs out (%s)" % [fuse[0], heard])
+	ok(
+		heard == {fuse[0]: 1, "boki_fuse_tired": 1},
+		"the Fusion plays %s once as it starts and boki_fuse_tired once as it runs out (%s)" % [fuse[0], heard]
+	)
 	if torso:
-		ok(torso.get_node_or_null(MergeLook.PARTS_NAME) == null or torso.get_node(MergeLook.PARTS_NAME).is_queued_for_deletion(), "the merge's parts are removed when it ends (no leftovers stacking up)")
-	ok(not KinMerge.active(m.player) and m.player.kin.state == "shoulder", "the merge ends and the Boki is back on the shoulder (state %s)" % m.player.kin.state)
+		ok(
+			(
+				torso.get_node_or_null(MergeLook.PARTS_NAME) == null
+				or torso.get_node(MergeLook.PARTS_NAME).is_queued_for_deletion()
+			),
+			"the merge's parts are removed when it ends (no leftovers stacking up)"
+		)
+	ok(
+		not KinMerge.active(m.player) and m.player.kin.state == "shoulder",
+		"the merge ends and the Boki is back on the shoulder (state %s)" % m.player.kin.state
+	)
 	ok(m.player.merge_cd > 0.0, "the slot rests a moment after it (%.1fs)" % m.player.merge_cd)
+
 
 func _cdr(h: Hunter) -> float:
 	return h.gear_stat("cdr")
+
 
 # ------------------------------------------------------------------ 7. merge from out
 func _leap() -> void:
@@ -552,7 +747,10 @@ func _leap() -> void:
 	run_for(1.0)
 	var mb := mob_at("skitter", (p_v.pos + k.pos) * 0.5 + Vector3(0, 0, 0.2))
 	p_v.ult = 1.0
-	ok(k.state == "active" and KinMerge.plan(p_v) == "leap", "a full meter with the Boki out says leap (plan '%s')" % KinMerge.plan(p_v))
+	ok(
+		k.state == "active" and KinMerge.plan(p_v) == "leap",
+		"a full meter with the Boki out says leap (plan '%s')" % KinMerge.plan(p_v)
+	)
 	ok(KinMerge.press(p_v) and k.state == "flying_home", "R sends it leaping back to you")
 	var merged_in_air := false
 	for i in 90:
@@ -565,21 +763,28 @@ func _leap() -> void:
 	# too far to leap
 	_fresh()
 	p_v = m.player
-	p_v.kin.pos = p_v.pos + Vector3(50.0, 0, 0); p_v.kin.state = "active"; p_v.kin.fly = {}
+	p_v.kin.pos = p_v.pos + Vector3(50.0, 0, 0)
+	p_v.kin.state = "active"
+	p_v.kin.fly = {}
 	p_v.ult = 1.0
 	ok(KinMerge.plan(p_v) == "far" and not KinMerge.press(p_v), "a Boki too far away must be called back first")
+
 
 # ------------------------------------------------------------------ 7. a downed Boki: R waits. No Boki at all: a weak surge
 func _surge() -> void:
 	_fresh()
 	var p_v := m.player
 	var k: Kin = p_v.kin
-	k.pos = p_v.pos + Vector3(8.0, 0, 0); k.state = "active"; k.fly = {}
+	k.pos = p_v.pos + Vector3(8.0, 0, 0)
+	k.state = "active"
+	k.fly = {}
 	k.go_down()
 	p_v.ult = 1.0
 	ok(KinMerge.plan(p_v) == "rescue", "with the Boki down, R does nothing but say so (plan '%s')" % KinMerge.plan(p_v))
-	ok(not KinMerge.press(p_v) and not KinMerge.active(p_v) and p_v.ult >= 1.0,
-			"...the full meter is kept (%.2f)" % p_v.ult)
+	ok(
+		not KinMerge.press(p_v) and not KinMerge.active(p_v) and p_v.ult >= 1.0,
+		"...the full meter is kept (%.2f)" % p_v.ult
+	)
 	ok(KinMerge.deny_text(p_v).begins_with("Rescue "), "...and says what to do ('%s')" % KinMerge.deny_text(p_v))
 	run_for(2.0)
 	ok(p_v.ult >= 1.0 and k.state == "downed", "the meter stays full while it is down")
@@ -590,9 +795,12 @@ func _surge() -> void:
 	k.state = "bench"
 	p_v.ult = 1.0
 	ok(KinMerge.plan(p_v) == "surge", "with no Boki at all, R is a surge (plan '%s')" % KinMerge.plan(p_v))
-	ok(KinMerge.press(p_v) and KinMerge.active(p_v) and bool(p_v.merge_st.get("surge", false)),
-			"R fires the basic surge")
+	ok(
+		KinMerge.press(p_v) and KinMerge.active(p_v) and bool(p_v.merge_st.get("surge", false)),
+		"R fires the basic surge"
+	)
 	ok(float(p_v.merge_st["T"]) <= 4.0, "...which is short and weak (%.1fs)" % float(p_v.merge_st["T"]))
+
 
 # ---------------------------------------------------------------- 7. the merge with Boki as wisps (decision 0101)
 ## R works from the wisp (the Boki leaps out of it into you), ends back in a wisp, and never touches the summon.
@@ -610,8 +818,10 @@ func _wisp_merge() -> void:
 		ok(KinMerge.plan(p_v) == "merge", "...R plans a merge from the wisp (plan '%s')" % KinMerge.plan(p_v))
 		ok(KinMerge.press(p_v) and KinMerge.active(p_v), "...and starts it, summon cooling down")
 		run_for(float(MergeForm.data()["xform_s"]) + 0.1)
-		ok(KinMerge.active(p_v) and String(p_v.merge_st["phase"]) == "live" and k.pos.distance_to(p_v.pos) < 3.0,
-			"...the form goes live on you")
+		ok(
+			KinMerge.active(p_v) and String(p_v.merge_st["phase"]) == "live" and k.pos.distance_to(p_v.pos) < 3.0,
+			"...the form goes live on you"
+		)
 		k.render(Match.DT, 1.0)
 		ok(not k.wisp and k.model.name != "BokiWisp", "...the full Boki fuses, not the wisp (%s)" % k.model.name)
 		ok(s.cd > 32.0 and s.cd <= 33.0 and not s.out(), "...the summon cooldown only ran on (%.1f s)" % s.cd)
@@ -619,8 +829,10 @@ func _wisp_merge() -> void:
 		run_for(float(p_v.merge_st["T"]) + 1.0)
 		ok(not KinMerge.active(p_v), "...the merge ends")
 		run_for(KinSummon.SHRINK_S + 0.5)
-		ok(k.wisp and k.state == "shoulder" and k.model.name == "BokiWisp" and k.scale.is_equal_approx(Vector3.ONE),
-			"...and the Boki is a wisp again (state %s)" % k.state)
+		ok(
+			k.wisp and k.state == "shoulder" and k.model.name == "BokiWisp" and k.scale.is_equal_approx(Vector3.ONE),
+			"...and the Boki is a wisp again (state %s)" % k.state
+		)
 		ok(s.cd > 0.0 and s.cd < 33.0 and not s.out(), "...the summon cooldown was left alone (%.1f s)" % s.cd)
 		s.cd = 0.0
 		ok(KinSummon.press(p_v) and not k.wisp, "...and it can be summoned after")
@@ -648,14 +860,20 @@ func _wisp_merge() -> void:
 			live = true
 			break
 	ok(live, "...and the merge goes live")
-	ok(left0 > 0.0 and not kk.summon.out() and kk.summon.cd > kk.summon.cd_base - 2.0,
-		"...taken in: the window is over, the full cooldown runs (%.1f s)" % kk.summon.cd)
+	ok(
+		left0 > 0.0 and not kk.summon.out() and kk.summon.cd > kk.summon.cd_base - 2.0,
+		"...taken in: the window is over, the full cooldown runs (%.1f s)" % kk.summon.cd
+	)
 	var cd_in := kk.summon.cd
 	run_for(float(q.merge_st["T"]) + 1.0)
-	ok(not KinMerge.active(q) and kk.state == "shoulder" and kk.wisp and not kk.summon.out(),
-		"...it ends with the Boki a wisp, not stuck out (state %s)" % kk.state)
-	ok(kk.summon.cd < cd_in and kk.summon.cd > cd_in - float(q.merge_st.get("T", 12.0)) - 14.0,
-		"...and the cooldown only ran on, one cooldown (%.1f s)" % kk.summon.cd)
+	ok(
+		not KinMerge.active(q) and kk.state == "shoulder" and kk.wisp and not kk.summon.out(),
+		"...it ends with the Boki a wisp, not stuck out (state %s)" % kk.state
+	)
+	ok(
+		kk.summon.cd < cd_in and kk.summon.cd > cd_in - float(q.merge_st.get("T", 12.0)) - 14.0,
+		"...and the cooldown only ran on, one cooldown (%.1f s)" % kk.summon.cd
+	)
 	# the ultimate (a release) from a wisp: the Boki is a wisp again at once, no rest, summon cooldown as it was
 	_fresh("cindle", true)
 	q = m.player
@@ -664,13 +882,17 @@ func _wisp_merge() -> void:
 	KinMerge.press(q)
 	run_for(float(MergeForm.data()["xform_s"]) + 0.5)
 	KinMerge.end(q, "ult")
-	ok(q.kin.wisp and q.kin.rest_t == 0.0 and q.kin.summon.cd > 18.0 and q.kin.summon.cd <= 20.0,
-		"wisp merge: the ultimate ends with a wisp, no rest (cooldown %.1f s)" % q.kin.summon.cd)
+	ok(
+		q.kin.wisp and q.kin.rest_t == 0.0 and q.kin.summon.cd > 18.0 and q.kin.summon.cd <= 20.0,
+		"wisp merge: the ultimate ends with a wisp, no rest (cooldown %.1f s)" % q.kin.summon.cd
+	)
+
 
 # ------------------------------------------------------------------ 8. net snapshot round trip
 ## What the owner's game sends for the hunter and its Boki, through the JSON the wire uses.
 func _wire() -> Array:
 	return JSON.parse_string(JSON.stringify([m._ser(m.player), m._ser(m.player.kin)]))
+
 
 ## Reads a wire pair on a fresh match as a remote hunter "r_h" with its Boki "r_k" (the real _net_make/_net_apply path).
 ## The sender's match is replaced, so take the pair first. Returns [Hunter, Kin].
@@ -685,6 +907,7 @@ func _remote(pair: Array) -> Array:
 	m._net_apply(k, pair[1])
 	return [h, k]
 
+
 ## A fresh match whose Boki lies downed 9m away (abyss: it fell out of the world).
 func _downed_kin(abyss := false) -> Kin:
 	_fresh()
@@ -694,6 +917,7 @@ func _downed_kin(abyss := false) -> Kin:
 	k.fly = {}
 	k.go_down(abyss)
 	return k
+
 
 func _snap() -> void:
 	# a Boki out, on the Guard order, resting after a merge, at partial health; the bond meter part full
@@ -735,6 +959,7 @@ func _snap() -> void:
 	_snap_fused()
 	_kcmd()
 
+
 ## Downed and carried out by its owner: the progress is a fraction of the rescue, the carrier's pose is an id.
 func _snap_carried() -> void:
 	var k := _downed_kin()
@@ -749,6 +974,7 @@ func _snap_carried() -> void:
 		"snapshot: the carry's progress arrives (%.2fs vs %.2fs)" % [(r[1] as Kin).rescue_t, prog]
 	)
 	ok(pose == "rs_carry", "...and the carrier's pose (%s)" % pose)
+
 
 func _snap_fused() -> void:
 	_fresh()
@@ -781,6 +1007,7 @@ func _snap_fused() -> void:
 		back.get("style") == form["style"] and back.get("word") == form["word"],
 		"the form string decodes to the same form"
 	)
+
 
 ## kcmd events as the owner's game queues them, through JSON, played by a client that knows the body.
 func _kcmd() -> void:
@@ -816,6 +1043,7 @@ func _kcmd() -> void:
 		KinNet.on_event(m, cmd_ev[0])
 	ok(m.fx.radial == rings, "...and a client plays it with no ground ring (%d -> %d)" % [rings, m.fx.radial])
 
+
 # ------------------------------------------------------------------ 9. net
 func _net() -> void:
 	ok(
@@ -823,6 +1051,7 @@ func _net() -> void:
 		"the net version moved for the new snapshot shape (%s)" % Net.VERSION
 	)
 	_stale_snapshot()
+
 
 ## BUGHUNT_1111 item 6: a snapshot sent before the kill but landing after it must not stand the Boki up.
 func _stale_snapshot() -> void:
