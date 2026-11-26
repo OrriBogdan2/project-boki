@@ -783,17 +783,17 @@ archetypes/juggernaut.json:body.size	0.825
 archetypes/juggernaut.json:dash.cd	10.4
 archetypes/juggernaut.json:dash.dist	4.5
 archetypes/juggernaut.json:dash.dodge_rage	15.0
-archetypes/juggernaut.json:dash.hit_dmg	9.0
+archetypes/juggernaut.json:dash.hit_dmg	6.0
 archetypes/juggernaut.json:dash.hit_kb	0.0
 archetypes/juggernaut.json:dash.time	0.17
-archetypes/juggernaut.json:dash.tip_dmg	18.0
+archetypes/juggernaut.json:dash.tip_dmg	12.0
 archetypes/juggernaut.json:dash.tip_kb	0.0
 archetypes/juggernaut.json:dash.tip_r	1.4
 archetypes/juggernaut.json:dash.windup	0.07
 archetypes/juggernaut.json:e.arrive_t	0.25
 archetypes/juggernaut.json:e.carry	0.35
 archetypes/juggernaut.json:e.cooldown	12.8
-archetypes/juggernaut.json:e.dmg	6.0
+archetypes/juggernaut.json:e.dmg	4.0
 archetypes/juggernaut.json:e.face_k	1.0
 archetypes/juggernaut.json:e.jump_carry	0.7
 archetypes/juggernaut.json:e.range	13.0
@@ -809,7 +809,7 @@ archetypes/juggernaut.json:e.tether_max	24.0
 archetypes/juggernaut.json:e.time	5.0
 archetypes/juggernaut.json:e.turn	6.0
 archetypes/juggernaut.json:lmb.arc	175.0
-archetypes/juggernaut.json:lmb.dmg	8.0
+archetypes/juggernaut.json:lmb.dmg	6.5
 archetypes/juggernaut.json:lmb.full	0.95
 archetypes/juggernaut.json:lmb.rate	0.34
 archetypes/juggernaut.json:lmb.reach	3.1
@@ -894,7 +894,7 @@ archetypes/juggernaut.json:rmb.lunge.perfect_w	0.15
 archetypes/juggernaut.json:rmb.lunge.push	0.0
 archetypes/juggernaut.json:rmb.lunge.speed	24.0
 archetypes/juggernaut.json:rmb.lunge.walk_k	0.8
-archetypes/juggernaut.json:rmb.slam.dmg	26.0
+archetypes/juggernaut.json:rmb.slam.dmg	18.0
 archetypes/juggernaut.json:rmb.slam.len	4.3
 archetypes/juggernaut.json:rmb.slam.low	0.35
 archetypes/juggernaut.json:rmb.slam.low_k	0.5
@@ -1163,7 +1163,7 @@ archetypes/rimewright.json:model_glow.strength	2.2
 archetypes/rimewright.json:passive.chill_t	4.0
 archetypes/rimewright.json:passive.fan_hits	8
 archetypes/rimewright.json:passive.fan_r	2.4
-archetypes/rimewright.json:passive.fan_splinter	60.0
+archetypes/rimewright.json:passive.fan_splinter	54.0
 archetypes/rimewright.json:passive.splinter_delay	0.4
 archetypes/rimewright.json:passive.splinter_dmg	37.0
 archetypes/rimewright.json:passive.splinter_r	3.0
