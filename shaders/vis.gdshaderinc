@@ -26,7 +26,7 @@ const float VIS_COS = 0.7071;          // cos of half the cone: 90 degrees wide 
 const float VIS_NEAR = 2.0;           // m: the circle all round you that is always lit (Match.NEAR_SENSE)
 const float VIS_REVEAL_R = 2.0;        // m: lit round a revealed rival, soft to +0.6 (~10% of the screen across, as measured)
 const float VIS_SOFT = 1.4;            // m each side of the cone's sides: it fades over 2.8 m, half lit on the rule's edge
-const float VIS_NEAR_SOFT = 1.0;       // m each side of VIS_NEAR: the circle behind you fades over 2 m, not a 0.6 m ring
+const float VIS_NEAR_SOFT = 1.6;       // m: the circle behind you is full to VIS_NEAR - 0.2, then fades over this (was a 0.6 m ring)
 
 // Two lit shares together without a crease: max() leaves a kink where the circle meets the cone's fade, which reads
 // as a line behind you (owner 11-26); this is smooth and is still 1 wherever either is.
@@ -43,7 +43,7 @@ float vis_side(vec2 d, float dist, vec2 dir) {
 float vis_one(vec2 eye, vec2 dir, float range, float scout, vec2 wp, int max_steps) {
 	vec2 d = wp - eye;
 	float dist = length(d);
-	float near_v = 1.0 - smoothstep(VIS_NEAR - VIS_NEAR_SOFT, VIS_NEAR + VIS_NEAR_SOFT, dist);
+	float near_v = 1.0 - smoothstep(VIS_NEAR - 0.2, VIS_NEAR - 0.2 + VIS_NEAR_SOFT, dist);
 	if (near_v >= 1.0) { return 1.0; }
 	float c = dot(d / max(dist, 0.001), dir);
 	float reach = range * (1.0 + scout * smoothstep(vis_scout.y - 0.006, vis_scout.y + 0.006, c));

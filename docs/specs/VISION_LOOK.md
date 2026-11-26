@@ -16,7 +16,7 @@ above, player controls below, found by row brightness). Numbers below are scaled
 |---|---|---|
 | Player on screen | (985, 686) -> (946, 622): 49% across, 58% down | the match camera's own framing (camera.json) |
 | Wedge sides on screen | left side 18 deg above level, right side 23 deg below: ~185 deg of screen | 90 deg on the ground (`VIEW_COS` 0.7071, `VIS_COS`; was 120 until 11-23, 170 until 11-18, 106 before 11-12): a wide cone like the target feel, not the half-plane |
-| Wedge at the player | the line runs straight through the player, no lit circle behind | 2.0 m lit circle (`NEAR_SENSE`, `VIS_NEAR`; was 3.2), fading over 1.0-3.0 m (`VIS_NEAR_SOFT`; a 2.0-2.6 m fade read as a line behind you: owner 11-26) |
+| Wedge at the player | the line runs straight through the player, no lit circle behind | 2.0 m lit circle (`NEAR_SENSE`, `VIS_NEAR`; was 3.2), full to 1.8 m, fading out by 3.4 m (`VIS_NEAR_SOFT` 1.6; the old 2.0-2.6 m ring read as a line behind you: owner 11-26; a 1.0-3.0 m fade was tried and left the circle too faint) |
 | Edge line | ~3 px solid core, cyan peak about (45, 138, 180) on dim ground | none: a cone, not an outline (owner 11-17) |
 | Edge glow | 4-6 px into the lit side, none on the dim side | none: the wedge fades over 2.8 m, half lit on its side (`VIS_SOFT` 1.4 m each way; was 1.6 m inside only). Lit areas join with `vis_union` (1-(1-a)(1-b)), not max(): max left a crease where the circle met the cone's fade (owner 11-26: "no line behind you, the fog should just be there") |
 | Lit ground | about (78-89, 105-121, 157-174), luma ~105 | the ground's own colour x 1.05 |
