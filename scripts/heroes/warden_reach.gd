@@ -8,7 +8,7 @@ extends RefCounted
 ## Data "reach": {"bones": [upper arm, forearm, hand], "grip": m from the hand joint to the middle of what it grips,
 ## "max_stretch": how far the forearm may stretch (default: as far as the tip), "level": the arm lies level whatever
 ## the tip's height}. A second instance, data "gun_reach" on the meta GUN_TIP, holds his gun arm straight out along the
-## aim without stretching (Brass Broadside); `aim` turns its hand so the gun's muzzle (not the bone) points down the arm.
+## aim without stretching (Brass Broadside); `aim` turns its hand so the gun's muzzle points down the arm.
 
 const TIP := "reach_tip"  # root meta: the world point the hand reaches to; unset (or INF) when the arm is home
 const GUN_TIP := "gun_reach_tip"  # root meta: the same for the gun arm ("gun_reach")
