@@ -130,6 +130,16 @@ plays today's clip.
 with at least 10 bones off Meshy's T-pose on the switch frame and after the crossfade; a charged swing takes `lmb`
 without `lmb_hold`; a synthetic clips file's clip lands on Meshy's bones and plays; every slot the data names has its clip.
 
+## Whole-body flips (data `flips`)
+Meshy's clips have no flip, so a kit move listed in `"flips": [kmove, ...]` (Sable's Vault cartwheels, 11-26) is drawn by
+`WardenNativeFlip`: the turn the move keys for the rig (`fx`/`fz` turn, `fy` twist, `lift`, `scripts/match/kmoves_*.gd`)
+is read at the move's clock and laid on the dressed model about the hips (`HunterAnim.BODY_C`), in the plane of the dash
+(the axis is up x the dash's way, locked at the press): the head goes over the way she travels, a cartwheel when she faces
+across it, a somersault along it. The body holds the jump clip meanwhile (no attack clip); a held move (`hold`, the air
+cartwheel) keeps the turn's end pose while the dash or the air lasts. No mesh or clip is edited. `--native-flip-check`
+(a real Shift in a match: starts on the press, full turn, head over the travel, upright when the dash ends, the same
+path frame for frame with the flip off) and `--native-flip-shots` (GPU stills per beat).
+
 ## Kit-move clips (data `kmoves`)
 A kit move (state `kmove`, the move's id) may have a clip of its own: `"kmoves": {kmove: {"clip": name, "hold_from": s,
 "rate": x, "fade": s}}` (`WardenNativeMoves`). While the move lasts the clip is laid at the move's clock (`kmove_t`), so a

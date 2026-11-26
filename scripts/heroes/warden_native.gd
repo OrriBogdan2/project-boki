@@ -76,6 +76,7 @@ var springs := WardenSprings.new()  # loose parts (data "springs": Sable's coat 
 var props: WardenProps  # the contract's parts Meshy's mesh lacks (data "props": Kael's sword, Cinder's heel jets)
 var upper: WardenNativeUpper  # a swing or cast over the running legs (the torso and arms only)
 var moves: WardenNativeMoves  # the kit moves with a clip of their own (data "kmoves")
+var flip: WardenNativeFlip  # the kit moves that turn the body whole (data "flips": Sable's Vault cartwheels)
 var companions: WardenCompanions  # floating companions cut out of Meshy's body (Meeko's sun and cloud), or null
 var steps: WardenNativeSteps  # the footsteps, on the foot plants of Meshy's clips (data "plants")
 var mood: WardenMood  # the faces on those companions swap and blink (warden_anim/<art>.json "mood"), or null
@@ -154,6 +155,7 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 		WardenClipFile.add(player.get_animation_library(lib_name), glb, WardenGlb.skeleton(glb), d["clip_files"])
 	moves = WardenNativeMoves.new(player, d)
 	plays.merge(moves.clips())
+	flip = WardenNativeFlip.new(glb, d)
 	skel = WardenGlb.skeleton(glb)
 	_borrow_clips()
 	for st in SLOTS + moves.clips().keys():  # (a slot whose clip is nowhere plays today's clip)
@@ -221,6 +223,10 @@ func _process(dt: float) -> void:
 		moves.play(s, plays, dt)
 		attack_left = 0.0
 		cur = "kmove"
+	elif flip.owns(s):  # a whole-body flip (WardenNativeFlip): the air pose under the turn, no attack clip
+		upper.stop()
+		attack_left = 0.0
+		_play("jump", float(d.get("jump_rate", 1.0)))
 	elif one != "":
 		attack_left = _clip_len(one) / _shot_rate(one)
 		if _over_legs(one, s):
@@ -237,6 +243,7 @@ func _process(dt: float) -> void:
 	upper.lay(dt)
 	steps.step(cur if xt < 0.0 else "")
 	WardenClips.air_tilt(root, skel, hips)  # (the glider's bank, the dive's pitch)
+	flip.step(s)
 	# (the look-at lies under a clip that turns the head: the attack clip owns it, eased in and out like a body clip)
 	head_look.owned = move_toward(head_look.owned, 1.0 if attack_left > 0.0 else 0.0, dt / FADE)
 	head_look.step(dt, null)
