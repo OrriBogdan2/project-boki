@@ -24,6 +24,7 @@ func run(main_node: Node) -> void:
 	ak = load("res://tools/archetype_check.gd").new()
 	_disc_rim()
 	_sector_rows()
+	_kept_points()
 	ak.main = main
 	var shots := ""
 	for a in OS.get_cmdline_user_args():
@@ -540,6 +541,42 @@ func _sector_rows() -> void:
 		heights[snappedf(p.y, 0.01)] = true
 	ok("geo: a sector's rings are the ones quad builds ring by ring", g.v == want.v and g.c == want.c,
 			"%d vs %d vertices, %d heights" % [g.v.size(), want.v.size(), heights.size()])
+	w.free()
+
+## A rebuild that repeats last frame's rings and sectors (kept ground points, new colours) is the very triangles a
+## fresh AimGeo builds, and a changed tile under them drops the kept points.
+func _kept_points() -> void:
+	var w := World.new()
+	w.w = 32
+	w.h = 32
+	w.kind.resize(32 * 32)
+	w.level.resize(32 * 32)
+	for i in 32 * 32:
+		w.kind[i] = World.T_VOID if i % 29 == 0 else World.T_GROUND
+		w.level[i] = (i * 7) % 3
+	var g := AimGeo.new()
+	g.world = w
+	var draw := func(geo: AimGeo, k: float) -> void:
+		geo.at_height(0.5)
+		geo.disc(Vector2(15.3, 16.7), 3.4, Color(1, 0, 0, k), Color(0, 0, 1, k * 0.5))
+		geo.sector(Vector2(15.3, 16.7), 1.5, 8.0, 0.2, 2.6, Color.RED, Color(0.2, 0.9, 0.1, k))
+		geo.ring(Vector2(10.1, 9.4), 2.2, 0.3, Color(1, 1, 0, k), 0.0, TAU, Color(0, 1, 1, k))
+		geo.ring(Vector2(10.1, 9.4), 2.2, 0.3, Color(1, 1, 0, k), 0.4, 1.1)
+	var same := true
+	var hits := 0
+	for frame in 4:
+		if frame == 3:
+			w.level[16 * 32 + 15] = 2 if w.level[16 * 32 + 15] != 2 else 0     # the ground changes under the disc
+		g.reset()
+		hits += g._pts_last.size()
+		draw.call(g, 0.3 + 0.2 * frame)
+		var fresh := AimGeo.new()
+		fresh.world = w
+		fresh.reset()
+		draw.call(fresh, 0.3 + 0.2 * frame)
+		same = same and g.v == fresh.v and g.c == fresh.c
+	ok("geo: a repeat frame's kept ring and sector points draw the same triangles as a fresh build", same and hits == 8,
+			"kept shapes reused over frames 2-3: %d (want 8), the ground change drops them" % hits)
 	w.free()
 
 ## A disc's rim vertices sit on the angle grid (segs steps round), every ring cut at the same angles.
