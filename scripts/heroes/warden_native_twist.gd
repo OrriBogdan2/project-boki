@@ -20,7 +20,9 @@ func step(dt: float, s: Dictionary, on: bool) -> void:
 	turn = lerpf(turn, goal, 1.0 - exp(-dt * WardenClips.HEADING_RATE))
 	if hips < 0 or torso < 0 or absf(turn) < 0.002:
 		return
-	var was := skel.get_bone_pose_rotation(hips)
-	skel.set_bone_pose_rotation(hips, Quaternion(Vector3.UP, turn) * was)
-	var back := was.inverse() * Quaternion(Vector3.UP, -turn) * was
-	skel.set_bone_pose_rotation(torso, back * skel.get_bone_pose_rotation(torso))
+	# (the torso keeps its posed world turn: the spine bones between bend with the run, so undoing the turn in the
+	# hips' own frame would tip the chest at a wide strafe)
+	var held := skel.get_bone_global_pose(torso).basis.get_rotation_quaternion()
+	skel.set_bone_pose_rotation(hips, Quaternion(Vector3.UP, turn) * skel.get_bone_pose_rotation(hips))
+	var up := skel.get_bone_global_pose(skel.get_bone_parent(torso)).basis.get_rotation_quaternion()
+	skel.set_bone_pose_rotation(torso, up.inverse() * held)
