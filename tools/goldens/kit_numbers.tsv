@@ -577,7 +577,7 @@ archetypes/gil.json:body.hit_h	1.38
 archetypes/gil.json:body.hit_r	0.375
 archetypes/gil.json:body.legs	1.03
 archetypes/gil.json:body.shoulder	1.14
-archetypes/gil.json:body.size	1.391
+archetypes/gil.json:body.size	1.265
 archetypes/gil.json:body.torso	1.0
 archetypes/gil.json:dash.cd	8.0
 archetypes/gil.json:dash.dist	4.5
@@ -635,7 +635,7 @@ archetypes/gil.json:passive.cd	8.0
 archetypes/gil.json:passive.need	3
 archetypes/gil.json:passive.stun	0.75
 archetypes/gil.json:passive.window	5.0
-archetypes/gil.json:plate_offset	2.1
+archetypes/gil.json:plate_offset	1.91
 archetypes/gil.json:resource.max	3
 archetypes/gil.json:rmb.bag.air	2
 archetypes/gil.json:rmb.bag.fire	2
@@ -779,7 +779,7 @@ archetypes/juggernaut.json:body.hit_h	2.15
 archetypes/juggernaut.json:body.hit_r	0.429
 archetypes/juggernaut.json:body.legs	2.05
 archetypes/juggernaut.json:body.neck	-0.012
-archetypes/juggernaut.json:body.size	0.825
+archetypes/juggernaut.json:body.size	0.953
 archetypes/juggernaut.json:dash.cd	10.4
 archetypes/juggernaut.json:dash.dist	4.5
 archetypes/juggernaut.json:dash.dodge_rage	15.0
@@ -827,7 +827,7 @@ archetypes/juggernaut.json:lmb.wave_size[1]	0.6
 archetypes/juggernaut.json:lmb.wave_speed	36.0
 archetypes/juggernaut.json:model_glow.emit	1.4
 archetypes/juggernaut.json:model_glow.strength	2.4
-archetypes/juggernaut.json:plate_offset	2.26
+archetypes/juggernaut.json:plate_offset	2.61
 archetypes/juggernaut.json:rank_cd.dash[0]	1
 archetypes/juggernaut.json:rank_cd.dash[1]	0.8462
 archetypes/juggernaut.json:rank_cd.dash[2]	0.6154
