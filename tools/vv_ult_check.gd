@@ -196,7 +196,7 @@ func _mage_merge(m: Match, P: Hunter, K: MageKit, home: Vector3) -> void:
 			"y +%.1f" % (P.pos.y - home.y))
 	KinMerge.end(P, "test")
 
-## The Static spread (owner ruling 11-26, the full cases are --sparkle-r-spread-check): the landed-on foe gains the
+## The Static spread (the owner's rule; the full cases are --sparkle-r-spread-check): the landed-on foe gains the
 ## ult's own stack, the other gains its Static + 1, capped at 4; with no Static anywhere each simply gains 1.
 func _mage_spread(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: MageKit, home: Vector3) -> void:
 	var spot := home + Vector3(5, 0, 0)

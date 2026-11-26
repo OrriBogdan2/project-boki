@@ -358,7 +358,7 @@ func _static_source(struck: Array, at: Vector3) -> Ent:
 			best_d = d
 	return best
 
-## Owner ruling 11-26: every other foe the strike hits gains the source's Static + spread_add (3 -> +4, 0 -> +1),
+## The owner's rule: every other foe the strike hits gains the source's Static + spread_add (3 -> +4, 0 -> +1),
 ## capped at the max, with lightning arcing from the source to each.
 func _spread_static(f: Ent, spread: int, source: Ent) -> void:
 	kit.add_spark(f, spread)

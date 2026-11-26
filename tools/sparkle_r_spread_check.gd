@@ -1,5 +1,5 @@
 extends RefCounted
-## --sparkle-r-spread-check: owner ruling 11-26 on Sparkle's Kitefall (R). The foe the strike lands on (the most
+## --sparkle-r-spread-check: the owner's rule for Sparkle's Kitefall (R). The foe the strike lands on (the most
 ## Static, the nearest on a tie) gains the ult's own stack; every other foe in the strike gains that foe's Static
 ## + spread_add (3 -> +4, 0 -> +1), capped at the max, the counters set the frame of the strike; a foe outside the
 ## strike keeps its count. Target at 0/1/2/3 Static with three foes in range and one out, then one in-range foe
@@ -46,7 +46,8 @@ func run(main: Node) -> void:
 	var got := _strike(m, P, K, foes, spot, [2, 1, 0, 0])
 	ok(got.slice(0, 4) == [3, mx, 3, 3], "target 2, a foe in range at 1 -> it adds to 4 (%s)" % [got])
 	var hit_n: int = K.ult.last.get("hits", 0)
-	ok(K.ult.spreads == 15 and hit_n == 4, "arcs drawn %d (3 a strike, 5 strikes), strike hit %d" % [K.ult.spreads, hit_n])
+	var arcs: int = K.ult.spreads
+	ok(arcs == 15 and hit_n == 4, "arcs drawn %d (3 a strike, 5 strikes), strike hit %d" % [arcs, hit_n])
 	print("SPREAD CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
