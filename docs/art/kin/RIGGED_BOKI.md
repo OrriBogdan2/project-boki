@@ -141,6 +141,30 @@ that keeps a planted paw closest to the ground most of the stance. `_pick_clip` 
 `MAX_CADENCE` cycles/s. A new or re-keyed species: run `--boki-anim-audit`, copy the printed "measured" numbers into
 `STRIDE`.
 
+## How big it is (`KinSize`)
+
+A rigged Boki's size is its data: `content/kin/<id>.json` `size.cm` x `KinSize.M_PER_CM` (0.03625 m per cm) x
+`KinSize.READ_SHARE` (0.54) is how big it *reads*, at root scale 1, whatever the glb's own size. A Boki's read is the
+square root of the area its silhouette covers on screen (the convex hull of its mesh) in its idle pose, averaged over
+four turns and over both views it is seen from: the match camera's 57 degrees and the farm third-person camera's 20
+degrees (a geometric mean, so neither view outweighs the other). Two things did not work: fitting the longest side
+(a tall, narrow Vespyx and a low, long Prismander of the same length read 1.2x apart from the farm's low view) and
+measuring the bind pose (idle tucks Mycroll in to 0.69 of its bind read, Vespyx only to 0.93, so the farm still showed
+1.25x). The idle reads are measured offline, CPU-skinned (Godot's `bake_mesh_from_current_skeleton_pose` fails
+headless), into `content/rules/kin_read.json` (`KinSize.READS`); `KinSize.fit` looks the species up there, so it costs
+nothing at run time (a species missing from it is measured in its bind pose once). **After a model swap run
+`--kin-size-check --write`**: the check fails on a stale entry. `BokiRig.build` scales Flex by `fit` and stores it as
+the root meta `fit`; `BokiRig` and `KinPuppet` multiply Flex's pose scale by it. A new Meshy model needs no size
+tuning: set its `size.cm` and `--write`. The kin's own roll (Unique, Evo growth, Mutations) and the farm's one
+`FARM_BOKI_SCALE` (the same for every Boki, the active companion included) multiply on top.
+`--kin-size-check` measures every species with a model in its idle pose and asserts each reads within 5% of its data,
+the table is fresh (2%), no longest side is more than 2x off its data length (an outlier model to look at), the three
+starters (Vespyx, Prismander, Mycroll, 28 cm each) read within 1.12x of each other from each pitch on its own, in a
+match and at the farm's scale (now 1.09x at both), and Heatherhorn (70 cm) reads at least 1.5x the biggest starter
+(now 2.5x). The starters' cm are not the 30/28/27 asked first: at those the silhouettes differed by 1.33x. `--boki-size-shots` renders the proof (the HUD frame, the game camera, an eye-level camera) and writes each
+one's measured box and the area it covers on screen. The portrait (`KinPortrait`) divides the fit out: its fixed frame
+was cut for the glb's own size.
+
 ## Attack contact
 
 A Boki's bite lands `Kin.STRIKE_WINDUP` (0.3 s) after it starts (decision 0061). `BokiRig.CONTACT` holds where the

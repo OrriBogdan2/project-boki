@@ -74,7 +74,7 @@ func _species(main: Node, id: String) -> void:
 	var label := "%s (%s)" % [id, plan]
 
 	_hold(rig, k, "alert", SETTLE_S)
-	ok(rig.flex.scale.y > 1.05 and rig.flex.rotation.x > 0.0, "%s alert: stands tall, rocks back" % label)
+	ok(_squash(rig) > 1.05 and rig.flex.rotation.x > 0.0, "%s alert: stands tall, rocks back" % label)
 	_face(rig, k, "angry", "alert", label, 0.4)
 
 	_hold(rig, k, "growl", SETTLE_S)
@@ -83,14 +83,14 @@ func _species(main: Node, id: String) -> void:
 	ok(rig.clip == "run", "%s charging runs, even slower than a gallop" % label)
 	_face(rig, k, "angry", "growl", label)
 	_hold(rig, k, "whine", SETTLE_S, 2.0)
-	ok(rig.clip == "run" and rig.flex.scale.y < 0.9, "%s bolting runs low" % label)
+	ok(rig.clip == "run" and _squash(rig) < 0.9, "%s bolting runs low" % label)
 	_face(rig, k, "sad", "whine", label)
 
 	var dazed := _hold(rig, k, "dazed", SETTLE_S * 2.0)
 	lean_by_plan[plan] = maxf(float(lean_by_plan.get(plan, 0.0)), float(dazed["lean"]))
 	var slow := rig.clip == "idle" and is_equal_approx(rig.player.speed_scale, 0.4)
 	ok(slow, "%s dazed: a slow idle, not a frozen pose" % label)
-	ok(rig.flex.scale.y < 0.92, "%s dazed: slumped to %.2f of its height" % [label, rig.flex.scale.y])
+	ok(_squash(rig) < 0.92, "%s dazed: slumped to %.2f of its height" % [label, _squash(rig)])
 	ok(float(dazed["swing"]) > 0.1, "%s dazed: sways %.2f rad side to side" % [label, dazed["swing"]])
 	_face(rig, k, "sleepy", "dazed", label)
 	rig.seek(0.5)
@@ -100,13 +100,13 @@ func _species(main: Node, id: String) -> void:
 
 	_hold(rig, k, "scan", SETTLE_S)
 	ok(rig.clip == "run" and is_equal_approx(rig.player.speed_scale, 0.7), "%s lifted by the scan: legs kick" % label)
-	ok(rig.flex.scale.y > 1.1, "%s lifted by the scan: stretched up" % label)
+	ok(_squash(rig) > 1.1, "%s lifted by the scan: stretched up" % label)
 
 	# (at rest BokiIdle may be mid-fidget: its idle_fidget clip is the same standing idle)
 	_hold(rig, k, "", SETTLE_S)
 	var idle := rig.clip in ["idle", BokiIdle.FIDGET]
 	ok(
-		absf(rig.flex.scale.y - 1.0) < 0.01 and absf(rig.flex.rotation.x) < 0.01 and idle,
+		absf(_squash(rig) - 1.0) < 0.01 and absf(rig.flex.rotation.x) < 0.01 and idle,
 		"%s back to rest when the pose ends" % label
 	)
 	k.queue_free()
@@ -127,3 +127,8 @@ func _posed(rig: BokiRig) -> bool:
 		if not skel.get_bone_pose(i).is_equal_approx(skel.get_bone_rest(i)):
 			return true
 	return false
+
+
+## Flex's height scale without the species size fit (KinSize): 1 at rest.
+func _squash(rig: BokiRig) -> float:
+	return rig.flex.scale.y / float(rig.root.get_meta("fit", 1.0))
