@@ -330,7 +330,7 @@ Same method as the slice section above (`--hit-shape-fine`, rows for the eight a
 | LMB hold, Crushing Blow | smash_reach 2.8, arc 180 | reach 4.0 (2.8 + ray ~0.8 + 0.4; was 3.6 before ShotOrigin put the swing rays at the body centre), arc of centres 215; asserted | one crescent, about 180 deg in front | match |
 | RMB Aegis, Shield Slam | wall 4.2 wide at 140 deg; slam r 2.6, 100 deg (only from the Shield Charge at Guard 50) | no foe hurt (a wall); the slam is not reached by a plain RMB | slab 2.2 h wide (4.0); the bash is not seen | content match; slam not measured |
 | E Mending Ground | radius 2.3 | heals only: not measured | green disc 1.3 h (2.34) | content match |
-| R Faultline | 4 cells x 4.0 = 16 m, width 4.5 | far 16.4, lane 5.2 (16.0 and 4.4 net); asserted | 9 bh x 2.5 bh (16.2 x 4.5) | match |
+| R Faultline | 3 cells x 4.0 = 12 m, width 7.0 (owner 11-26: shorter and wider; was 16 x 5.5) | asserted (`--bulwark-combo-check`: lane 12 x 7) | 9 bh x 2.5 bh (16.2 x 4.5) | owner: shorter, wider |
 
 **Neve** (`rimewright`, source Celeste)
 
@@ -656,7 +656,7 @@ PARITY FIRST (DECISIONS 2026-11-07). Source: `the reference kit notes on the bri
 | RMB | Hold shield, front block, Shift = bash, 6 s [D] | Aegis hold .1, 160 HP (+25% a rank), block arc 140, drawn as the layered `AegisWall` (chord 4.2 m, 1.7 m tall; look only, 11-20 to 11-22), boop on LMB 2.8 m no damage (owner 11-09), Shield Charge on Shift: 4.2 m, 12 dmg, push 11, own 6 s cooldown, spends no dash charge | match; routing closed (`ext/combat-albert-aegis-input`) |
 | Q | none | glove | ours |
 | E | Zone around hammer, burst, Wisps, 8 s @IV [D] | Mending Ground: r **2.3** (the old r 3.5 is gone), delay 1, 4 s, 2 every 0.5 s, burst 18, cd 12 / 8 | match |
-| R | Fissure stun, AoE, heavy Slow, 50 s [D] | Faultline: 4 cells of 4 m, stun .5, 18 + slow 50%, cd 40 (0.8x, gap 10 owner row); lane **5.5** wide (source 4.5; owner 11-09 feel brief, decision 0061), 1.2 m hop in the wind-up | match; lane width owner |
+| R | Fissure stun, AoE, heavy Slow, 50 s [D] | Faultline: 3 cells of 4 m, stun .5, 18 + slow 50%, cd 40 (0.8x, gap 10 owner row); lane **7.0** wide (source 4.5; 5.5 from the owner 11-09 feel brief, decision 0061; 12 x 7 from the owner 11-26 'less long, more wide'), 1.2 m hop in the wind-up | match; lane size owner |
 | Dash | Spin Dash 8 s, knock [D] | 360 Smash 3.5 m / 0.17 s, 24 dmg, push 7, cd 8, **one charge** (`dash.charges` 1, was the heavy class's 2; `1ff0d92e81`, 11-16) | match |
 | Passive | Wall knock Stuns [D] | Crushed: 1.0 s stun and 8 damage on a knock into a wall (walls only). **No Guard meter and no Shield Slam**: cut again 11-20 (`4ce1bd2953`, owner 11-07), `--kit-parity-check` fails if either returns | match |
 | Anim | Footage poses | 17 moves plus the fusion move, all on `breaker.glb` (48 clips) | match on coverage |
@@ -920,7 +920,7 @@ The slice pass (Vex, Zedran, Hem, Cinder: docs/heroes) applied to Albert, Neve, 
 | | LMB hold (charge) | not seen (stands in 0102-0108) | 0.55 | owner #59 (hold walk) |
 | | RMB shield held | "mostly stands still", not measured | 0.6 on the ground, 1.0 in the air | not seen; kept |
 | | E Purify Zone | 117 and 115 px/s (0450-0454, 0487-0491): 1.0 | 1.0 | match |
-| | R Faultline | a 0.4 s planted wind-up; 139 px/s after it (0558-0562) | 0 for the wind-up and 0.2 s of the eruption, then 1.0 | match |
+| | R Faultline | a 0.4 s planted wind-up; 139 px/s after it (0558-0562); data warm-up 0.5 s | 0 for the wind-up and 0.05 s of the eruption, then 1.0 (owner 11-26: was 0.2 s, plus the slam's hit-stop on a whiff); the fissure runs in 0.2 s, cells 0.1 s apart, done 0.9 s after the press (was 1.4 s) | match |
 | Neve `rimewright` (tamsin.md, 240 px/s) | LMB darts held | thrown "while walking or skating", no number | 0.9 | not measured |
 | | RMB Ice Spear aim | not seen | 1.0 | not seen |
 | | Dash Skate held | 450-600 px/s: 1.9-2.5 | 11.5 m/s on a 5.0 run: 2.3 | match |
