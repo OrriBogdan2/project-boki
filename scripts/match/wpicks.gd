@@ -18,9 +18,9 @@ static func update(m: Match, dt: float) -> void:
 	for h in m.hunters:
 		if h.out or h.downed or h.dropping or h.riding or h.remote:
 			continue
+		var reach: Dictionary = PickupReach.rules()["bot" if h.ctrl == "bot" else "tune"]
 		for wp in m.wpicks:
-			var rule := "bot" if h.ctrl == "bot" else "tune"
-			if wp.has("val") or not PickupReach.near(m, h, wp["pos"], rule):
+			if wp.has("val") or not PickupReach.within(h, wp["pos"], reach) or not PickupReach.clear(m, h, wp["pos"]):
 				continue
 			if wp.has("tune") or (h.ctrl == "bot" and GearDrops.bot_wants(h, String(wp["gear"]), int(wp["rar"]))):
 				m.take_pick(h, wp)

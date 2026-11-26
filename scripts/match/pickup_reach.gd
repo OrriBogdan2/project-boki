@@ -15,10 +15,14 @@ static func settle() -> float:
 
 ## Is `at` within `rule`'s reach of the hunter: inside its radius and height, with nothing in the way.
 static func near(m: Match, h: Hunter, at: Vector3, rule: String) -> bool:
-	var r: Dictionary = rules()[rule]
-	if h.flat_dist(at) >= float(r["radius"]) or absf(h.pos.y - at.y) >= float(r["height"]):
-		return false
-	return clear(m, h, at)
+	return within(h, at, rules()[rule]) and clear(m, h, at)
+
+## Inside a rule's radius and height, nothing else checked: the cheap test to run first over every pickup.
+static func within(h: Hunter, at: Vector3, r: Dictionary) -> bool:
+	var reach := float(r["radius"])
+	var dx := at.x - h.pos.x
+	var dz := at.z - h.pos.z
+	return dx * dx + dz * dz < reach * reach and absf(h.pos.y - at.y) < float(r["height"])
 
 ## No rock, higher ground or kit wall between the hunter and the thing. A thing lying inside a rock's
 ## own cell is reached from any side, so loot that bounced into one is never stranded.

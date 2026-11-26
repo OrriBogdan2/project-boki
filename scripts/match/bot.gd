@@ -1437,6 +1437,8 @@ func _clear_line(m: Match, h: Hunter, a: Vector2, b: Vector2) -> bool:
 	var n := int(d.length() / 0.4) + 1
 	var side := Vector2(-d.y, d.x).normalized() * 0.32
 	var w: World = m.world
+	var tz := TerrainHazards.of(m)
+	var hazards := tz != null and not tz.areas.is_empty()
 	for k in range(1, n + 1):
 		var p := a + d * (float(k) / n)
 		# a rock in the way, or the abyss (straight at a goal across a bay in the island, the edge guard
@@ -1448,7 +1450,7 @@ func _clear_line(m: Match, h: Hunter, a: Vector2, b: Vector2) -> bool:
 		if w.tile_kind(p.x - side.x, p.y - side.y) == World.T_BLOCK:
 			return false
 		# ground a Boki can't handle (main's TerrainHazards): the walk goes round it
-		if TerrainHazards.avoid(m, h, p.x, p.y):
+		if hazards and TerrainHazards.avoid(m, h, p.x, p.y):
 			return false
 	return true
 
@@ -1461,6 +1463,8 @@ const PATH_SLACK_RING := 40  # tiles: The Crown's stairs are 50-63 m out, a bot 
 const PATH_STEPS := 4000  # tiles one search may open: the tight window...
 const PATH_STEPS_RING := 14000  # ...and the wide one
 const RING_GOALS := ["ring", "ring_in"]
+const STEP_X := [1, -1, 0, 0]  # tile steps of the path search: east, west, south, north
+const STEP_Z := [0, 0, 1, -1]
 
 
 ## A walkable tile path from a to b (tile centres), [] when none: the tight window, then (wide) the wide one.
@@ -1483,37 +1487,51 @@ func _grid_path_in(m: Match, a: Vector2i, b: Vector2i, h: Hunter, slack: int, ca
 	var hc := Vector2(m.heart.site.x, m.heart.site.z) if cap < INF else Vector2.ZERO
 	var lo := Vector2i(mini(a.x, b.x) - slack, mini(a.y, b.y) - slack)
 	var hi := Vector2i(maxi(a.x, b.x) + slack, maxi(a.y, b.y) + slack)
-	var prev := {a: a}
-	var q: Array = [a]
+	var tz := TerrainHazards.of(m)
+	var hazards := h != null and tz != null and not tz.areas.is_empty()
+	var cols := hi.x - lo.x + 1
+	var prev := PackedInt32Array()      # per window tile: the tile it was reached from (a window index), -1 unseen
+	prev.resize(cols * (hi.y - lo.y + 1))
+	prev.fill(-1)
+	var start := (a.y - lo.y) * cols + a.x - lo.x
+	prev[start] = start
+	var q := PackedInt32Array([start])      # first in, first out: read from `head`, never shifted
+	var head := 0
 	var found := false
-	var steps := 0
-	while q.size() > 0 and steps < max_steps:
-		steps += 1
-		var cur: Vector2i = q.pop_front()
-		if cur == b or (absi(cur.x - b.x) <= 1 and absi(cur.y - b.y) <= 1 and w.is_block(b.x + 0.5, b.y + 0.5)):
-			b = cur
+	var goal_block := w.is_block(b.x + 0.5, b.y + 0.5)
+	var end := start
+	while head < q.size() and head < max_steps:
+		var cur := q[head]
+		head += 1
+		var cx := lo.x + cur % cols
+		var cz := lo.y + int(cur / float(cols))
+		if (cx == b.x and cz == b.y) or (absi(cx - b.x) <= 1 and absi(cz - b.y) <= 1 and goal_block):
+			end = cur
 			found = true
 			break
-		for dv in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
-			var nx: Vector2i = cur + dv
-			if prev.has(nx) or nx.x < lo.x or nx.y < lo.y or nx.x > hi.x or nx.y > hi.y or not w.inb(nx.x, nx.y):
+		var cy := w.ground_at(cx + 0.5, cz + 0.5)
+		for k in 4:      # east, west, south, north (the order picks between equal ways round)
+			var nx := cx + STEP_X[k]
+			var nz := cz + STEP_Z[k]
+			if nx < lo.x or nz < lo.y or nx > hi.x or nz > hi.y or not w.inb(nx, nz):
 				continue
-			var i := w.idx(nx.x, nx.y)
-			if w.kind[i] != World.T_GROUND or Vector2(nx.x + 0.5, nx.y + 0.5).distance_to(hc) > cap:
+			var ni := (nz - lo.y) * cols + nx - lo.x
+			if prev[ni] >= 0 or w.kind[w.idx(nx, nz)] != World.T_GROUND:
 				continue
-			if absf(w.ground_at(nx.x + 0.5, nx.y + 0.5) - w.ground_at(cur.x + 0.5, cur.y + 0.5)) > 1.7:
+			if cap < INF and Vector2(nx + 0.5, nz + 0.5).distance_to(hc) > cap:
 				continue
-			if h and TerrainHazards.avoid(m, h, nx.x + 0.5, nx.y + 0.5):
+			if absf(w.ground_at(nx + 0.5, nz + 0.5) - cy) > 1.7:
 				continue
-			prev[nx] = cur
-			q.append(nx)
+			if hazards and TerrainHazards.avoid(m, h, nx + 0.5, nz + 0.5):
+				continue
+			prev[ni] = cur
+			q.append(ni)
 	if not found:
 		return []
 	var out: Array = []
-	var c := b
-	while c != a:
-		out.push_front(Vector2(c.x + 0.5, c.y + 0.5))
-		c = prev[c]
+	while end != start:
+		out.push_front(Vector2(lo.x + end % cols + 0.5, lo.y + int(end / float(cols)) + 0.5))
+		end = prev[end]
 	return out
 
 
