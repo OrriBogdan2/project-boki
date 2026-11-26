@@ -370,10 +370,10 @@ func _native_row(id: String, nat: WardenNative, state: String, speed: float, pl:
 ## Walk, run, walk, run: the feet alternate across the hand-overs (a switch of clip never steps one foot twice).
 func _ramp_row(id: String, nat: WardenNative) -> void:
 	var heard := []
-	var walk := float(nat.d.get("walk_mps", 1.4))
-	var run_mps := float(nat.d.get("run_mps", 4.6))
+	var walk_v := float(nat.d.get("walk_mps", 1.4))
+	var run_v := float(nat.d.get("run_mps", 4.6))
 	var mid := float(nat.d.get("run_from", 3.0))
-	for speed in [walk, run_mps, (walk + mid) * 0.5, (mid + run_mps) * 0.5]:  # walk, run, walk, run
+	for speed in [walk_v, run_v, (walk_v + mid) * 0.5, (mid + run_v) * 0.5]:  # walk, run, walk, run
 		heard.append_array(_native_walk(nat, speed, false, RAMP_SECONDS))
 	var alternate := heard.size() > 1
 	for i in heard.size() - 1:
