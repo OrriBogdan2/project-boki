@@ -50,6 +50,8 @@ func open(by_plan := false) -> void:
 	zoom_to = 1.0
 	center = Vector2(m.world.w, m.world.h) * 0.5
 	hot_line = m.biomes.hot.take_plan_line(m) if by_plan and m.biomes else ""
+	if m.arena:
+		m.arena.show_overlay(false)      # (the practice keys and meter would print over the map)
 
 func close() -> void:
 	if is_open: Sfx.play("ui_close", null, -8.0)
@@ -57,6 +59,8 @@ func close() -> void:
 	auto = false
 	hot_line = ""
 	_press = Vector2.INF
+	if m.arena:
+		m.arena.show_overlay(true)
 
 
 # ------------------------------------------------------------------ coordinates
@@ -211,6 +215,7 @@ func draw(sz: Vector2) -> void:
 	ReviveHud.full_map(self)
 	if m.biomes:
 		m.biomes.hot.full_map(self, kk)
+	PracticeMap.full_map(self)
 	HeartHud.full_map(self)
 	NestMap.full_map(self)
 	WaysOutMap.full_map(self)
@@ -667,8 +672,35 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 	var wv := minf(SIDE_W, sz.x - x0 - 14.0)
 	if wv < 150.0:
 		return
+	var r: Rect2
+	if m.spawn_plan:
+		r = _spawn_card(c, x0, wv, team)
+	elif m.arena:
+		r = PracticeMap.card(self, Vector2(x0, rect.position.y), wv)
+	else:
+		r = Rect2(x0, rect.position.y - 10.0, wv, 0.0)
+	# exits, under the spawns
+	var exit_rows := 1 + int(not m.shrines.is_empty()) + int(not m.beacons.is_empty())
+	var r2 := Rect2(Vector2(x0, r.end.y + 10), Vector2(wv, 38 + exit_rows * 22))
+	if r2.end.y < sz.y - 10 and m.exits and not m.exits.list.is_empty():
+		hud._rounded(r2, Color(0.04, 0.05, 0.08, 0.88), 12)
+		hud._text(r2.position + Vector2(14, 22), "WAYS OUT", 14, Color("8fe3c8"), hud.big)
+		ExitMark.glyph(c, Vector2(r2.position.x + 26, r2.position.y + 42), 8.0, ExitMark.SAMPLE, 0.0)
+		hud._text(Vector2(r2.position.x + 48, r2.position.y + 47), "Extraction (green: open)", 12, INK)
+		var row_y := r2.position.y + 42 + 22
+		if not m.shrines.is_empty():
+			shrine_glyph(c, Vector2(r2.position.x + 26, row_y), 5.5)
+			var shrine := "Shrine (hold %s: a power-up)" % Settings.key_cap("interact")
+			hud._text(Vector2(r2.position.x + 48, row_y + 5), shrine, 12, INK)
+			row_y += 22
+		if not m.beacons.is_empty():
+			ReviveHud.beacon_glyph(c, Vector2(r2.position.x + 26, row_y), 5.0, {}, 0.0)
+			hud._text(Vector2(r2.position.x + 48, row_y + 5), "Revive beacon (your squad back)", 12, INK)
+
+## The spawn card: every spawn category on this map and how much your squad knows. Returns its box.
+func _spawn_card(c: Control, x0: float, wv: float, team: int) -> Rect2:
 	var sp: SpawnPlan = m.spawn_plan
-	var cats: Array = sp.shown_cats() if sp else []
+	var cats: Array = sp.shown_cats()
 	var rows := cats.size()
 	var notes: Array = cats.map(func(cat): return Glossary.first_line(String(sp.cats[cat].get("name", cat))))
 	var note_rows := notes.filter(func(note): return note != "").size()
@@ -707,23 +739,7 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 		y += 22.0
 	hud._text(Vector2(r.position.x + 14, y + 6), "Vaults and lairs are known to all.", 11, MUTED)
 	hud._text(Vector2(r.position.x + 14, y + 20), "The rest show up once your squad sees them.", 11, MUTED)
-	# exits, under the spawns
-	var exit_rows := 1 + int(not m.shrines.is_empty()) + int(not m.beacons.is_empty())
-	var r2 := Rect2(Vector2(x0, r.end.y + 10), Vector2(wv, 38 + exit_rows * 22))
-	if r2.end.y < sz.y - 10 and m.exits:
-		hud._rounded(r2, Color(0.04, 0.05, 0.08, 0.88), 12)
-		hud._text(r2.position + Vector2(14, 22), "WAYS OUT", 14, Color("8fe3c8"), hud.big)
-		ExitMark.glyph(c, Vector2(r2.position.x + 26, r2.position.y + 42), 8.0, ExitMark.SAMPLE, 0.0)
-		hud._text(Vector2(r2.position.x + 48, r2.position.y + 47), "Extraction (green: open)", 12, INK)
-		var row_y := r2.position.y + 42 + 22
-		if not m.shrines.is_empty():
-			shrine_glyph(c, Vector2(r2.position.x + 26, row_y), 5.5)
-			var shrine := "Shrine (hold %s: a power-up)" % Settings.key_cap("interact")
-			hud._text(Vector2(r2.position.x + 48, row_y + 5), shrine, 12, INK)
-			row_y += 22
-		if not m.beacons.is_empty():
-			ReviveHud.beacon_glyph(c, Vector2(r2.position.x + 26, row_y), 5.0, {}, 0.0)
-			hud._text(Vector2(r2.position.x + 48, row_y + 5), "Revive beacon (your squad back)", 12, INK)
+	return r
 
 ## Left of the map: your squad, who leads the drop, and the keys for it.
 func _side(c: Control, sz: Vector2) -> void:

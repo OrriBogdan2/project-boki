@@ -402,6 +402,14 @@ func _build_ui() -> void:
 	meter.custom_minimum_size = Vector2(310, 0)
 	root.add_child(meter)
 
+## The practice keys, meter and station prompts off while the full map is up, back when it closes.
+func show_overlay(on: bool) -> void:
+	if layer != null:
+		layer.visible = on
+	if grounds != null:
+		grounds.show_layer(on)
+
+
 func _update_ui() -> void:
 	if meter == null:
 		return

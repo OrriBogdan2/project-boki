@@ -50,8 +50,13 @@ func _mode(tag: String, o: Dictionary, allowed: bool) -> void:
 		for i in 3:
 			await main.get_tree().process_frame
 		ok(m.hud.full_map.rect.size.x > 0.0, "%s: the map was drawn" % tag)
+		if m.arena:
+			ok(not m.arena.layer.visible, "%s: the practice keys and meter step aside" % tag)
+			ok(not PracticeMap.rows(m).is_empty(), "%s: the legend lists the practice tools" % tag)
 		await _key(KEY_M)
 		ok(not m.hud.map_open(), "%s: M again closes it" % tag)
+		if m.arena:
+			ok(m.arena.layer.visible, "%s: the practice keys and meter are back" % tag)
 		await _key(KEY_M)
 		await _key(KEY_ESCAPE)
 		ok(not m.hud.map_open(), "%s: Esc closes it" % tag)
@@ -84,8 +89,16 @@ func _shots() -> void:
 		m.start({"training": Match.arena_opts(), "test_zone": TestZone.opts()}[tag])
 		while m.hud == null or m.hud.full_map == null:
 			await main.get_tree().process_frame
+		var fade = main.get("fade")
+		if fade != null:
+			await fade.reveal(0.01)
+		m.set_process(false)
+		for i in 30:
+			m.step(Match.DT)
+			m.cam.snap(m.player.pos)
+			await main.get_tree().process_frame
 		await _key(KEY_M)
-		for i in 20:
+		for i in 10:
 			await main.get_tree().process_frame
 		main.get_viewport().get_texture().get_image().save_png(dir.path_join("map_%s.png" % tag))
 		m.queue_free()
