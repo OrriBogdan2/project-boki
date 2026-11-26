@@ -59,7 +59,7 @@ static var _uv := PackedVector2Array()
 static func _semibold() -> FontVariation:
 	var f := FontVariation.new()
 	f.base_font = HudStyle.BODY
-	f.variation_opentype = {TextServerManager.get_primary_interface().name_to_tag("wght"): 600}
+	f.variation_opentype = UI.weight(600)
 	return f
 
 
