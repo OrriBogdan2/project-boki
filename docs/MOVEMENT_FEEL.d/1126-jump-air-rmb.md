@@ -20,6 +20,11 @@ keeps the whole reach. `WallMoves.HOP_CLIMB_CAP` 1.6 -> 1.95 m (the new apex: a 
 goes). The wall tier results are unchanged: 1.6/2.4 m top from a jump, 3.2 m never (kick + mantle: yes), 4.0 m
 never however much you kick.
 
+The higher jump meets a one-terrace face with its lip 0-0.37 m over the feet on a dash + jump (under the ledge
+catch's floor), where the wall used to stop you dead (`--cliff-mantle-check` face 1 dash_jump: kept 0.6x of the
+speed 0/80, lip 5.3 m/s). `WallMoves.stopped` now holds the speed while you rise past a lip that close; you go over
+it a step later still moving (80/80, lip 11.0 m/s; main 80/80 at 6.3 m/s through the ledge rise).
+
 **Kael's air RMB (the Meteor Drop)**, headless, run 5.28 m/s, jump, RMB at the apex (1.91 m), 60 Hz steps:
 
 | | Kael before | Kael after | Brall (source) |

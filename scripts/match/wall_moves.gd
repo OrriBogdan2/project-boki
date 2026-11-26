@@ -118,8 +118,12 @@ func _at_wall(h: Hunter) -> bool:
 ## glider slides, never rebounds or stops dead, and nothing closes the canopy; the glide force
 ## (Hunter.GLIDE_ACCEL) then settles the slide at cruise x sin(angle off the normal). The source dump has no
 ## glide-wall row of its own [?]. Everyone else gets WALL_BACK of it. Measured by --move-feel-check glide_wall_*.
-static func stopped(h: Hunter, v: float) -> float:
-	return 0.0 if h.gliding else v * WALL_BACK
+## Rising past a lip already within a step of your feet (`top`, under the ledge catch's floor), the speed waits
+## at the face and carries on over it a step later: a jump that clips a terrace's edge doesn't die on it.
+static func stopped(h: Hunter, v: float, top: float) -> float:
+	if h.gliding:
+		return 0.0
+	return v if h.vel.y > 0.0 and top - h.pos.y <= World.STEP + 0.05 else v * WALL_BACK
 
 
 ## Called the step a wall stopped you in the air, with the velocity you hit it at and the wall's top.
