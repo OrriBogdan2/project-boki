@@ -37,6 +37,7 @@ const COLLAPSE_RAMP := 90.0  # s before the islands fall that the rumble starts 
 ## Bed level 0..1 per raid condition (Sfx.amb_layer scales 1 to the ambience's full level).
 const GUST := {"clear": 0.2, "day": 0.2, "dusk": 0.35, "night": 0.5, "ash": 1.0, "fog": 0.2}
 const RAIN := {"clear": 0.0, "day": 0.0, "dusk": 0.45, "night": 0.0, "ash": 0.0, "fog": 0.3}
+
 static var _rules: Dictionary = {}
 
 

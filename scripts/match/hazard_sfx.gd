@@ -2,14 +2,14 @@ class_name HazardSfx
 extends RefCounted
 ## The terrain hazards' sounds (content/sfx/hazards.json "play", tools/gen_sfx_hazards.py, docs/AUDIO.md):
 ## a quiet bed per area, heard as you near its edge; a contact cue per kind at a hunter on that ground (a
-## burn tick, a wade or a swim stroke, a skid, the static's crackle on a shock, a bramble snag); a gasp
-## before drowning; and a soft "warded" cue the first time a Boki or perk keeps a kind of ground off you.
+## burn tick, a skid, the static's crackle on a shock, a bramble snag; a swimmer's strokes are HazardMoveSfx's); a gasp
+## before drowning; and a soft "warded" cue the first time a Boki keeps a kind of ground off you.
 ## TerrainHazards calls it, for the bodies this game owns. Beds are held loops (Sfx.loop_hold), so they
 ## stop by themselves once the match stops ticking; cues go through the pool (Sfx.play: positional,
 ## gapped and stacked like every one-shot).
 
 const PATH := "res://content/sfx/hazards.json"
-const MOVING := 1.0  # m/s of ground speed that counts as moving through (a skid, a wade)
+const MOVING := 1.0  # m/s of ground speed that counts as moving through (a skid)
 
 static var _play := {}
 
@@ -88,8 +88,8 @@ func contact(h: Hunter, kind: String, safe: bool, st: Dictionary, entered: bool,
 	var kd: Dictionary = play_rules()["kinds"][kind]
 	if kd.has("breath"):
 		_breath(h, kd, safe, st)
-	var cue := String(kd.get("warded_contact", "")) if safe else String(kd["contact"])
-	if cue == "" or float(kd["every_s"]) <= 0.0:
+	var cue := String(kd.get("contact", ""))
+	if safe or cue == "" or float(kd["every_s"]) <= 0.0:
 		return
 	st["snd"] = 0.0 if entered else float(st.get("snd", 0.0)) - dt
 	if float(st["snd"]) > 0.0:
@@ -115,7 +115,7 @@ func shock(h: Hunter) -> void:
 	_cue(h, String(play_rules()["kinds"]["static"]["contact"]))
 
 
-## The player's Boki or perk keeps this ground off them: a soft cue, the first time for each kind a match.
+## The player's Boki keeps this ground off them: a soft cue, the first time for each kind a match.
 func ward(h: Hunter, kind: String) -> void:
 	if h != tz.m.player or warded.has(kind):
 		return
