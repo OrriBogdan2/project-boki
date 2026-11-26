@@ -11399,3 +11399,4 @@ READY ext/stuck-integ-50964d2a 599d5cec5e3c96ca573237604f3cc9ce08a8a638 (superse
 READY ext/farm-boki-xp-curve-port bbca99b13bfb9e0a396082dcc906f54a892c2426 (PR #230: main merged, wiki regenerated, check.sh + touched flags green)
 READY ext/sfx-native-steps eb9cd4891c715febc2bc06d32fa97d5438fc7313 (PR #864: main merged, warden_native.json doc conflict resolved, wiki regenerated, check.sh + step-sync green)
 READY ext/perf-hud-draw 7286e9d1f4d95ffbc9e57ce60d57ea26cc292388 (HUD CPU -0.75 ms/frame: label size cache, icon glyph cache, buffs at 20 Hz, bench zones; bar -2 ms not reached)
+READY ext/merge-lane-n19h-1119 de4bcc8d720 (PR #434: main merged, hazard sounds = main, wade/swim orphans + dup doc dropped; reds left = main reds)
