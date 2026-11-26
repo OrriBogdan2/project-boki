@@ -39,6 +39,8 @@ var hits_all: Array = []       # [[t, d]] everything you dealt (the session DPS 
 var dealt := 0.0
 var _cb: Callable
 var layer: CanvasLayer = null
+const MINIMAP_CLEAR := 50.0      # px the practice layout's key line shifts right so it clears the minimap
+var tools := true               # key line, DPS meter, dodge drill, bar on screen (the Test Zone starts them off)
 var hint: Label = null
 var meter: Label = null
 var card_layer: CanvasLayer = null
@@ -72,8 +74,10 @@ func setup(match_node: Match, which: String) -> void:
 		bot_at = _free_near(home + Vector3(0, 0, -7.0))
 	_cb = func(by, t, d, tags): _on_hit(by, t, d, tags)
 	CombatBus.hit_landed.connect(_cb)
+	tools = not m.opts.get("test_zone", false)
 	_build_ui()
-	_sign()
+	if tools:
+		_sign()
 	if layout == "arena":
 		grounds = Grounds.new(self)
 		grounds.build()
@@ -81,6 +85,7 @@ func setup(match_node: Match, which: String) -> void:
 	m.add_child(keys_node)
 	if m.hud:
 		m.hud.guide_hidden = true
+	if m.hud and tools:
 		m.hud.toast(("Training Grounds" if layout == "arena" else "Training") + "  ·  K kit card  ·  L loadout  ·  2-9 first eight Hunters", Color("f3eee2"))
 
 func teardown() -> void:
@@ -243,7 +248,8 @@ func tick(dt: float) -> void:
 			p_v.remove_meta("arena_down")
 			m.revive_hunter(p_v, null)
 			p_v.hp = p_v.max_hp
-	drill.tick(dt)
+	if tools:
+		drill.tick(dt)
 	if grounds:
 		grounds.tick(dt)
 	_update_ui()
@@ -423,16 +429,37 @@ func _build_ui() -> void:
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hint.position.y = 10 if layout == "arena" else 70     # (the Training Grounds's banner sits at the top)
 	hint.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	if layout != "arena":      # the practice layout's minimap fills the top left: start right of it
+		hint.offset_left += MINIMAP_CLEAR
+		hint.offset_right += MINIMAP_CLEAR
 	root.add_child(hint)
 	meter = UI.label("", 15, UI.INK, UI.big)
 	meter.autowrap_mode = TextServer.AUTOWRAP_OFF
 	meter.add_theme_constant_override("outline_size", 6)
 	meter.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
-	meter.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
-	meter.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	meter.position = Vector2(-330, 120)
+	if layout == "arena":
+		meter.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+		meter.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		meter.position = Vector2(-330, 120)
+	else:      # right-hand tips and toasts stack from y 108: the practice layout's meter sits under its minimap instead
+		meter.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+		meter.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		meter.position = Vector2(24, 244)
 	meter.custom_minimum_size = Vector2(310, 0)
 	root.add_child(meter)
+	hint.visible = tools
+	meter.visible = tools
+
+## The Test Zone's "Practice tools" switch: the key line, the DPS meter, the dodge drill and the bottom bar.
+func set_tools(on: bool) -> void:
+	tools = on
+	hint.visible = on
+	meter.visible = on
+	if not on:
+		drill.stop()
+	var pr := Practice.of(m)
+	if pr and pr.bar:
+		pr.show_bar(on)
 
 func _update_ui() -> void:
 	if meter == null:
