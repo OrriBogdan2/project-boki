@@ -13,6 +13,7 @@ const SAVE_KEY := "kit_drill"
 const SLICE := ["gunslinger", "juggernaut", "archer", "ashwick"]
 const SLOTS := ["lmb", "rmb", "e", "x", "dash"]      # "x" is the hunter ultimate (R)
 const ACTIONS := {"lmb": "fire", "rmb": "secondary", "e": "signature", "x": "hunter_ult", "dash": "dash"}
+const PANEL_Y := 24.0  # px from the top: the drill panel, centred
 const HOLD_S := 0.4            # s: how long a "hold" step wants the key down
 const DONE_S := 2.0            # s: the closing line stays up
 const GOLD := Color("f2c84a")
@@ -145,6 +146,8 @@ func _input(event: InputEvent) -> void:
 			on_press(ACTIONS[slot])
 
 func _process(dt: float) -> void:
+	var sz: Vector2 = m.hud.c.size
+	SafeArea.place(_panel, Vector2((sz.x - _panel.get_combined_minimum_size().x) * 0.5, PANEL_Y), sz)
 	if done_t >= 0.0:
 		done_t += dt
 		if done_t >= DONE_S:
@@ -160,8 +163,6 @@ func build_ui() -> void:
 	layer.layer = 4
 	add_child(layer)
 	_panel = UI.glass(10, 14)
-	_panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE, 24)
-	_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	layer.add_child(_panel)
 	var rows := VBoxContainer.new()
 	_panel.add_child(rows)

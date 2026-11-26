@@ -8,6 +8,11 @@ extends RefCounted
 const MARGIN := 12.0  # logical px kept clear on every side
 const MAX_ASPECT := 16.0 / 9.0  # widest the HUD spreads: wider screens keep it in a centred frame this shape
 
+const GAP := 8.0  # px kept between a popup and a reserved rect
+const FPS_LINE := Vector2(96.0, 22.0)  # px: the one-line readout "123 fps" with its margin, top right
+const FPS_KEY := "fps_counter"
+const MINIMAP_KEY := "minimap"
+
 static var recording := false
 static var seen := {}  # group -> Array of the Rect2s that group drew
 static var group := ""
@@ -40,6 +45,49 @@ static func framed(parent: Control) -> Control:
 	parent.resized.connect(fit)
 	fit.call()
 	return c
+
+
+## The one list of screen rects no popup, panel or toast may cover (name -> Rect2, screen px): the frame-rate readout
+## (its live rect while it shows, else the room of its one line) and the minimap, as large as the HUD size setting
+## grows it. Every popup of a match is placed with `clear_of`, never with an offset of its own.
+static func reserved(sz: Vector2) -> Dictionary:
+	var fps: Control = Overlay.fps_lbl
+	var room := Rect2(Vector2(sz.x - FPS_LINE.x - 8.0, 4.0), FPS_LINE)
+	var out := {FPS_KEY: fps.get_global_rect() if fps.visible and fps.size.x > 0.0 else room}
+	var box := inner(sz)
+	var map := HudStyle.minimap_rect(sz)
+	var grown := Rect2(box.position + (map.position - box.position) * HudScale.up(), map.size * HudScale.up())
+	out[MINIMAP_KEY] = grown
+	return out
+
+
+## `r` moved the shortest way (right, left, below or above a reserved rect) that keeps it inside the margin and off
+## every reserved rect; `r` itself when it is clear already or nowhere fits.
+static func clear_of(r: Rect2, sz: Vector2) -> Rect2:
+	var boxes: Array = []
+	for b: Rect2 in reserved(sz).values():
+		boxes.append(b.grow(GAP))
+	var best := r
+	var best_d := INF
+	var field := inner(sz)
+	for b: Rect2 in boxes:
+		if not b.intersects(r):
+			continue
+		for at: Vector2 in [
+			Vector2(b.end.x, r.position.y), Vector2(b.position.x - r.size.x, r.position.y),
+			Vector2(r.position.x, b.end.y), Vector2(r.position.x, b.position.y - r.size.y)
+		]:
+			var moved := Rect2(at, r.size)
+			var d := at.distance_to(r.position)
+			if d < best_d and field.encloses(moved) and not boxes.any(func(o: Rect2): return o.intersects(moved)):
+				best = moved
+				best_d = d
+	return best
+
+
+## Puts `c` (a popup, at least as big as its content) at `want`, moved off every reserved rect (clear_of).
+static func place(c: Control, want: Vector2, sz: Vector2) -> void:
+	c.position = clear_of(Rect2(want, c.size.max(c.get_combined_minimum_size())), sz).position
 
 
 ## `r` moved the least that puts it inside the margin (anchoring a panel to the corner it hangs from).

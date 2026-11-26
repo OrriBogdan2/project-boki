@@ -14,7 +14,6 @@ const ACTIONS := {"e": "signature", "x": "hunter_ult", "dash": "dash"}
 const REPS := 3  # reps per ability
 const CAST_WAIT := 1.0  # s the cast gets to open its window before the rep is dropped (cast denied)
 const COOL_MAX := 20.0  # s a finished rep waits for its window to close before the slot resets anyway
-const PANEL_POS := Vector2(16, 120)  # px, from the top left, under the portrait
 const WORDS := {"hit": "HIT", "late": "LATE: the window had closed", "early": "EARLY: wait for the marker"}
 
 var m: Match
@@ -62,7 +61,6 @@ func _open() -> void:
 	add_child(_layer)
 	_panel = UI.glass(10, 14)
 	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	_panel.position = PANEL_POS
 	_layer.add_child(_panel)
 	var v := UI.vbox(6)
 	_panel.add_child(v)
@@ -104,6 +102,7 @@ func _input(event: InputEvent) -> void:
 
 
 func _process(dt: float) -> void:
+	SafeArea.place(_panel, Practice.STATION_POS, m.hud.c.size)
 	if m.player.arch != arch:
 		start(m.player.arch)
 	tick(dt)

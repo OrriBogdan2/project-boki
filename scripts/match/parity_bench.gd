@@ -12,7 +12,6 @@ const KNOCK_END_SPEED := 0.5     # m/s, slower than this the knock is over
 const KNOCK_MAX_T := 1.0         # s, give up following a knock (the dummy walks back to its mark after a quiet moment)
 const WINDOW := 5.0              # s, the span of the "last N seconds" damage line
 const AWAY_DIST := 14.0          # m, walk this far from the selected dummy and the readout clears
-const PANEL_POS := Vector2(16, 120)   # px, from the top left, under the portrait
 
 var m: Match
 var target: Hunter = null       # the selected dummy
@@ -61,7 +60,6 @@ func _open() -> void:
 	add_child(_layer)
 	_panel = UI.glass(10, 14)
 	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	_panel.position = PANEL_POS
 	_layer.add_child(_panel)
 	var v := UI.vbox(6)
 	_panel.add_child(v)
@@ -124,6 +122,7 @@ func _on_status(t: Node, st: String, dur: float) -> void:
 	cc_kind = st
 
 func _process(_dt: float) -> void:
+	SafeArea.place(_panel, Practice.STATION_POS, m.hud.c.size)
 	if target != null and (not is_instance_valid(target) or m.player.pos.distance_to(target.pos) > AWAY_DIST):
 		_deselect()
 	if knocking and is_instance_valid(target):

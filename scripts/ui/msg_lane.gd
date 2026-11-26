@@ -28,6 +28,7 @@ var top := 100.0                ## px from the top of the screen where the colum
 var right_edge := 0.0           ## 0: the column is centred; else its right edge, in px
 var max_w := 0.0                ## px: the widest a card gets (the tutorial's column); 0: WIDE of the screen
 var avoid := Rect2()            ## screen area (the player's hunter, HunterZone) a card never covers: it slides aside
+var reserved: Array = []        ## screen rects (SafeArea.reserved: the frame-rate readout, the minimap) a card slides aside from
 var fight := false              ## true while the player is in a fight (Hud sets it): fewer, shorter lines
 var one_hint := false           ## true: one hint (own-life line) on show at a time (a match's TopStack sets it)
 var hold := false:              ## true: nothing but URGENT comes in (the tutorial banner has the floor)
@@ -188,6 +189,8 @@ func _layout(delta: float) -> void:
 		e["placed"] = true
 		y = maxf(y, above + GAP)
 		x += HunterZone.slide(Rect2(Vector2(x, y), box.size), avoid)
+		for r: Rect2 in reserved:
+			x += HunterZone.slide(Rect2(Vector2(x, y), box.size), r)
 		box.position = Vector2(x, y)
 		above = y + box.size.y
 		want += box.size.y + GAP
