@@ -1281,6 +1281,7 @@ func _move_player(d: float) -> void:
 	else:
 		var want := mv * run * (HunterMove.sneak_speed if crouching else 1.0)
 		hv = HunterMove.walk(hv, want, HunterMove.accel(String(Save.d.get("arch", ""))), 1.0, d)
+	hv = mover.trim.step(hv, air and not gliding and dash_t <= 0.0, d)
 	# the island's edge doesn't hold you: walk off it and you fall (glide back, or the abyss returns you)
 	var guard := false
 	var p0 := ppos
@@ -1324,6 +1325,7 @@ func _move_player(d: float) -> void:
 		if dash_t > 0.0:      # out of a dash, as in a match: the dash ends, the jump carries Loco.dash_jump_keep of it
 			dash_t = 0.0
 			pvel *= Loco.dash_jump_keep
+		mover.trim.start(Vector2(pvel.x, pvel.z))
 		Sfx.play("jump", null, -12.0)
 	elif air and can_act:
 		var holding := Input.is_action_pressed("jump") or Input.is_action_pressed("glide")
@@ -1331,7 +1333,7 @@ func _move_player(d: float) -> void:
 		if not gliding and press and loco.go(Loco.S.GLIDING):
 			dash_t = 0.0      # a press mid-dash ends it that frame: the glide carries the dash's velocity
 			gliding = true
-			pvy = Loco.glide_start(pvy)
+			pvy = Loco.glide_start(pvy, over)
 			Sfx.play("whoosh", null, -10.0, 0.1, 0.8)
 		elif gliding and not holding:
 			gliding = false

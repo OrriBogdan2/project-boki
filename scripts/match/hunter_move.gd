@@ -2,7 +2,7 @@ class_name HunterMove
 extends RefCounted
 ## Per-hunter run speed, ground acceleration and tall-ledge climbing, plus the ground stop, dash exit,
 ## fall, glide, dive, mantle and glider heat tunables every hunter shares, from content/rules/hunter_move.json
-## ([game data]: SUPERVIVE's movement settings, uu converted to metres).
+## ([game data]: the reference's movement settings, uu converted to metres).
 
 const CHASE_BONUS := 0.18  # share of run speed: heading at whoever took your kin
 
@@ -22,6 +22,8 @@ static var abyss_slow_to: float = _phys["abyss_slow_to"]
 static var glide_height: float = _phys["glide_height"]
 static var glide_pull_vy: float = _phys["glide_pull_vy"]
 static var glide_start_vy: float = _phys["glide_start_vy"]
+static var glide_rise_vy: float = _phys["glide_rise_vy"]  # m/s, the most rise an open near the ground keeps
+static var glide_rise_h: Array = _phys["glide_rise_h"]  # m above the ground: that rise eases to none between
 static var glide_sink: float = _phys["glide_sink"]
 static var glide_heat_s: float = _phys["glide_heat_s"]
 static var lift_heat: float = _phys["lift_heat"]
@@ -44,6 +46,9 @@ static var speed_cap: float = _phys["speed_cap"]
 static var haste: float = _phys["haste"]
 static var coyote_s: float = _phys["coyote_s"]
 static var jump_buffer_s: float = _phys["jump_buffer_s"]
+static var land_buffer_h: float = _phys["land_buffer_h"]  # m: falling closer, a jump press waits for the landing
+static var glide_floor_rise: float = _phys["glide_floor_rise"]  # m: rising closer, the glider can't open
+static var jump_trim_k: float = _phys["jump_trim_k"]  # 1/s^2, the dash-jump trim spring's rate (JumpTrim)
 static var sneak_speed: float = _phys["sneak_speed"]
 static var glide_regen_s: float = _phys["glide_regen_s"]  # s, an empty glider refills on the ground
 static var body_scale: float = _rules["body_scale"]  # our hunter's height over the source's (speed, accel, glide)
@@ -51,6 +56,9 @@ static var body_scale: float = _rules["body_scale"]  # our hunter's height over 
 static var glide_cruise: float = _phys["glide_cruise"] * body_scale
 ## m/s^2, the glider's pull toward where you steer at or under cruise, scaled with the cruise so a turn takes as long
 static var glide_accel: float = _phys["glide_accel"] * body_scale
+## m/s: a jump faster across the ground than [0] is trimmed (JumpTrim), to [0] of jump_trim_to from there up to [1]
+static var jump_trim_in := Vector2(float(_phys["jump_trim_in"][0]), float(_phys["jump_trim_in"][1])) * body_scale
+static var jump_trim_to := Vector2(float(_phys["jump_trim_to"][0]), float(_phys["jump_trim_to"][1])) * body_scale
 
 
 static func rules() -> Dictionary:
@@ -302,9 +310,21 @@ static func caught(dashing: bool, b1: float, b2: float) -> bool:
 	return b1 > 0.0 or b2 > 0.0
 
 
-## "About to land": falling, with the ground no further than the jump buffer (and a step more) of falling away,
-## and never further than 0.9 m. A jump pressed then waits for the landing instead of opening the glider.
-## `height` is metres above the ground.
+## "About to land" [game data]: falling with the ground under land_buffer_h. A jump pressed then never opens the
+## glider; it is kept until the landing (jump_hold) and jumps there. `height` is metres above the ground.
 static func near_landing(vy: float, height: float) -> bool:
-	var lead := jump_buffer_s + 0.02
-	return vy < 0.0 and height < maxf(0.9, (0.5 * Hunter.H_GRAV * lead - vy) * lead)
+	return vy < 0.0 and height < land_buffer_h
+
+
+## [game data] Too close to the ground for the glider to open: rising under glide_floor_rise, or about to land.
+static func too_low(vy: float, height: float) -> bool:
+	return near_landing(vy, height) or (vy >= 0.0 and height < glide_floor_rise)
+
+
+## Seconds a jump pressed in the air at `vy`, `height` metres over the ground, is kept: about to land, until the
+## landing (the fall's time and a step more), so a press near the ground is never lost; else jump_buffer_s.
+static func jump_hold(vy: float, height: float) -> float:
+	if not near_landing(vy, height):
+		return jump_buffer_s
+	var t := (vy + sqrt(vy * vy + 2.0 * Hunter.H_GRAV * height)) / Hunter.H_GRAV
+	return maxf(jump_buffer_s, t + 0.02)
