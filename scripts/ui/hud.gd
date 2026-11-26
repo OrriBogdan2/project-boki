@@ -367,7 +367,7 @@ func _draw_world_labels() -> void:
 			continue
 		if cam.is_position_behind(h.position) or LabelCull.ride_skip(h):
 			continue
-		var sp := LabelCull.at(self, _head(h, HudPlate.plate_offset(h)))
+		var sp := LabelCull.at(self, _head(h, HudPlate.up(h, HudPlate.plate_offset(h))))
 		if not sp.is_finite():
 			continue
 		LabelCull.mark(h)
@@ -1740,7 +1740,7 @@ func _head(h: Node3D, up: float) -> Vector3:
 ## Health right above your hunter, where your eyes already are.
 func _draw_overhead(p: Hunter) -> void:
 	var cam := m.cam
-	var at := _head(p, 2.7 * float(p.cdat["scale"]))
+	var at := _head(p, HudPlate.up(p, 2.7 * float(p.cdat["scale"])))
 	if cam.is_position_behind(at) or p.downed or p.riding:
 		return
 	var sp := cam.unproject_position(at)
