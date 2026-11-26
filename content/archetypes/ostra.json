@@ -20,6 +20,7 @@
 		"name": "Swell",
 		"max": 100,
 		"kind": "meter",
+		"gauge": true,
 		"wait": 4.0,
 		"drain": 12.0,
 		"hunter_k": 10.0,
