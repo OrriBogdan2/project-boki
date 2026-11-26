@@ -12,10 +12,10 @@ extends RefCounted
 ## --cues=off draws them with the height cues off, for the before shots (names get a "before_" prefix).
 
 const DT := 1.0 / 60.0
-const SETTLE := 0.5     # s of match time before each capture
-const SHOTS := 5        # shots in the string of the shots capture
+const SETTLE := 0.5  # s of match time before each capture
+const SHOTS := 5  # shots in the string of the shots capture
 const JUMP_WAIT := 0.3  # s after the jump press for the --air capture
-const SHOT_SPEED := 2.0 # m/s of those shots (slow, so they are still in frame at the capture)
+const SHOT_SPEED := 2.0  # m/s of those shots (slow, so they are still in frame at the capture)
 
 var main: Node
 var m: Match
@@ -25,12 +25,16 @@ var seed_v := 77
 var prefix := ""
 var arch := ""
 
+
 func run(main_node: Node) -> void:
 	main = main_node
 	for a in OS.get_cmdline_user_args():
-		if String(a).begins_with("--shots-dir="): dir = String(a).substr(12)
-		if String(a).begins_with("--seed="): seed_v = int(String(a).substr(7))
-		if String(a).begins_with("--arch="): arch = String(a).substr(7)
+		if String(a).begins_with("--shots-dir="):
+			dir = String(a).substr(12)
+		if String(a).begins_with("--seed="):
+			seed_v = int(String(a).substr(7))
+		if String(a).begins_with("--arch="):
+			arch = String(a).substr(7)
 		if String(a) == "--cues=off":
 			Settings.set_v("depth_cues", false, false)
 			prefix = "before_"
@@ -55,10 +59,13 @@ func run(main_node: Node) -> void:
 	print("DEPTHSHOTS in %s" % dir)
 	main.get_tree().quit(0)
 
+
 ## How many terrace levels lower the ground one tile from (x, z) along d lies (0 when it is not ground).
 func _step_to(w: World, x: int, z: int, d: Vector2i) -> int:
-	if not w.inb(x + d.x, z + d.y) or w.kind[w.idx(x + d.x, z + d.y)] != World.T_GROUND: return 0
+	if not w.inb(x + d.x, z + d.y) or w.kind[w.idx(x + d.x, z + d.y)] != World.T_GROUND:
+		return 0
 	return int(w.level[w.idx(x, z)]) - int(w.level[w.idx(x + d.x, z + d.y)])
+
 
 ## First roomy ground tile (scanning from the middle out) with a neighbour that passes `test`:
 ## [tile, direction to the neighbour, tile the other hunter stands on].
@@ -67,19 +74,22 @@ func _find(test: Callable) -> Array:
 	for r in range(0, int(w.w / 2.0) - 3):
 		for z in range(int(w.h / 2.0) - r, int(w.h / 2.0) + r + 1):
 			for x in range(int(w.w / 2.0) - r, int(w.w / 2.0) + r + 1):
-				if w.kind[w.idx(x, z)] != World.T_GROUND or not w.roomy(x, z): continue
+				if w.kind[w.idx(x, z)] != World.T_GROUND or not w.roomy(x, z):
+					continue
 				for d in [Vector2i(0, 1), Vector2i(0, -1), Vector2i(1, 0), Vector2i(-1, 0)]:
 					if w.inb(x + d.x, z + d.y) and test.call(x, z, d):
 						return [Vector2i(x, z), d, Vector2i(x, z) - d * 3]
 	return [Vector2i(int(w.w / 2.0), int(w.h / 2.0)), Vector2i(0, 1), Vector2i(int(w.w / 2.0), int(w.h / 2.0) - 3)]
+
 
 func _shoot(file: String, tile: Vector2i, d: Vector2i, foe_tile: Vector2i, fire := Vector2i.ZERO) -> void:
 	var w := m.world
 	P.teleport(Vector3(tile.x + 0.5, w.ground_at(tile.x + 0.5, tile.y + 0.5), tile.y + 0.5))
 	var foe: Hunter = m.hunters.filter(func(x): return x != P)[0]
 	var fy := w.ground_at(foe_tile.x + 0.5, foe_tile.y + 0.5)
-	if fy > -1e8: foe.teleport(Vector3(foe_tile.x + 0.5, fy, foe_tile.y + 0.5))
-	if fire != Vector2i.ZERO:      # a string of shots leaving along `fire`
+	if fy > -1e8:
+		foe.teleport(Vector3(foe_tile.x + 0.5, fy, foe_tile.y + 0.5))
+	if fire != Vector2i.ZERO:  # a string of shots leaving along `fire`
 		for k in range(1, SHOTS + 1):
 			var at := P.pos + Vector3(fire.x, 0.0, fire.y) * (1.0 + k * 1.1) + Vector3(0, 1.2, 0)
 			m.spawn_shot(P, at, Vector2(fire) * SHOT_SPEED, 1.0, 5.0, 0.12, Color("ffd66b"))
@@ -88,15 +98,18 @@ func _shoot(file: String, tile: Vector2i, d: Vector2i, foe_tile: Vector2i, fire 
 		m.step(DT)
 		t += DT
 		m.cam.snap(P.pos)
-		for h in m.hunters: h.render(DT, 1.0)
+		for h in m.hunters:
+			h.render(DT, 1.0)
 		await main.get_tree().process_frame
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join(prefix + file + ".png"))
+
 
 func _run_compat_child() -> void:
 	var args := ["--path", ProjectSettings.globalize_path("res://"), "--rendering-method", "gl_compatibility"]
 	args.append_array(["--rendering-driver", "opengl3", "--audio-driver", "Dummy", "--"])
 	args.append_array(OS.get_cmdline_user_args())
 	OS.execute(OS.get_executable_path(), args, [], true)
+
 
 ## The player on the middle ground tile, standing and then JUMP_WAIT s into a jump, framed by the match camera.
 func _air_shots() -> void:
@@ -112,17 +125,21 @@ func _air_shots() -> void:
 	var up := P.global_position.y - w.ground_at(P.pos.x, P.pos.z)
 	print("AIRSHOTS %s grounded=%s height=%.2f" % [arch, P.grounded, up])
 
+
 func _settle(secs := SETTLE) -> void:
 	var t := 0.0
 	while t < secs:
 		m.step(DT)
 		t += DT
 		m.cam.snap(P.pos)
-		for h in m.hunters: h.render(DT, 1.0)
+		for h in m.hunters:
+			h.render(DT, 1.0)
 		await main.get_tree().process_frame
+
 
 func _cls() -> String:
 	return Arch.weight(arch) if arch != "" else Data.class_of_save()
+
 
 func _setup() -> void:
 	m = Match.new()
@@ -131,10 +148,12 @@ func _setup() -> void:
 	m.start(opts.merged({"arch": arch, "cls": _cls()}))
 	m.set_process(false)
 	P = m.player
-	for mb in m.mobs: mb.queue_free()
+	for mb in m.mobs:
+		mb.queue_free()
 	m.mobs.clear()
 	for h in m.hunters:
 		h.ctrl = "idle"
 		h.inp["move"] = Vector2.ZERO
 	var fade = main.get("fade")
-	if fade != null: await fade.reveal(0.01)
+	if fade != null:
+		await fade.reveal(0.01)
