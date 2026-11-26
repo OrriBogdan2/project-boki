@@ -10,7 +10,7 @@ extends RefCounted
 const AKCheck := preload("res://tools/archetype_check.gd")
 const DT := AKCheck.DT
 const FULL := 5.9  # rad: the most the body turns in the flip (a full turn, 6.283 keyed)
-const OVER := 0.15  # m: at the quarter turn the head leads the hips this far along the dash's way
+const OVER := 0.3  # m: in the first half turn the head leads the hips this far along the dash's way
 const SAME := 0.0001  # m: the flipped and unflipped dashes' positions agree to this, every frame
 const GROUND_M := 4.5  # m and s: the Vault (content/archetypes/thief.json "dash"; dancer_feel_check's bounds)
 const GROUND_S := 0.48
@@ -141,7 +141,8 @@ func _ground(r: Dictionary) -> void:
 	var nat_attack := String(WardenNative.entry("sable")["clips"]["attack"])
 	ok(String(r["press"]).begins_with("thf_vault"), "the Shift press frame starts the flip (%s)" % r["press"])
 	var most := 0.0
-	var quarter := {}
+	var lead := -1.0  # m: the most the head leads the hips along the way, in the first half turn
+	var way: Vector3 = r["way"]
 	var top := {}
 	var clips := {}
 	var end_i := -1
@@ -150,18 +151,17 @@ func _ground(r: Dictionary) -> void:
 		if String(f["flip"]) != "":
 			clips[f["clip"]] = true
 			most = maxf(most, float(f["angle"]))
-			if quarter.is_empty() and float(f["angle"]) >= PI * 0.5:
-				quarter = f
+			if float(f["angle"]) > 0.0 and float(f["angle"]) < PI:
+				lead = maxf(lead, ((f["head"] as Vector3) - (f["hips"] as Vector3)).dot(way))
 			if top.is_empty() and float(f["angle"]) >= PI:
 				top = f
 		if end_i < 0 and not bool(f["rolling"]):
 			end_i = i
 	ok(most >= FULL, "she turns a full turn (%.2f rad)" % most)
-	var way: Vector3 = r["way"]
-	var lead := -1.0
-	if not quarter.is_empty():
-		lead = ((quarter["head"] as Vector3) - (quarter["hips"] as Vector3)).dot(way)
-	ok(lead >= OVER, "her head goes over the way she dashes: %.2f m ahead of the hips at the quarter turn" % lead)
+	ok(
+		lead >= OVER,
+		"her head goes over the way she dashes: up to %.2f m ahead of the hips in the first half turn" % lead
+	)
 	var under := not top.is_empty() and (top["head"] as Vector3).y < (top["hips"] as Vector3).y
 	ok(under, "at the top of the flip her head is under her hips")
 	ok(
