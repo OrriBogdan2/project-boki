@@ -246,9 +246,7 @@ friend's five: the higher total wins 10 gems (a tie pays nothing), paid once per
 and only friends who landed something are listed. Tuning: `derby` in `content/rules/glint_fishing.json`; `--glint-fishing-check`.
 Default taken: no save version bump, because both keys are optional and read with a default (old saves load as is). The
 alternative was a migration that seeds an empty list. Without the store (a desktop build) the rock starts a solo session.
-
 **XP pace pass (ext/garden-xp-pace).** GARDEN_FIRST_HOUR item 6: care 5 to 15, drill 1 to 2, play 3 to 5, win 5 to 8, curve 50 to 30 x level (first_win stays 60). `--garden-pace-check`: garden-only first form 123 to 28 min (runs 76 to 27, ratio 1.63 to 1.02: the farm now pays about as well as a 12 min run); Grown 669 to 190 min, first egg 1346 to 386 min of one sitting. That sitting model pays care once and plays no garden games, so it overstates a daily player's wait: `tools/garden_sim.py` now prints the first egg day (the visitor as the second Boki, its own care each day, all XP once the starter is Grown; friends and its care minute not charged, so about a day early). Home only 20 min a day (player home20): Lv 8 day 7 to 3, first egg day 12 to 6. Home only 5 min: Lv 8 14 to 7, egg 24 to 11. Default taken: care 15 + curve 30 (a week for the 20 min player even with the uncharged day). Alternatives tried: care 10 + curve 35 (egg day 8), care 15 alone or curve 30 alone (day 7, no margin), first_win 80 (day 7).
-
 ## What raising shows (audit 2026-11-20, `ext/farm-raise-shapes`)
 
 Every food and care input and what the player can see of it today:
