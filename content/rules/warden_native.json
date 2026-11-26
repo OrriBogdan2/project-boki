@@ -50,7 +50,7 @@
 	"hem": {"meshy_native": true, "hand": "RightHand",
 		"anchors": {"anchor_head_top": "head_end", "anchor_chest": "Spine02", "anchor_gun_R": "RightHand"},
 		"plants": {"walk": {"L": [0.049], "R": [0.577]}, "run": {"L": [0.05], "R": [0.317]}, "crouch": {"L": [0.117], "R": [0.567]}},
-		"clips": {"idle": "Idle", "walk": "walk", "run": "run", "jump": "Jump_Run", "attack": "Attack", "crouch": "Crouch_Walk_with_Torch"},
+		"clips": {"idle": "lace_idle", "idle_combat": "lace_idle_combat", "walk": "walk", "run": "run", "jump": "Jump_Run", "attack": "Attack", "crouch": "Crouch_Walk_with_Torch"},
 		"kmoves": {
 			"arc_draw": {"clip": "lace_draw", "hold_from": 1.15},
 			"arc_over": {"clip": "lace_over", "hold_from": 0.08},

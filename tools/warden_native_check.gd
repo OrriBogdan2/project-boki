@@ -157,6 +157,8 @@ func _states(main: Node, a: String) -> void:
 	_toon(a, m)
 	_crouch_arms(a, nat)
 	await _slots(main, a, m, nat)
+	await _combat_idle(main, a, m, nat)
+	await _fall(main, a, m, nat)
 	await _upper(main, a, m, nat)
 	await _kmoves(main, a, m, nat)
 	_moves(a, nat)
@@ -334,6 +336,7 @@ func _orbits(main: Node, a: String, nat: WardenNative) -> void:
 ## Plays state `s` for two frames (`calm` first, so the counters take it as their baseline) from a clean slate.
 func _feed(main: Node, nat: WardenNative, m: Node3D, calm: Dictionary, s: Dictionary) -> void:
 	nat.attack_left = 0.0
+	nat.combat_left = 0.0
 	nat.last = {"kmove": "", "swing_n": 0, "cast": -1.0, "recoil": 0.0}
 	nat.hit_prev = 99.0
 	nat.land_prev = 0.0
@@ -387,6 +390,38 @@ func _slots(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
 	ok(nat.player.current_animation == pick, "%s: a charged swing takes lmb without lmb_hold" % a)
 	nat.plays.erase("lmb")
 	await _synthetic_clips(main, a, m, nat)
+
+
+## Walking off a ledge starts the jump clip past its take-off crouch; a jump from the ground starts at the crouch.
+func _fall(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
+	for c in [["off a ledge", -5.0, true], ["a jump", 6.0, false]]:
+		m.set_meta(WardenClips.STATE, {"cast": CALM_CAST, "grounded": true})
+		await main.get_tree().process_frame
+		await main.get_tree().process_frame
+		m.set_meta(WardenClips.STATE, {"cast": CALM_CAST, "grounded": false, "vel": Vector3(0.0, c[1], -2.0)})
+		await main.get_tree().process_frame
+		var late: bool = nat.player.current_animation_position >= WardenNative.FALL_FROM - 0.1
+		ok(late == c[2], "%s: %s starts the jump clip at %.2f s" % [a, c[0], nat.player.current_animation_position])
+
+
+## A Hunter with an idle_combat clip stands in it for COMBAT_HOLD after a shot or a swing and in idle otherwise.
+func _combat_idle(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
+	if not nat.plays.has("idle_combat"):
+		return
+	var calm := {"cast": CALM_CAST, "grounded": true}
+	var cases := [["a shot just left", {"fired": 0.5}], ["a swing just ended", {"swing_n": 1}]]
+	for c in cases:
+		nat.combat_left = 0.0
+		await _feed(main, nat, m, {"swing_n": 0}, c[1])
+		nat.attack_left = 0.0
+		m.set_meta(WardenClips.STATE, calm)
+		await main.get_tree().process_frame
+		var now := nat.player.current_animation
+		ok(now == String(nat.plays["idle_combat"]), "%s: %s -> combat idle (%s)" % [a, c[0], now])
+	nat.combat_left = 0.0
+	m.set_meta(WardenClips.STATE, calm)
+	await main.get_tree().process_frame
+	ok(nat.player.current_animation == String(nat.plays["idle"]), "%s: calm for COMBAT_HOLD -> casual idle" % a)
 
 
 ## A swing while he runs plays on the upper body (the run clip stays the playing one, the layer owns the arms); on the

@@ -18,12 +18,17 @@ const FADE := 0.15  # s: one clip into the next
 const RATE_MIN := 0.6  # the walk, run and sneak clips' slowest rate, of their keyed pace
 const RATE_MAX := 1.8  # and their fastest: a quicker stride keeps the feet nearer the ground speed
 const ATTACK_AGAIN := 0.6  # share of the attack clip after which a new hit starts it over
-const LOOPS := ["idle", "walk", "run", "crouch"]
+const LOOPS := ["idle", "idle_combat", "walk", "run", "crouch"]
+const COMBAT_HOLD := 2.0  # s a Hunter keeps the combat idle (weapon ready) after a swing, a cast or a shot
+const FALL_FROM := 0.7  # s into the jump clip where its take-off crouch is over and the legs are in the air
+const FALL_V := 1.0  # m/s: leaving the ground slower upward than this is a fall (a ledge), which skips the take-off
+const REVIVE_HOLD := 0.2  # s into the crouch clip where the revive pose is held (a rate of 0 would freeze the fade in)
+const IDLE_FADE := 0.35  # s: the weapon lowers or comes up between the two idles
 ## Clip slots data "clips" may add beside the six states; a missing one plays today's clip (MESHY_NATIVE.md).
 ## Swing and cast one-shots (the attack clip without them): lmb, lmb_hold (a charged swing), rmb, e, r (the kit's cast
 ## slots, MOVE_SLOTS). One-shots: hit, land. Held while the state lasts: dash, glide and stomp (these two loop), downed.
 const HIT_SLOTS := ["hit", "land"]
-const SLOTS := ["lmb", "lmb_hold", "rmb", "e", "r", "dash", "glide", "land", "hit", "downed", "stomp"]
+const SLOTS := ["idle_combat", "lmb", "lmb_hold", "rmb", "e", "r", "dash", "glide", "land", "hit", "downed", "stomp"]
 const MOVE_SLOTS := {"secondary": "rmb", "utility": "e", "ult": "r"}  # the state's cast_slot -> its clip slot
 const SLOT_CAST := 0.5  # s: a kit move that starts this soon after a cast belongs to that cast's slot
 const LAND_MIN := 0.3  # a landing this hard (WardenClips.FEEL, 0..1) plays the land clip
@@ -51,6 +56,7 @@ var gun: Node3D
 var built := 0  # the rig weapon last hidden (instance id): Hunter.equip rebuilds it
 var built_off := 0  # and the rig's Offhand last hidden (instance id)
 var cur := ""  # the game state playing ("idle", "walk", ...)
+var combat_left := 0.0  # s the combat idle still plays once he stands (COMBAT_HOLD after his last attack)
 var attack_left := 0.0  # s the clip of a swing, cast, hit or landing still owns the body
 var attack_move := false  # it was started by a kit move or a swing (not a cast or a shot): the open reach waits
 var hit_prev := 99.0  # the state's s since a hit, last frame
@@ -212,6 +218,7 @@ func _process(dt: float) -> void:
 	_hide_rig_weapon()
 	var s: Dictionary = root.get_meta(WardenClips.STATE, {})
 	attack_left -= dt
+	combat_left -= dt
 	var one := _one_shot(s)
 	var xt := float(s.get("extract_t", -1.0))
 	if xt >= 0.0:  # the extract beat (WardenClips.leave_t): Meshy's crouch for the dip, then its jump for the take-off
@@ -231,6 +238,8 @@ func _process(dt: float) -> void:
 			_play(one, _shot_rate(one), true)
 	elif attack_left <= 0.0 or upper.on:
 		_loco(s)
+	if one != "" or cur == "kmove" or float(s.get("fired", 99.0)) < COMBAT_HOLD:
+		combat_left = COMBAT_HOLD
 	var hips := WardenSkeleton.find(skel, "root")
 	skel.set_bone_pose_scale(hips, skel.get_bone_rest(hips).basis.get_scale())  # (Meshy keys no scale: no old squash)
 	player.advance(dt)
@@ -321,13 +330,20 @@ func _loco(s: Dictionary) -> void:
 	elif held != "":
 		_play(held, 1.0)
 	elif not bool(s.get("grounded", true)):
+		var stepped_off := cur != "jump" and vel.y < FALL_V
 		_play("jump", float(d.get("jump_rate", 1.0)))
+		if stepped_off:
+			player.seek(FALL_FROM, true)
+	elif bool(s.get("reviving", false)):  # (down on one knee beside the downed mate: the crouch pose held)
+		_play("crouch", 1.0 if player.current_animation_position < REVIVE_HOLD else 0.0)
 	elif float(s.get("crouch", 0.0)) > 0.5:
 		_play("crouch", _rate(ground, "crouch_mps", 0.0))
 	elif ground >= float(d.get("run_from", 3.0)):
 		_play("run", _rate(ground, "run_mps", RATE_MIN))
 	elif ground >= STILL:
 		_play("walk", _rate(ground, "walk_mps", RATE_MIN))
+	elif combat_left > 0.0 and plays.has("idle_combat"):
+		_play("idle_combat", 1.0)
 	else:
 		_play("idle", 1.0)
 
@@ -441,7 +457,7 @@ func _clip_len(st: String) -> float:
 ## The game state's clip, crossfaded in when it changes (restart: a new attack plays it from the start).
 func _play(st: String, rate: float, restart := false) -> void:
 	if st != cur or restart:
-		player.play(String(plays[st]), FADE)
+		player.play(String(plays[st]), IDLE_FADE if st.begins_with("idle") and cur.begins_with("idle") else FADE)
 		if restart:
 			player.seek(0.0, true)
 		cur = st

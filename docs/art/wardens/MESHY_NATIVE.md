@@ -107,6 +107,7 @@ Data `clips` may add any of these keys beside idle, walk, run, jump, attack and 
 plays today's clip, so nothing changes until a Hunter's clips land (`WardenNative._one_shot` / `_held`).
 | Key | Plays | Without it |
 |---|---|---|
+| `idle_combat` | standing still for `COMBAT_HOLD` (2 s) after a swing, cast or shot; `idle` is the casual stand (Lace: bow hanging at her side) and the weapon comes up over `IDLE_FADE` | `idle` |
 | `lmb` | a melee swing or a shot | `attack` |
 | `lmb_hold` | a charged swing (state `combo` -1) | `lmb`, then `attack` |
 | `rmb`, `e`, `r` | the kit move or cast of that slot (state `cast_slot` secondary, utility, ult; a kit move starting within `SLOT_CAST` of a cast takes its slot) | `attack` |
@@ -116,6 +117,7 @@ plays today's clip, so nothing changes until a Hunter's clips land (`WardenNativ
 | `glide` | while `gliding` (loops) | `jump` |
 | `downed` | while the knocked-down beat runs (`fall` >= 0; holds its last frame) | the loop clip |
 | `stomp` | while the stomp cycle runs (`stomp` >= 0; loops) | the loop clip |
+Air: a jump from the ground plays `jump` from its take-off crouch; stepping off a ledge (rising slower than `FALL_V`) starts it at `FALL_FROM`, in the airborne stride. A Hunter that is `reviving` holds the first `REVIVE_HOLD` of the crouch (a stand-in for a kneel, no clip of its own).
 Swing, cast, `hit` and `land` are one-shots: they own the body for their length (a new one restarts a clip once 60% is
 played) and play at `attack_rate`, `hit` and `land` at 1.
 A swing or cast while he moves on the ground, or is in the air, plays on the torso and arms only (`WardenNativeUpper`: Spine02
