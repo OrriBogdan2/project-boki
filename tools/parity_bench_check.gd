@@ -28,7 +28,7 @@ func run(main: Node) -> void:
 	Save.d = d
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(OPTS.duplicate().merged({"training": true, "practice": true}))
+	m.start(OPTS.duplicate().merged({"training": true, "practice": true}))
 	m.set_process(false)
 	for i in 5: await tree.process_frame
 	await _bench(m)
@@ -39,7 +39,7 @@ func run(main: Node) -> void:
 		o.merge(area, true)
 		var other := Match.new()
 		main.add_child(other)
-		await other.start(o)
+		other.start(o)
 		other.set_process(false)
 		var where := "the tutorial" if area.has("tutorial") else "the duel room"
 		ok(ParityBench.of(other) == null, "no bench in " + where)
@@ -47,7 +47,7 @@ func run(main: Node) -> void:
 		await tree.process_frame
 	var rm := Match.new()
 	main.add_child(rm)
-	await rm.start({"teams": 2, "squad": 1, "tier": 0, "seed": 77, "no_drop": true})
+	rm.start({"teams": 2, "squad": 1, "tier": 0, "seed": 77, "no_drop": true})
 	rm.set_process(false)
 	ok(ParityBench.of(rm) == null, "a real match has no bench")
 	rm.queue_free()

@@ -53,10 +53,9 @@ const DEFAULTS := {
 	"kin_chatter": "normal",
 	"mod_mode": false,
 	"bot_diff": "auto",
-	# Boki ride as wisps (KinWisp): in expeditions the perks are on while it rides with you, off while summoned.
-	# wisps_v 1: the default became on (a file from before it has the old default saved: load_file turns it on once)
+	# Boki ride as wisps (KinWisp): the perks are on while it rides with you, off while summoned. Every match, no
+	# menu row: load_file never reads a saved value (checks set it in memory to test the walking Boki's rules)
 	"boki_wisps": true,
-	"wisps_v": 1,
 	# action -> finished holds (HoldTeach: chop, mine, glide, hold); at 3 that action stops teaching tap-vs-hold
 	"hold_done": {},
 	# how keys behave (Controls)
@@ -74,7 +73,8 @@ const DEFAULTS := {
 	# camera
 	"depth_cues": true,
 	"cam_style": "default",
-	"cam_follow": "centred",
+	"cam_follow": "pan",
+	"cam_v": 2,
 	"cam_lead": 1.0,
 	# sounds
 	"reset_cue": "a",
@@ -124,7 +124,7 @@ const CAM_IDS := {
 	"cam_style": {"supervive": "default", "supervive_wide": "default_wide"},
 	"cam_follow": {"supervive": "lean"},
 }
-const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake", "warden_models"]
+const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake", "warden_models", "wisps_v"]
 
 ## Graphics presets (Video → Quality). High is the game's full look; Very Low, Low and Medium trade
 ## detail for speed, Ultra pushes draw distance, shadows and level of detail further. A preset sets the
@@ -312,6 +312,8 @@ const ACTIONS := [
 	["util2", "Utility belt slot 2 (an armor kit to start)"],
 	["util3", "Utility belt slot 3"],
 	["util4", "Utility belt slot 4"],
+	["util5", "Utility belt slot 5"],
+	["util6", "Utility belt slot 6"],
 	["scores", "Scoreboard"],
 	["emote", "Emote wheel (hold, in a match)"],
 	["ping", "Ping for your squad: a spot, an enemy or loot (on the map too; Alt+click also pings)"],
@@ -356,7 +358,8 @@ const HOME_ONLY := ["play", "talk", "details", "build", "rotate", "store"]
 const MATCH_ONLY := ["gear2", "summon", "base", "hunter_ult", "ultimate", "emote", "pass_lead", "separate", "scout"]
 
 ## Pairs that share a key on purpose although they aren't a plain garden-vs-match pair (build-mode and
-## training-only actions, the lobby's push to talk).
+## training-only actions, the lobby's push to talk; Boki key and Summon: a wisp takes no orders, so C is Summon
+## on a wisp and send / recall on a Boki that is out).
 const SHARED_OK := [
 	["undo", "separate"],
 	["push_to_talk", "gear2"],
@@ -365,7 +368,8 @@ const SHARED_OK := [
 	["goals", "throw"],
 	["fold_guide", "whistle"],
 	["details", "throw"],
-	["goals", "scout"]
+	["goals", "scout"],
+	["throw", "summon"]
 ]
 
 ## Short cap text for the mouse buttons (code_text has the long names for the Controls page). No spaces,
@@ -517,6 +521,10 @@ func load_file() -> ConfigFile:
 	if not cf.has_section_key("s", "keys_v") and String(v.get("cam_follow", "")) == "standard":
 		v["cam_follow"] = "centred"  # the centred follow becomes everyone's default once
 	migrate_cam(v)
+	if int(v.get("cam_v", 1)) < 2 or not cf.has_section_key("s", "cam_v"):
+		if String(v.get("cam_follow", "")) == "centred":
+			v["cam_follow"] = "pan"  # the cursor pan becomes everyone's default once
+		v["cam_v"] = 2
 	if int(v.get("keys_v", 1)) < KEYS_V or not cf.has_section_key("s", "keys_v"):
 		v["keys"] = {}  # the kit changed (archetypes: E utility, C kin ability, G send/recall): start from the new defaults
 		v["keys_v"] = KEYS_V
@@ -543,8 +551,7 @@ func load_file() -> ConfigFile:
 		# saves wrote "fullscreen: false" for anyone who never chose, so a windowed start looked like a choice: start over once
 		v["fullscreen"] = desktop_export
 		v["video_v"] = 5
-	if not cf.has_section_key("s", "wisps_v"):
-		v["boki_wisps"] = true  # (saves wrote the old default for everyone: an untouched toggle reads as off)
+	v["boki_wisps"] = true  # (an "off" saved by the old toggle, or a check, left players with the walking Boki)
 	v["hud_scale"] = HudScale.setting()  # (saves from before HUD size load at 100%; hand edits stay in range)
 	if not SideColor.ORDER.has(v.get(SideColor.KEY)):
 		v[SideColor.KEY] = "default"  # missing in older files, or a palette that is gone

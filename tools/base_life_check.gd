@@ -15,6 +15,7 @@ const NIGHT_AT := 480.0  # s: the last two minutes are night
 const ARRIVE_AT := 20.0  # s: the fourth Boki comes out
 const LONGEST := 90.0  # s: no state but Nap may last longer
 const LET_GO_MIN_FRAMES := 5  # frames the breath check waits at least, however slow they run
+const HUNGRY_START := 12.0  # food a Boki starts the left-alone sim with: near the hungry floor (care.json sulky 8)
 const ISLAND_SEED := 11  # the farm-start island: a random one moved the nap spots and what the walk runs into
 const LET_GO_MS := 1500  # ms of real time a woken Boki's breathing loop may take to stop
 
@@ -189,14 +190,17 @@ func _notice_part(home, center: Vector3) -> void:
 	for _i in int(float(r["follow_s"]) / DT) + 6:
 		home._move_kin(DT)
 	ok(
-		m.is_in(BaseLife.S.ROAM) and not k.has("life_greet") and not k.has("led"),
+		not m.is_in(BaseLife.S.GREET) and not k.has("life_greet") and not k.has("led"),
 		"then it went back to what it was doing"
 	)
 	r["chance"] = kept_chance
 	var hits := {0.0: 0, 95.0: 0}
+	home.ppos = back  # you stand where you came back (the follow part above walked you off)
 	seed(11)
 	for trust in hits:
 		for _i in 200:
+			for key in ["play", "eat", "nap_t", "life_at", "life_rival", "life_greet", "led"]:
+				k.erase(key)  # the Boki may have started its own play while it followed you
 			m.go(BaseLife.S.ROAM, "test")
 			k["rec"]["trust"] = trust
 			k["notice_away"] = float(r["away_s"])
@@ -405,6 +409,40 @@ func _spots_part(home, center: Vector3) -> void:
 	zone["nap"] = kept
 
 
+## Left alone: hungry Boki, a bare pantry, no patch and no bowl. Over the same 10 simulated minutes every one eats
+## from a wild tree on its own, and none ends pinned at the hungry floor.
+func _left_alone(home) -> void:
+	var floor_food := float(Care.sulky()["food"])
+	Save.d["crops"] = {}
+	Save.d["items"] = {}
+	home.day_t = 0.4
+	seed(11)
+	for k in home.kins:
+		for key in ["eat", "life_eat", "nap_t", "life_spot", "life_at"]:
+			k.erase(key)
+		(k["life"] as Fsm).go(BaseLife.S.ROAM, "test")
+		k["rec"]["needs"]["food"] = HUNGRY_START
+		k["rec"]["needs"]["energy"] = 100.0
+	_gather(home, home.kins[0]["pos"])
+	var lowest := {}
+	var t := 0.0
+	while t < SIM_SECS:
+		home._move_kin(DT)
+		t += DT
+		for k in home.kins:
+			var uid := String(k["rec"]["uid"])
+			var food := Care.need(k["rec"], "food")
+			lowest[uid] = minf(float(lowest.get(uid, 100.0)), food)
+	for k in home.kins:
+		var uid := String(k["rec"]["uid"])
+		var food := Care.need(k["rec"], "food")
+		ok(
+			food > floor_food + 10.0,
+			"%s left alone ate on its own (food %.0f, lowest %.0f, floor %.0f)"
+			% [k["rec"]["name"], food, lowest[uid], floor_food]
+		)
+
+
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
@@ -510,6 +548,7 @@ func run(m: Node) -> void:
 	_rival_beat(home)
 	_play_sounds(home)
 	_notice_part(home, center)
+	_left_alone(home)
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame

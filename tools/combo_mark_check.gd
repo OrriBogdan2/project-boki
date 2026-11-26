@@ -1,5 +1,6 @@
 extends RefCounted
-## The overhead combo tag (scripts/ui/combo_mark.gd) for Sable's Marks, Vex's Daze, Sparkle's Static,
+## The combo state on a foe (scripts/ui/combo_mark.gd; the plate status row shows it) for Sable's Marks, Vex's Daze,
+## Sparkle's Static,
 ## Cinder's Ignite (Ablaze/Flashover), Neve's Chill and Meeko's Kindle, Gil's splash marks, and Kael's Slam
 ## window (a knock readies the Riposte) and Warchain hold (the pull):
 ## it reads the kit's own status (ArchKit.combo_read), so it shows while the status runs, counts down, is
@@ -50,7 +51,7 @@ func run(ok: Callable, ac, arch: String) -> void:
 	ok.call("%s: the payoff hit flashes the body white" % tag, flashed, "stamp %.2f flash %.3f" % [stamp, t.flash_t])
 	ac.done(m)
 	if arch == "juggernaut":
-		await _chain(ok, ac)
+		_chain(ok, ac)
 
 ## Kael's second state: the Warchain's hold on a foe shows for its 5s, ends with the chain, and the pull
 ## flashes the foe.
