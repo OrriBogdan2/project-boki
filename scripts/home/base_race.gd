@@ -722,8 +722,14 @@ static func pull_rows(res: Dictionary) -> Array:
 	return [["Friends pull together: they run each other's pace", UI.MUTED]] if res.get("pull", false) else []
 
 ## The result-card row for a win that went on the wall (none when it did not).
-static func pin_rows(pinned: bool) -> Array:
-	return [["%s: pinned to the showcase wall" % twist()["name"], UI.MUTED]] if pinned else []
+## font 0 leaves the size out (show_card rows); Seek and Volley pass 14 (result_card rows).
+static func pin_rows(pinned: bool, font := 0) -> Array:
+	if not pinned:
+		return []
+	var row: Array = ["%s: pinned to the showcase wall" % twist()["name"], UI.MUTED]
+	if font > 0:
+		row.insert(1, font)
+	return [row]
 
 func _solo_card(pay: Dictionary) -> void:
 	var marks := ""
