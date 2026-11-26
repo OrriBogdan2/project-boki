@@ -9,7 +9,6 @@ extends RefCounted
 
 ## s after the lunge's own time it still counts toward the swing's distance: the exit slide settles in this
 const SETTLE_T := 0.3
-const READOUT_COL := Color("ffe9a8")
 
 var k: BulwarkKit
 var h: Hunter
@@ -80,9 +79,6 @@ func tick() -> void:
 	last_kind = String(st["kind"])
 	last_air = bool(st["air"])
 	st = {}
-	if h.is_local() and Settings.fps_mode() == "full":
-		var at := h.pos + Vector3(0, HudPlate.plate_offset(h) + 0.4, 0)
-		m.fx.word(at, "%s %.1f m" % [last_kind, last_d], READOUT_COL)
 
 
 ## An air lunge hands back only the speed he had along it: in the air nothing brakes the dash's exit, so it

@@ -43,7 +43,7 @@ func run(main_node: Node) -> void:
 	Save.d["music"] = Save.d.get("music", [])
 	await _abyss()
 	Game.goto("match", {"autoplay": true, "teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true,
-		"demo_kin": "cindle"})
+		"boki_wisps": false, "demo_kin": "cindle"})
 	for i in 6:
 		await main.get_tree().process_frame
 	var m: Match = main.current
@@ -697,7 +697,7 @@ func _abyss() -> void:
 		ok(glide.find("abyss_whoosh") == 0 and glide.find("abyss_catch") == 1 and not glide.has("abyss_fallout"),
 			"...gliding: whoosh, then the catch %s" % [glide])
 		var hot := _walk(am, p, rim, true, true)
-		ok(hot.find("abyss_catch") == 1 and hot.has("strain"),
+		ok(hot.find("abyss_whoosh") == 0 and hot.has("abyss_catch") and hot.has("strain"),
 			"...an overheated glider lifting: the catch and the strain loop %s" % [hot])
 		_teammate(am, other, rim)
 	am.queue_free()

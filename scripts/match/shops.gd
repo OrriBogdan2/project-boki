@@ -151,7 +151,6 @@ static func _bought(m, h, row: Dictionary, paid: int) -> void:
 	m.fx.ring(h.pos, 1.3, col, 0.3)
 	if h == m.player and m.hud:
 		m.hud.toast_small("Bought %s  ·  %d gems left" % [ShopStock.name_of(row), int(h.gems)], TOAST_COL)
-		m.fx.word(h.pos + Vector3(0, 2.4, 0), "-%d" % paid, TOAST_COL, false)
 
 
 ## Remote events: "sbuy" (the host settles it), "sgot" (a sale happened), "sno" (it was gone).
