@@ -75,9 +75,11 @@ static func _states(player: AnimationPlayer) -> Dictionary:
 			out[s] = [false, 0.0, false, ""]
 			continue
 		var smp := BokiClipCover.sample(player.get_animation(c))
-		out[s] = [true, BokiClipCover.motion(smp), BokiClipCover.off_idle(smp, idle) > BokiClipCover.NEAR_IDLE_DEG,
-			_sig(smp)]
+		out[s] = [
+			true, BokiClipCover.motion(smp), BokiClipCover.off_idle(smp, idle) > BokiClipCover.NEAR_IDLE_DEG, _sig(smp)
+		]
 	return out
+
 
 ## The clip's motion: each bone's turn (whole deg) from its first key at every sample. A turn's size does not depend
 ## on the rest pose, so two species playing one shared clip over different rests sign the same.

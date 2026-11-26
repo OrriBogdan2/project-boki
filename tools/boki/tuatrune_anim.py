@@ -3,13 +3,14 @@ rig `auto_legs.py` gave it: a spiny tuatara with a giant key for a tail. A lizar
 to side against its steps, the head held level by turning against the bend; the tail (skinned to the hips) whips
 the other way. `reclip_own.py` keeps the file's planted-paw leg curves and root height for walk and run, so those two
 clips here are the body only: spine, hips, neck, head, root turn."""
+
 import glomwort_anim
 from boki_clips import LOOK_UP, add, s, seq
 
 BONES = glomwort_anim.BONES
 HIDE_AT = glomwort_anim.HIDE_AT
 LEGS = tuple(p + "leg1." + sd for p in "fh" for sd in "LR")
-KEEP_LEGS = ("walk", "run")      # reclip_own keeps the file's leg curves and root_at for these
+KEEP_LEGS = ("walk", "run")  # reclip_own keeps the file's leg curves and root_at for these
 
 
 def slink(t, n, bend, pitch, head_down):
@@ -117,13 +118,15 @@ def sprawl(t):
 
 
 CLIPS = dict(glomwort_anim.CLIPS)
-CLIPS.update({
-    "idle": (3.2, True, idle),
-    "walk": (0.9, True, walk),
-    "run": (0.5, True, run),
-    "hop": (0.9, True, scuttle_hop),
-    "carry": (0.9, True, carry),
-    "attack": (0.8, False, snap),
-    "ability": (1.5, False, rune_flare),
-    "sleep": (4.2, True, sprawl),
-})
+CLIPS.update(
+    {
+        "idle": (3.2, True, idle),
+        "walk": (0.9, True, walk),
+        "run": (0.5, True, run),
+        "hop": (0.9, True, scuttle_hop),
+        "carry": (0.9, True, carry),
+        "attack": (0.8, False, snap),
+        "ability": (1.5, False, rune_flare),
+        "sleep": (4.2, True, sprawl),
+    }
+)

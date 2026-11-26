@@ -2,6 +2,7 @@
 three-toed sloth that carries a glass greenhouse on its back. Nothing is hurried: each step is a long reach and a
 slow hauling of the weight over it, the greenhouse swaying a beat behind, a swipe takes a whole breath, and its
 wall goes up as a tall, unhurried stretch."""
+
 import glomwort_anim
 from boki_clips import LOOK_UP, add, s, seq
 
@@ -125,14 +126,16 @@ def pet(t):
 
 
 CLIPS = dict(glomwort_anim.CLIPS)
-CLIPS.update({
-    "idle": (4.2, True, idle),
-    "walk": (1.7, True, walk),
-    "run": (0.95, True, run),
-    "hop": (1.2, True, drift),
-    "carry": (1.7, True, carry),
-    "pet": (3.0, True, pet),
-    "attack": (1.2, False, swipe),
-    "ability": (2.0, False, open_glass),
-    "sleep": (5.0, True, hang),
-})
+CLIPS.update(
+    {
+        "idle": (4.2, True, idle),
+        "walk": (1.7, True, walk),
+        "run": (0.95, True, run),
+        "hop": (1.2, True, drift),
+        "carry": (1.7, True, carry),
+        "pet": (3.0, True, pet),
+        "attack": (1.2, False, swipe),
+        "ability": (2.0, False, open_glass),
+        "sleep": (5.0, True, hang),
+    }
+)

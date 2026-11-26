@@ -9,6 +9,7 @@ module's, the legs at rest.
 
   blender -b --factory-startup --python tools/boki/reclip_own.py -- --species=<id>
 """
+
 import os
 import re
 import sys
@@ -33,7 +34,7 @@ def hidden_props(arm):
     for b in arm.pose.bones:
         if b.name.startswith("prop_"):
             w = b.bone.matrix_local.to_quaternion() @ b.location / boki_rig.CLIP_SCALE
-            out[b.name] = (w.x, w.z, -w.y)      # boki_rig.game_axis back again
+            out[b.name] = (w.x, w.z, -w.y)  # boki_rig.game_axis back again
     return out
 
 
@@ -46,9 +47,16 @@ def owned(path, legs):
 def capture(action, legs):
     first = min(k.co[0] for fc in action.fcurves for k in fc.keyframe_points)
     last = max(k.co[0] for fc in action.fcurves for k in fc.keyframe_points)
-    curves = [(fc.data_path, fc.array_index, fc.group.name if fc.group else "",
-               [(k.co[0] - first, k.co[1], k.interpolation) for k in fc.keyframe_points])
-              for fc in action.fcurves if owned(fc.data_path, legs)]
+    curves = [
+        (
+            fc.data_path,
+            fc.array_index,
+            fc.group.name if fc.group else "",
+            [(k.co[0] - first, k.co[1], k.interpolation) for k in fc.keyframe_points],
+        )
+        for fc in action.fcurves
+        if owned(fc.data_path, legs)
+    ]
     return (last - first) / bpy.context.scene.render.fps, curves
 
 
@@ -71,7 +79,7 @@ def main():
     anim = build_boki.anim
     glb = os.path.join(build_boki.REPO, "art/kin", species, species + ".glb")
     bpy.ops.wm.read_factory_settings(use_empty=True)
-    bpy.context.scene.render.fps = 30       # the clips are keyed at 30 fps: the importer's 24 would re-time kept ones
+    bpy.context.scene.render.fps = 30  # the clips are keyed at 30 fps: the importer's 24 would re-time kept ones
     bpy.ops.import_scene.gltf(filepath=glb)
     arm = next(o for o in bpy.data.objects if o.type == "ARMATURE")
     extra = {b.name for b in arm.data.bones} - set(anim.BONES)
