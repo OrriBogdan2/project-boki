@@ -7,8 +7,10 @@ extends RefCounted
 ## content/rules/tutorial.json "lead"; the farm's twin is BaseTutLead. It is a nudge on the steps that already
 ## have a marker: no new HUD, toast or arrow.
 
+
 static func rules() -> Dictionary:
 	return Content.rules("tutorial")["lead"]
+
 
 ## Where this Boki leads to now: the lead goal of the step it was told about, else Vector3.INF.
 static func goal(k: Kin) -> Vector3:
@@ -17,12 +19,15 @@ static func goal(k: Kin) -> Vector3:
 	var to = k.comp.guide.get("to", Vector3.INF)
 	return to if to is Vector3 else Vector3.INF
 
+
 static func _flat(a: Vector3, b: Vector3) -> float:
 	return Vector2(a.x - b.x, a.z - b.z).length()
+
 
 ## You have run past it (nearer the goal by more than 2 m): it stops leading and falls in beside you.
 static func passed(at: Vector3, you: Vector3, to: Vector3) -> bool:
 	return _flat(you, to) + 2.0 < _flat(at, to)
+
 
 ## Does the walking Boki lead right now? Not once you have run past it (it falls in beside you), and not for
 ## off_s after it stood stalled for stall_s trying to (an edge or a wall on the straight way): it rejoins you
@@ -38,20 +43,23 @@ static func on(k: Kin, to: Vector3, dt: float) -> bool:
 	if c.lead_stall >= float(rules()["stall_s"]):
 		c.lead_stall = 0.0
 		c.lead_off = float(rules()["off_s"])
-		k.path = []          # (a failed search for the far goal backs off: search for the way to you now)
+		k.path = []  # (a failed search for the far goal backs off: search for the way to you now)
 		k.path_t = 0.0
 		return false
 	return true
 
+
 ## Stands and waits: it has arrived, or you are further behind than wait_m.
 static func holds(at: Vector3, you: Vector3, to: Vector3) -> bool:
 	return _flat(at, to) < float(rules()["stop_m"]) or _flat(at, you) > float(rules()["wait_m"])
+
 
 ## Turns to look back at you (the walking Boki's body yaw).
 static func look_back(k: Kin, dt: float) -> void:
 	var d := Vector2(k.owner_h.pos.x - k.pos.x, k.owner_h.pos.z - k.pos.z)
 	if d.length() > 0.1:
 		k.face = lerp_angle(k.face, atan2(-d.x, -d.y), minf(1.0, dt * 8.0))
+
 
 ## One sim step of a wisp's lead: it floats on toward the goal (comp.lead_pos, a spot in the air above the
 ## ground) while you keep up, holds and looks back when it must wait, and comes home to your shoulder when the
@@ -65,7 +73,7 @@ static func wisp_step(k: Kin, dt: float) -> void:
 	if c.lead_pos == Vector3.INF:
 		c.lead_pos = o.pos
 	if to != Vector3.INF and passed(c.lead_pos, o.pos, to):
-		c.lead_pos = Vector3.INF       # you have run past it: it drops back onto your shoulder
+		c.lead_pos = Vector3.INF  # you have run past it: it drops back onto your shoulder
 		return
 	var home := to == Vector3.INF
 	var dest: Vector3 = o.pos if home else to

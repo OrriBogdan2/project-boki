@@ -21,13 +21,12 @@ const WINDUP := {
 	},
 	"dolm": {
 		"rmb": [TAP + 1, "tap/hold, owner item 61: a tap shows nothing, lands on the release (heroes/dolm.md)"],
-		"lmb": [TAP + 1, "tap/hold, the hold punch: a tap acts on the release (docs/MOVEMENT_FEEL.md, lmb-spam)"],
+		"lmb": [TAP + 1, "tap/hold: a tap acts on the release, a hold's wind-up HOLD_POSE_T in (heroes/dolm.md)"],
 	},
 	# main's kits since the branch was cut (11-13): the tap acts on the release; the hold pose starts at the hold
 	# threshold. OPEN: each could start its pose on the press, as Lace's and Mossy's now do.
 	"bulwark": {"lmb": [TAP + 1, "tap/hold split on main's kit, acts on the release (open: pose on the press)"]},
 	"rimewright": {"rmb": [TAP + 1, "tap/hold split on main's kit, acts on the release (open: pose on the press)"]},
-	"ashwick": {"rmb": [TAP + 1, "tap/hold split on main's kit, acts on the release (open: pose on the press)"]},
 	"mage": {"rmb": [TAP + 1, "tap/hold split on main's kit, acts on the release (open: pose on the press)"]},
 	"gil": {"rmb": [TAP + 1, "tap/hold split on main's kit, acts on the release (open: pose on the press)"]},
 }

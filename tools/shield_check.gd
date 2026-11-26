@@ -9,33 +9,54 @@ extends RefCounted
 ## the break at match zoom. Never touches the save.
 
 const DT := 1.0 / 60.0
-const SETTLE_S := 0.6        # s each shield runs before it is measured
+const SETTLE_S := 0.6  # s each shield runs before it is measured
 
 var bad := 0
 var _dir := ""
+
 
 func ok(cond: bool, what: String) -> void:
 	print("SHIELDCHECK %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
 
+
 func run(main: Node) -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	for a in OS.get_cmdline_user_args():
-		if String(a).begins_with("--shots-dir="): _dir = String(a).substr(12)
-	if _dir != "": DirAccess.make_dir_recursive_absolute(_dir)
+		if String(a).begins_with("--shots-dir="):
+			_dir = String(a).substr(12)
+	if _dir != "":
+		DirAccess.make_dir_recursive_absolute(_dir)
 	Save.no_write = true
 	Save.d = Save.fresh()
 	Econ.ensure()
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "arch": "bulwark",
-		"cls": Arch.weight("bulwark"), "weapon": Arch.signature("bulwark")})
+	m.start(
+		{
+			"teams": 2,
+			"squad": 1,
+			"tier": 0,
+			"length": 1e9,
+			"seed": 4242,
+			"no_drop": true,
+			"arch": "bulwark",
+			"cls": Arch.weight("bulwark"),
+			"weapon": Arch.signature("bulwark")
+		}
+	)
 	m.set_process(false)
 	var fade = main.get("fade")
-	if fade != null: await fade.reveal(0.01)
+	if fade != null:
+		await fade.reveal(0.01)
 	for mb in m.mobs:
 		mb.dead = true
 		mb.visible = false
+	# wild Bokis too: one that lands beside the idle Hunter would chew the shield down (seed-dependent)
+	for k in m.kins:
+		k.dead = true
+		k.visible = false
 	var P: Hunter = m.player
 	P.ctrl = "idle"
 	P.unlock_all()
@@ -47,7 +68,7 @@ func run(main: Node) -> void:
 	rival.teleport(P.pos + Vector3(0, 0, 4.0))
 	rival.face = 0.0
 	rival.inp["aim"] = P.pos + Vector3(0, 0.9, 0)
-	P.inp["aim"] = rival.pos + Vector3(0, 0.9, 0)      # aiming down the screen, toward the camera: the worst case
+	P.inp["aim"] = rival.pos + Vector3(0, 0.9, 0)  # aiming down the screen, toward the camera: the worst case
 	P.face = PI
 	await _settle(main, m, P, 0.3)
 	var meshes := _body_meshes(P)
@@ -63,9 +84,15 @@ func run(main: Node) -> void:
 		"Bulwark aegis": func(): _aegis(P),
 	}
 	# the icon the vitals strip leads with; Mass Guard is a plate in front of you (a wall), no pool on you
-	var icons := {"ability shield": ShieldSrc.ITEM, "ally area": ShieldSrc.HEAL, "Boki Refraction": ShieldSrc.BOKI,
-		"Boki Mass Guard": "none", "Fuse release": ShieldSrc.FUSE, "Boki owner shield": ShieldSrc.BOKI,
-		"Bulwark aegis": ShieldSrc.ITEM}
+	var icons := {
+		"ability shield": ShieldSrc.ITEM,
+		"ally area": ShieldSrc.HEAL,
+		"Boki Refraction": ShieldSrc.BOKI,
+		"Boki Mass Guard": "none",
+		"Fuse release": ShieldSrc.FUSE,
+		"Boki owner shield": ShieldSrc.BOKI,
+		"Bulwark aegis": ShieldSrc.ITEM
+	}
 	for src in sources:
 		P.shield = 0.0
 		P.shield_t = 0.0
@@ -96,19 +123,20 @@ func run(main: Node) -> void:
 	print("SHIELDCHECK done, %d failures" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 ## The break look: a hit through a shield cracks it, running out doesn't, Low keeps it, the aegis cracks the same.
 func _breaks(main: Node, m: Match, P: Hunter, rival: Hunter) -> void:
 	var sb := ShieldBreak.of(m)
 	var pieces := ShieldBreak.SEGS + ShieldBreak.BRANCH + ShieldBreak.SHARDS
 	var col := Arch.color(P.arch)
-	sb.set_process(false)        # stepped with the match below
+	sb.set_process(false)  # stepped with the match below
 	for low in [false, true]:
 		m.fx.particles = 0.0 if low else Fx.PARTICLES
 		Effects.run([{"type": "shield", "amount": 40.0, "time": 5.0}], P, {})
 		await _settle(main, m, P, 0.2)
 		var n0 := sb.played
 		P.hurt(P.shield + 5.0, rival, {})
-		var radial0 := m.fx.radial      # (the hit's own sparks are made by now: only the break is counted)
+		var radial0 := m.fx.radial  # (the hit's own sparks are made by now: only the break is counted)
 		ShieldLook.tick(P)
 		var tag := " (Low)" if low else ""
 		ok(m.fx.radial == radial0, "no burst or ring on the break%s" % tag)
@@ -139,16 +167,20 @@ func _breaks(main: Node, m: Match, P: Hunter, rival: Hunter) -> void:
 	sb.net_in(["fx", "sbrk", P.pos.x, 1.0, P.pos.z, 0.45, 0.8, col.to_html()])
 	ok(sb.played == n3 + 1 and sb.last_col.to_html() == col.to_html(), "a break from another game plays here")
 
+
 func _settle(main: Node, m: Match, P: Hunter, secs: float) -> void:
 	var t := 0.0
 	while t < secs:
 		m.step(DT)
-		for h in m.hunters: h.render(DT, 1.0)
-		if m.verbs: m.verbs.render(1.0)
+		for h in m.hunters:
+			h.render(DT, 1.0)
+		if m.verbs:
+			m.verbs.render(1.0)
 		m.cam.snap(P.pos)
 		ShieldBreak.of(m).step(DT)
 		await main.get_tree().process_frame
 		t += DT
+
 
 func _body_meshes(P: Hunter) -> Array:
 	var out: Array = []
@@ -156,6 +188,7 @@ func _body_meshes(P: Hunter) -> Array:
 		if (mi as MeshInstance3D).is_visible_in_tree():
 			out.append(mi)
 	return out
+
 
 func _boki(m: Match, P: Hunter, species: String, slot: String) -> void:
 	if P.kin:
@@ -175,9 +208,11 @@ func _boki(m: Match, P: Hunter, species: String, slot: String) -> void:
 	k.grounded = true
 	k.use_ability(slot, P.pos)
 
+
 func _aegis(P: Hunter) -> void:
 	P.inp["sec"] = true
 	P.inp["sec_hold"] = true
+
 
 func _clear(m: Match, P: Hunter) -> void:
 	P.inp["sec"] = false
@@ -186,6 +221,7 @@ func _clear(m: Match, P: Hunter) -> void:
 		w["t"] = 0.0
 	for mr in m.verbs.mirrors:
 		mr["t"] = 0.0
+
 
 func _shot(main: Node, m: Match, P: Hunter, label: String, whole := false) -> void:
 	if _dir == "":

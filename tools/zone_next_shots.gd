@@ -8,6 +8,7 @@ var main: Node
 var m: Match
 var dir := ""
 
+
 func run(main_node: Node) -> void:
 	main = main_node
 	for a in OS.get_cmdline_user_args():
@@ -19,8 +20,19 @@ func run(main_node: Node) -> void:
 	Econ.ensure()
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 2, "tier": 0, "seed": 77, "no_drop": true, "autoplay": true, "heart": true,
-		"god": true, "length": 1e9})
+	m.start(
+		{
+			"teams": 2,
+			"squad": 2,
+			"tier": 0,
+			"seed": 77,
+			"no_drop": true,
+			"autoplay": true,
+			"heart": true,
+			"god": true,
+			"length": 1e9
+		}
+	)
 	m.set_process(false)
 	var fade = main.get("fade")
 	if fade != null:
@@ -36,6 +48,7 @@ func run(main_node: Node) -> void:
 	m.sess_t0 = Heart.r("tide_start_s") + 200.0 - m.time
 	await _grab("%d_closing" % w)
 	main.get_tree().quit(0)
+
 
 func _grab(file: String) -> void:
 	for i in 24:

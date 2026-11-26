@@ -101,9 +101,16 @@ func _break_wall(w: Dictionary) -> void:
 	if is_instance_valid(w["node"]):
 		(w["node"] as Node3D).queue_free()
 
-## Whether a barrier blocks sight (World.los). A wall carried in front of a Hunter (a raised aegis, a Boki's
-## Mass Guard) never does: it would hide its own bearer from everyone they face.
+## Whether a barrier hides who stands behind it (World.los with sight: the fog, bots' sight). Only a rock
+## does: a translucent plate (a Boki's Prism Wall, a Barrier Glove, Neve's Rink Wall) may stop shots, never
+## make a Hunter vanish.
 static func blocks_sight(w: Dictionary) -> bool:
+	return bool(w.get("rock", false))
+
+
+## Whether a barrier blocks a shot line (World.los). A wall carried in front of a Hunter (a raised aegis, a
+## Boki's Mass Guard) never does: it would block its own bearer's aim at everyone they face.
+static func blocks_shots(w: Dictionary) -> bool:
 	return not bool(w.get("follow", false))
 
 ## Is a body at (x, z) with radius r and feet at y blocked by a barrier? (World.occupy asks.) cls: the
@@ -248,9 +255,9 @@ func _cap_traps(caster: Node, e: Dictionary) -> void:
 		return
 	var grp := String(e.get("group", ""))
 	var mine: Array = []
-	for tr in traps:
-		if tr["caster"] == caster and String(tr.get("group", "")) == grp:
-			mine.append(tr)
+	for trap in traps:
+		if trap["caster"] == caster and String(trap.get("group", "")) == grp:
+			mine.append(trap)
 	while mine.size() >= cap:
 		_drop_trap(mine.pop_front())
 
@@ -324,7 +331,7 @@ func _bridge_cracks(n: Node3D, tz: Dictionary) -> void:
 func _bridge_mid(tz: Dictionary) -> Vector3:
 	var w: World = m.world
 	var i := int(tz["tiles"][tz["tiles"].size() / 2][0])
-	return Vector3(i % w.w + 0.5, w.level[i] * World.LEVEL, i / w.w + 0.5)
+	return Vector3(i % w.w + 0.5, w.level[i] * World.LEVEL, int(i / float(w.w)) + 0.5)
 
 ## A crumble-warned span ends: its slabs drop into the abyss in a spray of dust.
 func _bridge_crumble(n: Node3D, tz: Dictionary) -> void:
@@ -409,7 +416,7 @@ func shot_check(s: Dictionary, p: Vector3) -> String:
 		return ""
 	var x: Dictionary = s["x"]
 	var p2 := Vector2(p.x, p.z)
-	var cls := "pierce" if x.get("pierce_terrain", false) else "solid"
+	var cls := String(x.get("block_class", "pierce")) if x.get("pierce_terrain", false) else "solid"
 	for w in walls:
 		if not _stops(w, int(s["team"]), p, float(s["r"]), cls):
 			continue
@@ -571,39 +578,39 @@ func tick(dt: float) -> void:
 			_drop_tether(t)
 		elif float(t["t"]) <= 0.0:
 			_drop_tether(t)
-	for tr in traps.duplicate():
-		tr["t"] = float(tr["t"]) - dt
-		var was_arming := float(tr["arm"]) > 0.0
-		tr["arm"] = float(tr["arm"]) - dt
-		var caster = tr["caster"]
-		if was_arming and float(tr["arm"]) <= 0.0 and m.player and int(tr["team"]) == int(m.player.team):
+	for trapx in traps.duplicate():
+		trapx["t"] = float(trapx["t"]) - dt
+		var was_arming := float(trapx["arm"]) > 0.0
+		trapx["arm"] = float(trapx["arm"]) - dt
+		var caster = trapx["caster"]
+		if was_arming and float(trapx["arm"]) <= 0.0 and m.player and int(trapx["team"]) == int(m.player.team):
 			# armed: a blink and a beep for its own side (rivals only ever see a faint glint)
-			m.fx.flash((tr["at"] as Vector3) + Vector3(0, 0.2, 0), Color(tr["col"]).lerp(Color.WHITE, 0.5), 0.45, 0.1)
-			m.fx.ring(tr["at"], float(tr["r"]), Color(tr["col"], 0.9), 0.25)
-			m.sfx("ping", tr["at"], -12.0 if caster != m.player else -7.0, 1.6)
-		if float(tr["t"]) <= 0.0 or not is_instance_valid(caster):
-			if float(tr["t"]) <= 0.0 and tr.get("kx_end") is Callable:
-				(tr["kx_end"] as Callable).call(tr["at"])      # waited out untriggered: on_end
-			_drop_trap(tr); continue
-		if float(tr["arm"]) > 0.0:
+			m.fx.flash((trapx["at"] as Vector3) + Vector3(0, 0.2, 0), Color(trapx["col"]).lerp(Color.WHITE, 0.5), 0.45, 0.1)
+			m.fx.ring(trapx["at"], float(trapx["r"]), Color(trapx["col"], 0.9), 0.25)
+			m.sfx("ping", trapx["at"], -12.0 if caster != m.player else -7.0, 1.6)
+		if float(trapx["t"]) <= 0.0 or not is_instance_valid(caster):
+			if float(trapx["t"]) <= 0.0 and trapx.get("kx_end") is Callable:
+				(trapx["kx_end"] as Callable).call(trapx["at"])      # waited out untriggered: on_end
+			_drop_trap(trapx); continue
+		if float(trapx["arm"]) > 0.0:
 			continue
-		var at: Vector3 = tr["at"]
-		for f in m.foes_of(int(tr["team"])):
-			if f.flat_dist(at) < float(tr["r"]) + f.r and absf(f.pos.y - at.y) < 1.5 and f.hittable():
-				var c3: Dictionary = (tr["ctx"] as Dictionary).duplicate()
+		var at: Vector3 = trapx["at"]
+		for f in m.foes_of(int(trapx["team"])):
+			if f.flat_dist(at) < float(trapx["r"]) + f.r and absf(f.pos.y - at.y) < 1.5 and f.hittable():
+				var c3: Dictionary = (trapx["ctx"] as Dictionary).duplicate()
 				c3["at"] = at
 				c3["target"] = f
-				if float(tr["reveal"]) > 0.0 and f is Hunter:
-					f.reveal_t = maxf(f.reveal_t, float(tr["reveal"]))
+				if float(trapx["reveal"]) > 0.0 and f is Hunter:
+					f.reveal_t = maxf(f.reveal_t, float(trapx["reveal"]))
 				m.sfx("click", at, 0.0, 1.7)       # the snap before it goes off
-				m.fx.flash(at + Vector3(0, 0.4, 0), Color(tr["col"]).lerp(Color.WHITE, 0.6), 0.8, 0.1)
+				m.fx.flash(at + Vector3(0, 0.4, 0), Color(trapx["col"]).lerp(Color.WHITE, 0.6), 0.8, 0.1)
 				if caster.dead:
-					_drop_trap(tr); break
-				if tr.get("kx") is Callable:
-					(tr["kx"] as Callable).call(at, f)        # a grammar trap: its effects and on_trigger followups
+					_drop_trap(trapx); break
+				if trapx.get("kx") is Callable:
+					(trapx["kx"] as Callable).call(at, f)        # a grammar trap: its effects and on_trigger followups
 				else:
-					Effects.run(tr["effects"], caster, c3)
-				_drop_trap(tr)
+					Effects.run(trapx["effects"], caster, c3)
+				_drop_trap(trapx)
 				break
 	for tz in terrain.duplicate():
 		tz["t"] = float(tz["t"]) - dt
@@ -663,11 +670,11 @@ func _drop_tether(t: Dictionary) -> void:
 	if is_instance_valid(t["node"]): t["node"].queue_free()
 	if is_instance_valid(t["ring"]): t["ring"].queue_free()
 
-func _drop_trap(tr: Dictionary) -> void:
-	traps.erase(tr)
-	if is_instance_valid(tr["node"]):
-		m.fx.burst((tr["at"] as Vector3) + Vector3(0, 0.3, 0), tr["col"], 10, 3.0, 0.3)
-		tr["node"].queue_free()
+func _drop_trap(trap: Dictionary) -> void:
+	traps.erase(trap)
+	if is_instance_valid(trap["node"]):
+		m.fx.burst((trap["at"] as Vector3) + Vector3(0, 0.3, 0), trap["col"], 10, 3.0, 0.3)
+		trap["node"].queue_free()
 
 ## Every rendered frame: walls flash when hit and fade as they weaken, tethers stretch and redden,
 ## traps are only faint glints to the other side.
@@ -710,15 +717,15 @@ func render(_alpha: float) -> void:
 		var rg: MeshInstance3D = t["ring"]
 		rg.global_position = Vector3(a.position.x, a.position.y + 0.08, a.position.z)
 		rg.scale = Vector3.ONE * float(t["max"])
-	for tr in traps:
-		var n4: Node3D = tr["node"]
+	for trap in traps:
+		var n4: Node3D = trap["node"]
 		if not is_instance_valid(n4): continue
-		var mine := int(tr["team"]) == pt
-		var armed := float(tr["arm"]) <= 0.0
+		var mine := int(trap["team"]) == pt
+		var armed := float(trap["arm"]) <= 0.0
 		n4.visible = mine or not armed or fmod(m.time, 1.6) < 0.25
 		var rgn := n4.get_node_or_null("Ring") as MeshInstance3D
 		if rgn:
-			rgn.material_override.set_shader_parameter("color", Color(tr["col"], (0.85 if armed else 0.35) if mine else 0.35))
+			rgn.material_override.set_shader_parameter("color", Color(trap["col"], (0.85 if armed else 0.35) if mine else 0.35))
 	for tz in terrain:
 		var n5: Node3D = tz["node"]
 		if not is_instance_valid(n5):
@@ -735,7 +742,7 @@ func render(_alpha: float) -> void:
 func clear() -> void:
 	for w in walls.duplicate(): _break_wall(w)
 	for t in tethers.duplicate(): _drop_tether(t)
-	for tr in traps.duplicate(): _drop_trap(tr)
+	for trap in traps.duplicate(): _drop_trap(trap)
 	for mr in mirrors:
 		if is_instance_valid(mr["node"]): mr["node"].queue_free()
 	mirrors.clear()

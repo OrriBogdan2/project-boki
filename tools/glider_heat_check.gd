@@ -6,7 +6,8 @@ extends "res://tools/abyss_check.gd"
 ## (decision 0022), and the other heat rows in hunter_move.json (heat_doc) do what they say: a real glide
 ## press 8 m deep spends the footage's quarter to a third of the bar, an overheated glider flies
 ## at overheat_speed (only slower sideways: its height and heading match a cool glide held on the same keys)
-## and burns overheat_burn of your health a second in 20-damage ticks. Prints "ACHECK ok|FAIL ..." and "ACHECK DONE, failures: N".
+## and burns overheat_burn of your health a second in 20-damage ticks.
+## Prints "ACHECK ok|FAIL ..." and "ACHECK DONE, failures: N".
 
 const MoveSpeedCheck := preload("res://tools/move_speed_check.gd")
 const GLIDE_RUN_UP := 30.0     # m above the lane the overheat glide starts
@@ -288,7 +289,7 @@ func _burn_hint(e: Dictionary) -> void:
 	ok(hud.lines.is_empty(), "gliding cool over the abyss: no hint")
 	h.glide_fuel = 0.0
 	m._tips()
-	var want := "Your glider is burning but still lifts. Keep holding %s." % Settings.key_cap("jump")
+	var want := TipText.overheat_lift()
 	ok(hud.lines == [want], "first overheat over the abyss: the one line, live key cap (%s)" % str(hud.lines))
 	ok(want.length() <= 70 and not want.contains("\n"), "the line is one short line (%d chars)" % want.length())
 	ok(Save.d["tutorial"].get("overheat_lift", false), "...and it is marked seen in the save")

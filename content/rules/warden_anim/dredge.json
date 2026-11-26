@@ -53,12 +53,14 @@
 		"walk_speed": 2.2,
 		"run_speed": 4.4, "stride": [1.3, 1.2], "bob": [0.5, 0.5], "foot_mps": [1.79, 5.01], "back_foot_mps": [1.95, 5.41], "side_foot_mps": [1.85, 5.01], "start_phase": 0.7
 	},
-	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 2.42},
+	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 2.42,
+		"plants": {"crouch_b": {"L": [0.233], "R": [0.483]}, "crouch_f": {"L": [0.233], "R": [0.483]}, "crouch_l": {"L": [0.233], "R": [0.483]}, "crouch_r": {"L": [0.233], "R": [0.483]}}
+	},
 	"air": {
 		"rise": "jump",
 		"fall": "fall",
 		"glide": "glide",
-		"dive": "pounce"
+		"dive": "pounce", "fade_out": 0.25
 	},
 	"land": {"clip": "land", "hop": {"w": 0.6, "rate": 1.4, "dur": 0.24, "moving": 0.1}, "drop": {"rate": 0.9, "dur": 0.4, "moving": 0.13}},
 	"kmoves": {
@@ -196,7 +198,8 @@
 	"procedural": [
 		"ledge",
 		"mantle",
-		"base"
+		"base",
+		"swim"
 	],
 	"recoil": {"deg": 4.0, "settle": 0.11},
 	"upper": [
@@ -218,6 +221,7 @@
 		"hoard",
 		"gun"
 	],
+	"beats": {"win": {"clip": "emote"}, "lose": {"clip": "downed"}},
 	"cancels": [
 		["dr_dive", 0.3, "glide"],
 		["dr_blast", 0.5, "stun"],

@@ -11,9 +11,12 @@ const SALE := "thunder_stomp"
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("STYLE %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -24,6 +27,7 @@ func run(main: Node) -> void:
 	print("STOMPSTYLE %s (%d fail)" % ["PASS" if bad == 0 else "FAIL", bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _data() -> void:
 	var keys: Array = StompLook.style("").keys()
 	for id in StompLook.rules()["styles"]:
@@ -33,6 +37,7 @@ func _data() -> void:
 	ok(StompLook.for_sale(SALE), "%s is for sale" % SALE)
 	ok(StompLook.default_for("gil") == "fin_slap", "Gil's own stomp is Fin Slap")
 	ok(StompLook.style("nope") == StompLook.style(""), "an unknown style is the base stomp")
+
 
 func _slot() -> void:
 	Save.d.erase("stomps")
@@ -49,6 +54,7 @@ func _slot() -> void:
 	ok(StompLook.equip("") and StompLook.equipped() == "", "back to the own stomp")
 	Save.d.erase("stomps")
 	Save.d["gems"] = 0
+
 
 func _picker(main: Node) -> void:
 	var p := StompPick.make("gil", func(): pass)
@@ -68,10 +74,13 @@ func _picker(main: Node) -> void:
 	Save.d.erase("stomps")
 	StompLook.equip("")
 
+
 ## Real models through HunterAnim at the top of a lift (phase 0.35).
 func _pose(main: Node) -> void:
 	var clip_id := ""
 	for a in Arch.ids():
+		if WardenNative.on(String(a)):
+			continue  # (Meshy's own skeleton plays its own clips, no Warden/Sync: --warden-native-check)
 		var st: Dictionary = WardenClips.data(WardenGlb.art(String(a))).get("states", {})
 		if st.has("stomp"):
 			clip_id = String(a)
@@ -88,15 +97,18 @@ func _pose(main: Node) -> void:
 	var fin := _legs(main, "gil", "fin_slap")
 	ok(fin.x - fin.y > 0.6, "Gil's Fin Slap lifts the left leg (%.2f over %.2f)" % [fin.x, fin.y])
 
+
 func _model(main: Node, id: String) -> Node3D:
 	var m := PreviewBuild.model(id)
 	main.add_child(m)
 	return m
 
+
 func _state(extra: Dictionary) -> Dictionary:
 	var s := {"fired": 99.0, "face": 0.0, "grounded": true, "stomp": 0.35, "stomp_n": 0}
 	s.merge(extra, true)
 	return s
+
 
 ## The clip on a clip Hunter's live channel after 20 steps of the stomp state.
 func _cur(main: Node, id: String, extra: Dictionary) -> String:
@@ -106,7 +118,7 @@ func _cur(main: Node, id: String, extra: Dictionary) -> String:
 	s["wid"] = Arch.signature(id)
 	var sync := m.get_node_or_null("Warden/Sync")
 	if sync:
-		sync.set_process(false)       # (stepped here: no frame passes in the check)
+		sync.set_process(false)  # (stepped here: no frame passes in the check)
 	for i in 20:
 		anim.update(DT, s.duplicate())
 		if sync:
@@ -114,6 +126,7 @@ func _cur(main: Node, id: String, extra: Dictionary) -> String:
 	var cur := String(sync.clips.cur) if sync and sync.clips else "(no clips)"
 	m.free()
 	return cur
+
 
 ## Vector2(left hip, right hip) rig angles after 30 frames in a style.
 func _legs(main: Node, id: String, style: String) -> Vector2:

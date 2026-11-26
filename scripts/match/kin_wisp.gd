@@ -4,13 +4,13 @@ extends RefCounted
 ## "boki_wisps" setting on, a hunter's Boki rides as a small wisp (BokiWispLook) orbiting them at shoulder
 ## height instead of walking beside them. It is carried by order the whole time, so its carry passives are
 ## always on; it takes no orders, throws or hits, and its AI (KinTactics, KinCompanion, the walking state
-## machine) does not tick. When it is left behind (its hunter goes out in a risky match) it turns back into
-## the walking Boki and the old rules run. The summon out of the wisp: KinSummon; stealing: KinSteal. The ult
-## waits on WISP_DESIGN_OPEN.md.
+## machine) does not tick. Its ability goes off through you (the carried rule) and R merges it (KinSummon.fuse,
+## decision 0038). When it is left behind (its hunter goes out in a risky match) it turns back into the walking
+## Boki and the old rules run. The summon out of the wisp: KinSummon; stealing: KinSteal.
 ## Online: the kin snapshot carries the flag (KinNet), so other games show the wisp too.
 
 const SHOULDER_Y := 1.45  # m above the hunter's feet when their rig has no shoulder bone
-const ORBIT_R := 0.6  # m from the hunter's middle
+const ORBIT_R := 0.8  # m from the hunter's middle: beside the body at the match camera, not over it
 const ORBIT_HZ := 0.35  # laps per second: quick enough to read as alive, slow enough to read as a shape
 
 
@@ -45,6 +45,7 @@ static func set_wisp(k: Kin, on: bool) -> void:
 ## A merge ended (KinMerge.end): the Boki is a wisp on its hunter's shoulder again, its summon cooldown as it was.
 static func rewisp(k: Kin) -> void:
 	set_wisp(k, true)
+	k.giant = {}  # (a mount's giant form ends with the merge: merge_out does not run for a wisp)
 	k.stow()
 	k.scale = Vector3.ONE
 
@@ -66,7 +67,7 @@ static func ride(k: Kin, dt: float) -> bool:
 		return false
 	k.pos = k.owner_h.pos + Vector3(0, 1.5, 0)
 	k.prev = k.pos
-	TutorialLead.wisp_step(k, dt)       # (the match tutorial: it floats on ahead to the step's goal, a look only)
+	TutorialLead.wisp_step(k, dt)  # (the match tutorial: it floats on ahead to the step's goal, a look only)
 	return true
 
 
@@ -85,7 +86,7 @@ static func render(k: Kin) -> bool:
 	var sh := o.model.get_node_or_null("Rig/Torso/Shoulder") as Node3D
 	var y := sh.global_position.y if sh else o.position.y + SHOULDER_Y
 	var a: float = TAU * (k.m.time * ORBIT_HZ + float(k.model.get_meta("phase", 0.0)))
-	var mid: Vector3 = o.position            # (leading in the tutorial: it orbits a spot out ahead, still a look only)
+	var mid: Vector3 = o.position  # (leading in the tutorial: it orbits a spot out ahead, still a look only)
 	if k.comp and k.comp.lead_pos != Vector3.INF:
 		mid = k.comp.lead_pos
 		y += mid.y - o.position.y
@@ -94,6 +95,8 @@ static func render(k: Kin) -> bool:
 		k.global_position = k.summon.streak(k.global_position)
 		k.m.fx.burst(k.global_position, k.sp.get("glow", k.sp["color"]), 1, 0.4)
 	k.model.rotation.y = k.face if mid != o.position else atan2(sin(a), -cos(a))
-	k.model.scale = Vector3.ONE
+	k.model.scale = Vector3.ONE * KinWispForm.SIZE
+	BokiWispLook.side(k.model, SideColor.of(k.m, k))
 	BokiWispLook.pose(k.model, k.m.time)
+	KinWispProc.watch(k)
 	return true

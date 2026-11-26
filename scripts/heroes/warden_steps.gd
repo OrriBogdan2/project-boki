@@ -7,7 +7,8 @@ extends RefCounted
 ## own triangles; off them, the nearest loop): a step sounds when its playback passes a plant. Through a blend the
 ## feet keep alternating, so two loops planting the same foot a frame apart step once; a loop that takes over looks
 ## back CATCH of a step for a plant the last one had not reached, so a strafe never drops one. Each step bumps the
-## model's meta STEPS, which HunterAnim hands on as `stepped` (Juice.footstep).
+## model's meta STEPS, which HunterAnim hands on as `stepped` (Juice.footstep). The crouch layer's sneak ring has its
+## own WardenSteps ("crouch.plants", its points plain clips), bumping the same meta.
 
 const STEPS := "clip_steps"  # root meta: how many feet have planted (HunterAnim.stepped when it changes)
 const CATCH := 0.5  # x the clip time from one plant to the next: how far back a new loop looks
@@ -24,16 +25,23 @@ var count := 0  # steps so far
 var side := ""  # the foot that stepped last ("" none since he last stood)
 
 
+## `at`: the blend space's node in the tree ("loco", "crouch_loco").
 func _init(
-	model: Node3D, t: AnimationTree, bs: AnimationNodeBlendSpace2D, plants: Dictionary, lib: AnimationLibrary
+	model: Node3D,
+	t: AnimationTree,
+	bs: AnimationNodeBlendSpace2D,
+	plants: Dictionary,
+	lib: AnimationLibrary,
+	at := "loco"
 ) -> void:
 	root = model
 	tree = t
 	for i in bs.get_blend_point_count():
-		var seekable := bs.get_blend_point_node(i) as AnimationNodeBlendTree  # (WardenClips._seekable: clip + seek)
-		if seekable == null:
+		var point := bs.get_blend_point_node(i)
+		var seekable := point as AnimationNodeBlendTree  # (WardenClips._seekable: clip + seek)
+		var node := seekable.get_node("clip") as AnimationNodeAnimation if seekable else point as AnimationNodeAnimation
+		if node == null:
 			continue
-		var node := seekable.get_node("clip") as AnimationNodeAnimation
 		var clip := String(node.animation)
 		if not plants.has(clip):
 			continue
@@ -46,10 +54,15 @@ func _init(
 		times.sort()
 		of_point[i] = ring.size()
 		ring.append(
-			[bs.get_blend_point_position(i), "parameters/loco/%d/clip/current_position" % i, length * stretch, times]
+			[
+				bs.get_blend_point_position(i),
+				"parameters/%s/%d/%scurrent_position" % [at, i, "clip/" if seekable else ""],
+				length * stretch,
+				times
+			]
 		)
 	space = bs
-	if not ring.is_empty():
+	if not ring.is_empty() and not root.has_meta(STEPS):
 		root.set_meta(STEPS, 0)
 
 
@@ -76,7 +89,7 @@ func step(walking: bool, at: Vector2) -> void:
 	if not best.is_empty():
 		side = best[1]
 		count += 1
-		root.set_meta(STEPS, count)
+		root.set_meta(STEPS, int(root.get_meta(STEPS)) + 1)
 
 
 ## The loop in `ring` the blend weighs most at `at`.

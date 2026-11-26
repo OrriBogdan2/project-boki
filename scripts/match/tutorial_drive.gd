@@ -11,9 +11,14 @@ const MISS_RATE := 0.3     # share of 0.5 s aim windows that land MISS_OFF to th
 const MISS_OFF := 3.0      # m a missed aim is off the target
 const MISS_WINDOW := 0.5   # s one aim roll holds
 
-const KEYS := [      # the action inputs
-		"fire", "glide", "interact", "crouch", "sec", "sig", "jump", "dash", "throw", "gear1", "ult"]
+const LOOKOUT_OFF := 7.0     # m west of the lookout's stop: where a bot that got up without a kick walks off to retry
 
+const REST_S := 1.0   # s of standing with the stick neutral after which the stuck-hop timer starts over
+
+const KEYS := [      # the action inputs
+		"fire", "glide", "interact", "crouch", "sec", "sec_hold", "sig", "jump", "dash", "throw", "gear1", "ult"]
+
+static var _retreat := false   # a wall kick step bot that got up without a kick, walking off to retry
 static var human := false
 static var reading_t := 0.0      # s of reading and reacting still to go before the next input
 static var idle := false         # this frame the player did nothing (no stick, no key, no Boki command)
@@ -27,6 +32,7 @@ static var _wait_run := 0.0
 static var last_step := -1
 static var still_t := 0.0     # s the player has stood in one place while walking
 static var last_pos := Vector3.INF
+static var _rest_t := 0.0      # s the stick has been neutral (waiting for the next foe is not being stuck)
 static var recalled_once := false  # the summon step: the first window is called back early, as a hasty player would
 
 static func drive(m: Match) -> void:
@@ -38,6 +44,7 @@ static func drive(m: Match) -> void:
 			" pts=", m.player.skill_pts, " kin=", m.player.kin != null, " seen=", tu.seen.keys())
 		last_step = tu.step
 	var p := m.player
+	_rest_t = _rest_t + Match.DT if p.inp["move"] == Vector2.ZERO else 0.0      # (last frame's stick)
 	for k in KEYS:
 		p.inp[k] = false
 	p.inp["move"] = Vector2.ZERO
@@ -46,7 +53,7 @@ static func drive(m: Match) -> void:
 		_log(tu)
 	if human and _read(tu):
 		return
-	still_t = still_t + Match.DT if p.pos.distance_to(last_pos) < 0.02 else 0.0
+	still_t = still_t + Match.DT if _rest_t < REST_S and p.pos.distance_to(last_pos) < 0.02 else 0.0
 	last_pos = p.pos
 	var goto := func(at: Vector3, r := 0.5):
 		var d := Vector2(at.x - p.pos.x, at.z - p.pos.z)
@@ -77,9 +84,21 @@ static func drive(m: Match) -> void:
 			else:
 				p.inp["move"] = to.normalized()
 				if sid == "exdash" and p.vel.y < 0.5: p.inp["dash"] = true
-				if sid == "glide": p.inp["glide"] = true
+				if sid == "glide":
+					var press: bool = not p.gliding and p.coyote <= 0.0 and p.can_glide()
+					p.inp["jump"] = press     # the second press opens it
+					p.inp["glide"] = p.gliding or press     # holding only keeps it open
 		"wallkick":
-			goto.call(tu.stop("crouch"), 0.4)
+			var top := tu.stop("crouch")
+			if tu.on_lookout() and not tu.seen.get("kick", false):
+				_retreat = true      # (up without a kick: walk off the cliff and kick up it)
+			var back := top - Vector3(LOOKOUT_OFF, 0.0, 0.0)
+			if _retreat and p.flat_dist(back) < 1.0:
+				_retreat = false
+			if _retreat:
+				goto.call(back)
+			else:
+				goto.call(tu.stop("crouch"), 0.4)
 			_kick_up(m, tu.stop("crouch").y)
 		"crouch":
 			goto.call(dest, 0.4)
@@ -156,6 +175,11 @@ static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 	if sid == "sec":
 		_rmb(m, tu)
 	if best == null:
+		if not tu.camps.coming.is_empty():
+			var ring: Vector3 = tu.camps.coming["at"]
+			if Vector2(p.pos.x - ring.x, p.pos.z - ring.z).length() > 8.0: goto.call(ring)  # (to the ring)
+		if sid == "summon" or sid == "pack":
+			_summon(m, tu)      # (the monster fell in a window called back early: the Boki still comes out again)
 		return
 	p.inp["aim"] = _aim_at(m, best.pos)
 	var melee: bool = p.wpn.get("melee", false)

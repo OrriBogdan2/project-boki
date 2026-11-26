@@ -99,13 +99,15 @@ func tick(dt: float) -> void:
 				if Vector2(f.pos.x - at.x, f.pos.z - at.z).length() < float(z["r"]) + f.r and absf(f.pos.y - at.y) < 2.0:
 					var o := {"src": "kin" if by is Kin else "abil", "ab": String(z["ctx"].get("slot", "zone")), "tags": ["zone", String(z["ctx"].get("ability", ""))],
 							"at": at}      # the zone's own point: HitContact clamps it onto the foe's collider
-					for k in ["slow", "root", "stun", "burn"]:
+					for k in ["slow", "root", "stun", "burn", "blight"]:
 						if e.has(k): o[k] = float(e[k])
 					if float(e.get("dmg", 0.0)) > 0.0:
 						f.hurt(float(e["dmg"]) * float(z["pw"]), by, o)
 					else:
 						if by: DashReset.note(f, by)
-						if o.has("slow"): f.slow_t = maxf(f.slow_t, float(o["slow"]))
+						if o.has("slow"):
+							CcSfx.zone_slow(f)
+							f.slow_t = maxf(f.slow_t, float(o["slow"]))
 						if o.has("root"): f.root_t = maxf(f.root_t, float(o["root"]))
 			if float(e.get("heal", 0.0)) > 0.0:
 				for h in m.hunters:

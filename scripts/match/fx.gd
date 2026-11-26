@@ -2,41 +2,105 @@ class_name Fx
 extends Node3D
 ## Pooled visual effects: particle bursts, damage numbers, ground rings, attack telegraphs, lightning.
 
+## What a floating number counts, and so its look: your direct hits, a heal, a Boki's hits (smaller, in
+## its type colour) and over-time ticks (burn, poison: small, a second of them on one number). A number
+## adds up only with its own kind on a target, so a heal never joins a damage number on the same body,
+## and a Boki's hits, your hits and a burn on one body stay three numbers.
+enum Num { HIT, HEAL, KIN, TICK }
+
 const TELEGRAPH: Shader = preload("res://shaders/telegraph.gdshader")
 const RING: Shader = preload("res://shaders/fx_ring.gdshader")
+
 ## cel_ring's band ends at this share of the quad's half-size, so a burst is scaled to end at the radius asked
 const RING_REACH := 0.9
+
 ## a word that would land on another stacks this far above it (m along the camera's up), at most this
 ## many times
 const WORD_STEP := 0.62
 const WORD_STACK_MAX := 4
-const NO_GROUND := -1000.0       # m: a ground height far below everything, so a dot never fades
+const NO_GROUND := -1000.0  # m: a ground height far below everything, so a dot never fades
+
 ## One word at a spot at a time (docs/COMBAT_CLARITY.md): a word within WORD_ROOM m of another still younger than
 ## WORD_HOLD s is dropped, so a fight never stacks a tower of names; what holds a body shows on it (BodyTell).
 const WORD_ROOM := 3.0
 const WORD_HOLD := 0.6
-const UNDER_A := 0.35          # share of its alpha a telegraph keeps when a higher one covers its centre
+const UNDER_A := 0.35  # share of its alpha a telegraph keeps when a higher one covers its centre
+
+## Readability: every particle burst is thinned out, so effects mark what happened without
+## burying the fight under confetti.
+const PARTICLES := 0.6
+const DEBRIS_MAX := 6  # particles in one debris puff
+
+const DUST := Color(0.82, 0.8, 0.72, 0.9)  # kicked-up dust (fx_dot draws it in two flat tones)
+const HEAVY_DUST := Color(0.6, 0.55, 0.47, 0.95)  # a heavy landing's: darker than a step's, so it reads on snow
+const AIR := Color(0.95, 0.97, 1.0, 0.95)  # a puff of air in the sky
+const PUFF_N := 10  # dots in a jump-out puff, before the quality thinning
+const SETTLE_N := 36  # dots in the dust round a drop rocket's landing, before the thinning
+const GLOW_DUR := 0.5  # s: a body glow's life
+const GLOW_RISE := 1.4  # m/s: how fast it drifts up
+const NUM_MIN := 0.5  # a number under this would read 0: such a hit shows nothing, such a heal waits
+const HEAL_NUM_Y := 2.1  # m over the feet: heal numbers sit above the damage numbers (1.5 m)
+const HEAL_MOTES := 16  # motes in a heal's rise, before the particle quality scales them
+
+## How long a number keeps taking hits after the last one, and how long it lingers on the target.
+const MERGE_T := 0.45
+const STICK_T := 0.3
+const ROLL_T := 1.1  # s: a tick joins its number if the last one was this recent (slow ticks included)
+const ROLL_MAX_T := 5.0  # s: a number rolls this long, then the next tick starts a new one
+const TICK_WINDOW := 1.0  # s: ticks on one body add up on one number this long, then a new one starts
+const RETICLE_CLEAR_PX := 70.0  # px round the reticle where no number spawns
+
+const CRIT_POP := 1.7  # a crit lands this many times its size and settles
+const HIT_POP := 1.25  # ... and a normal hit this many
+const NUM_POOL := 24  # floating numbers and words on screen at once (the oldest is reused)
+const NUM_OUTLINE := Color(0.05, 0.04, 0.08, 0.9)  # every number's dark outline ...
+const CRIT_OUTLINE := Color(0.42, 0.12, 0.0, 0.95)  # ... a crit's is a hot ember brown, and thicker
+
+## Font size by damage tier: [from this damage up, size], on our health scale (a Hunter has 124 to 193): a dart or
+## a pellet the smallest, a rifle round or a slash 40, an ability hit 48, a heavy ability 58, an ult 70.
+## A crit adds CRIT_SIZE on top.
+const SIZE_TIERS := [[0.0, 34], [6.0, 40], [12.0, 48], [24.0, 58], [45.0, 70]]
+const CRIT_SIZE := 10
+const NUM_SCALE := [1.0, 1.0, 0.78, 0.62]  # size and outline by Num: a Boki's hits smaller, a tick's small
+
+## m along the camera's right and up from your hits' spot, by Num: a Boki's beside yours, a tick lower on
+## the body, so the three don't print over each other on one target (a heal has its own height)
+const LOOK_SPOT := [Vector2.ZERO, Vector2.ZERO, Vector2(0.6, -0.35), Vector2(0.0, -0.8)]
+const FLASH_MIN := 0.1  # s an impact flash holds at least: ~6 frames, so the hit frame reads
+
+static var _impact_quad: QuadMesh
+
 var font: Font = preload("res://fonts/LilitaOne-Regular.ttf")
 
 var bursts: Array[CPUParticles3D] = []
 var bi := 0
-var nums: Array = []          # {node, t, vel}
+var nums: Array = []  # {node, t, vel}
 var num_pool: Array[Label3D] = []
-var rings: Array = []         # {node, t, dur, col}
+var rings: Array = []  # {node, t, dur, col}
 var teles: Array = []
 var flashes: Array = []
 var particle_mat: StandardMaterial3D
 var rng := RandomNumberGenerator.new()
-var sparks: Array[CPUParticles3D] = []    # velocity-stretched streaks (shaders/spark.gdshader)
+var sparks: Array[CPUParticles3D] = []  # velocity-stretched streaks (shaders/spark.gdshader)
 var si := 0
 var flash_pool: Array[MeshInstance3D] = []
 var fi := 0
+
 ## Ring, after-image, beam and swing meshes come from pools made at load (FxPool): a fight makes and frees none.
 var ring_pool: FxPool
 var ghost_pool: FxPool
 var beam_pool: FxPool
 var slash_pool: FxPool
-var _slash_arcs := {}          # arc in whole degrees -> its crescent mesh at 1 m reach
+var particles := PARTICLES  # times the quality preset's particle amount (Settings q("fx"))
+var own_look := false  # a Hero's stage with its own look runs: the shared rings, cones and bursts stay out
+var wall_impact: WallImpact  # the crack decals where a wall stun landed
+var ash := 0  # dissolve ash particles emitted so far (checks read it)
+var radial := 0  # bursts and rings spawned so far (dust puffs don't count; checks read it)
+
+var ghosts: Array = []
+
+var _slash_arcs := {}  # arc in whole degrees -> its crescent mesh at 1 m reach
+
 
 func _ready() -> void:
 	wall_impact = WallImpact.new(self)
@@ -47,10 +111,12 @@ func _ready() -> void:
 	particle_mat.vertex_color_use_as_albedo = true
 	particle_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	# soft painted dots with a bright core, always facing the camera (shaders/fx_dot.gdshader)
-	var pm := QuadMesh.new(); pm.size = Vector2(0.17, 0.17)
+	var pm := QuadMesh.new()
+	pm.size = Vector2(0.17, 0.17)
 	var dot_mat := FxDot.material()
 	var ramp := Gradient.new()
-	ramp.set_color(0, Color(1, 1, 1, 1)); ramp.set_color(1, Color(1, 1, 1, 0))
+	ramp.set_color(0, Color(1, 1, 1, 1))
+	ramp.set_color(1, Color(1, 1, 1, 0))
 	for i in 28:
 		var p := CPUParticles3D.new()
 		p.one_shot = true
@@ -92,24 +158,31 @@ func _ready() -> void:
 	# no effect casts a shadow: rings, telegraphs, decals, particles, bolts (item 94, ShadowPolicy)
 	ShadowPolicy.off(self)
 	child_entered_tree.connect(ShadowPolicy.off)
-	ShadowPolicy.watch_particles(get_tree())     # and no particle system anywhere in the match does
+	ShadowPolicy.watch_particles(get_tree())  # and no particle system anywhere in the match does
+
 
 ## Warm counts: about the most the fight worst case (tools/perf_fight.gd) has out at once.
 func _build_pools() -> void:
-	var quad := QuadMesh.new()          # 1 x 1: a beam stretches it
+	var quad := QuadMesh.new()  # 1 x 1: a beam stretches it
 	var flat := Models.flat_quad(2.0)
 	var capsule := Models.capsule(0.3, 1.25)
 	ring_pool = FxPool.new(self, func() -> MeshInstance3D: return _mesh_node(flat, _ring_look()), 24)
-	ghost_pool = FxPool.new(self, func() -> MeshInstance3D: return _mesh_node(capsule, Models.glow_mat(Color.WHITE)), 24)
-	beam_pool = FxPool.new(self, func() -> MeshInstance3D:
-		return _mesh_node(quad, _shader_mat("res://shaders/light_shaft.gdshader")), 48)      # (a bolt takes 10)
-	slash_pool = FxPool.new(self, func() -> MeshInstance3D:
-		return _mesh_node(null, _shader_mat("res://shaders/swoosh.gdshader")), 8)
+	ghost_pool = FxPool.new(
+		self, func() -> MeshInstance3D: return _mesh_node(capsule, Models.glow_mat(Color.WHITE)), 24
+	)
+	beam_pool = FxPool.new(
+		self, func() -> MeshInstance3D: return _mesh_node(quad, _shader_mat("res://shaders/light_shaft.gdshader")), 48
+	)  # (a bolt takes 10)
+	slash_pool = FxPool.new(
+		self, func() -> MeshInstance3D: return _mesh_node(null, _shader_mat("res://shaders/swoosh.gdshader")), 8
+	)
+
 
 func _ring_look() -> ShaderMaterial:
 	var m := ShaderMaterial.new()
 	m.shader = RING
 	return m
+
 
 func _mesh_node(mesh: Mesh, mat: Material) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
@@ -117,18 +190,24 @@ func _mesh_node(mesh: Mesh, mat: Material) -> MeshInstance3D:
 	mi.material_override = mat
 	return mi
 
+
 func _shader_mat(path: String) -> ShaderMaterial:
 	var m := ShaderMaterial.new()
 	m.shader = load(path)
 	return m
 
+
 func _build_sparks() -> void:
-	var qm := QuadMesh.new(); qm.size = Vector2(1, 1)
-	var sm := ShaderMaterial.new(); sm.shader = load("res://shaders/spark.gdshader")
+	var qm := QuadMesh.new()
+	qm.size = Vector2(1, 1)
+	var sm := ShaderMaterial.new()
+	sm.shader = load("res://shaders/spark.gdshader")
 	var ramp := Gradient.new()
-	ramp.set_color(0, Color(1, 1, 1, 1)); ramp.set_color(1, Color(1, 1, 1, 0))
+	ramp.set_color(0, Color(1, 1, 1, 1))
+	ramp.set_color(1, Color(1, 1, 1, 0))
 	var shrink := Curve.new()
-	shrink.add_point(Vector2(0, 1)); shrink.add_point(Vector2(1, 0.25))
+	shrink.add_point(Vector2(0, 1))
+	shrink.add_point(Vector2(1, 0.25))
 	for i in 18:
 		var p := CPUParticles3D.new()
 		p.one_shot = true
@@ -155,27 +234,41 @@ func _build_sparks() -> void:
 		add_child(p)
 		sparks.append(p)
 	if _impact_quad == null:
-		_impact_quad = QuadMesh.new(); _impact_quad.size = Vector2(2, 2)
+		_impact_quad = QuadMesh.new()
+		_impact_quad.size = Vector2(2, 2)
 	var ish: Shader = load("res://shaders/impact.gdshader")
 	for i in 20:
 		var mi := MeshInstance3D.new()
 		mi.mesh = _impact_quad
-		var m := ShaderMaterial.new(); m.shader = ish
+		var m := ShaderMaterial.new()
+		m.shader = ish
 		mi.material_override = m
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		mi.visible = false
 		add_child(mi)
 		flash_pool.append(mi)
 
+
 ## A spray of hot streaks (hit sparks, muzzle embers) along dir.
-func spark(at: Vector3, dir: Vector3, col: Color, amount := 8, speed := 9.0, spread := 50.0, life := 0.22, grav := 10.0, size := 1.0) -> void:
+func spark(
+	at: Vector3,
+	dir: Vector3,
+	col: Color,
+	amount := 8,
+	speed := 9.0,
+	spread := 50.0,
+	life := 0.22,
+	grav := 10.0,
+	size := 1.0
+) -> void:
 	if sparks.is_empty():
 		return
 	var p := sparks[si]
 	si = (si + 1) % sparks.size()
 	p.global_position = at
 	var na := maxi(2, int(round(amount * clampf(particles / PARTICLES, 0.4, 1.0))))
-	if p.amount != na: p.amount = na
+	if p.amount != na:
+		p.amount = na
 	p.color = col
 	p.lifetime = life * float(Settings.q("fx_life"))
 	p.direction = dir.normalized() if dir.length() > 0.01 else Vector3.UP
@@ -188,32 +281,67 @@ func spark(at: Vector3, dir: Vector3, col: Color, amount := 8, speed := 9.0, spr
 	p.restart()
 	p.emitting = true
 
+
 ## A gun going off: a short star of flame at the muzzle, embers thrown forward, and on the heavy
 ## guns a puff of smoke that hangs for a moment. power: 1 an SMG round .. 3 a slug or a sniper.
 func muzzle(at: Vector3, dir2: Vector2, col: Color, power := 1.0) -> void:
 	var d := Vector3(dir2.x, 0.05, dir2.y).normalized()
 	var hot := Color(1.0, 0.86, 0.55).lerp(col, 0.25)
 	flash(at + d * 0.12, hot, 0.22 + 0.09 * power, 0.05 + 0.012 * power)
-	spark(at, d, hot, int(3 + 2 * power), 7.0 + 3.0 * power, 16.0 + 6.0 * power, 0.09 + 0.02 * power, 0.0, 0.8 + 0.15 * power)
+	spark(
+		at,
+		d,
+		hot,
+		int(3 + 2 * power),
+		7.0 + 3.0 * power,
+		16.0 + 6.0 * power,
+		0.09 + 0.02 * power,
+		0.0,
+		0.8 + 0.15 * power
+	)
 	if power >= 1.8:
 		burst(at + d * 0.35, Color(0.78, 0.76, 0.74, 0.35), int(3 * power), 1.2, 0.5, -0.6, 1.6, d, 30.0)
+
 
 ## A hit landing: a flash where it struck, sparks thrown out the far side along the shot, a few
 ## kicked back toward the shooter; crits flash gold and wider, armor sheds blue shards.
 ## power: 0..3 from the damage.
 func impact(at: Vector3, dir: Vector3, col: Color, power := 1.0, crit := false, armor := false) -> void:
 	var fcol := col
-	if crit: fcol = Color("ffd23f")
-	elif armor: fcol = Color("8fd4ff")
+	if crit:
+		fcol = Color("ffd23f")
+	elif armor:
+		fcol = Color("8fd4ff")
 	var sz := (0.34 + 0.17 * power) * (1.45 if crit else 1.0)
 	flash(at, fcol, sz, 0.07 + 0.02 * power + (0.04 if crit else 0.0))
 	var dd := dir.normalized() if dir.length() > 0.01 else Vector3.UP
 	dd = (dd + Vector3(0, 0.35, 0)).normalized()
-	spark(at, dd, fcol.lerp(Color.WHITE, 0.3), int(5 + 4 * power) + (6 if crit else 0), 7.0 + 3.0 * power, 38.0 + (25.0 if crit else 0.0), 0.2 + 0.04 * power, 12.0, 1.0 + 0.2 * power)
+	spark(
+		at,
+		dd,
+		fcol.lerp(Color.WHITE, 0.3),
+		int(5 + 4 * power) + (6 if crit else 0),
+		7.0 + 3.0 * power,
+		38.0 + (25.0 if crit else 0.0),
+		0.2 + 0.04 * power,
+		12.0,
+		1.0 + 0.2 * power
+	)
 	if power >= 1.0 or crit:
-		spark(at, (-dd + Vector3(0, 0.9, 0)).normalized(), fcol, int(2 + 2 * power), 4.0 + 1.5 * power, 70.0, 0.18, 14.0, 0.8)
+		spark(
+			at,
+			(-dd + Vector3(0, 0.9, 0)).normalized(),
+			fcol,
+			int(2 + 2 * power),
+			4.0 + 1.5 * power,
+			70.0,
+			0.18,
+			14.0,
+			0.8
+		)
 	if armor:
 		burst(at, Color("9ad8ff"), int(4 + 3 * power), 4.5, 0.35, 14.0, 0.8, dd, 70.0)
+
 
 ## A straight bolt of light from a to b that flares and fades (a rail shot, a beam ability): a soft
 ## camera-facing ribbon (shaders/light_shaft.gdshader) with a white-hot core line inside it.
@@ -232,35 +360,52 @@ func beam(a: Vector3, b: Vector3, col: Color, width := 0.45, dur := 0.28) -> voi
 		var z_axis := x_axis.cross(axis).normalized()
 		mi.global_transform = Transform3D(Basis(x_axis, axis * ln, z_axis), (a + b) * 0.5)
 		var tw := mi.create_tween()
-		tw.tween_method(func(v: float) -> void: m.set_shader_parameter("intensity", v), 2.2 if k == 0 else 3.0, 0.0, dur).set_ease(Tween.EASE_IN)
+		(
+			tw
+			. tween_method(
+				func(v: float) -> void: m.set_shader_parameter("intensity", v), 2.2 if k == 0 else 3.0, 0.0, dur
+			)
+			. set_ease(Tween.EASE_IN)
+		)
 		tw.tween_callback(beam_pool.give.bind(mi))
 
-## Readability: every particle burst is thinned out, so effects mark what happened without
-## burying the fight under confetti.
-const PARTICLES := 0.6
-const DEBRIS_MAX := 6          # particles in one debris puff
-var particles := PARTICLES     # times the quality preset's particle amount (Settings q("fx"))
-var own_look := false          # a Hero's stage with its own look runs: the shared rings, cones and bursts stay out
-var wall_impact: WallImpact     # the crack decals where a wall stun landed
-var ash := 0                   # dissolve ash particles emitted so far (checks read it)
-var radial := 0                # bursts and rings spawned so far (dust puffs don't count; checks read it)
 
 ## A particle burst: an effect that marks a hit or a blast, never plain movement (dust is for that).
-func burst(at: Vector3, col: Color, amount := 14, speed := 4.0, life := 0.5, grav := 12.0, size_k := 1.0,
-		dir := Vector3.UP, spread := 180.0) -> void:
+func burst(
+	at: Vector3,
+	col: Color,
+	amount := 14,
+	speed := 4.0,
+	life := 0.5,
+	grav := 12.0,
+	size_k := 1.0,
+	dir := Vector3.UP,
+	spread := 180.0
+) -> void:
 	if own_look:
 		return
 	radial += 1
 	_emit(at, col, amount, speed, life, grav, size_k, dir, spread)
 
-func _emit(at: Vector3, col: Color, amount: int, speed: float, life: float, grav: float, size_k: float, dir: Vector3,
-		spread: float) -> void:
+
+func _emit(
+	at: Vector3,
+	col: Color,
+	amount: int,
+	speed: float,
+	life: float,
+	grav: float,
+	size_k: float,
+	dir: Vector3,
+	spread: float
+) -> void:
 	var p := bursts[bi]
 	bi = (bi + 1) % bursts.size()
 	p.global_position = at
 	p.set_instance_shader_parameter("ground_y", _ground_under(at))
 	var na := maxi(3, int(round(amount * particles)))
-	if p.amount != na: p.amount = na      # (resizing reallocates its buffers: only when it changes)
+	if p.amount != na:
+		p.amount = na  # (resizing reallocates its buffers: only when it changes)
 	p.color = col
 	p.lifetime = life * float(Settings.q("fx_life"))
 	p.initial_velocity_min = speed * 0.5
@@ -273,11 +418,13 @@ func _emit(at: Vector3, col: Color, amount: int, speed: float, life: float, grav
 	p.restart()
 	p.emitting = true
 
+
 ## The ground height under a burst, for the dots' fade where there is no depth read (see FxDot); the burst's own
 ## no fade off a match (home, interiors).
 func _ground_under(at: Vector3) -> float:
 	var m := get_parent() as Match
 	return m.world.ground_at(at.x, at.z) if m else NO_GROUND
+
 
 ## Ash drifting up off something that is dissolving. Not a blast, so it is not counted in `radial`.
 func motes(at: Vector3, col: Color, amount: int) -> void:
@@ -285,20 +432,27 @@ func motes(at: Vector3, col: Color, amount: int) -> void:
 		ash += maxi(3, int(round(amount * particles)))
 		_emit(at, col, amount, 1.6, 0.8, -2.0, 0.9, Vector3.UP, 70.0)
 
-const DUST := Color(0.82, 0.8, 0.72, 0.9)      # kicked-up dust (fx_dot draws it in two flat tones)
-const HEAVY_DUST := Color(0.6, 0.55, 0.47, 0.95)   # a heavy landing's: darker than a step's, so it reads on snow
-const AIR := Color(0.95, 0.97, 1.0, 0.95)      # a puff of air in the sky
-const PUFF_N := 10             # dots in a jump-out puff, before the quality thinning
-const SETTLE_N := 36           # dots in the dust round a drop rocket's landing, before the thinning
+
 ## Particles that ride a mover: turf a dash kicks up, a trail behind a glide or a thrown lantern. Not a burst
 ## (no `radial`, never thinned by `own_look`): capped at DEBRIS_MAX so it stays a few specks (--move-fx-check).
-func debris(at: Vector3, col: Color, amount := 4, speed := 2.0, life := 0.35, grav := 8.0, size_k := 1.0,
-		dir := Vector3.UP, spread := 60.0) -> void:
+func debris(
+	at: Vector3,
+	col: Color,
+	amount := 4,
+	speed := 2.0,
+	life := 0.35,
+	grav := 8.0,
+	size_k := 1.0,
+	dir := Vector3.UP,
+	spread := 60.0
+) -> void:
 	_emit(at, col, mini(amount, DEBRIS_MAX), speed, life, grav, size_k, dir, spread)
+
 
 ## A low puff of dust at the feet: the cue for movement (dashes, landings, jumps).
 func dust(at: Vector3, n := 8, col := DUST) -> void:
 	_emit(at + Vector3(0, 0.1, 0), col, n, 2.2, 0.45, 2.0, 1.3, Vector3.UP, 80.0)
+
 
 ## A thin smoke puff drifting behind `dir` (an overheated glider's trail). Like dust, not a burst: dark and grey
 ## (no hot core), ~0.4 m soft dots that rise a little and fade over a second, so the puffs left every SMOKE_EVERY
@@ -306,24 +460,24 @@ func dust(at: Vector3, n := 8, col := DUST) -> void:
 func smoke(at: Vector3, dir: Vector3) -> void:
 	_emit(at, Color(0.16, 0.15, 0.15, 0.8), 4, 0.6, 1.1, -0.8, 2.6, dir, 20.0)
 
+
 ## A small puff of air where a Hunter jumps out of the drop rocket: slow, every way, hanging where it was left (no
 ## fall) for a moment. Not a ring or a burst.
 func puff(at: Vector3) -> void:
 	_emit(at, AIR, PUFF_N, 1.6, 0.6, 0.0, 3.0, Vector3.UP, 180.0)
+
 
 ## Dust rolling out low round the drop rocket's landing and sinking back over a second: it is not a bomb, so
 ## nothing fast, no flash, no ring.
 func settle(at: Vector3) -> void:
 	_emit(at + Vector3(0, 0.2, 0), HEAVY_DUST, SETTLE_N, 3.6, 1.2, 1.0, 3.6, Vector3.UP, 88.0)
 
+
 ## The shared dash cue: a dust puff where it sets off (the after-images follow in Hunter.render). No ring or
 ## burst: those are kept for blasts that do something.
 func dash_trail(h) -> void:
 	dust(h.pos, 7)
 
-var ghosts: Array = []
-const GLOW_DUR := 0.5      # s: a body glow's life
-const GLOW_RISE := 1.4     # m/s: how fast it drifts up
 
 ## A fading after-image of a dashing hunter.
 func ghost(at: Vector3, yaw: float, col: Color, scl: float) -> void:
@@ -334,6 +488,7 @@ func ghost(at: Vector3, yaw: float, col: Color, scl: float) -> void:
 	mi.scale = Vector3(1.0, 1.0, 1.3) * scl
 	ghosts.append({"node": mi, "t": 0.0, "col": col, "dur": 0.26, "rise": 0.0})
 
+
 ## The one world cue for a level-up or an ability coming ready: a short upward glow over the body
 ## in `col`. No ground ring, no burst (a ground ring means gameplay).
 func body_glow(at: Vector3, col: Color) -> void:
@@ -341,6 +496,7 @@ func body_glow(at: Vector3, col: Color) -> void:
 	var g: Dictionary = ghosts[ghosts.size() - 1]
 	g["dur"] = GLOW_DUR
 	g["rise"] = GLOW_RISE
+
 
 ## The one read for a heal, whatever gave it (docs/DASHES_AND_ABILITY_FEEL.md 5.1, sustain): a soft
 ## green-gold glow that rises over the healed Hunter and moves with them, a few motes rising off them
@@ -362,14 +518,6 @@ func healed(h: Hunter, n: float) -> void:
 	(glow["node"] as Node3D).reparent(h)
 	_emit(h.global_position + Vector3(0, 0.25, 0), col, HEAL_MOTES, 2.6, GLOW_DUR, -4.0, 1.3, Vector3.UP, 20.0)
 
-## What a floating number counts, and so its look: your direct hits, a heal, a Boki's hits (smaller, in
-## its type colour) and over-time ticks (burn, poison: small, a second of them on one number). A number
-## adds up only with its own kind on a target, so a heal never joins a damage number on the same body,
-## and a Boki's hits, your hits and a burn on one body stay three numbers.
-enum Num { HIT, HEAL, KIN, TICK }
-const NUM_MIN := 0.5          # a number under this would read 0: such a hit shows nothing, such a heal waits
-const HEAL_NUM_Y := 2.1       # m over the feet: heal numbers sit above the damage numbers (1.5 m)
-const HEAL_MOTES := 16        # motes in a heal's rise, before the particle quality scales them
 
 ## One floating number. Hits with the same `key` (Fx.roll_key: one source on one target) roll into a
 ## single label that counts up while they keep landing (a burn, a zone, a minigun), then floats off;
@@ -405,18 +553,34 @@ func number(
 	num_pool.append(l)
 	for n in nums:
 		if n["node"] == l:
-			nums.erase(n); break
+			nums.erase(n)
+			break
 	l.text = prefix + str(int(round(v)))
 	l.modulate = col
 	_num_look(l, crit, kind)
 	l.font_size = _num_size(v, crit, small, kind)
 	var off := Vector3(rng.randf_range(-0.35, 0.35), 0, rng.randf_range(-0.2, 0.2))
 	l.global_position = at + off
-	l.visible = v >= NUM_MIN       # a sliver of a heal (lifesteal on a light hit) shows once more adds up
+	l.visible = v >= NUM_MIN  # a sliver of a heal (lifesteal on a light hit) shows once more adds up
 	l.scale = Vector3.ONE * (CRIT_POP if crit else HIT_POP)
-	nums.append({"node": l, "t": 0.0, "last": 0.0, "vel": Vector3(rng.randf_range(-0.5, 0.5), 2.6, 0), "val": v,
-		"pre": prefix, "base": at, "off": off, "hits": 1, "crit": crit, "key": key, "kind": kind,
-		"small": small})
+	nums.append(
+		{
+			"node": l,
+			"t": 0.0,
+			"last": 0.0,
+			"vel": Vector3(rng.randf_range(-0.5, 0.5), 2.6, 0),
+			"val": v,
+			"pre": prefix,
+			"base": at,
+			"off": off,
+			"hits": 1,
+			"crit": crit,
+			"key": key,
+			"kind": kind,
+			"small": small
+		}
+	)
+
 
 ## Does a new hit join this number? Keyed hits join the same key's number (ticks, so a long window;
 ## a crit only within MERGE_T and never into a number past ROLL_MAX_T); unkeyed ones join any nearby one.
@@ -433,9 +597,11 @@ func _rolls_into(n: Dictionary, at: Vector3, prefix: String, crit: bool, key: St
 	var max_t := TICK_WINDOW if kind == Num.TICK else ROLL_MAX_T
 	return float(n["last"]) < ROLL_T and float(n["t"]) < max_t
 
+
 ## A tick number that has gathered TICK_WINDOW of ticks: it takes no more and floats off.
 func _second_up(n: Dictionary) -> bool:
 	return int(n["kind"]) == Num.TICK and float(n["t"]) >= TICK_WINDOW
+
 
 ## The kind of number a hit by `by` shows (o: the hit's options): a burn or poison tick, or any hit
 ## flagged as a tick, then a Boki's own hit, else a direct hit.
@@ -443,6 +609,7 @@ static func num_kind(by: Ent, o: Dictionary) -> Num:
 	if String(o.get("src", "")) == "burn" or o.get("tick", false):
 		return Num.TICK
 	return Num.KIN if by is Kin else Num.HIT
+
 
 ## The number for `d` dealt to `target` by `by` (o: the hit's options), in the look its source picks.
 ## Only damage that involves `you` shows (dealt by you or your Boki, or taken by you): other fights
@@ -461,15 +628,18 @@ func damage_number(target: Ent, by: Ent, d: float, o: Dictionary, you: Hunter, a
 	var at := target.pos + Vector3(0, 1.5 if target is Hunter else 1.0, 0) + _look_spot(kind)
 	number(at, d, col, crit, "", roll_key(by, target, kind), kind, target is Kin)
 
+
 ## Where a kind's number sits from your hits' spot (LOOK_SPOT), along the camera's right and up.
 func _look_spot(kind: Num) -> Vector3:
 	var s: Vector2 = LOOK_SPOT[kind]
 	var cam := get_viewport().get_camera_3d() if get_viewport() else null
 	return (cam.global_basis.x if cam else Vector3.RIGHT) * s.x + Vector3.UP * s.y
 
+
 ## The roll key for damage from `src` onto `target` of one kind: one source on one target, per kind.
 static func roll_key(src: Ent, target: Ent, kind := Num.HIT) -> String:
 	return "%d>%d:%d" % [src.get_instance_id() if src else 0, target.get_instance_id(), kind]
+
 
 ## `at` moved (in the camera's plane, same depth) off the reticle's screen area, so a number
 ## never prints over where you are aiming.
@@ -484,6 +654,7 @@ func _off_reticle(at: Vector3) -> Vector3:
 		return at
 	return cam.project_position(out, (at - cam.global_position).dot(-cam.global_basis.z))
 
+
 ## `p` on screen, moved straight out of the circle of radius `r` round `centre` (unchanged when outside).
 static func push_out(p: Vector2, centre: Vector2, r: float) -> Vector2:
 	var d := p - centre
@@ -491,32 +662,13 @@ static func push_out(p: Vector2, centre: Vector2, r: float) -> Vector2:
 		return p
 	return centre + (d.normalized() if d.length() > 0.5 else Vector2.UP) * r
 
-## How long a number keeps taking hits after the last one, and how long it lingers on the target.
-const MERGE_T := 0.45
-const STICK_T := 0.3
-const ROLL_T := 1.1            # s: a tick joins its number if the last one was this recent (slow ticks included)
-const ROLL_MAX_T := 5.0        # s: a number rolls this long, then the next tick starts a new one
-const TICK_WINDOW := 1.0       # s: ticks on one body add up on one number this long, then a new one starts
-const RETICLE_CLEAR_PX := 70.0 # px round the reticle where no number spawns
-
-const CRIT_POP := 1.7          # a crit lands this many times its size and settles
-const HIT_POP := 1.25          # ... and a normal hit this many
-const NUM_POOL := 24           # floating numbers and words on screen at once (the oldest is reused)
-const NUM_OUTLINE := Color(0.05, 0.04, 0.08, 0.9)     # every number's dark outline ...
-const CRIT_OUTLINE := Color(0.42, 0.12, 0.0, 0.95)    # ... a crit's is a hot ember brown, and thicker
-## Font size by damage tier: [from this value up, size]. A crit adds CRIT_SIZE on top.
-const SIZE_TIERS := [[0.0, 34], [20.0, 40], [50.0, 48], [100.0, 58], [200.0, 70]]
-const CRIT_SIZE := 10
-const NUM_SCALE := [1.0, 1.0, 0.78, 0.62]   # size and outline by Num: a Boki's hits smaller, a tick's small
-## m along the camera's right and up from your hits' spot, by Num: a Boki's beside yours, a tick lower on
-## the body, so the three don't print over each other on one target (a heal has its own height)
-const LOOK_SPOT := [Vector2.ZERO, Vector2.ZERO, Vector2(0.6, -0.35), Vector2(0.0, -0.8)]
 
 ## Outline per kind: crits get a thicker, warm outline so they read as a different thing, not just
 ## a yellower number; it thins with a smaller kind (pooled labels are reused, so every number sets this).
 func _num_look(l: Label3D, crit: bool, kind := Num.HIT) -> void:
 	l.outline_modulate = CRIT_OUTLINE if crit else NUM_OUTLINE
-	l.outline_size = 20 if crit else 14
+	l.outline_size = int((20 if crit else 14) * float(NUM_SCALE[kind]))
+
 
 ## Big hits read big: the size steps up with the damage tier, a crit is larger again; a number on a
 ## Boki (small) and a Boki's or a tick's number (NUM_SCALE) are smaller.
@@ -528,18 +680,26 @@ static func _num_size(v: float, crit: bool, small := false, kind := Num.HIT) -> 
 	px += CRIT_SIZE if crit else 0
 	return int(px * (Juice.BOKI_NUM_K if small else 1.0) * float(NUM_SCALE[kind]))
 
+
 ## A short word that floats up (COMBO, an ability's name, BOND READY).
 func word(at: Vector3, txt: String, col: Color, big := false) -> void:
+	if get_parent() != null and get_parent().has_meta("pitch_no_foe_plates"):  # pitch-reel films: no game words
+		return
 	for n in nums:
 		var w: Label3D = n["node"]
-		if n.get("word", false) and w.visible and float(n["t"]) < WORD_HOLD \
-				and Vector2(w.global_position.x - at.x, w.global_position.z - at.z).length() < WORD_ROOM:
+		if (
+			n.get("word", false)
+			and w.visible
+			and float(n["t"]) < WORD_HOLD
+			and Vector2(w.global_position.x - at.x, w.global_position.z - at.z).length() < WORD_ROOM
+		):
 			return
 	var l: Label3D = num_pool.pop_front()
 	num_pool.append(l)
 	for n in nums:
 		if n["node"] == l:
-			nums.erase(n); break
+			nums.erase(n)
+			break
 	l.text = txt
 	l.modulate = col
 	_num_look(l, false)
@@ -548,6 +708,7 @@ func word(at: Vector3, txt: String, col: Color, big := false) -> void:
 	l.visible = true
 	l.scale = Vector3.ONE * (1.25 if big else 1.0)
 	nums.append({"node": l, "t": 0.0, "vel": Vector3(0, 2.4, 0), "word": true})
+
 
 ## Where a new word goes so it doesn't print over a word or number still rising near `at`: stepped up
 ## the screen (along the camera's up) above whatever is there.
@@ -572,6 +733,7 @@ func _clear_spot(at: Vector3) -> Vector3:
 		spot += up * WORD_STEP
 	return spot
 
+
 ## `order`: where it sits among the ground looks (SideColor.ORDER_*, a render_priority).
 func ring(at: Vector3, radius: float, col: Color, dur := 0.35, order := 0) -> void:
 	if own_look:
@@ -586,6 +748,7 @@ func ring(at: Vector3, radius: float, col: Color, dur := 0.35, order := 0) -> vo
 	mi.global_position = at + Vector3(0, 0.08, 0)
 	mi.scale = Vector3.ONE * radius / RING_REACH
 	rings.append({"node": mi, "t": 0.0, "dur": dur, "col": col})
+
 
 ## A melee swing: a bright crescent sweeping the arc in front of you, gone in a blink.
 func slash(at: Vector3, a0: float, arc: float, reach: float, col: Color, heavy := false) -> void:
@@ -603,6 +766,7 @@ func slash(at: Vector3, a0: float, arc: float, reach: float, col: Color, heavy :
 	tw.tween_method(func(v: float) -> void: m.set_shader_parameter("progress", v), 0.0, 1.0, 0.2 if not heavy else 0.26)
 	tw.chain().tween_callback(slash_pool.give.bind(mi))
 
+
 ## The swing's crescent at 1 m reach centred on +X, one per arc in whole degrees (slash turns and scales it).
 func _slash_mesh(arc: float) -> ArrayMesh:
 	var deg := roundi(rad_to_deg(arc))
@@ -617,18 +781,31 @@ func _slash_mesh(arc: float) -> ArrayMesh:
 		var u0 := -arc * 0.5 + arc * float(i) / n
 		var u1 := -arc * 0.5 + arc * float(i + 1) / n
 		# thickest in the middle of the sweep, thin at the ends
-		var w0 := sin(PI * float(i) / n); var w1 := sin(PI * float(i + 1) / n)
-		var a := Vector3(cos(u0), 0, sin(u0)); var b := Vector3(cos(u1), 0, sin(u1))
-		var c := b * lerpf(1.0, r0, w1); var d := a * lerpf(1.0, r0, w0)
-		var ua := float(i) / n; var ub := float(i + 1) / n
+		var w0 := sin(PI * float(i) / n)
+		var w1 := sin(PI * float(i + 1) / n)
+		var a := Vector3(cos(u0), 0, sin(u0))
+		var b := Vector3(cos(u1), 0, sin(u1))
+		var c := b * lerpf(1.0, r0, w1)
+		var d := a * lerpf(1.0, r0, w0)
+		var ua := float(i) / n
+		var ub := float(i + 1) / n
 		# UV.x along the sweep, UV.y from the blade's tip (0) to the inner edge (1)
-		st.set_uv(Vector2(ua, 0)); st.add_vertex(a); st.set_uv(Vector2(ub, 0)); st.add_vertex(b); st.set_uv(Vector2(ub, 1)); st.add_vertex(c)
-		st.set_uv(Vector2(ua, 0)); st.add_vertex(a); st.set_uv(Vector2(ub, 1)); st.add_vertex(c); st.set_uv(Vector2(ua, 1)); st.add_vertex(d)
+		st.set_uv(Vector2(ua, 0))
+		st.add_vertex(a)
+		st.set_uv(Vector2(ub, 0))
+		st.add_vertex(b)
+		st.set_uv(Vector2(ub, 1))
+		st.add_vertex(c)
+		st.set_uv(Vector2(ua, 0))
+		st.add_vertex(a)
+		st.set_uv(Vector2(ub, 1))
+		st.add_vertex(c)
+		st.set_uv(Vector2(ua, 1))
+		st.add_vertex(d)
 	_slash_arcs[deg] = st.commit()
 	return _slash_arcs[deg]
 
-static var _impact_quad: QuadMesh
-const FLASH_MIN := 0.1         # s an impact flash holds at least: ~6 frames, so the hit frame reads
+
 func flash(at: Vector3, col: Color, size := 0.35, dur := 0.06) -> void:
 	# a star of rays round a white-hot core (shaders/impact.gdshader), from a pool so a firefight
 	# doesn't make and free a mesh for every shot
@@ -638,7 +815,8 @@ func flash(at: Vector3, col: Color, size := 0.35, dur := 0.06) -> void:
 	fi = (fi + 1) % flash_pool.size()
 	for f in flashes:
 		if f["node"] == mi:
-			flashes.erase(f); break
+			flashes.erase(f)
+			break
 	var m := mi.material_override as ShaderMaterial
 	m.set_shader_parameter("color", col)
 	m.set_shader_parameter("seed", rng.randf() * TAU)
@@ -650,22 +828,27 @@ func flash(at: Vector3, col: Color, size := 0.35, dur := 0.06) -> void:
 	mi.global_position = at
 	flashes.append({"node": mi, "t": 0.0, "dur": dur, "s0": size * 1.6})
 
+
 ## A jagged bolt of lightning from a to b: soft glowing segments that flare and fade.
 func bolt(a: Vector3, b: Vector3, col: Color) -> void:
 	var pts := [a]
 	for i in range(1, 5):
 		var k := i / 5.0
-		pts.append(a.lerp(b, k) + Vector3(rng.randf_range(-0.3, 0.3), rng.randf_range(-0.2, 0.2), rng.randf_range(-0.3, 0.3)))
+		pts.append(
+			a.lerp(b, k) + Vector3(rng.randf_range(-0.3, 0.3), rng.randf_range(-0.2, 0.2), rng.randf_range(-0.3, 0.3))
+		)
 	pts.append(b)
 	for i in pts.size() - 1:
 		beam(pts[i], pts[i + 1], col, 0.22, 0.22)
 	burst(b, col, 10, 3.0, 0.3, 4.0)
 
-func cone(at: Vector3, d: Vector2, length: float, col: Color) -> void:
+
+func cone(at: Vector3, d: Vector2, _length: float, col: Color) -> void:
 	if own_look:
 		return
 	for i in 3:
 		burst(at + Vector3(d.x, 0.5, d.y) * (0.5 + i * 1.2), col, 12, 6.0, 0.4, 4.0, 1.4, Vector3(d.x, 0.2, d.y), 25.0)
+
 
 # ---- telegraphs
 func _tele_mesh(col: Color, shape: int, order: int) -> MeshInstance3D:
@@ -677,35 +860,44 @@ func _tele_mesh(col: Color, shape: int, order: int) -> MeshInstance3D:
 	mat.shader = TELEGRAPH
 	mat.set_shader_parameter("color", col)
 	mat.set_shader_parameter("shape", shape)
+	mat.set_shader_parameter("quiet", 1.0 if order < SideColor.ORDER_FOE else 0.0)  # yours and allies': a faint rim
 	mi.material_override = mat
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(mi)
 	teles.append(mi)
 	return mi
 
-func telegraph_circle(at: Vector3, radius: float, col: Color, order := 0) -> Node3D:
+
+func telegraph_circle(at: Vector3, radius: float, col: Color, order := SideColor.ORDER_FOE) -> Node3D:
 	var mi := _tele_mesh(col, 0, order)
 	mi.mesh = Models.flat_quad(radius * 2.0)
 	mi.set_meta("r", radius)
 	mi.global_position = at + Vector3(0, 0.07, 0)
 	return mi
 
-func telegraph_rect(at: Vector3, d: Vector2, length: float, width: float, col: Color, order := 0) -> Node3D:
+
+func telegraph_rect(
+	at: Vector3, d: Vector2, length: float, width: float, col: Color, order := SideColor.ORDER_FOE
+) -> Node3D:
 	var mi := _tele_mesh(col, 1, order)
-	var pm := PlaneMesh.new(); pm.size = Vector2(width, length)
+	var pm := PlaneMesh.new()
+	pm.size = Vector2(width, length)
 	mi.mesh = pm
 	mi.set_meta("len", length)
 	mi.set_meta("w", width)
 	aim_telegraph(mi, at, d)
 	return mi
 
+
 func aim_telegraph(mi: Node3D, at: Vector3, d: Vector2) -> void:
 	var length: float = mi.get_meta("len", 2.0)
 	mi.global_position = at + Vector3(d.x, 0, d.y) * (length * 0.5) + Vector3(0, 0.07, 0)
 	mi.rotation = Vector3(0, atan2(-d.x, -d.y), 0)
 
+
 func telegraph_progress(mi: Node3D, p: float) -> void:
 	(mi as MeshInstance3D).material_override.set_shader_parameter("progress", clampf(p, 0.0, 1.0))
+
 
 ## One full-strength fill under a body: a telegraph whose centre sits inside a higher one (the later one on a tie)
 ## drops to UNDER_A of its alpha until that one ends. Only the colour changes, and only when the answer does.
@@ -720,6 +912,7 @@ func stack_telegraphs() -> void:
 			var keep := UNDER_A if low else 1.0
 			t.material_override.set_shader_parameter("color", Color(c, float(t.get_meta("a0")) * keep))
 
+
 ## True when a telegraph or a ring still spreading lies over the ground point `p`.
 func covers(p: Vector3) -> bool:
 	for t in teles:
@@ -731,9 +924,11 @@ func covers(p: Vector3) -> bool:
 			return true
 	return false
 
+
 func _above(o: Node3D, t: Node3D) -> bool:
 	var oo := int(o.get_meta("order")) - int(t.get_meta("order"))
 	return oo > 0 or (oo == 0 and teles.find(o) > teles.find(t))
+
 
 ## True when the world point `p` is on the ground this circle or lane telegraph covers.
 func _holds(tele: Node3D, p: Vector3) -> bool:
@@ -742,14 +937,16 @@ func _holds(tele: Node3D, p: Vector3) -> bool:
 		return absf(q.x) <= float(tele.get_meta("w")) * 0.5 and absf(q.z) <= float(tele.get_meta("len")) * 0.5
 	return Vector2(q.x, q.z).length() <= float(tele.get_meta("r"))
 
+
 func end_telegraph(mi: Node3D) -> void:
 	teles.erase(mi)
 	mi.queue_free()
 
+
 func _process(delta: float) -> void:
 	if not teles.is_empty():
 		stack_telegraphs()
-	var m := get_parent() as Match      # (the zone is empty off a match: home and interiors)
+	var m := get_parent() as Match  # (the zone is empty off a match: home and interiors)
 	var zone := HunterZone.rect(m) if m != null and not nums.is_empty() else Rect2()
 	var cam: Camera3D = m.cam if m != null else null
 	for n in nums.duplicate():
@@ -761,8 +958,10 @@ func _process(delta: float) -> void:
 			var lt: float = n["last"]
 			var base: Vector3 = n["base"]
 			var rise := minf(float(n["t"]), 0.25) * 1.6
-			if lt < STICK_T:
-				l.global_position = l.global_position.lerp(base + n["off"] + Vector3(0, 0.25 + rise, 0), minf(1.0, delta * 18.0))
+			if lt < STICK_T and not _second_up(n):
+				l.global_position = l.global_position.lerp(
+					base + n["off"] + Vector3(0, 0.25 + rise, 0), minf(1.0, delta * 18.0)
+				)
 			else:
 				n["vel"].y -= 5.0 * delta
 				l.global_position += n["vel"] * delta
@@ -784,14 +983,15 @@ func _process(delta: float) -> void:
 			l.visible = false
 			nums.erase(n)
 	if nums.size() > 1:
-		NumSpacing.spread(nums, cam)      # numbers on one spot slide apart (docs/HUD.md)
+		NumSpacing.spread(nums, cam)  # numbers on one spot slide apart (docs/HUD.md)
 	for rg in rings.duplicate():
 		rg["t"] += delta
 		var k: float = rg["t"] / rg["dur"]
 		var mi: MeshInstance3D = rg["node"]
 		mi.material_override.set_shader_parameter("life", minf(k, 1.0))
 		if k >= 1.0:
-			ring_pool.give(mi); rings.erase(rg)
+			ring_pool.give(mi)
+			rings.erase(rg)
 	for f in flashes.duplicate():
 		f["t"] += delta
 		var mi: MeshInstance3D = f["node"]
@@ -799,10 +999,11 @@ func _process(delta: float) -> void:
 		mi.scale = Vector3.ONE * float(f.get("s0", 1.0)) * (1.0 + fk * 0.6)
 		(mi.material_override as ShaderMaterial).set_shader_parameter("life", clampf(fk, 0.0, 1.0))
 		if f["t"] >= f["dur"]:
-			mi.visible = false; flashes.erase(f)
+			mi.visible = false
+			flashes.erase(f)
 	for g in ghosts.duplicate():
 		if not is_instance_valid(g["node"]):
-			ghosts.erase(g)         # a heal glow goes with the Hunter it rides on
+			ghosts.erase(g)  # a heal glow goes with the Hunter it rides on
 			continue
 		g["t"] += delta
 		var k: float = g["t"] / float(g["dur"])
@@ -811,4 +1012,5 @@ func _process(delta: float) -> void:
 		gm.material_override.set_shader_parameter("color", Color(g["col"], 0.55 * (1.0 - k)))
 		gm.scale *= 1.0 - delta * 1.5
 		if k >= 1.0:
-			ghost_pool.give(gm); ghosts.erase(g)
+			ghost_pool.give(gm)
+			ghosts.erase(g)

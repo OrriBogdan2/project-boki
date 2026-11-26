@@ -21,3 +21,17 @@ Measured (same 623-check suite, 3 pods x 8 slots, server 4 slots under load 16-3
 - Pod accuracy vs the 11-19 server result (idle dedicated pods): 12 slots: 6 false reds of 145 non-OOM reds (4 %) vs 53 % on rpc;
   confirm mode: 1 false red of 141 delivered reds. Pod timeouts matched the server's 6 of 6.
 Open: rpg pods are cgroup v1 or v2 mixed, merge-candidate.sh has the same cpu.stat-only idle check (rpc pods are all v2 today).
+
+## 11-20 follow-up (release-gate-1120.patch, installed in ~/bin and coord/boki-tools, backups `.bak-1120`)
+
+Measured after #416 (ledger `~/coord/release-gate-runs.tsv`): the 3-pod run took 149 min, but the next three gates got
+only 1-2 of the 3 release pods (PR gates already on them, one-shot idle check) and took 189, 158 and ~162 min.
+
+- **Drain wait:** the idle check repeats every 2 min for up to `RELEASE_POD_WAIT` s (default 900) until all release pods are idle.
+- **Pre-reserve:** `release-gate.sh --reserve MIN` holds the release-pod lock with a sleep pid, so PR gates drain off the pods
+  before a planned train. Proposed cron (not installed), 2 h before the ~22:15Z daily train:
+  `15 20 * * * /home/boki/bin/release-gate.sh --reserve 150 >> /home/boki/coord/release-reserve.log 2>&1`
+- **Stale main tree fix:** on 11-19 `~/wt-rel-main` was a symlink ("failed to delete ... Not a directory"); `worktree add`
+  then failed silently and the main side ran on the link's old tree. A symlink is now removed (never its target) and a
+  main tree that is not at origin/main stops the gate.
+- **Run ledger:** every gate appends start, end, minutes, tree, pods, NEW-RED and main reruns skipped to `~/coord/release-gate-runs.tsv`.

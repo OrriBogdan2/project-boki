@@ -86,9 +86,9 @@ func mage() -> void:
 	var range_r := float(xd["range"])
 	var hang: Array = hc._looks_at(m, from)
 	var wide: Array = hang.filter(func(l): return l["mode"] == HeroVfx.MODES["scorch"] and float(l["size"]) > range_r)
-	ok("Kitefall look (footage): a dark ring band on the range edge, a gold crown at the cursor, no storm field yet",
+	ok("Kitefall look (footage): a dark ring band on the range edge, a pink crown at the cursor, no storm field yet",
 			not hc._pool(hang, range_r, 0.1).is_empty() and wide.size() == 1
-			and AimKit.entry(P, "x_aim").get("col") == MageKit.DEEP_GOLD,
+			and AimKit.entry(P, "x_aim").get("col") == MageKit.DEEP_PINK,
 			"%d range-wide looks (the band only)" % wide.size())
 	var hp0 := P.hp
 	P.hurt(40.0, T, {"src": "abil", "ab": "k1"})
@@ -143,13 +143,13 @@ func mage() -> void:
 			U.phase() == MageUlt.AFTER and K.fire_ok() and K.anim_id == "mage_x_land")
 	ok("Kitefall: on cooldown, a press now does nothing", not HunterKeys.ult_pressed(P) and U.casts == 1)
 	ac.step(m, 0.6)
-	await _mage_whiff(m, P, K, home)
-	await _mage_merge(m, P, K, home)
+	_mage_whiff(m, P, K, home)
+	_mage_merge(m, P, K, home)
 	_mage_shift(m, P, K, home)
 	_mage_jump(m, P, K, home)
 	_mage_move(m, P, K, home)
 	_mage_spread(m, P, T, T2, K, home)
-	await _mage_116(m, P, T, T2, K, home)
+	_mage_116(m, P, T, T2, K, home)
 	await ac.done(m)
 	await _mage_burst()
 	var got: Dictionary = await EXIT.run(ac, "mage")
@@ -307,7 +307,7 @@ func _mage_116(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: MageKit, home: Vec
 		ac.step(m, 0.6)
 	ac.fresh(T2)
 	K.sparks.clear()
-	await _mage_116b(m, P, T, K, home)
+	_mage_116b(m, P, T, K, home)
 
 ## Items 116.2 and 116b: the bolt rate, and the Wirerun after a reset (further, charged quicker), press and hold.
 func _mage_116b(m: Match, P: Hunter, T: Hunter, K: MageKit, home: Vector3) -> void:
@@ -574,7 +574,7 @@ func gunslinger() -> void:
 	ok("Cinderfall: the patch is gone after 3s", not U.running() and not AimKit.shown(P, "xz1"))
 	ok("Cinderfall: on cooldown, a press now does nothing", not HunterKeys.ult_pressed(P) and U.casts == 1)
 	T2.teleport(home + Vector3(-30, 0, 0))
-	await _gun_dodge(m, P, K, T, home)
+	_gun_dodge(m, P, K, T, home)
 	await ac.done(m)
 	await _gun_burst()
 

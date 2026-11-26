@@ -8,33 +8,47 @@ extends RefCounted
 ## (content/rules/audio_mix.json). Big events (a rival's ult, the Heart opening, a steal) dip Music and
 ## Ambience together and let them come back over a second.
 
-## Name -> the bus it sends to. In creation order: Godot only sends to a bus created before.
-const BUSES := {"Music": "Master", "SFX": "Master", "Ambience": "Master", "SFXFar": "SFX",
-	"SFXPan": "SFX", "SFXMuffled": "SFX", "Voice": "SFX", "Boki": "SFX", "UI": "Master"}
-## Sounds behind terrain (Sfx.occlusion) go through SFXMuffled: a low-pass and a small gain drop.
-const OCCLUDED_HZ := 700.0
-const OCCLUDED_DB := -4.0
 ## How dull the world is (set_muffle): clear, under the low-health line, downed or out. Each has the SFX bus's
 ## low-pass cutoff (Hz) and duck (dB); the UI bus (pings, the low-health heartbeat) stays clear.
 enum Muffle { OFF, LOW_HP, DOWN }
+
+## Name -> the bus it sends to. In creation order: Godot only sends to a bus created before.
+const BUSES := {
+	"Music": "Master",
+	"SFX": "Master",
+	"Ambience": "Master",
+	"SFXFar": "SFX",
+	"SFXPan": "SFX",
+	"SFXMuffled": "SFX",
+	"SFXFoe": "SFX",
+	"Voice": "SFX",
+	"Boki": "SFX",
+	"UI": "Master"
+}
+
+## Sounds behind terrain (Sfx.occlusion) go through SFXMuffled: a low-pass and a small gain drop.
+const OCCLUDED_HZ := 700.0
+const OCCLUDED_DB := -4.0
 const MUFFLE_HZ := [20000.0, 3500.0, 1200.0]
 const MUFFLE_DB := [0.0, -2.0, -6.0]
-const MUFFLE_S := 0.3            # s: ramp between two levels
+const MUFFLE_S := 0.3  # s: ramp between two levels
 const RULES := "res://content/rules/audio_mix.json"
 
 var rules: Dictionary
-var bus_of_sound := {}           # sound name -> bus, from the sound sets' categories
-var big_sounds := {}             # sound name -> true: these dip Music and Ambience (big_event)
-var _host: Node                  # Sfx, which owns the tweens
-var _duck_fx: AudioEffectAmplify     # Music: Sfx.duck's stage (slow-motion beats, a catch)
+var bus_of_sound := {}  # sound name -> bus, from the sound sets' categories
+var big_sounds := {}  # sound name -> true: these dip Music and Ambience (big_event)
+
+var _host: Node  # Sfx, which owns the tweens
+var _duck_fx: AudioEffectAmplify  # Music: Sfx.duck's stage (slow-motion beats, a catch)
 var _duck_tw: Tween
-var _event_fx: Array[AudioEffectAmplify] = []    # Music and Ambience: the big-event stage
+var _event_fx: Array[AudioEffectAmplify] = []  # Music and Ambience: the big-event stage
 var _event_tw: Tween
 var _muffle := Muffle.OFF
-var _muffle_fx: AudioEffectLowPassFilter    # SFX: the world gone dull
+var _muffle_fx: AudioEffectLowPassFilter  # SFX: the world gone dull
 var _muffle_duck: AudioEffectAmplify
 var _muffle_tw: Tween
-var _muffle_at := 0                         # the low-pass's slot on the SFX bus
+var _muffle_at := 0  # the low-pass's slot on the SFX bus
+
 
 func _init(host: Node) -> void:
 	_host = host
@@ -52,12 +66,14 @@ func _init(host: Node) -> void:
 	AudioServer.add_bus_effect(AudioServer.get_bus_index("Ambience"), amb_fx)
 	_event_fx.append(amb_fx)
 
+
 ## A sound set's sounds and their categories (content/sfx/<group>.json "sounds").
 func learn(sounds: Dictionary) -> void:
 	var by_cat: Dictionary = rules["bus_of_category"]
 	for sname in sounds:
 		if by_cat.has(sounds[sname]):
 			bus_of_sound[sname] = by_cat[sounds[sname]]
+
 
 ## The bus a sound plays on: behind terrain (muffled) is SFXMuffled, far (past Sfx.FAR from the listener)
 ## is SFXFar, else its kind's bus.
@@ -72,6 +88,7 @@ func bus_for(sname: String, muffled: bool, far: bool) -> StringName:
 		if sname.begins_with(pre):
 			return &"Voice"
 	return &"SFX"
+
 
 ## SFX gets a soft compressor, a little room and a limiter; far sounds are low-passed on their way in;
 ## the master has a last safety limiter.
@@ -119,6 +136,7 @@ func _sfx_effects() -> void:
 	mlim.ceiling_db = -0.5
 	AudioServer.add_bus_effect(0, mlim)
 
+
 func _music_effects() -> void:
 	var music := AudioServer.get_bus_index("Music")
 	# the music gives way a little whenever the action is loud (keyed off the SFX bus), so gunfire
@@ -139,6 +157,7 @@ func _music_effects() -> void:
 	mlim2.ceiling_db = -1.5
 	AudioServer.add_bus_effect(music, mlim2)
 
+
 ## Sets how dull the SFX bus is (a low-pass and a duck, eased over MUFFLE_S): DOWN while downed or out, the milder
 ## LOW_HP under the low-health line. The low-pass is only switched on while it is not OFF.
 func set_muffle(level: Muffle) -> void:
@@ -157,11 +176,16 @@ func set_muffle(level: Muffle) -> void:
 	if level == Muffle.OFF:
 		tw.chain().tween_callback(AudioServer.set_bus_effect_enabled.bind(bus, _muffle_at, false))
 
+
 ## What the bus has right now (--match-audio-check).
 func muffle_state() -> Dictionary:
 	var bus := AudioServer.get_bus_index("SFX")
-	return {"on": AudioServer.is_bus_effect_enabled(bus, _muffle_at), "db": _muffle_duck.volume_db,
-		"hz": _muffle_fx.cutoff_hz}
+	return {
+		"on": AudioServer.is_bus_effect_enabled(bus, _muffle_at),
+		"db": _muffle_duck.volume_db,
+		"hz": _muffle_fx.cutoff_hz
+	}
+
 
 ## Softens the music for a moment, e.g. under a big slow-motion beat (eased, never a sudden drop).
 func duck(seconds: float, depth_db: float) -> void:
@@ -173,6 +197,7 @@ func duck(seconds: float, depth_db: float) -> void:
 	tw.tween_interval(seconds)
 	tw.tween_property(_duck_fx, "volume_db", 0.0, 0.8).set_trans(Tween.TRANS_SINE)
 
+
 ## A big event was heard: Music and Ambience dip together and recover; a second one restarts the hold.
 func big_event() -> void:
 	var r: Dictionary = rules["big_event"]
@@ -182,8 +207,10 @@ func big_event() -> void:
 	_event_tw = tw
 	for fx in _event_fx:
 		tw.tween_property(fx, "volume_db", float(r["dip_db"]), float(r["in_s"])).set_trans(Tween.TRANS_SINE)
-		tw.tween_property(fx, "volume_db", 0.0, float(r["recover_s"])).set_trans(Tween.TRANS_SINE) \
-			.set_delay(float(r["in_s"]) + float(r["hold_s"]))
+		tw.tween_property(fx, "volume_db", 0.0, float(r["recover_s"])).set_trans(Tween.TRANS_SINE).set_delay(
+			float(r["in_s"]) + float(r["hold_s"])
+		)
+
 
 ## The big-event dip right now on Music and Ambience, in dB (0 = none).
 func event_db() -> float:

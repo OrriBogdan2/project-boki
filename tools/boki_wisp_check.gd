@@ -7,11 +7,12 @@ extends RefCounted
 ## shiny: about 0.25 s, soft light only, eyes open last and close first. Prints PASS/FAIL.
 
 const Gallery := preload("res://tests/kin_gallery.gd")
-const PARTICLE_BUDGET := 300   # sparkles alive for ten wisps (DECISIONS 2026-11-09)
+const PARTICLE_BUDGET := 300  # sparkles alive for ten wisps (DECISIONS 2026-11-09)
 
-const COLOUR_STEP := 1.0 / 255.0   # vertex colours are stored 8 bits a channel
+const COLOUR_STEP := 1.0 / 255.0  # vertex colours are stored 8 bits a channel
 
 var bad := 0
+
 
 func run(main: Node) -> void:
 	for id in Data.KIN:
@@ -20,13 +21,16 @@ func run(main: Node) -> void:
 		_pop(String(id), {})
 		_pop(String(id), {"shimmer": true})
 	_room()
+	_pop_types()
 	print("BOKIWISP %s (%d fail)" % ["PASS" if bad == 0 else "FAIL", bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 func ok(cond: bool, what: String) -> void:
 	if not cond:
 		print("BOKIWISP FAIL ", what)
 		bad += 1
+
 
 func _species(id: String, rec: Dictionary) -> void:
 	var tag := id + (" shiny" if rec.get("shimmer", false) else "")
@@ -53,9 +57,65 @@ func _species(id: String, rec: Dictionary) -> void:
 	ok(body.scale.y < 1.0, tag + " squashes as it lands")
 	w.free()
 
+
+## The pop's light takes the Boki's type colour (DexView.type_col): its edge glow, read off the wisp's rim,
+## starts and ends on its own glow and is mostly the type colour at the fullest. Checked for every species and
+## spelled out for three types (ember, tempest teal, bloom), one species each.
+func _pop_types() -> void:
+	var seen := {}
+	for id in Data.KIN:
+		var t := DexView.type_of(String(id))
+		if not seen.has(t):
+			seen[t] = String(id)
+	for t in ["ember", "tempest", "bloom"]:
+		ok(seen.has(t), "a species has the " + t + " type")
+	for t in ["ember", "tempest", "bloom"]:
+		if seen.has(t):
+			var rim := _pop_rim(String(seen[t]), 0.3, true)
+			var want := DexView.type_col(t)
+			var own := Shiny.col(String(seen[t]), {}, "glow")
+			var hex := [own, rim, want].map(func(c: Color) -> String: return c.to_html(false))
+			print("BOKIWISP pop colour %s (%s): glow %s -> %s, type %s" % [t, seen[t], hex[0], hex[1], hex[2]])
+			var near := _dist(own, want) * (1.0 - BokiWispPop.TINT) + 0.02
+			ok(_dist(rim, want) <= near, "%s pop flashes %s" % [seen[t], t])
+	for id in Data.KIN:
+		var own := Shiny.col(String(id), {}, "glow")
+		var want := DexView.type_col(DexView.type_of(String(id)))
+		var tag := String(id) + " pop colour"
+		var far := _dist(own, want) + 0.001
+		var ends := _pop_flash(String(id), 0.0) + _pop_flash(String(id), 1.0)
+		ok(ends == 0.0, tag + " body flash is off at both ends")
+		ok(_pop_flash(String(id), 0.3) > 0.3, tag + " body flash is up when the wisp swells")
+		ok(_dist(_pop_rim(String(id), 0.0, true), own) < 0.02, tag + " starts on its own glow")
+		ok(_dist(_pop_rim(String(id), 1.0, true), own) < 0.02, tag + " ends on its own glow")
+		ok(_dist(_pop_rim(String(id), 0.3, true), want) <= far, tag + " moves to the type colour")
+		ok(_dist(_pop_rim(String(id), 0.4, false), want) <= far, tag + " fold moves to the type colour")
+
+
+func _pop_flash(id: String, u: float) -> float:
+	var pop := BokiWispPop.new(id, {})
+	pop.pose(u, true)
+	var f: float = (pop.wisp.get_node("Body") as GeometryInstance3D).get_instance_shader_parameter("flash")
+	pop.free()
+	return f
+
+
+func _pop_rim(id: String, u: float, burst: bool) -> Color:
+	var pop := BokiWispPop.new(id, {})
+	pop.pose(u, burst)
+	var c: Color = (pop.wisp.get_node("Body") as GeometryInstance3D).get_instance_shader_parameter("rim_col")
+	pop.free()
+	return c
+
+
+func _dist(a: Color, b: Color) -> float:
+	return maxf(maxf(absf(a.r - b.r), absf(a.g - b.g)), absf(a.b - b.b))
+
+
 ## Equal to within a step of the 8-bit vertex colour.
 func _same(a: Color, b: Color) -> bool:
 	return maxf(maxf(absf(a.r - b.r), absf(a.g - b.g)), absf(a.b - b.b)) <= COLOUR_STEP
+
 
 func _room() -> void:
 	var sparkles := 0
@@ -70,6 +130,7 @@ func _room() -> void:
 	var ten := BokiWispLook.TRAIL_AMOUNT * Gallery.WISP_ROOM.size()
 	ok(ten < PARTICLE_BUDGET, "ten wisps make %d sparkles, under %d" % [ten, PARTICLE_BUDGET])
 	print("BOKIWISP room: %d sparkles for the ones in this build, %d for ten" % [sparkles, ten])
+
 
 ## The pop in both directions, sampled at its key moments; a pop makes the wisp and the Boki and nothing else.
 func _pop(id: String, rec: Dictionary) -> void:

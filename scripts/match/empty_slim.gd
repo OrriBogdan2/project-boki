@@ -45,7 +45,7 @@ static func slim(mesh: Mesh, keep: float) -> Mesh:
 		st.index()
 		var arrs := st.commit_to_arrays()
 		var src: PackedInt32Array = arrs[Mesh.ARRAY_INDEX]
-		var tris := src.size() / 3
+		var tris := int(src.size() / 3.0)
 		if tris < MIN_TRIS:
 			out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrs)
 			continue
@@ -54,7 +54,7 @@ static func slim(mesh: Mesh, keep: float) -> Mesh:
 			return mesh
 		arrs[Mesh.ARRAY_INDEX] = idx
 		var far := reduce(arrs, LOD_KEEP)
-		var lods := {} if far.is_empty() else {0.05: far}
+		var lods := {} if far.is_empty() or far.size() >= idx.size() else {0.05: far}
 		out.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrs, [], lods)
 	return out
 
@@ -69,5 +69,5 @@ static func reduce(arrs: Array, keep: float) -> PackedInt32Array:
 	am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, plain)
 	var st := SurfaceTool.new()
 	st.create_from(am, 0)
-	var want := int((arrs[Mesh.ARRAY_INDEX] as PackedInt32Array).size() * keep) / 3 * 3
+	var want := int(int((arrs[Mesh.ARRAY_INDEX] as PackedInt32Array).size() * keep) / 3.0) * 3
 	return st.generate_lod(MAX_ERROR, want)

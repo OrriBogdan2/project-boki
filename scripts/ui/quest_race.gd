@@ -9,12 +9,13 @@ extends RefCounted
 ## ("xc" "seat"), the boss's hp and the outpost's charge, so it updates for every player online.
 
 const PIPS := 5
-const PIP_R := 2.5         # px, a pip's radius
-const STEP := 7.0          # px between pips
-const ROW_GAP := 8.0       # px between the two rows
-const EMPTY_A := 0.28      # alpha of a pip not reached yet
+const PIP_R := 2.5  # px, a pip's radius
+const STEP := 7.0  # px between pips
+const ROW_GAP := 8.0  # px between the two rows
+const EMPTY_A := 0.28  # alpha of a pip not reached yet
 
-static var _read := {"mine": 0.0, "rival": 0.0, "rival_team": -1}    # reused every frame
+static var _read := {"mine": 0.0, "rival": 0.0, "rival_team": -1}  # reused every frame
+
 
 ## The two rows for the quest at badge `i` (0 Sealed Lair, 2 Uplink): `mine`, `rival` 0..1 and the rival's team.
 ## Empty when that seat has none (not a quest badge, no seats, locked or shut).
@@ -26,7 +27,7 @@ static func read(m: Match, i: int) -> Dictionary:
 	if s == null:
 		return {}
 	var p := 0.0
-	var team := -1      # (an open seat: nobody on it yet)
+	var team := -1  # (an open seat: nobody on it yet)
 	match s.state:
 		QuestSeat.S.OPEN:
 			pass
@@ -44,6 +45,7 @@ static func read(m: Match, i: int) -> Dictionary:
 	_read["rival_team"] = -1 if mine else team
 	return _read
 
+
 ## 0..1: a lair's boss hurt, an uplink's charge.
 static func _progress(m: Match, s: QuestSeat) -> float:
 	if s.kind == "uplink":
@@ -52,6 +54,7 @@ static func _progress(m: Match, s: QuestSeat) -> float:
 	if b == null:
 		return 0.0
 	return clampf(1.0 - b.hp / maxf(b.max_hp, 1.0), 0.0, 1.0)
+
 
 ## The rows with their top-left pip centred on `at.x` and the first row at `at.y`.
 static func draw(m: Match, c: Control, at: Vector2, rd: Dictionary) -> void:
@@ -63,6 +66,7 @@ static func draw(m: Match, c: Control, at: Vector2, rd: Dictionary) -> void:
 	_row(c, at, float(rd["mine"]), SideColor.of_team(viewer, viewer), false)
 	_row(c, at + Vector2(0, ROW_GAP), float(rd["rival"]), rival_col, true)
 
+
 static func _row(c: Control, mid: Vector2, p: float, col: Color, diamond: bool) -> void:
 	var x0 := mid.x - STEP * (PIPS - 1) * 0.5
 	for k in PIPS:
@@ -71,12 +75,13 @@ static func _row(c: Control, mid: Vector2, p: float, col: Color, diamond: bool) 
 		WaysOutHud.pip(c, pv, PIP_R + 1.0, Color(0, 0, 0, 0.6), diamond, true)
 		WaysOutHud.pip(c, pv, PIP_R, Color(col, lerpf(EMPTY_A, 1.0, f)), diamond, true)
 
+
 ## The lair's boss: the host's own reference, else (a client builds none) the mirrored Boss mob in the lair.
-static func _boss(m: Match, L: Dictionary) -> Boss:
-	var b: Boss = m.lairs.boss_of(L)
+static func _boss(m: Match, l: Dictionary) -> Boss:
+	var b: Boss = m.lairs.boss_of(l)
 	if b != null:
 		return b
 	for mb in m.mobs:
-		if mb is Boss and m.lairs.inside(L, mb.pos):
+		if mb is Boss and m.lairs.inside(l, mb.pos):
 			return mb
 	return null
