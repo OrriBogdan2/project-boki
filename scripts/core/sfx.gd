@@ -145,6 +145,7 @@ const NAMES := [
 	"keg_blast",
 ]
 const POOL := 24
+const AMB_FADE := 2.5  # s an ambience layer takes from silent to full (amb_layer)
 const SAMPLE := "ping"  # the sound play_sample() puts through a bus
 ## The squad cues (you or a squadmate downs or finishes a rival, or a squadmate is downed): one dedicated
 ## voice, so footsteps and the combat crowd never steal it, and no gap or stack cap thins it.
@@ -576,7 +577,6 @@ func _stop_layers(fade: float) -> void:
 ## and pond beds), each faded to a level by where you are; created on first use, freed once faded
 ## to nothing, stopped together by clear_amb_layers.
 var amb_layers := {}  # name -> {p, want, fade}  (fade: seconds from silent to full)
-const AMB_FADE := 2.5
 const MATCH_BEDS := ["abyss", "ruins"]  # MusicDir's beds; other amb_layers are the farm's
 
 
