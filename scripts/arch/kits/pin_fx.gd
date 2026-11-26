@@ -1,18 +1,39 @@
 class_name PinFx
 extends Node3D
-## Hem's own pooled meshes (built once when the kit starts, then shown, moved and hidden); every other look of hers
-## is HeroVfx data (content/vfx/archer.json). The coloured ones are layered (KitShaders): an alpha-blended body in her
-## red, its pale half with the glow on top, so they keep their colour on bright grass.
+## Hem's own effects, every one pooled (built once when the kit starts, then shown, moved and hidden). The
+## coloured ones are layered (KitShaders): an alpha-blended body in her red, its pale half and gold with the glow
+## on top, so they keep their colour on bright grass.
+## - fletch bursts (her own motif: feathers radiating from a core): the red stage-ready flash at the bow,
+##   the gold perfect-release burst with its ring, the glint at the bow hand (only while a stage is ready:
+##   red Empowered, white-hot Supercharged and a full Heavy Shot)
+## - stars: the red X-star on a Supercharged hit, the red-white Heavy Shot impact
 ## - arrows: the look of each of her shots (Empowered red bolt, Supercharged white-red beam, a dull
 ##   overdrawn shaft, the big red Heavy Shot with a hot core), each with its own trail, drawn
 ##   over the shot the match moves (the round's own sphere is shrunk away)
 ## - spent arrows: one of the bow's arrows that lands with no hit stays stuck in the ground, thread attached,
 ##   for 4 s (the Heavy Shot leaves nothing: owner 11-08)
+## - the Rain of Arrows (Hail Wall): needle posts round the arc laced together like her corset, red thread
+##   criss-crossing between the posts and across the ground the wall covers (her laces, red, not a
+##   glowing band), arrows streaking down, blue burn flames on foes inside
 ## - the Spirit Walk screen tint while she is inside something (her own screen only)
 ## - the Spirit Walk body tint: her whole body darkens toward her deep orchid for the roll and the walk (every game)
 
+const STARS := 8
+const BURSTS := 3
 const ARROWS := 10
 const SPENT := 8
+const STREAKS := 26
+const FLAMES := 4
+const POSTS := 9               # the Hail Wall's needle posts (8 gaps, each laced)
+const LACE_W := 0.06           # m: a lace's thickness, a thread that still holds at the match camera
+const LACE_Y := Vector2(0.15, 0.9)  # m: where the upright laces cross between two posts, low and high
+const LACE_IN := 0.25          # s the laces take to draw across as the wall goes up
+const LACE_CLEAR := 0.8        # m of ground a lace keeps from a shown Hunter's feet, else it parts (COMBAT_CLARITY)
+## her dash after-image: red fletch streaks left at hip, chest and shoulder height, how long each lasts
+## (s), how many are pooled and how often a set is left (s)
+const WISP_T := 0.26
+const WISPS := 12
+const WISP_EVERY := 0.05
 const SPENT_T := 4.0           # s a spent arrow stays in the ground
 ## the Heavy Shot's arrow is this many times a normal arrow (the Empowered bolt is 1.0): unmistakable
 const HEAVY_SCALE := 6.0
@@ -31,10 +52,21 @@ const WASH_MAX := 0.75              # 0..1: how far the body mixes toward WASH_C
 const WASH_RATE := 5.0              # 1/s: the tint fades in and out in 0.2 s
 
 var h: Hunter
+var stars: Array = []          # {node, t, dur, size, follow}
 var arrows: Array = []         # pooled arrow nodes
 var live := {}                 # shot sid -> {node, kind, pos, life}
 var spent: Array = []          # {node, t}
 var hits: Array = []           # [pos, time] of shot hits (a shot that hit someone isn't planted)
+var bursts: Array = []         # fletch bursts {node, t, dur, size, pow}
+var bow_glint: MeshInstance3D  # the fletch glint at the bow hand while a stage is ready
+var rain := {}                 # the live wall: {center, dir, radius, deg, t, every}
+var posts: Array = []
+var laces: Array = []          # {node, a, b}: the Hail Wall's threads, a -> b in the world
+var streaks: Array = []        # {node, t, from, to}
+var flames: Array = []         # {node, foe}
+var wisps: Array = []          # {node, t}
+var wisp_next := 0
+var wisp_at := -1.0
 var tint: ColorRect = null
 var tint_k := 0.0
 var tint_want := 0.0
@@ -48,11 +80,48 @@ func _init(hunter: Hunter) -> void:
 	name = "PinFx"
 
 func _ready() -> void:
+	for i in STARS:
+		var star_node := KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", THREAD, true))
+		KitShaders.param(star_node, "white", 0.3)
+		stars.append({"node": star_node, "t": 0.0, "dur": 0.0})
+	for i in BURSTS:
+		var burst_node := KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("rosette", GOLD, true))
+		burst_node.sorting_offset = 2.0         # drawn over the bow hand and the body
+		bursts.append({"node": burst_node, "t": 0.0, "dur": 0.0})
+	bow_glint = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("rosette", THREAD, true))
+	KitShaders.param(bow_glint, "leaves", 4.0)
 	for i in ARROWS:
 		arrows.append(_arrow_node())
 	for i in SPENT:
 		var n := _arrow_node()
 		spent.append({"node": n, "t": 0.0})
+	# the laces: solid toon thread (no added glow, so the red holds on bright grass); every other one in
+	# shade, the strand passing under
+	for i in (POSTS - 1) * 4:
+		var tone := THREAD if i % 2 == 0 else THREAD.darkened(0.3)
+		var lace := KitMeshes.inst(self, Models.box(LACE_W, LACE_W, 1.0), Models.toon(tone, false, 0.5))
+		laces.append({"node": lace, "a": Vector3.ZERO, "b": Vector3.ZERO})
+	for i in POSTS:
+		var p := KitMeshes.inst(self, Models.box(0.05, 1.0, 0.05), Models.glow_mat(Color(SILVER, 0.95)))
+		var fl := MeshInstance3D.new()
+		fl.mesh = Models.prism_tip()
+		fl.material_override = Models.glow_mat(Color(THREAD, 0.9))
+		fl.scale = Vector3(0.22, 0.24, 0.05)
+		fl.position = Vector3(0, 0.62, 0)
+		fl.rotation = Vector3(PI, 0, 0)
+		fl.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		p.add_child(fl)
+		posts.append(p)
+	for i in STREAKS:
+		var streak_node := KitMeshes.inst(self, KitMeshes.quad(0.07, 1.3), KitShaders.mat("streak", SILVER))
+		streaks.append({"node": streak_node, "t": 0.0})
+	for i in WISPS:
+		var wisp := KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("streak", THREAD, true))
+		wisps.append({"node": wisp, "t": 0.0})
+	for i in FLAMES:
+		var fm := KitShaders.mat("flame", Color("ff4a3a"))
+		fm.set_shader_parameter("seed", float(i) * 1.7)
+		flames.append({"node": KitMeshes.inst(self, KitMeshes.quad(0.9, 1.3), fm), "foe": null})
 	aura = KitMeshes.inst(self, Models.capsule(0.42, 1.7), KitShaders.mat("beam", Color(THREAD, 0.9)))
 	aura.material_override.set_shader_parameter("bands", 3.0)
 
@@ -129,6 +198,57 @@ func _dress(n: Node3D, kind: String) -> void:
 	for f in ["Fin0", "Fin2"]:
 		(n.get_node(f) as Node3D).scale = Vector3.ONE * s * (1.7 if kind == "heavy" else 1.0)
 
+# ------------------------------------------------------------------ stars
+## A star flash at `at`: size m across, held `dur` s (it pops in and fades), with an optional ring.
+func star(at: Vector3, across: float, col: Color, dur := 0.12, ring := 0.0, rot := 0.0, power := 1.6) -> void:
+	var s: Dictionary = stars[0]
+	for c in stars:
+		if float(c["t"]) >= float(c["dur"]):
+			s = c
+			break
+	var n: MeshInstance3D = s["node"]
+	n.visible = true
+	n.global_position = at
+	KitShaders.param(n, "color", col)
+	KitShaders.param(n, "ring", ring)
+	KitShaders.param(n, "rot", rot)
+	s["t"] = 0.0
+	s["dur"] = dur
+	s["size"] = across
+	s["pow"] = power
+
+## A fletch burst at `at`: `across` m wide, `leaves` feathers, at full strength for `hold` s then gone over
+## `fade` s, with an optional ring (the perfect release, a stage coming up).
+func fletch_burst(at: Vector3, across: float, col: Color, hold: float, fade: float, ring := 0.0, leaves := 6.0) -> void:
+	var b: Dictionary = bursts[0]
+	for c in bursts:
+		if float(c["t"]) >= float(c["dur"]):
+			b = c
+			break
+	var n: MeshInstance3D = b["node"]
+	n.visible = true
+	n.global_position = at
+	n.scale = Vector3.ONE * across
+	KitShaders.param(n, "color", col)
+	KitShaders.param(n, "ring", ring)
+	KitShaders.param(n, "leaves", leaves)
+	KitShaders.param(n, "rot", KitLooks.vis_rng.randf() * TAU)
+	KitShaders.param(n, "power", 1.6)
+	b["t"] = 0.0
+	b["dur"] = hold + fade
+	b["hold"] = hold
+
+## The fletch glint at the bow hand while a stage is ready (k 0 = off; it swells as k rises), in `col`.
+func bow_glint_at(at: Vector3, k: float, col: Color) -> void:
+	bow_glint.visible = k > 0.01
+	if bow_glint.visible:
+		bow_glint.global_position = at
+		var pulse := 1.0 + 0.1 * sin(Time.get_ticks_msec() * 0.02)
+		bow_glint.scale = Vector3.ONE * lerpf(0.35, 0.75, k) * pulse
+		KitShaders.param(bow_glint, "color", col)
+		KitShaders.param(bow_glint, "power", lerpf(0.6, 1.4, k))
+		KitShaders.param(bow_glint, "rot", Time.get_ticks_msec() * 0.002)
+
 # ------------------------------------------------------------------ shots and spent arrows
 ## Skins a shot of ours as `kind` (the match keeps moving it; we draw over it).
 func skin(s: Dictionary, kind: String) -> Node3D:
@@ -201,6 +321,211 @@ func _plant(at: Vector3, v: Vector2, kind: String) -> void:
 	planted += 1
 	HeroVfx.of(h.m).play(h, "needle_stuck", g, -v.normalized(), {"t": SPENT_T})
 
+## Her dash after-image: three red fletch streaks at hip, chest and shoulder height, lying along the way
+## she faces and fading behind her (pooled, a set every WISP_EVERY s).
+func afterimage(at: Vector3, yaw: float, body_scale: float) -> void:
+	var now := float(h.m.time)
+	if now - wisp_at < WISP_EVERY and now >= wisp_at:
+		return
+	wisp_at = now
+	for lift in [0.55, 1.0, 1.4]:
+		var w: Dictionary = wisps[wisp_next]
+		wisp_next = (wisp_next + 1) % WISPS
+		var n: MeshInstance3D = w["node"]
+		n.visible = true
+		n.global_position = at + Vector3(0, lift * body_scale, 0)
+		n.rotation = Vector3(-PI * 0.5, yaw + PI * 0.5, 0)
+		n.scale = Vector3(1.3, 0.16, 1.0) * body_scale
+		w["t"] = WISP_T
+
+## Hail Wall's cast: red arrows streaking up out of the bow, lobbed toward `dir`.
+func lob(at: Vector3, dir: Vector2) -> void:
+	var launched := 0
+	for c in streaks:
+		if float(c["t"]) > 0.0:
+			continue
+		var spread := Vector3(KitLooks.vis_rng.randf_range(-0.6, 0.6), 0, KitLooks.vis_rng.randf_range(-0.6, 0.6))
+		c["t"] = 0.32
+		c["from"] = at
+		c["to"] = at + Vector3(dir.x * 2.0, 5.5, dir.y * 2.0) + spread
+		c["up"] = true
+		launched += 1
+		if launched >= 5:
+			return
+
+func _tick_wisps(delta: float) -> void:
+	for w in wisps:
+		if float(w["t"]) <= 0.0:
+			continue
+		w["t"] = float(w["t"]) - delta
+		var n: MeshInstance3D = w["node"]
+		KitShaders.param(n, "power", 1.6 * clampf(float(w["t"]) / WISP_T, 0.0, 1.0))
+		n.visible = float(w["t"]) > 0.0
+
+# ------------------------------------------------------------------ Rain of Arrows
+## Shows the wall for `t` s: an arc of `deg` round `center` at `radius`, facing `dir`, `width` m deep. The
+## laces draw across over LACE_IN (_tick_rain).
+func rain_on(center: Vector3, dir: Vector2, radius: float, deg: float, width: float, t: float) -> void:
+	rain = {"center": center, "dir": dir, "radius": radius, "deg": deg, "t": t, "t0": t, "every": 0.0}
+	var yaw := atan2(-dir.x, -dir.y)
+	var half := deg_to_rad(deg) * 0.5
+	var gaps := POSTS - 1
+	for i in POSTS:
+		var q := _arc_pt(center, yaw, radius, lerpf(-half, half, float(i) / gaps))
+		(posts[i] as Node3D).global_position = q + Vector3(0, 0.5, 0)
+		(posts[i] as Node3D).visible = true
+		if i == 0:
+			continue
+		var u0 := lerpf(-half, half, float(i - 1) / gaps)
+		var u1 := lerpf(-half, half, float(i) / gaps)
+		var p := _arc_pt(center, yaw, radius, u0)
+		var lo := Vector3(0, LACE_Y.x, 0)
+		var hi := Vector3(0, LACE_Y.y, 0)
+		var gnd := Vector3(0, 0.05, 0)
+		var w := width * 0.5
+		var n := (i - 1) * 4
+		# upright: an X between the two posts; on the ground: an X across the wall's depth
+		_lace(n, p + lo, q + hi)
+		_lace(n + 1, p + hi, q + lo)
+		_lace(n + 2, _arc_pt(center, yaw, radius - w, u0) + gnd, _arc_pt(center, yaw, radius + w, u1) + gnd)
+		_lace(n + 3, _arc_pt(center, yaw, radius + w, u0) + gnd, _arc_pt(center, yaw, radius - w, u1) + gnd)
+	_pull_laces(0.0, 1.0)
+
+func _lace(i: int, a: Vector3, b: Vector3) -> void:
+	laces[i]["a"] = a
+	laces[i]["b"] = b
+
+## Every lace drawn `grow` (0..1) of the way from its start, `thick` (0..1) of its thickness.
+func _pull_laces(grow: float, thick: float) -> void:
+	for l in laces:
+		var n: MeshInstance3D = l["node"]
+		var a: Vector3 = l["a"]
+		var b: Vector3 = a.lerp(l["b"], maxf(grow, 0.01))
+		n.visible = true
+		n.global_position = (a + b) * 0.5
+		n.look_at(b, Vector3.UP if absf((b - a).normalized().y) < 0.98 else Vector3.RIGHT)
+		n.scale = Vector3(thick, thick, a.distance_to(b))
+
+## A lace that runs within LACE_CLEAR of a shown Hunter's feet (ground distance), or crosses its box on screen (the
+## camera looks down at a slant, so a lace on its side of a body cuts across it), is hidden while it does: the wall's
+## red threads never cut across a body (docs/COMBAT_CLARITY.md); the posts, flames and arrows still mark the wall.
+func _part_laces() -> void:
+	var feet: Array[Vector2] = []
+	var zones: Array[Rect2] = []
+	for o: Hunter in h.m.hunters:
+		if not o.out and not o.unseen:
+			feet.append(Vector2(o.pos.x, o.pos.z))
+			var z: Rect2 = HunterZone.rect_of(h.m, o)
+			if z.has_area():
+				zones.append(z)
+	for l in laces:
+		var a: Vector3 = l["a"]
+		var b: Vector3 = l["b"]
+		var near := false
+		for f in feet:
+			var c := Geometry2D.get_closest_point_to_segment(f, Vector2(a.x, a.z), Vector2(b.x, b.z))
+			if c.distance_to(f) < LACE_CLEAR:
+				near = true
+				break
+		if not near and not zones.is_empty():
+			near = _on_screen_box(a, b, zones)
+		(l["node"] as Node3D).visible = not near
+
+
+## Whether the line a -> b crosses any of the screen boxes `zones` (sampled every eighth of its length).
+func _on_screen_box(a: Vector3, b: Vector3, zones: Array[Rect2]) -> bool:
+	var cam: Camera3D = h.m.cam
+	if cam == null or cam.is_position_behind(a) or cam.is_position_behind(b):
+		return false
+	var sa: Vector2 = cam.unproject_position(a)
+	var sb: Vector2 = cam.unproject_position(b)
+	for i in 9:
+		var p: Vector2 = sa.lerp(sb, i / 8.0)
+		for z in zones:
+			if z.has_point(p):
+				return true
+	return false
+
+
+func _arc_pt(center: Vector3, yaw: float, radius: float, u: float) -> Vector3:
+	var a := yaw + u
+	var q := center + Vector3(-sin(a), 0, -cos(a)) * radius
+	return AimMode.ground(h.m, q)
+
+func rain_off() -> void:
+	rain = {}
+	for p in posts: (p as Node3D).visible = false
+	for l in laces: (l["node"] as Node3D).visible = false
+	for f in flames:
+		(f["node"] as Node3D).visible = false
+		f["foe"] = null
+
+## Blue burn flames on the foes inside (the anti-heal burn); `foes` is this step's list.
+func burn(foes: Array) -> void:
+	for i in flames.size():
+		var f: Dictionary = flames[i]
+		var foe: Ent = foes[i] if i < foes.size() else null
+		f["foe"] = foe
+		(f["node"] as Node3D).visible = foe != null and is_instance_valid(foe)
+
+func _tick_rain(dt: float) -> void:
+	if rain.is_empty():
+		return
+	rain["t"] = float(rain["t"]) - dt
+	# the laces draw across as it goes up and thin away over its last 0.4 s (moved only while they change)
+	var grow := clampf((float(rain["t0"]) - float(rain["t"])) / LACE_IN, 0.0, 1.0)
+	var thick := clampf(float(rain["t"]) / 0.4, 0.0, 1.0)
+	if grow < 1.0 or thick < 1.0 or not rain.has("laced"):
+		_pull_laces(grow, thick)
+		if grow >= 1.0: rain["laced"] = true
+	_part_laces()
+	if float(rain["t"]) <= 0.0:
+		rain_off()
+		return
+	# arrows streaking down all along the arc
+	rain["every"] = float(rain["every"]) - dt
+	if float(rain["every"]) <= 0.0:
+		rain["every"] = 0.035
+		var yaw := atan2(-(rain["dir"] as Vector2).x, -(rain["dir"] as Vector2).y)
+		var half := deg_to_rad(float(rain["deg"])) * 0.5
+		var depth := float(rain["radius"]) + KitLooks.vis_rng.randf_range(-0.45, 0.45)
+		var q := _arc_pt(rain["center"], yaw, depth, KitLooks.vis_rng.randf_range(-half, half))
+		for c in streaks:
+			if float(c["t"]) <= 0.0:
+				c["t"] = 0.32
+				c["to"] = q
+				var vr := KitLooks.vis_rng
+				c["from"] = q + Vector3(vr.randf_range(-0.8, 0.8), 6.5, vr.randf_range(-0.8, 0.8))
+				c["up"] = false
+				break
+	for f in flames:
+		var foe: Ent = f["foe"]
+		if foe != null and is_instance_valid(foe) and not foe.dead:
+			(f["node"] as Node3D).global_position = foe.position + Vector3(0, 0.75, 0)
+		else:
+			(f["node"] as Node3D).visible = false
+
+func _tick_streaks(dt: float) -> void:
+	for c in streaks:
+		var n: MeshInstance3D = c["node"]
+		if float(c["t"]) <= 0.0:
+			n.visible = false
+			continue
+		c["t"] = float(c["t"]) - dt
+		var u := 1.0 - clampf(float(c["t"]) / 0.32, 0.0, 1.0)
+		var from: Vector3 = c["from"]
+		var to: Vector3 = c["to"]
+		var p := from.lerp(to, u * u)
+		n.visible = true
+		n.global_position = p + (from - to).normalized() * 0.6
+		var cam := get_viewport().get_camera_3d() if get_viewport() else null
+		n.rotation = Vector3(0, cam.global_rotation.y if cam else 0.0, 0)
+		if u >= 0.98:
+			n.visible = false
+			c["t"] = 0.0
+			if not c.get("up", false):
+				h.m.fx.spark(to + Vector3(0, 0.05, 0), Vector3.UP, SILVER, 3, 3.0, 70.0, 0.18, 8.0, 0.7)
+
 # ------------------------------------------------------------------ Spirit Walk tint
 func tint_to(k: float) -> void:
 	tint_want = k
@@ -220,6 +545,17 @@ func _process(_delta: float) -> void:
 	# effects run on match time (a slow frame or a screenshot never skips them), long steps clamped
 	var delta := clampf(float(h.m.time) - fx_clock, 0.0, 1.0 / 30.0)
 	fx_clock = float(h.m.time)
+	for s in stars:
+		var n: MeshInstance3D = s["node"]
+		if float(s["t"]) >= float(s["dur"]):
+			n.visible = false
+			continue
+		s["t"] = float(s["t"]) + delta
+		var u := clampf(float(s["t"]) / maxf(0.01, float(s["dur"])), 0.0, 1.0)
+		n.scale = Vector3.ONE * float(s["size"]) * (0.6 + 0.6 * sin(minf(u * 2.2, 1.0) * PI * 0.5))
+		KitShaders.param(n, "power", float(s.get("pow", 1.6)) * (1.0 - u * u))
+	_tick_bursts(delta)
+	_tick_wisps(delta)
 	for c in spent:
 		if float(c["t"]) > 0.0:
 			c["t"] = float(c["t"]) - delta
@@ -228,6 +564,8 @@ func _process(_delta: float) -> void:
 			n2.scale = Vector3.ONE * f
 			if float(c["t"]) <= 0.0: n2.visible = false
 	tick_shots()
+	_tick_rain(delta)
+	_tick_streaks(delta)
 	var phasing: bool = h.ak is ArcherKit and (h.ak as ArcherKit).spirit.phasing()
 	wash_k = move_toward(wash_k, 1.0 if phasing else 0.0, delta * WASH_RATE)
 	h.wash = wash_k * WASH_MAX
@@ -236,6 +574,17 @@ func _process(_delta: float) -> void:
 		tint_k = move_toward(tint_k, tint_want, delta * 5.0)
 		tint.material.set_shader_parameter("power", tint_k)
 		tint.visible = tint_k > 0.01
+
+func _tick_bursts(delta: float) -> void:
+	for b in bursts:
+		var n: MeshInstance3D = b["node"]
+		if float(b["t"]) >= float(b["dur"]):
+			n.visible = false
+			continue
+		b["t"] = float(b["t"]) + delta
+		var fade := float(b["dur"]) - float(b["hold"])
+		var u := clampf((float(b["t"]) - float(b["hold"])) / maxf(0.01, fade), 0.0, 1.0)
+		KitShaders.param(n, "power", 1.6 * (1.0 - u))
 
 # ------------------------------------------------------------------ Spirit Walk aura
 var aura: MeshInstance3D       # built with the pools above, hidden until she walks

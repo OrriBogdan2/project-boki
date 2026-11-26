@@ -51,10 +51,13 @@ Downed, the screen said who did it three times in the middle of the fight: "Knoc
 ## First-time armour hint waits out the fight (11-24)
 "Hits on Hunters build armour. XP comes from monster kills." (`ArmourHint`, drawn by `ArmorHud.note` just over the LV / XP row) comes from your first hit on a Hunter, so it always landed mid-fight: its box sat on the vitals and on the fight next to them. While `Hud.in_fight()` is true it now waits, keeping its whole 6 s for the next lull. `--armour-hint-check` holds it.
 
-## Lace's Hail Wall laces (11-24, moved)
-The wall's red threads used to part round a shown Hunter (`PinFx._part_laces`, `PinFx.LACE_CLEAR`). The wall is now
-the laced `AimKit.arc_wall` (one pooled mesh, `archer_kit.gd`), so those per-lace nodes are gone and the parting with
-them; threads cross bodies again until the pooled arc learns to skip a Hunter's box. Open item.
+## Lace's Hail Wall laces part round a Hunter (11-24)
+The wall's 32 red threads (`PinFx.rain_on`: an X between each pair of posts and an X across the ground) ran straight
+through any Hunter on or near the arc: a red zigzag over the fight. A lace whose ground line passes within
+`PinFx.LACE_CLEAR` (0.8 m) of a shown Hunter's feet, or that crosses its box on screen (`HunterZone.rect_of`: the
+camera's slant puts a lace on its side of a body across it), is hidden while it does (`PinFx._part_laces`, every frame);
+the posts, the ground laces elsewhere, the arrows and the blue burn flames still mark the wall. Purely visual.
+`--archer-combo-check` holds it.
 
 ## What sits on a Hunter (11-20, stabilize sprint: declutter only)
 `--clarity-shots` also plays a bot 3v3 of the slice Hunters on the Hollow Crown (`tools/clarity_fight.gd`: Vex, Kael,
