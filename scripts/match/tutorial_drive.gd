@@ -14,7 +14,8 @@ const MISS_WINDOW := 0.5  # s one aim roll holds
 const LOOKOUT_OFF := 7.0  # m west of the lookout's stop: where a bot that got up without a kick walks off to retry
 const REST_S := 1.0  # s of standing with the stick neutral after which the stuck-hop timer starts over
 
-const KEYS := ["fire", "glide", "interact", "crouch", "sec", "sec_hold", "sig", "jump", "dash", "throw", "gear1", "ult"]  # the action inputs
+# the action inputs
+const KEYS := ["fire", "glide", "interact", "crouch", "sec", "sec_hold", "sig", "jump", "dash", "throw", "gear1", "ult"]
 
 static var _retreat := false  # a wall kick step bot that got up without a kick, walking off to retry
 static var human := false
