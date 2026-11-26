@@ -93,8 +93,10 @@ static func deny_text(h: Hunter) -> String:
 		return ""
 	if active(h):
 		return (h.merge_st["kit"] as MergeKit).ult_text() if h.merge_st["kit"] != null else ""
-	if h.merge_cd > 0.0 or int(h.slot_lv.get("ult", 0)) <= 0:
+	if int(h.slot_lv.get("ult", 0)) <= 0:
 		return ""
+	if h.merge_cd > 0.0:
+		return "Fusion again in %ds" % ceili(h.merge_cd)
 	if h.ult < 1.0:
 		return "Bond %d%%: fight together to fill it" % int(h.ult * 100.0)
 	match plan(h):
