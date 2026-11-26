@@ -15,8 +15,9 @@ var src := ""  # every script under scripts/arch/, and the archetype files, for 
 func run(check_ok: Callable) -> void:
 	ok = check_ok
 	_read_dir("res://scripts/arch")
-	for f in DirAccess.get_files_at("res://content/archetypes"):
-		src += FileAccess.get_file_as_string("res://content/archetypes/" + f)
+	for dir in ["archetypes", "weapons", "vfx"]:
+		for f in DirAccess.get_files_at("res://content/" + dir):
+			src += FileAccess.get_file_as_string("res://content/%s/%s" % [dir, f])
 	var sets := 0
 	for f in DirAccess.get_files_at("res://content/sfx"):
 		if not f.ends_with(".json"):
@@ -25,7 +26,7 @@ func run(check_ok: Callable) -> void:
 		if d is Dictionary and d.has("bar"):
 			_bar(String(d["group"]), d)
 			sets += 1
-	ok.call(sets >= 2, "ability bar: %d Hunter sets list one (Tenzo, Grimble at least)" % sets)
+	ok.call(sets >= 4, "ability bar: %d Hunter sets list one (Tenzo, Grimble, Sable, Sparkle at least)" % sets)
 
 
 func _bar(arch: String, d: Dictionary) -> void:
