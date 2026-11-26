@@ -186,7 +186,7 @@ func _through_walls() -> void:
 	_fire_after(m, p, k, 0.6)
 	step(m, 0.6)
 	ok("walls: fired pressed against the rock, a plain orb still passes", dmg(t) > 5.0, "took %.1f" % dmg(t))
-	await _net_copy(m, p, t, k)
+	_net_copy(m, p, t, k)
 	await done(m)
 
 ## What other games get: the "s" event carries the full size and the pierce kind, and the copy it makes crosses
