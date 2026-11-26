@@ -69,8 +69,6 @@ defaults aren't cited, since the data names no field for these windows.
 | ground_stop_dist | 0.10m | 0.43m | 0.31–0.47m | [game data] UE's walking brake slides 0.28–0.39m drawn at 30–144 fps (MOVEMENT_PARITY.md §1), at our 5.28 m/s run (the source's 4.55 x body_scale 1.16, decision 0061) |
 | ground_reverse_t (180 degrees) | 0.150s | 0.117s | <= 0.12s | [spec] crisp |
 | ground_turn90_t | 0.100s | 0.083s | <= 0.09s | [spec] crisp |
-| speed light / medium / heavy | 5.2 / 5.0 / 4.73 | 5.28 (each weight's first hunter; 5.16-5.63 across all) | 5.1-5.7 | [game data] MoveSpeed x `body_scale` 1.16 (decision 0061); the same in an expedition, the Training Grounds and on the farm; each hunter's run, half-tilt walk and crouch (0.5x) are also timed over 2 s against the JSON (`--move-speed-check`) |
-| haste_two_bonus_x (haste 0.35 + kin buff 0.15, speed / plain run) | 1.55x (multiplied) | 1.50x | 1.49–1.51x | [game data] one MoveSpeed attribute: bonuses add (decision 0054) |
 | speed light / medium / heavy | 5.2 / 5.0 / 4.73 | 5.28 (each weight's first hunter; 5.16-5.63 across all) | 5.1-5.7 | [game data] MoveSpeed x `body_scale` 1.16 (decision 0061); the same in an expedition, the Training Grounds and on the farm (`--move-speed-check`) |
 | haste_two_bonus_x (haste 0.35 + kin buff 0.15, speed / plain run) | 1.55x (multiplied) | 1.50x | 1.49–1.51x | [game data] one MoveSpeed attribute: bonuses add (decision 0054); measured from a 4.0 m/s run, since 1.5 x our 5.28 m/s run clips at the 7.0 m/s cap |
 | haste_bonus_slow_x (haste 0.35 under a 40% slow) | 0.81x | 0.81x | 0.80–0.82x | the slow multiplies the hasted total |
@@ -1031,7 +1029,7 @@ Source: `origin/ext/hero-ref-footage`, folders `venator_ghost` (Ghost), `juggern
 - Lace's RMB tap: the source data fires on any release ("HOLD to charge, RELEASE to fire"; pin.md: a tap fires uncharged). Ours looses nothing on a tap (archer.json's own rule).
 - Kael's LMB swings on the release (the greatsword's charge): a press held past a tap swings later. Brall's press starts the series at once; his hold is the ranged blast.
 - Albert's aegis (not in this slice) rises at its 0.1 s hold, 7 steps at 60 Hz with nothing before it; the same shape as Lace's draw before the fix, if Oath's shield shows on the press.
-- Tenzo's LMB and RMB (not in this slice) show nothing until the release (first sign 2 frames at 60 Hz, 7 at 144: the tap plus the tick hop). If the source shows a wind-up on the press for his fists or his RMB hold, that pose is the fix; if not, this is parity.
+- Tenzo's LMB and RMB (not in this slice): a tap still shows nothing until the release (first sign 2 frames at 60 Hz, 7 at 144: the tap plus the tick hop). LMB, fixed to the source (breah.md 0118: the gauntlet is cocked on the hold's first frame): the `breah_wind` pose now starts `ArchKit.HOLD_POSE_T` (0.1 s) into the hold instead of at the 0.28 s tap window, so 60 Hz frame 6 (was 16) and 144 Hz frame 15 (was 39); the lane and charge still wait for the tap window and a tap shows no hold pose (`--hold-pose-check`). RMB kept: owner item 61 ("a tap shows nothing, it lands on the release") overrides the source's crouch, which shows from the first frame of its hold (0253).
 
 Found by the check and fixed on the side: `VVFx.echo` (Vex's dash after-image) read mesh instances the model had since freed (a muzzle flash, an old weapon) and spammed "previously freed instance" errors on every echo frame; the pair is now skipped and its ghost hidden.
 ## Snag audit (`--snag-check`, decision 0022)

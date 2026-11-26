@@ -3,6 +3,7 @@ extends RefCounted
 ## A Boki's lines in a match (BokiLines): its talking level, its element and any personal lines the
 ## AI wrote for it pick the words, and Match.kin_bark shows them over its head.
 
+
 ## Its line for a trigger ("" while it's on cooldown). A Boki that barely trusts you grumbles instead
 ## of reviving you; one with no save record (a bot's or a wild one) talks freely.
 static func line(k: Kin, trigger_id: String) -> String:
@@ -11,7 +12,21 @@ static func line(k: Kin, trigger_id: String) -> String:
 		t = "revive_low"
 	var stage := Care.speech(k.rec) if k.rec.size() > 0 else 3
 	var id := String(k.rec.get("uid", "kin%d" % k.get_instance_id()))
-	return BokiLines.line(id, t, k.species, stage, -1.0, k.lines.get(t, []))
+	return BokiLines.line(id, t, k.species, stage, clock(k), k.lines.get(t, []))
+
+
+## The clock a Boki's line cooldown runs on in a match: the match's own time, set level with the wall clock at its
+## first line (so a cooldown begun on the farm carries on). A pause or a check that steps a match faster than real
+## time then waits game seconds, not real ones (on the wall clock --tutorial-dead-air-check's stepped course heard
+## its Boki by how loaded the box was).
+static func clock(k: Kin) -> float:
+	var mt = k.m.get("time") if k.m != null else null
+	if not (mt is float):
+		return -1.0
+	if not k.m.has_meta("chat_t0"):
+		k.m.set_meta("chat_t0", Time.get_ticks_msec() / 1000.0 - float(mt))
+	return float(k.m.get_meta("chat_t0")) + float(mt)
+
 
 ## Says a trigger's line over the Boki, if it has one to say right now (inside a Fusion it's quiet).
 ## fill: placeholders in the line and what replaces them ("%H" -> "the lava").
@@ -26,8 +41,10 @@ static func say(m: Match, k: Kin, trigger_id: String, fill := {}) -> void:
 	if txt != "":
 		m.kin_bark(k, txt, trigger_id)
 
+
 ## Fight-time Boki text the HUD let through (callout pins, others' lines; --clarity-shots counts it per frame).
 static var drawn := 0
+
 
 ## Is the line over this Boki's head drawn? In a fight only your own Boki's are: the rest print over the fight.
 static func heard(m: Match, k: Kin) -> bool:
@@ -54,6 +71,7 @@ static func calm(m: Match) -> bool:
 			return false
 	return true
 
+
 ## Tutorial hints in its own voice, by step (grown speech, then what a hatchling does instead).
 const TUT_HINT := {
 	"land": ["That meadow looks nice and quiet!", "(peeks over your shoulder at the ground below)"],
@@ -76,11 +94,12 @@ const TUT_HINT := {
 	"ult": ["Fuse with me! We fight as one!", "(glows brighter, pressed against you)"],
 	"ranks": ["Spare points! Make something stronger!", "(points at the gold plus)"],
 	"wayout": ["Follow me, the outpost is this way!", "(runs ahead toward the outpost and waits)"],
-	"uplink": ["Stay in the circle till it's yours. Step out and it slips back!",
-		"(sits in the circle, looking at you)"],
+	"uplink":
+	["Stay in the circle till it's yours. Step out and it slips back!", "(sits in the circle, looking at you)"],
 	"defend": ["Here they come! Stay inside the circle!", "(bristles at the walls)"],
 	"extract": ["We did it! Into the light!", "(bounces toward the light)"],
 }
+
 
 ## Its hint for a tutorial step.
 static func tut_hint(k: Kin, id: String) -> String:

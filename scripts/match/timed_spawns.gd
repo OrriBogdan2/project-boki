@@ -80,7 +80,7 @@ func _appear(e: Dictionary) -> void:
 		return
 	if host:
 		var w := m.spawn_mob("warden", at + Vector3(0, 0, 1.5))
-		w.st = "idle"
+		w.calm("spawn")
 		if m.opts.get("watch_heart", false) and m.player:
 			var wp := at + Vector3(0, 0, 5.0)
 			m.player.teleport(Vector3(wp.x, m.world.ground_at(wp.x, wp.z), wp.z))
