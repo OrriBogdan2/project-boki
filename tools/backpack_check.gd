@@ -4,7 +4,7 @@ extends RefCounted
 ## death puts it in the deathbox, a revived hunter is on the Pouch, a rival takes a bigger one from
 ## the box (leaving theirs), a shop sells the next tier, nothing drops one at random, and an extracted
 ## backpack comes home. The size always goes through Equal.pack_slots. Never touches the save file.
-## It also counts the loadout slots by type (decisions 0005: 2 gloves, 2 charms, boots, 4 utility slots, 5 perk
+## It also counts the loadout slots by type (decisions 0005: 2 gloves, 2 charms, boots, 6 utility slots, 5 perk
 ## orbs, keys in utility slots) at home and in a match. Prints PACKS ok/FAIL lines and "PACKS DONE, failures: N".
 
 var bad := 0
@@ -157,7 +157,7 @@ func _loadout() -> void:
 			PerkOrbs.slots()])
 	ok(gloves == 2 and Gloves.key_cap(0) != Gloves.key_cap(1), "2 gloves, on their own keys (Q, V)")
 	ok(Gear.SLOTS.count("boots") == 1, "1 boots slot")
-	ok(p.belt.size() == 4 and UtilityBelt.SLOTS == 4 and picks == 4, "4 utility slots in a match and at home")
+	ok(p.belt.size() == 6 and UtilityBelt.SLOTS == 6 and picks == 6, "6 utility slots in a match and at home")
 	if charms != 2:
 		print("PACKS GAP charms: %d of 2 slots built (decisions 0005 follow-up: a new slot and tile)" % charms)
 	ok(PerkOrbs.slots() == 5, "up to 5 perk orbs")
