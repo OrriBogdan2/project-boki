@@ -475,6 +475,7 @@ func _start(o: Dictionary) -> void:
 	hud.visible = false
 	await hud.setup(self)
 	hud.process_mode = hud_mode
+	SquadChat.attach(hud, opts, self)
 	hud.visible = true
 	if player and player.dropping and tut == null:
 		hud.toast("Steer to choose where you land", Color("f3eee2"))
@@ -4557,6 +4558,7 @@ func _extract(h: Hunter, how := "", where := "") -> void:
 		if opts.get("tut_test", false):
 			print("TUT DONE extracted by %s at %s, t=%.1f" % [how, where, time])
 			get_tree().create_timer(0.5).timeout.connect(func(): get_tree().quit())
+	KinSteal.on_extract(self, h)
 	_check_last()
 
 func _update_rules(dt: float) -> void:
@@ -4982,12 +4984,8 @@ func _net_apply(e: Ent, it: Array, t_owner := -1.0) -> void:
 		"m":
 			var mb: Mob = e
 			mb.face = it[5]; mb.hp = it[6]; mb.max_hp = it[7]
-			var st: int = int(it[8])
-			if st >= 0 and st < MOB_STATES.size():
-				if mb.st == "idle" and st == 1: MobNotice.woke(mb)
-				mb.st = MOB_STATES[st]
+			mb.follow(int(it[8]), it[12])
 			mb.atk_dir = Vector2(it[10], it[11])
-			mb.st_t = it[12]
 			mb.net_vel = Vector3(it[13], 0, it[14])
 			if it.size() > 16:
 				mb.stag_open = float(it[15]); mb.stagger_t = float(it[16])

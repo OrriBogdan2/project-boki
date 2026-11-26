@@ -690,3 +690,13 @@ Travel is the JSON number x the dash feel (content/rules/dash_feel.json juggerna
 Asserted: "juggernaut X small mechanic: killing a monster with it resets it" (tools/dj_ult_check.gd); the lunge lane
 and fling asserts in `--juggernaut-combo-check` read the JSON. Not changed here: the lunge's 24 m/s (5.4 m in 0.30 s
 against the footage's 0.2 s).
+
+## Native clips (11-23, ext/anim-kael-native-clips)
+Kael plays his own clips on Meshy's skeleton (`art/wardens/kael/kael_clips.glb`, `warden_native.json` `kmoves`) instead
+of Meshy's one `Attack` for every move. Poses are ours; timing is the table above, on the kit clock (clip second 0 = the
+second the kit starts the move), the hit pose exactly on the kit's hit: slash 0.033, wave 0.033 (the tip's fastest
+frame 0.021), slam 0.583 (lowest tip 0.567), lunge 0.217 (full reach 0.229), chain throw 0.02 (0.033), riposte 0.117
+(0.104); held moves (`wave_wind`, `lunge_wind`, `guard`, `reel`) stay on their last pose. `jug_ult_recover` follows the
+riposte's cleave. Asserted per move in `--warden-native-check`. Not mapped (still `Attack`): dash, meteor, spin, chain
+lunge, haul, roar, exdash. The kit's LMB alternates two sides (`slash_n % 2`), so there are two slash clips, not three.
+Native clips are full body: the legs do not keep walking under a slash the way the contract clips' `upper: moving` does.
