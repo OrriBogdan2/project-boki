@@ -9,7 +9,7 @@ const WEIGHT_ARCH := {"light": "archer", "medium": "dolm", "heavy": "ashwick"}
 # the file that plays each move, and the call it makes
 const WIRED := {
 	"scripts/match/wall_moves.gd": ["ClimbSfx.play(h, ClimbSfx.KICK)", 2],
-	"scripts/match/hunter.gd": ["ClimbSfx.play(self, ClimbSfx.GRAB)", 1],
+	"scripts/match/hunter_ledge.gd": ["ClimbSfx.play(h, ClimbSfx.GRAB)", 1],
 }
 const FAR_M := 30.0  # m: a Hunter this far off is past the footstep range
 
@@ -52,7 +52,7 @@ func run(main: Node, check_ok: Callable) -> void:
 		var src := FileAccess.get_file_as_string("res://" + f)
 		var want: Array = WIRED[f]
 		ok.call(src.count(want[0]) == want[1], "climb: %s plays %s x%d" % [f, want[0], want[1]])
-	var hunter_src := FileAccess.get_file_as_string("res://scripts/match/hunter.gd")
-	var mantle := "ClimbSfx.play(self, ClimbSfx.MANTLE)"
+	var hunter_src := FileAccess.get_file_as_string("res://scripts/match/hunter_ledge.gd")
+	var mantle := "ClimbSfx.play(h, ClimbSfx.MANTLE)"
 	ok.call(hunter_src.count(mantle) == 1, "climb: the mantle sounds as you pull over the lip")
 	m.queue_free()
