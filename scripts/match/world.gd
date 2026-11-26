@@ -1219,7 +1219,7 @@ func build_meshes() -> void:
 	var heights: ImageTexture = tm.height_texture()
 	mat.set_shader_parameter("height_tex", heights)
 	add_child(FxGround.new(heights, Vector2(w, h)))     # compat soft effect edges (soft_fade.gdshaderinc)
-	mat.set_shader_parameter("map_size", Vector2(w, h)); GroundBake.request(self, mat, Vector2(w, h))
+	GroundBake.request(self, mat, Vector2(w, h))     # sets map_size, bakes the big ground patterns
 	mat.set_shader_parameter("use_ao", true)
 	mat.set_shader_parameter("depth_k", DepthCues.k())
 	mat.set_shader_parameter("paint2", 1.0 if Flora.v2() else 0.0)

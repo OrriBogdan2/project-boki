@@ -15,8 +15,9 @@ var _key := Vector2i.ZERO
 var _mat: ShaderMaterial
 var _n := 0
 
-## Bakes for (or hands the cached textures right away to) this terrain material.
+## Sets the terrain material's map_size and bakes for it (or hands it the cached textures right away).
 static func request(parent: Node, mat: ShaderMaterial, map_size: Vector2) -> void:
+	mat.set_shader_parameter("map_size", map_size)
 	if DisplayServer.get_name() == "headless" or "--ground-live" in OS.get_cmdline_user_args():
 		return
 	var key := Vector2i(map_size)
