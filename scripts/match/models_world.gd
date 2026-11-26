@@ -1004,7 +1004,7 @@ static func jump_pad(c: Color) -> Node3D:
 		return glb
 	var root := Node3D.new()
 	ModelsBase.part(root, ModelsBase.cyl(0.7, 0.8, 0.14, 20), ModelsBase.toon(Color("3f4456")), Vector3(0, 0.07, 0))
-	var top := ModelsBase.part(
+	ModelsBase.part(
 		root,
 		ModelsBase.cyl(0.55, 0.55, 0.02, 20),
 		ModelsBase.toon(c.darkened(0.25), false, 0.45),

@@ -41,9 +41,9 @@ static func plot() -> Node3D:
 		"Wet"
 	)
 	wet.visible = false
-	var crop := Node3D.new()
-	crop.name = "Crop"
-	root.add_child(crop)
+	var crop_root := Node3D.new()
+	crop_root.name = "Crop"
+	root.add_child(crop_root)
 	return root
 
 
