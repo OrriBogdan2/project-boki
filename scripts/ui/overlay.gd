@@ -800,14 +800,16 @@ func _tab_demo(v: VBoxContainer) -> void:
 ## Settings > Gameplay > Reticle: the aiming reticle's shape (with a preview), size, colour, opacity and outline.
 func _reticle_rows(v: VBoxContainer) -> void:
 	_group(v, "Reticle")
-	_choice(v, "Shape", "reticle_shape", Reticle.SHAPES, Callable(), "Default: a small broken ring with a dot")
+	var tip := "Default: your Hunter's own small reticle with a dot"
+	_choice(v, "Shape", "reticle_shape", Reticle.SHAPES, Callable(), tip)
 	var preview := Control.new()
 	preview.custom_minimum_size = Vector2(40, 40)
 	preview.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	preview.draw.connect(
 		func():
 			preview.draw_rect(Rect2(Vector2.ZERO, preview.size), Color(0.16, 0.2, 0.17))
-			Reticle.draw(preview, preview.size * 0.5, 0.0, Reticle.swatch("hunter"))
+			var look := Reticle.look_of(String(Save.d.get("arch", "")))
+			Reticle.draw(preview, preview.size * 0.5, 0.0, Reticle.swatch("hunter"), Color.TRANSPARENT, look)
 	)
 	Settings.changed.connect(preview.queue_redraw.unbind(1))
 	v.get_child(v.get_child_count() - 1).add_child(preview)

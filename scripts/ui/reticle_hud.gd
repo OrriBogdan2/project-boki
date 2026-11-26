@@ -4,8 +4,8 @@ extends RefCounted
 ## the archetype's resource arc, the charge / warm-up / spin-up arc or the ammo arc round it, the
 ## full-charge flare, and the hit tick (thin strokes off the ring, longer with a pulse ring on a crit or a
 ## knock, gold on a crit, pale on armour, with a ring flash). The tick's state is the HUD's Reticle. Thin strokes,
-## a dark edge under every one, the Hunter's accent on the dot and arcs. Numbers: content/rules/tuning.json
-## "reticle". The AimKit cursor states are AimReticle.
+## a dark edge under every one, the Hunter's accent on the look, dot and arcs; an arc shows only its filled
+## part. Numbers: content/rules/tuning.json "reticle". The AimKit cursor states are AimReticle.
 
 var rt: Reticle  # the hit tick's state (the HUD's)
 var pin := Vector2.INF  # review tools: draw here (HUD canvas px) instead of at the mouse
@@ -33,7 +33,7 @@ func draw(c: CanvasItem, p: Hunter, at: Vector2, time: float) -> void:
 		spread += lerpf(12.0, 0.0, clampf(p.spun_t / float(p.wpn.get("tighten_time", 1.5)), 0.0, 1.0))
 	var hc := _hit_color()
 	var k := rt.tick_k()
-	Reticle.draw(c, at, spread, accent, Color(hc, k * _t("hit_ring_flash")))
+	Reticle.draw(c, at, spread, accent, Color(hc, k * _t("hit_ring_flash")), Reticle.look_of(p.arch))
 	if p.ak and p.ak.has_gauge():
 		var rc := p.ak.res_col()
 		var full := p.ak.tell == "full"
@@ -73,14 +73,13 @@ func _states(c: CanvasItem, p: Hunter, at: Vector2, time: float, accent: Color) 
 	_full = ck >= 1.0
 
 
-## One arc of `span` radians from `from` with its dark track and the fraction `frac` filled in `col`.
+## One arc of `span` radians from `from`: the fraction `frac` of it, in `col` (nothing when empty).
 func _arc(
 	c: CanvasItem, at: Vector2, r: float, from: float, span: float, frac: float, col: Color, a: float, bold: bool
 ) -> void:
-	var w := _t("arc_w_full") if bold else _t("arc_w")
-	c.draw_arc(at, r, from, from + span, 32, Color(0, 0, 0, _t("track_a")), _t("arc_w") + 1.6, true)
 	if frac > 0.0:
-		c.draw_arc(at, r, from, from + span * clampf(frac, 0.0, 1.0), 32, Color(col, a), w, true)
+		var w := _t("arc_w_full") if bold else _t("arc_w")
+		Reticle.arc(c, at, r, from, from + span * clampf(frac, 0.0, 1.0), Color(col, a), w)
 
 
 ## The ring that snaps out when a charge reaches full (out-cubic, fading).

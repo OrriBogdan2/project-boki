@@ -1,7 +1,7 @@
 class_name AimReticle
 extends Control
 ## The cursor states of AimKit (docs/AIMKIT.md), for the local player only, drawn on the crosshair:
-## - charge ring: a thin arc that fills with the charge (0..1) at 26 px, outside the HUD's ammo ring;
+## - charge ring: a thin arc that fills with the charge (0..1) at 26 px, outside the HUD's ammo ring (no track);
 ## - full-charge flare: on reaching full, a ring that snaps out and fades plus a 4-point glint (0.28 s);
 ## - perfect-window star: a gold 4-point star with a soft ring, held for one footage frame (0.12 s).
 
@@ -44,12 +44,11 @@ func _draw() -> void:
 	var col: Color = r["col"]
 	var k := float(r["k"])
 	if k >= 0.0 and float(d.m.time) - float(r["t"]) <= AimDraw.KEEP:
-		var w := Reticle.t("arc_w")
-		draw_arc(mp, rr, 0.0, TAU, 48, Color(0, 0, 0, Reticle.t("track_a")), w + 1.6, true)
 		if k > 0.0:
 			var full := k >= 1.0
 			var fill := Color(col.lerp(Color.WHITE, 0.4), 0.95) if full else Color(col, 0.8)
-			draw_arc(mp, rr, -PI * 0.5, -PI * 0.5 + TAU * minf(1.0, k), 48, fill, Reticle.t("arc_w_full") if full else w, true)
+			var w := Reticle.t("arc_w_full") if full else Reticle.t("arc_w")
+			Reticle.arc(self, mp, rr, -PI * 0.5, -PI * 0.5 + TAU * minf(1.0, k), fill, w)
 	var ft := float(r["flare"])
 	if ft > 0.0:
 		var t := 1.0 - ft / FLARE_T            # 0 -> 1 over the flare

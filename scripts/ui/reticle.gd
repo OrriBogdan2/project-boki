@@ -1,20 +1,20 @@
 class_name Reticle
 extends RefCounted
 ## The aiming reticle at the cursor, in the player's own style (Settings > Gameplay > Reticle): shape,
-## size, colour, opacity and a dark outline. The default is a small thin ring broken into four arcs with a
-## centre dot; the ring opens with weapon bloom, and on a hit it flashes. With the "hunter" colour (the
-## default) the ring stays pale and the dot and the aim arcs take the Hunter's own accent (Arch.color).
+## size, colour, opacity and a dark outline. The default is each Hunter's own small look (ReticleLooks, else a
+## thin ring broken into four arcs) with a centre dot; it opens with weapon bloom, and on a hit it flashes. With
+## the "hunter" colour (the default) the look, the dot and the aim arcs take the Hunter's own accent (Arch.color).
 ## ReticleHud draws it first each frame; the aim states (ammo ring, charge arcs, hit tick and the AimKit
 ## cursor states on their own layer) draw on top of it. Every number is in content/rules/tuning.json "reticle".
 ## One instance per HUD also owns the hit tick's state (`new(match)`, `tick`): see below.
 
 ## Shape id -> its name in Settings.
 const SHAPES := [
-	["default", "Default"], ["dot", "Dot"], ["circle", "Small circle"], ["cross", "Cross"],
+	["default", "Hunter's own"], ["dot", "Dot"], ["circle", "Small circle"], ["cross", "Cross"],
 	["circle_dot", "Circle and dot"],
 ]
-## Colour id -> [its name in Settings, the colour]. "hunter" is a pale ring with the Hunter's accent on the dot
-## and arcs (draw's `accent`); "yellow" is the high-visibility one.
+## Colour id -> [its name in Settings, the colour]. "hunter" is the Hunter's accent on the look, dot and arcs
+## (draw's `accent`; the pale colour here is for a plain ring); "yellow" is the high-visibility one.
 const COLORS := {
 	"hunter": ["Hunter colour", Color("f4f1e6")],
 	"white": ["White", Color("f4f1e6")],
@@ -102,6 +102,11 @@ static func accent(arch_id: String) -> Color:
 static func swatch(id: String) -> Color:
 	return Arch.color(String(Save.d.get("arch", ""))) if id == "hunter" else COLORS[id][1]
 
+## A Hunter's own look id (content/archetypes/<id>.json "reticle"), or "" for the plain broken ring.
+static func look_of(arch_id: String) -> String:
+	return String(Arch.def(arch_id).get("reticle", ""))
+
+
 ## The style in effect: {shape, k (size factor), col (with the opacity), outline, hunter (the accent colour mode)}.
 static func style() -> Dictionary:
 	var col_id := String(Settings.get_v("reticle_col"))
@@ -116,15 +121,23 @@ static func style() -> Dictionary:
 	}
 
 ## Draws the reticle at `at` on `c`. `spread` (px) opens the ring or cross with weapon bloom; `accent` is the
-## Hunter's colour (used when the colour setting is "hunter"); `flash` (alpha = strength) tints the ring on a hit.
-static func draw(c: CanvasItem, at: Vector2, spread := 0.0, accent := Color.WHITE, flash := Color(0, 0, 0, 0)) -> void:
+## Hunter's colour (used when the colour setting is "hunter"); `flash` (alpha = strength) tints the ring on a hit;
+## `look` is the Hunter's own look (ReticleLooks), drawn for the "default" shape. With the "hunter" colour the
+## strokes take the accent too, lifted so a dark colour still reads on dark ground.
+static func draw(
+	c: CanvasItem, at: Vector2, spread := 0.0, accent := Color.WHITE, flash := Color(0, 0, 0, 0), look := ""
+) -> void:
 	var st := style()
 	var k := float(st["k"])
 	var col: Color = st["col"]
 	var dot_col := Color(accent, col.a) if st["hunter"] else col
 	var shape := String(st["shape"])
+	if shape == "default" and ReticleLooks.has(look):
+		shape = look
+		if st["hunter"]:
+			col = Color(accent.lightened(t("look_lift")), col.a)
 	var ring := t("ring_r") * k + minf(spread, t("spread_max"))
-	var has_dot := shape in ["default", "dot", "circle_dot"]
+	var has_dot := shape not in ["circle", "cross"]
 	var dot := t("dot_r") * k * (1.6 if shape == "dot" else 1.0)
 	var line_w := t("line_w") * k
 	if bool(st["outline"]):
@@ -136,8 +149,21 @@ static func draw(c: CanvasItem, at: Vector2, spread := 0.0, accent := Color.WHIT
 	if has_dot:
 		c.draw_circle(at, dot * (1.0 + flash.a * 0.6), dot_col)
 
-## The strokes of a shape (no dot): a broken ring, a full ring or a cross.
+
+## An arc of the reticle's aim states (ammo, resource, charge) from angle `from` to `to`: only the part drawn,
+## over a thin dark edge when the outline is on. No dark track runs on past it, so an empty gauge draws nothing
+## (a full-length track read as a second, shadow ring round the reticle).
+static func arc(c: CanvasItem, at: Vector2, r: float, from: float, to: float, col: Color, width: float) -> void:
+	if bool(style()["outline"]):
+		c.draw_arc(at, r, from, to, 32, Color(0, 0, 0, t("edge_a") * col.a), width + t("edge_w") * 2.0, true)
+	c.draw_arc(at, r, from, to, 32, col, width, true)
+
+
+## The strokes of a shape (no dot): a broken ring, a full ring, a cross or a Hunter's look.
 static func _shape(c: CanvasItem, at: Vector2, shape: String, ring: float, k: float, col: Color, width: float) -> void:
+	if ReticleLooks.has(shape):
+		ReticleLooks.strokes(c, at, shape, ring, k, col, width)
+		return
 	match shape:
 		"default":
 			var gap := t("arc_gap_rad")
