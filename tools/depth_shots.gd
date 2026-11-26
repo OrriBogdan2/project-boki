@@ -8,6 +8,7 @@ extends RefCounted
 ##   depth_d_shots  the top of the step again with shots flying along the ledge (their drop shadows)
 ## --air --arch=<id>: instead, the player (that Hunter) on flat ground, standing (air_a_stand) and a moment
 ## after a jump (air_b_jump), at 1920x1080, to look at the shadow disc and ring under a Hunter in the air.
+## --compat runs the same shots in a child game on the Compatibility renderer (the web and mobile look).
 ## --cues=off draws them with the height cues off, for the before shots (names get a "before_" prefix).
 
 const DT := 1.0 / 60.0
@@ -34,6 +35,10 @@ func run(main_node: Node) -> void:
 			Settings.set_v("depth_cues", false, false)
 			prefix = "before_"
 	DirAccess.make_dir_recursive_absolute(dir)
+	if "--compat" in OS.get_cmdline_user_args() and Look.full_renderer():
+		_run_compat_child()
+		main.get_tree().quit(0)
+		return
 	await _setup()
 	var w := m.world
 	if "--air" in OS.get_cmdline_user_args():
@@ -86,6 +91,12 @@ func _shoot(file: String, tile: Vector2i, d: Vector2i, foe_tile: Vector2i, fire 
 		for h in m.hunters: h.render(DT, 1.0)
 		await main.get_tree().process_frame
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join(prefix + file + ".png"))
+
+func _run_compat_child() -> void:
+	var args := ["--path", ProjectSettings.globalize_path("res://"), "--rendering-method", "gl_compatibility"]
+	args.append_array(["--rendering-driver", "opengl3", "--audio-driver", "Dummy", "--"])
+	args.append_array(OS.get_cmdline_user_args())
+	OS.execute(OS.get_executable_path(), args, [], true)
 
 ## The player on the middle ground tile, standing and then JUMP_WAIT s into a jump, framed by the match camera.
 func _air_shots() -> void:
