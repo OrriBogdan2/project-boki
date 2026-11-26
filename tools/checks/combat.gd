@@ -5,6 +5,8 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	# a blast: falloff curve by distance, no damage through rock, the armour ring pitched by the shell left
+	"--blast-parity-check": ["res://tools/blast_parity_check.gd", "blast_parity_check", null],
 	# a Boki plate, glove wall or ice wall never hides the Hunter behind it; a rock does
 	"--barrier-sight-check": ["res://tools/barrier_sight_check.gd", "barrier_sight_check", null],
 	# Vex's Slipstep: one plain dash, no pips, no Second Wind
