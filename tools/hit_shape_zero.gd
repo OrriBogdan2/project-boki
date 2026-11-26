@@ -207,8 +207,8 @@ static func content(c: Object, a: String, kind: String) -> Dictionary:
 			var oe: Dictionary = ak.e_def()
 			o = {"reach": float(oe["reach"]) + float(oe["rmax"]), "width": 2.0 * float(oe["rmax"]), "arc": 0.0}
 		"tender:rmb":
-			var seed: Dictionary = ak.rmb_def()["seed"]
-			o = {"reach": float(seed["range"]), "width": 2.0 * float(seed["hit_r"]), "arc": 0.0}
+			var sdef: Dictionary = ak.rmb_def()["seed"]
+			o = {"reach": float(sdef["range"]), "width": 2.0 * float(sdef["hit_r"]), "arc": 0.0}
 		"tender:rmb_burst":
 			var sd: Dictionary = ak.rmb_def()["seed"]
 			o = {"reach": float(sd["burst_r"]), "width": 2.0 * float(sd["burst_r"]), "arc": 0.0}
