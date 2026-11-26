@@ -138,7 +138,7 @@ func _match(who: String, arch: String) -> void:
 	while t < 900.0 and not m.player.extracted:
 		if tu.step != at_step:
 			at_step = tu.step
-			seed(11 + at_step)  # (each step rolls its own camp spot: an earlier step running longer must not move a later one's)
+			seed(11 + at_step)  # (each step rolls its own camp spot: a longer earlier step must not move a later one)
 			wait = SLOW_WAIT_S
 		wait -= Match.DT
 		if wait > 0.0:
