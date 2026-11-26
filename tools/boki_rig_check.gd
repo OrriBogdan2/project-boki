@@ -153,7 +153,7 @@ const OVER_TRIS := {
 	"rimeshrew": MESHY_TRIS
 }
 const MAX_BONES := 64
-const DEEP := 1.0  # m of water for the swim rows
+const DEEP := 2.0  # m of water for the swim rows: deeper than half the tallest species at its size
 const SHALLOW := 0.1  # m: a puddle it stands in
 const FEET_CLEAR := 0.1  # m its lowest bone keeps off the bed when it floats
 
