@@ -6,8 +6,10 @@ extends RefCounted
 ## The game that owns the hunter decides (its perks never reach the others); the move rides its snapshot
 ## row (HunterNet) so every other game shows the same.
 
-const META := "hazard_move"  # a remote hunter's move from its snapshot
 enum { NONE, SWIM, FOOTING }
+
+const META := "hazard_move"  # a remote hunter's move from its snapshot
+
 
 ## The move h makes now: worked out here for a hunter this game owns, as sent for a remote one.
 static func of(h: Hunter) -> int:
@@ -21,11 +23,13 @@ static func of(h: Hunter) -> int:
 		return SWIM
 	return FOOTING if (h.m as Match).ground_grip(h.pos, h) < 1.0 else NONE
 
+
 ## Hunter._anim_state: the keys HunterAnim and WardenClips read.
 static func anim_state(h: Hunter, s: Dictionary) -> void:
 	var mv := of(h)
 	s["swim"] = mv == SWIM
 	s["footing"] = TerrainHazards.kind_def("ice")["moves"] if mv == FOOTING else {}
+
 
 ## m below its feet the model is drawn: sunk into the water as the swim eases in (HomeWater's depth).
 static func sink(h: Hunter) -> float:

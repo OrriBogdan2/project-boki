@@ -14,6 +14,7 @@ var _species := ""
 var _rng := RandomNumberGenerator.new()
 var _done := false
 
+
 ## keep_text "" leaves the Keep button out (the caller's own button finishes; read chosen()).
 func _init(species: String, keep_text := "Keep") -> void:
 	_species = species
@@ -34,15 +35,19 @@ func _init(species: String, keep_text := "Keep") -> void:
 	note.visible = false
 	add_child(note)
 	reroll()
-	tree_exiting.connect(func():
-		if not _done:
-			_done = true
-			named.emit(suggestion, false))
+	tree_exiting.connect(
+		func():
+			if not _done:
+				_done = true
+				named.emit(suggestion, false)
+	)
+
 
 ## The caret in the box with the suggestion selected, so typing replaces it.
 func focus() -> void:
 	box.grab_focus()
 	box.select_all()
+
 
 ## A new suggestion, into the box.
 func reroll() -> void:
@@ -51,9 +56,11 @@ func reroll() -> void:
 	box.caret_column = suggestion.length()
 	note.visible = false
 
+
 ## The name as it stands: what was typed, or the suggestion for an empty or rude one.
 func chosen() -> String:
 	return KinNames.pick(box.text, suggestion)
+
 
 func keep() -> void:
 	if _done:
