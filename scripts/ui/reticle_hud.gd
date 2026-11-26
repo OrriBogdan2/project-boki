@@ -1,7 +1,7 @@
 class_name ReticleHud
 extends RefCounted
 ## The in-match cursor reticle with its aim states (the HUD owns one): the Reticle ring that opens with bloom,
-## the archetype's resource arc, the charge / warm-up / spin-up arc or the ammo arc round it, the
+## the archetype's resource arc, the charge / warm-up / spin-up arc or the ammo arc (off by default) round it, the
 ## full-charge flare, and the hit tick (thin strokes off the ring, longer with a pulse ring on a crit or a
 ## knock, gold on a crit, pale on armour, with a ring flash). The tick's state is the HUD's Reticle. Thin strokes,
 ## a dark edge under every one, the Hunter's accent on the look, dot and arcs; an arc shows only its filled
@@ -43,7 +43,7 @@ func draw(c: CanvasItem, p: Hunter, at: Vector2, time: float) -> void:
 		_hit(c, at, spread, hc, k)
 
 
-## The charge, warm-up, spin-up or ammo arc (one at a time).
+## The charge, warm-up, spin-up or (tuning ammo_at_cursor) ammo arc (one at a time).
 func _states(c: CanvasItem, p: Hunter, at: Vector2, time: float, accent: Color) -> void:
 	var r := _t("charge_r")
 	var ck := p.atk.charge_k()
@@ -58,8 +58,8 @@ func _states(c: CanvasItem, p: Hunter, at: Vector2, time: float, accent: Color) 
 		_arc(c, at, r, -PI * 0.5, TAU, warm, p.wpn["color"], 1.0, false)
 	elif p.wpn.has("spin_up") and p.spin > 0.0 and p.spin < 1.0:
 		_arc(c, at, r, -PI * 0.5, TAU, p.spin, _tc("col_warm_up"), 1.0, false)
-	elif p.wpn.get("melee", false):
-		pass
+	elif p.wpn.get("melee", false) or _t("ammo_at_cursor") <= 0.0:
+		pass  # (the ammo shows in the HUD's weapon panel; tuning ammo_at_cursor 1 also draws it as this arc)
 	else:
 		var af := float(p.ammo) / maxf(1.0, float(p.wpn["mag"]))
 		var low := af <= _t("low_ammo_frac")

@@ -22,6 +22,7 @@
 		"arc_gap_rad": 0.32,
 		"spread_max": 16.0,
 		"charge_r": 13.0,
+		"ammo_at_cursor": 0,
 		"ammo_r": 16.0,
 		"res_r": 22.0,
 		"arc_w": 2.0,

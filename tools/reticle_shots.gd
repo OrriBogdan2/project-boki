@@ -4,8 +4,10 @@ extends RefCounted
 ##     and a 3x crop round the cursor
 ##   --reticle-hunters-shots: every Hunter in the Training Area (title-screen Arena), the reticle at rest, mid-bloom,
 ##     on a hit and on a crit, as one 3x crop round the cursor per hunter (a row of four per hunter)
-##   --reticle-looks-shots: every Hunter's own look (ReticleLooks) at 4x on dark ground, bright ground and,
-##     opened by bloom with a hit flash, on grass: one column per hunter (reticle_looks.png)
+##   --reticle-looks-shots: every Hunter's own look (ReticleLooks) at rest at 4x on dark, light and grass swatch
+##     rows with row labels, one column per hunter (reticle_looks_1126b_swatches.png)
+##   --reticle-proof-shots: for the owner, on a real GPU at 1920x1080 (set --resolution): every Hunter's full frame
+##     at rest and firing over the Training Area's grass, and contact sheets of 3 tiles a row with a 2x zoom
 ##   --ping-shots: your ping on an enemy (red, "Enemy") and a teammate's loot ping off screen (edge arrow),
 ##     with the minimap
 ##   --hit-marker-shots: the hit tick on a landed hit and the knock tick, each full frame and 3x crop
@@ -21,11 +23,18 @@ const STYLES := [
 ]
 const AT := Vector2(0.62, 0.42)  # where the cursor rests, as a fraction of the window
 const CROP := Vector2i(160, 110)  # px round the cursor, scaled 3x
-const LOOK_CELL := 96.0  # px: one look's tile on the looks sheet
-const LOOK_ZOOM := 4.0  # the looks sheet draws each reticle this many times its size
-const LOOK_ROWS := [
-	["dark ground", "1b1f1c", 0.0, 0.0], ["bright ground", "ece6cc", 0.0, 0.0], ["bloom + hit", "5f8f4a", 4.0, 0.85]
-]  # [label, ground, bloom px, hit flash strength]
+const LOOK_CELL := 96.0  # px: one look's tile on the swatch sheet
+const LOOK_LABEL_W := 130.0  # px: the row labels' column on the swatch sheet
+const LOOK_ZOOM := 4.0  # the swatch sheet draws each reticle this many times its size
+const LOOK_ROWS := [["dark ground", "1b1f1c"], ["light ground", "ece6cc"], ["grass", "5f8f4a"]]  # [label, ground]
+const PROOF_RES := Vector2i(1920, 1080)  # the full-screen proof frames
+const TILES_PER_SHEET := 6  # Hunters on one contact sheet (rows of 3)
+const TILE_W := 640  # px: one tile of the contact sheet
+const TILE_GAP := 8
+const TILE_NAME_H := 60  # px: the Hunter's name band
+const ZOOM_CROP := Vector2i(160, 100)  # px round the cursor, shown 2x under the tile
+const TILE_ZOOM_H := 200  # px: ZOOM_CROP at 2x
+const TILE_H := TILE_NAME_H + 360 + TILE_ZOOM_H  # name, the 16:9 frame at tile width, the zoom crops
 
 var main: Node
 var m: Match
@@ -39,6 +48,8 @@ func run(main_node: Node, what: String) -> void:
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
 	DirAccess.make_dir_recursive_absolute(dir)
+	if what == "looks" or what == "proof":
+		main.get_window().size = PROOF_RES
 	if what == "looks":
 		await _reveal()
 		await _looks()
@@ -47,7 +58,7 @@ func run(main_node: Node, what: String) -> void:
 	m = Match.new()
 	main.add_child(m)
 	var opts := {"teams": 2, "squad": 2, "tier": 0, "length": 1500.0, "seed": 4242, "no_drop": true}
-	if what == "hunters":
+	if what == "hunters" or what == "proof":
 		opts = Match.arena_opts()
 	m.start(opts)
 	await _reveal()
@@ -62,6 +73,8 @@ func run(main_node: Node, what: String) -> void:
 		await _pings()
 	elif what == "hunters":
 		await _hunters()
+	elif what == "proof":
+		await _proof()
 	elif what == "hit":
 		await _hits()
 	else:
@@ -119,41 +132,115 @@ func _reveal() -> void:
 		await fade.reveal(0.01)
 
 
-## Every Hunter's own look on the grounds of LOOK_ROWS, drawn at LOOK_ZOOM on a layer over everything.
+## Every Hunter's own look at rest on the grounds of LOOK_ROWS, drawn at LOOK_ZOOM: a small sheet with a
+## label on each row and each Hunter's name under its column.
 func _looks() -> void:
 	Settings.reset_all()
-	var layer := CanvasLayer.new()
-	layer.layer = 100
-	main.add_child(layer)
-	var cv := Control.new()
-	cv.set_anchors_preset(Control.PRESET_FULL_RECT)
-	layer.add_child(cv)
-	cv.draw.connect(_draw_looks.bind(cv))
-	var img := await _frame(6)
 	var ids := Arch.ids()
-	var sheet := Vector2i(int(LOOK_CELL) * ids.size(), int(LOOK_CELL) * LOOK_ROWS.size() + 22)
-	img.get_region(Rect2i(Vector2i.ZERO, sheet)).save_png(dir.path_join("reticle_looks.png"))
-	layer.queue_free()
-	print("RETICLESHOTS reticle_looks %d hunters" % ids.size())
+	var size := Vector2i(int(LOOK_LABEL_W + LOOK_CELL * ids.size()), int(LOOK_CELL) * LOOK_ROWS.size() + 22)
+	var img := await _compose(size, _draw_looks)
+	img.save_png(dir.path_join("reticle_looks_1126b_swatches.png"))
+	print("RETICLESHOTS reticle_looks_1126b_swatches %d hunters" % ids.size())
 
 
 func _draw_looks(cv: Control) -> void:
 	var ids := Arch.ids()
 	var font := ThemeDB.fallback_font
 	cv.draw_rect(Rect2(Vector2.ZERO, cv.size), Color.BLACK)
+	for row in LOOK_ROWS.size():
+		var label_at := Vector2(6.0, (row + 0.5) * LOOK_CELL + 5.0)
+		cv.draw_string(font, label_at, String(LOOK_ROWS[row][0]), HORIZONTAL_ALIGNMENT_LEFT, LOOK_LABEL_W, 16)
 	for i in ids.size():
 		var id := String(ids[i])
 		for row in LOOK_ROWS.size():
-			var spec: Array = LOOK_ROWS[row]
-			var tile := Rect2(Vector2(i, row) * LOOK_CELL, Vector2.ONE * LOOK_CELL)
-			cv.draw_rect(tile.grow(-1.0), Color(String(spec[1])))
+			var origin := Vector2(LOOK_LABEL_W + i * LOOK_CELL, row * LOOK_CELL)
+			var tile := Rect2(origin, Vector2.ONE * LOOK_CELL)
+			cv.draw_rect(tile.grow(-1.0), Color(String(LOOK_ROWS[row][1])))
 			cv.draw_set_transform(tile.get_center(), 0.0, Vector2.ONE * LOOK_ZOOM)
-			var flash := Color(Reticle.tc("col_hit"), float(spec[3]))
-			Reticle.draw(cv, Vector2.ZERO, float(spec[2]), Reticle.accent(id), flash, Reticle.look_of(id))
+			Reticle.draw(cv, Vector2.ZERO, 0.0, Reticle.accent(id), Color(0, 0, 0, 0), Reticle.look_of(id))
 			cv.draw_set_transform(Vector2.ZERO)
-		var name_at := Vector2(i * LOOK_CELL, LOOK_CELL * LOOK_ROWS.size() + 16.0)
+		var name_at := Vector2(LOOK_LABEL_W + i * LOOK_CELL, LOOK_CELL * LOOK_ROWS.size() + 16.0)
 		var label := String(Arch.def(id).get("base_name", id))
 		cv.draw_string(font, name_at, label, HORIZONTAL_ALIGNMENT_CENTER, LOOK_CELL, 13, Arch.color(id).lightened(0.3))
+
+
+## Every Hunter in the Training Area at the default match camera, 1920x1080 on a real GPU: the reticle mid-screen over
+## grass at rest and then firing (the fire action held, a hit raised). Each full frame is saved
+## (reticle_looks_1126b_<id>_rest.png, _fire.png) and then the contact sheets, TILES_PER_SHEET Hunters each.
+func _proof() -> void:
+	Settings.reset_all()
+	Settings.set_v("tips", false)
+	_pin_reticle()
+	main.get_viewport().gui_disable_input = true
+	var tiles := []
+	for id in Arch.ids():
+		m.arena.set_arch(String(id), Arch.signature(String(id)))
+		for pn in m.hud.ui_extra:
+			if pn is Control:
+				pn.visible = false
+		await main.get_tree().create_timer(2.5).timeout
+		var rest := await _frame(12)
+		var fire := await _frame(12, _hold_fire)
+		Input.action_release("fire")
+		for st in [["rest", rest], ["fire", fire]]:
+			var img: Image = st[1]
+			if img.get_size() != PROOF_RES:
+				push_error("RETICLESHOTS frame is %s, not %s" % [img.get_size(), PROOF_RES])
+				main.get_tree().quit(1)
+				return
+			img.save_png(dir.path_join("reticle_looks_1126b_%s_%s.png" % [id, st[0]]))
+		tiles.append([String(Arch.def(id).get("base_name", id)), Arch.color(String(id)), rest, fire])
+		print("RETICLESHOTS proof %s ammo %d" % [id, m.player.ammo])
+	for part in ceili(tiles.size() / float(TILES_PER_SHEET)):
+		var chunk := tiles.slice(part * TILES_PER_SHEET, (part + 1) * TILES_PER_SHEET)
+		var rows := ceili(chunk.size() / 3.0)
+		var size := Vector2i(TILE_W * 3 + TILE_GAP * 2, rows * TILE_H + (rows - 1) * TILE_GAP)
+		var sheet := await _compose(size, _draw_tiles.bind(chunk))
+		sheet.save_png(dir.path_join("reticle_looks_1126b_sheet%d.png" % (part + 1)))
+	print("RETICLESHOTS proof sheets done")
+
+
+## Holds the fire action and a hit tick, so the frame shows the aiming reticle in use.
+func _hold_fire() -> void:
+	Input.action_press("fire")
+	m.player.recoil = 1.0
+	m.hud.reticle.raise(false)
+
+
+## One tile per Hunter: its name large, the rest frame scaled to the tile width, and under it 2x crops round the
+## reticle at rest and firing.
+func _draw_tiles(cv: Control, tiles: Array) -> void:
+	var font := ThemeDB.fallback_font
+	cv.draw_rect(Rect2(Vector2.ZERO, cv.size), Color(0.07, 0.07, 0.08))
+	for i in tiles.size():
+		var t: Array = tiles[i]
+		var o := Vector2(i % 3 * (TILE_W + TILE_GAP), i / 3 * (TILE_H + TILE_GAP))
+		cv.draw_string(font, o + Vector2(12, 46), String(t[0]), HORIZONTAL_ALIGNMENT_LEFT, TILE_W, 44, t[1])
+		var shot := Vector2(TILE_W, TILE_W * 9.0 / 16.0)
+		cv.draw_texture_rect(ImageTexture.create_from_image(t[2]), Rect2(o + Vector2(0, TILE_NAME_H), shot), false)
+		for j in 2:
+			var crop := Rect2i(_cursor_px(t[2]) - Vector2i(ZOOM_CROP / 2.0), ZOOM_CROP)
+			var piece := ImageTexture.create_from_image((t[2 + j] as Image).get_region(crop))
+			var at := o + Vector2(j * TILE_W / 2.0, TILE_NAME_H + shot.y)
+			cv.draw_texture_rect(piece, Rect2(at, Vector2(TILE_W / 2.0, TILE_ZOOM_H)), false)
+			cv.draw_string(font, at + Vector2(8, 22), ["rest", "firing"][j], HORIZONTAL_ALIGNMENT_LEFT, -1, 20)
+
+
+## Draws `painter` on a Control in a SubViewport of `size` and returns what it drew.
+func _compose(size: Vector2i, painter: Callable) -> Image:
+	var vp := SubViewport.new()
+	vp.size = size
+	vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	var cv := Control.new()
+	cv.size = Vector2(size)
+	cv.draw.connect(painter.bind(cv))
+	vp.add_child(cv)
+	main.add_child(vp)
+	for i in 4:
+		await main.get_tree().process_frame
+	var img := vp.get_texture().get_image()
+	vp.queue_free()
+	return img
 
 
 ## The tick a landed hit raises and the knock one (the rival's hp at 0 for that frame), slowed to
