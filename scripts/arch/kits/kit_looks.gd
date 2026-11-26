@@ -219,12 +219,15 @@ func _build_thrown_card(n: Node3D) -> void:
 	_build_card(card)
 	_tail(n, 0.1, 0.4, Color(ORB_EDGE, 0.45))
 
-## A playing card, face up (+Y): a pale stock edge, a void-violet back and a lit teal diamond pip.
+## A playing card, face up (+Y): a pale stock edge, a void-violet back and a lit teal diamond pip. Unlit
+## (shade_mat), so the stock stays cream in the warm sun; each layer draws over the one under it.
 func _build_card(n: Node3D) -> void:
-	Models.part(n, Models.box(CARD_SIZE.x, 0.02, CARD_SIZE.y), Models.toon(CARD_EDGE), Vector3.ZERO)
-	var inset := Models.toon(CARD_BACK, false)
+	Models.part(n, Models.box(CARD_SIZE.x, 0.02, CARD_SIZE.y), shade_mat(CARD_EDGE), Vector3.ZERO)
+	var inset := shade_mat(CARD_BACK)
+	inset.render_priority = 1
 	Models.part(n, Models.box(CARD_SIZE.x * 0.8, 0.022, CARD_SIZE.y * 0.84), inset, Vector3.ZERO)
 	var pip := Models.glow_mat(ORB_EDGE)
+	pip.render_priority = 2
 	Models.part(n, Models.box(0.1, 0.026, 0.1), pip, Vector3.ZERO, Vector3(1.0, 1.0, 1.5), Vector3(0, PI * 0.25, 0))
 
 ## Motley's charged shot: a round void orb (dark glass, white-hot core), a teal rim shell and a long
