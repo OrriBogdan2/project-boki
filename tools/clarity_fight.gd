@@ -223,5 +223,7 @@ static func _what(v: VisualInstance3D) -> String:
 		var sh := ""
 		if mat is ShaderMaterial and mat.shader:
 			sh = (mat as ShaderMaterial).shader.resource_path.get_file()
+			if (mat as ShaderMaterial).get_shader_parameter("quiet") == 1.0:
+				sh += " quiet"  # a faint own or ally telegraph (Fx._tele_mesh): not a loud mark on the Hunter
 		w += " <%s %s>" % [mi.mesh.get_class(), sh]
 	return w
