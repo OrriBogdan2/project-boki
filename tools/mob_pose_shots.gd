@@ -62,7 +62,7 @@ func setup(mn: Node) -> Array:
 		var q := Vector2(p.pos.x, p.pos.z) + to
 		if not m.world.is_void(q.x, q.y) and not m.world.is_block(q.x, q.y):
 			p.teleport(Vector3(q.x, m.world.ground_at(q.x, q.y) + 1.0, q.y))
-	m.cam.user_zoom = float(CamWheel.rules()["min"])  # the wheel's closest view
+	m.cam.user_zoom = float(CamWheel.rules(true)["min"])  # the wheel's closest view
 	await _frames(30)
 	p.process_mode = Node.PROCESS_MODE_DISABLED  # the player stands still and never fires back
 	return kinds
