@@ -91,3 +91,8 @@ shards in the front slit) is replaced by a wine curtain BETWEEN the legs (prim `
 own leg), and the lining = the outer skirt image x0.55 with no hue shift (`hem_meshy_skirt_lining30.jpg`; replaces skirt_lining29,
 which read as a pale-pink flap). Outer skirt, body, hands, bow unchanged (partlock PASS). 90,391 tris. Tools: tools/art1/hem_r30
 (README). Needs an owner visual check before it goes live.
+
+r31 (2026-11-26): material rename only (glTF JSON chunk; the binary chunk, mesh, skin and textures are byte-identical to r30). The
+four skirt materials (`skirt-meshy`, `skirt-liner`, `skirt-lining23`, `skirt-godet30`) become `cloth-*`, so they get Lace's tuned cloth
+slot (fresnel 0.35, no rim) instead of the untuned `skirt` slot (fresnel 1.0). That fresnel turned the near-vertical skirt pale
+salmon / grey at the match camera (r30 art-gate GAME DEFECT). Tool: tools/art1/hem_r31/slot31.py. Needs an owner visual check before it goes live.
