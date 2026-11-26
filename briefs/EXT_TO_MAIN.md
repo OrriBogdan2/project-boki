@@ -11407,3 +11407,4 @@ READY ext/merge-lane-N1-1122 4df71e81612 (PR #641 salvage: main 8369d10952 merge
 READY ext/meeko-mood-hero-toon 7e9cf49101b0decb5b2ba999a8f509f7144e2209 (Meeko mood eyes use hero-toon, native check 7/7)
 READY ext/stuck-integ-dcde0252 854c6aeffe (bulk-rebase: origin/main merged in mechanically, was 006fde1b47; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/main-ink-dark-ghost-1126 b5217b25b3 (ink_drops dark/ghost -> shadow, evo-check ink line green; hob_talk null CamLook on first line fixed)
+READY ext/fuse-label-truth 84479cb2a8c58727650b24f907950d60e993cba9 (Boki box: lit ring only when X fuses; post-Fusion wait shows seconds + deny toast; boki-hud-check)
