@@ -3,6 +3,7 @@
 old key data stays in the file unused; the new keys are appended.
 Run: python3 tools/art1/glb_retime.py <glb> <clip> <new:old>[,<new:old>...] [out.glb]
   e.g. lmb_punch 0:0,0.09:0.05,0.14:0.12  (the end maps to itself; the pose the clip had at 0.05 s now arrives at 0.09 s; the end keeps its time)"""
+
 import math
 import struct
 import sys
@@ -39,14 +40,19 @@ def floats(j, b, i, n):
     ac = j["accessors"][i]
     bv = j["bufferViews"][ac["bufferView"]]
     off = bv.get("byteOffset", 0) + ac.get("byteOffset", 0)
-    return struct.unpack("<%df" % n, b[off:off + 4 * n])
+    return struct.unpack("<%df" % n, b[off : off + 4 * n])
 
 
 def append(j, b, vals, typ, lo=None):
     b.extend(b"\0" * (-len(b) % 4))
     j["bufferViews"].append({"buffer": 0, "byteOffset": len(b), "byteLength": 4 * len(vals)})
     b.extend(struct.pack("<%df" % len(vals), *vals))
-    ac = {"bufferView": len(j["bufferViews"]) - 1, "componentType": 5126, "count": len(vals) // {"SCALAR": 1, "VEC3": 3, "VEC4": 4}[typ], "type": typ}
+    ac = {
+        "bufferView": len(j["bufferViews"]) - 1,
+        "componentType": 5126,
+        "count": len(vals) // {"SCALAR": 1, "VEC3": 3, "VEC4": 4}[typ],
+        "type": typ,
+    }
     if lo:
         ac["min"], ac["max"] = [lo[0]], [lo[1]]
     j["accessors"].append(ac)
@@ -72,7 +78,7 @@ def retime(j, b, clip, anchors):
             k = max(i for i in range(n_in) if ts[i] <= o + 1e-9)
             k1 = min(k + 1, n_in - 1)
             f = 0.0 if k1 == k else (o - ts[k]) / (ts[k1] - ts[k])
-            a, c = vs[k * w:k * w + w], vs[k1 * w:k1 * w + w]
+            a, c = vs[k * w : k * w + w], vs[k1 * w : k1 * w + w]
             out.extend(slerp(a, c, f) if w == 4 else [x + (y - x) * f for x, y in zip(a, c)])
         sm["input"] = new_in
         sm["output"] = append(j, b, out, typ)

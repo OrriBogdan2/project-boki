@@ -28,6 +28,7 @@ func run(main_node: Node) -> void:
 	await _cards()
 	await _loadout()
 	printerr("ARENACHECK (training match next)")
+	_farm_entry()
 	await _training()
 	print("ARENACHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit()
@@ -39,7 +40,7 @@ func _breaker_whirl() -> void:
 	for start in ["bulwark", "thief"]:
 		var m := Match.new()
 		main.add_child(m)
-		await m.start(Match.arena_opts(start))
+		m.start(Match.arena_opts(start))
 		m.set_process(false)
 		var P: Hunter = m.player
 		if start != "bulwark":
@@ -105,7 +106,7 @@ func _breaker_whirl() -> void:
 func _arena() -> void:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(Match.arena_opts("thief"))
+	m.start(Match.arena_opts("thief"))
 	m.set_process(false)
 	var P: Hunter = m.player
 	ok(
@@ -432,11 +433,23 @@ func _press(start: String) -> bool:
 	await main.get_tree().process_frame
 	return true
 
+## One Training Grounds entry: the farm's way in (_start_training) opens the Arena's opts, as the title does.
+func _farm_entry() -> void:
+	var g_main = Game.main
+	Game.main = null          # (goto only records the opts)
+	var home := Home.new()
+	home._start_training()
+	home.free()
+	Game.main = g_main
+	var same := Game.match_opts == Match.arena_opts(Arch.of_save())
+	ok("the farm opens the title's Training Grounds", same, str(Game.match_opts))
+
+
 func _training() -> void:
 	var m := Match.new()
 	main.add_child(m)
 	printerr("ARENACHECK starting the training match")
-	await m.start(
+	m.start(
 		{
 			"training": true, "practice": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242,
 			"no_drop": true
@@ -587,10 +600,10 @@ func _loadout() -> void:
 	ok("loadout strip: six kit tiles (the hunter ultimate has its own X tile)", tiles == 6, str(tiles))
 	st.queue_free()
 	# the real expedition panel at home carries the strip
-	var Home = load("res://scripts/home/home.gd")
+	var home_node = load("res://scripts/home/home.gd")
 	ok(
 		"home has the kit card",
-		Home != null and (Home as Script).get_script_method_list().any(
+		home_node != null and (home_node as Script).get_script_method_list().any(
 			func(md): return String(md["name"]) == "_open_kit_card"
 		)
 	)

@@ -28,48 +28,48 @@ func run(main_node: Node) -> void:
 	Econ.ensure()
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 21, "no_drop": true,
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 21, "no_drop": true,
 		"arch": "gunslinger", "cls": Arch.weight("gunslinger"), "weapon": Arch.signature("gunslinger")})
-	var P: Hunter = m.player
-	P.ctrl = "local"
+	var p: Hunter = m.player
+	p.ctrl = "local"
 	var bot: Hunter = null
 	for o in m.hunters:
-		if o != P:
+		if o != p:
 			o.ctrl = "idle"
-			o.teleport(P.pos + Vector3(40, 0, 40))
+			o.teleport(p.pos + Vector3(40, 0, 40))
 			bot = o
 	await m.hud.panels.draw      # (in play the HUD has drawn long before the first level-up)
-	_max_e_first(P)
+	_max_e_first(p)
 	_bot_ranks(bot)
-	await _bar(m, P)
-	await _ready_chime(m, P)
+	await _bar(m, p)
+	await _ready_chime(m, p)
 	print("RANKUI DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
 ## 1 + 2: three level-ups' points all go into E; RMB and dash stay locked; E's rank drives the kit.
-func _max_e_first(P: Hunter) -> void:
+func _max_e_first(p: Hunter) -> void:
 	var e_max := int(Hunter.SLOT_MAX["kin"])
-	var pow1 := P.ak.power("kin") if P.ak.rank("kin") == 1 else -1.0
-	var cd1 := P.ak.cd_k("kin")
+	var pow1 := p.ak.power("kin") if p.ak.rank("kin") == 1 else -1.0
+	var cd1 := p.ak.cd_k("kin")
 	var h0 := LevelSfx.heard.duplicate()
-	P.gain_xp(float(Hunter.XP_TO[e_max - 1]) - P.xp + 1.0)
-	ok(P.lvl == e_max and P.skill_pts == e_max, "level %d banks %d points (%d)" % [e_max, e_max, P.skill_pts])
+	p.gain_xp(float(Hunter.XP_TO[e_max - 1]) - p.xp + 1.0)
+	ok(p.lvl == e_max and p.skill_pts == e_max, "level %d banks %d points (%d)" % [e_max, e_max, p.skill_pts])
 	var rises := _heard(h0, "level_up")
 	ok(rises == e_max - 1, "the level-up rise played once per level gained (%d)" % rises)
 	for i in e_max:
-		P.level_slot("kin")
+		p.level_slot("kin")
 	var ups := _heard(h0, "rank_up")
 	var stings := _heard(h0, "rank_max")
 	ok(ups == e_max - 1 and stings == 1,
 		"E's ranks: a confirm each below the top, one sting at the top (%d, %d)" % [ups, stings])
-	ok(int(P.slot_lv["kin"]) == e_max and P.skill_pts == 0, "every point went into E: rank %d of %d" % [
-		int(P.slot_lv["kin"]), e_max])
-	ok(int(P.slot_lv["sec"]) == 0 and int(P.slot_lv["dash"]) == 0, "RMB and dash untouched (E-max first)")
-	ok(not P.can_level("kin"), "E can't rank past its max")
-	ok(P.ak.rank("kin") == e_max, "the kit reads E at rank %d" % P.ak.rank("kin"))
-	ok(pow1 < 0.0 or P.ak.power("kin") > pow1, "E hits harder at max rank (%.2f -> %.2f)" % [pow1, P.ak.power("kin")])
-	var cuts: bool = P.ak.rank_k("rank_cd", "kin", 0.0) < 1.0      # the source's E upgrade cuts it (Vex's doesn't)
-	var cd_max: float = P.ak.cd_k("kin")
+	ok(int(p.slot_lv["kin"]) == e_max and p.skill_pts == 0, "every point went into E: rank %d of %d" % [
+		int(p.slot_lv["kin"]), e_max])
+	ok(int(p.slot_lv["sec"]) == 0 and int(p.slot_lv["dash"]) == 0, "RMB and dash untouched (E-max first)")
+	ok(not p.can_level("kin"), "E can't rank past its max")
+	ok(p.ak.rank("kin") == e_max, "the kit reads E at rank %d" % p.ak.rank("kin"))
+	ok(pow1 < 0.0 or p.ak.power("kin") > pow1, "E hits harder at max rank (%.2f -> %.2f)" % [pow1, p.ak.power("kin")])
+	var cuts: bool = p.ak.rank_k("rank_cd", "kin", 0.0) < 1.0      # the source's E upgrade cuts it (Vex's doesn't)
+	var cd_max: float = p.ak.cd_k("kin")
 	ok(cd_max < cd1 if cuts else is_equal_approx(cd_max, cd1),
 		"E recharges faster at max rank where its rank_cd row cuts it, else the same (%.2f -> %.2f)" % [cd1, cd_max])
 
@@ -90,18 +90,18 @@ func _bot_ranks(bot: Hunter) -> void:
 	ok(str(RankSfx.heard) == heard, "and made no rank sound (%s)" % str(RankSfx.heard))
 
 ## 4 + 5: the "+" and its click target on the real bar.
-func _bar(m: Match, P: Hunter) -> void:
+func _bar(m: Match, p: Hunter) -> void:
 	var clicks: Array = m.hud.ui_extra.filter(func(n): return n is RankClick)
 	ok(clicks.size() == Hunter.SLOTS.size(), "one click target per ranked slot (%d)" % clicks.size())
-	P.gain_xp(float(Hunter.XP_TO[P.lvl]) - P.xp + 1.0)
+	p.gain_xp(float(Hunter.XP_TO[p.lvl]) - p.xp + 1.0)
 	var h0 := LevelSfx.heard.duplicate()
-	P.level_slot("dash")
+	p.level_slot("dash")
 	ok(_heard(h0, "rank_up") == 1 and _heard(h0, "rank_max") == 0, "ranking dash once: one confirm, no sting")
 	await _frames(3)
-	P.gain_xp(float(Hunter.XP_TO[P.lvl]) - P.xp + 1.0)
+	p.gain_xp(float(Hunter.XP_TO[p.lvl]) - p.xp + 1.0)
 	await m.hud.panels.draw      # the slots are drawn on HudPanels, REDRAW_HZ times a second
 	await _frames(3)
-	ok(P.skill_pts == 1 and P.can_level("sec") and P.can_level("dash"), "a new point that RMB or dash can take")
+	ok(p.skill_pts == 1 and p.can_level("sec") and p.can_level("dash"), "a new point that RMB or dash can take")
 	ok(RankMarks.spot("sec").has_area() and RankMarks.spot("dash").has_area(),
 		"locked RMB and rank-1 dash both take a click")
 	ok(not RankMarks.spot("kin").has_area(), "maxed E shows no +")
@@ -120,7 +120,7 @@ func _bar(m: Match, P: Hunter) -> void:
 	click.button_index = MOUSE_BUTTON_LEFT
 	click.pressed = true
 	rc._gui_input(click)
-	ok(int(P.slot_lv["sec"]) == 1 and P.skill_pts == 0, "clicking the + spent the point on RMB")
+	ok(int(p.slot_lv["sec"]) == 1 and p.skill_pts == 0, "clicking the + spent the point on RMB")
 	await m.hud.panels.draw
 	await _frames(3)
 	ok(not RankMarks.spot("sec").has_area() and not rc.visible, "no points left: the + and its target are gone")
@@ -128,23 +128,23 @@ func _bar(m: Match, P: Hunter) -> void:
 
 ## 7: _bar's point was spent within frames, so its chime never came; the next one waits out the level-up
 ## chime, plays once and keeps quiet while the point waits; two levels at once chime once.
-func _ready_chime(m: Match, P: Hunter) -> void:
+func _ready_chime(m: Match, p: Hunter) -> void:
 	await _wait(m, RankSfx.READY_DELAY + 0.2)
 	ok(_count("rank_ready") == 0, "a point spent within a moment never chimed")
-	P.gain_xp(float(Hunter.XP_TO[P.lvl]) - P.xp + 1.0)
+	p.gain_xp(float(Hunter.XP_TO[p.lvl]) - p.xp + 1.0)
 	await m.hud.panels.draw
 	var due := RankSfx.ready_at - float(m.time)
 	ok(_count("rank_ready") == 0 and due > RankSfx.READY_DELAY - 0.1,
-		"level %d's point: its chime waits out the level-up chime (due in %.2f s)" % [P.lvl, due])
+		"level %d's point: its chime waits out the level-up chime (due in %.2f s)" % [p.lvl, due])
 	await _wait(m, due + 0.2)
 	ok(_count("rank_ready") == 1, "then it chimes once")
 	await _wait(m, RankSfx.READY_DELAY * 2.0)
-	ok(_count("rank_ready") == 1 and P.skill_pts == 1, "and never again while the point waits")
-	P.level_slot("ult")
-	P.gain_xp(float(Hunter.XP_TO[P.lvl + 1]) - P.xp + 1.0)
+	ok(_count("rank_ready") == 1 and p.skill_pts == 1, "and never again while the point waits")
+	p.level_slot("ult")
+	p.gain_xp(float(Hunter.XP_TO[p.lvl + 1]) - p.xp + 1.0)
 	await m.hud.panels.draw
 	await _wait(m, RankSfx.READY_DELAY + 0.2)
-	ok(_count("rank_ready") == 2 and P.skill_pts == 2, "two levels in one go: one chime, not two on top of each other")
+	ok(_count("rank_ready") == 2 and p.skill_pts == 2, "two levels in one go: one chime, not two on top of each other")
 
 ## How many times RankSfx played `cue`.
 func _count(cue: String) -> int:

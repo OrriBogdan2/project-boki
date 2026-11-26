@@ -29,6 +29,8 @@ var stations: Array = []  # {kind, id, at: Vector3 (the pedestal), c: Vector3 (i
 var near_i := -1
 var summon_pad: SummonStation = null  # the Boki island's summon pad (arena layout)
 var prompt: Label = null
+var trial: TimeTrial = null  # the time-trial course on the open floor
+
 var _belt_turn := 0  # which belt slot a full belt gives up next
 var _layer: CanvasLayer = null
 
@@ -119,6 +121,8 @@ func build() -> void:
 	prompt.visible = false
 	_layer.add_child(prompt)
 	m.add_child(_layer)
+	trial = TimeTrial.new(m)
+	trial.build(_layer, self)
 
 
 ## One ring of pedestals round a perch's middle, one per id of the kind.
@@ -191,10 +195,12 @@ func _duel(at: Vector3) -> void:
 	lb.position = at + Vector3(0, 2.7, 0)
 	m.add_child(lb)
 	m.duel_pad = at
+	m.duel_hint = DuelRingHint.make(m)
 
 
-## Per frame (from Arena.tick): show the near pedestal's name, use it on interact, bring a faller home.
-func tick() -> void:
+## Per frame (from Arena.tick): show the near pedestal's name, use it on interact, bring a faller home,
+## run the time trial.
+func tick(dt: float) -> void:
 	var p: Hunter = m.player
 	if p == null or prompt == null:
 		return
@@ -202,9 +208,11 @@ func tick() -> void:
 	if p.pos.y < FALL_Y and not p.downed:
 		p.teleport(a.home)
 		p.vel = Vector3.ZERO
+		trial.stop()
 		if m.hud:
 			m.hud.toast_small("Back to the Training Grounds", Color("8fe3c8"))
 		return
+	trial.tick(dt)
 	var best := -1
 	var bd := ACT_R
 	for i in stations.size():
@@ -247,12 +255,18 @@ func use(i: int) -> void:
 	m.fx.ring(s["at"], 1.2, color_of(String(s["kind"]), id), 0.3)
 
 
-## Fill this item's stack. The belt has four slots: when they are all taken, the next one in turn is emptied.
+## Fill this item's stack. The belt has six slots (1 and 2 pinned to the tonic and the armor kit): when the slots this
+## item may use are all taken, the next one in turn is emptied.
 func _stock(id: String) -> void:
 	var p: Hunter = m.player
 	if UtilityBelt.room_for(p, id) <= 0 and UtilityBelt.count(p, id) <= 0:
-		p.belt[_belt_turn % UtilityBelt.SLOTS] = {}
-		_belt_turn += 1
+		var pin := UtilityBelt.fixed_slot(id)
+		for _k in UtilityBelt.SLOTS:
+			var k := _belt_turn % UtilityBelt.SLOTS
+			_belt_turn += 1
+			if (pin >= 0 and k == pin) or (pin < 0 and UtilityBelt.reserved_id(k) == ""):
+				p.belt[k] = {}
+				break
 	UtilityBelt.grant(p, id, UtilityBelt.room_for(p, id))
 
 

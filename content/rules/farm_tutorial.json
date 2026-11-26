@@ -154,7 +154,7 @@
 				"patch_dry": "Press {build} and place a patch; you water it yourself.",
 				"plant": "Press {interact} at the patch to plant a seed.",
 				"water": "Press {interact} at the patch to water it.",
-				"grow": "Your seed is growing. Wait by the patch, then pick it.",
+				"grow": "Your seed is growing: wait by the patch, then pick it.",
 				"pick": "It's ripe: press {interact} to pick it."
 			},
 			"world": {
@@ -242,7 +242,7 @@
 		}
 	],
 	"base": {
-		"doc": "The Boki base's tutorial (GARDEN.md section 8; only while farm_build.json base_mode is on, then it replaces 'steps'): meet your Boki, feed it and watch it change, place a toy and watch it play, head out or stay. One banner line each, a Skip that leaves a toy placed and food in hand. start_food: a typed food, so the feed step shows the lean change. skip_toy: the toy put down on a skip. near: tiles from your Boki that count as meeting it. lead: your Boki leads each step (scripts/home/base_tut_lead.gd): it waits and looks back when you are more than wait_m metres behind, and stops stop_m metres short of the place. boki: the line it says over its head when the step comes up.",
+		"doc": "The Boki base's tutorial (GARDEN.md section 8; only while farm_build.json base_mode is on, then it replaces 'steps'): meet your Boki, plant the snack patch, feed it and watch it change, place a toy and watch it play, head out or stay. One banner line each, a Skip that leaves a toy placed and food in hand. start_food: a typed food, so the feed step shows the lean change. skip_toy: the toy put down on a skip. near: tiles from your Boki that count as meeting it. lead: your Boki leads each step (scripts/home/base_tut_lead.gd): it waits and looks back when you are more than wait_m metres behind, and stops stop_m metres short of the place. boki: the line it says over its head when the step comes up.",
 		"lead": {"wait_m": 6.0, "stop_m": 1.8},
 		"start_food": {"emberberry": 3},
 		"skip_toy": "toy_ball",
@@ -256,8 +256,17 @@
 				"boki": "Hi! Hi! Over here!"
 			},
 			{
-				"id": "eat",
+				"id": "patch",
 				"needs": ["meet"],
+				"title": "Plant the snack patch",
+				"hints": {"go": "Press {build}, open Garden and set the snack patch down. It is free and grows the snacks that feed your Boki."},
+				"world": {"go": ""},
+				"spot": {"go": {"hub": "build", "tile": "snack_patch", "tab": "Garden"}},
+				"boki": "Can we grow some snacks?"
+			},
+			{
+				"id": "eat",
+				"needs": ["patch"],
 				"title": "Feed it",
 				"hints": {"go": "Click your Boki (or press {details} next to it), choose Feed and give it the {food}: watch its colour change."},
 				"world": {"go": "Feed your Boki"},
@@ -268,9 +277,10 @@
 				"needs": ["eat"],
 				"title": "Place a toy",
 				"hints": {
-					"place": "Press {build}, open Base and set a toy down.",
+					"place": "Press {build}: Base tab Play ball ({toy_cost} gems), Garden tab Snack patch (free).",
 					"watch": "Watch your Boki go and play with it."
 				},
+				"marks": {"place": ["toy_ball", "snack_patch"]},
 				"world": {"place": "", "watch": "Toy"},
 				"boki": "Can we have something to play with?"
 			},
@@ -302,7 +312,7 @@
 	},
 	"tracker": {
 		"title": "Goals",
-		"max": 5,
+		"max": 3,
 		"per_source": {
 			"shelter": 1,
 			"first_day": 5,
@@ -311,12 +321,18 @@
 			"milestone": 1,
 			"level": 1
 		},
+		"next": {
+			"egg": "Hatch your egg at the Nest",
+			"boki": "Visit your Boki",
+			"go": "Start an expedition at the portal"
+		},
+		"next_doc": "Plain steps for a card that would be empty: a ready egg, your Boki, the portal. Always at least two, so the player is never left with nothing to do.",
 		"shelter": {
 			"open": "No Boki: adopt a stray at the Shelter in the market stall (%d gems)",
 			"locked": "No Boki: upgrade the market stall to open the Shelter (a stray costs %d gems)"
 		},
 		"shelter_doc": "One row while the roster is empty after the first hatch; it clears when a Boki is adopted.",
-		"per_source_doc": "At most this many rows from each source, so the top five are not all Hunter challenges. Order inside a source: closest to done first; ready-to-claim rows lead everything."
+		"per_source_doc": "At most this many rows from each source, so the top rows are not all Hunter challenges. Order inside a source: closest to done first; ready-to-claim rows lead everything."
 	},
 	"tool_toasts": {
 		"axe": "Hob hands you an axe.",

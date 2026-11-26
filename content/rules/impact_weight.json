@@ -1,9 +1,9 @@
 {
-	"_doc": "Hit weight (docs/DASHES_AND_ABILITY_FEEL.md §5.4): three tiers with a fixed hit-stop and shake, the tier of every Hunter ability, and the stacking caps that keep a team fight readable. hitstop_ms: how long the struck body holds (and the attacker too on a melee hit when attacker is true). shake: Shake.incoming_big power (0-1) on the struck player's camera only, never the attacker's; only heavy shakes (owner rule, §5.5: only big things that happen to you shake). Hunters: arch id -> ability key (lmb, rmb, dash, e, x, or a kit's own hit tag such as rock or fan) -> tier. --impact-weight-check asserts every damaging ability has one.",
+	"_doc": "Hit weight (docs/DASHES_AND_ABILITY_FEEL.md §5.4): three tiers with a fixed hit-stop and shake, the tier of every Hunter ability, and the stacking caps that keep a team fight readable. hitstop_ms: how long the struck body holds (and the attacker too on a melee hit when attacker is true). The shake of each tier is its <tier>_hit class in content/rules/shake.json (the struck player's camera only; only heavy shakes). flash_ms: how long the struck body flashes white (Ent.flash_t; a tick flashes the light one); a kit never sets its own (docs/DASHES_AND_ABILITY_FEEL.md §5.4 hit-feel table). boki: the tier of a summoned Boki's hits (its basic bite, its tagged ability, throw and recall hits). Hunters: arch id -> ability key (lmb, rmb, dash, e, x, or a kit's own hit tag such as rock or fan) -> tier. --impact-weight-check asserts every damaging ability has one.",
 	"tiers": {
-		"light": {"hitstop_ms": 25, "attacker": false, "shake": 0.0},
-		"solid": {"hitstop_ms": 50, "attacker": true, "shake": 0.0},
-		"heavy": {"hitstop_ms": 90, "attacker": true, "shake": 0.6}
+		"light": {"hitstop_ms": 25, "attacker": false, "flash_ms": 120},
+		"solid": {"hitstop_ms": 50, "attacker": true, "flash_ms": 120},
+		"heavy": {"hitstop_ms": 90, "attacker": true, "flash_ms": 120}
 	},
 	"cap": {
 		"hitstop_ms": 110,
@@ -12,6 +12,7 @@
 		"repeat_k": 0.33,
 		"shake_gap_s": 0.5
 	},
+	"boki": {"basic": "light", "ability": "solid"},
 	"hunters": {
 		"archer": {"lmb": "light", "rmb": "solid", "e": "solid", "x": "heavy"},
 		"juggernaut": {"lmb": "light", "rmb": "heavy", "dash": "solid", "e": "solid", "x": "heavy"},

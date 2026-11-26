@@ -9,15 +9,19 @@ const HUD_CHECK := preload("res://tools/hud_groups_check.gd")
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("EXTRACTGOAL %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func at(m: Match, sess: float) -> void:
 	m.sess_t0 = sess - m.time
 
+
 func run(main: Node) -> void:
-	var m: Match = await HUD_CHECK.make_match(main)
+	var m: Match = HUD_CHECK.make_match(main)
 	var q: Dictionary = Heart.rules()["quest"]
 	at(m, 30.0)
 	ok(ExtractGoal.pick(m, false) == 0, "veteran, 0:30: the Lair opens first")

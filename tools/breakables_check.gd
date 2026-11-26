@@ -32,7 +32,7 @@ func run(main_node: Node) -> void:
 	Save.no_write = true
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 1, "squad": 1, "tier": 0, "seed": 5, "no_drop": true, "god": true})
+	m.start({"teams": 1, "squad": 1, "tier": 0, "seed": 5, "no_drop": true, "god": true})
 	m.set_process(false)
 	var spot := _open_spot(m)
 	_data()
@@ -147,10 +147,12 @@ func _chain(m: Match, spot: Vector3) -> void:
 	step(m, float(ex["chain_fuse"]) + 0.1)
 	ok("the chained keg blew a beat later", second["dead"])
 
-## The sounds `act` starts (Sfx's play log, cleared first so no repeat gap or stack limit holds one back).
+## The sounds `act` starts (Sfx play log, cleared first so no repeat gap, stack limit or voice cap holds one back).
 func _heard(act: Callable) -> Array:
 	Sfx.last_played.clear()
 	Sfx.recent.clear()
+	for p in Sfx.players:
+		p.stop()
 	act.call()
 	return Sfx.last_played.keys()
 

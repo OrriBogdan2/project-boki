@@ -1,6 +1,6 @@
 extends RefCounted
 ## --farm-tutorial-check: Hob the builder, the guided farm tutorial and the Goals tracker
-## (docs/decisions/0011-farm-builder-tutorial.md). Also --farm-hob-shots=<dir> and --farm-spot-shots=<dir>: screenshots.
+## (docs/decisions/0104-farm-builder-tutorial.md). Also --farm-hob-shots=<dir> and --farm-spot-shots=<dir>: screenshots.
 ##   1. Hob: the starter set, blueprints drawn up on talking, the toast once, the spread over levels
 ##      2-5, hidden tabs and the footer line, a v7 save keeps what it could build
 ##   2. the tutorial: steps in order, free order with the house first, skip, the one reward, old saves
@@ -9,8 +9,9 @@ extends RefCounted
 ##      Done (not Feed) is the page's filled button until the trough step
 ##   5. in the world: Hob stands by the house and is talked to, the house is a free site that Boki
 ##      and the player build, save and load mid-build, skipping still puts the house down
-##   5. base_mode: the four-step base tutorial (meet, feed and the lean, toy, head out or stay), your Boki
-##      leading each step, a Skip on screen at every step, resume after save and load, the farm guides retired
+##   5. base_mode: the five-step base tutorial (meet, plant the snack patch, feed and the lean, toy, head out
+##      or stay), your Boki leading each step, a Skip on screen at every step, resume after save and load,
+##      the farm guides retired
 ##   6. the hub's first visit (HubFirstVisit): the Waystone marker, the one line on the first locked zone's
 ##      card, each once per save, and neither on a skipped save
 ## Never touches the real save.
@@ -62,9 +63,14 @@ func run(m: Node, mode := "") -> void:
 		if String(a).begins_with("--farm-spot-shots="):
 			await load("res://tools/farm_spot_shots.gd").new().run(m, String(a).substr(18))
 			return
+		if a == "--tutorial-low-fps":
+			await load("res://tools/farm_tutorial_low_fps.gd").new().run(m)
+			return
 		if String(a).begins_with("--farm-hob-shots="):
 			await load("res://tools/farm_hob_shots.gd").new().run(m, String(a).substr(17))
 			return
+	ok(FarmUnlocks.base_mode(), "base_mode is on in the shipped rules")
+	FarmUnlocks.rules()["base_mode"] = false      # sections 1-4 are the old farm's Hob and twelve steps
 	_hob_rules()
 	_tutorial_rules()
 	_tracker_rules()
@@ -72,6 +78,7 @@ func run(m: Node, mode := "") -> void:
 	await _spotlight()
 	await _build_spotlight()
 	await _farm2()
+	FarmUnlocks.rules()["base_mode"] = true
 	await _base_mode()
 	await _base_tutorial()
 	await _hub_first_visit()
@@ -83,7 +90,7 @@ func run(m: Node, mode := "") -> void:
 func _base_mode() -> void:
 	var home = await _home(1)
 	var rules: Dictionary = FarmUnlocks.rules()
-	ok(rules["base_mode"] == false and not FarmUnlocks.base_mode(), "base_mode is off in the shipped rules")
+	rules["base_mode"] = false
 	home.hb.toggle()
 	var off: Array = home.hb._tabs()
 	var kept: bool = off.has("Work") and off.has("Upgrades") and home.hmk.tabs().has("Exchange")
@@ -101,12 +108,13 @@ func _base_mode() -> void:
 	ok(not home.hmk.tabs().has("Exchange"), "on: no Exchange tab")
 	var wild: Array = (home.hb.wild_t as Dictionary).keys()
 	var w: World = home.world
-	var tree_at := Vector2.ZERO if wild.is_empty() else Vector2(int(wild[0]) % w.w + 0.5, int(wild[0]) / w.w + 0.5)
+	var tree_at := Vector2.ZERO if wild.is_empty() else Vector2(int(wild[0]) % w.w + 0.5,
+			int(int(wild[0]) / float(w.w)) + 0.5)
 	ok(home.hg.find(tree_at).is_empty(), "on: wild trees and boulders are not choppable")
 	home.hw.scan()
 	var econ_kinds := ["chop", "break", "log", "ore", "carry", "stock"]
 	ok(not home.hw.jobs.any(func(j): return econ_kinds.has(String(j["kind"]))), "on: no wild, station or haul jobs")
-	rules["base_mode"] = false
+	rules["base_mode"] = true
 	home.hb.toggle()
 	home.queue_free()
 	await main.get_tree().process_frame
@@ -115,6 +123,7 @@ func _base_mode() -> void:
 # ------------------------------------------------------------------ 6. the base tutorial (GARDEN.md section 8)
 func _base_tutorial() -> void:
 	var rules: Dictionary = FarmUnlocks.rules()
+	rules["base_mode"] = false
 	Save.d = _new_save()
 	HomeLayout.ensure(Save.d)
 	_stats()
@@ -125,8 +134,8 @@ func _base_tutorial() -> void:
 	rules["base_mode"] = true
 	var ids: Array = FarmTutorial.steps().map(func(st): return String(st["id"]))
 	ok(
-		ids == ["meet", "eat", "toy", "out"] and FarmTutorial.skippable(),
-		"base_mode on: four steps and a Skip: %s" % str(ids)
+		ids == ["meet", "patch", "eat", "toy", "out"] and FarmTutorial.skippable(),
+		"base_mode on: five steps and a Skip: %s" % str(ids)
 	)
 	var one_line := true
 	for st in FarmTutorial.steps():
@@ -144,10 +153,22 @@ func _base_tutorial() -> void:
 	FarmTutorial.event("play")
 	ok(FarmTutorial.current() == "meet", "a later step done early does not count")
 	FarmTutorial.event("meet")
+	var spot := FarmTutorial.spot("patch")
+	ok(
+		FarmTutorial.current() == "patch" and FarmTutorial.hint_text("patch").contains("snack patch"),
+		"met: plant the snack patch comes before feeding"
+	)
+	ok(
+		spot.get("tile", "") == SnackPatch.ID and spot.get("tab", "") == HomeLayout.CATALOG[SnackPatch.ID]["cat"],
+		"the patch step lights the snack patch tile in its Garden tab"
+	)
+	var pl := HomeLayout.of(Save.d)
+	(pl["deco"] as Array).append({"u": HomeLayout._next_uid(pl), "id": SnackPatch.ID, "x": 44, "z": 30, "r": 0})
+	FarmTutorial.detect()
 	var eat_hint := FarmTutorial.hint_text("eat")
 	ok(
 		FarmTutorial.current() == "eat" and eat_hint.contains(Care.food_name("emberberry")),
-		"met: feed it, the hint names the food"
+		"patch down: feed it, the hint names the food"
 	)
 	var rec: Dictionary = Save.d["roster"][0]
 	Evo.eat(rec, "kibble")
@@ -163,13 +184,12 @@ func _base_tutorial() -> void:
 		"a toy down: watch it play, marked"
 	)
 	FarmTutorial.event("play")
-	ok(FarmTutorial.current() == "out" and FarmTutorial.done_count() == 3, "a Boki at play finishes the toy step")
+	ok(FarmTutorial.current() == "out" and FarmTutorial.done_count() == 4, "a Boki at play finishes the toy step")
 	var g := int(Save.d["gems"])
 	FarmTutorial.event("stay")
 	var paid: bool = int(Save.d["gems"]) == g + int(FarmTutorial.option("end_gems"))
 	ok(not FarmTutorial.active() and paid, "staying ends it with the one reward")
 	await _base_world()
-	rules["base_mode"] = false
 
 
 ## The hint line's Skip button is up (and not hidden behind a quiet guide).
@@ -230,8 +250,15 @@ func _base_world() -> void:
 	)
 	home.ppos = k["node"].position + Vector3(1, 0, 0)
 	guide._poll()
-	ok(FarmTutorial.current() == "eat" and _berries() == 3, "walking up meets it and hands over the food")
+	ok(
+		FarmTutorial.current() == "patch" and guide.target("patch") == Vector3.INF,
+		"walking up meets it: the patch is next"
+	)
 	ok(_skip_shown(guide), "step 2: Skip is on screen")
+	var hl := HomeLayout.of(Save.d)
+	(hl["deco"] as Array).append({"u": HomeLayout._next_uid(hl), "id": SnackPatch.ID, "x": 44, "z": 30, "r": 0})
+	guide._poll()
+	ok(FarmTutorial.current() == "eat" and _berries() == 3, "the patch down hands over the food")
 	home._after_feed(k, "emberberry", Care.feed(k["rec"], "emberberry"))  # Care.feed leans, the home shows it
 	guide._poll()
 	ok(Evo.lean(k["rec"])[0] == "fire" and FarmTutorial.current() == "toy", "feeding it through the home leans it")
@@ -257,17 +284,30 @@ func _base_world() -> void:
 			FarmTutorial.did("meet")
 			and FarmTutorial.did("eat")
 			and FarmTutorial.current() == "toy"
-			and FarmTutorial.done_count() == 2
+			and FarmTutorial.done_count() == 3
 		),
 		"after save and load it resumes at the toy step"
 	)
 	guide._poll()
-	ok(_skip_shown(guide) and guide.hint_box.line.get("count") == "3/4", "resumed: 3/4 on the line, Skip still there")
+	ok(_skip_shown(guide) and guide.hint_box.line.get("count") == "4/5", "resumed: 4/5 on the line, Skip still there")
 	var resumed_gift := _berries()
 	FarmTutorial.give_food()
 	ok(_berries() == resumed_gift, "resumed: the starter food is not handed over twice")
 	ok(guide.target("toy") == Vector3.INF, "toy: no marker until a toy is down")
+	var hint := FarmTutorial.hint_text("toy")
+	var price := str(HomeLayout.price("toy_ball")[0])
+	ok(
+		hint.contains(Settings.key_cap("build")) and hint.contains(price) and hint.contains("free"),
+		"toy: the line names the build key, the ball's price and that the patch is free: %s" % hint
+	)
+	var marked: Array = []
+	for tab in ["Base", "Garden"]:
+		for e in home.hb.entries.tab(tab):
+			if bool(e.get("hl", false)):
+				marked.append(String(e["id"]))
+	ok(marked == ["toy_ball", "snack_patch"], "toy: the ball and the patch glow in their tabs: %s" % str(marked))
 	guide.place_toy()
+	ok(FarmTutorial.marks().is_empty(), "toy: nothing glows once a toy is down")
 	ok(
 		guide.target("toy") == FarmTutorial.toy_spot() and _on_no_isle([guide.target("toy")]),
 		"toy: the marker is on the toy you put down, not a side isle"
@@ -446,8 +486,8 @@ func _tutorial_rules() -> void:
 	ok(FarmTutorial.did("stone") and FarmTutorial.current() == "house", "enough stone for the house finishes mining")
 	var house_hint := FarmTutorial.hint_text("house")
 	ok(
-		house_hint.contains(FarmSites.cost_text(FarmSites.build_cost("house"))) and not house_hint.contains("{"),
-		"the house hint names what it costs: %s" % house_hint
+		house_hint.contains("House") and not house_hint.contains("{"),
+		"the house hint names the House tile, keys filled in: %s" % house_hint
 	)
 	FarmTutorial.event("swing")
 	ok(not FarmTutorial.did("hammer"), "doing a later step early does not count")
@@ -559,9 +599,9 @@ func _tutorial_rules() -> void:
 		(
 			FarmTutorial.did("buy")
 			and FarmTutorial.current() == "sell"
-			and FarmTutorial.hint_text("sell").contains("Gems come from")
+			and FarmTutorial.hint_text("sell").contains("sell your crop")
 		),
-		"buying a seed finishes it; selling is next and says where gems come from"
+		"buying a seed finishes it; selling the crop is next"
 	)
 	FarmTutorial.event("sell")
 	ok(
@@ -582,6 +622,7 @@ func _tutorial_rules() -> void:
 	L = HomeLayout.ensure(Save.d)
 	_stats()
 	var g1 := int(Save.d["gems"])
+	var kibble0 := int(Save.d["items"].get("kibble", 0))  # the fresh bag already holds the first-day kibble
 	FarmTutorial.skip()
 	var kept: bool = int(Save.d["gems"]) == g1 and HomeGather.has_tool("axe") and HomeGather.has_tool("pickaxe")
 	ok(
@@ -590,7 +631,7 @@ func _tutorial_rules() -> void:
 			and FarmTutorial.current() == ""
 			and FarmTutorial.state()["skipped"]
 			and kept
-			and int(Save.d["items"].get("kibble", 0)) == int(FarmTutorial.rules()["start_food"]["kibble"])
+			and int(Save.d["items"].get("kibble", 0)) == kibble0 + int(FarmTutorial.rules()["start_food"]["kibble"])
 		),
 		"skipping ends the prompts, takes nothing, and hands over the axe, the pickaxe and the food"
 	)
@@ -623,14 +664,19 @@ func _tracker_rules() -> void:
 	_stats(0, 0, 1, 4)
 	ClassUnlock.choose_starters(ClassUnlock.starters().slice(0, ClassUnlock.picks_needed()))
 	var rows := GoalTracker.lines()
-	ok(rows.size() >= 2 and rows.size() <= 5, "the tracker has a few rows, at most 5 (%d)" % rows.size())
+	ok(rows.size() >= 2 and rows.size() <= 3, "the tracker has a few rows, at most 3 (%d)" % rows.size())
 	var tut_words: Array = []
 	for s in FarmTutorial.steps():
 		tut_words.append(String(s["title"]))
 		for k in s["hints"]:
 			tut_words.append(String(s["hints"][k]))
 	ok(rows.all(func(r): return not tut_words.has(String(r["text"]))), "no row is tutorial text")
-	ok(String(rows[-1]["source"]) == "level", "the next farm level is the last row")
+	var src_at: Array = rows.map(func(r): return GoalTracker.SOURCE_ORDER.find(r["source"]))
+	ok(src_at.all(func(i): return i >= 0), "every row comes from a known source")
+	var cap_was: int = GoalTracker.cfg()["max"]
+	GoalTracker.cfg()["max"] = 99      # (the card shows three: the per-source rules are read off the whole list)
+	rows = GoalTracker.lines()
+	GoalTracker.cfg()["max"] = cap_was
 	var counts := {}
 	for r in rows:
 		counts[r["source"]] = int(counts.get(r["source"], 0)) + 1
@@ -684,9 +730,10 @@ func _tracker_rules() -> void:
 		var hs: Dictionary = ClassUnlock.state().get("hunters", {}) as Dictionary
 		hs[mast_id] = hs.get(mast_id, {})
 		hs[mast_id][String(g["stat"])] = int(g["target"])
+	var plain := GoalTracker.lines()
 	ok(
-		GoalTracker.lines().is_empty() and GoalTracker.build() == null,
-		"with nothing left to work towards the card is hidden"
+		plain.size() >= 2 and plain.size() <= 3 and plain.all(func(r): return r["source"] == "next"),
+		"with nothing left to work towards the card lists plain steps, never empty (%d)" % plain.size()
 	)
 
 

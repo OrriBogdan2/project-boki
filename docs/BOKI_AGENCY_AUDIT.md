@@ -3,9 +3,9 @@
 The rule: a Boki never moves, steers, stops, swaps, teleports, launches or roots its own hunter, and never
 takes over the controls. Boki act on foes, the world and the hunter's stats (heal, shield, buff). The one
 exception is the obvious abyss rescue (Moonlift). Owner 11-08: "make sure the boki changes to not interfere
-with ur gameplay (only buff/aid it)". Decision note: [0022](decisions/0022-boki-never-move-you.md).
+with ur gameplay (only buff/aid it)". Decision note: [0022](decisions/0109-boki-never-move-you.md).
 
-Re-audited on main d255acbee: every kin_v2 species (50), abilities_v2 (16), merges_v2 (9), merge_forms (3),
+Re-audited on main d255acbee: every kin species (50), abilities_v2 (16), merges_v2 (9), merge_forms (3),
 evolution_v2 (10), the throw, carry styles and passives, and the Boki body itself. The starting point was the
 item 186 audit (briefs/BOKI_PLAYER_AUDIT.md, main 7907d9af).
 
@@ -44,8 +44,9 @@ guards at your side. Smaller ones still ride your shoulder or pack.
   the other one when that flank is void, a block, or a step off your level.
 - It is never closer than `guard_min_m` (1.2 m), and it stays on the ground under its own nav: your jumps do not lift it.
 - When you glide or cross a gap it can't walk, or both flanks are blocked, it curls up on your back. It goes
-  back to its flank when you land.
-- Code: `KinFollow.guard_tick` / `guard_spot` / `onto`, `Kin.big()`. Tuning: `content/rules/boki_system.json` "follow".
+  back to its flank when you land. Both hops are eased over 0.6 s (`KinCurl`, every species), never a one-frame
+  jump (`--boki-curl-check`).
+- Code: `KinFollow.guard_tick` / `guard_spot` / `onto`, `Kin.big()`, `KinCurl`. Tuning: `content/rules/boki_system.json` "follow".
 
 ## The fence
 

@@ -1,0 +1,15 @@
+{
+	"id": "kilnbadger",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/kilnbadger.json.",
+	"trade_to": "scaldamus",
+	"shiny": {
+		"color": "#2a2e2c",
+		"belly": "#c0d4d8",
+		"glow": "#2aafff"
+	},
+	"work": {
+		"ember": 3,
+		"craft": 2,
+		"forage": 1
+	}
+}

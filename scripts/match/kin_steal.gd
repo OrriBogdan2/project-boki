@@ -8,6 +8,7 @@ extends RefCounted
 ##     rest at the carry cap, Hunter._refresh_kin_stats) and one summon this match (summon_k of its window, at
 ##     least summon_min_s) on the Summon key while their own Boki is resting or not riding with them.
 ##   - A thief who goes down or dies scatters what they carry: loose again where they fell.
+##   - A thief who extracts alive sends what they carry home and is paid for each (on_extract, settle).
 ##   - At match end every loose or stolen wisp goes home (match_end). The save never moved it: nothing is lost.
 ## The Kin keeps its own hunter in home_h; owner_h is whoever it rides with now (the thief while stolen), so the
 ## orbit, the summon's leash and the hit credit follow the carrier.
@@ -17,7 +18,13 @@ extends RefCounted
 
 const BOB_M := 0.12  # m a loose wisp bobs up and down
 const BOB_HZ := 0.8  # bobs per second
+const STING_DB := -3.0  # dB of the "your Boki was grabbed" sting (the owner's and squad's game only)
+const PICKUP_DB := -9.0  # dB of the thief's soft pickup cue: well under the sting
+const STING_DUCK_S := 0.4  # s the music dips under the sting
+const STING_DUCK_DB := -4.0  # dB of that dip
 const POP_M := 2.5  # m from the fallen hunter it floats: clear of their stomp and revive ring (Life revive_radius)
+
+static var carried_home: Array = []  # records of the stolen wisps the player carried when the match ended
 
 
 static func rules() -> Dictionary:
@@ -72,7 +79,7 @@ static func ride(k: Kin, dt: float) -> bool:
 	var o := k.owner_h
 	if k.remote or o == null or k.home_h == null or k.state != "shoulder":
 		return false
-	if stolen(k) and (o.downed or o.out or o.extracted):
+	if stolen(k) and (o.downed or o.out):
 		break_loose(k, o.pos)  # the thief fell: what they carry scatters
 	elif not stolen(k) and o.downed and not k.back_home:
 		break_loose(k, o.pos)
@@ -93,6 +100,7 @@ static func break_loose(k: Kin, at: Vector3) -> void:
 	k.pos = at + Vector3(0, KinWisp.SHOULDER_Y, 0)
 	k.prev = k.pos
 	k.m.fx.burst(k.pos, k.sp.get("glow", k.sp["color"]), 10, 2.5)
+	k.m.sfx("boki_downed", k.pos, -4.0)
 
 
 ## Back to its own hunter's shoulder (loose too long, or the match is over). A downed hunter keeps it this time.
@@ -155,7 +163,7 @@ static func grab(k: Kin, h: Hunter) -> bool:
 	return true
 
 
-## Every game: the catch moment, and the soul echo for a local thief.
+## Every game: the catch moment, the cue for whoever it matters to here, and the soul echo for a local thief.
 static func _grabbed(k: Kin, h: Hunter) -> void:
 	var glow: Color = k.sp.get("glow", k.sp["color"])
 	k.m.fx.ring(h.pos, 1.4, Color(glow, 0.8), 0.3)
@@ -163,8 +171,22 @@ static func _grabbed(k: Kin, h: Hunter) -> void:
 	if h == k.home_h:
 		return
 	k.m.add_feed("%s grabbed %s's %s" % [h.pname, k.home_h.pname, k.rec.get("name", "Boki")])
+	_cue(k, h)
 	if h == k.m.player:
 		Care.dex_mark(k.species, "echo")  # the thief keeps a soul echo in the Field Book (decision 0041)
+
+
+## What this game's own hunter hears of a grab: the owner's squad get the sting (a rival took it), the thief a
+## softer pickup cue. Rivals' grabs on third squads play nothing. Sounds from the library (ui set).
+static func _cue(k: Kin, h: Hunter) -> void:
+	var me: Hunter = k.m.player
+	if me == null:
+		return
+	if h == me:
+		k.m.sfx("pickup", null, PICKUP_DB)
+	elif me.team == k.home_h.team and h.team != me.team:
+		k.m.sfx("steal_lost", null, STING_DB)
+		Sfx.duck(STING_DUCK_S, STING_DUCK_DB)
 
 
 ## Summon with your own Boki resting or away: the first stolen wisp you carry that still has its one summon
@@ -224,8 +246,31 @@ static func render(k: Kin) -> void:
 	BokiWispLook.pose(k.model, k.m.time)
 
 
+## A hunter leaves alive: the stolen wisps they carry go home, and the player's are noted for the bonus.
+static func on_extract(m: Match, h: Hunter) -> void:
+	var held: Array = []
+	for k in m.kins:
+		if k.owner_h == h and stolen(k) and not k.dead:
+			held.append(k.species)
+			go_home(k)
+	if h == m.player and not held.is_empty():
+		m.result["stolen"] = held
+
+
+## The results (Game.apply_result): gems for each stolen wisp brought out alive.
+static func settle(r: Dictionary, out: Dictionary) -> void:
+	var gems := (r.get("stolen", []) as Array).size() * int(rules()["extract_gems"])
+	if gems > 0 and r.get("extracted", false):
+		Save.d["gems"] = int(Save.d["gems"]) + gems
+		out["gems"] = int(out["gems"]) + gems
+		out["stolen_gems"] = gems
+
+
 ## Match end: every loose or stolen wisp goes home to its own hunter.
 static func match_end(m: Match) -> void:
+	carried_home = []
 	for k in m.kins:
+		if m.player != null and k.owner_h == m.player and stolen(k) and not k.dead:
+			carried_home.append(k.rec.duplicate())
 		if taken(k) and k.home_h and not k.dead:
 			go_home(k)

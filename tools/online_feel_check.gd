@@ -1,10 +1,12 @@
 extends RefCounted
 ## --online-feel-check: how an online game feels with 100 ms of added delay each way (docs/ONLINE_FEEL.md).
 ## Two real headless games over the desktop relay, like --displace-net-check. This process is the host: it
-## runs the relay in-process and watches. The actor (--online-feel-check=guest) connects through
+## runs the relay in-process and watches. The actor (--online-feel-guest) connects through
 ## tools/online_feel_proxy.py, a userspace stand-in for `tc netem delay 100ms` (every packet held 100 ms
 ## each way, so 200 ms round trip). The actor presses dash, LMB, E and a recast as Vex, Kael and Neve; all
 ## clocks are this machine's wall clock, so one press can be followed on both games and at the relay.
+## The registry runs one flag per Hunter (--online-feel-<n>-check, the shard's arg is the Hunter) so each stays under
+## the gate's 300 s cap.
 ## Lines: OFEEL ok|FAIL <what>, OFEEL row ... (ms from the press), OFEEL smooth ... (remote Hunter in a dash).
 
 const GODOT := "/usr/local/bin/godot"
@@ -26,6 +28,7 @@ const SIG_AT := [2, 3, 4, 5, 6, 7, 8, 11, 31]      # hunter snapshot fields that
 const AGE_AT := 32          # the kit move's age: a drop in it is the same move cast again
 
 var main: Node
+var heroes: Array = HEROES      # the Hunters this run presses as
 var bad := 0
 var port := 0
 var t_start := 0             # the host: when it started (ms)
@@ -51,15 +54,16 @@ func ok(cond: bool, what: String, info := "") -> void:
 static func now() -> float:
 	return Time.get_unix_time_from_system()
 
-func run(main_node: Node) -> void:
+func run(main_node: Node, shard := "") -> void:
 	main = main_node
+	heroes = [shard] if shard != "" else HEROES
 	Save.no_write = true
 	Engine.max_fps = 60
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--of-port="): port = int(a.substr(10))
 		if a.begins_with("--of-parent="): host_pid = int(a.substr(12))
 	Net.message.connect(_on_msg)
-	if "--online-feel-check=guest" in OS.get_cmdline_user_args():
+	if "--online-feel-guest" in OS.get_cmdline_user_args():
 		await _guest()
 	else:
 		await _host()
@@ -89,7 +93,7 @@ func _host() -> void:
 		proxy, port + PROXY_GAP, port, str(LAG_MS), OS.get_process_id(), int(MAX_LIFE_S), dir.path_join("proxy.log")]
 	pids.append(OS.create_process("/bin/sh", ["-c", pcmd]))
 	ok(await _connect(port), "the host is on the relay as %s" % Net.me)
-	var cmd := "cd '%s' && exec %s --headless -- --online-feel-check=guest --of-port=%d --of-parent=%d" % [
+	var cmd := "cd '%s' && exec %s --headless -- --online-feel-guest --of-port=%d --of-parent=%d" % [
 		root, GODOT, port + PROXY_GAP, OS.get_process_id()]
 	cmd += " > '%s' 2>&1 < /dev/null" % dir.path_join("guest.log")
 	pids.append(OS.create_process("/bin/sh", ["-c", cmd]))
@@ -105,7 +109,7 @@ func _host() -> void:
 		{"peer": Net.me, "team": 0, "name": "Host", "cls": "medium", "weapon": "", "kin": {}},
 		{"peer": gid, "team": 1, "name": "Actor", "cls": "medium", "weapon": "", "kin": {}}]}
 	Net.lobby_emit("of", {"c": "start", "d": d})
-	await _build(d)
+	_build(d)
 	var A: Hunter = m.ents_by_id.get("P" + gid, null)
 	var t1 := Time.get_ticks_msec()
 	while (A == null or A.net_t < 0.0) and Time.get_ticks_msec() - t1 < START_S * 1000.0:
@@ -117,16 +121,16 @@ func _host() -> void:
 	var done := 0
 	var t_run := Time.get_ticks_msec()
 	var f_run := Engine.get_process_frames()
-	for arch in HEROES:
+	for arch in heroes:
 		for what in CASES:
 			for rep in REPS:
 				if (Time.get_ticks_msec() - t_start) / 1000.0 > BUDGET_S: break
 				await _measure(A, arch, what)
 				done += 1
 	var secs := (Time.get_ticks_msec() - t_run) / 1000.0
-	print("OFEEL timing: %d of %d presses in %.0f s, %.1f fps" % [done, HEROES.size() * CASES.size() * REPS, secs,
+	print("OFEEL timing: %d of %d presses in %.0f s, %.1f fps" % [done, heroes.size() * CASES.size() * REPS, secs,
 		(Engine.get_process_frames() - f_run) / maxf(secs, 0.001)])
-	ok(done == HEROES.size() * CASES.size() * REPS, "every press ran in the %.0f s budget" % BUDGET_S, "%d done" % done)
+	ok(done == heroes.size() * CASES.size() * REPS, "every press ran in the %.0f s budget" % BUDGET_S, "%d done" % done)
 	_table()
 	_finish()
 
@@ -230,7 +234,7 @@ func _row(key: String) -> Dictionary:
 static func _median(v: Array) -> float:
 	var w: Array = v.filter(func(x): return x >= 0.0)
 	w.sort()
-	return -1.0 if w.is_empty() else float(w[w.size() / 2])
+	return -1.0 if w.is_empty() else float(w[int(w.size() / 2.0)])
 
 static func _ms(t: float, t0: float) -> float:
 	return (t - t0) * 1000.0
@@ -380,7 +384,7 @@ func _connect(on_port: int) -> bool:
 func _build(d: Dictionary) -> void:
 	var nm := Match.new()
 	main.add_child(nm)
-	await nm.start({"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": SEED, "no_drop": true,
+	nm.start({"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": SEED, "no_drop": true,
 		"cls": "medium", "net": d})
 	nm.set_process(false)
 	var W: World = nm.world

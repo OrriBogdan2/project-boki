@@ -17,9 +17,10 @@ const BOKI_BEATS := ["gkey", "ult"]
 const PAYS := {"sec": "sec", "gkey": "gkey", "kin": "kin", "hook": "hook"}
 ## The fights knocked down: by then their camp has nothing left to pay, so a kill while down changes nothing.
 const DOWNS := ["gkey", "kin", "hook"]
-const XP_EPS := 0.05          # XP: rounding slack (the last kill of a camp adds 0.01 to tip the level)
-const TIP_WAIT := 3.0         # s for the tip to show (it waits for the banner like every message)
-const GLOVE_WAIT := 30.0      # s: the walk to the glove takes 7-14; past this the check hands it over
+const XP_EPS := 0.05  # XP: rounding slack (the last kill of a camp adds 0.01 to tip the level)
+# s for the tip to show (it waits for the banner and for a level-up card ahead of it, like every message)
+const TIP_WAIT := 8.0
+const GLOVE_WAIT := 30.0  # s: the walk to the glove takes 7-14; past this the check hands it over
 
 var bad := 0
 var m: Match
@@ -28,19 +29,33 @@ var seen := {}
 var paid_once := {}
 var downed := {}
 
+
 func ok(cond: bool, what: String) -> void:
 	print("TUTRETRY %s %s" % ["PASS" if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(mn: Node) -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	Save.no_write = true
-	seed(11)       # (the same run each time)
+	seed(11)  # (the same run each time)
 	m = Match.new()
 	mn.add_child(m)
 	# a starter whose right click has a hold: without one the sec beat asks for no cast (need 0) and passes
 	# by itself (docs/DEBT.md), so there would be no beat to start again
-	m.start({"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "demo_kin": "cindle",
-		"arch": "archer", "cls": Arch.weight("archer")})
+	m.start(
+		{
+			"tutorial": true,
+			"teams": 1,
+			"squad": 1,
+			"tier": 0,
+			"length": 1500.0,
+			"demo_kin": "cindle",
+			"arch": "archer",
+			"cls": Arch.weight("archer")
+		}
+	)
 	m.set_process(false)
 	tu = m.tut
 	tu.ack()
@@ -51,7 +66,7 @@ func run(mn: Node) -> void:
 			seen[sid] = true
 			_beat(sid)
 		if sid == "glove" and tu.t > GLOVE_WAIT and not tu.ground_item().is_empty():
-			m.player.teleport(tu.ground_item()["pos"])      # (the driver's straight walk can stick by the lookout)
+			m.player.teleport(tu.ground_item()["pos"])  # (the driver's straight walk can stick by the lookout)
 		TutorialDrive.drive(m)
 		m.step(Match.DT)
 		t += Match.DT
@@ -65,14 +80,16 @@ func run(mn: Node) -> void:
 	print("TUTRETRY DONE, failures: ", bad)
 	mn.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _missing(want: Array, got: Dictionary) -> Array:
 	return want.filter(func(s): return not got.has(s))
+
 
 ## One beat, from its first frame: a camp that pays a level has a kill paid first, the fall, then that camp
 ## killed one by one, then a down in the fights whose camp has nothing left to pay.
 func _beat(sid: String) -> void:
 	var p := m.player
-	p.inp["move"] = Vector2.ZERO      # (the driver's last step must not steer the player while the check has them)
+	p.inp["move"] = Vector2.ZERO  # (the driver's last step must not steer the player while the check has them)
 	var to := int(Content.rules("tutorial")["camps"][PAYS[sid]]["to"]) if PAYS.has(sid) else 0
 	var lvl0 := p.lvl
 	var ups0 := p.level_ups
@@ -85,6 +102,7 @@ func _beat(sid: String) -> void:
 	if sid in DOWNS and tu.id() == sid:
 		downed[sid] = true
 		_down(sid)
+
 
 ## Drops the player off the island (the Boki down too in its beats): the beat starts again.
 func _fall(sid: String) -> void:
@@ -110,9 +128,12 @@ func _fall(sid: String) -> void:
 	if sid in FIGHTS:
 		var camp: Array = tu.camps.ledger
 		var full := camp.all(func(e): return not e["paid"] and (e["mb"] as Mob).hp >= (e["mb"] as Mob).max_hp - 0.01)
-		ok(not camp.is_empty() and full and tu.camps.alive() == camp.size(),
-			"%s: the camp is back in full, none of it paid (%d)" % [tag, camp.size()])
+		ok(
+			not camp.is_empty() and full and tu.camps.alive() == camp.size(),
+			"%s: the camp is back in full, none of it paid (%d)" % [tag, camp.size()]
+		)
 	_tip_shows(tag)
+
 
 ## The beat's one line shows, every key in it drawn by Settings.key_cap (no token left).
 func _tip_shows(tag: String) -> void:
@@ -120,10 +141,13 @@ func _tip_shows(tag: String) -> void:
 	var shown := false
 	for i in int(TIP_WAIT / Match.DT):
 		m.step(Match.DT)
+		# the lane ages on frames; the check steps faster than frames, so age it by sim time
+		m.hud.msgs._process(Match.DT)
 		if m.hud.msgs.texts().any(func(x): return x.begins_with(line)):
 			shown = true
 			break
 	ok(shown and not line.contains("%"), "%s: the tip shows ('%s')" % [tag, line])
+
 
 ## After the fall the camp is back unpaid. Killed one by one, its kills pay equal shares of what was left to the
 ## camp's level (nothing is left when kills before the fall reached it), the level waits for the last one and
@@ -131,8 +155,8 @@ func _tip_shows(tag: String) -> void:
 ## kill by the Boki, paid in the same step or the next, is one more share.
 func _pays_once(sid: String, to: int, lvl0: int, ups0: int) -> void:
 	var p := m.player
-	var camp: Array = tu.camps.ledger.duplicate()      # (its entries: their paid marks stay readable after a respawn)
-	var paid0 := camp.filter(func(e): return e["paid"]).size()      # (the Boki may have had one while the tip showed)
+	var camp: Array = tu.camps.ledger.duplicate()  # (its entries: their paid marks stay readable after a respawn)
+	var paid0 := camp.filter(func(e): return e["paid"]).size()  # (the Boki may have had one while the tip showed)
 	var xp0 := p.xp
 	var left := maxf(0.0, float(Hunter.XP_TO[to - 1]) - xp0)
 	var share := left / float(maxi(camp.size() - paid0, 1))
@@ -149,8 +173,11 @@ func _pays_once(sid: String, to: int, lvl0: int, ups0: int) -> void:
 	ok(all_paid and fair, "%s: each kill of the camp brought back pays its share (%.1f XP)" % [sid, share])
 	var over := p.xp - float(Hunter.XP_TO[to - 1])
 	var ups := p.level_ups - ups0
-	ok(p.lvl == to and ups == to - lvl0 and over >= 0.0 and over < XP_EPS,
-		"%s: the retried camp paid once (level %d, %d level-ups, %.2f XP over)" % [sid, p.lvl, ups, over])
+	ok(
+		p.lvl == to and ups == to - lvl0 and over >= 0.0 and over < XP_EPS,
+		"%s: the retried camp paid once (level %d, %d level-ups, %.2f XP over)" % [sid, p.lvl, ups, over]
+	)
+
 
 ## A down in a fight is no retry: up after Tutorial.DOWN_T, the same beat with its clock running on (a retry would
 ## start it from 0 at the last stop).
@@ -166,6 +193,7 @@ func _down(sid: String) -> void:
 	var tag := sid + " down"
 	ok(not p.downed and absf(t - Tutorial.DOWN_T) < 0.1, "%s: up again after %.0f s (%.2f)" % [tag, Tutorial.DOWN_T, t])
 	ok(tu.step == step and tu.t >= t0 + t - 0.1, "%s: the beat goes on, no restart" % tag)
+
 
 ## A camp monster killed the real way (by the player), then one step so the camp pays for it.
 func _kill(mb: Mob) -> void:

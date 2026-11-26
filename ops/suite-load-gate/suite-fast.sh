@@ -22,7 +22,8 @@
 # every hub script, check_registry.gd without its entry lines, main.gd without any flag block, and the names of all
 # tracked code/data files (a new .gd/.json/.tscn anywhere invalidates everything). A flag the map does not resolve is
 # never cached; neither are timing/perf-sensitive flags (SUITE_NOCACHE_RE, default perf|bench|hitch|load|net-check|title-check).
-# SUITE_CACHE_STRICT=1 additionally hashes every .gd file (any script change -> no reuse).
+# SUITE_CACHE_REUSE=0 keeps the fingerprints (same-input main skip, cache_store) but never reuses a stored pass (release gates: every
+# check really runs). SUITE_CACHE_STRICT=1 additionally hashes every .gd file (any script change -> no reuse).
 # Main-tree and merge-tree flags with identical dependencies share fingerprints, so main passes serve merge and back.
 #
 # 11-12 (merge-candidate speed-up; the 20261111-2230 candidate took 14 h):
@@ -55,27 +56,13 @@
 #   OPT-IN ONLY (SUITE_ORDER=longest). Measured 11-13 (0245c vs 0245b, same trees): the first 40 flags ran a median 2.3x
 #   slower when the heavy ones ran together (CPU contention), giving 4 extra 1200 s timeouts = false NEW-RED. Needs a
 #   heavy-flag concurrency cap before it can be the default.
-# 11-15 LOAD GATE (gate-0249 + anim-lane suite ENV-BROKEN: the aimkit canary timed out rc124 on BOTH trees at load 26-34 on 16
-#   cores; the trees were fine). load_wait waits while loadavg1 > SUITE_MAX_LOAD (default 1.5 x nproc; 0 disables):
-#   - before the canary: max SUITE_LOAD_WAIT s (900), and while >= SUITE_MAX_SUITES (default 3) other suites are live
-#     (pid files in SUITE_CACHE_DIR/running/), so merge lanes / candidates / regates cap themselves by load and count.
-#   - before every run(): max SUITE_RUN_LOAD_WAIT s (300), after the memory gate (back-pressure between concurrent suites);
-#     a run whose wait hits the cap writes OUT/LOADCAP, and runs skip this wait for 10 min after that.
-#   - canary runs that timed out (rc124) are rerun once after another wait before the ENV-BROKEN verdict; the verdict line
-#     carries loadavg1 so an overloaded box is visible. SUITE_RUN_TIMEOUT (1200) and SUITE_CANARY_ONLY=1 are test hooks.
 set -u
 P=${1:-6}
 OUT=${OUT:-/home/boki/suite-claude}; MW=${MW:-/home/boki/wt-main-claude}; GW=${GW:-/home/boki/wt-merge-claude}
 GODOT_BIN=${GODOT_BIN:-/opt/godot/godot-bin}   # override only for tests
 export OUT MW GW GODOT_BIN LP_NUM_THREADS=2; T0=$(date +%s)
 mkdir -p $OUT/merge $OUT/main
-LMAX=${SUITE_MAX_LOAD:-$(( $(nproc) * 3 / 2 ))}; export LMAX
-load1() { awk '{print int($1 + 0.5)}' /proc/loadavg; }; export -f load1
-load_wait() { # MAXSECS [WHY]: wait while loadavg1 > LMAX (max MAXSECS); prints only when it waited
-  local t=0 l; [ "$LMAX" = 0 ] && return 0; l=$(load1)
-  while [ $l -gt $LMAX ] && [ $t -lt $1 ]; do sleep 5; t=$((t + 5)); l=$(load1); done
-  [ $t -gt 0 ] && echo "suite-fast: load gate waited ${t}s${2:+ ($2)}, loadavg1 now $l (limit $LMAX)"; return 0; }
-export -f load_wait
+echo $$ > $OUT/suite.pid   # 11-17: the ONLY safe kill target for this run (kill $(cat OUT/suite.pid)); never pkill/pgrep by pattern -- a fix job killed the mc gate suite that way
 SC=${SUITE_CACHE_DIR:-/home/boki/suite-cache}; DUR=$SC/durations.tsv; mkdir -p $SC; export DUR
 CHECK_MAP=${CHECK_MAP:-}; CMAP_PY=${CMAP_PY:-/home/boki/bin/check-map.py}
 NOCACHE_RE=${SUITE_NOCACHE_RE:-perf|bench|hitch|load|net-check|title-check}
@@ -86,13 +73,17 @@ fname() { echo "$1" | tr -c 'a-z0-9\n' _; }
 # A log matching NOTRUN_RE is rerun here like rc 126/127, a leftover is ignored by compare and counted in summary.txt.
 NOTRUN_RE='Unable to create DisplayServer|X11 Display is not available'; export NOTRUN_RE
 notrun() { grep -qsE "$NOTRUN_RE" $OUT/$1/$2.log; }; export -f notrun
-[ -s $OUT/flags.txt ] || { { grep -ohE '"--[a-z0-9-]+-check"' $GW/tools/check_registry.gd $GW/scripts/main.gd | tr -d '"'; echo --check; } | sort -u > $OUT/flags.txt; echo "--simtest --seed=5" >> $OUT/flags.txt; }
+[ -s $OUT/flags.txt ] || { { grep -ohE '"--[a-z0-9-]+-check"' $GW/tools/check_registry.gd $GW/tools/checks/*.gd $GW/scripts/main.gd | tr -d '"'; echo --check; } | sort -u > $OUT/flags.txt; echo "--simtest --seed=5" >> $OUT/flags.txt; }
+# 11-20 ABSOLUTE checks (tools/gate_absolute.txt of the merge tree): always run, even when a caller passed a subset,
+# and a red on merge is NEW-RED even when main is red too (see the compare below).
+ABS_LIST=$OUT/absolute.txt; sed 's/#.*//; s/[[:space:]]//g; /^$/d' $GW/tools/gate_absolute.txt 2>/dev/null > $ABS_LIST || : > $ABS_LIST
+while IFS= read -r f; do grep -qF -- "\"$f\"" $GW/tools/check_registry.gd $GW/tools/checks/*.gd 2>/dev/null && ! grep -qxF -- "$f" $OUT/flags.txt && echo "$f" >> $OUT/flags.txt; done < $ABS_LIST
 # ---- result cache helpers (see header) ----
 GODOT_ID="$GODOT_BIN $($GODOT_BIN --version 2>/dev/null | head -1) $(stat -c '%s-%Y' $GODOT_BIN 2>/dev/null)"
 fpgen() { # side tree outfile: "flag<TAB>fingerprint" for every mapped flag; empty file on any failure (= nothing cached)
   python3 $CMAP_PY fingerprint --map "$CHECK_MAP" --repo "$2" --flags $OUT/flags.txt --godot "$GODOT_ID" $([ "${SUITE_CACHE_STRICT:-0}" = 1 ] && echo --strict) > "$3.tmp" 2>"$3.err" && mv "$3.tmp" "$3" || : > "$3"; }
 cache_apply() { # side listfile: copy cached passes into OUT/<side> for the flags in listfile that have no result yet
-  [ $CACHE_ON = 1 ] || return 0; local side=$1 list=$2 f fp n k=0; declare -A FP=()
+  [ $CACHE_ON = 1 ] && [ "${SUITE_CACHE_REUSE:-1}" = 1 ] || return 0; local side=$1 list=$2 f fp n k=0; declare -A FP=()
   while IFS=$'\t' read -r f fp; do FP[$f]=$fp; done < $OUT/fp.$side.tsv
   while IFS= read -r f; do fp=${FP[$f]:-}; [ -n "$fp" ] || continue
     echo "$f" | grep -qE -- "$NOCACHE_RE" && continue
@@ -160,7 +151,7 @@ print("\n".join(fl))' "$1" $DUR 2>/dev/null || cat "$1"; }
 ALERT=${SUITE_ALERT:-/home/boki/coord/SUITE_ALERT}; SID=$(echo "$OUT" | md5sum | cut -c1-8); export SID
 stop_suite() { { echo "flags: $(wc -l < $OUT/flags.txt)"; echo "$1"; echo "No NEW-RED/WORSE verdict: suite stopped, nothing cached. Logs: $OUT/merge, $OUT/main"; echo DONE; } > $OUT/summary.txt
   echo "$1 ($OUT)" > $ALERT; echo "suite-fast: $1"; exit 3; }
-rm -f $OUT/BREAKER $OUT/NORETRY $OUT/ABORT $OUT/main_tree_cached $OUT/LOADCAP
+rm -f $OUT/BREAKER $OUT/NORETRY $OUT/ABORT $OUT/main_tree_cached $OUT/YIELD_T0
 run() { side=$1; flag=$2; T=$([ $side = main ] && echo $MW || echo $GW)
   n=$(echo "$flag" | tr -c 'a-z0-9\n' _); [ -f $OUT/ABORT ] && return
   if [ -f $OUT/$side/$n.rc ]; then   # done, except not-run results (126/127) and timeouts (retried unless too many)
@@ -169,16 +160,23 @@ run() { side=$1; flag=$2; T=$([ $side = main ] && echo $MW || echo $GW)
   if [ $side = merge ] && [ -f $OUT/BREAKER ]; then
     [ -f $OUT/merge/$n.rc ] || { echo "suite-fast: not run, timeout breaker: $(cat $OUT/BREAKER)" > $OUT/merge/$n.log; echo "125 0" > $OUT/merge/$n.rc; }
     return; fi
+  # 11-18 PRIORITY YIELD: a suite whose priority is lower than the pointer holder's (mc=1 under a release=2) starts no new check
+  # on this server while the holder lives (max SUITE_YIELD_MAX, default 5 h); checks already running finish.
+  # The check is a no-op while PTR is unset (canary) or when this suite holds the pointer itself.
+  # The cap is per SUITE, not per run(): the first yielder stamps $OUT/YIELD_T0, every later check shares it (review 11-18).
+  while [ $(( $(date +%s) - $(cat $OUT/YIELD_T0 2>/dev/null || date +%s) )) -lt ${SUITE_YIELD_MAX:-18000} ]; do
+    [ -n "${PTR:-}" ] && [ -s "$PTR.pid" ] && [ "$(cat $PTR.pid)" != "${SUITE_PID:-0}" ] && kill -0 "$(cat $PTR.pid)" 2>/dev/null \
+      && [ "$(cat $PTR.prio 2>/dev/null || echo 0)" -gt "${SUITE_PRIORITY:-0}" ] 2>/dev/null || break
+    [ -f $OUT/ABORT ] && return
+    [ -f $OUT/YIELD_T0 ] || echo $(date +%s) > $OUT/YIELD_T0 2>/dev/null   # clock starts at the first real yield
+    [ -f $OUT/YIELDING ] || echo "yielding to $(cat $PTR.pid) (priority $(cat $PTR.prio)) since $(date -u +%FT%TZ)" > $OUT/YIELDING
+    sleep 30; done; rm -f $OUT/YIELDING
   # 11-15 MEMORY GATE: several suites (merge lanes, merge-candidate) share hetzner; 23 Godot runs = 22G pushed it to 3G free and
-  # Claude Code reaped shells. Wait (max 15 min) while MemAvailable < SUITE_MIN_FREE_MB (default 6000) before starting a run.
-  for _w in $(seq 180); do [ $(awk '/MemAvailable/{print int($2/1024)}' /proc/meminfo) -ge ${SUITE_MIN_FREE_MB:-6000} ] && break; sleep 5; done
-  # 11-15 LOAD GATE (header). A wait that hits its cap writes OUT/LOADCAP; for 10 min after that, runs do not wait again
-  # (a box that stays loaded must not add 300 s to every run).
-  if [ -z "$(find $OUT/LOADCAP -mmin -10 2>/dev/null)" ] && [ $(load1) -gt $LMAX ]; then
-    load_wait ${SUITE_RUN_LOAD_WAIT:-300} "$side $flag" >&2; [ $(load1) -gt $LMAX ] && touch $OUT/LOADCAP; fi
+  # Claude Code reaped shells. Wait (max 15 min) while MemAvailable < SUITE_MIN_FREE_MB (default 11-18: 20% of RAM, max 12000; runs take 3-5 GB each) before starting a run.
+  for _w in $(seq 180); do [ $(awk '/MemAvailable/{print int($2/1024)}' /proc/meminfo) -ge ${SUITE_MIN_FREE_MB:-$(awk '/MemTotal/{m=int($2/1024/5); print (m>12000?12000:m)}' /proc/meminfo)} ] && break; sleep 5; done
   (set -o noclobber; echo server > $OUT/$side/$n.claim) 2>/dev/null || return   # pods (suite-pod) claim both sides
   X=$(mktemp -d /tmp/xdg.$SID.XXXX); t0=$(date +%s)
-  (cd $T && XDG_DATA_HOME=$X timeout ${SUITE_RUN_TIMEOUT:-1200} xvfb-run -a $GODOT_BIN --rendering-driver opengl3 --audio-driver Dummy --path . -- $flag 2>&1 | timeout -k 5 1300 tail -c 20000000 >$OUT/$side/$n.log; exit ${PIPESTATUS[0]})  # cap 20 MB: Godot leak spam made 2 GB logs (11-11 disk full)
+  (cd $T && XDG_DATA_HOME=$X timeout 1200 xvfb-run -a $GODOT_BIN --rendering-driver opengl3 --audio-driver Dummy --path . -- $flag 2>&1 | timeout -k 5 1300 tail -c 20000000 >$OUT/$side/$n.log; exit ${PIPESTATUS[0]})  # cap 20 MB: Godot leak spam made 2 GB logs (11-11 disk full)
   rc=$?; rm -rf $X; secs=$(( $(date +%s) - t0 )); rm -f $OUT/$side/$n.cached
   echo $secs > $OUT/$side/$n.secs; printf '%s\t%s\t%s\tserver\t%s\n' "$flag" $side $secs "$(date -u +%FT%TZ)" >> $DUR
   echo "$rc $(grep -cE 'FAIL|SCRIPT ERROR' $OUT/$side/$n.log)" > $OUT/$side/$n.rc
@@ -197,7 +195,7 @@ run() { side=$1; flag=$2; T=$([ $side = main ] && echo $MW || echo $GW)
   fi
 }
 export -f run
-export SC
+export SC SUITE_PRIORITY
 red() { local n r fc; n=$(echo "$1" | tr -c 'a-z0-9\n' _); read r fc < $OUT/merge/$n.rc 2>/dev/null || return 1; [ "$r$fc" != 00 ]; }   # local: must not clobber the caller's loop var f
 CANARY=${SUITE_CANARY:---check --base-check --aimkit-check --ability-check --boki-wisp-check --cam-framing-check --nook-check --race-check --roster-check --evo-check}
 canary() { # run the canary on both trees; ENV-BROKEN when >= half are red on BOTH or exit codes contradict the checks' own verdicts
@@ -205,10 +203,6 @@ canary() { # run the canary on both trees; ENV-BROKEN when >= half are red on BO
   for f in $CANARY; do grep -qxF -- "$f" $OUT/flags.txt && echo "$f"; done > $OUT/canary.txt
   [ -s $OUT/canary.txt ] || return 0
   { sed 's/^/merge /' $OUT/canary.txt; sed 's/^/main /' $OUT/canary.txt; } | nice -n 10 xargs -P $P -d '\n' -I{} bash -c 'run {}'
-  local to; to=$(while IFS= read -r f; do n=$(fname "$f"); for s in merge main; do grep -qs '^124 ' $OUT/$s/$n.rc && echo "$s $f"; done; done < $OUT/canary.txt)
-  if [ -n "$to" ]; then   # 11-15: a timed-out canary run means a loaded box more often than a broken tree: wait, rerun once
-    echo "suite-fast: $(echo "$to" | wc -l) canary runs timed out (loadavg1 $(load1)), rerunning them once after the load gate"
-    load_wait ${SUITE_RETRY_LOAD_WAIT:-${SUITE_LOAD_WAIT:-900}} "canary retry"; echo "$to" | nice -n 10 xargs -P $P -d '\n' -I{} bash -c 'run {}'; fi
   while IFS= read -r f; do n=$(fname "$f"); tot=$((tot + 1)); bad=0
     for s in merge main; do read r c < $OUT/$s/$n.rc; [ "$r$c" != 00 ] && bad=$((bad + 1))
       v=$(grep -oE 'failures: [0-9]+' $OUT/$s/$n.log | tail -1); v=${v#failures: }
@@ -217,22 +211,17 @@ canary() { # run the canary on both trees; ENV-BROKEN when >= half are red on BO
   done < $OUT/canary.txt
   echo "suite-fast: canary $both of $tot red on both trees, $mm of $((tot * 2)) runs exit != own verdict"
   [ $((both * 2)) -lt $tot ] && [ $mm -lt $tot ] && { rm -f $ALERT; return 0; }
-  stop_suite "ENV-BROKEN: $both of $tot canary checks red on BOTH trees, $mm of $((tot * 2)) runs exit != the check's own 'failures: N' ($(date -u +%H:%MZ), $(( $(date +%s) - T0 )) s in, loadavg1 $(load1) of limit $LMAX; canary: $(tr '\n' ' ' < $OUT/canary.txt))"; }
-RUND=$SC/running; mkdir -p $RUND; echo "$OUT" > $RUND/$$; trap 'rm -f $RUND/$$' EXIT   # live-suite count for the cap
-nlive() { local f k=0; for f in $RUND/*; do [ -f "$f" ] || continue; [ "${f##*/}" = $$ ] && continue
-  kill -0 "${f##*/}" 2>/dev/null && k=$((k + 1)) || rm -f "$f"; done; echo $k; }
-_t=0; while [ "$LMAX" != 0 ] && [ $_t -lt ${SUITE_LOAD_WAIT:-900} ] && { [ $(load1) -gt $LMAX ] || [ $(nlive) -ge ${SUITE_MAX_SUITES:-3} ]; }; do sleep 5; _t=$((_t + 5)); done
-[ $_t -ge ${SUITE_LOAD_WAIT:-900} ] && [ $(load1) -gt $LMAX ] && touch $OUT/LOADCAP   # gave up: no per-run waits for 10 min
-echo "suite-fast: start gate ${_t}s: loadavg1 $(load1) (limit $LMAX), $(nlive) other suites live (cap ${SUITE_MAX_SUITES:-3})"
+  stop_suite "ENV-BROKEN: $both of $tot canary checks red on BOTH trees, $mm of $((tot * 2)) runs exit != the check's own 'failures: N' ($(date -u +%H:%MZ), $(( $(date +%s) - T0 )) s in; canary: $(tr '\n' ' ' < $OUT/canary.txt))"; }
 canary
-[ "${SUITE_CANARY_ONLY:-0}" = 1 ] && { echo "suite-fast: SUITE_CANARY_ONLY, stopping after the canary ($(( $(date +%s) - T0 )) s)"; exit 0; }
 order $OUT/flags.txt > $OUT/order.txt
 if [ $CACHE_ON = 1 ]; then fpgen merge $GW $OUT/fp.merge.tsv; fpgen main $MW $OUT/fp.main.tsv; cache_apply merge $OUT/flags.txt; fi
 # One suite owns the worker pointer at a time (two suites used to overwrite and delete each other's, 2026-11-06).
 # A live owner keeps it; this suite then runs on the server alone. On exit we remove it only if it is still ours.
-PTR=${SUITE_PTR:-/home/boki/suite-active}; PTRV="$OUT $GW $MW"
-# Priority (SUITE_PRIORITY=1, set by merge-candidate.sh) takes the pointer from a non-priority owner (a worker job's
-# suite); workers finish their current check into the old dir and move over. A suite that starts without the pointer
+PTR=${SUITE_PTR:-/home/boki/suite-active}; PTRV="$OUT $GW $MW"; SUITE_PID=$$; export PTR SUITE_PID; rm -f $OUT/YIELDING
+# Priority (SUITE_PRIORITY, a number; 0 = worker job's suite, 1 = merge-candidate.sh, 2 = release gate / ship-release, set by
+# release-gate.sh) takes the pointer from an owner with a LOWER number (11-18: the v0.24.11 release, also 1, could not take it from
+# the mc suite started 40 min earlier and ran ~3 h server-only at load 57/16). A lower-priority suite that loses the pointer to a
+# higher one also pauses starting new checks on the server (see yield_run) until the higher suite ends, so the release gets the box; workers finish their current check into the old dir and move over. A suite that starts without the pointer
 # keeps trying to take it every 60 s, so the PC/Mac join as soon as the other suite ends (2026-11-07: the 16:30
 # candidate ran 2 h server-only because a job's suite held the pointer at its start and never re-checked).
 take() { echo "$PTRV" > $PTR; echo $$ > $PTR.pid; echo "${SUITE_PRIORITY:-0}" > $PTR.prio; echo "suite-fast: took the worker pointer ($1)"; }
@@ -246,17 +235,24 @@ eta() { local d tot done rate; d=$(cut -d' ' -f1 $PTR 2>/dev/null); [ -s "$d/fla
 # ~2 h, a shared one ~1 h, so waiting up to WAIT_MAX (default 20) min for the workers wins.
 WAIT_MAX=${WAIT_MAX:-20}
 if held; then e=$(eta)
-  if [ $e -le $WAIT_MAX ]; then echo "suite-fast: $(cut -d' ' -f1 $PTR) holds the workers, ~${e} min left: waiting for it"
+  # 11-18: never wait for a lower-priority holder (a release must not queue behind a candidate); it is preempted below
+  if [ $e -le $WAIT_MAX ] && ! [ "${SUITE_PRIORITY:-0}" -gt "$(cat $PTR.prio 2>/dev/null || echo 0)" ]; then echo "suite-fast: $(cut -d' ' -f1 $PTR) holds the workers, ~${e} min left: waiting for it"
     for i in $(seq 1 $((WAIT_MAX * 2 + 10))); do held || break; sleep 30; done; fi; fi
 if ! held; then take free
-elif [ "${SUITE_PRIORITY:-0}" = 1 ] && [ "$(cat $PTR.prio 2>/dev/null)" != 1 ]; then take "priority over $(cut -d' ' -f1 $PTR), its eta ~$(eta) min"
+elif [ "${SUITE_PRIORITY:-0}" -gt "$(cat $PTR.prio 2>/dev/null || echo 0)" ]; then take "priority ${SUITE_PRIORITY:-0} over $(cat $PTR.prio 2>/dev/null || echo 0): $(cut -d' ' -f1 $PTR), its eta ~$(eta) min"
 else echo "suite-fast: another suite ($(cut -d' ' -f1 $PTR)) owns the worker pointer (~$(eta) min left); server-only until it ends"
-  ( while kill -0 $$ 2>/dev/null; do sleep 60; kill -0 $$ 2>/dev/null || exit; [ "$(cat $PTR 2>/dev/null)" = "$PTRV" ] && exit; held || { take "freed mid-run"; exit; }; done ) & fi
-PODPIDS=""; PODS=${SUITE_PODS:-}; PODK=${SUITE_POD_KEY:-$HOME/.ssh/boki_s2_deploy}
+  ( while kill -0 $$ 2>/dev/null; do sleep 60; kill -0 $$ 2>/dev/null || exit; [ "$(cat $PTR 2>/dev/null)" = "$PTRV" ] && exit; held || { take "freed mid-run"; exit; }
+      [ "${SUITE_PRIORITY:-0}" -gt "$(cat $PTR.prio 2>/dev/null || echo 0)" ] && { take "priority ${SUITE_PRIORITY:-0} mid-run"; exit; }; done ) & fi
+# 11-18 ETA (computed from result files by suite-eta, not guessed): OUT/ETA.txt, and $SUITE_ETA_FILE too when set (release gates), every 60 s.
+ETAB=${SUITE_ETA_BIN:-/home/boki/bin/suite-eta}
+eta_write() { [ -f "$ETAB" ] || return 0; python3 "$ETAB" $OUT --write $OUT/ETA.txt >/dev/null 2>&1; [ -n "${SUITE_ETA_FILE:-}" ] && cp $OUT/ETA.txt "$SUITE_ETA_FILE" 2>/dev/null; return 0; }
+( while kill -0 $$ 2>/dev/null; do eta_write; sleep 60; done ) & ETAPID=$!
+PODPIDS=""; PODS=${SUITE_PODS-$(cat $HOME/.mc_pods 2>/dev/null)};  # 11-18 owner "route somewhere else": pods (503 GB RAM) by default; SUITE_PODS="" = server-only
+ PODK=${SUITE_POD_KEY:-$HOME/.ssh/boki_s2_deploy}
 pod_stop() { local p h; [ -n "$PODPIDS" ] || return 0; for p in $PODPIDS; do pkill -P $p 2>/dev/null; kill $p 2>/dev/null; done
   for h in $PODS; do h=${h%%:*}; timeout 30 ssh -i $PODK -o BatchMode=yes -o ConnectTimeout=10 $h "pkill -f -- '--path /root/mcshard/$(echo "$OUT" | md5sum | cut -c1-10)/'" 2>/dev/null; done
   PODPIDS=""; rm -f $OUT/merge/*.log.pod $OUT/main/*.log.pod; }
-trap 'rm -f $RUND/$$; pod_stop; [ "$(cat $PTR 2>/dev/null)" = "$PTRV" ] && rm -f $PTR $PTR.pid $PTR.prio' EXIT
+trap 'kill $ETAPID 2>/dev/null; pod_stop; [ "$(cat $PTR 2>/dev/null)" = "$PTRV" ] && rm -f $PTR $PTR.pid $PTR.prio' EXIT
 for p in $PODS; do h=${p%%:*}; sl=${p#*:}; [ "$sl" = "$p" ] && sl=8
   OUT=$OUT GW=$GW SUITE_POD_KEY=$PODK bash ${SUITE_POD_BIN:-/home/boki/bin/suite-pod} $h $sl > $OUT/pod-$h.log 2>&1 & PODPIDS="$PODPIDS $!"; done
 # 1. merge side, every flag
@@ -273,8 +269,27 @@ nice -n 10 xargs -P $P -d '\n' -I{} bash -c 'run merge "{}"' < $OUT/order.txt
 [ -f $OUT/ABORT ] && stop_suite "$(cat $OUT/ABORT)"
 # 2. main side, only where the merge is red (workers already ran main for their own reds)
 : > $OUT/main_needed; [ -f $OUT/BREAKER ] || while read f; do red "$f" && echo "$f" >> $OUT/main_needed; done < $OUT/flags.txt
-tree_apply $OUT/main_needed; cache_apply main $OUT/main_needed
-order $OUT/main_needed > $OUT/main_order.txt
+# 11-18 UNCHANGED DEPENDENCIES: a flag that is red on the merge tree and whose inputs are byte-identical on the main tree (same git tree
+# when GW and MW are both clean, e.g. a release gate on main itself; else the same check-map fingerprint on both sides) cannot be
+# NEW-RED: the candidate changed nothing it reads, so its main run would be a pure repeat (the 11-18 release re-ran 164 such reds, 25 of
+# them timeouts, for 2.5 h). They are listed in main_same, not re-run, and compare.txt shows them as "same ... main=skip". Flags whose
+# inputs differ still get their main run (the 2-run rule for real NEW-RED is unchanged). SUITE_SAME_DEPS=0 disables.
+: > $OUT/main_same; rm -f $OUT/main/*.same
+if [ "${SUITE_SAME_DEPS:-1}" != 0 ] && [ -s $OUT/main_needed ]; then SAMETREE=0
+  gclean() { [ -z "$(git -C $1 status --porcelain 2>/dev/null | grep -vE '^\?\? .*\.(import|uid)$')" ]; }
+  [ "$(git -C $GW rev-parse 'HEAD^{tree}' 2>/dev/null)" = "$(git -C $MW rev-parse 'HEAD^{tree}' 2>/dev/null || echo x)" ] && gclean $GW && gclean $MW && SAMETREE=1
+  declare -A FPG=() FPM=(); if [ $SAMETREE = 0 ] && [ $CACHE_ON = 1 ]; then
+    while IFS=$'\t' read -r f fp; do FPG[$f]=$fp; done < $OUT/fp.merge.tsv; while IFS=$'\t' read -r f fp; do FPM[$f]=$fp; done < $OUT/fp.main.tsv; fi
+  : > $OUT/main_needed.run
+  while IFS= read -r f; do
+    if [ $SAMETREE = 1 ] || { [ -n "${FPG[$f]:-}" ] && [ "${FPG[$f]}" = "${FPM[$f]:-x}" ]; }; then echo "$f" >> $OUT/main_same; touch $OUT/main/$(fname "$f").same
+    else echo "$f" >> $OUT/main_needed.run; fi
+  done < $OUT/main_needed
+  mv $OUT/main_needed.run $OUT/main_run_list
+  echo "suite-fast: main re-run skipped for $(wc -l < $OUT/main_same) reds with identical inputs on both trees ($([ $SAMETREE = 1 ] && echo 'same git tree' || echo 'same fingerprint')); $(wc -l < $OUT/main_run_list) still re-run"
+else cp $OUT/main_needed $OUT/main_run_list; fi
+tree_apply $OUT/main_run_list; cache_apply main $OUT/main_run_list
+order $OUT/main_run_list > $OUT/main_order.txt
 # pods join the main side too (passes only); the server takes what they leave, then waits for their claims (max 25 min)
 if [ -s $OUT/main_order.txt ]; then for p in $PODS; do h=${p%%:*}; sl=${p#*:}; [ "$sl" = "$p" ] && sl=8
   OUT=$OUT GW=$GW MW=$MW SUITE_POD_KEY=$PODK bash ${SUITE_POD_BIN:-/home/boki/bin/suite-pod} $h $sl main > $OUT/pod-$h.main.log 2>&1 & PODPIDS="$PODPIDS $!"; done; fi
@@ -291,14 +306,18 @@ cache_store; tree_store
 cd $OUT
 while read flag; do n=$(echo "$flag" | tr -c 'a-z0-9\n' _); mr=.; mf=.
   read gr gf < merge/$n.rc; gs=$([ "$gr$gf" = 00 ] && echo pass || echo red); ms=pass
-  if [ -f main/$n.rc ] && ! notrun main $n; then read mr mf < main/$n.rc; [ "$mr$mf" != 00 ] && ms=red; fi
+  if [ -f main/$n.same ]; then mr=skip; ms=red   # identical inputs on both trees (see UNCHANGED DEPENDENCIES): main's result is this red by construction
+  elif [ -f main/$n.rc ] && ! notrun main $n; then read mr mf < main/$n.rc; [ "$mr$mf" != 00 ] && ms=red; fi
   t=same; [ $ms = pass ] && [ $gs = red ] && t=NEW-RED; [ $ms = red ] && [ $gs = pass ] && t=FIXED
   [ $ms = red ] && [ $gs = red ] && [ "$gf" -gt "$mf" ] 2>/dev/null && t=WORSE
+  [ $gs = red ] && [ $t != NEW-RED ] && grep -qxF -- "$flag" $ABS_LIST && t="NEW-RED(absolute)"
   echo "$t $flag main=$mr/$mf merge=$gr/$gf"
 done < flags.txt > compare.txt
 { echo "flags: $(wc -l < flags.txt)"; echo "NEW-RED: $(grep -c ^NEW-RED compare.txt)  WORSE: $(grep -c ^WORSE compare.txt)  FIXED: $(grep -c ^FIXED compare.txt)  red on merge: $(wc -l < main_needed)"
+  [ -s main_same ] && echo "main re-run skipped (identical inputs on both trees, cannot be NEW-RED): $(wc -l < main_same) of $(wc -l < main_needed) reds"
   echo "cached: $(ls merge/*.cached main/*.cached 2>/dev/null | wc -l)  pod passes: $(ls merge/*.pod 2>/dev/null | wc -l) merge, $(ls main/*.pod 2>/dev/null | wc -l) main"
   [ -s main_tree_cached ] && echo "main-tree cache (tree ${MTREE:0:12}): $(wc -l < main_tree_cached) main results reused, $(while IFS= read -r f; do read r c < main/$(fname "$f").rc; [ "$r$c" != 00 ] && echo; done < main_tree_cached | wc -l) of them red"
   nd=$(grep -lsE "$NOTRUN_RE" merge/*.log main/*.log | wc -l); [ $nd -gt 0 ] && echo "NOT-RUN (no display, Godot never started): $nd results; this suite is INVALID"
   [ -f BREAKER ] && echo "BREAKER: $(cat BREAKER); main side skipped, remaining merge checks not run"
   grep -E "^(NEW-RED|WORSE|FIXED)" compare.txt; echo DONE; } > summary.txt
+kill $ETAPID 2>/dev/null; eta_write

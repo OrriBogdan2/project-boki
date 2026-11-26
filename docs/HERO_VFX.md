@@ -14,6 +14,12 @@ The parity reels (`--parity-reel`, one MP4 per Hunter with the keys shown, `docs
 ## From a kit
 - `vfx("move", at, dir, {...})` (ArchKit): a moment. Sounds and layers come from the recipe; online it goes to other
   games as the `["fx", "hvfx", ...]` event, since they don't run the kit. Set `"net": false` on a recipe to keep it local.
+- A kit-drawn ground zone (Gil's puddle, Meeko's seed field and Hearthlight, Motley's well) rides its move: `"life"`
+  (s), `"zone_r"` (else `"r"`), `"follow"` (an Ent it rides) and `"zone"` (a key a later beat renews it under) in `{...}`
+  send it with the event, even on a `"net": false` recipe (then only the zone draws there). Other games draw it
+  with `HeroVfxZone` (a lit rim over a soft wash, the recipe's `"zone": {"rim", "in"}` colours) for that long.
+  `--zone-net-check` asserts it host+guest; with `--shots-dir=` (GPU) the guest saves its frames
+  (docs/shots/vfx-zones-remote).
 - `HeroVfx.of(m).hold(h, "move", k)`: something that lasts while the kit asks every tick (a blade heating). It follows its
   anchors and turns with the aim (a hose sweeping), and stops by itself when the asks stop, whichever way the move
   ended. Local. Particle layers, `string`, and surface layers: a surface (a cast's dark ring) stays at 85% of its
@@ -42,12 +48,15 @@ named by a layer's `"when"` / `"unless"`; `"on"`, a body that the move's ground 
 | `flare` | a ragged burst facing the camera | `size`, `grow`; `"ride": true` keeps it on its `at` while it lives (any surface look: it follows the Hero and the clip, e.g. a hop) |
 | `ribbon` | a mesh trail following an anchor, or the kit's `o.follow` node with `"follow": true` | `at`, `life`, `tail` s, `size` width, `wave` m of sideways drift (a thread), `"streak": true` a clean tracer (hot head, tail thinning and cooling, no burn-away noise; `tail` s x the round's m/s is its length), `head` m across a bright tip on the newest point (`head_len` times as long: a pointed diamond; drawn in the trail's own mesh), `soft` a feathered glow strewn with twinkling glints and a round twinkling head instead of the hard edge |
 | `thread` | a loose thread lying on the ground from `at` along `dir`, swaying | `len`, `w`, `life` (may outlast the 2.2 s cap, with its needle) |
-| `string` | holds only: a thin glowing line through named anchors | `through`, `size`, `skip_if` (a model node that means it brings its own) |
+| `string` | holds only: a thin glowing line through named anchors, or through the points the kit's hold passes (`pts`) | `through`, `size`, `skip_if` (a model node that means it brings its own), `xray` (drawn over walls and rock) |
 | `bolt` | a strip from A to B facing the camera: lightning with `jag` > 0 (0.3-0.7), a taut thread at 0 | `size` width, `len` along the aim, or `to` (an anchor; `"here"`: the move's point `to_y` m up, a bolt out of the sky with `y`), or the kit's `o.to` (a Vector3; local only, other games use `len`) |
 | `vortex` | a ground disc spinning inward to a dark core (`c3`); with `"thin": true` only three lit comet arcs on its rim (no fill, no core), which `grow` < 1 draws in toward the centre | `size` radius, `spin` turns/s (negative: the other way), `grow`, `thin` |
 | `ring` | a shockwave racing out over the ground: a hard band with a hot lead edge, a flash of dust inside, breaking up as it spends | `size` radius it reaches |
 | `fist` | a translucent cel-shaded fist (a closed-fist mesh, knuckles down) falling onto the ground: it drops over `fall` of its `life` (a share, or an option), rests, then fades | `size` width, `drop` m it falls from, `fall`, `fwd`, `pitch` (deg, negative tips the wrist back so the knuckles face a top-down camera); `cut` (any surface): it goes if its hunter is stunned or downed before that share of its life |
 | `ember` / `smoke` / `chunk` / `shard` / `card` / `coin` / `star` / `drop` / `plus` | GPU particles: hot streaks, cel puffs (lit `c`, shaded `c3`), dark debris, crisp crystals, tumbling cards burning from the edges, spinning metal glints, twinkling four-point stars, water drops, upright healing crosses | `n`, `speed`, `spread`, `way` up / fwd / back / along, `grav`, `drag`, `curl`, `shape` ball / line / disc / gather / arc, `burst` 1 all at once .. 0 over the life |
+
+A palette's optional `"peak"` (RRGGBBAA) is what the hottest part turns toward, its alpha how far (absent: halfway to
+white; Kael's: all the way to red, so a red stays red).
 
 All layers: `at` (`here`, `h` the body, or an anchor), `y`, `fwd`, `delay`, `life`, `c` / `c2` / `c3` (palette keys: body,
 hot, char), `near` (dropped past LOD_NEAR). Sounds: `n`, `db`, `other` (extra dB for anyone but the player), `pitch`,
@@ -108,8 +117,14 @@ The HUD strip flashes white as it loses some. Reel: `--hero-vfx-reel --reel-only
   weapon colour sit within 40 degrees of hue of its archetype `color` (grey, pale and dark colours are free). A colour
   that means something stays and is named in `MEANING` in `tools/hero_colour_check.gd` (heals, a shield's blue, timing
   and status cues, materials such as dust and copper), as do the moves in `EXEMPT_MOVES` (Gil's Shatter wears the broken
-  Boki's type, Meeko's heals keep gold). `--hero-vfx-check` runs three rows per Hunter (recipes, literal colours in its
+  Boki's type). `--hero-vfx-check` runs three rows per Hunter (recipes, literal colours in its
   kit scripts, slots and weapon) and fails on a stray. A new literal outside the family needs a `MEANING` line or a retint.
+- **Heal vs hurt (Meeko, 11-20):** a support's heals and hurts must not look alike. Meeko's heals (Hearthlight, Hearth
+  Call, the bloom, the tether) are her leaf green family with soft rising stars and pluses; her hurts (Ember Cast,
+  Kindle, Burrseed and its root field) are embers (`MEANING` `ff8c32` / `ffb45a`): short sharp streaks that fall, no
+  curl. The Hearthlight disc (`tender.json` `hearth_disc`) and the root field stay at most 0.25 alpha inside up to their
+  rim; the bloom swirls only on its rim (`thin`). `--hero-vfx-check` rows "Meeko: heals leaf green and rising, hurts
+  embers falling" and the inside-to-rim alpha rows.
 - **Hunter colours stay apart:** every pair of archetype `color`s is at least 0.15 apart in OKLab
   (`--hunter-colour-gap-check`). Gil is sea teal `#2fa08c` (was `#4aa8ff`, 0.117 from Tenzo's blue). Nine older pairs
   under the bar wait for the owner (the check's `OPEN` list, docs/DEBT.md).
@@ -174,6 +189,13 @@ asserts coverage of all 18 types, distinct colours and shapes, the budget and a 
 20261109-130430 (most read; Electric/Steel lost, Rock/Bug faint, so those four were enlarged/lengthened and Rock darkened).
 The sheet backdrop (glow zone, chests at top) hides Normal and Electric: judge those on open grass.
 
+### Hit colour
+A hit a Boki lands (an ability, a strike, whatever it hits: Hunter, mob or another Boki) flashes and sparks in its own
+type colour, the Field Book's (`DexView.type_col`): one lookup in `Juice.flash_col(target, p, by)`, no new effect. A hit
+by anything else keeps the old by-target colour (a Boki target rims in its type, a Hunter white). Crit gold and armour
+blue still win in `Fx.impact`. `--boki-type-hit-check` reads the flash and spark of three types; `--boki-type-hit-shots
+--shots-dir=<dir>` (GPU) draws six in one strip.
+
 ### Movement trail and capture pop
 
 `KinTypeTrail` (`scripts/match/kin_type_trail.gd`) gives every **moving** summoned or wild Boki a light trail in its
@@ -185,26 +207,39 @@ standing still, parked, knocked out, out of sight or over 45 m from the local pl
 uses the same type colour. `--kin-type-trail-check` asserts group coverage and the cut-offs; `--kin-type-trail-shots`
 (GPU) walks one Boki per type and pops them.
 
-| Type | Species | Colour | Accent | Before |
-|---|---|---|---|---|
-| Normal | 0 | cream | plain short puff | none |
-| Fire | 4 | orange | embers rise slowly | none |
-| Water | 0 | blue | droplets arc up and fall | none |
-| Grass | 4 | green | leaves drift down | none |
-| Spore | 3 | tan | big soft puffs float up | cue only |
-| Electric | 4 | yellow | thin fast zaps, all directions | none |
-| Ice | 4 | cyan | chunky shards fall | none |
-| Rock | 4 | brown | pebbles drop fast | none |
-| Psychic | 3 | violet | two slow ripples and rising motes | cue only |
-| Flying | 2 | sky white | wind streaks along the cast | none |
-| Dragon | 0 | indigo | embers and streaks rising | none |
-| Dark | 4 | deep violet | big slow smoke | none |
-| Poison | 3 | acid green | bubbles rise | cue only |
-| Bug | 4 | amber | many tiny dots, scattered | none |
-| Steel | 2 | silver | short thick glints along the cast | none |
-| Fairy | 3 | pink | small sparkles float up | cue only |
-| Crystal | 3 | teal | facets fan upward | cue only |
-| Sound | 3 | gold | three quick rings | cue only |
+### Boki type colours (what each Boki effect draws in)
+Types are labels (19 in the Bokidex, 16 themes in the game: `KinParts.THEMES`). Two colours show a Boki's type:
+its Bokidex colour (`DexView.type_col`: badge, hit numbers, garden cues) and its cast accent (`KinTypeFx.LOOKS`, from
+`BY_THEME`; the trail and capture pop use it too). The accent keeps the Bokidex colour's hue (shade tuned to read on
+grass). A stage of an ability draws in its **effect category** colour, never a theme colour (`KinRules.CAT_COLORS`:
+damage `#ff7a52`, control `#b48cff`, sustain `#6fe8a6`, utility `#ffd84a`), so colour keeps meaning the effect.
+Data check, 11-20: all 196 stages of every Boki's active, auto and merge ability draw one of those four, none the stock
+fallback; no ability data holds a colour of its own, so there was nothing to fix there. What did ignore the type
+was the accent: ten of 16 accents sat 40-177 degrees of hue away from the type's Bokidex colour (Venom acid green vs
+violet, Echo gold vs blue, Storm yellow vs blue-grey, Prism teal vs pink, Ghost violet vs mint, Stone brown vs grey,
+Titan silver vs tan, Fairy pink vs pale blue, Spore tan vs green, Tempest white vs teal); all ten now match.
+`--boki-type-colour-check` asserts (every stage inside its type's palette = Bokidex colour, accent, four category
+colours; every accent within 30 degrees of hue of its Bokidex colour unless grey); `--verbose` prints the stage colours
+per ability. Venom's violet is the control violet's neighbour: the accent stays at the Boki's feet, the effect stays
+above it. Strips: `--boki-anim-shots --shots-dir=<dir> --boki=<id>` (one Boki per type), `--kin-type-sheet`.
 
-Types that shared a look before: all of them (one category-coloured look). Types with no look of their own in the
-data: Normal, Water and Dragon have no species yet (accents ready). Merged forms (`KinMerge`) are not changed.
+| Type | Species | Bokidex colour | Accent | Effect colours its abilities and merge draw |
+|---|---|---|---|---|
+| venom | Nettlynx, Pipewurm, Vespyx | #b98cff | #b98cff | control, damage |
+| spore | Glomwort, Knotwyrm, Mycroll | #9ccf6a | #9ccf6a | control |
+| gravity | Anchorbill, Gravadillo, Lodestick | #8f8cff | #4a55ff | control, sustain, utility |
+| prism | Bubblisk, Mirrolin, Prismander | #ff9fd0 | #ff9fd0 | control, sustain |
+| lunar | Lanterloris, Lunowl, Selenfin | #cfdcff | #cfdcff | control, sustain |
+| echo | Echolop, Gongibbon, Thrumbird | #6fb6ff | #6fb6ff | control, sustain, utility |
+| ember | Anvilbrock, Bellowary, Chuggamus, Kindlewren | #ff7a3a | #ff6a1a | control, damage, sustain |
+| frost | Frigatee, Prowyak, Rimeshrew, Skateron | #a6eeff | #7fe4ff | control, damage, sustain |
+| storm | Barokat, Barrelmander, Boltstrich, Kestrike | #5f7fb8 | #5f7fb8 | control, utility |
+| stone | Buckleron, Effigeetle, Glintmole, Rampartoad | #a8b0c4 | #7a859f | control, damage, sustain, utility |
+| bloom | Crofthorn, Mossgrade, Soakybara, Terrasloth | #6fd86a | #55d84a | control, damage, sustain |
+| ghost | Snuffapi, Umbrathere | #bcebdf | #bcebdf | control, sustain, utility |
+| dark | Gloamshell, Zippelith | #4a4a9a | #5a3d86 | control, utility |
+| titan | Cairnhorn, Lockatara | #cbb48a | #cbb48a | control, damage, sustain |
+| swarm | Hivara, Marchleaf, Murmurling, Spirevark | #f2c24a | #f0b030 | control, sustain, utility |
+| tempest | Canvastross, Zephyrak | #6fe0cf | #6fe0cf | control, damage |
+
+Normal and Water accents (no species yet) keep their own colours. Merged forms (`KinMerge`) are not changed.

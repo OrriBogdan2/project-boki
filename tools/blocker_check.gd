@@ -31,7 +31,7 @@ func _crosser(c: String) -> void:
 		var want := Blockers.stops(c, b)
 		if want == Blockers.NA:
 			continue
-		var got := await _try(m, P, T, home, c, b)
+		var got := _try(m, P, T, home, c, b)
 		ok("%s vs %s" % [c, b], (got == "stop") == (want == Blockers.STOP), "want %s, got %s" % [want, got])
 		_clear(m, P, T, home)
 	await done(m)
@@ -54,7 +54,7 @@ func _try(m: Match, P: Hunter, T: Hunter, home: Vector3, c: String, b: String) -
 		"ice":
 			_ice(m, home, line)
 	step(m, 0.3, func(): _hold(X))
-	return await _fire(m, P, X, home, c)
+	return _fire(m, P, X, home, c)
 
 func _fire(m: Match, P: Hunter, X: Hunter, home: Vector3, c: String) -> String:
 	var hp0 := X.hp

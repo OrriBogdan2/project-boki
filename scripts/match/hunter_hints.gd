@@ -6,10 +6,10 @@ extends RefCounted
 ## own keys. Seen flags are "hh_<hunter>_<slot>" in Save.d.tutorial. The ultimate has its own hint (FirstUltHint).
 
 const SLOTS := ["lmb", "rmb", "e", "dash"]
-const GAP_S := 8.0   # s between two of these lines (a hint stays up HUD.TIP_LIFE = 6 s)
-const FOE_M := 9.0   # m: a monster or rival this close makes the next slot due
+const GAP_S := 8.0  # s between two of these lines (a hint stays up HUD.TIP_LIFE = 6 s)
+const FOE_M := 9.0  # m: a monster or rival this close makes the next slot due
 
-var _last_at := -99.0   # match time of the last line shown
+var _last_at := -99.0  # match time of the last line shown
 
 
 static func key(arch: String, slot: String) -> String:

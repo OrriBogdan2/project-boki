@@ -6,32 +6,43 @@ extends RefCounted
 ## progress bar under it; this adds a shield badge on the portrait, ringed by that progress, that pops on a level-up.
 ## Look: HudStyle.
 
-const POP := 0.5               # seconds the badge pops after a level-up
-const RADIUS := 19.0           # px: the badge at rest
-const BAR_H := 2.0             # px: the progress bar by the armour strip (above it on your own HUD)
-const TICK := 0.5              # seconds the head tick shows after armour progress grows
-const NOTE_PX := 14            # px: the first-time hint's text
+const POP := 0.5  # seconds the badge pops after a level-up
+const RADIUS := 19.0  # px: the badge at rest
+const BAR_H := 2.0  # px: the progress bar by the armour strip (above it on your own HUD)
+const TICK := 0.5  # seconds the head tick shows after armour progress grows
+const NOTE_PX := 14  # px: the first-time hint's text
+
 
 ## Makes the badge pop (a level-up, or a hint pointing at it).
 static func pop(hud) -> void:
 	hud.set_meta("armor_pop", POP)
 
+
 ## The first-time armour hint (ArmourHint, via Hud.tip "armor"): one line just over the armour
 ## readout at `at`, fading out over its last second. The meta is [text, match time it ends]
-## (match time, as in bar(): the vitals redraw at HudPanels.REDRAW_HZ).
+## (match time, as in bar(): the vitals redraw at HudPanels.REDRAW_HZ). While you fight (Hud.in_fight) it
+## waits and keeps its whole time for the next lull: its box sat on the vitals and on the fight around them.
 static func note(hud, at: Vector2) -> void:
 	var n: Array = hud.get_meta("armor_note", [])
 	if n.is_empty():
+		return
+	if hud.in_fight():  # COMBAT_CLARITY: no hint box over a fight
+		hud.set_meta("armor_note", [n[0], hud.m.time + hud.TIP_LIFE])
 		return
 	var left: float = float(n[1]) - hud.m.time
 	if left <= 0.0:
 		hud.set_meta("armor_note", [])
 		return
 	var a := clampf(left, 0.0, 1.0)
-	var tw: float = HudStyle.BIG.get_string_size(n[0], HORIZONTAL_ALIGNMENT_LEFT, -1, NOTE_PX).x
-	hud.c.draw_style_box(HudStyle.box(Color(HudStyle.SHADE, 0.86 * a), 8, Color(0, 0, 0, 0), 0),
-			Rect2(at + Vector2(-8, -17), Vector2(tw + 16, 24)))
+	hud.c.draw_style_box(HudStyle.box(Color(HudStyle.SHADE, 0.86 * a), 8, Color(0, 0, 0, 0), 0), note_rect(at, n[0]))
 	HudStyle.text(hud.c, at, n[0], NOTE_PX, Color(hud.TIP_COL, a))
+
+
+## The hint's box for its text baseline at `at`.
+static func note_rect(at: Vector2, text: String) -> Rect2:
+	var tw: float = HudStyle.BIG.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, NOTE_PX).x
+	return Rect2(at + Vector2(-8, -17), Vector2(tw + 16, 24))
+
 
 ## The badge at the portrait's bottom-right corner: a shield in the tier's colour ringed by progress.
 static func badge(hud, pr: Rect2, p: Hunter) -> void:
@@ -47,7 +58,7 @@ static func badge(hud, pr: Rect2, p: Hunter) -> void:
 	if left > 0.0:
 		grow = 1.0 + 0.35 * sin(k * PI)
 	var col: Color = p.armor_col()
-	var at := pr.end - Vector2(RADIUS, RADIUS)      # inside the portrait corner: the badge stays in the safe area
+	var at := pr.end - Vector2(RADIUS, RADIUS)  # inside the portrait corner: the badge stays in the safe area
 	var r := RADIUS * grow
 	if left > 0.0:
 		c.draw_style_box(HudStyle.box(Color(0, 0, 0, 0), 16, Color(col, 1.0 - k), 4), pr.grow(4.0 + k * 18.0))
@@ -57,6 +68,7 @@ static func badge(hud, pr: Rect2, p: Hunter) -> void:
 	c.draw_arc(at, r - 2.5, -PI / 2, -PI / 2 + TAU * p.armor_frac(), 40, _next_col(p), 3.0, true)
 	Icons.draw(c, "brightshield", at + Vector2(0, -1), 8.0 * grow, col)
 	hud.hover_spots.append([Rect2(at - Vector2(r, r), Vector2(r, r) * 2.0), "armor_level"])
+
 
 ## Progress to the next tier as a thin bar in the current tier's colour (full at the top tier); a short
 ## bright tick at its head marks a hit that added to it. The tier's name shows on hover only.
@@ -75,11 +87,13 @@ static func bar(hud, x: float, y: float, w: float, p: Hunter) -> void:
 		c.draw_rect(Rect2(x + fw - 1.0, y - 2.0, 2.0, BAR_H + 4.0), Color(1, 1, 1, tick / TICK))
 	hud.hover_spots.append([r.grow_individual(0, 4, 0, 4), "armor_level"])
 
+
 ## The ring's colour: the next tier's, or the top tier's own once there is no next.
 static func _next_col(p: Hunter) -> Color:
 	if p.armor_tier >= Hunter.ARMOR_TIERS.size() - 1:
 		return p.armor_col()
 	return Hunter.ARMOR_TIERS[p.armor_tier + 1][1]
+
 
 static func tip(p: Hunter) -> Array:
 	var out: Array = []
@@ -92,6 +106,14 @@ static func tip(p: Hunter) -> Array:
 		out.append(["Top level: %d armor." % int(p.max_armor), HudStyle.MUTED, 13])
 	else:
 		var nx: Array = Hunter.ARMOR_TIERS[p.armor_tier + 1]
-		out.append(["Next: %s  ·  %d of %d  ·  blocks %d%%" % [nx[0], int(p.armor_xp), int(nx[2]),
-				int(round(float(nx[3]) * 100.0))], nx[1], 13])
+		out.append(
+			[
+				(
+					"Next: %s  ·  %d of %d  ·  blocks %d%%"
+					% [nx[0], int(p.armor_xp), int(nx[2]), int(round(float(nx[3]) * 100.0))]
+				),
+				nx[1],
+				13
+			]
+		)
 	return out
