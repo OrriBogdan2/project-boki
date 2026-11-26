@@ -1,8 +1,8 @@
 {
-	"doc": "The match camera (CamRig, scripts/match/cam.gd). match_hunter_scale: how many times bigger every match Hunter is drawn on top of Hunter.VIS_SCALE's base 1.12 (visual only; farm, Model Room and Bokidex never use it; hitboxes, speeds and ranges keep their size). styles: the Settings 'Camera' presets: pitch in degrees down from level, dist m back from the focus, fov the vertical lens in degrees, rise m the view aims above the focus. hunter_scale (source_scale only, off unless picked): match Hunters drawn that many times bigger (on top of Hunter.VIS_SCALE, which already holds match_hunter_scale: 1.91 x 1.232 = the 2.35x total the test style was tuned at; hitboxes and hit circles keep their size), so this style shows the source's ground across and its Hunter size together (docs/MOVEMENT_FEEL.md 'Source scale flag'); the home keeps the default style under it. follow: the Settings 'Camera follow' cursor lean: [deadzone, share or maxzone, cap m, ease 1/s, quadratic easing]; lean reads the cursor's distance from you in metres (deadzone m, share of the distance past it), the others its distance from the screen centre (-1..1). lean_edge_m: metres the cursor lean and an aimed cast keep between you and the screen's edge. pose_far_m: metres (flat) from the camera's focus past which a Hunter on screen is posed every 2nd frame (SimLod.pose_every): past the play view at zoom 1, small at a wide one. source: the bands docs/MOVEMENT_FEEL.md 'Camera framing vs the source' measured from the source footage; --cam-framing-check holds the default style inside them (pitch, lens, feet) and the source_scale style inside across_m; --move-feel-check holds its medium Hunter inside hunter_screen_pct.. scout: the held far look (ScoutLook, Settings 'Look ahead'): ease_in_s / ease_out_s seconds the view takes to go 90% of the way out toward the cursor and back, zoom how much wider it gets held (0.25: 25%, the sight's share, so the lean has room up and down too), sight_mul how much further you see inside a cone_deg cone along your aim while it is held (walking speed unchanged). source: the bands docs/MOVEMENT_FEEL.md 'Camera framing vs the source' measured from the source footage; --cam-framing-check holds the default style inside them (pitch, lens, feet) and the source_scale style inside across_m; --move-feel-check holds its medium Hunter inside hunter_screen_pct. frame_aspect: width / height of the screen the styles' fov is measured on (16:9, the source's frame): other screen shapes get the same ground across (CamRig.frame_fov), held by --camera-frame-check.",
+	"doc": "The match camera (CamRig, scripts/match/cam.gd). match_hunter_scale: how many times bigger every match Hunter is drawn on top of Hunter.VIS_SCALE's base 1.12 (visual only; farm, Model Room and Bokidex never use it; hitboxes, speeds and ranges keep their size). styles: the Settings 'Camera' presets: pitch in degrees down from level, dist m back from the focus, fov the vertical lens in degrees, rise m the view aims above the focus. hunter_scale (source_scale only, off unless picked): match Hunters drawn that many times bigger (on top of Hunter.VIS_SCALE, which already holds match_hunter_scale: 1.91 x 1.232 = the 2.35x total the test style was tuned at; hitboxes and hit circles keep their size), so this style shows the source's ground across and its Hunter size together (docs/MOVEMENT_FEEL.md 'Source scale flag'); the home keeps the default style under it. follow: the Settings 'Camera follow' cursor lean: [deadzone, share or maxzone, cap m, ease 1/s, quadratic easing]; lean reads the cursor's distance from you in metres (deadzone m, share of the distance past it), the others its distance from the screen centre (-1..1). lean_edge_m: metres the cursor lean and an aimed cast keep between you and the screen's edge. pose_far_m: metres (flat) from the camera's focus past which a Hunter on screen is posed every 2nd frame (SimLod.pose_every): past the play view at zoom 1, small at a wide one. source: the bands docs/MOVEMENT_FEEL.md 'Camera framing vs the source' measured from the source footage; --cam-framing-check holds the default style inside them (pitch, lens, feet, and start_arm_m: the arm at the wheel's start notch) and the source_scale style inside across_m; --move-feel-check holds its medium Hunter inside hunter_screen_pct.. scout: the held far look (ScoutLook, Settings 'Look ahead'): ease_in_s / ease_out_s seconds the view takes to go 90% of the way out toward the cursor and back, zoom how much wider it gets held (0.25: 25%, the sight's share, so the lean has room up and down too), sight_mul how much further you see inside a cone_deg cone along your aim while it is held (walking speed unchanged). source: the bands docs/MOVEMENT_FEEL.md 'Camera framing vs the source' measured from the source footage; --cam-framing-check holds the default style inside them (pitch, lens, feet, and start_arm_m: the arm at the wheel's start notch) and the source_scale style inside across_m; --move-feel-check holds its medium Hunter inside hunter_screen_pct. frame_aspect: width / height of the screen the styles' fov is measured on (16:9, the source's frame): other screen shapes get the same ground across (CamRig.frame_fov), held by --camera-frame-check.",
 	"match_hunter_scale": 1.10,
 	"styles": {
-		"default": {"pitch": 66.0, "dist": 23.0, "fov": 32.0, "rise": 1.2, "name": "Default"},
+		"default": {"pitch": 66.0, "dist": 23.0, "fov": 35.3, "rise": 1.2, "name": "Default"},
 		"default_wide": {"pitch": 65.0, "dist": 20.5, "fov": 35.0, "rise": 0.0, "name": "Default (wider lens)"},
 		"high": {"pitch": 70.0, "dist": 27.0, "fov": 36.0, "name": "Top-down"},
 		"classic": {"pitch": 57.0, "dist": 32.2, "fov": 28.0, "name": "Classic (flat, far)"},
@@ -48,19 +48,19 @@
 		"cut_speed": 90.0
 	},
 	"zoom": {
-		"doc": "The wheel's zoom (CamWheel, scripts/match/cam_wheel.gd), as a factor on the style's distance. min/max/step/ctrl are the farm's (the farm camera is untouched). match: the match's own range, from the target feel's data. Its camera arm runs 20.2..30.2 m in 4 notches of 2.5 m (a 59 degree HORIZONTAL lens, 35.3 vertical at 16:9: 34.2 m of ground across at the widest, 22.9 m at the closest). Ours is a 32 degree vertical lens 23 m back: 1.0196 m of ground per metre back, the data's is 1.1315 per metre of arm, so 1 m of the data's arm is 1.1098 m of ours and the factors are 20.2 / 1.1098 / 23 -> min, 30.2 x 1.1098 / 23 -> max (1.4572), 2.5 x 1.1098 / 23 -> step. The view starts at max (spawn and respawn); the wheel steps it by step per notch between min and max. ctrl: holding Ctrl (Sneak) eases the view to max x ctrl, kept at the old 2.24x (51.5 m back) so the scouting look reaches as far as it did. glide_m: metres added to the distance under the glider (the data's +5.81 m of arm = 6.45 m of ours). abyss: below the lip of the map the arm grows from add_from_m at from_m deep to add_to_m at to_m deep and stays there (the data's +0.5..+15 m over 3.5..10 m = x1.1098), off for falls shorter than from_m. omega: rad/s of the critically damped spring the arm length follows (the match only; the farm eases its zoom as before). cap: the widest the view ever goes, with the glider and height stacked on top.",
+		"doc": "The wheel's zoom (CamWheel, scripts/match/cam_wheel.gd), as a factor on the style's distance. min/max/step/ctrl are the farm's (the farm camera is untouched). match: the match's own range, from the target feel's data. Its camera arm runs 20.2..30.2 m in 4 notches of 2.5 m (a 59 degree HORIZONTAL lens, 35.3 vertical at 16:9: 34.2 m of ground across at the widest, 22.9 m at the closest). The default style has the data's lens (35.3 vertical, 11-26; it was 32 with the arm stretched x1.1098 to show the same ground), so 1 m of the data's arm is 1 m of ours and the factors are 20.2 / 23 -> min, 30.2 / 23 -> max (1.3130), 2.5 / 23 -> step. The view starts at max (spawn and respawn); the wheel steps it by step per notch between min and max. ctrl: holding Ctrl (Sneak) eases the view to max x ctrl, the same 52.5 m of ground across it showed before (46.4 m back at the data's lens). glide_m: metres added to the distance under the glider (the data's +5.81 m of arm). abyss: below the lip of the map the arm grows from add_from_m at from_m deep to add_to_m at to_m deep and stays there (the data's +0.5..+15 m over 3.5..10 m), off for falls shorter than from_m. omega: rad/s of the critically damped spring the arm length follows (the match only; the farm eases its zoom as before). cap: the widest the view ever goes, with the glider and height stacked on top.",
 		"min": 0.55,
 		"max": 1.6,
 		"step": 0.1,
 		"ctrl": 1.4,
 		"cap": 2.4,
 		"match": {
-			"min": 0.9748,
-			"max": 1.4572,
-			"step": 0.1206,
+			"min": 0.8783,
+			"max": 1.3130,
+			"step": 0.1087,
 			"ctrl": 1.5372,
-			"glide_m": 6.45,
-			"abyss": {"from_m": 3.5, "to_m": 10.0, "add_from_m": 0.555, "add_to_m": 16.65},
+			"glide_m": 5.81,
+			"abyss": {"from_m": 3.5, "to_m": 10.0, "add_from_m": 0.5, "add_to_m": 15.0},
 			"omega": 10.0
 		}
 	},
@@ -69,7 +69,9 @@
 	"scout": {"ease_in_s": 0.35, "ease_out_s": 0.25, "zoom": 0.25, "sight_mul": 1.25, "cone_deg": 30.0},
 	"source": {
 		"pitch_deg": [64.0, 67.0],
-		"fov_deg": [25.0, 34.0],
+		"fov_deg": [35.0, 35.6],
+		"fov_note": "35.3 is the target feel data (a 59 degree horizontal lens at 16:9); the footage read 25-34 before the data was known",
+		"start_arm_m": [30.0, 30.4],
 		"feet_below_pct": [3.0, 4.0],
 		"ahead_per_behind": [1.46, 1.62],
 		"side_per_ahead": [1.25, 1.35],

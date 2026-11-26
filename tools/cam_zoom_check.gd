@@ -124,6 +124,7 @@ func _arm(lo: float, hi: float, step: float) -> void:
 		absf(wide * hi - 34.17) < 0.1 and absf(wide * lo - 22.86) < 0.1,
 		"%.1f m across at the widest, %.1f m at the closest (34.2 / 22.9)" % [wide * hi, wide * lo]
 	)
+	ok(absf(m.cam.dist * hi - 30.2) < 0.05, "the arm starts %.2f m back (the data's 30.2)" % (m.cam.dist * hi))
 	ok(absf((hi - lo) / step - 4.0) < 0.01, "the wheel has four notches (%.2f)" % ((hi - lo) / step))
 	var cam: CamRig = m.cam
 	cam.user_zoom = hi
@@ -135,12 +136,12 @@ func _arm(lo: float, hi: float, step: float) -> void:
 	p.gliding = true
 	var glide_m: float = (cam.air_zoom(p, 0.0) - still) * cam.dist
 	p.gliding = false
-	ok(absf(glide_m - 6.45) < 0.01, "the glider adds %.2f m to the arm (the data's 5.81 m = 6.45 m of ours)" % glide_m)
+	ok(absf(glide_m - 5.81) < 0.01, "the glider adds %.2f m to the arm (the data's 5.81 m)" % glide_m)
 	var seen := []
 	for deep in [3.0, 3.5, 6.75, 10.0, 14.0]:
 		p.pos.y = -deep
 		seen.append(snappedf((cam.air_zoom(p, 0.0) - still) * cam.dist, 0.01))
-	ok(seen == [0.0, 0.56, 8.6, 16.65, 16.65], "the abyss adds %s m at 3 / 3.5 / 6.75 / 10 / 14 m deep" % [seen])
+	ok(seen == [0.0, 0.5, 7.75, 15.0, 15.0], "the abyss adds %s m at 3 / 3.5 / 6.75 / 10 / 14 m deep" % [seen])
 	p.pos.y = 0.0
 	cam.zoom_omega = 10.0
 	cam.zoom = hi
