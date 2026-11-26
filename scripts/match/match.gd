@@ -2555,8 +2555,9 @@ func _update_pickups(dt: float) -> void:
 					continue
 				if p["kind"] == "ckey" and not KeyChest.has_room(h):
 					continue      # a full key stack leaves the key on the ground, glinting
-				if PickupReach.near(self, h, pos, "walk") and UtilityBelt.can_take(h, String(p["kind"])):
-					v = PickupReach.pull(h, pos)
+				var rule := PickupReach.walk_rule(String(p["kind"]))
+				if PickupReach.near(self, h, pos, rule) and UtilityBelt.can_take(h, String(p["kind"])):
+					v = PickupReach.pull(h, pos, rule)
 					if PickupReach.grabbed(h, pos):
 						_collect(h, p)
 						grabbed = true

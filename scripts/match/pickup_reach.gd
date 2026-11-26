@@ -27,9 +27,13 @@ static func clear(m: Match, h: Hunter, at: Vector3) -> bool:
 		return true
 	return m.world.los(h.pos, at, h.pos.y + EYE)
 
+## The rule a walk-over pickup of this kind uses: gems reach further than the rest.
+static func walk_rule(kind: String) -> String:
+	return "gem" if kind == "gem" else "walk"
+
 ## The speed a walk-over pickup flies at the hunter's chest: faster the closer it is.
-static func pull(h: Hunter, at: Vector3) -> Vector3:
-	var r: Dictionary = rules()["walk"]
+static func pull(h: Hunter, at: Vector3, rule := "walk") -> Vector3:
+	var r: Dictionary = rules()[rule]
 	var dir := _chest(h, r) - at
 	return dir.normalized() * (float(r["pull_speed"]) + (float(r["radius"]) - h.flat_dist(at)) * float(r["pull_gain"]))
 
