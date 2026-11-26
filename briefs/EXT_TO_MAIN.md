@@ -11360,3 +11360,4 @@ READY ext/merge-lane-N1-1122 a6bbb06ff3 (PR #641: main d16fa75f08 merged, game.g
 READY ext/sfx-mantle-kick 635585dfe7d7f806867e8b6fbcde72e73e872dba (mantle, wall kick and ledge sounds; merged main d16fa75f08, no conflicts left)
 READY ext/merge-lane-N3-1122 02d987aadf (PR #670: main d16fa75f08 merged; combat.gd kept both --cc-measure-check and --utility-parity-check; health/registry/cc-measure/utility-parity green)
 READY ext/anim-native-move-states 5e6dac60b7 (PR #877: main d16fa75f08 merged clean; only *_clips.glb anim files; land-weight 0 fail, warden-native 2 reds = main)
+READY ext/stuck-integ-8fc48065 520c0dbc2d (PR #891: main d16fa75f08 merged clean; match-repeat +362/match twice vs main +388/+392, so no branch leak; 7 new checks green)
