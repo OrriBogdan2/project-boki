@@ -12,19 +12,26 @@ var is_ready := false
 var mode := Data.saved_mode()  # Data.MODES (the expedition panel's pick), or "heart_raid"
 var mode_btns := {}
 var duel := false
-var line_key := "lobby"      # the presence key that puts you in this list: "lobby", or "duel" on the duel line
+var line_key := "lobby"  # the presence key that puts you in this list: "lobby", or "duel" on the duel line
 var started := false
+
 
 func setup(o: Dictionary) -> void:
 	opts = o
 	duel = bool(o.get("duel", false))
 	line_key = "duel" if duel else "lobby"
 
+
 func _ready() -> void:
 	Sfx.play_music(Soundtrack.track("menu", "title"))
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var bg := ColorRect.new(); bg.color = UI.BG; bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); add_child(bg)
-	var center := CenterContainer.new(); center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); add_child(center)
+	var bg := ColorRect.new()
+	bg.color = UI.BG
+	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(bg)
+	var center := CenterContainer.new()
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(center)
 	var pb := UI.scroll_panel("Duel online" if duel else "Play online", 640, _back, "Back")
 	var panel: PanelContainer = pb[0]
 	var v: VBoxContainer = pb[1]
@@ -56,12 +63,29 @@ func _ready() -> void:
 		mode_btns[key] = b
 		modes.add_child(b)
 	v.add_child(track)
-	v.add_child(UI.para(("Bots fill the empty places: %d hunters in trios, %d in solos (Heart Raid:" % [Data.MATCH_PLAYERS, Data.SOLO_PLAYERS]) + " one squad of 4 against the waves, the first 4 ready; press it again for Hard or Nightmare). Whoever presses Start hosts the match and runs the monsters, so keep the game open and in front."))
+	(
+		v
+		. add_child(
+			(
+				UI
+				. para(
+					(
+						(
+							"Bots fill the empty places: %d hunters in trios, %d in solos (Heart Raid:"
+							% [Data.MATCH_PLAYERS, Data.SOLO_PLAYERS]
+						)
+						+ " one squad of 4 against the waves, the first 4 ready; press it again for Hard or Nightmare). Whoever presses Start hosts the match and runs the monsters, so keep the game open and in front."
+					)
+				)
+			)
+		)
+	)
 	ready_btn = UI.button("I'm ready", _toggle_ready, 160, "check")
 	UI.footer(v).add_child(ready_btn)
 	start_btn = UI.footer_primary(v, "Start the match", _start, 220, "portal")
 	_refresh_modes()
 	_listen()
+
 
 func _listen() -> void:
 	Net.peers_changed.connect(_refresh)
@@ -71,11 +95,13 @@ func _listen() -> void:
 	_announce()
 	_refresh()
 
+
 ## Esc goes back, like the X.
 func _unhandled_input(e: InputEvent) -> void:
 	if e.is_action_pressed("menu") and not Overlay.is_open():
 		get_viewport().set_input_as_handled()
 		_back()
+
 
 ## Back to the farm, or from the duel line back to the Training Grounds.
 func _back() -> void:
@@ -84,15 +110,17 @@ func _back() -> void:
 	else:
 		Game.goto("home")
 
+
 func _exit_tree() -> void:
 	if duel and Net.my_presence.has("duel"):
 		var p := Net.my_presence.duplicate()
 		p.erase("duel")
-		Net.set_presence(p)       # out of the line (into a duel, or back): nobody pairs with you any more
+		Net.set_presence(p)  # out of the line (into a duel, or back): nobody pairs with you any more
 	if Net.peers_changed.is_connected(_refresh):
 		Net.peers_changed.disconnect(_refresh)
 	if Net.message.is_connected(_on_msg):
 		Net.message.disconnect(_on_msg)
+
 
 ## A mode button; pressing the raid's again steps its difficulty (HeartRaidPick.cycle).
 func _pick_mode(key: String) -> void:
@@ -100,8 +128,9 @@ func _pick_mode(key: String) -> void:
 		HeartRaidPick.cycle()
 	mode = key
 	if key in Data.MODES:
-		Save.d["exp_mode"] = key      # the same pick as the expedition panel's (ModeCards)
+		Save.d["exp_mode"] = key  # the same pick as the expedition panel's (ModeCards)
 	_refresh_modes()
+
 
 func _refresh_modes() -> void:
 	for k in mode_btns:
@@ -110,23 +139,42 @@ func _refresh_modes() -> void:
 	var raid_text := "Heart Raid: %s (prototype)" % diff
 	mode_btns["heart_raid"].text = raid_text if mode == "heart_raid" else "Heart Raid (prototype)"
 
+
 func _announce() -> void:
 	var k := Save.active_kin()
-	var arch := ClassUnlock.online_arch(Arch.of_save())      # (Settings > Demo > All masks open is offline only)
+	var arch := ClassUnlock.online_arch(Arch.of_save())  # (Settings > Demo > All masks open is offline only)
 	var cls: String = opts.get("cls", Data.class_of_save())
 	var weapon: String = Save.d.get("weapon", "")
 	if arch != Arch.of_save():
 		cls = Arch.weight(arch)
 		weapon = Arch.signature(arch)
-	Net.set_presence({"name": Save.d.get("name", "Hunter"), "tag": ClanInfo.my_tag(), "cls": cls, "weapon": weapon, "arch": arch, "ready": is_ready,
-		line_key: 1,
-		"kin": {"species": k.get("species", "cindle"), "level": int(k.get("level", 1)), "name": k.get("name", "Boki"), "traits": k.get("traits", {}), "trust": float(k.get("trust", 50))}})
+	Net.set_presence(
+		{
+			"name": Save.d.get("name", "Hunter"),
+			"tag": ClanInfo.my_tag(),
+			"cls": cls,
+			"weapon": weapon,
+			"arch": arch,
+			"ready": is_ready,
+			line_key: 1,
+			"kin":
+			{
+				"species": k.get("species", "cindle"),
+				"level": int(k.get("level", 1)),
+				"name": k.get("name", "Boki"),
+				"traits": k.get("traits", {}),
+				"trust": float(k.get("trust", 50))
+			}
+		}
+	)
+
 
 func _toggle_ready() -> void:
 	is_ready = not is_ready
 	ready_btn.text = "Ready" if is_ready else "I'm ready"
 	ready_btn.theme_type_variation = "Chosen" if is_ready else ""
 	_announce()
+
 
 func _refresh() -> void:
 	if not is_instance_valid(list_box):
@@ -145,14 +193,34 @@ func _refresh() -> void:
 		if not p.has(line_key):
 			continue
 		var row := UI.card(UI.CARD, 10, 12)
-		var h := UI.hbox(12); row.add_child(h)
-		h.add_child(UI.IconDot.new("paw", Data.KIN.get(p.get("kin", {}).get("species", "cindle"), Data.KIN["cindle"])["color"], 20.0))
-		var nm := UI.label("%s%s" % [p.get("name", "Hunter"), "  (you)" if id == Net.me else ""], UI.T_BODY, UI.ACCENT_HI if id == Net.me else UI.INK, UI.semi)
+		var h := UI.hbox(12)
+		row.add_child(h)
+		h.add_child(
+			UI.IconDot.new(
+				"paw", Data.KIN.get(p.get("kin", {}).get("species", "cindle"), Data.KIN["cindle"])["color"], 20.0
+			)
+		)
+		var nm := UI.label(
+			"%s%s" % [p.get("name", "Hunter"), "  (you)" if id == Net.me else ""],
+			UI.T_BODY,
+			UI.ACCENT_HI if id == Net.me else UI.INK,
+			UI.semi
+		)
 		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		nm.autowrap_mode = TextServer.AUTOWRAP_OFF
 		h.add_child(nm)
 		var kin: Dictionary = p.get("kin", {})
-		var info := UI.label("%s · %s" % [Arch.label(String(p.get("arch", ""))), Data.KIN.get(kin.get("species", "cindle"), Data.KIN["cindle"])["name"]], 14, UI.MUTED)
+		var info := UI.label(
+			(
+				"%s · %s"
+				% [
+					Arch.label(String(p.get("arch", ""))),
+					Data.KIN.get(kin.get("species", "cindle"), Data.KIN["cindle"])["name"]
+				]
+			),
+			14,
+			UI.MUTED
+		)
 		info.autowrap_mode = TextServer.AUTOWRAP_OFF
 		h.add_child(info)
 		var peer_ready: bool = p.get("ready", false)
@@ -161,6 +229,7 @@ func _refresh() -> void:
 		list_box.add_child(row)
 	if duel:
 		_pair()
+
 
 func _start() -> void:
 	if Net.mode == "":
@@ -177,22 +246,42 @@ func _start() -> void:
 	ids.sort()
 	if mode == "heart_raid":
 		ids.erase(Net.me)
-		ids = [Net.me] + ids.slice(0, squad - 1)      # one squad: you and the first ready (scripts/match/heart_raid.gd)
+		ids = [Net.me] + ids.slice(0, squad - 1)  # one squad: you and the first ready (scripts/match/heart_raid.gd)
 	var roster := []
 	for i in ids.size():
 		var id: String = ids[i]
 		var p: Dictionary = Net.peers.get(id, Net.my_presence)
 		if id == Net.me:
 			p = Net.my_presence
-		roster.append({"peer": id, "team": int(i / float(squad)), "name": p.get("name", "Hunter"), "tag": ClanInfo.clean_tag(p.get("tag")), "arch": p.get("arch", ""), "cls": p.get("cls", "medium"), "weapon": p.get("weapon", ""), "kin": p.get("kin", {})})
+		roster.append(
+			{
+				"peer": id,
+				"team": int(i / float(squad)),
+				"name": p.get("name", "Hunter"),
+				"tag": ClanInfo.clean_tag(p.get("tag")),
+				"arch": p.get("arch", ""),
+				"cls": p.get("cls", "medium"),
+				"weapon": p.get("weapon", ""),
+				"kin": p.get("kin", {})
+			}
+		)
 	var teams := maxi(int(ceil(float(ids.size()) / squad)), int(mo["teams"]))
 	if mode == "heart_raid":
 		teams = 1
-	var d := {"mid": "%d" % (Time.get_ticks_msec() % 100000000), "seed": randi(), "host": Net.me, "roster": roster, "teams": mini(teams, int(mo["total"])), "squad": squad, "tier": int(opts.get("tier", 0))}
+	var d := {
+		"mid": "%d" % (Time.get_ticks_msec() % 100000000),
+		"seed": randi(),
+		"host": Net.me,
+		"roster": roster,
+		"teams": mini(teams, int(mo["total"])),
+		"squad": squad,
+		"tier": int(opts.get("tier", 0))
+	}
 	d["heart_raid"] = mode == "heart_raid"
 	d["raid_diff"] = HeartRaidPick.difficulty
 	Net.lobby_emit("start", d)
 	_go(d)
+
 
 ## Who is in the duel line: you and every hunter whose presence says "duel".
 static func duel_line(peers: Dictionary, me: String) -> Array:
@@ -202,6 +291,7 @@ static func duel_line(peers: Dictionary, me: String) -> Array:
 			line.append(id)
 	return line
 
+
 ## The duel line pairs off in id order, two by two; the first of each pair hosts and starts it.
 static func duel_partner(line: Array, me: String) -> String:
 	var ids := line.duplicate()
@@ -209,15 +299,34 @@ static func duel_partner(line: Array, me: String) -> String:
 	var i := ids.find(me)
 	return String(ids[i + 1]) if i >= 0 and i % 2 == 0 and i + 1 < ids.size() else ""
 
+
 ## The start message of a duel between this game (team 0, hosting) and `other` (team 1).
 static func duel_start(me: Dictionary, other: Dictionary) -> Dictionary:
 	var roster := []
 	for p in [me, other]:
-		roster.append({"peer": p["peer"], "team": roster.size(), "name": p.get("name", "Hunter"),
-			"arch": p.get("arch", ""), "cls": p.get("cls", "medium"), "weapon": p.get("weapon", ""), "kin": p.get("kin", {})})
+		roster.append(
+			{
+				"peer": p["peer"],
+				"team": roster.size(),
+				"name": p.get("name", "Hunter"),
+				"arch": p.get("arch", ""),
+				"cls": p.get("cls", "medium"),
+				"weapon": p.get("weapon", ""),
+				"kin": p.get("kin", {})
+			}
+		)
 	var o := Match.duel_opts()
-	return {"mid": "d%d" % (Time.get_ticks_msec() % 100000000), "seed": int(o["seed"]), "host": me["peer"],
-		"roster": roster, "teams": 2, "squad": 1, "tier": 0, "duel": true}
+	return {
+		"mid": "d%d" % (Time.get_ticks_msec() % 100000000),
+		"seed": int(o["seed"]),
+		"host": me["peer"],
+		"roster": roster,
+		"teams": 2,
+		"squad": 1,
+		"tier": 0,
+		"duel": true
+	}
+
 
 ## The match a duel start message opens: the duel room with both players in it.
 static func duel_match(d: Dictionary) -> Dictionary:
@@ -225,9 +334,10 @@ static func duel_match(d: Dictionary) -> Dictionary:
 	o.merge({"net": d, "teams": 2}, true)
 	return o
 
+
 func _pair() -> void:
 	if started or Net.mode == "" or not Net.my_presence.has("duel"):
-		return       # (not until this game has announced itself in the line)
+		return  # (not until this game has announced itself in the line)
 	var other := duel_partner(duel_line(Net.peers, Net.me), Net.me)
 	if other == "":
 		return
@@ -239,6 +349,7 @@ func _pair() -> void:
 	Net.lobby_emit("start", d)
 	_go(d)
 
+
 func _on_msg(topic: String, data, _from: String) -> void:
 	if topic != "start" or typeof(data) != TYPE_DICTIONARY:
 		return
@@ -246,6 +357,7 @@ func _on_msg(topic: String, data, _from: String) -> void:
 		if String(r["peer"]) == Net.me:
 			_go(data)
 			return
+
 
 func _go(d: Dictionary) -> void:
 	if started:
@@ -256,5 +368,14 @@ func _go(d: Dictionary) -> void:
 		Game.start_match(duel_match(d))
 		return
 	var o := HeartRaid.opts(int(d["squad"]), String(d.get("raid_diff", "normal"))) if d.get("heart_raid", false) else {}
-	o.merge({"net": d, "seed": int(d["seed"]), "teams": int(d["teams"]), "squad": int(d["squad"]), "tier": int(d.get("tier", 0))}, true)
+	o.merge(
+		{
+			"net": d,
+			"seed": int(d["seed"]),
+			"teams": int(d["teams"]),
+			"squad": int(d["squad"]),
+			"tier": int(d.get("tier", 0))
+		},
+		true
+	)
 	Game.start_match(o)
