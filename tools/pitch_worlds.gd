@@ -10,6 +10,10 @@ const ZONE_TAKE_S := 8.0  # s a zone's walk lasts at least
 ## the side the walk up to the Waystone comes from: 30 deg east of south keeps the view level (straight from the south
 ## the Expeditions ring stands behind the camera and the view tips top-down; probe shot 18)
 const STONE_SIDE := Vector3(0.5, 0.0, 0.866)
+const HUNTER_ARCH := "ostra"  # Motley's archetype (WardenGlb.ART): the best in-game model, on its v95 glb
+const HUNTER_CLASS := "medium"
+## (m right, m ahead) of the Hunter's landing where the staged Boki stand
+const STAGE_AT := [Vector2(-1.4, 2.3), Vector2(1.7, 3.0), Vector2(-0.3, 4.2)]
 const ZONES := ["glasswater", "cinderstep", "hushwood", "ridge"]
 const ZONE_OF_SHOT := {12: "glasswater", 13: "cinderstep", 14: "hushwood", 15: "ridge"}
 ## species, name, the lean type the zone loves
@@ -27,7 +31,9 @@ const CAST := {
 var rig
 var h: Node = null  # the Home on screen now (it is a new one after every hop)
 var keep_say := false  # shot 17 keeps the Boki's bubble
-var _tick := 0
+var _pins: Array = []  # [kin record, where it stands]: a staged Boki is held there for the whole take (no wandering off, no errand)
+var _show: Array = []  # the Boki nodes that are in the film (all the others are hidden)
+var _cuts := 0  # hops filmed so far this take
 var _frames := 0  # frames this take has run (Engine.get_frames_drawn stays 0 headless)
 
 
@@ -36,8 +42,12 @@ func _init(r) -> void:
 
 
 func play(shot: int) -> void:
+	RenderingServer.frame_pre_draw.connect(_pre_draw)  # (Home shows its icons again in its own frame: hide after it)
 	_save()
 	Record.set_level(2)
+	var farm_view: Dictionary = CamRig.rules["farm"]
+	farm_view["dist_min"] = 3.0  # a closer view than the game's: the Hunter and its Boki fill the frame
+	farm_view["dist_max"] = 4.8
 	match shot:
 		11:
 			await hop_take("glasswater")
@@ -72,6 +82,8 @@ func _save() -> void:
 			rec["lean"] = {String(c[2]): 14.0}
 		d["roster"].append(rec)
 	d["roster"][0]["starter"] = true
+	d["cls"] = HUNTER_CLASS
+	d["arch"] = HUNTER_ARCH
 	d["active"] = d["roster"][0]["uid"]
 	d["tutorial"] = {"home": true, "hatched": true, "intro": true, "day1_done": true}
 	for z in ZONES:
@@ -82,48 +94,50 @@ func _save() -> void:
 
 
 # ------------------------------------------------------------------ the takes
-## Shot 11: the Hunter walks up to the Waystone and steps in; the stone lights, the ink wipes, `zone` is there.
+## Shot 11: the Hunter walks up to the Waystone and steps in; the stone lights, the zone cuts in, `zone` is there.
 func hop_take(zone: String) -> void:
 	await _load(GardenZones.HUB)
 	_place(HubWaystone.HUB_AT + STONE_SIDE * 8.0)
 	await _wait(0.8)
 	rig.mark("portal")
-	await _walk(HubWaystone.HUB_AT, 3.2)
+	await _walk(HubWaystone.HUB_AT, 1.8)
 	await _wait(0.3)
 	await _hop(zone)
 	rig.mark("arrived")
-	await _wait(1.0)
-	await _walk(_resident_at(zone, 0), 1.9)
-	await _wait(3.0)
+	await _wait(0.6)
+	for n in 3:
+		await _walk(_boki_at(n), 1.9)
+		await _wait(0.6)
+	await _wait(1.5)
 
 
-## Shots 12-15: the Hunter lands in the zone and walks up to its Boki while the view turns.
+## Shots 12-15: the Hunter lands in the zone and walks up to its Boki, one after the other, while the view turns.
 func zone_take(zone: String) -> void:
 	await _load(zone)
 	await _wait(1.0)
 	rig.mark(zone)
 	var t0 := _frames
-	_orbit_start(1.4, 4.5)
-	for n in 4:  # walks up to its Boki one after the other (the nearest from where it stands)
-		await _walk(_resident_at(zone, n % 2), 1.9)
-		await _wait(0.5)
+	_orbit_start(0.9, ZONE_TAKE_S - 1.0)
+	for n in 3:
+		await _walk(_boki_at(n), 1.9)
+		await _wait(0.7)
 	while _frames - t0 < int(ZONE_TAKE_S * FPS):
 		await _wait(0.5)
 
 
-## Shot 16: hub -> zone -> hub -> zone, each hop the moment you arrive.
+## Shot 16: hub -> zone -> hub -> zone, each hop the moment you arrive (the wipes are cut out by the encoder).
 func montage() -> void:
 	await _load(GardenZones.HUB)
 	_place(HubWaystone.HUB_AT + STONE_SIDE * 6.0)
 	await _wait(0.5)
 	rig.mark("montage")
-	await _walk(HubWaystone.HUB_AT, 3.2)
+	await _walk(HubWaystone.HUB_AT, 1.8)
 	await _hop("glasswater")
 	await _wait(0.9)
 	await _hop(GardenZones.HUB)
-	_place(HubWaystone.HUB_AT + STONE_SIDE * 5.0)  # (under the ink: lands on the clear side)
+	_place(HubWaystone.HUB_AT + STONE_SIDE * 5.0)  # lands on the clear side
 	await _wait(0.4)
-	await _walk(HubWaystone.HUB_AT, 3.2)
+	await _walk(HubWaystone.HUB_AT, 1.8)
 	await _hop("ridge")
 	await _wait(1.8)
 
@@ -196,7 +210,98 @@ func _arrived() -> void:
 	h.farm_cam.k = 1.0  # (a new Home starts on the top-down view and eases to the close one: start close)
 	h.farm_cam.pitch = deg_to_rad(float(FarmCam.rules()["pitch_deg"]))
 	h.cam.snap(h.ppos)
+	_dress_hunter()
+	_stage()
 	_tidy()
+
+
+## Up to three of the zone's Boki stand in an open arc ahead of the Hunter, clear of every prop; the others are out of the
+## film (hidden), so each shot has 2-3 readable Boki and none inside a sign or post.
+## Props that stay in the film (course scenery is hidden, see COURSE_NAMES): a staged Boki is moved off any of them.
+const PROP_GAP := 1.7
+
+
+func _props() -> Array:
+	var out: Array = []
+	var kin_nodes: Array = []
+	for k in h.kins:
+		kin_nodes.append(k["node"])
+	for n in h.get_children():
+		var n3 := n as Node3D
+		if n3 == null or not n3.visible or n3 == h.player or n3 in kin_nodes or n3.get_script() != null:
+			continue
+		if _is_course(n3) or _is_placeholder(n3) or n3.get_child_count() == 0 or n3.position.length() < 1.0:
+			continue
+		if n3.find_children("*", "MeshInstance3D", true, false).is_empty():
+			continue
+		out.append(n3.position)
+	return out
+
+
+func _clear_of_props(at: Vector3) -> Vector3:
+	var props := _props()
+	var best := at
+	var best_d := -1.0
+	for ring in [0.0, 0.9, 1.8, 2.7]:
+		for i in (1 if ring == 0.0 else 10):
+			var cand := at + Vector3(ring, 0, 0).rotated(Vector3.UP, TAU * i / 10.0)
+			cand = h.world.free_spot_near(cand, [], 1.2, 0.9)
+			var d := 99.0
+			for p in props:
+				d = minf(d, Vector2(cand.x - p.x, cand.z - p.z).length())
+			if d >= PROP_GAP:
+				return cand
+			if d > best_d:
+				best_d = d
+				best = cand
+	return best
+
+
+func _stage() -> void:
+	_show.clear()
+	_pins.clear()
+	var zone := GardenZones.current()
+	var awake: Array = h.kins.filter(func(k): return not k.has("indoors"))
+	var mine: Array = awake.filter(func(k): return GardenZones.zone_of(k["rec"]) == zone)
+	for k in awake:  # a zone with fewer than three residents borrows the rest: the film shows 2-3 Boki, readable
+		if mine.size() < STAGE_AT.size() and not (k in mine):
+			mine.append(k)
+	print("PITCH stage zone=%s kins=%d staged=%d" % [zone, h.kins.size(), mini(STAGE_AT.size(), mine.size())])
+	var fwd2 := Vector2(0.0, -1.0).rotated(h.cam.yaw)  # the view's "up", on the ground
+	var fwd := Vector3(fwd2.x, 0.0, fwd2.y)
+	var right := Vector3(-fwd.z, 0.0, fwd.x)
+	var placed: Array = []
+	for i in mini(STAGE_AT.size(), mine.size()):
+		var k: Dictionary = mine[i]
+		var at: Vector3 = h.ppos + right * STAGE_AT[i].x + fwd * STAGE_AT[i].y
+		at = _clear_of_props(h.world.free_spot_near(at, placed, 1.5, 1.1))
+		placed.append(at)
+		k.erase("job")
+		k["pos"] = at
+		k["goal"] = at
+		k["t"] = 600.0
+		(k["node"] as Node3D).position = at
+		_show.append(k["node"])
+		_pins.append([k, at])
+
+
+## The staged Boki's spot `n` (where it stands now).
+func _boki_at(n: int) -> Vector3:
+	if _show.is_empty():
+		return h.ppos + Vector3(0, 0, -4)
+	return (_show[mini(n, _show.size() - 1)] as Node3D).global_position
+
+
+## The farm wears your Unmasked (a cloaked Empty); the film shows a finished hunter on its game glb, built as Home does.
+func _dress_hunter() -> void:
+	var at: Vector3 = h.player.position
+	var rot: Vector3 = h.player.rotation
+	h.player.queue_free()
+	h.player = Models.hunter(HUNTER_CLASS, Data.TEAM_COLORS[0], h._weapon(), "", {}, HUNTER_ARCH)
+	h.player.position = at
+	h.player.rotation = rot
+	h.add_child(h.player)
+	print("PITCH hunter arch=%s glb=%s" % [HUNTER_ARCH, WardenGlb.ART.get(HUNTER_ARCH, "?")])
 
 
 func _tidy() -> void:
@@ -209,18 +314,108 @@ func _tidy() -> void:
 	c.day_t = DAY_T
 	c.talk_cd = 1e9  # no chatter bubbles
 	for k in c.kins:
-		if k.has("emote") and (k["emote"] as Label3D).text != "♥":
-			k["emote_t"] = 0.0  # no star, note or question mark over a Boki
-	_tick += 1
-	if true:  # every frame: a heart can pop up and fill the lens between checks
-		for l in c.find_children("*", "Label3D", true, false):
-			var t: String = (l as Label3D).text
-			var cam: Camera3D = rig.main.get_viewport().get_camera_3d()
-			var close := cam != null and (l as Label3D).global_position.distance_to(cam.global_position) < 12.0
-			if t != "♥" and not (keep_say and t.length() > 16):  # every word or glyph over the world (signs, names, bubbles)
-				(l as Label3D).visible = false
-			elif t == "♥" and close:  # a heart right at the lens fills the frame
-				(l as Label3D).visible = false
+		k["emote_t"] = 0.0  # no star, note, question mark or heart over a Boki
+	_hide_marks(c)
+
+
+func _pre_draw() -> void:
+	var c: Node = rig.main.current
+	if is_instance_valid(c) and c.get("ppos") != null and c.get("player") != null:
+		_hide_marks(c)
+		for pin in _pins:
+			var k: Dictionary = pin[0]
+			var node := k["node"] as Node3D
+			if is_instance_valid(node):
+				if node.position.distance_to(pin[1]) > 0.4:
+					print("PITCH pin drift %s %.1f m" % [k["rec"]["name"], node.position.distance_to(pin[1])])
+				node.position = pin[1]
+				k["pos"] = pin[1]
+				k["goal"] = pin[1]
+				k["t"] = 600.0
+				k.erase("job")
+
+
+## Every frame: no word or glyph over the world (signs, names, bubbles), no billboard icon (a heart, z, work mark), no
+## zone air (its wind streaks and glints read as grey bars and specks), no haze quad on the hunter, no UI layer.
+const COURSE_NAMES := ["RacePost", "RelayStand", "KiteStand"]
+
+
+func _is_course(n: Node) -> bool:
+	for nm in COURSE_NAMES:
+		if String(n.name).begins_with(nm):
+			return true
+	return false
+
+
+## Primitive-built stand-ins (blank signs, bare logs, the flat shallows slab) are not filmed; glb-built props stay.
+func _is_placeholder(n: Node3D) -> bool:
+	if n.name == "Shallows":
+		return true
+	if n.get_script() != null or n is MeshInstance3D or n is MultiMeshInstance3D:
+		return false
+	var meshes := n.find_children("*", "MeshInstance3D", true, false)
+	if meshes.is_empty():
+		return false
+	var only_cyl := true
+	var plain := meshes.size() <= 4
+	for m in meshes:
+		var ms: Mesh = (m as MeshInstance3D).mesh
+		if not ms is CylinderMesh:
+			only_cyl = false
+		if ms is ArrayMesh or ms is PlaneMesh or ms is QuadMesh:
+			plain = false
+	var has_label := not n.find_children("*", "Label3D", false, false).is_empty()
+	var round_part := false
+	for m in meshes:
+		round_part = round_part or (m as MeshInstance3D).mesh is SphereMesh
+	return (has_label and not round_part and meshes.size() <= 5) or only_cyl or plain
+
+
+func _hide_marks(c: Node) -> void:
+	if not is_instance_valid(c.get("player")):
+		return
+	var kin_nodes: Array = []
+	for k in c.kins:
+		kin_nodes.append(k["node"])
+	for n in c.get_children():
+		var n3 := n as Node3D
+		if n3 != null and n3 != c.player and not (n3 in kin_nodes) and _is_placeholder(n3):
+			n3.visible = false
+	for n in c.get_children():
+		if _is_course(n):
+			(n as Node3D).visible = false
+	var hrace: Object = c.get("hrace")
+	var bases: Array = [hrace, c.get("hkite")]
+	if hrace != null:
+		bases.append(hrace.get("relay"))
+	for b in bases:
+		if b == null:
+			continue
+		for f in ["post", "wall", "stand"]:
+			var v: Variant = b.get(f)
+			if v is Node3D and is_instance_valid(v):
+				(v as Node3D).visible = false
+	for k in c.kins:
+		(k["node"] as Node3D).visible = _show.is_empty() or (k["node"] in _show)
+	for l in c.find_children("*", "Label3D", true, false):
+		var t: String = (l as Label3D).text
+		if not (keep_say and t.length() > 16):
+			(l as Label3D).visible = false
+	for sp in c.find_children("*", "Sprite3D", true, false):
+		(sp as Sprite3D).visible = false
+	var air := c.get_node_or_null(ZoneAir.NAME) as Node3D
+	if air != null:
+		air.visible = false
+	var crack := c.get_node_or_null("crack") as Node3D  # (Cinderstep's glowing ground cracks read as flat yellow strips)
+	if crack != null:
+		crack.visible = false
+	var ring := c.player.get_node_or_null("TeamRing") as Node3D
+	if ring != null:
+		ring.visible = false
+	for q in c.player.find_children("*", "MeshInstance3D", true, false):
+		var mi := q as MeshInstance3D
+		if mi.mesh is QuadMesh or String(mi.name).begins_with("orbit_cards") or String(mi.name).begins_with("Halo"):
+			mi.visible = false
 	if c.get("ui") != null:
 		(c.ui as CanvasLayer).visible = false
 
@@ -238,17 +433,27 @@ func _place(p: Vector3) -> void:
 	h.cam.snap(at)
 
 
-## Press the Waystone's hop (the zone cards' pick) and film through the wipe to the Home that follows.
+## Press the Waystone's hop (the zone cards' pick). The ink wipe is not filmed: the take marks cut_N_out (the stone has
+## lit up and begun to fade) and cut_N_in (the wipe is gone, the new zone clear) and the encoder joins them with a
+## short dissolve, so no black or ragged wipe frame is in the clip.
 func _hop(zone: String) -> void:
 	var from := h
 	if not h.hway.hop(zone):
 		rig.fail("hop to %s refused" % zone)
 		return
+	_cuts += 1
+	await _wait(float(GardenZones.rules()["hop_fade_s"]) - 0.1)
+	rig.mark("cut%d_out" % _cuts)
 	await _wait(0.1)
 	await _arrived()
 	if h == from:
 		rig.fail("no new Home after the hop to %s" % zone)
-	await rig.main.get_tree().process_frame
+	var fade: ScreenFade = rig.main.fade
+	while fade.covered or fade.rect.color.a > 0.01:
+		await rig.main.get_tree().process_frame
+		_tidy()
+	await _wait(0.2)
+	rig.mark("cut%d_in" % _cuts)
 
 
 ## The nth Boki living in `zone` (not the partner), where it stands now.
