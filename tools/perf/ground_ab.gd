@@ -5,13 +5,14 @@ extends RefCounted
 ## of a block (the renderer's stamps arrive a frame or two late) goes to that variant:
 ##   old    the terrain's full fine detail everywhere (the look before the cut), sea shown
 ##   cut    the terrain skips its fine detail past 14-36 m (shaders/terrain.gdshader detail_range), sea shown
+##   bake   the cut plus the big patterns read from the per-map bake (scripts/match/ground_bake.gd, use_bake)
 ##   flat   the terrain returns its base colour (flat_ground), sea shown
-##   nosea  old terrain, the cloud-sea plane hidden
+## (the cloud sea hidden measured -0.29 ms on 11-24, docs/PERF_DRAW_1124.md; the sea list stays for shots)
 ## Prints "BENCH ab ground: <variant> gpu <ms> over <n> frames" and the saving of each against old.
 
 const BLOCK := 45
 const SKIP := 8
-const NAMES := ["old", "cut", "flat", "nosea"]
+const NAMES := ["old", "cut", "bake", "flat"]
 const SHOT_AT := 1100  # first frame of the pictures: each variant 3 frames apart, saved 2 frames after it is set
 
 var mats: Array[ShaderMaterial] = []
@@ -59,9 +60,8 @@ func frame(f: int) -> void:
 func _apply(i: int) -> void:
 	for m in mats:
 		m.set_shader_parameter("detail_range", Vector2(14, 36) if i == 1 else Vector2(1e6, 1e6))
-		m.set_shader_parameter("flat_ground", i == 2)
-	for s in sea:
-		s.visible = i != 3
+		m.set_shader_parameter("use_bake", i == 2 and m.get_shader_parameter("bake0") != null)
+		m.set_shader_parameter("flat_ground", i == 3)
 
 
 ## The pictures: variant k is set at k * 3 and saved at k * 3 + 2 (the frame shown is the one drawn after the set).
@@ -81,6 +81,9 @@ func add_gpu(us: int) -> void:
 
 
 func report() -> void:
+	for m in mats:
+		if m.get_shader_parameter("bake0") == null:
+			print("BENCH ab ground: WARNING no ground bake on a terrain material (bake = cut)")
 	var base := 0.0
 	for i in NAMES.size():
 		var ms: float = gpu_us[i] / 1000.0 / maxi(n[i], 1)

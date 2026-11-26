@@ -25,6 +25,12 @@ uniform bool flat_ground = false;      // bench probe (--bench-flat-ground): the
 uniform float paint2 = 1.0;     // the second art pass's larger painted structure (0 = off, --art1)
 #include "res://shaders/noise.gdshaderinc"
 #include "res://shaders/vis.gdshaderinc"
+#include "res://shaders/ground_big.gdshaderinc"
+// The big patterns baked per map (scripts/match/ground_bake.gd); live noise until the bake lands, and headless.
+uniform bool use_bake = false;
+uniform sampler2D bake0 : filter_linear_mipmap, repeat_disable;
+uniform sampler2D bake1 : filter_linear_mipmap, repeat_disable;
+uniform sampler2D bake2 : filter_linear_mipmap, repeat_disable;
 varying vec3 wpos;
 varying vec3 wnorm;
 varying float style;
@@ -33,6 +39,13 @@ varying float vdist;
 // brush streaks, dabs, speckles, clover and petals are sub-pixel or a blur out there; the big painted
 // patches, swathes and pools stay everywhere). Skips their noise reads, not only hides them.
 uniform vec2 detail_range = vec2(14.0, 36.0);   // m from the camera: full fine detail, none (bench: 1e6 = the old look)
+float big(int k) {
+	if (!use_bake) return big_live(wpos.xz, k);
+	vec2 uv = wpos.xz / map_size;
+	vec4 t = k < 4 ? texture(bake0, uv) : (k < 8 ? texture(bake1, uv) : texture(bake2, uv));
+	int ch = k % 4;
+	return ch == 0 ? t.r : (ch == 1 ? t.g : (ch == 2 ? t.b : t.a));
+}
 float detail_w() { return 1.0 - smoothstep(detail_range.x, detail_range.y, vdist); }
 void vertex() {
 	vdist = length((MODELVIEW_MATRIX * vec4(VERTEX, 1.0)).xyz);
@@ -61,9 +74,8 @@ float contact(vec3 p) {
 	return clamp(occ, 0.0, 1.0);
 }
 
-vec3 ground(vec3 c) {
+vec3 ground(vec3 c, float n) {
 	// soft patches of lighter and darker ground, then tiny speckles of light
-	float n = fbm3(wpos.xz * 0.22);
 	c *= 0.86 + n * 0.28;
 	float dw = detail_w();
 	if (dw > 0.0) {
@@ -100,19 +112,19 @@ vec3 ground_rich(vec3 c, float n_in, out vec3 emit) {
 		c *= 1.0 + (stroke * 0.1 - 0.05) * dw;
 	}
 	// warm sunlit swathes and cool hollows
-	float sw = fbm3(wpos.xz * 0.09 + 11.0);
+	float sw = big(1);
 	c = mix(c, c * vec3(1.1, 1.08, 0.88), smoothstep(0.55, 0.8, sw) * 0.6);
 	c = mix(c, c * vec3(0.84, 0.9, 1.06), smoothstep(0.42, 0.15, sw) * 0.55);
 	if (paint2 > 0.0) {
 		// big painted value structure across an island: soft pools of warm light, broad shaded
 		// zones, and a gentle drift of hue (warmer one way, cooler the other) so no island reads
 		// as one flat colour from the match camera
-		float pool = fbm3(wpos.xz * 0.045 + 31.0);
+		float pool = big(2);
 		float lit = smoothstep(0.52, 0.78, pool);
 		float dim = smoothstep(0.42, 0.18, pool);
 		c = mix(c, c * vec3(1.16, 1.12, 0.94) + vec3(0.025, 0.02, 0.0), lit * 0.75 * paint2);
 		c = mix(c, c * vec3(0.76, 0.8, 0.94), dim * 0.65 * paint2);
-		float hue = fbm3(wpos.xz * 0.03 - 17.0);
+		float hue = big(3);
 		c = mix(c, c * vec3(1.06, 1.02, 0.9), smoothstep(0.55, 0.8, hue) * 0.5 * paint2);
 		c = mix(c, c * vec3(0.92, 1.0, 1.08), smoothstep(0.45, 0.2, hue) * 0.5 * paint2);
 		// dappled mid-size brush dabs
@@ -135,7 +147,7 @@ vec3 ground_rich(vec3 c, float n_in, out vec3 emit) {
 		}
 	} else if (b == 1) {
 		// bloom: drifts of fallen petals, small and pink, thick in some places and absent in others
-		float drift = smoothstep(0.5, 0.75, fbm3(wpos.xz * 0.16 + 2.0));
+		float drift = smoothstep(0.5, 0.75, big(4));
 		if (near_k > 0.0) {
 			vec2 pp = wpos.xz + vec2(vnoise(wpos.xz * 2.0)) * 0.3;
 			float d = cell_dot(vec2(pp.x * 0.7, pp.y), 3.4, 0.12, 5.0, pick) * step(0.2 + (1.0 - drift) * 0.7, pick);
@@ -145,7 +157,7 @@ vec3 ground_rich(vec3 c, float n_in, out vec3 emit) {
 		c = mix(c, c * vec3(1.12, 0.92, 1.02), drift * 0.3);
 	} else if (b == 2) {
 		// frost: snow drifts in soft ridges, blue on their lee side, sparkling on top
-		float dn = fbm3(wpos.xz * 0.25);
+		float dn = big(5);
 		float dr = sin(dot(wpos.xz, vec2(0.55, 0.3)) * 1.6 + dn * 6.0) * 0.5 + 0.5;
 		float ridge = smoothstep(0.55, 0.95, dr) * smoothstep(0.3, 0.6, dn);
 		float lee = smoothstep(0.35, 0.05, dr) * smoothstep(0.3, 0.6, dn);
@@ -157,11 +169,11 @@ vec3 ground_rich(vec3 c, float n_in, out vec3 emit) {
 		}
 	} else if (b == 3) {
 		// ember: grey ash drifts and cracks that glow
-		float ash = smoothstep(0.5, 0.75, fbm3(wpos.xz * 0.35 + 4.0));
+		float ash = smoothstep(0.5, 0.75, big(6));
 		c = mix(c, vec3(0.42, 0.38, 0.38), ash * 0.45);
 		float cn = vnoise(wpos.xz * 0.75 + vec2(vnoise(wpos.xz * 2.0) * 0.6));
 		float crack = 1.0 - smoothstep(0.0, 0.03, abs(cn - 0.5));
-		crack *= smoothstep(0.45 + 0.1 * paint2, 0.7 + 0.08 * paint2, fbm3(wpos.xz * 0.2 + 9.0)) * (1.0 - path);
+		crack *= smoothstep(0.45 + 0.1 * paint2, 0.7 + 0.08 * paint2, big(7)) * (1.0 - path);
 		c = mix(c, vec3(0.16, 0.08, 0.06), crack * (0.8 - 0.25 * paint2));
 		emit = vec3(1.0, 0.42, 0.12) * crack * (0.75 + 0.25 * sin(TIME * 1.3 + wpos.x * 0.7 + wpos.z * 0.4)) * (1.0 - 0.4 * paint2);
 		if (near_k > 0.0) {
@@ -171,7 +183,7 @@ vec3 ground_rich(vec3 c, float n_in, out vec3 emit) {
 	} else if (b == 4) {
 		// storm: slabs of cracked slate showing through the grass (irregular cells: the gap between
 		// the nearest and second-nearest scattered point)
-		float sl = smoothstep(0.55, 0.7, fbm3(wpos.xz * 0.3 + 2.0));
+		float sl = smoothstep(0.55, 0.7, big(8));
 		vec2 cq = wpos.xz * 0.85 + vec2(vnoise(wpos.xz * 1.5), vnoise(wpos.xz * 1.5 + 7.0)) * 0.3;
 		vec2 ci = floor(cq);
 		float f1 = 9.0; float f2 = 9.0; vec2 cell = ci;
@@ -193,7 +205,7 @@ vec3 ground_rich(vec3 c, float n_in, out vec3 emit) {
 		// gloom: faint veins of violet light under the dark ground
 		float vn = vnoise(wpos.xz * 0.6 + vec2(vnoise(wpos.xz * 1.7)) * 0.8);
 		float vein = 1.0 - smoothstep(0.0, 0.025, abs(vn - 0.5));
-		vein *= smoothstep(0.4, 0.65, fbm3(wpos.xz * 0.15 + 3.0)) * (1.0 - path);
+		vein *= smoothstep(0.4, 0.65, big(9)) * (1.0 - path);
 		c = mix(c, vec3(0.5, 0.36, 0.9), vein * 0.4);
 		emit = vec3(0.62, 0.42, 1.0) * vein * (0.3 + 0.25 * sin(TIME * 0.9 + wpos.z * 0.5));
 	}
@@ -277,7 +289,7 @@ void fragment() {
 	if (flat_ground) {
 	} else if (st == 0) {
 		if (up > 0.5) {
-			c = ground(c);
+			c = ground(c, fbm3(wpos.xz * 0.22));
 		} else if (up > -0.5) {
 			float along = abs(wnorm.x) > 0.5 ? wpos.z : wpos.x;
 			float y = wpos.y * 1.6 + vnoise(vec2(along * 0.6, wpos.y * 0.3)) * 1.4;
@@ -293,8 +305,8 @@ void fragment() {
 			c = mix(c, ao_color.rgb, 0.5);
 		}
 	} else if (st == 1) {
-		float n0 = fbm3(wpos.xz * 0.22);
-		c = ground(c);
+		float n0 = big(0);
+		c = ground(c, n0);
 		if (use_biome) { c = ground_rich(c, n0, gemit); }
 		if (use_ao) {
 			float o = contact(wpos);
