@@ -17,7 +17,7 @@ grows with every knock.
 ## How it plays
 
 1. **Salvage** builds from knocks and assists (+2.5% health each, up to 10). Hits on a hunter's back deal 50% more.
-2. **Scattergun** (LMB): seven slugs in one tight group, a shot every half second. One aim line shows on the ground.
+2. **Scattergun** (LMB): seven slugs spread over a 20 degree fan, a shot every half second. The fan's two edges show on the ground while you aim, and each shot lights the fan for a moment.
 3. **Deep Reach** (RMB): your arm reaches through rocks and cliffs to the first foe and reels them to your feet, stunned, while you stand braced (a slow shuffle swings them). It also pulls an ally to safety. Only the barge works while you reel.
 4. **Anchor Drop** (E): hop forward and slam a giant anchor down in front of you for a long stun. In the air you smash straight down, and the higher you fall the harder it hits.
 5. **Barge** (Shift, 3 charges a beat apart): a low clawing lunge the way you move that touches nobody, further in the air; just after the Anchor it can't turn much.
@@ -64,7 +64,7 @@ What the in-game kit card (K) says.
 | RMB: Deep Reach | An abyssal arm grabs the first body and reels it in, stunned. |
 | E: Anchor Drop | Slam your fist into the ground ahead: damage and a long stun. |
 | Hunter ultimate: Brass Broadside | Charge a fan while walking slowly, then two waves of brass slugs. |
-| Weapon: Shotgun | Seven slugs, 6m out: all seven fly in a tight group along your aim; rear hits hurt more. |
+| Weapon: Shotgun | Seven slugs in a 20 degree fan, 6.3m out: up close all land, further out the middle ones; rear hits hurt more. |
 
 ### Abilities in full
 

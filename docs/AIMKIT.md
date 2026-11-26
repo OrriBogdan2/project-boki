@@ -107,8 +107,8 @@ AimKit.circle(h, "draw_mark", {"at": point, "r": 0.22})
 Nothing in the game uses it now (Lace's draw was the V until owner item 55b).
 ```gdscript
 AimKit.vee(h, "draw", {"k": stage_k, "glint": stage_k * 0.4, "col2": Color("b6ff8a")})
-# Grimble Buckshot: one aim line (a merged V) to the slug range
-AimKit.vee(h, "spread", {"len": 6.3, "k": 1.0, "follow": true})
+# Grimble Buckshot: the fan's two edges to the slug range
+AimKit.cone(h, "spread", {"len": 6.3, "deg": 20.0, "edges": true, "follow": true})
 ```
 Params: `from`, `dir`, `len` (to the cursor, clamped 1.5-20), `k`, `open` (degrees, 25), `glint`
 (0..1 along the line, -1 for none).
