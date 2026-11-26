@@ -1483,9 +1483,9 @@ func _draw_squad_pings(p: Hunter) -> void:
 
 ## For the first seconds of every match: what each of your buttons does.
 func _draw_kit(sz: Vector2, p: Hunter) -> void:
-	if not HudGroups.kit_wanted(self, p):
+	if not HudReveal.kit_wanted(self, p):
 		return
-	var show_t := HudGroups.KIT_S if not m.opts.get("training", false) else 1e9
+	var show_t := HudReveal.kit_s(m)
 	var t := m.time - kit_t0
 	if p.dropping or p.riding:
 		# shown once you land, not over the drop map
