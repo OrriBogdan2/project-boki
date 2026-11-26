@@ -1259,7 +1259,8 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 	# 1 2 3 4: the utility belt (tonic, armor kit and gadgets: BeltHud); Q V C: the gloves (GripHud); G is on the Boki
 	# card only (BokiHud), not again beside the belt
 	BeltHud.draw(self, p, r.end.x - s, y)
-	GripHud.draw(self, p, r)
+	if HudReveal.on(m, "summon_ring"):
+		GripHud.draw(self, p, r)
 	# what you're carrying home, as a counter
 	var seeds := 0
 	for sd in p.seeds: seeds += int(p.seeds[sd])

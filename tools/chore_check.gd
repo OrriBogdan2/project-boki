@@ -1,18 +1,19 @@
 extends RefCounted
-## --chore-check (GARDEN.md section 4): with base_mode on, four Boki live on the real farm for 4 simulated minutes
+## --chore-check (GARDEN.md section 4): with base_mode on, five Boki live on the real farm for 4 simulated minutes
 ## (home.gd _move_kin at 4 steps a second) in Bramblebank: a Mend one (Glom) beside a glum friend, a Haul one (Mole)
 ## with a toy spot to fetch the ball back to, a Boki with none of those knacks (Bur) and an Ember one (Wren), your
 ## partner, who minds the egg only in the hub, where the one Nook is (HubLayout.holds). Each chore starts for the
-## right Boki and nobody else, ends, writes exactly one journal line each time it is done (a chore that gives up
-## writes none) and shows on the debug readout;
-## its effect lands (egg time halved once, joy up); each chore's guard refuses when its reason is gone; no machine
-## refuses a transition. Never touches the real save.
+## right Boki and nobody else (Rill, a farmhand, waters a dry snack patch: it ripens sooner until the next pick), ends,
+## writes exactly one journal line each time it is done (a chore that gives up writes none) and shows on the
+## debug readout; its effect lands (egg time halved once, joy up); each chore's guard refuses when its reason is gone;
+## no machine refuses a transition. Never touches the real save.
 
 const SIM_SECS := 240.0      # simulated seconds
 const DT := 0.25             # s per farm step
 const HATCH_S := 600.0       # s of home hatch time the egg starts with (home.gd _start_egg)
 const ISLAND_SEED := 7     # the farm-start island (a random one each run moved the toy and the ball)
-const CHORE_WORDS := ["minded the egg", "cheered up ", "fetched the ball back"]      # BaseChore's journal lines
+const CHORE_WORDS := ["minded the egg", "cheered up ",
+		"fetched the ball back", "watered the snack patch"]      # BaseChore's journal lines
 const GLUM_JOY := 25.0       # Bur's joy at the start: glum, but one cheer lifts it out of it
 const HUB_FRAMES := 600      # frames to wait for the hub to load
 
@@ -27,7 +28,8 @@ func ok(cond: bool, what: String) -> void:
 func _new_save() -> Dictionary:
 	var d := Save.fresh()
 	var recs: Array = []
-	for spec in [["kindlewren", "Wren"], ["glomwort", "Glom"], ["glintmole", "Mole"], ["burrlet", "Bur"]]:
+	for spec in [["kindlewren", "Wren"], ["glomwort", "Glom"], ["glintmole", "Mole"], ["burrlet", "Bur"],
+			["burrlet", "Rill"]]:
 		var rec := Save.new_kin(spec[0], spec[1], recs.size() + 1)      # a fixed Unique roll: the same body every run
 		rec["uid"] = "chore_%s" % spec[1]      # likes are seeded from the uid: a random one changes what each Boki does
 		rec["mutations"] = []
@@ -36,6 +38,7 @@ func _new_save() -> Dictionary:
 		rec["needs"]["joy"] = 80.0
 	recs[0]["starter"] = true
 	recs[3]["needs"]["joy"] = GLUM_JOY
+	recs[4]["farmhand"] = true      # Work.of: a farmhand waters even without Tide, so Rill is the Tide Boki
 	d["roster"] = recs
 	d["active"] = recs[0]["uid"]
 	d["tutorial"] = {"hatched": true, "intro": true, "day1_done": true}      # no base tutorial (Lead)
@@ -66,21 +69,32 @@ func run(m: Node) -> void:
 	d["layout"]["deco"].append({"id": "training_post", "u": 990001, "px": center.x + 3.0, "pz": center.z})
 	home.life.r_v["chore_chance"] = 1.0      # a chore whenever one can run: the check is about the chores, not the dice
 	d["layout"]["deco"].append({"id": "toy_ball", "u": 990003, "px": center.x + 6.0, "pz": center.z})
+	var patch_at: Vector3 = home.world.free_spot_near(center + Vector3(-3, 0, 3), [], 1.0)      # on the Bokis' island
+	d["layout"]["deco"].append({"id": SnackPatch.ID, "u": 990004, "px": patch_at.x, "pz": patch_at.z,
+			"t": Time.get_unix_time_from_system()})
 	home._sync_fixtures()
 	for k in home.kins:
 		k["pos"] = home.world.free_spot_near(center + Vector3(randf_range(-2, 2), 0, randf_range(-2, 2)), [], 0.8)
 		(k["node"] as Node3D).position = k["pos"]
 	ok(home.NEST_AT.x < -100.0 and home.life.toy_spots().size() == 1,
 		"Bramblebank: one toy stands and no Nook (the egg waits in the hub's)")
-	var s := _sim(home)
 	var by := {}
 	for k in home.kins:
 		by[k["rec"]["name"]] = k
+	var s := _sim(home)
 	_chore_ran(s, "Glom", "cheer")
 	_chore_ran(s, "Mole", "fetch")
 	ok(not s["kinds"].get("Wren", {}).has("mind") and not d["egg"].get("minded", false),
 		"Wren minds no egg in Bramblebank: there is no Nook there")
 	ok(not s["kinds"].has("Bur"), "Bur has no chore knack and does none")
+	_chore_ran(s, "Rill", "water")
+	var patch := SnackPatch.entry(d)
+	var now := Time.get_unix_time_from_system()
+	ok(SnackPatch.watered(patch) and not SnackPatch.dry(patch, now), "the patch was watered and is no longer dry")
+	ok(is_equal_approx(SnackPatch.grow_secs(patch), SnackPatch.grow_secs() * float(SnackPatch.rules()["water_mult"])),
+		"a watered patch ripens in water_mult of the time")
+	SnackPatch.harvest(d, patch["t"] + SnackPatch.grow_secs() * 2.0)
+	ok(not SnackPatch.watered(patch), "a pick makes the patch dry again")
 	ok(Care.need(by["Bur"]["rec"], "joy") > GLUM_JOY, "Bur's joy went up (%.0f)" % Care.need(by["Bur"]["rec"], "joy"))
 	ok(BaseChore.pick(home.life, by["Glom"]) == "" or Care.need(by["Bur"]["rec"], "joy") < BaseChore.GLUM_AT,
 		"Glom has nobody left to cheer once Bur is up")

@@ -37,6 +37,12 @@ static func ways_out_shown(m: Match) -> bool:
 			return true
 	return false
 
+## The gear strip (GearPanel's four slots): HudReveal's "gear" stage is open and a slot holds gear. Until then
+## nothing is drawn, so nothing is counted (the perk row is held the same way: HudReveal "perks", and a perk picked up).
+static func gear_shown(m: Match, p: Hunter) -> bool:
+	return HudReveal.on(m, "gear") and GearPanel.worn_any(p)
+
+
 ## The clock/status strip under the minimap: a save's first expeditions hold it back until the first Ways Out beat (a
 ## seat within ways_out_lead_s of opening, open, taken or lost; or you are out) or your first kill or knock
 ## (DECISIONS 2026-11-08), then it stays (HudReveal "beat_clock", remembered in the save). Through HudReveal's table:
@@ -61,13 +67,19 @@ static func on_screen(hud) -> Array:
 	var m: Match = hud.m
 	var p: Hunter = m.player
 	var out: Array = (rules()["always"] as Array).duplicate()
-	if HudReveal.on(m, "counters"):
+	if gear_shown(m, p):
+		out.append("gear")
+	if HudReveal.on(m, "abilities"):
+		out.append_array(["abilities", "weapon"])
+	if HudReveal.on(m, "summon_ring"):
+		out.append("slots")
+	if not m.tut and HudReveal.on(m, "counters"):      # (the tutorial draws only its strip up top)
 		out.append("counters")
 	if glider_shown(p):
 		out.append("glider")
 	if BeltHud.shown(m, p):
 		out.append("belt")
-	if p.perks.size() > 0:
+	if p.perks.size() > 0 and HudReveal.on(m, "perks"):
 		out.append("perks")
 	if m.hunters.any(func(h): return h != p and h.team == p.team):
 		out.append("squad")
