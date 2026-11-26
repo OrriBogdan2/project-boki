@@ -634,6 +634,8 @@ func _tab_controls(v: VBoxContainer) -> void:
 					"util2",
 					"util3",
 					"util4",
+					"util5",
+					"util6",
 					"base",
 				]
 				+ KinKeys.ids()
@@ -675,6 +677,7 @@ func _tab_camera(v: VBoxContainer) -> void:
 	var styles: Array = CamRig.styles.keys().map(func(k): return [k, CamRig.styles[k]["name"]])
 	_choice(v, "Camera", "cam_style", styles, Callable(), "How high and how wide the camera looks down on you")
 	var follow := [
+		["pan", "Cursor pan"],
 		["centred", "Centred on you"],
 		["lean", "Cursor lean"],
 		["standard", "Standard dynamic"],
