@@ -184,7 +184,7 @@ const WEAPON_MUZZLE := "weapon_muzzle"  # an empty on its mouth, a child of it: 
 const LOOK_PATH := "res://content/rules/warden_look.json"
 const HALO := preload("res://shaders/warden_halo.gdshader")
 
-## The match-zoom read (ext/warden-matchzoom; hero_toon.gdshader far_*, outline.gdshader far_cut and glow_shell),
+## The match-zoom read (ext/warden-matchzoom; hero_toon.gdshader far_*, outline.gdshader far_px and glow_shell),
 ## on a painted atlas: from 8 to 18 m (by size on screen) the pale fresnel drops to a third, the gloss, sheen and
 ## light rims go, the rest is anti-aliased, stray texels are clamped to their coarser mip, rim_far becomes a broad
 ## band in the signature colour and whatever glows is a step brighter. A Hunter's warden_look.json "painted" or
@@ -192,9 +192,9 @@ const HALO := preload("res://shaders/warden_halo.gdshader")
 const FAR_LOOK := {
 	"far_fres": 0.35, "far_spec": 0.0, "far_aa": 1.0, "far_clamp": 0.8, "far_rim_soft": 1.0, "far_glow": 0.6
 }
-const INK_FAR_CUT := 0.55  # the ink gone from ~13.5 m (outline.gdshader far_cut): a sub-pixel line is dark dots
-## ... and in its place one dark line round the whole figure (outline.gdshader far_px, far_push): px of a 720 px tall
-## view, and m pushed back so the body hides its inner pieces' shells (only the edge against the ground shows)
+## The ink at the match camera: one dark line round the whole figure (outline.gdshader far_px, far_push), px of a
+## 720 px tall view, and m pushed back along the view so the body hides its inner pieces' shells (only the edge
+## against the ground shows): with no line there a Hunter had no edge on a light ground.
 const INK_FAR_PX := 1.5
 const INK_FAR_PUSH := 0.3
 
@@ -671,7 +671,7 @@ static func _param(v: Variant) -> Variant:
 
 
 ## A surface's match-zoom read (FAR_LOOK), after its own look; and the Hunter's warden_look.json keys:
-## "no_ink" (material tags or slots without the ink shell: thin crossbows, a gum bubble), "ink" {"far_cut",
+## "no_ink" (material tags or slots without the ink shell: thin crossbows, a gum bubble), "ink" {"far_px",
 ## "far_thin", "color"} for its ink shell, "glow_shell" for the glow pieces' halo.
 static func _far_look(m: ShaderMaterial, src: BaseMaterial3D, slot: String, tag: String, own: Dictionary) -> void:
 	if m.shader != Models.HERO or not (src and src.albedo_texture):
@@ -707,7 +707,6 @@ static func _far_ink(ink: ShaderMaterial, own_ink: Dictionary, only: bool) -> Sh
 	var key := [ink, JSON.stringify(own_ink), only]
 	if not _far_inks.has(key):
 		var far := ink.duplicate() as ShaderMaterial
-		far.set_shader_parameter("far_cut", INK_FAR_CUT)
 		far.set_shader_parameter("far_px", INK_FAR_PX)
 		far.set_shader_parameter("far_push", INK_FAR_PUSH)
 		far.set_shader_parameter("far_only", only)
