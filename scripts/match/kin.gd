@@ -596,6 +596,7 @@ func start_rush(d: Vector2, e: Dictionary, ctx: Dictionary) -> void:
 	}
 	state = "flying"
 	KinFlinch.dash(model, Vector3(d.x, 0, d.y), mass())
+	HazardMoveSfx.kin_dash(self)
 
 
 ## A jump onto a spot (a grammar leap): untouchable in the air, then its landing.
@@ -957,6 +958,8 @@ func _sim_fly(dt: float) -> void:
 			pos.y = g
 			grounded = true
 			KinFlinch.land(model, mass())
+			if not rush:
+				HazardMoveSfx.kin_land(self)
 		vel = Vector3.ZERO
 		state = "active"
 		if thrown:
@@ -1146,6 +1149,7 @@ func _ground_move(wish: Vector2, dt: float) -> void:
 	body_vertical(dt)
 	if grounded and not m.world.is_void(pos.x, pos.z):
 		last_safe = pos
+	HazardMoveSfx.kin_wade(self)
 	if hv.length() > 0.3:
 		face = lerp_angle(face, atan2(-hv.x, -hv.y), minf(1.0, dt * 12.0))
 
