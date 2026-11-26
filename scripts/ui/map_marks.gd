@@ -23,6 +23,7 @@ const CAT := {"camp": ENEMY, "shop": LOOT, "chest": LOOT, "shrine": OBJECTIVE, "
 const NAMELESS := ["shop", "pad"]  # they carry their own name in the world
 const HUNTER_CLEAR_PX := 70.0  # px: a name never sits within this of the hunter
 const NAME_PX := 13
+const HUD_BAR_Y := 0.7  # of the screen's height: below this sit the health, ability and weapon bars (no names)
 
 static var _rows: Array = []  # {id, pos, src}: rebuilt when the match, or what it holds, changes
 static var _owner := 0
@@ -119,7 +120,8 @@ static func full_map(fm: FullMap) -> void:
 
 
 ## In the world, within NEAR_M of the hunter: a ground ring in the category colour and the thing's name over it
-## (a camp's beside its ring; shops and pads already carry their own sign; a name skips the hunter's own spot).
+## (a camp's beside its ring; shops and pads already carry their own sign). A name skips the hunter's own spot,
+## the bottom HUD bars and any nameplate, monster bar or damage number already there (LabelClash).
 ## A Blight nest holding Skitters gets the same, in its own ember (NestMap draws it on the maps).
 static func world(hud) -> void:
 	var m: Match = hud.m
@@ -146,12 +148,12 @@ static func _ground(hud, p: Hunter, at: Vector3, id: String, base: Color, word: 
 		return
 	var w := TextCache.width(hud.big, word, NAME_PX)
 	var lp := _name_spot(cam, at, id, w)
-	if lp.distance_to(cam.unproject_position(p.pos)) > HUNTER_CLEAR_PX:
-		hud._rounded(
-			Rect2(lp + Vector2(-w * 0.5 - 6.0, -NAME_PX), Vector2(w + 12.0, NAME_PX + 8.0)),
-			Color(0.04, 0.05, 0.08, 0.7 * col.a),
-			6
-		)
+	var box := Rect2(lp + Vector2(-w * 0.5 - 6.0, -NAME_PX), Vector2(w + 12.0, NAME_PX + 8.0))
+	var bar_top := cam.get_viewport().get_visible_rect().size.y * HUD_BAR_Y
+	if lp.distance_to(cam.unproject_position(p.pos)) < HUNTER_CLEAR_PX or box.end.y > bar_top:
+		return
+	if not LabelClash.blocked(box):
+		hud._rounded(box, Color(0.04, 0.05, 0.08, 0.7 * col.a), 6)
 		hud._ctext(lp, word, NAME_PX, col, hud.big)
 
 
