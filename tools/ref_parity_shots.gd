@@ -111,12 +111,9 @@ func _cam_row() -> void:
 	var across := 2.0 * arm * tan(hfov * 0.5)
 	var p := m.player.position
 	var ppm := (c.unproject_position(p + Vector3(0.5, 0, 0)).x - c.unproject_position(p - Vector3(0.5, 0, 0)).x) * _k()
-	print(
-		(
-			"REFCAM style %s: pitch %.1f deg, arm %.1f m (dist %.1f x zoom %.4f), lens %.1f v / %.1f h deg, across %.1f m, %.1f px/m"
-			% [c.style_id, rad_to_deg(c.pitch), arm, c.dist, c.zoom, c.fov, rad_to_deg(hfov), across, ppm]
-		)
-	)
+	var fmt := "REFCAM style %s: pitch %.1f deg, arm %.1f m (dist %.1f x zoom %.4f), lens %.1f v / %.1f h deg"
+	fmt += ", across %.1f m, %.1f px/m"
+	print(fmt % [c.style_id, rad_to_deg(c.pitch), arm, c.dist, c.zoom, c.fov, rad_to_deg(hfov), across, ppm])
 
 
 ## REFH row for the player; returns its px height.
@@ -131,21 +128,12 @@ func _hero_row(hero: String) -> float:
 	var rp := m.cam.unproject_position(p.position + m.cam.char_lean() * Vector3(0, rival, 0))
 	var rf := HudPlate._frame_rect(0.0, 0.0, HudStyle.PLATE_W)
 	var tall := (feet.y - top) * _k()
-	print(
-		(
-			"REFH %s: %.0f px tall (top %.2f m), own plate %.0f px wide, gap %.0f px; as a rival (at %.2f m): %.0f px wide, gap %.0f px"
-			% [
-				hero,
-				tall,
-				_top_m(p.model) - p.position.y,
-				frame.size.x * _k(),
-				(top - plate.y - frame.size.y) * _k(),
-				rival,
-				rf.size.x * _k(),
-				(top - rp.y - rf.size.y) * _k()
-			]
-		)
-	)
+	var fmt := "REFH %s: %.0f px tall (top %.2f m), own plate %.0f px wide, gap %.0f px"
+	fmt += "; as a rival (at %.2f m): %.0f px wide, gap %.0f px"
+	var own_gap := (top - plate.y - frame.size.y) * _k()
+	var rival_gap := (top - rp.y - rf.size.y) * _k()
+	var top_m := _top_m(p.model) - p.position.y
+	print(fmt % [hero, tall, top_m, frame.size.x * _k(), own_gap, rival, rf.size.x * _k(), rival_gap])
 	return tall
 
 

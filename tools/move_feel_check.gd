@@ -248,7 +248,7 @@ const T := {
 		"~",
 		[34.0, 34.4],
 		"m",
-		"ground across a 16:9 screen at the focus at the match's start notch (the reference's 30.2 m arm and 59 deg lens: 34.2)"
+		"ground across 16:9 at the focus, the match's start notch (reference: 30.2 m arm, 59 deg lens, 34.2)"
 	],
 	# (the reference body is the plain medium hunter since Vex took her own proportions: at the same camera it
 	# measures 6.56% where the old reference, the default medium Warden at plain size, measured 6.07%, so the
