@@ -155,3 +155,17 @@ Scripts: `/home/boki/gens/hunter-round-1124/kael/hair/scripts/` (`hairmask.py GL
   (slots.metal top_light 0.3, fres 0.35, sheen 0): near-white px per frame eye 38 -> 5, knee 30 -> 7 vs round 25.
 - Tried and dropped: painted rim_far 0.2 / top_light 0.55 / fres 0.8 / desat 0.08 (median red 182 -> 174 only, not visible).
   The neon red is the albedo under the sun: needs a colour pass on the cape/arm texels (Meshy), not shader params.
+
+**Round 27 (2026-11-26, ext/kael-r25, scripts /home/boki/gens/hunter-round-1124/kael/r27/scripts/, plan section 9):**
+- Cause found: the texels already matched the v95-latest-ta-1119 turnaround (cloth 115,19,34; leather 73,60,63; off arm
+  182,86,90). The game's light response made them wrong: lit red x1.45-1.7 clipped to flat neon, leather x0.65 = black,
+  off-arm base clipped pink so its white veins lost all contrast. A Meshy retexture (4 runs, original UVs) gave the
+  same cloth colours as live (A/B) or went off-model (C/D), so no Meshy texels were kept.
+- kael_meshy.glb Image_0, body texels only (body triangles rasterised in UV + 3 px padding; hair texels untouched):
+  red cloth scaled per channel to median 94,27,35; leather/belts/boots to brown 80,66,58 (was mauve 73,60,63, which lit
+  pink); off-arm base to 125,56,66 with its white veins held >= 236. Sword arm (dark red 89,12,16) untouched.
+  `grade.py BASE EMIT labels.npy OUT0 OUTE --dark 80,66,58 --off 125,56,66` (labels from `labels.py GLB labels.npy`).
+- Image_emit: the sword-arm vein lines grown 1 texel inside the arm, ember orange (no halo).
+- Measured on real-GPU renders, live -> r27 (r27/scripts/m27.py): game camera cloth red median 196 -> 157, neon px per
+  1000 red 230 -> 32, ink slits per 1000 red 1.20 -> 0.28; eye level red 166 -> 123, neon 118 -> 8, leather 52,42,43 ->
+  61,45,41.
