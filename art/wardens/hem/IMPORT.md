@@ -76,3 +76,7 @@ Tools: tools/art1/hem_r20 (README). Renders: /home/boki/gens/hunter-round-1124/l
 11-25 r23 (ext/lace-r13-slit): skirt-meshy gets COLOR_0 (ink room 0 on the inner layer and fray band), its inner-layer faces move to
 prim `skirt-lining23` (wine copy of the skirt texture, `hem_meshy_skirt_lining23.jpg`), the bow fist `body-hand17` gets ink room 0:
 no black ink blotches on the skirt / fist. Tools: tools/art1/hem_r23 (README). Needs an owner visual check before it goes live.
+
+r27 (2026-11-26): slit-closing keys only (tools/art1/hem_r26/slitclose.py, args in its README): Idle/walk closed like Attack so the
+game camera no longer sees the ground through the slit; Jump_Run/run closed less so the knee stays inside. Mesh/textures = r26
+(partlock PASS). Needs an owner visual check before it goes live.
