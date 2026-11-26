@@ -270,11 +270,11 @@ func push_out_blocks(x: float, z: float, r: float, y: float) -> Vector2:
 			break
 	return p
 
-## Line of sight at height y between two points (rocks and higher ground block it). A sample every
-## 0.4 m, each read straight off the grid and a tile read once however many samples land on it (its
-## ground is one height, stairs aside): can_see, Bot.can_hit and the kits ask this hundreds of times
-## a step in a ten-squad brawl, and the three lookups a sample were a quarter of the step.
-func los(a: Vector3, b: Vector3, y: float) -> bool:
+## Line of sight at height y between two points (rocks, higher ground and barriers block it; with `sight`,
+## only barriers that hide: Verbs.blocks_sight). A sample every 0.4 m, each read straight off the grid and a tile
+## read once however many samples land on it (its ground is one height, stairs aside): can_see, Bot.can_hit and
+## the kits ask this hundreds of times a step in a ten-squad brawl; three lookups a sample were a quarter of it.
+func los(a: Vector3, b: Vector3, y: float, sight := false) -> bool:
 	var d := Vector2(b.x - a.x, b.z - a.z)
 	var n := int(d.length() / 0.4) + 1
 	for i in range(1, n):
@@ -284,7 +284,7 @@ func los(a: Vector3, b: Vector3, y: float) -> bool:
 		if gy > y + 0.2 or (gy + BLOCK_H > y and is_block(px, pz)):
 			return false
 	for wl in dyn_walls:
-		if not Verbs.blocks_sight(wl): continue
+		if not (Verbs.blocks_sight(wl) if sight else Verbs.blocks_shots(wl)): continue
 		if y > float(wl["y"]) - 0.3 and y < float(wl["y"]) + Verbs.WALL_H and Geometry2D.segment_intersects_segment(Vector2(a.x, a.z), Vector2(b.x, b.z), wl["a"], wl["b"]) != null:
 			return false
 	return true

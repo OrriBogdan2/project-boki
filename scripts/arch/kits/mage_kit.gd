@@ -10,6 +10,7 @@ extends ArchKit
 ## The Storm Rod knocks the first foe back (a stun against a wall or another foe) and leaves a charge
 ## orb, a pickup that gives Wirerun back; Skycall drags a crowd the way you flick and grounds it.
 
+const SLOT_PINK := Color("ff5ab4")   # her ability slot colour (docs/VFX_QUALITY.md palette)
 const PINK := Color("ff3fb4")        # the lightning's hot core: it burns hot pink (DECISIONS)
 const COPPER := Color("e08a46")
 const DEEP_PINK := Color("e0148c")   # the aim kit whitens its accent: this lands as a rich hot pink
@@ -41,6 +42,7 @@ var reset_dash_boost := false  # a reset armed the next Wirerun: further, charge
 var reset_boost_t := 0.0       # s left on it
 var slams := 0
 var orb_bursts := 0
+var lmb_sd := {}                # the last finger bolt while it flies (its crackle, mage_bolt_fly, follows it)
 var lmb_n := 0                 # finger bolts fired (left, right, left...)
 var last_shot := 0
 var last_dash_kind := ""
@@ -287,6 +289,8 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 ## A new finger bolt left the hand: alternate hands (the bolt starts at that hand), a twist, a crackle
 ## at the fingertip; the round becomes a jagged bolt with a spark impact (content/vfx/mage.json).
 func _tick_lmb() -> void:
+	if not lmb_sd.is_empty() and not HeroSfx.fly(m, h, "mage_bolt_fly", lmb_sd):
+		lmb_sd = {}
 	var idle := wire.is_empty() and not rmb_down and run_t <= 0.0 and not ult.busy()
 	if h.is_local() and idle and not h.downed:
 		# the aim line runs through the cursor out to full range, an arrow tick at its end (always up)
@@ -317,6 +321,8 @@ func _tick_lmb() -> void:
 	sd["prev"] = p
 	sd["start"] = p
 	play("mage_lmb_l" if left else "mage_lmb_r")
+	lmb_sd = sd
+	m.sfx("mage_bolt_tail", p, -6.0 if h.is_local() else -9.0)     # sparks pattering after the snap
 	# a thrust from the shoulder to the fingertip, the hand's swoosh, then (at the release key) the fingertip
 	# crackles; a jagged bolt rides the round and splinters back where it ends
 	vfx("lmb", null, null, {"left": left})
@@ -774,9 +780,9 @@ func _build_mote() -> Node3D:
 	for ch in n.get_children():
 		(ch as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var lt := OmniLight3D.new()
-	lt.light_color = PINK
+	lt.light_color = SLOT_PINK       # her slot pink (#ff5ab4): the haze on the ground stays pink, not orange
 	lt.omni_range = 2.4
-	lt.light_energy = 1.2
+	lt.light_energy = 0.6
 	n.add_child(lt)
 	mote_pool.append(n)
 	return n
