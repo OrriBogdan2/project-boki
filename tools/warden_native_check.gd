@@ -367,7 +367,8 @@ func _moves(a: String, m: Node3D, nat: WardenNative) -> void:
 	var swing := String(nat.plays["attack"])
 	var before := _at(m, nat, s, "as_aim", 0.0)
 	var held := _at(m, nat, s, "as_lance", 0.6)
-	var own: bool = nat.player.current_animation != swing and nat.upper.clip == nat.player.get_animation("cn_u_lance_loop") and nat.upper.w >= 1.0
+	var lance := nat.player.get_animation("cn_u_lance_loop")
+	var own: bool = nat.player.current_animation != swing and nat.upper.clip == lance and nat.upper.w >= 1.0
 	ok(own, "%s: the lance holds its own clip over Meshy's idle (no swing; weight %.2f)" % [a, nat.upper.w])
 	var reach: Vector3 = held["hand"]
 	ok(reach.z < -0.2 and reach.y > 0.8, "%s: the lance's hand is held out ahead (%s)" % [a, reach])
