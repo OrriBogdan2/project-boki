@@ -75,6 +75,8 @@ func tick(dt: float) -> void:
 	_guide()
 	for h in [m.player, tu.guide] + tu.foes:
 		_keep_in(h)
+	for h in [tu.guide] + tu.foes:
+		_no_finish(h)
 	if m.truce:
 		m.truce.offers.clear()      # (sparring partners don't offer a truce)
 
@@ -87,6 +89,14 @@ func _keep_in(h: Hunter) -> void:
 	var back := DuoTutorial.RING_C + off.normalized() * BACK_R
 	h.teleport(Vector3(back.x, m.world.ground_at(back.x, back.y), back.y))
 	h.vel = Vector3.ZERO
+
+## Nobody loses here: a guide or rival bot that holds interact over a knocked hunter never gets to stomp it (the
+## execution would cost a life and land it by the drop, outside the ring); the knocked one is back up instead.
+func _no_finish(h: Hunter) -> void:
+	if h.stomp.is_empty():
+		return
+	Life.end_stomp(m, h, "gone")
+	h.finish_t = 0.0
 
 func _foe(f: Hunter, i: int, dt: float) -> void:
 	f.reveal_t = maxf(f.reveal_t, 0.3)       # (always in sight: nothing hides in a sparring ring)
