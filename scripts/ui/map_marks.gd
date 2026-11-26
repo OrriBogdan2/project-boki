@@ -4,7 +4,8 @@ extends RefCounted
 ## one badge on the minimap and the full map, and on the ground near you a ring and a short name. A thing's
 ## colour is its category: enemy red, loot gold, travel cyan, objective white (also the key's swatches).
 ## Blight nests get their ground ring here too (NestMap draws them on the maps, in ember: the enemy family).
-## Boss lairs, exits, beacons and the Ways Out have their own marks (ExitMark, ...) in the same colours. tools/minimap_check.gd asserts the registry, the colours and the key.
+## Boss lairs, exits, beacons, Ways Out: their own marks (ExitMark, ...), same colours.
+## tools/minimap_check.gd asserts the registry, the colours and the key.
 
 const ENEMY := Color("ff5a4a")
 const LOOT := Color("f2c84a")
