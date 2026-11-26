@@ -7,7 +7,9 @@ extends RefCounted
 
 const DT := 1.0 / 60.0
 const WARM := 30  # frames dropped before timing
-const TIMED := 240  # frames timed per case
+const TIMED := 120  # frames timed per block
+const ROUNDS := 4  # off/on blocks alternated, so a drifting box loads both sides alike
+const PX := Vector2i(1920, 1080)  # the shots' size
 
 var bad := 0
 var main: Node
@@ -28,12 +30,17 @@ func run(root: Node, mode: String = "check") -> void:
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
+	if mode == "shots":
+		main.get_window().size = PX
 	m = Match.new()
 	main.add_child(m)
 	var squad := 4 if mode == "shots" else 1
 	await m.start({"teams": 2, "squad": squad, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
 	m.set_process(false)
 	pl = m.player
+	var fade = main.get("fade")
+	if fade != null:
+		await fade.reveal(0.01)
 	if mode == "shots":
 		await _shots()
 	else:
@@ -107,29 +114,41 @@ func _shots() -> void:
 		await _go(40)
 		main.get_viewport().get_texture().get_image().save_png(dir.path_join(name + ".png"))
 	_clear()
-	var off := await _frame_ms()
-	pl.stun_t = 600.0
-	var on := await _frame_ms()
-	var row := "SEDGE frame ms off p95 %.2f mean %.2f | on p95 %.2f mean %.2f | delta p95 %.2f"
-	print(row % [off[0], off[1], on[0], on[1], on[0] - off[0]])
+	var off: Array = []
+	var on: Array = []
+	for r in ROUNDS:
+		pl.stun_t = 0.0
+		off.append_array(await _frame_ms())
+		pl.stun_t = 600.0
+		on.append_array(await _frame_ms())
+	var row := "SEDGE frame ms (%d frames each) off p95 %.2f mean %.2f | on p95 %.2f mean %.2f | delta p95 %.2f"
+	print(row % [off.size(), _p95(off), _mean(off), _p95(on), _mean(on), _p95(on) - _p95(off)])
 
 
-## [p95, mean] of the wall time between frames over TIMED frames of the fight.
+## The wall time between frames over TIMED frames of the fight, in ms.
 func _frame_ms() -> Array:
 	await _go(WARM)
 	var ts: Array = []
 	var last := Time.get_ticks_usec()
 	for i in TIMED:
-		m.step(DT)
-		await main.get_tree().process_frame
+		await _go(1)
 		var now := Time.get_ticks_usec()
 		ts.append(float(now - last) / 1000.0)
 		last = now
-	ts.sort()
+	return ts
+
+
+func _p95(ts: Array) -> float:
+	var s := ts.duplicate()
+	s.sort()
+	return s[int(s.size() * 0.95)]
+
+
+func _mean(ts: Array) -> float:
 	var sum := 0.0
 	for t in ts:
 		sum += t
-	return [ts[int(ts.size() * 0.95)], sum / ts.size()]
+	return sum / ts.size()
 
 
 func _go(frames: int) -> void:
