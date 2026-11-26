@@ -1,0 +1,37 @@
+{
+ "group": "hazards",
+ "name": "Terrain hazards",
+ "script": "tools/gen_sfx_hazards.py",
+ "sounds": {
+  "hazard_bed_lava": "loop", "hazard_bed_water": "loop", "hazard_bed_ice": "loop", "hazard_bed_static": "loop",
+  "hazard_bed_bramble": "loop",
+  "hazard_lava_burn": "dash", "hazard_wade": "dash", "hazard_swim": "dash", "hazard_breath": "grunt",
+  "hazard_ice_skid": "dash", "hazard_static_crackle": "impact", "hazard_bramble_snag": "dash", "hazard_warded": "ui"
+ },
+ "reach": {
+  "hazard_bed_lava": 16, "hazard_bed_water": 14, "hazard_bed_ice": 12, "hazard_bed_static": 12,
+  "hazard_bed_bramble": 10,
+  "hazard_lava_burn": 16, "hazard_wade": 16, "hazard_swim": 14, "hazard_ice_skid": 16,
+  "hazard_static_crackle": 18, "hazard_bramble_snag": 14
+ },
+ "signature": [],
+ "loops": ["hazard_bed_lava", "hazard_bed_water", "hazard_bed_ice", "hazard_bed_static", "hazard_bed_bramble"],
+ "play": {
+  "doc": "HazardSfx (scripts/match/hazard_sfx.gd). bed: the area's quiet loop, placed on its nearest ground to the listener, so it swells as you near the edge and sits round you inside; the nearest beds_max areas within the bed's reach sound, never more. contact: the cue at a hunter on that ground, every every_s seconds (the first at once on stepping in), only while moving when moving is true; warded_contact plays instead while it is warded (swimming). static has no cadence: its crackle plays on each shock. breath plays once a dip when breath falls under breath_at of full. warded plays the first time a Boki or perk keeps each kind of ground off you, once a match.",
+  "bed_db": -12.0,
+  "contact_db": -6.0,
+  "others_db": -4.0,
+  "beds_max": 2,
+  "bed_scan_s": 0.25,
+  "warded": "hazard_warded",
+  "warded_db": -8.0,
+  "kinds": {
+   "lava": {"bed": "hazard_bed_lava", "contact": "hazard_lava_burn", "every_s": 0.5, "moving": false},
+   "deep_water": {"bed": "hazard_bed_water", "contact": "hazard_wade", "warded_contact": "hazard_swim",
+    "every_s": 0.45, "moving": true, "breath": "hazard_breath", "breath_at": 0.4},
+   "ice": {"bed": "hazard_bed_ice", "contact": "hazard_ice_skid", "every_s": 0.6, "moving": true},
+   "static": {"bed": "hazard_bed_static", "contact": "hazard_static_crackle", "every_s": 0.0, "moving": false},
+   "bramble": {"bed": "hazard_bed_bramble", "contact": "hazard_bramble_snag", "every_s": 0.5, "moving": false}
+  }
+ }
+}
