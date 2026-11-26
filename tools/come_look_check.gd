@@ -247,6 +247,7 @@ func _carried_home(crowded: bool) -> void:
 	var res := _watch(who["pos"])
 	ok(res["spoke"].size() >= 1, "%s: they chatter (%s)" % [tag, ",".join(res["spoke"].keys())])
 
+
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
