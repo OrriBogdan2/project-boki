@@ -865,6 +865,7 @@ func _tele_mesh(col: Color, shape: int, order: int) -> MeshInstance3D:
 	mat.shader = TELEGRAPH
 	mat.set_shader_parameter("color", col)
 	mat.set_shader_parameter("shape", shape)
+	mat.set_shader_parameter("quiet", 1.0 if order < SideColor.ORDER_FOE else 0.0)  # yours and allies': a faint rim
 	mi.material_override = mat
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(mi)
@@ -872,7 +873,7 @@ func _tele_mesh(col: Color, shape: int, order: int) -> MeshInstance3D:
 	return mi
 
 
-func telegraph_circle(at: Vector3, radius: float, col: Color, order := 0) -> Node3D:
+func telegraph_circle(at: Vector3, radius: float, col: Color, order := SideColor.ORDER_FOE) -> Node3D:
 	var mi := _tele_mesh(col, 0, order)
 	mi.mesh = Models.flat_quad(radius * 2.0)
 	mi.set_meta("r", radius)
@@ -880,7 +881,9 @@ func telegraph_circle(at: Vector3, radius: float, col: Color, order := 0) -> Nod
 	return mi
 
 
-func telegraph_rect(at: Vector3, d: Vector2, length: float, width: float, col: Color, order := 0) -> Node3D:
+func telegraph_rect(
+	at: Vector3, d: Vector2, length: float, width: float, col: Color, order := SideColor.ORDER_FOE
+) -> Node3D:
 	var mi := _tele_mesh(col, 1, order)
 	var pm := PlaneMesh.new()
 	pm.size = Vector2(width, length)
