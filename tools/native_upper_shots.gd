@@ -1,20 +1,30 @@
 extends "res://tools/clip_shots.gd"
-## --native-upper-shots --shots-dir=<dir> [--size=480] [--ids=a,b] [--mode=swing|strafe|back]: each native Hunter
+## --native-upper-shots --shots-dir=<dir> [--size=480] [--ids=a,b] [--mode=swing|left|right|back] [--view=match|eye] [--zoom=1.0]: each native Hunter
 ## running at 4.6 m/s, a frame every 1/30 s to 1.2 s: <dir>/<id>/f###.png. swing: a side view, a swing pressed 0.3 s in.
-## strafe: facing -Z, running right, seen from the front. back: facing -Z, running backwards. Needs a renderer.
+## left, right (strafe) and back: aim -Z (up the screen at --view=match, the game's angle), moving -X, +X, +Z. --view=
+## match (default) or eye (a front three-quarter view at eye level). Needs a renderer.
 
 const DT := 1.0 / 30.0
 const PRESS := 0.3  # s into the run the swing starts
 const SECS := 1.2
 const RUN := 4.6  # m/s
 const IDS := ["mage", "juggernaut", "archer", "dredge"]
-## mode -> [velocity, the Hunter's yaw, the camera]
+## mode -> [velocity, the Hunter's yaw]
 const MODES := {
-	"swing": [Vector3(0, 0, -RUN), 90.0, Vector3(5.0, 1.2, 0.0)],
-	"strafe": [Vector3(RUN, 0, 0), 0.0, Vector3(3.0, 1.2, -4.5)],
-	"back": [Vector3(0, 0, RUN), 0.0, Vector3(3.0, 1.2, -4.5)],
+	"swing": [Vector3(0, 0, -RUN), 90.0],
+	"left": [Vector3(-RUN, 0, 0), 0.0],
+	"right": [Vector3(RUN, 0, 0), 0.0],
+	"back": [Vector3(0, 0, RUN), 0.0],
+}
+## view -> [fov, the camera, what it looks at]
+const VIEWS := {
+	"swing": [30.0, Vector3(5.0, 1.2, 0.0), Vector3(0, 0.9, 0)],
+	"match": [6.5, Vector3(0.0, 21.0, 9.4), Vector3(0, 0.8, 0)],
+	"eye": [30.0, Vector3(3.0, 1.3, -4.5), Vector3(0, 0.9, 0)],
 }
 var mode := "swing"
+var view := "match"
+var zoom := 1.0  # the lens widens by this much (a tall Hunter)
 
 
 func run(main: Node) -> void:
@@ -28,6 +38,10 @@ func run(main: Node) -> void:
 			frame_px = int(a.substr(7))
 		if a.begins_with("--mode="):
 			mode = a.substr(7)
+		if a.begins_with("--view="):
+			view = a.substr(7)
+		if a.begins_with("--zoom="):
+			zoom = float(a.substr(7))
 		if a.begins_with("--ids="):
 			ids = a.substr(6).split(",")
 	if main.get("fade") != null:
@@ -35,9 +49,10 @@ func run(main: Node) -> void:
 	main.get_window().size = Vector2i(frame_px, frame_px)
 	main.get_viewport().size = Vector2i(frame_px, frame_px)
 	_stage(main)
-	cam.fov = 30.0
-	cam.position = MODES[mode][2]
-	cam.look_at(Vector3(0, 0.9, 0))
+	var v: Array = VIEWS["swing" if mode == "swing" else view]
+	cam.fov = v[0] * zoom
+	cam.position = v[1]
+	cam.look_at(v[2] + Vector3(0, 0.5 * (zoom - 1.0), 0))
 	for id in ids:
 		await _hunter(String(id), out.path_join(String(id)))
 	print("NATIVE_UPPER_SHOTS_DONE")
