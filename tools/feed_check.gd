@@ -14,6 +14,7 @@ const STEP := 0.05  # s a simulated frame
 const HAND_DT := 0.25  # s per farm step
 const SNACK := "sapjelly"  # a snack of snacks.json: it gives joy and leans (kibble gives neither)
 const HAND_WITHIN := 3.0  # s a trusting Boki takes to eat from your hand
+const HOLD_THINK_S := 60.0  # s the hand cases hold the Boki's own think timer (each case runs ~12 s)
 
 var bad := 0
 var main: Node
@@ -286,6 +287,9 @@ func _hand_cases() -> void:
 		var hand: BaseHandFeed = home.life.hand
 		var fsm: Fsm = home.life.machine(e)
 		fsm.go(BaseLife.S.ROAM, "check")
+		# its own next pick waits out the case: a hungry Boki whose random think timer ran out fetched its own snack
+		# 1 s after a shy look (Roam>Eat), so the second offer was refused; hand feeding runs on the machine, not on t
+		e["t"] = HOLD_THINK_S
 		ok(BaseHandFeed.hint() == "Hold %s to feed" % Settings.key_cap("interact"), "prompt text names the use key")
 		ok(not hand.offer(e), "%s: no snack selected, the hold does not feed" % who)
 		hand.cycle()
