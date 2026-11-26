@@ -162,8 +162,12 @@ def brawl(path, undo=False):
         if cache[name] is not None:
             ev.append((int(t) / 1000.0, name, float(rank), float(db) - (float(duck) if undo else 0.0)))
     edges = [k for k, (t, n, rk, _) in enumerate(ev) if rk >= 0 and n in WINDUPS]
-    cast = {k: e for e in edges for k, (t, n, rk, _) in enumerate(ev)
-            if rk >= 0 and abs(t - ev[e][0]) * 1000 <= CAST_MS and abs(rk - ev[e][2]) < 0.5}
+    cast = {
+        k: e
+        for e in edges
+        for k, (t, n, rk, _) in enumerate(ev)
+        if rk >= 0 and abs(t - ev[e][0]) * 1000 <= CAST_MS and abs(rk - ev[e][2]) < 0.5
+    }
     total = max(t + len(cache[n]) / BRAWL_SR for t, n, _, _ in ev) + 0.1
     own = np.zeros(int(total * BRAWL_SR))
     rest = np.zeros_like(own)
@@ -173,7 +177,7 @@ def brawl(path, undo=False):
         tgt = own if rk == -2.0 else rest
         if k in cast:
             tgt = warn[cast[k]]
-        tgt[i:i + len(x)] += x[:len(tgt) - i]
+        tgt[i : i + len(x)] += x[: len(tgt) - i]
     rows = []
     for e in edges:
         t, n, _, db = ev[e]
@@ -192,18 +196,35 @@ def brawl_report(paths):
         m = lambda k: float(np.mean([r[k] for r in rows])) if rows else float("nan")
         for n in sorted({r[0] for r in rows}):
             rr = [r for r in rows if r[0] == n]
-            print("  %-14s x%-3d edge %.1f dB, wind-up (edge + cast) %.1f, your sounds %.1f, rest of mix %.1f" % (
-                n, len(rr), np.mean([r[1] for r in rr]), np.mean([r[4] for r in rr]),
-                np.mean([r[2] for r in rr]), np.mean([r[3] for r in rr])))
-        print("%s%s: %d wind-ups; edge over your sounds %+.1f dB, over the rest of the mix %+.1f dB; "
-              "wind-up over the rest %+.1f dB, buried %d" % (
-                  os.path.basename(path), " (duck undone)" if undo else "", len(rows), m(1) - m(2), m(1) - m(3),
-                  m(4) - m(3), sum(1 for r in rows if r[4] < r[3])))
+            print(
+                "  %-14s x%-3d edge %.1f dB, wind-up (edge + cast) %.1f, your sounds %.1f, rest of mix %.1f"
+                % (
+                    n,
+                    len(rr),
+                    np.mean([r[1] for r in rr]),
+                    np.mean([r[4] for r in rr]),
+                    np.mean([r[2] for r in rr]),
+                    np.mean([r[3] for r in rr]),
+                )
+            )
+        print(
+            "%s%s: %d wind-ups; edge over your sounds %+.1f dB, over the rest of the mix %+.1f dB; "
+            "wind-up over the rest %+.1f dB, buried %d"
+            % (
+                os.path.basename(path),
+                " (duck undone)" if undo else "",
+                len(rows),
+                m(1) - m(2),
+                m(1) - m(3),
+                m(4) - m(3),
+                sum(1 for r in rows if r[4] < r[3]),
+            )
+        )
 
 
 def main():
     if "--brawl" in sys.argv:
-        return brawl_report(sys.argv[sys.argv.index("--brawl") + 1:])
+        return brawl_report(sys.argv[sys.argv.index("--brawl") + 1 :])
     levels, rows, groups, medians, outliers, missing = audit()
     fresh = {n: d for n, d in outliers.items() if n not in levels["outliers_ok"]}
     stale = [n for n in levels["outliers_ok"] if n not in outliers]
