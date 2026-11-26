@@ -1,11 +1,15 @@
 extends "res://tools/vv_shots.gd"
 ## --boki-size-shots --shots-dir=<dir> [--view=3840x2160]: the hero and one average-size Vespyx, Mycroll, Prismander and
-## Heatherhorn side by side on flat ground at the match camera's closest zoom. Writes <dir>/size.png (the frame, HUD
-## hidden) and <dir>/size.json: each one's foot px, its real height in cm, the px that height spans on screen (vpx) and
-## the px its projected mesh vertices span (px; taller than vpx where the camera looks down).
+## Heatherhorn side by side on flat ground at the match camera's closest zoom, the Boki idling. Writes <dir>/game.png
+## (the real frame with the HUD), <dir>/size.png (the same frame, HUD hidden), <dir>/eye.png (a camera on the ground,
+## HUD hidden) and <dir>/size.json: per one its player name, foot px, its world box in cm (w, h, d), its data cm, and
+## what it covers at the game camera: bbox px (w, h) and the area px of its silhouette (convex hull of the mesh).
 
 const SPECIES := ["cindle", "burrlet", "puddlet", "heatherhorn"]
 const GAP := 1.7
+const EYE_FOV := 30.0  # degrees: the eye-level camera's vertical lens
+const EYE_DIST := 12.0  # m from the row
+const EYE_HEIGHT := 0.3  # m above the ground: a Boki's own eye height
 
 
 func run(main_node: Node) -> void:
@@ -32,6 +36,8 @@ func run(main_node: Node) -> void:
 	for k in ks:
 		k.teleport(k.home)
 	await _go(0.5, Callable(), [], 3.0)
+	await main.get_tree().process_frame
+	main.get_viewport().get_texture().get_image().save_png(dir.path_join("game.png"))
 	_hide_ui()
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
@@ -39,9 +45,12 @@ func run(main_node: Node) -> void:
 	img.save_png(dir.path_join("size.png"))
 	var cam := main.get_viewport().get_camera_3d()
 	var out := {"size": [img.get_width(), img.get_height()], "rows": []}
-	out["rows"].append(_row("hunter", P, cam))
+	out["rows"].append(_row(HeroTitle.base_name(String(P.arch)), P, cam, 0.0))
 	for k in ks:
-		out["rows"].append(_row(String(k.species), k, cam))
+		out["rows"].append(
+			_row(KinLib.kin(String(k.species)).display_name, k, cam, float(Unique.base_size(k.species)["cm"]))
+		)
+	await _eye_level(Vector3(home.x + GAP * 2.0, home.y, home.z))
 	var f := FileAccess.open(dir.path_join("size.json"), FileAccess.WRITE)
 	f.store_string(JSON.stringify(out))
 	f.close()
@@ -49,37 +58,49 @@ func run(main_node: Node) -> void:
 	main.get_tree().quit(0)
 
 
-func _row(label: String, node: Node3D, cam: Camera3D) -> Dictionary:
-	var lo := INF
-	var hi := -INF
-	var left := INF
-	var right := -INF
-	var low_y := INF
-	var high_y := -INF
+func _row(who: String, node: Node3D, cam: Camera3D, data_cm: float) -> Dictionary:
+	var lo := Vector3(INF, INF, INF)
+	var hi := -lo
+	var pts := PackedVector2Array()
 	for n in node.find_children("*", "MeshInstance3D", true, false):
 		var mi := n as MeshInstance3D
 		if not mi.is_visible_in_tree() or not mi.mesh is ArrayMesh:
 			continue
 		for v in mi.mesh.get_faces():
 			var w := mi.global_transform * v
-			low_y = minf(low_y, w.y)
-			high_y = maxf(high_y, w.y)
-			var p := cam.unproject_position(w)
-			lo = minf(lo, p.y)
-			hi = maxf(hi, p.y)
-			left = minf(left, p.x)
-			right = maxf(right, p.x)
+			lo = lo.min(w)
+			hi = hi.max(w)
+			pts.append(cam.unproject_position(w))
+	var hull := Geometry2D.convex_hull(pts)
+	var area := 0.0
+	for i in hull.size() - 1:
+		area += hull[i].x * hull[i + 1].y - hull[i + 1].x * hull[i].y
 	var foot := cam.unproject_position(node.global_position)
-	var up := cam.unproject_position(node.global_position + Vector3(0, high_y - low_y, 0))
+	var box := (hi - lo) * 100.0
+	var bbox := Rect2(pts[0], Vector2.ZERO)
+	for p in pts:
+		bbox = bbox.expand(p)
 	return {
-		"who": label,
+		"who": who,
 		"foot": [foot.x, foot.y],
-		"top": lo,
-		"px": hi - lo,
-		"box": [left, right],
-		"cm": (high_y - low_y) * 100.0,
-		"vpx": foot.y - up.y,
+		"box_cm": [box.x, box.y, box.z],
+		"data_cm": data_cm,
+		"px": [bbox.size.x, bbox.size.y],
+		"area_px": absf(area) * 0.5,
 	}
+
+
+## A camera on the ground facing the row from the front, the HUD hidden: size.png's row seen at the Boki's own height.
+func _eye_level(row_mid: Vector3) -> void:
+	var eye := Camera3D.new()
+	main.add_child(eye)
+	eye.fov = EYE_FOV
+	eye.global_position = row_mid + Vector3(0, EYE_HEIGHT, EYE_DIST)
+	eye.look_at(row_mid + Vector3(0, EYE_HEIGHT, 0))
+	eye.make_current()
+	await main.get_tree().process_frame
+	await main.get_tree().process_frame
+	main.get_viewport().get_texture().get_image().save_png(dir.path_join("eye.png"))
 
 
 ## Every 2D layer and top-level control off, so the frame is the world alone.

@@ -1,10 +1,11 @@
 extends RefCounted
-## --kin-size-check: a rigged Boki stands as tall as its data says (KinSize). Every species with a model, built the way
-## the farm and the match build it (Models.kin), measures within 10% of size.cm times KinSize.M_PER_CM, so the heights
-## stand in the ratio of the data's centimetres; the starters stand close together and Heatherhorn stands over all.
+## --kin-size-check: a rigged Boki is as big as its data says (KinSize). Every species with a model, built the way the
+## farm and the match build it (Models.kin), has a longest side within 10% of size.cm times KinSize.M_PER_CM; the
+## starters have close footprints (seen from above) and Heatherhorn is bigger than all of them. --table prints each.
 
 const TOLERANCE := 0.1  # the share a species' measured height may differ from its data height
 const STARTERS := ["cindle", "puddlet", "burrlet"]
+const FOOTPRINT_SPREAD := 1.2  # the biggest starter footprint is at most this many times the smallest
 const BIG := "heatherhorn"
 const BIG_OVER := 1.5  # Heatherhorn stands at least this many times the tallest starter
 
@@ -18,16 +19,16 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 
-## The metres from the lowest to the highest point of the meshes under `root`, in the world.
-func _stands(root: Node3D) -> float:
-	var lo := INF
-	var hi := -INF
+## The metre size of the box round the meshes under `root`, in the world.
+func _box(root: Node3D) -> Vector3:
+	var all := AABB()
+	var first := true
 	for n in root.find_children("*", "MeshInstance3D", true, false):
 		var mi := n as MeshInstance3D
-		var box := mi.global_transform * mi.get_aabb()
-		lo = minf(lo, box.position.y)
-		hi = maxf(hi, box.end.y)
-	return hi - lo
+		var b := mi.global_transform * mi.get_aabb()
+		all = b if first else all.merge(b)
+		first = false
+	return all.size
 
 
 func run(m: Node) -> void:
@@ -43,33 +44,47 @@ func run(m: Node) -> void:
 			continue
 		var k := Models.kin(id, {})
 		stage.add_child(k)
-		var h := _stands((k.get_node("Body/Flex/BokiRig") as BokiRig).model)
+		var box := _box((k.get_node("Body/Flex/BokiRig") as BokiRig).model)
+		var longest := box[box.max_axis_index()]
 		var cm := float(Unique.base_size(id)["cm"])
-		seen[id] = h
-		worst = maxf(worst, absf(h / (cm * KinSize.M_PER_CM) - 1.0))
+		seen[id] = box
+		worst = maxf(worst, absf(longest / (cm * KinSize.M_PER_CM) - 1.0))
 		if _print_table:
 			print(
 				(
-					"KIN_SIZE_ROW %s data %.0f cm, stands %.1f cm, raw glb %.1f cm"
-					% [id, cm, h * 100.0, KinSize.height(k.get_node("Body/Flex/BokiRig").model) * 100.0]
+					"KIN_SIZE_ROW %s data %.0f cm, box %.0f x %.0f x %.0f cm"
+					% [id, cm, box.x * 100, box.y * 100, box.z * 100]
 				)
 			)
 		k.queue_free()
 	ok(seen.size() >= 40, "%d species with a model measured" % seen.size())
 	ok(
 		worst <= TOLERANCE,
-		"every species stands within %d%% of its data height (worst %.1f%%)" % [TOLERANCE * 100.0, worst * 100.0]
+		(
+			"every species' longest side is within %d%% of its data size (worst %.1f%%)"
+			% [TOLERANCE * 100.0, worst * 100.0]
+		)
 	)
-	var tall := 0.0
+	var big := 0.0
+	var small := INF
+	var longest_starter := 0.0
 	for s in STARTERS:
-		tall = maxf(tall, float(seen[s]))
-	var small := 99.0
-	for s in STARTERS:
-		small = minf(small, float(seen[s]))
-	ok(tall / small < 1.25, "the starters stand close together (%.0f to %.0f cm)" % [small * 100.0, tall * 100.0])
+		var box: Vector3 = seen[s]
+		big = maxf(big, box.x * box.z)
+		small = minf(small, box.x * box.z)
+		longest_starter = maxf(longest_starter, box[box.max_axis_index()])
 	ok(
-		float(seen[BIG]) >= tall * BIG_OVER,
-		"Heatherhorn stands over every starter (%.0f cm against %.0f)" % [float(seen[BIG]) * 100.0, tall * 100.0]
+		big / small < FOOTPRINT_SPREAD,
+		"the starters have close footprints (%.0f to %.0f cm2)" % [small * 1e4, big * 1e4]
+	)
+	var heather: Vector3 = seen[BIG]
+	var heather_longest := heather[heather.max_axis_index()]
+	ok(
+		heather_longest >= longest_starter * BIG_OVER,
+		(
+			"Heatherhorn is bigger than every starter (%.0f cm against %.0f)"
+			% [heather_longest * 100.0, longest_starter * 100.0]
+		)
 	)
 	stage.queue_free()
 	print("KIN_SIZE_DONE bad=%d" % bad)

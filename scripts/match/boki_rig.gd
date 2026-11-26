@@ -1500,9 +1500,9 @@ func _swim_clip() -> String:
 	return "swim" if _swimmer else "paddle"
 
 
-## m of it under the water when it floats: SWIM_LINE of its height (KinSize.target) at its size in the world.
+## m of it under the water when it floats: SWIM_LINE of its height (FRAME "top") at its size in the world.
 func _afloat() -> float:
-	return SWIM_LINE * KinSize.target(species) * flex.global_basis.y.length() / float(root.get_meta("fit", 1.0))
+	return SWIM_LINE * float(FRAME[species]["top"]) * flex.global_basis.y.length()
 
 
 ## m the model rises off the bed: afloat in deep water, onto the surface for one that hovers.
