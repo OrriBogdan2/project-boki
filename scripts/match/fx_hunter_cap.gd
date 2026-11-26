@@ -23,7 +23,7 @@ var _match: Match
 var _glows: Array[MeshInstance3D] = []
 var _fresh: Array = []  # mesh nodes that entered the match since the last look
 var _scan_in := 0.0
-var _held := {}  # instance id -> true: the glows now capped or dimmed (one far from every Hunter and not here needs nothing)
+var _held := {}  # instance id -> true: the glows now capped or dimmed (any other far one needs nothing)
 
 
 func _init(m: Match) -> void:
