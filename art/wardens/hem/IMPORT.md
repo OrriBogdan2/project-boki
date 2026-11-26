@@ -85,3 +85,9 @@ r29 (2026-11-26): the skirt shell is turned +14 deg so the slit sits in front of
 so the knee hit the panel beside it), knee-follow s 0.6 and the r28 V godet re-centred; skirt texture = a Meshy retexture of the r21
 skirt model (dark wine, `hem_meshy_skirt29.jpg`), lining = a darker copy (`hem_meshy_skirt_lining29.jpg`; replaces skirt22 /
 skirt_lining23). Tools: tools/art1/hem_r29 (README). Needs an owner visual check before it goes live.
+
+r30 (2026-11-26): the r28/r29 slit godet (a membrane 10-15 cm in front of the right thigh; the swinging thigh crossed it = white
+shards in the front slit) is replaced by a wine curtain BETWEEN the legs (prim `skirt-godet30`, 320 tris, each edge skinned to its
+own leg), and the lining = the outer skirt image x0.55 with no hue shift (`hem_meshy_skirt_lining30.jpg`; replaces skirt_lining29,
+which read as a pale-pink flap). Outer skirt, body, hands, bow unchanged (partlock PASS). 90,391 tris. Tools: tools/art1/hem_r30
+(README). Needs an owner visual check before it goes live.

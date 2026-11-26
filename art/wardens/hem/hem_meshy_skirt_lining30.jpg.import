@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://buc8d047gqcun"
-path="res://.godot/imported/hem_meshy_skirt_lining29.jpg-1b4edf6b7e2c98732f6267642541a267.ctex"
+uid="uid://cxtro1btpd4by"
+path="res://.godot/imported/hem_meshy_skirt_lining30.jpg-50b057d34c5f1a7fe69c63b112b13962.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "bd14bb2d028450e7a1e6feed489ead4c"
+"md5": "9f16c5feb33741862cc5c31f5b881a66"
 }
 
 [deps]
 
-source_file="res://art/wardens/hem/hem_meshy_skirt_lining29.jpg"
-dest_files=["res://.godot/imported/hem_meshy_skirt_lining29.jpg-1b4edf6b7e2c98732f6267642541a267.ctex"]
+source_file="res://art/wardens/hem/hem_meshy_skirt_lining30.jpg"
+dest_files=["res://.godot/imported/hem_meshy_skirt_lining30.jpg-50b057d34c5f1a7fe69c63b112b13962.ctex"]
 
 [params]
 
