@@ -279,8 +279,10 @@ static func catch_up(roster: Array) -> Array:
 	return out
 
 ## The form names version-11 saves gave every 4 levels (e.g. "Cindfang"), so migrate can keep them.
+## These are the names those saves already hold, not today's species names: the six first species keep their
+## old roots; the later species (cairnback, zephyrak, hivara) have no v11 saves, so theirs start from the shown name.
 const V11_ROOTS := {"cindle": "Cind", "puddlet": "Pud", "burrlet": "Burr", "zapple": "Zap", "pebbit": "Peb",
-	"wisplet": "Wisp"}
+	"wisplet": "Wisp", "cairnback": "Cairn", "zephyrak": "Zeph", "hivara": "Hiv"}
 const V11_SUFFIX := {
 	"fierce": ["fang", "claw", "maw", "rend", "fury"],
 	"steadfast": ["shell", "ward", "keep", "bulwark", "aegis"],
@@ -379,6 +381,7 @@ static func dress(root: Node3D, rec: Dictionary) -> void:
 		root.set_meta("evo_scale", 1.0 + grown + minf(forms.size() * 0.1, 0.6))
 	if String(ln[0]) != "":
 		base = base.lerp(Lean.face(ln[0])["tint"], LEAN_TINT * float(ln[1]))
+		root.set_meta("evo_scale", float(root.get_meta("evo_scale", 1.0)) * Lean.size(rec))
 		if Lean.on():
 			Lean.mark(body, ln[0], Lean.flecks(rec))
 	# recolour the body to the form's and the meals' tint

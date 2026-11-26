@@ -185,6 +185,64 @@ Other checks:
     - Expedition island: 31 of 31 laps clean, 853 of 853 walk-aways leave at once, 851 walk-pasts with 0.0000m pull.
     - Training map: all 20 clusters clean.
 
+## Review pass 11-22 (the stabilize sprint's day-3 review, on main 0a0db9747c)
+
+Five checks on main as it stood: `--move-feel-check`, `--glide-hold-check`, `--mantle-check`, `--dash-wall-check`, `--chain-sweep-check`. "11-15" is the same check on main 24a9d4bd01. A check must not depend on the box: every number is a count of 60 Hz steps. Verdicts: ok (inside the target, same as 11-15), drifted (inside the target but moved since 11-15, or its target moved), regressed (outside the target).
+
+| Row | Target | Main today | 11-15 | Verdict |
+|---|---|---|---|---|
+| glide_catch_t | <= 0.2 s | 0.183 s | 0.183 | ok |
+| glide_speed / glide_sink | 4.5-5.5 / 1.38-1.42 m/s | 5.00 / 1.40 | same | ok |
+| dashglide_open_speed | >= 12 m/s | 23.0 | 23.0 | ok |
+| dashglide_1s_speed | >= 10.5 m/s | 11.58 | 8.55 | ok (up since 11-15: decision 0099) |
+| dashglide_2s_speed | 7-9 m/s | 7.96 | 5.87 | ok (same) |
+| dashglide_3s_speed | <= 6.5 m/s | 6.33 | n/a | ok |
+| abyss_lift_t | <= 1.0 s | 0.667 s | 0.500 | drifted (0.17 s slower, inside) |
+| abyss_recover_depth / abyss_kill_depth | >= 15 m / 17-18 m | 18.5 / 17.5 | same | ok |
+| abyss_bounce_m | >= 1.5 m | 1.59 | 1.585 | ok |
+| abyss_tint_end | >= 0.95 | 0.943 | 1.000 | regressed (the check: 11-17's graded curve 1.5 reads 0.943 at 0.5 m above the kill line) |
+| cam_lag_m | <= 0.40 m | 0.387 | 0.284 | drifted (+0.10 m, 0.013 m from the limit) |
+| cam_settle_t / cam_glide_lead_m | <= 0.35 s / >= 0.4 m | 0.233 / 0.637 | 0.200 / 0.633 | ok |
+| cam_glide_zoom_05 | 1.12-1.25x | 1.178 | 1.178 | ok |
+| cam_dive_zoom_hold / cam_dive_land_view | >= 0.98x / <= 0.3 | 1.000 / 0.173 | same | ok |
+| land_carry_hop_held / drop4_held | 0.98-1.02x | 1.000 / 1.000 | same | ok |
+| land_carry_glide_held | 0.98-1.07x | 1.000 | 1.052 | drifted (the glide's extra no longer carries into the landing; inside the range) |
+| ledge_rise_t / ledge_rise_peak_m | <= 0.45 s / >= 0.2 m | 0.333 / 0.400 | 0.333 / 0.412 | ok |
+| ledge_rise_vy_max | <= 7 m/s | 5.82 | 5.58 | ok |
+| dive_feather_speed / _m | >= 8 m/s / >= 7 m | 9.69 / 9.65 | 8.14 / 8.25 | ok |
+| haste_two_bonus_x | 1.49-1.51x | 1.326x | no row | regressed (speed cap, see fix 1) |
+| haste_cap_mps | 6.95-7.0 | 7.0 | no row | drifted (cap not scaled with the run speed) |
+| dash_curve thief (peak_u / peak_k / dist / time) | 0.28-0.44 / 1.7-1.9 / 0.95-1.05 / 0.95-1.08 | 0.10 / 1.55 / 0.43 / 0.52 | 0.36 / 1.77 / 1.0 / 1.0 | regressed (the check, see fix 2) |
+| ground_stop_dist | 0.27-0.40 m | 0.429 m | 0.305 | drifted (11-17 exact walking brake at the 1.16 body-scale run) |
+| ledge_dash ashwick | exit >= 0.75x run | 0.367x | no row | regressed (kit, follow-up) |
+| ledge_dash bulwark | held height <= 1 step, glider <= 2 steps | 14 / 15 | no row | regressed (kit, follow-up) |
+| knock_lace_04_m / knock_sparkle_04_m / knock_done_04 | 4.03-4.23 / 2.62-2.82 m / >= 0.85 | 4.24 / 2.88 / 0.80 | no rows | drifted (by 0.01-0.06 m; the share 0.05 short) |
+| vault_exit_run | 0.95-1.05x | 1.18x | no row | regressed (thief hand-over, follow-up) |
+| source_hunter_screen_pct | 8.3-9.3 % | 4.73 | no row | drifted (camera framing; the target was never re-fitted, hunter_screen_pct itself is ok) |
+| `--glide-hold-check` | 0 fails | 5 (bulwark x3, ostra x2) | 0 | regressed (bulwark's air dash holds height 14 steps) |
+| `--mantle-check` | 0 fails | 2 (dash-rim gunslinger, bulwark: 2.1 s stall) | 2 (the same) | ok vs 11-15, still red |
+| `--dash-wall-check` | 0 fails | 3 (juggernaut rock a80, mage rock a80, mage Neve wall a80) | 2 | drifted (mage Neve wall a80 is new: 15% kept, 17% table) |
+| `--chain-sweep-check` | advisory | 0 fails, 25 documented refusals | n/a | ok |
+
+Fixed in this pass (before / after, `--move-feel-check` FAIL rows 14 -> 8; the other four checks are unchanged):
+
+1. **Speed cap.** `hunter_move.json` `speed_cap` was 7.0 m/s, the source's cap at the source's run speed. Run speeds took decision 0061's body scale 1.16 (5.28 m/s), the cap did not, so the haste status alone (+35%, 7.13 m/s) hit the cap and haste plus a kin buff gave 1.326x instead of 1.50x (decision 0054). Now `speed_cap` = 7.0 x 1.16 = 8.12. `haste_two_bonus_x` 1.326 -> 1.500x, `haste_cap_mps` 7.000 -> 8.120 (target now 8.07-8.12), `haste_clip_rate` 1.000 -> 1.000, `--move-speed-check` 0 fails. `--feel-golden-check` is red both ways (115 rows, see follow-ups), so it cannot vouch for this change.
+2. **Dash curve rows measured a leaked spin.** `_dash_curves` stopped Bulwark's dash at its end while Bulwark's spin hit was still queued (`Match.later`); the next row's Sable then fired it as a 0.22 s long dash. Six thief rows read: peak_u 0.100, peak_k 1.547x, dist 0.429x, time 0.521x. The check now runs 120 quiet steps after each hunter. Now 0.362, 1.767x, 1.004x, 1.007x. No game code changed: Sable's dash was fine.
+3. **abyss_tint_end** is sampled 0.25 m above the kill line (was 0.5 m): 0.943 -> 0.971 (target stays 0.95). The 11-17 graded tint (curve 1.5) made the old sample point read 0.94 on purpose.
+
+Follow-ups (one line each, none fixed here):
+
+- Bulwark's air dash holds its height 14 steps and delays the glider 15 steps (`ledge_dash`, `--glide-hold-check` x3, `--mantle-check` dash-rim 2.1 s stall): one root cause, the whirl; HARD 5/10, BLOCKS 4/10 (breaks "ledges always responsive").
+- Ostra: the glider opened from a run-speed jump reads gain inf (`--glide-hold-check`); HARD 3/10, BLOCKS 2/10.
+- Ashwick ledge dash leaves the lip at 0.367x run (needs 0.75x); HARD 4/10, BLOCKS 2/10.
+- Sable's Cartwheel hand-over is 1.18x her hasted run (`vault_exit_run`); HARD 3/10, BLOCKS 2/10.
+- `--feel-golden-check` is red on main (115 rows; "golden traces take main's (re-record check pending)" since the 11-17 merge); HARD 4/10, BLOCKS 6/10 (it is the net under every feel change).
+- Stop distance 0.43 m: the farm rows in `--move-rate-check` and `ground_stop_dist` read the 11-17 exact brake at the 1.16 run speed against unscaled source distances; decide the targets (x1.16) or the brake; HARD 2/10, BLOCKS 2/10.
+- `cam_lag_m` is 0.013 m from its limit (0.284 on 11-15): find which camera change added 0.1 m before the next one pushes it over; HARD 3/10, BLOCKS 3/10.
+- `abyss_lift_t` 0.50 -> 0.667 s, `land_carry_glide_held` 1.05 -> 1.00x: inside their targets, note for the next owner playtest.
+- Knock rows (`knock_*_04`) and `source_hunter_screen_pct` need their targets re-fitted; HARD 2/10, BLOCKS 1/10.
+- `--dash-wall-check`: mage a80 on the Neve wall keeps 15% (table 17%); HARD 3/10, BLOCKS 1/10.
+
 ## What changed (all in clearly marked `(movefeel)` blocks)
 
 - **Input to screen:** the local player is drawn at the present (`Hunter.render_pos`, `LOCAL_RENDER_LEAD`), extrapolated by the fraction of a step since the last one. Before, it was interpolated up to a step in the past, so a press showed a frame late and the camera trailed. Everyone else is still interpolated, and a teleport snaps.
@@ -290,7 +348,7 @@ Owner: "still zoomed in too much. Start zoomed out as far as it allows, then the
 
 ## Move pass: wall moves, ledges that answer, a springier abyss (`--wallmove-check`)
 
-- **Wall kick / wall dance** (`WallMoves`, every hunter; item 149, the REFERENCE wall dance): touching or facing a wall (your keys, else your aim), every jump press hops you off it: no limit, no cooldown, no glider, and a stone scuff with a varied pitch that everyone nearby hears (online too: the "fx" "whop" event). Keys into the wall or none add `KICK_RISE` 0.8m to the jump you are on; keys away push you off at 7.5 m/s. A hop only starts up to `HOP_CLIMB_CAP` 1.6m over your take-off ground, so you can dance at a wall indefinitely, jump + kick + mantle (1.5m) tops 4 terraces (3.2m, the Cinder Steps plateau), and 5 terraces (4.0m) stay sheer. Near a wall a capped press does nothing rather than open the glider (the glide button or a held glide still does). The glider stays shut until each hop's rise ends. **Diminishing returns** (decision 0158, owner 11-13): each kick in a row without touching the ground keeps less of its rise and push: kick 1 at 100%, kick 2 at 60%, kick 3 and later at 30% (`content/rules/wall_kick.json` `curve`, `WallMoves.chain`). Landing resets the chain. `HOP_CLIMB_CAP` is unchanged. A climb kick never stacks on an earlier climb's rise still going (it only lifts the rise left to its own share), so mashing gains nothing; it still adds to a jump or a push-off. `--wallmove-check`, a 5-terrace wall (4.0m), a press every step: peak 4.98m on main, 4.26m with the curve alone, 1.81m now. Timed presses on the way down peak at 2.28m either way, because the cap stops a hop that starts too high.
+- **Wall kick / wall dance** (`WallMoves`, every hunter; item 149, the REFERENCE wall dance): touching or facing a wall (your keys, else your aim), every jump press hops you off it: no limit, no cooldown, no glider, and a plant-and-push sound by weight class (`ClimbSfx`, `wallkick_<light|medium|heavy>`) that everyone within the footstep range hears (online too: SfxCast sends it). Keys into the wall or none add `KICK_RISE` 0.8m to the jump you are on; keys away push you off at 7.5 m/s. A hop only starts up to `HOP_CLIMB_CAP` 1.6m over your take-off ground, so you can dance at a wall indefinitely, jump + kick + mantle (1.5m) tops 4 terraces (3.2m, the Cinder Steps plateau), and 5 terraces (4.0m) stay sheer. Near a wall a capped press does nothing rather than open the glider (the glide button or a held glide still does). The glider stays shut until each hop's rise ends. **Diminishing returns** (decision 0158, owner 11-13): each kick in a row without touching the ground keeps less of its rise and push: kick 1 at 100%, kick 2 at 60%, kick 3 and later at 30% (`content/rules/wall_kick.json` `curve`, `WallMoves.chain`). Landing resets the chain. `HOP_CLIMB_CAP` is unchanged. A climb kick never stacks on an earlier climb's rise still going (it only lifts the rise left to its own share), so mashing gains nothing; it still adds to a jump or a push-off. `--wallmove-check`, a 5-terrace wall (4.0m), a press every step: peak 4.98m on main, 4.26m with the curve alone, 1.81m now. Timed presses on the way down peak at 2.28m either way, because the cap stops a hop that starts too high.
 - **Wall bounce** (`WallMoves`): an airborne dash or boosted jump that hits a wall more than 20 degrees off its normal and at least 4 m/s into it reflects about the normal, keeping 85% of the speed. Your keys steer the rebound for 0.25s at 25 m/s^2. Head-on it stops as before. Ground dashes, shoves and charges, walls low enough to mantle, knockbacks and slow jumps don't bounce. Dust, a spark and the landing thud mark it.
 - **Glider on a wall** (`WallMoves.stopped`, decision 0023): a glider never bounces or stops dead on a cliff face, a ruin wall or a Tenzo rock. [game data] REFERENCE glides on UE's CharacterMovementComponent, whose wall hit slides: the part of the speed into the wall is dropped, the part along it kept, and the canopy stays open; the glide force then holds the slide at cruise x sin(angle off the normal) while your keys push into it (0, 30, 60 degrees in `--move-feel-check`, rows `glide_wall_*`). [?] No glide-wall row in the physics dump and no footage of one.
 - **Ledges:** the rise no longer waits for the apex of a jump. Any airborne state (rising, falling, gliding, just after releasing the glider, after a dash) catches a ledge top within `MANTLE_REACH` above you when you press into it, or when glide momentum carries you into it. A ledge higher than where you last stood counts once you have been in the air 0.5s (`GlideLift.LEDGE_AIR_T`), are gliding, or let go of the glider within the last 0.6s (`FEATHER_KEEP`); before, launching from a higher place meant the ledge never caught you. Stunned or rooted players never grab a ledge. Only a tile sharing an edge with yours counts, so sliding along a wall never pulls you up it.
@@ -575,7 +633,7 @@ No double buffering: a press is gathered, queued and applied in the same frame's
 - **A cleared kit move froze its pose.** When a kit cleared its move (a cancelled draw, the lowered aegis), `Hunter.anim_s` kept the old move with its clock stopped, so the body held that frame. The move now ends.
 - **Kael and Tenzo RMB: tap/hold splits, kept.** The press can't show which one it is until the release (the tap) or the hold threshold, so both act on the tap's release (tick 6 here, tick 0 from the release). Tenzo's is owner item 61 ("a tap shows nothing, it lands on the release"). Alternative not built: start Kael's Finishing Slam wind-up on the press, which would bring its strike up to 0.3 s earlier (a balance change).
 - **Neve and Motley RMB: tick 1** (within target; Cinder's RMB is a cast since 11-21: pose tick 0, bolt tick 24). The aim pose starts on the kit's first hold tick, which runs the step after the press.
-- **Since the branch was cut (11-13), main's kits act on the release for a tap/hold split** (the check's `WINDUP` rows carry it, tick 6 = the release): Kael and Tarek's LMB, Bjorn's LMB, Claire's, Ryzz's and Gil's RMB (Cinder's RMB left the list on 11-21: a cast that shows on the press). Open, not built: start each hold pose on the press, as Lace's and Mossy's now do. Gil is new in the roster since the table above.
+- **Since the branch was cut (11-13), main's kits act on the release for a tap/hold split** (the check's `WINDUP` rows carry it, tick 6 = the release): Tarek's LMB (Kael's swings on the press since ext/kael-lmb-press), Bjorn's LMB, Claire's, Ryzz's and Gil's RMB (Cinder's RMB left the list on 11-21: a cast that shows on the press). Open, not built: start each hold pose on the press, as Lace's and Mossy's now do. Gil is new in the roster since the table above.
 ## Steps: the drawn body and the camera never jolt (`StepSmooth`, `--step-smooth-check`)
 - Stepping onto a one-terrace lip snaps the body up (`Hunter` step_up, 0.8 m in one step), and a run down a flight of stairs is a fall. Both stay exactly as they were for hit boxes and ledge rules: only the drawn node eases.
 - `StepSmooth.ease` chases the body's y at most `step_max_speed` 4.4 m/s (0.073 m a frame), never further than `step_lag_up` / `step_lag_down` behind. Higher than a step above the ground (`step_free_from` 0.9 to `step_free_to` 1.5 m: a jump, a glide, a fall) the body is drawn where it is. The camera follows the drawn y. All in `FeelConfig` ("Steps").
@@ -1027,7 +1085,7 @@ Source: `origin/ext/hero-ref-footage`, folders `venator_ghost` (Ghost), `juggern
 
 **Worth a look (not built, PARITY FIRST):**
 - Lace's RMB tap: the source data fires on any release ("HOLD to charge, RELEASE to fire"; pin.md: a tap fires uncharged). Ours looses nothing on a tap (archer.json's own rule).
-- Kael's LMB swings on the release (the greatsword's charge): a press held past a tap swings later. Brall's press starts the series at once; his hold is the ranged blast.
+- ~~Kael's LMB swings on the release~~ Built (ext/kael-lmb-press): the press swings at once, the hold still charges the Searing Wave (frames in docs/heroes/juggernaut.md, "LMB press").
 - Albert's aegis (not in this slice) rises at its 0.1 s hold, 7 steps at 60 Hz with nothing before it; the same shape as Lace's draw before the fix, if Oath's shield shows on the press.
 - Tenzo's LMB and RMB (not in this slice): a tap still shows nothing until the release (first sign 2 frames at 60 Hz, 7 at 144: the tap plus the tick hop). LMB, fixed to the source (breah.md 0118: the gauntlet is cocked on the hold's first frame): the `breah_wind` pose now starts `ArchKit.HOLD_POSE_T` (0.1 s) into the hold instead of at the 0.28 s tap window, so 60 Hz frame 6 (was 16) and 144 Hz frame 15 (was 39); the lane and charge still wait for the tap window and a tap shows no hold pose (`--hold-pose-check`). RMB kept: owner item 61 ("a tap shows nothing, it lands on the release") overrides the source's crouch, which shows from the first frame of its hold (0253).
 

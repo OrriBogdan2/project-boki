@@ -2,7 +2,7 @@ extends RefCounted
 ## An ult's cast lock and the press made at its end (docs/heroes/ults.md, docs/decisions/0118-cc-exit-buffer.md):
 ## a Shift, LMB or jump pressed PRESS_S before the lock ends goes off on the first free step, as in the source.
 ## Used by the hero ult checks (Albert, Kael, Motley, Sparkle). A press is timed in steps from the last step that
-## forbade it (or from the press, with no lock): 1 is the next step. Kael's LMB, say, goes on its release, a step on.
+## forbade it (or from the press, with no lock): 1 is the next step. Kael's LMB swings on the press, the same step.
 
 const PRESS_S := 0.1  # s of lock left when the press is made (inside Loco.press_buffer)
 const SLOTS := ["dash", "lmb", "jump"]
@@ -47,12 +47,15 @@ static func _cast(m: Match, P: Hunter, n: int, ult := true) -> int:
 		if not k.ult_running() and not locked(P) and P.grounded and k.dash_left() <= 0.0 and P.roll_t <= 0.0:
 			break
 		m.step(Match.DT)
+	# one step with the keys up, as between any two real presses: a trial that ended on the step its press went
+	# off (a DashFlow-replayed tap) must not leave the attack key down into the next press
+	P.inp["fire"] = false
+	P.inp["move"] = Vector2.ZERO
+	m.step(Match.DT)
 	for key in k.cd:
 		k.cd[key] = 0.0
 	P.dashes = P.max_dashes()
 	P.fire_cd = 0.0
-	P.inp["fire"] = false
-	P.inp["move"] = Vector2.ZERO
 	P.inp["aim"] = P.pos + Vector3(4, 0.9, 0)
 	if ult:
 		HunterKeys.ult_pressed(P)

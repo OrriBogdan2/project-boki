@@ -192,9 +192,7 @@ func reel() -> void:
 	stagger_mult = 1.0
 	stagger_t = StealReel.reel_time()
 	stun_t = maxf(stun_t, stagger_t)
-	_cancel_tele()
-	st = "recover"
-	st_t = stagger_t
+	_stun("reel", stagger_t)  # (the machine owns the state: a reel stands it still like a stagger)
 
 
 func _stagger(by: Ent, opts: Dictionary) -> void:

@@ -8,19 +8,14 @@ extends RefCounted
 
 var bad := 0
 
-
 func ok(cond: bool, what: String) -> void:
 	print("BLIGHT %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond:
-		bad += 1
-
+	if not cond: bad += 1
 
 func _run(m: Match, secs: float, each := Callable()) -> void:
 	for i in int(secs / Match.DT):
-		if each.is_valid():
-			each.call()
+		if each.is_valid(): each.call()
 		m.step(Match.DT)
-
 
 func _match(main: Node, seed_v: int, raid := "clear", extra := {}) -> Match:
 	var m := Match.new()
@@ -30,7 +25,6 @@ func _match(main: Node, seed_v: int, raid := "clear", extra := {}) -> Match:
 	m.start(o)
 	m.set_process(false)
 	return m
-
 
 ## Everyone but the player stands still far away, camp monsters are cleared, and the Blight the
 ## test doesn't place is gone, so each part tests one thing.
@@ -44,14 +38,11 @@ func _quiet(m: Match, keep_wardens := false) -> void:
 		if mb is Blight:
 			(mb as Blight).burrow()
 		else:
-			mb.dead = true
-			mb.visible = false
+			mb.dead = true; mb.visible = false
 	m.player.ctrl = "idle"
-
 
 func _open_spot(m: Match, near: Vector3, r := 9.0) -> Vector3:
 	return m.world.free_spot_near(near, [], 1.0, 0.5, r)
-
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -66,7 +57,6 @@ func run(main: Node) -> void:
 	_tide_sfx(main)
 	print("BLIGHT DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
-
 
 # ------------------------------------------------------------------ 1. the strength curve
 func _curve(main: Node) -> void:
@@ -117,16 +107,11 @@ func _curve(main: Node) -> void:
 	var e_dmg := float(sk["dmg"]) * BlightDir.dmg_k(l0_core)
 	var late_hp := float(sk["hp"]) * BlightDir.hp_k(l10_core)
 	var late_dmg := float(sk["dmg"]) * BlightDir.dmg_k(l10_core)
-	print(
-		"BLIGHT skitter early %.1f hp / %.1f a bite, late core %.1f hp / %.1f a bite" % [e_hp, e_dmg, late_hp, late_dmg]
-	)
+	print("BLIGHT skitter early %.1f hp / %.1f a bite, late core %.1f hp / %.1f a bite" % [e_hp, e_dmg, late_hp, late_dmg])
 	ok(e_hp <= 18.0 and e_dmg <= 4.5, "an early Skitter dies fast and bites soft")
 	ok(late_hp >= e_hp * 2.0 and late_dmg >= e_dmg * 2.0, "a late one is the real thing")
 	var wd: Dictionary = Data.MOBS["bl_warden"]
-	ok(
-		float(wd["dmg"]) * BlightDir.dmg_k(l0_core) <= 7.0,
-		"an early Warden's bolt is soft (%.1f)" % (float(wd["dmg"]) * BlightDir.dmg_k(l0_core))
-	)
+	ok(float(wd["dmg"]) * BlightDir.dmg_k(l0_core) <= 7.0, "an early Warden's bolt is soft (%.1f)" % (float(wd["dmg"]) * BlightDir.dmg_k(l0_core)))
 	m.queue_free()
 	# the raid condition: night is worse than a clear evening, at the same spot and time
 	var mn := _match(main, 7101, "night")
@@ -170,10 +155,8 @@ func _spawns(main: Node) -> void:
 	var bad_spot := 0
 	for b in b_v.wardens:
 		for c in w.camp_spots:
-			if b.flat_dist(c["pos"]) < 8.0:
-				bad_spot += 1
-		if m.lairs and not m.lairs.lair_of(b.pos, 3.0).is_empty():
-			bad_spot += 1
+			if b.flat_dist(c["pos"]) < 8.0: bad_spot += 1
+		if m.lairs and not m.lairs.lair_of(b.pos, 3.0).is_empty(): bad_spot += 1
 	ok(bad_spot == 0, "Wardens stand clear of camps and lairs")
 	# noise in the open draws nothing out of the ground: Skitters only come from nests (blight_nests.gd)
 	_quiet(m)
@@ -199,7 +182,6 @@ func _spawns(main: Node) -> void:
 	)
 	ok(not far or b_v.spawned == n0, "noise away from any nest draws no Skitters (they only come from nests)")
 	m.queue_free()
-
 
 # ------------------------------------------------------------------ 3. noise, a fight, a chase
 func _noise_and_fights(main: Node) -> void:
@@ -297,51 +279,21 @@ func _noise_and_fights(main: Node) -> void:
 	else:
 		b._despawn_tick()
 		if not runner.gone:
-			print(
-				(
-					"BLIGHT burrow dead=%s gone=%s far_spot %s " % [runner.dead, runner.gone, str(far_spot)]
-					+ (
-						": runner at %s st %s heard %s idle %.1f, hunters %s"
-						% [
-							str(runner.pos),
-							runner.st,
-							str(runner.heard),
-							runner.idle_t,
-							str(
-								(
-									m
-									. hunters
-									. filter(func(o): return not o.out)
-									. map(func(o): return snappedf(o.flat_dist(runner), 0.1))
-								)
-							)
-						]
-					)
-				)
-			)
+			print("BLIGHT burrow dead=%s gone=%s far_spot %s " % [runner.dead, runner.gone, str(far_spot)] + ": runner at %s st %s heard %s idle %.1f, hunters %s" % [str(runner.pos), runner.st, str(runner.heard), runner.idle_t, str(m.hunters.filter(func(o): return not o.out).map(func(o): return snappedf(o.flat_dist(runner), 0.1)))])
 		ok(runner.dead and runner.gone, "an idle Skitter far from everyone burrows away")
 	# the network: a Blight's snapshot carries its light, alert and strength, and builds a Blight
 	var wd := b.spawn("bl_warden", _open_spot(m, base + Vector3(-6, 0, 0), 4.0), 0.5)
 	wd.cone_a = 1.25
 	wd.spot = 0.4
 	var it: Array = m._ser(wd)
-	ok(
-		it.size() >= 21 and is_equal_approx(float(it[17]), 1.25) and String(it[9]) == "bl_warden",
-		"a Warden's snapshot carries its light and state (%d fields)" % it.size()
-	)
+	ok(it.size() >= 21 and is_equal_approx(float(it[17]), 1.25) and String(it[9]) == "bl_warden", "a Warden's snapshot carries its light and state (%d fields)" % it.size())
 	var it2 := it.duplicate()
-	it2[1] = "mnet1"
-	it2[17] = -0.5
+	it2[1] = "mnet1"; it2[17] = -0.5
 	var made: Ent = m._net_make(it2)
-	if made:
-		m._net_apply(made, it2)
-	ok(
-		made is Blight and absf((made as Blight).cone_a + 0.5) < 0.01 and (made as Blight).cone != null,
-		"a remote Warden is built from the snapshot, light and all"
-	)
+	if made: m._net_apply(made, it2)
+	ok(made is Blight and absf((made as Blight).cone_a + 0.5) < 0.01 and (made as Blight).cone != null, "a remote Warden is built from the snapshot, light and all")
 	ok(Net.VERSION != "0.4.0", "the network version moved on (%s)" % Net.VERSION)
 	m.queue_free()
-
 
 # ------------------------------------------------------------------ 4. a Warden's light
 func _warden(main: Node) -> void:
@@ -412,7 +364,6 @@ func _warden(main: Node) -> void:
 		p.inp["crouch"] = false
 	m.queue_free()
 
-
 # ------------------------------------------------------------------ 5. bots
 func _bots(main: Node) -> void:
 	var m := _match(main, 7105, "clear")
@@ -426,8 +377,7 @@ func _bots(main: Node) -> void:
 			break
 	ok(bot != null, "found a bot")
 	if bot == null:
-		m.queue_free()
-		return
+		m.queue_free(); return
 	bot.ctrl = "bot"
 	var base := _open_spot(m, m.world.spawns[2 % m.world.spawns.size()])
 	bot.teleport(base)
@@ -442,16 +392,9 @@ func _bots(main: Node) -> void:
 	var t := 0.0
 	var hp0 := bot.hp + bot.armor
 	while t < 15.0 and not (s1.dead and s2.dead):
-		m.step(Match.DT)
-		t += Match.DT
-		if s1.tgt == bot or s2.tgt == bot:
-			targeted = true
-	print(
-		(
-			"BLIGHT a bot vs two early Skitters: %.1fs, skitters dead %s/%s, bot lost %.0f, bot out %s downed %s"
-			% [t, s1.dead, s2.dead, hp0 - bot.hp - bot.armor, bot.out, bot.downed]
-		)
-	)
+		m.step(Match.DT); t += Match.DT
+		if s1.tgt == bot or s2.tgt == bot: targeted = true
+	print("BLIGHT a bot vs two early Skitters: %.1fs, skitters dead %s/%s, bot lost %.0f, bot out %s downed %s" % [t, s1.dead, s2.dead, hp0 - bot.hp - bot.armor, bot.out, bot.downed])
 	ok(targeted, "Skitters go for bots too")
 	ok(s1.dead or s2.dead, "the bot fights back")
 	ok(not bot.out and not bot.downed, "and isn't knocked by early Blight")
@@ -461,17 +404,12 @@ func _bots(main: Node) -> void:
 	var s3 := b.spawn("bl_skitter", _open_spot(m, bot.pos + Vector3(5, 0, 0), 3.0), l)
 	s3.cd = 99.0
 	var fl: Vector3 = Bot.new()._blight_flee(m, bot)
-	ok(
-		fl != Vector3.INF and Vector2(fl.x - s3.pos.x, fl.z - s3.pos.z).length() > s3.flat_dist(bot),
-		"a hurt bot picks a spot away from the Blight"
-	)
+	ok(fl != Vector3.INF and Vector2(fl.x - s3.pos.x, fl.z - s3.pos.z).length() > s3.flat_dist(bot), "a hurt bot picks a spot away from the Blight")
 	m.queue_free()
-
 
 # ------------------------------------------------------------------ 6. the tide's damage
 ## The source's death circle per stage, flat, scaled by our medium health over theirs (heart.json).
 const TIDE_SRC := [3.0, 6.0, 50.0, 100.0, 150.0, 200.0, 250.0, 300.0, 350.0, 400.0, 450.0]
-
 
 func _tide(main: Node) -> void:
 	var m := _match(main, 7105, "clear", {"heart": true})
@@ -493,12 +431,8 @@ func _tide(main: Node) -> void:
 			var ticks := ceili(float(Data.CLASSES[c]["hp"]) / Heart.tide_dmg(st))
 			ttk += " %s %ds" % [c, ticks * int(rl["tide_tick_s"])]
 		var from := t0 + close * st / Heart.TIDE_STAGES
-		print(
-			(
-				"BLIGHT tide stage %d from %.0fs: %.2f a tick (source %.0f), full health dies in%s"
-				% [st, from, Heart.tide_dmg(st), TIDE_SRC[st], ttk]
-			)
-		)
+		print("BLIGHT tide stage %d from %.0fs: %.2f a tick (source %.0f), full health dies in%s"
+			% [st, from, Heart.tide_dmg(st), TIDE_SRC[st], ttk])
 	ok(stages_ok, "the close runs the source's 11 stages, each at its damage scaled by health")
 	m.time = t0 + close * 3.0 - m.sess_t0
 	ok(Heart.tide_stage(m) == Heart.TIDE_STAGES - 1, "the last stage holds once the ring is closed")
@@ -527,7 +461,6 @@ func _tide(main: Node) -> void:
 	_end_phase(m)
 	m.queue_free()
 
-
 ## The end phase (0051): a tick ramps from the last stage's to end_dmg_k times it over the end close, and
 ## out in the Blight it wears down the down health of a Hunter it downed itself (never before the end phase,
 ## never one a rival downed).
@@ -546,11 +479,8 @@ func _end_phase(m: Match) -> void:
 	var b: Hunter = m.hunters.filter(func(o): return o != m.player)[0]
 	var rival: Hunter = m.hunters.filter(func(o): return o.team != b.team)[0]
 	var site: Vector3 = m.heart.site
-	var cases := [
-		["before the end phase", Heart.last_close() - 30.0, null],
-		["downed by a rival", end_t, rival],
-		["downed by the Blight", end_t, null]
-	]
+	var cases := [["before the end phase", Heart.last_close() - 30.0, null], ["downed by a rival", end_t, rival],
+		["downed by the Blight", end_t, null]]
 	for c: Array in cases:
 		m.time = float(c[1]) - m.sess_t0
 		b.teleport(m.world.free_spot_near(site + Vector3(Heart.tide_r(m) + 10.0, 0, 0), [], 1.0, 0.45, 8.0))
@@ -573,12 +503,11 @@ func _end_phase(m: Match) -> void:
 		else:
 			ok(outside and lost < top * 0.5, "%s: the tide leaves the downed to bleed (%.1f)" % [c[0], lost])
 
-
 # ------------------------------------------------------------------ 7. the tide's sounds
 ## Onset once when the tide starts, a sting at each new close stage and none inside one, the front's rumble on
 ## the nearest point of the ring, louder the nearer the wall (content/sfx/tide.json, scripts/match/tide_sfx.gd).
 func _tide_sfx(main: Node) -> void:
-	Sfx.loop_stop(TideSfx.FRONT_KEY)  # (the last section's match was freed without a frame to lapse its hold)
+	Sfx.loop_stop(TideSfx.FRONT_KEY)       # (the last section's match was freed without a frame to lapse its hold)
 	var m := _match(main, 7106, "clear", {"heart": true})
 	_quiet(m)
 	var h: Heart = m.heart
@@ -619,7 +548,6 @@ func _tide_sfx(main: Node) -> void:
 	print("BLIGHT tide rumble: %.1f dB at 60 m, %.1f dB at 12 m; on the ring %s" % [vols[0], vols[1], on_ring])
 	ok(on_ring and vols[1] > vols[0] + 3.0, "the rumble sits on the wall and rises as it nears you")
 	m.queue_free()
-
 
 func _rumble_db() -> float:
 	if not Sfx.loop_on(TideSfx.FRONT_KEY):

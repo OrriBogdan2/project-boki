@@ -1,0 +1,29 @@
+{
+ "group": "climb",
+ "name": "Wall kick, ledge grab and mantle by weight class",
+ "script": "tools/gen_sfx_climb.py",
+ "sounds": {
+  "wallkick_light": "step",
+  "wallkick_medium": "step",
+  "wallkick_heavy": "step",
+  "ledgegrab_light": "step",
+  "ledgegrab_medium": "step",
+  "ledgegrab_heavy": "step",
+  "mantle_light": "step",
+  "mantle_medium": "step",
+  "mantle_heavy": "step"
+ },
+ "reach": {
+  "wallkick_light": 20,
+  "wallkick_medium": 20,
+  "wallkick_heavy": 20,
+  "ledgegrab_light": 20,
+  "ledgegrab_medium": 20,
+  "ledgegrab_heavy": 20,
+  "mantle_light": 20,
+  "mantle_medium": 20,
+  "mantle_heavy": 20
+ },
+ "signature": [],
+ "replaces": []
+}

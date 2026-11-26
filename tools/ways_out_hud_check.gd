@@ -15,27 +15,22 @@ extends RefCounted
 
 var bad := 0
 
-
 func ok(cond: bool, what: String) -> void:
 	print("WAYSHUD %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond:
-		bad += 1
-
+	if not cond: bad += 1
 
 func _st(m: Match, i: int) -> int:
 	return int(WaysOutHud.seats(m)[i]["st"])
 
-
 func run(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
-	Save.d.erase("hud_reveal")  # the full HUD (staging is --hud-reveal-check's)
+	Save.d.erase("hud_reveal")      # the full HUD (staging is --hud-reveal-check's)
 	Econ.ensure()
 	var m := Match.new()
 	main.add_child(m)
-	m.start(
-		{"teams": 3, "squad": 1, "tier": 0, "length": 1e9, "seed": 7301, "no_drop": true, "heart": true, "god": true}
-	)
+	m.start({"teams": 3, "squad": 1, "tier": 0, "length": 1e9, "seed": 7301, "no_drop": true,
+		"heart": true, "god": true})
 	for o in m.hunters:
 		if o != m.player:
 			o.ctrl = "idle"
@@ -93,7 +88,7 @@ func run(main: Node) -> void:
 	m.time = float(q["uplink_open_s"]) + 1.0 - m.sess_t0
 	ok(_st(m, 2) == st.OPEN, "past uplink_open_s the Uplink is open")
 	var foe: Hunter = m.hunters.filter(func(h): return h.team != m.player.team)[0]
-	var qs: QuestSeats = m.exits.seats  # (their host moves, from the Sealed Lair and the Uplink's own outpost)
+	var qs: QuestSeats = m.exits.seats      # (their host moves, from the Sealed Lair and the Uplink's own outpost)
 	qs.build()
 	var l: Dictionary = qs.lair.ref
 	var x: Dictionary = qs.uplink.ref
@@ -152,10 +147,8 @@ func run(main: Node) -> void:
 	# ---------------------------------------------------------------- 6. the Gate prompt
 	var it := {"kind": "heart", "act": "leave", "prog": 0.5, "need": Heart.r("gate_hold_s")}
 	var other := {"kind": "heart", "col": Color.WHITE, "label": "x"}
-	ok(
-		not WaysOutHud.gate_prompt(m.hud, Vector2(1280, 720), 500.0, other),
-		"only the carrier's leave prompt is drawn by the strip"
-	)
+	ok(not WaysOutHud.gate_prompt(m.hud, Vector2(1280, 720), 500.0, other),
+		"only the carrier's leave prompt is drawn by the strip")
 	ok(Heart.r("gate_hold_s") == 4.0, "the Gate hold is 4 s (rules)")
 	h_v.state = Heart.S.WAITING
 	ok(
@@ -172,10 +165,8 @@ func run(main: Node) -> void:
 	var gate_it := h_v.interact_for(m.player)
 	var label := String(gate_it["label"])
 	var has_key := label.contains(Settings.key_cap("interact"))
-	ok(
-		gate_it.get("act", "") == "leave" and label.contains("leave now, small reward") and has_key,
-		"at the Gate the carrier's prompt says leave now, small reward, with the live key"
-	)
+	ok(gate_it.get("act", "") == "leave" and label.contains("leave now, small reward") and has_key,
+		"at the Gate the carrier's prompt says leave now, small reward, with the live key")
 	ok(is_equal_approx(float(gate_it["need"]), 4.0), "...and holds 4 s")
 	# ---------------------------------------------------------------- 7. the real HUD draws it
 	m.player.pos = h_v.gate
@@ -190,7 +181,6 @@ func run(main: Node) -> void:
 	print("WAYSHUD DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
 
-
 # ---------------------------------------------------------------- 8. the quest tracker
 ## The quest tracker's rows, on the real HUD with the match paused (so the host does not move the seats).
 func _tracker(main: Node, m: Match) -> void:
@@ -203,10 +193,8 @@ func _tracker(main: Node, m: Match) -> void:
 	ok(qs.uplink != null and b != null, "the map has both quest seats and the Sealed Lair has its boss")
 	if qs.uplink == null or b == null:
 		return
-	ok(
-		QuestTracker.WORDS.has(qs.lair.kind) and QuestTracker.WORDS.has(qs.uplink.kind),
-		"both quest seats have their plain words"
-	)
+	ok(QuestTracker.WORDS.has(qs.lair.kind) and QuestTracker.WORDS.has(qs.uplink.kind),
+		"both quest seats have their plain words")
 	m.interact = {}
 	var away := m.world.free_spot_near(x["pos"] + Vector3(40, 0, 0), [], 1.0, 0.45, 6.0)
 	p.teleport(away)
@@ -231,10 +219,8 @@ func _tracker(main: Node, m: Match) -> void:
 	)
 	r = await _tracker_rect(main, m)
 	var strip: Rect2 = SafeArea.seen.get("ways_strip", [Rect2()])[0]
-	ok(
-		r.has_area() and r.position.y >= strip.end.y and r.end.y <= m.hud.msgs.top,
-		"drawn under the strip (%s) and above the message lane (y %d): %s" % [strip, int(m.hud.msgs.top), r]
-	)
+	ok(r.has_area() and r.position.y >= strip.end.y and r.end.y <= m.hud.msgs.top,
+		"drawn under the strip (%s) and above the message lane (y %d): %s" % [strip, int(m.hud.msgs.top), r])
 	b.hp = b.max_hp * 0.7
 	qs.lair._force(QuestSeat.S.IN_USE, "check", foe.team)
 	nums = QuestTracker.numbers(m, qs.uplink, QuestTracker.rival_seat(m, p.team))
@@ -263,7 +249,6 @@ func _tracker(main: Node, m: Match) -> void:
 	qs.lair._force(QuestSeat.S.TAKEN, "check", p.team)
 	r = await _tracker_rect(main, m)
 	ok(QuestTracker.seat_of(m, p.team) == null and not r.has_area(), "the quest finished (taken): no tracker")
-
 
 ## The tracker's rect on the HUD this frame (no area when it is not drawn). SafeArea records the panel pass.
 func _tracker_rect(main: Node, m: Match) -> Rect2:

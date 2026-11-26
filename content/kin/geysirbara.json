@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "geysirbara",
+	"name": "Geysirbara",
+	"theme": "bloom",
+	"type2": "tide",
+	"flavor": "Massive capybara, erupting geyser pool and moss terraces.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "dribbara",
+		"stage": 3,
+		"from": "lilybara"
+	}
+}

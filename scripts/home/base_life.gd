@@ -135,6 +135,16 @@ func toy_spots() -> Array:
 	return h.toys.toys().map(func(t): return t["pos"])
 
 
+## A hungry Boki asleep by day or playing with a friend leaves it for the snack just dropped in the bowl, so it
+## answers at once instead of after the nap (20-40 s) or the game (up to 40 s). Night sleepers sleep on till dawn.
+func hungry_wake(k: Dictionary) -> void:
+	var m := machine(k)
+	if m.is_in(S.NAP) and _awake(k):
+		k["nap_t"] = 0.0  # NAP -> ROAM is guarded on the nap being over
+	if m.is_in(S.NAP) or m.is_in(S.PLAY_WITH):
+		m.go(S.ROAM, "hungry")
+
+
 ## The Boki's machine (made the first time the base sees it).
 func machine(k: Dictionary) -> Fsm:
 	if not k.has("life"):
@@ -260,6 +270,10 @@ func choose(k: Dictionary) -> void:
 	if Mentor.is_mentor(rec):
 		_mentor(k)
 		return
+	var lazy := float(Content.rules("base_axes")["nap_odds"]) * (BaseAxes.mult(rec, "nap") - 1.0)
+	if lazy > 0.0 and randf() < lazy:
+		_nap(k, "lazy")
+		return
 	if BaseShy.keep_to_edge(h, k):
 		return
 	if not night and _clock >= float(k.get("doze_ok", 0.0)) and randf() < _doze(k):
@@ -280,17 +294,21 @@ func choose(k: Dictionary) -> void:
 	if randf() < float(r_v["chore_chance"]) and _chore(k):
 		return
 	var mate := _mate(k, near)
-	if not mate.is_empty() and (bored or randf() < float(pers.get("social", 0.22)) + bond(rec, mate["rec"]) * 0.5):
-		_tag(k, mate)
-		return
-	if (bored or randf() < 0.2 + float(traits.get("curiosity", 0.5)) * 0.3) and h.toys.pick(k, true):
+	if not mate.is_empty():
+		var chase := float(pers.get("social", 0.22)) + bond(rec, mate["rec"]) * 0.5
+		if bored or randf() < chase * BaseAxes.mult(rec, "chase"):
+			_tag(k, mate)
+			return
+	var play := 0.2 + float(traits.get("curiosity", 0.5)) * 0.3
+	if (bored or randf() < play * BaseAxes.mult(rec, "play")) and h.toys.pick(k, true):
 		m.go(S.PLAY, "toy")  # HomeToys has it now: the walk, the play and the squabbles are its
 		return
 	if bored:
 		_nap(k, "bored")
 		return
 	var here: int = h.world.island_of(k["pos"].x, k["pos"].z)
-	if randf() < float(pers.get("cling", 0.25)) and h.world.island_of(h.ppos.x, h.ppos.z) == here:
+	var cling := float(pers.get("cling", 0.25)) * BaseAxes.mult(rec, "cling")
+	if randf() < cling and h.world.island_of(h.ppos.x, h.ppos.z) == here:
 		k["goal"] = h._seat(k, h.ppos, 1.5)
 	else:
 		k["goal"] = h.world.random_ground(maxi(here, 0))

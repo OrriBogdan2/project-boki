@@ -30,7 +30,12 @@ script, so a change to a shape, colour or clip is an edit and a rebuild:
 | `scripts/match/boki_dna.gd` | Inborn proportions, ear and tail shapes, birthmark (`Unique.dress` calls it) |
 | `shaders/boki_eye.gdshader`, `boki_marks.gdshader` | Eye with its own iris colour; coat marks fixed to the rest pose |
 
-Clips: idle, walk, run, attack, ability, hop, sleep, eat, pet, chop, mine, carry, tend. In a match the ability plays as
+Clips: idle, walk, run, attack, ability, hop, sleep, eat, pet, chop, mine, carry, tend (the three starters also
+glide: `boki_clips.glide`, a 1.6 s loop carried through your glide, Vespyx spread like a flying squirrel, Prismander
+splayed flat with its tail sculling, Mycroll tucked into its cap; `BokiHomeClips` then builds no glide pose for them).
+A clip can go into the live .glb without the model source or Blender: `~/venv-img/bin/python tools/boki/glb_clip.py
+<id> <clip> --check=idle` appends it (the mesh bytes untouched) after rebuilding the baked idle to within 0.05 degrees;
+a clip that shows a hidden prop (the berry) still needs the Blender build. In a match the ability plays as
 `cast` (0.56 s, release at 0.2 s), retimed at load from the keyed one (`BokiSwing`; decision 0040): `Kin` holds the skill
 until the release frame. A Blender pass should key `cast` per species (same name and release time) and drop the retime.
 Home and garden-game clips (settle, nap, wake, munch, nudge, climb, splash, rush, brace, dodge, stonehop, spin, crouch, burst, sulk) are not baked: `BokiHomeClips` builds them when the rig
@@ -38,6 +43,8 @@ Home and garden-game clips (settle, nap, wake, munch, nudge, climb, splash, swim
 loads, from the species' own idle and sleep with `BokiHomePoses` deltas by body plan (quad, bird, legless) and a small
 `TWEAK` table per species. `kstate` sleep settles down, naps (curled, slow breathing) and wakes with a stretch; the
 `kact` meta munch (at a feeder) and nudge, climb, splash (the ball, post and tub, toys.json `clip`) play the rest.
+The munch and the nap are the species' own baked `eat` and `sleep` clips when those pass `BokiClipCover` (the coverage
+test: not a held pose); the built ones, and settle and wake's curl, are the fallback.
 Tumble's moves play `kact` rush (coil, then lunge), brace (squat, shiver) and dodge (sway, hop aside), each as long as
 `impact_s`; Echo Steps plays stonehop (one `hop_s` hop, legs tucked) and spin (`EchoSteps.spin_s()`). `--boki-rig-check`
 asserts every rigged species has all twelve, with the five game clips timed to those beats and no T-pose frame.
@@ -87,6 +94,15 @@ them; a prop named in the species' `GLOW_PIECES` wears the glow (Lunowl's dazzle
 `boki_coat` (atlas, ink), `boki_glow` (the species' glow), `boki_face` (lids, brows, mouth), `boki_eye`. Face LODs
 stay off (`FACE_LOD_BIAS`): Godot cuts them from the rest pose, where the lids lie folded.
 
+**The face overlay is per species** (`BokiRig.uses_overlay`, owner 11-24: the overlay eyes read as glued on). A species
+not listed in `content/rules/boki_eyes.json` drops the Face mesh at load and shows the coat's own painted eyes;
+expressions, blinks and eye looks stop with it. The 17 listed species have no usable eyes of their own under the
+overlay (most had them painted out by `boki_scan.py`'s `"cover"`) and keep the overlay until their eye-paint pass
+lands (rebake with `cover` 0 where the scan has eyes, else a Meshy eye retexture): remove the id from the list in that
+pass. `BokiRig.face_overlay = true` is the global override that brings the overlay back on every species (the face
+checks turn it on). `face.py` and the Face in each glb stay. `--boki-eyes-shots --shots-dir=<dir>` (GPU) renders each
+species' head as the game builds it, with the overlay forced on, and the match camera.
+
 ### A summoned Boki (out of the wisp)
 
 The Boki bursting out of its wisp (decision 0039) is the same `Kin` and rig, so it plays the clips above. The burst
@@ -109,6 +125,31 @@ than what shows: the head covers its rim. Past that the high cameras and `CamRig
 Palettes live at the top of each species' coat section (`PLUM`, `SHELL`...); tools held in the tail are Vespyx's `chop`
 and `mine` clips, and `boki_clips.chop_mouth` / `mine_mouth` are the mouth versions the others use.
 
+11-22: Spirevark (`moundvark`), Murmurling (`murmurling`) and Barrelmander (`spatewader`) have their own clips
+(`moundvark_anim.py`, `murmurling_anim.py`, `spatewader_anim.py`) on the borrowed Glomwort skeleton and the
+`auto_legs.py` legs: an aardvark that sniffs with its snout low, rakes and rears up to call its swarm; a starling that
+snaps its head about, darts and pecks, sings with its pipe tail up; a salamander that bends in S-curves with the barrel
+water sloshing behind. `reclip.py` re-keys everything but walk and run (the planted-paw trot stays), then
+`gait_layer.py` adds each module's `GAIT` body motion (head, neck, spine, hips, root rotations only) on top of those
+two, the legs untouched. Run both once, in that order, on a file whose walk and run are the plain trot (to redo, run
+`auto_legs.py` first). `--anim-coverage-check`: all six states of the three rows read `clip`.
+
+11-20: Frigatee (`floenatee`), Gongibbon (`gibbelle`) and Prowyak (`glaciyak`) have their own clips (`floenatee_anim.py`,
+`gibbelle_anim.py`, `glaciyak_anim.py`) on the borrowed Glomwort skeleton: a seal's hump-and-haul and belly-flop, a gibbon's
+pendulum roll and bell clang, a yak's lumber, gore and ground slam. Their glbs were re-keyed with `tools/boki/reclip.py`
+(`blender -b --factory-startup --python tools/boki/reclip.py -- --species=<id>`): it reads the built .glb back, swaps
+the actions for the module's `CLIPS` and exports again, body, face, skin and atlases untouched (the unchanged clips came
+back identical), for a species whose raw Meshy model is not at hand. A full `build_boki.py` run gives the same clips.
+11-22: Prowyak has `auto_legs.py` legs (below), so reclip keeps its leg bones and planted-paw walk and run and re-keys
+only the other 11 clips, legs at rest (the module's lumbering walk/run would glide the paws and is not used).
+11-20: Crofthorn (`heatherhorn`) and Anvilbrock (`kilnbadger`) have their own clips (`heatherhorn_anim.py`,
+`kilnbadger_anim.py`) on the borrowed Glomwort skeleton: a cow's level-backed plod, horn sweep and proud bellow; a honey
+badger's low swagger, headbutt and ringing anvil. Their glbs were re-keyed with `tools/boki/reclip.py`. Then they got
+their real legs back on top: `auto_legs.py heatherhorn top=0.42 reach=1.15`, `auto_legs.py kilnbadger top=0.35
+reach=1.35` (the args main's leg pass used, read back off its bones and swing). To re-key them again, run `reclip.py`
+on the legless glb from before the legs (`git show 836178d90b:art/kin/<id>/<id>.glb`; its assert wants the module's
+skeleton), then `auto_legs.py` with those args. The trot touches down at the wrap, so heatherhorn's walk and run seams
+sit in SEAM_OVER (2.09, 1.62).
 11-20: Buckleron (`limpetor`) and Lanterloris (`moonloris`) have their own clips (`limpetor_anim.py`, `moonloris_anim.py`)
 on the borrowed Glomwort skeleton: a limpet that creeps under a rocking shield, bashes it down and clamps to brace, and
 a slow loris that climbs hand over hand, freezes and snaps, and floats up with its lantern belly. Their glbs were
@@ -377,3 +418,18 @@ action, sleep, hop, ability or attack takes over at once and restarts the count.
 Boki is: its Bokidex quirk (`content/rules/boki_quirks.json` on ext/boki-quirks; the runtime does not read it) else
 body plan and type; the `note` of each row says which. Review: `--boki-idle-shots` (a row per species: 4 breath
 frames, 4 fidget frames); axis signs: x pitches the nose up, y turns left, z rolls; right-side bones mirror y and z.
+
+### Own clips for a long body, a flyer and a lizard (squalltross, threadwyrm, tuatrune, velvorm)
+
+These four are Meshy scans on Glomwort's 5-bone rig (root, hips, spine, neck, head), so a body shape has only those
+bones to move. `tools/boki/<id>_anim.py` keys idle, walk, run, hop, carry, attack, ability and sleep for each:
+threadwyrm a travelling S-wave (yaw on head, neck, spine, hips, each `LAG` later, the root countering), velvorm a
+caterpillar's arch running tail to head with the root stretching and bunching, squalltross a wing beat as the spine's
+lateral scale (`SCALED`: the neck takes the inverse so the head keeps its shape; the body rises as the wings open),
+tuatrune a lizard's spine bend against its steps. Squalltross and tuatrune have `auto_legs.py` legs: `KEEP_LEGS`
+(walk, run) tells `tools/boki/reclip_own.py` to keep the file's leg curves and root height and lay the module's body
+turns over them, so the paws still plant (slide 35% -> 11% on tuatrune's walk: the old shared body drove the feet).
+Rebuild without the raw model: `blender -b --factory-startup --python tools/boki/reclip_own.py -- --species=<id>`, then
+`godot --headless --import`. Contact sheet: `--boki-anim-shots --clips --boki=<id> --tag=after --shots-dir=<dir>` (a row
+a clip, eight poses across its loop, front quarter). Walk loop seams: `SEAM_OVER` squalltross 1.50, tuatrune 1.57 (the
+planted-paw wrap, 1.45 before, a little rougher under a calmer body).
