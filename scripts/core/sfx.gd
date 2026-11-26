@@ -284,6 +284,7 @@ var sound_reach := {}  # sound -> metres it carries, past hear_range (content/sf
 ## sound -> dB added in play, so an old file off its category sits level (sfx_levels.json "gain_db")
 var sound_gain := {}
 var last_played := {}
+var foe_next := false  # play_foe is playing: _bus_for sends the voice to SFXFoe
 ## --sfx-silence-audit only (null = off): play() and loop_start() append [name, pos, found].
 var cue_log = null
 var rng := RandomNumberGenerator.new()
@@ -609,8 +610,8 @@ func _process(delta: float) -> void:
 	for n in amb_layers.keys():
 		var ap: AudioStreamPlayer = amb_layers[n]["p"]
 		var full := db_to_linear(-12.0)
-		var fade_s: float = float(amb_layers[n].get("fade", AMB_FADE))
-		var ac := move_toward(db_to_linear(ap.volume_db), float(amb_layers[n]["want"]) * full, full * delta / fade_s)
+		var amount: float = full * delta / float(amb_layers[n].get("fade", AMB_FADE))
+		var ac := move_toward(db_to_linear(ap.volume_db), float(amb_layers[n]["want"]) * full, amount)
 		ap.volume_db = linear_to_db(maxf(ac, 0.0001))
 		if ac <= 0.0001 and float(amb_layers[n]["want"]) <= 0.0:
 			ap.queue_free()
@@ -633,9 +634,9 @@ var _step_i := 0
 
 
 ## A plain footstep (three takes in turn). reach: metres it carries, 0 for hear_range (see StepReach).
-func step(pos = null, vol := -16.0, reach := 0.0) -> void:
+func step(pos = null, vol := -16.0, reach := 0.0, pitch := 1.0) -> void:
 	_step_i = (_step_i + 1) % 3
-	play("step%d" % _step_i, pos, vol, 0.12, 1.0, reach)
+	play("step%d" % _step_i, pos, vol, 0.12, pitch, reach)
 
 
 func has(sname: String) -> bool:
@@ -686,11 +687,21 @@ func _voice(pos, rk: float, sname: String) -> AudioStreamPlayer:
 ## Which bus a sound at pos plays on: muffled behind terrain, low-passed when far, else its own kind's bus
 ## (SfxMix.bus_for). No position (a cue for you alone): its kind's bus, never muffled.
 func _bus_for(pos, sname := "") -> StringName:
+	if foe_next and pos != null and not occlusion.blocked(pos, listener):
+		return &"SFXFoe"
 	if pos == null:
 		return mix.bus_for(sname, false, false)
 	var muffled: bool = occlusion.blocked(pos, listener)
 	var far: bool = Vector2(pos.x - listener.x, pos.z - listener.z).length() > FAR
 	return mix.bus_for(sname, muffled, far)
+
+
+## An enemy's ultimate cue (UltCue): the same sound as `play`, on the SFXFoe bus (SFX's compressor, no far
+## low-pass, so it carries out to its reach) unless terrain muffles it. A teammate's goes through `play`.
+func play_foe(sname: String, pos: Vector3, vol_db := 0.0) -> void:
+	foe_next = true
+	play(sname, pos, vol_db)
+	foe_next = false
 
 
 ## Settings > Audio: a short sound through one bus when its slider is let go, to hear the new level.
@@ -960,10 +971,10 @@ func loop_start(key: String, sname: String, pos = null, vol_db := 0.0, reach := 
 func loop_set(key: String, pos = null, pitch := 1.0) -> void:
 	if not loops.has(key):
 		return
-	var lay: Dictionary = loops[key]
-	lay["pos"] = pos
-	(lay["p"] as AudioStreamPlayer).pitch_scale = maxf(0.05, pitch)
-	_loop_level(lay)
+	var lp: Dictionary = loops[key]
+	lp["pos"] = pos
+	(lp["p"] as AudioStreamPlayer).pitch_scale = maxf(0.05, pitch)
+	_loop_level(lp)
 
 
 func loop_stop(key: String) -> void:
@@ -1001,16 +1012,16 @@ func loop_on(key: String) -> bool:
 	return loops.has(key)
 
 
-func _loop_level(lay: Dictionary) -> void:
-	var p: AudioStreamPlayer = lay["p"]
-	var v := float(lay["vol"]) + _distance_db(lay["pos"], float(lay["reach"]))
+func _loop_level(lp: Dictionary) -> void:
+	var p: AudioStreamPlayer = lp["p"]
+	var v := float(lp["vol"]) + _distance_db(lp["pos"], float(lp["reach"]))
 	v = -80.0 if is_nan(v) else v
 	# Set only on a change: each set on a playing voice queues new bus details in the AudioServer, and a
 	# loop held every step (LastAlive's bed) piled up enough to stall a headless check's exit for minutes.
 	if absf(p.volume_db - v) > 0.01:
 		p.volume_db = v
 	# A bed on another bus (LastAlive's on Music) stays there so it ducks with the score.
-	var bus: StringName = _bus_for(lay["pos"], lay["sound"]) if String(lay["bus"]) == "SFX" else StringName(lay["bus"])
+	var bus: StringName = _bus_for(lp["pos"], lp["sound"]) if String(lp["bus"]) == "SFX" else StringName(lp["bus"])
 	if p.bus != bus:
 		p.bus = bus
 

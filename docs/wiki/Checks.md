@@ -31,7 +31,8 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--arena-check` | The Arena boots with its tools, dummies take and show damage, reset and swaps work, the kit card builds for every class, the training area works |
 | `--hunter-parity-check` | Every Hunter in the Training Grounds (started as them, or swapped in place from another, with no save, a fresh one, and after the title screen) is the one a real match builds: model file, kit script, node tree, bone scales, and every mesh surface's shader, uniforms, visibility range and shadow setting |
 | `--hunter-unlock-check` (alias `--class-unlock-check`) | Hunter unlocks and mastery: Vex as the one starter and the second Relic (Kael, Cinder or Meeko) after the first expedition (offered by Hob: `--hob-check`), no Relic pick before the egg, challenge-only Hunters never offered, each Hunter's challenge (tier, target, measurable stat) making it ready and hold to unlock opening it (a partial hold cancels, the reveal plays), mastery goals counted per Hunter with cosmetic-only rewards (no stat or ability anywhere in the progression data), glider skins changing no handling, the feats HunterFeats records, save migration keeping every Hunter a save had unlocked or played, the viewer showing every ability as a clip of it working (keys from the bindings, one short line each, no story or gender text), the glider pick, locked Hunters playable in the Arena (its Training dummy) and practice picker |
-| `--recast-cue-check` | Every two-step ability reports its open recast (slot, time left, world spot) to the shared RecastCue; an unused window shows EXPIRED, an early press is buffered, foe marks/stacks/Daze reach the badges; each kit's payoff plays its own sound once at the fight-mix level |
+| `--recast-cue-check` | Every two-step ability reports its open recast (slot, time left, world spot) to the shared RecastCue; an unused window shows EXPIRED, an early press is buffered, the kit's world copy of a foe's state hides on the owner's screen; each kit's payoff plays its own sound once at the fight-mix level |
+| `--plate-status-check` | The one status row on a plate: each crowd-control kind (stun, root, Ground, Daze, Slow) and each kit's mark shows its icon with its time left shrinking under its ring; order (what stops them, your marks, the rest), at most 4, a mark over the status it repeats, a Boki setup, the monster row, nothing past the plate cull range |
 | `--weapon-check[=<id>]` | Every weapon against a standing target at a few ranges (taps and charges), printing the DPS it really lands |
 | `--weapon-clip-check` | No held weapon dips into the ground in any pose, on any class |
 | `--pickup-check` | A picked-up weapon arrives with a full magazine and no reload running, from any source |
@@ -109,7 +110,7 @@ line (the gate's GPU-host run). See [CHECKS_TIMING](../CHECKS_TIMING.md).
 ## Tooling flags
 
 Not checks, but useful: `--loop-tour[=<class>]` (the core loop with a screenshot per step),
-`--perf-bench` (`--bench-probe`, `--bench-hunter-gpu` and the other perf flags: see `docs/PERF.md`), `--match-profile` (a 30-hunter expedition timed per phase on a GPU worker, see
+`--perf-probe`, `--match-profile` (a 30-hunter expedition timed per phase on a GPU worker, see
 `docs/MATCH_PERF.md`), `--meshtime`, `--gentime`, `--map-bake=<png>`, `--grammar-vocab` (prints the grammar
 vocabulary as Markdown), the galleries (`--arch-lineup`, `--mob-gallery`, `--prop-gallery`,
 `--flora-gallery`, `--pack-gallery`, `--hair-gallery`, `--map-overview`), and many `--*-demo` flags for

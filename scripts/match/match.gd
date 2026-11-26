@@ -476,6 +476,7 @@ func _start(o: Dictionary) -> void:
 	hud.visible = false
 	await hud.setup(self)
 	hud.process_mode = hud_mode
+	SquadChat.attach(hud, opts, self)
 	hud.visible = true
 	if player and player.dropping and tut == null:
 		hud.toast("Steer to choose where you land", Color("f3eee2"))
@@ -828,7 +829,7 @@ func make_bot(t: int, at: Vector3, names: Array, mate := {}) -> Hunter:
 ## Every match starts in the sky. Hunters glide down from above their squad's side of the map
 ## and steer to wherever they want to land.
 func _start_drop(h: Hunter, at: Vector3) -> void:
-	if h == player and cam: cam.user_zoom = CamWheel.far()      # spawn, respawn: the widest view
+	if h == player and cam: cam.user_zoom = CamWheel.far(true)      # spawn, respawn: the widest view
 	if opts.get("no_drop", false):
 		return
 	if big and time < 1.0:

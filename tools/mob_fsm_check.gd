@@ -13,9 +13,7 @@ const DT := Match.DT
 const STAGGER_S := 3.0  # s a Brute's stagger lasts (Mob._stagger)
 var fails := 0
 var m: Match
-var ply: Hunter
-
-# ------------------------------------------------------------------ helpers
+var pl: Hunter
 var hurt_at := -1.0  # match time of the first hit on the Hunter since it was last reset
 
 
@@ -32,17 +30,17 @@ func run(main: Node) -> void:
 	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
 	m.set_process(false)
 	await main.get_tree().process_frame
-	ply = m.player
+	pl = m.player
 	for h in m.hunters:
-		h.ctrl = "idle" if h != ply else "local"
+		h.ctrl = "idle" if h != pl else "local"
 		h.inp["move"] = Vector2.ZERO
-	for k in [ply.kin, ply.kin2]:
+	for k in [pl.kin, pl.kin2]:
 		if k != null:
 			_drop(k)
 	for mb in m.mobs:
 		if not (mb is Boss):
 			_drop(mb)
-	ply.teleport(m.world.free_spot_near(ply.pos, [], 1.0, 0.45, 20.0))
+	pl.teleport(m.world.free_spot_near(pl.pos, [], 1.0, 0.45, 20.0))
 	_skitter()
 	_brute()
 	_return_home()
@@ -80,14 +78,17 @@ func _tables() -> void:
 	)
 
 
+# ------------------------------------------------------------------ helpers
+
+
 ## One step; the Hunter stays at full health (the first hit's time goes in hurt_at).
 func _step() -> void:
-	var h0 := ply.hp + ply.armor
+	var h0 := pl.hp + pl.armor
 	m.step(DT)
-	if ply.hp + ply.armor < h0 - 0.01 and hurt_at < 0.0:
+	if pl.hp + pl.armor < h0 - 0.01 and hurt_at < 0.0:
 		hurt_at = m.time
-	ply.hp = ply.max_hp
-	ply.armor = ply.max_armor
+	pl.hp = pl.max_hp
+	pl.armor = pl.max_armor
 
 
 ## Steps until `cond` holds (true) or `secs` pass (false); `each` runs after every step.
@@ -150,7 +151,7 @@ func _near(a: float, b: float) -> bool:
 
 # ------------------------------------------------------------------ monsters
 func _skitter() -> void:
-	var sk := _spawn("skitter", ply.pos, 3.0)
+	var sk := _spawn("skitter", pl.pos, 3.0)
 	sk.cd = 0.0
 	var tell := [true]
 	var struck := [-1.0]
@@ -200,12 +201,12 @@ func _skitter() -> void:
 
 
 func _brute() -> void:
-	var br := _spawn("brute", ply.pos, 6.0)
+	var br := _spawn("brute", pl.pos, 6.0)
 	br.cd = 9.0
-	br.aggro(ply, "check")
+	br.aggro(pl, "check")
 	_step()
 	br.stag_open = 2.0
-	br.hurt(5.0, ply, {"ab": "check", "src": "ab"})
+	br.hurt(5.0, pl, {"ab": "check", "src": "ab"})
 	ok(br.fsm.is_in(Mob.S.STUNNED) and br.stagger_t > 0.0, "an ability in its window staggers it: %s" % br.readout())
 	ok(Mob.watched != null and Mob.watched.get_ref() == br, "the F7 readout follows the Brute (the monster last hit)")
 	_until(func(): return not br.fsm.is_in(Mob.S.STUNNED), 4.0)
@@ -218,9 +219,9 @@ func _brute() -> void:
 
 
 func _return_home() -> void:
-	var rt := _spawn("skitter", ply.pos, 20.0)
+	var rt := _spawn("skitter", pl.pos, 20.0)
 	rt.camp = rt.pos + Vector3(16, 0, 0)  # (dragged well off its leash)
-	rt.aggro(ply, "check")
+	rt.aggro(pl, "check")
 	ok(rt.st == "chase", "NOTICE shows as a chase to the snapshot (%s)" % rt.st)
 	_until(func(): return rt.fsm.is_in(Mob.S.RETURN), 0.5)
 	ok(rt.fsm.is_in(Mob.S.RETURN) and rt.st == "idle", "off its leash and alone it RETURNs (shows as %s)" % rt.st)
@@ -231,7 +232,7 @@ func _return_home() -> void:
 
 
 func _proxy() -> void:
-	var px := _spawn("spitter", ply.pos, 12.0)
+	var px := _spawn("spitter", pl.pos, 12.0)
 	px.remote = true
 	px.follow(Match.MOB_STATES.find("windup"), 0.3)
 	ok(
@@ -247,7 +248,7 @@ func _boss() -> void:
 	for x in m.lairs.list:
 		m.lairs.activate(x)
 		if lair.is_empty() and x["boss_mob"] != null:
-			m.lairs.open(x, ply, "check")  # (the quest seat may hold one shut: take the first that opens)
+			m.lairs.open(x, pl, "check")  # (the quest seat may hold one shut: take the first that opens)
 			if x["state"] == "open":
 				lair = x
 	ok(not lair.is_empty(), "setup: an open lair with its boss")
@@ -255,7 +256,7 @@ func _boss() -> void:
 		return
 	var b: Boss = lair["boss_mob"]
 	ok(b.dormant and b.st == "idle", "the boss sleeps (IDLE, shows idle)")
-	ply.teleport(lair["c"] + Vector3(lair["out"].x, 0, lair["out"].y) * 3.0)
+	pl.teleport(lair["c"] + Vector3(lair["out"].x, 0, lair["out"].y) * 3.0)
 	ok(
 		_until(func(): return b.attacking() and _cuttable(b), 12.0),
 		"it wakes on the Hunter walking in and starts an attack: %s (lair %s)" % [b.readout(), lair["state"]]

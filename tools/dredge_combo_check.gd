@@ -81,6 +81,7 @@ func _hook_hold() -> void:
 	ak.step(m, 0.25)
 	var crawl := p.flat_dist(p0) / 0.25
 	var k := crawl / maxf(0.01, walk)
+	# (upper bound 0.26: the walk is timed 0.3 s after its start; it read exactly 0.25 on the lane, 0.25 on main)
 	ok(
 		"hook hold: while the hook flies out he walks at 15-25% speed",
 		k_v.flying and k >= 0.15 and k <= 0.26,
@@ -186,16 +187,23 @@ func _slam_tell() -> void:
 	var fist_up: bool = HeroVfx.of(m).plays.get("anchor_fist", 0) == 1 and lands
 	ok(
 		"anchor tell: a soft gold wedge of the hit cone for all (lit front = the wind-up); fist lands on the slam",
-		AimKit.shown(p, "e_tell") and bool(tell.get("all", false))
+		(
+			AimKit.shown(p, "e_tell")
+			and bool(tell.get("all", false))
 			and absf(float(tell.get("len", 0.0)) - reach) < 0.01
-			and absf(float(tell.get("deg", 0.0)) - float(ed["angle"])) < 0.01 and tdir.distance_to(Vector2(1, 0)) < 0.02
-			and bool(tell.get("soft", false)) and float(tell.get("fill", -1.0)) > 0.0
+			and absf(float(tell.get("deg", 0.0)) - float(ed["angle"])) < 0.01
+			and tdir.distance_to(Vector2(1, 0)) < 0.02
+			and bool(tell.get("soft", false))
+			and float(tell.get("fill", -1.0)) > 0.0
 			and float(tell.get("fill", 2.0)) < 1.0
 			and (tell.get("col", Color.BLACK) as Color).is_equal_approx(Color("ffc832"))
-			and fist_up and ak.dmg(t) == 0.0,
-		"len %.1f deg %.0f fill %.2f fist %s" % [
-			float(tell.get("len", 0.0)), float(tell.get("deg", 0.0)),
-			float(tell.get("fill", -1.0)), fist_up]
+			and fist_up
+			and ak.dmg(t) == 0.0
+		),
+		(
+			"len %.1f deg %.0f fill %.2f fist %s"
+			% [float(tell.get("len", 0.0)), float(tell.get("deg", 0.0)), float(tell.get("fill", -1.0)), fist_up]
+		)
 	)
 	# the hop carries the drawn cone with him: wait it out, then place the foes in the cone
 	while k.wind > 0.03:
@@ -661,11 +669,11 @@ func _all() -> void:
 		k.pull.is_empty() and ak.dmg(t) <= dm0 and k.grapples == gw0,
 		"grapples +%d took %.1f" % [k.grapples - gw0, ak.dmg(t) - dm0]
 	)
-	for wl in m.verbs.walls.duplicate():
-		if wl.get("by") == albert:
-			m.verbs.walls.erase(wl)
-			if is_instance_valid(wl.get("node")):
-				(wl["node"] as Node).queue_free()
+	for aw in m.verbs.walls.duplicate():
+		if aw.get("by") == albert:
+			m.verbs.walls.erase(aw)
+			if is_instance_valid(aw.get("node")):
+				(aw["node"] as Node).queue_free()
 	albert.queue_free()
 	m.hunters.erase(albert)
 	m.step(ak.DT)

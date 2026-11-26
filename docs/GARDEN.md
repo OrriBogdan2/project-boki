@@ -167,12 +167,12 @@ milestones ("Defeat a boss in a lair"). Both rows now wait for the first match w
 showed `BaseFetch` had no `playing()`, so `GardenMusic.tick` errored every 0.5 s with Fetch Cup in `Home.games`
 (zone music never switched): added. Result: 0 nags, 0 script errors, exit 0.
 
-**Zones open after 30 min of garden-only play: 1 of 5** (the start zone; `Black Market placed false, matches 0`).
+**Zones open after 30 min of garden-only play: 1 of 5** (the start zone; `Black Market placed false, matches 0`). Since fixed on ext/garden-market-no-match: the building now stands at once in base mode (open question 1).
 The Black Market is the only blocker left. A zone opens with two keys, a Wayseed and a leaning Boki
 (`GardenZones.keys`); a Wayseed comes from only two places, the Black Market's weekly stock (the building is
 placed once `matches >= 1`, `home.gd _fs_arrivals`) or a lair (an expedition). Nothing else gates a zone.
 `--garden-unlock-pace-check` passes (garden player: 2nd zone day 3, 5th day 12) because it buys the Wayseed
-without the building. Open question 1 was then decided (a) and built (below).
+without the building. Open question 1 is the fix (done).
 
 1. **Old Pell's Black Market (decided: (a), done).** `home.gd _fs_arrivals` used to place it (and the
    Challenge House) only once `matches >= 1`, so a player who never extracts could never buy a Wayseed.

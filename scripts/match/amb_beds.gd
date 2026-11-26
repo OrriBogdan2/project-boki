@@ -40,6 +40,9 @@ const RAIN := {"clear": 0.0, "day": 0.0, "dusk": 0.45, "night": 0.0, "ash": 0.0,
 static var _rules: Dictionary = {}
 
 
+static var _rules: Dictionary = {}
+
+
 static func rules() -> Dictionary:
 	if _rules.is_empty():
 		_rules = JSON.parse_string(FileAccess.get_file_as_string(RULES_PATH))

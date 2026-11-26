@@ -32,6 +32,7 @@ const TABLE := {
 const LOOKS: PackedStringArray = ["idle", "chase", "chase", "windup", "lunge", "recover", "recover", "idle"]
 const CUT_HOLD := 0.4  # s a stun that cuts a wind-up holds it, at the least
 const WALL_HOLD := 1.0  # s stunned by a knock into a wall or rock
+const STAGGER_DMG := 2.5  # damage multiplier while a monster is staggered (below)
 const AMBLE_M := 3.0  # m from its camp it ambles while calm; a RETURN is home inside this
 const STAGGER_DMG := 2.5
 static var watched: WeakRef = null  # the monster the local player last hit: the F7 readout shows its machine
@@ -588,11 +589,11 @@ func _begin_attack() -> void:
 func _strike() -> void:
 	_cancel_tele()
 	cd = md["cd"] * randf_range(0.85, 1.15)
-	var knd := String(md["attack"])
+	var blow := String(md["attack"])
 	_go(S.ATTACK, "tell full", MobAnim.LUNGE_S)
-	if knd != "lunge" and knd != "fuse":
-		_go(S.RECOVER, knd, float(MobAnim.RECOVER_S.get(knd, 0.0)))
-	match knd:
+	if blow != "lunge" and blow != "fuse":
+		_go(S.RECOVER, blow, float(MobAnim.RECOVER_S.get(blow, 0.0)))
+	match blow:
 		"lunge":
 			lunge_hit = {}
 		"spit":

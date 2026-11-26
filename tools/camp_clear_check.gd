@@ -48,6 +48,7 @@ func run(main: Node, only_cell := "") -> void:
 	print("CAMPCLEAR DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
 
+
 func _hero(main: Node, arch: String, only_cell: String) -> void:
 	var m := Match.new()
 	main.add_child(m)
@@ -64,7 +65,7 @@ func _hero(main: Node, arch: String, only_cell: String) -> void:
 		for camp in CAMPS:
 			if only_cell != "" and only_cell != "%s@%d" % [camp, lv]:
 				continue
-			seed(hash("%s %s %d" % [arch, camp, lv]))      # a cell rolls the same dice whichever shard runs it
+			seed(hash("%s %s %d" % [arch, camp, lv]))  # a cell rolls the same dice whichever shard runs it
 			var ts: Array = []
 			var dmg: Array = []
 			for i in REPS:
