@@ -105,8 +105,9 @@ static func charge_discs(c: CanvasItem, r: Rect2, charges: float, cap: int, col:
 		fills.append(fill)
 	return fills
 
-## A locked slot: the dimmed icon under a padlock and the key cap; "Spend point" in gold when a point can open it
-## (`can`), else `tag` (when it opens, "" for none) on a pill over the slot. `id` names it in shown_keys.
+## A locked slot: the dimmed icon under a padlock and the key cap; "Spend point" in gold when a point can open
+## it (`can`, out of a fight), else `tag` (when it opens, "" for none) on a pill over the slot. `id` names it
+## in shown_keys.
 static func locked(h, id: String, r: Rect2, icon: String, col: Color, key: String, can: bool, tag: String) -> void:
 	var c: CanvasItem = h.c
 	var pulse := 0.5 + 0.5 * sin(float(h.m.time) * 5.0)
@@ -118,7 +119,7 @@ static func locked(h, id: String, r: Rect2, icon: String, col: Color, key: Strin
 	Icons.draw(c, icon, r.get_center() + Vector2(0, -2), r.size.x * 0.25, icol)
 	var lcol := HudStyle.GOLD if can else Color(HudStyle.MUTED, 0.85)
 	padlock(h, r.get_center() + Vector2(0, 4), lcol)
-	if can:
+	if can and not h.in_fight():      # in a fight the gold glow says it; the word waits
 		# (at a bigger Text size the word grows down into the slot, not up into the resource bar's name)
 		var base := r.position.y - 2.0 + (UI.fs(10) - 10)      # (just clear of the resource bar's label above the slot)
 		var pt := TextCache.fit(HudStyle.BIG, POINT_TAG, 10, r.size.x + 8.0)

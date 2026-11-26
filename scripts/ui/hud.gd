@@ -1011,7 +1011,7 @@ func level_up(lv: int, info := {}) -> void:
 	lvl_pop = 0.35      # every level: the badge flashes (the growth itself is quiet, LevelGrowth)
 	var line := "LEVEL %d  ·  +1 skill point" % lv
 	if lv % 2 == 0:
-		flash(Color("ffd27a"), 0.16)
+		if not in_fight(): flash(Color("ffd27a"), 0.16)      # no gold wash mid-fight (the line queues, MsgLane.fight)
 		if not info.is_empty(): line = "LEVEL %d  ·  %s" % [lv, info["name"]]
 	msgs.push(line, Color("ffd27a"), MsgLane.HIGH)
 

@@ -1,7 +1,8 @@
 extends RefCounted
 ## --combat-calm-check: the combat HUD stays calm. Hit or hitting back: toasts and hints queue and
 ## only an urgent line shows; once 3 s pass without a hit they show one at a time, under the top row, never in
-## the centre 40% of the screen or over the hunter. Never touches the save.
+## the centre 40% of the screen or over the hunter. A level-up skips its gold wash in a fight and its line
+## waits; the "Spend point" word on a locked slot waits too (a draw path, not asserted). Never touches the save.
 
 const CENTRE := 0.4      # of the screen's width and height: the middle nothing pops into
 const QUIET_S := 3.1     # s without a hit that end a fight (Hud.MSG_FIGHT_S is 3)
@@ -28,6 +29,7 @@ func run(main_node: Node) -> void:
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
 	_lane(m)
+	_level_up(m)
 	m.queue_free()
 	print("CALM DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -66,4 +68,24 @@ func _lane(m: Match) -> void:
 		ok(lane.texts().size() <= 1, "second %d: at most one card (%d)" % [i, lane.texts().size()])
 	ok(worst == 0, "no card entered the centre %d%% or the hunter's zone (%d frames)" % [int(CENTRE * 100.0), worst])
 	ok(lane.count() == 0, "the queue drains (%d left)" % lane.count())
+	lane.clear()
+
+
+func _level_up(m: Match) -> void:
+	var lane: MsgLane = m.hud.msgs
+	lane.clear()
+	m.hud.flash_t = 0.0
+	m.player.hurt_at = m.time
+	m.hud._place_msgs()
+	m.hud.level_up(2, {})
+	lane._process(0.1)
+	ok(m.hud.flash_t == 0.0, "a level-up in a fight: no gold wash (%.2f)" % m.hud.flash_t)
+	ok(lane.texts().is_empty() and lane.waiting() == 1, "... and its line waits (%s)" % str(lane.texts()))
+	m.time += QUIET_S
+	m.hud._place_msgs()
+	lane._process(0.1)
+	var up := lane.texts()
+	ok(up.size() == 1 and String(up[0]).begins_with("LEVEL 2"), "it shows once quiet (%s)" % str(up))
+	m.hud.level_up(4, {})
+	ok(m.hud.flash_t > 0.0, "out of a fight an even level still washes gold")
 	lane.clear()
