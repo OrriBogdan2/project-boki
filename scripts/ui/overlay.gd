@@ -588,8 +588,7 @@ func _tab_gameplay(v: VBoxContainer) -> void:
 	_reticle_rows(v)
 	_group(v, "Boki")
 	var talk := [["quiet", "Quiet"], ["normal", "Normal"], ["chatty", "Chatty"]]
-	_choice(v, "How much your Boki talks", "kin_chatter", talk)
-	_toggle(v, "Boki ride as wisps", "boki_wisps")
+	_choice(v, "How much your Boki talks", "kin_chatter", talk, Callable(), "Quiet: only danger. Chatty: all of it")
 	if admin_allowed():
 		_group(v, "Admin")
 		_toggle(v, "Pre-match lobby", "lobby_enabled")
