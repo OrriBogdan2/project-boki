@@ -3,14 +3,16 @@ extends RefCounted
 ## Three small icons over every other hunter's nameplate, so rivals can read what they carry:
 ##   their two gloves (a frame in the glove's rarity colour, dimmed while it's on cooldown) and
 ##   their Boki's type badge (in the type colour; a soft glow when their bond meter is full: a
-##   Merge is coming. A deliberate tell, kept subtle).
+##   Merge is coming. A deliberate tell, kept subtle). In a fight (MusicDir.fight_on) only that glowing badge is
+##   drawn: the row was on every Hunter in 20 of 20 --clarity-shots fight frames (docs/COMBAT_CLARITY.md).
 ## Drawn with the nameplate (Hud._nameplate) in the row HudPlate leaves free under every plate
 ## (HudStyle.PLATE_ICON_ROW), so it moves and hides with it. Remote hunters' gloves, cooldowns and
 ## bond come over the net (GripNet). Look: HudStyle.
 
-const ICON := 14.0            # px, each icon box
-const GAP := 3.0              # px between icons
+const ICON := 14.0  # px, each icon box
+const GAP := 3.0  # px between icons
 const EMPTY := Color(1, 1, 1, 0.12)
+
 
 ## The three icons' centres for a plate anchored at `sp` (exposed for checks).
 static func centres(sp: Vector2) -> Array:
@@ -19,6 +21,7 @@ static func centres(sp: Vector2) -> Array:
 	for i in 3:
 		out.append(Vector2(sp.x + (float(i) - 1.0) * (ICON + GAP), y))
 	return out
+
 
 ## What the row shows for a hunter: [{kind, id, col, dim, glow}] x3 (also read by --equal-check).
 static func row(h) -> Array:
@@ -29,26 +32,48 @@ static func row(h) -> Array:
 			out.append({"kind": "glove", "id": "", "col": EMPTY, "dim": true, "glow": false})
 		else:
 			var gid := String(g["id"])
-			out.append({"kind": "glove", "id": gid, "col": GripHud.rar_col(g), "icol": Gear.ALL[gid]["col"],
-				"dim": float(h.gear_cd[i]) > 0.0, "glow": false})
+			out.append(
+				{
+					"kind": "glove",
+					"id": gid,
+					"col": GripHud.rar_col(g),
+					"icol": Gear.ALL[gid]["col"],
+					"dim": float(h.gear_cd[i]) > 0.0,
+					"glow": false
+				}
+			)
 	var k = h.kin
 	if k != null and is_instance_valid(k):
 		var kin_type := DexView.type_of(String(k.species))
-		out.append({"kind": "boki", "id": kin_type, "col": DexView.type_col(kin_type),
-			"dim": String(k.state) == "downed", "glow": h.ult >= 1.0})
+		out.append(
+			{
+				"kind": "boki",
+				"id": kin_type,
+				"col": DexView.type_col(kin_type),
+				"dim": String(k.state) == "downed",
+				"glow": h.ult >= 1.0
+			}
+		)
 	else:
 		out.append({"kind": "boki", "id": "", "col": EMPTY, "dim": true, "glow": false})
 	return out
 
+
 static func draw(hud, sp: Vector2, h) -> void:
 	if not sp.is_finite():
 		return
+	var fight: bool = hud.m.music_dir != null and hud.m.music_dir.fight_on(hud.m)
+	if fight and h.ult < 1.0:
+		return  # (in a fight only a full bond's glow is drawn: skip building the row)
 	var c: CanvasItem = hud.c
 	var cs := centres(sp)
 	var items := row(h)
 	for i in 3:
 		var it: Dictionary = items[i]
 		var ctr: Vector2 = cs[i]
+		if fight and not it["glow"]:
+			continue
+		SafeArea.note_as("grip_icons", Rect2(ctr - Vector2(ICON, ICON) * 0.5, Vector2(ICON, ICON)))
 		var a := 0.45 if it["dim"] else 1.0
 		if it["kind"] == "boki":
 			if String(it["id"]) == "":

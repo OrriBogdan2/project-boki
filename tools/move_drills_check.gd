@@ -29,7 +29,7 @@ func run(main: Node) -> void:
 	Save.d["tutorial"] = {"hatched": true, "intro": true, "home": true, "day1_done": true}
 	m = Match.new()
 	main.add_child(m)
-	await m.start(OPTS.duplicate())
+	m.start(OPTS.duplicate())
 	m.set_process(false)
 	P = m.player
 	for mb in m.mobs:
@@ -116,8 +116,10 @@ func _dive_idle_bot(_f: int) -> void:
 
 
 func _climb_bot(f: int) -> void:
-	P.inp["move"] = Vector2(1, 0)
 	var to_wall := dr.target.x - P.pos.x
+	# over the top, it lets go of the keys to come down on it (a full-speed hop can carry past a 3-tile ledge)
+	var over := not P.grounded and to_wall < -1.5 and P.pos.y > float(dr._flags["top"])
+	P.inp["move"] = Vector2.ZERO if over else Vector2(1, 0)
 	P.inp["jump"] = to_wall > -0.3 and ((to_wall > 0.0 and to_wall < 1.0 and f % 2 == 0) if P.grounded else f % 6 == 0)
 	P.inp["glide"] = P.inp["jump"]
 
@@ -159,7 +161,7 @@ func _other_areas(main: Node) -> void:
 		main.add_child(mm)
 		var opts: Dictionary = {"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true}
 		opts.merge(o, true)
-		await mm.start(opts)
+		mm.start(opts)
 		mm.set_process(false)
 		var p := Practice.of(mm)
 		ok(p != null and p.drills == null and not p.bar_btns.has("drills"), "no Drills button in %s" % o.keys()[0])

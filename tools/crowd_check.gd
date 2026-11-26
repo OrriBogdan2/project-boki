@@ -10,10 +10,12 @@ extends RefCounted
 
 var fails := 0
 
+
 func _ok(cond: bool, what: String) -> void:
 	print("CROWD %s %s" % ["PASS" if cond else "FAIL", what])
 	if not cond:
 		fails += 1
+
 
 static func oklab(c: Color) -> Vector3:
 	var l := c.srgb_to_linear()
@@ -23,9 +25,12 @@ static func oklab(c: Color) -> Vector3:
 	lm = pow(lm, 1.0 / 3.0)
 	mm = pow(mm, 1.0 / 3.0)
 	sm = pow(sm, 1.0 / 3.0)
-	return Vector3(0.2104542553 * lm + 0.7936177850 * mm - 0.0040720468 * sm,
+	return Vector3(
+		0.2104542553 * lm + 0.7936177850 * mm - 0.0040720468 * sm,
 		1.9779984951 * lm - 2.4285922050 * mm + 0.4505937099 * sm,
-		0.0259040371 * lm + 0.7827717662 * mm - 0.8086757660 * sm)
+		0.0259040371 * lm + 0.7827717662 * mm - 0.8086757660 * sm
+	)
+
 
 func _colours() -> void:
 	var cs: Array = Data.TEAM_COLORS
@@ -41,16 +46,16 @@ func _colours() -> void:
 	var gap := Data.TEAM_COLOR_GAP
 	_ok(worst >= gap, "colours: closest pair %s at %.3f (gap %.2f)" % [pair, worst, gap])
 
+
 func _napping(main: Node) -> void:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 3, "squad": 2, "tier": 0, "length": 1e9, "seed": 9, "no_drop": true})
+	m.start({"teams": 3, "squad": 2, "tier": 0, "length": 1e9, "seed": 9, "no_drop": true})
 	m.set_process(false)
 	_ok(not m.mobs.is_empty(), "napping: the map has camps")
 	if not m.mobs.is_empty():
 		var mb: Mob = m.mobs[0]
-		mb.st = "idle"
-		mb.tgt = null
+		mb.calm("check")
 		mb.grounded = true
 		var far := mb.pos + Vector3(Mob.NAP_M * 4.0, 0, 0)
 		for e in m.hunters:
@@ -66,6 +71,7 @@ func _napping(main: Node) -> void:
 		_ok(not mb._napping(Mob.NAP_CHECK), "napping: a Hunter walking up wakes it at its next look")
 	m.queue_free()
 	await main.get_tree().process_frame
+
 
 func _models() -> void:
 	var arch := ""
@@ -84,6 +90,7 @@ func _models() -> void:
 	_ok(sc != null and WardenGlb._scene(arch) == sc, "models: %s's scene loaded once for two Hunters" % arch)
 	for n in built:
 		(n as Node).free()
+
 
 func run(main: Node) -> void:
 	Save.no_write = true

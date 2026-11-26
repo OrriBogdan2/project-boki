@@ -139,7 +139,7 @@ func e_free() -> void:
 	var K: JuggernautKit = g["K"]
 	var home: Vector3 = g["home"]
 	for how in ["slam", "lunge", "rampage"]:
-		var r := await _throw_after(m, P, K, home, how)
+		var r := _throw_after(m, P, K, home, how)
 		A.ok("jug 113.5: RMB/dash north (%s) then E at once at the east: the hook flies at the cursor" % how,
 				r["state"] == "throwing" and (r["dir"] as Vector2).dot(Vector2(1, 0)) > 0.97, str(r))
 	# both work: the Slam started north still strikes north though the cursor has gone east with the throw
@@ -377,6 +377,7 @@ func pull_waits() -> void:
 	K.use_e()
 	A.step(m, 0.45)
 	A.tap(m, P)
+	A.step(m, 0.2)                  # (a press sooner than that after the tap is the Cinder Spin)
 	K.use_e()
 	var kept := W.hooked() and not K.slam_w.is_empty()
 	_until(m, func(): return K.slam_w.is_empty(), 1.0)

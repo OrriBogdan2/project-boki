@@ -22,7 +22,6 @@ const BOKI_INTRO := Vector3(-1.25, 0.0, 1.45)     # your Boki at your side while
 const DRIFT_S := 3.4                             # s the Relic takes to reach you
 const DIM := 0.45                                # x the island's lights while the Relic comes
 const CLIP := Vector2(250, 140)                  # px: each ability clip in the intro
-const TEXT := "This Relic is the mask of a fallen Hunter. Put it on, and their soul becomes yours."
 const BUTTON := "Put on the Relic"
 const GO := "Into the portal"
 
@@ -108,7 +107,7 @@ func _wait() -> void:
 	box.offset_top = -170
 	box.offset_bottom = -40
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var line := UI.title(TEXT, 24, UI.INK)
+	var line := UI.title(String(Content.rules("lore")["mask_line"]), 24, UI.INK)
 	line.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	line.add_theme_constant_override("outline_size", 10)
 	line.add_theme_color_override("font_outline_color", Color(0.04, 0.03, 0.07))
@@ -151,7 +150,7 @@ func _show_intro() -> void:
 	_look_to = LOOK_INTRO
 	if kin and is_instance_valid(kin):
 		create_tween().tween_property(kin, "position", BOKI_INTRO, 0.9).set_trans(Tween.TRANS_SINE)
-	var panel := HunterViewer.make(hunter_id, Vector2.ZERO, CLIP, 3)
+	var panel := HunterViewer.make(hunter_id, Vector2.ZERO, CLIP, 3, false)
 	panel.set_meta("mask_intro", hunter_id)
 	var col := UI.vbox(12)
 	col.add_child(panel)

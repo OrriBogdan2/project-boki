@@ -9,21 +9,34 @@ extends UiFrame
 ## Drawn as a few canvas polygons and lines, recorded only when the control redraws; the outline
 ## of each rect is cached, so a menu costs no more per frame than with plain boxes.
 
-@export var jag := 4.0                      # px the outline wanders inward (0: a clean rectangle)
-@export var glow := 0.0                     # neon edge strength (0 none, 1 normal, ~1.6 hovered)
-@export var glow_a := Color("3fe0d0")       # neon colour on the left
-@export var glow_b := Color("ff3fd0")       # neon colour on the right
-@export var grain := 0.0                    # speckle and rune density in the border band (0..1)
-@export var ticket := false                 # cut a notch into the left and right sides
-@export var nails := false                  # two nails pinning the top corners (parchment strips)
-@export var tilt := 0                       # varies the tear pattern so boxes side by side differ
+const STEP_PX := 16.0  # spacing of the outline's points
 
-const STEP_PX := 16.0                       # spacing of the outline's points
-const BAND_PX := 22.0                       # depth of the border band that carries the speckle
-const GLOW_PASSES := [[10.0, 0.08], [5.0, 0.2], [2.0, 0.95]]    # [width px, alpha] outer to inner
-const CACHE_MAX := 48                       # outlines kept per box (rects in use on screen)
+const CORNER_DEPTH := 0.6  # x jag: deepest a corner point sits (= smallest chip, no fold)
+
+const BAND_PX := 22.0  # depth of the border band that carries the speckle
+
+const GLOW_PASSES := [[10.0, 0.08], [5.0, 0.2], [2.0, 0.95]]  # [width px, alpha] outer to inner
+
+const CACHE_MAX := 48  # outlines kept per box (rects in use on screen)
+
+@export var jag := 4.0  # px the outline wanders inward (0: a clean rectangle)
+
+@export var glow := 0.0  # neon edge strength (0 none, 1 normal, ~1.6 hovered)
+
+@export var glow_a := Color("3fe0d0")  # neon colour on the left
+
+@export var glow_b := Color("ff3fd0")  # neon colour on the right
+
+@export var grain := 0.0  # speckle and rune density in the border band (0..1)
+
+@export var ticket := false  # cut a notch into the left and right sides
+
+@export var nails := false  # two nails pinning the top corners (parchment strips)
+
+@export var tilt := 0  # varies the tear pattern so boxes side by side differ
 
 var _cache := {}
+
 
 ## A torn box with this fill; `glow_k` 0 leaves the neon edge off.
 static func make(fill_col: Color, jag_px := 4.0, glow_k := 0.0, grain_k := 0.0) -> UiTorn:
@@ -35,6 +48,7 @@ static func make(fill_col: Color, jag_px := 4.0, glow_k := 0.0, grain_k := 0.0) 
 	t.lit = 0.0
 	return t
 
+
 ## A copy of this box with another fill and glow (hover and pressed states of a button).
 func variant(fill_col: Color, glow_k: float) -> UiTorn:
 	var t := duplicate() as UiTorn
@@ -42,8 +56,10 @@ func variant(fill_col: Color, glow_k: float) -> UiTorn:
 	t.glow = glow_k
 	return t
 
+
 func _get_draw_rect(rect: Rect2) -> Rect2:
 	return rect.grow(6.0 if glow > 0.0 or edge.a > 0.0 else 0.0)
+
 
 func _draw(to_canvas_item: RID, rect: Rect2) -> void:
 	if rect.size.x < jag * 6.0 + 8.0 or rect.size.y < jag * 4.0 + 8.0:
@@ -82,6 +98,7 @@ func _draw(to_canvas_item: RID, rect: Rect2) -> void:
 			rs.canvas_item_add_circle(to_canvas_item, at, 3.2, Color("4a4650"))
 			rs.canvas_item_add_circle(to_canvas_item, at - Vector2(1.0, 1.0), 1.2, Color("b4b0bc"))
 
+
 func _build_shape(r: Rect2) -> Dictionary:
 	var pts := _outline(r)
 	var light := fill.get_luminance() > 0.5
@@ -95,14 +112,22 @@ func _build_shape(r: Rect2) -> Dictionary:
 	var ring := pts.duplicate()
 	ring.append(pts[0])
 	glow_cols.append(glow_cols[0])
-	var shape := {"pts": pts, "fill_cols": fill_cols, "ring": ring, "glow_cols": glow_cols,
-		"specks": PackedVector3Array(), "speck_cols": PackedColorArray(), "runes": [],
-		"rune_col": Color(0.78, 0.62, 1.0, 0.09)}
+	var shape := {
+		"pts": pts,
+		"fill_cols": fill_cols,
+		"ring": ring,
+		"glow_cols": glow_cols,
+		"specks": PackedVector3Array(),
+		"speck_cols": PackedColorArray(),
+		"runes": [],
+		"rune_col": Color(0.78, 0.62, 1.0, 0.09)
+	}
 	if grain > 0.0:
 		_add_specks(shape, r, light)
 		if not light and r.size.x > 180.0 and r.size.y > 160.0:
 			_add_runes(shape, r)
 	return shape
+
 
 ## The torn outline, clockwise from the top-left: chipped corners, small inward wobbles every
 ## STEP_PX, now and then a deeper tear, and the ticket notches.
@@ -123,14 +148,17 @@ func _outline(r: Rect2) -> PackedVector2Array:
 		for k in steps + 1:
 			var d := lerpf(chip_a, length - chip_b, float(k) / steps)
 			var h := _h(seed_i + side * 101 + k * 7)
-			var depth := jag * h if k > 0 and k < steps else 0.0      # corner ends stay on the edge
+			var depth := jag * h if k > 0 and k < steps else 0.0  # corner ends stay on the edge
 			if h > 0.94 and k > 0 and k < steps:
 				depth = jag * 2.4
+			elif k == 0 or k == steps:
+				depth = minf(depth, jag * CORNER_DEPTH)  # a corner point may not fold back over its chip
 			if notch and absf(d - length * 0.5) < minf(r.size.y * 0.2, 11.0):
 				var rn := minf(r.size.y * 0.2, 11.0)
 				depth = maxf(depth, sqrt(maxf(0.0, rn * rn - pow(d - length * 0.5, 2.0))) + 1.0)
 			pts.append(a + along * d + inward * depth)
 	return pts
+
 
 func _add_specks(shape: Dictionary, r: Rect2, light: bool) -> void:
 	var band := minf(BAND_PX, minf(r.size.x, r.size.y) * 0.2)
@@ -150,6 +178,7 @@ func _add_specks(shape: Dictionary, r: Rect2, light: bool) -> void:
 	shape.specks = specks
 	shape.speck_cols = cols
 
+
 ## Faint scratched glyphs in columns down the left and right bands, as on the refs.
 func _add_runes(shape: Dictionary, r: Rect2) -> void:
 	var cell := Vector2(9.0, 13.0)
@@ -166,6 +195,7 @@ func _add_runes(shape: Dictionary, r: Rect2) -> void:
 			var bar := PackedVector2Array([o + Vector2(0.0, cell.y * 0.3), bar_end])
 			shape.runes.append(bar)
 
+
 ## The point `t` px along the rect's edge (clockwise from the top-left), moved `depth` px inside.
 static func _on_perimeter(r: Rect2, t: float, depth: float) -> Vector2:
 	var w := r.size.x
@@ -177,6 +207,7 @@ static func _on_perimeter(r: Rect2, t: float, depth: float) -> Vector2:
 	if t < 2.0 * w + hgt:
 		return r.position + Vector2(2.0 * w + hgt - t, hgt - depth)
 	return r.position + Vector2(depth, 2.0 * (w + hgt) - t)
+
 
 ## A stable pseudo-random number in 0..1 for an integer key.
 func _h(i: int) -> float:

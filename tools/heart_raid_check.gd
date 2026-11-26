@@ -468,4 +468,4 @@ func _run_to(m: Match, t: float) -> void:
 
 
 static func _clock(t: float) -> String:
-	return "%d:%02d" % [int(t) / 60, int(t) % 60]
+	return "%d:%02d" % [int(int(t) / 60.0), int(t) % 60]

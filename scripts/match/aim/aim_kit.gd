@@ -6,7 +6,7 @@ extends RefCounted
 ## ("rmb", "e_drag"...). An entry not refreshed for AimDraw.KEEP (0.1 s of match time) disappears, so
 ## stopping the calls hides it; `hide` drops it at once, and a `"dur": secs` param keeps a one-off (a
 ## placed ring, a stuck grenade's cone) up that long without more calls. A second call with the same
-## id replaces the first. Everything draws through one pooled ImmediateMesh per match (AimDraw): no
+## id replaces the first. Everything draws through one pooled ArrayMesh per match (AimDraw): no
 ## node is made per call or per frame. A Boki merge clears a hunter's set and keeps it clear: AimDraw
 ## drops every entry of a merged or transforming hunter (whichever path started the merge), and
 ## ArchKit.drop_holds() clears it on the spot.
@@ -19,7 +19,7 @@ extends RefCounted
 ##   lw      float   m, the rim width (0.06)
 ##   all     bool    foes and allies see it too (an area someone must dodge); default false = your own
 ##                   aim only. A foe's shows lerped toward the hostile rim colour.
-##   soft    bool    lanes and cones: a lit rim glowing inward over a faint inside (alpha <= 0.25 at the
+##   soft    bool    lanes, cones and circles: a lit rim glowing inward over a faint inside (alpha <= 0.25 at the
 ##                   centre, the VFX_QUALITY zone rule) instead of the stacked fill
 ##   dur     float   s, how long it stays without a refresh (default 0.1)
 ##   fletch  float   lines and Vs only: 0 = plain; > 0 feathers the line with barbs swept back toward
@@ -35,10 +35,6 @@ static func layer(m: Node) -> AimDraw:
 		d = AimDraw.new(m)
 		m.add_child(d)
 	return d
-
-## Merged, or mid-transformation, or leaping home to merge: the form owns the buttons, nothing shows.
-static func blocked(h: Hunter) -> bool:
-	return KinMerge.active(h) or KinMerge.transforming(h)
 
 static func hero_col(h: Hunter) -> Color:
 	if h.ak != null:
@@ -165,7 +161,11 @@ static func line(h: Hunter, id: String, p := {}) -> void:
 		var d := _dir(h, p)
 		t = f + Vector3(d.x, 0, d.y) * float(p["len"])
 	else:
-		t = h.inp.get("aim", h.pos)
+		# the cursor's distance along aim_dir (the vision cone's centre, and the aim lock), never the raw cursor ray
+		var cur: Vector3 = h.inp.get("aim", h.pos)
+		var ad := h.aim_dir()
+		t = f + Vector3(ad.x, 0, ad.y) * Vector2(cur.x - f.x, cur.z - f.z).length()
+		t.y = cur.y
 	e["from"] = Vector2(f.x, f.z); e["to"] = Vector2(t.x, t.z); e["y"] = AimMode.ground(h.m, f).y
 	e["arrow"] = bool(p.get("arrow", true))
 	_put(h, id, e)
@@ -222,8 +222,6 @@ static func entry(h: Hunter, id: String) -> Dictionary:
 ## p: col (hero colour), flare (true: flare on reaching full), at ("cursor", or "body": round the hunter, where a
 ## source kit shows its charge arc on the hero, e.g. Kael's blast)
 static func charge(h: Hunter, k: float, p := {}) -> void:
-	if blocked(h):
-		return
 	var r := layer(h.m).ret_of(h)
 	var was := float(r["k"]) if float(h.m.time) - float(r["t"]) <= AimDraw.KEEP else -1.0
 	r["k"] = k; r["t"] = float(h.m.time)
@@ -234,16 +232,12 @@ static func charge(h: Hunter, k: float, p := {}) -> void:
 
 ## The full-charge flare on the cursor now. p: col (the accent colour)
 static func flare(h: Hunter, p := {}) -> void:
-	if blocked(h):
-		return
 	var r := layer(h.m).ret_of(h)
 	r["flare"] = AimReticle.FLARE_T
 	r["fcol"] = p.get("col2", p.get("col", accent_col(h)))
 
 ## The perfect-window star flash on the cursor (released on the ready frame). p: col (gold)
 static func perfect(h: Hunter, p := {}) -> void:
-	if blocked(h):
-		return
 	var r := layer(h.m).ret_of(h)
 	r["perfect"] = AimReticle.PERFECT_T
 	r["pcol"] = p.get("col", Color("ffd25a"))
@@ -297,6 +291,6 @@ static func _disc(h: Hunter, e: Dictionary, p: Dictionary) -> void:
 	e["pointer"] = pd.normalized() if pd.length() > 0.01 else Vector2.ZERO
 
 static func _put(h: Hunter, id: String, e: Dictionary) -> void:
-	if h == null or h.m == null or blocked(h):
+	if h == null or h.m == null:
 		return
 	layer(h.m).put(h, id, e)

@@ -8,13 +8,14 @@ extends RefCounted
 ## <dir>/captions.txt gets "file: caption" per file. Run it on a base and on the branch for before/after.
 
 const DT := 1.0 / 60.0
-const REST_S := 1.1      # s of real time the cursor rests (the tooltip waits MapHover.DWELL_S)
+const REST_S := 1.1  # s of real time the cursor rests (the tooltip waits MapHover.DWELL_S)
 
 var main: Node
 var m: Match
-var P: Hunter
+var p: Hunter
 var dir := ""
 var lines: Array = []
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -25,7 +26,7 @@ func run(main_node: Node) -> void:
 	DisplayServer.window_set_size(Vector2i(1280, 720))
 	await main.get_tree().process_frame
 	await _setup()
-	while m.hud.full_map == null:      # (the HUD builds it a few frames after the match starts)
+	while m.hud.full_map == null:  # (the HUD builds it a few frames after the match starts)
 		await main.get_tree().process_frame
 	var fm: FullMap = m.hud.full_map
 	await _go(0.5)
@@ -46,12 +47,13 @@ func run(main_node: Node) -> void:
 	print("MAPCLEARSHOTS %d in %s" % [lines.size(), dir])
 	main.get_tree().quit(0)
 
+
 func _setup() -> void:
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
+	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
 	m.set_process(false)
-	P = m.player
+	p = m.player
 	for mb in m.mobs:
 		mb.queue_free()
 	m.mobs.clear()
@@ -65,7 +67,8 @@ func _setup() -> void:
 	xs[0]["t"] = 12.0
 	xs[1]["state"] = "idle"
 	xs[1]["open_at"] = m.time + 80.0
-	P.teleport(m.world.free_spot_near(xs[0]["pos"] + Vector3(60, 0, 0), [], 1.0, 0.5, 20.0))
+	p.teleport(m.world.free_spot_near(xs[0]["pos"] + Vector3(60, 0, 0), [], 1.0, 0.5, 20.0))
+
 
 ## Rest the cursor on an exit for longer than the dwell.
 func _hover(x: Dictionary) -> void:
@@ -75,19 +78,22 @@ func _hover(x: Dictionary) -> void:
 	await main.get_tree().create_timer(REST_S).timeout
 	await _go(0.1)
 
+
 func _go(secs: float) -> void:
 	var t := 0.0
 	while t < secs:
 		m.step(DT)
 		t += DT
-		m.cam.snap(P.pos)
+		m.cam.snap(p.pos)
 		for h in m.hunters:
 			h.render(DT, 1.0)
 		await main.get_tree().process_frame
 
+
 func _take(file: String, caption: String) -> void:
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join(file + ".png"))
 	lines.append("%s.png: %s" % [file, caption])
+
 
 func _crop(file: String, caption: String) -> void:
 	var img := main.get_viewport().get_texture().get_image()
