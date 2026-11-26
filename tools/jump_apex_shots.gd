@@ -5,8 +5,9 @@ extends RefCounted
 ## (lift-off, apex height). Needs a renderer.
 
 const OLD_JUMP_V := 6.8  # m/s: the lift-off before 11-26
-const CAM_DIST := 9.0  # m: side-on, level with the jump's middle
-const CAM_FOV := 24.0  # degrees
+const CAM_DIST := 12.0  # m: side-on, a little above the jump's middle
+const CAM_UP := 2.4  # m: the camera's height over the ground
+const CAM_FOV := 30.0  # degrees
 
 var tree: SceneTree
 
@@ -45,6 +46,8 @@ func run(main: Node) -> void:
 	)
 	m.set_process(false)
 	m.hud.visible = false
+	for layer in main.find_children("*", "CanvasLayer", true, false):
+		(layer as CanvasLayer).visible = false  # (the training drill card too)
 	for mob in m.mobs:
 		mob.queue_free()
 	m.mobs.clear()
@@ -55,8 +58,10 @@ func run(main: Node) -> void:
 	m.add_child(cam)
 	cam.make_current()
 	cam.fov = CAM_FOV
-	cam.global_position = home + Vector3(CAM_DIST, 1.4, 0)
-	cam.look_at(home + Vector3(0, 1.4, 0))
+	cam.global_position = home + Vector3(CAM_DIST, CAM_UP, 0)
+	cam.look_at(home + Vector3(0, 1.3, 0))
+	for i in 60:
+		await tree.process_frame  # (past the splash fade)
 	for v in [OLD_JUMP_V, Hunter.JUMP_V]:
 		h.teleport(home)
 		h.vel = Vector3.ZERO
