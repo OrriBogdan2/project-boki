@@ -11390,3 +11390,4 @@ READY ext/tut-g-button-once b961f07bb3532365d8be952d89af21eee4c5f086 (tutorial t
 READY ext/tut-g-button-once b17759e0cf (bulk-rebase: origin/main merged in mechanically, was b961f07bb3; union 0 gen 1 files; the branch's own READY checks still apply)
 READY ext/stuck-integ-50964d2a fa9a16cec1470babb516a6bbf1c0263c5c7b30cd (supersedes: ext/tenzo-press-windup ext/anim-kael-native-clips ext/stuck-integ-1afe8a57 ext/merge-lane-n23e-1123 ext/mc-20261125-2050; main e13d753638+ merged; modes/hudref/come-look/mob-fsm/anim-coverage/summon-death/hunter-parity/tutorial-playthrough/hit-shape/sfx-set/terrain-hazard green, farm-tutorial/match-audio/warden-clips/warden-native same reds as main, health+kit golden+lint ratchet ok; claire.glb kept at main)
 READY ext/ui-boki-owner-read ffb45b092703 (Boki ownership reads in a 3v3)
+READY ext/ui-waypoint-fight-quiet 5bee7fbe78 (waypoint text off mid-field in fights)
