@@ -179,7 +179,7 @@ func _shiv() -> void:
 
 
 ## Celeste (rimewright, Neve): her darts bend onto a foe near the cursor line only; a foe elsewhere pulls on nothing
-## (owner 11-26: the reference's cone, docs/heroes/rimewright.md LMB).
+## (the reference's narrow cone, docs/heroes/rimewright.md LMB).
 func _celeste() -> void:
 	var r: Array = ac.setup("rimewright", 8.0)
 	var m: Match = r[0]

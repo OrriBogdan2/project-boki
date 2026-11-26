@@ -1,9 +1,10 @@
 extends RefCounted
 ## --native-stream-check (docs/art/wardens/MESHY_NATIVE.md, data "stream"): a native Hunter holding a stream of shots
-## (Neve's darts, one every 0.18 s, the hand alternating) on the spot and on the run. While it streams no upper-body
-## bone jumps (MAX_STEP a frame: the attack clip restarting from its first frame turned the arms 20+ degrees in one
-## frame; nor while it eases in or out), the hips keep their height (the attack clip's lunge dropped them 17 cm), the attack clip never takes the
-## body; DONE_IN s after the last shot the pose has eased out. Prints NSTREAM lines and a DONE line.
+## (Neve's darts, one every 0.18 s, the hand alternating) on the spot and on the run. While it streams, and while it
+## eases in and out, no upper-body bone jumps (MAX_STEP a frame: the attack clip restarting from its first frame
+## turned the arms 66 degrees in one frame), the hips keep their height (the attack clip's lunge dropped them 31 cm),
+## the attack clip never takes the body, and DONE_IN s after the last shot the pose has eased out. Prints NSTREAM
+## lines and a DONE line.
 
 const DT := 1.0 / 60.0
 const SHOT := 0.18  # s between the stream's shots (Neve's wpn.rate)

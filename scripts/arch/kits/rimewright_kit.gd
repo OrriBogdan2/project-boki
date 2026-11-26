@@ -329,7 +329,7 @@ func _throw_dart(heavy: bool) -> void:
 	var s := lk().last_shot()
 	if not s.is_empty():
 		lk().skin(s, "beam" if skating else "shard", {}, _heavy_k("size_k", heavy))
-		darts.append({"s": s, "t": 0.0, "foe": _lock_on(heavy), "k": _heavy_k("accel_k", heavy), "passed": false})
+		darts.append({"s": s, "t": 0.0, "foe": _lock_on(heavy), "passed": false})
 		if skating:
 			HeroVfx.of(m).trail(h, "beam_trail", s["node"])
 		else:
@@ -392,9 +392,9 @@ func _lock_on(heavy: bool) -> Ent:
 
 
 ## Homing: each dart (and each skating beam) steers toward the foe it locked on, else toward the cursor point, with
-## a capped sideways pull (wpn.home_accel m/s^2, x heavy.accel_k) that eases in over its first moments of flight
-## (wpn.home_delay to wpn.home_ramp s). The speed stays the same, so it curves in on an arc and never snaps; the cap
-## over the speed bounds the turn rate, and a foe it has gone past (over 0.6 PI off its heading) is let go.
+## a capped sideways pull (wpn.home_accel m/s^2) that eases in over its first wpn.home_ramp s of flight. The speed
+## stays the same, so it curves in on an arc and never snaps; the cap over the speed bounds the turn rate, and a foe
+## it has gone past (over 0.6 PI off its heading) is let go.
 func _tick_darts(dt: float) -> void:
 	var wd: Dictionary = h.wpn
 	var aimp: Vector3 = h.inp.get("aim", h.pos)
@@ -417,8 +417,8 @@ func _tick_darts(dt: float) -> void:
 				want = Vector2.ZERO
 		if want.length() < 0.05 or absf(v.angle_to(want)) > PI * 0.6:
 			continue  # nothing to chase, or it is already past it: it flies on
-		var grip := smoothstep(float(wd["home_delay"]), float(wd["home_ramp"]), float(dd["t"]))
-		var cap := float(wd["home_accel"]) * float(dd["k"]) * grip * dt
+		var grip := smoothstep(0.0, float(wd["home_ramp"]), float(dd["t"]))
+		var cap := float(wd["home_accel"]) * grip * dt
 		var pull := (want.normalized() * v.length() - v).limit_length(cap)
 		s["vel"] = (v + pull).normalized() * v.length()
 
