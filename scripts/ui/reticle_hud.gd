@@ -30,7 +30,7 @@ func draw(c: CanvasItem, p: Hunter, at: Vector2, time: float) -> void:
 	var hc := _hit_color()
 	var k := rt.tick_k()
 	Reticle.draw(c, at, spread, accent, Color(hc, k * _t("hit_ring_flash")))
-	if p.ak and p.ak.has_meter():
+	if p.ak and p.ak.has_gauge():
 		var rc := p.ak.res_col()
 		var full := p.ak.tell == "full"
 		_arc(c, at, _t("res_r"), PI * 1.62, PI * 0.76, p.ak.res_frac(), rc, 0.95 if full else 0.7, full)

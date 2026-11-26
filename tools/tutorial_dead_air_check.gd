@@ -10,10 +10,10 @@ extends RefCounted
 ##     the world marker are hidden together while you talk to Hob
 ## Runs on a throw-away save (Save.no_write). One table row per starter and course is printed.
 
-const GAP_MAX := 4.0       # s: the longest the player may be left without a prompt or marker
-const BOT_FARM_S := 6.0    # s the farm bot takes over each step before it does it
-const SLOW_WAIT_S := 5.0   # s the slow player stands still at the start of each match step
-const QUIET_MAX := 8.0     # s: the longest a slow player may go with nothing new to go on
+const GAP_MAX := 4.0  # s: the longest the player may be left without a prompt or marker
+const BOT_FARM_S := 6.0  # s the farm bot takes over each step before it does it
+const SLOW_WAIT_S := 5.0  # s the slow player stands still at the start of each match step
+const QUIET_MAX := 8.0  # s: the longest a slow player may go with nothing new to go on
 const QUIET_SLACK := 0.25  # s: the nag fires at NAG_T; the tick that sees it counts, so a few over is no gap
 const HAMMER_BEAT_S := 0.8  # s one hammer swing of yours takes (farm_build.json)
 const MARKER_MOVE_M := 3.0  # m the marker has to shift to count as moving on
@@ -21,25 +21,28 @@ const STARTERS := {"Lace": "archer", "Kael": "juggernaut", "Vex": "gunslinger"}
 
 var bad := 0
 var main: Node
-var gap := {}      # span -> s so far
-var worst := {}    # span -> longest s
-var quiet := []    # the stretches over QUIET_MAX s: "where | step | at s | long s"
-var calm := 0.0    # s since something new showed
-var last := {}     # what the player saw last frame: line, marker anchor, Boki and nag state
+var gap := {}  # span -> s so far
+var worst := {}  # span -> longest s
+var quiet := []  # the stretches over QUIET_MAX s: "where | step | at s | long s"
+var calm := 0.0  # s since something new showed
+var last := {}  # what the player saw last frame: line, marker anchor, Boki and nag state
 var farm_t := 0.0  # s on the farm so far
+
 
 func ok(cond: bool, what: String) -> void:
 	print("DEADAIR %s %s" % ["PASS" if cond else "FAIL", what])
 	if not cond:
 		bad += 1
 
+
 ## The lane's lines but a fallen Boki's (URGENT, the one kind a banner lets through).
 func _lines(m: Match) -> Array[String]:
 	return m.hud.msgs.texts().filter(func(t: String) -> bool: return not " is down  ·" in t)
 
+
 func run(mn: Node) -> void:
 	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
-	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm (base_mode is the shipped default)
+	FarmUnlocks.rules()["base_mode"] = false  # walks the old farm (base_mode is the shipped default)
 	main = mn
 	Save.no_write = true
 	for who in STARTERS:
@@ -51,14 +54,17 @@ func run(mn: Node) -> void:
 	print("DEADAIR DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 ## Counts a span of frames in which `lost` holds, and keeps the longest one.
 func _span(key: String, lost: bool, dt: float) -> void:
 	gap[key] = (float(gap.get(key, 0.0)) + dt) if lost else 0.0
 	worst[key] = maxf(float(worst.get(key, 0.0)), float(gap[key]))
 
+
 func _judge(tag: String, key: String, what: String) -> void:
 	var w := float(worst.get(key, 0.0))
 	ok(w <= GAP_MAX, "%s: %s for at most %.0f s (longest %.1f s)" % [tag, what, GAP_MAX, w])
+
 
 func _reset() -> void:
 	gap.clear()
@@ -92,20 +98,35 @@ func _match_fresh(m: Match, tu: Tutorial) -> bool:
 	var nags := tu.nag_t > 0.0
 	var fresh: bool = line != last.get("line", "") or moved or (comp != null and comp.leading())
 	fresh = fresh or (says and not last.get("says", false)) or (nags and not last.get("nags", false))
+	fresh = fresh or tu.hits > int(last.get("hits", 0))  # (a hit landing on a monster is its own feedback)
 	last["line"] = line
 	last["says"] = says
 	last["nags"] = nags
+	last["hits"] = tu.hits
 	last["sid"] = tu.id()
 	return fresh
+
 
 # ------------------------------------------------------------------ the match tutorial
 func _match(who: String, arch: String) -> void:
 	_reset()
 	seed(11)
+	BokiLines.reset()  # (the farm before talked on the wall clock: what it left must not shift this course's lines)
 	var m := Match.new()
 	main.add_child(m)
-	m.start({"tutorial": true, "tut_test": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0,
-			"demo_kin": "cindle", "arch": arch, "cls": Arch.weight(arch)})
+	m.start(
+		{
+			"tutorial": true,
+			"tut_test": true,
+			"teams": 1,
+			"squad": 1,
+			"tier": 0,
+			"length": 1500.0,
+			"demo_kin": "cindle",
+			"arch": arch,
+			"cls": Arch.weight(arch)
+		}
+	)
 	m.set_process(false)
 	var tu: Tutorial = m.tut
 	var tag := "%s match" % who
@@ -143,9 +164,14 @@ func _match(who: String, arch: String) -> void:
 	_judge(tag, "m_dead", "no span without a prompt or a marker")
 	_judge(tag, "m_marker", "a step with a place keeps its marker (%d frames)" % place_steps)
 	ok(rival == 0, "%s: no two prompts compete (%d frames)" % [tag, rival])
-	print("DEADAIR match | %s | dead %.1f s | marker lost %.1f s | rival %d | quiet %.1f s" % [who,
-			worst.get("m_dead", 0.0), worst.get("m_marker", 0.0), rival, worst.get("quiet", 0.0)])
+	print(
+		(
+			"DEADAIR match | %s | dead %.1f s | marker lost %.1f s | rival %d | quiet %.1f s"
+			% [who, worst.get("m_dead", 0.0), worst.get("m_marker", 0.0), rival, worst.get("quiet", 0.0)]
+		)
+	)
 	m.queue_free()
+
 
 ## The slow player's wait: no stick, no key.
 func _stand_still(p) -> void:
@@ -196,10 +222,15 @@ func _farm(who: String, arch: String) -> void:
 	_judge(tag, "f_dead", "no span without a hint line or a marker")
 	_judge(tag, "f_marker", "a step with a place keeps its marker")
 	ok(rival == 0, "%s: no two prompts compete (%d ticks)" % [tag, rival])
-	print("DEADAIR farm | %s | dead %.1f s | marker lost %.1f s | rival %d | quiet %.1f s" % [who,
-			worst.get("f_dead", 0.0), worst.get("f_marker", 0.0), rival, worst.get("quiet", 0.0)])
+	print(
+		(
+			"DEADAIR farm | %s | dead %.1f s | marker lost %.1f s | rival %d | quiet %.1f s"
+			% [who, worst.get("f_dead", 0.0), worst.get("f_marker", 0.0), rival, worst.get("quiet", 0.0)]
+		)
+	)
 	home.queue_free()
 	await main.get_tree().process_frame
+
 
 ## The bot spends BOT_FARM_S s on the step on show (the guide ticking at 10 Hz), judged each tick.
 ## Returns the ticks in which two prompts competed.
@@ -226,6 +257,7 @@ func _farm_step(g: FarmGuide, id: String, expect_id := true) -> int:
 		g.set_quiet(false)
 	ok(cur == id or not expect_id, "%s: it is the step on show (%s)" % [id, cur])
 	return rival
+
 
 ## The slow player hammers the house up, one swing a beat, with the quiet clock running each tick.
 func _hammer(g: FarmGuide) -> void:
@@ -267,10 +299,10 @@ func _crop_course(home, g: FarmGuide) -> int:
 	(lay["deco"] as Array).append(patch)
 	(lay["water"] as Dictionary).clear()
 	home._sync_fixtures()
-	var rival := _farm_step(g, "crop")      # plant
+	var rival := _farm_step(g, "crop")  # plant
 	Save.d["plots"][0] = {"crop": "tidebloom", "stage": 0, "wt": 0.0}
-	rival += _farm_step(g, "crop")      # water
+	rival += _farm_step(g, "crop")  # water
 	Save.d["plots"][0]["wt"] = 100.0
-	rival += _farm_step(g, "crop", false)      # grow
+	rival += _farm_step(g, "crop", false)  # grow
 	Save.d["plots"][0]["stage"] = int(Data.CROPS["tidebloom"]["grow"])
-	return rival + _farm_step(g, "crop")      # pick
+	return rival + _farm_step(g, "crop")  # pick
