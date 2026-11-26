@@ -11357,3 +11357,4 @@ READY ext/merge-lane-conflict-a-1124 00cbf5afebef77d6621f8971948b756a336ce67b (P
 READY ext/mantle-port-a aa873f8f09 (PR #135: main merged, dredge_anim_time_check dropped because Grimble is Meshy-native; 31 targeted flags, reds equal main except ostra swim-stroke row in --clip-check)
 READY ext/merge-lane-M4-1121 93a0094818 (PR #571: main d16fa75f08 merged, kin.gd keeps main's wisp/proc and the branch's KinAck; 29 targeted flags equal main)
 READY ext/merge-lane-N1-1122 a6bbb06ff3 (PR #641: main d16fa75f08 merged, game.gd = main + KinSteal.settle; 11 targeted flags equal main)
+READY ext/sfx-mantle-kick 635585dfe7d7f806867e8b6fbcde72e73e872dba (mantle, wall kick and ledge sounds; merged main d16fa75f08, no conflicts left)
