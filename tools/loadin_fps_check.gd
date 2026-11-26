@@ -24,7 +24,7 @@ var look_s := 30.0
 var advisory := false
 var headless := false
 var software := false
-var frames: Array = []  # wall ms, loading 1/0, draws, objs, nodes, phys, proc, mem, vram, steps, cpu ms, marks, phase, 3D off 1/0
+var frames: Array = []  # wall ms, loading, draws, objs, nodes, phys, proc, mem, vram, steps, cpu, marks, phase, 3D off, render cpu, gpu
 var loading_ms := 0.0
 var last_us := 0
 var t0_us := 0
@@ -34,6 +34,8 @@ var steps_total := 0  # sim steps taken after the screen
 var last_time := -1.0  # Match.time last frame
 var sole_reads0 := 0  # BootSole.reads when the screen went
 var last_cpu := 0.0  # cpu_ms() at the last frame
+var phase_prof := {}  # phase -> section -> us summed over its frames (_add_prof)
+var prev_prof := {}
 var land_t := -1.0  # Match.time the player touched down (-1: not yet)
 
 
@@ -79,6 +81,7 @@ func _ready() -> void:
 		var tk := Save.new_kin("zapple", "Pip")
 		Save.d["roster"].append(tk)
 		Save.d["active"] = tk["uid"]
+	RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)
 	t0_us = Time.get_ticks_usec()
 	last_us = t0_us
 	# the Play button's options (Home._start_match), made to play itself so the ride and drop run
@@ -109,6 +112,9 @@ func _process(_delta: float) -> void:
 			steps = roundi(((cur as Match).time - last_time) / (1.0 / 60.0))
 		last_time = (cur as Match).time
 		steps_total += steps
+	var ph := _phase(cur) if shown_us > 0 else "load"
+	if shown_us > 0:
+		_add_prof(ph)
 	var step := ""
 	for mk in marks:
 		step += "%s %.0f " % [mk[1], mk[2]]
@@ -126,8 +132,11 @@ func _process(_delta: float) -> void:
 			steps,
 			cpu,
 			step.strip_edges(),
-			_phase(cur) if shown_us > 0 else "load",
+			ph,
 			1 if get_viewport().disable_3d else 0,
+			RenderingServer.viewport_get_measured_render_time_cpu(get_viewport().get_viewport_rid())
+			+ RenderingServer.get_frame_setup_time_cpu(),
+			RenderingServer.viewport_get_measured_render_time_gpu(get_viewport().get_viewport_rid()),
 		]
 	)
 	if shown_us > 0 and (now - shown_us) / 1e6 >= look_s:
@@ -135,6 +144,17 @@ func _process(_delta: float) -> void:
 	elif (now - t0_us) / 1e6 > 300.0:
 		print("LOADIN stuck: no match after 300 s")
 		get_tree().quit(1)
+
+
+## What this frame's sim and visual sections cost (Match.prof / Match.vprof are running totals), summed per phase.
+func _add_prof(ph: String) -> void:
+	var acc: Dictionary = phase_prof.get_or_add(ph, {})
+	for src in [Match.prof, Match.vprof]:
+		for k in src:
+			var key := ("v:" if src == Match.vprof else "") + String(k)
+			acc[key] = float(acc.get(key, 0.0)) + float(src[k]) - float(prev_prof.get(key, 0.0))
+			prev_prof[key] = float(src[k])
+	acc["#frames"] = float(acc.get("#frames", 0.0)) + 1.0
 
 
 ## Where the player is in the drop, for the per-phase table: plan (ship waits), ride (aboard), rocket, fall (free fall
@@ -189,8 +209,12 @@ func _phase_lines(j: Array) -> Array:
 		var cpu := 0.0
 		var mem := 0.0
 		var off := 0
+		var rcpu := 0.0
+		var rgpu := 0.0
 		for f in fs:
 			off += int(f[13])
+			rcpu += float(f[14])
+			rgpu += float(f[15])
 			sum += float(f[0])
 			draws += float(f[2])
 			objs += float(f[3])
@@ -199,8 +223,15 @@ func _phase_lines(j: Array) -> Array:
 		ms.sort()
 		var n := float(fs.size())
 		var pf := "LOADIN phase %-6s %4d frames  avg %.1f ms  p99 %.1f  worst %.1f  draws %.0f  obj %.0f"
-		pf += "  cpu %.1f  mem peak %.0f MB  3D off %d"
-		lines.append(pf % [ph, fs.size(), sum / n, _pct(ms, 0.99), _pct(ms, 1.0), draws / n, objs / n, cpu / n, mem, off])
+		pf += "  cpu %.1f  mem peak %.0f MB  3D off %d  render cpu %.1f gpu %.1f"
+		var pp: Dictionary = phase_prof.get(ph, {})
+		if not pp.is_empty():
+			var nf := float(pp["#frames"])
+			var ks := pp.keys().filter(func(k): return k != "#frames")
+			ks.sort_custom(func(a, b): return pp[a] > pp[b])
+			var tops: Array = ks.slice(0, 7).map(func(k): return "%s %.1f" % [k, pp[k] / 1000.0 / nf])
+			pf += "\nLOADIN   top ms a frame: " + ", ".join(tops)
+		lines.append(pf % [ph, fs.size(), sum / n, _pct(ms, 0.99), _pct(ms, 1.0), draws / n, objs / n, cpu / n, mem, off, rcpu / n, rgpu / n])
 	return lines
 
 
@@ -303,7 +334,7 @@ func _finish() -> void:
 	if csv_path != "":
 		var fc := FileAccess.open(csv_path, FileAccess.WRITE)
 		if fc:
-			fc.store_line("ms,loading,draws,objects,nodes,phys_ms,proc_ms,mem_mb,vram_mb,sim_steps,cpu_ms,marks,phase,off3d")
+			fc.store_line("ms,loading,draws,objects,nodes,phys_ms,proc_ms,mem_mb,vram_mb,sim_steps,cpu_ms,marks,phase,off3d,render_cpu_ms,render_gpu_ms")
 			for f in frames:
-				fc.store_line("%.2f,%d,%d,%d,%d,%.2f,%.2f,%.0f,%.0f,%d,%.2f,%s,%s,%d" % f)
+				fc.store_line("%.2f,%d,%d,%d,%d,%.2f,%.2f,%.0f,%.0f,%d,%.2f,%s,%s,%d,%.2f,%.2f" % f)
 	get_tree().quit(0 if fails == 0 or advisory else 1)
