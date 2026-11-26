@@ -11,6 +11,8 @@ extends RefCounted
 ## data carries a `spike` block, {"bonus": extra damage share, "vy": m/s down}, read through dunks().
 ## Numbers: content/rules/hunter_move.json "glide_spike".
 
+const AIR_GAP := 0.35  # m: a body this far over its ground (or gliding) is in the air for a spike block
+
 static var _r: Dictionary = MoveRules.data()["glide_spike"]
 static var land_stun: float = _r["land_stun"]
 static var land_dmg: float = _r["land_dmg"]
@@ -20,7 +22,6 @@ static var keep_hv: float = _r["keep_hv"]
 static var reopen_cd: float = _r["reopen_cd"]
 static var slam_min: float = _r["slam_min"]
 static var cool_by: float = _r["cool_by"]
-const AIR_GAP := 0.35          # m: a body this far over its ground (or gliding) is in the air for a spike block
 
 ## A heat spike: the glider folds, the body plunges and is stunned in the air.
 static func shoot_down(h: Hunter) -> void:
