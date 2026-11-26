@@ -65,6 +65,7 @@ func run(main: Node) -> void:
 	var t := 0.0
 	var idle_ok := true
 	var reach := ""
+	var pending := ""
 	var early_seen := false  # the summon step: the first window was called back early, and the step stayed
 	var second_seen := false  # the pack step: summoned again after the ring went bright
 	var lead := {}  # per leading step: how the Boki (or its wisp) moves to the step's target
@@ -79,6 +80,11 @@ func run(main: Node) -> void:
 		var at_step := tu.step
 		m.step(Match.DT)
 		t += Match.DT
+		if pending != "":
+			# (one step after the start: a stray left off the island by the last camp is culled on the tick after,
+			# and the camp it held back comes in then, TutorialCamps._cull_strays)
+			reach += _unreachable(m, pending)
+			pending = ""
 		_lead_sample(m, tu, lead)
 		if tu.step == at_step:
 			_marker(m, lost)
@@ -90,7 +96,7 @@ func run(main: Node) -> void:
 			seen[tu.id()] = {"text": tu.text, "detail": tu.detail, "cap": tu.key_cap}
 			print("TUTCHECK STEP %d %s: %s" % [seen.size(), tu.id(), tu.text])
 			if tu.id() in FOE_STEPS:
-				reach += _unreachable(m, tu.id())  # (the step's dummies were just placed by its start)
+				pending = tu.id()  # (the step's dummies were just placed by its start)
 	ok(m.player.extracted, "the course finishes (%d steps in %.0fs)" % [seen.size(), t])
 	var banners := seen.keys().filter(func(k): return not TutorialHints.quiet(String(k)))
 	print(
