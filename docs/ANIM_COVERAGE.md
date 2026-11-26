@@ -134,9 +134,9 @@ Worst five, backlog-ready:
 
 - [anim] Boki casquebill (No. 9): 0 missing (none), 8 on the shared clip set (idle, walk, run, attack, cast, hop, eat, sleep); author its own clips in tools/boki/casquebill_anim.py, rebuild the .glb, rerun --anim-coverage-check
 - [anim] Boki duskapi (No. 11): 0 missing (none), 8 on the shared clip set (idle, walk, run, attack, cast, hop, eat, sleep); author its own clips in tools/boki/duskapi_anim.py, rebuild the .glb, rerun --anim-coverage-check
-- [anim] Boki glomwort (No. 17): 0 missing (none), 8 on the shared clip set (idle, walk, run, attack, cast, hop, eat, sleep); author its own clips in tools/boki/glomwort_anim.py, rebuild the .glb, rerun --anim-coverage-check
-- [anim] Boki nacrolin (No. 32): 0 missing (none), 8 on the shared clip set (idle, walk, run, attack, cast, hop, eat, sleep); author its own clips in tools/boki/nacrolin_anim.py, rebuild the .glb, rerun --anim-coverage-check
-- [anim] Boki opalisk (No. 35): 0 missing (none), 8 on the shared clip set (idle, walk, run, attack, cast, hop, eat, sleep); author its own clips in tools/boki/opalisk_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki glomwort (No. 18): 0 missing (none), 8 on the shared clip set (idle, walk, run, attack, cast, hop, eat, sleep); author its own clips in tools/boki/glomwort_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki nacrolin (No. 33): 0 missing (none), 8 on the shared clip set (idle, walk, run, attack, cast, hop, eat, sleep); author its own clips in tools/boki/nacrolin_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki opalisk (No. 36): 0 missing (none), 8 on the shared clip set (idle, walk, run, attack, cast, hop, eat, sleep); author its own clips in tools/boki/opalisk_anim.py, rebuild the .glb, rerun --anim-coverage-check
 
 ### Mobs
 
