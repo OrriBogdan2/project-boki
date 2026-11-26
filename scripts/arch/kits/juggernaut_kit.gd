@@ -29,6 +29,9 @@ const WAVE_EDGE := Color("ffe2c4")     # ... its white-hot inner edge
 const WAVE_FULL := Color("ffffff")     # ... white at full charge
 const LUNGE_HOT := 0.25                # 0..1: the Lunge lane's white-out at full charge (its rim stays crimson)
 const LUNGE_REACH := 0.6               # m: the Lunge reaches this far past touching (lane = body + this, each side)
+const LUNGE_COIL_T := 0.2              # s on jug_lunge's clock where its held coil ends (kael.json "lead" -0.45 at
+                                       # "rate" 2.2): a longer Lunge holds it there to its stop, thrusting on the stop
+const LUNGE_SNAP_T := 0.05             # s of travel left when the coil lets go: the thrust's snap and a frame to see it
 const CHAIN_RESET := 1.0               # s idle after a slash before the chain starts over on the right: the
                                        # footage still alternates across 4-frame gaps at 5 fps (0.6-1.0 s)
 
@@ -846,6 +849,8 @@ func _lunge(k: float, perfect: bool) -> void:
 func _tick_lunge() -> void:
 	var ld: Dictionary = rmb_def()["lunge"]
 	var dv: Vector2 = lunge["dir"]
+	if anim_id == "jug_lunge" and m.time - anim_at > LUNGE_COIL_T and h.roll_t > LUNGE_SNAP_T:
+		anim_at = m.time - LUNGE_COIL_T      # the coil holds while he travels: the thrust lands as the travel stops
 	for f in m.foes_of(h.team):
 		if f.hittable() and h.flat_dist(f) < h.r + f.r + LUNGE_REACH and absf(f.pos.y - h.pos.y) < 1.6:
 			var k := float(lunge["k"])
