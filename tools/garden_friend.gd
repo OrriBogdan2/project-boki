@@ -412,8 +412,8 @@ func _row(at: Vector3, cam_dir: Vector2, rel: Array) -> void:
 func _closeup(i: int, spot: Vector3, cd: Vector2, turn: float) -> void:
 	_front(spot, cd, 0.0)
 	h.player.visible = false
-	_view([30.0, 28.0, 26.0, 28.0][i], 27.0, 0.12)
-	CamRig.rules["farm"]["rise"] = 0.3  # the view looks low, so a knee-high Boki sits mid-frame
+	_view([24.0, 22.0, 21.0, 22.0][i], 19.0, 0.12)
+	CamRig.rules["farm"]["rise"] = [0.65, 0.65, 0.3, 0.65][i]  # the steeper view looks a little higher (puddlet sits low), so a knee-high Boki sits mid-frame
 	for j in h.kins.size():
 		_put(j, spot + (Vector3.ZERO if j == i else Vector3(-30 - j, 0, -30)))
 		h.kins[j].erase("job")
@@ -483,11 +483,11 @@ func _film() -> void:
 	CamRig.rules["farm"]["rise"] = 0.4
 	_front(H, cd, 0.0)
 	h.player.visible = false
-	_view(28.0, 28.0, 0.4)
-	_row(H, cd, [Vector2(-1.8, 1.6), Vector2(-0.6, 1.6), Vector2(0.6, 1.6), Vector2(1.8, 1.6)])
+	_view(28.0, 26.0, 0.5)
+	_row(H, cd, [Vector2(-0.9, 1.6), Vector2(0.05, 1.6), Vector2(1.0, 1.6), Vector2(1.95, 1.6)])  # +x is screen left
 	face_all = true
 	_face_yaw = atan2(-cd.x, -cd.y)
-	await _wait(0.6)
+	await _wait(1.2)
 	await _stills("r", 3, 0.7)
 	face_all = false
 	h.player.visible = true
