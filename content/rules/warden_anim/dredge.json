@@ -23,6 +23,7 @@
 		"bone": "gun"
 	},
 	"reach": {"bones": ["upper_arm.R", "forearm.R", "hand.R"], "grip": 0.35},
+	"gun_reach": {"bones": ["upper_arm.L", "forearm.L", "hand.L"], "grip": 0.2, "max_stretch": 1.0, "level": true},
 	"free_arm": {"throw": "L", "shot": "R"},
 	"loco": {
 		"plants": {

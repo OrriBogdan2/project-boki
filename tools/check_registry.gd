@@ -700,7 +700,6 @@ const CHECKS := {
 	"--kill-feed-shots": ["res://tools/kill_feed_shots.gd", "kill_feed_shots", null],  # GPU, --size= --shots-dir=
 	"--hunter-zone-shots": ["res://tools/hunter_zone_shots.gd", "hunter_zone_shots", null],
 	"--hud-portrait-shots": ["res://tools/hud_portrait_shots.gd", "hud_portrait_shots", null],
-	"--grimble-line-shots": ["res://tools/grimble_line_shots.gd", "grimble_line_shots", null],
 	"--unmasked-check": ["res://tools/unmasked_check.gd", "unmasked_check", null],  # the Unmasked
 	"--empty-creator-check": ["res://tools/empty_creator_check.gd", "empty_creator_check", null],
 	"--mastery-look-check": ["res://tools/mastery_look_check.gd", "mastery_look_check", null],

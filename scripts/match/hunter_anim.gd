@@ -484,6 +484,7 @@ var km_blend := KM_BLEND
 var km_bank := false  # the move rolls the body into the turns it flies (its "bank" key)
 var km_stance := false  # the move's legs are a standing stance: running, the legs keep running
 var km_swing := -1  # the weapon swing the move throws (its "swing" key), -1: the weapon's combo step
+var km_gun_up := false  # the move keeps the gun in his hand (its "gun_up" key: Brass Broadside)
 
 ## The blade's place and the body's twist for the current swing, into sw_*: w (weight), a (yaw,
 ## pitch, roll), tw (torso twist), hand ("r" "l" "b" both on one hilt, "x" both blades), drop, rad
@@ -1532,6 +1533,7 @@ func _update_km(id: String, tt: float, dt: float) -> void:
 		km_stance = bool(km_def(id).get("stance", false))
 		km_bank = bool(km_def(id).get("bank", false))
 		km_swing = int(km_def(id).get("swing", -1))
+		km_gun_up = bool(km_def(id).get("gun_up", false))
 	km_id = id
 	km_prev_t = tt
 	var now := km_sample(id, tt) if id != "" else {}
@@ -1739,7 +1741,7 @@ func _upper(
 		swing_dur = base_d * (1.25 if swing_step == 2 else 1.0) * (1.35 if swing_step < 0 else 1.0)
 	swing_t += dt
 	# aiming or relaxed: guns come up when you fire, and drop to a carry a little after
-	var want_aim := 1.0 if fired < 1.1 or float(s.get("charge", 0.0)) > 0.0 or crouch_k > 0.5 else 0.0
+	var want_aim := 1.0 if fired < 1.1 or float(s.get("charge", 0.0)) > 0.0 or crouch_k > 0.5 or km_gun_up else 0.0
 	aim_k = _ease(aim_k, want_aim, 14.0 if want_aim > aim_k else 3.0, dt)
 	model.set_meta(WardenHolster.DRAW, aim_k)
 	var carries := r1 > 0.55 or swim_k > 0.5  # (swimming keeps the gun in one hand, as on a run)

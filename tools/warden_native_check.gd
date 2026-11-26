@@ -16,6 +16,8 @@ const CONTRACT_BONES := ["hips", "upper_arm.L", "thigh.L"]
 const POSED_MIN := 10  # bones turned off Meshy's T-pose rest in a playing clip (the T-pose turns none)
 const TURNED := 0.03  # rad: a bone this far off its rest is posed
 const CALM_CAST := 99.0  # s since the last cast: Hunter._anim_state always sends "cast" (WardenNative baselines on it)
+const KIT_ARM_FRAMES := 12  # frames a kit arm is held out before its stretch is read (a stretch must not compound)
+const KIT_ARM_STRETCH := 12.0  # x: the forearm of a 3 m reach is never longer than this
 const SYNTH := "Zz_Clip"  # the test clip a synthetic clips file carries
 const STRING_PULL := 0.08  # m, Meshy scale: the string is drawn this far off the bow at a release move's first frame
 const STRING_BACK := 0.03  # and this near it a frame later
@@ -159,6 +161,7 @@ func _states(main: Node, a: String) -> void:
 	await _slots(main, a, m, nat)
 	await _upper(main, a, m, nat)
 	await _kmoves(main, a, m, nat)
+	await _kit_arms(main, m, nat)
 	_moves(a, nat)
 	_only_meshy(a, m)
 	await _orbits(main, a, nat)
@@ -288,6 +291,46 @@ func _peak(kind: String, tips: Array, hips: Array) -> int:
 		if score[k] >= best - (0.0 if kind == "speed" else 0.02):
 			return k
 	return 0
+
+
+## Grimble's arms the kit lays toward a point (data "reach", "gun_reach"; a clip never moves them while it does): with
+## the root's tip metas set the hook arm's hand sits at its tip, and the gun arm lies straight and level along the aim.
+func _kit_arms(main: Node, m: Node3D, nat: WardenNative) -> void:
+	if nat.reaches.is_empty():
+		return
+	var sk := nat.skel
+	var unit := sk.global_basis.get_scale().x  # (m per skeleton unit: the bones' lengths are in skeleton space)
+	var fwd := -m.global_basis.z
+	var tips := {}
+	for r: WardenReach in nat.reaches:
+		var shoulder := sk.global_transform * sk.get_bone_global_pose(r.bones[0]).origin
+		tips[r] = shoulder + fwd * 3.0 + Vector3(0.0, -0.4, 0.0)
+		m.set_meta(r.meta, tips[r])
+	for _i in KIT_ARM_FRAMES:
+		await main.get_tree().process_frame
+	for r: WardenReach in nat.reaches:
+		var fore := sk.get_bone_global_pose(r.bones[1]).basis.get_scale().y
+		var wrist := sk.get_bone_global_pose(r.bones[2]).basis.get_scale().y
+		var info := "%s: the %s arm keeps its stretch over %d frames (forearm x%.1f, hand x%.2f)"
+		var label := info % [nat.art_id, "hook" if r.meta == WardenReach.TIP else "gun", KIT_ARM_FRAMES, fore, wrist]
+		ok(fore >= 0.99 and fore <= KIT_ARM_STRETCH and absf(wrist - 1.0) < 0.05, label)
+	for r: WardenReach in nat.reaches:
+		r.apply(1.0, tips[r])
+		var shoulder := sk.get_bone_global_pose(r.bones[0]).origin
+		var elbow := sk.get_bone_global_pose(r.bones[1]).origin
+		var hand := sk.get_bone_global_pose(r.bones[2]).origin
+		var arm := hand - shoulder
+		if r.meta == WardenReach.TIP:
+			var off := (sk.global_transform * hand).distance_to(tips[r])
+			ok(off < 0.5, "%s: the hook arm's hand reaches its tip (%.2f m off)" % [nat.art_id, off])
+		else:
+			var own := shoulder.distance_to(elbow) + elbow.distance_to(hand)
+			var level := absf(arm.y) < 0.05 * arm.length()
+			var ahead := (sk.global_basis * arm).normalized().dot(Vector3(fwd.x, 0.0, fwd.z).normalized()) > 0.98
+			var info := "%s: the gun arm is straight, level and ahead (%.2f m of %.2f)"
+			ok(level and ahead and arm.length() < own * 1.02, info % [nat.art_id, arm.length() * unit, own * unit])
+		m.set_meta(r.meta, Vector3.INF)
+		r.apply(1.0, Vector3.INF)  # (the arm is back with the clips before the next case)
 
 
 ## Only Meshy's model draws the body: no mesh of the hidden procedural rig (its weapon, the Offhand's second gauntlet
