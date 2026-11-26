@@ -23,6 +23,7 @@ var _match: Match
 var _glows: Array[MeshInstance3D] = []
 var _fresh: Array = []  # mesh nodes that entered the match since the last look
 var _scan_in := 0.0
+var _held := {}  # instance id -> true: the glows now capped or dimmed (one far from every Hunter and not here needs nothing)
 
 
 func _init(m: Match) -> void:
@@ -90,6 +91,9 @@ func _rescan() -> void:
 	for i in range(_glows.size() - 1, -1, -1):
 		if not is_instance_valid(_glows[i]):
 			_glows.remove_at(i)
+	for id: int in _held.keys():
+		if not is_instance_id_valid(id):
+			_held.erase(id)
 	for n in _fresh:
 		if not is_instance_valid(n) or not n.is_inside_tree() or _glows.has(n):
 			continue
@@ -113,10 +117,16 @@ func _apply(mi: MeshInstance3D, near: Array[Vector3]) -> void:
 	var c := mi.global_position
 	var close := false
 	for p in near:
-		if Vector2(c.x - p.x, c.z - p.z).length() < NEAR_R and absf(c.y - p.y) < NEAR_R:
+		var dx := c.x - p.x
+		var dz := c.z - p.z
+		if dx * dx + dz * dz < NEAR_R * NEAR_R and absf(c.y - p.y) < NEAR_R:
 			close = true
 			break
+	var id := mi.get_instance_id()
+	if not close and not _held.has(id):
+		return  # (as it was left: full size, full alpha)
 	if close:
+		_held[id] = true
 		var sz := (mi.global_transform * mi.get_aabb()).size
 		var wide := maxf(sz.x, maxf(sz.y, sz.z))
 		if wide > MAX_SIZE:
@@ -133,3 +143,5 @@ func _apply(mi: MeshInstance3D, near: Array[Vector3]) -> void:
 	if float(mi.get_meta(META_ALPHA, 1.0)) != alpha:
 		mi.set_meta(META_ALPHA, alpha)
 		mi.set_instance_shader_parameter(PARAM, alpha)
+	if not close:
+		_held.erase(id)
