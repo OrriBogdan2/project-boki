@@ -331,7 +331,7 @@ func slam(c: float, at_feet: bool) -> void:
 	k.vfx("quakefall", at, h.aim_dir(), {"r": r, "k": c})
 	m.sfx("br_slam", at, 0.0, 1.0)
 	var gained := false
-	var spike: Dictionary = {} if at_feet else s["spike"]      # only the tap slam: a hop or dive is a leap
+	var spike: Dictionary = {} if at_feet else s["spike"]  # only the tap slam: a hop or dive is a leap
 	for f in k.foes_in(at, r, 3.2):
 		var in_core: bool = Vector2(f.pos.x - at.x, f.pos.z - at.z).length() <= cr + f.r
 		var d2 := dmg * (float(s["core_k"]) if in_core else 1.0)
