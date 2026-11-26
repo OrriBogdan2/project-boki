@@ -25,7 +25,7 @@ func run(main: Node) -> void:
 	for seed_n in SEEDS:
 		var m := Match.new()
 		main.add_child(m)
-		await m.start({"teams": Data.MATCH_PLAYERS, "squad": 1, "total": Data.MATCH_PLAYERS, "tier": 0, "seed": seed_n})
+		m.start({"teams": Data.MATCH_PLAYERS, "squad": 1, "total": Data.MATCH_PLAYERS, "tier": 0, "seed": seed_n})
 		for f in 30:
 			await main.get_tree().process_frame
 		var fm: FullMap = m.hud.full_map
