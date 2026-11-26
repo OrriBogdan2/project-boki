@@ -40,6 +40,7 @@ func run(main_node: Node) -> void:
 	var turn := func(_t: float) -> void:
 		for k in ks:
 			k.face = atan2(-FACE.x, -FACE.z)
+			k.render(DT, 1.0)  # (the match's own render pass is off here)
 	await _go(1.0, turn, [], 3.0)
 	for k in ks:
 		k.teleport(k.home)
