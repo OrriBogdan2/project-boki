@@ -5,6 +5,7 @@ extends RefCounted
 ## last back); each game ends in a cheer. Writes <dir>/clip1.avi and <dir>/clip1.png. Run it on a GPU worker
 ## (jobq --needs gpu); recording reuses tools/gameplay_media.gd's child Godot. Never writes the save.
 
+const Preflight := preload("res://tools/clip_preflight.gd")
 const GAME_S := 7.0  # s each game of tag lasts, so both end inside the clip
 ## s and what happens: "tag0"/"tag1" a game starts for pair 0 (Ash, Crag) or 1 (Moss, Pip), "catch0"/"catch1" the
 ## chaser reaches the other, "squabble0"/"squabble1" the pair bumps tempers (four cues inside one 3 s window)
@@ -53,6 +54,8 @@ func run(m: Node) -> void:
 	Settings.v["tips"] = false
 	seed(7)
 	var h = await _stage()
+	if not Preflight.enforce(main, 1, "garden_play"):
+		return
 	await _play(h, secs)
 	print(
 		(
