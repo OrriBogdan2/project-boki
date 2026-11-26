@@ -256,7 +256,7 @@ func run(main_node: Node) -> void:
 	gm.free()
 	# rare kin only at the live rare-kin points, one at each (a Great Camp still holds its guarded one)
 	var rare: Array = m.kins.filter(func(k): return k.has_meta("rare"))
-	var live: Array = sp.active_of("rare_kin").filter(func(cc): return not cc.has("camp"))   # (guarded: --camps-check)
+	var live: Array = sp.active_of("rare_kin").filter(func(cc): return not cc.has("camp"))  # (guarded: --camps-check)
 	var stray := 0
 	for k in rare:
 		var near := false

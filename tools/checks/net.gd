@@ -12,5 +12,6 @@ const CHECKS := {
 	"--remote-anim-3-check": ["res://tools/remote_anim_check.gd", "remote_anim_check", "3"],
 	"--remote-anim-rest-check": ["res://tools/remote_anim_check.gd", "remote_anim_check", "rest"],
 	"--remote-anim-guest": ["res://tools/remote_anim_check.gd", "remote_anim_check", ""],  # its guest game
+	"--squad-chat-check": ["res://tools/squad_chat_check.gd", "squad_chat_check", null],  # in-match squad chat
 	"--stomp-net-check": ["res://tools/stomp_net_check.gd", "stomp_net_check", null],  # a stomp reaches the peer
 }

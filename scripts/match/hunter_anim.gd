@@ -349,6 +349,9 @@ var glide_k := 0.0
 var bank_k := 0.0  # the roll into turns: the glider's, and a move keyed "bank" (Flue Flight)
 var swim_k := 0.0  # in deep water: the crawl
 var swim_ph := 0.0  # rad: the stroke
+var hz_cues := 0  # HazardMoveSfx bits this pose found
+var hz_swim := false  # swimming at the last pose
+var hz_ice := false  # no footing on ice at the last pose
 var dive_k := 0.0
 var crouch_k := 0.0
 var ledge_k := 0.0
@@ -1739,7 +1742,7 @@ func _upper(
 	var want_aim := 1.0 if fired < 1.1 or float(s.get("charge", 0.0)) > 0.0 or crouch_k > 0.5 else 0.0
 	aim_k = _ease(aim_k, want_aim, 14.0 if want_aim > aim_k else 3.0, dt)
 	model.set_meta(WardenHolster.DRAW, aim_k)
-	var carries := r1 > 0.55 or swim_k > 0.5      # (swimming keeps the gun in one hand, as on a run)
+	var carries := r1 > 0.55 or swim_k > 0.5  # (swimming keeps the gun in one hand, as on a run)
 	var want_carry := 1.0 if carries and aim_k < 0.3 and grounded and hold != "minigun" else 0.0
 	carry_k = _ease(carry_k, want_carry, 6.0, dt)
 	var stow := maxf(maxf(glide_k, dive_k), maxf(emote_k * (0.0 if emote_id == "" else 1.0), 0.0))
