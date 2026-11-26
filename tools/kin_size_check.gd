@@ -40,7 +40,7 @@ func _pts(root: Node3D) -> PackedVector3Array:
 	for n in root.find_children("*", "MeshInstance3D", true, false):
 		var mi := n as MeshInstance3D
 		for si in mi.mesh.get_surface_count():
-			for v in (mi.mesh.surface_get_arrays(si)[Mesh.ARRAY_VERTEX] as PackedVector3Array):
+			for v in mi.mesh.surface_get_arrays(si)[Mesh.ARRAY_VERTEX] as PackedVector3Array:
 				pts.append(mi.global_transform * v)
 	return pts
 
@@ -100,7 +100,10 @@ func run(m: Node) -> void:
 			)
 		k.queue_free()
 	ok(reads.size() >= 40, "%d species with a model measured" % reads.size())
-	ok(worst <= TOLERANCE, "every species reads within %d%% of its data size (worst %.1f%%)" % [TOLERANCE * 100.0, worst * 100.0])
+	ok(
+		worst <= TOLERANCE,
+		"every species reads within %d%% of its data size (worst %.1f%%)" % [TOLERANCE * 100.0, worst * 100.0]
+	)
 	ok(far <= FAR, "every species' longest side is within %.1fx of its data length (worst %.2fx)" % [FAR, far])
 	_close(reads, "in a match")
 	var farm_scale := float(load("res://scripts/home/home.gd").get_script_constant_map()["FARM_BOKI_SCALE"])
@@ -119,7 +122,10 @@ func run(m: Node) -> void:
 	for id in STARTERS:
 		biggest = maxf(biggest, sqrt(float(reads[id][0]) * float(reads[id][1])))
 	var big := sqrt(float(reads[BIG][0]) * float(reads[BIG][1]))
-	ok(big >= biggest * BIG_OVER, "Heatherhorn reads bigger than every starter (%.0f cm against %.0f)" % [big * 100.0, biggest * 100.0])
+	ok(
+		big >= biggest * BIG_OVER,
+		"Heatherhorn reads bigger than every starter (%.0f cm against %.0f)" % [big * 100.0, biggest * 100.0]
+	)
 	var t0 := Time.get_ticks_usec()
 	KinSize.read((Models.kin(BIG, {}).get_node("Body/Flex/BokiRig") as BokiRig).model)
 	print("KIN_SIZE_TIME read of one model %.1f ms" % ((Time.get_ticks_usec() - t0) / 1000.0))
