@@ -428,7 +428,7 @@ func _tick_spin(dt: float) -> void:
 	vfx("spin", h.pos, h.aim_dir(), {"r": r, "k": k})
 	for f in foes_in(h.pos, r):
 		var dmg := lerpf(float(ed["tick"][0]), float(ed["tick"][1]), k) * power("kin")
-		# no_hold: a hold every 0.25 s froze his screen in a stutter that read as shake (owner 11-26)
+		# no_hold: a hold every 0.25 s would stutter his own screen, which reads as shake
 		f.hurt(dmg, h, {"src": "abil", "ab": "k1", "tags": ["k1", "riptide"], "no_hold": true})
 
 func _release_spout() -> void:

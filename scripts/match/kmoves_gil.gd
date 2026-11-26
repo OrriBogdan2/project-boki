@@ -343,7 +343,7 @@ const MOVES := {
 	},
 	"gil_surface":
 	{
-		# ... and out: from the waist he bursts up through the ground, stretched, arms and point up, then lands in a squash
+		# ... and out: from the waist he bursts up through the ground, arms and point up, then lands in a squash
 		"keys":
 		[
 			[
