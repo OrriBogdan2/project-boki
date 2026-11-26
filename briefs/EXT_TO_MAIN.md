@@ -11400,3 +11400,4 @@ READY ext/farm-boki-xp-curve-port bbca99b13bfb9e0a396082dcc906f54a892c2426 (PR #
 READY ext/sfx-native-steps eb9cd4891c715febc2bc06d32fa97d5438fc7313 (PR #864: main merged, warden_native.json doc conflict resolved, wiki regenerated, check.sh + step-sync green)
 READY ext/perf-hud-draw 7286e9d1f4d95ffbc9e57ce60d57ea26cc292388 (HUD CPU -0.75 ms/frame: label size cache, icon glyph cache, buffs at 20 Hz, bench zones; bar -2 ms not reached)
 READY ext/merge-lane-n19h-1119 de4bcc8d720 (PR #434: main merged, hazard sounds = main, wade/swim orphans + dup doc dropped; reds left = main reds)
+READY ext/merge-lane-M3-1121 0d1f9b5a1c0 (PR #569: main merged twice, clean; only red left farm-tutorial-check = red on main)
