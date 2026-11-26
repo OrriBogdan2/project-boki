@@ -23,9 +23,9 @@ const DUMMY_HP := 3000.0
 const TEAM := 7
 
 var m: Match
-var layout := "arena"  # "arena" (its own map) | "practice" (the training island)
-var home := Vector3.ZERO  # where you start (and reset to)
-var dummies: Array = []  # {h: Hunter, kind, at, label: Label3D, hits: [[t, d]], total, last, quiet}
+var layout := "arena"          # "arena" (its own map) | "practice" (the training island)
+var home := Vector3.ZERO       # where you start (and reset to)
+var dummies: Array = []        # {h: Hunter, kind, at, label: Label3D, hits: [[t, d]], total, last, quiet}
 var drill: DodgeDrill = null
 var bot: Hunter = null
 var bot_mode := "off"
@@ -34,8 +34,8 @@ var bot_at := Vector3.ZERO
 var bot_down_t := -1.0
 var cd_off := false
 var ult_on := true
-var gloves := ["", ""]  # the two glove slots, Q and V (item 69)
-var hits_all: Array = []  # [[t, d]] everything you dealt (the session DPS meter)
+var gloves := ["", ""]         # the two glove slots, Q and V (item 69)
+var hits_all: Array = []       # [[t, d]] everything you dealt (the session DPS meter)
 var dealt := 0.0
 var _cb: Callable
 var layer: CanvasLayer = null
@@ -44,9 +44,8 @@ var meter: Label = null
 var card_layer: CanvasLayer = null
 var menu_layer: CanvasLayer = null
 var keys_node: Node = null
-var grounds: Grounds = null  # the stations on the sky perches and the duel ring (arena layout only)
-var pad: SummonPad = null  # the Training Grounds only
-
+var grounds: Grounds = null     # the stations on the sky perches and the duel ring (arena layout only)
+var pad: SummonPad = null      # the Training Grounds only
 
 func setup(match_node: Match, which: String) -> void:
 	m = match_node
@@ -85,61 +84,34 @@ func setup(match_node: Match, which: String) -> void:
 	m.add_child(keys_node)
 	if m.hud:
 		m.hud.guide_hidden = true
-		m.hud.toast(
-			(
-				("Training Grounds" if layout == "arena" else "Training")
-				+ "  ·  K kit card  ·  L loadout  ·  2-9 first eight Hunters"
-			),
-			Color("f3eee2")
-		)
-
+		m.hud.toast(("Training Grounds" if layout == "arena" else "Training") + "  ·  K kit card  ·  L loadout  ·  2-9 first eight Hunters", Color("f3eee2"))
 
 func teardown() -> void:
 	if _cb.is_valid() and CombatBus.hit_landed.is_connected(_cb):
 		CombatBus.hit_landed.disconnect(_cb)
 
-
 ## A point on the arena floor (map tile coords), on the ground.
 func _arena_point(p: Vector3) -> Vector3:
 	return Vector3(p.x, m.world.ground_at(p.x, p.z), p.z)
-
 
 func _free_near(p: Vector3) -> Vector3:
 	var q: Vector3 = m.world.free_spot_near(p, [m.player.pos], 1.2, 0.5, 6.0)
 	q.y = m.world.ground_at(q.x, q.z)
 	return q
 
-
 # ------------------------------------------------------------------ dummies
 func _spawn_dummies() -> void:
 	var spots: Array
 	if layout == "arena":
-		spots = (Grounds.data()["dummies"] as Array).map(
-			func(d): return [d[0], Vector3(float(d[1]), 0, float(d[2])), d[3]]
-		)
+		spots = (Grounds.data()["dummies"] as Array).map(func(d): return [d[0], Vector3(float(d[1]), 0, float(d[2])), d[3]])
 	else:
-		spots = [
-			["still", home + Vector3(-2.5, 0, -4.0), "light"],
-			["strafe", home + Vector3(2.5, 0, -4.5), "medium"],
-			["heavy", home + Vector3(0, 0, -6.5), "heavy"]
-		]
+		spots = [["still", home + Vector3(-2.5, 0, -4.0), "light"], ["strafe", home + Vector3(2.5, 0, -4.5), "medium"], ["heavy", home + Vector3(0, 0, -6.5), "heavy"]]
 	for sp in spots:
 		var at: Vector3 = sp[1]
 		at = _arena_point(at) if layout == "arena" else _free_near(at)
-		var d_v: Hunter = m.make_hunter(
-			m.next_id("dummy"),
-			TEAM,
-			String(sp[2]),
-			{"still": "Dummy", "strafe": "Strafer", "heavy": "Training dummy"}[sp[0]],
-			"idle",
-			{},
-			at,
-			{"arch": "none"}
-		)
-		d_v.max_hp = DUMMY_HP
-		d_v.hp = DUMMY_HP
-		d_v.armor = 0.0
-		d_v.max_armor = 0.0
+		var d_v: Hunter = m.make_hunter(m.next_id("dummy"), TEAM, String(sp[2]), {"still": "Dummy", "strafe": "Strafer", "heavy": "Training dummy"}[sp[0]], "idle", {}, at, {"arch": "none"})
+		d_v.max_hp = DUMMY_HP; d_v.hp = DUMMY_HP
+		d_v.armor = 0.0; d_v.max_armor = 0.0
 		d_v.lives = 99
 		d_v.tonics = 0
 		var lb := Label3D.new()
@@ -153,10 +125,7 @@ func _spawn_dummies() -> void:
 		lb.font = UI.big
 		lb.position = Vector3(0, 3.4, 0)
 		d_v.add_child(lb)
-		dummies.append(
-			{"h": d_v, "kind": sp[0], "at": at, "label": lb, "hits": [], "total": 0.0, "last": 0.0, "quiet": 0.0}
-		)
-
+		dummies.append({"h": d_v, "kind": sp[0], "at": at, "label": lb, "hits": [], "total": 0.0, "last": 0.0, "quiet": 0.0})
 
 func _on_hit(by, t, d, _tags) -> void:
 	var credit = by
@@ -175,18 +144,15 @@ func _on_hit(by, t, d, _tags) -> void:
 		hits_all.append([m.time, float(d)])
 		dealt += float(d)
 
-
 static func dps_of(hits: Array, now: float, win := 4.0) -> float:
 	var s := 0.0
 	var first := now
 	for hh in hits:
 		if now - float(hh[0]) <= win:
-			s += float(hh[1])
-			first = minf(first, float(hh[0]))
+			s += float(hh[1]); first = minf(first, float(hh[0]))
 	if s <= 0.0:
 		return 0.0
 	return s / maxf(1.0, now - first + 0.25)
-
 
 ## Runs right after the bots think (Match.step): dummies watch you, the strafer strafes, the bot
 ## mode trims what the sparring bot may do; heals, revives and cooldowns-off.
@@ -207,7 +173,7 @@ func after_think() -> void:
 			mv = Vector2(sin(m.time * 1.3), 0.0)
 		var off := Vector2(at.x - d_v.pos.x, at.z - d_v.pos.z)
 		if off.length() > (2.4 if dm["kind"] == "strafe" else 0.6) and float(dm["quiet"]) > 1.2:
-			mv = off.normalized()  # walk back to its mark once you stop hitting it
+			mv = off.normalized()       # walk back to its mark once you stop hitting it
 		d_v.inp["move"] = mv
 		for k in ["fire", "dash", "jump", "sig", "sec", "ult", "gear1", "gear2", "throw"]:
 			d_v.inp[k] = false
@@ -220,7 +186,6 @@ func after_think() -> void:
 			"moving":
 				for k in ["fire", "sig", "sec", "ult", "gear1", "gear2", "throw"]:
 					bot.inp[k] = false
-
 
 func tick(dt: float) -> void:
 	var p_v: Hunter = m.player
@@ -240,14 +205,7 @@ func tick(dt: float) -> void:
 			hs.pop_front()
 		var lb: Label3D = dm["label"]
 		var dps := dps_of(hs, m.time)
-		lb.text = (
-			(
-				"DPS %d   ·   last %d\ntotal %d"
-				% [int(round(dps)), int(round(float(dm["last"]))), int(round(float(dm["total"])))]
-			)
-			if float(dm["total"]) > 0.0
-			else {"still": "DUMMY", "strafe": "STRAFER", "heavy": "TRAINING DUMMY  ·  slam me into the pillar"}[dm["kind"]]
-		)
+		lb.text = "DPS %d   ·   last %d\ntotal %d" % [int(round(dps)), int(round(float(dm["last"]))), int(round(float(dm["total"])))] if float(dm["total"]) > 0.0 else {"still": "DUMMY", "strafe": "STRAFER", "heavy": "TRAINING DUMMY  ·  slam me into the pillar"}[dm["kind"]]
 	while not hits_all.is_empty() and m.time - float(hits_all[0][0]) > 6.0:
 		hits_all.pop_front()
 	# the sparring bot and you always see each other (the view cone never hides a sparring partner)
@@ -256,8 +214,7 @@ func tick(dt: float) -> void:
 		p_v.reveal_t = maxf(p_v.reveal_t, 0.3)
 	# the sparring bot: back up after a beat
 	if bot and is_instance_valid(bot) and bot.downed:
-		if bot_down_t < 0.0:
-			bot_down_t = 1.5
+		if bot_down_t < 0.0: bot_down_t = 1.5
 		bot_down_t -= dt
 		if bot_down_t <= 0.0:
 			bot_down_t = -1.0
@@ -268,13 +225,10 @@ func tick(dt: float) -> void:
 	if p_v.ak:
 		p_v.ak.cd_off = cd_off
 	if cd_off:
-		p_v.gear_cd[0] = 0.0
-		p_v.gear_cd[1] = 0.0
-		p_v.dashes = p_v.max_dashes()
-		p_v.ex_cd = 0.0
+		p_v.gear_cd[0] = 0.0; p_v.gear_cd[1] = 0.0
+		p_v.dashes = p_v.max_dashes(); p_v.ex_cd = 0.0
 		p_v.sig_cd = 0.0
-		if p_v.ammo < int(p_v.wpn["mag"]) and not p_v.wpn.get("melee", false):
-			p_v.ammo = int(p_v.wpn["mag"])
+		if p_v.ammo < int(p_v.wpn["mag"]) and not p_v.wpn.get("melee", false): p_v.ammo = int(p_v.wpn["mag"])
 	if ult_on and int(p_v.slot_lv.get("ult", 0)) <= 0:
 		_apply_ult()
 	if p_v.downed and layout == "arena":
@@ -289,8 +243,7 @@ func tick(dt: float) -> void:
 	if pad:
 		pad.tick()
 	_update_ui()
-	ArenaDemo.tick(self, dt)  # (screenshot tooling only, --arena-demo)
-
+	ArenaDemo.tick(self, dt)      # (screenshot tooling only, --arena-demo)
 
 func _apply_ult() -> void:
 	var p_v: Hunter = m.player
@@ -302,7 +255,6 @@ func _apply_ult() -> void:
 		p_v.slot_lv["ult"] = 0
 		p_v.lvl = mini(p_v.lvl, 5)
 
-
 # ------------------------------------------------------------------ actions
 ## Back to your marks: you, the dummies and the bot, all healed, cooldowns and resources cleared.
 func reset() -> void:
@@ -310,45 +262,27 @@ func reset() -> void:
 	for h in [p_v, bot]:
 		if h == null or not is_instance_valid(h):
 			continue
-		if h.downed:
-			m.revive_hunter(h, null)
-		h.hp = h.max_hp
-		h.armor = h.max_armor
-		h.stun_t = 0.0
-		h.root_t = 0.0
-		h.slow_t = 0.0
-		h.burn_t = 0.0
+		if h.downed: m.revive_hunter(h, null)
+		h.hp = h.max_hp; h.armor = h.max_armor
+		h.stun_t = 0.0; h.root_t = 0.0; h.slow_t = 0.0; h.burn_t = 0.0
 		h.vel = Vector3.ZERO
-		h.dashes = h.max_dashes()
-		h.ex_cd = 0.0
+		h.dashes = h.max_dashes(); h.ex_cd = 0.0
 		h.teleport(home if h == p_v else bot_at)
 		if h.ak:
-			for k in h.ak.cd.keys():
-				h.ak.cd[k] = 0.0
+			for k in h.ak.cd.keys(): h.ak.cd[k] = 0.0
 			h.ak.ch_rmb = float(h.ak.rmb_charges())
 			h.ak.res = 0.0
-		h.gear_cd[0] = 0.0
-		h.gear_cd[1] = 0.0
+		h.gear_cd[0] = 0.0; h.gear_cd[1] = 0.0
 	for dm in dummies:
 		var d_v: Hunter = dm["h"]
-		if not is_instance_valid(d_v):
-			continue
-		if d_v.downed:
-			m.revive_hunter(d_v, null)
-		d_v.hp = DUMMY_HP
-		d_v.vel = Vector3.ZERO
-		d_v.stun_t = 0.0
-		d_v.root_t = 0.0
-		d_v.slow_t = 0.0
+		if not is_instance_valid(d_v): continue
+		if d_v.downed: m.revive_hunter(d_v, null)
+		d_v.hp = DUMMY_HP; d_v.vel = Vector3.ZERO; d_v.stun_t = 0.0; d_v.root_t = 0.0; d_v.slow_t = 0.0
 		d_v.teleport(dm["at"])
 		d_v.set_meta("marks", {})
-		dm["hits"] = []
-		dm["total"] = 0.0
-		dm["last"] = 0.0
-	hits_all.clear()
-	dealt = 0.0
+		dm["hits"] = []; dm["total"] = 0.0; dm["last"] = 0.0
+	hits_all.clear(); dealt = 0.0
 	TrainingSfx.cue(TrainingSfx.RESET)
-
 
 ## Become another archetype on the spot (its weight class comes with it); your Boki stays.
 func set_arch(a: String, w := "") -> void:
@@ -356,48 +290,37 @@ func set_arch(a: String, w := "") -> void:
 	if not Arch.exists(a):
 		return
 	p_v.reclass(Arch.weight(a), a, w)
-	Match._trim_shadows(p_v)  # (the match's one pass over small parts ran before this model existed)
+	Match._trim_shadows(p_v)      # (the match's one pass over small parts ran before this model existed)
 	p_v.unlock_all()
 	_apply_ult()
 	for i in Gloves.SLOTS:
-		if gloves[i] != "":
-			give_glove(String(gloves[i]), i)
+		if gloves[i] != "": give_glove(String(gloves[i]), i)
 	m.fx.burst(p_v.pos + Vector3(0, 1.0, 0), Arch.color(a), 18, 3.5, 0.5)
 	m.sfx("unlock", null, -6.0, 1.1)
-	if m.hud:
-		m.hud.toast("%s  ·  %s" % [Arch.name_of(a), AbilityText.loop(a)], Arch.color(a))
-	if card_layer:
-		_open_card()
-
+	if m.hud: m.hud.toast("%s  ·  %s" % [Arch.name_of(a), AbilityText.loop(a)], Arch.color(a))
+	if card_layer: _open_card()
 
 ## Bring another Boki (one of yours, or a loaner of any kind); "" for none.
 func set_kin(sp: String) -> void:
 	var p_v: Hunter = m.player
 	if p_v.kin:
 		var o: Kin = p_v.kin
-		if KinMerge.active(p_v):
-			KinMerge.end(p_v, "broken")
-		o.dead = true
-		m.kins.erase(o)
-		o.queue_free()
-		p_v.kin = null
+		if KinMerge.active(p_v): KinMerge.end(p_v, "broken")
+		o.dead = true; m.kins.erase(o); o.queue_free(); p_v.kin = null
 		p_v.apply_kin_bonus()
 	if sp == "":
 		return
 	var rec := {}
 	for r in Save.d.get("roster", []):
 		if String(r.get("species", "")) == sp:
-			rec = (r as Dictionary).duplicate(true)
-			break
+			rec = (r as Dictionary).duplicate(true); break
 	if rec.is_empty():
 		rec = Save.new_kin(sp)
 		rec["trust"] = 90.0
 		rec["level"] = 8
 	var k: Kin = m.give_kin(p_v, rec)
 	k.stow()
-	if card_layer:
-		_open_card()
-
+	if card_layer: _open_card()
 
 ## Wear any glove in a slot (0 = Q, 1 = V; -1 = where Gloves.slot_for puts it: its twin's slot, a free one, the
 ## weaker). Two of the same glove can't be worn, so a glove picked for one slot leaves the other. Actives and
@@ -416,7 +339,6 @@ func give_glove(gid: String, slot := -1) -> void:
 	p_v.gear_cd[slot] = 0.0
 	p_v.refresh_gear()
 
-
 func clear_glove(slot: int) -> void:
 	var p_v: Hunter = m.player
 	gloves[slot] = ""
@@ -424,61 +346,40 @@ func clear_glove(slot: int) -> void:
 	p_v.gear_cd[slot] = 0.0
 	p_v.refresh_gear()
 
-
 func cycle_bot(step := 1) -> void:
 	bot_mode = BOT_MODES[(BOT_MODES.find(bot_mode) + step + BOT_MODES.size()) % BOT_MODES.size()]
 	_spawn_bot()
-	if m.hud:
-		m.hud.toast_small("Sparring bot: %s" % BOT_NAMES[bot_mode], Color("ff9a8a"))
-
+	if m.hud: m.hud.toast_small("Sparring bot: %s" % BOT_NAMES[bot_mode], Color("ff9a8a"))
 
 func set_bot_arch(a: String) -> void:
 	bot_arch = a
 	_spawn_bot()
 
-
 func _spawn_bot() -> void:
 	if bot and is_instance_valid(bot):
 		m.hunters.erase(bot)
 		if bot.kin:
-			m.kins.erase(bot.kin)
-			bot.kin.queue_free()
+			m.kins.erase(bot.kin); bot.kin.queue_free()
 		bot.queue_free()
 	bot = null
 	if bot_mode == "off":
 		return
 	var diff := "medium"
-	bot = m.make_hunter(
-		m.next_id("spar"),
-		TEAM,
-		Arch.weight(bot_arch),
-		"Sparring " + Arch.name_of(bot_arch, true),
-		"bot",
-		m.bot_kin_record(),
-		bot_at,
-		{"arch": bot_arch, "weapon": Arch.signature(bot_arch)}
-	)
+	bot = m.make_hunter(m.next_id("spar"), TEAM, Arch.weight(bot_arch), "Sparring " + Arch.name_of(bot_arch, true), "bot", m.bot_kin_record(), bot_at, {"arch": bot_arch, "weapon": Arch.signature(bot_arch)})
 	bot.ai = m.bot_brain.new_mind(m.rng, float(Data.BOT_DIFF[diff]["skill"]), Data.BOT_DIFF[diff])
 	bot.lives = 99
 	bot.tonics = 0
 	bot.unlock_all()
 	TrainingSfx.cue(TrainingSfx.BOT_SPAWN, bot_at)
 
-
 func toggle_cd() -> void:
 	cd_off = not cd_off
-	if m.hud:
-		m.hud.toast_small("Cooldowns %s" % ("OFF" if cd_off else "on"), Color("9ff0e0"))
-
+	if m.hud: m.hud.toast_small("Cooldowns %s" % ("OFF" if cd_off else "on"), Color("9ff0e0"))
 
 func toggle_ult() -> void:
 	ult_on = not ult_on
 	_apply_ult()
-	if m.hud:
-		m.hud.toast_small(
-			"Ultimate %s" % ("unlocked (level 6)" if ult_on else "locked (under level 6)"), Color("ffd27a")
-		)
-
+	if m.hud: m.hud.toast_small("Ultimate %s" % ("unlocked (level 6)" if ult_on else "locked (under level 6)"), Color("ffd27a"))
 
 # ------------------------------------------------------------------ on screen
 func _build_ui() -> void:
@@ -495,7 +396,7 @@ func _build_ui() -> void:
 	hint.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
 	hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hint.position.y = 10 if layout == "arena" else 70  # (the Training Grounds's banner sits at the top)
+	hint.position.y = 10 if layout == "arena" else 70     # (the Training Grounds's banner sits at the top)
 	hint.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	root.add_child(hint)
 	meter = UI.label("", 15, UI.INK, UI.big)
@@ -508,22 +409,14 @@ func _build_ui() -> void:
 	meter.custom_minimum_size = Vector2(310, 0)
 	root.add_child(meter)
 
-
 func _update_ui() -> void:
 	if meter == null:
 		return
 	var p_v: Hunter = m.player
-	var lines := (
-		"%s   DPS %d   ·   dealt %d"
-		% [Arch.name_of(p_v.arch).to_upper() if p_v.ak else "", int(round(dps_of(hits_all, m.time))), int(round(dealt))]
-	)
-	lines += (
-		"\nBot: %s   ·   Cooldowns: %s   ·   Ult: %s"
-		% [BOT_NAMES[bot_mode], "OFF" if cd_off else "on", "on" if ult_on else "locked"]
-	)
+	var lines := "%s   DPS %d   ·   dealt %d" % [Arch.name_of(p_v.arch).to_upper() if p_v.ak else "", int(round(dps_of(hits_all, m.time))), int(round(dealt))]
+	lines += "\nBot: %s   ·   Cooldowns: %s   ·   Ult: %s" % [BOT_NAMES[bot_mode], "OFF" if cd_off else "on", "on" if ult_on else "locked"]
 	if meter.text != lines:
 		meter.text = lines
-
 
 ## A sign by your start: where the kit card and the loadout are.
 func _sign() -> void:
@@ -544,7 +437,6 @@ func _sign() -> void:
 	post.position = Vector3(at.x, home.y + 0.8, at.z)
 	m.add_child(post)
 
-
 func _open_card() -> void:
 	_close_card()
 	var p_v: Hunter = m.player
@@ -554,19 +446,16 @@ func _open_card() -> void:
 	var root := Control.new()
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	card_layer.add_child(root)
-	var shade := ColorRect.new()
-	shade.color = Color(0, 0, 0, 0.35)
+	var shade := ColorRect.new(); shade.color = Color(0, 0, 0, 0.35)
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.add_child(shade)
-	var center := CenterContainer.new()
-	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var center := CenterContainer.new(); center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.add_child(center)
 	var sp := String((p_v.kin as Kin).species) if p_v.kin and not (p_v.kin as Kin).dead else ""
 	var card := KitCard.make(p_v.arch, sp, _close_card)
 	center.add_child(card)
 	m.paused = true
 	CursorMode.menu()
-
 
 func _close_card() -> void:
 	if card_layer:
@@ -576,21 +465,16 @@ func _close_card() -> void:
 			m.paused = false
 			CursorMode.aim()
 
-
 func toggle_card() -> void:
-	if card_layer:
-		_close_card()
-	else:
-		_open_card()
-
+	if card_layer: _close_card()
+	else: _open_card()
 
 # ---- the loadout panel (L): picks apply on the spot; the panel never changes size. It fits the view at the
 # default UI scale; the Boki list (every species) scrolls in what is left of the height.
-const MENU_MAX_H := 760.0  # px (logical UI): the tallest the panel gets on tall views
-const MENU_EDGE := 20.0  # px (logical UI): the gap kept between the panel and the screen edge
-const MENU_LEFT_W := 480.0  # px: the left column (Hunter, Boki, bot)
-const MENU_PICK_W := 92.0  # px: a Hunter or Boki button in the left column's five-wide grids
-
+const MENU_MAX_H := 760.0      # px (logical UI): the tallest the panel gets on tall views
+const MENU_EDGE := 20.0        # px (logical UI): the gap kept between the panel and the screen edge
+const MENU_LEFT_W := 480.0     # px: the left column (Hunter, Boki, bot)
+const MENU_PICK_W := 92.0      # px: a Hunter or Boki button in the left column's five-wide grids
 
 func open_menu() -> void:
 	close_menu()
@@ -602,12 +486,10 @@ func open_menu() -> void:
 	var root := Control.new()
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	menu_layer.add_child(root)
-	var shade := ColorRect.new()
-	shade.color = Color(0, 0, 0, 0.4)
+	var shade := ColorRect.new(); shade.color = Color(0, 0, 0, 0.4)
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.add_child(shade)
-	var center := CenterContainer.new()
-	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var center := CenterContainer.new(); center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.add_child(center)
 	var pn := PanelContainer.new()
 	pn.custom_minimum_size.y = minf(MENU_MAX_H, root.get_viewport_rect().size.y - 2.0 * MENU_EDGE)
@@ -618,7 +500,6 @@ func open_menu() -> void:
 	pn.add_child(v)
 	_fill_menu(v)
 	UI.pop_in(pn)
-
 
 func _fill_menu(v: VBoxContainer) -> void:
 	for ch in v.get_children():
@@ -638,14 +519,7 @@ func _fill_menu(v: VBoxContainer) -> void:
 	var ag := _pick_grid()
 	for a in Arch.ids():
 		var aa: String = a
-		var b := UI.choice(
-			HeroTitle.base_name(a),
-			p_v.arch == a,
-			func():
-				set_arch(aa)
-				_fill_menu(v),
-			MENU_PICK_W
-		)
+		var b := UI.choice(HeroTitle.base_name(a), p_v.arch == a, func(): set_arch(aa); _fill_menu(v), MENU_PICK_W)
 		b.tooltip_text = "%s\n%s" % [Arch.name_of(a), AbilityText.loop(a)]
 		b.add_theme_font_size_override("font_size", 14)
 		ag.add_child(b)
@@ -656,20 +530,11 @@ func _fill_menu(v: VBoxContainer) -> void:
 	for sp in _kin_choices():
 		var ss: String = sp
 		var nm := "None" if sp == "" else String(Data.KIN.get(sp, {}).get("name", sp))
-		var b := UI.choice(
-			nm,
-			cur == sp,
-			func():
-				set_kin(ss)
-				_fill_menu(v),
-			MENU_PICK_W
-		)
+		var b := UI.choice(nm, cur == sp, func(): set_kin(ss); _fill_menu(v), MENU_PICK_W)
 		b.add_theme_font_size_override("font_size", 12)
 		if sp != "" and KinLib.kin(sp):
 			var ks := KinLib.kin(sp)
-			b.tooltip_text = (
-				"%s  ·  %s" % [String(ks.theme).capitalize(), "   ".join(KitCard.infusion_lines(p_v.arch, ks))]
-			)
+			b.tooltip_text = "%s  ·  %s" % [String(ks.theme).capitalize(), "   ".join(KitCard.infusion_lines(p_v.arch, ks))]
 		kg.add_child(b)
 	# the species list outgrows any screen: it scrolls (wheel, or the pad moving focus through it)
 	var ks_scroll := ScrollContainer.new()
@@ -679,49 +544,21 @@ func _fill_menu(v: VBoxContainer) -> void:
 	ks_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	ks_scroll.add_child(kg)
 	left.add_child(ks_scroll)
-	var br := HBoxContainer.new()
-	br.add_theme_constant_override("separation", 6)
+	var br := HBoxContainer.new(); br.add_theme_constant_override("separation", 6)
 	br.add_child(UI.label("Bot (N)", 14, UI.MUTED))
 	for md in BOT_MODES:
 		var mm: String = md
-		br.add_child(
-			UI.choice(
-				BOT_NAMES[md],
-				bot_mode == md,
-				func():
-					bot_mode = mm
-					_spawn_bot()
-					_fill_menu(v),
-				80
-			)
-		)
+		br.add_child(UI.choice(BOT_NAMES[md], bot_mode == md, func(): bot_mode = mm; _spawn_bot(); _fill_menu(v), 80))
 	left.add_child(br)
-	var ba := HBoxContainer.new()
-	ba.add_theme_constant_override("separation", 6)
+	var ba := HBoxContainer.new(); ba.add_theme_constant_override("separation", 6)
 	ba.add_child(UI.label("Bot Hunter", 14, UI.MUTED))
 	var ids := Arch.ids()
-	ba.add_child(
-		UI.button(
-			"‹",
-			func():
-				set_bot_arch(String(ids[(ids.find(bot_arch) - 1 + ids.size()) % ids.size()]))
-				_fill_menu(v),
-			44
-		)
-	)
+	ba.add_child(UI.button("‹", func(): set_bot_arch(String(ids[(ids.find(bot_arch) - 1 + ids.size()) % ids.size()])); _fill_menu(v), 44))
 	var bl := UI.label(HeroTitle.base_name(bot_arch), 16, Arch.color(bot_arch), UI.big)
 	bl.custom_minimum_size = Vector2(150, 0)
 	bl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	ba.add_child(bl)
-	ba.add_child(
-		UI.button(
-			"›",
-			func():
-				set_bot_arch(String(ids[(ids.find(bot_arch) + 1) % ids.size()]))
-				_fill_menu(v),
-			44
-		)
-	)
+	ba.add_child(UI.button("›", func(): set_bot_arch(String(ids[(ids.find(bot_arch) + 1) % ids.size()])); _fill_menu(v), 44))
 	left.add_child(ba)
 	# right: the two gloves and the practice toggles
 	var right := VBoxContainer.new()
@@ -729,13 +566,7 @@ func _fill_menu(v: VBoxContainer) -> void:
 	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	cols.add_child(right)
 	var gl: Array = Gear.ALL.keys().filter(func(g): return Gear.is_glove(String(g)))
-	gl.sort_custom(
-		func(x, y):
-			return (
-				(1 if Gear.active(x) else 0) > (1 if Gear.active(y) else 0)
-				or (Gear.active(x) == Gear.active(y) and String(x) < String(y))
-			)
-	)
+	gl.sort_custom(func(x, y): return (1 if Gear.active(x) else 0) > (1 if Gear.active(y) else 0) or (Gear.active(x) == Gear.active(y) and String(x) < String(y)))
 	var drag := SlotDrag.attach(v, _glove_drop.bind(v))
 	for si in Gloves.SLOTS:
 		var slot: int = si
@@ -744,38 +575,15 @@ func _fill_menu(v: VBoxContainer) -> void:
 		gg.columns = 5
 		gg.add_theme_constant_override("h_separation", 4)
 		gg.add_theme_constant_override("v_separation", 4)
-		var nb := UI.choice(
-			"None",
-			String(gloves[slot]) == "",
-			func():
-				clear_glove(slot)
-				_fill_menu(v),
-			60
-		)
+		var nb := UI.choice("None", String(gloves[slot]) == "", func(): clear_glove(slot); _fill_menu(v), 60)
 		nb.add_theme_font_size_override("font_size", 12)
 		drag.add(nb, {"slot": slot, "id": ""})
 		gg.add_child(nb)
 		for g in gl:
 			var gid: String = g
 			var nm2 := String(Gear.ALL[g].get("name", g))
-			var b := UI.choice(
-				nm2.substr(0, 11),
-				String(gloves[slot]) == gid,
-				func():
-					give_glove(gid, slot)
-					_fill_menu(v),
-				90,
-				Gear.icon_of(gid)
-			)
-			b.tooltip_text = (
-				"%s%s  ·  %s\n%s"
-				% [
-					nm2,
-					("  ·  %ss" % KinText.n(Gear.cd_of(gid, 2))) if Gear.active(gid) else "  ·  passive",
-					Gloves.key_cap(slot),
-					Gear.desc_of(gid, 2)
-				]
-			)
+			var b := UI.choice(nm2.substr(0, 11), String(gloves[slot]) == gid, func(): give_glove(gid, slot); _fill_menu(v), 90, Gear.icon_of(gid))
+			b.tooltip_text = "%s%s  ·  %s\n%s" % [nm2, ("  ·  %ss" % KinText.n(Gear.cd_of(gid, 2))) if Gear.active(gid) else "  ·  passive", Gloves.key_cap(slot), Gear.desc_of(gid, 2)]
 			b.add_theme_font_size_override("font_size", 12)
 			drag.add(b, {"slot": slot, "id": gid}, nm2, UI.INK)
 			gg.add_child(b)
@@ -785,31 +593,11 @@ func _fill_menu(v: VBoxContainer) -> void:
 		gd.custom_minimum_size = Vector2(480, 20)
 		right.add_child(gd)
 	right.add_child(UI.section("Practice"))
-	var trap := HBoxContainer.new()
-	trap.add_theme_constant_override("separation", 6)
-	trap.add_child(
-		UI.choice(
-			"Cooldowns off  (O)",
-			cd_off,
-			func():
-				toggle_cd()
-				_fill_menu(v),
-			160
-		)
-	)
-	trap.add_child(
-		UI.choice(
-			"Ultimate unlocked  (U)",
-			ult_on,
-			func():
-				toggle_ult()
-				_fill_menu(v),
-			190
-		)
-	)
+	var trap := HBoxContainer.new(); trap.add_theme_constant_override("separation", 6)
+	trap.add_child(UI.choice("Cooldowns off  (O)", cd_off, func(): toggle_cd(); _fill_menu(v), 160))
+	trap.add_child(UI.choice("Ultimate unlocked  (U)", ult_on, func(): toggle_ult(); _fill_menu(v), 190))
 	trap.add_child(UI.button("Reset  (Backspace)", func(): reset(), 110))
 	right.add_child(trap)
-
 
 ## The panel's top row: the hunter's portrait and name with their loop under it, the closing hint and buttons.
 func _menu_header(arch: String) -> HBoxContainer:
@@ -830,20 +618,11 @@ func _menu_header(arch: String) -> HBoxContainer:
 	side.add_child(hint_v)
 	var btns := UI.hbox(8)
 	btns.alignment = BoxContainer.ALIGNMENT_END
-	btns.add_child(
-		UI.ghost(
-			"Kit card",
-			func():
-				close_menu()
-				_open_card(),
-			120
-		)
-	)
+	btns.add_child(UI.ghost("Kit card", func(): close_menu(); _open_card(), 120))
 	btns.add_child(UI.primary("Done", close_menu, 110))
 	side.add_child(btns)
 	hd.add_child(side)
 	return hd
-
 
 ## A five-wide grid of Hunter or Boki buttons for the left column.
 func _pick_grid() -> GridContainer:
@@ -853,21 +632,11 @@ func _pick_grid() -> GridContainer:
 	g.add_theme_constant_override("v_separation", 6)
 	return g
 
-
 func _glove_line(slot: int) -> String:
 	var g := String(gloves[slot])
 	if g == "" or not Gear.ALL.has(g):
 		return "%s: no glove. Pick any to wear it here." % Gloves.key_cap(slot)
-	return (
-		"%s: %s%s: %s"
-		% [
-			Gloves.key_cap(slot),
-			String(Gear.ALL[g].get("name", g)),
-			("  ·  %ss" % KinText.n(Gear.cd_of(g, 2))) if Gear.active(g) else "  ·  passive",
-			Gear.desc_of(g, 2)
-		]
-	)
-
+	return "%s: %s%s: %s" % [Gloves.key_cap(slot), String(Gear.ALL[g].get("name", g)), ("  ·  %ss" % KinText.n(Gear.cd_of(g, 2))) if Gear.active(g) else "  ·  passive", Gear.desc_of(g, 2)]
 
 ## A glove held and dragged onto the other glove's row (SlotDrag) is worn there; dragging the one you wear
 ## swaps the two gloves.
@@ -885,19 +654,15 @@ func _glove_drop(from: Dictionary, to: Dictionary, v: VBoxContainer) -> String:
 	_fill_menu(v)
 	return ""
 
-
 func _kin_choices() -> Array:
 	var out: Array = []
 	for r in Save.d.get("roster", []):
 		var sp := String(r.get("species", ""))
-		if sp != "" and not out.has(sp) and KinLib.kin(sp):
-			out.append(sp)
+		if sp != "" and not out.has(sp) and KinLib.kin(sp): out.append(sp)
 	for sp in KinLib.kin_ids():
-		if not out.has(sp) and Data.KIN.has(sp):
-			out.append(sp)
-	out.append("")  # every species, however many there are (the list scrolls)
+		if not out.has(sp) and Data.KIN.has(sp): out.append(sp)
+	out.append("")      # every species, however many there are (the list scrolls)
 	return out
-
 
 func close_menu() -> void:
 	if menu_layer:
@@ -907,16 +672,12 @@ func close_menu() -> void:
 		m.paused = false
 		CursorMode.aim()
 
-
 ## The keys (a little node so they work while the menu has the game paused).
-class ArenaKeys:
-	extends Node
+class ArenaKeys extends Node:
 	var a: Arena
-
 	func _init(owner_arena: Arena) -> void:
 		a = owner_arena
 		process_mode = Node.PROCESS_MODE_ALWAYS
-
 	func _unhandled_input(e: InputEvent) -> void:
 		if not (e is InputEventKey and e.pressed and not e.echo):
 			return
@@ -925,35 +686,23 @@ class ArenaKeys:
 		var k := (e as InputEventKey).physical_keycode
 		var handled := true
 		match k:
-			KEY_K:
-				a.toggle_card()
+			KEY_K: a.toggle_card()
 			KEY_L:
-				if a.menu_layer:
-					a.close_menu()
-				elif not Overlay.is_open():
-					a.open_menu()
+				if a.menu_layer: a.close_menu()
+				elif not Overlay.is_open(): a.open_menu()
 			KEY_ESCAPE:
-				if a.card_layer:
-					a._close_card()
-				elif a.menu_layer:
-					a.close_menu()
-				else:
-					handled = false
+				if a.card_layer: a._close_card()
+				elif a.menu_layer: a.close_menu()
+				else: handled = false
 			KEY_BACKSPACE:
-				if not a.m.paused:
-					a.reset()
-			KEY_N:
-				a.cycle_bot()
-			KEY_O:
-				a.toggle_cd()
-			KEY_U:
-				a.toggle_ult()
+				if not a.m.paused: a.reset()
+			KEY_N: a.cycle_bot()
+			KEY_O: a.toggle_cd()
+			KEY_U: a.toggle_ult()
 			KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9:
 				var ids := Arch.ids()
 				var i := int(k - KEY_2)
-				if i < ids.size():
-					a.set_arch(String(ids[i]))
-			_:
-				handled = false
+				if i < ids.size(): a.set_arch(String(ids[i]))
+			_: handled = false
 		if handled:
 			get_viewport().set_input_as_handled()

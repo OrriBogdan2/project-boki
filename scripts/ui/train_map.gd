@@ -108,7 +108,7 @@ func _draw_halts(hud, st: SkyTrain, inner: Rect2, to_screen: Callable, named: bo
 			if named:
 				hud.full_map.label_near(eta, pv + Vector2(0, y), 10, GOLD)
 			else:
-				hud._ctext(pv + Vector2(0, y), eta, 10, GOLD, hud.big)
+				MapNames.put(eta, pv + Vector2(0, y), 10, GOLD, hud.big, true)
 
 ## One marker for the train (a chevron on its heading) and a dot for each car behind it.
 func _draw_train(hud, st: SkyTrain, inner: Rect2, to_screen: Callable) -> void:

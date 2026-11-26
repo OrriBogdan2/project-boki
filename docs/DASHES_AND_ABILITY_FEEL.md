@@ -535,7 +535,10 @@ Every hit has one of three weights (`ImpactWeight`, numbers in `content/rules/im
 - A Hunter's hit takes its ability's weight from the rules' `hunters` table (arch -> lmb / rmb / dash / e / x,
   or a kit's own hit tag such as Tenzo's `rock`). The hit's `ab` tag names the ability; an untagged shot is the
   LMB. `--impact-weight-check` asserts every damaging ability of all 13 Hunters has a weight.
-- A payoff (`payoff`, `spiked`, `exploit`) lands one weight heavier. Anything else (a Boki, a monster, the world)
+- A summoned Boki's hit takes the rules' `boki` tier: its basic bite is light, a tagged hit (its ability, the throw,
+  the recall) is solid. Hits it takes, the Boki shield and the Merge shell use the same hold and flash numbers;
+  no Boki file sets its own freeze or flash (`--impact-weight-check` §9 and its `HITFEEL boki` row).
+- A payoff (`payoff`, `spiked`, `exploit`) lands one weight heavier. Anything else (a monster, the world)
   is light, or solid when it stuns, roots, lifts, knocks 8+ m/s or deals 8%+ of max HP.
 - No weight: ticks (`tick`, burns, falls, heat), monster hits, and slow-only touches under the solid line.
 - Heavy stays under one 10 fps frame (100ms), the longest hold in the reference footage.
@@ -574,7 +577,7 @@ their tier's 120 ms); the Bulwark ult's quake shook the players near it 0.8 (now
 him with its own 0.09 s outside the per-body cap (now the heavy hold through `Feel.hold`); the other ults' 0.6
 literals read the heavy tier; a Boki's big burst went through the cause-less world shake (now it names the Boki,
 and `Shake` treats your own Boki as you, so it never shakes its owner; an enemy Boki's burst near you still does).
-Left: the Meteor Drop's lighter 0.35 shake for bystanders (its hit still shakes the struck player heavy).
+The Meteor Drop's bystander shake is gone (11-23: landings shake no one; its hit still shakes the struck player heavy).
 `--impact-weight-check` 7-8 assert the tiers per slot (explained exceptions in `TIER_OK`) and that no kit file
 sets its own hit-stop, flash or shake number.
 
@@ -612,7 +615,8 @@ that happens TO you (a boss slam, a heavy ult or landing on or near you), throug
 `Shake.incoming_big(m, at, power, cause)` (scripts/match/shake.gd): at most 0.15 s, falling off over 14 m,
 never for whoever caused it, scaled by Settings "Screen shake" (0-100%, default 30%; 0 = off), at most one
 started per 0.5s in a team fight. A heavy hit (5.4) on you is one such big thing.
-`--shake-check` asserts it for all 12 hunters and your Boki. HUD hurt-direction indicators carry the "from where".
+Every shake is a hit class in `content/rules/shake.json` (power, duration, falloff per class, against the source:
+docs/MOVEMENT_FEEL.d/1123-shake-table.md). `--shake-check` asserts it for all 12 hunters, your Boki and every table row. HUD hurt-direction indicators carry the "from where".
 
 ### 5.6 Sound layering
 

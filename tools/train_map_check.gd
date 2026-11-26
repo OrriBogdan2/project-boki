@@ -33,7 +33,7 @@ func run(main: Node) -> void:
 			opts["map"] = map_id
 		var m := Match.new()
 		main.add_child(m)
-		await m.start(opts)
+		m.start(opts)
 		m.set_process(false)
 		if m.skytrain != null:
 			with_train += 1

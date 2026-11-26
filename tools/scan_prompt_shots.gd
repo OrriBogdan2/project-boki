@@ -19,7 +19,7 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(MATCH_OPTS)
+	m.start(MATCH_OPTS)
 	m.set_process(false)
 	var fade = main.get("fade")
 	if fade != null:

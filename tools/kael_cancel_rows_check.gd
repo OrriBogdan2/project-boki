@@ -15,10 +15,10 @@ func run(a) -> void:
 	P.lvl = maxi(P.lvl, 6)
 	P.slot_lv["ult"] = 1
 	var home: Vector3 = r[4]
-	await slam_rows(m, P, home)
-	await move_rows(m, P, home)
-	await riposte_rows(m, P, home)
-	await slash_rows(m, P, home)
+	slam_rows(m, P, home)
+	move_rows(m, P, home)
+	riposte_rows(m, P, home)
+	slash_rows(m, P, home)
 	await A.done(m)
 
 
@@ -67,7 +67,7 @@ func slam_rows(m: Match, P: Hunter, home: Vector3) -> void:
 		K.slash_at > t0 and not K.slam_w.is_empty(),
 		"slashed %s" % (K.slash_at > t0)
 	)
-	# RMB again: early in the wind-up it is dropped, in its last BUFFER it winds up the next Slam as it strikes
+	# RMB again: early in the wind-up it is dropped, in its last press_buffer it winds up the next Slam as it strikes
 	_fresh(m, P, home)
 	A.tap(m, P)
 	A.step(m, 0.1)

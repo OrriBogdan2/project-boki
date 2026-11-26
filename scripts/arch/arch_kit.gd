@@ -2,7 +2,7 @@ class_name ArchKit
 extends RefCounted
 ## One hunter's archetype kit at run time (docs/ARCHETYPES.md): the dash shape, the passive and
 ## its resource, the RMB router (tap / hold / airborne / during E / during R / resource full),
-## E, R (level 6, rank 2 at 9) and the Bonded R (bond full: the kin merges 0.2s after the ult's
+## E, R (level 6, rank 2 at 9, rank 3 at 10) and the Bonded R (bond full: the kin merges 0.2s after the ult's
 ## cast). Each archetype is a subclass (scripts/arch/kits/); this base holds the timers, the input
 ## router, the kin's infusion of the sockets, telegraphs and the shared helpers.
 ##
@@ -15,6 +15,8 @@ var d: Dictionary = {}
 var res := 0.0                 # the passive's resource (Marks live on targets instead)
 var res_wait := 0.0            # seconds left before it decays out of a fight
 var full_was := false
+var _x_rank := 0               # the R rank _x_ranked was built for (x_def)
+var _x_ranked: Dictionary = {}
 var cd := {"rmb": 0.0, "e": 0.0, "r": 0.0, "x": 0.0}
 var ch_rmb := 1.0              # RMB charges
 var rmb_down := false          # RMB held since its press
@@ -74,13 +76,23 @@ const OWN_LOOK_SKIP := ["boom", "ping", "whoosh", "throw"]     # KinExec's deliv
 func rmb_def() -> Dictionary: return d.get("rmb", {})
 func e_def() -> Dictionary: return d.get("e", {})
 func r_def() -> Dictionary: return d.get("r", {})
-func x_def() -> Dictionary: return d.get("x", {})          # the hero ultimate on X (HeroUlt)
+## The hero ultimate on X (HeroUlt) at the hunter's R rank (its x.per_rank steps added; rebuilt on a new rank).
+func x_def() -> Dictionary:
+	var r := h.ability_level("ult")
+	if r != _x_rank:
+		_x_rank = r
+		_x_ranked = HeroUlt.ranked(d.get("x", {}), r)
+	return _x_ranked
+
 func dash_def() -> Dictionary: return d.get("dash", {})
 func lmb_def() -> Dictionary: return d.get("lmb", {})       # the kit's own attack-key data (kits that run the weapon's attack themselves)
 func res_def() -> Dictionary: return d.get("resource", {})
 func res_max() -> float: return float(res_def().get("max", 100.0))
 ## false when the passive has no meter (Red Thread)
 func has_meter() -> bool: return String(res_def().get("kind", "")) != "none"
+## Does the passive draw a fill-up gauge on the HUD (the bar under health and the reticle arc)? Data: "gauge": true on the
+## resource block, for a passive that fills and pays off when full (Rage, Swell). Fever, stacks and foe marks have none.
+func has_gauge() -> bool: return bool(res_def().get("gauge", false))
 func res_col() -> Color: return Color(String(res_def().get("col", "#ffffff")))
 func col_of(sd: Dictionary) -> Color: return Color(String(sd.get("col", "#ffffff")))
 
@@ -149,15 +161,6 @@ func recast_window() -> Dictionary:
 		return RecastCue.window("e", e_t, float(e_def().get("time", e_t)), e_recast_at())
 	return {}
 func e_recast_at() -> Vector3: return h.pos           # where E's recast acts (the knife, the seed, the ring)
-## The foes carrying this kit's mark/stack/Daze, for RecastCue's badge: appends {e, n, left, total, ready}.
-## The base reports the Boki combo setups (Combos) this hunter or its Boki put on a foe.
-func combo_marks(out: Array) -> void:
-	for f in m.foes_of(h.team):
-		for ent_id in f.marks:
-			var mk: Dictionary = f.marks[ent_id]
-			var left := float(mk["until"]) - float(m.time)
-			if mk["owner"] == h and left > 0.0:
-				out.append(RecastCue.mark(f, 0, left, float(mk["window"]), true))
 ## A recast press from the buffer (RecastCue's ~0.15s): the slot's own press again.
 func recast_now(slot_id: String) -> void:
 	match slot_id:
@@ -333,7 +336,7 @@ func busy() -> bool:
 	return disabled()
 
 ## The kit's own cast lock (its ult planting the body) refuses a press of `slot` now: DashFlow holds the press for
-## the lock's end (docs/decisions/0022-cc-exit-buffer.md). A kit whose lock lets a slot through says so here.
+## the lock's end (docs/decisions/0118-cc-exit-buffer.md). A kit whose lock lets a slot through says so here.
 func lock_refuses(_slot: String) -> bool:
 	return busy() and not disabled()
 
@@ -567,7 +570,7 @@ func _r_impact() -> void:
 	m.fx.burst(h.pos + Vector3(0, 1.0, 0), col, 34, 7.0, 0.55, 2.0, 1.4)
 	m.fx.flash(h.pos + Vector3(0, 1.0, 0), col.lightened(0.4), 1.4, 0.12)
 	m.sfx("boom", h.pos, -2.0, 0.8)
-	Shake.incoming_big(m, h.pos, ImpactWeight.shake("heavy"), h)
+	Shake.big(m, h.pos, "ult", h)
 	if h.is_local():
 		if m.hud: m.hud.flash(col, 0.18)
 
@@ -1012,12 +1015,9 @@ var self_nodes: Array = []     # nodes this kit hangs on the hunter (freed by te
 var spips := {}                # the kit's own pips over the hunter's head (Chambers, Guard steps)
 var _pulse_t := 0.0
 
-## The combo state this kit has on `t`, for the overhead tag (ComboMark): {} or {icon, n, max, left, total}, plus
-## an optional lift (px up) when the kit already draws its own marker there.
+## The combo state this kit has on `t`, for its plate's status row (HudPlate.row): {} or {icon, n, max, left, total}.
 func combo_read(_t: Ent) -> Dictionary: return {}
 
-## The crosshair label while the kit's payoff is armed ("" = none).
-func ready_label() -> String: return ""
 ## The payoff lives on E (the Mage's Flashpoint): the E slot gets the gold dot.
 func e_payoff_ready() -> bool: return false
 

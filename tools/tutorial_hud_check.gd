@@ -45,7 +45,7 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 
-func run(mn: Node) -> void:
+func run(mn: Node, _arch := "") -> void:
 	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	main = mn
 	Save.no_write = true
@@ -58,6 +58,7 @@ func run(mn: Node) -> void:
 	_reach()
 	_dive_hint()
 	_cc_tips()
+	_hint_lines()
 	_zone_lines()
 	await _pointers()
 	print("TUTHUD DONE, failures: ", bad)
@@ -148,7 +149,7 @@ func _course() -> void:
 				chimed += 1
 			else:
 				stray += 1
-		if tu.step != before:
+		if tu.step != before and not TutorialHints.quiet(tu.id()):  # (a hint step has no banner, so no chime)
 			changes += 1
 		t += Match.DT
 		if tu.step != last:
@@ -196,7 +197,10 @@ func _course() -> void:
 	ok(key_label > 0 and key_loud == 0, "an interact step's card is the one prompt: the world label waits " + held)
 	ok(under == 0, "the hunter and the Boki are never under the banner (%d frames)" % under)
 	ok(worst < 45.0, "no step took more than 45s of plain play (%.0fs)" % worst)
-	var wide := texts.values().filter(func(x): return String(x).length() > MAX_LINE)
+	var wide := []
+	for sid in texts:
+		if not TutorialHints.quiet(String(sid)) and String(texts[sid]).length() > MAX_LINE:
+			wide.append(texts[sid])
 	ok(wide.is_empty(), "every banner line fits one short line (%s)" % str(wide))
 	var counts_ok: bool = String(counters.get("shoot", "")) == "0/2"
 	ok(counts_ok, "the panel counts hits and casts (%s)" % str(counters))
@@ -365,6 +369,30 @@ func _dive_hint() -> void:
 
 
 # ------------------------------------------------------------------ 8. the first crowd control
+## The first-time hints (TipText): one short line each, and any key in them is the player's own (key_cap).
+func _hint_lines() -> void:
+	for pair in TipText.all_lines():
+		var line := String(pair[1])
+		var short := line.length() <= TipText.MAX_LEN and not line.contains("\n")
+		ok(short, "hint '%s' is one short line (%d chars)" % [pair[0], line.length()])
+	var keyed := {
+		"move": ["fire", "dash", "jump"],
+		"ability": ["signature", "ultimate"],
+		"ability (kit)": ["throw", "ultimate"],
+		"ult": ["ultimate"],
+		"stagger": ["signature", "ultimate", "gear1"],
+		"overheat_lift": ["jump"]
+	}
+	var lines := {}
+	for pair in TipText.all_lines():
+		lines[pair[0]] = String(pair[1])
+	for k in keyed:
+		for act: String in keyed[k]:
+			ok(String(lines[k]).contains(Settings.key_cap(act)), "hint '%s' shows the live %s key" % [k, act])
+	var down := String(lines["down"])
+	ok(not down.contains("trusting") and down.contains("wisp"), "the down hint speaks of the wisp")
+
+
 func _cc_tips() -> void:
 	var tips: Dictionary = Content.rules("tutorial")["tips"]
 	for cc: String in ["stun", "root", "grounded"]:

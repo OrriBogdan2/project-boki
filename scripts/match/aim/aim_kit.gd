@@ -6,7 +6,7 @@ extends RefCounted
 ## ("rmb", "e_drag"...). An entry not refreshed for AimDraw.KEEP (0.1 s of match time) disappears, so
 ## stopping the calls hides it; `hide` drops it at once, and a `"dur": secs` param keeps a one-off (a
 ## placed ring, a stuck grenade's cone) up that long without more calls. A second call with the same
-## id replaces the first. Everything draws through one pooled ImmediateMesh per match (AimDraw): no
+## id replaces the first. Everything draws through one pooled ArrayMesh per match (AimDraw): no
 ## node is made per call or per frame. A Boki merge clears a hunter's set and keeps it clear: AimDraw
 ## drops every entry of a merged or transforming hunter (whichever path started the merge), and
 ## ArchKit.drop_holds() clears it on the spot.
@@ -161,7 +161,11 @@ static func line(h: Hunter, id: String, p := {}) -> void:
 		var d := _dir(h, p)
 		t = f + Vector3(d.x, 0, d.y) * float(p["len"])
 	else:
-		t = h.inp.get("aim", h.pos)
+		# the cursor's distance along aim_dir (the vision cone's centre, and the aim lock), never the raw cursor ray
+		var cur: Vector3 = h.inp.get("aim", h.pos)
+		var ad := h.aim_dir()
+		t = f + Vector3(ad.x, 0, ad.y) * Vector2(cur.x - f.x, cur.z - f.z).length()
+		t.y = cur.y
 	e["from"] = Vector2(f.x, f.z); e["to"] = Vector2(t.x, t.z); e["y"] = AimMode.ground(h.m, f).y
 	e["arrow"] = bool(p.get("arrow", true))
 	_put(h, id, e)

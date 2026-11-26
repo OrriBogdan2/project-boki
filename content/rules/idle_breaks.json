@@ -5,7 +5,7 @@
 		{"bone": "hips", "rot": [0, 0.1, 0], "from": 0.5},
 		{"bone": "forearm.R", "rot": [0.25, 0, 0], "from": 0.55, "beats": 2}
 	]},
-	"bulwark": {"line": "Mossy: huge, warm-hearted, laughs easily. He glances down at his lure and chuckles.", "dur": 2.6, "tracks": [
+	"bulwark": {"line": "Albert: huge, warm-hearted, laughs easily. He glances down at his lure and chuckles.", "dur": 2.6, "tracks": [
 		{"bone": "head", "rot": [-0.4, 0.15, 0], "to": 0.85},
 		{"bone": "hips", "rot": [-0.06, 0, 0], "to": 0.85},
 		{"bone": "hips", "rot": [0.05, 0, 0], "from": 0.4, "to": 0.95, "beats": 3}

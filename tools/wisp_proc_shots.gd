@@ -4,7 +4,7 @@ extends RefCounted
 ## after the cue: proc_<kind>.png, then a rival's wisp (proc_rival.png) and a shiny Boki's (proc_shiny.png).
 ## strip.png puts the crops side by side. Never touches the save.
 
-const Check := preload("res://tools/wisp_proc_check.gd")
+const Check := preload("res://tools/wisp_flash_check.gd")
 const DT := 1.0 / 60.0
 const CROP := Vector2i(240, 200)    # px cut out round the screen centre for the strip (shown at 2x)
 const KINDS := ["heal", "shield", "damage", "speed", "rival", "shiny"]

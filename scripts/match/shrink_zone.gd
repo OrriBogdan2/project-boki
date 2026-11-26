@@ -1,6 +1,6 @@
 class_name ShrinkZone
 extends RefCounted
-## The closing zone (docs/decisions/0060-shrinking-zone.md, the 11-11 order). Each expedition picks
+## The closing zone (docs/decisions/0138-shrinking-zone.md, the 11-11 order). Each expedition picks
 ## its final area from the shared match seed, the way HotZone picks its region, so every player gets
 ## the same one: a dock or outpost, and the circle round it leaning into its island, so the last exits
 ## are inside. The playable circle closes toward it in phases (content/rules/shrink_zone.json): it
@@ -8,10 +8,13 @@ extends RefCounted
 ## Outside the edge hurts, more each phase; when the last close ends, the islands wholly outside the
 ## final circle fall. The fall at the end of the clock (Match._update_rules) stays.
 ## Shown on the drop/full map, the minimap, a row under the match clock, and in the world as a glowing
-## wall; the kin warns before each close; bots keep inside (bot_goal). Nothing goes over Net: the
+## wall; the kin warns before each close (the first warning also says the first-time hint line);
+## bots keep inside (bot_goal). Nothing goes over Net: the
 ## circles come from the seed and the match clock alone, and each game hurts only its own bodies.
 
 const RULES_PATH := "res://content/rules/shrink_zone.json"
+const HINT_KEY := "zone"  # the first-time line (Save.d["tutorial"]), said at the first close's warning
+const HINT_TEXT := "The zone is closing: get inside the next ring"
 const COL := Color("5cc8ff")  # the edge, on the maps and in the world
 const NEXT_COL := Color(1, 1, 1, 0.8)  # the next circle
 const OUT_SHADE := Color(0.3, 0.08, 0.4, 0.3)  # outside the edge on the full map
@@ -201,6 +204,8 @@ func _warn() -> void:
 	if m.hud:
 		m.hud.toast_small("ZONE CLOSES IN %d s" % secs, COL)
 	audio.warn()
+	if nx == 1 and m.tips_live:
+		m._tip(HINT_KEY, HINT_TEXT)
 
 
 ## Outside the edge: a share of max health a second, landing in ticks (no armor, no glider drain; a tick, so no

@@ -14,5 +14,7 @@ const CHECKS := {
 	"--fight-p99-check": ["res://tools/fight_p99_check.gd", "fight_p99_check", null],  # p99 vs tools/perf.tsv
 	# parse every kin grammar file (=<root> for another folder)
 	"--grammar-check": ["res://tools/grammar_check.gd", "grammar_check", null],
+	"--hero-reel": ["res://tools/hero_reel.gd", "hero_reel", null],  # private pitch footage (GPU)
 	"--step-up-check": ["res://tools/step_up_check.gd", "step_up_check", null],  # lips walked over
+	"--turn-cost-check": ["res://tools/turn_cost_check.gd", "turn_cost_check", null],  # owner 11-11 momentum
 }
