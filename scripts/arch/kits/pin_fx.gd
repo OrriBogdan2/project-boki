@@ -297,9 +297,29 @@ func tick_shots() -> void:
 		live.erase(sid)
 		var kind := String(e["kind"])
 		var at: Vector3 = e["pos"]
-		var hit := hits.any(func(hh): return (hh[0] as Vector3).distance_to(at) < 1.6)
-		if not hit and kind in ["tap", "arrow", "over"]:
+		if kind in ["tap", "arrow", "over"] and not _ended_on_body(e["s"], at):
 			_plant(at, (e["s"]["vel"] as Vector2), kind)
+
+## Whether shot `s`, last seen at `at`, ended on someone: a hit arrow leaves nothing on the floor, only a miss
+## plants one (the owner's rule). A hit our side dealt (note_hit, at the contact) counts, and so does a shot that
+## ended touching a body it could hit: that covers a hit soaked by a shield or a dodge, and another player's screen,
+## where the damage is the shooter's and on_deal never runs. Both look one step past `at` (the match may have
+## moved the shot on before it hit).
+func _ended_on_body(s: Dictionary, at: Vector3) -> bool:
+	var reach := (s["vel"] as Vector2).length() / maxf(1.0, float(Engine.physics_ticks_per_second)) + 0.3
+	var flat := func(a: Vector3, b: Vector3) -> float: return Vector2(a.x - b.x, a.z - b.z).length()
+	if hits.any(func(hh): return flat.call(hh[0] as Vector3, at) < reach + 0.6):
+		return true
+	var m: Match = h.m
+	var rivals := func(o: Ent) -> bool: return o.team != h.team and o.hittable()
+	var alive := func(o: Ent) -> bool: return not o.dead
+	var bodies: Array = m.hunters.filter(rivals) + m.kins.filter(rivals) + m.mobs.filter(alive)
+	for b in bodies:
+		var e: Ent = b
+		if flat.call(e.pos, at) < e.r + float(s["r"]) + Match.HIT_SLACK + reach and \
+				(m.shot_height_ok(e, at.y) or m.shot_from_above_ok(s, e, at.y)):
+			return true
+	return false
 
 ## A spent needle stuck in the ground where the shot ended, its thread lying behind it, gone after SPENT_T.
 func _plant(at: Vector3, v: Vector2, kind: String) -> void:

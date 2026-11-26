@@ -193,6 +193,28 @@ func _loose_after(m: Match, P: Hunter, t: float, at: Vector3) -> float:
 	m.step(DT)
 	return _shot_reach(m, P)
 
+## The owner's rule: an arrow that hits someone leaves nothing on the floor; only a miss plants one. Checked for an
+## Empowered arrow and a tap into a rival, and for the other-screen case (no on_deal: the body alone decides).
+func _hit_plants_nothing(m: Match, P: Hunter, T: Hunter, T2: Hunter, home: Vector3) -> void:
+	var K: ArcherKit = P.ak
+	T.teleport(home + Vector3(6.0, 0, 0))
+	T2.teleport(home + Vector3(0, 0, -9.0))
+	for t in [1.0, 0.2]:
+		fresh(T)
+		var pl := K.fx.planted
+		_loose_after(m, P, t, T.pos)
+		step(m, 0.6)
+		ok("pin vfx: a hit arrow (%s) leaves no spent arrow on the floor" % K.draw.last_kind,
+			dmg(T) > 0.0 and K.fx.planted == pl, "took %.0f planted %d" % [dmg(T), K.fx.planted - pl])
+		step(m, 0.4)
+	K.fx.hits.clear()
+	var s := {"vel": Vector2(30.0, 0.0), "r": 0.1, "start": P.pos + Vector3(0, 1.1, 0)}
+	ok("pin vfx: a shot ending on a body counts as a hit without the damage (another player's screen)",
+		K.fx._ended_on_body(s, T.pos + Vector3(-0.6, 1.1, 0)), "")
+	var short := T.pos + Vector3(-4.0, 1.1, 0)
+	ok("pin vfx: a shot ending 4m short of everyone is a miss", not K.fx._ended_on_body(s, short), "")
+	T.teleport(home + Vector3(0, 0, 9.0))
+
 ## Lace's Spirit Walk look (tools/lace_spirit_look_check.gd), its counts added to these.
 func _spirit_look() -> void:
 	var look = load("res://tools/lace_spirit_look_check.gd").new()
@@ -301,6 +323,7 @@ func _archer_combos() -> void:
 	)
 	ok("pin anim: a tap shot plays arc_tap", K.anim_id == "arc_tap", K.anim_id)
 	step(m, 0.6)
+	_hit_plants_nothing(m, P, T, T2, home)
 	# overdraw: held 0.5s past Supercharged, the arrow does half
 	T.teleport(home + Vector3(7.0, 0, 0))
 	T2.teleport(home + Vector3(9.0, 0, 0))

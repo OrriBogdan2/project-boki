@@ -57,7 +57,7 @@ func teardown() -> void:
 
 func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 	if t != null and t.team != h.team and String(o.get("src", "")) == "shot" and not o.has("ab"):
-		_arrow_hit(t)
+		_arrow_hit(t, o.get("at", t.pos))
 
 func _tick(dt: float) -> void:
 	sense.tick(dt)
@@ -180,8 +180,8 @@ func on_take(_by: Ent, dmg: float, _o: Dictionary) -> void:
 		spirit.end("hit")
 
 ## One of the bow's arrows hit: the spent-arrow pool skips it; a Supercharged one bursts in an red X-star.
-func _arrow_hit(t: Ent) -> void:
-	fx.note_hit(t.pos)
+func _arrow_hit(t: Ent, at: Vector3) -> void:
+	fx.note_hit(at)          # (the contact, at the shot's height: the feet sit a body height under it)
 	var kind := ""
 	for sid in fx.live:
 		var e: Dictionary = fx.live[sid]
