@@ -11426,3 +11426,4 @@ READY ext/title-menu-slim-1126 5ad2dc61a56 (title slim menu: big button + 4 rows
 READY ext/tenzo-rmb-air-1126 d3302c44d2 (Tenzo RMB air press: arc onto the cursor spot clamped 3m, wall/terrace aware, abyss plunge kept; --tenzo-rmb-air-check 12 cases, main 9 fail -> 0)
 READY ext/meeko-mood-hero-toon be4ee238ec (Fix main red: Meeko mood eyes use hero-toon; native check 746/0, suite NEW-RED 0 after rerun)
 READY ext/sparkle-r-spread-1126 1ee75ebbd3 (Sparkle R: landed-on foe spreads its Static+1 to every other foe in the strike; --sparkle-r-spread-check)
+READY ext/boki-stat-economy-1126 569b25cb22bb325a661df3592b95ed98ba12a4d6 (stat economy: play joy-only, carried-home bites, limited races/drills; export dry-run pass; suite gate aborted HOST-OVERLOADED, NEW-RED 0 over 16 runs)
