@@ -20,7 +20,7 @@ const KINDS := [
 	["squad", "Squad"],
 	["boki", "Boki"],
 	["camp", "Camp"],
-	["nest", "Blight nest"],
+	["nest", MapMarks.NEST_WORD],
 	["shop", "Shop"],
 	["chest", "Chest (zoom)"],
 	["shrine", "Shrine"],
