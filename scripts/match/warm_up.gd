@@ -26,6 +26,9 @@ static var _mat_keys := {}
 ## A shader by its code (the same on every launch, unlike its instance id: WarmStamp keeps these keys).
 static var _code_hashes := {}
 
+## The step run() is on (--load-check --hitch-trace prints it on each slow frame).
+static var step := ""
+
 var m: Match
 
 
@@ -89,8 +92,10 @@ func run(progress := Callable()) -> void:
 		if progress.is_valid():
 			progress.call(0.7 * f)
 	var later: Array = []  # (stand-ins for the planning phase: _sweep_later)
+	step = "mob stand-ins"
 	var mob_warm := _mob_stand_ins(later)
 	var aim_warm := _aim_stand_in()  # (item 94c: the aim kit's one material draws only once somebody aims)
+	step = "batches"
 	var batched: bool = await _batches(batch_cb, seen)
 	var t_first := Time.get_ticks_msec()
 	if is_instance_valid(aim_warm):
@@ -106,6 +111,7 @@ func run(progress := Callable()) -> void:
 		var sm: MeshInstance3D = m.shot_pool[i]
 		sm.visible = true
 		shown.append(sm)
+	step = "views"
 	for vi in views.size():
 		var v: Array = views[vi]
 		var at: Vector3 = v[1]
@@ -153,6 +159,7 @@ func run(progress := Callable()) -> void:
 		swoosh = m.fx.get_child(m.fx.get_child_count() - 1).duplicate(0)
 		m.add_child(swoosh)
 		(swoosh as Node3D).global_position = late_at
+	step = "late"
 	batched = await _batches(late_cb, seen)
 	if not batched:
 		return
@@ -177,6 +184,7 @@ func run(progress := Callable()) -> void:
 	WarmStamp.save(seen)
 	PerfLog.mark("build.warm_up")
 	# the benchmark: a few frames of the opening view
+	step = "bench"
 	var times: Array = []
 	var last := Time.get_ticks_usec()
 	for i in 8:
@@ -201,6 +209,7 @@ func run(progress := Callable()) -> void:
 			if is_instance_valid(dot):
 				dot.queue_free()
 			WarmStamp.save(seen)
+	step = "rehearse"
 	await DashPace.rehearse(m)
 	PerfLog.skip()
 	if not later.is_empty():
@@ -401,6 +410,7 @@ func _batches(progress: Callable, seen: Dictionary) -> bool:
 	# are all still there.
 	var keep_mask := m.cam.cull_mask
 	m.cam.cull_mask = LAYER
+	step = "sources"
 	var list: Array = await _sources(seen)
 	if not m.is_inside_tree():
 		return false

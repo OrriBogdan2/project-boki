@@ -164,6 +164,7 @@ func _process(_delta: float) -> void:
 				var img := get_viewport().get_texture().get_image()
 				if img: img.save_png("%s/load_%03d.png" % [shots_dir, load_frames.size()])
 		load_frames.append({"wall": wall, "marks": marks, "render": _render_us / 1000.0, "compiles": new_c,
+			"cc": cache_changed.duplicate(), "wu": WarmUp.step,
 			"slice": _slices_between(last_us_prev, now),
 			"proc": Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0, "phys": Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0,
 			"spin": int(ld.get("spin_draws")) if ld and ld.get("spin_draws") != null else -1, "stage": String(ld.get("stage_label")) if ld and ld.get("stage_label") != null else ""})
@@ -407,6 +408,20 @@ func _finish_load() -> void:
 		worst_cpu = maxf(worst_cpu, cpu)
 		if (cpu if cpu_only else float(f["wall"])) > budget: over += 1
 	lines.append("LOAD total %.0f ms over %d frames; longest frame %.0f ms (%.0f ms outside drawing); %d frames over %.0f ms%s" % [load_ms, fl.size(), worst, worst_cpu, over, budget, " (judged outside drawing)" if cpu_only else ""])
+	# the slow frames by the stage shown, and how many of each were drawing (shader compiles, uploads: the GPU's,
+	# a cold cache) rather than the build's own work (item 33: the build's frames are what slicing can fix)
+	var by_stage := {}
+	for f in fl:
+		if (float(f["cpu"]) if cpu_only else float(f["wall"])) <= budget:
+			continue
+		var stg := String(f["stage"]) if String(f["stage"]) != "" else "-"
+		var cnt: Array = by_stage.get(stg, [0, 0])
+		cnt[0] += 1
+		if float(f["cpu"]) <= budget: cnt[1] += 1
+		by_stage[stg] = cnt
+	if not by_stage.is_empty():
+		lines.append("LOAD slow frames by stage (drawing-bound of them): " + ", ".join(by_stage.keys().map(
+				func(k): return "%s %d (%d)" % [k, by_stage[k][0], by_stage[k][1]])))
 	# the spinner: frames the loading screen was up on, and how many of them drew it
 	var up := 0
 	var drawn := 0
@@ -432,6 +447,22 @@ func _finish_load() -> void:
 	for f in ranked.slice(0, 12):
 		lines.append("LOAD   %7.0f %7.0f %7.0f %6.0f %5.0f  c%-3d %-22s %s%s" % [float(f["wall"]), float(f["cpu"]), float(f["render"]), float(f["proc"]), float(f["phys"]), int(f["compiles"]), String(f["stage"]),
 			", ".join((f["marks"] as Array).map(func(mk): return "%s %.0f" % [mk[1], mk[2]])), String(f["slice"])])
+	if trace:
+		# every slow frame in order (ms into the load): the top 12 above miss the long tail
+		lines.append("LOAD all slow frames in order (at ms, wall, render, compiles, stage, slice):")
+		var at := 0.0
+		for f in fl:
+			at += float(f["wall"])
+			if (float(f["cpu"]) if cpu_only else float(f["wall"])) > budget:
+				var mks := ", ".join((f["marks"] as Array).map(func(mk): return "%s %.0f" % [mk[1], mk[2]]))
+				lines.append("LOAD   @%6.0f %6.0f %6.0f c%-3d %-20s %s%s" % [at, float(f["wall"]),
+					float(f["render"]), int(f["compiles"]), String(f["stage"]), mks, String(f["slice"])])
+				var kinds := {}
+				for c in f["cc"]:
+					var ck := String(c).get_slice("/", 0)
+					kinds[ck] = int(kinds.get(ck, 0)) + 1
+				if not kinds.is_empty(): lines.append("LOAD        compiled: " + str(kinds))
+				if String(f["wu"]) != "": lines.append("LOAD        warm-up step: " + String(f["wu"]))
 	var steps := {}
 	for mk in PerfLog.marks:
 		steps[mk[1]] = float(steps.get(mk[1], 0.0)) + float(mk[2])
