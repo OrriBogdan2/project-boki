@@ -84,6 +84,7 @@ uniform float paint_glow_width = 0.12;
 // near-black paint lifted to this linear floor (jacket, trousers and gun no longer merge to black at the match
 // camera); mid and light colours keep their value and saturation
 uniform float dark_lift = 0.0;
+uniform float tex_sat = 1.0;  // the atlas's saturation (1 as painted): trims a coat that paints far more vivid than the rest
 // a painted atlas at the match camera (~2 cm a pixel at 23 m): its fine detail (belts, bullets, tattoos, the scan's
 // grain) breaks into speckle, so from ~8 to 18 m the texture blends toward a coarser mip of itself (far_smooth of
 // the way, far_smooth_bias mips up; more than ~1 mip mixes a baked atlas's UV islands into mud); close-ups keep
@@ -182,6 +183,7 @@ void fragment() {
 			}
 			tx = mix(tx, tc, far_smooth * far_k);
 		}
+		tx = mix(vec3(dot(tx, vec3(0.3, 0.59, 0.11))), tx, tex_sat);
 		c *= tx;
 		if (glow_key) {
 			// (the cracks' red-orange rims count too: in a white-hot glow they take the edge colour, not the paint)
