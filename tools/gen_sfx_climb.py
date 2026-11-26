@@ -9,7 +9,6 @@ Synthesised in code (no outside sound), at the footstep level (category "step") 
 fight. A light Hunter is quick and high, a heavy one longer and lower with more body.
 """
 
-import numpy as np
 import sfx_lib as S
 from sfx_lib import N, env, mix, at, bpf, lpf, noise
 from sfx_combat import kick, click, crack, grains
