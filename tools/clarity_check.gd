@@ -6,7 +6,7 @@ extends RefCounted
 ## Who and what on the body (docs/COMBAT_CLARITY.md): other Hunters' silhouettes carry their side's edge,
 ## other people's ability looks lean to their side (SideColor.fx), crowd control stays on the body it holds (stars,
 ## tendrils, frost and a pulsing tint, BodyTell) and a cast glints the caster. Less text: in a fight only your own
-## Boki's lines are drawn, and a Boki's ability name floats over your own Boki only. What sits on the Hunters in a bot
+## Boki's lines are drawn. No ability name floats over any Boki (owner 11-11). What sits on the Hunters in a bot
 ## 3v3 of the slice Hunters (ClarityFight, 10 frames) stays within ClarityFight.BUDGET.
 
 const ARCH_CHECK := preload("res://tools/archetype_check.gd")
@@ -347,8 +347,8 @@ func _body_tell(m: Match, f: Hunter) -> void:
 	ok(BodyTell.tint_of(f).a == 0.0, "the glint fades")
 
 
-## Boki text over a fight: every Boki's line is drawn out of a fight, only your own in one; an ability name floats
-## over your own Boki, not a rival's.
+## Boki text over a fight: every Boki's line is drawn out of a fight, only your own in one; no ability name floats
+## over any Boki.
 func _boki_text(m: Match, p: Hunter, ally: Hunter, foe: Hunter) -> void:
 	var mine: Kin = p.kin if p.kin else m.give_kin(p, Save.new_kin("puddlet"))
 	ok(ally.kin != null and foe.kin != null, "your ally and the rival each have a Boki")
@@ -374,7 +374,7 @@ func _boki_text(m: Match, p: Hunter, ally: Hunter, foe: Hunter) -> void:
 	m.on_kin_ability(foe.kin, (foe.kin as Kin).runner.def_of("k1"), false)
 	ok(words.call() == w0, "a rival's Boki casting: no name over it")
 	m.on_kin_ability(mine, mine.runner.def_of("k1"), false)
-	ok(words.call() == w0 + 1, "your own Boki casting: its name floats")
+	ok(words.call() == w0, "your own Boki casting: no name floats either (owner 11-11: no callout words in the world)")
 	mine.stow()
 
 
