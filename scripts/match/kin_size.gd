@@ -10,8 +10,14 @@ extends RefCounted
 
 ## The one display scale for every rigged Boki: world metres per data cm, at root scale 1. Data cm stay the truth for
 ## how big one is next to another; this only sets how big they all stand next to a hunter (a 28 cm starter is about
-## 0.8 m long). The match and, times Home's FARM_BOKI_SCALE, the farm draw it.
+## 0.8 m long). The match draws it at this scale.
 const M_PER_CM := 0.029
+
+## The farm's own display scale, metres per data cm at root scale 1: its camera sits much further back, so a Boki is
+## drawn bigger there. Home's FARM_BOKI_SCALE is this over M_PER_CM, so changing M_PER_CM resizes the match and leaves
+## the farm as it is.
+const FARM_M_PER_CM := 0.04437
+
 ## A Boki's read (m) per metre of data length: the starters' own share at the length fit, so they keep their size.
 const READ_SHARE := 0.66
 const PITCHES := [57.0, 20.0]  # degrees down from level the read is averaged over (CamRig match, FarmCam)
