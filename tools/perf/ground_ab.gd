@@ -5,7 +5,7 @@ extends RefCounted
 ## of a block (the renderer's stamps arrive a frame or two late) goes to that variant:
 ##   old    the terrain's full fine detail everywhere (the look before the cut), sea shown
 ##   cut    the terrain skips its fine detail past 14-36 m (shaders/terrain.gdshader detail_range), sea shown
-##   bake   the cut plus the big patterns read from the per-map bake (scripts/match/ground_bake.gd, use_bake)
+##   bake   full fine detail (as old) with the big patterns read from the per-map bake (ground_bake.gd, use_bake)
 ##   flat   the terrain returns its base colour (flat_ground), sea shown
 ## (the cloud sea hidden measured -0.29 ms on 11-24, docs/PERF_DRAW_1124.md; the sea list stays for shots)
 ## Prints "BENCH ab ground: <variant> gpu <ms> over <n> frames" and the saving of each against old.

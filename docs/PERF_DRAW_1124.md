@@ -98,7 +98,7 @@ SUPER), so a GPU step pays on the owner's PC only at 1440p (GPU and CPU about ev
 fight is GPU-bound; a CPU step pays everywhere.
 
 | # | step | expected saving | risk | proof |
-|---|---|---|---|---|
+|---|---|---|---|
 | 1 | **HUD draw**: the HUD's draw callbacks rebuild about 850 canvas items (350 draws) every frame: 3.9 ms CPU and 1.4 ms GPU (4090). Redraw only what changed: a plate or label keeps its shaped text (TextLine) and queues a redraw when its text, value or position changes; each plate group on its own CanvasItem with a dirty flag; the panels keep their 20 Hz. `hud.gd` is a god file: the logic goes to `hud_plate.gd`, `hud_panels.gd`, `label_cull.gd`. | 2-3 ms of CPU off the owner's frame (the largest cut left), 1-1.5 ms GPU on the 4090, 300 draws | medium: a stale plate. The HUD checks in `tools/checks/ui.gd`, shots at 1920x1080 and 390x844 | "engine wait sections: process rest" 5.3 to under 2.5 (the HUD-off run's 1.4 is the floor), "scene: draws" 800 to under 550 |
 | 2 | **Pixel cost** (2.9 ms per 1080p screen on the 4090, ~5 on a 4070 SUPER, ~9 at 1440p; glow and FXAA are not it): split it with two probes next to `--bench-nopost` (the terrain shader's noise behind a `flat` uniform; the cloud sea hidden), then cut the biggest: the terrain's 11 noise reads down to 2-3 past 30 m from the camera (a distance fade in the shader), or the ground pattern baked to a texture per island at load; the sea's fbm at 3 octaves. | 1-2 ms GPU at 1080p and 2-4 at 1440p on the owner's PC; 0 on the pods' wall | medium: look. Before/after shots at the match camera and from the drop | GPU ms at 1920x1080 against 960x540 (the per-screen share shrinks) |
 | 3 | **The Hunters' draw** (one job, one code path): (a) keep LODs through `WardenMerge._join` (build the joined mesh with `ImporterMesh.add_surface` + `generate_lods` + `get_mesh()`, cached per key as now, under the loading screen); (b) hide the ink shells and skip the far-ink next passes past 18 match-metres (the shader's `far_d`), from `Hunter.render` or `WardenGlb.Sync`. | 0.5-1.2 ms GPU on the 4090 (the 4 px LOD probe took 1.15 ms with only the LOD-carrying meshes answering), 1M triangles, 9 skinned objects and their skinning compute; more on weak GPUs | low: LOD popping on Hunters (2 px at medium, 1 px at high); nothing is visible past 18 m today, close-ups keep the ink by the same distance rule | hunter lines: "lods on N surfaces" = all, "+0 next passes"; tris -1M; GPU within noise on the 4090 |
@@ -132,7 +132,7 @@ read inside ONE run: `--bench-ab-ground` cycles four variants in blocks of 45 fr
 GPU of each (`tools/perf/ground_ab.gd`). Three runs at 1920x1080 medium on rp2g-0, GPU ms (old = the terrain as before):
 
 | variant | run 1 | run 2 | run 3 | mean vs old |
-|---|---|---|---|---|
+|---|---|---|---|
 | old (9.8 / 9.7 / 10.1 ms) | 0 | 0 | 0 | 0 |
 | terrain noise off (`flat_ground`) | -1.33 | -0.87 | -1.13 | **-1.11** |
 | cloud sea hidden | -0.29 | -0.09 | -0.49 | -0.29 |
@@ -143,3 +143,30 @@ takes about 45% of the terrain's ceiling; the other half is the big painted patc
 look. The plan's bar of -1 ms is the ceiling of removing the ground's pattern altogether, so it is not reachable without
 changing the look; a first cut (fade 28-55 m) gave only -0.1 (four runs). A bake of the big patches to a texture per
 island is the next step (about 0.3 ms more at best).
+
+## Step 2b, the big patterns baked per map (11-26, ext/perf-ground-pixels)
+The ground's big painted patterns (patches, sunlit swathes, pools, hue drift, and each biome's drifts and zones: 7 fbm,
+about 85 sin hashes a pixel) hang on world xz only. `scripts/match/ground_bake.gd` renders them once per map size on
+the GPU (`shaders/ground_bake.gdshader`, the same `shaders/ground_big.gdshaderinc` the terrain falls back to) into
+three mipmapped RGBA8 textures at 4 texels per metre (3 on the web), and the terrain reads 1-2 texels instead
+(`use_bake`). Headless runs and `--ground-live` keep the live noise. The fine detail cut of step 2 stays.
+`--bench-ab-ground` now cycles old / cut / bake / flat (bake = the old full fine detail plus the bake, so it is
+the bake alone; the shipped ground is cut + bake); six runs at 1920x1080 medium on rp2g-0, GPU ms vs old:
+
+| run (old GPU ms) | cut | bake | flat (ceiling) |
+|---|---|---|---|
+| 1 (9.86) | -0.53 | -1.15 | -2.39 |
+| 2 (3.90) | +0.00 | -0.03 | -0.46 |
+| 3 (8.72) | +0.16 | -0.98 | -1.06 |
+| 4 (5.09) | +0.19 | -0.06 | +0.18 |
+| 5 (9.23) | -0.22 | -0.40 | -0.87 |
+| 6 (4.03) | -0.19 | -0.19 | -0.21 |
+| **mean** | -0.10 | **-0.47** | -0.80 |
+
+The ground's cost tracks the pod's load: on a busy 4090 (old over 8.5 ms: runs 1, 3, 5) the bake takes -0.84 ms of a
+-1.44 ceiling (a seventh run, the paused shots, read old 6.03, cut +0.19, bake -1.25, flat -1.83); on a quiet one (runs 2, 4, 6) the whole ground costs about 0.2 ms and nothing moves. The bake alone takes
+about 60% of what a flat ground would save, with no look change (the pictures: `ab_old.png` and `ab_bake.png` show
+the same patches, streaks and petals); the rest is the contact shade (16 height reads) and the near detail.
+Process rest is unchanged (4.7-5.5 ms; the bake costs one 3-frame GPU draw and a readback at map load).
+The cut of step 2 measured -0.10 ms mean in these runs and, at the match camera, drops the petals and brush streaks
+that old and bake keep (`ab_cut.png`): that fade could go back to 28-55 m or off for the look, the bake staying.
