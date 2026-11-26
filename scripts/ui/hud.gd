@@ -135,6 +135,7 @@ func _place_msgs() -> void:
 	loot.fight = msgs.fight
 	loot.visible = msgs.visible
 	msgs.top = HudScale.from_edge(HudStyle.safe_pad(c.size).y + 72.0)      # under the timer / Ways Out strip
+	msgs.top = DropHud.lane_top(m, m.player, msgs.top)      # and under the drop lines on the way down
 	if m.guide: msgs.top = maxf(msgs.top, m.guide.bottom(c.size))      # and under the first-match guide's line
 	if m.tut: TutorialHud.place_msgs(msgs, c.size)
 	else: TopStack.place(self)
@@ -231,7 +232,7 @@ func _arc(center: Vector2, radius: float, frac: float, col: Color, width := 3.0)
 
 func _fmt(t: float) -> String:
 	t = maxf(0.0, t)
-	return "%d:%02d" % [int(t) / 60, int(t) % 60]
+	return "%d:%02d" % [int(int(t) / 60.0), int(t) % 60]
 
 # ------------------------------------------------------------------ frame
 var hover_spots: Array = []     # [rect, id] for things on the HUD you can point at
@@ -296,7 +297,7 @@ func _draw_parts() -> void:
 	lowhp.draw_edge(c, sz)
 	if flash_t > 0.0:
 		c.draw_rect(Rect2(Vector2.ZERO, sz), Color(flash_col, flash_col.a * flash_t * (0.3 if Settings.get_v("reduce_flashes") else 1.0)))
-	if p and (p.out or p.downed) and m.killcam_text != "":
+	if p and p.out and m.killcam_text != "":      # (a downed Hunter's card already says who and with what)
 		_ctext(Vector2(sz.x * 0.5, maxf(sz.y * 0.22, msgs.bottom() + 30.0)), m.killcam_text, 22, Color("ff9a8a"), big)
 	for dk in BokiHud.squad_downed(m):
 		BokiHud.downed_arrow(self, dk, sz)
@@ -357,6 +358,7 @@ func _draw_world_labels() -> void:
 	ObjectiveTracker.world(self)      # the first expedition's next step: a pin, or an arrow at the screen edge
 	_draw_exit_labels()
 	_draw_lair_labels()
+	CampMark.world(self)
 	_draw_truce_marks()
 	_draw_wisp_rings()
 	RecastCue.world(self, cam, m.player)      # two-step abilities: the recast marker and the combo badges on foes
@@ -660,10 +662,12 @@ func _draw_minimap(sz: Vector2) -> void:
 		c.draw_texture_rect_region(map_tex(), dest, map_region(tex_view))
 	if MapDetail.shows("hazard", hold, HazardMap.matters(m)):
 		HazardMap.draw(c, m, to_map, inner, mm_circ, HazardMap.MM_SHIELD)
+	MapNames.begin(inner)      # (place names give way to each other and to the train's line)
 	if MapDetail.shows("place", hold):
 		_draw_map_labels(w, inner, view, k, riding)
 	if m.skytrain and MapDetail.shows("train", hold, train_map.near(m.skytrain, m.player)):
 		train_map.draw(self, m.skytrain, inner, view, k, false)
+	MapNames.flush(c)
 	# your view cone, faintly
 	if vh and not riding:
 		var pp: Vector2 = to_map.call(vh.pos)
@@ -686,6 +690,7 @@ func _draw_minimap(sz: Vector2) -> void:
 	if m.biomes and MapDetail.shows("hot_zone", hold): m.biomes.hot.minimap(self, to_map, on_map)
 	HeartHud.minimap(self, inner, to_map, on_map)
 	NestMap.minimap(self, to_map, on_map, hold)
+	CampMark.minimap(self, to_map, on_map)
 	WaysOutMap.minimap(self, inner, to_map, on_map)
 	if m.zone: m.zone.minimap(self, to_map, on_map)
 	if m.spawn_plan and full_map and m.player:
@@ -1287,7 +1292,8 @@ func _mate_state(h: Hunter) -> Array:
 			return ["DEAD", Color("8a8f9e"), Vector3.INF, ""]
 		var left := float(b.get("soul_until", 0.0)) - m.time
 		if left > 0.0:
-			return ["DEATHBOX", Color("ff6a5a"), b.get("pos", h.pos), "%d:%02d" % [int(left) / 60, int(left) % 60]]
+			return ["DEATHBOX", Color("ff6a5a"), b.get("pos", h.pos), "%d:%02d" % [int(int(left) / 60.0),
+					int(left) % 60]]
 		return ["DEAD", Color("8a8f9e"), b.get("pos", h.pos), ""]
 	if h.downed:
 		return ["WISP", Color("ffb36a"), h.pos, ""]
@@ -1476,8 +1482,8 @@ func _draw_squad_pings(p: Hunter) -> void:
 		_draw_waypoint(pg["pos"], PingInput.label(pg, p), Color(pg["col"], a), EdgeMarker.PRIO_LOW)
 	# a Boki's callout: a marker with what it spotted, fading after a few seconds
 	for pg in m.pings:
-		if not pg.has("kin") or int(pg.get("team", -1)) != p.team or m.tut != null:
-			continue      # (the tutorial has one marker: no Boki callout pins)
+		if not pg.has("kin") or int(pg.get("team", -1)) != p.team or m.tut != null or not BokiChatter.pin_shown(m):
+			continue      # (the tutorial has one marker: no Boki callout pins; none in a fight either)
 		var kk: Kin = pg["kin"] if is_instance_valid(pg["kin"]) else null
 		var a2 := clampf(float(pg.get("life", 5.0)) - float(pg["t"]), 0.0, 1.0) * clampf(float(pg["t"]) * 6.0, 0.0, 1.0)
 		var who := String(kk.rec.get("name", "Boki")) if kk and kk.owner_h != p else ""
@@ -1639,7 +1645,7 @@ func _draw_crosshair(p: Hunter) -> void:
 	if p.ak and p.ak.has_meter():
 		# the payoff is armed (FLASHPOINT, CALLED SHOT, SLAM): a pulsing word under the resource arc
 		var rl := p.ak.ready_label()
-		if rl != "":
+		if rl != "" and not m.has_meta("pitch_no_foe_plates"):  # (pitch-reel fights: no game text)
 			var pk := 0.5 + 0.5 * sin(m.time * 9.0)
 			_ctext(mp + Vector2(0, Reticle.t("res_r") + 16.0), rl, 13, Color(p.ak.res_col().lightened(0.2), 0.75 + 0.25 * pk), big)
 	# aiming at a truce partner: a reminder before you break it
@@ -1671,7 +1677,7 @@ func _draw_downed(sz: Vector2, p: Hunter) -> void:
 			_ctext(Vector2(sz.x * 0.5, sz.y * 0.32 + 84), "%s is reviving you  %d%%" % [(revs[0] as Hunter).pname, int(p.revive * 100.0)], 15, GOOD, big)
 	if Settings.get_v("tips") and not Record.clean():
 		var tip_v := TipPick.for_downed(p, m.time, m.opts.get("blight", true), m.tut == null and m.duo == null)
-		c.draw_multiline_string(body, Vector2(sz.x * 0.5 - 280.0, sz.y * 0.32 + 118.0), "TIP  ·  " + tip_v,
+		c.draw_multiline_string(body, Vector2(sz.x * 0.5 - 280.0, sz.y * 0.32 - 64.0), "TIP  ·  " + tip_v,
 			HORIZONTAL_ALIGNMENT_CENTER, 560.0, 14, 2, MUTED)
 
 ## Dead, but your team's still in it.
@@ -1788,11 +1794,12 @@ func _draw_map_labels(w: World, inner: Rect2, view: Rect2, k: float, overview: b
 			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -8), pv + Vector2(6, 3), pv + Vector2(-6, 3)]), Color(0, 0, 0, 0.6))
 			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -6), pv + Vector2(4.5, 2), pv + Vector2(-4.5, 2)]), Color("9af0ff"))
 			if overview:
-				_ctext(pv + Vector2(0, 15), "%dm" % int(round(float(lb.get("height", 0.0)))), 10, Color("c8f6ff"))
+				var metres := "%dm" % int(round(float(lb.get("height", 0.0))))
+				MapNames.put(metres, pv + Vector2(0, 15), 10, Color("c8f6ff"), body)
 			continue
 		if String(lb["kind"]) == "lair":
 			if overview:
-				_ctext(pv + Vector2(0, 18), nm, 11, Color("ffe2b0"), big)
+				MapNames.put(nm, pv + Vector2(0, 18), 11, Color("ffe2b0"), big)
 			continue
 		if String(lb["kind"]) == "rail":
 			continue      # (the halts are TrainMap's, gated as the "train" kind)
@@ -1804,7 +1811,7 @@ func _draw_map_labels(w: World, inner: Rect2, view: Rect2, k: float, overview: b
 			if overview and not _region_names(w).has(nm):
 				continue      # (the whole map at this size: region names only, as the full map does)
 			var col := Color("ffd2f0") if String(lb.get("role", "")) == "heart" else INK
-			_ctext(pv + Vector2(0, 4), nm, 13 if overview else 11, col, big)
+			MapNames.put(nm, pv + Vector2(0, 4), 13 if overview else 11, col, big)
 
 # ------------------------------------------------------------------ the deathbox loot window
 ## Pressing interact at a deathbox opens LootWindow (what is in it beside what you carry); press interact

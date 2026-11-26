@@ -50,7 +50,7 @@ func run(mn: Node) -> void:
 		await tree.process_frame
 	var match_node := Match.new()
 	main.add_child(match_node)
-	await match_node.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
+	match_node.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
 	match_node.set_process(false)
 	var home: Node = main.current
 	for text_size: float in TEXTS:

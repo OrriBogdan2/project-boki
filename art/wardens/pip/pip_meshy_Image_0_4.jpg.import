@@ -3,23 +3,25 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b71wxrov7ubyu"
-path="res://.godot/imported/pip_meshy_Image_0_4.jpg-d8d882dab0c461002f8ba21d8f76531e.ctex"
+path.bptc="res://.godot/imported/pip_meshy_Image_0_4.jpg-d8d882dab0c461002f8ba21d8f76531e.bptc.ctex"
+path.astc="res://.godot/imported/pip_meshy_Image_0_4.jpg-d8d882dab0c461002f8ba21d8f76531e.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
-"md5": "e339734c72599200835e1419530aee0f"
+"md5": "547daf38727f33f4c110a1f8215a42ec"
 }
 
 [deps]
 
 source_file="res://art/wardens/pip/pip_meshy_Image_0_4.jpg"
-dest_files=["res://.godot/imported/pip_meshy_Image_0_4.jpg-d8d882dab0c461002f8ba21d8f76531e.ctex"]
+dest_files=["res://.godot/imported/pip_meshy_Image_0_4.jpg-d8d882dab0c461002f8ba21d8f76531e.bptc.ctex", "res://.godot/imported/pip_meshy_Image_0_4.jpg-d8d882dab0c461002f8ba21d8f76531e.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

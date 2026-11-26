@@ -201,6 +201,7 @@ const CHECKS := {
 	# the Boki summon pad
 	"--summon-station-check": ["res://tools/summon_station_check.gd", "summon_station_check", null],
 	"--grounds-shots": ["res://tools/grounds_shots.gd", "grounds_shots", null],  # --shots-dir=<dir>, GPU only
+	"--vex-cast-closeup": ["res://tools/vex_cast_closeup.gd", "vex_cast_closeup", null],  # Vex RMB / E close-up film
 	"--parity-bench-check": ["res://tools/parity_bench_check.gd", "parity_bench_check", null],
 	"--time-trial-check": ["res://tools/time_trial_check.gd", "time_trial_check", null],  # the Grounds course
 	"--ult-label-scan": ["res://tools/ult_label_scan.gd", "ult_label_scan", null],  # no bare number over an ult
@@ -314,6 +315,8 @@ const CHECKS := {
 	"--heal-read-check": ["res://tools/heal_read_check.gd", "heal_read_check", null],  # every heal: one read
 	"--results-ways-check": ["res://tools/results_ways_check.gd", "results_ways_check", null],  # 0051 results
 	"--results-five-check": ["res://tools/results_five_check.gd", "results_five_check", "check"],
+	"--results-boki-line-check": ["res://tools/results_boki_line_check.gd", "results_boki_line_check", "check"],
+	"--results-boki-line-shots": ["res://tools/results_boki_line_check.gd", "results_boki_line_check", "shots"],
 	"--results-five-shots": ["res://tools/results_five_check.gd", "results_five_check", "shots"],
 	"--kill-reset-check": ["res://tools/kill_reset_check.gd", "kill_reset_check", null],
 	"--xp-cue-check": ["res://tools/xp_cue_check.gd", "xp_cue_check", null],  # kill XP tick, steal stings
@@ -557,7 +560,6 @@ const CHECKS := {
 	"--boki-cost": ["res://tools/boki_cost.gd", "boki_cost", null],  # draw cost of sets of rigged Bokis
 	"--boki-rig-shots": ["res://tools/boki_rig_shots.gd", "boki_rig_shots", null],  # rigged Boki review sheets
 	"--fish-watch-shots": ["res://tools/fish_watch_shots.gd", "fish_watch_shots", null],
-	"--boki-everywhere-check": ["res://tools/boki_everywhere_check.gd", "boki_everywhere_check", null],  # Boki in .pck
 	"--vespyx-places-check": ["res://tools/vespyx_places_check.gd", "vespyx_places_check", null],  # Vespyx everywhere
 	"--boki-swim-shots": ["res://tools/boki_swim_shots.gd", "boki_swim_shots", null],  # Boki afloat in 1 m of water
 	"--boki-fly-shots": ["res://tools/boki_fly_shots.gd", "boki_fly_shots", null],  # fliers hover, glide, flare
@@ -646,6 +648,8 @@ const CHECKS := {
 	# the first two Extractions' guide
 	# the sight wedge first-time hint
 	"--first-time-hint-check": ["res://tools/first_time_hint_check.gd", "first_time_hint_check", null],
+	# every first-time hint shows once per save: three matches with a save and load between
+	"--hint-once-check": ["res://tools/hint_once_check.gd", "hint_once_check", null],
 	"--first-objective-shots": ["res://tools/first_objective_shots.gd", "first_objective_shots", null],
 	"--first-objective-check": ["res://tools/first_objective_check.gd", "first_objective_check", null],
 	"--first-match-guide-check": ["res://tools/first_match_guide_check.gd", "first_match_guide_check", null],
@@ -823,7 +827,7 @@ const CHECKS := {
 	"--online-feel-1-check": ["res://tools/online_feel_check.gd", "online_feel_check", "gunslinger"],
 	"--online-feel-2-check": ["res://tools/online_feel_check.gd", "online_feel_check", "juggernaut"],
 	"--online-feel-3-check": ["res://tools/online_feel_check.gd", "online_feel_check", "rimewright"],
-	"--online-feel-guest": ["res://tools/online_feel_check.gd", "online_feel_check", ""],  # the second game (not gated)
+	"--online-feel-guest": ["res://tools/online_feel_check.gd", "online_feel_check", ""],     # second game, not gated
 	"--online-feel-check": ["res://tools/online_feel_check.gd", "online_feel_check", null],  # 2 games, 100 ms delay
 	"--lagcomp-check": ["res://tools/lagcomp_check.gd", "lagcomp_check", null],  # 2 games, lag relay
 	"--ally-cc-check": ["res://tools/ally_cc_check.gd", "ally_cc_check", null],  # no ally moved or given a status
@@ -1020,7 +1024,6 @@ const CHECKS := {
 	"--air-cast-shots": ["res://tools/air_cast_shots.gd", "air_cast_shots", null],  # air casts, frame by frame
 	"--idle-break-check": ["res://tools/idle_break_check.gd", "idle_break_check", null],  # WardenBreak
 	"--idle-break-shots": ["res://tools/idle_break_shots.gd", "idle_break_shots", null],  # WardenBreak frames
-	"--next-form-shots": ["res://tools/next_form_shots.gd", "next_form_shots", null],  # GPU, =<dir>
 	# moved out of main.gd (ext/checks-out-of-main-c)
 }
 
@@ -1051,22 +1054,31 @@ static func run(main: Node, args: PackedStringArray) -> bool:
 		printerr("CHECKREGISTRY FAIL: duplicate flags across tools/checks/*.gd and CHECKS: ", _dupes)
 		main.get_tree().quit(1)
 		return true
+	var flag := flag_in(args)
+	if flag == "":
+		return false
+	var e: Array = checks[flag]
+	Content.rules("merge_forms")["fusion_enabled"] = true  # (checks run with Fusion on)
+	seed(hash(flag))
+	for a in args:
+		if String(a).begins_with("--rng-seed="):
+			seed(int(String(a).substr(11)))
+	var c = load(String(e[0])).new()
+	main.set_meta(String(e[1]), c)
+	if e[2] == null:
+		c.run(main)
+	else:
+		c.run(main, e[2])
+	return true
+
+
+## The first registered check flag on the command line, "" if none (Settings uses it too).
+static func flag_in(args: PackedStringArray) -> String:
+	var checks := all()
 	for flag in checks:
 		if Array(args).any(func(a): return a == flag if flag == "--check" else String(a).begins_with(flag)):
-			var e: Array = checks[flag]
-			Content.rules("merge_forms")["fusion_enabled"] = true  # (checks run with Fusion on)
-			seed(hash(flag))
-			for a in args:
-				if String(a).begins_with("--rng-seed="):
-					seed(int(String(a).substr(11)))
-			var c = load(String(e[0])).new()
-			main.set_meta(String(e[1]), c)
-			if e[2] == null:
-				c.run(main)
-			else:
-				c.run(main, e[2])
-			return true
-	return false
+			return flag
+	return ""
 
 
 ## Every check, one lookup: the legacy CHECKS above plus the area files in tools/checks/. A flag present in two

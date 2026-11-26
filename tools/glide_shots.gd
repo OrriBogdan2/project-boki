@@ -56,7 +56,7 @@ func _phase(t: float) -> String:
 	return at
 
 func _hunter(main: Node, arch: String, dir: String) -> void:
-	var m := await _start(main, arch, dir)
+	var m := _start(main, arch, dir)
 	var h: Hunter = m.player
 	h.teleport(h.pos + Vector3(0, HEIGHT, 0))
 	var sync := _sync(h)
@@ -84,7 +84,7 @@ func _hunter(main: Node, arch: String, dir: String) -> void:
 		if sync:
 			sync._process(Match.DT)
 		if step % EVERY == 0:
-			var i := step / EVERY
+			var i := int(step / float(EVERY))
 			var on := "gl=%d dv=%d" % [int(h.gliding), int(h.plunging())]
 			if boki != "":
 				var k: Kin = h.kin
@@ -108,7 +108,7 @@ func _start(main: Node, arch: String, dir: String) -> Match:
 		"cls": Arch.weight(arch), "arch": arch, "weapon": Arch.signature(arch)}
 	if boki != "":
 		opts["demo_kin"] = boki
-	await m.start(opts)
+	m.start(opts)
 	m.set_process(false)
 	m.hud.visible = false
 	for mob in m.mobs:

@@ -4,6 +4,7 @@ extends RefCounted
 ## more. Per Hunter with stepping legs this poses the real model (WardenClips through Warden/Sync) moving forward,
 ## back, left and right at 0 m/s, every 0.5 m/s, and its run speed from content/rules/hunter_move.json, and measures
 ## how fast a planted foot moves against the ground (m/s: the body's velocity plus the foot's own, flat).
+## A NATIVE line per native Hunter (Meshy's own clips) at walk, run and crouch speed, from the same planted-foot read.
 ## Prints one SLIP line per Hunter and direction; FAIL when a Hunter's worst slip passes its bar in BAR.
 ## A STEP line per Hunter reads the forward run as a match shows it (the model at Hunter.VIS_SCALE, moving at
 ## HunterMove.speed, the row times body_scale): its model (glb, triangles), the run cycle, the stride a planted foot
@@ -59,6 +60,14 @@ const SKATE_BAR := 0.45
 const SKATE_IDLE_S := 1.5
 const SKATE_SETTLE_S := 0.1
 const SKATE_RUN_S := 1.35
+## The native path (Meshy's own clips, warden_native.json): each Hunter's walk, run and crouch loop is held at a ground
+## speed and a planted foot's travel over the ground per step is read as for STEP (FAIL past STEP_CM): the walk at
+## NATIVE_WALK (m/s, in the walk's range of every Hunter), the run at HunterMove.speed, the crouch at its sneak share.
+## "loop" is the speed a planted foot sweeps at rate 1: the data's walk_mps, run_mps and crouch_mps.
+const NATIVE_WALK := 2.0
+## Native loops that print OPEN, not FAIL: their clips step too short for the speed at the fastest loop rate
+## (WardenNative.RATE_MAX), so no data rate plants them (Meeko's trot, Gil's and Motley's sneak; DEBT.md).
+const NATIVE_OPEN := {"tender": ["walk", "run", "crouch"], "gil": ["crouch"], "ostra": ["crouch"]}
 
 var bad := 0
 var holder: Node3D
@@ -78,6 +87,10 @@ func run(main: Node) -> void:
 	var done := 0
 	for id in ids:
 		if await _hero(main, String(id)):
+			done += 1
+	WardenNative.contract_only = false
+	for id in ids:
+		if WardenNative.on(String(id)) and await _native(main, String(id)):
 			done += 1
 	print("FOOT_SLIDE_DONE ", done, " FAIL ", bad)
 	main.get_tree().quit(1 if bad > 0 or done == 0 else 0)
@@ -155,6 +168,37 @@ func _hero(main: Node, id: String) -> bool:
 	m.free()
 	return true
 
+## Native Hunter `id` (WardenNative) at walk, run and crouch speed: one NATIVE line each (Meshy's clips step even
+## where the contract model hovers: Neve, Motley).
+func _native(main: Node, id: String) -> bool:
+	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
+	holder.add_child(m)
+	var nat := m.get_node("Warden/Native") as WardenNative
+	nat.set_process(false)
+	for k in 5:
+		await main.get_tree().process_frame
+	m.scale *= Hunter.VIS_SCALE
+	AUDIT.soles = AUDIT.sole_ends(nat.skel)
+	var run_speed := HunterMove.speed(id)
+	var sneak := run_speed * HunterMove.sneak_speed
+	var cases := {"walk": [NATIVE_WALK, {}], "run": [run_speed, {}], "crouch": [sneak, {"crouch": 1.0}]}
+	for loop in cases:
+		var spd: float = cases[loop][0]
+		var fr := _sample(m, nat, null, nat.skel, DIRS["f"] * spd, 0.0, STEP_DT, cases[loop][1])[0] as Array
+		var rate := nat.player.speed_scale
+		var st := _stance_cm(fr, spd)
+		print("NATIVE %-8s %-6s %.2f m/s %-24s rate %.2f loop %.2f m/s slide %+.1f cm/step (%d steps)"
+				% [id, loop, spd, nat.plays[loop], rate, (spd - float(st[1])) / rate, st[0], st[2]])
+		if absf(st[0]) > STEP_CM and loop in NATIVE_OPEN.get(id, []):
+			print("OPEN %s: native %s travels %+.1f cm a step (bar %.1f, NATIVE_OPEN)" % [id, loop, st[0], STEP_CM])
+		elif absf(st[0]) > STEP_CM:
+			print("FAIL %s: native %s: a planted foot travels %+.1f cm a step at %.2f m/s, bar %.1f"
+					% [id, loop, st[0], spd, STEP_CM])
+			bad += 1
+	AUDIT.soles = {}
+	m.free()
+	return true
+
 ## Prints the STEP line of the forward run at `spd` (m/s): FAIL when a planted foot travels past STEP_CM a step.
 func _step_line(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, id: String, spd: float) -> void:
 	AUDIT.soles = AUDIT.sole_ends(sk)
@@ -169,7 +213,7 @@ func _step_line(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, id: S
 		var mesh := (mi as MeshInstance3D).mesh as ArrayMesh
 		if (mi as MeshInstance3D).is_visible_in_tree() and mesh:
 			for si in mesh.get_surface_count():
-				tris += mesh.surface_get_array_index_len(si) / 3
+				tris += int(mesh.surface_get_array_index_len(si) / 3.0)
 	var fmt := "STEP %-10s %s tris %d run %.2f m/s cycle %.3f s stride %.2f m rate %.2f (%.1f steps/s) slide %+.1f"
 	print((fmt + " cm/step (%d steps)") % [id, WardenGlb.path(id), tris, spd, cycle, stride, rate, 2.0 * rate / cycle,
 			st[0], st[2]])
@@ -281,16 +325,17 @@ func _slip(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, vel: Vecto
 ## [frames of AUDIT.points, the facing of each] over SAMPLE_S at `vel` after WARM_S, `dt` apart, facing -Z
 ## swaying `sway` (rad).
 func _sample(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, vel: Vector3, sway := 0.0,
-		dt := AUDIT.DT) -> Array:
-	m.set_meta(WardenClips.STATE, {"vel": vel, "face": 0.0, "grounded": true})
-	clips.loco_pos = Vector2.ZERO
+		dt := AUDIT.DT, extra := {}) -> Array:
+	m.set_meta(WardenClips.STATE, {"vel": vel, "face": 0.0, "grounded": true}.merged(extra))
+	if clips:
+		clips.loco_pos = Vector2.ZERO
 	for k in int(WARM_S / dt):
 		sync.call("_process", dt)
 	var fr: Array = []
 	var faces: Array = []
 	for k in int(SAMPLE_S / dt):
 		var face := sway * sin(TAU * WOBBLE_HZ * k * dt)
-		m.set_meta(WardenClips.STATE, {"vel": vel, "face": face, "grounded": true})
+		m.set_meta(WardenClips.STATE, {"vel": vel, "face": face, "grounded": true}.merged(extra))
 		faces.append(face)
 		sync.call("_process", dt)
 		fr.append(AUDIT.points(sk))
@@ -327,4 +372,4 @@ func _skate(m: Node3D, sync: Node, sk: Skeleton3D, spd: float) -> float:
 		was = now
 	m.set_meta(WardenClips.STATE, {})
 	shares.sort()
-	return shares[shares.size() / 2]
+	return shares[int(shares.size() / 2.0)]

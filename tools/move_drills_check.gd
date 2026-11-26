@@ -29,7 +29,7 @@ func run(main: Node) -> void:
 	Save.d["tutorial"] = {"hatched": true, "intro": true, "home": true, "day1_done": true}
 	m = Match.new()
 	main.add_child(m)
-	await m.start(OPTS.duplicate())
+	m.start(OPTS.duplicate())
 	m.set_process(false)
 	P = m.player
 	for mb in m.mobs:
@@ -161,7 +161,7 @@ func _other_areas(main: Node) -> void:
 		main.add_child(mm)
 		var opts: Dictionary = {"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true}
 		opts.merge(o, true)
-		await mm.start(opts)
+		mm.start(opts)
 		mm.set_process(false)
 		var p := Practice.of(mm)
 		ok(p != null and p.drills == null and not p.bar_btns.has("drills"), "no Drills button in %s" % o.keys()[0])

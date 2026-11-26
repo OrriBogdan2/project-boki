@@ -1,6 +1,6 @@
 extends RefCounted
 ## --farm-tutorial-check: Hob the builder, the guided farm tutorial and the Goals tracker
-## (docs/decisions/0011-farm-builder-tutorial.md). Also --farm-hob-shots=<dir> and --farm-spot-shots=<dir>: screenshots.
+## (docs/decisions/0104-farm-builder-tutorial.md). Also --farm-hob-shots=<dir> and --farm-spot-shots=<dir>: screenshots.
 ##   1. Hob: the starter set, blueprints drawn up on talking, the toast once, the spread over levels
 ##      2-5, hidden tabs and the footer line, a v7 save keeps what it could build
 ##   2. the tutorial: steps in order, free order with the house first, skip, the one reward, old saves
@@ -63,6 +63,9 @@ func run(m: Node, mode := "") -> void:
 		if String(a).begins_with("--farm-spot-shots="):
 			await load("res://tools/farm_spot_shots.gd").new().run(m, String(a).substr(18))
 			return
+		if a == "--tutorial-low-fps":
+			await load("res://tools/farm_tutorial_low_fps.gd").new().run(m)
+			return
 		if String(a).begins_with("--farm-hob-shots="):
 			await load("res://tools/farm_hob_shots.gd").new().run(m, String(a).substr(17))
 			return
@@ -105,7 +108,8 @@ func _base_mode() -> void:
 	ok(not home.hmk.tabs().has("Exchange"), "on: no Exchange tab")
 	var wild: Array = (home.hb.wild_t as Dictionary).keys()
 	var w: World = home.world
-	var tree_at := Vector2.ZERO if wild.is_empty() else Vector2(int(wild[0]) % w.w + 0.5, int(wild[0]) / w.w + 0.5)
+	var tree_at := Vector2.ZERO if wild.is_empty() else Vector2(int(wild[0]) % w.w + 0.5,
+			int(int(wild[0]) / float(w.w)) + 0.5)
 	ok(home.hg.find(tree_at).is_empty(), "on: wild trees and boulders are not choppable")
 	home.hw.scan()
 	var econ_kinds := ["chop", "break", "log", "ore", "carry", "stock"]
@@ -290,7 +294,20 @@ func _base_world() -> void:
 	FarmTutorial.give_food()
 	ok(_berries() == resumed_gift, "resumed: the starter food is not handed over twice")
 	ok(guide.target("toy") == Vector3.INF, "toy: no marker until a toy is down")
+	var hint := FarmTutorial.hint_text("toy")
+	var price := str(HomeLayout.price("toy_ball")[0])
+	ok(
+		hint.contains(Settings.key_cap("build")) and hint.contains(price) and hint.contains("free"),
+		"toy: the line names the build key, the ball's price and that the patch is free: %s" % hint
+	)
+	var marked: Array = []
+	for tab in ["Base", "Garden"]:
+		for e in home.hb.entries.tab(tab):
+			if bool(e.get("hl", false)):
+				marked.append(String(e["id"]))
+	ok(marked == ["toy_ball", "snack_patch"], "toy: the ball and the patch glow in their tabs: %s" % str(marked))
 	guide.place_toy()
+	ok(FarmTutorial.marks().is_empty(), "toy: nothing glows once a toy is down")
 	ok(
 		guide.target("toy") == FarmTutorial.toy_spot() and _on_no_isle([guide.target("toy")]),
 		"toy: the marker is on the toy you put down, not a side isle"

@@ -1,6 +1,6 @@
 extends RefCounted
 ## --terrain-hazard-check: the Hollow Crown's terrain hazard areas (TerrainHazards,
-## content/rules/terrain_hazards.json, docs/decisions/0060-terrain-hazards.md). One real match (seed 5);
+## content/rules/terrain_hazards.json, docs/decisions/0139-terrain-hazards.md). One real match (seed 5);
 ## for each hazard kind the player stands in its first area twice, with a Boki that doesn't counter it
 ## (Vespyx, venom) and with one that does, and the check asserts:
 ##   lava        burns (hp drops, burn on)              / ember: no burn, no damage
@@ -47,9 +47,7 @@ func run(main_node: Node) -> void:
 	m = Match.new()
 	main.add_child(m)
 	# a grown Boki (level 12, trust 95) talks in full lines, so its hint names the hazard
-	await m.start(
-		{"teams": 2, "squad": 1, "tier": 0, "seed": 5, "no_drop": true, "demo_kin": PLAIN, "demo_kin_lv": "12:95"}
-	)
+	m.start({"teams": 2, "squad": 1, "tier": 0, "seed": 5, "no_drop": true, "demo_kin": PLAIN, "demo_kin_lv": "12:95"})
 	m.set_process(false)
 	tz = TerrainHazards.of(m)
 	ok("the Hollow Crown has its hazard areas", tz != null and tz.areas.size() >= 5, str(tz.areas.size() if tz else 0))
@@ -69,7 +67,7 @@ func run(main_node: Node) -> void:
 					"ice":
 						await _ice(ai, safe)
 					"static":
-						await _static(ai, safe)
+						_static(ai, safe)
 					"bramble":
 						await _bramble(ai, safe)
 				var hud_safe: Variant = tz.underfoot(p_v).get("safe", null)

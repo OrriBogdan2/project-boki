@@ -115,8 +115,11 @@ func _bag() -> void:
 	for i in 9:
 		var v := K._draw_vial()
 		counts[v] = int(counts.get(v, 0)) + 1
-	ok("bag: one bag is 2 Thunder, 2 Slime, 2 Air, 2 Fire, 1 Super Zeep",
+	ok("bag: one bag is 2 Thunder, 2 Slime, 2 Air, 2 Fire, 1 Geyser",
 		counts == {"thunder": 2, "slime": 2, "air": 2, "fire": 2, "zeep": 1}, str(counts))
+	var rare: String = String(K.d["rmb"]["vials"]["zeep"]["name"])
+	ok("bag: the rare vial reads Geyser, no third-party name (cut c506559e4e, undone by the sv-names merges)",
+		rare == "Geyser" and "Zeep" not in JSON.stringify(K.d), rare)
 	ok("bag: refills itself when empty", K.bag.size() == 9, "left %d" % K.bag.size())
 	var nx := K.next_vial()
 	ok("bag: the next vial is visible on the HUD",
@@ -204,7 +207,7 @@ func _vials() -> void:
 				ok("Air: knocks the dummy away", T.pos.x - x0 > 1.5, "pushed %.2f" % (T.pos.x - x0))
 			"fire": ok("Fire: damage plus a burn", hit and top["burn"] > 0.0,
 				"dmg %.1f burn %.2f" % [dmg(T), top["burn"]])
-			"zeep": ok("Super Zeep: bigger blast, knocks up", hit and top["stun"] >= 0.6 and top["lift"] > 0.3,
+			"zeep": ok("Geyser: bigger blast, knocks up", hit and top["stun"] >= 0.6 and top["lift"] > 0.3,
 				"stun %.2f lift %.2f" % [top["stun"], top["lift"]])
 	_puddle()
 
@@ -227,7 +230,7 @@ func _puddle() -> void:
 	var quad := (node.get_child(1) as MeshInstance3D).mesh as PlaneMesh
 	var flare: Color = rim.get_shader_parameter("color")
 	ok("Slime: the rim sits on the puddle's radius and flares white as it lands",
-		absf(quad.size.x - 2.0 * float(vd["puddle_r"])) < 0.01 and flare.a > GilKit.PUDDLE_RIM_A + 0.05
+		absf(quad.size.x - 2.0 * float(vd["puddle_r"])) < 0.01 and flare.a > HeroVfxZone.RIM_A + 0.05
 			and flare.r > sig.r + 0.05,
 		"quad %.2f m, flare %s" % [quad.size.x, flare])
 	fresh(T)
@@ -237,7 +240,7 @@ func _puddle() -> void:
 	var steady: Color = rim.get_shader_parameter("color")
 	var in_col: Color = inside.get_shader_parameter("color")
 	ok("Slime: then a steady rim in Gil's colour over a faint inside in the slime's (0.25 alpha or less)",
-		Color(steady, 1.0).is_equal_approx(sig) and absf(steady.a - GilKit.PUDDLE_RIM_A) < 0.01
+		Color(steady, 1.0).is_equal_approx(sig) and absf(steady.a - HeroVfxZone.RIM_A) < 0.01
 			and Color(in_col, 1.0).is_equal_approx(K.col_of(vd)) and in_col.a * 0.3 <= 0.25,
 		"rim %s inside %s" % [steady, in_col])
 	var at: Vector3 = pd["at"]
@@ -245,10 +248,10 @@ func _puddle() -> void:
 	var on_it := func(rg: Dictionary) -> bool:
 		return absf(float(rg["r"]) - r) < 0.05 and (rg["node"] as Node3D).global_position.distance_to(at) < 0.5
 	var strobe := false
-	while float(pd["left"]) > GilKit.PUDDLE_FADE * 0.5:
+	while float(pd["left"]) > HeroVfxZone.FADE * 0.5:
 		step(m, DT)
 		strobe = strobe or m.fx.rings.any(on_it)
-	var mid: float = (rim.get_shader_parameter("color") as Color).a / GilKit.PUDDLE_RIM_A
+	var mid: float = (rim.get_shader_parameter("color") as Color).a / HeroVfxZone.RIM_A
 	ok("Slime: no rings strobe over it, and it fades on an ease-out curve as the slow ends (a quarter left halfway)",
 		not strobe and absf(mid - 0.25) < 0.05, "%.3f of its glow halfway through the fade" % mid)
 	step(m, 0.3)

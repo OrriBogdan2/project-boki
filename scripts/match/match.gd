@@ -344,6 +344,7 @@ func _start(o: Dictionary) -> void:
 	await world.build_meshes()
 	RaidLook.tune_world(world, raid)
 	if DepthCues.k() > 0.0: add_child(DepthCues.new(self))
+	add_child(FxHunterCap.new(self))
 	world.stage_cb = Callable()
 	fx = Fx.new(); fx.name = "Fx"; add_child(fx)
 	DashStreak.of(self)
@@ -520,7 +521,8 @@ func _build_env() -> void:
 	raid = RaidLook.pick(opts, seed_val)
 	RaidLook.apply(env.environment, sun, get_node_or_null("Fill") as DirectionalLight3D, T, raid)
 	sight_k = float(RaidLook.SIGHT.get(raid, 1.0))
-	RenderingServer.global_shader_parameter_set("vis_dark", 1.0 if "--shot-bright" in OS.get_cmdline_user_args() else float(RaidLook.VIS_DARK.get(raid, 0.7)))     # (--shot-bright: map screenshots without the sight shading)
+	RenderingServer.global_shader_parameter_set("vis_dark", 1.0 if "--shot-bright" in OS.get_cmdline_user_args() else RaidLook.VIS_DARK)     # (--shot-bright: map screenshots without the sight shading)
+	RenderingServer.global_shader_parameter_set("vis_greyness", RaidLook.VIS_GREY)
 	RenderingServer.global_shader_parameter_set("vis_ally_range", VIEW_RANGE * sight_k)
 	raid_fx = RaidLook.storm_fx(raid)
 	if raid_fx:
@@ -1083,7 +1085,7 @@ func _spawn_breakables() -> void:
 		for row in [[-2.4, 0.0], [-4.6, 1.3], [0.0, 1.3], [2.4, 0.0], [4.6, 1.3]]:
 			# across the row from the middle out: 0, 2.6, -2.6, 5.2 ... (or 1.3, -1.3, 3.9 ... staggered)
 			for k in 6:
-				var x := (float(row[1]) + float((k + (1 if row[1] == 0.0 else 0)) / 2) * 2.6) * (1.0 if k % 2 == 0 else -1.0)
+				var x := (float(row[1]) + float(int((k + (1 if row[1] == 0.0 else 0)) / 2.0)) * 2.6) * (1.0 if k % 2 == 0 else -1.0)
 				if Vector2(x, float(row[0])).length() <= 6.2:
 					spots.append(Vector3(x, 0, float(row[0])))
 		var used: Array = [Vector3(-2.0, 0, 1.2), Vector3(-2.6, 0, 2.2), Vector3(1.4, 0, 1.6), Vector3(3.6, 0, 2.6), Vector3(-3.6, 0, 2.6), Vector3(0, 0, 4.0)]
@@ -1931,7 +1933,7 @@ func eliminate(h: Hunter, by: Ent, why: String, final := false) -> void:
 	elif not world.is_void(h.pos.x, h.pos.z) and not h.remote:
 		var n := mini(10, int(ceil(h.gems / 5.0)))
 		for i in n:
-			drop("gem", h.pos + Vector3(0, 0.5, 0), maxi(1, h.gems / maxi(1, n)))
+			drop("gem", h.pos + Vector3(0, 0.5, 0), maxi(1, int(h.gems / float(maxi(1, n)))))
 		for s in h.seeds:
 			drop("seed", h.pos + Vector3(0, 0.5, 0), int(h.seeds[s]), s)
 		for rec in h.caught:
@@ -1982,7 +1984,7 @@ func train_hit(e: Ent, fwd: Vector3, spd := 8.0) -> void:
 	fx.burst(at + Vector3(0, 0.4, 0), Color("6b5a4a"), 16, 4.0, 0.7, 10.0, 1.2)
 	fx.ring(at, 3.6, Color(1.0, 0.75, 0.4, 0.9), 0.45)
 	fx.flash(at + Vector3(0, 1.0, 0), Color("fff2c0"), 1.4, 0.1)
-	Shake.incoming_big(self, at, 0.9)
+	Shake.big(self, at, "train_hit")
 	if e is Hunter:
 		var h: Hunter = e
 		if h.out or h.extracted or h.remote:
@@ -2015,7 +2017,7 @@ func _lose_life(h: Hunter, by: Ent, why: String) -> void:
 			var n := mini(5, lose)
 			for i in n:
 				# the last pile takes the remainder so nothing is lost to rounding
-				drop("gem", h.pos + Vector3(0, 0.5, 0), (lose / n) + (lose % n if i == n - 1 else 0))
+				drop("gem", h.pos + Vector3(0, 0.5, 0), (int(lose / float(n))) + (lose % n if i == n - 1 else 0))
 	elif lose > 0:
 		h.lost_gems += lose
 	h.gems -= lose
@@ -2411,7 +2413,7 @@ func on_wall_slam(e: Ent, dir: Vector2) -> void:
 ## sight, tall grass hides you from anyone outside it, and crouching shrinks both distances.
 ## Firing or getting hit gives you away to anyone with a clear line, whichever way they face.
 const VIEW_RANGE := 24.0
-const VIEW_COS := 0.5          # 120 degrees wide (cos of half; vis.gdshaderinc VIS_COS draws the same cone)
+const VIEW_COS := 0.7071       # 90 degrees wide (cos of half; vis.gdshaderinc VIS_COS draws the same cone)
 const NEAR_SENSE := 2.0        # m all round you, half for a crouched target (vis.gdshaderinc VIS_NEAR)
 
 func can_see(team_i: int, target: Hunter) -> bool:
@@ -2438,7 +2440,7 @@ func sees(team_i: int, p: Vector3, crouched := false, revealed := false) -> bool
 			continue
 		if not revealed and rel.normalized().dot(h.aim_dir()) < VIEW_COS:
 			continue
-		if world.los(h.pos, p, h.pos.y + 1.1) or world.los(h.pos, p + Vector3(0, 0.6, 0), h.pos.y + 1.6):
+		if world.los(h.pos, p, h.pos.y + 1.1, true) or world.los(h.pos, p + Vector3(0, 0.6, 0), h.pos.y + 1.6, true):
 			return true
 	return false
 
@@ -2936,7 +2938,8 @@ func _shot_apply(s: Dictionary, at: Vector3, e: Ent) -> void:
 		# the blade's sweet spot
 		dmg *= 1.0 + float(x["tip"][1])
 		fx.burst(at + Vector3(0, 0.4, 0), Color("fff6c0"), 10, 4.5, 0.3, 4.0)
-	var o := {"src": "shot", "crit": crit, "pg": x.get("pg", ""), "at": at}      # at: the contact (HitContact); pg: the volley id (a kit reads it)
+	# at: the contact (HitContact); pg: the volley id (a kit reads it); from: where it was fired (IncomingHitSfx)
+	var o := {"src": "shot", "crit": crit, "pg": x.get("pg", ""), "at": at, "from": s["start"]}
 	if x.has("pg"):
 		# a shotgun volley: the first slug on someone does a fixed share of the whole volley,
 		# the rest split what's left, so landing every slug still adds up to the full volley
@@ -3655,7 +3658,7 @@ func step(dt: float) -> void:
 		player.inp["crouch"] = opts.get("crouch_demo", false)
 	if opts.get("wall_behind", false) and player and time < 0.05:
 		for wi in world.walls:
-			var wx: int = int(wi) % world.w; var wz: int = int(wi) / world.w
+			var wx: int = int(wi) % world.w; var wz: int = int(int(wi) / float(world.w))
 			var gi := world.idx(wx, wz - 1)
 			if world.kind[gi] == World.T_GROUND and world.walls.has(world.idx(wx + 1, wz)) and world.walls.has(world.idx(wx - 1, wz)):
 				player.teleport(Vector3(wx + 0.5, world.ground_at(wx + 0.5, wz - 0.5), wz - 0.5))
@@ -3664,7 +3667,7 @@ func step(dt: float) -> void:
 		# stand in grass right beside a wall, with a rival hiding in grass nearby
 		var spot := Vector3.INF; var rival_spot := Vector3.INF
 		for bi in world.bush:
-			var bx: int = int(bi) % world.w; var bz: int = int(bi) / world.w
+			var bx: int = int(bi) % world.w; var bz: int = int(int(bi) / float(world.w))
 			var near_wall := false
 			for dz in range(-2, 3):
 				for dx in range(-2, 3):
@@ -4003,7 +4006,7 @@ func _hold_demo() -> void:
 		var i := 0
 		for h in hunters:
 			h.ctrl = "idle"; h.inp["move"] = Vector2.ZERO
-			var col := i % 4; var row := i / 4
+			var col := i % 4; var row := int(i / 4.0)
 			var at := base + Vector3((col - 1.5) * 2.4, 0, row * 2.6)
 			at = world.free_spot_near(at, [], 0.6, 0.5, 3.0)
 			h.teleport(Vector3(at.x, world.ground_at(at.x, at.z), at.z))
@@ -4121,8 +4124,7 @@ func _update_interact(dt: float) -> void:
 						best = {"kind": "revive", "ent": o, "label": "An enemy is standing on %s: revive blocked. Knock them off!" % o.pname, "col": Color("ff6a5a")}
 					else:
 						best = {"kind": "revive", "ent": o, "label": "Reviving %s  ·  stay on the wisp" % o.pname, "col": Color("9ee2a0")}
-			elif not o.remote:
-				best = {"kind": "finish", "ent": o, "label": "Hold %s to stomp %s  (you'll be locked in)" % [Settings.key_cap("interact"), o.pname], "col": Color("ff8a6a")}
+		best = StompTarget.prompt(self, h, best)
 		if not want or best.get("kind", "") != "finish":
 			h.finish_t = 0.0
 		# 1b. deathboxes: bring a teammate back while their soul is there, or take everything
@@ -4345,7 +4347,8 @@ func demo_shielded(e: Ent) -> bool:
 ## can be lost, what you extract is kept).
 const DEMO_SEED := 5
 static func demo_opts() -> Dictionary:
-	return {"teams": Data.MATCH_PLAYERS / 2, "squad": 2, "total": Data.MATCH_PLAYERS, "tier": 1, "seed": DEMO_SEED,
+	return {"teams": int(Data.MATCH_PLAYERS / 2.0), "squad": 2, "total": Data.MATCH_PLAYERS, "tier": 1,
+			"seed": DEMO_SEED,
 		"raid": "clear", "blight": false, "fresh_t": Settings.DEMO_FRESH_T, "demo_match": true,
 		"live_lair": "The Thornhive"}     # (the Hollow Crown: the Thornhive and Thornwood's uplink share an island)
 
@@ -4500,7 +4503,7 @@ func _meteor_hit(at: Vector3) -> void:
 	fx.burst(at + Vector3(0, 0.3, 0), Color("ffcf8a"), 22, 6.0, 0.5, 6.0, 1.2)
 	fx.dust(at, 10)
 	sfx("boom", at, -3.0, 1.3)
-	Shake.incoming_big(self, at, 0.35)
+	Shake.big(self, at, "explosion")
 	for e in hunters + mobs + kins:
 		if e.remote or not e.hittable() or (e is Hunter and (e as Hunter).riding):
 			continue
@@ -4666,6 +4669,7 @@ func _finish() -> void:
 			player.kin.comp.on_loss()
 		if player.kin:
 			r["kin_say"] = BokiChatter.line(player.kin, "extract" if result.get("extracted", false) else "comfort")
+		r["wisps_home"] = KinSteal.carried_home      # stolen wisps you carried: the results say they go home
 		# what each kin you brought did, for its memories and growth
 		r["kin_runs"] = []
 		for kk in [player.kin, player.kin2]:
@@ -5059,6 +5063,7 @@ func _net_ev(x, from: String) -> void:
 				"snd": SfxCast.net_in(self, x)        # a sound a Hunter of another game made
 				"whop": WallMoves.scuff(self, Vector3(x[2], x[3], x[4]), float(x[5]))      # a wall hop (item 149)
 		"xp": KillXp.net_in(self, x)
+		"stomp": Life.net_stomp(self, x)      # a stomp began or ended in another game
 		"knock":
 			who = ents_by_id.get(String(x[1]), null)
 			var by: Ent = ents_by_id.get(String(x[2]), null)
@@ -5233,7 +5238,7 @@ func _net_ev(x, from: String) -> void:
 					var gems := int(x[4])
 					var n := mini(10, int(ceil(gems / 5.0)))
 					for i in n:
-						drop("gem", at + Vector3(0, 0.5, 0), maxi(1, gems / maxi(1, n)))
+						drop("gem", at + Vector3(0, 0.5, 0), maxi(1, int(gems / float(maxi(1, n)))))
 					for s in x[5]:
 						drop("seed", at + Vector3(0, 0.5, 0), int(x[5][s]), s)
 					for rec in x[6]:
@@ -5582,7 +5587,7 @@ func _update_aim(alpha: float) -> void:
 	var to_max := String(p.wpn.get("aim", "")) == "max"
 	var dist := float(p.wpn["range"]) if to_max else minf(d.length(), float(p.wpn["range"]))
 	if dist > 0.6:
-		var dir := d.normalized()
+		var dir := p.aim_dir()      # the vision cone's centre (vis_dir), so the line always runs down it
 		var y := at.y + 0.95 * float(p.cdat["scale"])
 		var a := Vector3(at.x + dir.x * 0.6, y, at.z + dir.y * 0.6)
 		var b := Vector3(at.x + dir.x * dist, y, at.z + dir.y * dist)

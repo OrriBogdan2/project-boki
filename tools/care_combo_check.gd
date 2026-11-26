@@ -1139,7 +1139,7 @@ func tender() -> void:
 			float(tele.get("band", 0.0)) > 0.0 and float(tele.get("fill", -1.0)) < 0.0 and field_n != null
 				and is_equal_approx(field_n.scale.x, K.burst_radius()),
 			"band %.2f disc r %.2f" % [float(tele.get("band", 0.0)), field_n.scale.x if field_n else 0.0])
-	await _burr_build(m, P, T, K, bid)
+	_burr_build(m, P, T, K, bid)
 	await _free(m)
 	# --- Hearthlight: on her a 2.6 m ring with its own cast move; E again throws it to the cursor at once
 	r = sc.setup("tender", 6.0)
@@ -1761,6 +1761,12 @@ func rimewright() -> void:
 	ok(
 			"tm passive: the knock's Shatter deals the data's damage to the neighbour (and Chills them)",
 			hh - T2.hp >= want - 0.5 and K.chilled(T2), "neighbour -%.1f, data %.1f" % [hh - T2.hp, want])
+	T2.slow_t = 0.0
+	K.splinter(T2.pos, 1.0, 2.0)
+	# the engine's own 0.28 s stagger on a big (payoff) hit is not the kit's; the old rider was 1.2 s at 30%
+	ok(
+			"tm passive: the Shatter burst is damage only, no slow of ours (the source has none)",
+			T2.slow_t <= T2.stagger_t + 0.01, "slow_t %.2f, stagger %.2f" % [T2.slow_t, T2.stagger_t])
 	# --- no Chill, no Shatter: knocking an unchilled foe only knocks
 	K.chill.erase(T2.get_instance_id())
 	K.fan_hits.clear()

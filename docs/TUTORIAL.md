@@ -6,7 +6,7 @@ drivers. It is **advisory**: it prints one `TUTT` row per step and only a stall 
 playtest. DECISIONS 2026-11-08 ask for a match tutorial of about 8 steps and a garden one of 4 to 5, one banner line each, with a
 visible Skip; the tables show how far the line is from that (section 5).
 
-**Gate check (absolute, not advisory):** `--tutorial-playthrough-check` (`tools/tutorial_playthrough_check.gd`) plays prologue, hatch, starter pick and the whole course on a fresh save, then the whole garden (farm) tutorial with the dead-air check's farm player (12 steps, house hammered, crop picked), prints a `TUTPLAY` row (step, game seconds) per step, and fails if any step takes over 40 s of game time or the course does not reach the lift and results. About 20-90 s wall headless (21 s on rpg7, 88 s on a gpu worker, 2026-11-20): the hatch and Relic screens run at 4x speed, game time unchanged. It is listed in `tools/gate_absolute.txt`: the gate (`ops/regate-bot/suite_speed.py`, `ops/suite-load-gate/suite-fast.sh`) runs every flag there on every PR and reports a red on the PR side as NEW-RED even when main is red too, so it must stay green on main.
+**Gate check (absolute, not advisory):** `--tutorial-playthrough-check` (`tools/tutorial_playthrough_check.gd`) plays prologue, hatch, starter pick and the whole course on a fresh save, then the whole garden (farm) tutorial with the dead-air check's farm player (12 steps, house hammered, crop picked), prints a `TUTPLAY` row (step, game seconds) per step, and fails if any step takes over 40 s of game time or the course does not reach the lift and results. About 20-90 s wall headless (21 s on rpg7, 88 s on a gpu worker, 2026-11-20): the hatch and Relic screens run at 4x speed, game time unchanged. It is listed in `tools/gate_absolute.txt`: the gate (`ops/regate-bot/suite_speed.py`, `ops/suite-load-gate/suite-fast.sh`) runs every flag there on every PR and reports a red on the PR side as NEW-RED even when main is red too, so it must stay green on main. The starter is Vex; `-- --starter=archer|juggernaut|gunslinger` plays it as Lace or Kael (2026-11-23, 3 runs each: Lace 86-90 s, Vex 85-93 s, Kael 106-118 s of course time, no step over 21 s but Kael's `sec`/`kin` at 9-19 s). Lace used to fall off the pack camp's edge and restart the step: TutorialDrive's stuck-hop fired on the first stride after a long wait (`pack_wait`).
 
 Columns: **Time** is sim seconds of the instant-reacting `TutorialDrive` (no reading, no misses; screens: wall seconds; farm and
 garden: the driver ticks them off at once, so n/a). **Read s** = words / 3.5 + 0.45 s, the pace of `docs/TUTORIAL_PACE.md` (add it to
@@ -265,3 +265,54 @@ The owner's first-match playtest on the PC build, and what each fix is:
 - **The marker never covers its label.** `EdgeMarker._label_at` seats a label clear of its arrow by the label's own
   half-extent (a wide label beside a sideways arrow sat under its point: "Glove" read as "love").
   `TutorialStrip.layout` is the one place the strip's widths are worked out, so the check can read them.
+
+# First-time hints show once per save (`--hint-once-check`, 2026-11-22)
+
+`--hint-once-check` starts three short matches (two teams, bots idle) on one save, arms the same triggers in each (a keg
+close by, the hero ultimate ready after a fight's first hits, the Blight's tide, a quest seat, the Heart, a knock), and
+records every line that reaches the message lane. Between matches the save is written and read back through
+`Save.load_from`. It fails on a line shown twice, in one match or across matches, on a seen flag lost in the round
+trip, and on a knock card past its showings. Result on main c303669761: 0 repeats (13 lines in match 1, 2 in match 2,
+1 in match 3; the later ones are the next Hunter slot hint and the second knock card). No hint needed a fix.
+It also fails when `Match.tip_once` forgets a key (checked by hand: 3 matches then show 40 lines).
+
+All of these are `Match._tip` lines (the key is in `Save.d.tutorial`, set the first time it is asked for) unless noted.
+Never in the tutorial course, the arena, training, with tips off, or while dropping.
+
+| Hint | Trigger | Save key |
+|---|---|---|
+| move | 1 s after landing | `move` |
+| ability | 14 s in | `ability` |
+| first keg | an unbroken powder keg within 8 m, no other prompt up | `keg` |
+| first ultimate | the hero ultimate ready (level gate, no cooldown), not in the first 2 s of a fight | `hero_ult` |
+| Ways Out: tide | the Blight's tide first closes (also lights the edge arrow for 8 s) | `ways_tide` |
+| Ways Out: quest | a quest seat opens | `ways_quest` |
+| Ways Out: Heart | the Heart wakes (charging, ready or carried) | `ways_heart` |
+| Heart spark, carry | the charged spark lies free; you carry it | `heart_spark`, `heart_carry` |
+| Blight closing | the ring's edge within 20 m of you, or you out in it | `blight` |
+| first kill, deathbox, wall kick | a monster kill; a lootable deathbox; a jump into a climbable wall | `camp`, `deathbox`, `wallkick` |
+| Hunter slots | a foe within 9 m, one line per 8 s: primary, RMB, E, dash | `hh_<hunter>_<slot>` |
+| belt items | first ground pickup; tonic at low health; armor kit when armour breaks | `belt_<item>` |
+| first capture | the first capturable wild Boki in range | `first_capture` |
+| sight wedge | a rival hidden only by the wedge | `vision` |
+| duel ring | near the duel pad | `duel_ring` |
+| status effects | first stun, root or grounded on you | `cc_stun`, `cc_root`, `cc_grounded` |
+| first knock card | you go down in a real Extraction of the first-match guide | `knock_tip` (a count) |
+
+The knock card is the one hint that shows more than once on purpose: once per match, at most `showings` times (2,
+`content/rules/knock_tip.json`) per save, counted in `knock_tip`. The check pins both.
+The first-summon line (`first_summon`, key once per save) is on `ext/tut-first-summon`, not on main; when it lands, add
+a wisp-ready trigger to `_play` so it is counted too.
+## Telegraphed first camp
+
+The first camp of a run (`TutorialCamps.spawn`) does not appear at once: a ring on the ground and a clock (`CampMark`, drawn in
+the world and on the minimap like the nest marker) count down `TELEGRAPH_T` (3 s) on the spots the monsters then stand on. No
+step ends and no camp is re-spawned while it counts (`alive()` counts it). Step order is unchanged; the fight beats take about
+3 s longer. `--tutorial-fight-check` asserts the marker shows for 3 s with no monster out, then the monsters stand on its spots.
+
+## Low-end PCs: the course at 30 fps and with stalls (`--tutorial-low-fps`)
+Every step runs on the match's fixed 60 Hz step (`Match.step`) and the garden on `FarmStep`, so a slow frame never skips
+a step. `--tutorial-check[=<arch>] --tutorial-low-fps` plays the course again on the Low preset in the game's own frame
+loop, at a 30 fps cap and at 60 fps with a 100 ms stall every 5th frame: same steps in order, none past 2x the
+fixed-step time + 5 s. `--farm-tutorial-check --tutorial-low-fps` does the same for the garden's five steps (meet, patch,
+eat, toy, out). Key taps surviving the same rates are `--low-fps-input-check`.

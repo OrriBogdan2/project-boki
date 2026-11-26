@@ -30,7 +30,7 @@ func run(main: Node) -> void:
 	Econ.ensure()
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "arch": "ashwick",
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "arch": "ashwick",
 		"cls": Arch.weight("ashwick"), "weapon": Arch.signature("ashwick")})
 	m.set_process(false)
 	var fade = main.get("fade")
@@ -173,7 +173,7 @@ func _strip(main: Node, m: Match, P: Hunter, k: Kin) -> void:
 			var vp := main.get_viewport()
 			var c := vp.get_camera_3d().unproject_position((e as Ent).position + Vector3(0, 0.9, 0))
 			c *= Vector2(img.get_size()) / vp.get_visible_rect().size
-			var box := Rect2i(Vector2i(c) - Vector2i(CELL / 2, CELL / 2), Vector2i(CELL, CELL))
+			var box := Rect2i(Vector2i(c) - Vector2i(int(CELL / 2.0), int(CELL / 2.0)), Vector2i(CELL, CELL))
 			var rg := box.intersection(Rect2i(Vector2i.ZERO, img.get_size()))
 			strip.blit_rect(img, rg, Vector2i(f * CELL, row * CELL) + (rg.position - box.position))
 			row += 1
