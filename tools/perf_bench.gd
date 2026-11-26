@@ -108,7 +108,7 @@ var vp: RID
 
 func run(main_node: Node) -> void:
 	var args := OS.get_cmdline_user_args()
-	if "--bench-probe" in args:      # the two own-setup parts: their window, save and camera, not setup()'s
+	if "--bench-probe" in args:  # the two own-setup parts: their window, save and camera, not setup()'s
 		main_node.add_child(load("res://tests/perf_probe.gd").new())
 		return
 	if "--bench-hunter-gpu" in args:
@@ -709,6 +709,7 @@ func _frame(part: String, i: int, wall: float, script_ms: float) -> Dictionary:
 	)
 	return f
 
+
 ## Times the HUD's canvas draw (it redraws every frame) by wrapping its draw callback, as tests/perf_probe.gd does.
 func _hook_hud(m: Match) -> void:
 	var h = m.hud
@@ -951,7 +952,7 @@ func _owners() -> void:
 		var cam := main.get_viewport().get_camera_3d()
 		var box := gi.global_transform * gi.get_aabb()
 		if cam and not cam.is_position_in_frustum(box.get_center()) and not cam.is_position_in_frustum(box.position):
-			continue      # (a rough cull: the draws are what the camera sees)
+			continue  # (a rough cull: the draws are what the camera sees)
 		var passes := 0
 		for si in mesh.get_surface_count():
 			var mat: Material = gi.material_override if gi.material_override else mesh.surface_get_material(si)

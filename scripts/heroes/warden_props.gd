@@ -46,8 +46,12 @@ static func carry(art: String, skel: Skeleton3D, to_m: Transform3D, d: Dictionar
 		mi.mesh = p[0]
 		# (data "scale": the part grown about its bone)
 		var grow := _grow((d.get("scale", {}) as Dictionary).get(cb, 1.0))
-		mi.transform = ((to_m * skel.get_bone_global_rest(nb)).affine_inverse() * onto * (p[1] as Transform3D)
-			* Transform3D(Basis.from_scale(grow)))
+		mi.transform = (
+			(to_m * skel.get_bone_global_rest(nb)).affine_inverse()
+			* onto
+			* (p[1] as Transform3D)
+			* Transform3D(Basis.from_scale(grow))
+		)
 		# (data "grip": a point of the part into the fist)
 		var grip: Dictionary = (d.get("grip", {}) as Dictionary).get(cb, {})
 		if not grip.is_empty():
