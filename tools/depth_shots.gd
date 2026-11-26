@@ -6,11 +6,15 @@ extends RefCounted
 ##   depth_b_step   at the top of a terrace step, a hunter on the lower tier
 ##   depth_c_low    the same step from below, looking up at a hunter on the upper tier
 ##   depth_d_shots  the top of the step again with shots flying along the ledge (their drop shadows)
+## --air --arch=<id>: instead, the player (that Hunter) on flat ground, standing (air_a_stand) and a moment
+## after a jump (air_b_jump), at 1920x1080, to look at the shadow disc and ring under a Hunter in the air.
+## --compat runs the same shots in a child game on the Compatibility renderer (the web and mobile look).
 ## --cues=off draws them with the height cues off, for the before shots (names get a "before_" prefix).
 
 const DT := 1.0 / 60.0
 const SETTLE := 0.5     # s of match time before each capture
 const SHOTS := 5        # shots in the string of the shots capture
+const JUMP_WAIT := 0.3  # s after the jump press for the --air capture
 const SHOT_SPEED := 2.0 # m/s of those shots (slow, so they are still in frame at the capture)
 
 var main: Node
@@ -19,18 +23,28 @@ var P: Hunter
 var dir := ""
 var seed_v := 77
 var prefix := ""
+var arch := ""
 
 func run(main_node: Node) -> void:
 	main = main_node
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="): dir = String(a).substr(12)
 		if String(a).begins_with("--seed="): seed_v = int(String(a).substr(7))
+		if String(a).begins_with("--arch="): arch = String(a).substr(7)
 		if String(a) == "--cues=off":
 			Settings.set_v("depth_cues", false, false)
 			prefix = "before_"
 	DirAccess.make_dir_recursive_absolute(dir)
+	if "--compat" in OS.get_cmdline_user_args() and Look.full_renderer():
+		_run_compat_child()
+		main.get_tree().quit(0)
+		return
 	await _setup()
 	var w := m.world
+	if "--air" in OS.get_cmdline_user_args():
+		await _air_shots()
+		main.get_tree().quit(0)
+		return
 	var edge := _find(func(x, z, d): return w.kind[w.idx(x + d.x, z + d.y)] == World.T_VOID)
 	var step := _find(func(x, z, d): return _step_to(w, x, z, d) >= 2)
 	await _shoot("depth_a_edge", edge[0], edge[1], edge[2])
@@ -78,10 +92,43 @@ func _shoot(file: String, tile: Vector2i, d: Vector2i, foe_tile: Vector2i, fire 
 		await main.get_tree().process_frame
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join(prefix + file + ".png"))
 
+func _run_compat_child() -> void:
+	var args := ["--path", ProjectSettings.globalize_path("res://"), "--rendering-method", "gl_compatibility"]
+	args.append_array(["--rendering-driver", "opengl3", "--audio-driver", "Dummy", "--"])
+	args.append_array(OS.get_cmdline_user_args())
+	OS.execute(OS.get_executable_path(), args, [], true)
+
+## The player on the middle ground tile, standing and then JUMP_WAIT s into a jump, framed by the match camera.
+func _air_shots() -> void:
+	main.get_window().size = Vector2i(1920, 1080)
+	var w := m.world
+	var tile: Vector2i = _find(func(_x, _z, _d): return true)[0]
+	P.teleport(Vector3(tile.x + 0.5, w.ground_at(tile.x + 0.5, tile.y + 0.5), tile.y + 0.5))
+	await _settle()
+	main.get_viewport().get_texture().get_image().save_png(dir.path_join(prefix + "air_a_stand.png"))
+	P.do_jump()
+	await _settle(JUMP_WAIT)
+	main.get_viewport().get_texture().get_image().save_png(dir.path_join(prefix + "air_b_jump.png"))
+	var up := P.global_position.y - w.ground_at(P.pos.x, P.pos.z)
+	print("AIRSHOTS %s grounded=%s height=%.2f" % [arch, P.grounded, up])
+
+func _settle(secs := SETTLE) -> void:
+	var t := 0.0
+	while t < secs:
+		m.step(DT)
+		t += DT
+		m.cam.snap(P.pos)
+		for h in m.hunters: h.render(DT, 1.0)
+		await main.get_tree().process_frame
+
+func _cls() -> String:
+	return Arch.weight(arch) if arch != "" else Data.class_of_save()
+
 func _setup() -> void:
 	m = Match.new()
 	main.add_child(m)
-	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": seed_v, "no_drop": true})
+	var opts := {"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": seed_v, "no_drop": true}
+	m.start(opts.merged({"arch": arch, "cls": _cls()}))
 	m.set_process(false)
 	P = m.player
 	for mb in m.mobs: mb.queue_free()

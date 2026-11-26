@@ -1,7 +1,7 @@
 class_name DepthCues
 extends Node3D
 ## Height readability (briefs/CAMERA_DEPTH.md), behind Settings "depth_cues". Purely visual: it draws a
-## soft shadow disc on the ground straight under every hunter and every flying shot, at the ground's own
+## soft shadow disc on the ground straight under every airborne hunter and every flying shot, at the ground's own
 ## height, so a body at a ledge or a shot in the air reads as high above what is below it. A hunter's
 ## disc fades out with height, and an airborne hunter gets a ring on the ground in its own colour (gold
 ## for you, blue for a teammate, red for an enemy); both are tuned in content/rules/depth_cues.json. The ground
@@ -11,9 +11,10 @@ extends Node3D
 const DISC := 2.0  # m, shadow disc diameter at the feet (a hunter's body is ~0.8 m wide)
 const LIFT := 0.04  # m, above the ground so the disc does not z-fight
 const ABYSS_DIM := 0.55  # brightness of the abyss clouds relative to normal
-const STRENGTH := 0.75  # darkest alpha at the centre of the disc
+const AIR_MIN := 0.25  # m a hunter must be above the ground for its disc to show (a standing hunter has none)
+const STRENGTH := 0.5  # darkest alpha at the centre of the disc (any darker reads as a black spot)
 const SHOT_DISC := 0.9  # m, shadow disc diameter under a shot (they are small, so the disc is too)
-const SHOT_STRENGTH := 0.55  # darkest alpha at the centre of a shot's disc (fainter than a hunter's)
+const SHOT_STRENGTH := 0.4  # darkest alpha at the centre of a shot's disc (fainter than a hunter's)
 
 const RING: Shader = preload("res://shaders/ring.gdshader")
 
@@ -86,11 +87,11 @@ func _new_disc(mesh: QuadMesh, mat: ShaderMaterial) -> MeshInstance3D:
 	return disc
 
 
-## Lays `disc` on the ground under `p`; hidden over the void or when the body is not above the ground.
-## Returns the ground's height there.
-func _lay(disc: MeshInstance3D, p: Vector3, shown: bool) -> float:
+## Lays `disc` on the ground under `p`; hidden over the void or when the body is less than `min_air` above the
+## ground. Returns the ground's height there.
+func _lay(disc: MeshInstance3D, p: Vector3, shown: bool, min_air := -0.3) -> float:
 	var y := _match.world.ground_at(p.x, p.z)
-	disc.visible = shown and y > World.VOID + 1.0 and y <= p.y + 0.3
+	disc.visible = shown and y > World.VOID + 1.0 and p.y - y >= min_air
 	disc.global_position = Vector3(p.x, y + LIFT, p.z)
 	return y
 
@@ -133,7 +134,7 @@ func _process(_dt: float) -> void:
 			_discs[h] = disc
 		var p := h.global_position
 		var shown := h.visible and not h.out
-		var y := _lay(disc, p, shown)
+		var y := _lay(disc, p, shown, AIR_MIN)
 		var fade := shadow_fade(p.y - y)
 		disc.set_instance_shader_parameter("fade", fade)
 		disc.visible = disc.visible and fade > 0.0
