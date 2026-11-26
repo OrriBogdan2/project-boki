@@ -236,7 +236,7 @@ Hub: `HubHints`. Farm: `FarmKeyHints` and the farm tutorial.
 - **Ways Out:** `exit_uplink` and the guide's `exit` line ("Go to an exit and hold F to leave") only know outposts
   (`Exits.spots()`, kind `outpost`). Heart, Lair, quest and final-seat ways out never trigger either, so "extract now means
   Heart/quest exits" is not told anywhere. Branches with the fix: `ext/tut-first-ways-out`, `ext/tut-heart-raid-hints`.
-- **Mini-rockets:** no hint on main; `ext/tut-rocket-hint`.
+- **Mini-rockets:** covered by DropHud's aboard lines ("Steer with ..." for the leader, "Jump out: ...", then "Glider: ... again"; `--drop-rocket-check` `_hud_lines`); `ext/tut-rocket-hint`'s once-per-save toasts are superseded.
 - **Stomps:** no hint on main; `ext/tut-stomp-hints`.
 - **Closing zone:** the guide's `blight` line fires at 40% left; no "get inside the circle" line on main; `ext/tut-first-zone`.
 - **Hot zone / Waystone:** `ext/tut-hot-zone-line`, `ext/tut-waystone-hint`.
