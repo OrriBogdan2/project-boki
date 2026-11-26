@@ -97,7 +97,10 @@ plays today's clip, so nothing changes until a Hunter's clips land (`WardenNativ
 | `downed` | while the knocked-down beat runs (`fall` >= 0; holds its last frame) | the loop clip |
 | `stomp` | while the stomp cycle runs (`stomp` >= 0; loops) | the loop clip |
 Swing, cast, `hit` and `land` are one-shots: they own the body for their length (a new one restarts a clip once 60% is
-played) and play at `attack_rate`, `hit` and `land` at 1. A hit wins over a swing, a swing over a landing.
+played) and play at `attack_rate`, `hit` and `land` at 1.
+A swing or cast while he moves on the ground, or is in the air, plays on the torso and arms only (`WardenNativeUpper`: Spine02
+and every bone above it, eased in 0.1 s and out 0.16 s) over the running legs; standing on the ground it owns the body as
+above, and `hit` and `land` always do. A hit wins over a swing, a swing over a landing.
 A clip may come from an animation-only file `art/wardens/<art>/<art>_clips.glb`, packed with `native_pack.py` onto the
 same skeleton (Y-up Hips as in the main file). Clips the data names that Meshy's own file lacks are looked up there by
 clip name, their tracks laid on this skeleton's bones by bone name (tracks of a bone it lacks are dropped), and added

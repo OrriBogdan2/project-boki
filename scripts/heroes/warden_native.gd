@@ -72,6 +72,7 @@ var torso_off := Transform3D()  # that bone's frame -> the rig torso's, at rest 
 var mouth: Node3D  # the copied weapon_muzzle (on a bone, a part or the sun): where the Gun's Muzzle sits each frame
 var gunprop: WardenGunProp  # Grimble's one gun (data "holster"): hip at rest, hand while he aims
 var props: WardenProps  # the contract's parts Meshy's mesh lacks (data "props": Kael's sword, Cinder's heel jets)
+var upper: WardenNativeUpper  # a swing or cast over the running legs (the torso and arms only)
 var moves: WardenNativeMoves  # the kit moves with a clip of their own (data "kmoves")
 var companions: WardenCompanions  # floating companions cut out of Meshy's body (Meeko's sun and cloud), or null
 var mood: WardenMood  # the faces on those companions swap and blink (warden_anim/<art>.json "mood"), or null
@@ -169,6 +170,7 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 		plays["crouch"] = _arms_swapped("crouch", String(d["crouch_arms_from"]))
 	hand = skel.find_bone(String(d.get("hand", "RightHand")))
 	torso_bi = WardenSkeleton.find(skel, "hips")
+	upper = WardenNativeUpper.make(skel, torso_bi)
 	var rest: Dictionary = model.get_meta("rig_rest", {})
 	if torso_bi >= 0 and rest.has("hips"):
 		var at_rest := WardenGlb.model_xf(model, skel) * skel.get_bone_global_rest(torso_bi)
@@ -207,17 +209,24 @@ func _process(dt: float) -> void:
 	if xt >= 0.0:  # the extract beat (WardenClips.leave_t): Meshy's crouch for the dip, then its jump for the take-off
 		_play("crouch" if xt < WardenClips.EXTRACT_DIP else "jump", 1.0)
 	elif moves.owns(s, plays):  # a kit move with its own clip (draw, release, Spirit Walk): laid at the move's clock
+		upper.stop()
 		moves.play(s, plays, dt)
 		attack_left = 0.0
 		cur = "kmove"
 	elif one != "":
 		attack_left = _clip_len(one) / _shot_rate(one)
-		_play(one, _shot_rate(one), true)
-	elif attack_left <= 0.0:
+		if _over_legs(one, s):
+			upper.play(player.get_animation(String(plays[one])), _shot_rate(one))
+			_loco(s)
+		else:
+			upper.stop()
+			_play(one, _shot_rate(one), true)
+	elif attack_left <= 0.0 or upper.on:
 		_loco(s)
 	var hips := WardenSkeleton.find(skel, "root")
 	skel.set_bone_pose_scale(hips, skel.get_bone_rest(hips).basis.get_scale())  # (Meshy keys no scale: no old squash)
 	player.advance(dt)
+	upper.lay(dt)
 	WardenClips.air_tilt(root, skel, hips)  # (the glider's bank, the dive's pitch)
 	# (the look-at lies under a clip that turns the head: the attack clip owns it, eased in and out like a body clip)
 	head_look.owned = move_toward(head_look.owned, 1.0 if attack_left > 0.0 else 0.0, dt / FADE)
@@ -339,6 +348,15 @@ func _one_shot(s: Dictionary) -> String:
 	if swing != "":
 		return swing
 	return "land" if landed and plays.has("land") and _fresh("land") else ""
+
+
+## Whether a new one-shot plays on the upper body over the loop clips: a swing or cast while he moves or is in the air
+## (standing on the ground it owns the whole body; a stagger or a landing always does).
+func _over_legs(st: String, s: Dictionary) -> bool:
+	if st in HIT_SLOTS:
+		return false
+	var vel: Vector3 = s.get("vel", Vector3.ZERO)
+	return not bool(s.get("grounded", true)) or Vector2(vel.x, vel.z).length() >= STILL
 
 
 func _new_hit(t: float) -> bool:
