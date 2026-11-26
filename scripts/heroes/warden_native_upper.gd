@@ -50,9 +50,9 @@ func lay(dt: float) -> void:
 	w = move_toward(w, 1.0 if on else 0.0, dt / fade)
 	if w <= 0.0:
 		return
-	for tr in tracks():
-		var bi: int = tr[1]
-		var q := clip.rotation_track_interpolate(tr[0], minf(t, clip.length))
+	for trk in tracks():
+		var bi: int = trk[1]
+		var q := clip.rotation_track_interpolate(trk[0], minf(t, clip.length))
 		skel.set_bone_pose_rotation(bi, skel.get_bone_pose_rotation(bi).slerp(q, w))
 
 
