@@ -204,9 +204,10 @@ func _hit(a: Subject, ctl: Subject, box: AABB, push: Vector3, frac: float, mass:
 		var pc := ctl.places()
 		for j in pa.size():
 			r["part"] = maxf(r["part"], (pa[j] as Vector3).distance_to(pc[j]) / box.size.y)
+		var fit := float(a.k.get_meta("fit", 1.0))  # Flex also carries the species' size fit (KinSize): measure without it
 		for c in 3:
-			r["scale_lo"] = minf(r["scale_lo"], a.flex.scale[c])
-			r["scale_hi"] = maxf(r["scale_hi"], a.flex.scale[c])
+			r["scale_lo"] = minf(r["scale_lo"], a.flex.scale[c] / fit)
+			r["scale_hi"] = maxf(r["scale_hi"], a.flex.scale[c] / fit)
 	for s in series:
 		if float(s[1]) > SETTLED * r["peak"]:
 			r["settle"] = float(s[0])
