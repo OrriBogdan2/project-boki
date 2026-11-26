@@ -7,11 +7,13 @@ extends RefCounted
 var main: Node
 var dir := ""
 
+
 func _shot(shot_name: String, settle := 0.4) -> void:
 	await main.get_tree().create_timer(settle).timeout
 	await RenderingServer.frame_post_draw
 	main.get_viewport().get_texture().get_image().save_png("%s/%s.png" % [dir, shot_name])
 	print("HSHOT %s" % shot_name)
+
 
 func _until(cond: Callable, cap := 1800) -> bool:
 	for _i in cap:
@@ -19,6 +21,7 @@ func _until(cond: Callable, cap := 1800) -> bool:
 			return true
 		await main.get_tree().process_frame
 	return false
+
 
 func run(m: Node) -> void:
 	main = m
@@ -31,6 +34,7 @@ func run(m: Node) -> void:
 	await _farm_egg()
 	print("HSHOT DONE")
 	main.get_tree().quit()
+
 
 func _first_egg() -> void:
 	Save.d = Save.fresh()
@@ -53,6 +57,7 @@ func _first_egg() -> void:
 	await _shot("a3_name", 1.0)
 	hx.queue_free()
 	await main.get_tree().process_frame
+
 
 func _farm_egg() -> void:
 	var d := Save.fresh()
