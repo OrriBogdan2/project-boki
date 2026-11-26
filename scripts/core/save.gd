@@ -9,11 +9,17 @@ extends Node
 ## See docs/BOKI_IDENTITY.md.
 
 const VERSION := 23
+
 const UNNAMED := "Hunter"  # the name of a player who never typed one (the results line then drops it)
+
 const MAX_MEMORY := 40
+
 const SLOTS := 6
+
 const LOG_CAP := 200
+
 const SettingsScript := preload("res://scripts/core/settings.gd")  # where the last slot is remembered (file_path)
+
 ## Upgrades, oldest first: MIGRATIONS[n] turns a version-n save into version n + 1.
 const MIGRATIONS := {
 	1: "_migrate_1_to_2",
@@ -40,8 +46,50 @@ const MIGRATIONS := {
 	22: "_migrate_22_to_23"
 }
 
+# ------------------------------------------------------------------ ids
+const B32 := "0123456789abcdefghjkmnpqrstvwxyz"
+
+const HOW_EVENT := {
+	"wild": "caught",
+	"taken": "caught",
+	"egg": "hatched",
+	"boss_egg": "hatched",
+	"starter": "hatched",
+	"event": "caught",
+	"market": "traded",
+	"shelter": "adopted",
+	"transfer": "received",
+	"unknown": "registered"
+}
+
+## Checks that play on a copy of the save (they used to be listed in main.gd).
+const NO_SAVE_FLAGS := [
+	"--archetype-check",
+	"--kit-combo-check",
+	"--mage-combo-check",
+	"--gunslinger-combo-check",
+	"--zone-check",
+	"--dolm-combo-check",
+	"--ostra-combo-check",
+	"--hero-combo-check",
+	"--archer-combo-check",
+	"--bulwark-combo-check",
+	"--arena-check",
+	"--dredge-combo-check",
+	"--ashwick-combo-check",
+]
+
+static var _crypto: Crypto = null
+
+static var _id_rng: RandomNumberGenerator = null
+
 var d: Dictionary = {}
+
 var slot := 1  # which save file is in play
+
+var no_write := _tool_run()  # headless checks play with a save without touching the real file
+
+var newer := false  # the slot holds a save from a newer game: never overwrite it
 
 
 func _ready() -> void:
@@ -199,12 +247,6 @@ func new_kin(species: String, kname := "", seed := -1) -> Dictionary:
 	return rec
 
 
-# ------------------------------------------------------------------ ids
-const B32 := "0123456789abcdefghjkmnpqrstvwxyz"
-static var _crypto: Crypto = null
-static var _id_rng: RandomNumberGenerator = null
-
-
 static func _b32(bytes: PackedByteArray, chars: int) -> String:
 	var out := ""
 	var bit := 0
@@ -278,20 +320,6 @@ func log_trade(rec: Dictionary, from_name: String) -> void:
 	log_event("traded", rec, {"from": from_name})
 
 
-const HOW_EVENT := {
-	"wild": "caught",
-	"taken": "caught",
-	"egg": "hatched",
-	"boss_egg": "hatched",
-	"starter": "hatched",
-	"event": "caught",
-	"market": "traded",
-	"shelter": "adopted",
-	"transfer": "received",
-	"unknown": "registered"
-}
-
-
 ## Gives a kin joining this collection its provenance, once: where it came from (rec["origin"],
 ## set where it was made, or `how` / `where` here), when, its original trainer, its serial within
 ## its species on this save (global once there's a server), lineage and the edition slot. Logs it.
@@ -341,13 +369,13 @@ func register_all() -> void:
 	for r in d.get("roster", []):
 		if typeof(r) == TYPE_DICTIONARY and not r.has("serial"):
 			register(r)
-	for L in d.get("lost_kin", []):
+	for l in d.get("lost_kin", []):
 		if (
-			typeof(L) == TYPE_DICTIONARY
-			and typeof(L.get("rec", null)) == TYPE_DICTIONARY
-			and not L["rec"].has("serial")
+			typeof(l) == TYPE_DICTIONARY
+			and typeof(l.get("rec", null)) == TYPE_DICTIONARY
+			and not l["rec"].has("serial")
 		):
-			register(L["rec"])
+			register(l["rec"])
 
 
 ## "#0042 of Vespyx" ("" before it has a serial).
@@ -517,9 +545,9 @@ func _migrate_2_to_3(data: Dictionary) -> void:
 	for r in data.get("roster", []):
 		if typeof(r) == TYPE_DICTIONARY:
 			Unique.ensure_sex(r)
-	for L in data.get("lost_kin", []):
-		if typeof(L) == TYPE_DICTIONARY and typeof(L.get("rec", null)) == TYPE_DICTIONARY:
-			Unique.ensure_sex(L["rec"])
+	for l in data.get("lost_kin", []):
+		if typeof(l) == TYPE_DICTIONARY and typeof(l.get("rec", null)) == TYPE_DICTIONARY:
+			Unique.ensure_sex(l["rec"])
 	for g in data.get("graves", []):
 		if typeof(g) == TYPE_DICTIONARY and typeof(g.get("rec", null)) == TYPE_DICTIONARY:
 			Unique.ensure_sex(g["rec"])
@@ -535,9 +563,9 @@ func _migrate_1_to_2(data: Dictionary) -> void:
 	for r in data.get("roster", []):
 		if typeof(r) == TYPE_DICTIONARY:
 			recs.append(r)
-	for L in data.get("lost_kin", []):
-		if typeof(L) == TYPE_DICTIONARY and typeof(L.get("rec", null)) == TYPE_DICTIONARY:
-			recs.append(L["rec"])
+	for l in data.get("lost_kin", []):
+		if typeof(l) == TYPE_DICTIONARY and typeof(l.get("rec", null)) == TYPE_DICTIONARY:
+			recs.append(l["rec"])
 	for g in data.get("graves", []):
 		if typeof(g) == TYPE_DICTIONARY and typeof(g.get("rec", null)) == TYPE_DICTIONARY:
 			recs.append(g["rec"])
@@ -686,9 +714,6 @@ func load_from(p: String) -> void:
 	Evo.catch_up(d.get("roster", []))  # Boki that were waiting for their next form's art
 
 
-var no_write := _tool_run()  # headless checks play with a save without touching the real file
-
-
 ## Tooling runs (--no-save, checks that ask for it, screenshots) never write the real save file,
 ## from the very first frame (other autoloads may save while starting up).
 static func _tool_run() -> bool:
@@ -699,25 +724,6 @@ static func _tool_run() -> bool:
 			if String(a).begins_with(pre):
 				return true
 	return false
-
-
-## Checks that play on a copy of the save (they used to be listed in main.gd).
-const NO_SAVE_FLAGS := [
-	"--archetype-check",
-	"--kit-combo-check",
-	"--mage-combo-check",
-	"--gunslinger-combo-check",
-	"--zone-check",
-	"--dolm-combo-check",
-	"--ostra-combo-check",
-	"--hero-combo-check",
-	"--archer-combo-check",
-	"--bulwark-combo-check",
-	"--arena-check",
-	"--dredge-combo-check",
-	"--ashwick-combo-check",
-]
-var newer := false  # the slot holds a save from a newer game: never overwrite it
 
 
 func save_game() -> void:
