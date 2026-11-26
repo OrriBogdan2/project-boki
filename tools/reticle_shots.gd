@@ -39,6 +39,7 @@ const TILE_H := TILE_NAME_H + 360 + TILE_ZOOM_H  # name, the 16:9 frame at tile 
 var main: Node
 var m: Match
 var dir := "user://shots"
+var cursor_at := AT  # where the cursor rests, as a fraction of the window
 
 
 func run(main_node: Node, what: String) -> void:
@@ -55,6 +56,9 @@ func run(main_node: Node, what: String) -> void:
 		await _looks()
 		main.get_tree().quit(0)
 		return
+	if what == "proof":
+		cursor_at = Vector2(0.5, 0.5)
+		Save.d["tutorial"][KitDrill.SAVE_KEY] = true  # (its card would cover the top of every frame)
 	m = Match.new()
 	main.add_child(m)
 	var opts := {"teams": 2, "squad": 2, "tier": 0, "length": 1500.0, "seed": 4242, "no_drop": true}
@@ -74,6 +78,7 @@ func run(main_node: Node, what: String) -> void:
 	elif what == "hunters":
 		await _hunters()
 	elif what == "proof":
+		m.arena.layer.visible = false  # (the practice hint and the DPS meter)
 		await _proof()
 	elif what == "hit":
 		await _hits()
@@ -165,7 +170,7 @@ func _draw_looks(cv: Control) -> void:
 
 
 ## Every Hunter in the Training Area at the default match camera, 1920x1080 on a real GPU: the reticle mid-screen over
-## grass at rest and then firing (the fire action held, a hit raised). Each full frame is saved
+## grass at rest and then firing (the fire action held, bloom open). Each full frame is saved
 ## (reticle_looks_1126b_<id>_rest.png, _fire.png) and then the contact sheets, TILES_PER_SHEET Hunters each.
 func _proof() -> void:
 	Settings.reset_all()
@@ -190,6 +195,7 @@ func _proof() -> void:
 				return
 			img.save_png(dir.path_join("reticle_looks_1126b_%s_%s.png" % [id, st[0]]))
 		tiles.append([String(Arch.def(id).get("base_name", id)), Arch.color(String(id)), rest, fire])
+		tiles[-1].append_array([ImageTexture.create_from_image(rest), ImageTexture.create_from_image(fire)])
 		print("RETICLESHOTS proof %s ammo %d" % [id, m.player.ammo])
 	for part in ceili(tiles.size() / float(TILES_PER_SHEET)):
 		var chunk := tiles.slice(part * TILES_PER_SHEET, (part + 1) * TILES_PER_SHEET)
@@ -200,15 +206,14 @@ func _proof() -> void:
 	print("RETICLESHOTS proof sheets done")
 
 
-## Holds the fire action and a hit tick, so the frame shows the aiming reticle in use.
+## Holds the fire action and the weapon's bloom, so the frame shows the reticle in use.
 func _hold_fire() -> void:
 	Input.action_press("fire")
 	m.player.recoil = 1.0
-	m.hud.reticle.raise(false)
 
 
 ## One tile per Hunter: its name large, the rest frame scaled to the tile width, and under it 2x crops round the
-## reticle at rest and firing.
+## reticle at rest and firing (a tile is [name, colour, rest image, fire image, rest texture, fire texture]).
 func _draw_tiles(cv: Control, tiles: Array) -> void:
 	var font := ThemeDB.fallback_font
 	cv.draw_rect(Rect2(Vector2.ZERO, cv.size), Color(0.07, 0.07, 0.08))
@@ -217,12 +222,12 @@ func _draw_tiles(cv: Control, tiles: Array) -> void:
 		var o := Vector2(i % 3 * (TILE_W + TILE_GAP), i / 3 * (TILE_H + TILE_GAP))
 		cv.draw_string(font, o + Vector2(12, 46), String(t[0]), HORIZONTAL_ALIGNMENT_LEFT, TILE_W, 44, t[1])
 		var shot := Vector2(TILE_W, TILE_W * 9.0 / 16.0)
-		cv.draw_texture_rect(ImageTexture.create_from_image(t[2]), Rect2(o + Vector2(0, TILE_NAME_H), shot), false)
+		cv.draw_texture_rect(t[4], Rect2(o + Vector2(0, TILE_NAME_H), shot), false)
+		var cursor := Vector2(PROOF_RES) * cursor_at
 		for j in 2:
-			var crop := Rect2i(_cursor_px(t[2]) - Vector2i(ZOOM_CROP / 2.0), ZOOM_CROP)
-			var piece := ImageTexture.create_from_image((t[2 + j] as Image).get_region(crop))
 			var at := o + Vector2(j * TILE_W / 2.0, TILE_NAME_H + shot.y)
-			cv.draw_texture_rect(piece, Rect2(at, Vector2(TILE_W / 2.0, TILE_ZOOM_H)), false)
+			var src := Rect2(cursor - Vector2(ZOOM_CROP) / 2.0, Vector2(ZOOM_CROP))
+			cv.draw_texture_rect_region(t[4 + j], Rect2(at, Vector2(TILE_W / 2.0, TILE_ZOOM_H)), src)
 			cv.draw_string(font, at + Vector2(8, 22), ["rest", "firing"][j], HORIZONTAL_ALIGNMENT_LEFT, -1, 20)
 
 
@@ -303,7 +308,7 @@ func _level_spot(at: Vector3, offsets: Array) -> Vector3:
 ## the HUD would draw there, under whatever panel covers it). Older HUDs without the pin keep the mouse.
 func _pin_reticle() -> void:
 	if "ret" in m.hud and "pin" in m.hud.ret:
-		var at := main.get_viewport().get_visible_rect().size * AT
+		var at := main.get_viewport().get_visible_rect().size * cursor_at
 		m.hud.ret.pin = m.hud.c.get_global_transform_with_canvas().affine_inverse() * at
 
 
@@ -324,7 +329,7 @@ func _cursor_px(img: Image) -> Vector2i:
 func _frame(frames := 20, hold := Callable()) -> Image:
 	var vp := main.get_viewport()
 	for i in frames:
-		vp.warp_mouse(vp.get_visible_rect().size * AT)
+		vp.warp_mouse(vp.get_visible_rect().size * cursor_at)
 		if hold.is_valid():
 			hold.call()
 		await main.get_tree().process_frame
