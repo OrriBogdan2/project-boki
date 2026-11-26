@@ -67,6 +67,12 @@ on the A swatch [62,78,85]. Runes are masked out and keep their emission.
 - Re-running `v95_swap` on this rig drops the split. The recolour scripts (grade.py, gamesplit.py, armprim.py) and their
   inputs are in /home/boki/meshy/tenzo-arm-3d-1113/ (NOTES.md, work/).
 
+walk and run b, l, r, fl, fr, bl, br (2026-11-11): `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- art/wardens/tarek/tarek.glb OUT.glb 2.2 5.0`,
+then `python3 tools/art1/glb_add_clips.py art/wardens/tarek/tarek.glb OUT.glb walk_b,walk_l,walk_r,walk_fl,walk_fr,walk_bl,walk_br,run_b,run_l,run_r,run_fl,run_fr,run_bl,run_br`
+(judge: docs/art/wardens/dirloops/JUDGE.md).
+
+Merge of origin/main (2026-11-13): tarek.glb is main's v95 model; the 16 walk/run clips (f, b, l, r, fl, fr, bl, br; pilot-length rings, pelvis on the forward loop) were put back with `python3 tools/art1/glb_add_clips.py art/wardens/tarek/tarek.glb <branch glb> walk_f,...,run_br` (same rig, rest pose checked equal).
+
 The strikes lmb_punch and lmb_throw are keyed at 60 fps (`bake(fps=60)`; tools/art1/fine_export.py exports them at that rate and splices
 them in), so the .glb.import keeps `animation/fps=60`. Clips only, with no raw files: import the shipped .glb in Blender
 (bone_heuristic BLENDER, actions dropped, the armature named `Armature`) as WORK, run the clip script on it, and splice
@@ -74,3 +80,61 @@ the changed clips into the shipped .glb with `python3 tools/art1/glb_add_clips.p
 other clips re-bake byte-equal that way).
 
 NOT APPLIED on main (11-16 merge): the diagonal and re-baked back/side loops (walk_/run_ fl fr bl br, b l r) described here were baked into the old model's glb with a walk_f/run_f of a different length than main's v95 clips, so main's glb and warden_anim json are kept. Re-bake: `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- SRC.glb OUT.glb WALK RUN` on main's glb, then `glb_add_clips.py`, then restore the json map from ext/anim-dirloops-lace-kael.
+
+## Native albedo grade (2026-11-24, job 20261124-163412-a1, round 28 "H")
+`tarek_meshy.glb`: only the bytes of image `Image_0` (base colour, bufferView 1) changed; the other 1033 bufferViews
+(mesh, UVs, skin, 6 clips, Image_1/Image_2) are byte-identical. `tarek_meshy_Image_0.jpg` = the same jpg.
+Per-region HSV grade on the original UVs, regions baked from the skin weights (left-arm bones = stone, legs = pants,
+head dark texels = hair): stone hue +14 deg S x1.15 V x1.2 (runes untouched), pants V x1.4 S x0.6 toward H 346 (plum),
+hair V x1.6 to H 22 S x0.6 (dark brown), skin S x0.65 V x0.88 (sash S > 0.58 untouched). Measured at the game's eye view
+(idle f010): chest S 0.92 -> 0.73, pants V 0.25 -> 0.45 (plum), hair V 0.18 -> 0.22 brown. Four Meshy retextures with
+--original-uv (60 credits) came back with live's colours (stone S 0.35 V 0.36), so they were not used.
+Scripts, region map and renders: /home/boki/gens/hunter-round-1124/tenzo/A/ (grade.py, swap.py, masks.py).
+
+## Clip offsets + skin islands (2026-11-24, job 20261124-202920-a1, round 29)
+`tarek_meshy.glb`: Image_0 bytes plus the float32 values of 28 rotation-key accessors changed (same accessors, same
+lengths, glTF JSON identical); mesh, UVs, skin weights, Image_1/2 byte-identical.
+- Clips (C/clip_offsets.py, spec C/b4.json): RightArm -14 / LeftArm +13 deg abduction about the chest's forward axis in
+  Idle/walk/run/Jump_Run/Crouch (LeftArm +17 in walk, RightArm -20 in Jump_Run); RightHand slerped 50% to rest
+  (wrist no longer bent back into the hip); thighs spread 6/8 deg (gait) and 6/16 deg (crouch) about the hips'
+  forward/up axes; Attack: arms spread in the wind-up (0.55-0.95 s), forward in the smash (1.08-1.9 s), neck back 12.
+  geo_check: worst clip 13.2 -> 5.8 cm, held worst 13.2 -> 3.0 cm, clipping frames 154 -> 47.
+- Skin islands: round 28 skipped skin skinned to LeftShoulder/LeftArm (left pec, left shoulder blade) and dark bare-arm
+  skin; C/fix_islands.py gives those 20.8k texels the same grade (S x0.65, V x0.9). Sash untouched.
+Scripts, specs, renders: /home/boki/gens/hunter-round-1124/tenzo/C/.
+
+### Round 30 (2026-11-24, job 20261124-233706-a1): game-crouch arms, Attack arc, crotch plum
+- The game plays crouch with the WALK clip's arms (warden_native.json `crouch_arms_from`), so crouch arm fixes go in
+  `walk`. Measured on the game's crouch (gens/hunter-round-1124/tenzo/D/crouch_game.py): stone hand in thigh held
+  7.5 cm (round 29) -> 1.5 cm. Offsets D/z5.json via C/clip_offsets.py (rotation floats only): walk LeftArm +15,
+  RightArm -5 deg abduct; run/Jump_Run thighs +3 deg spread; Attack stone arm lowered out in the wind-up (clear of the
+  head), both arms swung apart in the smash (palms no longer inside the other forearm).
+- Image_0: dark/grey inner-crotch pants texels lifted to the outer plum (D/crotch.py, 66.6k texels, V 0.36 -> 0.40).
+
+### Round 32 (2026-11-25, job 20261125-083305-a1): seeing-stones teal glow
+- `tarek.glb` (contract file; on the native path only its `orbit_stones` props are used): the `glow-tarek` eye disc on
+  mesh `eye_stone` scaled x1.7 in its own plane (r 2.1 -> 3.5 cm; the rock's flat face reaches 5.3 cm). Only that
+  POSITION accessor's floats + its min/max changed (1 of 5306 bufferViews; JSON padded to the same length).
+  Tool: gens/hunter-round-1124/tenzo/F/disc.py.
+- `warden_look.json` tarek `bloom` on anchor_stones_0-2 (WardenFx.bloom, world-sized additive puffs): dolm teal
+  [0.36, 0.9, 0.72], alpha 0.40, 0.30 m, depth_test on (a stone turned away only rims; depth_test off washed the cobalt
+  rock teal: rejected). Halos unchanged. The screen-sized halos alone sat inside the brighter cobalt rock (round 27+)
+  and only lifted it to light blue at the long-lens judge view.
+
+### Round 33 (2026-11-25, job 20261125-102228-a1): eyed seeing-stones, no bloom
+Owner on r32: the bloom puffs were flat mint discs wider than the stones that washed over the body, and the stones read
+as blank cups. So:
+- `warden_look.json` tarek: the r32 `bloom` block is gone (halos kept as live, px 5.5, now sitting on the eye).
+- `tarek.glb` mesh `eye_stone` (stone_0-2 share it) is now the Meshy eye-rock of job 20261120-053503-a6 (m4 retexture
+  pick, 5480 tris; game copy from ext/tenzo-eye-rocks-1120): cobalt cracked slate, almond eye with a slit pupil.
+  Turned 180 deg about Y (its eye faced +Z; the seeing-stone eye is -Z, warden_orbits._face), 0.17 m tall, material
+  `leather-eyerock` (base jpg + eye-only emission mask, embedded; Godot extracts `tarek_eyerock_{base,emit}.jpg`).
+  The new primitive, images and material are APPENDED: all 5306 old bufferViews are byte-identical (the old rock and
+  disc accessors are left unused). Not decimated: Blender collapse tore the UV seams; Godot's import LODs thin it at range.
+- Ring: stone_0-2 translations x/z x0.72, y +0.08 m (the front stone sits at the chest at the match camera, not on
+  the belly/bare hand). anchor_stones_0-2 moved onto the eye's front.
+- Look slot `leather-eyerock`: desat 0.45, albedo 1.2, emit 5.0 (the emission is a mask in dolm's model_glow teal, the
+  same teal as the arm runes).
+- Rejected: ring tilted 25/35 deg (front up) turns the back stones' eyes away (eye.camera median 0.78 -> 0.56/0.43);
+  ring x0.6 +0.2 m puts the front stone over the face.
+Tools: gens/hunter-round-1124/tenzo/G/scripts/{swap_rock,ring,slot,eyepitch}.py. Sheets: G/GAME_tenzo_r33_*.jpg.

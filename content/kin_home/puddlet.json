@@ -1,0 +1,14 @@
+{
+	"id": "puddlet",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/puddlet.json.",
+	"work": {
+		"tide": 3,
+		"mend": 2,
+		"bloom": 1
+	},
+	"shiny": {
+		"color": "#2e3a6a",
+		"belly": "#9ad8ff",
+		"glow": "#ffe066"
+	}
+}

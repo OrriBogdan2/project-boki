@@ -16,7 +16,7 @@ func _air(hv: Vector2, keys: Vector2, cap: float, secs: float) -> Vector2:
 	return hv
 
 func _glide(hv: Vector2, keys: Vector2, carry: float, secs: float) -> Vector2:
-	var gs := Hunter.GLIDE_SPEED
+	var gs := HunterMove.glide_cruise
 	for i in int(round(secs / DT)):
 		hv = Loco.glide_step(hv, keys * gs, gs, carry, DT)
 	return hv
@@ -45,7 +45,7 @@ func _numbers() -> void:
 	var farm_like := _air(Vector2.ZERO, Vector2(1, 0), cap, 0.2).x
 	ok(farm_like >= cap * (1.0 - exp(-6.0 * 0.2)),
 		"air control at least the old farm's (exp 6/s): %.2f m/s after 0.2s" % farm_like)
-	var gs := Hunter.GLIDE_SPEED
+	var gs := HunterMove.glide_cruise
 	var carry := Loco.glide_carry("")
 	var g1 := _glide(Vector2(12, 0), Vector2.ZERO, carry, DT).length()
 	var g2 := _glide(Vector2(12, 0), Vector2.ZERO, carry, 2.0).length()
@@ -211,7 +211,7 @@ func _every_shift() -> void:
 			print("ACHECK FLAG item 4 (%s): Shift in the air at %.1f m/s is the kit's own move (%s): no glide cancel"
 				% [arch, r[0], h.move_kind])
 		else:
-			ok(absf(r[1] - r[0]) < 0.1 and later >= minf(r[0], Hunter.GLIDE_SPEED) * 0.75,
+			ok(absf(r[1] - r[0]) < 0.1 and later >= minf(r[0], HunterMove.glide_cruise) * 0.75,
 				"item 4 (%s): Shift then a glide press: glides that step, h-speed %.2f -> %.2f, %.2f after 0.1s"
 				% [arch, r[0], r[1], later])
 	h.reclass(cls0, "")
@@ -253,7 +253,7 @@ func _jump_shift_reach() -> void:
 	h.reclass(cls0, "")
 	print("ACHECK note reach m (jump > Shift / Shift > jump): %s" % ", ".join(lines))
 	others.sort()
-	var median: float = others[others.size() / 2]
+	var median: float = others[int(others.size() / 2.0)]
 	ok(sable <= median * SABLE_REACH_K, "Sable's jump > Shift reach %.1f m is within %.1fx the cast's median %.1f m"
 		% [sable, SABLE_REACH_K, median])
 

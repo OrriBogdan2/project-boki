@@ -8,13 +8,15 @@ extends "res://tools/clip_shots.gd"
 ## <dir>/<id>/<strip>/fNNN.png, strips start and start_raw (setting off from a stand, _start), walk, jog, run (the
 ## game's own locomotion hand-off at WALK_MPS, JOG_MPS and RUN_MPS, seen from the side with a scrolling floor, so a
 ## sliding foot slides against it), idle and atk1, atk2 (the keyed clip, forced); --aim-runs=60,130 adds run_aimN
-## strips, running N degrees off the facing.
+## strips, running N degrees off the facing. --match-run: only strip run_match, the run as a match plays it (drawn at
+## Hunter.VIS_SCALE, at HunterMove.speed, MATCH_FPS frames a second: footage for an MP4; also a native Hunter's).
 ## Needs a renderer.
 
 const WALK_MPS := 2.2      # m/s: an analog-stick walk
 const JOG_MPS := 3.4       # m/s: between the walk and run rings, where the two clips blend
 const RUN_MPS := 5.39      # m/s: full stick, HunterMove.speed (a 465 uu/s row at body_scale)
 const LOCO_FPS := 10.0     # frames/s of the walk and run strips
+const MATCH_FPS := 30.0    # frames/s of the --match-run strip
 const WARM_S := 1.0        # s of locomotion before the strip starts, so the blend has settled
 const SIDE_YAW := -PI / 2.0     # facing screen right
 const POST_SPACING := 0.5       # m between floor posts
@@ -25,6 +27,7 @@ const CLOSE_REF_H := 1.1        # m: the Hunter height the --close camera is fra
 var close := false
 var release := false
 var upper := false
+var match_run := false      # --match-run
 var aim_runs: Array = []    # --aim-runs=60,130: extra run strips with the run this many degrees off the facing
 ## The two attacks each strip shows: the primary shots and one more (clip names of content/rules/warden_anim).
 const ATTACKS := {
@@ -49,6 +52,7 @@ func run(main: Node) -> void:
 		if a == "--close": close = true
 		if a == "--release": release = true
 		if a == "--upper": upper = true
+		if a == "--match-run": match_run = true
 		if a.begins_with("--aim-runs="): aim_runs = Array(a.substr(11).split_floats(","))
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
@@ -93,17 +97,26 @@ func _hunter(id: String, dir: String, frames: int) -> void:
 		ring.visible = false
 	for k in 20:
 		await tree.process_frame
-	var sync := model.get_node("Warden/Sync")
+	var sync := model.get_node_or_null("Warden/Native")  # (a Meshy-native Hunter: only --match-run)
+	if sync == null:
+		sync = model.get_node("Warden/Sync")
 	sync.set_process(false)
 	var clips: WardenClips = sync.get("clips")
-	if clips == null:
+	if clips == null and not (match_run and sync is WardenNative):
 		model.queue_free()
 		return
 	model.rotation.y = SIDE_YAW
+	if match_run:
+		model.scale *= Hunter.VIS_SCALE
 	if close:
 		_close_cam(WardenGlb.skeleton(model.get_node("Warden")))
 	if release:
 		await _release(model, sync, dir.path_join("release"), frames)
+		model.queue_free()
+		return
+	if match_run:
+		await _loco(model, sync, dir.path_join("run_match"), HunterMove.speed(id), frames, null, "", 0.0, WARM_S,
+				MATCH_FPS)
 		model.queue_free()
 		return
 	await _start(model, sync, clips, dir, frames)

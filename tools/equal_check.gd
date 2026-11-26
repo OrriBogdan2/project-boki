@@ -66,12 +66,12 @@ func _start(tier: int, seed := 9001) -> Match:
 	m.set_process(false)
 	return m
 
-func _look(P: Hunter) -> Dictionary:
-	return {"max_hp": P.max_hp, "max_armor": P.max_armor, "armor": P.armor,
-		"tier": P.armor_tier, "perks": P.perks.duplicate(),
-		"glide": P.glide_max, "pack": P.pack_cap, "speed": P.base_speed,
-		"armor_gear": (P.gear[2] as Dictionary).is_empty(), "dashes": P.max_dashes(),
-		"hp": P.hp, "ult": P.ult, "skill": P.skill_pts}
+func _look(p_v: Hunter) -> Dictionary:
+	return {"max_hp": p_v.max_hp, "max_armor": p_v.max_armor, "armor": p_v.armor,
+		"tier": p_v.armor_tier, "perks": p_v.perks.duplicate(),
+		"glide": p_v.glide_max, "pack": p_v.pack_cap, "speed": p_v.base_speed,
+		"armor_gear": (p_v.gear[2] as Dictionary).is_empty(), "dashes": p_v.max_dashes(),
+		"hp": p_v.hp, "ult": p_v.ult, "skill": p_v.skill_pts}
 
 func _drop(m: Match) -> void:
 	m.queue_free()
@@ -79,15 +79,19 @@ func _drop(m: Match) -> void:
 
 # ------------------------------------------------------------------ keys
 func _keys() -> void:
-	for pair in [["util1", KEY_1], ["util2", KEY_2], ["util3", KEY_3], ["util4", KEY_4]]:
+	for pair in [["util1", KEY_1], ["util2", KEY_2], ["util3", KEY_3], ["util4", KEY_4], ["util5", KEY_5],
+			["util6", KEY_6]]:
 		var evs := InputMap.action_get_events(String(pair[0]))
 		var code: int = pair[1]
 		var on_key := evs.any(func(ev): return ev is InputEventKey and (ev as InputEventKey).physical_keycode == code)
 		ok(on_key, "%s is on key %s" % [pair[0], OS.get_keycode_string(pair[1])])
 	ok(not InputMap.has_action("tonic") and not InputMap.has_action("armor_kit"),
 			"the old heal and armor-kit actions are gone")
-	ok(UtilityBelt.KEYS == ["util1", "util2", "util3", "util4"] and Hunter.new().inp.has("util4")
-			and not Hunter.new().inp.has("kit"), "hunters take util1..4 as inputs")
+	ok(UtilityBelt.KEYS == ["util1", "util2", "util3", "util4", "util5", "util6"] and Hunter.new().inp.has("util6")
+			and not Hunter.new().inp.has("kit"), "hunters take util1..6 as inputs")
+	ok(UtilityBelt.SLOTS == 6 and UtilityBelt.reserved_id(0) == "tonic" and UtilityBelt.reserved_id(1) == "armor_kit"
+			and UtilityBelt.reserved_id(2) == "",
+			"six slots: 1 is the tonic's, 2 the armor kit's, the rest open (as the source)")
 
 # ------------------------------------------------------------------ equal base
 func _equal_base() -> void:
@@ -105,8 +109,8 @@ func _equal_base() -> void:
 		_farm(true)
 		var armory_before := Econ.armory().size()
 		var m2 := _start(tier)
-		var P := m2.player
-		var rich := _look(P)
+		var p_v := m2.player
+		var rich := _look(p_v)
 		var same := true
 		for k in poor:
 			if str(poor[k]) != str(rich[k]):
@@ -117,33 +121,33 @@ func _equal_base() -> void:
 				and bool(rich["armor_gear"]),
 				"tier %d: base pack %d, armor level 0, no perks, no armor piece" % [tier, Equal.base_pack()])
 		var bare := poor_gear.all(func(g): return (g as Dictionary).is_empty())
-		ok(bare and poor_belt == ["tonic", "armor_kit", "", ""],
+		ok(bare and poor_belt == ["tonic", "armor_kit", "", "", "", ""],
 				"tier %d: the poor farm brings nothing but the everyday issue (%s)" % [tier, str(poor_belt)])
-		var worn: Array = P.gear.filter(func(g): return not (g as Dictionary).is_empty())
+		var worn: Array = p_v.gear.filter(func(g): return not (g as Dictionary).is_empty())
 		var worn_text: Array = worn.map(func(g): return "%s r%d" % [g["id"], g["rar"]])
 		ok(worn.all(func(g): return int(g["rar"]) <= Equal.rarity_cap(tier)),
 				"tier %d: every brought piece is within the rarity cap (%s)" % [tier, str(worn_text)])
-		ok((P.gear[2] as Dictionary).is_empty(), "tier %d: the armor in the loadout stayed home" % tier)
+		ok((p_v.gear[2] as Dictionary).is_empty(), "tier %d: the armor in the loadout stayed home" % tier)
 		if tier == 2:
-			ok(String(P.gear[3].get("id", "")) == "skylark_boots" and int(P.gear[3]["rar"]) == 4
-					and String(P.gear[0].get("id", "")) == "blink",
+			ok(String(p_v.gear[3].get("id", "")) == "skylark_boots" and int(p_v.gear[3]["rar"]) == 4
+					and String(p_v.gear[0].get("id", "")) == "blink",
 					"tier 2: Legendary boots and an Epic glove come (no cap)")
 		else:
-			ok((P.gear[3] as Dictionary).is_empty() and String(P.gear[0].get("id", "")) == "focus"
-					and (P.gear[1] as Dictionary).is_empty(),
+			ok((p_v.gear[3] as Dictionary).is_empty() and String(p_v.gear[0].get("id", "")) == "focus"
+					and (p_v.gear[1] as Dictionary).is_empty(),
 					"tier 0: boots and glove above Rare stay home, the Fine passive comes (on Q, the first glove slot)")
 			ok(Econ.find("a2").size() > 0 and Econ.find("a3").size() > 0,
 					"...and they are still in the armory, not lost")
 		ok(armory_before - Econ.armory().size() == worn.size(),
 				"what is brought leaves the armory (%d out)" % worn.size())
-		var b := _belt_ids(P)
-		ok(b[0] == "smoke" and b[1] == "tonic" and b[2] == "scanner",
-				"tier %d: the belt is what was picked, in order (%s)" % [tier, str(b)])
-		ok(P.tonics == UtilityBelt.bring_cap("tonic", tier)
-				and UtilityBelt.count(P, "smoke") == UtilityBelt.bring_cap("smoke", tier)
-				and UtilityBelt.count(P, "scanner") == UtilityBelt.bring_cap("scanner", tier),
-				"tier %d: stack caps by tier (tonic %d, smoke %d, seeker %d)" % [tier, P.tonics,
-				UtilityBelt.count(P, "smoke"), UtilityBelt.count(P, "scanner")])
+		var b := _belt_ids(p_v)
+		ok(b[0] == "tonic" and b[1] == "armor_kit" and b[2] == "smoke" and b[3] == "scanner",
+				"tier %d: the belt is what was picked, in order after the pinned two (%s)" % [tier, str(b)])
+		ok(p_v.tonics == UtilityBelt.bring_cap("tonic", tier)
+				and UtilityBelt.count(p_v, "smoke") == UtilityBelt.bring_cap("smoke", tier)
+				and UtilityBelt.count(p_v, "scanner") == UtilityBelt.bring_cap("scanner", tier),
+				"tier %d: stack caps by tier (tonic %d, smoke %d, seeker %d)" % [tier, p_v.tonics,
+				UtilityBelt.count(p_v, "smoke"), UtilityBelt.count(p_v, "scanner")])
 		ok(int(Save.d["items"]["tonic"]) == 9 - (UtilityBelt.bring_cap("tonic", tier) - 2)
 				and int(Save.d["items"]["smoke"]) == 3 - UtilityBelt.bring_cap("smoke", tier),
 				"tier %d: what is brought leaves the stash" % tier)
@@ -166,129 +170,159 @@ func _equal_base() -> void:
 			"workshop, lighthouse and forge no longer change the glider or tonics (glide %.2f)" % m3.player.glide_max)
 	await _drop(m3)
 
-func GLIDE_BASE(P: Hunter) -> float:
-	return HunterMove.glide_heat_s * float(P.cdat.get("glide_cap", 1.0))
+func GLIDE_BASE(p_v: Hunter) -> float:
+	return HunterMove.glide_heat_s * float(p_v.cdat.get("glide_cap", 1.0))
 
-func _belt_ids(P: Hunter) -> Array:
-	return P.belt.map(func(s): return String(s.get("id", "")))
+func _belt_ids(p_v: Hunter) -> Array:
+	return p_v.belt.map(func(s): return String(s.get("id", "")))
 
 # ------------------------------------------------------------------ the belt
 func _belt() -> void:
 	_farm(false)
 	var m := _start(2, 9002)
-	var P := m.player
-	P.ctrl = "idle"
+	var p_v := m.player
+	p_v.ctrl = "idle"
 	for x in m.hunters:
-		if x != P: x.ctrl = "idle"
+		if x != p_v: x.ctrl = "idle"
 	for mb in m.mobs:
 		mb.dead = true
 		mb.visible = false
-	ok(P.tonics == 3 and P.armor_kits == 2,
-			"a hunter sets out with the issue (2 tonics, 2 kits) plus the 1 tonic in the stash (%d, %d)" % [P.tonics,
-			P.armor_kits])
+	ok(p_v.tonics == 3 and p_v.armor_kits == 2,
+			"a hunter sets out with the issue (2 tonics, 2 kits) plus the 1 tonic in the stash (%d, %d)" % [p_v.tonics,
+			p_v.armor_kits])
 	# charges and caps
 	var h := Hunter.new()
 	h.belt = UtilityBelt.empty()
 	ok(UtilityBelt.grant(h, "smoke", 2) == 2 and UtilityBelt.grant(h, "smoke", 5) == 1
 			and UtilityBelt.count(h, "smoke") == 3, "grant stacks onto one slot up to its max (smoke 3)")
-	ok(UtilityBelt.grant(h, "tonic", 1) == 1 and UtilityBelt.grant(h, "scanner", 1) == 1
-			and UtilityBelt.grant(h, "medkit", 1) == 1 and UtilityBelt.grant(h, "stim", 1) == 0,
-			"four slots hold four kinds; a fifth kind does not fit")
-	ok(UtilityBelt.take(h, "smoke", 5) == 3 and h.belt[0].is_empty(), "an emptied slot frees up")
+	ok(UtilityBelt.slot_of(h, "smoke") == 2, "an open item skips the pinned slots 1 and 2")
+	ok(UtilityBelt.grant(h, "scanner", 1) == 1 and UtilityBelt.grant(h, "medkit", 1) == 1
+			and UtilityBelt.grant(h, "stim", 1) == 1 and UtilityBelt.grant(h, "jump_pad", 1) == 0,
+			"four open slots hold four kinds; a fifth kind does not fit")
+	ok(UtilityBelt.grant(h, "tonic", 1) == 1 and UtilityBelt.slot_of(h, "tonic") == 0
+			and UtilityBelt.grant(h, "armor_kit", 1) == 1 and UtilityBelt.slot_of(h, "armor_kit") == 1,
+			"...and the tonic and armor kit still fit, in their own slots")
+	ok(UtilityBelt.max_of("tonic") == 8 and UtilityBelt.max_of("armor_kit") == 8,
+			"a tonic or kit slot stacks to 8 (source)")
+	ok(UtilityBelt.take(h, "smoke", 5) == 3 and h.belt[2].is_empty(), "an emptied slot frees up")
 	h.free()
 	# the belt keys with charges
-	P.belt = UtilityBelt.empty()
-	P.belt_free = {}
-	UtilityBelt.grant(P, "tonic", 3)
-	UtilityBelt.grant(P, "armor_kit", 2)
-	UtilityBelt.grant(P, "smoke", 2)
-	P.hp = P.max_hp * 0.5
-	P.armor = 0.0
-	P.inp["util3"] = true
+	p_v.belt = UtilityBelt.empty()
+	p_v.belt_free = {}
+	UtilityBelt.grant(p_v, "tonic", 3)
+	UtilityBelt.grant(p_v, "armor_kit", 2)
+	UtilityBelt.grant(p_v, "smoke", 2)
+	p_v.hp = p_v.max_hp * 0.5
+	p_v.armor = 0.0
+	p_v.inp["util3"] = true
 	m.step(Match.DT)
-	ok(UtilityBelt.count(P, "smoke") == 1 and m.smokes.size() == 1,
+	ok(UtilityBelt.count(p_v, "smoke") == 1 and m.smokes.size() == 1,
 			"key 3 throws a smoke bomb: one charge spent, a cloud down")
-	P.inp["util3"] = true
+	p_v.inp["util3"] = true
 	m.step(Match.DT)
-	ok(UtilityBelt.count(P, "smoke") == 1, "it has a short cooldown between uses")
-	P.inv_t = 99.0
-	P.inp["util1"] = true
+	ok(UtilityBelt.count(p_v, "smoke") == 1, "it has a short cooldown between uses")
+	p_v.inv_t = 99.0
+	p_v.inp["util1"] = true
 	m.step(Match.DT)
-	ok(P.drink_t > 0.0, "key 1 starts a drink")
-	for i in int((UtilityUse.channel("tonic", "time") + 0.3) / Match.DT): m.step(Match.DT)
-	ok(P.tonics == 2 and P.hp > P.max_hp * 0.5 + 40.0,
-			"a finished drink spends one tonic and heals (%d left, hp %.0f/%.0f)" % [P.tonics, P.hp, P.max_hp])
-	P.inp["util2"] = true
+	ok(p_v.drink_t > 0.0, "key 1 starts a drink")
+	ok(is_equal_approx(p_v.drink_len, 1.0) and is_equal_approx(UtilityUse.channel_move(p_v), 1.0),
+			"a tonic takes 1 s and does not slow you (source: heals after 1 s, no slow)")
+	for i in int((p_v.drink_len + 0.3) / Match.DT): m.step(Match.DT)
+	ok(p_v.tonics == 2 and p_v.hp >= p_v.max_hp * 0.5 + 41.0 and p_v.hp <= p_v.max_hp * 0.5 + 43.0,
+			"a finished drink spends one tonic and heals a flat 42 (%d left, hp %.0f/%.0f)"
+			% [p_v.tonics, p_v.hp, p_v.max_hp])
+	p_v.inp["util2"] = true
 	m.step(Match.DT)
-	ok(P.kit_t > 0.0, "key 2 starts an armor repair")
-	P.inv_t = 0.0
-	P.hurt(5.0, null, {"src": "shot"})
-	ok(P.kit_t <= 0.0 and P.armor_kits == 2, "a hit spills it and nothing is spent")
-	P.inv_t = 99.0
-	P.inp["util2"] = true
+	ok(p_v.kit_t > 0.0 and is_equal_approx(UtilityUse.channel_move(p_v), 0.45),
+			"key 2 starts an armor repair (slow while it runs)")
+	p_v.inv_t = 0.0
+	Sfx.cue_log = []
+	p_v.hurt(5.0, null, {"src": "shot"})
+	ok(p_v.kit_t <= 0.0 and p_v.armor_kits == 2, "a hit spills it and nothing is spent")
+	ok(_cued("belt_fumble"), "...and the kit's plates clatter (belt_fumble)")
+	p_v.hp = p_v.max_hp * 0.5
+	p_v.inp["util1"] = true
 	m.step(Match.DT)
-	for i in int((UtilityUse.channel("armor_kit", "time") + 0.3) / Match.DT): m.step(Match.DT)
-	ok(P.armor_kits == 1 and P.armor >= P.max_armor - 0.5, "a finished repair spends one kit and fills armor")
-	P.hp = P.max_hp
-	P.inp["util1"] = true
+	ok(p_v.drink_t > 0.0, "a second drink starts")
+	p_v.stun_t = 1.0
 	m.step(Match.DT)
-	ok(P.drink_t <= 0.0 and P.tonics == 2, "a tonic at full health does nothing (the slot buzzes)")
+	ok(p_v.drink_t <= 0.0 and p_v.tonics == 2 and _cued("belt_spill"),
+			"a stun spills it with the tonic's splash (belt_spill), nothing spent")
+	p_v.stun_t = 0.0
+	Sfx.cue_log = null
+	p_v.inv_t = 99.0
+	p_v.inp["util2"] = true
+	m.step(Match.DT)
+	for i in int((p_v.kit_len + 0.3) / Match.DT): m.step(Match.DT)
+	ok(p_v.armor_kits == 1 and absf(p_v.armor - p_v.max_armor * 0.8) < 0.5,
+			"a finished repair spends one kit and patches 80%% of a Common armor (%.0f/%.0f)"
+			% [p_v.armor, p_v.max_armor])
+	p_v.armor_tier = 2
+	ok(is_equal_approx(UtilityUse.repair_frac(p_v), 0.3), "...and 30% of a Rare one (source 80/40/30)")
+	p_v.armor_tier = 0
+	ok(is_equal_approx(UtilityUse.channel("deep_draught", "move"), 0.4)
+			and is_equal_approx(UtilityUse.channel("deep_draught", "time"), 5.0),
+			"the deep draught is a 5 s drink at 40% speed (source: 60% slow)")
+	p_v.hp = p_v.max_hp
+	p_v.inp["util1"] = true
+	m.step(Match.DT)
+	ok(p_v.drink_t <= 0.0 and p_v.tonics == 2, "a tonic at full health does nothing (the slot buzzes)")
 	# the other items
-	P.belt = UtilityBelt.empty()
-	UtilityBelt.grant(P, "medkit", 2)
-	UtilityBelt.grant(P, "stim", 1)
-	UtilityBelt.grant(P, "shield_cell", 1)
-	P.hp = P.max_hp * 0.4
-	P.armor = 0.0
-	UtilityBelt.use_id(P, "medkit")
-	ok(P.hp >= P.max_hp * 0.4 + 39.0 and P.armor >= 19.0, "a mending kit heals 40 and mends 20 armor")
-	UtilityBelt.use_id(P, "stim")
-	ok(P.haste_t > 5.0, "a swift draught hastes you")
-	UtilityBelt.use_id(P, "shield_cell")
-	ok(P.shield > 30.0, "a shield cell gives a shield")
-	P.belt = UtilityBelt.empty()
-	UtilityBelt.grant(P, "jump_pad", 1)
-	UtilityBelt.grant(P, "scanner", 1)
+	p_v.belt = UtilityBelt.empty()
+	UtilityBelt.grant(p_v, "medkit", 2)
+	UtilityBelt.grant(p_v, "stim", 1)
+	UtilityBelt.grant(p_v, "shield_cell", 1)
+	p_v.hp = p_v.max_hp * 0.4
+	p_v.armor = 0.0
+	UtilityBelt.use_id(p_v, "medkit")
+	ok(p_v.hp >= p_v.max_hp * 0.4 + 39.0 and p_v.armor >= 19.0, "a mending kit heals 40 and mends 20 armor")
+	UtilityBelt.use_id(p_v, "stim")
+	ok(p_v.haste_t > 5.0, "a swift draught hastes you")
+	UtilityBelt.use_id(p_v, "shield_cell")
+	ok(p_v.shield > 30.0, "a shield cell gives a shield")
+	p_v.belt = UtilityBelt.empty()
+	UtilityBelt.grant(p_v, "jump_pad", 1)
+	UtilityBelt.grant(p_v, "scanner", 1)
 	var pads0 := m.gpads.size()
-	UtilityBelt.use_id(P, "jump_pad")
-	var foe: Hunter = m.hunters.filter(func(x): return x != P)[0]
+	UtilityBelt.use_id(p_v, "jump_pad")
+	var foe: Hunter = m.hunters.filter(func(x): return x != p_v)[0]
 	foe.reveal_t = 0.0
-	foe.teleport(P.pos + Vector3(8, 0, 0))
-	UtilityBelt.use_id(P, "scanner")
+	foe.teleport(p_v.pos + Vector3(8, 0, 0))
+	UtilityBelt.use_id(p_v, "scanner")
 	ok(m.gpads.size() == pads0 + 1 and foe.reveal_t > 2.0,
 			"a spring pad goes down and a seeker flare reveals rivals nearby")
-	ok(UtilityBelt.count(P, "jump_pad") == 0 and UtilityBelt.count(P, "scanner") == 0,
+	ok(UtilityBelt.count(p_v, "jump_pad") == 0 and UtilityBelt.count(p_v, "scanner") == 0,
 			"single-charge items are used up")
 	# found in the match: a pickup goes on the belt (and only if there is room)
-	P.belt = UtilityBelt.empty()
-	UtilityBelt.grant(P, "tonic", 5)
-	UtilityBelt.grant(P, "armor_kit", 4)
-	UtilityBelt.grant(P, "smoke", 3)
-	UtilityBelt.grant(P, "medkit", 1)
-	ok(not UtilityBelt.can_take(P, "scanner") and not UtilityBelt.can_take(P, "tonic")
-			and UtilityBelt.can_take(P, "gem"),
+	p_v.belt = UtilityBelt.empty()
+	UtilityBelt.grant(p_v, "tonic", 8)
+	UtilityBelt.grant(p_v, "armor_kit", 4)
+	for id in ["smoke", "medkit", "stim", "shield_cell"]:
+		UtilityBelt.grant(p_v, id, 1)
+	ok(not UtilityBelt.can_take(p_v, "scanner") and not UtilityBelt.can_take(p_v, "tonic")
+			and UtilityBelt.can_take(p_v, "gem"),
 			"a full belt cannot take another kind or more of a full stack (gems always can)")
-	UtilityBelt.take(P, "smoke", 3)
-	m.drop("scanner", P.pos + Vector3(0, 0.5, 0), 1)
+	UtilityBelt.take(p_v, "smoke", 3)
+	m.drop("scanner", p_v.pos + Vector3(0, 0.5, 0), 1)
 	var pk: Dictionary = m.pickups[m.pickups.size() - 1]
-	m._collect(P, pk)
-	ok(UtilityBelt.count(P, "scanner") == 1, "found in the match: a dropped seeker flare goes on the belt")
+	m._collect(p_v, pk)
+	ok(UtilityBelt.count(p_v, "scanner") == 1, "found in the match: a dropped seeker flare goes on the belt")
 	# lost on death: it goes in the deathbox, and the box gives it back
-	var n0 := UtilityBelt.count(P, "tonic")
-	P.lives = 1
-	m.eliminate(P, null, "knocked out", true)
-	var bx := Life.box_of(m, P)
+	var n0 := UtilityBelt.count(p_v, "tonic")
+	p_v.lives = 1
+	m.eliminate(p_v, null, "knocked out", true)
+	var bx := Life.box_of(m, p_v)
 	var in_box: bool = not bx.is_empty() \
 			and (bx["belt"] as Array).any(func(st): return st["id"] == "tonic" and int(st["n"]) == n0)
 	ok(in_box, "die and the whole belt is in your deathbox (%d tonics)" % n0)
-	var bare_belt := P.belt.all(func(slot): return (slot as Dictionary).is_empty())
-	ok(bare_belt and P.tonics == 0, "...and you have nothing left on you")
+	var bare_belt := p_v.belt.all(func(slot): return (slot as Dictionary).is_empty())
+	ok(bare_belt and p_v.tonics == 0, "...and you have nothing left on you")
 	var rows: Array = Life.box_items(m, foe, bx).filter(func(it): return it["key"] == "belt")
-	ok(rows.size() == 4, "a looter sees it item by item (%d rows)" % rows.size())
+	ok(rows.size() == 6, "a looter sees it item by item (%d rows)" % rows.size())
 	foe.belt = UtilityBelt.empty()
 	foe.belt_free = {}
 	Life.loot_box(m, foe, bx)
-	ok(UtilityBelt.count(foe, "tonic") == 5 and UtilityBelt.count(foe, "scanner") == 1,
+	ok(UtilityBelt.count(foe, "tonic") == 8 and UtilityBelt.count(foe, "scanner") == 1,
 			"a rival who loots the box takes the charges")
 	# coming home: only what is above the everyday issue
 	var q := Hunter.new()
@@ -309,73 +343,75 @@ func _belt() -> void:
 func _armor_levels() -> void:
 	_farm(false)
 	var m := _start(1, 9003)
-	var P := m.player
-	P.ctrl = "idle"
-	var B: Hunter = m.hunters.filter(func(x): return x != P)[0]
-	B.ctrl = "idle"
-	B.max_hp = 9000.0
-	B.hp = 9000.0
-	B.armor = 0.0
+	var p_v := m.player
+	p_v.ctrl = "idle"
+	var b: Hunter = m.hunters.filter(func(x): return x != p_v)[0]
+	b.ctrl = "idle"
+	b.max_hp = 9000.0
+	b.hp = 9000.0
+	b.armor = 0.0
 	for mb in m.mobs:
 		mb.dead = true
 		mb.visible = false
-	ok(P.armor_tier == 0 and B.armor_tier == 0, "everyone starts at armor level 0")
-	var base := P.max_armor
+	ok(p_v.armor_tier == 0 and b.armor_tier == 0, "everyone starts at armor level 0")
+	var base := p_v.max_armor
 	m.hud.c.queue_redraw()      # draw once at 0 xp so the next hit shows as a gain
 	for i in 2: await main.get_tree().process_frame
-	B.hurt(100.0, P, {"src": "shot"})
-	ok(P.armor_tier == 0 and P.armor_xp > 0.0, "damage to a rival fills your armor progress (%.0f xp)" % P.armor_xp)
-	ok(not ArmorHud.tip(P).is_empty() and String(ArmorHud.tip(P)[2][0]).begins_with("Next"),
+	b.hurt(100.0, p_v, {"src": "shot"})
+	ok(p_v.armor_tier == 0 and p_v.armor_xp > 0.0,
+			"damage to a rival fills your armor progress (%.0f xp)" % p_v.armor_xp)
+	ok(not ArmorHud.tip(p_v).is_empty() and String(ArmorHud.tip(p_v)[2][0]).begins_with("Next"),
 			"the HUD tip names the next level")
 	var hud = m.hud
 	hud.c.queue_redraw()
 	for i in 2: await main.get_tree().process_frame
-	ok(is_equal_approx(P.armor_frac(), P.armor_xp / float(Hunter.ARMOR_TIERS[1][2])) and P.armor_frac() > 0.0,
-			"the armour bar follows armor_xp toward the next level (%.2f)" % P.armor_frac())
+	ok(is_equal_approx(p_v.armor_frac(), p_v.armor_xp / float(Hunter.ARMOR_TIERS[1][2])) and p_v.armor_frac() > 0.0,
+			"the armour bar follows armor_xp toward the next level (%.2f)" % p_v.armor_frac())
 	var seen := float(hud.get_meta("armor_xp_seen", -1.0))
-	ok(float(hud.get_meta("armor_tick_at", -9.0)) == m.time and is_equal_approx(seen, P.armor_xp),
+	ok(float(hud.get_meta("armor_tick_at", -9.0)) == m.time and is_equal_approx(seen, p_v.armor_xp),
 			"a hit that added armour progress ticks the bar")
 	m.time += ArmorHud.TICK + 0.1
 	hud.c.queue_redraw()
 	for i in 2: await main.get_tree().process_frame
 	ok(float(hud.get_meta("armor_tick_at", -9.0)) < m.time - ArmorHud.TICK,
 			"the tick is over %.1f s after the hit, no new hit" % ArmorHud.TICK)
-	_armor_up_own(P, B)
-	for i in 3: B.hurt(100.0, P, {"src": "shot"})
-	ok(P.armor_tier >= 1 and float(Hunter.ARMOR_TIERS[P.armor_tier][3]) > float(Hunter.ARMOR_TIERS[0][3]),
-			"enough damage levels your armor up: it blocks more (tier %d)" % P.armor_tier)
-	var tier_dur := float(Hunter.ARMOR_TIERS[P.armor_tier][4]) - float(Hunter.ARMOR_TIERS[0][4])
-	ok(is_equal_approx(P.max_armor - base, tier_dur),
-			"its durability is the tier's (%.0f -> %.0f; --armour-check holds the numbers)" % [base, P.max_armor])
-	ok(B.armor_tier == 0, "the one who was hit does not level")
-	_armor_up_rival(m, P, B)
-	var xp0 := P.armor_xp
-	var mob: Mob = m.spawn_mob("skitter", P.pos + Vector3(3, 0, 0))
-	mob.hurt(30.0, P, {"src": "shot"})
-	ok(P.armor_xp - xp0 > 0.0 and P.armor_xp - xp0 < 30.0 * 0.5,
-			"monsters count for a third (%.1f xp for 30 damage)" % (P.armor_xp - xp0))
-	P.armor_gain(5000.0)
-	ok(P.armor_tier == Hunter.ARMOR_TIERS.size() - 1 and ArmorHud.tip(P).size() == 3,
+	_armor_up_own(p_v, b)
+	for i in 3: b.hurt(100.0, p_v, {"src": "shot"})
+	ok(p_v.armor_tier >= 1 and float(Hunter.ARMOR_TIERS[p_v.armor_tier][3]) > float(Hunter.ARMOR_TIERS[0][3]),
+			"enough damage levels your armor up: it blocks more (tier %d)" % p_v.armor_tier)
+	var tier_dur := float(Hunter.ARMOR_TIERS[p_v.armor_tier][4]) - float(Hunter.ARMOR_TIERS[0][4])
+	ok(is_equal_approx(p_v.max_armor - base, tier_dur),
+			"its durability is the tier's (%.0f -> %.0f; --armour-check holds the numbers)" % [base, p_v.max_armor])
+	ok(b.armor_tier == 0, "the one who was hit does not level")
+	_armor_up_rival(m, p_v, b)
+	var xp0 := p_v.armor_xp
+	var mob: Mob = m.spawn_mob("skitter", p_v.pos + Vector3(3, 0, 0))
+	mob.hurt(30.0, p_v, {"src": "shot"})
+	ok(p_v.armor_xp - xp0 > 0.0 and p_v.armor_xp - xp0 < 30.0 * 0.5,
+			"monsters count for a third (%.1f xp for 30 damage)" % (p_v.armor_xp - xp0))
+	p_v.armor_gain(5000.0)
+	ok(p_v.armor_tier == Hunter.ARMOR_TIERS.size() - 1 and ArmorHud.tip(p_v).size() == 3,
 			"the top level is reachable and the HUD says so")
-	ok(P.armor_frac() == 1.0 and P.armor_col() == Hunter.ARMOR_TIERS[-1][1], "the bar is full in the top tier's colour")
+	ok(p_v.armor_frac() == 1.0 and p_v.armor_col() == Hunter.ARMOR_TIERS[-1][1],
+			"the bar is full in the top tier's colour")
 	ok(m.hud != null and ResourceLoader.exists("res://scripts/ui/armor_hud.gd"),
 			"the HUD has the armor badge (ArmorHud)")
 	await _drop(m)
 
 ## The tier-up cue (Juice.armor_up), part 1: a break and a heal play no cue, then your own tier-up plays the
 ## fuller one at the tier's pitch (P is set 50 xp short of tier 1, so B's 150 hp is enough whatever the tier's xp is).
-func _armor_up_own(P: Hunter, B: Hunter) -> void:
-	Sfx.listener = P.pos
+func _armor_up_own(p_v: Hunter, b: Hunter) -> void:
+	Sfx.listener = p_v.pos
 	var own0 := int(Sfx.last_played.get("armor_up_own", -1000))
 	var near0 := int(Sfx.last_played.get("armor_up", -1000))
-	P.armor_xp = float(Hunter.ARMOR_TIERS[1][2]) - 50.0
-	P.armor = 5.0
-	P.hurt(40.0, B, {"src": "shot"})
-	P.heal(30.0)
-	ok(P.armor <= 0.0 and int(Sfx.last_played.get("armor_up_own", -1000)) == own0
+	p_v.armor_xp = float(Hunter.ARMOR_TIERS[1][2]) - 50.0
+	p_v.armor = 5.0
+	p_v.hurt(40.0, b, {"src": "shot"})
+	p_v.heal(30.0)
+	ok(p_v.armor <= 0.0 and int(Sfx.last_played.get("armor_up_own", -1000)) == own0
 			and int(Sfx.last_played.get("armor_up", -1000)) == near0, "an armor break and a heal play no tier-up cue")
-	B.hurt(150.0, P, {"src": "shot"})
-	ok(P.armor_tier == 1 and int(Sfx.last_played.get("armor_up_own", -1000)) > own0
+	b.hurt(150.0, p_v, {"src": "shot"})
+	ok(p_v.armor_tier == 1 and int(Sfx.last_played.get("armor_up_own", -1000)) > own0
 			and int(Sfx.last_played.get("armor_up", -1000)) == near0, "your own tier-up plays the fuller cue, once")
 	var p1 := Juice.armor_up_pitch(1)
 	var p4 := Juice.armor_up_pitch(4)
@@ -383,22 +419,29 @@ func _armor_up_own(P: Hunter, B: Hunter) -> void:
 	ok(is_equal_approx(own_pitch, p1) and p4 > p1, "pitched by tier: higher is brighter (%.2f-%.2f)" % [p1, p4])
 
 ## Part 2: a rival's tier-up plays the short positional cue; out of earshot nothing (the falloff of other combat cues).
-func _armor_up_rival(m: Match, P: Hunter, B: Hunter) -> void:
+func _armor_up_rival(m: Match, p_v: Hunter, b: Hunter) -> void:
 	var near0 := int(Sfx.last_played.get("armor_up", -1000))
 	var own0 := int(Sfx.last_played.get("armor_up_own", -1000))
-	Sfx.listener = B.pos + Vector3(4, 0, 0)
-	P.hp = 9000.0
-	P.max_hp = 9000.0
-	P.hurt(400.0, B, {"src": "shot"})
-	ok(B.armor_tier >= 1 and int(Sfx.last_played.get("armor_up", -1000)) > near0
+	Sfx.listener = b.pos + Vector3(4, 0, 0)
+	p_v.hp = 9000.0
+	p_v.max_hp = 9000.0
+	p_v.hurt(400.0, b, {"src": "shot"})
+	ok(b.armor_tier >= 1 and int(Sfx.last_played.get("armor_up", -1000)) > near0
 			and int(Sfx.last_played.get("armor_up_own", -1000)) == own0, "a rival's tier-up plays the positional cue")
 	var pitch := _cue_pitch("armor_up")
-	ok(is_equal_approx(pitch, Juice.armor_up_pitch(B.armor_tier)), "...at its tier's pitch (%.2f)" % pitch)
+	ok(is_equal_approx(pitch, Juice.armor_up_pitch(b.armor_tier)), "...at its tier's pitch (%.2f)" % pitch)
 	var far0 := int(Sfx.last_played.get("armor_up", -1000))
-	Sfx.listener = B.pos + Vector3(Sfx.hear_range + 5.0, 0, 0)
-	B.armor_gain(5000.0)
-	m._armor_up(B)
+	Sfx.listener = b.pos + Vector3(Sfx.hear_range + 5.0, 0, 0)
+	b.armor_gain(5000.0)
+	m._armor_up(b)
 	ok(int(Sfx.last_played.get("armor_up", -1000)) == far0, "a tier-up out of earshot is not played")
+
+## True when `sname` was asked of Sfx since `Sfx.cue_log` was last reset and its sound loads.
+func _cued(sname: String) -> bool:
+	for c in Sfx.cue_log:
+		if c[0] == sname and c[2]:
+			return true
+	return false
 
 ## The pitch the pool voice playing `sname` was started at (0 if none).
 func _cue_pitch(sname: String) -> float:
@@ -411,45 +454,45 @@ func _cue_pitch(sname: String) -> float:
 func _bots() -> void:
 	_farm(false)
 	var m := _start(1, 9004)
-	var P := m.player
-	P.ctrl = "idle"
+	var p_v := m.player
+	p_v.ctrl = "idle"
 	for mb in m.mobs:
 		mb.dead = true
 		mb.visible = false
-	var B: Hunter = m.hunters.filter(func(x): return x != P)[0]
-	B.belt = UtilityBelt.empty()
-	B.belt_free = {}
-	UtilityBelt.grant(B, "tonic", 2)
-	UtilityBelt.grant(B, "armor_kit", 2)
-	UtilityBelt.grant(B, "smoke", 1)
-	B.hp = B.max_hp * 0.3
-	B.armor = B.max_armor
+	var b: Hunter = m.hunters.filter(func(x): return x != p_v)[0]
+	b.belt = UtilityBelt.empty()
+	b.belt_free = {}
+	UtilityBelt.grant(b, "tonic", 2)
+	UtilityBelt.grant(b, "armor_kit", 2)
+	UtilityBelt.grant(b, "smoke", 1)
+	b.hp = b.max_hp * 0.3
+	b.armor = b.max_armor
 	var inp := {}
-	BotBelt.think(m, B, B.ai, inp)
+	BotBelt.think(m, b, b.ai, inp)
 	ok(inp.get("util1", false), "a hurt bot reaches for its tonic (slot 1)")
 	inp = {}
-	B.hp = B.max_hp
-	B.armor = 0.0
-	BotBelt.think(m, B, B.ai, inp)
+	b.hp = b.max_hp
+	b.armor = 0.0
+	BotBelt.think(m, b, b.ai, inp)
 	ok(inp.get("util2", false), "a bot with broken armor and nobody close reaches for an armor kit (slot 2)")
 	inp = {}
-	B.armor = B.max_armor
-	B.hp = B.max_hp * 0.3
-	B.ai["tgt"] = P
-	P.teleport(B.pos + Vector3(5, 0, 0))
-	UtilityBelt.take(B, "tonic", 2)
-	BotBelt.think(m, B, B.ai, inp)
+	b.armor = b.max_armor
+	b.hp = b.max_hp * 0.3
+	b.ai["tgt"] = p_v
+	p_v.teleport(b.pos + Vector3(5, 0, 0))
+	UtilityBelt.take(b, "tonic", 2)
+	BotBelt.think(m, b, b.ai, inp)
 	ok(inp.get("util3", false), "hurt with a rival close and no tonic, a bot throws smoke (slot 3)")
 	# and for real: a hurt bot, left alone, drinks within a few seconds of play
-	B.ai.erase("tgt")
-	P.teleport(B.pos + Vector3(60, 0, 0))
-	UtilityBelt.grant(B, "tonic", 2)
-	B.hp = B.max_hp * 0.3
-	var t0 := UtilityBelt.count(B, "tonic")
+	b.ai.erase("tgt")
+	p_v.teleport(b.pos + Vector3(60, 0, 0))
+	UtilityBelt.grant(b, "tonic", 2)
+	b.hp = b.max_hp * 0.3
+	var t0 := UtilityBelt.count(b, "tonic")
 	var used := false
 	for i in 400:
 		m.step(Match.DT)
-		if UtilityBelt.count(B, "tonic") < t0 or B.drink_t > 0.0:
+		if UtilityBelt.count(b, "tonic") < t0 or b.drink_t > 0.0:
 			used = true
 			break
 	ok(used, "in play, a hurt bot drinks a tonic by itself (%d steps)" % [400])
@@ -474,43 +517,47 @@ func _bots() -> void:
 func _gloves() -> void:
 	_farm(false)
 	var m := _start(1, 9005)
-	var P := m.player
+	var p_v := m.player
 	for mb in m.mobs:
 		mb.dead = true
 		mb.visible = false
-	var B: Hunter = m.hunters.filter(func(x): return x != P)[0]
-	B.ctrl = "idle"
+	var b: Hunter = m.hunters.filter(func(x): return x != p_v)[0]
+	b.ctrl = "idle"
 	# skill points: never on a glove
-	ok(not Hunter.SLOTS.has("gear") and not Hunter.SLOT_MAX.has("gear") and not P.slot_lv.has("gear"),
+	ok(not Hunter.SLOTS.has("gear") and not Hunter.SLOT_MAX.has("gear") and not p_v.slot_lv.has("gear"),
 			"gloves are not a ranked slot (%s)" % str(Hunter.SLOTS))
-	var pts := P.skill_pts
-	ok(not P.can_level("gear") and not P.level_slot("gear") and P.skill_pts == pts,
+	var pts := p_v.skill_pts
+	ok(not p_v.can_level("gear") and not p_v.level_slot("gear") and p_v.skill_pts == pts,
 			"no skill point can be spent on a glove")
 	# a worn glove casts at once: level 1, no point spent, on either key
-	ok(P.lvl == 1 and P.slot_lv.values().all(func(v): return int(v) == 0), "a fresh hunter: level 1, nothing ranked")
-	P.gear[0] = {"id": "grapple", "rar": 1}
-	P.gear[1] = {"id": "quake", "rar": 1}
-	P.gear_cd[0] = 0.0
-	P.gear_cd[1] = 0.0
-	P.inp["aim"] = B.pos + Vector3(0, 0.9, 0)
-	P.inp["gear1"] = true
+	ok(p_v.lvl == 1 and p_v.slot_lv.values().all(func(v): return int(v) == 0),
+			"a fresh hunter: level 1, nothing ranked")
+	p_v.gear[0] = {"id": "grapple", "rar": 1}
+	p_v.gear[1] = {"id": "quake", "rar": 1}
+	p_v.gear_cd[0] = 0.0
+	p_v.gear_cd[1] = 0.0
+	p_v.inp["aim"] = b.pos + Vector3(0, 0.9, 0)
+	p_v.inp["gear1"] = true
 	m.step(Match.DT)
-	ok(P.gear_cd[0] > 0.0 and P.skill_pts == pts,
-			"a worn glove casts on Q at level 1 with no point spent (cd %.1f)" % P.gear_cd[0])
-	P.inp["gear2"] = true
+	ok(p_v.gear_cd[0] > 0.0 and p_v.skill_pts == pts,
+			"a worn glove casts on Q at level 1 with no point spent (cd %.1f)" % p_v.gear_cd[0])
+	p_v.inp["gear2"] = true
 	m.step(Match.DT)
-	ok(P.gear_cd[1] > 0.0 and P.skill_pts == pts, "the second glove casts on V (cd %.1f)" % P.gear_cd[1])
-	ok(absf(P.gear_cd[0] - Gear.cd_of("grapple", 1)) < 0.1, "its cooldown is the glove's own: no rank shortens it")
+	ok(p_v.gear_cd[1] > 0.0 and p_v.skill_pts == pts, "the second glove casts on V (cd %.1f)" % p_v.gear_cd[1])
+	ok(absf(p_v.gear_cd[0] - Gear.cd_of("grapple", 1)) < 0.1, "its cooldown is the glove's own: no rank shortens it")
 	var evs := InputMap.action_get_events("gear2")
 	var on_v := evs.any(func(ev): return ev is InputEventKey and (ev as InputEventKey).physical_keycode == KEY_V)
 	ok(on_v and Settings.conflicts(evs[0], "gear2").is_empty(), "glove 2 is on V, shared on purpose with play at home")
 	# bots: points go to the hero's own abilities only
-	B.skill_pts = 8
-	B.lvl = 9
-	B._bot_spend()
-	ok(B.skill_pts < 8 and not B.slot_lv.has("gear"),
-			"a bot spends its points on its hero's abilities (%s)" % str(B.slot_lv))
+	b.skill_pts = 8
+	b.lvl = 9
+	b._bot_spend()
+	ok(b.skill_pts < 8 and not b.slot_lv.has("gear"),
+			"a bot spends its points on its hero's abilities (%s)" % str(b.slot_lv))
 	# the HUD: both gloves and the Boki's Merge box sit on the right (GripHud), not on the left bar
+	# (at level 6: before it the locked Merge tile is held back, HudReveal "ult_tiles")
+	var lvl0: int = p_v.lvl
+	p_v.lvl = maxi(p_v.lvl, int(Hunter.ULT_AT[0]))
 	m.hud.c.queue_redraw()
 	for i in 3: await main.get_tree().process_frame
 	var sz: Vector2 = m.hud.c.size
@@ -522,34 +569,35 @@ func _gloves() -> void:
 	for hs in m.hud.hover_spots:
 		if String(hs[1]) == "r" and (hs[0] as Rect2).position.x > sz.x * 0.5:
 			merge_right = true
-	ok(P.kin == null or merge_right, "the Boki box beside them is the Merge's (its key and tip: \"ultimate\")")
-	ok(not P.slot_info("gear1").is_empty()
-			and String(P.slot_info("gear1")["name"]) == String(Gear.ALL["quake"]["name"]),
+	ok(p_v.kin == null or merge_right, "the Boki box beside them is the Merge's (its key and tip: \"ultimate\")")
+	p_v.lvl = lvl0
+	ok(not p_v.slot_info("gear1").is_empty()
+			and String(p_v.slot_info("gear1")["name"]) == String(Gear.ALL["quake"]["name"]),
 			"the V glove has its own slot info")
 	# overhead: two gloves and the Boki type, read from the net snapshot for a remote hunter
-	B.gear[0] = {"id": "blink", "rar": 4}
-	B.gear[1] = {"id": "barrier", "rar": 1}
-	B.gear_cd[0] = 0.0
-	B.gear_cd[1] = 7.0
-	B.ult = 1.0
-	var R: Hunter = m.make_hunter("R9", 3, "medium", "Remote", "remote", {}, P.pos + Vector3(5, 0, 0))
-	R.remote = true
-	var snap: Array = m._ser(B)
-	snap[1] = R.nid
-	m._net_apply(R, snap)
-	var row := GripOverhead.row(R)
+	b.gear[0] = {"id": "blink", "rar": 4}
+	b.gear[1] = {"id": "barrier", "rar": 1}
+	b.gear_cd[0] = 0.0
+	b.gear_cd[1] = 7.0
+	b.ult = 1.0
+	var r: Hunter = m.make_hunter("R9", 3, "medium", "Remote", "remote", {}, p_v.pos + Vector3(5, 0, 0))
+	r.remote = true
+	var snap: Array = m._ser(b)
+	snap[1] = r.nid
+	m._net_apply(r, snap)
+	var row := GripOverhead.row(r)
 	ok(String(row[0]["id"]) == "blink" and String(row[1]["id"]) == "barrier"
 			and row[0]["col"] == Data.RARITY[4]["color"],
 			"a remote hunter's two gloves come over the net with their rarity (%s, %s)" % [row[0]["id"], row[1]["id"]])
-	ok(not row[0]["dim"] and row[1]["dim"] and R.ult >= 1.0,
+	ok(not row[0]["dim"] and row[1]["dim"] and r.ult >= 1.0,
 			"the glove on cooldown is dimmed, the ready one is not; the full bond comes too")
-	var kb: Kin = P.kin
+	var kb: Kin = p_v.kin
 	if kb != null:
-		R.kin = kb
-		var rk := GripOverhead.row(R)
+		r.kin = kb
+		var rk := GripOverhead.row(r)
 		ok(String(rk[2]["id"]) == DexView.type_of(kb.species) and rk[2]["glow"],
 				"the third icon is the Boki's type, glowing on a full bond (%s)" % String(rk[2]["id"]))
-		R.kin = null
+		r.kin = null
 	var cs := GripOverhead.centres(Vector2(400, 300))
 	var under := cs.all(func(c): return (c as Vector2).y >= 300.0 + HudStyle.PLATE_ICON_ROW)
 	ok(cs.size() == 3 and under, "the three icons sit in the row HudStyle leaves under the nameplate")
@@ -568,18 +616,18 @@ func _gloves() -> void:
 	ok(two >= 18, "a hard bot starts with two different active gloves (%d of 20)" % two)
 	# a bot's glove choice, both slots: each fires on its own key when its moment comes (Bot passes
 	# its real aim here; the stub says "now" so terrain and line of sight stay out of the test)
-	B.gear[0] = {"id": "grapple", "rar": 2}
-	B.gear[1] = {"id": "quake", "rar": 2}
-	B.gear_cd[0] = 0.0
-	B.gear_cd[1] = 0.0
+	b.gear[0] = {"id": "grapple", "rar": 2}
+	b.gear[1] = {"id": "quake", "rar": 2}
+	b.gear_cd[0] = 0.0
+	b.gear_cd[1] = 0.0
 	var used := [false, false]
 	for i in 200:
 		var bot_inp := {}
-		Gloves.bot_use(B, P, 1.0, bot_inp, func(_gdf, tgt): return tgt.pos)
+		Gloves.bot_use(b, p_v, 1.0, bot_inp, func(_gdf, tgt): return tgt.pos)
 		for gi in 2:
 			if bot_inp.get(Gloves.KEYS[gi], false):
 				used[gi] = true
-				B.gear_cd[gi] = 5.0
+				b.gear_cd[gi] = 5.0
 		if used[0] and used[1]:
 			break
 	ok(used[0] and used[1], "a bot uses both gloves, each on its own key (Q %s, V %s)" % [str(used[0]), str(used[1])])

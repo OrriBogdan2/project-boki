@@ -39,9 +39,6 @@ class Radar extends Control:
 		v = vals; v2 = vals2; col = c; col2 = c2
 		custom_minimum_size = Vector2(px, px)
 		mouse_filter = Control.MOUSE_FILTER_PASS
-		var lines: Array = []
-		for k in Care.IV_KEYS: lines.append(IvView.tip(k, int(v[k])))
-		tooltip_text = "\n".join(lines)
 	func _pt(i: int, frac: float, c: Vector2, r: float) -> Vector2:
 		var a := -PI * 0.5 + TAU * float(i) / float(Care.IV_KEYS.size())
 		return c + Vector2(cos(a), sin(a)) * r * frac
@@ -237,9 +234,7 @@ static func mini(rec: Dictionary, h := 20.0, show_total := true) -> HBoxContaine
 		tl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		row.add_child(tl)
 	row.mouse_filter = Control.MOUSE_FILTER_PASS
-	var lines: Array = ["%s  ·  %d/155" % [Care.iv_grade(rec)[0], Care.iv_total(rec)]]
-	for k in Care.IV_KEYS: lines.append(tip(k, Care.iv(rec, k)))
-	row.tooltip_text = "\n".join(lines)
+	row.tooltip_text = "%s  ·  IVs %d/155" % [Care.iv_grade(rec)[0], Care.iv_total(rec)]
 	return row
 
 class Mini extends Control:
@@ -293,7 +288,7 @@ static func compare(a: Dictionary, b: Dictionary, bar_w := 120.0) -> VBoxContain
 		r.add_child(bb)
 		var yl := UI.label(str(y), UI.T_SMALL, word_col(y), UI.semi); yl.custom_minimum_size.x = 22
 		r.add_child(yl)
-		r.tooltip_text = "%s: %s %d, %s %d. An egg takes this from one of them %d%% of the time (either parent equally), otherwise it's a fresh roll." % [Care.IVS[k]["name"], a["name"], x, b["name"], y, int(round(100.0 * Care.IV_INHERIT / Care.IV_KEYS.size()))]
+		r.tooltip_text = "%d%% chance the egg takes a parent's %s" % [int(round(100.0 * Care.IV_INHERIT / Care.IV_KEYS.size())), Care.IVS[k]["name"]]
 		r.mouse_filter = Control.MOUSE_FILTER_PASS
 		v.add_child(r)
 	var tr := UI.hbox(8)

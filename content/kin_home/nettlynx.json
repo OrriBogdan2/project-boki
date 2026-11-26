@@ -1,0 +1,14 @@
+{
+	"id": "nettlynx",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/nettlynx.json.",
+	"shiny": {
+		"color": "#465f9e",
+		"belly": "#c0dbe8",
+		"glow": "#794aff"
+	},
+	"work": {
+		"ember": 3,
+		"mend": 2,
+		"forage": 1
+	}
+}

@@ -37,6 +37,7 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 func run(main: Node) -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	Save.no_write = true
 	holder = Node3D.new()
 	main.add_child(holder)
@@ -49,7 +50,7 @@ func run(main: Node) -> void:
 	for id in boki_species():
 		var mass := KinLib.kin(id).mass
 		await _case(main, "rigged %s" % id, id, weight_of(mass), mass)
-	await _in_match(main)
+	_in_match(main)
 	print("BOKIREACT DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -169,9 +170,19 @@ func _dash(a: Subject, mass: float, label: String) -> void:
 		lean = maxf(lean, -a.flex.rotation.x)
 	ok(lean >= MIN_LEAN, "%s: a dash leans it forward %.3f rad within %.1f s" % [label, lean, READ_T])
 
+## The control rig picks the same random idle as `a` (BokiIdle's fidgets, blinks, looks), so only the hit differs.
+func _twin(a: Subject, ctl: Subject) -> void:
+	if a.rig == null:
+		return
+	ctl.rig._rng.state = a.rig._rng.state
+	ctl.rig._idle._gap = a.rig._idle._gap
+	for v in ["_blink_t", "_look_t", "_look", "_look_to"]:
+		ctl.rig.set(v, a.rig.get(v))
+
 ## One hit on a resting model `a`, followed for RUN_S against `ctl`. Returns read (share of height at READ_T), peak (m),
 ## settle (s), part (worst share of height a part or bone left its place) and Flex's scale range.
 func _hit(a: Subject, ctl: Subject, box: AABB, push: Vector3, frac: float, mass: float) -> Dictionary:
+	_twin(a, ctl)
 	for i in 90:
 		a.step()
 		ctl.step()

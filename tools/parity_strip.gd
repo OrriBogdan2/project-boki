@@ -105,10 +105,10 @@ func _drive(t: float) -> void:
 
 ## The --pillar: a rock tile at `at` (a plain walk stops at it) under a dark stone pillar.
 func _raise_pillar(at: Vector3) -> void:
-	var W: World = m.world
-	var wk: PackedByteArray = W.kind
-	wk[W.idx(int(at.x), int(at.z))] = World.T_BLOCK
-	W.kind = wk
+	var w: World = m.world
+	var wk: PackedByteArray = w.kind
+	wk[w.idx(int(at.x), int(at.z))] = World.T_BLOCK
+	w.kind = wk
 	var stone := CylinderMesh.new()
 	stone.top_radius = PILLAR_R
 	stone.bottom_radius = PILLAR_R
@@ -136,7 +136,7 @@ func _footage(n: int) -> Image:
 		return Image.create(VIEW_CROP.x, VIEW_CROP.y, false, Image.FORMAT_RGB8)
 	var w := int(img.get_width() * 0.5)
 	var h := int(w * VIEW_CROP.y / float(VIEW_CROP.x))
-	return img.get_region(Rect2i((img.get_width() - w) / 2, (img.get_height() - h) / 2, w, h))
+	return img.get_region(Rect2i(int((img.get_width() - w) / 2.0), int((img.get_height() - h) / 2.0), w, h))
 
 ## The sheet: row pairs of COLS tiles (ours, then the footage), a time label under each, saved as a JPG.
 func _sheet(path: String) -> void:
@@ -155,7 +155,7 @@ func _sheet(path: String) -> void:
 			who, slot, FOOTAGE[who], first_frame, first_frame + count - 1, int(FPS)]
 	vp.add_child(head)
 	for i in count:
-		var at := Vector2((i % COLS) * TILE.x, LABEL_H + (i / COLS) * pair_h)
+		var at := Vector2((i % COLS) * TILE.x, LABEL_H + (int(i / float(COLS))) * pair_h)
 		_tile(vp, shots[i], at, "ours  +%.1fs" % (i / FPS))
 		var label := "src %04d  +%.1fs" % [first_frame + i, i / FPS]
 		_tile(vp, _footage(first_frame + i), at + Vector2(0, TILE.y + LABEL_H), label)

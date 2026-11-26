@@ -4,13 +4,16 @@ extends RefCounted
 ## kept 60 degrees off the heading: the glider turns as fast as it can), the dive (crouch held) and the glide catching
 ## again. <dir>/<arch>/{back,side}/f000.png... at 15 fps: from behind (the bank reads) and from the left (the dive's
 ## pitch reads), the body's lean toward the match camera (CamRig.char_lean) left out, as it would read as a roll from
-## here. Prints one GLIDE_SHOT line a frame with the rig's tilt and the body's, so a strip reads with them.
+## here. --boki=a,b: instead, the first of --wardens (default Arch.ORDER[0]) with each of those Boki stowed on it (the
+## frames closer in, on the Boki: <dir>/<boki>/...), the carried glide pose.
+## Prints one GLIDE_SHOT line a frame with the rig's tilt and the body's, so a strip reads with them.
 ## Needs a renderer.
 
 const HEIGHT := 60.0       # m above the ground: room for the dive
 const EVERY := 4           # sim steps (60 Hz) per frame: 15 fps
 const STEER := 60.0        # degrees the keys sit off the heading in a hard turn
 const DIST := 7.5          # m from the Hunter
+const BOKI_DIST := 1.3     # m from a Boki riding on it
 const FOV := 30.0
 ## s: the phases, each to the next one's start
 const PHASES := [["fall", 0.0], ["open", 0.3], ["hold", 0.7], ["left", 1.2], ["level", 2.0], ["right", 2.4],
@@ -19,22 +22,29 @@ const PHASES := [["fall", 0.0], ["open", 0.3], ["hold", 0.7], ["left", 1.2], ["l
 var tree: SceneTree
 var cam: Camera3D
 var px := 360
+var boki := ""             # the Boki riding on the Hunter ("": none)
 
 func run(main: Node) -> void:
 	tree = main.get_tree()
 	Save.no_write = true
 	var out := ""
 	var only: Array = Arch.ORDER
+	var bokis: Array = []
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="): out = a.substr(12)
 		if a.begins_with("--wardens="): only = Array(a.substr(10).split(",", false))
 		if a.begins_with("--size="): px = int(a.substr(7))
+		if a.begins_with("--boki="): bokis = Array(a.substr(7).split(",", false))
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	main.get_window().size = Vector2i(px, px)
 	main.get_viewport().size = Vector2i(px, px)
-	for arch in only:
-		await _hunter(main, String(arch), out.path_join(String(arch)))
+	for id in bokis:
+		boki = String(id)
+		await _hunter(main, String(only[0]), out.path_join(boki))
+	if bokis.is_empty():
+		for arch in only:
+			await _hunter(main, String(arch), out.path_join(String(arch)))
 	print("GLIDE_SHOTS_DONE")
 	tree.quit()
 
@@ -46,7 +56,7 @@ func _phase(t: float) -> String:
 	return at
 
 func _hunter(main: Node, arch: String, dir: String) -> void:
-	var m := await _start(main, arch, dir)
+	var m := _start(main, arch, dir)
 	var h: Hunter = m.player
 	h.teleport(h.pos + Vector3(0, HEIGHT, 0))
 	var sync := _sync(h)
@@ -68,12 +78,17 @@ func _hunter(main: Node, arch: String, dir: String) -> void:
 		h.inp["crouch"] = ph == "dive"
 		m.step(Match.DT)
 		h.render(Match.DT, 1.0)
+		if boki != "":
+			(h.kin as Kin).render(Match.DT, 1.0)
 		h.model.basis = Basis(Vector3.UP, h.face).scaled_local(h.model.scale)
 		if sync:
 			sync._process(Match.DT)
 		if step % EVERY == 0:
-			var i := step / EVERY
+			var i := int(step / float(EVERY))
 			var on := "gl=%d dv=%d" % [int(h.gliding), int(h.plunging())]
+			if boki != "":
+				var k: Kin = h.kin
+				on += " kin=%s dy=%.1f clip=%s" % [k.state, k.global_position.y - h.pos.y, k.model.get_meta("kact", "")]
 			print("GLIDE_SHOT %s f%03d %-5s %s %s" % [arch, i, ph, on, _body(h)])
 			_aim(h, 180.0, 0.25)
 			await _grab(dir.path_join("back/f%03d.png" % i))
@@ -89,8 +104,11 @@ func _hunter(main: Node, arch: String, dir: String) -> void:
 func _start(main: Node, arch: String, dir: String) -> Match:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true,
-		"cls": Arch.weight(arch), "arch": arch, "weapon": Arch.signature(arch)})
+	var opts := {"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true,
+		"cls": Arch.weight(arch), "arch": arch, "weapon": Arch.signature(arch)}
+	if boki != "":
+		opts["demo_kin"] = boki
+	m.start(opts)
 	m.set_process(false)
 	m.hud.visible = false
 	for mob in m.mobs:
@@ -103,7 +121,9 @@ func _start(main: Node, arch: String, dir: String) -> Match:
 		if other != h:
 			other.ctrl = "idle"
 			other.teleport(h.pos + Vector3(60, 0, 60))
-	for i in 20:
+	if boki != "":
+		(h.kin as Kin).stow()
+	for i in 20 if boki == "" else 90:       # (a stowed Boki takes a second to settle in)
 		m.step(Match.DT)
 	cam = Camera3D.new()
 	m.add_child(cam)
@@ -140,8 +160,12 @@ func _body(h: Hunter) -> String:
 ## The camera `yaw` degrees round from the Hunter's front (180: behind it, 90: its left), `rise` of the way up.
 func _aim(h: Hunter, yaw: float, rise: float) -> void:
 	var at := h.model.global_position + Vector3(0, 1.0, 0) * h.model.scale.y
+	var dist := DIST
+	if boki != "":
+		at = (h.kin as Kin).global_position
+		dist = BOKI_DIST
 	var y := h.model.global_rotation.y + deg_to_rad(yaw)
-	cam.global_position = at + Vector3(-sin(y), rise, -cos(y)) * DIST * h.model.scale.y
+	cam.global_position = at + Vector3(-sin(y), rise, -cos(y)) * dist * h.model.scale.y
 	cam.look_at(at)
 
 func _grab(path: String) -> void:
