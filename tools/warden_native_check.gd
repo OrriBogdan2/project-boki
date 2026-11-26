@@ -10,6 +10,8 @@ extends RefCounted
 
 const HEIGHT_TOL := 0.03  # share: the head stands this close to the contract model's head height
 const UPRIGHT := 0.25  # m, Meshy scale: the head stays this far over the hips in every state (a clip in a wrong frame)
+const BLADE := 1.38  # Meshy units: a held sword's tip from the hand bone, along its Y (Kael's: warden_props)
+const PROBE := 1.0 / 240.0  # s: the step the move clips are swept at
 const CONTRACT_BONES := ["hips", "upper_arm.L", "thigh.L"]
 const POSED_MIN := 10  # bones turned off Meshy's T-pose rest in a playing clip (the T-pose turns none)
 const TURNED := 0.03  # rad: a bone this far off its rest is posed
@@ -17,6 +19,9 @@ const CALM_CAST := 99.0  # s since the last cast: Hunter._anim_state always send
 const SYNTH := "Zz_Clip"  # the test clip a synthetic clips file carries
 const STRING_PULL := 0.08  # m, Meshy scale: the string is drawn this far off the bow at a release move's first frame
 const STRING_BACK := 0.03  # and this near it a frame later
+const RUN_STEP := 0.1  # m per frame the model runs (6 m/s) in the springs case
+const TRAIL_MIN := 0.04  # m: a coat tail's tip streams this much farther back in the run than at a stand
+const LINK_TOL := 0.02  # share: a spring chain's links keep their rest lengths
 ## Slot -> [state before, state that starts it, the clip today's game plays for it]. A cast's state names its cast
 ## slot, which HunterAnim's counters turn into a new cast (cast 5 -> 0).
 const SLOT_CASES := {
@@ -28,7 +33,7 @@ const SLOT_CASES := {
 	"dash": [{}, {"rolling": true}, "idle"],
 	"glide": [{"grounded": false}, {"grounded": false, "gliding": true}, "jump"],
 	"land": [{}, {"feel": Vector2(0.8, 0.0)}, "idle"],
-	"hit": [{"hit_t": 99.0}, {"hit_t": 0.0}, "idle"],
+	"hit": [{"hit_t": 99.0}, {"hit_t": 0.0, "hit_k": Oomph.HEAVY_FLINCH}, "idle"],  # (a stagger; a chip hit only leans)
 	"downed": [{}, {"fall": 0.5}, "idle"],
 	"stomp": [{}, {"stomp": 0.4}, "idle"],
 }
@@ -92,12 +97,14 @@ func _bones(a: String) -> void:
 	m.free()
 
 
-## The head stands where the contract model's does (the same size in game).
+## The head stands where the contract model's does (the same size in game), times the Hunter's data "size".
 func _height(a: String) -> void:
 	var nm := WardenGlb.art(a)
 	var old := (load("res://art/wardens/%s/%s.glb" % [nm, nm]) as PackedScene).instantiate() as Node3D
 	var osk := WardenGlb.skeleton(old)
-	var want := osk.get_bone_global_rest(osk.find_bone("head")).origin.y
+	var want := (
+		osk.get_bone_global_rest(osk.find_bone("head")).origin.y * float(WardenNative.entry(nm).get("size", 1.0))
+	)
 	old.free()
 	var m := _model(a)
 	var glb := m.get_node("Warden") as Node3D
@@ -114,9 +121,14 @@ func _states(main: Node, a: String) -> void:
 	# (every state carries "cast" like Hunter._anim_state's: without it WardenNative reads the state
 	# as not yet filled and ignores the swing; the idle case is the first read, the baseline
 	# the attack's swing_n 1 is counted against)
+	# (the walk at 1.5 m/s, or half the speed this Hunter's walk hands over to the run: Meeko's is under 1.5, but not
+	# under 1.2 STILL)
+	var walk := clampf(
+		0.5 * float(WardenNative.entry(WardenGlb.art(a)).get("run_from", 3.0)), 1.2 * WardenNative.STILL, 1.5
+	)
 	var cases := [
 		["idle", {"cast": 99.0, "grounded": true}],
-		["walk", {"cast": 99.0, "grounded": true, "vel": Vector3(0.0, 0.0, -1.5)}],
+		["walk", {"cast": 99.0, "grounded": true, "vel": Vector3(0.0, 0.0, -walk)}],
 		["run", {"cast": 99.0, "grounded": true, "vel": Vector3(0.0, 0.0, -4.6)}],
 		["jump", {"cast": 99.0, "grounded": false, "vel": Vector3(0.0, 3.0, -4.0)}],
 		["crouch", {"cast": 99.0, "grounded": true, "crouch": 1.0}],
@@ -145,11 +157,49 @@ func _states(main: Node, a: String) -> void:
 	_toon(a, m)
 	_crouch_arms(a, nat)
 	await _slots(main, a, m, nat)
+	await _upper(main, a, m, nat)
 	await _kmoves(main, a, m, nat)
+	_moves(a, nat)
 	_only_meshy(a, m)
 	await _orbits(main, a, nat)
 	_drop_poses(a, m, nat)
+	_springs(a, m, nat)
 	m.free()
+
+
+## Data "springs" builds its chains on Meshy's own bones and no other Hunter's: Sable's coat tails stream back in a
+## run (the tip farther behind the hips than standing) and keep their links' lengths.
+func _springs(a: String, m: Node3D, nat: WardenNative) -> void:
+	var want := (WardenNative.entry(WardenGlb.art(a)).get("springs", []) as Array).size()
+	ok(nat.springs.chains.size() == want, "%s: %d spring chains (data names %d)" % [a, nat.springs.chains.size(), want])
+	if want == 0:
+		return
+	nat.set_process(false)
+	var ids: Array = nat.springs.chains[0]["ids"]
+	var tip := int(ids[ids.size() - 2])
+	var back: Array = []
+	for run_mps in [0.0, RUN_STEP]:
+		m.set_meta(WardenClips.STATE, {"cast": CALM_CAST, "grounded": true, "vel": Vector3(0.0, 0.0, -run_mps * 60.0)})
+		for k in 90:
+			m.position.z -= run_mps
+			nat._process(1.0 / 60.0)
+		var hips := nat.skel.global_transform * nat.skel.get_bone_global_pose(int(ids[0])).origin
+		var tail := nat.skel.global_transform * nat.skel.get_bone_global_pose(tip).origin
+		back.append(tail.z - hips.z)
+	ok(
+		back[1] > back[0] + TRAIL_MIN,
+		"%s: the coat tail streams back in a run (%.2f m, standing %.2f m)" % [a, back[1], back[0]]
+	)
+	var worst := 0.0
+	for j in ids.size() - 2:
+		var rest := nat.skel.get_bone_global_rest(int(ids[j + 1])).origin.distance_to(
+			nat.skel.get_bone_global_rest(int(ids[j])).origin
+		)
+		var now := nat.skel.get_bone_global_pose(int(ids[j + 1])).origin.distance_to(
+			nat.skel.get_bone_global_pose(int(ids[j])).origin
+		)
+		worst = maxf(worst, absf(now / rest - 1.0))
+	ok(worst < LINK_TOL, "%s: the coat tail keeps its link lengths (off by %.1f%%)" % [a, worst * 100.0])
 
 
 ## The drop's shared poses (WardenDropPose) on Meshy's bones, held to the contract Heroes' bars (--clip-check's
@@ -194,6 +244,50 @@ func _crouch_arms(a: String, nat: WardenNative) -> void:
 	var ci := meshy.find_track(leg, rot)
 	var same_leg: bool = li >= 0 and ci >= 0 and mix.track_get_key_value(li, 0) == meshy.track_get_key_value(ci, 0)
 	ok(same_arm and same_leg, "%s: the crouch takes the %s's arms and keeps its own legs" % [a, from])
+
+
+## Each kit move's own clip (data "kmoves"; its clock is the kit's) is there, and its hit pose sits on the kit's hit
+## second (data "hit") within a frame: "peak" speed = the blade tip's fastest second, low = its lowest (first second
+## within 2 cm of it), reach = the first second it stands within 2 cm of its farthest from the hips.
+func _moves(a: String, nat: WardenNative) -> void:
+	for km: String in nat.moves.moves:
+		var mv: Dictionary = nat.moves.moves[km]
+		var clip := String(mv["clip"])
+		ok(nat.player.has_animation(clip), "%s: %s plays its own clip %s" % [a, km, clip])
+		if not mv.has("hit"):
+			continue
+		var length := nat.player.get_animation(clip).length
+		var tips: Array = []
+		var hips: Array = []
+		nat.player.play(clip)
+		for k in int(length / PROBE) + 1:
+			nat.player.seek(k * PROBE, true)
+			var hand := nat.skel.get_bone_global_pose(nat.hand)
+			tips.append(hand.origin + hand.basis.y * BLADE)
+			hips.append(nat.skel.get_bone_global_pose(nat.skel.find_bone("Hips")).origin)
+		var at := _peak(String(mv["peak"]), tips, hips) * PROBE
+		ok(
+			absf(at - float(mv["hit"])) <= 1.0 / 30.0 + 0.001,
+			"%s: %s's hit pose (%s) at %.3f s, the kit's hit %.3f s" % [a, km, mv["peak"], at, mv["hit"]]
+		)
+	nat.player.stop()
+
+
+func _peak(kind: String, tips: Array, hips: Array) -> int:
+	var score: Array = []
+	for k in tips.size():
+		match kind:
+			"speed":
+				score.append(0.0 if k == 0 else (tips[k] as Vector3).distance_to(tips[k - 1]))
+			"low":
+				score.append(-(tips[k] as Vector3).y)
+			_:
+				score.append((tips[k] as Vector3).distance_to(hips[k]))
+	var best: float = score.max()
+	for k in score.size():
+		if score[k] >= best - (0.0 if kind == "speed" else 0.02):
+			return k
+	return 0
 
 
 ## Only Meshy's model draws the body: no mesh of the hidden procedural rig (its weapon, the Offhand's second gauntlet
@@ -295,6 +389,25 @@ func _slots(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
 	await _synthetic_clips(main, a, m, nat)
 
 
+## A swing while he runs plays on the upper body (the run clip stays the playing one, the layer owns the arms); on the
+## spot the attack clip owns the whole body.
+func _upper(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
+	var run_in := {"vel": Vector3(0.0, 0.0, -4.6)}
+	await _feed(main, nat, m, run_in, run_in.merged({"swing_n": 1, "combo": 0}, true))
+	var run_clip := String(nat.plays["run"])
+	ok(
+		nat.player.current_animation == run_clip,
+		"%s: a swing on the run keeps the run clip (%s)" % [a, nat.player.current_animation]
+	)
+	var n_tracks := nat.upper.tracks().size()
+	ok(nat.upper.on and nat.upper.w > 0.0 and n_tracks >= 5, "%s: ...and %d upper-body tracks play it" % [a, n_tracks])
+	await _feed(main, nat, m, {}, {"swing_n": 1, "combo": 0})
+	ok(
+		not nat.upper.on and nat.player.current_animation == String(nat.plays["attack"]),
+		"%s: a swing standing owns the body" % a
+	)
+
+
 ## A clips file (made here: a skeleton under another node name, one clip named SYNTH) lends its clip to a slot.
 func _synthetic_clips(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
 	var src := Node3D.new()
@@ -348,7 +461,9 @@ func _kmoves(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
 		)
 		var length := nat.player.get_animation(clip).length
 		var hold := float(mv.get("hold_from", -1.0))
-		await _feed(main, nat, m, {}, {"kmove": km, "kmove_t": 0.2})
+		# (0.2 s in, or half a short clip's length: a clip with no hold loop stops on its last frame, holds that pose)
+		var early := minf(0.2, 0.5 * length)
+		await _feed(main, nat, m, {}, {"kmove": km, "kmove_t": early})
 		ok(nat.player.current_animation == clip and _turned(nat) >= POSED_MIN, "%s: %s plays %s" % [a, km, clip])
 		if hold >= 0.0:
 			var late := hold + 2.5 * (length - hold)

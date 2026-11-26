@@ -20,9 +20,11 @@ const NEAR_K := 1.0  # body widths round a Hunter's screen box that count as on 
 ## Plates, ownership rings, telegraphs and your own damage numbers are gameplay and not held here.
 const BUDGET := {
 	"text": 1.0,  # words on a Hunter: only your own Boki's ability name, now and then (no callout words)
+	"text plate": 0.0,  # no status word on a standing Hunter's plate: a status is an icon in the plate's row
 	"icon": 0.0,  # no world icon (Sprite3D) on a Hunter
 	"hud grip_icons": 6.0,  # in a fight the glove row shows only the merge-ready glow
 	"ring merge_look": 0.0,  # a ground ring means gameplay: the merge look wears none
+	"hud world_tip": 0.0,  # no hover card (HudHover.draw_world_tip) while you or a squadmate fights
 }
 
 
@@ -50,7 +52,7 @@ static func play(main: Node, archs: Array, frames: int, on_frame: Callable) -> M
 		"demo_kin_lv": "8:95"
 	}
 	o.merge({"arch": archs[0], "cls": Arch.weight(archs[0]), "weapon": Arch.signature(archs[0])}, true)
-	await m.start(o)
+	m.start(o)
 	m.set_process(false)
 	var fade = main.get("fade")
 	if fade != null:
@@ -123,6 +125,11 @@ static func tally(m: Match) -> Array:
 			var on := _on(zones, r)
 			if on > 0:
 				out.append(["hud", g, on])
+	if m.hud:  # a word drawn on a standing Hunter's plate (in place of the name) is a floating word on them too
+		for h: Hunter in m.hunters:
+			var sh: Dictionary = m.hud.plates.shown.get(h.nid, {})
+			if not h.out and not bool(sh.get("downed", true)) and String(sh.get("word", "")) != "":
+				out.append(["text", "plate '%s'" % sh["word"], 1])
 	return out
 
 
@@ -216,5 +223,7 @@ static func _what(v: VisualInstance3D) -> String:
 		var sh := ""
 		if mat is ShaderMaterial and mat.shader:
 			sh = (mat as ShaderMaterial).shader.resource_path.get_file()
+			if (mat as ShaderMaterial).get_shader_parameter("quiet") == 1.0:
+				sh += " quiet"  # a faint own or ally telegraph (Fx._tele_mesh): not a loud mark on the Hunter
 		w += " <%s %s>" % [mi.mesh.get_class(), sh]
 	return w

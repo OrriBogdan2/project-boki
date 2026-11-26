@@ -23,6 +23,7 @@ extends ArchKit
 ##   to it through a chain of afterimages, or you step there when it runs out.
 
 const HAND_OFF := 0.28         # m: a bolt leaves this far to the side, alternating hands
+const FLASH_HIT := 0.12        # s: the struck body's flash (Ent.hurt's own): 3 frames full, then a fade
 const BOLT_COL := Color("9a5cff")
 const BOLT_CORE := Color("e6d8ff")
 const FIZZLE := Color("8e48ff")    # a bolt running out at the cursor: a violet puff
@@ -40,12 +41,18 @@ const GLINT_NET_EVERY := 1.1       # s between two glint pings online viewers ge
 const KNIFE_RELEASE_S := 0.12      # s into thf_knife: the throw's key pose, where the knife leaves her hand
 const CARTWHEELS := ["thf_vault_r", "thf_vault_l", "thf_vault_f", "thf_vault_b", "thf_vault_twist", "thf_exdash"]
 
+## Hunter nid -> {target instance id: target}: every body that hunter's Marks went on (add_mark, set_marks, the
+## only writers). While a hunter's is empty no foe carries one of its Marks, so the step skips the fade walk over
+## every foe on the map. Static: a kit rebuilt mid-match still finds the Marks its hunter left.
+static var marked_by := {}
+
 var primed_t := 0.0            # Vault empowered the next bolt
 var haste_t := 0.0             # Vault's burst of speed (ends on the empowered hit)
 var mark_gap := {}             # target id -> time of its last Mark from us
 var pips := {}                 # target instance id -> {node, t: Ent}: the Mark pips over their head
 var pip_spare: Array = []      # pip rings whose Marks ran out, hidden, for the next target (none made mid-fight)
 var pip_mats: Array[ShaderMaterial] = []    # [lit, unlit]: every diamond wears one of the two
+var knife_sd := {}             # the thrown knife's shot while it flies (its whirr, thief_knife_fly, follows it)
 var knife := {}                # the stuck Shadow Knife: {target, pos, dir} (+ wall, u, s, dy, side: stuck in a barrier)
 var bola_cast := {}            # the Bola winding up, lane showing: {t}
 var bola := {}                 # the Bola in flight: {pos, dir, left, first, bounces, stg}
@@ -124,6 +131,7 @@ func add_mark(t: Ent, n := 1, force := false) -> void:
 	mk[h.nid] = [c, float(res_def().get("dur", 4.0))]
 	t.set_meta("marks", mk)
 	t.set_meta("marks_t", now)
+	_track(t)
 	_pip_pop(t, c)
 	_on_marks(t, had, c)
 	sync_marks(t)
@@ -166,6 +174,7 @@ func set_marks(t: Ent, n: int) -> void:
 	var had := int(e[0]) if float(e[1]) > 0.0 else 0
 	mk[h.nid] = [n, float(res_def().get("dur", 4.0))]
 	t.set_meta("marks", mk)
+	_track(t)
 	_pip_pop(t, n)
 	_on_marks(t, had, n)
 	sync_marks(t)
@@ -259,9 +268,6 @@ func res_text() -> String:
 func dash_payoff_ready() -> bool:
 	return primed_t > 0.0
 
-func ready_label() -> String:
-	return "EMPOWERED  ·  land it to reset Vault" if primed_t > 0.0 else ""
-
 func _tick(dt: float) -> void:
 	haste_t = maxf(0.0, haste_t - dt)
 	if primed_t > 0.0:
@@ -270,13 +276,9 @@ func _tick(dt: float) -> void:
 			primed_t = 0.0
 			fx().puff(hand_pos(hand == 0), FIZZLE, 0.3, 0.2)       # unused, it fades from the hand
 	_tick_pips(dt)
-	# marks fade on every target we've touched
-	for f in m.foes_of(h.team):
-		var mk: Dictionary = f.get_meta("marks", {}) if f.has_meta("marks") else {}
-		if mk.has(h.nid):
-			var e: Array = mk[h.nid]
-			e[1] = float(e[1]) - dt
-			if float(e[1]) <= 0.0: mk.erase(h.nid)
+	var mine: Dictionary = marked_by.get(h.nid, {})
+	if not mine.is_empty():
+		_fade_marks(dt, mine)
 	if not bola_cast.is_empty(): _tick_bola_cast(dt)
 	if not bola.is_empty(): _tick_bola(dt)
 	encore.tick(dt)
@@ -285,10 +287,32 @@ func _tick(dt: float) -> void:
 	quick.tick(dt)
 	_tick_landing()
 	_tick_wrapped(dt)
+	if not knife_sd.is_empty() and not HeroSfx.fly(m, h, "thief_knife_fly", knife_sd):
+		knife_sd = {}
 	_tick_knife()
 	_tick_glint(dt)
 	_tick_aim_line()
 	_net_glint(dt)
+
+## Marks fade on every foe that carries one of ours; then the bodies that no longer carry one leave `mine`.
+func _fade_marks(dt: float, mine: Dictionary) -> void:
+	for f in m.foes_of(h.team):
+		if not f.has_meta("marks"):      # (get_meta with a null default logs an engine error when the key is missing)
+			continue
+		var mk: Dictionary = f.get_meta("marks")
+		if mk.has(h.nid):
+			var e: Array = mk[h.nid]
+			e[1] = float(e[1]) - dt
+			if float(e[1]) <= 0.0: mk.erase(h.nid)
+	for iid in mine.keys():
+		var t: Variant = mine[iid]
+		if not is_instance_valid(t) or not ((t as Node).get_meta("marks", {}) as Dictionary).has(h.nid):
+			mine.erase(iid)
+
+func _track(t: Ent) -> void:
+	if not marked_by.has(h.nid):
+		marked_by[h.nid] = {}
+	marked_by[h.nid][t.get_instance_id()] = t
 
 ## The aim line (your screen only): thin and pale lilac along the aim to the bolt's full range, with an
 ## arrow tick; a thick, solid gold line with a soft gold glow while the next bolt is empowered.
@@ -429,6 +453,7 @@ func _bolt() -> void:
 	else:
 		# the spinning chakram heads a short cel tracer (bolt_trail: dark edge, violet body, hot core, about the
 		# source's comet length); the quick run after a Vault keeps the cartwheel's pale lilac in her hands
+		m.sfx("thief_bolt_tail", h.pos, -6.0 if h.is_local() else -9.0)     # the zip's shimmer, after the weapon's cast
 		var head := fx().ride(sd, "chakram", BOLT_COL, GHOST if came_quick else BOLT_COL, 0.0)
 		HeroVfx.of(m).trail(h, "bolt_trail", head)
 		if came_quick:
@@ -444,6 +469,9 @@ func _bolt_end(s: Dictionary, at: Vector3, e: Ent, why: String, emp: bool) -> vo
 	last_bolt_end = at
 	primed_on = e if emp else null
 	if emp: chain.bolt_ended()
+	if e != null:
+		e.flash_tint = Arch.color(id)      # the struck body flashes in her colour
+		e.flash_t = maxf(e.flash_t, FLASH_HIT)
 	if e != null and emp:
 		fx().star(at, Color("d8c0ff"), 1.5, 0.24)
 		m.fx.spark(at, Vector3.UP, EMP_PALE, 14, 11.0, 70.0)
@@ -824,16 +852,6 @@ func recast_window() -> Dictionary:
 		w["auto"] = true
 	return w
 
-## RecastCue's badge: your Marks on each foe; gold while the empowered bolt is ready to cash them in.
-func combo_marks(out: Array) -> void:
-	super(out)
-	for f in m.foes_of(h.team):
-		var mk: Dictionary = f.get_meta("marks", {}) if f.has_meta("marks") else {}
-		var e: Array = mk.get(h.nid, [0, 0.0])
-		if int(e[0]) > 0 and float(e[1]) > 0.0:
-			var dur := float(res_def().get("dur", 4.0))
-			out.append(RecastCue.mark(f, int(e[0]), float(e[1]), dur, primed_t > 0.0))
-
 func cast_e() -> bool:
 	play("thf_knife")
 	m.later(KNIFE_RELEASE_S, func():     # spun into a side-arm throw, released on the key pose
@@ -858,6 +876,7 @@ func _throw_knife() -> void:
 			if knife.is_empty() and e == null: _stick_ground(at, _why == "wall", land)}))
 	if m.shots.size() > n0 and m.shots[-1]["by"] == h:
 		fx().ride(m.shots[-1], "dagger", col_of(ed), Color("b890ff"), 1.6, 0.26)
+		knife_sd = m.shots[-1]
 	vfx("knife_throw", h.pos + Vector3(h.aim_dir().x * 0.6, 1.1, h.aim_dir().y * 0.6))
 	m.sfx("dj_knife_throw", h.pos, -3.0, 1.0)
 	m.sfx("thief_knife_whisk", h.pos, -6.0 if h.is_local() else -9.0)     # the blade spinning away

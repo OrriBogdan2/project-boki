@@ -42,7 +42,7 @@ func run(main_node: Node) -> void:
 	main.add_child(m)
 	var opts := {"teams": 4, "squad": 3, "tier": 0, "seed": 77, "no_drop": true, "autoplay": true}
 	opts.merge({"heart": true, "god": true, "length": 1e9})
-	await m.start(opts)
+	m.start(opts)
 	m.set_process(false)
 	if main.fade != null:
 		await main.fade.reveal(0.01)

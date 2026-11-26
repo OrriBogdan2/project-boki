@@ -13,3 +13,4 @@ Format and rules: docs/AUDIO.md.
 `water.json` is moving through Deep Water: the weight-class splash going in, the dash spray and a Boki's wading loop (scripts/match/hazard_move_sfx.gd, tools/gen_sfx_water.py).
 `carry.json` is the lead swap, the carry-out claim and a stolen Boki (scripts/match/carry_sfx.gd).
 `blight_mobs.json` is the Blight mobs' wind-up voices (`v_bl_*`, played by `Mob._begin_attack`).
+`belt.json` is the belt cancel cues (`belt_spill` for a spilt tonic, `belt_fumble` for a dropped repair), played by `UtilityUse.spill`; `--hearth-lamp-check`.

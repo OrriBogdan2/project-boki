@@ -20,6 +20,7 @@ const BUSES := {
 	"SFXFar": "SFX",
 	"SFXPan": "SFX",
 	"SFXMuffled": "SFX",
+	"SFXFoe": "SFX",
 	"Voice": "SFX",
 	"Boki": "SFX",
 	"UI": "Master"

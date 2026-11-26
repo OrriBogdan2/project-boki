@@ -62,7 +62,7 @@ func _hunter(main: Node, ak: String, glove: String) -> void:
 	var tree := main.get_tree()
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(
+	m.start(
 		{
 			"training": true,
 			"practice": true,

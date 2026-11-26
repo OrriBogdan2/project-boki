@@ -88,6 +88,11 @@ func _tap_trial(tree: SceneTree, m: Match, key: String, stall: bool) -> bool:
 	if stall:
 		OS.delay_msec(int(STALL_S * 1000.0))
 		await tree.process_frame
+	# The real frames since _ready_up let mobs spawn and your Boki hit one: its hit freeze (Match.hitstop, drained by
+	# real time) eats a tap of any key but fire, and a loaded box runs more game time per frame, so more of them
+	# (11-19: "juggernaut e tap, 100 ms stall: 1/6 lost" only at load 30). This check is about frame rate, not freezes.
+	_clear_mobs(m)
+	m.hitstop = 0.0
 	var before := _snap()
 	var y0 := hunter.pos.y
 	var dash0 := hunter.dash_at

@@ -40,7 +40,7 @@ func run(mn: Node) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 91, "no_drop": true, "god": true})
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 91, "no_drop": true, "god": true})
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)
@@ -138,7 +138,7 @@ func _boss(dir: String, id: String) -> void:
 		if row_name != "wake":
 			b._clear_attack()
 			b.stagger_t = 0.0
-		b.dormant = row_name == "wake"
+		b.set_asleep(row_name == "wake")
 		b.awake_t = 5.0
 		await _frames(30)
 		_trigger(b, row_name)
