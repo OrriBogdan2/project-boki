@@ -8,14 +8,16 @@
                                                           pack image (only pack-meshy uses it); nothing else changes
   dredge_r31.py --backing OUT.glb IN.glb [--ring N]       r32: a reversed-winding backing under every fold zone of the
                                                           skin/dome/goo (see backing()), ink off on the folds
-  dredge_r31.py --relax OUT.glb IN.glb [--goo] [--knee] [--target X] [--passes N]
+  dredge_r31.py --relax OUT.glb IN.glb [--goo] [--knee] [--box B] [--target X] [--passes N]
                                                           skin weights blended toward their neighbours (r28's relax
                                                           loop) only where edges stretch past --target in any clip:
                                                           --goo = the skin-goo primitive (review D1: shards at the goo
                                                           root in Attack, goo stretch 3x live), with each horn rigid except
                                                           its collar (2 rings next to the goo); --knee = the
                                                           skin around both knees (D2: crack under the raised knee at
-                                                          jump apex). Everything outside the mask keeps its weights.
+                                                          jump apex); --box x0,y0,z0,x1,y1,z1 (r34) = skin+dome
+                                                          in that rest box (D3: Attack stretch on the back).
+                                                          Everything outside the mask keeps its weights.
 
 Why: the game camera looks down on Grimble from behind, so the pack is most of what the player sees, and its Meshy
 texture reads near-black/grey with orange specks (review D3, outfit/open_chest 5.5-6.0) against the turnaround's warm
@@ -143,6 +145,16 @@ def relax(o):
             fade = np.where(k, np.clip(np.minimum(rest[:, 1] - lo[1], hi[1] - rest[:, 1]) / RAMP, 0, 1), fade)
             mask |= k
             print("knee: %d verts in box" % k.sum())
+        for bx in o.box:  # r34: any rest box (review D3 torso: Attack stretch on the back, which the game camera sees)
+            lo, hi = np.array(bx[:3]), np.array(bx[3:])
+            k = ((rest >= lo) & (rest <= hi)).all(1)
+            for m, mt in enumerate(mats):  # skin + dome only (not goo, horns, gauntlet, pack)
+                if mt not in ("skin-native", "skin-native-dome"):
+                    k[maps[m]] = False
+            edge = np.minimum(rest - lo, hi - rest).min(1)
+            fade = np.where(k, np.clip(edge / RAMP, 0, 1), fade)
+            mask |= k
+            print("box %s: %d verts" % (bx, k.sum()))
         orig = s.w.copy()
         f = (fade * mask)[:, None]
         worst = _report("before " + name, s, pz, mask)
@@ -329,6 +341,8 @@ def main():
     ap.add_argument("--size", type=int, default=2048, help="pack image size cap (px)")
     ap.add_argument("--goo", action="store_true")
     ap.add_argument("--knee", action="store_true")
+    ap.add_argument("--box", action="append", default=[], type=lambda v: [float(x) for x in v.split(",")],
+                    help="--relax r34: x0,y0,z0,x1,y1,z1 rest box of skin+dome, fade from every face (repeatable)")
     ap.add_argument("--target", type=float, default=3.0, help="x rest length: masked edges over this relax")
     ap.add_argument("--passes", type=int, default=60)
     ap.add_argument("--ink-off", action="store_true", help="--backing: no ink room on the folded originals either")
