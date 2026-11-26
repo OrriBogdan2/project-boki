@@ -52,6 +52,7 @@ func start() -> void:
 	h.panel_open = TALK
 	h.cam.zoom_to = TALK_ZOOM
 	_screen_clear(false)
+	_cam_look(h)      # (a talk can start before the first tick, and its first line already looks)
 	box = TalkBox.open(h, FarmBuilder.full_name(), HobModel.face(TalkBox.FACE_PX))
 	box.line_shown.connect(_on_line)
 	box.closed.connect(_closed)
@@ -179,10 +180,7 @@ func _screen_clear(shown: bool) -> void:
 # ------------------------------------------------------------------ every frame
 func tick(dt: float) -> void:
 	var h = hob.h
-	if look == null:
-		look = CamLook.new()
-		h.add_child(look)
-	look.watching = busy()
+	_cam_look(h).watching = busy()
 	_lock_while_moving(h)
 	if talking():
 		if h.panel_open != TALK:      # (Esc closed it)
@@ -193,6 +191,13 @@ func tick(dt: float) -> void:
 		var to: Vector3 = hob.node.position - h.ppos
 		h.pface = atan2(-to.x, -to.z)
 	_intro()
+
+## The camera's look-here beats, made on first use (tick, or a talk started before any tick).
+func _cam_look(h) -> CamLook:
+	if look == null:
+		look = CamLook.new()
+		h.add_child(look)
+	return look
 
 ## On the first arrival you stand still only while the camera moves (a talk already holds you).
 func _lock_while_moving(h) -> void:
