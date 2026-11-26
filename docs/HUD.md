@@ -82,6 +82,13 @@ drawn, your shield strip drains first and fades, the downed plate shows, cooldow
 the ultimate tile goes cooling -> ready with the shine on the redraw it comes back, steady after, padlocked while stunned,
 no second shine).
 
+## Combat HUD clutter check: backlog (all 13 Hunters, 2026-11-20)
+
+`--hud-clutter-check --hunter=<id>` run for all 13 Hunters on main fff700af22: 6 Hunters failed: Gil cast (drawn panels 58/57), Thief ult (kill feed over the Hunter), Mage and Rimewright ult ("not in a fight", a harness gap), Juggernaut cast (62/57 while three rank-up hints showed) and Tender cast (knock banner still open under load). Fixed here: the kill feed slides out of the Hunter's box, one fresh ALT+key rank-up hint at a time, the check stages a fight state for god-mode Hunters and waits for the knock banner by clock. Open, needs a design call:
+- The drawn-panel budget (`drawn_panels` 57, `total` 68) counts every panel redraw inside the 4-frame recording window, and the panels redraw 20 times a second, so one pass is counted 1 to 3 times (a single pass is about 25 for Albert, the recorded count 50 to 75). Count one pass and lower the budget to match, or keep the budget and say so. Owner OK needed: it changes the gate.
+- After the fixes Gil and Juggernaut casts still read 58 against 57 (18 ability panels and 12 weapon-card panels over two redraws, 29 a pass; Archer's cast is 8 and 10). Budget room, or a lighter ability row and weapon card while casting, is a design call.
+- The hover tooltip can sit over the Boki in the harness shots (cursor at screen centre); the check does not count it.
+
 ## Damage numbers
 
 Every hit's number goes through `Fx.damage_number`, which shows only damage that involves you (dealt by you
