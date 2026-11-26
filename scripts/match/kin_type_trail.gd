@@ -13,7 +13,7 @@ extends Node3D
 const GROUPS := {
 	"rise":
 	{
-		"types": ["fire", "spore", "psychic", "fairy", "dark", "poison", "dragon"],
+		"types": ["fire", "spore", "psychic", "fairy", "dark", "poison", "dragon", "wyrm"],
 		"life": 0.9,
 		"rise": 0.9,
 		"drift": 0.3,

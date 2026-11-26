@@ -62,6 +62,8 @@ const KIT_KEY := {
 
 const CARD_T := 1.5  # s a new step's panel counts as fresh: messages, bubbles and the scout hint wait
 const NAG_T := 8.0  # s without progress before the panel pulses and the Boki says it once more
+# s: the same for a step that is one key or one walk (no thinking); hook has no banner and no other voice
+const NAG_QUICK := {"crouch": 4.0, "glove": 4.0, "hook": 4.0}
 const INTRO_T := 2.0  # s the first-time intro card stays up (any key closes it sooner)
 const SPOT_T := 5.0  # s the lookout shows the glove it spotted
 const POINTS_T := 3.5  # s the "one ability point" line stands before the first pick
@@ -541,7 +543,7 @@ func _is_done(sid: String, dt: float) -> bool:
 			return flag and near.call(5.0)
 		"wallkick":
 			seen["kick"] = seen.get("kick", false) or int(p.stats.get("wall_kicks", 0)) > kicks0
-			return on_lookout()
+			return seen["kick"] and on_lookout()  # (a jump and a ledge catch can climb it too: that does not count)
 		"crouch":
 			if p.crouch and on_lookout():
 				crouch_t += dt
@@ -619,7 +621,7 @@ func _boki_sent() -> bool:
 	return false
 
 
-## Standing on the lookout's top (the wall kick's goal and the scouting spot).
+## Standing on the lookout's top (the wall kick step ends here after a kick, and the scouting spot).
 func on_lookout() -> bool:
 	var p := m.player
 	return p.grounded and _dist(stop("crouch")) < LOOKOUT_R and p.pos.y > stop("crouch").y - LOOKOUT_DROP
@@ -727,7 +729,7 @@ func _stall(dt: float) -> void:
 			stall_t = 0.0
 	if id() == "defend" and not outpost().is_empty() and m.exits.in_yard(outpost(), m.player):
 		stall_t = 0.0  # (holding the circle while the capture runs is the progress)
-	if stall_t >= NAG_T and wait <= 0.0:
+	if stall_t >= float(NAG_QUICK.get(id(), NAG_T)) and wait <= 0.0:
 		stall_t = 0.0
 		best_d = 1e9 if target == Vector3.INF else _dist(target)
 		nag_t = 2.5

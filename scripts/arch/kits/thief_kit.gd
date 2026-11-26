@@ -23,7 +23,6 @@ extends ArchKit
 ##   to it through a chain of afterimages, or you step there when it runs out.
 
 const HAND_OFF := 0.28         # m: a bolt leaves this far to the side, alternating hands
-const FLASH_HIT := 0.12        # s: the struck body's flash (Ent.hurt's own): 3 frames full, then a fade
 const BOLT_COL := Color("9a5cff")
 const BOLT_CORE := Color("e6d8ff")
 const FIZZLE := Color("8e48ff")    # a bolt running out at the cursor: a violet puff
@@ -268,9 +267,6 @@ func res_text() -> String:
 func dash_payoff_ready() -> bool:
 	return primed_t > 0.0
 
-func ready_label() -> String:
-	return "EMPOWERED  ·  land it to reset Vault" if primed_t > 0.0 else ""
-
 func _tick(dt: float) -> void:
 	haste_t = maxf(0.0, haste_t - dt)
 	if primed_t > 0.0:
@@ -473,8 +469,7 @@ func _bolt_end(s: Dictionary, at: Vector3, e: Ent, why: String, emp: bool) -> vo
 	primed_on = e if emp else null
 	if emp: chain.bolt_ended()
 	if e != null:
-		e.flash_tint = Arch.color(id)      # the struck body flashes in her colour
-		e.flash_t = maxf(e.flash_t, FLASH_HIT)
+		e.flash_tint = Arch.color(id)  # the struck body's hit flash shows in her colour
 	if e != null and emp:
 		fx().star(at, Color("d8c0ff"), 1.5, 0.24)
 		m.fx.spark(at, Vector3.UP, EMP_PALE, 14, 11.0, 70.0)
@@ -855,16 +850,6 @@ func recast_window() -> Dictionary:
 		w["auto"] = true
 	return w
 
-## RecastCue's badge: your Marks on each foe; gold while the empowered bolt is ready to cash them in.
-func combo_marks(out: Array) -> void:
-	super(out)
-	for f in m.foes_of(h.team):
-		var mk: Dictionary = f.get_meta("marks", {}) if f.has_meta("marks") else {}
-		var e: Array = mk.get(h.nid, [0, 0.0])
-		if int(e[0]) > 0 and float(e[1]) > 0.0:
-			var dur := float(res_def().get("dur", 4.0))
-			out.append(RecastCue.mark(f, int(e[0]), float(e[1]), dur, primed_t > 0.0))
-
 func cast_e() -> bool:
 	play("thf_knife")
 	m.later(KNIFE_RELEASE_S, func():     # spun into a side-arm throw, released on the key pose
@@ -923,6 +908,7 @@ func _stick(f: Ent, at: Vector3, on_wall := {}) -> void:
 		DashReset.cue(h)
 	vfx("knife_stick", at, null, {"foe": f != null})
 	m.sfx("thief_knife_stick" if f else "thief_knife_ground", at, -6.0, 1.0)
+	net_ring(at, float(ed["ring_r"]), col_of(ed))  # the source arrival circle: 1.5 bh (2.7 m) in radius, no hit area
 
 ## The stuck dagger (a pooled look, everyone sees it); on your screen RecastCue's marker sits on it.
 func _tick_knife() -> void:

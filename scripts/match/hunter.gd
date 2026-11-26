@@ -12,8 +12,8 @@ const H_GRAV := 14.7             # m/s^2 [game data] DefaultGravityZ -1470 uu/s^
 # out under four terraces (the wall kick's job) on our 0.8m terraces
 const JUMP_V := 6.8
 # one-step presses, cleared after each sim step
-const PRESS_KEYS := ["dash", "jump", "sig", "util1", "util2", "util3", "util4", "ult", "sec", "gear1", "gear2", "skill",
-		"swap"]
+const PRESS_KEYS := ["dash", "jump", "sig", "util1", "util2", "util3", "util4", "util5", "util6", "ult", "sec",
+		"gear1", "gear2", "skill", "swap"]
 # [input key, skill slot, feedback slot]: a press on a slot with no point is refused
 const SLOT_GATES := [["dash", "dash", "dash"], ["sec", "sec", "sec"], ["sig", "kin", "k1"], ["ult", "ult", "r"]]
 const AIR_ACCEL := 40.0          # a ledge rise steers crisply (a jump steers by Loco.air_step)
@@ -35,7 +35,7 @@ var wid := "rifle"
 var wpn: Dictionary = {}
 var ctrl := "bot"             # local | bot | remote
 var inp := {"move": Vector2.ZERO, "aim": Vector3.ZERO, "fire": false, "dash": false, "jump": false,
-	"throw": false, "skill": false, "sig": false, "interact": false, "util1": false, "util2": false, "util3": false, "util4": false, "glide": false, "glide_press_only": false, "ult": false,
+	"throw": false, "skill": false, "sig": false, "interact": false, "util1": false, "util2": false, "util3": false, "util4": false, "util5": false, "util6": false, "glide": false, "glide_press_only": false, "ult": false,
 	"sec": false, "sec_hold": false, "crouch": false, "scout": false, "gear1": false, "gear2": false, "swap": false}
 var base_speed := 5.4
 var ground_accel := HunterFeel.ground_accel     # per hunter (HunterMove)
@@ -498,7 +498,7 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 	if downed:
 		return Life.wisp_hit(self, by, dmg, opts)
 	var d_in := d
-	d = MergeShell.absorb(self, d, opts)         # a merged form's shell takes the hit first (docs/decisions/0003)
+	d = MergeShell.absorb(self, d, opts, by)         # a merged form's shell takes the hit first (docs/decisions/0003)
 	var shelled := false
 	if d <= 0.0:
 		if d_in <= 0.0:
@@ -509,10 +509,10 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 		var a := minf(shield, d)
 		shield -= a; d -= a
 		ShieldSfx.hit(self, a)
+		SoakNumber.at(self, by, a, HudStyle.NUM_SHIELD)       # what the shield took, in its own look
 		if shield <= 0.0: shield_kind = ""
 		if d <= 0.0:
 			flash_t = 0.06
-			m.fx.number(pos + Vector3(0, 1.6, 0), a, Color("cfe8ff"), false)
 			return 0.0
 	if drink_t > 0.0 or kit_t > 0.0 or box_reviving():
 		d *= CONSUME_VULN
@@ -538,6 +538,7 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 		# your kin's owner shield soaks last; a fully soaked hit still counts as a hit (truces, interrupts)
 		var ks0 := minf(kin_shield, d)
 		kin_shield -= ks0
+		SoakNumber.at(self, by, ks0, HudStyle.NUM_SHIELD)
 		d = maxf(0.01, d - ks0)
 		opts["soaked"] = ks0
 	return d
@@ -1338,9 +1339,12 @@ func heal(n: float) -> void:
 ## are open to hits (CONSUME_VULN). Dashing, getting stunned or going down spills it (you keep the item).
 ## The belt and what each item does: UtilityBelt, UtilityUse.
 var drink_t := 0.0
+var drink_id := "tonic"        # which belt drink is being drunk, and how long it takes (UtilityUse, the item's "time")
+var drink_len := 1.0
 var kit_t := 0.0
 var beat_id := ""              # the instant belt item whose body beat is playing (UtilityPose)
 var beat_t := 0.0
+var kit_len := 1.6             # how long the armor kit takes (its "time"; both lengths are set when a use starts)
 var vuln_fx_t := 0.0            # paces the pulsing "vulnerable" tell while drinking or repairing
 var finish_t := 0.0             # holding interact over a downed enemy (until the stomp commits)
 var stomp: Dictionary = {}      # committed stomp on an enemy wisp: {o, t, hits} (see Life)
@@ -1392,7 +1396,8 @@ func sim(dt: float) -> void:
 			if ctrl == "local" and inp["jump"] and not m.skydrop.detach(self):
 				m.ship_jump(self)
 			_glide_btn_held = inp.get("glide_btn", false)      # a glide key held aboard is no press out there
-			for k in ["jump", "dash", "sig", "util1", "util2", "util3", "util4", "ult", "fire", "skill", "swap"]:
+			for k in ["jump", "dash", "sig", "util1", "util2", "util3", "util4", "util5", "util6", "ult", "fire",
+					"skill", "swap"]:
 				inp[k] = false
 		return
 	tick_status(dt)
@@ -1454,8 +1459,8 @@ func sim(dt: float) -> void:
 		BoxRevive.guard_inputs(self)
 	# mid-stomp you're committed: none of your own buttons do anything until it ends
 	if not stomp.is_empty():
-		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "util1", "util2", "util3", "util4",
-				"gear1", "gear2", "fire", "throw", "kin_ab"]:
+		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "util1", "util2", "util3", "util4", "util5",
+				"util6", "gear1", "gear2", "fire", "throw", "kin_ab"]:
 			inp[kk] = false
 		inp["move"] = Vector2.ZERO
 	# inputs
@@ -1838,7 +1843,7 @@ func _physics(dt: float) -> void:
 		g = minf(g, pos.y + HunterFeel.spirit_climb * dt)
 		grounded = true
 		vel.y = 0.0
-	var keep: float = 0.05 + m.world.stair_slope(x0, z0, pos.x, pos.z)      # m of drop kept on foot (stairs: the slope)
+	var keep: float = HunterMove.step_down + m.world.stair_slope(x0, z0, pos.x, pos.z)  # m kept on foot (stairs: slope)
 	if grounded and g < pos.y - keep:
 		grounded = false
 		vel.y = minf(vel.y, 0.0)

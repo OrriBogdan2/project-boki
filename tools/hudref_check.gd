@@ -4,7 +4,7 @@ extends RefCounted
 ##   2. the chip holds after a hit, then drains to the new health; the frame flashes on the hit
 ##   3. armour (a strip above health) and shields (past the end of health) are drawn; your own shield
 ##      is a strip over your health with its source's icon, drains before health, fades before it drops
-##   4. a downed hunter shows the downed plate and a status word replaces a slowed rival's name
+##   4. a downed hunter shows the downed plate and a held rival's status rides in the plate's icon row
 ##   5. an ability cooling down shows its countdown on the slot
 ##   6. key caps come from Settings.key_cap, one Merge slot, one G slot, an X tile for the hunter ultimate
 ##   7. a press on cooldown raises one deny (PressDeny: pulse + tick, throttled); a press DashFlow buffers raises none
@@ -111,7 +111,11 @@ func run(main_node: Node) -> void:
 	ok(arm.shield > 0.0 and bool(as_v.get("shield", false)) and HudPlate.shield_frac(arm) > 0.0,
 		"a shielded rival's plate draws the shield past their health (%.2f of the bar)" % HudPlate.shield_frac(arm))
 	arm.armor = 0.0
-	await main.get_tree().process_frame
+	arm.reveal_t = 3.0      # seen however the headless camera faces: an unseen rival's plate is not drawn
+	for i in 60:            # vision refreshes every 0.05s; wait for the first draw after the drop
+		await main.get_tree().process_frame
+		if float(_state(hud, arm).get("armor", 1.0)) <= 0.5:
+			break
 	ok(float(_state(hud, arm).get("brk", 0.0)) > 0.0, "armour hitting zero cracks the strip")
 	await _check_strip(p)
 	# ---------------------------------------------------------------- 4. downed, and status words
@@ -120,18 +124,18 @@ func run(main_node: Node) -> void:
 	var down_word := String(ds.get("word", ""))
 	ok(dn.downed and bool(ds.get("downed", false)) and down_word.begins_with("DOWN"),
 		"a downed rival shows the downed plate ('%s')" % down_word)
-	var sl: Hunter = foes[3]  # the demo holds the whole CC row on them: the bar's word is the worst, STUNNED
+	var sl: Hunter = foes[3]  # the demo holds the whole CC row on them: stunned first, slowed in the row
 	sl.reveal_t = 3.0       # seen however the headless camera faces
-	var sw := ""
+	var icons: Array = []
 	for i in 60:            # vision refreshes every 0.05s and line of sight can lag a few frames headless
 		await main.get_tree().process_frame
-		sw = String(_shown(hud, sl).get("word", ""))
-		if sw == "STUNNED":
+		icons = _row_icons(hud, sl)
+		if "status_stunned" in icons:
 			break
 	var why := "slow %.2f, unseen %s, drawn %s" % [sl.slow_t, sl.unseen, not _shown(hud, sl).is_empty()]
-	var cc_row: Array = HudPlate.statuses(sl).map(func(ic): return String(ic[2]))
-	ok(sw == "STUNNED" and "SLOWED" in cc_row,
-		"a stunned, slowed rival's plate: STUNNED over the bar, SLOWED in its row ('%s', %s, %s)" % [sw, cc_row, why])
+	ok(icons.size() == HudPlate.ROW_MAX and icons[0] == "status_stunned",
+		"a rival held by the whole CC row: a full plate row, stun first ('%s', %s)" % [icons, why])
+	ok(not _shown(hud, sl).has("word"), "a plate carries no status word")
 	await _cc_words(m, hud, sl)
 	m.knock(foes[0], p, {})
 	await main.get_tree().process_frame
@@ -218,6 +222,7 @@ func run(main_node: Node) -> void:
 	_check_safe(hud)
 	await _frames(m, hud, p)
 	await _hud_size(m)
+	await _solos()
 	_done()
 
 ## 10. One screen-edge margin (HudStyle.SAFE_FRAC): every block the HUD registered for hover this frame, the minimap,
@@ -408,39 +413,41 @@ func _redraw(hud) -> void:
 func _shown(hud, h: Hunter) -> Dictionary:
 	return hud.plates.shown.get(h.nid, {})
 
-## One crowd-control effect at a time on a rival (KIT_PARITY "Crowd control"): the plate's word is its own,
+## One crowd-control effect at a time on a rival (KIT_PARITY "Crowd control"): the plate's row shows its own icon,
 ## in its own colour, and no two effects share a colour.
 func _cc_words(m: Match, hud, h: Hunter) -> void:
 	m.remove_meta("hudref_stun")           # (the demo stops holding the whole row on them)
 	var cc := {
-		"STUNNED": [Color("fff27a"), func(): h.stun_t = 3.0],
-		"ROOTED": [Color("8fe0a0"), func(): h.root_t = 3.0],
-		"GROUNDED": [KitStatus.GROUND_COL, func(): KitStatus.apply(h, "gnd", 3.0, 0.0, false, "demo")],
-		"DAZED": [KitStatus.RATTLE_COL, func(): KitStatus.apply(h, "rat", 3.0, 0.0, false)],
-		"SLOWED": [Color("9ae8ff"), func(): h.slow_t = 3.0],
+		"status_stunned": [Color("fff27a"), func(): h.stun_t = 3.0],
+		"status_rooted": [Color("8fe0a0"), func(): h.root_t = 3.0],
+		"status_grounded": [KitStatus.GROUND_COL, func(): KitStatus.apply(h, "gnd", 3.0, 0.0, false, "demo")],
+		"status_dazed": [KitStatus.RATTLE_COL, func(): KitStatus.apply(h, "rat", 3.0, 0.0, false)],
+		"status_slowed": [Color("9ae8ff"), func(): h.slow_t = 3.0],
 	}
 	var cols := {}
-	for word in cc:
+	for icon in cc:
 		h.stun_t = 0.0
 		h.root_t = 0.0
 		h.slow_t = 0.0
 		h.set_meta("gnd_until", 0.0)
 		KitStatus.clear_rattled(h)
 		h.reveal_t = 3.0
-		(cc[word][1] as Callable).call()
-		var got := {}
+		(cc[icon][1] as Callable).call()
+		var items: Array = []
 		for i in 60:
 			await main.get_tree().process_frame
-			got = _shown(hud, h)
-			if String(got.get("word", "")) == word:
+			items = _shown(hud, h).get("row", [])
+			if not items.is_empty():
 				break
-		var col: Color = got.get("word_col", Color.BLACK)
-		var row: Array = HudPlate.statuses(h).map(func(ic): return String(ic[2]))
-		var own: bool = String(got.get("word", "")) == word and col.is_equal_approx(cc[word][0])
-		ok(own and row == [word],
-			"%s alone: plate word %s in its colour, row %s" % [word, got.get("word", ""), row])
+		var col: Color = items[0]["col"] if not items.is_empty() else Color.BLACK
+		var only: bool = items.size() == 1 and items[0]["icon"] == icon and col.is_equal_approx(cc[icon][0])
+		ok(only, "%s alone: its icon in its colour in the plate's row (%s)" % [icon, _row_icons(hud, h)])
 		cols[col.to_html()] = true
-	ok(cols.size() == cc.size(), "the %d crowd-control words use %d different colours" % [cc.size(), cols.size()])
+	ok(cols.size() == cc.size(), "the %d crowd-control icons use %d different colours" % [cc.size(), cols.size()])
+
+## The icons of what the last frame drew in this hunter's plate row.
+func _row_icons(hud, h: Hunter) -> Array:
+	return (_shown(hud, h).get("row", []) as Array).map(func(it): return String(it["icon"]))
 
 ## The plate's animation state (chip, crack, burst ...) for this hunter.
 func _state(hud, h: Hunter) -> Dictionary:
@@ -528,8 +535,8 @@ func _channel(m: Match, hud, p: Hunter) -> void:
 	ok(ChannelBar.shown.has(m_v.nid), "another machine: the snapshot's target and seconds left bring it back")
 	var bare := row.duplicate()
 	# the tail's channel target and seconds left (not its last two fields: the hazard move rides after them)
-	bare[bare.size() - HunterNet.TAIL + 3] = ""
-	bare[bare.size() - HunterNet.TAIL + 4] = 0.0
+	bare[bare.size() - HunterNet.TAIL + 6] = ""
+	bare[bare.size() - HunterNet.TAIL + 7] = 0.0
 	m._net_apply(m_v, bare)
 	await hud.panels.draw
 	ok(ChannelBar.shown.is_empty(), "a snapshot with no channel: the bar is gone")
@@ -651,6 +658,44 @@ func _hud_size(demo: Match) -> void:
 	if had_obj == null: Save.d["tutorial"].erase(FirstObjective.KEY)
 	else: Save.d["tutorial"][FirstObjective.KEY] = had_obj
 	main.get_tree().root.size = Vector2i(1280, 720)
+
+func _spot(hud, id: String) -> bool:
+	return hud.hover_spots.any(func(x): return String(x[1]) == id)
+
+## 9. A solos match with the real HUD: nothing of the squad shows, and the same HUD still draws the rest.
+func _solos() -> void:
+	var m := Match.new()
+	main.add_child(m)
+	var opts := HudRefDemo.opts("--hudref-demo=plates")
+	opts.merge({"tier": 0, "length": 1e9, "seed": 5, "arch": "thief", "cls": Arch.weight("thief"),
+		"weapon": Arch.signature("thief")})
+	opts.merge({"teams": 20, "squad": 1, "total": 20}, true)      # solos: 20 hunters, each their own squad
+	opts["teams"] = 6       # (a few rivals, the demo's row of them, not the whole 20)
+	m.start(opts)
+	var hud = m.hud
+	await frames_until(m, 1.0)
+	var pl: Hunter = m.player
+	await hud.panels.draw
+	ok(not Life.has_mates(m, pl) and m.hunters.size() > 3, "solos: %d hunters, none on your squad" % m.hunters.size())
+	ok(TeamBoki.shown.is_empty() and hud.mates.last.is_empty(),
+		"solos: no squad row, Boki icon or squad watch on the left")
+	ok(_spot(hud, "vitals") and not _spot(hud, "base"),
+		"solos: the vitals block is there, the base-to-a-teammate badge is not")
+	var rivals: Array = m.hunters.filter(func(x): return x != pl)
+	m.knock(rivals[0], pl, {})
+	await hud.panels.draw
+	ok(hud.mates.lines.is_empty() and hud.mates.last.is_empty(), "solos: a rival going down raises no squad line")
+	var fm: FullMap = hud.full_map
+	fm.open()
+	await hud.panels.draw
+	ok(fm.side_rows == 0, "solos: the full map has no squad panel")
+	rivals[1].team = pl.team       # the same HUD with a squadmate: every squad piece comes back
+	await hud.panels.draw
+	ok(fm.side_rows == 2 and _spot(hud, "base"),
+		"a squadmate joins: the map's squad panel (%d rows) and the base badge show" % fm.side_rows)
+	fm.close()
+	m.queue_free()
+	await main.get_tree().process_frame
 
 ## 10. the kill feed (KillFeed): a knock, a finish, a Boki's kill and a monster's knock as rows with faces and the
 ## icon of what did it, a text plate for the rest; at most four, yours outlined, fading, and seen again in the

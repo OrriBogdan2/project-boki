@@ -11,6 +11,7 @@ const STRAFE_HZ := 0.9       # rad/s of a strafing rival's side-to-side
 const WILD_AHEAD := 5.0      # m in front of you the wild Boki turns up
 const WILD_HP := 0.3         # of its health the wild Boki arrives with (two or three hits)
 const KEEP_R := 12.9         # m from the ring's centre: past this a hunter is in or over the wall (its tiles start ~12)
+const STAND_R := 11.9        # m from the centre: the furthest spot she stands at (never in the wall)
 const BACK_R := 11.5         # m from the centre such a hunter is put back at
 
 var tu: DuoTutorial
@@ -100,6 +101,9 @@ func _foe(f: Hunter, i: int, dt: float) -> void:
 		"still", "hold":
 			_hush(f)
 			f.inp["move"] = _toward(f, tu.foe_home(i), 0.6) if foe_mode == "hold" else Vector2.ZERO
+			if tu.guide.downed and f.flat_dist(tu.guide) < Life.R["revive_radius"] + 0.5:
+				# a rival standing by the downed guide stomps her: step off, so you can revive her
+				f.inp["move"] = -f.dir_to(tu.guide)
 			f.inp["aim"] = p.pos + Vector3(0, 0.9, 0)
 		"strafe":
 			_hush(f)
@@ -156,7 +160,10 @@ func _beside() -> Vector3:
 	var p := m.player
 	var fwd := p.aim_dir()
 	var side := Vector2(-fwd.y, fwd.x) * BESIDE
-	return Vector3(p.pos.x + side.x, p.pos.y, p.pos.z + side.y)
+	var at := Vector2(p.pos.x + side.x, p.pos.z + side.y) - DuoTutorial.RING_C
+	if at.length() > STAND_R:
+		at = at.normalized() * STAND_R      # (you stand near the rim: she waits on the floor)
+	return Vector3(DuoTutorial.RING_C.x + at.x, p.pos.y, DuoTutorial.RING_C.y + at.y)
 
 ## Her enemy ping follows the rival she marked.
 func _mark(f: Hunter) -> void:

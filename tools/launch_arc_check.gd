@@ -15,9 +15,9 @@ const DT := 1.0 / 60.0
 ## key -> [op, target, unit, note]. Ops: "<=", ">=", "~" (target [lo, hi]).
 const T := {
 	"pad_vy":              ["~", [16.9, 17.1], "m/s", "[?] no source number: ours, hunter_move.json jump_pad.vy"],
-	"pad_apex_m":          ["~", [9.0, 10.5], "m", "[?] PAD_VY^2 / 2g at [game data] gravity 14.7"],
-	"pad_apex_t":          ["~", [1.05, 1.25], "s", "PAD_VY / g"],
-	"pad_walk_hv":         ["~", [5.9, 6.1], "m/s", "[?] a walk-on leaves at the PAD_MIN_HV floor"],
+	"pad_apex_m":          ["~", [9.0, 10.5], "m", "[?] pad_vy^2 / 2g at [game data] gravity 14.7"],
+	"pad_apex_t":          ["~", [1.05, 1.25], "s", "pad_vy / g"],
+	"pad_walk_hv":         ["~", [5.9, 6.1], "m/s", "[?] a walk-on leaves at the pad_min_hv floor"],
 	"pad_still_hv":        ["~", [5.9, 6.1], "m/s", "[?] standing on it: the floor, toward your aim"],
 	"pad_walk_travel_m":   ["~", [8.5, 10.5], "m", "to pad height: [game data] FallingLateralFriction 0.375/s"],
 	"pad_dash_carry":      [">=", 0.97, "x", "[wiki] a dash into a pad keeps its momentum (off / into)"],
@@ -119,7 +119,8 @@ func _place_pad() -> void:
 			break
 	var n := Node3D.new()
 	m.add_child(n)
-	pad = {"pos": at, "t": 1e9, "node": n, "cd": {}}
+	pad = {"pos": at, "t": 1e9, "arm": 0.0, "after": 0.0, "push": UtilityUse.pad_min_hv, "lift": UtilityUse.pad_vy,
+		"col": Color.WHITE, "node": n, "cd": {}}      # (the fields UtilityMore._pad gives a pad)
 	m.gpads.append(pad)
 	print("LARC pad at %s" % str(at))
 

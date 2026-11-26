@@ -23,6 +23,7 @@ const BRONZE := Color("b9732f")  # Cinderfall's shell (gunslinger_ult)
 const GOLD := Color("ffcf3f")  # her coin (unshaded: the toon light turns gold red-brown)
 const GOLD_DARK := Color("d99a1e")  # its struck faces
 const DUD_DUST := Color("6b4a2e")  # a dud Burr Charge's dull dust puff where its lane ended
+const FEVER_DB := -9.0  # dB: the stim as Fever lights, under a knock's -3
 const DAZE_PINK := Color("ff4fb0")  # palette "daze": the Daze's own colour, so its bonus is not a plain crit
 const GUN_MUZZLE := ^"Rig/Torso/Aim/Gun/Muzzle"  # on her model this sits on the rifle's mouth
 const DAZE_NUM_LIFT := 2.1  # m over a foe's feet: the "+N" floats above its hit number
@@ -109,10 +110,6 @@ func fever_k() -> float:
 	return float(res_def()["vamp"]) * floorf(res)
 
 
-func ready_label() -> String:
-	return ""
-
-
 # ------------------------------------------------------------------ per step
 func _tick(dt: float) -> void:
 	if res_wait <= 0.0 and res > 0.0:
@@ -149,11 +146,12 @@ func shows_charge_ball() -> bool:
 	return false  # the Palm Lance charges an ember orb at her open palm instead
 
 
-const SLIDE_LOOP_FROM := 0.367  # s: the dash clip's slide loop (three keys): a held slide replays it from here,
-const SLIDE_LOOP_T := 0.133  # s: one period at a time, so she stands up as the skid ends
+## kit s: the dash clip's slide loop (clip 0.367-0.5 at its vex.json "rate" 1.25): a held slide replays it from here,
+## one period at a time (the drive pose), and she stands up (the clip's recovery) only once the slide ends
+const SLIDE_LOOP_FROM := 0.367 / 1.25
+const SLIDE_LOOP_T := 0.133 / 1.25  # s, one period of it
 const OVER := 2.0  # s: older than any of her clips (the longest runs 1.07 s): a move aged this far
 # is over to the clips (the kit's anim_id is read as long as it is set)
-
 
 ## Walking out of the slide's stand-up once the skid has ended: the legs are hers again and the walk blends in
 ## (WardenClips.FADE_LOCO) in place of the clip's stand-still pose, the source's Ghost walking off.
@@ -208,6 +206,8 @@ func gate_inputs() -> void:
 
 
 func add_fever(n := 1) -> void:
+	if res <= 0.0:
+		m.sfx("vn_stim", h.pos, FEVER_DB, 1.3)  # Hot Streak lights: the stim, quieter and higher than a knock's
 	res = minf(res_max(), res + float(n))
 	touch_res(float(res_def()["wait"]))
 
@@ -653,14 +653,6 @@ func _confirm_hit(victim: Ent, at: Vector3, dir: Vector2) -> void:
 	vfx("rmb_hit", victim.pos, -dir, {"r": victim.r + 0.9})
 	if h == m.player and m.hud:
 		m.sfx("crit", at, -2.0, 0.8)
-
-
-## RecastCue's badge: Dazed foes (her rifle and Longneedle hit harder; a Longneedle on a Dazed rival SKEWERS).
-func combo_marks(out: Array) -> void:
-	super(out)
-	for f in m.foes_of(h.team):
-		if KitStatus.rattled(f):
-			out.append(RecastCue.mark(f, 0, KitStatus.rattled_left(f), KitStatus.rattled_total(f), true))
 
 
 ## Dazed: the foe takes more from the rifle and Longneedle (rattle_k in the data). The status draws its own

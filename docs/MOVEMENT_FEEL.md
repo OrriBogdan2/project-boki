@@ -661,7 +661,7 @@ Parity pass (DECISIONS 2026-11-07). Sources: sv/briefs/physics.md, SOURCE_UTILIT
 |---|---|---|---|
 | Pad launch speed | not published or decoded | 17 m/s up (hunter_move.json `jump_pad.vy`) | [?] |
 | Pad apex | not published | 9.7 m at 1.15 s, back to pad height after ~2.3 s | [?] (gravity [game data] 14.7) |
-| Pad sideways speed | launches whatever walks onto it | what you brought, at least 6 m/s (`PAD_MIN_HV`; toward your aim if you stood still) | [?] floor |
+| Pad sideways speed | launches whatever walks onto it | what you brought, at least 6 m/s (`pad_min_hv`; toward your aim if you stood still) | [?] floor |
 | Dash into the pad | keeps the forward momentum, plus a small boost | **was: the dash held you level and ran over the pad, no launch.** Now the pad ends the dash and keeps its speed (10.5 of 10.7 m/s), 1.6x the walk-on's travel | [wiki] fixed; boost size [?], not added |
 | WASD in the arc | AirControl 0.015, FallingLateralFriction 0.375 | the one model, `HunterMove.air_steer`: keys reversed the whole arc take 2.3 m/s off, sideways keys drift 1.3 m; a walk-on carries 9.5 m | [game data] match |
 | Glider after a pad | you open it to slow the fall, as after any launch (wiki Gliding) | stays shut; a second press opens it the same frame | [wiki] match (DECISIONS allows a pad auto-glide; the source has none, so none) |
@@ -1030,7 +1030,7 @@ Source: `origin/ext/hero-ref-footage`, folders `venator_ghost` (Ghost), `juggern
 - Lace's RMB tap: the source data fires on any release ("HOLD to charge, RELEASE to fire"; pin.md: a tap fires uncharged). Ours looses nothing on a tap (archer.json's own rule).
 - Kael's LMB swings on the release (the greatsword's charge): a press held past a tap swings later. Brall's press starts the series at once; his hold is the ranged blast.
 - Albert's aegis (not in this slice) rises at its 0.1 s hold, 7 steps at 60 Hz with nothing before it; the same shape as Lace's draw before the fix, if Oath's shield shows on the press.
-- Tenzo's LMB and RMB (not in this slice) show nothing until the release (first sign 2 frames at 60 Hz, 7 at 144: the tap plus the tick hop). If the source shows a wind-up on the press for his fists or his RMB hold, that pose is the fix; if not, this is parity.
+- Tenzo's LMB and RMB (not in this slice): a tap still shows nothing until the release (first sign 2 frames at 60 Hz, 7 at 144: the tap plus the tick hop). LMB, fixed to the source (breah.md 0118: the gauntlet is cocked on the hold's first frame): the `breah_wind` pose now starts `ArchKit.HOLD_POSE_T` (0.1 s) into the hold instead of at the 0.28 s tap window, so 60 Hz frame 6 (was 16) and 144 Hz frame 15 (was 39); the lane and charge still wait for the tap window and a tap shows no hold pose (`--hold-pose-check`). RMB kept: owner item 61 ("a tap shows nothing, it lands on the release") overrides the source's crouch, which shows from the first frame of its hold (0253).
 
 Found by the check and fixed on the side: `VVFx.echo` (Vex's dash after-image) read mesh instances the model had since freed (a muzzle flash, an old weapon) and spammed "previously freed instance" errors on every echo frame; the pair is now skipped and its ghost hidden.
 ## Snag audit (`--snag-check`, decision 0022)

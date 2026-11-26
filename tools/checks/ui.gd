@@ -5,11 +5,17 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	"--modes-check": ["res://tools/modes_check.gd", "modes_check", null],  # trios / solos (decision 0084)
+	"--solo-hud-shots": ["res://tools/solo_hud_shots.gd", "solo_hud_shots", null],  # GPU, --shots-dir=
+	"--results-boki-line-check": ["res://tools/results_boki_line_check.gd", "results_boki_line_check", "check"],
+	"--results-boki-line-shots": ["res://tools/results_boki_line_check.gd", "results_boki_line_check", "shots"],
 	"--reticle-hunters-shots": ["res://tools/reticle_shots.gd", "reticle_shots", "hunters"],
 	"--ghost-visible-check": ["res://tools/ghost_visible_check.gd", "ghost_visible_check", "check"],
 	"--ghost-visible-shots": ["res://tools/ghost_visible_check.gd", "ghost_visible_check", "shots"],
 	"--hatch-flow-shots": ["res://tools/hatch_flow_shots.gd", "hatch_flow_shots", null],  # --hatch-flow-shots=<dir>
 	"--hazard-counter-shots": ["res://tools/hazard_counter_shots.gd", "hazard_counter_shots", null],  # GPU
 	"--stomp-prompt-shots": ["res://tools/stomp_prompt_shots.gd", "stomp_prompt_shots", null],  # --shots-dir=<dir>
+	"--shops-check": ["res://tools/shops_check.gd", "shops_check", null],  # in-match shops, the map legend
+	"--plate-status-check": ["res://tools/plate_status_check.gd", "plate_status_check", null],  # one status row
 	"--ui-text-probe-check": ["res://tools/ui_text_probe.gd", "ui_text_probe", null],  # no text per-letter/off screen
 }

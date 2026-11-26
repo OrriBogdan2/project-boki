@@ -89,7 +89,6 @@ func _setup() -> void:
 
 func res_text() -> String: return "%d" % int(res)
 func res_frac() -> float: return clampf(res / res_max(), 0.0, 1.0)
-func ready_label() -> String: return "SALVAGE" if res >= res_max() else ""
 func rd() -> Dictionary: return res_def()
 ## Seafoam, his palette's "anchor" (content/vfx/dredge.json): the Anchor's telegraph rims stand off yellow-green grass.
 func anchor_col() -> Color: return HeroVfx.of(m).color(h, "anchor")
@@ -535,6 +534,8 @@ func _end_pull(arrived: bool) -> void:
 		arrivals += 1
 		var rdf := rmb_def()
 		if not ally:
+			# the foe stays stunned through the Anchor's wind-up: Deep Reach then Anchor Drop is a sure stun
+			(f as Ent).stun_t = maxf((f as Ent).stun_t, float(rdf["arrive_stun"]))
 			payoff_fx((f as Ent).pos, col_of(rdf), "dredge_coin_jingle", h.aim_dir(), f)
 	var queued := e_queued
 	e_queued = false
@@ -560,7 +561,7 @@ func cast_e() -> bool:
 	slam_dir = e_at if e_at != Vector2.ZERO else h.aim_dir()
 	play("dr_anchor")
 	KitWindup.play(self, "e", "dr_anchor_wind", -3.0)
-	var lands := h.pos + Vector3(slam_dir.x, 0, slam_dir.y) * float(ed["hop"])    # where the hop leaves him
+	var lands := h.pos + Vector3(slam_dir.x, 0, slam_dir.y) * float(ed.get("hop", 0.0))    # where the hop leaves him
 	vfx("anchor_fist", lands, slam_dir, {"r": float(ed["radius"])})
 	return true
 
@@ -597,7 +598,7 @@ func _tick_wind(dt: float) -> void:
 ## direction, `hop` metres over `hop_t` seconds from `hop_from` seconds into the wind-up, so the fist lands on the
 ## far end of it. Skipped mid-barge or in the air (the barge and the dive own the motion there).
 func _hop(ed: Dictionary, t: float) -> void:
-	if float(ed["hop"]) <= 0.0 or t < float(ed["hop_from"]) or t >= float(ed["hop_from"]) + float(ed["hop_t"]):
+	if float(ed.get("hop", 0.0)) <= 0.0 or t < float(ed["hop_from"]) or t >= float(ed["hop_from"]) + float(ed["hop_t"]):
 		return
 	if not h.grounded or h.roll_t > 0.0:
 		return
@@ -606,7 +607,7 @@ func _hop(ed: Dictionary, t: float) -> void:
 		h.vel.x -= slam_dir.x * fwd
 		h.vel.z -= slam_dir.y * fwd
 		return
-	var v: Vector2 = slam_dir * (float(ed["hop"]) / float(ed["hop_t"]))
+	var v: Vector2 = slam_dir * (float(ed.get("hop", 0.0)) / float(ed["hop_t"]))
 	h.vel.x = v.x
 	h.vel.z = v.y
 
@@ -641,7 +642,7 @@ func _anchor() -> void:
 	var stun := _stun_t()
 	var stg := stage("e", {"delivery": {"type": "cone", "radius": float(ed["radius"]), "angle": float(ed["angle"])},
 		"effects": [{"type": "damage", "amount": amt}, {"type": "stun", "duration": stun}]})
-	var on_foe := func(f: Ent, _c: Dictionary): _slammed(f, stun, amt)
+	var on_foe := func(f: Ent, _c: Dictionary): _slammed(f, stun, amt, ed["spike"])
 	var aim_pt := h.pos + Vector3(dd.x, 0, dd.y) * float(ed["radius"])
 	run(stg, cx("e", "anchor_drop", aim_pt, {"no_floor": true, "on_foe": on_foe}))
 	var at := ground(h.pos + Vector3(dd.x, 0, dd.y) * float(ed["radius"]) * 0.5)
@@ -673,13 +674,15 @@ func _stun_t() -> float:
 func over_abyss(f: Ent) -> bool:
 	return m.world.ground_at(f.pos.x, f.pos.z) <= World.VOID + 1.0
 
-func _slammed(f: Ent, stun: float, amt: float) -> void:
+## `spike`: the ground slam's spike block (a foe in the air is driven down); {} for the dive's landing.
+func _slammed(f: Ent, stun: float, amt: float, spike: Dictionary) -> void:
 	var ed := e_def()
 	if not is_instance_valid(f) or f.dead: return
 	if rank("kin") >= 3 and over_abyss(f):
 		abyss_dunks += 1
 		f.hurt(amt * power("kin") * float(ed["abyss_k"]), h, {"src": "abil", "ab": "k1", "tags": ["anchor"]})
-	m.displace.spike(f, -16.0, h)
+	if GlideSpike.dunks(f, spike):
+		m.displace.spike(f, -float(spike["vy"]), h)
 	Feel.hitstop(m, h, f, 30.0, {"melee": true, "heavy": true})
 	if tells_visible():
 		vfx("stunned", f.pos, null, {"on": f, "t": stun})     # a seafoam swirl over the stunned foe
@@ -745,7 +748,7 @@ func _quake(at: Vector3, fell: float) -> void:
 	var r := float(ed["quake_r"])
 	var stg := stage("e", {"delivery": {"type": "burst", "radius": r},
 		"effects": [{"type": "damage", "amount": amt}, {"type": "stun", "duration": stun}]})
-	var on_foe := func(f: Ent, _c: Dictionary): _slammed(f, stun, amt)
+	var on_foe := func(f: Ent, _c: Dictionary): _slammed(f, stun, amt, {})      # a dive: no spike
 	run(stg, cx("e", "anchor_drop", at, {"at_fixed": at, "no_floor": true, "on_foe": on_foe}))
 	var d2 := h.aim_dir()
 	vfx("quake", at, d2, {"r": r})

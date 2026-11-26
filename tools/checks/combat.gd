@@ -7,6 +7,7 @@ extends RefCounted
 const CHECKS := {
 	# a Boki plate, glove wall or ice wall never hides the Hunter behind it; a rock does
 	"--barrier-sight-check": ["res://tools/barrier_sight_check.gd", "barrier_sight_check", null],
+	"--cc-measure-check": ["res://tools/cc_measure_check.gd", "cc_measure_check", null],
 	# Vex's Slipstep: one plain dash, no pips, no Second Wind
 	"--vex-dash-check": ["res://tools/vex_dash_check.gd", "vex_dash_check", null],
 	"--camps-check": ["res://tools/camps_check.gd", "camps_check", null],  # fixed camps and their XP
@@ -22,5 +23,8 @@ const CHECKS := {
 	# Vex's cross-ability interactions
 	"--gunslinger-combo-check": ["res://tools/archetype_check.gd", "archetype_check", null],
 	"--boss-check": ["res://tools/boss_check.gd", "boss_check", null],  # boss lairs: dial, wards, phases, the Rare Egg
+	# belt vs source
+	"--utility-parity-check": ["res://tools/utility_parity_check.gd", "utility_parity_check", null],
 	"--bot-spacing-shots": ["res://tools/bot_spacing_shots.gd", "bot_spacing_shots", null],  # --shots-dir=<dir>, GPU
+	"--mob-fsm-check": ["res://tools/mob_fsm_check.gd", "mob_fsm_check", null],  # monster + boss machines (M9)
 }

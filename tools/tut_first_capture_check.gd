@@ -111,7 +111,7 @@ func _hint() -> void:
 	var text := FirstCapture.hint_text(k)
 	var named: bool = text.contains(k.sp["name"]) and text.contains(String(k.sp["type"]).capitalize())
 	var keyed: bool = text.contains("Hold %s to capture it" % Settings.key_cap("interact"))
-	var home: bool = text.contains("comes home with you if you get out")
+	var home: bool = text.contains("get out to keep it")
 	ok(named and keyed and home, 'the hint names the Boki, its type and the key: "%s"' % text)
 	ok(_flag() and _shown("capture it"), "the hint is on screen and in the save, once per save")
 	var far := _wild("puddlet", 40.0)

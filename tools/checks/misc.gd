@@ -6,6 +6,7 @@ extends RefCounted
 
 const CHECKS := {
 	"--registry-check": ["res://tools/registry_check.gd", "registry_check", null],  # the registry holds together
+	"--stolen-extract-check": ["res://tools/stolen_extract_check.gd", "stolen_extract_check", null],  # extract, saves
 	"--intro-deck-check": ["res://tools/intro_deck_check.gd", "intro_deck_check", null],
 	"--tester-feedback-check": ["res://tools/tester_feedback_check.gd", "tester_feedback_check", null],  # tester 11-19
 	"--cliff-mantle-meadow-check": ["res://tools/cliff_mantle_check.gd", "cliff_mantle_check", 0],
@@ -15,5 +16,8 @@ const CHECKS := {
 	# parse every kin grammar file (=<root> for another folder)
 	"--grammar-check": ["res://tools/grammar_check.gd", "grammar_check", null],
 	"--hero-reel": ["res://tools/hero_reel.gd", "hero_reel", null],  # private pitch footage (GPU)
+	"--warm-twice": ["res://tools/warm_twice.gd", "warm_twice", null],  # a second launch, for benches
 	"--step-up-check": ["res://tools/step_up_check.gd", "step_up_check", null],  # lips walked over
+	# fall parity
+	"--fall-parity-check": ["res://tools/fall_parity_check.gd", "fall_parity_check", null],
 }

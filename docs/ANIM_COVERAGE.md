@@ -71,9 +71,9 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 
 | | idle | walk | run | attack | hit | death | jump | land | glide | dash | cast | stomp |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| burrlet | clip | clip | clip | clip | proc | proc | clip | proc | proc | proc | clip | missing |
-| cindle | clip | clip | clip | clip | proc | proc | clip | proc | proc | proc | clip | missing |
-| puddlet | clip | clip | clip | clip | proc | proc | clip | proc | proc | proc | clip | missing |
+| burrlet | clip | clip | clip | clip | proc | proc | clip | proc | clip | proc | clip | missing |
+| cindle | clip | clip | clip | clip | proc | proc | clip | proc | clip | proc | clip | missing |
+| puddlet | clip | clip | clip | clip | proc | proc | clip | proc | clip | proc | clip | missing |
 
 ### Boki garden states
 
@@ -86,20 +86,21 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | glaciyak | shared | shared | shared | shared | shared | shared | proc | proc |
 | glomwort | shared | shared | shared | shared | shared | shared | proc | proc |
 | goliathite | shared | shared | shared | shared | shared | shared | proc | proc |
+| limpetor | shared | shared | shared | shared | shared | shared | proc | proc |
+| moonloris | shared | shared | shared | shared | shared | shared | proc | proc |
 | moundvark | shared | shared | shared | shared | shared | shared | proc | proc |
 | murmurling | shared | shared | shared | shared | shared | shared | proc | proc |
 | nacrolin | shared | shared | shared | shared | shared | shared | proc | proc |
 | opalisk | shared | shared | shared | shared | shared | shared | proc | proc |
 | scaldamus | shared | shared | shared | shared | shared | shared | proc | proc |
 | sentrikat | shared | shared | shared | shared | shared | shared | proc | proc |
-| spatewader | shared | shared | shared | shared | shared | shared | proc | proc |
 | squalltross | shared | shared | shared | shared | shared | shared | proc | proc |
 | threadwyrm | shared | shared | shared | shared | shared | shared | proc | proc |
-| tuatrune | shared | shared | shared | shared | shared | shared | proc | proc |
 | velvorm | shared | shared | shared | shared | shared | shared | proc | proc |
 | hoarheron | clip | shared | shared | shared | shared | shared | proc | proc |
 | nimbostrich | shared | clip | clip | shared | shared | shared | proc | proc |
 | orchisloth | shared | clip | clip | shared | shared | shared | proc | proc |
+| tuatrune | shared | clip | clip | shared | shared | shared | proc | proc |
 | limpetor | clip | shared | shared | clip | clip | clip | proc | proc |
 | moonloris | clip | shared | shared | clip | clip | clip | proc | proc |
 | cindle | clip | clip | clip | clip | clip | clip | proc | proc |
@@ -119,9 +120,12 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | lodestick | clip | clip | clip | clip | clip | clip | proc | proc |
 | marchleaf | clip | clip | clip | clip | clip | clip | proc | proc |
 | mossgrade | clip | clip | clip | clip | clip | clip | proc | proc |
+| moundvark | clip | clip | clip | clip | clip | clip | proc | proc |
+| murmurling | clip | clip | clip | clip | clip | clip | proc | proc |
 | nettlynx | clip | clip | clip | clip | clip | clip | proc | proc |
 | rimeshrew | clip | clip | clip | clip | clip | clip | proc | proc |
 | selenfin | clip | clip | clip | clip | clip | clip | proc | proc |
+| spatewader | clip | clip | clip | clip | clip | clip | proc | proc |
 | thrumbird | clip | clip | clip | clip | clip | clip | proc | proc |
 | umbrathere | clip | clip | clip | clip | clip | clip | proc | proc |
 | cairnback | clip | clip | clip | clip | clip | clip | proc | proc |
@@ -132,9 +136,9 @@ Worst five, backlog-ready:
 
 - [anim] Boki casquebill (No. 9): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/casquebill_anim.py, rebuild the .glb, rerun --anim-coverage-check
 - [anim] Boki duskapi (No. 11): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/duskapi_anim.py, rebuild the .glb, rerun --anim-coverage-check
-- [anim] Boki floenatee (No. 12): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/floenatee_anim.py, rebuild the .glb, rerun --anim-coverage-check
-- [anim] Boki gibbelle (No. 13): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/gibbelle_anim.py, rebuild the .glb, rerun --anim-coverage-check
-- [anim] Boki glaciyak (No. 14): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/glaciyak_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki floenatee (No. 13): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/floenatee_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki gibbelle (No. 14): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/gibbelle_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki glaciyak (No. 15): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/glaciyak_anim.py, rebuild the .glb, rerun --anim-coverage-check
 
 ### Mobs
 
@@ -158,6 +162,13 @@ Worst five, backlog-ready:
    legs move). His kit moves, stun, glide, knock-down, death and crouch stay `proc`. The rig pass still owes: his own
    loco and hit clips (a fencer's guard, not Meeko's skip), kit-move clips (thrusts, lunge, abilities), crouch, dash
    and death, foot bones; then drop `clips_from`.
+2. **Boki stomp is `missing`** (the Wisp stomp is the Hunter's, a Boki has none). The glide is a `clip` now: each starter
+   .glb bakes a 1.6 s `glide` loop (`boki_clips.glide`: ears pinned, a slow roll and yaw, Cindle spread like a flying
+   squirrel, Puddlet splayed flat with its tail sculling, Burrlet tucked into its cap; added by `tools/boki/glb_clip.py`
+   on the live Bokidex models), and BokiHomeClips builds its `glide` pose (`BokiHomePoses._glide`, legs swung out)
+   only for a species without one, every other Boki; `--glide-shots --boki=<ids>` films it. `Kin.render` sets `kact`
+   `glide` while `owner_h.gliding`, the rider already banks and pitches with your body (`_ride_basis`), and BokiRig
+   blends in and out over 0.15 s (`GLIDE_FADE`). A big Boki's mount form still curls into a ball on your back.
 2. **Boki stomp is `missing`** (the Wisp stomp is the Hunter's, a Boki has none). The glide is `proc` now: no starter
    .glb has a glide clip, so a Boki on your shoulder or pack through your glide plays BokiHomeClips' `glide` (the
    species' idle with all four legs swung out and the ears back, `BokiHomePoses._glide`); `Kin.render` sets `kact`

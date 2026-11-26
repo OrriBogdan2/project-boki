@@ -116,5 +116,11 @@
 		"cm": 26,
 		"kg": 2.1,
 		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
-	}
+	},
+	"roster": {
+		"art": "todo",
+		"line": "puddlet",
+		"stage": 1
+	},
+	"type2": "tide"
 }

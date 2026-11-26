@@ -28,6 +28,7 @@ var m: Match
 var stations: Array = []  # {kind, id, at: Vector3 (the pedestal), c: Vector3 (its perch's middle), label: Label3D}
 var near_i := -1
 var summon_pad: SummonStation = null  # the Boki island's summon pad (arena layout)
+var hints: GroundsHints = null  # the first-time line for each station
 var prompt: Label = null
 var trial: TimeTrial = null  # the time-trial course on the open floor
 
@@ -108,6 +109,7 @@ func build() -> void:
 		_duel(v3(g["duel"]))
 	summon_pad = SummonStation.new(a)
 	GroundsLanes.build(m, g)
+	hints = GroundsHints.new(m)
 	_layer = CanvasLayer.new()
 	_layer.layer = 20
 	prompt = Label.new()
@@ -205,6 +207,7 @@ func tick(dt: float) -> void:
 	if p == null or prompt == null:
 		return
 	summon_pad.tick()
+	hints.tick()
 	if p.pos.y < FALL_Y and not p.downed:
 		p.teleport(a.home)
 		p.vel = Vector3.ZERO
@@ -255,12 +258,18 @@ func use(i: int) -> void:
 	m.fx.ring(s["at"], 1.2, color_of(String(s["kind"]), id), 0.3)
 
 
-## Fill this item's stack. The belt has four slots: when they are all taken, the next one in turn is emptied.
+## Fill this item's stack. The belt has six slots (1 and 2 pinned to the tonic and the armor kit): when the slots this
+## item may use are all taken, the next one in turn is emptied.
 func _stock(id: String) -> void:
 	var p: Hunter = m.player
 	if UtilityBelt.room_for(p, id) <= 0 and UtilityBelt.count(p, id) <= 0:
-		p.belt[_belt_turn % UtilityBelt.SLOTS] = {}
-		_belt_turn += 1
+		var pin := UtilityBelt.fixed_slot(id)
+		for _k in UtilityBelt.SLOTS:
+			var k := _belt_turn % UtilityBelt.SLOTS
+			_belt_turn += 1
+			if (pin >= 0 and k == pin) or (pin < 0 and UtilityBelt.reserved_id(k) == ""):
+				p.belt[k] = {}
+				break
 	UtilityBelt.grant(p, id, UtilityBelt.room_for(p, id))
 
 

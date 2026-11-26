@@ -20,7 +20,7 @@ text is rare. Our looks stay ours: the signature colour is the body of every eff
 | the true area | `AbilityFx.land` / `cast` | an area landing rings exactly its radius (was 1.15x), in the side lean; a zone cast rings its radius once (the extra 1.8x ring is gone) |
 | the true area: lines | `AimKit.span` `width` | a placement line can carry the band it hits under it; Tenzo's X cracks sit on the 3.2 m band its rise slows (was a 0.16 m line), `docs/shots/combat-clarity/tenzo_x_tell_band.jpg` |
 | the hit | `Ent.render` | the hit flash holds full white for 3 frames (`FLASH_FADE`), then fades |
-| what it did: CC | `StatusLooks` + `BodyTell` | each status's own body look (`StatusLooks`, docs/STATUS_LOOKS.md: stars over the head for a stun, stakes at the feet for a root, rings down the legs for a slow, and Grounded, Dazed and the rest), the same from every source; and the body pulses that colour while it lasts (`BodyTell`). No floating CC words, no icon tiles beside other Hunters' plates (the plate's word stays in place of the name) |
+| what it did: CC | `StatusLooks` + `BodyTell` | each status's own body look (`StatusLooks`, docs/STATUS_LOOKS.md: stars over the head for a stun, stakes at the feet for a root, rings down the legs for a slow, and Grounded, Dazed and the rest), the same from every source; and the body pulses that colour while it lasts (`BodyTell`). No floating CC words: a status is an icon with its time ring in the plate's status row (`HudPlate.row`), and the plate keeps the name (no word in its place) |
 | less text | `Fx.word` | one floating word at a spot at a time (`WORD_ROOM` 3 m, `WORD_HOLD` 0.6 s), smaller (28 / 40 px) |
 | less text: Boki | `BokiChatter.heard`, `Match.on_kin_ability` | while you or a squadmate fights (`BokiChatter.calm`) only your own Boki's speech bubble is drawn and no callout pin ("Behind you! · 3m"; `--clarity-shots` prints `CLARITYCHATTER n/20`, 0 is the rule); a Boki's ability name floats over your own Boki only (others' read from their looks) |
 | less text: hover cards | `HudHover.draw_world_tip` | the card about a monster, Boki or Hunter under a resting cursor ("Lace / The Red Stitch", "Boki: Prismander") is not drawn while you or a squadmate fights (`BokiChatter.calm`): in a fight the cursor rests on whoever you aim at. `--clarity-check` budget `hud world_tip` 0 |
@@ -51,13 +51,10 @@ Downed, the screen said who did it three times in the middle of the fight: "Knoc
 ## First-time armour hint waits out the fight (11-24)
 "Hits on Hunters build armour. XP comes from monster kills." (`ArmourHint`, drawn by `ArmorHud.note` just over the LV / XP row) comes from your first hit on a Hunter, so it always landed mid-fight: its box sat on the vitals and on the fight next to them. While `Hud.in_fight()` is true it now waits, keeping its whole 6 s for the next lull. `--armour-hint-check` holds it.
 
-## Lace's Hail Wall laces part round a Hunter (11-24)
-The wall's 32 red threads (`PinFx.rain_on`: an X between each pair of posts and an X across the ground) ran straight
-through any Hunter on or near the arc: a red zigzag over the fight. A lace whose ground line passes within
-`PinFx.LACE_CLEAR` (0.8 m) of a shown Hunter's feet, or that crosses its box on screen (`HunterZone.rect_of`: the
-camera's slant puts a lace on its side of a body across it), is hidden while it does (`PinFx._part_laces`, every frame);
-the posts, the ground laces elsewhere, the arrows and the blue burn flames still mark the wall. Purely visual.
-`--archer-combo-check` holds it.
+## Lace's Hail Wall laces (11-24, moved)
+The wall's red threads used to part round a shown Hunter (`PinFx._part_laces`, `PinFx.LACE_CLEAR`). The wall is now
+the laced `AimKit.arc_wall` (one pooled mesh, `archer_kit.gd`), so those per-lace nodes are gone and the parting with
+them; threads cross bodies again until the pooled arc learns to skip a Hunter's box. Open item.
 
 ## What sits on a Hunter (11-20, stabilize sprint: declutter only)
 `--clarity-shots` also plays a bot 3v3 of the slice Hunters on the Hollow Crown (`tools/clarity_fight.gd`: Vex, Kael,

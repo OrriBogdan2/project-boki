@@ -241,12 +241,14 @@ func _tips() -> void:
 		"bond full (next)": TipText.bond_full("Fuse", true),
 		"send": TipText.send("Pip"),
 		"scan": TipText.scan(),
-		"stagger": TipText.stagger("Brute")
+		"stagger": TipText.stagger(),
+		"down": TipText.down(),
+		"skill": TipText.skill("Pip", "Zap")
 	}
 	for k in lines:
 		_clean(lines[k], "first-time hint '%s'" % k)
 	ok(
-		TipText.move().contains(Settings.key_cap("fire")) and TipText.move().contains("again in the air"),
+		TipText.move().contains(Settings.key_cap("fire")) and TipText.move().contains("again to glide"),
 		"the first move hint names the rebound attack key and the glide wording"
 	)
 
@@ -264,12 +266,15 @@ func _garden() -> void:
 	ok(build == "Press " + Settings.key_cap("build"), "a garden hint follows a rebind ('%s')" % build)
 
 
-## The Training Area checklist: no key in the words (the HUD prints the live cap beside each row).
+## The Training Area checklist: the rows follow the binding (the glide row shows the live jump key).
 func _drill(m: Match) -> void:
 	for t in m.training.rows():
 		_clean(t[1], "training drill '%s'" % t[0])
 	var glide: Array = m.training.rows().filter(func(t): return t[0] == "glide")[0]
-	ok(glide[1].contains("again in the air"), "the glide drill is jump, then press again in the air ('%s')" % glide[1])
+	ok(
+		glide[1].contains(Settings.key_cap("jump") + " again in the air"),
+		"the glide drill is jump, again ('%s')" % glide[1]
+	)
 	var ult: Array = m.training.rows().filter(func(t): return t[0] == "ult")[0]
 	ok(ult[1].contains(Settings.key_cap("ultimate")), "the Fuse drill names the rebound key ('%s')" % ult[1])
 
