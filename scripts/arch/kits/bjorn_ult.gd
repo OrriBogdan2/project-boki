@@ -10,8 +10,8 @@ extends Node3D
 ## standing on it. A stun during the wind-up interrupts it (the cooldown comes back to "refund" s); a merge
 ## drops the wind-up with no slam.
 ##
-## The landing is the impact: a hit-stop for him (his own screen never shakes, item 50), a shake for players near,
-## a dust ring, rock debris, a cracked-ground decal and a sub-heavy quake under the slam.
+## The landing is the impact: a hit-stop for him when it strikes a foe (his own screen never shakes, item 50), a
+## shake for players near, a dust ring, rock debris, a cracked-ground decal and a sub-heavy quake under the slam.
 ##
 ## Look (pooled): one soft lane over the whole reach (lit rails over a faint inside, never a solid fill: the
 ## zone rule in docs/VFX_QUALITY.md) with a lightning crack down its middle that glows brighter through the
@@ -259,11 +259,12 @@ func _slam() -> void:
 ## and the quake.
 func _impact(at: Vector3) -> void:
 	var m: Node = k.m
-	var stop := ImpactWeight.hold_s("heavy")       # his landing holds him a heavy hit's hit-stop, foes or none
-	if h == m.get("player") and not bool(m.get("net_on")):
-		m.freeze_frame(stop)
-	else:
-		Feel.hold(h, stop, float(m.time))       # (within the per-body cap, like every other hold)
+	var stop := ImpactWeight.hold_s("heavy")       # a slam that strikes a foe holds him a heavy hit's hit-stop
+	if not hit.is_empty():      # (a whiff never holds him past the plant: owner 11-26)
+		if h == m.get("player") and not bool(m.get("net_on")):
+			m.freeze_frame(stop)
+		else:
+			Feel.hold(h, stop, float(m.time))       # (within the per-body cap, like every other hold)
 	for f in k.foes_in(origin, cell_len() * 1.2):
 		if hit.has(f.get_instance_id()):
 			Feel.hitstop(m, h, f, float(xd().get("strike_dmg", 4.0)), {"heavy": true, "payoff": true})

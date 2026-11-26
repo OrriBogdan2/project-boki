@@ -136,7 +136,7 @@
 		},
 		"surf_heat": 1.25,
 		"variants": {
-			"hold": "Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. Walking into foes pushes nobody; {fire} with it up is the boop, a shield thrust that shoves foes in front 2.8m (no damage). With it up, {dash} is the Shield Charge on this slot's 6s cooldown.",
+			"hold": "Raise the aegis: your wooden figurehead shield held up as a wall, 160 HP that regenerates; it blocks shots from the front and you walk slower. Walking into foes pushes nobody; {fire} with it up is the boop, a shield thrust that shoves foes in front 2.8m (no damage). With it up, {dash} is the Shield Charge on this slot's 6s cooldown.",
 			"tap": "A tap only raises and lowers the aegis; the Bash is the Shield Charge on the dash key.",
 			"air": "Shield Surf: hold to block from the front while gliding."
 		},
@@ -183,13 +183,13 @@
 		"unlock": 6,
 		"cooldown": 40.0,
 		"windup": 0.4,
-		"plant": 0.2,
+		"plant": 0.05,
 		"leap_h": 1.2,
-		"cells": 4,
+		"cells": 3,
 		"cell_len": 4.0,
-		"width": 5.5,
-		"lead": 0.4,
-		"cell_t": 0.15,
+		"width": 7.0,
+		"lead": 0.2,
+		"cell_t": 0.1,
 		"strike_dmg": 4.0,
 		"strike_stun": 0.5,
 		"dmg": 18.0,
@@ -200,7 +200,7 @@
 		"scar_w": 1.4,
 		"scar_slow": 0.2,
 		"refund": 8.0,
-		"desc": "Hop 1.2m up with the hammer high overhead and drive it down (0.4s, the 16m by 5.5m lane shows to everyone), then slam (planted 0.2s more; then you move freely while it runs): the fissure races down the lane, striking each foe on it (4, stun 0.5), and the ground erupts cell by cell to the far end, throwing each foe up once (18, slowed 50% for 1.5s). A wall or a raised ledge stops it. A glowing scar stays 10s and slows foes on it 20%."
+		"desc": "Hop 1.2m up with the hammer high overhead and drive it down (0.4s, the 12m by 7m lane shows to everyone), then slam and move on at once while it runs: the fissure races down the lane in 0.2s, striking each foe on it (4, stun 0.5), and the ground erupts cell by cell to the far end, throwing each foe up once (18, slowed 50% for 1.5s). A wall or a raised ledge stops it. A glowing scar stays 10s and slows foes on it 20%."
 	},
 	"order": [
 		"sec",
@@ -242,7 +242,7 @@
 		"lmb": "[D] [O] (owner) (cd/dmg/range/timing: KIT_PARITY row)",
 		"rmb": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
 		"e": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
-		"x": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"x": "[D] [O] (owner 11-26: shorter plant and run, wider lane) (cd/dmg/range/timing: KIT_PARITY row)",
 		"dash": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
 		"passive": "[D] [O] (owner question open) (cd/dmg/range/timing: KIT_PARITY row)"
 	}
