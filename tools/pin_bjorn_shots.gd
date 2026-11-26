@@ -149,6 +149,14 @@ const SHOTS := [
 		"Supercharged hit: the teal X-star and a mint fletch burst on the dummy"
 	],
 	[
+		"pin_super_hit_after",
+		"archer",
+		"super_shot",
+		2.2,
+		5.0,
+		"0.8 s after a Supercharged hit: nothing left on the floor under the dummy"
+	],
+	[
 		"pin_heavy_hold",
 		"archer",
 		"heavy",
@@ -784,7 +792,7 @@ func take(main_node: Node, out: String) -> void:
 
 ## Where a shot's close-up looks: an impact at the target, anything else between the hero and the lead.
 func _close_focus(stem: String, lead: float) -> Vector3:
-	if stem.ends_with("_hit") or stem.ends_with("_impact"):
+	if stem.ends_with("_hit") or stem.ends_with("_hit_after") or stem.ends_with("_impact"):
 		return T.pos
 	return P.pos + Vector3(lead * 0.6, 0, 0)
 
