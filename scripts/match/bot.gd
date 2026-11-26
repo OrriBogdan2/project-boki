@@ -1511,11 +1511,11 @@ func _grid_path_in(m: Match, a: Vector2i, b: Vector2i, h: Hunter, slack: int, ca
 			break
 		var cy := w.ground_at(cx + 0.5, cz + 0.5)
 		for k in 4:      # east, west, south, north (the order picks between equal ways round)
-			var nx := cx + STEP_X[k]
-			var nz := cz + STEP_Z[k]
+			var nx: int = cx + STEP_X[k]
+			var nz: int = cz + STEP_Z[k]
 			if nx < lo.x or nz < lo.y or nx > hi.x or nz > hi.y or not w.inb(nx, nz):
 				continue
-			var ni := (nz - lo.y) * cols + nx - lo.x
+			var ni: int = (nz - lo.y) * cols + nx - lo.x
 			if prev[ni] >= 0 or w.kind[w.idx(nx, nz)] != World.T_GROUND:
 				continue
 			if cap < INF and Vector2(nx + 0.5, nz + 0.5).distance_to(hc) > cap:
