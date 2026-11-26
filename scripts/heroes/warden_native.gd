@@ -230,6 +230,8 @@ func _process(dt: float) -> void:
 		_loco(s)
 	var hips := WardenSkeleton.find(skel, "root")
 	skel.set_bone_pose_scale(hips, skel.get_bone_rest(hips).basis.get_scale())  # (Meshy keys no scale: no old squash)
+	if twist.back and cur in LEGS_RUN:
+		player.speed_scale = -absf(player.speed_scale)  # (a back-pedal: the loop clip backwards, WardenNativeTwist)
 	player.advance(dt)
 	upper.lay(dt)
 	twist.step(dt, s, cur in LEGS_RUN)

@@ -319,7 +319,7 @@ func _upper(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
 
 
 ## Strafing right while facing ahead turns the legs a quarter turn to the way he goes and leaves the torso where it
-## was (the aim); standing, nothing turns.
+## was (the aim); back-pedalling, the legs face the aim and run backwards; standing, nothing turns.
 func _twist(a: String, nat: WardenNative) -> void:
 	var sk := nat.skel
 	var hips_before := sk.get_bone_global_pose(nat.twist.hips).basis.get_rotation_quaternion()
@@ -331,6 +331,10 @@ func _twist(a: String, nat: WardenNative) -> void:
 		absf(legs - PI / 2.0) < 0.05 and torso < 0.05,
 		"%s: strafing turns the legs %.2f rad, the torso %.2f" % [a, legs, torso]
 	)
+	for k in 4:
+		nat.twist.step(1.0, {"vel": Vector3(0.0, 0.0, 4.6), "face": 0.0}, true)
+	var turn := nat.twist.turn
+	ok(nat.twist.back and absf(turn) < 0.05, "%s: back-pedalling runs backwards, legs %.2f rad" % [a, turn])
 	nat.twist.step(1.0, {"vel": Vector3.ZERO, "face": 0.0}, true)
 	ok(absf(nat.twist.turn) < 0.01, "%s: standing, the legs face the aim again" % a)
 
