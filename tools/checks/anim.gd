@@ -17,6 +17,7 @@ const CHECKS := {
 	"--geo-shots": ["res://tools/geo_shots.gd", "geo_shots", null],
 	"--native-upper-shots": ["res://tools/native_upper_shots.gd", "native_upper_shots", null],
 	"--warden-native-check": ["res://tools/warden_native_check.gd", "warden_native_check", null],  # Meshy skeleton
+	"--glide-anim-check": ["res://tools/glide_anim_check.gd", "glide_anim_check", null],  # glide/dive clips, all 13
 	"--native-springs-shots": ["res://tools/native_springs_shots.gd", "native_springs_shots", null],
 	"--tenzo-press-strip": ["res://tools/tenzo_press_strip.gd", "tenzo_press_strip", null],  # Tenzo LMB press frames
 	"--live-audit": ["res://tools/live_audit.gd", "live_audit", null],  # Hunters as played, GPU renders
