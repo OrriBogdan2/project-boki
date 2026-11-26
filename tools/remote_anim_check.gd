@@ -171,14 +171,17 @@ func _guest_door() -> int:
 	if door_gap == 0:
 		return port
 	_line(0.0)
-	var cmd := "exec python3 '%s' %d %d 0 --parent-pid %d --max-life 900 --delay-file '%s' > '%s' 2>&1 < /dev/null" % [
-		ProjectSettings.globalize_path("res://tools/online_feel_proxy.py"),
-		port + PROXY_GAP,
-		port,
-		OS.get_process_id(),
-		dir.path_join("line_ms"),
-		dir.path_join("proxy.log")
-	]
+	var cmd := (
+		"exec python3 '%s' %d %d 0 --parent-pid %d --max-life 900 --delay-file '%s' > '%s' 2>&1 < /dev/null"
+		% [
+			ProjectSettings.globalize_path("res://tools/online_feel_proxy.py"),
+			port + PROXY_GAP,
+			port,
+			OS.get_process_id(),
+			dir.path_join("line_ms"),
+			dir.path_join("proxy.log")
+		]
+	)
 	proxy_pid = OS.create_process("/bin/sh", ["-c", cmd])
 	return port + PROXY_GAP
 
@@ -389,8 +392,7 @@ func _hazard_moves() -> void:
 	for kind in ["deep_water", "ice"]:
 		var c: Vector3 = spots[kind]
 		tz._add_area(
-			kind,
-			[[c.x - 2.5, c.z - 2.5], [c.x + 2.5, c.z - 2.5], [c.x + 2.5, c.z + 2.5], [c.x - 2.5, c.z + 2.5]]
+			kind, [[c.x - 2.5, c.z - 2.5], [c.x + 2.5, c.z - 2.5], [c.x + 2.5, c.z + 2.5], [c.x - 2.5, c.z + 2.5]]
 		)
 	for kind: String in spots:
 		_fresh(p)

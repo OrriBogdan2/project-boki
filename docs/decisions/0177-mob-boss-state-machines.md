@@ -1,4 +1,4 @@
-# 0179: Monsters and lair bosses on one explicit state each
+# 0177: Monsters and lair bosses on one explicit state each
 
 - **Status:** accepted
 - **Date:** 2026-11-11

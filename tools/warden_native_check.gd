@@ -94,12 +94,14 @@ func _bones(a: String) -> void:
 	m.free()
 
 
-## The head stands where the contract model's does (the same size in game).
+## The head stands where the contract model's does (the same size in game), times the Hunter's data "size".
 func _height(a: String) -> void:
 	var nm := WardenGlb.art(a)
 	var old := (load("res://art/wardens/%s/%s.glb" % [nm, nm]) as PackedScene).instantiate() as Node3D
 	var osk := WardenGlb.skeleton(old)
-	var want := osk.get_bone_global_rest(osk.find_bone("head")).origin.y
+	var want := (
+		osk.get_bone_global_rest(osk.find_bone("head")).origin.y * float(WardenNative.entry(nm).get("size", 1.0))
+	)
 	old.free()
 	var m := _model(a)
 	var glb := m.get_node("Warden") as Node3D
@@ -116,8 +118,11 @@ func _states(main: Node, a: String) -> void:
 	# (every state carries "cast" like Hunter._anim_state's: without it WardenNative reads the state
 	# as not yet filled and ignores the swing; the idle case is the first read, the baseline
 	# the attack's swing_n 1 is counted against)
-	# (the walk at 1.5 m/s, or half the speed this Hunter's walk hands over to the run: Meeko's is under 1.5)
-	var walk := minf(1.5, 0.5 * float(WardenNative.entry(WardenGlb.art(a)).get("run_from", 3.0)))
+	# (the walk at 1.5 m/s, or half the speed this Hunter's walk hands over to the run: Meeko's is under 1.5, but not
+	# under 1.2 STILL)
+	var walk := clampf(
+		0.5 * float(WardenNative.entry(WardenGlb.art(a)).get("run_from", 3.0)), 1.2 * WardenNative.STILL, 1.5
+	)
 	var cases := [
 		["idle", {"cast": 99.0, "grounded": true}],
 		["walk", {"cast": 99.0, "grounded": true, "vel": Vector3(0.0, 0.0, -walk)}],

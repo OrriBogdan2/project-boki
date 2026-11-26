@@ -104,7 +104,7 @@ the farm top bar (y 24) and key hints (y 679). Decide the safe-area size before 
 Retired terms (Warden, Mantle, Bearer, Merge, Unmasked) were not seen on any first-15 screen. Terms that appear before any line explains them:
 - **Creator:** Shroud, Hollow, Glow, Ghost, Aura (shown on screen 05; "You are one of the Empty" is the only line).
 - **Hatch:** egg types Venom / Prism / Spore, "BOLD / GENTLE / CURIOUS" tags (06).
-- **Tutorial HUD (from the first frame):** Fever (resource bar), FIGHTING / FOLLOW (status under the portrait), COMMON / UNCOMMON (armour tier), AUTO, "from Boki",
+- **Tutorial HUD (from the first frame):** Fever (buff icon), FIGHTING / FOLLOW (status under the portrait), COMMON / UNCOMMON (armour tier), AUTO, "from Boki",
   "CARRY OFF FOLLOW", "Relics / Leave" bar and the key `J`, the glider strip (4 unlabeled icons), belt slots 1-4, Q V X, "Box 0/3", seeds, the weapon class label
   "THE HIRED GUN · MEDIUM". Toasts name perks before any perk is explained: "Kindling!", "LEVEL 6 · Deep Magazine", "Quick Feed, Hotload".
 - **Results:** Knocks, Armor "Uncommon", Tidebloom seeds, "Into your armory", the name line "Hunter the Hired Gun" (the default player name is "Hunter").
