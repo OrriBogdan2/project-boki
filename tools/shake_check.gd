@@ -44,6 +44,7 @@ func run(main: Node) -> void:
 		_enemy_hits_at_zero(m, hero)
 		m.queue_free()
 		await main.get_tree().process_frame
+	Settings.v["screen_shake"] = 1.0
 	await _own_boki(main)
 	await _boss_slam(main)
 	await _fight(main)
