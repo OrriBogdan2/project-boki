@@ -5,7 +5,7 @@ Her hands are empty: fire comes from the right palm (LMB, RMB), so G is that pal
 from hanging along the arm to palm out, fingers up; "RH"/"LH" (palm normal, fingers) turn a hand freely (the idle and stance).
 The idle and stance (docs/art/IDLE_AUDIT.md) are authored with empty hands, fire from her hands (DECISIONS Nov 7: no weapons): she is
 not mad, just certain, and pleased with herself.
-Run: blender -b --python tools/art1/cinder_clips.py -- <cinder.blend> <out.glb> [clip,clip]"""
+Run: blender -b --python tools/art1/cinder_clips.py -- <cinder.blend or the shipped cinder.glb> <out.glb> [clip,clip]"""
 import sys, os, math
 import bpy
 import numpy as np
@@ -339,8 +339,11 @@ def clips():
     out.append(C("rise", 0.4, [(0.0, ri), (0.2, dict(ri, FL=(-0.09, 0.15, 0.38))), (0.4, ri)]))
     fa = {"pel": (0, 0, 0.03), "prt": (0.08, 0, 0), "tor": (-0.08, 0, 0), "hed": (0.06, 0, 0), "G": (0.3, 0.1, 0.96), "LP": (-0.36, 0.06, 1.04), "FL": (-0.11, 0.12, 0.25), "FR": (0.13, -0.08, 0.31), "FLp": 0.3, "FRp": 0.4, "fing": 0.1, "skirt": 0.35, "jaw": 0.2}
     out.append(C("fall", 0.6, [(0.0, fa), (0.3, dict(fa, FL=(-0.11, 0.09, 0.27), FR=(0.13, -0.05, 0.28), LP=(-0.36, 0.06, 1.08))), (0.6, fa)]))
-    l2 = {"pel": (0, 0.02, -0.2), "prt": (0.3, 0, 0), "tor": (0.26, 0, 0), "hed": (-0.26, 0, 0), "G": (0.28, 0.08, 0.72), "LP": (-0.3, 0.06, 0.74), "FL": (-0.12, 0.08, A_Z), "FR": (0.13, -0.08, A_Z), "fing": 0.5}
-    out.append(C("land", 0.4, [(0.0, dict(l2, pel=(0, 0, -0.04))), (0.08, l2, "out"), (0.4, END)]))
+    # a heavy's absorb (docs/DEBT.md, ext/cinder-land-weight): the hips go 0.08 m lower (a deeper bend in the knees, the feet
+    # planted), the arms trail the drop a little more, and the low is held to 0.12 s before she rises, so the 3 m drop dips
+    # at least as far on screen as the mediums' median (--clip-check JL rows). The pose and the 0.4 s length are as before.
+    l2 = {"pel": (0, 0.02, -0.28), "prt": (0.32, 0, 0), "tor": (0.28, 0, 0), "hed": (-0.28, 0, 0), "G": (0.28, 0.08, 0.68), "LP": (-0.3, 0.06, 0.7), "FL": (-0.12, 0.08, A_Z), "FR": (0.13, -0.08, A_Z), "fing": 0.5}
+    out.append(C("land", 0.4, [(0.0, dict(l2, pel=(0, 0, -0.07))), (0.07, l2, "out"), (0.12, l2), (0.4, END)]))
     sg = (K.SH - 0.02, -0.06, K.SHOULDER_Z + 0.36)
     gl = {"pel": (0, 0, 0.0), "prt": (0.12, 0, 0), "tor": (-0.02, 0, 0), "hed": (-0.08, 0, 0), "G": sg, "LP": (-sg[0], sg[1], sg[2] - 0.06), "FL": (-0.1, 0.0, 0.2), "FR": (0.12, -0.2, 0.26), "FLp": 0.4, "FRp": 0.5, "fing": 1.0, "skirt": -0.2, "jaw": 0.3, }
     out.append(C("glide", 1.6, [(0.0, gl), (0.8, dict(gl, pel=(0.01, 0, 0.012), FR=(0.12, -0.23, 0.27), FL=(-0.1, 0.03, 0.19))), (1.6, gl)]))
@@ -484,7 +487,18 @@ def bake_jets(arm, clip, act):
 
 if __name__ == "__main__":
     a = sys.argv[sys.argv.index("--") + 1:]
-    bpy.ops.wm.open_mainfile(filepath=a[0])
+    from_glb = a[0].endswith(".glb")
+    if from_glb:      # the shipped model (its clips then go on with tools/art1/glb_add_clips.py): bone axes as exported
+        bpy.ops.wm.read_factory_settings(use_empty=True)
+        bpy.ops.import_scene.gltf(filepath=a[0], bone_heuristic="BLENDER")
+        for act in list(bpy.data.actions):      # (the baked clips keep their own names)
+            bpy.data.actions.remove(act)
+        # the scan's palm centre is not in a .glb: the hanging rest hand's palm, found by re-baking idle and fall until they
+        # matched the shipped clips (right forearm within 1 deg): 0.015 m in and 0.0545 m down from the hand joint
+        hr = next(o for o in bpy.data.objects if o.type == "ARMATURE").data.bones["hand.R"].head_local
+        bpy.context.scene["palm"] = tuple(Vector(hr) + Vector((0.015, 0.0, -0.0545)))
+    else:
+        bpy.ops.wm.open_mainfile(filepath=a[0])
     for im in bpy.data.images:      # the finish saves paths from the Meshy dir (stage/c/atlas.png): found next to the .blend from anywhere else
         alt = os.path.join(os.path.dirname(os.path.abspath(a[0])), os.path.basename(im.filepath))
         if im.filepath and not im.packed_file and not os.path.exists(bpy.path.abspath(im.filepath)) and os.path.exists(alt):
@@ -494,7 +508,8 @@ if __name__ == "__main__":
     rig = {"grip_rest": tuple(bpy.context.scene["palm"]), "blade_rest": tuple(K.GUN_B), "edge_rest": tuple(K.GUN_E), "pelvis": K.HIPS_Z + 0.03, "hilt_l": -K.FORE,
            "lhand": {"k": (0, 1, -0.15), "o": (-1, 0, 0), "palm": (-K.SH + 0.005, 0.0, K.HAND_Z - 0.05)}}
     bpy.context.scene.render.fps = FPS
-    add_breath(arm)
+    if not from_glb:      # (x_breath and its skin weights are in the shipped model)
+        add_breath(arm)
     sol = CastSolver(arm, rig)
     bpy.context.view_layer.objects.active = arm
     names = []
