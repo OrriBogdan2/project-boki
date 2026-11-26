@@ -2,6 +2,7 @@ extends RefCounted
 ## --flinch-layer-check: a hit during each Hero's LMB hold keeps the ability clip running and adds the flinch
 ## (WardenFlinch): the clip, its weights and the legs are as without the hit; the torso leans away from the hit
 ## (front, back, left, right); a harder hit leans further; it settles back; only a stagger plays the hit clip.
+## A Hero with no keyed moves yet (Gil: borrowed clips) is hit from the same four sides and leans away too.
 
 const LMB := {
 	"archer": "arc_draw",
@@ -43,8 +44,11 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	holder = Node3D.new()
 	main.add_child(holder)
-	for id in LMB:
-		_hero(String(id), String(LMB[id]))
+	for id in Arch.ids():
+		if LMB.has(id):
+			_hero(String(id), String(LMB[id]))
+		else:
+			_procedural(String(id))
 	print("FLINCH_CHECK_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -107,6 +111,52 @@ func _hero(id: String, move: String) -> void:
 	ok(heavy > peaks["front"] * 1.5, "%s: a stagger leans further (%.3f m vs %.3f)" % [id, heavy, peaks["front"]])
 	for r in pair:
 		(r["m"] as Node).free()
+
+
+## A Hero with no keyed moves: one model on its flinch, hit from each side, its head against an unhit twin's.
+func _procedural(id: String) -> void:
+	var pair: Array = []
+	for i in 2:
+		var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
+		m.set_meta("anim_seed", 1)
+		holder.add_child(m)
+		var sync := m.get_node_or_null("Warden/Sync")
+		var s := {"vel": Vector3.ZERO, "face": 0.0, "grounded": true, "hit_t": 99.0}
+		m.set_meta(WardenClips.STATE, s)
+		sync.set_process(false)
+		pair.append(
+			{"m": m, "sync": sync, "s": s, "an": HunterAnim.new(m), "sk": WardenGlb.skeleton(m.get_node("Warden"))}
+		)
+	# its clips (Gil borrows idle/walk/hit, no kit moves) may run under the flinch, but a keyed move belongs in LMB
+	var clips: WardenClips = (pair[0]["sync"] as Node).get("clips")
+	var keyed: Dictionary = {} if clips == null else clips.d.get("kmoves", {})
+	ok(keyed.is_empty(), "%s: no keyed moves, so no LMB row is missing" % id)
+	_steps(pair, 12)
+	var off := _gap(pair)
+	for nm in DIRS:
+		var peak := 0.0
+		var s: Dictionary = (pair[0] as Dictionary)["s"]
+		s["hit_t"] = 0.0
+		s["hit_dir"] = DIRS[nm][0]
+		s["hit_k"] = 1.0
+		for i in 9:
+			_steps(pair, 1)
+			peak = maxf(peak, (_gap(pair) - off).dot(DIRS[nm][1]))
+		s["hit_t"] = 99.0
+		ok(peak >= LEAN_M, "%s: %s hit leans the torso away (%.3f m)" % [id, nm, peak])
+		_steps(pair, 14)
+		ok((_gap(pair) - off).length() < 0.005, "%s: settles after the %s hit" % [id, nm])
+	for r in pair:
+		(r["m"] as Node).free()
+
+
+func _steps(pair: Array, n: int) -> void:
+	for i in n:
+		for r in pair:
+			var s: Dictionary = r["s"]
+			s["hit_t"] = minf(float(s["hit_t"]) + DT, 99.0)
+			(r["an"] as HunterAnim).update(DT, s)
+			(r["sync"] as Node).call("_process", DT)
 
 
 func _bone(r: Dictionary, nm: String) -> Quaternion:

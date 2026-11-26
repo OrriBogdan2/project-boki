@@ -20,7 +20,7 @@ text is rare. Our looks stay ours: the signature colour is the body of every eff
 | the true area | `AbilityFx.land` / `cast` | an area landing rings exactly its radius (was 1.15x), in the side lean; a zone cast rings its radius once (the extra 1.8x ring is gone) |
 | the true area: lines | `AimKit.span` `width` | a placement line can carry the band it hits under it; Tenzo's X cracks sit on the 3.2 m band its rise slows (was a 0.16 m line), `docs/shots/combat-clarity/tenzo_x_tell_band.jpg` |
 | the hit | `Ent.render` | the hit flash holds full white for 3 frames (`FLASH_FADE`), then fades |
-| what it did: CC | `StatusLooks` + `BodyTell` | each status's own body look (`StatusLooks`, docs/STATUS_LOOKS.md: stars over the head for a stun, stakes at the feet for a root, rings down the legs for a slow, and Grounded, Dazed and the rest), the same from every source; and the body pulses that colour while it lasts (`BodyTell`). No floating CC words, no icon tiles beside other Hunters' plates (the plate's word stays in place of the name) |
+| what it did: CC | `StatusLooks` + `BodyTell` | each status's own body look (`StatusLooks`, docs/STATUS_LOOKS.md: stars over the head for a stun, stakes at the feet for a root, rings down the legs for a slow, and Grounded, Dazed and the rest), the same from every source; and the body pulses that colour while it lasts (`BodyTell`). No floating CC words: a status is an icon with its time ring in the plate's status row (`HudPlate.row`), and the plate keeps the name (no word in its place) |
 | less text | `Fx.word` | one floating word at a spot at a time (`WORD_ROOM` 3 m, `WORD_HOLD` 0.6 s), smaller (28 / 40 px) |
 | less text: Boki | `BokiChatter.heard`, `Match.on_kin_ability` | while you or a squadmate fights (`BokiChatter.calm`) only your own Boki's speech bubble is drawn and no callout pin ("Behind you! · 3m"; `--clarity-shots` prints `CLARITYCHATTER n/20`, 0 is the rule); a Boki's ability name floats over your own Boki only (others' read from their looks) |
 | less text: hover cards | `HudHover.draw_world_tip` | the card about a monster, Boki or Hunter under a resting cursor ("Lace / The Red Stitch", "Boki: Prismander") is not drawn while you or a squadmate fights (`BokiChatter.calm`): in a fight the cursor rests on whoever you aim at. `--clarity-check` budget `hud world_tip` 0 |
@@ -143,6 +143,28 @@ on its side of a Hunter still buried the body: the "pink sphere clusters" over a
 disc on screen covers a shown Hunter's box (`HunterZone.rect_of`). Concealment (`Match.in_smoke`) is untouched.
 `--fx-hunter-cap-check` holds it (a puff 3.6 m off on the ground, between the camera and the Hunter, parts).
 
+## Rivals read at Hunter size (11-25)
+A rival was a red silhouette: `hero_toon`'s `side_rim` took every pixel with `nv < 0.55` (about a third of a Hunter, and
+all of a thin limb, at full strength with emission), and the nameplate (100 px wide) was ~2.5x the body's pixels.
+Now `side_rim` is a screen-width edge (`SIDE_RIM_PX` 1.6 px, from `nv / (2 * fwidth(nv))`, emission x0.8) and
+`HudStyle.PLATE_W` is 76 (was 100). A ground rim in a dark side hue was tried and dropped: it made `--hudref-check`'s
+armour-crack step fail. The ownership ring is a thin band (0.16x the body's pixels) and as wide as the body: left as
+is, it is the hit circle.
+`--clarity-shots` prints `CLARITYREAD` (`tools/clarity_read.gd`): means per shown Hunter over the bot 3v3 frames (1080p
+pixels): body, nameplate, ring band, ring width vs body width, and the share of a rival's body pixels within 0.12 of
+the same body drawn with `side_rim` off ("kept"). It saves `read<f>_<i>_on/off.png` and `clarity_read.tsv`.
+GPU runs (rp workers), before (origin/main b7258e5, 2 runs) -> after (this branch's shader and plate; 4 runs, the last
+one the committed tree, the three before it also had the dropped ground-rim hue):
+| | before | after |
+|---|---|---|
+| rival colours kept | 52.6%, 55.6% | 72.8% (committed); 62.8%, 60.4%, 56.7% (variant) |
+| nameplate px (x body) | 11841 (2.5), 10508 (2.4) | 8893 (1.7); 6989 (1.6), 9425 (2.0), 9825 (2.0) |
+| CLARITYCONTRAST (rim on vs off) | +29%, +42% | +39% (committed); +65%, +39%, +39% |
+| ring band px / ring width vs body | ~606 / x1.0 | ~608 / x1.0 |
+The bot fight is not repeatable (the same seed gives a different fight), so each run has different frames; the
+nameplate px count also depends on how many plates overlap. Kael and Cinder are red by nature and barely change;
+Vex (lime) keeps her body with a thin red edge: `docs/shots/vfx-rival-read/rival_bodies.png` (columns are different
+rivals; rows: before own colours, before as played, after own colours, after as played; the after rows are the variant run with the dropped ground-rim hue).
 ## Own and ally telegraphs are a faint rim, a rival's is the strong one (11-25, baseline problem 8)
 The baseline (`coord/focus-1122`, problem 8) had a red zigzag and a hatched striped lane round the player: the zigzag is
 Lace's laced AimKit lane (`lace`: Heavy Shot bar, Hail Wall arc), the stripes are `telegraph.gdshader`'s hatching and
@@ -158,3 +180,20 @@ yours pass `SideColor.order(m, hunter)`. Hit shapes, radii and timings are untou
 Fx telegraph element-Hunter pairs 8 loud -> 3 loud + 5 quiet; elements over a Hunter per frame 119.1 -> 114.8; AimKit
 shapes over Hunters unchanged at 6 pairs but plain for yours. Stills: `docs/shots/combat-own-telegraph-quiet/` (before
 over after).
+
+## Boki ownership read (2026-11-26)
+
+Can you tell your own Boki, a teammate's and a rival's apart at match zoom? `--wisp-read-shots` (GPU) plays the bot 3v3 on the
+Hollow Crown with every Boki riding as a wisp (bots summon them as the fight goes, so walking Boki show too) and, on five
+frames, `BokiOwnerRead` draws each Boki's mark alone, with and without it: a wisp's side-coloured rim or a walking Boki's
+ring. Per Boki it prints `OWNERREAD`: the mark's pixels at 1080p, the share painted in the right `SideColor` (you, ally,
+rival) and the share still changing the played frame. A Boki reads when the mark is 40 px or more, 70% or more right
+and 50% or more visible; a case (role x wisp or walking) passes at 80% of its Boki-frames (`OWNERCASE`).
+- Colour: right on 97 to 100% of every mark pixel, in every case (wisp rim and ring). Own, ally and rival are three
+  colours apart (`--clarity-check`, `_boki_owner`: the rim is the side colour for all three, RGB gap 0.6 or more).
+- Visible: the weak spot, 25 to 60% on some frames, from what lies over the Boki and not from its colour: your own
+  wisp behind your HUD or the status icons of your plate (see `docs/shots/wisp-owner-read/`), a rival's behind its
+  nameplate or a big body. The thin ring (SideRings.THIN) and the rim were left as they are: more weight would add to the
+  clutter the budget above holds down, and the cover is the plate's and the HUD's, not the mark's.
+- One transient has no side colour: the 0.25 s burst and fold of a summon (`BokiWispPop`) tints its rim to the Boki's
+  glow and type, so a Boki mid-pop reads as no one's (rim 9 to 10% right on those frames).
