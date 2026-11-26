@@ -144,6 +144,19 @@ no retarget; the string follows the drawing hand on `StringMid`): `lace_draw`, `
 `[hold_from, end]` while the move lasts and is gone when it ends; a release has the string drawn on its first frame and
 back on the bow a frame later.
 
+## Held shot streams (data `stream`, Neve's darts)
+A Hunter whose LMB is a stream of quick kit moves and has no clip of its own for them would replay the attack clip from
+its first frame on every shot: Neve's darts (`tm_dart_r/l/heavy`, one every 0.18 s) restarted Meshy's whole-body staff
+twirl (2.8 s, at 2x) every 0.84 s, popping the arms up to 66 degrees in one frame and dropping the hips 31 cm into its
+lunge. `"stream": {"kmoves": [...], "clip": slot, "hold": [from, to], "rate": x, "gap": s, "fade": s}`
+(`WardenNativeStream`) instead lays one calm window of that clip on the upper body only (the legs keep idle, walk or
+run) and sways through it forth and back at `rate` while the moves keep coming, easing in and out over `fade`; it ends
+`gap` s after the last move started (`kmove_t`, which the net carries). Neve: the staff held level across her chest
+(clip 1.4-1.65 s, the calm stretch after the twirl), a half sway about one dart long, 0.35 s ease. A `kmoves` clip for
+the same moves wins over it (own clips: remove the `stream` entry then). `--native-stream-check`: while streaming, no
+upper bone turns over 6 degrees a frame (or 1.25x the run clip's own), the hips hold within 3 cm, the attack clip never
+takes the body, and 0.6 s after the last shot the pose has eased out.
+
 ## Look-at on Meshy's bones
 `WardenLookAt.make(model, skel, true)`: the same layer, limits (70 deg yaw, 25 deg pitch) and smoothing as the contract path,
 laid after the clip and the air tilt. The turn is shared down Meshy's chain so the head's total turn is the contract's

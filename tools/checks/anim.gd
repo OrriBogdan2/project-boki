@@ -16,7 +16,9 @@ const CHECKS := {
 	# GPU: posed hunter clip frames, --geo-dir= --shots-dir=
 	"--geo-shots": ["res://tools/geo_shots.gd", "geo_shots", null],
 	"--native-upper-shots": ["res://tools/native_upper_shots.gd", "native_upper_shots", null],
+	"--neve-lmb-shots": ["res://tools/neve_lmb_shots.gd", "neve_lmb_shots", null],  # GPU: Neve's LMB, body + darts
 	"--warden-native-check": ["res://tools/warden_native_check.gd", "warden_native_check", null],  # Meshy skeleton
+	"--native-stream-check": ["res://tools/native_stream_check.gd", "native_stream_check", null],  # Neve's dart sway
 	"--native-springs-shots": ["res://tools/native_springs_shots.gd", "native_springs_shots", null],
 	"--tenzo-press-strip": ["res://tools/tenzo_press_strip.gd", "tenzo_press_strip", null],  # Tenzo LMB press frames
 	"--live-audit": ["res://tools/live_audit.gd", "live_audit", null],  # Hunters as played, GPU renders

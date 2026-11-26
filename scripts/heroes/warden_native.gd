@@ -76,6 +76,7 @@ var springs := WardenSprings.new()  # loose parts (data "springs": Sable's coat 
 var props: WardenProps  # the contract's parts Meshy's mesh lacks (data "props": Kael's sword, Cinder's heel jets)
 var upper: WardenNativeUpper  # a swing or cast over the running legs (the torso and arms only)
 var moves: WardenNativeMoves  # the kit moves with a clip of their own (data "kmoves")
+var stream: WardenNativeStream  # a held stream of shots swaying through one calm window (data "stream"), or null
 var companions: WardenCompanions  # floating companions cut out of Meshy's body (Meeko's sun and cloud), or null
 var steps: WardenNativeSteps  # the footsteps, on the foot plants of Meshy's clips (data "plants")
 var mood: WardenMood  # the faces on those companions swap and blink (warden_anim/<art>.json "mood"), or null
@@ -153,6 +154,7 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 		var lib_name := player.find_animation_library(player.get_animation(String(plays["idle"])))
 		WardenClipFile.add(player.get_animation_library(lib_name), glb, WardenGlb.skeleton(glb), d["clip_files"])
 	moves = WardenNativeMoves.new(player, d)
+	stream = WardenNativeStream.make(d)
 	plays.merge(moves.clips())
 	skel = WardenGlb.skeleton(glb)
 	_borrow_clips()
@@ -214,6 +216,8 @@ func _process(dt: float) -> void:
 	attack_left -= dt
 	var one := _one_shot(s)
 	var xt := float(s.get("extract_t", -1.0))
+	var was_stream := stream != null and stream.u >= 0.0
+	var streaming := stream != null and stream.step(s, dt)
 	if xt >= 0.0:  # the extract beat (WardenClips.leave_t): Meshy's crouch for the dip, then its jump for the take-off
 		_play("crouch" if xt < WardenClips.EXTRACT_DIP else "jump", 1.0)
 	elif moves.owns(s, plays):  # a kit move with its own clip (draw, release, Spirit Walk): laid at the move's clock
@@ -221,6 +225,10 @@ func _process(dt: float) -> void:
 		moves.play(s, plays, dt)
 		attack_left = 0.0
 		cur = "kmove"
+	elif streaming:  # (one calm sway while the darts stream, not the attack clip from frame 0)
+		upper.pose(player.get_animation(String(plays[stream.d["clip"]])), stream.at(), float(stream.d["fade"]))
+		attack_left = 0.0
+		_loco(s)
 	elif one != "":
 		attack_left = _clip_len(one) / _shot_rate(one)
 		if _over_legs(one, s):
@@ -231,6 +239,8 @@ func _process(dt: float) -> void:
 			_play(one, _shot_rate(one), true)
 	elif attack_left <= 0.0 or upper.on:
 		_loco(s)
+	if was_stream and not streaming and upper.rate == 0.0:
+		upper.stop()  # (the stream is over: its pose eases out)
 	var hips := WardenSkeleton.find(skel, "root")
 	skel.set_bone_pose_scale(hips, skel.get_bone_rest(hips).basis.get_scale())  # (Meshy keys no scale: no old squash)
 	player.advance(dt)

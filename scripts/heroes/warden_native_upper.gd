@@ -15,6 +15,8 @@ var t := 0.0  # s into it
 var rate := 1.0  # its play rate
 var on := false  # the clip still plays
 var w := 0.0  # 0..1: how much of the upper body it owns
+var fade_in := FADE_IN  # s this clip eases in over (pose() may ask for a slower one)
+var fade_out := FADE_OUT  # and out
 var _tracks := {}  # Animation -> [[track index, bone index]] of its rotation tracks on the upper bones
 
 
@@ -31,6 +33,19 @@ func play(anim: Animation, speed: float) -> void:
 	clip = anim
 	t = 0.0
 	rate = speed
+	fade_in = FADE_IN
+	fade_out = FADE_OUT
+	on = not bones.is_empty()
+
+
+## Holds `anim` at `at` s (a caller that steps the clip time itself: WardenNativeStream), easing in from the pose
+## below over `fade` s, and out over as long on stop().
+func pose(anim: Animation, at: float, fade: float) -> void:
+	clip = anim
+	t = at
+	rate = 0.0
+	fade_in = fade
+	fade_out = fade
 	on = not bones.is_empty()
 
 
@@ -46,7 +61,7 @@ func lay(dt: float) -> void:
 	if on:
 		t += dt * rate
 		on = t < clip.length
-	var fade := FADE_IN if on else FADE_OUT
+	var fade := fade_in if on else fade_out
 	w = move_toward(w, 1.0 if on else 0.0, dt / fade)
 	if w <= 0.0:
 		return
