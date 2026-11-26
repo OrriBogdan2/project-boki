@@ -104,7 +104,7 @@ func _line_at(W: World, a: Vector2i, d: Vector2i, kind: String, onto: bool) -> D
 			return {}
 	return {"face": face, "dir": d, "thick": thick, "lv": lv, "top": false}
 
-## Stands him `gap` m short of the face, the dummy behind it, and fires one charged and one quick orb at it.
+## Stands him `gap` m short of the face, the dummy behind it, and fires one charged orb and one card at it.
 func _through(kind: String, spot: Dictionary, gap: float) -> void:
 	var dir := Vector2(spot["dir"])
 	var face: Vector2i = spot["face"]
@@ -136,8 +136,14 @@ func _through(kind: String, spot: Dictionary, gap: float) -> void:
 		var fired := P.shot_n > shots0
 		step(m, 0.8, func(): D.teleport(aim))
 		var took := before - (D.hp + D.armor)
+		# owner 11-26: the void orb passes walls, a card stops at a wall or rock face (onto raised ground it can
+		# still land on the top, like any shot aimed up there)
+		var passes := wait > 1.0 or bool(spot["top"])
+		var shot := "full orb" if wait > 1.0 else "card"
+		var outcome := "passes" if passes else "stops"
 		ok(
-			"walls: a %s orb from %.1fm: %s" % ["full" if wait > 1.0 else "quick", gap, kind],
-			fired and took > 5.0, "took %.1f fired %s from %s to %s y %.1f->%.1f" % [took, fired, from, to, y, ty]
+			"walls: a %s from %.1fm %s: %s" % [shot, gap, outcome, kind],
+			fired and (took > 5.0) == passes,
+			"took %.1f fired %s from %s to %s y %.1f->%.1f" % [took, fired, from, to, y, ty]
 		)
 		step(m, 0.1)

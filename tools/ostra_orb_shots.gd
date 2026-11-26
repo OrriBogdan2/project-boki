@@ -21,6 +21,7 @@ func run(main_node: Node) -> void:
 	K = P.ak
 	await _quick_vs_full()
 	await _glow()
+	await _hand_card()
 	await _impacts()
 	_rock_row()
 	await _through_wall()
@@ -64,7 +65,7 @@ func _shot(wait: float, secs: float, marks: Array, each := Callable()) -> void:
 
 func _quick_vs_full() -> void:
 	var file := "orb_quick_vs_full"
-	var cap := "The same moment after the shot: a quick orb (0.6s wait), halfway (1.0s), full (1.4s, x1.9 size and hit)"
+	var cap := "The same moment after the shot: a card (0.6s wait), the void orb at half (1.0s) and full (1.4s, x1.9)"
 	await _reset(11.0, 3.0)
 	_aim(home + Vector3(8.0, 0, 0))
 	for w in [0.6, 1.0, 1.4]:
@@ -74,7 +75,7 @@ func _quick_vs_full() -> void:
 	await _shot(1.4, 0.5, [[0.14, "full", "orb_full", "A full orb at gameplay zoom", _orb_at]])
 	await _reset(11.0, 3.0)
 	_aim(home + Vector3(8.0, 0, 0))
-	await _shot(0.6, 0.5, [[0.14, "full", "orb_quick", "A quick orb at gameplay zoom", _orb_at]])
+	await _shot(0.6, 0.5, [[0.14, "full", "orb_quick", "A thrown card at gameplay zoom", _orb_at]])
 	for w in [0.6, 1.4]:
 		await _reset(11.0, 3.0)
 		_aim(home + Vector3(8.0, 0, 0))
@@ -94,7 +95,7 @@ func _orb_px() -> float:
 ## Quick and full on a dummy, a moment after the hit: the impact grows with the charge too.
 func _impacts() -> void:
 	var file := "orb_impact"
-	var cap := "The impact on the dummy, three frames from the hit: a quick orb, then a full one"
+	var cap := "The impact on the dummy, three frames from the hit: a card, then a full orb"
 	for row in [[0.6, 30.0], [1.4, 42.0]]:
 		await _reset(5.0)
 		_aim(T.position)
@@ -119,6 +120,18 @@ func _glow() -> void:
 		marks.append([t, file, file, cap, _hand_at])
 	await _go(1.5, Callable(), marks, 3.0)
 
+## The card in his hand: gone just after a throw, the next one drawn in, held, then the void motes take over.
+func _hand_card() -> void:
+	var file := "hand_card"
+	var cap := "His hand 0.05s after a throw (card gone), 0.17s (drawn in), 0.5s (held), 1.1s (void orb charging)"
+	await _reset(11.0, 3.0)
+	_aim(home + Vector3(8.0, 0, 0))
+	var marks: Array = []
+	for t in [0.05, 0.17, 0.5, 1.1]:
+		marks.append([t, file, file, cap, _hand_at])
+	marks.append([0.5, "full", "hand_card_view", "The card in his hand at gameplay zoom", _hand_at])
+	await _shot(0.6, 1.2, marks)
+
 func _rock_row() -> void:
 	var W = m.world
 	var wx := int(floor(home.x + ROW_X))
@@ -131,9 +144,9 @@ func _rock_row() -> void:
 		W.kind[W.idx(wx, int(floor(home.z)) + dz)] = World.T_BLOCK
 
 func _through_wall() -> void:
-	for row in [["wall_full", 1.4, "A full orb"], ["wall_quick", 0.6, "A quick orb"]]:
+	for row in [["wall_full", 1.4, "A full orb passes"], ["wall_quick", 0.6, "A card stops at"]]:
 		var file: String = row[0]
-		var cap := "%s through the rock row, then on to the dummy: before, inside, past it" % row[2]
+		var cap := "%s the rock row in front of the dummy: before, at, past it" % row[2]
 		await _reset(8.0)
 		_aim(home + Vector3(8.0, 0, 0))
 		var speed := float(K.base_wpn["speed"]) * (1.4 if float(row[1]) >= 1.4 else 1.0)
