@@ -109,8 +109,10 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | howlop | shared | shared | shared | shared | shared | shared | proc | proc |
 | lanceron | shared | shared | shared | shared | shared | shared | proc | proc |
 | lanternlong | shared | shared | shared | shared | shared | shared | proc | proc |
+| limpetor | shared | shared | shared | shared | shared | shared | proc | proc |
 | lodestaff | shared | shared | shared | shared | shared | shared | proc | proc |
 | lyrewing | shared | shared | shared | shared | shared | shared | proc | proc |
+| moonloris | shared | shared | shared | shared | shared | shared | proc | proc |
 | mossbastion | shared | shared | shared | shared | shared | shared | proc | proc |
 | moundvark | shared | shared | shared | shared | shared | shared | proc | proc |
 | murmurling | shared | shared | shared | shared | shared | shared | proc | proc |
@@ -140,6 +142,7 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | hoarheron | clip | shared | shared | shared | shared | shared | proc | proc |
 | nimbostrich | shared | clip | clip | shared | shared | shared | proc | proc |
 | orchisloth | shared | clip | clip | shared | shared | shared | proc | proc |
+| tuatrune | shared | clip | clip | shared | shared | shared | proc | proc |
 | limpetor | clip | shared | shared | clip | clip | clip | proc | proc |
 | moonloris | clip | shared | shared | clip | clip | clip | proc | proc |
 | cindle | clip | clip | clip | clip | clip | clip | proc | proc |
@@ -159,9 +162,12 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | lodestick | clip | clip | clip | clip | clip | clip | proc | proc |
 | marchleaf | clip | clip | clip | clip | clip | clip | proc | proc |
 | mossgrade | clip | clip | clip | clip | clip | clip | proc | proc |
+| moundvark | clip | clip | clip | clip | clip | clip | proc | proc |
+| murmurling | clip | clip | clip | clip | clip | clip | proc | proc |
 | nettlynx | clip | clip | clip | clip | clip | clip | proc | proc |
 | rimeshrew | clip | clip | clip | clip | clip | clip | proc | proc |
 | selenfin | clip | clip | clip | clip | clip | clip | proc | proc |
+| spatewader | clip | clip | clip | clip | clip | clip | proc | proc |
 | thrumbird | clip | clip | clip | clip | clip | clip | proc | proc |
 | umbrathere | clip | clip | clip | clip | clip | clip | proc | proc |
 | cairnback | clip | clip | clip | clip | clip | clip | proc | proc |
