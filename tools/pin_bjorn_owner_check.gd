@@ -650,7 +650,7 @@ func _bjorn_abyss() -> void:
 		var c: Vector3 = ud.cells[i]
 		if W.ground_at(c.x + ud.dir.x * 2.0, c.z + ud.dir.y * 2.0) <= World.VOID + 1.0:
 			over += 1
-	ok("bjorn ult trail: the lane runs on over the abyss (cells over it: %d)" % over, ud.cells.size() == 4
+	ok("bjorn ult trail: the lane runs on over the abyss (cells over it: %d)" % over, ud.cells.size() == int(K.d["x"]["cells"])
 		and over >= 2,
 		"cells %d over %d" % [ud.cells.size(), over])
 	ok("bjorn ult trail: the drawn length equals its travel length, over the abyss cells too",

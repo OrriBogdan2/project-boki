@@ -66,7 +66,7 @@ func _ult_walk() -> void:
 	step(m, 0.5)
 	P.teleport(home)
 	P.vel = Vector3.ZERO
-	T.teleport(home + Vector3(13.0, 0, 0))
+	T.teleport(home + Vector3(float(xd["cells"]) * float(xd["cell_len"]) - 1.5, 0, 0))      # near the lane's far end
 	fresh(T)
 	K.cd["x"] = 0.0
 	aim_at(P, T.pos)

@@ -5,11 +5,13 @@ extends "res://tools/bjorn_launch_check.gd"
 ## pin_bjorn_owner_check hold them).
 ## Prints AKCHECK lines.
 
-const OLD_WIDTH := 4.5  # m: the Faultline lane before the pass
+const OLD_WIDTH := 5.5  # m: the Faultline lane before the owner's 11-26 pass (4.5 before decision 0061)
+const OLD_LEN := 16.0  # m: the Faultline lane's length before that pass
 const LUNGE_SLACK := 0.3  # m: a measured lunge may miss its data distance by this (step rounding, slide)
 
 
 func albert() -> void:
+	await _shield_up()
 	await _ult_hop()
 	await _rope()
 	await _lunges()
@@ -26,17 +28,18 @@ func _ult_hop() -> void:
 	var xd: Dictionary = k.d["x"]
 	var wind := float(xd["windup"])
 	var width := float(xd["width"])
+	var length := float(xd["cells"]) * float(xd["cell_len"])
 	ok(
-		"albert ult: the lane is 20-25% wider (telegraph and hits read the one width)",
-		width / OLD_WIDTH >= 1.2 and width / OLD_WIDTH <= 1.25,
-		"%.1f -> %.1f m" % [OLD_WIDTH, width]
+		"albert ult: the lane is shorter and at least 25% wider (owner 11-26; telegraph and hits read the one width)",
+		width >= OLD_WIDTH * 1.25 and length < OLD_LEN,
+		"%.1f x %.1f -> %.1f x %.1f m" % [OLD_LEN, OLD_WIDTH, length, width]
 	)
 	step(m, 0.3)
 	p.teleport(home)
 	p.vel = Vector3.ZERO
 	var y0 := p.pos.y
-	# a dummy 8 m down the lane, 3 m off its line: outside the old lane, inside the new
-	t_v.teleport(home + Vector3(8.0, 0, 3.0))
+	# a dummy 8 m down the lane, 3.4 m off its line: outside the old lane, inside the new
+	t_v.teleport(home + Vector3(8.0, 0, 3.4))
 	fresh(t_v)
 	k.cd["x"] = 0.0
 	aim_at(p, home + Vector3(12.0, 0, 0))
@@ -44,14 +47,25 @@ func _ult_hop() -> void:
 	var top := 0.0
 	var slam_at := -1.0
 	var down_at_slam := false
+	var free_at := -1.0
+	var end_at := -1.0
 	var t := DT
-	while t < 1.2:
+	while t < 1.4:
 		m.step(DT)
 		t += DT
 		top = maxf(top, p.pos.y - y0)
 		if slam_at < 0.0 and k.ult.phase == "erupt":
 			slam_at = t
 			down_at_slam = p.pos.y - y0 < 0.15
+		if free_at < 0.0 and k.lock_left() <= 0.0 and k.move_k() > 0.0:
+			free_at = t
+		if end_at < 0.0 and k.ult.phase == "":
+			end_at = t
+	ok(
+		"albert ult: rooted no more than 0.45 s and done within 0.95 s of the press (owner 11-26: was 0.6 + hit-stop, 1.4)",
+		free_at > 0.0 and free_at <= 0.45 + 1.5 * DT and end_at > 0.0 and end_at <= 0.95 + 1.5 * DT,
+		"root %.2f s, done %.2f s, lane %.1f x %.1f m" % [free_at, end_at, length, width]
+	)
 	ok("albert ult: he hops 1-1.5 m with the hammer up", top >= 1.0 and top <= 1.5, "top %.2f m" % top)
 	ok(
 		"albert ult: the slam keeps its 0.4 s and lands him on the ground",
@@ -59,10 +73,46 @@ func _ult_hop() -> void:
 		"slam at %.2f, %.2f m up" % [slam_at, p.pos.y - y0]
 	)
 	ok(
-		"albert ult: a foe 3 m off the line is thrown (outside the old lane, inside the new)",
+		"albert ult: a foe 3.4 m off the line is thrown (outside the old lane, inside the new)",
 		dmg(t_v) > 0.0,
 		"took %.0f" % dmg(t_v)
 	)
+	await done(m)
+
+
+## RMB: his own wooden shield comes up in front of his chest (WardenArmRaise over the guard clip, owner 11-26), not
+## left at his hip where the clip keys it; the arm gives it back to the clips once the aegis is down.
+func _shield_up() -> void:
+	var r := setup("bulwark", 7.0)
+	var m: Match = r[0]
+	var p: Hunter = r[1]
+	var clips := (p.model.get_node("Warden/Sync") as WardenGlb.Sync).clips
+	var sk := WardenGlb.skeleton(p.model.get_node("Warden"))
+	var shield := WardenSkeleton.find(sk, "x_shield")
+	var shoulder := WardenSkeleton.find(sk, "upper_arm.L")
+	var raise := clips.arm_raise
+	var at := {}
+	for k in ["clip", "raised", "down"]:
+		clips.arm_raise = null if k == "clip" else raise
+		p.inp["sec_hold"] = k != "down"
+		if k != "down":
+			p.ak.press_rmb()
+		for i in 30:
+			p.inp["sec_hold"] = k != "down"
+			m.step(DT)
+			p.render(DT, 1.0)
+			await main.get_tree().process_frame
+		at[k] = sk.get_bone_global_pose(shield).origin
+		at[k + "_sh"] = sk.get_bone_global_pose(shoulder).origin
+	var up: Vector3 = at["raised"]
+	var clip_y: float = at["clip"].y
+	var sh: Vector3 = at["raised_sh"]
+	ok(
+		"albert RMB: his wooden shield is pulled up in front of his chest (not at his hip, as the clip keys it)",
+		raise != null and up.y >= clip_y + 0.12 and up.y >= sh.y - 0.15 and up.z <= sh.z - 0.3,
+		"shield y %.2f (clip %.2f, shoulder %.2f), %.2f in front of the shoulder" % [up.y, clip_y, sh.y, sh.z - up.z]
+	)
+	ok("albert RMB: the arm goes back to the clips once the aegis is down", raise.w == 0.0, "w %.2f" % raise.w)
 	await done(m)
 
 

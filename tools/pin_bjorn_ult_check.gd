@@ -252,8 +252,9 @@ func bjorn() -> void:
 		K.ult.phase == "wind" and K.anim_id == "bul_ult_wind" and K.move_k() == 0.0,
 		"%s %s move %.2f" % [K.ult.phase, K.anim_id, K.move_k()])
 	var c0 := AimKit.entry(P, "x")
-	ok("bjorn ult telegraph: one outlined 16x4.5m lane (the gameplay box) for everyone, with its crack",
-		AimKit.shown(P, "x") and bool(c0.get("all", false)) and absf(float(c0.get("len", 0.0)) - 16.0) < 0.01
+	var lane_len := float(xd["cells"]) * float(xd["cell_len"])
+	ok("bjorn ult telegraph: one outlined lane (the gameplay box, cells x cell_len by width) for everyone, with its crack",
+		AimKit.shown(P, "x") and bool(c0.get("all", false)) and absf(float(c0.get("len", 0.0)) - lane_len) < 0.01
 			and absf(float(c0.get("width", 0.0)) - float(xd["width"])) < 0.01 and K.ult._crack.visible,
 		str(c0.keys()))
 	var crack_mat := K.ult._crack.material_override as ShaderMaterial
