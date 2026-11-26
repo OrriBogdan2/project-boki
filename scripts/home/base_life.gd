@@ -261,7 +261,8 @@ func choose(k: Dictionary) -> void:
 		_mentor(k)
 		return
 	var lazy := float(Content.rules("base_axes")["nap_odds"]) * (BaseAxes.mult(rec, "nap") - 1.0)
-	if lazy > 0.0 and randf() < lazy:
+	# (never while the base tutorial wants it leading: a lazy nature must not stall the first steps)
+	if lazy > 0.0 and BaseTutLead.target(h, k).x == INF and randf() < lazy:
 		_nap(k, "lazy")
 		return
 	if BaseShy.keep_to_edge(h, k):
