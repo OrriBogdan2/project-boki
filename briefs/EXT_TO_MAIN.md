@@ -11363,3 +11363,4 @@ READY ext/anim-native-move-states 5e6dac60b7 (PR #877: main d16fa75f08 merged cl
 READY ext/stuck-integ-8fc48065 520c0dbc2d (PR #891: main d16fa75f08 merged clean; match-repeat +362/match twice vs main +388/+392, so no branch leak; 7 new checks green)
 READY ext/mc-integ-f1-1118 34954a99bd (PR #313: origin/main merged again, 0 behind, no conflicts; fixed prologue_check freed-pr script error; --check 0 fail, health --strict OK, roster/summon-death/save-compat/old-saves/prologue/mode-boki/nest-items/demo/garden-visitor 0 fail; evo-check ink-drops red same as main)
 READY ext/p16-port-1118 beddc086f141 (PR #334: main merged; squad chat in match, Net.VERSION 0.24.29 kept; squad-chat-check 0 fails)
+READY ext/training-time-trial-1119 d0b1aa1025c0 (PR #377: main merged; time-trial clock centred, finish arch 4 m east; time-trial-check 19/19)
