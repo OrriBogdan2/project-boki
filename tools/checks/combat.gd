@@ -6,6 +6,7 @@ extends RefCounted
 
 const CHECKS := {
 	"--hearth-lamp-check": ["res://tools/hearth_lamp_check.gd", "hearth_lamp_check", null],  # Hearth Lamp revive beacon
+	"--utility-parity-check": ["res://tools/utility_parity_check.gd", "utility_parity_check", null],  # belt vs source
 	# a Boki plate, glove wall or ice wall never hides the Hunter behind it; a rock does
 	"--barrier-sight-check": ["res://tools/barrier_sight_check.gd", "barrier_sight_check", null],
 	# Vex's Slipstep: one plain dash, no pips, no Second Wind
