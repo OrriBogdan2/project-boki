@@ -1,8 +1,8 @@
 class_name PracticeMap
 extends RefCounted
 ## The practice tools on the full map (M) in the Training Grounds, the Arena and the Test Zone: the dummies and
-## the sparring bot as red rings, the stations as small diamonds (one per perch), and a legend card with a row for each kind
-## that is really there. Called by FullMap (the map and its legend).
+## the sparring bot as red rings, the stations as small diamonds (one per perch), and a legend card with a row
+## for each kind that is really there. Called by FullMap (the map and its legend).
 
 const RING_R := 6.0  # px: a dummy's or the bot's ring
 const STATION_R := 5.0  # px: half a station diamond
@@ -74,8 +74,8 @@ static func card(fm: FullMap, at: Vector2, w: float) -> Rect2:
 
 
 static func _diamond(c: Control, pv: Vector2, col: Color) -> void:
-	var pts := PackedVector2Array(
-		[pv + Vector2(0, -STATION_R), pv + Vector2(STATION_R, 0), pv + Vector2(0, STATION_R), pv + Vector2(-STATION_R, 0)]
-	)
+	var up := Vector2(0, STATION_R)
+	var side := Vector2(STATION_R, 0)
+	var pts := PackedVector2Array([pv - up, pv + side, pv + up, pv - side])
 	c.draw_colored_polygon(pts, Color(col, 0.9))
 	c.draw_polyline(pts + PackedVector2Array([pts[0]]), Color(0, 0, 0, 0.7), 1.0)

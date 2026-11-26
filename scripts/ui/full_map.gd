@@ -4,7 +4,9 @@ extends RefCounted
 ## the exits and what they're doing, the train loop, your squad and their pings, enemies your squad can
 ## see right now, and the match's random spawns (see SpawnPlan) with a legend. Click to ping, right click
 ## to take your ping down, wheel to zoom, drag to pan. It opens by itself for the planning phase before
-## the drop, with the countdown and the squad's drop order. The match keeps going behind it.
+## the drop, with the countdown and the squad's drop order. The match keeps going behind it. Every mode with a
+## world has it (Training Grounds, Test Zone, duel room too): without a SpawnPlan or exits the legend only
+## lists what exists (PracticeMap for the practice tools).
 
 const SIDE_W := 268.0
 const NOTE_H := 14.0             # px a legend row grows by for its first-time line (Glossary)

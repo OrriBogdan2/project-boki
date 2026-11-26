@@ -7,7 +7,7 @@ extends RefCounted
 const CHECKS := {
 	"--passive-gauge-shots": ["res://tools/passive_gauge_shots.gd", "passive_gauge_shots", null],
 	"--map-every-mode-check": ["res://tools/map_every_mode_check.gd", "map_every_mode_check", null],  # M in every mode
-	"--map-every-mode-shots": ["res://tools/map_every_mode_check.gd", "map_every_mode_shots", true],  # GPU, --shots-dir=<dir>
+	"--map-every-mode-shots": ["res://tools/map_every_mode_check.gd", "map_every_mode_shots", true],  # GPU: --shots-dir
 	"--shops-check": ["res://tools/shops_check.gd", "shops_check", null],  # in-match shops, the map legend
 	"--reticle-hunters-shots": ["res://tools/reticle_shots.gd", "reticle_shots", "hunters"],
 	"--ghost-visible-check": ["res://tools/ghost_visible_check.gd", "ghost_visible_check", "check"],
