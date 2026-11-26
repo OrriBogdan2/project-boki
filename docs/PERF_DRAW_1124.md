@@ -125,3 +125,21 @@ one: the terrain's noise reads down to 2-3 past 30 m from the camera (fade by `d
 pattern baked to a texture per island at load; the sea's fbm at 3 octaves. The bar is GPU -1 ms at 1080p on the
 4090 with before/after shots at the match camera and from the drop that the owner can tell apart only side by side.
 Open each as its own PR and drive its gate.
+
+## Result of step 2, ground pixels (11-24, ext/perf-ground-pixels)
+Separate pod runs of the same build spread 2.5-9.5 ms of GPU (the pod's other jobs share the 4090), so the probes were
+read inside ONE run: `--bench-ab-ground` cycles four variants in blocks of 45 frames over the same fight and averages the
+GPU of each (`tools/perf/ground_ab.gd`). Three runs at 1920x1080 medium on rp2g-0, GPU ms (old = the terrain as before):
+
+| variant | run 1 | run 2 | run 3 | mean vs old |
+|---|---|---|---|---|
+| old (9.8 / 9.7 / 10.1 ms) | 0 | 0 | 0 | 0 |
+| terrain noise off (`flat_ground`) | -1.33 | -0.87 | -1.13 | **-1.11** |
+| cloud sea hidden | -0.29 | -0.09 | -0.49 | -0.29 |
+| the cut (fine detail fades over 14-36 m, 4 of 8 contact directions far out) | -0.49 | -0.52 | -0.47 | **-0.49** |
+
+So the ground is the bigger cost (1.1 ms: its whole shader, noise and contact shade), the sea is 0.3 ms at most. The cut
+takes about 45% of the terrain's ceiling; the other half is the big painted patches and the height reads, which are the
+look. The plan's bar of -1 ms is the ceiling of removing the ground's pattern altogether, so it is not reachable without
+changing the look; a first cut (fade 28-55 m) gave only -0.1 (four runs). A bake of the big patches to a texture per
+island is the next step (about 0.3 ms more at best).
