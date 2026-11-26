@@ -16,6 +16,7 @@ const BUFFER := 0.2             # s a click during a thrust's recovery waits to 
 ## line for other games).
 const LINE_FX_DT := 0.06
 const BOT_TAP := 0.1      # s a bot holds RMB for a tap (RMB has no hold: one press throws)
+const SWIM_FX_DT := 0.08  # s between the wake's ground breaks behind the swim (~0.65 m apart at its speed)
 
 var bag: Array = []                 # the potions still in the bag; the last one is the next throw
 var rng := RandomNumberGenerator.new()
@@ -28,6 +29,7 @@ var combo_at := -9.0
 var third_until := -9.0             # the third thrust's hits slow until then
 var hit_swing := -1                 # the swing whose hit sound played (one per thrust, however many foes)
 var swim_t := 0.0                   # Ground Swim under way
+var swim_fx := 0.0                  # s to the wake's next ground break
 var spin_t := -1.0                  # Riptide spin time (-1: not spinning)
 var spin_tick := 0.0
 var spouts: Array = []              # moving waterspouts: {p, y, dir, left, w, spd, hit, id, from, len}
@@ -341,10 +343,24 @@ func on_dash(use_ex: bool) -> bool:
 		return true
 	swim_t = float(dd["time"]) * float(dash_feel()["time"])      # (before the dash: own_dash_trail reads it)
 	travel(float(dd["dist"]), float(dd["time"]))
-	# head first into the ground: the body goes fully under (gil_dive) and only the wake shows on top
+	# into the ground to the waist (gil_dive): the top half swims, the wake breaks the ground behind him
 	play("gil_dive")
-	vfx("dive", h.pos, h.roll_dir, {"len": h.roll_speed * h.roll_t})
+	vfx("dive", h.pos, h.roll_dir)
+	swim_fx = SWIM_FX_DT
 	return true
+
+## A swim step: the move keys (none held: the cursor) bend his heading at up to dash.steer rad/s, and the
+## wake breaks the ground behind him along the path he really took.
+func _swim_step(dt: float) -> void:
+	if h.roll_t > 0.0 and h.move_kind == "dash":
+		var mv: Vector2 = h.inp.get("move", Vector2.ZERO)
+		var want := mv.normalized() if mv.length() > 0.1 else h.aim_dir()
+		var turn := float(dash_def()["steer"]) * dt
+		h.roll_dir = h.roll_dir.rotated(clampf(h.roll_dir.angle_to(want), -turn, turn))
+	swim_fx -= dt
+	if swim_fx <= 0.0:
+		swim_fx = SWIM_FX_DT
+		vfx("swim_wake", h.pos, -h.roll_dir)
 
 ## Under the ground there is no body to leave after-images: the wake is the trail.
 func own_dash_trail() -> bool:
@@ -389,9 +405,11 @@ func _e_end() -> void:
 	if spin_t >= 0.0:
 		_release_spout()
 
+## The spin builds momentum: he moves faster as it fills (e.move_k, start to full).
 func move_k() -> float:
 	if spin_t >= 0.0:
-		return float(e_def().get("move_k", 0.7))
+		var mk: Array = e_def()["move_k"]
+		return lerpf(float(mk[0]), float(mk[1]), _spin_k())
 	return float(lmb_def()["tide"]["walk_k"]) if lmb_t >= 0.0 else 1.0
 
 func _spin_k() -> float:
@@ -410,7 +428,8 @@ func _tick_spin(dt: float) -> void:
 	vfx("spin", h.pos, h.aim_dir(), {"r": r, "k": k})
 	for f in foes_in(h.pos, r):
 		var dmg := lerpf(float(ed["tick"][0]), float(ed["tick"][1]), k) * power("kin")
-		f.hurt(dmg, h, {"src": "abil", "ab": "k1", "tags": ["k1", "riptide"]})
+		# no_hold: a hold every 0.25 s froze his screen in a stutter that read as shake (owner 11-26)
+		f.hurt(dmg, h, {"src": "abil", "ab": "k1", "tags": ["k1", "riptide"], "no_hold": true})
 
 func _release_spout() -> void:
 	var ed := e_def()
@@ -424,7 +443,7 @@ func _release_spout() -> void:
 	spouts.append({"p": Vector2(h.pos.x, h.pos.z), "y": h.pos.y, "dir": dir, "left": length, "w": w, "spd": spd,
 		"id": _tele_id(), "from": h.pos, "len": length,
 		"hit": {}, "lift": float(ed["lift"]), "stun": float(ed["knockup"]), "dmg": float(ed["dmg"]) * power("kin"),
-		"col": col_of(ed), "ab": "k1", "fx_t": 0.0})
+		"col": col_of(ed), "ab": "k1", "fx_t": 0.0, "no_hold": true})
 	play("gil_spout")
 	vfx("spout", h.pos, dir, {"len": length, "w": w, "k": k})
 
@@ -450,6 +469,7 @@ func _tick_lines(list: Array, dt: float) -> void:
 			s["hit"][key] = true
 			var o := {"lift": float(s["lift"]), "stun": float(s["stun"]), "dr": true, "src": "abil", "ab": s["ab"]}
 			o["tags"] = [s["ab"], "gil_line"]
+			o["no_hold"] = s.get("no_hold", false)
 			if s.has("slow"):
 				o["slow"] = float(s["stun"]) + float(s["slow"])
 				o["slow_k"] = float(s["slow_k"])
@@ -557,6 +577,7 @@ func _tick(dt: float) -> void:
 		else:
 			HeroVfxZone.glow(pd, float(pd["t"]) - float(pd["left"]), float(pd["left"]))
 	if swim_t > 0.0:
+		_swim_step(dt)
 		swim_t -= dt
 		if swim_t <= 0.0:
 			_surface()
