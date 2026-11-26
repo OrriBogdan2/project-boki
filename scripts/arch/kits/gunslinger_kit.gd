@@ -72,10 +72,6 @@ var commit_end := 0.0  # match time her committed recovery ends (E after the bea
 var x_wind_end := 0.0  # match time the ult's short wind-up ends (GunslingerUlt.WINDUP): slowed, never rooted
 
 
-## One plain dash with one cooldown (Vex's Slipstep): no charge pips, no Second Wind.
-func single_dash() -> bool: return true
-
-
 func _setup() -> void:
 	ult = GunslingerUlt.new(self)
 	last_shot = h.shot_n  # a round fired before she took the kit (another hero's) is not hers
