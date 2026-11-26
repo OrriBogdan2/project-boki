@@ -11,7 +11,8 @@ const MISS_RATE := 0.3  # share of 0.5 s aim windows that land MISS_OFF to the s
 const MISS_OFF := 3.0  # m a missed aim is off the target
 const MISS_WINDOW := 0.5  # s one aim roll holds
 
-const LOOKOUT_OFF := 7.0  # m west of the lookout's stop: where a bot that got up without a kick walks off to retry
+const LOOKOUT_OFF := 7.0     # m west of the lookout's stop: where a bot that got up without a kick walks off to retry
+
 const REST_S := 1.0   # s of standing with the stick neutral after which the stuck-hop timer starts over
 
 const KEYS := [      # the action inputs
