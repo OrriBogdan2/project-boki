@@ -4,6 +4,8 @@ extends RefCounted
 ##     and a 3x crop round the cursor
 ##   --reticle-hunters-shots: every Hunter in the Training Area (title-screen Arena), the reticle at rest, mid-bloom,
 ##     on a hit and on a crit, as one 3x crop round the cursor per hunter (a row of four per hunter)
+##   --reticle-looks-shots: every Hunter's own look (ReticleLooks) at 4x on dark ground, bright ground and,
+##     opened by bloom with a hit flash, on grass: one column per hunter (reticle_looks.png)
 ##   --ping-shots: your ping on an enemy (red, "Enemy") and a teammate's loot ping off screen (edge arrow),
 ##     with the minimap
 ##   --hit-marker-shots: the hit tick on a landed hit and the knock tick, each full frame and 3x crop
@@ -17,6 +19,10 @@ const STYLES := [
 ]
 const AT := Vector2(0.62, 0.42)      # where the cursor rests, as a fraction of the window
 const CROP := Vector2i(160, 110)     # px round the cursor, scaled 3x
+const LOOK_CELL := 96.0              # px: one look's tile on the looks sheet
+const LOOK_ZOOM := 4.0               # the looks sheet draws each reticle this many times its size
+const LOOK_ROWS := [["dark ground", "1b1f1c", 0.0, 0.0], ["bright ground", "ece6cc", 0.0, 0.0],
+	["bloom + hit", "5f8f4a", 4.0, 0.85]]   # [label, ground, bloom px, hit flash strength]
 
 var main: Node
 var m: Match
@@ -29,15 +35,18 @@ func run(main_node: Node, what: String) -> void:
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
 	DirAccess.make_dir_recursive_absolute(dir)
+	if what == "looks":
+		await _reveal()
+		await _looks()
+		main.get_tree().quit(0)
+		return
 	m = Match.new()
 	main.add_child(m)
 	var opts := {"teams": 2, "squad": 2, "tier": 0, "length": 1500.0, "seed": 4242, "no_drop": true}
 	if what == "hunters":
 		opts = Match.arena_opts()
 	m.start(opts)
-	var fade = main.get("fade")
-	if fade != null:
-		await fade.reveal(0.01)      # (the screen fade from start-up still covers the view)
+	await _reveal()
 	m.cam.lead = 0.0
 	for mb in m.mobs:
 		mb.dead = true
@@ -95,6 +104,49 @@ func _hunters() -> void:
 			strip.blit_rect(tiles[i], Rect2i(Vector2i.ZERO, tiles[i].get_size()), Vector2i(i * CROP.x * 3, 0))
 		strip.save_png(dir.path_join("hunter_%s.png" % id))
 		print("RETICLESHOTS hunter_%s" % id)
+
+## Lifts the screen fade from start-up, which still covers the view.
+func _reveal() -> void:
+	var fade = main.get("fade")
+	if fade != null:
+		await fade.reveal(0.01)
+
+
+## Every Hunter's own look on the grounds of LOOK_ROWS, drawn at LOOK_ZOOM on a layer over everything.
+func _looks() -> void:
+	Settings.reset_all()
+	var layer := CanvasLayer.new()
+	layer.layer = 100
+	main.add_child(layer)
+	var cv := Control.new()
+	cv.set_anchors_preset(Control.PRESET_FULL_RECT)
+	layer.add_child(cv)
+	cv.draw.connect(_draw_looks.bind(cv))
+	var img := await _frame(6)
+	var ids := Arch.ids()
+	var sheet := Vector2i(int(LOOK_CELL) * ids.size(), int(LOOK_CELL) * LOOK_ROWS.size() + 22)
+	img.get_region(Rect2i(Vector2i.ZERO, sheet)).save_png(dir.path_join("reticle_looks.png"))
+	layer.queue_free()
+	print("RETICLESHOTS reticle_looks %d hunters" % ids.size())
+
+
+func _draw_looks(cv: Control) -> void:
+	var ids := Arch.ids()
+	var font := ThemeDB.fallback_font
+	cv.draw_rect(Rect2(Vector2.ZERO, cv.size), Color.BLACK)
+	for i in ids.size():
+		var id := String(ids[i])
+		for row in LOOK_ROWS.size():
+			var spec: Array = LOOK_ROWS[row]
+			var tile := Rect2(Vector2(i, row) * LOOK_CELL, Vector2.ONE * LOOK_CELL)
+			cv.draw_rect(tile.grow(-1.0), Color(String(spec[1])))
+			cv.draw_set_transform(tile.get_center(), 0.0, Vector2.ONE * LOOK_ZOOM)
+			var flash := Color(Reticle.tc("col_hit"), float(spec[3]))
+			Reticle.draw(cv, Vector2.ZERO, float(spec[2]), Reticle.accent(id), flash, Reticle.look_of(id))
+			cv.draw_set_transform(Vector2.ZERO)
+		var name_at := Vector2(i * LOOK_CELL, LOOK_CELL * LOOK_ROWS.size() + 16.0)
+		var label := String(Arch.def(id).get("base_name", id))
+		cv.draw_string(font, name_at, label, HORIZONTAL_ALIGNMENT_CENTER, LOOK_CELL, 13, Arch.color(id).lightened(0.3))
 
 ## The tick a landed hit raises and the knock one (the rival's hp at 0 for that frame), slowed to
 ## a twentieth so the shot lands while it shows.

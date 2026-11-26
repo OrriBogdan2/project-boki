@@ -8,6 +8,7 @@ const CHECKS := {
 	"--passive-gauge-shots": ["res://tools/passive_gauge_shots.gd", "passive_gauge_shots", null],
 	"--shops-check": ["res://tools/shops_check.gd", "shops_check", null],  # in-match shops, the map legend
 	"--reticle-hunters-shots": ["res://tools/reticle_shots.gd", "reticle_shots", "hunters"],
+	"--reticle-looks-shots": ["res://tools/reticle_shots.gd", "reticle_shots", "looks"],
 	"--ghost-visible-check": ["res://tools/ghost_visible_check.gd", "ghost_visible_check", "check"],
 	"--ghost-visible-shots": ["res://tools/ghost_visible_check.gd", "ghost_visible_check", "shots"],
 	"--hatch-flow-shots": ["res://tools/hatch_flow_shots.gd", "hatch_flow_shots", null],  # --hatch-flow-shots=<dir>
