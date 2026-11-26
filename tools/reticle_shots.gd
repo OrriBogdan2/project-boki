@@ -212,7 +212,7 @@ func _meadow_spot() -> Vector3:
 	for x in range(-PROOF_SCAN, PROOF_SCAN, PROOF_STEP):
 		for z in range(-PROOF_SCAN, PROOF_SCAN, PROOF_STEP):
 			var inside := true
-			for d in [Vector2.ZERO, Vector2(12, 0), Vector2(-12, 0), Vector2(0, 12), Vector2(0, -12)]:
+			for d: Vector2 in [Vector2.ZERO, Vector2(12, 0), Vector2(-12, 0), Vector2(0, 12), Vector2(0, -12)]:
 				var q := Vector2(x, z) + d
 				inside = inside and not w.is_void(q.x, q.y) and w.biome_at(q.x, q.y) == "meadow"
 			if inside:
