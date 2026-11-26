@@ -8,34 +8,30 @@ var panels: HudPanels
 var cursor: Control
 var big: Font = preload("res://fonts/LilitaOne-Regular.ttf")
 var body: Font = preload("res://fonts/Rubik.ttf")
-var reticle: Reticle  # the hit tick's state: raised by every landed hit of yours (CombatBus), dealt_at for the fight budget
-var ret: ReticleHud  # draws the cursor reticle, its aim arcs and the hit tick from `reticle`
-var buffs := BuffStack.new()  # the stack of what is on you, right edge
-var score_mute := ScoreMute.new()  # the scoreboard's Mute chips
-var lowhp := LowHpCue.new()  # the low-health heartbeat and edge glow
-var plates := HudPlate.new()  # overhead plates' chip, flash, armour-break and knock state
+var reticle: Reticle        # the hit tick's state: raised by every landed hit of yours (CombatBus), dealt_at for the fight budget
+var ret: ReticleHud         # draws the cursor reticle, its aim arcs and the hit tick from `reticle`
+var buffs := BuffStack.new()     # the stack of what is on you, right edge
+var score_mute := ScoreMute.new()     # the scoreboard's Mute chips
+var lowhp := LowHpCue.new()      # the low-health heartbeat and edge glow
+var plates := HudPlate.new()     # overhead plates' chip, flash, armour-break and knock state
 var hurt_t := 0.0
 var mates := MateAlerts.new()  # a teammate down, back or lost: their squad row and a faint line
-var msgs := MsgLane.new()  # every short message on screen: toasts, level-ups, hints
-var loot := LootFeed.new()  # what you just picked up, bottom right
+var msgs := MsgLane.new()      # every short message on screen: toasts, level-ups, hints
+var loot := LootFeed.new()     # what you just picked up, bottom right
 var knocks := KnockBanner.new()  # ALLY KNOCKED / KNOCK top-centre
 var minimap: ImageTexture
-var map_paint: Texture2D = null  # the painted map (MapPaint), when it's ready
-
+var map_paint: Texture2D = null   # the painted map (MapPaint), when it's ready
 
 ## The map picture to draw, and its pixels per tile (for regions given in tiles).
 func map_tex() -> Texture2D:
 	return map_paint if map_paint else minimap
 
-
 func map_region(tiles: Rect2) -> Rect2:
 	var t := map_tex()
 	var k := Vector2(float(t.get_width()) / m.world.w, float(t.get_height()) / m.world.h)
 	return Rect2(tiles.position * k, tiles.size * k)
-
-
 var kit_t0 := 0.0
-var kit_fade := 1.0  # 0 while the fight budget hides the kit panel, 1 when it shows
+var kit_fade := 1.0       # 0 while the fight budget hides the kit panel, 1 when it shows
 
 const INK := Color("f3eee2")
 const MUTED := Color("a9b0bf")
@@ -45,14 +41,13 @@ const GOOD := Color("8fe0a0")
 const BAD := Color("ff6a5a")
 const GOLD := Color("f2c84a")
 
-
 func setup(match_node: Match) -> void:
 	m = match_node
 	reticle = Reticle.new(m)
 	ret = ReticleHud.new(reticle)
 	layer = 5
-	Record.hide_in_cinema(self)  # recording mode with the HUD hidden
-	panels = HudPanels.make(self)  # the fixed panels, under c, redrawn 20 times a second
+	Record.hide_in_cinema(self)      # recording mode with the HUD hidden
+	panels = HudPanels.make(self)       # the fixed panels, under c, redrawn 20 times a second
 	add_child(panels)
 	c = Control.new()
 	c.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -62,7 +57,7 @@ func setup(match_node: Match) -> void:
 	add_child(msgs)
 	add_child(loot)
 	add_child(knocks)
-	abyss_fx = ABYSS_FX.new()  # (movefeel) the abyss closing in: under the HUD, local player only
+	abyss_fx = ABYSS_FX.new()      # (movefeel) the abyss closing in: under the HUD, local player only
 	add_child(abyss_fx)
 	# the pointer over the item windows: drawn above them (the crosshair lives under them on `c`,
 	# and the system cursor stays hidden in a match, so without this you can't see where you click)
@@ -72,48 +67,41 @@ func setup(match_node: Match) -> void:
 	cursor.z_index = 100
 	add_child(cursor)
 	cursor.draw.connect(_draw_pointer)
-	RankClick.attach(self)  # the gold + on a rankable slot takes a click
+	RankClick.attach(self)      # the gold + on a rankable slot takes a click
 	await _build_minimap()
 	# the painted map (smooth coasts, shading, paths) replaces the tile texture once it's baked
 	c.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-	await m._slice()  # under the loading screen: a frame now and then (never waits otherwise)
+	await m._slice()      # under the loading screen: a frame now and then (never waits otherwise)
 	MapPaint.request(self, m.world, func(t: Texture2D): map_paint = t)
 	await m._slice()
 	full_map = FullMap.new(self, m)
 
-
 # ------------------------------------------------------------------ the full map (M)
 var full_map: FullMap
 
-
 func map_open() -> bool:
 	return full_map != null and full_map.is_open
-
 
 ## Expeditions only: the tutorial, training and the duel room keep their own screens.
 func map_allowed() -> bool:
 	return not (m.opts.get("tutorial", false) or m.opts.get("training", false) or m.opts.get("duel", false))
 
-
 func open_map(by_plan := false) -> void:
 	if map_allowed() and full_map:
 		full_map.open(by_plan)
-
 
 func close_map() -> void:
 	if full_map:
 		full_map.close()
 
-
 func _unhandled_input(event: InputEvent) -> void:
 	if score_mute.click(event, c.get_local_mouse_position()) or (full_map and full_map.input(event)):
 		get_viewport().set_input_as_handled()
 
-
 func _process(delta: float) -> void:
 	Prof.begin("hud_tick")
 	if full_map and full_map.is_open and full_map.auto and not (m.skydrop and m.skydrop.planning):
-		full_map.close()  # the ship's off: the planning map steps aside
+		full_map.close()      # the ship's off: the planning map steps aside
 	_tick_wheel()
 	reticle.tick(delta)
 	_hud_tick(delta)
@@ -128,20 +116,15 @@ func _process(delta: float) -> void:
 	cursor.queue_redraw()
 	Prof.end()
 
-
 var flash_t := 0.0
 var flash_col := Color.WHITE
-
-
 ## A full-screen flash for big moments.
 func flash(col: Color, strength := 0.35) -> void:
 	flash_col = Color(col, strength)
 	flash_t = 1.0
 
-
 func hurt_flash(d: float) -> void:
 	hurt_t = clampf(0.25 + d / 60.0, 0.25, 0.6)
-
 
 ## The message lane sits under the timer, or in the tutorial's own lane while that runs (Tutorial
 ## holds it while its banner is up). In a fight (hit, or landing hits) it shows fewer, shorter lines (MsgLane.fight).
@@ -151,51 +134,39 @@ func _place_msgs() -> void:
 	msgs.avoid = HunterZone.rect(m)
 	loot.fight = msgs.fight
 	loot.visible = msgs.visible
-	msgs.top = HudScale.from_edge(HudStyle.safe_pad(c.size).y + 72.0)  # under the timer / Ways Out strip
-	msgs.top = DropHud.lane_top(m, m.player, msgs.top)  # and under the drop lines on the way down
-	if m.guide:
-		msgs.top = maxf(msgs.top, m.guide.bottom(c.size))  # and under the first-match guide's line
-	if m.tut:
-		TutorialHud.place_msgs(msgs, c.size)
-	else:
-		TopStack.place(self)
-
+	msgs.top = HudScale.from_edge(HudStyle.safe_pad(c.size).y + 72.0)      # under the timer / Ways Out strip
+	msgs.top = DropHud.lane_top(m, m.player, msgs.top)      # and under the drop lines on the way down
+	if m.guide: msgs.top = maxf(msgs.top, m.guide.bottom(c.size))      # and under the first-match guide's line
+	if m.tut: TutorialHud.place_msgs(msgs, c.size)
+	else: TopStack.place(self)
 
 ## World labels (damage numbers, monster plates, the lairs' name boards) never print over
 ## each other or over a message card: the lower-priority one fades back and returns as it clears.
 func _clear_under_toasts(delta: float) -> void:
 	if m == null or m.cam == null:
 		return
-	LabelClash.fade_orbs(m, delta)  # perk orb names yield to the claimed plates, bars and numbers
+	LabelClash.fade_orbs(m, delta)       # perk orb names yield to the claimed plates, bars and numbers
 	LabelSpacing.update(m, msgs.rects(), delta)
-
 
 ## A message in the lane (MsgLane).
 func toast(text: String, col: Color) -> void:
 	msgs.push(text, col)
-
 
 ## A first-time hint, in the lane for longer (Match._tip says each once); `near` "armor" puts it
 ## next to the armour readout instead (ArmorHud.note); `life` is how long it stays, s.
 func tip(text: String, near := "", life := TIP_LIFE) -> void:
 	if Record.clean():
 		return
-	if near == "armor":
-		set_meta("armor_note", [text, m.time + life])
-	else:
-		msgs.push(text, TIP_COL, MsgLane.NORMAL, life)
-
-
+	if near == "armor": set_meta("armor_note", [text, m.time + life])
+	else: msgs.push(text, TIP_COL, MsgLane.NORMAL, life)
 const TIP_COL := Color("f3e6c8")
-const TIP_LIFE := 6.0  # s a hint stays up
-const MSG_FIGHT_S := 4.0  # s after you last took or landed a hit that the HUD keeps to its fight budget
-const KIT_FADE_S := 0.35  # s the kit panel takes to fade out or back
-
+const TIP_LIFE := 6.0      # s a hint stays up
+const MSG_FIGHT_S := 4.0   # s after you last took or landed a hit that the HUD keeps to its fight budget
+const KIT_FADE_S := 0.35   # s the kit panel takes to fade out or back
 
 ## The fight budget is on (you took or landed a hit lately): the message lane shrinks, the kit panel hides.
 func in_fight() -> bool:
 	return m.player != null and m.time - maxf(m.player.hurt_at, reticle.dealt_at) < MSG_FIGHT_S
-
 
 func _build_minimap() -> void:
 	var w := m.world
@@ -207,30 +178,23 @@ func _build_minimap() -> void:
 			var col := Color(0, 0, 0, 0)
 			if w.kind[i] == World.T_GROUND:
 				col = Color(w._bio(i)["top"]).lightened(0.12 + 0.08 * mini(w.level[i], 4))
-				if w.level[i] >= 8:
-					col = col.lightened(0.35)  # a high perch: brighter, and marked
+				if w.level[i] >= 8: col = col.lightened(0.35)      # a high perch: brighter, and marked
 				# authored maps: grabbable rims pale, sheer cliffs dark, so the map shows where you can climb
-				if w.sheer.has(i):
-					col = Color("6a6488")
-				elif w.lip.has(i):
-					col = Color("e6d6ae")
+				if w.sheer.has(i): col = Color("6a6488")
+				elif w.lip.has(i): col = Color("e6d6ae")
 			elif w.kind[i] == World.T_BLOCK:
 				col = Color(w.biome["top2"]).darkened(0.2)
 			img.set_pixel(x, z, col)
 	minimap = ImageTexture.create_from_image(img)
 
-
 # ------------------------------------------------------------------ drawing helpers
 ## Panel styles are made once per look and reused (the HUD draws dozens of panels every frame).
 var _boxes := {}
-
-
 func _box(col: Color, rad: int, border: Color, bw: int, aa := false) -> StyleBoxFlat:
 	var key := [col, rad, border, bw, aa]
 	var sb: StyleBoxFlat = _boxes.get(key)
 	if sb == null:
-		if _boxes.size() > 512:
-			_boxes.clear()
+		if _boxes.size() > 512: _boxes.clear()
 		sb = StyleBoxFlat.new()
 		sb.bg_color = col
 		sb.set_corner_radius_all(rad)
@@ -241,63 +205,51 @@ func _box(col: Color, rad: int, border: Color, bw: int, aa := false) -> StyleBox
 		_boxes[key] = sb
 	return sb
 
-
 func _panel(r: Rect2, col := PANEL, rad := 10) -> void:
 	SafeArea.note(r)
 	c.draw_style_box(_box(col, rad, EDGE, 1, true), r)
-
 
 func _bar(r: Rect2, frac: float, col: Color, back := Color(0, 0, 0, 0.45)) -> void:
 	c.draw_rect(r, back)
 	c.draw_rect(Rect2(r.position, Vector2(r.size.x * clampf(frac, 0.0, 1.0), r.size.y)), col)
 
-
-func _text(
-	p: Vector2, s: String, size := 15, col := INK, font: Font = null, align := HORIZONTAL_ALIGNMENT_LEFT, width := -1.0
-) -> void:
+func _text(p: Vector2, s: String, size := 15, col := INK, font: Font = null, align := HORIZONTAL_ALIGNMENT_LEFT, width := -1.0) -> void:
 	var f := font if font else body
 	if align == HORIZONTAL_ALIGNMENT_LEFT and width < 0.0:
-		TextCache.draw(c, f, p, s, size, col, 4)  # shaped once, kept while the text stays the same (item 94)
+		TextCache.draw(c, f, p, s, size, col, 4)       # shaped once, kept while the text stays the same (item 94)
 		return
 	c.draw_string_outline(f, p, s, align, width, UI.fs(size), 4, Color(0, 0, 0, 0.55))
 	c.draw_string(f, p, s, align, width, UI.fs(size), col)
-
 
 func _ctext(p: Vector2, s: String, size := 15, col := INK, font: Font = null) -> void:
 	var f := font if font else body
 	var w := TextCache.width(f, s, size)
 	_text(Vector2(p.x - w * 0.5, p.y), s, size, col, f)
 
-
 func _arc(center: Vector2, radius: float, frac: float, col: Color, width := 3.0) -> void:
-	if frac <= 0.0:
-		return
+	if frac <= 0.0: return
 	c.draw_arc(center, radius, -PI / 2, -PI / 2 + TAU * clampf(frac, 0.0, 1.0), 40, col, width, true)
-
 
 func _fmt(t: float) -> String:
 	t = maxf(0.0, t)
 	return "%d:%02d" % [int(int(t) / 60.0), int(t) % 60]
 
-
 # ------------------------------------------------------------------ frame
-var hover_spots: Array = []  # [rect, id] for things on the HUD you can point at
+var hover_spots: Array = []     # [rect, id] for things on the HUD you can point at
 var hover_id := ""
 var hover_t := 0.0
-var hover := HudHover.new(self)  # the hover tips (HUD slots and things in the world)
-
+var hover := HudHover.new(self)      # the hover tips (HUD slots and things in the world)
 
 func _draw_all() -> void:
 	Prof.begin("hud_draw")
 	_draw_parts()
 	Prof.end()
 
-
 func _draw_parts() -> void:
 	var sz := c.size
 	var p := m.player
 	if m.tut and m.tut.intro:
-		TutorialHud.draw(self, sz)  # the intro card alone: the rest of the HUD waits
+		TutorialHud.draw(self, sz)      # the intro card alone: the rest of the HUD waits
 		return
 	edge_world.begin(EdgeMarker.world_rim(sz), WORLD_ARROW)
 	_draw_world_labels()
@@ -307,12 +259,7 @@ func _draw_parts() -> void:
 		var a := hurt_t * 0.9
 		for i in 6:
 			var inset := i * 14.0
-			c.draw_rect(
-				Rect2(Vector2(inset, inset), sz - Vector2(inset, inset) * 2.0),
-				Color(0.8, 0.1, 0.08, a * (0.12 - i * 0.018)),
-				false,
-				14.0
-			)
+			c.draw_rect(Rect2(Vector2(inset, inset), sz - Vector2(inset, inset) * 2.0), Color(0.8, 0.1, 0.08, a * (0.12 - i * 0.018)), false, 14.0)
 	# abyss danger [footage]: sinking below island level darkens the screen from the edges with a cold
 	# tint, more the closer you get to the kill depth and the emptier your glider; near the bottom it
 	# pulses red with a quickening heartbeat. It fades away as you climb back up or catch an updraft.
@@ -333,55 +280,36 @@ func _draw_parts() -> void:
 		for i in 6:
 			var inset := i * minf(sz.x, sz.y) * 0.03
 			var a := ek * (0.22 - float(i) * 0.035) * (0.6 + 0.4 * pulse)
-			if a <= 0.0:
-				break
-			c.draw_rect(
-				Rect2(Vector2(inset, inset), sz - Vector2(inset, inset) * 2.0),
-				Color(0.45, 0.02, 0.18, a),
-				false,
-				minf(sz.x, sz.y) * 0.035
-			)
+			if a <= 0.0: break
+			c.draw_rect(Rect2(Vector2(inset, inset), sz - Vector2(inset, inset) * 2.0), Color(0.45, 0.02, 0.18, a), false, minf(sz.x, sz.y) * 0.035)
 		if p == m.player and AbyssFallSfx.warn_db(abyss_a) > -INF:
 			var beat := int(floor(abyss_pulse))
 			if beat != abyss_beat:
 				abyss_beat = beat
 				Sfx.play("thump", null, AbyssFallSfx.warn_db(abyss_a), 0.0, 0.7 + red * 0.15)
 				if red > 0.3 and beat % 2 == 0:
-					Sfx.play("boom", null, -24.0 + red * 10.0, 0.0, 0.35)  # a low rumble under the heartbeat
+					Sfx.play("boom", null, -24.0 + red * 10.0, 0.0, 0.35)     # a low rumble under the heartbeat
 		if abyss_a > 0.8 and p == m.player:
 			# the point of no return is close: say so, pulsing, in the middle of the screen
 			var wk := clampf((abyss_a - 0.8) / 0.15, 0.0, 1.0)
-			var txt := (
-				"HOLD GLIDE TO LIFT"
-				if p.glide_fuel > 0.001 and not p.gliding
-				else ("CLIMB OUT" if p.glide_fuel > 0.001 else "HOLD GLIDE: HALF LIFT, IT BURNS")
-			)
-			_ctext(
-				Vector2(sz.x * 0.5, sz.y * 0.36),
-				txt,
-				26,
-				Color(1.0, 0.25 + 0.35 * pulse, 0.2, 0.55 + 0.45 * wk * (0.5 + 0.5 * pulse)),
-				big
-			)
+			var txt := "HOLD GLIDE TO LIFT" if p.glide_fuel > 0.001 and not p.gliding else ("CLIMB OUT" if p.glide_fuel > 0.001 else "HOLD GLIDE: HALF LIFT, IT BURNS")
+			_ctext(Vector2(sz.x * 0.5, sz.y * 0.36), txt, 26, Color(1.0, 0.25 + 0.35 * pulse, 0.2, 0.55 + 0.45 * wk * (0.5 + 0.5 * pulse)), big)
 	lowhp.draw_edge(c, sz)
 	if flash_t > 0.0:
-		c.draw_rect(
-			Rect2(Vector2.ZERO, sz),
-			Color(flash_col, flash_col.a * flash_t * (0.3 if Settings.get_v("reduce_flashes") else 1.0))
-		)
-	if p and p.out and m.killcam_text != "":  # (a downed Hunter's card already says who and with what)
+		c.draw_rect(Rect2(Vector2.ZERO, sz), Color(flash_col, flash_col.a * flash_t * (0.3 if Settings.get_v("reduce_flashes") else 1.0)))
+	if p and p.out and m.killcam_text != "":      # (a downed Hunter's card already says who and with what)
 		_ctext(Vector2(sz.x * 0.5, maxf(sz.y * 0.22, msgs.bottom() + 30.0)), m.killcam_text, 22, Color("ff9a8a"), big)
 	for dk in BokiHud.squad_downed(m):
 		BokiHud.downed_arrow(self, dk, sz)
 	if p and not p.out and not p.extracted:
 		_draw_overhead(p)
 		_draw_glider_heat(p)
-		HoldPrompt.air_tap(c, m.cam, _head(p, 2.25 * float(p.cdat["scale"])))  # a tapped Space: "Hold"
+		HoldPrompt.air_tap(c, m.cam, _head(p, 2.25 * float(p.cdat["scale"])))      # a tapped Space: "Hold"
 	if p:
 		dmg_dir.draw(c, m, sz)
 		if not p.riding:
 			_draw_kit(sz, p)
-			buffs.draw(self, p, sz)  # after the kit tips so they never cover it
+			buffs.draw(self, p, sz)       # after the kit tips so they never cover it
 		elif not map_open() and p.rocket == null:
 			_draw_ship_prompt(sz)
 		if (p.dropping or p.rocket != null) and not map_open():
@@ -389,12 +317,10 @@ func _draw_parts() -> void:
 		if not p.riding and not map_open():
 			_draw_squad_pings(p)
 		if not p.riding:
-			if TutorialHud.prompt_shows(m):
-				_draw_prompt(sz, p)
+			if TutorialHud.prompt_shows(m): _draw_prompt(sz, p)
 			if m.lairs and not p.out and not map_open():
 				_draw_lair_dial(sz, p)
-			if not map_open() and not mouse_on_panel():
-				_draw_crosshair(p)
+			if not map_open() and not mouse_on_panel(): _draw_crosshair(p)
 		if p.downed:
 			_draw_downed(sz, p)
 		elif p.out and not p.gone and not m.result.get("ending", false):
@@ -416,44 +342,28 @@ func _draw_parts() -> void:
 		# the planning map was closed: how to get it back
 		_ctext(Vector2(sz.x * 0.5, 40), "%s opens the map to plan your drop" % Settings.key_cap("map"), 18, GOLD, big)
 
-
 func _draw_world_labels() -> void:
 	var cam := m.cam
-	LabelCull.begin()  # (item 94: anything off screen or far away isn't laid out)
+	LabelCull.begin()        # (item 94: anything off screen or far away isn't laid out)
 	LabelClash.begin()
-	if m.fx:
-		LabelClash.claim_numbers(m.fx, cam)  # (damage numbers stay on top: no tag draws over one)
-	ReviveHud.world_labels(self)  # deathboxes and revive beacons
-	HeartHud.world_labels(self)  # the Heart, its Heartspark and Gate
-	WaysOutPins.draw(self)  # the seats out and the Blight's edge, from afar
-	BondHud.draw(self)  # whoever carries your Boki: an arrow to them; and the Tracked chip if that is you
-	TerrainHud.draw(self)  # the hazard you're standing in, and whether your Boki keeps you safe
+	if m.fx: LabelClash.claim_numbers(m.fx, cam)      # (damage numbers stay on top: no tag draws over one)
+	ReviveHud.world_labels(self)       # deathboxes and revive beacons
+	HeartHud.world_labels(self)        # the Heart, its Heartspark and Gate
+	WaysOutPins.draw(self)             # the seats out and the Blight's edge, from afar
+	BondHud.draw(self)       # whoever carries your Boki: an arrow to them; and the Tracked chip if that is you
+	TerrainHud.draw(self)    # the hazard you're standing in, and whether your Boki keeps you safe
 	# the tutorial's marker: a pin over what to go to, or an arrow at the screen edge, with the distance
 	if m.tut and m.tut.target != Vector3.INF and m.player and not m.player.out:
-		_draw_waypoint(
-			m.tut.target,
-			m.tut.label,
-			Color("8fe3c8").lerp(
-				Color.WHITE, 0.6 if m.tut.flash_t > 0.0 and int(Time.get_ticks_msec() / 150.0) % 2 == 0 else 0.0
-			)
-		)
-	ObjectiveTracker.world(self)  # the first expedition's next step: a pin, or an arrow at the screen edge
+		_draw_waypoint(m.tut.target, m.tut.label, Color("8fe3c8").lerp(Color.WHITE, 0.6 if m.tut.flash_t > 0.0 and int(Time.get_ticks_msec() / 150.0) % 2 == 0 else 0.0))
+	ObjectiveTracker.world(self)      # the first expedition's next step: a pin, or an arrow at the screen edge
 	_draw_exit_labels()
 	_draw_lair_labels()
 	CampMark.world(self)
 	_draw_truce_marks()
 	_draw_wisp_rings()
-	RecastCue.world(self, cam, m.player)  # two-step abilities: the recast marker and the payoff burst
+	RecastCue.world(self, cam, m.player)      # two-step abilities: the recast marker and the payoff burst
 	for h in m.hunters:
-		if (
-			h == m.player
-			or h.out
-			or h.extracted
-			or not h.model
-			or not (h.model.visible or HunterWisp.hides(h))
-			or h.unseen
-			or HudPlate.hidden(m, h)
-		):
+		if h == m.player or h.out or h.extracted or not h.model or not (h.model.visible or HunterWisp.hides(h)) or h.unseen or HudPlate.hidden(m, h):
 			continue
 		if cam.is_position_behind(h.position) or LabelCull.ride_skip(h):
 			continue
@@ -463,27 +373,21 @@ func _draw_world_labels() -> void:
 		LabelCull.mark(h)
 		LabelClash.claim(sp, LabelClash.PLATE)
 		_nameplate(sp, h)
-		if not h.downed:
-			GripOverhead.draw(self, sp, h)  # their two gloves and Boki type, under the plate
+		if not h.downed: GripOverhead.draw(self, sp, h)      # their two gloves and Boki type, under the plate
 		BokiHud.form_overhead(self, sp, h)
 	if m.player and not m.player.out and m.player.model and not cam.is_position_behind(m.player.position):
 		var own_head := m.player.position + Vector3(0, HudPlate.plate_offset(m.player), 0)
 		BokiHud.form_overhead(self, cam.unproject_position(own_head), m.player)
-	BaseHud.draw(self)  # basing rings (anyone) and your B wheel
+	BaseHud.draw(self)       # basing rings (anyone) and your B wheel
 	for mb in m.mobs:
 		if mb.dead or not mb.visible or cam.is_position_behind(mb.position):
 			continue
 		var hy := 1.4
-		if mb is Blight:
-			hy = 3.0 if mb.mkind == "bl_warden" else 1.1
-		if mb is Boss:
-			hy = 4.8 if mb.mkind == "colossus" else 3.4
-		elif mb.mkind == "ward":
-			hy = 3.0
-		elif mb.mkind == "brute":
-			hy = 2.4
-		elif mb.mkind == "warden":
-			hy = 3.4
+		if mb is Blight: hy = 3.0 if mb.mkind == "bl_warden" else 1.1
+		if mb is Boss: hy = 4.8 if mb.mkind == "colossus" else 3.4
+		elif mb.mkind == "ward": hy = 3.0
+		elif mb.mkind == "brute": hy = 2.4
+		elif mb.mkind == "warden": hy = 3.4
 		var sp := LabelCull.at(self, mb.position + Vector3(0, hy, 0))
 		if not sp.is_finite():
 			continue
@@ -491,7 +395,7 @@ func _draw_world_labels() -> void:
 		LabelClash.claim(sp, LabelClash.BAR)
 		if mb.stagger_t > 0.0:
 			c.draw_arc(sp + Vector2(0, -16), 9.0, 0, TAU, 20, Color("fff27a"), 3.0, true)
-		elif mb.stag_open > 0.0:  # a pulsing purple ring: hit it with an ability now (no word)
+		elif mb.stag_open > 0.0:       # a pulsing purple ring: hit it with an ability now (no word)
 			var ring_r := 9.0 + 2.0 * sin(m.time * 12.0)
 			c.draw_arc(sp + Vector2(0, -16), ring_r, 0, TAU, 20, Color(0.85, 0.6, 1.0), 3.0, true)
 		# compact bar; rare and mutated monsters (mb.rarity, mb.mutations) wear a tinted frame and
@@ -505,7 +409,7 @@ func _draw_world_labels() -> void:
 				StealTell.mark(self, Vector2(lr.end.x + 14, lr.get_center().y), mb)
 			continue
 		if m.lairs.boss_for(m.player) == mb:
-			continue  # the raid boss (a Boss or plain Mob copy on a client): the top bar has it
+			continue      # the raid boss (a Boss or plain Mob copy on a client): the top bar has it
 		if mb.hp < mb.max_hp or rare:
 			var bw := 64.0 if mb.mkind in ["brute", "warden"] else 48.0
 			var br := Rect2(sp + Vector2(-bw * 0.5, 0), Vector2(bw, 6))
@@ -516,21 +420,12 @@ func _draw_world_labels() -> void:
 				var mx: float = sp.x - mb.mutations.size() * 7.0 + 7.0
 				for mu in mb.mutations:
 					c.draw_circle(Vector2(mx, sp.y - 8), 6.0, Color(0.03, 0.03, 0.05, 0.85))
-					Icons.draw(
-						c,
-						String(mu.get("icon", "burst")) if mu is Dictionary else String(mu),
-						Vector2(mx, sp.y - 8),
-						3.6,
-						rc
-					)
+					Icons.draw(c, String(mu.get("icon", "burst")) if mu is Dictionary else String(mu), Vector2(mx, sp.y - 8), 3.6, rc)
 					mx += 14.0
 			var ct := _chip_of(mb, bfrac)
 			_bar(br, bfrac, Color("e0b0ff") if mb.stagger_t > 0.0 else Color("ff8a6a"))
 			if ct > bfrac:
-				c.draw_rect(
-					Rect2(br.position + Vector2(bw * bfrac, 0), Vector2(bw * (ct - bfrac), 6)),
-					Color(1.0, 0.95, 0.88, 0.8)
-				)
+				c.draw_rect(Rect2(br.position + Vector2(bw * bfrac, 0), Vector2(bw * (ct - bfrac), 6)), Color(1.0, 0.95, 0.88, 0.8))
 			_status_row(sp + Vector2(0, 18), mb)
 	for k in m.kins:
 		if k.dead or not k.visible or k.state == "shoulder" or cam.is_position_behind(k.position):
@@ -542,7 +437,7 @@ func _draw_world_labels() -> void:
 		LabelClash.claim(sp, LabelClash.BAR)
 		if k.is_wild():
 			if k.state == "dazed":
-				CaptureHud.dazed_label(self, k, sp)  # knocked out: how to scan it, and the scan filling
+				CaptureHud.dazed_label(self, k, sp)       # knocked out: how to scan it, and the scan filling
 			else:
 				_ctext(sp + Vector2(0, -10), "Wild %s" % Data.KIN[k.species]["name"], 16, Color("bfe9ff"), big)
 				_bar(Rect2(sp + Vector2(-24, -2), Vector2(48, 5)), k.hp / k.max_hp, Color("bfe9ff"))
@@ -550,12 +445,8 @@ func _draw_world_labels() -> void:
 			BokiHud.downed_label(self, k, sp)
 		elif k.hp < k.max_hp:
 			_bar(Rect2(sp + Vector2(-22, 0), Vector2(44, 5)), k.hp / k.max_hp, SideColor.of(m, k))
-			c.draw_rect(
-				Rect2(sp + Vector2(-22, 0), Vector2(44 * k.hp / k.max_hp, 5)),
-				Color(KinRegen.MOTE_COL, KinRegen.pulse(k, m.time))
-			)
+			c.draw_rect(Rect2(sp + Vector2(-22, 0), Vector2(44 * k.hp / k.max_hp, 5)), Color(KinRegen.MOTE_COL, KinRegen.pulse(k, m.time)))
 	_draw_ground_tags(cam)
-
 
 ## Gear and tunings on the ground: name and rarity when you're close enough to care. Tags that would overlap one
 ## already drawn this frame step up above it, so a few drops side by side stay readable.
@@ -571,15 +462,11 @@ func _draw_ground_tags(cam: Camera3D) -> void:
 		var is_gear: bool = wp.has("gear") and Gear.ALL.has(String(wp["gear"]))
 		var is_tune: bool = wp.has("tune") and Data.PERKS.has(String(wp["tune"]))
 		var it := {} if (is_gear or is_tune) else Pack.ground_item(wp)
-		var nm := (
-			String(Loot.name_of(Pack.ground_item(wp)))
-			if is_gear
-			else (String(Data.PERKS[String(wp["tune"])]["name"]) if is_tune else Loot.name_of(it))
-		)
+		var nm := String(Loot.name_of(Pack.ground_item(wp))) if is_gear else (String(Data.PERKS[String(wp["tune"])]["name"]) if is_tune else Loot.name_of(it))
 		var tw := TextCache.width(big, nm, 16) + 10.0
 		var tag := Rect2(sp + Vector2(-tw * 0.5, -16.0), Vector2(tw, 34.0 if (is_gear or is_tune) else 20.0))
 		if LabelClash.blocked(tag):
-			continue  # (a nameplate, bar or damage number is there: the loot name waits)
+			continue      # (a nameplate, bar or damage number is there: the loot name waits)
 		for tries in 4:
 			var bumped := false
 			for o in tags:
@@ -593,19 +480,7 @@ func _draw_ground_tags(cam: Camera3D) -> void:
 		if is_gear:
 			# a piece of gear: its name, rarity and which slot it goes in
 			_ctext(sp, nm, 15, r["color"], big)
-			_ctext(
-				sp + Vector2(0, 17),
-				(
-					Gear.slot_name(String(wp["gear"]))
-					+ (
-						(" · %s / %s" % [Gloves.key_cap(0), Gloves.key_cap(1)])
-						if Gear.active(String(wp["gear"]))
-						else ""
-					)
-				),
-				12,
-				INK
-			)
+			_ctext(sp + Vector2(0, 17), Gear.slot_name(String(wp["gear"])) + ((" · %s / %s" % [Gloves.key_cap(0), Gloves.key_cap(1)]) if Gear.active(String(wp["gear"])) else ""), 12, INK)
 		elif is_tune:
 			var pd: Dictionary = Data.PERKS[String(wp["tune"])]
 			_ctext(sp, nm, 15, pd["col"], big)
@@ -613,10 +488,9 @@ func _draw_ground_tags(cam: Camera3D) -> void:
 		else:
 			_ctext(sp, nm, 16, Loot.col_of(it), big)
 
-
 func _draw_bubbles() -> void:
 	if m.tut and m.tut.card_up():
-		return  # (one voice at a time: the tutorial banner is up)
+		return        # (one voice at a time: the tutorial banner is up)
 	var cam := m.cam
 	for b in m.bubbles:
 		if not is_instance_valid(b["ent"]):
@@ -638,29 +512,16 @@ func _draw_bubbles() -> void:
 		var r := Rect2(sp + Vector2(-tw * 0.5 - 12, -44), Vector2(tw + 24, 30))
 		var mine: bool = k.owner_h == m.player
 		var col := Color(0.98, 0.96, 0.9, 0.95 * a) if mine else Color(0.2, 0.22, 0.3, 0.85 * a)
-		var sb := StyleBoxFlat.new()
-		sb.bg_color = col
-		sb.set_corner_radius_all(12)
+		var sb := StyleBoxFlat.new(); sb.bg_color = col; sb.set_corner_radius_all(12)
 		c.draw_style_box(sb, r)
-		c.draw_colored_polygon(
-			PackedVector2Array([sp + Vector2(-7, -15), sp + Vector2(7, -15), sp + Vector2(0, -6)]), col
-		)
-		c.draw_string(
-			body,
-			r.position + Vector2(12, 20),
-			s,
-			HORIZONTAL_ALIGNMENT_LEFT,
-			-1,
-			UI.fs(BokiSpeech.MATCH_PX),
-			Color(0.1, 0.09, 0.12, a) if mine else Color(INK, a)
-		)
-
+		c.draw_colored_polygon(PackedVector2Array([sp + Vector2(-7, -15), sp + Vector2(7, -15), sp + Vector2(0, -6)]), col)
+		c.draw_string(body, r.position + Vector2(12, 20), s, HORIZONTAL_ALIGNMENT_LEFT, -1, UI.fs(BokiSpeech.MATCH_PX), Color(0.1, 0.09, 0.12, a) if mine else Color(INK, a))
 
 func _draw_pings(sz: Vector2) -> void:
 	var cam := m.cam
 	for p in m.pings:
 		if p.has("by") or p.has("kin"):
-			continue  # squad pings and Boki callouts get a waypoint instead (see _draw_squad_pings)
+			continue        # squad pings and Boki callouts get a waypoint instead (see _draw_squad_pings)
 		var a := clampf(4.0 - p["t"], 0.0, 1.0)
 		var col := Color(p["col"], a)
 		var at: Vector3 = p["pos"] + Vector3(0, 1.0, 0)
@@ -678,10 +539,7 @@ func _draw_pings(sz: Vector2) -> void:
 			var d := (sp - center).normalized()
 			var edge := center + d * minf(sz.x * 0.46 / maxf(absf(d.x), 0.001), sz.y * 0.44 / maxf(absf(d.y), 0.001))
 			var n := Vector2(-d.y, d.x)
-			c.draw_colored_polygon(
-				PackedVector2Array([edge + d * 14, edge - d * 8 + n * 10, edge - d * 8 - n * 10]), col
-			)
-
+			c.draw_colored_polygon(PackedVector2Array([edge + d * 14, edge - d * 8 + n * 10, edge - d * 8 - n * 10]), col)
 
 func _draw_top(sz: Vector2) -> void:
 	var pad := HudStyle.safe_pad(sz)
@@ -689,10 +547,10 @@ func _draw_top(sz: Vector2) -> void:
 		_draw_duel(sz)
 		return
 	if m.opts.get("arena", false):
-		return  # the Arena draws its own key line and meter (scripts/match/arena.gd)
+		return        # the Arena draws its own key line and meter (scripts/match/arena.gd)
 	if m.opts.get("training", false):
 		if Record.clean():
-			return  # (recording: no training banner or checklist)
+			return      # (recording: no training banner or checklist)
 		var rr := Rect2(Vector2(sz.x * 0.5 - 220, 12), Vector2(440, 54))
 		_panel(rr, Color(0.06, 0.07, 0.1, 0.88), 12)
 		_ctext(Vector2(sz.x * 0.5, 34), "TRAINING GROUNDS", 12, Color("8fe3c8"))
@@ -716,33 +574,16 @@ func _draw_top(sz: Vector2) -> void:
 		for i in shown.size():
 			var t: Array = shown[i]
 			var key := ("[%s]  " % Settings.key_cap(t[2])) if t[2] != "" else ""
-			if t[0] == "move":
-				key = (
-					"[%s%s%s%s]  "
-					% [
-						Settings.key_cap("up"),
-						Settings.key_cap("left"),
-						Settings.key_cap("down"),
-						Settings.key_cap("right")
-					]
-				)
-			_text(
-				box.position + Vector2(14, 50 + i * 24),
-				("→  " if i == 0 else "○  ") + key + String(t[1]),
-				13,
-				GOLD if i == 0 else INK
-			)
+			if t[0] == "move": key = "[%s%s%s%s]  " % [Settings.key_cap("up"), Settings.key_cap("left"), Settings.key_cap("down"), Settings.key_cap("right")]
+			_text(box.position + Vector2(14, 50 + i * 24), ("→  " if i == 0 else "○  ") + key + String(t[1]), 13, GOLD if i == 0 else INK)
 		_text(box.position + Vector2(14, box.size.y - 10), "H hides the guide and your kit", 11, Color(MUTED, 0.8))
 		return
 	if m.tut:
 		TutorialHud.draw(self, sz)
 		return
-	if m.guide:
-		m.guide.draw(self, sz)
-	if m.crouch_hint:
-		m.crouch_hint.draw(self, sz)
-	feed_top = AliveCounter.draw(c, m)  # top right: squads and players left, your own numbers
-
+	if m.guide: m.guide.draw(self, sz)
+	if m.crouch_hint: m.crouch_hint.draw(self, sz)
+	feed_top = AliveCounter.draw(c, m)       # top right: squads and players left, your own numbers
 
 ## The duel room: what you're up against at the top, and your numbers on the right.
 func _draw_duel(sz: Vector2) -> void:
@@ -751,21 +592,7 @@ func _draw_duel(sz: Vector2) -> void:
 	var rr := Rect2(Vector2(sz.x * 0.5 - 260, pad.y), Vector2(520, 58))
 	_panel(rr, Color(0.06, 0.07, 0.1, 0.88), 12)
 	_ctext(Vector2(sz.x * 0.5, rr.position.y + 20), "DUEL ROOM  ·  ROUND %d" % d.round_n, 12, Color("ff9a8a"))
-	_ctext(
-		Vector2(sz.x * 0.5, rr.position.y + 44),
-		(
-			"%s bot  ·  %s class  ·  %s  ·  %s  ·  %s"
-			% [
-				d.pick_text("diff"),
-				d.pick_text("cls"),
-				d.pick_text("weapon"),
-				d.pick_text("glove") if d.glove != "" else "no glove",
-				d.pick_text("mode")
-			]
-		),
-		15,
-		INK
-	)
+	_ctext(Vector2(sz.x * 0.5, rr.position.y + 44), "%s bot  ·  %s class  ·  %s  ·  %s  ·  %s" % [d.pick_text("diff"), d.pick_text("cls"), d.pick_text("weapon"), d.pick_text("glove") if d.glove != "" else "no glove", d.pick_text("mode")], 15, INK)
 	if guide_hidden or Record.clean():
 		return
 	var st: Dictionary = d.stats
@@ -773,18 +600,7 @@ func _draw_duel(sz: Vector2) -> void:
 	var rows := [
 		["Damage dealt", "%d" % int(st["dealt"]), GOOD],
 		["Damage taken", "%d" % int(st["taken"]), Color("ff8a7a")],
-		[
-			"Shots landed",
-			(
-				"%d / %d  (%d%%)"
-				% [
-					int(st["hits"]),
-					int(st["shots"]),
-					int(round(100.0 * int(st["hits"]) / shots)) if int(st["shots"]) > 0 else 0
-				]
-			),
-			INK
-		],
+		["Shots landed", "%d / %d  (%d%%)" % [int(st["hits"]), int(st["shots"]), int(round(100.0 * int(st["hits"]) / shots)) if int(st["shots"]) > 0 else 0], INK],
 		["Shots dodged", "%d / %d" % [int(st["dodged"]), int(st["bot_shots"])], Color("9af0ff")],
 		["Knocks", "%d  -  %d" % [int(st["knocks"]), int(st["knocked"])], GOLD],
 	]
@@ -798,14 +614,11 @@ func _draw_duel(sz: Vector2) -> void:
 	var keys_at := Vector2(box.position.x + 14, box.end.y - 12)
 	_text(keys_at, "B bot setup  ·  Backspace reset  ·  G hide", 11, Color(MUTED, 0.85))
 
-
 var feed_top := 18.0
-
-
 func _draw_minimap(sz: Vector2) -> void:
 	var riding: bool = m.player != null and (m.player.riding or m.player.dropping)
-	var hold := riding or MapDetail.holding()  # (MapDetail: what shows by default, what waits for a hold)
-	var s := minf(340.0, HudStyle.safe_rect(sz).size.y * 0.36) if riding else 196.0  # (the big drop map leaves room under it, its rows and the squad)
+	var hold := riding or MapDetail.holding()      # (MapDetail: what shows by default, what waits for a hold)
+	var s := minf(340.0, HudStyle.safe_rect(sz).size.y * 0.36) if riding else 196.0      # (the big drop map leaves room under it, its rows and the squad)
 	var r := Rect2(HudStyle.safe_pad(sz), Vector2(s, s))
 	mm_bottom = r.end.y
 	SafeArea.note(r)
@@ -822,23 +635,20 @@ func _draw_minimap(sz: Vector2) -> void:
 		c.draw_circle(r.get_center(), inner.size.x * 0.5, Color(0.07, 0.07, 0.14, 0.92))
 	# riding in or dropping: the whole map. On the ground: a close view that follows you.
 	var view := Rect2(Vector2.ZERO, Vector2(w.w, w.h))
-	var vh: Hunter = m.spectate.viewed()  # you, or the teammate you watch once you're out
+	var vh: Hunter = m.spectate.viewed()      # you, or the teammate you watch once you're out
 	if not riding and vh:
 		var R := 34.0
 		view = Rect2(Vector2(vh.pos.x, vh.pos.z) - Vector2(R, R), Vector2(R, R) * 2.0)
-	edge_mini.begin(
-		Rect2(inner.position + Vector2(6, 6), inner.size - Vector2(12, 12)),
-		MINI_ARROW,
-		mm_circ.z - 7.0 if mm_circ.z > 0.0 else 0.0
-	)
+	edge_mini.begin(Rect2(inner.position + Vector2(6, 6), inner.size - Vector2(12, 12)), MINI_ARROW, mm_circ.z - 7.0 if mm_circ.z > 0.0 else 0.0)
 	var k := inner.size.x / view.size.x
-	var to_map := func(p3: Vector3) -> Vector2: return inner.position + (Vector2(p3.x, p3.z) - view.position) * k
-	var on_map := func(v: Vector2, pad := 0.0) -> bool: return _mm_has(inner, v, pad)
+	var to_map := func(p3: Vector3) -> Vector2:
+		return inner.position + (Vector2(p3.x, p3.z) - view.position) * k
+	var on_map := func(v: Vector2, pad := 0.0) -> bool:
+		return _mm_has(inner, v, pad)
 	var tex_view := view.intersection(Rect2(Vector2.ZERO, Vector2(w.w, w.h)))
 	if mm_circ.z > 0.0:
 		# the map texture drawn into a disc: a fan of points round the rim, each with its map UV
-		var pts := PackedVector2Array()
-		var uvs := PackedVector2Array()
+		var pts := PackedVector2Array(); var uvs := PackedVector2Array()
 		var tsz := Vector2(w.w, w.h)
 		var ctr := Vector2(mm_circ.x, mm_circ.y)
 		for i in 56:
@@ -852,7 +662,7 @@ func _draw_minimap(sz: Vector2) -> void:
 		c.draw_texture_rect_region(map_tex(), dest, map_region(tex_view))
 	if MapDetail.shows("hazard", hold, HazardMap.matters(m)):
 		HazardMap.draw(c, m, to_map, inner, mm_circ, HazardMap.MM_SHIELD)
-	MapNames.begin(inner)  # (place names give way to each other and to the train's line)
+	MapNames.begin(inner)      # (place names give way to each other and to the train's line)
 	if MapDetail.shows("place", hold):
 		_draw_map_labels(w, inner, view, k, riding)
 	if m.skytrain and MapDetail.shows("train", hold, train_map.near(m.skytrain, m.player)):
@@ -877,14 +687,12 @@ func _draw_minimap(sz: Vector2) -> void:
 	if m.lairs:
 		_draw_map_lairs(inner, to_map, on_map, hold)
 	ReviveHud.minimap(self, inner, to_map, on_map, hold)
-	if m.biomes and MapDetail.shows("hot_zone", hold):
-		m.biomes.hot.minimap(self, to_map, on_map)
+	if m.biomes and MapDetail.shows("hot_zone", hold): m.biomes.hot.minimap(self, to_map, on_map)
 	HeartHud.minimap(self, inner, to_map, on_map)
 	NestMap.minimap(self, to_map, on_map, hold)
 	CampMark.minimap(self, to_map, on_map)
 	WaysOutMap.minimap(self, inner, to_map, on_map)
-	if m.zone:
-		m.zone.minimap(self, to_map, on_map)
+	if m.zone: m.zone.minimap(self, to_map, on_map)
 	if m.spawn_plan and full_map and m.player:
 		# this match's spawns your squad knows are there (vaults from the start; the rest once scouted)
 		for cnd in m.spawn_plan.cands:
@@ -895,17 +703,9 @@ func _draw_minimap(sz: Vector2) -> void:
 			var cpv: Vector2 = to_map.call(cnd["pos"])
 			if on_map.call(cpv, 5.0):
 				var cdef: Dictionary = m.spawn_plan.cats.get(cnd["cat"], {})
-				full_map.marker(
-					c,
-					String(cdef.get("shape", "star")),
-					cpv,
-					MapDetail.ICON_R / 1.35,
-					cdef.get("col", Color.WHITE),
-					"active"
-				)
+				full_map.marker(c, String(cdef.get("shape", "star")), cpv, MapDetail.ICON_R / 1.35, cdef.get("col", Color.WHITE), "active")
 	if not m.ship.is_empty() and not m.ship.get("gone", false) and MapDetail.shows("ship", hold):
-		var sa: Vector2 = to_map.call(m.ship["a"])
-		var sb: Vector2 = to_map.call(m.ship["b"])
+		var sa: Vector2 = to_map.call(m.ship["a"]); var sb: Vector2 = to_map.call(m.ship["b"])
 		c.draw_line(sa, sb, Color(1, 1, 1, 0.35), 2.0, true)
 		c.draw_circle(to_map.call(m.ship_pos()), MapDetail.ICON_R, GOLD)
 	if m.rolling and MapDetail.shows("bounty", hold):
@@ -915,8 +715,7 @@ func _draw_minimap(sz: Vector2) -> void:
 				continue
 			var wp: Vector2 = to_map.call(m.ship_pos_of(ws))
 			if on_map.call(wp, 3.0):
-				var wa: Vector2 = to_map.call(ws["a"])
-				var wb: Vector2 = to_map.call(ws["b"])
+				var wa: Vector2 = to_map.call(ws["a"]); var wb: Vector2 = to_map.call(ws["b"])
 				c.draw_line(wa, wb, Color(1.0, 0.72, 0.35, 0.3), 1.5, true)
 				c.draw_circle(wp, MapDetail.ICON_R, Color("ffb64a"))
 			else:
@@ -925,22 +724,18 @@ func _draw_minimap(sz: Vector2) -> void:
 			if m.player and h.team == m.player.team or not h.has_meta("bounty") or h.out or h.extracted:
 				continue
 			var bp: Vector2 = to_map.call(h.pos)
-			if on_map.call(bp, 3.0):
-				bounty_marker(c, bp, MapDetail.ICON_R / 6.5)
-			else:
-				edge_mini.add(bp - inner.get_center(), Color("ffb64a"))
+			if on_map.call(bp, 3.0): bounty_marker(c, bp, MapDetail.ICON_R / 6.5)
+			else: edge_mini.add(bp - inner.get_center(), Color("ffb64a"))
 	if m.tut and m.tut.target != Vector3.INF:
 		var tv: Vector2 = to_map.call(m.tut.target)
-		if on_map.call(tv, 4.0):
-			c.draw_arc(tv, 6.0, 0, TAU, 16, Color("8fe3c8"), 2.5, true)
-		else:
-			edge_mini.add(tv - inner.get_center(), Color("8fe3c8"), EdgeMarker.PRIO_GOAL)
+		if on_map.call(tv, 4.0): c.draw_arc(tv, 6.0, 0, TAU, 16, Color("8fe3c8"), 2.5, true)
+		else: edge_mini.add(tv - inner.get_center(), Color("8fe3c8"), EdgeMarker.PRIO_GOAL)
 	if m.objective and m.objective.target_pos() != Vector3.INF:
 		var ov: Vector2 = to_map.call(m.objective.target_pos())
 		ObjectiveTracker.minimap(self, ov, on_map.call(ov, 4.0), inner.get_center())
 	for pg in m.pings:
 		if pg.has("team") and m.player and int(pg["team"]) != m.player.team:
-			continue  # another squad's ping
+			continue        # another squad's ping
 		var pv: Vector2 = to_map.call(pg["pos"])
 		if on_map.call(pv):
 			if pg.has("by") or pg.has("kin"):
@@ -950,21 +745,17 @@ func _draw_minimap(sz: Vector2) -> void:
 				c.draw_circle(pv + Vector2(0, -9), MapDetail.ICON_R - 1.0, pg["col"])
 			else:
 				c.draw_circle(pv, MapDetail.ICON_R - 1.0, pg["col"])
-		else:
-			edge_mini.add(pv - inner.get_center(), pg["col"], EdgeMarker.PRIO_LOW)
+		else: edge_mini.add(pv - inner.get_center(), pg["col"], EdgeMarker.PRIO_LOW)
 	# sound pings: rings that ripple out where you heard gunfire or a blast you can't see
 	for sp in m.sound_pings:
 		var age := m.time - float(sp["t"])
 		var life := float(sp.get("life", 1.6))
-		if age > life:
-			continue
+		if age > life: continue
 		var pv: Vector2 = to_map.call(sp["pos"])
 		var boom: bool = sp["kind"] == "boom" or sp["kind"] == "shriek"
 		var col := Color("ff9a5a") if boom else Color("ff5a5a")
-		if sp["kind"] in ["blight", "shriek"]:
-			col = Color("ff6a2a")  # the Blight: ember
-		if sp["kind"] == "wisp":
-			col = Color("9fe8ff")  # a rival's killed Boki showing its owner (KinSummon)
+		if sp["kind"] in ["blight", "shriek"]: col = Color("ff6a2a")      # the Blight: ember
+		if sp["kind"] == "wisp": col = Color("9fe8ff")      # a rival's killed Boki showing its owner (KinSummon)
 		var a := clampf(1.0 - age / life, 0.0, 1.0)
 		if on_map.call(pv):
 			c.draw_arc(pv, 3.0 + age * (12.0 if boom else 8.0), 0, TAU, 20, Color(col, a), 2.0, true)
@@ -982,14 +773,8 @@ func _draw_minimap(sz: Vector2) -> void:
 				if on_map.call(tv, 3.0):
 					c.draw_circle(tv, MapDetail.ICON_R - 1.0, BAD)
 					c.draw_arc(tv, MapDetail.ICON_R + ph * 8.0, 0, TAU, 20, Color(BAD, 1.0 - ph), 2.0, true)
-				else:
-					edge_mini.add(tv - inner.get_center(), BAD)
-			elif (
-				m.truce.allied(m.player.team, h.team)
-				and not h.unseen
-				and on_map.call(tv, 3.0)
-				and MapDetail.shows("ally", hold)
-			):
+				else: edge_mini.add(tv - inner.get_center(), BAD)
+			elif m.truce.allied(m.player.team, h.team) and not h.unseen and on_map.call(tv, 3.0) and MapDetail.shows("ally", hold):
 				c.draw_circle(tv, MapDetail.ICON_R, Color(0, 0, 0, 0.6))
 				c.draw_circle(tv, MapDetail.ICON_R - 1.0, Color("f4f1e6"))
 	# your squad, with an arrow for anyone off the edge (a dead teammate shows at their deathbox)
@@ -997,7 +782,7 @@ func _draw_minimap(sz: Vector2) -> void:
 		if m.player == null or h.team != m.player.team:
 			continue
 		var mst := _mate_state(h) if h != m.player else ["ALIVE", INK, h.pos, ""]
-		if mst[2] == Vector3.INF or h.out or (h == m.player and h.extracted):  # (a fallen mate: their box)
+		if mst[2] == Vector3.INF or h.out or (h == m.player and h.extracted):      # (a fallen mate: their box)
 			continue
 		var pv: Vector2 = to_map.call(mst[2])
 		var col: Color = INK if h == m.player else mst[1]
@@ -1007,10 +792,7 @@ func _draw_minimap(sz: Vector2) -> void:
 		if h == m.player:
 			var d: Vector2 = h.aim_dir()
 			var side := Vector2(-d.y, d.x)
-			c.draw_colored_polygon(
-				PackedVector2Array([pv + d * 8.0, pv - d * 4.0 + side * 5.0, pv - d * 2.0, pv - d * 4.0 - side * 5.0]),
-				col
-			)
+			c.draw_colored_polygon(PackedVector2Array([pv + d * 8.0, pv - d * 4.0 + side * 5.0, pv - d * 2.0, pv - d * 4.0 - side * 5.0]), col)
 		else:
 			c.draw_circle(pv, MapDetail.ICON_R, Color(0, 0, 0, 0.6))
 			c.draw_circle(pv, MapDetail.ICON_R - 1.0, col)
@@ -1027,15 +809,9 @@ func _draw_minimap(sz: Vector2) -> void:
 	if mm_circ.z > 0.0:
 		var ctr := Vector2(mm_circ.x, mm_circ.y)
 		c.draw_arc(ctr, mm_circ.z + 1.0, 0, TAU, 72, Color(0.85, 0.8, 1.0, 0.55), 2.5, true)
-		c.draw_colored_polygon(
-			PackedVector2Array(
-				[ctr + Vector2(0, -mm_circ.z - 7), ctr + Vector2(5, -mm_circ.z + 1), ctr + Vector2(-5, -mm_circ.z + 1)]
-			),
-			Color("ffd27a")
-		)
+		c.draw_colored_polygon(PackedVector2Array([ctr + Vector2(0, -mm_circ.z - 7), ctr + Vector2(5, -mm_circ.z + 1), ctr + Vector2(-5, -mm_circ.z + 1)]), Color("ffd27a"))
 	_draw_clock_bar(sz, r)
 	ObjectiveTracker.draw(self)
-
 
 ## Under the minimap, like Supervive's day bar: the match clock, your run
 ## level, and a thin bar for how far through the match you are.
@@ -1044,13 +820,11 @@ func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 		return
 	WaysOutHud.draw(self)
 	if not HudGroups.clock_shown(m):
-		return  # a save's first expedition: the clock waits for the first Ways Out beat or kill (HudReveal "beat_clock")
+		return      # a save's first expedition: the clock waits for the first Ways Out beat or kill (HudReveal "beat_clock")
 	var left := m.length - m.time
-	var phase := "ISLANDS FALLING" if left < 30.0 else HeartHud.zone_line(m).to_upper()  # (the tide's clock)
+	var phase := "ISLANDS FALLING" if left < 30.0 else HeartHud.zone_line(m).to_upper()      # (the tide's clock)
 	var pc := BAD if left < 30.0 else SideColor.tone("tide_next")
-	var r := Rect2(
-		Vector2(mm.position.x, mm.end.y + 8), Vector2(maxf(mm.size.x, HudStyle.clock_w(_fmt(left), phase)), 30)
-	)
+	var r := Rect2(Vector2(mm.position.x, mm.end.y + 8), Vector2(maxf(mm.size.x, HudStyle.clock_w(_fmt(left), phase)), 30))
 	mm_bottom = r.end.y
 	_rounded(r, Color(0.04, 0.05, 0.08, 0.86), 8)
 	_text(r.position + Vector2(10, 20), _fmt(left), 16, BAD if left < 30.0 else INK, big)
@@ -1061,17 +835,13 @@ func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 		_text(Vector2(r.end.x - 10 - TextCache.width(big, lt, 12), r.position.y + 19), lt, 12, Color("ffd27a"), big)
 	var prog := clampf(m.time / maxf(1.0, m.length), 0.0, 1.0)
 	c.draw_rect(Rect2(Vector2(r.position.x + 6, r.end.y - 5), Vector2(r.size.x - 12, 2)), Color(1, 1, 1, 0.12))
-	c.draw_rect(
-		Rect2(Vector2(r.position.x + 6, r.end.y - 5), Vector2((r.size.x - 12) * prog, 2)),
-		BAD if left < 30.0 else Color("b9a6ff")
-	)
+	c.draw_rect(Rect2(Vector2(r.position.x + 6, r.end.y - 5), Vector2((r.size.x - 12) * prog, 2)), BAD if left < 30.0 else Color("b9a6ff"))
 	if not HudReveal.on(m, "weather"):
 		return
 	# the raid condition (RaidLook), and how far you see under it
 	var rr := Rect2(Vector2(r.position.x, r.end.y + 4), Vector2(r.size.x, 20))
 	mm_bottom = rr.end.y
-	if m.zone:
-		mm_bottom = m.zone.hud_row(self, Rect2(Vector2(r.position.x, rr.end.y + 4), Vector2(r.size.x, 20)))
+	if m.zone: mm_bottom = m.zone.hud_row(self, Rect2(Vector2(r.position.x, rr.end.y + 4), Vector2(r.size.x, 20)))
 	var rcol: Color = RaidLook.COLORS.get(m.raid, INK)
 	_rounded(rr, Color(0.04, 0.05, 0.08, 0.7), 6)
 	c.draw_circle(rr.position + Vector2(11, 10), 4.0, rcol)
@@ -1081,7 +851,6 @@ func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 		_text(Vector2(rr.end.x - 8 - TextCache.width(big, st, 10), rr.position.y + 14), st, 10, MUTED, big)
 	if m.rolling:
 		SessionRow.draw(self, Rect2(Vector2(r.position.x, rr.end.y + 4), Vector2(r.size.x, 42)))
-
 
 ## A bounty mark: an amber target with a pulse (on the maps and over a hunter's nameplate).
 func bounty_marker(cv: Control, p: Vector2, k := 1.0) -> void:
@@ -1095,19 +864,15 @@ func bounty_marker(cv: Control, p: Vector2, k := 1.0) -> void:
 		var a := PI * 0.5 * i
 		cv.draw_line(p + Vector2(cos(a), sin(a)) * 3.5 * k, p + Vector2(cos(a), sin(a)) * 8.0 * k, amber, 1.5, true)
 
-
-const WORLD_ARROW := 16.0  # px: the scale of the world's screen-edge arrows (EdgeMarker)
-const MINI_ARROW := 4.0  # px: the same on the minimap's rim
-var edge_world := EdgeMarker.new()  # off-screen markers on the play box, laid out once a frame
-var edge_mini := EdgeMarker.new()  # off-map markers on the minimap's rim
-var mm_circ := Vector3.ZERO  # the round minimap: centre x, y and radius (0 while it's the square overview)
-
-
+const WORLD_ARROW := 16.0      # px: the scale of the world's screen-edge arrows (EdgeMarker)
+const MINI_ARROW := 4.0        # px: the same on the minimap's rim
+var edge_world := EdgeMarker.new()    # off-screen markers on the play box, laid out once a frame
+var edge_mini := EdgeMarker.new()     # off-map markers on the minimap's rim
+var mm_circ := Vector3.ZERO    # the round minimap: centre x, y and radius (0 while it's the square overview)
 func _mm_has(inner: Rect2, v: Vector2, pad := 0.0) -> bool:
 	if mm_circ.z > 0.0:
 		return v.distance_to(Vector2(mm_circ.x, mm_circ.y)) <= mm_circ.z - pad
 	return inner.grow(-pad).has_point(v)
-
 
 ## A world marker: a bobbing pin and label over the spot, or (when it's off screen or behind the
 ## camera, or under the hunter: MarkerDir) a big arrow at the screen edge pointing the way. Both show how far.
@@ -1120,12 +885,10 @@ func _draw_waypoint(at: Vector3, label: String, col: Color, prio := EdgeMarker.P
 	if d == Vector2.ZERO:
 		var p := cam.unproject_position(at + Vector3(0, MarkerDir.PIN_UP, 0)) + Vector2(0, bob)
 		c.draw_circle(p, 24.0, Color(0, 0, 0, 0.5))
-		c.draw_colored_polygon(
-			PackedVector2Array([p + Vector2(0, -20), p + Vector2(16, 0), p + Vector2(0, 20), p + Vector2(-16, 0)]), col
-		)
+		c.draw_colored_polygon(PackedVector2Array([p + Vector2(0, -20), p + Vector2(16, 0), p + Vector2(0, 20), p + Vector2(-16, 0)]), col)
 		c.draw_colored_polygon(PackedVector2Array([p + Vector2(-12, 27), p + Vector2(12, 27), p + Vector2(0, 46)]), col)
 		_ctext(p + Vector2(0, 70), "%s  ·  %dm" % [label, dist], 22, col, big)
-		var gp := cam.unproject_position(at + Vector3(0, 0.05, 0))  # a ring on the ground under it
+		var gp := cam.unproject_position(at + Vector3(0, 0.05, 0))      # a ring on the ground under it
 		c.draw_arc(gp, 28.0 + bob, 0, TAU, 28, Color(col, 0.85), 4.0, true)
 	else:
 		edge_world.add(d, col, prio, label, dist)
@@ -1146,28 +909,13 @@ func _draw_exit_labels() -> void:
 		var st := String(x["state"])
 		var line := ""
 		match st:
-			"charging":
-				line = (
-					"Uplink %d%%%s"
-					% [
-						int(x["prog"] * 100.0),
-						(
-							"  ·  contested"
-							if x["contested"]
-							else ("  ·  draining %s" % _fmt(m.exits.drain_left(x)) if x.get("draining", false) else "")
-						)
-					]
-				)
-			"fizzling":
-				line = "Shutting off"
-			"open":
-				line = "LIFT OPEN  %ds" % int(ceil(x["t"]))
-			"spent":
-				line = "Cooling down"
-			_:
-				line = "Start uplink" if m.exits.startable(x) else ("Online in %s" % _fmt(float(x["open_at"]) - m.time))
+			"charging": line = "Uplink %d%%%s" % [int(x["prog"] * 100.0), "  ·  contested" if x["contested"] else ("  ·  draining %s" % _fmt(m.exits.drain_left(x)) if x.get("draining", false) else "")]
+			"fizzling": line = "Shutting off"
+			"open": line = "LIFT OPEN  %ds" % int(ceil(x["t"]))
+			"spent": line = "Cooling down"
+			_: line = "Start uplink" if m.exits.startable(x) else ("Online in %s" % _fmt(float(x["open_at"]) - m.time))
 		var reach := 70.0 if st == "open" else 44.0
-		var prompted: bool = not m.interact.is_empty() and is_same(m.interact.get("x"), x)  # the prompt already says it
+		var prompted: bool = not m.interact.is_empty() and is_same(m.interact.get("x"), x)     # the prompt already says it
 		if d < reach and not cam.is_position_behind(at) and not prompted:
 			var lp := cam.unproject_position(at + Vector3(0, 3.4, 0))
 			_ctext(lp, String(x["name"]), 13, col, big)
@@ -1176,64 +924,42 @@ func _draw_exit_labels() -> void:
 		if is_same(x, mine) and d > 7.0 and not m.opts.get("tutorial", false):
 			_draw_waypoint(at, "Lift" if st == "open" else "Uplink", col)
 
-
 ## On narrow windows the ability bar takes the whole bottom row and the player card sits above it.
 func _narrow(sz: Vector2) -> bool:
 	return sz.x < 1080.0
 
-
 ## ------------------------------------------------------------------ combat HUD
 ## Bottom centre: armor and health over the ability row. Bottom left: your kin. Bottom right: your
 ## weapon and what you're carrying. Left: your squad. Hits on you show which way they came from.
-const ARMOR_COL := Color("dfe9f7")  # armor kits and repairs (the armour strip itself: HudStyle / armor_col)
+const ARMOR_COL := Color("dfe9f7")      # armor kits and repairs (the armour strip itself: HudStyle / armor_col)
 const HP_LOW := Color("ff6a5a")
 var armor_lerp := 1.0
-var ready_was := {}  # slot id -> was it ready last frame, for the "ready" flash
-var ready_flash := {}  # slot id -> time left on its flash
-var slot_text := {}  # slot id -> the countdown it shows now (HudSlot; checks read it)
-var slot_fx := {}  # slot id -> {kind: "cast"|"deny", t}: a pop when a press lands, a red shake when it can't
-
+var ready_was := {}        # slot id -> was it ready last frame, for the "ready" flash
+var ready_flash := {}      # slot id -> time left on its flash
+var slot_text := {}        # slot id -> the countdown it shows now (HudSlot; checks read it)
+var slot_fx := {}          # slot id -> {kind: "cast"|"deny", t}: a pop when a press lands, a red shake when it can't
 
 ## A press on an ability slot: "cast" pops it, "deny" (on cooldown, not ready) shakes it red; "reset" (it just came back) swells it with a ring.
 func ability_feedback(id: String, kind: String) -> void:
 	slot_fx[id] = {"kind": kind, "t": 0.0}
-
-
 var dmg_dir := DamageDir.new()
-
 
 ## A less urgent message: it waits behind the others, and goes if it waits too long.
 func toast_small(text: String, col: Color) -> void:
 	msgs.push(text, col, MsgLane.LOW)
 
-
 func _rounded(r: Rect2, col: Color, rad := 10, border := Color(0, 0, 0, 0), bw := 0) -> void:
 	SafeArea.note(r)
 	c.draw_style_box(_box(col, rad, border, bw, true), r)
-
 
 ## The key label under a slot (HudStyle.key_pill).
 func _keycap(center: Vector2, key: String, col: Color) -> void:
 	HudStyle.key_pill(c, center, key, col)
 
-
 ## One ability slot (HudSlot draws it; BokiHud's slots come through here too).
-func _ab_slot(
-	id: String,
-	rect: Rect2,
-	icon: String,
-	key: String,
-	col: Color,
-	cd_frac: float,
-	cd_secs: float,
-	ready_v: bool,
-	charges := -1,
-	max_ch := 0,
-	label := ""
-) -> void:
-	var on := ready_v and not AirLimits.drop_locked(m.player)  # greyed through the opening drop
+func _ab_slot(id: String, rect: Rect2, icon: String, key: String, col: Color, cd_frac: float, cd_secs: float, ready_v: bool, charges := -1, max_ch := 0, label := "") -> void:
+	var on := ready_v and not AirLimits.drop_locked(m.player)      # greyed through the opening drop
 	HudSlot.ab_slot(self, id, rect, icon, key, col, cd_frac, cd_secs, on, charges, max_ch, label)
-
 
 var guide_hidden := false
 var abyss_pulse := 0.0
@@ -1241,15 +967,11 @@ var abyss_beat := -1
 var glider_hit_t := 0.0
 var glider_hit_amt := 0.0
 
-
 ## A hit drained your glider: flash the meter and show how much went.
 func glider_hit(amount: float) -> void:
 	glider_hit_amt = (glider_hit_amt if glider_hit_t > 0.0 else 0.0) + amount
 	glider_hit_t = 0.5
-
-
 var _h_down := false
-
 
 func _hud_tick(delta: float) -> void:
 	mates.track(self, m.player, delta)
@@ -1264,41 +986,32 @@ func _hud_tick(delta: float) -> void:
 	HudSlot.decay(self, delta)
 	# the kit panel fades out in a fight (Tab holds it up) and its show timer waits the fight out
 	var fight := in_fight()
-	if fight:
-		kit_t0 += delta
+	if fight: kit_t0 += delta
 	var hide_kit := fight and not Input.is_action_pressed("scores")
 	kit_fade = move_toward(kit_fade, 0.0 if hide_kit else 1.0, delta / KIT_FADE_S)
 	dmg_dir.tick(delta)
 
-
 ## The bottom-left cluster (HudVitals draws the portrait and bars; the ability row sits under them).
 const HUD_PORTRAIT := Vector2(112, 132)
-const HUD_REACH := 16.0  # px the level coin and the name line reach past the portrait (left and below)
-
-
+const HUD_REACH := 16.0      # px the level coin and the name line reach past the portrait (left and below)
 func _hud_origin(sz: Vector2) -> Vector2:
 	var pad := HudStyle.safe_pad(sz)
 	return Vector2(pad.x + HUD_REACH, sz.y - pad.y - HUD_REACH - HUD_PORTRAIT.y)
 
-
 var lvl_pop := 0.0
 var lvl_seen := -1
-var xp_seen := -1.0  # the last XP the tracker saw (HudVitals.xp_step)
-var xp_shown := -1.0  # the XP the bar has filled to
-var xp_pop := 0.0  # s left of the pop after XP landed
-
-
+var xp_seen := -1.0      # the last XP the tracker saw (HudVitals.xp_step)
+var xp_shown := -1.0     # the XP the bar has filled to
+var xp_pop := 0.0        # s left of the pop after XP landed
 ## A level just went up (Hunter.gain_xp): the badge pops and the lane names what improved (the
 ## weapon's step on even levels, which also get a gold wash).
 func level_up(lv: int, info := {}) -> void:
-	lvl_pop = 0.35  # every level: the badge flashes (the growth itself is quiet, LevelGrowth)
+	lvl_pop = 0.35      # every level: the badge flashes (the growth itself is quiet, LevelGrowth)
 	var line := "LEVEL %d  ·  +1 skill point" % lv
 	if lv % 2 == 0:
 		flash(Color("ffd27a"), 0.16)
-		if not info.is_empty():
-			line = "LEVEL %d  ·  %s" % [lv, info["name"]]
+		if not info.is_empty(): line = "LEVEL %d  ·  %s" % [lv, info["name"]]
 	msgs.push(line, Color("ffd27a"), MsgLane.HIGH)
-
 
 ## The archetype resource under the health bar, with its name and tells (ARCHETYPES §3.2).
 func _draw_res_bar(x0: float, y: float, w: float, p: Hunter) -> void:
@@ -1312,7 +1025,7 @@ func _draw_res_bar(x0: float, y: float, w: float, p: Hunter) -> void:
 	if String(rd.get("kind", "")) in ["count", "on_targets"]:
 		var n := int(rd.get("max", 3))
 		var have := int(round(f * n))
-		SafeArea.note(Rect2(Vector2(bx, y + 2), Vector2(bw, 7)))  # (one meter, not one panel per pip)
+		SafeArea.note(Rect2(Vector2(bx, y + 2), Vector2(bw, 7)))      # (one meter, not one panel per pip)
 		for i in n:
 			var cr := Rect2(Vector2(bx + i * (bw / n), y + 2), Vector2(bw / n - 3.0, 7))
 			c.draw_style_box(_box(rc if i < have else Color(1, 1, 1, 0.12), 3, Color(0, 0, 0, 0), 0, true), cr)
@@ -1329,7 +1042,6 @@ func _draw_res_bar(x0: float, y: float, w: float, p: Hunter) -> void:
 		var pulse := 0.5 + 0.5 * sin(m.time * 8.0)
 		_rounded(Rect2(Vector2(bx - 2, y), Vector2(bw + 4, 11)), Color(0, 0, 0, 0), 4, Color(rc, 0.4 + 0.5 * pulse), 2)
 
-
 ## Glider heat as a ring floating beside the glider, as in Supervive: it fills as you glide (faster
 ## when you're hit or lifting out of the abyss), drains on the ground, and pulses red when
 ## overheated, when the next hit will spike you.
@@ -1343,8 +1055,7 @@ func _draw_glider_heat(p: Hunter) -> void:
 	var cpt := m.cam.unproject_position(at) + Vector2(58, -6)
 	var hot := heat >= 0.999
 	var gcol := Color("ffd27a").lerp(Color("ff5a3a"), clampf(heat * 1.2 - 0.2, 0.0, 1.0))
-	if hot:
-		gcol = gcol.lerp(Color.WHITE, 0.35 + 0.35 * sin(m.time * 14.0))
+	if hot: gcol = gcol.lerp(Color.WHITE, 0.35 + 0.35 * sin(m.time * 14.0))
 	var a := 1.0 if p.gliding else 0.6
 	# a hit just drained it (2x): the ring flashes red and shows the chunk it lost
 	if glider_hit_t > 0.0:
@@ -1357,12 +1068,9 @@ func _draw_glider_heat(p: Hunter) -> void:
 		c.draw_arc(cpt, 11.0, -PI * 0.5, -PI * 0.5 + TAU * heat, 40, Color(gcol, a), 4.0, true)
 	# a little wing in the middle
 	var wcol := Color(gcol if hot else Color(1, 1, 1, 0.8), a)
-	c.draw_polyline(
-		PackedVector2Array([cpt + Vector2(-6, 2), cpt + Vector2(0, -3), cpt + Vector2(6, 2)]), wcol, 2.0, true
-	)
+	c.draw_polyline(PackedVector2Array([cpt + Vector2(-6, 2), cpt + Vector2(0, -3), cpt + Vector2(6, 2)]), wcol, 2.0, true)
 	if hot:
 		c.draw_arc(cpt, 17.0 + 2.0 * sin(m.time * 14.0), 0.0, TAU, 32, Color(1.0, 0.3, 0.2, 0.6), 2.0, true)
-
 
 ## The ability row under the bars: right click, Shift dash, E kin, R bond ultimate (gloves: GripHud). Every
 ## one starts the run locked; rank pips sit above each, a gold border means a point can unlock it
@@ -1381,19 +1089,7 @@ func _draw_abilities(sz: Vector2, p: Hunter) -> void:
 	# right click: the weapon's ability
 	var sr := Rect2(Vector2(x, y), Vector2(s, s))
 	if util:
-		_skill_slot(
-			"sec",
-			"sec",
-			sr,
-			util.icon,
-			Settings.key_cap("secondary"),
-			util.color,
-			p.runner.cd_frac("utility"),
-			p.runner.cd_left("utility") if not p.runner.is_ready("utility") else 0.0,
-			p.runner.is_ready("utility"),
-			p.runner.charges("utility") if util.charges > 1 else -1,
-			util.charges if util.charges > 1 else 0
-		)
+		_skill_slot("sec", "sec", sr, util.icon, Settings.key_cap("secondary"), util.color, p.runner.cd_frac("utility"), p.runner.cd_left("utility") if not p.runner.is_ready("utility") else 0.0, p.runner.is_ready("utility"), p.runner.charges("utility") if util.charges > 1 else -1, util.charges if util.charges > 1 else 0)
 	x += s + gap
 	# Shift: your dash
 	DashSlot.row_slot(self, Rect2(Vector2(x, y), Vector2(s, s)), p)
@@ -1404,17 +1100,7 @@ func _draw_abilities(sz: Vector2, p: Hunter) -> void:
 		var kd: AbilitySpec = k.runner.def_of("k1")
 		if kd:
 			var rdy: bool = k.runner.is_ready("k1") and k.ready_to_fight()
-			_skill_slot(
-				"kin",
-				"k1",
-				er,
-				KinText.icon(kd),
-				Settings.key_cap("signature"),
-				KinText.color(kd),
-				k.runner.cd_frac("k1"),
-				k.runner.cd_left("k1") if not k.runner.is_ready("k1") else 0.0,
-				rdy
-			)
+			_skill_slot("kin", "k1", er, KinText.icon(kd), Settings.key_cap("signature"), KinText.color(kd), k.runner.cd_frac("k1"), k.runner.cd_left("k1") if not k.runner.is_ready("k1") else 0.0, rdy)
 			if not k.ready_to_fight() and int(p.slot_lv["kin"]) > 0:
 				_rounded(er, Color(0, 0, 0, 0.45), 10)
 	BokiHud.aug_mark(self, p, er, "e")
@@ -1424,17 +1110,7 @@ func _draw_abilities(sz: Vector2, p: Hunter) -> void:
 	# B (base to a teammate) as a small badge at the end of the row (the gloves sit on the right: GripHud)
 	if Life.has_mates(m, p):
 		var brr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
-		_ab_slot(
-			"base",
-			brr,
-			"swap",
-			Settings.key_cap("base"),
-			Color("8fe3c8"),
-			p.base_cd / BaseRecall.CD_S if p.base_cd > 0.0 else 0.0,
-			p.base_cd,
-			p.base_cd <= 0.0 and p.base_t <= 0.0
-		)
-
+		_ab_slot("base", brr, "swap", Settings.key_cap("base"), Color("8fe3c8"), p.base_cd / BaseRecall.CD_S if p.base_cd > 0.0 else 0.0, p.base_cd, p.base_cd <= 0.0 and p.base_t <= 0.0)
 
 ## The archetype row: RMB, Shift dash, E utility, X the hero's ultimate (locked until level 6), then the
 ## kin's own ability (C) and send/recall (G) as small badges. The Merge is the Boki box on the right (GripHud).
@@ -1447,40 +1123,15 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 	var k: Kin = p.kin
 	var info := p.slot_info("sec")
 	var sr := Rect2(Vector2(x, y), Vector2(s, s))
-	_skill_slot(
-		"sec",
-		"sec",
-		sr,
-		String(info["icon"]),
-		Settings.key_cap("secondary"),
-		info["col"],
-		float(info["cd"]) / maxf(0.01, float(info["cd_max"])) if float(info["cd"]) > 0.0 else 0.0,
-		float(info["cd"]),
-		bool(info["ready"]),
-		float(info.get("charge_f", info["charges"])) if int(info["max_charges"]) > 1 else -1.0,
-		int(info["max_charges"]) if int(info["max_charges"]) > 1 else 0
-	)
+	_skill_slot("sec", "sec", sr, String(info["icon"]), Settings.key_cap("secondary"), info["col"], float(info["cd"]) / maxf(0.01, float(info["cd_max"])) if float(info["cd"]) > 0.0 else 0.0, float(info["cd"]), bool(info["ready"]), float(info.get("charge_f", info["charges"])) if int(info["max_charges"]) > 1 else -1.0, int(info["max_charges"]) if int(info["max_charges"]) > 1 else 0)
 	if info.get("full", false) and int(p.slot_lv["sec"]) > 0:
 		# the resource-full variant is ready (Cash In, Called Shot...): a gold dot
 		c.draw_circle(sr.position + Vector2(s - 6, 6), 5.0 + sin(m.time * 8.0), Color("ffd23f"))
 	if float(info.get("hold", -1.0)) >= 0.0:
 		# a merged form's RMB hold: the fill ring, bright once it is full
-		c.draw_arc(
-			sr.get_center(),
-			s * 0.5 + 4.0,
-			-PI / 2,
-			-PI / 2 + TAU * clampf(float(info["hold"]), 0.0, 1.0),
-			32,
-			Color(info["col"], 1.0 if info.get("full", false) else 0.8),
-			3.0,
-			true
-		)
+		c.draw_arc(sr.get_center(), s * 0.5 + 4.0, -PI / 2, -PI / 2 + TAU * clampf(float(info["hold"]), 0.0, 1.0), 32, Color(info["col"], 1.0 if info.get("full", false) else 0.8), 3.0, true)
 	if p.ak and p.ak.rmb_down and p.ak.rmb_t > 0.05:
-		var hfull: float = (
-			p.ak.rmb_charge_full()
-			if p.ak.rmb_charge_full() > float(p.ak.rmb_def().get("hold", 0.3))
-			else float(p.ak.rmb_def().get("hold", 0.3))
-		)
+		var hfull: float = p.ak.rmb_charge_full() if p.ak.rmb_charge_full() > float(p.ak.rmb_def().get("hold", 0.3)) else float(p.ak.rmb_def().get("hold", 0.3))
 		var hk := clampf(p.ak.rmb_t / maxf(0.05, hfull), 0.0, 1.0)
 		c.draw_arc(sr.get_center(), s * 0.5 + 4.0, -PI / 2, -PI / 2 + TAU * hk, 32, Color(info["col"], 0.9), 3.0, true)
 	BokiHud.aug_mark(self, p, sr, "rmb")
@@ -1495,35 +1146,12 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 	x += s + gap
 	var ei := p.slot_info("k1")
 	var er := Rect2(Vector2(x, y), Vector2(s, s))
-	_skill_slot(
-		"kin",
-		"k1",
-		er,
-		String(ei["icon"]),
-		Settings.key_cap("signature"),
-		ei["col"],
-		(
-			float(ei["cd"]) / maxf(0.01, float(ei["cd_max"]))
-			if float(ei["cd"]) > 0.0 and float(ei.get("up", 0.0)) <= 0.0
-			else 0.0
-		),
-		float(ei["cd"]) if float(ei.get("up", 0.0)) <= 0.0 else 0.0,
-		bool(ei["ready"])
-	)
+	_skill_slot("kin", "k1", er, String(ei["icon"]), Settings.key_cap("signature"), ei["col"], float(ei["cd"]) / maxf(0.01, float(ei["cd_max"])) if float(ei["cd"]) > 0.0 and float(ei.get("up", 0.0)) <= 0.0 else 0.0, float(ei["cd"]) if float(ei.get("up", 0.0)) <= 0.0 else 0.0, bool(ei["ready"]))
 	if ei.get("full", false):
 		# the payoff lives on E (the Mage's Flashpoint): the same gold dot as the right click's
 		c.draw_circle(er.position + Vector2(s - 6, 6), 5.0 + sin(m.time * 8.0), Color("ffd23f"))
 	if not RecastCue.slot(self, p, "e", er) and float(ei.get("up", 0.0)) > 0.0:
-		c.draw_arc(
-			er.get_center(),
-			s * 0.5 + 4.0,
-			-PI / 2,
-			-PI / 2 + TAU * clampf(float(ei["up"]) / maxf(0.1, float(p.ak.e_def().get("time", 5.0))), 0.0, 1.0),
-			32,
-			Color(ei["col"], 0.9),
-			3.0,
-			true
-		)
+		c.draw_arc(er.get_center(), s * 0.5 + 4.0, -PI / 2, -PI / 2 + TAU * clampf(float(ei["up"]) / maxf(0.1, float(p.ak.e_def().get("time", 5.0))), 0.0, 1.0), 32, Color(ei["col"], 0.9), 3.0, true)
 	x += s + gap
 	# X: the hero's own ultimate (the Merge sits on the right: GripHud)
 	x = HunterUltTile.draw(self, p, x, y, s, gap)
@@ -1531,17 +1159,7 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 	x = BokiHud.cg_slots(self, p, x, y, s)
 	if Life.has_mates(m, p):
 		var brr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
-		_ab_slot(
-			"base",
-			brr,
-			"swap",
-			Settings.key_cap("base"),
-			Color("8fe3c8"),
-			p.base_cd / BaseRecall.CD_S if p.base_cd > 0.0 else 0.0,
-			p.base_cd,
-			p.base_cd <= 0.0 and p.base_t <= 0.0
-		)
-
+		_ab_slot("base", brr, "swap", Settings.key_cap("base"), Color("8fe3c8"), p.base_cd / BaseRecall.CD_S if p.base_cd > 0.0 else 0.0, p.base_cd, p.base_cd <= 0.0 and p.base_t <= 0.0)
 
 ## What the R slot says about its lock: "LV 6" until then, "Spend point" with a point to spend on it,
 ## "" once it's unlocked.
@@ -1554,25 +1172,9 @@ func r_lock_text(p: Hunter) -> String:
 		return "NEXT POINT"
 	return "LV %d" % int(Hunter.ULT_AT[0])
 
-
 ## One ability in the row, aware of run levels (HudSlot.skill_slot).
-func _skill_slot(
-	slot: String,
-	id: String,
-	r: Rect2,
-	icon: String,
-	key: String,
-	col: Color,
-	cdf: float,
-	cds: float,
-	ready_v: bool,
-	ch := -1.0,
-	mx := 0
-) -> void:
-	HudSlot.skill_slot(
-		self, slot, id, r, icon, key, col, cdf, cds, ready_v and not AirLimits.drop_locked(m.player), ch, mx
-	)
-
+func _skill_slot(slot: String, id: String, r: Rect2, icon: String, key: String, col: Color, cdf: float, cds: float, ready_v: bool, ch := -1.0, mx := 0) -> void:
+	HudSlot.skill_slot(self, slot, id, r, icon, key, col, cdf, cds, ready_v and not AirLimits.drop_locked(m.player), ch, mx)
 
 ## Your kin, perched on the top corner of your portrait: its face, a health ring and its state.
 func _draw_kin_card(sz: Vector2, p: Hunter) -> void:
@@ -1584,7 +1186,7 @@ func _draw_kin_card(sz: Vector2, p: Hunter) -> void:
 	var glow: Color = Data.KIN[k.species].get("glow", kc)
 	var rr := 20.0
 	var ring := Vector2(rr + 4.0, rr + 4.0)
-	var pc := SafeArea.keep(Rect2(o + Vector2(6, 6) - ring, ring * 2.0), sz).get_center()  # (the corner of the portrait, kept on screen)
+	var pc := SafeArea.keep(Rect2(o + Vector2(6, 6) - ring, ring * 2.0), sz).get_center()      # (the corner of the portrait, kept on screen)
 	SafeArea.note(Rect2(pc - ring, ring * 2.0))
 	c.draw_circle(pc, rr + 4, Color(0.03, 0.03, 0.05, 0.95))
 	c.draw_arc(pc, rr + 1.5, 0, TAU, 40, Color(1, 1, 1, 0.12), 3.0, true)
@@ -1601,37 +1203,20 @@ func _draw_kin_card(sz: Vector2, p: Hunter) -> void:
 	var st := ""
 	match k.state:
 		"shoulder":
-			st = (
-				(
-					{"mount": "at your side", "perch": "perched"}.get(k.carry_style(), "on shoulder")
-					if k.cmd == "return"
-					else "carried"
-				)
-				if k.settle >= 1.0
-				else "settling"
-			)
-			if not k.giant.is_empty():
-				st = "GIANT"
-			elif k.carry_style() == "mount" and p.gliding:
-				st = "curled up"
-		"flying", "flying_home":
-			st = "in the air"
-		"active":
-			st = "attacking" if k.target else String(KinFollow.PLAIN.get(k.cmd, "with you"))
-		"returning":
-			st = "coming back"
-		"downed":
-			st = "down"
-		"wisp":
-			st = "reviving you!" if KinWispForm.pulling(k) else "wisp"
-		"fused":
-			st = "merged"
+			st = ({"mount": "at your side", "perch": "perched"}.get(k.carry_style(), "on shoulder") if k.cmd == "return" else "carried") if k.settle >= 1.0 else "settling"
+			if not k.giant.is_empty(): st = "GIANT"
+			elif k.carry_style() == "mount" and p.gliding: st = "curled up"
+		"flying", "flying_home": st = "in the air"
+		"active": st = "attacking" if k.target else String(KinFollow.PLAIN.get(k.cmd, "with you"))
+		"returning": st = "coming back"
+		"downed": st = "down"
+		"wisp": st = "reviving you!" if KinWispForm.pulling(k) else "wisp"
+		"fused": st = "merged"
 	if k.state in ["active", "downed", "wisp", "fused", "returning"] or not k.giant.is_empty():
 		var tw := TextCache.width(big, st.to_upper(), 9)
 		var sr := SafeArea.keep(Rect2(pc + Vector2(-tw * 0.5 - 5, rr + 3), Vector2(tw + 10, 14)), sz)
 		_rounded(sr, Color(0.03, 0.03, 0.05, 0.9), 6)
 		_ctext(sr.get_center() + Vector2(0, 3.5), st.to_upper(), 9, Color(kc.lerp(INK, 0.3), 0.95), big)
-
 
 ## Bottom right, as in Supervive: your consumables and kin throw as small slots with counts, your
 ## loot counter, and the weapon card with ammo underneath.
@@ -1643,7 +1228,7 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 	_rounded(r, Color(0.04, 0.05, 0.08, 0.88), 12, Color(rc, 0.45), 1)
 	hover_spots.append([r, "weapon"])
 	BokiHud.aug_mark(self, p, Rect2(r.position + Vector2(6, 4), Vector2(18, 18)), "lmb")
-	RecastCue.slot(self, p, "lmb", Rect2(r.position + Vector2(14, 8), Vector2(52, 52)))  # the recall (Bulwark)
+	RecastCue.slot(self, p, "lmb", Rect2(r.position + Vector2(14, 8), Vector2(52, 52)))      # the recall (Bulwark)
 	c.draw_rect(Rect2(r.position + Vector2(0, 10), Vector2(3, r.size.y - 20)), rc)
 	Icons.draw(c, p.wid, r.position + Vector2(40, 34), 26.0, Color(rc, 0.9))
 	var wn := String(p.wpn["name"]).to_upper()
@@ -1661,11 +1246,9 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 		var live := m.time - p.swing_at <= float(p.wpn["rate"]) + float(p.wpn.get("combo_reset", 0.6))
 		for ci in cn:
 			var on := live and (p.combo_i % cn) > ci
-			c.draw_circle(
-				r.position + Vector2(160 + ci * 16, 42), 5.0 if ci == cn - 1 else 3.5, rc if on else Color(1, 1, 1, 0.2)
-			)
+			c.draw_circle(r.position + Vector2(160 + ci * 16, 42), 5.0 if ci == cn - 1 else 3.5, rc if on else Color(1, 1, 1, 0.2))
 	elif not p.wpn.get("ammo", true):
-		pass  # no ammo (Data.weapon_stats): no count to show
+		pass                       # no ammo (Data.weapon_stats): no count to show
 	else:
 		_text(r.position + Vector2(78, 52), str(p.ammo), 28, ammo_col, big)
 		var aw := TextCache.width(big, str(p.ammo), 28)
@@ -1679,20 +1262,13 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 	GripHud.draw(self, p, r)
 	# what you're carrying home, as a counter
 	var seeds := 0
-	for sd in p.seeds:
-		seeds += int(p.seeds[sd])
+	for sd in p.seeds: seeds += int(p.seeds[sd])
 	# (inside the weapon card on the right: the slot row above is full with the four-slot belt)
 	var gx := r.end.x - 112.0
 	var cy := r.position.y + 6.0
 	Icons.draw(c, "gem", Vector2(gx + 8, cy + s - 10), 7.0, GOLD)
 	_text(Vector2(gx + 20, cy + s - 4), "%d" % p.gems, 18, GOLD if p.gems > 0 else MUTED, big)
-	_text(
-		Vector2(gx + 2, cy + 14),
-		"%d seeds · %s" % [seeds, CaptureHud.box_text(p)],
-		10,
-		CaptureHud.box_col(p, MUTED),
-		big
-	)
+	_text(Vector2(gx + 2, cy + 14), "%d seeds · %s" % [seeds, CaptureHud.box_text(p)], 10, CaptureHud.box_col(p, MUTED), big)
 	if not m.opts.get("training", false):
 		# the backpack: slots used (red when full); the key opens it
 		var full := p.pack.size() >= p.pack_cap
@@ -1703,7 +1279,6 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 		_text(Vector2(px + 20, cy + s - 4), "%d/%d" % [p.pack.size(), p.pack_cap], 14, pcol, big)
 		var pw := TextCache.width(big, "%d/%d" % [p.pack.size(), p.pack_cap], 14)
 		hover_spots.append([Rect2(Vector2(px, cy + s - 22), Vector2(24 + pw, 24)), "pack"])
-
 
 ## Your squadmates down the left side.
 ## A teammate's state, for the squad frames, markers and arrows: [label, colour, where to point,
@@ -1717,27 +1292,23 @@ func _mate_state(h: Hunter) -> Array:
 			return ["DEAD", Color("8a8f9e"), Vector3.INF, ""]
 		var left := float(b.get("soul_until", 0.0)) - m.time
 		if left > 0.0:
-			return [
-				"DEATHBOX", Color("ff6a5a"), b.get("pos", h.pos), "%d:%02d" % [int(int(left) / 60.0), int(left) % 60]
-			]
+			return ["DEATHBOX", Color("ff6a5a"), b.get("pos", h.pos), "%d:%02d" % [int(int(left) / 60.0),
+					int(left) % 60]]
 		return ["DEAD", Color("8a8f9e"), b.get("pos", h.pos), ""]
 	if h.downed:
 		return ["WISP", Color("ffb36a"), h.pos, ""]
 	return ["ALIVE", GOOD, h.pos, ""]
 
-
 ## Rendered portraits for hunters with no painted art, one per hunter (and a greyed copy for the fallen).
-var portraits := {}  # nid -> SubViewport
+var portraits := {}       # nid -> SubViewport
 var portraits_grey := {}  # nid -> ImageTexture
-
 
 func portrait(h: Hunter) -> Texture2D:
 	var pkey := "%s|%s|%s" % [h.arch, h.cls, h.wid]
 	if portraits.has(h.nid) and String((portraits[h.nid] as Node).get_meta("pkey", pkey)) != pkey:
 		# a new archetype or weapon (the Arena's 2-7 swap): the portrait follows
 		(portraits[h.nid] as Node).queue_free()
-		portraits.erase(h.nid)
-		portraits_grey.erase(h.nid)
+		portraits.erase(h.nid); portraits_grey.erase(h.nid)
 	if not portraits.has(h.nid):
 		var look: Dictionary = Unmasked.mask_look() if h.ctrl == "local" else h.bot_look
 		var vp := Portraits.make(h.cls, Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()], h.wid, look, h.arch)
@@ -1746,7 +1317,6 @@ func portrait(h: Hunter) -> Texture2D:
 		portraits[h.nid] = vp
 	return (portraits[h.nid] as SubViewport).get_texture()
 
-
 func portrait_grey(h: Hunter) -> Texture2D:
 	if not portraits_grey.has(h.nid):
 		var g := Portraits.grey(portrait(h))
@@ -1754,7 +1324,6 @@ func portrait_grey(h: Hunter) -> Texture2D:
 			return portrait(h)
 		portraits_grey[h.nid] = g
 	return portraits_grey[h.nid]
-
 
 ## A hunter's framed portrait (Portraits): its Warden's painted face, or its rendered model when it has
 ## none. state: "" alive, "down", "dead", "out". Alive, a hit flashes it and low health drains it.
@@ -1768,18 +1337,14 @@ func _draw_portrait(r: Rect2, h: Hunter, state: String, border: Color) -> void:
 	var mood := plates.mood_of(h, low) if state == "" else ""
 	Portraits.draw(c, r, ak, fallback, border, state, hurt, low, m.time, false, mood)
 
-
-var mm_bottom := 226.0  # where the minimap ends (it grows while you ride in)
-
+var mm_bottom := 226.0    # where the minimap ends (it grows while you ride in)
 
 func _chip_of(e: Ent, frac: float) -> float:
 	return plates.chip_of(e, frac, get_process_delta_time())
 
-
 ## Who sees a rival's name on their plate (HudPlate draws it).
-const NP_NAME_NEAR := 9.0  # a rival this close shows their name
-const NP_HOVER_PX := 46.0  # ... or the mouse within this of their plate
-
+const NP_NAME_NEAR := 9.0       # a rival this close shows their name
+const NP_HOVER_PX := 46.0       # ... or the mouse within this of their plate
 
 ## Does this hunter's plate show their name? Allies always; rivals when hovered or close, or down.
 func _np_show_name(sp: Vector2, h: Hunter) -> bool:
@@ -1788,7 +1353,6 @@ func _np_show_name(sp: Vector2, h: Hunter) -> bool:
 	if m.player.flat_dist(h) < NP_NAME_NEAR:
 		return true
 	return c.get_local_mouse_position().distance_to(sp) < NP_HOVER_PX
-
 
 func _nameplate(sp: Vector2, h: Hunter) -> void:
 	if not sp.is_finite():
@@ -1799,11 +1363,9 @@ func _nameplate(sp: Vector2, h: Hunter) -> void:
 		bounty_marker(c, Vector2(sp.x, sp.y - 34), 1.15)
 		_ctext(Vector2(sp.x, sp.y - 48), "BOUNTY  ·  LV %d" % h.lvl, 11, Color("ffb64a"), big)
 
-
 ## The status row (HudPlate.row) centred on `at`, under a monster's bar.
 func _status_row(at: Vector2, e: Ent) -> void:
 	HudPlate.draw_row(c, at, plates.row(m.player, e, HudPlate.statuses(e)), true)
-
 
 ## Teammates you can't see on screen get an arrow at the screen edge (with distance, coloured by
 ## how they're doing; a dead teammate's deathbox in their squad colour while their soul can still be saved).
@@ -1823,22 +1385,19 @@ func _draw_squad_markers(sz: Vector2, p: Hunter) -> void:
 		var behind := cam.is_position_behind(wp)
 		var sp := cam.unproject_position(wp)
 		if not behind and inner.has_point(sp):
-			continue  # on screen: their own label (or their box's, ReviveHud) says it
+			continue          # on screen: their own label (or their box's, ReviveHud) says it
 		if String(st[0]) == "DEATHBOX":
 			col = m.mate_col(h)
 		var lbl: String = h.pname.substr(0, 10)
 		var away := sp - sz * 0.5
-		if behind:
-			away = -away
+		if behind: away = -away
 		var shown := float(dist)
 		var wisp: Hunter = h if String(st[0]) == "WISP" else null
-		if wisp:
-			lbl += " DOWN"
+		if wisp: lbl += " DOWN"
 		elif String(st[0]) == "DEATHBOX":
 			lbl = "%s's box %s" % [lbl, st[3]]
-			shown = -1.0  # (its text already says how far)
+			shown = -1.0      # (its text already says how far)
 		edge_world.add(away, col, EdgeMarker.PRIO_ALLY, lbl, shown, wisp)
-
 
 ## Aboard the skyship: when to jump.
 func _draw_ship_prompt(sz: Vector2) -> void:
@@ -1854,9 +1413,7 @@ func _draw_ship_prompt(sz: Vector2) -> void:
 		var dash := 0.0
 		var L := gp.distance_to(top)
 		while dash < L:
-			c.draw_line(
-				top.lerp(gp, dash / L), top.lerp(gp, minf(1.0, (dash + 6.0) / L)), Color(1, 0.85, 0.4, 0.55), 2.0
-			)
+			c.draw_line(top.lerp(gp, dash / L), top.lerp(gp, minf(1.0, (dash + 6.0) / L)), Color(1, 0.85, 0.4, 0.55), 2.0)
 			dash += 12.0
 		var pul := 1.0 + sin(m.time * 5.0) * 0.08
 		c.draw_arc(gp, 22.0 * pul, 0, TAU, 40, GOLD, 3.0, true)
@@ -1876,29 +1433,18 @@ func _draw_ship_prompt(sz: Vector2) -> void:
 	else:
 		_ctext(Vector2(sz.x * 0.5, rr.position.y + 36), "Press %s to launch" % Settings.key_cap("jump"), 26, GOLD, big)
 	var sub := "Pick your spot on the map. Everyone left aboard drops in %ds" % int(ceil(left))
-	if dr and dr.planning:
-		sub = "%s opens the map to ping a spot" % Settings.key_cap("map")
-	elif waits:
-		sub = "You'll ride the squad's rocket down with them. %ds left aboard" % int(ceil(left))
-	elif i_lead and squad:
-		sub = "Your squad rides your rocket down. %ds left aboard" % int(ceil(left))
+	if dr and dr.planning: sub = "%s opens the map to ping a spot" % Settings.key_cap("map")
+	elif waits: sub = "You'll ride the squad's rocket down with them. %ds left aboard" % int(ceil(left))
+	elif i_lead and squad: sub = "Your squad rides your rocket down. %ds left aboard" % int(ceil(left))
 	_ctext(Vector2(sz.x * 0.5, rr.position.y + 62), sub, 14, INK)
-	_bar(
-		Rect2(Vector2(rr.position.x + 20, rr.position.y + 76), Vector2(w - 40, 4)),
-		clampf(m.time / maxf(1.0, float(m.ship.get("ride", 1.0))), 0.0, 1.0),
-		GOLD
-	)
+	_bar(Rect2(Vector2(rr.position.x + 20, rr.position.y + 76), Vector2(w - 40, 4)), clampf(m.time / maxf(1.0, float(m.ship.get("ride", 1.0))), 0.0, 1.0), GOLD)
 	if squad:
 		# the keys for the drop, as keycaps
 		var keys: Array = []
-		if i_lead:
-			keys = [["jump", "Launch"], ["pass_lead", "Pass lead"], ["map", "Map"]]
-		elif waits:
-			keys = [["map", "Map"]]
-		else:
-			keys = [["jump", "Launch"], ["map", "Map"]]
+		if i_lead: keys = [["jump", "Launch"], ["pass_lead", "Pass lead"], ["map", "Map"]]
+		elif waits: keys = [["map", "Map"]]
+		else: keys = [["jump", "Launch"], ["map", "Map"]]
 		_key_row(Vector2(sz.x * 0.5, rr.position.y + 104), keys)
-
 
 ## A centred row of keycap prompts: [[action, label], ...].
 func _key_row(center: Vector2, keys: Array) -> void:
@@ -1918,7 +1464,6 @@ func _key_row(center: Vector2, keys: Array) -> void:
 		_text(Vector2(kr.end.x + 6, center.y + 5), pt[2], 13, INK)
 		x = kr.end.x + 6 + float(pt[3]) + 22.0
 
-
 ## Squad pings out in the world: a marker over each with how far it is.
 func _draw_squad_pings(p: Hunter) -> void:
 	for pg in m.pings:
@@ -1929,15 +1474,12 @@ func _draw_squad_pings(p: Hunter) -> void:
 	# a Boki's callout: a marker with what it spotted, fading after a few seconds
 	for pg in m.pings:
 		if not pg.has("kin") or int(pg.get("team", -1)) != p.team or m.tut != null or not BokiChatter.pin_shown(m):
-			continue  # (the tutorial has one marker: no Boki callout pins; none in a fight either)
+			continue      # (the tutorial has one marker: no Boki callout pins; none in a fight either)
 		var kk: Kin = pg["kin"] if is_instance_valid(pg["kin"]) else null
 		var a2 := clampf(float(pg.get("life", 5.0)) - float(pg["t"]), 0.0, 1.0) * clampf(float(pg["t"]) * 6.0, 0.0, 1.0)
 		var who := String(kk.rec.get("name", "Boki")) if kk and kk.owner_h != p else ""
 		var lbl2 := String(pg.get("label", ""))
-		_draw_waypoint(
-			pg["pos"], ("%s: %s" % [who, lbl2]) if who != "" else lbl2, Color(pg["col"], a2), EdgeMarker.PRIO_LOW
-		)
-
+		_draw_waypoint(pg["pos"], ("%s: %s" % [who, lbl2]) if who != "" else lbl2, Color(pg["col"], a2), EdgeMarker.PRIO_LOW)
 
 ## For the first seconds of every match: what each of your buttons does.
 func _draw_kit(sz: Vector2, p: Hunter) -> void:
@@ -1964,91 +1506,24 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		var ak: ArchKit = p.ak
 		var rv: Dictionary = ak.rmb_def().get("variants", {})
 		var rdesc := "Tap: %s" % String(rv.get("tap", "")) if rv.has("tap") else ""
-		if rv.has("hold"):
-			rdesc += "  Hold: %s" % String(rv["hold"])
-		lines.append(
-			[Settings.key_cap("secondary"), AbilityText.name_of(p.arch, "rmb"), rdesc, ak.col_of(ak.rmb_def())]
-		)
-		lines.append(
-			[
-				Settings.key_cap("signature"),
-				AbilityText.name_of(p.arch, "e"),
-				AbilityText.full(p.arch, "e"),
-				ak.col_of(ak.e_def())
-			]
-		)
-		lines.append(
-			[
-				Settings.key_caps("hunter_ult"),
-				(
-					AbilityText.name_of(p.arch, "r")
-					+ ("" if p.lvl >= int(Hunter.ULT_AT[0]) else "  (level %d)" % int(Hunter.ULT_AT[0]))
-				),
-				AbilityText.full(p.arch, "r"),
-				ak.col_of(ak.r_def())
-			]
-		)
+		if rv.has("hold"): rdesc += "  Hold: %s" % String(rv["hold"])
+		lines.append([Settings.key_cap("secondary"), AbilityText.name_of(p.arch, "rmb"), rdesc, ak.col_of(ak.rmb_def())])
+		lines.append([Settings.key_cap("signature"), AbilityText.name_of(p.arch, "e"), AbilityText.full(p.arch, "e"), ak.col_of(ak.e_def())])
+		lines.append([Settings.key_caps("hunter_ult"), AbilityText.name_of(p.arch, "r") + ("" if p.lvl >= int(Hunter.ULT_AT[0]) else "  (level %d)" % int(Hunter.ULT_AT[0])), AbilityText.full(p.arch, "r"), ak.col_of(ak.r_def())])
 	if p.kin and p.ak:
 		var k: Kin = p.kin
 		var kcol: Color = Data.KIN[k.species]["color"]
 		var kd1: AbilitySpec = k.runner.def_of("k1")
-		if kd1:
-			lines.append(
-				[
-					"Auto",
-					kd1.display_name + " (" + String(k.rec.get("name", "your Boki")) + ")",
-					KinText.ability(k.effective("k1")),
-					KinText.color(kd1)
-				]
-			)
-		(
-			lines
-			. append(
-				[
-					Settings.key_cap("throw"),
-					"Orders for " + String(k.rec.get("name", "your Boki")),
-					"Tap: Sic at the cursor (it staggers what it lands on), or call it back when it is away. Hold and flick: Chase, Guard, Return, Follow.",
-					kcol
-				]
-			)
-		)
+		if kd1: lines.append(["Auto", kd1.display_name + " (" + String(k.rec.get("name", "your Boki")) + ")", KinText.ability(k.effective("k1")), KinText.color(kd1)])
+		lines.append([Settings.key_cap("throw"), "Orders for " + String(k.rec.get("name", "your Boki")), "Tap: Sic at the cursor (it staggers what it lands on), or call it back when it is away. Hold and flick: Chase, Guard, Return, Follow.", kcol])
 	elif p.kin:
 		var k: Kin = p.kin
 		var kcol: Color = Data.KIN[k.species]["color"]
 		var kd1: AbilitySpec = k.runner.def_of("k1")
-		if kd1:
-			lines.append(
-				[
-					Settings.key_cap("signature"),
-					kd1.display_name,
-					KinText.ability(k.effective("k1")),
-					KinText.color(kd1)
-				]
-			)
+		if kd1: lines.append([Settings.key_cap("signature"), kd1.display_name, KinText.ability(k.effective("k1")), KinText.color(kd1)])
 		var ud := KinMerge.def_for(k)
-		if ud and MergeForm.enabled():
-			lines.append(
-				[
-					Settings.key_caps("ultimate"),
-					ud.display_name + " (Fusion)",
-					(
-						" ".join(KinText.merge(ud, k.carry_style() == "mount"))
-						+ " Fusion: needs a full bond meter. Unlocks at level %d." % int(Hunter.ULT_AT[0])
-					),
-					GOLD
-				]
-			)
-		(
-			lines
-			. append(
-				[
-					Settings.key_cap("throw"),
-					"Orders for " + String(k.rec.get("name", "your Boki")),
-					"Tap: Sic at the cursor (it staggers what it lands on), or call it back when it is away. Hold and flick: Chase, Guard, Return, Follow.",
-					kcol
-				]
-			)
-		)
+		if ud and MergeForm.enabled(): lines.append([Settings.key_caps("ultimate"), ud.display_name + " (Fusion)", " ".join(KinText.merge(ud, k.carry_style() == "mount")) + " Fusion: needs a full bond meter. Unlocks at level %d." % int(Hunter.ULT_AT[0]), GOLD])
+		lines.append([Settings.key_cap("throw"), "Orders for " + String(k.rec.get("name", "your Boki")), "Tap: Sic at the cursor (it staggers what it lands on), or call it back when it is away. Hold and flick: Chase, Guard, Return, Follow.", kcol])
 	if p.kin:
 		lines.append_array(KinKeys.card_lines(Data.KIN[p.kin.species]["color"]))
 	var dsi := p.slot_info("dash")
@@ -2069,8 +1544,7 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		# too tall to sit under the kill feed: names only
 		compact = true
 		hs = []
-		for l in lines:
-			hs.append(28.0)
+		for l in lines: hs.append(28.0)
 		total = 34.0 + 28.0 * lines.size() + 4.0
 	var fr := SafeArea.frame(sz)  # (with the corner panels: a centred 16:9 frame on wider screens)
 	var box := Rect2(Vector2(fr.end.x - w - pad.x, bottom - total), Vector2(w, total))
@@ -2081,8 +1555,7 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		if total > sz.y - box.position.y - pad.y - 178.0:
 			compact = true
 			hs = []
-			for l in lines:
-				hs.append(28.0)
+			for l in lines: hs.append(28.0)
 			total = 34.0 + 28.0 * lines.size() + 4.0
 		box.size.y = total
 	_panel(box, Color(0.06, 0.07, 0.1, 0.82 * a), 12)
@@ -2091,33 +1564,13 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 	for i in lines.size():
 		var l: Array = lines[i]
 		var kw := TextCache.width(big, l[0], 13)
-		var ks := StyleBoxFlat.new()
-		ks.bg_color = Color(l[3], a)
-		ks.set_corner_radius_all(5)
+		var ks := StyleBoxFlat.new(); ks.bg_color = Color(l[3], a); ks.set_corner_radius_all(5)
 		c.draw_style_box(ks, Rect2(Vector2(box.position.x + 14, y), Vector2(kw + 12, 20)))
-		c.draw_string(
-			big,
-			Vector2(box.position.x + 20, y + 15),
-			l[0],
-			HORIZONTAL_ALIGNMENT_LEFT,
-			-1,
-			UI.fs(13),
-			Color(0.07, 0.06, 0.08, a)
-		)
+		c.draw_string(big, Vector2(box.position.x + 20, y + 15), l[0], HORIZONTAL_ALIGNMENT_LEFT, -1, UI.fs(13), Color(0.07, 0.06, 0.08, a))
 		_text(Vector2(box.position.x + 34 + kw, y + 15), l[1], 14, Color(INK, a))
 		if not compact:
-			c.draw_multiline_string(
-				body,
-				Vector2(box.position.x + 14, y + 38),
-				String(l[2]),
-				HORIZONTAL_ALIGNMENT_LEFT,
-				w - 28,
-				12,
-				-1,
-				Color(MUTED, a)
-			)
+			c.draw_multiline_string(body, Vector2(box.position.x + 14, y + 38), String(l[2]), HORIZONTAL_ALIGNMENT_LEFT, w - 28, 12, -1, Color(MUTED, a))
 		y += float(hs[i])
-
 
 ## Perks you've picked up this run: a row of little badges over your health bar, with stacks.
 func _draw_perks(sz: Vector2, p: Hunter) -> void:
@@ -2125,8 +1578,7 @@ func _draw_perks(sz: Vector2, p: Hunter) -> void:
 		return
 	var seen: Array = []
 	for pk in p.perks:
-		if not seen.has(pk):
-			seen.append(pk)
+		if not seen.has(pk): seen.append(pk)
 	var bs := 26.0
 	var x := sz.x * 0.5 - (seen.size() * (bs + 6.0)) * 0.5
 	var y := sz.y - HudStyle.safe_pad(sz).y - 26.0
@@ -2141,41 +1593,28 @@ func _draw_perks(sz: Vector2, p: Hunter) -> void:
 			_text(r.position + Vector2(bs - 7, bs + 1), str(n), 11, INK, big)
 		x += bs + 6.0
 
-
 func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 	var it := m.interact
 	var y := sz.y - 222.0
 	if not it.is_empty():
 		var prog := 0.0
 		match it["kind"]:
-			"revive":
-				prog = it["ent"].revive
-			"finish":
-				prog = p.finish_t / Life.R["stomp_commit"]
-			"stomping":
-				prog = float(p.stomp.get("t", 0.0)) / Life.R["stomp_time"]
-			"boxrev":
-				prog = p.box_t / BoxRevive.time_for(it["box"]["owner"])
-			"loot":
-				prog = p.box_t / Life.R["loot_time"]
-			"catch":
-				prog = CaptureHud.progress(p)
-			"chest":
-				prog = it["chest"]["prog"]
-			"exit":
-				prog = float(it["x"]["hold"].get(p.nid, 0.0)) / float(it["need"]) if it.has("need") else 0.0
-			"lair":
-				prog = float(it["rune"]["prog"]) if it.has("rune") else 0.0
-			"heart":
-				prog = float(it.get("prog", 0.0))
+			"revive": prog = it["ent"].revive
+			"finish": prog = p.finish_t / Life.R["stomp_commit"]
+			"stomping": prog = float(p.stomp.get("t", 0.0)) / Life.R["stomp_time"]
+			"boxrev": prog = p.box_t / BoxRevive.time_for(it["box"]["owner"])
+			"loot": prog = p.box_t / Life.R["loot_time"]
+			"catch": prog = CaptureHud.progress(p)
+			"chest": prog = it["chest"]["prog"]
+			"exit": prog = float(it["x"]["hold"].get(p.nid, 0.0)) / float(it["need"]) if it.has("need") else 0.0
+			"lair": prog = float(it["rune"]["prog"]) if it.has("rune") else 0.0
+			"heart": prog = float(it.get("prog", 0.0))
 		# "Hold F ...": the ring (HoldPrompt)
-		if (
-			not WaysOutHud.gate_prompt(self, sz, y, it)
-			and not HoldPrompt.row(c, Vector2(sz.x * 0.5, y), it["label"], prog, it.get("col", GOLD))
-		):
+		if not WaysOutHud.gate_prompt(self, sz, y, it) \
+				and not HoldPrompt.row(c, Vector2(sz.x * 0.5, y), it["label"], prog, it.get("col", GOLD)):
 			var s: String = it["label"]
 			var w := TextCache.width(body, s, 16)
-			if not (m.tut and m.tut.prompt_quiet() and not String(it["kind"]) in TutorialHud.FIGHT_PROMPTS):  # (the tutorial card says it: only the bar stays; a fight's prompt always shows)
+			if not (m.tut and m.tut.prompt_quiet() and not String(it["kind"]) in TutorialHud.FIGHT_PROMPTS):      # (the tutorial card says it: only the bar stays; a fight's prompt always shows)
 				_panel(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y - 22), Vector2(w + 32, 32)))
 				_ctext(Vector2(sz.x * 0.5, y), s, 16, it.get("col", GOLD))
 				GroundCompare.draw(c, sz.x * 0.5, y - 28.0, p, it)
@@ -2183,14 +1622,13 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 				_bar(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y + 12), Vector2(w + 32, 4)), prog, GOLD)
 	var st: Dictionary = m.exits.status_for(p) if m.exits else {}
 	if not st.is_empty():
-		var sy := maxf(sz.y * 0.2, msgs.bottom() + 30.0)  # (under the message lane, like the killcam line)
+		var sy := maxf(sz.y * 0.2, msgs.bottom() + 30.0)      # (under the message lane, like the killcam line)
 		var sw := TextCache.width(big, String(st["text"]), 24)
 		SafeArea.note_as("exit_status", Rect2(Vector2(sz.x * 0.5 - sw * 0.5, sy - 22.0), Vector2(sw, 42.0)))
 		_ctext(Vector2(sz.x * 0.5, sy), String(st["text"]), 24, st["col"], big)
 		_bar(Rect2(Vector2(sz.x * 0.5 - 140, sy + 12), Vector2(280, 8)), clampf(float(st["prog"]), 0.0, 1.0), st["col"])
 		if st.has("hint"):
 			_ctext(Vector2(sz.x * 0.5, sy + 38), String(st["hint"]), 13, Color(1, 1, 1, 0.85 * st["hint_a"]))
-
 
 func _draw_crosshair(p: Hunter) -> void:
 	var mp := c.get_local_mouse_position() if ret.pin == Vector2.INF else ret.pin
@@ -2202,66 +1640,30 @@ func _draw_crosshair(p: Hunter) -> void:
 			_flag(mp + Vector2(-58, 30), 0.7, Color("f4f1e6"))
 			_ctext(mp + Vector2(6, 36), "Truce with %s  ·  shooting breaks it" % ph.pname, 13, Color("f4f1e6"), big)
 
-
 func _draw_downed(sz: Vector2, p: Hunter) -> void:
 	c.draw_rect(Rect2(Vector2.ZERO, sz), Color(0.3, 0.02, 0.02, 0.18))
 	m.recap.draw(c, Vector2(sz.x * 0.5, sz.y * 0.32 + 100.0), p)
 	_ctext(Vector2(sz.x * 0.5, sz.y * 0.32), "You're down", 34, BAD, big)
 	var left := p.down_hp / Data.MATCH["down_hp"] * Life.R["bleed_out"]
-	var who := (
-		"You're a wisp: %ds left. %s standing on you brings you back. Enemies can stomp or execute you."
-		% [int(ceil(left)), "A teammate or your Boki" if Life.has_mates(m, p) else "Your Boki"]
-	)
+	var who := "You're a wisp: %ds left. %s standing on you brings you back. Enemies can stomp or execute you." % [int(ceil(left)), "A teammate or your Boki" if Life.has_mates(m, p) else "Your Boki"]
 	if p.kin and p.kin.state == "downed":
-		who = (
-			"You're a wisp: %ds left, and your Boki is down. %s"
-			% [
-				int(ceil(left)),
-				(
-					"Only a teammate standing on you can bring you back."
-					if Life.has_mates(m, p)
-					else "Nobody can bring you back."
-				)
-			]
-		)
+		who = "You're a wisp: %ds left, and your Boki is down. %s" % [int(ceil(left)), "Only a teammate standing on you can bring you back." if Life.has_mates(m, p) else "Nobody can bring you back."]
 	var stomped: bool = p.get_meta("stomped", false)
 	if stomped:
 		var sts: Array = p.get_meta("stompers", [])
-		who = (
-			"%s is on you! You're pinned and draining %.1fx faster. Drift away!"
-			% [(sts[0] as Hunter).pname if not sts.is_empty() else "An enemy", Life.R["stomp_mult"]]
-		)
+		who = "%s is on you! You're pinned and draining %.1fx faster. Drift away!" % [(sts[0] as Hunter).pname if not sts.is_empty() else "An enemy", Life.R["stomp_mult"]]
 		_edge_pulse(sz, Color(1.0, 0.1, 0.05), 0.35 + 0.3 * (0.5 + 0.5 * sin(m.time * 9.0)))
 	_ctext(Vector2(sz.x * 0.5, sz.y * 0.32 + 28), who, 16, Color("ff7a6a") if stomped else INK)
-	_bar(
-		Rect2(Vector2(sz.x * 0.5 - 140, sz.y * 0.32 + 44), Vector2(280, 8)),
-		p.down_hp / Data.MATCH["down_hp"],
-		Color("ff2a1a").lerp(Color.WHITE, 0.3 * (0.5 + 0.5 * sin(m.time * 14.0))) if stomped else BAD
-	)
+	_bar(Rect2(Vector2(sz.x * 0.5 - 140, sz.y * 0.32 + 44), Vector2(280, 8)), p.down_hp / Data.MATCH["down_hp"], Color("ff2a1a").lerp(Color.WHITE, 0.3 * (0.5 + 0.5 * sin(m.time * 14.0))) if stomped else BAD)
 	if p.revive > 0.0:
 		_bar(Rect2(Vector2(sz.x * 0.5 - 140, sz.y * 0.32 + 58), Vector2(280, 8)), p.revive, GOOD)
 		var revs: Array = p.get_meta("revivers", [])
 		if not revs.is_empty():
-			_ctext(
-				Vector2(sz.x * 0.5, sz.y * 0.32 + 84),
-				"%s is reviving you  %d%%" % [(revs[0] as Hunter).pname, int(p.revive * 100.0)],
-				15,
-				GOOD,
-				big
-			)
+			_ctext(Vector2(sz.x * 0.5, sz.y * 0.32 + 84), "%s is reviving you  %d%%" % [(revs[0] as Hunter).pname, int(p.revive * 100.0)], 15, GOOD, big)
 	if Settings.get_v("tips") and not Record.clean():
 		var tip_v := TipPick.for_downed(p, m.time, m.opts.get("blight", true), m.tut == null and m.duo == null)
-		c.draw_multiline_string(
-			body,
-			Vector2(sz.x * 0.5 - 280.0, sz.y * 0.32 - 64.0),
-			"TIP  ·  " + tip_v,
-			HORIZONTAL_ALIGNMENT_CENTER,
-			560.0,
-			14,
-			2,
-			MUTED
-		)
-
+		c.draw_multiline_string(body, Vector2(sz.x * 0.5 - 280.0, sz.y * 0.32 - 64.0), "TIP  ·  " + tip_v,
+			HORIZONTAL_ALIGNMENT_CENTER, 560.0, 14, 2, MUTED)
 
 ## Dead, but your team's still in it.
 func _draw_dead(sz: Vector2, p: Hunter) -> void:
@@ -2280,17 +1682,8 @@ func _draw_dead(sz: Vector2, p: Hunter) -> void:
 		y0 = sz.y * 0.58
 		_ctext(Vector2(sz.x * 0.5, y0 - 64), left_line, 20, GOLD, big)
 	if not b.is_empty() and Life.soul_here(m, b) and Life.has_mates(m, p):
-		lines.append(
-			"A teammate can bring you back at your deathbox: %ds left." % int(ceil(float(b["soul_until"]) - m.time))
-		)
-	if Life.has_mates(m, p):
-		lines.append(
-			(
-				"Or at any revive beacon (the green pillars), with nothing you carried."
-				if m.beacons.any(func(x): return not x["used"])
-				else "No revive beacons left."
-			)
-		)
+		lines.append("A teammate can bring you back at your deathbox: %ds left." % int(ceil(float(b["soul_until"]) - m.time)))
+	if Life.has_mates(m, p): lines.append("Or at any revive beacon (the green pillars), with nothing you carried." if m.beacons.any(func(x): return not x["used"]) else "No revive beacons left.")
 	m.recap.draw(c, Vector2(sz.x * 0.5, sz.y * 0.2), p)
 	lines.append("%s to open the menu and leave." % Settings.key_cap("menu"))
 	_panel(Rect2(Vector2(sz.x * 0.5 - 300, y0 - 44), Vector2(600, 62 + lines.size() * 22)))
@@ -2298,15 +1691,11 @@ func _draw_dead(sz: Vector2, p: Hunter) -> void:
 	for i in lines.size():
 		_ctext(Vector2(sz.x * 0.5, y0 + 28 + i * 22), lines[i], 16, INK if i < 2 else MUTED)
 
-
 func _draw_scores(sz: Vector2) -> void:
 	var r := Rect2(Vector2(sz.x * 0.5 - 345, sz.y * 0.18), Vector2(690, 40 + m.hunters.size() * 28))
 	_panel(r, Color(0.05, 0.06, 0.09, 0.9), 14)
-	_text(r.position + Vector2(20, 30), "Hunter", 14, MUTED)
-	_text(r.position + Vector2(260, 30), "Boki", 14, MUTED)
-	_text(r.position + Vector2(380, 30), "Knocks", 14, MUTED)
-	_text(r.position + Vector2(450, 30), "Damage", 14, MUTED)
-	_text(r.position + Vector2(530, 30), "State", 14, MUTED)
+	_text(r.position + Vector2(20, 30), "Hunter", 14, MUTED); _text(r.position + Vector2(260, 30), "Boki", 14, MUTED)
+	_text(r.position + Vector2(380, 30), "Knocks", 14, MUTED); _text(r.position + Vector2(450, 30), "Damage", 14, MUTED); _text(r.position + Vector2(530, 30), "State", 14, MUTED)
 	var hs := m.hunters.duplicate()
 	hs.sort_custom(func(a, b): return a.team < b.team)
 	var y := r.position.y + 58
@@ -2314,15 +1703,13 @@ func _draw_scores(sz: Vector2) -> void:
 		var tc: Color = Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()]
 		c.draw_rect(Rect2(Vector2(r.position.x + 12, y - 14), Vector2(4, 18)), tc)
 		_text(Vector2(r.position.x + 22, y), h.pname, 15, INK if h != m.player else GOLD)
-		if h.kin:
-			_text(Vector2(r.position.x + 260, y), Data.KIN[h.kin.species]["name"], 14, Data.KIN[h.kin.species]["color"])
+		if h.kin: _text(Vector2(r.position.x + 260, y), Data.KIN[h.kin.species]["name"], 14, Data.KIN[h.kin.species]["color"])
 		_text(Vector2(r.position.x + 392, y), str(h.knocks), 15)
 		_text(Vector2(r.position.x + 456, y), str(int(h.dmg_done)), 15)
 		var st := "Out" if h.out else ("Extracted" if h.extracted else ("Down" if h.downed else "Alive"))
 		_text(Vector2(r.position.x + 530, y), st, 14, BAD if h.out else (Color("8fe3c8") if h.extracted else INK))
 		score_mute.draw(self, h, r.position.x + 606, y)
 		y += 28
-
 
 var abyss_a := 0.0
 const ABYSS_FX := preload("res://scripts/match/abyss_fx.gd")
@@ -2334,7 +1721,6 @@ var abyss_fx: CanvasLayer = null
 func _head(h: Node3D, up: float) -> Vector3:
 	return h.position + (m.cam.char_lean() * Vector3(0, up, 0) if m.cam else Vector3(0, up, 0))
 
-
 ## Health right above your hunter, where your eyes already are.
 func _draw_overhead(p: Hunter) -> void:
 	var cam := m.cam
@@ -2344,20 +1730,15 @@ func _draw_overhead(p: Hunter) -> void:
 	var sp := cam.unproject_position(at)
 	var vr: Rect2 = cam.get_viewport().get_visible_rect().grow(200.0)
 	if not sp.is_finite() or not vr.has_point(sp):
-		return  # off screen, or a degenerate camera (headless, mid-teleport): huge/NaN coords can't triangulate
-	sp = sp.round()  # whole pixels: the bars and pips don't shimmer as the camera glides
+		return      # off screen, or a degenerate camera (headless, mid-teleport): huge/NaN coords can't triangulate
+	sp = sp.round()     # whole pixels: the bars and pips don't shimmer as the camera glides
 	var w := HudStyle.PLATE_W_SELF
 	plates.draw_self(self, sp, p)
 	# high up: a small readout of how far above the ground you are
 	var alt := m.player_altitude() if p == m.player else 0.0
 	if alt > 6.0 and not p.grounded:
 		_ctext(sp + Vector2(-w * 0.5 - 30, 8), "%dm" % int(round(alt)), 13, Color("bfe6ff"), big)
-		c.draw_colored_polygon(
-			PackedVector2Array(
-				[sp + Vector2(-w * 0.5 - 30, -10), sp + Vector2(-w * 0.5 - 35, -3), sp + Vector2(-w * 0.5 - 25, -3)]
-			),
-			Color("bfe6ff")
-		)
+		c.draw_colored_polygon(PackedVector2Array([sp + Vector2(-w * 0.5 - 30, -10), sp + Vector2(-w * 0.5 - 35, -3), sp + Vector2(-w * 0.5 - 25, -3)]), Color("bfe6ff"))
 	if p.drink_t > 0.0:
 		var df := 1.0 - p.drink_t / p.drink_len
 		var dc := sp + Vector2(-w * 0.5 - 16, 4)
@@ -2369,21 +1750,16 @@ func _draw_overhead(p: Hunter) -> void:
 		c.draw_circle(kc, 11.0, Color(0.04, 0.04, 0.06, 0.75))
 		_arc(kc, 8.0, kf, ARMOR_COL, 3.0)
 
-
-var train_map := TrainMap.new()  # the sky train on the minimap and the full map
+var train_map := TrainMap.new()      # the sky train on the minimap and the full map
 
 var _regions_of: World = null
 var _regions := {}
-
-
 func _region_names(w: World) -> Dictionary:
 	if _regions_of != w:
 		_regions_of = w
 		_regions = {}
-		for isl in w.islands:
-			_regions[String(isl.get("name", ""))] = true
+		for isl in w.islands: _regions[String(isl.get("name", ""))] = true
 	return _regions
-
 
 ## Place names on the minimap (authored maps). Riding in or dropping you see the whole map with every
 ## point of interest and chokepoint named; on the ground, the names of places near you.
@@ -2398,12 +1774,8 @@ func _draw_map_labels(w: World, inner: Rect2, view: Rect2, k: float, overview: b
 		var nm := String(lb["name"])
 		if String(lb["kind"]) == "perch":
 			# a high perch: an up-arrow with its height, so you know it takes vertical tech
-			c.draw_colored_polygon(
-				PackedVector2Array([pv + Vector2(0, -8), pv + Vector2(6, 3), pv + Vector2(-6, 3)]), Color(0, 0, 0, 0.6)
-			)
-			c.draw_colored_polygon(
-				PackedVector2Array([pv + Vector2(0, -6), pv + Vector2(4.5, 2), pv + Vector2(-4.5, 2)]), Color("9af0ff")
-			)
+			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -8), pv + Vector2(6, 3), pv + Vector2(-6, 3)]), Color(0, 0, 0, 0.6))
+			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -6), pv + Vector2(4.5, 2), pv + Vector2(-4.5, 2)]), Color("9af0ff"))
 			if overview:
 				var metres := "%dm" % int(round(float(lb.get("height", 0.0))))
 				MapNames.put(metres, pv + Vector2(0, 15), 10, Color("c8f6ff"), body)
@@ -2413,57 +1785,37 @@ func _draw_map_labels(w: World, inner: Rect2, view: Rect2, k: float, overview: b
 				MapNames.put(nm, pv + Vector2(0, 18), 11, Color("ffe2b0"), big)
 			continue
 		if String(lb["kind"]) == "rail":
-			continue  # (the halts are TrainMap's, gated as the "train" kind)
+			continue      # (the halts are TrainMap's, gated as the "train" kind)
 		if String(lb["kind"]) == "choke":
 			# a chokepoint: a small orange diamond, named in the overview
-			c.draw_colored_polygon(
-				PackedVector2Array([pv + Vector2(0, -5), pv + Vector2(5, 0), pv + Vector2(0, 5), pv + Vector2(-5, 0)]),
-				Color(0, 0, 0, 0.55)
-			)
-			c.draw_colored_polygon(
-				PackedVector2Array(
-					[pv + Vector2(0, -3.5), pv + Vector2(3.5, 0), pv + Vector2(0, 3.5), pv + Vector2(-3.5, 0)]
-				),
-				Color("ffb36a")
-			)
+			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -5), pv + Vector2(5, 0), pv + Vector2(0, 5), pv + Vector2(-5, 0)]), Color(0, 0, 0, 0.55))
+			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -3.5), pv + Vector2(3.5, 0), pv + Vector2(0, 3.5), pv + Vector2(-3.5, 0)]), Color("ffb36a"))
 		else:
 			if overview and not _region_names(w).has(nm):
-				continue  # (the whole map at this size: region names only, as the full map does)
+				continue      # (the whole map at this size: region names only, as the full map does)
 			var col := Color("ffd2f0") if String(lb.get("role", "")) == "heart" else INK
 			MapNames.put(nm, pv + Vector2(0, 4), 13 if overview else 11, col, big)
-
 
 # ------------------------------------------------------------------ the deathbox loot window
 ## Pressing interact at a deathbox opens LootWindow (what is in it beside what you carry); press interact
 ## again to take everything worth having. Walking away, going down or emptying the box closes it.
-var loot_open = null  # the box Dictionary, or null
+var loot_open = null          # the box Dictionary, or null
 var loot_panel: LootWindow
-
 
 func loot_is(b: Dictionary) -> bool:
 	return loot_open != null and is_same(loot_open, b)
 
-
 func mouse_on_ui() -> bool:
 	return wheel_open or map_open() or mouse_on_panel() or score_mute.over(c.get_local_mouse_position())
 
-
-var ui_extra: Array = []  # other panels that own the mouse (the practice areas' bottom bar)
-
+var ui_extra: Array = []      # other panels that own the mouse (the practice areas' bottom bar)
 
 ## The cursor is over one of the item windows (deathbox loot, swap, backpack) or a panel in ui_extra.
 func mouse_on_panel() -> bool:
 	for pn in [loot_panel, swap_panel, pack_panel] + ui_extra:
-		if (
-			pn != null
-			and is_instance_valid(pn)
-			and pn.visible
-			and not pn.is_queued_for_deletion()
-			and pn.get_global_rect().grow(6.0).has_point(pn.get_global_mouse_position())
-		):
+		if pn != null and is_instance_valid(pn) and pn.visible and not pn.is_queued_for_deletion() and pn.get_global_rect().grow(6.0).has_point(pn.get_global_mouse_position()):
 			return true
 	return false
-
 
 ## Over an item window the crosshair gives way to a pointer, drawn on top of the window.
 func _draw_pointer() -> void:
@@ -2471,25 +1823,14 @@ func _draw_pointer() -> void:
 		return
 	var mp := cursor.get_local_mouse_position()
 	var pts := PackedVector2Array()
-	for q in [
-		Vector2(0, 0),
-		Vector2(0, 19),
-		Vector2(4.6, 14.6),
-		Vector2(8.2, 22.0),
-		Vector2(11.2, 20.6),
-		Vector2(7.8, 13.4),
-		Vector2(13.6, 13.4)
-	]:
+	for q in [Vector2(0, 0), Vector2(0, 19), Vector2(4.6, 14.6), Vector2(8.2, 22.0), Vector2(11.2, 20.6), Vector2(7.8, 13.4), Vector2(13.6, 13.4)]:
 		pts.append(mp + q * 1.3)
 	var sh := PackedVector2Array()
-	for q in pts:
-		sh.append(q + Vector2(1.5, 2.0))
+	for q in pts: sh.append(q + Vector2(1.5, 2.0))
 	cursor.draw_colored_polygon(sh, Color(0, 0, 0, 0.45))
 	cursor.draw_colored_polygon(pts, INK)
-	var ring := pts.duplicate()
-	ring.append(pts[0])
+	var ring := pts.duplicate(); ring.append(pts[0])
 	cursor.draw_polyline(ring, Color(0.06, 0.065, 0.1), 1.6, true)
-
 
 func open_loot(b: Dictionary) -> void:
 	close_loot()
@@ -2500,13 +1841,11 @@ func open_loot(b: Dictionary) -> void:
 	add_child(loot_panel)
 	UI.pop_in(loot_panel)
 
-
 func close_loot() -> void:
 	loot_open = null
 	if loot_panel and is_instance_valid(loot_panel):
 		loot_panel.queue_free()
 	loot_panel = null
-
 
 func _loot_tick(_delta: float) -> void:
 	_pack_tick()
@@ -2519,30 +1858,25 @@ func _loot_tick(_delta: float) -> void:
 		return
 	loot_panel.tick()
 
-
 # ------------------------------------------------------------------ the backpack and the swap window
 ## The backpack (I): what you're carrying home, each with Equip (weapons and gloves go in your hands,
 ## what you held takes its slot) and Drop. The swap window opens when you pick something up with a
 ## full pack: click the thing to leave behind, or leave the new one where it lies.
-var swap_wp = null  # the ground pick-up waiting for a slot, or null
+var swap_wp = null             # the ground pick-up waiting for a slot, or null
 var swap_panel: PanelContainer
 var pack_panel: PanelContainer
 var pack_sig := ""
 
-
 func swap_open() -> bool:
 	return swap_wp != null and swap_panel != null and is_instance_valid(swap_panel)
-
 
 func pack_open() -> bool:
 	return pack_panel != null and is_instance_valid(pack_panel)
 
-
 func _pack_chip(p: Hunter) -> Control:
 	var full: bool = p.pack.size() >= p.pack_cap
 	var chip := UI.card(Color(Color("ffb0a0") if full else INK, 0.1), 4, 999)
-	var hb := UI.hbox(5)
-	chip.add_child(hb)
+	var hb := UI.hbox(5); chip.add_child(hb)
 	hb.add_child(Icons.Glyph.new("satchel", Color("ffb0a0") if full else INK, 14.0))
 	var l := UI.label("%d/%d" % [p.pack.size(), p.pack_cap], 13, Color("ffb0a0") if full else INK, UI.semi)
 	l.autowrap_mode = TextServer.AUTOWRAP_OFF
@@ -2551,7 +1885,6 @@ func _pack_chip(p: Hunter) -> Control:
 	chip.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	return chip
 
-
 func _item_panel(title: String, col: Color, width: float) -> Array:
 	var pc := PanelContainer.new()
 	pc.theme = UI.theme()
@@ -2559,32 +1892,22 @@ func _item_panel(title: String, col: Color, width: float) -> Array:
 	var sb := StyleBoxFlat.new()
 	sb.bg_color = Color(0.06, 0.065, 0.1, 0.95)
 	sb.set_corner_radius_all(14)
-	sb.border_color = Color(col, 0.8)
-	sb.set_border_width_all(2)
-	sb.border_width_top = 4
-	sb.content_margin_left = 14
-	sb.content_margin_right = 14
-	sb.content_margin_top = 12
-	sb.content_margin_bottom = 12
-	sb.shadow_color = Color(0, 0, 0, 0.5)
-	sb.shadow_size = 18
+	sb.border_color = Color(col, 0.8); sb.set_border_width_all(2); sb.border_width_top = 4
+	sb.content_margin_left = 14; sb.content_margin_right = 14; sb.content_margin_top = 12; sb.content_margin_bottom = 12
+	sb.shadow_color = Color(0, 0, 0, 0.5); sb.shadow_size = 18
 	pc.add_theme_stylebox_override("panel", sb)
 	pc.custom_minimum_size.x = width
-	var v := UI.vbox(6)
-	pc.add_child(v)
-	var head := UI.hbox(8)
-	v.add_child(head)
+	var v := UI.vbox(6); pc.add_child(v)
+	var head := UI.hbox(8); v.add_child(head)
 	head.add_child(Icons.Glyph.new("satchel", col, 18.0))
 	var t := UI.title(title, 22, INK)
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(t)
 	return [pc, v, head]
 
-
 ## One item as a row: icon, name, what it does, its worth, and buttons [[text, callable, primary]].
 func _item_row(it: Dictionary, buttons: Array, note := "") -> Control:
 	return LootHold.item_row(it, buttons, note)
-
 
 ## A scrolling list inside an item window: [scroll, rows]. _fit_panel sizes it.
 func _scroll_rows(v: VBoxContainer) -> Array:
@@ -2596,19 +1919,18 @@ func _scroll_rows(v: VBoxContainer) -> Array:
 	v.add_child(sc)
 	return [sc, rows]
 
-
 ## Puts an item window on the right, between the top counters and the weapon/slots cluster at the
 ## bottom right, and lets its list scroll if it's too long to fit.
 func _fit_panel(pc: PanelContainer, sc: ScrollContainer, rows: VBoxContainer) -> void:
-	pc.position = Vector2(-10000, 0)  # out of sight until it's sized
+	pc.position = Vector2(-10000, 0)     # out of sight until it's sized
 	await get_tree().process_frame
-	await get_tree().process_frame  # wrapping labels settle their height one frame after they get a width
+	await get_tree().process_frame      # wrapping labels settle their height one frame after they get a width
 	if not is_instance_valid(pc):
 		return
 	var vs := pc.get_viewport_rect().size
 	var pad := HudStyle.safe_pad(vs)
 	var top := pad.y + 46.0
-	var bottom := vs.y - pad.y - 154.0  # clear of the weapon card and the consumable slots
+	var bottom := vs.y - pad.y - 154.0          # clear of the weapon card and the consumable slots
 	var want := rows.get_combined_minimum_size().y
 	var rest := pc.get_combined_minimum_size().y - sc.get_combined_minimum_size().y
 	sc.custom_minimum_size.y = clampf(bottom - top - rest, 60.0, want)
@@ -2616,26 +1938,20 @@ func _fit_panel(pc: PanelContainer, sc: ScrollContainer, rows: VBoxContainer) ->
 	await get_tree().process_frame
 	if not is_instance_valid(pc):
 		return
-	pc.position = Vector2(
-		vs.x - pc.size.x - pad.x, clampf(vs.y * 0.42 - pc.size.y * 0.5, top, maxf(top, bottom - pc.size.y))
-	)
-
+	pc.position = Vector2(vs.x - pc.size.x - pad.x, clampf(vs.y * 0.42 - pc.size.y * 0.5, top, maxf(top, bottom - pc.size.y)))
 
 func open_swap(wp: Dictionary) -> void:
 	close_pack()
 	swap_wp = wp
 	_build_swap()
-	if swap_panel:
-		UI.pop_in(swap_panel)
+	if swap_panel: UI.pop_in(swap_panel)
 	Sfx.play("lock_rattle", null, -4.0)
-
 
 func close_swap() -> void:
 	swap_wp = null
 	if swap_panel and is_instance_valid(swap_panel):
 		swap_panel.queue_free()
 	swap_panel = null
-
 
 func _build_swap() -> void:
 	if swap_panel and is_instance_valid(swap_panel):
@@ -2644,12 +1960,9 @@ func _build_swap() -> void:
 	var wp: Dictionary = swap_wp
 	var incoming := Pack.ground_item(wp)
 	var pb := _item_panel("Backpack full", Color("ffb0a0"), 470)
-	var pc: PanelContainer = pb[0]
-	var v: VBoxContainer = pb[1]
-	var head: HBoxContainer = pb[2]
+	var pc: PanelContainer = pb[0]; var v: VBoxContainer = pb[1]; var head: HBoxContainer = pb[2]
 	head.add_child(_pack_chip(p))
-	var cl := UI.button("✕", func(): close_swap(), 36)
-	cl.flat = true
+	var cl := UI.button("✕", func(): close_swap(), 36); cl.flat = true
 	head.add_child(cl)
 	v.add_child(UI.label("Picking up", 12, MUTED, UI.caps))
 	var incoming_row := _item_row(incoming, [])
@@ -2669,8 +1982,7 @@ func _build_swap() -> void:
 		var srow := _item_row(it, [["Drop", drop_it, worse]], "least valuable" if i == low else "")
 		LootHold.row_click(srow, drop_it)
 		sl[1].add_child(srow)
-	var foot := UI.hbox(8)
-	v.add_child(foot)
+	var foot := UI.hbox(8); v.add_child(foot)
 	foot.add_child(UI.button("Leave it  (Esc)", func(): close_swap(), 150))
 	var hint := UI.label("What you drop stays on the ground", 12, MUTED)
 	hint.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -2679,39 +1991,25 @@ func _build_swap() -> void:
 	swap_panel = pc
 	_fit_panel(pc, sl[0], sl[1])
 
-
 func toggle_pack() -> void:
 	if pack_open():
 		close_pack()
 	else:
-		close_swap()
-		close_loot()
+		close_swap(); close_loot()
 		pack_sig = ""
 		_build_pack()
-		if pack_panel:
-			UI.pop_in(pack_panel)
+		if pack_panel: UI.pop_in(pack_panel)
 		Sfx.play("ui_open", null, -10.0)
-
 
 func close_pack() -> void:
 	if pack_panel and is_instance_valid(pack_panel):
 		pack_panel.queue_free()
 	pack_panel = null
 
-
 func _pack_state(p: Hunter) -> String:
 	var belt := str(p.belt.map(func(s): return [s.get("id", ""), s.get("n", 0)]))
-	return (
-		str(p.pack.map(func(it): return it.get("uid", "")))
-		+ p.wid
-		+ p.welem
-		+ str(p.gear)
-		+ str(p.pack_cap)
-		+ str(p.caught.size())
-		+ belt
-		+ str(p.perks)
-	)
-
+	return str(p.pack.map(func(it): return it.get("uid", ""))) + p.wid + p.welem + str(p.gear) + str(p.pack_cap) \
+		+ str(p.caught.size()) + belt + str(p.perks)
 
 func _build_pack() -> void:
 	if pack_panel and is_instance_valid(pack_panel):
@@ -2719,20 +2017,16 @@ func _build_pack() -> void:
 	var p: Hunter = m.player
 	pack_sig = _pack_state(p)
 	var pb := _item_panel("Inventory", INK, LootHold.WIDTH)
-	var pc: PanelContainer = pb[0]
-	var v: VBoxContainer = pb[1]
-	var head: HBoxContainer = pb[2]
+	var pc: PanelContainer = pb[0]; var v: VBoxContainer = pb[1]; var head: HBoxContainer = pb[2]
 	head.add_child(_pack_chip(p))
-	var cl := UI.button("✕", func(): close_pack(), 36)
-	cl.flat = true
+	var cl := UI.button("✕", func(): close_pack(), 36); cl.flat = true
 	head.add_child(cl)
 	var sl := LoadoutPanel.fill(m, pc, v, func(): _build_pack())
 	if not p.caught.is_empty():
-		CaptureHud.pack_section(self, v, p, func(): _build_pack())  # the capsules in your box, with Release
+		CaptureHud.pack_section(self, v, p, func(): _build_pack())       # the capsules in your box, with Release
 	add_child(pc)
 	pack_panel = pc
 	_fit_panel(pc, sl[0], sl[1])
-
 
 ## Closes the windows when they stop making sense (you went down, walked off, or it's gone).
 func _pack_tick() -> void:
@@ -2749,13 +2043,11 @@ func _pack_tick() -> void:
 		elif _pack_state(p) != pack_sig:
 			_build_pack()
 
-
 # ------------------------------------------------------------------ wisp and deathbox revive rings
 ## Downed Hunters and the Boki tethers (DownedMarks, BokiMarks); on top of an enemy wisp you get
 ## "Standing on <name>". Deathbox revives get the same ground ring.
 func _ground_ring(at: Vector3, r: float, col: Color, width: float, frac := 1.0, start := -PI * 0.5) -> void:
 	DownedMarks.ring(c, m.cam, at, r, col, width, frac, start)
-
 
 func _draw_wisp_rings() -> void:
 	var p: Hunter = m.player
@@ -2768,8 +2060,7 @@ func _draw_wisp_rings() -> void:
 			var sz := c.size
 			var s := "Standing on %s  ·  %.1fx drain" % [(o2 as Hunter).pname, Life.R["stomp_mult"]]
 			_ctext(Vector2(sz.x * 0.5, sz.y * 0.5 + 89), s, 13, Color("ff8a7a", 0.85))
-	ReviveHud.revive_rings(self)  # deathbox revives in progress
-
+	ReviveHud.revive_rings(self)       # deathbox revives in progress
 
 ## A soft coloured glow round the screen edges (danger to you).
 func _edge_pulse(sz: Vector2, col: Color, a: float) -> void:
@@ -2789,26 +2080,15 @@ var wheel_open := false
 var wheel_at := Vector2.ZERO
 var wheel_sel := -1
 
-
 ## Hold the emote key: a wheel opens at the cursor; point at an emote and let go to use it.
 func _tick_wheel() -> void:
 	var p: Hunter = m.player
-	var can: bool = (
-		m.truce != null
-		and p != null
-		and not p.out
-		and not p.extracted
-		and not p.riding
-		and not m.paused
-		and m.duel == null
-	)
+	var can: bool = m.truce != null and p != null and not p.out and not p.extracted and not p.riding and not m.paused and m.duel == null
 	var held := can and Input.is_action_pressed("emote")
 	var n := Truce.EMOTES.size()
 	if has_meta("wheel_demo"):
 		# test: the wheel held open, pointing at Truce
-		wheel_open = true
-		wheel_at = c.size * Vector2(0.72, 0.5)
-		wheel_sel = 0
+		wheel_open = true; wheel_at = c.size * Vector2(0.72, 0.5); wheel_sel = 0
 		return
 	if held and not wheel_open:
 		wheel_open = true
@@ -2819,15 +2099,13 @@ func _tick_wheel() -> void:
 	elif held:
 		var d := c.get_local_mouse_position() - wheel_at
 		var s := -1 if d.length() < 26.0 else int(round(fposmod(atan2(d.y, d.x) + PI / 2.0, TAU) / (TAU / n))) % n
-		if s != wheel_sel and s >= 0:
-			Sfx.play("click", null, -18.0, 0.02, 1.6)
+		if s != wheel_sel and s >= 0: Sfx.play("click", null, -18.0, 0.02, 1.6)
 		wheel_sel = s
 	elif wheel_open:
 		wheel_open = false
 		if wheel_sel >= 0 and can:
 			m.truce.emote(p, String(Truce.EMOTES[wheel_sel]["id"]))
 		wheel_sel = -1
-
 
 func _draw_wheel() -> void:
 	var n := Truce.EMOTES.size()
@@ -2851,23 +2129,14 @@ func _draw_wheel() -> void:
 	var p: Hunter = m.player
 	if p and m.truce.offers.has(p.team):
 		mid = "Offer from %s" % (m.truce.offers[p.team]["by"] as Hunter).pname
-	_ctext(
-		wheel_at + Vector2(0, 5), mid, 12 if mid.length() > 6 else 13, Color("f4f1e6") if mid != "Emote" else MUTED, big
-	)
-
+	_ctext(wheel_at + Vector2(0, 5), mid, 12 if mid.length() > 6 else 13, Color("f4f1e6") if mid != "Emote" else MUTED, big)
 
 ## A little white flag (k scales it), pole at p.
 func _flag(p: Vector2, k: float, col: Color) -> void:
 	c.draw_line(p, p + Vector2(0, 22) * k, Color(0, 0, 0, 0.6), 3.0 * k)
 	c.draw_line(p, p + Vector2(0, 22) * k, Color("c9b39a"), 1.6 * k)
 	var w := sin(m.time * 6.0) * 1.5
-	c.draw_colored_polygon(
-		PackedVector2Array(
-			[p + Vector2(1, 0) * k, p + Vector2(14, 2 + w) * k, p + Vector2(13, 8 + w) * k, p + Vector2(1, 9) * k]
-		),
-		col
-	)
-
+	c.draw_colored_polygon(PackedVector2Array([p + Vector2(1, 0) * k, p + Vector2(14, 2 + w) * k, p + Vector2(13, 8 + w) * k, p + Vector2(1, 9) * k]), col)
 
 ## Over heads: emote bubbles from anyone you can see, a white flag on truce partners, and a red
 ## mark on whoever just broke a truce.
@@ -2886,15 +2155,12 @@ func _draw_truce_marks() -> void:
 		var a := clampf((Truce.BUBBLE_T - float(s["t"])) * 2.0, 0.0, 1.0) * clampf(float(s["t"]) * 8.0, 0.0, 1.0)
 		var sp := cam.unproject_position(_head(h, 3.3)) + Vector2(0, -6.0 * minf(1.0, float(s["t"]) * 4.0))
 		if not c.get_viewport_rect().grow(240.0).has_point(sp):
-			continue  # (far off screen, e.g. someone falling away into the abyss: the bubble's triangles degenerate and spam "triangulation failed")
+			continue     # (far off screen, e.g. someone falling away into the abyss: the bubble's triangles degenerate and spam "triangulation failed")
 		var label := String(e["name"])
 		var w := TextCache.width(big, label, 15) + (40.0 if e["id"] == "truce" else 22.0)
 		var r := Rect2(sp - Vector2(w * 0.5, 15), Vector2(w, 28))
 		_rounded(r, Color(0.05, 0.06, 0.09, 0.88 * a), 12, Color(e["col"], 0.8 * a), 2)
-		c.draw_colored_polygon(
-			PackedVector2Array([sp + Vector2(-6, 13), sp + Vector2(6, 13), sp + Vector2(0, 21)]),
-			Color(0.05, 0.06, 0.09, 0.88 * a)
-		)
+		c.draw_colored_polygon(PackedVector2Array([sp + Vector2(-6, 13), sp + Vector2(6, 13), sp + Vector2(0, 21)]), Color(0.05, 0.06, 0.09, 0.88 * a))
 		if e["id"] == "truce":
 			_flag(r.position + Vector2(12, 3), 0.95, Color(e["col"], a))
 			_text(r.position + Vector2(30, 20), label, 15, Color(e["col"], a), big)
@@ -2909,11 +2175,10 @@ func _draw_truce_marks() -> void:
 		if not c.get_viewport_rect().grow(240.0).has_point(tp):
 			continue
 		if m.truce.is_marked(h):
-			_ctext(tp + Vector2(0, -16), "BROKE THE TRUCE", 12, BAD, big)  # (above the name, not over it)
+			_ctext(tp + Vector2(0, -16), "BROKE THE TRUCE", 12, BAD, big)     # (above the name, not over it)
 		elif m.truce.allied(me.team, h.team):
 			# a white flag beside their name plate
 			_flag(tp + Vector2(-66, -12), 0.7, Color("f4f1e6"))
-
 
 # ------------------------------------------------------------------ boss lairs
 ## A lair on the minimap: a padlock while sealed, an open gate once open, a pulsing horned skull
@@ -2941,27 +2206,13 @@ func _lair_icon(pv: Vector2, L: Dictionary, k := 1.0) -> void:
 			c.draw_circle(pv, 8.0 * k, dark)
 			c.draw_circle(pv, 6.5 * k, BAD)
 			for sx in [-1.0, 1.0]:
-				c.draw_colored_polygon(
-					PackedVector2Array(
-						[
-							pv + Vector2(4.5 * sx, -3) * k,
-							pv + Vector2(8.5 * sx, -10) * k,
-							pv + Vector2(2.0 * sx, -5.5) * k
-						]
-					),
-					BAD
-				)
+				c.draw_colored_polygon(PackedVector2Array([pv + Vector2(4.5 * sx, -3) * k, pv + Vector2(8.5 * sx, -10) * k, pv + Vector2(2.0 * sx, -5.5) * k]), BAD)
 				c.draw_circle(pv + Vector2(2.4 * sx, -0.5) * k, 1.4 * k, dark)
 			c.draw_rect(Rect2(pv + Vector2(-2.5, 2.5) * k, Vector2(5, 1.6) * k), dark)
 		"cleared":
 			c.draw_circle(pv, 7.0 * k, dark)
 			c.draw_circle(pv, 5.5 * k, Color(0.55, 0.58, 0.64, 0.9))
-			c.draw_polyline(
-				PackedVector2Array([pv + Vector2(-3, 0) * k, pv + Vector2(-0.8, 2.6) * k, pv + Vector2(3.4, -2.6) * k]),
-				dark,
-				2.0 * k
-			)
-
+			c.draw_polyline(PackedVector2Array([pv + Vector2(-3, 0) * k, pv + Vector2(-0.8, 2.6) * k, pv + Vector2(3.4, -2.6) * k]), dark, 2.0 * k)
 
 func _draw_map_lairs(inner: Rect2, to_map: Callable, on_map: Callable, hold: bool) -> void:
 	for L in m.lairs.list:
@@ -2984,8 +2235,7 @@ func _draw_map_lairs(inner: Rect2, to_map: Callable, on_map: Callable, hold: boo
 	# a dropped Rare Egg (and whoever just picked it up) shows to everyone for a few seconds
 	for e in m.lairs.egg_pings:
 		var at: Vector3 = e["pos"]
-		if e.get("follow") != null and is_instance_valid(e["follow"]):
-			at = (e["follow"] as Hunter).pos
+		if e.get("follow") != null and is_instance_valid(e["follow"]): at = (e["follow"] as Hunter).pos
 		var pv: Vector2 = to_map.call(at)
 		var ph := fmod(m.time * 1.8, 1.0)
 		if on_map.call(pv, 4.0):
@@ -2997,7 +2247,6 @@ func _draw_map_lairs(inner: Rect2, to_map: Callable, on_map: Callable, hold: boo
 		else:
 			edge_mini.add(pv - inner.get_center(), GOLD)
 
-
 ## Over each lair nearby: what's going on at its gate. Someone working the dial shows a small dial
 ## over the lectern so everyone can see it turning; runes being lit show their fill.
 func _draw_lair_labels() -> void:
@@ -3008,23 +2257,12 @@ func _draw_lair_labels() -> void:
 	for L in m.lairs.list:
 		var d := p.flat_dist(L["dial"])
 		var u = L["user"]
-		if (
-			L["state"] == "sealed"
-			and u != null
-			and not is_same(u, p)
-			and d < 40.0
-			and not cam.is_position_behind(L["dial"])
-		):
+		if L["state"] == "sealed" and u != null and not is_same(u, p) and d < 40.0 and not cam.is_position_behind(L["dial"]):
 			var sp := cam.unproject_position(L["dial"] + Vector3(0, 3.0, 0))
 			_dial_widget(sp, 26.0, L, false)
 			_ctext(sp + Vector2(0, -36), "%s is opening the gate" % (u as Hunter).pname, 13, Lairs.color_of(L), big)
 		for rn in L["runes"]:
-			if (
-				rn["lit"]
-				or float(rn["prog"]) <= 0.0
-				or p.flat_dist(rn["pos"]) > 30.0
-				or cam.is_position_behind(rn["pos"])
-			):
+			if rn["lit"] or float(rn["prog"]) <= 0.0 or p.flat_dist(rn["pos"]) > 30.0 or cam.is_position_behind(rn["pos"]):
 				continue
 			var rp := cam.unproject_position(rn["pos"] + Vector3(0, 2.6, 0))
 			_bar(Rect2(rp + Vector2(-34, 0), Vector2(68, 6)), float(rn["prog"]), Lairs.color_of(L))
@@ -3033,7 +2271,6 @@ func _draw_lair_labels() -> void:
 		var wp = L.get("egg_wp")
 		if wp != null and m.wpicks.has(wp) and p.flat_dist(wp["pos"]) < 70.0 and not p.out:
 			_draw_waypoint(wp["pos"], "Rare Egg", GOLD)
-
 
 ## The dial: a ring with the lit arcs (gold until hit, then dim green), the needle, and pips for the
 ## locks. Drawn big for whoever is working it, small over the lectern for everyone else.
@@ -3044,20 +2281,16 @@ func _dial_widget(ctr: Vector2, rad: float, L: Dictionary, big_one: bool) -> voi
 	c.draw_circle(ctr, rad + w * 1.4, Color(0.03, 0.03, 0.06, 0.82))
 	c.draw_arc(ctr, rad, 0, TAU, 64, Color(1, 1, 1, 0.14) if not jam else Color(BAD, 0.5), w, true)
 	for t in L["targets"]:
-		var a := float(t["a"])
-		var tw := float(t["w"])
+		var a := float(t["a"]); var tw := float(t["w"])
 		var tc: Color = Color(GOOD, 0.55) if t["hit"] else col.lightened(0.25)
 		if not t["hit"] and not jam:
 			tc = tc.lerp(Color.WHITE, 0.25 + 0.25 * sin(m.time * 9.0))
 		c.draw_arc(ctr, rad, a - tw * 0.5, a + tw * 0.5, 16, tc, w * (1.0 if t["hit"] else 1.35), true)
 	# the needle, with a short glowing trail behind it
-	var nd := float(L["needle"])
-	var dirn := float(L["dir"])
+	var nd := float(L["needle"]); var dirn := float(L["dir"])
 	for i in 6:
 		var ta := nd - dirn * i * 0.06
-		c.draw_line(
-			ctr, ctr + Vector2(cos(ta), sin(ta)) * rad * 1.08, Color(1, 0.97, 0.85, 0.22 - i * 0.035), w * 0.7, true
-		)
+		c.draw_line(ctr, ctr + Vector2(cos(ta), sin(ta)) * rad * 1.08, Color(1, 0.97, 0.85, 0.22 - i * 0.035), w * 0.7, true)
 	var tip_v := ctr + Vector2(cos(nd), sin(nd)) * rad * 1.12
 	c.draw_line(ctr, tip_v, Color(BAD, 0.95) if jam else Color("fff4d0"), w * 0.75, true)
 	c.draw_circle(tip_v, w * 0.6, Color("fff4d0") if not jam else BAD)
@@ -3068,12 +2301,7 @@ func _dial_widget(ctr: Vector2, rad: float, L: Dictionary, big_one: bool) -> voi
 	for i in n:
 		var pp := Vector2(px0 + i * rad * 0.22, ctr.y + rad + w * 2.4)
 		c.draw_circle(pp, rad * 0.07 + 1.0, Color(0, 0, 0, 0.8))
-		c.draw_circle(
-			pp,
-			rad * 0.07,
-			col if i < int(L["lock"]) else (Color(INK, 0.9) if i == int(L["lock"]) else Color(1, 1, 1, 0.22))
-		)
-
+		c.draw_circle(pp, rad * 0.07, col if i < int(L["lock"]) else (Color(INK, 0.9) if i == int(L["lock"]) else Color(1, 1, 1, 0.22)))
 
 func _draw_lair_dial(sz: Vector2, p: Hunter) -> void:
 	var L: Dictionary = m.lairs.puzzle_of(p)
@@ -3084,25 +2312,13 @@ func _draw_lair_dial(sz: Vector2, p: Hunter) -> void:
 	_dial_widget(ctr, rad, L, true)
 	var col: Color = Lairs.color_of(L)
 	_ctext(ctr + Vector2(0, -rad - 42), String(L["name"]).to_upper(), 15, col, big)
-	_ctext(
-		ctr + Vector2(0, -rad - 24),
-		"LOCK %d OF %d" % [mini(int(L["lock"]) + 1, int(L["locks"])), int(L["locks"])],
-		13,
-		INK,
-		big
-	)
+	_ctext(ctr + Vector2(0, -rad - 24), "LOCK %d OF %d" % [mini(int(L["lock"]) + 1, int(L["locks"])), int(L["locks"])], 13, INK, big)
 	var jam := float(L["jam"]) > 0.0
 	var key := Settings.key_cap("interact")
 	var hint := "JAMMED" if jam else "%s  ·  CLICK  ·  (A)   to stop on a lit arc" % key
 	_ctext(ctr + Vector2(0, rad + 48), hint, 14 if not jam else 18, BAD if jam else INK, big)
 	var lit: int = (L["targets"] as Array).filter(func(t): return t["hit"]).size()
-	_ctext(
-		ctr + Vector2(0, rad + 68),
-		"%d of %d arcs  ·  a miss rings the chime" % [lit, (L["targets"] as Array).size()],
-		12,
-		MUTED
-	)
-
+	_ctext(ctr + Vector2(0, rad + 68), "%d of %d arcs  ·  a miss rings the chime" % [lit, (L["targets"] as Array).size()], 12, MUTED)
 
 ## After the kill, still sealed in: the gate's clock, and the two ways out sooner.
 func _draw_lair_victory(sz: Vector2, p: Hunter) -> void:
@@ -3117,27 +2333,15 @@ func _draw_lair_victory(sz: Vector2, p: Hunter) -> void:
 	var lc := r.position + Vector2(24, 26)
 	c.draw_arc(lc + Vector2(0, -5), 6.0, PI, TAU, 12, col, 2.5, true)
 	_rounded(Rect2(lc + Vector2(-8, -5), Vector2(16, 13)), col, 3)
-	_ctext(
-		Vector2(sz.x * 0.5 + 8, r.position.y + 20),
-		"VICTORY  ·  LOCKED IN  ·  gate opens in %s" % Lairs.clock(m.lairs.victory_left(L)),
-		15,
-		col,
-		big
-	)
+	_ctext(Vector2(sz.x * 0.5 + 8, r.position.y + 20), "VICTORY  ·  LOCKED IN  ·  gate opens in %s" % Lairs.clock(m.lairs.victory_left(L)), 15, col, big)
 	var k := Settings.key_cap("interact")
-	_ctext(
-		Vector2(sz.x * 0.5 + 8, r.position.y + 37),
-		"%s at the lever by the gate opens it now  ·  the updraft at the back carries only those who fought" % k,
-		11,
-		MUTED
-	)
+	_ctext(Vector2(sz.x * 0.5 + 8, r.position.y + 37), "%s at the lever by the gate opens it now  ·  the updraft at the back carries only those who fought" % k, 11, MUTED)
 	# the lock's clock draining
 	var bw := r.size.x - 64.0
 	var f := clampf(m.lairs.victory_left(L) / Lairs.VICTORY_T, 0.0, 1.0)
 	_rounded(Rect2(Vector2(r.position.x + 48, r.end.y - 10), Vector2(bw, 4)), Color(1, 1, 1, 0.12), 2)
 	_rounded(Rect2(Vector2(r.position.x + 48, r.end.y - 10), Vector2(bw * f, 4)), col, 2)
 	feed_top = maxf(feed_top, r.end.y + 8.0)
-
 
 ## At the top of the screen while you're in a lair with its boss awake: name, phase, health with
 ## marks at the phase lines, and the enrage clock. A client's boss is a Boss too (BossNet syncs phase, enraged
@@ -3151,13 +2355,7 @@ func _draw_boss_bar(sz: Vector2, p: Hunter) -> void:
 	var col: Color = Lairs.color_of(bb.lair if bb else {"boss": b.mkind})
 	var w := minf(560.0, sz.x * 0.46)
 	var r := Rect2(Vector2(sz.x * 0.5 - w * 0.5, HudStyle.safe_pad(sz).y + 22.0), Vector2(w, 16))
-	_rounded(
-		Rect2(r.position - Vector2(14, 22), r.size + Vector2(28, 50)),
-		Color(0.04, 0.04, 0.07, 0.85),
-		10,
-		Color(col, 0.6),
-		2
-	)
+	_rounded(Rect2(r.position - Vector2(14, 22), r.size + Vector2(28, 50)), Color(0.04, 0.04, 0.07, 0.85), 10, Color(col, 0.6), 2)
 	_text(r.position + Vector2(0, -6), bname.to_upper(), 15, col, big)
 	var phase_n := bb.phase if bb else Boss.phase_at(b.hp, b.max_hp)
 	var ph := "PHASE %d" % (phase_n + 1)
@@ -3166,17 +2364,13 @@ func _draw_boss_bar(sz: Vector2, p: Hunter) -> void:
 	c.draw_rect(r, Color(0, 0, 0, 0.6))
 	var ct := _chip_of(b, frac)
 	if ct > frac:
-		c.draw_rect(
-			Rect2(r.position + Vector2(w * frac, 0), Vector2(w * (ct - frac), r.size.y)), Color(1.0, 0.95, 0.88, 0.8)
-		)
+		c.draw_rect(Rect2(r.position + Vector2(w * frac, 0), Vector2(w * (ct - frac), r.size.y)), Color(1.0, 0.95, 0.88, 0.8))
 	var enraged: bool = bb != null and bb.enraged
 	var hc := Color("ff5a4a") if enraged else (Color("e0b0ff") if b.stagger_t > 0.0 else Color("ff8a5a"))
 	c.draw_rect(Rect2(r.position, Vector2(w * frac, r.size.y)), StealTell.fill(b, hc, m.time))
 	StealTell.mark(self, Vector2(r.position.x + 9, r.end.y + 16), b)
 	for mk in [0.66, 0.33]:
-		c.draw_line(
-			r.position + Vector2(w * mk, -3), r.position + Vector2(w * mk, r.size.y + 3), Color(1, 1, 1, 0.8), 2.0
-		)
+		c.draw_line(r.position + Vector2(w * mk, -3), r.position + Vector2(w * mk, r.size.y + 3), Color(1, 1, 1, 0.8), 2.0)
 	_ctext(r.get_center() + Vector2(0, 5), "%d / %d" % [int(ceil(b.hp)), int(b.max_hp)], 12, INK, big)
 	if bb == null:
 		feed_top = maxf(feed_top, r.end.y + 30.0)
@@ -3187,15 +2381,7 @@ func _draw_boss_bar(sz: Vector2, p: Hunter) -> void:
 	var lk: Dictionary = m.lairs.sealed_lair(p)
 	if not lk.is_empty():
 		# sealed in with it: what it takes to get out, and when the seal gives up on its own
-		_ctext(
-			Vector2(sz.x * 0.5, r.end.y + 40),
-			"SEALED IN  ·  DEFEAT %s  ·  %s" % [bname.to_upper(), Lairs.clock(m.lairs.lock_left(lk))],
-			15,
-			col,
-			big
-		)
+		_ctext(Vector2(sz.x * 0.5, r.end.y + 40), "SEALED IN  ·  DEFEAT %s  ·  %s" % [bname.to_upper(), Lairs.clock(m.lairs.lock_left(lk))], 15, col, big)
 	if bb.invul_t > 0.0:
-		_ctext(
-			Vector2(sz.x * 0.5, r.end.y + (64 if not lk.is_empty() else 44)), "PHASE %d" % (bb.phase + 1), 22, col, big
-		)
+		_ctext(Vector2(sz.x * 0.5, r.end.y + (64 if not lk.is_empty() else 44)), "PHASE %d" % (bb.phase + 1), 22, col, big)
 	feed_top = maxf(feed_top, r.end.y + (54.0 if not lk.is_empty() else 34.0))
