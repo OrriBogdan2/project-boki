@@ -237,6 +237,7 @@ The garden games, home chimes, Ways Out calls and Heartspark sets merged after t
 - Boki sounds: `boki_*` (and the existing `kin_*` names; `k_<type>` is a Boki's cast cue, one per standard type (19: Ghost airy and hollow, Dark low and close), picked by `KinLib.cue_of`); UI: `ui_*` (and the existing `click`, `hover`...).
 - Garden sleepers: `boki_sleep` (a 6.2 s seamless loop, two slow breaths, the second with a tiny snore) and `boki_yawn` (two takes), in `tools/gen_sfx_boki.py`, played by `scripts/home/boki_nap_sfx.gd` (`BokiNapSfx`, stepped from `home.gd _move_kin` at 10 Hz). Every Boki with `nap_t` running and not indoors (napping alone, in a BaseLife pile, curled up outside) is a sleeper; only the 3 nearest you breathe, each through `Sfx.loop_hold` at its position (-12 dB, reach 7 m), pitched by height (sqrt of 30 cm over its `Unique.size_info` cm, 0.75-1.35, so a big Boki breathes slower and lower). A sleeper that wakes yawns (-8 dB, reach 9 m, at most one every 0.4 s so a garden waking at dawn does not chorus). Both are positional through Sfx, so they take the bus Sfx picks for the spot (far muffle; a reverb zone send once the garden has one). `--base-life-check` asserts the cap of 30, the size pitch, the night loops, the dawn yawn and an awake Boki's loop letting go.
 - Species voices: `bk_<species>_<mood>` for every species the game can show (`Data.KIN`: the wild, the starters, the mystery egg's pool, the rare boss kin), moods happy, alert, unsure, sleepy, hurt, 2 takes each (set `content/sfx/boki_voices.json`, made by `gen_sfx_boki.py`). Pitch comes from the species' weight, the texture from its type (crackle Fire/storm, burble Water/venom, rustle Grass/spore/swarm, chime Crystal/moon/sound, else plain), the 3-note motif is its signature. Play them with `KinVoice.cue(species, mood)`: it falls back to `kin_happy` / `kin_alert` / `kin_unsure` / `boki_sleep` / `kinhit` for a species with no set. A new species appends its row to `SPECIES_VOICE` (at the end, so the older takes keep their random draws) and regenerates; `--sfx-set-check` fails if a shown species lacks a mood or would play a shared cue.
+- Boki command answers (`scripts/match/kin_ack.gd`, `KinAck.say`): the Boki cries back to every G send, recall and wheel order (Chase, Guard, Return, Follow), through the species voice above (`KinVoice.cue`: alert for send/chase/guard, happy for recall/return/follow) at the Boki's own pitch (`Unique.voice`), -8 dB, no new sounds. Its owner always hears it (unpositioned, so it carries when the Boki is off-screen); teammates hear it only within `Sfx.hear_range`; a rival never. A Boki answers once per `KinAck.GAP_S` (1.2 s of match time), so a spammed key stays quiet; a send the Boki hesitates over or refuses keeps its own `unsure` cry. `--boki-system-check` section 3b asserts one cry per command, the gap and who hears it.
 - Pairing in the Nesting Nook (`NookSfx`, UI set): `nook_note` twice (a chime, each note pitched by one parent's size, the bigger the lower), the egg settling (`garden_egg`), `nook_nuzzle` and `nook_settle` each layered with a parent's own `kin_happy` chirp, and `nook_wobble` for an unstable mix (a sour, soft wobble: it needs care, it did not fail). All at the nest, timed from the pairing click; `--nook-check` guards it.
 - A Boki's life cues, through `BokiLifeSfx` (`scripts/core/boki_life_sfx.gd`): `boki_eat` as it eats (at a feeder, a snack it fetched, fed by hand), `boki_sleep` as it dozes off (`HomeChimes` watches every nap start), `boki_fuse` as it leaps into a Fusion and `boki_downed` as it goes down (other players' Boki too, from the `merge` and `down` events). Played through Sfx at the Boki, so the takes rotate (never one twice running), pitched by its voice roll, -4 dB in a match and -10 dB at home; a Boki voices one cue at a time (one that comes while its last still sounds is dropped). `--sfx-set-check` section 10, `--boki-system-check` part `cries`, `--feed-check`.
 - Farm reactions: `garden_feed|pet|friend|trait|toy` (UI set, `tools/gen_sfx_ui.py`), one per kind of good thing at home; `unlock` is only for real unlocks. The Boki eat and nap sounds (`boki_eat`, `boki_sleep`) play from the care states. `--garden-react-check` guards both. (No race exists on the farm yet, so there is no race cue.)
@@ -309,6 +310,7 @@ lunge's cast have no own cue.
 ## The Hunter Wisp's hum
 A downed Hunter's Wisp is slow, heavy and low, so it hums: `wisp_hum`, a 2 s seamless loop of D2 and its low partials, with `wisp_hum_end` as the soft fall-away when the Wisp is revived or bleeds out (`tools/gen_wisp_sfx.py`, set `content/sfx/wisp.json`). It is never a chirp; the Boki wisps chirp. `WispHum` (called by `HunterWisp`) holds it as a keyed loop through `Sfx.loop_hold`, with no state of its own: it reads the Wisp as it is each frame, so a stomp lock (the revive drains, the pitch falls back) or a teammate's carry (the hum rides with the Wisp) just follows. Heard to 20 m, a teammate's a little louder than a rival's, the pitch rising up to 35% as the revive channel fills, and at most 6 hums at once (the nearest to the listener). Numbers: `content/rules/wisp_hum.json`. Check: `--wisp-hum-check`.
 
+When an enemy grabs a loose Hunter Wisp (`KinSteal._cue`, run in every game from the grab or the kin snapshot): the owner and their squad hear the existing `steal_lost` sting (-3 dB, with the same short music dip as the monster-steal stings) and the thief a softer `pickup` (-9 dB). A squadmate's take, an own take-back and a third squad's grab play nothing. No new sound files. Check: `--wisp-steal-check` (`cues:` rows).
 ## The stomp (`content/sfx/stomp.json`, `tools/gen_sfx_stomp.py`)
 The stomp is an uncancellable finisher only a stun or hard CC breaks (DECISIONS 2026-11-11), and it has four cues of its own; the first three are played by `Life` at a position (no `mine`), so everyone in reach hears them, both squads: `stomp_windup` (cast, a low rising groan and a heel scuff) when the hold commits (`Life.start_stomp`, at the stomper), `stomp_finish` (heavy_impact, a crushing thud and the wisp's light squeezed out, heard to 40 m) when the last slam kills the wisp (at the wisp), and `stomp_crack` (impact, a bright crack and a rising ring) when hard CC breaks it (`Life.end_stomp` "broken", at the stomper). Each foot slam keeps the shared `thump`. They replace the stand-in `crit` and `whoosh`. The fourth, `stomp_relief` (cast, a soft rising two-note chime over an exhale), plays unpositioned with the crack for the saved wisp's squad only. A stomp that runs out has neither the crack nor the chime. Online the stomp is the Net `stomp` event (0.24.28): the other game plays the stomper's pose and the same cues from it. Checks: `--sfx-set-check` (set, levels, wiring, the wind-up rises) and `--stomp-check` (the wind-up once per stomp, one crack per hard-CC break and none for slows or Daze, the thud once on the kill).
 
@@ -407,7 +409,7 @@ Whole-burst peak (the first shot) is unchanged to within 0.7 dB (-3.4 to -4.9 dB
   each and wants its voice silent within 0.1 s.
 
 ## Ultimate cast cues
-You hear an ultimate before you see it. Every Hunter's X goes through `HeroUlt.press`, which calls `UltCue.cast`: the Hunter's own `<arch>_ult_cue` at its position plus a team tag, `ult_tag_ally` (bright, rising) for your team or `ult_tag_foe` (low, falling) for a rival, both at the same level (the colour tells them apart, never loudness). They carry 60 m (`reach` in `content/sfx/ult_cues.json`, falling off with distance, muffled past 9 m) and play on the match's pool voices. Kits only run in their owner's game, so the cast also sends `["fx", "ucast", nid]` and the other games play it. Sounds: `tools/gen_sfx_ult_cues.py` (own seed; re-rolls nothing else). `--sfx-set-check` asserts a cue and reach per Hunter with an ultimate; `--match-audio-check` the ally/rival tag and the range.
+You hear an ultimate before you see it. Every Hunter's X goes through `HeroUlt.press`, which calls `UltCue.cast`: the Hunter's own `<arch>_ult_cue` at its position plus a team tag, `ult_tag_ally` (bright, rising) for your team or `ult_tag_foe` (low, falling) for a rival. A teammate's pair plays at `UltCue.DB` (-2 dB) on the SFX bus; an enemy's is the same two sounds at `UltCue.DB_FOE` (+1 dB, 3 dB louder) on their own `SFXFoe` bus (sends to SFX; `Sfx.play_foe`; only terrain muffles it, no far low-pass), so your squad's ult and an enemy's tell apart before you see either. No HUD element. They carry 60 m (`reach` in `content/sfx/ult_cues.json`, falling off with distance, muffled past 9 m) and play on the match's pool voices. Kits only run in their owner's game, so the cast also sends `["fx", "ucast", nid]` and the other games play it. Sounds: `tools/gen_sfx_ult_cues.py` (own seed; re-rolls nothing else). `--sfx-set-check` asserts a cue and reach per Hunter with an ultimate and the foe wiring; `--match-audio-check` the ally/rival tag, level, bus and the range; `--sfx-remote-check` the other game's cue, tag and level for the ult of archer, mage and thief, as a teammate's and as a rival's.
 
 ## Broken casts (`scripts/arch/kit_windup.gd`)
 `Sfx.play` returns a handle to its pool voice (-1 when nothing played); `Sfx.cut(handle)` fades just that sound out (`CUT_FADE` 0.05 s) if the voice still plays it, `Sfx.sounding(handle)` says whether it does. A kit plays an interruptible wind-up's sound through `KitWindup.play(kit, slot, name, db)` (or `KitWindup.keep` for a HeroVfx move's, `HeroVfx.last_voice`); where a stun or a knock breaks the cast it calls `KitWindup.broken(kit, slot)`: the wind-up voice stops and the caster hears `cast_broken` (ui set, `tools/gen_sfx_ui.py`). One per kit: Albert's Faultline plant, Grimble's Anchor Drop, Vex's Longneedle, Kael's Finishing Slam, Motley's Shard Snap, Sparkle's Wirerun, Meeko's Hearth Call, Sable's Bola, Neve's spear push, Cinder's Flue Flight, Lace's bow draw, Tenzo's Quake Fist. `--match-audio-check` breaks each and wants its voice silent within 0.1 s.
@@ -545,7 +547,7 @@ All wired in `scripts/match/capture.gd`, so a rival's game plays them from the s
 "Carry 2 in, 1 extra out" (docs/decisions/0090), all through `scripts/match/carry_sfx.gd` (`CarrySfx`), one-shots on the SFX bus:
 - **Lead swap** (`Match.on_kin_swap`): `carry_swap_out`, the outgoing Boki's chirp dipping into the satchel, then 0.13 s later `carry_swap_in`, the incoming one's a fifth up; each pitched by its Boki's size (`HomeChimes.PITCH`), -6 dB at the hunter. It runs in the owner's game only (the swap is not a net event).
 - **Carry-out claim**: `carry_claim`, a soft latch and a warm low chord under the scan's chime, when a wild Boki's scan lands (`Capture._pop`, so every game hears it) or a capsule comes out of your own team's deathbox.
-- **Stolen**: a rival takes one of your Boki (`KinTrack.register`, which every game runs for a catch online, or a rival's deathbox in `Life`): its owner hears `carry_stolen` (a falling minor sting, flat, wherever the thief is); everyone else hears `carry_take` at the thief, a sly pluck and swish that carries 30 m (`reach`), so a squad nearby knows.
+- **Stolen**: a rival takes one of your Boki (`KinTrack.register`, which every game runs for a catch online, or a rival's deathbox in `Life`): its owner hears `carry_stolen` (a falling minor sting, flat, wherever the thief is); everyone else hears `carry_take` at the thief, a sly pluck and swish that carries 34 m (`reach`), so a squad nearby knows.
 - Voice cap: each cue has a `Sfx.MIN_GAP` (200 ms, the sting 400 ms), so a burst of claims or a looted box full of capsules plays once; at most two voices per event. `--sfx-set-check` section 10 asserts the names, gaps, reach and wiring; `--match-audio-check` the swap order, the claim, and who hears a steal where.
 ## The Heart and the Ways Out calls
 - `scripts/match/heart_sfx.gd` (`Heart.audio`) owns the Heartspark cues (`tools/gen_sfx_heart.py`, set `content/sfx/heart.json`) and the Ways Out calls: `call_out(event, seat, team)` with `open`, `start`, `taken`, `warn`, `last` plays one flat UI sting (`ways_*`) and writes the same line to the match feed and the toast lane, so sound and banner fire together. Each call plays once per seat (a squad's `start` again after 10 s); the quest seats call it the same way when they are built. `--ways-out-sfx-check` asserts it.
@@ -574,6 +576,103 @@ All through `m.sfx`, owned by `HeartRaid.audio`. The wave and boss cues follow t
 The tide ring closing on the Heart decides who gets out, so it is heard before it is seen. `TideSfx` is ticked by `HeartSfx.update` and reads only `Heart.tide_stage` and `Heart.tide_r`, so a client hears what the host does (no Net change). `tide_onset`: a 3 s rising swell when the tide starts (`tide_start_s`), flat, with the score ducked under it (`Sfx.duck`, 3 s, -8 dB). `tide_rumble`: a held loop (`Sfx.loop_hold`) on the ring's nearest point to you, carrying 70 m; `Sfx`'s distance roll-off makes it rise as the wall closes on you, and past 9 m it plays through the muffled bus so only the low end carries. `tide_warn`: a short falling two-note sting at each new close stage (11 stages, about 46 s apart), flat, score ducked 1 s, -5 dB. Joining mid-stage plays no cue. `--blight-check` section 7 asserts the onset once, a sting per stage and none inside one, the rumble on the ring and louder at 12 m than at 60 m; `--sfx-set-check` the files and levels.
 ## The garden's ambience (`scripts/home/home_ambience.gd`)
 One bed for the part of the day on the home clock (`Home.day_t`): `amb_garden_morning` birds (0.2-0.4), `amb_garden_midday` a quiet hush (0.4-0.6), `amb_garden_evening` insects (0.6-0.8), `amb_garden_night` a slow wind; `amb_rain` while it rains. `amb_pond` comes up as you near water (full within 2 tiles, silent past 9, from `layout["water"]`). The beds go through `Sfx.amb_layer`, so they sit on the **Ambience** bus and follow its volume setting; a bed fades out as the next fades in over 20 s. At most 3 loops sound at once (the pond steps out during a crossfade), and the garden never plays `amb_match` (the title's wind). `Sfx` frees a bed once it has faded to nothing. Under them sits the bed of the zone you are in (GARDEN.md 10.2), `amb_zone_<zone>`, up in 3 s and kept: `hub` a quiet Waystone hum, `bramblebank` stream and nap-tree leaves, `glasswater` still pools and ice ticks, `cinderstep` warm cracks and embers, `hushwood` moss-soft hush with echoing knocks, `ridge` wind and humming stones. Hushwood's rule has `"clock": 0.7`, so its time-of-day bed stays at dusk. A hop plays `garden_hop` (0.64 s, swelling for the 0.5 s `hop_fade_s` light-up) from `HubWaystone.hop`; `GardenZones.wake(id)` opens a zone and plays `garden_wake`, once (the unlock step calls it). Regenerate the beds with `tools/gen_garden_ambience.py`, the two sounds with `tools/gen_sfx_garden.py`; `--garden-audio-check` asserts the zone beds, the hop and the wake. `--sfx-set-check` section 7 asserts all of this.
+
+## Ability sounds (`--sfx-set-check` section 21)
+Every ability of the 13 Hunters plays its own sound: LMB (held), RMB (held), E, Shift (the dash) and R (the ultimate) are each pressed once in a real match at a dummy 3 m away (`tools/sfx_ability_rows.gd`, which logs `Sfx.cue_log`). A move is **silent** when no sound of its Hunter's own set (`content/sfx/<arch>.json`, plus `<arch>_ult_cue` for R) is heard, and a move that hurts the dummy needs an own sound within 100 ms of the damage; a shared stock cue (`hit`, `ab_hit`, `splash`, another Hunter's `jug_ting`) alone counts as silence and fails the check. The columns below split what is heard by when it is first heard: **cast** before the first damage (or in the first 0.35 s), **hit** within 100 ms after it, **end** later (a landing, a burst, a wall dropping). A blank cast means the move's first sound is its hit (a beam, a cloak); a blank hit means it does no damage (a dash, a shield, a seed). Each passive that has a proc moment is listed too (`PROCS` in the tool): its sound exists and the script or `content/vfx` file that plays it names it.
+
+Fills (library sounds only, nothing generated):
+- Gil's `content/vfx/gil.json` borrowed other Hunters' and stock sounds (`jug_ting`, `br_rise`, `dr_dive`, `mage_zap`, `swipe`, `splash`, `ab_throw`, `drip`) and left his own set (`gil_toss`, `gil_pop_*`, `gil_spin`, `gil_spout`, `gil_wave`, `gil_wave_land`, `gil_surface`, `gil_beached`, `gil_thrust_hit`) unplayed. Each vfx move now plays its own sound at -2 to -9 dB, the level of the other kits' own vfx sounds (median -3 dB); the dive has none of its own because `gil_dash` already plays on the press.
+- Vex's Fever lighting (Hot Streak) had no sound: `vn_stim` at -9 dB and pitch 1.3 (`FEVER_DB`; a knock keeps it at -3 dB, pitch 1).
+- Tenzo's Shardskin stack had no sound: `br_raise` at -8 dB and pitch 1.3 (`SHARD_DB`).
+
+Before and after (only the cells that changed; every other Hunter's cells were already heard in their own set):
+
+| Hunter | Move | Before | After |
+|---|---|---|---|
+| Gil | LMB hit | `slash_hit`, `jug_lunge_hit` (Kael's), `hit_blade` | `gil_thrust_hit` |
+| Gil | RMB cast | **silent**: `ab_throw` (shared) | `gil_toss` |
+| Gil | RMB hit | **silent**: `mage_zap` (Sparkle's), `boom`, `hit`, `drip` | `gil_pop_<kind>` (thunder, slime, air, fire, Zeep) |
+| Gil | E cast | `swipe`, `splash` (shared) | `gil_spin` per spin tick |
+| Gil | E recast, hit | `splash`, `br_rise` (Tenzo's), `hit` | `gil_spout` |
+| Gil | Shift end, hit | `splash`, `br_rise` (Tenzo's), `hit` | `gil_surface` |
+| Gil | Shift cast | `gil_dash` + `splash`, `dr_dive` (Grimble's) | `gil_dash` |
+| Gil | R cast | `gil_dash` + `splash`, `br_rumble` (Tenzo's), `swim` | `gil_wave` |
+| Gil | R end | `splash`, `shield` (shared) | `gil_wave_land` |
+| Gil | passive Beached | `splash`, `ab_stun` (shared) | `gil_beached` (+ `pay_flashpoint`) |
+| Vex | passive Fever lit | silent | `vn_stim` (quiet) |
+| Tenzo | passive Shardskin stack | silent | `br_raise` (quiet) |
+
+Passives with no proc moment: Lace's Red Thread (rivals under half health seen through cover; a wall climb).
+
+All 65 moves after (the check prints these as `ABILITY` rows):
+
+| Hunter | Move | Ability | Cast | Hit | End |
+|---|---|---|---|---|---|
+| Lace | LMB | longbow | `pin_draw` | `archer_thread_twang`, `pin_loose`, `pin_arrow_hit`, `archer_hit` | - |
+| Lace | RMB | Heavy Shot | `pin_heavy_draw` | `pin_heavy`, `pin_heavy_burst`, `archer_hit`, `pin_heavy_hit` | - |
+| Lace | E | Hail Wall | `pin_hail` | `pin_rain`, `pin_patter`, `archer_hit` | - |
+| Lace | Shift | Spirit Walk | `archer_dash`, `pin_spirit` | - | `pin_spirit_end` |
+| Lace | R | Starpiercer | `pin_ult_beam`, `pin_ult_cast`, `archer_ult_cue` | `pin_super_hit`, `archer_hit` | - |
+| Cinder | LMB | flamethrower | `lw_pilot`, `lw_roar` | `ashwick_hit`, `ashwick_tank_hiss` | - |
+| Cinder | RMB | Cinder Shot | - | `lw_bolt`, `ashwick_hit`, `lw_bolt_hit`, `as_ignite` | - |
+| Cinder | E | Furnace Cloak | - | `lw_shield`, `ashwick_cloak_hit`, `ashwick_hit` | - |
+| Cinder | Shift | Soot Ram | `ashwick_dash`, `lw_bash` | `ashwick_hit`, `lw_bash_hit` | - |
+| Cinder | R | Flue Flight | `ashwick_dash`, `lw_jet`, `ashwick_ult_cue` | `lw_trail`, `ashwick_hit` | `lw_jet_land`, `as_ignite`, `lw_blaze` |
+| Albert | LMB | tower shield | `bjorn_spin` | `bulwark_dash`, `bjorn_slam`, `bulwark_hit` | - |
+| Albert | RMB | Aegis | `bjorn_shield_up`, `bulwark_hull_creak` | - | - |
+| Albert | E | Mending Ground | `bjorn_purify` | - | `bjorn_purify_burst` |
+| Albert | Shift | 360 Smash | `bulwark_dash`, `bjorn_spin`, `bjorn_whirl` | `bulwark_hit` | - |
+| Albert | R | Faultline | `bjorn_ult_wind`, `bulwark_ult_cue` | `bjorn_ult_slam`, `bjorn_ult_rumble`, `bulwark_hit`, `bjorn_ult_quake` | `bjorn_slam`, `bjorn_ult_crackle` |
+| Tenzo | LMB | rubble fists | `br_wind` | `dolm_rock_crunch`, `br_punch`, `dolm_hit` | - |
+| Tenzo | RMB | Quakefall | `dolm_rock_crunch` | `br_crack`, `br_leap`, `br_slam`, `dolm_hit` | - |
+| Tenzo | E | Stone Row | `br_crack`, `br_raise` | - | - |
+| Tenzo | Shift | Rock Hop | `br_rise`, `br_leap`, `br_slam` | `dolm_hit` | `br_launch`, `br_roll`, `br_burst` |
+| Tenzo | R | Basalt Spine | `dolm_ult_cue`, `br_crack` | `dolm_hit` | `br_slam` |
+| Grimble | LMB | shotgun | `dr_shot` | `dredge_hit` | - |
+| Grimble | RMB | Deep Reach | `dr_throw` | `dredge_hit`, `dr_grab`, `dr_reel` | `dredge_coin_jingle` |
+| Grimble | E | Anchor Drop | `dr_anchor_wind` | `dredge_hit`, `dr_anchor` | - |
+| Grimble | Shift | Barge | `dredge_dash`, `dr_barge`, `dredge_junk_clatter` | - | - |
+| Grimble | R | Brass Broadside | `dr_blast_charge`, `dredge_ult_cue` | `dr_blast`, `dredge_hit` | - |
+| Gil | LMB | swordfish | `gil_thrust` | `gil_thrust_hit` | `gil_dash`, `gil_surface` |
+| Gil | RMB | Grab Bag | `gil_toss` | `gil_pop_air`, `gil_recast_tick` | - |
+| Gil | E | Riptide | `gil_spin` | `gil_recast_tick`, `gil_spout` | - |
+| Gil | Shift | Ground Swim | `gil_dash` | `gil_surface` | - |
+| Gil | R | Tidal Wave | `gil_dash`, `gil_wave`, `gil_ult_cue` | - | `gil_wave_land` |
+| Vex | LMB | quill rifle | `vn_rifle` | `gunslinger_hit` | - |
+| Vex | RMB | Burr Charge | `gunslinger_grenade_thunk` | `vn_stim`, `gunslinger_hit`, `vn_blast` | - |
+| Vex | E | Longneedle | `vn_ion_charge` | `vn_ion_fire`, `vn_stim`, `gunslinger_hit` | - |
+| Vex | Shift | Slipstep | `gunslinger_dash`, `vn_slide` | - | - |
+| Vex | R | Cinderfall | `vn_nuke_fall`, `gunslinger_ult_cue`, `vn_nuke_fire` | `vn_nuke_boom`, `vn_nuke_burn`, `vn_stim` | `gunslinger_hit` |
+| Kael | LMB | greatsword | `jug_ting` | `jug_wave`, `juggernaut_blade_hiss`, `juggernaut_hit` | - |
+| Kael | RMB | Smash | `jug_ting`, `jug_charge` | `juggernaut_dash`, `juggernaut_hit`, `jug_lunge_hit` | - |
+| Kael | E | Warchain | `jug_chain`, `juggernaut_chain_rattle` | `juggernaut_hit`, `juggernaut_chain_bite`, `jug_taut` | - |
+| Kael | Shift | Rampage | `jug_charge`, `juggernaut_dash` | `juggernaut_hit` | - |
+| Kael | R | Gilded Riposte | `jug_guard`, `juggernaut_ult_cue` | `juggernaut_dash`, `jug_riposte`, `juggernaut_heal` | - |
+| Sparkle | LMB | coilcaster | `vv_bolt` | `mage_zap`, `mage_hit` | - |
+| Sparkle | RMB | Storm Rod | `vv_rod_summon` | `vv_rod_throw`, `mage_hit`, `mage_zap`, `mage_rod_hit`, `vv_orb` | - |
+| Sparkle | E | Skycall | `vv_sky_place`, `vv_sky_count` | `vv_sky_strike`, `mage_hit`, `mage_zap` | - |
+| Sparkle | Shift | Wirerun | `vv_surge_charge`, `mage_dash`, `vv_surge_go` | `mage_hit` | `mage_bubble_pop` |
+| Sparkle | R | Kitefall | `vv_ult_charge`, `mage_ult_cue`, `vv_ult_rise` | `vv_ult_hum`, `vv_ult_crack`, `vv_ult_slam`, `mage_hit`, `mage_zap` | - |
+| Motley | LMB | tether lantern | `os_orb_hot` | `ostra_hit` | `os_prime` |
+| Motley | RMB | Shard Snap | `os_snap_wind`, `os_snap` | `os_snap_hit`, `ostra_hit` | - |
+| Motley | E | Brimseed | `os_seed` | - | `ostra_music_box` |
+| Motley | Shift | Lantern Trade | `os_swap_lob` | - | `os_swap` |
+| Motley | R | Nightwell | `os_well`, `ostra_ult_cue` | `os_well_hum`, `ostra_hit` | - |
+| Neve | LMB | hoar fan | `rime_shard` | `rimewright_hit` | - |
+| Neve | RMB | Ice Spear | `rime_spear_aim` | `rime_lance`, `rime_zone`, `rimewright_chime`, `rimewright_hit` | `rime_burst`, `rime_splinter` |
+| Neve | E | Rink Wall | `rime_wall_tell`, `rime_wall` | `rimewright_hit` | - |
+| Neve | Shift | Skate | `rimewright_dash`, `rimewright_skate_glide`, `rimewright_skate_scrape`, `rime_stop`, `rimewright_skate_hiss` | - | - |
+| Neve | R | Rimelock | `rime_lock`, `rimewright_ult_cue` | `rime_creak`, `rimewright_hit`, `rime_crash` | - |
+| Meeko | LMB | lantern crook | `tend_ember` | `tender_hit` | - |
+| Meeko | RMB | Burrseed | `tend_seed_aim` | `tend_seed`, `tend_stick`, `tender_hit` | `tend_root` |
+| Meeko | E | Hearthlight | `tend_hearth`, `tender_lantern_chime` | - | `tend_flare` |
+| Meeko | Shift | Relay Step | `tender_dash`, `tend_hop` | - | - |
+| Meeko | R | Hearth Call | `tend_call_loop`, `tend_call`, `tender_ult_cue` | - | `tend_arrive`, `tender_cheer` |
+| Sable | LMB | arc bolts | `dj_bolt` | `thief_hit` | - |
+| Sable | RMB | Bola | `dj_bola_whirl` | `dj_bola_throw`, `thief_hit`, `dj_bola_wrap` | - |
+| Sable | E | Shadow Knife | `dj_knife_throw` | `thief_hit`, `thief_knife_stick` | - |
+| Sable | Shift | Vault | `thief_dash` | - | `thief_cock` |
+| Sable | R | Encore | `dj_encore`, `dj_encore_rise`, `thief_ult_cue` | `dj_blade`, `dj_encore_whirr`, `thief_hit`, `dj_encore_hit` | - |
 
 ## Silence audit (`--sfx-silence-audit`)
 Which game events play nothing, or only a shared cue? `Sfx.cue_log` (null = off, nothing runs in a shipped game) records every `play()` / `loop_start()` as `[name, pos, found]`. The check `tools/sfx_silence_audit.gd` runs a seeded 10-trio bot match headless (seed 31, 150 s, `--audit-secs=`, `--audit-seed=`, `--audit-out=<tsv>`, `--audit-arch=<id>`, `--audit-throw`), picks events up from `CombatBus` (hit, cast, status, Boki throw/recall) and by polling state (knock, out, level, pickup, recast window open/close, exit step, Boki state, extract), and pairs each with the cues played within 6 m in its own or the next step. It prints the events ranked by `none` (no cue) plus `shared` (only generic names no `content/sfx` set owns), and every cue asked for that has no file (`MISSING`). Caveats: the pairing is by place and time, so `shared` can include a neighbour's cue (`none` is solid); a cue culled by distance still counts (this is wiring, not hearing range); `[you]` is only the autoplay player's own Hunter, so rows mostly read `[other]`. An event with every place more than `Juice.FAR` (24 m) from the player reads `[far]` (for a hit, its target: `Juice.hit` draws and plays nothing that far, by design) and is ranked last; `SILENCE TOTAL` gives the none / none + shared sums within and beyond 24 m. A Boki event's places are its owner and the Boki (its cues play at the Boki). The models are not processed in this hand-stepped match, so a cue placed on a model anchor (Lace's Heavy Shot from the bow's mouth) can lag metres off; a Lace cast therefore counts the bow anchor as part of its place, and the check also proves the release by a direct probe. Settled 11-22 (`ext/sfx-lace-heavy-release`): the 3 silent Heavy Shot rows were the audit's pairing, not a missing cue (`ArcherKit._pin` is the only release path and calls `heavy_go` before any distance or LOD check); `--audit-arch=archer` now reads `cast secondary archer_rmb` 0 none (7 releases, every one `pin_heavy` + `pin_heavy_burst`).
@@ -699,3 +798,5 @@ All match sounds go through `Sfx._distance_db`; the numbers live in one place at
 | 31 | silent | silent |
 
 `--sfx-set-check` section 10 asserts it: a cue at the screen edge is above -12 dB on the clear bus, one 10 m past it is at least 4 dB quieter but present, one at 31 m is silent.
+
+- Boki wisp cues (Boki wisps setting): a carried passive acting (heal, shield soak, damage bonus on a shot, run boost) gives one quiet chirp from the wisp in its species' voice (`KinWispProc`: your wisp -20 dB, a rival's -26 dB before distance, ducked 8 dB under an ability cast, at most one per 0.8 s per wisp, small bodies pitched higher); `--wisp-proc-check`. The summon's end gives two soft rising notes of the same voice 2 s before the window ends (`KinSummon.warn`, yours -8 dB in the ear, others -20 dB positional) and the summon coming back plays `ab_ready` at -4 dB; `--summon-end-sfx-check`. A killed summon and a wisp breaking loose say `boki_downed` (-4 dB) where they fell; `--summon-death-check`.
