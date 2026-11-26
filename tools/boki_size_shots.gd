@@ -50,7 +50,13 @@ func run(main_node: Node) -> void:
 	out["rows"].append(_row(HeroTitle.base_name(String(P.arch)), P, cam, 0.0))
 	for k in ks:
 		out["rows"].append(
-			_row(KinLib.kin(String(k.species)).display_name, k, cam, float(Unique.base_size(k.species)["cm"]))
+			_row(
+				KinLib.kin(String(k.species)).display_name,
+				k,
+				cam,
+				float(Unique.base_size(k.species)["cm"]),
+				String(k.species)
+			)
 		)
 	var nodes: Array = [P] + ks
 	var eye_feet: Array = await _eye_level(Vector3(home.x + GAP * 2.0, home.y, home.z), nodes)
