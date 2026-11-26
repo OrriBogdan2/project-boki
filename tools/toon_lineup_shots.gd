@@ -3,6 +3,7 @@ extends "res://tools/vv_shots.gd"
 ## draws, one after another on the same spot under the same light at the match camera, in a real match
 ## --ab=<species>:<atlas png/webp> adds that species again, right after itself, with the given coat atlas (an old one):
 ## a before/after in the same run and frame, row id <species>_ab (separate runs drift by up to 0.09 luminance).
+## --turn=<deg> turns every model about its up axis (90: its side to the camera, where a baked top light shows most).
 ## (jobq submit --needs gpu). Writes <dir>/lineup_<id>.png (crop round the model), <dir>/lineup_sheet.png (all of
 ## them, labelled, darkest rendered model first) and <dir>/lineup_stats.tsv (rendered luminance of the model's own
 ## pixels, from the shot minus the empty spot). Pairs with --toon-consistency-check, which judges the materials.
@@ -15,6 +16,7 @@ var zoom := 2.5
 var ids: Array = []
 var world: Node3D  # what the models are added to: the match, or the farm
 var ab := PackedStringArray()  # --ab: [species, atlas path]
+var turn := 0.0  # --turn, degrees
 
 
 func run(main_node: Node) -> void:
@@ -28,6 +30,8 @@ func run(main_node: Node) -> void:
 			dir = arg.substr(12)
 		if arg.begins_with("--species="):
 			boki = Array(arg.substr(10).split(","))
+		if arg.begins_with("--turn="):
+			turn = float(arg.substr(7))
 		if arg.begins_with("--ab="):
 			ab = arg.substr(5).split(":", true, 1)
 		if arg.begins_with("--arch="):
@@ -95,6 +99,7 @@ func _spawn(row: Array, at: Vector3) -> Node3D:
 		var look := PlayerLook.neutral()
 		node = Models.hunter(Arch.weight(arch), Data.TEAM_COLORS[0], Arch.signature(arch), "", look, arch)
 	node.position = at
+	node.rotation.y = deg_to_rad(turn)
 	world.add_child(node)
 	return node
 
