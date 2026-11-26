@@ -4,14 +4,17 @@ class_name Care
 ## Everything lives on the kin's save record, so it travels into matches and to other players.
 
 const NEEDS := ["food", "energy", "joy", "clean"]
+
 const NEED_INFO := {
 	"food": {"name": "Full", "col": Color("f2a24a")},
 	"energy": {"name": "Energy", "col": Color("8fd0ff")},
 	"joy": {"name": "Happy", "col": Color("ff8fb0")},
 	"clean": {"name": "Clean", "col": Color("8fe3c8")},
 }
+
 ## How fast each need drops at home, per minute. Sleeping refills energy instead.
 const DECAY := {"food": 1.5, "energy": 0.7, "joy": 0.6, "clean": 0.45}
+
 ## What an expedition takes out of the kin that went.
 const MATCH_COST := {"food": -26.0, "energy": -34.0, "clean": -30.0}
 
@@ -27,11 +30,14 @@ const STARVE_INFO := {
 	"refuse": ["Very weak from hunger", "No expedition on an empty belly. One meal and it comes along."],
 	"sick": ["Sick from hunger", "Sick and drooping. Feed it, nap, keep a friend close; one Puffcorn snack cures it."],
 }
+
 ## Getting better, in starve-seconds undone per second while it is fed (food over 20): a meal's worth,
 ## plus a nap (asleep, indoors or in bed) and a friend close by. A snack crop (Data.CROPS use "snack")
 ## given to a weak or sick kin cures it at once.
 const RECOVER_FED := 6.0
+
 const RECOVER_NAP := 4.0
+
 const RECOVER_FRIEND := 2.0
 
 const STATS := {
@@ -75,7 +81,9 @@ const STATS := {
 ## is small and capped (IV_BONUS at 31, linear from 0), so a flawless kin is only a little ahead of
 ## a plain one: everything that reads them goes through iv_mult().
 const IV_MAX := 31
+
 const IV_KEYS := ["hp", "atk", "spd", "work", "bond"]
+
 const IVS := {
 	"hp": {"name": "Health", "col": Color("8fe39a"), "desc": "health in a match"},
 	"atk": {"name": "Power", "col": Color("ff7a5a"), "desc": "damage in a match"},
@@ -83,17 +91,23 @@ const IVS := {
 	"work": {"name": "Work", "col": Color("f2c84a"), "desc": "how fast it does farm jobs"},
 	"bond": {"name": "Bond", "col": Color("ffb3c6"), "desc": "how fast it fills your bond meter"},
 }
+
 ## The most a stat can gain, at 31 (0 adds nothing). Speed is held lower: a step ahead in a chase
 ## matters more than a little extra health.
 const IV_BONUS := {"hp": 0.10, "atk": 0.10, "spd": 0.05, "work": 0.10, "bond": 0.10}
+
 ## Stats a bred kin takes from a parent (each from a random one of the two); the rest are fresh.
 ## IV_INHERIT_MAX is the ceiling for a future nest upgrade or rare item (Care.breed's inherit_n):
 ## nothing in the game raises it yet.
 const IV_INHERIT := 3
+
 const IV_INHERIT_MAX := 5
+
 ## Rare Eggs from boss lairs: this many stats are always at least IV_RARE_FLOOR.
 const IV_RARE_HIGH := 3
+
 const IV_RARE_FLOOR := 26
+
 const IV_EXPLAIN := "IVs: born-with stats from 0 to 31, passed on to eggs."
 
 const BONDS := [
@@ -142,6 +156,21 @@ const STALL_FOODS := {
 	"chimebun":
 	{"name": "Chime bun", "col": Color("f0a040"), "food": 16.0, "joy": 8.0, "price": 16, "desc": "A bun that hums."},
 }
+
+const LEAN_HEAD_START := 0.5  # share of the stronger parent's lean a hatchling starts with
+
+const PLAYS := ["fetch", "brush", "bath", "chat", "pet"]
+
+## Play is practice: a finished game of fetch trains this stat by one point, as long as the Boki has
+## the energy (PLAY_TRAIN_ENERGY, the same line under which the Training post drill teaches less).
+const PLAY_TRAINS := {"fetch": "speed"}
+
+const PLAY_TRAIN_ENERGY := 35.0
+
+const PLAY_NAMES := {
+	"fetch": "playing fetch", "brush": "being brushed", "bath": "baths", "chat": "chatting", "pet": "scratches"
+}
+
 ## Every prepared food: the stall's plus the type snacks of content/rules/snacks.json (coloured by their type's tint).
 static var foods_v: Dictionary = _foods()
 
@@ -160,17 +189,6 @@ static func _foods() -> Dictionary:
 			"col": Color(String(Content.rules("lean")["types"][f["type"]]["tint"]))
 		}
 	return all
-
-
-const LEAN_HEAD_START := 0.5  # share of the stronger parent's lean a hatchling starts with
-const PLAYS := ["fetch", "brush", "bath", "chat", "pet"]
-## Play is practice: a finished game of fetch trains this stat by one point, as long as the Boki has
-## the energy (PLAY_TRAIN_ENERGY, the same line under which the Training post drill teaches less).
-const PLAY_TRAINS := {"fetch": "speed"}
-const PLAY_TRAIN_ENERGY := 35.0
-const PLAY_NAMES := {
-	"fetch": "playing fetch", "brush": "being brushed", "bath": "baths", "chat": "chatting", "pet": "scratches"
-}
 
 
 ## Fills in anything an older record is missing. Likes come from the kin's id, so they're fixed.
@@ -686,14 +704,14 @@ static func trust_add(rec: Dictionary, amount: float, now_s: float) -> float:
 static func trust_taper(rec: Dictionary, now_s: float) -> float:
 	if float(rec.get("trust", 0.0)) >= 100.0:
 		return 1.0
-	var T: Dictionary = Content.rules("garden_trust")["taper"]
+	var t: Dictionary = Content.rules("garden_trust")["taper"]
 	var w: Dictionary = rec.get_or_add("trust_acts", {"t0": now_s, "n": 0})
 	if now_s - float(w["t0"]) >= float(Content.rules("care")["care_day_s"]) or now_s < float(w["t0"]):
 		w["t0"] = now_s
 		w["n"] = 0
-	var over := int(w["n"]) - int(T["free"])
+	var over := int(w["n"]) - int(t["free"])
 	w["n"] = int(w["n"]) + 1
-	return 1.0 if over < 0 else maxf(float(T["floor"]), 1.0 - float(T["step"]) * float(over + 1))
+	return 1.0 if over < 0 else maxf(float(t["floor"]), 1.0 - float(t["step"]) * float(over + 1))
 
 
 # ------------------------------------------------------------------ IVs
