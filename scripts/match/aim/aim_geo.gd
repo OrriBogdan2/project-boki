@@ -16,6 +16,7 @@ var base_y := 0.0
 # The ground points of every ring and sector the last rebuild drew, by shape: a telegraph that holds still keeps its
 # points while only its colours move, so a repeat copies them in one call instead of looking each one up again (the
 # same vertices, the same colour formulas). Dropped whenever the ground changes (ground_key).
+static var keep_points := true  # (off only for tools/perf/aim_ab.gd: the cost without the kept points)
 var _pts_last := {}
 var _pts_now := {}
 var _ground := 0
@@ -164,7 +165,7 @@ func ring(ctr: Vector2, r: float, w: float, col: Color, a0 := 0.0, a1 := TAU, co
 		col_in = col
 	var segs := clampi(int(r * absf(a1 - a0) / 0.4), 10, 64)
 	var key := [1, ctr, r, w, a0, a1, base_y]
-	if _pts_last.has(key):
+	if keep_points and _pts_last.has(key):
 		var pts: PackedVector3Array = _pts_last[key]
 		v.append_array(pts)
 		_repeat(PackedColorArray([col_in, col, col, col_in, col, col_in]), segs)
@@ -184,7 +185,8 @@ func ring(ctr: Vector2, r: float, w: float, col: Color, a0 := 0.0, a1 := TAU, co
 		_quad3(pi0, pi1, po1, po0, col_in, col)
 		pi0 = pi1
 		po0 = po1
-	_pts_now[key] = v.slice(n0)
+	if keep_points:
+		_pts_now[key] = v.slice(n0)
 
 
 ## A filled annulus sector between radii r0 and r1, angles a0..a1 (discs, cones, wall bands).
@@ -194,7 +196,7 @@ func sector(ctr: Vector2, r0: float, r1: float, a0: float, a1: float, c0: Color,
 	var segs := clampi(int(r1 * absf(a1 - a0) / 0.5), 8, 48)
 	var rings := maxi(1, int(ceil((r1 - r0) / (STEP * 1.5))))
 	var key := [0, ctr, r0, r1, a0, a1, base_y]
-	if _pts_last.has(key):
+	if keep_points and _pts_last.has(key):
 		var pts: PackedVector3Array = _pts_last[key]
 		v.append_array(pts)
 		for j in rings:
@@ -241,7 +243,8 @@ func sector(ctr: Vector2, r0: float, r1: float, a0: float, a1: float, c0: Color,
 		var row := inner
 		inner = outer
 		outer = row
-	_pts_now[key] = v.slice(n0)
+	if keep_points:
+		_pts_now[key] = v.slice(n0)
 
 
 func disc(ctr: Vector2, r: float, col: Color, col_edge := Color(0, 0, 0, -1)) -> void:
