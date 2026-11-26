@@ -13,7 +13,10 @@ const STONE_SIDE := Vector3(0.5, 0.0, 0.866)
 const HUNTER_ARCH := "ostra"  # Motley's archetype (WardenGlb.ART): the best in-game model, on its v95 glb
 const HUNTER_CLASS := "medium"
 ## (m right, m ahead) of the Hunter's landing where the staged Boki stand
-const STAGE_AT := [Vector2(-1.4, 2.3), Vector2(1.7, 3.0), Vector2(-0.3, 4.2)]
+## (far enough apart that the Hunter walks, not stands, for most of a take)
+const STAGE_AT := [Vector2(-2.0, 3.6), Vector2(2.4, 5.6), Vector2(-0.8, 7.6)]
+const STOP_M := 2.2  # m the Hunter stops short of a Boki (big Boki like Frigatee overlapped at 1.5)
+const PATH_GAP := 2.2  # m: a prop this close to the Hunter's walk (landing -> Boki 0 -> 1 -> 2) is out of the film
 const ZONES := ["glasswater", "cinderstep", "hushwood", "ridge"]
 const ZONE_OF_SHOT := {12: "glasswater", 13: "cinderstep", 14: "hushwood", 15: "ridge"}
 ## species, name, the lean type the zone loves
@@ -32,6 +35,7 @@ var rig
 var h: Node = null  # the Home on screen now (it is a new one after every hop)
 var keep_say := false  # shot 17 keeps the Boki's bubble
 var _pins: Array = []  # [kin record, where it stands]: a staged Boki is held there for the whole take (no wandering off, no errand)
+var _cleared: Array = []  # props hidden off the Hunter's walk (kept hidden every frame)
 var _show: Array = []  # the Boki nodes that are in the film (all the others are hidden)
 var _cuts := 0  # hops filmed so far this take
 var _frames := 0  # frames this take has run (Engine.get_frames_drawn stays 0 headless)
@@ -106,9 +110,8 @@ func hop_take(zone: String) -> void:
 	rig.mark("arrived")
 	await _wait(0.6)
 	for n in 3:
-		await _walk(_boki_at(n), 1.9)
-		await _wait(0.6)
-	await _wait(1.5)
+		await _walk(_boki_at(n), STOP_M)
+		await _wait(0.35)
 
 
 ## Shots 12-15: the Hunter lands in the zone and walks up to its Boki, one after the other, while the view turns.
@@ -118,11 +121,11 @@ func zone_take(zone: String) -> void:
 	rig.mark(zone)
 	var t0 := _frames
 	_orbit_start(0.9, ZONE_TAKE_S - 1.0)
-	for n in 3:
-		await _walk(_boki_at(n), 1.9)
-		await _wait(0.7)
-	while _frames - t0 < int(ZONE_TAKE_S * FPS):
-		await _wait(0.5)
+	var n := 0
+	while _frames - t0 < int(ZONE_TAKE_S * FPS):  # Boki to Boki and round again: the Hunter is walking nearly all take
+		await _walk(_boki_at(n % 3), STOP_M)
+		await _wait(0.35)
+		n += 1
 
 
 ## Shot 16: hub -> zone -> hub -> zone, each hop the moment you arrive (the wipes are cut out by the encoder).
@@ -260,6 +263,7 @@ func _clear_of_props(at: Vector3) -> Vector3:
 func _stage() -> void:
 	_show.clear()
 	_pins.clear()
+	_cleared.clear()
 	var zone := GardenZones.current()
 	var awake: Array = h.kins.filter(func(k): return not k.has("indoors"))
 	var mine: Array = awake.filter(func(k): return GardenZones.zone_of(k["rec"]) == zone)
@@ -283,6 +287,45 @@ func _stage() -> void:
 		(k["node"] as Node3D).position = at
 		_show.append(k["node"])
 		_pins.append([k, at])
+	_clear_path(h.ppos, placed)
+
+
+## Hides every prop within PATH_GAP of the Hunter's walk, so it never stops beside a crate or target.
+func _clear_path(start: Vector3, stops: Array) -> void:
+	var legs: Array = []
+	var prev := start
+	for p in stops:
+		legs.append([prev, p])
+		prev = p
+	if stops.size() > 1:
+		legs.append([prev, stops[0]])
+	var kin_nodes: Array = []
+	for k in h.kins:
+		kin_nodes.append(k["node"])
+	for n in h.get_children():
+		var n3 := n as Node3D
+		if n3 == null or not n3.visible or n3 == h.player or n3 in kin_nodes or n3.get_script() != null:
+			continue
+		var meshes: Array = n3.find_children("*", "MeshInstance3D", true, false)
+		if n3 is MeshInstance3D:
+			meshes.append(n3)
+		if meshes.is_empty() or n3 == h.get("world") or n3.name == ZoneAir.NAME:
+			continue
+		var big := false  # ground, cliffs and ponds stay; props and lone trees on the walk go (Motley walked through a trunk)
+		for m in meshes:
+			var sz: Vector3 = (m as MeshInstance3D).get_aabb().size * (m as Node3D).global_transform.basis.get_scale()
+			big = big or maxf(sz.x, sz.z) > 4.5 or sz.y > 7.0
+		if big:
+			continue
+		var q := Vector2(n3.position.x, n3.position.z)
+		for leg in legs:
+			var a := Vector2(leg[0].x, leg[0].z)
+			var b := Vector2(leg[1].x, leg[1].z)
+			if Geometry2D.get_closest_point_to_segment(q, a, b).distance_to(q) < PATH_GAP:
+				print("PITCH path-clear hide %s at %s" % [n3.name, n3.position])
+				n3.visible = false
+				_cleared.append(n3)
+				break
 
 
 ## The staged Boki's spot `n` (where it stands now).
@@ -324,8 +367,11 @@ func _pre_draw() -> void:
 		_hide_marks(c)
 		for pin in _pins:
 			var k: Dictionary = pin[0]
-			var node := k["node"] as Node3D
-			if is_instance_valid(node):
+			var nv: Variant = k["node"]
+			if not is_instance_valid(nv):  # (the Home of a finished hop is freed: its Boki with it)
+				continue
+			var node := nv as Node3D
+			if true:
 				if node.position.distance_to(pin[1]) > 0.4:
 					print("PITCH pin drift %s %.1f m" % [k["rec"]["name"], node.position.distance_to(pin[1])])
 				node.position = pin[1]
@@ -397,6 +443,9 @@ func _hide_marks(c: Node) -> void:
 				(v as Node3D).visible = false
 	for k in c.kins:
 		(k["node"] as Node3D).visible = _show.is_empty() or (k["node"] in _show)
+	for n3 in _cleared:
+		if is_instance_valid(n3):
+			(n3 as Node3D).visible = false
 	for l in c.find_children("*", "Label3D", true, false):
 		var t: String = (l as Label3D).text
 		if not (keep_say and t.length() > 16):
