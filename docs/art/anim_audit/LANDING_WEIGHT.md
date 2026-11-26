@@ -100,4 +100,6 @@ The median is lower than the 0.110 / 0.192 this page quotes for 11-11: Tender an
 or no run dip, so her old clip already cleared the bar on main when this branch started. The deeper absorb makes the
 heavy read as one rather than clearing it by a hair. `JL_HEAVY_OPEN` no longer lists her. This is the contract clip
 (`WardenNative.contract_only`; what `--clip-check` and `--jump-land-shots` play). The Meshy-native Cinder in a match
-lands with Meshy's own pose plus the Hips squash (`--land-weight-check`, unchanged).
+lands with Meshy's own pose plus the Hips squash at the heavy class's depth and seconds (`--land-weight-check` native rows, unchanged): no Meshy-native Hunter has a `land` clip slot (content/rules/warden_native.json).
+
+Before/after at the match camera (`--jump-land-shots --wardens=ashwick --way=drop`; before = main 4cd06e75a with only this branch's one-line contract_only fix, which main's run needs to not crash on a native Hunter): `/home/boki/gens/cinder-land-weight/cinder_drop_before_after{,_zoom}.mp4` (half speed; the deeper crouch is a few pixels at 23 m out, clearer in the 3x crop).
