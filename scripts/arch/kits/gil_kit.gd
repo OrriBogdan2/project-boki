@@ -8,6 +8,7 @@ extends ArchKit
 ## potion effects on one foe inside 5s Beach them. Every number lives in the JSON.
 
 const TELE_A := 1.3                  # his telegraphs are areas foes dodge: a touch stronger than an aim line
+const SOFT_A := 1.2                  # soft lanes: inside alpha 0.1 or less (zone rule)
 const TELE_LW := 0.1                 # m, their rim
 const THRUSTS := ["gil_thrust_1", "gil_thrust_2", "gil_lunge"]   # KMovesGil, one per chain step
 const BUFFER := 0.2             # s a click during a thrust's recovery waits to thrust next
@@ -143,7 +144,8 @@ func _tide_tick(dt: float) -> void:
 	var td: Dictionary = lmb_def()["tide"]
 	var reach := float(td["reach"])
 	AimKit.lane(h, "lmb", {"len": float(td["dist"][1]) + reach, "len0": float(td["dist"][0]) + reach,
-			"width": float(td["w"]), "k": k, "fill": k, "col": col_of(lmb_def()), "col_full": res_col()})
+			"width": float(td["w"]), "k": k, "fill": k, "col": col_of(lmb_def()), "col_full": res_col(),
+			"soft": true})
 	AimKit.charge(h, k, {"col": col_of(lmb_def()), "col2": res_col()})
 	HeroVfx.of(m).hold(h, "tide_charge", k)
 	if k >= 1.0 and was < 1.0:
@@ -305,8 +307,8 @@ func _mark(f: Ent, mk: String, col: Color) -> void:
 		m.fx.word(f.pos + Vector3(0, 2.2, 0), "%d/%d" % [mini(n, 3), int(pd.get("need", 3))], col)
 		vfx("mark", f.pos)
 
-## The splash marks on `f`, for the ComboMark tag: a pip per different mark (three Beach it); the ring is the
-## time the oldest mark has left (when it runs out the count drops).
+## The splash marks on `f`, for the status row (HudPlate.row): a pip per different mark (three Beach it); the ring is
+## the time the oldest mark has left (when it runs out the count drops).
 func combo_read(f: Ent) -> Dictionary:
 	var pd: Dictionary = d.get("passive", {})
 	var win := float(pd.get("window", 5.0))
@@ -436,7 +438,7 @@ func _tick_lines(list: Array, dt: float) -> void:
 	for s in list.duplicate():
 		var fill := 1.0 - float(s["left"]) / float(s["len"]) if s["ab"] != "ult" else -1.0
 		AimKit.lane(h, s["id"], {"from": s["from"], "dir": s["dir"], "len": s["len"], "width": s["w"], "col": s["col"],
-			"fill": fill, "all": true, "alpha": TELE_A, "lw": TELE_LW})
+			"fill": fill, "all": true, "alpha": SOFT_A, "lw": TELE_LW, "soft": true})
 		var step := float(s["spd"]) * dt
 		s["p"] = (s["p"] as Vector2) + (s["dir"] as Vector2) * step
 		s["left"] = float(s["left"]) - step

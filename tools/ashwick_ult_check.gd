@@ -175,8 +175,8 @@ func _flight() -> void:
 	ok("ult bond: nothing for a cast that lands on nobody", _owed(P) == 0.0, "owed %.2f" % _owed(P))
 	HunterKeys.ult_pressed(P)
 	ok("ult: the cooldown denies a new flight", not J.running() and J.flights == 2, "cd %.1f" % float(K.cd["x"]))
-	await _steer(m, P, K, home)
-	await _move_feel(m, P, K, home)
+	_steer(m, P, K, home)
+	_move_feel(m, P, K, home)
 	await ak.done(m)
 
 ## Steering: the flight follows the cursor at no more than turn_deg a second, so the carpet curves.
@@ -246,7 +246,7 @@ func _move_feel(m: Match, P: Hunter, K: AshwickKit, home: Vector3) -> void:
 	P.inp["move"] = Vector2.ZERO
 	ok("ult end: the first step after it is free (Shift dashes)", P.roll_t > 0.0 and not J.running())
 	ak.step(m, 0.6)
-	await _ledge_and_void(m, P, K, home, m.world)
+	_ledge_and_void(m, P, K, home, m.world)
 
 func _ledge_and_void(m: Match, P: Hunter, K: AshwickKit, home: Vector3, W) -> void:
 	var J := K.jet
@@ -356,7 +356,7 @@ func _carpet() -> void:
 	var used0: int = K.cloaks
 	P.ak.use_e()
 	ok("ult: E (Furnace Cloak) still works mid-flight, the flight goes on", K.cloaks == used0 + 1 and J.running())
-	await _locked_inputs(m, P, K, home + Vector3(16, 0, 0))
+	_locked_inputs(m, P, K, home + Vector3(16, 0, 0))
 	var card := String(K.x_def()["desc"])
 	ok("ult card: only the Furnace Cloak works in the flight",
 		card.contains("only the Furnace Cloak works") and not card.contains("Shift) speeds"))
@@ -384,9 +384,9 @@ func _carpet() -> void:
 		"ult payoff: standing in it, Ablaze after about 2.4s", at_14 == 0 and K.burning(T) >= 1,
 		"at 1.4s %d, at 2.6s %d" % [at_14, K.burning(T)]
 	)
-	await _lance_off(m, P, K, T, home)
-	await _abyss(m, P, K, home, m.world)
-	await _knock_stun_merge(m, P, K, home)
+	_lance_off(m, P, K, T, home)
+	_abyss(m, P, K, home, m.world)
+	_knock_stun_merge(m, P, K, home)
 	await ak.done(m)
 
 ## The carpet never forms over the abyss; he flies on over it.
@@ -430,7 +430,7 @@ func _knock_stun_merge(m: Match, P: Hunter, K: AshwickKit, home: Vector3) -> voi
 		"speed %.1f -> %.1f" % [sp0, float(J.flight.get("speed", 0.0))]
 	)
 	ak.step(m, 1.8)
-	await _shift_and_jump(m, P, K, home)
+	_shift_and_jump(m, P, K, home)
 	P.teleport(home)
 	_cast(P, home + Vector3(16, 0, 0))
 	ak.step(m, 0.3)
@@ -649,7 +649,8 @@ func _locked_inputs(m: Match, P: Hunter, K: AshwickKit, at: Vector3) -> void:
 	var hp0 := P.hp
 	var pos_y := P.pos.y
 	var l0 := J.locked
-	var keys := ["sec", "dash", "util1", "util2", "util3", "util4", "gear1", "gear2", "kin_ab", "skill", "throw"]
+	var keys := ["sec", "dash", "util1", "util2", "util3", "util4", "util5", "util6", "gear1", "gear2", "kin_ab",
+		"skill", "throw"]
 	for key in keys:
 		ak.step(m, 0.05, func():
 			P.inp[key] = true

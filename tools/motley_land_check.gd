@@ -57,7 +57,7 @@ func _map(id: String) -> void:
 			o["map"] = id
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(o)
+	m.start(o)
 	m.set_process(false)
 	wd = m.world
 	rng.seed = 1111

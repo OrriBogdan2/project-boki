@@ -84,14 +84,14 @@ func _list() -> void:
 	Save.d["tutorial"] = Save.fresh()["tutorial"]      # (a fresh save's list, with two Boki: the pair lines show)
 	var rows := GoalTracker.lines()
 	var texts: Array = (GardenFirstDay.rules()["rows"] as Array).map(func(r): return String(r["text"]))
-	ok(rows.size() == 5 and rows.map(func(r): return r["text"]) == texts,
-			"the tracker leads with the five lines, in order")
+	ok(rows.size() == 3 and rows.map(func(r): return r["text"]) == texts.slice(0, 3),
+			"the tracker leads with the first three lines, in order (the card shows at most three)")
 	ok(rows.all(func(r): return r["source"] == "first_day" and int(r["need"]) == 1),
 			"one line each, none of them a tutorial step")
 	GardenFirstDay.mark("toy")
 	rows = GoalTracker.lines()
-	ok(int(rows[-1]["have"]) == 1 and rows[-1]["text"] == texts[1] and rows[0]["text"] == texts[0],
-			"a ticked line drops to the end")
+	ok(rows.map(func(r): return r["text"]) == [texts[0], texts[2], texts[3]],
+			"a ticked line drops out of the first three, to the end of the list")
 	GardenFirstDay.mark("toy")
 	GardenFirstDay.mark("bogus")
 	var gems0 := int(Save.d["gems"])
@@ -123,7 +123,12 @@ func _pair_after_grown() -> void:
 	Save.d["roster"][0]["level"] = NookRules.GROWN_LV
 	ok(pair_shown.call() and GardenFirstDay.rows().size() == 5,
 			"a Grown Boki (level %d): the 'pair' line shows" % NookRules.GROWN_LV)
-	ok(GoalTracker.lines().any(func(r): return r["text"] == _pair_text()), "and the tracker lists it")
+	var cap_was: int = GoalTracker.cfg()["max"]
+	# the card shows three: the pair line is the fifth open line, read off the whole list
+	GoalTracker.cfg()["max"] = 99
+	var listed := GoalTracker.lines().any(func(r): return r["text"] == _pair_text())
+	GoalTracker.cfg()["max"] = cap_was
+	ok(listed, "and the tracker lists it")
 
 ## DECISIONS 2026-11-11: a player with few gems can always adopt. Three of the five first-day lines need a second Boki,
 ## so a one-Boki base_mode save must be able to adopt a stray from the Shelter on day one (stall level 1).
@@ -150,7 +155,11 @@ func _second_boki() -> void:
 	var r := Shelter.adopt(cid)
 	ok(bool(r["ok"]) and Save.d["roster"].size() == 2,
 			"second Boki: adopting the stray gives a second Boki (%s)" % str(r["why"]))
-	ok(GoalTracker.lines().filter(func(l): return l["source"] == "first_day").size() >= 4,
+	var cap_was: int = GoalTracker.cfg()["max"]
+	GoalTracker.cfg()["max"] = 99      # (the card shows three: count the whole first-day list, not the card)
+	var first_day_lines: int = GoalTracker.lines().filter(func(l): return l["source"] == "first_day").size()
+	GoalTracker.cfg()["max"] = cap_was
+	ok(first_day_lines >= 4,
 			"second Boki: the first-day list is still on and now holds the lines that need company")
 	rules["base_mode"] = false
 	ok(Shelter.open_level() == 2, "second Boki: off base_mode the Shelter opens at stall level 2")
@@ -204,7 +213,7 @@ func _bot() -> void:
 		if i % 200 == 0:
 			await main.get_tree().process_frame
 	ok(GardenFirstDay.did("toy"), "bot: a Boki playing at the toy ticks 'toy'")
-	await _race(home)
+	_race(home)
 	_nap(home, a, b)
 	home._make_egg(a["rec"], b["rec"])
 	ok(GardenFirstDay.did("pair"), "bot: pairing two Boki ticks 'pair'")

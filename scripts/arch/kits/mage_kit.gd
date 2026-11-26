@@ -18,7 +18,6 @@ const PINK_WHITE := Color("ffc4ea")   # the lightning body: pink-white (DECISION
 const FINGER_SIDE := 0.11            # m: where a pointing fingertip is at the release: off her centre...
 const FINGER_AHEAD := 0.3            # ... and ahead of where a round starts
 const MARK_LIFT := 0.5               # m the Static marker sits above the HP bar
-const TAG_LIFT := 30.0               # px the overhead combo tag (ComboMark) moves up to clear the Static marker
 const RMB_KEY := 0.06               # s into the rmb clip: the throw (tools/art1/ryzz_clips.py)
 const ECHO_GAP := 0.045              # s between her after-images on the Wirerun and the air dash
 const STATIC_GAP := 0.35             # s between the Static sparks' puffs on a marked foe (each lives as long)
@@ -42,6 +41,7 @@ var reset_dash_boost := false  # a reset armed the next Wirerun: further, charge
 var reset_boost_t := 0.0       # s left on it
 var slams := 0
 var orb_bursts := 0
+var lmb_sd := {}                # the last finger bolt while it flies (its crackle, mage_bolt_fly, follows it)
 var lmb_n := 0                 # finger bolts fired (left, right, left...)
 var last_shot := 0
 var last_dash_kind := ""
@@ -104,16 +104,6 @@ func recast_window() -> Dictionary: return ult.window()
 func move_vel() -> Vector3:
 	return ult.move_vel()
 
-## RecastCue's badge: Sparks on each foe; gold at the cap, where her next hit is the BLOWOUT.
-func combo_marks(out: Array) -> void:
-	super(out)
-	var rd := res_def()
-	for key in sparks:
-		var sp: Dictionary = sparks[key]
-		if is_instance_valid(sp["e"]):
-			var n := int(sp["n"])
-			out.append(RecastCue.mark(sp["e"], n, float(sp["t"]), float(rd["dur"]), n >= int(rd["max"])))
-
 ## Kitefall holds her from the crouch to the strike: no other key works until she lands (in the crouch Shift and
 ## a jump still do).
 func busy() -> bool:
@@ -141,9 +131,6 @@ func res_text() -> String:
 
 func res_frac() -> float:
 	return float(_best()) / float(res_def()["max"])
-
-func ready_label() -> String:
-	return "LIVE FOE: WIRERUN THROUGH" if full_ready() else ""
 
 func live(f: Ent) -> bool:
 	var s = sparks.get(f.get_instance_id())
@@ -185,7 +172,7 @@ func combo_read(f: Ent) -> Dictionary:
 	if s == null:
 		return {}
 	return {"icon": "mark_static", "n": int(s["n"]), "max": int(res_def()["max"]), "left": float(s["t"]),
-			"total": float(res_def()["dur"]), "lift": TAG_LIFT}
+			"total": float(res_def()["dur"])}
 
 func clear_sparks(f: Ent) -> void:
 	var key := f.get_instance_id()
@@ -288,6 +275,8 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 ## A new finger bolt left the hand: alternate hands (the bolt starts at that hand), a twist, a crackle
 ## at the fingertip; the round becomes a jagged bolt with a spark impact (content/vfx/mage.json).
 func _tick_lmb() -> void:
+	if not lmb_sd.is_empty() and not HeroSfx.fly(m, h, "mage_bolt_fly", lmb_sd):
+		lmb_sd = {}
 	var idle := wire.is_empty() and not rmb_down and run_t <= 0.0 and not ult.busy()
 	if h.is_local() and idle and not h.downed:
 		# the aim line runs through the cursor out to full range, an arrow tick at its end (always up)
@@ -318,6 +307,8 @@ func _tick_lmb() -> void:
 	sd["prev"] = p
 	sd["start"] = p
 	play("mage_lmb_l" if left else "mage_lmb_r")
+	lmb_sd = sd
+	m.sfx("mage_bolt_tail", p, -6.0 if h.is_local() else -9.0)     # sparks pattering after the snap
 	# a thrust from the shoulder to the fingertip, the hand's swoosh, then (at the release key) the fingertip
 	# crackles; a jagged bolt rides the round and splinters back where it ends
 	vfx("lmb", null, null, {"left": left})

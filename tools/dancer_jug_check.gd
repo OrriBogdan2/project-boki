@@ -204,10 +204,9 @@ func thief(a) -> void:
 			(gold.get("col", Color.WHITE) as Color).is_equal_approx(ThiefKit.EMP_LINE)
 			and float(gold.get("lw", 0.0)) >= 0.09
 			and float(gold.get("hot", 1.0)) == 0.0 and AimKit.shown(p_v, "aim_glow"))
-	a_x.ok("dancer HUD: EMPOWERED label + dash dot",
-			k.ready_label().begins_with("EMPOWERED") and p_v.slot_info("dash").get("full", false)
-			and not p_v.slot_info("sec").get("full", false),
-			k.ready_label())
+	a_x.ok("dancer HUD: dash dot while empowered",
+			k.dash_payoff_ready() and p_v.slot_info("dash").get("full", false)
+			and not p_v.slot_info("sec").get("full", false))
 	a_x.fresh(t_v)
 	a_x.aim_at(p_v, t_v.pos)
 	p_v.fire_cd = 0.0
@@ -387,8 +386,8 @@ func thief(a) -> void:
 	var capped := DJFx.of(m).free_pools.values().all(func(arr): return (arr as Array).size() <= DJFx.POOL_CAP)
 	a_x.ok("dancer fx: pooled (every kind capped, a handful of nodes at most per burst)",
 			capped and DJFx.of(m).made <= made + 6, "made %d -> %d" % [made, DJFx.of(m).made])
-	await _dancer_dash_flow(m, p_v, k, t_v, home)
-	await DFEEL.new().run(a_x, m, p_v, k, t_v, home)
+	_dancer_dash_flow(m, p_v, k, t_v, home)
+	DFEEL.new().run(a_x, m, p_v, k, t_v, home)
 	DPARITY.new().run(a_x, m, p_v, k, t_v, home)
 	DTIMING.new().run(a_x, m, k)
 	DLOOP.new().run(a_x, m, p_v, k, t_v, t2, home)
@@ -650,7 +649,7 @@ func juggernaut(a) -> void:
 	a_x.ok("juggernaut passive: no bonus below full", absf(k.outgoing(t_v, 100.0, {}) - 100.0) < 0.1)
 	k.gain_rage(100.0)
 	a_x.ok("juggernaut passive: full = Enraged (+15%)",
-			k.enraged_t > 0.0 and absf(k.outgoing(t_v, 100.0, {}) - 115.0) < 0.1 and k.ready_label() == "ENRAGED",
+			k.enraged_t > 0.0 and absf(k.outgoing(t_v, 100.0, {}) - 115.0) < 0.1,
 			"%.1f" % k.outgoing(t_v, 100.0, {}))
 	k.cd["e"] = 10.0
 	p_v.dashes = 0.0
