@@ -30,6 +30,7 @@ var near_i := -1
 var summon_pad: SummonStation = null  # the Boki island's summon pad (arena layout)
 var prompt: Label = null
 var trial: TimeTrial = null  # the time-trial course on the open floor
+var roost_trainer: RoostTrainer = null  # the Boki fight drill at the Boki Roost
 
 var _belt_turn := 0  # which belt slot a full belt gives up next
 var _layer: CanvasLayer = null
@@ -123,6 +124,12 @@ func build() -> void:
 	m.add_child(_layer)
 	trial = TimeTrial.new(m)
 	trial.build(_layer, self)
+	_build_roost_trainer()
+
+
+## The Boki fight trainer, on the roost beside the summon pad.
+func _build_roost_trainer() -> void:
+	roost_trainer = RoostTrainer.new(a, summon_pad.pad, _layer)
 
 
 ## One ring of pedestals round a perch's middle, one per id of the kind.
@@ -209,10 +216,12 @@ func tick(dt: float) -> void:
 		p.teleport(a.home)
 		p.vel = Vector3.ZERO
 		trial.stop()
+		roost_trainer.stop()
 		if m.hud:
 			m.hud.toast_small("Back to the Training Grounds", Color("8fe3c8"))
 		return
 	trial.tick(dt)
+	roost_trainer.tick(dt)
 	var best := -1
 	var bd := ACT_R
 	for i in stations.size():
