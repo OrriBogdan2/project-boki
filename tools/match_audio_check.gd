@@ -24,14 +24,21 @@ extends RefCounted
 ## thief and a squad nearby but not across the map, and one take per burst (MIN_GAP).
 ## And a broken cast's wind-up sound ends within 0.1 s, one interrupt per kit (tools/match_audio_interrupts.gd).
 
-var main: Node
-var fails := 0
-var n := 0
 const SETTLE := 4.0  # s: longer than the slowest match fade (the score's stems, 1.2s)
+
 const LOUD_S := 12.0  # s of autoplay match the bus meters are read over
+
 const REPEAT_GAP_MS := 200  # ms of real time between two chimes: past Sfx.STACK_MS, so not stacked
+
 const WALK_S := 8.0  # s: the longest an abyss walk is run
+
 const ABYSS_NAMES := ["abyss_whoosh", "abyss_catch", "abyss_fallout"]
+
+var main: Node
+
+var fails := 0
+
+var n := 0
 
 
 func ok(cond: bool, what: String) -> void:
@@ -721,17 +728,17 @@ func _carry(m: Match, p_v: Hunter) -> void:
 	ok(not pairs.is_empty() and pairs[0].kin2 != null, "setup: a bot carries two Boki")
 	if pairs.is_empty():
 		return
-	var wisp: Hunter = pairs[0]
-	Sfx.listener = wisp.pos
+	var b: Hunter = pairs[0]
+	Sfx.listener = b.pos
 	Sfx.last_played.clear()
-	wisp.swap_kin(true)
+	b.swap_kin(true)
 	var first := Sfx.last_played.has("carry_swap_out") and not Sfx.last_played.has("carry_swap_in")
 	await main.get_tree().create_timer(CarrySfx.SWAP_GAP_S + 0.1).timeout
 	ok(
 		first and Sfx.last_played.has("carry_swap_in") and not Sfx.last_played.has("swap"),
 		"swap: the outgoing Boki's chirp, then the incoming one's (%s)" % [Sfx.last_played.keys()]
 	)
-	var foe: Hunter = m.hunters.filter(func(x): return x.team != p_v.team)[0]
+	var r: Hunter = m.hunters.filter(func(x): return x.team != p_v.team)[0]
 	var rec := {"species": p_v.kin.species, "uid": "carry_check", "name": "Check"}
 	Sfx.listener = p_v.pos
 	var got := _from_box(m, p_v, p_v, rec)
@@ -748,29 +755,29 @@ func _carry(m: Match, p_v: Hunter) -> void:
 			Sfx.last_played.has("carry_claim") and p_v.caught.size() == 1,
 			"claim: a scan that lands locks in (%s)" % [Sfx.last_played.keys()]
 		)
-	got = _from_box(m, p_v, foe, rec)
+	got = _from_box(m, p_v, r, rec)
 	ok(got == ["carry_take"], "steal: taking from a rival's box plays the sly take (%s)" % [got])
 	Sfx.last_played.clear()
-	foe.pos = p_v.pos + Vector3(60, 0, 0)
-	KinTrack.register(foe, rec, p_v)
+	r.pos = p_v.pos + Vector3(60, 0, 0)
+	KinTrack.register(r, rec, p_v)
 	got = Sfx.last_played.keys()
 	ok(got == ["carry_stolen"], "steal: the owner hears the sting, flat, 60 m from the thief (%s)" % [got])
 	for d in [25.0, 40.0]:
-		foe.pos = p_v.pos + Vector3(d, 0, 0)
+		r.pos = p_v.pos + Vector3(d, 0, 0)
 		Sfx.last_played.clear()
-		CarrySfx.stolen(m, foe, wisp)
+		CarrySfx.stolen(m, r, b)
 		var hears: bool = d < float(Sfx.sound_reach["carry_take"])
 		ok(
 			Sfx.last_played.has("carry_take") == hears,
 			"steal: a squad %.0f m from the thief %s the take" % [d, "hears" if hears else "does not hear"]
 		)
-	foe.pos = p_v.pos + Vector3(2, 0, 0)
+	r.pos = p_v.pos + Vector3(2, 0, 0)
 	Sfx.last_played.clear()
 	Sfx.recent.erase("carry_take")
 	for i in 3:
-		CarrySfx.stolen(m, foe, wisp)
+		CarrySfx.stolen(m, r, b)
 	ok((Sfx.recent.get("carry_take", []) as Array).size() == 1, "voice cap: three takes at once play one")
-	foe.remove_meta(KinTrack.META)
+	r.remove_meta(KinTrack.META)
 
 
 ## Takes `rec` out of a box `dropper` left and returns the carry cues it played.
