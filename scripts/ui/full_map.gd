@@ -208,6 +208,7 @@ func draw(sz: Vector2) -> void:
 	if m.exits:
 		ExitMark.full_map(self)
 	hud.mm_circ = saved
+	ShopLegend.markers(self, c)
 	_spawns(c, team, kk)
 	ReviveHud.full_map(self)
 	if m.biomes:
@@ -729,7 +730,7 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 			hud._text(Vector2(r2.position.x + 48, row_y + 5), "Revive beacon (your squad back)" if Life.has_mates(m, m.player) else "Revive beacon", 12, INK)
 
 ## Left of the map: your squad, who leads the drop, and the keys for it.
-func _side(c: Control, _sz: Vector2) -> void:
+func _side(c: Control, sz: Vector2) -> void:
 	var p: Hunter = m.player
 	if p == null:
 		return
@@ -742,6 +743,9 @@ func _side(c: Control, _sz: Vector2) -> void:
 	var squad: Array = m.hunters.filter(func(x): return x.team == p.team)
 	var in_drop: bool = p.riding or p.dropping
 	var r := Rect2(Vector2(x0, rect.position.y), Vector2(wv, 48 + squad.size() * 44 + (118 if in_drop else 40)))
+	var lr := ShopLegend.place(m, x0, wv, r.end.y)
+	if lr.end.y < sz.y - 10:
+		ShopLegend.draw(self, c, lr)
 	hud._rounded(r, Color(0.04, 0.05, 0.08, 0.88), 12)
 	hud._text(r.position + Vector2(14, 26), "YOUR SQUAD", 16, GOLD, hud.big)
 	var y := r.position.y + 50.0

@@ -58,7 +58,7 @@ func _expedition(first: bool) -> void:
 	got = _moment(func(): p.armor = 0.0)
 	_count(got, want, "an armor break")
 	if first and got.size() == 1:
-		ok(got[0].contains(_key("armor_kit") + ": Repairs your armor to full"), "kit line: " + got[0])
+		ok(got[0].contains(_key("armor_kit") + ": Patches your armor"), "kit line: " + got[0])
 	got = _moment(func(): p.hp = p.max_hp * 0.2)
 	_count(got, want, "low health")
 	if first and got.size() == 1:
