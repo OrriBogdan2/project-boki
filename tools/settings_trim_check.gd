@@ -10,6 +10,7 @@ const MAIN_KEYS := ["quality", "fullscreen", "ui_scale", "master"]
 const NOT_ROWS := [
 	"keys",
 	"keys_v",
+	"cam_v",
 	"keys2_v",
 	"keys3_v",
 	"keys4_v",
