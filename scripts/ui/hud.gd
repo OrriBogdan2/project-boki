@@ -252,6 +252,7 @@ func _draw_parts() -> void:
 		TutorialHud.draw(self, sz)      # the intro card alone: the rest of the HUD waits
 		return
 	edge_world.begin(EdgeMarker.world_rim(sz), WORLD_ARROW)
+	edge_world.fight = _fight_on()
 	_draw_world_labels()
 	_draw_bubbles()
 	_draw_pings(sz)
@@ -874,6 +875,11 @@ func _mm_has(inner: Rect2, v: Vector2, pad := 0.0) -> bool:
 		return v.distance_to(Vector2(mm_circ.x, mm_circ.y)) <= mm_circ.z - pad
 	return inner.grow(-pad).has_point(v)
 
+## A fight is on for you or a squadmate (the tutorial keeps its labels): goal markers lose their words.
+func _fight_on() -> bool:
+	return m.tut == null and not BokiChatter.calm(m)
+
+
 ## A world marker: a bobbing pin and label over the spot, or (when it's off screen or behind the
 ## camera, or under the hunter: MarkerDir) a big arrow at the screen edge pointing the way. Both show how far.
 func _draw_waypoint(at: Vector3, label: String, col: Color, prio := EdgeMarker.PRIO_GOAL) -> void:
@@ -887,7 +893,8 @@ func _draw_waypoint(at: Vector3, label: String, col: Color, prio := EdgeMarker.P
 		c.draw_circle(p, 24.0, Color(0, 0, 0, 0.5))
 		c.draw_colored_polygon(PackedVector2Array([p + Vector2(0, -20), p + Vector2(16, 0), p + Vector2(0, 20), p + Vector2(-16, 0)]), col)
 		c.draw_colored_polygon(PackedVector2Array([p + Vector2(-12, 27), p + Vector2(12, 27), p + Vector2(0, 46)]), col)
-		_ctext(p + Vector2(0, 70), "%s  ·  %dm" % [label, dist], 22, col, big)
+		if prio != EdgeMarker.PRIO_GOAL or not _fight_on():      # a fight: the pin, not its words
+			_ctext(p + Vector2(0, 70), "%s  ·  %dm" % [label, dist], 22, col, big)
 		var gp := cam.unproject_position(at + Vector3(0, 0.05, 0))      # a ring on the ground under it
 		c.draw_arc(gp, 28.0 + bob, 0, TAU, 28, Color(col, 0.85), 4.0, true)
 	else:
