@@ -25,11 +25,13 @@ with a 0.1 s blend and keep `KinFlinch` as the fallback. `--boki-flinch-shots --
 
 Boki garden states (`tools/anim_coverage_boki.gd`): every species with a rigged .glb in the game (a `BokiRig.FRAME`
 row and `art/kin/<id>/<id>.glb`, the Bokidex 3D models, 48 today) through idle, walk, run, attack, cast (`ability`),
-hop, eat (the feeder's `munch`) and sleep (the garden `nap`), read off the clips of a live rig. `clip` is the species'
+hop, eat (the feeder's `munch`) and sleep (the garden `nap`), read off the clips of a live rig (`munch` and `nap` are
+the species' own baked eat and sleep clips when those pass the test below, BokiHomeClips). `clip` is the species'
 own clip; `shared` a clip whose motion (each bone's turn at 16 samples) is the same as another species' (the generic
-set every Meshy batch-1 model was built with: no motion of its own); `proc` a clip `BokiHomeClips` builds at runtime
-(munch from idle, nap from sleep); `missing` no clip, a clip that holds one pose (no bone turns 2 deg; not sleep), or
-one whose every pose sits within 3 deg of a pose idle passes through. Rows run worst first (most `missing`, then most
+set every Meshy batch-1 model was built with: no motion of its own); `proc` (eat and sleep only) a clip that fails the
+test, so `BokiHomeClips` builds the munch from idle and the nap from sleep instead (none today); `missing` no clip, a
+clip that holds one pose (no bone turns 2 deg; not sleep), or one whose every pose sits within 3 deg of a pose idle
+passes through (`BokiClipCover`). Rows run worst first (most `missing`, then most
 `shared`, then the lowest Field Book number), and the five worst are written out as backlog lines.
 
 Mobs (`tools/anim_coverage_mobs.gd`): the seven common monsters through idle, walk, attack (the wind-up tell, plus
@@ -79,6 +81,54 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 
 | | idle | walk | run | attack | cast | hop | eat | sleep |
 |---|---|---|---|---|---|---|---|---|
+| casquebill | shared | shared | shared | shared | shared | shared | shared | shared |
+| duskapi | shared | shared | shared | shared | shared | shared | shared | shared |
+| floenatee | shared | shared | shared | shared | shared | shared | shared | shared |
+| gibbelle | shared | shared | shared | shared | shared | shared | shared | shared |
+| glaciyak | shared | shared | shared | shared | shared | shared | shared | shared |
+| glomwort | shared | shared | shared | shared | shared | shared | shared | shared |
+| goliathite | shared | shared | shared | shared | shared | shared | shared | shared |
+| heatherhorn | shared | shared | shared | shared | shared | shared | shared | shared |
+| kilnbadger | shared | shared | shared | shared | shared | shared | shared | shared |
+| limpetor | shared | shared | shared | shared | shared | shared | shared | shared |
+| moonloris | shared | shared | shared | shared | shared | shared | shared | shared |
+| moundvark | shared | shared | shared | shared | shared | shared | shared | shared |
+| murmurling | shared | shared | shared | shared | shared | shared | shared | shared |
+| nacrolin | shared | shared | shared | shared | shared | shared | shared | shared |
+| opalisk | shared | shared | shared | shared | shared | shared | shared | shared |
+| scaldamus | shared | shared | shared | shared | shared | shared | shared | shared |
+| sentrikat | shared | shared | shared | shared | shared | shared | shared | shared |
+| spatewader | shared | shared | shared | shared | shared | shared | shared | shared |
+| squalltross | shared | shared | shared | shared | shared | shared | shared | shared |
+| threadwyrm | shared | shared | shared | shared | shared | shared | shared | shared |
+| tuatrune | shared | shared | shared | shared | shared | shared | shared | shared |
+| velvorm | shared | shared | shared | shared | shared | shared | shared | shared |
+| hoarheron | clip | shared | shared | shared | shared | shared | shared | shared |
+| nimbostrich | shared | clip | clip | shared | shared | shared | shared | shared |
+| orchisloth | shared | clip | clip | shared | shared | shared | shared | shared |
+| cindle | clip | clip | clip | clip | clip | clip | clip | clip |
+| puddlet | clip | clip | clip | clip | clip | clip | clip | clip |
+| burrlet | clip | clip | clip | clip | clip | clip | clip | clip |
+| zapple | clip | clip | clip | clip | clip | clip | clip | clip |
+| pebbit | clip | clip | clip | clip | clip | clip | clip | clip |
+| wisplet | clip | clip | clip | clip | clip | clip | clip | clip |
+| caecilith | clip | clip | clip | clip | clip | clip | clip | clip |
+| glintmole | clip | clip | clip | clip | clip | clip | clip | clip |
+| gloamshell | clip | clip | clip | clip | clip | clip | clip | clip |
+| kestrike | clip | clip | clip | clip | clip | clip | clip | clip |
+| kindlewren | clip | clip | clip | clip | clip | clip | clip | clip |
+| lilybara | clip | clip | clip | clip | clip | clip | clip | clip |
+| lodestick | clip | clip | clip | clip | clip | clip | clip | clip |
+| marchleaf | clip | clip | clip | clip | clip | clip | clip | clip |
+| mossgrade | clip | clip | clip | clip | clip | clip | clip | clip |
+| nettlynx | clip | clip | clip | clip | clip | clip | clip | clip |
+| rimeshrew | clip | clip | clip | clip | clip | clip | clip | clip |
+| selenfin | clip | clip | clip | clip | clip | clip | clip | clip |
+| thrumbird | clip | clip | clip | clip | clip | clip | clip | clip |
+| umbrathere | clip | clip | clip | clip | clip | clip | clip | clip |
+| cairnback | clip | clip | clip | clip | clip | clip | clip | clip |
+| hivara | clip | clip | clip | clip | clip | clip | clip | clip |
+| zephyrak | clip | clip | clip | clip | clip | clip | clip | clip |
 | casquebill | shared | shared | shared | shared | shared | shared | proc | proc |
 | duskapi | shared | shared | shared | shared | shared | shared | proc | proc |
 | floenatee | shared | shared | shared | shared | shared | shared | proc | proc |
@@ -134,11 +184,11 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 
 Worst five, backlog-ready:
 
-- [anim] Boki casquebill (No. 9): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/casquebill_anim.py, rebuild the .glb, rerun --anim-coverage-check
-- [anim] Boki duskapi (No. 11): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/duskapi_anim.py, rebuild the .glb, rerun --anim-coverage-check
-- [anim] Boki floenatee (No. 12): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/floenatee_anim.py, rebuild the .glb, rerun --anim-coverage-check
-- [anim] Boki gibbelle (No. 13): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/gibbelle_anim.py, rebuild the .glb, rerun --anim-coverage-check
-- [anim] Boki glaciyak (No. 14): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/glaciyak_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki casquebill (No. 9): 0 missing (none), 8 on the shared clip set (idle, walk, run, attack, cast, hop, eat, sleep); author its own clips in tools/boki/casquebill_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki duskapi (No. 11): 0 missing (none), 8 on the shared clip set (idle, walk, run, attack, cast, hop, eat, sleep); author its own clips in tools/boki/duskapi_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki floenatee (No. 12): 0 missing (none), 8 on the shared clip set (idle, walk, run, attack, cast, hop, eat, sleep); author its own clips in tools/boki/floenatee_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki gibbelle (No. 13): 0 missing (none), 8 on the shared clip set (idle, walk, run, attack, cast, hop, eat, sleep); author its own clips in tools/boki/gibbelle_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki glaciyak (No. 14): 0 missing (none), 8 on the shared clip set (idle, walk, run, attack, cast, hop, eat, sleep); author its own clips in tools/boki/glaciyak_anim.py, rebuild the .glb, rerun --anim-coverage-check
 
 ### Mobs
 
@@ -204,5 +254,5 @@ Worst five, backlog-ready:
    models, 9116769e95: casquebill to velvorm in the table; hoarheron has its own idle only). Nothing is `missing` on
    any Boki, but the shared set is the same wobble on a heron, an okapi and a rope wyrm. That includes glomwort,
    whose `glomwort_anim.py` clips the batch-1 model replaced (docs/art/kin/RIGGED_BOKI.md still lists them). Eat and
-   sleep are `proc` on every Boki (munch and nap built from idle and sleep); the baked `eat` clip is never played.
+   sleep play each species' baked clip (the generic set on the shared Boki); the built munch and nap are the fallback.
 5. Hunter death clips are mostly unseen while the Wisp stands in for a death (DEBT: downed Wisp).
