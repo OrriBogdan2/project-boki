@@ -357,9 +357,8 @@ func _fs_arrivals() -> bool:
 	var w: World = world
 	var loop := BaseRace.loop_rect()      # the race loop stays clear
 	for b in ["board", "ransom"]:
-		if HomeLayout.placed(b, _d()) or not _has_b(b):
-			continue
-		if not fought and not (b == "ransom" and FarmUnlocks.base_mode()):
+		var early: bool = b == "ransom" and FarmUnlocks.base_mode()  # the Ransom board stands before a first fight
+		if HomeLayout.placed(b, _d()) or not _has_b(b) or (not fought and not early):
 			continue
 		var item := {"kind": "b", "id": b, "r": 0, "from": 0}
 		var best := Vector2i(-1, -1); var bd := 1e9

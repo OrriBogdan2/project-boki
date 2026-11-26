@@ -48,6 +48,7 @@ func run(m: Node, mode: String = "check") -> void:
 	if mode == "shots":
 		await _shots()
 		return
+	MsgLane.of(home.root_ui).clear()      # (base mode: Old Pell's "set up the Black Market" toast is not a stat tip)
 	var glint: StatGlint = home.stat_glint
 	var a: Dictionary = home.kins[0]
 	var rec: Dictionary = a["rec"]
