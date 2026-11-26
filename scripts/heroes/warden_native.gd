@@ -146,6 +146,9 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	process_priority = 10  # (after Match renders the hunters: HunterAnim.update)
 	player = glb.find_children("*", "AnimationPlayer", true, false)[0] as AnimationPlayer
 	plays = (d["clips"] as Dictionary).duplicate()
+	if d.has("clip_files"):  # (clips-only files: Hero moves keyed on Meshy's skeleton, beside the .glb)
+		var lib_name := player.find_animation_library(player.get_animation(String(plays["idle"])))
+		WardenClipFile.add(player.get_animation_library(lib_name), glb, WardenGlb.skeleton(glb), d["clip_files"])
 	moves = WardenNativeMoves.new(player, d)
 	plays.merge(moves.clips())
 	skel = WardenGlb.skeleton(glb)

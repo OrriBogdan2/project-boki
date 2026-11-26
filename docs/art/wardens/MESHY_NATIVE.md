@@ -26,6 +26,16 @@ contract (RIG_CONTRACT.md). The game adapts to Meshy: its bones are never rename
 - HunterAnim still poses the hidden rig and hands over its state (`WardenClips.STATE`); the AnimationPlayer plays:
   idle `Idle`, walk `walk`, run `run`, air `Jump_Run`, any new swing/cast/kit move `Attack` (or its clip slot below), crouch
   `Crouch_Walk_with_Torch` (rate follows ground speed; standing still holds the crouch pose).
+- Own move clips (data `clip_files` + `kmoves`, 11-23, Kael first): a clips-only file beside the model
+  (`art/wardens/<art>/<art>_clips.glb`, the rig's nodes with no mesh; WardenClipFile adds its clips to Meshy's library
+  by bone name) holds clips keyed on Meshy's skeleton, and `kmoves` (WardenNativeMoves, see Kit-move clips) maps a kit move (`kmove`) to one: `clip`, `fade` (a clip with no
+  `hold_from` stays on its last pose while the kit holds the move), and for the check `hit` (the kit's hit second) with
+  `peak` (`speed`, `low`, `reach`: how the clip's hit pose is measured). The clip's clock is the kit's (`kmove_t`),
+  so its hit pose lands on the kit's hit. A move with no entry still plays `Attack`. Kael's are made by
+  `python3 -I tools/art1/kael_native_clips.py` (poses as body-frame numbers: hips, chest, feet, sword hand and blade
+  direction, solved with two-bone IK by `tools/art1/meshy_rig.py`; the blade runs along the right hand bone). Timing and
+  poses: docs/heroes/juggernaut.md "Native clips". `--warden-native-check` sweeps each clip and asserts the hit pose
+  within one frame of the kit's hit; `--clip-shots --states` presses each mapped move.
 - Crouch arms (`crouch_arms_from`): Meshy's only crouch holds a torch out in front, which read in game as Sable's
   pistol and Tenzo's stone arm floating off the body. The crouch plays a copy (`<clip>_arms`, added beside Meshy's
   clips at load) whose arm bones (every bone below Meshy's `LeftShoulder`/`RightShoulder`, data `arm_roots`) take
@@ -112,7 +122,8 @@ with at least 10 bones off Meshy's T-pose on the switch frame and after the cros
 without `lmb_hold`; a synthetic clips file's clip lands on Meshy's bones and plays; every slot the data names has its clip.
 
 ## State clips (dash, glide, land, hit, hit_back, downed)
-All ten native Hunters map these six slots to the clips of `art/wardens/<art>/<art>_clips.glb`, built by
+All ten native Hunters map these six slots to the clips of `art/wardens/<art>/<art>_clips.glb` (Kael: `kael_state_clips.glb`,
+listed in his data `clip_files`, since `kael_clips.glb` holds his move clips), built by
 `python3 tools/meshy/native_states.py OUT BASE_meshy.glb tools/meshy/native_states.json SRC_DIR <art>` (spec: Meshy
 library action id, kept second range, game seconds, per weight class; sources are one `animate` download per action id
 on one rig task, `/home/boki/meshy/anim-native-states-1123`). The clip file carries no mesh; translations scale by hips
