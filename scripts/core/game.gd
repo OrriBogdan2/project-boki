@@ -48,6 +48,7 @@ func apply_mod() -> void:
 		s._refresh_top()
 
 func _key(action: String, keys: Array, mouse := -1) -> void:
+	Settings.caps_changed()
 	if not InputMap.has_action(action):
 		InputMap.add_action(action)
 	for k in keys:

@@ -388,6 +388,7 @@ var _defaults_keys := {}
 var _dirty := false
 var _started := false  # the bindings the game ships with, for "reset"
 var _quality_basics := false
+var _caps := {}  # action -> its key cap (key_cap), until a binding changes
 
 
 ## The preset in effect: the player's pick, or what auto-detect found for this machine.
@@ -902,6 +903,7 @@ func _events_to_list(evs: Array) -> Array:
 func _bind(action: String, list: Array) -> void:
 	if not InputMap.has_action(action):
 		return
+	caps_changed()
 	InputMap.action_erase_events(action)
 	for s in list:
 		var parts := String(s).split(":")
@@ -1075,7 +1077,17 @@ func move_caps(sep := "") -> String:
 	return sep.join(["up", "left", "down", "right"].map(func(a): return key_cap(a)))
 
 
-## The first binding of an action, short, for HUD key caps ("E", "LMB", "M4").
+## A binding changed: the key caps are read again.
+func caps_changed() -> void:
+	_caps.clear()
+
+
+## The first binding of an action, short, for HUD key caps ("E", "LMB", "M4"). Kept per action until a binding
+## changes (_bind): the HUD asks for dozens every frame.
 func key_cap(action: String) -> String:
-	var evs := InputMap.action_get_events(action)
-	return cap_text(ev_code(evs[0])) if not evs.is_empty() else "?"
+	var cap: String = _caps.get(action, "")
+	if cap == "":
+		var evs := InputMap.action_get_events(action)
+		cap = cap_text(ev_code(evs[0])) if not evs.is_empty() else "?"
+		_caps[action] = cap
+	return cap
