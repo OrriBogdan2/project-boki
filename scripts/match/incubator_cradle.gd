@@ -4,6 +4,7 @@ extends RefCounted
 ## egg anchor ("Egg") and an iron grate ("Lock", shown while the cradle isn't bought). The named parts are the ones
 ## HomeIncubator finds and changes. Models.incubator copies one built cradle eight times.
 
+
 static func build(stone: Material, straw: Material, pebble: Material, iron: Material) -> Node3D:
 	var c := Node3D.new()
 	Models.part(c, Models.cyl(0.14, 0.16, 0.1, 12), stone, Vector3(0, 0.05, 0))
