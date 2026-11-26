@@ -247,6 +247,7 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree, pick: Callabl
 	info.add_child(note)
 	_fact(info, "ruler", "Size", _size_range(spk))
 	_fact(info, "pin", "Lives", _habitat(spk))
+	info.add_child(summon_row(spk))
 	_fact(info, "portal", "Found in", DexFound.found_in(spk) if FieldBook.form_seen(spk) else "?")
 	_fact(info, "info", "Rarity", DexFound.tier_name(spk) if FieldBook.form_seen(spk) else "?")
 	HazardCounter.add_row(info, spk, 18.0, UI.T_SMALL)
@@ -340,7 +341,7 @@ static func _fact(parent: Control, icon: String, k: String, val: String) -> void
 
 
 ## "Summon 12 s / rest 45 s": the species' window and cooldown (KinSummon.times, the one table the summon
-## itself reads), a ring icon and the plain line (KinSummon.card_line).
+## itself reads), a ring icon and the plain line (KinSummon.card_line). The Boki card and loadout show it too.
 static func summon_text(spk: String) -> String:
 	var t := KinSummon.times(KinLib.kin(spk))
 	return "Summon %d s / rest %d s" % [int(t.x), int(t.y)]
