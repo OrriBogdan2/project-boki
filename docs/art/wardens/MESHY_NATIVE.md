@@ -113,9 +113,22 @@ plays today's clip, so nothing changes until a Hunter's clips land (`WardenNativ
 | `hit` | one-shot when a stagger lands (state `hit_t` jumps back with `hit_k` at Oomph.HEAVY_FLINCH; a chip hit only leans) | the loop clip plays on |
 | `land` | one-shot on a hard landing (`WardenClips.FEEL` landing >= `LAND_MIN`) | the loop clip |
 | `dash` | while the state `rolling` (a dash or kit rush) lasts | the air or ground clip |
-| `glide` | while `gliding` (loops) | `jump` |
+| `glide` | while `gliding` in the air (loops) | the shared glide pose (`WardenGlidePose`) |
+| `dive` | while `diving` (the glider's dive; loops) | the shared dive pose |
 | `downed` | while the knocked-down beat runs (`fall` >= 0; holds its last frame) | the loop clip |
 | `stomp` | while the stomp cycle runs (`stomp` >= 0; loops) | the loop clip |
+**Glide and dive** (`scripts/heroes/warden_glide_pose.gd`, data `content/rules/warden_glide.json`): one shared pose per
+state, built once per model library at setup and added beside Meshy's clips as `glide_pose` and `dive_pose`, so every
+Hunter has them without a clip file. The data names Meshy's Left bones (the Right ones mirror) and the way each points
+to the mean of its children, in the body's frame read off that skeleton's rest (x left, y hips to head, z toes): the
+glide hangs the body under the canopy with both hands up on the lines and the legs together, trailing, swaying as one
+(no stride); the dive sweeps the arms back along the body, legs straight, the head tipped up (HunterAnim's air tilt
+pitches the body nose-down and banks it into turns, as before). A data `glide`/`dive` clip still wins. They fade in and
+out over `AIR_FADE` (0.3 s). The farm's swim also sends `gliding`, on the ground: that keeps the loop clips.
+`--glide-anim-check`: all 13 Hunters glide on their glide clip (never walk, run, idle or jump), hands over the
+shoulders, feet within 2.2 hip widths and not ahead of the hips; dive on the dive clip, hands under the shoulders; run
+again on touchdown; Breaker (contract path) on its clips' glide layer; the farm avatar (the Empty, procedural rig)
+hangs its legs together (HunterAnim's glide legs, no paddle).
 Swing, cast, `hit` and `land` are one-shots: they own the body for their length (a new one restarts a clip once 60% is
 played) and play at `attack_rate`, `hit` and `land` at 1.
 A swing or cast while he moves on the ground, or is in the air, plays on the torso and arms only (`WardenNativeUpper`: Spine02
@@ -162,7 +175,7 @@ fingers, untouched names and tree, Meshy's six clips. Only the weights and the c
 Meshy's files (`tools/meshy/sable_hybrid/README.md`: pistol/hand lock, coat/arm split, coat and armpit smoothing,
 contact-band smoothing, coat chains hung by gravity with floor and thigh collision). Torn frames (glbstretch, 15 fps):
 raw Meshy rig 100% Attack, 93% Jump, 100% Crouch, 89% run, 67% walk; this file 0% in all six clips.
-Game states with no Meshy clip (fall, land, glide, climb, mantle, hit, emote, aim twist) play the nearest of the six.
+Game states with no Meshy clip (fall, land, climb, mantle, hit, emote, aim twist) play the nearest of the six.
 
 ## Native hunter pack (Sparkle, Tenzo, Cinder, Kael, Motley, Meeko)
 Their rigged Meshy files carry 300k-tri meshes. `tools/meshy/native_hunters/pack.sh <art> <rigged.glb> <decimated.glb> [clip glbs]`

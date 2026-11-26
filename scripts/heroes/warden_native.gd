@@ -15,15 +15,18 @@ const DATA_PATH := "res://content/rules/warden_native.json"
 const META := "meshy_native"  # root meta: this Hunter is drawn on Meshy's skeleton
 const STILL := 0.25  # m/s: below this he is standing
 const FADE := 0.15  # s: one clip into the next
+const AIR_FADE := 0.3  # s: into and out of the glide and dive poses (the canopy's opening, the touchdown)
+const AIR_HOLDS := ["glide", "dive"]
 const RATE_MIN := 0.6  # the walk, run and sneak clips' slowest rate, of their keyed pace
 const RATE_MAX := 1.8  # and their fastest: a quicker stride keeps the feet nearer the ground speed
 const ATTACK_AGAIN := 0.6  # share of the attack clip after which a new hit starts it over
 const LOOPS := ["idle", "walk", "run", "crouch"]
 ## Clip slots data "clips" may add beside the six states; a missing one plays today's clip (MESHY_NATIVE.md).
 ## Swing and cast one-shots (the attack clip without them): lmb, lmb_hold (a charged swing), rmb, e, r (the kit's cast
-## slots, MOVE_SLOTS). One-shots: hit, land. Held while the state lasts: dash, glide and stomp (these two loop), downed.
+## slots, MOVE_SLOTS). One-shots: hit, land. Held while the state lasts: dash, glide, dive and stomp (these three
+## loop), downed. Glide and dive default to the shared poses (WardenGlidePose).
 const HIT_SLOTS := ["hit", "land"]
-const SLOTS := ["lmb", "lmb_hold", "rmb", "e", "r", "dash", "glide", "land", "hit", "downed", "stomp"]
+const SLOTS := ["lmb", "lmb_hold", "rmb", "e", "r", "dash", "glide", "dive", "land", "hit", "downed", "stomp"]
 const MOVE_SLOTS := {"secondary": "rmb", "utility": "e", "ult": "r"}  # the state's cast_slot -> its clip slot
 const SLOT_CAST := 0.5  # s: a kit move that starts this soon after a cast belongs to that cast's slot
 const LAND_MIN := 0.3  # a landing this hard (WardenClips.FEEL, 0..1) plays the land clip
@@ -156,11 +159,13 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	plays.merge(moves.clips())
 	skel = WardenGlb.skeleton(glb)
 	_borrow_clips()
+	var idle := player.get_animation(String(plays["idle"]))
+	plays.merge(WardenGlidePose.add(player, skel, idle), false)  # (a data glide / dive clip wins)
 	for st in SLOTS + moves.clips().keys():  # (a slot whose clip is nowhere plays today's clip)
 		if plays.has(st) and not player.has_animation(String(plays[st])):
 			push_warning("warden_native %s: slot %s names clip %s, which no file has" % [art_id, st, plays[st]])
 			plays.erase(st)
-	for st in LOOPS + ["stomp", "glide"]:
+	for st in LOOPS + ["stomp"] + AIR_HOLDS:
 		if plays.has(st):
 			player.get_animation(String(plays[st])).loop_mode = Animation.LOOP_LINEAR
 	# (the clips advance in _process, then the layers go on top: WardenSync's order)
@@ -338,7 +343,10 @@ func _held(s: Dictionary) -> String:
 		return "downed"
 	if plays.has("stomp") and float(s.get("stomp", -1.0)) >= 0.0:
 		return "stomp"
-	if plays.has("glide") and bool(s.get("gliding", false)):
+	if plays.has("dive") and bool(s.get("diving", false)):
+		return "dive"
+	# (the glider's open in the air: the farm's swim sends "gliding" on the ground, and keeps the loop clips)
+	if plays.has("glide") and bool(s.get("gliding", false)) and not bool(s.get("grounded", true)):
 		return "glide"
 	if plays.has("dash") and bool(s.get("rolling", false)):
 		return "dash"
@@ -441,7 +449,7 @@ func _clip_len(st: String) -> float:
 ## The game state's clip, crossfaded in when it changes (restart: a new attack plays it from the start).
 func _play(st: String, rate: float, restart := false) -> void:
 	if st != cur or restart:
-		player.play(String(plays[st]), FADE)
+		player.play(String(plays[st]), AIR_FADE if st in AIR_HOLDS or cur in AIR_HOLDS else FADE)
 		if restart:
 			player.seek(0.0, true)
 		cur = st
