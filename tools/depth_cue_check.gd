@@ -1,11 +1,12 @@
 extends RefCounted
 ## --depth-cue-check: the height cues of briefs/CAMERA_DEPTH.md exist and stay cheap. Headless, no
 ## renderer: a live match has the ledge-light terrain shader (depth_k on, with ledges for it to light),
-## the dimmed abyss clouds, a shadow disc on the ground under every hunter and under every flying shot
+## the dimmed abyss clouds, a shadow disc on the ground under every airborne hunter (none while it stands) and under every flying shot
 ## (at the ground's height, hidden over the void), and a per-frame cost within budget with no new
 ## nodes once warmed up. With the setting off the terrain and cloud cues read as off. Never touches the save.
 
 const SHOTS := 120              # shots in the air at once for the cost test (the pool holds 160)
+const HUNTER_LIFT := 1.5       # m above the ground the test hunter is lifted
 const SHOT_LIFT := 1.5          # m above the ground the test shots fly
 const BUDGET_US := 2000.0       # us per frame for all discs (hunters + SHOTS shots), a generous headless bound
 const FRAMES := 30              # frames averaged for the cost
@@ -78,17 +79,20 @@ func _check_abyss(m: Match) -> void:
 
 func _check_hunter_discs(m: Match, dc: DepthCues) -> void:
 	dc._process(0.0)
-	var live := 0
-	for i in m.hunters.size():
-		var h: Hunter = m.hunters[i]
-		var disc: MeshInstance3D = dc._discs.get(h)
-		ok(disc != null, "a shadow disc for hunter %d" % i)
-		if disc == null or not disc.visible:
-			continue
-		live += 1
-		var y := m.world.ground_at(h.global_position.x, h.global_position.z)
-		ok(_on_ground(disc, y), "hunter %d's disc lies on the ground (y %.2f)" % [i, y])
-	ok(live > 0, "at least one hunter's disc is visible on the ground")
+	var visible_standing := m.hunters.filter(func(h): return dc._discs[h].visible)
+	ok(visible_standing.is_empty(), "no disc under a hunter standing on the ground (%d show)" % visible_standing.size())
+	var h: Hunter = m.player
+	var y := m.world.ground_at(h.global_position.x, h.global_position.z)
+	h.global_position.y = y + DepthCues.AIR_MIN - 0.05
+	dc._process(0.0)
+	ok(not dc._discs[h].visible, "no disc just under the air threshold")
+	h.global_position.y = y + HUNTER_LIFT
+	dc._process(0.0)
+	var disc: MeshInstance3D = dc._discs[h]
+	ok(disc.visible and _on_ground(disc, y), "an airborne hunter's disc lies on the ground (y %.2f)" % y)
+	h.global_position.y = y
+	dc._process(0.0)
+	ok(not disc.visible, "the disc hides again on landing")
 
 func _check_shot_discs(m: Match, dc: DepthCues) -> void:
 	var P: Hunter = m.player
