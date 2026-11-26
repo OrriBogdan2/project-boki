@@ -342,6 +342,7 @@ func _swim() -> void:
 	ok("Ground Swim: the top half swims a crawl (the arms trade places every stroke, the pose holds the depth)",
 		(pose["blade"] as Vector3).distance_to(later["blade"]) > 0.8
 		and (pose["fl"] as Vector3).distance_to(later["fl"]) > 0.8 and absf(float(later["lift"]) - lift) < 0.01)
+	_native_body()
 	var top := {"stun": 0.0, "y": 0.0, "out": false}
 	var y0 := T.pos.y
 	step(m, 0.8, func():
@@ -359,6 +360,22 @@ func _swim() -> void:
 		"stun %.2f lift %.2f" % [top["stun"], top["y"]])
 	ok("Ground Swim: 8 s cooldown", float(K.dash_def()["cd"]) == 8.0)
 	_swim_steer()
+
+## Gil's model is drawn on Meshy's clips (WardenNative), which key no sink or spin: his kit moves lay their keyed lift
+## and turn on the model root ("body" in warden_native.json kmoves) and put it back after.
+func _native_body() -> void:
+	var nm := WardenNativeMoves.new(null, WardenNative.entry("gil"))
+	var g := Node3D.new()
+	g.rotation.y = PI
+	nm.pose({"kmove": "gil_dive", "kmove_t": 0.3}, g)
+	var sunk := g.position.y
+	nm.pose({"kmove": "gil_spin", "kmove_t": 0.2}, g)
+	var turned := absf(angle_difference(g.rotation.y, PI))
+	nm.pose({"kmove": ""}, g)
+	ok("Ground Swim / Riptide on his Meshy model: the root sinks to the waist, turns in the spin, then goes home",
+		absf(sunk - KMovesGil.SWIM_LIFT) < 0.01 and turned > 0.3 and g.position.y == 0.0 and is_equal_approx(g.rotation.y, PI),
+		"sunk %.2f turned %.2f" % [sunk, turned])
+	g.free()
 
 ## Owner 11-26: he turns during the swim. A swim started east with the keys turned north bends at dash.steer
 ## (4.4 rad/s, was 0: a straight line), and the wake breaks the ground along the curve.

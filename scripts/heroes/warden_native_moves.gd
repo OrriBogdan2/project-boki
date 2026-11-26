@@ -4,7 +4,9 @@ extends RefCounted
 ## MESHY_NATIVE.md): {kmove: {"clip": name, "hold_from": s, "rate": x, "fade": s}}. While the kit's move is on the body
 ## the clip is laid at the move's own clock (state "kmove_t"), so a release move starts at the frame the arrow leaves.
 ## A clip with "hold_from" loops from there to its end for as long as the move lasts and not a frame longer: the kit
-## ends the draw move the moment the hold input goes, and the body falls back to the walk clips.
+## ends the draw move the moment the hold input goes, and the body falls back to the walk clips. A move with "body":
+## true also carries its keyed whole-body channels (HunterAnim.KMOVES "lift" and the spin "fy") on the model's root over
+## the clip, for what no Meshy clip keys (Gil sunk to the waist in Ground Swim, his Riptide turn winding up).
 
 const FADE := 0.06  # s: the previous clip into a move's, unless the data says
 const KEY := "km:%s"  # the name a move's clip has in WardenNative.plays
@@ -13,6 +15,7 @@ var player: AnimationPlayer
 var moves: Dictionary
 var cur := ""  # the move playing now ("" none)
 var prev_t := 0.0  # its clock last frame (a clock that goes back is the same move again)
+var bodied := false  # a "body" move moved the root last frame (it goes home once the move ends)
 
 
 func _init(p: AnimationPlayer, data: Dictionary) -> void:
@@ -46,6 +49,22 @@ func play(s: Dictionary, plays: Dictionary, dt: float) -> void:
 	prev_t = t
 	player.speed_scale = 1.0
 	player.seek(maxf(at(m, t, player.get_animation(clip).length) - dt, 0.0), false)
+
+
+## The root of the Meshy model (`glb`, turned PI to face -Z) under a "body" move: down by its keyed lift, turned by
+## its spin. Call every frame after the clips advance; a frame with no such move puts the root back once.
+func pose(s: Dictionary, glb: Node3D) -> void:
+	var km := String(s.get("kmove", ""))
+	if not (moves.has(km) and bool(moves[km].get("body", false))):
+		if bodied:
+			glb.position.y = 0.0
+			glb.rotation.y = PI
+			bodied = false
+		return
+	var k := HunterAnim.km_sample(km, float(s.get("kmove_t", 0.0)))
+	glb.position.y = float(k.get("lift", 0.0))
+	glb.rotation.y = PI + float(k.get("fy", 0.0))
+	bodied = true
 
 
 ## The clip time at move clock `t`: the hold loop wraps from "hold_from", a clip with none stops on its last frame.
