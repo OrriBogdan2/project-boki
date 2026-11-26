@@ -38,6 +38,7 @@ func run(main_node: Node) -> void:
 	await load("res://tools/dredge_rmb_carry_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_reel_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_ult_check.gd").new(ak, ok).run()
+	await load("res://tools/dredge_combo_e_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_cancel_check.gd").new(ak, ok).run()
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "dredge")
 	ok(

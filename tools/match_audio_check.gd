@@ -461,7 +461,7 @@ func _buses() -> void:
 		"click": "UI",
 		"ashwick_hurt": "Voice",
 		"v_brute": "Voice",
-		"rifle": "SFX"
+		"gun_rifle": "SFX"
 	}
 	for sname in want:
 		ok(
