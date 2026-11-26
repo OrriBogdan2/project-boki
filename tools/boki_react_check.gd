@@ -93,6 +93,10 @@ class Subject:
 			rig.advance(STEP)
 			rig._process(STEP)
 
+	## Flex's pose scale (squash, stretch, girth): its scale without the size fit KinSize gives every rigged model.
+	func shape() -> Vector3:
+		return flex.scale / float(k.get_meta("fit", 1.0))
+
 	## Flex-space spot of every part (primitive bodies) or bone (rigged).
 	func places() -> Array:
 		var out := []
@@ -204,9 +208,10 @@ func _hit(a: Subject, ctl: Subject, box: AABB, push: Vector3, frac: float, mass:
 		var pc := ctl.places()
 		for j in pa.size():
 			r["part"] = maxf(r["part"], (pa[j] as Vector3).distance_to(pc[j]) / box.size.y)
+		var shape := a.shape()
 		for c in 3:
-			r["scale_lo"] = minf(r["scale_lo"], a.flex.scale[c])
-			r["scale_hi"] = maxf(r["scale_hi"], a.flex.scale[c])
+			r["scale_lo"] = minf(r["scale_lo"], shape[c])
+			r["scale_hi"] = maxf(r["scale_hi"], shape[c])
 	for s in series:
 		if float(s[1]) > SETTLED * r["peak"]:
 			r["settle"] = float(s[0])
