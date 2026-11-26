@@ -74,8 +74,10 @@ static func clear_of(r: Rect2, sz: Vector2) -> Rect2:
 		if not b.intersects(r):
 			continue
 		for at: Vector2 in [
-			Vector2(b.end.x, r.position.y), Vector2(b.position.x - r.size.x, r.position.y),
-			Vector2(r.position.x, b.end.y), Vector2(r.position.x, b.position.y - r.size.y)
+			Vector2(b.end.x, r.position.y),
+			Vector2(b.position.x - r.size.x, r.position.y),
+			Vector2(r.position.x, b.end.y),
+			Vector2(r.position.x, b.position.y - r.size.y)
 		]:
 			var moved := Rect2(at, r.size)
 			var d := at.distance_to(r.position)

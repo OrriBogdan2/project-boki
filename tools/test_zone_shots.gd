@@ -14,7 +14,9 @@ const SETTLE_PX := 0.5  # the Hunter's screen box moved less than this between f
 const FIGHT_S := 2.0  # s of match time with a dummy hit every 0.5 s before the fight shot
 const OWN_DRAWN := ["plate", "grip_icons"]  # your own plate and its grip icons: part of your Hunter, by design
 const STATIONS := ["bench", "two-step", "toast", "drills"]  # the popups to open one at a time (station())
-const STATION_GROUP := {"bench": "ParityBench/", "two-step": "RecastDrill/", "toast": "toast #", "drills": "MoveDrills/"}
+const STATION_GROUP := {
+	"bench": "ParityBench/", "two-step": "RecastDrill/", "toast": "toast #", "drills": "MoveDrills/"
+}  # (the group name each station's popup shows up under)
 const HUD := "Hud"
 const FPS := "fps_counter"  # the frame-rate readout's group (Overlay.fps_lbl, on its own layer above the match)
 const FPS_MODE := 2  # Settings show_fps: 2 = the performance overlay, the largest readout
@@ -32,10 +34,10 @@ static func groups(m: Match) -> Dictionary:
 	var layers: Array = m.find_children("*", "CanvasLayer", true, false)
 	if not layers.has(m.hud):
 		layers.append(m.hud)
-	var cards: Array[Rect2] = m.hud.msgs.rects()      # (the message lane's cards are toasts, a group each)
+	var cards: Array[Rect2] = m.hud.msgs.rects()  # (the message lane's cards are toasts, a group each)
 	for layer: CanvasLayer in layers:
 		if layer == m.arena.menu_layer:
-			continue      # the L menu is a modal on a dimmed screen: it is drawn over the HUD on purpose
+			continue  # the L menu is a modal on a dimmed screen: it is drawn over the HUD on purpose
 		var found := SafeArea.groups_of(layer, sz)
 		for g: String in found:
 			if layer != m.hud or not cards.has(found[g][0]):
@@ -72,13 +74,14 @@ static func _owner(m: Match, layer: CanvasLayer) -> String:
 
 ## The popups, panels and toasts: every group that is not the HUD's own panels (nor the fps readout itself).
 static func popups(gs: Dictionary) -> Array:
-	return gs.keys().filter(func(g: String): return g != FPS and not g.begins_with(HUD + "/") and not g.begins_with("drawn "))
+	var own := func(g: String) -> bool: return g == FPS or g.begins_with(HUD + "/") or g.begins_with("drawn ")
+	return gs.keys().filter(func(g: String): return not own.call(g))
 
 
 ## The pairs the owner reported (11-26), each judged on its own so a regression names them: the frame-rate counter
 ## against every popup, and the minimap against every popup (the practice stations' above all, the Two-step drill
 ## among them). Each entry is [a, b, overlaps].
-static func pairs(m: Match, gs: Dictionary) -> Array:
+static func pairs(gs: Dictionary) -> Array:
 	var out: Array = []
 	var map: Array = gs.get("drawn minimap", [])
 	for g: String in popups(gs):
@@ -160,7 +163,7 @@ func _zone(size: Vector2i) -> void:
 		if i % 30 == 0:
 			dm.hurt(80.0, m.player)
 	await _stage(m, "fight", size)
-	if m.arena.has_method("set_tools"):      # (the old Test Zone had no such switch: its tools were always on)
+	if m.arena.has_method("set_tools"):  # (the old Test Zone had no such switch: its tools were always on)
 		m.arena.set_tools(true)
 	await _stage(m, "tools", size)
 	m.arena.open_menu()
@@ -216,7 +219,7 @@ func _grounds(size: Vector2i) -> void:
 
 func _stage(m: Match, stage: String, size: Vector2i) -> void:
 	var found: Array = await judge(main.get_tree(), m)
-	for pr: Array in pairs(m, groups(m)):
+	for pr: Array in pairs(groups(m)):
 		print("TZSHOT   PAIR %s | %s vs %s: %s" % [stage, pr[0], pr[1], "OVERLAP" if pr[2] else "clear"])
 	var tag := "%s %dx%d" % [stage, size.x, size.y]
 	print("TZSHOT %s: %d overlaps (window %s, HUD %s)" % [tag, found.size(), main.get_window().size, m.hud.c.size])

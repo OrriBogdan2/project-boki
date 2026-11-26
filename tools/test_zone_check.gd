@@ -118,7 +118,7 @@ func _zone() -> void:
 	m.arena.reset()
 	ok(dm.hp == Arena.DUMMY_HP, "reset heals the dummies")
 	Overlay.close()
-	await _reserved(m, true)      # (last: the Drills run moves you)
+	await _reserved(m, true)  # (last: the Drills run moves you)
 	m.queue_free()
 	await tree.process_frame
 	var grounds := Match.new()
@@ -168,8 +168,8 @@ func _reserved(m: Match, test_zone: bool) -> void:
 			var what := "%s, %s popup, %dx%d" % [where, id, size.x, size.y]
 			var scanned: bool = gs.has(Shots.FPS) and gs.has("drawn minimap")
 			var popup: Array = Shots.popups(gs).filter(func(g: String): return g.begins_with(Shots.STATION_GROUP[id]))
-			ok(scanned and not popup.is_empty(), "the pairs are scanned: fps counter, minimap and the popup (%s)" % what)
-			for pr: Array in Shots.pairs(m, gs):
+			ok(scanned and not popup.is_empty(), "scanned: fps counter, minimap and the popup (%s)" % what)
+			for pr: Array in Shots.pairs(gs):
 				if pr[2]:
 					print("TESTZONE   overlap %s vs %s" % [pr[0], pr[1]])
 				ok(not pr[2], "%s keeps clear of %s (%s)" % [pr[1], pr[0], what])

@@ -9,7 +9,7 @@ extends Node
 const NAME := "Practice"
 const LEFT_PAD := 560          # px, the bar starts right of the HUD's portrait and ability row
 const BOTTOM_PAD := 8          # px, under the bar
-const STATION_POS := Vector2(272, 112)  # px: where a station's popup wants to sit, right of the minimap, under the key line
+const STATION_POS := Vector2(272, 112)  # px: a station popup's home: right of the minimap, under the key line
 const TEST_ZONE_PAD := 150     # px, under the Test Zone's bar: above the carried-Boki and weapon cards (y 612+)
 
 var m: Match
