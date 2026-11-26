@@ -17,4 +17,5 @@ const CHECKS := {
 	"--grammar-check": ["res://tools/grammar_check.gd", "grammar_check", null],
 	"--hero-reel": ["res://tools/hero_reel.gd", "hero_reel", null],  # private pitch footage (GPU)
 	"--step-up-check": ["res://tools/step_up_check.gd", "step_up_check", null],  # lips walked over
+	"--traversal-parity-check": ["res://tools/traversal_parity_check.gd", "traversal_parity_check", null],  # ref rows
 }
