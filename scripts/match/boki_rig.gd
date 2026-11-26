@@ -873,14 +873,14 @@ const STRIDE := {
 	"tuatrune": [0.33, 1.35],
 	"moonloris": [0.35, 1.41],
 	"scaldamus": [0.34, 1.36],
-	"spatewader": [0.32, 1.34],
+	"spatewader": [0.31, 1.41],
 	"orchisloth": [0.33, 1.35],
 	"limpetor": [0.30, 1.25],
 	"opalisk": [0.30, 1.24],
 	"nimbostrich": [0.34, 1.73],
 	"sentrikat": [0.34, 1.33],
 	"nacrolin": [0.33, 1.59],
-	"murmurling": [0.29, 1.17],
+	"murmurling": [0.26, 1.73],
 	"squalltross": [0.29, 1.17],
 }
 
