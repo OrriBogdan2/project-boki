@@ -32,8 +32,10 @@ static func grey(row: Control, rows: Array) -> void:
 			(row.get_child(i) as CanvasItem).modulate.a = GREY_A
 
 
-## Puts `box` over the world point `at`, kept on screen; hides it when `at` is behind the camera.
+## Puts `box` over the world point `at`, kept inside the safe area (SafeArea.inner: the 12 px margin, the
+## centred frame on ultrawide); hides it when `at` is behind the camera.
 static func place(box: Control, cam: Camera3D, at: Vector3, vp: Vector2) -> void:
 	box.visible = box.visible and not cam.is_position_behind(at)
 	var p := cam.unproject_position(at + Vector3.UP * LINE_M) - Vector2(box.size.x * 0.5, box.size.y)
-	box.position = p.clamp(Vector2.ZERO, (vp - box.size).max(Vector2.ZERO))
+	var safe := SafeArea.inner(vp)
+	box.position = p.clamp(safe.position, safe.position + (safe.size - box.size).max(Vector2.ZERO))

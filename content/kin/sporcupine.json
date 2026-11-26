@@ -1,0 +1,14 @@
+{
+	"grammar": 1,
+	"id": "sporcupine",
+	"name": "Sporcupine",
+	"theme": "spore",
+	"flavor": "Porcupine whose quills are mushroom stalks.",
+	"data_only": true,
+	"roster": {
+		"art": "locked",
+		"line": "burrlet",
+		"stage": 2,
+		"from": "burrlet"
+	}
+}
