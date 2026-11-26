@@ -148,3 +148,12 @@ Scripts and recipe: `~/gens/hunter-round-1124/sparkle/p6/tools/` (stance.py, spr
 - geo_check: worst 3.2 cm, held worst 1.7 cm (hair>torso); hands L sep .51, R sep .54. art-gate GAME 6.7, LIVE GAME 5.0 (not a pass).
 - Open: side hoses read as netting at game view, patch on the side of the top in attack back 2, lace too fine.
 Scripts: `~/gens/hunter-round-1124/sparkle/p7/tools/`.
+
+### Round 1124o-11 (glb 18a6a71e41ab, 79,965 tris; on top of P1 9a1d6d3fbbd0)
+- Gutter pad on all 7 images (push-pull fill of every texel outside its material group's UV islands, +1 texel margin).
+  Why: hero_toon blends far fragments toward a +1-mip sample, and Meshy filled the gutters with red-brown, so at match distance
+  the hair, face and body edges averaged in gutter colour (the "red wash / mud" art-gate notes at the match camera).
+- Hair Image_0 at mip 4: texels tinted >12/255 41% -> 11%, mean error 20.4 -> 5.0; mip 5 68% -> 17%. Face Image_6 mip 4 27% -> 5%.
+  Body Image_3 mip 4 15% -> 7%. Drawn texels change only by the JPEG re-encode (q97, mean 0.3-3.7/255).
+- Mesh, UV, skin, clips byte-identical. The extracted ryzz_meshy_Image_N.jpg files hold the same bytes as the embedded images.
+Scripts: `~/gens/hunter-round-1124/sparkle/p11/tools/` (padall.py, bleed.py).
