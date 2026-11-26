@@ -169,3 +169,17 @@ Scripts: `/home/boki/gens/hunter-round-1124/kael/hair/scripts/` (`hairmask.py GL
 - Measured on real-GPU renders, live -> r27 (r27/scripts/m27.py): game camera cloth red median 196 -> 157, neon px per
   1000 red 230 -> 32, ink slits per 1000 red 1.20 -> 0.28; eye level red 166 -> 123, neon 118 -> 8, leather 52,42,43 ->
   61,45,41.
+
+**Round 28 (2026-11-26, ext/kael-r25, scripts /home/boki/gens/hunter-round-1124/kael/r28/scripts/, plan section 10):**
+- The review's "hit" blade-through-knee is the Attack clip's tail (Kael has no hit clip; the 1.4 s Attack one-shot is
+  still playing). A headless `--live-audit --probe` showed, on every LMB swing: blade within 2 cm of the legs in 8 frames
+  (104 samples) and the tip 0.33-0.39 m under the floor at the slam. Fix: the Attack clip's RightHand rotation keys get a
+  per-frame hand-local turn about the blade's two cross axes (`viterbi28.py` -> curve.json, <= 10 deg change per frame,
+  max 22 deg, zero at both clip ends), `build28.py`. Re-probed in Godot: leg samples 104 -> 36, lowest tip -0.39 -> -0.03 m.
+  Mesh, skin, other clips and the sword seat are untouched.
+- Image_0 (r27 texels graded again, masks from a per-texel rest-position map `posmap.py` + `regions.py`): knee guards
+  (lighter texels in the knee box) -> steel grey 138,136,142 (was tan 101,89,80); boots -> charcoal brown 64,52,52
+  (was 77,65,57); pants -> grey-brown 86,69,72 (was 69,57,49); boot buckles -> steel; hair-only texels -> cool
+  silver 170,171,180 with luminance gamma 1.35 (was neutral 199,193,195; p10 154 -> 125) so strands separate at the game
+  camera (a lilac 178,163,169 try rendered PINK at the game camera under the warm sun: keep hair neutral-to-cool);
+  off-arm red skin: r25 glossy white streaks wiped, thin tapered white vein lines redrawn (r23 vein field). `grade28.py`.
