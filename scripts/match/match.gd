@@ -3070,7 +3070,8 @@ func _boom(s: Dictionary, at: Vector3) -> void:
 	for e in _shot_targets(s):
 		var d := Vector2(e.pos.x - at.x, e.pos.z - at.z).length()
 		if d < radius + e.r and absf(e.pos.y + 0.5 - at.y) < 2.0:
-			var f := 1.0 - 0.45 * minf(1.0, d / radius)
+			var f := Blast.share(world, at, e, radius, x.get("boom_open", false))
+			if f <= 0.0: continue
 			var dir := Vector2(e.pos.x - at.x, e.pos.z - at.z).normalized()
 			var o := {"src": "boom", "kb": dir * float(x.get("boom_kb", 8.0)) * f, "lift": (7.0 if not small else 1.5) * f, "at": at}
 			if x.has("ab"): o["ab"] = x["ab"]
