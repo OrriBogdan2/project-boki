@@ -73,7 +73,7 @@ func run(main_node: Node) -> void:
 	main.get_tree().quit(0)
 
 
-func _row(who: String, node: Node3D, cam: Camera3D, data_cm: float, species := "") -> Dictionary:
+func _row(player: String, node: Node3D, cam: Camera3D, data_cm: float, species := "") -> Dictionary:
 	var lo := Vector3(INF, INF, INF)
 	var hi := -lo
 	var pts := PackedVector2Array()
@@ -96,7 +96,7 @@ func _row(who: String, node: Node3D, cam: Camera3D, data_cm: float, species := "
 	for p in pts:
 		bbox = bbox.expand(p)
 	return {
-		"who": who,
+		"who": player,
 		"species": species,
 		"foot": [foot.x, foot.y],
 		"box_cm": [box.x, box.y, box.z],
