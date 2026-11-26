@@ -149,6 +149,7 @@ func _states(main: Node, a: String) -> void:
 	_toon(a, m)
 	_crouch_arms(a, nat)
 	await _slots(main, a, m, nat)
+	await _upper(main, a, m, nat)
 	await _kmoves(main, a, m, nat)
 	_moves(a, nat)
 	_only_meshy(a, m)
@@ -342,6 +343,25 @@ func _slots(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
 	ok(nat.player.current_animation == pick, "%s: a charged swing takes lmb without lmb_hold" % a)
 	nat.plays.erase("lmb")
 	await _synthetic_clips(main, a, m, nat)
+
+
+## A swing while he runs plays on the upper body (the run clip stays the playing one, the layer owns the arms); on the
+## spot the attack clip owns the whole body.
+func _upper(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
+	var run := {"vel": Vector3(0.0, 0.0, -4.6)}
+	await _feed(main, nat, m, run, run.merged({"swing_n": 1, "combo": 0}, true))
+	var run_clip := String(nat.plays["run"])
+	ok(
+		nat.player.current_animation == run_clip,
+		"%s: a swing on the run keeps the run clip (%s)" % [a, nat.player.current_animation]
+	)
+	var n_tracks := nat.upper.tracks().size()
+	ok(nat.upper.on and nat.upper.w > 0.0 and n_tracks >= 5, "%s: ...and %d upper-body tracks play it" % [a, n_tracks])
+	await _feed(main, nat, m, {}, {"swing_n": 1, "combo": 0})
+	ok(
+		not nat.upper.on and nat.player.current_animation == String(nat.plays["attack"]),
+		"%s: a swing standing owns the body" % a
+	)
 
 
 ## A clips file (made here: a skeleton under another node name, one clip named SYNTH) lends its clip to a slot.
