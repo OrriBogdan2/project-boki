@@ -34,7 +34,8 @@ const SEQ := {
 	"thief": [["dash", 0.0, CARTWHEEL], ["dash", 0.0, CARTWHEEL], ["dash", 0.0, CARTWHEEL]],
 	"juggernaut": [["rmb", LUNGE_HOLD, ["jug_lunge"]], ["rmb", LUNGE_HOLD, ["jug_lunge"]], ["rmb", 1.1, ["jug_lunge"]],
 			["dash", 0.0, ["jug_dash"]], ["dash", 0.0, ["jug_dash"]]],
-	"gunslinger": ONE, "archer": ONE, "ashwick": ONE, "tender": ONE, "dolm": ONE, "dredge": ONE,
+	"gunslinger": [["dash", 0.0, []], ["dash", 0.9, []]],      # (a tap, then a held slide)
+	"archer": ONE, "ashwick": ONE, "tender": ONE, "dolm": ONE, "dredge": ONE,
 	"rimewright": ONE, "ostra": ONE, "bulwark": ONE, "mage": ONE,
 }
 const POSE_NODES := ["Rig", "Rig/Torso", "Rig/Torso/ArmLPivot", "Rig/Torso/ArmRPivot", "Rig/Legs/LegL", "Rig/Legs/LegR"]
@@ -240,7 +241,7 @@ func tail() -> void:
 				if img:
 					img.resize(int(img.get_width() / 2.0), int(img.get_height() / 2.0))
 					img.save_png("%s/%s_%d_%03d.png" % [shots_dir, arch, use, fr - press_fr])
-			if t_s >= 0.08:
+			if t_s >= (maxf(0.08, float(seq[use][1])) if seq[use][0] == "dash" else 0.08):
 				Input.action_release("dash")
 			if t_s >= WINDOW_S:
 				_next()
