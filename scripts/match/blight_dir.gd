@@ -68,6 +68,7 @@ static func dmg_k(l: float) -> float:
 
 func _init(match_node: Match) -> void:
 	m = match_node
+	OnFree.cut_with(m, self)        # its parts point back at it (--match-repeat-check)
 	raid_k = float(RaidLook.BLIGHT.get(m.raid, 1.0))
 	host = not m.net_on or m.is_host
 	rng.seed = int(m.seed_val) * 31 + 977

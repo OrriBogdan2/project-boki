@@ -17,23 +17,11 @@ var _scripted := false   # a scripted glider (the drop, a check, the net) is not
 
 func _init(hunter: Hunter) -> void:
 	h = hunter
-	hunter.tree_exited.connect(_left, CONNECT_ONE_SHOT)
+	OnFree.call_on(hunter, fsm.unbind)   # the hooks below hold this, and this holds fsm (--match-repeat-check)
 	fsm.guard(Loco.S.GLIDING, _glide_ok)
 	fsm.on_exit(Loco.S.GLIDING, _glide_folded)
 	fsm.on_exit(Loco.S.DASHING, func(_to: int) -> void: dash_left = minf(dash_left, 0.0))     # (an overrun stays)
 	fsm.on_exit(Loco.S.MANTLING, func(_to: int) -> void: ledge = {})
-
-## The Hunter left the tree: once it is gone for good (not just moved), break the cycle its hooks make
-## (fsm -> Callable -> this -> fsm), which otherwise keeps every Hunter's machine alive for the session
-## (--match-repeat-check).
-func _left() -> void:
-	_check_gone.call_deferred()
-
-func _check_gone() -> void:
-	if is_instance_valid(h) and h.is_inside_tree():
-		h.tree_exited.connect(_left, CONNECT_ONE_SHOT)
-		return
-	fsm.unbind()
 
 ## A press opens the glider only out of a stun and out of a knock carried under a dash or a ledge rise.
 func _glide_ok(from: int) -> bool:

@@ -43,15 +43,18 @@ func _build() -> void:
 	_root = Node3D.new()
 	_root.name = "WaysOut"
 	m.add_child(_root)
-	_add(m.heart.gate, Heart.r("gate_r"), func(): return WaysOutLook.early(m))
-	_add(m.heart.site, Heart.r("final_r"), func(): return WaysOutLook.final(m))
-	if m.lairs:
-		for L in m.lairs.list:
-			_add(L["up"], Lairs.UP_R, func(): return WaysOutLook.lair(m, L))
-	if m.exits:
-		for x in m.exits.of_kind("outpost"):
+	# the readers capture the Match, not this helper: a lambda naming a member holds self, and _seats holds the
+	# lambda, a cycle that kept this and its seven beacons (14 materials) alive past the match (--match-repeat-check)
+	var mt := m
+	_add(mt.heart.gate, Heart.r("gate_r"), func(): return WaysOutLook.early(mt))
+	_add(mt.heart.site, Heart.r("final_r"), func(): return WaysOutLook.final(mt))
+	if mt.lairs:
+		for L in mt.lairs.list:
+			_add(L["up"], Lairs.UP_R, func(): return WaysOutLook.lair(mt, L))
+	if mt.exits:
+		for x in mt.exits.of_kind("outpost"):
 			if not x.get("tut", false):
-				_add(x["pos"], Exits.OUTPOST_R, func(): return WaysOutLook.uplink(m, x))
+				_add(x["pos"], Exits.OUTPOST_R, func(): return WaysOutLook.uplink(mt, x))
 
 func _add(at: Vector3, radius: float, src: Callable) -> void:
 	_seats.append({"b": SeatBeacon.new(_root, at, radius), "src": src, "rd": null})
