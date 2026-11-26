@@ -59,6 +59,8 @@ func setup(match_node: Match) -> void:
 	add_child(knocks)
 	abyss_fx = ABYSS_FX.new()      # (movefeel) the abyss closing in: under the HUD, local player only
 	add_child(abyss_fx)
+	status_edge = StatusEdge.new()  # stun / untouchable / Grounded / cloak as a screen-edge tint
+	add_child(status_edge)
 	# the pointer over the item windows: drawn above them (the crosshair lives under them on `c`,
 	# and the system cursor stays hidden in a match, so without this you can't see where you click)
 	cursor = Control.new()
@@ -267,6 +269,7 @@ func _draw_parts() -> void:
 	# instead of a guess 14m down, and much stronger: the screen shader drains, darkens and reddens the
 	# picture and closes a vignette in; here the rings, the heartbeat, a low rumble and a pulsing
 	# warning near the end (the falling wind and the warning sound are AbyssFallSfx)
+	status_edge.tick(p if p == m.player else null, get_process_delta_time())
 	var want_a: float = ABYSS_FX.danger(p) if p == m.player else 0.0
 	abyss_a = lerpf(abyss_a, want_a, 1.0 - exp(-10.0 * get_process_delta_time()))
 	if abyss_fx:
@@ -1714,6 +1717,7 @@ func _draw_scores(sz: Vector2) -> void:
 var abyss_a := 0.0
 const ABYSS_FX := preload("res://scripts/match/abyss_fx.gd")
 var abyss_fx: CanvasLayer = null
+var status_edge: StatusEdge = null
 
 
 ## A point `up` metres above a hunter's feet, following the body's lean toward the camera
