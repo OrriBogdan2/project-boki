@@ -44,6 +44,10 @@ SPECS = {"cindle": ("vespyx", "vespyx_paint", "vespyx_anim"), "puddlet": ("prism
          "floenatee": ("glomwort", "glomwort", "glomwort_anim"),
          **{i: ("glomwort",) * 2 + ("glomwort_anim",)
            for i in boki_scan.AUTO if boki_scan.AUTO[i] is boki_scan.BORROWED},
+         "heatherhorn": ("glomwort", "glomwort", "heatherhorn_anim"),
+         "kilnbadger": ("glomwort", "glomwort", "kilnbadger_anim"),
+         "limpetor": ("glomwort", "glomwort", "limpetor_anim"),     # their own clips over the borrowed rig
+         "moonloris": ("glomwort", "glomwort", "moonloris_anim"),
          "kestrike": ("kestrike", "kestrike", "kestrike_anim"),
          "kindlewren": ("kindlewren", "kindlewren", "kindlewren_anim"),
          "lodestick": ("lodestick", "lodestick", "lodestick_anim"),

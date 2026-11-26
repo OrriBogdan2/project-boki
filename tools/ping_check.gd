@@ -72,7 +72,7 @@ func _start(extra: Dictionary) -> void:
 	main.add_child(m)
 	var o := {"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242}
 	o.merge(extra, true)
-	await m.start(o)
+	m.start(o)
 	m.set_process(false)
 
 func _mate() -> Hunter:

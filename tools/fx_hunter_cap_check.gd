@@ -19,7 +19,7 @@ func run(main: Node) -> void:
 	Econ.ensure()
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
 	m.set_process(false)
 	var cap: FxHunterCap = m.get_node_or_null("FxHunterCap")
 	ok(cap != null, "the FxHunterCap node is in the match")
@@ -56,6 +56,18 @@ func run(main: Node) -> void:
 	on.global_position = h.pos + Vector3(9.0, 1.0, 3.0)
 	cap._process(0.016)
 	ok(on.visible, "the puff is back once the Hunter is clear of it")
+	# a puff on the camera's side of the Hunter, clear of it on the ground, still hides the body on screen: it parts
+	var chest := h.pos + Vector3(0, 1.0, 0)
+	on.global_position = chest + (m.cam.global_position - chest).normalized() * 9.0
+	var gd := Vector2(on.global_position.x - h.pos.x, on.global_position.z - h.pos.z).length()
+	var reach := on.get_aabb().size.x * 0.5 * on.global_transform.basis.get_scale().x + FxHunterCap.PUFF_CLEAR
+	cap._process(0.016)
+	ok(
+		not on.visible and gd > reach,
+		"a puff between the camera and the Hunter parts (%.1f m off on the ground, %.1f m reach)" % [gd, reach]
+	)
+	on.global_position = h.pos + Vector3(9.0, 1.0, 3.0)
+	cap._process(0.016)
 	var before := cap._glows.size()
 	orb.free()
 	cap._rescan()
