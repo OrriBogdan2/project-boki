@@ -11403,3 +11403,4 @@ READY ext/merge-lane-n19h-1119 de4bcc8d720 (PR #434: main merged, hazard sounds 
 READY ext/merge-lane-M3-1121 0d1f9b5a1c0 (PR #569: main merged twice, clean; only red left farm-tutorial-check = red on main)
 READY ext/merge-lane-N1-1122 c528596e97b (PR #641: main merged, hazard sounds + results.gd = main, duplicate --stolen-extract-check registry row dropped; reds left = main reds)
 READY ext/mantle-port-a 3a59a2cb894 (PR #135: main merged by sibling job, gdformat vex_clip_live_check; clip-check has ~6 rows red beyond main)
+READY ext/merge-lane-N1-1122 4df71e81612 (PR #641 salvage: main 8369d10952 merged; save.gd/care.gd conflicts = main layout + branch v23 BaseAxes migration; suite-fast 19 flags NEW-RED 0, 4 red same as main; health --strict OK)
