@@ -37,6 +37,7 @@ var ult_on := true
 var gloves := ["", ""]         # the two glove slots, Q and V (item 69)
 var hits_all: Array = []       # [[t, d]] everything you dealt (the session DPS meter)
 var dealt := 0.0
+var pad: SummonPad = null      # the Training Grounds only
 var _cb: Callable
 var layer: CanvasLayer = null
 var hint: Label = null
@@ -45,7 +46,6 @@ var card_layer: CanvasLayer = null
 var menu_layer: CanvasLayer = null
 var keys_node: Node = null
 var grounds: Grounds = null     # the stations on the sky perches and the duel ring (arena layout only)
-var pad: SummonPad = null      # the Training Grounds only
 
 func setup(match_node: Match, which: String) -> void:
 	m = match_node

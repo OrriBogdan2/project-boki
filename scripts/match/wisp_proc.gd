@@ -9,16 +9,16 @@ extends Node3D
 ## With the wisps off, a walking Boki carried by order (the Return order) cues the same way while it rides.
 ## The sound and the first-proc tip are KinWispProc's; when that tip shows, the wisp flashes again (reflash).
 
-const RATE_S := 0.5        # s between cues of one wisp
-const FLASH_S := 0.25      # s the flash takes to swell and fade
-const STREAK_S := 0.2      # s the streak takes to fade
-const FLASH_R := 0.14      # m: the flash's radius at its biggest
-const STREAK_R := 0.012    # m: the streak's radius (thin, like the thief tether)
-const CHEST_Y := 1.2       # m above a hunter's feet where a heal, shield or boost lands
-const SHOT_REACH := 6.0    # m the damage streak runs along the aim
-const RUN_START := 3.0     # m/s the hunter must pass, from standing, for the speed boost to read
-const TIP_KEEP_S := 6.0    # s a cue may wait for the first-proc tip's reflash (the tip lane can be busy)
-const KINDS := {           # cue kind -> the carry passive stats that make it
+const RATE_S := 0.5  # s between cues of one wisp
+const FLASH_S := 0.25  # s the flash takes to swell and fade
+const STREAK_S := 0.2  # s the streak takes to fade
+const FLASH_R := 0.14  # m: the flash's radius at its biggest
+const STREAK_R := 0.012  # m: the streak's radius (thin, like the thief tether)
+const CHEST_Y := 1.2  # m above a hunter's feet where a heal, shield or boost lands
+const SHOT_REACH := 6.0  # m the damage streak runs along the aim
+const RUN_START := 3.0  # m/s the hunter must pass, from standing, for the speed boost to read
+const TIP_KEEP_S := 6.0  # s a cue may wait for the first-proc tip's reflash (the tip lane can be busy)
+const KINDS := {  # cue kind -> the carry passive stats that make it
 	"heal": ["regen"],
 	"shield": ["armor", "damage_reduction", "knockback_resist"],
 	"damage": ["damage"],
@@ -28,20 +28,21 @@ const KINDS := {           # cue kind -> the carry passive stats that make it
 static var _flash_mesh: SphereMesh
 static var _streak_mesh: CylinderMesh
 
-var cues := 0                    # how many cues this wisp has played (the checks count them)
+var cues := 0  # how many cues this wisp has played (the checks count them)
 var last_kind := ""
 var _flash: MeshInstance3D
 var _streak: MeshInstance3D
 var _glow := Color.WHITE
-var _next := 0.0                 # match time the next cue may play
-var _t0 := -1e9                  # match time of the last cue
+var _next := 0.0  # match time the next cue may play
+var _t0 := -1e9  # match time of the last cue
 var _from := Vector3.ZERO
 var _to := Vector3.ZERO
 var _seen := false
 var _hp := 0.0
-var _soak := 0.0                 # armor plus kin shield last frame
+var _soak := 0.0  # armor plus kin shield last frame
 var _muzzle := 0.0
 var _moving := false
+
 
 ## Watch one wisp's hunter this frame and play a cue if a passive of the wisp acted (KinWisp.render calls it).
 static func watch(k: Kin) -> void:
@@ -49,6 +50,7 @@ static func watch(k: Kin) -> void:
 	if p == null:
 		p = _make(k)
 	p._look(k)
+
 
 ## A walking Boki (no wisp): watched while its hunter carries it by order; off them its watch rests, so
 ## the hp or shield it missed meanwhile is not read as a proc when it is carried again (KinWisp.render calls it).
@@ -61,6 +63,7 @@ static func watch_carried(k: Kin) -> void:
 		p._seen = false
 		p._fade(k.m.time)
 
+
 ## Your Boki's first-proc tip just showed (KinWispProc.tip, Match._tips): the wisp flashes again so the eye
 ## finds it, while its last cue is under TIP_KEEP_S old.
 static func reflash(k: Kin) -> void:
@@ -68,6 +71,7 @@ static func reflash(k: Kin) -> void:
 	if p == null or p.last_kind == "" or k.m.time - p._t0 > TIP_KEEP_S:
 		return
 	p._play(k, p.last_kind, p._to, k.m.time)
+
 
 static func _make(k: Kin) -> WispProc:
 	if _flash_mesh == null:
@@ -90,6 +94,7 @@ static func _make(k: Kin) -> WispProc:
 	k.add_child(p)
 	return p
 
+
 func _part(mesh: Mesh) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
 	mi.mesh = mesh
@@ -105,6 +110,7 @@ func _part(mesh: Mesh) -> MeshInstance3D:
 	add_child(mi)
 	return mi
 
+
 static func carries(k: Kin, kind: String) -> bool:
 	if k.ks == null:
 		return false
@@ -112,6 +118,7 @@ static func carries(k: Kin, kind: String) -> bool:
 		if String(ps["stat"]) in KINDS[kind]:
 			return true
 	return false
+
 
 func _look(k: Kin) -> void:
 	var h := k.owner_h
@@ -145,6 +152,7 @@ func _look(k: Kin) -> void:
 		_play(k, kind, to, now)
 	_fade(now)
 
+
 ## Play a cue now: the flash at the wisp, the streak from it to `to`.
 func _play(k: Kin, kind: String, to: Vector3, now: float) -> void:
 	_next = now + RATE_S
@@ -153,6 +161,7 @@ func _play(k: Kin, kind: String, to: Vector3, now: float) -> void:
 	_to = to
 	cues += 1
 	last_kind = kind
+
 
 func _fade(now: float) -> void:
 	var f := (now - _t0) / FLASH_S

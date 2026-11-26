@@ -116,6 +116,7 @@ var crouch_t := 0.0
 var rmb_t_prev := 0.0
 var pell: TutorialPell = null  # the guide, by each stop (TutorialPell)
 
+var wb: TutorialWisp  # the Boki-wisp steps (wisp, steal), with Boki wisps on
 var _course: Dictionary = {}
 var _beams: Array = []
 var _pads: Array = []
@@ -129,9 +130,6 @@ static func leads(sid: String) -> bool:
 
 static func steps() -> Array:
 	return Content.rules("tutorial")["steps"]
-
-
-var wb: TutorialWisp  # the Boki-wisp steps (wisp, steal), with Boki wisps on
 
 
 func _init(match_node: Match) -> void:

@@ -6,7 +6,7 @@ extends RefCounted
 
 const Check := preload("res://tools/wisp_flash_check.gd")
 const DT := 1.0 / 60.0
-const CROP := Vector2i(240, 200)    # px cut out round the screen centre for the strip (shown at 2x)
+const CROP := Vector2i(240, 200)  # px cut out round the screen centre for the strip (shown at 2x)
 const KINDS := ["heal", "shield", "damage", "speed", "rival", "shiny"]
 
 var main: Node
@@ -14,6 +14,7 @@ var m: Match
 var dir := ""
 var chk := Check.new()
 var crops: Array[Image] = []
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -24,8 +25,18 @@ func run(main_node: Node) -> void:
 	Save.no_write = true
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 78, "no_drop": true,
-		"demo_kin": "cindle", "boki_wisps": true})
+	await m.start(
+		{
+			"teams": 2,
+			"squad": 2,
+			"tier": 0,
+			"length": 1e9,
+			"seed": 78,
+			"no_drop": true,
+			"demo_kin": "cindle",
+			"boki_wisps": true
+		}
+	)
 	m.set_process(false)
 	chk.m = m
 	for mb in m.mobs:
@@ -48,6 +59,7 @@ func run(main_node: Node) -> void:
 	print("WISPPROCSHOTS %d in %s" % [crops.size(), dir])
 	main.get_tree().quit(0)
 
+
 func _kind(kind: String, rival: Hunter) -> void:
 	var who: Hunter = rival if kind == "rival" else m.player
 	var k: Kin = who.kin
@@ -67,6 +79,7 @@ func _kind(kind: String, rival: Hunter) -> void:
 	crop.resize(CROP.x * 2, CROP.y * 2, Image.INTERPOLATE_NEAREST)
 	crops.append(crop)
 	chk._carry(k, "")
+
 
 func _go(secs: float) -> void:
 	var t := 0.0

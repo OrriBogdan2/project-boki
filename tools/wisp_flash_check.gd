@@ -9,11 +9,12 @@ extends RefCounted
 
 const DT := 1.0 / 60.0
 const STAT_OF := {"heal": "regen", "shield": "armor", "damage": "damage", "speed": "move_speed"}
-const TIPS_AT_S := 20.0    # Match._tip_t past every opening tip's wait
-const OPENING_TIPS := ["move", "ability", "throw", "skill", "ult"]   # marked seen: only the proc tip may show
+const TIPS_AT_S := 20.0  # Match._tip_t past every opening tip's wait
+const OPENING_TIPS := ["move", "ability", "throw", "skill", "ult"]  # marked seen: only the proc tip may show
 
 var bad := 0
 var m: Match
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -35,13 +36,24 @@ func run(main: Node) -> void:
 	print("WISPFLASH %s (%d fail)" % ["PASS" if bad == 0 else "FAIL", bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _start(main: Node, wisps: bool) -> void:
 	if m:
 		m.queue_free()
 	m = Match.new()
 	main.add_child(m)
-	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 78, "no_drop": true,
-		"demo_kin": "cindle", "boki_wisps": wisps})
+	m.start(
+		{
+			"teams": 2,
+			"squad": 2,
+			"tier": 0,
+			"length": 1e9,
+			"seed": 78,
+			"no_drop": true,
+			"demo_kin": "cindle",
+			"boki_wisps": wisps
+		}
+	)
 	m.set_process(false)
 	for mb in m.mobs:
 		mb.queue_free()
@@ -50,10 +62,12 @@ func _start(main: Node, wisps: bool) -> void:
 		h.ctrl = "idle"
 	_frames(0.3)
 
+
 func ok(cond: bool, what: String) -> void:
 	print("WISPFLASH %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func _frames(secs: float) -> void:
 	var t := 0.0
@@ -63,9 +77,11 @@ func _frames(secs: float) -> void:
 		for h in m.hunters:
 			h.render(DT, 1.0)
 
+
 ## The wisp carries only this stat, as a lone carry passive.
 func _carry(k: Kin, stat: String) -> void:
 	k.ks.carry_passives = [{"stat": stat, "amount": 0.1, "category": ""}] if stat != "" else []
+
 
 ## Make the hunter's state do what the kind reads (a heal, a shield soak, a shot, a run start), over one frame.
 func _trigger(h: Hunter, kind: String) -> void:
@@ -92,8 +108,10 @@ func _trigger(h: Hunter, kind: String) -> void:
 	m.time += 0.01
 	h.kin.render(DT, 1.0)
 
+
 func _proc(k: Kin) -> WispProc:
 	return k.get_node("Proc") as WispProc
+
 
 func _kind(k: Kin, kind: String) -> void:
 	var h := k.owner_h
@@ -117,6 +135,7 @@ func _kind(k: Kin, kind: String) -> void:
 	ok(p.cues == n, tag + ": another passive's wisp does not cue it")
 	k.ks.carry_passives = saved
 
+
 func _rate(k: Kin) -> void:
 	var h := k.owner_h
 	_carry(k, "regen")
@@ -124,7 +143,7 @@ func _rate(k: Kin) -> void:
 	_trigger(h, "heal")
 	var n := _proc(k).cues
 	for i in 12:
-		_trigger(h, "heal")        # 12 triggers 0.02 s apart: all inside one RATE_S
+		_trigger(h, "heal")  # 12 triggers 0.02 s apart: all inside one RATE_S
 	ok(_proc(k).cues == n, "rate: a flood inside 0.5 s plays no second cue")
 	m.time += WispProc.RATE_S
 	_trigger(h, "heal")
@@ -139,6 +158,7 @@ func _rate(k: Kin) -> void:
 	var what := "rate: 60 triggers over %.1f s give %d cues (at most %d)"
 	ok(got > 0 and got <= allowed, what % [m.time - span, got, allowed])
 
+
 func _pooled(k: Kin) -> void:
 	var kids := k.get_child_count()
 	var proc_kids := _proc(k).get_child_count()
@@ -148,6 +168,7 @@ func _pooled(k: Kin) -> void:
 	var parts := k.find_children("*", "CPUParticles3D", true, false).size()
 	ok(k.get_child_count() == kids and _proc(k).get_child_count() == proc_kids, "pooled: no node added by cues")
 	ok(parts <= 1, "no burst: the cue adds no particles (%d on the wisp)" % parts)
+
 
 func _shiny(k: Kin) -> void:
 	var plain: Color = Shiny.col(k.species, {}, "glow")
@@ -163,6 +184,7 @@ func _shiny(k: Kin) -> void:
 	ok(is_equal_approx(got.r, shiny.r) and is_equal_approx(got.b, shiny.b), "shiny: the flash wears the shiny glow")
 	ok(not (is_equal_approx(got.r, plain.r) and is_equal_approx(got.b, plain.b)), "shiny: and not the plain one")
 
+
 ## The tip lines on screen after Match._tips ran (the opening tips seen, so only the proc tip can show).
 func _tip_lines() -> Array[String]:
 	for key in OPENING_TIPS:
@@ -172,12 +194,13 @@ func _tip_lines() -> Array[String]:
 	m.hud.msgs._process(DT)
 	return m.hud.msgs.texts().filter(func(t: String): return t.contains("'s "))
 
+
 ## Your Boki's first-proc tip (KinWispProc) shows once and the wisp flashes again with it; never again.
 func _first_tip(k: Kin, _rival: Kin) -> void:
 	var saved: Array = k.ks.carry_passives
 	Save.d["tutorial"].erase("proc")
 	m.hud.msgs.clear()
-	m.time += WispProc.TIP_KEEP_S + 1.0      # the cues of the rows above are stale
+	m.time += WispProc.TIP_KEEP_S + 1.0  # the cues of the rows above are stale
 	_carry(k, "regen")
 	_trigger(m.player, "heal")
 	var n := _proc(k).cues
@@ -190,6 +213,7 @@ func _first_tip(k: Kin, _rival: Kin) -> void:
 	n = _proc(k).cues
 	ok(_tip_lines().is_empty() and _proc(k).cues == n, "tip: a later cue says nothing, no reflash")
 	k.ks.carry_passives = saved
+
 
 ## Wisps off: a walking Boki's damage passive cues only while it is carried by order.
 func _walking_tip() -> void:

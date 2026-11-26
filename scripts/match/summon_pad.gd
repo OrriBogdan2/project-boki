@@ -8,21 +8,24 @@ extends RefCounted
 ## targets. Where it sits and the three species: content/rules/summon_pad.json.
 
 const SIGN := "SUMMON PAD\nstand on it"
-const CARD_LIFT := 3.0         # m above the pad
+const CARD_LIFT := 3.0  # m above the pad
 const COL_PAD := Color("9ad8ff")
 
 var a: Arena
 var pad: Vector3
 var card: Label3D
-var _line := ""                # the label's last text (it is only rewritten when it changes)
+var _line := ""  # the label's last text (it is only rewritten when it changes)
+
 
 static func rules() -> Dictionary:
 	return Content.rules("summon_pad")
+
 
 ## Where the pad wants to be, from where you start (metres).
 static func offset() -> Vector3:
 	var off: Array = rules()["offset"]
 	return Vector3(float(off[0]), 0.0, float(off[1]))
+
 
 func _init(arena: Arena, at: Vector3) -> void:
 	a = arena
@@ -43,10 +46,12 @@ func _init(arena: Arena, at: Vector3) -> void:
 	card.position = pad + Vector3(0, CARD_LIFT, 0)
 	a.m.add_child(card)
 
+
 ## Is the player standing on the pad (and up)?
 func on_pad() -> bool:
-	var P: Hunter = a.m.player
-	return not P.downed and P.flat_dist(pad) < float(rules()["r"])
+	var pl: Hunter = a.m.player
+	return not pl.downed and pl.flat_dist(pad) < float(rules()["r"])
+
 
 ## Interact on the pad: the next practice Boki, as a wisp with its summon ready.
 func cycle() -> void:
@@ -56,12 +61,14 @@ func cycle() -> void:
 	a.set_kin(String(ids[(at + 1) % ids.size()]))
 	KinWisp.set_wisp(a.m.player.kin, true)
 
+
 ## Each step: the card while you stand on the pad, else just its name.
 func tick() -> void:
 	var text := _text() if on_pad() else SIGN
 	if text != _line:
 		_line = text
 		card.text = text
+
 
 func _text() -> String:
 	var k: Kin = a.m.player.kin
