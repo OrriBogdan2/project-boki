@@ -83,7 +83,8 @@ func add_gpu(us: int) -> void:
 
 func report() -> void:
 	var baked := mats.filter(func(m): return m.get_shader_parameter("bake0") != null).size()
-	print("BENCH ab ground: %d of %d terrain materials baked%s" % [baked, mats.size(), "" if baked else " (WARNING: bake = cut)"])
+	var warn := "" if baked else " (WARNING: bake = old)"
+	print("BENCH ab ground: %d of %d terrain materials baked%s" % [baked, mats.size(), warn])
 	var base := 0.0
 	for i in NAMES.size():
 		var ms: float = gpu_us[i] / 1000.0 / maxi(n[i], 1)
