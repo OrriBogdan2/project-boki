@@ -11379,3 +11379,4 @@ READY ext/anim-blend-times-1125 9314743f47 (anim: glide blend in 0 / out 0.2 s, 
 READY ext/stuck-integ-c70a5076 c4324ec2170e38cc83795122edeb3a9abca9b9ab (supersedes: ext/revive-sickness-lamp ext/merge-lane-N2-1122 ext/merge-lane-N3-1122)
 READY ext/farm-hunter-look-1125 90a464c9c79ebc7d5f912e853fa0bf8c61d65e3c (same sha, no new push: 0 behind main; verified on w2 --check 0 fails, --farm-cam-check 0 fails, --farm-start-check 1 fail "nobody unassigned fires the Kiln" which also fails on origin/main (headless w2); health --strict red only on sfx loudness = no numpy)
 READY ext/cam-parity-1125 6613e3657178c21c5db3830b8a5b66421c20340d (supersedes dca40c2ed1; origin/main merged in cleanly, 0 conflicts, camera.json valid; check.sh --check SAVECOMPAT 0 fail, health --strict OK)
+READY ext/anim-kael-native-clips bfe750c249c4041be6547f0d624259901a078e4a (redfix-r: merged main 6613e36571, warden_native.json conflict resolved, wiki Rules regen, check.sh --changed green)
