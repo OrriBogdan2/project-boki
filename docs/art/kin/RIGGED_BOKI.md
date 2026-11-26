@@ -151,8 +151,9 @@ scales Flex by `fit` = target / measured and stores it as the root meta `fit`; `
 Flex's pose scale by it. A new Meshy model needs no size tuning: set its `size.cm`. The kin's own roll (Unique, Evo
 growth, Mutations) and the farm's `FARM_BOKI_SCALE` multiply on top, as before.
 `--kin-size-check` measures every species with a model and asserts each longest side is within 10% of its data, the
-starters (Vespyx 30, Prismander 28, Mycroll 27 cm) have footprints within 1.2x and Heatherhorn (70 cm) is bigger than
-them. `--boki-size-shots` renders the proof (the HUD frame, the game camera, an eye-level camera) and writes each
+three starters (Vespyx, Prismander, Mycroll, 28 cm each) cover areas within 1.15x at the game camera (the hull of the
+mesh seen from its 57 degree pitch, averaged over four turns) and Heatherhorn (70 cm) is bigger than them. The starters'
+cm are not the 30/28/27 asked first: at those the silhouettes differed by 1.33x; 28 each gives 1.07x. `--boki-size-shots` renders the proof (the HUD frame, the game camera, an eye-level camera) and writes each
 one's measured box and the area it covers on screen. The portrait (`KinPortrait`) divides the fit out: its fixed frame
 was cut for the glb's own size.
 
