@@ -11,6 +11,7 @@ the extracted <glb>_<image>.webp beside it (the file Godot loads), which must st
   python tools/boki/boki_delight.py art/kin/heatherhorn/heatherhorn.glb [--target 1.25] [--dry]
   python tools/boki/boki_delight.py --measure art/kin/*/*.glb   # up/down, side/up per species
 """
+
 import argparse
 import io
 import json
@@ -153,7 +154,7 @@ def delight(path, target, dry):
     for _ in range(14):  # the measure is per vertex, the fit per texel: settle k on the measure itself
         f = np.exp((k - 1.0) * field)
         out = lin * f[..., None]
-        out *= (lum[cov].mean() / max((out @ LUM)[cov].mean(), 1e-6))
+        out *= lum[cov].mean() / max((out @ LUM)[cov].mean(), 1e-6)
         out /= np.maximum(out.max(2, keepdims=True), 1.0)  # a texel lifted past white keeps its hue, not its clip
         r = bake_ratio(nrm, vertex_lum(np.clip(out, 0, 1), uv))[0]
         if abs(r - target) < 0.01:

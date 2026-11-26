@@ -1,6 +1,8 @@
 extends "res://tools/vv_shots.gd"
 ## --toon-lineup-shots --shots-dir=<dir> [--close] [--species=a,b] [--arch=a,b]: every Boki and Hunter the game
 ## draws, one after another on the same spot under the same light at the match camera, in a real match
+## --ab=<species>:<atlas png/webp> adds that species again, right after itself, with the given coat atlas (an old one):
+## a before/after in the same run and frame, row id <species>_ab (separate runs drift by up to 0.09 luminance).
 ## (jobq submit --needs gpu). Writes <dir>/lineup_<id>.png (crop round the model), <dir>/lineup_sheet.png (all of
 ## them, labelled, darkest rendered model first) and <dir>/lineup_stats.tsv (rendered luminance of the model's own
 ## pixels, from the shot minus the empty spot). Pairs with --toon-consistency-check, which judges the materials.
@@ -12,6 +14,7 @@ var crop_px := Vector2i(170, 170)  # px of the screen round the model, drawn at 
 var zoom := 2.5
 var ids: Array = []
 var world: Node3D  # what the models are added to: the match, or the farm
+var ab := PackedStringArray()  # --ab: [species, atlas path]
 
 
 func run(main_node: Node) -> void:
@@ -25,11 +28,15 @@ func run(main_node: Node) -> void:
 			dir = arg.substr(12)
 		if arg.begins_with("--species="):
 			boki = Array(arg.substr(10).split(","))
+		if arg.begins_with("--ab="):
+			ab = arg.substr(5).split(":", true, 1)
 		if arg.begins_with("--arch="):
 			var named := Array(arg.substr(7).split(","))  # "none" or empty: no Hunters
 			hunters = named.filter(func(a): return a != "" and a != "none")
 	for sp in boki:
 		ids.append(["boki", sp])
+		if ab.size() == 2 and ab[0] == sp:
+			ids.append(["boki", sp, ab[1]])
 	for arch in hunters:
 		ids.append(["hunter", arch])
 	DirAccess.make_dir_recursive_absolute(dir)
@@ -48,7 +55,7 @@ func run(main_node: Node) -> void:
 		var img := main.get_viewport().get_texture().get_image()
 		var st := _model_stats(img, empty, spot + Vector3(0, 0.8, 0))
 		var crop := _crop_px(img, st["centre"], crop_px, zoom)
-		crop.save_png(dir.path_join("lineup_%s.png" % row[1]))
+		crop.save_png(dir.path_join("lineup_%s.png" % _label(row)))
 		shots.append([row, crop, st])
 		node.queue_free()
 	_write(shots)
@@ -81,6 +88,8 @@ func _spawn(row: Array, at: Vector3) -> Node3D:
 	var node: Node3D
 	if row[0] == "boki":
 		node = Models.kin(String(row[1]), {"level": 5})
+		if row.size() > 2:
+			_swap_atlas(node, String(row[2]))
 	else:
 		var arch := String(row[1])
 		var look := PlayerLook.neutral()
@@ -90,9 +99,26 @@ func _spawn(row: Array, at: Vector3) -> Node3D:
 	return node
 
 
+func _label(row: Array) -> String:
+	return String(row[1]) + ("_ab" if row.size() > 2 else "")
+
+
+## The --ab row: the rig's coat draws the given atlas instead of its own.
+func _swap_atlas(node: Node3D, path: String) -> void:
+	var img := Image.load_from_file(path)
+	if img == null:
+		push_error("toon lineup: no atlas at %s" % path)
+		return
+	img.generate_mipmaps()
+	for n in node.find_children("*", "", true, false):
+		if n is BokiRig and (n as BokiRig)._coat != null:
+			(n as BokiRig)._coat.set_shader_parameter("albedo_tex", ImageTexture.create_from_image(img))
+
+
 ## The model's own pixels in a window round `at` (not the empty spot, and not the ground darkened by its shadow: a
-## shadow keeps the ground's colour balance, a model does not): mean luminance, mean HSV saturation, pixel count and
-## the centre of those pixels, which the crop is cut round (the model stands low in the frame, not on `at`).
+## shadow keeps the ground's colour balance, a model does not): mean luminance, mean HSV saturation, pixel count, the
+## 10th and 90th percentile luminance (its shaded and lit sides) and the centre of those pixels, which the crop is
+## cut round (the model stands low in the frame, not on `at`).
 func _model_stats(img: Image, empty: Image, at: Vector3) -> Dictionary:
 	var cam := main.get_viewport().get_camera_3d()
 	var c := cam.unproject_position(at)
@@ -100,6 +126,7 @@ func _model_stats(img: Image, empty: Image, at: Vector3) -> Dictionary:
 	var sat := 0.0
 	var sum_p := Vector2.ZERO
 	var n := 0
+	var lums := PackedFloat32Array()
 	var half := Vector2i(160, 160)
 	for y in range(int(c.y) - half.y, int(c.y) + half.y):
 		for x in range(int(c.x) - half.x, int(c.x) + half.x):
@@ -112,12 +139,16 @@ func _model_stats(img: Image, empty: Image, at: Vector3) -> Dictionary:
 			var hue_shift := Vector3(a.r / la - b.r / lb, a.g / la - b.g / lb, a.b / la - b.b / lb).length()
 			if hue_shift > DIFF_MIN:
 				sum += la
+				lums.append(la)
 				sat += a.s
 				sum_p += Vector2(x, y)
 				n += 1
 	n = maxi(n, 1)
 	var centre := Vector2i(sum_p / n) if sum_p != Vector2.ZERO else Vector2i(c)
-	return {"lum": sum / n, "sat": sat / n, "n": n, "centre": centre}
+	lums.sort()
+	var p10 := lums[int(lums.size() * 0.1)] if lums.size() > 0 else 0.0
+	var p90 := lums[int(lums.size() * 0.9)] if lums.size() > 0 else 0.0
+	return {"lum": sum / n, "sat": sat / n, "n": n, "centre": centre, "p10": p10, "p90": p90}
 
 
 func _crop_px(img: Image, centre: Vector2i, px: Vector2i, mag: float) -> Image:
@@ -134,12 +165,13 @@ func _write(shots: Array) -> void:
 	var rows := int(ceil(shots.size() / float(COLS)))
 	var sheet := Image.create(w * COLS, h * rows, false, Image.FORMAT_RGB8)
 	var f := FileAccess.open(dir.path_join("lineup_stats.tsv"), FileAccess.WRITE)
-	f.store_line("kind\tid\trendered_lum\trendered_sat\tpixels")
+	f.store_line("kind\tid\trendered_lum\trendered_sat\tpixels\tlum_p10\tlum_p90")
 	for i in shots.size():
 		var crop: Image = shots[i][1]
 		crop.convert(Image.FORMAT_RGB8)  # blit_rect between formats draws nothing
 		sheet.blit_rect(crop, Rect2i(Vector2i.ZERO, crop.get_size()), Vector2i((i % COLS) * w, int(i / COLS) * h))
 		var st: Dictionary = shots[i][2]
-		f.store_line("%s\t%s\t%.3f\t%.3f\t%d" % [shots[i][0][0], shots[i][0][1], st["lum"], st["sat"], st["n"]])
+		var row := [shots[i][0][0], _label(shots[i][0]), st["lum"], st["sat"], st["n"], st["p10"], st["p90"]]
+		f.store_line("%s\t%s\t%.3f\t%.3f\t%d\t%.3f\t%.3f" % row)
 	f.close()
 	sheet.save_png(dir.path_join("lineup_sheet.png"))
