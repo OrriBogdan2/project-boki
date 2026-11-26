@@ -7,7 +7,7 @@ extends RefCounted
 
 const GROUND := Color(0.1, 0.11, 0.1)
 const MIN_PEAK := 0.6   # luma of the brightest body pixel (rim or core is near white)
-const MIN_MEAN := 0.3   # luma of the body's mean (the ground is 0.1)
+const MIN_MEAN := 0.4   # luma of the body's mean (the ground is 0.1; a Boki wisp in Forward+ is 0.49 and up)
 const SIZE := Vector2i(256, 256)
 const SPECIES := 2   # Boki species drawn (the first ones in Data.KIN)
 
