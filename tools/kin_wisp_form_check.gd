@@ -24,13 +24,14 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 func run(main_node: Node) -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	main = main_node
 	Save.no_write = true
 	Save.d = Save.fresh()
 	Econ.ensure()
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
+	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
 	m.set_process(false)
 	for mb in m.mobs:
 		mb.dead = true

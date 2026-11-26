@@ -73,6 +73,8 @@ func _setup_input() -> void:
 	_key("util2", [KEY_2])                    # utility belt slot 2 (an armor kit to start)
 	_key("util3", [KEY_3])                    # utility belt slot 3
 	_key("util4", [KEY_4])                    # utility belt slot 4
+	_key("util5", [KEY_5])                    # utility belt slot 5
+	_key("util6", [KEY_6])                    # utility belt slot 6
 	_key("gear1", [KEY_Q])                    # glove 1 (Q)
 	_key("gear2", [KEY_V], MOUSE_BUTTON_XBUTTON1)  # glove 2: V (shares it with play at home) or Mouse 4
 	_key("crouch", [KEY_CTRL])                # sneak: slower, quieter, and you see further
@@ -89,7 +91,6 @@ func _setup_input() -> void:
 	_key("glide", [], MOUSE_BUTTON_XBUTTON2)  # press Mouse 5 (the front side button) in the air and hold to glide, like a second Space press; never jumps
 	_key("hunter_ult", [KEY_R])               # the hunter's own ultimate (level 6, see ArchKit.cast_ult)
 	_key("ultimate", [KEY_X])                 # Fuse with your Boki (level 6, a full bond meter); X again releases
-	_key("summon", [KEY_C])                   # Boki wisps: your wisp out as the full Boki (KinSummon)
 	_key("util1", [KEY_1])                    # utility belt slot 1 (a tonic to start)
 	_key("scores", [KEY_TAB])
 	_key("menu", [KEY_ESCAPE])
@@ -184,7 +185,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 				nk["name"] = Data.default_kin_name(String(nk["species"]))
 				nk["memory"] = []
 				nk.erase("lost_from")
-				Save.remember(nk, "caught", "was scanned by you out in the islands and brought home")
+				Save.remember(nk, "caught", CarryArrival.line(nk["origin"]["where"]))
 			else:
 				# a rival's kin you took home: it still misses them. One that loved its old hunter
 				# (trust 80+) pines for a good while and is very slow to bond with you
@@ -200,9 +201,11 @@ func apply_result(r: Dictionary) -> Dictionary:
 			d["roster"].append(nk)
 			Save.register(nk)         # serial, original trainer, the event log
 			KinBox.route_new(nk)      # the farm if there's room; a repeat species goes to the Kin Burrow
+			CarryArrival.pending.append(nk["uid"])
 			Care.dex_got(nk)
 			out["caught"].append(nk)
 	if won: Heart.settle(r, out)   # the Heartspark's rare egg and materials (heart.gd)
+	KinSteal.settle(r, out)        # gems for stolen wisps brought out alive (kin_steal.gd)
 	WaysResult.settle(r, out)      # a squad that did not leave: placement pay
 	Equal.settle_belt(r)       # the utility you brought and found comes home with you, or is gone (equal.gd)
 	Backpacks.settle(r)        # and the backpack you wore out
@@ -275,7 +278,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 		out["kin"] = brought[0]
 	# the vault keeps a third of what you were carrying when you go down
 	if not won and Save.has_building("vault") and int(r.get("lost_gems", 0)) > 0:
-		out["vault_gems"] = int(r["lost_gems"]) / 3
+		out["vault_gems"] = int(int(r["lost_gems"]) / 3.0)
 		d["gems"] = int(d["gems"]) + out["vault_gems"]
 	# kin who stayed home rest in the cottages and train in the yard
 	var rest := (2.0 if Save.has_building("cottage") else 0.0) + (2.0 if Save.has_building("cottage2") else 0.0)
@@ -367,6 +370,8 @@ func _kin_after(k: Dictionary, run: Dictionary, won: bool, r: Dictionary, treat:
 		out["levelup"] = true
 	if lead:
 		out["trust_delta"] = float(k["trust"]) - before
+	# what the results screen lists for each Boki you brought: the XP and bond just applied above
+	out["kin_gains"] = out.get("kin_gains", []) + [{"kin": k, "xp": xp, "bond": float(k["trust"]) - before}]
 
 ## XP a kin needs to go from level `lv` to the next (the curve is in content/rules/garden_xp.json).
 func xp_need(lv: int) -> int:

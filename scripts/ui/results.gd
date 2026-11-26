@@ -10,6 +10,7 @@ func show_result(r: Dictionary) -> void:
 	shown_at = Time.get_ticks_msec()
 	var s := Game.apply_result(r)
 	s["kin_say"] = String(r.get("kin_say", ""))     # what your Boki said as the run ended
+	s["wisps_home"] = r.get("wisps_home", [])      # stolen wisps you carried
 	var bg := ColorRect.new(); bg.color = UI.BG; bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); add_child(bg)
 	_stage(r, s)
 	var won: bool = r.get("extracted", false)
@@ -57,6 +58,9 @@ func show_result(r: Dictionary) -> void:
 		head.add_child(UI.para(how, UI.T_BODY, UI.MUTED))
 	if int(s.get("place_gems", 0)) > 0:
 		head.add_child(UI.label("Placement pay: %d gems" % int(s["place_gems"]), UI.T_BODY, UI.GOLD, UI.semi))
+	if int(s.get("stolen_gems", 0)) > 0:
+		var stolen_line := "Stolen wisps brought out: +%d gems" % int(s["stolen_gems"])
+		head.add_child(UI.label(stolen_line, UI.T_BODY, UI.GOLD, UI.semi))
 	if WaysResult.hid_line(r) != "":
 		head.add_child(UI.label(WaysResult.hid_line(r), UI.T_BODY, UI.MUTED))
 	if r.has("heart_raid"):
@@ -159,6 +163,9 @@ func show_result(r: Dictionary) -> void:
 		kept.add_child(_note("Left in your deathbox: %s." % ", ".join(names), Color("ffb0a0")))
 	if s.has("kin"):
 		boki.add_child(_kin_card(s, det))
+	var lines := ResultsBokiLines.card(s, get_tree())
+	if lines != null:
+		boki.add_child(lines)
 	for back in s.get("rescued", []):
 		boki.add_child(_notes(HomeNotices.fill(HomeNotices.BACK_HOME, back["name"]), UI.GOOD))
 	# kin left behind when you went down, and where they ended up
@@ -220,7 +227,7 @@ func _stat_tile(icon: String, what: String, value: float, fmt: String, delay: fl
 	lr.add_child(lab)
 	col.add_child(lr)
 	var show := func(x: float) -> void:
-		num.text = ("%d:%02d" % [int(x) / 60, int(x) % 60]) if fmt == "time" else str(int(round(x)))
+		num.text = ("%d:%02d" % [int(int(x) / 60.0), int(x) % 60]) if fmt == "time" else str(int(round(x)))
 	var tw := create_tween()
 	tw.tween_interval(delay)
 	tw.tween_method(show, 0.0, value, clampf(0.4 + value * 0.01, 0.5, 1.1)).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)

@@ -1,7 +1,7 @@
 # Bots that play like people (2026-11-11)
 
 Branch `ext/bots-human-1111`, base `origin/ext/release-integ-0245` (92df78ce4). Decision note:
-docs/decisions/0061-bots-play-as-a-squad.md.
+docs/decisions/0142-bots-play-as-a-squad.md.
 
 An expedition is 10 squads of 3 and most of them are bots, so the bots are most of what a player meets. This
 pass watched full bot expeditions headless, ranked what gives a bot away, and fixed the top of the list.
@@ -160,6 +160,30 @@ base of two runs with nobody out. Treat that as noise until more runs agree.
 Bot sanity (`--bot-sanity-check`, three seeds of 150 s): the 25 s roam wobble did not come back in four branch
 runs. Two runs had one or two single-window flags (`keyhunt`, or `roam` while crossing to an island). Those are the
 kinds the base flags too, and that base run was clean.
+
+## Spacing in a fight (2026-11-24)
+
+Playtest: rival bot squads bunched up so close that a fight was hard to read and hits hard to land or see. Squadmates
+sat on the same arc round their focused rival (same preferred range, random strafe side), walked onto a mate when they
+had no shot (`assist_goal`), and followed the lead's roam goal to the very spot, so fights started stacked.
+
+Now (`BotSquad.spread`, called once in `Bot.think`'s fight branch, and again while it works round to a shot): a
+push off every squadmate closer than 4 m (easy) to 6 m (expert), and the strafe side that leads away from the nearest
+of them, so two on one rival take two angles. In reach with no shot: a spot 5 m beside the mate, square to the mate's
+line onto the rival (`BotSquad._beside`; a spot at any angle round the mate cost assists). Following the lead's roam
+goal: a spot of its own 5 m round it (`BotWays.around`). Targets, focus, ranges, fire and abilities are untouched.
+
+Nearest squadmate (within 35 m) of a hunter in a fight, medium, seeds 3, 11, 5, 7 (`--bh-measure`):
+
+| | median m | p10 m | share under 2.5 m |
+|---|---|---|---|
+| before | 3.5 4.8 4.3 3.3 (4.0) | 0.9 1.1 1.1 0.9 (1.0) | 31% |
+| after | 5.9 5.5 6.9 5.5 (6.0) | 3.3 1.7 3.6 2.2 (2.7) | 10% |
+
+Fights come out the same within the noise (means over the same four runs, before / after): out per expedition
+28.5 / 29.0, extracted 1.5 / 1.0, knocks by a rival 27.8 / 34.0 (22 to 40 / 23 to 41 per run), turned fights
+survived 0.64 / 0.60, revived / knocks 0.32 / 0.45, assist share 0.84 / 0.79, same target as a fighting mate
+0.91 / 0.88. The check now fails when that p10 drops under 1.5 m.
 
 ## Left
 

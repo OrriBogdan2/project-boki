@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bgwe7ctbob6wb"
-path="res://.godot/imported/wisplet_wisplet_normal.webp-15bb98d561f1690e60659493a52e2b4a.ctex"
+path.bptc="res://.godot/imported/wisplet_wisplet_normal.webp-15bb98d561f1690e60659493a52e2b4a.bptc.ctex"
+path.astc="res://.godot/imported/wisplet_wisplet_normal.webp-15bb98d561f1690e60659493a52e2b4a.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "4e496a8f5c717d8b0f29387a2b694d36"
@@ -14,12 +16,12 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/wisplet/wisplet_wisplet_normal.webp"
-dest_files=["res://.godot/imported/wisplet_wisplet_normal.webp-15bb98d561f1690e60659493a52e2b4a.ctex"]
+dest_files=["res://.godot/imported/wisplet_wisplet_normal.webp-15bb98d561f1690e60659493a52e2b4a.bptc.ctex", "res://.godot/imported/wisplet_wisplet_normal.webp-15bb98d561f1690e60659493a52e2b4a.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

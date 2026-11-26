@@ -112,5 +112,10 @@
 		"temper": "Airy",
 		"desc": "Pale and faintly glowing. At night it floats a hair above the nest. Something airy is in here.",
 		"play": "Quick and slippery. Gusts foes away and flits out of reach."
+	},
+	"size": {
+		"cm": 32,
+		"kg": 1.4,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
 	}
 }

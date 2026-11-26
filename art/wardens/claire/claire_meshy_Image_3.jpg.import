@@ -3,23 +3,25 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cdo36ypsa54ws"
-path="res://.godot/imported/claire_meshy_Image_3.jpg-1f9a098b949ae90ea83139b7dd8c3a36.ctex"
+path.bptc="res://.godot/imported/claire_meshy_Image_3.jpg-1f9a098b949ae90ea83139b7dd8c3a36.bptc.ctex"
+path.astc="res://.godot/imported/claire_meshy_Image_3.jpg-1f9a098b949ae90ea83139b7dd8c3a36.astc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
-"md5": "473c13574f9e979313b0eaad7bd1e79c"
+"md5": "64040611f7de218acf144bda908e9ac3"
 }
 
 [deps]
 
 source_file="res://art/wardens/claire/claire_meshy_Image_3.jpg"
-dest_files=["res://.godot/imported/claire_meshy_Image_3.jpg-1f9a098b949ae90ea83139b7dd8c3a36.ctex"]
+dest_files=["res://.godot/imported/claire_meshy_Image_3.jpg-1f9a098b949ae90ea83139b7dd8c3a36.bptc.ctex", "res://.godot/imported/claire_meshy_Image_3.jpg-1f9a098b949ae90ea83139b7dd8c3a36.astc.ctex"]
 
 [params]
 
-compress/mode=0
-compress/high_quality=false
+compress/mode=2
+compress/high_quality=true
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

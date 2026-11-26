@@ -33,6 +33,7 @@ func ok(cond: bool, what: String) -> void:
 
 func run(main_node: Node) -> void:
 	main = main_node
+	WardenNative.contract_only = true  # (the contract rigs RigPace paces; Meshy-native models have no pace yet)
 	m = Match.new()
 	main.add_child(m)
 	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
@@ -67,7 +68,7 @@ func _spawn_sight() -> void:
 	if sp == null or sp.cands.size() <= 4:
 		return
 	var n := sp.cands.size()
-	var c: Dictionary = sp.cands[n / 2]
+	var c: Dictionary = sp.cands[int(n / 2.0)]
 	(c["known"] as Dictionary).erase(m.player.team)
 	m.player.teleport(c["pos"])
 	var at := sp._next

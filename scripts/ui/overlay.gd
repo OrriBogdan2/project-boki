@@ -599,7 +599,7 @@ func _tab_gameplay(v: VBoxContainer) -> void:
 		"In expeditions your Boki rides as a little wisp at your shoulder, its carry bonus always on. "
 		+ "Off: it walks beside you"
 	)
-	_toggle(v, "Boki ride as wisps (prototype)", "boki_wisps", wisp_hint)
+	_toggle(v, "Boki ride as wisps", "boki_wisps", wisp_hint)
 	if admin_allowed():
 		_group(v, "Admin")
 		_toggle(v, "Pre-match lobby", "lobby_enabled", "The 30 s lobby before each expedition. Off: plain loading")
@@ -634,6 +634,8 @@ func _tab_controls(v: VBoxContainer) -> void:
 					"util2",
 					"util3",
 					"util4",
+					"util5",
+					"util6",
 					"base",
 				]
 				+ KinKeys.ids()
@@ -675,6 +677,7 @@ func _tab_camera(v: VBoxContainer) -> void:
 	var styles: Array = CamRig.styles.keys().map(func(k): return [k, CamRig.styles[k]["name"]])
 	_choice(v, "Camera", "cam_style", styles, Callable(), "How high and how wide the camera looks down on you")
 	var follow := [
+		["pan", "Cursor pan"],
 		["centred", "Centred on you"],
 		["lean", "Cursor lean"],
 		["standard", "Standard dynamic"],

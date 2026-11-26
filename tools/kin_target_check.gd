@@ -24,7 +24,7 @@ func run(main: Node) -> void:
 	Econ.ensure()
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
+	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
 	m.set_process(false)
 	for mb in m.mobs:
 		mb.dead = true
@@ -75,7 +75,7 @@ func run(main: Node) -> void:
 		if got != want:
 			print("KINTARGET layout %d: picked %s, the rule says %s" % [i, _name(got), _name(want)])
 	ok(same == LAYOUTS, "%d of %d layouts pick the foe the rule says" % [same, LAYOUTS])
-	var mixed := picked > LAYOUTS / 4 and picked <= LAYOUTS - LAYOUTS / 5
+	var mixed := picked > int(LAYOUTS / 4.0) and picked <= LAYOUTS - int(LAYOUTS / 5.0)
 	ok(mixed, "the layouts cover picks and no-picks (%d picked)" % picked)
 	print("KINTARGET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)

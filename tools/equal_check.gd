@@ -79,15 +79,19 @@ func _drop(m: Match) -> void:
 
 # ------------------------------------------------------------------ keys
 func _keys() -> void:
-	for pair in [["util1", KEY_1], ["util2", KEY_2], ["util3", KEY_3], ["util4", KEY_4]]:
+	for pair in [["util1", KEY_1], ["util2", KEY_2], ["util3", KEY_3], ["util4", KEY_4], ["util5", KEY_5],
+			["util6", KEY_6]]:
 		var evs := InputMap.action_get_events(String(pair[0]))
 		var code: int = pair[1]
 		var on_key := evs.any(func(ev): return ev is InputEventKey and (ev as InputEventKey).physical_keycode == code)
 		ok(on_key, "%s is on key %s" % [pair[0], OS.get_keycode_string(pair[1])])
 	ok(not InputMap.has_action("tonic") and not InputMap.has_action("armor_kit"),
 			"the old heal and armor-kit actions are gone")
-	ok(UtilityBelt.KEYS == ["util1", "util2", "util3", "util4"] and Hunter.new().inp.has("util4")
-			and not Hunter.new().inp.has("kit"), "hunters take util1..4 as inputs")
+	ok(UtilityBelt.KEYS == ["util1", "util2", "util3", "util4", "util5", "util6"] and Hunter.new().inp.has("util6")
+			and not Hunter.new().inp.has("kit"), "hunters take util1..6 as inputs")
+	ok(UtilityBelt.SLOTS == 6 and UtilityBelt.reserved_id(0) == "tonic" and UtilityBelt.reserved_id(1) == "armor_kit"
+			and UtilityBelt.reserved_id(2) == "",
+			"six slots: 1 is the tonic's, 2 the armor kit's, the rest open (as the source)")
 
 # ------------------------------------------------------------------ equal base
 func _equal_base() -> void:
@@ -117,7 +121,7 @@ func _equal_base() -> void:
 				and bool(rich["armor_gear"]),
 				"tier %d: base pack %d, armor level 0, no perks, no armor piece" % [tier, Equal.base_pack()])
 		var bare := poor_gear.all(func(g): return (g as Dictionary).is_empty())
-		ok(bare and poor_belt == ["tonic", "armor_kit", "", ""],
+		ok(bare and poor_belt == ["tonic", "armor_kit", "", "", "", ""],
 				"tier %d: the poor farm brings nothing but the everyday issue (%s)" % [tier, str(poor_belt)])
 		var worn: Array = p_v.gear.filter(func(g): return not (g as Dictionary).is_empty())
 		var worn_text: Array = worn.map(func(g): return "%s r%d" % [g["id"], g["rar"]])
@@ -137,8 +141,8 @@ func _equal_base() -> void:
 		ok(armory_before - Econ.armory().size() == worn.size(),
 				"what is brought leaves the armory (%d out)" % worn.size())
 		var b := _belt_ids(p_v)
-		ok(b[0] == "smoke" and b[1] == "tonic" and b[2] == "scanner",
-				"tier %d: the belt is what was picked, in order (%s)" % [tier, str(b)])
+		ok(b[0] == "tonic" and b[1] == "armor_kit" and b[2] == "smoke" and b[3] == "scanner",
+				"tier %d: the belt is what was picked, in order after the pinned two (%s)" % [tier, str(b)])
 		ok(p_v.tonics == UtilityBelt.bring_cap("tonic", tier)
 				and UtilityBelt.count(p_v, "smoke") == UtilityBelt.bring_cap("smoke", tier)
 				and UtilityBelt.count(p_v, "scanner") == UtilityBelt.bring_cap("scanner", tier),
@@ -191,10 +195,16 @@ func _belt() -> void:
 	h.belt = UtilityBelt.empty()
 	ok(UtilityBelt.grant(h, "smoke", 2) == 2 and UtilityBelt.grant(h, "smoke", 5) == 1
 			and UtilityBelt.count(h, "smoke") == 3, "grant stacks onto one slot up to its max (smoke 3)")
-	ok(UtilityBelt.grant(h, "tonic", 1) == 1 and UtilityBelt.grant(h, "scanner", 1) == 1
-			and UtilityBelt.grant(h, "medkit", 1) == 1 and UtilityBelt.grant(h, "stim", 1) == 0,
-			"four slots hold four kinds; a fifth kind does not fit")
-	ok(UtilityBelt.take(h, "smoke", 5) == 3 and h.belt[0].is_empty(), "an emptied slot frees up")
+	ok(UtilityBelt.slot_of(h, "smoke") == 2, "an open item skips the pinned slots 1 and 2")
+	ok(UtilityBelt.grant(h, "scanner", 1) == 1 and UtilityBelt.grant(h, "medkit", 1) == 1
+			and UtilityBelt.grant(h, "stim", 1) == 1 and UtilityBelt.grant(h, "jump_pad", 1) == 0,
+			"four open slots hold four kinds; a fifth kind does not fit")
+	ok(UtilityBelt.grant(h, "tonic", 1) == 1 and UtilityBelt.slot_of(h, "tonic") == 0
+			and UtilityBelt.grant(h, "armor_kit", 1) == 1 and UtilityBelt.slot_of(h, "armor_kit") == 1,
+			"...and the tonic and armor kit still fit, in their own slots")
+	ok(UtilityBelt.max_of("tonic") == 8 and UtilityBelt.max_of("armor_kit") == 8,
+			"a tonic or kit slot stacks to 8 (source)")
+	ok(UtilityBelt.take(h, "smoke", 5) == 3 and h.belt[2].is_empty(), "an emptied slot frees up")
 	h.free()
 	# the belt keys with charges
 	p_v.belt = UtilityBelt.empty()
@@ -215,20 +225,44 @@ func _belt() -> void:
 	p_v.inp["util1"] = true
 	m.step(Match.DT)
 	ok(p_v.drink_t > 0.0, "key 1 starts a drink")
-	for i in int((UtilityUse.channel("tonic", "time") + 0.3) / Match.DT): m.step(Match.DT)
-	ok(p_v.tonics == 2 and p_v.hp > p_v.max_hp * 0.5 + 40.0,
-			"a finished drink spends one tonic and heals (%d left, hp %.0f/%.0f)" % [p_v.tonics, p_v.hp, p_v.max_hp])
+	ok(is_equal_approx(p_v.drink_len, 1.0) and is_equal_approx(UtilityUse.channel_move(p_v), 1.0),
+			"a tonic takes 1 s and does not slow you (source: heals after 1 s, no slow)")
+	for i in int((p_v.drink_len + 0.3) / Match.DT): m.step(Match.DT)
+	ok(p_v.tonics == 2 and p_v.hp >= p_v.max_hp * 0.5 + 41.0 and p_v.hp <= p_v.max_hp * 0.5 + 43.0,
+			"a finished drink spends one tonic and heals a flat 42 (%d left, hp %.0f/%.0f)"
+			% [p_v.tonics, p_v.hp, p_v.max_hp])
 	p_v.inp["util2"] = true
 	m.step(Match.DT)
-	ok(p_v.kit_t > 0.0, "key 2 starts an armor repair")
+	ok(p_v.kit_t > 0.0 and is_equal_approx(UtilityUse.channel_move(p_v), 0.45),
+			"key 2 starts an armor repair (slow while it runs)")
 	p_v.inv_t = 0.0
+	Sfx.cue_log = []
 	p_v.hurt(5.0, null, {"src": "shot"})
 	ok(p_v.kit_t <= 0.0 and p_v.armor_kits == 2, "a hit spills it and nothing is spent")
+	ok(_cued("belt_fumble"), "...and the kit's plates clatter (belt_fumble)")
+	p_v.hp = p_v.max_hp * 0.5
+	p_v.inp["util1"] = true
+	m.step(Match.DT)
+	ok(p_v.drink_t > 0.0, "a second drink starts")
+	p_v.stun_t = 1.0
+	m.step(Match.DT)
+	ok(p_v.drink_t <= 0.0 and p_v.tonics == 2 and _cued("belt_spill"),
+			"a stun spills it with the tonic's splash (belt_spill), nothing spent")
+	p_v.stun_t = 0.0
+	Sfx.cue_log = null
 	p_v.inv_t = 99.0
 	p_v.inp["util2"] = true
 	m.step(Match.DT)
-	for i in int((UtilityUse.channel("armor_kit", "time") + 0.3) / Match.DT): m.step(Match.DT)
-	ok(p_v.armor_kits == 1 and p_v.armor >= p_v.max_armor - 0.5, "a finished repair spends one kit and fills armor")
+	for i in int((p_v.kit_len + 0.3) / Match.DT): m.step(Match.DT)
+	ok(p_v.armor_kits == 1 and absf(p_v.armor - p_v.max_armor * 0.8) < 0.5,
+			"a finished repair spends one kit and patches 80%% of a Common armor (%.0f/%.0f)"
+			% [p_v.armor, p_v.max_armor])
+	p_v.armor_tier = 2
+	ok(is_equal_approx(UtilityUse.repair_frac(p_v), 0.3), "...and 30% of a Rare one (source 80/40/30)")
+	p_v.armor_tier = 0
+	ok(is_equal_approx(UtilityUse.channel("deep_draught", "move"), 0.4)
+			and is_equal_approx(UtilityUse.channel("deep_draught", "time"), 5.0),
+			"the deep draught is a 5 s drink at 40% speed (source: 60% slow)")
 	p_v.hp = p_v.max_hp
 	p_v.inp["util1"] = true
 	m.step(Match.DT)
@@ -261,10 +295,10 @@ func _belt() -> void:
 			"single-charge items are used up")
 	# found in the match: a pickup goes on the belt (and only if there is room)
 	p_v.belt = UtilityBelt.empty()
-	UtilityBelt.grant(p_v, "tonic", 5)
+	UtilityBelt.grant(p_v, "tonic", 8)
 	UtilityBelt.grant(p_v, "armor_kit", 4)
-	UtilityBelt.grant(p_v, "smoke", 3)
-	UtilityBelt.grant(p_v, "medkit", 1)
+	for id in ["smoke", "medkit", "stim", "shield_cell"]:
+		UtilityBelt.grant(p_v, id, 1)
 	ok(not UtilityBelt.can_take(p_v, "scanner") and not UtilityBelt.can_take(p_v, "tonic")
 			and UtilityBelt.can_take(p_v, "gem"),
 			"a full belt cannot take another kind or more of a full stack (gems always can)")
@@ -284,11 +318,11 @@ func _belt() -> void:
 	var bare_belt := p_v.belt.all(func(slot): return (slot as Dictionary).is_empty())
 	ok(bare_belt and p_v.tonics == 0, "...and you have nothing left on you")
 	var rows: Array = Life.box_items(m, foe, bx).filter(func(it): return it["key"] == "belt")
-	ok(rows.size() == 4, "a looter sees it item by item (%d rows)" % rows.size())
+	ok(rows.size() == 6, "a looter sees it item by item (%d rows)" % rows.size())
 	foe.belt = UtilityBelt.empty()
 	foe.belt_free = {}
 	Life.loot_box(m, foe, bx)
-	ok(UtilityBelt.count(foe, "tonic") == 5 and UtilityBelt.count(foe, "scanner") == 1,
+	ok(UtilityBelt.count(foe, "tonic") == 8 and UtilityBelt.count(foe, "scanner") == 1,
 			"a rival who loots the box takes the charges")
 	# coming home: only what is above the everyday issue
 	var q := Hunter.new()
@@ -401,6 +435,13 @@ func _armor_up_rival(m: Match, p_v: Hunter, b: Hunter) -> void:
 	b.armor_gain(5000.0)
 	m._armor_up(b)
 	ok(int(Sfx.last_played.get("armor_up", -1000)) == far0, "a tier-up out of earshot is not played")
+
+## True when `sname` was asked of Sfx since `Sfx.cue_log` was last reset and its sound loads.
+func _cued(sname: String) -> bool:
+	for c in Sfx.cue_log:
+		if c[0] == sname and c[2]:
+			return true
+	return false
 
 ## The pitch the pool voice playing `sname` was started at (0 if none).
 func _cue_pitch(sname: String) -> float:

@@ -112,10 +112,13 @@ func add_chill(t: Ent) -> void:
 		vfx("chill", t.pos)
 		StatusSfx.cue(t, "chill", h, float(d["passive"].get("chill_t", 4.0)))
 
-## The Chill on `t`, for the ComboMark tag (one state, no stacks); the ring is the Chill left.
+## The Chill on `t`, else its Fan stacks, for the plate status row (HudPlate.row); the ring is the time left.
 func combo_read(t: Ent) -> Dictionary:
 	if not chilled(t):
-		return {}
+		var fan: Dictionary = fan_hits.get(t.get_instance_id(), {})
+		if fan.is_empty():
+			return {}
+		return {"icon": "frost", "n": int(fan["n"]), "max": 0, "left": float(fan["left"]), "total": FAN_HOLD}
 	return {"icon": "frost", "n": 1, "max": 1, "left": float(chill[t.get_instance_id()]["left"]),
 			"total": float(d["passive"].get("chill_t", 4.0))}
 
@@ -178,7 +181,7 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 			m.sfx("rimewright_chime", t.pos, -3.0, 1.0)
 			var at := t.pos
 			var tid := t.get_instance_id()
-			var fan_r := float(pd["splinter_r"]) * 0.8
+			var fan_r := float(pd["fan_r"])  # m, the 8-dart Shatter (0.8 x the knock Shatter's radius)
 			m.later(SHELL_T, func(): splinter(at, float(pd["fan_splinter"]), fan_r, instance_from_id(tid) as Ent))
 
 
@@ -200,8 +203,6 @@ func splinter(at: Vector3, dmg: float, r: float, skip: Ent = null) -> void:
 				{
 				"src": "splinter",
 				"ab": "passive",
-				"slow": 1.2,
-				"slow_k": 0.3,
 				"tags": ["passive", "splinter"],
 				"payoff": true
 			}
@@ -370,14 +371,14 @@ func _play_dart(heavy: bool, side: float) -> void:
 		play("tm_dart_r" if side > 0.0 else "tm_dart_l")
 
 
-## Homing: late in its flight each dart (and each skating beam) turns toward the foe nearest the cursor (or,
-## with none there, the nearest one ahead of it, or else the cursor point itself).
+## Homing: late in its flight each dart (and each skating beam) bends toward the foe nearest the cursor, or else
+## toward the cursor point itself. A foe that is not at the cursor pulls on nothing: you have to aim.
 func _tick_darts(dt: float) -> void:
 	var wd: Dictionary = h.wpn
 	var turn := float(wd.get("turn", 7.0))
 	var aimp: Vector3 = h.inp.get("aim", h.pos)
 	var near_cur: Ent = null
-	var nd := float(wd.get("cursor_r", 3.5))
+	var nd := float(wd.get("cursor_r", 2.4))
 	for f in m.foes_of(h.team):
 		if not f.hittable():
 			continue
@@ -395,26 +396,11 @@ func _tick_darts(dt: float) -> void:
 		var want := Vector2.ZERO
 		if near_cur != null:
 			want = Vector2(near_cur.pos.x - p.x, near_cur.pos.z - p.z)
-		else:
-			var best: Ent = null
-			var bd := float(wd.get("acquire", 9.0))
-			for f in m.foes_of(h.team):
-				var to := Vector2(f.pos.x - p.x, f.pos.z - p.z)
-				if (
-					to.length() < bd
-						and to.length() > 0.3
-						and absf(v.angle_to(to)) < deg_to_rad(float(wd.get("cone_deg", 75.0)))
-					and f.hittable()
-				):
-					bd = to.length()
-					best = f
-			if best != null:
-				want = Vector2(best.pos.x - p.x, best.pos.z - p.z)
-			elif not bool(dd["passed"]):
-				want = Vector2(aimp.x - p.x, aimp.z - p.z)
-				if want.length() < 0.8 or v.dot(want) < 0.0:
-					dd["passed"] = true          # past the cursor: it flies on straight
-					want = Vector2.ZERO
+		elif not bool(dd["passed"]):
+			want = Vector2(aimp.x - p.x, aimp.z - p.z)
+			if want.length() < 0.8 or v.dot(want) < 0.0:
+				dd["passed"] = true          # past the cursor: it flies on straight
+				want = Vector2.ZERO
 		if want.length() < 0.05 or absf(v.angle_to(want)) > PI * 0.6:
 			continue             # nothing to chase, or it is already past it: it flies on
 		var rate := turn * _homing_k(s, want.length())
@@ -869,7 +855,7 @@ func _detonate(at: Vector3) -> void:
 	vfx("spear_burst", at, null, {"r": rr})
 	m.sfx("rime_burst", at, 1.0, 0.9)
 	m.sfx("rime_splinter", at, -3.0, 0.75)
-	Shake.incoming_big(m, at, ImpactWeight.shake("heavy"), h)
+	Shake.big(m, at, "explosion", h)
 	play_soft("tm_clench")
 	for f in foes_in(at, rr):
 		f.hurt(
@@ -978,10 +964,6 @@ func recast_window() -> Dictionary:
 		if left <= float(xd["late"]):
 			return RecastCue.window("x", left, float(xd["late"]), rime["at"], true, true)
 	return {}
-
-## No overhead badges for her: the shards stuck in the foe are the one read.
-func combo_marks(_out: Array) -> void:
-	pass
 
 func e_recast() -> bool:
 	if not wall_cast.is_empty():
@@ -1252,6 +1234,7 @@ func _rime_skate_out() -> void:
 ## A slow zone's step (the spear's and the rink): foes in it are Chilled and slowed a flat k while they stay.
 func _chill_zone(at: Vector3, r: float, k: float) -> void:
 	for f in foes_in(at, r):
+		CcSfx.zone_slow(f)
 		f.slow_k = maxf(f.slow_k if f.slow_t > 0.0 else 0.0, k)
 		f.slow_t = maxf(f.slow_t, ZONE_SLOW_T)
 		add_chill(f)
@@ -1288,7 +1271,7 @@ func _rime_crash(k: float) -> void:
 		if not m.world.los(at, f.pos, at.y + 0.95):
 			continue
 		f.hurt(
-			float(xd["dmg"]) * power("ult") * k,
+			float(xd["dmg"]) * power("x") * k,
 			h,
 			{"src": "abil", "ab": "ult", "stun": stun, "dr": true, "payoff": true, "tags": ["ult", "rimelock"]}
 		)

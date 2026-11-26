@@ -68,7 +68,7 @@ func _zone() -> void:
 	Save.d = d
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(TestZone.opts())
+	m.start(TestZone.opts())
 	for i in 5:
 		await tree.process_frame
 	var was: Node = main.get("current")

@@ -5,6 +5,8 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	"--incoming-hit-check": ["res://tools/incoming_hit_check.gd", "incoming_hit_check", null],  # [--shots-dir=] AVI
+	"--hunter-foley-check": ["res://tools/hunter_foley_check.gd", "hunter_foley_check", null],  # gear sounds
 	"--sfx-priority-check": ["res://tools/sfx_priority_check.gd", "sfx_priority_check", null],  # enemy wind-ups
 	"--steal-sfx-check": ["res://tools/steal_sfx_check.gd", "steal_sfx_check", null],  # StealSfx: prize cry + reel thud
 }

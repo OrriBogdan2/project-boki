@@ -1,6 +1,6 @@
 class_name TerrainHazards
 extends RefCounted
-## Terrain hazard areas on an authored map (docs/decisions/0060-terrain-hazards.md): lava fields, deep
+## Terrain hazard areas on an authored map (docs/decisions/0139-terrain-hazards.md): lava fields, deep
 ## water, ice sheets, static flats and bramble, each an outline in the map's islands[].hazard_areas.
 ## What the ground does and which Boki walks it safely is content/rules/terrain_hazards.json.
 ##
@@ -28,6 +28,7 @@ var cell := PackedInt32Array()  # per tile: area index + 1, 0 = no hazard
 var state := {}  # hunter instance id -> {area, safe, breath, tick, fx}
 var hint_t := 0.0
 var hinted := {}  # kind -> m.time the player's Boki last spoke of it
+var audio: HazardSfx  # the beds and cues (content/sfx/hazards.json)
 
 
 static func rules() -> Dictionary:
@@ -56,6 +57,7 @@ func _init(match_node: Match) -> void:
 	for d in World.load_layout(w.layout_id).get("islands", []):
 		for a in d.get("hazard_areas", []):
 			_add_area(String(a["kind"]), a["poly"])
+	audio = HazardSfx.new(self)
 
 
 # ------------------------------------------------------------------ the areas
@@ -146,7 +148,7 @@ func _thorns(cells: Array[Vector2i], y: float) -> void:
 	mm.mesh = Models.cyl(0.0, 0.07, 0.6, 5)
 	mm.instance_count = cells.size() * 2
 	for i in mm.instance_count:
-		var c: Vector2i = cells[i / 2]
+		var c: Vector2i = cells[int(i / 2.0)]
 		var b := Basis.from_euler(Vector3(rr.randf_range(-0.6, 0.6), rr.randf() * TAU, rr.randf_range(-0.6, 0.6)))
 		var at := Vector3(c.x + rr.randf(), y + 0.2, c.y + rr.randf())
 		mm.set_instance_transform(i, Transform3D(b.scaled(Vector3.ONE * rr.randf_range(0.7, 1.4)), at))
@@ -168,6 +170,12 @@ func area_at(p: Vector3) -> int:
 	if a < 0 or absf(p.y - float(areas[a]["y"])) > STAND_Y:
 		return -1
 	return a
+
+
+## Whether p is standing in Deep Water.
+func in_deep(p: Vector3) -> bool:
+	var a := area_at(p)
+	return a >= 0 and areas[a]["kind"] == "deep_water"
 
 
 ## Whether h's active Boki walks this kind of ground safely (its type or its species is a counter).
@@ -241,6 +249,7 @@ func tick(dt: float) -> void:
 			_tick_static(ai, dt)
 	for h in m.hunters:
 		_tick_hunter(h, dt)
+	audio.tick(dt)
 	hint_t -= dt
 	if hint_t <= 0.0:
 		hint_t = float(rules()["hint"]["every_s"])
@@ -264,11 +273,12 @@ func _tick_hunter(h: Hunter, dt: float) -> void:
 		st = {"area": -1, "breath": float(e.get("breath_s", 0.0)), "tick": TICK_S, "fx": 0.0, "weak": 1.0}
 		state[id] = st
 	var safe := guards(h, kind)
-	if int(st["area"]) != a or bool(st.get("safe", false)) != safe:
+	var entered := int(st["area"]) != a
+	if entered or bool(st.get("safe", false)) != safe:
 		st["area"] = a
 		st["safe"] = safe
 		if safe:
-			_protect_fx(h)
+			_protect_fx(h, kind)
 	st["weak"] = float(e.get("dmg_out", 1.0)) if not safe else 1.0
 	match kind:
 		"lava":
@@ -291,6 +301,7 @@ func _tick_hunter(h: Hunter, dt: float) -> void:
 				if _every(st, dt):
 					h.hurt(float(e["dps"]) * TICK_S * _tier(), null, {"src": "hazard", "tags": ["hazard"]})
 	_feet_fx(h, st, kind, dt)
+	audio.contact(h, kind, safe, st, entered, dt)
 
 
 ## Out of the hazard: breath comes back twice as fast as it went; the state goes once it's full.
@@ -318,6 +329,7 @@ func _tier() -> float:
 
 
 func _slow(h: Hunter, k: float) -> void:
+	CcSfx.zone_slow(h)
 	h.slow_t = maxf(h.slow_t, 0.15)
 	h.slow_k = maxf(h.slow_k, k)
 
@@ -347,20 +359,20 @@ func _tick_static(ai: int, dt: float) -> void:
 		if h.remote or h.out or h.dead or area_at(h.pos) != ai:
 			continue
 		if guards(h, "static"):
-			_protect_fx(h)
+			_protect_fx(h, "static")
 		else:
 			m.fx.burst(h.pos + Vector3(0, 0.8, 0), Color("fff9c0"), 16, 5.0, 0.3, 1.0)
 			h.hurt(float(e["dmg"]) * _tier(), null, {"src": "hazard", "tags": ["hazard"], "stun": float(e["stun_s"])})
+			audio.shock(h)
 
 
 # ------------------------------------------------------------------ feedback
-## The Boki keeps you safe here: a burst in its colour at your feet (and a chime for the player).
-func _protect_fx(h: Hunter) -> void:
+## The Boki keeps you safe here: a burst in its colour at your feet (and, the first time, a cue for the player).
+func _protect_fx(h: Hunter, kind: String) -> void:
 	var k := h.kin as Kin
 	var col: Color = k.sp.get("glow", Color.WHITE) if k else Color.WHITE
 	m.fx.burst(h.pos + Vector3(0, 0.3, 0), col, 12, 3.0, 0.45, -1.0)
-	if h == m.player:
-		m.sfx("shield", h.pos, -10.0, 1.3)
+	audio.ward(h, kind)
 
 
 func _feet_fx(h: Hunter, st: Dictionary, kind: String, dt: float) -> void:

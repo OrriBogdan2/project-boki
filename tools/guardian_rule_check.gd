@@ -26,13 +26,14 @@ func ok(cond: bool, what: String) -> void:
 
 
 func run(main_node: Node) -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	main = main_node
 	Save.no_write = true
 	Save.d = Save.fresh()
 	Econ.ensure()
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
+	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
 	m.set_process(false)
 	m.opts["sim_keep"] = true  # the player going out must not end the match (the next case reuses it)
 	for mb in m.mobs:

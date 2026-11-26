@@ -1,6 +1,6 @@
 extends RefCounted
 ## --farm-tutorial-check: Hob the builder, the guided farm tutorial and the Goals tracker
-## (docs/decisions/0011-farm-builder-tutorial.md). Also --farm-hob-shots=<dir> and --farm-spot-shots=<dir>: screenshots.
+## (docs/decisions/0104-farm-builder-tutorial.md). Also --farm-hob-shots=<dir> and --farm-spot-shots=<dir>: screenshots.
 ##   1. Hob: the starter set, blueprints drawn up on talking, the toast once, the spread over levels
 ##      2-5, hidden tabs and the footer line, a v7 save keeps what it could build
 ##   2. the tutorial: steps in order, free order with the house first, skip, the one reward, old saves
@@ -63,6 +63,9 @@ func run(m: Node, mode := "") -> void:
 		if String(a).begins_with("--farm-spot-shots="):
 			await load("res://tools/farm_spot_shots.gd").new().run(m, String(a).substr(18))
 			return
+		if a == "--tutorial-low-fps":
+			await load("res://tools/farm_tutorial_low_fps.gd").new().run(m)
+			return
 		if String(a).begins_with("--farm-hob-shots="):
 			await load("res://tools/farm_hob_shots.gd").new().run(m, String(a).substr(17))
 			return
@@ -105,7 +108,8 @@ func _base_mode() -> void:
 	ok(not home.hmk.tabs().has("Exchange"), "on: no Exchange tab")
 	var wild: Array = (home.hb.wild_t as Dictionary).keys()
 	var w: World = home.world
-	var tree_at := Vector2.ZERO if wild.is_empty() else Vector2(int(wild[0]) % w.w + 0.5, int(wild[0]) / w.w + 0.5)
+	var tree_at := Vector2.ZERO if wild.is_empty() else Vector2(int(wild[0]) % w.w + 0.5,
+			int(int(wild[0]) / float(w.w)) + 0.5)
 	ok(home.hg.find(tree_at).is_empty(), "on: wild trees and boulders are not choppable")
 	home.hw.scan()
 	var econ_kinds := ["chop", "break", "log", "ore", "carry", "stock"]
@@ -290,7 +294,20 @@ func _base_world() -> void:
 	FarmTutorial.give_food()
 	ok(_berries() == resumed_gift, "resumed: the starter food is not handed over twice")
 	ok(guide.target("toy") == Vector3.INF, "toy: no marker until a toy is down")
+	var hint := FarmTutorial.hint_text("toy")
+	var price := str(HomeLayout.price("toy_ball")[0])
+	ok(
+		hint.contains(Settings.key_cap("build")) and hint.contains(price) and hint.contains("free"),
+		"toy: the line names the build key, the ball's price and that the patch is free: %s" % hint
+	)
+	var marked: Array = []
+	for tab in ["Base", "Garden"]:
+		for e in home.hb.entries.tab(tab):
+			if bool(e.get("hl", false)):
+				marked.append(String(e["id"]))
+	ok(marked == ["toy_ball", "snack_patch"], "toy: the ball and the patch glow in their tabs: %s" % str(marked))
 	guide.place_toy()
+	ok(FarmTutorial.marks().is_empty(), "toy: nothing glows once a toy is down")
 	ok(
 		guide.target("toy") == FarmTutorial.toy_spot() and _on_no_isle([guide.target("toy")]),
 		"toy: the marker is on the toy you put down, not a side isle"
@@ -647,14 +664,19 @@ func _tracker_rules() -> void:
 	_stats(0, 0, 1, 4)
 	ClassUnlock.choose_starters(ClassUnlock.starters().slice(0, ClassUnlock.picks_needed()))
 	var rows := GoalTracker.lines()
-	ok(rows.size() >= 2 and rows.size() <= 5, "the tracker has a few rows, at most 5 (%d)" % rows.size())
+	ok(rows.size() >= 2 and rows.size() <= 3, "the tracker has a few rows, at most 3 (%d)" % rows.size())
 	var tut_words: Array = []
 	for s in FarmTutorial.steps():
 		tut_words.append(String(s["title"]))
 		for k in s["hints"]:
 			tut_words.append(String(s["hints"][k]))
 	ok(rows.all(func(r): return not tut_words.has(String(r["text"]))), "no row is tutorial text")
-	ok(String(rows[-1]["source"]) == "level", "the next farm level is the last row")
+	var src_at: Array = rows.map(func(r): return GoalTracker.SOURCE_ORDER.find(r["source"]))
+	ok(src_at.all(func(i): return i >= 0), "every row comes from a known source")
+	var cap_was: int = GoalTracker.cfg()["max"]
+	GoalTracker.cfg()["max"] = 99      # (the card shows three: the per-source rules are read off the whole list)
+	rows = GoalTracker.lines()
+	GoalTracker.cfg()["max"] = cap_was
 	var counts := {}
 	for r in rows:
 		counts[r["source"]] = int(counts.get(r["source"], 0)) + 1
@@ -708,9 +730,10 @@ func _tracker_rules() -> void:
 		var hs: Dictionary = ClassUnlock.state().get("hunters", {}) as Dictionary
 		hs[mast_id] = hs.get(mast_id, {})
 		hs[mast_id][String(g["stat"])] = int(g["target"])
+	var plain := GoalTracker.lines()
 	ok(
-		GoalTracker.lines().is_empty() and GoalTracker.build() == null,
-		"with nothing left to work towards the card is hidden"
+		plain.size() >= 2 and plain.size() <= 3 and plain.all(func(r): return r["source"] == "next"),
+		"with nothing left to work towards the card lists plain steps, never empty (%d)" % plain.size()
 	)
 
 
