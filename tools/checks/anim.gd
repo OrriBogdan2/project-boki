@@ -17,6 +17,8 @@ const CHECKS := {
 	"--geo-shots": ["res://tools/geo_shots.gd", "geo_shots", null],
 	"--native-upper-shots": ["res://tools/native_upper_shots.gd", "native_upper_shots", null],
 	"--warden-native-check": ["res://tools/warden_native_check.gd", "warden_native_check", null],  # Meshy skeleton
+	"--native-flip-check": ["res://tools/native_flip_check.gd", "native_flip_check", null],  # Sable's Vault flip
+	"--native-flip-shots": ["res://tools/native_flip_shots.gd", "native_flip_shots", null],  # its GPU stills
 	"--native-springs-shots": ["res://tools/native_springs_shots.gd", "native_springs_shots", null],
 	"--tenzo-press-strip": ["res://tools/tenzo_press_strip.gd", "tenzo_press_strip", null],  # Tenzo LMB press frames
 	"--live-audit": ["res://tools/live_audit.gd", "live_audit", null],  # Hunters as played, GPU renders
