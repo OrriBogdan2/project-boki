@@ -2060,8 +2060,8 @@ func _slug_hits(main: Node) -> void:
 			if surface == "hunter": e = me if who == "rival" else rival
 			elif surface == "mob": e = mob
 			var heard := _slug_land(m, by, e, "wall" if surface == "wall" else "hit", "t_%s_%s" % [who, surface])
-			var exp: Array = [] if who == "player" and surface != "wall" else [want[surface]]
-			ok(heard == exp, "slug hit: the %s's slug on a %s plays %s (%s)" % [who, surface, exp, heard])
+			var expect: Array = [] if who == "player" and surface != "wall" else [want[surface]]
+			ok(heard == expect, "slug hit: the %s's slug on a %s plays %s (%s)" % [who, surface, expect, heard])
 		var volley := _slug_volley(m, by, mob)
 		var one: Array = [] if who == "player" else ["dr_slug_mob"]
 		ok(volley == one, "slug hit: %s's seven-slug volley on one monster sounds %s, once" % [who, volley])
