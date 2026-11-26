@@ -8,8 +8,6 @@ extends ArchKit
 ## comes up (a gold fletch burst) and the next draw is faster; hold too long and the arrow is overdrawn (half).
 ## Passive: Red Thread (hurt rivals are seen through cover). No resource meter: the old Focus and Deadeye were invented.
 
-const HEAVY_BURST_AHEAD := 0.5  # m along the shot past the bow's mouth the Heavy Shot's release burst sits
-
 var rain := {}  # the live Hail Wall: {a, b, t, tick, patter, tele}
 var draw: PinDraw  # the bow's stages, reticle, perfect release and overdraw
 var spirit: PinSpirit  # Shift: Spirit Walk
@@ -112,7 +110,7 @@ func own_aim_line() -> bool:
 	return h.wpn.has("draw")
 
 
-## Her bow hand carries its own tell (PinFx's fletch glint), so the shared charge orb stays off.
+## Her bow hand carries its own tell (the "heavy_glint" look), so the shared charge orb stays off.
 func charge_orb() -> bool:
 	return false
 
@@ -122,9 +120,8 @@ func fires_in_glide() -> bool:
 	return true
 
 
-## Her dash after-image: red fletch streaks instead of the shared ghost.
+## Her dash after-image is the red ribbons of "spirit_go" (data), so the shared ghost stays off.
 func dash_afterimage() -> bool:
-	fx.afterimage(h.position, h.face, float(h.cdat.get("scale", 1.0)))
 	return true
 
 
@@ -313,10 +310,11 @@ func _heavy_tele() -> void:
 		}
 	)
 	AimKit.charge(h, hk, {"col": PinFx.THREAD, "col2": PinFx.PALE})
-	fx.bow_glint_at(bow_mouth(), 1.0 if hk >= 0.99 else 0.0, PinFx.THREAD)
-	if hk >= 0.99 and not heavy_full_cued:
-		heavy_full_cued = true
-		vfx("heavy_full")
+	if hk >= 0.99:
+		HeroVfx.of(m).hold(h, "heavy_glint")
+		if not heavy_full_cued:
+			heavy_full_cued = true
+			vfx("heavy_full")
 
 
 ## The Heavy Shot charges from the hold threshold to full.
@@ -359,7 +357,6 @@ func _drop_holds() -> void:
 func _drop_tele() -> void:
 	pin_aim = false
 	heavy_full_cued = false
-	fx.bow_glint_at(Vector3.ZERO, 0.0, PinFx.THREAD)
 	needle.put_away()
 	AimKit.hide(h, "rmb_bar")
 
@@ -471,9 +468,6 @@ func _pin(a: Vector3, k: float) -> void:
 			)
 	run_own(stg, cx("rmb", "heavy_shot", a, extra))
 	vfx("heavy_go", bow, dir, {"k": k})
-	# the release burst's pale fletch core just off the bow along the shot (kept small enough that the bow, not her
-	# body, is what it lights), still wider than any bow cue, and a screen kick along the shot
-	fx.fletch_burst(bow + Vector3(dir.x, 0, dir.y) * HEAVY_BURST_AHEAD, 1.2 + 0.4 * k, PinFx.PALE, 0.06, 0.06, 1.0, 5.0)
 	heavy_kicks += 1
 
 
@@ -557,13 +551,26 @@ func _tick_rain(dt: float) -> void:
 	rain["t"] = float(rain["t"]) - dt
 	if float(rain["t"]) <= 0.0:
 		rain = {}
-		fx.rain_off()
 		return
 	if float(rain["start"]) > 0.0:
 		rain["start"] = float(rain["start"]) - dt
 		if float(rain["start"]) <= 0.0:
-			fx.rain_on(
-				rain["center"], rain["d"], float(rain["radius"]), arc_deg(), float(ed["width"]), float(rain["t"])
+			# the live wall: the same laced arc as the tell, for the rest of the rain
+			AimKit.arc_wall(
+				h,
+				"e",
+				{
+					"center": rain["center"],
+					"dir": rain["d"],
+					"radius": rain["radius"],
+					"deg": arc_deg(),
+					"thick": float(ed["width"]),
+					"panels": 7,
+					"all": true,
+					"dur": float(rain["t"]),
+					"col": col_of(ed),
+					"lace": true
+				}
 			)
 			m.sfx("pin_rain", rain["c"], -3.0)
 		return
@@ -587,7 +594,6 @@ func _tick_rain(dt: float) -> void:
 	for f in m.foes_of(h.team):
 		if f.hittable() and _in_rain(f):
 			inside.append(f)
-	fx.burn(inside)
 	rain["tick"] = float(rain["tick"]) - dt
 	if float(rain["tick"]) > 0.0:
 		return
@@ -609,6 +615,7 @@ func _tick_rain(dt: float) -> void:
 		KinExec.apply_foe(stg.effects, f, tick_v, f.pos, stg)
 		if "blight_t" in f:
 			f.set("blight_t", maxf(float(f.get("blight_t")), float(ed["blight"])))
+		vfx("rain_burn", f.pos)
 	for w in m.hunters:  # rival Wisps in the wall lose down_hp (no slow, no burn: they are not hit)
 		if w.downed and not w.dead and w.team != h.team and _in_rain(w):
 			w.hurt(float(ed["dmg"]) * WISP_DRAIN_K, h, {"src": "wisp"})
