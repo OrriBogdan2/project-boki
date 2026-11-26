@@ -476,6 +476,7 @@ func _start(o: Dictionary) -> void:
 	hud.visible = false
 	await hud.setup(self)
 	hud.process_mode = hud_mode
+	SquadChat.attach(hud, opts, self)
 	hud.visible = true
 	if player and player.dropping and tut == null:
 		hud.toast("Steer to choose where you land", Color("f3eee2"))
@@ -828,7 +829,7 @@ func make_bot(t: int, at: Vector3, names: Array, mate := {}) -> Hunter:
 ## Every match starts in the sky. Hunters glide down from above their squad's side of the map
 ## and steer to wherever they want to land.
 func _start_drop(h: Hunter, at: Vector3) -> void:
-	if h == player and cam: cam.user_zoom = CamWheel.far()      # spawn, respawn: the widest view
+	if h == player and cam: cam.user_zoom = CamWheel.far(true)      # spawn, respawn: the widest view
 	if opts.get("no_drop", false):
 		return
 	if big and time < 1.0:
@@ -2352,7 +2353,7 @@ func on_wild_dazed(k: Kin) -> void:
 func on_stag_open(mb: Mob) -> void:
 	if player and not player.out and player.flat_dist(mb) < 14.0:
 		MobSfx.stagger_open(self, mb)
-		_tip("stagger", TipText.stagger(String(mb.md["name"])))
+		_tip("stagger", TipText.stagger())
 
 ## Someone landed an ability in a stagger window. Runs where the monster lives (the host online).
 var stag_n := 0
@@ -4984,12 +4985,8 @@ func _net_apply(e: Ent, it: Array, t_owner := -1.0) -> void:
 		"m":
 			var mb: Mob = e
 			mb.face = it[5]; mb.hp = it[6]; mb.max_hp = it[7]
-			var st: int = int(it[8])
-			if st >= 0 and st < MOB_STATES.size():
-				if mb.st == "idle" and st == 1: MobNotice.woke(mb)
-				mb.st = MOB_STATES[st]
+			mb.follow(int(it[8]), it[12])
 			mb.atk_dir = Vector2(it[10], it[11])
-			mb.st_t = it[12]
 			mb.net_vel = Vector3(it[13], 0, it[14])
 			if it.size() > 16:
 				mb.stag_open = float(it[15]); mb.stagger_t = float(it[16])
@@ -5369,7 +5366,7 @@ func _tips() -> void:
 	var hunter_tip := hunter_hints.next(self)
 	if hunter_tip: _tip(hunter_tip[0], hunter_tip[1])
 	if player.gliding and player.glide_fuel <= 0.001 and player.over_void():
-		_tip("overheat_lift", "Your glider is burning but still lifts. Keep holding %s." % Settings.key_cap("jump"))
+		_tip("overheat_lift", TipText.overheat_lift())
 	var heart_tip := heart.tip_for(player) if heart else []
 	if heart_tip: _tip(heart_tip[0], heart_tip[1])
 	var ex := ExpeditionTips.next(self)
@@ -5383,11 +5380,11 @@ func _tips() -> void:
 	if proc_tip != "": _tip("proc", proc_tip)
 	if k.state == "active":
 		var a1 := k.runner.def_of("k1")
-		_tip("skill", "Stun a foe with %s's %s, then shoot it: combo" % [k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability"])
+		_tip("skill", TipText.skill(k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability"))
 	FirstCapture.tick(self)   # the first-capture hint (its own key-cap text) replaces the old "catch" scan tip
 	if exits and not interact.is_empty() and interact["kind"] == "exit":
-		_tip("exit_uplink", "Start the uplink, hold the outpost, then take the lift")
-	if player.downed: _tip("down", "Down  ·  a trusting Boki may pick you up")
+		_tip("exit_uplink", TipText.exit_uplink())
+	if player.downed: _tip("down", TipText.down())
 
 # ------------------------------------------------------------------ aim indicators
 # ---- ability previews: hold E, R or Q to see the reach and where it lands

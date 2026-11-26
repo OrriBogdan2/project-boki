@@ -89,7 +89,6 @@ func _setup() -> void:
 
 func res_text() -> String: return "%d" % int(res)
 func res_frac() -> float: return clampf(res / res_max(), 0.0, 1.0)
-func ready_label() -> String: return "SALVAGE" if res >= res_max() else ""
 func rd() -> Dictionary: return res_def()
 ## Seafoam, his palette's "anchor" (content/vfx/dredge.json): the Anchor's telegraph rims stand off yellow-green grass.
 func anchor_col() -> Color: return HeroVfx.of(m).color(h, "anchor")

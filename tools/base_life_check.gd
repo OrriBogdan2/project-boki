@@ -195,9 +195,12 @@ func _notice_part(home, center: Vector3) -> void:
 	)
 	r["chance"] = kept_chance
 	var hits := {0.0: 0, 95.0: 0}
+	home.ppos = back  # you stand where you came back (the follow part above walked you off)
 	seed(11)
 	for trust in hits:
 		for _i in 200:
+			for key in ["play", "eat", "nap_t", "life_at", "life_rival", "life_greet", "led"]:
+				k.erase(key)  # the Boki may have started its own play while it followed you
 			m.go(BaseLife.S.ROAM, "test")
 			k["rec"]["trust"] = trust
 			k["notice_away"] = float(r["away_s"])

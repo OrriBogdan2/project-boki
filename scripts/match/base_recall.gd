@@ -3,7 +3,7 @@ extends RefCounted
 ## B: base to a teammate (a recall to an ally, in our own look). A CHANNEL_S channel where you stand
 ## still and can't attack; moving, attacking, any damage, or the teammate going down or out cancels it, and
 ## no progress is kept. Everyone sees it coming: a ring filling round you and a circle filling under the
-## teammate (Fx telegraph). A hit breaks it loudly (a red burst, "INTERRUPTED", its own sound). You arrive
+## teammate (Fx telegraph). A hit breaks it loudly (a red burst, its own sound). You arrive
 ## beside them weakened for WEAK_S: half damage, and the crowd control, healing and shields you apply are
 ## halved. Bots use the same start/cancel/tick, so the same rules. State lives on Hunter (base_t, base_to,
 ## base_cd, base_tele, weak_t) because the HUD, bots and anims read it. The player picks with BaseWheel.
@@ -86,7 +86,6 @@ static func cancel(h: Hunter, why := "", hurt := false) -> void:
 	h.base_cd = LOCKOUT_S
 	if hurt:
 		m.fx.ring(h.pos, 1.8, HURT, 0.45)
-		m.fx.word(h.pos + Vector3(0, 2.6, 0), "INTERRUPTED", HURT, true)
 		if h.base_to != null and is_instance_valid(h.base_to):
 			m.fx.ring(h.base_to.pos, TELE_R, HURT, 0.45)
 		m.sfx("scan_fail", h.pos, 0.0, 0.8)
