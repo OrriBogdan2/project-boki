@@ -11420,3 +11420,4 @@ READY ext/main-red-audio-1126 a70edf410fbfa95df108a96982c7ddbd9f980fd5 (fix --ma
 READY ext/stuck-integ-e4d11822 be72256420 (supersedes its own 5bd81cfd30 line; origin/main merged in, only conflict scripts/match/boki_rig.gd INK_MIN_PX comment wrap, main's one-liner kept; 0 behind main; import 0 err, health --strict OK, --check/registry/hud-reveal/sfx-set/step-sync/dmg-number/time-trial/hit-shape/farm-cam/dredge-combo/fall-parity rc 0)
 READY ext/testzone-dummies-1126 0e1d8a345e9 (dummies lose HP, knocked down at 0, respawn on mark)
 READY ext/boki-size-follow-data-1125 0e89931dea21b5fa104f1be89b60d73d2ccf1fd1 (Boki size A: M_PER_CM 0.03625, farm 1.224x; main coat roll restored; pose checks read scale without fit; garden-day steps tweens)
+READY ext/jumppad-momentum-1126 78b2869516 (map jump pads carry entry momentum: side dash +10.4 m/s sideways, landing clamped to target island terrace; --launch-arc-check map_* 8/8)
