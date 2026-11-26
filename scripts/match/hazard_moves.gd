@@ -15,11 +15,10 @@ const META := "hazard_move"  # a remote hunter's move from its snapshot
 static func of(h: Hunter) -> int:
 	if h.remote:
 		return int(h.get_meta(META, NONE))
-	if not h.grounded or h.downed or h.out or h.mounted():
+	if h.m == null or not h.grounded or h.downed or h.out or h.mounted():
 		return NONE
 	var tz := TerrainHazards.of(h.m)
-	var a := tz.area_at(h.pos) if tz else -1
-	if a >= 0 and tz.areas[a]["kind"] == "deep_water":
+	if tz and tz.in_deep(h.pos):
 		return SWIM
 	return FOOTING if (h.m as Match).ground_grip(h.pos, h) < 1.0 else NONE
 
