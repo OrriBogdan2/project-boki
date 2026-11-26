@@ -202,7 +202,7 @@ func run(main: Node) -> void:
 
 ## The ambience beds the match (AmbBeds) and the title ask for each have their loop file.
 func _ambience() -> void:
-	for bed in AmbBeds.BEDS + ["title", "match", "abyss", "ruins"]:
+	for bed in AmbBeds.BEDS + AmbBeds.rules()["beds"].values() + ["title", "match", "abyss", "ruins"]:
 		ok(ResourceLoader.exists("res://audio/amb_%s.ogg" % bed), "ambience bed amb_%s.ogg" % bed)
 
 
