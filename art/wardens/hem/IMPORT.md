@@ -80,3 +80,8 @@ no black ink blotches on the skirt / fist. Tools: tools/art1/hem_r23 (README). N
 r27 (2026-11-26): slit-closing keys only (tools/art1/hem_r26/slitclose.py, args in its README): Idle/walk closed like Attack so the
 game camera no longer sees the ground through the slit; Jump_Run/run closed less so the knee stays inside. Mesh/textures = r26
 (partlock PASS). Needs an owner visual check before it goes live.
+
+r29 (2026-11-26): the skirt shell is turned +14 deg so the slit sits in front of her right leg (it was ~20 deg too far to her side,
+so the knee hit the panel beside it), knee-follow s 0.6 and the r28 V godet re-centred; skirt texture = a Meshy retexture of the r21
+skirt model (dark wine, `hem_meshy_skirt29.jpg`), lining = a darker copy (`hem_meshy_skirt_lining29.jpg`; replaces skirt22 /
+skirt_lining23). Tools: tools/art1/hem_r29 (README). Needs an owner visual check before it goes live.
