@@ -24,7 +24,12 @@ back to their hunter, who keeps them for that down.
 Carry-passive stacking (Q8): `Hunter._refresh_kin_stats` sums your own Boki at 100 % and each stolen wisp at
 `passive_k` (x its carry_k, like your own), then clamps the one sum per stat at the carry cap (KinParts.OWNER_STATS).
 Soul echo (kept from ext/merge-lane-integ-1115): a grab adds to the dex entry's optional `echo` count (seen = true;
-Care.dex_mark). Left out: guardian interplay, bots grabbing, extraction bonus.
+Care.dex_mark). Extraction (2026-11-22): a thief who extracts alive sends what they carry home at that moment (`KinSteal.on_extract`;
+it used to scatter them as loose wisps) and the result lists the species; `Game.apply_result` pays `extract_gems` (30)
+per wisp (`KinSteal.settle`), shown on the results screen. A hunter holds at most 4 wisps: 1 own (2 when TWO_KIN is
+on) + carry 2. `--stolen-extract-check` plays grab, cap, extract and both saves with bots.
+Left out: guardian interplay, bots grabbing, the echo's hatch odds and its stolen mutation/shiny roll (the echo is a
+Field Book count only).
 
 ## Consequences
 - Net.VERSION 0.24.15: kin snapshot 28-30 = loose s, carrier id, stolen summon used; kcmd "wgrab"/"wsum" ask the
