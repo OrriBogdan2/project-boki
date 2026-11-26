@@ -1067,10 +1067,11 @@ func _void(w: World, x: int, z: int, d: Vector2i, from: int, to: int) -> bool:
 			return false
 	return true
 
+
 # ---------------------------------------------------------------- solos
 func _solos() -> void:
 	var opts := {"autoplay": true, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "demo_kin": "cindle"}
-	opts["squad"] = 1      # solos: every hunter is their own squad
+	opts["squad"] = 1  # solos: every hunter is their own squad
 	opts["teams"] = 4
 	Game.goto("match", opts)
 	for i in 6:
@@ -1087,8 +1088,10 @@ func _solos() -> void:
 	m.knock(rivals[0], pl, {})
 	_step(m, 0.5)
 	m.hud.mates.track(m.hud, pl, 0.1)
-	ok(not Sfx.last_played.has("ping") and m.hud.mates.lines.is_empty(),
-			"solos: your ping and a rival down make no squad cue (%s)" % [Sfx.last_played.keys()])
+	ok(
+		not Sfx.last_played.has("ping") and m.hud.mates.lines.is_empty(),
+		"solos: your ping and a rival down make no squad cue (%s)" % [Sfx.last_played.keys()]
+	)
 	m.kin_ping(pl.kin, pl.pos, Color.WHITE, "x")
 	ok(not Sfx.last_played.has("ping"), "solos: your Boki's callout marker is silent too")
 	rivals[1].team = pl.team
@@ -1099,5 +1102,7 @@ func _solos() -> void:
 	m.knock(rivals[1], rivals[0], {})
 	_step(m, 0.5)
 	m.hud.mates.track(m.hud, pl, 0.1)
-	ok(Sfx.last_played.has("ping") and int(Sfx.cue_plays.get("knock_warn", 0)) == warns + 1,
-			"...with a squadmate the ping and 'teammate down' sound (%s)" % [Sfx.last_played.keys()])
+	ok(
+		Sfx.last_played.has("ping") and int(Sfx.cue_plays.get("knock_warn", 0)) == warns + 1,
+		"...with a squadmate the ping and 'teammate down' sound (%s)" % [Sfx.last_played.keys()]
+	)
