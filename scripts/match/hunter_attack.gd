@@ -410,7 +410,7 @@ func emit_shot() -> void:
 		extra["crit"] = true
 	Loot.rider(h, extra, dmg)
 	h._kin_riders(extra)
-	ShotOrigin.draw_from(extra, h, "lmb")      # drawn from the bow, the gun's mouth or the hand
+	ShotOrigin.draw_from(extra, h, "lmb")  # drawn from the bow, the gun's mouth or the hand
 	if pel > 1:
 		# a shotgun throws the same fixed fan every time, wider with each shot in a row. However
 		# few slugs land, the first one on a target still does a good share of the whole volley

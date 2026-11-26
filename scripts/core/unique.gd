@@ -414,6 +414,8 @@ static func dress(root: Node3D, rec: Dictionary) -> void:
 	if not rec.get("shimmer", false) and not rec.get("ghost", false):
 		for i in mini(3, mats.size()):
 			_set_albedo(mats[i], tint(_albedo(mats[i]), d))
+		if mats.size() > 0:
+			(mats[0] as Material).set_meta("rolled", true)   # BokiRig: a painted coat takes only its brightness
 	# coat marks on the body material (toon shader mark_*), placed from its own seed
 	var mk := String(d.get("mark", "plain"))
 	var mi: Dictionary = MARK_INFO.get(mk, MARK_INFO["plain"])
