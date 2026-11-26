@@ -44,7 +44,7 @@ func _tip(h: Hunter, id: String) -> Array:
 	return [key, line(id, slot)]
 
 
-## "<item> on <key>: <its "tip" if it has one, else the first sentence of its desc>" (a tip keeps a long desc to one line).
+## "<item> on <key>: <its "tip", else the first sentence of its desc>" (a tip keeps a long desc to one line).
 static func line(id: String, slot: int) -> String:
 	var def := UtilityBelt.def(id)
 	var effect := String(def.get("tip", String(def.get("desc", "")).get_slice(". ", 0))).trim_suffix(".")
