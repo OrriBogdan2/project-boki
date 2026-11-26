@@ -43,6 +43,7 @@ const KIT_ROOM_M := 10  # m of solid ground all round the kit fight (at a cliff 
 const KIT_LEASH_M := 3.0  # m the Hunter may stray from the fight's centre before it walks back (dashes)
 const KIT_SEARCH_M := 30  # m from the start the kit shot looks for that much room
 const PitchClean := preload("res://tools/pitch_clean.gd")
+const Preflight := preload("res://tools/clip_preflight.gd")
 const SHADOW_M := 70.0  # m of sun shadow range in a take (_crisp_shadows)
 const DROP_PLAN_MAX_S := 25.0  # s shot 8 waits for the plan-your-drop screen to hand over to the drop
 const ESCAPE_TAIL_S := 2.5  # s of the ride out kept after the Hunter is extracted
@@ -190,7 +191,7 @@ func _film_one(s: int, k: int) -> int:
 	var marks_text := String(out[0]) if out.size() > 0 else ""
 	for line in marks_text.split("\n"):
 		marks.store_line(line)
-		if line.begins_with("PITCH_") or line.contains("ERROR"):
+		if line.begins_with("PITCH_") or line.begins_with("CLIP_PREFLIGHT") or line.contains("ERROR"):
 			print(stem, " ", line)
 	marks.close()
 	var ok := keeps_movie(rc, marks_text) and FileAccess.file_exists(movie)
@@ -221,6 +222,8 @@ func fail(why: String) -> void:
 
 ## The frame a part starts on, for the encoder.
 func mark(what: String) -> void:
+	if marks.is_empty() and "--pitch-child" in OS.get_cmdline_user_args():  # (not --pitch-check: it must not quit)
+		Preflight.enforce(main, 1, "pitch_shot%d" % shot, shot == 6)  # staged: models and overlays checked once
 	marks[what] = Engine.get_frames_drawn()
 	print("PITCH_MARK %s movie_frame=%d" % [what, Engine.get_frames_drawn()])
 
