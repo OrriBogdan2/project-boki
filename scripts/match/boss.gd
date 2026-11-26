@@ -550,9 +550,9 @@ func _atk_boulders() -> void:
 		_at(delay, func(): _throw(to, 1.0, 1.9, 20.0, Color("9c968a"), "boulder", tn))
 
 ## Throws a boulder or glob at `to`; its landing tell `tele` now stays up even if the attack is cut.
-func _throw(to: Vector3, dur: float, rad: float, base: float, c: Color, what: String, tele: Node3D) -> void:
+func _throw(to: Vector3, dur: float, rad: float, base: float, c: Color, what: String, tell_n: Node3D) -> void:
 	for t in teles:
-		if t["n"] == tele: t["thrown"] = true
+		if t["n"] == tell_n: t["thrown"] = true
 	var n := Node3D.new()
 	if what == "boulder":
 		Models.part(n, Models.sphere(0.55, 7), Models.toon(c), Vector3.ZERO, Vector3(1.1, 0.9, 1.0))
