@@ -198,8 +198,9 @@ func _sizes(main: Node, m: Match, p: Hunter) -> void:
 		var listed: bool = pc.get_global_rect().encloses(pane) and _on_screen(vs, pane.end)
 		ok(listed, "%s: the backpack list %s is on screen" % [tag, pane])
 		ok(
-			slots["worn"] == 4 and slots["belt"] == 4 and slots["pack"] >= 6 and stray.is_empty(),
-			"%s: 4 worn, 4 belt, %d pack slots on screen, clickable %s" % [tag, slots["pack"], stray.slice(0, 3)]
+			slots["worn"] == 4 and slots["belt"] == UtilityBelt.SLOTS and slots["pack"] >= 6 and stray.is_empty(),
+			"%s: 4 worn, %d belt, %d pack slots on screen, clickable %s"
+			% [tag, UtilityBelt.SLOTS, slots["pack"], stray.slice(0, 3)]
 		)
 		var orbs: HFlowContainer = pc.find_children("*", "HFlowContainer", true, false)[0]
 		var shown := orbs.get_child_count()

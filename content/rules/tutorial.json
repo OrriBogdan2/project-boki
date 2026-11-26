@@ -119,7 +119,7 @@
   "glide": "Jump, then press %J again in the air to open your glider.",
   "wallkick": "A jump against a wall kicks you up it.",
   "crouch": "Crouching shows what lies far ahead.",
-  "gkey": "%T sends %s at a monster; tap again to recall %s.",
+  "gkey": "%s fights on its own, with its own abilities.",
   "summon": "%s fights for %D seconds; your perks are off meanwhile",
   "summon_warn": "Almost time. %s is getting tired.",
   "summon_back": "Back to a light. %s rests now.",
@@ -138,7 +138,7 @@
   "summon_out": "%s is out for %D seconds",
   "summon_rest": "%s is resting",
   "summon_early": "That calls it back early: let it stay",
-  "pack_wait": "Wait for the bright ring, then press %M",
+  "pack_wait": "Wait for the bright ring",
   "shoot_draw": "Hold %K to draw, let go to loose",
   "shoot_melee": "Step in and swing at them (%K)"
  },

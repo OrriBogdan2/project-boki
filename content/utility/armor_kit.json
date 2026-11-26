@@ -14,6 +14,7 @@
  ],
  "price": 40,
  "desc": "Patches your armor: most of a Common set, less of a finer one. You are open and slow while you repair.",
+ "tip": "Patches your armor",
  "channel": {
   "time": 1.6,
   "move": 0.45,

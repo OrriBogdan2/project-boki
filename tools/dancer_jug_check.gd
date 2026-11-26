@@ -326,13 +326,12 @@ func thief(a) -> void:
 		)
 	)
 	a_x.ok(
-		"dancer HUD: EMPOWERED label + dash dot",
+		"dancer HUD: dash dot while empowered",
 		(
-			k.ready_label().begins_with("EMPOWERED")
+			k.dash_payoff_ready()
 			and p_v.slot_info("dash").get("full", false)
 			and not p_v.slot_info("sec").get("full", false)
-		),
-		k.ready_label()
+		)
 	)
 	a_x.fresh(t_v)
 	a_x.aim_at(p_v, t_v.pos)
@@ -954,7 +953,7 @@ func juggernaut(a) -> void:
 	k.gain_rage(100.0)
 	a_x.ok(
 		"juggernaut passive: full = Enraged (+15%)",
-		k.enraged_t > 0.0 and absf(k.outgoing(t_v, 100.0, {}) - 115.0) < 0.1 and k.ready_label() == "ENRAGED",
+		k.enraged_t > 0.0 and absf(k.outgoing(t_v, 100.0, {}) - 115.0) < 0.1,
 		"%.1f" % k.outgoing(t_v, 100.0, {})
 	)
 	k.cd["e"] = 10.0

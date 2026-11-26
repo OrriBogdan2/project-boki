@@ -77,7 +77,8 @@ func run(main_node: Node) -> void:
 	P.lvl = 6
 	for slot in P.slot_lv:
 		P.slot_lv[slot] = 3
-	for part: String in parts():
+	# (--reel-only may name a part kept off the reel)
+	for part: String in (parts() if only == "" or only in parts() else [only]):
 		if only != "" and part != only:
 			continue
 		print("REEL_MARK %d %s" % [Engine.get_frames_drawn(), part])
@@ -389,6 +390,39 @@ func _juggernaut_lunge() -> void:
 		),
 		3.0
 	)
+	await _go(GAP)
+
+
+## (--reel-only=lunge_far) a perfect Lunge down a lane with nothing in it: the whole 7.6 m at the match camera
+## (the coil holds to the stop, then the thrust; JuggernautKit.LUNGE_COIL_T).
+func _juggernaut_lunge_far() -> void:
+	await _reset(3.0, 6.0)
+	var kit: JuggernautKit = P.ak
+	var far := P.pos + Vector3(12.0, 0, 0)
+	var go := 0.1 + kit.rmb_charge_full() + 0.05
+	var lunge := func(t: float):
+		if _at(t, 0.1):
+			P.inp["sec_hold"] = true
+			kit.press_rmb()
+		if t >= go:
+			P.inp["sec_hold"] = false
+		_aim(far)
+	await _go(2.4, lunge, [], 2.5)
+	await _go(GAP)
+
+
+## Vex's Slipstep held 0.9 s down a lane with nothing in it: the slide's whole length at the match camera.
+func _gunslinger_dash() -> void:
+	await _reset(14.0)
+	var slide := func(t: float):
+		if _at(t, 0.15):
+			P.inp["move"] = Vector2(1, 0)
+			P.do_dash()
+		P.inp["dash_down"] = t > 0.15 and t < 1.05
+		if t > 0.3:
+			P.inp["move"] = Vector2.ZERO
+		_aim(T.pos)
+	await _go(2.4, slide, [], 2.5)
 	await _go(GAP)
 
 

@@ -119,6 +119,7 @@ func _tile(key: String, slot_name: String, icon: String, col: Color, item_name: 
 	v.add_child(head)
 	var nm := UI.label(item_name, 12, col if icon != "" else Color(MUTED, 0.7), UI.semi)
 	nm.clip_text = true
+	nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS  # (a six-slot belt: a long name ends in "...")
 	nm.custom_minimum_size.x = 10.0
 	nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var line := UI.hbox(4)

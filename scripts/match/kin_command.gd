@@ -161,8 +161,7 @@ static func order(h: Hunter, id: String) -> bool:
 			"follow": "at your side"
 		}
 		say(h, "%s: %s" % [k.rec.get("name", "Your Boki"), what[id]], k.sp["color"])
-		var mood := "alert" if id in ["guard", "chase"] else "happy"
-		h.m.sfx(KinVoice.cue(k.species, mood), k.pos, -8.0, Unique.voice(k.rec))
+		KinAck.say(k, id)
 	return ok
 
 
