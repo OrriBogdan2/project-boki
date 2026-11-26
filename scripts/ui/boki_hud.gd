@@ -14,6 +14,8 @@ extends RefCounted
 ## Kept out of hud.gd (a god file): hud.gd only calls these.
 
 const DOWN_COL := Color("ff7a6a")
+const LABEL_PX := 14  # font px (1080p) of the order and carry labels over the G slot: the smallest that reads
+const LABEL_GAP := 4.0  # px: the lowest label's baseline above the G slot, and half the step to the label over it
 
 ## Stolen wisp rows (stolen_wisps) above the Boki box
 const STOLEN_W := 168.0  # px: a row's width, right edge on the box's right edge
@@ -289,20 +291,6 @@ static func cg_slots(h_v, p: Hunter, x: float, y: float, s: float) -> float:
 	var in_form := KinMerge.in_form(p)
 	if in_form:
 		h_v._rounded(cr, Color(0.04, 0.04, 0.06, 0.72), 8)  # (the Boki is part of you)
-	var from_txt := (
-		"Boki's move"
-		if k.state in ["active", "flying", "returning", "flying_home"]
-		else ("DOWN" if down else "through you")
-	)
-	if in_form:
-		from_txt = "FUSED"
-	h_v._ctext(
-		Vector2(cr.get_center().x, cr.position.y - 5),
-		from_txt,
-		8,
-		DOWN_COL if down else Color(h_v.INK, 0.5 if in_form else 0.7),
-		h_v.big
-	)
 	x += 50.0
 	var gr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
 	var out := k.state in ["active", "flying", "returning", "flying_home"]
@@ -325,9 +313,9 @@ static func cg_slots(h_v, p: Hunter, x: float, y: float, s: float) -> float:
 		# its carried bonuses: on while it is on you, greyed while it is out beside you
 		var on := p.kin_carry_on()
 		h_v._ctext(
-			Vector2(gr.get_center().x, gr.position.y - 22.0),
+			Vector2(gr.get_center().x, gr.position.y - LABEL_PX - LABEL_GAP * 2.0),
 			"CARRY ON" if on else "CARRY OFF",
-			8,
+			LABEL_PX,
 			Color(k.sp["color"], 0.95) if on else Color(h_v.INK, 0.4),
 			h_v.big
 		)
@@ -343,9 +331,9 @@ static func cg_slots(h_v, p: Hunter, x: float, y: float, s: float) -> float:
 		h_v._ctext(gr.get_center() + Vector2(0, 4), str(int(ceil(k.rest_t))), 14, Color(h_v.INK, 0.8), h_v.big)
 		mode = "RESTING"
 	h_v._ctext(
-		Vector2(gr.get_center().x, gr.position.y - 5),
+		Vector2(gr.get_center().x, gr.position.y - LABEL_GAP),
 		mode,
-		10,
+		LABEL_PX,
 		DOWN_COL if down else (Color(h_v.INK, 0.5) if in_form else Color(k.sp["color"], 0.95)),
 		h_v.big
 	)
