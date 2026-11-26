@@ -11439,3 +11439,4 @@ READY ext/farm-boki-xp-curve-port 71b919d0dc (PR #230: merge conflict in generat
 READY ext/expedition-perf-1126 1feac288e2 (perf(expedition): loot loops reach-first, hazard-free path search, far hunters' looks on pose frames; 30-hunter pickups 1.2-1.6 -> 0.5 ms, rest inside noise; doc has ranked costs)
 READY ext/reticle-one-styled-1126 36a08948771 (reticle proof redo: ammo arc off cursor, grass/stray fixes, GPU sheets docs/shots/reticle_looks_1126b_*)
 READY ext/sfx-grounded-wave2-1126 10c4cc5647e4f9fffa4160486132387416499800 (SFX grounded wave 2: 27 combat/movement sounds + wave 1; 0 new sfx reds)
+READY ext/testzone-ui-1126 95f6af47f3a (reserved rects: fps counter + minimap kept clear by every practice popup; fps/minimap pairs in --test-zone-check and shots)
