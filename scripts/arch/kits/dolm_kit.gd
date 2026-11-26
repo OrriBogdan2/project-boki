@@ -15,6 +15,7 @@ extends ArchKit
 
 const COBALT := Color("3a7cff")         # Tenzo's signature (docs/VFX_QUALITY.md): every look of his kit is this blue
 const LANE_COL := Color("d8ecff")       # the punch lane: pale ice white, as bright as an aim reticle
+const SHARD_DB := -8.0         # dB: the plating sound of a Shardskin stack, under a punch
 const ROCK_STEP_OFF := 1.0     # m: from atop a rock, Stone Row measures from the ground this far ahead
 
 var lmb_t := -1.0              # how long the attack key has been down (-1: not pressed)
@@ -45,6 +46,7 @@ var wall_stuns := 0
 var guard_punches := 0         # punches that launched a rock of ours and gave a Shardskin stack
 var rocks_made := 0
 var row_heard_t := -1.0       # s (m.time): when a Stone Row's rise was last heard
+var rock_sd := {}               # the last punched rock while it flies (its tumble, br_rock_fly, follows it)
 var boulder_sd := {}           # the thrown boulder in flight: its tumble (br_boulder_fly) follows it
 var sight_pings := 0
 var landslides := 0            # Rock Hop's last rocks that rolled on
@@ -155,6 +157,7 @@ func _fire_rock(start: Vector3, dir: Vector2, dmg: float, src: String, skin: Str
 		}
 	)
 	HeroVfx.of(m).trail(h, "rock_trail", KitLooks.of(m).skin(m.shots[-1], skin))
+	rock_sd = m.shots[-1]
 	m.sfx("br_launch", start, -3.0, 1.0)
 
 ## Where a launched rock ends: it bursts, shreds and slows what it caught and splashes whoever is next
@@ -228,6 +231,8 @@ func _tick(dt: float) -> void:
 	slam.tick(dt)
 	spine.tick(dt)
 	_tick_sight(dt)
+	if not rock_sd.is_empty() and not HeroSfx.fly(m, h, "br_rock_fly", rock_sd):
+		rock_sd = {}
 	if not boulder_sd.is_empty():
 		Sfx.loop_hold(_fly_key(), "br_boulder_fly", boulder_sd["pos"], -8.0, 1.0)
 
@@ -370,6 +375,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 		if lmb_t >= 0.0:
 			lmb_t = -1.0
 			h.mel_hold = 0.0
+			if h.stun_t > 0.0 or h.downed: KitWindup.broken(self, "lmb")
 		return true
 	if slam.charging():
 		if pressed: slam.extend()            # a punch during the Quakefall charge carries her (and the circle) forward
@@ -391,13 +397,16 @@ func lmb_override(held: bool, dt: float) -> bool:
 				return true
 			lmb_t = 0.0
 		lmb_t += dt
+		# the gauntlet draws back from HOLD_POSE_T into the hold (source 0118: cocked on the hold's first frame), not
+		# at the tap window; the lane, glow and charge still wait for it, and a tap's release throws as before
+		if lmb_t <= float(ld["tap"]): play_hold("breah_wind", lmb_t)
 		if lmb_t > float(ld["tap"]):
 			var k := punch_k()
 			h.mel_hold = k
 			if anim_id != "breah_wind" or m.time - anim_at > 3.0: play("breah_wind")
 			_punch_tele(k)
 			HeroVfx.of(m).hold(h, "punch_charge", k)
-			if not KitLooks.of(m).holding("br_fist"): m.sfx("br_wind", h.pos, -6.0, 1.0)
+			if not KitLooks.of(m).holding("br_fist"): KitWindup.play(self, "lmb", "br_wind", -6.0)
 			KitLooks.of(m).hold_on("br_fist", "mote", h, _fist_at(), 0.9 + 1.0 * k, COBALT.lerp(Color("9ad0ff"), k))
 	elif lmb_t >= 0.0:
 		# held as long as you like (the data: hold and release; no timeout), full stays full
@@ -449,6 +458,7 @@ func _boulder_fly() -> void:
 	HeroVfx.of(m).trail(h, "rock_trail", KitLooks.of(m).skin(m.shots[-1], "boulder"))
 	boulder_sd = m.shots[-1]
 	m.sfx("br_throw", h.pos, -3.0, 1.0)
+	m.sfx("br_throw_tail", h.pos, -6.0 if h.is_local() else -9.0)     # stone grinding after the heave
 	vfx("boulder_throw", start, dir)
 	Juice.shot(h, start, dir)
 
@@ -493,8 +503,8 @@ func _punch(k: float) -> void:
 		hv = HunterMove.push(Vector2(h.vel.x, h.vel.z), dir, stepv * float(pd["air_k"]))
 	h.vel.x = hv.x
 	h.vel.z = hv.y
-	var dmg: float = lerpf(float(pd["dmg"][0]), float(pd["dmg"][1]), k) * m.dmg_mult(h)
-	var kb := lerpf(float(pd["kb"][0]), float(pd["kb"][1]), k)
+	var dmg: float = float(pd["dmg"]) * m.dmg_mult(h)
+	var kb := float(pd["kb"])
 	vfx("punch", h.pos, dir, {"len": float(pd["len"]), "k": k})
 	m.sfx("br_punch", h.pos, -1.0, 1.0)
 	var swept := sweep_rocks(dir)
@@ -685,6 +695,7 @@ func guard_stack() -> void:
 	ShieldSrc.give(h, float(gd["shield"]) * shield_stacks, ShieldSrc.MOLTEN)
 	h.shield_t = float(gd["t"])
 	h.shield_kind = "molten"
+	m.sfx("br_raise", h.pos, SHARD_DB, 1.3)     # Shardskin: a stack of stone plating
 	vfx("guard_up")
 	h.shield_kind = "molten"
 
@@ -738,7 +749,7 @@ func cast_e() -> bool:
 	m.sfx("br_crack", h.pos, -3.0, 1.0)
 	for j in spots.size():
 		var p2: Vector3 = spots[j][0]
-		m.later(tell, func(): if is_instance_valid(h): _raise(p2, dir))
+		m.later(tell, func(): if is_instance_valid(h) and not KinMerge.active(h): _raise(p2, dir))
 	return true
 
 ## One rock of the Stone Row rises; the row's rocks rise on the same step and the first to rise carries its sound.

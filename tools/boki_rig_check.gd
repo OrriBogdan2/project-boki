@@ -169,6 +169,7 @@ func ok(cond: bool, what: String) -> void:
 
 
 func run(main: Node) -> void:
+	FarmUnlocks.rules()["base_mode"] = false  # walks the old farm (base_mode is the shipped default)
 	ok(not BokiRig.has("no_model"), "an id without one keeps its KinModels body")
 	for id in SPECIES_LIST:
 		kin_id = id
@@ -229,7 +230,7 @@ func _contents(rig: BokiRig) -> void:
 	for mi in rig.model.find_children("*", "MeshInstance3D", true, false):
 		var m := (mi as MeshInstance3D).mesh
 		for si in m.get_surface_count():
-			tris += (m.surface_get_arrays(si)[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3
+			tris += int((m.surface_get_arrays(si)[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3.0)
 	var cap: int = OVER_TRIS.get(kin_id, MAX_TRIS)
 	ok(tris <= cap, "%d tris, budget %d" % [tris, cap])
 	_lods(rig)
@@ -290,6 +291,14 @@ func _stepping(main: Node, rig: BokiRig) -> void:
 	var clip_s := rig.player.current_animation_position + rig.pace.held  # (plus what waits for its next step)
 	ok(absf(clip_s - 0.01 * frames) < 0.0001, "and kept up with the time: %.3f s of clip" % clip_s)
 	rig.pace.every = 1
+	# a crowded home (more than RigPace.crowd_from Boki out) steps its rigs every EVERY frames below Ultra
+	var calm: int = rig.pace._gap()
+	RigPace.crowd = RigPace.crowd_from + 1
+	var crowded: int = rig.pace._gap()
+	RigPace.crowd = 0
+	var want := 1 if Settings.quality() == "ultra" else RigPace.EVERY
+	ok(calm == 1 or RigPace.dear(), "a home with few Boki steps every frame (%d)" % calm)
+	ok(crowded == want or RigPace.dear(), "a crowded home steps every %d frames (want %d)" % [crowded, want])
 	rig.set_process(true)
 
 
@@ -550,6 +559,9 @@ func _own_look(main: Node) -> void:
 	var rig := k.get_node("Body/Flex/BokiRig") as BokiRig
 	var marks := rig._coat.next_pass as ShaderMaterial
 	ok(marks != null and marks.shader.resource_path.begins_with("res://shaders/boki_marks"), "its coat marks are on")
+	var shift := rig._coat.get_shader_parameter("albedo") as Color
+	var grey := is_equal_approx(shift.r, shift.g) and is_equal_approx(shift.g, shift.b)
+	ok(grey, "its colour roll keeps the painted hues")
 	await _grown_parts(main)
 	var iris := rig.eye_mat.get_shader_parameter("iris") as Color
 	for nm in ["Tuft", "TailTuft", "Birthmark"]:

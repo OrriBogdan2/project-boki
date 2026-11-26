@@ -18,7 +18,7 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
+	m.start({"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
 	m.set_process(false)
 	var fade = main.get("fade")
 	if fade != null:
@@ -34,7 +34,7 @@ func run(main: Node) -> void:
 	var base: Vector3 = m.player.pos + Vector3(-GAP * (PER_ROW - 1) * 0.5, 0, -2.0)
 	m.cam.snap(m.player.pos + Vector3(0, 0, GAP * (rows - 1) * 0.5 - 2.0))
 	for i in types.size():
-		var at := base + Vector3(GAP * (i % PER_ROW), 0, GAP * (i / PER_ROW))
+		var at := base + Vector3(GAP * (i % PER_ROW), 0, GAP * (int(i / float(PER_ROW))))
 		var col := Color(String(KinTypeFx.LOOKS[types[i]]["col"]))
 		m.fx.word(at + Vector3(0, 2.2, 0), String(types[i]).capitalize(), col, false)
 		KinTypeFx.play(m.fx, types[i], at, Vector2(1, 0))

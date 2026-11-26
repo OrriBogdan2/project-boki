@@ -23,8 +23,8 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	_kinds()
 	_source()
-	await _match(main)
-	await _zone(main)
+	_match(main)
+	_zone(main)
 	print("MINIMAP CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -63,7 +63,7 @@ func _source() -> void:
 func _match(main: Node) -> void:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
+	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
 	m.set_process(false)
 	var near := MapDetail.nearest_exit(m)
 	ok(not near.is_empty() and MapDetail.exit_matters(m, near), "the nearest exit matters")
@@ -114,7 +114,7 @@ func _key(m: Match) -> void:
 func _zone(main: Node) -> void:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "heart": true})
+	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "heart": true})
 	m.set_process(false)
 	var start := Heart.r("tide_start_s")
 	var held := start + Heart.r("tide_close_s")
@@ -122,7 +122,7 @@ func _zone(main: Node) -> void:
 	ok(HeartHud.zone_line(m) == "Closes in 0:30", "30 s before the tide moves: '%s'" % HeartHud.zone_line(m))
 	m.sess_t0 = start + 75.0 - m.time
 	var left := int(held - start - 75.0)
-	ok(HeartHud.zone_line(m) == "Closing %d:%02d" % [left / 60, left % 60],
+	ok(HeartHud.zone_line(m) == "Closing %d:%02d" % [int(left / 60.0), left % 60],
 		"while it closes: '%s'" % HeartHud.zone_line(m))
 	m.sess_t0 = held + 5.0 - m.time
 	ok(HeartHud.zone_line(m).is_empty(), "once the ring holds there is no clock")

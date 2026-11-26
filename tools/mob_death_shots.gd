@@ -28,7 +28,7 @@ func run(mn: Node) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 91, "no_drop": true, "god": true})
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 91, "no_drop": true, "god": true})
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)
@@ -58,14 +58,14 @@ func _foes(kind_s: String, n: int) -> Array:
 		if l["state"] == "sealed":
 			m.lairs.open(l, m.player, "dial")
 		var b: Boss = l["boss_mob"]
-		b.dormant = false
+		b.set_asleep(false)
 		b.stagger_t = 0.0
 		return [b]
 	var at := p.pos + Vector3(0, 0, -3.0)
 	var out: Array = []
 	var mob_kind := "skitter" if kind_s == "camp" else kind_s
 	for i in n:
-		out.append(m.spawn_mob(mob_kind, at + Vector3((i % 3 - 1) * 1.0, 0, (i / 3) * 1.0)))
+		out.append(m.spawn_mob(mob_kind, at + Vector3((i % 3 - 1) * 1.0, 0, (int(i / 3.0)) * 1.0)))
 	return out
 
 
@@ -91,8 +91,8 @@ func _case(dir: String, kind_s: String, n: int) -> void:
 		var img := main.get_viewport().get_texture().get_image()
 		img.convert(Image.FORMAT_RGBA8)
 		var c := Vector2i(m.cam.unproject_position(mid + Vector3(0, 0.8, 0)))
-		var x := clampi(c.x - CROP / 2, 0, img.get_width() - CROP)
-		var y := clampi(c.y - CROP / 2, 0, img.get_height() - CROP)
+		var x := clampi(c.x - int(CROP / 2.0), 0, img.get_width() - CROP)
+		var y := clampi(c.y - int(CROP / 2.0), 0, img.get_height() - CROP)
 		strip.blit_rect(img, Rect2i(x, y, CROP, CROP), Vector2i(i * CROP, 0))
 	strip.save_png(dir.path_join("mob_death_%s.png" % kind_s))
 	print("MOBDEATHSHOT %s" % kind_s)

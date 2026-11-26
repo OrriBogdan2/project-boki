@@ -34,12 +34,12 @@ func run(main_node: Node, _mode: String) -> void:
 	o.merge(Match.arena_opts("gunslinger"), true)
 	m = Match.new()
 	main.add_child(m)
-	await m.start(o)
+	m.start(o)
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)
 	sv = SubViewport.new()
-	sv.size = Vector2i(res * 16 / 9, res)
+	sv.size = Vector2i(int(res * 16 / 9.0), res)
 	sv.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	eye = Camera3D.new()
 	sv.add_child(eye)

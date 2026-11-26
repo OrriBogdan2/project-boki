@@ -78,6 +78,7 @@ func down(m: Match, A: Hunter) -> void:
 	A.down_hp = 60.0
 
 func run(mn: Node, md := "all") -> void:
+	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	main = mn
 	mode = md
 	Save.no_write = true
@@ -92,14 +93,14 @@ func run(mn: Node, md := "all") -> void:
 	var feel = load("res://tools/neve_feel_check.gd").new()
 	feel.sc = self
 	if mode in ["all", "tender"]:
-		await _tender_support()
+		_tender_support()
 		await _ranks("tender")
 		await combos.tender()
 		await carry.tender()
 		await _combo_tag("tender")
 		await ults.tender()
 	if mode in ["all", "rimewright"]:
-		await _rime_support()
+		_rime_support()
 		await _ranks("rimewright")
 		await combos.rimewright()
 		await _combo_tag("rimewright")

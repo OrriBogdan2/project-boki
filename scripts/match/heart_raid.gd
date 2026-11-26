@@ -246,9 +246,7 @@ func _steer() -> void:
 			t = _nearest(mb.pos, reach)
 			if t == null:
 				continue
-			mb.tgt = t
-			if mb.st == "idle":
-				mb.st = "chase"
+			mb.aggro(t, "heart raid")
 		mb.camp = t.pos
 
 
@@ -300,7 +298,7 @@ func _spawn_boss() -> void:
 	b.max_hp = float(bd["hp"]) * tier_k * scale("boss_hp")
 	b.dmg_mult *= float(diff()["dmg"])
 	b.hp = b.max_hp
-	b.dormant = false
+	b.set_asleep(false)
 	m.add_child(b)
 	m._draw_range(b)
 	m.mobs.append(b)
@@ -372,7 +370,7 @@ func summary() -> Dictionary:
 
 
 static func result_line(rd: Dictionary) -> String:
-	var clock := "%d:%02d" % [int(rd["t"]) / 60, int(rd["t"]) % 60]
+	var clock := "%d:%02d" % [int(int(rd["t"]) / 60.0), int(rd["t"]) % 60]
 	var mode := "Heart Raid (%s)" % diff_name(String(rd.get("difficulty", "normal")))
 	if bool(rd["won"]):
 		return "%s won: %s fell and your squad held the Heart (%s)." % [mode, rd["boss"], clock]

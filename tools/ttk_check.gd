@@ -7,54 +7,82 @@ extends "res://tools/archetype_check.gd"
 ## Rows outside RATIO_LO..RATIO_HI fail unless OVERRIDES cites the owner decision. --write updates docs/TTK.md.
 ## A Hunter with no source hero (Gil) is held to the roster median: the median source time of the same row.
 
-const RATIO_LO := 0.8      # ours / source time to knock: the parity bar either side (1.25 = 1 / 0.8)
+const RATIO_LO := 0.8  # ours / source time to knock: the parity bar either side (1.25 = 1 / 0.8)
 const RATIO_HI := 1.25
-const SOURCE_DR := 0.2     # Common armour reduction (docs/SUPERVIVE_DATA.md section 3; its durability outlasts it)
-const OUR_HP := 154.0      # mean of the 12 Hunters' health (light 124, medium 145, heavy 193)
-const SRC_HP := 1285.0     # mean Base HP of the 12 (supervive_physics.md attribute table)
-const SRC_HP_LV := 77.1    # mean HP per level; numbers read at level N face a level N target
-const DIST := 1.5          # m to the target: inside every melee reach, short of the sweet-spot tips
-const DRAW_S := 1.1        # s a bow is held before the release (the full draw)
-const MAX_S := 20.0        # a row that has not knocked by then counts as never
-const DT_SRC := 0.01       # s step of the source model
+const SOURCE_DR := 0.2  # Common armour reduction (docs/SUPERVIVE_DATA.md section 3; its durability outlasts it)
+const OUR_HP := 154.0  # mean of the 12 Hunters' health (light 124, medium 145, heavy 193)
+const SRC_HP := 1285.0  # mean Base HP of the 12 (supervive_physics.md attribute table)
+const SRC_HP_LV := 77.1  # mean HP per level; numbers read at level N face a level N target
+const DIST := 1.5  # m to the target: inside every melee reach, short of the sweet-spot tips
+const DRAW_S := 1.1  # s a bow is held before the release (the full draw)
+const MAX_S := 20.0  # a row that has not knocked by then counts as never
+const DT_SRC := 0.01  # s step of the source model
 
 ## One row per Hunter: [id, source name, our LMB mode (hold / tap / draw), level the numbers were read at,
 ## source LMB, abilities]. The source target is the mean Hunter at that level.
-## LMB is [damage, interval s, extra damage per consecutive hit(, cap per hit)]. Abilities map a slot to
+## LMB is [damage, interval s, extra damage per consecutive hit(, cap per hit(, every Nth hit, its bonus))]; the
+## bonus is a stack payoff the footage shows landing on a held target (Celeste's Shatter). Abilities map a slot to
 ## [damage, damage gain at max rank, cooldown s, cooldown cut at max rank, charges, extra charges at max rank].
 ## Every number is a supervive_kits.md tooltip (level 1, or level 15 where its section says so), except the LMB of
 ## Myth, Elluna, Tetra, Kingpin and Celeste: the tooltips have no damage there, so it is read from the floating
 ## damage numbers in the hero-ref footage (docs/TTK.md "Footage LMB"). Those five keep no abilities: their
 ## tooltips are level 1 (Tetra 15) and the footage is level 9 (Tetra about 18), so no combo row mixes the two.
 const HEROES := [
-	["gunslinger", "Ghost", "hold", 1, [51.0, 0.08, 0.0], {
-		"rmb": [165.0, 0.0, 9.0, 3.0, 1, 0], "e": [202.0, 0.4, 12.0, 0.0, 1, 0]}],
-	["juggernaut", "Brall", "tap", 1, [43.0, 0.35, 0.0], {
-		"rmb": [130.0, 0.4, 2.5, 0.0, 1, 0], "dash": [49.0, 0.0, 13.0, 5.0, 2, 1],
-		"e": [30.0, 0.0, 16.0, 6.0, 1, 0]}],
-	["ashwick", "Felix", "hold", 1, [25.8, 0.1, 0.0], {
-		"rmb": [106.0, 0.5, 9.0, 3.0, 1, 1], "dash": [150.4, 0.266, 9.0, 1.5, 2, 0],
-		"e": [76.8, 0.5, 13.0, 4.0, 1, 0]}],
-	["mage", "Joule", "hold", 1, [90.0, 0.8, 0.0], {
-		"rmb": [133.0, 0.9, 10.0, 2.0, 1, 0], "dash": [153.0, 1.0, 9.0, 1.5, 1, 0],
-		"e": [162.0, 0.5, 12.0, 3.0, 1, 0]}],
+	[
+		"gunslinger",
+		"Ghost",
+		"hold",
+		1,
+		[51.0, 0.08, 0.0],
+		{"rmb": [165.0, 0.0, 9.0, 3.0, 1, 0], "e": [202.0, 0.4, 12.0, 0.0, 1, 0]}
+	],
+	[
+		"juggernaut",
+		"Brall",
+		"tap",
+		1,
+		[43.0, 0.35, 0.0],
+		{"rmb": [130.0, 0.4, 2.5, 0.0, 1, 0], "dash": [49.0, 0.0, 13.0, 5.0, 2, 1], "e": [30.0, 0.0, 16.0, 6.0, 1, 0]}
+	],
+	[
+		"ashwick",
+		"Felix",
+		"hold",
+		1,
+		[25.8, 0.1, 0.0],
+		{"rmb": [106.0, 0.5, 9.0, 3.0, 1, 1], "dash": [150.4, 0.266, 9.0, 1.5, 2, 0], "e": [76.8, 0.5, 13.0, 4.0, 1, 0]}
+	],
+	[
+		"mage",
+		"Joule",
+		"hold",
+		1,
+		[90.0, 0.8, 0.0],
+		{"rmb": [133.0, 0.9, 10.0, 2.0, 1, 0], "dash": [153.0, 1.0, 9.0, 1.5, 1, 0], "e": [162.0, 0.5, 12.0, 3.0, 1, 0]}
+	],
 	["bulwark", "Oath", "tap", 15, [192.0, 0.45, 0.0], {"dash": [364.0, 0.0, 8.0, 3.0, 1, 0]}],
 	["thief", "Shiv", "hold", 15, [160.0, 0.45, 16.0], {"rmb": [46.0, 0.5, 13.0, 4.0, 1, 0]}],
-	["ostra", "Void", "hold", 15, [263.0, 0.6, 0.0], {
-		"rmb": [277.0, 0.4, 10.0, 3.0, 1, 0], "e": [365.0, 0.2, 10.0, 2.0, 1, 0]}],
+	[
+		"ostra",
+		"Void",
+		"hold",
+		15,
+		[263.0, 0.6, 0.0],
+		{"rmb": [277.0, 0.4, 10.0, 3.0, 1, 0], "e": [365.0, 0.2, 10.0, 2.0, 1, 0]}
+	],
 	["archer", "Myth", "draw", 9, [505.0, 1.7, 0.0], {}],
 	["tender", "Elluna", "hold", 9, [64.0, 0.4, 7.25, 93.0], {}],
 	["dolm", "Tetra", "tap", 18, [169.0, 0.6, 0.0], {}],
 	["dredge", "Kingpin", "hold", 9, [339.0, 0.5, 0.0], {}],
-	["rimewright", "Celeste", "hold", 9, [35.0, 0.2, 0.0], {}],
-	["gil", MEDIAN_BAR, "tap", false, [], {"rmb": [], "dash": [], "e": []}],      # last: needs the rows above
+	["rimewright", "Celeste", "hold", 9, [35.0, 0.2, 0.0, 35.0, 8, 520.0], {}],
+	["gil", MEDIAN_BAR, "tap", false, [], {"rmb": [], "dash": [], "e": []}],  # last: needs the rows above
 ]
-const MEDIAN_BAR := "roster median"      # source name of a Hunter with no source hero
+const MEDIAN_BAR := "roster median"  # source name of a Hunter with no source hero
 
 ## The share table watches one cast this long (s): a damage-a-second source number (Rain of Arrows) is counted
 ## over the same window, and Meeko's Burrseed shows its sourced hit, not the burst 2 s after it sticks.
 const HIT_S := 2.0
-const RMB_HOLD := {"archer": 1.1}      # hero -> s its RMB is held before the release (Heavy Shot at full draw)
+const RMB_HOLD := {"archer": 1.1}  # hero -> s its RMB is held before the release (Heavy Shot at full draw)
 
 ## Casts the share table lists that no combo row uses: hero -> slot -> source damage of one cast, a level 1
 ## tooltip against the level 1 target (the footage LMB is level 9, so these five cannot join a combo). our_hit
@@ -75,7 +103,8 @@ const OVERRIDES := {
 }
 
 var rows: Array = []
-var hits: Array = []      # [id, source name, slot, our share of the target, source share]
+var hits: Array = []  # [id, source name, slot, our share of the target, source share]
+
 
 ## Seconds until the [time, damage] hits add up to `need`, or -1.
 func _src_knock(shots: Array, need: float) -> float:
@@ -86,6 +115,7 @@ func _src_knock(shots: Array, need: float) -> float:
 		if sum >= need:
 			return shot[0]
 	return -1.0
+
 
 ## The source fight: LMB shots and abilities at their cooldowns, until `need` raw damage lands.
 func src_ttk(hero: Array, combo: bool, max_rank: bool) -> float:
@@ -98,8 +128,11 @@ func src_ttk(hero: Array, combo: bool, max_rank: bool) -> float:
 	var n_v := 0
 	while t <= MAX_S:
 		var dmg_v := float(lmb[0]) + float(lmb[2]) * n_v
-		shots.append([t, minf(dmg_v, float(lmb[3])) if lmb.size() > 3 else dmg_v])
+		dmg_v = minf(dmg_v, float(lmb[3])) if lmb.size() > 3 else dmg_v
 		n_v += 1
+		if lmb.size() > 5 and n_v % int(lmb[4]) == 0:
+			dmg_v += float(lmb[5])
+		shots.append([t, dmg_v])
 		t += float(lmb[1])
 	for slot in hero[5] if combo else {}:
 		var a: Array = hero[5][slot]
@@ -112,6 +145,7 @@ func src_ttk(hero: Array, combo: bool, max_rank: bool) -> float:
 				t += cd
 	return _src_knock(shots, need)
 
+
 ## The median source time of the rows so far with this label (the bar for a Hunter with no source hero).
 func _median_src(label: String) -> float:
 	var times := []
@@ -121,11 +155,13 @@ func _median_src(label: String) -> float:
 	if times.is_empty():
 		return -1.0
 	times.sort()
-	var mid := times.size() / 2
+	var mid := int(times.size() / 2.0)
 	return times[mid] if times.size() % 2 == 1 else (times[mid - 1] + times[mid]) / 2.0
+
 
 func _src_hp(hero: Array) -> float:
 	return SRC_HP + SRC_HP_LV * float(int(hero[3]) - 1)
+
 
 ## A fresh fight: the Hunter at `rank` and the standard target (armoured or not) held on its spot.
 func _fight(arch: String, rank: int, armoured: bool) -> Array:
@@ -141,6 +177,7 @@ func _fight(arch: String, rank: int, armoured: bool) -> Array:
 	T.armor = T.max_armor
 	return [r[0], P, T, T.pos]
 
+
 ## One step: the target stays put, the Hunter aims at it, then the world moves on.
 func _tick(m: Match, P: Hunter, T: Hunter, spot: Vector3) -> void:
 	T.pos = spot
@@ -153,6 +190,7 @@ func _tick(m: Match, P: Hunter, T: Hunter, spot: Vector3) -> void:
 	m.step(DT)
 	P.inp["dash"] = false
 	P.inp["sig"] = false
+
 
 ## Our fight: seconds to knock, or -1.
 func our_ttk(hero: Array, combo: bool, rank: int) -> float:
@@ -173,6 +211,7 @@ func our_ttk(hero: Array, combo: bool, rank: int) -> float:
 	await done(m)
 	return out
 
+
 ## Is the LMB down at time t: held, tapped every other step, or drawn DRAW_S then released a step.
 func _fire_down(mode: String, t: float) -> bool:
 	if mode == "tap":
@@ -180,6 +219,7 @@ func _fire_down(mode: String, t: float) -> bool:
 	if mode == "draw":
 		return fmod(t, DRAW_S + DT) < DRAW_S
 	return true
+
 
 ## What one cast of `slot` does to the target at rank 1, as a share of its health.
 func our_hit(arch: String, slot: String) -> float:
@@ -201,14 +241,15 @@ func our_hit(arch: String, slot: String) -> float:
 	var t := 0.0
 	while t < wait:
 		if slot == "e":
-			_abilities(P, [slot])      # (the recast that sets a planted E off)
+			_abilities(P, [slot])  # (the recast that sets a planted E off)
 		P.inp["sec_hold"] = t < hold_v
-		P.inp["fire"] = P.ak.ult_running()      # an ult that empowers the next shots (Starpiercer) fires them
+		P.inp["fire"] = P.ak.ult_running()  # an ult that empowers the next shots (Starpiercer) fires them
 		_tick(m, P, T, f[3])
 		t += DT
 	var share := (OUR_HP - T.hp) / OUR_HP
 	await done(m)
 	return share
+
 
 ## Casts one listed ability that is ready (RMB is a tap; E is pressed again while its window is up).
 func _abilities(P: Hunter, slots: Array) -> void:
@@ -223,11 +264,14 @@ func _abilities(P: Hunter, slots: Array) -> void:
 	elif "e" in slots and (float(K.cd["e"]) <= 0.0 or K.e_t > 0.0):
 		P.inp["sig"] = true
 
+
 func _fmt(v: float) -> String:
 	return "never" if v < 0.0 else "%.2f" % v
 
+
 func _ratio_text(ratio: float) -> String:
 	return "%.2f" % ratio if ratio > 0.0 else "n/a"
+
 
 ## One table row: ours, source and the verdict.
 func _cell(hero: Array, label: String, ours: float, src: float) -> Dictionary:
@@ -245,9 +289,11 @@ func _cell(hero: Array, label: String, ours: float, src: float) -> Dictionary:
 		row["state"] = "FAIL"
 	return row
 
+
 ## The damage share an owner decision lets this Hunter give up (OVERRIDES), else 0.
 func _given_up(id: String) -> float:
 	return float(OVERRIDES[id][0]) if OVERRIDES.has(id) else 0.0
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -264,8 +310,12 @@ func run(main_node: Node) -> void:
 				var row := _cell(hero, label, ours, src)
 				rows.append(row)
 				bad += int(row["state"] == "FAIL")
-				print("TTK %-4s %-11s %-14s ours %s s, source %s s, ratio %s" % [
-					row["state"], hero[0], label, _fmt(ours), _fmt(src), _ratio_text(row["ratio"])])
+				print(
+					(
+						"TTK %-4s %-11s %-14s ours %s s, source %s s, ratio %s"
+						% [row["state"], hero[0], label, _fmt(ours), _fmt(src), _ratio_text(row["ratio"])]
+					)
+				)
 	for hero in HEROES:
 		for slot in hero[5]:
 			if hero[5][slot].is_empty():
@@ -282,23 +332,42 @@ func run(main_node: Node) -> void:
 	print("TTK CHECK DONE, rows: %d, failures: %d" % [rows.size(), bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 ## One share-of-target row: printed and kept for the table, flagged "out" outside the bar (not a failure).
 func _add_hit(hero: Array, slot: String, ours_share: float, src_share: float) -> void:
 	var ratio := ours_share / src_share
 	var flag := "ok" if ratio >= RATIO_LO and ratio <= RATIO_HI else "out"
 	hits.append([hero[0], hero[1], slot, ours_share, src_share, flag])
-	print("TTK hit %-3s %-11s %-4s ours %.3f of the target, source %.3f, ratio %.2f" % [
-		flag, hero[0], slot, ours_share, src_share, ratio])
+	print(
+		(
+			"TTK hit %-3s %-11s %-4s ours %.3f of the target, source %.3f, ratio %.2f"
+			% [flag, hero[0], slot, ours_share, src_share, ratio]
+		)
+	)
 
-const TABLE_MARK := "<!-- ttk:table -->"      # docs/TTK.md keeps its tables between two of these
+
+const TABLE_MARK := "<!-- ttk:table -->"  # docs/TTK.md keeps its tables between two of these
+
 
 ## Rewrites the tables between the markers in docs/TTK.md.
 func _write() -> void:
 	var lines := ["| Hunter (source) | Row | Ours s | Source s | Ours / source | Verdict |"]
 	lines.append("|---|---|---|---|---|---|")
 	for r in rows:
-		lines.append("| %s (%s) | %s | %s | %s | %s | %s |" % [
-			r["hero"], r["name"], r["label"], _fmt(r["ours"]), _fmt(r["src"]), _ratio_text(r["ratio"]), r["state"]])
+		lines.append(
+			(
+				"| %s (%s) | %s | %s | %s | %s | %s |"
+				% [
+					r["hero"],
+					r["name"],
+					r["label"],
+					_fmt(r["ours"]),
+					_fmt(r["src"]),
+					_ratio_text(r["ratio"]),
+					r["state"]
+				]
+			)
+		)
 	lines.append_array(["", "| Hunter (source) | Cast | Ours (share of target) | Source | Ours / source | Bar |"])
 	lines.append("|---|---|---|---|---|---|")
 	for h in hits:

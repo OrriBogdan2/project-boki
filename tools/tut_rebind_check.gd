@@ -90,6 +90,7 @@ func ok(cond: bool, what: String) -> void:
 
 
 func run(mn: Node) -> void:
+	FarmUnlocks.rules()["base_mode"] = false  # walks the old farm (base_mode is the shipped default)
 	main = mn
 	Save.no_write = true
 	Settings.reset_all()
@@ -240,7 +241,9 @@ func _tips() -> void:
 		"bond full (next)": TipText.bond_full("Fuse", true),
 		"send": TipText.send("Pip"),
 		"scan": TipText.scan(),
-		"stagger": TipText.stagger("Brute")
+		"stagger": TipText.stagger(),
+		"down": TipText.down(),
+		"skill": TipText.skill("Pip", "Zap")
 	}
 	for k in lines:
 		_clean(lines[k], "first-time hint '%s'" % k)
@@ -268,7 +271,10 @@ func _drill(m: Match) -> void:
 	for t in m.training.rows():
 		_clean(t[1], "training drill '%s'" % t[0])
 	var glide: Array = m.training.rows().filter(func(t): return t[0] == "glide")[0]
-	ok(glide[1].contains("again in the air"), "the glide drill is jump, then press again in the air ('%s')" % glide[1])
+	ok(
+		glide[1].contains(Settings.key_cap("jump") + " again in the air"),
+		"the glide drill is jump, again ('%s')" % glide[1]
+	)
 	var ult: Array = m.training.rows().filter(func(t): return t[0] == "ult")[0]
 	ok(ult[1].contains(Settings.key_cap("ultimate")), "the Fuse drill names the rebound key ('%s')" % ult[1])
 

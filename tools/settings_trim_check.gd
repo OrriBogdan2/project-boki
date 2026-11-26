@@ -10,6 +10,7 @@ const MAIN_KEYS := ["quality", "fullscreen", "ui_scale", "master"]
 const NOT_ROWS := [
 	"keys",
 	"keys_v",
+	"cam_v",
 	"keys2_v",
 	"keys3_v",
 	"keys4_v",
@@ -21,7 +22,8 @@ const NOT_ROWS := [
 	"bot_diff",
 	"audio_v",
 	"keys7_v",
-	"hold_done"
+	"hold_done",
+	"boki_wisps",
 ]
 
 var bad := 0
@@ -67,7 +69,7 @@ func _tab_names() -> Array:
 
 func _saved(key: String):
 	var cf := ConfigFile.new()
-	cf.load(Settings.PATH)
+	cf.load(Settings.path)
 	return cf.get_value("s", key)
 
 
@@ -170,7 +172,10 @@ func run(main: Node) -> void:
 	if main.fade:
 		main.fade.reveal(0.05)
 		await tree.create_timer(0.35).timeout
+	var player_file := ProjectSettings.globalize_path(Settings.PLAYER_PATH)
+	var player_before := FileAccess.get_file_as_string(player_file)
 	Settings.reset_all()
+	ok(Settings.path != Settings.PLAYER_PATH, "a check run keeps its settings in its own file (%s)" % Settings.path)
 	Overlay.ctx = "title"
 	Overlay.more_tabs = false
 	# the first page
@@ -250,5 +255,6 @@ func run(main: Node) -> void:
 	await _search(shot)
 	Overlay.close()
 	Settings.reset_all()
+	ok(FileAccess.get_file_as_string(player_file) == player_before, "the player's settings.cfg is untouched")
 	print("TRIM DONE, failures: %d" % bad)
 	tree.quit(1 if bad > 0 else 0)

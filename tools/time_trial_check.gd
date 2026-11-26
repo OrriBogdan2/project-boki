@@ -27,7 +27,7 @@ func run(main_node: Node) -> void:
 	Save.d["time_trial"] = {}
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(Match.arena_opts("gunslinger"))
+	m.start(Match.arena_opts("gunslinger"))
 	m.set_process(false)
 	var t: TimeTrial = m.arena.grounds.trial
 	_built(m, t)
@@ -60,7 +60,7 @@ func _heights(m: Match, t: TimeTrial) -> void:
 	var kick := _gate(t, "kick")
 	var kick_top := m.world.ground_at(kick.at.x, kick.at.z)
 	var glide_top := t.pad_land.y
-	var cap := Hunter.JUMP_V * Hunter.JUMP_V / (2.0 * Hunter.H_GRAV) + Hunter.MANTLE_REACH
+	var cap := Hunter.JUMP_V * Hunter.JUMP_V / (2.0 * Hunter.H_GRAV) + HunterFeel.mantle_reach
 	ok("kick tower is out of a plain jump's reach", kick_top > cap, "%.1f m vs %.1f" % [kick_top, cap])
 	ok("glide tower is out of a wall kick's reach", glide_top > WallMoves.HOP_CLIMB_CAP + cap, "%.1f m" % glide_top)
 

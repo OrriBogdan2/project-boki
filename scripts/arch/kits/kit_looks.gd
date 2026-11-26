@@ -23,9 +23,9 @@ extends Node3D
 const ROCK_SH := preload("res://shaders/molten_rock.gdshader")
 const GLASS_SH := preload("res://shaders/void_glass.gdshader")
 const TINT_SH := preload("res://shaders/cel_tint.gdshader")
-const SLATE := Color("1a2733")          # Tenzo's stone, the A look of his arm (blue slate): in the cracks and shadows
-const SLATE_HI := Color("3a4d5c")       # and on its faces (the arm's stone, rgb 62 78 85)
-const SLATE_CAP := Color("8fabb6")      # its upward faces in the sun
+const SLATE := Color("152848")          # Tenzo's stone: cobalt slate, in the cracks and shadows
+const SLATE_HI := Color("34569a")       # and on its faces (cobalt, never grey)
+const SLATE_CAP := Color("8fb6f0")      # its upward faces in the sun
 const RUNE_TEAL := Color("5ce6b8")      # the glow of his runes and eye-stones (warden_look tarek rim_far_color)
 const RUNE_HOT := Color("b4f5e0")       # the rim light: the rune teal, lifted
 const KEEP := 0.12            # s: a refreshed effect (a mote, the aura) stays this long without a refresh
@@ -148,7 +148,8 @@ static func slate_mat(heat: float, seed_v: float, rim := 0.5) -> ShaderMaterial:
 	var mt := rock_mat(heat, seed_v)
 	mt.set_shader_parameter("stone", SLATE)
 	mt.set_shader_parameter("stone_hi", SLATE_HI)
-	mt.set_shader_parameter("glow", RUNE_TEAL.darkened(0.3))   # the shader lifts it 1.2x and up
+	mt.set_shader_parameter("glow", RUNE_TEAL)   # the shader lifts it 1.2x and up
+	mt.set_shader_parameter("pulse", 0.35)   # the cracks breathe
 	mt.set_shader_parameter("rim_col", RUNE_HOT)
 	mt.set_shader_parameter("rim", rim)
 	return mt
@@ -367,7 +368,7 @@ func skin(s: Dictionary, kind: String) -> Node3D:
 		(sn as Node3D).visible = false
 	s["node"] = null
 	var n := _take(kind)
-	n.global_position = s["pos"]
+	n.global_position = ShotOrigin.drawn(s, s["pos"])
 	live.append({"s": s, "n": n, "kind": kind, "t": 0.0})
 	return n
 
@@ -438,6 +439,7 @@ func _tick_skins(delta: float) -> void:
 		e["t"] = float(e["t"]) + delta
 		var v: Vector2 = s["vel"]
 		var fwd := Vector3(v.x, 0, v.y).normalized() if v.length() > 0.1 else Vector3.FORWARD
+		p = ShotOrigin.drawn(s, p)      # out of the hand or weapon it left
 		n.global_position = p
 		if fwd.length() > 0.1:
 			n.look_at(p + fwd, Vector3.UP)

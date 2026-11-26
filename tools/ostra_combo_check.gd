@@ -7,6 +7,7 @@ extends "res://tools/hero_pair_check.gd"
 const TIME := preload("res://tools/ostra_anim_time_check.gd")        # his move timing against the footage frames
 
 func run(main_node: Node) -> void:
+	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	main = main_node
 	await _ostra()
 	await _bolt_through_terrain()
@@ -339,7 +340,7 @@ func _ostra() -> void:
 		"moved %.2f" % Vector2(P.pos.x - home.x, P.pos.z - home.z).length()
 	)
 	# item 17: he drifts slowly while the lantern flies, keeps his height over the abyss
-	await _hover(m, P, T, home, K)
+	_hover(m, P, T, home, K)
 	TIME.new(self).run(m, P, K, T, home)
 	_far_cast(m, P, home, K)
 	_air_cast(m, P, home, K)
@@ -347,7 +348,7 @@ func _ostra() -> void:
 	K.swollen_t = 5.0
 	ok("combo: Swollen Trade is quicker", absf(K.swap_time() - 1.25) < 0.01, "%.2f" % K.swap_time())
 	# owner: everyone in the landing circle goes to where he stood (two units both end up at the origin)
-	await _multi(m, P, T, home, K)
+	_multi(m, P, T, home, K)
 	# ---- E: the seed drops at the cursor, grows 6.5s, light column near full, the 0.3s recast floor
 	reset.call()
 	T.teleport(home + Vector3(6.0, 0, 0))

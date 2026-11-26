@@ -62,7 +62,23 @@ const ODD_KEYS := [
 	KEY_SEMICOLON,
 	KEY_BRACKETLEFT,
 	KEY_BRACKETRIGHT,
-	KEY_APOSTROPHE
+	KEY_APOSTROPHE,
+	KEY_MENU,
+	KEY_PRINT,
+	KEY_CAPSLOCK,
+	KEY_HELP,
+	KEY_BACK,
+	KEY_FORWARD,
+	KEY_REFRESH,
+	KEY_STOP,
+	KEY_SEARCH,
+	KEY_FAVORITES,
+	KEY_HOMEPAGE,
+	KEY_VOLUMEUP,
+	KEY_VOLUMEDOWN,
+	KEY_MEDIAPLAY,
+	KEY_MEDIASTOP,
+	KEY_MEDIANEXT
 ]
 
 ## Caps that are also everyday words or numbers: only a hit after "press", "hold", "tap", "key" or in "(A)".
@@ -85,6 +101,7 @@ func ok(cond: bool, what: String) -> void:
 
 
 func run(main_node: Node) -> void:
+	FarmUnlocks.rules()["base_mode"] = false  # walks the old farm (base_mode is the shipped default)
 	Save.no_write = true
 	_read_defaults()
 	_source_tips()
@@ -130,6 +147,10 @@ func _esc(c: String) -> String:
 
 
 func _rebind() -> void:
+	ok(
+		ODD_KEYS.size() >= Settings.ACTIONS.size(),
+		"an odd key per action (%d keys, %d actions)" % [ODD_KEYS.size(), Settings.ACTIONS.size()]
+	)
 	var i := 0
 	for a in Settings.ACTIONS:
 		var ev := InputEventKey.new()
@@ -217,6 +238,8 @@ func _tips() -> void:
 	var shown: Array = m.hud.msgs.texts()
 	for s in shown:
 		_line("first-time hint", s)
+	for pair: Array in TipText.all_lines():
+		_line("TipText " + String(pair[0]), String(pair[1]))
 	ok(shown.any(func(s): return s.contains(Settings.key_cap("dash"))), "the move hint names the rebound dash key")
 
 
@@ -229,15 +252,8 @@ func _source_tips() -> void:
 		if hit != null:
 			_line("match.gd _tip", hit.get_string(1))
 			n += 1
-	# most tips are TipText's now (scripts/match/tip_text.gd): every string literal there is tip text
-	var str_lit := RegEx.create_from_string('"([^"]{12,})"')
-	for ln in FileAccess.get_file_as_string("res://scripts/match/tip_text.gd").split("\n"):
-		if ln.strip_edges().begins_with("#"):
-			continue
-		for hit in str_lit.search_all(ln):
-			_line("TipText", hit.get_string(1))
-			n += 1
-	ok(n > 10, "match.gd _tip and TipText lines read (%d)" % n)
+	# the hints moved out of match.gd are filled by TipText from Settings.key_cap: _tips() checks them after the rebind
+	ok(TipText.all_lines().size() + n > 3, "match.gd _tip lines read (%d) + TipText lines" % n)
 
 
 func _farm() -> void:

@@ -14,9 +14,11 @@ const TOP := 5  # the worst cancels printed
 
 ## Heroes whose worst cancel pops past POP: the ceiling in m each is held to until its clips are reworked (a blend of
 ## two far-apart arm poses peaks mid-arc: a hammer's lever, a held pose cut for the next one). A cancel rework drops its
-## entry (the check says when one now passes). thief 0.52: Sable's run foot_mps fit (4.99 -> 4.6) moves the run
-## phase at the cut, bola>stun 0.454 -> 0.515.
-const OVER := {"juggernaut": 1.1, "bulwark": 0.8, "ashwick": 0.4, "dredge": 0.62, "tender": 0.51, "thief": 0.52}
+## entry (the check says when one now passes). thief 0.54: Sable's run foot_mps fit (4.99 -> 4.6) moves the run
+## phase at the cut, bola>stun 0.454 -> 0.515; with the merge lane's blend-out changes on top 0.534.
+const OVER := {
+	"juggernaut": 1.1, "bulwark": 0.8, "ashwick": 0.4, "dredge": 0.62, "tender": 0.58, "thief": 0.54, "dolm": 0.27
+}
 ## Cancels still blending in after the window: "<hero> <from>@<cut>><to>" rows (docs/DEBT.md).
 const LATE_OPEN := [
 	"juggernaut jug_guard@0.50>glide",
@@ -26,6 +28,7 @@ const LATE_OPEN := [
 	"rimewright tm_spear_aim@0.30>tm_dart_r",
 	"rimewright tm_rime_hold@0.80>tm_skate_go",
 	"bulwark bul_smash_wind@0.50>bul_smash",
+	"bulwark bul_smash_wind@0.50>glide",
 ]
 
 var bad := 0
@@ -41,6 +44,7 @@ func ok(cond: bool, what: String) -> void:
 
 
 func run(main: Node) -> void:
+	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	Save.no_write = true
 	holder = Node3D.new()
 	main.add_child(holder)

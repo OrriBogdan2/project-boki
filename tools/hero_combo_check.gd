@@ -404,6 +404,7 @@ func _mage() -> void:
 	P.dashes = P.max_dashes()      # the press spends it; the pickup gives it back
 	K.motes.clear()
 	K.motes.append({"pos": home + Vector3(5, 0, 0), "t": 4.0, "node": K.own_node(), "owner": P})
+	T.teleport(home + Vector3(5, 0, 3))      # beside the orb, off the run's lane (the run itself stacks Static)
 	ac.aim_at(P, home + Vector3(8, 0, 0))
 	var ob0 := K.orb_bursts
 	_dash(m, P, 0.25)
@@ -839,12 +840,12 @@ func _gunslinger_beam_look(V: HeroVfx, K: GunslingerKit) -> void:
 			body >= 0.9 and absf(strip - K.beam_width()) < 0.01)
 	ok("Longneedle look: the beam fades out over about 0.8 s", lasts >= 0.7 and lasts <= 0.9, "%.2f s" % lasts)
 	var fire: Array = HeroVfx.data("gunslinger")["moves"]["e_fire"]["fx"]
-	var ring := fire.any(func(l: Dictionary) -> bool: return l["p"] == "ring" and l.get("at") == "palm")
+	var ring := fire.any(func(l: Dictionary) -> bool: return l["p"] == "ring")
 	var palm: Dictionary = HeroVfx.data("gunslinger")["anchors"]["palm"]
 	var ring_nodes: Array = V.pools.get("ring", [])
 	var ring_live := V.live.any(func(e: Dictionary) -> bool: return ring_nodes.has(e["node"]))
-	ok("Longneedle look: a smoke ring opens at the open palm of her cyborg (left) hand on release",
-			ring and ring_live and palm["bone"] == "hand.L")
+	ok("Longneedle look: no ground ring at the palm on release (a muzzle is no area); anchor stays hand.L",
+			not ring and not ring_live and palm["bone"] == "hand.L")
 
 func _gunslinger() -> void:
 	var r: Array = ac.setup("gunslinger", 5.0, "", true)
@@ -1127,8 +1128,8 @@ func _gunslinger() -> void:
 		K.cd["e"] = 0.0
 		P.ak.use_e()
 		ac.step(m, 0.7))
-	ok("small: the rifle loses half its punch over a 10-round string",
-			is_equal_approx(float(P.wpn["sustain_loss"]), 0.5) and int(P.wpn["sustain_rounds"]) == 10)
+	ok("small: the rifle loses a fifth of its punch over a 10-round string (docs/TTK.md 11-24: one drum knocks)",
+			is_equal_approx(float(P.wpn["sustain_loss"]), 0.2) and int(P.wpn["sustain_rounds"]) == 10)
 	K.res = 3.0
 	K.res_wait = 0.0
 	ac.step(m, 0.05)
