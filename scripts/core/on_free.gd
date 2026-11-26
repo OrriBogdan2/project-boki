@@ -10,8 +10,10 @@ const MAX_DEPTH := 3            # helper -> part -> part's part: deep enough for
 
 var _f: Callable
 
-## Calls f when `owner` is freed (this object rides in its metadata, so it goes with it).
+## Calls f when `owner` is freed (this object rides in its metadata, so it goes with it). No owner: never.
 static func call_on(owner: Object, f: Callable) -> void:
+	if owner == null:             # a check's bare helper has no node
+		return
 	var held: Array = owner.get_meta(&"_on_free", [])
 	held.append(OnFree.new(f))
 	owner.set_meta(&"_on_free", held)
