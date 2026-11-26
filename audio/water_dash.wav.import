@@ -2,13 +2,13 @@
 
 importer="wav"
 type="AudioStreamWAV"
-uid="uid://deaadtuovgo34"
-path="res://.godot/imported/hazard_swim.wav-7bc816a0b642ebbc5602f4924e55eeaf.sample"
+uid="uid://bv6q6alkvfx86"
+path="res://.godot/imported/water_dash.wav-e251c33af273691b0b0d993f994076e5.sample"
 
 [deps]
 
-source_file="res://audio/hazard_swim.wav"
-dest_files=["res://.godot/imported/hazard_swim.wav-7bc816a0b642ebbc5602f4924e55eeaf.sample"]
+source_file="res://audio/water_dash.wav"
+dest_files=["res://.godot/imported/water_dash.wav-e251c33af273691b0b0d993f994076e5.sample"]
 
 [params]
 

@@ -8,13 +8,12 @@
   hazard_bed_static     loop: a dry electric hum that wavers, sparse fizzing ticks
   hazard_bed_bramble    loop: twigs and leaves stirring, a faint insect whirr
   hazard_lava_burn      (3 takes) a short sizzle at your feet: the burn ticking
-  hazard_wade           (3 takes) a heavy slosh: wading where you can't swim (also the splash going in)
-  hazard_swim           (3 takes) a light stroke through the water: swimming with a Boki or perk that can
   hazard_breath         a tight gasp and a low throb: breath running out, drowning is close
   hazard_ice_skid       (3 takes) a scraping slide on ice
   hazard_static_crackle (3 takes) the ground's shock going through you: a snap and a fizz
   hazard_bramble_snag   (3 takes) thorns catching: a twig rasp and a little tear
-  hazard_warded         a soft two-note shimmer: your Boki or perk keeps this ground off you (first time)
+  hazard_catch          (3 takes) footing coming back on ice: a small dry tick of boots biting, one squeak in it
+  hazard_warded         a soft two-note shimmer: your Boki keeps this ground off you (first time)
 Original synthesis, no samples.
 """
 
@@ -149,19 +148,12 @@ def burn(_i):
     return soft_in(mix(sizzle, spit, thump), 1.0)
 
 
-def wade(_i):
-    d = 0.42
-    slosh = lpf(bpf(noise(d), 200, 1800), 1600) * env(N(d), 0.03, 0.14) * 1.2
-    drops = at(grains(0.3, 50, 900, 4000, 0.003, 0.009, 0.1) * 0.5, 0.06)
-    plunge = sub(110, 70, 0.15, 0.06) * 0.35
-    return soft_in(mix(slosh, drops, plunge), 1.0)
-
-
-def swim(_i):
-    d = 0.32
-    stroke = bpf(noise(d), 500, 2600) * shape(d, 0.08, 0.04, 0.18) * 0.8
-    drips = at(grains(0.22, 40, 1500, 5000, 0.002, 0.006, 0.08) * 0.4, 0.1)
-    return soft_in(mix(stroke, drips), 1.0)
+def catch(_i):
+    d = 0.22
+    tick = crack(0.06, 1500, 7000, 0.006) * 1.1
+    f = 2300 + 500 * S.rng.random()
+    squeak = np.sin(2 * np.pi * f * T(d)) * env(N(d), 0.004, 0.05) * 0.12
+    return soft_in(mix(tick, at(squeak, 0.01)), 0.5)
 
 
 def breath():
@@ -212,9 +204,8 @@ def build():
     ]:
         S.save_loop("hazard_bed_" + name, fn(), "loop")
     S.takes_cat("hazard_lava_burn", burn, 3, "dash")
-    S.takes_cat("hazard_wade", wade, 3, "dash")
-    S.takes_cat("hazard_swim", swim, 3, "dash")
     S.save_cat("hazard_breath", breath(), "grunt")
+    S.takes_cat("hazard_catch", catch, 3, "impact")
     S.takes_cat("hazard_ice_skid", skid, 3, "dash")
     S.takes_cat("hazard_static_crackle", crackle, 3, "impact")
     S.takes_cat("hazard_bramble_snag", snag, 3, "dash")
