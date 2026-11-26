@@ -103,6 +103,23 @@ func run(m: Node) -> void:
 		most / least < COVER_SPREAD,
 		"the starters cover close areas at the game camera (%.0f to %.0f cm2)" % [least * 1e4, most * 1e4]
 	)
+	var farm_scale := float(load("res://scripts/home/home.gd").get_script_constant_map()["FARM_BOKI_SCALE"])
+	var farm_most := 0.0
+	var farm_least := INF
+	for id in STARTERS:
+		var rec := Save.new_kin(id, "", 7)  # a fresh hatchling, the way the farm draws one (its evo scale)
+		(rec["dna"] as Dictionary)["size"] = 0.0
+		var k := Models.kin(id, rec)
+		stage.add_child(k)
+		k.scale = k.scale * farm_scale  # Home draws a Boki at its own scale times FARM_BOKI_SCALE, the same for each
+		var cover := _cover((k.get_node("Body/Flex/BokiRig") as BokiRig).model)
+		farm_most = maxf(farm_most, cover)
+		farm_least = minf(farm_least, cover)
+		k.queue_free()
+	ok(
+		farm_most / farm_least < COVER_SPREAD,
+		"on the farm the starters cover areas within %.2fx" % (farm_most / farm_least)
+	)
 	var heather: Vector3 = seen[BIG]
 	var heather_longest := heather[heather.max_axis_index()]
 	ok(

@@ -107,7 +107,7 @@ func _row(player: String, node: Node3D, cam: Camera3D, data_cm: float, species :
 		"data_cm": data_cm,
 		"px": [bbox.size.x, bbox.size.y],
 		"area_px": absf(area) * 0.5,
-		"face_deg": rad_to_deg(float(node.get("face"))),
+		"face_deg": rad_to_deg(float(node.get("face") if "face" in node else 0.0)),
 	}
 
 
