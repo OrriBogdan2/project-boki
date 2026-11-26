@@ -8,8 +8,12 @@ extends RefCounted
 ##      monster kind and a searchable Boki list; every Hunter can be picked, every monster spawns in front of you
 ##      (and lives a few frames), a Boki partner of another species comes along, god mode toggles, the dummies
 ##      reset. Run headless; grep the output for SCRIPT ERROR as well.
+##   3. a clean HUD (the owner's "UI overload" report): on entering, and with the Practice tools switched on, at
+##      1920x1080 and 2560x1440, no HUD element overlaps another and none covers your Hunter (TestZoneShots);
+##      the tools (key line, DPS meter, bottom bar, drills, guide banner) start off and come on from the page.
 
 const OPTS_SEED := 4242
+const Shots := preload("res://tools/test_zone_shots.gd")
 
 var bad := 0
 var main: Node
@@ -74,6 +78,7 @@ func _zone() -> void:
 	var was: Node = main.get("current")
 	main.set("current", m)
 	ok(TestZone.current() == m and m.arena != null, "the Test Zone runs on the sandbox map with its practice tools")
+	await _clean_hud(m)
 	Overlay.open_admin()
 	ok(_buttons().has("Test Zone tools"), "Admin tools in the zone lead to its page")
 	Overlay.open_test_zone()
@@ -116,6 +121,26 @@ func _zone() -> void:
 	main.set("current", was)
 	m.queue_free()
 	await tree.process_frame
+
+
+## The Test Zone's HUD at the owner's two screen sizes: tools off (as entered) and on, nothing crowded.
+func _clean_hud(m: Match) -> void:
+	var pr := Practice.of(m)
+	var shown: bool = m.arena.tools or pr.bar.visible or m.arena.hint.visible or m.arena.meter.visible
+	ok(not shown, "the practice tools start off")
+	var drill_or_pad: bool = pr.get_node_or_null(KitDrill.NAME) != null or m.duel_pad != Vector3.INF
+	ok(not drill_or_pad, "no kit drill banner and no duel pad on entering")
+	for size: Vector2i in Shots.SIZES:
+		main.get_window().size = size
+		for on in [false, true]:
+			m.arena.set_tools(on)
+			var found: Array = await Shots.judge(tree, m)
+			for f in found:
+				print("TESTZONE   overlap %s: %s" % [size, f])
+			ok(found.is_empty(), "no HUD overlap at %dx%d, practice tools %s" % [size.x, size.y, "on" if on else "off"])
+			var label := "the tools are %s at %dx%d" % ["shown" if on else "hidden", size.x, size.y]
+			ok(pr.bar.visible == on and m.arena.hint.visible == on, label)
+	m.arena.set_tools(false)
 
 
 func _buttons() -> Array:
