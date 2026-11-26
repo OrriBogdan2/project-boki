@@ -475,6 +475,7 @@ func _start(o: Dictionary) -> void:
 	hud.visible = false
 	await hud.setup(self)
 	hud.process_mode = hud_mode
+	SquadChat.attach(hud, opts, self)
 	hud.visible = true
 	if player and player.dropping and tut == null:
 		hud.toast("Steer to choose where you land", Color("f3eee2"))
@@ -4557,6 +4558,7 @@ func _extract(h: Hunter, how := "", where := "") -> void:
 		if opts.get("tut_test", false):
 			print("TUT DONE extracted by %s at %s, t=%.1f" % [how, where, time])
 			get_tree().create_timer(0.5).timeout.connect(func(): get_tree().quit())
+	KinSteal.on_extract(self, h)
 	_check_last()
 
 func _update_rules(dt: float) -> void:
