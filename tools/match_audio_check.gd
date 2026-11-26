@@ -394,7 +394,6 @@ func _ult_cues(m: Match, p: Hunter) -> void:
 	)
 
 
-
 ## Each kind of sound plays on its own bus, set up in one place (SfxMix.BUSES).
 func _buses() -> void:
 	for bn in SfxMix.BUSES:
@@ -722,10 +721,10 @@ func _carry(m: Match, p_v: Hunter) -> void:
 	ok(not pairs.is_empty() and pairs[0].kin2 != null, "setup: a bot carries two Boki")
 	if pairs.is_empty():
 		return
-	var wisp: Hunter = pairs[0]
-	Sfx.listener = wisp.pos
+	var B: Hunter = pairs[0]
+	Sfx.listener = B.pos
 	Sfx.last_played.clear()
-	wisp.swap_kin(true)
+	B.swap_kin(true)
 	var first := Sfx.last_played.has("carry_swap_out") and not Sfx.last_played.has("carry_swap_in")
 	await main.get_tree().create_timer(CarrySfx.SWAP_GAP_S + 0.1).timeout
 	ok(
@@ -752,14 +751,14 @@ func _carry(m: Match, p_v: Hunter) -> void:
 	got = _from_box(m, p_v, R, rec)
 	ok(got == ["carry_take"], "steal: taking from a rival's box plays the sly take (%s)" % [got])
 	Sfx.last_played.clear()
-	foe.pos = p_v.pos + Vector3(60, 0, 0)
-	KinTrack.register(foe, rec, p_v)
+	R.pos = p_v.pos + Vector3(60, 0, 0)
+	KinTrack.register(R, rec, p_v)
 	got = Sfx.last_played.keys()
 	ok(got == ["carry_stolen"], "steal: the owner hears the sting, flat, 60 m from the thief (%s)" % [got])
 	for d in [25.0, 40.0]:
-		foe.pos = p_v.pos + Vector3(d, 0, 0)
+		R.pos = p_v.pos + Vector3(d, 0, 0)
 		Sfx.last_played.clear()
-		CarrySfx.stolen(m, foe, wisp)
+		CarrySfx.stolen(m, R, B)
 		var hears: bool = d < float(Sfx.sound_reach["carry_take"])
 		ok(
 			Sfx.last_played.has("carry_take") == hears,
@@ -769,9 +768,9 @@ func _carry(m: Match, p_v: Hunter) -> void:
 	Sfx.last_played.clear()
 	Sfx.recent.erase("carry_take")
 	for i in 3:
-		CarrySfx.stolen(m, foe, wisp)
+		CarrySfx.stolen(m, R, B)
 	ok((Sfx.recent.get("carry_take", []) as Array).size() == 1, "voice cap: three takes at once play one")
-	foe.remove_meta(KinTrack.META)
+	R.remove_meta(KinTrack.META)
 
 
 ## Takes `rec` out of a box `dropper` left and returns the carry cues it played.
@@ -790,7 +789,6 @@ func _from_box(m: Match, h: Hunter, dropper: Hunter, rec: Dictionary) -> Array:
 	Life.take_item(m, h, b, {"key": "caught", "i": 0})
 	h.caught.clear()
 	return Sfx.last_played.keys().filter(func(nm): return String(nm).begins_with("carry_"))
-
 
 
 ## Walks one hunter's glider through open, fast glide, dive, overheat and fold, setting the state a
@@ -1069,10 +1067,10 @@ func _void(w: World, x: int, z: int, d: Vector2i, from: int, to: int) -> bool:
 			return false
 	return true
 
-# ---------------------------------------------------------------- solos
+
 func _solos() -> void:
 	var opts := {"autoplay": true, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "demo_kin": "cindle"}
-	opts["squad"] = 1      # solos: every hunter is their own squad
+	opts["squad"] = 1  # solos: every hunter is their own squad
 	opts["teams"] = 4
 	Game.goto("match", opts)
 	for i in 6:
@@ -1089,8 +1087,10 @@ func _solos() -> void:
 	m.knock(rivals[0], pl, {})
 	_step(m, 0.5)
 	m.hud.mates.track(m.hud, pl, 0.1)
-	ok(not Sfx.last_played.has("ping") and m.hud.mates.lines.is_empty(),
-			"solos: your ping and a rival down make no squad cue (%s)" % [Sfx.last_played.keys()])
+	ok(
+		not Sfx.last_played.has("ping") and m.hud.mates.lines.is_empty(),
+		"solos: your ping and a rival down make no squad cue (%s)" % [Sfx.last_played.keys()]
+	)
 	m.kin_ping(pl.kin, pl.pos, Color.WHITE, "x")
 	ok(not Sfx.last_played.has("ping"), "solos: your Boki's callout marker is silent too")
 	rivals[1].team = pl.team
@@ -1101,5 +1101,7 @@ func _solos() -> void:
 	m.knock(rivals[1], rivals[0], {})
 	_step(m, 0.5)
 	m.hud.mates.track(m.hud, pl, 0.1)
-	ok(Sfx.last_played.has("ping") and int(Sfx.cue_plays.get("knock_warn", 0)) == warns + 1,
-			"...with a squadmate the ping and 'teammate down' sound (%s)" % [Sfx.last_played.keys()])
+	ok(
+		Sfx.last_played.has("ping") and int(Sfx.cue_plays.get("knock_warn", 0)) == warns + 1,
+		"...with a squadmate the ping and 'teammate down' sound (%s)" % [Sfx.last_played.keys()]
+	)
