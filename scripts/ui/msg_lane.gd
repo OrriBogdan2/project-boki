@@ -112,7 +112,7 @@ func bottom() -> float:
 static func yield_label(lbl: Label3D, cam: Camera3D, rects: Array[Rect2], delta: float) -> void:
 	yield_at(lbl, cam, rects, delta)
 
-## yield_label (`over`: its rects), returning the label's box on screen (at Vector2.INF when it is hidden or behind the camera).
+## yield_label (`over`: its rects); returns the label's box on screen (at Vector2.INF if hidden or behind the camera).
 static func yield_at(lbl: Label3D, cam: Camera3D, over: Array[Rect2], delta: float) -> Rect2:
 	var mine := Rect2(Vector2.INF, Vector2.ZERO)
 	var want := 0.0
