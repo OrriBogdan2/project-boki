@@ -79,5 +79,25 @@ carrying at 0.44 s. Now 0.198 / 0.256 m on screen; the hop at the heavies' `w` 0
 `albert_land_{drop,jump}_{run,still}_{before,after}.jpg` (`--jump-land-shots --wardens=bulwark --way=drop|jump`;
 before = 568829fd6, the stack without his new clip, jobs 185337-24954 / 185351-17899 on rp1-3; after = 0149b4d38, jobs
 161732-28161 / 161743-09660 on a mac and pc-MRROBOTO; the workers' renderers shade the ink and glow differently, the
-.glb materials are the same). Open: Cinder (ashwick) reads 0.094 / 0.182 m, under the
-mediums, reported as open in `JL_HEAVY_OPEN` (docs/DEBT.md).
+.glb materials are the same). Cinder (ashwick) was the open one (0.094 / 0.182 m): see below.
+
+## Cinder's drop (ext/cinder-land-weight)
+
+Her `land` clip (tools/art1/cinder_clips.py) took the hips 0.2 m down at 0.08 s and straight back up. Now the hips go 0.28 m
+down by 0.07 s, the torso, head and arms trail the drop a little more (prt/tor 0.32/0.28, G and LP 0.04 lower), and the low
+is held to 0.12 s before she rises to the idle at 0.4 s (same length, same pose family). The clip was re-baked on her shipped
+`cinder.glb` (`blender -b --factory-startup --python tools/art1/cinder_clips.py -- art/wardens/cinder/cinder.glb OUT.glb land`;
+the script now takes a .glb, its palm centre found by re-baking idle and fall until they matched the shipped clips to under
+1 deg) and only `land` went in with `glb_add_clips.py =land`. The mesh, head and every other clip are byte for byte.
+
+`--clip-check` drop dip on screen (world metres, run / still), on the 11-26 main:
+
+| | before | after | mediums' median | heavy bar |
+|---|---|---|---|---|
+| Cinder drop | 0.115 / 0.180 | 0.205 / 0.271 | 0.074 / 0.140 | median x 1.0 |
+
+The median is lower than the 0.110 / 0.192 this page quotes for 11-11: Tender and Gil joined the mediums with a light
+or no run dip, so her old clip already cleared the bar on main when this branch started. The deeper absorb makes the
+heavy read as one rather than clearing it by a hair. `JL_HEAVY_OPEN` no longer lists her. This is the contract clip
+(`WardenNative.contract_only`; what `--clip-check` and `--jump-land-shots` play). The Meshy-native Cinder in a match
+lands with Meshy's own pose plus the Hips squash (`--land-weight-check`, unchanged).

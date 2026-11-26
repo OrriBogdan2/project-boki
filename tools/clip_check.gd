@@ -65,7 +65,6 @@ const JL_BACK_MAX := 0.6       # s: the longest a landing may own the body stand
 const JL_HEAVY_K := 1.0        # a heavy's drop crouch on screen is at least this times the mediums' median
 ## Heavies whose land clip is still shallower (docs/DEBT.md): "<id>" -> what. Each land rework removes its entry.
 const JL_HEAVY_OPEN := {
-	"ashwick": "Cinder's drop 0.094 / 0.182 m on screen (run / still), the mediums' median 0.110 / 0.192",
 	"bulwark": "Albert's drop 0.163 m on screen standing, the mediums' median 0.199 (main's v95 clips; batch 10 1113)",
 }
 ## Standing loops docs/art/IDLE_AUDIT.md found open: "<id>:<clip>" -> what. Each idle rework removes its entries.
