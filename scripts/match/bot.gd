@@ -3,6 +3,8 @@ extends RefCounted
 ## Bot hunters. They fight, farm monsters, open chests, catch kin, revive teammates and head for a
 ## way out (charge an uplink, or the Heart), and the scrappier ones go and crash a rival's uplink.
 
+const PITY := {"Easy": 1.0, "Medium": 1.5, "Hard": 0.5, "Expert": 0.0}  # aim-error pity per difficulty name (x lost share)
+
 
 func new_mind(rng: RandomNumberGenerator, skill: float, diff := {}) -> Dictionary:
 	return {
@@ -27,16 +29,6 @@ func new_mind(rng: RandomNumberGenerator, skill: float, diff := {}) -> Dictionar
 	}
 
 
-## The aim error's pity (reference tuning): it grows with the share of health the target has lost, by the
-## difficulty's PITY (keyed by Data.BOT_DIFF name), so a badly hurt player is harder to finish off.
-const PITY := {"Easy": 1.0, "Medium": 1.5, "Hard": 0.5, "Expert": 0.0}
-
-
-static func pity_k(a: Dictionary, tgt: Ent) -> float:
-	var lost := 1.0 - clampf(tgt.hp / maxf(1.0, tgt.max_hp), 0.0, 1.0)
-	return 1.0 + float(PITY.get(String((a.get("diff", {}) as Dictionary).get("name", "")), 0.0)) * lost
-
-
 const ARRIVE_R := 1.5  # bots ease off and stop turning this close to where they're going
 const GOAL_KEEP := 4.0  # metres of extra reach for a goal we're already heading to
 const GOAL_STICK := 5.0  # seconds a bot sticks to a goal before it may flip back to the last one
@@ -45,6 +37,13 @@ const LAND_SPREAD := 16.0  # metres: another squad landing this close counts as 
 const ULT_LOOK_S := 0.3  # s: ult ready in a fight with a Hunter: the next ability look comes this soon
 const ULT_EAGER_ABIL := 0.5  # abil at least this (medium and up) looks that soon; easy keeps its own pace
 const FRESH_T := 20.0  # seconds after landing a hunter is left alone unless they start it
+
+
+## The aim error's pity (reference tuning): it grows with the share of health the target has lost, by the
+## difficulty's PITY, so a badly hurt player is harder to finish off.
+static func pity_k(a: Dictionary, tgt: Ent) -> float:
+	var lost := 1.0 - clampf(tgt.hp / maxf(1.0, tgt.max_hp), 0.0, 1.0)
+	return 1.0 + float(PITY.get(String((a.get("diff", {}) as Dictionary).get("name", "")), 0.0)) * lost
 
 
 ## How many hunters of other squads are coming down (or standing) within r of p: where they mean to
