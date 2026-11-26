@@ -110,21 +110,24 @@ func _process(_delta: float) -> void:
 	var step := ""
 	for mk in marks:
 		step += "%s %.0f " % [mk[1], mk[2]]
-	frames.append(
-		[
-			wall,
-			0 if shown_us > 0 else 1,
-			int(RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)),
-			int(Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME)),
-			int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT)),
-			Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0,
-			Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
-			Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0,
-			Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,
-			steps,
-			cpu,
-			step.strip_edges(),
-		]
+	(
+		frames
+		. append(
+			[
+				wall,
+				0 if shown_us > 0 else 1,
+				int(RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)),
+				int(Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME)),
+				int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT)),
+				Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0,
+				Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
+				Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0,
+				Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,
+				steps,
+				cpu,
+				step.strip_edges(),
+			]
+		)
 	)
 	if shown_us > 0 and (now - shown_us) / 1e6 >= look_s:
 		_finish()
@@ -195,8 +198,10 @@ func _finish() -> void:
 	for x in cpus:
 		cpu_sum += float(x)
 	lines.append(
-		"LOADIN main-thread cpu a frame (other jobs cannot stretch it): avg %.1f ms, p50 %.1f, p99 %.1f, max %.1f"
-		% [cpu_sum / maxi(cpus.size(), 1), _pct(cpus, 0.5), _pct(cpus, 0.99), _pct(cpus, 1.0)]
+		(
+			"LOADIN main-thread cpu a frame (other jobs cannot stretch it): avg %.1f ms, p50 %.1f, p99 %.1f, max %.1f"
+			% [cpu_sum / maxi(cpus.size(), 1), _pct(cpus, 0.5), _pct(cpus, 0.99), _pct(cpus, 1.0)]
+		)
 	)
 	var per_frame := float(steps_total) / maxi(w.size(), 1)
 	var sf2 := "LOADIN sim steps %d in %d frames (%.1f a frame; 1.0 is real time)"
