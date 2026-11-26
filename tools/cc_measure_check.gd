@@ -271,7 +271,8 @@ func _grimble() -> void:
 	pl.slot_lv["kin"] = 1
 	_reset(m, pl, tg, home, 8.0)
 	tap(m, pl)
-	# the reeled foe stays stunned rmb.arrive_stun after it lands (0.9 s: RMB then E is a sure stun, docs/heroes/dredge.md)
+	# the reeled foe stays stunned rmb.arrive_stun after it lands
+	# (0.9 s: RMB then E is a sure stun, docs/heroes/dredge.md)
 	var reel_stun := float(pl.ak.rmb_def().get("arrive_stun", 0.2))
 	_row("Grimble", "Hook reel", _watch(m, tg, 3.0, Callable(), pl), {"stun": reel_stun, "self_gnd": [0.5, 3.0]})
 	await done(m)
