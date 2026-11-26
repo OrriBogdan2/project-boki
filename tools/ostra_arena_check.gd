@@ -138,8 +138,8 @@ func _through(kind: String, spot: Dictionary, gap: float) -> void:
 		var took := before - (D.hp + D.armor)
 		# owner 11-26: the void orb passes walls, a card stops at a wall or rock face (onto raised ground it can
 		# still land on the top, like any shot aimed up there)
-		var passes := wait > 1.0 or bool(spot["top"])
-		var shot := "full orb" if wait > 1.0 else "card"
+		var passes: bool = wait > 1.0 or bool(spot["top"])
+		var shot: String = "full orb" if wait > 1.0 else "card"
 		var outcome := "passes" if passes else "stops"
 		ok(
 			"walls: a %s from %.1fm %s: %s" % [shot, gap, outcome, kind],

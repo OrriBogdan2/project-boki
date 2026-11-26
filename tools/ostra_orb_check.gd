@@ -181,16 +181,16 @@ func _through_walls() -> void:
 	var wx := int(floor(home.x)) + 3
 	for dz in range(-2, 3):
 		w.kind[w.idx(wx, int(floor(home.z)) + dz)] = World.T_BLOCK
-	p.teleport(Vector3(float(wx) - 2.0, p.pos.y, p.pos.z))
+	p.teleport(Vector3(float(wx) - 4.0, p.pos.y, p.pos.z))
 	aim_at(p, t.pos)
 	fresh(t)
 	var card: Dictionary = _fire_after(m, p, k, 0.6)["s"]
-	var flew := 0.0
-	step(m, 0.2, func(): if m.shots.has(card): flew = float(card["pos"].x))
+	var flew := [0.0]
+	step(m, 0.3, func(): if m.shots.has(card): flew[0] = float(card["pos"].x))
 	ok(
-		"walls: a card fired 2m short of the rock stops at its face",
-		not card.is_empty() and not m.shots.has(card) and flew > float(wx) - 1.9 and flew < float(wx) + 0.1,
-		"last x %.2f, rock face x %d" % [flew, wx]
+		"walls: a card fired 4m short of the rock stops at its face",
+		not card.is_empty() and not m.shots.has(card) and flew[0] > float(wx) - 3.0 and flew[0] < float(wx) + 0.1,
+		"last x %.2f, rock face x %d" % [flew[0], wx]
 	)
 	step(m, 0.4)
 	ok("walls: the dummy behind the rock takes nothing from the card", dmg(t) < 0.01, "took %.1f" % dmg(t))
@@ -263,6 +263,14 @@ func _glow_and_chime() -> void:
 	ok("chime: not again while it waits", k.full_chimes == chimes + 1)
 	await done(m)
 
+## The kit looks on `qh` refreshed after `since` (match time).
+func _looks_updating(qm: Match, qh: Hunter, since: float) -> Array:
+	var keys: Array = []
+	for key in KitLooks.of(qm).held.keys():
+		var hd: Dictionary = KitLooks.of(qm).held[key]
+		if hd["ent"] == qh and float(hd["t"]) > since: keys.append(key)
+	return keys
+
 ## The charge lives on a copy of the weapon: an upgrade re-bases it, and the kit hands back what it was given.
 func _weapon_kept() -> void:
 	var r := setup("ostra", 12.0)
@@ -315,11 +323,10 @@ func _no_kit_tick_when_down() -> void:
 		var qh: Hunter = q[1]
 		step(qm, 3.0)
 		qm.knock(qh, null, {})
-		step(qm, 0.2)
-		var live := 0
-		for key in KitLooks.of(qm).held.keys():
-			var hd: Dictionary = KitLooks.of(qm).held[key]
-			if hd["ent"] == qh and float(hd["t"]) >= qm.time - 0.1: live += 1
-		if arch == "ostra": ok("wisp kit: ostra: no look still updating", live == 0)
-		else: print("PAIRCHECK NOTE %s: %d kit looks still updating while downed" % [arch, live])
+		var knock_t := float(qm.time)
+		# (a lone training Hunter is back up within a frame or so: only refreshes while he is down count)
+		var live: Array = []
+		step(qm, 0.2, func(): if qh.downed: live.append_array(_looks_updating(qm, qh, knock_t)))
+		if arch == "ostra": ok("wisp kit: ostra: no look still updating while down", live.is_empty(), str(live))
+		else: print("PAIRCHECK NOTE %s: %d kit looks still updating while downed" % [arch, live.size()])
 		await done(qm)

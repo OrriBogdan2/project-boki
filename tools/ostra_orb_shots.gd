@@ -143,18 +143,27 @@ func _rock_row() -> void:
 	for dz in range(-3, 4):
 		W.kind[W.idx(wx, int(floor(home.z)) + dz)] = World.T_BLOCK
 
+## A full orb flying through the rock row (strip frames follow it), then a card stopping at it (strip frames on
+## the rock face: the card arriving, its miss puff, then nothing past the rock).
 func _through_wall() -> void:
-	for row in [["wall_full", 1.4, "A full orb passes"], ["wall_quick", 0.6, "A card stops at"]]:
-		var file: String = row[0]
-		var cap := "%s the rock row in front of the dummy: before, at, past it" % row[2]
-		await _reset(8.0)
-		_aim(home + Vector3(8.0, 0, 0))
-		var speed := float(K.base_wpn["speed"]) * (1.4 if float(row[1]) >= 1.4 else 1.0)
-		var marks: Array = []
-		for dist in [2.0, 3.6, 5.2, 6.2]:
-			marks.append([(dist - 0.6) / speed, file, file, cap, _orb_at])
-		marks.append([3.0 / speed, "full", file + "_view", cap, _orb_at])
-		await _shot(float(row[1]), 0.5, marks)
+	var cap := "A full orb passes the rock row in front of the dummy: before, inside, past it"
+	await _reset(8.0)
+	_aim(home + Vector3(8.0, 0, 0))
+	var speed := float(K.base_wpn["speed"]) * 1.4
+	var marks: Array = []
+	for dist in [2.0, 3.6, 5.2, 6.2]:
+		marks.append([(dist - 0.6) / speed, "wall_full", "wall_full", cap, _orb_at])
+	marks.append([3.0 / speed, "full", "wall_full_view", cap, _orb_at])
+	await _shot(1.4, 0.5, marks)
+	cap = "A card stops at the rock row: arriving, at the face (miss puff), after (nothing gets past)"
+	await _reset(8.0)
+	_aim(home + Vector3(8.0, 0, 0))
+	var face := func(): return home + Vector3(ROW_X - 0.6, 0.9, 0)
+	marks = []
+	for t in [0.06, 0.1, 0.13, 0.3]:
+		marks.append([t, "wall_quick", "wall_quick", cap, face])
+	marks.append([0.11, "full", "wall_quick_view", cap, face])
+	await _shot(0.6, 0.5, marks)
 
 ## The Trade (Shift tap) at gameplay zoom: the lantern rising, near its peak, falling, and his arrival.
 func _trade() -> void:
