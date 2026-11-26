@@ -8,33 +8,42 @@ extends RefCounted
 ## of the knocks with their context (docs/BOTS_HUMAN_1111.md has the before/after table).
 ## Fails when a behaviour this branch fixed slips back past its limit. Never touches the save.
 
-const SAMPLE_S := 0.5           # seconds between two samples of every hunter
-const WARMUP_S := 70.0          # seconds skipped at the start: the skyship ride and the drop
-const NEAR_M := 20.0            # metres: a rival this close is "in the fight"
-const MATE_M := 35.0            # metres: a teammate this close could help in a fight
-const APART_M := 30.0           # metres: a teammate further than this is not playing with you
-const LOW_HP := 0.35            # health share under which a person backs off and heals
-const HURT_HP := 0.7            # health share under which a person tops up when it is calm
-const HIT_FRESH_S := 2.5        # seconds a hit keeps a hunter "under fire"
-const CALM_S := 6.0             # seconds without a hit before a hunter counts as calm
-const BACK_M := 0.8             # metres moved straight away from the nearest rival in one sample = backing off
-const EP_HP := 0.5              # health share under which a fight has "turned" on a hunter
-const MIN_SAMPLES := 2000       # squad samples per expedition under which there is too little to judge
+const SAMPLE_S := 0.5  # seconds between two samples of every hunter
+const WARMUP_S := 70.0  # seconds skipped at the start: the skyship ride and the drop
+const NEAR_M := 20.0  # metres: a rival this close is "in the fight"
+const MATE_M := 35.0  # metres: a teammate this close could help in a fight
+const APART_M := 30.0  # metres: a teammate further than this is not playing with you
+const LOW_HP := 0.35  # health share under which a person backs off and heals
+const HURT_HP := 0.7  # health share under which a person tops up when it is calm
+const HIT_FRESH_S := 2.5  # seconds a hit keeps a hunter "under fire"
+const CALM_S := 6.0  # seconds without a hit before a hunter counts as calm
+const BACK_M := 0.8  # metres moved straight away from the nearest rival in one sample = backing off
+const EP_HP := 0.5  # health share under which a fight has "turned" on a hunter
+const MIN_SAMPLES := 2000  # squad samples per expedition under which there is too little to judge
 
 ## Limits the fixed behaviours must stay inside (medium bots, the default run).
-const MAX_APART := 0.3          # share of samples with no teammate within APART_M (3 runs in 14: 0.14 to 0.22)
+const MAX_APART := 0.3  # share of samples with no teammate within APART_M (3 runs in 14: 0.14 to 0.22)
 const MAX_CALM_UNHEALED := 0.7  # share of calm, hurt samples with a heal in the belt and no drink started
-                                # (0.03 to 0.58 measured on fourteen runs; the old behaviour 0.42 to 0.95)
-const MIN_ASSIST := 0.6         # share of near teammates that join a squadmate's fight (0.74 to 0.91 measured)
+# (0.03 to 0.58 measured on fourteen runs; the old behaviour 0.42 to 0.95)
+const MIN_ASSIST := 0.6  # share of near teammates that join a squadmate's fight (0.74 to 0.91 measured)
+const MIN_FIGHT_GAP_P10 := 1.5  # m: 10th percentile of the nearest squadmate's distance in a fight (BotSquad.spread;
+# 1.73 to 3.59 measured on twelve runs, without the spread 0.89 to 1.11 on six)
+const TIGHT_M := 2.5  # metres: a squadmate this close in a fight is stacked on you
 
-var n := {}                     # counters
+var n := {}  # counters
 var log_left := 30
-var st := {}                    # hunter -> its state between samples
+var st := {}  # hunter -> its state between samples
+var fight_gaps: Array[float] = []  # m: nearest squadmate (within MATE_M) of a hunter in a fight, every sample
 var teams := 10
-var wall_ms := 900000           # the run stops and reports after this much real time (a loaded server is slow)
-var t0_ms := 0
-var cut := false                # the wall clock ended a run before its match time was up
-var plain := false              # --bh-plain: bots without squad play or retreats (BotSquad.on), to compare
+## The run stops and reports (limits skipped) after this much real time since the engine started, boot included:
+## under the gate's 450 s cap for this check (flag_timeouts.tsv), so a loaded host cuts it here instead of the
+## gate killing it as a red timeout (it was 900 s, past the cap: 12 of 13 gate runs on rpc8 died at the cap on
+## main and on the branch alike). An idle host finishes the whole expedition in about 270 s.
+var wall_ms := 400000
+var t0_ms := 0  # ms the wall clock counts from (0 = engine start)
+var cut := false  # the wall clock ended a run before its match time was up
+var plain := false  # --bh-plain: bots without squad play or retreats (BotSquad.on), to compare
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -42,20 +51,26 @@ func run(main: Node) -> void:
 	Econ.ensure()
 	var diff := "medium"
 	var seeds := [3]
-	var secs := 730.0               # a whole expedition (720 s) and its last seconds
+	var secs := 730.0  # a whole expedition (720 s) and its last seconds
 	var strict := true
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--bh-diff="): diff = a.substr(10)
-		if a.begins_with("--bh-seeds="): seeds = Array(a.substr(11).split(",")).map(func(x): return int(x))
-		if a.begins_with("--bh-t="): secs = float(a.substr(7))
-		if a.begins_with("--bh-log="): log_left = int(a.substr(9))
-		if a.begins_with("--bh-teams="): teams = int(a.substr(11))
-		if a.begins_with("--bh-wall="): wall_ms = int(a.substr(10)) * 1000
-		if a == "--bh-measure": strict = false
+		if a.begins_with("--bh-diff="):
+			diff = a.substr(10)
+		if a.begins_with("--bh-seeds="):
+			seeds = Array(a.substr(11).split(",")).map(func(x): return int(x))
+		if a.begins_with("--bh-t="):
+			secs = float(a.substr(7))
+		if a.begins_with("--bh-log="):
+			log_left = int(a.substr(9))
+		if a.begins_with("--bh-teams="):
+			teams = int(a.substr(11))
+		if a.begins_with("--bh-wall="):
+			wall_ms = int(a.substr(10)) * 1000
+		if a == "--bh-measure":
+			strict = false
 		if a == "--bh-plain":
 			plain = true
 			strict = false
-	t0_ms = Time.get_ticks_msec()
 	for sd in seeds:
 		_expedition(main, int(sd), diff, secs)
 	var bad := _report(diff, seeds.size())
@@ -64,11 +79,22 @@ func run(main: Node) -> void:
 	print("BOTHUMAN done, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _expedition(main: Node, sd: int, diff: String, secs: float) -> void:
 	var m := Match.new()
 	main.add_child(m)
-	m.start({"teams": teams, "squad": 3, "tier": 0, "seed": sd, "autoplay": true, "bot_diff": diff, "sim_keep": true,
-		"bot_plain": plain})
+	m.start(
+		{
+			"teams": teams,
+			"squad": 3,
+			"tier": 0,
+			"seed": sd,
+			"autoplay": true,
+			"bot_diff": diff,
+			"sim_keep": true,
+			"bot_plain": plain
+		}
+	)
 	m.set_process(false)
 	st = {}
 	var cb_use := func(who, _id, slot):
@@ -89,20 +115,34 @@ func _expedition(main: Node, sd: int, diff: String, secs: float) -> void:
 	CombatBus.ability_used.disconnect(cb_use)
 	for h in m.hunters:
 		_add("end " + _end_state(h))
-		if h.extracted: _add("gems home", int(h.gems))
-	print("BOTHUMAN run seed=%d diff=%s t=%d extracted=%d out=%d" % [sd, diff, int(m.time),
-			m.hunters.filter(func(x): return x.extracted).size(),
-			m.hunters.filter(func(x): return x.out and not x.extracted).size()])
+		if h.extracted:
+			_add("gems home", int(h.gems))
+	print(
+		(
+			"BOTHUMAN run seed=%d diff=%s t=%d extracted=%d out=%d"
+			% [
+				sd,
+				diff,
+				int(m.time),
+				m.hunters.filter(func(x): return x.extracted).size(),
+				m.hunters.filter(func(x): return x.out and not x.extracted).size()
+			]
+		)
+	)
 	m.queue_free()
+
 
 func _add(k: String, by := 1) -> void:
 	n[k] = int(n.get(k, 0)) + by
 
+
 func _up(h: Hunter) -> bool:
 	return not (h.out or h.gone or h.extracted or h.downed or h.riding or h.dropping)
 
+
 func _frac(h: Hunter) -> float:
 	return h.hp / maxf(h.max_hp, 1.0)
+
 
 func _hunter_of(e) -> Hunter:
 	if e == null or not is_instance_valid(e):
@@ -113,6 +153,7 @@ func _hunter_of(e) -> Hunter:
 		return e.owner_h
 	return null
 
+
 func _near(m: Match, h: Hunter, p: Vector3, r: float, same_team: bool) -> Array:
 	var out := []
 	for o in m.hunters:
@@ -120,22 +161,33 @@ func _near(m: Match, h: Hunter, p: Vector3, r: float, same_team: bool) -> Array:
 			out.append(o)
 	return out
 
+
 func _heals(h: Hunter) -> int:
 	return UtilityBelt.count(h, "tonic") + UtilityBelt.count(h, "medkit")
+
 
 ## Every step: the edges a 0.5 s sample would miss (a dash press, the moment of a knock).
 func _edges(m: Match) -> void:
 	for h in m.hunters:
 		var s: Dictionary = st.get(h, {})
 		if s.is_empty():
-			s = {"down": false, "tgt": null, "low_t": -1.0, "belt": {}, "pos": h.pos, "still": 0.0,
-				"fight": false, "back_s": 0.0}
+			s = {
+				"down": false,
+				"tgt": null,
+				"low_t": -1.0,
+				"belt": {},
+				"pos": h.pos,
+				"still": 0.0,
+				"fight": false,
+				"back_s": 0.0
+			}
 			st[h] = s
 		if h.downed and not s["down"]:
 			_knocked(m, h, s)
 		elif s["down"] and not h.downed and not h.out and not h.gone:
 			_add("revived")
 		s["down"] = h.downed
+
 
 func _knocked(m: Match, h: Hunter, s: Dictionary) -> void:
 	var by := _hunter_of(h.last_hit_by)
@@ -156,18 +208,27 @@ func _knocked(m: Match, h: Hunter, s: Dictionary) -> void:
 			mwhat = "fighting" if _hunter_of(o.ai.get("tgt")) != null else String(o.ai.get("goal_kind", "?"))
 	var allies := _near(m, h, h.pos, NEAR_M, true).size() + 1
 	var foes := _near(m, h, h.pos, NEAR_M, false).size()
-	if heals > 0: _add("knocked with heals")
-	if md > APART_M: _add("knocked alone")
-	if foes > allies: _add("knocked outnumbered")
-	if low_s > 2.0 and float(s["back_s"]) < 0.5: _add("knocked never backed off")
+	if heals > 0:
+		_add("knocked with heals")
+	if md > APART_M:
+		_add("knocked alone")
+	if foes > allies:
+		_add("knocked outnumbered")
+	if low_s > 2.0 and float(s["back_s"]) < 0.5:
+		_add("knocked never backed off")
 	if log_left > 0 and m.time > WARMUP_S:
 		log_left -= 1
 		var mate_s: String = ("%d m (%s)" % [int(md), mwhat]) if md < 900.0 else "none left"
-		print("BOTLOG t=%d %s knocked by %s: low %.1f s (backing off %.1f s), heals left %d, %dv%d, nearest mate %s"
-			% [int(m.time), h.pname, by.pname, low_s, float(s["back_s"]), heals, allies, foes, mate_s])
+		print(
+			(
+				"BOTLOG t=%d %s knocked by %s: low %.1f s (backing off %.1f s), heals left %d, %dv%d, nearest mate %s"
+				% [int(m.time), h.pname, by.pname, low_s, float(s["back_s"]), heals, allies, foes, mate_s]
+			)
+		)
+
 
 func _sample(m: Match) -> void:
-	var fighters := {}          # hunter -> the rival hunter it is fighting
+	var fighters := {}  # hunter -> the rival hunter it is fighting
 	for h in m.hunters:
 		if not _up(h):
 			st[h]["fight"] = false
@@ -183,7 +244,8 @@ func _sample(m: Match) -> void:
 		var foe: Hunter = tgt if tgt != null else hitter
 		var fight := foe != null
 		s["fight"] = fight
-		if fight: fighters[h] = foe
+		if fight:
+			fighters[h] = foe
 		var frac := _frac(h)
 		var rivals := _near(m, h, h.pos, NEAR_M, false)
 		var rd := 999.0
@@ -201,7 +263,8 @@ func _sample(m: Match) -> void:
 				md = minf(md, o.flat_dist(h))
 			_add("squad samples")
 			_add("squad dist sum", int(md))
-			if md > APART_M: _add("squad apart")
+			if md > APART_M:
+				_add("squad apart")
 		# 2. low health in a fight: stand and trade, or back off?
 		if frac < LOW_HP and fight and rd < 900.0:
 			if float(s["low_t"]) < 0.0:
@@ -215,7 +278,8 @@ func _sample(m: Match) -> void:
 				s["back_s"] = float(s["back_s"]) + SAMPLE_S
 			else:
 				_add("low fight standing")
-			if _heals(h) > 0 and h.drink_t <= 0.0: _add("low fight heal unused")
+			if _heals(h) > 0 and h.drink_t <= 0.0:
+				_add("low fight heal unused")
 		elif frac >= LOW_HP:
 			s["low_t"] = -1.0
 		# 2b. a fight that turned (under half health): did the hunter come out of it on its feet?
@@ -238,22 +302,27 @@ func _sample(m: Match) -> void:
 		# 4. calm and hurt with a heal in the belt
 		if not fight and rd > NEAR_M and m.time - h.hurt_at > CALM_S and frac < HURT_HP:
 			_add("calm hurt samples")
-			if _heals(h) > 0 and h.drink_t <= 0.0: _add("calm hurt heal unused")
+			if _heals(h) > 0 and h.drink_t <= 0.0:
+				_add("calm hurt heal unused")
 		# 5. picking a fight: numbers and health at the moment a rival becomes the target
 		var old_gone: bool = s["tgt"] == null or not is_instance_valid(s["tgt"])
 		if tgt != null and s["tgt"] != tgt and (old_gone or s["tgt"].team != tgt.team):
 			_add("engages")
 			var allies := _near(m, h, h.pos, NEAR_M, true).size() + 1
 			var foes := _near(m, tgt, tgt.pos, NEAR_M, true).size() + 1
-			if foes > allies: _add("engages outnumbered")
-			if frac < 0.4: _add("engages low")
+			if foes > allies:
+				_add("engages outnumbered")
+			if frac < 0.4:
+				_add("engages low")
 		# 6. letting a weak rival go
 		var prev: Hunter = s["tgt"] if s["tgt"] != null and is_instance_valid(s["tgt"]) else null
 		if prev != null and tgt == null and _up(prev) and _frac(prev) < 0.4 and frac > 0.5:
 			_add("weak target dropped")
 		if prev != null and tgt != null and prev != tgt and prev.team == tgt.team and _up(prev):
 			_add("target flips")
-		if fight: _add("fight samples")
+		if fight:
+			_add("fight samples")
+			_fight_gap(m, h)
 		s["tgt"] = tgt
 		# 7. standing around
 		var moved: float = Vector2(h.pos.x - s["pos"].x, h.pos.z - s["pos"].z).length()
@@ -273,15 +342,46 @@ func _sample(m: Match) -> void:
 				_add("assists")
 				if fighters.has(o) and _hunter_of(h.ai.get("tgt")) != null:
 					_add("focus chances")
-					if ot == _hunter_of(h.ai.get("tgt")): _add("focus same")
+					if ot == _hunter_of(h.ai.get("tgt")):
+						_add("focus same")
 			elif log_left > 0 and int(n.get("assist chances", 0)) % 60 == 7:
 				# (a few of them, and no dice: the match's own rolls stay as they are)
 				log_left -= 1
-				print("BOTLOG t=%d %s fights %s; %s is %d m away doing '%s'" % [int(m.time), h.pname, foe.pname,
-					o.pname, int(o.flat_dist(h)), String(o.ai.get("goal_kind", "?"))])
+				print(
+					(
+						"BOTLOG t=%d %s fights %s; %s is %d m away doing '%s'"
+						% [
+							int(m.time),
+							h.pname,
+							foe.pname,
+							o.pname,
+							int(o.flat_dist(h)),
+							String(o.ai.get("goal_kind", "?"))
+						]
+					)
+				)
+
+
+## How far the nearest squadmate stands from a hunter in a fight (only a mate close enough to be in it).
+func _fight_gap(m: Match, h: Hunter) -> void:
+	var md := MATE_M
+	for o in _near(m, h, h.pos, MATE_M, true):
+		md = minf(md, o.flat_dist(h))
+	if md < MATE_M:
+		fight_gaps.append(md)
+
+
+func _pct(q: float) -> float:
+	if fight_gaps.is_empty():
+		return 0.0
+	var s := fight_gaps.duplicate()
+	s.sort()
+	return s[mini(int(q * s.size()), s.size() - 1)]
+
 
 func _share(a: String, b: String) -> float:
 	return float(n.get(a, 0)) / maxf(float(n.get(b, 0)), 1.0)
+
 
 func _report(diff: String, runs: int) -> int:
 	var fight_min := maxf(float(n.get("fight samples", 0)) * SAMPLE_S / 60.0, 0.01)
@@ -311,6 +411,12 @@ func _report(diff: String, runs: int) -> int:
 		["weak targets dropped", float(n.get("weak target dropped", 0))],
 		["target flips per fight minute", float(n.get("target flips", 0)) / fight_min],
 		["fight share of up time", _share("fight samples", "up samples")],
+		["fight nearest-mate distance median m", _pct(0.5)],
+		["fight nearest-mate distance p10 m", _pct(0.1)],
+		[
+			"fight nearest-mate share under %.1f m" % TIGHT_M,
+			float(fight_gaps.filter(func(x): return x < TIGHT_M).size()) / maxf(fight_gaps.size(), 1.0)
+		],
 		["idle share of up time", _share("idle samples", "up samples")],
 		["revived / knocks", _share("revived", "knocks")],
 		["extracted per expedition", float(n.get("end extracted", 0)) / float(runs)],
@@ -325,21 +431,29 @@ func _report(diff: String, runs: int) -> int:
 		if String(k).begins_with("belt ") or String(k).begins_with("idle at ") or String(k).begins_with("abil "):
 			print("BOTHUMAN %s | %s | %d" % [diff, k, n[k]])
 	if cut or int(n.get("squad samples", 0)) < MIN_SAMPLES * runs:
-		print("BOTHUMAN skip limits: the run was cut short (%d samples), too little to judge"
-				% int(n.get("squad samples", 0)))
+		print(
+			(
+				"BOTHUMAN skip limits: the run was cut short (%d samples), too little to judge"
+				% int(n.get("squad samples", 0))
+			)
+		)
 		return 0
 	var bad := 0
 	bad += _limit("squad apart share", _share("squad apart", "squad samples"), MAX_APART, true)
-	bad += _limit("calm hurt with heal unused", _share("calm hurt heal unused", "calm hurt samples"),
-			MAX_CALM_UNHEALED, true)
+	bad += _limit(
+		"calm hurt with heal unused", _share("calm hurt heal unused", "calm hurt samples"), MAX_CALM_UNHEALED, true
+	)
 	bad += _limit("assist share", _share("assists", "assist chances"), MIN_ASSIST, false)
+	bad += _limit("fight nearest-mate p10 m", _pct(0.1), MIN_FIGHT_GAP_P10, false)
 	return bad
+
 
 func _limit(what: String, v: float, lim: float, is_max: bool) -> int:
 	var ok := v <= lim if is_max else v >= lim
 	var verdict := "ok" if ok else "FAIL"
 	print("BOTHUMAN %s %s: %.2f (limit %s %.2f)" % [verdict, what, v, "<=" if is_max else ">=", lim])
 	return 0 if ok else 1
+
 
 func _end_state(h: Hunter) -> String:
 	if h.extracted:

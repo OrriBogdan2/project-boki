@@ -7,6 +7,8 @@ extends "res://tools/combo51_shots.gd"
 ## Run it under the movie writer so the looks run on the fixed step and the real mix is recorded:
 ##   xvfb-run -a godot --rendering-driver opengl3 --resolution 1280x720 --path . --fixed-fps 60 \
 ##       --write-movie <dir>/reel.avi -- --hero-vfx-reel --shots-dir=<dir>
+## --reel-movie runs the reel as a child Godot under the movie writer and leaves <dir>/<hero>.avi with the real mix
+## (the GPU workers pass only the arguments after "--", so the engine's --write-movie cannot be given to them).
 ## --reel-frames also saves every drawn frame as <dir>/frames/NNNNN.jpg (FRAME_W wide), for a clip made off the
 ## box (jobq's GPU worker returns the out dir, not a movie): ffmpeg -framerate 60 -i <dir>/frames/%05d.jpg ...
 
@@ -19,12 +21,15 @@ const GENERIC := ["lmb", "hold", "rmb", "dash", "e", "r", "tierup", "armour"]
 const GAP := 0.7               # s of quiet between parts
 const SHEET_CROP := Vector2i(440, 300)    # px of each sheet frame
 const WIDE_CROP := Vector2i(640, 300)     # ... for a bow's long shots
-const LMB_RANGE := {"gunslinger": 8.0}    # m to the dummy in the LMB parts, for rounds to show in flight (else 3.3)
+## m to the dummy in the LMB parts, for rounds to show in flight (else 3.3)
+const LMB_RANGE := {"gunslinger": 8.0, "mage": 8.0}
 ## LMB sheet times for a round that flies in ~0.1 s (74 m/s over 8 m): a frame per step of the first flight.
 const LMB_TIMES_DEFAULT := [0.05, 0.1, 0.18, 0.3, 0.55, 0.62, 0.7, 1.0, 1.6]
-const LMB_TIMES := {"gunslinger": [0.033, 0.05, 0.067, 0.083, 0.1, 0.117, 0.133, 0.55, 0.62]}
+const LMB_TIMES := {"gunslinger": [0.033, 0.05, 0.067, 0.083, 0.1, 0.117, 0.133, 0.55, 0.62],
+	"mage": [0.06, 0.09, 0.12, 0.15, 0.18, 0.21, 0.25, 0.55, 0.62]}
 const FAN_CROP := Vector2i(900, 440)      # ... for Grimble's 5.9 m fan and the bodies in it
 const FRAME_W := 1280                     # px wide, each --reel-frames frame
+const MOVIE_SIZE := Vector2i(1280, 720)   # px, the --reel-movie video
 
 var only := ""
 var frame_dir := ""            # --reel-frames: where each drawn frame goes
@@ -49,6 +54,9 @@ func run(main_node: Node) -> void:
 			only = arg.substr(12)
 		if arg == "--reel-frames":
 			frame_dir = "frames"
+	if "--reel-movie" in OS.get_cmdline_user_args() and not "--reel-child" in OS.get_cmdline_user_args():
+		_record_movie()
+		return
 	var own := "res://tools/vfx_reel/%s.gd" % who
 	if get_script().resource_path != own and ResourceLoader.exists(own):
 		await load(own).new().run(main_node)
@@ -76,6 +84,27 @@ func run(main_node: Node) -> void:
 	print("REEL_DONE %d in %s" % [lines.size(), dir])
 	main.get_tree().quit(0)
 
+## --reel-movie: this reel again as a child Godot under the movie writer at a fixed 60 fps. The movie is as big as
+## the project's viewport setting, so the child gets MOVIE_SIZE from a temporary override.cfg.
+func _record_movie() -> void:
+	var cfg := ProjectSettings.globalize_path("res://override.cfg")
+	var f := FileAccess.open(cfg, FileAccess.WRITE)
+	f.store_string("[display]\n\nwindow/size/viewport_width=%d\n" % MOVIE_SIZE.x)
+	f.store_string("window/size/viewport_height=%d\n\n[editor]\n\nmovie_writer/mjpeg_quality=0.9\n" % MOVIE_SIZE.y)
+	f.close()
+	var args := ["--path", ProjectSettings.globalize_path("res://"), "--rendering-driver", "opengl3"]
+	args.append_array(["--audio-driver", "Dummy", "--position", "30000,30000", "--fixed-fps", "60"])
+	args.append_array(["--write-movie", dir.path_join(who + ".avi"), "--"])
+	args.append_array(OS.get_cmdline_user_args())
+	args.append("--reel-child")
+	var out := []
+	var rc := OS.execute(OS.get_executable_path(), args, out, true)
+	DirAccess.remove_absolute(cfg)
+	for line in (String(out[0]) if out.size() > 0 else "").split("\n"):
+		if line.begins_with("REEL_") or line.contains("ERROR"):
+			print(line)
+	main.get_tree().quit(rc)
+
 ## (the match's own step is off here, so the ears and the detail share follow from this)
 func _go(secs: float, each := Callable(), marks: Array = [], lead := 3.5) -> void:
 	Sfx.listener = P.pos
@@ -90,7 +119,7 @@ func _go(secs: float, each := Callable(), marks: Array = [], lead := 3.5) -> voi
 ## (--reel-frames) the frame last drawn, scaled down to FRAME_W
 func _save_frame() -> void:
 	var img := main.get_viewport().get_texture().get_image()
-	img.resize(FRAME_W, FRAME_W * img.get_height() / img.get_width(), Image.INTERPOLATE_BILINEAR)
+	img.resize(FRAME_W, int(FRAME_W * img.get_height() / float(img.get_width())), Image.INTERPOLATE_BILINEAR)
 	img.save_jpg(frame_dir.path_join("%05d.jpg" % frames), 0.88)
 	frames += 1
 

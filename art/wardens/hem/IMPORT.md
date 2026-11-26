@@ -1,3 +1,15 @@
+# Hem (Lace): native Meshy model r4b (2026-11-22, ext/lace-native-r4)
+
+`hem_meshy.glb` is Lace on Meshy's own 66+2-joint rig, drawn by `scripts/heroes/warden_native.gd` when `hem.meshy_native`
+is on in `content/rules/warden_native.json` (off = the contract `hem.glb` below, unchanged). Source:
+`/home/boki/gens/native-next-1122/Lace/r4/glb/hem_meshy_lace_r4b.glb` (never edited in git). 71,050 tris, 6 clips
+(Idle walk run Jump_Run Attack Crouch_Walk_with_Torch), images extracted by Godot to `hem_meshy_*.jpg/png`.
+Body, head and bow are round 3's (PART-LOCK); the skirt is a Meshy image-to-3d skirt + retexture, weighted by position
+(Hips at the waist, thighs toward the hem, no shin/foot), +10% wide, back faces culled
+(Lace/r5/tools/build_r5.py, notes in Lace/r4/RESULT.md). Art gate run.Hajq: game view 7.2 vs live 3.5.
+Open polish: right-side skirt split in close-ups at run/dash/jump, skirt brighter than the deep-red ref and no slit,
+short hair, corset side texture, bow string through the chest in attack.
+
 # Hem (archer; shown as Ravyl): import note, v95 swap of Lace appeal3, body b (2026-11-10)
 
 ## LIVE v95 master in game (2026-11-12, ext/hunters-v95-ingame)
@@ -47,3 +59,14 @@ the old clips put back with `glb_add_clips.py` (judge: docs/art/wardens/dirloops
 NOT APPLIED on main (11-16 merge): the diagonal and re-baked back/side loops (walk_/run_ fl fr bl br, b l r) described here were baked into the old model's glb with a walk_f/run_f of a different length than main's v95 clips, so main's glb and warden_anim json are kept. Re-bake: `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- SRC.glb OUT.glb WALK RUN` on main's glb, then `glb_add_clips.py`, then restore the json map from ext/anim-dirloops-lace-kael.
 
 Idle and stance rework (11-09, ported 11-17): `python3 tools/art1/glb_add_clips.py art/wardens/hem/hem.glb <old idle glb> idle,stance --drop-missing`; the old glb's `x_breath` track has no bone here and is dropped (docs/art/IDLE_AUDIT.md).
+
+Native bow clips (ext/anim-lace-native-clips, 11-23): `hem_clips.glb` is the animation-only file for her Meshy skeleton
+(`hem_meshy.glb`, untouched): `/home/boki/venv-img/bin/python3 tools/meshy/lace_clips.py art/wardens/hem/hem_clips.glb`.
+No mesh, skeleton nodes and ten clips, 30 fps, keyed from poses (no Meshy animation, no retarget). Mapped by `kmoves` in
+`content/rules/warden_native.json` (docs/art/wardens/MESHY_NATIVE.md).
+
+11-23 hem_meshy.glb (native path, ext/lace-face-dress-1123): the face, hood hair and bun of the body soup are replaced by a Meshy head
+(own skinned mesh `Head_new`, material `body-face`, 8k tris, grafted at the choker, weighted Head/neck) plus two hair pins (`Pins`, material `metal-pin`).
+The skirt is welded (1.5 mm), gets a flipped red inner face (2 mm inset) and eight `SkirtSw*` billow bones on the Hips that swing the cloth out
+of the legs in every frame of every clip (radius margin 0.12 m = thigh radius; pivot 1.1 m). The stray unskinned Icosphere is gone.
+Build scripts and renders: /home/boki/gens/lace-face-dress-1123 (tools/build_b.py, tools/graft_head.py). Needs an owner visual check before it goes live.

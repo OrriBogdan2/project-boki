@@ -12,9 +12,12 @@ static func add_bag(v: VBoxContainer, rec: Dictionary, mates: Array, feed: Calla
 	var any := false
 	for id in GardenItems.ids():
 		var n := int(Save.d["items"].get(id, 0))
-		if n <= 0 or not GardenItems.fed(id):
+		if n <= 0:
 			continue
 		any = true
+		if not GardenItems.fed(id):
+			_note(v, "%s  ×%d" % [GardenItems.item_name(id), n], String(GardenItems.item(id)["desc"]))
+			continue
 		var title := "%s  ×%d" % [GardenItems.item_name(id), n]
 		var e: Dictionary = GardenItems.item(id)["effect"]
 		if e["kind"] == "sweet":
@@ -27,6 +30,13 @@ static func add_bag(v: VBoxContainer, rec: Dictionary, mates: Array, feed: Calla
 		else:
 			_row(v, title, String(GardenItems.preview(rec, id)["text"]), "Feed", feed.bind(id), null, peek.bind(id, ""))
 	return any
+
+## A row with no button: a nest item sits in the menu with its line (it is placed in the Nook, not fed).
+static func _note(v: VBoxContainer, title: String, desc: String) -> void:
+	var info := UI.vbox(2)
+	info.add_child(UI.label(title, 16))
+	info.add_child(UI.label(desc, 12, UI.MUTED))
+	v.add_child(info)
 
 static func _twin(v: VBoxContainer, rec: Dictionary, id: String, title: String, mates: Array, used: Callable) -> void:
 	if mates.is_empty():

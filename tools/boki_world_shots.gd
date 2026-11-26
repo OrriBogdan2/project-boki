@@ -47,10 +47,10 @@ func run(main_node: Node) -> void:
 	if not crops.is_empty():
 		var w := crops[0].get_width()
 		var h := crops[0].get_height()
-		var rows := (crops.size() + COLS - 1) / COLS
+		var rows := int((crops.size() + COLS - 1) / float(COLS))
 		var sheet := Image.create(w * mini(COLS, crops.size()), h * rows, false, Image.FORMAT_RGB8)
 		for i in crops.size():
-			var at := Vector2i((i % COLS) * w, (i / COLS) * h)
+			var at := Vector2i((i % COLS) * w, (int(i / float(COLS))) * h)
 			sheet.blit_rect(crops[i], Rect2i(Vector2i.ZERO, crops[i].get_size()), at)
 		sheet.save_png(dir.path_join("world_sheet.png"))
 	var f := FileAccess.open(dir.path_join("world_report.txt"), FileAccess.WRITE)
@@ -63,7 +63,7 @@ func run(main_node: Node) -> void:
 func _setup() -> void:
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
 	m.set_process(false)
 	P = m.player
 	for mb in m.mobs:

@@ -608,7 +608,7 @@ func _home(tree: SceneTree) -> void:
 	# some play: Kael's challenge done (ready to hold), Sable's half way, Lace's ring goal done
 	var jt := int(ClassUnlock.challenge("juggernaut")["target"])
 	var gt := int(ClassUnlock.challenge("thief")["target"])
-	Game.apply_result(result("archer", true, {"slams": jt, "air_hits": gt / 2, "rings": 8, "stuns": 5}))
+	Game.apply_result(result("archer", true, {"slams": jt, "air_hits": int(gt / 2.0), "rings": 8, "stuns": 5}))
 	var hm = await main._hb_home()
 	for i in 30: await tree.process_frame
 	var items: Array = hm.hub_items().filter(func(it): return String(it[0]) == "hero")
@@ -684,7 +684,7 @@ func _home(tree: SceneTree) -> void:
 	var cb := _find_meta(hm.panel_host, "challenge_block")
 	ok(cb != null and String(cb.get_meta("challenge_block")) == "thief" and float(cb.get_meta("frac")) > 0.4,
 			"a locked Hunter shows its challenge and progress bar")
-	ok(_any_text(hm.panel_host, "%d/%d" % [gt / 2, gt]) and _any_text(hm.panel_host, "Medium challenge"),
+	ok(_any_text(hm.panel_host, "%d/%d" % [int(gt / 2.0), gt]) and _any_text(hm.panel_host, "Medium challenge"),
 			"with its counter and tier")
 	var ml := _find_meta(hm.panel_host, "mastery_list")
 	ok(ml != null and _count_meta(ml, "mastery_goal") == ClassUnlock.mastery("thief").size(),
@@ -765,7 +765,7 @@ func _arena(tree: SceneTree) -> void:
 	new_save(["archer"])
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(Match.arena_opts("ashwick"))
+	m.start(Match.arena_opts("ashwick"))
 	m.set_process(false)
 	var P: Hunter = m.player
 	ok(P != null and P.arch == "ashwick" and m.arena != null, "the Arena starts you as a locked Hunter")

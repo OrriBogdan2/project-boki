@@ -39,7 +39,7 @@ func setup(mn: Node) -> Array:
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 91, "no_drop": true, "god": true})
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 91, "no_drop": true, "god": true})
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)
@@ -132,8 +132,8 @@ func _grab(mb: Mob) -> Image:
 	var img := main.get_viewport().get_texture().get_image()
 	img.convert(Image.FORMAT_RGBA8)
 	var c := Vector2i(m.cam.unproject_position(mb.pos + Vector3(0, 0.8, 0)))
-	var x := clampi(c.x - CROP / 2, 0, img.get_width() - CROP)
-	var y := clampi(c.y - CROP / 2, 0, img.get_height() - CROP)
+	var x := clampi(c.x - int(CROP / 2.0), 0, img.get_width() - CROP)
+	var y := clampi(c.y - int(CROP / 2.0), 0, img.get_height() - CROP)
 	return img.get_region(Rect2i(x, y, CROP, CROP))
 
 

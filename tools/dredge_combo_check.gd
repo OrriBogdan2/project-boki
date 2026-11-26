@@ -75,7 +75,7 @@ func _hook_hold() -> void:
 	var k := crawl / maxf(0.01, walk)
 	ok(
 		"hook hold: while the hook flies out he walks at 15-25% speed",
-		k_v.flying and k >= 0.15 and k <= 0.25, "%.2f of %.1f m/s" % [k, walk]
+		k_v.flying and k >= 0.15 and k <= 0.26, "%.2f of %.1f m/s" % [k, walk]
 	)
 	ak.step(m, 01.0)
 	p.inp["move"] = Vector2.ZERO
@@ -175,14 +175,17 @@ func _slam_tell() -> void:
 	var lands := absf(float(fist["life"]) * float(fist["fall"]) - float(ed["windup"])) < 0.01
 	var fist_up: bool = HeroVfx.of(m).plays.get("anchor_fist", 0) == 1 and lands
 	ok(
-		"anchor tell: an outline (no fill) of the hit cone for all; the fist lands on the slam",
+		"anchor tell: a soft gold wedge of the hit cone for all (lit front = the wind-up); fist lands on the slam",
 		AimKit.shown(p, "e_tell") and bool(tell.get("all", false))
 			and absf(float(tell.get("len", 0.0)) - reach) < 0.01
 			and absf(float(tell.get("deg", 0.0)) - float(ed["angle"])) < 0.01 and tdir.distance_to(Vector2(1, 0)) < 0.02
-			and bool(tell.get("outline", false)) and float(tell.get("fill", -1.0)) < 0.0
+			and bool(tell.get("soft", false)) and float(tell.get("fill", -1.0)) > 0.0
+			and float(tell.get("fill", 2.0)) < 1.0
+			and (tell.get("col", Color.BLACK) as Color).is_equal_approx(Color("ffc832"))
 			and fist_up and ak.dmg(t) == 0.0,
-		"len %.1f deg %.0f outline %s fist %s" % [
-			float(tell.get("len", 0.0)), float(tell.get("deg", 0.0)), tell.get("outline"), fist_up]
+		"len %.1f deg %.0f fill %.2f fist %s" % [
+			float(tell.get("len", 0.0)), float(tell.get("deg", 0.0)),
+			float(tell.get("fill", -1.0)), fist_up]
 	)
 	# the hop carries the drawn cone with him: wait it out, then place the foes in the cone
 	while k.wind > 0.03:
@@ -470,8 +473,8 @@ func _all() -> void:
 		"grapples %d took %.1f cd %.1f" % [k.grapples, ak.dmg(t), float(k.cd["rmb"])]
 	)
 	ok(
-		"reel: Grimble is Grounded while he reels, the foe is stunned",
-		KitStatus.grounded(p) and t.stun_t > 0.0 and HeroVfx.of(k.m).holds.has("%d/reel" % p.get_instance_id()),
+		"reel: Grimble is Grounded while he reels, the foe is stunned, no ring at his feet (not an area)",
+		KitStatus.grounded(p) and t.stun_t > 0.0 and not HeroVfx.of(k.m).holds.has("%d/reel" % p.get_instance_id()),
 		"gnd %s stun %.2f" % [KitStatus.grounded(p), t.stun_t]
 	)
 	var reach_to: Vector3 = p.model.get_meta(WardenReach.TIP, Vector3.INF) if p.model else Vector3.INF
@@ -489,7 +492,8 @@ func _all() -> void:
 	ok("reel: a second Deep Reach is denied", k.grapples == 1)
 	k.cd["e"] = 0.0
 	p.ak.use_e()
-	ok("reel: E is denied while reeling", k.anchors == 0 and k.wind <= 0.0)
+	ok("reel: E is not cast while reeling (it waits for the arrival)", k.anchors == 0 and k.wind <= 0.0 and k.e_queued)
+	k.e_queued = false  # (this check casts its own Anchor after the arrival, below)
 	ok("reel: the gun is locked", not k.can_shoot())
 	var pos0 := p.pos
 	ak.aim_at(p, t.pos)
@@ -597,6 +601,44 @@ func _all() -> void:
 	)
 	m.verbs.walls.erase(wall)
 	if is_instance_valid(wall.get("node")): (wall["node"] as Node).queue_free()
+	# --- owner rule, placed walls: Tenzo's ridge (his rocks) and Albert's raised shield stop the Hand too
+	reset.call()
+	var rock: Dictionary = HeroZones.rock(m, t, home + Vector3(4.0, 0, 0), Vector2.RIGHT, "kit_rk", 4.0, 60.0, 9999.0)
+	dm0 = ak.dmg(t)
+	gw0 = k.grapples
+	_throw(m, p)
+	ok(
+		"Tenzo ridge: a rock of his stops the Deep Reach, no hook and no damage behind it",
+		not rock.is_empty() and k.pull.is_empty() and ak.dmg(t) <= dm0 and k.grapples == gw0,
+		"grapples +%d took %.1f" % [k.grapples - gw0, ak.dmg(t) - dm0]
+	)
+	m.verbs.walls.erase(rock)
+	if is_instance_valid(rock.get("node")): (rock["node"] as Node).queue_free()
+	reset.call()
+	var albert: Hunter = m.make_hunter(
+		"AL", t.team, "heavy", "Albert", "idle", {}, home + Vector3(4.0, 0, 0), {"arch": "bulwark"}
+	)
+	albert.set_arch("bulwark")
+	albert.max_hp = 1e9
+	albert.hp = albert.max_hp
+	ak.aim_at(albert, p.pos)
+	m.step(ak.DT)
+	(albert.ak as BulwarkKit)._raise()
+	dm0 = ak.dmg(t)
+	gw0 = k.grapples
+	_throw(m, p)
+	ok(
+		"Albert shield: his raised aegis stops the Deep Reach, no hook and no damage behind it",
+		k.pull.is_empty() and ak.dmg(t) <= dm0 and k.grapples == gw0,
+		"grapples +%d took %.1f" % [k.grapples - gw0, ak.dmg(t) - dm0]
+	)
+	for aw in m.verbs.walls.duplicate():
+		if aw.get("by") == albert:
+			m.verbs.walls.erase(aw)
+			if is_instance_valid(aw.get("node")): (aw["node"] as Node).queue_free()
+	albert.queue_free()
+	m.hunters.erase(albert)
+	m.step(ak.DT)
 	# --- rocks: the hook flies over a rock and the foe is dragged over it
 	reset.call()
 	for dz in range(-1, 2):

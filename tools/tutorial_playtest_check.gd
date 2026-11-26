@@ -36,13 +36,14 @@ func ok(cond: bool, what: String) -> void:
 
 
 func run(main: Node) -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--tutorial-playtest-check="):
 			arch = a.substr(26)
 	Save.no_write = true
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(
+	m.start(
 		{
 			"tutorial": true,
 			"teams": 1,
@@ -208,10 +209,11 @@ func _words(_m: Match) -> void:
 		if not NO_KEY.has(sid):
 			ok(want != "" and String(s["text"]).contains(want), "%s names its key %s: '%s'" % [sid, want, s["text"]])
 		if sid.begins_with("pick_"):
-			ok(
-				String(s["text"]).begins_with("Press ") and String(s["text"]).contains(" to unlock "),
-				"%s says what to press to unlock: '%s'" % [sid, s["text"]]
-			)
+			var said := String(s["text"])
+			# (a quiet pick step is a hint: the pick is made for you, so it says what unlocked and the key)
+			var unlock_ok := said.contains("nlocked ") if TutorialHints.quiet(sid) else (
+				said.begins_with("Press ") and said.contains(" to unlock "))
+			ok(unlock_ok, "%s says what to press to unlock: '%s'" % [sid, said])
 		for w in OLD_WORDS:
 			ok(not String(s["text"]).contains(w), "%s has no '%s'" % [sid, w])
 	var fuse: String = Settings.key_cap("ultimate")

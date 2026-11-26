@@ -85,7 +85,7 @@ static func word(i: int, s: Dictionary) -> String:
 	return "%s lost" % WORDS[i]
 
 static func _clock(t: float) -> String:
-	return "%d:%02d" % [int(t) / 60, int(t) % 60]
+	return "%d:%02d" % [int(int(t) / 60.0), int(t) % 60]
 
 ## One badge: a dark underlay, a faint track, the lit arc from the top, a pulse while open, a strike once taken or lost.
 static func badge(c: Control, pv: Vector2, r: float, i: int, s: Dictionary, now: float) -> void:
@@ -122,9 +122,10 @@ static func minimap(hud, inner: Rect2, to_map: Callable, on_map: Callable) -> vo
 		if on_map.call(pv, 8.0):
 			badge(hud.c, pv, 8.0, i, sd[i], m.time)
 			if i == goal or MapDetail.holding():
-				HudStyle.ctext(hud.c, pv + Vector2(0, 22), WORDS[i], 10, HudStyle.INK, 3)      # the badge's name
+				MapNames.put(WORDS[i], pv + Vector2(0, 22), 10, HudStyle.INK, HudStyle.BIG, true, 3)
 		elif int(sd[i]["st"]) <= WaysOutHud.St.USE:
 			hud.edge_mini.add(pv - inner.get_center(), color_of(sd[i]), EdgeMarker.PRIO_GOAL)
+	MapNames.flush(hud.c)      # (the boxes the place names and the train took in this draw stay taken)
 	if m.heart_raid:
 		HeartRaidHud.minimap(hud, to_map, on_map)      # the coming wave's gates
 

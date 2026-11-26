@@ -27,6 +27,7 @@ const EXEC_RED := Color("ff2a2a")      # the wounded-enough-to-finish outline
 const WAVE_RED := Color("ff3a2a")      # the Searing Wave's flame crescent: his crimson
 const WAVE_EDGE := Color("ffe2c4")     # ... its white-hot inner edge
 const WAVE_FULL := Color("ffffff")     # ... white at full charge
+const LUNGE_HOT := 0.25                # 0..1: the Lunge lane's white-out at full charge (its rim stays crimson)
 const LUNGE_REACH := 0.6               # m: the Lunge reaches this far past touching (lane = body + this, each side)
 const CHAIN_RESET := 1.0               # s idle after a slash before the chain starts over on the right: the
                                        # footage still alternates across 4-frame gaps at 5 fps (0.6-1.0 s)
@@ -590,7 +591,7 @@ func rmb_hold_tick(t: float) -> void:
 	var ld: Dictionary = sd["lunge"]
 	var feel := float(dash_feel()["dist"])        # the lane shows the fling travel() really makes
 	var lane := {"len": float(ld["dist"][1]) * feel, "len0": float(ld["dist"][0]) * feel, "k": k, "fill": k,
-			"width": lunge_w(), "soft": true, "tip": true}
+			"width": lunge_w(), "soft": true, "hot": LUNGE_HOT}
 	if _aims_down_chain():
 		var to := warchain.to_anchor()
 		lane["dir"] = to
@@ -766,11 +767,13 @@ func fire_rmb(c: Dictionary) -> void:
 		slam_w = {"t": float(rmb_def()["windup"]), "dir": h.aim_dir()}
 		play("jug_slam")                # keyed to the wind-up: the strike lands at 0.6s
 		vfx("slam_tell")
+		KitWindup.keep(self, "rmb", HeroVfx.of(m).last_voice)
 
 func _tick_slam(dt: float) -> void:
 	slam_w["t"] = float(slam_w["t"]) - dt
 	if h.stun_t > 0.0 or h.downed:
 		slam_w = {}          # interrupted
+		KitWindup.broken(self, "rmb")
 		return
 	# the short crimson strike cone ahead of him, filling as the wind-up runs (everyone sees it)
 	var sl: Dictionary = rmb_def()["slam"]
@@ -984,7 +987,6 @@ func _tick_tells() -> void:
 				"col": JuggernautDrop.AREA, "alpha": 0.7, "ticks": true})
 	if lmb_t > float(lmb_def()["tap"]):
 		var k := wave_k()
-		AimKit.circle(h, "wave", {"self": true, "r": 1.35, "fill": k, "col": WAVE_RED})
 		AimKit.charge(h, k, {"col": Color("ff6a4a")})
 
 ## During the Warchain's pull: a fiery spin around you that blights everyone it hits.

@@ -10,6 +10,7 @@ extends ArchKit
 ## The Storm Rod knocks the first foe back (a stun against a wall or another foe) and leaves a charge
 ## orb, a pickup that gives Wirerun back; Skycall drags a crowd the way you flick and grounds it.
 
+const SLOT_PINK := Color("ff5ab4")   # her ability slot colour (docs/VFX_QUALITY.md palette)
 const PINK := Color("ff3fb4")        # the lightning's hot core: it burns hot pink (DECISIONS)
 const COPPER := Color("e08a46")
 const DEEP_PINK := Color("e0148c")   # the aim kit whitens its accent: this lands as a rich hot pink
@@ -41,6 +42,7 @@ var reset_dash_boost := false  # a reset armed the next Wirerun: further, charge
 var reset_boost_t := 0.0       # s left on it
 var slams := 0
 var orb_bursts := 0
+var lmb_sd := {}                # the last finger bolt while it flies (its crackle, mage_bolt_fly, follows it)
 var lmb_n := 0                 # finger bolts fired (left, right, left...)
 var last_shot := 0
 var last_dash_kind := ""
@@ -206,7 +208,7 @@ func _tick_sparks(dt: float) -> void:
 			fx().unmark("vs%d" % key)
 			continue
 		var n := int(s["n"])
-		var badge := not h.is_local()      # yours: the badge
+		var badge := not h.is_local() and not m.has_meta("pitch_no_foe_plates")  # your own: no badge
 		fx().marker("vs%d" % key, f, n, mx, PINK_WHITE, PINK, _top(f) + MARK_LIFT, badge)
 		StatusLooks.of(m).keep(f, "static")
 		if f.visible and int(m.time / STATIC_GAP) != int((m.time - dt) / STATIC_GAP):
@@ -235,6 +237,9 @@ func _tick(dt: float) -> void:
 		_tick_wire(dt)
 	if run_t > 0.0:
 		_tick_run(dt)
+	if run_exit and h.dash_buf > 0.0 and h.dashes < 1.0:
+		h.dash_buf = 0.0           # Shift mashed in the streak with no charge back: dropped, not the 4 m plain dash
+		h._ab_feedback("dash", "deny")
 	if run_exit and h.roll_t <= 0.0:
 		_exit_run()
 	if rmb_down:
@@ -284,6 +289,8 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 ## A new finger bolt left the hand: alternate hands (the bolt starts at that hand), a twist, a crackle
 ## at the fingertip; the round becomes a jagged bolt with a spark impact (content/vfx/mage.json).
 func _tick_lmb() -> void:
+	if not lmb_sd.is_empty() and not HeroSfx.fly(m, h, "mage_bolt_fly", lmb_sd):
+		lmb_sd = {}
 	var idle := wire.is_empty() and not rmb_down and run_t <= 0.0 and not ult.busy()
 	if h.is_local() and idle and not h.downed:
 		# the aim line runs through the cursor out to full range, an arrow tick at its end (always up)
@@ -314,6 +321,8 @@ func _tick_lmb() -> void:
 	sd["prev"] = p
 	sd["start"] = p
 	play("mage_lmb_l" if left else "mage_lmb_r")
+	lmb_sd = sd
+	m.sfx("mage_bolt_tail", p, -6.0 if h.is_local() else -9.0)     # sparks pattering after the snap
 	# a thrust from the shoulder to the fingertip, the hand's swoosh, then (at the release key) the fingertip
 	# crackles; a jagged bolt rides the round and splinters back where it ends
 	vfx("lmb", null, null, {"left": left})
@@ -375,7 +384,7 @@ func on_dash(use_ex: bool) -> bool:
 	reset_dash_boost = false
 	play("mage_dash")
 	vfx("dash")                    # a bolt slams down onto her: the charging tell
-	m.sfx("vv_surge_charge", h.pos, -3.0)
+	KitWindup.play(self, "dash", "vv_surge_charge", -3.0)
 	return true
 
 ## A Boki merge ends the Wirerun's charge (refunded: nothing ran), the Storm Rod's hold, a Skycall
@@ -416,6 +425,7 @@ func _tick_wire(dt: float) -> void:
 	var t := float(wire["t"])
 	if h.downed or h.stun_t > 0.0 or h.root_t > 0.0 or KitStatus.grounded(h):
 		_end_wire(false)                # the charge was spent on the press: cut, it's gone
+		KitWindup.broken(self, "dash")
 		return
 	# no control of your own while you hold it: the keys do nothing, momentum drifts you, height holds
 	h.inp["move"] = Vector2.ZERO
@@ -554,7 +564,9 @@ func _wire_hit(f: Ent, dmg: float) -> void:
 	f.hurt(dmg * power("dash"), h, {"src": "abil", "ab": "dodge", "tags": ["dodge"]})
 	vfx("wire_hit", f.pos)        # a hit on the way, not a burst
 	m.sfx("mage_wire_hit", f.pos, -4.0)
-	if was_live and is_instance_valid(f) and not f.dead:
+	if not was_live:
+		add_spark(f)              # the run stacks Static like every hit of hers
+	elif is_instance_valid(f) and not f.dead:
 		_blowout(f)
 
 func _blowout(f: Ent) -> void:
@@ -768,9 +780,9 @@ func _build_mote() -> Node3D:
 	for ch in n.get_children():
 		(ch as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var lt := OmniLight3D.new()
-	lt.light_color = PINK
+	lt.light_color = SLOT_PINK       # her slot pink (#ff5ab4): the haze on the ground stays pink, not orange
 	lt.omni_range = 2.4
-	lt.light_energy = 1.2
+	lt.light_energy = 0.6
 	n.add_child(lt)
 	mote_pool.append(n)
 	return n

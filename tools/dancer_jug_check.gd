@@ -19,6 +19,7 @@ var a_x: AKCheck
 
 ## Standalone: one hero's sections (both for "all"). Prints AKCHECK lines like --archetype-check.
 func run(main_node: Node, who := "all") -> void:
+	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	a_x = AKCheck.new()
 	a_x.main = main_node
 	if who in ["all", "thief"]:
@@ -69,23 +70,12 @@ func thief(a) -> void:
 	a_x.ok("dancer LMB: every bolt flies under its cel tracer and every hit plays her lit burst (thief.json)",
 			int(hv.plays.get("bolt_trail", 0)) == 3 and int(hv.plays.get("bolt_hit", 0)) == 3,
 			"trails %d hits %d" % [hv.plays.get("bolt_trail", 0), hv.plays.get("bolt_hit", 0)])
-	a_x.ok("dancer LMB: the aim line ends at the cursor, pale lilac",
+	a_x.ok("dancer LMB: the aim line is pale lilac",
 			AimKit.shown(p_v, "aim") and (AimKit.entry(p_v, "aim")["col"] as Color).is_equal_approx(ThiefKit.AIM_LILAC))
-	# a bolt with nothing in its way stops at the cursor and fizzles there; past range it stops at 8.5m
-	var spot := home + Vector3(-4.0, 0, -3.0)
-	a_x.aim_at(p_v, spot)
-	p_v.fire_cd = 0.0
-	var fz := k.fizzles
-	p_v.inp["fire"] = true
-	m.step(a_x.DT)
-	p_v.inp["fire"] = false
-	a_x.step(m, 0.5)
-	var off := Vector2(k.last_bolt_end.x - spot.x, k.last_bolt_end.z - spot.z).length()
-	a_x.ok("dancer LMB: a bolt lands at the cursor and fizzles (cursor-placed)",
-			k.fizzles == fz + 1 and off < 0.75, "%.2f m off the cursor" % off)
+	# a bolt with nothing in its way flies its full range whatever the cursor (--tester-feedback-check)
 	a_x.aim_at(p_v, home + Vector3(-30.0, 0, 0))
 	p_v.fire_cd = 0.0
-	fz = k.fizzles
+	var fz := k.fizzles
 	p_v.inp["fire"] = true
 	m.step(a_x.DT)
 	p_v.inp["fire"] = false
@@ -180,8 +170,11 @@ func thief(a) -> void:
 	var wheel := k.anim_id
 	var pop := [0.0]           # an Array: a lambda can't assign a captured local
 	var live := {"before": 0, "mid": 0, "after": 0}      # steps her flip trail (data "flip") draws, by turn phase
+	var flipped := [0.0]       # how far the flip itself carried her: the run after it (keys held) is not the Cartwheel
 	a_x.step(m, 0.55, func():
 		pop[0] = maxf(pop[0], k.glint_pop)
+		if p_v.roll_t <= 0.0 and flipped[0] == 0.0:
+			flipped[0] = p_v.flat_dist(home)
 		var at: float = m.time - k.anim_at
 		var key := "after"
 		if at < FLIP_TURN[0]: key = "before"
@@ -203,9 +196,9 @@ func thief(a) -> void:
 					k.glint.global_position.distance_to(k.hand_pos(k.hand == 0)) if k.glint else -1.0])
 	var far := 4.5        # the sheet's measured 4.5m (she is off the global dash feel)
 	a_x.ok("dancer dash: Vault cartwheels about 4.5m, speeds +18%, empowers",
-			absf(p_v.flat_dist(home) - far) < 0.6 and k.primed_t > 0.0 and k.speed_bonus() > 0.15
+			absf(flipped[0] - far) < 0.6 and k.primed_t > 0.0 and k.speed_bonus() > 0.15
 			and p_v.dashes < d0 - 0.5 and wheel in ["thf_vault_l", "thf_vault_r"],
-		"moved %.1f primed %.2f anim %s" % [p_v.flat_dist(home), k.primed_t, wheel])
+		"flip %.1f (to 0.55 s %.1f) primed %.2f anim %s" % [flipped[0], p_v.flat_dist(home), k.primed_t, wheel])
 	var gold: Dictionary = AimKit.entry(p_v, "aim")
 	a_x.ok("dancer dash: the aim line turns solid gold, thick, with a glow while empowered",
 			(gold.get("col", Color.WHITE) as Color).is_equal_approx(ThiefKit.EMP_LINE)
@@ -394,8 +387,8 @@ func thief(a) -> void:
 	var capped := DJFx.of(m).free_pools.values().all(func(arr): return (arr as Array).size() <= DJFx.POOL_CAP)
 	a_x.ok("dancer fx: pooled (every kind capped, a handful of nodes at most per burst)",
 			capped and DJFx.of(m).made <= made + 6, "made %d -> %d" % [made, DJFx.of(m).made])
-	await _dancer_dash_flow(m, p_v, k, t_v, home)
-	await DFEEL.new().run(a_x, m, p_v, k, t_v, home)
+	_dancer_dash_flow(m, p_v, k, t_v, home)
+	DFEEL.new().run(a_x, m, p_v, k, t_v, home)
 	DPARITY.new().run(a_x, m, p_v, k, t_v, home)
 	DTIMING.new().run(a_x, m, k)
 	DLOOP.new().run(a_x, m, p_v, k, t_v, t2, home)

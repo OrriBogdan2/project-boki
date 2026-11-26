@@ -8,8 +8,10 @@ extends RefCounted
 
 ## An ability hit's "ab" -> the slot its own hit sound is named for (`<arch>_hit_<slot>`): the cx slots
 ## (utility, k1, ult) and the kits' own (rmb, e, x, dash; Tenzo's "rock", a punched or raised rock).
-const HIT_SLOT := {"utility": "rmb", "rmb": "rmb", "k1": "e", "e": "e", "dash": "dash", "ult": "r", "x": "r",
-	"r": "r", "rock": "rock"}
+const HIT_SLOT := {"utility": "rmb", "rmb": "rmb", "k1": "e", "e": "e", "dash": "dash", "dodge": "dash", "ult": "r",
+	"x": "r", "r": "r", "rock": "rock"}
+
+const FLY_DB := -8.0           # dB, a shot's travel loop
 
 static var _has := {}          # sound name -> whether audio/ has it
 
@@ -60,3 +62,14 @@ static func hit_sound(by: Ent, o := {}) -> String:
 		if own != "":
 			return own
 	return of(h, "hit", hit_tick(h, o))
+
+## Holds the travel loop `sname` on the flying shot `sd` for this tick (a kit calls it every tick while it keeps `sd`);
+## false, with the loop let go, once the shot has ended.
+static func fly(m: Match, h: Hunter, sname: String, sd: Dictionary) -> bool:
+	var key := "fly_%s_%d" % [sname, h.get_instance_id()]
+	for s in m.shots:
+		if is_same(s, sd):
+			Sfx.loop_hold(key, sname, sd["pos"], FLY_DB, 1.0)
+			return true
+	Sfx.loop_stop(key)
+	return false

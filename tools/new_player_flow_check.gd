@@ -32,6 +32,7 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 func run(m: Node) -> void:
+	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm (base_mode is the shipped default)
 	main = m
 	tree = main.get_tree()
 	Save.no_write = true
@@ -43,7 +44,7 @@ func run(m: Node) -> void:
 	await _prologue()
 	await _hatch()
 	var home = await _tutorial_match()
-	await _farm_tutorial(home)
+	_farm_tutorial(home)
 	await _second_relic(home)
 	await _first_expedition(home)
 	await _skip_paths()
@@ -91,7 +92,7 @@ func _button(root: Node, text: String) -> Button:
 
 ## A real button the player can see: says so, and presses it.
 func _press(root: Node, text: String) -> bool:
-	await _before_act("press " + text)
+	_before_act("press " + text)
 	var b := _button(root, text)
 	ok(b != null, "there is a way forward: '%s'" % text)
 	if b != null:
@@ -159,18 +160,18 @@ func _hatch() -> void:
 	_begin("hatch: card and look")
 	var hx = main.current
 	await _wait(func(): return hx.stage == "intro", "the hatch opens on its card")
-	await _press(hx, String(hx.CARD_BUTTON))
+	_press(hx, String(hx.CARD_BUTTON))
 	await _wait(func(): return hx.stage == "create", "then you make yourself")
 	ok(_button(hx, "Random") != null, "with a Random button as well")
-	await _press(hx, "Looks good")
+	_press(hx, "Looks good")
 	await _wait(func(): return hx.stage == "pick", "then the eggs")
 	_begin("hatch: egg pick and knocks")
-	await _press(hx, "This one")
+	_press(hx, "This one")
 	var chosen: int = hx.chosen
 	ok(chosen >= 0 and _button(hx, "Hatch it") != null, "choosing an egg offers 'Hatch it'")
-	await _press(hx, "Hatch it")
+	_press(hx, "Hatch it")
 	await _wait(func(): return hx.stage == "warm", "the egg waits for knocks")
-	await _before_act("knock")
+	_before_act("knock")
 	for i in hx.TAPS:
 		hx._unhandled_input(_key("jump"))
 		if i == 0:
@@ -201,7 +202,7 @@ func _take(root: Node, card: Control, id: String) -> void:
 	click.pressed = true
 	card.gui_input.emit(click)
 	await tree.process_frame
-	await _press(root, "Yes, take " + HeroTitle.base_name(id))
+	_press(root, "Yes, take " + HeroTitle.base_name(id))
 
 ## The first Relic: the starter pick, then it drifts in, is put on, its page is read, and "Into the portal" goes on.
 func _relic(hx) -> void:
@@ -211,7 +212,7 @@ func _relic(hx) -> void:
 	await _wait(func(): return _child_of(hx, "MaskMoment") != null, "the pick leads into the first Relic")
 	var moment := _child_of(hx, "MaskMoment") as MaskMoment
 	await _wait(func(): return moment.phase == "wait", "the Relic waits by your face")
-	await _before_act("put the Relic on")
+	_before_act("put the Relic on")
 	moment._unhandled_input(_key("interact"))
 	await _wait(func(): return moment.phase == "intro", "putting it on opens its page")
 	await _wait(func(): return moment.go_button != null, "the page has a way on")
@@ -239,7 +240,7 @@ func _tutorial_match():
 		m.step(Match.DT)
 		_course_tick(m)
 		t += Match.DT
-		await _sim_tick(m, t)
+		_sim_tick(m, t)
 		step_t += Match.DT
 		if m.tut.step != last:
 			last = m.tut.step
@@ -258,7 +259,7 @@ func _tutorial_match():
 	var tut: Dictionary = Save.d["tutorial"]
 	ok(bool(tut.get("match", false)) and int(Save.d.get("matches", 0)) == 1, "it counts as the first expedition")
 	ok(ClassUnlock.second_pending(), "and the second Relic is on offer")
-	await _press(main.current, "Go home")
+	_press(main.current, "Go home")
 	_begin("farm: first arrival")
 	await _wait(func(): return _is_screen("home.gd"), "'Go home' opens the farm")
 	var home = main.current
@@ -283,7 +284,7 @@ func _farm_tutorial(home) -> void:
 		var hint := FarmTutorial.hint_text(cur)
 		ok(hint != "", "'%s' tells you what to do" % cur)
 		ok(hint.length() <= HINT_MAX, "and in at most %d characters (%d)" % [HINT_MAX, hint.length()])
-		await _farm_step(home, cur)
+		_farm_step(home, cur)
 		_do_step(cur)
 	ok(bool(FarmTutorial.state()["done"]) and not FarmTutorial.state()["skipped"], "every step can be done in turn")
 	ok(HomeGather.has_tool("axe") and HomeGather.has_tool("pickaxe"), "the axe and the pickaxe were handed over")
@@ -438,7 +439,7 @@ func _ways_out(m: Match) -> void:
 	ok(p_v.extracted, "stepping into the light takes you out (%.0f s of play)" % (m.time - t0))
 	_begin("first expedition: results")
 	await _wait(func(): return main.current is CanvasLayer, "and the expedition ends on the results")
-	await _press(main.current, "Back to the farm")
+	_press(main.current, "Back to the farm")
 	await _wait(func(): return _is_screen("home.gd"), "back on the farm")
 	_end()
 

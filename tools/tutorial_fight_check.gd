@@ -5,7 +5,9 @@ extends RefCounted
 ## names the starter's own move (draw, step in, shoot). The run levels: it lands at level 1 with every
 ## ability locked, the first pick can only be the right click, every ability ends up unlocked and used
 ## (right click, attack, dash, wall kick, Boki, E, glove), Fusion stays locked and unused (the tutorial never
-## teaches it, 11-18), and only the camps paid XP.
+## teaches it, 11-18), and only the camps paid XP. Each run also judges the framing at 1280x720 (TutorialFraming).
+## The first camp is telegraphed: its marker and countdown show (world + minimap, CampMark) for TELEGRAPH_T
+## with no monster out, then the monsters appear on the spots the marker showed.
 
 var bad := 0
 
@@ -23,9 +25,10 @@ func ok(cond: bool, what: String) -> void:
 	if not cond: bad += 1
 
 func run(main: Node) -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	Save.no_write = true
 	for id in STARTERS:
-		await _play(main, id)
+		_play(main, id)
 	print("TUTFIGHT DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -49,16 +52,20 @@ func _play(main: Node, id: String) -> void:
 	var locked: bool = m.player.slot_lv.values().all(func(v): return int(v) == 0)
 	ok(locked and m.player.lvl == 1 and m.player.skill_pts == 1, id + ": lands at level 1, one point, all locked")
 	var forced := false
+	var tele := {"ticks": 0, "early": false, "spots": [], "landed": false, "on_spot": false}
+	var framing := TutorialFraming.new()
 	while t < 400.0 and not m.player.extracted:
 		TutorialDrive.drive(m)
 		m.step(Match.DT)
 		t += Match.DT
+		framing.tick(m)
 		texts[tu.id()] = tu.text
+		_watch_telegraph(m, tele)
 		if tu.id() == "pick_sec" and not forced:
 			forced = true
 			var p := m.player
-			var only: bool = p.can_level("sec") and not p.can_level("dash") and not p.can_level("kin")
-			ok(only and not p.can_level("ult"), id + ": the first pick can only be the right click")
+			var only: bool = int(p.slot_lv["sec"]) == 1 and not p.can_level("dash") and not p.can_level("kin")
+			ok(only and not p.can_level("ult"), id + ": the first pick (made for you) is the right click, no other")
 			p.gain_xp(500.0)
 			ok(p.lvl == 1, id + ": XP from anything but the camps is ignored")
 		if tu.id() in FIGHT_STEPS:
@@ -66,12 +73,19 @@ func _play(main: Node, id: String) -> void:
 			damage += maxf(0.0, hp - m.player.hp)
 			downed += 1 if m.player.out else 0
 		hp = m.player.hp
+	if fight_t > 0.0:      # (a course that stalls before any camp is red on its own lines below)
+		var want := int(TutorialCamps.TELEGRAPH_T / Match.DT)
+		var counted := "the first camp's marker counts down %.0f s" % TutorialCamps.TELEGRAPH_T
+		ok(absi(int(tele["ticks"]) - want) <= 2, "%s: %s (%d ticks)" % [id, counted, tele["ticks"]])
+		ok(not tele["early"], id + ": no monster is out while the marker counts down")
+		ok(tele["landed"] and tele["on_spot"], id + ": the monsters appear on the marked spots when it ends")
 	var tag := "%s: fight beats %.1f s, damage %.0f hp, finished %s" % [id, fight_t, damage, str(m.player.extracted)]
 	print("TUTFIGHT ", tag)
 	var hint := String(texts.get("shoot", "")).to_lower()
 	var names_move: bool = hint.contains(HINT_WORD[id]) and hint.length() <= 34
 	ok(names_move, "%s: the first fight line names its move ('%s')" % [id, hint])
 	ok(m.player.extracted, id + ": the course finishes")
+	framing.judge(id, ok)
 	var lv: Dictionary = m.player.slot_lv
 	var all_on: bool = lv.keys().all(func(k): return int(lv[k]) > 0 if k != "ult" else int(lv[k]) == 0)
 	ok(all_on, "%s: every ability unlocked, Fusion left locked %s" % [id, str(m.player.slot_lv)])
@@ -82,3 +96,18 @@ func _play(main: Node, id: String) -> void:
 	ok(in_range, "%s: the fight beats take %.0f-%.0f s (%.1f)" % [id, FIGHT_MIN, FIGHT_MAX, fight_t])
 	ok(downed == 0 and damage <= DAMAGE_MAX, "%s: never brought down, damage %.0f <= %.0f" % [id, damage, DAMAGE_MAX])
 	m.queue_free()
+
+## One tick of the first camp's telegraph: the marker is up on the world and the minimap's source (CampMark.pending)
+## while no monster is out; the tick it ends, the monsters stand on the spots it showed.
+func _watch_telegraph(m: Match, tele: Dictionary) -> void:
+	var cm := CampMark.pending(m)
+	var ledger: Array = m.tut.camps.ledger
+	if not cm.is_empty():
+		tele["ticks"] += 1
+		tele["spots"] = cm["spots"]
+		tele["early"] = tele["early"] or not ledger.is_empty()
+	elif tele["ticks"] > 0 and not tele["landed"]:
+		tele["landed"] = not ledger.is_empty()
+		tele["on_spot"] = ledger.size() == (tele["spots"] as Array).size()
+		for i in ledger.size():
+			tele["on_spot"] = tele["on_spot"] and (ledger[i]["mb"] as Mob).pos.distance_to(tele["spots"][i]) < 0.6

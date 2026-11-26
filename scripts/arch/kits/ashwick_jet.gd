@@ -51,7 +51,8 @@ const LIFT_LEAD := 0.12         # s of lw_jet skipped on the press: its fly key 
 ## other ability or item press is dropped before it reaches its handler (not buffered): RMB (Cinder Shot, and a
 ## hold carried in is cancelled with nothing fired), Shift (no poof, no Soot Ram), the glove/utility slots,
 ## gear, the Boki's C, a throw and the Merge key. A press answers with the soft "can't" tick.
-const LOCKED := ["dash", "sec", "util1", "util2", "util3", "util4", "gear1", "gear2", "kin_ab", "skill", "throw", "ult"]
+const LOCKED := ["dash", "sec", "util1", "util2", "util3", "util4", "util5", "util6", "gear1", "gear2", "kin_ab",
+	"skill", "throw", "ult"]
 const SLOT_OF := {"gear1": "gear0", "gear2": "gear1"}      # input -> the HUD slot its deny pulses
 
 func lock_inputs() -> void:
@@ -127,6 +128,7 @@ func in_lava(f: Ent) -> bool:
 func _fly(dt: float) -> void:
 	if h.stun_t > 0.0 or h.downed or h.out:
 		_land()
+		KitWindup.broken(k, "x")
 		return
 	if h.inp.get("jump", false) and h.vel.y > 0.0:
 		_leap()
@@ -289,7 +291,7 @@ func _lava_at(f: Ent):
 ## (content/vfx "liftoff").
 func _liftoff_fx() -> void:
 	k.vfx("liftoff", k.ground(h.pos), null, {"r": float(xd()["burst_r"])})
-	m.sfx("lw_jet", h.pos, -1.0, 1.0)
+	KitWindup.play(k, "x", "lw_jet", -1.0)
 
 ## The flight's lift: fire bursting from both heels and her tail, blown back and down, and its smoke
 ## (content/vfx "jets": the heel_l/heel_r/tail anchors are where it burns), with a roar now and then.
@@ -299,4 +301,4 @@ func _jet_fx() -> void:
 	HeroVfx.of(m).hold(h, "jets")
 	if m.time - last_roar >= ROAR_EVERY:
 		last_roar = m.time
-		m.sfx("lw_jet", h.pos, -6.0, 1.1)
+		KitWindup.play(k, "x", "lw_jet", -6.0, 1.1)

@@ -45,7 +45,7 @@ func _map(mp: Dictionary) -> void:
 	main.add_child(m)
 	var o := {"teams": 1, "squad": 1, "tier": 0, "seed": 4242, "no_drop": true, "length": 1e9}
 	o.merge(mp["opts"], true)
-	await m.start(o)
+	m.start(o)
 	m.set_process(false)
 	var runs := flights(m.world)
 	ok("%s: has flights to walk" % mp["name"], runs.size() > 0, "%d stair tiles" % m.world.stairs.size())
@@ -53,8 +53,8 @@ func _map(mp: Dictionary) -> void:
 	var b_v: Hunter = m.make_hunter("B", 3, "heavy", "Walker", "idle", {}, spawn + Vector3(0, 0, 1), {"arch": "none"})
 	for p in [m.player, b_v]:
 		for fl in runs:
-			await _cross(m, p, "%s %s %s" % [mp["name"], p.cls, fl["at"]], fl["a"], fl["b"])
-			await _cross(m, p, "%s %s %s down" % [mp["name"], p.cls, fl["at"]], fl["b"], fl["a"])
+			_cross(m, p, "%s %s %s" % [mp["name"], p.cls, fl["at"]], fl["a"], fl["b"])
+			_cross(m, p, "%s %s %s down" % [mp["name"], p.cls, fl["at"]], fl["b"], fl["a"])
 		p.teleport(spawn)  # (out of the next walker's way)
 	m.queue_free()
 	await main.get_tree().process_frame

@@ -47,7 +47,7 @@ func take(main_node: Node, out: String) -> void:
 	o.merge(Match.arena_opts("gunslinger"), true)
 	m = Match.new()
 	main.add_child(m)
-	await m.start(o)
+	m.start(o)
 	m.set_process(false)
 	P = m.player
 	for mb in m.mobs: mb.queue_free()
@@ -150,7 +150,7 @@ func _shot(what: String, aim_d: float, lead: float, zoom: bool, caption: String)
 	if zoom:
 		var c := L.reticle.body(P) if what == "reticle_body" else L.reticle.cursor(P)
 		var sz := Vector2i(180, 120)
-		var rg := Rect2i(Vector2i(int(c.x) - sz.x / 2, int(c.y) - sz.y / 2), sz).intersection(Rect2i(Vector2i.ZERO, img.get_size()))
+		var rg := Rect2i(Vector2i(int(c.x) - int(sz.x / 2.0), int(c.y) - int(sz.y / 2.0)), sz).intersection(Rect2i(Vector2i.ZERO, img.get_size()))
 		var crop := img.get_region(rg)
 		crop.resize(rg.size.x * 3, rg.size.y * 3, Image.INTERPOLATE_NEAREST)
 		var zf := file.replace(".png", "_zoom.png")

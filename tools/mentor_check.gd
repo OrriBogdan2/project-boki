@@ -53,7 +53,7 @@ func run(m: Node) -> void:
 	ok(not Work.can_work(elder), "a mentor takes no jobs")
 	ok(Mentor.pace(elder) < Mentor.pace(young), "a mentor walks slowly")
 	_gifts(elder, young, mate)
-	await _roundtrip(elder, young, mate)
+	_roundtrip(elder, young, mate)
 	await _base(elder, young, mate)
 	rules["base_mode"] = false
 	print("MENTOR DONE, failures: %d" % bad)
@@ -140,7 +140,7 @@ func _base(elder: Dictionary, young: Dictionary, mate: Dictionary) -> void:
 		var fsm: Fsm = mk["life"]
 		in_state += 1 if fsm.is_in(BaseLife.S.MENTOR) or fsm.is_in(BaseLife.S.NAP) else 0
 		var from_shrine := Vector2(mk["pos"].x - shrine.x, mk["pos"].z - shrine.z).length()
-		var close := from_shrine < 4.0 + float(home.life.R["mentor_radius"])
+		var close := from_shrine < 4.0 + float(home.life.r_v["mentor_radius"])
 		if close and arrived < 0: arrived = frames
 		near += 1 if close and arrived >= 0 else 0
 		top = maxf(top, Vector2(mk["vel"].x, mk["vel"].z).length())

@@ -19,7 +19,7 @@ func run(main_node: Node) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	m = Match.new()
 	main.add_child(m)
-	await m.start(
+	m.start(
 		{
 			"teams": 2,
 			"squad": 1,
@@ -63,7 +63,7 @@ func _shot(tag: String, frames := 40) -> void:
 	var img := vp.get_texture().get_image()
 	img.save_png(dir.path_join(tag + ".png"))
 	var c := Vector2i(m.cam.unproject_position(m.player.pos + Vector3.UP))
-	var crop := img.get_region(Rect2i(c - CROP / 2, CROP))
+	var crop := img.get_region(Rect2i(c - Vector2i(Vector2(CROP) / 2.0), CROP))
 	crop.resize(CROP.x * 3, CROP.y * 3, Image.INTERPOLATE_NEAREST)
 	crop.save_png(dir.path_join(tag + "_zoom.png"))
 	print("ULTGLOWSHOTS %s glow %.2f" % [tag, m.player.ult_glow])

@@ -70,7 +70,12 @@ const KNOWN := {
 	"dredge":
 	{"rmb": ["dredge_coin_jingle", "dr_let_go"], "hold": ["dredge_coin_jingle", "dr_let_go"], "r": ["dr_blast_end"]},
 	"gil": {"rmb": ["gil_toss", "gil_pop_zeep"], "hold": ["gil_toss", "gil_pop_zeep"], "r": ["gil_wave_land"]},
-	"gunslinger": {"rmb": ["gunslinger_grenade_thunk"], "hold": ["gunslinger_grenade_thunk"], "r": ["vn_nuke_fire"]},
+	"gunslinger":
+	{
+		"rmb": ["gunslinger_grenade_thunk", "vn_coin_flip"],
+		"hold": ["gunslinger_grenade_thunk", "vn_coin_flip"],
+		"r": ["vn_nuke_fire"]
+	},
 	"juggernaut": {"lhold": ["jug_ting"], "hold": ["jug_ting"], "r": ["juggernaut_heal"]},
 	"mage": {"r": ["vv_ult_rise"]},
 	"ostra": {"e": ["os_seed"]},
@@ -150,7 +155,7 @@ func _lead_in(sname: String) -> float:
 			ch = b.decode_u16(i + 10)
 			rate = b.decode_u32(i + 12)
 		elif id == "data":
-			at = _loud_at(b.slice(i + 8, i + 8 + n), ch * 2, rate / 100)
+			at = _loud_at(b.slice(i + 8, i + 8 + n), ch * 2, int(rate / 100.0))
 			break
 		i += 8 + n + (n & 1)
 	lead_in[sname] = at

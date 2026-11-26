@@ -17,7 +17,6 @@ static func land(k: Kin, hit: Dictionary, charge := false) -> void:
 			continue
 		hit[f.nid] = true
 		_strike(k, f, k.dmg * float(r["dmg_k"]), float(r["stun"]) + float(cm["stun_add"]), float(r["kb"]) * float(cm["kb_k"]), (Vector2(f.pos.x - k.pos.x, f.pos.z - k.pos.z)).normalized(), "land")
-	k.m.shake(0.3, k.pos)
 
 ## A leap home from `a` to `b` this step: foes within the path's width get hit once.
 static func sweep(k: Kin, a: Vector3, b: Vector3) -> void:
@@ -44,4 +43,4 @@ static func _strike(k: Kin, f: Ent, dmg: float, stun: float, kb: float, dir: Vec
 	k.m.fx.burst(f.pos + Vector3(0, 0.6, 0), k.sp["color"], 10, 3.5)
 	k.m.sfx("kinhit", f.pos, -2.0)
 	if k.owner_h and k.owner_h.is_local():
-		k.m.freeze_frame(0.04)
+		k.m.freeze_frame(ImpactWeight.hold_s(ImpactWeight.of_boki(true)))

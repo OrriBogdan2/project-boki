@@ -120,7 +120,7 @@ func _match_mode(mode: String, _rules: Dictionary) -> Dictionary:
 			o = Match.duel_opts()
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(o)
+	m.start(o)
 	m.set_process(false)
 	for mb in m.mobs:
 		mb.queue_free()
@@ -152,7 +152,7 @@ func _match_mode(mode: String, _rules: Dictionary) -> Dictionary:
 	m.biomes = null  # the map's ice and wind are terrain, not a mode's numbers
 	mfc.m = m
 	mfc.w = m.world
-	mfc.P = p
+	mfc.p_v = p
 	var spot := _match_spot(m)
 	var got := _measure_match(m, p, spot)
 	m.queue_free()

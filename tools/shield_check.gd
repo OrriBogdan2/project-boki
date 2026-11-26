@@ -20,6 +20,7 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 func run(main: Node) -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="): _dir = String(a).substr(12)
 	if _dir != "": DirAccess.make_dir_recursive_absolute(_dir)
@@ -28,7 +29,7 @@ func run(main: Node) -> void:
 	Econ.ensure()
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "arch": "bulwark",
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "arch": "bulwark",
 		"cls": Arch.weight("bulwark"), "weapon": Arch.signature("bulwark")})
 	m.set_process(false)
 	var fade = main.get("fade")
