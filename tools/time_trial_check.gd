@@ -4,7 +4,9 @@ extends RefCounted
 ## plain jump, the glide tower only by the pad); a scripted run with real inputs goes start -> ten gates ->
 ## finish and sets this Hunter's best; a dash gate walked through doesn't count; a slower run keeps the best;
 ## a Hunter swap, a fall or walking off the course (a toast says so) ends the run; the clock, the pedestal
-## prompt and the station signs never overlap the HUD, the FPS counter, toasts or the hunter at three window sizes; a v21 save migrates to an empty best list. Prints TIMETRIALCHECK PASS/FAIL.
+## prompt never overlap the HUD, the FPS counter, toasts or the hunter at three window sizes; each station kind
+## has a sign (the bot pen's says how to spawn a bot); a v21 save migrates to an empty best list.
+## Prints TIMETRIALCHECK PASS/FAIL.
 
 const DT := 1.0 / 60.0
 const RUN_CAP := 120.0  # [s] a scripted run that takes longer has got stuck
@@ -200,7 +202,7 @@ func _layout(m: Match, t: TimeTrial) -> void:
 	g.prompt.text = "Bot: Juggernaut   ·   Enter"
 	g.prompt.visible = true
 	m.hud.msgs.clear()
-	m.hud.toast("Time trial  0:42.31  ·  new best (was 0:44.10)", Color.WHITE)
+	m.hud.toast("Time trial  0:42.31  ·  your first best", Color.WHITE)
 	m.hud.toast("Trial cancelled - left the course", Color.WHITE)
 	for sz in [Vector2i(1280, 720), Vector2i(1706, 775), Vector2i(1920, 1080)]:
 		main.get_window().size = sz

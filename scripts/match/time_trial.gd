@@ -175,7 +175,8 @@ func show_best() -> void:
 		return
 	_shown_arch = m.player.arch
 	var b := best(_shown_arch)
-	_best_lb.text = "TIME TRIAL\nPass the gates in order, fastest time wins\nBest  %s" % (_fmt(b) if b > 0.0 else "none yet")
+	var best_s := _fmt(b) if b > 0.0 else "none yet"
+	_best_lb.text = "TIME TRIAL\nPass the gates in order, fastest time wins\nBest  %s" % best_s
 
 
 static func _fmt(secs: float) -> String:

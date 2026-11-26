@@ -224,7 +224,8 @@ func _duel(at: Vector3) -> void:
 	var pad := Models.jump_pad(Color(String(KIND_COL["duel"])))
 	pad.position = at
 	m.add_child(pad)
-	var lb := label("DUEL ROOM\nSpar a Hunter one on one\n%s to enter" % Settings.key_cap("interact"), Color(String(KIND_COL["duel"])), 2.6)
+	var col := Color(String(KIND_COL["duel"]))
+	var lb := label("DUEL ROOM\nSpar a Hunter one on one\n%s to enter" % Settings.key_cap("interact"), col, 2.6)
 	lb.position = at + Vector3(0, 2.7, 0)
 	m.add_child(lb)
 	m.duel_pad = at
