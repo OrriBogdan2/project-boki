@@ -11,9 +11,11 @@ const STRIP := 6
 var out := ""
 var parts := ["chain", "fish", "guard", "ult"]
 
+
 func _grab(main: Node, nm: String) -> void:
 	await RenderingServer.frame_post_draw
 	main.get_viewport().get_texture().get_image().save_png(out.path_join(nm))
+
 
 func run(main: Node) -> void:
 	for a in OS.get_cmdline_user_args():
@@ -38,6 +40,7 @@ func run(main: Node) -> void:
 	print("BREAKER_PROOF_DONE")
 	main.get_tree().quit()
 
+
 func _chain(main: Node) -> void:
 	var m := Match.new()
 	main.add_child(m)
@@ -54,6 +57,7 @@ func _chain(main: Node) -> void:
 			await _grab(main, "chain_%02d.png" % i)
 	m.queue_free()
 	await main.get_tree().process_frame
+
 
 func _fish(main: Node) -> void:
 	var holder := Node3D.new()
@@ -78,7 +82,7 @@ func _fish(main: Node) -> void:
 		sync._process(DT)
 	var rest := sk.get_bone_global_pose(fish).origin
 	var far := 0.0
-	for i in 60:      # walking: the root sways as a step does, the line swings
+	for i in 60:  # walking: the root sways as a step does, the line swings
 		model.position.x = 0.12 * sin(i * 0.3)
 		an.update(DT, st)
 		sync._process(DT)
@@ -123,35 +127,36 @@ func _arena(main: Node) -> Match:
 ## left with and without the raised shield arm (WardenArmRaise), the wall shown and hidden.
 func _guard(main: Node) -> void:
 	var m := _arena(main)
-	var P: Hunter = m.player
+	var p: Hunter = m.player
 	for aim in [Vector3(7, 0, 0), Vector3(2, 0, 7)]:
-		P.inp["aim"] = P.pos + aim
-		P.inp["sec_hold"] = true
-		P.ak.press_rmb()
+		p.inp["aim"] = p.pos + aim
+		p.inp["sec_hold"] = true
+		p.ak.press_rmb()
 		for i in 40:
-			P.inp["sec_hold"] = true
+			p.inp["sec_hold"] = true
 			await _tick(main, m)
 		await _grab(main, "guard_match_%s.png" % ("side" if aim.z == 0.0 else "front"))
 	var cam := Camera3D.new()
 	m.add_child(cam)
 	cam.fov = 34.0
-	var fwd := Vector3(P.aim_dir().x, 0, P.aim_dir().y)
-	cam.look_at_from_position(P.pos + fwd * 5.5 + fwd.cross(Vector3.UP) * 2.0 + Vector3(0, 2.2, 0),
-		P.pos + Vector3(0, 1.1, 0), Vector3.UP)
+	var fwd := Vector3(p.aim_dir().x, 0, p.aim_dir().y)
+	cam.look_at_from_position(
+		p.pos + fwd * 5.5 + fwd.cross(Vector3.UP) * 2.0 + Vector3(0, 2.2, 0), p.pos + Vector3(0, 1.1, 0), Vector3.UP
+	)
 	cam.current = true
-	var clips := (P.model.get_node("Warden/Sync") as WardenGlb.Sync).clips
+	var clips := (p.model.get_node("Warden/Sync") as WardenGlb.Sync).clips
 	var raise := clips.arm_raise
-	var aegis := (P.ak as BulwarkKit).fx.aegis
+	var aegis := (p.ak as BulwarkKit).fx.aegis
 	for k in ["raised", "clip"]:
 		clips.arm_raise = raise if k == "raised" else null
 		for i in 6:
-			P.inp["sec_hold"] = true
+			p.inp["sec_hold"] = true
 			await _tick(main, m)
 		await _grab(main, "guard_close_%s.png" % k)
 		aegis.visible = false
 		await _grab(main, "guard_close_%s_nowall.png" % k)
 	clips.arm_raise = raise
-	P.inp["sec_hold"] = false
+	p.inp["sec_hold"] = false
 	m.queue_free()
 	await main.get_tree().process_frame
 
@@ -159,11 +164,11 @@ func _guard(main: Node) -> void:
 ## Faultline toward the screen's right: the wind-up, the slam and the eruption, timed from the press.
 func _ult(main: Node) -> void:
 	var m := _arena(main)
-	var P: Hunter = m.player
-	P.lvl = 6
-	P.ak.cd["x"] = 0.0
-	P.inp["aim"] = P.pos + Vector3(7, 0, 2)
-	HunterKeys.ult_pressed(P)
+	var p: Hunter = m.player
+	p.lvl = 6
+	p.ak.cd["x"] = 0.0
+	p.inp["aim"] = p.pos + Vector3(7, 0, 2)
+	HunterKeys.ult_pressed(p)
 	var shots := {12: "ult_wind", 27: "ult_slam", 36: "ult_erupt", 54: "ult_late"}
 	for i in 60:
 		await _tick(main, m)
@@ -175,28 +180,38 @@ func _ult(main: Node) -> void:
 
 func _pose(main: Node) -> void:
 	var m := _arena(main)
-	var P: Hunter = m.player
-	P.inp["aim"] = P.pos + Vector3(0, 0, 7)
+	var p: Hunter = m.player
+	p.inp["aim"] = p.pos + Vector3(0, 0, 7)
 	for i in 30:
 		await _tick(main, m)
-	_bones(P, "idle")
-	P.inp["sec_hold"] = true
-	P.ak.press_rmb()
+	_bones(p, "idle")
+	p.inp["sec_hold"] = true
+	p.ak.press_rmb()
 	for i in 40:
-		P.inp["sec_hold"] = true
+		p.inp["sec_hold"] = true
 		await _tick(main, m)
-	_bones(P, "guard")
+	_bones(p, "guard")
 	m.queue_free()
 
 
-func _bones(P: Hunter, tag: String) -> void:
-	var sk := WardenGlb.skeleton(P.model.get_node("Warden"))
-	var inv := P.model.global_transform.affine_inverse() * sk.global_transform
+func _bones(p: Hunter, tag: String) -> void:
+	var sk := WardenGlb.skeleton(p.model.get_node("Warden"))
+	var inv := p.model.global_transform.affine_inverse() * sk.global_transform
 	for b in ["chest", "upper_arm.L", "forearm.L", "hand.L", "x_shield", "head"]:
 		var bi := WardenSkeleton.find(sk, b)
 		if bi < 0:
 			continue
 		var g := sk.get_bone_global_pose(bi)
-		print("POSE %s %s pos %s sk %s basis %s" % [tag, b, (inv * g.origin).snapped(Vector3.ONE * 0.01),
-			g.origin.snapped(Vector3.ONE * 0.01), g.basis.get_euler() * 57.3])
+		print(
+			(
+				"POSE %s %s pos %s sk %s basis %s"
+				% [
+					tag,
+					b,
+					(inv * g.origin).snapped(Vector3.ONE * 0.01),
+					g.origin.snapped(Vector3.ONE * 0.01),
+					g.basis.get_euler() * 57.3
+				]
+			)
+		)
 	print("POSE sk-to-model %s" % inv)
