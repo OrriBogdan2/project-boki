@@ -50,9 +50,9 @@ const T := {
 	"haste_cap_mps": ["~", [6.95, 7.0], "m/s", "[game data] MaxMoveSpeed 700 uu/s"],
 	"haste_clip_rate": ["~", [0.99, 1.01], "x", "clip rate / (speed / clip speed), worst Warden"],
 	"jump_input_frames": ["<=", 1.0, "frames", "press to lift-off, same sim step"],
-	"jump_apex": ["~", [1.2, 1.6], "m", "[game data] 1.9m; under 1.6 so jump + mantle stays below 4 terraces"],
-	"jump_speed_vs_source": ["~", [0.85, 1.0], "x", "[game data] JumpZVelocity 7.5; ours 6.8 (terraces)"],
-	"jump_airtime": ["~", [0.85, 1.05], "s", "[game data] JumpZVelocity 750 at gravity 1470 uu/s2: 1.02s"],
+	"jump_apex": ["~", [1.85, 1.95], "m", "[game data] JumpZVelocity 750 uu/s at 1470 uu/s2: 1.91m"],
+	"jump_speed_vs_source": ["~", [0.96, 1.0], "x", "[game data] JumpZVelocity 7.5, less our first step of gravity"],
+	"jump_airtime": ["~", [0.98, 1.06], "s", "[game data] JumpZVelocity 750 at gravity 1470 uu/s2: 1.02s"],
 	"air_carry_m": [">=", 3.0, "m", "[game data] FallingLateralFriction 0.375: the run-up carries"],
 	"air_reverse_dv": [">=", 5.0, "m/s", "[owner 11-08] strong WASD air control"],
 	# landing carry (_landing_carry): run speed at take-off, then a fall onto flat ground with the keys held;

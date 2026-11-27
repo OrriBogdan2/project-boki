@@ -4,6 +4,8 @@ extends RefCounted
 ## fall, glide, dive, mantle and glider heat tunables every hunter shares, from content/rules/hunter_move.json
 ## ([game data]: the reference's movement settings, uu converted to metres).
 
+# terraces a plain jump and mantle tops: the wall tier (four, LAYOUT_RULES) is the wall kick's job (decision 0007)
+const JUMP_TIERS := 3
 const CHASE_BONUS := 0.18  # share of run speed: heading at whoever took your kin
 
 static var _rules: Dictionary = MoveRules.data()
@@ -132,6 +134,20 @@ static func speed_bonus(h: Hunter, mv: Vector2) -> float:
 ## True when this hunter can mantle a double-high ledge (Archer and Juggernaut).
 static func climbs_tall(h: Hunter) -> bool:
 	return bool(of(h.arch).get("climb_tall", false))
+
+
+## How far above you an airborne hunter still catches a lip (m): the suction's reach (more for the tall climbers),
+## but a jump never tops more than JUMP_TIERS terraces over where you stood (one more after a wall kick, or for a
+## tall climber). A glide, or a launch higher than a jump explains, keeps the whole reach.
+static func ledge_reach(h: Hunter) -> float:
+	var tall := climbs_tall(h)
+	var reach := HunterFeel.mantle_reach + (HunterFeel.tall_climb_extra if tall else 0.0)
+	var kicked := h.wall_moves.chain > 0
+	var hop := Hunter.JUMP_V * Hunter.JUMP_V / (2.0 * Hunter.H_GRAV) + (WallMoves.KICK_RISE if kicked else 0.0)
+	if h.gliding or h.pos.y - h.last_gy > hop + 0.05:
+		return reach
+	var tiers := JUMP_TIERS + int(kicked) + int(tall)
+	return minf(reach, h.last_gy + tiers * World.LEVEL + 0.05 - h.pos.y)
 
 
 ## The source's walking brake at `speed` (m/s^2): brake_friction's share of the speed plus brake_decel. UE
@@ -327,6 +343,9 @@ static func caught(dashing: bool, b1: float, b2: float) -> bool:
 	return b1 > 0.0 or b2 > 0.0
 
 
+## "About to land": falling, with the ground no further than the jump buffer (and a step more) of falling away,
+## and never further than 0.9 m. A jump pressed then waits for the landing instead of opening the glider.
+## `height` is metres above the ground.
 ## "About to land" [game data]: falling with the ground under land_buffer_h. A jump pressed then never opens the
 ## glider; it is kept until the landing (jump_hold) and jumps there. `height` is metres above the ground.
 static func near_landing(vy: float, height: float) -> bool:

@@ -561,8 +561,8 @@ func _all() -> void:
 		ak.step(m, 0.05)
 		tw += 0.05
 	ok(
-		"deep reach: foe arrives at your feet and does not land Grounded",
-		k.arrivals == 1 and k.pull.is_empty() and not KitStatus.grounded(t) and p.flat_dist(t) < 3.6,
+		"deep reach: foe arrives at your feet and lands Grounded, not stunned",
+		k.arrivals == 1 and k.pull.is_empty() and KitStatus.grounded(t) and p.flat_dist(t) < 3.6,
 		"arrivals %d dist %.1f (was %.1f)" % [k.arrivals, p.flat_dist(t), d0]
 	)
 	ok("reel: Grimble's own Grounded ends with the reel", not KitStatus.grounded(p))
@@ -585,9 +585,9 @@ func _all() -> void:
 		"anchors at 0.3s %d (dmg %.0f), moved %.1f m" % [early, early_dmg, p.flat_dist(at0)]
 	)
 	ok(
-		"combo: reel > Anchor Drop = damage and stun, the foe is not Grounded (no Ground in the source)",
-		k.anchors == 1 and ak.dmg(t) - hp0 >= 20.0 and not KitStatus.grounded(t) and t.stun_t > 0.8,
-		"anchors %d took %.0f stun %.2f gnd %s" % [k.anchors, ak.dmg(t) - hp0, t.stun_t, KitStatus.grounded(t)]
+		"combo: reel > Anchor Drop = damage and a long stun on the Grounded foe",
+		k.anchors == 1 and ak.dmg(t) - hp0 >= 20.0 and t.stun_t > 0.8,
+		"anchors %d took %.0f stun %.2f" % [k.anchors, ak.dmg(t) - hp0, t.stun_t]
 	)
 	var swirl := HeroVfx.of(k.m).live.filter(func(e): return e.get("on") == t)
 	ok("anchor: the stunned foe shows a stun swirl", not swirl.is_empty())

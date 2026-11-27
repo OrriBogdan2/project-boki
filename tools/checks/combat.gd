@@ -7,6 +7,7 @@ extends RefCounted
 const CHECKS := {
 	# the glider's timing: spike freeze + 80 m/s fall, regen stun, slam heat, 6.25 s glide, 0.4 s hold to open
 	"--glider-parity-check": ["res://tools/glider_parity_check.gd", "glider_parity_check", null],
+	"--air-rmb-feel-check": ["res://tools/air_rmb_feel_check.gd", "air_rmb_feel_check", null],  # Kael jump -> RMB
 	# the glider opens after any attack or ability, LMB or not (input buffer, every hunter)
 	"--glide-after-attack-check": ["res://tools/glide_after_attack_check.gd", "glide_after_attack_check", null],
 	# a blast: falloff curve by distance, no damage through rock, the armour ring pitched by the shell left

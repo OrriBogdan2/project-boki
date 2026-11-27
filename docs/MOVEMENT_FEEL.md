@@ -77,9 +77,9 @@ defaults aren't cited, since the data names no field for these windows.
 | aim_side / aim_back / aim_back_fire speed_k (run with the keys across or away from the aim, over toward it) | 1.0 | 1.0 | 0.99–1.01 | [game data] no backpedal or strafe slow: one MoveSpeed per hunter, no directional row in the movement data (the only forward/back split decoded is rail grinding, 1300/1050); hero-ref footage has no clean walk-away run to frame (see ext/feel-backpedal-speed) |
 | aim_back_3m_frames (frames to cover 3 m away from the aim, minus toward it) | 0 | 0 | <= 0 | [game data] same; 42 frames both ways at 4.55 m/s |
 | jump_input_frames | 1 | 1 | <= 1 | |
-| jump_apex | 1.28m | 1.52m | 1.2–1.6m | [game data] 1.9m, held under 1.6 for the terrace grammar |
-| jump_speed_vs_source (lift-off 6.8 m/s over 7.5) | n/a | 0.87 | 0.85–1.0 | [game data] JumpZVelocity 750 uu/s; the gap is the terrace call, plus one step of gravity |
-| jump_airtime | 0.633s | 0.900s | 0.85–1.05s | [game data] 1.02s |
+| jump_apex | 1.28m | 1.91m (1.52m before 11-26) | 1.85–1.95m | [game data] JumpZVelocity 750 uu/s at 1470 uu/s²: 1.91m (owner 11-26: "not as high" as the source) |
+| jump_speed_vs_source (lift-off 7.5 m/s over 7.5, after our first step of gravity) | n/a | 0.967 (0.87 before) | 0.96–1.0 | [game data] JumpZVelocity 750 uu/s |
+| jump_airtime | 0.633s | 1.017s (0.900s before) | 0.98–1.06s | [game data] 1.02s |
 | air_carry_m (let go at take-off) | n/a | 3.4m | >= 3.0m | [game data] FallingLateralFriction 0.375 |
 | air_reverse_dv (keys reversed for a whole jump) | n/a | 0.63 m/s | 0.5–1.1 m/s | [game data] AirControl 0.015 |
 | dash_exit_run (speed as a dash ends / run speed) | 0.15x | 1.0x | 0.95–1.05x | [game data] no hard stop |
@@ -356,7 +356,7 @@ A walking jump bounces between 20 and about 30 degrees off the normal (where `co
 
 Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMove`; values and sources are in sv/DATA.md.
 
-- **Gravity** 30 (x1.2 falling) → 14.7 m/s², one gravity. **Jump** 9 → 6.8 m/s (the data's 7.5 would let jump + mantle top four terraces). **Wall kick** rise 0.9 → 0.8m, so jump + kick + mantle still tops 4 terraces and not 5.
+- **Gravity** 30 (x1.2 falling) → 14.7 m/s², one gravity. **Jump** 9 → 6.8 m/s, then 7.5 m/s on 11-26 (the data's; `HunterMove.ledge_reach` keeps jump + mantle under four terraces). **Wall kick** rise 0.9 → 0.8m, so jump + kick + mantle still tops 4 terraces and not 5.
 - **Fall cap** 10 → 12 m/s, easing to 10 m/s from 1m to 16.5m under the lip. **Point of no return** 13 → 17.5m under the lip: about 1.9s of falling to save yourself (was ~1.4s).
 - **Air control** (`Loco.air_step`, owner 11-08: the data's low AirControl is overruled): WASD adds 32 m/s^2 onto what you carry, 2.5x that against your drift (a 5 m/s backward drift turns forward in ~0.07 s), never past your run speed along the keys; speed above it (dash, knock) bleeds at 2/s. The farm uses the same step. Numbers in content/rules/tuning.json `air`.
 - **Glide height hold** (`GlideLift.sink`): more than 8.5m over the ground (or the lip) the glider sinks at 3.5 m/s.
@@ -694,13 +694,13 @@ The source: mashing the mouse never beats holding. The weapon's cadence caps bot
 
 Only the farm's ponds are water you move through (`scripts/home/home_water.gd`; the edge ring of a pond is shallow, the middle deep). Match maps have no wadeable water: their pools and falls are set dressing and a hunter runs over them at land values. Source side: the game-data dump (`sv/briefs/physics.md`) overrides no swim or water setting in the movement component (no swim speed, no water speed multiplier, no water physics volume), the kit data and the hero footage notes (`briefs/hero-ref`) never mention crossing water, and no public page we could read gives a water rule. Nothing settles any cell on the source side, so every one is [?] and ours stand. No `hunter_move.json` const and no `--move-feel-check` row was added: the check only takes rows the source settles.
 
-Ours below are the farm's constants (run `SPEED` 5.0 m/s, `JUMP_V` 6.8 m/s, `H_GRAV` 14.7 m/s²; jump height = v²/2g). `--swim-check` reads the speeds through a window that spans the shoreline, so it prints 3.5 wading and 3.3 swimming; the steady values are the products in the table.
+Ours below are the farm's constants (run `SPEED` 5.0 m/s, `JUMP_V` 7.5 m/s, `H_GRAV` 14.7 m/s²; jump height = v²/2g). `--swim-check` reads the speeds through a window that spans the shoreline, so it prints 3.5 wading and 3.3 swimming; the steady values are the products in the table.
 
 | Move | Source, shallow | Source, deep | Ours, shallow (wade) | Ours, deep (swim) |
 |---|---|---|---|---|
 | Run speed | [?] | [?] | 0.68x walk (`WADE_SPEED`): 3.4 m/s | 0.5x walk (`SWIM_SPEED`): 2.5 m/s |
 | Dash length | [?] | [?] | land length (the dash ignores water) | no dash |
-| Jump height | [?] | [?] | land height, 1.57 m | kick up at 0.85x lift (`BREACH_V`): 5.78 m/s, 1.14 m |
+| Jump height | [?] | [?] | land height, 1.91 m | kick up at 0.85x lift (`BREACH_V`): 6.38 m/s, 1.38 m |
 | Glide take-off | [?] | [?] | as on land: a second Space in the air held 0.4 s (`GLIDE_ENGAGE`, 11-27) | as on land once the kick has you airborne; from the lower apex |
 
 What to do when the source gets a value: put it in `hunter_move.json` as a named const, read it from `HomeWater`, and add a `--move-feel-check` row for it.
@@ -1059,7 +1059,7 @@ Settled against the source, PARITY FIRST (briefs/DECISIONS.md 2026-11-07): sv/br
 |---|---|---|---|
 | How long a climb takes | [footage] owner_mantle_clip 18.3 to 18.5 s (dash in from the abyss) and sv_joule_1v4 9.20 to 9.27 s (glide onto a low rim): rim to standing in ~0.1 to 0.2 s, no pause, no pose. [game data] MantleSuctionUpwardsForceZSpeedCap 2.5 m/s caps the suction's lift, not the pull-up: MantleZImpulseMin/Max and MantleLaunchDelay are C++ defaults the data doesn't store, so the rise per metre is [?] | the rise is the suction (`HunterMove.rise_vy`: gravity plus 175 m/s^2 while you rise slower than the 2.5 m/s cap), so a jump's momentum carries you over; catch to top 0.28 s (1.6 m) and 0.30 s (2.4 m) from a running jump, 0.18 s from a glide at every height | near the footage's ~0.2 s from a glide, jump-paced from a jump; the per-height curve is [?] in the data |
 | Highest rise from a walk | [game data] stores no MaxStepHeight for the hero (a C++ default) [?]; the 1.5 m bot nav step is the pathing agent, not the walk; bCanWalkOffLedges false only says you don't stroll off. No walk-up in the footage | one terrace (0.8 m) is a ramp (LAYOUT_RULES); 1.6 m and up never climb from a walk (`Hunter._try_ledge_grab`: walking into a wall doesn't climb it, jump and you mantle at the top) | source [?]; ours kept |
-| Highest rise from a jump | [game data] JumpZVelocity 7.5 m/s (apex 1.91 m) plus MantleSuctionUpwardsForceHeightMax 1.5 m: about 3.4 m | `JUMP_V` 6.8 (apex ~1.5 m) plus `MANTLE_REACH` 1.5: 1.6 and 2.4 m top, 3.2 m (four terraces, the wall tier) never; `--cliff-mantle-check` asserts the four-terrace miss | deliberately lower (the jump decision in the Physics pass; LAYOUT_RULES' wall tier) |
+| Highest rise from a jump | [game data] JumpZVelocity 7.5 m/s (apex 1.91 m) plus MantleSuctionUpwardsForceHeightMax 1.5 m: about 3.4 m; the suction only runs over the abyss (IsAbyss), so on terraces the cap is ours | `JUMP_V` 7.5 (apex 1.91 m) plus `MANTLE_REACH` 1.5, capped at three terraces over where you stood (`HunterMove.ledge_reach`, `JUMP_TIERS`; four after a wall kick or for the tall climbers): 1.6 and 2.4 m top, 3.2 m (four terraces, the wall tier) never; `--cliff-mantle-check` asserts the four-terrace miss | jump matched 11-26; the wall-tier cap is LAYOUT_RULES' (decision 0007) |
 | Highest rise from a glide | [game data] the same 1.5 m below the top from any glide height (the 8.5 m hold): faces to ~10 m | any airborne state catches a top within `MANTLE_REACH` 1.5 m; 3.2 m tops from a glide | match |
 | Speed you leave with | [game data] max(0.6x the approach, 3.5 m/s) (MiniMantleXYSpeedTargetCoefficient / Min), held 0.75 s (MiniMantlePostLaunchDuration); how firmly it's held (MiniMantleForwardForceSpeedDeltaMultiplier 8) is a force we don't model [?] | `MantleCarry.exit`: the same floor (`physics.mantle_launch_keep` 0.6, `mantle_launch_min` 3.5), held firm 0.75 s, never above the approach speed or run speed (that cap is ours [?]) | match |
 | Walking off ledges | bCanWalkOffLedges false | always allowed | owner rule, kept |

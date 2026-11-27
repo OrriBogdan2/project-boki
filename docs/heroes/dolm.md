@@ -357,7 +357,7 @@ would also settle the same row on the boulder. Unsettled rows for a follow-up: t
 ## Small mechanics
 | Mechanic | Source | Footage | Ours |
 |---|---|---|---|
-| Punched rocks explode and shred armour (no slow) | card and guide: "explode and shred Armor" (`breah.md`, `sv/briefs/kits.md`); the Landslide rock alone is "160 and SLOWED" | yes (fireballs on the dummy) | built: Shred +15%, no slow; only the Rock Hop's rolling rock slows (1.5s) |
+| Punched rocks explode, shred armour and slow | reference numbers (owner rule 11-27): shred, slow 0.85x for 0.8 s; the Landslide rock "160 and SLOWED" | yes (fireballs on the dummy) | built: Shred +15%, slow 15% for 0.8 s (`rock.slow_k`, `slow_t`); the Rock Hop's rolling rock slows 1.5 s. Not built: the stacked 0.9x/2.5 s slow, the Spine rocks' 0.667x/1 s |
 | Repeat rock explosions on one target within 0.8s deal 30% less | patch 2.00 notes | no | built (`repeat_t`, `repeat_k`) |
 | Mid-air LMB carries momentum, with a penalty (air impulse penalty 15% -> 50%) | patch 2.00 notes | no | built: the punch step in the air is half as long, added to what she carries (MOVEMENT_FEEL.md "Air velocity") |
 | Punch cooldown starts at cast, not on release | patch 2.01 / 2.04 notes | no | built (`fire_cd` set when the punch fires) |
