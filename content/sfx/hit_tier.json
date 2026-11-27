@@ -1,0 +1,9 @@
+{
+ "group": "hit_tier",
+ "name": "Hit-weight confirms",
+ "script": "tools/gen_sfx_hits.py",
+ "sounds": {
+  "hit_light": "impact",
+  "hit_solid": "impact"
+ }
+}
