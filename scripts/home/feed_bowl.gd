@@ -63,8 +63,6 @@ static func drop(h, e: Dictionary) -> bool:
 	for k in h.kins:
 		if Care.need(k["rec"], "food") < Econ.HUNGRY_AT and not k.has("life_eat"):
 			k["t"] = 0.0  # answers now, not after its rest
-			if h.life != null:
-				h.life.hungry_wake(k)  # a day nap or a game of tag is not worth missing the meal for
 	return true
 
 
@@ -114,11 +112,6 @@ static func _my_turn(h, k: Dictionary, e: Dictionary) -> bool:
 
 
 # ------------------------------------------------------------------ BaseFeed's hooks
-## m a Boki with this much food will walk to a bowl: RANGE when it is just hungry, up to 3x that when it is starving.
-static func reach(food: float) -> float:
-	return RANGE * (1.0 + 2.0 * clampf(1.0 - food / Econ.HUNGRY_AT, 0.0, 1.0))
-
-
 ## A hungry Boki near a bowl with a snack to spare for it sets off. True if it did (k["life_eat"] is set).
 static func want(h, k: Dictionary) -> bool:
 	if not h.visit.is_empty():
@@ -126,7 +119,7 @@ static func want(h, k: Dictionary) -> bool:
 	var here: int = h.world.island_of(k["pos"].x, k["pos"].z)
 	var hate := String(k["rec"].get("likes", {}).get("hates", ""))
 	var best := {}
-	var bd := reach(Care.need(k["rec"], "food"))
+	var bd := RANGE
 	for e in bowls(h):
 		var p := at(e)
 		var dd := Vector2(p.x - k["pos"].x, p.z - k["pos"].z).length()

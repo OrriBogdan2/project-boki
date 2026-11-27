@@ -42,7 +42,6 @@ var species := ""
 var clip := ""
 var amp := 1.0
 var d := {}                     # bone -> Vector3(rx, ry, rz)
-var curl := 1.0                 # how much of the napper's curl settle and wake carry (0: they join the baked sleep)
 var move := Vector3.ZERO        # the body's own shift (m)
 var squash := Vector3.ONE       # and its scale
 var _n := 1
@@ -113,7 +112,7 @@ func _settle(u: float) -> void:
 	var bow := sin(PI * u)
 	_nap(0.0)
 	for b in d.keys():
-		d[b] *= w * curl
+		d[b] *= w
 	squash = Vector3.ONE
 	move.y = -0.02 * bow
 	add("spine", -0.14 * bow)
@@ -128,7 +127,7 @@ func _wake(u: float) -> void:
 	var yawn := sin(PI * clampf((u - 0.55) / 0.35, 0.0, 1.0))
 	_nap(0.0)
 	for b in d.keys():
-		d[b] *= k * curl
+		d[b] *= k
 	squash = Vector3.ONE
 	match plan:
 		"quad":

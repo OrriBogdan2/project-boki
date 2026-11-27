@@ -16,6 +16,13 @@ const DEADLINE_S := 150.0  # s of film at most
 const BUILDINGS := [
 	["house", 33, 28, 0], ["crop_patch", 42, 31, 0], ["cook_pot", 36, 35, 0], ["market_stall", 44, 37, 0]
 ]  # id, x, z, turns
+const GAMES := [  # member on Home, its fixture, zone ("" the classic base), shots (s into the game), key held
+	["hvolley", "log_node", "glasswater", [1.0, 5.0], ""],
+	["hfetch", "mat", "", [1.0, 6.0], ""],
+	["hkite", "stand", "ridge", [1.5, 4.0], "right"],
+	["hecho", "middle", "", [2.0, 9.0], ""]
+]
+const GAME_FROM := Vector3(0.0, 0, 1.6)  # m south of a game's fixture: where you stand to start it
 const SPECS := [["cindle", "Ash", 95.0], ["burrlet", "Moss", 60.0], ["zapple", "Pip", 30.0]]  # species, name, trust
 
 var main: Node
