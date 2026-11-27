@@ -839,7 +839,8 @@ var _glide_btn_held := false
 func can_glide() -> bool:
 	return not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed and stun_t <= 0.0 \
 		and m.time - kb_t > 0.4 and not dropping and charge.is_empty() and not KitStatus.grounded(self) and not shot_down \
-		and not (ak != null and ak.no_glide()) and not AirLimits.glide_shut(self)
+		and not (ak != null and ak.no_glide()) and not AirLimits.glide_shut(self) \
+		and not KitStatus.silenced(self)
 
 ## Item 4: a fresh glide press at any moment of an air Shift dash ends the dash that frame (no minimum time) and
 ## the glide takes over at the dash's own velocity, no reset, no snap: Loco.glide_step's drag and this hunter's
@@ -1471,6 +1472,7 @@ func sim(dt: float) -> void:
 	AirLimits.gate_drop(self)        # the opening drop: steering only (item 162)
 	KinDowned.commit(self)           # carrying your Boki: Shift or interact puts it down; no jump, glide or firing
 	if ak: ak.gate_inputs()          # a kit's lock-out (Cinder's Flue Flight: only E)
+	if KitStatus.silenced(self): KitStatus.gate_silenced(self)  # Silenced: abilities, gear, belt and base are shut
 	# gloves need no point: Gloves
 	gate_ranks()
 	BaseRecall.tick(self, dt)

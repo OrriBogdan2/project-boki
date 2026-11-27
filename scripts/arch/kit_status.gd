@@ -3,6 +3,8 @@ extends RefCounted
 ## Statuses the archetype kits put on a body that a plain hit can't carry over the network (kits2):
 ##   gnd  Grounded (the Thief's Bola, Sparkle's Skycall): no dash, jump or glide; cords round the legs (StatusLooks),
 ##        in the caster's colour when `by` names one, else amber
+##   sil  Silenced (a reeling hook, Silence effects): no ability, glider, base recall or belt use; attack, dash and the
+##        quick jump stay free (reference tuning); a revive guard or granted immunity keeps it off, a cleanse ends it
 ##   blt  Blight (the Juggernaut's Warchain, Sable's Encore rim): healing on the body is cut
 ##   vul  Shred (the Thief's Primed shot): the body takes `k` more damage
 ##   rat  Dazed (Vex's Burr Charge; "Rattled" in code): her rifle and Longneedle hit harder (no slow: the
@@ -16,7 +18,9 @@ extends RefCounted
 ## tag kinds from 0.24.5), every game shows it. A tag with k = 0 ends it (Chill spent by a Shatter).
 
 const GROUND_COL := Color("e0a03a")
+const SILENCE_COL := Color("b48cff")
 const RATTLE_COL := Color("ffb36a")
+const SILENCED_KEYS := ["sig", "sec", "ult", "skill", "gear1", "gear2", "util1", "util2", "util3", "util4", "util5", "util6"]
 const TAG_COL := {"ign": Color("ff8a2a"), "chl": Color("9fe0ff"), "sta": Color("ff7fd0"), "mrk": Color("ffd24a")}
 const TAG_TOP := 2.9  # m above the feet where the stack pips ring the body
 
@@ -55,6 +59,38 @@ static func grounded(e: Ent) -> bool:
 	)
 
 
+static func silenced(e: Ent) -> bool:
+	return (
+		e != null
+		and is_instance_valid(e)
+		and e.has_meta("sil_until")
+		and e.m != null
+		and float(e.m.time) < float(e.get_meta("sil_until"))
+	)
+
+
+static func silenced_left(e: Ent) -> float:
+	return maxf(0.0, float(e.get_meta("sil_until")) - float(e.m.time)) if silenced(e) else 0.0
+
+
+## Silenced: the presses for abilities (E, RMB, ultimate), gear, belt items and the base recall are dropped with the
+## deny cue; attack, dash, jump and the Boki commands stay (reference tuning). Run each step from Hunter.
+static func gate_silenced(h: Hunter) -> void:
+	for key in SILENCED_KEYS:
+		if h.inp.get(key, false):
+			h.inp[key] = false
+			h._ab_feedback(key, "deny")
+	if h.base_t > 0.0:
+		BaseRecall.cancel(h, "silenced")
+
+
+## A cleanse or a granted immunity ends the kit statuses that are crowd control (Grounded, Silenced).
+static func clear_cc(e: Ent) -> void:
+	for key in ["gnd_until", "sil_until"]:
+		if e.has_meta(key):
+			e.set_meta(key, 0.0)
+
+
 static func grounded_left(e: Ent) -> float:
 	return maxf(0.0, float(e.get_meta("gnd_until")) - float(e.m.time)) if grounded(e) else 0.0
 
@@ -67,6 +103,8 @@ static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true, toa
 		return
 	if secs <= 0.0 and not (kind in TAG_COL and k == 0.0):
 		return
+	if kind == "sil" and e.cc_guard_t > 0.0:
+		return  # a revive guard or granted immunity: no silence lands
 	var m: Node = e.m
 	if m == null:
 		return
@@ -82,6 +120,11 @@ static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true, toa
 		_tag(e, kind, secs, int(k), by)
 		return
 	match kind:
+		"sil":
+			var was_s := silenced(e)
+			e.set_meta("sil_until", maxf(float(e.get_meta("sil_until", 0.0)), float(m.time) + secs))
+			if not was_s:
+				_show(e, kind, secs)
 		"gnd":
 			var was := grounded(e)
 			e.set_meta("gnd_until", maxf(float(e.get_meta("gnd_until", 0.0)), float(m.time) + secs))
@@ -104,8 +147,7 @@ static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true, toa
 		"dsr":
 			var was_d := e.has_meta("dsr_until") and float(m.time) < float(e.get_meta("dsr_until"))
 			e.set_meta("dsr_until", maxf(float(e.get_meta("dsr_until", 0.0)), float(m.time) + secs))
-			e.slow_k = maxf(e.slow_k if e.slow_t > 0.0 else 0.0, k if k > 0.0 else 0.4)
-			e.slow_t = maxf(e.slow_t, secs)
+			e.add_slow(secs, k if k > 0.0 else 0.4)
 			if not was_d:
 				_show(e, kind, secs)
 				if secs >= CcSfx.MIN_SLOW_S:
@@ -118,7 +160,7 @@ static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true, toa
 
 ## A remote body's own game runs the rule, so here only the time left is kept, for the plate's timer.
 static func _note_remote(e: Ent, kind: String, secs: float) -> void:
-	if kind == "gnd" or kind == "rat":
+	if kind == "gnd" or kind == "rat" or kind == "sil":
 		var key := kind + "_until"
 		e.set_meta(key, maxf(float(e.get_meta(key, 0.0)), float(e.m.time) + secs))
 		if kind == "rat":
@@ -139,6 +181,9 @@ static func _show(e: Ent, kind: String, secs: float, toast := "") -> void:
 			_look(e, "gnd", secs)
 			if e == m.get("player") and m.hud and toast != "":
 				m.hud.toast_small("GROUNDED  ·  " + toast, GROUND_COL)
+		"sil":
+			if e == m.get("player") and m.hud:
+				m.hud.toast_small("SILENCED  ·  no abilities, glider or belt", SILENCE_COL)
 		"rat":
 			_look(e, "daze", secs)
 		"dsr":

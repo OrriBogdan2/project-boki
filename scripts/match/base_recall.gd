@@ -62,6 +62,7 @@ static func start(h: Hunter, to: Hunter) -> void:
 		or h.out
 		or h.dropping
 		or h.riding
+		or KitStatus.silenced(h)
 		or not h.grounded
 		or h.base_t > 0.0
 		or not can_take(h, to)
