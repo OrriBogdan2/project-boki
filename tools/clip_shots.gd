@@ -29,6 +29,9 @@ const STATE_VIEWS := {
 	"match": [8.0, Vector3(0.0, 21.0, 9.4), Vector3(0.0, 0.8, 0.0)],
 	"eye": [30.0, Vector3(0.0, 1.6, 5.6), Vector3(0.0, 0.95, 0.0)],
 	"knee": [30.0, Vector3(0.0, 0.45, 5.6), Vector3(0.0, 0.95, 0.0)],
+	"body": [30.0, Vector3(0.0, 1.35, 3.2), Vector3(0.0, 1.2, 0.0)],
+	"chest": [18.0, Vector3(0.0, 1.3, 2.6), Vector3(0.0, 1.28, 0.0)],
+	"face": [10.0, Vector3(0.0, 1.52, 2.6), Vector3(0.0, 1.5, 0.0)],
 }
 var ground_col := Color("4f7a3e")
 var holder: Node3D
@@ -226,7 +229,10 @@ func _states(model: Node3D, fps: float, out: String, sub := "states") -> void:
 	if clips:
 		kmove = String((clips.d.get("kmoves", {}) as Dictionary).keys().front())
 	var i := 0
+	var idle_only := OS.get_cmdline_user_args().has("--idle-only")     # one idle frame set (a turn-around of stills)
 	for st in STATE_SHOTS:
+		if idle_only and st[0] != "idle":
+			continue
 		var s: Dictionary = (st[1] as Dictionary).duplicate()
 		s["face"] = model.rotation.y
 		s["cast"] = 99.0  # no recent cast: a native swing needs the counters
@@ -239,7 +245,8 @@ func _states(model: Node3D, fps: float, out: String, sub := "states") -> void:
 			poser.call("_process", 1.0 / fps)
 			await _grab(dir.path_join("f%03d.png" % i))
 			i += 1
-	i = await _native_moves(model, poser, fps, dir, i)
+	if not idle_only:
+		i = await _native_moves(model, poser, fps, dir, i)
 	print("STATES ", ", ".join(STATE_SHOTS.map(func(st): return "%s %.1fs" % [st[0], st[2]])))
 
 
