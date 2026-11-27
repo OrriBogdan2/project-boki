@@ -7,15 +7,15 @@ extends "res://tools/hunter_scale_shots.gd"
 ## ability row as % of the screen) and REFMEAN (the mean and range of the heights). --stills also saves
 ## <dir>/<tag>_<hero>.png for the four STILLS heroes: the hero with a squad mate on its left and a Grimble rival on its
 ## right (both idle), HUD on, so the own, ally and rival plates read side by side. --wide (with --stills and
-## --hero=gunslinger) saves <dir>/<tag>_wide.png instead: WIDE_HERO mid-row with three mates and three rivals out to
-## +-14 m, to show how much ground the start notch frames. Needs a renderer (xvfb or jobq gpu).
+## --hero=gunslinger) saves <dir>/<tag>_wide.png instead: WIDE_HERO with two mates on its left and four rivals on its
+## right out to 13 m, to show how much ground the start notch frames. Needs a renderer (xvfb or jobq gpu).
 
 const STILLS := ["juggernaut", "gunslinger", "ostra", "rimewright"]  # Kael, Vex, Motley, Neve
 const RIVAL := "dredge"  # Grimble: the tallest plate to clear
 const SIDE_M := 3.2  # m either side of the hero the still's mate and rival stand
-const WIDE_HERO := "gunslinger"  # --wide: this hero stands mid-row between three squad mates and three rivals
+const WIDE_HERO := "gunslinger"  # --wide: this hero stands between two squad mates (left) and four rivals (right)
 const WIDE_ROW := [
-	[-14.0, "juggernaut"], [-8.5, "ostra"], [-4.0, "mage"], [4.0, "dredge"], [8.5, "thief"], [14.0, "rimewright"]
+	[-7.0, "juggernaut"], [-3.5, "ostra"], [3.5, "dredge"], [6.8, "thief"], [10.1, "rimewright"], [13.4, "mage"]
 ]
 
 
@@ -71,11 +71,11 @@ func run(main_node: Node) -> void:
 	main.get_tree().quit(0)
 
 
-## WIDE_ROW's hunters: the first three on the hero's squad, the rest rivals, all idle, spread over the row.
+## WIDE_ROW's hunters: the ones left of the hero on its squad, the ones right of it rivals, all idle.
 func _wide_row(at: Vector3) -> Array:
 	var out: Array = []
 	for i in WIDE_ROW.size():
-		var team := (m.player.team + (0 if i < 3 else 1)) % 2
+		var team := (m.player.team + (0 if WIDE_ROW[i][0] < 0.0 else 1)) % 2
 		var spot := at + Vector3(WIDE_ROW[i][0], 0.0, 0.6 if i % 2 == 0 else -0.6)
 		out.append(_idle("ref_w%d" % i, team, WIDE_ROW[i][1], spot))
 	return out
