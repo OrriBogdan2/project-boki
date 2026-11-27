@@ -329,7 +329,11 @@ static func cg_slots(h_v, p: Hunter, x: float, y: float, s: float) -> float:
 		mode = ("CARRY ON" if p.kin_carry_on() else "CARRY OFF") + " - " + mode
 		centre = (cr.get_center().x + centre) * 0.5
 	var tint := Color(k.sp["color"]).lerp(Color.WHITE, LABEL_LIGHT)
-	var col := DOWN_COL if down else (Color(h_v.INK, 0.6) if in_form else tint)
+	var col := tint
+	if down:
+		col = DOWN_COL
+	elif in_form:
+		col = Color(h_v.INK, 0.6)
 	h_v._ctext(Vector2(centre, gr.position.y - LABEL_GAP), mode, LABEL_PX, col, h_v.big)
 	if KinWheel.is_open(p):
 		wheel(h_v, p)

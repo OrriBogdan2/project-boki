@@ -40,7 +40,7 @@ const STOPS := ["status_stunned", "status_rooted", "status_grounded"]  # what st
 const RING_KEY := 0.04  # a status ring repaints its plate in steps this big (of its 0..1)
 const MARK_FOR := {"mark_daze": "status_dazed", "fireball": "status_burning"}
 const PLATE_OFFSET := 2.35  # m over the feet where a plate sits unless the archetype sets its own
-const CLEAR_M := 0.85  # m: anchor over the model's top: the frame's 25 px (1080p) hang + ~11 px of air (~44 px per m up)
+const CLEAR_M := 0.85  # m: anchor over the model's top: the frame's 25 px (1080p) hang + ~11 px air (~44 px/m up)
 
 ## nid -> {chip, hold, frac, armor, flash, brk, down, burst, seen, tot (the status row's ring clocks)}
 var st := {}
