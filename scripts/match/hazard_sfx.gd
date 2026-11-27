@@ -40,14 +40,14 @@ static func _reach(sname: String) -> float:
 # ------------------------------------------------------------------ beds
 ## Every frame: re-find the nearest beds every bed_scan_s, and hold the ones that sound.
 func tick(dt: float) -> void:
-	var rules := play_rules()
+	var rl := play_rules()
 	scan_t -= dt
 	if scan_t <= 0.0:
-		scan_t = float(rules["bed_scan_s"])
+		scan_t = float(rl["bed_scan_s"])
 		scan(Sfx.listener)
 	for ai in beds:
-		var bed := String(rules["kinds"][tz.areas[ai]["kind"]]["bed"])
-		Sfx.loop_hold("hazard_bed%d" % ai, bed, beds[ai], float(rules["bed_db"]))
+		var bed := String(rl["kinds"][tz.areas[ai]["kind"]]["bed"])
+		Sfx.loop_hold("hazard_bed%d" % ai, bed, beds[ai], float(rl["bed_db"]))
 
 
 ## The beds that sound around p: each area's ground nearest p, if its bed carries that far; the nearest
@@ -124,5 +124,5 @@ func ward(h: Hunter, kind: String) -> void:
 
 
 func _cue(h: Hunter, sname: String) -> void:
-	var rules := play_rules()
-	Sfx.play(sname, h.pos, float(rules["contact_db"]) + (0.0 if h == tz.m.player else float(rules["others_db"])))
+	var rl := play_rules()
+	Sfx.play(sname, h.pos, float(rl["contact_db"]) + (0.0 if h == tz.m.player else float(rl["others_db"])))
