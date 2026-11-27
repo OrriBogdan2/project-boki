@@ -16,6 +16,8 @@ const CHECKS := {
 	# GPU: posed hunter clip frames, --geo-dir= --shots-dir=
 	"--geo-shots": ["res://tools/geo_shots.gd", "geo_shots", null],
 	"--empty-3d-shots": ["res://tools/empty_3d_shots.gd", "empty_3d_shots", null],  # GPU: the Empty's 3D models
+	# every Hunter faces its aim (skeleton forward vs aim, 4 aims); --shots-dir= adds front-view shots
+	"--facing-check": ["res://tools/facing_check.gd", "facing_check", null],
 	"--native-upper-shots": ["res://tools/native_upper_shots.gd", "native_upper_shots", null],
 	"--warden-native-check": ["res://tools/warden_native_check.gd", "warden_native_check", null],  # Meshy skeleton
 	"--native-springs-shots": ["res://tools/native_springs_shots.gd", "native_springs_shots", null],
