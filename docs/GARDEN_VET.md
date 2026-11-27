@@ -8,5 +8,5 @@ the starve clock) and the Boki perks up (`KinAiling.perk_up`).
 
 - The booth is a hub fixture (`HubLayout.DECO`). A hub saved before it existed gets it the next time the hub opens
   (`HubLayout._add_missing`); no save format changed, it is one more deco entry.
-- Opening it needs `VetBooth.find` / `label` / `open` routed from `home.gd` (three lines, see the PR).
+- Opening it: `HomeEcon.find` offers the booth as a `"feeder"` entry carrying `"vet"` (a route `home.gd` already sends to `HomeEcon.label` / `use`), so `home.gd` is unchanged.
 - Render: `--vet-booth-shots --shots-dir=<dir>` (GPU).

@@ -16,6 +16,8 @@ static func rules() -> Dictionary:
 
 ## The booth's deco entry on this island, or {}.
 static func entry(h) -> Dictionary:
+	if h.hb == null:
+		return {}
 	for e in h.hb.L()["deco"]:
 		if String(e["id"]) == ID:
 			return e
@@ -28,7 +30,8 @@ static func find(h, p2: Vector2) -> Dictionary:
 	if e.is_empty():
 		return {}
 	var c := HomeLayout.deco_center(e)
-	return {"kind": "vet", "e": e} if p2.distance_to(Vector2(c.x, c.z)) < REACH else {}
+	var d := p2.distance_to(Vector2(c.x, c.z))
+	return {"kind": "vet", "e": e, "d": d} if d < REACH else {}
 
 
 static func label() -> String:

@@ -94,7 +94,11 @@ func _on_the_island() -> void:
 	var mid := HomeLayout.deco_center(e)
 	ok(VetBooth.find(home, Vector2(mid.x, mid.z))["kind"] == "vet", "within reach it offers the check-up")
 	ok(VetBooth.find(home, Vector2(mid.x + VetBooth.REACH + 0.5, mid.z)).is_empty(), "out of reach it does not")
-	VetBooth.open(home)
+	home.ppos = Vector3(mid.x, 0, mid.z + 1.0)  # walk up to it: home.gd's own interact scan and prompt
+	home._find_interact()
+	ok(home.interact.has("vet"), "walking up, the island's interact scan picks the booth (via HomeEcon)")
+	ok(home._label_for(home.interact) == VetBooth.label(), "the prompt reads: %s" % home._label_for(home.interact))
+	home._use(home.interact)
 	var buttons: Array = home.panel_host.find_children("*", "Button", true, false)
 	var cure_btn: Button = null
 	for b in buttons:
