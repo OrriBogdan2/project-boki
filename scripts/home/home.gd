@@ -1138,9 +1138,13 @@ func _apply_cam_settings() -> void:
 	cam.apply_settings()
 	cam.dist_mul = CamRig.style_across(HOME_ACROSS_REF) / CamRig.style_across(cam.style_id)
 	if player and is_instance_valid(player):
-		# drawn at its match size (Hunter.drawn_k); a hero swap's pop rides on top, so it can't get stuck stretched
+		# drawn at its match size: the scale Models built it at x Hunter.drawn_k, as a match draws it; a hero swap's
+		# pop rides on top, so it can't get stuck stretched
+		if not player.has_meta("built_scale"):
+			player.set_meta("built_scale", player.scale)
 		var k := Hunter.drawn_k(Arch.of_save()) * cam.hunter_scale
-		player.scale = (player.get_meta("pop", Vector3.ONE) as Vector3) * k
+		var built: Vector3 = player.get_meta("built_scale")
+		player.scale = (player.get_meta("pop", Vector3.ONE) as Vector3) * built * k
 
 ## Trees between the camera and you (or your active Boki) thin out, as in a match (SeeThrough).
 func _see_through() -> void:
