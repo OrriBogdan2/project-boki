@@ -35,9 +35,11 @@ func run(main_node: Node) -> void:
 			seed_v = int(String(a).substr(7))
 		if String(a).begins_with("--arch="):
 			arch = String(a).substr(7)
+		if String(a) == "--ring-shadow=off":
+			prefix += "noringsh_"
 		if String(a) == "--cues=off":
 			Settings.set_v("depth_cues", false, false)
-			prefix = "before_"
+			prefix += "before_"
 	DirAccess.make_dir_recursive_absolute(dir)
 	if "--compat" in OS.get_cmdline_user_args() and Look.full_renderer():
 		_run_compat_child()
@@ -45,6 +47,10 @@ func run(main_node: Node) -> void:
 		return
 	await _setup()
 	var w := m.world
+	if "--census" in OS.get_cmdline_user_args():
+		await _census()
+		main.get_tree().quit(0)
+		return
 	if "--air" in OS.get_cmdline_user_args():
 		await _air_shots()
 		main.get_tree().quit(0)
@@ -126,6 +132,55 @@ func _air_shots() -> void:
 	print("AIRSHOTS %s grounded=%s height=%.2f" % [arch, P.grounded, up])
 
 
+## --census: every drawn mesh low under each Hunter (standing, then mid-jump), to find what lies at the feet.
+func _census() -> void:
+	var w := m.world
+	var tile: Vector2i = _find(func(_x, _z, _d): return true)[0]
+	P.teleport(Vector3(tile.x + 0.5, w.ground_at(tile.x + 0.5, tile.y + 0.5), tile.y + 0.5))
+	await _settle()
+	_census_at("stand")
+	P.do_jump()
+	await _settle(JUMP_WAIT)
+	_census_at("jump")
+
+
+func _census_at(tag: String) -> void:
+	for h: Hunter in m.hunters:
+		var g := w_ground(h)
+		for gi in main.find_children("*", "GeometryInstance3D", true, false):
+			var n := gi as GeometryInstance3D
+			if not n.is_visible_in_tree():
+				continue
+			var box := n.global_transform * n.get_aabb()
+			var c := box.get_center()
+			if Vector2(c.x - h.global_position.x, c.z - h.global_position.z).length() > 1.6:
+				continue
+			if box.position.y > h.global_position.y + 0.35 or box.end.y < g - 0.3:
+				continue
+			var mat: Variant = n.material_override
+			var mi := n as MeshInstance3D
+			if mat == null and mi and mi.mesh and mi.mesh.get_surface_count() > 0:
+				mat = mi.get_active_material(0)
+			var where: NodePath = h.get_path_to(n) if h.is_ancestor_of(n) else n.get_path()
+			var mesh_cls: String = mi.mesh.get_class() if mi and mi.mesh else "-"
+			var mdesc := "-"
+			if mat is ShaderMaterial and (mat as ShaderMaterial).shader:
+				mdesc = (mat as ShaderMaterial).shader.resource_path
+			elif mat is StandardMaterial3D:
+				var sm := mat as StandardMaterial3D
+				mdesc = "std alb=%s tex=%s tr=%d" % [sm.albedo_color, sm.albedo_texture != null, sm.transparency]
+			elif mat != null:
+				mdesc = mat.get_class()
+			var fmt := "CENSUS %s %s %s %s mesh=%s size=%s y=%.2f..%.2f gnd=%.2f body=%.2f shadow=%d mat=%s"
+			var who := h.arch + ":" + h.pname
+			var box_y := [box.size, box.position.y, box.end.y, g, h.global_position.y]
+			print(fmt % ([tag, who, n.get_class(), where, mesh_cls] + box_y + [n.cast_shadow, mdesc]))
+
+
+func w_ground(h: Hunter) -> float:
+	return m.world.ground_at(h.global_position.x, h.global_position.z)
+
+
 func _settle(secs := SETTLE) -> void:
 	var t := 0.0
 	while t < secs:
@@ -152,6 +207,10 @@ func _setup() -> void:
 		mb.queue_free()
 	m.mobs.clear()
 	for h in m.hunters:
+		if "--ring-shadow=off" in OS.get_cmdline_user_args():
+			var r := h.model.get_node_or_null("TeamRing") as GeometryInstance3D
+			if r:
+				r.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		h.ctrl = "idle"
 		h.inp["move"] = Vector2.ZERO
 	var fade = main.get("fade")
