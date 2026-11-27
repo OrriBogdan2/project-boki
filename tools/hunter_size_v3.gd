@@ -1,5 +1,5 @@
 extends "res://tools/hunter_size_sheet.gd"
-## --hunter-size-v3 --shots-dir=<dir> --k-file=<json {"<arch>": k}> [--hero=a,b] [--verify]: each hunter alone on open
+## --hunter-size-v3 --shots-dir=<dir> --k-file=res://<json {"<arch>": k}> [--hero=a,b] [--verify]: each hunter alone on open
 ## floor at the game camera in a 3840x2160 frame, drawn at k 1 (live, <hero>_v3live.png) and at its k from the file
 ## (<hero>_v3new.png). One HFRM row per frame (crown height on screen, px per m, feet px). --verify reads the new-k
 ## body silhouette (HSIL lean rows, 8 facings) so the target on-screen height can be checked.
@@ -12,7 +12,7 @@ const V3_ZOOM := 1.4572
 func run(main_node: Node) -> void:
 	main = main_node
 	var heroes: Array = Arch.ids()
-	var ks := {}
+	var ks: Dictionary = {}
 	var verify := false
 	for a in OS.get_cmdline_user_args():
 		if String(a) == "--verify":
@@ -22,7 +22,13 @@ func run(main_node: Node) -> void:
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
 		if String(a).begins_with("--k-file="):
-			ks = JSON.parse_string(FileAccess.get_file_as_string(String(a).substr(9)))
+			var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(String(a).substr(9)))
+			if parsed is Dictionary:
+				ks = parsed
+	if ks.is_empty():
+		print("HFRM no k file read")
+		main.get_tree().quit(1)
+		return
 	main.get_window().size = V3_FRAME
 	DirAccess.make_dir_recursive_absolute(dir)
 	Save.no_write = true
