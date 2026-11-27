@@ -19,6 +19,7 @@ const KEYS := [      # the action inputs
 		"fire", "glide", "interact", "crouch", "sec", "sec_hold", "sig", "jump", "dash", "throw", "gear1", "ult"]
 
 static var _retreat := false   # a wall kick step bot that got up without a kick, walking off to retry
+static var _runup := false     # a crouch step bot stuck at the lookout's foot, walking off to kick up its sheer rim
 static var human := false
 static var reading_t := 0.0      # s of reading and reacting still to go before the next input
 static var idle := false         # this frame the player did nothing (no stick, no key, no Boki command)
@@ -101,7 +102,16 @@ static func drive(m: Match) -> void:
 				goto.call(tu.stop("crouch"), 0.4)
 			_kick_up(m, tu.stop("crouch").y)
 		"crouch":
-			goto.call(dest, 0.4)
+			var runup := dest - Vector3(LOOKOUT_OFF, 0.0, 0.0)
+			if p.grounded and p.pos.y < dest.y - 1.0 and still_t > 0.75:
+				_runup = true      # (below the sheer rim and stuck at its foot: back off and kick up it)
+			if _runup and p.flat_dist(runup) < 1.0:
+				_runup = false
+			if _runup:
+				goto.call(runup)
+			else:
+				goto.call(dest, 0.4)
+			_kick_up(m, dest.y)
 			p.inp["crouch"] = Vector2(dest.x - p.pos.x, dest.z - p.pos.z).length() < 1.2
 		"glove":
 			var wp := tu.ground_item()
