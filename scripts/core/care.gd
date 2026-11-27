@@ -228,6 +228,7 @@ static func ensure(rec: Dictionary) -> void:
 	for old in ["pet_m", "played", "fed_m", "trained_m", "talked"]:
 		rec.erase(old)  # the old once-per-expedition care stamps (now care_day)
 	give_habit(rec)
+	BaseAxes.ensure(rec)  # the lean its care has raised (BaseLife reads it)
 
 
 ## base_mode's floors (care.json sulky): needs bottom out at sulky, never sick (GARDEN.md 2); {} off base_mode.
@@ -429,6 +430,7 @@ static func care_day(rec: Dictionary, kind: String) -> bool:
 	if now - float(days.get(kind, 0.0)) < float(Content.rules("care")["care_day_s"]):
 		return false
 	days[kind] = now
+	BaseAxes.care(rec, kind)
 	return true
 
 
