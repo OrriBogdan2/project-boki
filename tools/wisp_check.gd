@@ -463,7 +463,8 @@ func _boki_wisps() -> void:
 	ok(k.model.name == "BokiWisp", "...drawing it keeps its model (the downed-form render took it for its own node)")
 	var flat := Vector2(k.global_position.x - p.position.x, k.global_position.z - p.position.z).length()
 	var high := k.global_position.y - p.position.y
-	var orbit: bool = absf(flat - KinWisp.ORBIT_R) < 0.05 and high > 1.0 and high < 2.0
+	# (the hunter is drawn match_hunter_scale larger now, so its shoulder bone, and the wisp over it, rides that much higher)
+	var orbit: bool = absf(flat - KinWisp.ORBIT_R) < 0.05 and high > 1.0 and high < 2.0 * CamRig.match_hunter_scale
 	ok(orbit, "...orbiting at shoulder height (%.2f m out, %.2f m up)" % [flat, high])
 	var other: Kin = owned.filter(func(x: Kin): return x != k)[0]
 	var snap := KinNet.kin_extra(k)
