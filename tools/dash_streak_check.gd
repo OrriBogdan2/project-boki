@@ -93,6 +93,11 @@ func _case(main: Node, m: Match, hero: String, ev: String, n: int) -> void:
 		all_laid = all_laid and r["peak"] > 0 and r["tinted"]
 		peaks.append(r["peak"])
 	var tag := "%s/%s" % [hero, ev]
+	if hero == "gil" and ev != "air dash":
+		# the swim lays no ribbon (it showed as a teal box at his waist); his air dash still does
+		ok(not all_laid and st.get_child_count() == made, "gil/dash: a streak piece was laid over the swim")
+		print("DASHSTREAK gil/dash swim lays none (%s): %s" % [ev, not all_laid])
+		return
 	print("DASHSTREAK %-10s %-12s ran %s, peak pieces %s, left %d" % [hero, ev, all_ran, peaks, st.live])
 	ok(all_ran, "%s: the dash never ran" % tag)
 	ok(all_laid, "%s: no streak piece in %s while it ran" % [tag, want.to_html(false)])
