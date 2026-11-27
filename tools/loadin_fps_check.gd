@@ -5,10 +5,13 @@ extends Node
 ## gone, with the engine's own monitors (draw calls, objects, nodes, physics, memory), and judges the
 ## frames after the screen: none may run under MIN_FPS and the average must reach AVG_FPS.
 ##   godot -- --loadin-fps-check [--loadin-out=report.txt] [--loadin-csv=frames.csv] [--loadin-seed=4101]
-##   [--loadin-res=1920x1080] [--loadin-secs=30] [--loadin-split]
+##   [--loadin-res=1920x1080] [--loadin-secs=30] [--loadin-split] [--loadin-inv]
 ## --loadin-split (a probe, not judged): after the screen the check calls Match._process and every other script
 ## _process itself and times each by file, and times the draw from the renderer's pre/post-draw signals, so the
-## report names where a frame's main-thread time goes.
+## report names where a frame's main-thread time goes. --loadin-inv adds the planning map's scene inventory (one slow
+## frame of its own, so not in a run whose frame times matter).
+## Judged everywhere, headless too: the 3D is off while the planning map covers the screen (MapCover; a couple of
+## frames' grace while its still is copied) and on again once the ship has set off.
 ## Frame times swing with the box, so like --hitch-check it is "advisory" off a GPU host
 ## (docs/CHECKS_TIMING.md) and strict with --timing-strict. Headless draws nothing: only the frame
 ## count and node growth per frame are judged (the spawn burst limit).
@@ -18,6 +21,7 @@ const AVG_FPS := 60.0  # the average over the look window
 const BURST_NODES := 400  # nodes one frame may add after the loading screen (headless-safe spawn limit)
 const SOFTWARE_RES := Vector2i(640, 360)
 const FightScene := preload("res://tools/perf/fight_scene.gd")
+const COVER_GRACE := 4  # frames the 3D may still draw under the planning map (its still is on its way off the GPU)
 const MAP_OBJECTS := 20000  # (--loadin-split) objects in a frame that mean the planning map is open: inventory it once
 
 var out_path := ""
@@ -47,6 +51,9 @@ var split_m: Match
 var t_pre := 0
 var t_post := 0
 var inventoried := false
+var inv := false  # --loadin-inv
+var cover_late := 0  # frames the planning map covered the screen with the 3D still drawn
+var cover_stuck := 0  # frames after the planning with the 3D off
 var draws_seen: Array = []  # (--loadin-split) the last few [pre, post] draw clocks, matched to the renderer's stamps
 var stamp_frame := -1
 var stamp_ph := "plan"  # the phase the stamps are added to
@@ -84,6 +91,9 @@ func _ready() -> void:
 			res = Vector2i(int(p[0]), int(p[1]))
 		elif a == "--loadin-split":
 			split = true
+		elif a == "--loadin-inv":
+			split = true
+			inv = true
 	headless = DisplayServer.get_name() == "headless"
 	var adapter := RenderingServer.get_video_adapter_name().to_lower()
 	var soft := ["llvmpipe", "softpipe", "swiftshader", "swrast"]
@@ -132,6 +142,8 @@ func _process(_delta: float) -> void:
 			_take_process(get_tree().root)
 	elif split and split_m != null and is_instance_valid(split_m):
 		_split_frame(wall, now)
+	if shown_us > 0 and cur is Match:
+		_judge_cover(cur as Match)
 	var steps := 0
 	if shown_us > 0 and cur is Match:
 		if last_time >= 0.0:
@@ -266,23 +278,30 @@ func _finish() -> void:
 	var sf := "LOADIN boot-sole reads after the screen: %d in %d frames (limit %d: a squad of 3 every %d frames)"
 	lines.append(sf % [sole_reads, w.size(), sole_limit, SkyDeck.SOLE_EVERY])
 	var fails := 0
+	var cf := "LOADIN planning map over the 3D: %d frames drawn under it (limit %d), %d frames dark after it (limit 0)"
+	lines.append(cf % [cover_late, COVER_GRACE, cover_stuck])
+	if cover_late > COVER_GRACE or cover_stuck > 0:
+		fails += 1
+		lines.append("LOADIN FAIL the 3D under the planning map")
 	if sole_reads > sole_limit:
 		fails += 1
 		lines.append("LOADIN FAIL %d boot-sole reads (limit %d)" % [sole_reads, sole_limit])
 	if burst > BURST_NODES:
 		fails += 1
 		lines.append("LOADIN FAIL %d nodes in one frame" % burst)
+	var timed: Array = []
 	if not headless:
 		if slow > 0:
-			fails += 1
-			lines.append("LOADIN FAIL %d frames under %.0f fps" % [slow, MIN_FPS])
+			timed.append("LOADIN FAIL %d frames under %.0f fps" % [slow, MIN_FPS])
 		if avg_fps < AVG_FPS:
-			fails += 1
-			lines.append("LOADIN FAIL average %.1f fps under %.0f" % [avg_fps, AVG_FPS])
+			timed.append("LOADIN FAIL average %.1f fps under %.0f" % [avg_fps, AVG_FPS])
+	if advisory:
+		timed = timed.map(func(t: String) -> String: return t.replace(" FAIL", " ADVISORY"))
+	else:
+		fails += timed.size()
+	lines.append_array(timed)
 	lines.append("LOADIN %s" % ("PASS" if fails == 0 else "FAIL (%d)" % fails))
 	var txt := "\n".join(lines)
-	if advisory and fails > 0:
-		txt = txt.replace(" FAIL", " ADVISORY")
 	print(txt)
 	if out_path != "":
 		var fa := FileAccess.open(out_path, FileAccess.WRITE)
@@ -291,10 +310,12 @@ func _finish() -> void:
 	if csv_path != "":
 		var fc := FileAccess.open(csv_path, FileAccess.WRITE)
 		if fc:
-			fc.store_line("ms,loading,draws,objects,nodes,phys_ms,proc_ms,mem_mb,vram_mb,sim_steps,cpu_ms,marks,rcpu,setup,gpu")
+			fc.store_line(
+				"ms,loading,draws,objects,nodes,phys_ms,proc_ms,mem_mb,vram_mb,sim_steps,cpu_ms,marks,rcpu,setup,gpu"
+			)
 			for f in frames:
 				fc.store_line("%.2f,%d,%d,%d,%d,%.2f,%.2f,%.0f,%.0f,%d,%.2f,%s,%.2f,%.2f,%.2f" % f)
-	get_tree().quit(0 if fails == 0 or advisory else 1)
+	get_tree().quit(0 if fails == 0 else 1)
 
 
 ## (--loadin-split) Every node but this one and Match running a script _process: the engine stops calling it and
@@ -326,7 +347,14 @@ func _split_frame(wall: float, now: int) -> void:
 		ph = "plan-map"
 	split_n[ph] = int(split_n.get(ph, 0)) + 1
 	stamp_ph = ph
-	if not inventoried and not headless and ph.begins_with("plan") and frames.size() > 0 and int(frames[-1][3]) > MAP_OBJECTS:
+	if (
+		inv
+		and not inventoried
+		and not headless
+		and ph.begins_with("plan")
+		and frames.size() > 0
+		and int(frames[-1][3]) > MAP_OBJECTS
+	):
 		inventoried = true
 		_inventory()
 	_add(ph, "draw", draw)
@@ -386,12 +414,14 @@ func _on_post_draw() -> void:
 func _inventory() -> void:
 	FightScene.new().report(get_tree().root, split_m, get_viewport(), "loadin plan-map")
 	var cam := get_viewport().get_camera_3d()
+	if cam == null:
+		return
 	var by := {}
 	var cast := {}
 	var n := 0
 	for g in get_tree().root.find_children("*", "GeometryInstance3D", true, false):
 		var gi := g as GeometryInstance3D
-		if not gi.is_visible_in_tree() or cam == null:
+		if not gi.is_visible_in_tree():
 			continue
 		var box := gi.global_transform * gi.get_aabb()
 		if not cam.is_position_in_frustum(box.get_center()):
@@ -401,6 +431,16 @@ func _inventory() -> void:
 		by[k] = int(by.get(k, 0)) + 1000
 		if gi.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF:
 			cast[k] = int(cast.get(k, 0)) + 1000
-	print("LOADIN plan-map: %d things in view; cam at %s, far %.0f" % [n, str(cam.global_position) if cam else "-", cam.far if cam else 0.0])
+	print("LOADIN plan-map: %d things in view; cam at %s, far %.0f" % [n, str(cam.global_position), cam.far])
 	print("LOADIN plan-map in view by owner (count): " + _top(by, 1))
 	print("LOADIN plan-map shadow casters by owner (count): " + _top(cast, 1))
+
+
+## MapCover: the 3D is off while the planning map covers the screen, on again after the planning.
+func _judge_cover(m: Match) -> void:
+	var off := get_viewport().disable_3d
+	var planning := m.skydrop != null and m.skydrop.planning
+	if planning and m.hud != null and m.hud.map_open() and not off:
+		cover_late += 1
+	elif not planning and off:
+		cover_stuck += 1

@@ -28,6 +28,7 @@ var auto := false              # opened by the planning phase (closes when the s
 var zoom := 1.0
 var center := Vector2.ZERO     # the world point (x, z) at the middle of the map
 var rect := Rect2()            # where the map is on screen
+var cover := MapCover.new()    # while it plans the drop, the 3D behind it is not drawn
 var _taken: Array = []         # Rect2s of the names drawn this frame: a name never prints over another
 var _spots := PackedVector2Array()    # this frame's marker centres (_obstacles): place names keep off them
 var _press := Vector2.INF
@@ -36,7 +37,6 @@ var _dragged := false
 var _roster: Array = []        # [Rect2, Hunter] squad rows you can click to pass the lead
 var hover := MapHover.new()    # the tooltip under the resting cursor
 var hot_line := ""             # the hot zone's first-time line under the map (HotZone.take_plan_line)
-var cover := MapCover.new()    # while it plans the drop, the 3D behind it is not drawn
 
 func _init(h, match_node: Match) -> void:
 	hud = h
