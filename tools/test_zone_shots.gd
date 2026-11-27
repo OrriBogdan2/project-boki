@@ -39,7 +39,7 @@ static func groups(m: Match) -> Dictionary:
 			continue  # the L menu is a modal on a dimmed screen: it is drawn over the HUD on purpose
 		var found := SafeArea.groups_of(layer, sz)
 		for g: String in found:
-			if layer != m.hud or not cards.has(found[g][0]):
+			if layer != m.hud or not cards.any(func(c: Rect2): return _same(c, found[g][0])):
 				out["%s/%s" % [_owner(m, layer), g]] = found[g]
 	for i in cards.size():
 		out["toast #%d" % i] = [cards[i]]
@@ -90,6 +90,11 @@ static func pairs(gs: Dictionary) -> Array:
 				hit = hit or (edge[1] as Array).any(func(o: Rect2): return r.intersects(o))
 			out.append([edge[0], g, hit])
 	return out
+
+
+## The same card measured twice (the lane's rect and the control's, a sub-pixel apart while it eases).
+static func _same(a: Rect2, b: Rect2) -> bool:
+	return _still(a, b)
 
 
 static func _still(a: Rect2, b: Rect2) -> bool:
