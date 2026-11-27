@@ -13,6 +13,8 @@ extends "res://tools/hunter_scale_shots.gd"
 ## area in m2 and screen height in m (the view plane at the hero, so both read against the reference's idle
 ## silhouettes at its 66 deg camera), the mean over the facings and the facing-camera one.
 ## The facing-camera mask is saved as <dir>/<hero>_sil_<lean|flat>_<case>.png. Floating companions are not the hero.
+## --lineup=arch,arch,...: those heroes side by side, left to right LINEUP_GAP m apart, each at its own match_k, idling
+## at the match camera's widest zoom: one frame, <dir>/lineup.png (no HUD), and a LINEUP row per hero (feet x,y px).
 
 const PASSES := [  # [label, draw at the archetype's own match_k (else 1), wheel zoom]
 	["main", false, 1.4572],  # main today: every hunter at the base size, the wheel starting at its widest
@@ -28,6 +30,7 @@ const SIL_TURN := 30  # match steps the hero gets to turn to a facing
 const SIL_ZOOM := 0.45  # the panel's close view: more px for the mask, same metres
 const SIL_DIFF := 0.2  # summed RGB step from the empty frame that counts as the hero
 const SIL_WEAPONS := ["Gun", "Shield"]  # the held weapon (out for the "body" cases)
+const LINEUP_GAP := 2.6  # m between two heroes in the --lineup frame
 const SIL_PAD := 0.6  # share of the body's screen box added all round the box the mask reads (weapons reach out)
 
 
@@ -35,9 +38,12 @@ func run(main_node: Node) -> void:
 	main = main_node
 	var heroes: Array = Arch.ids()
 	var sil := false
+	var row: Array = []
 	for a in OS.get_cmdline_user_args():
 		if String(a) == "--silhouette":
 			sil = true
+		if String(a).begins_with("--lineup="):
+			row = String(a).substr(9).split(",")
 		if String(a).begins_with("--hero="):
 			heroes = String(a).substr(7).split(",")
 		if String(a).begins_with("--shots-dir="):
@@ -46,6 +52,10 @@ func run(main_node: Node) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	Save.no_write = true
 	Settings.v["tips"] = false
+	if not row.is_empty():
+		await _lineup(row)
+		main.get_tree().quit(0)
+		return
 	for hero in heroes:
 		await _start(hero, "cindle")
 		for h in m.hunters:
@@ -228,3 +238,46 @@ func _mask(model: Node3D, flat: Material, no_weapon: bool, cap_y := -1e9) -> Arr
 				low = maxi(low, y)
 				mask.set_pixel(x, y, Color.WHITE)
 	return [px / (sc * sc), maxi(low - top + 1, 0) / sc, mask]
+
+
+## The --lineup frame (see the header): the first hero is the player, the rest are bots that only stand (no brain).
+func _lineup(row: Array) -> void:
+	await _start(String(row[0]), "cindle")
+	for h in m.hunters:
+		h.out = h != m.player
+	var at := _arena_spot(m.player.pos)
+	_bare_floor(at)
+	var left := at - Vector3(LINEUP_GAP * (row.size() - 1) / 2.0, 0.0, 0.0)
+	var line: Array = [m.player]
+	for i in range(1, row.size()):
+		var h := _hunter(
+			"line%d" % i, m.player.team, String(row[i]), "cindle", left + Vector3(LINEUP_GAP * i, 0.0, 0.0)
+		)
+		h.ctrl = "local"
+		line.append(h)
+	m.player.teleport(left)
+	m.cam.user_zoom = PASSES[0][2]
+	m.cam.zoom = PASSES[0][2]
+	m.cam.zoom_to = PASSES[0][2]
+	m.cam.snap(at)
+	for i in WARM_UP:
+		_purge()
+		for j in line.size():
+			var h: Hunter = line[j]
+			if i % 20 == 0:
+				h.teleport(left + Vector3(LINEUP_GAP * j, 0.0, 0.0))
+				h.vel = Vector3.ZERO
+			h.inp["aim"] = h.pos + Vector3(0.0, 0.9, 8.0)  # facing the camera
+		m.step(STEP)
+		m.cam.follow(at, STEP, false)
+		for h in m.hunters:
+			h.render(STEP, 1.0)
+		for k in m.kins:
+			k.model.visible = false
+		_clean()
+	m.hud.visible = false
+	await _save("lineup.png")
+	var k := float(SIZE.y) / main.get_viewport().get_visible_rect().size.y
+	for h in line:
+		var feet := m.cam.unproject_position(h.position) * k
+		print("LINEUP %s: k %.3f, feet at %.0f,%.0f px" % [h.arch, Arch.match_k(h.arch), feet.x, feet.y])
