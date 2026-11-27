@@ -163,9 +163,12 @@ func _reserved(m: Match, test_zone: bool) -> void:
 			if id == "drills" and Practice.of(m).drills == null:
 				continue
 			Shots.station(m, id, true)
-			await Shots.judge(tree, m)
+			var found: Array = (await Shots.judge(tree, m)).filter(func(f: String): return " overlaps " in f)
 			var gs := Shots.groups(m)
 			var what := "%s, %s popup, %dx%d" % [where, id, size.x, size.y]
+			for f in found:
+				print("TESTZONE   overlap %s: %s" % [what, f])
+			ok(found.is_empty(), "no HUD overlap (key line, kit drill, DPS meter, toasts, station popups) (%s)" % what)
 			var scanned: bool = gs.has(Shots.FPS) and gs.has("drawn minimap")
 			var popup: Array = Shots.popups(gs).filter(func(g: String): return g.begins_with(Shots.STATION_GROUP[id]))
 			ok(scanned and not popup.is_empty(), "scanned: fps counter, minimap and the popup (%s)" % what)
