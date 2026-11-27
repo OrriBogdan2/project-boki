@@ -41,6 +41,11 @@ static func top_h(id: String) -> float:
 static func match_k(id: String) -> float:
 	return float(body(id).get("match_k", 1.0))
 
+## The size the farm draws a hunter of this archetype at: body.farm_k (the owner's canon height, heights.json, over
+## our crown at k 1; Albert's to his helmet top), else a match's (Hunter.drawn_k: the reference game's height).
+static func farm_k(id: String) -> float:
+	return float(body(id).get("farm_k", Hunter.drawn_k(id)))
+
 
 ## Sets a hunter's hurtbox radius (`r`, what shots and abilities hit) and its separate body collision radius.
 static func apply_body(h: Hunter) -> void:

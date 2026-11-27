@@ -1138,11 +1138,11 @@ func _apply_cam_settings() -> void:
 	cam.apply_settings()
 	cam.dist_mul = CamRig.style_across(HOME_ACROSS_REF) / CamRig.style_across(cam.style_id)
 	if player and is_instance_valid(player):
-		# drawn at its match size: the scale Models built it at x Hunter.drawn_k, as a match draws it; a hero swap's
-		# pop rides on top, so it can't get stuck stretched
+		# drawn at its farm size: the scale Models built it at x Arch.farm_k (the owner's canon height); a hero
+		# swap's pop rides on top, so it can't get stuck stretched
 		if not player.has_meta("built_scale"):
 			player.set_meta("built_scale", player.scale)
-		var k := Hunter.drawn_k(Arch.of_save()) * cam.hunter_scale
+		var k := Arch.farm_k(Arch.of_save()) * cam.hunter_scale
 		var built: Vector3 = player.get_meta("built_scale")
 		player.scale = (player.get_meta("pop", Vector3.ONE) as Vector3) * built * k
 

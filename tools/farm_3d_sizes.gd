@@ -1,7 +1,7 @@
 extends RefCounted
 ## --farm-3d-sizes --shots-dir=<dir> [--view=1920x1080] [--albert-k=1.08]: the real farm scene with five hunters
 ## (Albert is the farm's own avatar, drawn at the size Home gives it; Kael, Sparkle, Meeko and Cinder are built as a
-## match builds a hunter) at their match size (Hunter.drawn_k: the reference's height) and the four Boki at Home's
+## match builds a hunter) at their farm size (Arch.farm_k: the owner's canon height) and the four Boki at Home's
 ## own farm size, all idle and facing the camera, HUD, marks and particles hidden.
 ## Writes 1_farm_cam.png (the farm's close third-person view: one row with Albert, the camera's target, in the middle
 ## and the three starters a step nearer under the gaps), 2_eye_row.png (eye level, one row), 3_mid.png and
@@ -51,7 +51,7 @@ var cam3: Camera3D
 var layout := "farm"  # farm | row | mid
 var anims: Array = []  # one HunterAnim per hunter (Albert's is the farm's own, h.p_anim)
 var cam_at := Vector3.ZERO  # the free camera's position: everyone turns to it
-var scales: Array[Vector3] = []  # the four others' drawn scale: own model size x Hunter.drawn_k (Albert's is Home's)
+var scales: Array[Vector3] = []  # the four others' drawn scale: own model size x Arch.farm_k (Albert's is Home's)
 var albert_k := 1.0  # --albert-k=<x>: Albert's extra size in this tool only (game data unchanged)
 var cam_side := 1.0  # +1: the eye camera swings to +x, Albert at +x end of the row; -1 the other way
 
@@ -144,7 +144,7 @@ func _make_save() -> void:
 
 
 ## The farm draws you as the Unmasked, so Albert is built here like the other four (as a match builds a hunter) and
-## takes the avatar's place; Home sizes him (Hunter.drawn_k) as it sizes your avatar. The four others get the same
+## takes the avatar's place; Home sizes him (Arch.farm_k) as it sizes your avatar. The four others get the same
 ## size here, and a HunterAnim each, so they idle as they do in play.
 func _place() -> void:
 	group = h.world.free_spot_near(_clear_spot(Vector3(56.0, 0, 29.0)), [], 0.8)
@@ -155,7 +155,7 @@ func _place() -> void:
 			cls, Data.TEAM_COLORS[0], Arch.signature(ARCHES[i]), "", Unmasked.mask_look(), ARCHES[i]
 		)
 		if i > 0:
-			m.scale *= Hunter.drawn_k(ARCHES[i]) * h.cam.hunter_scale  # as a match and the farm draw it
+			m.scale *= Arch.farm_k(ARCHES[i]) * h.cam.hunter_scale  # as the farm draws your avatar
 		scales.append(m.scale)
 		h.add_child(m)
 		hunters.append(m)
@@ -287,7 +287,7 @@ func _write_heights() -> void:
 		var hi := 0.0
 		for wp in pts:
 			hi = maxf(hi, wp.y)
-		var k := Hunter.drawn_k(ARCHES[i]) * (albert_k if i == 0 else 1.0)
+		var k := Arch.farm_k(ARCHES[i]) * (albert_k if i == 0 else 1.0)
 		var crown := HunterCrown.crown(m, pts, k, hi) - m.global_position.y
 		m.basis = lean
 		out["hunters"][NAMES[i]] = {
