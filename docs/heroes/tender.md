@@ -17,7 +17,7 @@ Internal design doc (was "Linnet"; the id and file names stay `tender`). Source 
 
 Body: a very small hunter (`body` in tender.json; legs 0.98, torso 1.02, shoulder 1.12, neck -0.036 since the ART-1 rebuild): fallback model 0.6, .glb 0.66 of a medium (body size 0.68; owner item 108 took her down from 0.78, about 13%), nothing above her head, hitbox radius 0.34 (from 0.40; the 0.85x floor of item 46's band, so it stays there), nameplate 1.85 m (it came down with her head) and own bars 2.35 m (`Arch.plate_y` / `Arch.body`, for the HUD to read). A low forward-leaning scurry at 1.25x step cadence with a small per-step bob, her ember-tipped tail swinging with each step; the torso keeps facing the aim while the legs go where she moves. Run speed is the shared one.
 
-Scaling: HP 145 (medium). Hearth Call heals 26.5 over 5s (5.3/s: the data's 44/s x 154/1285, about a fifth of a medium health bar); cooldown 46s against Hearthlight's 11s (source card 41.6 : 10). Ratios kept: an ember is 8, rising to about 11.6 at 5 Kindle (+45%; footage 64 -> 93). The seed burst is 32 (4x an ember). Hearthlight is 10 + 22 per squadmate. Cooldown ratio: Burrseed 10.5s against Hearthlight 11s (the data's 11.5 : 12).
+Scaling: HP 145 (medium). Hearth Call heals 26.5 over 5s (5.3/s: the data's 44/s x 154/1285, about a fifth of a medium health bar); cooldown 46s against Hearthlight's 11s (source card 41.6 : 10). Ratios kept: an ember was 8, rising to about 11.6 at 5 Kindle (+45%; footage 64 -> 93); on 11-24 the owner cut the ember to 6 (`8495f5a6b8`, playtest: hard to do damage) and kept Kindle's flat +0.72 a stack, so it now rises to 9.6 (+60%, past the footage's +45%). The seed burst is 32 (5.3x the ember now, 4x before). Hearthlight is 10 + 22 per squadmate. Cooldown ratio: Burrseed 10.5s against Hearthlight 11s (the data's 11.5 : 12).
 
 ## Parity pass (owner 18:45: LMB first, then the rest by distance from the source)
 Source vs ours per slot. [data] = sv/briefs (sv/briefs/kits.md, ref-tender), [footage] = briefs/hero-ref/mooshmoosh.md.
@@ -174,7 +174,7 @@ Row 9 numbers (source order: owner note > game data > footage; no owner note cov
 
 | Number | Source | Old | New | Assert |
 |---|---|---|---|---|
-| Ramp at the plateau | footage 64 -> 93 (f84-f98): x1.453 | `per_stack` 0.72 x 5 / 8 = +45% (check window 38-52%) | unchanged, 8 -> 11.6; the check window is now +/-3 points round the footage's +45.3% | `mm passive: Kindle ramps embers +45% at 5 stacks (footage 64 -> 93)` |
+| Ramp at the plateau | footage 64 -> 93 (f84-f98): x1.453 | `per_stack` 0.72 x 5 / 6 = +60% (owner 11-24: ember 8 -> 6, flat step kept) | footage +45.3% on the 8 ember; the check window is now +/-3 points round +60% | `mm passive: Kindle ramps embers +60% at 5 stacks (flat +0.72 a stack on the 6 ember, docs/TTK.md)` |
 | Damage number colour | footage f98: 93 is yellow, the earlier hits white | white at every stack | yellow at full Kindle (5 stacks, the plateau), white below; the brief's "warm yellow at 3+" was a suggestion, the footage shows yellow only on the 93 | `mm passive: the damage number is yellow at the plateau, white before it (footage)` |
 
 Not changed, to note: the footage reads the plateau after 4 hits (64, 66, 84, 93, 93); ours needs 5 stacks (6 hits). One dummy and five hits do not fix a curve, so the 5-stack cap stays.
@@ -184,7 +184,7 @@ Where the footage and the wiki are silent, this is the most likely behaviour, an
 - **Empowered** (the next ember after a pause): the card and wiki name it and give no effect; footage did not isolate it. Our riders (+40% range, double Hearthlight wind-back) are removed, not neutralised; the pause, the move and the chime stay as the cue.
 - **Hearthlight on herself**: the source gives no self-heal factor, so our 0.33 is removed and she is healed like an ally in the ring. Hearth Call on herself in solo still heals at the same full rate (no factor).
 - The Burrseed area **sticks to the foe** and moves with them (the dummy in the footage doesn't move).
-- The root lasts 1.1s (wiki). Damage is 32 (4x an ember), down from 35, because the shorter window is more reliable.
+- The root lasts 1.1s (wiki). Damage is 32 (5.3x an ember since 11-24, 4x before), down from 35, because the shorter window is more reliable.
 - The Hearthlight keeps its heal amount and duration when thrown. The throw reach is 9m.
 - Kindle: 5 stacks, 4s, refreshed per hit, no per-stack decay (the wiki says up to 5).
 - The Empowered pause is 1s.
