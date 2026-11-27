@@ -329,7 +329,7 @@ func _throw_dart(heavy: bool) -> void:
 	var s := lk().last_shot()
 	if not s.is_empty():
 		lk().skin(s, "beam" if skating else "shard", {}, _heavy_k("size_k", heavy))
-		darts.append({"s": s, "side": side, "passed": false})
+		darts.append({"s": s, "t": 0.0, "foe": _lock_on(heavy), "passed": false})
 		if skating:
 			HeroVfx.of(m).trail(h, "beam_trail", s["node"])
 		else:
@@ -371,52 +371,56 @@ func _play_dart(heavy: bool, side: float) -> void:
 		play("tm_dart_r" if side > 0.0 else "tm_dart_l")
 
 
-## Homing: late in its flight each dart (and each skating beam) bends toward the foe nearest the cursor, or else
-## toward the cursor point itself. A foe that is not at the cursor pulls on nothing: you have to aim.
+## The foe a dart locks on as it leaves (null: none, it curves to the cursor point): the one nearest the line to the
+## cursor within wpn.acquire_deg of it and wpn.acquire_r of her (x heavy.acquire_k for a large dart). A foe off
+## that cone pulls on nothing: you aim.
+func _lock_on(heavy: bool) -> Ent:
+	var wd: Dictionary = h.wpn
+	var aim := h.aim_dir()
+	var reach := float(wd["acquire_r"]) * _heavy_k("acquire_k", heavy)
+	var best := deg_to_rad(float(wd["acquire_deg"]))
+	var got: Ent = null
+	for f in m.foes_of(h.team):
+		var to := Vector2(f.pos.x - h.pos.x, f.pos.z - h.pos.z)
+		if not f.hittable() or to.length() > reach:
+			continue
+		var off := absf(aim.angle_to(to))
+		if off <= best:
+			best = off
+			got = f
+	return got
+
+
+## Homing: each dart (and each skating beam) steers toward the foe it locked on, else toward the cursor point, with
+## a capped sideways pull (wpn.home_accel m/s^2) that eases in over its first wpn.home_ramp s of flight. The speed
+## stays the same, so it curves in on an arc and never snaps; the cap over the speed bounds the turn rate, and a foe
+## it has gone past (over 0.6 PI off its heading) is let go.
 func _tick_darts(dt: float) -> void:
 	var wd: Dictionary = h.wpn
-	var turn := float(wd.get("turn", 7.0))
 	var aimp: Vector3 = h.inp.get("aim", h.pos)
-	var near_cur: Ent = null
-	var nd := float(wd.get("cursor_r", 2.4))
-	for f in m.foes_of(h.team):
-		if not f.hittable():
-			continue
-		var dc := Vector2(f.pos.x - aimp.x, f.pos.z - aimp.z).length()
-		if dc < nd:
-			nd = dc
-			near_cur = f
 	for dd in darts.duplicate():
 		var s: Dictionary = dd["s"]
 		if not m.shots.has(s):
 			darts.erase(dd)
 			continue
+		dd["t"] = float(dd["t"]) + dt
 		var v: Vector2 = s["vel"]
 		var p: Vector3 = s["pos"]
+		var foe: Ent = dd["foe"] if is_instance_valid(dd["foe"]) else null
 		var want := Vector2.ZERO
-		if near_cur != null:
-			want = Vector2(near_cur.pos.x - p.x, near_cur.pos.z - p.z)
+		if foe != null and foe.hittable():
+			want = Vector2(foe.pos.x - p.x, foe.pos.z - p.z)
 		elif not bool(dd["passed"]):
 			want = Vector2(aimp.x - p.x, aimp.z - p.z)
 			if want.length() < 0.8 or v.dot(want) < 0.0:
-				dd["passed"] = true          # past the cursor: it flies on straight
+				dd["passed"] = true  # past the cursor: it flies on straight
 				want = Vector2.ZERO
 		if want.length() < 0.05 or absf(v.angle_to(want)) > PI * 0.6:
-			continue             # nothing to chase, or it is already past it: it flies on
-		var rate := turn * _homing_k(s, want.length())
-		var ang := clampf(v.angle_to(want), -rate * dt, rate * dt)
-		s["vel"] = v.rotated(ang)
-
-
-## How hard a dart (or a skating beam) homes now, 0..1: it flies out along the aim, then curves in toward the end
-## of its flight to what it chases, as Celeste's do (from wpn.home_from to wpn.home_full of the way there).
-func _homing_k(s: Dictionary, left: float) -> float:
-	var wd: Dictionary = h.wpn
-	var from: Vector3 = s["start"]
-	var p: Vector3 = s["pos"]
-	var flown := Vector2(p.x - from.x, p.z - from.z).length()
-	var way := flown / maxf(0.01, flown + left)
-	return smoothstep(float(wd.get("home_from", 0.35)), float(wd.get("home_full", 0.7)), way)
+			continue  # nothing to chase, or it is already past it: it flies on
+		var grip := smoothstep(0.0, float(wd["home_ramp"]), float(dd["t"]))
+		var cap := float(wd["home_accel"]) * grip * dt
+		var pull := (want.normalized() * v.length() - v).limit_length(cap)
+		s["vel"] = (v + pull).normalized() * v.length()
 
 
 # ------------------------------------------------------------------ Shift: Skate

@@ -20,7 +20,9 @@ const CHECKS := {
 	# every Hunter faces its aim (skeleton forward vs aim, 4 aims); --shots-dir= adds front-view shots
 	"--facing-check": ["res://tools/facing_check.gd", "facing_check", null],
 	"--native-upper-shots": ["res://tools/native_upper_shots.gd", "native_upper_shots", null],
+	"--neve-lmb-shots": ["res://tools/neve_lmb_shots.gd", "neve_lmb_shots", null],  # GPU: Neve's LMB, body + darts
 	"--warden-native-check": ["res://tools/warden_native_check.gd", "warden_native_check", null],  # Meshy skeleton
+	"--native-stream-check": ["res://tools/native_stream_check.gd", "native_stream_check", null],  # Neve's dart sway
 	"--native-springs-shots": ["res://tools/native_springs_shots.gd", "native_springs_shots", null],
 	"--gil-swim-spin-shots": ["res://tools/gil_swim_spin_shots.gd", "gil_swim_spin_shots", null],  # Gil GPU frames
 	"--tenzo-press-strip": ["res://tools/tenzo_press_strip.gd", "tenzo_press_strip", null],  # Tenzo LMB press frames
