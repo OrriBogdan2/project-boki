@@ -7,7 +7,7 @@ extends RefCounted
 
 const FPS := 60
 const HOME_AWAY_M := 7.0  # m from the Waystone Motley starts (home farm)
-const PAD_AWAY_M := 5.5  # m from a return pad Motley is set down again, facing it
+const PAD_AWAY_M := 6.5  # m from a return pad Motley is set down again, facing it (on the far side of the two Boki)
 const STONE_MID_M := 0.9  # m from the stone's middle he must reach before the light takes him (the ring's standing stones stop him nearer)
 const ENTER_S := 3.5  # s at most to reach it
 const STROLL_S := 2.7  # s of walking in a world after he lands
@@ -15,9 +15,13 @@ const STROLL_AHEAD_M := 9.0  # m the walk on is aimed past the pad (the view's u
 const STEP_S := 0.5  # s the Waystone's light is up before the ink wipe (rules hop_fade_s)
 const EMERGE_S := 0.45  # s he takes to step out of the light on the other side
 const AWAY_RAD := [0.52, -0.52, 0.0, 1.05, -1.05, 1.57, -1.57, 2.1, -2.1, 2.6, -2.6, 3.14]  # tried in order: 0 = south of the stone
+const BACK_RAD := [0.0, 0.35, -0.35, 0.7, -0.7, 1.05, -1.05, 1.57, -1.57]  # in a zone, tried in order round the way he walked on
+## (0 = straight back up his walk: he turns round and walks back past the two Boki into the pad, which is ahead in
+## the view, never under it)
 const LEVEL_TIP := 0.1  # rad: a view tipped more than this over a wall is not filmed
-const MONTAGE_AT := [Vector2(-2.3, 3.2), Vector2(2.3, 4.6)]  # (m right, m ahead) of the landing: two Boki either side of the straight walk on, close enough to read
-const HUSHWOOD_CLOCK := 0.74  # Hushwood's own hour is deep dusk (0.78, daylight 0.3): the film shows it at 0.7 daylight, warm and readable
+const MONTAGE_AT := [Vector2(-3.0, 2.6), Vector2(3.0, 4.4)]  # (m right, m ahead) of the landing: two Boki either side of the straight walk on
+## (r12 had them 2.3 m out and the walk steered round both: the pushes cancelled and Motley stood still on the pad)
+const HUSHWOOD_CLOCK := 0.68  # Hushwood's own hour is deep dusk (0.78): the film shows it earlier, warm and readable
 const ZONE_ORDER := ["glasswater", "cinderstep", "hushwood", "ridge"]
 const PILLAR_H := 3.6
 const PILLAR_R := 0.7
@@ -27,6 +31,7 @@ var w  # tools/pitch_worlds.gd
 var _cuts := 0
 var _jumps := 0
 var _s0 := Vector3.ONE  # Motley's own scale (the hunters are x1.10)
+var _walk_rad := 0.0  # the way he walked on from the pad, as _start_for's angle (0 = south)
 
 
 func _init(worlds) -> void:
@@ -38,7 +43,7 @@ func play() -> void:
 	w._stage_at = MONTAGE_AT
 	await w._load(GardenZones.HUB)
 	_s0 = w.h.player.scale
-	await _jump(HOME_AWAY_M)
+	await _jump(HOME_AWAY_M, AWAY_RAD)
 	_partner_aside()
 	w.rig.mark("montage")
 	await w._wait(0.3)
@@ -47,7 +52,7 @@ func play() -> void:
 		await _through(z)
 		await _stroll()
 		if z != ZONE_ORDER[-1]:
-			await _jump(PAD_AWAY_M)
+			await _jump(PAD_AWAY_M, BACK_RAD)
 	w.rig.mark("end")
 	await w._wait(0.4)
 
@@ -55,7 +60,7 @@ func play() -> void:
 ## Motley is set down `dist` m from the stone on open ground, tree-free, the view turned to face it. Each start is tried
 ## by walking it to the stone (unfilmed); the first whose view stays level all the way is kept (a wall or cliff behind
 ## the camera tips the view top-down, which is not filmed). The hard cut: jumpN_out before, jumpN_in after the settle.
-func _jump(dist: float) -> void:
+func _jump(dist: float, rads: Array) -> void:
 	var h: Node = w.h
 	var stone: Vector3 = h.hway.node.position
 	_jumps += 1
@@ -63,8 +68,8 @@ func _jump(dist: float) -> void:
 		w.rig.mark("jump%d_out" % (_jumps - 1))
 	var best := 99.0
 	var best_a := 0.0
-	for a in AWAY_RAD:
-		var at := _start_for(stone, a, dist)
+	for a in rads:
+		var at := _start_for(stone, _rad(a), dist)
 		if at == Vector3.INF:
 			continue
 		await _set_down(at, stone)
@@ -77,10 +82,15 @@ func _jump(dist: float) -> void:
 	if best == 99.0:
 		w.rig.fail("no open approach to the stone")
 		return
-	await _set_down(_start_for(stone, best_a, dist), stone)
-	print("PITCH jump%d dist=%.1f away=%.2f tip_max=%.2f" % [_jumps, dist, best_a, best])
+	await _set_down(_start_for(stone, _rad(best_a), dist), stone)
+	print("PITCH jump%d dist=%.1f away=%.2f tip_max=%.2f" % [_jumps, dist, _rad(best_a), best])
 	if _jumps > 1:
 		w.rig.mark("jump%d_in" % (_jumps - 1))
+
+
+## Angle `a` as _start_for takes it: in a zone it is turned to point back up the walk on (the view's up at landing).
+func _rad(a: float) -> float:
+	return a + (_walk_rad if _jumps > 1 else 0.0)
 
 
 ## The open, tree-free, Boki-free spot `dist` m from the stone at angle `a` (0 = south of it), or INF.
@@ -104,7 +114,7 @@ func _trial(stone: Vector3) -> float:
 	var top: float = w.h.farm_cam.tip
 	var left := 6 * FPS
 	while left > 0 and Vector2(stone.x - w.h.ppos.x, stone.z - w.h.ppos.z).length() > STONE_MID_M:
-		w._keys(w._steer(stone).rotated(w.h.cam.yaw))
+		w._keys(_toward(stone))
 		await w.rig.main.get_tree().process_frame
 		w._tidy()
 		top = maxf(top, w.h.farm_cam.tip)
@@ -134,7 +144,7 @@ func _boki_near(at: Vector3) -> bool:
 ## Walks up to the stone and into its ring, up to the middle.
 func _into_stone() -> void:
 	var stone: Vector3 = w.h.hway.node.position
-	await w._walk(stone, STONE_MID_M, ENTER_S)
+	await _straight(stone, STONE_MID_M, ENTER_S)
 
 
 ## Steps through the light: the pillar rises round him as the stone lights, he keeps walking and goes into it; the mark
@@ -189,12 +199,32 @@ func _through(zone: String) -> void:
 ## Boki are read; the way is cleared of props first.
 func _stroll() -> void:
 	var h: Node = w.h
+	var fwd2 := Vector2(0.0, -1.0).rotated(h.cam.yaw)  # the view's up (the two Boki stand either side of it)
 	var goal: Vector3 = h.world.free_spot_near(
-		h.hway.node.position + Vector3(0.0, 0.0, -STROLL_AHEAD_M), [], 1.2, 0.9, 3.0
+		h.ppos + Vector3(fwd2.x, 0.0, fwd2.y) * STROLL_AHEAD_M, [], 1.2, 0.9, 3.0
 	)
+	_walk_rad = atan2(goal.x - h.ppos.x, goal.z - h.ppos.z)
 	w._clear_path(h.ppos, [goal])
-	await w._walk(goal, 0.5, STROLL_S - EMERGE_S)
+	var from: Vector3 = h.ppos
+	await _straight(goal, 0.5, STROLL_S - EMERGE_S)
+	print("PITCH stroll %.1f m of %.1f" % [Vector2(h.ppos.x - from.x, h.ppos.z - from.z).length(), from.distance_to(goal)])
 	await w._wait(0.15)
+
+
+## Walks straight at `goal` with the real keys (no bending round the Boki: they stand clear of the line).
+func _straight(goal: Vector3, near: float, secs: float) -> void:
+	var left := int(secs * FPS)
+	while left > 0 and Vector2(goal.x - w.h.ppos.x, goal.z - w.h.ppos.z).length() > near:
+		w._keys(_toward(goal))
+		await w.rig.main.get_tree().process_frame
+		w._tidy()
+		left -= 1
+	w._keys(Vector2.ZERO)
+
+
+## The keys that walk straight at `goal` (the view's own terms).
+func _toward(goal: Vector3) -> Vector2:
+	return Vector2(goal.x - w.h.ppos.x, goal.z - w.h.ppos.z).normalized().rotated(w.h.cam.yaw)
 
 
 ## A soft column of the zone's colour standing on the stone (film-only; the game's own light-up is its burst).
