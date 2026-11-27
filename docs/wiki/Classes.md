@@ -32,15 +32,15 @@ it out (C), and adds a little of its type to your kit: each class ability has
 their strength (35% on RMB, 30% on E and the dash, 50% on R). Hard control from a socket is capped. An
 empty socket gives +10% to that ability's main number instead.
 
-**R is the Merge** for every class. When your **bond meter** is full, press it and you and your Boki
+**X is Fuse** for every class. When your **bond meter** is full, press it and you and your Boki
 become one for a while: you wear its look, and your abilities change by its type and power (its merge
-form, see [Boki species](Boki-Species.md)). The class's own ultimate is held back for now.
+form, see [Boki species](Boki-Species.md)). The class's own ultimate (R) is held back for now.
 
 ## Choosing
 
 Each weight class has a default: Sable (light), Vex (medium) and Kael (heavy). You pick
 your class in the Expedition menu, and you can try every class against dummies in the
-[Arena](Arena-and-Training.md) at any time.
+[Training Grounds](Arena-and-Training.md) at any time.
 
 ## At a glance
 
@@ -51,19 +51,19 @@ your class in the Expedition menu, and you can try every class against dummies i
 
 | Hunter | Health / dashes | Weapons | Passive | Dash | RMB | E | R |
 |---|---|---|---|---|---|---|---|
-| [the Red Stitch](Class-Red-Stitch.md) | 124 / 1 | Longbow | Red Thread | Spirit Walk | Heavy Shot | Hail Wall | none (Boki Fusion) |
-| [the Unbroken](Class-Unbroken.md) | 193 / 2 | Greatsword | Rage | Rampage | Smash | Warchain | none (Boki Fusion) |
-| [the Hired Gun](Class-Hired-Gun.md) | 145 / 1 | Quill Rifle | Hot Streak | Slipstep | Coin Blast | Palm Lance | none (Boki Fusion) |
-| [the Barnacle Knight](Class-Barnacle-Knight.md) | 193 / 2 | War Hammer & Aegis | Crushed | 360 Smash | Aegis | Mending Ground | none (Boki Fusion) |
-| [the Snowglide](Class-Snowglide.md) | 124 / 1 | Hoar Fan | Hoarfrost | Skate | Ice Spear | Rink Wall | none (Boki Fusion) |
-| [the Ashen Kiss](Class-Ashen-Kiss.md) | 193 / 2 | Torch Lance | Flashover | Soot Ram | Cinder Shot | Furnace Cloak | none (Boki Fusion) |
-| [the Stone Seer](Class-Stone-Seer.md) | 145 / 1 | Rubble Fists | Shardskin | Rock Hop | Quakefall | Stone Row | none (Boki Fusion) |
-| [the Storm Chaser](Class-Storm-Chaser.md) | 124 / 1 | Coilcaster | Static | Wirerun | Storm Rod | Skycall | none (Boki Fusion) |
-| [the Scrap King](Class-Scrap-King.md) | 193 / 2 | Shotgun | Salvage | Barge | Deep Reach | Anchor Drop | none (Boki Fusion) |
-| [the Dawnfox](Class-Dawnfox.md) | 145 / 1 | Ember Cast | Carrier | Relay Step | Burrseed | Hearthlight | none (Boki Fusion) |
-| [the Silver Thief](Class-Silver-Thief.md) | 124 / 1 | Arc Shots | Marks | Vault | Bola | Shadow Knife | none (Boki Fusion) |
-| [the Void Jester](Class-Void-Jester.md) | 145 / 1 | Tether Lantern | Swell | Lantern Trade | Shard Snap | Brimseed | none (Boki Fusion) |
-| [the Novice Mage](Class-Novice-Mage.md) | 124 / 1 | Swordfish | Fish Out of Water | Ground Swim | Grab Bag | Riptide | none (Boki Fusion) |
+| [the Red Stitch](Class-Red-Stitch.md) | 124 / 1 | Longbow | Red Thread | Spirit Walk | Heavy Shot | Hail Wall | none yet |
+| [the Unbroken](Class-Unbroken.md) | 193 / 2 | Greatsword | Rage | Rampage | Smash | Warchain | none yet |
+| [the Hired Gun](Class-Hired-Gun.md) | 145 / 1 | Quill Rifle | Hot Streak | Slipstep | Coin Blast | Palm Lance | none yet |
+| [the Barnacle Knight](Class-Barnacle-Knight.md) | 193 / 2 | War Hammer & Aegis | Crushed | 360 Smash | Aegis | Mending Ground | none yet |
+| [the Snowglide](Class-Snowglide.md) | 124 / 1 | Hoar Fan | Hoarfrost | Skate | Ice Spear | Rink Wall | none yet |
+| [the Ashen Kiss](Class-Ashen-Kiss.md) | 193 / 2 | Torch Lance | Flashover | Soot Ram | Cinder Shot | Furnace Cloak | none yet |
+| [the Stone Seer](Class-Stone-Seer.md) | 145 / 1 | Rubble Fists | Shardskin | Rock Hop | Quakefall | Stone Row | none yet |
+| [the Storm Chaser](Class-Storm-Chaser.md) | 124 / 1 | Coilcaster | Static | Wirerun | Storm Rod | Skycall | none yet |
+| [the Scrap King](Class-Scrap-King.md) | 193 / 2 | Shotgun | Salvage | Barge | Deep Reach | Anchor Drop | none yet |
+| [the Dawnfox](Class-Dawnfox.md) | 145 / 1 | Ember Cast | Carrier | Relay Step | Burrseed | Hearthlight | none yet |
+| [the Silver Thief](Class-Silver-Thief.md) | 124 / 1 | Arc Shots | Marks | Vault | Bola | Shadow Knife | none yet |
+| [the Void Jester](Class-Void-Jester.md) | 145 / 1 | Tether Lantern | Swell | Lantern Trade | Shard Snap | Brimseed | none yet |
+| [the Novice Mage](Class-Novice-Mage.md) | 124 / 1 | Swordfish | Fish Out of Water | Ground Swim | Grab Bag | Riptide | none yet |
 
 ### How Hunters unlock
 
@@ -82,7 +82,7 @@ A new save picks 1 of 3 starters (the Red Stitch, the Unbroken, the Hired Gun) a
 | [the Scrap King](Class-Scrap-King.md) | medium | Make it out carrying 8 items | 8 |
 | [the Dawnfox](Class-Dawnfox.md) | hard | Revive 4 teammates, once 6 Hunters are open | 4 |
 | [the Silver Thief](Class-Silver-Thief.md) | medium | Land 12 hits while in the air | 12 |
-| [the Void Jester](Class-Void-Jester.md) | hard | Knock down 3 hunters while fused with your Boki, once 8 Hunters are open | 3 |
+| [the Void Jester](Class-Void-Jester.md) | hard | Knock down 3 hunters while your Boki is out, once 8 Hunters are open | 3 |
 | [the Novice Mage](Class-Novice-Mage.md) | easy | Stun 4 enemies | 4 |
 
 ### Mastery
@@ -96,7 +96,7 @@ Each Hunter has its own mastery goals, counted only in expeditions played as tha
 | the Red Stitch | Fly through 8 air rings | 8 | Glider: Paper Crane |
 | the Red Stitch | Make it out after being knocked down | 1 | Title: Last Arrow |
 | the Unbroken | Knock 10 enemies into walls | 10 | Colours: Forge Red |
-| the Unbroken | Knock down 2 hunters while fused | 2 | Emote: Chest Thump |
+| the Unbroken | Knock down 2 hunters while your Boki is out | 2 | Emote: Chest Thump |
 | the Unbroken | Open 8 chests | 8 | Banner: Broken Chain |
 | the Unbroken | Make it out after being knocked down | 1 | Title: the Unbowed |
 | the Hired Gun | Land 30 hits from 12 m or more | 30 | Colours: Dust Rider |
@@ -135,8 +135,8 @@ Each Hunter has its own mastery goals, counted only in expeditions played as tha
 | the Silver Thief | Land 25 hits while in the air | 25 | Colours: Midnight Silk |
 | the Silver Thief | Stun 6 enemies | 6 | Emote: Twirl |
 | the Silver Thief | Make it out carrying 6 items | 6 | Title: Light Fingers |
-| the Silver Thief | Knock down a hunter while fused | 1 | Glider: Dusk Moth |
-| the Void Jester | Knock down 4 hunters while fused | 4 | Skin: Void Bloom |
+| the Silver Thief | Knock down a hunter while your Boki is out | 1 | Glider: Dusk Moth |
+| the Void Jester | Knock down 4 hunters while your Boki is out | 4 | Skin: Void Bloom |
 | the Void Jester | Stun 15 enemies | 15 | Trail: Lantern Motes |
 | the Void Jester | Make it out carrying 8 items | 8 | Title: Swapkeeper |
 | the Void Jester | Fly through 15 air rings | 15 | Glider: Lantern Moth |

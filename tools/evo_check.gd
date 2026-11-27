@@ -366,7 +366,7 @@ func _inks() -> void:
 	)
 
 
-## Boss and camp Inks (InkDrops): all 18 types map to a real Ink, every boss gives its kin's, a boss kill puts that
+## Boss and camp Inks (InkDrops): every kin theme maps to a real Ink, every boss gives its kin's, a boss kill puts that
 ## Ink on the ground (a backpack item that comes home as a good), camp kills rarely do.
 func _ink_drops(types: Array) -> void:
 	var map: Dictionary = InkDrops.rules()["type_ink"]
@@ -378,8 +378,8 @@ func _ink_drops(types: Array) -> void:
 	var used: Array = map.values()
 	var all_inks: bool = used.all(func(i): return types.has(i)) and types.all(func(i): return used.has(i))
 	ok(
-		map.size() == 18 and unmapped.is_empty() and all_inks,
-		"ink drops: the 18 types map onto all nine Inks (unmapped themes: %s)" % str(unmapped)
+		unmapped.is_empty() and all_inks,
+		"ink drops: all %d kin themes map onto the nine Inks (unmapped themes: %s)" % [themes.size(), str(unmapped)]
 	)
 	var m := Match.new()
 	_main.add_child(m)
