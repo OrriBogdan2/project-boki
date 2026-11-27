@@ -1,0 +1,2 @@
+## Armour ring follows the shell left (11-26)
+The armour ring on a hit (`armor_hit`, `Juice.hit`) is pitched by how much shell is left after the hit: normal on a full shell, down to `content/rules/armor.json` `confirm.pitch_empty` (0.7) as it runs out, so a dull ring warns that the break is near. Your own shell's ring (taken hits) uses the same factor on its 0.85 base. `ArmorRules.confirm_pitch`, held by `--blast-parity-check`.

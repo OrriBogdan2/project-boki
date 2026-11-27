@@ -256,7 +256,9 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			a["strafe"] = -a["strafe"]
 		var keep_off := BotSquad.spread(m, h, a, to)  # (before the strafe: it may turn the strafe side)
 		move += keep_off
-		move += Vector2(-to.y, to.x) * a["strafe"] * 0.8
+		# point blank (a melee bot at 1.2 m) a full strafe orbits the target and its facing spins ~5 turns
+		# in 5 s (--bot-sanity-check); closer than 2.5 m the sidestep shrinks with the distance
+		move += Vector2(-to.y, to.x) * a["strafe"] * 0.8 * clampf(d / 2.5, 0.35, 1.0)
 		if finishing:
 			# walk onto the wisp to stomp it, and finish it
 			move = to if d > 0.7 else Vector2.ZERO

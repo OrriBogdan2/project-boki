@@ -16,7 +16,13 @@ static func next(m: Match) -> Array:
 	var p := m.player
 	var seen: Dictionary = Save.d["tutorial"]
 	var trap := Heart.tide_r(m)
-	var near := trap > 0.0 and m.heart.site != Vector3.INF and p.flat_dist(m.heart.site) > trap - BLIGHT_M
+	# (the play space's ring stands from the start: the tip waits for the tide to begin closing)
+	var near := (
+		trap > 0.0
+		and Heart.tide_stage(m) >= 0
+		and m.heart.site != Vector3.INF
+		and p.flat_dist(m.heart.site) > trap - BLIGHT_M
+	)
 	if not seen.has("blight") and near:
 		return ["blight", "The Blight is closing. Move toward the Heart."]
 	if not seen.has("camp") and int(p.stats.get("mobs", 0)) > 0:
