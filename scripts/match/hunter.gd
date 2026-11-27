@@ -831,6 +831,7 @@ static func abyss_lift_vy(vy: float, depth: float, dt: float, k := 1.0) -> float
 ## Real keys only open the glider with a fresh press in the air (a second Space, or the glide button). Opening uses
 ## the press up, so a fold (heal, dash, a knock) stays shut until a new press; release or landing clears it too.
 var _glide_armed := false
+var _press_in_dash := false     # the armed press was made in an air dash (or its grace): it opens at the dash's speed
 var _glide_press_t := 0.0     # s the armed press has been held (it opens at HunterFeel.glide_engage)
 var _glide_btn_held := false
 
@@ -849,15 +850,17 @@ func can_glide() -> bool:
 ## the kit lets go of its own flight on the press (ArchKit.glide_cancel: Rock Hop's launch_to). The dash's own
 ## wind-down (glide_cd a kit set at its start, or left by the dash before in a chain) goes with it.
 ## A press just after the dash (DashGlide.fresh) counts as one in it, past the kit's wind-down (decision 0061).
+## A glide press made in an air dash, or inside its grace after it, counts as a press in the dash.
+func _in_dash_press() -> bool:
+	return (roll_t > 0.0 and move_kind == "dash") or (roll_t <= 0.0 and dash_glide.fresh(self))
+
 func _dash_into_glide() -> bool:
 	if grounded or dropping or downed or shot_down or stun_t > 0.0 or (ak != null and ak.no_glide()) \
 			or not loco.can(Loco.S.GLIDING) or AirLimits.too_low(self):
 		return false
 	if ak != null and ak.glide_cancel():
 		return true
-	var in_dash := roll_t > 0.0 and move_kind == "dash"
-	var just_after := roll_t <= 0.0 and dash_glide.fresh(self)
-	if not (in_dash or just_after):
+	if not (_press_in_dash or _in_dash_press()):
 		return false
 	roll_t = 0.0
 	glide_cd = 0.0
@@ -1859,7 +1862,8 @@ func _physics(dt: float) -> void:
 		var fv := vel.y
 		pos.y += vel.y * dt
 		air_peak = maxf(air_peak, pos.y)
-		if g > World.VOID + 1.0 and vel.y <= 0.0 and pos.y <= g and pos.y > g - maxf(1.25, -fv * dt + 0.05):   # (a spike's 80 m/s steps 1.3 m)
+		# (a spike's 80 m/s steps 1.3 m: the window widens with the step)
+		if g > World.VOID + 1.0 and vel.y <= 0.0 and pos.y <= g and pos.y > g - maxf(1.25, -fv * dt + 0.05):
 			pos.y = g
 			vel.y = 0.0
 			grounded = true
@@ -2039,9 +2043,14 @@ func _update_glide(dt: float) -> void:
 		and (gliding or m.time - kb_t > 0.4) and pad.is_empty() and not shot_down
 	var held: bool = inp.get("glide", false)
 	var btn_down: bool = inp.get("glide_btn", false)
-	# a fresh button press arms through a lock (a wind-down) as a second Space does: held, it opens HunterFeel.glide_engage
+	# a fresh button press arms through a lock (a wind-down) as a second Space does: held, it opens
+	# HunterFeel.glide_engage
 	# s after the press, or as the lock ends if that has passed; let go early and nothing opens (a tap is not a glide)
 	_glide_armed = (_glide_armed or (btn_down and not _glide_btn_held)) and held and not grounded
+	if not _glide_armed:
+		_press_in_dash = false
+	elif _glide_press_t == 0.0:
+		_press_in_dash = _in_dash_press()      # (11-27) the press's own moment, not the 0.4 s later when it opens
 	_glide_press_t = _glide_press_t + dt if _glide_armed else 0.0
 	var want: bool = held or auto_glide or (_glide_armed and not gliding)
 	_glide_btn_held = btn_down
@@ -2061,10 +2070,12 @@ func _update_glide(dt: float) -> void:
 			glide_fuel = maxf(0.0, glide_fuel - dt * hk / (glide_max * (1.0 + gear_stat("heat"))))
 		if not dropping:
 			stats["glide_t"] = float(stats.get("glide_t", 0.0)) + dt
-	elif want and hold_opens and loco.can(Loco.S.GLIDING) and (_glide_press_t if _glide_armed else air_t) >= HunterFeel.glide_engage \
-			and jump_at != m.time and not AirLimits.glide_shut(self) and (can or _dash_into_glide()):
+	elif want and hold_opens and loco.can(Loco.S.GLIDING) and jump_at != m.time \
+			and (_glide_press_t if _glide_armed else air_t) >= HunterFeel.glide_engage \
+			and ((can and not AirLimits.glide_shut(self)) or (_glide_armed and _dash_into_glide())):
 		# a fresh press in the air (_glide_armed) held glide_engage s, or a pad's auto-glide, or scripted input: the
-		# glider opens (a dash it was pressed in ends here). Space held since the jump never gets here (glide_press_only)
+		# glider opens (a dash an armed press was made in ends here; held scripted input never cuts a dash short).
+		# Space held since the jump never gets here (glide_press_only)
 		moves.open_glider()
 		_glide_armed = false
 		if below_lip:

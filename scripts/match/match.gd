@@ -3231,7 +3231,7 @@ func _gather_input() -> void:
 	# a second Space press (or Mouse 5/4) in the air, held, glides; Space held from the jump never does
 	player.inp["glide_press_only"] = true
 	player.inp["glide"] = (Input.is_action_pressed("jump") or Input.is_action_pressed("glide")) and not paused
-	player.inp["glide_btn"] = Input.is_action_pressed("glide") and not paused     # (movefeel) a fresh press opens the glider with no wait
+	player.inp["glide_btn"] = Input.is_action_pressed("glide") and not paused     # (11-27) a fresh press arms the glider; it opens once held HunterFeel.glide_engage (0.4 s)
 	player.inp["dash_down"] = Input.is_action_pressed("dash") and not paused     # hold-shaped dashes (Slide, Rampage)
 	var quick: bool = Settings.get_v("cast_on_press")
 	player.inp["sec_hold"] = Input.is_action_pressed("secondary") and not paused and not on_panel
