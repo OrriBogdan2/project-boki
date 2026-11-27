@@ -84,7 +84,7 @@
 	"gil": {"meshy_native": true, "size": 0.69, "hand": "RightHand",
 		"props": {"hand.R": ["metal-swordfish"], "hips": ["skin-fin-back"]}, "tilt": {"hand.R": -45.0},
 		"scale": {"hand.R": 1.6, "hips": [1.0, 1.0, 0.7]},
-		"grip": {"hips": {"part": [-0.001, 0.412, 0.337], "bone": [0.001, 0.221, -0.161]},
+		"grip": {"hips": {"part": [-0.001, 0.412, 0.337], "bone": [0.001, 0.021, -0.161]},
 			"hand.R": {"part": [-0.12, -0.057, 0.02], "bone": [0.003, 0.12, 0.03], "turn": [2.3528, -0.0066, 0.9028]}},
 		"anchors": {"anchor_head_top": "head_end", "anchor_chest": "Spine02", "anchor_gun_R": "RightHand"},
 		"plants": {"walk": {"L": [0.3], "R": [0.683]}, "run": {"L": [0.083], "R": [0.417]}, "crouch": {"L": [0.133], "R": [0.717]}},

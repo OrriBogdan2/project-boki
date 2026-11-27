@@ -135,3 +135,9 @@ LMB, RMB, E + recast, X + leap, hit, death).
 - warden_native.json: `skin-fin-back` hangs on hips -> Spine02, nothing cut from gil_meshy.glb (no open edges; live's strip stays inside the fan). Grip pins the fan root (part [-0.001, 0.412, 0.337]) onto the coat back at nape-to-mid-back height (bone [0.001, 0.221, -0.161]); scale [1, 1, 0.7] flattens its depth about the root. r7's own seat floated the fan 0.13 m off the coat and up to the brim. The crest is not hung (it floated behind the head and is not in the turnaround).
 - gil_meshy.glb unchanged from r18, so geo_check = r18: worst 12.0 cm, held worst 5.6 (live 13.6 / 13.4); hands ok.
 - art-gate (3-row match sheets, new | r18 | live): GAME 7.8, r18 7.5, live 5.2, PASS. Vs r18's own art-gate (GAME 7.8): fin 7.0 -> 7.4, fin_head 7.0 -> 6.8 (run noise ~0.4); vs the Fable review of r18: fin 6.5, fin_head 6.2.
+
+## Dorsal fan reseat r20 (warden_native.json only), 2026-11-27
+- Why: the Fable review of r19 found the fan's front spike rising up through the hat brim in crouch walk and at the jump apex. r19 seated the fan root at the nape, right under the brim.
+- Fix: hips grip bone y 0.221 -> 0.021 (the fan sits ~22 cm lower on Spine02, at shoulder-blade height like the turnaround). Same size, scale and tilt. No glb changed.
+- Tried: dy -0.08/-0.12/-0.15, with tilts -0.25/+0.2 rad. Only -0.20 cleared the brim in back-view eye renders of every clip (5 yaws x 8 clips x 3 frames).
+- art-gate (3-row match sheets, r20 | r19 | live, all re-rendered with the same moving-crouch audit): GAME 7.2, r19 6.5, live 5.0, PASS. Fin 6.0 -> 6.5, fin_head 6.5 -> 7.0 in the paired runs. An earlier run with stale r19/live rows gave 7.0 / 6.5 / 5.0.
