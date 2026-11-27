@@ -42,3 +42,24 @@ static func tick(m: Match, map: FullMap) -> void:
 	var vp := m.get_viewport()
 	if vp.disable_3d != off:
 		vp.disable_3d = off
+
+
+## Frames apart a hunter is drawn while the 3D view is off (OFF_EVERY), and the skipped time past which it is drawn
+## anyway. Hunters are staggered by id so each frame draws about a quarter of them.
+const OFF_EVERY := 4
+const OFF_MAX_DT := 0.25
+
+
+## Match._process: every hunter's visuals each frame, but while the 3D view is off (the ride map covers the screen)
+## each is drawn every OFF_EVERY frames and catches up the time it skipped (Ent.lod_dt, as far monsters do). The ride
+## measured ~7.5 ms a frame of hunter visuals at 30 players for a picture nobody sees. The sim is not touched; when
+## the 3D view comes back at the launch every hunter is drawn that frame with at most OFF_EVERY frames to catch up.
+static func render_hunters(m: Match, delta: float, alpha: float) -> void:
+	var off := m.get_viewport().disable_3d
+	var f := Engine.get_process_frames()
+	for e in m.hunters:
+		if not off or e.lod_dt + delta > OFF_MAX_DT or (f + e.get_instance_id()) % OFF_EVERY == 0:
+			e.render(delta + e.lod_dt, alpha)
+			e.lod_dt = 0.0
+		else:
+			e.lod_dt += delta

@@ -252,8 +252,8 @@ var _render_n := 0
 func _render_now(e: Ent, cf: Vector3, near2: float) -> bool:
 	if e.dead or e.lod_dt > 0.2:
 		return true
-	if Vector2(e.pos.x - cf.x, e.pos.z - cf.z).length_squared() < near2:
-		return true
+	if not get_viewport().disable_3d and Vector2(e.pos.x - cf.x, e.pos.z - cf.z).length_squared() < near2:
+		return true      # (none is near while 3D is off: RideView)
 	return (_render_n + e.get_instance_id()) % 4 == 0
 
 ## Monsters, kin, chests, crates, shrines and loot are each several meshes; from the skyship the
@@ -3138,7 +3138,7 @@ func _process(delta: float) -> void:
 		var fp := player.model.global_position + Vector3(0, 0.8, 0) if player and player.model and not player.out else Vector3(0, -999, 0)
 		world.wall_mat.set_shader_parameter("focus", fp)
 	Prof.begin("render_entities")
-	for e in hunters: e.render(delta, alpha)
+	RideView.render_hunters(self, delta, alpha)      # (3D off behind the ride map: a few a frame)
 	_vprof("hunters")
 	# monsters and wild kin well away from the view animate at a quarter rate (each catches up with
 	# the time it skipped); near ones every frame

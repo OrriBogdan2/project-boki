@@ -96,6 +96,16 @@ func _ride_view() -> void:
 	m.skydrop.planning = false
 	RideView.tick(m, map)
 	ok(map.is_open and vp.disable_3d, "ride view: the ship has set off, the map stays and 3D stays off")
+	for e in m.hunters:
+		e.lod_dt = 0.0
+	RideView.render_hunters(m, 0.016, 1.0)
+	var skipped := m.hunters.filter(func(e): return e.lod_dt > 0.0).size()
+	var drawn := m.hunters.size() - skipped
+	ok(drawn > 0 and skipped > drawn, "ride view: 3D off, a few hunters drawn a frame (%d of %d)" % [drawn, m.hunters.size()])
+	vp.disable_3d = false
+	RideView.render_hunters(m, 0.016, 1.0)
+	ok(m.hunters.all(func(e): return e.lod_dt == 0.0), "ride view: 3D back on, every hunter drawn and caught up")
+	vp.disable_3d = true
 	m.warmed = false
 	RideView.tick(m, map)
 	ok(not vp.disable_3d, "ride view: 3D is never switched off before the warm-up has run")
