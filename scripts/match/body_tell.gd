@@ -48,6 +48,12 @@ static func tick(h: Hunter, _delta: float) -> void:
 		h.m.fx.ring(h.pos + Vector3(0, 0.05, 0), CAST_RING_R, col, CAST_RING_T, SideColor.order(h.m, h))
 
 
+## A cast the glint and ring have not shown yet, or a tint still showing (a pose-throttled Hunter ticks
+## the looks on this too, so a cast reads at once and its glint fades on time).
+static func pending(h: Hunter) -> bool:
+	return h.cast_at > float(h.get_meta("tell_cast", -9.0)) or tint_of(h).a > 0.0
+
+
 ## The body's tint now (transparent when none), for checks.
 static func tint_of(h: Hunter) -> Color:
 	return h.get_meta("tell_tint", Color.TRANSPARENT)
