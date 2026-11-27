@@ -18,6 +18,7 @@ const FADE := 0.15  # s: one clip into the next
 const GLIDE_OUT := 0.2  # s: the glide clip back into the next one (it opens at once)
 const DASH_IN := 0.25  # s: the dash clip over the body
 const RATE_MIN := 0.6  # the walk, run and sneak clips' slowest rate, of their keyed pace
+const KEYED_DRAW := 1.12  # x its own size the model was drawn at when the *_mps in warden_native.json were keyed
 const RATE_MAX := 1.8  # and their fastest: a quicker stride keeps the feet nearer the ground speed
 const ATTACK_AGAIN := 0.6  # share of the attack clip after which a new hit starts it over
 const LEGS_RUN := ["walk", "run", "crouch"]  # the states where the legs carry him (they turn to his way)
@@ -439,7 +440,14 @@ func _shot_rate(st: String) -> float:
 
 ## The loop's rate for this ground speed against the speed it was keyed at (data, m/s), clamped to the clip's range.
 func _rate(ground: float, key: String, lo: float) -> float:
-	return clampf(ground / float(d.get(key, 1.5)), lo, RATE_MAX)
+	return clampf(ground / (float(d.get(key, 1.5)) * _stride_k()), lo, RATE_MAX)
+
+
+## How much further a cycle covers than the keyed speeds say: they were measured with the model drawn KEYED_DRAW
+## times its own size (a match's old size), and a match now draws it larger (Hunter.VIS_SCALE); elsewhere 1.
+func _stride_k() -> float:
+	var drawn := root.scale.y / float(root.get_meta("look_scale", root.scale.y))
+	return maxf(drawn / KEYED_DRAW, 1.0)
 
 
 func _clip_len(st: String) -> float:
