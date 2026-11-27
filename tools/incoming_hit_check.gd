@@ -136,13 +136,13 @@ func _none() -> void:
 ## With every pool voice sounding, the cue still plays: it ranks as yours, so it takes a far rifle's voice.
 func _full_pool() -> void:
 	_hush()
-	Sfx.ensure("rifle")
+	Sfx.ensure("gun_rifle")
 	for i in Sfx.POOL:
-		var st = Sfx.streams["rifle"]
+		var st = Sfx.streams["gun_rifle"]
 		Sfx.players[i].stream = st[0] if st is Array else st
 		Sfx.players[i].play()
 		Sfx.voices.rank[i] = 30.0 + float(i)      # far sounds, ranked below yours
-		Sfx.voices.sound[i] = "rifle"
+		Sfx.voices.sound[i] = "gun_rifle"
 	var full := Sfx.players.filter(func(p): return p.playing).size()
 	foe.pos = P.pos + right * NEAR_M
 	m.on_damage(P, foe, 20.0, {})
