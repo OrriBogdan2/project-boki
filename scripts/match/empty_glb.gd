@@ -51,6 +51,7 @@ static func dress(root: Node3D, appearance: Dictionary, lk: Dictionary) -> void:
 	_hide_body(root.get_node("Rig") as Node3D)
 	var size := EmptyFrame.factor(Unmasked.clean(appearance), "head") / EmptyFrame.factor(rest_look(k), "head")
 	_into_hood(root, KEYS.find(k), size)
+	WardenBulk.apply(root, EmptyFrame.bulk(Unmasked.clean(appearance)))  # (the build slider thickens the skin)
 	_dye(root.get_node("Warden") as Node3D, Unmasked.clean(appearance))
 
 

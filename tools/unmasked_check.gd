@@ -42,15 +42,13 @@ func _proc(lk: Dictionary) -> Node3D:
 
 ## How far a 3D Empty's skinned arm bone sits from its spine under the look's sliders (the pose WardenSync gives
 ## it from the rig), 0 if none.
-func _glb_arm(m: Node3D) -> float:
-	var sync := m.get_node_or_null("Warden/Sync") as WardenSync
-	if sync == null:
+## How wide the 3D Empty's skin is cut (WardenBulk): the first bone's bind pose scale across, 0 for a procedural body.
+func _glb_width(m: Node3D) -> float:
+	var glb := m.get_node_or_null("Warden")
+	if glb == null:
 		return 0.0
-	var arm := WardenSkeleton.find(sync.skel, "upper_arm.L")
-	for l in sync.links:
-		if int(l[0]) == arm:
-			return absf(sync._rig_pose(l).origin.x)
-	return 0.0
+	var mi := glb.find_children("*", "MeshInstance3D", true, false)[0] as MeshInstance3D
+	return mi.skin.get_bind_pose(0).basis.get_scale().x
 
 func _in_lists(u: Dictionary) -> bool:
 	for row in Unmasked.ROWS:
@@ -198,10 +196,10 @@ func _model(main: Node) -> void:
 	var arms := []
 	for b in [0.0, 1.0]:
 		var g := _build({"unmasked": true, "frame": {"build": b}})
-		arms.append(_glb_arm(g))
+		arms.append(_glb_width(g))
 		g.free()
 	ok(arms[0] > 0.0 and arms[1] > arms[0] * 1.05,
-		"and the 3D Empty's arms follow it (EmptyGlb: %.3f / %.3f m from the spine)" % arms)
+		"and the 3D Empty's skin follows it (EmptyGlb: bind width %.3f / %.3f)" % arms)
 	for n in [styled, woman, man, slight, sturdy]:
 		n.free()
 	var marked := _build({"unmasked": true, "marks": [{"x": 0.0, "y": 0.9, "col": "#ff4040"}]})
