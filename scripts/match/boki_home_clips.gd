@@ -6,7 +6,9 @@ extends RefCounted
 ## Kin.render; a flier's wings hold wide) and a flier's hover and flare (BokiFly), its wings and tail driving them.
 ## Each is the species' baked idle (or sleep; the burst its run, the strut its walk) with BokiHomePoses' deltas laid
 ## over it, sampled into a new Animation, so every Boki keeps its own rest shape and idle motion. Built once per
-## species and shared.
+## species and shared. The munch and the nap are the species' own baked eat and sleep clips when those pass
+## BokiClipCover (the settle and wake then skip the curl they add, to join the clip as it is); a species whose clip
+## fails it keeps the built ones.
 
 const NAMES := [
 	"settle",
@@ -60,13 +62,18 @@ static func _build(species: String, player: AnimationPlayer, skel: Skeleton3D) -
 		names[skel.get_bone_name(i)] = i
 	var idle := player.get_animation("idle")
 	var sleep := player.get_animation("sleep")
+	var eat := player.get_animation("eat") if player.has_animation("eat") else null
 	var pose := BokiHomePoses.new(names, species)
 	var il := idle.length
 	var out := {}
+	var own_sleep := BokiClipCover.passes(sleep, idle, true)
+	pose.curl = 0.0 if own_sleep else 1.0
 	out["settle"] = _clip(skel, pose, "settle", idle, sleep, SETTLE_SECS)
 	out["wake"] = _clip(skel, pose, "wake", sleep, idle, WAKE_SECS)
-	out["nap"] = _clip(skel, pose, "nap", sleep, null, sleep.length)
-	for n in ["munch", "nudge", "climb", "splash", "swim", "paddle"]:
+	out["nap"] = _own(sleep) if own_sleep else _clip(skel, pose, "nap", sleep, null, sleep.length)
+	out["munch"] = _own(eat) if BokiClipCover.passes(eat, idle) else _clip(skel, pose, "munch", idle, null, il,
+			BokiHomePoses.cycles("munch", il))
+	for n in ["nudge", "climb", "splash", "swim", "paddle"]:
 		out[n] = _clip(skel, pose, n, idle, null, il, BokiHomePoses.cycles(n, il))
 	var impact := float(BaseTumble.rules()["impact_s"])
 	for n in ["rush", "brace", "dodge"]:
@@ -86,6 +93,11 @@ static func _build(species: String, player: AnimationPlayer, skel: Skeleton3D) -
 		out["flare"] = _clip(skel, pose, "flare", idle, null, float(BokiFly.rules()["flare_s"]))
 	return out
 
+## A baked clip played as it is, looped.
+static func _own(clip: Animation) -> Animation:
+	var anim := clip.duplicate() as Animation
+	anim.loop_mode = Animation.LOOP_LINEAR
+	return anim
 
 ## `a` is the base (and `b` what it turns into over the clip, for settle and wake).
 static func _clip(
