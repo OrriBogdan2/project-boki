@@ -49,19 +49,6 @@ static func lean_text(def: Dictionary) -> String:
 	return text if text != "" else "no particular lean"
 
 
-## Marks every vendor on the map itself.
-static func markers(fm, c: Control) -> void:
-	for v in Shops.list(fm.m):
-		var th := ShopStock.theme(String(v["theme"]))
-		var col := Color(String(th["col"]))
-		var pv: Vector2 = fm.to_screen(v["pos"])
-		if not fm.rect.grow(-6.0).has_point(pv):
-			continue
-		c.draw_circle(pv, 11.0, Color(0.04, 0.05, 0.09, 0.9))
-		c.draw_arc(pv, 11.0, 0.0, TAU, 24, col, 2.0, true)
-		Icons.draw(c, String(th["icon"]), pv, 7.0, col)
-
-
 ## How tall the legend wants to be.
 static func height(m) -> float:
 	return HEAD_H * 2.0 + ROW_H * Shops.legend_rows(m).size() + PAD

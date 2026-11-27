@@ -672,7 +672,7 @@ func _fresh(m: Match) -> void:
 func _jump_cast(m: Match, slot: String) -> String:
 	_fresh(m)
 	hunter.inp["jump"] = true
-	_steps(m, 9)
+	_steps(m, 8)  # (0.13 s up: ~0.87 m at JUMP_V 7.5, still inside Stone Row's 0.9 m ground-only window)
 	if hunter.grounded:
 		return "n/a: no jump"
 	var before := _snap()
