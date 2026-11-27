@@ -20,6 +20,7 @@ extends RefCounted
 const BUDGET_PATH := "res://ops/hud-budget.json"
 const FIGHT_S := 5.0  # s of match time before the HUD is judged
 const RIVAL_GAP := 5.0  # m between the player and the rival dropped beside them
+const HIT_BEFORE_S := 1.0  # s before FIGHT_S that the player lands one real hit on the rival
 const FIGHT_EXTRA_S := 15.0  # s more a Hunter scene may wait for a hit given or taken
 const CAST_S := 0.3  # s after the cast or ult press that the HUD is judged
 const MATE_GAP := 30.0  # m behind the player the teammate waits, away from the rival
@@ -101,7 +102,7 @@ func _scene(arch: String, moment: String, size: Vector2i, statuses: bool, shots:
 		for i in 3:
 			await main.get_tree().process_frame
 	if moment == "fusion":
-		Content.rules("merge_forms")["fusion_enabled"] = true  # (shipped off; this scene is the form's HUD)
+		MergeForm.set_enabled(true)  # (shipped off; this scene is the form's HUD)
 	Save.d = Save.fresh()
 	if arch != "":
 		Save.d.erase("hud_reveal")  # the full HUD, as a veteran sees it (a new player's is staged, HudReveal)
@@ -129,9 +130,12 @@ func _scene(arch: String, moment: String, size: Vector2i, statuses: bool, shots:
 		var at := m.player.pos - Vector3(MATE_GAP, 0.0, 0.0)
 		mate.ctrl = "idle"  # out of the fight, so the rival does not finish them into a deathbox
 		mate.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
+	var hit_at := int((FIGHT_S - HIT_BEFORE_S) / Match.DT)
 	for i in int((FIGHT_S + (FIGHT_EXTRA_S if arch != "" else 0.0)) / Match.DT):
 		m.step(Match.DT)
 		m.hud.loot.tick(Match.DT)  # pickup rows age with the match clock too (a busy box ran frames slower)
+		if i == hit_at:  # one landed hit before judging: the fight never hangs on the seed's AI
+			rival.hurt(10.0, m.player)
 		if i % 20 == 0:
 			await main.get_tree().process_frame
 		if arch != "" and m.time >= FIGHT_S and m.hud.in_fight():
@@ -178,7 +182,7 @@ func _scene(arch: String, moment: String, size: Vector2i, statuses: bool, shots:
 	if scene_bad > 0:
 		failed.append(tag.trim_suffix(": ") if tag != "" else "plain")
 		print("HUDCLUTTER FAIL SCENE %s (%d failing lines)" % [tag.trim_suffix(": "), scene_bad])
-	Content.rules("merge_forms")["fusion_enabled"] = false
+	MergeForm.set_enabled(false)
 	m.queue_free()
 	await main.get_tree().process_frame
 
