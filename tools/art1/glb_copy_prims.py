@@ -29,22 +29,34 @@ import native_pack as npk  # noqa: E402
 
 
 def height(js, bin_, skip):
-    hi = [graft.read(js, bin_, p["attributes"]["POSITION"])[:, 1].max()
-          for m in js["meshes"] for p in m["primitives"] if js["materials"][p["material"]]["name"] not in skip]
+    hi = [
+        graft.read(js, bin_, p["attributes"]["POSITION"])[:, 1].max()
+        for m in js["meshes"]
+        for p in m["primitives"]
+        if js["materials"][p["material"]]["name"] not in skip
+    ]
     return float(max(hi))
 
 
 def box(js, bin_, skip=()):
-    ps = [graft.read(js, bin_, p["attributes"]["POSITION"]) for m in js["meshes"] for p in m["primitives"]
-          if js["materials"][p["material"]]["name"] not in skip]
+    ps = [
+        graft.read(js, bin_, p["attributes"]["POSITION"])
+        for m in js["meshes"]
+        for p in m["primitives"]
+        if js["materials"][p["material"]]["name"] not in skip
+    ]
     ps = np.concatenate(ps)
     return ps.min(0), ps.max(0)
 
 
 def add_acc(out, arr, ctype, typ, minmax=False):
     js = out.js
-    acc = {"bufferView": out.add_view(np.ascontiguousarray(arr).tobytes()), "componentType": ctype,
-           "count": len(arr), "type": typ}
+    acc = {
+        "bufferView": out.add_view(np.ascontiguousarray(arr).tobytes()),
+        "componentType": ctype,
+        "count": len(arr),
+        "type": typ,
+    }
     if minmax:
         acc["min"], acc["max"] = arr.min(0).tolist(), arr.max(0).tolist()
     js["accessors"].append(acc)
@@ -56,8 +68,13 @@ def copy_texture(out, sjs, sbin, ti):
     js = out.js
     st = sjs["textures"][ti]
     img = sjs["images"][st["source"]]
-    js.setdefault("images", []).append({"bufferView": out.add_view(npk.view_bytes(sjs, sbin, img["bufferView"])),
-                                        "mimeType": img["mimeType"], "name": img.get("name", "copied")})
+    js.setdefault("images", []).append(
+        {
+            "bufferView": out.add_view(npk.view_bytes(sjs, sbin, img["bufferView"])),
+            "mimeType": img["mimeType"],
+            "name": img.get("name", "copied"),
+        }
+    )
     samp = {}
     if "sampler" in st:
         js.setdefault("samplers", []).append(dict(sjs["samplers"][st["sampler"]]))
@@ -75,6 +92,7 @@ def copy_material(out, sjs, sbin, mi):
                 if k.endswith("Texture") and "index" in v:
                     v["index"] = copy_texture(out, sjs, sbin, v["index"])
                 fix(v)
+
     fix(m)
     out.js["materials"].append(m)
     return len(out.js["materials"]) - 1
@@ -102,8 +120,13 @@ def main():
         lo, hi = box(fjs, fbin)
         dlo, dhi = box(js, bin_, mats)
         s = float((dhi[1] - dlo[1]) / (hi[1] - lo[1]))
-        t = np.float32([(dlo[0] + dhi[0]) / 2 - s * (lo[0] + hi[0]) / 2, dlo[1] - s * lo[1],
-                        (dlo[2] + dhi[2]) / 2 - s * (lo[2] + hi[2]) / 2])
+        t = np.float32(
+            [
+                (dlo[0] + dhi[0]) / 2 - s * (lo[0] + hi[0]) / 2,
+                dlo[1] - s * lo[1],
+                (dlo[2] + dhi[2]) / 2 - s * (lo[2] + hi[2]) / 2,
+            ]
+        )
     names = o.name.split(",") if o.name else []
     joint = graft.joint_names(js).index(o.bone)
     out = npk.Out(js, bin_)
@@ -144,7 +167,14 @@ def main():
             done.append(name)
     graft.compact(out)
     out.write(o.out)
-    print(o.out, f"scale {s:.4f} shift {t.round(4).tolist()}", "copied", done, "missing", [m for m in mats if m not in done])
+    print(
+        o.out,
+        f"scale {s:.4f} shift {t.round(4).tolist()}",
+        "copied",
+        done,
+        "missing",
+        [m for m in mats if m not in done],
+    )
 
 
 if __name__ == "__main__":

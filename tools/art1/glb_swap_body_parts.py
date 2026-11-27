@@ -47,6 +47,7 @@ def fix_caps(p, u, i, name):
     e = np.vstack([wi[ct[:, [0, 1]]], wi[ct[:, [1, 2]]]])
     from scipy.sparse import coo_matrix
     from scipy.sparse.csgraph import connected_components
+
     nv = wi.max() + 1
     _, lab = connected_components(coo_matrix((np.ones(len(e)), (e[:, 0], e[:, 1])), shape=(nv, nv)), directed=False)
     gi = np.where(good_v)[0]
@@ -56,8 +57,10 @@ def fix_caps(p, u, i, name):
         vs = np.where(bad_v & (lab[wi] == c))[0]
         _, ix = tree.query(p[vs].mean(0))
         u[vs] = u[gi[ix]]
-    print("%s: %d cap triangles with a zero-area UV, %d vertices in %d patches re-mapped" % (
-        name, deg.sum(), bad_v.sum(), len(comps)))
+    print(
+        "%s: %d cap triangles with a zero-area UV, %d vertices in %d patches re-mapped"
+        % (name, deg.sum(), bad_v.sum(), len(comps))
+    )
     return u
 
 
@@ -121,7 +124,9 @@ def main():
             for s in range(4):
                 np.add.at(full, (np.arange(len(p)), OJ[oi, s]), wt[:, kk] * OW[oi, s])
         far = d[:, 0] > a.far
-        if far.any():  # surfaces the old mesh did not have (the leg backs under the tail): weights diffuse in along the mesh
+        if (
+            far.any()
+        ):  # surfaces the old mesh did not have (the leg backs under the tail): weights diffuse in along the mesh
             e = np.vstack([i.reshape(-1, 3)[:, [0, 1]], i.reshape(-1, 3)[:, [1, 2]], i.reshape(-1, 3)[:, [2, 0]]])
             _, wi = np.unique(np.round(p, 5), axis=0, return_inverse=True)
             wi = wi.ravel()
@@ -145,8 +150,10 @@ def main():
         tw = np.take_along_axis(full, top, 1)
         tw /= tw.sum(1, keepdims=True)
         print("%s: %d far verts relaxed" % (path, far.sum()))
-        print("%s: %d verts, %d tris, nearest old vertex median %.1f mm, p99 %.1f mm" % (
-            path, len(p), len(i) // 3, 1000 * np.median(d[:, 0]), 1000 * np.percentile(d[:, 0], 99)))
+        print(
+            "%s: %d verts, %d tris, nearest old vertex median %.1f mm, p99 %.1f mm"
+            % (path, len(p), len(i) // 3, 1000 * np.median(d[:, 0]), 1000 * np.percentile(d[:, 0], 99))
+        )
         P.append(p), N.append(n), U.append(u), I.append(i + base), J.append(top), W.append(tw)
         base += len(p)
     for spec in [s for s in a.rigid.split(",") if s]:
