@@ -60,3 +60,43 @@ The pods swing run to run by about 1 ms of script and 4 ms of wall, so only the 
 2. Hunter.render for hunters far from the camera: skip the cosmetic state between pose frames (about 1.5 ms of the 3.2).
 3. AimDraw: build only entries near the camera, and keep a built entry's vertices while its inputs do not change.
 4. Kit ticks and `_refresh_kin_stats` (a Dictionary rebuilt per hunter per frame, 0.28 ms).
+
+## Round 2 (11-27): hidden Hunters, the path search, the line test
+Profiled with temporary per-function timers (not committed) on the same `--bench-trios=10` run, 4090 pods and headless
+here. What the counts said (per frame, 30 hunters): 27 Hunters rendered, **23 of them hidden by sight** (fog of war),
+yet each ran the whole `Hunter.render` and was posed every 6th frame; 14.6 full bot sims; the tile path search hit its
+4000-tile cap about every 2 s and then ran again without hazards (8000 tiles, ~24 ms here, ~50 ms on the pods: the
+frames behind the 1% lows); `_clear_line` 4 calls at ~140 us.
+
+What changed:
+1. `SimLod.unheard`: a Hunter hidden (not visible) and over 40 m from the listener (past `Sfx.hear_range` 30 and
+   StepReach 20) skips pose, looks and fx in `Hunter.render`; the wisp and ult-ready ticks still run, its Hero rig
+   holds (`WardenGlb.POSE_HELD`), and it poses at once when it shows (catch-up capped at 0.5 s). Nothing visible or
+   audible changes.
+2. `Bot._grid_path_in` is A* with a bucket queue (newest first) and a per-search height cache: same found/not-found
+   and the same path lengths as the old breadth-first search on 4800 real pairs (Hollow Crown and a generated map),
+   3.3-4.6x faster when a path exists. The wide and no-hazard repeats run only when the search before ran into the
+   window's edge or its cap, or turned a hazard tile down (otherwise they could not differ).
+3. `Bot._clear_line` reads tiles inline and skips samples on the same three tiles: same answers on 8000 lines,
+   1.7x faster.
+
+Before -> after (`--perf-bench --bench-trios=10 --bench-secs=45 --bench-view=1920x1080 --quality=medium`):
+| run | script avg | script p99 | wall p99 | 1% low | hunter render | bots | gpu | draws / objects |
+|---|---|---|---|---|---|---|---|---|
+| main rp3g-1 | 35.53 | 107.6 | 198.5 | 3.1 | 5.99 | 6.41 | 5.61 | 535 / 1160 |
+| branch rp3g-1 | 36.90 | 77.2 | 128.2 | 4.2 | 3.98 | 5.83 | 0.79 | 471 / 912 |
+| main rp3g-2 | 36.33 | 89.1 | 146.9 | 3.8 | 6.48 | 6.99 | 5.56 | 531 / 1178 |
+| branch rp3g-2 | 36.36 | 65.9 | 99.9 | 5.4 | 3.88 | 5.66 | 0.65 | 465 / 913 |
+| main here (headless, 2 runs) | 18.63 / 18.34 | 45.6 / 40.8 | | | 3.26 / 3.30 | 3.30 / 3.28 | | |
+| branch here (headless, 2 runs) | 16.53 / 16.49 | 33.7 / 33.5 | | | 2.07 / 2.00 | 2.62 / 2.78 | | |
+The pods were shared with other GPU jobs during the branch runs: sections this PR does not touch (mobs, kins, shots,
+separate, interact, lairs, pickups, rest) cost 6% and 18% more there than in the main runs, which eats the average.
+The same-box headless A/B (interleaved) has the script average 1.9 ms lower (-10%) and p99 -22%; on the pods the
+targeted sections fall 2.0-2.6 ms (render) and 0.6-1.3 ms (bots), script p99 -25 to -28%, wall p99 -32 to -35%.
+The 1% lows stay low because of one-off spawn hitches (box spawns, 800+ ms) that are the load-in job's.
+
+## Next, ranked (round 2)
+1. Hunter sim (4-8 ms): 14.6 full sims a frame; the kit ticks and the input gates are 1.4 ms, `_physics` 1.1 ms. A
+   lower rate for calm bots past THINK_FAR_M (decision 0022 sets 20 Hz) is the big lever; it changes far fights.
+2. HUD 5-6 ms on the pods: panels 1.2, world labels 0.9, minimap 0.3 (headless numbers), spread over many parts.
+3. The spawn hitches above (box spawns building 24 Nodes each at once).
