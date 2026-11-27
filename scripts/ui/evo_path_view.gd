@@ -4,13 +4,20 @@ extends RefCounted
 ## the pip sources under each end, and at the line's level "Evolve now / Not yet". Ink lines show only the
 ## silhouette a held Ink would make. An unknown form is a black shape named '?'.
 
-const SIL := Vector2(64, 64)                 # px: one final's silhouette
-const BAR_H := 14.0                          # px: the tug bar's height
-const UNKNOWN := Color(0.05, 0.05, 0.07)     # an unmet form's shape
-const MET := Color(0.36, 0.38, 0.46)         # a met form's shape (no art yet to draw it)
-const SIDES := [Color("ff9a6a"), Color("7ac8ff")]   # left and right end of the bar
-const SOURCE_NAMES := {"stat": "stat lead", "lean": "lean", "tokens": "tokens", "care": "care", "ribbons": "ribbons",
-		"play": "how it plays"}
+const SIL := Vector2(64, 64)  # px: one final's silhouette
+const BAR_H := 14.0  # px: the tug bar's height
+const UNKNOWN := Color(0.05, 0.05, 0.07)  # an unmet form's shape
+const MET := Color(0.36, 0.38, 0.46)  # a met form's shape (no art yet to draw it)
+const SIDES := [Color("ff9a6a"), Color("7ac8ff")]  # left and right end of the bar
+const SOURCE_NAMES := {
+	"stat": "stat lead",
+	"lean": "lean",
+	"tokens": "tokens",
+	"care": "care",
+	"ribbons": "ribbons",
+	"play": "how it plays"
+}
+
 
 ## Adds the meter (or the Ink preview) to v. refresh() redraws the card after Evolve.
 static func block(rec: Dictionary, v: VBoxContainer, refresh: Callable) -> void:
@@ -39,23 +46,33 @@ static func block(rec: Dictionary, v: VBoxContainer, refresh: Callable) -> void:
 	if EvoPath.due(rec):
 		_prompt(rec, v, refresh)
 
+
 static func _prompt(rec: Dictionary, v: VBoxContainer, refresh: Callable) -> void:
 	var why := EvoPath.blocked(rec)
 	if why != "":
-		var why_t := {"stay": "Wearing a Stayleaf: it will not evolve.", "undecided": "It waits until one end leads.",
-				"art": "Art not in the game yet: it will wait."}
+		var why_t := {
+			"stay": "Wearing a Stayleaf: it will not evolve.",
+			"undecided": "It waits until one end leads.",
+			"art": "Art not in the game yet: it will wait."
+		}
 		v.add_child(UI.para(why_t[why], 12, UI.FAINT))
 	var row := UI.hbox(8)
-	var go := UI.button("Evolve now", func():
-		EvoPath.evolve(rec)
-		refresh.call(), 140)
+	var go := UI.button(
+		"Evolve now",
+		func():
+			EvoPath.evolve(rec)
+			refresh.call(),
+		140
+	)
 	go.disabled = why != ""
 	row.add_child(go)
 	row.add_child(UI.ghost("Not yet", refresh, 100))
 	v.add_child(row)
 
+
 static func _name(e: Dictionary) -> String:
 	return String(e["name"]) if EvoPath.known(String(e["form"])) else "?"
+
 
 static func _sources(list: Array, e: Dictionary) -> String:
 	if list.is_empty():
@@ -70,6 +87,7 @@ static func _sources(list: Array, e: Dictionary) -> String:
 		parts.append("%s %d" % [what, int(p["count"])])
 	return ", ".join(parts)
 
+
 static func sil(form: String, nm: String) -> Control:
 	var box := UI.vbox(2)
 	var shape := Panel.new()
@@ -81,6 +99,7 @@ static func sil(form: String, nm: String) -> Control:
 	box.add_child(shape)
 	box.add_child(UI.label(nm if EvoPath.known(form) else "?", UI.T_SMALL, UI.MUTED))
 	return box
+
 
 static func tug_bar(a: int, b: int) -> Control:
 	var bar := UI.hbox(0)

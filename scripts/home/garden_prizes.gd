@@ -8,14 +8,18 @@ extends RefCounted
 ## in that game's season the season keepsake (GardenSeasons).
 ## State is lazy and needs no migration: Save.d cups (runs), Save.d prize_day (first win), rec.ribbons.
 
+
 static func rules() -> Dictionary:
 	return Content.rules("garden_prizes")
+
 
 static func ids() -> Array:
 	return rules()["games"].keys()
 
+
 static func game(id: String) -> Dictionary:
 	return rules()["games"][id]
+
 
 ## The weights of a game's prize table added up.
 static func table_total(id: String) -> int:
@@ -24,12 +28,14 @@ static func table_total(id: String) -> int:
 		total += int(e["w"])
 	return total
 
+
 ## What the cup compares: a Boki's trained stats added up.
 static func strength(rec: Dictionary) -> int:
 	var total := 0
 	for s in Care.STATS:
 		total += int(rec["stats"].get(s, 0))
 	return total
+
 
 ## The stat a game's cup compares ("speed" for the Dash), "best" resolved to `rec`'s highest stat; "" = the total.
 static func cup_stat(id: String, rec: Dictionary) -> String:
@@ -42,10 +48,12 @@ static func cup_stat(id: String, rec: Dictionary) -> String:
 			best = s
 	return best
 
+
 ## What a cup round compares for `rec` in game `id`: the game's own stat (stat total when it names none).
 ## `stat` is the stat to read (cup_stat of the backed Boki), so both sides are judged on the same one.
 static func edge(rec: Dictionary, stat: String) -> int:
 	return int(rec["stats"].get(stat, 0)) if stat != "" else strength(rec)
+
 
 ## A visiting rival for `rec`: a copy whose stats are rec's times `ratio` (rounded up, so its strength is
 ## at least ratio times rec's and the win counts for a cup round of that min_ratio).
@@ -55,6 +63,7 @@ static func rival(rec: Dictionary, ratio: float) -> Dictionary:
 	for s in Care.STATS:
 		r["stats"][s] = ceili(float(rec["stats"].get(s, 0)) * ratio)
 	return r
+
 
 ## The strongest of `recs` other than `mine`: the rival a race is judged against. With a game `id`, strongest in
 ## that game's cup stat (the fastest rival in the Dash), else by the stat total.
@@ -66,6 +75,7 @@ static func strongest(recs: Array, mine: Dictionary, id := "") -> Dictionary:
 			best = r
 	return best
 
+
 ## One weighted pick from a game's table.
 static func roll(id: String, rng: RandomNumberGenerator) -> Dictionary:
 	var at := rng.randi_range(1, table_total(id))
@@ -75,27 +85,34 @@ static func roll(id: String, rng: RandomNumberGenerator) -> Dictionary:
 			return e
 	return game(id)["table"][0]
 
+
 static func entry_name(e: Dictionary) -> String:
 	if String(e["kind"]) == "snack":
 		return Care.food_name(String(e["id"]))
 	return GardenItems.item_name(String(e["id"]))
 
+
 static func week_of(now: float) -> int:
 	return int(now / float(rules()["week_s"]))
 
+
 static func ribbon_count(rec: Dictionary, id: String) -> int:
 	return int(rec.get("ribbons", {}).get(id, {}).get("n", 0))
+
 
 ## True once this Boki has taken the game's Crown this week.
 static func crowned_this_week(rec: Dictionary, id: String, now: float) -> bool:
 	return ribbon_count(rec, id) > 0 and int(rec["ribbons"][id]["week"]) == week_of(now)
 
+
 ## The round this Boki fights next in a game's cup: an index into cup.rounds.
 static func stage(rec: Dictionary, id: String) -> int:
 	return int(_runs(id).get(String(rec["uid"]), 0))
 
+
 static func _runs(id: String) -> Dictionary:
 	return Save.d.get_or_add("cups", {}).get_or_add(id, {})
+
 
 ## Banks one prize entry: an item to the garden bag, a snack to the pantry.
 static func bank(e: Dictionary) -> void:
@@ -105,14 +122,27 @@ static func bank(e: Dictionary) -> void:
 	else:
 		Save.add_item(String(e["id"]), 1)
 
+
 ## Pays one finished match to the Boki you backed (`mine`) against `foe`. Returns what the card shows:
 ## {game, won, items (entries), first, round (name of the round won), crown, ribbon, reset, keepsake (name or ""),
 ## charged, runs ("Races left today: N")}. A win uses one limited race run (TrainRuns); with none left it was a
 ## friendly: no prize, no cup step (charged false). A loss pays nothing, so it uses no run.
-static func settle(id: String, mine: Dictionary, foe: Dictionary, won: bool, now := -1.0,
-		rng: RandomNumberGenerator = null) -> Dictionary:
-	var out := {"game": id, "won": won, "items": [], "first": false, "round": "", "crown": false,
-			"ribbon": false, "reset": false, "keepsake": "", "charged": true, "runs": ""}
+static func settle(
+	id: String, mine: Dictionary, foe: Dictionary, won: bool, now := -1.0, rng: RandomNumberGenerator = null
+) -> Dictionary:
+	var out := {
+		"game": id,
+		"won": won,
+		"items": [],
+		"first": false,
+		"round": "",
+		"crown": false,
+		"ribbon": false,
+		"reset": false,
+		"keepsake": "",
+		"charged": true,
+		"runs": ""
+	}
 	if now < 0.0:
 		now = Time.get_unix_time_from_system()
 	PlayStyle.garden(mine, "game", id, now)
@@ -143,6 +173,7 @@ static func settle(id: String, mine: Dictionary, foe: Dictionary, won: bool, now
 	_cup(out, mine, foe, now)
 	return out
 
+
 static func _cup(out: Dictionary, mine: Dictionary, foe: Dictionary, now: float) -> void:
 	var id: String = out["game"]
 	var rounds: Array = rules()["cup"]["rounds"]
@@ -160,6 +191,7 @@ static func _cup(out: Dictionary, mine: Dictionary, foe: Dictionary, now: float)
 		return
 	runs.erase(uid)
 	_crown(out, mine, now)
+
 
 ## The Crown: the game's Cup Ribbon on the winner and the cup prize in the bag.
 static func _crown(out: Dictionary, mine: Dictionary, now: float) -> void:
@@ -179,6 +211,7 @@ static func _crown(out: Dictionary, mine: Dictionary, now: float) -> void:
 		(out["items"] as Array).append(prize)
 	out["keepsake"] = GardenSeasons.keepsake(id, mine, now)
 	Save.remember(mine, "cup", "won the %s Crown cup and wears the %s" % [g["name"], g["ribbon"]], 2.0)
+
 
 ## The lines a result card adds under the gems: the prizes won and the cup step. font 0 leaves it out.
 ## Each cup round sounds its fanfare as the card shows it.

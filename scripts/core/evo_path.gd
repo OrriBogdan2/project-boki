@@ -8,12 +8,15 @@ class_name EvoPath
 
 const SOURCES := ["stat", "lean", "tokens", "care", "ribbons", "play"]
 
+
 static func rules() -> Dictionary:
 	return Content.rules("evo_paths")
+
 
 ## The branching line of this Boki's species ({} when its line does not branch by pips).
 static func line(rec: Dictionary) -> Dictionary:
 	return rules()["lines"].get(String(rec.get("species", "")), {})
+
 
 ## Per end of the line, the pip sources that count: [[{source, count}, ...], [...]] ([] for no line).
 static func pips(rec: Dictionary) -> Array:
@@ -25,9 +28,14 @@ static func pips(rec: Dictionary) -> Array:
 	var out := []
 	for i in ends.size():
 		var e: Dictionary = ends[i]
-		var counts := {"stat": int(rules()["pips"]["stat_lead"]) if lead == i else 0, "lean": _lean(rec, e),
-				"tokens": _tokens(rec, e), "care": _care(rec, e), "ribbons": _ribbons(rec, e),
-				"play": PlayStyle.path_pips(rec, String(e["path"]))}
+		var counts := {
+			"stat": int(rules()["pips"]["stat_lead"]) if lead == i else 0,
+			"lean": _lean(rec, e),
+			"tokens": _tokens(rec, e),
+			"care": _care(rec, e),
+			"ribbons": _ribbons(rec, e),
+			"play": PlayStyle.path_pips(rec, String(e["path"]))
+		}
 		var list := []
 		for s in SOURCES:
 			if int(counts[s]) > 0:
@@ -35,11 +43,13 @@ static func pips(rec: Dictionary) -> Array:
 		out.append(list)
 	return out
 
+
 static func total(list: Array) -> int:
 	var n := 0
 	for p in list:
 		n += int(p["count"])
 	return n
+
 
 ## The end index this Boki is growing toward: more pips, then the stat lead; -1 when undecided (or no line).
 static func winner(rec: Dictionary) -> int:
@@ -52,16 +62,20 @@ static func winner(rec: Dictionary) -> int:
 		return 0 if a > b else 1
 	return _stat_lead(rec, line(rec)["ends"])
 
+
 ## The level its final is due at (evolve.json's line for its species).
 static func level(rec: Dictionary) -> int:
 	return int(Evo.rules()["lines"].get(String(rec.get("species", "")), {}).get("level", 1))
+
 
 ## Its final is due: a branching line, at or past the line's level (once it evolves, its species has no line).
 static func due(rec: Dictionary) -> bool:
 	return not line(rec).is_empty() and int(rec.get("level", 1)) >= level(rec)
 
+
 static func has_art(form: String) -> bool:
 	return Evo.has_art(form)
+
 
 ## Why "Evolve now" can't happen now ("" when it can): "stay", "undecided" or "art".
 static func blocked(rec: Dictionary) -> String:
@@ -72,10 +86,12 @@ static func blocked(rec: Dictionary) -> String:
 		return "undecided"
 	return "" if has_art(String(line(rec)["ends"][w]["form"])) else "art"
 
+
 ## The final Evo.next_for(rec, "path") swaps to: the winner once due, art or not; "" when not due or undecided.
 static func pick(rec: Dictionary) -> String:
 	var w := winner(rec)
 	return String(line(rec)["ends"][w]["form"]) if due(rec) and w >= 0 else ""
+
 
 ## The affinity of the end that is `form` ("" for none), for Evo's event line.
 static func path_of(rec: Dictionary, form: String) -> String:
@@ -83,6 +99,7 @@ static func path_of(rec: Dictionary, form: String) -> String:
 		if String(e["form"]) == form:
 			return String(e["path"])
 	return Evo.leading(rec)
+
 
 ## Evolve now: the Boki takes the winning final (Evo.try_evolve "path"), and the event is queued for the
 ## home island to play. {} (nothing changes) when it is not due or blocked.
@@ -95,10 +112,12 @@ static func evolve(rec: Dictionary) -> Dictionary:
 		rec.get_or_add("pending_evo", []).append(ev)
 	return ev
 
+
 ## The player has met this form (Field Book), so its card shows its shape and name, not a black '?'.
 static func known(form: String) -> bool:
 	var e := Care.dex_entry(form)
 	return bool(e.get("seen", false)) or bool(e.get("caught", false))
+
 
 ## Ink lines (evolve.json "item" options): for each Ink in the market goods, the form it would make
 ## ([{ink, ink_name, form, name}]); [] for other species.
@@ -113,6 +132,7 @@ static func ink_previews(rec: Dictionary) -> Array:
 			out.append({"ink": ink, "ink_name": Goods.name_of("good:" + ink), "form": form, "name": nm})
 	return out
 
+
 static func _stat_lead(rec: Dictionary, ends: Array) -> int:
 	var st: Dictionary = rec.get("stats", {})
 	var a := int(st.get(String(ends[0]["stat"]), 0))
@@ -121,11 +141,13 @@ static func _stat_lead(rec: Dictionary, ends: Array) -> int:
 		return -1
 	return 0 if a > b else 1
 
+
 static func _lean(rec: Dictionary, e: Dictionary) -> int:
 	var f := float(rec.get("lean", {}).get(String(e["type"]), 0.0)) / Evo.LEAN_FULL
 	if f >= 1.0:
 		return int(rules()["pips"]["lean_full"])
 	return int(rules()["pips"]["lean_half"]) if f >= float(rules()["lean_half_at"]) else 0
+
 
 static func _tokens(rec: Dictionary, e: Dictionary) -> int:
 	var n := 0
@@ -134,15 +156,17 @@ static func _tokens(rec: Dictionary, e: Dictionary) -> int:
 			n += 1
 	return mini(n, int(rules()["pips"]["tokens_max"]))
 
+
 static func _care(rec: Dictionary, e: Dictionary) -> int:
 	var n := 0
 	for t in e["traits"]:
 		if float(rec.get("traits", {}).get(t, 0.5)) >= float(rules()["trait_at"]):
 			n = int(rules()["pips"]["care_trait"])
-	var top := FavToy.of(rec)      # the toy it plays most (its habit)
+	var top := FavToy.of(rec)  # the toy it plays most (its habit)
 	if top != "" and String(HomeToys.rules()["toys"].get(top, {}).get("stat", "")) == String(e["stat"]):
 		n += int(rules()["pips"]["care_toy"])
 	return n
+
 
 static func _ribbons(rec: Dictionary, e: Dictionary) -> int:
 	var n := 0
