@@ -1,0 +1,34 @@
+{
+ "_doc": "The day/night cycle (scripts/match/day_night.gd, docs/SPAWNS.md). It runs on the session clock: phase_s seconds of day, then phase_s of night, and so on, starting in day. phase_s is for a ref_session_s session and scales with the real session (a 720 s match gets 120 s phases). ramp: share of a phase the light takes to turn (centred on the swap). warn_s: seconds of warning before night spawns appear (a second call 10 s before). night_share / day_share: share of the Camps and Small Camps (never Great Camps) that stand only at night / only by day, picked by their spot alone like the camps' monsters. night_mix: what a night camp holds (by camp size, one list per spot's dice). boss: a night elite at one fixed outer-island spot per night, picked from the match seed and shown on the full map from the start.",
+ "phase_s": 300.0,
+ "ref_session_s": 1800.0,
+ "ramp": 0.2,
+ "warn_s": 30.0,
+ "night_share": 0.3,
+ "day_share": 0.12,
+ "night_mix": {
+  "light": [["bomber", "spitter"], ["skitter", "skitter", "bomber"]],
+  "normal": [["bomber", "spitter", "skitter"], ["brute", "bomber", "bomber"], ["sentinel", "spitter", "skitter"]]
+ },
+ "boss": {"kinds": ["brute", "sentinel"], "hp_k": 2.6, "rarity": 3},
+ "looks": {
+  "day": {
+   "sun_rot": [-52.0, -40.0, 0.0], "sun_col": "ffecd0", "sun_energy": 1.3,
+   "fill_col": "7f8fe0", "fill_energy": 0.4, "amb_col": "a4acd8", "amb_energy": 0.62,
+   "fog_col": "7e90c4", "fog_density": 0.0032,
+   "sky": {"top": "2c4c8e", "mid": "5c88c8", "horizon": "e6d2b4", "sun_col": "ffe2a8", "sun_dir": [0.4, 0.62, -0.68], "stars": 0.0}
+  },
+  "dusk": {
+   "sun_rot": [-34.0, -52.0, 0.0], "sun_col": "ffb27a", "sun_energy": 1.18,
+   "fill_col": "6f7fd8", "fill_energy": 0.34, "amb_col": "7e80b8", "amb_energy": 0.44,
+   "fog_col": "3c3462", "fog_density": 0.0042,
+   "sky": {"top": "090b18", "mid": "231f3c", "horizon": "c86c4c", "sun_col": "ff9a5c", "sun_dir": [0.62, 0.07, -0.78], "stars": 0.6}
+  },
+  "night": {
+   "sun_rot": [-48.0, 30.0, 0.0], "sun_col": "b8c4ec", "sun_energy": 0.6,
+   "fill_col": "5a5cb0", "fill_energy": 0.28, "amb_col": "6676b8", "amb_energy": 0.5,
+   "fog_col": "101c3c", "fog_density": 0.0065,
+   "sky": {"top": "020309", "mid": "0a0f22", "horizon": "1e2a4a", "sun_col": "b8c8ff", "sun_dir": [-0.4, 0.35, -0.85], "stars": 1.6}
+  }
+ }
+}

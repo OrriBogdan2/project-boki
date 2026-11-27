@@ -6,6 +6,8 @@ extends RefCounted
 
 const CHECKS := {
 	"--clip-preflight-check": ["res://tools/clip_preflight_check.gd", "clip_preflight_check", null],  # film preflight
+	"--day-night-check": ["res://tools/day_night_check.gd", "day_night_check", null],  # day/night cycle + its spawns
+	"--day-night-shots": ["res://tools/day_night_shots.gd", "day_night_shots", null],  # --shots-dir=<dir> (GPU)
 	"--registry-check": ["res://tools/registry_check.gd", "registry_check", null],  # the registry holds together
 	"--intro-deck-check": ["res://tools/intro_deck_check.gd", "intro_deck_check", null],
 	"--tester-feedback-check": ["res://tools/tester_feedback_check.gd", "tester_feedback_check", null],  # tester 11-19

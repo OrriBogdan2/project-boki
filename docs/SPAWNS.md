@@ -14,6 +14,8 @@ comes back on a clock (rolling sessions).
 |---|---|---|---|---|
 | Glimmerkin (treasure kin) | `timed_spawns.gd:18` | none: a seeded outer-island wild spot / `at` 0.5 of the session / fixed | map ping at the spot + feed and toast countdown 30 s and 10 s before, ping and announce on arrival | **fixed** (was a random tile on a random outer island, called out only on arrival) |
 | The Watcher at the Heart | `timed_spawns.gd:18` | none: the Heart / `at` 0.4 / fixed | ping at the Heart + countdown 30 s and 10 s before, then "The Watcher wakes" | **fixed** (was on time, no warning) |
+| Night camps and day camps | `camps.gd spawn_all`, `day_night_spawns.gd swap` | none: which Small Camps and Camps stand only at night (30%) or only by day (12%) is fixed by the spot alone (never Great Camps); their night mix is picked by the spot's dice / time: the swap of the cycle (`phase_s` 300 s of a 1800 s session, scaled) / fixed | the camps are marked on the minimap and the full map from the start (moon = night camp, sun = day camp; dim with a countdown while down); the HUD phase row counts down to the swap; map ping + feed and toast 30 s and 10 s before night | **fixed** |
+| Night elite (one per night) | `day_night_spawns.gd _stand_boss` | none: an outer-island wild spot picked from the match seed and the night number, kind cycles `boss.kinds` / at the start of each night, gone at dawn | its burst icon sits at the spot on the full map and the minimap from the start (countdown while it sleeps); ping at the spot warn_s before, announce on arrival | **fixed** |
 | Uplink monster waves | `exits.gd:377`, posts `exits.gd:430` | place: none, six fixed posts per outpost / time: every 12 s while charging / type: cycles the biome list by wave and post | the posts glow on the ground (`fx.ring`) 2.5 s before each wave | **fixed** (was a random angle 7-13 m out, random type, burst on arrival) |
 | Lair guards on a dial miss, rune or ward | `lairs.gd:478` | place: none, posts fanned away from the lair / time: your miss / type: cycles the pool | the miss chime, map ping and feed line (the guards are its answer) | **fixed** (was a random angle and type) |
 | Boss lairs (which are live) | `spawn_plan.gd:170`, `lairs.gd:209` | which lairs: seeded pick of fixed lairs | the live lairs are shown on the full map from the start; the boss sleeps until you step in | ok |
@@ -31,6 +33,8 @@ comes back on a clock (rolling sessions).
 | Training dummies | `match.gd:4538` | place: random ground on your island | none | exempt (training mode only) |
 | Arena and duel dummies and bots | `arena.gd:88`, `:338`, `duel.gd:75` | fixed spots | standing there | exempt (practice modes) |
 | Legendary Boki | not on main (`ext/legendary-spawns`) | one roll a match (20%), a remote rare point, 90 s in | none | DEBT when it merges |
+
+The day/night cycle (`DayNight`, `content/rules/day_night.json`, `--day-night-check`) runs on real expeditions under the clear raid condition: phases alternate day, night from the start of the session, 300 s each for a 1800 s session (scaled for shorter matches), the light turns over `ramp` of a phase. Night spawns follow the same rules as every other row: fixed spots, a predictable clock, a warning on the map and feed.
 
 How the fixed rows stay fixed: the place comes from the map (wild spots, outposts, lair geometry)
 and the match seed, never from `Match.rng`, so every peer works out the same spot and no Net message

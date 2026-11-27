@@ -10,8 +10,9 @@ extends RefCounted
 
 var m: Match
 var cfg: Dictionary
-## One per camp spot: {pos, size ("light" | "normal" | "heavy"), comp (monster kinds), mobs, xp, dice, cleared_at}
-## cleared_at is -1e9 while the camp stands.
+## One per camp spot: {pos, size ("light" | "normal" | "heavy"), comp (monster kinds), mobs, xp, dice, cleared_at,
+## mode, asleep}. cleared_at is -1e9 while the camp stands. mode is "night" or "day" for a camp the day/night
+## cycle (DayNight) raises and sends away, else "" (it comes back on a clock); asleep: it is not standing now.
 var list: Array = []
 
 
@@ -35,21 +36,27 @@ func spawn_all() -> void:
 		await m._slice()
 		var dice := dice_at(c["pos"])
 		var comp := _comp(c, dice)
+		var size := String(c.get("kind", "normal"))
+		var mode := m.day_night.spawns.camp_mode(c["pos"], size)
+		if mode == "night":
+			comp = m.day_night.spawns.night_comp(size, dice)
 		var cp := {
 			"pos": c["pos"],
-			"size": String(c.get("kind", "normal")),
+			"size": size,
 			"comp": comp,
 			"dice": dice,
 			"cleared_at": -1e9,
-			"xp": 0.0
+			"xp": 0.0,
+			"mode": mode,
+			"asleep": mode != "" and (mode == "night") != m.day_night.is_night(m.sess_time()),
 		}
-		cp["mobs"] = _stand(cp)
+		cp["mobs"] = [] if cp["asleep"] else _stand(cp)
 		list.append(cp)
 
 
 ## The camps still standing, for a bot or a map that wants a place to fight.
 func live() -> Array:
-	return list.filter(func(cp): return float(cp["cleared_at"]) <= -1e8)
+	return list.filter(func(cp): return float(cp["cleared_at"]) <= -1e8 and not cp["asleep"])
 
 
 ## The level a bot wants before it takes this camp (rules sizes.lvl).
@@ -62,12 +69,8 @@ func want_level(cp: Dictionary) -> int:
 func picked_over(frac: float, rng: RandomNumberGenerator) -> int:
 	var cleared := 0
 	for cp in list:
-		if rng.randf() < frac:
-			for mb in cp["mobs"]:
-				if is_instance_valid(mb) and not mb.dead:
-					mb.hp = 0.0
-					mb.dead = true
-					mb.visible = false
+		if not cp["asleep"] and rng.randf() < frac:
+			retreat(cp["mobs"])
 			cp["cleared_at"] = -rng.randf_range(0.0, float(cfg["back_s"]))
 			cleared += 1
 	return cleared
@@ -78,7 +81,7 @@ func picked_over(frac: float, rng: RandomNumberGenerator) -> int:
 func comeback() -> int:
 	var back := 0
 	for cp in list:
-		if not _all_dead(cp):
+		if cp["mode"] != "" or not _all_dead(cp):
 			continue
 		if float(cp["cleared_at"]) <= -1e8:
 			cp["cleared_at"] = m.time
@@ -89,6 +92,29 @@ func comeback() -> int:
 		cp["cleared_at"] = -1e9
 		back += 1
 	return back
+
+
+## The day/night cycle stands a camp up with fresh monsters.
+func wake(cp: Dictionary) -> void:
+	cp["asleep"] = false
+	cp["cleared_at"] = -1e9
+	cp["mobs"] = _stand(cp)
+
+
+## The day/night cycle sends a camp's survivors away until its phase comes round again.
+func sleep(cp: Dictionary) -> void:
+	retreat(cp["mobs"])
+	cp["asleep"] = true
+	cp["mobs"] = []
+
+
+## The monsters leave: dead and gone from the field.
+static func retreat(mobs: Array) -> void:
+	for mb in mobs:
+		if is_instance_valid(mb) and not mb.dead:
+			mb.hp = 0.0
+			mb.dead = true
+			mb.visible = false
 
 
 # The monsters: the region's table when the camp is in a biome, else the size's own mix.

@@ -88,6 +88,10 @@ static func pick(opts: Dictionary, seed_val := 0) -> String:
 ## (shaders/vis.gdshaderinc).
 static func apply(e: Environment, sun: DirectionalLight3D, fill: DirectionalLight3D, t: Dictionary, cond: String) -> void:
 	_apply(e, sun, fill, t, cond)
+	sync_vis(e)
+
+## Hands the ambient and the env fog to the sight shading (`vis_amb`, `vis_haze`), after any change to them.
+static func sync_vis(e: Environment) -> void:
 	RenderingServer.global_shader_parameter_set("vis_amb", vis_amb(e))
 	var h := e.fog_light_color.srgb_to_linear() * e.fog_light_energy
 	var on := 1.0 if e.fog_enabled else 0.0
