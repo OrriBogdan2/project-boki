@@ -73,10 +73,11 @@ static func _toys(gone_s: float, now: float, zone: String) -> Array:
 		Care.ensure(rec)
 		owned.sort_custom(func(a, b): return HomeToys.weight(rec, a) > HomeToys.weight(rec, b))
 		var stat := String(defs[owned[0]]["stat"])
-		var room := Care.stat_cap(rec) - int(rec["stats"].get(stat, 0))
+		var room := mini(Care.stat_cap(rec) - int(rec["stats"].get(stat, 0)), HomeToys.day_room(rec, now))
 		if room <= 0:
-			continue      # add_stat clamps, so a stat already past the cap must not go through it
+			continue      # add_stat clamps, so a stat already past the cap must not go through it; toys' day cap
 		var gained := Care.add_stat(rec, stat, mini(room, points))
+		HomeToys.day_used(rec, gained, now)
 		if gained > 0:
 			var words := "trained %s at the toys: +%d" % [String(Care.STATS[stat]["name"]).to_lower(), gained]
 			CareJournal.note(rec, words, now)
