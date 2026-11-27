@@ -282,7 +282,8 @@ func _glb_top_of(id: String, look: Dictionary) -> float:
 
 ## The top of a .glb Warden as skinned in its current pose (every vertex through its bones), above its feet.
 func _glb_top(m: Node3D) -> float:
-	(m.get_node("Warden/Sync") as WardenGlb.Sync).apply()
+	if m.has_node("Warden/Sync"):  # (a Meshy-native model has no Sync: WardenNative poses it)
+		(m.get_node("Warden/Sync") as WardenGlb.Sync).apply()
 	var top := -INF
 	for nd in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
 		if String(nd.get_parent().name).begins_with(WardenGlb.Orbits.PREFIX) or String(nd.name) in FLOATING:
