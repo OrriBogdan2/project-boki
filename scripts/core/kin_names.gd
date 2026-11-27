@@ -48,5 +48,23 @@ static func pick(typed: String, suggestion: String) -> String:
 	return suggestion if nm == "" or is_rude(nm) else nm
 
 
+## True for a Boki in your own roster (one seen on a visit or in the family tree keeps its name).
+static func can_rename(rec: Dictionary) -> bool:
+	return not Save.kin(String(rec.get("uid", ""))).is_empty()
+
+
+## Gives a Boki you own a new name. A blank, rude, too long or unchanged one is refused (false); a kept one goes in
+## its event log ("renamed", from the old name) and the save.
+static func rename(rec: Dictionary, typed: String) -> bool:
+	var nm := typed.strip_edges()
+	var was := String(rec.get("name", ""))
+	if not can_rename(rec) or nm == "" or nm == was or is_rude(nm) or nm.length() > int(rules()["max_len"]):
+		return false
+	rec["name"] = nm
+	Save.log_event("renamed", rec, {"from": was})
+	Save.save_game()
+	return true
+
+
 static func _vowel(ch: String) -> bool:
 	return "aeiouyAEIOUY".contains(ch)
