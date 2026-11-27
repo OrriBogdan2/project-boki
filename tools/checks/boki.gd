@@ -8,7 +8,6 @@ const CHECKS := {
 	"--toon-lineup-farm-shots": ["res://tools/toon_lineup_farm_shots.gd", "toon_lineup_farm_shots", null],
 	"--crofthorn-flat-shots": ["res://tools/crofthorn_flat_shots.gd", "crofthorn_flat_shots", null],
 	"--toon-lineup-shots": ["res://tools/toon_lineup_shots.gd", "toon_lineup_shots", null],  # lineup, match cam
-	"--toon-consistency-check": ["res://tools/toon_consistency_check.gd", "toon_consistency_check", null],  # toon look
 	"--boki-keys-check": ["res://tools/boki_keys_check.gd", "boki_keys_check", null],  # quick Boki command keys
 	"--boki-everywhere-check": ["res://tools/boki_everywhere_check.gd", "boki_everywhere_check", null],  # Boki in .pck
 	"--wisp-proc-check": ["res://tools/wisp_proc_check.gd", "wisp_proc_check", null],  # carried passive chirp + tip
