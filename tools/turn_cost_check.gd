@@ -8,7 +8,7 @@ extends RefCounted
 
 const SAME_KEEP := 0.95
 const REV_KEEP := 0.9
-const RUN_SLACK := 1.0      # m/s over the run an air dash straight back may still carry
+const RUN_SLACK := 1.0  # m/s over the run an air dash straight back may still carry
 const HEIGHT := 40.0
 ## Hunters whose chained ground dash is a shorter step by their own kit, TurnCost or not (the same-way keep is
 ## not asserted for them; straight back still is).
@@ -16,19 +16,34 @@ const CHAIN_SHORT := {"dredge": "Barge's charges chain a beat apart (dash.gap): 
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("TURNCOST %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
 
+
 ## A fresh match as `arch` on a flat, empty patch of ground.
 func _match(main: Node, arch: String) -> Match:
 	var m := Match.new()
 	main.add_child(m)
-	m.start({
-		"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true,
-		"cls": Arch.weight(arch), "arch": arch, "weapon": Arch.signature(arch),
-	})
+	(
+		m
+		. start(
+			{
+				"training": true,
+				"teams": 2,
+				"squad": 1,
+				"tier": 0,
+				"length": 1e9,
+				"seed": 77,
+				"no_drop": true,
+				"cls": Arch.weight(arch),
+				"arch": arch,
+				"weapon": Arch.signature(arch),
+			}
+		)
+	)
 	m.set_process(false)
 	for mob in m.mobs:
 		mob.queue_free()
@@ -44,9 +59,11 @@ func _match(main: Node, arch: String) -> Match:
 		m.step(Match.DT)
 	return m
 
+
 func _keys(hunter: Hunter, dir: Vector2) -> void:
 	hunter.inp["move"] = dir
 	hunter.inp["aim"] = hunter.pos + Vector3(dir.x, 0, dir.y) * 8.0 + Vector3(0, 0.9, 0)
+
 
 func _refill(hunter: Hunter) -> void:
 	hunter.dashes = hunter.max_dashes()
@@ -55,6 +72,7 @@ func _refill(hunter: Hunter) -> void:
 	hunter.dash_buf = 0.0
 	if hunter.ak and hunter.ak.cd.has("dash"):
 		hunter.ak.cd["dash"] = 0.0
+
 
 ## Presses dash along `dir` and runs it out: {dist: metres along dir while it lasts, carry: speed 0.1 s after it
 ## ends}, or {} when no new dash started within 0.3 s.
@@ -81,12 +99,14 @@ func _dash(m: Match, dir: Vector2) -> Dictionary:
 	var dist := Vector2(d.x, d.z).dot(dir)
 	return {"dist": dist}
 
+
 func _carry(m: Match, dir: Vector2) -> float:
 	var hunter: Hunter = m.player
 	for i in 6:
 		_keys(hunter, dir)
 		m.step(Match.DT)
 	return Vector2(hunter.vel.x, hunter.vel.z).length()
+
 
 ## Settles the hunter: on the ground (or HEIGHT up in the air), standing still for a second.
 func _settle(m: Match, home: Vector3, air: bool) -> void:
@@ -95,10 +115,11 @@ func _settle(m: Match, home: Vector3, air: bool) -> void:
 	hunter.vel = Vector3.ZERO
 	hunter.turn_cost = TurnCost.new()
 	for foe in m.foes_of(hunter.team):
-		foe.pos = home + Vector3(-60, 0, 60)     # a foe's Boki in the lane would stop a ram
-	for i in (6 if air else 60):
+		foe.pos = home + Vector3(-60, 0, 60)  # a foe's Boki in the lane would stop a ram
+	for i in 6 if air else 60:
 		_keys(hunter, Vector2.ZERO)
 		m.step(Match.DT)
+
 
 ## A first dash east, then at once a second along `dir2`: the second's row.
 func _chain(m: Match, home: Vector3, dir2: Vector2, air: bool) -> Dictionary:
@@ -110,12 +131,14 @@ func _chain(m: Match, home: Vector3, dir2: Vector2, air: bool) -> Dictionary:
 		r["carry"] = _carry(m, dir2)
 	return r
 
+
 func _fresh(m: Match, home: Vector3, air: bool) -> Dictionary:
 	_settle(m, home, air)
 	var r := _dash(m, Vector2(-1, 0))
 	if not r.is_empty():
 		r["carry"] = _carry(m, Vector2(-1, 0))
 	return r
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -154,8 +177,10 @@ func run(main: Node) -> void:
 			var same_c: float = same_air["carry"]
 			var back_c: float = back_air["carry"]
 			ok(same_c >= c * SAME_KEEP, "%s air: fresh carry %.1f m/s, same way %.1f" % [arch, c, same_c])
-			ok(back_c <= run_speed + RUN_SLACK,
-				"%s air: run %.1f m/s, straight back carries %.1f" % [arch, run_speed, back_c])
+			ok(
+				back_c <= run_speed + RUN_SLACK,
+				"%s air: run %.1f m/s, straight back carries %.1f" % [arch, run_speed, back_c]
+			)
 		m.queue_free()
 		await main.get_tree().process_frame
 	print("TURNCOST DONE, failures: %d" % bad)
