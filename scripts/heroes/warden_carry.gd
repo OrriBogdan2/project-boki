@@ -10,6 +10,7 @@ extends RefCounted
 
 const MOVE := "rs_carry"           # HunterAnim pose id (KinDowned.rescue_pose) that carries; "rs_done" eases it out
 const MOVES := [MOVE, "rs_done"]   # the pose ids the clips leave to this layer, legs and torso stay on the loco clips
+const HOME_ACTS := ["carry", "pack"]  # HunterAnim state "act" at home (HomeCarry): a Boki in the arms, on the back
 const SOCKET := "carry_socket"     # model meta: world position the Boki rides at
 const MOTE := "heart_mote"         # model meta: world position of the Heartspark held in the off hand
 const MOTE_REACH := 0.12           # arm lengths: the mote floats this far above the held wrist
@@ -21,6 +22,11 @@ const HANDS_APART := 0.34          # arm lengths: the two wrists, apart under th
 const SOCKET_UP := 0.12            # arm lengths: the Boki sits this far above the wrists
 const POLE_DOWN := 0.7             # the elbow bends down ...
 const POLE_OUT := 0.5              # ... and a little out
+const BACK_FWD := -0.3             # arm lengths: the Boki on the back, its hands this far behind the shoulders ...
+const BACK_DOWN := 0.8             # ... and this far below them (at the hips)
+const BACK_APART := 0.7            # arm lengths: the wrists, apart under its legs
+const BACK_UP := 0.4               # arm lengths: it sits this far above the wrists, against the back
+const BACK_LEAN := -0.2            # rad: the torso leans forward under it
 const STOW_SCALE := 0.001          # a stowed weapon bone shrinks to this
 const ARMS := ["upper_arm", "forearm", "hand"]
 const HAND_REACH := 0.1            # m: a hand's skin lies this near its head; a piece on it reaching past is a weapon
@@ -34,8 +40,9 @@ static func owns(km: String) -> bool:
 	return km in MOVES
 
 ## Lays the carry over the skeleton's current pose at weight w (0..1) and returns the socket in world space; fwd is
-## how far in front of the shoulders the cradle sits (arm lengths: a broad body's own, from its data).
-static func apply(skel: Skeleton3D, root: Node3D, w: float, fwd := REACH_FWD) -> Vector3:
+## how far in front of the shoulders the cradle sits (arm lengths: a broad body's own, from its data). `back`: the
+## Boki rides on the back, the hands hold it behind the hips and the torso leans forward.
+static func apply(skel: Skeleton3D, root: Node3D, w: float, fwd := REACH_FWD, back := false) -> Vector3:
 	var to_skel := skel.global_transform.affine_inverse().basis * root.global_basis
 	to_skel = to_skel.orthonormalized()
 	var ahead := to_skel * Vector3.FORWARD
@@ -46,20 +53,21 @@ static func apply(skel: Skeleton3D, root: Node3D, w: float, fwd := REACH_FWD) ->
 	for bi in idx.values():
 		keep[bi] = skel.get_bone_pose_rotation(bi)
 	keep[hips] = skel.get_bone_pose_rotation(hips)
-	_lean(skel, hips, to_skel * Vector3.RIGHT)
+	_lean(skel, hips, to_skel * Vector3.RIGHT, BACK_LEAN if back else LEAN)
 	var sh_l := skel.get_bone_global_pose(idx["upper_arm.L"]).origin
 	var sh_r := skel.get_bone_global_pose(idx["upper_arm.R"]).origin
 	var mid := (sh_l + sh_r) * 0.5
 	var across := (sh_r - sh_l).normalized()
 	var reach := _reach(skel, idx)
-	var cradle := mid + ahead * fwd * reach - up * REACH_DOWN * reach
+	var cradle := mid + ahead * (BACK_FWD if back else fwd) * reach - up * (BACK_DOWN if back else REACH_DOWN) * reach
+	var apart := BACK_APART if back else HANDS_APART
 	for s in ["L", "R"]:
 		var out := across * (-1.0 if s == "L" else 1.0)
-		var wrist := cradle + out * HANDS_APART * 0.5 * reach
+		var wrist := cradle + out * apart * 0.5 * reach
 		_arm(skel, idx, s, wrist, -up * POLE_DOWN + out * POLE_OUT)
 	for bi in keep:
 		skel.set_bone_pose_rotation(bi, (keep[bi] as Quaternion).slerp(skel.get_bone_pose_rotation(bi), w))
-	return skel.global_transform * (cradle + up * SOCKET_UP * reach)
+	return skel.global_transform * (cradle + up * (BACK_UP if back else SOCKET_UP) * reach)
 
 ## The Heartspark carry: the off hand (side "L" or "R") lifts to the cradle's height and holds the mote at the chest,
 ## the other arm and the legs stay on the clips so the main arm still fires and casts. Returns the mote in world space.
@@ -91,9 +99,9 @@ static func _arms(skel: Skeleton3D) -> Dictionary:
 	return idx
 
 ## The torso tips back about the hips' own point (right is the model's right in skeleton space).
-static func _lean(skel: Skeleton3D, hips: int, right: Vector3) -> void:
+static func _lean(skel: Skeleton3D, hips: int, right: Vector3, rad: float) -> void:
 	var pose := skel.get_bone_global_pose(hips)
-	pose.basis = Basis(right, LEAN) * pose.basis
+	pose.basis = Basis(right, rad) * pose.basis
 	skel.set_bone_global_pose(hips, pose)
 
 ## Mean arm length (shoulder to elbow to wrist), the unit every offset above is in.

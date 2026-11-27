@@ -12,6 +12,7 @@ const DAY_T := 0.72  # farm clock: golden hour (low honey sun)
 const DEADLINE_S := 1500.0
 const HUNTER_CLASS := "medium"
 const RUN_OFF := 1.25  # rad off her back-line in the run shot: a three-quarter side view, her face turned to us
+const FACE_OFF := 2.5  # rad off her back-line late in the run: in front of her, a little aside, so her face shows
 const CARRY_PACE := 0.8  # stick in the carry run: the followers keep up
 const HEAD_S := 0.55  # s of each take that the dissolve eats at its start and at its end
 const CLEAR_MARGIN := 0.45  # m of bare ground kept round a bed or building (grass blades are wide)
@@ -366,10 +367,11 @@ func _shot_run(meadow: Vector3) -> void:
 	_mark("run", true)
 	await _wait(HEAD_S)
 	h.life.machine(h.kins[0]).go(BaseLife.S.ROAM, "film")
-	await _run(meadow + Vector3(-4.5, 0, 1.0), 6.0, RUN_OFF)
+	await _run(meadow + Vector3(-7.5, 0, 2.0), 2.5, RUN_OFF)
+	await _run(meadow + Vector3(-4.5, 0, 1.0), 3.5, FACE_OFF)
 	for i in 4:
 		_call_over(i, 8.0)
-	await _run(meadow + Vector3(-1.8, 0, 0.4), 3.0, RUN_OFF)
+	await _run(meadow + Vector3(-1.8, 0, 0.4), 3.0, FACE_OFF)
 	await _wait(1.5)
 	await _still("run_end.png")
 	_dbg("run")

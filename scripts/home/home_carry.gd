@@ -36,6 +36,7 @@ var held := 0.0               # s the key has been held on it
 var base_scale := Vector3.ONE
 var _p0 := Vector3.ZERO       # where you stood last frame, to read your own speed while leading
 var lift_from := Vector3.ZERO      # where it stood when the lift began
+var held_off := Vector3.ZERO       # its middle above its feet at full size: it is held by that, not by its feet
 
 func _init(home) -> void:
 	h = home
@@ -134,6 +135,9 @@ func press_hold(who: Dictionary) -> void:
 	base_scale = n.scale
 	lift_from = HomeVerbs.hold_spot(h.ppos, h.ppos + _forward(), n) + Vector3(0.0, n.position.y, 0.0)
 	n.position = lift_from
+	held_off = Vector3(0.0, HomeVerbs.bounds(n).get_center().y - n.global_position.y, 0.0)
+	if RelayBeats.has_clip(n, "carry"):
+		n.set_meta("kact", "carry")
 	h.verbs.play("lift", n)
 	h._emote(who, "★" if temper_of(who["rec"]) == "brave" else "♥", true)
 	Sfx.play(KinVoice.cue(who["rec"]["species"], "happy"), null, -6.0, 0.12, Unique.voice(who["rec"]))
@@ -162,7 +166,8 @@ func _let_go(who: Dictionary, at: Vector3) -> void:
 		who["pos"] = Vector3(at.x, who["pos"].y, at.z)
 		n.position = who["pos"]
 		n.scale = base_scale
-		n.rotation.z = 0.0
+		n.rotation = Vector3(0.0, n.rotation.y, 0.0)      # on its feet again, never tipped
+		n.remove_meta("kact")
 		who["busy"] = false
 		who["hold_t"] = 1.0
 		who["goal"] = who["pos"]
@@ -185,23 +190,25 @@ func _step(d: float) -> void:
 	var n: Node3D = k["node"]
 	var s: float = h.player.scale.x
 	var fwd := _forward()
-	var off := fwd * 0.42 + Vector3(0, 0.85, 0)
+	var chest: Vector3 = h.player.position + (fwd * 0.42 + Vector3(0.0, 0.85, 0.0)) * s
+	# the hunter's hands hold it: the carry pose (WardenCarry, from her animation) leaves the cradle on her model
+	var socket: Vector3 = h.player.get_meta(WardenCarry.SOCKET, Vector3.INF)
+	var at := chest if socket == Vector3.INF else socket - held_off * CARRY_SCALE
 	# for the back: lifted to the chest, then swung up over the shoulder
 	var over := smoothstep(0.0, PACK_SWING_S, t - float(HunterVerbs.LENGTH["lift"])) if mode == "pack" else 0.0
-	off = off.lerp(fwd * -0.34 + Vector3(0, 1.05, 0), over) + Vector3(0, sin(PI * over) * 0.45, 0)
+	if mode == "pack":
+		at = chest.lerp(at, over) + Vector3(0.0, sin(PI * over) * 0.45, 0.0)
 	var wob := 0.0
 	match feel:
 		"brave":
 			wob = sin(t * 9.0) * 0.2
-			off.y += absf(sin(t * 9.0)) * 0.05
+			at.y += absf(sin(t * 9.0)) * 0.05
 		"timid":
-			off = off * Vector3(0.6, 1.0, 0.6)
 			wob = sin(t * 24.0) * 0.03
 		"grumpy":
 			wob = sin(t * 20.0) * 0.5 * (t / SQUIRM_S)
 		_:
 			wob = sin(t * 2.0) * 0.05
-	var at: Vector3 = h.player.position + off * s
 	var up := HunterVerbs.lifted(h.verbs.t) if lifting() else 1.0
 	at = lift_from.lerp(at, up)
 	k["pos"] = Vector3(at.x, k["pos"].y, at.z)
