@@ -3,18 +3,21 @@ extends RefCounted
 ## --dredge-combo-check (docs/heroes/dredge.md, "Animation timing"): measured in the match, press to hit frame to
 ## recovery, plus the .glb clips' lengths against the kit's keyed moves (the clip IS the visible hit frame).
 
-const BH := 1.8                     # m per body height (the sheet's unit: 3.5 bh = the 6.3 m slug stop)
-const FRAME := 0.2                  # s per footage frame
+const BH := 1.8  # m per body height (the sheet's unit: 3.5 bh = the 6.3 m slug stop)
+const FRAME := 0.2  # s per footage frame
 
 var ak = null
 var ok_fn: Callable
+
 
 func _init(arch_check, ok_cb: Callable) -> void:
 	ak = arch_check
 	ok_fn = ok_cb
 
+
 func ok(label: String, cond: bool, info := "") -> void:
 	ok_fn.call(label, cond, info)
+
 
 func run() -> void:
 	await _throw_and_reel()
@@ -22,6 +25,7 @@ func run() -> void:
 	await _barge()
 	await _barge_run()
 	_clips()
+
 
 ## Deep Reach (0121-0129): the arm is out at full reach 0.4 s after the cast (~5 bh), then the pull takes ~1.0 s.
 func _throw_and_reel() -> void:
@@ -45,11 +49,18 @@ func _throw_and_reel() -> void:
 			arrive = t
 	var rdf := K.rmb_def()
 	var want := float(rdf["windup"]) + 5.0 * BH / float(rdf["speed"])
-	ok("timing throw: coil, then 5 bh at hook speed (slowed from the footage 0.4 s on purpose, owner 11-10)",
-			grab > 0.0 and absf(grab - want) <= FRAME, "%.2f s, want %.2f" % [grab, want])
-	ok("timing reel: a 5 bh pull takes about 1.0 s (footage 0124-0129)",
-			arrive > 0.0 and absf(arrive - grab - 1.0) <= FRAME, "%.2f s" % (arrive - grab))
+	ok(
+		"timing throw: coil, then 5 bh at hook speed (slowed from the footage 0.4 s on purpose, owner 11-10)",
+		grab > 0.0 and absf(grab - want) <= FRAME,
+		"%.2f s, want %.2f" % [grab, want]
+	)
+	ok(
+		"timing reel: a 5 bh pull takes about 1.0 s (footage 0124-0129)",
+		arrive > 0.0 and absf(arrive - grab - 1.0) <= FRAME,
+		"%.2f s" % (arrive - grab)
+	)
 	await ak.done(m)
+
 
 ## Iron Smash (0221-0236): the hit at ~0.4 s; he stays put so the slam lands on a foe reeled to his feet.
 func _anchor() -> void:
@@ -72,11 +83,18 @@ func _anchor() -> void:
 		t += ak.DT
 		if K.anchors > anchors:
 			hit = t
-	ok("timing anchor: the fist lands 0.4 s after the press (footage 0221-0223)",
-			hit > 0.0 and absf(hit - 0.4) <= FRAME and T.hp < hp0, "%.2f s" % hit)
-	ok("timing anchor: he stays where he stands (no hop forward)", P.flat_dist(from) < 0.3,
-			"%.2f m" % P.flat_dist(from))
+	ok(
+		"timing anchor: the fist lands 0.4 s after the press (footage 0221-0223)",
+		hit > 0.0 and absf(hit - 0.4) <= FRAME and T.hp < hp0,
+		"%.2f s" % hit
+	)
+	ok(
+		"timing anchor: he stays where he stands (no hop forward)",
+		P.flat_dist(from) < 0.3,
+		"%.2f m" % P.flat_dist(from)
+	)
 	await ak.done(m)
+
 
 ## Brute Dash (0188): about 2.5-3 bh in a frame or less, then a crouch and back on the aim within a frame.
 func _barge() -> void:
@@ -95,6 +113,7 @@ func _barge() -> void:
 	var far := P.flat_dist(from)
 	ok("timing barge: short, 1.5-3 bh", far >= 1.5 * BH * 0.8 and far <= 3.0 * BH, "%.2f m" % far)
 	await ak.done(m)
+
 
 ## Three shoves with the 0.22 s gap are one burst (owner): each joins the ball still rolling from the last (the move
 ## stays dr_lunge, restarted at the clip's closed pose), it opens (dr_lunge_out) the moment the last charge is spent,
@@ -116,14 +135,20 @@ func _barge_run() -> void:
 		seeks.append(m.time - K.anim_at)
 	var shove := P.roll_t
 	var joined: bool = absf(seeks[1] - K.FOLD_T) < 0.001 and absf(seeks[2] - K.FOLD_T) < 0.001 and seeks[0] < 0.001
-	ok("barge run: shoves 2 and 3 join the ball at the clip's closed pose, no opening between",
-			held and K.anim_id == "dr_lunge" and joined, "%s held %s" % [seeks, held])
+	ok(
+		"barge run: shoves 2 and 3 join the ball at the clip's closed pose, no opening between",
+		held and K.anim_id == "dr_lunge" and joined,
+		"%s held %s" % [seeks, held]
+	)
 	var t := 0.0
 	while t < shove + 0.1 and K.anim_id != "dr_lunge_out":
 		m.step(ak.DT)
 		t += ak.DT
-	ok("barge run: the ball opens as the last shove ends (no charge left)",
-			K.anim_id == "dr_lunge_out" and t < shove + 0.05, "%.2f s, shove %.2f" % [t, shove])
+	ok(
+		"barge run: the ball opens as the last shove ends (no charge left)",
+		K.anim_id == "dr_lunge_out" and t < shove + 0.05,
+		"%.2f s, shove %.2f" % [t, shove]
+	)
 	P.dashes = 3.0
 	while m.time < K.next_barge + 0.2:
 		m.step(ak.DT)
@@ -134,9 +159,13 @@ func _barge_run() -> void:
 		m.step(ak.DT)
 		t += ak.DT
 	var after := shove + gap
-	ok("barge run: a lone shove stays closed through the gap, opens just after it",
-			t >= after and t <= after + K.CHAIN_GRACE + 0.1, "%.2f s (gap %.2f)" % [t, gap])
+	ok(
+		"barge run: a lone shove stays closed through the gap, opens just after it",
+		t >= after and t <= after + K.CHAIN_GRACE + 0.1,
+		"%.2f s (gap %.2f)" % [t, gap]
+	)
 	await ak.done(m)
+
 
 ## The clip in the .glb is what is drawn: each held-less move's clip lasts exactly the kit's keyed move, so the hit key
 ## (shot 0.05, anchor 0.38, lunge 0.18...) is the same instant in both.
@@ -158,6 +187,7 @@ func _clips() -> void:
 	_ball_clip(player)
 	glb.free()
 
+
 ## The ball holds closed at the clip's end exactly as at its fold-in (the pose a
 ## chained shove joins), and the recovery is quick.
 func _ball_clip(player: AnimationPlayer) -> void:
@@ -169,6 +199,8 @@ func _ball_clip(player: AnimationPlayer) -> void:
 		if lunge.track_get_type(tr) == Animation.TYPE_ROTATION_3D and not spring:
 			var from: Quaternion = lunge.rotation_track_interpolate(tr, DredgeKit.FOLD_T)
 			worst = maxf(worst, from.angle_to(lunge.rotation_track_interpolate(tr, lunge.length)))
-	ok("timing lunge clip: closed at the end as at 0.033 s (a chained shove joins it), the recovery under 0.25 s",
-			worst < 0.05 and lunge.length >= 0.38 and out.length <= 0.25,
-			"worst %.3f rad, %.2f / %.2f s" % [worst, lunge.length, out.length])
+	ok(
+		"timing lunge clip: closed at the end as at 0.033 s (a chained shove joins it), the recovery under 0.25 s",
+		worst < 0.05 and lunge.length >= 0.38 and out.length <= 0.25,
+		"worst %.3f rad, %.2f / %.2f s" % [worst, lunge.length, out.length]
+	)

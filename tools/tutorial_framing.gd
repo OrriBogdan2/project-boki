@@ -50,11 +50,11 @@ func judge(arch: String, ok: Callable) -> void:
 			ok.call(float(px[px.size() / 2]) >= MIN_PX, "%s %s: drawn %s px tall" % [arch, sid, tall])
 
 
-## Where the thing a step asks you to act on stands (INF for a step on the HUD alone): a gap step's pad
-## (you leave from it), else the step's goal.
+## Where the thing a step asks you to act on stands (INF for a step on the HUD alone): a gap step's sign
+## (over the pad you leave from; on a LAND_SIGN step, over the landing once you took off), else the step's goal.
 static func _act_at(tu: Tutorial, sid: String) -> Vector3:
 	if sid in Tutorial.GAP_STEPS and tu.pad_sign(sid) != null:
-		return tu.stop(sid, "pad")
+		return tu.sign_spot(sid)
 	return tu.goal(sid)
 
 
