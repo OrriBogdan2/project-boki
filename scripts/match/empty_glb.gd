@@ -2,8 +2,9 @@ class_name EmptyGlb
 extends RefCounted
 ## The Empty in 3D: a Meshy model of the Hooded Cloak cut for each sex (art/wardens/empty_f, empty_m), on Meshy's
 ## own skeleton and clips (WardenNative, docs/art/wardens/MESHY_NATIVE.md). Models.hunter builds the procedural Empty
-## as before (its rig, the void head with its hollow, ghost and glow, the aura), then this dresses it in the .glb of its sex
-## (WardenGlb.dress), hides the procedural body under it and dyes the cloak to the look's shroud and accent colours.
+## as before (its rig, the void head with its hollow, ghost and glow, the aura), then this dresses it in the .glb of
+## its sex (WardenGlb.dress), hides the procedural body under it and dyes the cloak to the look's shroud and accent
+## colours.
 ## The model has only that cut: another cut, the hood down, a trim pattern or an accessory keeps the procedural
 ## Empty, so every shroud choice still shows.
 
