@@ -373,9 +373,11 @@ def sample(rig, name):
     return times, out, hips, string
 
 
-def write_glb(rig, path):
+def write_glb(rig, path, extra=(), own=True):
     """Skeleton nodes (a skin over the joints, no mesh: Godot makes a Skeleton3D from it, so the tracks name bones) plus
-    one animation per clip, rotation tracks for every joint, and the hips and the string's translation."""
+    one animation per clip, rotation tracks for every joint, and the hips and the string's translation.
+    extra: more clips [(name, times, {joint: quats}, hips)] (native_clips.py; no string track); own=False: only those
+    (another Hunter's skeleton, without the bow)."""
     keep = list(rig.joints) + [rig.par[rig.root]]
     remap = {old: i for i, old in enumerate(keep)}
     nodes = []
@@ -400,8 +402,9 @@ def write_glb(rig, path):
         accs.append(a)
         return len(accs) - 1
 
-    for name in clips():
-        times, rots, hips, string = sample(rig, name)
+    todo = [(n,) + sample(rig, n) for n in clips()] if own else []
+    for name, times, rots, hips, *more in todo + [tuple(x) for x in extra]:
+        string = more[0] if more else None
         t_acc = add(times, "SCALAR", len(times))
         chans, samplers = [], []
         for j in rig.joints:
@@ -411,13 +414,14 @@ def write_glb(rig, path):
             chans.append({"sampler": len(samplers) - 1, "target": {"node": remap[j], "path": "rotation"}})
         samplers.append({"input": t_acc, "output": add(hips, "VEC3", len(times)), "interpolation": "LINEAR"})
         chans.append({"sampler": len(samplers) - 1, "target": {"node": remap[rig.root], "path": "translation"}})
-        samplers.append({"input": t_acc, "output": add(string, "VEC3", len(times)), "interpolation": "LINEAR"})
-        chans.append(
-            {"sampler": len(samplers) - 1, "target": {"node": remap[rig.id["StringMid"]], "path": "translation"}}
-        )
+        if string is not None:
+            samplers.append({"input": t_acc, "output": add(string, "VEC3", len(times)), "interpolation": "LINEAR"})
+            chans.append(
+                {"sampler": len(samplers) - 1, "target": {"node": remap[rig.id["StringMid"]], "path": "translation"}}
+            )
         anims.append({"name": name, "channels": chans, "samplers": samplers})
     js = {
-        "asset": {"version": "2.0", "generator": "tools/meshy/lace_clips.py"},
+        "asset": {"version": "2.0", "generator": "tools/meshy/lace_clips.py" if own else "tools/meshy/native_clips.py"},
         "scene": 0,
         "scenes": [{"name": "Scene", "nodes": [len(nodes) - 1]}],
         "nodes": nodes,

@@ -346,7 +346,10 @@ func _loco(s: Dictionary) -> void:
 	var vel: Vector3 = s.get("vel", Vector3.ZERO)
 	var ground := Vector2(vel.x, vel.z).length()
 	var held := _held(s)
-	if bool(s.get("dead", false)):
+	if held == "downed":  # (the knocked-down beat, HunterFall: as far into the collapse as the beat is, out or not)
+		_play(held, 0.0)
+		player.seek(float(s["fall"]) * _clip_len(held), true)
+	elif bool(s.get("dead", false)):
 		_play("idle", 0.0)
 	elif held != "":
 		_play(held, 1.0)
@@ -476,7 +479,7 @@ func _clip_len(st: String) -> float:
 
 
 ## Seconds the clip of state `to` blends in over the one of state `from`: the glide opens at once and lets go slower,
-## the dash takes the body gradually, everything else FADE.
+## the dash takes the body gradually, one idle into the other IDLE_FADE (the weapon lowers), everything else FADE.
 static func blend_s(from: String, to: String) -> float:
 	if from == "glide":
 		return GLIDE_OUT

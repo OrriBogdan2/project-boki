@@ -51,7 +51,7 @@ Player-facing matrix (`python3 tools/anim_coverage.py`, 13 Hunters x idle, idle_
 LMB, RMB, E, R, hit, down, revive): which clip the exported game plays, `shared` where a neighbouring state's clip plays,
 `WRONG` where a clip of another meaning plays (glide shows the run-in-air, dash the run, a knocked-down Hunter stands in idle) and
 `MISSING`. `--check` (run by `tools/health.py`) fails on a gap not listed in `tools/anim_coverage_gaps.json`; the list may only
-shrink, so a new Hunter ships with every cell filled. `--anim-state-shots` renders the states on the native rig (GPU).
+shrink, so a new Hunter ships with every cell filled. `--anim-state-shots` renders the states on the native rig (GPU). Since 11-27 the knocked-down beat, the dash and Gil's and Vex's casual idle are pose clips on every native Hunter (`tools/meshy/native_clips.py`): 11 gaps left, all glide (job glide-anim-1126).
 
 <!-- table:begin -->
 ### Hunters

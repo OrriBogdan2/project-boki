@@ -26,7 +26,9 @@ const STATES := {
 	"fall": {"grounded": false, "vel": Vector3(0, -7, -2)},
 	"glide": {"grounded": false, "gliding": true, "vel": Vector3(0, -2, -7)},
 	"dash": {"rolling": true, "vel": Vector3(0, 0, -9)},
-	"down": {"fall": 0.6},
+	"down_hit": {"fall": 0.25},  # the knocked-down beat (HunterFall k): shoved off the hit
+	"down": {"fall": 0.6},  # on the knees
+	"down_end": {"fall": 0.95},  # slumped, as the body fades
 	"revive": {"reviving": true},
 }
 
