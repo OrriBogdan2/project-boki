@@ -16,28 +16,30 @@ foe and Dazes them, and the rifle and one long needle of light do the rest.
 
 ## How it plays
 
-1. **Quill Rifle** (LMB): a full-auto rifle out to full range. A long string loses a fifth of its punch, but a Dazed foe takes 76% more (big gold numbers) and the string doesn't fade on them.
-2. **Coin Blast** (RMB): tap to flick a gold coin from your free hand along your aim. A foe it strikes is hurt and Dazed; a wall or the ground sticks it, and a cone shows back toward you for 0.9s, then it blasts: damage, a big shove along the cone and Dazed. A hunter shoved into more terrain is stunned.
-3. **Palm Lance** (E): stand still for 0.6s while a wide line narrows to a thin core, then fire a heavy beam from your palm through cover and everyone in its line, your view pulled out along it. A Dazed hunter hit is Skewered. A hunter hit takes 20% off its cooldown (30% at rank 3). The recoil shoves you back a step.
-4. **Slipstep** (Shift): tap to skid, hold to slide; it goes where you move and you keep shooting. In the air a tap slides two thirds as far.
-5. **Hot Streak** (passive): a knock gives Slipstep back. Abilities that land add a little lifesteal (Fever).
-6. **Cinderfall** (ultimate, X): mark a zone at your cursor; a shell lands there 1.6s later and burns. R is the Boki Fusion.
+1. **Quill Rifle** (LMB): a full-auto rifle out to full range. A long string loses half its punch, but a Dazed foe takes 76% more (big gold numbers).
+2. **Burr Charge** (RMB): tap to fire it from your arm-cannon along your aim. It goes off on the first foe it strikes, or sticks to a wall or the ground at the end of its flight. A cone shows back toward you for 0.9s, then it blasts: damage, a big shove along the cone and Dazed. A hunter shoved into more terrain is stunned and the cooldown drops 40%.
+1. **Quill Rifle** (LMB): a full-auto rifle out to full range. A long string loses half its punch, but a Dazed foe takes 90% more (big gold numbers) and the string doesn't fade on them.
+2. **Burr Charge** (RMB): tap to fire it from your arm-cannon along your aim. It goes off on the first foe it strikes, or sticks to a wall in its path; on nothing it fizzles. A cone shows back toward you for 0.9s, then it blasts: damage, a big shove along the cone and Dazed. A hunter shoved into more terrain is stunned and the cooldown drops 40%.
+3. **Longneedle** (E): stand still for 0.6s while a wide line narrows to a thin core, then fire a heavy beam through cover and everyone in its line, your view pulled out along it. A Dazed hunter hit is Skewered. Each hunter hit takes 30% off its cooldown. The recoil shoves you back a step.
+4. **Slipstep** (Shift): tap to skid, hold to slide; it goes where you move and you keep shooting. Let go early for part of it back. In the air a tap slides two thirds as far.
+5. **Hot Streak** (passive): a knock gives Slipstep back and heals a quarter of your health. Abilities that land add a little lifesteal (Fever).
+6. There is no R ultimate yet. X fuses you with your Boki.
 
 ## Combos and interactions
 
 | Do this | And you get |
 |---|---|
-| Coin Blast on a foe, then the rifle | Dazed: +76% rifle damage |
-| Coin Blast, then Palm Lance | +20% and a Skewered payoff on a hunter |
-| Coin Blast in a wall beside a foe | A cone, Dazed, a stun into more terrain |
-| Palm Lance through a wall | Still hits; the cooldown drops 20% per hunter (30% at rank 3) |
-| Knock a hunter | Slipstep back (Coin Blast back too at rank 3) |
+| Burr Charge past a foe, then the rifle | Dazed and pushed toward you: +76% rifle damage |
+| Burr Charge, then Longneedle | +20% and a Skewered payoff on a hunter |
+| Burr Charge in a wall beside a foe | A cone, Dazed, a stun into more terrain, and the cooldown drops 40% |
+| Longneedle through a wall | Still hits; the cooldown drops 30% per hunter |
+| Knock a hunter | Heal 25%, Slipstep back (Burr Charge back too at rank 3) |
 
 ## Tips
 
-- A coin that strikes a foe hurts and Dazes them at once; fired at a wall it Dazes everyone in the cone.
+- A charge that strikes a foe hurts and Dazes them at once; fired at a wall it Dazes everyone in the cone.
 - Slide sideways while you keep shooting.
-- You stand still while Palm Lance charges: use cover, since the beam ignores it.
+- You stand still while Longneedle charges: use cover, since the beam ignores it.
 
 ## Kit
 

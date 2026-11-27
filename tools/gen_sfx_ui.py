@@ -419,8 +419,6 @@ def main():
     S.save_cat('cast_broken', broken(0), 'ui')     # (after rank_ready: the takes above stay the same)
     S.save_cat('ready_e', ready_e(0), 'ui')
 
-    S.save_cat('cast_broken', broken(0), 'ui')
-
 
 if __name__ == '__main__':
     main()
