@@ -417,7 +417,8 @@ func _shot_carry(meadow: Vector3) -> void:
 func _shot_set_down(meadow: Vector3) -> void:
 	var k: Dictionary = h.kins[0]
 	_mark("down", true)
-	_stand(meadow + Vector3(1.0, 0, 6.0), meadow + Vector3(3.0, 0, 6.0), 1.1)  # behind and aside: the Boki that face him face the lens too
+	# behind and aside: the Boki that face him face the lens too
+	_stand(meadow + Vector3(1.0, 0, 6.0), meadow + Vector3(3.0, 0, 6.0), 1.1)
 	_put(1, h.ppos + Vector3(2.5, 0, -1.5))
 	_put(2, h.ppos + Vector3(2.0, 0, 1.8))
 	_put(3, h.ppos + Vector3(3.2, 0, 0.2))
