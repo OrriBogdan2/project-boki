@@ -116,7 +116,7 @@ func _trial(stone: Vector3) -> float:
 ## The partner stands off to the side of the walk in, not in the ring.
 func _partner_aside() -> void:
 	var stone: Vector3 = w.h.hway.node.position
-	var dir := (stone - w.h.ppos).normalized()
+	var dir: Vector3 = (stone - w.h.ppos).normalized()
 	var at: Vector3 = w.h.world.free_spot_near(stone + Vector3(-dir.z, 0.0, dir.x) * 3.6 - dir * 0.6, [], 1.5, 1.1, 3.0)
 	for pin in w._pins:
 		pin[1] = at
