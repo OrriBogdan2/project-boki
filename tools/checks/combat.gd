@@ -7,6 +7,8 @@ extends RefCounted
 const CHECKS := {
 	# silence, granted immunity and cleanse, and per-strength slow timers (reference tuning)
 	"--cc-silence-check": ["res://tools/cc_silence_check.gd", "cc_silence_check", null],
+	# the glider opens after any attack or ability, LMB or not (input buffer, every hunter)
+	"--glide-after-attack-check": ["res://tools/glide_after_attack_check.gd", "glide_after_attack_check", null],
 	# a blast: falloff curve by distance, no damage through rock, the armour ring pitched by the shell left
 	"--blast-parity-check": ["res://tools/blast_parity_check.gd", "blast_parity_check", null],
 	"--move-speed-check": ["res://tools/move_speed_check.gd", "move_speed_check", null],  # run, walk, crouch per Hunter
