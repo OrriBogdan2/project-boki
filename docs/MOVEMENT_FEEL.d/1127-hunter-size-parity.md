@@ -16,8 +16,8 @@ widest; ours is 32 deg vertical at 23 m x 1.4572 = 33.5 m, 34.2 m of ground acro
 metres match on screen too; nothing to change.
 
 What follows a Hunter's size (all read `Arch.match_k`): overhead and hover plates and their anchors (`Hud._head`,
-`HunterZone.rect_of`, the `CamRig` plate lean), the plate's clearance over the model's tallest point (`body.top_h`,
-`HudPlate.up`), stun stars, vulnerable sparks, glider heat smoke, a shoulder Boki's bubble, Sparkle's fingertip.
+`HunterZone.rect_of`, the `CamRig` plate lean; a plate sits at its own offset or 0.6 m over the model's tallest
+point (`body.top_h`, `HudPlate.up`), whichever is higher, so a bigger body does not float its plate), stun stars, vulnerable sparks, glider heat smoke, a shoulder Boki's bubble, Sparkle's fingertip.
 Meshy-native stride follows the model scale (`WardenNative._stride_k`).
 
 `--hunter-size-sheet --shots-dir=<dir>` (GPU) prints one HSIZE row per hunter for main's size and the parity size;

@@ -59,15 +59,15 @@ static func plate_offset(h: Hunter) -> float:
 	return float(Arch.def(h.arch).get("plate_offset", PLATE_OFFSET))
 
 
-## `base` m over the feet (before the Hunter's match_k, as Hud._head takes it), raised so the plate hangs clear over
-## h's tallest point: back props and horns grow with the drawn size, the plate's size on screen does not.
+## `base` m over the feet (Hud._head takes the result divided by match_k, and puts it back), raised so the plate hangs
+## clear over h's tallest point: back props and horns grow with the drawn size, the plate's size on screen does not.
 static func up(h: Hunter, base: float) -> float:
 	return up_of(h.arch, h.vis_k, base)
 
 
 ## up() for hunter archetype `arch` drawn at model scale `vis_k`.
 static func up_of(arch: String, vis_k: float, base: float) -> float:
-	return maxf(base, (Arch.top_h(arch) * vis_k + CLEAR_M) / Arch.match_k(arch))
+	return maxf(base, Arch.top_h(arch) * vis_k + CLEAR_M) / Arch.match_k(arch)
 
 
 ## A rival you can see but who is hiding (crouched, or in tall grass or smoke) shows no plate or hover card: you see a
