@@ -1,0 +1,14 @@
+{
+	"id": "lanceron",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/lanceron.json.",
+	"work": {
+		"craft": 2,
+		"frost": 3,
+		"mend": 1
+	},
+	"shiny": {
+		"belly": "#a5ffe4",
+		"color": "#9acc84",
+		"glow": "#e8ff90"
+	}
+}

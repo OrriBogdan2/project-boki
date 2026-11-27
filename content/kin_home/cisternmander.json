@@ -1,0 +1,14 @@
+{
+	"id": "cisternmander",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/cisternmander.json.",
+	"work": {
+		"haul": 1,
+		"spark": 3,
+		"tide": 2
+	},
+	"shiny": {
+		"belly": "#e4a494",
+		"color": "#36544b",
+		"glow": "#ff8d89"
+	}
+}
