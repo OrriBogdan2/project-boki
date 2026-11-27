@@ -37,7 +37,10 @@ func _glide_folded(to: int) -> void:
 		h.glider_sfx("close")
 
 func open_glider() -> bool:
-	return fsm.go(Loco.S.GLIDING)
+	if not fsm.go(Loco.S.GLIDING):
+		return false
+	AirLimits.end_move(h)
+	return true
 
 func set_glide(on: bool) -> void:
 	if not on:
