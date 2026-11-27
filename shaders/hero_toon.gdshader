@@ -115,6 +115,10 @@ uniform float far_glow = 0.0;
 // times a second while it lasts, or the Hunter's signature colour fading after a cast (rgb the colour, a the strength).
 uniform vec4 side_rim : source_color = vec4(0.0);
 const float SIDE_RIM_PX = 1.6;     // px of silhouette the side colour fades out over
+// A hit's edge pulse (Ent.outline_t, content/rules/impact_weight.json outline_ms): 1 just after the white flash, easing
+// to 0. The side edge grows wider and hotter (white-hot on a body with no side edge: your own).
+uniform float rim_pulse = 0.0;
+const float PULSE_RIM_PX = 3.2;    // extra px of edge at a full pulse
 uniform vec4 tell : source_color = vec4(0.0);
 uniform float tell_hz = 0.0;
 // Imported low-poly models carry each corner's averaged (smooth) normal in TANGENT (Assets.mesh).
@@ -321,14 +325,16 @@ void fragment() {
 			- rim_far_color.rgb * fr * rim_far * far_k * far_rim_soft + rim_far_color.rgb * frs * 0.6
 			+ (gf - gc) * step(0.0001, glow);
 	}
-	if (side_rim.a > 0.0) {
+	if (side_rim.a > 0.0 || rim_pulse > 0.0) {
 		// a screen-width edge, not a share of the body: nv / (2 * fwidth(nv)) is the pixel distance to the silhouette
 		// on a smooth surface, so the body keeps its own colours inside the rim (the old nv > 0.55 cut recoloured
 		// ~half of a rival).
 		float edge_px = nv / (2.0 * max(fwidth(nv), 0.0001));
-		float se = (1.0 - smoothstep(0.0, SIDE_RIM_PX, edge_px)) * side_rim.a * (1.0 - fog) * (1.0 - flash);
-		ALBEDO = mix(ALBEDO, side_rim.rgb, se * 0.9);
-		EMISSION += side_rim.rgb * se * 0.8;
+		vec3 rc = side_rim.a > 0.0 ? mix(side_rim.rgb, vec3(1.0), 0.45 * rim_pulse) : vec3(1.0, 0.95, 0.85);
+		float se = (1.0 - smoothstep(0.0, SIDE_RIM_PX + PULSE_RIM_PX * rim_pulse, edge_px))
+			* max(side_rim.a, rim_pulse) * (1.0 - fog) * (1.0 - flash);
+		ALBEDO = mix(ALBEDO, rc, se * 0.9);
+		EMISSION += rc * se * (0.8 + 1.2 * rim_pulse);
 	}
 	if (tell.a > 0.0) {
 		float tk = tell.a * (tell_hz > 0.0 ? 0.6 + 0.4 * sin(TIME * tell_hz * 6.2832) : 1.0);

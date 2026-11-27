@@ -1723,7 +1723,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 		(target as Hunter).ak.on_take(by, d, o)
 	# impact: hitstop and shake by the hit's weight (ImpactWeight, docs/DASHES_AND_ABILITY_FEEL.md §5.4-5.5)
 	if src != "burn":
-		Feel.hitstop(self, by, target, d, o)
+		target.pulse_edge(Feel.hitstop(self, by, target, d, o))  # + the struck body's edge pulse for that tier
 	if credit == player and target != player and src != "burn":
 		if not BokiImpact.play(self, by, target, o, crit, "you"):
 			sfx("crit" if crit else HeroSfx.hit_sound(by, o), target.pos, -4.0 if crit else -6.0, 1.25 if armor_hit else randf_range(0.92, 1.08), true)
