@@ -56,6 +56,7 @@ static func cpu_ms() -> float:
 func run(main: Node, mode: String) -> void:
 	advisory = mode == "advisory" and not "--timing-strict" in OS.get_cmdline_user_args()
 	main_node = main
+	Prof.sums = true  # (the Prof zones, the HUD's draw among them, show in the per-phase table as z:)
 	main.add_child(self)
 
 
@@ -170,9 +171,10 @@ func _shot(ph: String) -> void:
 ## What this frame's sim and visual sections cost (Match.prof / Match.vprof are running totals), summed per phase.
 func _add_prof(ph: String) -> void:
 	var acc: Dictionary = phase_prof.get_or_add(ph, {})
-	for src in [Match.prof, Match.vprof]:
+	for src in [Match.prof, Match.vprof, Prof.us]:
+		var pre := "v:" if src == Match.vprof else ("z:" if src == Prof.us else "")
 		for k in src:
-			var key := ("v:" if src == Match.vprof else "") + String(k)
+			var key := pre + String(k)
 			acc[key] = float(acc.get(key, 0.0)) + float(src[k]) - float(prev_prof.get(key, 0.0))
 			prev_prof[key] = float(src[k])
 	acc["#frames"] = float(acc.get("#frames", 0.0)) + 1.0
@@ -250,7 +252,7 @@ func _phase_lines(j: Array) -> Array:
 			var nf := float(pp["#frames"])
 			var ks := pp.keys().filter(func(k): return k != "#frames")
 			ks.sort_custom(func(a, b): return pp[a] > pp[b])
-			var tops: Array = ks.slice(0, 7).map(func(k): return "%s %.1f" % [k, pp[k] / 1000.0 / nf])
+			var tops: Array = ks.slice(0, 10).map(func(k): return "%s %.1f" % [k, pp[k] / 1000.0 / nf])
 			pf += "\nLOADIN   top ms a frame: " + ", ".join(tops)
 		var vals := [ph, fs.size(), sum / n, _pct(ms, 0.99), _pct(ms, 1.0), draws / n, objs / n, cpu / n, mem]
 		vals.append_array([off, rcpu / n, rgpu / n])
