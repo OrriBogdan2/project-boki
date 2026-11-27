@@ -3,11 +3,28 @@ extends RefCounted
 ## The Training Grounds' stations (the --arena map's "grounds" block, content/maps/arena.json).
 ## Pedestals on the sky perches let you try every Hunter, Boki, glove/armor/boot and belt item, and spawn
 ## a sparring bot of any Hunter; a ring on the floor takes you to the duel room. Walk up, press interact.
-## Cheap by design: every pedestal shares one mesh and a few materials, a label only shows when you are close,
+## Each island hangs a big sign (what it is for, how to use it). Cheap by design: every pedestal shares one mesh and
+## a few materials, a pedestal's name only shows when you are near,
 ## and nothing here runs per-pedestal physics.
 
 const ACT_R := 1.5  # [m] how close you stand to use a pedestal
-const SHOW_R := 6.5  # [m] a pedestal's name is drawn inside this
+const SHOW_R := 14.0  # [m] a pedestal's name is drawn inside this
+const PROMPT_Y := 230.0  # [px] the pedestal prompt's top: under the trial clock (TimeTrial.CLOCK_Y), clear of the HUD
+const PROMPT_W := 560.0  # [px] its width (centred)
+const SIGN_LIFT := 6.0  # [m] a station's sign hangs this far over the island's middle
+## Per station kind: the sign's title, what it is for, how a pedestal is used (`%s` is the interact key's cap).
+const SIGNS := {
+	"arch": ["HUNTERS", "Try any Hunter's kit", "Stand on a pedestal, press %s\nto play that Hunter"],
+	"gear": ["GEAR", "Test gloves, armor and boots", "Stand on a pedestal, press %s\nto wear that piece"],
+	"item": ["BELT ITEMS", "Test every utility belt item", "Stand on a pedestal, press %s\nto fill your belt with it"],
+	"bot":
+	[
+		"BOT PEN",
+		"Practise your combos and matchups on a real bot",
+		"Stand on a pedestal, press %s\nto spawn a sparring bot of that Hunter"
+	],
+	"kin": ["BOKI", "Try every Boki", "Stand on a pedestal, press %s\nto bring that Boki"],
+}
 const PED_GLOW := 0.3  # pedestal emission: a faint glow that keeps its colour under bloom (0.9 washed to white)
 const FALL_Y := -12.0  # [m] below this you fell off the map: back to the start (the abyss kills at -17)
 const KIND_COL := {
@@ -104,6 +121,7 @@ func build() -> void:
 		return
 	for st in g.get("stations", []):
 		_ring(String(st["kind"]), v3(st["at"]), float(st["ring"]))
+		_sign(String(st["kind"]), v3(st["at"]))
 	if g.has("duel"):
 		_duel(v3(g["duel"]))
 	summon_pad = SummonStation.new(a)
@@ -111,13 +129,15 @@ func build() -> void:
 	_layer = CanvasLayer.new()
 	_layer.layer = 20
 	prompt = Label.new()
-	prompt.position = Vector2(0, 150)
-	prompt.size = Vector2(1280, 30)
 	prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	prompt.add_theme_font_size_override("font_size", 22)
 	prompt.add_theme_color_override("font_outline_color", Color.BLACK)
 	prompt.add_theme_constant_override("outline_size", 8)
-	prompt.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	prompt.custom_minimum_size = Vector2(PROMPT_W, 0)
+	prompt.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE)
+	prompt.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	prompt.offset_top = PROMPT_Y
+	prompt.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	prompt.visible = false
 	_layer.add_child(prompt)
 	m.add_child(_layer)
@@ -175,6 +195,19 @@ func _pedestal(kind: String, id: String, p: Vector3, c: Vector3) -> void:
 	stations.append({"kind": kind, "id": id, "at": p, "c": c, "label": lb})
 
 
+## The big sign over a station's island: readable from far off, says what it is for and how to use a pedestal.
+func _sign(kind: String, at: Vector3) -> void:
+	var t: Array = SIGNS[kind]
+	var base := Vector3(at.x, m.world.ground_at(at.x, at.z) + SIGN_LIFT, at.z)
+	var col := Color(String(KIND_COL[kind]))
+	var title := label(String(t[0]), col, 9.0)
+	title.position = base + Vector3(0, 1.8, 0)
+	m.add_child(title)
+	var body := label("%s\n%s" % [t[1], String(t[2]) % Settings.key_cap("interact")], Color.WHITE, 3.4)
+	body.position = base
+	m.add_child(body)
+
+
 static func label(text: String, col: Color, scale_k := 1.0) -> Label3D:
 	var lb := Label3D.new()
 	lb.text = text
@@ -196,7 +229,8 @@ func _duel(at: Vector3) -> void:
 	var pad := Models.jump_pad(Color(String(KIND_COL["duel"])))
 	pad.position = at
 	m.add_child(pad)
-	var lb := label("DUEL ROOM\n%s to enter" % Settings.key_cap("interact"), Color(String(KIND_COL["duel"])), 2.6)
+	var col := Color(String(KIND_COL["duel"]))
+	var lb := label("DUEL ROOM\nSpar a Hunter one on one\n%s to enter" % Settings.key_cap("interact"), col, 2.6)
 	lb.position = at + Vector3(0, 2.7, 0)
 	m.add_child(lb)
 	m.duel_pad = at
@@ -236,7 +270,9 @@ func tick(dt: float) -> void:
 		prompt.visible = best >= 0
 		if best >= 0:
 			var sd: Dictionary = stations[best]
-			prompt.text = "%s   ·   %s" % [name_of(String(sd["kind"]), String(sd["id"])), Settings.key_cap("interact")]
+			var spawns := String(sd["kind"]) == "bot" and String(sd["id"]) != "clear"
+			var key := Settings.key_cap("interact") + (" to spawn" if spawns else "")
+			prompt.text = "%s   ·   %s" % [name_of(String(sd["kind"]), String(sd["id"])), key]
 			prompt.add_theme_color_override("font_color", color_of(String(sd["kind"]), String(sd["id"])).lightened(0.3))
 	if best >= 0 and Input.is_action_just_pressed("interact") and not m.paused and not p.downed:
 		use(best)

@@ -5,6 +5,7 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	"--solo-hud-shots": ["res://tools/solo_hud_shots.gd", "solo_hud_shots", null],  # GPU, --shots-dir=
 	"--passive-gauge-shots": ["res://tools/passive_gauge_shots.gd", "passive_gauge_shots", null],
 	"--map-every-mode-check": ["res://tools/map_every_mode_check.gd", "map_every_mode_check", null],  # M in every mode
 	"--map-every-mode-shots": ["res://tools/map_every_mode_check.gd", "map_every_mode_shots", true],  # GPU: --shots-dir
