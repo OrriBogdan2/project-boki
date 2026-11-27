@@ -124,7 +124,7 @@ func _arena(main: Node) -> Match:
 
 
 ## The aegis held toward the screen's right and toward the camera at the match camera, then close up from his front
-## left at three heights (high, eye, knee), the wall hidden at the last, then straight down from above.
+## left at three heights (high, eye, knee), the wall hidden at knee and high, then straight down from above.
 func _guard(main: Node) -> void:
 	var m := _arena(main)
 	var p: Hunter = m.player
@@ -136,6 +136,8 @@ func _guard(main: Node) -> void:
 			p.inp["sec_hold"] = true
 			await _tick(main, m)
 		await _grab(main, "guard_match_%s.png" % ("side" if aim.z == 0.0 else "front"))
+	for l in m.find_children("*", "Label3D", true, false):  # the zone's floor text and name tags in the close-ups
+		(l as Label3D).visible = false
 	var cam := Camera3D.new()
 	m.add_child(cam)
 	cam.fov = 34.0
@@ -143,8 +145,7 @@ func _guard(main: Node) -> void:
 	cam.current = true
 	var heights := {"guard_close": 2.2, "guard_eye": 1.4, "guard_knee": 0.45}
 	for shot: String in heights:
-		var from := p.pos + fwd * 5.5 + fwd.cross(Vector3.UP) * 2.0 + Vector3(0, float(heights[shot]), 0)
-		cam.look_at_from_position(from, p.pos + Vector3(0, 1.1, 0), Vector3.UP)
+		cam.look_at_from_position(_close_from(p, fwd, float(heights[shot])), p.pos + Vector3(0, 1.1, 0), Vector3.UP)
 		for i in 6:
 			p.inp["sec_hold"] = true
 			await _tick(main, m)
@@ -152,12 +153,19 @@ func _guard(main: Node) -> void:
 	var aegis := (p.ak as BulwarkKit).fx.aegis
 	aegis.visible = false
 	await _grab(main, "guard_knee_nowall.png")
+	cam.look_at_from_position(_close_from(p, fwd, 2.2), p.pos + Vector3(0, 1.1, 0), Vector3.UP)
+	await _grab(main, "guard_close_nowall.png")
 	aegis.visible = true
 	cam.look_at_from_position(p.pos + Vector3(0, 9.0, 0.01), p.pos, Vector3.UP)
 	await _grab(main, "guard_top.png")
 	p.inp["sec_hold"] = false
 	m.queue_free()
 	await main.get_tree().process_frame
+
+
+## The close-up camera: in front of him toward the aim and a little to his left, `h` m up.
+func _close_from(p: Hunter, fwd: Vector3, h: float) -> Vector3:
+	return p.pos + fwd * 5.5 + fwd.cross(Vector3.UP) * 2.0 + Vector3(0, h, 0)
 
 
 ## Faultline toward the screen's right: the wind-up, the slam and the eruption, timed from the press.
