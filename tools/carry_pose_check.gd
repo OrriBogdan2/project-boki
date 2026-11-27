@@ -99,7 +99,7 @@ func _hero(id: String) -> void:
 		m.queue_free()
 		return
 	P.inp["move"] = Vector2(0, -1)
-	P.inp["aim"] = P.pos + Vector3(0, 0.9, -10.0)      # (face the way he runs: the stride is read along z)
+	P.inp["aim"] = P.pos + Vector3(0, 0.9, -10.0)  # (face the way he runs: the stride is read along z)
 	P.inp["aim_y"] = P.pos.y
 	var sk := WardenGlb.skeleton(P.model.get_node("Warden"))
 	var shin := WardenSkeleton.find(sk, "shin.R")

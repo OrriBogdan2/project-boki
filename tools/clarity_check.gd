@@ -412,7 +412,7 @@ func _boki_text(m: Match, p: Hunter, ally: Hunter, foe: Hunter) -> void:
 ## Slowed, then rooted, then stunned on top: the line puts stun first and root before Slow, each bar
 ## starts full and shrinks with time, and the line is empty once it's over.
 func _cc_self(m: Match, p: Hunter) -> void:
-	p.stun_t = 0.0      # (the plate section above can leave you slowed)
+	p.stun_t = 0.0  # (the plate section above can leave you slowed)
 	p.root_t = 0.0
 	p.slow_t = 0.0
 	ok(SelfCcLine.entries(p).is_empty(), "you're free: no CC line")
@@ -431,6 +431,7 @@ func _cc_self(m: Match, p: Hunter) -> void:
 	p.root_t = 0.0
 	p.slow_t = 0.0
 	ok(SelfCcLine.entries(p).is_empty(), "all over: the line is gone")
+
 
 func _icon(e: Ent, icon: String) -> Array:
 	return HudPlate.statuses(e).filter(func(x): return x[0] == icon)

@@ -34,7 +34,7 @@ const TYPES := {
 	"wild": {"name": "Normal", "col": Color("e8d9a8")},
 	"wyrm": {"name": "Wyrm", "col": Color("c8344f")},  # the Wyrm theme (Kite, ribbon): its type colour is its accent
 }
-const SILHOUETTE := Color(0.05, 0.06, 0.1, 0.92)       # a Boki you haven't met, drawn as a dark shape
+const SILHOUETTE := Color(0.05, 0.06, 0.1, 0.92)  # a Boki you haven't met, drawn as a dark shape
 const TILE := Vector2(106, 132)
 const PORTRAIT := 70.0
 
@@ -50,6 +50,7 @@ static func type_name(t: String) -> String:
 static func type_col(t: String) -> Color:
 	return TYPES.get(t, {}).get("col", Color("a9b0bf"))
 
+
 ## The type pill: the type's icon and "<Name> type", in its colour.
 static func type_chip(t: String) -> PanelContainer:
 	var chip := PanelContainer.new()
@@ -60,6 +61,7 @@ static func type_chip(t: String) -> PanelContainer:
 	h.add_child(TypeIcon.new(t, 18.0))
 	h.add_child(UI.label("%s type" % type_name(t), UI.T_SMALL, UI.INK, UI.semi))
 	return chip
+
 
 ## Its number in the Field Book: the order entries are listed in (Data.KIN: the starters first); both
 ## forms of a branching line share one.
@@ -158,7 +160,7 @@ static func tile(key: String, tree: SceneTree, on_open: Callable) -> Control:
 		var pv := KinPortrait.view({"species": spk, "level": 5}, tree, PORTRAIT)
 		pv.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		if not is_caught:
-			pv.modulate = SILHOUETTE      # seen, not caught: a dark silhouette
+			pv.modulate = SILHOUETTE  # seen, not caught: a dark silhouette
 		holder.add_child(pv)
 		if is_caught and bool(entry(spk).get("shimmer", false)):
 			var sp := Sparkle.new()

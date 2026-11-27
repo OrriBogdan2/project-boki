@@ -71,7 +71,7 @@ static func _outside(hud, m: Match, ht: Heart) -> bool:
 	var at := Vector2(sz.x * 0.5, HudScale.from_bottom(sz.y * 0.8, sz))  # (clear of the bottom row, grown)
 	var lw := TextCache.width(hud.big, line, 18)
 	var vc: Vector2 = HudVitals.corner(hud, hud.panels.size) + hud.panels.position  # (in the panels' frame)
-	if at.x - lw * 0.5 < vc.x + 6.0:      # (it would touch the vitals block sideways: sit above it and its XP row)
+	if at.x - lw * 0.5 < vc.x + 6.0:  # (it would touch the vitals block sideways: sit above it and its XP row)
 		at.y = minf(at.y, vc.y - 24.0)
 	at.y += HudScale.lift(Rect2(at + Vector2(-lw * 0.5, -16.0), Vector2(lw, 22.0)), sz)
 	SafeArea.note_as("blight_line", Rect2(at + Vector2(-lw * 0.5, -16.0), Vector2(lw, 22.0)))

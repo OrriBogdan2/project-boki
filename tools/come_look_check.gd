@@ -159,6 +159,7 @@ func _newcomer(rare: bool) -> void:
 	var same := others.keys().all(func(nm): return _mem_size(nm) == others[nm])
 	ok(same, "%s: nobody else wrote a line" % tag)
 
+
 ## You come home: the expeditions count goes up and the farm looks.
 ## The toys put down so far leave the farm: a Boki at play or fetching a ball is busy and writes its own journal lines.
 func _clear_toys() -> void:
@@ -205,6 +206,7 @@ func _item_home(id: String, who: String, pose: String, verb: String) -> void:
 	)
 	var seen: bool = Save.d["tutorial"].get(ComeLook.ITEM_KEY + id, false)
 	ok(_look_mems(who) == looks and seen, "%s: no memory line, kind marked seen" % tag)
+
 
 ## A claimed Boki rides home (CarryArrival): `crowded` = the garden already has its cap out, so it goes to the Burrow.
 func _carried_home(crowded: bool) -> void:
@@ -255,6 +257,7 @@ func _carried_home(crowded: bool) -> void:
 	ok(came.size() == ComeLook.MAX_LOOKERS and not came.has(who), "%s: three residents come to look" % tag)
 	var res := _watch(who["pos"])
 	ok(res["spoke"].size() >= 1, "%s: they chatter (%s)" % [tag, ",".join(res["spoke"].keys())])
+
 
 func run(m: Node) -> void:
 	main = m

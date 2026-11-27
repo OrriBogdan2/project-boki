@@ -248,7 +248,18 @@ func _start() -> void:
 		var p: Dictionary = Net.peers.get(id, Net.my_presence)
 		if id == Net.me:
 			p = Net.my_presence
-		roster.append({"peer": id, "team": int(i / float(squad)), "name": p.get("name", "Hunter"), "tag": ClanInfo.clean_tag(p.get("tag")), "arch": p.get("arch", ""), "cls": p.get("cls", "medium"), "weapon": p.get("weapon", ""), "kin": p.get("kin", {})})
+		roster.append(
+			{
+				"peer": id,
+				"team": int(i / float(squad)),
+				"name": p.get("name", "Hunter"),
+				"tag": ClanInfo.clean_tag(p.get("tag")),
+				"arch": p.get("arch", ""),
+				"cls": p.get("cls", "medium"),
+				"weapon": p.get("weapon", ""),
+				"kin": p.get("kin", {})
+			}
+		)
 	var teams := maxi(int(ceil(float(ids.size()) / squad)), int(mo["teams"]))
 	if mode == "heart_raid":
 		teams = 1
