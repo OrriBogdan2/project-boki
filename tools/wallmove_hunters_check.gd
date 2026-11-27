@@ -128,7 +128,6 @@ func _fresh(at: Vector3, grounded: bool, v := Vector3.ZERO) -> void:
 	me.air_t = 0.0 if grounded else 0.5
 	me.dashes = me.max_dashes()
 	me.wall_moves.land()
-	me.glide_lift.kicked = false
 	me.glide_lift.hang_t = 0.0
 	for k in ["glide", "jump", "dash", "fire", "sig", "sec", "skill", "sec_hold"]:
 		me.inp[k] = false

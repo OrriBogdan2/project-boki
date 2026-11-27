@@ -111,7 +111,6 @@ func _reset(at: Vector3, grounded: bool, v := Vector3.ZERO) -> void:
 	h.air_t = 0.0 if grounded else 0.5
 	h.wall_moves.land()
 	h.wall_touch_t = 0.0
-	h.glide_lift.kicked = false
 	h.glide_lift.hang_t = 0.0
 	h.shot_down = false
 	h.root_t = 0.0
