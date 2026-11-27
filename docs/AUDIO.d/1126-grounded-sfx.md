@@ -1,0 +1,12 @@
+## Grounded pass (11-26, owner: "sfx are too arcade-y")
+
+**Sound direction.** Combat audio should feel weighty and physical, not like a synth:
+- Layer every sound as transient + body + tail: a short dull tick, a chest or ground thump at 80-250 Hz, a dark room tail (`reflections`, nothing bright).
+- Weight sits in the lower mids; the top is rolled off (about 5-6 kHz for fire and hits, 3-4 kHz for steps, dashes and jumps). Over-bright noise bursts (a dash at 5 kHz centroid) read as a toy.
+- Foley, not tones: boot leather and grit, cloth and moved air, a bolt clack as a dull knock. No pitched sweeps up, no bells or rings on hits, no tuned UI notes for a plain press.
+- 3-4 takes per sound (a repeat is never the same sample), each drawing its own layer gains and timings, plus play-time jitter: `Sfx.play` varies pitch by `pitch_var` (7% default) and volume by `play_jitter_db` (1 dB) whenever `pitch_var` is above 0 (the first shot of a burst stays exact).
+- UI sits quiet: the press is -2 dB under its category (`gain_db`).
+
+**Done.** `tools/gen_sfx_grounded.py` rewrites the eight most-heard sounds (Vex's rifle and hold takes, Kael's swing, the gun and blade hit confirms, `step0-2`, `jump`, `glider_snap`, `dash_ground`/`dash_air`, `click`). Run it after the generators of those groups (it overwrites their names). Kept as ruled: air dash differs from ground dash, each glider keeps its own wind (only the default cloth snap changed), chain gun reload untouched. Before and after, the spectral centroid (Hz) / share above 4 kHz: dash_air 5061 / 63% -> 843 / 0.1%; hit_blade 4301 / 43% -> 908 / 2%; swing 2999 / 22% -> 768 / 0.1%; dash_ground 3219 / 27% -> 914 / 0.2%.
+
+**Audit.** `python3 tools/sfx_arcade_audit.py out.tsv` flags every sound as bright (over 35% of energy above 4 kHz), bleep (a pure tone), rising (a short upward sweep), dry (no tail) or one-take. Over 1360 sounds: 94 bright, 225 rising, 207 dry, 589 one-take (the bleep flag is noisy on voices). **Not done:** Hunters' own steps, dashes and hits, the other kits' fire sounds and the remaining 94 bright ones; they still use the old recipe and should move to `gen_sfx_grounded.py`'s helpers one group at a time.
