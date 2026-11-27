@@ -12,6 +12,11 @@ static func window() -> float:
 	return float(Content.rules("combat")["window_s"])
 
 
+## How much of a heal Anti-Heal takes away when its source names no amount (content/rules/combat.json).
+static func anti_heal_cut() -> float:
+	return float(Content.rules("combat")["anti_heal_cut"])
+
+
 static func is_in(e: Ent) -> bool:
 	return e.m.time - e.combat_at < window()
 
