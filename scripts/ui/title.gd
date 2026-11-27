@@ -14,6 +14,7 @@ var admin_pop: Control         # the owner's corner popover (Test Zone, Demo Mat
 const LOGO_H := 150.0                 # the logo's floor; it grows into the column's spare height
 const LOGO_SHORT_H := 80.0            # on a window under SHORT_WIN tall, so Quit stays on screen
 const SHORT_WIN := 600.0
+const LOGO_BOOM_DB := -14.0     # dB, the impact under the logo horn
 const DISCORD := "https://discord.gg/nbeBaU7xt"        # the playtest server (never expires)
 
 func _ready() -> void:
@@ -26,9 +27,10 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	t += delta
 	if not stung and t > 0.7:
-		# the logo lands with a low horn under the music
+		# the logo lands with a low horn and a drum-hit boom, over the title track's tom intro
 		stung = true
 		Sfx.play("horn", null, -15.0, 0.0, 0.62)
+		Sfx.play("boom", null, LOGO_BOOM_DB, 0.0, 0.8)
 
 func _build_ui() -> void:
 	var ui := CanvasLayer.new(); add_child(ui)
