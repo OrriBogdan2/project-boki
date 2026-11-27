@@ -157,3 +157,10 @@ Scripts: `~/gens/hunter-round-1124/sparkle/p7/tools/`.
   Body Image_3 mip 4 15% -> 7%. Drawn texels change only by the JPEG re-encode (q97, mean 0.3-3.7/255).
 - Mesh, UV, skin, clips byte-identical. The extracted ryzz_meshy_Image_N.jpg files hold the same bytes as the embedded images.
 Scripts: `~/gens/hunter-round-1124/sparkle/p11/tools/` (padall.py, bleed.py).
+
+## 11-27 round 14: turnaround eyes on the stance body
+- Face Image_6 only: the chest-face branch eye repaint (eyes open, lavender, toward the turnaround; owner 11-26 "face like the turnaround")
+  transplanted into the stance face texture, then gutter-padded over its UV coverage (q97). Mesh, UV, skin, clips and other images byte-identical.
+- Bust stays the stance body (one step smaller than live, owner 11-26). geo_check PASS (worst clip 3.0 cm, hands ok).
+- art-gate game view: GAME 6.5, LIVE GAME 4.8 (stance alone 6.0). Open: grey panels at the crop-top bust sides (on the stance body too).
+Scripts: `~/gens/hunter-round-1124/sparkle/p14/tools/` (pad6.py).
