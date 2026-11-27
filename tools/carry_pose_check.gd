@@ -71,6 +71,7 @@ func _hero(id: String) -> void:
 		return
 	P.inp["move"] = Vector2(0, -1)
 	P.inp["aim"] = P.pos + Vector3(0, 0.9, -60)      # aim down the run: a start that faces the Heart would strafe
+	P.inp["aim_y"] = P.pos.y
 	var sk := WardenGlb.skeleton(P.model.get_node("Warden"))
 	var shin := WardenSkeleton.find(sk, "shin.R")
 	var hips := WardenSkeleton.find(sk, "hips")

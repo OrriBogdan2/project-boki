@@ -133,9 +133,9 @@ func _scene(arch: String, moment: String, size: Vector2i, statuses: bool, shots:
 	var hit_at := int((FIGHT_S - HIT_BEFORE_S) / Match.DT)
 	for i in int((FIGHT_S + (FIGHT_EXTRA_S if arch != "" else 0.0)) / Match.DT):
 		m.step(Match.DT)
+		m.hud.loot.tick(Match.DT)  # pickup rows age with the match clock too (a busy box ran frames slower)
 		if i == hit_at:  # one landed hit before judging: the fight never hangs on the seed's AI
 			rival.hurt(10.0, m.player)
-		m.hud.loot.tick(Match.DT)  # pickup rows age with the match clock too (a busy box ran frames slower)
 		if i % 20 == 0:
 			await main.get_tree().process_frame
 		if arch != "" and m.time >= FIGHT_S and m.hud.in_fight():
