@@ -1,14 +1,20 @@
 class_name HudVitals
 extends RefCounted
-## The bottom-left vitals block: your portrait framed in your class colour with the XP tracker (run
-## level and a bar toward the next level) along its top edge, then to its right your health as a big
-## number over a thick segmented bar, armour as a strip over it with its number and
-## tier, your shield as a strip over the top of health (ShieldStrip), the merged form's shell, and the
-## archetype resource under that, then any crowd control on you (SelfCcLine). The ability row sits
-## below the bars (Hud._draw_abilities). Look: HudStyle.
+## The bottom-left vitals block, the reference's order: your portrait framed in your class colour with the XP
+## tracker (run level and a bar toward the next level) along its top edge, under it a thick segmented health bar
+## with armour as a strip over it, your shield as a strip over the top of health (ShieldStrip), the merged form's
+## shell, then health as a big number over its max (and the armour number) under the bar, the archetype resource
+## and any crowd control on you (SelfCcLine) under that. The ability row sits to the right of the bars, its
+## bottom level with theirs (Hud._draw_abilities). Look: HudStyle.
 ## Hud keeps the state that checks read (lvl_pop, xp_pop, armor_lerp, hover_spots); this only draws.
 
-const BAR_W := 318.0  # px: health / armour width
+const BAR_W := 154.0  # px: health / armour width (the reference's 230 px of 1920)
+const ARM_GAP := 5.0  # px: the portrait's bottom to the armour strip
+const NUM_DROP := 17.0  # px: the bar's bottom to the health number's baseline
+const HP_PX := 20  # px: the health number
+const MAX_PX := 12  # px: the max health after it
+const ARM_PX := 14  # px: the armour number
+const VITALS_H := 64.0  # px: what the bars, the numbers under them and a resource or CC line add under the portrait
 const HP_H := 16.0  # px: the health bar
 const AR_H := 5.0  # px: the armour strip above it
 const LVL_POP := 0.35  # s: the level number's gold fade after a level-up
@@ -35,64 +41,64 @@ static func draw(h, sz: Vector2, p: Hunter) -> void:
 	if p.lives < 50 and p.lives > 1:
 		for i in p.lives:
 			c.draw_circle(pr.position + Vector2(pr.size.x - 10 - i * 11.0, 10), 4.0, Color("ff7a8a"))
-	var x0 := pr.end.x + 16.0
+	var x0 := pr.position.x
 	var w := BAR_W
-	var y0 := o.y + 16.0
+	var y0 := pr.end.y + ARM_GAP  # the armour strip's top
 	var dt: float = h.get_process_delta_time()
 	var frac := clampf(p.hp / maxf(1.0, p.max_hp), 0.0, 1.0)
 	var af := clampf(p.armor / maxf(1.0, p.max_armor), 0.0, 1.0)
 	h.armor_lerp = move_toward(h.armor_lerp, af, dt * (0.5 if h.armor_lerp > af else 4.0))
-	h.hover_spots.append([Rect2(Vector2(x0, y0 - 20), Vector2(w, 52)), "vitals"])
-	# the numbers: health big, max small; armour and its tier on the right
-	var hp_col := HudStyle.hp_fill(SideColor.you(), frac, h.m.time)
-	var hp_txt := HudStyle.num(ceili(p.hp))
-	HudStyle.text(c, Vector2(x0, y0 + 1), hp_txt, 26, HudStyle.INK if frac >= 0.3 else hp_col)
-	var hw := TextCache.width(HudStyle.BIG, hp_txt, 26)
-	var max_txt := "/ " + HudStyle.num(int(p.max_hp))
-	HudStyle.text(c, Vector2(x0 + hw + 4, y0 + 1), max_txt, 14, HudStyle.MUTED)
-	if p.armor > 0.5:
-		var at := "%d" % int(ceil(p.armor))
-		var aw := TextCache.width(HudStyle.BIG, at, 15)
-		HudStyle.text(c, Vector2(x0 + w - aw, y0 + 1), at, 15, p.armor_col())
-		if p.armor_tier > 0:  # the tier's name waits until the first tier-up (TermHints says what it is)
-			var tn := String(Hunter.ARMOR_TIERS[p.armor_tier][0]).to_upper()
-			var tw := TextCache.width(HudStyle.BIG, tn, 10)
-			HudStyle.text(c, Vector2(x0 + w - aw - 8 - tw, y0), tn, 10, Color(p.armor_col(), 0.75))
-	ArmorHud.note(h, note_at(pr))  # above the LV / XP row, never on it
+	h.hover_spots.append([Rect2(Vector2(x0, y0 - 4), Vector2(w, VITALS_H - 4.0)), "vitals"])
 	# armour on top (the merged form's shell while merged), health thick and segmented under it, the chip and flash
 	# shared with your overhead plate
-	var ar := Rect2(Vector2(x0, y0 + 6), Vector2(w, AR_H))
+	var ar := Rect2(Vector2(x0, y0), Vector2(w, AR_H))
 	var hr := Rect2(Vector2(x0, ar.end.y + 3), Vector2(w, HP_H))
 	h._rounded(hr.grow(2.0), HudStyle.SHADE, 4)
 	var flash: float = h.plates.flash_of(p) * 0.6
+	var hp_col := HudStyle.hp_fill(SideColor.you(), frac, h.m.time)
 	HudStyle.seg_bar(c, hr, p.hp, p.max_hp, hp_col, h._chip_of(p, frac), 0.0, flash)
-	var mw := HudStyle.BIG.get_string_size(max_txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
-	ShieldStrip.draw(c, hr, p, x0 + hw + 4 + mw + 12, y0 + 1)
+	# the numbers under the bar: health big, max small; armour on the right
+	var ny := hr.end.y + NUM_DROP
+	var hp_txt := HudStyle.num(ceili(p.hp))
+	HudStyle.text(c, Vector2(x0, ny), hp_txt, HP_PX, HudStyle.INK if frac >= 0.3 else hp_col)
+	var hw := TextCache.width(HudStyle.BIG, hp_txt, HP_PX)
+	var max_txt := "/ " + HudStyle.num(int(p.max_hp))
+	HudStyle.text(c, Vector2(x0 + hw + 4, ny), max_txt, MAX_PX, HudStyle.MUTED)
+	if p.armor > 0.5:
+		var at := "%d" % int(ceil(p.armor))
+		var aw := TextCache.width(HudStyle.BIG, at, ARM_PX)
+		HudStyle.text(c, Vector2(x0 + w - aw, ny), at, ARM_PX, p.armor_col())
+	ArmorHud.note(h, note_at(pr))  # above the LV / XP row, never on it
+	var mw := HudStyle.BIG.get_string_size(max_txt, HORIZONTAL_ALIGNMENT_LEFT, -1, MAX_PX).x
+	ShieldStrip.draw(c, hr, p, x0 + hw + 4 + mw + 8, ny)
 	# the strip above health: the merged form's shell while merged, else armour (with its own trail as it drops)
 	var shv := MergeShell.view(p)
 	if shv.y > 0.0 and not p.merge_st.is_empty():
 		var fcol: Color = (p.merge_st["form"] as Dictionary)["glow"]
 		BokiHud.shell_bar(h, ar.grow_individual(0, 2, 0, 2), shv.x / shv.y, fcol, BokiHud.shell_flash(h, p))
-		var shell_x := x0 + w - (70 if p.armor <= 0.5 else 170)
-		HudStyle.text(c, Vector2(shell_x, y0 + 1), "SHELL %d" % int(ceil(shv.x)), 13, fcol)
+		HudStyle.text(c, Vector2(pr.end.x + 6.0, ar.position.y - 5.0), "SHELL %d" % int(ceil(shv.x)), 10, fcol)
 	else:
 		var fl := BokiHud.shell_flash(h, p)
 		if fl > 0.0:
 			BokiHud.shell_bar(h, ar.grow_individual(0, 2, 0, 2), 0.0, p.get_meta("shell_break_col", Color.WHITE), fl)
+		if p.armor > 0.5 and p.armor_tier > 0:  # the tier's name waits until the first tier-up (TermHints says what it is)
+			var tn := String(Hunter.ARMOR_TIERS[p.armor_tier][0]).to_upper()
+			var tw := TextCache.width(HudStyle.BIG, tn, 9)
+			HudStyle.text(c, Vector2(x0 + w - tw, ar.position.y - 5.0), tn, 9, Color(p.armor_col(), 0.75))
 		if p.max_armor > 0.5:
 			c.draw_rect(ar.grow(1.0), HudStyle.SHADE)
 			HudStyle.strip(c, ar, h.armor_lerp, HudStyle.CHIP)
 			var acol: Color = p.armor_col().lerp(Color.WHITE, h.plates.armor_flash_of(p))
 			c.draw_rect(Rect2(ar.position, Vector2(ar.size.x * af, ar.size.y)), acol)
 	ArmorHud.bar(h, x0, ar.position.y - 3, w, p)  # progress to the next armour tier, a hairline above the strip
-	var cc_y := hr.end.y + 4
+	var cc_y := ny + 6.0
 	if p.ak and p.ak.has_gauge():
 		h._draw_res_bar(x0, cc_y, w, p)
 		cc_y += 12.0
 	SelfCcLine.draw(c, Vector2(x0, cc_y), w, p)
 	xp_row(h, pr, x0, w, p)
 	_hidden_tag(h, sz, p)
-	h.lvl_cue.card(h, x0, y0 - 32.0)  # clear of the XP tracker on the block's top edge
+	h.lvl_cue.card(h, x0, pr.position.y - 16.0)  # clear of the XP tracker on the block's top edge
 
 
 ## HIDDEN / CROUCHED / SPOTTED over the middle of the bar when you're in grass or crouching.
@@ -108,7 +114,7 @@ static func _hidden_tag(h, sz: Vector2, p: Hunter) -> void:
 		fg = Color("8fe0a0") if grass else Color("c9d2e0")
 		bg = Color(0.05, 0.12, 0.06, 0.85) if grass else Color(0.08, 0.09, 0.12, 0.85)
 	var tw := TextCache.width(HudStyle.BIG, txt, 13)
-	var hr := Rect2(Vector2(sz.x * 0.5 - tw * 0.5 - 12, h._hud_origin(sz).y + 46.0), Vector2(tw + 24, 20))
+	var hr := Rect2(Vector2(sz.x * 0.5 - tw * 0.5 - 12, h._hud_origin(sz).y + VITALS_H + 46.0), Vector2(tw + 24, 20))
 	var back := HudScale.begin(h, "status", sz)  # (centred above the bottom row, not part of the left block)
 	h._rounded(hr, bg, 10)
 	HudStyle.text(h.c, hr.position + Vector2(12, 15), txt, 13, fg)
@@ -119,12 +125,12 @@ static func _hidden_tag(h, sz: Vector2, p: Hunter) -> void:
 ## reaches left of it rises above it (HeartHud's Blight line on a narrow 1240 px logical screen).
 static func corner(h, sz: Vector2) -> Vector2:
 	var o: Vector2 = h._hud_origin(sz)
-	return Vector2(o.x + h.HUD_PORTRAIT.x + 16.0 + BAR_W, o.y - 5.0 - 9.0 - 3.0)
+	return Vector2(o.x + BAR_W, o.y - 5.0 - 9.0 - 3.0)
 
 
 ## Where the armour hint's baseline sits: its box is over the LV / XP row, never on it.
 static func note_at(pr: Rect2) -> Vector2:
-	return Vector2(pr.end.x + 16.0, pr.position.y - 5.0 - NOTE_UP)
+	return Vector2(pr.position.x, pr.position.y - 5.0 - NOTE_UP)
 
 
 ## The LV / XP row at its tallest (the number popped to its peak), as drawn by xp_row.

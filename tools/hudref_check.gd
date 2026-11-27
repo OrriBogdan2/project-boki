@@ -286,7 +286,7 @@ func _check_safe(hud) -> void:
 		ok(s.encloses(tip), "%s: the tip card by a corner slot stays in the safe area" % tag)
 		var reach: float = hud.HUD_REACH
 		var origin: Vector2 = hud._hud_origin(size)
-		var vitals := Rect2(origin - Vector2(reach, 0.0), Vector2(HudVitals.BAR_W + 144.0 + reach, 132.0 + reach))
+		var vitals := Rect2(origin - Vector2(reach, 0.0), Vector2(HudVitals.BAR_W + 144.0 + reach, hud.HUD_PORTRAIT.y + HudVitals.VITALS_H))
 		ok(s.encloses(vitals), "%s: the vitals block sits in the safe area" % tag)
 		var alive := AliveCounter.rects(size, 2)
 		var alive_in := s.encloses(alive[0]) and s.encloses(alive[1])
