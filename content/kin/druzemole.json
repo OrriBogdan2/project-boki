@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "druzemole",
+	"name": "Druzemole",
+	"theme": "stone",
+	"type2": "prism",
+	"flavor": "Giant, amethyst cavern for a back, crystal digging claws.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "glintmole",
+		"stage": 3,
+		"from": "geodemole"
+	}
+}
