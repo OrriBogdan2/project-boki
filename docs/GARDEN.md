@@ -47,15 +47,25 @@ garden minutes of either player; it arrives at trust 50. The player works the st
 goes to whoever is being raised. "Friends" is the first time trust is 50 or more on both (the starter's trust
 climbs 1 a pet and 2 a meal, one of each per 12.5 s).
 
+Re-measured 2026-11-22 on main 0a0db9747cc (after ext/garden-xp-pace, toy XP, snack patch and minigame-fair; no number
+changed: `--garden-pace-check` and `tools/garden_sim.py` print the same values as before those merges, because the
+play model reads only care, drill, game XP and the level curve, none of which moved). Minutes of play:
+
 | Player (shipped numbers) | Second Boki | Grown (starter) | Friends | First egg |
 |---|---|---|---|---|
 | Garden-only | 5 min | 190 min (3.2 h) | 33 min | 386 min (6.4 h) |
 | 1 expedition a session | 29 min | 190 min (3.2 h) | 108 min | 389 min (6.5 h) |
 
 The model plays care (once a kind a day, so mostly from the training yard) and runs; it does not play the garden
-games (the sim in `tools/garden_sim.py` has those). Re-measured after the XP rework (care once a day, games paid,
-halved curve: 50 x level); the first version of this table, on the old per-action XP and the 100 x level curve, was
-2230 and 1266 min.
+games. `tools/garden_sim.py` has those and counts days (visitor as the second Boki, friends not charged, so about a
+day early), first egg day, median of 200 seeds: 30 min a day (+2 runs) day 4; home only 30 min day 5; home only
+20 min day 6; 5 min a day (+1 run) day 8; home only 5 min day 11. (The sim's Lv 8 days are 2, 3, 3, 4 and 7.)
+
+**Largest single wait: the starter's climb to Grown, 190 min of the 386.** The second Boki (5 to 29 min) and
+friends (33 to 108 min) overlap it or are small; the visitor's own Grown climb is the other half of the egg wait.
+Knob: `content/rules/garden_xp.json`, key `curve.per_level` (30: XP from level n to n + 1 is 30 x n). The other
+levers on the same wait are `care` (15) and `play`/`win`/`first_win` (5/8/60) in the same file, or the Nook's Grown
+level (`breed_options` there, data only). Nothing is applied.
 
 The 30 minute target is still missed (half a day to a day of play for the egg): a Grown Boki needs 1400 XP, and the
 Nook needs two. The second Boki and friends are not the bottleneck (minutes); only levels are. That is why no
@@ -110,7 +120,7 @@ traits (curious sniffs, timid hides and says `look_shy`, the rest puff up and sa
 | Budget of 240 full, day (where it fills) | 7 to 30 | Never trivial |
 | Stat total on day 30 | 216 to 240 | Even five minutes a day nearly fills it |
 | Gems a day | 43 to 300 | At least a weekly Wayseed (300 / 7) so home-only players reach every zone; at most one a day |
-| Joy, mean over a visit | 50 to 90 | Above sulky, never always full |
+| Joy, mean over a visit | 40 to 90 | Above the whistle's sulky joy (25), never always full (toys give 3 joy since the farm joy tune) |
 
 Before (the stack as it stood) and after, per player (before / after):
 
