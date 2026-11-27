@@ -19,6 +19,7 @@ const BOT_MODES := ["off", "idle", "moving", "fighting"]
 const BOT_NAMES := {"off": "Off", "idle": "Idle", "moving": "Moving", "fighting": "Fights back"}
 const DUMMY_HP := 3000.0
 const TEAM := 7
+const MINIMAP_CLEAR := 50.0      # px the practice layout's key line shifts right so it clears the minimap
 
 var m: Match
 var layout := "arena"          # "arena" (its own map) | "practice" (the training island)
@@ -35,10 +36,9 @@ var ult_on := true
 var gloves := ["", ""]         # the two glove slots, Q and V (item 69)
 var hits_all: Array = []       # [[t, d]] everything you dealt (the session DPS meter)
 var dealt := 0.0
+var tools := true               # key line, DPS meter, dodge drill, bar on screen (the Test Zone starts them off)
 var _cb: Callable
 var layer: CanvasLayer = null
-const MINIMAP_CLEAR := 50.0      # px the practice layout's key line shifts right so it clears the minimap
-var tools := true               # key line, DPS meter, dodge drill, bar on screen (the Test Zone starts them off)
 var hint: Label = null
 var meter: Label = null
 var card_layer: CanvasLayer = null

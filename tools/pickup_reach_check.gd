@@ -10,10 +10,12 @@ var m: Match
 var w: World
 var P: Hunter
 
+
 func ok(cond: bool, what: String) -> void:
 	print("PICKUP %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -33,6 +35,9 @@ func run(main: Node) -> void:
 	_through_rock(flat)
 	_in_the_air(flat)
 	_within(flat)
+	var tune: Dictionary = PickupReach.rules()["tune"]
+	_tuning(flat, float(tune["radius"]) - 0.15, true)
+	_tuning(flat, float(tune["radius"]) + 0.2, false)
 	print("PICKUP REACH CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
@@ -57,8 +62,14 @@ func _walk_past(at: Vector3, off: float, taken: bool) -> void:
 		P.inp["move"] = Vector2.RIGHT
 		_step()
 	P.inp["move"] = Vector2.ZERO
-	ok(m.pickups.is_empty() == taken, "running past a tonic %.2f m to the side: %s (pickups left %d)"
-		% [off, "taken" if taken else "left", m.pickups.size()])
+	ok(
+		m.pickups.is_empty() == taken,
+		(
+			"running past a tonic %.2f m to the side: %s (pickups left %d)"
+			% [off, "taken" if taken else "left", m.pickups.size()]
+		)
+	)
+
 
 ## Two gear pieces in reach: the key takes the one under the cursor, the farther one from the hunter.
 func _cursor_pick(at: Vector3) -> void:
@@ -69,8 +80,10 @@ func _cursor_pick(at: Vector3) -> void:
 	m.spawn_gear(gid, 1, at + Vector3(-1.2, 0, 0), "far", false)
 	P.inp["aim"] = at + Vector3(-1.2, 0, 0)
 	_step()
-	ok(String(m.interact.get("kind", "")) == "weapon" and String(m.interact["wp"]["id"]) == "far",
-		"cursor on the farther piece: the prompt offers it (%s)" % str(m.interact.get("wp", {}).get("id", "")))
+	ok(
+		String(m.interact.get("kind", "")) == "weapon" and String(m.interact["wp"]["id"]) == "far",
+		"cursor on the farther piece: the prompt offers it (%s)" % str(m.interact.get("wp", {}).get("id", ""))
+	)
 	P.inp["aim"] = at + Vector3(0.5, 0, 0)
 	_step()
 	ok(String(m.interact.get("wp", {}).get("id", "")) == "near", "cursor on the nearer piece: the prompt offers it")
@@ -81,6 +94,7 @@ func _cursor_pick(at: Vector3) -> void:
 	var left: Array = m.wpicks.map(func(wp): return String(wp["id"]))
 	ok(left == ["near"], "pressing the key takes the one under the cursor first (left on the ground: %s)" % str(left))
 
+
 ## A rock between the hunter and a tonic (and a gear piece) within reach: neither is taken nor offered.
 func _through_rock(flat: Vector3) -> void:
 	_clear_ground()
@@ -90,7 +104,7 @@ func _through_rock(flat: Vector3) -> void:
 		return
 	var theirs := rock + Vector3(1.0, 0, 0)
 	theirs.y = w.ground_at(theirs.x, theirs.z)
-	var gear_at := rock + Vector3(0.55, 0, 0)      # just past the rock's far edge, inside the interact radius
+	var gear_at := rock + Vector3(0.55, 0, 0)  # just past the rock's far edge, inside the interact radius
 	gear_at.y = theirs.y
 	_reset(rock + Vector3(-0.9, 0, 0))
 	m.drop("tonic", theirs, 1, "", "", Vector3.ZERO)
@@ -99,8 +113,10 @@ func _through_rock(flat: Vector3) -> void:
 	for i in 60:
 		_step()
 	ok(m.pickups.size() == 1, "a tonic %.2f m away behind a rock stays there" % P.flat_dist(theirs))
-	ok(m.interact.is_empty(), "gear %.2f m away behind the rock is not offered (%s)"
-		% [P.flat_dist(gear_at), str(m.interact.get("kind", ""))])
+	ok(
+		m.interact.is_empty(),
+		"gear %.2f m away behind the rock is not offered (%s)" % [P.flat_dist(gear_at), str(m.interact.get("kind", ""))]
+	)
 	# the same distances with nothing between: both come
 	_clear_ground()
 	_reset(flat + Vector3(-1.0, 0, 0))
@@ -112,6 +128,7 @@ func _through_rock(flat: Vector3) -> void:
 		_step()
 	ok(m.pickups.is_empty(), "the same 2 m with nothing between: the tonic flies over (at %s)" % str(flat))
 	ok(String(m.interact.get("wp", {}).get("id", "")) == "open", "and the gear is offered")
+
 
 ## A dash takes a pickup like a run does; gliding well above it doesn't reach.
 func _in_the_air(at: Vector3) -> void:
@@ -133,6 +150,25 @@ func _in_the_air(at: Vector3) -> void:
 		_step()
 	ok(m.pickups.size() == 1, "gliding %.1f m over a tonic doesn't take it" % (height + 1.0))
 
+
+## A weapon tuning on the ground (Wpicks): standing `off` metres from it takes it inside the "tune" reach, not past it.
+func _tuning(at: Vector3, off: float, taken: bool) -> void:
+	var pid := ""
+	for k in Data.PERKS:
+		if (Data.PERKS[k] as Dictionary).has("wup"):
+			pid = k
+			break
+	_clear_ground()
+	_reset(at + Vector3(0, 0, off))
+	m.spawn_tune(pid, at, "", false)
+	for i in 5:
+		_step()
+	ok(
+		m.wpicks.is_empty() == taken,
+		"standing %.2f m from a tuning: %s (on the ground %d)" % [off, "taken" if taken else "left", m.wpicks.size()]
+	)
+
+
 func _clear_ground() -> void:
 	for p in m.pickups:
 		p["node"].queue_free()
@@ -140,6 +176,7 @@ func _clear_ground() -> void:
 	for wp in m.wpicks:
 		wp["node"].queue_free()
 	m.wpicks.clear()
+
 
 ## Flat ground with no rock or void within half_x by half_z metres, searched out from the spawn.
 func _flat_spot(half_x: float, half_z: float) -> Vector3:
@@ -153,6 +190,7 @@ func _flat_spot(half_x: float, half_z: float) -> Vector3:
 				return Vector3(x, w.ground_at(x, z), z)
 	return Vector3.INF
 
+
 func _clear_rect(x: float, z: float, half_x: float, half_z: float) -> bool:
 	var g := w.ground_at(x, z)
 	for ix in range(int(floor(x - half_x)), int(ceil(x + half_x)) + 1):
@@ -162,6 +200,7 @@ func _clear_rect(x: float, z: float, half_x: float, half_z: float) -> bool:
 			if w.is_block(cx, cz) or w.is_void(cx, cz) or absf(w.ground_at(cx, cz) - g) > 0.05:
 				return false
 	return true
+
 
 ## The middle of a rock cell with two clear flat cells on each side along x, at the rock's ground height.
 func _rock_with_room() -> Vector3:
@@ -187,6 +226,7 @@ func _rock_with_room() -> Vector3:
 				best_d = Vector2(cx - c.x, cz - c.z).length()
 	return best
 
+
 func _reset(at: Vector3) -> void:
 	P.teleport(Vector3(at.x, w.ground_at(at.x, at.z), at.z))
 	P.grounded = true
@@ -197,6 +237,7 @@ func _reset(at: Vector3) -> void:
 	P.inp["interact"] = false
 	P.inp["aim"] = P.pos
 	_step()
+
 
 func _step() -> void:
 	for mb in m.mobs:
