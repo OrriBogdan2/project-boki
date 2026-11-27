@@ -62,8 +62,7 @@ archetypes/archer.json:rmb.pin.push[1]	12.0
 archetypes/archer.json:rmb.pin.range	14.0
 archetypes/archer.json:rmb.pin.range_rank3	3.0
 archetypes/archer.json:rmb.pin.speed	62.0
-archetypes/archer.json:rmb.pin.stun[0]	0.4
-archetypes/archer.json:rmb.pin.stun[1]	1.2
+archetypes/archer.json:rmb.pin.stun	1.2
 archetypes/archer.json:rmb.pin.wall	3.0
 archetypes/archer.json:rmb.pin.wall_mult	4.94
 archetypes/archer.json:x.cooldown	60.0
@@ -721,10 +720,10 @@ archetypes/gunslinger.json:dash.tap_t	0.18
 archetypes/gunslinger.json:e.charge	0.6
 archetypes/gunslinger.json:e.cooldown	11.5
 archetypes/gunslinger.json:e.dmg	24.0
-archetypes/gunslinger.json:e.launch	0.15
 archetypes/gunslinger.json:e.range	18.0
 archetypes/gunslinger.json:e.rattle_k	0.2
-archetypes/gunslinger.json:e.self_slow	0.4
+archetypes/gunslinger.json:e.recoil	6.0
+archetypes/gunslinger.json:e.self_slow	1.0
 archetypes/gunslinger.json:e.shave	0.2
 archetypes/gunslinger.json:e.shave_rank3	0.3
 archetypes/gunslinger.json:e.view_near_m	5.0
@@ -1022,8 +1021,7 @@ archetypes/mage.json:rmb.coil.push[1]	6.6
 archetypes/mage.json:rmb.coil.range	13.0
 archetypes/mage.json:rmb.coil.slam_r	1.4
 archetypes/mage.json:rmb.coil.speed	55.0
-archetypes/mage.json:rmb.coil.stun[0]	0.4
-archetypes/mage.json:rmb.coil.stun[1]	1.0
+archetypes/mage.json:rmb.coil.stun	0.8
 archetypes/mage.json:rmb.cooldown	8.0
 archetypes/mage.json:rmb.hold	1.0
 archetypes/mage.json:rmb.min_t	0.33
@@ -1045,7 +1043,6 @@ archetypes/mage.json:x.push	0.0
 archetypes/mage.json:x.radius	2.7
 archetypes/mage.json:x.range	14.4
 archetypes/mage.json:x.rise	0.3
-archetypes/mage.json:x.spread_add	1
 archetypes/mage.json:x.stacks	1
 archetypes/mage.json:x.windup	0.3
 archetypes/ostra.json:body.body_r	0.412
