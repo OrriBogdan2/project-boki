@@ -1,0 +1,14 @@
+{
+	"id": "forgebrock",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/forgebrock.json.",
+	"work": {
+		"craft": 2,
+		"ember": 3,
+		"forage": 1
+	},
+	"shiny": {
+		"belly": "#87e6ff",
+		"color": "#54dfe4",
+		"glow": "#3ce2ff"
+	}
+}

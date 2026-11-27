@@ -552,6 +552,8 @@ func _fill_menu(v: VBoxContainer) -> void:
 		var nm := "None" if sp == "" else String(Data.KIN.get(sp, {}).get("name", sp))
 		var b := UI.choice(nm, cur == sp, func(): set_kin(ss); _fill_menu(v), MENU_PICK_W)
 		b.add_theme_font_size_override("font_size", 12)
+		b.clip_text = true  # a long name (Barrelmander) must not widen the grid past MENU_PICK_W: it trims (ellipsis)
+		b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		if sp != "" and KinLib.kin(sp):
 			var ks := KinLib.kin(sp)
 			b.tooltip_text = "%s  ·  %s" % [String(ks.theme).capitalize(), "   ".join(KitCard.infusion_lines(p_v.arch, ks))]
