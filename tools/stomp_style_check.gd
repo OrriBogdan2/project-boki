@@ -78,9 +78,8 @@ func _picker(main: Node) -> void:
 ## Real models through HunterAnim at the top of a lift (phase 0.35).
 func _pose(main: Node) -> void:
 	var clip_id := ""
+	WardenNative.contract_only = true  # (the contract path's clip Hunter; Meshy-native Hunters: --warden-native-check)
 	for a in Arch.ids():
-		if WardenNative.on(String(a)):
-			continue  # (Meshy's own skeleton plays its own clips, no Warden/Sync: --warden-native-check)
 		var st: Dictionary = WardenClips.data(WardenGlb.art(String(a))).get("states", {})
 		if st.has("stomp"):
 			clip_id = String(a)
@@ -91,6 +90,7 @@ func _pose(main: Node) -> void:
 	ok(own == stomp_clip, "%s's own stomp plays its clip (%s)" % [clip_id, own])
 	var worn := _cur(main, clip_id, {"stomp_own": false, "stomp_style": SALE})
 	ok(worn != stomp_clip and worn != "(no clips)", "a worn style leaves the clip (%s)" % worn)
+	WardenNative.contract_only = false
 	var both := _legs(main, "gil", SALE)
 	var alike := absf(both.x - both.y) < 0.02 and both.x > 0.25
 	ok(alike, "two-footed style lifts both hips alike (%.2f %.2f)" % [both.x, both.y])
