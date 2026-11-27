@@ -43,6 +43,7 @@ func _texts(n: Node) -> String:
 
 
 func run(m: Node, mode: String = "check") -> void:
+	Luck.rules()["base"] = 0.0  # Boki ids are random, so a lucky +2 would flake exact stat numbers (--playstyle-check tests luck)
 	main = m
 	Luck.rules()["base"] = 0.0  # exact bite numbers below; luck is tested in --playstyle-check
 	Save.no_write = true
