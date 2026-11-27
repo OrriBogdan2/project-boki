@@ -20,8 +20,6 @@ const CHECKS := {
 	"--home-build-check": ["res://tools/home_build_check.gd", "home_build_check", null],  # build mode at home
 	"--kit-parity-check": ["res://tools/kit_parity_check.gd", "kit_parity_check", null],
 	# first: it wraps the other flags on the line (a second launch of a bench or check)
-	"--warm-twice": ["res://tools/warm_twice.gd", "warm_twice", null],  # a second launch, for benches
-	"--boki-keys-check": ["res://tools/boki_keys_check.gd", "boki_keys_check", null],  # quick Boki command keys
 	"--heart-check": ["res://tools/heart_check.gd", "heart_check", null],  # the Heart early seat (0023, 0051)
 	# out: watch and switch teammates
 	"--spectate-check": ["res://tools/spectate_check.gd", "spectate_check", "check"],
@@ -297,7 +295,7 @@ const CHECKS := {
 	"--kin-form-check": ["res://tools/kin_form_check.gd", "kin_form_check", null],
 	"--gear-check": ["res://tools/gear_check.gd", "gear_check", null],
 	"--lair-lock-check": ["res://tools/lair_lock_check.gd", "lair_lock_check", null],
-	"--level-hud-check": ["res://tools/level_hud_check.gd", "level_hud_check", null],
+	"--level-hud-check": ["res://tools/level_hud_check.gd", "level_hud_check", null],  # XP bar, level-up moment
 	"--pack-ui-check": ["res://tools/pack_ui_check.gd", "pack_ui_check", null],
 	"--life-check": ["res://tools/life_check.gd", "life_check", null],
 	"--swim-check": ["res://tools/swim_check.gd", "swim_check", null],
@@ -410,10 +408,10 @@ const CHECKS := {
 	"--drop-launch-check": ["res://tools/drop_launch_check.gd", "drop_launch_check", null],  # item 163
 	"--air-limits-check": ["res://tools/air_limits_check.gd", "air_limits_check", null],  # items 162, 162b
 	"--layout-check": ["res://tools/layout_check.gd", "layout_check", null],  # item 151
+	"--drop-clean-shots": ["res://tools/drop_clean_shots.gd", "drop_clean_shots", null],  # (GPU)
 	# clans slices 1-2: roster, join, leave, old saves, base
 	"--clan-check": ["res://tools/clan_check.gd", "clan_check", null],
 	"--clan-roles-check": ["res://tools/clan_roles_check.gd", "clan_roles_check", null],  # ranks, kick, hand-off
-	"--drop-clean-shots": ["res://tools/drop_clean_shots.gd", "drop_clean_shots", null],  # (GPU)
 	"--drop-rocket-check": ["res://tools/drop_rocket_check.gd", "drop_rocket_check", null],  # the rocket drop
 	"--low-fps-input-check": ["res://tools/low_fps_input_check.gd", "low_fps_input_check", null],
 	"--input-release-check": ["res://tools/input_release_check.gd", "input_release_check", null],  # holds end
@@ -505,6 +503,7 @@ const CHECKS := {
 	"--home-gait-check": ["res://tools/home_gait_check.gd", "home_gait_check", null],  # the Empty's planted feet
 	"--clip-live-check": ["res://tools/clip_live_check.gd", "clip_live_check", null],  # clips in a real match
 	"--extract-board-check": ["res://tools/extract_board_check.gd", "extract_board_check", null],  # the leave beat
+	# hit flinch over clips
 	"--sfx-strike-check": ["res://tools/sfx_strike_check.gd", "sfx_strike_check", null],  # strike sounds
 	"--fire-run-check": ["res://tools/fire_run_check.gd", "fire_run_check", null],  # firing on the run
 	"--clip-live-sable-check": ["res://tools/clip_live_sable_check.gd", "clip_live_sable_check", null],
@@ -719,6 +718,7 @@ const CHECKS := {
 	"--bot-names-check": ["res://tools/bot_names_check.gd", "bot_names_check", null],  # bots wear gamer tags
 	"--hero-grid-check": ["res://tools/hero_grid_check.gd", "hero_grid_check", null],  # Relics tile grid
 	"--tg-text-check": ["res://tools/tg_text_check.gd", "tg_text_check", null],  # no "Arena" in practice text
+	# lobby screenshots + safe-area scan at the window size
 	"--bot-names-shots": ["res://tools/bot_names_shots.gd", "bot_names_shots", null],
 	"--mantle-clip": ["res://tools/mantle_clip.gd", "mantle_clip", null],
 	"--wall-slide-check": ["res://tools/wall_slide_check.gd", "wall_slide_check", null],  # walls and corners

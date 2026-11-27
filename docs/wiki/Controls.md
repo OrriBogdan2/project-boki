@@ -16,7 +16,7 @@ your Boki in a match; **R** turns a piece in build mode and reloads in a match.
 | Shift | Your class's dash |
 | Space | Jump; hold it in the air to glide |
 | Mouse 5 | Glide at once, without jumping (Mouse 4 works too) |
-| Q | Your active glove |
+| Q / V | Your two gloves |
 | E | Your class's utility |
 | R | Reload (it also reloads on its own after a short idle) |
 | X | Your hunter's own ultimate (from level 6; no hero has one yet) |
@@ -49,7 +49,7 @@ your Boki in a match; **R** turns a piece in build mode and reloads in a match.
 | I | Inventory |
 | Ctrl | Crouch |
 
-The Arena has its own practice keys (reset, cooldowns off, class swap...): see [Arena and training](Arena-and-Training.md).
+The Training Grounds have their own practice keys (reset, cooldowns off, class swap...): see [Training Grounds](Arena-and-Training.md).
 
 ## Every default binding
 
