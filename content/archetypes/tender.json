@@ -167,7 +167,7 @@
 		"dash_spent": "dash pip dark"
 	},
 	"lmb_note": "Ember Cast",
-	"lmb": {"wait": 1.0, "range_k": 1.25, "size_k": 1.5},
+	"lmb": {"wait": 1.0, "range_k": 1.25, "size_k": 1.5, "look_k": 0.85},
 	"x": {"per_rank": {"cooldown": [-4, -4], "heal_ps": [1.325, 1.325]},
 		"name": "Hearth Call",
 		"card_range": "range",
