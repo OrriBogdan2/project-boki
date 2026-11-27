@@ -186,7 +186,13 @@ func _through_walls() -> void:
 	fresh(t)
 	var card: Dictionary = _fire_after(m, p, k, 0.6)["s"]
 	var flew := [0.0]
-	step(m, 0.3, func(): if m.shots.has(card): flew[0] = float(card["pos"].x))
+	step(
+		m,
+		0.3,
+		func():
+			if m.shots.has(card):
+				flew[0] = float(card["pos"].x)
+	)
 	ok(
 		"walls: a card fired 4m short of the rock stops at its face",
 		not card.is_empty() and not m.shots.has(card) and flew[0] > float(wx) - 3.0 and flew[0] < float(wx) + 0.1,
@@ -326,7 +332,13 @@ func _no_kit_tick_when_down() -> void:
 		var knock_t := float(qm.time)
 		# (a lone training Hunter is back up within a frame or so: only refreshes while he is down count)
 		var live: Array = []
-		step(qm, 0.2, func(): if qh.downed: live.append_array(_looks_updating(qm, qh, knock_t)))
+		step(
+			qm,
+			0.2,
+			func():
+				if qh.downed:
+					live.append_array(_looks_updating(qm, qh, knock_t))
+		)
 		if arch == "ostra": ok("wisp kit: ostra: no look still updating while down", live.is_empty(), str(live))
 		else: print("PAIRCHECK NOTE %s: %d kit looks still updating while downed" % [arch, live.size()])
 		await done(qm)
