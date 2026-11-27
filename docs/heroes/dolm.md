@@ -62,6 +62,7 @@ Source vs ours per slot; [data] = the game data, [footage] = hero-ref/breah.md a
 | LMB tap beats | an underarm or side hurl from the right gauntlet, no long wind-up [footage 0108] | `breah_throw`: out at 0.07 s | matches; asserted |
 | LMB tap cadence, speed, range | 0.6 s [data card; footage 1 per 2-3 frames]; a slow molten boulder, about 10-12 bh/s; a small burst with a red ground ring [footage] | 0.6 s, 20 m/s, 11 m, a red ring and a 0.9 m splash | matches; asserted |
 | LMB hold beats | the gauntlet drawn back in a deep crouch, a straight drive that steps her about 0.5 bh; about 0.75 s hold [footage 0118-0121] | `breah_wind` (held) then `breah_punch`, out at 0.05 s; a 0.6 m step (0.8 m measured) | matches; asserted |
+| LMB press wind-up | the gauntlet is already cocked on the first frame of every hold (0118, 0.25 s per frame), and the tap's hurl has no long wind-up (0108) | `breah_wind` from `ArchKit.HOLD_POSE_T` (0.1 s) into the hold, was the 0.28 s tap window: first pose 60 Hz frame 6 (was 16), 144 Hz frame 15 (was 39). The lane, glow, sound and charge still start at the tap window; a tap's release throws as before (damage and timing unchanged) | matches; asserted (`lmb hold: the wind-up shows from HOLD_POSE_T...`, `--dolm-combo-check`). Strip: /home/boki/gens/tenzo-press-windup/lmb_press_strip.png |
 | LMB hold tracking | the lane points at the cursor, fixed length [footage] | the lane and her body follow a moved cursor during the hold; 4.2 m by 1.8 m | matches; asserted |
 | LMB hold walk | she stands through every punch hold (0118-0120, 0128-0150, 4 fps), and neither clip has a plain run to compare [footage] | 85% walk while held (`fire_slow`) | kept: not determinable (docs/MOVEMENT_FEEL.md) |
 | RMB Volcano Crusher | hold, crouch with glowing fists, hop forward and smash; jump while charging leaps forward [data, footage] | Quakefall: the same (Quakefall review, item 14) | matches |
@@ -343,7 +344,7 @@ would also settle the same row on the boulder. Unsettled rows for a follow-up: t
 | Charge, punch | a lunge forward, no punch | `small: a punch during the charge lunges her forward` |
 | Slam that knocks or kills | nothing: Quakefall has no reset (data pass) | `data: a slam that knocks does not reset Quakefall` |
 | Rock Hop beside a foe | a mid-chain landing nudges it with no damage; the last landing's crash shoves it, then the rock comes down after him and rolls into it (shred, slow) | `shove: a mid-chain landing nudges with no damage`, `crash: the last landing hits and shoves a foe beside it`, `crash: the rock comes down after him`, `crash: the rock rolls on and hits` |
-| Rock Hop crash, then slam | the crash pops the foe up, the slam dunks it while it is airborne | `crash: the last landing hits ...`, `rmb: a foe in the air is dunked` |
+| Rock Hop crash, then slam | the crash pops the foe up, the slam dunks it while it is airborne | `crash: the last landing hits ...`, `rmb spike: the tap slam drives a foe in the air down ...` |
 | Two bursts on one foe | the second inside 0.8s deals 30% less | `small: a second burst on the same foe inside 0.8s deals 30% less` |
 | Boulder into a pair | the one beside takes half | `small: the boulder's burst splashes the foe beside it` |
 | Merge start | dive, charge, its leap, Rock Hop, the Spine's aim and telegraphs all drop | `merge hold: ...` |
@@ -398,7 +399,7 @@ would also settle the same row on the boulder. Unsettled rows for a follow-up: t
 - One punch-lunge per charge.
 - Rocks last 9s (the footage only shows 5s or more).
 - The KNOCK beam on the dunk is a vertical light (no word) (a generic knock look in the source, it seems).
-- The KNOCK beam on the dunk is our vertical light, with no word (a generic knock look in the source, it seems).
+- The KNOCK beam on the dunk is our vertical light, with no word (a generic knock look in the source, it seems). Only the tap slam dunks (docs/SPIKE_SLAM.md): the hop and dive landings are leaps.
 - Anyone dropped onto a rock from above (a glide, a knock) stands on it and can walk off; only climbing is the caster's.
 - Rock Hop's landing spots: the cursor clamped to a hop's reach, pulled back to the nearest ground a body fits on (never into
   a wall). In the air Shift stays the class long dash. See Rock Hop below.

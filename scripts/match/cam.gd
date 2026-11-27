@@ -7,7 +7,9 @@ const HEIGHT := 27.0
 const BACK := 17.5
 const LEAD_X := 4.2
 const LEAD_Z := 5.4
-const FOLLOW_Y := 3.5  # 1/s
+const FOLLOW_Y := 3.5  # 1/s, the view rising while you are in the air
+const FOLLOW_Y_TIGHT := 15.0  # 1/s, the view's height while you stand or it comes down: a landing settles at once
+const STAND_TOL := 0.15  # m above the standing height that still counts as standing (a step down a flight)
 const GLIDE_LEAD := 0.2  # seconds of glide velocity to lean ahead...
 const GLIDE_LEAD_MAX := 1.8  # ...capped (m)
 const GLIDE_LEAD_EASE := 6.0  # 1/s: the lean's spring (critically damped), so it eases in and out with no kick at
@@ -51,6 +53,7 @@ const CHAR_LEAN := deg_to_rad(20.0)
 ## The default preset is measured from the source's footage: docs/MOVEMENT_FEEL.md, "Camera calibration" and
 ## "Camera framing vs the source".
 static var rules: Dictionary = _load_rules()
+static var match_hunter_scale: float = rules["match_hunter_scale"]  # x the base Hunter drawn size in a match
 
 ## Settings "Camera" presets: pitch in degrees, distance, vertical field of view, rise (the view aims that far
 ## above you).
@@ -86,6 +89,7 @@ var target: Node3D = null
 var shake_amp := 0.0  # a shake in progress (see Shake: only big hits on you)
 var shake_left := 0.0
 var shake_total := 0.0  # seconds of shake run so far (the shake check reads it)
+var shake_off := Vector3.ZERO  # m: the offset the last frame put on the view (zero unless a shake runs)
 var zoom := 1.0
 var zoom_to := 1.0
 var user_zoom: float = CamWheel.far(true)  # the mouse wheel (CamWheel), widest at the start; times the match's zoom
@@ -135,6 +139,9 @@ var dist_mul := 1.0
 ## Match Hunters are drawn this many times bigger (the style's "hunter_scale"; 1 but for the source_scale test
 ## style, see Hunter.fit_scale).
 var hunter_scale := 1.0
+
+## How much of CHAR_LEAN the bodies get: the farm's low third-person view (FarmCam) fades it out; a match keeps 1.
+var lean_scale := 1.0
 
 
 func air_zoom(h: Hunter, alt: float) -> float:
@@ -221,11 +228,6 @@ func pull_back(a: float) -> void:
 	pull = maxf(pull, a)
 
 
-## No-op: camera punches are gone (item 50). Kept only so the reserved merge files, which still call it, compile.
-func punch(_a: float) -> void:
-	pass
-
-
 ## Asked each step of an aimed cast: push out by `zoom_k` and frame the line of `reach` metres along `dir`.
 func cast_view(dir: Vector2, zoom_k: float, reach: float) -> void:
 	cast_left = CAST_HOLD
@@ -255,7 +257,8 @@ func _cast_room(dir: Vector2, zoom_k: float) -> float:
 	room -= edge
 	if hud_keep.is_empty() or room <= 0.0:
 		return room
-	var plate := (char_lean() * Vector3(0.0, HunterZone.PLATE_UP * hunter_scale, 0.0)).rotated(Vector3.UP, -yaw)
+	var plate_up: float = HunterZone.PLATE_UP * hunter_scale * match_hunter_scale
+	var plate := (char_lean() * Vector3(0.0, plate_up, 0.0)).rotated(Vector3.UP, -yaw)
 	plate.y += lift - rise
 	var lens_at := Vector3(d, t, wide)
 	var home := _box_at(0.0, plate, view, lens_at, turned)
@@ -398,7 +401,9 @@ func skydive(p: Vector3, heading: float, alt: float, delta: float) -> void:
 	follow(p, delta, false)
 
 
-func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
+## Eases the view onto `p`. stand_y: the height the body stands at (HunterMove.stand_y); the view's height
+## follows that, not the body, so a jump or a fall never reads as moving forward or back on screen.
+func follow(p: Vector3, delta: float, mouse_lead := true, stand_y := INF) -> void:
 	# recording mode (Record): softer follow, a slower lean, no zoom pops, much less shake
 	var rr: Array = Record.cam_rates()
 	var lean_k := float(rr[2])
@@ -418,13 +423,19 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 		pan = pan.lerp(want_pan, 1.0 - exp(-float(fm[3]) * lean_k * delta))
 	if follow_mode == "dynamic" and mouse_lead and not Record.clean():
 		pan = want_pan
-	# the focus sits a little below you (so the ground reads), but never more than 4m below, so even
-	# far up in the sky you stay on screen
-	var want := Vector3(p.x, maxf(p.y * 0.6, p.y - 4.0), p.z)
+	# the focus sits a little below where you stand (so the ground reads), but never more than 4m below
+	# you, so even far up in the sky you stay on screen
+	var at_y := minf(p.y, stand_y)
+	var want := Vector3(p.x, maxf(maxf(at_y * 0.6, at_y - 4.0), p.y - 4.0), p.z)
 	if p.y < 0.0:
 		want.y = p.y  # below island level: the view goes down with you, so you stay centred and the same size [reference footage]
-	# up and down follows softer, so falls and glides don't jolt the view; recording mode has its own rates
-	var ky := 1.0 - exp(-(float(rr[1]) if Record.clean() else FOLLOW_Y) * delta)
+	# soft only while the view rises (a lift, an updraft): standing or coming down it stays on you, so a fall
+	# never reads as sliding back on screen and a landing doesn't drift on; recording mode has its own rates
+	var tight := (is_finite(stand_y) and p.y <= stand_y + STAND_TOL) or want.y < base.y
+	var y_rate := FOLLOW_Y_TIGHT if tight else FOLLOW_Y
+	if Record.clean():
+		y_rate = float(rr[1])
+	var ky := 1.0 - exp(-y_rate * delta)
 	var flat := Vector2(base.x, base.z)
 	if Record.clean():
 		flat = flat.lerp(Vector2(want.x, want.z), 1.0 - exp(-float(rr[0]) * delta))
@@ -450,15 +461,15 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 	top = move_toward(top, top_to, delta * (0.9 if top_to < top else 2.0))
 	chase = move_toward(chase, chase_to, delta * 0.7)
 	yaw = lerp_angle(yaw, yaw_to, minf(1.0, delta * 1.6))
-	var shake := Vector3.ZERO
+	shake_off = Vector3.ZERO
 	if shake_left > 0.0:
 		var s := shake_amp * float(rr[4])
-		shake = Vector3(Sfx.rng.randf_range(-s, s), Sfx.rng.randf_range(-s, s) * 0.5, Sfx.rng.randf_range(-s, s))
+		shake_off = Vector3(Sfx.rng.randf_range(-s, s), Sfx.rng.randf_range(-s, s) * 0.5, Sfx.rng.randf_range(-s, s))
 		shake_total += minf(delta, shake_left)
 		shake_left = maxf(0.0, shake_left - delta)
 		if shake_left <= 0.0:
 			shake_amp = 0.0
-	_apply(shake)
+	_apply(shake_off)
 	Sfx.listener = focus
 
 
@@ -499,7 +510,7 @@ func _apply(shake: Vector3) -> void:
 func char_lean() -> Basis:
 	var k := top * top * (3.0 - 2.0 * top)
 	var c := chase * chase * (3.0 - 2.0 * chase)
-	var a := CHAR_LEAN * (1.0 - k) * (1.0 - c)
+	var a := CHAR_LEAN * (1.0 - k) * (1.0 - c) * lean_scale
 	if a < 0.001:
 		return Basis()
 	return Basis(Vector3.RIGHT.rotated(Vector3.UP, yaw + Record.orbit_yaw), -a)
@@ -528,6 +539,8 @@ func _plane_at(mp: Vector2, y: float) -> Vector3:
 	if absf(d.y) < 0.0001:
 		return focus
 	var t := (y - o.y) / d.y
+	if t < 0.0:
+		return focus  # looking above the horizon: no ground there (the low farm view)
 	return o + d * t
 
 

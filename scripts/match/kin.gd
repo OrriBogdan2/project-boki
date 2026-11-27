@@ -44,14 +44,14 @@ var disengaged := false  # an explicit Follow / Call back in a fight: it stays a
 var path: Array = []  # its A* path (KinPath), recomputed on path_t
 var path_goal := Vector2i.ZERO
 var path_t := 0.0
-var path_searches := 0          # A* searches it has run (a check counts them)
-var stuck_t := 0.0                # seconds without progress (KinFollow.watch_stuck)
-var guard_side := 1.0             # a big Boki on the Return order: the flank it guards (+1 right, -1 left)
-var beside := false               # ...and it is at that flank now (state "shoulder", not on you)
-var curl := 0.0                   # drawn curled up on your back (1) or on its feet (0), eased by KinCurl
-var curl_rel := Vector3.ZERO      # where it was last drawn off you, from your model (KinCurl's hop starts there)
-var steady_t := 0.0               # carried by traversal: seconds you have been steady on the ground
-var gap_at := -9.0                # when need_carry last searched for a way across, and what it found
+var path_searches := 0  # A* searches it has run (a check counts them)
+var stuck_t := 0.0  # seconds without progress (KinFollow.watch_stuck)
+var guard_side := 1.0  # a big Boki on the Return order: the flank it guards (+1 right, -1 left)
+var beside := false  # ...and it is at that flank now (state "shoulder", not on you)
+var curl := 0.0  # drawn curled up on your back (1) or on its feet (0), eased by KinCurl
+var curl_rel := Vector3.ZERO  # where it was last drawn off you, from your model (KinCurl's hop starts there)
+var steady_t := 0.0  # carried by traversal: seconds you have been steady on the ground
+var gap_at := -9.0  # when need_carry last searched for a way across, and what it found
 var gap_v := false
 var rng := RandomNumberGenerator.new()  # its own seeded stream (init_kin): decisions never shift other systems' rolls
 var marked := {}  # foe nid -> m.time until which your hits on it fill the bond meter faster (Bond.on_hit)
@@ -98,6 +98,7 @@ var grow := 0.0  # level growth, capped by the expedition tier (KinRules.level_g
 var melee_n := 0  # its own melee hits, for "on_hit" triggers
 var low_fired := {}  # on_low_hp triggers already fired this dip
 var brain: KinTactics = null  # how it fights on its own
+var ack_at := 0.0  # m.time before it answers another command (KinAck)
 var throw_cd := 0.0  # a moment after a recall before it can be thrown again
 var shield := 0.0
 var shield_t := 0.0
@@ -318,7 +319,7 @@ func danger_at(p: Vector3) -> float:
 ## The owner asks it to jump into a fight. Returns "go", "hesitate" or "refuse".
 func consider_throw(p: Vector3) -> String:
 	if trust >= 90.0 or m.tut != null:
-		return "go"          # soulbound, or in the tutorial: it goes wherever you send it
+		return "go"  # soulbound, or in the tutorial: it goes wherever you send it
 	var danger := danger_at(p)
 	var c := courage()
 	if danger > c + 1.1:
@@ -379,6 +380,7 @@ func _order_sic(p: Vector3, from_shoulder := false) -> void:
 			bark("hesitate")
 		m.sfx(KinVoice.cue(species, "unsure"), owner_h.pos, -4.0, Unique.voice(rec))
 		return
+	KinAck.say(self, "send")
 	if from_shoulder:
 		_launch(p)
 	else:
@@ -446,6 +448,7 @@ func recall() -> void:
 		if cmd == "follow":
 			KinFollow.disengage(self)  # Call back in a fight: it stays with you
 		m.sfx("recall", pos, -6.0)
+		KinAck.say(self, "recall")
 		KinNet.event(m, "recall", self)
 		CombatBus.kin_recalled.emit(self, owner_h)
 		fire_trigger("on_recall", {"at": owner_h.pos})
@@ -524,6 +527,7 @@ func _cast(slot: String, p: Vector3, auto: bool, caster: Ent, pw: float, chain: 
 	else:
 		_release(slot, p, auto, caster, pw, chain)
 
+
 func _release(slot: String, p: Vector3, auto: bool, caster: Ent, pw: float, chain: Array) -> void:
 	var def := runner.def_of(slot)
 	var rank := owner_h.ability_level("kin") if owner_h else 1
@@ -592,6 +596,7 @@ func start_rush(d: Vector2, e: Dictionary, ctx: Dictionary) -> void:
 	}
 	state = "flying"
 	KinFlinch.dash(model, Vector3(d.x, 0, d.y), mass())
+	HazardMoveSfx.kin_dash(self)
 
 
 ## A jump onto a spot (a grammar leap): untouchable in the air, then its landing.
@@ -841,7 +846,7 @@ func sim(dt: float) -> void:
 ## Where its speech bubble sits.
 func bubble_at() -> Vector3:
 	if state == "shoulder" and owner_h and not beside:
-		return owner_h.position + Vector3(0, 2.3, 0)
+		return owner_h.position + Vector3(0, 2.3 * CamRig.match_hunter_scale, 0)
 	return position + Vector3(0, 1.2, 0)
 
 
@@ -849,7 +854,7 @@ func bubble_at() -> Vector3:
 func seen_pos() -> Vector3:
 	if state == "shoulder" and owner_h and not beside:
 		if wisp and comp and comp.lead_pos != Vector3.INF:
-			return comp.lead_pos + Vector3(0, 1.5, 0)      # (a wisp leading the tutorial floats out ahead)
+			return comp.lead_pos + Vector3(0, 1.5, 0)  # (a wisp leading the tutorial floats out ahead)
 		return owner_h.pos + Vector3(0, 1.5, 0)
 	return pos
 
@@ -953,6 +958,8 @@ func _sim_fly(dt: float) -> void:
 			pos.y = g
 			grounded = true
 			KinFlinch.land(model, mass())
+			if not rush:
+				HazardMoveSfx.kin_land(self)
 		vel = Vector3.ZERO
 		state = "active"
 		if thrown:
@@ -1142,6 +1149,7 @@ func _ground_move(wish: Vector2, dt: float) -> void:
 	body_vertical(dt)
 	if grounded and not m.world.is_void(pos.x, pos.z):
 		last_safe = pos
+	HazardMoveSfx.kin_wade(self)
 	if hv.length() > 0.3:
 		face = lerp_angle(face, atan2(-hv.x, -hv.y), minf(1.0, dt * 12.0))
 
@@ -1381,7 +1389,7 @@ func render(delta: float, alpha: float) -> void:
 		return
 	if on_you and owner_h and owner_h.model and carry_style() != "shoulder":
 		if carry_style() == "mount":
-			KinCurl.back(self, body, delta)       # a mount curled up into a ball on your back while you glide
+			KinCurl.back(self, body, delta)  # a mount curled up into a ball on your back while you glide
 			return
 		# perched on the pack
 		global_position = WardenGlb.shown_torso(owner_h.model) * Vector3(0, 0.92, 0.3)
@@ -1431,7 +1439,7 @@ func render(delta: float, alpha: float) -> void:
 		body.rotation.x += delta * 14.0
 	if state == "active":
 		_render_attention(delta, body)
-	KinCurl.ground(self, body, delta)      # down off your back to your flank: eased
+	KinCurl.ground(self, body, delta)  # down off your back to your flank: eased
 	_render_demo()
 	Capture.dissolve(self)
 	KinDowned.scoop_pose(self)
