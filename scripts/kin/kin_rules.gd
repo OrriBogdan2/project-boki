@@ -128,7 +128,7 @@ static func mark(t: Ent, mode: String, dur: float, amount: float) -> void:
 			t.vuln_k = clampf(maxf(t.vuln_k if t.vuln_t > 0.0 else 0.0, amount), 0.0, VULN_MAX)
 		"blight":
 			t.blight_t = maxf(t.blight_t, dur)
-			t.blight_k = clampf(amount, 0.0, 0.9) if amount > 0.0 else 0.6
+			t.blight_k = clampf(amount, 0.0, 0.9) if amount > 0.0 else InCombat.anti_heal_cut()
 
 
 ## A merge or sidegrade multiplier pulled inside its allowed range.

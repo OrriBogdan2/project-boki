@@ -113,8 +113,11 @@ func run(main: Node) -> void:
 		_frame(m, P)
 	await main.get_tree().create_timer(AshwickKit.CRACKS_FADE + 0.2).timeout
 	ok(_emit(P) < emit0 + 0.2, "the cracks fall back after (%.1f)" % _emit(P))
+	var jet_mi := P.model.find_child(WardenProps.PREFIX + "jet_0", true, false) as MeshInstance3D  # (native path)
+	ok(jet_mi == null or jet_mi.layers == 0, "no flame cards at her heels at rest (turnaround)")
 	var jet := kit.jet
 	ok(jet.start(), "Flue Flight lifts off")
+	var jet_drawn := false
 	var spread := 0.0
 	var heels_low := true
 	var tail_behind := true
@@ -137,12 +140,14 @@ func run(main: Node) -> void:
 		tail_d = minf(tail_d, -(hv.anchor_pos(P, "tail") - P.pos).dot(fwd))
 		tail_behind = tail_behind and (hv.anchor_pos(P, "tail") - P.pos).dot(fwd) < -0.1   # (v2 tail curls)
 		jet_y = maxf(jet_y, WardenProps.stretch_of(P.model, "jet.0"))  # (the jet bone, or its part on Meshy's bones)
+		jet_drawn = jet_drawn or (jet_mi != null and jet_mi.layers != 0)
 		if kit.nozzle().distance_to(P.pos + fwd * 1.0) < 0.2:
 			stowed = false
 	ok(spread > 0.06, "two jets, one on each heel (%.2f m apart)" % spread)
 	ok(heels_low, "the lift burns from her heels (at her feet)")
 	ok(tail_behind, "the tail's fire burns behind her (at least %.2f m)" % tail_d)
 	ok(jet_y > 2.0, "the clip stretches the heels' flames in flight (x%.1f)" % jet_y)
+	ok(jet_mi == null or jet_drawn, "the heel flames are drawn in flight")
 	ok(kit.hose.emitted == puffs, "no stream of fire runs in flight")
 	ok(stowed, "the fire is off her hand in flight")
 	print("CINDERART_DONE fails=%d" % bad)

@@ -159,6 +159,8 @@ func _states(main: Node, a: String) -> void:
 	_crouch_arms(a, nat)
 	await _slots(main, a, m, nat)
 	await _upper(main, a, m, nat)
+	_twist(a, nat)
+	_blends(a)
 	await _kmoves(main, a, m, nat)
 	_moves(a, nat)
 	_only_meshy(a, m)
@@ -409,6 +411,55 @@ func _upper(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
 	)
 
 
+## Strafing right while facing ahead turns the legs a quarter turn to the way he goes and leaves the torso where it
+## was (the aim); back-pedalling, the legs face the aim and run backwards; standing, nothing turns.
+func _twist(a: String, nat: WardenNative) -> void:
+	var sk := nat.skel
+	var hips_before := sk.get_bone_global_pose(nat.twist.hips).basis.get_rotation_quaternion()
+	var torso_before := sk.get_bone_global_pose(nat.twist.torso).basis.get_rotation_quaternion()
+	nat.twist.step(1.0, {"vel": Vector3(4.6, 0.0, 0.0), "face": 0.0}, true)
+	var legs: float = sk.get_bone_global_pose(nat.twist.hips).basis.get_rotation_quaternion().angle_to(hips_before)
+	var torso: float = sk.get_bone_global_pose(nat.twist.torso).basis.get_rotation_quaternion().angle_to(torso_before)
+	ok(
+		absf(legs - PI / 2.0) < 0.05 and torso < 0.05,
+		"%s: strafing turns the legs %.2f rad, the torso %.2f" % [a, legs, torso]
+	)
+	nat.twist.step(1.0, {"vel": Vector3.ZERO, "face": 0.0}, true)
+	ok(absf(nat.twist.turn) < 0.01, "%s: standing, the legs face the aim again" % a)
+	_back(a, nat.twist)
+
+
+## Backing off (more than 120 deg off the aim) runs the clip in reverse with the legs straight under the torso, from
+## either side and at exactly 180 deg; between 110 and 130 deg it keeps the way it was going (no flicker).
+func _back(a: String, tw: WardenNativeTwist) -> void:
+	var reverse: Array = []
+	for deg in [90.0, 125.0, 180.0, 115.0, 105.0, -125.0, -180.0]:
+		var v := Vector3(-sin(deg_to_rad(deg)), 0.0, -cos(deg_to_rad(deg))) * 4.6
+		tw.step(1.0, {"vel": v, "face": 0.0}, true)
+		reverse.append(tw.dir < 0.0)
+	ok(
+		reverse == [false, false, true, true, false, false, true],
+		"%s: reverse past 130 deg, forwards inside 110: %s" % [a, reverse]
+	)
+	ok(absf(tw.turn) < 0.01, "%s: dead behind the aim, no hip twist (%.3f rad)" % [a, tw.turn])
+	tw.step(1.0, {"vel": Vector3.ZERO, "face": 0.0}, true)
+	ok(tw.dir > 0.99, "%s: standing, the clip plays forwards again" % a)
+
+
+## The clip blends: the glide opens at once and lets go over 0.2 s, the dash comes in over 0.25 s, the dive over 0.3 s,
+## the rest 0.15 s.
+func _blends(a: String) -> void:
+	var got := [
+		WardenNative.blend_s("run", "glide"),
+		WardenNative.blend_s("glide", "run"),
+		WardenNative.blend_s("run", "dash"),
+		WardenNative.blend_s("run", "jump"),
+		WardenNative.blend_s("jump", "dive"),
+		WardenNative.blend_s("dive", "glide")
+	]
+	ok(got == [0.0, 0.2, 0.25, 0.15, 0.3, 0.3], "%s: blends glide in/out, dash in, dive in/out, other: %s" % [a, got])
+
+
 ## A clips file (made here: a skeleton under another node name, one clip named SYNTH) lends its clip to a slot.
 func _synthetic_clips(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
 	var src := Node3D.new()
@@ -473,7 +524,12 @@ func _kmoves(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
 			var pos := nat.player.current_animation_position
 			ok(pos >= hold - 0.05 and pos < length, "%s: %s holds in its loop (%.2f s of %.2f)" % [a, km, pos, length])
 			await _feed(main, nat, m, {}, {})
-			ok(nat.player.current_animation != clip, "%s: no %s once the move ends" % [a, km])
+			# (a move on the idle loop itself, Gil's Riptide turn, ends back on that clip: the move lets go of the body)
+			var idle_clip := clip == String(nat.plays.get("idle", ""))
+			ok(
+				nat.cur != "kmove" and (idle_clip or nat.player.current_animation != clip),
+				"%s: no %s once the move ends" % [a, km]
+			)
 		elif string_bi >= 0:
 			var pulls := []
 			for t in [0.0, 1.0 / 30.0]:
