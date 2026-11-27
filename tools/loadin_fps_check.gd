@@ -5,7 +5,8 @@ extends Node
 ## gone, with the engine's own monitors (draw calls, objects, nodes, physics, memory), and judges the
 ## frames after the screen: none may run under MIN_FPS and the average must reach AVG_FPS.
 ##   godot -- --loadin-fps-check [--loadin-out=report.txt] [--loadin-csv=frames.csv] [--loadin-seed=4101]
-##   [--loadin-res=1920x1080] [--loadin-secs=30] [--loadin-split] [--loadin-inv]
+##   [--loadin-res=1920x1080] [--loadin-secs=30] [--loadin-split] [--loadin-inv] [--loadin-shot=map.png]
+## --loadin-shot saves the frame 2 s into the planning map (what the player sees over the covered world).
 ## --loadin-split (a probe, not judged): after the screen the check calls Match._process and every other script
 ## _process itself and times each by file, and times the draw from the renderer's pre/post-draw signals, so the
 ## report names where a frame's main-thread time goes. --loadin-inv adds the planning map's scene inventory (one slow
@@ -52,6 +53,8 @@ var t_pre := 0
 var t_post := 0
 var inventoried := false
 var inv := false  # --loadin-inv
+var shot_path := ""  # --loadin-shot
+var map_us := 0  # when the planning map first covered the screen
 var cover_late := 0  # frames the planning map covered the screen with the 3D still drawn
 var cover_stuck := 0  # frames after the planning with the 3D off
 var draws_seen: Array = []  # (--loadin-split) the last few [pre, post] draw clocks, matched to the renderer's stamps
@@ -91,6 +94,8 @@ func _ready() -> void:
 			res = Vector2i(int(p[0]), int(p[1]))
 		elif a == "--loadin-split":
 			split = true
+		elif a.begins_with("--loadin-shot="):
+			shot_path = a.substr(14)
 		elif a == "--loadin-inv":
 			split = true
 			inv = true
@@ -440,7 +445,14 @@ func _inventory() -> void:
 func _judge_cover(m: Match) -> void:
 	var off := get_viewport().disable_3d
 	var planning := m.skydrop != null and m.skydrop.planning
-	if planning and m.hud != null and m.hud.map_open() and not off:
+	var covered: bool = planning and m.hud != null and m.hud.map_open()
+	if covered and map_us == 0:
+		map_us = Time.get_ticks_usec()
+	elif covered and shot_path != "" and not headless and Time.get_ticks_usec() - map_us > 2000000:
+		get_viewport().get_texture().get_image().save_png(shot_path)
+		print("LOADIN shot ", shot_path)
+		shot_path = ""
+	if covered and not off:
 		cover_late += 1
 	elif not planning and off:
 		cover_stuck += 1
