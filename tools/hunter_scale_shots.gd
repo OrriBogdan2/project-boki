@@ -47,18 +47,18 @@ func run(main_node: Node) -> void:
 			h.out = h != m.player  # alone on the ground: no squad mate or rival stands in the measure
 		for k in m.kins:
 			k.model.visible = false
-		var top_h: Variant = Arch.body(hero).get("top_h")
+		var crown: Variant = Arch.body(hero).get("crown")
 		var at := _arena_spot(m.player.pos)
 		_bare_floor(at)
 		await _settle(at)  # one pose for both sizes: a shot only swaps the size
 		for pass_name in passes:
-			# "before" is main's code: the old size, the plates' old height (no top_h clearance)
+			# "before" is main's code: the old size, the plates' old height (no crown clearance)
 			CamRig.match_hunter_scale = 1.0 if pass_name == "before" else base
 			Hunter.VIS_SCALE = 1.12 * CamRig.match_hunter_scale
-			Arch.body(hero)["top_h"] = 0.0 if pass_name == "before" else top_h
+			Arch.body(hero)["crown"] = [0.0, 0.0, 0.0] if pass_name == "before" else crown
 			m.player.render(0.0, 1.0)
 			await _shot(hero, pass_name)
-		Arch.body(hero)["top_h"] = top_h
+		Arch.body(hero)["crown"] = crown
 		m.queue_free()
 	CamRig.match_hunter_scale = base
 	Hunter.VIS_SCALE = after
@@ -106,21 +106,23 @@ func _gaps(after: float, heroes_arg := []) -> void:
 			var own := 2.7 * float(p.cdat["scale"])
 			var rival := HudPlate.plate_offset(p)
 			var k := float(SIZE.y) / main.get_viewport().get_visible_rect().size.y  # viewport px to 1080p px
+			var own_y := _screen_y(p, own * CamRig.match_hunter_scale)
+			var rival_y := _screen_y(p, rival * CamRig.match_hunter_scale)
 			if fixed:
-				own = HudPlate.up(p, own)
-				rival = HudPlate.up(p, rival)
+				own_y = HudPlate.screen_at(m.cam, p, own).y
+				rival_y = HudPlate.screen_at(m.cam, p, rival).y
 			print(
 				(
-					"GAP %s %s: top %.2f m (top_h %.3f), plate over it: own %.0f px, rival %.0f px (silh. %.0f, %.0f)"
+					"GAP %s %s: top %.2f m (%.3f own size), plate: own %.0f px, rival %.0f px (silh. %.0f, %.0f)"
 					% [
 						hero,
 						pass_name,
 						up,
 						up / p.vis_k,
-						(column - _screen_y(p, own * CamRig.match_hunter_scale) - PLATE_H) * k,
-						(column - _screen_y(p, rival * CamRig.match_hunter_scale) - PLATE_H) * k,
-						(_top(p.model) - _screen_y(p, own * CamRig.match_hunter_scale) - PLATE_H) * k,
-						(_top(p.model) - _screen_y(p, rival * CamRig.match_hunter_scale) - PLATE_H) * k
+						(column - own_y - PLATE_H) * k,
+						(column - rival_y - PLATE_H) * k,
+						(_top(p.model) - own_y - PLATE_H) * k,
+						(_top(p.model) - rival_y - PLATE_H) * k
 					]
 				)
 			)
@@ -180,8 +182,7 @@ func _shot(hero: String, pass_name: String) -> void:
 	hud.visible = true
 	var feet := m.cam.unproject_position(p.position)
 	var top := _top(p.model)
-	var up := HudPlate.up(p, 2.7 * float(p.cdat["scale"])) * CamRig.match_hunter_scale
-	var plate := m.cam.unproject_position(p.position + m.cam.char_lean() * Vector3(0, up, 0))
+	var plate := HudPlate.screen_at(m.cam, p, 2.7 * float(p.cdat["scale"]))
 	# the viewport keeps the project's 1280x720 and the window shows it at 1920x1080: px are read at 1080p
 	var k := float(SIZE.y) / main.get_viewport().get_visible_rect().size.y
 	print(

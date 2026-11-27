@@ -5,7 +5,7 @@ extends RefCounted
 ##   3. a message card dropped right on the hunter slides aside; the knock banner does too
 ##   4. the lane shows 2 cards (1 in a fight); a small line never sits beside another and is dropped in a fight
 ##   5. armour breaking (yours or theirs) and a wall slam toast nothing: the bar and the number already say it
-##   6. every archetype has its model's top (body.top_h) and its plate hangs clear over it at the match's drawn size
+##   6. every archetype has its model's crown (body.crown) and its plate hangs clear over it at the match's drawn size
 ## Never touches the save.
 
 const MIN_GAP_PX := 8.0  # px at 1080p: the least air between a plate's bottom and the model's top
@@ -162,24 +162,22 @@ func _no_duplicate_toasts(m: Match) -> void:
 	ok(lane.count() == 0, "armour breaking and a wall slam add no toast (%s)" % str(lane.texts()))
 
 
-## The plate's bottom edge sits at or over every archetype's tallest point (back props, horns), whatever the drawn size.
+## The plate's lowest pixel sits MIN_GAP_PX over every archetype's crown (Arch.crown, HudPlate.top_y) at the drawn
+## size, at 8 headings, under the view's middle and out at its sides, top and bottom.
 func _plates_clear_tops(m: Match) -> void:
-	var feet := m.player.position
 	var vis_k := Hunter.VIS_SCALE * m.cam.hunter_scale
+	var k := 1080.0 / m.get_viewport().get_visible_rect().size.y  # viewport px to 1080p px
 	var worst := 1e9
 	var missing: Array[String] = []
 	for id in Arch.ids():
-		if not Arch.body(id).has("top_h"):
+		if not Arch.body(id).has("crown"):
 			missing.append(id)
-		var top := Arch.top_h(id) * vis_k
-		var up := HudPlate.up_of(id, vis_k, 0.0) * CamRig.match_hunter_scale
-		var gap := _screen_y(m, feet, top) - _screen_y(m, feet, up) - 17.0  # px: the plate hangs 17 px under its anchor
-		worst = minf(worst, gap)
-	ok(missing.is_empty(), "every archetype has body.top_h in its data (missing: %s)" % str(missing))
-	var k := 1080.0 / m.get_viewport().get_visible_rect().size.y  # viewport px to 1080p px
-	var msg := "a plate's bottom clears the tallest point of all %d archetypes by 8 px (worst %.0f px at 1080p)"
+		for off in [Vector3.ZERO, Vector3(-10, 0, 5), Vector3(10, 0, -6), Vector3(0, 0, 6), Vector3(0, 0, -7)]:
+			var feet: Vector3 = m.player.position + off
+			for f in 8:
+				var xf := Transform3D(m.cam.char_basis(TAU * f / 8.0, Vector3.ONE * vis_k), feet)
+				var plate := HudPlate.screen_at_xf(m.cam, feet, xf, id, HudPlate.PLATE_OFFSET).y
+				worst = minf(worst, HudPlate.top_y(m.cam, xf, id) - plate - HudPlate.HANG)
+	ok(missing.is_empty(), "every archetype has body.crown in its data (missing: %s)" % str(missing))
+	var msg := "a plate's lowest pixel clears the crown of all %d archetypes by 8 px across the view (worst %.0f px)"
 	ok(worst * k >= MIN_GAP_PX, msg % [Arch.ids().size(), worst * k])
-
-
-func _screen_y(m: Match, feet: Vector3, up: float) -> float:
-	return m.cam.unproject_position(feet + m.cam.char_lean() * Vector3(0, up, 0)).y

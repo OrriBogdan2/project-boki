@@ -8,10 +8,24 @@ extends "res://tools/hunter_scale_shots.gd"
 ## <dir>/<tag>_<hero>.png for the four STILLS heroes: the hero with a squad mate on its left and a Grimble rival on its
 ## right (both idle), HUD on, so the own, ally and rival plates read side by side. --wide (with --stills and
 ## --hero=gunslinger) saves <dir>/<tag>_wide.png instead: WIDE_HERO with two mates on its left and four rivals on its
-## right out to 13 m, to show how much ground the start notch frames. Needs a renderer (xvfb or jobq gpu).
+## right out to 13 m, to show how much ground the start notch frames. --plates (runs headless too): the hero plus six
+## copies of it as squad mates and rivals over the view (PLATE_SPOTS), each turned to FACES headings; prints REFGAP
+## (plate to crown px, min..max per side) and REFFIT (the body.crown that bounds them). Stills need a renderer.
 
 const STILLS := ["juggernaut", "gunslinger", "ostra", "rimewright"]  # Kael, Vex, Motley, Neve
 const RIVAL := "dredge"  # Grimble: the tallest plate to clear
+const CROWN_K := 0.2  # --plates: the top fifth of a body's height is its crown (what a plate must clear)
+const FACES := 8  # --plates: headings each hunter is turned to while its top is measured
+## --plates: where the copies stand off the hero (m): squad mates (even) and rivals (odd), out to the view's sides,
+## top and bottom at the start notch
+const PLATE_SPOTS := [
+	Vector3(-3.2, 0, 0.6),
+	Vector3(3.2, 0, -0.6),
+	Vector3(-10, 0, 5),
+	Vector3(10, 0, -6),
+	Vector3(0, 0, 6),
+	Vector3(0, 0, -7)
+]
 const SIDE_M := 3.2  # m either side of the hero the still's mate and rival stand
 const WIDE_HERO := "gunslinger"  # --wide: this hero stands between two squad mates (left) and four rivals (right)
 const WIDE_ROW := [
@@ -25,6 +39,7 @@ func run(main_node: Node) -> void:
 	var tag := "now"
 	var stills := OS.get_cmdline_user_args().has("--stills")
 	var wide := stills and OS.get_cmdline_user_args().has("--wide")
+	var plates := OS.get_cmdline_user_args().has("--plates")
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--hero="):
 			heroes = String(a).substr(7).split(",")
@@ -49,6 +64,10 @@ func run(main_node: Node) -> void:
 		var wide_shot: bool = wide and hero == WIDE_HERO
 		if wide_shot:
 			extra = _wide_row(at)
+		elif plates:  # the hero again as squad mates and rivals of itself, spread over the view
+			for i in PLATE_SPOTS.size():
+				var team := (m.player.team + i % 2) % 2
+				extra.append(_idle("ref_p%d" % i, team, hero, at + PLATE_SPOTS[i]))
 		elif stills and hero in STILLS:
 			var mate := "gunslinger" if hero != "gunslinger" else "juggernaut"
 			var team := m.player.team
@@ -58,7 +77,9 @@ func run(main_node: Node) -> void:
 		if tall.is_empty():
 			_cam_row()
 		tall.append(_hero_row(hero))
-		if not extra.is_empty():
+		if plates:
+			await _face_sweep(hero, extra)
+		if stills and not extra.is_empty():
 			await _save("%s_%s.png" % [tag, "wide" if wide_shot else hero])
 		if hero == heroes[0]:
 			_hud_row()
@@ -141,11 +162,10 @@ func _hero_row(hero: String) -> float:
 	var p := m.player
 	var feet := m.cam.unproject_position(p.position)
 	var top := _top(p.model)
-	var up := HudPlate.up(p, 2.7 * float(p.cdat["scale"])) * CamRig.match_hunter_scale
-	var plate := m.cam.unproject_position(p.position + m.cam.char_lean() * Vector3(0, up, 0))
+	var plate := HudPlate.screen_at(m.cam, p, 2.7 * float(p.cdat["scale"]))
 	var frame := HudPlate._frame_rect(0.0, 0.0, HudStyle.PLATE_W_SELF)
-	var rival := HudPlate.up(p, HudPlate.plate_offset(p)) * CamRig.match_hunter_scale
-	var rp := m.cam.unproject_position(p.position + m.cam.char_lean() * Vector3(0, rival, 0))
+	var rival := HudPlate.plate_offset(p) * CamRig.match_hunter_scale
+	var rp := HudPlate.screen_at(m.cam, p, HudPlate.plate_offset(p))
 	var rf := HudPlate._frame_rect(0.0, 0.0, HudStyle.PLATE_W)
 	var tall := (feet.y - top) * _k()
 	var fmt := "REFH %s: %.0f px tall (top %.2f m, top_h %.3f), own plate %.0f px wide, gap %.0f px"
@@ -155,6 +175,110 @@ func _hero_row(hero: String) -> float:
 	var top_m := _top_m(p.model) - p.position.y
 	print(fmt % [hero, tall, top_m, top_m / p.vis_k, frame.size.x * _k(), own_gap, rival, rf.size.x * _k(), rival_gap])
 	return tall
+
+
+## --plates: for the player and `extra` turned to FACES headings, the px (1080p) between the lowest pixel of each plate
+## where the HUD drew it (HudPlate._place: frame and level badge) and the body's highest pixel. Prints REFGAP (min and
+## max per side and overall) and REFFIT: the top_h / top_r (HudPlate.top_y) that bound every sample with the least
+## spare air (what body.top_h / top_r in the archetype's JSON should read).
+func _face_sweep(hero: String, extra: Array) -> void:
+	var all: Array = [m.player] + extra
+	var spots: Array = all.map(func(h: Hunter): return h.pos)
+	var gaps := {}  # side -> [min, max]
+	var samples: Array = []  # [feet, vis_k, top px]
+	for i in FACES:
+		var dir := Vector3.FORWARD.rotated(Vector3.UP, TAU * i / FACES)
+		for _f in SETTLE:
+			for j in all.size():
+				var h: Hunter = all[j]
+				h.teleport(spots[j])
+				h.vel = Vector3.ZERO
+				h.inp["aim"] = h.pos + dir * 8.0 + Vector3(0.0, 0.9, 0.0)
+			m.step(STEP)
+			m.cam.follow(m.player.pos, STEP, false)
+			for h in m.hunters:
+				h.render(STEP, 1.0)
+		await main.get_tree().process_frame
+		await main.get_tree().process_frame  # the HUD places its plates on the frame after the step
+		for h: Hunter in all:
+			var top := _crown_top(h)
+			samples.append([h.model.global_transform, top])
+			var it = m.hud.plates._items.get(h.nid)
+			if it == null or not it.visible:
+				continue
+			var gap: float = (top - it.position.y - HudPlate.HANG) * _k()
+			for side in [_side(h), "all"]:
+				var g: Array = gaps.get(side, [1e9, -1e9])
+				gaps[side] = [minf(g[0], gap), maxf(g[1], gap)]
+	for side in gaps:
+		print("REFGAP %s %s: %.0f..%.0f px" % [hero, side, gaps[side][0], gaps[side][1]])
+	_fit(hero, samples)
+
+
+## The screen y of h's crown: the highest pixel of the body's points in its top CROWN_K of height over the feet (the
+## head, hair, horns and back props; not an arm or a held weapon reaching out lower down).
+func _crown_top(h: Hunter) -> float:
+	var pts := _body_points(h.model)
+	var tall := 0.0
+	for wp in pts:
+		tall = maxf(tall, wp.y - h.position.y)
+	var top := 1e9
+	for wp in pts:
+		if wp.y - h.position.y >= tall * (1.0 - CROWN_K):
+			top = minf(top, m.cam.unproject_position(wp).y)
+	return top
+
+
+## REFFIT for `hero`: the crown (Arch.crown, model space) that keeps every sample's crown pixel under it with the
+## least mean spare px: x and z on a 0.1 m grid, then 0.02 m round the best; y the least that clears every sample.
+func _fit(hero: String, samples: Array) -> void:
+	var best := _fit_grid(hero, samples, Vector2.ZERO, 0.1, 8)
+	best = _fit_grid(hero, samples, Vector2(best[0].x, best[0].z), 0.02, 5)
+	var c: Vector3 = best[0]
+	var fmt := 'REFFIT %s: "crown": [%.2f, %.2f, %.2f] (spare %.1f px mean, %.1f max over %d samples; was %s)'
+	print(fmt % [hero, c.x, c.y, c.z, best[1], best[2], samples.size(), str(Arch.crown(hero))])
+
+
+## [crown, mean spare px, max spare px] of the best crown with x, z on a grid of `step` m, `n` steps out from `mid`.
+func _fit_grid(hero: String, samples: Array, mid: Vector2, step: float, n: int) -> Array:
+	var saved: Variant = Arch.body(hero).get("crown")
+	var best := [Vector3.ZERO, 1e9, 0.0]
+	for xi in range(-n, n + 1):
+		for zi in range(-n, n + 1):
+			var cx := snappedf(mid.x + xi * step, 0.01)
+			var cz := snappedf(mid.y + zi * step, 0.01)
+			var need := 0.0
+			for sm: Array in samples:
+				var lo := 0.0
+				var hi := 5.0
+				for _i in 20:
+					var mid_y := (lo + hi) * 0.5
+					if m.cam.unproject_position((sm[0] as Transform3D) * Vector3(cx, mid_y, cz)).y > sm[1]:
+						lo = mid_y
+					else:
+						hi = mid_y
+				need = maxf(need, hi)
+			need = ceilf(need * 100.0) / 100.0
+			Arch.body(hero)["crown"] = [cx, need, cz]
+			var spare := 0.0
+			var most := 0.0
+			for sm: Array in samples:
+				var px: float = (sm[1] - HudPlate.top_y(m.cam, sm[0], hero)) * _k()
+				spare += px / samples.size()
+				most = maxf(most, px)
+			if spare < best[1]:
+				best = [Vector3(cx, need, cz), spare, most]
+	if saved == null:
+		Arch.body(hero).erase("crown")
+	else:
+		Arch.body(hero)["crown"] = saved
+	return best
+
+
+func _side(h: Hunter) -> String:
+	if h == m.player:
+		return "self"
+	return "squad" if h.team == m.player.team else "rival"
 
 
 ## Where the vitals block's parts sit, as % of the screen (HudScale.drawn: the anchors' rects as drawn).

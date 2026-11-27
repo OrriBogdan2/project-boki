@@ -30,11 +30,12 @@ static func hit_h(id: String) -> float:
 	return float(body(id).get("hit_h", HIT_H_DEFAULT))
 
 
-## The model's tallest point as the match camera shows it, back props and horns included (m over its feet at its
-## own size, before the match's drawn size; a part reaching away from the camera counts as higher): the body's
-## top_h, else its hurtbox height. A plate hangs clear over it (HudPlate.up).
-static func top_h(id: String) -> float:
-	return float(body(id).get("top_h", hit_h(id)))
+## The model's crown in its own space (before its drawn scale and lean): the point over which the overhead plate
+## hangs (HudPlate.top_y), set so it stays over the head, hair, horns and back props at every heading. The body's
+## `crown` [x, y, z] (--ref-parity-shots --plates fits it from the drawn meshes), else its hurtbox height.
+static func crown(id: String) -> Vector3:
+	var c: Array = body(id).get("crown", [])
+	return Vector3(c[0], c[1], c[2]) if c.size() == 3 else Vector3(0, hit_h(id), 0)
 
 
 ## Sets a hunter's hurtbox radius (`r`, what shots and abilities hit) and its separate body collision radius.
