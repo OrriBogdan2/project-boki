@@ -5,8 +5,8 @@ extends RefCounted
 ## with none to eat from it picks the ripe snack patch and eats one snack (the rest go to your pantry), or eats a
 ## fruit fallen under a FruitTree, or fetches a snack from the pantry at the house door. With none of those it walks
 ## to a wild tree on its island and eats the zone's fruit (a lesser meal: it fills, but builds no trust and no lean),
-## so a garden left alone
-## never ends with every Boki pinned at the hungry floor. BaseLife runs the walk in its Eat state through tick()
+## so a garden left alone never ends with every Boki pinned at the hungry floor. BaseLife
+## runs the walk in its Eat state through tick()
 ## (k["life_eat"] = {from, food, at}, a bowl's own fields on top); every meal goes through meal() (Care.feed),
 ## so the journal, the lean (Evo.eat) and the care day see it like any other.
 
