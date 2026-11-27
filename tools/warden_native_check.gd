@@ -226,8 +226,7 @@ func _drop_poses(a: String, m: Node3D, nat: WardenNative) -> void:
 
 
 ## Every surface wears the game's hero-toon material (not Meshy's PBR), and the hit flashes see them (meta "mats"); a
-## flame slot's surface (Cinder's heel jets, WardenProps) wears the toon pass's flame shader instead, and a mood face
-## off an atlas (Meeko's companions, WardenMood: a see-through decal the opaque hero-toon cannot draw) its atlas shader.
+## flame slot's surface (Cinder's heel jets, WardenProps) wears the toon pass's flame shader instead.
 func _toon(a: String, m: Node3D) -> void:
 	var surfaces := 0
 	var toon := 0
@@ -235,19 +234,9 @@ func _toon(a: String, m: Node3D) -> void:
 		for si in (mi as MeshInstance3D).mesh.get_surface_count():
 			surfaces += 1
 			var sm := (mi as MeshInstance3D).get_surface_override_material(si) as ShaderMaterial
-			var game := (
-				sm != null and (sm.shader == Models.HERO or sm.shader == WardenGlb.FLAME or _atlas_face(a, mi, si, sm))
-			)
+			var game := sm != null and (sm.shader == Models.HERO or sm.shader == WardenGlb.FLAME)
 			toon += int(game and (m.get_meta("mats", []) as Array).has(sm))
 	ok(surfaces > 0 and toon == surfaces, "%s: hero-toon on %d of %d surfaces" % [a, toon, surfaces])
-
-
-## A mood face the data lists ("mood" "faces": eyes-mood_<tag>) on WardenMood's atlas shader.
-func _atlas_face(a: String, mi: MeshInstance3D, si: int, sm: ShaderMaterial) -> bool:
-	var src := mi.mesh.surface_get_material(si)
-	var tag := String(src.resource_name).trim_prefix("eyes-mood_") if src else ""
-	var faces: Dictionary = WardenClips.data(WardenGlb.art(a)).get("mood", {}).get("faces", {})
-	return sm.shader == WardenMood.ATLAS_SHADER and faces.has(tag)
 
 
 ## The crouch's arm bones play the walk's arm keys (Meshy's crouch holds a torch out); its legs keep the crouch.
