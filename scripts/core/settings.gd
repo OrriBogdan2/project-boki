@@ -387,7 +387,7 @@ var _defaults_keys := {}
 var _dirty := false
 var _started := false  # the bindings the game ships with, for "reset"
 var _quality_basics := false
-var _caps := {}  # action -> [its first InputEvent, its key cap] (key_cap); a rebind swaps the event, so the entry goes stale by itself
+var _caps := {}  # action -> [its first InputEvent, its key cap] (key_cap); a rebind swaps the event, so it goes stale
 
 
 ## The preset in effect: the player's pick, or what auto-detect found for this machine.
@@ -1082,8 +1082,8 @@ func move_caps(sep := "") -> String:
 	return sep.join(["up", "left", "down", "right"].map(func(a): return key_cap(a)))
 
 
-## The first binding of an action, short, for HUD key caps ("E", "LMB", "M4"). The text is kept per action while its
-## first event is the same object (the HUD asks for dozens every frame); any rebind, Settings or a bare InputMap, swaps it.
+## The first binding of an action, short, for HUD key caps ("E", "LMB", "M4"). Kept per action while its first
+## event is the same object (the HUD asks for dozens a frame); any rebind swaps it.
 func key_cap(action: String) -> String:
 	var evs := InputMap.action_get_events(action)
 	if evs.is_empty():
