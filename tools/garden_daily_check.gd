@@ -26,6 +26,7 @@ func ok(cond: bool, what: String) -> void:
 	if not cond:
 		bad += 1
 
+
 func _save(boki: int) -> Dictionary:
 	var d := Save.fresh()
 	for i in boki:
@@ -38,11 +39,13 @@ func _save(boki: int) -> Dictionary:
 	HomeLayout.ensure(d)
 	return d
 
+
 func _snap() -> Dictionary:
 	var out := {}
 	for rec in Save.d["roster"]:
 		out[rec["uid"]] = [(rec["needs"] as Dictionary).duplicate(), (rec["stats"] as Dictionary).duplicate()]
 	return out
+
 
 func _never_lower(before: Dictionary) -> bool:
 	for rec in Save.d["roster"]:
@@ -53,6 +56,7 @@ func _never_lower(before: Dictionary) -> bool:
 				if float(now[key]) < float(was[key]):
 					return false
 	return true
+
 
 func _gifts() -> void:
 	var now := 1.0e9
@@ -65,11 +69,13 @@ func _gifts() -> void:
 		ok(_never_lower(before), "%d h away never lowers a need or a stat" % int(case[0]))
 	ok(GardenAway.arrive(0.0, now).is_empty(), "the first arrival has nothing to give")
 
+
 func _toy_stat(rec: Dictionary) -> int:
 	var total := 0
 	for key in rec["stats"]:
 		total += int(rec["stats"][key])
 	return total
+
 
 func _toys() -> void:
 	var now := 1.0e9
@@ -85,8 +91,9 @@ func _toys() -> void:
 	ok(_toy_stat(a) == a0 + 2, "12 min away trains 2 points at a quarter rate (got %d)" % (_toy_stat(a) - a0))
 	var b0 := _toy_stat(b)
 	GardenAway.arrive(now - 72.0 * HOUR, now)
-	ok(_toy_stat(b) - b0 == 1, "same day: the toys' day cap (3) leaves 1 of the 3 points (got %d)" % (_toy_stat(b) - b0))
-	var next_day := now + 2.0 * 86400.0       # a new farm day: the toys' day cap starts over
+	var got := _toy_stat(b) - b0
+	ok(got == 1, "same day: the toys' day cap (3) leaves 1 of the 3 points (got %d)" % got)
+	var next_day := now + 2.0 * 86400.0  # a new farm day: the toys' day cap starts over
 	b0 = _toy_stat(b)
 	GardenAway.arrive(next_day - 72.0 * HOUR, next_day)
 	var toy_cap := int(GardenAway.rules()["toy_cap"])
@@ -95,6 +102,7 @@ func _toys() -> void:
 	b["stats"]["speed"] = cap + 4
 	GardenAway.arrive(now - 72.0 * HOUR, now)
 	ok(int(b["stats"]["speed"]) == cap + 4, "a stat already past the cap is left alone, never lowered")
+
 
 func _patch() -> void:
 	var now := 1.0e9
@@ -118,6 +126,7 @@ func _patch() -> void:
 	var said := "nothing is lost: %d snacks made, %d in the bowl, %d in the pantry"
 	ok(held - crops + in_bowl == made, said % [made, in_bowl, held - crops])
 	ok(SnackPatch.ripe(patch, now), "one batch still waits ripe on the patch")
+
 
 func _wishes() -> void:
 	var now := 1.0e9
@@ -167,6 +176,7 @@ func _wishes() -> void:
 	GardenWishes.check(now + 86400.0 * 9)
 	ok(int(lone["gems"]) == start_gems, "a short list gives no all-three gems")
 
+
 ## One return through the real arrival path (the same calls home.gd makes), with every clock `back` seconds
 ## earlier (negative: later, as if the device clock had moved back). Returns the card lines.
 func _return(back: float) -> Array:
@@ -183,6 +193,7 @@ func _return(back: float) -> Array:
 	Econ.catch_up_all()
 	return lines
 
+
 func _load_save() -> Dictionary:
 	var d := _save(2)
 	var rocky := Save.new_kin("pebbit", "Rocky")
@@ -192,6 +203,7 @@ func _load_save() -> Dictionary:
 	HomeLayout.of(d)["deco"].append({"id": "lumber_camp", "u": 1, "x": 0, "y": 0, "r": 0})
 	d["mats"] = {"wood": 0, "stone": 0}
 	return d
+
 
 ## The farm runs itself while away, capped: 2 h, 24 h and 7 days back credit the same capped wood and the gifts,
 ## once; a return is one plain line and never lowers a need; a clock moved backwards credits nothing.
@@ -226,6 +238,7 @@ func _load() -> void:
 	ok(Work.mat("wood") > wood, "and the next real hour away still counts (%d wood)" % Work.mat("wood"))
 	_load_return_card()
 
+
 ## The garden's return is the HUD line: no panel over the Boki, and no zone name as the line.
 func _load_return_card() -> void:
 	var d := _load_save()
@@ -244,6 +257,7 @@ func _load_return_card() -> void:
 	ZoneAway.card(stub)
 	ok(stub.shown == ["While you were away"], "a classic home keeps its one return card (%s)" % [stub.shown])
 	FarmUnlocks.rules()["base_mode"] = true
+
 
 func run(m: Node) -> void:
 	Save.no_write = true
