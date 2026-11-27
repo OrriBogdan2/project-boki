@@ -8,6 +8,7 @@ extends RefCounted
 const FADE_IN := 0.1  # s: the layer over the legs' run
 const LEAD_FADE_IN := 0.05  # s: and when the clip starts at its strike (WardenNative data "lmb_lead")
 const FADE_OUT := 0.16  # s: back to the loop clip's torso and arms
+const HOLD_END := 0.01  # s: a clip shown at its last frame stays on (the layer ends a clip at its length)
 
 var skel: Skeleton3D
 var bones := {}  # bone name -> true: the torso and everything above it
@@ -34,6 +35,14 @@ func play(anim: Animation, speed: float, from := 0.0) -> void:
 	t = from
 	fade_in = LEAD_FADE_IN if from > 0.0 else FADE_IN
 	rate = speed
+	on = not bones.is_empty()
+
+
+## Shows `anim` at `at` s while the caller keeps calling (a kit move's clip at the move's own clock): it holds there.
+func show_at(anim: Animation, at: float) -> void:
+	clip = anim
+	t = minf(at, anim.length - HOLD_END)
+	rate = 0.0
 	on = not bones.is_empty()
 
 

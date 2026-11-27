@@ -9,20 +9,23 @@ extends RefCounted
 ## A second Boki may join the first; two hot tempers squabble and the newcomer huffs off.
 ## k["play"] = {u: toy uid, phase: "go" | "play", t: seconds}. home.gd calls pick, step and pose.
 
-const SPOT_R := 1.15          # tiles from a toy's centre to where a Boki stands
-const SPOT_GAP := 0.9         # m: a toy's standing place keeps this far from a Boki lying down
-const CROWD := 1.9            # m: a toy with a Boki lying this close to it is left alone (it would push through them)
-const ARRIVE := 0.7           # tiles: close enough to start
-const HUFF_SECS := 1.5        # the growl after a squabble
-const BALL_R := 0.28          # the ball's resting height (its radius)
+const SPOT_R := 1.15  # tiles from a toy's centre to where a Boki stands
+const SPOT_GAP := 0.9  # m: a toy's standing place keeps this far from a Boki lying down
+const CROWD := 1.9  # m: a toy with a Boki lying this close to it is left alone (it would push through them)
+const ARRIVE := 0.7  # tiles: close enough to start
+const HUFF_SECS := 1.5  # the growl after a squabble
+const BALL_R := 0.28  # the ball's resting height (its radius)
 
 var h
+
 
 func _init(home) -> void:
 	h = home
 
+
 static func rules() -> Dictionary:
 	return Content.rules("toys")
+
 
 ## The toys on the layout: [{u, id, pos}].
 func toys() -> Array:
@@ -32,6 +35,7 @@ func toys() -> Array:
 		if defs.has(String(e["id"])):
 			out.append({"u": int(e["u"]), "id": String(e["id"]), "pos": HomeLayout.deco_center(e)})
 	return out
+
 
 ## Sets the clip a rigged Boki plays for what it is doing (kact: munch at a feeder, a toy's clip at a toy, pet while it
 ## is being scratched); true
@@ -45,7 +49,7 @@ func _act(k: Dictionary, n: Node3D) -> bool:
 	elif play is Dictionary and play["phase"] == "play":
 		act = String(rules()["toys"].get(String(_toy(int(play["u"])).get("id", "")), {}).get("clip", ""))
 	elif float(k.get("hold_t", 0.0)) > 0.0 and float(k.get("joy_t", 0.0)) > 0.0:
-		act = "pet"          # (a pat: PetReact holds it still and gives it joy)
+		act = "pet"  # (a pat: PetReact holds it still and gives it joy)
 	if act != "" or n.has_meta("kact_home"):
 		n.set_meta("kact", act)
 		if act != "":
@@ -54,15 +58,18 @@ func _act(k: Dictionary, n: Node3D) -> bool:
 			n.remove_meta("kact_home")
 	return n.has_node("Body/Flex/BokiRig")
 
+
 func _toy(u: int) -> Dictionary:
 	for t in toys():
 		if int(t["u"]) == u:
 			return t
 	return {}
 
+
 ## Who has committed to a toy (walking to it or playing), in the order they chose it.
 func players(u: int) -> Array:
 	return h.kins.filter(func(o): return o.has("play") and int(o["play"]["u"]) == u)
+
 
 ## The element this Boki leans to: its strongest lean (Evo.lean), else its species' element.
 static func lean_of(rec: Dictionary) -> String:
@@ -70,6 +77,7 @@ static func lean_of(rec: Dictionary) -> String:
 	if top == "":
 		top = BokiLines.element_of(String(rec.get("species", "")))
 	return top.to_lower()
+
 
 ## How much a Boki fancies a toy: its trait for that toy, and double the lean the toy is made for.
 static func weight(rec: Dictionary, toy_id: String) -> float:
@@ -82,6 +90,7 @@ static func weight(rec: Dictionary, toy_id: String) -> float:
 		w *= float(R["fav_weight"])
 	return w
 
+
 ## An idle Boki looks for a toy: true when it has set off for one. want: it is bored or curious (BaseLife.choose),
 ## so it goes whatever its joy and the pick chance say.
 func pick(k: Dictionary, want := false) -> bool:
@@ -90,18 +99,18 @@ func pick(k: Dictionary, want := false) -> bool:
 	if not FarmUnlocks.base_mode() or not h.visit.is_empty() or k.has("play"):
 		return k.has("play")
 	if BaseShy.shy(rec):
-		return false      # a newly adopted Boki keeps to the edge for its first day
+		return false  # a newly adopted Boki keeps to the edge for its first day
 	if not want and (Care.need(rec, "joy") >= float(R["joy_below"]) or randf() > float(R["pick_chance"])):
 		return false
 	if not want and h.life and not h.life.machine(k).is_in(BaseLife.S.ROAM):
-		return false      # a Boki mentoring, eating or napping (BaseLife) is not pulled off to a toy
+		return false  # a Boki mentoring, eating or napping (BaseLife) is not pulled off to a toy
 	var here: int = h.world.island_of(k["pos"].x, k["pos"].z)
 	var weights := {}
 	var total := 0.0
 	for t in toys():
 		var tp: Vector3 = t["pos"]
 		var full: bool = players(int(t["u"])).size() >= int(R["max_players"])
-		var kept: bool = h.life != null and h.life.saved(int(t["u"]), k)      # a new toy waits for its first try
+		var kept: bool = h.life != null and h.life.saved(int(t["u"]), k)  # a new toy waits for its first try
 		if h.world.island_of(tp.x, tp.z) != here or full or crowded(k, tp) or kept:
 			continue
 		var company := float(R["join_weight"]) if not players(int(t["u"])).is_empty() else 1.0
@@ -117,11 +126,13 @@ func pick(k: Dictionary, want := false) -> bool:
 			return true
 	return false
 
+
 ## Sends the Boki to toy `u` (walk there, then play).
 func take(k: Dictionary, u: int) -> void:
 	k["play"] = {"u": u, "phase": "go", "t": 0.0, "slot": _free_slot(u)}
 	k["t"] = 30.0
 	k.erase("stare")
+
 
 ## The lowest place round a toy nobody has taken.
 func _free_slot(u: int) -> int:
@@ -131,14 +142,27 @@ func _free_slot(u: int) -> int:
 		slot += 1
 	return slot
 
+
 func _busy(k: Dictionary) -> bool:
 	var rec: Dictionary = k["rec"]
-	return k.get("busy", false) or k.has("chase") or k.has("job") or k.has("fetch") or k.has("bath") or k.has("eat") \
-			or k.has("called_t") or k.has("going_in") or float(k.get("nap_t", 0.0)) > 0.0 \
-			or Care.need(rec, "food") < 30.0 or Care.need(rec, "energy") < 22.0
+	return (
+		k.get("busy", false)
+		or k.has("chase")
+		or k.has("job")
+		or k.has("fetch")
+		or k.has("bath")
+		or k.has("eat")
+		or k.has("called_t")
+		or k.has("going_in")
+		or float(k.get("nap_t", 0.0)) > 0.0
+		or Care.need(rec, "food") < 30.0
+		or Care.need(rec, "energy") < 22.0
+	)
+
 
 func _spot(k: Dictionary, t: Dictionary) -> Vector3:
 	return stand(k, t["pos"], 0.8 + float(k["play"]["slot"]) * PI)
+
 
 ## A place to stand beside the toy at `tp`, on its side `a` (rad): open ground, clear of any Boki parked there.
 func stand(k: Dictionary, tp: Vector3, a: float) -> Vector3:
@@ -147,19 +171,22 @@ func stand(k: Dictionary, tp: Vector3, a: float) -> Vector3:
 	if k.has("play"):
 		for o in players(int(k["play"]["u"])):
 			if o != k:
-				parked.append(o["goal"])      # the place a Boki on its way to this toy has taken
+				parked.append(o["goal"])  # the place a Boki on its way to this toy has taken
 	var taken := parked.any(func(q): return Vector2(q.x - p.x, q.z - p.z).length() < SPOT_GAP)
 	if taken or h.world.is_void(p.x, p.z) or h.world.occupy(p.x, p.z, 0.3, 0.0, true) != 0.0:
 		return h.world.free_spot_near(p, parked, SPOT_GAP)
 	return p
 
+
 ## Where the Boki (other than k) that `stays` (KinAvoid.lying or .parked) are.
 func parked_at(k: Dictionary, stays: Callable) -> Array:
 	return h.kins.filter(func(o): return o != k and stays.call(o)).map(func(o): return o["pos"])
 
+
 ## Is a Boki lying right by the toy at `tp`, so playing there would mean pushing through it?
 func crowded(k: Dictionary, tp: Vector3) -> bool:
 	return parked_at(k, KinAvoid.lying).any(func(q): return Vector2(q.x - tp.x, q.z - tp.z).length() < CROWD)
+
 
 ## Per frame, from home.gd's _care_step: walk to the toy, play, finish. True while it owns the Boki.
 func step(k: Dictionary, d: float) -> bool:
@@ -188,6 +215,7 @@ func step(k: Dictionary, d: float) -> bool:
 		_finish(k, t)
 	return true
 
+
 ## Reaching the toy: play, or (with someone already there) share it or squabble over it.
 func _arrive(k: Dictionary, t: Dictionary) -> void:
 	var R := rules()
@@ -199,7 +227,7 @@ func _arrive(k: Dictionary, t: Dictionary) -> void:
 		h._emote(others[0], "!", true)
 		k["huff_t"] = HUFF_SECS
 		Care.change(k["rec"], "joy", -3.0)
-		_bond(k, others[0], "bond_squabble")      # a squabble over a toy builds rivalry (BaseLife)
+		_bond(k, others[0], "bond_squabble")  # a squabble over a toy builds rivalry (BaseLife)
 		if h.life:
 			h.life.sfx.squabble(k["rec"], k["pos"])
 		_stop(k)
@@ -212,15 +240,18 @@ func _arrive(k: Dictionary, t: Dictionary) -> void:
 	p["secs"] = p["t"]
 	if others.size() >= 1:
 		h._emote(k, "★", true)
-		_bond(k, others[0], "bond_share")      # sharing one builds friendship
+		_bond(k, others[0], "bond_share")  # sharing one builds friendship
+
 
 ## Two Boki at one toy change their bond by base_life.json's `key` (base life on only).
 func _bond(k: Dictionary, o: Dictionary, key: String) -> void:
 	if h.life:
 		h.life.add_bond(k["rec"], o["rec"], float(h.life.r_v[key]))
 
+
 func _temper(k: Dictionary) -> float:
 	return float(k["rec"]["traits"].get("temper", 0.5))
+
 
 func _finish(k: Dictionary, t: Dictionary) -> void:
 	var R := rules()
@@ -238,11 +269,13 @@ func _finish(k: Dictionary, t: Dictionary) -> void:
 	if h.life and gained > 0:
 		h.life.sfx.toy_done(rec, k["pos"])
 	GardenFirstDay.mark("toy", h)
-	h._garden_xp(rec, "toy")      # play raises the Boki (docs/GARDEN_FIRST_HOUR.md item 7)
+	h._garden_xp(rec, "toy")  # play raises the Boki (docs/GARDEN_FIRST_HOUR.md item 7)
+	FarmTutorial.event("played")
 	if gained > 0:
 		h.fx.burst(k["pos"] + Vector3(0, 0.9, 0), Care.STATS[stat]["col"], 7, 2.0, 0.5)
 	_stop(k)
 	k["t"] = 2.0
+
 
 ## It stops (done, interrupted or squabbled): the pose and the toy go back to rest.
 func _stop(k: Dictionary) -> void:
@@ -254,9 +287,11 @@ func _stop(k: Dictionary) -> void:
 	if ball and players(int(p["u"])).is_empty():
 		ball.position = Vector3(0, BALL_R, 0)
 
+
 func _ball(u: int) -> Node3D:
 	var tn: Node3D = h.hb.nodes.get(u)
 	return tn.get_node_or_null("Ball") as Node3D if tn else null
+
 
 ## The play pose, over the usual bounce (after _quirk): readable at a glance. The ball hops and rolls, the
 ## Boki leans in and nudges it; the post is climbed and slid down; the tub is splashed in (the "happy"
