@@ -314,7 +314,6 @@ func _draw_parts() -> void:
 		dmg_dir.draw(c, m, sz)
 		if not p.riding:
 			_draw_kit(sz, p)
-			buffs.draw(self, p, sz)       # after the kit tips so they never cover it
 		elif not map_open() and p.rocket == null:
 			_draw_ship_prompt(sz)
 		if (p.dropping or p.rocket != null) and not map_open():

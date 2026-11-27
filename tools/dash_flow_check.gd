@@ -164,7 +164,8 @@ func _slot(m: Match, hero: String, slot: String) -> void:
 			var next_step: bool = got == "buffer" and wait_s < Match.DT * 0.5
 			var at_end_same: bool = late and (got in ["fire", "cancel"] or next_step) and want in ["fire", "cancel"]
 			var waited := " %.2fs after the dash" % wait_s if got == "buffer" else ""
-			ok(got == want or at_end_same, "%s: %s%s (row: %s)" % [what, got, waited, want])
+			var in_window := got != "buffer" or wait_s <= Loco.press_buffer + Match.DT
+			ok((got == want or at_end_same) and in_window, "%s: %s%s (row: %s)" % [what, got, waited, want])
 
 
 ## A fresh training match as `hero` on a flat patch, every slot open, a glove on Q, level 10.
@@ -256,7 +257,9 @@ func _ready_up(m: Match) -> void:
 		if not busy and hunter.roll_t <= 0.0 and k.dash_left() <= 0.0 and hunter.grounded and i > 30:
 			break
 		m.step(Match.DT)
-	if k.e_t > 0.0:
+	# Haul's chain still hooked or arriving would turn the next E into its pull
+	var chain: Variant = k.get("warchain")
+	if k.e_t > 0.0 or (chain != null and String(chain.state) != "ready"):
 		# an E that waits for its recast (Motley's seed) would turn the next E press into that recast: a new kit
 		hunter.set_arch(hunter.arch)
 	for wall in m.verbs.walls.duplicate():
@@ -589,6 +592,7 @@ func _combos(m: Match, hero: String, slot: String) -> void:
 		var row := _mode(hero, "into", slot, move)
 		var right := (out == "act") == (row in INTO_ACTS) and (row != "lock" or out == "lost")
 		_judge(right, out, "%s %s -> %s out of it: %s (row: %s)" % [hero, slot, move, out, row])
+	_shift_window(m, hero, slot)
 	if slot != "q" and hero != "gil":
 		for in_air in [false, true]:
 			_space_sweep(m, hero, slot, in_air)
@@ -867,30 +871,58 @@ func _space_sweep(m: Match, hero: String, slot: String, in_air: bool) -> void:
 	)
 
 
+## Shift in a cast whose into_dash row buffers it (an ult that plants its caster): pressed at 0, 25, 50 and 75
+## percent of the cast's lock, it is held to the lock's end and goes within Loco.press_buffer of it, never lost.
+func _shift_window(m: Match, hero: String, slot: String) -> void:
+	if String(DashFlow.into_row_of(hero, slot, "ground")["mode"]) != "buffer":
+		return
+	var lock := _lock_steps(m, slot, false, "dash")
+	if lock <= 0:
+		skipped += 1
+		print("DASHFLOW skip %s %s Shift in the cast: no lock found" % [hero, slot])
+		return
+	var right := true
+	var cells := []
+	for frac in [0.0, 0.25, 0.5, 0.75]:
+		var at := int(round(lock * frac))
+		var got := _space_at(m, slot, false, at, "dash")
+		var past := got.trim_prefix("end ").to_float() - float(lock - at) * Match.DT
+		cells.append(got if not got.begins_with("end") else "%+.2fs" % past)
+		right = right and got.begins_with("end") and past <= Loco.press_buffer + Match.DT
+	ok(
+		right,
+		(
+			"%s %s Shift in the cast: lock %.2fs, pressed at 0/25/50/75%%, goes from its end by: %s (row: buffer)"
+			% [hero, slot, lock * Match.DT, ", ".join(cells)]
+		)
+	)
+
+
 ## The first step after the cast at which a Space press acts at once (the lock's end), by halving; the search
 ## assumes a press later in the recovery is never less free. Minus the steps searched when none acted at once
 ## (within LOCK_MAX_S, or in the air before the fall from AIR_LIFT lands).
-func _lock_steps(m: Match, slot: String, in_air: bool) -> int:
+func _lock_steps(m: Match, slot: String, in_air: bool, move := "jump") -> int:
 	var lo := 0
 	var hi := int(LOCK_MAX_S / Match.DT)
-	var at_hi := _space_at(m, slot, in_air, hi)
+	var at_hi := _space_at(m, slot, in_air, hi, move)
 	while at_hi.begins_with("n/a") and hi > 1:
 		hi /= 2
-		at_hi = _space_at(m, slot, in_air, hi)
+		at_hi = _space_at(m, slot, in_air, hi, move)
 	if at_hi != "now":
 		return -hi
 	while hi - lo > 1:
 		var mid := int((lo + hi) / 2.0)
-		if _space_at(m, slot, in_air, mid) == "now":
+		if _space_at(m, slot, in_air, mid, move) == "now":
 			hi = mid
 		else:
 			lo = mid
 	return hi
 
 
-## `slot` cast (standing, or falling from AIR_LIFT), then Space pressed `at` steps after it went off: "now"
+## `slot` cast (standing, or falling from AIR_LIFT), then Space (`move` "jump") or Shift ("dash") pressed `at` steps
+## after it went off: "now"
 ## (acted within NOW_STEPS), "end %.2fs" (acted that long after the press), "never", or "n/a ...".
-func _space_at(m: Match, slot: String, in_air: bool, at: int) -> String:
+func _space_at(m: Match, slot: String, in_air: bool, at: int, move := "jump") -> String:
 	_fresh(m)
 	if in_air:
 		hunter.pos += Vector3(0, AIR_LIFT, 0)
@@ -909,13 +941,19 @@ func _space_at(m: Match, slot: String, in_air: bool, at: int) -> String:
 	_steps(m, at)
 	if in_air and hunter.grounded:
 		return "n/a: landed first"
-	var y0 := hunter.pos.y
-	hunter.inp["jump"] = true
+	var moved := {
+		"y": hunter.pos.y,
+		"dashes": hunter.dashes,
+		"ex": hunter.ex_cd,
+		"roll": hunter.roll_t,
+		"dashing": hunter.ak.in_dash()
+	}
+	hunter.inp[move] = true
 	hunter.inp["glide"] = in_air
 	var got := "never"
 	for i in WATCH:
 		m.step(Match.DT)
-		if (in_air and hunter.gliding) or (hunter.vel.y > 0.5 and hunter.pos.y > y0 + 0.01):
+		if (move == "jump" and in_air and hunter.gliding) or _moved(moved, move):
 			got = "now" if i < NOW_STEPS else "end %.2fs" % (float(i + 1) * Match.DT)
 			break
 	hunter.inp["glide"] = false
