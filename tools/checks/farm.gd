@@ -10,5 +10,6 @@ const CHECKS := {
 	"--farm-cam-check": ["res://tools/farm_cam_check.gd", "farm_cam_check", null],  # the farm third-person view
 	"--farm-cam-clip": ["res://tools/farm_cam_clip.gd", "farm_cam_clip", null],  # GPU film: the third-person view
 	"--lessons-check": ["res://tools/lessons_check.gd", "lessons_check", null],  # the Lessons hall: timed lessons
+	"--train-runs-check": ["res://tools/train_runs_check.gd", "train_runs_check", null],  # limited runs, bites
 	"--farm-greet-clip": ["res://tools/farm_greet_clip.gd", "farm_greet_clip", null],  # GPU film: Boki notice you back
 }
