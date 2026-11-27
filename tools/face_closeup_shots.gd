@@ -2,7 +2,7 @@ extends RefCounted
 ## --face-closeup-shots --shots-dir=<dir> [--warden=<id>] [--size=900] [--tag=<name>]: <dir>/<tag>_<view>.png,
 ## head close-ups (front, 3/4 left, 3/4 right, eye-level side) of one Hunter's in-game model. Needs a renderer.
 
-const VIEWS := {"front": 180.0, "q34l": 140.0, "q34r": -140.0, "side": 90.0}  # deg the model turns, camera fixed
+const VIEWS := {"front": 180.0, "q34l": 150.0, "q34r": -150.0, "side": 110.0}  # deg the model turns, camera fixed
 const FOCUS := Vector3(0, 1.45, 0)  # m: face centre of a Hunter model
 const DIST := 0.75  # m camera to face
 var holder: Node3D
