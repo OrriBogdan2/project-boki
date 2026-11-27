@@ -1,0 +1,14 @@
+{
+	"id": "vespox",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/vespox.json.",
+	"work": {
+		"ember": 3,
+		"forage": 1,
+		"mend": 1
+	},
+	"shiny": {
+		"belly": "#9acc84",
+		"color": "#549c56",
+		"glow": "#78ff7d"
+	}
+}

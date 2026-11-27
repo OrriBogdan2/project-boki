@@ -326,6 +326,7 @@ func run(m: Node) -> void:
 		ClassUnlock.choose_starters(ClassUnlock.starters().slice(0, ClassUnlock.picks_needed()))
 	var p = load("res://scripts/home/home.gd").new()
 	main.add_child(p)
+	ClassUnlock.choose_starters(["gunslinger"])      # (else the portal asks for a Relic)
 	for _f in 4: await main.get_tree().process_frame
 	p._open_expedition()
 	for _f in 2: await main.get_tree().process_frame
