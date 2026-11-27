@@ -44,18 +44,18 @@ Each species evolves into the next at its own level, with an Ink used on it, or 
 | Ribbonwyrm | Dragonkite | level 32 |  |
 | Bellowlet | Furnacowary | level 20 |  |
 | Dribbara | Soakybara | level 16 |  |
-| Soakybara | Geysirbara | level 36 |  |
+| Soakybara | Geyserbara | level 36 |  |
 | Parasolth | Umbrathere | level 30 |  |
 | Kayak | Prowyak | level 20 |  |
 | Prowyak | Dreadnoyak | level 40 |  |
 | Coolatee | Frigatee | level 20 |  |
 | Frigatee | Glaciatee | level 40 |  |
 | Fizzlet | Boltstrich | level 14 |  |
-| Boltstrich | Thunderstrich | level 32 |  |
+| Boltstrich | Thundrich | level 32 |  |
 | Wickapi | Snuffapi | level 16 |  |
 | Snuffapi | Chandelapi | level 36 |  |
 | Bucketmander | Barrelmander | level 20 |  |
-| Barrelmander | Cisternmander | level 40 |  |
+| Barrelmander | Vatmander | level 40 |  |
 | Tinbrock | Anvilbrock | level 20 |  |
 | Anvilbrock | Forgebrock | level 40 |  |
 | Bubblisk | Tidalisk | level 16 |  |
@@ -78,25 +78,25 @@ Each species evolves into the next at its own level, with an Ink used on it, or 
 | Jarmit | Stormit | Storm Ink |  |
 | Jarmit | Terrarimit | Bloom Ink |  |
 | Shinobant | Reapant | level 36 |  |
-| Gravadillo | Gravitank | level 30 |  |
+| Gravadillo | Gravidon | level 30 |  |
 | Moatpole | Rampartoad | level 30 |  |
-| Anchorbill | Anchorhorn | level 30 |  |
-| Gloamshell | Gloamspire | level 30 |  |
-| Glomwort | Glomworth | level 30 |  |
+| Anchorbill | Harpwhal | level 30 |  |
+| Gloamshell | Duskspire | level 30 |  |
+| Glomwort | Glombulus | level 30 |  |
 | Effigeetle | Effigoon | level 16 |  |
 | Effigoon | Mortarfly | level 36 |  |
 | Crofthorn | Crofthollow | level 30 |  |
 | Buckleron | Citadoad | level 30 |  |
-| Lodestick | Lodestaff | level 30 |  |
-| Lanterloris | Lanternlong | level 30 |  |
-| Mossgrade | Mossbastion | level 30 |  |
+| Lodestick | Magnestaff | level 30 |  |
+| Lanterloris | Glowris | level 30 |  |
+| Mossgrade | Mosstodon | level 30 |  |
 | Moundlet | Spirevark | level 30 |  |
 | Murmurling | Murmuron | level 30 |  |
 | Spanglin | Mirrolin | level 16 |  |
 | Mirrolin | Strobolin | level 36 |  |
 | Rimekit | Rimeshrew | level 16 |  |
 | Rimeshrew | Rimefang | level 36 |  |
-| Selenfin | Selenwhale | level 30 |  |
+| Selenfin | Lunarca | level 30 |  |
 | Barokit | Barokat | level 16 |  |
 | Barokat | Barostorm | level 36 |  |
 | Knotling | Knotwyrm | level 30 |  |
@@ -169,16 +169,16 @@ Every Boki has four paths (Fierce, Steadfast, Curious, Swift); some species have
 
 | Node | Path | Needs | Grants | Flavor | Species |
 |---|---|---|---|---|---|
-| Spore Drift | Curious | level 8 after Curious | auto: delivery.radius x1.2, delivery.duration x0.75 | Its spore cloud spreads wider and thins out faster. | Mycroll |
-| Barbed Tail | Fierce | level 8 after Fierce | active: delivery.range x1.2, effects.4.duration x0.7 | Its hook reaches further but stuns for less. | Vespyx |
+| Spore Drift | Curious | level 8 after Curious | auto: delivery.radius x1.2, delivery.duration x0.75 | Its spore cloud spreads wider and thins out faster. | Mycroll, Sporcupine |
+| Barbed Tail | Fierce | level 8 after Fierce | active: delivery.range x1.2, effects.4.duration x0.7 | Its hook reaches further but stuns for less. | Vespyx, Vespox |
 | Curious | Curious | level 4 | 1 point from kin_damage to owner_regen | Raised to explore: it hits softer and keeps you patched up. | all |
 | Fierce | Fierce | level 4 | 1 point from kin_hp to kin_damage | Raised to fight hard: it trades a little toughness for bite. | all |
-| Dense Plate | Steadfast | level 8 after Steadfast | auto: delivery.hp x1.25, delivery.duration x0.8 | Its guard plate soaks more but drops sooner. | Gravadillo |
-| Wide Prism | Steadfast | level 8 after Steadfast | active: delivery.length x1.25, delivery.duration x0.8 | A wider crystal wall that fades sooner. | Prismander |
+| Dense Plate | Steadfast | level 8 after Steadfast | auto: delivery.hp x1.25, delivery.duration x0.8 | Its guard plate soaks more but drops sooner. | Gravidon, Gravadillo |
+| Wide Prism | Steadfast | level 8 after Steadfast | active: delivery.length x1.25, delivery.duration x0.8 | A wider crystal wall that fades sooner. | Glassolotl, Prismander |
 | Steadfast | Steadfast | level 4 | 1 point from kin_speed to kin_hp | Raised to look after you: slower, sturdier. | all |
 | Swift | Swift | level 4 | 1 point from kin_hp to kin_speed | Raised on the move: lighter and quicker. | all |
-| Long Throw | Swift | level 8 after Swift | active: delivery.range x1.2, delivery.speed x0.85 | It throws its moon mark further, but slower. | Lunowl |
-| Overtone | Swift | level 8 after Swift | add_modifier | Its echo pulse rings through the first foe it hits. | Echolop |
+| Long Throw | Swift | level 8 after Swift | active: delivery.range x1.2, delivery.speed x0.85 | It throws its moon mark further, but slower. | Eclipsowl, Lunowl |
+| Overtone | Swift | level 8 after Swift | add_modifier | Its echo pulse rings through the first foe it hits. | Howlop, Echolop |
 
 ## Mutations
 
