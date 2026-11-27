@@ -519,7 +519,7 @@ func _numbers() -> void:
 	_passive_numbers()
 	_rank_numbers()
 
-## Fencer: 7 / 7 / 11 a thrust, 0.32 s between thrusts and 0.48 s after the lunge, the chain resets after 0.75 s.
+## Fencer: 9.2 / 9.2 / 14.5 a thrust (TTK 11-12), 0.32 s between thrusts, 0.48 s after the lunge, reset 0.75 s.
 func _lmb_numbers() -> void:
 	_reset(2.0)
 	K.combo_n = 0
@@ -536,8 +536,9 @@ func _lmb_numbers() -> void:
 	P.inp["fire"] = false
 	var hit := [float(by_n.get(1, 0.0)), float(by_n.get(2, 0.0)) - float(by_n.get(1, 0.0)),
 		float(by_n.get(3, 0.0)) - float(by_n.get(2, 0.0))]
-	ok("numbers LMB: 7, 7, then 11 on the lunge (+0.1 for the slow)",
-		absf(hit[0] - 7.0) < 0.2 and absf(hit[1] - 7.0) < 0.2 and absf(hit[2] - 11.1) < 0.2, str(hit))
+	ok("numbers LMB: 9.2, 9.2, then 14.5 on the lunge (+0.1 for the slow)",
+		absf(hit[0] - 9.2) < 0.2 and absf(hit[1] - 9.2) < 0.2 and absf(hit[2] - 14.6) < 0.2,
+		str(hit))
 	ok("numbers LMB: 0.32 s between thrusts, 0.48 s after the lunge",
 		absf(float(cds.get(1, 0.0)) - 0.32) < 0.02 and absf(float(cds.get(3, 0.0)) - 0.48) < 0.02, str(cds))
 	step(m, 0.8)
