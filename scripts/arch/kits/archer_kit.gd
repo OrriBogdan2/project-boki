@@ -328,7 +328,7 @@ func fire_rmb(c: Dictionary) -> void:
 	_pin(aim(), clampf((float(c["t"]) - float(rmb_def()["hold"])) / maxf(0.05, float(pd["full"]) - float(rmb_def()["hold"])), 0.0, 1.0))
 
 ## The Heavy Shot: a held, charged arrow (0.5s -> full at 1.1s) that stops on the first foe, knocks it back by
-## its charge and, driven into a wall within 3m, stuns (PINNED). Full charge is a heavy hit.
+## its charge and, driven into a wall within 3m, stuns by its charge (PINNED). Full charge is a heavy hit.
 func _pin(a: Vector3, k: float) -> void:
 	var pd: Dictionary = rmb_def()["pin"]
 	var reach := heavy_reach()
@@ -367,7 +367,8 @@ func _pin(a: Vector3, k: float) -> void:
 			f.hurt(float(pd["wall_mult"]) * dmg * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "pin"], "heavy": true})
 			m.later(0.12, func():
 				if is_instance_valid(f) and not f.dead:
-					f.hurt(0.1, h, {"stun": float(pd["stun"]), "src": "abil", "ab": "utility", "tags": ["utility", "pin"], "exploit": true, "dr": true})
+					var stun := lerpf(float(pd["stun"][0]), float(pd["stun"][1]), k)       # s: the charge sets the pin
+					f.hurt(0.1, h, {"stun": stun, "src": "abil", "ab": "utility", "tags": ["utility", "pin"], "exploit": true, "dr": true})
 					vfx("heavy_stun", f.pos, dir, {"k": k})
 					m.fx.dust(f.pos, 10))
 	run_own(stg, cx("rmb", "heavy_shot", a, extra))

@@ -233,13 +233,15 @@ func _lockout(m: Match, p: Hunter, t_v: Hunter, at: Vector3, first: Dictionary, 
 	)
 
 
-## A first knock carrying a longer wall stun (Shoulder Charge's 1.2 s) doesn't lend it to the second.
+## A first knock carrying a longer wall stun (Shoulder Charge's 1.2 s) doesn't lend it to the second: the second's
+## slam stuns what the same chain without it does (its own impact speed, KnockWall.slam_stun; decision 0179).
 func _stale_wallstun(m: Match, p: Hunter, t: Hunter, at: Vector3, first: Dictionary, second: Dictionary) -> void:
+	var plain: Dictionary = await _chain(m, p, t, at, first, second)
 	var long := first.duplicate()
 	long["wallstun"] = 1.2
 	var out: Dictionary = await _chain(m, p, t, at, long, second)
 	ok(
-		"a first knock's longer wall stun is the first knock's: the second's slam stuns the base 0.9 s",
-		int(out["slams"]) >= 1 and absf(float(out["stun"]) - 0.9) < 0.05,
-		"stun %.2f" % out["stun"]
+		"a first knock's longer wall stun is the first knock's: the second's slam stuns its own length",
+		int(out["slams"]) >= 1 and absf(float(out["stun"]) - float(plain["stun"])) < 0.05 and float(out["stun"]) < 1.1,
+		"stun %.2f, without the long one %.2f" % [out["stun"], plain["stun"]]
 	)

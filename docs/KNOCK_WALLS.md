@@ -28,6 +28,8 @@ Frame counts from the first damage of the knock. Same for every source unless no
 
 Now, per source on a cliff, rock or Rink Wall: Heavy Shot 1.2 s, 178 damage, frame 8 (the arrow's flight); Crush 0.5 s, 13, frame 0; Burr 0.68 s, 16, frame 0; Tenzo 0.9 s, 34, frame 0; Rod 0.78 s, frame 0; slam 0.9 s, 15, frame 0. Monsters: cliff and rock stun, a step does not.
 
+Stun lengths scale (decision 0179): the Heavy Shot 0.4 -> 1.2 s and the Storm Rod 0.4 -> 1.0 s with their charge; a plain knock's slam 0.4 s at 8 m/s into the wall up to 1.2 s at 16 m/s (`KnockWall.slam_stun`; a hit's own `wallstun` is the floor). Monsters keep their flat 1.0 s.
+
 ## Not built (ideas of ours)
 A stun when a knocked body hits a sky-train car's side, or a crate that survives the hit. Both have no source row.
 
