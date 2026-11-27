@@ -69,6 +69,13 @@ static func draw(c: CanvasItem, id: String, at: Vector2, s: float, col: Color) -
 				var a := TAU * i / 24.0
 				pts.append([sin(a) * 0.52 * (1.0 - 0.12 * cos(a)), -cos(a) * 0.72])
 			F.call(pts)
+		"sun":
+			O.call(0.0, 0.0, 0.36)
+			for i in 8:
+				var a := TAU * i / 8.0
+				L.call([[cos(a) * 0.55, sin(a) * 0.55], [cos(a) * 0.85, sin(a) * 0.85]])
+		"moon":
+			A.call(0.0, 0.0, 0.58, PI * 0.35, PI * 1.65, maxf(2.0, s * 0.3))
 		"paw":
 			O.call(0.0, 0.25, 0.32)
 			O.call(-0.42, -0.2, 0.15)

@@ -690,6 +690,7 @@ func _draw_minimap(sz: Vector2) -> void:
 	if m.biomes and MapDetail.shows("hot_zone", hold): m.biomes.hot.minimap(self, to_map, on_map)
 	HeartHud.minimap(self, inner, to_map, on_map)
 	NestMap.minimap(self, to_map, on_map, hold)
+	DayNightMap.minimap(self, to_map, on_map, hold)
 	CampMark.minimap(self, to_map, on_map)
 	WaysOutMap.minimap(self, inner, to_map, on_map)
 	if m.zone: m.zone.minimap(self, to_map, on_map)
@@ -844,11 +845,14 @@ func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 	if m.zone: mm_bottom = m.zone.hud_row(self, Rect2(Vector2(r.position.x, rr.end.y + 4), Vector2(r.size.x, 20)))
 	var rcol: Color = RaidLook.COLORS.get(m.raid, INK)
 	_rounded(rr, Color(0.04, 0.05, 0.08, 0.7), 6)
-	c.draw_circle(rr.position + Vector2(11, 10), 4.0, rcol)
-	_text(rr.position + Vector2(21, 14), String(RaidLook.NAMES.get(m.raid, m.raid)).to_upper(), 10, rcol, big)
-	if m.sight_k < 0.99:
-		var st := "SIGHT %d%%" % int(round(m.sight_k * 100.0))
-		_text(Vector2(rr.end.x - 8 - TextCache.width(big, st, 10), rr.position.y + 14), st, 10, MUTED, big)
+	if m.day_night.on():
+		DayNightMap.row(self, rr)
+	else:
+		c.draw_circle(rr.position + Vector2(11, 10), 4.0, rcol)
+		_text(rr.position + Vector2(21, 14), String(RaidLook.NAMES.get(m.raid, m.raid)).to_upper(), 10, rcol, big)
+		if m.sight_k < 0.99:
+			var st := "SIGHT %d%%" % int(round(m.sight_k * 100.0))
+			_text(Vector2(rr.end.x - 8 - TextCache.width(big, st, 10), rr.position.y + 14), st, 10, MUTED, big)
 	if m.rolling:
 		SessionRow.draw(self, Rect2(Vector2(r.position.x, rr.end.y + 4), Vector2(r.size.x, 42)))
 

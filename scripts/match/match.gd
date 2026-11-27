@@ -50,6 +50,7 @@ var ktip: KnockTip = null           # the first-knock card, in a save's first tw
 var exits: Exits = null     # the outpost uplinks (see Exits; the Heart is the other way out)
 var zone: ShrinkZone = null     # the closing zone (null off real expeditions)
 var training := Training.new()   # the Training Grounds checklist and the train/balloon test hooks
+var day_night: DayNight = DayNight.new(self)  # the day/night cycle: the light, and which camps stand now
 var camps: Camps = Camps.new(self)     # the map's fixed monster camps (see Camps)
 var lairs: Lairs = null     # boss lairs: sealed arenas, their bosses and Rare Eggs (see Lairs)
 var mate_look: MateLook = null   # F1-F3: look at a teammate
@@ -4444,6 +4445,7 @@ func _update_events() -> void:
 	if timed == null:
 		timed = TimedSpawns.new(self)
 	timed.tick()
+	day_night.tick()
 
 # ---- mid-match events
 ## A meteor shower partway through: falling stars hit the ground where hunters are, knock them
