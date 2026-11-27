@@ -8,7 +8,7 @@ extends Node
 ## lineage, edition). A small append-only event log (d["log"], LOG_CAP) keeps what happened to whom.
 ## See docs/BOKI_IDENTITY.md.
 
-const VERSION := 24
+const VERSION := 23
 
 const UNNAMED := "Hunter"  # the name of a player who never typed one (the results line then drops it)
 
@@ -43,8 +43,7 @@ const MIGRATIONS := {
 	19: "_migrate_19_to_20",
 	20: "_migrate_20_to_21",
 	21: "_migrate_21_to_22",
-	22: "_migrate_22_to_23",
-	23: "_migrate_23_to_24",
+	22: "_migrate_22_to_23"
 }
 
 # ------------------------------------------------------------------ ids
@@ -511,13 +510,8 @@ func _migrate_21_to_22(data: Dictionary) -> void:
 	TimeTrial.migrate(data)
 
 
-## v22 -> v23: nothing on this line (v23 is another branch's bump; its migration goes here when it lands).
-func _migrate_22_to_23(_data: Dictionary) -> void:
-	pass
-
-
-## v23 -> v24: raising leans (BaseAxes): every Boki gets its zero lean.
-func _migrate_23_to_24(data: Dictionary) -> void:
+## v22 -> v23: raising leans (BaseAxes): every Boki gets its zero lean.
+func _migrate_22_to_23(data: Dictionary) -> void:
 	BaseAxes.migrate(data)
 
 

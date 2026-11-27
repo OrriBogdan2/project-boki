@@ -1,10 +1,12 @@
 extends RefCounted
-## Grimble's sure-stun combo for --dredge-combo-check: Deep Reach on a foe at full range, then the Anchor Drop
-## within 0.5 s of the foe landing at his feet. The foe is stunned every time and the Anchor never moves him.
+## Grimble's hook-into-slam combo for --dredge-combo-check: Deep Reach on a foe at full range, then the Anchor Drop
+## within 0.07 s of the foe landing at his feet. The foe lands Grounded (it can still walk, owner rule 11-27: the
+## reference grounds, it does not stun), so the slam must come at once (a press mid-reel does); it stuns every
+## time and never moves him.
 
 const RUNS := 10
 const MAX_MOVE := 0.3  # m: how far the Anchor may carry him
-const E_DELAY := 0.5  # s after the reel ends by which E is pressed (varied per run, 0 .. E_DELAY)
+const E_DELAY := 0.07  # s after the reel ends by which E is pressed (varied per run, 0 .. E_DELAY)
 
 var ak = null
 var ok_fn: Callable
@@ -26,7 +28,7 @@ func run() -> void:
 		if not bool(res[0]) and why == "":
 			why = " (run %d: %s)" % [i, res[2]]
 	ok_fn.call(
-		"combo e: reel at full range, then E within 0.5 s stuns the foe, every run",
+		"combo e: reel at full range, then E within 0.07 s stuns the foe, every run",
 		stunned == RUNS,
 		"%d / %d runs%s" % [stunned, RUNS, why]
 	)
