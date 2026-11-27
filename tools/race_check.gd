@@ -417,6 +417,8 @@ func _lap(home, perfect: bool) -> void:
 		race.tick(DT)
 		t += DT
 
+## The training lap pays Speed stat bites into the bag and uses one limited drill run (TrainRuns), never raw
+## points: stats come from pieces you give, and runs are few a day.
 func _solo(home) -> void:
 	var rec := Save.active_kin()
 	rec["level"] = 5
@@ -424,20 +426,33 @@ func _solo(home) -> void:
 	rec["needs"]["food"] = 90.0
 	rec["needs"]["joy"] = 50.0
 	rec["stats"]["speed"] = 10
-	var perfect: int = int(BaseRace.rules()["train"]["great"]) * 3
+	TrainRuns.state()["drill"] = 2
+	var b: Dictionary = TrainRuns.rules()["drill_bites"]
+	var perfect: int = int(b["perfect"]) + (int(b["dojo"]) if Save.has_building("dojo") else 0)
+	var bag0 := int(Save.d["items"].get("zipseed", 0))
 	_lap(home, false)
 	ok(home.hrace.cue == null, "cue: a solo lap clears its marks")
-	ok(int(rec["stats"]["speed"]) == 10 and is_instance_valid(home.hrace.card),
-			"solo: a lap of missed cheers adds no Speed")
+	ok(int(rec["stats"]["speed"]) == 10 and is_instance_valid(home.hrace.card) and TrainRuns.left("drill") == 2,
+			"solo: a lap of missed cheers adds no Speed and uses no run")
 	rec["needs"]["energy"] = 90.0
 	var mem: int = rec.get("memory", []).size()
 	_lap(home, true)
-	ok(int(rec["stats"]["speed"]) == 10 + perfect,
-			"solo: three perfect cheers add %d Speed (now %d)" % [perfect, rec["stats"]["speed"]])
+	var bag1 := int(Save.d["items"].get("zipseed", 0))
+	ok(int(rec["stats"]["speed"]) == 10 and bag1 == bag0 + perfect and TrainRuns.left("drill") == 1,
+			"solo: three perfect cheers put %d Zipseed in the bag (%d), Speed stays %d, drills left %d"
+			% [perfect, bag1 - bag0, rec["stats"]["speed"], TrainRuns.left("drill")])
 	var mems: Array = rec["memory"]
 	ok(mems.size() == mem + 1 and mems[-1]["kind"] == "trained",
 			"solo: the lap is a journal line (\"%s\")" % mems[-1]["text"])
 	ok(float(rec["needs"]["energy"]) < 90.0, "solo: the lap costs energy")
+	rec["needs"]["energy"] = 90.0
+	_lap(home, true)
+	rec["needs"]["energy"] = 90.0
+	_lap(home, true)
+	var bag3 := int(Save.d["items"].get("zipseed", 0))
+	var left := TrainRuns.left("drill")
+	ok(bag3 == bag1 + perfect and left == 0, "solo: 0 drills left pays nothing (bag %d, left %d)" % [bag3, left])
+	TrainRuns.state()["drill"] = 2
 	rec["stats"]["speed"] = Care.stat_cap(rec)
 	_lap(home, true)
 	ok(home.hrace.run == null and int(rec["stats"]["speed"]) == Care.stat_cap(rec),
