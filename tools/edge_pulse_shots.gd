@@ -3,7 +3,7 @@ extends RefCounted
 ## hero_toon rim_pulse) at match camera, 1920x1080, in a 4v4: rest.png (before: no pulse), light.png and heavy.png
 ## (the four rivals each mid-pulse, as a light poke and a heavy hit leave them a few frames after the white flash),
 ## then the frame time of the fight with no pulse and with all 8 bodies pulsing every frame (the worst a team fight
-## asks; EDGE rows, p95 and mean in ms, off/on blocks alternated). The pulse rows of --impact-weight-check are the check.
+## asks; EDGE rows, p95 and mean in ms, off/on blocks alternated). The check is --impact-weight-check.
 
 const DT := 1.0 / 60.0
 const WARM := 30  # frames dropped before timing
