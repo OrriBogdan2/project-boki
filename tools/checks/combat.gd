@@ -11,6 +11,8 @@ const CHECKS := {
 	# a blast: falloff curve by distance, no damage through rock, the armour ring pitched by the shell left
 	"--blast-parity-check": ["res://tools/blast_parity_check.gd", "blast_parity_check", null],
 	"--move-speed-check": ["res://tools/move_speed_check.gd", "move_speed_check", null],  # run, walk, crouch per Hunter
+	# 0179: wall stuns scale with the charge and the impact speed
+	"--kit-cc-scale-check": ["res://tools/kit_cc_scale_check.gd", "kit_cc_scale_check", null],
 	"--mob-fsm-check": ["res://tools/mob_fsm_check.gd", "mob_fsm_check", null],  # monster + boss machines (M9)
 	"--utility-parity-check": ["res://tools/utility_parity_check.gd", "utility_parity_check", null],  # belt vs source
 	"--vex-daze-check": ["res://tools/vex_daze_check.gd", "vex_daze_check", null],  # Daze team, coin wall stun
