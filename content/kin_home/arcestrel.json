@@ -1,0 +1,14 @@
+{
+	"id": "arcestrel",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/arcestrel.json.",
+	"work": {
+		"haul": 1,
+		"spark": 3,
+		"tide": 2
+	},
+	"shiny": {
+		"belly": "#6cb49e",
+		"color": "#54b4af",
+		"glow": "#6dfff7"
+	}
+}
