@@ -13,7 +13,7 @@ const DEADLINE_S := 1500.0
 const HUNTER_CLASS := "medium"
 const RUN_OFF := 1.25  # rad off her back-line in the run shot: a three-quarter side view, her face turned to us
 const FACE_OFF := 2.5  # rad off her back-line late in the run: in front of her, a little aside, so her face shows
-const CARRY_PACE := 0.6  # stick in the carry run: a jog the followers keep up with at a walk (no gallop, no air time)
+const CARRY_PACE := 0.5  # stick in the carry run: a walk the followers match on foot (no gallop, no air time)
 const FOLLOW_GAP := 1.1  # m: the closest a follower stays to the hunter's feet (none runs through her legs)
 const HEAD_S := 0.55  # s of each take that the dissolve eats at its start and at its end
 const CLEAR_MARGIN := 0.45  # m of bare ground kept round a bed or building (grass blades are wide)
@@ -282,7 +282,7 @@ func _run(goal: Vector3, secs: float, off: float, stop_at := 0.6, pace := 1.0, p
 		await _wait(1.0 / FPS)
 		var mine := Vector2(h.ppos.x - was.x, h.ppos.z - was.z).length() * FPS
 		for i in pull:  # as HomeCarry._lead: a led Boki goes at your pace
-			h.kins[i]["led"] = maxf(mine, BokiRig.WALK_SPEED) * 1.1
+			h.kins[i]["led"] = clampf(mine, BokiRig.WALK_SPEED, BokiRig.RUN_SPEED - 0.1)
 			_keep_clear(h.kins[i])
 		left -= 1
 	_keys(Vector2.ZERO)
