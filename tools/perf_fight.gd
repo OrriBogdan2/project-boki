@@ -17,6 +17,7 @@ const PEAK_AT := 19.5  # s into the camp: 0.9 s after the fourth wave's R, the s
 const QUIET_AT := 23.5  # s into the camp: the same inventory in the quiet before the run ends
 const FightScene := preload("res://tools/perf/fight_scene.gd")
 const GroundAb := preload("res://tools/perf/ground_ab.gd")
+const AimAb := preload("res://tools/perf/aim_ab.gd")
 
 var bench  # the PerfBench: frames are logged and summed by it
 var m: Match
@@ -37,6 +38,7 @@ var stamp_frames := 0  # stamp sets read
 var stamp_gpu_us := {}  # timestamp name -> us of GPU from it to the next one (the draw's steps)
 var stamp_cpu_us := {}  # the same on the render thread's clock
 var draws: Array = []  # [pre, post] us of the last few draws
+var aim_ab: AimAb  # (--bench-ab-aim: telegraph points kept or not, alternating inside one run)
 var taken_us := {}  # script file -> us spent in those _process calls
 
 
@@ -227,6 +229,8 @@ func _camp() -> Array:
 		print("BENCH fight sea off")
 	if "--bench-ab-ground" in OS.get_cmdline_user_args():  # (old, cut, flat, no sea: 45 frames each)
 		ab = GroundAb.new(bench.main.get_tree().root, m.world)
+	if "--bench-ab-aim" in OS.get_cmdline_user_args():
+		aim_ab = AimAb.new()
 	if "--bench-nohud" in OS.get_cmdline_user_args():  # (a probe: what the HUD's canvas costs the draw)
 		m.hud.visible = false
 		print("BENCH fight hud off")
@@ -258,6 +262,8 @@ func _camp() -> Array:
 				h.ak.use_r()
 		if ab:
 			ab.frame(f)
+		if aim_ab:
+			aim_ab.frame(f, int(taken_us.get("aim_draw.gd", 0)))
 		var t0 := Time.get_ticks_usec()
 		await _step(1)
 		var now := Time.get_ticks_usec()
@@ -285,6 +291,8 @@ func _camp() -> Array:
 	_print_sections(stamp_cpu_us, "draw steps (cpu, the same)", stamp_frames, 40)
 	if ab:
 		ab.report()
+	if aim_ab:
+		aim_ab.report()
 	_print_casters()
 	_give_back()
 	return fl
