@@ -8,16 +8,18 @@ extends RefCounted
 
 # m: a body walks up a rise this tall (the Hunter's step-up); anything higher is a wall
 const RISE := World.LEVEL + 0.05
-const STRIDE := 0.3                   # m between the probe points along the knock
+const STRIDE := 0.3  # m between the probe points along the knock
 
-const CHEST := 0.9                    # m above the feet where the decal goes
-const SLAM_V := Vector2(8.0, 16.0)     # m/s into the wall: a plain knock's slam starts at x, its longest stun at y
-const SLAM_STUN := Vector2(0.4, 1.2)   # s stunned by a plain knock's slam at SLAM_V.x and at SLAM_V.y and over
-const NONE := Vector3.INF             # "no wall" from contact()
+const CHEST := 0.9  # m above the feet where the decal goes
+const SLAM_V := Vector2(8.0, 16.0)  # m/s into the wall: a plain knock's slam starts at x, its longest stun at y
+const SLAM_STUN := Vector2(0.4, 1.2)  # s stunned by a plain knock's slam at SLAM_V.x and at SLAM_V.y and over
+const NONE := Vector3.INF  # "no wall" from contact()
+
 
 ## A wall within `reach` m of the body's edge, straight along `dir`.
 static func behind(m: Match, e: Ent, dir: Vector2, reach: float) -> bool:
 	return contact(m, e, dir, reach) != NONE
+
 
 ## About to stun `e` against a wall: true if one stands within `reach` m along `dir`, and then says where it
 ## was hit (CombatBus.wall_stunned: the decal and puff in WallImpact). `by` is whoever drove it there.
@@ -28,12 +30,15 @@ static func hit(m: Match, e: Ent, dir: Vector2, reach: float, by: Node) -> bool:
 	announce(e, at, dir, by)
 	return true
 
+
 ## The body is already against a wall (its slam): say so at its edge, along `dir`.
 static func slammed(e: Ent, dir: Vector2, by: Node) -> void:
 	announce(e, e.pos + Vector3(dir.x, 0, dir.y) * e.r, dir, by)
 
+
 static func announce(e: Ent, at: Vector3, dir: Vector2, by: Node) -> void:
 	CombatBus.wall_stunned.emit(e, at + Vector3(0, CHEST, 0), Vector3(-dir.x, 0, -dir.y), by)
+
 
 ## Where the body's edge first touches a wall within `reach` along `dir` (at the feet), else NONE.
 static func contact(m: Match, e: Ent, dir: Vector2, reach: float) -> Vector3:
@@ -52,6 +57,7 @@ static func contact(m: Match, e: Ent, dir: Vector2, reach: float) -> Vector3:
 		k += STRIDE
 	return NONE
 
+
 ## How long a plain knock's slam stuns a body that hit the wall at `speed` m/s: harder hits stun longer.
 static func slam_stun(speed: float) -> float:
 	var k := clampf((speed - SLAM_V.x) / (SLAM_V.y - SLAM_V.x), 0.0, 1.0)
@@ -63,6 +69,7 @@ static func tall(m: Match, e: Ent, top: float) -> bool:
 	# (a knock lifts it: measure from the floor)
 	var feet := maxf(m.world.ground_at(e.pos.x, e.pos.z), e.pos.y - RISE)
 	return top > feet + RISE
+
 
 static func _top_at(m: Match, q: Vector3, e: Ent) -> float:
 	var top := m.world.occupy(q.x, q.z, e.r, e.pos.y, false)

@@ -28,41 +28,41 @@ func _curve() -> void:
 
 ## A cliff one tile past the dummy (east); returns the undo.
 func _cliff(m: Match, spot: Vector3, lv: int) -> Callable:
-	var W: World = m.world
+	var w: World = m.world
 	var tx := int(floor(spot.x)) + 1
 	var tz := int(floor(spot.z))
 	for dz in range(-3, 4):
-		W.level[W.idx(tx, tz + dz)] = lv + 3
+		w.level[w.idx(tx, tz + dz)] = lv + 3
 	return func():
 		for dz in range(-3, 4):
-			W.level[W.idx(tx, tz + dz)] = lv
+			w.level[w.idx(tx, tz + dz)] = lv
 
 
-## The longest stun on `T` over `secs`.
-func _stun_over(m: Match, T: Hunter, secs: float) -> float:
+## The longest stun on `t` over `secs`.
+func _stun_over(m: Match, t: Hunter, secs: float) -> float:
 	var most := 0.0
-	var t := 0.0
-	while t < secs:
+	var waited := 0.0
+	while waited < secs:
 		m.step(DT)
-		t += DT
-		most = maxf(most, T.stun_t)
+		waited += DT
+		most = maxf(most, t.stun_t)
 	return most
 
 
 func _knock() -> void:
 	var r := setup("thief", 3.0)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[2]
-	var spot := T.pos
+	var p: Hunter = r[1]
+	var t: Hunter = r[2]
+	var spot := t.pos
 	var undo := _cliff(m, spot, r[5])
 	var got := {}
 	for kb: float in [10.0, 20.0]:
-		fresh(T)
-		T.teleport(spot)
-		T.wslam_t = 0.0
-		T.hurt(5.0, P, {"src": "abil", "ab": "lmb", "kb": Vector2(kb, 0.0), "lift": 0.5})
-		got[kb] = _stun_over(m, T, 1.5)
+		fresh(t)
+		t.teleport(spot)
+		t.wslam_t = 0.0
+		t.hurt(5.0, p, {"src": "abil", "ab": "lmb", "kb": Vector2(kb, 0.0), "lift": 0.5})
+		got[kb] = _stun_over(m, t, 1.5)
 	undo.call()
 	var info := "kb 10: %.2f s, kb 20: %.2f s" % [got[10.0], got[20.0]]
 	ok("slam: a harder knock stuns longer", got[10.0] > 0.3 and got[20.0] > got[10.0] + 0.2, info)
@@ -75,26 +75,25 @@ func _knock() -> void:
 func _charged(arch: String) -> void:
 	var r := setup(arch, 3.0)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[2]
-	var K = P.ak
-	var spot := T.pos
+	var p: Hunter = r[1]
+	var t: Hunter = r[2]
+	var kit = p.ak
+	var spot := t.pos
 	var undo := _cliff(m, spot, r[5])
-	var span: Array = K.rmb_def()["pin" if arch == "archer" else "coil"]["stun"]
+	var span: Array = kit.rmb_def()["pin" if arch == "archer" else "coil"]["stun"]
 	var got := {}
 	for k: float in [0.0, 1.0]:
-		fresh(T)
-		T.teleport(spot)
-		T.wslam_t = 99.0  # the kit's own wall probe only, no body slam
-		aim_at(P, T.pos)
+		fresh(t)
+		t.teleport(spot)
+		t.wslam_t = 99.0  # the kit's own wall probe only, no body slam
+		aim_at(p, t.pos)
 		if arch == "archer":
-			K._pin(T.pos, k)
+			kit._pin(t.pos, k)
 		else:
-			K._coil_hit(T, Vector2(1, 0), k)
-		got[k] = _stun_over(m, T, 0.6)
+			kit._coil_hit(t, Vector2(1, 0), k)
+		got[k] = _stun_over(m, t, 0.6)
 	undo.call()
 	var info := "uncharged %.2f s (want %.2f), full %.2f s (want %.2f)" % [got[0.0], span[0], got[1.0], span[1]]
 	var near := absf(got[0.0] - float(span[0])) < EPS and absf(got[1.0] - float(span[1])) < EPS
 	ok("%s: wall stun scales with the charge" % arch, near and got[1.0] > got[0.0], info)
 	await done(m)
-
