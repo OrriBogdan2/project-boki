@@ -413,10 +413,10 @@ func _slots(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
 		var own := String(nat.plays[sl])
 		await _feed(main, nat, m, SLOT_CASES[sl][0], SLOT_CASES[sl][1])
 		var posed := _turned(nat)
-		var len := nat.player.get_animation(own).length
+		var clip_s := nat.player.get_animation(own).length
 		ok(
-			nat.player.current_animation == own and posed >= POSED_MIN and len > 0.2,
-			"%s: slot %s plays its own clip %s (%.2f s, %d bones posed)" % [a, sl, own, len, posed]
+			nat.player.current_animation == own and posed >= POSED_MIN and clip_s > 0.2,
+			"%s: slot %s plays its own clip %s (%.2f s, %d bones posed)" % [a, sl, own, clip_s, posed]
 		)
 	for sl in SLOT_CASES:
 		var c: Array = SLOT_CASES[sl]

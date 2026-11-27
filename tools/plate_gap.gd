@@ -52,7 +52,7 @@ func _surface_top(m: MeshInstance3D, arr: Array, xf: Array) -> float:
 		weights = arr[Mesh.ARRAY_WEIGHTS]
 	var skinned := not xf.is_empty() and weights.size() >= bones.size() and not bones.is_empty()
 	var per := int(bones.size() / float(maxi(verts.size(), 1)))
-	var top := -INF
+	var peak := -INF
 	for v in verts.size():
 		var y := 0.0
 		if skinned:
@@ -62,5 +62,5 @@ func _surface_top(m: MeshInstance3D, arr: Array, xf: Array) -> float:
 					y += ((xf[bones[v * per + k]] as Transform3D) * verts[v]).y * w
 		else:
 			y = (m.global_transform * verts[v]).y
-		top = maxf(top, y)
-	return top
+		peak = maxf(peak, y)
+	return peak
