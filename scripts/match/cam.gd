@@ -47,7 +47,9 @@ const SKYDIVE_TURN_H := 8.0  # m above the ground: below this the view turns bac
 ## faces and bodies (as in the reference footage) instead of the tops of hats, without changing the
 ## world's framing. Faded out for the bird's-eye and the
 ## ship's chase view. The world is drawn at the style's pitch; characters read as if at ~pitch - lean.
-const CHAR_LEAN := deg_to_rad(20.0)
+## 0 (owner 11-27): the reference draws its hunters upright at its pitch, and the 20 deg tip made ours read 1.3-1.75x
+## taller on screen than theirs. Motion leans (stride start, landing) are the body's own and stay.
+const CHAR_LEAN := 0.0
 
 ## The numbers (Settings "Camera" presets, "Camera follow" cursor lean, the edge kept) are in content/rules/camera.json.
 ## The default preset is measured from the source's footage: docs/MOVEMENT_FEEL.md, "Camera calibration" and
