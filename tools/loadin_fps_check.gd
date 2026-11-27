@@ -23,7 +23,8 @@ var look_s := 30.0
 var advisory := false
 var headless := false
 var software := false
-var frames: Array = []  # wall ms, loading 1/0, draws, objs, nodes, phys, proc, mem, vram, steps, cpu ms, marks
+var frames: Array = []  # wall ms, loading 1/0, draws, objs, nodes, phys, proc, mem, vram, steps, cpu ms, marks,
+# render cpu ms (the viewport's culling + draw submission), frame setup cpu ms, gpu ms
 var loading_ms := 0.0
 var last_us := 0
 var t0_us := 0
@@ -71,6 +72,8 @@ func _ready() -> void:
 	if not headless:
 		get_window().size = SOFTWARE_RES if software else res
 	process_priority = -100
+	if not headless:
+		RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)
 	Save.no_write = true
 	Save.d["tutorial"]["home"] = true
 	if Save.d["roster"].is_empty():
@@ -108,6 +111,7 @@ func _process(_delta: float) -> void:
 		last_time = (cur as Match).time
 		steps_total += steps
 	var step := ""
+	var vp := get_viewport().get_viewport_rid()
 	for mk in marks:
 		step += "%s %.0f " % [mk[1], mk[2]]
 	(
@@ -126,6 +130,9 @@ func _process(_delta: float) -> void:
 				steps,
 				cpu,
 				step.strip_edges(),
+				RenderingServer.viewport_get_measured_render_time_cpu(vp) if not headless else 0.0,
+				RenderingServer.get_frame_setup_time_cpu() if not headless else 0.0,
+				RenderingServer.viewport_get_measured_render_time_gpu(vp) if not headless else 0.0,
 			]
 		)
 	)
@@ -190,8 +197,8 @@ func _finish() -> void:
 	lines.append("LOADIN worst frames after the screen (ms; draws, objects, nodes, phys, proc, mem, vram, steps):")
 	for f in ranked.slice(0, 10):
 		var wf := "LOADIN   %6.0f ms  %d draws %d obj %d nodes  phys %.1f proc %.1f  mem %.0f vram %.0f"
-		wf += "  %d steps  cpu %.1f  %s"
-		lines.append(wf % [f[0], f[2], f[3], f[4], f[5], f[6], f[7], f[8], f[9], f[10], f[11]])
+		wf += "  %d steps  cpu %.1f  rcpu %.1f setup %.1f gpu %.1f  %s"
+		lines.append(wf % [f[0], f[2], f[3], f[4], f[5], f[6], f[7], f[8], f[9], f[10], f[12], f[13], f[14], f[11]])
 	var cpus: Array = j.map(func(f): return float(f[10]))
 	cpus.sort()
 	var cpu_sum := 0.0
@@ -206,6 +213,12 @@ func _finish() -> void:
 			% [cpu_sum / maxi(cpus.size(), 1), _pct(cpus, 0.5), _pct(cpus, 0.99), _pct(cpus, 1.0)]
 		)
 	)
+	var rs := [0.0, 0.0, 0.0]
+	for f in j:
+		for k in 3:
+			rs[k] += float(f[12 + k])
+	var rf := "LOADIN render a frame (ms avg): cpu %.1f (culling + draw submission), frame setup %.1f, gpu %.1f"
+	lines.append(rf % [rs[0] / maxi(j.size(), 1), rs[1] / maxi(j.size(), 1), rs[2] / maxi(j.size(), 1)])
 	var per_frame := float(steps_total) / maxi(w.size(), 1)
 	var sf2 := "LOADIN sim steps %d in %d frames (%.1f a frame; 1.0 is real time)"
 	lines.append(sf2 % [steps_total, w.size(), per_frame])
@@ -246,7 +259,7 @@ func _finish() -> void:
 	if csv_path != "":
 		var fc := FileAccess.open(csv_path, FileAccess.WRITE)
 		if fc:
-			fc.store_line("ms,loading,draws,objects,nodes,phys_ms,proc_ms,mem_mb,vram_mb,sim_steps,cpu_ms,marks")
+			fc.store_line("ms,loading,draws,objects,nodes,phys_ms,proc_ms,mem_mb,vram_mb,sim_steps,cpu_ms,marks,rcpu,setup,gpu")
 			for f in frames:
-				fc.store_line("%.2f,%d,%d,%d,%d,%.2f,%.2f,%.0f,%.0f,%d,%.2f,%s" % f)
+				fc.store_line("%.2f,%d,%d,%d,%d,%.2f,%.2f,%.0f,%.0f,%d,%.2f,%s,%.2f,%.2f,%.2f" % f)
 	get_tree().quit(0 if fails == 0 or advisory else 1)
