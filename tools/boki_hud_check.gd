@@ -1,7 +1,8 @@
 extends RefCounted
 ## --boki-hud-check: the Boki HUD decisions (docs/HUD.md "Boki HUD"), driven in a real trio match at 1280x720.
 ##   1. the right-side box (GripHud.boki) shows the bond percent, and a tag for each state: FUSE (bond full, Boki
-##      with you), TOO FAR (bond full, Boki out past the leap range), RESCUE (Boki down), RESTING (a Fusion ran out)
+##      with you), TOO FAR (bond full, Boki out past the leap range), RESCUE (Boki down), RESTING (a Fusion ran out);
+##      the ready ring is lit only with FUSE, and the wait after a Fusion shows its seconds, not a full percent
 ##   2. its health bar follows the Boki's health
 ##   3. a teammate's squad row carries their Boki's icon with its health
 ##   GAP lines name what the decision asks for and the game does not have yet; they are not failures.
@@ -92,6 +93,7 @@ func run(main_node: Node) -> void:
 	k.down_total = 30.0
 	await hud.panels.draw
 	ok(GripHud.shown.get("tag") == "RESCUE", "Boki downed: RESCUE (%s)" % str(GripHud.shown.get("tag")))
+	ok(not GripHud.shown.get("lit", true), "a downed Boki's full bond ring is not lit as ready")
 	k.state = "shoulder"
 	k.hp = k.max_hp
 	await hud.panels.draw
@@ -102,6 +104,23 @@ func run(main_node: Node) -> void:
 	ok(
 		k.resting() and GripHud.shown.get("tag") == "RESTING",
 		"a Fusion that ran out leaves the Boki resting: RESTING (%.1f s, %s)" % [k.rest_t, GripHud.shown.get("tag")]
+	)
+	# the wait after a Fusion (a wisp Boki does not rest): a full bar shows the seconds, unlit, and X says why
+	k.rest_t = 0.0
+	k.state = "shoulder"
+	P.ult = 1.0
+	P.merge_cd = 7.2
+	await hud.panels.draw
+	ok(
+		GripHud.shown.get("tag") == "" and not GripHud.shown.get("lit", true) and GripHud.shown.get("fill") == "8s",
+		"full bond in the post-Fusion wait: no FUSE, not lit, 8s shown (%s)" % str(GripHud.shown)
+	)
+	ok(KinMerge.deny_text(P) == "Fusion again in 8s", "X in the wait says when ('%s')" % KinMerge.deny_text(P))
+	P.merge_cd = 0.0
+	await hud.panels.draw
+	ok(
+		GripHud.shown.get("tag") == "FUSE" and GripHud.shown.get("lit", false) and KinMerge.plan(P) == "merge",
+		"wait over: FUSE and the lit ring exactly when X fuses (%s)" % str(GripHud.shown)
 	)
 	# ---------------------------------------------------------------- 2. the box's health bar
 	k.rest_t = 0.0
