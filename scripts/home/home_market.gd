@@ -33,6 +33,7 @@ func _init(home, spawn_kin_cb: Callable) -> void:
 	h = home
 	spawn_kin = spawn_kin_cb
 	trade = HomeTrade.new(self)
+	OnFree.cut_with(home, self)
 
 ## The stall level a tab opens at.
 static func tab_level(tab_name: String) -> int:

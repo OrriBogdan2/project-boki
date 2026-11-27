@@ -19,15 +19,16 @@ const ROT := Animation.TYPE_ROTATION_3D
 const POS := Animation.TYPE_POSITION_3D
 const SCL := Animation.TYPE_SCALE_3D
 
-static var _cache := {}             # species -> {clip: Animation}
+static var _cache := MeshCache.new(false)  # species -> {clip: Animation} (aged: an unused species goes)
 
 static func install(species: String, player: AnimationPlayer, skel: Skeleton3D) -> void:
-	if not _cache.has(species):
-		_cache[species] = _build(species, player, skel)
+	var clips = _cache.value(species)
+	if clips == null:
+		clips = _cache.hold(species, _build(species, player, skel))
 	var lib := player.get_animation_library(&"")
-	for n in _cache[species]:
+	for n in clips:
 		if not lib.has_animation(n):
-			lib.add_animation(n, _cache[species][n])
+			lib.add_animation(n, clips[n])
 
 static func _build(species: String, player: AnimationPlayer, skel: Skeleton3D) -> Dictionary:
 	var names := {}

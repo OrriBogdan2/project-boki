@@ -79,6 +79,7 @@ var alert_log: Array = []      # tests: every outside alert {lair, kind: fight|f
 
 func setup(match_node: Match) -> void:
 	m = match_node
+	OnFree.cut_with(m, self)        # its parts point back at it (--match-repeat-check)
 	breach = LairBreach.new(m, self)
 	fight = LairsFight.new(self)
 	lock = LairsLock.new(self)

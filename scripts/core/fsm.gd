@@ -31,6 +31,14 @@ func _init(state_names: PackedStringArray, from_to: Dictionary, start := 0, labe
 	if label != "":
 		live[label] = weakref(self)
 
+## Drops every hook. A hook is a Callable bound to its owner, and the owner holds this machine: a cycle that no
+## refcount frees, so the owner has OnFree call this when it goes (HunterLoco, BaseLife).
+func unbind() -> void:
+	_guards.clear()
+	_edge_guards.clear()
+	_enter.clear()
+	_exit.clear()
+
 ## Guards every edge into `to`.
 func guard(to: int, f: Callable) -> void:
 	_guards[to] = f

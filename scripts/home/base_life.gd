@@ -139,6 +139,7 @@ func toy_spots() -> Array:
 func machine(k: Dictionary) -> Fsm:
 	if not k.has("life"):
 		var m := Fsm.new(PackedStringArray(NAMES), TABLE, S.ROAM, "boki:" + String(k["rec"]["name"]))
+		OnFree.call_on(h, m.unbind)    # its hooks hold this and k, which holds it (--match-repeat-check)
 		m.guard(S.PLAY, func(_from: int) -> bool: return k.has("play"))
 		m.guard(S.PLAY_WITH, func(_from: int) -> bool: return _awake(k))
 		m.guard(S.CHORE, func(_from: int) -> bool: return k.has("life_chore"))

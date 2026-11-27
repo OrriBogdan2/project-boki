@@ -86,6 +86,7 @@ static func make(match_node: Match) -> ShrinkZone:
 
 func _init(match_node: Match) -> void:
 	m = match_node
+	OnFree.cut_with(m, self)        # its parts point back at it (--match-repeat-check)
 	var r_v := rules()
 	var tk := m.length / float(r_v["length_ref"])
 	var mk := float(m.world.w) / float(r_v["map_ref"])

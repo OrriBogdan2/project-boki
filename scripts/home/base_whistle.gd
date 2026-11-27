@@ -33,6 +33,7 @@ func _init(home, rules: Dictionary) -> void:
 	h = home
 	r = rules["whistle"]
 	hint = WhistleHint.new(self)
+	OnFree.cut_with(home, self)
 	Sfx.streams[TAP] = Synth.whistle()
 	Sfx.streams[HOLD] = Synth.whistle(true)
 

@@ -58,6 +58,7 @@ const BASE_BIOME := {"top": Color("5f8d45"), "top2": Color("4a7538"), "side": Co
 func _init(home) -> void:
 	h = home
 	entries = BuildEntries.new(self)
+	OnFree.cut_with(home, self)
 
 func L() -> Dictionary:
 	return HomeLayout.of(h._d())
