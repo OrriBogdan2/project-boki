@@ -378,7 +378,7 @@ func _card(res: Dictionary, pinned: bool) -> void:
 				[(sulk % lose["name"]) + ': "lost the Seek to %s"' % win["name"], 14, UI.MUTED],
 				["+%d gems" % res["gems"], 14, UI.GOLD]
 			]
-			+ BaseRace.pin_rows(pinned)
+			+ BaseRace.pin_rows(pinned, 14)
 			+ GardenPrizes.rows(res["prize"], 14)
 		)
 	)

@@ -290,7 +290,7 @@ def gen_classes():
         if not d: continue
         cs = CLASSES.get(d["weight"], {})
         rows.append([link(class_page_name(aid), the(d["title"])), "%s / %s" % (num(cs.get("hp", "?")), num(cs.get("dashes", "?"))), wname(d["signature"] if "signature" in d else d["weapons"][0]),
-                     d["passive"]["name"], d["dash"]["name"], d["rmb"]["name"], d["e"]["name"], d["r"]["name"] if "r" in d else "none (Boki Fusion)"])
+                     d["passive"]["name"], d["dash"]["name"], d["rmb"]["name"], d["e"]["name"], d["r"]["name"] if "r" in d else "none yet"])
     cu = json.load(open(os.path.join(ROOT, "content", "rules", "class_unlock.json"), encoding="utf-8"))
     kinds = cu["reward_kinds"]
     cu_rows = []
@@ -489,7 +489,7 @@ def gen_boki():
         gd_const("core/care.gd", "IV_INHERIT"), gd_const("core/care.gd", "IV_RARE_HIGH"), gd_const("core/care.gd", "IV_RARE_FLOOR"))
     b += table(["IV", "Affects", "Most it adds (at 31)"], [[v["name"], v["desc"], "+%d%%" % round(ivb.get(k, 0) * 100)] for k, v in ivs.items()])
     tr = gd_const("core/care.gd", "STATS") or {}
-    b += "\n\n## Trained stats\n\nTrained at the Training post with a timing drill.\n\n" + table(["Stat", "Per point", "Drill"], [[v["name"], v["desc"], v["drill"]] for v in tr.values()])
+    b += "\n\n## Trained stats\n\nRaised by giving stat bites (carried home from expeditions, won in a few limited races and drills a day).\n\n" + table(["Stat", "Per point", "Drill"], [[v["name"], v["desc"], v["drill"]] for v in tr.values()])
     nat = gd_const("core/care.gd", "NATURES") or {}
     if nat:
         b += "\n\n## Natures\n\nA Boki's nature comes from its two strongest traits.\n\n" + table(["Traits", "Nature"], [[k.replace("+", " + "), v] for k, v in nat.items()])
@@ -884,6 +884,85 @@ def _dash_jump_rows(hero, f):
         rows.append([hero, label, row.get("source", ""), ours, row.get("verdict", "[?]")])
     return rows
 
+def _const_s(path, name):
+    """A float `const name := 0.15` in a GDScript file (the shared DashFlow window when it is an alias)."""
+    text = open(os.path.join(ROOT, path), encoding="utf-8").read()
+    m = re.search(r"^const %s\s*:?=\s*([0-9.]+)" % name, text, re.M)
+    return float(m.group(1)) if m else _press_buffer()
+
+def _press_buffer():
+    """The one press window every kit shares (Loco.press_buffer, content/rules/tuning.json)."""
+    return float(load_json(os.path.join(ROOT, "content", "rules", "tuning.json"))["press_buffer"])
+
+# Measured by --dash-flow-check on main (11-20): s a buffered press went off past the dash's end (every buffer
+# row, 0.00-0.02 s), and Shift held in an ult's lock: [lock s, goes past the lock's end by s].
+BUFFER_SHIFT_IN_CAST = {"bulwark": (0.60, "+0.03"), "juggernaut": (0.73, "-0.10"), "ostra": (0.97, "+0.04")}
+
+NOT_CAST_THERE = {("dolm", "air", "e")}      # Rockwave needs the ground: the press has nothing to cast
+
+def _buffer_rows(flows):
+    """Every explicit `buffer` row of content/dash_flow: what the source says, how long ours holds the press."""
+    rows = []
+    for aid in ARCH_ORDER:
+        f = flows.get(aid, {})
+        hero = "%s (%s)" % (ARCH[aid]["base_name"], aid) if aid in ARCH else aid
+        for kind in ("ground", "air"):
+            for slot, label in DASH_SLOTS:
+                row = f.get("dash", {}).get(kind, {}).get(slot, {})
+                if row.get("mode") == "buffer":
+                    held = "the whole dash; goes 0.00-0.02 s after it ends"
+                    if (aid, kind, slot) in NOT_CAST_THERE:
+                        held = "the whole dash; the slot does not go off there at all, so nothing fires (skipped by the check)"
+                    rows.append([hero, "%s dash -> %s" % (kind, label), _src(row), held])
+        for slot, label in DASH_SLOTS:
+            row = f.get("into_dash", {}).get(slot, {})
+            if row.get("mode") == "buffer":
+                lock, past = BUFFER_SHIFT_IN_CAST[aid]
+                rows.append([hero, "%s -> dash" % label, _src(row),
+                             "the cast's lock (%.2f s); the dash goes %s s from its end" % (lock, past)])
+        for slot, label in DASH_SLOTS:
+            row = f.get("jump", {}).get(slot, {})
+            if row.get("mode") == "buffer":
+                rows.append([hero, "jump -> %s" % label, _src(row), "the whole jump; goes as she lands"])
+    return rows
+
+def gen_buffer_windows(flows):
+    """The press-window section of dash_interactions.md: the shared rule, the kit windows that are not it, and
+    every buffer row against its source (--dash-flow-check asserts the numbers)."""
+    shared = _press_buffer()
+    jump = load_json(os.path.join(ROOT, "content", "rules", "hunter_move.json"))["physics"]["jump_buffer_s"]
+    kit_rows = [
+        ["Gil, LMB in a thrust's recovery", _const_s("scripts/arch/kits/gil_kit.gd", "BUFFER"),
+         "Owner 11-11 (Gil's real thrusts, docs/heroes/gil.md): the next thrust goes when the click's window opens.",
+         "owner, kept"],
+        ["Shift in a Shift dash, a grapple or a pad flight", _const_s("scripts/match/hunter.gd", "DASH_BUFFER"),
+         "[?] ours, no source (docs/CHAIN_SWEEP.md): a tail past the dash's end, on top of the dash left (at most %.1f s)."
+         " It only matters when the dash is still refused at the end, so it is kept." % _const_s("scripts/match/hunter.gd", "DASH_KEEP"),
+         "[?] kept"],
+        ["Jump press before a landing", jump,
+         "[?] ours: the movement data's jump fields are encrypted (docs/MOVEMENT_FEEL.md, jump buffer row); "
+         "`--move-feel-check` asserts 0.10 s lands a jump and 0.15 s does not.", "[?] kept"],
+        ["Recast press before its window", _const_s("scripts/arch/arch_kit.gd", "RECAST_BUFFER"),
+         "Owner 11-08 two-step abilities (docs/INPUT_MODES.md).", "same as the shared window"],
+        ["Kael, a slash or Smash in a heavy move or the ult's guard", _const_s("scripts/arch/kits/juggernaut_kit.gd", "BUFFER"),
+         "It was 0.12 s with no source (\"ours, no footage\", docs/heroes/juggernaut.md); now the shared window, "
+         "`--dash-flow-check` asserts it.", "fixed: the shared window"],
+    ]
+    body = ("\n\n## Press windows: how long a press is held\n\n"
+            "Measured on main with `--dash-flow-check`. **Shared rule** (`Loco.press_buffer` = %.2f s): a press made in a dash "
+            "whose row says buffer is held for the whole dash and goes the step it ends; if the kit is still busy it "
+            "waits at most %.2f s more, then goes through the slot's own path (it casts, or answers with its deny cue). A "
+            "press made in a cast lock or crowd control is held only in the lock's last %.2f s, an earlier one is dropped "
+            "(docs/decisions/0022-cc-exit-buffer.md). A press in a mantle waits for the top, one mid-jump whose jump row "
+            "says buffer for the landing. A hold let go in a dash goes when the dash ends. Every dash pair with no row "
+            "buffers the same way. A hold animation never shows without its hold input (`--hold-pose-check`).\n\n"
+            "`[?]` rows stay as they are. Windows that are not the shared one, each with its source line:\n\n"
+            % (shared, shared, shared))
+    body += table(["Press", "Window (s)", "Source", "Verdict"],
+                  [[a, "%.2f" % b, c, d] for a, b, c, d in kit_rows])
+    body += "\n\nEvery `buffer` row in `content/dash_flow` (the hold rows are keep or cancel: none buffers):\n\n"
+    body += table(["Hero", "Pair", "Source", "Held for (measured)"], _buffer_rows(flows))
+    return body
 CAST_SLOTS = [("lmb", "LMB tap"), ("lmb_hold", "LMB hold"), ("rmb", "RMB"), ("e", "E"), ("x", "ult (X)")]
 
 def _cast_ours(row, phase):
@@ -976,6 +1055,7 @@ def gen_dash_flow():
              "`content/rules/mantle_press.json` by `DashFlow` while the hunter rises up a ledge. [?]: the source doesn't "
              "show it, so the press waits for the top (never a cancel). Q and any input without a row buffer too.\n\n")
     body += table(["Pair", "Source", "Ours"], _mantle_rows())
+    body += gen_buffer_windows(flows)
     body += gen_turn_table()
     body += _cast_tables(flows)
     write("dash_interactions.md", "%s\n# Dash, jump and ability interactions\n\n_Generated from `content/dash_flow`._\n\n%s"

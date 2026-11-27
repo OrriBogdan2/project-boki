@@ -4,21 +4,29 @@ extends RefCounted
 ## close you stand to take gear with the interact key, which of several the key takes (the one
 ## nearest the cursor), and that no wall stands between you and any of them.
 
-const EYE := 1.0      # m above the feet the line to a pickup runs at: a one-terrace step hides nothing, a rock does
+const EYE := 1.0  # m above the feet the line to a pickup runs at: a one-terrace step hides nothing, a rock does
+
 
 static func rules() -> Dictionary:
 	return Content.rules("pickup")
+
 
 ## Seconds a dropped pickup lies before anyone can take it, so it is seen to land.
 static func settle() -> float:
 	return float(rules()["walk"]["settle"])
 
+
 ## Is `at` within `rule`'s reach of the hunter: inside its radius and height, with nothing in the way.
 static func near(m: Match, h: Hunter, at: Vector3, rule: String) -> bool:
-	var r: Dictionary = rules()[rule]
-	if h.flat_dist(at) >= float(r["radius"]) or absf(h.pos.y - at.y) >= float(r["height"]):
-		return false
-	return clear(m, h, at)
+	return within(h, at, rules()[rule]) and clear(m, h, at)
+
+## Inside a rule's radius and height, nothing else checked: the cheap test to run first over every pickup.
+static func within(h: Hunter, at: Vector3, r: Dictionary) -> bool:
+	var reach := float(r["radius"])
+	var dx := at.x - h.pos.x
+	var dz := at.z - h.pos.z
+	return dx * dx + dz * dz < reach * reach and absf(h.pos.y - at.y) < float(r["height"])
+
 
 ## No rock, higher ground or kit wall between the hunter and the thing. A thing lying inside a rock's
 ## own cell is reached from any side, so loot that bounced into one is never stranded.
@@ -27,16 +35,24 @@ static func clear(m: Match, h: Hunter, at: Vector3) -> bool:
 		return true
 	return m.world.los(h.pos, at, h.pos.y + EYE)
 
+
+## The rule a walk-over pickup of this kind uses: gems reach further than the rest.
+static func walk_rule(kind: String) -> String:
+	return "gem" if kind == "gem" else "walk"
+
+
 ## The speed a walk-over pickup flies at the hunter's chest: faster the closer it is.
-static func pull(h: Hunter, at: Vector3) -> Vector3:
-	var r: Dictionary = rules()["walk"]
+static func pull(h: Hunter, at: Vector3, rule := "walk") -> Vector3:
+	var r: Dictionary = rules()[rule]
 	var dir := _chest(h, r) - at
 	return dir.normalized() * (float(r["pull_speed"]) + (float(r["radius"]) - h.flat_dist(at)) * float(r["pull_gain"]))
+
 
 ## Has a walk-over pickup reached the hunter's body?
 static func grabbed(h: Hunter, at: Vector3) -> bool:
 	var r: Dictionary = rules()["walk"]
 	return (_chest(h, r) - at).length() < float(r["grab"])
+
 
 ## The ground item the interact key takes: of the gear (and, for the player, treasure) in reach, the
 ## one nearest the cursor. Tunings are taken by walking over them.
@@ -54,6 +70,7 @@ static func under_cursor(m: Match, h: Hunter) -> Dictionary:
 			best_d = d
 			best = wp
 	return best
+
 
 static func _chest(h: Hunter, r: Dictionary) -> Vector3:
 	return h.pos + Vector3(0, float(r["grab"]), 0)
