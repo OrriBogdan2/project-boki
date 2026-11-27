@@ -1,22 +1,36 @@
 class_name MapKey
 extends RefCounted
 ## The key in the corner of the full map: one icon and one word for each kind of marker the map is showing
-## right now (nothing it isn't). The icons are the ones the maps draw. The minimap never calls this.
+## right now (nothing it isn't). The icons are the ones the maps draw (MapMarks for camp, shop, chest, shrine and pad).
+## The minimap never calls this.
 ## tools/minimap_check.gd asserts that kinds() is exactly what is on the map. Terrain hazards add a row per
 ## kind on this map ("hz:<kind>", its HazardMap swatch and rules name), then "safe" (a shield) when your
 ## Boki counters one of them: the same shield HazardMap puts on those areas.
 
 const ROW_H := 20.0
-const KEY_W := 78.0       # px: icon column, gap and the word (at least; a longer word widens it)
+const COL_ROWS := 8  # rows in a column; more go in a second column beside it
+const KEY_W := 78.0  # px: icon column, gap and the word (at least; a longer word widens it)
 const PAD := 10.0
 const WORD_PX := 13
-const MARGIN := 14.0      # px from the map's corner
-const ICON_X := 16.0      # px from the panel's left edge to the icon's centre
+const MARGIN := 14.0  # px from the map's corner
+const ICON_X := 16.0  # px from the panel's left edge to the icon's centre
 
 ## Every kind, in the order the key lists it: [id, word].
 const KINDS := [
-	["squad", "Squad"], ["boki", "Boki"], ["exit", "Extract"], ["way", "Way out"], ["hot", "Hot"], ["stop", "Stop"],
+	["squad", "Squad"],
+	["boki", "Boki"],
+	["camp", "Camp"],
+	["nest", MapMarks.NEST_WORD],
+	["shop", "Shop"],
+	["chest", "Chest (zoom)"],
+	["shrine", "Shrine"],
+	["pad", "Jump pad"],
+	["exit", "Extract"],
+	["way", "Way out"],
+	["hot", "Hot"],
+	["stop", "Stop"],
 ]
+
 
 ## The ids of the kinds on the map now, in KINDS order.
 static func kinds(m: Match, tm: TrainMap) -> Array:
@@ -37,40 +51,55 @@ static func kinds(m: Match, tm: TrainMap) -> Array:
 		out.append("safe")
 	return out
 
+
 static func _mate(m: Match) -> Hunter:
 	for h in m.hunters:
 		if m.player and h != m.player and h.team == m.player.team and not h.out and not h.extracted:
 			return h
 	return null
 
+
 static func _shown(m: Match, id: String, tm: TrainMap) -> bool:
 	match id:
-		"squad": return _mate(m) != null
-		"boki": return BokiHud.mapped_kin(m) != null
-		"exit": return m.exits != null and not m.exits.list.is_empty()
-		"way": return WaysOutMap.sites(m).any(func(v: Vector3): return v != Vector3.INF)
-		"hot": return m.biomes != null and not m.biomes.hot.zone.is_empty()
-		_: return m.skytrain != null and not tm.halts(m.skytrain).is_empty()
+		"squad":
+			return _mate(m) != null
+		"boki":
+			return BokiHud.mapped_kin(m) != null
+		"exit":
+			return m.exits != null and not m.exits.list.is_empty()
+		"way":
+			return WaysOutMap.sites(m).any(func(v: Vector3): return v != Vector3.INF)
+		"hot":
+			return m.biomes != null and not m.biomes.hot.zone.is_empty()
+		"nest":
+			return m.blight != null and not m.blight.nests.list.is_empty()
+		"camp", "shop", "chest", "shrine", "pad":
+			return not MapMarks.first(m, id).is_empty()
+		_:
+			return m.skytrain != null and not tm.halts(m.skytrain).is_empty()
 	return false
 
-## Bottom-left of the map, over the sea: a dark panel, a row per kind.
+
+## Bottom-left of the map, over the sea: a dark panel, a row per kind, a second column past COL_ROWS rows.
 static func draw(fm: FullMap) -> void:
 	var m: Match = fm.m
 	var hud = fm.hud
-	var c: Control = hud.c
 	var ids := kinds(m, hud.train_map)
 	if ids.is_empty():
 		return
-	var w := KEY_W
+	var cols := ceili(float(ids.size()) / COL_ROWS)
+	var rows := ceili(float(ids.size()) / cols)
+	var col_w := KEY_W
 	for id in ids:
-		w = maxf(w, ICON_X + 14.0 + TextCache.width(hud.big, _word(id), WORD_PX) + 6.0)
-	var r := Rect2(Vector2.ZERO, Vector2(w + PAD, PAD + ids.size() * ROW_H))
+		col_w = maxf(col_w, ICON_X + 14.0 + TextCache.width(hud.big, _word(id), WORD_PX) + 6.0)
+	var r := Rect2(Vector2.ZERO, Vector2(col_w * cols + PAD, PAD + rows * ROW_H))
 	r.position = Vector2(fm.rect.position.x + MARGIN, fm.rect.end.y - MARGIN - r.size.y)
 	hud._rounded(r, Color(0.04, 0.05, 0.08, 0.88), 8)
 	for i in ids.size():
-		var at := r.position + Vector2(ICON_X, PAD * 0.5 + (i + 0.5) * ROW_H)
+		var at := r.position + Vector2(ICON_X + col_w * floorf(float(i) / rows), PAD * 0.5 + (i % rows + 0.5) * ROW_H)
 		_glyph(fm, ids[i], at)
 		hud._text(at + Vector2(14.0, 5.0), _word(ids[i]), WORD_PX, fm.INK, hud.big)
+
 
 static func _word(id: String) -> String:
 	if id.begins_with("hz:"):
@@ -82,6 +111,7 @@ static func _word(id: String) -> String:
 			return String(k[1])
 	return id
 
+
 static func _glyph(fm: FullMap, id: String, at: Vector2) -> void:
 	var m: Match = fm.m
 	var c: Control = fm.hud.c
@@ -89,6 +119,9 @@ static func _glyph(fm: FullMap, id: String, at: Vector2) -> void:
 		var sw := Rect2(at - Vector2(6.0, 6.0), Vector2(12.0, 12.0))
 		c.draw_rect(sw, HazardMap.fill(id.substr(3)).lightened(0.15))
 		c.draw_rect(sw, HazardMap.edge(id.substr(3)), false, 1.5)
+		return
+	if id in MapMarks.CAT:
+		MapMarks.badge(fm.hud, id, at, 6.5, MapMarks.first(m, id)["src"])
 		return
 	match id:
 		"squad":
@@ -98,6 +131,8 @@ static func _glyph(fm: FullMap, id: String, at: Vector2) -> void:
 			var k := BokiHud.mapped_kin(m)
 			c.draw_circle(at, MapDetail.ICON_R, Color(0, 0, 0, 0.6))
 			Icons.draw(c, "paw", at, MapDetail.ICON_R * 0.8, Color(k.sp.get("glow", k.sp["color"])))
+		"nest":
+			NestMap.glyph(c, at, 6.5)
 		"exit":
 			ExitMark.glyph(c, at, 6.5, ExitMark.SAMPLE, 0.0)
 		"way":
