@@ -106,6 +106,7 @@ func run(main_node: Node) -> void:
 	var mid := group + Vector3(0, 0, 0)
 	cam_at = mid + Vector3(sin(EYE_YAW) * EYE_DIST * cam_side, EYE_HEIGHT, cos(EYE_YAW) * EYE_DIST)
 	_free_camera(cam_at, mid + Vector3(0, 1.0, 0), EYE_FOV)
+	_start_anims()  # a fresh idle facing this camera, not the last one
 	await _wait(1.5)
 	_log("2_eye_row")
 	await _shot("2_eye_row")
@@ -114,6 +115,7 @@ func run(main_node: Node) -> void:
 	_layout()
 	cam_at = group + Vector3(0.0, MID_UP, MID_BACK)
 	_free_camera(cam_at, group + Vector3(0, 0.9, 1.0), MID_FOV)
+	_start_anims()
 	await _wait(1.5)
 	_log("3_mid")
 	await _shot("3_mid")
