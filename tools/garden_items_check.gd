@@ -12,20 +12,23 @@ const SPECS := [["cindle", 2, "power"], ["zapple", 5, "focus"], ["burrlet", 12, 
 
 var bad := 0
 var main: Node
-var used := {}          # item id -> times it was usable on a sample
+var used := {}  # item id -> times it was usable on a sample
+
 
 func ok(cond: bool, what: String) -> void:
 	print("GARDENITEMS %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
 
+
 func _boki(species: String, level: int, stat: String) -> Dictionary:
 	var rec := Save.new_kin(species, "T-" + species)
 	rec["level"] = level
-	rec["stats"][stat] = 12 + level * 6 - 1       # one point under its cap
+	rec["stats"][stat] = 12 + level * 6 - 1  # one point under its cap
 	rec["stats"]["speed"] = mini(5, 12 + level * 6)
 	rec["lean"] = {"ember": 9.0} if level > 1 else {}
 	return rec
+
 
 func _snap(rec: Dictionary) -> String:
 	var t := {}
@@ -34,8 +37,9 @@ func _snap(rec: Dictionary) -> String:
 	t["stats"] = rec["stats"]
 	return JSON.stringify(t)
 
+
 func run(m: Node) -> void:
-	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm (base_mode is the shipped default)
+	FarmUnlocks.rules()["base_mode"] = false  # walks the old farm (base_mode is the shipped default)
 	main = m
 	Save.no_write = true
 	Save.d = Save.fresh()
@@ -54,6 +58,7 @@ func run(m: Node) -> void:
 	print("GARDENITEMS DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _rules() -> void:
 	var seen := {}
 	var fine := true
@@ -68,6 +73,7 @@ func _rules() -> void:
 	for id in GardenItems.ids():
 		q = q or "?" in String(GardenItems.preview(rec, id)["text"])
 	ok(not q, "no preview line hides its effect behind a question mark")
+
 
 ## Raised stats show as body size (StatBudget.growth -> Evo.dress evo_scale): none fresh, more with more points, capped.
 func _growth() -> void:
@@ -92,6 +98,7 @@ func _growth() -> void:
 	var res := GardenItems.use(bite, "thumpnut")
 	ok(res["ok"] and res["look"], "a stat bite flags look (the model is rebuilt at its new size)")
 
+
 func _samples(rec: Dictionary) -> void:
 	var who := String(rec["species"])
 	for id in GardenItems.ids():
@@ -110,8 +117,11 @@ func _samples(rec: Dictionary) -> void:
 		var moved := {}
 		for key in pv["deltas"]:
 			moved[key] = true
-			exact = exact and JSON.stringify(GardenItems.value(probe, key)) == JSON.stringify(pv["deltas"][key][1]) \
-					and JSON.stringify(pv["deltas"][key][0]) != JSON.stringify(pv["deltas"][key][1])
+			exact = (
+				exact
+				and JSON.stringify(GardenItems.value(probe, key)) == JSON.stringify(pv["deltas"][key][1])
+				and JSON.stringify(pv["deltas"][key][0]) != JSON.stringify(pv["deltas"][key][1])
+			)
 		for key in TRACKED:
 			if not moved.has(key):
 				exact = exact and JSON.stringify(probe.get(key)) == JSON.stringify(rec.get(key))
@@ -126,6 +136,7 @@ func _samples(rec: Dictionary) -> void:
 		var named: bool = fresh.size() == 1 and (lines.size() == jn + 1 or pv["deltas"].has("level"))
 		ok(named, "%s on %s: one journal line names it" % [id, who])
 
+
 func _tokens_and_stay() -> void:
 	var rec := _boki("cindle", 4, "power")
 	rec["aff"] = {"fierce": 0.0, "steadfast": 0.0, "curious": 0.0, "swift": 0.0}
@@ -136,19 +147,24 @@ func _tokens_and_stay() -> void:
 	ok(rec["path"].size() == 3 and not fourth, "three tokens at most, the fourth is refused")
 	ok(Evo.leading(rec) == "swift", "three Galeribbons steer the form to swift")
 	Save.d["items"]["galeribbon"] = 0
-	ok(GardenItems.take_off(rec, "galeribbon") and rec["path"].size() == 2 and int(Save.d["items"]["galeribbon"]) == 1,
-			"taking one off frees the slot and returns it to the bag")
+	ok(
+		GardenItems.take_off(rec, "galeribbon") and rec["path"].size() == 2 and int(Save.d["items"]["galeribbon"]) == 1,
+		"taking one off frees the slot and returns it to the bag"
+	)
 	ok(not GardenItems.take_off(rec, "keepstone"), "taking off what it doesn't wear does nothing")
 	# its line's form level (evolve.json), at least 6: a form with no art yet grows a part only at level % 4 == 2
 	rec["level"] = maxi(int(Evo.rules()["lines"]["cindle"]["level"]), 6)
-	ok(not Evo.on_level(rec.duplicate(true)).is_empty(),
-			"level %d changes it (a form, or a part while the form has no art)" % rec["level"])
+	ok(
+		not Evo.on_level(rec.duplicate(true)).is_empty(),
+		"level %d changes it (a form, or a part while the form has no art)" % rec["level"]
+	)
 	GardenItems.apply(rec, "stayleaf")
 	ok(Evo.on_level(rec).is_empty(), "with a Stayleaf worn it does not evolve")
 	var off := GardenItems.take_off(rec, "stayleaf")
 	ok(off and not rec["stay"] and not Evo.on_level(rec).is_empty(), "taken off, it evolves again")
 	_aura(rec)
 	_more_auras()
+
 
 ## Glowmoss Sprig: a worn aura, one at a time, looks only; the model grows a GardenAura that glows at night.
 func _aura(rec: Dictionary) -> void:
@@ -157,10 +173,12 @@ func _aura(rec: Dictionary) -> void:
 	ok(pv["ok"] and pv["deltas"].keys() == ["aura"], "Glowmoss Sprig previews one change: its aura")
 	Save.d["items"]["glowmoss_sprig"] = 1
 	var res := GardenItems.use(rec, "glowmoss_sprig")
-	ok(res["ok"] and res["look"] and rec["aura"] == "glowmoss_sprig" and rec["stats"] == stats,
-			"worn: rec.aura set, stats untouched, the model redraws")
+	ok(
+		res["ok"] and res["look"] and rec["aura"] == "glowmoss_sprig" and rec["stats"] == stats,
+		"worn: rec.aura set, stats untouched, the model redraws"
+	)
 	ok(not GardenItems.preview(rec, "glowmoss_sprig")["ok"], "a second one on the same Boki is refused")
-	var look := Save.new_kin(String(rec["species"]), "Look")      # a plain body: only the aura differs
+	var look := Save.new_kin(String(rec["species"]), "Look")  # a plain body: only the aura differs
 	look["aura"] = rec["aura"]
 	var n := Models.kin(String(rec["species"]), look)
 	var pt: GardenAura = n.get_node_or_null("GardenAura")
@@ -169,15 +187,16 @@ func _aura(rec: Dictionary) -> void:
 	ok(GardenAura.lit(null, true) and clock, "no day clock: it glows; Home lights it at night")
 	n.free()
 	var off := GardenItems.take_off(rec, "glowmoss_sprig")
-	ok(off and rec["aura"] == "" and int(Save.d["items"]["glowmoss_sprig"]) == 1,
-			"taken off, back in the bag")
+	ok(off and rec["aura"] == "" and int(Save.d["items"]["glowmoss_sprig"]) == 1, "taken off, back in the bag")
 	look["aura"] = rec["aura"]
 	var bare := Models.kin(String(rec["species"]), look)
 	ok(bare.get_node_or_null("GardenAura") == null, "no aura worn, no aura node")
 	bare.free()
 
+
 class FakeHome:
 	var kins: Array = []
+
 
 ## Mistbloom and Chimegrass: worn like the Sprig; one particle set each, none at Low quality.
 func _more_auras() -> void:
@@ -192,12 +211,21 @@ func _more_auras() -> void:
 	var previews: bool = GardenItems.preview(rec, "mistbloom")["ok"] and GardenItems.preview(rec, "chimegrass")["ok"]
 	ok(previews, "both new auras preview on hold")
 	ok(GardenItems.use(rec, "mistbloom")["ok"] and rec["aura"] == "mistbloom", "Mistbloom is worn")
-	ok(GardenItems.take_off(rec, "mistbloom") and GardenItems.use(other, "mistbloom")["ok"]
-			and other["aura"] == "mistbloom" and rec["aura"] == "", "taken off and given to another Boki")
+	ok(
+		(
+			GardenItems.take_off(rec, "mistbloom")
+			and GardenItems.use(other, "mistbloom")["ok"]
+			and other["aura"] == "mistbloom"
+			and rec["aura"] == ""
+		),
+		"taken off and given to another Boki"
+	)
 	other["lean"] = {"fire": Evo.LEAN_FULL}
 	var mist := _aura_node(other)
-	ok(mist != null and mist.color == Lean.face("fire")["tint"] and not mist.night_only and mist.emitting,
-			"Mistbloom: one set, in the lean colour, always on")
+	ok(
+		mist != null and mist.color == Lean.face("fire")["tint"] and not mist.night_only and mist.emitting,
+		"Mistbloom: one set, in the lean colour, always on"
+	)
 	other["lean"] = {}
 	ok(_aura_node(other).color == Color(GardenAura.NO_LEAN), "no lean yet: pale mist")
 	GardenItems.use(rec, "chimegrass")
@@ -215,8 +243,10 @@ func _more_auras() -> void:
 	Care.change(rec, "joy", HomeChimes.JOY_RISE + 1.0)
 	chimes.tick(0.1)
 	var puffed: bool = (model.get_node("GardenAura") as GardenAura).emitting
-	ok(int(GardenSfx.heard.get("garden_chime_level", 0)) == heard + 1 and puffed,
-			"a happy rise (a win): one note through the garden sound path and a puff of notes")
+	ok(
+		int(GardenSfx.heard.get("garden_chime_level", 0)) == heard + 1 and puffed,
+		"a happy rise (a win): one note through the garden sound path and a puff of notes"
+	)
 	rec["aura"] = ""
 	Care.change(rec, "joy", -30.0)
 	chimes.tick(0.1)
@@ -228,6 +258,7 @@ func _more_auras() -> void:
 	Settings.v["quality"] = "low"
 	ok(_aura_node(other) == null and _aura_node(rec) == null, "Low quality: no aura particles")
 	Settings.v["quality"] = q_was
+
 
 func _aura_node(rec: Dictionary) -> GardenAura:
 	var look := Save.new_kin(String(rec["species"]), "Look")
@@ -241,9 +272,10 @@ func _aura_node(rec: Dictionary) -> GardenAura:
 	n.free()
 	return pt
 
+
 func _feeding() -> void:
 	var rec := _boki("zapple", 3, "speed")
-	Care.change(rec, "food", 100.0)           # full: a meal would be refused, an item is not
+	Care.change(rec, "food", 100.0)  # full: a meal would be refused, an item is not
 	rec["stats"]["power"] = 4
 	var res := Care.feed(rec, "thumpnut")
 	ok(res["ok"] and int(rec["stats"]["power"]) == 7 and not res["full"], "Care.feed: Thumpnut when full, Power 4 to 7")
@@ -253,25 +285,37 @@ func _feeding() -> void:
 	var power: int = rec["stats"]["power"]
 	ok(tea["ok"] and int(rec["loose"]) == 7 and power == 0, "Unwind Tea: all 7 Power points go loose")
 
+
 ## An expedition's lair-pile bite: carried out, banked in the garden bag, eaten at home. The Boki card's
 ## journal then says which item changed what.
 func _loot() -> void:
 	var drop: Dictionary = GardenItems.rules()["lair_drop"]
-	ok(GardenItems.lair_drop(0.0, 1) == String(drop["ids"][1]) and GardenItems.lair_drop(0.99, 1) == "",
-			"a lair pile holds a bite below the chance roll and none above it")
+	ok(
+		GardenItems.lair_drop(0.0, 1) == String(drop["ids"][1]) and GardenItems.lair_drop(0.99, 1) == "",
+		"a lair pile holds a bite below the chance roll and none above it"
+	)
 	for id in drop["ids"]:
 		var v: Dictionary = Loot.VALUABLES.get(id, {})
-		ok(GardenItems.has(id) and v.get("bag", false) and String(v.get("name", "")) == GardenItems.item_name(id)
-				and String(GardenItems.item(id)["effect"]["kind"]) == "stat",
-				"lair drop %s is a stat bite carried as treasure under its own name" % id)
+		ok(
+			(
+				GardenItems.has(id)
+				and v.get("bag", false)
+				and String(v.get("name", "")) == GardenItems.item_name(id)
+				and String(GardenItems.item(id)["effect"]["kind"]) == "stat"
+			),
+			"lair drop %s is a stat bite carried as treasure under its own name" % id
+		)
 		_loot_card(id)
+
 
 func _loot_card(id: String) -> void:
 	Save.d = Save.fresh()
 	var out := {}
 	Econ.after_raid({"extracted": true, "haul": [Loot.valuable(id)]}, out)
-	ok(int(Save.d["items"].get(id, 0)) == 1 and not Save.d["valuables"].has(id),
-			"%s brought out of a match lands in the garden bag, not the sell shelf" % id)
+	ok(
+		int(Save.d["items"].get(id, 0)) == 1 and not Save.d["valuables"].has(id),
+		"%s brought out of a match lands in the garden bag, not the sell shelf" % id
+	)
 	var stat := String(GardenItems.item(id)["effect"]["stat"])
 	var rec := _boki("cindle", 3, stat)
 	rec["stats"][stat] = 4
@@ -286,13 +330,19 @@ func _loot_card(id: String) -> void:
 		shown += (c as Label).text + "\n" if c is Label else ""
 	card.free()
 	var name_ := GardenItems.item_name(id)
-	ok(pv["ok"] and gain > 0 and lines.size() == before + 1 and int(Save.d["items"][id]) == 0,
-			"%s eaten at home: +%d %s, one journal line, bag empty" % [id, gain, stat])
-	ok(shown.contains(name_) and shown.contains("%s +%d (4 to %d)" % [Care.STATS[stat]["name"], gain, 4 + gain]),
-			"%s: the Boki card's journal shows the item and the change" % id)
+	ok(
+		pv["ok"] and gain > 0 and lines.size() == before + 1 and int(Save.d["items"][id]) == 0,
+		"%s eaten at home: +%d %s, one journal line, bag empty" % [id, gain, stat]
+	)
+	ok(
+		shown.contains(name_) and shown.contains("%s +%d (4 to %d)" % [Care.STATS[stat]["name"], gain, 4 + gain]),
+		"%s: the Boki card's journal shows the item and the change" % id
+	)
+
 
 func _heard(sname: String) -> int:
 	return int(GardenSfx.heard.get(sname, 0))
+
 
 ## The cues played since `before` (a copy of GardenSfx.heard), one entry a play.
 func _played(before: Dictionary) -> Array:
@@ -301,6 +351,7 @@ func _played(before: Dictionary) -> Array:
 		for i in int(GardenSfx.heard[sname]) - int(before.get(sname, 0)):
 			out.append(sname)
 	return out
+
 
 ## Every fed item has its family's cue on file; a give plays exactly that one at the Boki, and a path token's pip
 ## clicks into the meter PIP_S later.
@@ -323,6 +374,7 @@ func _cues() -> void:
 			wrong.append(id)
 	ok(missing.is_empty(), "every fed item has its family's cue, on file (missing: %s)" % [missing])
 	ok(wrong.is_empty(), "a give plays one cue, its family's (wrong: %s)" % [wrong])
+
 
 ## The brighter chime (HomeChimes "ready") once a Boki reaches its evolve level: Zapple's branching final.
 func _evolve_chime() -> void:
@@ -351,6 +403,7 @@ func _evolve_chime() -> void:
 	GardenItems.take_off(rec, "stayleaf")
 	chimes.tick(1.0)
 	ok(_heard("garden_chime_ready") == ready + 2, "the Stayleaf off: it can evolve again, the brighter chime")
+
 
 func _migration() -> void:
 	var old := Save.new_kin("cindle", "Old")
