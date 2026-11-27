@@ -10,6 +10,8 @@
   dredge_r22.py --loincloth OUT IN TEX  r24: a Meshy retexture of that part composited into the atlas inside the mask
   dredge_r22.py --horns OUT IN HORN.glb r24: the 2D's cream crescent horns along the goo arm (one Meshy part, rigid)
   dredge_r22.py --nodome OUT IN         variant: the socket dome removed
+  dredge_r22.py --rod OUT IN ROD.glb    r34: the gauntlet-side hooked post swapped for the r21 knob rod
+                                        (the 2D has one of each)
   dredge_r22.py --all OUT IN            every r22 stage in order
 
 Every stage takes IN.glb and writes OUT.glb (dredge_post.rebuild_stages). numpy/scipy/PIL only.
@@ -735,7 +737,23 @@ def horns(js, b, out, rig, part_path):
     return "%d tris each; " % len(F) + "; ".join(msg)
 
 
+def rod_side(js, b, out, rig, part_path):
+    """r34 (review D6, hook 6.0 'two posts, not one rod'): the turnaround has ONE hooked post (bell, chain,
+    lantern) on the goo side (x < 0) and a plain knobbed rod on the gauntlet side (x > 0, the front view's right).
+    r23 put the hooked post on both sides; the gauntlet-side copy goes and the r21 Meshy knob rod
+    (dredge_post.add_rod, ROD_BASE->ROD_TOP) takes its place. The goo-side post is untouched."""
+    prims = js["meshes"][0]["primitives"]
+    rods = [p for p in prims if js["materials"][p["material"]]["name"] == "leather-rod"]
+    gone = [p for p in rods if n.floats(js, b, p["attributes"]["POSITION"])[:, 0].mean() > 0]
+    if len(rods) != 2 or len(gone) != 1:
+        raise SystemExit("expected the two r23 posts (one per side), found %d / %d on x > 0" % (len(rods), len(gone)))
+    js["meshes"][0]["primitives"] = [p for p in prims if p is not gone[0]]
+    d.prune_materials(js)
+    return "gauntlet-side post dropped; " + d.add_rod(js, b, out, rig, part_path)
+
+
 STAGES = {"--strap": [("strap", strap_r22)], "--slivers": [("slivers", drop_slivers)]}
+STAGES["--rod"] = [("rod", lambda js, b, out, rig: rod_side(js, b, out, rig, sys.argv[4]))]
 STAGES["--goo"] = [("goo flare", flare_goo)]
 STAGES["--dome"] = [("dome weights", dome_weights)]
 STAGES["--nodome"] = [("dome", drop_dome)]
