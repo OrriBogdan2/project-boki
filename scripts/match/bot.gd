@@ -1440,8 +1440,16 @@ func _clear_line(m: Match, h: Hunter, a: Vector2, b: Vector2) -> bool:
 	var side := Vector2(-d.y, d.x).normalized() * 0.32
 	var w: World = m.world
 	var hazards := _has_hazards(m)
+	var sheer := not w.sheer.is_empty()
+	var last_gy := w.ground_at(a.x, a.y)
 	for k in range(1, n + 1):
 		var p := a + d * (float(k) / n)
+		# up on to a sheer rim (authored maps): no jump mantles it, so the tile path goes round instead
+		if sheer:
+			var gy := w.ground_at(p.x, p.y)
+			if gy > last_gy + 0.3 and w.is_sheer(int(floor(p.x)), int(floor(p.y))):
+				return false
+			last_gy = gy
 		# a rock in the way, or the abyss (straight at a goal across a bay in the island, the edge guard
 		# turned the bot aside every frame and it shuffled on the spot instead of taking the way round)
 		if w.tile_kind(p.x, p.y) != World.T_GROUND:
