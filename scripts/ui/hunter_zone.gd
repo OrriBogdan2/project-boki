@@ -6,7 +6,7 @@ extends RefCounted
 
 const MIN_HALF_W := 40.0  # px: the zone is at least this far either side of the hunter's middle
 const BODY_HALF_K := 0.32  # of the hunter's height on screen: the half width
-const PLATE_UP := 2.7  # m over the feet (times the hunter's scale): the overhead plate (Hud._draw_overhead)
+const PLATE_UP := 2.7  # m over the feet (x its scale and match_hunter_scale, HudPlate.up): the overhead plate
 const FEET_PAD := 10.0  # px under the feet
 const PLATE_PAD := 20.0  # px over the plate's top
 const NEAR_PX := 260.0  # px: a label farther than this from the zone is not measured
@@ -22,7 +22,7 @@ static func rect(m: Match) -> Rect2:
 static func rect_of(m: Match, p: Hunter) -> Rect2:
 	if p == null or m.cam == null or p.out or p.downed or p.riding:
 		return Rect2()
-	var up := Vector3(0, PLATE_UP * float(p.cdat["scale"]), 0)
+	var up := Vector3(0, HudPlate.up(p, PLATE_UP * float(p.cdat["scale"])) * CamRig.match_hunter_scale, 0)
 	var feet := p.position
 	var head := p.position + m.cam.char_lean() * up
 	if m.cam.is_position_behind(head) or m.cam.is_position_behind(feet):
