@@ -155,9 +155,10 @@ func _tidy_scene() -> void:
 				sz.y + 2.0 * CLEAR_MARGIN
 			)
 		)
-	for ch in h.get_children():  # the Expeditions signpost stands in the lift shot's foreground: not in this film
-		if ch is Node3D and (ch as Node3D).position.distance_to(Vector3(39.8, 0.0, 38.2)) < 0.01:
-			(ch as Node3D).visible = false
+	for ch in h.get_children():  # the Ferry and Expeditions stands fill the meadow's foreground: not in this film
+		for l in ch.find_children("*", "Label3D", true, false):
+			if (l as Label3D).text in ["Ferry", "Expeditions"]:
+				(ch as Node3D).visible = false
 	var cleared := 0
 	for n in h.find_children("*", "MultiMeshInstance3D", true, false):
 		var mmi := n as MultiMeshInstance3D
@@ -343,18 +344,18 @@ func _film() -> void:
 
 ## 1: the hunter runs across the garden toward the group; the Boki see him and hop over.
 func _shot_run(meadow: Vector3) -> void:
-	var from := meadow + Vector3(-11.0, 0, 3.0)
+	var from := meadow + Vector3(-12.0, 0, 5.0)  # the corridor the carry shot also runs: no prop pulls the lens in
 	for i in 4:
 		_put(i, meadow + Vector3([0.0, 1.6, -1.2, 0.4][i], 0, [0.0, 1.3, 1.5, -1.6][i]))
-	_stand(from, meadow, -0.45)
+	_stand(from, meadow, 0.45)
 	_view(34.0, 16.0, 0.6, 0.9)
 	_mark("run", true)
 	await _wait(HEAD_S)
 	h.life.machine(h.kins[0]).go(BaseLife.S.ROAM, "film")
-	await _run(meadow + Vector3(-4.5, 0, 1.0), 6.0, -0.45)
+	await _run(meadow + Vector3(-4.5, 0, 1.0), 6.0, 0.45)
 	for i in 4:
 		_call_over(i, 8.0)
-	await _run(meadow + Vector3(-1.8, 0, 0.4), 3.0, -0.45)
+	await _run(meadow + Vector3(-1.8, 0, 0.4), 3.0, 0.45)
 	await _wait(1.5)
 	await _still("run_end.png")
 	_dbg("run")
@@ -416,11 +417,11 @@ func _shot_carry(meadow: Vector3) -> void:
 func _shot_set_down(meadow: Vector3) -> void:
 	var k: Dictionary = h.kins[0]
 	_mark("down", true)
-	_stand(meadow + Vector3(1.0, 0, 6.0), meadow + Vector3(3.0, 0, 6.0), PI - 0.5)
+	_stand(meadow + Vector3(1.0, 0, 6.0), meadow + Vector3(3.0, 0, 6.0), 1.1)  # behind and aside: the Boki that face him face the lens too
 	_put(1, h.ppos + Vector3(2.5, 0, -1.5))
 	_put(2, h.ppos + Vector3(2.0, 0, 1.8))
 	_put(3, h.ppos + Vector3(3.2, 0, 0.2))
-	_view(32.0, 14.0, 0.4, 0.8)
+	_view(32.0, 17.0, 0.62, 0.95)
 	await _wait(HEAD_S + 0.5)
 	h.carry.drop()
 	await _wait(0.8)
