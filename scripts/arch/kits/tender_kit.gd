@@ -213,8 +213,8 @@ func _dress_ember(s: Dictionary) -> void:
 	s["start"] = from
 	s["muzzle"] = HeroVfx.of(m).anchor_pos(h, "hand_r" if right else "hand_l")  # drawn out of that hand
 	var size_k: float = float(lmb_def()["size_k"]) if emp else 1.0
-	s["r"] = float(s["r"]) * size_k  # the hit grows with the look
-	lk().skin(s, "ember", {}, size_k)
+	s["r"] = float(s["r"]) * size_k  # the hit grows when Empowered; the look stays 15% smaller (lmb.look_k)
+	lk().skin(s, "ember", {}, size_k * float(lmb_def()["look_k"]))
 	HeroVfx.of(m).trail(h, "cast_trail", s["node"])
 	stats["embers"] += 1
 	stats["swirls"] += 1
@@ -699,10 +699,12 @@ func _hearth_on() -> Ent:
 			return w if is_instance_valid(w) else null
 	return null
 
+
 ## How long the other games draw the Hearthlight from one of its beats: to its end, or past the next beat (so
 ## an early end goes there within a beat).
 func _hearth_life() -> float:
 	return minf(float(hearth["left"]), float(e_def()["every"]) + HeroVfxZone.FADE + HeroVfxZone.PAD)
+
 
 func hearth_r() -> float:
 	var ed := e_def()
