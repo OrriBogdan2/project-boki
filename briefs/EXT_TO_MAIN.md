@@ -11473,3 +11473,4 @@ READY ext/stuck-integ-8331facf 7ba6d35412 (replayed on origin/main, not the red 
 READY ext/expedition-perf-1126 e675f07b7c (perf(expedition) round 2: hidden Hunters skip render, A* bot paths, line test; render -2..-2.6 ms, bots -0.6..-1.3 ms, script p99 -25%)
 READY ext/testzone-ui-1126 9bf9d0d6416c8001391dc4bbde2928fa721b7933 (Test Zone/Training Grounds HUD: one reserved-rects list = fps counter + minimap + held key line/DPS meter/kit drill; toasts one-pass; --test-zone-check 153/0)
 READY ext/garden-basics-rename-1127 1808344a444 (garden basics: rename a Boki from its card, --rename-check 18/18, draft PR)
+READY ext/garden-basics-mood-bubbles-1127 b19e0d22079 (garden basics: happy+sad mood bubbles, --mood-bubbles-check 15/15, kin-indoors 0 fail, draft PR)
