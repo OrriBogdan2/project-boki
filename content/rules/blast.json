@@ -1,0 +1,5 @@
+{
+	"_doc": "How hard a blast (a shot's \"boom\", Match._boom) hits by how far from its centre the body stands: [distance / radius, share of damage] points, straight lines between them. Full to a quarter of the radius, then 89 / 54 / 33 percent at half, three quarters and the edge [reference data, owner-authorised]. Knockback and lift follow the same share. cover_height: m over the higher of blast and body feet where the line from the blast must be clear of rock and cliff (World.los); a shot with \"boom_open\" skips it.",
+	"curve": [[0.0, 1.0], [0.25, 1.0], [0.5, 0.89], [0.75, 0.54], [1.0, 0.33]],
+	"cover_height": 0.6
+}

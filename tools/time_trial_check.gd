@@ -3,10 +3,14 @@ extends RefCounted
 ## built; the course asks for a dash, a wall kick, the pad and a glide (the kick tower can't be climbed with a
 ## plain jump, the glide tower only by the pad); a scripted run with real inputs goes start -> ten gates ->
 ## finish and sets this Hunter's best; a dash gate walked through doesn't count; a slower run keeps the best;
-## a Hunter swap or a fall ends the run; a v21 save migrates to an empty best list. Prints TIMETRIALCHECK PASS/FAIL.
+## a Hunter swap, a fall or walking off the course (a toast says so) ends the run; the clock, the pedestal
+## prompt never overlap the HUD, the FPS counter, toasts or the hunter at three window sizes; each station kind
+## has a sign (the bot pen's says how to spawn a bot); a v21 save migrates to an empty best list.
+## Prints TIMETRIALCHECK PASS/FAIL.
 
 const DT := 1.0 / 60.0
 const RUN_CAP := 120.0  # [s] a scripted run that takes longer has got stuck
+const HUNTER_BOX := Vector2(160, 170)  # [px] the hunter and its plate, mid-screen (HunterZone needs a running camera)
 const DASH_AT := 3.0  # [m] the scripted run dashes this far before a dash gate
 
 var main: Node
@@ -35,6 +39,9 @@ func run(main_node: Node) -> void:
 	_full_run(m, t)
 	_dash_gate(m, t)
 	_slower_and_swap(m, t)
+	_leave(m, t)
+	await _layout(m, t)
+	_signs(m)
 	_migrate()
 	print("TIMETRIALCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit()
@@ -165,3 +172,85 @@ func _migrate() -> void:
 	var empty: bool = bests is Dictionary and (bests as Dictionary).is_empty()
 	ok("a v21 save gets an empty best list", good and int(old["v"]) == Save.VERSION and empty)
 	ok("a fresh save has one", Save.fresh().get("time_trial", null) is Dictionary)
+
+
+## Walking off the course ends the run with a toast; a step past the last gate (inside the margin) doesn't.
+func _leave(m: Match, t: TimeTrial) -> void:
+	var p: Hunter = m.player
+	var g: TimeTrial.Gate = t.gates[0]
+	t.running = true
+	t.run_arch = p.arch
+	t.next_i = 1
+	m.hud.msgs.clear()
+	p.teleport(Vector3(t.area.position.x + TimeTrial.LEAVE_MARGIN * 0.5, 0.0, g.at.z))
+	t.tick(DT)
+	ok("a step off the course (inside the margin) keeps the run", t.running)
+	p.teleport(Vector3(t.area.position.x - 1.0, 0.0, g.at.z))
+	t.tick(DT)
+	var said: bool = m.hud.msgs.texts().has("Trial cancelled - left the course")
+	ok("leaving the course ends the run with a toast", not t.running and said, str(m.hud.msgs.texts()))
+	ok("the area covers start, gates, pad and finish", t.area.has_point(Vector2(t.finish.x, t.finish.z)))
+
+
+## The clock, the pedestal prompt and the toasts at three window sizes: none overlaps the FPS counter (full
+## overlay), the minimap, the arena's banner and meter, the practice bar, each other or the hunter.
+func _layout(m: Match, t: TimeTrial) -> void:
+	Settings.v["show_fps"] = 2
+	var g: Grounds = m.arena.grounds
+	t.clock.text = "0:42.31  ·  gate 10 / 10  ·  best 0:40.00"
+	t.clock.visible = true
+	g.prompt.text = "Bot: Juggernaut   ·   Enter"
+	g.prompt.visible = true
+	m.hud.msgs.clear()
+	m.hud.toast("Time trial  0:42.31  ·  your first best", Color.WHITE)
+	m.hud.toast("Trial cancelled - left the course", Color.WHITE)
+	for sz in [Vector2i(1280, 720), Vector2i(1706, 775), Vector2i(1920, 1080)]:
+		main.get_window().size = sz
+		for _i in 40:
+			await main.get_tree().process_frame
+		var vs := m.get_viewport().get_visible_rect().size
+		var others := {
+			"fps": Overlay.fps_lbl.get_global_rect(),
+			"minimap": Rect2(HudStyle.safe_pad(vs), Vector2(196, 196)),
+			"banner": m.arena.hint.get_global_rect(),
+			"meter": m.arena.meter.get_global_rect(),
+			"practice bar": Practice.of(m).bar.get_global_rect(),
+			"kit drill": _kit_panel(m),
+			"hunter": Rect2(vs * 0.5 - HUNTER_BOX * 0.5, HUNTER_BOX),  # (the camera keeps the hunter mid-screen)
+		}
+		for i in m.hud.msgs.rects().size():
+			others["toast %d" % i] = m.hud.msgs.rects()[i]
+		var mine := {"clock": t.clock.get_global_rect(), "prompt": g.prompt.get_global_rect()}
+		var real := others.values().all(func(r: Rect2): return r.has_area())
+		ok("every reserved rect is real at %dx%d" % [sz.x, sz.y], real and others.size() == 9, str(others))
+		var clash := []
+		for a_k in mine:
+			for b_k in others:
+				if (mine[a_k] as Rect2).intersects(others[b_k]):
+					clash.append("%s/%s" % [a_k, b_k])
+		if (mine["clock"] as Rect2).intersects(mine["prompt"]):
+			clash.append("clock/prompt")
+		ok("no overlap at %dx%d (window %s)" % [sz.x, sz.y, vs], clash.is_empty(), "%s %s" % [clash, mine])
+	t.stop()
+	g.prompt.visible = false
+
+
+## Each station kind has a sign that names its purpose and the interact key; the bot pen's says how to spawn a bot.
+func _signs(m: Match) -> void:
+	var texts := []
+	for ch in m.get_children():
+		if ch is Label3D and (ch as Label3D).text.contains("Stand on a pedestal"):
+			texts.append((ch as Label3D).text)
+	var key := Settings.key_cap("interact")
+	var bot := texts.filter(func(x): return x.contains("Practise your combos"))
+	var spawn := " ".join(PackedStringArray(bot)).replace("\n", " ").contains("press %s to spawn a sparring bot" % key)
+	ok("one sign per station kind", texts.size() == Grounds.SIGNS.size(), str(texts.size()))
+	ok("the bot pen's sign says what it is for and how to spawn a bot", bot.size() == 1 and spawn, str(bot))
+
+
+## The kit drill's banner (a top-centre panel the Training Grounds always shows), through its `_panel` field.
+func _kit_panel(m: Match) -> Rect2:
+	for ch in Practice.of(m).get_children():
+		if ch is KitDrill:
+			return (ch.get("_panel") as Control).get_global_rect()
+	return Rect2()

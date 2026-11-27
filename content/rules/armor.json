@@ -1,5 +1,6 @@
 {
  "_doc": "Armor tiers, matched to the source (docs/ARMOUR_PARITY.md; read by ArmorRules into Hunter.ARMOR_TIERS). Every hunter starts on tier 0 and levels up by dealing damage (xp = damage dealt to reach the tier). While durability is above 0, a hit is cut by dr (the share blocked); what gets through hurts health and wears durability by the same amount. dur = durability in our health units: the source's durability x 0.14 (our Medium 145 HP / the source's medium ~1,040 HP), so the same for every class. xp = the source's 2,000 / 3,600 / 12,000 / 20,000 x 0.14. col = the bar colour.",
+ "confirm": {"pitch_empty": 0.7, "_doc": "The armour ring on a hit (Juice.hit) is pitched by the shell left: x1 at full, x pitch_empty as it runs out [reference data: the confirm cue takes the armour-left share]."},
  "tiers": [
   {"name": "Common", "col": "dfe9f7", "xp": 0, "dr": 0.2, "dur": 350},
   {"name": "Uncommon", "col": "7fe08a", "xp": 280, "dr": 0.25, "dur": 350},
