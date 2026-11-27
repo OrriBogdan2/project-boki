@@ -5,6 +5,7 @@ archetypes/archer.json:body.hit_r	0.408
 archetypes/archer.json:body.legs	2.35
 archetypes/archer.json:body.neck	-0.05
 archetypes/archer.json:body.size	1.054
+archetypes/archer.json:body.top_h	1.69
 archetypes/archer.json:dash.ally_r	6.0
 archetypes/archer.json:dash.cd	9.5
 archetypes/archer.json:dash.inside_boost	0.33
@@ -91,6 +92,7 @@ archetypes/ashwick.json:body.legs	1.85
 archetypes/ashwick.json:body.neck	-0.02
 archetypes/ashwick.json:body.shoulder	0.88
 archetypes/ashwick.json:body.size	1.185
+archetypes/ashwick.json:body.top_h	1.7
 archetypes/ashwick.json:body.torso	0.9
 archetypes/ashwick.json:dash.air_dist	3.4
 archetypes/ashwick.json:dash.air_keep	0.5
@@ -206,6 +208,7 @@ archetypes/bulwark.json:body.legs	0.46
 archetypes/bulwark.json:body.neck	0.0
 archetypes/bulwark.json:body.shoulder	1.35
 archetypes/bulwark.json:body.size	1.464
+archetypes/bulwark.json:body.top_h	3.01
 archetypes/bulwark.json:body.torso	1.06
 archetypes/bulwark.json:dash.cd	8.0
 archetypes/bulwark.json:dash.charge	4.2
@@ -340,6 +343,7 @@ archetypes/dolm.json:body.hit_r	0.411
 archetypes/dolm.json:body.legs	2.9
 archetypes/dolm.json:body.neck	-0.02
 archetypes/dolm.json:body.size	0.798
+archetypes/dolm.json:body.top_h	1.91
 archetypes/dolm.json:dash.cd	12.0
 archetypes/dolm.json:dash.dist	2.8
 archetypes/dolm.json:dash.dmg	12.0
@@ -488,6 +492,7 @@ archetypes/dredge.json:body.legs	1.5
 archetypes/dredge.json:body.neck	-0.16
 archetypes/dredge.json:body.shoulder	0.9
 archetypes/dredge.json:body.size	1.273
+archetypes/dredge.json:body.top_h	2.7
 archetypes/dredge.json:body.torso	0.95
 archetypes/dredge.json:dash.air.cd	12.5
 archetypes/dredge.json:dash.air.rank_cut	2.0
@@ -508,9 +513,6 @@ archetypes/dredge.json:e.angle	110.0
 archetypes/dredge.json:e.cooldown	7.0
 archetypes/dredge.json:e.dive	28.0
 archetypes/dredge.json:e.dmg	25.0
-archetypes/dredge.json:e.hop	1.8
-archetypes/dredge.json:e.hop_from	0.14
-archetypes/dredge.json:e.hop_t	0.2
 archetypes/dredge.json:e.quake_r	3.2
 archetypes/dredge.json:e.radius	3.0
 archetypes/dredge.json:e.rank3_stun	0.2
@@ -540,6 +542,7 @@ archetypes/dredge.json:resource.back_k	0.5
 archetypes/dredge.json:resource.heal_knock	0.16
 archetypes/dredge.json:resource.max	10
 archetypes/dredge.json:resource.per_stack	0.025
+archetypes/dredge.json:rmb.arrive_stun	0.9
 archetypes/dredge.json:rmb.charges	1
 archetypes/dredge.json:rmb.cooldown	12.0
 archetypes/dredge.json:rmb.dmg	6.0
@@ -579,6 +582,7 @@ archetypes/gil.json:body.hit_r	0.375
 archetypes/gil.json:body.legs	1.03
 archetypes/gil.json:body.shoulder	1.14
 archetypes/gil.json:body.size	1.391
+archetypes/gil.json:body.top_h	1.92
 archetypes/gil.json:body.torso	1.0
 archetypes/gil.json:dash.cd	8.0
 archetypes/gil.json:dash.dist	4.5
@@ -630,6 +634,7 @@ archetypes/gil.json:lmb.tide.dmg[0]	10.0
 archetypes/gil.json:lmb.tide.dmg[1]	22.0
 archetypes/gil.json:lmb.tide.full	0.8
 archetypes/gil.json:lmb.tide.kb	6.0
+archetypes/gil.json:lmb.tide.kb_full	10.0
 archetypes/gil.json:lmb.tide.reach	1.6
 archetypes/gil.json:lmb.tide.time	0.2
 archetypes/gil.json:lmb.tide.w	1.4
@@ -694,6 +699,7 @@ archetypes/gunslinger.json:body.legs	2.3
 archetypes/gunslinger.json:body.neck	-0.02
 archetypes/gunslinger.json:body.shoulder	0.8
 archetypes/gunslinger.json:body.size	0.941
+archetypes/gunslinger.json:body.top_h	1.63
 archetypes/gunslinger.json:body.torso	0.92
 archetypes/gunslinger.json:dash.air_k	0.667
 archetypes/gunslinger.json:dash.cd	8.5
@@ -751,9 +757,10 @@ archetypes/gunslinger.json:rmb.burr.hit_dmg	22.0
 archetypes/gunslinger.json:rmb.burr.lane_w	0.72
 archetypes/gunslinger.json:rmb.burr.push	11.0
 archetypes/gunslinger.json:rmb.burr.range	10.5
+archetypes/gunslinger.json:rmb.burr.rattle_k	0.2
 archetypes/gunslinger.json:rmb.burr.speed	26.0
 archetypes/gunslinger.json:rmb.burr.wall_daze	0.6
-archetypes/gunslinger.json:rmb.burr.wall_stun	0.7
+archetypes/gunslinger.json:rmb.burr.wall_stun	1.2
 archetypes/gunslinger.json:rmb.charges	1
 archetypes/gunslinger.json:rmb.cooldown	6.5
 archetypes/gunslinger.json:turn.e.early	30.0
@@ -770,6 +777,7 @@ archetypes/gunslinger.json:x.per_rank.tick_dmg[0]	0.7
 archetypes/gunslinger.json:x.per_rank.tick_dmg[1]	0.7
 archetypes/gunslinger.json:x.radius	3.4
 archetypes/gunslinger.json:x.range	14.0
+archetypes/gunslinger.json:x.rattle_k	0.2
 archetypes/gunslinger.json:x.slow	0.3
 archetypes/gunslinger.json:x.slow_t	0.6
 archetypes/gunslinger.json:x.tick	0.5
@@ -783,6 +791,7 @@ archetypes/juggernaut.json:body.hit_r	0.429
 archetypes/juggernaut.json:body.legs	2.05
 archetypes/juggernaut.json:body.neck	-0.012
 archetypes/juggernaut.json:body.size	0.825
+archetypes/juggernaut.json:body.top_h	1.52
 archetypes/juggernaut.json:dash.cd	10.4
 archetypes/juggernaut.json:dash.dist	4.5
 archetypes/juggernaut.json:dash.dodge_rage	15.0
@@ -943,6 +952,7 @@ archetypes/mage.json:body.legs	1.95
 archetypes/mage.json:body.neck	-0.05
 archetypes/mage.json:body.shoulder	0.85
 archetypes/mage.json:body.size	1.235
+archetypes/mage.json:body.top_h	1.92
 archetypes/mage.json:dash.auto	0.9
 archetypes/mage.json:dash.cd	8.0
 archetypes/mage.json:dash.dist[0]	6.02
@@ -1037,6 +1047,7 @@ archetypes/ostra.json:body.hit_h	2.22
 archetypes/ostra.json:body.hit_r	0.434
 archetypes/ostra.json:body.legs	1.8
 archetypes/ostra.json:body.size	0.952
+archetypes/ostra.json:body.top_h	1.67
 archetypes/ostra.json:dash.aim_max	1.5
 archetypes/ostra.json:dash.ally_shield	0.326
 archetypes/ostra.json:dash.ally_shield_t	3.0
@@ -1131,6 +1142,7 @@ archetypes/rimewright.json:body.legs	2.04
 archetypes/rimewright.json:body.neck	-0.04
 archetypes/rimewright.json:body.shoulder	0.84
 archetypes/rimewright.json:body.size	1.11
+archetypes/rimewright.json:body.top_h	1.76
 archetypes/rimewright.json:body.torso	0.96
 archetypes/rimewright.json:dash.air_fall	1.5
 archetypes/rimewright.json:dash.cd	13.0
@@ -1230,6 +1242,7 @@ archetypes/tender.json:body.legs	0.98
 archetypes/tender.json:body.neck	-0.036
 archetypes/tender.json:body.shoulder	1.12
 archetypes/tender.json:body.size	0.92
+archetypes/tender.json:body.top_h	1.38
 archetypes/tender.json:body.torso	1.02
 archetypes/tender.json:dash.air.burst	0.55
 archetypes/tender.json:dash.air.cd	14.0
@@ -1258,6 +1271,7 @@ archetypes/tender.json:e.time	2.5
 archetypes/tender.json:e.toss_boost_t	1.0
 archetypes/tender.json:e.toss_speed	45.0
 archetypes/tender.json:e.wisp_k	5.0
+archetypes/tender.json:lmb.look_k	0.85
 archetypes/tender.json:lmb.range_k	1.25
 archetypes/tender.json:lmb.size_k	1.5
 archetypes/tender.json:lmb.wait	1.0
@@ -1328,6 +1342,7 @@ archetypes/thief.json:body.hit_r	0.398
 archetypes/thief.json:body.legs	2.04
 archetypes/thief.json:body.shoulder	0.92
 archetypes/thief.json:body.size	1.155
+archetypes/thief.json:body.top_h	1.77
 archetypes/thief.json:body.torso	0.96
 archetypes/thief.json:dash.cd	5.0
 archetypes/thief.json:dash.dist	4.5
@@ -1417,8 +1432,8 @@ rules/kit_parity.json:rows[10].tol	0.001
 rules/kit_parity.json:rows[10].value	1.225
 rules/kit_parity.json:rows[11].tol	0.001
 rules/kit_parity.json:rows[11].value	1.5
-rules/kit_parity.json:rows[12].tol	0.34
-rules/kit_parity.json:rows[12].value	6.75
+rules/kit_parity.json:rows[12].tol	0.37
+rules/kit_parity.json:rows[12].value	7.43
 rules/kit_parity.json:rows[13].tol	4.5
 rules/kit_parity.json:rows[13].value	31.5
 rules/kit_parity.json:rows[14].tol	0.001
