@@ -5,8 +5,8 @@ extends "res://tools/hunter_size_sheet.gd"
 ## body silhouette (HSIL lean rows, 8 facings) so the target on-screen height can be checked.
 ## Needs a renderer (jobq --needs gpu).
 
-const FRAME := Vector2i(3840, 2160)
-const GAME_ZOOM := 1.4572
+const V3_FRAME := Vector2i(3840, 2160)
+const V3_ZOOM := 1.4572
 
 
 func run(main_node: Node) -> void:
@@ -23,7 +23,7 @@ func run(main_node: Node) -> void:
 			dir = String(a).substr(12)
 		if String(a).begins_with("--k-file="):
 			ks = JSON.parse_string(FileAccess.get_file_as_string(String(a).substr(9)))
-	main.get_window().size = FRAME
+	main.get_window().size = V3_FRAME
 	DirAccess.make_dir_recursive_absolute(dir)
 	Save.no_write = true
 	Settings.v["tips"] = false
@@ -38,9 +38,9 @@ func run(main_node: Node) -> void:
 		for tag in ["live", "new"]:
 			var k := 1.0 if tag == "live" else float(ks.get(hero, 1.0))
 			_draw_k(hero, k)
-			m.cam.user_zoom = GAME_ZOOM
-			m.cam.zoom = GAME_ZOOM
-			m.cam.zoom_to = GAME_ZOOM
+			m.cam.user_zoom = V3_ZOOM
+			m.cam.zoom = V3_ZOOM
+			m.cam.zoom_to = V3_ZOOM
 			m.player.render(0.0, 1.0)
 			await _settle(at)
 			m.player.render(0.0, 1.0)
