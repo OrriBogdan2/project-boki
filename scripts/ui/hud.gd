@@ -102,8 +102,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _process(delta: float) -> void:
 	Prof.begin("hud_tick")
-	if full_map and full_map.is_open and full_map.auto and not (m.skydrop and m.skydrop.planning):
-		full_map.close()      # the ship's off: the planning map steps aside
+	RideView.tick(m, full_map)
 	_tick_wheel()
 	reticle.tick(delta)
 	_hud_tick(delta)
@@ -1425,12 +1424,7 @@ func _draw_ship_prompt(sz: Vector2) -> void:
 	var squad := Life.has_mates(m, p)
 	var rr := Rect2(Vector2(sz.x * 0.5 - w * 0.5, 92), Vector2(w, 122 if squad else 92))
 	_panel(rr, Color(0.06, 0.07, 0.1, 0.88), 14)
-	if dr and dr.planning:
-		_ctext(Vector2(sz.x * 0.5, rr.position.y + 36), "Plan your drop", 26, GOLD, big)
-	elif waits:
-		_ctext(Vector2(sz.x * 0.5, rr.position.y + 36), "%s leads the drop" % lead.pname, 26, GOLD, big)
-	else:
-		_ctext(Vector2(sz.x * 0.5, rr.position.y + 36), "Press %s to launch" % Settings.key_cap("jump"), 26, GOLD, big)
+	_ctext(Vector2(sz.x * 0.5, rr.position.y + 36), RideView.title(m), 26, GOLD, big)
 	var sub := "Pick your spot on the map. Everyone left aboard drops in %ds" % int(ceil(left))
 	if dr and dr.planning: sub = "%s opens the map to ping a spot" % Settings.key_cap("map")
 	elif waits: sub = "You'll ride the squad's rocket down with them. %ds left aboard" % int(ceil(left))

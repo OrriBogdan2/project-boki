@@ -55,6 +55,7 @@ var camps: Camps = Camps.new(self)     # the map's fixed monster camps (see Camp
 var lairs: Lairs = null     # boss lairs: sealed arenas, their bosses and Rare Eggs (see Lairs)
 var mate_look: MateLook = null   # F1-F3: look at a teammate
 var truce: Truce = null     # emotes and truces between squads (see Truce)
+var warmed := false  # the loading screen's warm-up has drawn everything once (RideView may switch 3D off)
 var skydrop: DropSquad = null  # the planning phase before the ship sets off: drop leaders, formations (DropSquad)
 var spawn_plan: SpawnPlan = null   # which of the map's candidate spawns are live this match (see SpawnPlan)
 var time := 0.0
@@ -226,6 +227,7 @@ func warm_up(progress := Callable()) -> void:
 		h.ak.warm_fx(Vector3(0, -600, 0))      # the kits' effect pools, filled deep under the map
 	SpanLooks.of(self).warm()      # bridge slabs and platform pads (a frost glove's first bridge: 8-10 ms)
 	await WarmUp.new(self).run(progress)
+	warmed = true
 
 ## Tooling (--perf-bench --bench-probe): microseconds per section of step(), summed while prof_on.
 static var prof_on := false
@@ -250,8 +252,8 @@ var _render_n := 0
 func _render_now(e: Ent, cf: Vector3, near2: float) -> bool:
 	if e.dead or e.lod_dt > 0.2:
 		return true
-	if Vector2(e.pos.x - cf.x, e.pos.z - cf.z).length_squared() < near2:
-		return true
+	if not get_viewport().disable_3d and Vector2(e.pos.x - cf.x, e.pos.z - cf.z).length_squared() < near2:
+		return true      # (none is near while 3D is off: RideView)
 	return (_render_n + e.get_instance_id()) % 4 == 0
 
 ## Monsters, kin, chests, crates, shrines and loot are each several meshes; from the skyship the
@@ -3136,7 +3138,7 @@ func _process(delta: float) -> void:
 		var fp := player.model.global_position + Vector3(0, 0.8, 0) if player and player.model and not player.out else Vector3(0, -999, 0)
 		world.wall_mat.set_shader_parameter("focus", fp)
 	Prof.begin("render_entities")
-	for e in hunters: e.render(delta, alpha)
+	RideView.render_hunters(self, delta, alpha)      # (3D off behind the ride map: a few a frame)
 	_vprof("hunters")
 	# monsters and wild kin well away from the view animate at a quarter rate (each catches up with
 	# the time it skipped); near ones every frame
