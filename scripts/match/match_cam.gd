@@ -18,6 +18,7 @@ static func update(m: Match, delta: float, alpha: float) -> void:
 		cam.use_style(sty)
 	cam.lead_vel = Vector3.ZERO  # only a live glide leans the view (set below)
 	cam.scout_on = player != null and player.scout
+	cam.target = player  # (the lean's HUD room reads your plate's height off your own body)
 	cam.hud_keep = HudScale.drawn if m.hud != null and (m.hud as CanvasLayer).visible else {}
 	if player and player.riding and player.rocket == null:
 		# aboard the skyship: a low view from just behind and above it, looking ahead along its

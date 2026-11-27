@@ -27,8 +27,8 @@ across. Bodies stand upright like the reference's (`CamRig.CHAR_LEAN` 0; a
 start, landing, glider tilt) are the body's own and stay.
 
 What follows a Hunter's size (all read `Arch.match_k`): overhead and hover plates and their anchors (`Hud._head`,
-`HunterZone.rect_of`, the `CamRig` plate lean; a plate sits at its own offset or 0.6 m over the model's tallest
-point (`body.top_h`, `HudPlate.up`), whichever is higher, so a bigger body does not float its plate), stun stars, vulnerable sparks, glider heat smoke, a shoulder Boki's bubble, Sparkle's fingertip.
+`HunterZone.rect_of`, the `CamRig` plate lean (`CamRig.target`, set by `MatchCam.update`); a plate sits at its own
+offset or 1.0 m over the model's tallest point (`body.top_h`, `HudPlate.up`; upright, its 17 px hang and some air), whichever is higher, so a bigger body does not float its plate), stun stars, vulnerable sparks, glider heat smoke, a shoulder Boki's bubble, Sparkle's fingertip.
 Meshy-native stride follows the model scale (`WardenNative._stride_k`).
 
 `--hunter-size-sheet --shots-dir=<dir>` (GPU) prints one HSIZE row per hunter for main's size and the parity size;
