@@ -161,11 +161,8 @@ const LEAN_HEAD_START := 0.5  # share of the stronger parent's lean a hatchling 
 
 const PLAYS := ["fetch", "brush", "bath", "chat", "pet"]
 
-## Play is practice: a finished game of fetch trains this stat by one point, as long as the Boki has
-## the energy (PLAY_TRAIN_ENERGY, the same line under which the Training post drill teaches less).
-const PLAY_TRAINS := {"fetch": "speed"}
-
-const PLAY_TRAIN_ENERGY := 35.0
+## Play (fetch, brush, pet...) is joy and bond only: it never raises a stat. Stats come from stat bites the
+## player carries home and gives (see TrainRuns and briefs/design/GARDEN_MODERN_BALANCE.md "Stat economy").
 
 const PLAY_NAMES := {
 	"fetch": "playing fetch", "brush": "being brushed", "bath": "baths", "chat": "chatting", "pet": "scratches"
@@ -231,6 +228,7 @@ static func ensure(rec: Dictionary) -> void:
 	for old in ["pet_m", "played", "fed_m", "trained_m", "talked"]:
 		rec.erase(old)  # the old once-per-expedition care stamps (now care_day)
 	give_habit(rec)
+	BaseAxes.ensure(rec)  # the lean its care has raised (BaseLife reads it)
 
 
 ## base_mode's floors (care.json sulky): needs bottom out at sulky, never sick (GARDEN.md 2); {} off base_mode.
@@ -432,6 +430,7 @@ static func care_day(rec: Dictionary, kind: String) -> bool:
 	if now - float(days.get(kind, 0.0)) < float(Content.rules("care")["care_day_s"]):
 		return false
 	days[kind] = now
+	BaseAxes.care(rec, kind)
 	return true
 
 
@@ -488,13 +487,6 @@ static func match_mods(rec: Dictionary) -> Dictionary:
 		"skill": 1.05 if trust >= 50.0 else 1.0,
 		"mood": clampf((c - 50.0) / 50.0, -1.0, 1.0),
 	}
-
-
-## A game it just finished: the point it trains (0 when too tired or at its cap for now).
-static func play_train(rec: Dictionary, play: String) -> int:
-	if not PLAY_TRAINS.has(play) or need(rec, "energy") < PLAY_TRAIN_ENERGY:
-		return 0
-	return add_stat(rec, String(PLAY_TRAINS[play]), 1)
 
 
 ## What its raising does for it on an expedition, in one line (the expedition panel): match_mods

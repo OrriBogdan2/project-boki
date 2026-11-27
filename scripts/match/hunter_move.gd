@@ -2,18 +2,20 @@ class_name HunterMove
 extends RefCounted
 ## Per-hunter run speed, ground acceleration and tall-ledge climbing, plus the ground stop, dash exit,
 ## fall, glide, dive, mantle and glider heat tunables every hunter shares, from content/rules/hunter_move.json
-## ([game data]: SUPERVIVE's movement settings, uu converted to metres).
+## ([game data]: the reference's movement settings, uu converted to metres).
 
-const CHASE_BONUS := 0.18      # share of run speed: heading at whoever took your kin
+# terraces a plain jump and mantle tops: the wall tier (four, LAYOUT_RULES) is the wall kick's job (decision 0007)
+const JUMP_TIERS := 3
+const CHASE_BONUS := 0.18  # share of run speed: heading at whoever took your kin
 
 static var _rules: Dictionary = MoveRules.data()
 static var _phys: Dictionary = _rules["physics"]
 static var brake_decel: float = _phys["brake"]
 ## 1/s: GroundFriction x BrakingFrictionFactor, the share of the speed the walking brake sheds per second
 static var brake_friction: float = _phys["ground_friction"] * _phys["braking_friction_factor"]
-static var braking_substep: float = _phys["braking_substep"]      # s, the longest sub-step of a brake
-static var brake_stop_speed: float = _phys["brake_stop_speed"]    # m/s, a brake leaving less stops dead
-static var min_tick: float = _phys["min_tick"]                    # s, the shortest sub-step braked
+static var braking_substep: float = _phys["braking_substep"]  # s, the longest sub-step of a brake
+static var brake_stop_speed: float = _phys["brake_stop_speed"]  # m/s, a brake leaving less stops dead
+static var min_tick: float = _phys["min_tick"]  # s, the shortest sub-step braked
 static var dash_exit_run: float = _phys["dash_exit_run"]
 static var fall_max: float = _phys["fall_cap"]
 static var abyss_fall_max: float = _phys["abyss_fall_cap"]
@@ -22,15 +24,17 @@ static var abyss_slow_to: float = _phys["abyss_slow_to"]
 static var glide_height: float = _phys["glide_height"]
 static var glide_pull_vy: float = _phys["glide_pull_vy"]
 static var glide_start_vy: float = _phys["glide_start_vy"]
+static var glide_rise_vy: float = _phys["glide_rise_vy"]  # m/s, the most rise an open near the ground keeps
+static var glide_rise_h: Array = _phys["glide_rise_h"]  # m above the ground: that rise eases to none between
 static var glide_sink: float = _phys["glide_sink"]
 static var glide_heat_s: float = _phys["glide_heat_s"]
 static var lift_heat: float = _phys["lift_heat"]
 static var lift_tap_heat: float = _phys["lift_tap_heat"]
-static var hit_heat_per_dmg: float = _phys["hit_heat"] * 0.30 / 34.5      # 34.5 damage heats it hit_heat x 30%
+static var hit_heat_per_dmg: float = _phys["hit_heat"] * 0.30 / 34.5  # 34.5 damage heats it hit_heat x 30%
 static var overheat_burn: float = _phys["overheat_burn"]
 static var overheat_speed: float = _phys["overheat_speed"]
 static var overheat_lift: float = _phys["overheat_lift"]
-static var turn_rate: float = deg_to_rad(_phys["turn_rate"])      # rad/s, the body turning to the cursor
+static var turn_rate: float = deg_to_rad(_phys["turn_rate"])  # rad/s, the body turning to the cursor
 static var mantle_vy_cap: float = _phys["mantle_vy_cap"]
 static var mantle_pull: float = _phys["mantle_pull"]
 static var mantle_launch_keep: float = _phys["mantle_launch_keep"]
@@ -45,32 +49,45 @@ static var haste: float = _phys["haste"]
 static var coyote_s: float = _phys["coyote_s"]
 static var step_down: float = _phys["step_down"]
 static var jump_buffer_s: float = _phys["jump_buffer_s"]
+static var land_buffer_h: float = _phys["land_buffer_h"]  # m: falling closer, a jump press waits for the landing
+static var glide_floor_rise: float = _phys["glide_floor_rise"]  # m: rising closer, the glider can't open
+static var jump_trim_k: float = _phys["jump_trim_k"]  # 1/s^2, the dash-jump trim spring's rate (JumpTrim)
 static var sneak_speed: float = _phys["sneak_speed"]
-static var body_scale: float = _rules["body_scale"]      # our hunter's height over the source's (speed, accel, glide)
+static var glide_regen_s: float = _phys["glide_regen_s"]  # s, an empty glider refills on the ground
+static var body_scale: float = _rules["body_scale"]  # our hunter's height over the source's (speed, accel, glide)
 ## m/s, the glide cruise every hunter shares (MaxGlide), at body scale so a run into a glide keeps the source's ratio
 static var glide_cruise: float = _phys["glide_cruise"] * body_scale
 ## m/s^2, the glider's pull toward where you steer at or under cruise, scaled with the cruise so a turn takes as long
 static var glide_accel: float = _phys["glide_accel"] * body_scale
+## m/s: a jump faster across the ground than [0] is trimmed (JumpTrim), to [0] of jump_trim_to from there up to [1]
+static var jump_trim_in := Vector2(float(_phys["jump_trim_in"][0]), float(_phys["jump_trim_in"][1])) * body_scale
+static var jump_trim_to := Vector2(float(_phys["jump_trim_to"][0]), float(_phys["jump_trim_to"][1])) * body_scale
+
 
 static func rules() -> Dictionary:
 	return _rules
+
 
 ## This archetype's movement row (the default row for none or an unknown id).
 static func of(arch: String) -> Dictionary:
 	return _rules.get(arch, _rules["default"])
 
+
 ## This archetype's walk speed (m/s): its source MoveSpeed at our body scale. Every mode reads it.
 static func speed(arch: String) -> float:
 	return float(of(arch)["speed"]) * body_scale
+
 
 ## This archetype's ground acceleration (m/s^2), at the same scale so reaching the walk takes the source's time.
 static func accel(arch: String) -> float:
 	return float(of(arch)["accel"]) * body_scale
 
+
 ## Sets the hunter's run speed and acceleration for its archetype.
 static func apply(h: Hunter) -> void:
 	h.base_speed = speed(h.arch)
 	h.ground_accel = accel(h.arch)
+
 
 ## One step of walking on the ground, shared by the match and the farm: toward `want` (m/s) at `acc`, speed over
 ## it shed under the walking brake; with no keys, the brake alone. grip < 1 on ice.
@@ -79,10 +96,12 @@ static func walk(hv: Vector2, want: Vector2, acc: float, grip: float, dt: float)
 		return brake(hv, grip, dt)
 	return Loco.accel_to(hv, want, acc * grip, 0.0, brake_rate(hv.length()) * grip, dt)
 
+
 ## A standing body whose ground drops `drop` metres in a step stays on it (down a flight, a ramp or a stone):
 ## more than step_down is a fall.
 static func sticks(drop: float) -> bool:
 	return drop <= step_down
+
 
 ## The height a hunter stands at for the camera: the ground under it, or where it last stood over the void,
 ## so a jump or a fall moves the view only with the ground (Cam.follow).
@@ -90,31 +109,52 @@ static func stand_y(h: Hunter) -> float:
 	var g := h.ground()
 	return g if g > World.VOID + 1.0 else h.last_gy
 
+
 ## The one rule for ground speed: the move-speed bonuses (shares of run speed) add, the slows and
 ## states multiply that total, and nothing passes speed_cap ([game data] MaxMoveSpeed 700 uu/s).
 static func ground_speed(run: float, bonus: float, mult: float) -> float:
 	return clampf(run * maxf(0.0, 1.0 + bonus) * mult, 0.0, speed_cap)
+
 
 ## Every move-speed bonus a hunter has right now, summed: gear, perk orbs, kin carry passives, owner
 ## points, merge and kin-ability buffs (gear_stat), the haste status, its kit's own bursts, its mount's
 ## gait and the chase after a kin thief.
 static func speed_bonus(h: Hunter, mv: Vector2) -> float:
 	var b := h.gear_stat("speed") + (haste if h.haste_t > 0.0 else 0.0)
-	if h.ak: b += h.ak.speed_bonus()
-	if h.mounted() and h.grounded: b += h.mount_speed() - 1.0
+	if h.ak:
+		b += h.ak.speed_bonus()
+	if h.mounted() and h.grounded:
+		b += h.mount_speed() - 1.0
 	var c := h.chase
 	if c and not c.out and not c.extracted and mv.length() > 0.1 and mv.normalized().dot(h.dir_to(c)) > 0.5:
 		b += CHASE_BONUS
 	return b
 
+
 ## True when this hunter can mantle a double-high ledge (Archer and Juggernaut).
 static func climbs_tall(h: Hunter) -> bool:
 	return bool(of(h.arch).get("climb_tall", false))
+
+
+## How far above you an airborne hunter still catches a lip (m): the suction's reach (more for the tall climbers),
+## but a jump never tops more than JUMP_TIERS terraces over where you stood (one more after a wall kick, or for a
+## tall climber). A glide, or a launch higher than a jump explains, keeps the whole reach.
+static func ledge_reach(h: Hunter) -> float:
+	var tall := climbs_tall(h)
+	var reach := HunterFeel.mantle_reach + (HunterFeel.tall_climb_extra if tall else 0.0)
+	var kicked := h.wall_moves.chain > 0
+	var hop := Hunter.JUMP_V * Hunter.JUMP_V / (2.0 * Hunter.H_GRAV) + (WallMoves.KICK_RISE if kicked else 0.0)
+	if h.gliding or h.pos.y - h.last_gy > hop + 0.05:
+		return reach
+	var tiers := JUMP_TIERS + int(kicked) + int(tall)
+	return minf(reach, h.last_gy + tiers * World.LEVEL + 0.05 - h.pos.y)
+
 
 ## The source's walking brake at `speed` (m/s^2): brake_friction's share of the speed plus brake_decel. UE
 ## sheds any speed over the run this way, keys held or not, so a knock or a kit step slides out the same.
 static func brake_rate(speed_v: float) -> float:
 	return brake_friction * speed_v + brake_decel
+
 
 ## Ground speed after a step with no keys: UE's walking brake (ApplyVelocityBraking) exactly, so a let-go from a
 ## run slides 0.31-0.37 m and a knock or kit step slides out under the same rule. A step longer than
@@ -133,10 +173,12 @@ static func brake(hv: Vector2, grip: float, dt: float) -> Vector2:
 			return Vector2.ZERO
 	return Vector2.ZERO if v.length() <= brake_stop_speed else v
 
+
 ## Velocity a dash leaves you with: no hard stop, it hands over at dash_exit_run of run speed (never
 ## faster than the dash), and the walk, brake or air carry takes it from there.
 static func dash_exit(dash_v: Vector2, run: float) -> Vector2:
 	return dash_v.limit_length(run * dash_exit_run)
+
 
 ## A knock (one that sets knock_t) or a stun landing on an air Shift dash after its i-frames ends the dash on the
 ## spot, as a glide press does: the knock's push or the stun's stop takes over (source: a stun is "no movement",
@@ -146,6 +188,7 @@ static func cut_air_dash(h: Hunter) -> void:
 		return
 	h.roll_t = 0.0
 	h.shove = {}
+
 
 ## A ground dash that runs off a ledge keeps its own course (distance, speed curve) but falls as it goes: the
 ## height hold is an air dash's (Hunter.roll_falls, set as the ground goes). It ends in the air with the usual dash
@@ -159,11 +202,13 @@ static func dash_off_ledge(h: Hunter) -> void:
 	if h.ak and not h.grounded:
 		h.ak.on_dash_off_ledge()
 
+
 ## The step a ground dash ends in runs the dash for the `left` seconds it still had, then the hand-over: the
 ## metres to add to that step's travel at `run_v`, so the dash covers its whole distance at any tick rate. (An
 ## air dash needs none: it carries its own speed through the step, under air drag after.)
 static func dash_rest(dash_v: Vector2, run_v: Vector2, left: float) -> Vector2:
 	return (dash_v - run_v) * maxf(0.0, left)
+
 
 ## A dash's speed at u (0..1 through it) against its mean, on a piecewise-linear curve of [u, k] knots
 ## (content/rules/dash_feel.json "curve": mean 1, so the dash still covers its distance).
@@ -175,11 +220,13 @@ static func dash_k(curve: Array, u: float) -> float:
 			return lerpf(float(a[1]), float(b[1]), (u - float(a[0])) / maxf(0.001, float(b[0]) - float(a[0])))
 	return float(curve[-1][1])
 
+
 ## Metres speed v0 slides on flat ground under brake_rate before it falls to `to_speed` m/s (0: a let-go; the run
 ## speed: keys held). A kit step with a measured total takes this off its dash so the slide doesn't add to it.
 static func slide(v0: float, to_speed := 0.0) -> float:
 	var k := brake_friction
 	return (v0 - to_speed) / k - brake_decel / (k * k) * log((k * v0 + brake_decel) / (k * to_speed + brake_decel))
+
 
 ## The speed that slides `dist` metres before it falls to `to_speed` (the inverse of slide; a lunge's push).
 static func slide_speed(dist: float, to_speed := 0.0) -> float:
@@ -193,11 +240,13 @@ static func slide_speed(dist: float, to_speed := 0.0) -> float:
 			hi = mid
 	return hi
 
+
 ## `hv` pushed along unit `dir` up to at least `speed` there, everything across `dir` kept (a knock, a lunge, a
 ## kit's air step): it adds to what you carry instead of overwriting it, so air steering lives on (DECISIONS 11-08).
 static func push(hv: Vector2, dir: Vector2, speed_v: float) -> Vector2:
 	var along := hv.dot(dir)
 	return hv + dir * (maxf(along, speed_v) - along)
+
 
 ## Gravity for a step in the air, capped at fall_cap. The step moves at its mean vertical speed (the half of
 ## the speed change the position integration in Hunter._physics misses is added here), so a jump's apex and
@@ -206,6 +255,7 @@ static func fall(h: Hunter, dt: float) -> void:
 	var vy := maxf(h.vel.y - Hunter.H_GRAV * dt, -fall_cap(h))
 	h.pos.y += 0.5 * (h.vel.y - vy) * dt
 	h.vel.y = vy
+
 
 ## The fastest this hunter falls (m/s): fall_max, easing to abyss_fall_max as it sinks from
 ## abyss_slow_from to abyss_slow_to metres under an island's lip over the abyss (time to recover). A kit's
@@ -217,6 +267,7 @@ static func fall_cap(h: Hunter) -> float:
 		return fall_max
 	var k := clampf((h.lip_y - h.pos.y - abyss_slow_from) / (abyss_slow_to - abyss_slow_from), 0.0, 1.0)
 	return lerpf(fall_max, abyss_fall_max, k)
+
 
 ## Vertical speed after one step up a ledge's face, `left` metres under its lip. Within HunterFeel.mantle_reach it's the
 ## source's suction: gravity as in any jump, plus mantle_pull while you rise slower than mantle_vy_cap, so a
@@ -231,6 +282,7 @@ static func rise_vy(vy: float, left: float, k: float, deep_max: float, dt: float
 		vy = minf(vy + mantle_pull * dt, cap)
 	return vy
 
+
 ## The longest a rise from `depth` metres under a lip takes under rise_vy (s): thrown up to the suction band,
 ## then the band at the cap from a standstill.
 static func rise_time(depth: float) -> float:
@@ -239,9 +291,11 @@ static func rise_time(depth: float) -> float:
 	var deep := (sqrt(c2 + 2.0 * Hunter.H_GRAV * depth) - sqrt(c2 + 2.0 * Hunter.H_GRAV * band)) / Hunter.H_GRAV
 	return deep + band / mantle_vy_cap
 
+
 ## Speed onto a ledge you climb (m/s), from a hunter's run speed.
 static func mantle_launch(run_speed: float) -> float:
 	return maxf(run_speed * mantle_launch_keep, mantle_launch_min)
+
 
 ## Where a body wanting to be at p ends up once it's pushed straight out of every barrier that blocks
 ## it (a Tenzo rock, a raised wall; Verbs.wall_blocks), as World.push_out_blocks does for rock tiles:
@@ -259,12 +313,13 @@ static func push_out_walls(h: Hunter, p: Vector2) -> Vector3:
 		if d.length_squared() >= reach * reach:
 			continue
 		if d.length_squared() < 1e-8:
-			d = Vector2(h.pos.x, h.pos.z) - c      # (dead on its line: back out the side you came from)
+			d = Vector2(h.pos.x, h.pos.z) - c  # (dead on its line: back out the side you came from)
 		# out to a skin past the reach: a body sliding along the face then stays clear of it, where a float's
 		# rounding would otherwise push it a hair with a random normal and eat its speed
 		p = c + d.normalized() * (reach + World.BLOCK_SKIN)
 		top = maxf(top, wt)
 	return Vector3(p.x, p.y, top)
+
 
 ## The keys' velocity against the wall the last step's walk pressed into (n: out of it, zero for
 ## none): its part into the wall is dropped, so the whole run-up goes along the face and you slide at
@@ -275,6 +330,7 @@ static func along_wall(wish: Vector2, n: Vector2) -> Vector2:
 	var into := wish.dot(n)
 	return wish - n * into if into < 0.0 else wish
 
+
 ## Whether a step the walls stopped (b1, b2: World.occupy's answer for the x and z moves) is caught on a
 ## corner and needs the sideways slip. A dash step along a face, its one axis free, is not: it slides at
 ## the tangent part of its speed as the source's dashes do (decision 0047), and the slip would add to it.
@@ -283,9 +339,25 @@ static func caught(dashing: bool, b1: float, b2: float) -> bool:
 		return b1 > 0.0 and b2 > 0.0
 	return b1 > 0.0 or b2 > 0.0
 
+
 ## "About to land": falling, with the ground no further than the jump buffer (and a step more) of falling away,
 ## and never further than 0.9 m. A jump pressed then waits for the landing instead of opening the glider.
 ## `height` is metres above the ground.
+## "About to land" [game data]: falling with the ground under land_buffer_h. A jump pressed then never opens the
+## glider; it is kept until the landing (jump_hold) and jumps there. `height` is metres above the ground.
 static func near_landing(vy: float, height: float) -> bool:
-	var lead := jump_buffer_s + 0.02
-	return vy < 0.0 and height < maxf(0.9, (0.5 * Hunter.H_GRAV * lead - vy) * lead)
+	return vy < 0.0 and height < land_buffer_h
+
+
+## [game data] Too close to the ground for the glider to open: rising under glide_floor_rise, or about to land.
+static func too_low(vy: float, height: float) -> bool:
+	return near_landing(vy, height) or (vy >= 0.0 and height < glide_floor_rise)
+
+
+## Seconds a jump pressed in the air at `vy`, `height` metres over the ground, is kept: about to land, until the
+## landing (the fall's time and a step more), so a press near the ground is never lost; else jump_buffer_s.
+static func jump_hold(vy: float, height: float) -> float:
+	if not near_landing(vy, height):
+		return jump_buffer_s
+	var t := (vy + sqrt(vy * vy + 2.0 * Hunter.H_GRAV * height)) / Hunter.H_GRAV
+	return maxf(jump_buffer_s, t + 0.02)
