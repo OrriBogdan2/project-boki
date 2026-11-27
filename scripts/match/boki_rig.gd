@@ -70,7 +70,7 @@ const FRAME := {
 	},
 	"threadwyrm":
 	{
-		"head": Vector3(0, 0.357, -0.0958),
+		"head": Vector3(0.113, 0.066, -0.150),
 		"top": 0.464,
 		"carry": Vector3(0, 0.517, 0.0491),
 		"ear_tip": Vector3(0.0602, 0.464, 0.0443),
@@ -444,7 +444,7 @@ const FRAME := {
 	},
 	"zephyrak":
 	{
-		"head": Vector3(0, 0.248, -0.0989),
+		"head": Vector3(-0.0275, 0.336, -0.118),
 		"top": 0.341,
 		"carry": Vector3(0, 0.248, 0.00952),
 		"ear_tip": Vector3(0.0786, 0.284, -0.0313),
@@ -582,7 +582,7 @@ const FRAME := {
 	},
 	"caecilith":
 	{
-		"head": Vector3(0, 0.328, -0.146),
+		"head": Vector3(0, 0.405, -0.161),
 		"top": 0.381,
 		"carry": Vector3(0, 0.152, 0.0473),
 		"ear_tip": Vector3(0.0413, 0.369, -0.0734),
@@ -787,7 +787,7 @@ const FRAME := {
 	},
 	"thrumbird":
 	{
-		"head": Vector3(0, 0.557, -0.0858),
+		"head": Vector3(0, 0.347, -0.010),
 		"top": 0.631,
 		"carry": Vector3(0, 0.192, -0.019),
 		"ear_tip": Vector3(0.0119, 0.411, 0.0451),
@@ -866,8 +866,8 @@ const STRIDE := {
 	"umbrathere": [0.25, 0.60],
 	"duskapi": [0.36, 1.43],
 	"glaciyak": [0.35, 1.43],
-	"heatherhorn": [0.35, 1.43],
-	"kilnbadger": [0.34, 1.41],
+	"heatherhorn": [0.24, 1.20],
+	"kilnbadger": [0.39, 1.84],
 	"moundvark": [0.34, 1.41],
 	"tuatrune": [0.33, 1.35],
 	"moonloris": [0.35, 1.41],
@@ -901,6 +901,7 @@ const RUN_SPEED := 2.2  # m/s: from here it gallops (a walk clip sped up past MA
 const MAX_CADENCE := 6.0  # step cycles/s a gait may be sped up to: small animals gallop at 6-8, past it blurs
 const INK_WIDTH := 0.0011  # the outline per metre of camera distance
 const INK_FAR_THIN := 0.5
+const INK_MIN_PX := 0.4  # thinnest line, in drawn px: at 150-180 px tall thinner broke into specks (as the hunters')
 
 ## Softer than the Hunters' painted look (WardenGlb.PAINTED): fur, not armour, and no wash-out at the match zoom.
 const COAT_LOOK := {"far_lift": 0.12, "fres": 0.55, "top_light": 0.45, "rim_amount": 0.25}
@@ -1260,6 +1261,12 @@ func _process(dt: float) -> void:
 		return
 	if not root.is_visible_in_tree():
 		return
+	# a crowded home (RigPace.crowd): the whole step, scripts and skeleton, runs every other frame with the time held
+	var crowded := pace.every == 1 and RigPace.crowd > RigPace.crowd_from
+	if crowded:
+		dt = pace.step(dt, RigPace.is_lead(get_viewport(), root.global_position))
+		if dt <= 0.0:
+			return
 	_flinch.update(root, dt)
 	_water = float(root.get_meta("kwater", 0.0))
 	if _water > 0.0:
@@ -1267,7 +1274,7 @@ func _process(dt: float) -> void:
 	_keep_flex(dt)
 	_track_speed(dt)
 	_pick_clip(dt)
-	var t := pace.step(dt)
+	var t := dt if crowded else pace.step(dt)
 	if t > 0.0:
 		_face_step(t)
 		advance(t)
@@ -1661,6 +1668,7 @@ static func _ink() -> ShaderMaterial:
 	ink.shader = Models.OUTLINE
 	ink.set_shader_parameter("width", INK_WIDTH)
 	ink.set_shader_parameter("far_thin", INK_FAR_THIN)
+	ink.set_shader_parameter("min_px", INK_MIN_PX)
 	return ink
 
 
@@ -1673,7 +1681,8 @@ func _copy_coat() -> void:
 	var body := mats[0] as ShaderMaterial
 	var base: Color = Data.KIN[species]["color"]
 	var now := body.get_shader_parameter("albedo") as Color
-	_coat.set_shader_parameter("albedo", _tint(now, base))
+	var shift := _brightness(now, base) if body.get_meta("rolled", false) else _tint(now, base)
+	_coat.set_shader_parameter("albedo", shift)
 	if body.get_shader_parameter("mark_kind") == null:
 		return
 	var marks := ShaderMaterial.new()
@@ -1690,3 +1699,10 @@ func _copy_coat() -> void:
 ## How far a colour has moved from the species' own (white: not at all), to multiply a painted atlas with.
 static func _tint(now: Color, base: Color) -> Color:
 	return Color(now.r / maxf(base.r, 0.01), now.g / maxf(base.g, 0.01), now.b / maxf(base.b, 0.01))
+
+
+## A Boki's own small colour roll (Unique.tint) on a painted atlas: only its lighter or darker, never the per-channel
+## ratio, which on a dark coat swings the low channel up to 25% and turns the whole atlas (cream face, teal caps) pink.
+static func _brightness(now: Color, base: Color) -> Color:
+	var k := now.get_luminance() / maxf(base.get_luminance(), 0.01)
+	return Color(k, k, k)

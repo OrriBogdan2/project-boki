@@ -28,7 +28,7 @@ func run(mn: Node) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 91, "no_drop": true, "god": true})
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 91, "no_drop": true, "god": true})
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)
@@ -58,7 +58,7 @@ func _foes(kind_s: String, n: int) -> Array:
 		if l["state"] == "sealed":
 			m.lairs.open(l, m.player, "dial")
 		var b: Boss = l["boss_mob"]
-		b.dormant = false
+		b.set_asleep(false)
 		b.stagger_t = 0.0
 		return [b]
 	var at := p.pos + Vector3(0, 0, -3.0)

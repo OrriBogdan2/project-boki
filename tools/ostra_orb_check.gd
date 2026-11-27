@@ -1,7 +1,8 @@
 extends "res://tools/hero_pair_check.gd"
 ## Motley's charged orb (item 60, for --ostra-combo-check; docs/heroes/ostra.md): the wait between shots charges
 ## the next orb smoothly, its damage, speed, size and brightness follow the charge and cap at the window, a full
-## orb slows, every orb passes walls and terrain at any charge, and the glow and chime show the build-up.
+## orb slows, a card stops at walls and terrain while the void orb passes them (the owner's 11-26 rule), and the
+## glow and chime show the build-up.
 
 const WAITS := [0.0, 0.3, 0.6, 0.8, 1.0, 1.2, 1.4, 2.0, 6.0]      # s since the last shot
 
@@ -61,7 +62,7 @@ func _charge_curve() -> void:
 		rows.append({
 			"wait": w, "k": f["k"], "dmg": sd["dmg"], "r": sd["r"], "speed": (sd["vel"] as Vector2).length(),
 			"scale": sn.scale.x, "bright": rim.get_luminance(), "orb": (sn.get_node("Orb") as Node3D).visible,
-			"shard": (sn.get_node("Shard") as Node3D).visible, "sfx": f["sfx"]
+			"card": (sn.get_node("Card") as Node3D).visible, "sfx": f["sfx"]
 		})
 		step(m, 0.05)
 	var at: Dictionary = {}
@@ -88,18 +89,18 @@ func _charge_curve() -> void:
 	)
 	var two_looks := rows.all(_two_looks_ok)
 	ok(
-		"owner 11-08: a quick shot is the violet shard, a charged one (k >= 0.5) the void orb, each with its sound",
-		two_looks and bool(rows[0]["shard"]) and bool(at[1.4]["orb"])
+		"owner 11-26: a quick shot is a thrown card, a charged one (k >= 0.5) the void orb, each with its sound",
+		two_looks and bool(rows[0]["card"]) and bool(at[1.4]["orb"])
 	)
 	var full_x := float(at[1.4]["scale"]) / float(rows[0]["scale"])
 	ok("owner 11-08: the full void orb is drawn at least 1.8x a quick shot", full_x >= 1.8, "x%.2f" % full_x)
 	await done(m)
 
-## Owner 11-08: below ORB_HELD_K a row is the shard with os_orb, from it the void orb with os_orb_hot.
+## Owner 11-08: below ORB_HELD_K a row is the card with os_orb, from it the void orb with os_orb_hot.
 func _two_looks_ok(q: Dictionary) -> bool:
 	var held_orb := float(q["k"]) >= KitLooks.ORB_HELD_K
 	var sound := "os_orb_hot" if held_orb else "os_orb"
-	return bool(q["orb"]) == held_orb and bool(q["shard"]) != held_orb and String(q["sfx"]) == sound
+	return bool(q["orb"]) == held_orb and bool(q["card"]) != held_orb and String(q["sfx"]) == sound
 
 ## Held, the fire rate never builds a charge: the stream stays plain orbs, so its damage is unchanged.
 func _held_fire() -> void:
@@ -167,7 +168,8 @@ func _full_slows() -> void:
 	ok("slow: a full orb fired point blank still slows", dmg(t) > 11.0 and t.slow_t > 0.5, "slow %.2f" % t.slow_t)
 	await done(m)
 
-## A rock row between him and the dummy: every charge passes it, also fired with him pressed against it.
+## A rock row between him and the dummy, the owner's 11-26 rule: a card hits it and stops there, also fired
+## pressed against it, while the void orb passes it.
 func _through_walls() -> void:
 	var r := setup("ostra", 6.0)
 	var m: Match = r[0]
@@ -179,14 +181,34 @@ func _through_walls() -> void:
 	var wx := int(floor(home.x)) + 3
 	for dz in range(-2, 3):
 		w.kind[w.idx(wx, int(floor(home.z)) + dz)] = World.T_BLOCK
-	aim_at(p, t.pos)
-	p.teleport(Vector3(float(wx) - 0.45, p.pos.y, p.pos.z))
+	p.teleport(Vector3(float(wx) - 4.0, p.pos.y, p.pos.z))
 	aim_at(p, t.pos)
 	fresh(t)
+	var card: Dictionary = _fire_after(m, p, k, 0.6)["s"]
+	var flew := [0.0]
+	step(
+		m,
+		0.3,
+		func():
+			if m.shots.has(card):
+				flew[0] = float(card["pos"].x)
+	)
+	ok(
+		"walls: a card fired 4m short of the rock stops at its face",
+		not card.is_empty() and not m.shots.has(card) and flew[0] > float(wx) - 3.0 and flew[0] < float(wx) + 0.1,
+		"last x %.2f, rock face x %d" % [flew[0], wx]
+	)
+	step(m, 0.4)
+	ok("walls: the dummy behind the rock takes nothing from the card", dmg(t) < 0.01, "took %.1f" % dmg(t))
+	p.teleport(Vector3(float(wx) - 0.45, p.pos.y, p.pos.z))
+	aim_at(p, t.pos)
 	_fire_after(m, p, k, 0.6)
 	step(m, 0.6)
-	ok("walls: fired pressed against the rock, a plain orb still passes", dmg(t) > 5.0, "took %.1f" % dmg(t))
-	await _net_copy(m, p, t, k)
+	ok("walls: a card fired pressed against the rock stops too", dmg(t) < 0.01, "took %.1f" % dmg(t))
+	_fire_after(m, p, k, 1.0)
+	step(m, 0.6)
+	ok("walls: fired pressed against the rock, the void orb (1s wait) passes", dmg(t) > 5.0, "took %.1f" % dmg(t))
+	_net_copy(m, p, t, k)
 	await done(m)
 
 ## What other games get: the "s" event carries the full size and the pierce kind, and the copy it makes crosses
@@ -247,6 +269,14 @@ func _glow_and_chime() -> void:
 	ok("chime: not again while it waits", k.full_chimes == chimes + 1)
 	await done(m)
 
+## The kit looks on `qh` refreshed after `since` (match time).
+func _looks_updating(qm: Match, qh: Hunter, since: float) -> Array:
+	var keys: Array = []
+	for key in KitLooks.of(qm).held.keys():
+		var hd: Dictionary = KitLooks.of(qm).held[key]
+		if hd["ent"] == qh and float(hd["t"]) > since: keys.append(key)
+	return keys
+
 ## The charge lives on a copy of the weapon: an upgrade re-bases it, and the kit hands back what it was given.
 func _weapon_kept() -> void:
 	var r := setup("ostra", 12.0)
@@ -299,11 +329,16 @@ func _no_kit_tick_when_down() -> void:
 		var qh: Hunter = q[1]
 		step(qm, 3.0)
 		qm.knock(qh, null, {})
-		step(qm, 0.2)
-		var live := 0
-		for key in KitLooks.of(qm).held.keys():
-			var hd: Dictionary = KitLooks.of(qm).held[key]
-			if hd["ent"] == qh and float(hd["t"]) >= qm.time - 0.1: live += 1
-		if arch == "ostra": ok("wisp kit: ostra: no look still updating", live == 0)
-		else: print("PAIRCHECK NOTE %s: %d kit looks still updating while downed" % [arch, live])
+		var knock_t := float(qm.time)
+		# (a lone training Hunter is back up within a frame or so: only refreshes while he is down count)
+		var live: Array = []
+		step(
+			qm,
+			0.2,
+			func():
+				if qh.downed:
+					live.append_array(_looks_updating(qm, qh, knock_t))
+		)
+		if arch == "ostra": ok("wisp kit: ostra: no look still updating while down", live.is_empty(), str(live))
+		else: print("PAIRCHECK NOTE %s: %d kit looks still updating while downed" % [arch, live.size()])
 		await done(qm)

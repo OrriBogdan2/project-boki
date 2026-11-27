@@ -36,9 +36,7 @@ func run(main_node: Node) -> void:
 			DirAccess.make_dir_recursive_absolute(dir)
 	m = Match.new()
 	main.add_child(m)
-	await m.start(
-		{"teams": 1, "squad": 1, "tier": 0, "length": 1000.0, "seed": 4242, "demo_kin": "cindle", "no_drop": true}
-	)
+	m.start({"teams": 1, "squad": 1, "tier": 0, "length": 1000.0, "seed": 4242, "demo_kin": "cindle", "no_drop": true})
 	m.set_process(false)
 	if main.fade != null:
 		await main.fade.reveal(0.01)
@@ -115,7 +113,7 @@ func _send_and_hint() -> void:
 		"the settled lane shows the rest, not the Boki-key hint (%s)" % str(texts)
 	)
 	ok(
-		lane.waiting() == 0 or lane.texts().size() == lane.MAX_SHOWN,
+		lane.waiting() == 0 or lane.texts().size() == lane.max_shown,
 		"nothing is left behind (%d waiting)" % lane.waiting()
 	)
 	var cards: Array[Rect2] = lane.rects()

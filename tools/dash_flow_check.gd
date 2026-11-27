@@ -91,6 +91,7 @@ func ok(cond: bool, what: String) -> void:
 	if not cond:
 		bad += 1
 
+
 ## The whole check over `heroes`; the registry runs it in four shards (tools/dash_flow_shard_check.gd).
 func run_heroes(main: Node, heroes: Array) -> void:
 	for r in SOURCE_ROWS:
@@ -130,6 +131,7 @@ func _hero(main: Node, hero: String, rows: bool) -> int:
 		await main.get_tree().process_frame
 	CombatBus.ability_used.disconnect(_on_used)
 	return bad
+
 
 func _on_used(caster: Node, _ability: String, slot: String) -> void:
 	if caster == hunter:
@@ -249,12 +251,14 @@ func _ready_up(m: Match) -> void:
 			or k.ult_running()
 			or _last_shot() >= 0
 			or k.commit_left() > 0.0  # (a move's committed recovery: Vex's E and X)
-			or k.fire_wait() > 0.0  # (a kit's own cadence: Neve's burst pause would hold the next tap)
-		)
+			or k.fire_wait() > 0.0
+		)  # (a kit's own cadence: Neve's burst pause would hold the next tap)
 		if not busy and hunter.roll_t <= 0.0 and k.dash_left() <= 0.0 and hunter.grounded and i > 30:
 			break
 		m.step(Match.DT)
-	if k.e_t > 0.0:
+	# Haul's chain still hooked or arriving would turn the next E into its pull
+	var chain: Variant = k.get("warchain")
+	if k.e_t > 0.0 or (chain != null and String(chain.state) != "ready"):
 		# an E that waits for its recast (Motley's seed) would turn the next E press into that recast: a new kit
 		hunter.set_arch(hunter.arch)
 	for wall in m.verbs.walls.duplicate():

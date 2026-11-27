@@ -112,10 +112,13 @@ func add_chill(t: Ent) -> void:
 		vfx("chill", t.pos)
 		StatusSfx.cue(t, "chill", h, float(d["passive"].get("chill_t", 4.0)))
 
-## The Chill on `t`, for the ComboMark tag (one state, no stacks); the ring is the Chill left.
+## The Chill on `t`, else its Fan stacks, for the plate status row (HudPlate.row); the ring is the time left.
 func combo_read(t: Ent) -> Dictionary:
 	if not chilled(t):
-		return {}
+		var fan: Dictionary = fan_hits.get(t.get_instance_id(), {})
+		if fan.is_empty():
+			return {}
+		return {"icon": "frost", "n": int(fan["n"]), "max": 0, "left": float(fan["left"]), "total": FAN_HOLD}
 	return {"icon": "frost", "n": 1, "max": 1, "left": float(chill[t.get_instance_id()]["left"]),
 			"total": float(d["passive"].get("chill_t", 4.0))}
 
@@ -200,8 +203,6 @@ func splinter(at: Vector3, dmg: float, r: float, skip: Ent = null) -> void:
 				{
 				"src": "splinter",
 				"ab": "passive",
-				"slow": 1.2,
-				"slow_k": 0.3,
 				"tags": ["passive", "splinter"],
 				"payoff": true
 			}
@@ -963,10 +964,6 @@ func recast_window() -> Dictionary:
 		if left <= float(xd["late"]):
 			return RecastCue.window("x", left, float(xd["late"]), rime["at"], true, true)
 	return {}
-
-## No overhead badges for her: the shards stuck in the foe are the one read.
-func combo_marks(_out: Array) -> void:
-	pass
 
 func e_recast() -> bool:
 	if not wall_cast.is_empty():

@@ -5,8 +5,10 @@ extends Node3D
 ## What a floating number counts, and so its look: your direct hits, a heal, a Boki's hits (smaller, in
 ## its type colour) and over-time ticks (burn, poison: small, a second of them on one number). A number
 ## adds up only with its own kind on a target, so a heal never joins a damage number on the same body,
-## and a Boki's hits, your hits and a burn on one body stay three numbers.
-enum Num { HIT, HEAL, KIN, TICK }
+## and a Boki's hits, your hits and a burn on one body stay three numbers. What a hit landed on is its
+## look too (HudStyle.num_style, the one table): a shield or Fusion shell soaking it (SHIELD) and an
+## empowered hit (HEAVY: o.heavy / o.payoff) are numbers of their own, so none reads as another.
+enum Num { HIT, HEAL, KIN, TICK, SHIELD, HEAVY }
 
 const TELEGRAPH: Shader = preload("res://shaders/telegraph.gdshader")
 const RING: Shader = preload("res://shaders/fx_ring.gdshader")
@@ -56,14 +58,16 @@ const NUM_POOL := 24  # floating numbers and words on screen at once (the oldest
 const NUM_OUTLINE := Color(0.05, 0.04, 0.08, 0.9)  # every number's dark outline ...
 const CRIT_OUTLINE := Color(0.42, 0.12, 0.0, 0.95)  # ... a crit's is a hot ember brown, and thicker
 
-## Font size by damage tier: [from this value up, size]. A crit adds CRIT_SIZE on top.
-const SIZE_TIERS := [[0.0, 34], [20.0, 40], [50.0, 48], [100.0, 58], [200.0, 70]]
+## Font size by damage tier: [from this damage up, size], on our health scale (a Hunter has 124 to 193): a dart or
+## a pellet the smallest, a rifle round or a slash 40, an ability hit 48, a heavy ability 58, an ult 70.
+## A crit adds CRIT_SIZE on top.
+const SIZE_TIERS := [[0.0, 34], [6.0, 40], [12.0, 48], [24.0, 58], [45.0, 70]]
 const CRIT_SIZE := 10
-const NUM_SCALE := [1.0, 1.0, 0.78, 0.62]  # size and outline by Num: a Boki's hits smaller, a tick's small
+const NUM_SCALE := [1.0, 1.0, 0.78, 0.62, 0.85, 1.12]  # size and outline by Num: a Boki's hits smaller, a tick's small
 
 ## m along the camera's right and up from your hits' spot, by Num: a Boki's beside yours, a tick lower on
 ## the body, so the three don't print over each other on one target (a heal has its own height)
-const LOOK_SPOT := [Vector2.ZERO, Vector2.ZERO, Vector2(0.6, -0.35), Vector2(0.0, -0.8)]
+const LOOK_SPOT := [Vector2.ZERO, Vector2.ZERO, Vector2(0.6, -0.35), Vector2(0.0, -0.8), Vector2.ZERO, Vector2.ZERO]
 const FLASH_MIN := 0.1  # s an impact flash holds at least: ~6 frames, so the hit frame reads
 
 static var _impact_quad: QuadMesh
@@ -606,7 +610,9 @@ func _second_up(n: Dictionary) -> bool:
 static func num_kind(by: Ent, o: Dictionary) -> Num:
 	if String(o.get("src", "")) == "burn" or o.get("tick", false):
 		return Num.TICK
-	return Num.KIN if by is Kin else Num.HIT
+	if by is Kin:
+		return Num.KIN
+	return Num.HEAVY if o.get("heavy", false) or o.get("payoff", false) else Num.HIT
 
 
 ## The number for `d` dealt to `target` by `by` (o: the hit's options), in the look its source picks.
@@ -620,7 +626,11 @@ func damage_number(target: Ent, by: Ent, d: float, o: Dictionary, you: Hunter, a
 	var crit: bool = o.get("crit", false)
 	var on_your_kin := target is Kin and (target as Kin).owner_h == you
 	var plain := DexView.type_col(String((by as Kin).sp.get("type", ""))) if kind == Num.KIN else HudStyle.HIT
-	var col := DotLook.COL if kind == Num.TICK else HudStyle.dmg_col(crit, armor_hit, target == you, on_your_kin, plain)
+	var col := (
+		DotLook.COL
+		if kind == Num.TICK
+		else HudStyle.dmg_col(crit, armor_hit, target == you, on_your_kin, plain, kind == Num.HEAVY)
+	)
 	if credit is Hunter and (credit as Hunter).ak and target != you:
 		col = (credit as Hunter).ak.number_col(target, col, o)
 	var at := target.pos + Vector3(0, 1.5 if target is Hunter else 1.0, 0) + _look_spot(kind)
@@ -681,6 +691,8 @@ static func _num_size(v: float, crit: bool, small := false, kind := Num.HIT) -> 
 
 ## A short word that floats up (COMBO, an ability's name, BOND READY).
 func word(at: Vector3, txt: String, col: Color, big := false) -> void:
+	if get_parent() != null and get_parent().has_meta("pitch_no_foe_plates"):  # pitch-reel films: no game words
+		return
 	for n in nums:
 		var w: Label3D = n["node"]
 		if (
@@ -856,6 +868,7 @@ func _tele_mesh(col: Color, shape: int, order: int) -> MeshInstance3D:
 	mat.shader = TELEGRAPH
 	mat.set_shader_parameter("color", col)
 	mat.set_shader_parameter("shape", shape)
+	mat.set_shader_parameter("quiet", 1.0 if order < SideColor.ORDER_FOE else 0.0)  # yours and allies': a faint rim
 	mi.material_override = mat
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(mi)
@@ -863,7 +876,7 @@ func _tele_mesh(col: Color, shape: int, order: int) -> MeshInstance3D:
 	return mi
 
 
-func telegraph_circle(at: Vector3, radius: float, col: Color, order := 0) -> Node3D:
+func telegraph_circle(at: Vector3, radius: float, col: Color, order := SideColor.ORDER_FOE) -> Node3D:
 	var mi := _tele_mesh(col, 0, order)
 	mi.mesh = Models.flat_quad(radius * 2.0)
 	mi.set_meta("r", radius)
@@ -871,7 +884,9 @@ func telegraph_circle(at: Vector3, radius: float, col: Color, order := 0) -> Nod
 	return mi
 
 
-func telegraph_rect(at: Vector3, d: Vector2, length: float, width: float, col: Color, order := 0) -> Node3D:
+func telegraph_rect(
+	at: Vector3, d: Vector2, length: float, width: float, col: Color, order := SideColor.ORDER_FOE
+) -> Node3D:
 	var mi := _tele_mesh(col, 1, order)
 	var pm := PlaneMesh.new()
 	pm.size = Vector2(width, length)
@@ -976,7 +991,7 @@ func _process(delta: float) -> void:
 			l.visible = false
 			nums.erase(n)
 	if nums.size() > 1:
-		NumSpacing.spread(nums, cam)  # numbers on one spot slide apart (docs/HUD.md)
+		NumSpacing.spread(nums, cam, zone)  # numbers on one spot slide apart (docs/HUD.md)
 	for rg in rings.duplicate():
 		rg["t"] += delta
 		var k: float = rg["t"] / rg["dur"]

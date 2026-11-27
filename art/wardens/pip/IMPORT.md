@@ -34,7 +34,7 @@ Rig unchanged (tender.json body: legs 0.98, torso 1.02, shoulder 1.12, neck -0.0
 - **Companions (pip_v2/meeko_v2_companions_sheet):** the sun floats at her left shoulder (skinned to pauldron.L) and the raincloud at her right (pauldron.R), both rigid and thick (the sun 0.62 as deep as wide, the cloud 0.46), replacing the hand-held star lantern. The lantern's faces are gone from the body mesh; its spring_hanglantern bones stay (the shared armature). The FX points weapon_muzzle, anchor_hang_lantern and anchor_lantern_top (names kept) ride the sun on pauldron.L; `"skinned_weapon": true`, `blade` on anchor_lantern_top and weapon_muzzle with bone pauldron.L.
 - **Orbit (runtime):** in the game the companions do not ride the pauldrons. At load scripts/heroes/warden_companions.gd cuts their surfaces (cloth-sun, skin-cloud, ice-drop, the two eyes-mood) out of the body mesh into one unskinned MeshInstance3D each, and every frame floats them round her on a mostly horizontal ellipse, 180 degrees apart, with a small Y bob at its own frequency and a slow ease behind her when she moves; the sun's FX points follow it. All numbers: content/rules/warden_anim/pip.json "companions". Checked by `--meeko-orbit-check`; frames by `--meeko-orbit-shots`. No re-bake: a rebuilt GLB with the same material names works unchanged.
   `pip_companions.py` edits the old glb in place (the clips, rig and body untouched; 30 fps, each clip's last key kept): `blender -b --factory-startup --python tools/art1/pip_companions.py -- <old pip.glb> art/wardens/pip/pip.glb <faces.png>`.
-- **Expressions:** 8 faces drawn into one atlas, a decal patch on each companion's front: the sun happy / laugh / grumpy / sleep, the cloud shy / happy / sleep / cry. The game swaps cells (shaders/warden_mood_atlas.gdshader, WardenMood `faces`), driven by warden_anim/pip.json "mood": calm (sun happy, cloud shy), happy on emotes and Meeko's own moves, grumpy / cry on a hit, asleep when downed, a blink to the sleep cell.
+- **Expressions:** 8 faces drawn into one atlas, a decal patch on each companion's front: the sun happy / laugh / grumpy / sleep, the cloud shy / happy / sleep / cry. The game swaps cells (hero_toon's atlas_grid, WardenMood `faces`), driven by warden_anim/pip.json "mood": calm (sun happy, cloud shy), happy on emotes and Meeko's own moves, grumpy / cry on a hit, asleep when downed, a blink to the sleep cell.
   FX points are empties: weapon_muzzle, anchor_hang_lantern, anchor_lantern_top, anchor_palm_L, anchor_flower, anchor_tail_tip, anchor_chest, anchor_head_top.
 - **Imports:** pip.glb.import `remove_immutable_tracks=false`, `generate_lods=true`, `force_disable_compression=true`, `animation/fps=48` (the walk/run keys' rate); textures VRAM compressed high quality, mipmapped, at most 2048. Normal maps through hero_toon `use_nrm` (from ext/art1-hem).
 - **Burrseed `seed` clip (ext/meeko-lane-picks, from ext/meeko-rmb-verify):** the release-hop `seed` (tools/art1/pip_clips.py)
@@ -60,3 +60,55 @@ Rig unchanged (tender.json body: legs 0.98, torso 1.02, shoulder 1.12, neck -0.0
   `glb_add_clips.py` with the eight names (the lines at the top of pip_gait.py).
 
 - **Idle pilot (ext/anim-pilot-four): NOT carried (2026-11-14).** The Meshy idle's tracks key `brow.R`, which main's v95 model does not have, so `glb_add_clips.py` refuses it; Meeko's `idle` stays main's.
+
+**11-23 (ext/meeko-companions-1123): the sun and cloud of `pip_meshy.glb` (the live match model) were rebuilt.** The old ones were the
+Meshy master's, cut by `native_hunters/decimate.py` to 124/164 tris: 12 px dots at the game camera, face decals sunk into the bodies,
+the cloud on the tinted `skin` slot (pink on pink). Now (Blender builds, `graft_companions.py` swaps them in; the body is untouched):
+
+    B=~/tools/blender-4.5.15-linux-x64/blender
+    $B -b --factory-startup --python tools/art1/pip_companions_native.py -- WORK/comp.glb WORK/faces.png
+    python3 tools/meshy/native_hunters/graft_companions.py art/wardens/pip/pip_meshy.glb art/wardens/pip/pip_meshy.glb WORK/comp.glb WORK/faces.png
+
+Sun 0.50 m across (was 0.21), cloud 0.52 m (was 0.23), both leant back 50 deg toward the 66 deg match camera, faces 1.7x bolder
+(eyes, mouth, blush, tears) on 8x8-quad patches the build asserts sit >= 2 mm off the body, the cloud on `cloth-cloud` (untinted,
+inked), the sun on `glow-sun` (emissive + halo), two bigger rain drops hung clear of the cloud. 1.8k tris. WardenNative now runs
+WardenMood (faces swap with her moves, blink). `pip.glb` (contract model) is not rebuilt. Orbit: radius [1.1, 1.05], trail_max 0.12,
+head/wing/hand avoid spheres (`companions.avoid`; the push opens at once). Checks: `--meeko-orbit-check`, `--meeko-companions-clip-check`
+(sun/cloud vs the CPU-skinned body in idle, walk, run, dash, crouch, jump, attack, ult), `--meeko-companions-shots` (GPU).
+
+**11-24 (plan /home/boki/gens/meeko-comp-plan-1124/PLAN.md): sun and cloud bodies from Meshy, faces as the portrait.** Faceless refs of
+the portrait's sun and cloud (`art/portraits/tender.jpg` crops, vertex-gen, 48 gens, raws + gen_log.tsv in
+/home/boki/gens/meeko-comp-fix-1124/), then Meshy image-to-3D (meshy-7.1, 2k texture, no pose). Picked: sun `01a20cbd-4517-706a-83b8-55ae9c7a5d29`
+(sun_q2_r2: a ball with 10 soft petals; its portrait-like side is Meshy's back, so `--sun-turn=180`), cloud
+`01a20cb8-573a-75d8-b9fc-08eb7f29876b` (cloud_p4_r1: round lobes, smooth belly, lavender-white). Build:
+
+    M=/home/boki/meshy/meeko-comp-1124     # (the two task folders: glb.glb + texture maps + task.json)
+    $B -b --factory-startup --python tools/art1/pip_companions_native.py -- WORK/comp.glb WORK/faces.png \
+        --sun-glb=$M/sun_q2_r2/glb.glb --sun-turn=180 --cloud-glb=$M/cloud_p4_r1/glb.glb
+    python3 tools/meshy/native_hunters/graft_companions.py art/wardens/pip/pip_meshy.glb art/wardens/pip/pip_meshy.glb WORK/comp.glb WORK/faces.png
+    cp WORK/faces.png art/wardens/pip/pip_meshy_faces.png
+
+The builder welds Meshy's UV-seam splits (decimated apart they open as cracks), scales to 0.50 / 0.52 m, decimates to 700 / 800 tris
+and keeps the albedo at 512 px; the graft carries that image + UVs (glow-sun, cloth-cloud). Atlas cells 0/1 (sun calm/happy) and 4/5
+(cloud calm/happy) are the portrait's dot eyes, thin level brows, small closed smile, soft blush; cells 2, 3, 6, 7 are byte-identical.
+Raindrops show only while the cloud cries (`warden_anim/pip.json` cloud `mood_only`). Look (`warden_look.json` pip): the sun's albedo
+is a tint over the texture, low glow and no far-glow boost (the boost clipped the gold to lemon), the cloud lavender, uninked.
+
+**11-24, body reads (PLAN 4A-4C; after the graft above, Blender-free, in this order):**
+
+    G=art/wardens/pip/pip_meshy.glb
+    python3 tools/art1/glb_mat_rename.py $G $G meshy_textured=meshy_textured-wing
+    python3 tools/art1/glb_island_dilate.py $G $G --material=meshy_textured-wing --px=8
+    python3 tools/art1/glb_clip_hands_cap.py $G $G --clip=Attack --pose=Idle --margin=0.16 \
+        --hands=LeftHand,RightHand,LeftHand_End,RightHand_End
+
+- Wings (4C): `meshy_textured` holds only the wings (17,492 tris, all on the Bone_046-051 chains), so the rename puts them on
+  their own tag: same slot look, and pip's `"no_ink": ["cloud", "wing"]` drops their ink shell (the dark plum fringe). Their
+  material samples its own copy of the body atlas, so the dilate bleeds the wing UV islands 8 px and fills the unused rest
+  with their mean colour (the pale broken edge at the eye camera; the glb 0.5 MB smaller).
+- Fire pose (4A): Meshy's `Attack` lifted both paws through her muzzle (paw tips 476 mm over the head bone, model units).
+  The Meshy rig task (pip-method-1119/A_rig) has expired, so no re-animate: the shoulder and upper-arm keys are slerped
+  toward the Idle pose per key, only as far as needed, so the wrists and paw tips stay 0.16 under the head bone (119 mm in
+  game, `--meeko-companions-clip-check` "attack hands"); key times, the forearms and every other track are unchanged.
+- The dark patch at her shoulder in the knee idle (4B) is her dark-purple paw held at the chest (it moves with the hand,
+  the portrait's pose): kept.

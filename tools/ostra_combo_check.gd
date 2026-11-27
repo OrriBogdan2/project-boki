@@ -340,7 +340,7 @@ func _ostra() -> void:
 		"moved %.2f" % Vector2(P.pos.x - home.x, P.pos.z - home.z).length()
 	)
 	# item 17: he drifts slowly while the lantern flies, keeps his height over the abyss
-	await _hover(m, P, T, home, K)
+	_hover(m, P, T, home, K)
 	TIME.new(self).run(m, P, K, T, home)
 	_far_cast(m, P, home, K)
 	_air_cast(m, P, home, K)
@@ -348,7 +348,7 @@ func _ostra() -> void:
 	K.swollen_t = 5.0
 	ok("combo: Swollen Trade is quicker", absf(K.swap_time() - 1.25) < 0.01, "%.2f" % K.swap_time())
 	# owner: everyone in the landing circle goes to where he stood (two units both end up at the origin)
-	await _multi(m, P, T, home, K)
+	_multi(m, P, T, home, K)
 	# ---- E: the seed drops at the cursor, grows 6.5s, light column near full, the 0.3s recast floor
 	reset.call()
 	T.teleport(home + Vector3(6.0, 0, 0))
@@ -730,7 +730,8 @@ func _quiet_float(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
 
 ## Item 35: his own ground and air dash moves (the Trade's lob), ids no other hero's table has, and each one's
 ## Item 60: the orb charges smoothly with the wait since the last shot (damage, speed, size monotonic from 0 to the
-## window, capped after), every orb passes a wall between him and the foe at any charge, and a full orb slows.
+## window, capped after), only the void orb (charge from KitLooks.ORB_HELD_K) passes a wall between him and the
+## foe while a card stops at it (the owner's 11-26 rule), and a full orb slows.
 func _bolt_through_terrain() -> void:
 	var r := setup("ostra", 6.0)
 	var m: Match = r[0]
@@ -757,16 +758,17 @@ func _bolt_through_terrain() -> void:
 		step(m, 0.03)
 		var shots0 := P.shot_n
 		spds.append(float(P.wpn["speed"]))
+		dmgs.append(float(P.wpn["dmg"]))      # the shot's own damage (a card never reaches him past the wall)
+		var void_orb := K.charge >= KitLooks.ORB_HELD_K
 		P.fire_cd = 0.0
 		P.inp["fire"] = true
 		step(m, 0.05)
 		P.inp["fire"] = false
 		step(m, 0.9)
 		var d := dmg(T)
-		dmgs.append(d)
 		rads.append(K.last_orb_r)
 		slows.append(T.slow_t > 0.0)
-		if P.shot_n <= shots0 or d <= 0.5:
+		if P.shot_n <= shots0 or (d > 0.5) != void_orb:
 			through = false
 		step(m, 0.6)
 	var mono := true
@@ -788,7 +790,7 @@ func _bolt_through_terrain() -> void:
 		str(dmgs)
 	)
 	ok("item 60: a full orb hits for the data's +34% (353 vs 263)", absf(dmgs[4] / dmgs[0] - 1.34) < 0.06, str(dmgs))
-	ok("item 60: every orb passes the wall between him and the foe at any charge", through, str(dmgs))
+	ok("walls: the void orb passes the wall between him and the foe, a card stops at it", through, str(dmgs))
 	ok("item 60: only the full orb slows", slows[4] and slows[5] and not slows[0] and not slows[2], str(slows))
 	await done(m)
 

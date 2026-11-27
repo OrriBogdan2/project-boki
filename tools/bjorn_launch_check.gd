@@ -18,7 +18,7 @@ func bjorn() -> void:
 	await _launch_glide()
 	await _combo_moves()
 	await _lmb_parity()
-	await _hold_spin()
+	_hold_spin()
 	await _audit()
 
 func _planar(P: Hunter) -> float:
@@ -220,8 +220,10 @@ func _launch_flat() -> void:
 	P.inp["fire"] = false
 	step(m, 0.08)
 	var open := _glide_open(m, P, true)
-	ok("bjorn #49: glide pressed during the launch jumps him out into a glide at >= 70% of its speed",
-		open >= K.launch.speed * 0.7, "glide opens at %.1f of %.1f m/s" % [open, K.launch.speed])
+	# a jump out of a dash-fast launch sheds to jump_trim_to (JumpTrim, 11-26): the floor is that, not 70%
+	var floor_v := minf(K.launch.speed * 0.7, HunterMove.jump_trim_to.x)
+	ok("bjorn #49: glide pressed during the launch jumps out into a glide at >= 70% (or the trim floor)",
+		open >= floor_v, "glide opens at %.1f of %.1f m/s" % [open, K.launch.speed])
 	await done(m)
 
 ## Steps until the glider opens (glide held when `hold`), returning his planar speed on that step (-1: never).
@@ -427,7 +429,7 @@ func _lmb_parity() -> void:
 	ok("bjorn parity LMB: the throw's cadence is the source card's 0.45 s (sheet: 175 out, 175 back)",
 		absf(float(K.lmb_def()["throw_rate"]) - 0.45) < 0.001 and cadence > 0.30 and cadence <= 0.45 + 0.001,
 		"throw_rate %s fire_cd %.3f" % [K.lmb_def()["throw_rate"], cadence])
-	await _rmb_parity(m, P, K, home)
+	_rmb_parity(m, P, K, home)
 	await done(m)
 
 ## RMB (sheet 0179-0200, data Brightshield 0.1 s): the aegis is up 0.1 s into the hold and sweeps round with
@@ -481,7 +483,7 @@ func _hold_spin() -> void:
 	var passed_window := false
 	while K.lmb_t < float(md["full"]) + 0.7:
 		passed_window = passed_window or K.launch.in_window(K.lmb_t)
-		var turns := await _spun(m, P, K, at, SPIN_STRETCH) / SPIN_STRETCH
+		var turns := _spun(m, P, K, at, SPIN_STRETCH) / SPIN_STRETCH
 		slowest = minf(slowest, turns)
 		fastest = maxf(fastest, turns)
 		var head: Vector3 = K.fx._head_world()
@@ -509,7 +511,7 @@ func _hold_spin() -> void:
 	P.inp["move"] = Vector2(0, 1)
 	step(m, 0.1, press_at.bind(P, at))
 	var z0 := P.pos.z
-	var walked := await _spun(m, P, K, at, 0.5, func(): P.inp["move"] = Vector2(0, 1)) / 0.5
+	var walked := _spun(m, P, K, at, 0.5, func(): P.inp["move"] = Vector2(0, 1)) / 0.5
 	var speed := absf(P.pos.z - z0) / 0.5
 	P.inp["move"] = Vector2.ZERO
 	ok("bjorn #59: he walks at the hold speed while it whirls (55% of his run)",
@@ -519,13 +521,13 @@ func _hold_spin() -> void:
 	_ready_swing(m, P, T, home)
 	step(m, 0.5, press_at.bind(P, at))
 	_tap_key(m, P, "jump", at)
-	var jumped := await _spun(m, P, K, at, 0.3) / 0.3
+	var jumped := _spun(m, P, K, at, 0.3) / 0.3
 	ok("bjorn #59: a jump keeps the whirl", jumped >= MIN_TURNS and K.fx.held and not P.grounded,
 		"%.2f turns/s" % jumped)
 	_ready_swing(m, P, T, home)
 	step(m, 0.5, press_at.bind(P, at))
 	_tap_key(m, P, "dash", at)
-	var dashed := await _spun(m, P, K, at, 0.3) / 0.3
+	var dashed := _spun(m, P, K, at, 0.3) / 0.3
 	ok("bjorn #59: Shift keeps the whirl", dashed >= MIN_TURNS and K.fx.held, "%.2f turns/s" % dashed)
 	# the release: the hammer back in his hand, the trail gone, the slam at the cursor
 	var r2 := setup("bulwark", 7.0)
