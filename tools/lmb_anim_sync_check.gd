@@ -4,6 +4,7 @@ extends RefCounted
 ## or the first damage) is set against the frame the attack clip's weapon hand moves fastest (Meshy's clip on its own
 ## skeleton, or the contract clip). The strike must come within SYNC_MS of the spawn: a clip that swings after its
 ## shot has gone looks late, and no attack clip may begin once the shot is already gone.
+## Cinder's lance (CHANNELLED) is held: its first puff is the spawn. Tenzo and Kael are checked again with LMB held (HELD).
 
 const AKCheck := preload("res://tools/archetype_check.gd")
 const SYNC_MS := 50.0  # ms: the clip's strike may trail or lead the spawn by this much
@@ -11,7 +12,10 @@ const PRESS_F := 6  # frame the key goes down
 const SPAN_F := 90  # frames (1.5 s) watched after the press
 const DIST := 3.0  # m to the dummy
 const LOOK_BACK := 12  # frames before the spawn the strike is looked for (an earlier one fails anyway)
-const CHANNELLED := ["ashwick"]  # no single round: the lance is a held stream
+const CHANNELLED := ["ashwick"]  # a held stream: its first puff is the spawn, the hold clip's first play the swing
+
+## Held-LMB variants, checked again with the key held this many frames: Tenzo's lane punch, Kael's Searing Wave
+const HELD := {"dolm": 40, "juggernaut": 60}
 
 var A: AKCheck
 var bad := 0
@@ -31,6 +35,8 @@ func run(main: Node) -> void:
 	print("LMBSYNC %-10s %-9s | spawn ms | clip start ms | strike ms | offset ms" % ["hunter", "path"])
 	for arch in Arch.ORDER:
 		await _hunter(String(arch))
+		if HELD.has(arch):
+			await _hunter(String(arch), int(HELD[arch]))
 	print("LMBSYNC DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -39,7 +45,7 @@ func _on_hit(_by: Node, _on: Node, _amount: float, _tags: Array) -> void:
 	_hit = 0
 
 
-func _hunter(arch: String) -> void:
+func _hunter(arch: String, hold_f := 0) -> void:
 	var r := A.setup(arch, DIST)
 	var m: Match = r[0]
 	var P: Hunter = r[1]
@@ -56,7 +62,7 @@ func _hunter(arch: String) -> void:
 	var lead := -1.0  # s into the attack clip it started (-1: a kit move lays its clip, or the contract path)
 	var prev := {}
 	var speed := {}  # frame -> how far the fastest hand moved in it
-	var held := 30 if P.wpn.has("draw") else 3
+	var held := hold_f if hold_f > 0 else 30 if P.wpn.has("draw") or arch in CHANNELLED else 3
 	_hit = -1
 	for f in SPAN_F:
 		P.inp["fire"] = f >= PRESS_F and f < PRESS_F + held
@@ -67,11 +73,11 @@ func _hunter(arch: String) -> void:
 		for n in [nat, sync]:
 			if n:
 				n._process(A.DT)
-		if spawn < 0 and f >= PRESS_F and _spawned(m, P, seen):
+		if spawn < 0 and f >= PRESS_F and (_streamed(P) if arch in CHANNELLED else _spawned(m, P, seen)):
 			spawn = f
 		if f < PRESS_F:
 			continue
-		if start < 0 and nat and (nat.attack_left > 0.0 or nat.cur == "kmove"):
+		if start < 0 and nat and (nat.attack_left > 0.0 or nat.cur == "kmove" or nat.moves.upper_on):
 			start = f
 			lead = nat.attack_lead if nat.cur == "attack" else -1.0
 		for i in hands.size():
@@ -81,8 +87,12 @@ func _hunter(arch: String) -> void:
 			prev[i] = p
 	var best := 0.0
 	var at := -1
+	var last := SPAN_F
+	if arch in CHANNELLED and start >= 0:  # (the hold's loop bucks the hand on: only the clip into it counts)
+		var clip := String(nat.plays[WardenNativeMoves.KEY % _hold_move(P)])
+		last = start + ceili(nat.player.get_animation(clip).length / A.DT)
 	for f in speed:
-		if f >= spawn - LOOK_BACK and float(speed[f]) > best:
+		if f >= spawn - LOOK_BACK and f <= last and float(speed[f]) > best:
 			best = float(speed[f])
 			at = f
 	if lead >= 0.0:  # the clip's own strike (a blend into it moves the hand too): where the swing lands from its start
@@ -92,11 +102,11 @@ func _hunter(arch: String) -> void:
 	var ms := func(fr: int) -> float: return float(fr - PRESS_F) * A.DT * 1000.0
 	var off: float = (ms.call(at) - ms.call(spawn)) if at >= 0 and spawn >= 0 else INF
 	var late: bool = start > spawn and spawn >= 0  # the clip begins after the shot has gone
-	if not arch in CHANNELLED:
-		ok(absf(off) <= SYNC_MS + 0.5, "%s: the strike is %.0f ms off the spawn (limit %.0f)" % [arch, off, SYNC_MS])
+	if true:  # (every Hunter: the stream too)
+		ok(absf(off) <= SYNC_MS + 0.5, "%s%s: the strike is %.0f ms off the spawn (limit %.0f)" % [arch, " held" if hold_f else "", off, SYNC_MS])
 		ok(not late, "%s: the clip starts at %.0f ms, the shot left at %.0f" % [arch, ms.call(start), ms.call(spawn)])
 	print("LMBSYNC %-10s %-9s | %8.0f | %13.0f | %9.0f | %9.0f" % [HeroTitle.base_name(arch),
-			"native" if nat else "contract", ms.call(spawn), ms.call(start), ms.call(at), off])
+			("held" if hold_f > 0 else "native") if nat else "contract", ms.call(spawn), ms.call(start), ms.call(at), off])
 	m.queue_free()
 
 
@@ -141,3 +151,13 @@ func _clip_strike(nat: WardenNative, clip: String) -> float:
 			prev[i] = p
 		t += A.DT
 	return at
+
+
+## The stream's first puff left the Hunter's hand (Cinder's Torch Lance).
+func _streamed(P: Hunter) -> bool:
+	return P.ak.get("hose") != null and int(P.ak.hose.emitted) > 0
+
+
+## The kit move a held stream shows (Cinder: "as_lance").
+func _hold_move(_P: Hunter) -> String:
+	return "as_lance"
