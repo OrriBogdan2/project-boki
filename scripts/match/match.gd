@@ -1147,7 +1147,7 @@ func _spawn_breakables() -> void:
 				spawn_gear(gid, 2, q2)
 				break
 		# the duel ring: a glowing pad next to where you start (scripts/match/duel_ring.gd)
-		if not opts.get("duel", false):
+		if not opts.get("duel", false) and not opts.get("test_zone", false):      # (the Test Zone has no pad: a clean start)
 			for off in [Vector3(3.6, 0, 2.6), Vector3(-3.6, 0, 2.6), Vector3(3.6, 0, -1.0), Vector3(0, 0, 4.0)]:
 				var dq: Vector3 = player.pos + off
 				if world.is_void(dq.x, dq.z) or world.is_block(dq.x, dq.z):
