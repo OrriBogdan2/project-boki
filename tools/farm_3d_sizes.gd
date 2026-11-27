@@ -8,17 +8,7 @@ extends RefCounted
 
 const WARDEN_SKIN := preload("res://tools/warden_skin.gd")
 const NOT_BODY := [
-	"Glider",
-	"TeamRing",
-	"Companion",
-	"prop_",
-	"Gun",
-	"Shield",
-	"Halo",
-	"hammer",
-	"Bloom",
-	"Shell",
-	"Aura"
+	"Glider", "TeamRing", "Companion", "prop_", "Gun", "Shield", "Halo", "hammer", "Bloom", "Shell", "Aura"
 ]
 const FPS := 30
 const ISLAND_SEED := 11
@@ -250,9 +240,7 @@ func _clear_foreground() -> void:
 		for i in mmi.multimesh.instance_count:
 			var at := mmi.global_transform * mmi.multimesh.get_instance_transform(i).origin
 			if _in_the_way(Vector2(at.x, at.z), from, line):
-				mmi.multimesh.set_instance_transform(
-					i, Transform3D(Basis.from_scale(Vector3.ZERO), at)
-				)
+				mmi.multimesh.set_instance_transform(i, Transform3D(Basis.from_scale(Vector3.ZERO), at))
 
 
 func _in_the_way(centre: Vector2, from: Vector2, line: Vector2) -> bool:
@@ -270,9 +258,7 @@ func _write_labels(shot: String, size: Vector2i) -> void:
 	for i in hunters.size():
 		px[NAMES[i]] = _on_still(cam, hunters[i].global_position, size)
 	for j in h.kins.size():
-		px[KinLib.kin(SPECIES[j]).display_name] = _on_still(
-			cam, (h.kins[j]["node"] as Node3D).global_position, size
-		)
+		px[KinLib.kin(SPECIES[j]).display_name] = _on_still(cam, (h.kins[j]["node"] as Node3D).global_position, size)
 	var f := FileAccess.open(dir.path_join(shot + ".json"), FileAccess.WRITE)
 	f.store_string(JSON.stringify(px))
 	f.close()
@@ -300,9 +286,7 @@ func _write_heights() -> void:
 		var crown := HunterCrown.crown(m, pts, k, hi) - m.global_position.y
 		m.basis = lean
 		out["hunters"][NAMES[i]] = {
-			"body": snappedf(crown, 0.01),
-			"full": snappedf(hi - m.global_position.y, 0.01),
-			"scale": m.scale.y
+			"body": snappedf(crown, 0.01), "full": snappedf(hi - m.global_position.y, 0.01), "scale": m.scale.y
 		}
 	for j in h.kins.size():
 		var n := h.kins[j]["node"] as Node3D
@@ -382,9 +366,7 @@ func _pose_hunters(d: float) -> void:
 	for i in range(1, hunters.size()):
 		var face := _face_to(hunters[i].position)
 		hunters[i].basis = h.cam.char_basis(face, scales[i])
-		anims[i].update(
-			d, {"vel": Vector3.ZERO, "face": face, "grounded": true, "idle_break": true}
-		)
+		anims[i].update(d, {"vel": Vector3.ZERO, "face": face, "grounded": true, "idle_break": true})
 	if layout != "farm":
 		h.pface = _face_to(hunters[0].position)
 
@@ -437,8 +419,7 @@ func _clear_spot(near: Vector3) -> Vector3:
 				for sz in range(cz - 10, cz + 17):
 					var dz := sz - cz
 					var bad: bool = (
-						wd.is_block(sx + 0.5, sz + 0.5)
-						or wd.occupy(sx + 0.5, sz + 0.5, 0.9, 0.0, true) != 0.0
+						wd.is_block(sx + 0.5, sz + 0.5) or wd.occupy(sx + 0.5, sz + 0.5, 0.9, 0.0, true) != 0.0
 					)
 					var off: bool = wd.is_void(sx + 0.5, sz + 0.5)
 					if dz >= -3 and dz <= 4 and absi(sx - cx) <= 8:
@@ -456,8 +437,7 @@ func _clear_spot(near: Vector3) -> Vector3:
 				var sg := 1.0 if si == 0 else -1.0
 				var c0 := Vector3(cx + 0.5, 0, cz + 0.5)
 				var cams := [
-					c0 + Vector3(sin(EYE_YAW) * EYE_DIST * sg, 0, cos(EYE_YAW) * EYE_DIST),
-					c0 + Vector3(0, 0, MID_BACK)
+					c0 + Vector3(sin(EYE_YAW) * EYE_DIST * sg, 0, cos(EYE_YAW) * EYE_DIST), c0 + Vector3(0, 0, MID_BACK)
 				]
 				for cm in cams:
 					for tx in [-5.8, 0.0, 5.8]:
@@ -500,13 +480,6 @@ func _log(tag: String) -> void:
 	var rows := []
 	for i in hunters.size():
 		rows.append(
-			(
-				"%s %.1f,%.1f"
-				% [
-					NAMES[i],
-					hunters[i].global_position.x - group.x,
-					hunters[i].global_position.z - group.z
-				]
-			)
+			"%s %.1f,%.1f" % [NAMES[i], hunters[i].global_position.x - group.x, hunters[i].global_position.z - group.z]
 		)
 	print("FARM3D ", tag, " ppos ", h.ppos - group, " ", "; ".join(rows))
