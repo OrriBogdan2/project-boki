@@ -189,7 +189,7 @@ func _run_payoff() -> void:
 
 
 func run(m: Node) -> void:
-	Luck.rules()["base"] = 0.0  # Boki ids are random, so a lucky +2 would flake exact stat numbers (--playstyle-check tests luck)
+	Luck.rules()["base"] = 0.0  # random Boki ids: a lucky +2 would flake exact stats (see --playstyle-check)
 	main = m
 	Save.no_write = true
 	FarmUnlocks.rules()["base_mode"] = false  # the pre-garden affinity (--lean-check: the garden)
