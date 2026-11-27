@@ -174,8 +174,8 @@ ground): the aegis is `scripts/arch/kits/aegis_wall.gd` + `shaders/aegis_wall.gd
 his figurehead shield's look, not gold: a translucent face of dark hull planks (palette `wood`, each plank its own
 shade with a grain, the sea's cyan faint in the gaps as on his body), a carved lighter panel in the middle, an iron
 frame, strap and rivets (palette `band`), the boards' darker back a hand inside it, an iron rim bar along the top and
-a soft dark ground contact with a thin sea line; it breaks in wood-coloured chunks. His model's own shield is pulled
-up in front of his chest meanwhile (`arm_raise`, WardenArmRaise). Both faces draw alike (`cull_disabled`), so it reads
+a soft dark ground contact with a thin sea line; it breaks in wood-coloured chunks. (Raising his model's own shield
+in front of his chest waits for the body rework.) Both faces draw alike (`cull_disabled`), so it reads
 from behind too (not shot). Shape, size, rise, block flash, hurt tint and break are as before; no hit or timing change.
 Strip at match zoom (grey = main, green = after): `docs/shots/vfx-albert-e-wall/aegis_before_after.jpg` (GPU jobq
 20261120-113804-24869 before, 20261120-120528-04629 after; `--hero-vfx-reel --reel-hero=bulwark --reel-only=shield`).

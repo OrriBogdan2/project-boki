@@ -118,7 +118,6 @@ var crouch_steps: WardenSteps  # the same for the crouch layer's sneak ring (nul
 var cc: WardenCc             # a rooted torso's strain and a Grounded head's bow (scripts/heroes/warden_cc.gd)
 var out_fade := FADE_LOCO    # s the last action takes to hand back to the legs
 var reach: WardenReach       # an arm a kit stretches out to a point (scripts/heroes/warden_reach.gd), or null
-var arm_raise: WardenArmRaise  # an arm a held clip raises (scripts/heroes/warden_arm_raise.gd), or null
 var out_w := 0.0             # the "weapon_out" data: how far the free-arm pose lies over the clips
 var out_pose: Array = []     # [bone index, rotation]: the free arm, sampled once from its clip
 var weapon_bi := -1          # "weapon_bone": the bone a thrown weapon hides on
@@ -276,7 +275,6 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, clips: A
 		crouch_steps = WardenSteps.new(model, tree, sneak, d["crouch"].get("plants", {}), lib, "crouch_loco")
 	cc = WardenCc.new(sk, d.get("cc", {}))
 	reach = WardenReach.make(sk, d)
-	arm_raise = WardenArmRaise.make(sk, d)
 	_setup_out()
 	if not bool(d.get("rig_root", false)):
 		turn = WardenTurn.make(model, sk)
@@ -850,8 +848,6 @@ func step(dt: float) -> void:
 		skel.set_bone_pose_scale(root_bi, skel.get_bone_rest(root_bi).basis.get_scale())
 	_out(dt)
 	free_arm.apply(dt, "" if proc else String(want.get("clip", "")))
-	if arm_raise:
-		arm_raise.apply(dt, "" if proc else String(want.get("clip", "")))
 	if reach:
 		reach.apply(dt, root.get_meta(WardenReach.TIP, Vector3.INF))
 	_carry(String(s.get("kmove", "")) == WardenCarry.MOVE and not proc, dt)

@@ -11,7 +11,6 @@ const LUNGE_SLACK := 0.3  # m: a measured lunge may miss its data distance by th
 
 
 func albert() -> void:
-	await _shield_up()
 	await _ult_hop()
 	await _rope()
 	await _lunges()
@@ -77,42 +76,6 @@ func _ult_hop() -> void:
 		dmg(t_v) > 0.0,
 		"took %.0f" % dmg(t_v)
 	)
-	await done(m)
-
-
-## RMB: his own wooden shield comes up in front of his chest (WardenArmRaise over the guard clip, owner 11-26), not
-## left at his hip where the clip keys it; the arm gives it back to the clips once the aegis is down.
-func _shield_up() -> void:
-	var r := setup("bulwark", 7.0)
-	var m: Match = r[0]
-	var p: Hunter = r[1]
-	var clips := (p.model.get_node("Warden/Sync") as WardenGlb.Sync).clips
-	var sk := WardenGlb.skeleton(p.model.get_node("Warden"))
-	var shield := WardenSkeleton.find(sk, "x_shield")
-	var shoulder := WardenSkeleton.find(sk, "upper_arm.L")
-	var raise := clips.arm_raise
-	var at := {}
-	for k in ["clip", "raised", "down"]:
-		clips.arm_raise = null if k == "clip" else raise
-		p.inp["sec_hold"] = k != "down"
-		if k != "down":
-			p.ak.press_rmb()
-		for i in 30:
-			p.inp["sec_hold"] = k != "down"
-			m.step(DT)
-			p.render(DT, 1.0)
-			await main.get_tree().process_frame
-		at[k] = sk.get_bone_global_pose(shield).origin
-		at[k + "_sh"] = sk.get_bone_global_pose(shoulder).origin
-	var up: Vector3 = at["raised"]
-	var clip_y: float = at["clip"].y
-	var sh: Vector3 = at["raised_sh"]
-	ok(
-		"albert RMB: his wooden shield is pulled up in front of his chest (not at his hip, as the clip keys it)",
-		raise != null and up.y >= clip_y + 0.12 and up.y >= sh.y - 0.15 and up.z <= sh.z - 0.3,
-		"shield y %.2f (clip %.2f, shoulder %.2f), %.2f in front of the shoulder" % [up.y, clip_y, sh.y, sh.z - up.z]
-	)
-	ok("albert RMB: the arm goes back to the clips once the aegis is down", raise.w == 0.0, "w %.2f" % raise.w)
 	await done(m)
 
 

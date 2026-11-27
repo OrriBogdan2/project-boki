@@ -35,8 +35,6 @@ func run(main: Node) -> void:
 		await _guard(main)
 	if "ult" in parts:
 		await _ult(main)
-	if "pose" in parts:
-		await _pose(main)
 	print("BREAKER_PROOF_DONE")
 	main.get_tree().quit()
 
@@ -120,11 +118,13 @@ func _arena(main: Node) -> Match:
 	m.set_process(false)
 	if m.hud:
 		m.hud.visible = false
+	for layer in m.find_children("*", "CanvasLayer", true, false):  # the drill card and the zone's buttons
+		(layer as CanvasLayer).visible = false
 	return m
 
 
 ## The aegis held toward the screen's right and toward the camera at the match camera, then close up from his front
-## left with and without the raised shield arm (WardenArmRaise), the wall shown and hidden.
+## left, the wall shown and hidden, then straight down from above.
 func _guard(main: Node) -> void:
 	var m := _arena(main)
 	var p: Hunter = m.player
@@ -144,18 +144,16 @@ func _guard(main: Node) -> void:
 		p.pos + fwd * 5.5 + fwd.cross(Vector3.UP) * 2.0 + Vector3(0, 2.2, 0), p.pos + Vector3(0, 1.1, 0), Vector3.UP
 	)
 	cam.current = true
-	var clips := (p.model.get_node("Warden/Sync") as WardenGlb.Sync).clips
-	var raise := clips.arm_raise
+	for i in 6:
+		p.inp["sec_hold"] = true
+		await _tick(main, m)
+	await _grab(main, "guard_close.png")
 	var aegis := (p.ak as BulwarkKit).fx.aegis
-	for k in ["raised", "clip"]:
-		clips.arm_raise = raise if k == "raised" else null
-		for i in 6:
-			p.inp["sec_hold"] = true
-			await _tick(main, m)
-		await _grab(main, "guard_close_%s.png" % k)
-		aegis.visible = false
-		await _grab(main, "guard_close_%s_nowall.png" % k)
-	clips.arm_raise = raise
+	aegis.visible = false
+	await _grab(main, "guard_close_nowall.png")
+	aegis.visible = true
+	cam.look_at_from_position(p.pos + Vector3(0, 9.0, 0.01), p.pos, Vector3.UP)
+	await _grab(main, "guard_top.png")
 	p.inp["sec_hold"] = false
 	m.queue_free()
 	await main.get_tree().process_frame
@@ -176,42 +174,3 @@ func _ult(main: Node) -> void:
 			await _grab(main, "%s.png" % shots[i])
 	m.queue_free()
 	await main.get_tree().process_frame
-
-
-func _pose(main: Node) -> void:
-	var m := _arena(main)
-	var p: Hunter = m.player
-	p.inp["aim"] = p.pos + Vector3(0, 0, 7)
-	for i in 30:
-		await _tick(main, m)
-	_bones(p, "idle")
-	p.inp["sec_hold"] = true
-	p.ak.press_rmb()
-	for i in 40:
-		p.inp["sec_hold"] = true
-		await _tick(main, m)
-	_bones(p, "guard")
-	m.queue_free()
-
-
-func _bones(p: Hunter, tag: String) -> void:
-	var sk := WardenGlb.skeleton(p.model.get_node("Warden"))
-	var inv := p.model.global_transform.affine_inverse() * sk.global_transform
-	for b in ["chest", "upper_arm.L", "forearm.L", "hand.L", "x_shield", "head"]:
-		var bi := WardenSkeleton.find(sk, b)
-		if bi < 0:
-			continue
-		var g := sk.get_bone_global_pose(bi)
-		print(
-			(
-				"POSE %s %s pos %s sk %s basis %s"
-				% [
-					tag,
-					b,
-					(inv * g.origin).snapped(Vector3.ONE * 0.01),
-					g.origin.snapped(Vector3.ONE * 0.01),
-					g.basis.get_euler() * 57.3
-				]
-			)
-		)
-	print("POSE sk-to-model %s" % inv)
