@@ -136,6 +136,8 @@ func run(m: Node) -> void:
 	if bb != null and bb.life != null:
 		if _want("morning"):
 			await _morning(bb)
+		if _want("loot"):
+			await _loot_react(bb)
 		if _want("dash"):
 			await _dash_and_cup(bb)
 		if _want("fetch"):
@@ -162,6 +164,36 @@ func run(m: Node) -> void:
 	Engine.time_scale = 1.0
 	print("GDAY DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+
+## Row: you come home from an expedition with a garden item kind you never had. The nearest free Boki walks up, reacts
+## and says a line, its journal keeps one line, no pop-up opens, and the same kind is not news a second time.
+func _loot_react(bb) -> void:
+	FarmChatter._look_t = 0.0
+	FarmChatter.tick(bb, 0.01)  # the farm learns who is home and what is in the bag
+	ComeLook._looks.clear()
+	var panel: String = bb.panel_open
+	Save.d["items"]["hushpearl"] = int(Save.d["items"].get("hushpearl", 0)) + 1
+	Save.d["extracts"] = int(Save.d.get("extracts", 0)) + 1
+	FarmChatter._look_t = 0.0
+	FarmChatter.tick(bb, 0.01)
+	var looks: Array = ComeLook._looks.duplicate()
+	ok(
+		looks.size() == 1 and looks[0]["kind"] == "item",
+		"react: one Boki walks up to the new Hushpearl (%d)" % looks.size()
+	)
+	if looks.is_empty():
+		return
+	var k: Dictionary = looks[0]["k"]
+	var t0 := _now()
+	while ComeLook._looks.has(looks[0]) and _now() - t0 < 25.0:
+		await main.get_tree().process_frame
+	var lines: Array = (k["rec"].get("journal", []) as Array).map(func(e): return CareJournal.text(e))
+	var said := lines.any(func(t): return String(t).ends_with("the new Hushpearl"))
+	ok(said, "react: %s's journal: %s" % [k["rec"]["name"], lines[-1]])
+	ok(bb.panel_open == panel, "react: no pop-up opened")
+	ok(Save.d["tutorial"].get(ComeLook.ITEM_KEY + "hushpearl", false), "react: the kind is marked, once per save")
+	await _grab("loot_react")
 
 
 ## Arrival, the feed menu's preview, feeding an item.
