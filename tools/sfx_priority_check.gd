@@ -45,6 +45,7 @@ func run(main_node: Node) -> void:
 	var m := await _brawl()
 	m.player.max_hp *= 20.0
 	t0 = Time.get_ticks_msec()
+	Sfx.play_jitter_db = 0.0  # the levels below are compared exactly
 	Sfx.played.connect(_on_played)
 	var start := m.time
 	while is_instance_valid(m) and m.time - start < secs:
