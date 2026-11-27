@@ -300,6 +300,8 @@ Base life (GARDEN.md section 4, scripts/home/base_life.gd): with farm_build.json
 | chore_chance | 0.3 |
 | chore_chance_doc | chance a roaming Boki whose knack has a chore to do right now (scripts/home/base_chore.gd) does it. |
 | chore_mind | 15 |
+| chore_water | 6 |
+| chore_water_doc | s a Tide Boki stands at the dry snack patch before it is watered. |
 | chore_mind_doc | s an Ember Boki sits by the egg before the egg's hatch time halves. |
 | nap | [20.0, 40.0] |
 | nap_doc | s of a day nap (energy low or bored); at night a non-nocturnal Boki naps till dawn. |
@@ -1067,8 +1069,9 @@ Hunter unlocks and mastery (docs/decisions/0005). A new save picks one of `start
 
 | Setting | Value |
 |---|---|
-| doc | The one 'in combat' rule (scripts/match/in_combat.gd). A Hunter or a Boki is in combat for window_s seconds after it deals or takes damage in a fight: a hit on or from a Hunter, a Boki, a monster or Blight. Healing, falls, wall slams, heat, friendly fire and damage to yourself don't count. A Boki's fight is its owner's too. Hunter shield refill, a Boki's own mending, the drive music, a Boki's 10 Hz think out of combat and a Boki's refused orders all read it, so they switch on the same frame. (Far bots' 20 Hz step is SimLod's, not this window: far fights are slowed on purpose.) The source publishes no combat timer [gap]: 5 s is the old Hunter regen wait, kept as the one shared value. Channels (a recall, an exit call, a rune, a box revive) are not on this window: the source cancels them on the hit itself, so they read Hunter.hurt_at. |
+| doc | Combat rules. window_s: the one 'in combat' rule (scripts/match/in_combat.gd). A Hunter or a Boki is in combat for window_s seconds after it deals or takes damage in a fight: a hit on or from a Hunter, a Boki, a monster or Blight. Healing, falls, wall slams, heat, friendly fire and damage to yourself don't count. A Boki's fight is its owner's too. Hunter shield refill, a Boki's own mending, the drive music, a Boki's 10 Hz think out of combat and a Boki's refused orders all read it, so they switch on the same frame. (Far bots' 20 Hz step is SimLod's, not this window: far fights are slowed on purpose.) The source publishes no combat timer [gap]: 5 s is the old Hunter regen wait, kept as the one shared value. anti_heal_cut: how much of a heal Anti-Heal (blight) takes away when the source gives no amount of its own: 0.7 leaves 30% of every heal (the target feel is 0.3; was 0.6, 40% left). Channels (a recall, an exit call, a rune, a box revive) are not on this window: the source cancels them on the hit itself, so they read Hunter.hurt_at. |
 | window_s | 5 |
+| anti_heal_cut | 0.7 |
 
 ## dash_feel (`content/rules/dash_feel.json`)
 
@@ -1099,6 +1102,16 @@ Decor with a purpose (briefs/design/GARDEN_MODERN.md section 5 rank 7; scripts/h
 | need_doc | Decorations of one comfort tag a zone needs before that tag's effect is on. |
 | effects | {"cosy": {"name": "Snug naps", "does": "naps restore joy", "nap_joy": 6.0, "nap_joy_doc": "Joy per minute a napping Boki gains (without it a nap only slows joy's fall, Care.tick)."}, "bright": {"name": "Sunny patch", "does": "the snack patch ripens faster", "grow": 0.75, "grow_doc": "Share of snack_patch.json grow_secs the patch takes to ripen."}, "wild": {"name": "Wild welcome", "does": "wild visitors come more often", "visit": 2.0, "visit_doc": "Times garden_visitor.json chance a look brings a visitor."}, "quiet": {"name": "Calm air", "does": "fewer squabbles", "clash": 0.5, "clash_doc": "Times base_life.json clash, the chance two hot tempers squabble."}} |
 | effects_doc | One per tag: name and does are shown on the zone card; the number is the effect's size. |
+
+## depth_cues (`content/rules/depth_cues.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | Height cues under a hunter (scripts/match/depth_cues.gd, briefs/CAMERA_DEPTH.md). shadow: the soft disc on the ground under a hunter keeps full strength up to fade_from_m above the ground, fades out linearly and is gone at gone_at_m (a body high in the air no longer paints a dark spot far below it). ring: while a hunter is airborne, min_m to max_m above the ground, a ring of diameter_m lies on the ground under it, so a glider's height still reads once its shadow has faded. Colours are linear RGB (the target feel): own is gold, a teammate is blue, an enemy is red. |
+| shadow | {"fade_from_m": 0.5, "gone_at_m": 10.0} |
+| ring | {"min_m": 1.5, "max_m": 50.0, "diameter_m": 3.0, "thickness": 0.1, "alpha": 0.85, "own": [0.885, 0.664, 0.0], "ally": [0.0, 0.711, 1.0], "enemy": [1.0, 0.0, 0.0]} |
 
 ## drop_poses (`content/rules/drop_poses.json`)
 
@@ -1771,8 +1784,8 @@ A big Boki led at home (scripts/home/home_carry.gd _lead). It walks at your own 
 | _budget | groups; the owner's number for a new player |
 | ways_out_lead_s | 30 |
 | _ways_out_lead_s | the Ways Out strip stays away until a seat is this many seconds from opening (or already open, in use, taken or lost); before that its four countdowns tell a new player nothing to act on |
-| always | ["minimap", "vitals", "abilities", "slots", "weapon"] |
-| _always | blocks the match HUD draws from the first second: the minimap (its clock strip hangs under it), vitals, the ability row, the Boki and glove boxes, the weapon card. The counters, glider ring and belt are folded in until they matter (see HudGroups.on_screen) |
+| always | ["minimap", "vitals"] |
+| _always | blocks the match HUD draws from the first second: the minimap (its clock strip hangs under it) and vitals. The ability row, weapon card, Boki and glove boxes and counters come by HudReveal (the tutorial by step); the glider ring and belt are folded in until they matter (see HudGroups.on_screen) |
 | newcomer_seats | [2, 3] |
 | _newcomer_seats | the Ways Out seats (0 Lair, 1 Heart Gate, 2 Uplink, 3 Heart ring) a new player's objective line points at: the two that need no boss fight and no carried Heart (ExtractGoal) |
 | goal_how | ["Beat the boss, then ride the lift", "Carry the Heartspark to the Gate, hold %F", "Hold %F at the outpost until the lift opens", "Stand in the Heart ring until the end"] |
@@ -1784,7 +1797,7 @@ A big Boki led at home (scripts/home/home_carry.gd _lead). It walks at your own 
 
 | Setting | Value |
 |---|---|
-| groups | {"vitals": {"from_match": 1, "what": "health, level and the XP bar"}, "abilities": {"from_match": 1, "what": "ability and weapon slots with their keys"}, "beat_clock": {"from_match": 4, "first": "beat", "what": "the match clock under the minimap, from the first Ways Out beat or the first kill"}, "summon_ring": {"from_match": 1, "what": "the Boki card and its summon ring"}, "objective": {"from_match": 1, "what": "the minimap, waypoints and prompts"}, "seat_pips": {"from_match": 0, "first": "seat_open", "what": "the Ways Out strip, from the first open seat"}, "belt": {"from_match": 4, "first": "item_matters", "what": "the utility belt, from the first time a held item could be used"}, "counters": {"from_match": 4, "what": "squads left, kills, knocks, gems"}, "feed": {"from_match": 4, "what": "the kill feed"}, "gear": {"from_match": 4, "what": "the gear panel"}, "squad": {"from_match": 4, "what": "squad frames"}, "perks": {"from_match": 4, "what": "the perk row"}, "weather": {"from_match": 4, "what": "the weather and sight chip"}, "belt_spare": {"from_match": 0, "what": "belt slots 3 to 6 while they are empty (a filled one always shows)"}, "ult_tiles": {"from_match": 0, "what": "the locked ultimate tiles (X, and the Fusion box) until level 6"}, "pace_tags": {"from_match": 4, "what": "ahead / behind pace tags (no widget yet)"}, "plate_colours": {"from_match": 4, "what": "squad-coloured names on overhead plates"}} |
+| groups | {"vitals": {"from_match": 1, "what": "health, level and the XP bar"}, "abilities": {"from_match": 1, "tut_from": "shoot", "what": "ability and weapon slots with their keys"}, "beat_clock": {"from_match": 4, "first": "beat", "what": "the match clock under the minimap, from the first Ways Out beat or the first kill"}, "summon_ring": {"from_match": 1, "tut_from": "gkey", "what": "the Boki card and its summon ring"}, "objective": {"from_match": 1, "what": "the minimap, waypoints and prompts"}, "seat_pips": {"from_match": 0, "first": "seat_open", "what": "the Ways Out strip, from the first open seat"}, "belt": {"from_match": 4, "tut_from": "glove", "first": "item_matters", "what": "the utility belt, from the first time a held item could be used"}, "counters": {"from_match": 4, "what": "squads left, kills, knocks, gems"}, "feed": {"from_match": 4, "what": "the kill feed"}, "gear": {"from_match": 4, "what": "the gear panel"}, "squad": {"from_match": 4, "what": "squad frames"}, "perks": {"from_match": 4, "what": "the perk row"}, "weather": {"from_match": 4, "what": "the weather and sight chip"}, "belt_spare": {"from_match": 0, "what": "belt slots 3 to 6 while they are empty (a filled one always shows)"}, "ult_tiles": {"from_match": 0, "what": "the locked ultimate tiles (X, and the Fusion box) until level 6"}, "pace_tags": {"from_match": 4, "what": "ahead / behind pace tags (no widget yet)"}, "plate_colours": {"from_match": 4, "what": "squad-coloured names on overhead plates"}} |
 
 ## hunter_foley (`content/rules/hunter_foley.json`)
 
@@ -2248,11 +2261,12 @@ How a Boki answers a pat by personality (scripts/home/pet_react.gd, used by home
 
 ## pickup (`content/rules/pickup.json`)
 
-Ground pickup reach (scripts/match/pickup_reach.gd, docs/PICKUP_REACH.md). Each rule is a flat radius and a height (m) a hunter must be within, and nothing may stand between them and the thing: a rock, higher ground or a kit wall blocks a pickup as it blocks sight. walk: consumables, armor shards, gems, seeds, Rift and chest keys fly to you as you pass (no key); pull_speed + (radius - distance) x pull_gain m/s, taken when within grab m of your chest, settle s after they land. tune: a weapon tuning taken by walking over it. bot: a bot walking over a tuning or a gear piece better than its own. interact: gear and treasure, taken with the interact key; of several in reach the key takes the one nearest the cursor.
+Ground pickup reach (scripts/match/pickup_reach.gd, docs/PICKUP_REACH.md). Each rule is a flat radius and a height (m) a hunter must be within, and nothing may stand between them and the thing: a rock, higher ground or a kit wall blocks a pickup as it blocks sight. walk: consumables, armor shards, gems, seeds, Rift and chest keys fly to you as you pass (no key); pull_speed + (radius - distance) x pull_gain m/s, taken when within grab m of your chest, settle s after they land. gem: the same rule for gems alone, with the wider 4 m reach (the target feel: gems come to you from across a room). tune: a weapon tuning taken by walking over it. bot: a bot walking over a tuning or a gear piece better than its own. interact: gear and treasure, taken with the interact key; of several in reach the key takes the one nearest the cursor.
 
 | Setting | Value |
 |---|---|
 | walk | {"radius": 2.2, "height": 2.0, "settle": 0.5, "pull_speed": 6.0, "pull_gain": 6.0, "grab": 0.6} |
+| gem | {"radius": 4.0, "height": 2.0, "pull_speed": 6.0, "pull_gain": 6.0, "grab": 0.6} |
 | tune | {"radius": 1.1, "height": 1.0} |
 | bot | {"radius": 1.4, "height": 1.0} |
 | interact | {"radius": 1.5, "height": 1.2} |
@@ -2307,7 +2321,7 @@ Ground pickup reach (scripts/match/pickup_reach.gd, docs/PICKUP_REACH.md). Each 
 | _cue_db | volume_db at the call site, on top of the sound's own category level: the tutorial strip's new-objective chime (TutorialStrip.chime), and the same ducked while you are in a fight |
 | cats | {"fire": -17.0, "impact": -16.0, "heavy_fire": -15.5, "heavy_impact": -14.5, "cast": -18.0, "signature": -17.0, "dash": -20.0, "step": -23.0, "grunt": -18.0, "loop": -21.0, "boki": -19.0, "ui": -22.0} |
 | _cats | heavy_fire / heavy_impact: a damage carry's weapon and hits (Vex's gatling, Kael's greatsword, Grimble's blunderbuss, Albert's hammer), a little louder than the lighter Hunters; fire: a weapon shot or swing; impact: something landing; cast: an ability starting; signature: a Hunter's recognisable sound; step: footsteps (many per second, so quietest); grunt: hurt/downed/death, wordless; loop: held sounds; boki: Boki voices and moves; ui: menus and HUD |
-| table_cats | {"fire": ["smg", "rifle", "shotgun", "sniper", "rail", "swipe", "cleave", "ab_throw", "ab_rail"], "impact": ["hit", "hit_light", "hit_solid", "hit_heavy", "crit", "slash_hit", "armor_hit", "armor_break", "ab_hit", "ab_shield_hit", "thump", "boom", "ab_blast", "ab_slam", "break_wood", "break_clay", "break_metal", "train_hit", "br_crumble", "br_rumble", "knock", "pay_slam", "pay_rockfall", "pay_collapse", "hero_skewer", "hero_blowout", "splash"], "cast": ["ab_blink", "armor_up", "armor_up_own", "ab_charge", "ab_guard", "ab_leap", "ab_parry", "ab_plant", "ab_slow", "ab_stun", "ab_tether", "ab_wall", "ab_whirr", "charge", "cloak", "shield", "heal", "ult", "combo", "swap", "zap", "whoosh", "pay_called", "pay_cashin", "pay_deadeye", "pay_flashpoint", "pay_rage", "revive", "revive_done", "portal", "horn", "warn", "fuse_hiss"], "grunt": ["hurt", "v_skitter", "v_spitter", "v_brute", "v_bomber", "v_sentinel", "v_glimmer", "v_warden", "die_small", "die_big"], "dash": ["dash", "jump", "land", "fall", "glide"], "step": ["step0", "step1", "step2", "step_grass", "step_snow", "step_stone", "step_wood", "swim", "drip"], "ui": ["ab_ready", "knock_confirm", "knock_warn", "elim_confirm", "extract_ok", "key_get", "lock_rattle", "reset_a", "reset_b", "reset_c", "build", "kill", "reload"], "boki": ["grab", "plant", "harvest", "rustle", "squeak", "scan_pop"], "loop": ["revive_hum", "wisp_hum"]} |
+| table_cats | {"fire": ["rail", "swipe", "cleave", "ab_throw", "ab_rail"], "impact": ["hit", "hit_light", "hit_solid", "hit_heavy", "crit", "slash_hit", "armor_hit", "armor_break", "ab_hit", "ab_shield_hit", "thump", "boom", "ab_blast", "ab_slam", "break_wood", "break_clay", "break_metal", "train_hit", "br_crumble", "br_rumble", "knock", "pay_slam", "pay_rockfall", "pay_collapse", "hero_skewer", "hero_blowout", "splash"], "cast": ["ab_blink", "armor_up", "armor_up_own", "ab_charge", "ab_guard", "ab_leap", "ab_parry", "ab_plant", "ab_slow", "ab_stun", "ab_tether", "ab_wall", "ab_whirr", "charge", "cloak", "shield", "heal", "ult", "combo", "swap", "zap", "whoosh", "pay_called", "pay_cashin", "pay_deadeye", "pay_flashpoint", "pay_rage", "revive", "revive_done", "portal", "horn", "warn", "fuse_hiss"], "grunt": ["hurt", "v_skitter", "v_spitter", "v_brute", "v_bomber", "v_sentinel", "v_glimmer", "v_warden", "die_small", "die_big"], "dash": ["dash", "jump", "land", "fall", "glide"], "step": ["step0", "step1", "step2", "step_grass", "step_snow", "step_stone", "step_wood", "swim", "drip"], "ui": ["ab_ready", "knock_confirm", "knock_warn", "elim_confirm", "extract_ok", "key_get", "lock_rattle", "reset_a", "reset_b", "reset_c", "build", "kill", "reload"], "boki": ["grab", "plant", "harvest", "rustle", "squeak", "scan_pop"], "loop": ["revive_hum", "wisp_hum"]} |
 | gain_db | {"click": -2.0, "charge": 8.0, "cloak": 5.5, "v_glimmer": 5.5, "v_skitter": 4.5, "v_bomber": 4.5, "br_crumble": 3.5, "fuse_hiss": 2.0, "drip": -4.5} |
 | outliers_ok | {"boom": "the blast category: Sfx.BLAST_DB keeps it under the mix (Moosh Moosh item 23)", "ab_blast": "the blast category: Sfx.BLAST_DB keeps it under the mix (Moosh Moosh item 23)", "ab_slam": "the blast category: Sfx.BLAST_DB keeps it under the mix (Moosh Moosh item 23)", "kill": "a confirm sting, meant to cut through the fight above the menu sounds", "knock_confirm": "a confirm sting, meant to cut through the fight above the menu sounds", "knock_warn": "a squad warning sting, meant to cut through the fight above the menu sounds", "elim_confirm": "a confirm sting, meant to cut through the fight above the menu sounds", "extract_ok": "a confirm sting, meant to cut through the fight above the menu sounds", "revive_hum": "borderline (under 4.5 dB), mixed by ear at its call sites; left for a listening pass", "swap": "borderline (under 4.5 dB), mixed by ear at its call sites; left for a listening pass", "ab_shield_hit": "borderline (under 4.5 dB), mixed by ear at its call sites; left for a listening pass", "whoosh": "borderline (under 4.5 dB), mixed by ear at its call sites; left for a listening pass", "grab": "borderline (under 4.5 dB), mixed by ear at its call sites; left for a listening pass", "key_get": "borderline (under 4.5 dB), mixed by ear at its call sites; left for a listening pass", "v_spitter": "borderline (under 4.5 dB), mixed by ear at its call sites; left for a listening pass", "pay_rage": "borderline (under 4.5 dB), mixed by ear at its call sites; left for a listening pass", "revive_done": "borderline (under 4.5 dB), mixed by ear at its call sites; left for a listening pass", "armor_hit": "borderline (under 4.5 dB), mixed by ear at its call sites; left for a listening pass", "ab_charge": "borderline (under 4.5 dB), mixed by ear at its call sites; left for a listening pass"} |
 | _gain_db | dB Sfx adds when it plays the sound: brings an old file that sits off its category's median back to it (tools/sfx_loudness.py measures them); a positive gain may not push its peak past peak_db |
@@ -2437,7 +2451,7 @@ Show Ring, a judged show on a small stage near the Training post (briefs/design/
 
 ## snack_patch (`content/rules/snack_patch.json`)
 
-The garden's one snack patch (scripts/home/snack_patch.gd, base_mode only; GARDEN.md section 10 question 1). It grows one of each snack in snacks every grow_secs and you pick them up by walking over it. They go to the pantry (Save.d crops) to feed the element-lean foods; the patch is never sold and has no seed, shop or water chore.
+The garden's one snack patch (scripts/home/snack_patch.gd, base_mode only; GARDEN.md section 10 question 1). It grows one of each snack in snacks every grow_secs and you pick them up by walking over it. They go to the pantry (Save.d crops) to feed the element-lean foods; the patch is never sold and has no seed or shop; a Tide Boki's water chore (scripts/home/base_chore.gd) speeds it up.
 
 | Setting | Value |
 |---|---|
@@ -2446,11 +2460,15 @@ The garden's one snack patch (scripts/home/snack_patch.gd, base_mode only; GARDE
 | zone_snacks | {"bramblebank": ["kibble", "sweetbun", "sunroot", "sapjelly", "glowcap"], "glasswater": ["tidebloom", "frostdrop", "geodecandy"], "cinderstep": ["emberberry", "pebblenut", "ironcrisp", "scalepepper"], "hushwood": ["duskplum", "mindmint", "pricklepear"], "ridge": ["puffcorn", "tonicbrew", "starfruit", "chimebun"]} |
 | zone_snacks_doc | Each zone's snack list, the foods of its group's types (GARDEN.md 10.2): Bramblebank normal, grass, bug, spore; Glasswater water, ice, crystal; Cinderstep fire, rock, steel, dragon; Hushwood dark, psychic, poison; Kitewind (theme ridge) flying, electric, fairy, sound. Every food in lean.json is in exactly one list (--lean-snacks-check). A patch on a theme with a list grows that list; the key is the home_layout THEMES id. |
 | grow_secs | 480 |
+| water_mult | 0.7 |
+| water_mult_doc | Share of grow_secs a watered patch needs: a Tide Boki waters a dry, growing patch once per ripening and it ripens 30% sooner. |
 | grow_secs_doc | Seconds from put down (or from the last pick) until it is ripe; it keeps ripening while you are away, but only one batch waits at a time. |
 | first_grow_secs | 60 |
 | first_grow_secs_doc | Seconds the first batch of a save takes (the starter gift), so the Feed step is doable by minute 2 (GARDEN_FIRST_HOUR.md item 8). Every later batch takes grow_secs. A save with no snack_picks counter (older saves) has no first batch. |
 | reach | 0.35 |
 | reach_doc | Tiles beyond the patch's edge from which your feet pick the snacks. |
+| pick_textures | {"crisp": ["normal", "fire", "grass", "flying", "electric"], "juicy": ["water", "ice", "poison", "dark"], "hard": ["rock", "steel", "crystal", "dragon"], "soft": ["spore", "bug", "fairy", "psychic", "sound"]} |
+| pick_textures_doc | The crunch each snack makes when picked (garden_snack_<texture>, tools/gen_sfx_garden.py), by the lean type of the food (lean.json foods): every type is in exactly one list (--snack-patch-check). |
 | rotate_doc | The start garden's patch grows its four snacks and one more every ripening: the next food, in the order of the zone lists, that is not one of its four. rot on the patch's deco entry counts the ripenings. |
 
 ## snacks (`content/rules/snacks.json`)
