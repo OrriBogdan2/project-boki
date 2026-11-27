@@ -1,8 +1,9 @@
 extends RefCounted
 ## Meeko's Soulpack (docs/heroes/tender.md, passive Bearer), run by tools/support_check.gd inside
-## --tender-combo-check. Source (sv/briefs/kits.md, Elluna): taking too much damage or being stunned
-## drops the carried Wisps and locks re-pick for 4 s; nothing else. Each way a carrier can be hit is
-## asserted: shot damage, a DoT tick, a knock-back, a stun, a root, a slow and a teammate's heal.
+## --tender-combo-check. Carrying gives her a shield; it breaking (a hit past it) or a stun drops the carried
+## Wisps, stuns her and locks re-pick for 4 s; nothing else. Each way a carrier can be hit is
+## asserted: a hit the shield soaks, a hit that breaks it, a DoT tick, a knock-back, a stun, a root, a slow
+## and a teammate's heal.
 
 var sc  # the SupportCheck running us (setup, step, ok, aim_at)
 
@@ -24,6 +25,11 @@ func _pick(m: Match, pc: Hunter, ally: Hunter, kit: TenderKit) -> bool:
 	return CareUtil.is_carried(ally)
 
 
+## A hit big enough to get past her carry shield as it stands.
+func _breaker(pc: Hunter) -> float:
+	return pc.shield + 30.0
+
+
 func tender() -> void:
 	var r: Array = sc.setup("tender", 14.0)
 	var m: Match = r[0]
@@ -32,20 +38,37 @@ func tender() -> void:
 	var tgt: Hunter = r[3]
 	var kit: TenderKit = pc.ak
 	sc.down(m, ally)
-	# --- drops: shot damage (no stun on her), a DoT tick, a stun
+	# --- the shield: a pickup gives it, a small hit is soaked, one past it breaks it
 	var held := _pick(m, pc, ally, kit)
-	pc.hurt(10.0, tgt, {"src": "primary"})
+	var sh := pc.shield
+	var want: float = float(kit.d["passive"]["shield"]) * LevelGrowth.hp(pc)
+	ok(
+		"mm carry: a pickup gives her the carry shield",
+		held and kit.carry_shield and absf(sh - want) < 0.5,
+		"shield %.1f want %.1f" % [sh, want]
+	)
+	pc.hurt(sh * 0.4, tgt, {"src": "primary"})
 	sc.step(m, 0.1)
 	ok(
-		"mm carry: a rival's shot drops them, 4 s lock, no stun on her",
-		held and not CareUtil.is_carried(ally) and kit.lock_t > 3.8 and pc.stun_t <= 0.0,
-		"lock %.2f stun %.2f" % [kit.lock_t, pc.stun_t]
+		"mm carry: a hit the shield soaks keeps them, no stun",
+		CareUtil.is_carried(ally) and pc.stun_t <= 0.0 and kit.lock_t <= 0.0 and pc.shield > 0.0,
+		"shield %.1f stun %.2f" % [pc.shield, pc.stun_t]
+	)
+	# --- drops: a hit past the shield (stuns her), a DoT tick past it, a stun
+	held = _pick(m, pc, ally, kit)
+	pc.hurt(_breaker(pc), tgt, {"src": "primary"})
+	sc.step(m, 0.1)
+	var bs := float(kit.d["passive"]["break_stun"])
+	ok(
+		"mm carry: a hit past the shield drops them, 4 s lock, she is stunned",
+		held and not CareUtil.is_carried(ally) and kit.lock_t > 3.8 and pc.stun_t >= bs - 0.15,
+		"lock %.2f stun %.2f (want %.2f)" % [kit.lock_t, pc.stun_t, bs]
 	)
 	held = _pick(m, pc, ally, kit)
-	pc.hurt(1.0, tgt, {"src": "burn"})
+	pc.hurt(_breaker(pc), tgt, {"src": "burn"})
 	sc.step(m, 0.1)
 	ok(
-		"mm carry: a burn tick drops them (any damage, no figure in source)",
+		"mm carry: a burn tick past the shield drops them",
 		held and not CareUtil.is_carried(ally) and kit.lock_t > 3.8
 	)
 	held = _pick(m, pc, ally, kit)
@@ -89,7 +112,7 @@ func tender() -> void:
 	pc.root_t = 0.0
 	# --- the lock: no re-pick for 4 s after a drop, then they can be scooped up again
 	held = _pick(m, pc, ally, kit)
-	pc.hurt(10.0, tgt, {"src": "primary"})
+	pc.hurt(_breaker(pc), tgt, {"src": "primary"})
 	sc.step(m, 0.1)
 	var locked := held and not CareUtil.is_carried(ally)
 	for i in 7:

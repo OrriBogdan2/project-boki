@@ -498,6 +498,31 @@ func _mage() -> void:
 	P.inp["dash_down"] = false
 	step(m, 0.5)
 	ok("vireo Wirerun through Live: Blowout + dash back", K.blowouts == 1 and not K.live(T) and P.dashes >= 1.0 and dmg(T) >= 17.0, "blowouts %d took %.0f dashes %.1f" % [K.blowouts, dmg(T), P.dashes])
+	# the charge hold guards her: shots pass through, other hits land at half damage and half knock
+	var t_pos := T.pos
+	P.teleport(home)
+	fresh(T)
+	T.teleport(home + Vector3(20, 0, 0))
+	step(m, 0.2)
+	P.dashes = P.max_dashes()
+	P.inp["dash_down"] = true
+	P.do_dash()
+	step(m, 0.2, func(): P.inp["dash_down"] = true)
+	var gd := float(K.dash_def()["guard"])
+	var inc: Array = K.incoming(T, 10.0, {"kb": Vector2(4, 0), "lift": 2.0})
+	var guarded: bool = absf(inc[0] - 10.0 * gd) < 0.01 and absf(inc[1]["kb"].x - 4.0 * gd) < 0.01
+	guarded = guarded and absf(inc[1]["lift"] - 2.0 * gd) < 0.01
+	ok("vireo Wirerun charge: shots pass through her, hits land at the guard share of damage and knock",
+			not K.wire.is_empty() and P.phase_t > 0.0 and guarded,
+			"phase %.2f dmg %.1f guard %.2f" % [P.phase_t, inc[0], gd])
+	P.inp["dash_down"] = false
+	step(m, 1.2)
+	var full: float = K.incoming(T, 10.0, {})[0]
+	ok("vireo Wirerun charge: with the run over a hit lands in full", K.wire.is_empty() and full == 10.0)
+	T.teleport(t_pos)
+	fresh(T)
+	P.teleport(home)
+	step(m, 0.2)
 	# no knock heal (audit: the data's passive is Static only)
 	P.hp = 20.0
 	var kt := P.hp
