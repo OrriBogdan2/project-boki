@@ -2,21 +2,21 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://csktsxhpptqds"
-path.bptc="res://.godot/imported/sable_meshy_b2e_base_seam.png-c11afa2e31bfd9ae0116d5129c321aec.bptc.ctex"
-path.astc="res://.godot/imported/sable_meshy_b2e_base_seam.png-c11afa2e31bfd9ae0116d5129c321aec.astc.ctex"
+uid="uid://n0byybokqdfb"
+path.bptc="res://.godot/imported/sable_meshy_b2e_base_seam.jpg-48938a049d65e9353115d930b842f2f0.bptc.ctex"
+path.astc="res://.godot/imported/sable_meshy_b2e_base_seam.jpg-48938a049d65e9353115d930b842f2f0.astc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
-"md5": "6ce74bad111fd6da2ba3ec31c5630850"
+"md5": "f129b3b5b52fe82f3a63fc58ced76fc3"
 }
 
 [deps]
 
-source_file="res://art/wardens/sable/sable_meshy_b2e_base_seam.png"
-dest_files=["res://.godot/imported/sable_meshy_b2e_base_seam.png-c11afa2e31bfd9ae0116d5129c321aec.bptc.ctex", "res://.godot/imported/sable_meshy_b2e_base_seam.png-c11afa2e31bfd9ae0116d5129c321aec.astc.ctex"]
+source_file="res://art/wardens/sable/sable_meshy_b2e_base_seam.jpg"
+dest_files=["res://.godot/imported/sable_meshy_b2e_base_seam.jpg-48938a049d65e9353115d930b842f2f0.bptc.ctex", "res://.godot/imported/sable_meshy_b2e_base_seam.jpg-48938a049d65e9353115d930b842f2f0.astc.ctex"]
 
 [params]
 
