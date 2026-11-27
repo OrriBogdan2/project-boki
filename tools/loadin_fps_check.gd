@@ -313,7 +313,10 @@ func _finish() -> void:
 		cpu_sum += float(x)
 	lines.append(
 		(
-			"LOADIN main-thread cpu a frame (other jobs cannot stretch it): avg %.1f ms, p50 %.1f, p99 %.1f, max %.1f"
+			(
+				"LOADIN main-thread cpu a frame (other jobs cannot stretch it):"
+				+ " avg %.1f ms, p50 %.1f, p99 %.1f, max %.1f"
+			)
 			% [cpu_sum / maxi(cpus.size(), 1), _pct(cpus, 0.5), _pct(cpus, 0.99), _pct(cpus, 1.0)]
 		)
 	)

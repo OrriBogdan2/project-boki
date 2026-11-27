@@ -165,7 +165,8 @@ static func hitstop(m: Node, by: Ent, target: Ent, d: float, o: Dictionary) -> S
 	if _pair.size() > 256: _pair.clear()
 	var tt := ImpactWeight.hold_s(w) * k
 	var melee := is_melee(by, target, o)
-	var ta := tt if melee and ImpactWeight.holds_attacker(w) else 0.0
+	# o.no_hold: a fast repeating hit (Gil's Riptide) never holds its attacker, whose screen would stutter
+	var ta := tt if melee and ImpactWeight.holds_attacker(w) and not o.get("no_hold", false) else 0.0
 	var p = m.get("player")
 	var mine: bool = p != null and (by == p or target == p or (by is Kin and (by as Kin).owner_h == p))
 	if not bool(m.get("net_on")) and mine:

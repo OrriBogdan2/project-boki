@@ -25,6 +25,7 @@ func run(main_node: Node) -> void:
 	_bag()
 	_fencer()
 	_tide()
+	_tide_wall()
 	_vials()
 	_hold_and_air()
 	_beach()
@@ -183,6 +184,30 @@ func _tide() -> void:
 	ok("Tide Lunge: the release plays its pose and look",
 		int(HeroVfx.of(m).plays.get("tide_lunge", 0)) > 0 and int(HeroVfx.of(m).plays.get("tide_hit", 0)) > 0)
 
+## Tide Lunge into a wall (gil.md): only a full charge knocks the foe fast enough (over 8 m/s) for the shared wall
+## slam (Hunter's body slam, docs/KNOCK_WALLS.md: 0.9 s stun); a part charge pushes it into the rock and nothing more.
+func _tide_wall() -> void:
+	var rec := {}
+	for hold_s in [0.6, 1.2]:
+		_reset(3.0)
+		var w := HeroZones.rock(m, T, T.pos + Vector3(1.6, 0, 0), Vector2(1, 0), "gtw", 4.0, 30.0, 999.0, false)
+		P.inp["fire"] = true
+		step(m, hold_s, func(): P.inp["fire"] = true)
+		var k := K.tide_k()
+		P.inp["fire"] = false
+		var top := {"v": 0.0, "stun": 0.0}
+		step(m, 0.8, func():
+			top["v"] = maxf(top["v"], Vector2(T.vel.x, T.vel.z).length())
+			top["stun"] = maxf(top["stun"], T.stun_t))
+		m.verbs.walls.erase(w)
+		rec[k >= 1.0] = [k, top["v"], top["stun"]]
+	var part: Array = rec.get(false, [0.0, 0.0, 9.0])
+	var full: Array = rec.get(true, [0.0, 0.0, 0.0])
+	ok("Tide Lunge into a rock: a part charge pushes the foe, no wall stun", part[2] < 0.3,
+		"k %.2f, %.1f m/s, stun %.2f s" % part)
+	ok("Tide Lunge into a rock: a full charge slams the foe into it (the shared 0.9 s wall stun)",
+		full[1] > 8.0 and full[2] >= 0.85, "k %.2f, %.1f m/s, stun %.2f s" % full)
+
 func _vials() -> void:
 	var want := {"thunder": "stun", "slime": "slow", "fire": "burn", "zeep": "lift"}
 	for v in ["thunder", "slime", "air", "fire", "zeep"]:
@@ -330,12 +355,19 @@ func _swim() -> void:
 	ok("Ground Swim: the dive and its wake play, no shared dash pill over the ground",
 		int(HeroVfx.of(m).plays.get("dive", 0)) == dives + 1 and K.own_dash_trail())
 	step(m, 0.15)
-	# owner 11-11: the swim didn't take him under. Mid-swim the dive pose has the whole body (hat and all,
-	# plate_offset up from the feet) below the surface.
+	# owner 11-26: sunk to the waist, the top half swimming (it was all the way under, owner 11-11). Mid-swim the
+	# legs are under (lift past half the 2.1 m plate_offset's hips) and the head and shoulders above.
 	var age := m.time - K.anim_at
-	var lift := float(HunterAnim.km_sample(K.anim_id, age).get("lift", 0.0))
-	ok("Ground Swim: mid-swim his whole body is under the ground",
-		K.anim_id == "gil_dive" and lift + float(K.d["plate_offset"]) < 0.0, "%s lift %.2f" % [K.anim_id, lift])
+	var pose := HunterAnim.km_sample(K.anim_id, age)
+	var lift := float(pose.get("lift", 0.0))
+	ok("Ground Swim: mid-swim he is sunk to the waist, head and shoulders above the ground",
+		K.anim_id == "gil_dive" and lift < -0.6 and lift + float(K.d["plate_offset"]) > 0.9,
+		"%s lift %.2f" % [K.anim_id, lift])
+	var later := HunterAnim.km_sample(K.anim_id, age + KMovesGil.SWIM_STROKE)
+	ok("Ground Swim: the top half swims a crawl (the arms trade places every stroke, the pose holds the depth)",
+		(pose["blade"] as Vector3).distance_to(later["blade"]) > 0.8
+		and (pose["fl"] as Vector3).distance_to(later["fl"]) > 0.8 and absf(float(later["lift"]) - lift) < 0.01)
+	_native_body()
 	var top := {"stun": 0.0, "y": 0.0, "out": false}
 	var y0 := T.pos.y
 	step(m, 0.8, func():
@@ -352,6 +384,45 @@ func _swim() -> void:
 	ok("Ground Swim: surfacing knocks nearby foes up 0.5 s", top["stun"] >= 0.4 and top["y"] > 0.2,
 		"stun %.2f lift %.2f" % [top["stun"], top["y"]])
 	ok("Ground Swim: 8 s cooldown", float(K.dash_def()["cd"]) == 8.0)
+	_swim_steer()
+
+## Gil's model is drawn on Meshy's clips (WardenNative), which key no sink or spin: his kit moves lay their keyed lift
+## and turn on the model root ("body" in warden_native.json kmoves) and put it back after.
+func _native_body() -> void:
+	var nm := WardenNativeMoves.new(null, WardenNative.entry("gil"))
+	var g := Node3D.new()
+	g.rotation.y = PI
+	nm.pose({"kmove": "gil_dive", "kmove_t": 0.3}, g)
+	var sunk := g.position.y
+	nm.pose({"kmove": "gil_spin", "kmove_t": 0.2}, g)
+	var turned := absf(angle_difference(g.rotation.y, PI))
+	nm.pose({"kmove": ""}, g)
+	ok("Ground Swim / Riptide on his Meshy model: the root sinks to the waist, turns in the spin, then goes home",
+		absf(sunk - KMovesGil.SWIM_LIFT * nm.size) < 0.01 and turned > 0.3 and g.position.y == 0.0
+		and is_equal_approx(g.rotation.y, PI),
+		"sunk %.2f turned %.2f" % [sunk, turned])
+	g.free()
+
+## Owner 11-26: he turns during the swim. A swim started east with the keys turned north bends at dash.steer
+## (4.4 rad/s, was 0: a straight line), and the wake breaks the ground along the curve.
+func _swim_steer() -> void:
+	_reset(9.0)
+	var wakes := int(HeroVfx.of(m).plays.get("swim_wake", 0))
+	P.inp["move"] = Vector2(1, 0)
+	K.on_dash(false)
+	m.step(DT)
+	var a0 := P.roll_dir.angle()
+	P.inp["move"] = Vector2(0, 1)
+	step(m, 0.25)
+	var turned := absf(angle_difference(a0, P.roll_dir.angle()))
+	var want := float(K.dash_def()["steer"]) * 0.25
+	P.inp["move"] = Vector2.ZERO
+	step(m, 0.6)
+	ok("Ground Swim steer: the move keys turn the swim at 4.4 rad/s (~1.1 rad in 0.25 s)",
+		float(K.dash_def()["steer"]) == 4.4 and absf(turned - want) < 0.15, "%.2f rad (want %.2f)" % [turned, want])
+	ok("Ground Swim steer: the wake breaks the ground along the path (every 0.08 s)",
+		int(HeroVfx.of(m).plays.get("swim_wake", 0)) - wakes >= 5,
+		"%d" % (int(HeroVfx.of(m).plays.get("swim_wake", 0)) - wakes))
 
 func _riptide() -> void:
 	_reset(1.6)
@@ -448,7 +519,7 @@ func _numbers() -> void:
 	_passive_numbers()
 	_rank_numbers()
 
-## Fencer: 7 / 7 / 11 a thrust, 0.32 s between thrusts and 0.48 s after the lunge, the chain resets after 0.75 s.
+## Fencer: 9.2 / 9.2 / 14.5 a thrust (TTK 11-12), 0.32 s between thrusts, 0.48 s after the lunge, reset 0.75 s.
 func _lmb_numbers() -> void:
 	_reset(2.0)
 	K.combo_n = 0
@@ -465,8 +536,9 @@ func _lmb_numbers() -> void:
 	P.inp["fire"] = false
 	var hit := [float(by_n.get(1, 0.0)), float(by_n.get(2, 0.0)) - float(by_n.get(1, 0.0)),
 		float(by_n.get(3, 0.0)) - float(by_n.get(2, 0.0))]
-	ok("numbers LMB: 7, 7, then 11 on the lunge (+0.1 for the slow)",
-		absf(hit[0] - 7.0) < 0.2 and absf(hit[1] - 7.0) < 0.2 and absf(hit[2] - 11.1) < 0.2, str(hit))
+	ok("numbers LMB: 9.2, 9.2, then 14.5 on the lunge (+0.1 for the slow)",
+		absf(hit[0] - 9.2) < 0.2 and absf(hit[1] - 9.2) < 0.2 and absf(hit[2] - 14.6) < 0.2,
+		str(hit))
 	ok("numbers LMB: 0.32 s between thrusts, 0.48 s after the lunge",
 		absf(float(cds.get(1, 0.0)) - 0.32) < 0.02 and absf(float(cds.get(3, 0.0)) - 0.48) < 0.02, str(cds))
 	step(m, 0.8)
@@ -516,23 +588,38 @@ func _dash_numbers() -> void:
 	ok("numbers Shift: a charge back in 8 s at rank 1", absf(back + under + 0.1 - 8.0) < 0.3,
 		"%.2f s" % (back + under + 0.1))
 
-## Riptide: ticks every 0.25 s rising 2 -> 5, he walks at 70% while spinning, the full-spin spout is 11 m long,
-## 2.2 m wide, 22 m/s, and does 10.
+## Riptide: ticks every 0.25 s rising 2 -> 5, he walks at 55% rising to full as the spin fills, the full-spin
+## spout is 11 m long, 2.2 m wide, 22 m/s, and does 10. Owner 11-26: no screen shake from E: his own hits at 1.6 m
+## (melee range) never freeze the frame (each tick's hold did, every 0.25 s) and nothing starts a camera shake.
 func _e_numbers() -> void:
 	_reset(1.6)
-	var seen := {"ticks": [], "last": 0.0, "k": 1.0}
+	var seen := {"ticks": [], "last": 0.0, "k0": -1.0, "k1": 0.0, "freeze": 0.0}
+	var shake_at: float = Shake._started
+	m.hitstop = 0.0           # (an earlier trial's hold: headless steps never run it down)
 	_press("sig")
 	step(m, 1.95, func():
-		seen["k"] = minf(seen["k"], K.move_k())
+		if float(seen["k0"]) < 0.0: seen["k0"] = K.move_k()
+		seen["k1"] = K.move_k()
+		seen["freeze"] = maxf(seen["freeze"], m.hitstop)
 		if dmg(T) > float(seen["last"]) + 0.01:
 			seen["ticks"].append(snappedf(dmg(T) - float(seen["last"]), 0.01))
 			seen["last"] = dmg(T))
 	var ticks: Array = seen["ticks"]
 	ok("numbers E: 8 spin ticks, 2 at first, rising, under 5", ticks.size() == 8 and absf(float(ticks[0]) - 2.0) < 0.2
 		and float(ticks[-1]) > float(ticks[0]) and float(ticks[-1]) <= 5.0, str(ticks))
-	ok("numbers E: he moves at 70% while he spins", absf(float(seen["k"]) - 0.7) < 0.01, "%.2f" % seen["k"])
+	ok("numbers E: he moves at 55% as the spin starts, near full speed as it fills",
+		absf(float(seen["k0"]) - 0.55) < 0.02 and float(seen["k1"]) > 0.95, "%.2f -> %.2f" % [seen["k0"], seen["k1"]])
+	var spin := HunterAnim.km_def("gil_spin")
+	var rate0 := HunterAnim._km_clock(spin, 0.11) - HunterAnim._km_clock(spin, 0.1)
+	var rate1 := HunterAnim._km_clock(spin, 1.91) - HunterAnim._km_clock(spin, 1.9)
+	ok("numbers E: the spin clip winds up with the fill (3x as fast near 2 s, its ramp is the 2 s spin)",
+		rate1 > rate0 * 2.8 and float(spin["ramp"][2]) == float(K.e_def()["spin_t"]), "%.4f -> %.4f" % [rate0, rate1])
 	var spout := {}
 	step(m, 0.2, func(): if spout.is_empty() and not K.spouts.is_empty(): spout.merge(K.spouts[0]))
+	seen["freeze"] = maxf(seen["freeze"], m.hitstop)       # (headless, a hold never runs down: this is the most)
+	ok("numbers E: no screen shake: no freeze frame and no camera shake from the spin or the spout",
+		float(seen["freeze"]) == 0.0 and Shake._started == shake_at and dmg(T) > 10.0,
+		"freeze %.3f s, dmg %.1f" % [seen["freeze"], dmg(T)])
 	ok("numbers E: a full 2 s spin sends an 11 m, 2.2 m wide, 22 m/s spout",
 		absf(float(spout.get("left", 0.0)) - 11.0) < 0.6 and absf(float(spout.get("w", 0.0)) - 2.2) < 0.05
 		and absf(float(spout.get("spd", 0.0)) - 22.0) < 0.5 and K.move_k() == 1.0, str(spout.get("left", 0.0)))
