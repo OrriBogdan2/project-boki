@@ -699,10 +699,12 @@ func _hearth_on() -> Ent:
 			return w if is_instance_valid(w) else null
 	return null
 
+
 ## How long the other games draw the Hearthlight from one of its beats: to its end, or past the next beat (so
 ## an early end goes there within a beat).
 func _hearth_life() -> float:
 	return minf(float(hearth["left"]), float(e_def()["every"]) + HeroVfxZone.FADE + HeroVfxZone.PAD)
+
 
 func hearth_r() -> float:
 	var ed := e_def()

@@ -1177,7 +1177,7 @@ func tender() -> void:
 	)
 	var emp_look: Node3D = K.lk().skins[-1]["n"] if not K.lk().skins.is_empty() else null
 	ok(
-		"mm LMB: the waited ember looks 1.5x a tap's, both looks 15% smaller (owner 11-26), the hit is not",
+		"mm LMB: the waited ember looks 1.5x a tap's, both looks 15% smaller, the hit is not",
 		emp_look != null and absf(emp_look.scale.x - 1.5 * float(K.lmb_def()["look_k"])) < 0.001,
 		"look x%.3f" % (emp_look.scale.x if emp_look else -1.0)
 	)
