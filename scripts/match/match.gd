@@ -3574,7 +3574,7 @@ func step(dt: float) -> void:
 		player.inp["aim"] = player.pos + Vector3(cos(time * 0.6), 0.9, sin(time * 0.6)) * 4.0
 	if opts.get("merge_demo", false) and player and time > 0.8 and not train.has("_merge"):
 		train["_merge"] = true
-		Content.rules("merge_forms")["fusion_enabled"] = true
+		MergeForm.set_enabled(true)
 		player.slot_lv["ult"] = maxi(1, int(player.slot_lv["ult"]))
 		player.ult = 1.0
 		player.merge_cd = 0.0
@@ -5361,7 +5361,7 @@ func _tips() -> void:
 	if belt_tip: _tip(belt_tip[0], belt_tip[1])
 	if _tip_t > 14.0:
 		_tip("ability", TipText.ability(player.ak != null, tut == null and duo == null))
-	if player.ult >= 1.0 and player.kin and tut == null and duo == null:
+	if player.ult >= 1.0 and player.kin and tut == null and duo == null and MergeForm.enabled():
 		var ud := KinMerge.def_for(player.kin)
 		if ud and player.ak == null: _tip("ult", TipText.bond_full(ud.display_name, false))
 		elif ud and int(player.slot_lv.get("ult", 0)) > 0: _tip("ult", TipText.bond_full(ud.display_name, true))
