@@ -105,7 +105,9 @@ func _hops(m: Match) -> void:
 				_idle(h)
 				for i in 40:
 					m.step(Match.DT)
-				if top > World.BLOCK_H - 0.5:
+				# (over = feet at the rock's top: blocks are never mantled, and a kick off one peaks at a 1.91 m jump
+				# plus WallMoves.KICK_RISE, 2.71 m, under the 3 m rock)
+				if top > World.BLOCK_H - 0.1:
 					on_top += 1
 				var left := _can_leave(m, h)
 				if not left:

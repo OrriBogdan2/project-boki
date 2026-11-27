@@ -230,7 +230,7 @@ const SPIN_EASE := 4.0  # how fast they spin up and wind down (1/s)
 const SWAP_S := 0.2  # s: one hold handing over to the next (a Boki lifted, then carried)
 const LAND_HOP_V := 4.0  # m/s down at touchdown: slower (a kerb, a step down of ~0.5 m) plays no landing at all
 const LAND_DROP_V := 8.5  # m/s: a terrace drop (2.5 m+) or a jump off a ledge gets the deep crouch; a plain jump
-# lands at JUMP_V 6.8, the hop's small dip (the source: briefs/hero-ref, DECISIONS 11-07)
+# lands at JUMP_V 7.5, the hop's small dip (the source: briefs/hero-ref, DECISIONS 11-07)
 const LAND_HEAVY_V := 13.2  # m/s: a ~6 m drop (v = sqrt(2 x 14.7 x h)) lands heavier than a terrace drop's 3-5 m
 const LAND_DIVE_V := 17.0  # m/s: a glide dive's plunge (lands ~25 m/s after the canopy): the heavy crouch
 const SKATE_LEAN_MAX := 0.4  # radians: the most Claire's skate leans forward, all leans together
