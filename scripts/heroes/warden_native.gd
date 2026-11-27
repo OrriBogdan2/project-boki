@@ -15,9 +15,12 @@ const DATA_PATH := "res://content/rules/warden_native.json"
 const META := "meshy_native"  # root meta: this Hunter is drawn on Meshy's skeleton
 const STILL := 0.25  # m/s: below this he is standing
 const FADE := 0.15  # s: one clip into the next
+const GLIDE_OUT := 0.2  # s: the glide clip back into the next one (it opens at once)
+const DASH_IN := 0.25  # s: the dash clip over the body
 const RATE_MIN := 0.6  # the walk, run and sneak clips' slowest rate, of their keyed pace
 const RATE_MAX := 1.8  # and their fastest: a quicker stride keeps the feet nearer the ground speed
 const ATTACK_AGAIN := 0.6  # share of the attack clip after which a new hit starts it over
+const LEGS_RUN := ["walk", "run", "crouch"]  # the states where the legs carry him (they turn to his way)
 const LOOPS := ["idle", "walk", "run", "crouch"]
 ## Clip slots data "clips" may add beside the six states; a missing one plays today's clip (MESHY_NATIVE.md).
 ## Swing and cast one-shots (the attack clip without them): lmb, lmb_hold (a charged swing), rmb, e, r (the kit's cast
@@ -74,6 +77,7 @@ var mouth: Node3D  # the copied weapon_muzzle (on a bone, a part or the sun): wh
 var gunprop: WardenGunProp  # Grimble's one gun (data "holster"): hip at rest, hand while he aims
 var springs := WardenSprings.new()  # loose parts (data "springs": Sable's coat tails) swinging on Meshy's bones
 var props: WardenProps  # the contract's parts Meshy's mesh lacks (data "props": Kael's sword, Cinder's heel jets)
+var twist := WardenNativeTwist.new()  # the legs turned to the way he goes, the torso held on the aim
 var upper: WardenNativeUpper  # a swing or cast over the running legs (the torso and arms only)
 var moves: WardenNativeMoves  # the kit moves with a clip of their own (data "kmoves")
 var companions: WardenCompanions  # floating companions cut out of Meshy's body (Meeko's sun and cloud), or null
@@ -180,6 +184,9 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	hand = skel.find_bone(String(d.get("hand", "RightHand")))
 	torso_bi = WardenSkeleton.find(skel, "hips")
 	upper = WardenNativeUpper.make(skel, torso_bi)
+	twist.skel = skel
+	twist.hips = WardenSkeleton.find(skel, "root")
+	twist.torso = torso_bi
 	var rest: Dictionary = model.get_meta("rig_rest", {})
 	if torso_bi >= 0 and rest.has("hips"):
 		var at_rest := WardenGlb.model_xf(model, skel) * skel.get_bone_global_rest(torso_bi)
@@ -237,6 +244,7 @@ func _process(dt: float) -> void:
 	skel.set_bone_pose_scale(hips, skel.get_bone_rest(hips).basis.get_scale())  # (Meshy keys no scale: no old squash)
 	player.advance(dt)
 	upper.lay(dt)
+	twist.step(dt, s, cur in LEGS_RUN)
 	steps.step(cur if xt < 0.0 else "")
 	WardenClips.air_tilt(root, skel, hips)  # (the glider's bank, the dive's pitch)
 	# (the look-at lies under a clip that turns the head: the attack clip owns it, eased in and out like a body clip)
@@ -440,14 +448,24 @@ func _clip_len(st: String) -> float:
 	return player.get_animation(String(plays[st])).length
 
 
+## Seconds the clip of state `to` blends in over the one of state `from`: the glide opens at once and lets go slower,
+## the dash takes the body gradually, everything else FADE.
+static func blend_s(from: String, to: String) -> float:
+	if from == "glide":
+		return GLIDE_OUT
+	if to == "glide":
+		return 0.0
+	return DASH_IN if to == "dash" else FADE
+
+
 ## The game state's clip, crossfaded in when it changes (restart: a new attack plays it from the start).
 func _play(st: String, rate: float, restart := false) -> void:
 	if st != cur or restart:
-		player.play(String(plays[st]), FADE)
+		player.play(String(plays[st]), blend_s(cur, st))
 		if restart:
 			player.seek(0.0, true)
 		cur = st
-	player.speed_scale = rate
+	player.speed_scale = rate * (twist.dir if st in LEGS_RUN else 1.0)  # (the legs run backwards when he backs off)
 
 
 ## Meshy's model carries its weapons in the mesh (Sable's two pistols, Tenzo's one stone arm): the rig's procedural
