@@ -1,6 +1,6 @@
 extends "res://tools/gameplay_media.gd"
 ## --hunter-scale-shots --shots-dir=<dir> [--hero=arch,arch]: each hero standing on the same open ground, shot at the
-## old match size (Hunter.VIS_SCALE 1.12) and at the camera.json match_hunter_scale, as <dir>/<hero>_<before|after>.png
+## old match size (every hunter at Hunter.VIS_SCALE 1.12) and at its own body.match_k, as <dir>/<hero>_<before|after>.png
 ## (no HUD) and <hero>_<before|after>_hud.png (with the overhead plate). Prints a HSCALE row per hero: on-screen
 ## body height in px at 1080p (feet to the top of the head), the model scale, and the hit radius (must not change).
 ## --gaps (no renderer needed): every archetype, at the old and the new size, prints a GAP row with the model's top
@@ -31,10 +31,8 @@ func run(main_node: Node) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	Save.no_write = true
 	Settings.v["tips"] = false
-	var after := Hunter.VIS_SCALE
-	var base := CamRig.match_hunter_scale
 	if OS.get_cmdline_user_args().has("--gaps"):
-		await _gaps(after, heroes if heroes != HEROES else [])
+		await _gaps(heroes if heroes != HEROES else [])
 		main.get_tree().quit(0)
 		return
 	var passes := ["before", "after"]
@@ -48,21 +46,28 @@ func run(main_node: Node) -> void:
 		for k in m.kins:
 			k.model.visible = false
 		var top_h: Variant = Arch.body(hero).get("top_h")
+		var own_k := Arch.match_k(hero)
 		var at := _arena_spot(m.player.pos)
 		_bare_floor(at)
 		await _settle(at)  # one pose for both sizes: a shot only swaps the size
 		for pass_name in passes:
 			# "before" is main's code: the old size, the plates' old height (no top_h clearance)
-			CamRig.match_hunter_scale = 1.0 if pass_name == "before" else base
-			Hunter.VIS_SCALE = 1.12 * CamRig.match_hunter_scale
+			_draw_k(hero, 1.0 if pass_name == "before" else own_k)
 			Arch.body(hero)["top_h"] = 0.0 if pass_name == "before" else top_h
 			m.player.render(0.0, 1.0)
 			await _shot(hero, pass_name)
 		Arch.body(hero)["top_h"] = top_h
 		m.queue_free()
-	CamRig.match_hunter_scale = base
-	Hunter.VIS_SCALE = after
 	main.get_tree().quit(0)
+
+
+## Draws the hero at match_k `k` (the data every plate and effect reads), keeping Kael's grow on the size it started at.
+func _draw_k(hero: String, k: float) -> void:
+	var was := m.player.vis_k
+	Arch.body(hero)["match_k"] = k
+	m.player.fit_scale()
+	if m.player.model.has_meta("base_scale"):
+		m.player.model.set_meta("base_scale", (m.player.model.get_meta("base_scale") as Vector3) * m.player.vis_k / was)
 
 
 ## The spot nearest `p` with the most open floor all round it that the island has (up to ROOM tiles from any cliff
@@ -87,17 +92,16 @@ func _arena_spot(p: Vector3) -> Vector3:
 
 
 ## One GAP row per archetype and size: "main" is the size before this rule, "now" the rule's.
-func _gaps(after: float, heroes_arg := []) -> void:
-	var base := CamRig.match_hunter_scale
+func _gaps(heroes_arg := []) -> void:
 	for hero in heroes_arg if not heroes_arg.is_empty() else Arch.ids():
 		await _start(hero, "cindle")
 		for h in m.hunters:
 			h.out = h != m.player
 		var at := _ground(m.player.pos)
 		await _settle(at)
+		var own_k := Arch.match_k(hero)
 		for pass_name in ["main", "now", "fixed"]:
-			CamRig.match_hunter_scale = 1.0 if pass_name == "main" else base
-			Hunter.VIS_SCALE = 1.12 * CamRig.match_hunter_scale
+			_draw_k(hero, 1.0 if pass_name == "main" else own_k)
 			m.player.render(0.0, 1.0)
 			var p := m.player
 			var up := _top_m(p.model) - p.position.y
@@ -117,16 +121,14 @@ func _gaps(after: float, heroes_arg := []) -> void:
 						pass_name,
 						up,
 						up / p.vis_k,
-						(column - _screen_y(p, own * CamRig.match_hunter_scale) - PLATE_H) * k,
-						(column - _screen_y(p, rival * CamRig.match_hunter_scale) - PLATE_H) * k,
-						(_top(p.model) - _screen_y(p, own * CamRig.match_hunter_scale) - PLATE_H) * k,
-						(_top(p.model) - _screen_y(p, rival * CamRig.match_hunter_scale) - PLATE_H) * k
+						(column - _screen_y(p, own * Arch.match_k(p.arch)) - PLATE_H) * k,
+						(column - _screen_y(p, rival * Arch.match_k(p.arch)) - PLATE_H) * k,
+						(_top(p.model) - _screen_y(p, own * Arch.match_k(p.arch)) - PLATE_H) * k,
+						(_top(p.model) - _screen_y(p, rival * Arch.match_k(p.arch)) - PLATE_H) * k
 					]
 				)
 			)
 		m.queue_free()
-	CamRig.match_hunter_scale = base
-	Hunter.VIS_SCALE = after
 
 
 ## The screen y of the point `up` m over the hunter's feet, leaning with the body like the plates do.
@@ -180,7 +182,7 @@ func _shot(hero: String, pass_name: String) -> void:
 	hud.visible = true
 	var feet := m.cam.unproject_position(p.position)
 	var top := _top(p.model)
-	var up := HudPlate.up(p, 2.7 * float(p.cdat["scale"])) * CamRig.match_hunter_scale
+	var up := HudPlate.up(p, 2.7 * float(p.cdat["scale"])) * Arch.match_k(p.arch)
 	var plate := m.cam.unproject_position(p.position + m.cam.char_lean() * Vector3(0, up, 0))
 	# the viewport keeps the project's 1280x720 and the window shows it at 1920x1080: px are read at 1080p
 	var k := float(SIZE.y) / main.get_viewport().get_visible_rect().size.y

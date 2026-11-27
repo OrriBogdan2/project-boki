@@ -1397,7 +1397,7 @@ func tender() -> void:
 	)
 	ok(
 		"mm body: small (a 0.92 model, heights.json) with the 0.352 m hurtbox (the chart size, --hurtbox-check)",
-		absf(P.r - 0.352) < 0.001 and P.model.scale.y < Hunter.VIS_SCALE,
+		absf(P.r - 0.352) < 0.001 and P.model.scale.y < P.vis_k,
 		"r %.2f scale %.2f" % [P.r, P.model.scale.y]
 	)
 	step(m, 1.0)

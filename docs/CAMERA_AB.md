@@ -30,7 +30,7 @@ at 960x540. Made by `godot -- --camera-ab-shots --hero=<id> --shots-dir=<dir>` (
 | Pixels per metre of ground at the hero, scaled to 1080p (measured by the A/B tool) | 78 | 50 | ~51 (the data's run speeds against the pan px/s) |
 | Ground up and down the screen (flat ground, zoom 1; computed) | 15.5 m (9.3 ahead of you, 6.2 behind) | 24.5 m (14.7 ahead, 9.8 behind) | follows from pitch, lens and distance |
 | Medium Hunter, share of screen height | 6.47% | 8.66% | 8.3–9.3% (90–100 px of 1080) |
-| Hunter drawn size | 1.12x the model (`Hunter.VIS_SCALE`) | 2.35x (1.232 x `hunter_scale` 1.91) | ~2x the size of the world ours are |
+| Hunter drawn size | 1.12x the model (`Hunter.VIS_SCALE`) | 2.35x (1.12 x `hunter_scale` 2.1) | ~2x the size of the world ours are |
 | Look-ahead, cursor lean | 42% of the cursor's distance past 1.4 m, capped at 7.5 m (x zoom), eased 6/s | the same metres (the flag does not touch it) | not measurable in the sheets: the view sits still through 1–2 bh moves and pans with the aim |
 | Look-ahead, glide | 0.2 s of speed, capped 1.8 m (the opening drop: 3x); zoom 1.25x | the same | only ability zoom-outs seen |
 

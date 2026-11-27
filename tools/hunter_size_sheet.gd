@@ -1,18 +1,16 @@
 extends "res://tools/hunter_scale_shots.gd"
 ## --hunter-size-sheet --shots-dir=<dir> [--hero=arch,arch]: how big each hunter is at the match camera, for a size
-## side-by-side. Each hero idles alone on open floor. One HSIZE row per hero and pass (scale = camera.json
-## match_hunter_scale, zoom = the wheel's factor): the crown's height over the feet in m as drawn, the same on screen
+## side-by-side. Each hero idles alone on open floor. One HSIZE row per hero and pass (match_k 1 = main's size, own =
+## the archetype's body.match_k, zoom = the wheel's factor): the crown's height over the feet in m as drawn, the same on screen
 ## in px at 1080p, and px per m. The crown is the top of the skull: hair tips, ears, horns and the glider do not count
 ## (the highest slice of the head that is at least CROWN_KEEP as wide as the head). "top" is the highest body point
 ## of all (hair and ears in). The "panel" pass stands the hero close in a fixed camera, shot with no HUD
 ## (<dir>/<hero>_panel.png), so every hero shares one px/m. Needs a renderer (jobq --needs gpu).
 
-const PASSES := [  # [label, match_hunter_scale, wheel zoom]
-	["old_cam_1.00", 1.0, 1.6],  # before the camera parity pass: the wheel started at 1.6
-	["old_cam_1.10", 1.1, 1.6],
-	["cam_1.10", 1.1, 1.4572],  # the camera parity pass: the wheel starts at 1.4572
-	["cam_1.00", 1.0, 1.4572],  # main now, without the hunter scale rule
-	["panel", 1.1, 0.45],
+const PASSES := [  # [label, draw at the archetype's own match_k (else 1), wheel zoom]
+	["main", false, 1.4572],  # main today: every hunter at the base size, the wheel starting at its widest
+	["parity", true, 1.4572],
+	["panel", true, 0.45],
 ]
 const WARM_UP := 200  # match steps (1/60 s) the camera settles for before a pass is read
 const SAMPLES := 12  # frames the idle is averaged over
@@ -35,7 +33,6 @@ func run(main_node: Node) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	Save.no_write = true
 	Settings.v["tips"] = false
-	var base := CamRig.match_hunter_scale
 	for hero in heroes:
 		await _start(hero, "cindle")
 		for h in m.hunters:
@@ -44,22 +41,18 @@ func run(main_node: Node) -> void:
 			k.model.visible = false
 		var at := _arena_spot(m.player.pos)
 		_bare_floor(at)
+		var own_k := Arch.match_k(hero)
 		for pass_row in PASSES:
-			var ratio: float = 1.12 * float(pass_row[1]) / Hunter.VIS_SCALE
-			CamRig.match_hunter_scale = pass_row[1]
-			Hunter.VIS_SCALE = 1.12 * CamRig.match_hunter_scale
+			_draw_k(hero, own_k if pass_row[1] else 1.0)
 			m.cam.user_zoom = pass_row[2]
 			m.cam.zoom = pass_row[2]
 			m.cam.zoom_to = pass_row[2]
 			m.player.render(0.0, 1.0)
-			if m.player.model.has_meta("base_scale"):  # Kael's grow keeps the size it started at
-				m.player.model.set_meta("base_scale", (m.player.model.get_meta("base_scale") as Vector3) * ratio)
 			await _settle(at)
 			m.player.render(0.0, 1.0)
 			_clean()
 			await _measure(hero, pass_row[0])
 		m.queue_free()
-	CamRig.match_hunter_scale = base
 	main.get_tree().quit(0)
 
 
