@@ -70,6 +70,7 @@ func _r() -> void:
 	await _side("r", "charge", "front", Vector3(4.5, 1.5, 1.2), Vector3(0.0, 1.2, 0.0))
 	await _go(0.4, aim_at)
 	_save("r", "wave")
+	await _go(1.0, aim_at)  # the cast runs out (charge 1.1s + gap 0.6s + 0.3s): a live Broadside denies the hook
 
 
 ## The same moment from his right side at chest height (the match camera looks down on the arms), or from `eye`
