@@ -133,6 +133,7 @@ func _tender_rescue() -> void:
 	# in combat 10 s more, as if just hit: with her only teammate down she is the last one up, and LastAlive's
 	# self-mend (1 hp/s once out of combat) holds off, so any hp she gains below is the tether's
 	P.combat_at = m.time + 10.0 - InCombat.window()
+	P.hurt_at = m.time  # and health recovery waits 4 s after a hit
 	var p_hp0 := P.hp
 	A.down_hp = float(Data.MATCH["down_hp"]) * 0.4
 	var a_down0 := A.down_hp

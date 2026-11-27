@@ -80,6 +80,7 @@ func _global() -> void:
 	var third := _dummy(m, "Third", 7, home + Vector3(0, 0, -3))
 	# an assist: P hit T, the ally knocks T: P's dash is back, P is not healed, the softer cue
 	P.max_hp = 200.0
+	P.hurt_at = m.time  # health recovery waits 4 s after a hit: only the assist decides hp here
 	_spend(P, 0.5)
 	_touch(P, T)
 	var c0 := cues.size()
@@ -167,6 +168,7 @@ func _kael() -> void:
 	T2.teleport(home + Vector3(2.6, 0, 0))
 	A.aim_at(P, T2.pos)
 	T2.hp = 10.0
+	T2.hurt_at = m.time  # as if just hit: health recovery waits 4 s, so the cleave is what downs him
 	K.cd["x"] = 0.0
 	HunterKeys.ult_pressed(P)
 	A.step(m, 0.9)

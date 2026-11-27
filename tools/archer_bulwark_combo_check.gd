@@ -1332,6 +1332,7 @@ func _bulwark_combos() -> void:
 	c0 = K.crushes
 	P.hp = P.max_hp - 40.0
 	var hp_before := P.hp
+	P.hurt_at = m.time  # health recovery waits 4 s after a hit: only the Crush decides hp here
 	var dashes_before := P.dashes
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
