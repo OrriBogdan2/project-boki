@@ -1,8 +1,9 @@
 extends RefCounted
 ## --roost-trainer-check: the Boki Roost's fight trainer (RoostTrainer). At the sign, interact starts it; the
-## Summon key's burst moves it to the knock-out step and drops a wild practice Boki; a dazed wild Boki moves it
-## to the scan step; if it wakes the drill goes back; a capsule in the carry-out slot finishes it and is handed
-## back; falling off the roost stops it. Prints ROOSTTRAIN PASS/FAIL.
+## Summon key's burst drops a wild practice Boki and asks for an order; a Chase order moves it to knock-out; a
+## dazed wild Boki moves it to the scan step; if it wakes the drill goes back; the real Capture.complete on it
+## finishes the drill (no capsule or stat kept: the Grounds are a training match); falling off stops it.
+## Prints ROOSTTRAIN PASS/FAIL.
 
 const DT := 1.0 / 60.0
 
@@ -32,26 +33,37 @@ func run(main_node: Node) -> void:
 	p.teleport(tr.sign_at)
 	m.step(DT)
 	arena.grounds.summon_pad.cycle()
-	tr._start()
+	tr.start()
 	m.step(DT)
-	ok("started at step 0, line shown", tr.step == 0 and tr.line.visible and tr.line.text.begins_with("1/3"))
+	ok("started at step 1, line shown", tr.step == RoostTrainer.Step.SUMMON and tr.line.text.begins_with("1/4"))
 	p.kin.summon.left = 5.0
 	m.step(DT)
-	ok("summoned: knock-out step, a wild Boki on the roost", tr.step == 1 and tr.wild != null and tr.wild.is_wild())
+	var on_order := tr.step == RoostTrainer.Step.ORDER and tr.line.text.begins_with("2/4")
+	ok("summoned: order step, a wild Boki on the roost", on_order and tr.wild != null and tr.wild.is_wild())
+	p.kin.cmd = "chase"
+	m.step(DT)
+	ok("an order given: knock-out step", tr.step == RoostTrainer.Step.KNOCK and tr.line.text.begins_with("3/4"))
 	tr.wild.hp = 1.0
 	tr.wild._daze()
 	m.step(DT)
-	ok("dazed: scan step", tr.step == 2 and tr.line.text.begins_with("3/3"), tr.line.text)
+	ok("dazed: scan step", tr.step == RoostTrainer.Step.SCAN and tr.line.text.begins_with("4/4"), tr.line.text)
 	tr.wild.state = "wild"
 	m.step(DT)
-	ok("it woke: back to the knock-out step", tr.step == 1)
-	p.caught.append(Save.new_kin("kestrike"))
+	ok("it woke: back to the knock-out step", tr.step == RoostTrainer.Step.KNOCK)
+	tr.wild._daze()
 	m.step(DT)
-	ok("captured: done, and the slot is handed back", tr.step == 3 and p.caught.is_empty())
-	tr.step = 1
+	var w := tr.wild
+	var n0 := p.caught.size()
+	Capture.complete(m, p, w)
+	ok("the real scan finishes it, keeps no capsule", tr.step == RoostTrainer.Step.DONE and p.caught.size() == n0)
+	ok("the practice Boki is gone", tr.wild == null and not w in m.kins)
+	var b0 := Rect2(tr.line.get_global_rect())
+	var half := m.get_viewport().get_visible_rect().size.y * 0.5
+	ok("step line under the pedestal prompt, top half", b0.position.y >= Grounds.PROMPT_Y and b0.end.y < half, str(b0))
+	tr.step = RoostTrainer.Step.KNOCK
 	p.teleport(Vector3(p.pos.x, Grounds.FALL_Y - 5.0, p.pos.z))
 	tr.tick(DT)
-	ok("falling stops it and clears the wild Boki", tr.step == -1 and tr.wild == null)
+	ok("falling stops it and clears the wild Boki", tr.step == RoostTrainer.Step.IDLE and tr.wild == null)
 	arena.teardown()
 	m.queue_free()
 	await main.get_tree().process_frame
