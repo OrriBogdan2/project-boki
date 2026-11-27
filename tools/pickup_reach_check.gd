@@ -36,6 +36,9 @@ func run(main: Node) -> void:
 	_cursor_pick(flat)
 	_through_rock(flat)
 	_in_the_air(flat)
+	var tune: Dictionary = PickupReach.rules()["tune"]
+	_tuning(flat, float(tune["radius"]) - 0.15, true)
+	_tuning(flat, float(tune["radius"]) + 0.2, false)
 	print("PICKUP REACH CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
@@ -157,6 +160,24 @@ func _in_the_air(at: Vector3) -> void:
 		P.pos.y = at.y + height + 1.0
 		_step()
 	ok(m.pickups.size() == 1, "gliding %.1f m over a tonic doesn't take it" % (height + 1.0))
+
+
+## A weapon tuning on the ground (Wpicks): standing `off` metres from it takes it inside the "tune" reach, not past it.
+func _tuning(at: Vector3, off: float, taken: bool) -> void:
+	var pid := ""
+	for k in Data.PERKS:
+		if (Data.PERKS[k] as Dictionary).has("wup"):
+			pid = k
+			break
+	_clear_ground()
+	_reset(at + Vector3(0, 0, off))
+	m.spawn_tune(pid, at, "", false)
+	for i in 5:
+		_step()
+	ok(
+		m.wpicks.is_empty() == taken,
+		"standing %.2f m from a tuning: %s (on the ground %d)" % [off, "taken" if taken else "left", m.wpicks.size()]
+	)
 
 
 func _clear_ground() -> void:
