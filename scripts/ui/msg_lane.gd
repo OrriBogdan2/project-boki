@@ -112,17 +112,23 @@ func bottom() -> float:
 
 ## Fades a world label (a lair's name board, a farm marker) while any of `rects` covers it on screen.
 static func yield_label(lbl: Label3D, cam: Camera3D, rects: Array[Rect2], delta: float) -> void:
+	yield_at(lbl, cam, rects, delta)
+
+## yield_label (`over`: its rects); returns the label's box on screen (at Vector2.INF if hidden or behind the camera).
+static func yield_at(lbl: Label3D, cam: Camera3D, over: Array[Rect2], delta: float) -> Rect2:
+	var mine := Rect2(Vector2.INF, Vector2.ZERO)
 	var want := 0.0
-	if not rects.is_empty() and lbl.is_visible_in_tree() and not cam.is_position_behind(lbl.global_position):
-		var mine := label_rect(lbl, cam)
-		for r in rects:
+	if lbl.is_visible_in_tree() and not cam.is_position_behind(lbl.global_position):
+		mine = label_rect(lbl, cam)
+		for r in over:
 			if r.intersects(mine):
 				want = 1.0
-	if lbl.transparency == want:
-		return
-	lbl.transparency = move_toward(lbl.transparency, want, delta * 6.0)
-	lbl.modulate.a = 1.0 - lbl.transparency            # (the outline ignores transparency on some renderers)
-	lbl.outline_modulate.a = 1.0 - lbl.transparency
+				break
+	if lbl.transparency != want:
+		lbl.transparency = move_toward(lbl.transparency, want, delta * 6.0)
+		lbl.modulate.a = 1.0 - lbl.transparency            # (the outline ignores transparency on some renderers)
+		lbl.outline_modulate.a = 1.0 - lbl.transparency
+	return mine
 
 ## A billboarded Label3D's box on screen, in px, from its text and font (centred on its position).
 static func label_rect(lbl: Label3D, cam: Camera3D) -> Rect2:
