@@ -30,8 +30,8 @@ const GLIDE_STRIDE := [1.5, 2.9]      # what such a Boki keeps: BokiRig.STRIDE b
 ## No stepping feet, so not gated: the check asserts these are exactly the ones whose feet do not sweep.
 const EXEMPT := {"thrumbird": "flyer", "selenfin": "flyer (fins)", "zephyrak": "serpent", "glomwort": "blob",
 	"gloamshell": "blob (snail foot)", "gibbelle": "blob", "casquebill": "seal (flippers)",
-	"floenatee": "seal (flippers)", "goliathite": "caterpillar", "threadwyrm": "worm", "velvorm": "caterpillar",
-	"caecilith": "worm", "hoarheron": "heron on skates"}
+	"floenatee": "seal (flippers)", "goliathite": "scan (stumps ride the body)", "threadwyrm": "worm",
+	"velvorm": "caterpillar", "caecilith": "worm", "hoarheron": "heron on skates"}
 ## Ratchet: gaits that slide more than MAX_SLIDE at some size and speed even at the best rate BokiRig picks, with
 ## the most they may slide: the planted paw's speed is uneven (a sine swing from the hip), and at match speeds the
 ## step is too short even at BokiRig.MAX_CADENCE. Ceilings only come down: lower or drop a row when a clip is
@@ -63,7 +63,6 @@ const MAX_SEAM := 1.0
 const SEAM_OVER := {
 	"caecilith walk": 1.54, "cairnback walk": 1.61, "duskapi walk": 1.43, "floenatee idle": 1.04,
 	"floenatee run": 1.21, "floenatee walk": 1.39, "glaciyak walk": 1.42, "gloamshell walk": 1.18,
-	"goliathite idle": 1.04, "goliathite run": 1.22, "goliathite walk": 1.41,
 	"heatherhorn run": 1.63, "heatherhorn walk": 2.10, "hoarheron idle": 1.10, "hoarheron run": 1.25,
 	"hoarheron walk": 1.45, "kestrike walk": 1.33, "limpetor walk": 1.44,
 	"lodestick run": 1.06, "marchleaf walk": 1.45, "moonloris walk": 1.42, "mossgrade walk": 1.07,

@@ -1535,6 +1535,7 @@ const STRIDE := {
 	"zapple": [1.02, 1.97],
 	"hivara": [0.34, 0.76],
 	"glomwort": [1.50, 2.90],
+	"goliathite": [1.50, 2.90],
 	"kestrike": [0.33, 0.70],
 	"kindlewren": [0.49, 0.88],
 	"lodestick": [0.46, 1.62],
