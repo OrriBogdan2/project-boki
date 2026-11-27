@@ -241,6 +241,7 @@ func _process(dt: float) -> void:
 	var hips := WardenSkeleton.find(skel, "root")
 	skel.set_bone_pose_scale(hips, skel.get_bone_rest(hips).basis.get_scale())  # (Meshy keys no scale: no old squash)
 	player.advance(dt)
+	moves.pose(s, get_parent() as Node3D)
 	upper.lay(dt)
 	twist.step(dt, s, cur in LEGS_RUN)
 	steps.step(cur if xt < 0.0 else "")
