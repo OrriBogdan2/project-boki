@@ -360,8 +360,7 @@ func _board_panel() -> void:
 	buttons.clear()
 	for i in board.caps.size():
 		var b := Button.new()
-		var sb := StyleBoxFlat.new()
-		sb.set_corner_radius_all(int(UI_CAP * 0.5))
+		var sb := UiFrame.plate(Color(0, 0, 0, 0), int(UI_CAP * 0.5))
 		for st in ["normal", "hover", "pressed", "disabled", "focus"]:
 			b.add_theme_stylebox_override(st, sb)
 		b.custom_minimum_size = Vector2.ONE * UI_CAP

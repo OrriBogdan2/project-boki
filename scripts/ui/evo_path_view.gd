@@ -73,9 +73,7 @@ static func sil(form: String, nm: String) -> Control:
 	var box := UI.vbox(2)
 	var shape := Panel.new()
 	shape.custom_minimum_size = SIL
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = MET if EvoPath.known(form) else UNKNOWN
-	sb.set_corner_radius_all(int(SIL.x / 2.0))
+	var sb := UiFrame.plate(MET if EvoPath.known(form) else UNKNOWN, int(SIL.x / 2.0))
 	shape.add_theme_stylebox_override("panel", sb)
 	box.add_child(shape)
 	box.add_child(UI.label(nm if EvoPath.known(form) else "?", UI.T_SMALL, UI.MUTED))

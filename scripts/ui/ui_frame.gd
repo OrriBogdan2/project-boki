@@ -111,6 +111,21 @@ func _add(b: StyleBoxFlat, where: int) -> void:
 	_boxes.append(b)
 	_where.append(where)
 
+## A plain rounded plate for the few places that draw or override one box by hand (a pill, a dot, a bubble):
+## the menu look's flat box, with an optional border and content margins.
+static func plate(
+	col: Color, radius: int, border_col := Color(0, 0, 0, 0), border_px := 0, pad := Vector2.ZERO
+) -> StyleBoxFlat:
+	var b := _flat(col, radius)
+	if border_px > 0:
+		b.border_color = border_col
+		b.set_border_width_all(border_px)
+	b.content_margin_left = pad.x
+	b.content_margin_right = pad.x
+	b.content_margin_top = pad.y
+	b.content_margin_bottom = pad.y
+	return b
+
 static func _flat(col: Color, radius: int) -> StyleBoxFlat:
 	var b := StyleBoxFlat.new()
 	b.bg_color = col
