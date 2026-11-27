@@ -11,7 +11,7 @@ extends "res://tools/hero_vfx_reel.gd"
 ## then one past it, from the ground or a jump's top; r_run: R pressed while running at the far dummy), "run" (run
 ## at the dummy, then circle it), "death" (the knocked-down beat) and "backfaces" (every surface flat, red where it
 ## shows its back). --reel-close swaps the match camera for a close orbit round the Hunter (CLOSE_FILL of the frame
-## high, no HUD). Never writes the save.
+## high, no HUD). rmb_e is Grimble's Deep Reach into the Anchor. Never writes the save.
 
 const SEQUENCE := ["lmb_tap", "lmb_hold", "rmb", "e", "r", "dash_ground", "dash_air", "dash_back", "glide", "mantle"]
 const FRAME_FPS := 30                   # saved frames per second (every 2nd step of the 60 Hz match)
@@ -208,6 +208,13 @@ func _p_rmb_walk_lmb() -> void:
 func _p_rmb_ground() -> void:
 	await _seg("RMB at the dummy, then past it", 4.0, func(t: float) -> void:
 		P.inp["sec"] = _rmb_shot(t, 0.2, false) or _rmb_shot(t, 2.0, true))
+
+## Grimble's combo: Deep Reach at the dummy at full range, then the Anchor Drop the moment it lands at his feet.
+func _p_rmb_e() -> void:
+	var kit: DredgeKit = P.ak
+	await _seg("RMB, then E", 6.0, func(t: float) -> void:
+		P.inp["sec"] = _rmb_shot(t, 0.2, false)
+		P.inp["sig"] = kit.arrivals > 0 and kit.anchors == 0 and kit.wind <= 0.0, 11.0)
 
 func _p_rmb_air() -> void:
 	await _seg("Jump, RMB at the dummy; jump, RMB past it", 4.0, func(t: float) -> void:
