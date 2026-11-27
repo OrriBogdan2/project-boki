@@ -1,7 +1,7 @@
 extends RefCounted
-## --garden-carry-film [--gc-dir=<dir>]: film of the real farm carry (HomeCarry) for a friend: Motley runs across the
-## garden, four Boki hop over, he lifts one (the real lift and arms hold), spins and jumps with it, runs on with the
-## others at his heels, sets it down, pats it. Close third-person farm view, golden hour, no HUD, 1920x1080 at 60 fps.
+## --garden-carry-film [--gc-dir=<dir>]: film of the real farm carry (HomeCarry) for a friend: Sable runs across the
+## garden, four Boki hop over, she lifts one (the real lift and arms hold), spins and jumps with it, runs on with the
+## others at her heels, sets it down, pats it. Close third-person farm view, golden hour, no HUD, 1920x1080 at 60 fps.
 ## Private film tool (GPU worker, not shipped). It re-runs itself as a child Godot under the movie writer; the child
 ## prints "GC SHOT <name> <start_s> <end_s>" for each take (the encode step dissolves them) and saves the stills.
 
@@ -11,13 +11,14 @@ const ISLAND_SEED := 11
 const DAY_T := 0.72  # farm clock: golden hour (low honey sun)
 const DEADLINE_S := 1500.0
 const HUNTER_CLASS := "medium"
+const RUN_OFF := 1.25  # rad off her back-line in the run shot: a three-quarter side view, her face turned to us
 const HEAD_S := 0.55  # s of each take that the dissolve eats at its start and at its end
 const CLEAR_MARGIN := 0.45  # m of bare ground kept round a bed or building (grass blades are wide)
 const DNA_PARTS := ["Tuft", "TailTuft", "Birthmark"]  # plain sphere parts of a Boki's unique look
 const SPECS := [["burrlet", "Moss"], ["cindle", "Ash"], ["puddlet", "Dew"], ["heatherhorn", "Haggis"]]
 
 var main: Node
-var hunter_arch := "ostra"  # Motley, on his live v95 glb (WardenGlb.ART)
+var hunter_arch := "thief"  # Sable, on her live v95 glb (WardenGlb.ART); --gc-arch=ostra films Motley
 var h
 var dir := "gc"
 var _frames := 0
@@ -155,7 +156,10 @@ func _tidy_scene() -> void:
 				sz.y + 2.0 * CLEAR_MARGIN
 			)
 		)
-	for ch in h.get_children():  # the Ferry and Expeditions stands fill the meadow's foreground: not in this film
+	for ch in h.get_children():  # the Ferry and Expeditions stands and the portal ring fill the meadow: not in this film
+		var ring := ch.get_node_or_null("Ring") as MeshInstance3D
+		if ring != null and ring.mesh is TorusMesh:
+			(ch as Node3D).visible = false
 		for l in ch.find_children("*", "Label3D", true, false):
 			if (l as Label3D).text in ["Ferry", "Expeditions"]:
 				(ch as Node3D).visible = false
@@ -347,15 +351,15 @@ func _shot_run(meadow: Vector3) -> void:
 	var from := meadow + Vector3(-12.0, 0, 5.0)  # the corridor the carry shot also runs: no prop pulls the lens in
 	for i in 4:
 		_put(i, meadow + Vector3([0.0, 1.6, -1.2, 0.4][i], 0, [0.0, 1.3, 1.5, -1.6][i]))
-	_stand(from, meadow, 0.45)
+	_stand(from, meadow, RUN_OFF)
 	_view(34.0, 16.0, 0.6, 0.9)
 	_mark("run", true)
 	await _wait(HEAD_S)
 	h.life.machine(h.kins[0]).go(BaseLife.S.ROAM, "film")
-	await _run(meadow + Vector3(-4.5, 0, 1.0), 6.0, 0.45)
+	await _run(meadow + Vector3(-4.5, 0, 1.0), 6.0, RUN_OFF)
 	for i in 4:
 		_call_over(i, 8.0)
-	await _run(meadow + Vector3(-1.8, 0, 0.4), 3.0, 0.45)
+	await _run(meadow + Vector3(-1.8, 0, 0.4), 3.0, RUN_OFF)
 	await _wait(1.5)
 	await _still("run_end.png")
 	_dbg("run")
@@ -367,7 +371,7 @@ func _shot_run(meadow: Vector3) -> void:
 func _shot_lift(meadow: Vector3) -> void:
 	var k: Dictionary = h.kins[0]
 	_mark("lift", true)
-	_stand(meadow + Vector3(-1.0, 0, 0.0), meadow + Vector3(4.0, 0, 0.0), PI + 0.35)
+	_stand(meadow + Vector3(-1.0, 0, 0.0), meadow + Vector3(4.0, 0, 0.0), PI + 0.75)
 	_put(1, meadow + Vector3(1.0, 0, 2.4))
 	_put(2, meadow + Vector3(0.0, 0, -2.4))
 	_put(3, meadow + Vector3(1.6, 0, 1.4))
