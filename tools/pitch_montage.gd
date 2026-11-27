@@ -16,7 +16,7 @@ const STEP_S := 0.5  # s the Waystone's light is up before the ink wipe (rules h
 const EMERGE_S := 0.45  # s he takes to step out of the light on the other side
 const AWAY_RAD := [0.52, -0.52, 0.0, 1.05, -1.05, 1.57, -1.57, 2.1, -2.1, 2.6, -2.6, 3.14]  # tried in order: 0 = south of the stone
 const LEVEL_TIP := 0.1  # rad: a view tipped more than this over a wall is not filmed
-const MONTAGE_AT := [Vector2(-2.4, 3.6), Vector2(2.5, 5.0)]  # (m right, m ahead) of the landing: two Boki either side of the straight walk on, close enough to read
+const MONTAGE_AT := [Vector2(-2.3, 3.2), Vector2(2.3, 4.6)]  # (m right, m ahead) of the landing: two Boki either side of the straight walk on, close enough to read
 const HUSHWOOD_CLOCK := 0.74  # Hushwood's own hour is deep dusk (0.78, daylight 0.3): the film shows it at 0.7 daylight, warm and readable
 const ZONE_ORDER := ["glasswater", "cinderstep", "hushwood", "ridge"]
 const PILLAR_H := 3.6

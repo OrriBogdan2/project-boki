@@ -655,6 +655,8 @@ func _hide_marks(c: Node) -> void:
 	var air := c.get_node_or_null(ZoneAir.NAME) as Node3D
 	if air != null:
 		air.visible = false
+	for ball in c.find_children("Ball", "Node3D", true, false):  # a toy's ball (the red ball) rolls about wherever it likes
+		(ball as Node3D).visible = false
 	var crack := c.get_node_or_null("crack") as Node3D  # (Cinderstep's glowing ground cracks read as flat yellow strips)
 	if crack != null:
 		crack.visible = false
