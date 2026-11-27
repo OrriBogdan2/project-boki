@@ -7,14 +7,18 @@ extends RefCounted
 const DT := 1.0 / 30.0
 const SIZE := Vector2i(1920, 1080)
 
+
 func run(main: Node) -> void:
 	var out := ""
 	var video_s := 6.0
 	var at: Array = [4.0, 16.0, 40.0]
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--shots-dir="): out = a.substr(12)
-		if a.begins_with("--video-s="): video_s = float(a.substr(10))
-		if a.begins_with("--at="): at = Array(a.substr(5).split(",", false)).map(func(s): return float(s))
+		if a.begins_with("--shots-dir="):
+			out = a.substr(12)
+		if a.begins_with("--video-s="):
+			video_s = float(a.substr(10))
+		if a.begins_with("--at="):
+			at = Array(a.substr(5).split(",", false)).map(func(s): return float(s))
 	DirAccess.make_dir_recursive_absolute(out.path_join("video"))
 	var tree := main.get_tree()
 	main.get_window().size = SIZE
@@ -23,10 +27,10 @@ func run(main: Node) -> void:
 		main.fade.reveal(0.01)
 	await main.show_screen("title", {})
 	for i in 40:
-		await tree.process_frame        # (the menu pops in)
+		await tree.process_frame  # (the menu pops in)
 	var pen: PlayPen = main.screen_node().find_children("*", "PlayPen", true, false)[0]
 	pen.set_process(false)
-	pen.still = false       # (a software renderer is slow enough to freeze the pen; the footage is stepped by hand)
+	pen.still = false  # (a software renderer is slow enough to freeze the pen; the footage is stepped by hand)
 	var t := 0.0
 	for shot_at: float in at:
 		while t < shot_at:
@@ -40,6 +44,7 @@ func run(main: Node) -> void:
 		n += 1
 	print("PLAY_PEN_SHOTS_DONE ", at.size(), " ", n)
 	tree.quit()
+
 
 func _grab(main: Node, path: String) -> void:
 	for k in 2:

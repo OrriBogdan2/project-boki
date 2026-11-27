@@ -7,35 +7,35 @@ extends SubViewportContainer
 ## last frame (a still) instead of stuttering under the menu.
 
 const PALS := ["burrlet", "puddlet", "cindle", "pebbit", "zapple", "nettlynx", "lilybara"]
-const PAL_SCALE := 1.45          # a bit under the farm's 1.7 x (home.gd FARM_BOKI_SCALE), so the pen stays roomy
-const HALF := Vector2(5.2, 3.4)  # m: half the pen's size, x and z
-const EDGE := 1.1                # m a Boki stays in from the fence
-const SPACING := 1.25           # m: two Boki are pushed apart closer than this
+const PAL_SCALE := 1.45  # a bit under the farm's 1.7 x (home.gd FARM_BOKI_SCALE), so the pen stays roomy
+const HALF := Vector2(4.3, 2.9)  # m: half the pen's size, x and z
+const EDGE := 1.1  # m a Boki stays in from the fence
+const ROOM := Vector2(0.55, 0.9)  # m of room a Boki keeps around itself: base + per metre of its height (content/kin size cm)
 const WALK := Vector2(0.9, 1.3)  # m/s: a stroll
-const RUN := 2.5                 # m/s: a game of chase
+const RUN := 2.5  # m/s: a game of chase
 const NAP := Vector2(7.0, 12.0)  # s a nap lasts
-const BOUNCE := 0.2              # m a happy hop rises
-const TURN_RATE := 7.0           # 1/s the heading eases at
-const ACCEL := 3.0               # m/s^2 a Boki speeds up and slows down at
+const BOUNCE := 0.2  # m a happy hop rises
+const TURN_RATE := 7.0  # 1/s the heading eases at
+const ACCEL := 3.0  # m/s^2 a Boki speeds up and slows down at
 const TREES := [Vector3(-5.6, 0, -4.2), Vector3(6.0, 0, -4.8), Vector3(-8.0, 0, 0.8), Vector3(8.4, 0, 0.5)]
 const MAX_FPS := 60.0
-const SLOW_FRAME := 1.0 / 24.0   # s: an average frame slower than this, once warm, turns the view into a still
-const WARM_S := 2.0              # s the pen gets to load before the frame time is judged
-const JUDGE_S := 2.0             # s of frames the slow check averages
-const DRIFT_S := 48.0            # s for one slow sweep of the camera
-const DRIFT_YAW := 0.1           # rad the camera swings to each side
-const CAM_FRAMING := Vector3(0.0, 3.5, 7.8)    # m: where the camera sits, from the pen's centre
-const CAM_LOOK := Vector3(0.0, 0.1, -0.7)
-const CAM_SHIFT := -1.1          # m the frustum slides so the pen sits right of the menu column
+const SLOW_FRAME := 1.0 / 24.0  # s: an average frame slower than this, once warm, turns the view into a still
+const WARM_S := 2.0  # s the pen gets to load before the frame time is judged
+const JUDGE_S := 2.0  # s of frames the slow check averages
+const DRIFT_S := 48.0  # s for one slow sweep of the camera
+const DRIFT_YAW := 0.1  # rad the camera swings to each side
+const CAM_FRAMING := Vector3(0.0, 4.1, 9.6)  # m: where the camera sits, from the pen's centre
+const CAM_LOOK := Vector3(0.0, 0.3, 0.3)
+const CAM_SHIFT := -1.7  # m the frustum slides so the pen sits right of the menu column
 
-var still := false              # frozen on its last frame (a slow device, or a check asking)
+var still := false  # frozen on its last frame (a slow device, or a check asking)
 var _t := 0.0
 var _judged := 0.0
 var _judge_n := 0
 var _since_draw := 0.0
 var _cam: Camera3D
 var _view: SubViewport
-var _pals: Array = []           # {node, state, t, goal, speed, bounce}
+var _pals: Array = []  # {node, state, t, goal, speed, bounce, room}
 var _rng := RandomNumberGenerator.new()
 
 
@@ -44,12 +44,21 @@ func _ready() -> void:
 	_view = get_node("View") as SubViewport
 	_view.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	var env := WorldEnvironment.new()
-	env.environment = Look.environment(
-		{
-			"top": Color("6fa0dc"), "mid": Color("b8d4ee"), "horizon": Color("ffe6c4"), "stars": 0.0,
-			"ambient": Color("ffe9d0"), "ambient_energy": 0.7, "fog": Color("f3e6c8"), "fog_density": 0.004,
-			"saturation": 1.1,
-		}
+	env.environment = (
+		Look
+		. environment(
+			{
+				"top": Color("6fa0dc"),
+				"mid": Color("b8d4ee"),
+				"horizon": Color("ffe6c4"),
+				"stars": 0.0,
+				"ambient": Color("ffe9d0"),
+				"ambient_energy": 0.7,
+				"fog": Color("f3e6c8"),
+				"fog_density": 0.004,
+				"saturation": 1.1,
+			}
+		)
 	)
 	_view.add_child(env)
 	Look.lights(_view, Color("ffe2b8"), 1.15, Vector3(-38, 52, 0), 30.0)
@@ -115,7 +124,7 @@ func _build_pen() -> void:
 	_view.add_child(ground)
 	var props := Node3D.new()
 	_view.add_child(props)
-	var back := Models.fence(HALF.x * 2.0)     # (the front is open toward the camera)
+	var back := Models.fence(HALF.x * 2.0)  # (the front is open toward the camera)
 	back.position = Vector3(0, 0, -HALF.y)
 	props.add_child(back)
 	for side in [-1.0, 1.0]:
@@ -176,11 +185,19 @@ func _add_pals() -> void:
 		node.position = _spot()
 		node.rotation.y = _rng.randf() * TAU
 		_view.add_child(node)
-		_pals.append(
-			{
-				"node": node, "state": "idle", "t": _rng.randf_range(0.2, 2.5), "goal": node.position,
-				"speed": 0.0, "bounce": 0.0,
-			}
+		(
+			_pals
+			. append(
+				{
+					"node": node,
+					"state": "idle",
+					"t": _rng.randf_range(0.2, 2.5),
+					"goal": node.position,
+					"speed": 0.0,
+					"bounce": 0.0,
+					"room": ROOM.x + ROOM.y * float(Unique.base_size(PALS[i])["cm"]) / 100.0,
+				}
+			)
 		)
 
 
@@ -244,10 +261,11 @@ func _separate() -> void:
 		for j in range(i + 1, _pals.size()):
 			var a: Node3D = _pals[i]["node"]
 			var b: Node3D = _pals[j]["node"]
+			var room: float = float(_pals[i]["room"]) + float(_pals[j]["room"])
 			var gap := b.position - a.position
 			gap.y = 0.0
 			var dist := gap.length()
-			if dist < SPACING and dist > 0.001:
-				var push := gap / dist * (SPACING - dist) * 0.5
+			if dist < room and dist > 0.001:
+				var push := gap / dist * (room - dist) * 0.5
 				a.position -= push
 				b.position += push
