@@ -143,7 +143,9 @@ func _place() -> void:
 	var old: Node3D = h.player
 	for i in ARCHES.size():
 		var cls := Arch.weight(ARCHES[i])
-		var m: Node3D = Models.hunter(cls, Data.TEAM_COLORS[0], Arch.weapon_for(ARCHES[i], cls, ""), "", {}, ARCHES[i])
+		var m: Node3D = Models.hunter(
+			cls, Data.TEAM_COLORS[0], Arch.signature(ARCHES[i]), "", Unmasked.mask_look(), ARCHES[i]
+		)
 		m.scale *= Hunter.VIS_SCALE * Arch.match_k(ARCHES[i])  # as a match draws it: the reference's height
 		scales.append(m.scale)
 		h.add_child(m)
