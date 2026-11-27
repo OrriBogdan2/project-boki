@@ -24,7 +24,8 @@ var look_s := 30.0
 var advisory := false
 var headless := false
 var software := false
-var frames: Array = []  # wall ms, loading, draws, objs, nodes, phys, proc, mem, vram, steps, cpu, marks, phase, 3D off, render cpu, gpu
+# wall ms, loading, draws, objs, nodes, phys, proc, mem, vram, steps, cpu, marks, phase, 3D off, render cpu, gpu
+var frames: Array = []
 var loading_ms := 0.0
 var last_us := 0
 var t0_us := 0
@@ -118,26 +119,31 @@ func _process(_delta: float) -> void:
 	var step := ""
 	for mk in marks:
 		step += "%s %.0f " % [mk[1], mk[2]]
-	frames.append(
-		[
-			wall,
-			0 if shown_us > 0 else 1,
-			int(RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)),
-			int(Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME)),
-			int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT)),
-			Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0,
-			Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
-			Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0,
-			Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,
-			steps,
-			cpu,
-			step.strip_edges(),
-			ph,
-			1 if get_viewport().disable_3d else 0,
-			RenderingServer.viewport_get_measured_render_time_cpu(get_viewport().get_viewport_rid())
-			+ RenderingServer.get_frame_setup_time_cpu(),
-			RenderingServer.viewport_get_measured_render_time_gpu(get_viewport().get_viewport_rid()),
-		]
+	(
+		frames
+		. append(
+			[
+				wall,
+				0 if shown_us > 0 else 1,
+				int(RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)),
+				int(Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME)),
+				int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT)),
+				Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0,
+				Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
+				Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0,
+				Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,
+				steps,
+				cpu,
+				step.strip_edges(),
+				ph,
+				1 if get_viewport().disable_3d else 0,
+				(
+					RenderingServer.viewport_get_measured_render_time_cpu(get_viewport().get_viewport_rid())
+					+ RenderingServer.get_frame_setup_time_cpu()
+				),
+				RenderingServer.viewport_get_measured_render_time_gpu(get_viewport().get_viewport_rid()),
+			]
+		)
 	)
 	if shown_us > 0 and (now - shown_us) / 1e6 >= look_s:
 		_finish()
@@ -231,7 +237,9 @@ func _phase_lines(j: Array) -> Array:
 			ks.sort_custom(func(a, b): return pp[a] > pp[b])
 			var tops: Array = ks.slice(0, 7).map(func(k): return "%s %.1f" % [k, pp[k] / 1000.0 / nf])
 			pf += "\nLOADIN   top ms a frame: " + ", ".join(tops)
-		lines.append(pf % [ph, fs.size(), sum / n, _pct(ms, 0.99), _pct(ms, 1.0), draws / n, objs / n, cpu / n, mem, off, rcpu / n, rgpu / n])
+		var vals := [ph, fs.size(), sum / n, _pct(ms, 0.99), _pct(ms, 1.0), draws / n, objs / n, cpu / n, mem]
+		vals.append_array([off, rcpu / n, rgpu / n])
+		lines.append(pf % vals)
 	return lines
 
 
@@ -289,8 +297,10 @@ func _finish() -> void:
 	for x in cpus:
 		cpu_sum += float(x)
 	lines.append(
-		"LOADIN main-thread cpu a frame (other jobs cannot stretch it): avg %.1f ms, p50 %.1f, p99 %.1f, max %.1f"
-		% [cpu_sum / maxi(cpus.size(), 1), _pct(cpus, 0.5), _pct(cpus, 0.99), _pct(cpus, 1.0)]
+		(
+			"LOADIN main-thread cpu a frame (other jobs cannot stretch it): avg %.1f ms, p50 %.1f, p99 %.1f, max %.1f"
+			% [cpu_sum / maxi(cpus.size(), 1), _pct(cpus, 0.5), _pct(cpus, 0.99), _pct(cpus, 1.0)]
+		)
 	)
 	lines.append_array(_phase_lines(frames))
 	lines.append("LOADIN load steps (ms): " + _load_steps())
@@ -334,7 +344,8 @@ func _finish() -> void:
 	if csv_path != "":
 		var fc := FileAccess.open(csv_path, FileAccess.WRITE)
 		if fc:
-			fc.store_line("ms,loading,draws,objects,nodes,phys_ms,proc_ms,mem_mb,vram_mb,sim_steps,cpu_ms,marks,phase,off3d,render_cpu_ms,render_gpu_ms")
+			var cols := "ms,loading,draws,objects,nodes,phys_ms,proc_ms,mem_mb,vram_mb,sim_steps,cpu_ms,marks,phase"
+			fc.store_line(cols + ",off3d,render_cpu_ms,render_gpu_ms")
 			for f in frames:
 				fc.store_line("%.2f,%d,%d,%d,%d,%.2f,%.2f,%.0f,%.0f,%d,%.2f,%s,%s,%d,%.2f,%.2f" % f)
 	get_tree().quit(0 if fails == 0 or advisory else 1)
