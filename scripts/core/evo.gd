@@ -96,8 +96,8 @@ static func lean(rec: Dictionary) -> Array:
 			best = af
 	return [best, clampf(most / LEAN_FULL, 0.0, 1.0)]
 
-## The affinity that wins right now: what it's been doing plus its personality.
-static func leading(rec: Dictionary) -> String:
+## Each affinity's score right now: what it's been doing, its personality and (tokens) its worn path tokens.
+static func scores(rec: Dictionary, tokens := true) -> Dictionary:
 	ensure(rec)
 	var tr: Dictionary = rec.get("traits", {})
 	var sp: Dictionary = Data.KIN.get(rec.get("species", "cindle"), {})
@@ -107,8 +107,16 @@ static func leading(rec: Dictionary) -> String:
 		"curious": float(rec["aff"]["curious"]) + float(tr.get("curiosity", 0.5)) * 10.0,
 		"swift": float(rec["aff"]["swift"]) + float(sp.get("speed", 6.5)) / 8.0 * 6.0,
 	}
-	for t in rec.get("path", []):
+	for t in rec.get("path", []) if tokens else []:
 		score[GardenItems.aff_of(t)] += float(GardenItems.rules()["pip"])
+	return score
+
+## The affinity that wins right now: the form it grows toward (worn path tokens count).
+static func leading(rec: Dictionary) -> String:
+	return top(scores(rec))
+
+## The affinity with the best score.
+static func top(score: Dictionary) -> String:
 	var best := "fierce"; var bv := -1e9
 	for k in ["fierce", "steadfast", "curious", "swift"]:
 		if score[k] > bv: bv = score[k]; best = k
@@ -251,10 +259,10 @@ static func on_level(rec: Dictionary, rng: RandomNumberGenerator = null) -> Dict
 		return ev
 	if lv >= 2 and lv % 4 == 2:
 		var a := leading(rec)
-		# mostly from the leading affinity, sometimes from another one it's been building
-		if rng.randf() < 0.3:
+		# mostly from its leaning, sometimes from any affinity: the stronger the leaning, the rarer (PlayStyle)
+		if rng.randf() < float(PlayStyle.tier(rec)["stray"]):
 			a = ["fierce", "steadfast", "curious", "swift"][rng.randi_range(0, 3)]
-		var pool: Array = AFF[a]["parts"]
+		var pool := PlayStyle.parts(rec, a)
 		var part: String = pool[rng.randi_range(0, pool.size() - 1)]
 		for m in rec["muts"]:
 			if m["id"] == part:
@@ -329,13 +337,6 @@ static func simulate(rec: Dictionary, rng: RandomNumberGenerator) -> void:
 
 ## (Forms no longer grow stats by a percentage: a form takes the next node on its affinity's
 ## evolution path, budget-neutral, see KinLib.nodes_for and docs/KIN_GRAMMAR.md.)
-
-## What a match taught it: called from Game.apply_result with the kin's match stats.
-static func learn(rec: Dictionary, st: Dictionary) -> void:
-	add(rec, "fierce", float(st.get("hits", 0)) * 0.4 + float(st.get("kos", 0)) * 3.0)
-	add(rec, "steadfast", float(st.get("revives", 0)) * 6.0 + float(st.get("won", 0)) * 2.0)
-	add(rec, "curious", float(st.get("skills", 0)) * 0.6 + float(st.get("caught", 0)) * 4.0)
-	add(rec, "swift", float(st.get("throws", 0)) * 0.8)
 
 static func describe(ev: Dictionary, rec: Dictionary) -> String:
 	var kname: String = rec.get("name", "Your Boki")

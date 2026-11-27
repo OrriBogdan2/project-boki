@@ -358,7 +358,7 @@ func _kin_after(k: Dictionary, run: Dictionary, won: bool, r: Dictionary, treat:
 		k["traits"]["bravery"] = clampf(float(k["traits"]["bravery"]) + 0.015, 0.05, 0.95)
 	else:
 		Save.remember(k, "lost", "lost a match with you (%s)" % _why(r.get("why", "")), -1.0)
-	Evo.learn(k, run.get("stats", {}))
+	PlayStyle.learn(k, run.get("stats", {}))
 	# an expedition is hungry, tiring, muddy work
 	Care.catch_up(k)
 	for nd in Care.MATCH_COST:
@@ -369,10 +369,12 @@ func _kin_after(k: Dictionary, run: Dictionary, won: bool, r: Dictionary, treat:
 	if treat == "treat_xp": xp = int(xp * 1.5)
 	if add_xp(k, xp, out) > 0:
 		out["levelup"] = true
+	var grew := PlayStyle.run_growth(k, won, lead)  # the stat points this expedition taught it, by its leaning
 	if lead:
 		out["trust_delta"] = float(k["trust"]) - before
-	# what the results screen lists for each Boki you brought: the XP and bond just applied above
-	out["kin_gains"] = out.get("kin_gains", []) + [{"kin": k, "xp": xp, "bond": float(k["trust"]) - before}]
+	# what the results screen lists for each Boki you brought: the XP, bond and stat points just applied above
+	var gains := {"kin": k, "xp": xp, "bond": float(k["trust"]) - before, "stats": grew}
+	out["kin_gains"] = out.get("kin_gains", []) + [gains]
 
 ## XP a kin needs to go from level `lv` to the next (the curve is in content/rules/garden_xp.json).
 func xp_need(lv: int) -> int:
