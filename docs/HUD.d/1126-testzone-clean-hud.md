@@ -20,3 +20,9 @@ Test Zone page, the L menu) dim the screen and are not counted.
 - `--test-zone-check` opens each station popup (bench, a toast, the Drills banner) with the frame-rate
   overlay on, in the Test Zone and the Training Grounds at 1920x1080 and 2560x1440, and asserts every popup keeps clear
   of `fps_counter` and `minimap` (`TestZoneShots.pairs`); `--test-zone-shots` prints the same pairs as `TZSHOT PAIR`.
+- HUD lines that stay up hold their place in the same list (`SafeArea.hold(key, control)`): the Arena key line, the
+  DPS meter and the kit drill panel, in that order. A held control keeps clear only of what was held before it (the kit
+  drill panel sits under the key line), so two held lines never push each other in turn; every other popup and every
+  toast keeps clear of all of them. The message lane places a card in one pass over every block (`MsgLane.spot`), so
+  sliding off one never lands it on the next. `--test-zone-check` also asserts no HUD overlap at all with each station
+  popup open, the Training Grounds' first-time kit drill up.
