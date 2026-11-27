@@ -207,7 +207,8 @@ func busy() -> bool:
 func gate_inputs() -> void:
 	if commit_left() > Loco.press_buffer:
 		h.inp["dash"] = false
-		h.inp["jump"] = false
+		if h.grounded:
+			h.inp["jump"] = false  # (in the air a jump press is the glide press: the recoil is cancelled by it, 0180)
 
 
 func add_fever(n := 1) -> void:
@@ -850,6 +851,8 @@ func _fire_needle() -> void:
 	last_beam = palm
 	vfx("e_fire", palm, Vector2(to.x, to.z).normalized(), {"len": Vector2(to.x, to.z).length(), "r": beam_width()})
 	h.impulse(-d * float(ed.get("recoil", 6.0)))  # the recoil shoves her back a step
+	h.knock_t = 0.0  # (no KNOCKED state: it cannot open the glider)
+	h.kb_t = -9.0  # her own recoil is no hit: a glide press cancels it at once (0180, owner: glide never dropped after attacks)
 	commit_end = float(m.time) + E_RECOVER
 	var hits := 0
 	var dmg0: float = float(ed["dmg"]) * power("kin")

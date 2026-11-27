@@ -26,3 +26,9 @@ refused as in DashFlow. Folding the glider on release is unchanged (the buffer i
 `--glide-after-attack-check`: every hunter, six actions, delays 0/50/100/200 ms, hold and tap. Held ults and
 channels (Rimewright X, Motley X, Vex E hold, Tenzo's Quakefall) still delay it to the action's end. No Net or
 save change.
+
+## Addendum 11-27: Vex's E recoil
+Coordinator decision 11-26 (owner: "glide never dropped after attacks"): a glide press cancels Vex's E recoil (0.6 s
+commit: a 0.2 s shove, then 0.4 s). Her own shove no longer sets `kb_t` or the KNOCKED state, `DashFlow.cc_left`
+lets an air jump press (the glide press) through a recovery, and `gate_inputs` keeps it. Ult channels stay shut.
+`--glide-after-attack-check` gains 8 Vex E recoil trials (hold/tap x 4 delays): 632 trials, 0 failures.
