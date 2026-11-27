@@ -1,0 +1,14 @@
+{
+	"id": "dreadnoyak",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/dreadnoyak.json.",
+	"work": {
+		"craft": 2,
+		"frost": 3,
+		"mend": 1
+	},
+	"shiny": {
+		"belly": "#e494ac",
+		"color": "#172420",
+		"glow": "#ff82a7"
+	}
+}
