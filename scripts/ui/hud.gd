@@ -372,7 +372,7 @@ func _draw_world_labels() -> void:
 			continue
 		if cam.is_position_behind(h.position) or LabelCull.ride_skip(h):
 			continue
-		var sp := LabelCull.at(self, _head(h, HudPlate.plate_offset(h)))
+		var sp := LabelCull.at(self, _head(h, HudPlate.up(h, HudPlate.plate_offset(h))))
 		if not sp.is_finite():
 			continue
 		LabelCull.mark(h)
@@ -1699,14 +1699,15 @@ var abyss_fx: CanvasLayer = null
 
 
 ## A point `up` metres above a hunter's feet, following the body's lean toward the camera
-## (CamRig.char_lean), so bars and names stay just over the head.
+## (CamRig.char_lean), so bars and names stay just over the head (`up` grows with the match's Hunter size).
 func _head(h: Node3D, up: float) -> Vector3:
+	up *= CamRig.match_hunter_scale
 	return h.position + (m.cam.char_lean() * Vector3(0, up, 0) if m.cam else Vector3(0, up, 0))
 
 ## Health right above your hunter, where your eyes already are.
 func _draw_overhead(p: Hunter) -> void:
 	var cam := m.cam
-	var at := _head(p, 2.7 * float(p.cdat["scale"]))
+	var at := _head(p, HudPlate.up(p, 2.7 * float(p.cdat["scale"])))
 	if cam.is_position_behind(at) or p.downed or p.riding:
 		return
 	var sp := cam.unproject_position(at)
