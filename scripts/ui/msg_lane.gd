@@ -223,16 +223,42 @@ func _layout(delta: float) -> void:
 			y = maxf(y, want)
 		e["placed"] = true
 		y = maxf(y, above + GAP)
-		x += HunterZone.slide(Rect2(Vector2(x, y), box.size), avoid)
-		for r: Rect2 in reserved:
-			x += HunterZone.slide(Rect2(Vector2(x, y), box.size), r)
-		for r: Rect2 in keep_off:
-			x += HunterZone.slide(Rect2(Vector2(x, y), box.size), r)
-		box.position = Vector2(x, y)
+		box.position = spot(Rect2(Vector2(x, y), box.size), [avoid] + reserved + keep_off)
+		y = box.position.y
 		above = y + box.size.y
 		want += box.size.y + GAP
 		var t := float(e["t"])
 		box.modulate.a = clampf(t / FADE_IN, 0.0, 1.0) * clampf((_life(e) - t) / FADE_OUT, 0.0, 1.0)
+
+
+## Where card `r` goes: its spot, else the nearest spot beside one of `blocks` (your Hunter, the reserved rects, the
+## keep-off rects) that is clear of all of them and on the lane, else the same below the lowest block it hit.
+## One pass over every block, so sliding off one never lands a card on the next (the DPS meter beside the kit drill).
+func spot(r: Rect2, blocks: Array) -> Vector2:
+	var sz := r.size
+	var hits := func(at: Vector2) -> Array:
+		return blocks.filter(func(b: Rect2): return b.has_area() and b.intersects(Rect2(at, sz)))
+	var hit: Array = hits.call(r.position)
+	for drop in 2:
+		if hit.is_empty():
+			return r.position
+		var best := r.position
+		var best_d := INF
+		for b: Rect2 in blocks:
+			for at_x: float in [b.position.x - r.size.x - HunterZone.SIDE_GAP, b.end.x + HunterZone.SIDE_GAP]:
+				var at := Vector2(at_x, r.position.y)
+				var on_lane := at_x >= 0.0 and at_x + r.size.x <= size.x
+				if on_lane and absf(at_x - r.position.x) < best_d and hits.call(at).is_empty():
+					best = at
+					best_d = absf(at_x - r.position.x)
+		if best_d < INF:
+			return best
+		var low := r.position.y
+		for b: Rect2 in hit:
+			low = maxf(low, b.end.y + GAP)
+		r.position.y = low
+		hit = hits.call(r.position)
+	return r.position
 
 
 ## One card: the menu's glass with a line in the message's colour.
