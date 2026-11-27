@@ -163,7 +163,8 @@ static func _aim_at(m: Match, at: Vector3) -> Vector3:
 ## take-off on, or the mantle climbs a low cliff first and the kick never counts).
 static func _kick_up(m: Match, top_y: float) -> void:
 	var p := m.player
-	if not p.grounded and p.pos.y < top_y - 0.2:
+	# (not while the coyote window is open: off the ledge a press there is a ground jump, not the kick's second press)
+	if not p.grounded and p.coyote <= 0.0 and p.pos.y < top_y - 0.2:
 		p.inp["jump"] = int(m.time / Match.DT) % 2 == 0
 
 static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:

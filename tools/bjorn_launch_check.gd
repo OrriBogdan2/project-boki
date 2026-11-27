@@ -220,8 +220,9 @@ func _launch_flat() -> void:
 	P.inp["fire"] = false
 	step(m, 0.08)
 	var open := _glide_open(m, P, true)
-	ok("bjorn #49: glide pressed during the launch jumps him out into a glide at >= 70% of its speed",
-		open >= K.launch.speed * 0.7, "glide opens at %.1f of %.1f m/s" % [open, K.launch.speed])
+	# a jump out of a dash-fast launch sheds to jump_trim_to (JumpTrim, 11-26 traversal parity): the floor is that, not 70%
+	ok("bjorn #49: glide pressed during the launch jumps him out into a glide at >= 70% of its speed (or the dash-jump trim's low end)",
+		open >= minf(K.launch.speed * 0.7, HunterMove.jump_trim_to.x), "glide opens at %.1f of %.1f m/s" % [open, K.launch.speed])
 	await done(m)
 
 ## Steps until the glider opens (glide held when `hold`), returning his planar speed on that step (-1: never).
