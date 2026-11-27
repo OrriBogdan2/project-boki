@@ -1,10 +1,10 @@
 extends RefCounted
-## --farm-3d-sizes --shots-dir=<dir> [--view=1920x1080] [--albert-k=1.08]: the real farm scene with five hunters (Albert is the farm's own
-## avatar; Kael, Sparkle, Meeko and Cinder are built as a match builds a hunter) at their match size (own model size x
-## Hunter.VIS_SCALE x body.match_k: the reference's height) and the four Boki, all idle, HUD, marks and particles
-## hidden.
-## Writes 1_farm_cam.png (the farm's close third-person view), 2_eye_row.png (eye level, one row), 3_mid.png and
-## heights.json (metres as drawn: crown and with extras, per hunter and per Boki). Needs a renderer for the stills.
+## --farm-3d-sizes --shots-dir=<dir> [--view=1920x1080] [--albert-k=1.08]: the real farm scene with five hunters (Albert
+## is the farm's own avatar; Kael, Sparkle, Meeko and Cinder are built as a match builds a hunter) at their match size
+## (own model size x Hunter.VIS_SCALE x body.match_k: the reference's height) and the four Boki, all idle, HUD, marks
+## and particles hidden. Writes 1_farm_cam.png (the farm's close third-person view), 2_eye_row.png (eye level, one row),
+## 3_mid.png and heights.json (metres as drawn: crown and with extras, per hunter and per Boki). Needs a renderer for
+## the stills.
 
 const WARDEN_SKIN := preload("res://tools/warden_skin.gd")
 const NOT_BODY := [
