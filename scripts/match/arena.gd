@@ -400,6 +400,7 @@ func _build_ui() -> void:
 	hint.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	root.add_child(hint)
+	SafeArea.hold("key_line", hint)  # later popups and toasts keep clear of it
 	meter = UI.label("", 15, UI.INK, UI.big)
 	meter.autowrap_mode = TextServer.AUTOWRAP_OFF
 	meter.add_theme_constant_override("outline_size", 6)
@@ -414,6 +415,7 @@ func _build_ui() -> void:
 		meter.position = Vector2(24, 244)
 	meter.custom_minimum_size = Vector2(310, 0)
 	root.add_child(meter)
+	SafeArea.hold("dps_meter", meter)
 	hint.visible = tools
 	meter.visible = tools
 

@@ -166,7 +166,7 @@ func _input(event: InputEvent) -> void:
 			on_press(ACTIONS[slot])
 
 
-## The panel's home: centred under the top margin, clear of the minimap and the frame-rate readout.
+## The panel's home: centred under the top margin, clear of the reserved rects (minimap, frame-rate readout, key line).
 func _place() -> void:
 	var sz: Vector2 = m.hud.c.size
 	SafeArea.place(_panel, Vector2((sz.x - _panel.get_combined_minimum_size().x) * 0.5, PANEL_Y), sz)
@@ -191,6 +191,7 @@ func build_ui() -> void:
 	add_child(layer)
 	_panel = UI.glass(10, 14)
 	layer.add_child(_panel)
+	SafeArea.hold("kit_drill", _panel)  # under the key line; the station popups and toasts keep clear of it
 	var rows := VBoxContainer.new()
 	_panel.add_child(rows)
 	var top := HBoxContainer.new()

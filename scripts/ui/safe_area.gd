@@ -16,6 +16,7 @@ const MINIMAP_KEY := "minimap"
 static var recording := false
 static var seen := {}  # group -> Array of the Rect2s that group drew
 static var group := ""
+static var held: Array = []  # [key, Control] in the order held (hold): HUD lines the reserved list keeps clear
 static var origin := Vector2.ZERO  # the canvas being drawn: where it sits on screen (HudPanels), for screen-px rects
 
 
@@ -48,9 +49,11 @@ static func framed(parent: Control) -> Control:
 
 
 ## The one list of screen rects no popup, panel or toast may cover (name -> Rect2, screen px): the frame-rate readout
-## (its live rect while it shows, else the room of its one line) and the minimap, as large as the HUD size setting
-## grows it. Every popup of a match is placed with `clear_of`, never with an offset of its own.
-static func reserved(sz: Vector2) -> Dictionary:
+## (its live rect while it shows, else the room of its one line), the minimap, as large as the HUD size setting
+## grows it, then the HUD lines that `hold` their place (the key line, the DPS meter, the kit drill panel). Every
+## popup of a match is placed with `clear_of`, never with an offset of its own. For a held control `c` the list
+## stops at `c`: it keeps clear of what was held before it only, so two held lines never push each other in turn.
+static func reserved(sz: Vector2, c: Control = null) -> Dictionary:
 	var fps: Control = Overlay.fps_lbl
 	var room := Rect2(Vector2(sz.x - FPS_LINE.x - 8.0, 4.0), FPS_LINE)
 	var out := {FPS_KEY: fps.get_global_rect() if fps.visible and fps.size.x > 0.0 else room}
@@ -58,14 +61,28 @@ static func reserved(sz: Vector2) -> Dictionary:
 	var map := HudStyle.minimap_rect(sz)
 	var grown := Rect2(box.position + (map.position - box.position) * HudScale.up(), map.size * HudScale.up())
 	out[MINIMAP_KEY] = grown
+	held = held.filter(func(e: Array) -> bool: return is_instance_valid(e[1]))
+	for e: Array in held:
+		var h: Control = e[1]
+		if h == c:
+			break
+		if h.is_visible_in_tree() and h.size.x > 0.0:
+			out[e[0]] = h.get_global_rect()
 	return out
 
 
+## Adds `c` (a HUD line that stays up: the key line, the DPS meter, the kit drill panel) to the reserved list under
+## `key`, after everything held before it. A freed control drops out of the list by itself.
+static func hold(key: String, c: Control) -> void:
+	if not held.any(func(e: Array) -> bool: return e[1] == c):
+		held.append([key, c])
+
+
 ## `r` moved the shortest way (right, left, below or above a reserved rect) that keeps it inside the margin and off
-## every reserved rect; `r` itself when it is clear already or nowhere fits.
-static func clear_of(r: Rect2, sz: Vector2) -> Rect2:
+## every reserved rect (those before `c` for a held control); `r` itself when it is clear already or nowhere fits.
+static func clear_of(r: Rect2, sz: Vector2, c: Control = null) -> Rect2:
 	var boxes: Array = []
-	for b: Rect2 in reserved(sz).values():
+	for b: Rect2 in reserved(sz, c).values():
 		boxes.append(b.grow(GAP))
 	var best := r
 	var best_d := INF
@@ -89,7 +106,7 @@ static func clear_of(r: Rect2, sz: Vector2) -> Rect2:
 
 ## Puts `c` (a popup, at least as big as its content) at `want`, moved off every reserved rect (clear_of).
 static func place(c: Control, want: Vector2, sz: Vector2) -> void:
-	c.position = clear_of(Rect2(want, c.size.max(c.get_combined_minimum_size())), sz).position
+	c.position = clear_of(Rect2(want, c.size.max(c.get_combined_minimum_size())), sz, c).position
 
 
 ## `r` moved the least that puts it inside the margin (anchoring a panel to the corner it hangs from).
