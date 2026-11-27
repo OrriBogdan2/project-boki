@@ -369,7 +369,7 @@ Same method as the slice section above (`--hit-shape-fine`, rows for the eight a
 
 | Input | Ours (content) | In game | Source | Verdict |
 |---|---|---|---|---|
-| LMB Ember Cast | range 6.75, x1.25 on the shot after a 1 s pause (8.4) | reach 8.6 in `--hit-shape-fine` 2026-11-23 (a fresh probe's first ember is the Empowered 8.4 + the circle); was 13.1 / 16.1 before the 11-17 halving | flies past the cursor to max, 7-8 bh (12.6-14.4) | owner call (11-17, `5ce4816037`): half the source range on purpose |
+| LMB Ember Cast | range 7.43, x1.25 on the shot after a 1 s pause (9.3) | reach 8.6 in `--hit-shape-fine` 2026-11-23 (a fresh probe's first ember is the Empowered 8.4 + the circle); was 13.1 / 16.1 before the 11-17 halving | flies past the cursor to max, 7-8 bh (12.6-14.4) | owner call (11-17, `5ce4816037`): half the source range on purpose; owner 11-26: +10% range and a 15% smaller look (hit unchanged) |
 | RMB Burrseed | range 14, hit_r 0.7, burst 2.2 | reach 15.9 (14 + 0.6 + 0.7 + 0.4 + step), lane 1.6 | 8-9 bh (14.4-16.2), disc 1.2 bh (2.2) | match |
 | E Hearthlight | ring 2.6, thrown 2.9, reach 9 | heals, hurts nobody: not measured | ring 1.3-1.5 bh, thrown 1.6 bh (2.9) | content match |
 | R Hearth Call | range 12.6, pick 2.5, land 0.9 | not a damage input: not measured | tether ring 7 bh (12.6) | content match |
@@ -515,7 +515,7 @@ Re-read 2026-11-23 on main dae69e1c59, same note as Vex above.
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
-| LMB | Ramp per hit; idle shot Empowered [D]; footage ember flies 7-8 bh (13.5 m) [F] | Cadence .4; the ember flies its full 6.75 m (`lantern_crook` range); after a 1 s pause the next one is bigger (x1.5) and flies 1.25x further (8.4 m); Kindle +0.72 a stack to 5 (owner 11-17, `5ce4816037`) | owner call; the footage's 13.5 m is halved on purpose. Empowered's effect is not in the source |
+| LMB | Ramp per hit; idle shot Empowered [D]; footage ember flies 7-8 bh (13.5 m) [F] | Cadence .4; the ember flies its full 7.43 m (`lantern_crook` range); after a 1 s pause the next one is bigger hit (x1.5; the look is 15% smaller, `lmb.look_k`) and flies 1.25x further (9.3 m); Kindle +0.72 a stack to 5 (owner 11-17, `5ce4816037`; 11-26: +10% range) | owner call; the footage's 13.5 m is halved on purpose. Empowered's effect is not in the source |
 | RMB | Shot, delayed Root, 11.5 s [D]; wiki 2 s delay | Burrseed: fixed 0.6 s wind-up (owner 11-11), seed 24 m/s, 9 dmg, roots after 2 s of the foe within 15 m (owner 11-10), unwinds 2x out of it, burst 32 in 2.2 m, root 1.1 s, cd 10.5 | differ `[?]` motion · **owner** (11-10, 11-11); 0.91x cd (gap 10) |
 | Q | none | glove | ours |
 | E | 2.5 s zone, burst, throw, attaches, 12 s [D] | Hearthlight: 2.5 s, r 2.6, 10 over the zone and 22 at the end, thrown to 9 m (r 2.9), latches onto the first teammate it passes, heals her like any teammate (no self factor), cd 11 | match; 0.92x cd (gap 10) |
