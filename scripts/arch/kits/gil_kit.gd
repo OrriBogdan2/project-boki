@@ -181,7 +181,9 @@ func _tick_tide(dt: float) -> void:
 		var key: int = f.get_instance_id()
 		if tide["hit"].has(key): continue
 		tide["hit"][key] = true
-		var o := {"kb": dir * float(td["kb"]), "src": "abil", "ab": "primary", "tags": ["primary", "tide"]}
+		# a full charge knocks past the shared wall-slam speed (8 m/s): into a wall, the foe is stunned
+		var kb := float(td["kb_full"] if tide["full"] else td["kb"])
+		var o := {"kb": dir * kb, "src": "abil", "ab": "primary", "tags": ["primary", "tide"]}
 		f.hurt(float(tide["dmg"]), h, o)
 		vfx("tide_hit", f.pos, dir, {"full": tide["full"]})
 		if tide["full"]:
