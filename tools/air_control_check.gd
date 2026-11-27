@@ -122,9 +122,11 @@ func _press_vs_control(setup: Callable) -> Array:
 	_replay = false
 	return r + [Vector2(h.vel.x, h.vel.z).length(), later, roll_left]
 
-## True when the glider opened on the step it would have had without the press, at the speed that step has.
+## True when opening the glider costs no speed against the same flight with no press (r[4]) and adds none over what
+## it had (the step before, or that flight's): a held press may keep MORE than the unpressed flight, which bleeds a
+## dash off by itself (the glide carries the dash), but the opening step itself never speeds you up.
 func _open_keeps_speed(r: Array) -> bool:
-	return absf(r[1] - r[4]) <= 0.1
+	return r[1] >= r[4] - 0.1 and r[1] <= maxf(r[0], r[4]) + 0.1
 
 func _match_items() -> void:
 	_air_at(30.0, Vector3(3, -11, 0))
