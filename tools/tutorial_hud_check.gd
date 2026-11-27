@@ -71,13 +71,17 @@ func _lanes() -> void:
 		var ln := TutorialHud.lanes(sz)
 		var b: Rect2 = ln["banner"]
 		var tag := "%dx%d" % [sz.x, sz.y]
-		var small: bool = b.size.x <= sz.x * TutorialStrip.WIDTH_FRAC + 0.5 and b.size.y <= sz.y * 0.06 + 0.5
+		var small: bool = (
+			b.size.x <= sz.x * TutorialStrip.WIDTH_FRAC + 0.5 and b.size.y <= sz.y * 0.06 + 0.5
+		)
 		ok(small, "%s: the strip is at most 42%% x 6%% of the screen (%s)" % [tag, str(b.size)])
 		var margin := HudStyle.safe_pad(sz).y
 		var in_safe := HudStyle.safe_rect(sz).grow(0.5).encloses(b)
 		ok(in_safe, "%s: the strip is inside the safe margin (%.0f)" % [tag, b.position.y])
 		ok(absf(b.get_center().x - sz.x * 0.5) < 1.0, "%s: the strip is at the top-centre" % tag)
-		var pulse_ok := TutorialStrip.glow(0.0) == 1.0 and TutorialStrip.glow(TutorialStrip.PULSE_T) == 0.0
+		var pulse_ok := (
+			TutorialStrip.glow(0.0) == 1.0 and TutorialStrip.glow(TutorialStrip.PULSE_T) == 0.0
+		)
 		ok(pulse_ok, "%s: the glow starts full on a new objective and is calm after PULSE_T" % tag)
 		var centre := Rect2(sz * Vector2(0.3, 0.25), sz * Vector2(0.4, 0.45))
 		var names: Array = ln.keys()
@@ -89,7 +93,10 @@ func _lanes() -> void:
 			for j in range(i + 1, names.size()):
 				if names[i] != "intro" and names[j] != "intro" and r.intersects(ln[names[j]]):
 					clash += " %s/%s" % [names[i], names[j]]
-			ok(Rect2(Vector2.ZERO, sz).encloses(r), "%s: the %s lane is on screen" % [tag, names[i]])
+			ok(
+				Rect2(Vector2.ZERO, sz).encloses(r),
+				"%s: the %s lane is on screen" % [tag, names[i]]
+			)
 		ok(clash == "", "%s: no two lanes intersect and none is in the middle%s" % [tag, clash])
 		# a real match (the first-match guide): the strip drops under the Ways Out strip and its line
 		var wo_w := maxf(WaysOutHud.CELL.x * 4.0, 240.0)
@@ -97,15 +104,32 @@ func _lanes() -> void:
 		var wo_b := wo_top + WaysOutHud.CELL.y + 31.0
 		var wo := Rect2(Vector2(sz.x * 0.5 - wo_w * 0.5, wo_top), Vector2(wo_w, wo_b - wo_top))
 		var gb := TutorialStrip.rect(sz, wo_b)
-		var g_ok := not gb.intersects(wo) and gb.size.y <= sz.y * 0.06 + 0.5 and gb.end.y <= sz.y - margin
-		ok(g_ok, "%s: in a real match the strip sits under the Ways Out zone clocks (%s)" % [tag, str(gb)])
+		var g_ok := (
+			not gb.intersects(wo) and gb.size.y <= sz.y * 0.06 + 0.5 and gb.end.y <= sz.y - margin
+		)
+		ok(
+			g_ok,
+			(
+				"%s: in a real match the strip sits under the Ways Out zone clocks (%s)"
+				% [tag, str(gb)]
+			)
+		)
 
 
 # ------------------------------------------------------------------ 2, 3, 4. a run of the course
 func _course() -> void:
 	m = Match.new()
 	main.add_child(m)
-	m.start({"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "demo_kin": "cindle"})
+	m.start(
+		{
+			"tutorial": true,
+			"teams": 1,
+			"squad": 1,
+			"tier": 0,
+			"length": 1500.0,
+			"demo_kin": "cindle"
+		}
+	)
 	m.set_process(false)
 	var tu: Tutorial = m.tut
 	ok(m.hud != null, "the HUD is up")
@@ -117,7 +141,10 @@ func _course() -> void:
 		held_at += Match.DT
 	var closed := not tu.intro and held_at < Tutorial.INTRO_T + 0.2
 	ok(closed, "the intro card closes by itself within %.1fs (%.2fs)" % [Tutorial.INTRO_T, held_at])
-	ok(bool(Save.d["tutorial"].get("tut_intro", false)), "and is remembered, so it only shows the first time")
+	ok(
+		bool(Save.d["tutorial"].get("tut_intro", false)),
+		"and is remembered, so it only shows the first time"
+	)
 	_marker()
 	_one_prompt()
 	var t := 0.0
@@ -170,7 +197,14 @@ func _course() -> void:
 			key_loud += int(not tu.prompt_quiet())
 		if tu.card_up():
 			# (a Boki that falls says so at once, as an URGENT line: the one kind a banner lets through)
-			toast_in_card += m.hud.msgs.texts().filter(func(t: String) -> bool: return not " is down  ·" in t).size()
+			toast_in_card += (
+				m
+				. hud
+				. msgs
+				. texts()
+				. filter(func(t: String) -> bool: return not " is down  ·" in t)
+				. size()
+			)
 			bubble_in_card += m.bubbles.size()
 			prompt_in_card += int(not m.interact.is_empty() and TutorialHud.prompt_shows(m))
 			under += _under_banner()
@@ -180,7 +214,13 @@ func _course() -> void:
 			m.hud.msgs.clear()
 	ok(m.player.extracted, "the course still finishes")
 	var once := changes > 3 and chimed == changes and stray == 0
-	ok(once, "one chime per new objective, none otherwise (%d steps, %d chimes, %d stray)" % [changes, chimed, stray])
+	ok(
+		once,
+		(
+			"one chime per new objective, none otherwise (%d steps, %d chimes, %d stray)"
+			% [changes, chimed, stray]
+		)
+	)
 	var calm_db := TutorialStrip.chime_db(m)
 	m.player.hurt_at = m.time
 	var fight_db := TutorialStrip.chime_db(m)
@@ -189,12 +229,24 @@ func _course() -> void:
 	ok(toast_in_card == 0, "no toast shows while a banner is up (%d seen)" % toast_in_card)
 	ok(bubble_in_card == 0, "no Boki bubble shows while a banner is up (%d seen)" % bubble_in_card)
 	var frames := "(%d frames over %d steps)" % [words_seen, last + 1]
-	ok(words_seen > 0 and words_seen <= last + 1, "the step's plain words come to the lane once a step " + frames)
-	ok(prompt_in_card == 0, "no world prompt shows while a banner is up (%d frames)" % prompt_in_card)
+	ok(
+		words_seen > 0 and words_seen <= last + 1,
+		"the step's plain words come to the lane once a step " + frames
+	)
+	ok(
+		prompt_in_card == 0,
+		"no world prompt shows while a banner is up (%d frames)" % prompt_in_card
+	)
 	var waited := "(%d asked, %d shown)" % [asked, shown_after]
-	ok(asked > 0 and shown_after > 0, "a toast fired during a banner waits and shows after it " + waited)
+	ok(
+		asked > 0 and shown_after > 0,
+		"a toast fired during a banner waits and shows after it " + waited
+	)
 	var held := "(%d of %d frames drawn)" % [key_loud, key_label]
-	ok(key_label > 0 and key_loud == 0, "an interact step's card is the one prompt: the world label waits " + held)
+	ok(
+		key_label > 0 and key_loud == 0,
+		"an interact step's card is the one prompt: the world label waits " + held
+	)
 	ok(under == 0, "the hunter and the Boki are never under the banner (%d frames)" % under)
 	ok(worst < 45.0, "no step took more than 45s of plain play (%.0fs)" % worst)
 	var wide := []
@@ -226,15 +278,24 @@ func _one_prompt() -> void:
 	m.hud.toast("one prompt", Color.WHITE)
 	m.interact = {"kind": "chest", "label": "Press F to open"}
 	var n := _prompts()
-	ok(tu.card_up() and n == 1, "a fresh banner, a toast and a world prompt: one prompt shows (%d)" % n)
+	ok(
+		tu.card_up() and n == 1,
+		"a fresh banner, a toast and a world prompt: one prompt shows (%d)" % n
+	)
 	lane.push("Your Boki is down", Color.WHITE, MsgLane.URGENT)
 	m.interact = {"kind": "revive", "label": "Hold F to revive"}
 	n = _prompts()
-	ok(n == 3 and lane.waiting() == 1, "a fight's urgent line and revive prompt still show (%d)" % n)
+	ok(
+		n == 3 and lane.waiting() == 1,
+		"a fight's urgent line and revive prompt still show (%d)" % n
+	)
 	m.interact = {}
 	tu.card_t = Tutorial.CARD_T
 	m.step(Match.DT)
-	ok(lane.texts().has("one prompt"), "when the banner settles the toast shows (%s)" % str(lane.texts()))
+	ok(
+		lane.texts().has("one prompt"),
+		"when the banner settles the toast shows (%s)" % str(lane.texts())
+	)
 	lane.clear()
 
 
@@ -253,15 +314,24 @@ func _marker() -> void:
 	fwd = Vector3(fwd.x, 0.0, fwd.z).normalized()
 	var me := m.player.pos
 	var near := MarkerDir.off_dir(cam, sz, me + fwd * 1.0, me)
-	ok(near == Vector2.ZERO, "a target at the hunter's feet shows its pin, not an arrow (%s)" % str(near))
+	ok(
+		near == Vector2.ZERO,
+		"a target at the hunter's feet shows its pin, not an arrow (%s)" % str(near)
+	)
 	var aim := sz * Vector2(0.5, 0.3)  # where the pin should land: in the play box, above the hunter
 	var o := cam.project_ray_origin(aim)
 	var ray := cam.project_ray_normal(aim)
 	var pin := o + ray * ((me.y + MarkerDir.PIN_UP - o.y) / ray.y)
 	var ahead := MarkerDir.off_dir(cam, sz, pin - Vector3(0, MarkerDir.PIN_UP, 0), me)
-	ok(ahead == Vector2.ZERO, "a target ahead whose pin is in the play box shows its pin (%s)" % str(ahead))
+	ok(
+		ahead == Vector2.ZERO,
+		"a target ahead whose pin is in the play box shows its pin (%s)" % str(ahead)
+	)
 	var back := MarkerDir.off_dir(cam, sz, me - fwd * 4.0, me)
-	ok(back != Vector2.ZERO and back.y > 0.0, "one behind the hunter gets an arrow pointing down (%s)" % str(back))
+	ok(
+		back != Vector2.ZERO and back.y > 0.0,
+		"one behind the hunter gets an arrow pointing down (%s)" % str(back)
+	)
 
 
 ## Frames where the hunter or the Boki sit under the banner (at the screen sizes it is built for).
@@ -315,10 +385,17 @@ func _reach() -> void:
 	ok(worst <= jump_apex * 0.6, msg % [worst, jump_apex, worst_at])
 	var cr := tu.stop("crouch")
 	var kick_ok := cr.y > jump_apex and cr.y <= jump_apex + WallMoves.HOP_CLIMB_CAP
-	ok(kick_ok, "the lookout top is %.2fm up: over a jump (%.2fm), within a wall kick climb" % [cr.y, jump_apex])
+	ok(
+		kick_ok,
+		(
+			"the lookout top is %.2fm up: over a jump (%.2fm), within a wall kick climb"
+			% [cr.y, jump_apex]
+		)
+	)
 	var rim := _lookout_rim(cr)
 	var msg2 := "the lookout's whole rim is sheer, so a jump alone never mantles it (%d rim tiles, %d open)"
 	ok(rim[0] > 0 and rim[1] == 0, msg2 % rim)
+
 
 ## [rim tiles, rim tiles that are not sheer]: the tiles at the lookout's height with a drop of over a metre beside them.
 func _lookout_rim(top: Vector3) -> Array:
@@ -353,7 +430,9 @@ func _dive_hint() -> void:
 	Save.d["first_guide"] = int(FirstMatchGuide.rules()["matches"])  # past the first matches: dive line only
 	var dm := Match.new()
 	main.add_child(dm)
-	dm.start({"teams": 2, "squad": 1, "tier": 0, "length": 1000.0, "seed": 4242, "demo_kin": "cindle"})
+	dm.start(
+		{"teams": 2, "squad": 1, "tier": 0, "length": 1000.0, "seed": 4242, "demo_kin": "cindle"}
+	)
 	dm.set_process(false)
 	var g := dm.guide
 	var p: Hunter = dm.player
@@ -370,7 +449,10 @@ func _dive_hint() -> void:
 	ok(wide <= strip.size.x - strip.size.y, "the dive line fits the one-line strip at %d px" % px)
 	p.glide_dive.on = true
 	g.tick(0.1)
-	ok(g.line == "" and FirstMatchGuide.dive_taught(), "the dive stops the line and counts as learnt")
+	ok(
+		g.line == "" and FirstMatchGuide.dive_taught(),
+		"the dive stops the line and counts as learnt"
+	)
 	p.glide_dive.on = false
 	g.shown.clear()
 	_glide_secs(g, p, 5.0)
@@ -380,7 +462,10 @@ func _dive_hint() -> void:
 	var g2 := FirstMatchGuide.for_match(dm, {})
 	g2.shown.clear()
 	_glide_secs(g2, p, 2.0)
-	ok(g2.id == "dive" and FirstMatchGuide.dive_taught(), "the line itself counts as shown for the save")
+	ok(
+		g2.id == "dive" and FirstMatchGuide.dive_taught(),
+		"the line itself counts as shown for the save"
+	)
 	g2.tick(20.0)
 	g2.shown.clear()
 	_glide_secs(g2, p, 5.0)
@@ -408,7 +493,10 @@ func _hint_lines() -> void:
 		lines[pair[0]] = String(pair[1])
 	for k in keyed:
 		for act: String in keyed[k]:
-			ok(String(lines[k]).contains(Settings.key_cap(act)), "hint '%s' shows the live %s key" % [k, act])
+			ok(
+				String(lines[k]).contains(Settings.key_cap(act)),
+				"hint '%s' shows the live %s key" % [k, act]
+			)
 	var down := String(lines["down"])
 	ok(not down.contains("trusting") and down.contains("wisp"), "the down hint speaks of the wisp")
 
@@ -457,7 +545,10 @@ func _cc_tips() -> void:
 			p.root_t = 0.0
 			p.set_meta("gnd_until", 0.0)
 	for cc: String in tips:
-		ok(not String(tips[cc]).contains("%") and String(tips[cc]).length() < 70, "the %s card is one short line" % cc)
+		ok(
+			not String(tips[cc]).contains("%") and String(tips[cc]).length() < 70,
+			"the %s card is one short line" % cc
+		)
 
 
 # ------------------------------------------------------------------ 9. the closing zone's two lines
@@ -465,7 +556,9 @@ func _cc_tips() -> void:
 func _zone_match() -> Match:
 	var zm := Match.new()
 	main.add_child(zm)
-	zm.start({"teams": 2, "squad": 1, "tier": 0, "length": 1000.0, "seed": 4242, "demo_kin": "cindle"})
+	zm.start(
+		{"teams": 2, "squad": 1, "tier": 0, "length": 1000.0, "seed": 4242, "demo_kin": "cindle"}
+	)
 	zm.set_process(false)
 	for h in zm.hunters:
 		if h != zm.player:
@@ -501,7 +594,10 @@ func _zone_lines() -> void:
 	ok(z.told == 1, "the zone's first warning has come (close 1)")
 	var line := g.line.to_lower()
 	var points := line.contains("blue ring") and line.contains("minimap")
-	ok(g.id == "zone" and points, "first warning: the line points to the safe ring on the minimap (%s)" % g.line)
+	ok(
+		g.id == "zone" and points,
+		"first warning: the line points to the safe ring on the minimap (%s)" % g.line
+	)
 	ok(line.contains("lose health over time"), "and says outside costs health over time")
 	ok(bool(Save.d["tutorial"].get("guide_zone", false)), "the profile remembers it was told")
 	var zone_secs := 14.0
@@ -521,7 +617,10 @@ func _zone_lines() -> void:
 	_zone_tick(zm, 2.0)
 	ok(z.outside(p.pos) and g.id == "wall", wall_msg % g.line)
 	var wall := g.line.to_lower()
-	ok(wall.contains("losing health") and wall.contains("blue ring"), "it says you are losing health and where to run")
+	ok(
+		wall.contains("losing health") and wall.contains("blue ring"),
+		"it says you are losing health and where to run"
+	)
 	ok(bool(Save.d["tutorial"].get("guide_wall", false)), "the profile remembers the wall line too")
 	p.pos = Vector3(z.cur_c.x, p.pos.y, z.cur_c.y)
 	_zone_tick(zm, 1.0)
@@ -539,7 +638,9 @@ func _zone_lines() -> void:
 	var quiet := not zn.guide.shown.has("zone") and zn.guide.line == ""
 	ok(zn.zone.told == 1 and quiet, "next match: the first warning gets no zone line")
 	zn.time = zn.zone.t0[1] + 1.0
-	zn.player.pos = Vector3(zn.zone.cur_c.x + zn.zone.cur_r + 40.0, zn.player.pos.y, zn.zone.cur_c.y)
+	zn.player.pos = Vector3(
+		zn.zone.cur_c.x + zn.zone.cur_r + 40.0, zn.player.pos.y, zn.zone.cur_c.y
+	)
 	_zone_tick(zn, 3.0)
 	ok(zn.guide.line == "", "next match: outside the wall gets no wall line")
 	zn.queue_free()
@@ -555,9 +656,24 @@ func _zone_widths(zm: Match) -> void:
 					continue
 				var px := int(strip.size.y * 0.5)
 				var w := strip.size.x - strip.size.y
-				while px > 12 and zm.hud.big.get_string_size(String(row[1]), HORIZONTAL_ALIGNMENT_LEFT, -1, px).x > w:
+				while (
+					px > 12
+					and (
+						(
+							zm
+							. hud
+							. big
+							. get_string_size(String(row[1]), HORIZONTAL_ALIGNMENT_LEFT, -1, px)
+							. x
+						)
+						> w
+					)
+				):
 					px -= 1
-				ok(px >= 12, "%dx%d: the %s line fits the strip on one line (%d px)" % [sz.x, sz.y, lid, px])
+				ok(
+					px >= 12,
+					"%dx%d: the %s line fits the strip on one line (%d px)" % [sz.x, sz.y, lid, px]
+				)
 
 
 # ------------------------------------------------------------------ 9. the pointer follows the HUD's slot
@@ -565,7 +681,16 @@ func _zone_widths(zm: Match) -> void:
 func _pointers() -> void:
 	var pm := Match.new()
 	main.add_child(pm)
-	pm.start({"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "demo_kin": "cindle"})
+	pm.start(
+		{
+			"tutorial": true,
+			"teams": 1,
+			"squad": 1,
+			"tier": 0,
+			"length": 1500.0,
+			"demo_kin": "cindle"
+		}
+	)
 	pm.set_process(false)
 	var seen := {}
 	for i in Tutorial.steps().size():
@@ -662,9 +787,15 @@ func _framing(arch: String) -> void:
 		if sid in Tutorial.WALK_LEAD:
 			ok(row[3], "%s %s: the place you walk to is on screen when you get there" % [arch, sid])
 		else:
-			ok(share >= ON_SHARE, "%s %s: its thing is on screen %.0f%% of the step" % [arch, sid, share * 100.0])
+			ok(
+				share >= ON_SHARE,
+				"%s %s: its thing is on screen %.0f%% of the step" % [arch, sid, share * 100.0]
+			)
 		if not px.is_empty():
-			ok(float(px[int(px.size() / 2.0)]) >= MIN_PX, "%s %s: drawn %s px tall" % [arch, sid, tall])
+			ok(
+				float(px[int(px.size() / 2.0)]) >= MIN_PX,
+				"%s %s: drawn %s px tall" % [arch, sid, tall]
+			)
 	ok(fm.player.extracted, arch + ": the framing run finishes the course")
 	fm.queue_free()
 
@@ -707,7 +838,12 @@ func _tall_px(cam: Camera3D, node: Node3D) -> float:
 	if node is Label3D:
 		var lab := node as Label3D
 		var half := cam.global_transform.basis.y * lab.font_size * lab.pixel_size * 0.5
-		return absf(_to_view(cam, lab.global_position + half).y - _to_view(cam, lab.global_position - half).y)
+		return absf(
+			(
+				_to_view(cam, lab.global_position + half).y
+				- _to_view(cam, lab.global_position - half).y
+			)
+		)
 	var box := _box(node)
 	var lo := INF
 	var hi := -INF
@@ -723,5 +859,7 @@ func _box(node: Node3D) -> AABB:
 	var box := AABB(node.global_position, Vector3.ZERO)
 	for vi in node.find_children("*", "VisualInstance3D", true, false):
 		if (vi as VisualInstance3D).is_visible_in_tree():
-			box = box.merge((vi as VisualInstance3D).global_transform * (vi as VisualInstance3D).get_aabb())
+			box = box.merge(
+				(vi as VisualInstance3D).global_transform * (vi as VisualInstance3D).get_aabb()
+			)
 	return box

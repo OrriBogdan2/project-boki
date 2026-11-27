@@ -72,7 +72,13 @@ static func puff(m: Match, col: Color, at: Vector3, wall: bool) -> void:
 static func shot_landed(m: Match, s: Dictionary, at: Vector3, e: Ent, why: String) -> void:
 	var x: Dictionary = s["x"]
 	var by = s["by"]
-	if x.has("src") or x.has("boom") or x.has("lob") or x.get("mob", false) or x.get("melee", false):
+	if (
+		x.has("src")
+		or x.has("boom")
+		or x.has("lob")
+		or x.get("mob", false)
+		or x.get("melee", false)
+	):
 		return
 	if not is_instance_valid(by) or not by is Hunter or why in ["expire", "caught"]:
 		return
@@ -94,5 +100,10 @@ static func shot_landed(m: Match, s: Dictionary, at: Vector3, e: Ent, why: Strin
 			_landed.clear()
 		_landed[key] = true
 	var v: Vector2 = s["vel"]
-	HeroVfx.of(m).play(by as Hunter, LANDED_MOVE, at, v.normalized() if v.length() > 0.01 else Vector2.RIGHT,
-			{surface: true, "mine": by == m.player})
+	HeroVfx.of(m).play(
+		by as Hunter,
+		LANDED_MOVE,
+		at,
+		v.normalized() if v.length() > 0.01 else Vector2.RIGHT,
+		{surface: true, "mine": by == m.player}
+	)

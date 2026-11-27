@@ -1,7 +1,8 @@
 """Builds a rigged Boki: shapes to mesh, paint, face, rig, clips, .glb and .blend. docs/art/kin/RIGGED_BOKI.md.
 
-  blender -b --factory-startup --python tools/boki/build_boki.py -- [--preview=<prefix>] [--no-export]
+blender -b --factory-startup --python tools/boki/build_boki.py -- [--preview=<prefix>] [--no-export]
 """
+
 import math
 import os
 import sys
@@ -25,51 +26,51 @@ import boki_rig
 REPO = os.path.dirname(os.path.dirname(HERE))
 SPECIES = "cindle"
 # id -> (shapes module, paint module, skeleton and clips module)
-SPECS = {"cindle": ("vespyx", "vespyx_paint", "vespyx_anim"), "puddlet": ("prismander", "prismander", "prismander_anim"),
-         "burrlet": ("mycroll", "mycroll", "mycroll_anim"),
-         "glintmole": ("glintmole", "glintmole", "glintmole_anim"),
-         "rimeshrew": ("rimeshrew", "rimeshrew", "rimeshrew_anim"),
-         "zephyrak": ("zephyrak", "zephyrak", "zephyrak_anim"),
-         "pebbit": ("gravadillo", "gravadillo", "gravadillo_anim"),
-         "cairnback": ("cairnback", "cairnback", "cairnback_anim"),
-         "wisplet": ("lunowl", "lunowl", "lunowl_anim"),
-         "gloamshell": ("gloamshell", "gloamshell", "gloamshell_anim"),
-         "selenfin": ("selenfin", "selenfin", "selenfin_anim"),
-         "zapple": ("echolop", "echolop", "echolop_anim"),
-         "hivara": ("hivara", "hivara", "hivara_anim"),
-         "glomwort": ("glomwort", "glomwort", "glomwort_anim"),
-         "gibbelle": ("glomwort", "glomwort", "glomwort_anim"),     # a scan (boki_scan) on the simplest rig there is
-         "goliathite": ("glomwort", "glomwort", "goliathite_anim"),   # scans too: every lobe on root, the body rides it
-         "gibbelle": ("glomwort", "glomwort", "gibbelle_anim"),     # a scan (boki_scan) on the simplest rig there is
-         "goliathite": ("glomwort", "glomwort", "glomwort_anim"),   # scans too: every lobe on root, the body rides it
-         "hoarheron": ("glomwort", "glomwort", "glomwort_anim"),
-         "floenatee": ("glomwort", "glomwort", "floenatee_anim"),
-         **{i: ("glomwort",) * 2 + ("glomwort_anim",)
-           for i in boki_scan.AUTO if boki_scan.AUTO[i] is boki_scan.BORROWED},
-         "heatherhorn": ("glomwort", "glomwort", "heatherhorn_anim"),
-         "kilnbadger": ("glomwort", "glomwort", "kilnbadger_anim"),
-         "limpetor": ("glomwort", "glomwort", "limpetor_anim"),     # their own clips over the borrowed rig
-         "moonloris": ("glomwort", "glomwort", "moonloris_anim"),
-         "opalisk": ("glomwort", "glomwort", "opalisk_anim"),        # its own clips over the borrowed rig
-         "orchisloth": ("glomwort", "glomwort", "orchisloth_anim"),
-         **{i: ("glomwort", "glomwort", i + "_anim") for i in ("squalltross", "threadwyrm", "tuatrune", "velvorm")},
-         "nacrolin": ("glomwort", "glomwort", "nacrolin_anim"),         # its own clips over the borrowed rig
-         "nimbostrich": ("glomwort", "glomwort", "nimbostrich_anim"),
-         "glaciyak": ("glomwort", "glomwort", "glaciyak_anim"),      # its own clips over the borrowed rig
-         "scaldamus": ("glomwort", "glomwort", "scaldamus_anim"),    # its own clips over the borrowed rig
-         "sentrikat": ("glomwort", "glomwort", "sentrikat_anim"),
-         "kestrike": ("kestrike", "kestrike", "kestrike_anim"),
-         "kindlewren": ("kindlewren", "kindlewren", "kindlewren_anim"),
-         "lodestick": ("lodestick", "lodestick", "lodestick_anim"),
-         "marchleaf": ("marchleaf", "marchleaf", "marchleaf_anim"),
-         "mossgrade": ("mossgrade", "mossgrade", "mossgrade_anim"),
-         "nettlynx": ("nettlynx", "nettlynx", "nettlynx_anim"),
-         "thrumbird": ("thrumbird", "thrumbird", "thrumbird_anim"),
-         "caecilith": ("zippelith", "zippelith", "zippelith_anim")}
+SPECS = {
+    "cindle": ("vespyx", "vespyx_paint", "vespyx_anim"),
+    "puddlet": ("prismander", "prismander", "prismander_anim"),
+    "burrlet": ("mycroll", "mycroll", "mycroll_anim"),
+    "glintmole": ("glintmole", "glintmole", "glintmole_anim"),
+    "rimeshrew": ("rimeshrew", "rimeshrew", "rimeshrew_anim"),
+    "zephyrak": ("zephyrak", "zephyrak", "zephyrak_anim"),
+    "pebbit": ("gravadillo", "gravadillo", "gravadillo_anim"),
+    "cairnback": ("cairnback", "cairnback", "cairnback_anim"),
+    "wisplet": ("lunowl", "lunowl", "lunowl_anim"),
+    "gloamshell": ("gloamshell", "gloamshell", "gloamshell_anim"),
+    "selenfin": ("selenfin", "selenfin", "selenfin_anim"),
+    "zapple": ("echolop", "echolop", "echolop_anim"),
+    "hivara": ("hivara", "hivara", "hivara_anim"),
+    "glomwort": ("glomwort", "glomwort", "glomwort_anim"),
+    "goliathite": ("glomwort", "glomwort", "goliathite_anim"),  # scans too: every lobe on root, the body rides it
+    "gibbelle": ("glomwort", "glomwort", "gibbelle_anim"),  # a scan (boki_scan) on the simplest rig there is
+    "hoarheron": ("glomwort", "glomwort", "glomwort_anim"),
+    "floenatee": ("glomwort", "glomwort", "floenatee_anim"),
+    **{i: ("glomwort",) * 2 + ("glomwort_anim",) for i in boki_scan.AUTO if boki_scan.AUTO[i] is boki_scan.BORROWED},
+    "heatherhorn": ("glomwort", "glomwort", "heatherhorn_anim"),
+    "kilnbadger": ("glomwort", "glomwort", "kilnbadger_anim"),
+    "limpetor": ("glomwort", "glomwort", "limpetor_anim"),  # their own clips over the borrowed rig
+    "moonloris": ("glomwort", "glomwort", "moonloris_anim"),
+    "opalisk": ("glomwort", "glomwort", "opalisk_anim"),  # its own clips over the borrowed rig
+    "orchisloth": ("glomwort", "glomwort", "orchisloth_anim"),
+    **{i: ("glomwort", "glomwort", i + "_anim") for i in ("squalltross", "threadwyrm", "tuatrune", "velvorm")},
+    "nacrolin": ("glomwort", "glomwort", "nacrolin_anim"),  # its own clips over the borrowed rig
+    "nimbostrich": ("glomwort", "glomwort", "nimbostrich_anim"),
+    "glaciyak": ("glomwort", "glomwort", "glaciyak_anim"),  # its own clips over the borrowed rig
+    "scaldamus": ("glomwort", "glomwort", "scaldamus_anim"),  # its own clips over the borrowed rig
+    "sentrikat": ("glomwort", "glomwort", "sentrikat_anim"),
+    "kestrike": ("kestrike", "kestrike", "kestrike_anim"),
+    "kindlewren": ("kindlewren", "kindlewren", "kindlewren_anim"),
+    "lodestick": ("lodestick", "lodestick", "lodestick_anim"),
+    "marchleaf": ("marchleaf", "marchleaf", "marchleaf_anim"),
+    "mossgrade": ("mossgrade", "mossgrade", "mossgrade_anim"),
+    "nettlynx": ("nettlynx", "nettlynx", "nettlynx_anim"),
+    "thrumbird": ("thrumbird", "thrumbird", "thrumbird_anim"),
+    "caecilith": ("zippelith", "zippelith", "zippelith_anim"),
+}
 creature = paint = anim = None
 ATLAS_PX = 2048
-GROWN_K = 0.22         # most Boki show one or two grown parts; all of them hide in every tri count
-SCALE = 0.95             # the whole Boki, so its body sits near the other species' 0.8 m frame
+GROWN_K = 0.22  # most Boki show one or two grown parts; all of them hide in every tri count
+SCALE = 0.95  # the whole Boki, so its body sits near the other species' 0.8 m frame
 
 
 def use_species(species, scan=False):
@@ -129,7 +130,7 @@ class Piece:
 def mesh_pieces():
     out = []
     for name, (shape, h, tris) in creature.parts().items():
-        if hasattr(shape, "mesh"):       # a body from a scanned model, already on its surface
+        if hasattr(shape, "mesh"):  # a body from a scanned model, already on its surface
             v, t = shape.mesh(tris)
         else:
             v, q = boki_sdf.mesh_shape(shape, h)
@@ -212,12 +213,13 @@ def dilate(img, mask, rounds=28):
         fill = (~mask) & (cnt > 0)
         img[fill] = got[fill] / cnt[fill][..., None]
         mask = mask | fill
-    img[~mask] = img[mask].mean(0)     # the deep mips of the far camera average into these gaps
+    img[~mask] = img[mask].mean(0)  # the deep mips of the far camera average into these gaps
     return img
 
 
 def occlusion(pieces, p, n):
     """A soft crevice term from all the shapes: how far the surface can see along its normal."""
+
     def scene(q):
         d = None
         for pc in pieces:
@@ -434,13 +436,13 @@ def preview(prefix):
 
 
 def main():
-    argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
+    argv = sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else []
     bpy.ops.wm.read_factory_settings(use_empty=True)
     t0 = time.time()
     species = next((a[10:] for a in argv if a.startswith("--species=")), "cindle")
     use_species(species, scan=True)
     for a in argv:
-        if a.startswith("--fit-sheet="):     # a scanned species' landmarks (boki_scan.fit_sheet), and nothing else
+        if a.startswith("--fit-sheet="):  # a scanned species' landmarks (boki_scan.fit_sheet), and nothing else
             image_from("fit", boki_scan.fit_sheet(creature.model, creature.BONES, creature.EYE_C), a[12:])
             print("FRAME row through the fit:\n" + boki_scan.frame_row(species, creature.fit, SCALE))
             return
