@@ -141,3 +141,9 @@ LMB, RMB, E + recast, X + leap, hit, death).
 - Fix: hips grip bone y 0.221 -> 0.021 (the fan sits ~22 cm lower on Spine02, at shoulder-blade height like the turnaround). Same size, scale and tilt. No glb changed.
 - Tried: dy -0.08/-0.12/-0.15, with tilts -0.25/+0.2 rad. Only -0.20 cleared the brim in back-view eye renders of every clip (5 yaws x 8 clips x 3 frames).
 - art-gate (3-row match sheets, r20 | r19 | live, all re-rendered with the same moving-crouch audit): GAME 7.2, r19 6.5, live 5.0, PASS. Fin 6.0 -> 6.5, fin_head 6.5 -> 7.0 in the paired runs. An earlier run with stale r19/live rows gave 7.0 / 6.5 / 5.0.
+
+## Crouch carry r21 (gil_meshy.glb anim + warden_native.json), 2026-11-27
+- Why: the Fable review of r20 found the swordfish hanging bill-down in the crouch walk. A live probe gave the crouch bill 17-35 deg below level, tip at shin height. Every other clip is level (y -0.05..+0.3). Cause: `crouch_arms_from: walk` lays walk's arm keys over the crouch's forward-bent spine.
+- Fix (rig only, no mesh/UV/texture change): Crouch_Walk_with_Torch now carries walk's 24 arm tracks, baked as WardenNative._arms_swapped does (times x 1.031). RightForeArm is re-pitched per key so the bill sits 6 deg above level, heading kept (tool: gens/hunter-round-1124/gil/r21/tools/crouchfix.py). `crouch_arms_from` dropped for gil only.
+- Probe after: crouch bill y +0.10 at every sample, tip above the hips. geo_check: worst 12.0 cm, held worst 5.6, hands ok (same as r20). Crouch hand_L>thigh_L 5.4 cm is walk's left arm on the crouch, as the runtime mix already played.
+- art-gate (3-row match sheets, r21 | r20 | live): GAME 7.3, r20 7.0, live 5.0, PASS.

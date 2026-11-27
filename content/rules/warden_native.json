@@ -89,7 +89,7 @@
 		"anchors": {"anchor_head_top": "head_end", "anchor_chest": "Spine02", "anchor_gun_R": "RightHand"},
 		"plants": {"walk": {"L": [0.3], "R": [0.683]}, "run": {"L": [0.083], "R": [0.417]}, "crouch": {"L": [0.133], "R": [0.717]}},
 		"clips": {"idle": "Idle", "walk": "walk", "run": "run", "jump": "Jump_Run", "attack": "Attack", "crouch": "Crouch_Walk_with_Torch"},
-		"walk_mps": 1.0, "run_mps": 3.54, "crouch_mps": 0.91, "run_from": 1.96, "attack_rate": 2.0, "jump_rate": 1.3, "crouch_arms_from": "walk"},
+		"walk_mps": 1.0, "run_mps": 3.54, "crouch_mps": 0.91, "run_from": 1.96, "attack_rate": 2.0, "jump_rate": 1.3},
 	"ostra": {"meshy_native": true, "hand": "RightHand",
 		"anchors": {"anchor_head_top": "head_end", "anchor_chest": "Spine02", "anchor_gun_R": "RightHand"},
 		"clips": {"idle": "Idle", "walk": "walk", "run": "run", "jump": "Jump_Run", "attack": "Attack", "crouch": "Crouch_Walk_with_Torch"},
