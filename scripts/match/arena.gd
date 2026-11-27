@@ -15,7 +15,8 @@ extends RefCounted
 ##   Boki, glove, toggles), K the kit card
 ## Nobody dies for good here: a downed player or bot is back up after a beat, a downed dummy after respawn_s.
 
-const KEYS_HINT := "K kit card   ·   L loadout   ·   2-9 first eight Hunters (L: all)   ·   Backspace reset   ·   N bot   ·   O cooldowns   ·   U ultimate"
+const KEYS_HINT := "K kit card   ·   L loadout   ·   2-9 first eight Hunters (L: all)\nBackspace reset   ·   N bot   ·   O cooldowns   ·   U ultimate"
+const HINT_Y := {"arena": 10.0, "practice": 70.0}  # px from the top: the key line, by layout
 const BOT_MODES := ["off", "idle", "moving", "fighting"]
 const BOT_NAMES := {"off": "Off", "idle": "Idle", "moving": "Moving", "fighting": "Fights back"}
 const DUMMY_HP := 3000.0
@@ -196,6 +197,10 @@ func tick(dt: float) -> void:
 	var p_v: Hunter = m.player
 	if p_v == null:
 		return
+	if hint.visible:
+		var sz: Vector2 = m.hud.c.size
+		var x: float = (sz.x - hint.get_combined_minimum_size().x) * 0.5
+		SafeArea.place(hint, Vector2(x, float(HINT_Y[layout])), sz)
 	for dm in dummies:
 		var d_v: Hunter = dm["h"]
 		if not is_instance_valid(d_v):
@@ -425,14 +430,9 @@ func _build_ui() -> void:
 	hint.autowrap_mode = TextServer.AUTOWRAP_OFF
 	hint.add_theme_constant_override("outline_size", 6)
 	hint.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
-	hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hint.position.y = 10 if layout == "arena" else 70     # (the Training Grounds's banner sits at the top)
-	hint.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	if layout != "arena":      # the practice layout's minimap fills the top left: start right of it
-		hint.offset_left += MINIMAP_CLEAR
-		hint.offset_right += MINIMAP_CLEAR
 	root.add_child(hint)
+	SafeArea.hold("key_line", hint)  # later popups and toasts keep clear of it
 	meter = UI.label("", 15, UI.INK, UI.big)
 	meter.autowrap_mode = TextServer.AUTOWRAP_OFF
 	meter.add_theme_constant_override("outline_size", 6)
@@ -447,6 +447,7 @@ func _build_ui() -> void:
 		meter.position = Vector2(24, 244)
 	meter.custom_minimum_size = Vector2(310, 0)
 	root.add_child(meter)
+	SafeArea.hold("dps_meter", meter)
 	hint.visible = tools
 	meter.visible = tools
 

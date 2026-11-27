@@ -118,8 +118,16 @@ func _zone() -> void:
 	m.arena.reset()
 	ok(dm.hp == Arena.DUMMY_HP, "reset heals the dummies")
 	Overlay.close()
-	main.set("current", was)
+	await _reserved(m, true)  # (last: the Drills run moves you)
 	m.queue_free()
+	await tree.process_frame
+	var grounds := Match.new()
+	main.add_child(grounds)
+	grounds.start(Match.arena_opts())
+	main.set("current", grounds)
+	await _reserved(grounds, false)
+	grounds.queue_free()
+	main.set("current", was)
 	await tree.process_frame
 
 
@@ -141,6 +149,34 @@ func _clean_hud(m: Match) -> void:
 			var label := "the tools are %s at %dx%d" % ["shown" if on else "hidden", size.x, size.y]
 			ok(pr.bar.visible == on and m.arena.hint.visible == on, label)
 	m.arena.set_tools(false)
+
+
+## The owner's 11-26 reports: with the frame-rate readout on, no popup, panel or toast of the practice stations covers
+## it or the minimap (and the pairs were really scanned: both rects and the popup were on screen).
+func _reserved(m: Match, test_zone: bool) -> void:
+	Settings.set_v("show_fps", Shots.FPS_MODE, false)
+	var where := "Test Zone" if test_zone else "Training Grounds"
+	for size: Vector2i in Shots.SIZES:
+		main.get_window().size = size
+		m.arena.set_tools(true)
+		for id: String in Shots.STATIONS:
+			if id == "drills" and Practice.of(m).drills == null:
+				continue
+			Shots.station(m, id, true)
+			var found: Array = (await Shots.judge(tree, m)).filter(func(f: String): return " overlaps " in f)
+			var gs := Shots.groups(m)
+			var what := "%s, %s popup, %dx%d" % [where, id, size.x, size.y]
+			for f in found:
+				print("TESTZONE   overlap %s: %s" % [what, f])
+			ok(found.is_empty(), "no HUD overlap (key line, kit drill, DPS meter, toasts, station popups) (%s)" % what)
+			var scanned: bool = gs.has(Shots.FPS) and gs.has("drawn minimap")
+			var popup: Array = Shots.popups(gs).filter(func(g: String): return g.begins_with(Shots.STATION_GROUP[id]))
+			ok(scanned and not popup.is_empty(), "scanned: fps counter, minimap and the popup (%s)" % what)
+			for pr: Array in Shots.pairs(gs):
+				if pr[2]:
+					print("TESTZONE   overlap %s vs %s" % [pr[0], pr[1]])
+				ok(not pr[2], "%s keeps clear of %s (%s)" % [pr[1], pr[0], what])
+			Shots.station(m, id, false)
 
 
 func _buttons() -> Array:
