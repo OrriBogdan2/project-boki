@@ -7,7 +7,8 @@ extends RefCounted
 ##   4. seven at once: six icons and "+1"
 ##   5. hover card: the hovered icon (only it) gets a card with its name, source and seconds left; holding
 ##      the scores key (Tab) shows every icon's card
-## Runs the --hudref-demo=plates scene (real frames, the real HUD) and reads BuffStack.shown.
+## Runs the --hudref-demo=plates scene (real frames, the real HUD) and reads BuffStack.shown once the panel canvas
+## it draws on (HudPanels, 20 Hz) has drawn again.
 ## --buff-stack-shots --shots-dir=<dir> (GPU): the stack mid-fight with three icons (three.png), with
 ## seven (seven.png) and Tab held (tab.png: every icon's card; a real window keeps its own cursor, so
 ## the one-icon hover card is only asserted by the check).
@@ -28,6 +29,15 @@ func ok(cond: bool, what: String) -> void:
 func frames_until(t: float) -> void:
 	var guard := 0
 	while m.time < t and guard < 20000:
+		await main.get_tree().process_frame
+		guard += 1
+
+
+## Until the panel canvas (HudPanels, where the stack draws at 20 Hz) has drawn again after this call.
+func redrawn() -> void:
+	var at := HudPanels.draws
+	var guard := 0
+	while HudPanels.draws < at + 1 and guard < 60:
 		await main.get_tree().process_frame
 		guard += 1
 
@@ -137,15 +147,13 @@ func run(main_node: Node, mode := "check") -> void:
 	ok(hud != null and ids().is_empty() and hud.buffs.more == 0, "nothing on you: no icons")
 	var t0 := m.time
 	three(p, 3.0)
-	await main.get_tree().process_frame
-	await main.get_tree().process_frame
+	await redrawn()
 	ok(ids() == ["swift", "fever", "kin_damage"], "three statuses, three icons in file order (%s)" % str(ids()))
 	ok(stacks("fever") == 2 and stacks("swift") == 1, "the stacking one carries its count (fever x2), the others none")
 	var fresh := frac("swift", 0.0)
 	ok(fresh > 0.9, "a fresh timer's ring is nearly full (%.2f)" % fresh)
 	hover("kin_damage")
-	await main.get_tree().process_frame
-	await main.get_tree().process_frame
+	await redrawn()
 	ok(hud.buffs.carded == ["kin_damage"], "the mouse on one icon: only its card (%s)" % str(hud.buffs.carded))
 	var lines := BuffStack.card_lines(row("kin_damage"))
 	ok(
@@ -154,8 +162,7 @@ func run(main_node: Node, mode := "check") -> void:
 	)
 	hover("")
 	Input.action_press("scores")
-	await main.get_tree().process_frame
-	await main.get_tree().process_frame
+	await redrawn()
 	ok(hud.buffs.carded.size() == 3, "Tab held: a card for every icon (%s)" % str(hud.buffs.carded))
 	Input.action_release("scores")
 	await frames_until(t0 + 0.6)
@@ -171,8 +178,7 @@ func run(main_node: Node, mode := "check") -> void:
 	await frames_until(t0 + 3.6)
 	ok(ids().is_empty(), "everything expired: the stack is empty again (%s)" % str(ids()))
 	seven(p)
-	await main.get_tree().process_frame
-	await main.get_tree().process_frame
+	await redrawn()
 	var n: int = hud.buffs.shown.size()
 	ok(n == BuffStack.MAX_ICONS and hud.buffs.more == 1, "seven at once: %d icons and +%d" % [n, hud.buffs.more])
 	print("BUFFSTACK CHECK DONE, failures: ", bad)
