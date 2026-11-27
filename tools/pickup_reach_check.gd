@@ -36,12 +36,24 @@ func run(main: Node) -> void:
 	_cursor_pick(flat)
 	_through_rock(flat)
 	_in_the_air(flat)
+	_within(flat)
 	var tune: Dictionary = PickupReach.rules()["tune"]
 	_tuning(flat, float(tune["radius"]) - 0.15, true)
 	_tuning(flat, float(tune["radius"]) + 0.2, false)
 	print("PICKUP REACH CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
+## The cheap test the pickup loops run first (radius and height, nothing else) agrees with the rule's edges.
+func _within(at: Vector3) -> void:
+	_reset(at)
+	var r: Dictionary = PickupReach.rules()["walk"]
+	var rad := float(r["radius"])
+	var hgt := float(r["height"])
+	var here := P.pos
+	ok(PickupReach.within(P, here + Vector3(rad - 0.05, 0, 0), r), "within: just inside the radius")
+	ok(not PickupReach.within(P, here + Vector3(0, 0, rad + 0.05), r), "within: just outside the radius")
+	ok(PickupReach.within(P, here + Vector3(0, hgt - 0.05, 0), r), "within: just inside the height")
+	ok(not PickupReach.within(P, here + Vector3(0, hgt + 0.05, 0), r), "within: just above the height")
 
 ## A tonic lies at `at`; the hunter runs along x past it `off` metres to the side.
 func _walk_past(at: Vector3, off: float, taken: bool) -> void:
