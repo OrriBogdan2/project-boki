@@ -5,6 +5,7 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	"--air-rmb-feel-check": ["res://tools/air_rmb_feel_check.gd", "air_rmb_feel_check", null],  # Kael jump -> RMB
 	# the glider opens after any attack or ability, LMB or not (input buffer, every hunter)
 	"--glide-after-attack-check": ["res://tools/glide_after_attack_check.gd", "glide_after_attack_check", null],
 	# a blast: falloff curve by distance, no damage through rock, the armour ring pitched by the shell left
