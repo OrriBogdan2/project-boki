@@ -1,0 +1,16 @@
+{
+ "doc": "Gap cells (WRONG or MISSING) of tools/anim_coverage.py; the list may only shrink.",
+ "gaps": [
+  "cinder:glide",
+  "claire:glide",
+  "dredge:glide",
+  "gil:glide",
+  "hem:glide",
+  "kael:glide",
+  "ostra:glide",
+  "pip:glide",
+  "ryzz:glide",
+  "sable:glide",
+  "tarek:glide"
+ ]
+}

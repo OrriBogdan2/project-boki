@@ -107,6 +107,7 @@ Data `clips` may add any of these keys beside idle, walk, run, jump, attack and 
 plays today's clip, so nothing changes until a Hunter's clips land (`WardenNative._one_shot` / `_held`).
 | Key | Plays | Without it |
 |---|---|---|
+| `idle_combat` | standing still for `COMBAT_HOLD` (2 s) after a swing, cast or shot; `idle` is the casual stand (Lace: bow hanging at her side) and the weapon comes up over `IDLE_FADE` | `idle` |
 | `lmb` | a melee swing or a shot | `attack` |
 | `lmb_hold` | a charged swing (state `combo` -1) | `lmb`, then `attack` |
 | `rmb`, `e`, `r` | the kit move or cast of that slot (state `cast_slot` secondary, utility, ult; a kit move starting within `SLOT_CAST` of a cast takes its slot) | `attack` |
@@ -114,8 +115,9 @@ plays today's clip, so nothing changes until a Hunter's clips land (`WardenNativ
 | `land` | one-shot on a hard landing (`WardenClips.FEEL` landing >= `LAND_MIN`) | the loop clip |
 | `dash` | while the state `rolling` (a dash or kit rush) lasts (blends in over 0.25 s) | the air or ground clip |
 | `glide` | while `gliding` (loops; opens at once, lets go over 0.2 s) | `jump` |
-| `downed` | while the knocked-down beat runs (`fall` >= 0; holds its last frame) | the loop clip |
+| `downed` | while the knocked-down beat runs (`fall` >= 0; run as far in as the beat is, not on its own clock; before the `dead` freeze) | the loop clip |
 | `stomp` | while the stomp cycle runs (`stomp` >= 0; loops) | the loop clip |
+Air: a jump from the ground plays `jump` from its take-off crouch; stepping off a ledge (rising slower than `FALL_V`) starts it at `FALL_FROM`, in the airborne stride. A Hunter that is `reviving` holds the first `REVIVE_HOLD` of the crouch (a stand-in for a kneel, no clip of its own).
 Swing, cast, `hit` and `land` are one-shots: they own the body for their length (a new one restarts a clip once 60% is
 played) and play at `attack_rate`, `hit` and `land` at 1.
 A swing or cast while he moves on the ground, or is in the air, plays on the torso and arms only (`WardenNativeUpper`: Spine02
@@ -136,7 +138,7 @@ A kit move (state `kmove`, the move's id) may have a clip of its own: `"kmoves":
 release move, which the kit starts at the frame the arrow leaves, shows its release on its first frames. `hold_from` loops
 the clip from there to its end for as long as the move lasts; the kit ends the draw move with the hold input, so the loop
 never shows without it. A move with no clip, or whose clip no file has, keeps the slot clips above. The clips come from
-`<art>_clips.glb` by name like the slots'. Lace's (`tools/meshy/lace_clips.py`, poses by limb direction on her skeleton,
+`<art>_clips.glb` by name like the slots'. Every native Hunter's `<art>_downed` (stagger, both knees, slump onto the hands), `<art>_dash` (a low lunge, held; not Vex or Lace, who have their own) and Gil's and Vex's casual `<art>_idle` (arms at the sides, weapon low; Meshy's own idle with the weapon out is their `idle_combat`) are written by `tools/meshy/native_clips.py` from each skeleton's own measures (it adds them to Lace's file through `lace_clips.write_glb` and to another tool's file, Kael's, without touching its clips). Lace's (`tools/meshy/lace_clips.py`, poses by limb direction on her skeleton,
 no retarget; the string follows the drawing hand on `StringMid`): `lace_draw`, `lace_over`, `lace_tap`, `lace_loose`,
 `lace_super`, `lace_heavy_wind`, `lace_heavy`, `lace_spirit`, `lace_ult`, `lace_ult_final`. The clips are the whole body
 (the contract's upper-body layer is not on this path): the feet of the draw and Spirit Walk clips do not follow the ground.

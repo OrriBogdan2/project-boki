@@ -47,6 +47,12 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 `--verbose-states` prints every state; `--warden-states-shots
 --shots-dir=<dir>` (GPU) renders one frame per Hunter and state for a contact sheet; add `--cc` for the stun, root and knock strips (`--true-cam` for the match camera).
 
+Player-facing matrix (`python3 tools/anim_coverage.py`, 13 Hunters x idle, idle_combat, walk, run, jump, fall, land, glide, dash,
+LMB, RMB, E, R, hit, down, revive): which clip the exported game plays, `shared` where a neighbouring state's clip plays,
+`WRONG` where a clip of another meaning plays (glide shows the run-in-air, dash the run, a knocked-down Hunter stands in idle) and
+`MISSING`. `--check` (run by `tools/health.py`) fails on a gap not listed in `tools/anim_coverage_gaps.json`; the list may only
+shrink, so a new Hunter ships with every cell filled. `--anim-state-shots` renders the states on the native rig (GPU). Since 11-27 the knocked-down beat, the dash and Gil's and Vex's casual idle are pose clips on every native Hunter (`tools/meshy/native_clips.py`): 11 gaps left, all glide (job glide-anim-1126).
+
 <!-- table:begin -->
 ### Hunters
 

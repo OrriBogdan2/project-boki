@@ -17,6 +17,8 @@ const CHECKS := {
 	"--stretch-7-check": ["res://tools/stretch_check.gd", "stretch_check", "gil"],
 	# GPU: posed hunter clip frames, --geo-dir= --shots-dir=
 	"--geo-shots": ["res://tools/geo_shots.gd", "geo_shots", null],
+	# GPU: every native Hunter held in a game state
+	"--anim-state-shots": ["res://tools/anim_state_shots.gd", "anim_state_shots", null],
 	# every Hunter faces its aim (skeleton forward vs aim, 4 aims); --shots-dir= adds front-view shots
 	"--facing-check": ["res://tools/facing_check.gd", "facing_check", null],
 	"--native-upper-shots": ["res://tools/native_upper_shots.gd", "native_upper_shots", null],

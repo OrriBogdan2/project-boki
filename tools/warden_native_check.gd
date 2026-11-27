@@ -156,7 +156,10 @@ func _states(main: Node, a: String) -> void:
 	ok(anchors.size() == 3, "%s: the anchors ride Meshy's bones (%s)" % [a, str(anchors)])
 	_toon(a, m)
 	_crouch_arms(a, nat)
+	await _downed(main, a, m, nat)  # (before _slots, which takes every slot out after its case)
 	await _slots(main, a, m, nat)
+	await _combat_idle(main, a, m, nat)
+	await _fall(main, a, m, nat)
 	await _upper(main, a, m, nat)
 	_twist(a, nat)
 	_blends(a)
@@ -347,6 +350,7 @@ func _orbits(main: Node, a: String, nat: WardenNative) -> void:
 ## Plays state `s` for two frames (`calm` first, so the counters take it as their baseline) from a clean slate.
 func _feed(main: Node, nat: WardenNative, m: Node3D, calm: Dictionary, s: Dictionary) -> void:
 	nat.attack_left = 0.0
+	nat.combat_left = 0.0
 	nat.last = {"kmove": "", "swing_n": 0, "cast": -1.0, "recoil": 0.0}
 	nat.hit_prev = 99.0
 	nat.land_prev = 0.0
@@ -400,6 +404,59 @@ func _slots(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
 	ok(nat.player.current_animation == pick, "%s: a charged swing takes lmb without lmb_hold" % a)
 	nat.plays.erase("lmb")
 	await _synthetic_clips(main, a, m, nat)
+
+
+## Walking off a ledge starts the jump clip past its take-off crouch; a jump from the ground starts at the crouch.
+func _fall(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
+	for c in [["off a ledge", -5.0, true], ["a jump", 6.0, false]]:
+		m.set_meta(WardenClips.STATE, {"cast": CALM_CAST, "grounded": true})
+		await main.get_tree().process_frame
+		await main.get_tree().process_frame
+		m.set_meta(WardenClips.STATE, {"cast": CALM_CAST, "grounded": false, "vel": Vector3(0.0, c[1], -2.0)})
+		await main.get_tree().process_frame
+		var late: bool = nat.player.current_animation_position >= WardenNative.FALL_FROM - 0.1
+		ok(late == c[2], "%s: %s starts the jump clip at %.2f s" % [a, c[0], nat.player.current_animation_position])
+
+
+## The knocked-down clip runs as far in as HunterFall's beat is (its share k of the clip), also once he is out.
+func _downed(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
+	if not nat.plays.has("downed"):
+		return
+	var length := nat.player.get_animation(String(nat.plays["downed"])).length
+	for c in [[0.2, false], [0.9, true]]:
+		await _feed(main, nat, m, {}, {"fall": c[0], "dead": c[1]})
+		var at := nat.player.current_animation_position
+		ok(
+			nat.cur == "downed" and absf(at - c[0] * length) < 0.05,
+			"%s: knocked down at k %.1f%s plays downed at %.2f s of %.2f"
+			% [a, c[0], " (out)" if c[1] else "", at, length]
+		)
+	# the body shows it: after the fade the hips are down by the knees (a rate of 0 once froze the fade at the stand)
+	var hips := nat.skel.find_bone("Hips")
+	for i in 12:
+		await _feed(main, nat, m, {"fall": 0.9}, {"fall": 0.9})
+	var low := nat.skel.get_bone_pose_position(hips).y / nat.skel.get_bone_rest(hips).origin.y
+	ok(low < 0.75, "%s: knocked down, the hips sink to %.2f of their stand" % [a, low])
+
+
+## A Hunter with an idle_combat clip stands in it for COMBAT_HOLD after a shot or a swing and in idle otherwise.
+func _combat_idle(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
+	if not nat.plays.has("idle_combat"):
+		return
+	var calm := {"cast": CALM_CAST, "grounded": true}
+	var cases := [["a shot just left", {"fired": 0.5}], ["a swing just ended", {"swing_n": 1}]]
+	for c in cases:
+		nat.combat_left = 0.0
+		await _feed(main, nat, m, {"swing_n": 0}, c[1])
+		nat.attack_left = 0.0
+		m.set_meta(WardenClips.STATE, calm)
+		await main.get_tree().process_frame
+		var now := nat.player.current_animation
+		ok(now == String(nat.plays["idle_combat"]), "%s: %s -> combat idle (%s)" % [a, c[0], now])
+	nat.combat_left = 0.0
+	m.set_meta(WardenClips.STATE, calm)
+	await main.get_tree().process_frame
+	ok(nat.player.current_animation == String(nat.plays["idle"]), "%s: calm for COMBAT_HOLD -> casual idle" % a)
 
 
 ## A swing while he runs plays on the upper body (the run clip stays the playing one, the layer owns the arms); on the
@@ -485,6 +542,7 @@ func _synthetic_clips(main: Node, a: String, m: Node3D, nat: WardenNative) -> vo
 	sp.add_animation_library(&"", lib)
 	src.add_child(sp)
 	nat.plays["dash"] = SYNTH
+	nat.player.stop()  # (a clip added while one plays can leave the playback on a freed entry: Godot 4.6 crash)
 	nat.borrow(src)
 	var got := nat.player.get_animation(SYNTH) if nat.player.has_animation(SYNTH) else null
 	var home := nat.player.get_node(nat.player.root_node)

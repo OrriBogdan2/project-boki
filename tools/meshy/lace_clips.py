@@ -196,11 +196,18 @@ def build(rig, q):
     hand = hand + (anchor + away - hand) * q["rel"] + Y * q.get("handy", 0.0)
     tre = q.get("tremor", 0.0)
     hand = hand + np.array([tre * 0.4, tre, tre * 0.3])
+    if "idle" in q:  # the casual stand: both hands down at her sides, the bow hanging from the left
+        shR = pre[rig.id["RightArm"]]
+        out = unit(shL - shR)
+        bow = shL + out * 0.2 + A * q.get("bowfwd", 0.04) + Y * (-0.42 + q.get("bowy", 0.0))
+        hand = shR - out * 0.17 + A * 0.03 + Y * -0.45 + np.array([tre * 0.4, tre, tre * 0.3])
     ankle = rig.pos("LeftFoot")[1]
     hip_xz = np.array([rig.hips_t[0], 0.0, rig.hips_t[2]])
     gap = q.get("gap", 0.21)
     lf = hip_xz + A * (gap + q.get("fl", 0.0)) + S * 0.04 + np.array([0, ankle + q.get("fly", 0.0), 0])
     rf = hip_xz - A * (gap - q.get("fl", 0.0)) - S * 0.04 + np.array([0, ankle + q.get("fry", 0.0), 0])
+    if "idle" in q:  # feet where the bind pose has them, side by side
+        lf, rf = rig.pos("LeftFoot") + Y * q.get("fly", 0.0), rig.pos("RightFoot") + Y * q.get("fry", 0.0)
     pose = dict(base)
     pose["ik"] = [
         ("LeftArm", "LeftForeArm", "LeftHand", bow, -S * 0.3 + Y * -1.0),
@@ -208,7 +215,8 @@ def build(rig, q):
         ("LeftUpLeg", "LeftLeg", "LeftFoot", lf, F),
         ("RightUpLeg", "RightLeg", "RightFoot", rf, F),
     ]
-    pose["keep"] = {"LeftFoot": yaw * 1.3 - 20.0, "RightFoot": yaw * 1.3 - 20.0, "LeftHand": 0.0}
+    foot = 0.0 if "idle" in q else yaw * 1.3 - 20.0
+    pose["keep"] = {"LeftFoot": foot, "RightFoot": foot, "LeftHand": 0.0}
     # the string rides the fingers while drawn and is back on the bow the moment it lets go
     pose["string"] = (nock + (anchor - nock) * q["draw"], min(q["draw"] * 4, 1.0) * (1.0 - min(q["rel"] * 4, 1.0)))
     return pose
@@ -218,6 +226,8 @@ STANCE = dict(yaw=-25, lean=0, crouch=0.04, ext=0.55, lift=0.25, draw=0.0, rel=0
 NOCK = dict(STANCE, yaw=-40, ext=0.85, lift=0.95, draw=0.0, crouch=0.06)
 FULL = dict(STANCE, yaw=-55, ext=1.0, lift=1.0, draw=1.0, crouch=0.08, gap=0.22)
 HALF = dict(FULL, draw=0.6, ext=0.95, yaw=-48)
+CASUAL = dict(idle=1.0, yaw=-6, lean=0, crouch=0.015, ext=0, lift=0, draw=0.0, rel=0.0, gap=0.1)  # bow down at her side
+READY = dict(STANCE, yaw=-30, ext=0.7, lift=0.55, crouch=0.05)  # bow forward, an arrow nocked, not drawn
 
 
 def ease(u, kind):
@@ -295,6 +305,9 @@ def clips():
         + [(0.7, steps[1][1], "smooth"), (1.0, steps[0][1], "smooth")],
         0.2,
     )
+    # the two stands (4 s loops, whole sine periods): casual with the bow hanging, ready with the bow up
+    out["lace_idle"] = (4.0, [(0.0, CASUAL, "lin"), (4.0, CASUAL, "lin")], None)
+    out["lace_idle_combat"] = (4.0, [(0.0, READY, "lin"), (4.0, READY, "lin")], None)
     out["lace_ult"] = (0.4, settle(released(over(FULL, draw=0.9), back=1.1, kick=0.08, hold=0.3), 0.4, NOCK), None)
     out["lace_ult_final"] = (0.55, settle(released(over(FULL, lean=5), back=1.3, kick=0.12, hold=0.5), 0.55), None)
     return out
@@ -303,6 +316,11 @@ def clips():
 def pose_at(name, t):
     length, keys, loop_from = clips()[name]
     q = track(keys, t)
+    if name.startswith("lace_idle"):  # a weight shift, a breath and a slow look round
+        ph = 2 * math.pi * t / length
+        q["sway"] = 0.012 * math.sin(ph)
+        q["lean"] = q["lean"] + 0.7 * math.sin(2 * ph)
+        q["look"] = 9.0 * math.sin(ph)
     if loop_from is not None and t >= loop_from:
         # the hold: a breath and a faint tremor, closing on its own first frame (period = the loop)
         ph = (t - loop_from) / (length - loop_from)
@@ -355,9 +373,11 @@ def sample(rig, name):
     return times, out, hips, string
 
 
-def write_glb(rig, path):
+def write_glb(rig, path, extra=(), own=True):
     """Skeleton nodes (a skin over the joints, no mesh: Godot makes a Skeleton3D from it, so the tracks name bones) plus
-    one animation per clip, rotation tracks for every joint, and the hips and the string's translation."""
+    one animation per clip, rotation tracks for every joint, and the hips and the string's translation.
+    extra: more clips [(name, times, {joint: quats}, hips, {joint: translations})] (native_clips.py; no string track); own=False: only those
+    (another Hunter's skeleton, without the bow)."""
     keep = list(rig.joints) + [rig.par[rig.root]]
     remap = {old: i for i, old in enumerate(keep)}
     nodes = []
@@ -382,22 +402,30 @@ def write_glb(rig, path):
         accs.append(a)
         return len(accs) - 1
 
-    for name in clips():
-        times, rots, hips, string = sample(rig, name)
+    todo = [(n,) + sample(rig, n) for n in clips()] if own else []
+    for name, times, rots, hips, *more in todo + [tuple(x) for x in extra]:
+        string = more[0] if more and not isinstance(more[0], dict) else None
+        moves = more[0] if more and isinstance(more[0], dict) else {}  # (native_clips riders: bone -> translations)
         t_acc = add(times, "SCALAR", len(times))
         chans, samplers = [], []
         for j in rig.joints:
+            if rig.name[j].startswith("SkirtSw"):  # (Meshy's clips leave the skirt joints at rest; no track, as before)
+                continue
             samplers.append({"input": t_acc, "output": add(rots[j], "VEC4", len(times)), "interpolation": "LINEAR"})
             chans.append({"sampler": len(samplers) - 1, "target": {"node": remap[j], "path": "rotation"}})
         samplers.append({"input": t_acc, "output": add(hips, "VEC3", len(times)), "interpolation": "LINEAR"})
         chans.append({"sampler": len(samplers) - 1, "target": {"node": remap[rig.root], "path": "translation"}})
-        samplers.append({"input": t_acc, "output": add(string, "VEC3", len(times)), "interpolation": "LINEAR"})
-        chans.append(
-            {"sampler": len(samplers) - 1, "target": {"node": remap[rig.id["StringMid"]], "path": "translation"}}
-        )
+        for j, tr in moves.items():
+            samplers.append({"input": t_acc, "output": add(tr, "VEC3", len(times)), "interpolation": "LINEAR"})
+            chans.append({"sampler": len(samplers) - 1, "target": {"node": remap[j], "path": "translation"}})
+        if string is not None:
+            samplers.append({"input": t_acc, "output": add(string, "VEC3", len(times)), "interpolation": "LINEAR"})
+            chans.append(
+                {"sampler": len(samplers) - 1, "target": {"node": remap[rig.id["StringMid"]], "path": "translation"}}
+            )
         anims.append({"name": name, "channels": chans, "samplers": samplers})
     js = {
-        "asset": {"version": "2.0", "generator": "tools/meshy/lace_clips.py"},
+        "asset": {"version": "2.0", "generator": "tools/meshy/lace_clips.py" if own else "tools/meshy/native_clips.py"},
         "scene": 0,
         "scenes": [{"name": "Scene", "nodes": [len(nodes) - 1]}],
         "nodes": nodes,
