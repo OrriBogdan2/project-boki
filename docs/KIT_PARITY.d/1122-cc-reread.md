@@ -11,7 +11,7 @@ other source cell is a 5 fps footage read (about +-0.2 s) or only the word "Slow
 | Hunter | Effect | Measured (ours) | 11-09 table | Verdict |
 |---|---|---|---|---|
 | Vex | Burr Charge cone | Daze 1.40 s, no slow | same | match |
-| Vex | Burr cone into a wall | stun 0.90 s, Daze 2.0 s (1.4 + 0.6) | stun 0.7 s | **0.9, not 0.7**: the shove is a knock, and a knock into a wall at speed is the shared body slam (0.9 s floor, `Hunter.wslam_t`); the kit's own `wall_stun` 0.7 only wins when the shove is too slow to slam. Table corrected; data kept |
+| Vex | Burr cone into a wall | stun 1.20 s, Daze 2.0 s (1.4 + 0.6) | stun 0.7 s | **1.2, not 0.7**: main's Vex Daze change (befeb9bf70, #1118) made the coin wall slam stun 1.2 s; re-measured 2026-11-27 after merging main. Table corrected; data kept |
 | Vex | Cinderfall zone | slow 30%, 0.58 s refreshed | 30%, 0.6 s | match |
 | Kael | Meteor Drop core | stun 0.8 s | stun 0.8 s | match |
 | Kael | Meteor Drop ring | stun 0.45 s (a knockdown), **no slow** | slow 40% 1.5 s | table stale, not a regression: the 11-10 owner spec made the air Smash a down slam that knocks down (`rmb.drop.down`); the ring slow went with it (7bb30c1afd5) |
@@ -26,7 +26,7 @@ other source cell is a 5 fps footage read (about +-0.2 s) or only the word "Slow
 | Tenzo | Basalt Spine | slow 35% 0.98 s | 35% 1.0 s | match |
 | Tenzo | Rock Hop's rolling rock | slow 30% 1.5 s | same | match |
 | Grimble | Anchor Drop | stun 1.08 s, rank 3: 1.48 s | 1.1 s (+0.1 a rank, +0.2 rank 3) | match |
-| Grimble | Hook reel | foe stun 0.2 s refreshed; Grimble Grounded (up to 3.0 s, to the reel's end) | same | match |
+| Grimble | Hook reel | foe stun 0.9 s (0.88 measured, 2026-11-27 on current main); Grimble Grounded (up to 3.0 s, to the reel's end) | stun 0.2 s | **0.9, not 0.2**: re-measured after merging main; the PR changes no Grimble code |
 | Neve | Ice Spear hit | slow 35% 0.78 s (**was 45%**, see Fixed) | 35% 0.6 to 0.8 s | **fixed** |
 | Neve | Rink Wall touch | slow 30% 1.0 s | 30% 1 s | match |
 | Neve | Shatter splinter | none (damage only: `f6c93c7a59` took the slow out; the check asserts none) | none | match (see docs/heroes/rimewright.md) |

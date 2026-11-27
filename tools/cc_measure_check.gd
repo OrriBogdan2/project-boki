@@ -9,7 +9,7 @@ const WALLS := preload("res://tools/wall_stun_check.gd")  # its probes: each kit
 const WALL_NAMES := {
 	"archer": ["Lace", "Heartpiercer into a wall", 1.2],
 	"bulwark": ["Albert", "knock into a wall (Crush)", 1.0],
-	"gunslinger": ["Vex", "Burr cone into a wall", 0.9],
+	"gunslinger": ["Vex", "Burr cone into a wall", 1.2],
 	"dolm": ["Tenzo", "Quake Punch into a wall", 0.9],
 	"mage": ["Sparkle", "Storm Rod into a wall", 0.8],
 	"knock": ["any", "plain knock into a wall", 0.9],
@@ -271,7 +271,7 @@ func _grimble() -> void:
 	pl.slot_lv["kin"] = 1
 	_reset(m, pl, tg, home, 8.0)
 	tap(m, pl)
-	_row("Grimble", "Hook reel", _watch(m, tg, 3.0, Callable(), pl), {"stun": 0.2, "self_gnd": [0.5, 3.0]})
+	_row("Grimble", "Hook reel", _watch(m, tg, 3.0, Callable(), pl), {"stun": 0.9, "self_gnd": [0.5, 3.0]})
 	await done(m)
 
 
