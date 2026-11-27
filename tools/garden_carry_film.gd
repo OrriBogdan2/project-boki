@@ -14,7 +14,8 @@ const HUNTER_CLASS := "medium"
 const RUN_OFF := 1.25  # rad off her back-line in the run shot: a three-quarter side view, her face turned to us
 const FACE_OFF := 2.5  # rad off her back-line late in the run: in front of her, a little aside, so her face shows
 const CARRY_PACE := 0.5  # stick in the carry run: a walk the followers match on foot (no gallop, no air time)
-const FOLLOW_GAP := 1.1  # m: the closest a follower stays to the hunter's feet (none runs through her legs)
+const FOLLOW_GAP := 1.7  # m: the closest a follower stays to the hunter's feet (none runs through her legs)
+const BED_SIDE := 2.4  # m from the bed row's middle line to the carry path: the crops beside her in the lens
 const HEAD_S := 0.55  # s of each take that the dissolve eats at its start and at its end
 const CLEAR_MARGIN := 0.45  # m of bare ground kept round a bed or building (grass blades are wide)
 const DNA_PARTS := ["Tuft", "TailTuft", "Birthmark"]  # plain sphere parts of a Boki's unique look
@@ -130,10 +131,8 @@ func _hide_marks() -> void:
 		(pt as GPUParticles3D).visible = false
 
 
-## Film only: no crop models (plain primitives), soft sun shadows, bare ground in the beds.
+## Film only: soft sun shadows, bare ground in the beds round the growing crops.
 func _tidy_scene() -> void:
-	for pl in h.plots:
-		(pl.get_node("Crop") as Node3D).visible = false
 	RenderingServer.directional_shadow_atlas_set_size(16384, true)
 	RenderingServer.directional_soft_shadow_filter_set_quality(RenderingServer.SHADOW_QUALITY_SOFT_ULTRA)
 	var sun := h.sun_l as DirectionalLight3D
@@ -288,13 +287,18 @@ func _run(goal: Vector3, secs: float, off: float, stop_at := 0.6, pace := 1.0, p
 	_keys(Vector2.ZERO)
 
 
-## A follower stands on the ground and no nearer the hunter than FOLLOW_GAP (pushed straight out from her).
+## A follower stands on the ground, behind the hunter's shoulder line and no nearer her than FOLLOW_GAP.
 func _keep_clear(k: Dictionary) -> void:
 	var p: Vector3 = k["pos"]
 	var away := Vector2(p.x - h.ppos.x, p.z - h.ppos.z)
+	var fwd := Vector2(-sin(h.pface), -cos(h.pface))
+	var ahead := away.dot(fwd)
+	if ahead > -0.4:  # beside or ahead of her: back to her heels (none at her hip or under her feet)
+		away -= fwd * (ahead + 0.4)
 	if away.length() < FOLLOW_GAP:
-		var out := away.normalized() if away.length() > 0.01 else Vector2.from_angle(h.pface)
-		p = Vector3(h.ppos.x + out.x * FOLLOW_GAP, p.y, h.ppos.z + out.y * FOLLOW_GAP)
+		var out := away.normalized() if away.length() > 0.01 else -fwd
+		away = out * FOLLOW_GAP
+	p = Vector3(h.ppos.x + away.x, p.y, h.ppos.z + away.y)
 	p.y = maxf(h.world.ground_at(p.x, p.z), 0.0)
 	k["pos"] = p
 	(k["node"] as Node3D).position = p
@@ -421,18 +425,20 @@ func _shot_lift(meadow: Vector3) -> void:
 	_mark("lift", false)
 
 
-## 3: he runs on with it past the beds, the others at his heels, the view in front of him.
+## 3: she runs on with it along the crop beds, the others at her heels, the view in front of her.
 func _shot_carry(meadow: Vector3) -> void:
 	_mark("carry", true)
-	var start := meadow + Vector3(7.0, 0, 5.0)
-	var goal := meadow + Vector3(-12.0, 0, 5.0)
+	var path := _bed_path(meadow)
+	var start: Vector3 = path[0]
+	var goal: Vector3 = path[1]
 	_stand(start, goal, PI + 0.4)
 	_view(34.0, 15.0, 0.55, 0.85)
+	var back := Vector2(start.x - goal.x, start.z - goal.z).normalized()
 	for i in range(1, 4):
-		_put(i, h.ppos + Vector3(2.0 + i, 0, 0.5 * i))
+		_put(i, h.ppos + Vector3(back.x, 0, back.y) * (FOLLOW_GAP + 0.6 * i) + Vector3(back.y, 0, -back.x) * (i - 2.0))
 		_call_over(i, 20.0)
 	await _wait(HEAD_S)
-	for leg in 3:  # the followers are called over again each leg so they stay at his heels
+	for leg in 3:  # the followers are called over again each leg so they stay at her heels
 		await _run(goal, 3.4 / CARRY_PACE, PI + 0.4, 1.0, CARRY_PACE, [1, 2, 3])
 		for i in range(1, 4):
 			_call_over(i, 20.0)
@@ -443,16 +449,65 @@ func _shot_carry(meadow: Vector3) -> void:
 	_mark("carry", false)
 
 
-## 4: he sets it down; it hops and settles; the others play round; he pats it.
+## The middle of the crop beds (the meadow when the farm has none).
+func _beds_mid(meadow: Vector3) -> Vector3:
+	if h.plots.is_empty():
+		return meadow
+	var c := Vector3.ZERO
+	for pl in h.plots:
+		c += (pl as Node3D).position
+	c /= float(h.plots.size())
+	return Vector3(c.x, 0, c.z)
+
+
+## Dry, open ground under the line a..b (fewer = clearer): blocks, void and pond tiles count against it.
+func _line_cost(a: Vector3, b: Vector3) -> int:
+	var n := 0
+	for s in 25:
+		var q := a.lerp(b, s / 24.0)
+		for o in [Vector2.ZERO, Vector2(0.7, 0), Vector2(-0.7, 0), Vector2(0, 0.7), Vector2(0, -0.7)]:
+			var x := q.x + o.x
+			var z := q.z + o.y
+			if h.world.is_block(x, z) or h.world.is_void(x, z) or h.water.depth(x, z) > 0:
+				n += 1
+	return n
+
+
+## A run line past the beds, BED_SIDE m clear of the bed block's edge, on its clearest side: [start, goal].
+func _bed_path(meadow: Vector3) -> Array:
+	var c := _beds_mid(meadow)
+	var best: Array = [meadow + Vector3(7.0, 0, 5.0), meadow + Vector3(-12.0, 0, 5.0)]
+	var best_n := 1 << 30
+	for side in [Vector2(0, 1), Vector2(0, -1), Vector2(1, 0), Vector2(-1, 0)]:
+		var along := Vector2(-side.y, side.x)
+		var mid := c + Vector3(side.x, 0, side.y) * (2.2 + BED_SIDE)
+		for flip in [1.0, -1.0]:
+			var a := mid + Vector3(along.x, 0, along.y) * 7.0 * flip
+			var b := mid - Vector3(along.x, 0, along.y) * 9.0 * flip
+			var n := _line_cost(a, b)
+			if n < best_n:
+				best_n = n
+				best = [a, b]
+	print("GC beds mid %s path %s -> %s cost %d" % [str(c), str(best[0]), str(best[1]), best_n])
+	return best
+
+
+## 4: she sets it down beside the beds on dry ground; it hops and settles; the others play round; she pats it.
+## The view stands in front of her, a little aside, so her face and the Boki's face both show.
 func _shot_set_down(meadow: Vector3) -> void:
 	var k: Dictionary = h.kins[0]
 	_mark("down", true)
-	# behind and aside: the Boki that face him face the lens too
-	_stand(meadow + Vector3(1.0, 0, 6.0), meadow + Vector3(3.0, 0, 6.0), 1.1)
-	_put(1, h.ppos + Vector3(2.5, 0, -1.5))
-	_put(2, h.ppos + Vector3(2.0, 0, 1.8))
-	_put(3, h.ppos + Vector3(3.2, 0, 0.2))
-	_view(40.0, 13.0, 1.1, 1.0)
+	var path := _bed_path(meadow)
+	var at: Vector3 = (path[0] as Vector3).lerp(path[1], 0.5)
+	var c := _beds_mid(meadow)
+	var toward := at + (at - c).normalized().rotated(Vector3.UP, PI / 2.0) * 3.0  # along the beds, them at her side
+	_stand(at, toward, PI - 0.7)
+	var fwd := Vector3(-sin(h.pface), 0, -cos(h.pface))
+	var side := fwd.rotated(Vector3.UP, PI / 2.0)
+	_put(1, h.ppos + fwd * 2.6 + side * 1.8)
+	_put(2, h.ppos - fwd * 1.2 + side * 2.2)
+	_put(3, h.ppos + fwd * 3.0 - side * 1.6)
+	_view(40.0, 13.0, 1.0, 1.0)
 	await _wait(HEAD_S + 0.5)
 	h.carry.drop()
 	await _wait(0.8)
@@ -462,6 +517,7 @@ func _shot_set_down(meadow: Vector3) -> void:
 	h._pet_kin(k)
 	await _wait(3.0)
 	await _still("down_pet.png")
+	_dbg("down")
 	await _wait(HEAD_S)
 	_mark("down", false)
 
@@ -473,7 +529,11 @@ func _record() -> void:
 	f.store_string("[display]\n\nwindow/size/viewport_width=1920\nwindow/size/viewport_height=1080\n\n")
 	f.store_string("[editor]\n\nmovie_writer/mjpeg_quality=0.9\n")
 	f.close()
-	var args := ["--path", root, "--rendering-driver", "vulkan", "--audio-driver", "Dummy", "--resolution", SIZE]
+	var driver := "vulkan"  # --gc-driver=opengl3: a box with no Vulkan (xvfb + software GL) films it too
+	for a in OS.get_cmdline_user_args():
+		if String(a).begins_with("--gc-driver="):
+			driver = String(a).substr(12)
+	var args := ["--path", root, "--rendering-driver", driver, "--audio-driver", "Dummy", "--resolution", SIZE]
 	var avi := dir.path_join("gc_reel.avi") if dir.is_absolute_path() else root.path_join(dir).path_join("gc_reel.avi")
 	args.append_array(["--fixed-fps", str(FPS), "--write-movie", avi, "--"])
 	args.append_array(OS.get_cmdline_user_args())
