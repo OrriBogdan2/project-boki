@@ -7,7 +7,7 @@ extends RefCounted
 ##   --reticle-looks-shots: every Hunter's own look (ReticleLooks) at rest at 4x on dark, light and grass swatch
 ##     rows with row labels, one column per hunter (reticle_looks_1126b_swatches.png)
 ##   --reticle-proof-shots: for the owner, on a real GPU at 1920x1080 (set --resolution): every Hunter's full frame
-##     at rest and firing on flower-free match grass, and contact sheets of 3 tiles a row, 2.2x zoom
+##     at rest and firing on flower-free match grass, and contact sheets of 5 Hunters (a row each: frame, 3.6x zooms)
 ##   --ping-shots: your ping on an enemy (red, "Enemy") and a teammate's loot ping off screen (edge arrow),
 ##     with the minimap
 ##   --hit-marker-shots: the hit tick on a landed hit and the knock tick, each full frame and 3x crop
@@ -32,13 +32,13 @@ const PROOF_SCAN := 600  # world units each way the meadow search covers, in ste
 const PROOF_STEP := 6
 const PROOF_CLEAR := 2.5  # world units: no flower this close to where the cursor rests (it read as a stray mark)
 const PROOF_RES := Vector2i(1920, 1080)  # the full-screen proof frames
-const TILES_PER_SHEET := 9  # Hunters on one contact sheet (rows of 3)
-const TILE_W := 640  # px: one tile of the contact sheet
+const TILES_PER_SHEET := 5  # Hunters on one contact sheet, one row each: the frame, then the rest and firing zooms
+const TILE_W := 640  # px: the full frame, scaled
+const TILE_H := 360
 const TILE_GAP := 8
 const TILE_NAME_H := 60  # px: the Hunter's name band
-const ZOOM_CROP := Vector2i(144, 90)  # px round the cursor, shown 2.2x (the gauge bars sit below the ring)
-const TILE_ZOOM_H := 200  # px: ZOOM_CROP at 2.2x
-const TILE_H := TILE_NAME_H + 360 + TILE_ZOOM_H  # name, the 16:9 frame at tile width, the zoom crops
+const ZOOM_CROP := Vector2i(144, 90)  # px round the cursor, shown 3.6x (the gauge bars sit below the ring)
+const ZOOM_SIZE := Vector2(512, 320)  # px: one zoom panel
 
 var main: Node
 var m: Match
@@ -183,6 +183,7 @@ func _proof() -> void:
 	await _frame(30)
 	var aim := _cursor_ground() - m.player.pos  # (the cursor rests this far from the Hunter on the ground)
 	m.player.teleport(_meadow_spot(aim, _flower_points()))
+	_hide_aim_guides()
 	var tiles := []
 	for id in Arch.ids():
 		m.player.reclass(Arch.weight(String(id)), String(id), Arch.signature(String(id)))
@@ -190,6 +191,7 @@ func _proof() -> void:
 		await main.get_tree().create_timer(2.5).timeout
 		var rest := await _frame(12)
 		var firing := await _frame(12, _hold_fire)
+		var bars := m.player.ak.has_gauge() or m.player.atk.charge_k() > 0.0  # (a gauge bar shows under the ring)
 		Input.action_release("fire")
 		for st in [["rest", rest], ["fire", firing]]:
 			var img: Image = st[1]
@@ -198,13 +200,14 @@ func _proof() -> void:
 				main.get_tree().quit(1)
 				return
 			img.save_png(dir.path_join("reticle_looks_1126b_%s_%s.png" % [id, st[0]]))
-		tiles.append([String(Arch.def(id).get("base_name", id)), Arch.color(String(id)), rest, firing])
+		tiles.append([String(Arch.def(id).get("base_name", id)), Arch.color(String(id)), rest, firing, bars])
 		tiles[-1].append_array([ImageTexture.create_from_image(rest), ImageTexture.create_from_image(firing)])
 		print("RETICLESHOTS proof %s ammo %d" % [id, m.player.ammo])
 	for part in ceili(tiles.size() / float(TILES_PER_SHEET)):
 		var chunk := tiles.slice(part * TILES_PER_SHEET, (part + 1) * TILES_PER_SHEET)
-		var rows := ceili(chunk.size() / 3.0)
-		var size := Vector2i(TILE_W * 3 + TILE_GAP * 2, rows * TILE_H + (rows - 1) * TILE_GAP)
+		var size := Vector2i(
+			TILE_W + TILE_GAP * 2 + int(ZOOM_SIZE.x) * 2, chunk.size() * (TILE_NAME_H + TILE_H + TILE_GAP)
+		)
 		var sheet := await _compose(size, _draw_tiles.bind(chunk))
 		sheet.save_png(dir.path_join("reticle_looks_1126b_sheet%d.png" % (part + 1)))
 	print("RETICLESHOTS proof sheets done")
@@ -245,6 +248,13 @@ func _cursor_ground() -> Vector3:
 	return from + dir * ((m.player.pos.y - from.y) / dir.y)
 
 
+## Hides the aim line and the kit's aim telegraphs (they aim at the desktop's real mouse, not at the pinned cursor, so
+## their arrowheads would stop short of the reticle like a stray mark). The reticle and its gauge bars stay.
+func _hide_aim_guides() -> void:
+	m.aim_line.layers = 0
+	(m.get_node("AimKit") as AimDraw).mi.layers = 0
+
+
 ## The x, z of every flower in the world's flower batches.
 func _flower_points() -> Array:
 	var pts := []
@@ -261,25 +271,23 @@ func _flower_points() -> Array:
 	return pts
 
 
-## One tile per Hunter: its name large, the rest frame scaled to the tile width, and under it 2.2x crops round the
-## reticle at rest and firing (a tile: [name, colour, rest image, fire image, rest texture, fire texture]).
+## One row per Hunter: its name large, the rest frame scaled, and beside it zooms round the reticle at rest and
+## firing (a tile: [name, colour, rest image, fire image, bars shown, rest texture, fire texture]).
 func _draw_tiles(cv: Control, tiles: Array) -> void:
 	var font := ThemeDB.fallback_font
 	cv.draw_rect(Rect2(Vector2.ZERO, cv.size), Color(0.07, 0.07, 0.08))
+	var cursor := Vector2(PROOF_RES) * cursor_at
+	var src := Rect2(cursor - Vector2(ZOOM_CROP) / 2.0, Vector2(ZOOM_CROP))
 	for i in tiles.size():
 		var t: Array = tiles[i]
-		var o := Vector2(i % 3 * (TILE_W + TILE_GAP), i / 3 * (TILE_H + TILE_GAP))
+		var o := Vector2(0.0, i * (TILE_NAME_H + TILE_H + TILE_GAP))
 		cv.draw_string(font, o + Vector2(12, 46), String(t[0]), HORIZONTAL_ALIGNMENT_LEFT, TILE_W, 44, t[1])
-		var shot := Vector2(TILE_W, TILE_W * 9.0 / 16.0)
-		cv.draw_texture_rect(t[4], Rect2(o + Vector2(0, TILE_NAME_H), shot), false)
-		var cursor := Vector2(PROOF_RES) * cursor_at
+		cv.draw_texture_rect(t[5], Rect2(o + Vector2(0, TILE_NAME_H), Vector2(TILE_W, TILE_H)), false)
+		var labels := ["rest", "firing" + (" (gauge bar under the ring)" if t[4] else "")]
 		for j in 2:
-			var at := o + Vector2(j * TILE_W / 2.0, TILE_NAME_H + shot.y)
-			var src := Rect2(cursor - Vector2(ZOOM_CROP) / 2.0, Vector2(ZOOM_CROP))
-			cv.draw_texture_rect_region(t[4 + j], Rect2(at, Vector2(TILE_W / 2.0, TILE_ZOOM_H)), src)
-			cv.draw_string(
-				font, at + Vector2(8, 22), ["rest", "firing: gauge bars show"][j], HORIZONTAL_ALIGNMENT_LEFT, -1, 20
-			)
+			var at := o + Vector2(TILE_W + TILE_GAP + j * (ZOOM_SIZE.x + TILE_GAP), TILE_NAME_H + 20.0)
+			cv.draw_texture_rect_region(t[5 + j], Rect2(at, ZOOM_SIZE), src)
+			cv.draw_string(font, at + Vector2(8, 22), labels[j], HORIZONTAL_ALIGNMENT_LEFT, -1, 20)
 
 
 ## Draws `painter` on a Control in a SubViewport of `size` and returns what it drew.

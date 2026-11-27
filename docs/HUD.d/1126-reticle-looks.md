@@ -16,7 +16,7 @@ Only the AimKit charge "body" mode still draws a ring, round the Hunter, not the
 shackle arcs is part of his look.
 Checks: `--reticle-check` (every Hunter's look is known and its own; every look draws).
 Proof (real GPU, `--resolution 1920x1080`): `--reticle-looks-shots` (dark/light/grass swatch rows, labelled, at rest)
-and `--reticle-proof-shots` (every Hunter full frame at rest and firing on flower-free grass, contact sheets of 3 tiles a row with 2.2x zoom).
-Shots: `docs/shots/reticle_looks_1126b_swatches.png` (dark/light/grass at rest), `reticle_looks_1126b_sheet1.png` and
-`_sheet2.png` (every Hunter on a meadow at 1920x1080, tile = full frame, 2.2x zoom at rest and firing, cursor on flower-free grass). The 26 full
+and `--reticle-proof-shots` (every Hunter full frame at rest and firing on flower-free grass, contact sheets of 5 Hunters, one row each (the frame and 3.6x zooms; the aim guides hidden)).
+Shots: `docs/shots/reticle_looks_1126b_swatches.png` (dark/light/grass at rest), `reticle_looks_1126b_sheet1.png`,
+`_sheet2.png`, `_sheet3.png` (every Hunter on a meadow at 1920x1080, a row = full frame, 3.6x zooms at rest and firing, cursor on flower-free grass). The 26 full
 frames are in `/home/boki/gens/reticle-looks-1126b/`. A cursor sitting on grass at rest is the same size and colour as on dark/light.
