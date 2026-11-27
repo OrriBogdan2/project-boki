@@ -124,7 +124,7 @@ func _arena(main: Node) -> Match:
 
 
 ## The aegis held toward the screen's right and toward the camera at the match camera, then close up from his front
-## left, the wall shown and hidden, then straight down from above.
+## left at three heights (high, eye, knee), the wall hidden at the last, then straight down from above.
 func _guard(main: Node) -> void:
 	var m := _arena(main)
 	var p: Hunter = m.player
@@ -140,17 +140,18 @@ func _guard(main: Node) -> void:
 	m.add_child(cam)
 	cam.fov = 34.0
 	var fwd := Vector3(p.aim_dir().x, 0, p.aim_dir().y)
-	cam.look_at_from_position(
-		p.pos + fwd * 5.5 + fwd.cross(Vector3.UP) * 2.0 + Vector3(0, 2.2, 0), p.pos + Vector3(0, 1.1, 0), Vector3.UP
-	)
 	cam.current = true
-	for i in 6:
-		p.inp["sec_hold"] = true
-		await _tick(main, m)
-	await _grab(main, "guard_close.png")
+	var heights := {"guard_close": 2.2, "guard_eye": 1.4, "guard_knee": 0.45}
+	for shot: String in heights:
+		var from := p.pos + fwd * 5.5 + fwd.cross(Vector3.UP) * 2.0 + Vector3(0, float(heights[shot]), 0)
+		cam.look_at_from_position(from, p.pos + Vector3(0, 1.1, 0), Vector3.UP)
+		for i in 6:
+			p.inp["sec_hold"] = true
+			await _tick(main, m)
+		await _grab(main, "%s.png" % shot)
 	var aegis := (p.ak as BulwarkKit).fx.aegis
 	aegis.visible = false
-	await _grab(main, "guard_close_nowall.png")
+	await _grab(main, "guard_knee_nowall.png")
 	aegis.visible = true
 	cam.look_at_from_position(p.pos + Vector3(0, 9.0, 0.01), p.pos, Vector3.UP)
 	await _grab(main, "guard_top.png")
