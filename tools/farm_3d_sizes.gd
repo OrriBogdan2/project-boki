@@ -1,9 +1,10 @@
 extends RefCounted
-## --farm-3d-sizes --shots-dir=<dir> [--view=1920x1080] [--albert-k=1.08]: the real farm scene with five hunters (Albert is the farm's own
-## avatar; Kael, Sparkle, Meeko and Cinder are built as a match builds a hunter) at their match size (own model size x
-## Hunter.VIS_SCALE x body.match_k: the reference's height) and the four Boki, all idle, HUD, marks and particles
-## hidden.
-## Writes 1_farm_cam.png (the farm's close third-person view), 2_eye_row.png (eye level, one row), 3_mid.png and
+## --farm-3d-sizes --shots-dir=<dir> [--view=1920x1080] [--albert-k=1.08]: the real farm scene with five hunters
+## (Albert is the farm's own avatar, drawn at the size Home gives it; Kael, Sparkle, Meeko and Cinder are built as a
+## match builds a hunter) at their match size (Hunter.drawn_k: the reference's height) and the four Boki at Home's
+## own farm size, all idle and facing the camera, HUD, marks and particles hidden.
+## Writes 1_farm_cam.png (the farm's close third-person view: one row with Albert, the camera's target, in the middle
+## and the Boki a step nearer in the gaps), 2_eye_row.png (eye level, one row), 3_mid.png and
 ## heights.json (metres as drawn: crown and with extras, per hunter and per Boki). Needs a renderer for the stills.
 
 const WARDEN_SKIN := preload("res://tools/warden_skin.gd")
@@ -32,10 +33,9 @@ const ROW_STEP := 1.45  # m between neighbours in the one row of nine (eye shot)
 const ROW_ORDER := ["h0", "b0", "h1", "b1", "h2", "b2", "h3", "b3", "h4"]  # Albert at the end nearest the 3/4 camera
 const HUNTER_X := [-5.0, -2.5, 0.0, 2.5, 5.0]  # m across the group (mid shot back row), Albert far left
 const BOKI_X := [-3.75, 1.25, 3.75, -1.25]  # m (cindle, burrlet, puddlet, heatherhorn): in the gaps, a row nearer
-const WALK_X := [-4.2, -2.1, 2.1, 4.2]  # m: the four others in the farm-cam shot, level with Albert, two a side
-const WALK_BOKI_X := [-3.1, -1.0, 1.0, 3.1]  # m: the Boki between and ahead of them
-const WALK_AHEAD := 1.0  # m the others stand in front of Albert (farm-cam shot)
-const WALK_BOKI_AHEAD := 2.6  # m the Boki stand in front of the hunters (farm-cam shot)
+const FARM_X := [-4.6, -2.3, 2.3, 4.6]  # m: Kael, Sparkle, Meeko, Cinder in the farm-cam row, Albert at 0 between them
+const FARM_BOKI_X := [-3.45, -1.15, 1.15, 3.45]  # m: the Boki in the row's gaps, so none stands over a hunter
+const FARM_BOKI_NEAR := 1.4  # m the Boki stand nearer the farm camera (south) than the hunters
 const BOKI_FRONT := 2.2  # m the Boki stand nearer the camera than the hunters
 const FACE_BOKI := 0.18  # rad: a small turn either side of the camera, so it is not stiff but the face reads
 const CLEAR_HALF_W := 6.0  # m either side of the camera-to-group line that scenery is hidden in
@@ -55,11 +55,10 @@ var dir := "farm_3d_sizes"
 var group := Vector3.ZERO  # ground point the group stands on
 var hunters: Array[Node3D] = []
 var cam3: Camera3D
-var walking := true  # farm-cam shot: Albert is the avatar seen from behind; else the whole group faces the camera
 var layout := "farm"  # farm | row | mid
 var anims: Array = []  # one HunterAnim per hunter (Albert's is the farm's own, h.p_anim)
 var cam_at := Vector3.ZERO  # the free camera's position: everyone turns to it
-var scales: Array[Vector3] = []  # each hunter's drawn scale: its own model size x a match's VIS_SCALE x match_k
+var scales: Array[Vector3] = []  # the four others' drawn scale: own model size x Hunter.drawn_k (Albert's is Home's)
 var albert_k := 1.0  # --albert-k=<x>: Albert's extra size in this tool only (game data unchanged)
 var cam_side := 1.0  # +1: the eye camera swings to +x, Albert at +x end of the row; -1 the other way
 
@@ -148,7 +147,8 @@ func _make_save() -> void:
 
 
 ## The farm draws you as the Unmasked, so Albert is built here like the other four (as a match builds a hunter) and
-## takes the avatar's place and scale. Each of the four gets a HunterAnim, so it idles as it does in play.
+## takes the avatar's place; Home sizes him (Hunter.drawn_k) as it sizes your avatar. The four others get the same
+## size here, and a HunterAnim each, so they idle as they do in play.
 func _place() -> void:
 	group = h.world.free_spot_near(_clear_spot(Vector3(56.0, 0, 29.0)), [], 0.8)
 	var old: Node3D = h.player
@@ -157,33 +157,31 @@ func _place() -> void:
 		var m: Node3D = Models.hunter(
 			cls, Data.TEAM_COLORS[0], Arch.signature(ARCHES[i]), "", Unmasked.mask_look(), ARCHES[i]
 		)
-		m.scale *= Hunter.VIS_SCALE * Arch.match_k(ARCHES[i])  # as a match draws it: the reference's height
-		if i == 0:
-			m.scale *= albert_k  # --albert-k=<x>: the owner's "Albert tallest" look, this tool only
+		if i > 0:
+			m.scale *= Hunter.drawn_k(ARCHES[i]) * h.cam.hunter_scale  # as a match and the farm draw it
 		scales.append(m.scale)
 		h.add_child(m)
 		hunters.append(m)
 		anims.append(null if i == 0 else HunterAnim.new(m))
 	h.player = hunters[0]
-	hunters[0].set_meta("pop", scales[0])  # Home sets the avatar's scale back to this when the camera settings apply
+	hunters[0].set_meta("pop", Vector3.ONE * albert_k)  # --albert-k=<x>: rides on Home's size, this tool only
 	old.queue_free()
 	h.farm_cam.yaw = 0.0
 	_layout()
 
 
-## farm: Albert at the group's spot facing north as the farm shows him, the other four in a row ahead of him facing the
-## camera. row: all nine in one line, hunters and Boki alternating, Albert at the camera's end. mid: the hunters in a
-## back row, Boki a row nearer, Albert a step in front.
+## farm: one row across the farm camera's view, Albert (its target) in the middle, two a side, the Boki a step nearer
+## in the gaps. row: all nine in one line, hunters and Boki alternating, Albert at the camera's end. mid: the hunters
+## in a back row, Boki a row nearer, Albert a step in front.
 func _layout() -> void:
 	var spots := {}  # node -> ground position
 	var albert := group
 	match layout:
 		"farm":
-			albert = group + Vector3(0, 0, WALK_AHEAD)
 			for i in range(1, 5):
-				spots[i] = group + Vector3(WALK_X[i - 1], 0, 0)
+				spots[i] = group + Vector3(FARM_X[i - 1], 0, 0)
 			for j in 4:
-				spots[10 + j] = group + Vector3(WALK_BOKI_X[j], 0, -WALK_BOKI_AHEAD)
+				spots[10 + j] = group + Vector3(FARM_BOKI_X[j], 0, FARM_BOKI_NEAR)
 		"row":
 			for slot in ROW_ORDER.size():
 				var x := (4 - slot) * ROW_STEP * cam_side
@@ -202,7 +200,7 @@ func _layout() -> void:
 				spots[10 + j] = group + Vector3(BOKI_X[j], 0, BOKI_FRONT)
 	h.ppos = albert
 	h.player.position = albert
-	h.pface = 0.0 if layout == "farm" else PI
+	h.pface = PI  # facing south, toward the farm camera
 	h.cam.snap(albert)
 	for i in range(1, 5):
 		hunters[i].position = spots[i]
@@ -296,7 +294,7 @@ func _write_heights() -> void:
 		var hi := 0.0
 		for wp in pts:
 			hi = maxf(hi, wp.y)
-		var k := Hunter.VIS_SCALE * Arch.match_k(ARCHES[i]) * (albert_k if i == 0 else 1.0)
+		var k := Hunter.drawn_k(ARCHES[i]) * (albert_k if i == 0 else 1.0)
 		var crown := HunterCrown.crown(m, pts, k, hi) - m.global_position.y
 		m.basis = lean
 		out["hunters"][NAMES[i]] = {
@@ -385,23 +383,20 @@ func _pose_hunters(d: float) -> void:
 		anims[i].update(
 			d, {"vel": Vector3.ZERO, "face": face, "grounded": true, "idle_break": true}
 		)
-	if layout != "farm":
-		h.pface = _face_to(hunters[0].position)
+	h.pface = _face_to(hunters[0].position)
 
 
-## After Home's own pose each frame: everyone faces the camera, the Boki at the non-active farm size, UI and marks gone.
+## After Home's own pose each frame: everyone faces the camera (the Boki at Home's own size), UI and marks gone.
 func _hide_marks() -> void:
 	if not is_instance_valid(h) or hunters.is_empty():
 		return
 	for i in hunters.size():
 		for g in hunters[i].find_children("Glider", "Node3D", true, false):
 			(g as Node3D).visible = false  # folded away on the ground, as in play
-		if i > 0 or layout != "farm":
-			hunters[i].rotation.y = _face_to(hunters[i].position)
+		hunters[i].rotation.y = _face_to(hunters[i].position)
 	for j in h.kins.size():
 		var n := h.kins[j]["node"] as Node3D
 		n.rotation.y = _face_to(n.position) + FACE_BOKI * (1.0 if j % 2 == 0 else -1.0)
-		n.scale = Vector3.ONE * 0.9 * float(n.get_meta("evo_scale", 1.0)) * h.FARM_BOKI_SCALE
 	h.ui.visible = false
 	for ring in h.find_children("TeamRing", "MeshInstance3D", true, false):
 		(ring as Node3D).visible = false  # the orange discs under the hunters' feet
