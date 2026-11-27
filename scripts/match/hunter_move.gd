@@ -234,6 +234,9 @@ static func push(hv: Vector2, dir: Vector2, speed_v: float) -> Vector2:
 ## the speed change the position integration in Hunter._physics misses is added here), so a jump's apex and
 ## a fall's depth are the same at any step size.
 static func fall(h: Hunter, dt: float) -> void:
+	if h.shot_down:
+		GlideSpike.plunge(h)
+		return
 	var vy := maxf(h.vel.y - Hunter.H_GRAV * dt, -fall_cap(h))
 	h.pos.y += 0.5 * (h.vel.y - vy) * dt
 	h.vel.y = vy

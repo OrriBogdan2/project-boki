@@ -174,6 +174,7 @@ var lfloat: Dictionary:
 	get: return moves.ledge
 	set(v): moves.set_ledge(v)
 var glide_fuel := 1.0          # shown as glider heat: 1 = cool, 0 = overheated
+var glide_regen_t := 0.0       # s the heat refill is blocked (after a slam's heat or a spike landing)
 var shot_down := false         # knocked out of an overheated glide: stunned when you land
 var below_lip := false         # dropped below the nearest island's edge, over the abyss
 var wall_hit_v := Vector2.ZERO  # this step's speed into an island side that stopped you (for the ledge catch)
@@ -799,14 +800,10 @@ func do_jump() -> void:
 		return
 	if wall_moves.try_kick(self):
 		return
-	# already in the air: a second press opens the glider, rising or falling, unless you're about to land
+	# already in the air: a second press, held, opens the glider, rising or falling, unless you're about to land
 	var height := pos.y - ground()
 	var near_ground := HunterMove.near_landing(vel.y, height) and not over_void()
-	if not gliding and not near_ground and (_dash_into_glide() or can_glide()):
-		_open_glider()
-		if gliding:
-			return          # (refused by the locomotion state, e.g. a wire's knocked tail: the press stays armed below)
-	_glide_armed = not gliding and not near_ground      # a move keeps it shut: held, it opens as the move ends
+	_glide_armed = not gliding and not near_ground      # held HunterFeel.glide_engage s it opens (a tap never does)
 	jump_buf = HunterMove.jump_hold(vel.y, height) if near_ground else HunterMove.jump_buffer_s
 
 ## Feathering [est] (SUPERVIVE players tap the glider on and off instead of holding it): opening and
@@ -834,7 +831,7 @@ static func abyss_lift_vy(vy: float, depth: float, dt: float, k := 1.0) -> float
 ## Real keys only open the glider with a fresh press in the air (a second Space, or the glide button). Opening uses
 ## the press up, so a fold (heal, dash, a knock) stays shut until a new press; release or landing clears it too.
 var _glide_armed := false
-var _glide_hold_t := 0.0      # s a let-go glide press stays armed (Loco.press_buffer)
+var _glide_press_t := 0.0     # s the armed press has been held (it opens at HunterFeel.glide_engage)
 var _glide_btn_held := false
 
 func glide_armed() -> bool:
@@ -1862,7 +1859,7 @@ func _physics(dt: float) -> void:
 		var fv := vel.y
 		pos.y += vel.y * dt
 		air_peak = maxf(air_peak, pos.y)
-		if g > World.VOID + 1.0 and vel.y <= 0.0 and pos.y <= g and pos.y > g - 1.25:
+		if g > World.VOID + 1.0 and vel.y <= 0.0 and pos.y <= g and pos.y > g - maxf(1.25, -fv * dt + 0.05):   # (a spike's 80 m/s steps 1.3 m)
 			pos.y = g
 			vel.y = 0.0
 			grounded = true
@@ -2015,8 +2012,10 @@ func _update_glide(dt: float) -> void:
 			diving = false
 			glide_fuel = 1.0
 		return
+	glide_regen_t = maxf(0.0, glide_regen_t - dt)
 	if grounded:
-		glide_fuel = minf(1.0, glide_fuel + dt / HunterMove.glide_regen_s)
+		if glide_regen_t <= 0.0:
+			glide_fuel = minf(1.0, glide_fuel + dt / HunterMove.glide_regen_s)
 		glide_off_t = 9.0
 	elif not gliding:
 		glide_off_t += dt
@@ -2040,12 +2039,11 @@ func _update_glide(dt: float) -> void:
 		and (gliding or m.time - kb_t > 0.4) and pad.is_empty() and not shot_down
 	var held: bool = inp.get("glide", false)
 	var btn_down: bool = inp.get("glide_btn", false)
-	# a fresh button press arms through a lock (a wind-down) as a second Space does: it opens as the lock ends, even
-	# if let go meanwhile (a tap is kept Loco.press_buffer, never eaten by an attack's recovery)
-	_glide_hold_t = Loco.press_buffer if held else maxf(0.0, _glide_hold_t - dt)
-	_glide_armed = (_glide_armed or (btn_down and not _glide_btn_held)) and (held or _glide_hold_t > 0.0) and not grounded
+	# a fresh button press arms through a lock (a wind-down) as a second Space does: held, it opens HunterFeel.glide_engage
+	# s after the press, or as the lock ends if that has passed; let go early and nothing opens (a tap is not a glide)
+	_glide_armed = (_glide_armed or (btn_down and not _glide_btn_held)) and held and not grounded
+	_glide_press_t = _glide_press_t + dt if _glide_armed else 0.0
 	var want: bool = held or auto_glide or (_glide_armed and not gliding)
-	var was_btn := _glide_btn_held
 	_glide_btn_held = btn_down
 	var hold_opens: bool = auto_glide or _glide_armed or not inp.get("glide_press_only", false)
 	if gliding:
@@ -2063,12 +2061,10 @@ func _update_glide(dt: float) -> void:
 			glide_fuel = maxf(0.0, glide_fuel - dt * hk / (glide_max * (1.0 + gear_stat("heat"))))
 		if not dropping:
 			stats["glide_t"] = float(stats.get("glide_t", 0.0)) + dt
-	elif btn_down and not was_btn and _dash_into_glide():
-		_open_glider()
-	elif want and can and hold_opens and loco.can(Loco.S.GLIDING) and air_t >= (0.0 if btn_down else HunterFeel.glide_engage) \
-			and jump_at != m.time and not AirLimits.glide_shut(self):      # (the press that jumped is not also a glide press)
-		# a fresh press in the air opened it (_glide_armed) and it is still held, or a pad's auto-glide, or scripted
-		# input: the glider opens. Space held since the jump never gets here (glide_press_only)
+	elif want and hold_opens and loco.can(Loco.S.GLIDING) and (_glide_press_t if _glide_armed else air_t) >= HunterFeel.glide_engage \
+			and jump_at != m.time and not AirLimits.glide_shut(self) and (can or _dash_into_glide()):
+		# a fresh press in the air (_glide_armed) held glide_engage s, or a pad's auto-glide, or scripted input: the
+		# glider opens (a dash it was pressed in ends here). Space held since the jump never gets here (glide_press_only)
 		moves.open_glider()
 		_glide_armed = false
 		if below_lip:
