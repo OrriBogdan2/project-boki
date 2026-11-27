@@ -19,4 +19,5 @@ const CHECKS := {
 	"--loadin-fps-check": ["res://tools/loadin_fps_check.gd", "loadin_fps_check", "advisory"],
 	"--step-up-check": ["res://tools/step_up_check.gd", "step_up_check", null],  # lips walked over
 	"--traversal-parity-check": ["res://tools/traversal_parity_check.gd", "traversal_parity_check", null],  # ref rows
+	"--fall-parity-check": ["res://tools/fall_parity_check.gd", "fall_parity_check", null],  # fall parity
 }
