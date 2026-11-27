@@ -887,8 +887,14 @@ func _shift_window(m: Match, hero: String, slot: String) -> void:
 		var past := got.trim_prefix("end ").to_float() - float(lock - at) * Match.DT
 		cells.append(got if not got.begins_with("end") else "%+.2fs" % past)
 		right = right and got.begins_with("end") and past <= Loco.press_buffer + Match.DT
-	ok(right, "%s %s Shift in the cast: lock %.2fs, pressed at 0/25/50/75%%, goes from its end by: %s (row: buffer)" % [
-			hero, slot, lock * Match.DT, ", ".join(cells)])
+	ok(
+		right,
+		(
+			"%s %s Shift in the cast: lock %.2fs, pressed at 0/25/50/75%%, goes from its end by: %s (row: buffer)"
+			% [hero, slot, lock * Match.DT, ", ".join(cells)]
+		)
+	)
+
 
 ## The first step after the cast at which a Space press acts at once (the lock's end), by halving; the search
 ## assumes a press later in the recovery is never less free. Minus the steps searched when none acted at once
@@ -909,6 +915,7 @@ func _lock_steps(m: Match, slot: String, in_air: bool, move := "jump") -> int:
 		else:
 			lo = mid
 	return hi
+
 
 ## `slot` cast (standing, or falling from AIR_LIFT), then Space (`move` "jump") or Shift ("dash") pressed `at` steps
 ## after it went off: "now"
@@ -932,8 +939,13 @@ func _space_at(m: Match, slot: String, in_air: bool, at: int, move := "jump") ->
 	_steps(m, at)
 	if in_air and hunter.grounded:
 		return "n/a: landed first"
-	var moved := {"y": hunter.pos.y, "dashes": hunter.dashes, "ex": hunter.ex_cd, "roll": hunter.roll_t,
-			"dashing": hunter.ak.in_dash()}
+	var moved := {
+		"y": hunter.pos.y,
+		"dashes": hunter.dashes,
+		"ex": hunter.ex_cd,
+		"roll": hunter.roll_t,
+		"dashing": hunter.ak.in_dash()
+	}
 	hunter.inp[move] = true
 	hunter.inp["glide"] = in_air
 	var got := "never"
