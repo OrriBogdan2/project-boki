@@ -84,9 +84,11 @@ sentences, and a grown, Devoted Boki talks freely.
 - **Coming home.** After an expedition (or two minutes or more away), the Boki out on the farm
   notice you and run over to say hello, the ones that trust you most first. Wary or napping ones
   don't.
-- **Training.** Power, Guard, Speed and Focus, trained at the Training post with a three-round timing
-  drill. A happy Boki learns faster; a tired one won't train. Play is practice too: a finished game
-  of fetch trains a point of Speed while it still has the energy.
+- **Training.** Power, Guard, Speed and Focus rise when you give a Boki stat bites from its Feed menu.
+  You carry bites home from expeditions (what you hunt decides the stat), and win them in garden races
+  and at the Training post's timing drill, which are limited runs: a few a day, plus one more of each
+  per match ("Races left today: 2"). Play (fetch, brushing, petting) is joy and bond only, never stats.
+  Toys give at most 3 points a day.
 - **Life stages.** Hatchling, Youngling (level 4), Grown (8), Elder (16).
 - **Evolution.** How you raise it decides what it grows into. It builds four affinities (Fierce,
   Steadfast, Curious, Swift) from what it eats, what it does in matches and its personality, and every

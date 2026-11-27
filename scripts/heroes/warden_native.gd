@@ -61,6 +61,7 @@ var hit_prev := 99.0  # the state's s since a hit, last frame
 var land_prev := 0.0  # the state's landing squash, last frame
 ## The state counters last frame; cast -1: none read yet (the first state read is the baseline, no new hit)
 var last := {"kmove": "", "swing_n": 0, "cast": -1.0, "recoil": 0.0}
+var own_casts := false  # data "own_casts": her casts and shots are her own kit moves (kmoves rows), no Meshy Attack
 var pose_held_t := 0.0  # s held by SimLod.pose_every (WardenGlb.POSE_HELD), stepped at the next posed frame
 var followers: Array = []  # [orbit holder, Meshy bone]: the holder keeps the bone's move from its rest
 var orbits := WardenOrbits.new()  # the contract model's orbit props (Tenzo's seeing-stones) riding Meshy's bones
@@ -81,7 +82,7 @@ var springs := WardenSprings.new()  # loose parts (data "springs": Sable's coat 
 var props: WardenProps  # the contract's parts Meshy's mesh lacks (data "props": Kael's sword, Cinder's heel jets)
 var twist := WardenNativeTwist.new()  # the legs turned to the way he goes, the torso held on the aim
 var upper: WardenNativeUpper  # a swing or cast over the running legs (the torso and arms only)
-var moves: WardenNativeMoves  # the kit moves with a clip of their own (data "kmoves")
+var moves: WardenNativeMoves  # the kit moves with a clip of their own (data "kmoves": full-body or upper layer)
 var companions: WardenCompanions  # floating companions cut out of Meshy's body (Meeko's sun and cloud), or null
 var steps: WardenNativeSteps  # the footsteps, on the foot plants of Meshy's clips (data "plants")
 var mood: WardenMood  # the faces on those companions swap and blink (warden_anim/<art>.json "mood"), or null
@@ -161,6 +162,7 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	moves = WardenNativeMoves.new(player, d)
 	plays.merge(moves.clips())
 	skel = WardenGlb.skeleton(glb)
+	own_casts = bool(d.get("own_casts", false))
 	_borrow_clips()
 	for st in SLOTS + moves.clips().keys():  # (a slot whose clip is nowhere plays today's clip)
 		if plays.has(st) and not player.has_animation(String(plays[st])):
@@ -169,6 +171,7 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	for st in LOOPS + ["stomp", "glide"]:
 		if plays.has(st):
 			player.get_animation(String(plays[st])).loop_mode = Animation.LOOP_LINEAR
+	moves.ready(plays)
 	# (the clips advance in _process, then the layers go on top: WardenSync's order)
 	player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	if d.has("bones"):
@@ -229,11 +232,16 @@ func _process(dt: float) -> void:
 	attack_left -= dt
 	var one := _one_shot(s)
 	var xt := float(s.get("extract_t", -1.0))
+	var mv := moves.pick(String(s.get("kmove", "")), float(s.get("kmove_t", 0.0)), plays)  # (the kit's move)
+	if not mv.is_empty() and bool(mv["upper"]):
+		attack_left = 0.0  # (a Meshy swing still playing from before gives way to the arms' own clip)
+	if mv.is_empty() or bool(mv["upper"]):
+		moves.release()
 	if xt >= 0.0:  # the extract beat (WardenClips.leave_t): Meshy's crouch for the dip, then its jump for the take-off
 		_play("crouch" if xt < WardenClips.EXTRACT_DIP else "jump", 1.0)
-	elif moves.owns(s, plays):  # a kit move with its own clip (draw, release, Spirit Walk): laid at the move's clock
+	elif not mv.is_empty() and not bool(mv["upper"]):  # a kit move's own full-body clip, laid at the move's clock
 		upper.stop()
-		moves.play(s, plays, dt)
+		moves.play(mv, dt)
 		attack_left = 0.0
 		cur = "kmove"
 	elif one != "":
@@ -249,6 +257,7 @@ func _process(dt: float) -> void:
 	var hips := WardenSkeleton.find(skel, "root")
 	skel.set_bone_pose_scale(hips, skel.get_bone_rest(hips).basis.get_scale())  # (Meshy keys no scale: no old squash)
 	player.advance(dt)
+	moves.lay(mv, upper)  # (a kit move on the arms over the legs: Cinder's lance, aim, shot, cloak)
 	moves.pose(s, get_parent() as Node3D)
 	upper.lay(dt)
 	twist.step(dt, s, cur in LEGS_RUN)
@@ -436,7 +445,8 @@ func _swing(s: Dictionary) -> String:
 	if float(last["cast"]) < 0.0:
 		last = now  # (the first state read is the baseline: counters a freshly dressed model finds are no new hit)
 		return ""
-	var move: bool = now["kmove"] != "" and now["kmove"] != last["kmove"]
+	# (a move with its own clip plays no Meshy swing)
+	var move: bool = now["kmove"] != "" and now["kmove"] != last["kmove"] and not moves.has_clip(now["kmove"], plays)
 	var melee: bool = now["swing_n"] > last["swing_n"]
 	var cast_new: bool = now["cast"] < last["cast"]
 	var shot: bool = now["recoil"] > last["recoil"]
@@ -450,6 +460,8 @@ func _swing(s: Dictionary) -> String:
 		slot = "lmb_hold" if melee and int(s.get("combo", 0)) < 0 else "lmb"
 	if not plays.has(slot):  # (an uncharged swing's slot stands in for a charged one's)
 		slot = "lmb" if slot == "lmb_hold" and plays.has("lmb") else "attack"
+	if own_casts and slot == "attack" and not (move or melee):
+		return ""  # (a hand caster's cast or shot with no slot clip plays no Meshy swing: data own_casts)
 	if not _fresh(slot):
 		return ""
 	attack_move = move or melee
