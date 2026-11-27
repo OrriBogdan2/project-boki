@@ -71,6 +71,23 @@ The `ready` answer repeats on every poll for the same ticket until the token is 
 game server reports `BOKI_SERVER joined slot=<i>` when the token is used, and the ticket answers `gone`
 from then on. A token nobody uses expires 60 s after `ready` (`TOKEN_TTL_S`), and the ticket goes `gone`.
 
+### The social store (`mm/social.py`, docs/decisions/0181)
+
+Clans, island visits, gifts, market stalls, the notice board, Boki transfers and town presence for the desktop
+game (`Social` over `SocialHttp`). All `POST`, JSON bodies; the player token goes in `X-Boki-Player`, never the path.
+
+| Call | Body | Answer |
+|---|---|---|
+| `POST /social/hello` | `{}` | no token: a new player `{"me", "owner", "token"}` (20 per address per hour, `429 rate_limited`); with a token: `{"me", "owner"}` or `403 not_member` |
+| `POST /social/db` | `{"op": "get\|set\|del\|add\|query\|claim", "path": "col/id" (add, query: "col"), "data"?, "q"?: {"where": [[field, "==", value]], "order", "dir", "limit"}}` | `{"r": doc\|null\|"ok"\|new id\|[{"id", "data"}]}`; `403 not_yours`; `400 bad_request` (bad path, doc over 64 KB, other operators) |
+| `POST /social/hub` | `{"room", "p": {...}\|null}` | `{"r": [{"id", "p"}]}`: the others in the room seen in the last 4 s (`null` leaves) |
+
+Who may write: a doc keyed to a player (`<id>` or `<x>_<id>`) only that player; a doc naming people (`to`, `from`,
+`by`, `seller`) only they or the player holding its claim (8 s, one buyer per listing); an added doc's `from`/`by`/
+`seller` must be the caller; everything else (guild docs, chat) any player. Every read is untrusted: the game
+cleans it. 1200 calls per player per minute. Behind HTTPS, the game's `SocialHttp.DEFAULT_URL` (or `--social=`,
+`BOKI_SOCIAL`) is the base URL.
+
 ## What the matchmaker expects of the game server
 
 It runs `SERVER_CMD --server --port <N> --mode duel|arena|trio --match-id <id> --tokens-file <path>`
@@ -108,6 +125,8 @@ with stdout piped, and:
 | `TOKEN_TTL_S` | `60` | an unused token's lifetime |
 | `READY_TIMEOUT_S` | `30` | how long a server may take to print `ready` |
 | `TOKENS_DIR` | `/run/boki` | where tokens files are written (0600) |
+| `SOCIAL_DB` | `/var/lib/boki/social.db` | the social store's sqlite file; empty turns `/social` off |
+| `SOCIAL_OWNERS` | (none) | comma-separated social player ids that get the game's admin tools |
 
 ## Run it locally
 
