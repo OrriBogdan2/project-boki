@@ -9,7 +9,9 @@ extends RefCounted
 const TOLERANCE := 0.05  # the share a species' measured read may differ from its data read
 const STALE := 0.02  # the share a species' KinSize.READS entry may differ from its model's idle read
 const STARTERS := ["cindle", "puddlet", "burrlet"]
-const READ_SPREAD := 1.12  # at each camera, the starter reading biggest reads at most this many times the least
+## at each camera, the starter reading biggest reads at most this many times the least; size A (owner) keeps the
+## starters 30/28/27 cm, which reads 1.17x from the low farm pitch
+const READ_SPREAD := 1.2
 const BIG := "heatherhorn"
 const BIG_OVER := 1.5  # Heatherhorn reads at least this many times the biggest starter
 const FAR := 2.0  # the most a species' longest side may differ from its data length (an outlier model to look at)

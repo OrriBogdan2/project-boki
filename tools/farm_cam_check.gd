@@ -1,6 +1,7 @@
 extends RefCounted
 ## --farm-cam-check: the farm's close third-person view (FarmCam, content/rules/camera.json "farm").
-##   0. in the farm it settles at the rules' pitch, lens and distance, behind you, and the bodies are not leaned back
+##   0. in the farm it settles at the rules' pitch, lens and distance, behind you, and the bodies are not leaned back;
+##      your avatar is drawn at its match size (Hunter.drawn_k), so a hunter is as tall at home as in a match
 ##   1. W walks away from the camera at every orbit angle (keys turned to the view)
 ##   2. a wall behind you pulls the camera in (and nothing it passes is inside the ground or the wall), and it backs
 ##      out again when the wall goes
@@ -62,6 +63,8 @@ func run(m: Node) -> void:
 	_keys_part()
 	await _wheel_part(r)
 	await _wall_part()
+	await _prop_part()
+	await _game_part()
 	await _build_part()
 	await _flag_part()
 	r["third_person"] = on0
@@ -83,6 +86,10 @@ func _third_part(r: Dictionary) -> void:
 	)
 	ok(cam.global_position.z > cam.focus.z, "the camera is south of you with the view at yaw 0 (looking north)")
 	ok(cam.char_lean() == Basis(), "bodies are not tipped back at this low angle")
+	var built: Vector3 = home.player.get_meta("built_scale", Vector3.ONE)
+	var want: float = built.y * Hunter.drawn_k(Arch.of_save()) * cam.hunter_scale
+	var got: float = home.player.scale.y
+	ok(absf(got - want) < 0.01, "your avatar is drawn at its match size (x%.3f, match x%.3f)" % [got, want])
 	ok(home.cam.get_viewport().get_camera_3d() == cam, "it is the farm's current camera")
 
 
@@ -135,11 +142,18 @@ func _wall_part() -> void:
 	for i in 120:
 		await main.get_tree().process_frame
 	var near := _back()
-	ok(near < free - 1.0, "a wall %.1f m behind pulls the camera in: %.1f m, from %.1f m" % [2.0, near, free])
 	var aim: Vector3 = cam.focus + Vector3(0, cam.rise, 0)
+	var rise_deg := rad_to_deg(asin((cam.global_position.y - aim.y) / near))
+	ok(
+		near > float(FarmCam.rules()["wall_min_m"]) - 0.3 and rise_deg > float(FarmCam.rules()["pitch_deg"]) + 10.0,
+		(
+			"a wall 2 m behind: the camera keeps %.1f m from you and tips up (%.0f deg, from %.0f)"
+			% [near, rise_deg, float(FarmCam.rules()["pitch_deg"])]
+		)
+	)
 	var inside := false
 	var s := 0.0
-	while s <= near:
+	while s <= near - 0.1:
 		var p: Vector3 = aim + (cam.global_position - aim).normalized() * s
 		inside = inside or FarmCam._blocked(home, p, 0.0)
 		s += 0.1
@@ -157,6 +171,74 @@ func _wall_part() -> void:
 		if _back() > free - 0.05:
 			break
 	ok(_back() > free - 0.1, "the wall gone, it backs out to %.1f m again" % _back())
+
+
+## The portal ring and the glider rack stand off the tile grid: with one between you and the camera, the camera comes
+## in front of it (never inside it) rather than looking through it.
+func _prop_part() -> void:
+	var cam: CamRig = home.cam
+	for nm in ["portal", "rack"]:
+		var at: Vector3 = home.spots[nm]
+		home.ppos = at + Vector3(0.0, 0.0, -2.0)  # you stand north of it, the camera south
+		home.cam.snap(home.ppos)
+		for i in 90:
+			await main.get_tree().process_frame
+		var aim: Vector3 = cam.focus + Vector3(0, cam.rise, 0)
+		var through := false
+		var s := 0.0
+		var dist := _back()
+		while s <= dist:
+			through = through or FarmCam._in_prop(home, aim + (cam.global_position - aim).normalized() * s, 0.0)
+			s += 0.1
+		ok(
+			not through,
+			(
+				"the %s: nothing of the view is inside it (%.1f m back, camera z %.1f, it at %.1f)"
+				% [nm, dist, cam.global_position.z, at.z]
+			)
+		)
+	home.ppos = HomeLayout.LANDING + Vector3(-6, 0, -3)
+	home.cam.snap(home.ppos)
+	await _settle(1.0)
+
+
+class Round:
+	extends RefCounted
+
+	func playing() -> bool:
+		return true
+
+	func tick(_d: float) -> void:
+		pass
+
+	func input(_e: InputEvent) -> bool:
+		return false
+
+	func find(_p: Vector2) -> Dictionary:
+		return {}
+
+
+## A minigame round tips the view up and draws it back (to show the court), and eases it back after.
+func _game_part() -> void:
+	var cam: CamRig = home.cam
+	home.ppos = HomeLayout.LANDING + Vector3(-6, 0, -3)
+	cam.snap(home.ppos)
+	await _settle(1.0)
+	await _zoomed()
+	var before := float(FarmCam.rules()["dist_max"])
+	var games: Array = home.games
+	home.games = [Round.new()]
+	for i in 150:
+		await main.get_tree().process_frame
+	var rise := rad_to_deg(cam.pitch)
+	ok(
+		rise > float(FarmCam.rules()["game_pitch_deg"]) - 3.0 and _back() > before + 1.0,
+		"a minigame round: the view tips up (%.0f deg) and draws back (%.1f m, from %.1f)" % [rise, _back(), before]
+	)
+	home.games = games
+	for i in 150:
+		await main.get_tree().process_frame
+	ok(absf(_back() - before) < 0.3, "the round over, the view comes back to %.1f m" % _back())
 
 
 func _build_part() -> void:

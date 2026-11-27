@@ -1,10 +1,11 @@
 extends RefCounted
 ## --farm-cam-clip [--clip-dir=farm_cam_clip]: film the farm's third-person view (FarmCam) on a made-up garden (never
 ## the real save): you walk with the real keys (W is away from the camera) to the garden beds, drag the view round,
-## to a roaming Boki, to the house, then back up to a wall so the camera is pulled in. PNG frames (cam_NN_<what>.png)
-## and the movie (farm_cam.avi) go to <tree>/<clip-dir>. --clip-arch=<id> plays that hunter (its class too);
-## --clip-beds-only stops after the garden beds shots. Like tools/farm_greet_clip.gd it re-runs itself as a child
-## Godot under the movie writer (GPU worker). Prints FCCLIP lines.
+## to a roaming Boki, to the house, then back up to a wall so the camera is pulled in. With --fc-games it films the
+## Boki minigames (Spark Volley, Fetch Cup, Kite Tow, Echo Steps) played from the third-person view instead. PNG
+## frames (cam_NN_<what>.png) and the movie (farm_cam.avi) go to <tree>/<clip-dir>. --clip-arch=<id> plays that hunter
+## (its class too); --clip-beds-only stops after the garden beds shots. Like tools/farm_greet_clip.gd it re-runs itself
+## as a child Godot under the movie writer (GPU worker). Prints FCCLIP lines.
 
 const FPS := 30
 const SIZE := "1600x900"
@@ -15,6 +16,13 @@ const DEADLINE_S := 150.0  # s of film at most
 const BUILDINGS := [
 	["house", 33, 28, 0], ["crop_patch", 42, 31, 0], ["cook_pot", 36, 35, 0], ["market_stall", 44, 37, 0]
 ]  # id, x, z, turns
+const GAMES := [  # member on Home, its fixture, zone ("" the classic base), shots (s into the game), key held
+	["hvolley", "log_node", "glasswater", [1.0, 5.0], ""],
+	["hfetch", "mat", "", [1.0, 6.0], ""],
+	["hkite", "stand", "ridge", [1.5, 4.0], "right"],
+	["hecho", "middle", "", [2.0, 9.0], ""]
+]
+const GAME_FROM := Vector3(0.0, 0, 1.6)  # m south of a game's fixture: where you stand to start it
 const SPECS := [["cindle", "Ash", 95.0], ["burrlet", "Moss", 60.0], ["zapple", "Pip", 30.0]]  # species, name, trust
 
 var main: Node
@@ -62,11 +70,14 @@ func run(main_node: Node) -> void:
 		(lay["deco"] as Array).append({"u": HomeLayout._next_uid(lay), "id": b[0], "x": b[1], "z": b[2], "r": b[3]})
 	Save.d = d
 	main.get_tree().create_timer(DEADLINE_S).timeout.connect(main.get_tree().quit.bind(1))  # never hang a worker
-	await _open("")
-	await _beds()
-	if not beds_only:
-		await _open(GardenZones.HUB)
-		await _hub()
+	if "--fc-games" in OS.get_cmdline_user_args():
+		await _games()
+	else:
+		await _open("")
+		await _beds()
+		if not beds_only:
+			await _open(GardenZones.HUB)
+			await _hub()
 	print("FCCLIP DONE shots=%d" % shot_n)
 	main.get_tree().quit()
 
@@ -119,6 +130,51 @@ func _hub() -> void:
 	await _orbit(3.1)  # turn the view round so it looks into the house wall: the camera comes in
 	await _wait(0.5)
 	await _shot("wall")
+
+
+## Each minigame on the classic base (it holds them all round its Training post), started from where you would stand.
+func _games() -> void:
+	for g in GAMES:
+		for rec in Save.d["roster"]:
+			rec["zone"] = g[2] if g[2] != "" else GardenZones.start()
+		if g[2] == "":
+			await _open_base()
+		else:
+			await _open(g[2])
+		var game: Object = h.get(g[0])
+		var fixture: Node3D = game.get(g[1])
+		h.ppos = fixture.position + GAME_FROM
+		h.player.position = h.ppos
+		h.cam.snap(h.ppos)
+		await _wait(1.2)
+		game.use()
+		var t := 0.0
+		for at in g[3]:
+			if g[4] != "":
+				Input.action_press(g[4])
+			await _wait(float(at) - t)
+			t = float(at)
+			await _shot(String(g[0]).substr(1) + "_%d" % int(at))
+		for a in ["left", "right"]:
+			Input.action_release(a)
+
+
+## The classic island with two rested Boki out and the minigames on (a made-up save, never the real one).
+func _open_base() -> void:
+	if h != null:
+		h.queue_free()
+		await main.get_tree().process_frame
+	Save.d["layout"] = HomeLayout.fresh()
+	HomeLayout.ensure(Save.d)
+	h = await main._hb_home()
+	for k in h.kins:
+		k.erase("indoors")
+	h.day_t = DAY_T
+	Settings.set_v("tips", false)
+	h._close_panel()
+	if main.get("fade") != null:
+		await main.fade.reveal(0.01)
+	await _wait(0.5)
 
 
 ## Walks to `goal` (xz) with the real keys, each frame held in the view's own terms. `shoot` names a frame taken on
