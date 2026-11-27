@@ -132,7 +132,7 @@ const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake", "warden_model
 ##   px: tallest 3D render in pixels (0: native); a bigger window renders the 3D smaller and FSR scales it
 ##   up (see _apply_render_scale), so a retina or 4K screen doesn't cost 2-4x the pixels  ·  scale: the most
 ##   of the window's size the 3D renders at (0.77 Low, 0.5 Very Low)  ·  fxaa: edge smoothing when MSAA is off
-##   ·  unlit: no lighting at all
+##   ·  steps: physics catch-up steps a frame (Engine.max_physics_steps_per_frame)  ·  unlit: no lighting at all
 ##   ·  lod: mesh LOD threshold (pixels of error allowed)  ·  grass: share of grass and flowers kept  ·  draw: draw distance
 ##   of scatter and props (x)  ·  shadow_k: shadow distance (x)  ·  splits: shadow cascades  ·  atlas: sun
 ##   shadow map size  ·  soft: soft-shadow filter quality  ·  ssao, glow: the desktop renderer's ambient
@@ -387,6 +387,7 @@ var _defaults_keys := {}
 var _dirty := false
 var _started := false  # the bindings the game ships with, for "reset"
 var _quality_basics := false
+var _caps := {}  # action -> [its first InputEvent, its key cap] (key_cap); a rebind swaps the event, so it goes stale
 
 
 ## The preset in effect: the player's pick, or what auto-detect found for this machine.
@@ -1081,7 +1082,15 @@ func move_caps(sep := "") -> String:
 	return sep.join(["up", "left", "down", "right"].map(func(a): return key_cap(a)))
 
 
-## The first binding of an action, short, for HUD key caps ("E", "LMB", "M4").
+## The first binding of an action, short, for HUD key caps ("E", "LMB", "M4"). Kept per action while its first
+## event is the same object (the HUD asks for dozens a frame); any rebind swaps it.
 func key_cap(action: String) -> String:
 	var evs := InputMap.action_get_events(action)
-	return cap_text(ev_code(evs[0])) if not evs.is_empty() else "?"
+	if evs.is_empty():
+		return "?"
+	var hit: Array = _caps.get(action, [])
+	if not hit.is_empty() and is_same(hit[0], evs[0]):
+		return hit[1]
+	var cap := cap_text(ev_code(evs[0]))
+	_caps[action] = [evs[0], cap]
+	return cap
