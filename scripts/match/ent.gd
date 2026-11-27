@@ -489,7 +489,7 @@ func show_flash(hit: float) -> void:
 			mt.set_shader_parameter("flash_color", fc)
 	# the hit's edge pulse: full as the flash lets go, easing out over the tier's outline time
 	var pk := clampf(outline_t / outline_len, 0.0, 1.0)
-	pk = snappedf(pk * pk, 0.02)
+	pk = snappedf(pk * pk, 0.125)  # (8 steps: a few material sets per pulse, not one a frame)
 	if pk != _pulse_set:
 		_pulse_set = pk
 		for mt in mats:

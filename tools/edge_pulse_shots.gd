@@ -6,9 +6,9 @@ extends RefCounted
 ## asks; EDGE rows, p95 and mean in ms, off/on blocks alternated). The check is --impact-weight-check.
 
 const DT := 1.0 / 60.0
-const WARM := 30  # frames dropped before timing
-const TIMED := 120  # frames timed per block
-const ROUNDS := 4  # off/on blocks alternated, so a drifting box loads both sides alike
+const WARM := 15  # frames dropped before timing
+const TIMED := 60  # frames timed per block
+const ROUNDS := 16  # off/on blocks alternated, so a drifting box loads both sides alike
 const PX := Vector2i(1920, 1080)
 
 var main: Node
@@ -47,30 +47,41 @@ func run(root: Node) -> void:
 		await _go(4)  # past the white flash's full frames, early in the pulse
 		main.get_viewport().get_texture().get_image().save_png(dir.path_join(shot[0] + ".png"))
 		print("EDGE shot %s %s" % [shot[0], dir.path_join(shot[0] + ".png")])
-	var off: Array = []
-	var on: Array = []
+	var vp := main.get_viewport().get_viewport_rid()
+	RenderingServer.viewport_set_measure_render_time(vp, true)
+	var off: Array = [[], []]
+	var on: Array = [[], []]
 	for r in ROUNDS:
 		pulse_all = false
-		off.append_array(await _frame_ms())
+		var a := await _frame_ms(vp)
 		pulse_all = true
-		on.append_array(await _frame_ms())
-	var row := "EDGE frame ms (%d frames each) off p95 %.2f mean %.2f | on p95 %.2f mean %.2f | delta p95 %.2f"
-	print(row % [off.size(), _p95(off), _mean(off), _p95(on), _mean(on), _p95(on) - _p95(off)])
+		var b := await _frame_ms(vp)
+		for i in 2:
+			off[i].append_array(a[i])
+			on[i].append_array(b[i])
+	var row := "EDGE %s ms (%d frames each) off p95 %.2f mean %.2f | on p95 %.2f mean %.2f | delta p95 %.2f mean %.2f"
+	for i in 2:
+		var o: Array = off[i]
+		var n: Array = on[i]
+		var d := [_p95(n) - _p95(o), _mean(n) - _mean(o)]
+		print(row % [["frame", "gpu"][i], o.size(), _p95(o), _mean(o), _p95(n), _mean(n), d[0], d[1]])
 	print("EDGE DONE")
 	main.get_tree().quit(0)
 
 
-## The wall time between frames over TIMED frames of the fight, in ms.
-func _frame_ms() -> Array:
+## The wall time between frames over TIMED frames of the fight, and the GPU's render time of each, in ms.
+func _frame_ms(vp: RID) -> Array:
 	await _go(WARM)
 	var ts: Array = []
+	var gpu: Array = []
 	var last := Time.get_ticks_usec()
 	for i in TIMED:
 		await _go(1)
 		var now := Time.get_ticks_usec()
 		ts.append(float(now - last) / 1000.0)
+		gpu.append(RenderingServer.viewport_get_measured_render_time_gpu(vp))
 		last = now
-	return ts
+	return [ts, gpu]
 
 
 func _p95(ts: Array) -> float:
