@@ -381,7 +381,11 @@ func _suction(e: Dictionary) -> void:
 	var face := Vector2(ex, ez) - dir * 0.2
 	var fx := floorf(face.x) + (1.0 if dir.x > 0.0 else 0.0)
 	var fz := floorf(face.y) + (1.0 if dir.y > 0.0 else 0.0)
-	var face_at := Vector2(fx if dir.x != 0.0 else ex, fz if dir.y != 0.0 else ez)
+	var face_at := Vector2(ex, ez)
+	if dir.x != 0.0:
+		face_at.x = fx
+	if dir.y != 0.0:
+		face_at.y = fz
 	var bs := HunterMove.body_scale
 	var fc := [1.0, 0.7513, 0.4623, 0.248, 0.1075, 0.0]
 	var uc := [1.0, 0.9909, 0.9609, 0.771, 0.3166, 0.0]

@@ -140,8 +140,10 @@ static func _wall_ahead(h: Hunter, dir: Vector2, reach: float) -> Dictionary:
 	var cz := int(floor(z))
 	var sx := 1 if dir.x > 0.0 else -1
 	var sz := 1 if dir.y > 0.0 else -1
-	var tx := ((cx + (1 if sx > 0 else 0)) - x) / dir.x if absf(dir.x) > 1e-6 else INF
-	var tz := ((cz + (1 if sz > 0 else 0)) - z) / dir.y if absf(dir.y) > 1e-6 else INF
+	var nx := cx + maxi(sx, 0)  # the next grid line ahead on each axis
+	var nz := cz + maxi(sz, 0)
+	var tx := (nx - x) / dir.x if absf(dir.x) > 1e-6 else INF
+	var tz := (nz - z) / dir.y if absf(dir.y) > 1e-6 else INF
 	var dtx := absf(1.0 / dir.x) if absf(dir.x) > 1e-6 else INF
 	var dtz := absf(1.0 / dir.y) if absf(dir.y) > 1e-6 else INF
 	while minf(tx, tz) <= reach:

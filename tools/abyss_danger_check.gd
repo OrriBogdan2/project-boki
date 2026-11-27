@@ -1,7 +1,7 @@
 extends RefCounted
 ## --abyss-danger-check: the abyss warning builds with depth instead of switching on at the lip
 ## (content/rules/abyss_danger.json). Over the 17.5 m drop from the lip to the point of no return, on the
-## target law (owner 11-27): no tint down to 0.25 m, full tint 3.5 m above the point of no return (14 m
+## target law: no tint down to 0.25 m, full tint 3.5 m above the point of no return (14 m
 ## down), the warning sound from 3 m down; tint, level and rate rise monotonically in between.
 
 const SPAN := 17.5  # m, lip to the point of no return (World.ABYSS_DEPTH + HunterFeel.abyss_extra)
