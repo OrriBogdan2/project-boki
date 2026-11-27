@@ -5,23 +5,40 @@ extends Control
 ## Nov 6: the owner read it as screen shake, mostly the lurch when a fresh, un-zoomed splash faded in over a
 ## zoomed, panned one. It stays still: no drift, so nothing here depends on Screen shake.)
 
-const ORDER := ["juggernaut", "gunslinger", "mage", "archer", "bulwark", "rimewright",
-	"ostra", "thief", "dolm", "ashwick", "dredge", "tender", "gil"]
-const HOLD := 7.0            # s each splash is on screen
-const FADE := 1.4            # s of crossfade into the next
+const ORDER := [
+	"juggernaut",
+	"gunslinger",
+	"mage",
+	"archer",
+	"bulwark",
+	"rimewright",
+	"ostra",
+	"thief",
+	"dolm",
+	"ashwick",
+	"dredge",
+	"tender",
+	"gil"
+]
+const HOLD := 7.0  # s each splash is on screen
+const FADE := 1.4  # s of crossfade into the next
+const SWELL_DB := -20.0  # dB, the air swell under each crossfade after the first
 
-var shown: Array = []        # [TextureRect, age]
+var shown: Array = []  # [TextureRect, age]
 var idx := 0
 var age := 0.0
+
 
 func _init() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	clip_contents = true
 
+
 func _ready() -> void:
 	_next()
 	shown[0][0].modulate.a = 1.0
+
 
 func _next() -> void:
 	var tr := TextureRect.new()
@@ -33,9 +50,12 @@ func _next() -> void:
 	add_child(tr)
 	shown.append([tr, 0.0])
 	idx += 1
+	if idx > 1:
+		Sfx.play("abyss_whoosh", null, SWELL_DB, 0.05)
+
 
 func _process(delta: float) -> void:
-	delta = minf(delta, 0.1)   # a hitch never skips the crossfade
+	delta = minf(delta, 0.1)  # a hitch never skips the crossfade
 	age += delta
 	if age >= HOLD:
 		age = 0.0
