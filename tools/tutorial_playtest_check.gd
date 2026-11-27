@@ -131,6 +131,9 @@ func _crouch(m: Match) -> void:
 		p.inp["crouch"] = true
 		m.step(Match.DT)
 	ok(tu.id() == "crouch", "crouching at the foot of the cliff does not count")
+	# (the lookout rim is sheer: the driver climbs it with a run-up kick, not from a standstill at its foot, so the
+	# rest of the course goes on from the top)
+	p.teleport(Vector3(mid.x, m.world.ground_at(mid.x, mid.z), mid.z))
 
 
 # ------------------------------------------------------------------ 2. the Boki send
