@@ -366,6 +366,10 @@ func _swim_step(dt: float) -> void:
 func own_dash_trail() -> bool:
 	return swim_t > 0.0
 
+## The flat teal ribbon would sit at body height over the waist-deep swim and read as a box; the wake is the trail.
+func hides_dash_streak() -> bool:
+	return swim_t > 0.0
+
 func _surface() -> void:
 	var dd := dash_def()
 	play("gil_surface")
