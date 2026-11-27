@@ -6,7 +6,7 @@ extends "res://tools/hunter_size_sheet.gd"
 ## Needs a renderer (jobq --needs gpu).
 
 const V3_FRAME := Vector2i(3840, 2160)
-const V3_ZOOM := 1.4572
+const V3_ZOOM := 0.33  # the game camera angle, closer in (the widest wheel zoom, 1.4572, draws a hunter ~80 px/m at 4K)
 
 
 func run(main_node: Node) -> void:
@@ -52,7 +52,10 @@ func run(main_node: Node) -> void:
 			m.player.render(0.0, 1.0)
 			_clean()
 			await _measure(hero, "v3" + tag)
-			print("HFRM %s %s: k %.3f" % [hero, tag, k])
+			var mid := m.player.position + Vector3(0, 1.0, 0)
+			var ppm := (m.cam.unproject_position(mid + m.cam.global_transform.basis.x) - m.cam.unproject_position(mid)).length()
+			var feet := m.cam.unproject_position(m.player.position)
+			print("HFRM %s %s: k %.3f, %.1f px/m, feet at %.0f,%.0f of %dx%d" % [hero, tag, k, ppm, feet.x, feet.y, main.get_viewport().size.x, main.get_viewport().size.y])
 		if verify:
 			m.cam.user_zoom = SIL_ZOOM
 			m.cam.zoom = SIL_ZOOM
