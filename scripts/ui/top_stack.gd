@@ -35,8 +35,9 @@ static func rail(h) -> void:
 	var fr := SafeArea.frame(sz)   # (on 21:9 and wider the corner groups keep to a centred 16:9 frame)
 	var pad := HudStyle.safe_pad(fr.size)
 	var y: float = maxf(h.feed_top, pad.y)
-	if not KillFeed.shown.is_empty():
-		y = maxf(y, (KillFeed.shown.back()["rect"] as Rect2).end.y + KillFeed.GAP)
+	var corner: Rect2 = HudScale.drawn.get(HudScale.TR, Rect2())   # (as drawn: the HUD size grows the feed down)
+	if corner.has_area():
+		y = maxf(y, corner.end.y + KillFeed.GAP)
 	h.msgs.right_edge = fr.end.x - pad.x
 	h.msgs.max_w = fr.size.x * RAIL_W
 	h.msgs.top = maxf(h.msgs.top, y)
