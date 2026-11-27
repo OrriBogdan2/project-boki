@@ -124,10 +124,9 @@ func _case(c: String) -> void:
 	if c == "air_hit":
 		dummy.teleport(home + Vector3(AIM_AT, 0, 0))
 		fresh(dummy)
-	var air := true
 	match c:
 		"ground_tap", "ground_hold", "terrace_hold", "wall_hold":
-			air = false
+			pass  # pressed from the ground: no setup
 		"apex", "air_hit", "terrace_air", "wall_air":
 			_jump()
 			_to_apex()

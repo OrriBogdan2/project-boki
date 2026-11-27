@@ -406,13 +406,13 @@ func arc_y(t: float) -> float:
 	return top + minf(air_vy, 0.0) * tf - 0.5 * _g_dn() * tf * tf
 
 
-## The arc's flight time down `drop` metres from its press: up at air_vy, down under _g_dn, no faster than _cap.
-func air_time(drop: float) -> float:
+## The arc's flight time down `fall` metres from its press: up at air_vy, down under _g_dn, no faster than _cap.
+func air_time(fall: float) -> float:
 	var up := maxf(air_vy, 0.0)
 	var s0 := -minf(air_vy, 0.0)
 	var g_dn := _g_dn()
 	var cap := maxf(_cap(), s0)
-	var fall_h := maxf(0.0, drop + up * up / (2.0 * Hunter.H_GRAV))
+	var fall_h := maxf(0.0, fall + up * up / (2.0 * Hunter.H_GRAV))
 	var cap_h := (cap * cap - s0 * s0) / (2.0 * g_dn)
 	var down := (cap - s0) / g_dn + (fall_h - cap_h) / cap
 	if fall_h <= cap_h:
