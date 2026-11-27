@@ -1,9 +1,11 @@
 extends RefCounted
-## --minigame-hub-check: the title's "Play with Your Boki" (scripts/home/minigame_hub.gd).
+## --minigame-hub-check: "Play with Your Boki", the garden's minigame picker (scripts/home/minigame_hub.gd).
+## The title no longer lists it (the title enters the world); the picker stays in the garden.
 ##   1. the registry (content/rules/minigames.json) names each game once, with a member and a rule line
 ##   2. results: nothing played reads "No games yet"; wins make the best Boki, the latest the last
-##   3. the title has the entry with a save, and not without one
-##   4. a save that has skipped the farm tutorial: the entry loads the home straight into the picker,
+##   3. the title has no entry, with a save or without
+##   4. a save that has skipped the farm tutorial: home {play_hub} (the garden waystone) loads the home
+##      straight into the picker,
 ##      and the tutorial flags are exactly as they were
 ##   6. the garden games for real (base_mode on, three Boki, the Training post): the picker lists all
 ##      five, and from the hub (where none is placed) every game of every open zone, a pick there
@@ -84,8 +86,8 @@ func _title() -> void:
 			if main.screen_node() != old and i >= 6:
 				break
 		var labels: Array = main.screen_node().menu_labels()
-		var how := "there with a save" if with_save else "absent without a Boki"
-		ok(labels.has(MinigameHub.TITLE) == with_save, "title: the entry is %s (%s)" % [how, labels])
+		var how := "with a save" if with_save else "without a Boki"
+		ok(not labels.has(MinigameHub.TITLE) and not labels.is_empty(), "title: no entry %s (%s)" % [how, labels])
 
 func _picker() -> void:
 	var d := Save.fresh()
