@@ -7,7 +7,8 @@ extends Node
 ##   far_hits        a hit from FAR_HIT_M or more
 ##   air_hits        a hit while you are off the ground
 ##   kin_hits        a hit by your Boki
-##   merged_knocks   a knock while merged with your Boki
+##   boki_knocks     a knock while your Boki is out beside you (summoned from its wisp, or walking with wisps off);
+##                   never a Fusion: there is no fusion in the game (decision 0159)
 ##   lowhp_knocks    a knock while under half health
 ## A Boki's statuses count for its hunter. Added as a child of the match (Match.start).
 
@@ -95,11 +96,20 @@ func _count_cast(h: Hunter, target: Node, tags: Array) -> void:
 		cast["done"] = true
 		h.add_stat("multi3")
 
+## Your Boki is out fighting: summoned out of its wisp (KinSummon), or the walking Boki (wisps off); not down,
+## benched, away, on your shoulder or riding as a wisp.
+static func _boki_out(h: Hunter) -> bool:
+	var e = h.kin
+	if e == null or not is_instance_valid(e) or not e is Kin:
+		return false
+	var k: Kin = e
+	return not k.dead and not k.wisp and k.state not in ["shoulder", "downed", "bench", "away", "fused", "wild"]
+
 ## After the hit has played out: did it knock the rival down, and how was the hunter doing then?
 func _watch_knock(h: Hunter, rival: Hunter, was_down: bool) -> void:
 	if not is_instance_valid(h) or not is_instance_valid(rival) or was_down or not rival.downed:
 		return
-	if not h.merge_st.is_empty():
-		h.add_stat("merged_knocks")
+	if _boki_out(h):
+		h.add_stat("boki_knocks")
 	if h.hp < h.max_hp * LOW_HP_K:
 		h.add_stat("lowhp_knocks")
