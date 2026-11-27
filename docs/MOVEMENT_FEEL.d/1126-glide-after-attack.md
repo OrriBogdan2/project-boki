@@ -6,7 +6,7 @@ Space held, or a 50 ms tap. Pass: the glider is open within 0.1 s of the press w
 action itself holds (a charge, a channel, a planted cast, a knock) a held press opens within 0.1 s of its end, and a tap
 inside `Loco.press_buffer` of that end does too (a longer lock refuses a tap). Cause: `AirLimits.move_running` shut the
 glider for a kit move's whole pose (an LMB tap ~0.35 s), and an arm let go inside it was forgotten. Fix: a fresh press cuts the
-pose short and stays armed `Loco.press_buffer` (0.15 s) after it is let go (decision 0178).
+pose short and stays armed `Loco.press_buffer` (0.15 s) after it is let go (decision 0180).
 
 | Hunter | trials | glide dropped before | after |
 |---|---|---|---|
