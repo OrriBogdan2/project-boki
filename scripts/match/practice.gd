@@ -9,12 +9,12 @@ extends Node
 const NAME := "Practice"
 const LEFT_PAD := 560          # px, the bar starts right of the HUD's portrait and ability row
 const BOTTOM_PAD := 8          # px, under the bar
+const TEST_ZONE_PAD := 150     # px, under the Test Zone's bar: above the carried-Boki and weapon cards (y 612+)
 
 var m: Match
 var bar: PanelContainer = null
 var bar_btns := {}             # id -> Button
 var bench: ParityBench = null  # the parity bench panel (the areas with dummies)
-var recast: RecastDrill = null # the two-step drill station (the same areas)
 var picker: CanvasLayer = null # the hero picker, while open
 var picker_page := ""          # "heroes" | "kit"
 var drills: MoveDrills = null  # the Training Area's movement drills
@@ -40,7 +40,6 @@ static func attach(match_node: Match) -> Practice:
 	match_node.add_child(p)
 	p.bench = ParityBench.attach(match_node)
 	p.drills = MoveDrills.attach(p)
-	p.recast = RecastDrill.attach(p)
 	p._build_bar()
 	KitDrill.attach(p)
 	return p
@@ -57,8 +56,6 @@ func items() -> Array:
 		out.append(["menu", "Duel", "gear", func(): if not m.paused: m.duel.open_menu(), "B"])
 	if bench:
 		out.append(["bench", "Bench", "gear", func(): bench.toggle(), ""])
-	if recast:
-		out.append(["recast", "Two-step", "burst", func(): recast.toggle(), ""])
 	out.append(["leave", "Skip" if m.opts.get("tutorial", false) else "Leave", "back", func(): leave(m, true), ""])
 	return out
 
@@ -72,17 +69,26 @@ func _build_bar() -> void:
 	_layer.add_child(root)
 	var mc := MarginContainer.new()
 	mc.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	mc.add_theme_constant_override("margin_left", LEFT_PAD)
-	mc.add_theme_constant_override("margin_bottom", BOTTOM_PAD)
 	root.add_child(mc)
 	bar = HubBar.build(items(), func(cb: Callable, _id: String): cb.call(), bar_btns)
 	bar.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	bar.size_flags_vertical = Control.SIZE_SHRINK_END
 	mc.add_child(bar)
-	mc.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE, Control.PRESET_MODE_MINSIZE)
+	mc.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT, Control.PRESET_MODE_MINSIZE)
+	mc.offset_left += LEFT_PAD          # the box is just the bar's own rectangle, not a full-width strip
+	mc.offset_right += LEFT_PAD
+	var pad := TEST_ZONE_PAD if m.opts.get("test_zone", false) else BOTTOM_PAD
+	mc.offset_top -= pad
+	mc.offset_bottom -= pad
 	mc.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	show_bar(m.arena == null or m.arena.tools)      # (the Test Zone starts with the tools off)
 	if m.hud:
 		m.hud.ui_extra.append(bar)       # the mouse is over UI here: no shooting, the pointer shows
+
+## Shows or hides the bar and the full-width box it sits in (a hidden bar leaves no empty strip to collide with).
+func show_bar(on: bool) -> void:
+	bar.visible = on
+	bar.get_parent().visible = on
 
 ## Ends the practice session and goes back (the bar's Leave and the Esc menu's).
 static func leave(match_node: Match, extracted: bool) -> void:
@@ -95,12 +101,8 @@ static func leave(match_node: Match, extracted: bool) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if m == null or m.over:
 		return
-	if picker != null:
-		if event.is_action_pressed("menu"):
-			if picker_page == "kit": PracticeHero.open(self)
-			else: PracticeHero.close(self)
-			get_viewport().set_input_as_handled()
-		elif event.is_action_pressed("kit_card") and hover_arch != "":
+	if picker != null:      # (Esc closes it, or goes back from a kit page: PanelClose)
+		if event.is_action_pressed("kit_card") and hover_arch != "":
 			PracticeHero.kit(self, hover_arch)
 			get_viewport().set_input_as_handled()
 		elif event.is_action_pressed("hero"):

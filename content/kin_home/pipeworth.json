@@ -1,0 +1,14 @@
+{
+	"id": "pipeworth",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/pipeworth.json.",
+	"work": {
+		"ember": 3,
+		"forage": 1,
+		"mend": 2
+	},
+	"shiny": {
+		"belly": "#8488e4",
+		"color": "#6cb486",
+		"glow": "#7e85ff"
+	}
+}
