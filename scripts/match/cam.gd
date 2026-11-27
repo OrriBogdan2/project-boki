@@ -256,7 +256,10 @@ func _cast_room(dir: Vector2, zoom_k: float) -> float:
 	room -= edge
 	if hud_keep.is_empty() or room <= 0.0:
 		return room
-	var plate := (char_lean() * Vector3(0.0, HunterZone.PLATE_UP * hunter_scale, 0.0)).rotated(Vector3.UP, -yaw)
+	var plate_up := HunterZone.PLATE_UP * hunter_scale
+	if target is Hunter:
+		plate_up *= Arch.match_k((target as Hunter).arch)
+	var plate := (char_lean() * Vector3(0.0, plate_up, 0.0)).rotated(Vector3.UP, -yaw)
 	plate.y += lift - rise
 	var lens_at := Vector3(d, t, wide)
 	var home := _box_at(0.0, plate, view, lens_at, turned)

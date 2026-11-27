@@ -2705,8 +2705,8 @@ func _anim_state(stretch: float) -> void:
 	else:
 		s.erase("air_h")
 
-## (movefeel) Hunters are drawn a little larger in a match so they read on screen (owner: SUPERVIVE's
-## heroes "feel more important"), times the camera style's hunter_scale. Visual only: the hitbox (r),
+## (movefeel) Hunters are drawn a little larger in a match so they read on screen (1.12 times
+## its archetype's body.match_k), times the camera style's hunter_scale. Visual only: the hitbox (r),
 ## the TeamRing hit circle under your feet, shot heights and the balloon marker are unchanged.
 const VIS_SCALE := 1.12
 var vis_k := 1.0       # the scale fit_scale last put on this model
@@ -2717,9 +2717,9 @@ func set_model(n: Node3D) -> void:
 	vis_k = 1.0
 	fit_scale()
 
-## Puts VIS_SCALE x the camera's hunter_scale on the model (again when the Settings camera changes).
+## Puts VIS_SCALE x match_k x the camera's hunter_scale on the model (again when the Settings camera changes).
 func fit_scale() -> void:
-	var k: float = VIS_SCALE * (m.cam.hunter_scale if m and m.cam else 1.0)
+	var k: float = VIS_SCALE * Arch.match_k(arch) * (m.cam.hunter_scale if m and m.cam else 1.0)
 	if is_equal_approx(k, vis_k):
 		return
 	model.scale *= k / vis_k
@@ -2863,4 +2863,4 @@ func render(delta: float, alpha: float) -> void:
 		vuln_fx_t -= delta
 		if vuln_fx_t <= 0.0:
 			vuln_fx_t = 0.22
-			m.fx.burst(pos + Vector3(0, 2.05, 0), Color("ff6a4a"), 3, 1.2, 0.3, -1.0, 0.8)
+			m.fx.burst(pos + Vector3(0, 2.05 * Arch.match_k(arch), 0), Color("ff6a4a"), 3, 1.2, 0.3, -1.0, 0.8)

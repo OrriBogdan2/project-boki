@@ -2851,7 +2851,7 @@ func _stand_in(id: String, look: Dictionary) -> Node3D:
 	var weapon := Arch.signature(id) if id != "" else REF_WEAPON
 	var h := Models.hunter(cls, Data.TEAM_COLORS[0], weapon, "", look, id)
 	m.add_child(h)
-	var at_scale := h.scale * Hunter.VIS_SCALE * m.cam.hunter_scale
+	var at_scale := h.scale * Hunter.VIS_SCALE * Arch.match_k(id) * m.cam.hunter_scale
 	var lean := p_v.model.global_basis.orthonormalized()
 	h.global_transform = Transform3D(lean * Basis.from_scale(at_scale), p_v.model.global_position)
 	h.set_meta("anim_seed", 1)  # one stance for every measure (HunterAnim seeds it per node otherwise)

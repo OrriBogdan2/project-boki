@@ -8,7 +8,7 @@ extends RefCounted
 
 const SMOKE_EVERY := 0.12      # s between smoke puffs while overheated
 const SMOKE_BACK := 0.9        # m behind the canopy the puffs start
-const SMOKE_UP := 2.0          # m above the feet the puffs start (the canopy's height)
+const SMOKE_UP := 2.0          # m above the feet the puffs start (the canopy's height, x the Hunter's match_k)
 const NET_LEVELS := 14         # heat steps on the wire: 0..14 (15 = overheated)
 
 static func overheated(h: Hunter) -> bool:
@@ -27,7 +27,7 @@ static func tick(h: Hunter, glider: Node3D, dt: float) -> void:
 	if puff and overheated(h) and h.model.visible:
 		var flat := Vector3(-h.vel.x, 0.0, -h.vel.z)
 		var back := flat.normalized() if flat.length() > 0.5 else Vector3.UP
-		h.m.fx.smoke(h.pos + Vector3(0, SMOKE_UP, 0) + back * SMOKE_BACK, back)
+		h.m.fx.smoke(h.pos + Vector3(0, SMOKE_UP * Arch.match_k(h.arch), 0) + back * SMOKE_BACK, back)
 
 ## Heat on the wire, 4 bits of the hunter flags (match._flags): 0..NET_LEVELS by heat, 15 while overheated. Whether
 ## it burns (over the abyss) is one more bit; a remote Hunter takes its lip state from it.
