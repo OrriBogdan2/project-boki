@@ -68,6 +68,7 @@ const CAST := {
 ## bubble; the Hunter follows (never nearer than STOP_M), presses E, and it walks onto the pad and blinks out.
 ## (r10: the Boki was pinned to its staged spot and the Hunter landed on the pad, so nothing moved.)
 const ASK_BACK := 9.0  # m up-view of the pad the Hunter starts (the pad is straight ahead in the view)
+const ASK_BESIDE := 2.6  # m left of the asking Boki the Hunter walks (the view sees both, side by side)
 const ASK_SIDE := [0.0, 2.0, -2.0, 4.0, -4.0]  # m sideways tried until the walk to the pad clears every tree
 ## Up to three of the zone's Boki stand in an open arc ahead of the Hunter, clear of every prop; the others are out of the
 ## film (hidden), so each shot has 2-3 readable Boki and none inside a sign or post.
@@ -79,7 +80,7 @@ const COURSE_NAMES := ["RacePost", "RelayStand", "KiteStand"]
 var rig
 var h: Node = null  # the Home on screen now (it is a new one after every hop)
 var hud := false  # --pitch-hud: the farm's HUD is filmed (the other version has none)
-var keep_say := false  # shot 17 keeps the Boki's bubble
+var _keep_say: Label3D = null  # shot 17: the asker's own bubble (no other words over the world)
 var _keep: Node3D = null  # shot 17 films the return pad (the stone the ask is about), though it is built of discs
 var _pins: Array = []  # [kin record, where it stands]: a staged Boki is held there for the whole take (no wandering off, no errand)
 var _cleared: Array = []  # props hidden off the Hunter's walk (kept hidden every frame)
@@ -201,7 +202,6 @@ func ask_take() -> void:
 	for rec in Save.d["roster"]:
 		if String(rec["name"]) == "Skateron":
 			rec["lean"] = {"fire": 20.0}
-	keep_say = true
 	await _load("glasswater")
 	var k: Dictionary = h.kins.filter(func(o): return String(o["rec"]["name"]) == "Skateron")[0]
 	var pad: Vector3 = h.hway.pad["pos"]
@@ -230,7 +230,7 @@ func ask_take() -> void:
 	_keep = h.hway.node
 	_cleared.erase(_keep)
 	_keep.visible = true
-	await _wait(0.8)
+	await _wait(1.8)  # (the view settles after the move: it starts tipped top-down)
 	rig.mark("ask")
 	var tries := 0
 	while not h.life._ask(k) and tries < 2000:
@@ -238,18 +238,23 @@ func ask_take() -> void:
 	if not h.life.machine(k).is_in(BaseLife.S.REACT):
 		rig.fail("Skateron did not ask")
 		return
+	_keep_say = k.get("say") as Label3D
 	var n := 0
-	while n < int(7.0 * FPS):  # follow it to the pad, STOP_M behind
+	while n < int(7.0 * FPS):  # walk beside it to the pad (behind it, the Hunter hid it)
 		var p3: Vector3 = (k["node"] as Node3D).global_position
 		var off := Vector2(p3.x - h.ppos.x, p3.z - h.ppos.z)
-		_keys(off.normalized().rotated(h.cam.yaw) if off.length() > STOP_M + 0.3 else Vector2.ZERO)
+		var to := Vector2(
+			p3.x - right.x * ASK_BESIDE - h.ppos.x, p3.z - right.z * ASK_BESIDE - h.ppos.z
+		)
+		var go := to.length() > 0.6 and off.length() > MIN_GAP_M + 0.3
+		_keys(to.normalized().rotated(h.cam.yaw) if go else Vector2.ZERO)
 		await rig.main.get_tree().process_frame
 		_tidy()
 		n += 1
 		if (
 			n > FPS
 			and Vector2(p3.x - pad.x, p3.z - pad.z).length() < 2.2
-			and off.length() <= STOP_M + 0.4
+			and (to.length() <= 0.8 or not go)
 		):
 			break
 	_keys(Vector2.ZERO)
@@ -478,8 +483,15 @@ func _hide_fixtures(zone: String) -> void:
 		for b in beds:
 			hide = hide or at.distance_to(b) < 1.0
 		if h.zone != GardenZones.HUB:
+			var tiles := 0  # flat box tiles (a zone game's course, e.g. Cinderstep's stepping slabs)
 			for m in n3.find_children("*", "MeshInstance3D", true, false):
 				hide = hide or (m as MeshInstance3D).mesh is PrismMesh
+				if (
+					(m as MeshInstance3D).mesh is BoxMesh
+					and (m as MeshInstance3D).get_aabb().size.y < 0.05
+				):
+					tiles += 1
+			hide = hide or tiles >= 4
 		if hide:
 			print("PITCH fixture-hide %s at %s" % [n3.name, n3.position])
 			n3.visible = false
@@ -655,7 +667,7 @@ func _hide_marks(c: Node) -> void:
 			(n3 as Node3D).visible = false
 	for l in c.find_children("*", "Label3D", true, false):
 		var t: String = (l as Label3D).text
-		if not (keep_say and t.length() > 16):
+		if l != _keep_say:
 			(l as Label3D).visible = false
 	for sp in c.find_children("*", "Sprite3D", true, false):
 		(sp as Sprite3D).visible = false
