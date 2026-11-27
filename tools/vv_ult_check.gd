@@ -6,26 +6,31 @@ extends RefCounted
 
 const BURST := preload("res://tools/ult_burst.gd")
 const EXIT := preload("res://tools/ult_exit.gd")
-const KIN := "pebbit"            # a Boki to bond with (the bond only fills while one is ready)
-const ZONE_TICK_S := 0.5         # s between Cinderfall burn ticks: the source's (briefs/hero-ref/venator.md, R)
+const KIN := "pebbit"  # a Boki to bond with (the bond only fills while one is ready)
+const ZONE_TICK_S := 0.5  # s between Cinderfall burn ticks: the source's (briefs/hero-ref/venator.md, R)
 
-var hc: RefCounted                # tools/hero_combo_check.gd
-var ac: RefCounted                # tools/archetype_check.gd
+var hc: RefCounted  # tools/hero_combo_check.gd
+var ac: RefCounted  # tools/archetype_check.gd
+
 
 func _init(combo_check: RefCounted) -> void:
 	hc = combo_check
 	ac = combo_check.ac
 
+
 func ok(what: String, cond: bool, info := "") -> void:
 	hc.ok(what, cond, info)
+
 
 ## What this cast has paid the bond so far (KinBond keeps it on the hunter per cast id).
 func _paid(P: Hunter, cast_id: String) -> float:
 	var c: Dictionary = P.get_meta("bond_cast", {})
 	return float(c.get("got", 0.0)) if String(c.get("id", "")) == cast_id else 0.0
 
+
 func _cast_id(K: ArchKit) -> String:
 	return HeroUlt.cast_id(K)
+
 
 ## Below the unlock level X does nothing; at it, one press is one cast.
 func _gate(m: Match, P: Hunter, K: ArchKit) -> void:
@@ -33,9 +38,12 @@ func _gate(m: Match, P: Hunter, K: ArchKit) -> void:
 	P.lvl = int(Hunter.ULT_AT[0]) - 1
 	var pressed := HunterKeys.ult_pressed(P)
 	ac.step(m, 0.05)
-	ok("X: no cast below level %d" % int(Hunter.ULT_AT[0]),
-			not pressed and float(K.cd["x"]) == 0.0 and int(P.used.get("x", 0)) == 0)
+	ok(
+		"X: no cast below level %d" % int(Hunter.ULT_AT[0]),
+		not pressed and float(K.cd["x"]) == 0.0 and int(P.used.get("x", 0)) == 0
+	)
 	P.lvl = int(Hunter.ULT_AT[0])
+
 
 # ------------------------------------------------------------------ Sparkle: Kitefall
 func mage() -> void:
@@ -53,54 +61,81 @@ func mage() -> void:
 	T.teleport(home + Vector3(6, 0, 0))
 	T2.teleport(home + Vector3(6.5, 0, 1.2))
 	ac.aim_at(P, T.pos)
-	Sfx.listener = P.pos               # (the looks are drawn near the camera's focus)
+	Sfx.listener = P.pos  # (the looks are drawn near the camera's focus)
 	ok("Kitefall: the press goes off", HunterKeys.ult_pressed(P))
-	ok("Kitefall: one press is one cast, its own cooldown starts",
-			U.casts == 1 and int(P.used.get("x", 0)) == 1 and is_equal_approx(float(K.cd["x"]), float(xd["cooldown"])),
-			"casts %d cd %.1f" % [U.casts, float(K.cd["x"])])
+	ok(
+		"Kitefall: one press is one cast, its own cooldown starts",
+		U.casts == 1 and int(P.used.get("x", 0)) == 1 and is_equal_approx(float(K.cd["x"]), float(xd["cooldown"])),
+		"casts %d cd %.1f" % [U.casts, float(K.cd["x"])]
+	)
 	ok("Kitefall: the crouch first (mage_x)", U.phase() == MageUlt.CROUCH and K.anim_id == "mage_x")
 	m.step(ac.DT)
 	var burst := 0
 	for e: Dictionary in HeroVfx.of(m).live:
 		if (e["s0"] as Vector3).x > 2.0 * float(xd["radius"]) + 0.01:
 			burst += 1
-	ok("Kitefall press (footage): the range ring shows at once, no range-wide burst (no screen flash)",
-			AimKit.shown(P, "x_ring") and burst == 0, "%d range-wide looks" % burst)
+	ok(
+		"Kitefall press (footage): the range ring shows at once, no range-wide burst (no screen flash)",
+		AimKit.shown(P, "x_ring") and burst == 0,
+		"%d range-wide looks" % burst
+	)
 	ac.step(m, 0.6, func(): ac.aim_at(P, T.pos))
 	# up there: high, invulnerable, the ring for everyone, the crown at the cursor, nothing else works
 	var hanging := U.phase() == MageUlt.AIR and P.pos.y > home.y + 3.5
-	ok("Kitefall: launched up and hanging", hanging and K.anim_id == "mage_x_air",
-			"y +%.1f %s" % [P.pos.y - home.y, U.phase()])
+	ok(
+		"Kitefall: launched up and hanging",
+		hanging and K.anim_id == "mage_x_air",
+		"y +%.1f %s" % [P.pos.y - home.y, U.phase()]
+	)
 	var ring := AimKit.entry(P, "x_ring")
 	var ring_r := float(ring.get("r", 0.0))
-	ok("Kitefall: the gold range ring (8 bh) round the take-off, seen by everyone",
-			AimKit.shown(P, "x_ring") and bool(ring.get("all", false)) and absf(ring_r - 8.0 * AimKit.BH) < 0.1,
-			"r %.1f" % float(ring.get("r", 0.0)))
+	ok(
+		"Kitefall: the gold range ring (8 bh) round the take-off, seen by everyone",
+		AimKit.shown(P, "x_ring") and bool(ring.get("all", false)) and absf(ring_r - 8.0 * AimKit.BH) < 0.1,
+		"r %.1f" % float(ring.get("r", 0.0))
+	)
 	var big := K.fx().live.filter(func(e): return e["kind"] == "disc" and (e["s0"] as Vector3).x > ring_r * 0.5)
 	ok("Kitefall: the look stays local (no ring-sized dark disc over the screen)", big.is_empty(), "%d" % big.size())
-	ok("Kitefall: the crown reticle sits at the cursor", AimKit.shown(P, "x_aim")
-			and Vector2(T.pos.x, T.pos.z).distance_to(AimKit.entry(P, "x_aim")["at"] as Vector2) < 0.6)
-	ok("Kitefall: the cursor marker is the strike's hit area", absf(float(AimKit.entry(P, "x_aim").get("r", 0.0))
-			- float(U.data()["radius"])) < 0.05)
+	ok(
+		"Kitefall: the crown reticle sits at the cursor",
+		(
+			AimKit.shown(P, "x_aim")
+			and Vector2(T.pos.x, T.pos.z).distance_to(AimKit.entry(P, "x_aim")["at"] as Vector2) < 0.6
+		)
+	)
+	ok(
+		"Kitefall: the cursor marker is the strike's hit area",
+		absf(float(AimKit.entry(P, "x_aim").get("r", 0.0)) - float(U.data()["radius"])) < 0.05
+	)
 	var from: Vector3 = U.leap["from"]
 	var range_r := float(xd["range"])
 	var hang: Array = hc._looks_at(m, from)
 	var wide: Array = hang.filter(func(l): return l["mode"] == HeroVfx.MODES["scorch"] and float(l["size"]) > range_r)
-	ok("Kitefall look (footage): a dark ring band on the range edge, a pink crown at the cursor, no storm field yet",
-			not hc._pool(hang, range_r, 0.1).is_empty() and wide.size() == 1
-			and AimKit.entry(P, "x_aim").get("col") == MageKit.DEEP_PINK,
-			"%d range-wide looks (the band only)" % wide.size())
+	ok(
+		"Kitefall look (footage): a dark ring band on the range edge, a pink crown at the cursor, no storm field yet",
+		(
+			not hc._pool(hang, range_r, 0.1).is_empty()
+			and wide.size() == 1
+			and AimKit.entry(P, "x_aim").get("col") == MageKit.DEEP_PINK
+		),
+		"%d range-wide looks (the band only)" % wide.size()
+	)
 	var hp0 := P.hp
 	P.hurt(40.0, T, {"src": "abil", "ab": "k1"})
 	ok("Kitefall: invulnerable in the air", P.hp == hp0)
 	K.cd["e"] = 0.0
 	K.use_e()
-	ok("Kitefall: nothing else of hers works up there (E, the attack)",
-			K.strikes.is_empty() and not K.fire_ok() and K.busy())
+	ok(
+		"Kitefall: nothing else of hers works up there (E, the attack)",
+		K.strikes.is_empty() and not K.fire_ok() and K.busy()
+	)
 	# the landing spot: clamped inside the ring, never in a wall
 	ac.aim_at(P, home + Vector3(40, 0, 0))
-	ok("Kitefall: the landing is clamped inside the ring",
-			absf(hc._flat(U.land_point(), home) - float(xd["range"])) < 0.6, "%.1f m" % hc._flat(U.land_point(), home))
+	ok(
+		"Kitefall: the landing is clamped inside the ring",
+		absf(hc._flat(U.land_point(), home) - float(xd["range"])) < 0.6,
+		"%.1f m" % hc._flat(U.land_point(), home)
+	)
 	var wall_at := home + Vector3(3.5, 0, -3.0)
 	hc._wall(m, wall_at)
 	ac.aim_at(P, wall_at)
@@ -112,35 +147,52 @@ func mage() -> void:
 	var id := _cast_id(K)
 	var t_at := T.pos
 	ok("Kitefall: the second press brings her down", HunterKeys.ult_pressed(P) and U.phase() == MageUlt.FALL)
-	ok("Kitefall: the landing marker shows for everyone",
-			AimKit.shown(P, "x_land") and bool(AimKit.entry(P, "x_land").get("all", false)))
+	ok(
+		"Kitefall: the landing marker shows for everyone",
+		AimKit.shown(P, "x_land") and bool(AimKit.entry(P, "x_land").get("all", false))
+	)
 	ac.step(m, float(xd["drop"]) + 0.05)
 	var storm := 0
 	for l: Dictionary in hc._looks_at(m, U.last.get("at", P.pos)):
 		if l["mode"] == HeroVfx.MODES["scorch"] and absf(float(l["size"]) - 1.6 * float(xd["radius"])) < 0.01:
 			storm += 1
-	var fields := 0                    # burning scorch discs past the hit area (the dark ring band is a pool)
+	var fields := 0  # burning scorch discs past the hit area (the dark ring band is a pool)
 	for e: Dictionary in HeroVfx.of(m).live:
 		var mt: ShaderMaterial = e["mat"]
 		var disc: bool = hc._param(mt, "mode", -1) == HeroVfx.MODES["scorch"] and hc._param(mt, "shape", 0) == 0
 		if disc and (e["s0"] as Vector3).x > 2.0 * float(xd["radius"]) + 0.01:
 			fields += 1
-	ok("Kitefall: the storm stays on the hit area once she lands (no ring-wide field, no screen tint)",
-			storm == 1 and fields == 0, "storm %d wide %d" % [storm, fields])
+	ok(
+		"Kitefall: the storm stays on the hit area once she lands (no ring-wide field, no screen tint)",
+		storm == 1 and fields == 0,
+		"storm %d wide %d" % [storm, fields]
+	)
 	var want := float(xd["dmg"]) * K.ult.power()
-	ok("Kitefall: she lands on the spot and the strike hits both foes",
-			hc._flat(P.pos, t_at) < 0.8 and U.last.get("hits", 0) == 2
-			and absf(ac.dmg(T) - want) < 0.5 and ac.dmg(T2) > 1.0,
-			"hits %d took %.1f want %.1f" % [int(U.last.get("hits", 0)), ac.dmg(T), want])
+	ok(
+		"Kitefall: she lands on the spot and the strike hits both foes",
+		(
+			hc._flat(P.pos, t_at) < 0.8
+			and U.last.get("hits", 0) == 2
+			and absf(ac.dmg(T) - want) < 0.5
+			and ac.dmg(T2) > 1.0
+		),
+		"hits %d took %.1f want %.1f" % [int(U.last.get("hits", 0)), ac.dmg(T), want]
+	)
 	var moved: float = hc._flat(T.pos, t_at)
-	ok("Kitefall: 1 Static each, no knock", moved < 0.3 and K.spark_n(T) >= 1 and K.spark_n(T2) >= 1,
-			"moved %.2f static %d %d" % [moved, K.spark_n(T), K.spark_n(T2)])
-	ok("Kitefall: the bond fills once, for the best event of the cast (a hit)",
-			is_equal_approx(_paid(P, id), float(KinBond.rules()["hit"]))
-			and P.ult >= float(KinBond.rules()["hit"]) - 0.01,
-			"paid %.2f bar %.2f" % [_paid(P, id), P.ult])
-	ok("Kitefall: free again at once (the attack works, gold crackle at her feet)",
-			U.phase() == MageUlt.AFTER and K.fire_ok() and K.anim_id == "mage_x_land")
+	ok(
+		"Kitefall: 1 Static each, no knock",
+		moved < 0.3 and K.spark_n(T) >= 1 and K.spark_n(T2) >= 1,
+		"moved %.2f static %d %d" % [moved, K.spark_n(T), K.spark_n(T2)]
+	)
+	ok(
+		"Kitefall: the bond fills once, for the best event of the cast (a hit)",
+		is_equal_approx(_paid(P, id), float(KinBond.rules()["hit"])) and P.ult >= float(KinBond.rules()["hit"]) - 0.01,
+		"paid %.2f bar %.2f" % [_paid(P, id), P.ult]
+	)
+	ok(
+		"Kitefall: free again at once (the attack works, gold crackle at her feet)",
+		U.phase() == MageUlt.AFTER and K.fire_ok() and K.anim_id == "mage_x_land"
+	)
 	ok("Kitefall: on cooldown, a press now does nothing", not HunterKeys.ult_pressed(P) and U.casts == 1)
 	ac.step(m, 0.6)
 	_mage_whiff(m, P, K, home)
@@ -153,12 +205,19 @@ func mage() -> void:
 	await ac.done(m)
 	await _mage_burst()
 	var got: Dictionary = await EXIT.run(ac, "mage")
-	ok("Kitefall exit: Shift, LMB and jump pressed 0.1s before the strike go on its first free step",
-		EXIT.on_time(got), EXIT.said(got))
+	ok(
+		"Kitefall exit: Shift, LMB and jump pressed 0.1s before the strike go on its first free step",
+		EXIT.on_time(got),
+		EXIT.said(got)
+	)
 	var flow = load("res://tools/dash_flow_check.gd").new()
 	var bad: int = await flow.combos_of(hc.main, "mage")
-	ok("Sparkle item 51: each slot casts mid-jump; Shift / jump out of it act in 0.1 s; the Rod held on",
-			bad == 0, "%d failing (the DASHFLOW lines)" % bad)
+	ok(
+		"Sparkle item 51: each slot casts mid-jump; Shift / jump out of it act in 0.1 s; the Rod held on",
+		bad == 0,
+		"%d failing (the DASHFLOW lines)" % bad
+	)
+
 
 ## A cast that strikes empty ground: comes down by itself at the cursor when the hover runs out, pays no bond.
 func _mage_whiff(m: Match, P: Hunter, K: MageKit, home: Vector3) -> void:
@@ -173,11 +232,18 @@ func _mage_whiff(m: Match, P: Hunter, K: MageKit, home: Vector3) -> void:
 	var id := _cast_id(K)
 	var air := float(xd["windup"]) + float(xd["rise"]) + float(xd["hover"]) + float(xd["drop"])
 	ac.step(m, air + 0.1, func(): ac.aim_at(P, spot))
-	ok("Kitefall: with no second press she comes down by herself at the cursor",
-			U.phase() == MageUlt.AFTER and hc._flat(P.pos, spot) < 0.6, "%.1f m off" % hc._flat(P.pos, spot))
-	ok("Kitefall: a strike that hits nobody pays no bond", _paid(P, id) == 0.0 and U.last.get("hits", -1) == 0,
-			"paid %.2f bar %.2f" % [_paid(P, id), P.ult])
+	ok(
+		"Kitefall: with no second press she comes down by herself at the cursor",
+		U.phase() == MageUlt.AFTER and hc._flat(P.pos, spot) < 0.6,
+		"%.1f m off" % hc._flat(P.pos, spot)
+	)
+	ok(
+		"Kitefall: a strike that hits nobody pays no bond",
+		_paid(P, id) == 0.0 and U.last.get("hits", -1) == 0,
+		"paid %.2f bar %.2f" % [_paid(P, id), P.ult]
+	)
 	ac.step(m, 0.6)
+
 
 ## A Boki merge while she hangs: she drops where she took off, nothing strikes, the cooldown stays spent.
 func _mage_merge(m: Match, P: Hunter, K: MageKit, home: Vector3) -> void:
@@ -191,10 +257,13 @@ func _mage_merge(m: Match, P: Hunter, K: MageKit, home: Vector3) -> void:
 	var up := U.phase() == MageUlt.AIR
 	ok("merge hold: Kitefall is in the air before the merge", up and ac.merge_now(P))
 	ac.step(m, 0.3)
-	ok("merge hold: Kitefall drops (no strike, back on the ground, cooldown spent)",
-			not U.running() and U.hits == hits and P.pos.y < home.y + 0.6 and float(K.cd["x"]) > 0.0,
-			"y +%.1f" % (P.pos.y - home.y))
+	ok(
+		"merge hold: Kitefall drops (no strike, back on the ground, cooldown spent)",
+		not U.running() and U.hits == hits and P.pos.y < home.y + 0.6 and float(K.cd["x"]) > 0.0,
+		"y +%.1f" % (P.pos.y - home.y)
+	)
 	KinMerge.end(P, "test")
+
 
 ## The Static spread (the owner's rule; the full cases are --sparkle-r-spread-check): the landed-on foe gains the
 ## ult's own stack, the other gains its Static + 1, capped at 4; with no Static anywhere each simply gains 1.
@@ -202,8 +271,7 @@ func _mage_spread(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: MageKit, home: 
 	var spot := home + Vector3(5, 0, 0)
 	var far := T2.pos
 	var got := _kitefall_with(m, P, T, T2, K, home, spot, 3, 0)
-	ok("Kitefall: stacks {3, 0} -> both at 4 (3 + the ult's own; the other 3 + 1, capped)",
-			got == [4, 4], str(got))
+	ok("Kitefall: stacks {3, 0} -> both at 4 (3 + the ult's own; the other 3 + 1, capped)", got == [4, 4], str(got))
 	got = _kitefall_with(m, P, T, T2, K, home, spot, 1, 0)
 	ok("Kitefall: stacks {1, 0} -> both at 2", got == [2, 2], str(got))
 	got = _kitefall_with(m, P, T, T2, K, home, spot, 0, 0)
@@ -212,8 +280,10 @@ func _mage_spread(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: MageKit, home: 
 	T2.teleport(far)
 	K.sparks.clear()
 
-func _kitefall_with(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: MageKit, home: Vector3, spot: Vector3,
-		a: int, b: int) -> Array:
+
+func _kitefall_with(
+	m: Match, P: Hunter, T: Hunter, T2: Hunter, K: MageKit, home: Vector3, spot: Vector3, a: int, b: int
+) -> Array:
 	var xd := K.x_def()
 	K.cd["x"] = 0.0
 	P.teleport(home)
@@ -222,8 +292,10 @@ func _kitefall_with(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: MageKit, home
 	T.teleport(spot + Vector3(0.8, 0, 0))
 	T2.teleport(spot + Vector3(-0.8, 0, 0))
 	K.sparks.clear()
-	if a > 0: K.add_spark(T, a)
-	if b > 0: K.add_spark(T2, b)
+	if a > 0:
+		K.add_spark(T, a)
+	if b > 0:
+		K.add_spark(T2, b)
 	ac.aim_at(P, spot)
 	HunterKeys.ult_pressed(P)
 	ac.step(m, float(xd["windup"]) + float(xd["rise"]) + float(xd["min_air"]) + 0.05, func(): ac.aim_at(P, spot))
@@ -232,6 +304,7 @@ func _kitefall_with(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: MageKit, home
 	var res := [K.spark_n(T), K.spark_n(T2)]
 	ac.step(m, 0.6)
 	return res
+
 
 ## Item 116: what play showed and the {3, 0} test above could not. The landing comes from the cursor's ray on the
 ## ground, not inp["aim"] (the plane at her own height, 5 m up, or a foe's); Static waits for her while she is up;
@@ -256,8 +329,11 @@ func _mage_116(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: MageKit, home: Vec
 	ac.step(m, float(xd["windup"]) + float(xd["rise"]) + float(xd["min_air"]) + 0.05, hang)
 	var off: float = hc._flat(U.land_point(), g)
 	var naive := Vector2(P.inp["aim"].x - g.x, P.inp["aim"].z - g.z).length()
-	ok("Kitefall lands exactly at the cursor, from 5 m up",
-			off < 0.1, "%.2f m off (the aim plane is %.2f m off)" % [off, naive])
+	ok(
+		"Kitefall lands exactly at the cursor, from 5 m up",
+		off < 0.1,
+		"%.2f m off (the aim plane is %.2f m off)" % [off, naive]
+	)
 	HunterKeys.ult_pressed(P)
 	ac.step(m, float(xd["drop"]) + 0.1, hang)
 	ok("Kitefall: she is on that spot", hc._flat(P.pos, g) < 0.1, "%.2f m" % hc._flat(P.pos, g))
@@ -278,8 +354,11 @@ func _mage_116(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: MageKit, home: Vec
 	HunterKeys.ult_pressed(P)
 	var whole := float(xd["windup"]) + float(xd["rise"]) + float(xd["hover"]) + float(xd["drop"]) + 0.1
 	ac.step(m, whole, func(): ac.aim_at(P, spot))
-	ok("Kitefall: Static waits for her in the air (2 + the ult's 1 on the stacked foe)",
-			K.spark_n(T) == 3, str(K.spark_n(T)))
+	ok(
+		"Kitefall: Static waits for her in the air (2 + the ult's 1 on the stacked foe)",
+		K.spark_n(T) == 3,
+		str(K.spark_n(T))
+	)
 	ok("Kitefall: the waited Static still spreads", K.spark_n(T2) == 3, str(K.spark_n(T2)))
 	ac.step(m, 0.6)
 	# drawn whichever foe the loop reaches first
@@ -309,6 +388,7 @@ func _mage_116(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: MageKit, home: Vec
 	K.sparks.clear()
 	_mage_116b(m, P, T, K, home)
 
+
 ## Items 116.2 and 116b: the bolt rate, and the Wirerun after a reset (further, charged quicker), press and hold.
 func _mage_116b(m: Match, P: Hunter, T: Hunter, K: MageKit, home: Vector3) -> void:
 	var pd: Dictionary = P.wpn
@@ -317,8 +397,10 @@ func _mage_116b(m: Match, P: Hunter, T: Hunter, K: MageKit, home: Vector3) -> vo
 	var far := float(dd["dist"][1])
 	var hold := float(dd["hold"])
 	K.reset_dash_boost = false
-	ok("Wirerun: a plain run stays 5.6 to 9.75 m, full at 0.6 s",
-			absf(K.wire_len(0.0) - float(dd["dist"][0])) < 0.01 and absf(K.wire_len(hold) - far) < 0.01)
+	ok(
+		"Wirerun: a plain run stays 5.6 to 9.75 m, full at 0.6 s",
+		absf(K.wire_len(0.0) - float(dd["dist"][0])) < 0.01 and absf(K.wire_len(hold) - far) < 0.01
+	)
 	K.cd["dash"] = 0.0
 	P.teleport(home)
 	K.grant_reset()
@@ -328,16 +410,23 @@ func _mage_116b(m: Match, P: Hunter, T: Hunter, K: MageKit, home: Vector3) -> vo
 	var boosted := bool(K.wire.get("boost", false))
 	ok("Wirerun: the press takes the boost", boosted and not K.reset_dash_boost)
 	var quick := hold * float(dd["reset_charge"])
-	ok("Wirerun: the reset run charges in 0.75x the time",
-			absf(K.wire_hold() - quick) < 0.001, "%.3f s" % K.wire_hold())
-	ok("Wirerun: full at that time, 1.5x further", absf(K.wire_len(quick) - far * 1.5) < 0.01,
-			"%.2f m" % K.wire_len(quick))
+	ok(
+		"Wirerun: the reset run charges in 0.75x the time",
+		absf(K.wire_hold() - quick) < 0.001,
+		"%.3f s" % K.wire_hold()
+	)
+	ok(
+		"Wirerun: full at that time, 1.5x further",
+		absf(K.wire_len(quick) - far * 1.5) < 0.01,
+		"%.2f m" % K.wire_len(quick)
+	)
 	ok("Wirerun: a tap is still a short zap, 1.5x", absf(K.wire_len(0.0) - float(dd["dist"][0]) * 1.5) < 0.01)
 	K._end_wire(true)
 	K.reset_dash_boost = false
 	K.grant_reset()
 	ac.step(m, float(dd["reset_window"]) + 0.1)
 	ok("Wirerun: the boost fades if the reset goes unused", not K.reset_dash_boost)
+
 
 ## Item 51: Shift in Kitefall's crouch charges the Wirerun at once; the crouch waits for the run, starts over
 ## where it ended, and she launches from there (the ring moves with her) and still comes down.
@@ -365,15 +454,23 @@ func _mage_shift(m: Match, P: Hunter, K: MageKit, home: Vector3) -> void:
 		crouched_again = crouched_again or (K.run_t <= 0.0 and K.anim_id == "mage_x")
 	var from: Vector3 = U.leap.get("from", home)
 	var ring_at: Vector2 = AimKit.entry(P, "x_ring").get("at", Vector2.ZERO)
-	ok("Kitefall + Shift (item 51): the Wirerun goes from the crouch, then she launches where it took her",
-			went and crouched_again and U.phase() == MageUlt.RISE and hc._flat(from, home) > 2.0
+	ok(
+		"Kitefall + Shift (item 51): the Wirerun goes from the crouch, then she launches where it took her",
+		(
+			went
+			and crouched_again
+			and U.phase() == MageUlt.RISE
+			and hc._flat(from, home) > 2.0
 			and hc._flat(P.pos, from) < 0.3
-			and ring_at.distance_to(Vector2(from.x, from.z)) < 0.01,
-			"went %s crouch %s %s from %.1f m out" % [went, crouched_again, U.phase(), hc._flat(from, home)])
+			and ring_at.distance_to(Vector2(from.x, from.z)) < 0.01
+		),
+		"went %s crouch %s %s from %.1f m out" % [went, crouched_again, U.phase(), hc._flat(from, home)]
+	)
 	var xd := K.x_def()
 	ac.step(m, float(xd["rise"]) + float(xd["hover"]) + float(xd["drop"]) + 0.1)
 	ok("Kitefall + Shift (item 51): she still comes down and strikes", U.phase() == MageUlt.AFTER, U.phase())
 	ac.step(m, 0.6)
+
 
 ## How Kitefall moves her (docs/heroes/mage.md "Movement settled"): straight up, WASD never moves her in the crouch or
 ## the hang (the cursor only places the landing); the climb reaches its height in the rise; the strike leaves her
@@ -401,23 +498,34 @@ func _mage_move(m: Match, P: Hunter, K: MageKit, home: Vector3) -> void:
 		if top < float(xd["height"]) - 0.15 and P.pos.y - home.y >= float(xd["height"]) - 0.15:
 			climb_t = t
 		top = maxf(top, P.pos.y - home.y)
-	ok("Kitefall move: WASD never moves her in the crouch or the hang (straight up, no drift)", drift < 0.05,
-			"%.3f m" % drift)
+	ok(
+		"Kitefall move: WASD never moves her in the crouch or the hang (straight up, no drift)",
+		drift < 0.05,
+		"%.3f m" % drift
+	)
 	var want_t := float(xd["windup"]) + float(xd["rise"])
-	ok("Kitefall move: up to her full height by the end of the rise (0.3 s crouch + 0.3 s rise)",
-			absf(climb_t - want_t) < 0.08 and absf(top - float(xd["height"])) < 0.2, "%.2f s, %.1f m" % [climb_t, top])
+	ok(
+		"Kitefall move: up to her full height by the end of the rise (0.3 s crouch + 0.3 s rise)",
+		absf(climb_t - want_t) < 0.08 and absf(top - float(xd["height"])) < 0.2,
+		"%.2f s, %.1f m" % [climb_t, top]
+	)
 	var air_t := float(xd["windup"]) + float(xd["rise"]) + float(xd["hover"])
-	ok("Kitefall move: with no second press she comes down after the full hover (crouch, rise, 1.7 s hang)",
-			absf(t - air_t) < 0.05, "%.2f s of %.2f" % [t, air_t])
+	ok(
+		"Kitefall move: with no second press she comes down after the full hover (crouch, rise, 1.7 s hang)",
+		absf(t - air_t) < 0.05,
+		"%.2f s of %.2f" % [t, air_t]
+	)
 	while U.phase() == MageUlt.FALL:
 		ac.step(m, hc.DT)
 	var still := Vector2(P.vel.x, P.vel.z).length()
 	var p0 := P.pos
 	ac.step(m, 0.15, func(): P.inp["move"] = Vector2(0, 1))
 	P.inp["move"] = Vector2.ZERO
-	ok("Kitefall end: no momentum from the strike, and the next step is hers (she walks off)",
-			still < 0.01 and hc._flat(P.pos, p0) > 0.25 and P.grounded,
-			"%.2f m/s then %.2f m" % [still, hc._flat(P.pos, p0)])
+	ok(
+		"Kitefall end: no momentum from the strike, and the next step is hers (she walks off)",
+		still < 0.01 and hc._flat(P.pos, p0) > 0.25 and P.grounded,
+		"%.2f m/s then %.2f m" % [still, hc._flat(P.pos, p0)]
+	)
 	ac.step(m, 0.6)
 	# the landing over the abyss backs off to ground; a higher terrace takes her on top
 	var hx := int(floor(home.x))
@@ -433,9 +541,11 @@ func _mage_move(m: Match, P: Hunter, K: MageKit, home: Vector3) -> void:
 	ac.step(m, 0.8, func(): ac.aim_at(P, over_void))
 	HunterKeys.ult_pressed(P)
 	ac.step(m, float(xd["drop"]) + 0.05)
-	ok("Kitefall abyss: a cursor over the void lands her on the nearest ground toward the take-off",
-			U.phase() == MageUlt.AFTER and not W.is_void(P.pos.x, P.pos.z) and P.pos.x - home.x > 2.5,
-			"x %.1f void %s" % [P.pos.x - home.x, W.is_void(P.pos.x, P.pos.z)])
+	ok(
+		"Kitefall abyss: a cursor over the void lands her on the nearest ground toward the take-off",
+		U.phase() == MageUlt.AFTER and not W.is_void(P.pos.x, P.pos.z) and P.pos.x - home.x > 2.5,
+		"x %.1f void %s" % [P.pos.x - home.x, W.is_void(P.pos.x, P.pos.z)]
+	)
 	for dz in range(-3, 4):
 		for dx in range(4, 9):
 			W.kind[W.idx(hx + dx, hz + dz)] = World.T_GROUND
@@ -448,13 +558,17 @@ func _mage_move(m: Match, P: Hunter, K: MageKit, home: Vector3) -> void:
 	HunterKeys.ult_pressed(P)
 	ac.step(m, float(xd["drop"]) + 0.05)
 	var up := P.pos.y - home.y
-	ok("Kitefall ledge: a cursor on a higher terrace lands her on top of it", absf(up - 2.0 * World.LEVEL) < 0.15,
-			"%.2f m up" % up)
+	ok(
+		"Kitefall ledge: a cursor on a higher terrace lands her on top of it",
+		absf(up - 2.0 * World.LEVEL) < 0.15,
+		"%.2f m up" % up
+	)
 	for dz in range(-3, 4):
 		for dx in range(4, 9):
 			W.level[W.idx(hx + dx, hz + dz)] -= 2
 	ac.step(m, 0.6)
 	P.teleport(home)
+
 
 ## Item 51: a jump in Kitefall's crouch goes at once; she launches from up there and the climb starts at her
 ## height (it never drops her back to the ground first).
@@ -480,28 +594,45 @@ func _mage_jump(m: Match, P: Hunter, K: MageKit, home: Vector3) -> void:
 		if U.phase() == MageUlt.RISE:
 			dip = maxf(dip, last_y - P.pos.y)
 		last_y = P.pos.y
-	ok("Kitefall + jump (item 51): the jump goes within 0.1 s of the press, from the crouch",
-			left_at >= 0.0 and left_at <= 0.1 + 0.001, "%.2f s" % left_at)
-	ok("Kitefall + jump (item 51): she climbs from her jump height, never dropping first, and hangs",
-			U.phase() == MageUlt.AIR and dip < 0.05, "dip %.2f m %s" % [dip, U.phase()])
+	ok(
+		"Kitefall + jump (item 51): the jump goes within 0.1 s of the press, from the crouch",
+		left_at >= 0.0 and left_at <= 0.1 + 0.001,
+		"%.2f s" % left_at
+	)
+	ok(
+		"Kitefall + jump (item 51): she climbs from her jump height, never dropping first, and hangs",
+		U.phase() == MageUlt.AIR and dip < 0.05,
+		"dip %.2f m %s" % [dip, U.phase()]
+	)
 	var xd := K.x_def()
 	ac.step(m, float(xd["hover"]) + float(xd["drop"]) + 0.1)
 	ac.step(m, 0.6)
 
+
 func _mage_burst() -> void:
-	var res: Dictionary = await BURST.run(ac, "mage", 6.0, func(m: Match, P: Hunter, T: Hunter):
-		LevelGrowth.apply(P)          # the ult at the level it is tested at, with its real growth
-		ac.aim_at(P, T.pos)
-		HunterKeys.ult_pressed(P)
-		ac.step(m, 0.7, func(): ac.aim_at(P, T.pos))
-		HunterKeys.ult_pressed(P)
-		ac.step(m, 0.4))
+	var res: Dictionary = await BURST.run(
+		ac,
+		"mage",
+		6.0,
+		func(m: Match, P: Hunter, T: Hunter):
+			LevelGrowth.apply(P)  # the ult at the level it is tested at, with its real growth
+			ac.aim_at(P, T.pos)
+			HunterKeys.ult_pressed(P)
+			ac.step(m, 0.7, func(): ac.aim_at(P, T.pos))
+			HunterKeys.ult_pressed(P)
+			ac.step(m, 0.4)
+	)
 	_burst_ok("Kitefall", res)
+
 
 func _burst_ok(ult_name: String, res: Dictionary) -> void:
 	var info := "ult %.0f, ult + merge %.0f of %d" % [res["ult"], res["total"], int(Data.CLASSES["light"]["hp"])]
-	ok("burst: %s then the merge never one-shots a full-health light hunter" % ult_name,
-			bool(res["merged"]) and bool(res["alive"]) and float(res["ult"]) > 1.0, info)
+	ok(
+		"burst: %s then the merge never one-shots a full-health light hunter" % ult_name,
+		bool(res["merged"]) and bool(res["alive"]) and float(res["ult"]) > 1.0,
+		info
+	)
+
 
 # ------------------------------------------------------------------ Vex: Cinderfall
 func gunslinger() -> void:
@@ -523,8 +654,10 @@ func gunslinger() -> void:
 	ok("Cinderfall: the tap goes off", HunterKeys.ult_pressed(P))
 	var id := _cast_id(K)
 	var s: Dictionary = U.shells[0] if not U.shells.is_empty() else {}
-	ok("Cinderfall: one press is one shell, its own cooldown starts",
-			U.casts == 1 and U.shells.size() == 1 and is_equal_approx(float(K.cd["x"]), float(xd["cooldown"])))
+	ok(
+		"Cinderfall: one press is one shell, its own cooldown starts",
+		U.casts == 1 and U.shells.size() == 1 and is_equal_approx(float(K.cd["x"]), float(xd["cooldown"]))
+	)
 	ok("Cinderfall: it lands exactly at the cursor", not s.is_empty() and hc._flat(s["at"], t_at) < 0.1)
 	ok("Cinderfall: the rifle goes straight up (gunslinger_x)", K.anim_id == "gunslinger_x")
 	# owner 11-17: the ult never roots her; the 0.25 s wind-up (GunslingerUlt.WINDUP) only slows the walk
@@ -532,44 +665,66 @@ func gunslinger() -> void:
 	ac.step(m, 0.2, func(): P.inp["move"] = Vector2(0, 1))
 	var wind_v := Vector2(P.vel.x, P.vel.z).length()
 	P.inp["move"] = Vector2.ZERO
-	ok("Cinderfall: she walks through the cast, slowed not stopped",
-			hc._flat(P.pos, w0) > 0.4 and wind_v > 0.5 * P.base_speed and wind_v < 0.8 * P.base_speed,
-			"%.2f m in 0.2 s, %.2f m/s (run %.1f)" % [hc._flat(P.pos, w0), wind_v, P.base_speed])
+	ok(
+		"Cinderfall: she walks through the cast, slowed not stopped",
+		hc._flat(P.pos, w0) > 0.4 and wind_v > 0.5 * P.base_speed and wind_v < 0.8 * P.base_speed,
+		"%.2f m in 0.2 s, %.2f m/s (run %.1f)" % [hc._flat(P.pos, w0), wind_v, P.base_speed]
+	)
 	ac.step(m, 0.3)
 	var disc := AimKit.entry(P, "x1")
 	var disc_r := float(disc.get("r", 0))
 	var core := AimKit.entry(P, "xc1")
 	var core_r := float(core.get("r", 0))
 	var fill := float(disc.get("fill", 0))
-	ok("Cinderfall: the disc and its hot centre ring, seen by everyone, filling together",
-			AimKit.shown(P, "x1") and bool(disc.get("all", false)) and absf(disc_r - float(xd["radius"])) < 0.05
-			and bool(core.get("all", false)) and absf(core_r - float(xd["core_r"])) < 0.05 and fill > 0.2
-			and is_equal_approx(float(core.get("fill", 0)), fill),
-			"r %.1f core %.1f fill %.2f" % [disc_r, core_r, fill])
+	ok(
+		"Cinderfall: the disc and its hot centre ring, seen by everyone, filling together",
+		(
+			AimKit.shown(P, "x1")
+			and bool(disc.get("all", false))
+			and absf(disc_r - float(xd["radius"])) < 0.05
+			and bool(core.get("all", false))
+			and absf(core_r - float(xd["core_r"])) < 0.05
+			and fill > 0.2
+			and is_equal_approx(float(core.get("fill", 0)), fill)
+		),
+		"r %.1f core %.1f fill %.2f" % [disc_r, core_r, fill]
+	)
 	# past the wind-up (GunslingerUlt.WINDUP) she is free while it falls: she walks at full speed and the rifle works
 	ac.step(m, 0.3)
 	var p0 := P.pos
 	ac.step(m, 0.4, func(): P.inp["move"] = Vector2(-1, 0))
 	P.inp["move"] = Vector2.ZERO
-	ok("Cinderfall: Vex moves and can shoot while it falls",
-			hc._flat(P.pos, p0) > 1.0 and not K.busy() and K.can_shoot())
+	ok(
+		"Cinderfall: Vex moves and can shoot while it falls",
+		hc._flat(P.pos, p0) > 1.0 and not K.busy() and K.can_shoot()
+	)
 	ok("Cinderfall: nothing lands before 1.6s", ac.dmg(T) == 0.0 and ac.dmg(T2) == 0.0)
 	ac.step(m, float(xd["delay"]) - 1.2 + 0.05)
 	var base := float(xd["dmg"]) * K.ult.power()
-	ok("Cinderfall: the impact, +50% in the centre",
-			absf(ac.dmg(T) - base * (1.0 + float(xd["core_k"]))) < 0.5 and absf(ac.dmg(T2) - base) < 0.5
-			and U.last.get("centre", 0) == 1,
-			"centre %.1f edge %.1f (base %.1f)" % [ac.dmg(T), ac.dmg(T2), base])
+	ok(
+		"Cinderfall: the impact, +50% in the centre",
+		(
+			absf(ac.dmg(T) - base * (1.0 + float(xd["core_k"]))) < 0.5
+			and absf(ac.dmg(T2) - base) < 0.5
+			and U.last.get("centre", 0) == 1
+		),
+		"centre %.1f edge %.1f (base %.1f)" % [ac.dmg(T), ac.dmg(T2), base]
+	)
 	var hit_share := float(KinBond.rules()["hit"])
-	ok("Cinderfall: the bond fills once for the impact (a hit)", is_equal_approx(_paid(P, id), hit_share),
-			"paid %.2f" % _paid(P, id))
+	ok(
+		"Cinderfall: the bond fills once for the impact (a hit)",
+		is_equal_approx(_paid(P, id), hit_share),
+		"paid %.2f" % _paid(P, id)
+	)
 	var took: float = ac.dmg(T)
 	var burn := _hurt_times(m, T, 1.1)
-	ok("Cinderfall: the patch burns and slows",
-			ac.dmg(T) > took and T.slow_t > 0.0 and U.zone_ticks >= 2 and AimKit.shown(P, "xz1"),
-			"+%.1f ticks %d" % [ac.dmg(T) - took, U.zone_ticks])
+	ok(
+		"Cinderfall: the patch burns and slows",
+		ac.dmg(T) > took and T.slow_t > 0.0 and U.zone_ticks >= 2 and AimKit.shown(P, "xz1"),
+		"+%.1f ticks %d" % [ac.dmg(T) - took, U.zone_ticks]
+	)
 	ok("Cinderfall: burn ticks pay no more bond", is_equal_approx(_paid(P, id), float(KinBond.rules()["hit"])))
-	burn.append_array(_hurt_times(m, T, float(xd["zone_t"]) - 0.9))    # on to 0.2 s past the zone's end
+	burn.append_array(_hurt_times(m, T, float(xd["zone_t"]) - 0.9))  # on to 0.2 s past the zone's end
 	_zone_cadence(burn, ac.dmg(T) - took, float(xd["tick_dmg"]) * U.power(), float(xd["zone_t"]))
 	ok("Cinderfall: the patch is gone after 3s", not U.running() and not AimKit.shown(P, "xz1"))
 	ok("Cinderfall: on cooldown, a press now does nothing", not HunterKeys.ult_pressed(P) and U.casts == 1)
@@ -577,6 +732,7 @@ func gunslinger() -> void:
 	_gun_dodge(m, P, K, T, home)
 	await ac.done(m)
 	await _gun_burst()
+
 
 ## Steps frame by frame for secs and returns the match times (s) at which T lost health.
 func _hurt_times(m: Match, T: Hunter, secs: float) -> Array:
@@ -590,6 +746,7 @@ func _hurt_times(m: Match, T: Hunter, secs: float) -> Array:
 		hp = T.hp
 	return out
 
+
 ## The burn's cadence: ZONE_TICK_S between ticks to within half a step, a full zone of them, each the same.
 func _zone_cadence(times: Array, burned: float, per: float, zone_t: float) -> void:
 	var lo := INF
@@ -599,9 +756,12 @@ func _zone_cadence(times: Array, burned: float, per: float, zone_t: float) -> vo
 		hi = maxf(hi, times[i] - times[i - 1])
 	var half_step := float(hc.DT) * 0.5
 	var even := absf(lo - ZONE_TICK_S) < half_step and absf(hi - ZONE_TICK_S) < half_step
-	ok("Cinderfall: the patch ticks every 0.5s (the source's), 6 times in its 3s, each the same",
-			even and times.size() == roundi(zone_t / ZONE_TICK_S) and absf(burned - per * times.size()) < 0.5,
-			"%d ticks, gaps %.3f to %.3f s, burn %.1f (%.1f each)" % [times.size(), lo, hi, burned, per])
+	ok(
+		"Cinderfall: the patch ticks every 0.5s (the source's), 6 times in its 3s, each the same",
+		even and times.size() == roundi(zone_t / ZONE_TICK_S) and absf(burned - per * times.size()) < 0.5,
+		"%d ticks, gaps %.3f to %.3f s, burn %.1f (%.1f each)" % [times.size(), lo, hi, burned, per]
+	)
+
 
 ## Stepping off the disc before it lands: no damage, no bond; a cursor past the range is clamped.
 func _gun_dodge(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> void:
@@ -615,8 +775,11 @@ func _gun_dodge(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3)
 	HunterKeys.ult_pressed(P)
 	var id := _cast_id(K)
 	var s: Dictionary = U.shells[-1]
-	ok("Cinderfall: a far cursor is clamped to its range",
-			absf(hc._flat(s["at"], home) - float(xd["range"])) < 0.3, "%.1f m" % hc._flat(s["at"], home))
+	ok(
+		"Cinderfall: a far cursor is clamped to its range",
+		absf(hc._flat(s["at"], home) - float(xd["range"])) < 0.3,
+		"%.1f m" % hc._flat(s["at"], home)
+	)
 	K.cd["x"] = 0.0
 	ac.aim_at(P, T.pos)
 	HunterKeys.ult_pressed(P)
@@ -624,14 +787,23 @@ func _gun_dodge(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3)
 	ac.step(m, 0.8)
 	T.teleport(home + Vector3(6, 0, 6))
 	ac.step(m, 1.0)
-	ok("Cinderfall: stepping out of the disc dodges it, and pays no bond", ac.dmg(T) == 0.0 and _paid(P, id) == 0.0,
-			"took %.1f paid %.2f at %s impacts %d" % [ac.dmg(T), _paid(P, id), str(T.pos - home), U.impacts])
+	ok(
+		"Cinderfall: stepping out of the disc dodges it, and pays no bond",
+		ac.dmg(T) == 0.0 and _paid(P, id) == 0.0,
+		"took %.1f paid %.2f at %s impacts %d" % [ac.dmg(T), _paid(P, id), str(T.pos - home), U.impacts]
+	)
 	ac.step(m, 3.2)
 
+
 func _gun_burst() -> void:
-	var res: Dictionary = await BURST.run(ac, "gunslinger", 6.0, func(m: Match, P: Hunter, T: Hunter):
-		LevelGrowth.apply(P)          # the ult at the level it is tested at, with its real growth
-		ac.aim_at(P, T.pos)
-		HunterKeys.ult_pressed(P)
-		ac.step(m, 1.7))
+	var res: Dictionary = await BURST.run(
+		ac,
+		"gunslinger",
+		6.0,
+		func(m: Match, P: Hunter, T: Hunter):
+			LevelGrowth.apply(P)  # the ult at the level it is tested at, with its real growth
+			ac.aim_at(P, T.pos)
+			HunterKeys.ult_pressed(P)
+			ac.step(m, 1.7)
+	)
 	_burst_ok("Cinderfall", res)
