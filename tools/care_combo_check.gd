@@ -6,6 +6,7 @@ extends RefCounted
 
 const TTIME := preload("res://tools/tender_anim_time_check.gd")  # Meeko's move timing against the footage frames
 const OLD_RANGE := 13.5  # m the ember flew before the owner's 11-17 cut
+const RANGE_K := 1.1  # owner 11-26: both embers fly 10% further than that cut
 const SHOT_OUT := 0.6  # m a shot starts ahead of her (Hunter.fire); it ends at its range from her
 const MOVE_TAIL_MAX := 0.45  # s a dash move may run past its dash (the landing and settle)
 ## Each move's release beat in pip.glb (tools/art1/pip_clips.py: the push, arms up, thrust), s into the clip.
@@ -1077,8 +1078,8 @@ func tender() -> void:
 		"range %.1f reach %s" % [rng, reaches]
 	)
 	ok(
-		"mm LMB: a tap flies half the old 13.5 m, owner 11-17",
-		absf(rng - OLD_RANGE * 0.5) <= OLD_RANGE * 0.05,
+		"mm LMB: a tap flies half the old 13.5 m +10%, owner 11-17 and 11-26",
+		absf(rng - OLD_RANGE * 0.5 * RANGE_K) <= OLD_RANGE * 0.05,
 		"%.2f m" % rng
 	)
 	ok(
@@ -1164,8 +1165,8 @@ func tender() -> void:
 		"emp %d anim %s" % [K.stats["emp"], K.anim_id]
 	)
 	ok(
-		"mm LMB: the waited ember flies 0.625x the old range (+-5%) and the tap range after it is back",
-		absf(emp_reach - OLD_RANGE * 0.625) <= OLD_RANGE * 0.625 * 0.05 and P.shot_range_k == 1.0,
+		"mm LMB: the waited ember flies 0.625x the old range +10% (+-5%) and the tap range after it is back",
+		absf(emp_reach - OLD_RANGE * 0.625 * RANGE_K) <= OLD_RANGE * 0.625 * 0.05 and P.shot_range_k == 1.0,
 		"reach %.2f m" % emp_reach
 	)
 	var emp_r := float(emp_sh[-1]["r"])
@@ -1173,6 +1174,12 @@ func tender() -> void:
 		"mm LMB: the waited ember has a bigger hit than the tap",
 		emp_r > tap_size * 1.4 and not K.ready_shown,
 		"r %.2f vs tap %.2f" % [emp_r, tap_size]
+	)
+	var emp_look: Node3D = K.lk().skins[-1]["n"] if not K.lk().skins.is_empty() else null
+	ok(
+		"mm LMB: the waited ember looks 1.5x a tap's, both looks 15% smaller, the hit is not",
+		emp_look != null and absf(emp_look.scale.x - 1.5 * float(K.lmb_def()["look_k"])) < 0.001,
+		"look x%.3f" % (emp_look.scale.x if emp_look else -1.0)
 	)
 	step(m, 0.6)
 	# --- Burrseed (items 118 and 23): a press, a quick fixed wind-up, the throw by itself on the aim of that moment
