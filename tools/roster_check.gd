@@ -6,17 +6,19 @@ extends RefCounted
 ## Never touches the save.
 
 const TARGET_TOTAL := 89  # the 50 roster species and the 39 evolved forms that got data and a model 11-18
-const BODY_PLAY := 0.95   # the scale Kin draws a model at (kin.gd), times the rig frame's "top" and the data's fit
-const MAX_HEIGHT := 1.2   # m in the world: no Boki towers over a hunter
-const MIN_GROWTH := 1.0   # an evolved form drawn at least as tall as the form it comes from
+const BODY_PLAY := 0.95  # the scale Kin draws a model at (kin.gd), times the rig frame's "top" and the data's fit
+const MAX_HEIGHT := 1.2  # m in the world: no Boki towers over a hunter
+const MIN_GROWTH := 1.0  # an evolved form drawn at least as tall as the form it comes from
 
 var bad := 0
+
 
 ## Prints a ROSTER ok or FAIL line and counts failures.
 func ok(cond: bool, what: String) -> void:
 	print("ROSTER %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 ## Runs the check and quits with 1 on any failure.
 func run(main: Node) -> void:
@@ -37,12 +39,17 @@ func run(main: Node) -> void:
 	var total := KinLib.kin_ids().size()
 	ok(total == TARGET_TOTAL, "%d species (want %d)" % [total, TARGET_TOTAL])
 	var rideable := int(sizes["rideable"])
-	print("ROSTER sizes: small %d, medium %d, large %d, rideable %d" % [
-		sizes["small"], sizes["medium"], sizes["large"], rideable])
+	print(
+		(
+			"ROSTER sizes: small %d, medium %d, large %d, rideable %d"
+			% [sizes["small"], sizes["medium"], sizes["large"], rideable]
+		)
+	)
 	_evolved_sizes()
 	_src_notes()
 	print("ROSTER DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 ## small, medium, large (no mount settings) or rideable (a large kin that may be ridden, at any mount speed).
 func _size_class(k: KinSpec) -> String:
@@ -50,15 +57,18 @@ func _size_class(k: KinSpec) -> String:
 		return "rideable"
 	return k.size
 
+
 func _mesh_count(n: Node) -> int:
 	var c := 1 if n is MeshInstance3D else 0
 	for ch in n.get_children():
 		c += _mesh_count(ch)
 	return c
 
+
 ## A species' height in the world (m): the rig frame's top, the model fit and the draw scale.
 func _drawn_height(id: String) -> float:
 	return float(BokiRig.FRAME[id]["top"]) * float(Unique.base_size(id)["fit"]) * BODY_PLAY
+
 
 ## No Boki is drawn taller than MAX_HEIGHT, and an evolved form with a fitted size is not shorter than its parent.
 func _evolved_sizes() -> void:
@@ -70,8 +80,11 @@ func _evolved_sizes() -> void:
 			var to := String(o["id"])
 			if not (BokiRig.FRAME.has(from) and BokiRig.FRAME.has(to)) or Unique.base_size(to)["fit"] == 1.0:
 				continue
-			ok(_drawn_height(to) >= _drawn_height(from) * MIN_GROWTH, "%s (%.2f m) is not shorter than %s (%.2f m)" % [
-				to, _drawn_height(to), from, _drawn_height(from)])
+			ok(
+				_drawn_height(to) >= _drawn_height(from) * MIN_GROWTH,
+				"%s (%.2f m) is not shorter than %s (%.2f m)" % [to, _drawn_height(to), from, _drawn_height(from)]
+			)
+
 
 ## Every Hunter kit has a `src` note per ability (PARITY FIRST: [D] data, [F] footage, [O] owner, ours, [?] unknown).
 func _src_notes() -> void:

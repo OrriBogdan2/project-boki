@@ -1739,7 +1739,7 @@ static var normal_k := 1.0
 static var _shadow_mat: StandardMaterial3D
 
 static var _ear_bones := {}  # species -> its ear bones keyed in the sleep clip
-static var _scenes := {}  # path -> PackedScene, kept so a species' next build doesn't read it again
+static var _scenes := MeshCache.new(false)  # path -> PackedScene: a species' next build reads no .glb (aged)
 
 var species := ""
 var manual := false  # tools pose it by hand: set_clip, seek and set_face, nothing automatic
@@ -1820,10 +1820,11 @@ static func fetch_common() -> void:
 
 static func _scene(kin_id: String) -> PackedScene:
 	var p := PATH % [kin_id, kin_id]
-	if not _scenes.has(p):
+	var ps = _scenes.value(p)
+	if ps == null:
 		var asked := ResourceLoader.load_threaded_get_status(p) != ResourceLoader.THREAD_LOAD_INVALID_RESOURCE
-		_scenes[p] = BackgroundWork.take(p) if asked else load(p)
-	return _scenes[p] as PackedScene
+		ps = _scenes.hold(p, BackgroundWork.take(p) if asked else load(p))
+	return ps as PackedScene
 
 
 ## The work clip for a farm Boki (home's kin dictionary, its "job"), or "" when it isn't doing one.
