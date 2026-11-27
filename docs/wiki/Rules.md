@@ -1744,19 +1744,6 @@ A big Boki led at home (scripts/home/home_carry.gd _lead). It walks at your own 
 |---|---|
 | groups | {"vitals": {"from_match": 1, "what": "health, level and the XP bar"}, "abilities": {"from_match": 1, "what": "ability and weapon slots with their keys"}, "beat_clock": {"from_match": 4, "first": "beat", "what": "the match clock under the minimap, from the first Ways Out beat or the first kill"}, "summon_ring": {"from_match": 1, "what": "the Boki card and its summon ring"}, "objective": {"from_match": 1, "what": "the minimap, waypoints and prompts"}, "seat_pips": {"from_match": 0, "first": "seat_open", "what": "the Ways Out strip, from the first open seat"}, "belt": {"from_match": 4, "first": "item_matters", "what": "the utility belt, from the first time a held item could be used"}, "counters": {"from_match": 4, "what": "squads left, kills, knocks, gems"}, "feed": {"from_match": 4, "what": "the kill feed"}, "gear": {"from_match": 4, "what": "the gear panel"}, "squad": {"from_match": 4, "what": "squad frames"}, "perks": {"from_match": 4, "what": "the perk row"}, "weather": {"from_match": 4, "what": "the weather and sight chip"}, "belt_spare": {"from_match": 0, "what": "belt slots 3 and 4 while they are empty (a filled one always shows)"}, "ult_tiles": {"from_match": 0, "what": "the locked ultimate tiles (X, and the Fusion box) until level 6"}, "pace_tags": {"from_match": 4, "what": "ahead / behind pace tags (no widget yet)"}, "plate_colours": {"from_match": 4, "what": "squad-coloured names on overhead plates"}} |
 
-## hunter_foley (`content/rules/hunter_foley.json`)
-
-
-
-| Setting | Value |
-|---|---|
-| _doc | Each Hunter's quiet foley layer under its steps and dashes (MoveSfx, docs/AUDIO.md). One row per archetype: note = what makes the sound (from its final design); step_db / dash_db = that Hunter's level trim in dB (its sounds are <arch>_foley and <arch>_foley_dash, made by tools/gen_sfx_foley.py). A step's foley follows the Hunter's speed: walk_db quieter at a standstill, full level at its base run speed. Foley is carried to step_reach_m like the step itself; at most voice_cap foley sounds start per voice_window_ms across all Hunters, so a crowd of 30 stays readable. base_db: the level before the role (own/ally/enemy) and fight trims MoveSfx.level adds. |
-| base_db | -6 |
-| walk_db | -8 |
-| voice_cap | 5 |
-| voice_window_ms | 200 |
-| rows | {"dredge": {"note": "Grimble: the junk hoard on his back rattles and clinks (chests, tin, coins, a dull bell)", "step_db": 0.0, "dash_db": 0.0}, "bulwark": {"note": "Albert: barnacle armour clanks, plate on plate and shell crunch", "step_db": 0.0, "dash_db": 0.0}, "rimewright": {"note": "Neve: skate blades hiss on the ground", "step_db": 2.0, "dash_db": 0.0}, "juggernaut": {"note": "Kael: the chain at his collar and wrists", "step_db": 0.0, "dash_db": 0.0}, "ashwick": {"note": "Cinder: living-fire hair and molten seams crackle", "step_db": 0.0, "dash_db": 0.0}, "thief": {"note": "Sable: coat and buckle on steps, moth wings flutter on dashes", "step_db": -2.0, "dash_db": 2.0}, "archer": {"note": "Lace: porcelain joints click, the wooden control cross knocks", "step_db": 0.0, "dash_db": 0.0}, "dolm": {"note": "Tenzo: pebbles and the floating eye stones, a soft jade ring", "step_db": 0.0, "dash_db": 0.0}, "gunslinger": {"note": "Vex: brass ammo strap and the coin chain jingle", "step_db": 0.0, "dash_db": 0.0}, "mage": {"note": "Sparkle: copper coils at the wrists spit static", "step_db": -1.0, "dash_db": 0.0}, "ostra": {"note": "Motley: tiny jester bells and a flick of cards", "step_db": 0.0, "dash_db": 0.0}, "tender": {"note": "Meeko: the glass globe tinks, a raindrop drips", "step_db": 1.0, "dash_db": 0.0}, "gil": {"note": "Gil: potion vials clink in his bag, a wet slap of robe hem", "step_db": 1.0, "dash_db": 0.0}} |
-
 ## hunter_move (`content/rules/hunter_move.json`)
 
 
