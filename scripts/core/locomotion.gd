@@ -4,7 +4,7 @@ extends RefCounted
 ## air and glide steps, the dash ease, and the locomotion state machine both own (docs/decisions/0022). Numbers
 ## come from content/rules/tuning.json, re-read live while the movement readout is open (MoveReadout).
 
-enum S {GROUNDED, AIRBORNE, GLIDING, DASHING, MANTLING, KNOCKED}
+enum S { GROUNDED, AIRBORNE, GLIDING, DASHING, MANTLING, KNOCKED }
 const NAMES: PackedStringArray = ["Grounded", "Airborne", "Gliding", "Dashing", "Mantling", "Knocked"]
 ## Where each state may go. Gliding is entered only from the air or a dash (never the ground: no hold-to-glide
 ## off a jump), and entering a dash folds the glider (exit hook): never both at once. Mantling is the ledge rise
@@ -40,9 +40,10 @@ static var glide_swoop_fade := 0.0
 static var carry_drag := 0.0
 static var dash_jump_keep := 0.0
 static var dash_glide_ease := 0.0
-static var press_buffer := 0.0   # s an early press waits to be allowed: a dash's end, a recast window, a CC's end
+static var press_buffer := 0.0  # s an early press waits to be allowed: a dash's end, a recast window, a CC's end
 static var _mtime := 0
 static var _loaded := load_tuning()
+
 
 ## (Re)reads tuning.json into the static knobs. True when it parsed.
 static func load_tuning() -> bool:
@@ -76,34 +77,41 @@ static func load_tuning() -> bool:
 	press_buffer = T["press_buffer"]
 	return true
 
+
 ## Re-reads the file if it changed on disk (the readout calls this every poll_s while open).
 static func poll() -> void:
 	if FileAccess.get_modified_time(PATH) != _mtime:
 		load_tuning()
 
+
 ## A fresh locomotion state machine for one mover.
 static func machine() -> Fsm:
 	return Fsm.new(NAMES, TABLE, S.GROUNDED)
+
 
 ## The most speed this hunter carries from Shift into a glide before carry_drag bites (m/s).
 static func glide_carry(arch: String) -> float:
 	var c: Dictionary = T["glide_carry"]
 	return float(c.get(arch, c["default"]))
 
+
 ## Seconds after an air dash ends that a fresh glide press still counts as a press in the dash (DashGlide).
 static func dash_glide_grace(arch: String) -> float:
 	var g: Dictionary = T["dash_glide"]["grace"]
 	return float(g.get(arch, g["default"]))
+
 
 ## A dash's speed scale for this hunter (tuning.json dash_speed; 1.0 for a hunter not listed): its time
 ## stretches by the inverse so the distance stays. The dash's shape is its source curve (HunterMove.dash_k).
 static func dash_speed(arch: String) -> float:
 	return float(T["dash_speed"].get(arch, 1.0))
 
+
 ## A dash's velocity: `v` (its direction x its speed) at the hunter's dash_speed. The farm avatar and a match
 ## hunter both dash through this, so a Shift feels the same everywhere.
 static func dash_hv(v: Vector2, arch: String) -> Vector2:
 	return v * dash_speed(arch)
+
 
 ## Momentum-preserving ground acceleration: under the wanted speed, move toward it; over it (a dash, a pad, a
 ## knock) bleed the extra at `over` while still steering, and steering back against it brakes properly.
@@ -122,7 +130,8 @@ static func accel_to(cur: Vector2, wish: Vector2, accel: float, decel: float, ov
 		d = wd
 	return d.normalized() * ns
 
-## One air step: strong WASD air control, as SUPERVIVE (DECISIONS 11-08). Never overwrites what you carry: the keys
+
+## One air step: strong WASD air control, as the reference (DECISIONS 11-08). Never overwrites what you carry: the keys
 ## (length <= 1) add air_accel toward where they point. The part of your speed against them brakes at
 ## air_counter x that, the part across them at air_side x (the arc bends). Along them you gain only up to
 ## `cap` (your run speed); speed above the cap (a dash, a knock, a launch) bleeds under air_drag, never clipped.
@@ -140,16 +149,21 @@ static func air_step(hv: Vector2, keys: Vector2, cap: float, dt: float) -> Vecto
 	var a := air_accel * k * dt
 	if along < 0.0:
 		var b := a * air_counter
-		along = along + b if along + b < 0.0 else (along + b) / air_counter     # what's left pushes at the normal rate
+		along = along + b if along + b < 0.0 else (along + b) / air_counter  # what's left pushes at the normal rate
 	else:
 		along = minf(along + a, maxf(along, cap * k))
 	across = across.move_toward(Vector2.ZERO, a * air_side)
 	return (wd * along + across).limit_length(maxf(s, cap))
 
-## Vertical speed the step the glider opens: falling at least HunterMove.glide_start_vy ([game data]
-## GlideStartFallSpeedMin), so a rising jump is cut and an open never adds speed.
-static func glide_start(vy: float) -> float:
-	return minf(vy, -HunterMove.glide_start_vy)
+
+## Vertical speed the step the glider opens, `height` metres above the ground ([game data]): a fall is caught at once
+## at no more than HunterMove.glide_start_vy, and a rise is kept only up to glide_rise_vy near the ground, easing to
+## none between glide_rise_h's heights, so an open never adds speed and never drops you.
+static func glide_start(vy: float, height: float) -> float:
+	var h: Array = HunterMove.glide_rise_h
+	var high := clampf((height - float(h[0])) / (float(h[1]) - float(h[0])), 0.0, 1.0)
+	return clampf(vy, -HunterMove.glide_start_vy, HunterMove.glide_rise_vy * (1.0 - high))
+
 
 ## One glide step. `wish` = keys x cruise speed `gs`; `carry` = the most this hunter carries from Shift. Speed
 ## above cruise bleeds back within ~1.5 s (glide_drag; glide_drag_steer while steering), faster above `carry`;
@@ -170,17 +184,19 @@ static func glide_step(hv: Vector2, wish: Vector2, gs: float, carry: float, dt: 
 	var d := hv / s
 	var ang := d.angle_to(wish / ws)
 	if absf(ang) > deg_to_rad(glide_brake_deg):
-		return hv.move_toward(wish, glide_brake * dt)     # pulling back against your heading
+		return hv.move_toward(wish, glide_brake * dt)  # pulling back against your heading
 	var fast := clampf((s - gs) / maxf(0.1, glide_max - gs), 0.0, 1.0)
 	var rate := deg_to_rad(glide_turn) * lerpf(1.0, glide_turn_fast, fast)
 	return d.rotated(clampf(ang, -rate * dt, rate * dt)) * s
 
+
 # ---------------------------------------------------------------- the movement readout's numbers
 ## The local mover writes these each step (no allocation); MoveReadout shows them.
-static var r_hs := 0.0           # horizontal speed, m/s
-static var r_vs := 0.0           # vertical speed, m/s
-static var r_cap := 0.0          # the speed the current state steers up to (run speed, glide cruise), m/s
+static var r_hs := 0.0  # horizontal speed, m/s
+static var r_vs := 0.0  # vertical speed, m/s
+static var r_cap := 0.0  # the speed the current state steers up to (run speed, glide cruise), m/s
 static var r_fsm: Fsm
+
 
 static func report(fsm: Fsm, hv: Vector2, vy: float, cap: float) -> void:
 	r_fsm = fsm
@@ -188,11 +204,14 @@ static func report(fsm: Fsm, hv: Vector2, vy: float, cap: float) -> void:
 	r_vs = vy
 	r_cap = cap
 
+
 ## The drag the reported state applies above its cap (1/s).
 static func drag_now() -> float:
 	if r_fsm == null:
 		return 0.0
 	match r_fsm.state:
-		S.AIRBORNE: return air_drag
-		S.GLIDING: return glide_drag
+		S.AIRBORNE:
+			return air_drag
+		S.GLIDING:
+			return glide_drag
 	return 0.0

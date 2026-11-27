@@ -85,7 +85,6 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | Space | Jump (hold to glide) | `jump` | yes |
 | Mouse 5 | Glide (hold in the air) | `glide` | yes |
 | R | Hunter ultimate | `hunter_ult` | yes |
-| X | Fuse with your Boki (needs a full bond meter) | `ultimate` | yes |
 | 1 | Utility belt slot 1 (a tonic to start) | `util1` | yes |
 | Tab | Scoreboard | `scores` | yes |
 | Esc | Menu | `menu` | no |

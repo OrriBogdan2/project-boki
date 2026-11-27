@@ -248,6 +248,8 @@ const SKATE_LEAN_MAX := 0.4  # radians: the most Claire's skate leans forward, a
 ## A move with "land": true is a landing or arrival pose: it never keeps the glider shut (AirLimits).
 ## A move with "hold": true stays on its last key until another replaces it; with
 ## "loop": t as well it cycles from t to the last key instead (a recoil wobble, hand over hand). A move with
+## "ramp": [from, to, secs] plays at a rate going from `from` to `to` over its first secs (a spin winding up); one
+## with "linear": true eases each span evenly instead of in and out (a steady turn). A move with
 ## "stance": true keys its legs as a planted stance, used only standing (stance_leg_k); with "swing": n the
 ## weapon swing it starts plays step n of the weapon's SWINGS (one blade or the other, or both).
 const KMOVES := {}
@@ -1602,6 +1604,7 @@ static func km_sample(id: String, tt: float) -> Dictionary:
 		return {}
 	var keys: Array = mv["keys"]
 	var last: Array = keys[-1]
+	tt = _km_clock(mv, tt)
 	if tt >= float(last[0]):
 		if not mv.get("hold", false):
 			return {}
@@ -1613,7 +1616,8 @@ static func km_sample(id: String, tt: float) -> Dictionary:
 	var b: Array = keys[mini(i + 1, keys.size() - 1)]
 	var span := maxf(0.001, float(b[0]) - float(a[0]))
 	var u := clampf((tt - float(a[0])) / span, 0.0, 1.0)
-	u = u * u * (3.0 - 2.0 * u)
+	if not mv.get("linear", false):
+		u = u * u * (3.0 - 2.0 * u)
 	var pa: Dictionary = a[1]
 	var pb: Dictionary = b[1]
 	var out := {}
@@ -1641,6 +1645,19 @@ static func km_sample(id: String, tt: float) -> Dictionary:
 		var vb2: Vector3 = pb.get(c, pa.get(c))
 		out[c] = va2.lerp(vb2, u)
 	return out
+
+
+## A move's own clock `tt` s after it started: with "ramp" its rate eases linearly from ramp[0] to ramp[1] over the
+## first ramp[2] s, so every game that plays it agrees from the move's age alone.
+static func _km_clock(mv: Dictionary, tt: float) -> float:
+	var rp: Array = mv.get("ramp", [])
+	if rp.is_empty():
+		return tt
+	var r0 := float(rp[0])
+	var r1 := float(rp[1])
+	var secs := float(rp[2])
+	var u := clampf(tt, 0.0, secs)
+	return r0 * u + (r1 - r0) * u * u / (2.0 * secs) + r1 * maxf(0.0, tt - secs)
 
 
 ## Where a held move samples past its last key: the last key, or with "loop" (the time it loops back to)
