@@ -166,7 +166,8 @@ func _no_duplicate_toasts(m: Match) -> void:
 ## size, at 8 headings, under the view's middle and out at its sides, top and bottom.
 func _plates_clear_tops(m: Match) -> void:
 	var vis_k := Hunter.VIS_SCALE * m.cam.hunter_scale
-	var k := 1080.0 / m.get_viewport().get_visible_rect().size.y  # viewport px to 1080p px
+	# HUD px to 1080p px: HANG and AIR are px of the 720-tall canvas the game shows at any window size
+	var k := 1080.0 / float(ProjectSettings.get_setting("display/window/size/viewport_height"))
 	var worst := 1e9
 	var missing: Array[String] = []
 	for id in Arch.ids():

@@ -187,13 +187,13 @@ func _face_sweep(hero: String, extra: Array) -> void:
 	var gaps := {}  # side -> [min, max]
 	var samples: Array = []  # [feet, vis_k, top px]
 	for i in FACES:
-		var dir := Vector3.FORWARD.rotated(Vector3.UP, TAU * i / FACES)
+		var heading := Vector3.FORWARD.rotated(Vector3.UP, TAU * i / FACES)
 		for _f in SETTLE:
 			for j in all.size():
 				var h: Hunter = all[j]
 				h.teleport(spots[j])
 				h.vel = Vector3.ZERO
-				h.inp["aim"] = h.pos + dir * 8.0 + Vector3(0.0, 0.9, 0.0)
+				h.inp["aim"] = h.pos + heading * 8.0 + Vector3(0.0, 0.9, 0.0)
 			m.step(STEP)
 			m.cam.follow(m.player.pos, STEP, false)
 			for h in m.hunters:
