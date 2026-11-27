@@ -92,7 +92,7 @@ static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true, toa
 				CcSfx.play(e, "ground")
 		"blt":
 			e.blight_t = maxf(e.blight_t, secs)
-			e.blight_k = maxf(0.6, k) if k > 0.0 else 0.6
+			e.blight_k = maxf(InCombat.anti_heal_cut(), k) if k > 0.0 else InCombat.anti_heal_cut()
 			_show(e, kind, secs)
 		"rat":
 			var was_r := rattled(e)

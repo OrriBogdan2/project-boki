@@ -1,6 +1,7 @@
 extends RefCounted
 ## --pickup-reach-check: ground pickup reach (PickupReach, content/rules/pickup.json). Walking past
-## a consumable at the walk radius takes it and a pass just outside leaves it; with two gear pieces in
+## a consumable at the walk radius takes it and a pass just outside leaves it; a gem reaches further
+## (4 m) than a consumable (2.2 m) when you stand still; with two gear pieces in
 ## reach the interact key takes the one nearest the cursor, even when it is the farther from you;
 ## nothing is taken or offered through a rock; a dash still takes, a glide well above the ground
 ## doesn't. An expedition island (the rival spawns far off), never touches the save.
@@ -31,6 +32,7 @@ func run(main: Node) -> void:
 	ok(flat != Vector3.INF, "a flat clear spot to walk on: %s" % str(flat))
 	_walk_past(flat, float(walk["radius"]) - 0.15, true)
 	_walk_past(flat, float(walk["radius"]) + 0.3, false)
+	_gem_reach()
 	_cursor_pick(flat)
 	_through_rock(flat)
 	_in_the_air(flat)
@@ -57,6 +59,27 @@ func _walk_past(at: Vector3, off: float, taken: bool) -> void:
 			% [off, "taken" if taken else "left", m.pickups.size()]
 		)
 	)
+
+
+## A standing hunter: a gem 3.5 m away flies in and is taken (a tonic there is not), one 4.5 m away stays.
+func _gem_reach() -> void:
+	var gem: Dictionary = PickupReach.rules()["gem"]
+	var walk: Dictionary = PickupReach.rules()["walk"]
+	var far := float(gem["radius"])
+	var near_r := float(walk["radius"])
+	ok(far == 4.0 and far > near_r, "gems reach 4 m, past the walk radius (%.1f)" % near_r)
+	var flat := _flat_spot(5.0, 1.0)
+	ok(flat != Vector3.INF, "a flat clear strip for the gem test: %s" % str(flat))
+	for case: Array in [["gem", 3.5, true], ["tonic", 3.5, false], ["gem", 4.5, false]]:
+		_clear_ground()
+		_reset(flat)
+		m.drop(case[0], flat + Vector3(float(case[1]), 0, 0), 1, "", "", Vector3.ZERO)
+		for i in 90:
+			_step()
+		ok(
+			m.pickups.is_empty() == case[2],
+			"a %s lying %.1f m from a standing hunter: %s" % [case[0], case[1], "taken" if case[2] else "left"]
+		)
 
 
 ## Two gear pieces in reach: the key takes the one under the cursor, the farther one from the hunter.
