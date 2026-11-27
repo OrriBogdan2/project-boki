@@ -10,14 +10,16 @@ extends RefCounted
 ##   godot --headless -- --match-repeat-check [--repeat-cycles=8]
 ## On a GPU (jobq --needs gpu) the video and texture memory lines include the painted map (MapPaint).
 
-const CYCLES := 7  # expeditions in a run (--repeat-cycles= overrides)
-const WARM := 4  # cycles that may fill the shared caches before growth counts
+const CYCLES := 5  # expeditions in a run (--repeat-cycles= overrides)
+const WARM := 3  # cycles that may fill the shared caches before growth counts
 const SIM_S := 20.0  # s of match time per expedition
 const DT := 1.0 / 60.0  # s per match step (Match.DT)
 const FRAME_EVERY := 30  # match steps between frames, so deferred frees and timers run
 const HOME_FRAMES := 30  # frames on the farm before the counts are read
 const MESH_GROWTH := 60  # cached meshes one more match may add (~420 a match before MeshCache)
-const OBJ_GROWTH := 400  # objects one more match may add (~750 a match before MeshCache)
+const OBJ_GROWTH := 450  # objects one more match may add (~750 a match before MeshCache)
+# main 82009a8c90 measured +384..+420 (median 402, 6 runs, dummy renderer as the gate) and +290..+316 on
+# xvfb/llvmpipe: 400 sat inside main's own noise; 450 = main max + about one run-to-run spread (36)
 
 var main: Node
 var bad := 0

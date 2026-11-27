@@ -29,13 +29,13 @@ func run(main: Node) -> void:
 		Save.d["roster"].append(tk)
 		Save.d["active"] = tk["uid"]
 	_hunters()
-	await _shots(main)
+	_layout()
 	await _real_load(main)
 	print("LOADING DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
 
-## Every Hunter: a splash that loads, a tip (none about the Blight when it is off), the map's name and mode line.
+## Every Hunter: a splash that loads, a tip from the tip set (also with the Blight off), the map's name.
 func _hunters() -> void:
 	var ids := Arch.ids()
 	ok(ids.size() >= 12, "every Hunter (%d)" % ids.size())
@@ -45,8 +45,9 @@ func _hunters() -> void:
 		var tex: Texture2D = ld.splash
 		var loads: bool = ld.splash_path != "" and tex != null and tex.get_width() > 0
 		ok(loads, "%s: its splash loads (%s)" % [ak, ld.splash_path])
-		ok(ld.tip != "", "%s: a tip" % ak)
-		ok(ld.title != "" and ld.mode_line != "", "%s: the map's name and a mode line (%s)" % [ak, ld.title])
+		ok(ld.tip != "" and _tip_set().has(ld.tip), "%s: a tip from the tip set" % ak)
+		ok(ld.map_name != "", "%s: the map's name (%s)" % [ak, ld.map_name])
+		ok(loads and absf(tex.get_width() * 9.0 - tex.get_height() * 16.0) < 16.0, "%s: its splash is 16:9" % ak)
 		ld.free()
 		var calm: Node = load(LOADING).new()
 		calm.setup({"teams": 10, "squad": 3, "tier": 0, "arch": ak, "blight": false})
@@ -54,32 +55,23 @@ func _hunters() -> void:
 		calm.free()
 
 
-## With --shots-dir=<dir> [--size=WxH]: the screen for a trio mid-load, as <dir>/loading_<W>x<H>.png.
-func _shots(main: Node) -> void:
-	var dir := ""
-	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--shots-dir="):
-			dir = a.substr(12)
-		if a.begins_with("--size="):
-			var wh := a.substr(7).split("x")
-			main.get_window().size = Vector2i(int(wh[0]), int(wh[1]))
-	if dir == "":
-		return
-	DirAccess.make_dir_recursive_absolute(dir)
-	if main.fade != null:
-		await main.fade.reveal(0.01)
-	var ld: Node = load(LOADING).new()
-	var opts := {"teams": 10, "squad": 3, "tier": 0, "arch": "gunslinger", "seed": 3}
-	Prematch.deal_mates(opts)
-	ld.setup(opts)
-	main.add_child(ld)
-	ld.want = 0.6
-	ld.set_stage("graphics")
-	for i in 40:
-		await main.get_tree().process_frame
-	var win := main.get_window().size
-	main.get_viewport().get_texture().get_image().save_png(dir.path_join("loading_%dx%d.png" % [win.x, win.y]))
-	ld.queue_free()
+## The bottom-left stack (title block, tip, bar) and the squad row at three window sizes, with a raid line
+## shown: all inside the window, none on another, the squad above the title block.
+func _layout() -> void:
+	for sz in [Vector2(1024, 640), Vector2(1280, 720), Vector2(1920, 1080)]:
+		var ld: Node = load(LOADING).new()
+		ld.setup({"teams": 10, "squad": 3, "tier": 0, "arch": "mage", "seed": 7})
+		ld.raid = "fog"
+		var lay: Dictionary = ld.layout(sz)
+		var squad: Rect2 = lay["squad"]
+		var block: Rect2 = lay["block"]
+		var tip: Rect2 = lay["tip"]
+		var bar: Rect2 = lay["bar"]
+		var inside := Rect2(Vector2.ZERO, sz).encloses(block) and Rect2(Vector2.ZERO, sz).encloses(bar)
+		ok(inside and squad.position.y >= 0.0, "%dx%d: the text and bar are inside the window" % [sz.x, sz.y])
+		var apart := squad.end.y < block.position.y and block.end.y < tip.position.y and tip.end.y < bar.position.y
+		ok(apart, "%dx%d: squad, title block, tip and bar are stacked apart (%s)" % [sz.x, sz.y, lay])
+		ld.free()
 
 
 func _screen(main: Node) -> Node:
@@ -96,7 +88,7 @@ func _real_load(main: Node) -> void:
 	opts["arch"] = "mage"
 	main.show_screen("match", opts)
 	var tree := main.get_tree()
-	var shown: Array = []  # [prog, want, frame seconds, stage] per frame
+	var shown: Array = []          # [prog, want, frame seconds, stage] per frame
 	var stages: Array = []
 	var waited := 0.0
 	while waited < TIMEOUT_S:
@@ -106,8 +98,7 @@ func _real_load(main: Node) -> void:
 		var ld := _screen(main)
 		if ld:
 			shown.append([float(ld.prog), float(ld.want), dt, String(ld.stage_label)])
-			if stages.is_empty() or stages[-1] != String(ld.stage_label):
-				stages.append(String(ld.stage_label))
+			if stages.is_empty() or stages[-1] != String(ld.stage_label): stages.append(String(ld.stage_label))
 		elif not shown.is_empty() and main.current is Match and (main.current as Match).is_processing():
 			break
 	if main.current is Match:
@@ -118,10 +109,8 @@ func _real_load(main: Node) -> void:
 	var jumps := 0
 	var want_back := 0
 	for i in range(1, shown.size()):
-		if shown[i][0] < shown[i - 1][0]:
-			back += 1
-		if shown[i][1] < shown[i - 1][1]:
-			want_back += 1
+		if shown[i][0] < shown[i - 1][0]: back += 1
+		if shown[i][1] < shown[i - 1][1]: want_back += 1
 		if shown[i][0] - shown[i - 1][0] > MAX_STEP and shown[i][2] < HITCH_S:
 			jumps += 1
 			var at := [i, shown[i][3], shown[i - 1][0], shown[i][0], shown[i][2]]
@@ -144,3 +133,8 @@ func _real_load(main: Node) -> void:
 	var seen := ", ".join(stages)
 	var complete := order_ok and at == names.size() - 1 and warm_seen
 	ok(complete, "the stages come in order, graphics warm-up included: " + seen)
+
+
+## Every tip in content/rules/tips.json as the loading screen shows it (keys filled in).
+func _tip_set() -> Array:
+	return TipPick.rules()["tips"].map(func(t): return TipPick.render(String(t["text"])))

@@ -1,95 +1,137 @@
 extends CanvasLayer
-## The screen between home and an expedition: your Hunter's splash, the map name over one mode line,
-## your squad, a spinner with the stage being worked on over one progress bar, and one tip. The bar
-## follows the real load stages (the build, then the shader warm-up) and only ever moves forward. The
-## match builds in short slices between frames (see Match._slice and World._slice), so the spinner keeps
-## turning the whole way.
+## The screen between home and an expedition: your Hunter's painted splash, full screen and unwashed, with
+## a soft shade at the top and bottom edges for the text. Your squad sits top left; the tier name, the
+## map, what you're heading into, a tip and the stage being worked on (a spinner over a progress bar)
+## stack up the bottom left, so the picture's centre stays clear. The bar follows the real load stages (the build, then the shader warm-up)
+## and only ever moves forward. The match builds in short slices between frames (see Match._slice and
+## World._slice), so the spinner keeps turning the whole way.
 
 signal shown
 
+## A line of the world's story shown under the tip (our own words; the canon is briefs/LORE_MASKS.md).
+const LORE := [
+	"Everyone born since the Hollowing is born without a face. We call ourselves the Empty.",
+	"A Mask holds the soul of a Hunter who stood against the Wyrm. Wear one and you remember what a self feels like.",
+	"Malgrave the Beloved never aged, and never forgot her vault. Under the Crown, it was always the Wyrm.",
+	"The Blight is the Wyrm's blood. It sours stone, grass and sky, and it follows whoever is loudest.",
+	"A thief once reached the Wyrmheart. Whatever she wished for, the whole land is still paying for it.",
+	"People once dug up Masks to smash them. Now they dig for the same relics to be whole again.",
+	"Skyfolk, beasts and humans all lost their faces alike. The sky doesn't ask who you were.",
+	"One wish waits in the Wyrmheart: remake the world, or rule it. Every Hunter wants it. So does the Wyrm.",
+	"Not every Mask has a face. Some are a compass, a jar, a pair of skates, and they remember just as much.",
+	"Bring home what you carry. Out here, only what reaches the farm is truly yours.",
+]
 ## What's being worked on, set by whoever builds the match (Main.show_screen, Match): shown by the spinner.
-const FADE_IN_T := 0.15  # s the screen takes to fade in before the build starts
-const FADE_OUT_T := 0.2  # s it takes to fade out when there is no ink to cover it
-const COVER_T := 0.1  # s the ink takes to cover it once the match is ready
-const FILL_T := 0.05  # s the bar takes to run full once the match is ready (inside COVER_T)
-const REVEAL_T := 0.2  # s the ink takes to sweep off the match (the match is already running)
+const FADE_IN_T := 0.15     # s the screen takes to fade in before the build starts
+const FADE_OUT_T := 0.2     # s it takes to fade out when there is no ink to cover it
+const COVER_T := 0.1        # s the ink takes to cover it once the match is ready
+const FILL_T := 0.05        # s the bar takes to run full once the match is ready (inside COVER_T)
+const REVEAL_T := 0.2       # s the ink takes to sweep off the match (the match is already running)
 const STAGES := {"map": "Building the map", "spawn": "Spawning", "graphics": "Preparing graphics", "ready": "Ready"}
-const MARGIN_FRAC := 0.05  # the screen's edge margin as a fraction of its height
-const TITLE_FRAC := 0.055  # the map name's size as a fraction of the screen height
-const FACE_FRAC := 0.09  # a squad portrait's side as a fraction of the screen height
-const TIP_W := 900.0  # px, the widest the tip runs before it wraps
-const SHADE := Color(0.05, 0.035, 0.08)  # the dark the splash fades into under the text
 
+const SHADE_BOTTOM := 0.55  # share of the screen height the bottom shade covers
+const SHADE_TOP := 0.25  # share of the screen height the top shade covers
+const SHADE_LEFT := 0.6  # share of the screen width the left shade covers (the text sits on it)
+const SHADE_ALPHA := 0.75  # black at the very bottom edge (the top and left edges use less)
+const MARGIN_SHARE := 0.05  # of the screen width: the margin text and bar keep from the edges
+const MARGIN_MIN := 32.0  # px
+const MARGIN_MAX := 96.0  # px
+const TIP_W := 720.0  # px, the tip line length
+const TEXT_W := 640.0  # px, the title block's wrap width
+const SQUAD_PX := 72.0  # px, a squad portrait
+const SQUAD_GAP := 22.0  # px between squad portraits
 const BAR_MIN_SPEED := 0.9  # bar share per second, at least, so it never sits still while the load works
 const BAR_CATCH_UP := 6.0  # the bar closes this many times its gap per second (eases out into each stage)
 
 var c: Control
 var t := 0.0
-var prog := 0.0  # what the bar shows
-var want := 0.0  # where the bar is heading
-var fill_speed := 0.0  # bar share per second once the match is ready: the rest of the bar while the screen goes
+var prog := 0.0          # what the bar shows
+var want := 0.0          # where the bar is heading
+var fill_speed := 0.0    # bar share per second once the match is ready: the rest of the bar while the screen goes
 var fade := 0.0
 var leaving := false
-var title := ""  # the map's name (the tutorial's and training's own names)
-var mode_line := ""  # tier, squad size, count and raid condition ("" off expeditions)
+var tier := 0
+var T: Dictionary
+var title := ""
+var sub := ""
+var mode_line := ""
+var raid := ""  # the raid condition this expedition rolled ("" when it doesn't roll one)
 var tip := ""
+var lore := ""  # a line of the world story, under the tip (LORE)
+var map_name := ""  # the map this expedition is on ("" when unknown)
 var party: Array = []  # your squad, [{name, arch, you}] (Prematch.squad_of)
 var arch := ""  # the Hunter whose splash fills the screen
 var splash_path := ""  # that splash's file ("" when the Hunter has none)
-var splash: Texture2D  # your Hunter's splash art (null if it has none)
-var shade_tex: GradientTexture2D
+var splash: Texture2D
+var shade_bottom: GradientTexture2D
+var shade_top: GradientTexture2D
+var shade_left: GradientTexture2D
 var stage_label := "Building the map"
 var spin_draws := 0  # frames the spinner has drawn (--load-check: one per frame means it never stalled)
 
 
+func _grad(cols: Array, offs: Array, across := false) -> GradientTexture2D:
+	var g := Gradient.new()
+	g.colors = PackedColorArray(cols)
+	g.offsets = PackedFloat32Array(offs)
+	var gt := GradientTexture2D.new()
+	gt.gradient = g
+	gt.width = 128
+	gt.height = 128
+	gt.fill_from = Vector2(0, 0)
+	gt.fill_to = Vector2(1, 0) if across else Vector2(0, 1)
+	return gt
+
+
 func setup(opts: Dictionary) -> void:
 	layer = 45
-	var tier := clampi(int(opts.get("tier", 0)), 0, Data.TIERS.size() - 1)
-	var mine := String(opts.get("arch", Arch.of_save()))
+	tier = clampi(int(opts.get("tier", 0)), 0, Data.TIERS.size() - 1)
+	T = Data.TIERS[tier]
 	if opts.get("tutorial", false):
 		title = "First Expedition"
+		sub = (
+			"A short, safe trip with %s to learn the ropes. No rivals out here yet."
+			% String(Save.active_kin().get("name", "your Boki"))
+		)
 	elif opts.get("training", false):
-		title = "Training Area"
+		title = "Training Grounds"
+		sub = "Dummies, ledges and boosters. No danger here."
 	else:
+		title = String(T["name"])
+		sub = String(T["desc"])
+		var teams := int(opts.get("teams", 6))
+		var squad := int(opts.get("squad", 1))
+		# solo lobbies count hunters ("Solo · 20 squads" read oddly), squad lobbies count squads
+		var count := ("%d hunters" % teams) if squad <= 1 else ("%d squads" % teams)
+		mode_line = "%s  •  %s  •  skyship drop" % [["Solo", "Duos", "Trios"][clampi(squad - 1, 0, 2)], count]
+		if opts.has("net"):
+			mode_line = "Online  •  " + mode_line
+		if opts.get("rolling", false):
+			mode_line = (
+				"%s  •  rolling 30-minute session  •  join in progress"
+				% ["Solo", "Duos", "Trios"][clampi(squad - 1, 0, 2)]
+			)
+		raid = RaidLook.pick(opts, int(opts.get("seed", 0)))
 		var map_id := String(opts.get("map", World.layout_for_tier(tier)))
 		if opts.get("rolling", false):
 			map_id = WideLayout.MAP
-		title = String(World.load_layout(map_id).get("name", Data.TIERS[tier]["name"]))
-		mode_line = _mode(opts, String(Data.TIERS[tier]["name"]))
-		party = Prematch.squad_of(opts, mine)
+		map_name = String(World.load_layout(map_id).get("name", ""))
+		party = Prematch.squad_of(opts, String(opts.get("arch", Arch.of_save())))
 	var tut: bool = opts.get("tutorial", false) or opts.get("duo_tut", false)
 	tip = TipPick.for_loading(opts.get("blight", true), not tut)
-	arch = mine
-	splash_path = Portraits.art_path(mine, true)
-	splash = load(splash_path) if splash_path != "" else null
-	var g := Gradient.new()
-	g.offsets = PackedFloat32Array([0.0, 0.5, 1.0])
-	g.colors = PackedColorArray([Color(SHADE, 0.0), Color(SHADE, 0.7), Color(SHADE, 0.92)])
-	shade_tex = GradientTexture2D.new()
-	shade_tex.gradient = g
-	shade_tex.fill_to = Vector2(0, 1)
+	lore = LORE[randi() % LORE.size()]
+	arch = String(opts.get("arch", Arch.of_save()))
+	splash_path = Portraits.art_path(arch, true)
+	if splash_path != "":
+		splash = load(splash_path)
+	shade_bottom = _grad([Color(0, 0, 0, 0), Color(0, 0, 0, SHADE_ALPHA)], [0.0, 1.0])
+	shade_top = _grad([Color(0, 0, 0, SHADE_ALPHA * 0.5), Color(0, 0, 0, 0)], [0.0, 1.0])
+	shade_left = _grad([Color(0, 0, 0, SHADE_ALPHA * 0.6), Color(0, 0, 0, 0)], [0.0, 1.0], true)
 	c = Control.new()
 	c.set_anchors_preset(Control.PRESET_FULL_RECT)
 	c.mouse_filter = Control.MOUSE_FILTER_STOP
 	c.draw.connect(_draw)
 	add_child(c)
-
-
-## The mode line: tier, squad size, how many (solo lobbies count hunters, squad lobbies squads), online,
-## a rolling session, and the raid condition this expedition rolled.
-func _mode(opts: Dictionary, tier_name: String) -> String:
-	var squad := int(opts.get("squad", 1))
-	var size_word: String = ["Solo", "Duos", "Trios"][clampi(squad - 1, 0, 2)]
-	var teams := int(opts.get("teams", 6))
-	var parts: Array = [tier_name, size_word, ("%d hunters" % teams) if squad <= 1 else ("%d squads" % teams)]
-	if opts.get("rolling", false):
-		parts[2] = "rolling session"
-	if opts.has("net"):
-		parts.push_front("Online")
-	var raid := RaidLook.pick(opts, int(opts.get("seed", 0)))
-	if raid != "":
-		parts.append(String(RaidLook.NAMES.get(raid, raid)))
-	return "  ·  ".join(parts)
 
 
 func _process(delta: float) -> void:
@@ -119,7 +161,6 @@ func step(frac: float) -> void:
 	while prog < want - 0.01 and is_inside_tree():
 		await get_tree().process_frame
 
-
 ## The match is built and drawn: the screen goes at once, with nothing to wait out (playtest 11-09:
 ## players were held on a full bar). The bar runs the rest of the way while the ink covers it, so it
 ## never leaps in one frame, then the ink sweeps off the match.
@@ -142,71 +183,150 @@ func set_stage(key: String) -> void:
 	stage_label = String(STAGES.get(key, key))
 
 
-## Bottom up: the tip, the bar with its stage and percent, then the map name and mode line on the left
-## and the squad on the right, all over the splash fading to dark below.
+## Where everything sits at a screen size: the squad row, the text block, the tip and the bar. Pure
+## geometry (--loading-check reads it), measured from the bottom edge up so a short window lifts the text.
+func layout(sz: Vector2) -> Dictionary:
+	var m := clampf(sz.x * MARGIN_SHARE, MARGIN_MIN, MARGIN_MAX)
+	var bar := Rect2(m, sz.y - m * 0.7, sz.x - m * 2.0, 4.0)
+	var tip_w := minf(TIP_W, sz.x - m * 2.0)
+	var lore_h := UI.body.get_multiline_string_size(lore, HORIZONTAL_ALIGNMENT_LEFT, tip_w, 14, 3).y + 10.0
+	var tip_h := UI.body.get_multiline_string_size(tip, HORIZONTAL_ALIGNMENT_LEFT, tip_w, 16, 3).y + 22.0 + lore_h
+	var tip_box := Rect2(m, bar.position.y - 44.0 - tip_h, tip_w, tip_h)
+	var text_w := minf(TEXT_W, sz.x - m * 2.0)
+	var sub_h := UI.body.get_multiline_string_size(sub, HORIZONTAL_ALIGNMENT_LEFT, text_w, 17, 3).y
+	var blurb_h := 0.0
+	if raid != "":
+		blurb_h = (
+			UI
+			. body
+			. get_multiline_string_size(String(RaidLook.BLURBS.get(raid, "")), HORIZONTAL_ALIGNMENT_LEFT, text_w, 14, 3)
+			. y
+		)
+	var block_h := 70.0 + sub_h
+	if mode_line != "":
+		block_h += 24.0
+	if raid != "":
+		block_h += 30.0 + blurb_h
+	var block := Rect2(m, tip_box.position.y - 28.0 - block_h, text_w, block_h)
+	var squad := Rect2(m, m * 0.8, 0.0, 0.0)
+	if not party.is_empty():
+		squad.size = Vector2(party.size() * SQUAD_PX + (party.size() - 1) * SQUAD_GAP, SQUAD_PX + 40.0)
+	return {"margin": m, "bar": bar, "tip": tip_box, "block": block, "squad": squad}
+
+
 func _draw() -> void:
 	var sz := c.size
 	var a := fade
-	c.draw_rect(Rect2(Vector2.ZERO, sz), Color(UI.BG, a))
+	var lay := layout(sz)
+	var m: float = lay["margin"]
 	if splash:
-		var cut := Portraits.region(arch, splash_path, splash.get_size(), sz)
-		c.draw_texture_rect_region(splash, Rect2(Vector2.ZERO, sz), cut, Color(1, 1, 1, a))
-	c.draw_texture_rect(shade_tex, Rect2(0, sz.y * 0.35, sz.x, sz.y * 0.65), false, Color(1, 1, 1, a))
-	var m := maxf(24.0, sz.y * MARGIN_FRAC)
-	var tw := minf(TIP_W, sz.x - 2.0 * m)
-	var tip_h := UI.body.get_multiline_string_size(tip, HORIZONTAL_ALIGNMENT_CENTER, tw, 15, 2).y
-	c.draw_multiline_string(
-		UI.body,
-		Vector2(sz.x * 0.5 - tw * 0.5, sz.y - m - tip_h + 15.0),
-		tip,
-		HORIZONTAL_ALIGNMENT_CENTER,
-		tw,
-		15,
-		2,
-		Color(UI.MUTED, a)
+		c.draw_texture_rect_region(
+			splash,
+			Rect2(Vector2.ZERO, sz),
+			Portraits.region(arch, splash_path, splash.get_size(), sz),
+			Color(1, 1, 1, a)
+		)
+	else:
+		c.draw_rect(Rect2(Vector2.ZERO, sz), Color(T["sky"] as Color, a).darkened(0.5))
+	c.draw_texture_rect(
+		shade_bottom, Rect2(0, sz.y * (1.0 - SHADE_BOTTOM), sz.x, sz.y * SHADE_BOTTOM), false, Color(1, 1, 1, a)
 	)
-	var br := Rect2(m, sz.y - m - tip_h - 22.0, sz.x - 2.0 * m, 6)
+	c.draw_texture_rect(shade_left, Rect2(0, 0, sz.x * SHADE_LEFT, sz.y), false, Color(1, 1, 1, a))
+	c.draw_texture_rect(shade_top, Rect2(0, 0, sz.x, sz.y * SHADE_TOP), false, Color(1, 1, 1, a))
+	var block: Rect2 = lay["block"]
+	var left := HORIZONTAL_ALIGNMENT_LEFT
+	var y := block.position.y
+	var kick := "GETTING READY"
+	if mode_line != "":
+		kick = "EXPEDITION  ·  " + map_name.to_upper() if map_name != "" else "EXPEDITION"
+	_text(Vector2(m, y + 14), kick, UI.caps, 15, Color(UI.GOLD, a), 3, left)
+	_text(Vector2(m, y + 66), title, UI.big, 58, Color(UI.INK, a), 0, left)
+	y += 78.0
+	_wrap(Vector2(m, y), sub, 17, block.size.x, Color(UI.INK, a * 0.8))
+	y += UI.body.get_multiline_string_size(sub, left, block.size.x, 17, 3).y + 8.0
+	if mode_line != "":
+		_text(Vector2(m, y + 12), mode_line, UI.semi, 15, Color(UI.TEAL, a), 0, left)
+		y += 24.0
+	if raid != "":
+		var rc: Color = RaidLook.COLORS.get(raid, UI.INK)
+		_text(
+			Vector2(m, y + 22),
+			"CONDITIONS  ·  " + String(RaidLook.NAMES.get(raid, raid)).to_upper(),
+			UI.caps,
+			13,
+			Color(rc, a),
+			2,
+			left
+		)
+		_wrap(Vector2(m, y + 28), String(RaidLook.BLURBS.get(raid, "")), 14, block.size.x, Color(UI.INK, a * 0.75))
+	var tip_box: Rect2 = lay["tip"]
+	c.draw_rect(Rect2(tip_box.position, Vector2(2.0, tip_box.size.y)), Color(UI.ACCENT, a * 0.9))
+	_text(Vector2(tip_box.position.x + 14.0, tip_box.position.y + 12), "TIP", UI.caps, 11, Color(UI.ACCENT, a), 2, left)
+	_wrap(
+		Vector2(tip_box.position.x + 14.0, tip_box.position.y + 14.0),
+		tip,
+		16,
+		tip_box.size.x - 14.0,
+		Color(UI.INK, a * 0.9)
+	)
+	var lore_y := tip_box.position.y + 14.0 + UI.body.get_multiline_string_size(tip, left, tip_box.size.x - 14.0, 16, 3).y + 10.0
+	_wrap(Vector2(tip_box.position.x + 14.0, lore_y), lore, 14, tip_box.size.x - 14.0, Color(UI.INK, a * 0.6))
+	var br: Rect2 = lay["bar"]
 	var af := snappedf(a, 0.1)
-	UI.draw_bar(c, br, prog if prog > 0.01 else 0.0, Color(UI.ACCENT, af), Color(1, 1, 1, af * 0.12), 3)
-	_spinner(Vector2(br.position.x + 7.0, br.position.y - 15.0), a)
+	UI.draw_bar(c, br, prog if prog > 0.01 else 0.0, Color(UI.ACCENT, af), Color(1, 1, 1, af * 0.18), 2)
+	_spinner(Vector2(br.position.x + 7.0, br.position.y - 17.0), a)
 	_text(
-		Vector2(br.position.x + 22.0, br.position.y - 10),
+		Vector2(br.position.x + 22.0, br.position.y - 12),
 		stage_label + "…",
 		UI.semi,
 		13,
-		Color(UI.INK, a * 0.8),
-		HORIZONTAL_ALIGNMENT_LEFT
+		Color(UI.INK, a * 0.85),
+		0,
+		left
 	)
 	_text(
-		Vector2(br.end.x, br.position.y - 10),
+		Vector2(br.end.x, br.position.y - 12),
 		"%d%%" % int(prog * 100.0),
 		UI.semi,
 		13,
-		Color(UI.INK, a * 0.55),
+		Color(UI.INK, a * 0.6),
+		0,
 		HORIZONTAL_ALIGNMENT_RIGHT
 	)
-	var base := br.position.y - 44.0
-	if mode_line != "":
-		_text(Vector2(m, base), mode_line, UI.semi, 16, Color(UI.TEAL, a), HORIZONTAL_ALIGNMENT_LEFT)
-		base -= 30.0
-	var title_px := maxi(36, int(sz.y * TITLE_FRAC))
-	_text(Vector2(m, base), title, UI.big, title_px, Color(UI.INK, a), HORIZONTAL_ALIGNMENT_LEFT)
-	_squad_row(Vector2(sz.x - m, br.position.y - 62.0), clampf(sz.y * FACE_FRAC, 64.0, 100.0), a)
+	_squad_row(lay["squad"], a)
 
 
-## Your squad's portraits with their names under them, right-aligned to `p` (the names' baseline).
-func _squad_row(p: Vector2, px: float, a: float) -> void:
+## Your squad's portraits and names, top left: who you are dropping with.
+func _squad_row(r: Rect2, a: float) -> void:
 	if party.size() < 2:
-		return  # (solos: nobody to drop with)
-	var gap := 18.0
-	var x := p.x - party.size() * px - (party.size() - 1) * gap
+		return      # (solos: nobody to drop with)
+	var left := HORIZONTAL_ALIGNMENT_LEFT
+	_text(Vector2(r.position.x, r.position.y - 6.0), "YOUR SQUAD", UI.caps, 12, Color(UI.GOLD, a), 2, left)
+	var x := r.position.x
 	for mate in party:
 		var ak: String = mate["arch"]
-		var edge: Color = Arch.color(ak) if Arch.exists(ak) else UI.MUTED
-		Portraits.draw(c, Rect2(x, p.y - 20.0 - px, px, px), ak, null, Color(edge, a))
-		var col := UI.ACCENT_HI if mate["you"] else UI.INK
-		_text(Vector2(x + px * 0.5, p.y), String(mate["name"]), UI.semi, 14, Color(col, a * 0.9))
-		x += px + gap
+		Portraits.draw(
+			c,
+			Rect2(x, r.position.y, SQUAD_PX, SQUAD_PX),
+			ak,
+			null,
+			Color(Arch.color(ak) if Arch.exists(ak) else UI.MUTED, a)
+		)
+		_text(
+			Vector2(x + SQUAD_PX * 0.5, r.position.y + SQUAD_PX + 20.0),
+			String(mate["name"]),
+			UI.semi,
+			13,
+			Color(UI.INK, a * 0.9)
+		)
+		_text(
+			Vector2(x + SQUAD_PX * 0.5, r.position.y + SQUAD_PX + 36.0),
+			Arch.label(ak),
+			UI.body,
+			12,
+			Color(UI.MUTED, a * 0.9)
+		)
+		x += SQUAD_PX + SQUAD_GAP
 
 
 ## A ring with a turning arc that grows and shrinks as it goes round: moves every frame, so a
@@ -220,13 +340,30 @@ func _spinner(p: Vector2, a: float) -> void:
 	c.draw_arc(p, r, head - span, head, 24, Color(UI.ACCENT, a), 2.5, true)
 
 
-## One line of text with a soft drop shadow, centred on (or starting/ending at) `pos.x`.
-func _text(pos: Vector2, s: String, f: Font, size: int, col: Color, al := HORIZONTAL_ALIGNMENT_CENTER) -> void:
+func _text(
+	pos: Vector2, s: String, f: Font, size: int, col: Color, spacing := 0, al := HORIZONTAL_ALIGNMENT_CENTER
+) -> void:
 	var w := 900.0
 	var x := pos.x - w * 0.5
 	if al == HORIZONTAL_ALIGNMENT_LEFT:
 		x = pos.x
 	elif al == HORIZONTAL_ALIGNMENT_RIGHT:
 		x = pos.x - w
-	c.draw_string(f, Vector2(x + 2, pos.y + 2), s, al, w, size, Color(0, 0, 0, col.a * 0.5))
+	if spacing > 0:
+		s = " ".join(s.split(""))
+	c.draw_string(f, Vector2(x + 2, pos.y + 2), s, al, w, size, Color(0, 0, 0, col.a * 0.55))
 	c.draw_string(f, Vector2(x, pos.y), s, al, w, size, col)
+
+
+func _wrap(pos: Vector2, s: String, size: int, w: float, col: Color) -> void:
+	c.draw_multiline_string(
+		UI.body,
+		Vector2(pos.x + 1, pos.y + size + 1),
+		s,
+		HORIZONTAL_ALIGNMENT_LEFT,
+		w,
+		size,
+		3,
+		Color(0, 0, 0, col.a * 0.55)
+	)
+	c.draw_multiline_string(UI.body, Vector2(pos.x, pos.y + size), s, HORIZONTAL_ALIGNMENT_LEFT, w, size, 3, col)
