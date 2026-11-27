@@ -14,6 +14,7 @@ const SNAP_M := 2.0  # m in one step: a teleport or a respawn, shown at once ins
 var acc := 0.0  # s of frame time not stepped yet
 var coyote := 0.0  # s left in which a jump still counts as off the ground it just walked off
 var jump_buf := 0.0  # s left in which a jump pressed just before a landing still jumps
+var glide_t := -1.0  # s the press that wants the glider has been held (-1: none); it opens at HunterFeel.glide_engage
 var trim := JumpTrim.new()  # a dash-jump's speed trim, as in a match
 ## How far the shown body trails the stepped one (m), for whatever frames the avatar (the camera).
 var lag := Vector3.ZERO
@@ -66,6 +67,7 @@ func pressed(action: StringName) -> bool:
 ## (jump_buffer_s). `height` is how far above the ground the avatar is (INF over the void).
 func jump(press: bool, air: bool, vy: float, height: float, d: float) -> Jump:
 	if not air:
+		glide_t = -1.0
 		coyote = HunterMove.coyote_s + d  # the first step in the air leaves the whole window, as in a match
 	else:
 		coyote = maxf(0.0, coyote - d) if vy <= 0.0 else 0.0
@@ -80,6 +82,21 @@ func jump(press: bool, air: bool, vy: float, height: float, d: float) -> Jump:
 		jump_buf = HunterMove.jump_hold(vy, height) + d  # kept to the landing, fired the step after (as a match)
 		return Jump.NONE
 	return Jump.NONE if HunterMove.too_low(vy, height) else Jump.GLIDE
+
+
+## Whether the glider opens this step (a match's rule, Hunter._update_glide, 11-27): a press in the air arms it and
+## it opens once the press has been held HunterFeel.glide_engage s. A tap, or letting go, drops the press.
+func glide_open(press: bool, holding: bool, d: float) -> bool:
+	if press:
+		glide_t = d
+	elif glide_t >= 0.0 and holding:
+		glide_t += d
+	else:
+		glide_t = -1.0
+	if glide_t < HunterFeel.glide_engage:
+		return false
+	glide_t = -1.0
+	return true
 
 
 ## The avatar's pose after a step. Under run() it plays once a frame, so the animation is as smooth as the
