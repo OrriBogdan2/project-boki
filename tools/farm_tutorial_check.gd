@@ -145,11 +145,12 @@ func _base_tutorial() -> void:
 		one_line = one_line and not FarmTutorial.hint_text(String(st["id"])).contains("{")
 	ok(one_line, "one banner line per step, no leftover tokens")
 	var last := FarmTutorial.hint_text("out")
-	var path_said: bool = last.contains("Wayseed") and last.contains("Boki that leans")
+	var path_said: bool = last.contains("Wayseed") and last.contains("leaning Boki")
 	ok(
 		last.contains("Waystone") and path_said and not last.contains("\n"),
 		"the last hint: the Waystone, and its unlock path (a Wayseed and a Boki leaning that way) in one line"
 	)
+	_banner_fits()
 	ok(FarmTutorial.current() == "meet", "it starts with meeting your Boki")
 	FarmTutorial.event("play")
 	ok(FarmTutorial.current() == "meet", "a later step done early does not count")
@@ -190,7 +191,45 @@ func _base_tutorial() -> void:
 	FarmTutorial.event("stay")
 	var paid: bool = int(Save.d["gems"]) == g + int(FarmTutorial.option("end_gems"))
 	ok(not FarmTutorial.active() and paid, "staying ends it with the one reward")
+	_base_ends_alone()
 	await _base_world()
+
+
+## The last base hint ("head out or stay"), with its counter, fits inside TutorialStrip's 42% width at a
+## readable size (12 px is the shrink
+## floor, so the line never runs past the "4/4" counter), at 1080p and at 720p.
+func _banner_fits() -> void:
+	var font: Font = load("res://fonts/LilitaOne-Regular.ttf")
+	var worst := 99
+	var over := ""
+	for sz in [Vector2(1920, 1080), Vector2(1280, 720)]:
+		var r := TutorialStrip.rect(sz)
+		var line := {"text": "\u2713 Done!  " + FarmTutorial.hint_text("out"), "count": "4/4"}
+		var lay := TutorialStrip.layout(font, r, line)
+		worst = mini(worst, int(lay["text_px"]))
+		if float(lay["text_w"]) > float(lay["text_room"]):
+			over = "at %s" % str(sz)
+	ok(over == "" and worst >= 12, "the head out line fits the strip beside 4/4 (smallest %d px) %s" % [worst, over])
+
+
+## "Head out or stay" also ends on its own: a zone waking, or a Boki finishing a toy turn. Neither counts before
+## the toy step is done, and each pays the one reward once.
+func _base_ends_alone() -> void:
+	for what in ["wake", "played"]:
+		Save.d = _new_save()
+		HomeLayout.ensure(Save.d)
+		_stats()
+		FarmTutorial.event(what)
+		ok(FarmTutorial.done_count() == 0 and FarmTutorial.active(), "%s before the toy step counts for nothing" % what)
+		for id in ["meet", "patch", "eat", "toy"]:
+			FarmTutorial.mark(id)
+		ok(FarmTutorial.current() == "out", "%s: toy done, 'head out or stay' is the step" % what)
+		var g := int(Save.d["gems"])
+		FarmTutorial.event(what)
+		var paid: bool = int(Save.d["gems"]) == g + int(FarmTutorial.option("end_gems"))
+		ok(not FarmTutorial.active() and FarmTutorial.did("out") and paid, "%s ends it with the one reward" % what)
+		FarmTutorial.event(what)
+		ok(int(Save.d["gems"]) == g + int(FarmTutorial.option("end_gems")), "%s again pays nothing more" % what)
 
 
 ## The hint line's Skip button is up (and not hidden behind a quiet guide).
@@ -675,7 +714,7 @@ func _tracker_rules() -> void:
 	var src_at: Array = rows.map(func(r): return GoalTracker.SOURCE_ORDER.find(r["source"]))
 	ok(src_at.all(func(i): return i >= 0), "every row comes from a known source")
 	var cap_was: int = GoalTracker.cfg()["max"]
-	GoalTracker.cfg()["max"] = 99      # (the card shows three: the per-source rules are read off the whole list)
+	GoalTracker.cfg()["max"] = 99  # (the card shows three: the per-source rules are read off the whole list)
 	rows = GoalTracker.lines()
 	GoalTracker.cfg()["max"] = cap_was
 	var counts := {}
