@@ -1239,7 +1239,7 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 		c.draw_circle(r.position + Vector2(w - 16, 18), 5.0, ec)
 		c.draw_arc(r.position + Vector2(w - 16, 18), 8.0, 0, TAU, 20, Color(ec, 0.5), 2.0)
 	var mag := int(p.wpn["mag"])
-	var ammo_col := INK if p.ammo >= mag * p.atk.low_frac() else HP_LOW
+	var ammo_col := INK if p.ammo > mag * 0.25 else HP_LOW
 	if p.wpn.get("melee", false):
 		_text(r.position + Vector2(78, 48), "MELEE", 18, rc, big)
 		var cn: int = (p.wpn.get("combo_dmg", p.wpn.get("combo", [1.0])) as Array).size()

@@ -20,7 +20,7 @@ func _init(hunter: Hunter) -> void:
 	h = hunter
 
 
-## The drum's share left under which the HUD shows it low (and a weapon with `low_mag_dmg` hits softer).
+## The drum share under which a `low_mag_dmg` weapon hits softer (reticle_hud reads the same `low_mag_at`).
 func low_frac() -> float:
 	return float(h.wpn.get("low_mag_at", 0.25))
 
