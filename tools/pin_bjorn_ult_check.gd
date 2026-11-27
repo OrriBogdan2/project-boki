@@ -383,7 +383,7 @@ func bjorn() -> void:
 		"stunned %s" % (T.stun_t > 0.0)
 	)
 	ok(
-		"bjorn ult: the racing fissure struck every foe on the lane before its cell erupts (data: stuns struck targets)",
+		"bjorn ult: the racing fissure struck every foe on the lane before its cell erupts (data: stuns)",
 		K.ult.hit.size() >= 2,
 		"struck %d" % K.ult.hit.size()
 	)

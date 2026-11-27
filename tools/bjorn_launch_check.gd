@@ -415,11 +415,10 @@ func _combo_moves() -> void:
 				if went:
 					took = (i + 1) * DT
 					break
+			var what := "a jump" if key == "jump" else "Shift"
+			var when := "perfect launch" if perfect else "swing's step"
 			ok(
-				(
-					"bjorn #51 %s in the %s acts within %.1f s"
-					% ["a jump" if key == "jump" else "Shift", "perfect launch" if perfect else "swing's step", ACT_S]
-				),
+				"bjorn #51 %s in the %s acts within %.1f s" % [what, when, ACT_S],
 				stepping and took > 0.0 and took <= ACT_S + 0.001,
 				"in it %s took %.2f s" % [stepping, took]
 			)
