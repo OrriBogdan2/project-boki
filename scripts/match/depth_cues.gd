@@ -1,7 +1,7 @@
 class_name DepthCues
 extends Node3D
 ## Height readability (briefs/CAMERA_DEPTH.md), behind Settings "depth_cues". Purely visual: it draws a
-## soft shadow disc on the ground straight under every hunter and every flying shot, at the ground's own
+## soft shadow disc on the ground straight under every airborne hunter and every flying shot, at the ground's own
 ## height, so a body at a ledge or a shot in the air reads as high above what is below it. The ground
 ## itself gets its share in shaders/terrain.gdshader (cliff faces darker toward their foot, a lit cliff
 ## lip), fed by k().
@@ -9,9 +9,10 @@ extends Node3D
 const DISC := 2.0       # m, shadow disc diameter at the feet (a hunter's body is ~0.8 m wide)
 const LIFT := 0.04      # m, above the ground so the disc does not z-fight
 const ABYSS_DIM := 0.55 # brightness of the abyss clouds relative to normal
-const STRENGTH := 0.75  # darkest alpha at the centre of the disc
+const AIR_MIN := 0.25   # m a hunter must be above the ground for its disc to show (a standing hunter has none)
+const STRENGTH := 0.5   # darkest alpha at the centre of the disc (any darker reads as a black spot)
 const SHOT_DISC := 0.9  # m, shadow disc diameter under a shot (they are small, so the disc is too)
-const SHOT_STRENGTH := 0.55 # darkest alpha at the centre of a shot's disc (fainter than a hunter's)
+const SHOT_STRENGTH := 0.4 # darkest alpha at the centre of a shot's disc (fainter than a hunter's)
 
 var _match: Match
 var _discs: Dictionary = {}     # Hunter -> MeshInstance3D
@@ -57,10 +58,10 @@ func _new_disc(mesh: QuadMesh, mat: ShaderMaterial) -> MeshInstance3D:
 	add_child(disc)
 	return disc
 
-## Lays `disc` on the ground under `p`; hidden over the void or when the body is not above the ground.
-func _lay(disc: MeshInstance3D, p: Vector3, shown: bool) -> void:
+## Lays `disc` on the ground under `p`; hidden over the void or when the body is less than `min_air` above the ground.
+func _lay(disc: MeshInstance3D, p: Vector3, shown: bool, min_air := -0.3) -> void:
 	var y := _match.world.ground_at(p.x, p.z)
-	disc.visible = shown and y > World.VOID + 1.0 and y <= p.y + 0.3
+	disc.visible = shown and y > World.VOID + 1.0 and p.y - y >= min_air
 	disc.global_position = Vector3(p.x, y + LIFT, p.z)
 
 func _process(_dt: float) -> void:
@@ -69,7 +70,7 @@ func _process(_dt: float) -> void:
 		if disc == null:
 			disc = _new_disc(_mesh, _mat)
 			_discs[h] = disc
-		_lay(disc, h.global_position, h.visible and not h.out)
+		_lay(disc, h.global_position, h.visible and not h.out, AIR_MIN)
 	var n := 0
 	for s: Dictionary in _match.shots:
 		var node: MeshInstance3D = s["node"]
