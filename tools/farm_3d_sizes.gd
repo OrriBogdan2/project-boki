@@ -31,6 +31,8 @@ const FACE_BOKI := 0.18  # rad: a small turn either side of the camera, so it is
 const CLEAR_MAX_W := 9.0  # m: wider meshes are the ground
 const CLEAR_MIN_H := 1.0  # m: lower meshes are grass and flowers
 const CLEAR_HALF_W := 6.0  # m either side of the camera-to-group line that scenery is hidden in
+const CLEAR_ROW_W := 8.0  # m either side of the group that scenery is hidden in, front to back CLEAR_ROW_D
+const CLEAR_ROW_D := 3.0
 const EYE_FOV := 40.0
 const EYE_DIST := 15.0  # m from the row's middle
 const EYE_YAW := 0.5  # rad: the 3/4 view, the camera swung round to Albert's end of the row
@@ -235,7 +237,15 @@ func _clear_foreground() -> void:
 		var bb := mi.global_transform * mi.get_aabb()
 		if bb.size.x > CLEAR_MAX_W or bb.size.y < CLEAR_MIN_H or chars.any(func(c): return c.is_ancestor_of(mi)):
 			continue
-		var at := Vector2(bb.get_center().x, bb.get_center().z) - from
+		var centre := Vector2(bb.get_center().x, bb.get_center().z)
+		if (
+			absf(centre.x - group.x) < CLEAR_ROW_W
+			and centre.y > group.z - CLEAR_ROW_D
+			and centre.y < group.z + CLEAR_ROW_D
+		):
+			mi.visible = false  # standing among them
+			continue
+		var at := centre - from
 		var t := at.dot(line) / line.length_squared()
 		if t > 0.0 and t < 0.95 and absf(at.cross(line)) / line.length() < CLEAR_HALF_W + bb.size.x * 0.5:
 			mi.visible = false

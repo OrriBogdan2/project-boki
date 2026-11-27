@@ -30,15 +30,19 @@ for i, (label, f) in enumerate(shots):
     im = im.resize((W, H), Image.LANCZOS)
     x, y = (i % 2) * W, 90 + (i // 2) * H
     tile = ImageDraw.Draw(im)
-    rows = []  # right edge of the last label on each row: a label that would touch another drops to the next row
+    placed = []  # label boxes so far: a label that would touch one drops a row lower
     for who, (px, py) in sorted(json.load(open(f"{src}/{f}.json")).items(), key=lambda kv: kv[1][0]):
         px, py = px * sc, py * sc
         w = tile.textlength(who, font=tag)
-        lvl = next((n for n, edge in enumerate(rows) if px - w / 2 - 8 > edge), len(rows))
-        if lvl == len(rows):
-            rows.append(0)
-        rows[lvl] = px + w / 2 + 6
-        ty = py + 6 + lvl * 34
+        lvl = 0
+        while True:
+            ty = py + 6 + lvl * 34
+            box = (px - w / 2 - 6, ty, px + w / 2 + 6, ty + 32)
+            if not any(box[0] < o[2] + 4 and o[0] < box[2] + 4 and box[1] < o[3] + 2 and o[1] < box[3] + 2
+                       for o in placed):
+                break
+            lvl += 1
+        placed.append(box)
         tile.line((px, py, px, ty), fill="white", width=2)
         tile.rectangle((px - w / 2 - 6, ty, px + w / 2 + 6, ty + 32), fill=(0, 0, 0))
         tile.text((px - w / 2, ty + 2), who, font=tag, fill="white")
