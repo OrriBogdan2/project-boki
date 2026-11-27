@@ -19,7 +19,7 @@ import argparse, os, sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sfx_lib as S
-from sfx_lib import N, env, mix, at, lpf, bpf, noise, click, crack, sub, tail, grains
+from sfx_lib import N, env, mix, at, lpf, bpf, noise, click, crack, tail, grains
 from gen_sfx_grounded import g, room, air, HIT_DB
 
 S.reseed(11262)  # after the import: wave 1 seeds its own stream
@@ -39,7 +39,9 @@ def cock(i):
     slide = at(bpf(noise(0.14), 450, 2400) * env(N(0.14), 0.04, 0.05) * 0.9 * g(), 0.05)
     k2 = at(kick(190 + 10 * i, 95, 0.12, 0.006, 0.03, 1.3) * 0.9 * g(), 0.22 + 0.01 * i)
     tick = at(click(0.0015, 1200, 4200) * 1.0 * g(), 0.225 + 0.01 * i)
-    return lpf(mix(at(click(0.0015, 1200, 4200) * 0.5, 0.0), k1, slide, k2, tick, room(tail(0.2, 900, 0.05) * 0.3)), 4800)
+    return lpf(
+        mix(at(click(0.0015, 1200, 4200) * 0.5, 0.0), k1, slide, k2, tick, room(tail(0.2, 900, 0.05) * 0.3)), 4800
+    )
 
 
 def throw(i):
@@ -63,7 +65,6 @@ def nuke_fire(i):
 
 def zap(i):
     """Static jumping onto a foe: a spit of crackle in the mids on a low mains buzz and a thump, no glassy top."""
-    d = 0.32
     crackle = grains(0.22, 70 + 6 * i, 350, 3400, 0.0008, 0.003, fall=0.07) * 0.55 * g()
     buzz = bpf(noise(0.26), 80, 260) * env(N(0.26), 0.004, 0.09) * 1.1 * g()
     zip_ = at(crack(0.12, 500, 2800, 0.012) * 1.6 * g(), 0.0)
