@@ -19,6 +19,8 @@ const LEVEL_TIP := 0.1  # rad: a view tipped more than this over a wall is not f
 const MONTAGE_AT := [Vector2(-2.3, 3.2), Vector2(2.3, 4.6)]  # (m right, m ahead) of the landing: two Boki either side of the straight walk on, close enough to read
 const HUSHWOOD_CLOCK := 0.74  # Hushwood's own hour is deep dusk (0.78, daylight 0.3): the film shows it at 0.7 daylight, warm and readable
 const ZONE_ORDER := ["glasswater", "cinderstep", "hushwood", "ridge"]
+const WALK_GAP_M := 2.8  # m a staged Boki is kept off Motley's walk into the stone
+const WALK_PAST_M := 4.0  # m past the stone the walk-in line is kept clear (a Boki there is on screen behind his head)
 const PILLAR_H := 3.6
 const PILLAR_R := 0.7
 const PILLAR_A := 0.45  # its strongest see-through
@@ -78,6 +80,7 @@ func _jump(dist: float) -> void:
 		w.rig.fail("no open approach to the stone")
 		return
 	await _set_down(_start_for(stone, best_a, dist), stone)
+	_clear_walk(stone)
 	print("PITCH jump%d dist=%.1f away=%.2f tip_max=%.2f" % [_jumps, dist, best_a, best])
 	if _jumps > 1:
 		w.rig.mark("jump%d_in" % (_jumps - 1))
@@ -119,6 +122,26 @@ func _partner_aside() -> void:
 	var dir: Vector3 = (stone - w.h.ppos).normalized()
 	var at: Vector3 = w.h.world.free_spot_near(stone + Vector3(-dir.z, 0.0, dir.x) * 3.6 - dir * 0.6, [], 1.5, 1.1, 3.0)
 	for pin in w._pins:
+		pin[1] = at
+		((pin[0] as Dictionary)["node"] as Node3D).position = at
+
+
+## A staged Boki on, beside or just past the walk in (one peeked over Motley's shoulder as he went in) is set
+## WALK_GAP_M off it, inside the jump's hard cut (so it is never seen to move).
+func _clear_walk(stone: Vector3) -> void:
+	var a := Vector2(w.h.ppos.x, w.h.ppos.z)
+	var b := Vector2(stone.x, stone.z)
+	b += (b - a).normalized() * WALK_PAST_M  # (one just past the stone sat at his shoulder all the walk in)
+	for pin in w._pins:
+		var p := Vector2(pin[1].x, pin[1].z)
+		var q := Geometry2D.get_closest_point_to_segment(p, a, b)
+		var d := p.distance_to(q)
+		if d >= WALK_GAP_M:
+			continue
+		var away := (p - q) / d if d > 0.01 else (b - a).normalized().orthogonal()
+		var to := q + away * WALK_GAP_M
+		var at: Vector3 = w.h.world.free_spot_near(Vector3(to.x, 0.0, to.y), [], 1.2, 0.9)
+		print("PITCH jump%d boki off the walk in: %.2f m -> %s" % [_jumps, d, at])
 		pin[1] = at
 		((pin[0] as Dictionary)["node"] as Node3D).position = at
 

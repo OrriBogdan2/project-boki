@@ -745,6 +745,9 @@ func _hide_marks(c: Node) -> void:
 			mi.visible = false
 	if c.get("ui") != null:
 		(c.ui as CanvasLayer).visible = hud
+	var hover: Variant = c.get("hover_box")  # the Boki card under the (unmoved, mid-screen) mouse sat over the Hunter
+	if hover is Control and is_instance_valid(hover):
+		(hover as Control).visible = false
 
 
 func _wait(secs: float) -> void:
