@@ -11466,3 +11466,4 @@ READY ext/boki-eyes-in-model-1124 26699fce09 (merged origin/main 3412c2779d into
 READY ext/parity-rock-shred-hook-ground aa13e8e5e6b (Grimble hook grounds; Tenzo rock slow 15%/0.8s; Neve already built)
 READY ext/p02-port-1118 9991edf2cc (PR #324: main merged clean, Rules.md regen, stale Net bump dropped; match-repeat +192/450 + 4 touched checks pass)
 READY ext/boki-stat-economy-1126 6983cf4ce8 (supersedes 569b25cb22b; origin/main merged, only conflict scripts/home/home_toys.gd kept day_room/day_used in main gdformat layout; garden_daily_check row wrapped for style ratchet; --check 0 fail, health --strict OK, train-runs/garden-daily/garden-day/garden-prizes/raising/race/seasons/kite checks 0 failures; 0 behind main)
+READY ext/lineup-3d-admin-1127 b90398aca37 (lineup_shot --export-glb: in-match-size posed glbs for the admin 3D height lineup)
