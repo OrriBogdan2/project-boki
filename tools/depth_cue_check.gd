@@ -43,6 +43,7 @@ func _check_match(main: Node) -> void:
 	_check_ledge_light(m)
 	_check_abyss(m)
 	_check_hunter_discs(m, dc)
+	_check_flat_casters(m)
 	_check_shot_discs(m, dc)
 	m.queue_free()
 
@@ -94,6 +95,17 @@ func _check_hunter_discs(m: Match, dc: DepthCues) -> void:
 	h.global_position.y = y
 	dc._process(0.0)
 	ok(not disc.visible, "the disc hides again on landing")
+
+## No flat quad on a Hunter (the TeamRing, halos, bloom) casts a shadow: a see-through quad throws a solid
+## square shadow on the ground under a jumping Hunter (owner 11-26 "black square").
+func _check_flat_casters(m: Match) -> void:
+	var casters: Array[String] = []
+	for h: Hunter in m.hunters:
+		for n in h.find_children("*", "MeshInstance3D", true, false):
+			var mi := n as MeshInstance3D
+			if (mi.mesh is PlaneMesh or mi.mesh is QuadMesh) and mi.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF:
+				casters.append("%s/%s" % [h.arch, mi.name])
+	ok(casters.is_empty(), "no flat quad on a hunter casts a shadow %s" % [casters])
 
 func _check_shot_discs(m: Match, dc: DepthCues) -> void:
 	var P: Hunter = m.player
