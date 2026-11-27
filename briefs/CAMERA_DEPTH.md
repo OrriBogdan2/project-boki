@@ -32,6 +32,9 @@ Owner feedback: height, ledges and drop depth are hard to read; the reference re
 Cliff faces: brightened at the lip, darkening toward the foot by drop height (full dark at 3.2 m).
 Ground lip lit where it ends in a drop. A soft dark disc on the ground under every hunter, at the
 ground's own height (hidden over void). Gameplay, camera, aim and ranges untouched.
+Height fade and air ring (content/rules/depth_cues.json): a hunter's disc stays full to 0.5 m above the
+ground and fades out by 10 m; from 1.5 m up to 50 m an airborne hunter also wears a 3 m ring on the
+ground, gold for you, blue for a teammate, red for an enemy. Checked by `--depth-cue-check`.
 
 Before/after, same seed and spot: briefs/camera_depth/{before,after}_{a_edge,b_step,c_low}.png
 (a: at a cliff edge over the abyss, b: top of a terrace step with a hunter below, c: the step from below).
