@@ -1,6 +1,6 @@
 class_name StatusEdge
 extends CanvasLayer
-## The local player's status as a screen-edge tint (HUD makes one, under its widgets): stunned or knocked is blue,
+## The local player's status as a screen-edge tint (the match makes one, under the HUD's widgets): stunned or knocked is blue,
 ## untouchable (a long invulnerable window: a revive, a landing, an ultimate) is yellow, Grounded is half-strength
 ## yellow, cloaked is a dark blue. The centre stays clear. One shader, no screen read, hidden when nothing applies.
 
@@ -14,13 +14,16 @@ const STRENGTH := {"stun": 0.9, "invuln": 0.75, "grounded": 0.45, "cloak": 0.7}
 const FADE_RATE := 12.0  # 1/s: how fast the tint follows the status
 const PULSE_RATE := 0.7  # Hz: the inner edge's breathing while untouchable
 
+var m: Match
 var rect: ColorRect
 var mat: ShaderMaterial
 var k := 0.0
 var _phase := 0.0
 
 
-func _init() -> void:
+func _init(match_node: Match = null) -> void:
+	m = match_node
+	name = "StatusEdge"
 	layer = 3  # under the abyss tint (4) and the HUD
 	rect = ColorRect.new()
 	rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -46,6 +49,11 @@ static func want(p: Hunter) -> Array:
 	if p.cloak_t > 0.0:
 		return [CLOAK, STRENGTH["cloak"]]
 	return [STUN, 0.0]
+
+
+func _process(dt: float) -> void:
+	if m:
+		tick(m.player, dt)
 
 
 ## One frame for `p` (the local player; null hides it): eases toward what it shows.

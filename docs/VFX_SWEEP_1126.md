@@ -47,7 +47,7 @@ and share a plan: ONE impact frame (a 0.1 s white-to-colour flash ring through `
 (the AimKit rim over a faint inside), applied through the data files, not per-kit code.
 
 ## PRs
-1. `ext/vfx-sweep-status-edge-1126`: the screen-edge status tint (`scripts/match/status_edge.gd`,
+1. `ext/vfx-sweep-status-edge-1126`: the screen-edge status tint (`scripts/match/status_edge.gd`, made by the match),
    `shaders/status_edge.gdshader`), checks `--status-edge-check` and `--status-edge-shots`.
    Stills (real GPU, 1920x1080, match camera, jobq 20261126-230827-00248): `docs/shots/vfx-sweep-status-edge/`
    `rest.jpg` is the before; `stun.jpg` (blue), `invuln.jpg` (yellow), `grounded.jpg`, `cloak.jpg` the after.

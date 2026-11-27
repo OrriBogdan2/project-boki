@@ -80,7 +80,8 @@ func _check() -> void:
 	pl.out = true
 	ok(StatusEdge.want(pl)[1] == 0.0, "a hunter that is out shows nothing")
 	_clear()
-	var edge: StatusEdge = m.hud.status_edge
+	var edge: StatusEdge = m.get_node("StatusEdge")
+	edge.set_process(false)  # ticked by hand below
 	pl.stun_t = 5.0
 	for i in 40:
 		edge.tick(pl, DT)

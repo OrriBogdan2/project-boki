@@ -477,6 +477,7 @@ func _start(o: Dictionary) -> void:
 	hud.process_mode = hud_mode
 	SquadChat.attach(hud, opts, self)
 	hud.visible = true
+	add_child(StatusEdge.new(self))  # stun / untouchable / Grounded / cloak as a screen-edge tint
 	if player and player.dropping and tut == null:
 		hud.toast("Steer to choose where you land", Color("f3eee2"))
 	intro = SquadIntro.start(self)      # the squad on the deck first (0.24.4); it opens the map after
