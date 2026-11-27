@@ -7,12 +7,19 @@ extends "res://tools/hunter_scale_shots.gd"
 ## (the highest slice of the head that is at least CROWN_KEEP as wide as the head). "top" is the highest body point
 ## of all (hair and ears in). Each pass is also saved whole frame, no HUD (<dir>/<hero>_<pass>.png);
 ## "panel" stands the hero close in a fixed camera, so every hero shares one px/m. Needs a renderer (jobq --needs gpu).
+## --kmap=hero:k,... (and --px=N, window = N x 1080p) is the v3 size plan: per hero a colour frame facing the camera at
+## match_k 1 and at k (<hero>_v3live.png, <hero>_v3new.png), the closest wheel zoom, and one HFRM row each with the
+## crown's centre-line height on screen (head top over the feet through the lean, in view-plane m) = the body-only
+## on-screen height; --silhouette also prints it per lean as HCL.
 ## --silhouette adds, at the base size (match_k 1), the hero's silhouette as the player sees it: drawn alone in one flat
 ## colour on its own render layer, at SIL_YAWS facings, with the character lean on and off, the held weapon in and
 ## out, and "crown" (weapon out and nothing above the head's crown: no back poles). One HSIL row per hero and case:
 ## area in m2 and screen height in m (the view plane at the hero, so both read against the reference's idle
 ## silhouettes at its 66 deg camera), the mean over the facings and the facing-camera one.
 ## The facing-camera mask is saved as <dir>/<hero>_sil_<lean|flat>_<case>.png. Floating companions are not the hero.
+
+var px_mul := 1  # window = SIZE * px_mul (more px per m; every row below is still in metres)
+var kmap := {}
 
 const PASSES := [  # [label, draw at the archetype's own match_k (else 1), wheel zoom]
 	["main", false, 1.4572],  # main today: every hunter at the base size, the wheel starting at its widest
@@ -28,6 +35,7 @@ const SIL_TURN := 30  # match steps the hero gets to turn to a facing
 const SIL_ZOOM := 0.45  # the panel's close view: more px for the mask, same metres
 const SIL_DIFF := 0.2  # summed RGB step from the empty frame that counts as the hero
 const SIL_WEAPONS := ["Gun", "Shield"]  # the held weapon (out for the "body" cases)
+const FRAME_ZOOM := 0.45  # the v3 colour frames: the wheel's closest view
 const SIL_PAD := 0.6  # share of the body's screen box added all round the box the mask reads (weapons reach out)
 
 
@@ -42,7 +50,12 @@ func run(main_node: Node) -> void:
 			heroes = String(a).substr(7).split(",")
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
-	main.get_window().size = SIZE
+		if String(a).begins_with("--px="):
+			px_mul = maxi(1, int(String(a).substr(5)))
+		if String(a).begins_with("--kmap="):  # hero:k,hero:k ... the v3 size plan: a colour frame at k 1 and at this k
+			for pair in String(a).substr(7).split(","):
+				kmap[pair.get_slice(":", 0)] = float(pair.get_slice(":", 1))
+	main.get_window().size = SIZE * px_mul
 	DirAccess.make_dir_recursive_absolute(dir)
 	Save.no_write = true
 	Settings.v["tips"] = false
@@ -75,6 +88,14 @@ func run(main_node: Node) -> void:
 				m.cam.lean_scale = lean
 				await _silhouette(hero, "lean" if lean > 0.0 else "flat")
 			m.cam.lean_scale = 1.0
+		if kmap.has(hero):
+			for row in [["live", 1.0], ["new", kmap[hero]]]:
+				_draw_k(hero, row[1])
+				m.cam.user_zoom = FRAME_ZOOM
+				m.cam.zoom = FRAME_ZOOM
+				m.cam.zoom_to = FRAME_ZOOM
+				await _settle(at)
+				await _frame(hero, row[0], row[1])
 		m.queue_free()
 	main.get_tree().quit(0)
 
@@ -124,6 +145,49 @@ func _measure(hero: String, label: String) -> void:
 	)
 
 
+## On-screen height of the hero's crown on the centre line (the head top over the feet through the character's lean),
+## in view-plane metres at the hero (the same ruler as the HSIL rows), and viewport px per metre at the hero.
+func _centre_h() -> Array:
+	var p := m.player
+	var mid := p.position + Vector3(0, 1.0, 0)
+	var right := m.cam.global_transform.basis.x
+	var ppm := (m.cam.unproject_position(mid + right) - m.cam.unproject_position(mid)).length()
+	var pts := _body_points(p.model)
+	var hi := -1e9
+	for wp in pts:
+		hi = maxf(hi, wp.y)
+	var c := HunterCrown.crown(p.model, pts, p.vis_k, hi)
+	var feet := m.cam.unproject_position(p.position)
+	var head := m.cam.unproject_position(p.position + m.cam.char_lean() * Vector3(0, c - p.position.y, 0))
+	return [(feet.y - head.y) / ppm, ppm, c - p.position.y, feet]
+
+
+## One colour frame (no HUD) of the hero facing the camera in the idle, at match_k `k`: HFRM row and <hero>_v3<tag>.png.
+func _frame(hero: String, tag: String, k: float) -> void:
+	var p := m.player
+	var to_cam := m.cam.global_position - p.position
+	to_cam.y = 0.0
+	to_cam = to_cam.normalized()
+	for _s in WARM_UP:
+		_tick(to_cam)
+	var h := 0.0
+	for _i in SAMPLES:
+		for _s in SAMPLE_GAP:
+			_tick(to_cam)
+		h += float(_centre_h()[0]) / SAMPLES
+	var got := _centre_h()
+	m.hud.visible = false
+	await _save("%s_v3%s.png" % [hero, tag])
+	m.hud.visible = true
+	var sc := float(SIZE.x * px_mul) / main.get_viewport().get_visible_rect().size.x
+	print(
+		(
+			"HFRM %s %s: k %.3f, centre-line crown %.3f m on screen (crown %.3f m), %.1f px/m, feet at %.0f,%.0f"
+			% [hero, tag, k, h, got[2], got[1] * sc, got[3].x * sc, got[3].y * sc]
+		)
+	)
+
+
 ## The hero's silhouette at SIL_YAWS facings (the camera's own yaw first, so facing 0 looks at the camera): HSIL rows,
 ## see the header. The mask is the hero's meshes drawn flat on SIL_LAYER against the same frame with nothing drawn.
 func _silhouette(hero: String, lean: String) -> void:
@@ -136,6 +200,7 @@ func _silhouette(hero: String, lean: String) -> void:
 	to_cam.y = 0.0
 	to_cam = to_cam.normalized()
 	# area, height; facing 0's area, height. "crown": weapon out, nothing above the head's crown (back poles)
+	var cl := 0.0  # centre-line crown height, mean of the facings
 	var sums := {"all": [0.0, 0.0, 0.0, 0.0], "body": [0.0, 0.0, 0.0, 0.0], "crown": [0.0, 0.0, 0.0, 0.0]}
 	for i in SIL_YAWS:
 		var face := to_cam.rotated(Vector3.UP, TAU * i / SIL_YAWS)
@@ -150,6 +215,7 @@ func _silhouette(hero: String, lean: String) -> void:
 		for wp in pts:
 			hi = maxf(hi, wp.y)
 		var c := HunterCrown.crown(p.model, pts, p.vis_k, hi)
+		cl += float(_centre_h()[0]) / SIL_YAWS
 		var cap := m.cam.unproject_position(p.position + m.cam.char_lean() * Vector3(0, c - p.position.y, 0)).y
 		for case in ["all", "body", "crown"]:
 			var got: Array = await _mask(p.model, flat, case != "all", cap if case == "crown" else -1e9)
@@ -161,6 +227,7 @@ func _silhouette(hero: String, lean: String) -> void:
 				sums[case][2] = area
 				sums[case][3] = tall
 				(got[2] as Image).save_png(dir.path_join("%s_sil_%s_%s.png" % [hero, lean, case]))
+	print("HCL %s %s: centre-line crown %.3f m on screen (mean of %d facings)" % [hero, lean, cl, SIL_YAWS])
 	for case in sums:
 		var r: Array = sums[case]
 		print(
