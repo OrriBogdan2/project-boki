@@ -129,6 +129,17 @@ on the legless glb from before the legs (`git show 836178d90b:art/kin/<id>/<id>.
 skeleton), then `auto_legs.py` with those args. The trot touches down at the wrap, so heatherhorn's walk and run seams
 sit in SEAM_OVER (2.09, 1.62).
 
+11-20: Mirrolin (`nacrolin`) and Boltstrich (`nimbostrich`) have their own clips (`nacrolin_anim.py`, `nimbostrich_anim.py`)
+on the borrowed Glomwort skeleton: a timid pangolin that creeps low, scurries, and curls into a ball to tumble-hop, ram and
+spin as a disco ball; a skittish ostrich that high-steps, snaps its neck at noises, sprints neck-out, pecks and rattles
+with static before its spell. Re-keyed with `tools/boki/reclip.py` (`blender -b --factory-startup --python
+tools/boki/reclip.py -- --species=<id>`): it reads the built .glb back, swaps the actions for the module's `CLIPS`
+and exports again, body, face, skin and atlases untouched. reclip needs the module's skeleton, so run it on the glb
+before its legs, then give the legs back with `auto_legs.py -- nacrolin legs=2 top=0.35 reach=1.3 hold=hips` (nimbostrich:
+`top=0.5 reach=0.8 hold=hips`): walk and run keep the species' own neck, head and spine motion, the root and hips
+are held so the planted feet can follow. Slide at home and match speed, borrowed walk -> own clips (x1): nacrolin
+18/22/21/29/32% -> 8/9/9/18/21, nimbostrich 18/19/18/33/44 -> 11/10/13/29/40.
+
 A Boki without legs (Zephyrak) writes all its own clips: the body is a chain bent along a curve sent down it
 (`zephyrak_anim.bend`); its FRAME row has `"hip": 0.0` and `"hover": true`, which gives it a soft shadow on the ground.
 
