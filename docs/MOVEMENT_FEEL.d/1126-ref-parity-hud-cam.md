@@ -28,14 +28,17 @@ REFMEAN rows; `--stills` saves Kael, Vex, Motley and Neve with a squad mate and 
 - **Plates:** the loadout icons (`GripOverhead`, out of fights) moved from under the plate, where they sat on heads,
   to over the name (`HudStyle.PLATE_ICON_ROW` -38). Colour-vision palettes have no `plate_mate` and keep their own you /
   squad colours on the plates (a yellow next to the red-green palette's orange rivals would not read).
-- **Plate clearance** (fix after the visual review): every plate (yours, squad, rival) hangs `HudPlate.CLEAR_M` = 0.85 m over
-  the hunter's measured top (was 0.6 m: about 26 px at the start notch under a 25 px frame, so no air at all, and the
-  wrong `top_h` of five hunters put the plate into their heads).
-  `body.top_h` was re-measured on the 13 in-game meshes at the x1.10 size, as the highest mesh point on screen at the start
-  notch (a part reaching away from the camera shows above the head, so it is not the plain mesh height): `--ref-parity-shots`
-  prints each hero's REFH gap, the px between the plate's bottom and that highest point (add (gap - 11) / 54 to
-  `top_h` to land on 11 px). Kael 1.52 -> 2.04, Grimble 2.70 -> 2.84, Gil 1.92 -> 1.47, Tender 1.38 -> 1.66.
-  `--hunter-zone-check` now asks for 8 px of air for all 13 (was 0).
+- **Plate clearance** (second visual review, 11-27): a fixed height up the body axis (the old `CLEAR_M` over `top_h`)
+  cleared your own plate but put squad and rival plates up to 28 px into heads: a crown reads higher on screen when
+  the hunter stands lower in the view (nearer the camera) or turns away from it, and idle squash moves it ~5%. Now
+  `HudPlate.screen_at` anchors every plate (yours, squad, rival) in screen px: never lower than the body's crown as
+  drawn (`HudPlate.top_y`: `body.crown`, a point in the model's own space, through the model's live transform, so it
+  turns, leans and squashes with the body) minus the plate's 21.5 px hang (frame + level badge) and `AIR` 6 px
+  (9 px at 1080p). `body.crown` replaces `top_h` and is fitted by `--ref-parity-shots --plates` (headless): the hero
+  and six copies as mates and rivals out to the view's sides, top and bottom, each at 8 headings; the crown is the
+  top fifth of the body's height (head, hair, horns, back props; an arm or weapon reaching out lower down does not
+  count). Result, 13 hunters x 7 spots x 8 headings: worst gap 8 px, most 9-30 px (REFGAP rows);
+  `--hunter-zone-check` asks 8 px at 5 spots x 8 headings (worst 9).
 - **Bottom-centre labels:** the 8 px "through you" line over the C slot is gone (the order label already says DOWN / FUSED);
   the order (RETURN, FOLLOW...) and CARRY ON / OFF lines over the G slot are 14 px (`BokiHud.LABEL_PX`).
 - **Check bands** (measured targets, not loosened): `source.fov_deg` 25..34 (footage estimate) -> 35.0..35.6 (the data);
