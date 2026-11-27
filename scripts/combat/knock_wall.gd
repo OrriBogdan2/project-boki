@@ -11,6 +11,8 @@ const RISE := World.LEVEL + 0.05
 const STRIDE := 0.3                   # m between the probe points along the knock
 
 const CHEST := 0.9                    # m above the feet where the decal goes
+const SLAM_V := Vector2(8.0, 16.0)     # m/s into the wall: a plain knock's slam starts at x, its longest stun at y
+const SLAM_STUN := Vector2(0.4, 1.2)   # s stunned by a plain knock's slam at SLAM_V.x and at SLAM_V.y and over
 const NONE := Vector3.INF             # "no wall" from contact()
 
 ## A wall within `reach` m of the body's edge, straight along `dir`.
@@ -49,6 +51,12 @@ static func contact(m: Match, e: Ent, dir: Vector2, reach: float) -> Vector3:
 			return e.pos + step * (k + e.r)
 		k += STRIDE
 	return NONE
+
+## How long a plain knock's slam stuns a body that hit the wall at `speed` m/s: harder hits stun longer.
+static func slam_stun(speed: float) -> float:
+	var k := clampf((speed - SLAM_V.x) / (SLAM_V.y - SLAM_V.x), 0.0, 1.0)
+	return lerpf(SLAM_STUN.x, SLAM_STUN.y, k)
+
 
 ## The body is stopped by something whose top is at `top`, and that is a wall to it (not a step up).
 static func tall(m: Match, e: Ent, top: float) -> bool:
