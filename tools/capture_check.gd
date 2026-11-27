@@ -410,12 +410,22 @@ func _branch_forms() -> void:
 	ok(pairs.size() == 4 and _uniq(ids) == 8, "the table lists 4 pairs of 8 different species")
 	var before: int = FieldBook.entries().size()
 	var kin_base: int = Data.KIN.size()
-	for id in ids:
-		Data.KIN[id] = Data.KIN["pebbit"].duplicate(true)
 	var a: String = pairs[0][0]
 	var b: String = pairs[0][1]
-	ok(Data.KIN.size() == kin_base + 8, "8 forms are added to the game")
-	ok(FieldBook.entries().size() == before + 4, "...but they make 4 entries: 4 fewer than one per species")
+	var a_forms: Array = FieldBook.forms_of(a)
+	# (only the forms not in the game yet are stand-ins: a pair with a real species already has its entry)
+	var added: Array = ids.filter(func(id): return not Data.KIN.has(id))
+	var new_pairs := pairs.filter(func(pr): return added.has(pr[0]) and added.has(pr[1])).size()
+	for id in added:
+		Data.KIN[id] = Data.KIN["pebbit"].duplicate(true)
+	ok(
+		Data.KIN.size() == kin_base + added.size() and ids.all(func(id): return Data.KIN.has(id)),
+		"8 forms are in the game (%d added)" % added.size()
+	)
+	ok(
+		FieldBook.entries().size() == before + new_pairs,
+		"...but they make 4 entries: 4 fewer than one per species (%d new)" % new_pairs
+	)
 	ok(FieldBook.entry_key(b) == a and FieldBook.forms_of(a) == [a, b], "...the pair is one entry, keyed by the first")
 	ok(DexView.number(b) == DexView.number(a), "...so both forms share one number")
 	Save.d["dex"] = {}
@@ -436,10 +446,10 @@ func _branch_forms() -> void:
 	ok(old["dex"].has(b), "...and an owned form gets its record")
 	Save.d["dex"] = old["dex"]
 	ok(FieldBook.entry_caught(b) and FieldBook.both_forms(a), "...so the old save shows it caught, with the star")
-	for id in ids:
+	for id in added:
 		Data.KIN.erase(id)
 	ok(
-		FieldBook.entries().size() == before and FieldBook.forms_of(a) == [a],
+		FieldBook.entries().size() == before and FieldBook.forms_of(a) == a_forms,
 		"...and without the forms, nothing changes"
 	)
 

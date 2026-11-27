@@ -17,6 +17,8 @@ NAME = re.compile(r"\b(%s)\b" % "|".join(RETIRED))
 # Not the retired hunters: the verb "Pin a note/it/a Boki", and the starter Boki's own nickname "Pip".
 ALLOW = re.compile(r"\bPin (a|an|it|the|to)\b|\"Pip\"|\bPip\b(?=\")")
 SKIP_KEYS = {"doc", "id", "src", "source", "sources", "note", "notes", "comment", "_comment", "file", "path"}
+# Boki name fragments (evolution "root", voice "syllables": Pip-eworth), never shown as a hunter name.
+SKIP_KEYS |= {"root", "syllables"}
 STRING = re.compile(r'"(?:[^"\\\n]|\\.)*"')
 
 

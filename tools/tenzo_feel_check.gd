@@ -4,8 +4,8 @@ extends "res://tools/hero_pair_check.gd"
 ##     it is ground for everyone (over_void, landing, a mantle onto its edge), goes out over Net, cracks and
 ##     shakes before it crumbles, then is abyss again; over solid ground it changes nothing.
 ##   RMB hop: a planted wind-up, an eased lob that lands on the circle, falls faster than it rose, never moves
-##     a body's width in one step, stops short at a body instead of shoving it; the air plunge hangs a beat and
-##     then gathers speed.
+##     a body's width in one step, stops short at a body instead of shoving it; the air press pops a beat and
+##     then its fall gathers speed.
 
 
 func run(main_node: Node) -> void:
@@ -262,7 +262,8 @@ func _hop_body() -> void:
 		await done(m)
 
 
-## The air press: a beat hanging at the top, then the plunge gathers speed (no 26 m/s from the first frame).
+## The air press over ground: a beat at the top (a small pop), then the fall gathers speed (no 26 m/s from the
+## first frame) onto the spot it arcs to.
 func _dive() -> void:
 	var r := setup("dolm", 30.0)
 	var m: Match = r[0]
@@ -277,8 +278,8 @@ func _dive() -> void:
 	m.step(DT)
 	p.inp["sec"] = false
 	var y0 := p.pos.y
-	step(m, float(feel["dive_hang"]) - DT * 1.5)
-	var hung := absf(p.pos.y - y0) < 0.05 and k.dive and k.dive_fall
+	step(m, float(feel["air_up"]) / Hunter.H_GRAV - DT * 1.5)
+	var hung := p.pos.y > y0 and k.dive and k.slam.air_on()
 	var vys: Array = []
 	var s0 := k.slams
 	var t := 0.0
@@ -289,7 +290,7 @@ func _dive() -> void:
 	var cap := float(k.slam_def()["dive_speed"])
 	var ramps := vys.size() > 4 and float(vys[1]) < float(vys[3]) and float(vys[0]) < cap * 0.5
 	ok(
-		"RMB air: it hangs a beat, then the plunge gathers speed and slams where he lands",
+		"RMB air: a beat at the top, then the fall gathers speed and slams where he lands",
 		hung and ramps and k.slams == s0 + 1,
 		"hung %s ramps %s first %.1f m/s" % [str(hung), str(ramps), float(vys[0]) if vys.size() > 0 else 0.0]
 	)
