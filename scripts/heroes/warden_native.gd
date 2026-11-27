@@ -257,7 +257,9 @@ func _process(dt: float) -> void:
 	# (the look-at lies under a clip that turns the head: the attack clip owns it, eased in and out like a body clip)
 	head_look.owned = move_toward(head_look.owned, 1.0 if attack_left > 0.0 else 0.0, dt / FADE)
 	head_look.step(dt, null)
-	_heart(bool(s.get("heart", false)) and attack_left <= 0.0 and not WardenCarry.owns(String(s.get("kmove", ""))), dt)
+	# (a swing or cast lays the carry aside; a stagger or landing keeps it, as WardenClips' procedural ones do)
+	var swinging := attack_left > 0.0 and not (cur in HIT_SLOTS)
+	_heart(bool(s.get("heart", false)) and not swinging and not WardenCarry.owns(String(s.get("kmove", ""))), dt)
 	if opener:
 		opener.busy = attack_left > 0.0 and attack_move  # (as clips.busy: a kit move's clip owns the body)
 		opener.step(dt, 1.0)
