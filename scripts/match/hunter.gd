@@ -1529,7 +1529,7 @@ func sim(dt: float) -> void:
 	atk.tick_burst(dt)
 	atk.tick_weapon(dt)
 	swing_t = maxf(0.0, swing_t - dt)
-	if inp["ult"]:
+	if inp["ult"] and MergeForm.enabled():  # (no fusion in the game: the Fusion input is dead, no deny pulse)
 		use_ultimate()
 	atk.trigger(dt)
 	inp["kin_ab"] = false
