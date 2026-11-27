@@ -32,10 +32,13 @@ static func grey(row: Control, rows: Array) -> void:
 			(row.get_child(i) as CanvasItem).modulate.a = GREY_A
 
 
-## Puts `box` over the world point `at`, kept inside the safe area (SafeArea.inner: the 12 px margin, the
-## centred frame on ultrawide); hides it when `at` is behind the camera.
-static func place(box: Control, cam: Camera3D, at: Vector3, vp: Vector2) -> void:
+## Puts `box` over the world point `at`, kept inside the safe margin; hides it when `at` is behind the camera.
+## A Boki so close that its head is off the top of the screen (the low farm view) has the line parked at
+## `park_y` instead (where the plain prompt sits), not squeezed under the top HUD row.
+static func place(box: Control, cam: Camera3D, at: Vector3, vp: Vector2, park_y := -1.0) -> void:
 	box.visible = box.visible and not cam.is_position_behind(at)
+	var room := SafeArea.inner(vp)
 	var p := cam.unproject_position(at + Vector3.UP * LINE_M) - Vector2(box.size.x * 0.5, box.size.y)
-	var safe := SafeArea.inner(vp)
-	box.position = p.clamp(safe.position, safe.position + (safe.size - box.size).max(Vector2.ZERO))
+	if park_y >= 0.0 and p.y < room.position.y:
+		p.y = park_y
+	box.position = p.clamp(room.position, (room.end - box.size).max(room.position))

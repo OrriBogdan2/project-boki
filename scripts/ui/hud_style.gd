@@ -76,6 +76,7 @@ const NUM_STYLE := {
 	"heal": {"col": HEAL, "k": 1.0, "crit": false},
 	"hurt": {"col": HURT, "k": 1.0, "crit": false},
 }
+
 static var _italic: FontVariation
 # style boxes are made once per look and reused (dozens of frames are drawn every frame)
 static var _boxes := {}
