@@ -64,6 +64,18 @@ const CAST := {
 	],
 }
 
+## Shot 17: a Boki that would thrive elsewhere walks ahead of the Hunter to the return pad and waits there with its
+## bubble; the Hunter follows (never nearer than STOP_M), presses E, and it walks onto the pad and blinks out.
+## (r10: the Boki was pinned to its staged spot and the Hunter landed on the pad, so nothing moved.)
+const ASK_BACK := 9.0  # m up-view of the pad the Hunter starts (the pad is straight ahead in the view)
+const ASK_SIDE := [0.0, 2.0, -2.0, 4.0, -4.0]  # m sideways tried until the walk to the pad clears every tree
+## Up to three of the zone's Boki stand in an open arc ahead of the Hunter, clear of every prop; the others are out of the
+## film (hidden), so each shot has 2-3 readable Boki and none inside a sign or post.
+## Props that stay in the film (course scenery is hidden, see COURSE_NAMES): a staged Boki is moved off any of them.
+const PROP_GAP := 1.7
+## Every frame: no word or glyph over the world (signs, names, bubbles), no billboard icon (a heart, z, work mark), no
+## zone air (its wind streaks and glints read as grey bars and specks), no haze quad on the hunter, no UI layer.
+const COURSE_NAMES := ["RacePost", "RelayStand", "KiteStand"]
 var rig
 var h: Node = null  # the Home on screen now (it is a new one after every hop)
 var hud := false  # --pitch-hud: the farm's HUD is filmed (the other version has none)
@@ -75,6 +87,11 @@ var _show: Array = []  # the Boki nodes that are in the film (all the others are
 var _min_gap := 99.0  # m: the nearest any shown Boki came to the Hunter this take
 var _cuts := 0  # hops filmed so far this take
 var _frames := 0  # frames this take has run (Engine.get_frames_drawn stays 0 headless)
+# a slow right-drag turn of the view: `turn` radians over `secs`, one step a frame (while walking or waiting)
+var _turn_left := 0
+var _turn_px := 0.0
+var _flip_at := -999  # the frame of the last reversal (a tipped view takes a moment to settle)
+var _flips := 0  # times this take the turn was reversed off a wall
 
 
 func _init(r) -> void:
@@ -178,13 +195,6 @@ func montage() -> void:
 	await _walk(HubWaystone.HUB_AT, 1.8)
 	await _hop("ridge")
 	await _wait(1.8)
-
-
-## Shot 17: a Boki that would thrive elsewhere walks ahead of the Hunter to the return pad and waits there with its
-## bubble; the Hunter follows (never nearer than STOP_M), presses E, and it walks onto the pad and blinks out.
-## (r10: the Boki was pinned to its staged spot and the Hunter landed on the pad, so nothing moved.)
-const ASK_BACK := 9.0  # m up-view of the pad the Hunter starts (the pad is straight ahead in the view)
-const ASK_SIDE := [0.0, 2.0, -2.0, 4.0, -4.0]  # m sideways tried until the walk to the pad clears every tree
 
 
 func ask_take() -> void:
@@ -328,12 +338,6 @@ func _arrived() -> void:
 	_dress_hunter()
 	_stage()
 	_tidy()
-
-
-## Up to three of the zone's Boki stand in an open arc ahead of the Hunter, clear of every prop; the others are out of the
-## film (hidden), so each shot has 2-3 readable Boki and none inside a sign or post.
-## Props that stay in the film (course scenery is hidden, see COURSE_NAMES): a staged Boki is moved off any of them.
-const PROP_GAP := 1.7
 
 
 func _props() -> Array:
@@ -583,11 +587,6 @@ func _pre_draw() -> void:
 			k.erase("job")
 
 
-## Every frame: no word or glyph over the world (signs, names, bubbles), no billboard icon (a heart, z, work mark), no
-## zone air (its wind streaks and glints read as grey bars and specks), no haze quad on the hunter, no UI layer.
-const COURSE_NAMES := ["RacePost", "RelayStand", "KiteStand"]
-
-
 func _is_course(n: Node) -> bool:
 	for nm in COURSE_NAMES:
 		if String(n.name).begins_with(nm):
@@ -785,13 +784,6 @@ func _keys(mv: Vector2) -> void:
 	if mv == Vector2.ZERO:
 		for a in ["right", "left", "down", "up"]:
 			Input.action_release(a)
-
-
-# a slow right-drag turn of the view: `turn` radians over `secs`, one step a frame (while walking or waiting)
-var _turn_left := 0
-var _turn_px := 0.0
-var _flip_at := -999  # the frame of the last reversal (a tipped view takes a moment to settle)
-var _flips := 0  # times this take the turn was reversed off a wall
 
 
 func _orbit_start(turn: float, secs: float) -> void:
