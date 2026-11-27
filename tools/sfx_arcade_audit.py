@@ -9,6 +9,7 @@ Per base sound (its takes folded together) it measures, with the numbers of tool
   one-take only one file (the same sample on every repeat; Sfx only varies its pitch)
 Prints the flag counts per group and writes every sound to the TSV.
 """
+
 import collections, glob, os, re, sys
 import numpy as np
 from sfx_stats import load
@@ -29,12 +30,17 @@ def flags(x, sr):
         out.append("bleep")
     third = len(x) // 3
     if len(x) / sr < 0.7 and third > 256:
-        c = [float((np.abs(np.fft.rfft(x[a:a + third])) ** 2 * np.fft.rfftfreq(third, 1 / sr)).sum()
-                   / max(np.sum(np.abs(np.fft.rfft(x[a:a + third])) ** 2), 1e-12)) for a in (0, 2 * third)]
+        c = [
+            float(
+                (np.abs(np.fft.rfft(x[a : a + third])) ** 2 * np.fft.rfftfreq(third, 1 / sr)).sum()
+                / max(np.sum(np.abs(np.fft.rfft(x[a : a + third])) ** 2), 1e-12)
+            )
+            for a in (0, 2 * third)
+        ]
         if c[1] > 1.4 * c[0] and c[0] > 0:
             out.append("rising")
     e = x * x
-    if e.sum() > 0 and e[int(0.12 * sr):].sum() / e.sum() < 0.04:
+    if e.sum() > 0 and e[int(0.12 * sr) :].sum() / e.sum() < 0.04:
         out.append("dry")
     return out, cent
 
