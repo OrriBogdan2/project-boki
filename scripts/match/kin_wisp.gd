@@ -4,9 +4,10 @@ extends RefCounted
 ## "boki_wisps" setting on, a hunter's Boki rides as a small wisp (BokiWispLook) orbiting them at shoulder
 ## height instead of walking beside them. It is carried by order the whole time, so its carry passives are
 ## always on; it takes no orders, throws or hits, and its AI (KinTactics, KinCompanion, the walking state
-## machine) does not tick. Its ability goes off through you (the carried rule) and R merges it (KinSummon.fuse,
-## decision 0038). When it is left behind (its hunter goes out in a risky match) it turns back into the walking
-## Boki and the old rules run. The summon out of the wisp: KinSummon; stealing: KinSteal.
+## machine) does not tick. Its ability goes off through you (the carried rule); it never fuses with you: there is no
+## fusion in the game (decision 0159: KinMerge is a dev flag, off). When it is left behind (its hunter goes out in a
+## risky match) it turns back into the walking Boki and the old rules run. The summon out of the wisp: KinSummon;
+## stealing: KinSteal.
 ## Online: the kin snapshot carries the flag (KinNet), so other games show the wisp too.
 
 const SHOULDER_Y := 1.45  # m above the hunter's feet when their rig has no shoulder bone
