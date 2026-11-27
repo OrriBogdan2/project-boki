@@ -519,7 +519,12 @@ func _kmoves(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
 			var pos := nat.player.current_animation_position
 			ok(pos >= hold - 0.05 and pos < length, "%s: %s holds in its loop (%.2f s of %.2f)" % [a, km, pos, length])
 			await _feed(main, nat, m, {}, {})
-			ok(nat.player.current_animation != clip, "%s: no %s once the move ends" % [a, km])
+			# (a move on the idle loop itself, Gil's Riptide turn, ends back on that clip: the move lets go of the body)
+			var idle_clip := clip == String(nat.plays.get("idle", ""))
+			ok(
+				nat.cur != "kmove" and (idle_clip or nat.player.current_animation != clip),
+				"%s: no %s once the move ends" % [a, km]
+			)
 		elif string_bi >= 0:
 			var pulls := []
 			for t in [0.0, 1.0 / 30.0]:
