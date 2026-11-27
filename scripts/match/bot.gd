@@ -219,6 +219,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		a["seen"] = tgt
 		a["react_t"] = float(df.get("react", 0.3)) * randf_range(0.8, 1.3) * (1.6 if tgt is Hunter else 1.0)
 	a["react_t"] = float(a.get("react_t", 0.0)) - dt
+	BotKin.summon(m, h, tgt, float(df.get("abil", 0.7)), dt)
 	# ---- a decoy: the rival vanished and left a copy behind; bots keep shooting the copy
 	if tgt is Hunter and (tgt as Hunter).cloak_t > 0.0 and m.verbs:
 		var dc: Dictionary = m.verbs.decoy_of(tgt)
@@ -253,7 +254,9 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			a["strafe"] = -a["strafe"]
 		var keep_off := BotSquad.spread(m, h, a, to)  # (before the strafe: it may turn the strafe side)
 		move += keep_off
-		move += Vector2(-to.y, to.x) * a["strafe"] * 0.8
+		# point blank (a melee bot at 1.2 m) a full strafe orbits the target and its facing spins ~5 turns
+		# in 5 s (--bot-sanity-check); closer than 2.5 m the sidestep shrinks with the distance
+		move += Vector2(-to.y, to.x) * a["strafe"] * 0.8 * clampf(d / 2.5, 0.35, 1.0)
 		if finishing:
 			# walk onto the wisp to stomp it, and finish it
 			move = to if d > 0.7 else Vector2.ZERO
@@ -388,6 +391,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		# or mid-drop)
 		var heal_ok: bool = h.grounded or (not h.gliding and not h.dropping and not h.over_void())
 		if heal_ok:
+			BotShop.think(m, h)
 			BotBelt.think(m, h, a, inp)  # tonic, armor kit and the rest of the belt (bot_belt.gd)
 		# swap a fainted kin out for the other one
 		if h.kin and (h.kin as Kin).state == "downed" and h.kin2 and (h.kin2 as Kin).hp > 0.0:
@@ -1080,6 +1084,11 @@ func _choose(m: Match, h: Hunter) -> void:
 		if og != Vector3.INF:
 			goal = og
 			gk = "orb"
+	if goal == Vector3.INF:
+		var sg := BotShop.goal(m, h)  # spare gems and a vendor close: go shopping
+		if not sg.is_empty():
+			goal = sg[0]
+			gk = String(sg[1])
 	# someone asked us to follow them (a Follow me emote from a teammate or truce partner)
 	if goal == Vector3.INF and a.has("follow"):
 		var fw: Dictionary = a["follow"]
@@ -1430,6 +1439,7 @@ func _clear_line(m: Match, h: Hunter, a: Vector2, b: Vector2) -> bool:
 	var n := int(d.length() / 0.4) + 1
 	var side := Vector2(-d.y, d.x).normalized() * 0.32
 	var w: World = m.world
+	var hazards := _has_hazards(m)
 	for k in range(1, n + 1):
 		var p := a + d * (float(k) / n)
 		# a rock in the way, or the abyss (straight at a goal across a bay in the island, the edge guard
@@ -1441,7 +1451,7 @@ func _clear_line(m: Match, h: Hunter, a: Vector2, b: Vector2) -> bool:
 		if w.tile_kind(p.x - side.x, p.y - side.y) == World.T_BLOCK:
 			return false
 		# ground a Boki can't handle (main's TerrainHazards): the walk goes round it
-		if TerrainHazards.avoid(m, h, p.x, p.y):
+		if hazards and TerrainHazards.avoid(m, h, p.x, p.y):
 			return false
 	return true
 
@@ -1464,9 +1474,15 @@ func _grid_path(m: Match, a: Vector2i, b: Vector2i, h: Hunter = null, wide := fa
 	var p := _grid_path_in(m, a, b, h, PATH_SLACK, cap, PATH_STEPS)
 	if p.is_empty() and wide:
 		p = _grid_path_in(m, a, b, h, PATH_SLACK_RING, cap, PATH_STEPS_RING)
-	if p.is_empty() and h:
-		return _grid_path(m, a, b, null, wide)
+	if p.is_empty() and h and _has_hazards(m):
+		return _grid_path(m, a, b, null, wide)      # (the same search again, without the hazards, only where there are some)
 	return p
+
+
+## Whether this map has hazard ground at all (TerrainHazards.avoid is false everywhere when it has none).
+func _has_hazards(m: Match) -> bool:
+	var tz := TerrainHazards.of(m)
+	return tz != null and not tz.areas.is_empty()
 
 
 ## Breadth-first search over walkable tiles in a window `slack` tiles round the trip, no farther than

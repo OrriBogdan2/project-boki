@@ -352,13 +352,14 @@ func _sync_fixtures() -> void:
 ## Challenge House goes up, each on open ground near the portal (move them wherever you like).
 ## Returns true if any went up.
 func _fs_arrivals() -> bool:
-	if int(Save.d.get("matches", 0)) < 1:
-		return false
+	var fought: bool = int(Save.d.get("matches", 0)) >= 1
 	var any := false
 	var put: Array = []
 	var w: World = world
+	var loop := BaseRace.loop_rect()      # the race loop stays clear
 	for b in ["board", "ransom"]:
-		if HomeLayout.placed(b, _d()) or not _has_b(b):
+		var early: bool = b == "ransom" and FarmUnlocks.base_mode()  # the Ransom board stands before a first fight
+		if HomeLayout.placed(b, _d()) or not _has_b(b) or (not fought and not early):
 			continue
 		var item := {"kind": "b", "id": b, "r": 0, "from": 0}
 		var best := Vector2i(-1, -1); var bd := 1e9
@@ -367,7 +368,9 @@ func _fs_arrivals() -> bool:
 				var dd := Vector2(x - HomeLayout.LANDING.x, z - HomeLayout.LANDING.z).length()
 				if dd < 5.0 or dd > 16.0 or dd >= bd: continue
 				if not w.inb(x, z) or w.island[w.idx(x, z)] != 0: continue
-				if hb.fits(item, HomeLayout.cells_of(HomeLayout.rect_at(b, x, z, 0))): best = Vector2i(x, z); bd = dd
+				var rc := HomeLayout.rect_at(b, x, z, 0)
+				var tiles := Rect2(rc[0], rc[1], rc[2] - rc[0] + 1, rc[3] - rc[1] + 1)
+				if not tiles.intersects(loop) and hb.fits(item, HomeLayout.cells_of(rc)): best = Vector2i(x, z); bd = dd
 		if best.x >= 0:
 			HomeLayout.of(_d())["b"][b] = {"x": best.x, "z": best.y, "r": 0}
 			hb._apply_blockers()
@@ -509,7 +512,7 @@ func _ready_rest() -> void:
 				get_tree().create_timer(0.3).timeout.connect(func():
 					var before := sc.scroll_vertical
 					if "--no-keep-scroll" in dbg: set_meta("no_keep_scroll", true)
-					Save.d["exp_rolling"] = not Save.d.get("exp_rolling", false)
+					Save.d["exp_mode"] = "solos" if Data.saved_mode() == "trios" else "trios"
 					_open_expedition()
 					get_tree().create_timer(0.5).timeout.connect(func():
 						var sc2 := _panel_scroll()
@@ -1278,6 +1281,7 @@ func _move_player(d: float) -> void:
 	else:
 		var want := mv * run * (HunterMove.sneak_speed if crouching else 1.0)
 		hv = HunterMove.walk(hv, want, HunterMove.accel(String(Save.d.get("arch", ""))), 1.0, d)
+	hv = mover.trim.step(hv, air and not gliding and dash_t <= 0.0, d)
 	# the island's edge doesn't hold you: walk off it and you fall (glide back, or the abyss returns you)
 	var guard := false
 	var p0 := ppos
@@ -1310,7 +1314,7 @@ func _move_player(d: float) -> void:
 			wedge_t = 0.0
 			unstick()
 	gh = _ground_h(ppos.x, ppos.z)
-	air = py > gh + 0.001 or pvy > 0.0
+	air = pvy > 0.0 or (py > gh + 0.001 and (air or not HunterMove.sticks(py - gh)))     # down a flight: still standing
 	# jump; in the air, a second press (or the glide key) opens the glider; holding Space never does
 	var over := py - gh if gh > World.VOID + 1.0 else INF
 	var jump := mover.jump(can_act and lfl.is_empty() and mover.pressed(&"jump")
@@ -1321,6 +1325,7 @@ func _move_player(d: float) -> void:
 		if dash_t > 0.0:      # out of a dash, as in a match: the dash ends, the jump carries Loco.dash_jump_keep of it
 			dash_t = 0.0
 			pvel *= Loco.dash_jump_keep
+		mover.trim.start(Vector2(pvel.x, pvel.z))
 		Sfx.play("jump", null, -12.0)
 	elif air and can_act:
 		var holding := Input.is_action_pressed("jump") or Input.is_action_pressed("glide")
@@ -1328,7 +1333,7 @@ func _move_player(d: float) -> void:
 		if not gliding and press and loco.go(Loco.S.GLIDING):
 			dash_t = 0.0      # a press mid-dash ends it that frame: the glide carries the dash's velocity
 			gliding = true
-			pvy = Loco.glide_start(pvy)
+			pvy = Loco.glide_start(pvy, over)
 			Sfx.play("whoosh", null, -10.0, 0.1, 0.8)
 		elif gliding and not holding:
 			gliding = false
@@ -3114,6 +3119,7 @@ func _kin_match_rows(rec: Dictionary, c2: Control, compact: bool) -> void:
 		ab_row.call(Settings.key_caps("ultimate"), "Fusion: " + ud.display_name, " ".join(KinText.merge(ud, kspec != null and kspec.carry_style == "mount")), Color("ffd84a").lerp(UI.INK, 0.3))
 	if kspec == null:
 		return
+	c2.add_child(DexView.summon_row(String(rec["species"])))
 	var lines: Array = [[KinText.carry(kspec), KinRules.cat_color("sustain").lerp(UI.INK, 0.35)]]
 	var ob := KinText.owner_bonus(KinLib.owner_bonus(kspec, rec))
 	if ob != "": lines.append(["Owner bonus while it's your Boki: " + ob, Color("ffd84a").lerp(UI.INK, 0.35)])
@@ -3521,9 +3527,7 @@ func _start_match() -> void:
 		if not (kk as Dictionary).is_empty() and KinBox.is_boxed(kk): KinBox.bring_out(kk)
 	Save.d["cls"] = Data.class_of_save()
 	Save.save_game()
-	# about 20 hunters a match, whatever the squad size (your squadmates are bots)
-	var o := {"teams": int(ceil(Data.MATCH_PLAYERS / 3.0)), "squad": 3}
-	o["total"] = Data.MATCH_PLAYERS
+	var o := Data.mode_opts(Data.saved_mode())      # its squads and hunters (bots fill the places nobody took)
 	if raid_squad > 0:
 		o = HeartRaid.opts(raid_squad, HeartRaidPick.difficulty)      # Heart Raid: one squad, no rivals
 	o["tier"] = exp_tier

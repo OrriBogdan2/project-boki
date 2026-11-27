@@ -37,10 +37,8 @@ static func contact(h: Hunter, form: Dictionary) -> void:
 	m.sfx(String(sn["xform"]), h.pos, SOUND_RANGE_DB, float(sn["pitch"]))
 	m.sfx("ult", h.pos, SOUND_RANGE_DB - 2.0, float(sn["pitch"]))
 	Shake.big(m, h.pos, "fuse", h)
-	if h.is_local() and m.cam:
-		m.cam.punch(0.14)
-		if m.hud:
-			m.hud.flash(col, 0.25)
+	if h.is_local() and m.hud:
+		m.hud.flash(col, 0.25)
 	h.squash = 0.35
 
 ## The look of the moment, for everyone: white flash, shards in the form's colours.

@@ -374,6 +374,9 @@ static func draw_icon(c: CanvasItem, id: String, at: Vector2, s: float, col: Col
 			for k in 4:
 				var p0 := at + Vector2(-0.6 + k * 0.3, 0.2 - k * 0.3) * s
 				c.draw_line(p0, p0 + Vector2(0.18, 0.18) * s, Color(0, 0, 0, 0.5), maxf(1.0, w * 0.6), true)
+		"ring":        # the summon timer: a faint full ring with a bright three-quarter arc
+			c.draw_arc(at, 0.8 * s, 0.0, TAU, 24, Color(col, 0.3), w, true)
+			c.draw_arc(at, 0.8 * s, -PI / 2.0, PI, 18, col, w, true)
 		"pin":
 			c.draw_circle(at + Vector2(0, -0.3) * s, 0.5 * s, col)
 			c.draw_colored_polygon(PackedVector2Array([at + Vector2(-0.42, -0.05) * s, at + Vector2(0.42, -0.05) * s, at + Vector2(0, 0.9) * s]), col)
@@ -969,6 +972,8 @@ static func scroll_panel(title_txt: String, width: float, on_close: Callable, cl
 	p.custom_minimum_size.x = width
 	# keyboard and pad users start on the first thing they can press
 	p.tree_entered.connect(func(): focus_first(p))
+	if on_close.is_valid():
+		PanelClose.attach(p, on_close)
 	return [p, body_text]
 
 static func _shell_of(body_text: Control) -> PanelContainer:
@@ -1121,6 +1126,7 @@ static func confirm(host: Control, head: String, text: String, yes_txt: String, 
 	row.add_child(danger(yes_txt, yes_cb) if dangerous else primary(yes_txt, yes_cb))
 	v.add_child(row)
 	layer.set_meta("modal", true)
+	PanelClose.attach(p, layer.queue_free)
 	host.add_child(layer)
 	pop_in(p)
 	no.grab_focus.call_deferred()

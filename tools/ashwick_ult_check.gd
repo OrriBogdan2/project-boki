@@ -604,11 +604,12 @@ func _shift_and_jump(m: Match, P: Hunter, K: AshwickKit, home: Vector3) -> void:
 	ak.step(m, 0.1)
 	P.inp["jump"] = false
 	var flat := Vector2(P.vel.x, P.vel.z).length()
-	# 0.1 s later the air drag above run speed (Loco.air_step, owner 11-08) has had its share: 0.8, not 0.9
+	# 0.1 s later the air drag above run speed (Loco.air_step, owner 11-08) has had its share: 0.8, not 0.9; and a
+	# dash-fast jump sheds to jump_trim_to (JumpTrim, 11-26 traversal parity), so that low end is the floor
 	ok(
 		"ult: a jump in the flight leaps off it within 0.1s, keeping its speed into the air (item 51)",
 		not J.running() and J.leaps >= 1 and P.pos.y > y0 + 0.2 and P.vel.y > 0.0
-				and flat >= sp * Loco.dash_jump_keep * 0.8,
+				and flat >= minf(sp * Loco.dash_jump_keep * 0.8, HunterMove.jump_trim_to.x),
 		"rose %.2f m, %.1f m/s of %.1f" % [P.pos.y - y0, flat, sp]
 	)
 	ak.step(m, 1.5)
@@ -649,7 +650,8 @@ func _locked_inputs(m: Match, P: Hunter, K: AshwickKit, at: Vector3) -> void:
 	var hp0 := P.hp
 	var pos_y := P.pos.y
 	var l0 := J.locked
-	var keys := ["sec", "dash", "util1", "util2", "util3", "util4", "gear1", "gear2", "kin_ab", "skill", "throw"]
+	var keys := ["sec", "dash", "util1", "util2", "util3", "util4", "util5", "util6", "gear1", "gear2", "kin_ab",
+		"skill", "throw"]
 	for key in keys:
 		ak.step(m, 0.05, func():
 			P.inp[key] = true

@@ -6,6 +6,7 @@ extends RefCounted
 ## it re-runs itself as a child Godot under the movie writer (GPU worker): <tree>/<clip-dir>/farm_greet.avi.
 ## Prints FGCLIP lines.
 
+const Preflight := preload("res://tools/clip_preflight.gd")
 const FPS := 30
 const ISLAND_SEED := 11  # the farm-start island of --base-life-check
 const AWAY_S := 3.0  # s: the filmed away time (base_life.json notice.away_s is 25)
@@ -63,6 +64,8 @@ func run(main_node: Node) -> void:
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)
+	if not Preflight.enforce(main, 0, "farm_greet"):
+		return
 	_caption(h)
 	main.get_tree().create_timer(DEADLINE_S).timeout.connect(main.get_tree().quit.bind(1))  # never hang a worker
 	for pass_n in 2:
@@ -155,7 +158,7 @@ func _record() -> void:
 	var out: Array = []
 	var rc := OS.execute(OS.get_executable_path(), args, out, true)
 	for line in (String(out[0]) if out.size() > 0 else "").split("\n"):
-		if line.begins_with("FGCLIP") or line.contains("SCRIPT ERROR"):
+		if line.begins_with("FGCLIP") or line.begins_with("CLIP_PREFLIGHT") or line.contains("SCRIPT ERROR"):
 			print(line)
 	print("FGCLIP child rc=%d" % rc)
 	main.get_tree().quit(rc)

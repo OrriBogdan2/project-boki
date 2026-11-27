@@ -656,7 +656,7 @@ func _process(delta: float) -> void:
 			continue
 		r["spin"] = float(r["spin"]) + delta * 9.0
 		r["last"] = sd["pos"]
-		var at := ShotOrigin.drawn(sd, sd["pos"])      # out of the blade it left
+		var at := ShotOrigin.drawn(sd, sd["pos"])  # out of the blade it left
 		_pose(n, String(r["kind"]), at, sd["vel"], float(r["trail"]), float(r["width"]), float(r["spin"]))
 	for id in placed.keys():
 		var e: Dictionary = placed[id]

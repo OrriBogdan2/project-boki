@@ -11,6 +11,7 @@ static func update(m: Match, delta: float, alpha: float) -> void:
 	var cam: CamRig = m.cam
 	var player: Hunter = m.player
 	cam.follow_mode = String(Settings.get_v("cam_follow"))
+	cam.zoom_omega = float(CamWheel.rules(true)["omega"])
 	var sty := String(Settings.get_v("cam_style"))
 	if sty != m.cam_style:
 		m.cam_style = sty
@@ -50,7 +51,7 @@ static func update(m: Match, delta: float, alpha: float) -> void:
 		cam.top_to = 0.0
 		cam.lead_vel = m.cam_lead_vel()
 		var peek := m.mate_look.focus(StepSmooth.view(player, alpha), alpha)
-		cam.follow(peek, delta, m.mate_look.looking == null)
+		cam.follow(peek, delta, m.mate_look.looking == null, HunterMove.stand_y(player))
 	elif player and (player.downed or player.out):
 		# death camera: frame you and whoever got you
 		var foc := player.prev.lerp(player.pos, alpha)

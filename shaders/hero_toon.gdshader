@@ -57,6 +57,14 @@ uniform float fres = 0.0;          // coloured fresnel rim, independent of the l
 uniform vec4 fres_color : source_color = vec4(0.75, 0.86, 1.0, 1.0);
 uniform float fres_tint = 0.5;     // 0 = fres_color, 1 = a lightened version of the surface's own colour
 uniform float top_light = 0.0;     // surfaces facing up (what the match camera sees most) lift a little     // a soft broad highlight on every surface facing the light
+// a drawn face off an atlas (WardenMood, Meeko's companions: albedo_tex holds the cells of atlas_grid, the mesh's UV
+// running 0..1 over a cell): from_cell fades into to_cell by k, blink shows blink_cell. atlas_grid.x 0 = not a face
+uniform ivec2 atlas_grid = ivec2(0);
+uniform int from_cell = 0;
+uniform int to_cell = 0;
+uniform int blink_cell = -1;
+uniform float blink = 0.0;
+uniform float k = 1.0;
 // a painted atlas (WardenGlb) at the match camera (~23 m): its colours this much brighter and richer, fading in
 // from 8 to 18 m away (close-ups keep the paint's own values)
 uniform float far_lift = 0.0;
@@ -110,10 +118,11 @@ uniform float far_clamp = 0.0;
 uniform float far_rim_soft = 0.0;
 uniform float far_glow = 0.0;
 // Who and what, on the body (docs/COMBAT_CLARITY.md): side_rim is a band round the silhouette in the viewer's
-// side colour (SideColor: an ally cool blue, a rival hostile red; alpha 0 = none, your own body), outside the
-// signature band. tell tints the body (BodyTell): a crowd control's colour pulsing tell_hz times a second while it
-// lasts, or the Hunter's signature colour fading after a cast (rgb the colour, a the strength).
+// side colour (SideColor: an ally cool blue, a rival hostile red; alpha 0 = none, your own body), a pixel or two
+// wide so the body keeps its own colours. tell tints the body (BodyTell): a crowd control's colour pulsing tell_hz
+// times a second while it lasts, or the Hunter's signature colour fading after a cast (rgb the colour, a the strength).
 uniform vec4 side_rim : source_color = vec4(0.0);
+const float SIDE_RIM_PX = 1.6;     // px of silhouette the side colour fades out over
 uniform vec4 tell : source_color = vec4(0.0);
 uniform float tell_hz = 0.0;
 // Imported low-poly models carry each corner's averaged (smooth) normal in TANGENT (Assets.mesh).
@@ -173,6 +182,16 @@ void fragment() {
 	float far_p = smoothstep(8.0, 18.0, match_d(VERTEX, PROJECTION_MATRIX));
 	if (use_tex) {
 		vec3 tx = texture(albedo_tex, UV).rgb;
+		if (atlas_grid.x > 0) {
+			vec2 g = vec2(atlas_grid);
+			vec2 uv = clamp(UV, 0.0, 1.0);
+			int to_c = (blink > 0.5 && blink_cell >= 0) ? blink_cell : to_cell;
+			vec4 fa = texture(albedo_tex, (vec2(float(from_cell % atlas_grid.x), float(from_cell / atlas_grid.x)) + uv) / g);
+			vec4 fb = texture(albedo_tex, (vec2(float(to_c % atlas_grid.x), float(to_c / atlas_grid.x)) + uv) / g);
+			vec4 fc = mix(fa, fb, k);
+			if (fc.a < 0.5) { discard; }
+			tx = fc.rgb;
+		}
 		if (far_smooth > 0.0 && far_k > 0.001) {
 			vec3 tc = texture(albedo_tex, UV, far_smooth_bias).rgb;
 			if (far_clamp > 0.0) {
@@ -321,11 +340,13 @@ void fragment() {
 			+ (gf - gc) * step(0.0001, glow);
 	}
 	if (side_rim.a > 0.0) {
-		// (a band, not a hairline: a Hunter is ~40 px tall at the match camera)
-		float sw = fwidth(nv) * 1.5;
-		float se = smoothstep(0.45 - sw, 0.72 + sw, 1.0 - nv) * side_rim.a * (1.0 - fog) * (1.0 - flash);
+		// a screen-width edge, not a share of the body: nv / (2 * fwidth(nv)) is the pixel distance to the silhouette
+		// on a smooth surface, so the body keeps its own colours inside the rim (the old nv > 0.55 cut recoloured
+		// ~half of a rival).
+		float edge_px = nv / (2.0 * max(fwidth(nv), 0.0001));
+		float se = (1.0 - smoothstep(0.0, SIDE_RIM_PX, edge_px)) * side_rim.a * (1.0 - fog) * (1.0 - flash);
 		ALBEDO = mix(ALBEDO, side_rim.rgb, se * 0.9);
-		EMISSION += side_rim.rgb * se;
+		EMISSION += side_rim.rgb * se * 0.8;
 	}
 	if (tell.a > 0.0) {
 		float tk = tell.a * (tell_hz > 0.0 ? 0.6 + 0.4 * sin(TIME * tell_hz * 6.2832) : 1.0);

@@ -408,7 +408,7 @@ func tip_lines(id: String, p: Hunter) -> Array:
 					13
 				]
 			)
-		"util1", "util2", "util3", "util4":
+		"util1", "util2", "util3", "util4", "util5", "util6":
 			out = BeltHud.tip(p, int(id.substr(4)) - 1)
 		"armor_level":
 			out = ArmorHud.tip(p)
@@ -529,6 +529,12 @@ func kit_lines(lines: Array, k: Kin) -> void:
 		lines.append([KinText.carry(k.ks), Color(KinRules.cat_color("sustain"), 0.9)])
 
 
+## the world hover card stays shut while recording, until the cursor rests 0.4 s, and all through a fight
+## (your own hits, or a squadmate in combat: COMBAT_CLARITY)
+func world_tip_waits() -> bool:
+	return Record.clean() or _wh_still < 0.4 or h_v.in_fight() or not BokiChatter.calm(h_v.m)
+
+
 func draw_world_tip(sz: Vector2, p: Hunter) -> void:
 	var mp: Vector2 = h_v.c.get_local_mouse_position()
 	var cam: CamRig = h_v.m.cam
@@ -539,8 +545,8 @@ func draw_world_tip(sz: Vector2, p: Hunter) -> void:
 	_wh_mp = mp
 	_wh_still += h_v.get_process_delta_time()
 	var testing := "--hover-rival" in OS.get_cmdline_user_args() or "--hover" in OS.get_cmdline_user_args()
-	if (Record.clean() or _wh_still < 0.4 or not BokiChatter.calm(h_v.m)) and not testing:
-		return  # (COMBAT_CLARITY: no card while you or a squadmate fights, the same rule as Boki chatter)
+	if world_tip_waits() and not testing:
+		return
 	if "--hover-rival" in OS.get_cmdline_user_args():
 		# test hook: point at the nearest rival hunter (or their kin, with --hover-rival-kin)
 		var nb: Ent = null
