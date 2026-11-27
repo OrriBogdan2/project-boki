@@ -46,8 +46,14 @@ REFMEAN rows; `--stills` saves Kael, Vex, Motley and Neve with a squad mate and 
   glide and the data's abyss metres; `--move-feel-check` `view_across_m` 22..25 m at zoom 1 (no longer the view anyone
   plays at) -> 34.0..34.4 at the start notch, and `source_view_across_m` now reads the source_scale style's own lens
   (it used the default's: the lens change would have moved it with no change to that style).
-- **Not matched:** the self HUD layout (portrait flush in the corner at x 0-12%, y 78-100%; the health bar with its
-  numbers under it at y ~92%; ability squares at x 14-26%, y 91-96%; squad rows at y 37% / 44%). Ours keeps the safe-area
-  margin and the vitals block's order (numbers over the bar, abilities under it): portrait x 6-15%, y 74-93%, bar
-  x 16-41%, y 78-81%, abilities x 16-29%, y 85-93%. Moving them is a HUD layout change with its own checks
-  (`--hud-groups-check`, SafeArea, the camera's HUD keep-out).
+- **Self HUD layout** (11-27, `HudVitals`, `Hud._draw_abilities`): the reference's order. The portrait (80 x 92 px at
+  1280 x 720, about the reference bust) sits in the bottom-left corner with the XP tracker on its top edge; under it the
+  health bar (154 px, the reference's 230 of 1920) with the armour strip over it; health "1,844 / 1,844" under the bar
+  with the armour number at its right; the resource bar and crowd-control line under that; the ability row to the right
+  of the bars, its bottom level with theirs. Before: the bars beside the portrait (318 px), numbers over the bar, the
+  ability row under it. The block is 148 px tall as before (portrait 92 + `HudVitals.VITALS_H` 56), so the left column
+  keeps its room (`--hudref-check`: minimap growth at 130%, squad rows clear of the kin card). The tier name sits over
+  the armour strip's right end, the merged form's SHELL number right of the portrait. The channel bar keeps its spot
+  under the block. Still kept from before: the safe-area margin (the reference sits flush in the corner), so the
+  block's left edge is at 6% and its bottom at 91%, not 1% and 97%; the squad rows stay under the minimap (the
+  reference's 37% / 44% when nothing else stacks above them).
