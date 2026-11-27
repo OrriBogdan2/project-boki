@@ -2528,6 +2528,10 @@ func drop(kind_s: String, at: Vector3, v: int, key := "", pid := "", vel0 = null
 		net_event(["drop", pid, kind_s, v, key, _r(at.x), _r(at.y), _r(at.z), _r(v0.x), _r(v0.y), _r(v0.z)])
 
 func _update_pickups(dt: float) -> void:
+	var walk: Dictionary = PickupReach.rules()["walk"]      # (read once a step, not per pickup and hunter)
+	var settle := float(walk["settle"])
+	var reach := float(walk["radius"])
+	var reach_h := float(walk["height"])
 	for p in pickups.duplicate():
 		p["t"] += dt
 		var pos: Vector3 = p["pos"]
@@ -2537,10 +2541,12 @@ func _update_pickups(dt: float) -> void:
 			if dk > World.VOID + 1.0 and (g < dk or g > pos.y + 0.9): g = dk
 		var v: Vector3 = p["vel"]
 		var grabbed := false
-		if p["t"] > PickupReach.settle():
+		if p["t"] > settle:
 			for h in hunters:
 				if h.out or h.extracted or h.downed or h.remote:
 					continue
+				if Vector2(pos.x - h.pos.x, pos.z - h.pos.z).length() >= reach or absf(h.pos.y - pos.y) >= reach_h:
+					continue      # (PickupReach.near's own first test, here: no call for each far pickup and hunter)
 				if net_on and not is_host and h != player:
 					continue
 				if p["kind"] == "ckey" and not KeyChest.has_room(h):
