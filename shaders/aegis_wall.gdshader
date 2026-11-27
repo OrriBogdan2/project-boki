@@ -34,12 +34,12 @@ void fragment() {
 		col = albedo.rgb * (0.82 + 0.3 * hash(pid)) * (0.88 + 0.16 * grain);
 		col *= mix(0.72, 1.08, smoothstep(0.0, 0.9, uv.y));   // darker at the foot, lit at the top
 		float gap = 1.0 - smoothstep(0.02, 0.05, min(px, 1.0 - px));
-		// the carved figurehead panel in the middle: lighter raised wood, a dark cut round its edge
+		// the carved figurehead panel in the middle: lighter raised wood, a faint cut round its edge
 		float panel = length(vec2(cx / 0.42, (uv.y - 0.52) / 0.36));
 		float carved = 1.0 - smoothstep(0.92, 1.0, panel);
 		float cut = smoothstep(0.86, 0.96, panel) * (1.0 - smoothstep(1.0, 1.1, panel));
 		col = mix(col, albedo.rgb * vec3(1.35, 1.25, 1.12) * (0.9 + 0.1 * grain), carved);
-		col = mix(col, albedo.rgb * 0.35, cut * 0.8);
+		col = mix(col, albedo.rgb * 0.6, cut * 0.35);
 		gap *= 1.0 - carved;
 		col = mix(col, mix(albedo.rgb * 0.3, sea.rgb, 0.18), gap);
 		// the iron: a frame round the edge, a strap across the middle (broken by the panel) and rivets on them
@@ -54,6 +54,8 @@ void fragment() {
 		col = mix(col, rim_color.rgb * 1.6, rivet);
 		a = mix(0.72, 0.56, uv.y) + iron * 0.2;
 		a *= smoothstep(0.0, 0.03, uv.y);
+		// clearer in the middle, more so up high, so Albert's head and shoulders read through it from the front
+		a *= 1.0 - (1.0 - smoothstep(0.0, 1.1, abs(cx))) * (0.3 + 0.35 * uv.y);
 		col += sea.rgb * gap * flash * 0.8;
 	} else if (kind < 1.5) {
 		// the boards' back: plain dark planks, mostly clear so the face reads over it, the gaps faintly lit
