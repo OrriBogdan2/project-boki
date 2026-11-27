@@ -202,7 +202,9 @@ def append_glb(path, rig, extra):
             samplers.append({"input": t_acc, "output": add(rots[j], "VEC4", len(times)), "interpolation": "LINEAR"})
             chans.append({"sampler": len(samplers) - 1, "target": {"node": node[nm], "path": "rotation"}})
         samplers.append({"input": t_acc, "output": add(hips, "VEC3", len(times)), "interpolation": "LINEAR"})
-        chans.append({"sampler": len(samplers) - 1, "target": {"node": node[rig.name[rig.root]], "path": "translation"}})
+        chans.append(
+            {"sampler": len(samplers) - 1, "target": {"node": node[rig.name[rig.root]], "path": "translation"}}
+        )
         js["animations"].append({"name": name, "channels": chans, "samplers": samplers})
     while len(blob) % 4:
         blob.append(0)
