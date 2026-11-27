@@ -43,7 +43,7 @@ What the in-game kit card (K) says.
 | RMB: Shard Snap | Shard bundle that stuns the first foe, longer the further it flew. |
 | E: Brimseed | Plant a bomb that grows for 6.5s; press again to pop it. |
 | Hunter ultimate: Nightwell | Open a well that stuns and pulls in everything for 3.5s. |
-| Weapon: Tether Lantern | Quick orbs through walls; wait longer between shots for bigger ones. |
+| Weapon: Tether Lantern | Thrown cards; wait 1s between shots for a void orb that passes walls. |
 
 ### Abilities in full
 
