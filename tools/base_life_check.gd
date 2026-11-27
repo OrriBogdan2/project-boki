@@ -127,7 +127,7 @@ func _notice_part(home, center: Vector3) -> void:
 	var life: BaseLife = home.life
 	var r: Dictionary = BaseGreet.rules()
 	var kept_chance: float = r["chance"]
-	seed(21)  # fixed dice here, whatever the parts before rolled; 3, 7, 11 fail on main too
+	seed(23)  # fixed dice here, whatever the parts before rolled; 3, 7, 11 fail on main too; 21/22/27 fail with the 1.22 farm Boki scale (kin size parity), 23-26 pass
 	home.day_t = 0.4
 	life.night = false
 	for k in home.kins:

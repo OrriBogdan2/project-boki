@@ -213,9 +213,13 @@ func _float(m: Match, P: Hunter, K: OstraKit, home: Vector3) -> void:
 		wl = [minf(wl[0], g), maxf(wl[1], g)]
 	P.inp["move"] = Vector2.ZERO
 	print("TIME float walk gap %.3f..%.3f" % [wl[0], wl[1]])
+	# The model is drawn match_k times bigger (body.match_k, kin parity), so its hover grows with it: judge the gap at the
+	# base size, the way the source states it.
+	var mk := Arch.match_k("ostra")
+	lo = [lo[0] / mk, lo[1] / mk]
 	var mid: float = (lo[0] + lo[1]) * 0.5
-	C.ok("he floats about 0.3 m over his ground point (source 0.25-0.35 m), the bob +-0.03 m",
-		mid > 0.25 and mid < 0.35 and (lo[1] - lo[0]) < 0.08, "%.3f..%.3f" % [lo[0], lo[1]])
+	C.ok("he floats about 0.3 m over his ground point (source 0.25-0.35 m), the bob +-0.03 m (gap / match_k)",
+		mid > 0.25 and mid < 0.35 and (lo[1] - lo[0]) < 0.08, "%.3f..%.3f (match_k %.3f)" % [lo[0], lo[1], mk])
 	C.ok("he never plants a foot: no foot bone, and walking keeps the gap (no step lowers him to the ground)",
 		not feet.any(func(n): return "foot" in n or "toe" in n) and wl[0] > 0.2,
 		"walk %.3f..%.3f, bones %s" % [wl[0], wl[1], feet])
