@@ -176,14 +176,16 @@ static func arc(c: CanvasItem, at: Vector2, r: float, from: float, to: float, co
 
 
 ## A gauge bar under the reticle (a gauge never wraps the ring, which would read as a second ring): `slot` 0 sits
-## under the ring, 1 under that. Only the filled part (`frac` of the bar, from the left) draws, over a thin dark edge
-## when the outline is on.
+## under the ring, 1 under that. A dim full-width track shows its length, the filled part (`frac` of it, from the
+## left) draws over it; a thin dark edge under both when the outline is on.
 static func bar(c: CanvasItem, at: Vector2, slot: int, frac: float, col: Color, width: float) -> void:
 	var y := at.y + t("bar_y") + slot * t("bar_step")
 	var x0 := at.x - t("bar_w") * 0.5
+	var x_full := x0 + t("bar_w")
 	var x1 := x0 + t("bar_w") * clampf(frac, 0.0, 1.0)
 	if bool(style()["outline"]):
-		c.draw_line(Vector2(x0, y), Vector2(x1, y), Color(0, 0, 0, t("edge_a") * col.a), width + t("edge_w") * 2.0)
+		c.draw_line(Vector2(x0, y), Vector2(x_full, y), Color(0, 0, 0, t("edge_a") * col.a), width + t("edge_w") * 2.0)
+	c.draw_line(Vector2(x0, y), Vector2(x_full, y), Color(col, col.a * t("bar_track_a")), width)
 	c.draw_line(Vector2(x0, y), Vector2(x1, y), col, width)
 
 

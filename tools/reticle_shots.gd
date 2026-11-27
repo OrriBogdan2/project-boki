@@ -191,7 +191,6 @@ func _proof() -> void:
 		await main.get_tree().create_timer(2.5).timeout
 		var rest := await _frame(12)
 		var firing := await _frame(12, _hold_fire)
-		var bars := m.player.ak.has_gauge() or m.player.atk.charge_k() > 0.0  # (a gauge bar shows under the ring)
 		Input.action_release("fire")
 		for st in [["rest", rest], ["fire", firing]]:
 			var img: Image = st[1]
@@ -200,7 +199,7 @@ func _proof() -> void:
 				main.get_tree().quit(1)
 				return
 			img.save_png(dir.path_join("reticle_looks_1126b_%s_%s.png" % [id, st[0]]))
-		tiles.append([String(Arch.def(id).get("base_name", id)), Arch.color(String(id)), rest, firing, bars])
+		tiles.append([String(Arch.def(id).get("base_name", id)), Arch.color(String(id)), rest, firing])
 		tiles[-1].append_array([ImageTexture.create_from_image(rest), ImageTexture.create_from_image(firing)])
 		print("RETICLESHOTS proof %s ammo %d" % [id, m.player.ammo])
 	for part in ceili(tiles.size() / float(TILES_PER_SHEET)):
@@ -272,7 +271,7 @@ func _flower_points() -> Array:
 
 
 ## One row per Hunter: its name large, the rest frame scaled, and beside it zooms round the reticle at rest and
-## firing (a tile: [name, colour, rest image, fire image, bars shown, rest texture, fire texture]).
+## firing (a tile: [name, colour, rest image, fire image, rest texture, fire texture]).
 func _draw_tiles(cv: Control, tiles: Array) -> void:
 	var font := ThemeDB.fallback_font
 	cv.draw_rect(Rect2(Vector2.ZERO, cv.size), Color(0.07, 0.07, 0.08))
@@ -282,11 +281,11 @@ func _draw_tiles(cv: Control, tiles: Array) -> void:
 		var t: Array = tiles[i]
 		var o := Vector2(0.0, i * (TILE_NAME_H + TILE_H + TILE_GAP))
 		cv.draw_string(font, o + Vector2(12, 46), String(t[0]), HORIZONTAL_ALIGNMENT_LEFT, TILE_W, 44, t[1])
-		cv.draw_texture_rect(t[5], Rect2(o + Vector2(0, TILE_NAME_H), Vector2(TILE_W, TILE_H)), false)
-		var labels := ["rest", "firing" + (" (gauge bar under the ring)" if t[4] else "")]
+		cv.draw_texture_rect(t[4], Rect2(o + Vector2(0, TILE_NAME_H), Vector2(TILE_W, TILE_H)), false)
+		var labels := ["rest", "firing (a gauge, if any, is the bar under the ring)"]
 		for j in 2:
 			var at := o + Vector2(TILE_W + TILE_GAP + j * (ZOOM_SIZE.x + TILE_GAP), TILE_NAME_H + 20.0)
-			cv.draw_texture_rect_region(t[5 + j], Rect2(at, ZOOM_SIZE), src)
+			cv.draw_texture_rect_region(t[4 + j], Rect2(at, ZOOM_SIZE), src)
 			cv.draw_string(font, at + Vector2(8, 22), labels[j], HORIZONTAL_ALIGNMENT_LEFT, -1, 20)
 
 

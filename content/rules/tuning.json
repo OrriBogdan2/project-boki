@@ -25,6 +25,7 @@
 		"bar_w": 28.0,
 		"bar_y": 25.0,
 		"bar_step": 5.0,
+		"bar_track_a": 0.3,
 		"arc_w": 1.5,
 		"arc_w_full": 2.0,
 		"flare_s": 0.18,
