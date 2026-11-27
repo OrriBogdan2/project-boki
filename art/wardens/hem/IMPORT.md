@@ -1,3 +1,11 @@
+# Hem (Lace) r33 (2026-11-27, ext/lace-r13-slit)
+
+Right fist (fused Meshy mitten) replaced by a Meshy image-to-3d open porcelain doll hand, rigid on `RightHand`, tinted to the
+forearm, wrist ball tucked into the sleeve (`tools/art1/hem_r33/graft33.py`, args `--rig 0 --cutfa 0.0 --ball -1`, then
+`hem_r19/compact19.py`). Everything else is r32's (part-lock: only the body primitive's old fist verts dropped, new hand
+primitive + `hem_meshy_hand33.jpg` added). Art gate: game 7.1 vs live 4.5. geo_check hand R sep 0.21 / ratio 0.41
+(not FLAT; under live's fist 0.32 / 0.63 because an open hand is thinner, see docs/art/HUNTER_GEO_AUDIT.md on Sparkle).
+
 # Hem (Lace): native Meshy model r4b (2026-11-22, ext/lace-native-r4)
 
 `hem_meshy.glb` is Lace on Meshy's own 66+2-joint rig, drawn by `scripts/heroes/warden_native.gd` when `hem.meshy_native`
