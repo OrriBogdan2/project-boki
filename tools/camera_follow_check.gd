@@ -277,6 +277,6 @@ func _shots() -> void:
 		var n := int(i / float(SHOT_EVERY))
 		strip.blit_rect(img.get_region(Rect2i(at, CROP)), Rect2i(Vector2i.ZERO, CROP), Vector2i(CROP.x * n, 0))
 		for y in CROP.y:
-			strip.set_pixel(CROP.x * n + CROP.x / 2, y, Color.WHITE)  # the screen's centre line
+			strip.set_pixel(CROP.x * n + int(CROP.x / 2.0), y, Color.WHITE)  # the screen's centre line
 	strip.save_png(dir.path_join("camera_follow_barges.png"))
 	print("CAMFOLLOW SHOTS DONE")

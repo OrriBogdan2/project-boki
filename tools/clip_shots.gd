@@ -7,8 +7,11 @@ extends RefCounted
 ## a root and Grounded standing in <dir>/cc_<state>/, with --cast a move pressed on the run (or standing,
 ## --cast-speed=0) in <dir>/cast_<kmove>/.
 ## --states: the game states (STATE_SHOTS) one after another as the match hands them over, on any model (contract
-## clips or a Meshy-native one), <dir>/states/f###.png every 1/fps s. --contract: the contract model even for a
-## Meshy-native Hunter (the live look); --cam-y=<m>: the camera's height (eye level, knee level) looking at --at.
+## clips or a Meshy-native one), <dir>/states/f###.png every 1/fps s; a native Hunter with its own kit-move clips
+## (data "kmoves") also gets each move, standing and (a layered one) running, in <dir>/move_<id>_<stand|run>/
+## (--no-moves: the same moves without its own clips, Meshy's Attack for each: the "before"). --contract: the contract
+## model even for a Meshy-native Hunter (the live look); --cam-y=<m>: the camera's height (eye level, knee level)
+## looking at --at.
 ## --drop: every Hero in a row wearing the drop poses (WardenDropPose), <dir>/drop/<pose>_<view>.png.
 ## Needs a renderer. ffmpeg makes the GIFs and sheets.
 
@@ -43,6 +46,7 @@ const STATE_VIEWS := {
 	"eye": [30.0, Vector3(0.0, 1.6, 5.6), Vector3(0.0, 0.95, 0.0)],
 	"knee": [30.0, Vector3(0.0, 0.45, 5.6), Vector3(0.0, 0.95, 0.0)],
 }
+const MOVE_SHOT := 1.2  # s of the kit's clock each native kit move is filmed for
 var ground_col := Color("4f7a3e")
 var holder: Node3D
 var cam: Camera3D
@@ -238,6 +242,10 @@ func _states(model: Node3D, fps: float, out: String, sub := "states") -> void:
 	var kmove := ""
 	if clips:
 		kmove = String((clips.d.get("kmoves", {}) as Dictionary).keys().front())
+	var native := poser as WardenNative
+	if native and OS.get_cmdline_user_args().has("--no-moves"):
+		native.moves = WardenNativeMoves.new(native.player, {})  # (no rows: Meshy's swing for each)
+		native.own_casts = false
 	var i := 0
 	for st in STATE_SHOTS:
 		var s: Dictionary = (st[1] as Dictionary).duplicate()
@@ -254,10 +262,28 @@ func _states(model: Node3D, fps: float, out: String, sub := "states") -> void:
 			i += 1
 	i = await _native_moves(model, poser, fps, dir, i)
 	print("STATES ", ", ".join(STATE_SHOTS.map(func(st): return "%s %.1fs" % [st[0], st[2]])))
-	var native := poser as WardenNative
 	if native:
 		await _slot_shots(native, model, fps, dir, i)
+	if native and not (native.d.get("kmoves", {}) as Dictionary).is_empty():
+		await _native_move_dirs(model, native, fps, out)
 
+
+## The kit moves a native Hunter has its own clips for (data "kmoves"), each pressed on the spot, an upper-body one
+## also on the run, held for MOVE_SHOT s of the kit's clock: <dir>/move_<id>_<stand|run>/f###.png.
+func _native_move_dirs(model: Node3D, native: WardenNative, fps: float, out: String) -> void:
+	for km in native.d.get("kmoves", {}):
+		var upper := bool(native.d["kmoves"][km].get("upper", false))
+		for pace in ["stand", "run"] if upper else ["stand"]:
+			var dir := out.path_join("move_%s_%s" % [km, pace])
+			DirAccess.make_dir_recursive_absolute(dir)
+			var s := {"grounded": true, "face": model.rotation.y, "kmove": km}
+			if pace == "run":
+				s["vel"] = Vector3(0.0, 0.0, -4.6)
+			model.set_meta(WardenClips.STATE, s)
+			for k in int(MOVE_SHOT * fps):
+				s["kmove_t"] = k / fps
+				native.call("_process", 1.0 / fps)
+				await _grab(dir.path_join("f%03d.png" % k))
 
 ## --states, native: each slot of data "clips" from SLOT_SHOTS pressed once on the stand (held slots run 1 s).
 func _slot_shots(native: WardenNative, model: Node3D, fps: float, dir: String, first: int) -> void:
@@ -322,8 +348,8 @@ func _native_moves(model: Node3D, poser: Node, fps: float, dir: String, i: int) 
 	var moves: WardenNativeMoves = poser.get("moves")
 	if moves == null:
 		return i
-	for km in moves.moves:
-		var mv: Dictionary = moves.moves[km]
+	for km in moves.rows:
+		var mv: Dictionary = moves.rows[km]
 		var len_s: float = poser.player.get_animation(String(poser.plays[WardenNativeMoves.KEY % km])).length
 		var hold := float(mv.get("hold_from", -1.0))
 		var secs: float = len_s if hold < 0.0 else hold + 1.5 * (len_s - hold)
