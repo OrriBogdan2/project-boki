@@ -1842,7 +1842,7 @@ func _physics(dt: float) -> void:
 		g = minf(g, pos.y + HunterFeel.spirit_climb * dt)
 		grounded = true
 		vel.y = 0.0
-	var keep: float = 0.05 + m.world.stair_slope(x0, z0, pos.x, pos.z)      # m of drop kept on foot (stairs: the slope)
+	var keep: float = HunterMove.step_down + m.world.stair_slope(x0, z0, pos.x, pos.z)  # m kept on foot (stairs: slope)
 	if grounded and g < pos.y - keep:
 		grounded = false
 		vel.y = minf(vel.y, 0.0)
@@ -1977,11 +1977,12 @@ func _fold_for_action() -> void:
 func _interrupt_consume() -> void:
 	if drink_t <= 0.0 and kit_t <= 0.0 and not box_reviving():
 		return
-	drink_t = 0.0
-	kit_t = 0.0
+	if drink_t > 0.0 or kit_t > 0.0:
+		UtilityUse.spill(self)
+	else:
+		m.fx.burst(pos + Vector3(0, 1.3, 0), Color("ff7a4a"), 10, 3.0, 0.35, 8.0)
+		m.sfx("crit", pos, -4.0, 0.7)
 	BoxRevive.cancel(self)
-	m.fx.burst(pos + Vector3(0, 1.3, 0), Color("ff7a4a"), 10, 3.0, 0.35, 8.0)
-	m.sfx("crit", pos, -4.0, 0.7)
 
 ## Hold jump while falling to open the glider. It folds when you land, let go, dash, are stunned or spiked.
 var air_t := 0.0                # time since you left the ground
@@ -2187,7 +2188,7 @@ func _try_ledge_grab(dt: float) -> void:
 	grap_cd = HunterFeel.ledge_cd
 	push_t = 0.0
 	roll_t = 0.0
-	m.sfx("grab", pos, -8.0, 1.2)
+	ClimbSfx.play(self, ClimbSfx.GRAB)
 	m.on_ledge_grab(self)
 
 ## (ledge rise) One step of rising up a ledge: sets vel.y and returns true while it lasts. Your
@@ -2217,6 +2218,7 @@ func _ledge_rise(dt: float, mv: Vector2) -> bool:
 	if left <= 0.0 or on_top:
 		# over the lip: a small pop, carried toward your keys
 		lfloat = {}
+		ClimbSfx.play(self, ClimbSfx.MANTLE)
 		vel.y = HunterFeel.lrise_pop
 		var hv := Vector2(vel.x, vel.z)
 		if mv.length() > 0.3:
@@ -2803,6 +2805,7 @@ func render(delta: float, alpha: float) -> void:
 		if grounded and spd > 4.0:     # (running: the surface's step and little puffs of dust, on the plant)
 			m.fx.dust(pos, 2)
 			Juice.footstep(self)
+	if posed: HazardMoveSfx.play(self)
 	if posed and anim.slammed and not downed:
 		# a heavy coming down hard: a ring of dust where they land
 		m.fx.dust(pos, 12)

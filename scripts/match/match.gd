@@ -1103,7 +1103,7 @@ func _spawn_breakables() -> void:
 				spawn_gear(gid, 2, q2)
 				break
 		# the duel ring: a glowing pad next to where you start (scripts/match/duel_ring.gd)
-		if not opts.get("duel", false):
+		if not opts.get("duel", false) and not opts.get("test_zone", false):      # (the Test Zone has no pad: a clean start)
 			for off in [Vector3(3.6, 0, 2.6), Vector3(-3.6, 0, 2.6), Vector3(3.6, 0, -1.0), Vector3(0, 0, 4.0)]:
 				var dq: Vector3 = player.pos + off
 				if world.is_void(dq.x, dq.z) or world.is_block(dq.x, dq.z):
@@ -4558,6 +4558,7 @@ func _extract(h: Hunter, how := "", where := "") -> void:
 		if opts.get("tut_test", false):
 			print("TUT DONE extracted by %s at %s, t=%.1f" % [how, where, time])
 			get_tree().create_timer(0.5).timeout.connect(func(): get_tree().quit())
+	KinSteal.on_extract(self, h)
 	_check_last()
 
 func _update_rules(dt: float) -> void:
@@ -5054,7 +5055,6 @@ func _net_ev(x, from: String) -> void:
 				"ucast": UltCue.net_in(self, x)       # an ultimate went off in another game
 				"hcast": HostileCue.net_in(self, x)   # a rival's E or R went off in another game
 				"snd": SfxCast.net_in(self, x)        # a sound a Hunter of another game made
-				"whop": WallMoves.scuff(self, Vector3(x[2], x[3], x[4]), float(x[5]))      # a wall hop (item 149)
 		"xp": KillXp.net_in(self, x)
 		"stomp": Life.net_stomp(self, x)      # a stomp began or ended in another game
 		"knock":

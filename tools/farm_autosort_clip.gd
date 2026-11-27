@@ -5,6 +5,7 @@ extends RefCounted
 ## Like tools/abyss_danger_clip.gd it re-runs itself as a child Godot under the movie writer (GPU worker), so the
 ## movie lands in <tree>/<clip-dir>/farm_autosort.avi. Prints FACLIP lines.
 
+const Preflight := preload("res://tools/clip_preflight.gd")
 const FPS := 30
 const BEFORE_S := 2.5  # s with nobody placed
 const SORTED_S := 7.0  # s watching the sorted crew walk over and work
@@ -39,6 +40,8 @@ func run(main_node: Node) -> void:
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)
+	if not Preflight.enforce(main, 0, "farm_autosort"):
+		return
 	var layer := CanvasLayer.new()
 	layer.layer = 100
 	label = Label.new()
@@ -117,7 +120,7 @@ func _record() -> void:
 	var out: Array = []
 	var rc := OS.execute(OS.get_executable_path(), args, out, true)
 	for line in (String(out[0]) if out.size() > 0 else "").split("\n"):
-		if line.begins_with("FACLIP") or line.contains("SCRIPT ERROR"):
+		if line.begins_with("FACLIP") or line.begins_with("CLIP_PREFLIGHT") or line.contains("SCRIPT ERROR"):
 			print(line)
 	print("FACLIP child rc=%d" % rc)
 	main.get_tree().quit(rc)

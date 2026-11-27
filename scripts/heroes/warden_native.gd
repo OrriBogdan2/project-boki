@@ -3,8 +3,9 @@ extends Node
 ## A Hunter drawn on Meshy's own skeleton and playing Meshy's own clips (docs/art/wardens/MESHY_NATIVE.md). Only the
 ## Hunters switched on in content/rules/warden_native.json ("meshy_native") take this path; every other one keeps the
 ## contract model (WardenGlb, WardenSync, WardenClips) untouched. Meshy's bones are never renamed, retargeted or merged
-## onto the contract: the clips play on them as Meshy keyed them; of the contract's procedural bone layers the springs
-## are not built, the look-at, the drop pose and the landing squash are (on WardenSkeleton.find's stand-ins). The
+## onto the contract: the clips play on them as Meshy keyed them; of the contract's procedural bone layers the look-at,
+## the drop pose and the landing squash are built (on WardenSkeleton.find's stand-ins), and the springs only where data
+## "springs" names Meshy's own bones for a chain (Sable's coat tails: WardenSprings.setup_named). The
 ## contract's anchor empties hang on Meshy's bones as BoneAttachment3D nodes (data "anchors"), and the weapon's aim
 ## node rides Meshy's hand bone. HunterAnim still runs
 ## on the hidden rig and hands over its state (WardenClips.STATE) each frame. The surfaces take the game's hero-toon
@@ -14,9 +15,12 @@ const DATA_PATH := "res://content/rules/warden_native.json"
 const META := "meshy_native"  # root meta: this Hunter is drawn on Meshy's skeleton
 const STILL := 0.25  # m/s: below this he is standing
 const FADE := 0.15  # s: one clip into the next
+const GLIDE_OUT := 0.2  # s: the glide clip back into the next one (it opens at once)
+const DASH_IN := 0.25  # s: the dash clip over the body
 const RATE_MIN := 0.6  # the walk, run and sneak clips' slowest rate, of their keyed pace
 const RATE_MAX := 1.8  # and their fastest: a quicker stride keeps the feet nearer the ground speed
 const ATTACK_AGAIN := 0.6  # share of the attack clip after which a new hit starts it over
+const LEGS_RUN := ["walk", "run", "crouch"]  # the states where the legs carry him (they turn to his way)
 const LOOPS := ["idle", "walk", "run", "crouch"]
 ## Clip slots data "clips" may add beside the six states; a missing one plays today's clip (MESHY_NATIVE.md).
 ## Swing and cast one-shots (the attack clip without them): lmb, lmb_hold (a charged swing), rmb, e, r (the kit's cast
@@ -71,10 +75,13 @@ var torso_bi := -1  # Meshy's bone standing in for the rig's torso (WardenSkelet
 var torso_off := Transform3D()  # that bone's frame -> the rig torso's, at rest (shown_torso)
 var mouth: Node3D  # the copied weapon_muzzle (on a bone, a part or the sun): where the Gun's Muzzle sits each frame
 var gunprop: WardenGunProp  # Grimble's one gun (data "holster"): hip at rest, hand while he aims
+var springs := WardenSprings.new()  # loose parts (data "springs": Sable's coat tails) swinging on Meshy's bones
 var props: WardenProps  # the contract's parts Meshy's mesh lacks (data "props": Kael's sword, Cinder's heel jets)
+var twist := WardenNativeTwist.new()  # the legs turned to the way he goes, the torso held on the aim
 var upper: WardenNativeUpper  # a swing or cast over the running legs (the torso and arms only)
 var moves: WardenNativeMoves  # the kit moves with a clip of their own (data "kmoves")
 var companions: WardenCompanions  # floating companions cut out of Meshy's body (Meeko's sun and cloud), or null
+var steps: WardenNativeSteps  # the footsteps, on the foot plants of Meshy's clips (data "plants")
 var mood: WardenMood  # the faces on those companions swap and blink (warden_anim/<art>.json "mood"), or null
 
 
@@ -164,6 +171,7 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	if d.has("bones"):
 		skel.set_meta(WardenSkeleton.BONE_MAP, d["bones"])
+	springs.setup_named(skel, d.get("springs", []))
 	flinch = WardenFlinch.make(model, skel)
 	wall = WardenWall.make(model, skel)
 	opener = WardenOpen.make_on(model, skel)
@@ -174,6 +182,9 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	hand = skel.find_bone(String(d.get("hand", "RightHand")))
 	torso_bi = WardenSkeleton.find(skel, "hips")
 	upper = WardenNativeUpper.make(skel, torso_bi)
+	twist.skel = skel
+	twist.hips = WardenSkeleton.find(skel, "root")
+	twist.torso = torso_bi
 	var rest: Dictionary = model.get_meta("rig_rest", {})
 	if torso_bi >= 0 and rest.has("hips"):
 		var at_rest := WardenGlb.model_xf(model, skel) * skel.get_bone_global_rest(torso_bi)
@@ -194,6 +205,7 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	companions = WardenCompanions.detach(glb, skel, WardenClips.data(art_id), to_m.affine_inverse() * c_xf)
 	mouth = skel.find_child(WardenGlb.WEAPON_MUZZLE, true, false) as Node3D
 	model.set_meta(WardenClips.DEATH_T, 0.0)  # (the extract beat plays, WardenClips.leave_t; no death clip to hold)
+	steps = WardenNativeSteps.new(model, player, d.get("plants", {}))
 	_play("idle", 1.0)
 
 
@@ -230,6 +242,8 @@ func _process(dt: float) -> void:
 	skel.set_bone_pose_scale(hips, skel.get_bone_rest(hips).basis.get_scale())  # (Meshy keys no scale: no old squash)
 	player.advance(dt)
 	upper.lay(dt)
+	twist.step(dt, s, cur in LEGS_RUN)
+	steps.step(cur if xt < 0.0 else "")
 	WardenClips.air_tilt(root, skel, hips)  # (the glider's bank, the dive's pitch)
 	# (the look-at lies under a clip that turns the head: the attack clip owns it, eased in and out like a body clip)
 	head_look.owned = move_toward(head_look.owned, 1.0 if attack_left > 0.0 else 0.0, dt / FADE)
@@ -246,6 +260,7 @@ func _process(dt: float) -> void:
 		drop_pose.step(dt)
 	var land: Vector2 = root.get_meta(WardenClips.FEEL, Vector2.ZERO)  # (HunterAnim's land_k by weight class)
 	WardenClips.lay_feel(root, skel, hips, land.x * WardenClips.LAND_SQUASH, 0.0)
+	springs.step(dt)
 	props.step(dt, String(s.get("kmove", "")))
 	if gunprop:
 		gunprop.step()
@@ -431,14 +446,24 @@ func _clip_len(st: String) -> float:
 	return player.get_animation(String(plays[st])).length
 
 
+## Seconds the clip of state `to` blends in over the one of state `from`: the glide opens at once and lets go slower,
+## the dash takes the body gradually, everything else FADE.
+static func blend_s(from: String, to: String) -> float:
+	if from == "glide":
+		return GLIDE_OUT
+	if to == "glide":
+		return 0.0
+	return DASH_IN if to == "dash" else FADE
+
+
 ## The game state's clip, crossfaded in when it changes (restart: a new attack plays it from the start).
 func _play(st: String, rate: float, restart := false) -> void:
 	if st != cur or restart:
-		player.play(String(plays[st]), FADE)
+		player.play(String(plays[st]), blend_s(cur, st))
 		if restart:
 			player.seek(0.0, true)
 		cur = st
-	player.speed_scale = rate
+	player.speed_scale = rate * (twist.dir if st in LEGS_RUN else 1.0)  # (the legs run backwards when he backs off)
 
 
 ## Meshy's model carries its weapons in the mesh (Sable's two pistols, Tenzo's one stone arm): the rig's procedural
