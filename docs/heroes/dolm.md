@@ -47,6 +47,7 @@ sounds from `tools/gen_sfx_tarek.py` (names in `scripts/core/sfx_kits.gd`).
   dash is 12s as in the source). Full charge 0.45s (0.2s tap window + 0.25s; owner item 61 overrides the source's 1.0-1.5s).
 - Quakefall 14-30, the sweet spot x1.2 (source 188 outer vs 225 centre), stun 0.5-1.2s by charge. RMB cooldown 11s (the owner's tooltip data; the footage card reads 9s; the
   dash is 12s as in the source, no longer equal to it). Full charge 0.45s (0.2s tap window + 0.25s; owner item 61 overrides the source's 1.0-1.5s).
+- Quakefall is ready again at once when a knock is his (the knocking blow ours; an assist gives nothing): the reference's slam resets on a knock. `--kit-refund-check`.
 - Punch hold: full at 0.9s (source about 0.75s release), step 0.6m (source 0.5 bh). Rocks 45 hp, 9s.
 - Scale: one body height (bh) is about 1.8m, for gameplay ranges and visuals alike: the punch lane 4.2 by 1.8m (2.5 by 1 bh),
   the slam a 2m hop ahead with a 3.6-4.5m radius (about 2.5 bh), the row 3.4m ahead (2 bh) spanning about 5m (3 bh).
