@@ -52,7 +52,7 @@ func open(by_plan := false) -> void:
 	center = Vector2(m.world.w, m.world.h) * 0.5
 	hot_line = m.biomes.hot.take_plan_line(m) if by_plan and m.biomes else ""
 	if m.skydrop and m.skydrop.planning:
-		cover.cover(m.get_viewport())
+		cover.cover(m)
 
 func close() -> void:
 	if is_open: Sfx.play("ui_close", null, -8.0)
@@ -180,7 +180,8 @@ func draw(sz: Vector2) -> void:
 	var v := view()
 	var kk := rect.size.x / v.size.x
 	var team: int = m.player.team if m.player else -9
-	cover.draw(c, sz, m.skydrop != null and m.skydrop.planning)
+	if m.skydrop == null or not m.skydrop.planning:
+		cover.uncover()  # (a map opened by hand stays open when the ship sets off)
 	c.draw_rect(Rect2(Vector2.ZERO, sz), Color(0.01, 0.02, 0.05, 0.92))      # (dark enough that the HUD behind doesn't read through)
 	# the header: the plan's title (no countdown: the minimap and the ship's own line say enough), or just the map
 	var planning: bool = m.skydrop != null and m.skydrop.planning
