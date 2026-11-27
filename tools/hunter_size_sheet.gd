@@ -5,8 +5,8 @@ extends "res://tools/hunter_scale_shots.gd"
 ## same on screen in px at 1080p, and px per m. The crown is the top of the skull: hair tips, ears, horns and the
 ## glider do not count
 ## (the highest slice of the head that is at least CROWN_KEEP as wide as the head). "top" is the highest body point
-## of all (hair and ears in). The "panel" pass stands the hero close in a fixed camera, shot with no HUD
-## (<dir>/<hero>_panel.png), so every hero shares one px/m. Needs a renderer (jobq --needs gpu).
+## of all (hair and ears in). Each pass is also saved whole frame, no HUD (<dir>/<hero>_<pass>.png);
+## "panel" stands the hero close in a fixed camera, so every hero shares one px/m. Needs a renderer (jobq --needs gpu).
 
 const PASSES := [  # [label, draw at the archetype's own match_k (else 1), wheel zoom]
 	["main", false, 1.4572],  # main today: every hunter at the base size, the wheel starting at its widest
@@ -69,10 +69,9 @@ func _measure(hero: String, label: String) -> void:
 	var p := m.player
 	for _i in WARM_UP:  # the camera's springs reach their rest
 		_tick()
-	if label == "panel":
-		m.hud.visible = false
-		await _save("%s_panel.png" % hero)
-		m.hud.visible = true
+	m.hud.visible = false  # every pass is shot with no HUD (<dir>/<hero>_<main|parity|panel>.png, the whole frame)
+	await _save("%s_%s.png" % [hero, label])
+	m.hud.visible = true
 	var top := 0.0
 	var crown := 0.0
 	var px := 0.0
