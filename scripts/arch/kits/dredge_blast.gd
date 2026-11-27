@@ -75,7 +75,20 @@ func move_k() -> float:
 func gun_tip() -> Vector3:
 	if not running():
 		return Vector3.INF
-	var d2: Vector2 = blast["dir"]
+	return _gun_tip(blast["dir"])
+
+
+## The same on another game's copy, which runs no blast: while the synced move is "dr_blast" and the cast's
+## length (charge, waves, recovery) has not run out, along his synced facing.
+func net_gun_tip() -> Vector3:
+	var x := xd()
+	var cast := float(x["charge"]) + float(x["gap"]) * (int(x["waves"]) - 1) + RECOVER
+	if k.anim_id != "dr_blast" or m.time - k.anim_at > cast:
+		return Vector3.INF
+	return _gun_tip(Vector2(-sin(h.face), -cos(h.face)))  # (Hunter.face = atan2(-aim.x, -aim.y))
+
+
+func _gun_tip(d2: Vector2) -> Vector3:
 	return h.pos + Vector3(d2.x * GUN_REACH, GUN_UP, d2.y * GUN_REACH)
 
 

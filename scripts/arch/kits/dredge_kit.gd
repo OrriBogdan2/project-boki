@@ -313,7 +313,8 @@ func net_reach_in(w: Array) -> void:
 	wire = w
 
 ## Another game's Grimble, every frame: his arm reaches where his row says, to the held body's copy, or in flight
-## after the row's tip at CHASE x the hook's speed (never past it: the next row may say it caught someone there).
+## after the row's tip at CHASE x the hook's speed (never past it: the next row may say it caught someone there);
+## his gun arm holds out through a synced Brass Broadside (DredgeBlast.net_gun_tip).
 func sound_tick(dt: float) -> void:
 	if not h.remote or h.model == null:
 		return
@@ -327,6 +328,7 @@ func sound_tick(dt: float) -> void:
 	else:
 		net_tip = Vector3.INF
 	h.model.set_meta(WardenReach.TIP, net_tip)
+	h.model.set_meta(WardenReach.GUN_TIP, broadside.net_gun_tip())
 
 # ------------------------------------------------------------------ RMB: Deep Reach
 func fire_rmb(c: Dictionary) -> void:

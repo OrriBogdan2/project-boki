@@ -91,6 +91,12 @@ func _charge_and_waves() -> void:
 	var p0 := p.pos
 	ak.step(m, 0.6, func(): p.inp["move"] = Vector2(0, 1))
 	var len_b := float(AimKit.entry(p, "x_fan").get("len", 0.0))
+	var net_off := b.net_gun_tip().distance_to(b.gun_tip())
+	ok(
+		"ult gun arm: another game's copy holds it out on his own line (synced move + facing)",
+		net_off < 0.6,
+		"%.2f m apart" % net_off
+	)
 	ok(
 		"ult telegraph: a 105 degree fan everyone sees, growing over the charge",
 		bool(fan.get("all", false)) and absf(float(fan.get("deg", 0.0)) - 105.0) < 0.5 and len_b > len_a + 0.5,
@@ -142,6 +148,8 @@ func _charge_and_waves() -> void:
 	)
 	HunterKeys.ult_pressed(p)
 	ok("ult: the cooldown denies a new cast", not b.running() and b.casts == 1, "cd %.1f" % float(k.cd["x"]))
+	ak.step(m, 0.05)
+	ok("ult gun arm: the copy's arm is free once the cast is over", not b.net_gun_tip().is_finite())
 	# point blank: every slug of both waves lands, with Anti-Heal; the waves 0.6s apart
 	p.teleport(home)
 	ak.fresh(t_v)
