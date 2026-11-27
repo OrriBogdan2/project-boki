@@ -296,7 +296,9 @@ func _tender_support() -> void:
 	P.inp["move"] = Vector2(1, 0); aim_at(P, P.pos + Vector3(5, 0, 0))
 	P.dashes = P.max_dashes()
 	P.inp["dash"] = true; step(m, 0.05); P.inp["dash"] = false
-	ok("Relay Step: through a teammate refunds nothing", P.dashes <= P.max_dashes() - 0.95 and K.cd["e"] > 7.9, "dashes %.2f e %.1f" % [P.dashes, K.cd["e"]])
+	ok("Relay Step: through a teammate gives half the hop back and 1s of Hearthlight",
+		P.dashes > P.max_dashes() - 0.55 and P.dashes < P.max_dashes() - 0.4 and absf(float(K.cd["e"]) - 7.0) < 0.1,
+		"dashes %.2f e %.1f" % [P.dashes, K.cd["e"]])
 	m.queue_free()
 
 # ------------------------------------------------------------------ Rimewright
