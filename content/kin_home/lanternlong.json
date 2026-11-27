@@ -1,0 +1,14 @@
+{
+	"id": "lanternlong",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/lanternlong.json.",
+	"work": {
+		"craft": 1,
+		"frost": 3,
+		"mend": 2
+	},
+	"shiny": {
+		"belly": "#a3dbfc",
+		"color": "#3cedfc",
+		"glow": "#4af1ff"
+	}
+}

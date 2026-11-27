@@ -1,0 +1,14 @@
+{
+	"id": "murmuron",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/murmuron.json.",
+	"work": {
+		"bloom": 2,
+		"craft": 1,
+		"ranch": 3
+	},
+	"shiny": {
+		"belly": "#54999c",
+		"color": "#2b3c24",
+		"glow": "#78faff"
+	}
+}
