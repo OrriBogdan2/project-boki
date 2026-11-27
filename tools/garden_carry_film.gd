@@ -15,7 +15,6 @@ const RUN_OFF := 1.25  # rad off her back-line in the run shot: a three-quarter 
 const FACE_OFF := 2.5  # rad off her back-line late in the run: in front of her, a little aside, so her face shows
 const CARRY_PACE := 0.5  # stick in the carry run: a walk the followers match on foot (no gallop, no air time)
 const FOLLOW_GAP := 1.7  # m: the closest a follower stays to the hunter's feet (none runs through her legs)
-const BED_SIDE := 2.4  # m from the bed row's middle line to the carry path: the crops beside her in the lens
 const HEAD_S := 0.55  # s of each take that the dissolve eats at its start and at its end
 const CLEAR_MARGIN := 0.45  # m of bare ground kept round a bed or building (grass blades are wide)
 const DNA_PARTS := ["Tuft", "TailTuft", "Birthmark"]  # plain sphere parts of a Boki's unique look
@@ -235,6 +234,11 @@ func _stand(at: Vector3, toward: Vector3, cam_off := 0.0) -> void:
 	h.cam.snap(at)
 
 
+## The view swings round to stand in front of the hunter, a little aside (she may turn to the Boki she sets down).
+func _face_view() -> void:
+	_turn_view(_view_behind(Vector2(-sin(h.pface), -cos(h.pface)), PI - 0.5), 0.6)
+
+
 func _put(i: int, at: Vector3) -> void:
 	var k: Dictionary = h.kins[i]
 	k["pos"] = h.world.free_spot_near(at, [], 0.8)
@@ -366,6 +370,7 @@ func _clear_spot(near: Vector3, wide: int) -> Vector3:
 func _film() -> void:
 	print("GC start %s plots=%d deco=%s" % [str(h.ppos), h.plots.size(), str(HomeLayout.ensure(Save.d)["deco"])])
 	var meadow := _clear_spot(h.ppos + Vector3(6.0, 0, 0), 5)  # the meadow the Boki gather on
+	_lay_beds(meadow)
 	var kind: String = HomeCarry.mode_for(h.kins[0]["rec"])
 	print("GC carry mode of %s: %s" % [h.kins[0]["rec"]["species"], kind])
 	await _shot_run(meadow)
@@ -449,6 +454,35 @@ func _shot_carry(meadow: Vector3) -> void:
 	_mark("carry", false)
 
 
+## The farm a player has: a crop patch (its four growing beds) on dry open ground just south of the meadow, put down
+## the way the build menu does (a layout entry, then HomeBuild.apply), the grass cleared round it again.
+func _lay_beds(meadow: Vector3) -> void:
+	if not h.plots.is_empty():
+		return
+	var sz := HomeLayout.size_of("crop_patch", 0)
+	var best := Vector2i(int(meadow.x) - 2, int(meadow.z) + 6)
+	var best_n := 1 << 30
+	for dx in range(-6, 7):
+		for dz in range(7, 11):  # south of the carry corridor (meadow z + 5), a 1.5 m verge between
+			var o := Vector2i(int(meadow.x) - 2 + dx, int(meadow.z) + dz)
+			var n := 0
+			for x in range(o.x - 1, o.x + sz.x + 1):
+				for z in range(o.y - 1, o.y + sz.y + 1):
+					var cx := x + 0.5
+					var cz := z + 0.5
+					if h.world.is_block(cx, cz) or h.world.is_void(cx, cz) or h.water.depth(cx, cz) > 0:
+						n += 1
+			n = n * 20 + absi(dx) + absi(dz - 7)
+			if n < best_n:
+				best_n = n
+				best = o
+	var lay := HomeLayout.of(Save.d)
+	(lay["deco"] as Array).append({"u": HomeLayout._next_uid(lay), "id": "crop_patch", "x": best.x, "z": best.y, "r": 0})
+	h.hb.apply()
+	_tidy_scene()
+	print("GC beds laid at %s score %d plots=%d" % [str(best), best_n, h.plots.size()])
+
+
 ## The middle of the crop beds (the meadow when the farm has none).
 func _beds_mid(meadow: Vector3) -> Vector3:
 	if h.plots.is_empty():
@@ -460,36 +494,9 @@ func _beds_mid(meadow: Vector3) -> Vector3:
 	return Vector3(c.x, 0, c.z)
 
 
-## Dry, open ground under the line a..b (fewer = clearer): blocks, void and pond tiles count against it.
-func _line_cost(a: Vector3, b: Vector3) -> int:
-	var n := 0
-	for s in 25:
-		var q := a.lerp(b, s / 24.0)
-		for o: Vector2 in [Vector2.ZERO, Vector2(0.7, 0), Vector2(-0.7, 0), Vector2(0, 0.7), Vector2(0, -0.7)]:
-			var x := q.x + o.x
-			var z := q.z + o.y
-			if h.world.is_block(x, z) or h.world.is_void(x, z) or h.water.depth(x, z) > 0:
-				n += 1
-	return n
-
-
-## A run line past the beds, BED_SIDE m clear of the bed block's edge, on its clearest side: [start, goal].
+## The carry corridor (open ground the run shot also crosses) with the crop patch laid along its south verge: [start, goal].
 func _bed_path(meadow: Vector3) -> Array:
-	var c := _beds_mid(meadow)
-	var best: Array = [meadow + Vector3(7.0, 0, 5.0), meadow + Vector3(-12.0, 0, 5.0)]
-	var best_n := 1 << 30
-	for side: Vector2 in [Vector2(0, 1), Vector2(0, -1), Vector2(1, 0), Vector2(-1, 0)]:
-		var along := Vector2(-side.y, side.x)
-		var mid := c + Vector3(side.x, 0, side.y) * (2.2 + BED_SIDE)
-		for flip: float in [1.0, -1.0]:
-			var a := mid + Vector3(along.x, 0, along.y) * 7.0 * flip
-			var b := mid - Vector3(along.x, 0, along.y) * 9.0 * flip
-			var n := _line_cost(a, b)
-			if n < best_n:
-				best_n = n
-				best = [a, b]
-	print("GC beds mid %s path %s -> %s cost %d" % [str(c), str(best[0]), str(best[1]), best_n])
-	return best
+	return [meadow + Vector3(7.0, 0, 5.0), meadow + Vector3(-12.0, 0, 5.0)]
 
 
 ## 4: she sets it down beside the beds on dry ground; it hops and settles; the others play round; she pats it.
@@ -498,10 +505,9 @@ func _shot_set_down(meadow: Vector3) -> void:
 	var k: Dictionary = h.kins[0]
 	_mark("down", true)
 	var path := _bed_path(meadow)
-	var at: Vector3 = (path[0] as Vector3).lerp(path[1], 0.5)
 	var c := _beds_mid(meadow)
-	var toward := at + (at - c).normalized().rotated(Vector3.UP, PI / 2.0) * 3.0  # along the beds, them at her side
-	_stand(at, toward, PI - 0.7)
+	var at := Vector3(c.x, 0, (path[0] as Vector3).z)  # on the corridor, the beds at her back
+	_stand(at, at + (at - c).normalized() * 3.0, PI - 0.5)
 	var fwd := Vector3(-sin(h.pface), 0, -cos(h.pface))
 	var side := fwd.rotated(Vector3.UP, PI / 2.0)
 	_put(1, h.ppos + fwd * 2.6 + side * 1.8)
@@ -510,11 +516,12 @@ func _shot_set_down(meadow: Vector3) -> void:
 	_view(40.0, 13.0, 1.0, 1.0)
 	await _wait(HEAD_S + 0.5)
 	h.carry.drop()
+	_face_view()
 	await _wait(0.8)
 	k["joy_t"] = 1.2
 	await _still("down_set.png")
 	await _wait(3.0)
-	h._pet_kin(k)
+	h._pet_kin(k)  # the view holds (a second swing round her ran it into the stream bank)
 	await _wait(3.0)
 	await _still("down_pet.png")
 	_dbg("down")
