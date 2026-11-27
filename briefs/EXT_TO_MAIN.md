@@ -11480,3 +11480,4 @@ READY ext/stuck-integ-8331facf 8d68589bd8 (same as the 19736bfb94 READY plus ori
 READY ext/garden-basics-lessons-hall-1127 f51344d7f8d73cc932796bcea353e6ce15c4d016 (Lessons hall: timed song/dance/drawing lessons, stat + habit; --lessons-check 33/33; DRAFT PR)
 READY ext/garden-basics-vet-booth-1127 2904df623ce13e428d488a2468342fd61728ad4b (vet booth by the hub market: free check-up + gem cure; --vet-check 17/17; needs 3 home.gd routing lines)
 READY ext/garden-basics-fruit-trees-1127 0c18ffbe205bdd33a01349de889d1cc18adc4a48 (fruit trees grow, drop fruit; DRAFT PR, --fruit-tree-check 0 fail)
+READY ext/garden-basics-vet-booth-1127 d035c9241399bb8a59b3aaea20fefe66286c54ed (vet booth by the hub market: free check-up + gem cure; opens in game via the HomeEcon feeder route, no home.gd edit; --vet-check 19/19)
