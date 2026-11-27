@@ -31,7 +31,7 @@ var guild_doc: Dictionary = {}
 var members: Array = []        # [{id, data}]
 var project_nodes := {}
 var project_prog := {}
-var _js_cb = null
+var _hub_out := false      # a presence call is on its way; the next waits for its answer
 var _pres_t := 0.0
 var _last_sent := Vector3.INF
 var center := Vector2.ZERO
@@ -61,12 +61,9 @@ func _ready() -> void:
 			var xz := a.substr(10).split(",")
 			ppos = Vector3(float(xz[0]), 0, float(xz[1])); player.position = ppos
 	cam.snap(ppos)
-	_join_presence()
 
 func _exit_tree() -> void:
-	var js = JavaScriptBridge.get_interface("kinBridge") if OS.has_feature("web") else null
-	if js:
-		js.hubLeave()
+	Social.hub(_room(), null, func(_peers: Array): pass)
 
 func _build_env() -> void:
 	var env := WorldEnvironment.new()
@@ -246,32 +243,25 @@ func _add_npc(rec: Dictionary, at: Vector3) -> void:
 	npcs.append({"node": n, "pos": at, "home": at, "goal": at, "t": randf() * 3.0, "hop": randf() * 5.0})
 
 # ------------------------------------------------------------------ live presence
-func _join_presence() -> void:
-	if not OS.has_feature("web"):
-		return
-	var js = JavaScriptBridge.get_interface("kinBridge")
-	if js == null:
-		return
-	_js_cb = JavaScriptBridge.create_callback(func(a):
-		var arr = JSON.parse_string(str(a[0])) if a.size() > 0 else null
-		if typeof(arr) == TYPE_ARRAY:
-			_on_peers(arr))
-	js.hubJoin("kf-" + (("guild-" + gid) if mode == "guild" else "town"), _js_cb)
+func _room() -> String:
+	return "kf-" + (("guild-" + gid) if mode == "guild" else "town")
+
+func _on_hub(arr: Array) -> void:
+	_hub_out = false
+	_on_peers(arr)
 
 func _send_presence(d: float) -> void:
 	# real time, not game time: slow frames must not let others think you've left
 	var now := Time.get_ticks_msec() / 1000.0
-	if now < _pres_t:
+	if now < _pres_t or _hub_out or not Social.available():
 		return
 	var moved := _last_sent == Vector3.INF or ppos.distance_to(_last_sent) > 0.15
 	_pres_t = now + (0.2 if moved else 1.0)
 	_last_sent = ppos
-	var js = JavaScriptBridge.get_interface("kinBridge") if OS.has_feature("web") else null
-	if js == null:
-		return
 	var ak := Save.active_kin()
-	js.hubPresence(JSON.stringify({"n": String(Save.d.get("name", "Hunter")).substr(0, 16), "h": Data.class_of_save(),
-		"a": Arch.of_save(), "x": snappedf(ppos.x, 0.01), "z": snappedf(ppos.z, 0.01), "f": snappedf(pface, 0.01), "k": ak.get("species", "")}))
+	_hub_out = true
+	Social.hub(_room(), {"n": String(Save.d.get("name", "Hunter")).substr(0, 16), "h": Data.class_of_save(),
+		"a": Arch.of_save(), "x": snappedf(ppos.x, 0.01), "z": snappedf(ppos.z, 0.01), "f": snappedf(pface, 0.01), "k": ak.get("species", "")}, _on_hub)
 
 func _on_peers(arr: Array) -> void:
 	var seen := {}
