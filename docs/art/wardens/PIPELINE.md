@@ -701,3 +701,9 @@ the default Empty of that sex, WardenGlb.rest_model). The game's chibi rig (hips
 and grows the hood: closer to the 2D picks than the Meshy proportions. The male's front cloak panels follow the
 arms down into crossed strips unless weight_rules pins them to the hips. Only the Hooded Cloak, hood up, plain trim,
 no accessory has a model; every other shroud choice stays procedural (EmptyGlb.key).
+The fitted Meshy surface is cracked (about 18k open edges after the 60k decimate) and the cloak that hangs from the
+shoulders was bound to the arms, so the skin tore it open in a run and the ink shell's back faces showed through as
+black shards. `tools/meshy/empty_reweight.py` (run once on each fitted .glb) frees the cloak from the arms away from
+the sleeves and smooths its weights across the cracks (0.08 m, 4 passes); `content/rules/warden_look.json` draws the
+cloth and trim without the ink shell (`no_ink`; the boots and hands keep it). `tools/meshy/empty_tear_check.py`
+poses a run and a jump and counts torn neighbour pairs: 42k-54k before, under 2.8k after.
