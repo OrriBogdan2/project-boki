@@ -28,8 +28,6 @@ const WALK_AHEAD := 1.0  # m the others stand in front of Albert (farm-cam shot)
 const WALK_BOKI_AHEAD := 2.6  # m the Boki stand in front of the hunters (farm-cam shot)
 const BOKI_FRONT := 2.2  # m the Boki stand nearer the camera than the hunters
 const FACE_BOKI := 0.18  # rad: a small turn either side of the camera, so it is not stiff but the face reads
-const CLEAR_MAX_W := 9.0  # m: wider meshes are the ground
-const CLEAR_MIN_H := 1.0  # m: lower meshes are grass and flowers
 const CLEAR_HALF_W := 6.0  # m either side of the camera-to-group line that scenery is hidden in
 const CLEAR_ROW_W := 8.0  # m either side of the group that scenery is hidden in, front to back CLEAR_ROW_D
 const CLEAR_ROW_D := 3.0
@@ -222,35 +220,29 @@ func _shot(name: String) -> void:
 	_write_labels(name)
 
 
-## Hides the scenery props (trees, rocks) that stand in a 2 m wide corridor between the camera and the group, so no
-## trunk covers anyone. Only meshes: the ground, water and the characters stay.
+## Hides the trees, bushes and rocks (the farm draws them as multimeshes) that stand among the group or in the
+## corridor between the camera and it, so no trunk covers anyone. The ground, water and characters stay.
 func _clear_foreground() -> void:
 	var cam := main.get_viewport().get_camera_3d()
 	var from := Vector2(cam.global_position.x, cam.global_position.z)
-	var to := Vector2(group.x, group.z)
-	var line := to - from
-	var chars: Array = hunters.duplicate()
-	for k in h.kins:
-		chars.append(k["node"])
-	for n in h.find_children("*", "MeshInstance3D", true, false):
-		var mi := n as MeshInstance3D
-		if mi.mesh == null or not mi.visible:
+	var line := Vector2(group.x, group.z) - from
+	for n in h.find_children("*", "MultiMeshInstance3D", true, false):
+		var mmi := n as MultiMeshInstance3D
+		var id := String(mmi.name)
+		if not (id.begins_with("tree") or id.begins_with("bush") or id.begins_with("rock")):
 			continue
-		var bb := mi.global_transform * mi.get_aabb()
-		if bb.size.x > CLEAR_MAX_W or bb.size.y < CLEAR_MIN_H or chars.any(func(c): return c.is_ancestor_of(mi)):
-			continue
-		var centre := Vector2(bb.get_center().x, bb.get_center().z)
-		if (
-			absf(centre.x - group.x) < CLEAR_ROW_W
-			and centre.y > group.z - CLEAR_ROW_D
-			and centre.y < group.z + CLEAR_ROW_D
-		):
-			mi.visible = false  # standing among them
-			continue
-		var at := centre - from
-		var t := at.dot(line) / line.length_squared()
-		if t > 0.0 and t < 0.95 and absf(at.cross(line)) / line.length() < CLEAR_HALF_W + bb.size.x * 0.5:
-			mi.visible = false
+		for i in mmi.multimesh.instance_count:
+			var at := mmi.global_transform * mmi.multimesh.get_instance_transform(i).origin
+			if _in_the_way(Vector2(at.x, at.z), from, line):
+				mmi.multimesh.set_instance_transform(i, Transform3D(Basis.from_scale(Vector3.ZERO), at))
+
+
+func _in_the_way(centre: Vector2, from: Vector2, line: Vector2) -> bool:
+	if absf(centre.x - group.x) < CLEAR_ROW_W and absf(centre.y - group.z) < CLEAR_ROW_D:
+		return true  # standing among them
+	var at := centre - from
+	var t := at.dot(line) / line.length_squared()
+	return t > 0.0 and t < 0.95 and absf(at.cross(line)) / line.length() < CLEAR_HALF_W
 
 
 ## <name>.json: where each character's feet are on the still, in px, for the sheet's name labels.
