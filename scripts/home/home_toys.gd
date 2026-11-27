@@ -27,6 +27,22 @@ static func rules() -> Dictionary:
 	return Content.rules("toys")
 
 
+## Stat points toys may still give this Boki today (day_cap; lazy rec.toy_day = {day, n}, no migration).
+static func day_room(rec: Dictionary, now := -1.0) -> int:
+	var day := GardenWishes.day_of(Time.get_unix_time_from_system() if now < 0.0 else now)
+	var td: Dictionary = rec.get_or_add("toy_day", {})
+	if int(td.get("day", -1)) != day:
+		td["day"] = day
+		td["n"] = 0
+	return maxi(0, int(rules()["day_cap"]) - int(td["n"]))
+
+
+## Counts toy points a Boki just gained against today's cap.
+static func day_used(rec: Dictionary, n: int, now := -1.0) -> void:
+	day_room(rec, now)
+	rec["toy_day"]["n"] = int(rec["toy_day"]["n"]) + n
+
+
 ## The toys on the layout: [{u, id, pos}].
 func toys() -> Array:
 	var out: Array = []
@@ -258,7 +274,9 @@ func _finish(k: Dictionary, t: Dictionary) -> void:
 	var rec: Dictionary = k["rec"]
 	var def: Dictionary = R["toys"][t["id"]]
 	var stat := String(def["stat"])
-	var gained := Care.add_stat(rec, stat, GardenZones.train_gain(rec, int(R["stat_gain"])))
+	var gain := mini(day_room(rec), GardenZones.train_gain(rec, int(R["stat_gain"])))
+	var gained := Care.add_stat(rec, stat, gain) if gain > 0 else 0
+	day_used(rec, gained)
 	FavToy.log_play(rec, String(t["id"]), float(k["play"]["secs"]))
 	Care.change(rec, "joy", float(R["joy_gain"]))
 	if randf() < float(def.get("snack", 0.0)):
@@ -269,8 +287,8 @@ func _finish(k: Dictionary, t: Dictionary) -> void:
 	if h.life and gained > 0:
 		h.life.sfx.toy_done(rec, k["pos"])
 	GardenFirstDay.mark("toy", h)
-	FarmTutorial.event("played")
 	h._garden_xp(rec, "toy")  # play raises the Boki (docs/GARDEN_FIRST_HOUR.md item 7)
+	FarmTutorial.event("played")
 	if gained > 0:
 		h.fx.burst(k["pos"] + Vector3(0, 0.9, 0), Care.STATS[stat]["col"], 7, 2.0, 0.5)
 	_stop(k)

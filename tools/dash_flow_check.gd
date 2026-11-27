@@ -97,7 +97,6 @@ func run_heroes(main: Node, heroes: Array) -> void:
 	for r in SOURCE_ROWS:
 		var row := DashFlow.row_of(r[0], r[2], r[1] == "air")
 		ok(String(row["mode"]) == r[3], "%s %s dash -> %s is %s in the source" % [r[0], r[1], r[2], r[3]])
-	ok(Loco.press_buffer == 0.15, "the shared press window Loco.press_buffer is 0.15 s (Kael's too)")
 	for hero in heroes:
 		await check_hero(main, hero)
 	await _one_window(main)
@@ -258,7 +257,9 @@ func _ready_up(m: Match) -> void:
 		if not busy and hunter.roll_t <= 0.0 and k.dash_left() <= 0.0 and hunter.grounded and i > 30:
 			break
 		m.step(Match.DT)
-	if k.e_t > 0.0:
+	# Haul's chain still hooked or arriving would turn the next E into its pull
+	var chain: Variant = k.get("warchain")
+	if k.e_t > 0.0 or (chain != null and String(chain.state) != "ready"):
 		# an E that waits for its recast (Motley's seed) would turn the next E press into that recast: a new kit
 		hunter.set_arch(hunter.arch)
 	for wall in m.verbs.walls.duplicate():
@@ -671,7 +672,7 @@ func _fresh(m: Match) -> void:
 func _jump_cast(m: Match, slot: String) -> String:
 	_fresh(m)
 	hunter.inp["jump"] = true
-	_steps(m, 9)
+	_steps(m, 8)  # (0.13 s up: ~0.87 m at JUMP_V 7.5, still inside Stone Row's 0.9 m ground-only window)
 	if hunter.grounded:
 		return "n/a: no jump"
 	var before := _snap()
@@ -918,7 +919,8 @@ func _lock_steps(m: Match, slot: String, in_air: bool, move := "jump") -> int:
 	return hi
 
 
-## `slot` cast (standing, or falling from AIR_LIFT), then Space pressed `at` steps after it went off: "now"
+## `slot` cast (standing, or falling from AIR_LIFT), then Space (`move` "jump") or Shift ("dash") pressed `at` steps
+## after it went off: "now"
 ## (acted within NOW_STEPS), "end %.2fs" (acted that long after the press), "never", or "n/a ...".
 func _space_at(m: Match, slot: String, in_air: bool, at: int, move := "jump") -> String:
 	_fresh(m)

@@ -489,7 +489,7 @@ def gen_boki():
         gd_const("core/care.gd", "IV_INHERIT"), gd_const("core/care.gd", "IV_RARE_HIGH"), gd_const("core/care.gd", "IV_RARE_FLOOR"))
     b += table(["IV", "Affects", "Most it adds (at 31)"], [[v["name"], v["desc"], "+%d%%" % round(ivb.get(k, 0) * 100)] for k, v in ivs.items()])
     tr = gd_const("core/care.gd", "STATS") or {}
-    b += "\n\n## Trained stats\n\nTrained at the Training post with a timing drill.\n\n" + table(["Stat", "Per point", "Drill"], [[v["name"], v["desc"], v["drill"]] for v in tr.values()])
+    b += "\n\n## Trained stats\n\nRaised by giving stat bites (carried home from expeditions, won in a few limited races and drills a day).\n\n" + table(["Stat", "Per point", "Drill"], [[v["name"], v["desc"], v["drill"]] for v in tr.values()])
     nat = gd_const("core/care.gd", "NATURES") or {}
     if nat:
         b += "\n\n## Natures\n\nA Boki's nature comes from its two strongest traits.\n\n" + table(["Traits", "Nature"], [[k.replace("+", " + "), v] for k, v in nat.items()])
@@ -884,16 +884,15 @@ def _dash_jump_rows(hero, f):
         rows.append([hero, label, row.get("source", ""), ours, row.get("verdict", "[?]")])
     return rows
 
-def _press_buffer():
-    """The shared press window: tuning.json press_buffer (Loco.press_buffer)."""
-    return float(load_json(os.path.join(ROOT, "content", "rules", "tuning.json"))["press_buffer"])
-
-
 def _const_s(path, name):
     """A float `const name := 0.15` in a GDScript file (the shared DashFlow window when it is an alias)."""
     text = open(os.path.join(ROOT, path), encoding="utf-8").read()
     m = re.search(r"^const %s\s*:?=\s*([0-9.]+)" % name, text, re.M)
     return float(m.group(1)) if m else _press_buffer()
+
+def _press_buffer():
+    """The one press window every kit shares (Loco.press_buffer, content/rules/tuning.json)."""
+    return float(load_json(os.path.join(ROOT, "content", "rules", "tuning.json"))["press_buffer"])
 
 # Measured by --dash-flow-check on main (11-20): s a buffered press went off past the dash's end (every buffer
 # row, 0.00-0.02 s), and Shift held in an ult's lock: [lock s, goes past the lock's end by s].
@@ -964,7 +963,6 @@ def gen_buffer_windows(flows):
     body += "\n\nEvery `buffer` row in `content/dash_flow` (the hold rows are keep or cancel: none buffers):\n\n"
     body += table(["Hero", "Pair", "Source", "Held for (measured)"], _buffer_rows(flows))
     return body
-
 CAST_SLOTS = [("lmb", "LMB tap"), ("lmb_hold", "LMB hold"), ("rmb", "RMB"), ("e", "E"), ("x", "ult (X)")]
 
 def _cast_ours(row, phase):

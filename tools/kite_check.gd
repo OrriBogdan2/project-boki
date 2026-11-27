@@ -289,6 +289,7 @@ func _cup() -> void:
 	)
 	Save.d = Save.fresh()
 	Save.d["items"] = {}
+	TrainRuns.state(now)["race"] = 9  # three wins in a row today: the run limits are --train-runs-check's
 	var rec := _kin(30, 25)
 	var steps: Array = []
 	var xps: Array = []

@@ -195,10 +195,11 @@ func _base_tutorial() -> void:
 	await _base_world()
 
 
-## The last base hint ("head out or stay"), with its counter, fits inside TutorialStrip's 42% width at a readable
-## size (12 px is the shrink floor, so the line never runs past the "4/4" counter), at 1080p and at 720p.
+## The last base hint ("head out or stay"), with its counter, fits inside TutorialStrip's 42% width at a
+## readable size (12 px is the shrink
+## floor, so the line never runs past the "4/4" counter), at 1080p and at 720p.
 func _banner_fits() -> void:
-	var font: Font = preload("res://fonts/LilitaOne-Regular.ttf")
+	var font: Font = load("res://fonts/LilitaOne-Regular.ttf")
 	var worst := 99
 	var over := ""
 	for sz in [Vector2(1920, 1080), Vector2(1280, 720)]:
@@ -226,8 +227,7 @@ func _base_ends_alone() -> void:
 		var g := int(Save.d["gems"])
 		FarmTutorial.event(what)
 		var paid: bool = int(Save.d["gems"]) == g + int(FarmTutorial.option("end_gems"))
-		var done := not FarmTutorial.active() and FarmTutorial.did("out") and paid
-		ok(done, "%s ends the tutorial with the one reward" % what)
+		ok(not FarmTutorial.active() and FarmTutorial.did("out") and paid, "%s ends it with the one reward" % what)
 		FarmTutorial.event(what)
 		ok(int(Save.d["gems"]) == g + int(FarmTutorial.option("end_gems")), "%s again pays nothing more" % what)
 
@@ -714,7 +714,7 @@ func _tracker_rules() -> void:
 	var src_at: Array = rows.map(func(r): return GoalTracker.SOURCE_ORDER.find(r["source"]))
 	ok(src_at.all(func(i): return i >= 0), "every row comes from a known source")
 	var cap_was: int = GoalTracker.cfg()["max"]
-	GoalTracker.cfg()["max"] = 99      # (the card shows three: the per-source rules are read off the whole list)
+	GoalTracker.cfg()["max"] = 99  # (the card shows three: the per-source rules are read off the whole list)
 	rows = GoalTracker.lines()
 	GoalTracker.cfg()["max"] = cap_was
 	var counts := {}
