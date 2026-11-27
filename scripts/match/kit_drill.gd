@@ -188,7 +188,7 @@ func build_ui() -> void:
 	bottom.add_child(skip)
 	if m.hud:
 		m.hud.ui_extra.append(skip)       # the mouse is over UI here: no shooting, the pointer shows
-		_place()      # (before the first frame: unplaced, the Skip button sits at the corner under a mouse parked there)
+		_place()  # before the first frame: unplaced, Skip sits at the corner under a parked mouse
 
 func _label(parent: Node, col: Color, px: int, wrap_w := 0.0) -> Label:
 	var l := Label.new()
