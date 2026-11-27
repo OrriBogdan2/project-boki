@@ -31,6 +31,7 @@
   "loop": ["revive_hum", "wisp_hum"]
  },
  "gain_db": {
+  "click": -2.0,
   "charge": 8.0,
   "cloak": 5.5,
   "v_glimmer": 5.5,
@@ -53,7 +54,6 @@
   "swap": "borderline (under 4.5 dB), mixed by ear at its call sites; left for a listening pass",
   "ab_shield_hit": "borderline (under 4.5 dB), mixed by ear at its call sites; left for a listening pass",
   "whoosh": "borderline (under 4.5 dB), mixed by ear at its call sites; left for a listening pass",
-  "jump": "borderline (under 4.5 dB), mixed by ear at its call sites; left for a listening pass",
   "grab": "borderline (under 4.5 dB), mixed by ear at its call sites; left for a listening pass",
   "key_get": "borderline (under 4.5 dB), mixed by ear at its call sites; left for a listening pass",
   "v_spitter": "borderline (under 4.5 dB), mixed by ear at its call sites; left for a listening pass",
