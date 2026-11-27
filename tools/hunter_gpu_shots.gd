@@ -1,7 +1,8 @@
 extends "res://tools/gameplay_media.gd"
 ## --hunter-gpu-shots --heroes=<arch ids> --shots-dir=<dir> [--size=WxH]: each Hunter alone in a real match (Dusk Isles,
 ## seed 5), under the match camera, as <dir>/<hero>_<shot>.png: match (idle, the default zoom), zoom (idle,
-## closer) and run (moving, closer). Needs a renderer (jobq --needs gpu). --face: idle hunters aim at the camera;
+## closer), run (moving, closer) and eye (idle, facing a camera at chest height, 3/4 front). Needs a renderer
+## (jobq --needs gpu). --face: idle hunters aim at the camera;
 ## --raid=day (RaidLook) shoots in the overcast day instead of the clear evening.
 
 const SIZE := Vector2i(1600, 900)  # px of each shot (--size=WxH)
@@ -9,6 +10,9 @@ const SETTLE := 1.5  # s of idle before a shot
 const RUN_SECS := 1.2  # s of run before the run shot
 const ZOOM_CLOSE := 0.5  # camera zoom of the closer shots
 const FACE_CAM := Vector3(0, 0.9, 3.0)  # --face: idle hunter aims toward the camera
+const EYE_DIR := Vector3(0.45, 0.12, 1.0)  # the eye shot: camera direction from the hunter's middle (3/4 front)
+const EYE_FOV := 30.0  # deg
+const EYE_FILL := 0.8  # of the frame height the hunter fills
 var face := false
 var size := SIZE
 var variants: Array = []  # --set=<name>:<param>=<v>,... shader overrides; shots <hero>_<name>_<shot>
@@ -47,6 +51,7 @@ func run(main_node: Node) -> void:
 			await _take(SETTLE, 1.0, Vector2.ZERO, "%s_match.png" % tag)
 			await _take(SETTLE, ZOOM_CLOSE, Vector2.ZERO, "%s_zoom.png" % tag)
 			await _take(RUN_SECS, ZOOM_CLOSE, Vector2(1, 0.4).normalized(), "%s_run.png" % tag)
+			await _take(SETTLE, 1.0, Vector2.ZERO, "%s_eye.png" % tag, true)
 		print("HUNTERGPU %s done" % hero)
 	print("HUNTERGPU all in %s" % dir)
 	main.get_tree().quit(0)
@@ -93,7 +98,8 @@ func _apply(over: Dictionary) -> void:
 
 
 ## Steps `secs` of the match as Match runs a frame (the player holds `move`), then saves the shot.
-func _take(secs: float, zoom_v: float, move: Vector2, file: String) -> void:
+## `eye`: the hunter faces the camera, which then moves to chest height in front of it (EYE_DIR).
+func _take(secs: float, zoom_v: float, move: Vector2, file: String, eye := false) -> void:
 	var p := m.player
 	_zoom(zoom_v)
 	m.cam.snap(p.pos)
@@ -101,8 +107,8 @@ func _take(secs: float, zoom_v: float, move: Vector2, file: String) -> void:
 	while t < secs:
 		_purge()
 		p.inp["move"] = move
-		if face and move == Vector2.ZERO:
-			p.inp["aim"] = p.pos + FACE_CAM
+		if (face or eye) and move == Vector2.ZERO:
+			p.inp["aim"] = p.pos + (EYE_DIR * Vector3(1, 0, 1) * 3.0 if eye else FACE_CAM)
 		for _i in 2:
 			m.step(STEP)
 		m.cam.follow(p.pos, FRAME, false)
@@ -110,4 +116,26 @@ func _take(secs: float, zoom_v: float, move: Vector2, file: String) -> void:
 			h.render(FRAME, 1.0)
 		await main.get_tree().process_frame
 		t += FRAME
+	if eye:
+		_eye_cam(p.model)
+		await main.get_tree().process_frame
+		await main.get_tree().process_frame
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join(file))
+
+
+## The match camera at chest height, framing the model's meshes (their world box) EYE_FILL of the frame high.
+func _eye_cam(model: Node3D) -> void:
+	var box := AABB()
+	var first := true
+	for mi in model.find_children("*", "MeshInstance3D", true, false):
+		if not (mi as MeshInstance3D).is_visible_in_tree():
+			continue
+		var b: AABB = (mi as MeshInstance3D).global_transform * (mi as MeshInstance3D).get_aabb()
+		box = b if first else box.merge(b)
+		first = false
+	var c := box.get_center()
+	var dist := box.size.y * 0.5 / EYE_FILL / tan(deg_to_rad(EYE_FOV * 0.5))
+	m.cam.fov = EYE_FOV
+	m.cam.global_position = c + EYE_DIR.normalized() * dist
+	m.cam.look_at(c)
+	print("HUNTERGPU eye box %s dist %.2f" % [box.size, dist])
