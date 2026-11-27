@@ -7,27 +7,30 @@ extends Control
 ## holds), from (s into the clip), whirl: hold_from (Breaker's held swing: the loop past hold_from runs on the kit's
 ## spin angle)}. Frames go to out/f%04d.png at 30 fps; one METRIC line per panel (foot slide, lowest foot, lowest
 ## bone above the floor).
-const PANEL := 480                  ## px per panel
-const SCREEN_H := 1440.0            ## px: the screen height the crop is cut from
-const PITCH := deg_to_rad(66.0)     ## cam.gd STYLES.default
-const DIST := 23.0                  ## m
-const FOV := 32.0                   ## deg, vertical
-const RISE := 1.0                   ## m above the feet the view aims at
-const CHAR_LEAN := CamRig.CHAR_LEAN ## the match's body lean (0: upright)
-const CONTACT_H := 0.06             ## m above the lowest foot height that counts as planted
+const PANEL := 480  ## px per panel
+const SCREEN_H := 1440.0  ## px: the screen height the crop is cut from
+const PITCH := deg_to_rad(66.0)  ## cam.gd STYLES.default
+const DIST := 23.0  ## m
+const FOV := 32.0  ## deg, vertical
+const RISE := 1.0  ## m above the feet the view aims at
+const CHAR_LEAN := CamRig.CHAR_LEAN  ## the match's body lean (0: upright)
+const CONTACT_H := 0.06  ## m above the lowest foot height that counts as planted
 const FPS := 30.0
-const TAP := 0.2                    ## s: content/archetypes/bulwark.json lmb.tap (the hold whirl starts here)
-const FULL := 1.25                  ## s: lmb.full
-const SPIN_TURNS := [2.5, 4.0]      ## turns/s from no charge to full (lmb.spin_turns)
+const TAP := 0.2  ## s: content/archetypes/bulwark.json lmb.tap (the hold whirl starts here)
+const FULL := 1.25  ## s: lmb.full
+const SPIN_TURNS := [2.5, 4.0]  ## turns/s from no charge to full (lmb.spin_turns)
 var _panels: Array[Dictionary] = []
+
 
 func _ready() -> void:
 	var path := ""
 	for s in OS.get_cmdline_user_args():
-		if s.begins_with("--jobs="): path = s.trim_prefix("--jobs=")
+		if s.begins_with("--jobs="):
+			path = s.trim_prefix("--jobs=")
 	for job: Dictionary in JSON.parse_string(FileAccess.get_file_as_string(path)):
 		await _run(job)
 	get_tree().quit()
+
 
 func _run(job: Dictionary) -> void:
 	var out := String(job["out"])
@@ -43,7 +46,7 @@ func _run(job: Dictionary) -> void:
 		var side := _make_panel(row, job, libs, p)
 		period = maxf(period, side["len"])
 		_panels.append(side)
-	await RenderingServer.frame_post_draw ## warm-up: the first frame comes out blank
+	await RenderingServer.frame_post_draw  ## warm-up: the first frame comes out blank
 	await RenderingServer.frame_post_draw
 	var n := int(ceil(period * FPS)) * int(job.get("loops", 1))
 	for f in n:
@@ -59,6 +62,7 @@ func _run(job: Dictionary) -> void:
 	row.queue_free()
 	await get_tree().process_frame
 
+
 func _libs(spec: Dictionary) -> Dictionary:
 	var out := {}
 	for lib: String in spec:
@@ -68,6 +72,7 @@ func _libs(spec: Dictionary) -> Dictionary:
 			al.add_animation(nm, UthanaClean.load_motion(p) if p.ends_with(".glb") else load(p))
 		out[lib] = al
 	return out
+
 
 func _make_panel(row: HBoxContainer, job: Dictionary, libs: Dictionary, p: Dictionary) -> Dictionary:
 	var box := SubViewportContainer.new()
@@ -112,14 +117,28 @@ func _make_panel(row: HBoxContainer, job: Dictionary, libs: Dictionary, p: Dicti
 	l.position = Vector2(8, 6)
 	l.add_theme_font_size_override("font_size", 15)
 	box.add_child(l)
-	return {"m": m, "ap": ap, "sk": sk, "cam": cam, "seq": seq, "len": total, "name": l.text, "feet": _feet(sk),
-		"prev": {}, "slide": 0.0, "minh": 99.0, "minb": 99.0}
+	return {
+		"m": m,
+		"ap": ap,
+		"sk": sk,
+		"cam": cam,
+		"seq": seq,
+		"len": total,
+		"name": l.text,
+		"feet": _feet(sk),
+		"prev": {},
+		"slide": 0.0,
+		"minh": 99.0,
+		"minb": 99.0
+	}
+
 
 ## Seeks the panel's sequence to t (s): the segment playing then, held on its last frame past its end.
 func _pose(s: Dictionary, t: float) -> void:
 	var seg: Dictionary = s["seq"][0]
 	for g: Dictionary in s["seq"]:
-		if t >= float(g["at"]): seg = g
+		if t >= float(g["at"]):
+			seg = g
 	var ap: AnimationPlayer = s["ap"]
 	var clip := String(seg["clip"])
 	var a := ap.get_animation(clip)
@@ -132,24 +151,28 @@ func _pose(s: Dictionary, t: float) -> void:
 		ap.pause()
 	ap.seek(minf(tt, a.length - 0.001), true)
 
+
 ## The held swing's clip time lt s after the whirl starts (lmb_t = TAP + lt): bjorn_fx.gd hold() sets the loop's phase
 ## from the kit's spin (starting in front of him, a quarter turn on from the clip's 0), warden_clips.gd seeks it.
 func _whirl_t(lt: float, hold_from: float, length: float) -> float:
 	var spin := 0.0
 	var t := 0.0
 	while t < lt:
-		var k := clampf(t / (FULL - TAP), 0.0, 1.0)      # bulwark_kit.gd smash_k()
+		var k := clampf(t / (FULL - TAP), 0.0, 1.0)  # bulwark_kit.gd smash_k()
 		spin += TAU * lerpf(SPIN_TURNS[0], SPIN_TURNS[1], k) / 60.0
 		t += 1.0 / 60.0
 	var phase := fposmod((spin + PI * 0.5) / TAU, 1.0)
 	return hold_from + phase * (length - hold_from - 0.001)
 
+
 func _feet(sk: Skeleton3D) -> Array[int]:
 	var out: Array[int] = []
 	for i in sk.get_bone_count():
 		var n := sk.get_bone_name(i)
-		if n.begins_with("foot.") or n.begins_with("x_foot."): out.append(i)
+		if n.begins_with("foot.") or n.begins_with("x_foot."):
+			out.append(i)
 	return out
+
 
 func _ground() -> MeshInstance3D:
 	var g := MeshInstance3D.new()
@@ -163,9 +186,10 @@ func _ground() -> MeshInstance3D:
 	var mat := StandardMaterial3D.new()
 	mat.albedo_texture = ImageTexture.create_from_image(img)
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
-	mat.uv1_scale = Vector3(40, 40, 1) ## 0.5 m checks
+	mat.uv1_scale = Vector3(40, 40, 1)  ## 0.5 m checks
 	g.material_override = mat
 	return g
+
 
 ## The game camera follows the root over the floor; the foot and floor metrics are read in the unleaned frame.
 func _track(f: int) -> void:
@@ -179,7 +203,8 @@ func _track(f: int) -> void:
 		cam.position = aim + Vector3(0, sin(PITCH), cos(PITCH)) * DIST
 		cam.look_at(aim)
 		for i in sk.get_bone_count():
-			if i > 0: s["minb"] = minf(s["minb"], (upright * sk.get_bone_global_pose(i).origin).y)
+			if i > 0:
+				s["minb"] = minf(s["minb"], (upright * sk.get_bone_global_pose(i).origin).y)
 		for b in s["feet"]:
 			var p := upright * sk.get_bone_global_pose(b).origin
 			s["minh"] = minf(s["minh"], p.y)
