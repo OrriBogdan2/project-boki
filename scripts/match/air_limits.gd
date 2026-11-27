@@ -12,13 +12,36 @@ extends RefCounted
 ##   recovery doesn't hold the glider shut after you jump out of it). An open glider is never folded by this rule.
 
 ## Every press the drop ignores (move, aim and glide stay: they steer).
-const TRAVEL_JOIN_S := 0.05      # s: a kit move started this close after a travel or Shift press is that move's
-const DROP_KEYS := ["dash", "jump", "fire", "sec", "sec_hold", "sig", "skill", "ult", "throw", "kin_ab", "swap",
-		"util1", "util2", "util3", "util4", "util5", "util6", "gear1", "gear2", "crouch", "interact"]
+const TRAVEL_JOIN_S := 0.05  # s: a kit move started this close after a travel or Shift press is that move's
+const DROP_KEYS := [
+	"dash",
+	"jump",
+	"fire",
+	"sec",
+	"sec_hold",
+	"sig",
+	"skill",
+	"ult",
+	"throw",
+	"kin_ab",
+	"swap",
+	"util1",
+	"util2",
+	"util3",
+	"util4",
+	"util5",
+	"util6",
+	"gear1",
+	"gear2",
+	"crouch",
+	"interact"
+]
+
 
 ## The opening drop, in the air: nothing but steering.
 static func drop_locked(h: Hunter) -> bool:
 	return h != null and h.dropping and not h.grounded
+
 
 ## Drops this step's presses while the drop lasts (before any of them is read).
 static func gate_drop(h: Hunter) -> void:
@@ -29,6 +52,7 @@ static func gate_drop(h: Hunter) -> void:
 			h.inp[key] = false
 	h.dash_buf = 0.0
 
+
 ## The glider folds on the step its fall reaches the ground, before that step's presses are read, so a shot, a cast
 ## or a dash pressed as you land goes off that step (docs/decisions/0061): a landing never eats a press.
 static func fold_at_touchdown(h: Hunter, dt: float) -> void:
@@ -38,6 +62,18 @@ static func fold_at_touchdown(h: Hunter, dt: float) -> void:
 		h.gliding = false
 		h.glide_dive.on = false
 		h.m.fx.dust(h.pos, 5)
+
+
+## True while the glider can't open: an ability or attack animation runs (glide_locked), or the ground is too close.
+static func glide_shut(h: Hunter) -> bool:
+	return glide_locked(h) or too_low(h)
+
+
+## [game data] Too close to the ground to open the glider (HunterMove.too_low): rising under glide_floor_rise, or
+## about to land, where a jump press waits for the landing instead. Over the void there is no ground to be near.
+static func too_low(h: Hunter) -> bool:
+	return not h.over_void() and HunterMove.too_low(h.vel.y, h.pos.y - h.ground())
+
 
 ## True while an ability or attack animation runs, so the glider can't open yet.
 static func glide_locked(h: Hunter) -> bool:
@@ -51,6 +87,7 @@ static func glide_locked(h: Hunter) -> bool:
 	if k.cast_locked() or k.locks_glide():
 		return true
 	return move_running(k, h)
+
 
 ## A kit move still inside its keys. A held move (a hold pose) counts only through the hold itself above,
 ## so a pose left on its last key never blocks the glider; nor does a landing or arrival pose ("land": true:
