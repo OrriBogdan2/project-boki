@@ -9,7 +9,7 @@ extends Node3D
 ##   his ivory (Arch.color) behind its head, a glint in his colour on the head from 0.6 s that grows, burning
 ##   white-hot while the perfect window is open. It never stops until he lets go: the charge motion only, the damage
 ##   comes on the release
-## - his aegis (AegisWall): a translucent pale-gold wall in four layers with a lit ivory rim, leaning out
+## - his aegis (AegisWall): his wooden figurehead shield as a translucent planked wall with an iron rim, leaning out
 ##   toward the camera, rising out of the ground, flashing on a block, darkening as it weakens and breaking
 ##   (the verbs wall underneath keeps the blocking; its plain slab is hidden)
 
@@ -314,7 +314,7 @@ func aegis_break(at: Vector3) -> void:
 	aegis.visible = false
 	AimKit.hide(h, "aegis_push")
 	var half := Vector2(AegisWall.R * sin(AegisWall.HALF), AegisWall.H * 0.5)
-	ShieldBreak.of(h.m).play(at + Vector3(0, half.y, 0), half, Arch.color(h.arch))
+	ShieldBreak.of(h.m).play(at + Vector3(0, half.y, 0), half, aegis.wood)
 
 
 func _process(_delta: float) -> void:

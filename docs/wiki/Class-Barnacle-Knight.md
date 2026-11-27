@@ -16,7 +16,7 @@ and into each other. Plants his hammer where the fight is and heals the squad th
 
 ## How it plays
 
-1. **Hold RMB** to raise his **aegis**, a curved gold shield: it has its own health, regenerates, and
+1. **Hold RMB** to raise his **aegis**, his wooden figurehead shield held up as a wall: it has its own health, regenerates, and
    blocks from the front while you walk slower. Letting go only lowers it.
 2. **Shift** with the aegis up is the **Shield Charge**, a heavy shoulder-first knock (its own 6s cooldown).
 3. **Tap LMB** to throw the hammer where your cursor is (up to 9m): it stays planted under a gold
@@ -82,13 +82,13 @@ What the in-game kit card (K) says.
 
 **Aegis (RMB, 6s cooldown).**
 
-- *Hold:* Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. Walking into foes pushes nobody; LMB with it up is the boop, a shield thrust that shoves foes in front 2.8m (no damage). With it up, Shift is the Shield Charge on this slot's 6s cooldown.
+- *Hold:* Raise the aegis: your wooden figurehead shield held up as a wall, 160 HP that regenerates; it blocks shots from the front and you walk slower. Walking into foes pushes nobody; LMB with it up is the boop, a shield thrust that shoves foes in front 2.8m (no damage). With it up, Shift is the Shield Charge on this slot's 6s cooldown.
 - *Tap:* A tap only raises and lowers the aegis; the Bash is the Shield Charge on the dash key.
 - *In the air:* Shield Surf: hold to block from the front while gliding.
 
 **Mending Ground (E, 12s cooldown).** A green light column comes down for 1s on your hammer (on you with the hammer in hand), then the zone round it heals allies inside 2 every 0.5s for 4s, following the hammer, and ends in a burst of 18; if your aegis is raised the burst mends it 60. A downed teammate inside is a third of the way back up at the burst.
 
-**Faultline (hunter ultimate, from level 6, 40s cooldown).** Hop 1.2m up with the hammer high overhead and drive it down (0.4s, the 16m by 5.5m lane shows to everyone), then slam (planted 0.2s more; then you move freely while it runs): the fissure races down the lane, striking each foe on it (4, stun 0.5), and the ground erupts cell by cell to the far end, throwing each foe up once (18, slowed 50% for 1.5s). A wall or a raised ledge stops it. A glowing scar stays 10s and slows foes on it 20%.
+**Faultline (hunter ultimate, from level 6, 40s cooldown).** Hop 1.2m up with the hammer high overhead and drive it down (0.4s, the 12m by 7m lane shows to everyone), then slam and move on at once while it runs: the fissure races down the lane in 0.2s, striking each foe on it (4, stun 0.5), and the ground erupts cell by cell to the far end, throwing each foe up once (18, slowed 50% for 1.5s). A wall or a raised ledge stops it. A glowing scar stays 10s and slows foes on it 20%.
 
 ### Ranks
 

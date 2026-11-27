@@ -170,9 +170,14 @@ ray is slimmer than the old beam and the wake reads about the same). `HeroVfx.ho
 wall: translucent since ext/vfx-albert-e-wall), and the shared charge ring is his ivory, not gold. GPU strips at match zoom, grey = main (top), border green = better, grey = no change: `docs/shots/albert-vfx-data/{throw,dash,wall,r}_before_after.jpg` (jobq 20261120-145918-29886 before, -145258-27518 after, `--hero-vfx-reel --reel-hero=bulwark`). The throw and the 360 Smash look the same (their looks were already data); the Faultline landing loses its dust rings, the wall and charge ring are ivory.
 Albert (bulwark), ext/vfx-albert-e-wall (row 8 again: the slab boxes were still reading as flat orange chunks on yellow
 ground): the aegis is `scripts/arch/kits/aegis_wall.gd` + `shaders/aegis_wall.gdshader`, four meshes (was 31 boxes, so
-27 fewer draw calls): an outer translucent sheet in the palette `slab` pale gold (deeper low down, amber seams between
-the 7 plates, a hammer cross), a brighter inner sheet a hand inside it, a lit ivory rim bar along the top and a soft
-gold ground contact that fades out along the foot and at the ends. Both faces draw alike (`cull_disabled`), so it reads
+27 fewer draw calls). Since ext/albert-shield-ult-1126 (owner 11-26: "should look like his wooden shield") it wears
+his figurehead shield's look, not gold: a translucent face of dark hull planks (palette `wood`, each plank its own
+shade with a grain, the sea's cyan faint in the gaps as on his body), a carved lighter panel in the middle, an iron
+frame and rivets out at the two sides (palette `band`), the boards' darker back a hand inside it, a light rim bar along
+the top and a soft ground contact with a thin sea line; the iron, rim, back and ground shade fade out across the middle
+(1 m either side of it) and the planks thin to 42% there, so no band or dark ring crosses Albert's body and his outfit
+colours read through; it breaks in wood-coloured chunks. (Raising his model's own shield
+in front of his chest waits for the body rework.) Both faces draw alike (`cull_disabled`), so it reads
 from behind too (not shot). Shape, size, rise, block flash, hurt tint and break are as before; no hit or timing change.
 Strip at match zoom (grey = main, green = after): `docs/shots/vfx-albert-e-wall/aegis_before_after.jpg` (GPU jobq
 20261120-113804-24869 before, 20261120-120528-04629 after; `--hero-vfx-reel --reel-hero=bulwark --reel-only=shield`).
