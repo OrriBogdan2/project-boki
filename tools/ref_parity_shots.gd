@@ -76,7 +76,8 @@ func _wide_row(at: Vector3) -> Array:
 	var out: Array = []
 	for i in WIDE_ROW.size():
 		var team := (m.player.team + (0 if i < 3 else 1)) % 2
-		out.append(_idle("ref_w%d" % i, team, WIDE_ROW[i][1], at + Vector3(WIDE_ROW[i][0], 0.0, 0.6 if i % 2 == 0 else -0.6)))
+		var spot := at + Vector3(WIDE_ROW[i][0], 0.0, 0.6 if i % 2 == 0 else -0.6)
+		out.append(_idle("ref_w%d" % i, team, WIDE_ROW[i][1], spot))
 	return out
 
 
