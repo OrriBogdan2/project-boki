@@ -73,7 +73,8 @@ func step(dt: float) -> void:
 		_pieces[i].scale.x = WIDTH * (1.0 - 0.5 * k)
 
 func _feed(h: Hunter) -> void:
-	if not (h.roll_t > 0.0 or (h.ak != null and h.ak.dash_left() > 0.0)) or not h.model.visible or (h.ak != null and h.ak.hides_dash_streak()):
+	var dashing: bool = h.roll_t > 0.0 or (h.ak != null and h.ak.dash_left() > 0.0)
+	if not dashing or not h.model.visible or (h.ak != null and h.ak.hides_dash_streak()):
 		_last.erase(h)
 		return
 	var at: Vector3 = h.position + Vector3(0, LIFT * float(h.cdat["scale"]), 0)
