@@ -15,7 +15,7 @@
 	"plate_offset": 1.85,
 	"body": {
 		"size": 0.92,
-		"hit_r": 0.352, "hit_h": 1.04, "body_r": 0.34,
+		"hit_r": 0.352, "top_h": 1.38, "hit_h": 1.04, "body_r": 0.34,
 		"head": 0.78,
 		"legs": 0.98,
 		"torso": 1.02,
@@ -169,7 +169,7 @@
 		"dash_spent": "dash pip dark"
 	},
 	"lmb_note": "Ember Cast",
-	"lmb": {"wait": 1.0, "range_k": 1.25, "size_k": 1.5},
+	"lmb": {"wait": 1.0, "range_k": 1.25, "size_k": 1.5, "look_k": 0.85},
 	"x": {"per_rank": {"cooldown": [-4, -4], "heal_ps": [1.325, 1.325]},
 		"name": "Hearth Call",
 		"card_range": "range",

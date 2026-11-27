@@ -173,7 +173,7 @@ func _lmb() -> void:
 	_settle(0.8)
 
 
-## LMB held (the source: one bolt every 0.8 s; ours 0.648, the owner's item 116): a bolt every 0.648 s, the hands
+## LMB held (the source: one bolt every 0.8 s; ours 0.55, the owner's item 116): a bolt every 0.55 s, the hands
 ## alternate, each bolt re-plays its clip from the start.
 func _lmb_held() -> void:
 	P.ammo = 99
@@ -193,8 +193,8 @@ func _lmb_held() -> void:
 	var gap := (float(rounds[-1]) - float(rounds[0])) / maxf(rounds.size() - 1, 1) if rounds.size() > 1 else 0.0
 	print("TIME mage_lmb held: %d bolts in 2.2 s, one every %.3f s (%s)" % [rounds.size(), gap, ids])
 	C.ok(
-		"Sparkle timing LMB held: a bolt every 0.648 s, the hands alternating, each re-plays its clip",
-		rounds.size() >= 3 and absf(gap - 0.648) < DT * 1.5 and ids[0] != ids[1] and ids[0] == ids[2],
+		"Sparkle timing LMB held: a bolt every 0.55 s, the hands alternating, each re-plays its clip",
+		rounds.size() >= 3 and absf(gap - 0.55) < DT * 1.5 and ids[0] != ids[1] and ids[0] == ids[2],
 		"%d bolts every %.3f s %s" % [rounds.size(), gap, ids]
 	)
 	_settle(0.8)

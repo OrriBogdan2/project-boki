@@ -408,10 +408,11 @@ func _pose_sample(m: Match) -> void:
 		_pose_file(m, "boki", k.pos, t0)
 
 
-## Hero rigs (WardenGlb.Sync) that pose this frame: those whose Hunter did not hold theirs (WardenGlb.POSE_HELD).
+## Hero rigs (WardenGlb.Sync, or WardenNative on Meshy's own skeleton) that pose this frame: those whose Hunter did
+## not hold theirs (WardenGlb.POSE_HELD).
 func _count_rigs(m: Match) -> void:
 	for h in m.hunters:
-		if h.model and h.model.get_node_or_null("Warden/Sync"):
+		if h.model and (h.model.get_node_or_null("Warden/Sync") or h.model.get_node_or_null("Warden/Native")):
 			rigs_posed.y += 1
 			if int(h.model.get_meta(WardenGlb.POSE_HELD, -1)) != Engine.get_process_frames():
 				rigs_posed.x += 1
