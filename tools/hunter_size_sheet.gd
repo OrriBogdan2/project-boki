@@ -12,7 +12,7 @@ const PASSES := [  # [label, match_hunter_scale, wheel zoom]
 	["old_cam_1.10", 1.1, 1.6],
 	["cam_1.10", 1.1, 1.4572],  # the camera parity pass: the wheel starts at 1.4572
 	["cam_1.00", 1.0, 1.4572],  # main now, without the hunter scale rule
-	["panel", 1.1, 0.3],
+	["panel", 1.1, 0.45],
 ]
 const WARM_UP := 200  # match steps (1/60 s) the camera settles for before a pass is read
 const SAMPLES := 12  # frames the idle is averaged over
@@ -100,7 +100,13 @@ func _measure(hero: String, label: String) -> void:
 		top += (hi - p.position.y) / SAMPLES
 		crown += (c - p.position.y) / SAMPLES
 		px += (feet.y - head.y) * k / SAMPLES
-	print("HSIZE %s %s: crown %.3f m, top %.3f m, crown %.1f px, %.1f px/m" % [hero, label, crown, top, px, px / crown])
+	var at := m.cam.unproject_position(p.position) * k
+	print(
+		(
+			"HSIZE %s %s: crown %.3f m, top %.3f m, crown %.1f px, %.1f px/m, feet at %.0f,%.0f"
+			% [hero, label, crown, top, px, px / crown, at.x, at.y]
+		)
+	)
 
 
 ## The world y of the top of the skull: the highest 2 cm slice, in a column round the head bone, that is at least
