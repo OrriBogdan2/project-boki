@@ -2531,8 +2531,7 @@ func drop(kind_s: String, at: Vector3, v: int, key := "", pid := "", vel0 = null
 func _update_pickups(dt: float) -> void:
 	var walk: Dictionary = PickupReach.rules()["walk"]      # (read once a step, not per pickup and hunter)
 	var settle := float(walk["settle"])
-	var reach := float(walk["radius"])
-	var reach_h := float(walk["height"])
+	var gem_rule: Dictionary = PickupReach.rules()["gem"]      # (gems reach further than the rest)
 	for p in pickups.duplicate():
 		p["t"] += dt
 		var pos: Vector3 = p["pos"]
@@ -2543,6 +2542,10 @@ func _update_pickups(dt: float) -> void:
 		var v: Vector3 = p["vel"]
 		var grabbed := false
 		if p["t"] > settle:
+			var rule := PickupReach.walk_rule(String(p["kind"]))
+			var reach_r: Dictionary = gem_rule if rule == "gem" else walk
+			var reach := float(reach_r["radius"])
+			var reach_h := float(reach_r["height"])
 			for h in hunters:
 				if h.out or h.extracted or h.downed or h.remote:
 					continue
@@ -2552,8 +2555,8 @@ func _update_pickups(dt: float) -> void:
 					continue
 				if p["kind"] == "ckey" and not KeyChest.has_room(h):
 					continue      # a full key stack leaves the key on the ground, glinting
-				if PickupReach.near(self, h, pos, "walk") and UtilityBelt.can_take(h, String(p["kind"])):
-					v = PickupReach.pull(h, pos)
+				if PickupReach.near(self, h, pos, rule) and UtilityBelt.can_take(h, String(p["kind"])):
+					v = PickupReach.pull(h, pos, rule)
 					if PickupReach.grabbed(h, pos):
 						_collect(h, p)
 						grabbed = true
