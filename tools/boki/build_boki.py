@@ -50,6 +50,7 @@ SPECS = {"cindle": ("vespyx", "vespyx_paint", "vespyx_anim"), "puddlet": ("prism
          "moonloris": ("glomwort", "glomwort", "moonloris_anim"),
          "opalisk": ("glomwort", "glomwort", "opalisk_anim"),        # its own clips over the borrowed rig
          "orchisloth": ("glomwort", "glomwort", "orchisloth_anim"),
+         **{i: ("glomwort", "glomwort", i + "_anim") for i in ("squalltross", "threadwyrm", "tuatrune", "velvorm")},
          "kestrike": ("kestrike", "kestrike", "kestrike_anim"),
          "kindlewren": ("kindlewren", "kindlewren", "kindlewren_anim"),
          "lodestick": ("lodestick", "lodestick", "lodestick_anim"),
