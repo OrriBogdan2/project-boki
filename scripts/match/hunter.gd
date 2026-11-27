@@ -861,7 +861,7 @@ func _dash_into_glide() -> bool:
 		return false
 	if ak != null and ak.glide_cancel():
 		return true
-	if not (_press_in_dash or _in_dash_press()):
+	if not _press_in_dash:      # (the press's own moment decides: a move that starts during the hold is not cut)
 		return false
 	roll_t = 0.0
 	glide_cd = 0.0
