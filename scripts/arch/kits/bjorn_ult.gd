@@ -339,8 +339,7 @@ func _tick_scar(dt: float) -> void:
 			continue
 		if AimMode.in_lane(a, dir, length, float(x.get("scar_w", 1.4)), f.pos):
 			CcSfx.zone_slow(f)
-			f.slow_k = maxf(f.slow_k, slow) if f.slow_t > 0.0 else slow
-			f.slow_t = maxf(f.slow_t, 0.25)
+			f.add_slow(0.25, slow)
 	scar["fx"] = float(scar["fx"]) - dt
 	if float(scar["fx"]) <= 0.0:
 		scar["fx"] = 0.7
