@@ -320,8 +320,8 @@ func _carry(s: Dictionary, dt: float) -> void:
 		for n in props.nodes if props else []:
 			if n.name.begins_with(WardenProps.PREFIX + "hand"):
 				n.visible = not away
-		for n in root.get_children():
-			if n.name.begins_with("Bloom"):
+		for n in get_tree().get_nodes_in_group(WardenFx.BLOOM_GROUP):
+			if root.is_ancestor_of(n):
 				(n as Node3D).visible = not away
 
 

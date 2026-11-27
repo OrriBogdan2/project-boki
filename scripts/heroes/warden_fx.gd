@@ -2,6 +2,8 @@ class_name WardenFx
 extends RefCounted
 ## A model's smoke and bloom off its held weapon (warden_look.json), split out of WardenGlb.
 
+const BLOOM_GROUP := "warden_bloom"  # the glow quads a data "bloom" puts on a blade or arm (WardenNative hides them)
+
 static var _puff_tex: Texture2D
 
 
@@ -147,6 +149,7 @@ static func _bloom_quad(m: Material, sz: float, at: Vector3) -> MeshInstance3D:
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	mi.position = at
 	mi.set_meta("glb_hidden", true)  # (kept out of the model's own bounds, like the hidden procedural parts)
+	mi.add_to_group(BLOOM_GROUP)
 	return mi
 
 
