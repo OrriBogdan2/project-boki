@@ -135,6 +135,7 @@ func _motion() -> void:
 				model.set_meta(WardenClips.STATE, s)
 				for k in int(float(st[2]) * FPS):
 					poser.call("_process", 1.0 / FPS)
+				await _frames(3)  # (the skeleton's draw catches up with the pose just set)
 				for view in VIEWS:
 					cam.position = Vector3(0.0, float(view[2]) + 0.1, float(view[1]))
 					cam.look_at(Vector3(0.0, float(view[2]), 0.0))

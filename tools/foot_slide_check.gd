@@ -95,7 +95,7 @@ func run(main: Node) -> void:
 		if await _hero(main, String(id)):
 			done += 1
 	WardenNative.contract_only = false
-	for id in ids:
+	for id in ids + EmptyGlb.KEYS.filter(func(k): return k not in ids):  # (the player's Empty is native too)
 		if WardenNative.on(String(id)) and await _native(main, String(id)):
 			done += 1
 	print("FOOT_SLIDE_DONE ", done, " FAIL ", bad)

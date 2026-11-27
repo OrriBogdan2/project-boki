@@ -19,7 +19,8 @@ const KEEP := ["Head", "Aura"]
 ## front, from the game shots). The void head is fitted onto it, so the hood frames the void face as in the art
 ## (the procedural head is about twice its size).
 const EGG := [[Vector3(0.0, 1.242, -0.09), 0.264], [Vector3(0.0, 1.235, -0.11), 0.25]]
-const EGG_COVER := 1.06  # x the egg's height: the void shell just covers the painted egg
+const EGG_COVER := 1.2  # x the egg's height: the void shell stands over the painted egg (Meshy's hood is closer to it)
+const EGG_FRONT := Vector3(0.0, 0.0, -0.08)  # m: the void shell sits this far ahead of the painted egg, over it
 
 
 ## The .glb this Empty look wears ("" for the procedural Empty).
@@ -51,8 +52,8 @@ static func dress(root: Node3D, appearance: Dictionary, lk: Dictionary) -> void:
 		return
 	_hide_body(root.get_node("Rig") as Node3D)
 	var size := EmptyFrame.factor(Unmasked.clean(appearance), "head") / EmptyFrame.factor(rest_look(k), "head")
-	_into_hood(root, KEYS.find(k), size)
 	WardenBulk.apply(root, EmptyFrame.bulk(Unmasked.clean(appearance)))  # (the build slider thickens the skin)
+	_into_hood(root, KEYS.find(k), size)
 	_dye(root.get_node("Warden") as Node3D, Unmasked.clean(appearance))
 
 
@@ -66,10 +67,11 @@ static func _hide_body(n: Node3D) -> void:
 		_hide_body(c as Node3D)
 
 
-## The void head (the procedural Head and the hollow shell on it) scaled and moved onto the model's painted egg and
-## hung on Meshy's Head bone, so it turns with the model's clips; `size` is the look's head-size slider against the rest
-## look's, so the slider still sizes the head in the hood. The egg's numbers are for the model as fitted, times how far
-## the rig's height scaled it (the glb's scale; 1 in the rest look).
+## The void head (the procedural Head and the hollow shell on it) scaled and moved onto the model's painted egg, and
+## skinned to Meshy's Head bone with the model's own skin (`VoidHead`), so it turns with the clips exactly as the hood
+## does; `size` is the look's head-size slider against the rest look's, so the slider still sizes the head in the hood.
+## The egg's numbers are for the model as fitted, times how far the rig's height scaled it (the glb's scale; 1 in the
+## rest look). The aura rides Spine02.
 static func _into_hood(root: Node3D, sex: int, size: float) -> void:
 	var head := root.get_node("Rig/Torso/HeadPivot/Head") as Node3D
 	var hollow := head.get_node("Hollow") as MeshInstance3D
@@ -77,15 +79,53 @@ static func _into_hood(root: Node3D, sex: int, size: float) -> void:
 	var box := WardenGlb.model_xf(root, hollow) * hollow.get_aabb()
 	head.scale *= float(EGG[sex][1]) * fitted * EGG_COVER * size / box.size.y
 	box = WardenGlb.model_xf(root, hollow) * hollow.get_aabb()
-	var xf := WardenGlb.model_xf(root, head)
-	xf.origin += (EGG[sex][0] as Vector3) * fitted - box.get_center()
-	_hang(root, head, "Head", xf)
+	var xf := WardenGlb.model_xf(root, hollow)
+	xf.origin += (EGG[sex][0] + EGG_FRONT) * fitted - box.get_center()
+	_skin_to_head(root, hollow, xf)
 	var aura := root.get_node_or_null("Rig/Torso/Aura") as Node3D
 	if aura:
 		_hang(root, aura, "Spine02", WardenGlb.model_xf(root, aura))
 
 
+## A skinned copy of `hollow` at `xf` (the model's frame): its vertices in the skin's space with all their weight on the
+## Head bone, on the model's own Skin, so the GPU moves it as it moves the cloak. The procedural shell is hidden; its
+## materials (the void, the rim) are shared, so the look's glow and ghost still reach the copy.
+static func _skin_to_head(root: Node3D, hollow: MeshInstance3D, xf: Transform3D) -> void:
+	var skel := WardenGlb.skeleton(root.get_node("Warden") as Node3D)
+	var skin := (skel.find_children("*", "MeshInstance3D", true, false)[0] as MeshInstance3D).skin
+	var bind := _bind_of(skel, skin, "Head")
+	var into := WardenGlb.model_xf(root, skel).affine_inverse() * xf
+	var mesh := ArrayMesh.new()
+	for si in hollow.mesh.get_surface_count():
+		var arrays := hollow.mesh.surface_get_arrays(si)
+		var verts := arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array
+		var normals := arrays[Mesh.ARRAY_NORMAL] as PackedVector3Array
+		var bones := PackedInt32Array()
+		var weights := PackedFloat32Array()
+		for v in verts.size():
+			verts[v] = into * verts[v]
+			if not normals.is_empty():
+				normals[v] = (into.basis * normals[v]).normalized()
+			bones.append_array([bind, 0, 0, 0])
+			weights.append_array([1.0, 0.0, 0.0, 0.0])
+		arrays[Mesh.ARRAY_VERTEX] = verts
+		arrays[Mesh.ARRAY_NORMAL] = normals
+		arrays[Mesh.ARRAY_BONES] = bones
+		arrays[Mesh.ARRAY_WEIGHTS] = weights
+		mesh.add_surface_from_arrays(hollow.mesh.surface_get_primitive_type(si), arrays)
+		mesh.surface_set_material(si, hollow.get_active_material(si))
+	var voidhead := MeshInstance3D.new()
+	voidhead.name = "VoidHead"
+	voidhead.mesh = mesh
+	voidhead.skin = skin
+	voidhead.cast_shadow = hollow.cast_shadow
+	skel.add_child(voidhead)
+	hollow.visible = false
+
+
 ## Puts the procedural node `nd` (at `xf` in the model's frame, at rest) on Meshy's bone `bone`: it rides the clips.
+## Meshy's skeleton rests a little off the pose its skin was bound in, so the offset is taken through the skin's bind
+## pose, the one the skinned vertices move by: the node stays put on the cloak, as a vertex does.
 static func _hang(root: Node3D, nd: Node3D, bone: String, xf: Transform3D) -> void:
 	var skel := WardenGlb.skeleton(root.get_node("Warden") as Node3D)
 	var at := BoneAttachment3D.new()
@@ -93,9 +133,16 @@ static func _hang(root: Node3D, nd: Node3D, bone: String, xf: Transform3D) -> vo
 	at.bone_name = bone
 	skel.add_child(at)
 	nd.reparent(at, false)
-	nd.transform = (
-		(WardenGlb.model_xf(root, skel) * skel.get_bone_global_rest(skel.find_bone(bone))).affine_inverse() * xf
-	)
+	var skin := (skel.find_children("*", "MeshInstance3D", true, false)[0] as MeshInstance3D).skin
+	nd.transform = skin.get_bind_pose(_bind_of(skel, skin, bone)) * WardenGlb.model_xf(root, skel).affine_inverse() * xf
+
+
+## The skin's bind of bone `bone` (a bind names its bone, or points at it by index).
+static func _bind_of(skel: Skeleton3D, skin: Skin, bone: String) -> int:
+	for i in skin.get_bind_count():
+		if skin.get_bind_name(i) == bone or skin.get_bind_bone(i) == skel.find_bone(bone):
+			return i
+	return -1
 
 
 ## The cloak takes the shroud colour and the hem band the accent (or, matching the shroud, its own lighter shade):

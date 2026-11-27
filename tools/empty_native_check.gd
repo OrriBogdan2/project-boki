@@ -67,11 +67,9 @@ func _one(main: Node, key: String) -> void:
 			"%s: %s plays %s" % [key, c[0], nat.player.current_animation]
 		)
 		ok(_posed(sk) >= POSED_MIN, "%s: %s is posed (%d bones off rest)" % [key, c[0], _posed(sk)])
-	var hood := m.find_child("Hollow", true, false) as Node3D
-	ok(
-		hood != null and hood.get_parent().get_parent() is BoneAttachment3D,
-		"%s: the void head rides a Meshy bone" % key
-	)
+	var hood := m.find_child("VoidHead", true, false) as MeshInstance3D
+	var body := sk.find_children("*", "MeshInstance3D", true, false)[0] as MeshInstance3D
+	ok(hood != null and hood.skin == body.skin, "%s: the void head is skinned with the cloak's own skin" % key)
 	var aura := m.find_child("Aura", true, false)
 	ok(aura == null or aura.get_parent() is BoneAttachment3D, "%s: the aura rides a Meshy bone" % key)
 	var shown := m.get_node("Rig/Torso").get_children().any(

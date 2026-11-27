@@ -12,7 +12,7 @@ extends RefCounted
 ## it on a GPU worker with --fixed-fps 30). Never writes the save.
 
 const TOUR_FRAMES := 450  # 15 s at 30 fps
-const HOOD_TOL := 0.06  # m: the void head's centre from the egg in the hood (the idle clip turns the head a little)
+const HOOD_TOL := 0.03  # m: the void head's centre from the egg in the hood
 
 var bad := 0
 var main: Node
@@ -178,11 +178,12 @@ func _model3d() -> void:
 			),
 			"sex %d wears its 3D model on Meshy's skeleton" % sex
 		)
-		var hollow := locker.model.find_child("Hollow", true, false) as Node3D
+		var hollow := locker.model.find_child("VoidHead", true, false) as MeshInstance3D
 		ok(hollow != null and hollow.is_visible_in_tree(), "sex %d keeps the void head over it" % sex)
-		# (in the model's frame, against the egg as fitted: the idle clip turns the head a little)
-		var at := WardenGlb.model_xf(locker.model, hollow) * (hollow as MeshInstance3D).get_aabb()
-		var want := (EmptyGlb.EGG[sex][0] as Vector3) * (w as Node3D).scale.y
+		# (the skinned shell's mesh sits in the skin's space, at rest: the egg as fitted, a little ahead)
+		var skel := WardenGlb.skeleton(w)
+		var at := WardenGlb.model_xf(locker.model, skel) * hollow.mesh.get_aabb()
+		var want: Vector3 = ((EmptyGlb.EGG[sex][0] as Vector3) + EmptyGlb.EGG_FRONT) * (w as Node3D).scale.y
 		ok(at.get_center().distance_to(want) < HOOD_TOL, "sex %d: the void head sits in the hood" % sex)
 		ok(
 			not locker.model.get_node("Rig/Torso").get_children().any(_body_shows),
