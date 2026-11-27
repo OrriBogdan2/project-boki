@@ -902,7 +902,7 @@ func _bind(action: String, list: Array) -> void:
 		return
 	InputMap.action_erase_events(action)
 	if action == "ultimate" and not MergeForm.enabled():
-		return      # no fusion in the game: the Fusion action holds no key (a saved one is kept for the dev flag)
+		return  # no fusion in the game: the Fusion action holds no key (a saved one is kept for the dev flag)
 	for s in list:
 		var parts := String(s).split(":")
 		if parts.size() != 2:
