@@ -17,7 +17,7 @@ const DT := 1.0 / 60.0          # s per match step (Match.DT)
 const FRAME_EVERY := 30         # match steps between frames, so deferred frees and timers run
 const HOME_FRAMES := 30         # frames on the farm before the counts are read
 const MESH_GROWTH := 60         # cached meshes one more match may add (~420 a match before MeshCache)
-const OBJ_GROWTH := 420         # objects one more match may add (~750 a match before MeshCache; main sat at 396-399 of the old 400, the Test Zone HUD pass adds ~10)
+const OBJ_GROWTH := 400         # objects one more match may add (~750 a match before MeshCache)
 
 var main: Node
 var bad := 0
