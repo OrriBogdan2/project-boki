@@ -73,6 +73,7 @@ var wall: WardenWall
 var opener: WardenOpen
 var head_look: WardenLookAt  # the head (and a share of the neck and chest) turns to the aim ahead of the body
 var drop_pose: WardenDropPose
+var weapon_away := false  # the carry layer has put the weapon part and its glow away
 var carry: WardenCarryLayer  # the home carry (WardenCarry): arms around the Boki, the weapon put away
 var heart_w := 0.0  # how far the Heartspark carry (WardenCarry.hold_mote) holds the mote (as WardenClips.heart_w)
 var torso_bi := -1  # Meshy's bone standing in for the rig's torso (WardenSkeleton.find "hips": Spine02)
@@ -313,10 +314,15 @@ func _carry(s: Dictionary, dt: float) -> void:
 	var act := String(s.get("act", ""))
 	var arms := act in WardenCarry.HOME_ACTS or String(s.get("kmove", "")) == WardenCarry.MOVE
 	carry.step(skel, root, arms, bool(s.get("holster", false)), act == "pack", dt)
-	if props:
-		for n in props.nodes:
+	var away := carry.away_w >= 0.5
+	if away != weapon_away:  # (the sword part and the glow that rides the blade come off together)
+		weapon_away = away
+		for n in props.nodes if props else []:
 			if n.name.begins_with(WardenProps.PREFIX + "hand"):
-				n.visible = carry.away_w < 0.5
+				n.visible = not away
+		for n in root.get_children():
+			if n.name.begins_with("Bloom"):
+				(n as Node3D).visible = not away
 
 
 ## The Heartspark carry on Meshy's arms (WardenClips._heart's layer): the off hand (the Hero's clip data "heart_hand")
