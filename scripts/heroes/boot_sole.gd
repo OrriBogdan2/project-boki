@@ -10,6 +10,7 @@ const META := "boot_sole"  # model meta: [[mesh, arrays, boot ids, weights, used
 ## Reads so far (tooling: --loadin-fps-check counts them, a rider's read is a CPU skin of its boot vertices).
 static var reads := 0
 
+
 ## The lowest boot vertex of `model` (Models.hunter's root) in world space; INF on a body with no .glb skeleton.
 ## The skin is read for the world y only: each bone's pose, bind and the skeleton's transform fold into one
 ## row (y = v . vertex + c) once per call, so a vertex costs a few dot products, not a matrix chain a weight.
@@ -52,9 +53,11 @@ static func low(model: Node3D) -> float:
 			lowest = minf(lowest, y)
 	return lowest
 
+
 static func _bone(sk: Skeleton3D, skin: Skin, bind: int) -> int:
 	var b := skin.get_bind_bone(bind)
 	return b if b >= 0 else sk.find_bone(skin.get_bind_name(bind))
+
 
 ## The skinned meshes of the body and, in each surface, the vertices that are boots.
 static func _boots(sk: Skeleton3D) -> Array:
