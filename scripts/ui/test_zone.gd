@@ -47,6 +47,11 @@ static func fill(v: VBoxContainer, m: Match, again: Callable) -> void:
 	god.button_pressed = Game.god
 	god.toggled.connect(func(on): Game.god = on)
 	v.add_child(god)
+	var tools := CheckButton.new()
+	tools.text = "Practice tools: key line, DPS meter, dodge drill and the bottom bar"
+	tools.button_pressed = m.arena.tools
+	tools.toggled.connect(m.arena.set_tools)
+	v.add_child(tools)
 	var row := UI.hbox(8)
 	row.add_child(UI.button("Reset dummies", m.arena.reset, 160, "back"))
 	row.add_child(
