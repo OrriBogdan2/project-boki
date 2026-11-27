@@ -58,6 +58,7 @@ var _layer: Node2D  # the items' parent, right under Hud.c
 static func plate_offset(h: Hunter) -> float:
 	return arch_offset(h.arch)
 
+
 ## The same for an archetype id (--warden-native-check measures the head under it before any Hunter is built).
 static func arch_offset(arch: String) -> float:
 	return float(Arch.def(arch).get("plate_offset", PLATE_OFFSET))
