@@ -11474,3 +11474,4 @@ READY ext/expedition-perf-1126 e675f07b7c (perf(expedition) round 2: hidden Hunt
 READY ext/testzone-ui-1126 9bf9d0d6416c8001391dc4bbde2928fa721b7933 (Test Zone/Training Grounds HUD: one reserved-rects list = fps counter + minimap + held key line/DPS meter/kit drill; toasts one-pass; --test-zone-check 153/0)
 READY ext/garden-basics-rename-1127 1808344a444 (garden basics: rename a Boki from its card, --rename-check 18/18, draft PR)
 READY ext/garden-basics-mood-bubbles-1127 b19e0d22079 (garden basics: happy+sad mood bubbles, --mood-bubbles-check 15/15, kin-indoors 0 fail, draft PR)
+READY ext/parity-sparkle-meeko-1127 b6fa8ad43d (Sparkle Wirerun charge guard + Meeko carry shield; Motley Snap burst and Sable knock heal stated with checks)
