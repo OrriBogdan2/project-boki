@@ -45,6 +45,7 @@ const VOID_SHADER := preload("res://shaders/void_face.gdshader")
 const AURA_RADIUS := 0.5               # m: how far from the shoulders the specks start
 const AURA_SPECK := 0.024             # m: a speck's radius (the old motes were 0.012: too small to see)
 const HEAD_SHELL := 1.012                 # x the head: the void's shell sits just over the head mesh
+const FIGURE_STEP := 0.02                 # the waist and chest factors are cached at this step (a mesh per step)
 
 ## The old face options (eyes, brows, blush) -> the closest hollow, ghost and glow.
 const HOLLOW_FROM_EYES := [0, 0, 2, 1, 3, 1]
@@ -55,7 +56,7 @@ const EYES_FROM_FACE := [0, 1, 2, 3, 4, 3, 5, 4, 1]
 static func default_look() -> Dictionary:
 	return {"unmasked": true, "gender": 1, "frame": EmptyFrame.clean({}), "void": 0, "line": 0, "hollow": 0, "glow": 0,
 		"ghost": 1, "aura": 1,
-		"shroud": 0, "colour": 1, "marks": [], "features": {}}
+		"shroud": Shrouds.NONE, "colour": 1, "marks": [], "features": {}}
 
 static func random_look() -> Dictionary:
 	var out := default_look()
@@ -77,6 +78,7 @@ static func clean(lk: Dictionary) -> Dictionary:
 	_hollow_from_face(out, src)
 	_shroud_from_outfit(out, src)
 	_frame_from_steps(out, src)
+	Wardrobe.fit(out)
 	for row in ROWS:
 		var lowest := Shrouds.NONE if row[0] == "shroud" else 0
 		out[row[0]] = clampi(_i(out[row[0]], 0), lowest, (row[2] as Array).size() - 1)
@@ -157,6 +159,7 @@ static func migrate(data: Dictionary) -> void:
 	if data.has("look") and data["look"] is Dictionary:
 		data["look"] = clean(data["look"])
 		MasteryLook.refresh(data["look"])
+	Wardrobe.migrate(data)
 
 ## The look the farm, town and house wear: yours, as the Unmasked.
 static func worn() -> Dictionary:
@@ -289,19 +292,23 @@ static func dress(c: Dictionary, lk: Dictionary) -> void:
 	Shrouds.dress(c, u)
 
 ## The Empty's torso: the hunter torso drawn into an hourglass for a woman (a slim waist, a fuller bust
-## and hips) or a broad, square chest for a man.
-static func figure(fem: bool) -> ArrayMesh:
+## and hips) or a broad, square chest for a man; `waist` (x the width there) and `chest` (x the bust's or chest's
+## fullness) are EmptyFrame's sliders, cached at FIGURE_STEP.
+static func figure(fem: bool, waist := 1.0, chest := 1.0) -> ArrayMesh:
+	waist = snappedf(waist, FIGURE_STEP)
+	chest = snappedf(chest, FIGURE_STEP)
 	var fn := func(u: float, v: float) -> Vector3:
 		var p := HeroKit.torso_pt(u, v, fem)
 		var front := clampf(-sin(u * TAU), 0.0, 1.0)
-		var k := 1.0
+		var k := lerpf(1.0, waist, exp(-pow((p.y + 0.07) / 0.12, 2.0)))
 		if fem:
 			k -= 0.21 * exp(-pow((p.y + 0.07) / 0.1, 2.0))
 			k += 0.13 * smoothstep(-0.16, -0.3, p.y)
 			for sx in [-1.0, 1.0]:
 				var d := Vector2(p.x - 0.08 * sx, (p.y - 0.08) * 1.1)
-				p.z -= 0.04 * exp(-d.length_squared() / 0.004) * front
+				p.z -= 0.04 * chest * exp(-d.length_squared() / 0.004) * front
 		else:
 			k += 0.1 * smoothstep(-0.05, 0.22, p.y) - 0.04 * exp(-pow((p.y + 0.1) / 0.12, 2.0))
+			p.z -= 0.03 * (chest - 1.0) * exp(-pow((p.y - 0.12) / 0.1, 2.0)) * front
 		return Vector3(p.x * k, p.y, p.z * lerpf(1.0, k, 0.6))
-	return HeroKit.surf("empty_torso|%s" % fem, fn, 48, 26)
+	return HeroKit.surf("empty_torso|%s|%.2f|%.2f" % [fem, waist, chest], fn, 48, 26)

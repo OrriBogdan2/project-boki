@@ -4,7 +4,8 @@ extends RefCounted
 ## an old Short / Average / Tall look becomes the nearest slider values (twice over changes nothing); the sexes'
 ## shoulder and hip ranges do not overlap; each slider changes the built body; every skin-side part is the void with
 ## an ink line and no hunter's gear is left on the joints; no cloak shows the bare body and still takes an
-## accessory; the creator's Body tab has a slider per frame key and dragging one reshapes the model.
+## accessory (a new Empty starts bare: Wardrobe, --wardrobe-check); the creator's Body tab has a slider per frame
+## key and dragging one reshapes the model.
 
 var bad := 0
 var main: Node
@@ -33,7 +34,7 @@ func run(main_node: Node) -> void:
 func _frame_data() -> void:
 	var rough := EmptyFrame.clean({"height": 7, "build": -3, "shoulders": "x", "hips": 0.123456, "extra": 1})
 	ok(
-		rough == {"height": 1.0, "build": 0.0, "shoulders": 0.5, "hips": 0.123, "head": 0.5},
+		rough == EmptyFrame.clean({}).merged({"height": 1.0, "build": 0.0, "hips": 0.123}, true),
 		"sliders clean to 0..1 at the saved step, a bad or missing one neutral (%s)" % str(rough)
 	)
 	var old := {"unmasked": true, "gender": 0, "height": 2, "build": 0}
@@ -149,8 +150,8 @@ func _no_cloak() -> void:
 		"medium", Data.TEAM_COLORS[0], "", "", {"unmasked": true, "shroud": Shrouds.NONE, "accessory": 2}
 	)
 	ok(scarf.get_node_or_null("Rig/Torso/ShroudBones") != null, "an accessory still goes on a body with no cloak")
-	var cloaked := Models.hunter("medium", Data.TEAM_COLORS[0], "", "", Unmasked.default_look())
-	ok(cloaked.get_node_or_null("Rig/Torso/ShroudBones") != null, "a new look still wears the hooded cloak")
+	var cloaked := Models.hunter("medium", Data.TEAM_COLORS[0], "", "", {"unmasked": true, "shroud": 0})
+	ok(cloaked.get_node_or_null("Rig/Torso/ShroudBones") != null, "a look with a cloak (an older save's) wears it")
 	for n in [bare, scarf, cloaked]:
 		n.free()
 
@@ -175,9 +176,11 @@ func _creator() -> void:
 		float(locker.look["frame"]["shoulders"]) == 1.0 and locker.model != before,
 		"dragging a slider changes the look and rebuilds the model"
 	)
-	locker.pick("shroud", Shrouds.NONE)
+	Save.d["wardrobe"]["owned"] = ["hooded_cloak"]
+	locker.pick(LookLocker.WEAR + "back", "hooded_cloak")
+	locker.pick(LookLocker.WEAR + "back", "")
 	ok(
 		locker.look["shroud"] == Shrouds.NONE and locker.model.get_node_or_null("Rig/Torso/ShroudBones") == null,
-		"picking None for the shroud shows the bare body"
+		"taking the cloak off shows the bare body"
 	)
 	hx.free()

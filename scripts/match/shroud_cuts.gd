@@ -8,6 +8,8 @@ extends RefCounted
 
 const LIMB := {"legs": 0.85, "arms": 0.8}       # cloth that hangs round the body and has to stay round the limbs
 const UPPER := {"arms": 0.85}                   # cloth above the hips
+const SCARF_FAT := Vector2(0.235, 0.14)         # m: the Shawl & Scarf cut's neck roll (ring radius, tube radius)
+const SCARF_SLIM := Vector2(0.15, 0.07)         # m: a scarf worn on its own, snug round the neck
 
 static func cut(t: ShroudTailor, style: int, hood_up: bool) -> void:
 	match style:
@@ -370,26 +372,49 @@ static func _mantle(t: ShroudTailor) -> void:
 	_collar(t, t.m["body"])
 
 # ---------------------------------------------------------------------------------------------- 7 Shawl & Scarf
-## The fat neck and the long tail: a huge rolled scarf as wide as the shoulders right under the head, one end hanging
-## down the chest and the other streaming far out behind, over a pointed shawl and a short tunic.
-static func _shawl(t: ShroudTailor) -> void:
-	var s := t.span
+## A scarf: a roll round the neck (`fat`: the Shawl & Scarf cut's, as wide as the shoulders) and a tail streaming
+## behind on the Scarf spring; the long one also hangs a strip down the front (the cut, and the scarf accessories).
+static func scarf(t: ShroudTailor, long: bool, fat := false) -> void:
+	var size := SCARF_FAT if fat else SCARF_SLIM
 	var roll := func(u: float, v: float) -> Vector3:
 		var th := u * TAU
 		var ph := v * TAU
-		var tube := 0.14 * (1.0 + 0.1 * sin(th * 3.0 + 1.0))
-		var ring := Vector3(cos(th), 0.0, sin(th)) * 0.235
+		var tube := size.y * (1.0 + 0.1 * sin(th * 3.0 + 1.0))
+		var ring := Vector3(cos(th), 0.0, sin(th)) * size.x
 		return ring + Vector3(cos(th), 0.0, sin(th)) * cos(ph) * tube + Vector3.UP * sin(ph) * tube * 0.82
-	t.add("trim", HeroKit.surf("shroud|scarfroll", roll, 26, 9, Callable(), -1.0), {},
+	t.add("trim", HeroKit.surf("shroud|scarfroll|%s" % fat, roll, 26, 9, Callable(), -1.0), {},
 		Transform3D(Basis(Vector3.RIGHT, 0.12), Vector3(0, 0.665, 0.01)))
-	var back := PackedVector3Array([Vector3(0.1, 0.66, 0.28), Vector3(0.16, 0.42, 0.42), Vector3(0.18, 0.12, 0.62),
+	var back := PackedVector3Array([Vector3(0.1, 0.66, 0.26), Vector3(0.15, 0.5, 0.36), Vector3(0.17, 0.32, 0.44),
+		Vector3(0.14, 0.16, 0.5)])
+	if not fat:
+		back[0] = Vector3(0.1, 0.64, 0.2)      # (the tail leaves the slimmer roll at its back)
+	if not long:
+		t.add("trim", _ribbon(t, "scarftail", back, 0.25, 0.2, Vector3.RIGHT, 8), {"bone": ShroudSkin.SCARF,
+			"from": back[0], "reach": 0.5})
+		return
+	back = PackedVector3Array([back[0], Vector3(0.16, 0.42, 0.42), Vector3(0.18, 0.12, 0.62),
 		Vector3(0.1, -0.08, 0.9), Vector3(0.2, -0.16, 1.2), Vector3(0.14, -0.22, 1.5)])
+	if fat:
+		back[0] = Vector3(0.1, 0.66, 0.28)
 	t.add("trim", _ribbon(t, "scarfback", back, 0.25, 0.3, Vector3.RIGHT, 16), {"bone": ShroudSkin.SCARF,
-		"from": Vector3(0.1, 0.66, 0.28), "reach": 1.2})
+		"from": back[0], "reach": 1.2})
 	var front := PackedVector3Array([Vector3(-0.1, 0.6, -0.24), Vector3(-0.13, 0.36, -0.3), Vector3(-0.12, 0.1, -0.31),
 		Vector3(-0.1, -0.14, -0.33)])
 	t.add("trim", _ribbon(t, "scarffront", front, 0.22, 0.26, Vector3.RIGHT, 9), {"legs": 0.4, "bone": ShroudSkin.SKIRT,
 		"from": Vector3(-0.1, 0.5, -0.24), "reach": 0.6, "share": 0.4})
+
+
+## A worn hood (Wardrobe "head") on a cut that has none of its own, or on the bare body: up round the head with its
+## piece's peak and flop, or down on the shoulders.
+static func hood_piece(t: ShroudTailor, p: Dictionary) -> void:
+	_hood_for(t, "wear|" + String(p["id"]), bool(p["up"]), float(p.get("peak", 0.0)), float(p.get("flop", 0.0)))
+
+
+## The fat neck and the long tail: a huge rolled scarf as wide as the shoulders right under the head, one end hanging
+## down the chest and the other streaming far out behind, over a pointed shawl and a short tunic.
+static func _shawl(t: ShroudTailor) -> void:
+	var s := t.span
+	scarf(t, true, true)
 	var shawl := func(u: float, v: float) -> Vector3:
 		var th := PI * 0.5 + (2.0 * u - 1.0) * (PI - 0.42)
 		var aft := pow(maxf(sin(th), 0.0), 2.0)

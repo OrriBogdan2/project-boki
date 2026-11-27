@@ -2,7 +2,7 @@ class_name LookLocker
 extends Node3D
 ## Making yourself (the Empty, Unmasked) in a locker: your model on a turntable in a lit set (LookSet: key, rims
 ## and a backdrop with depth, softly out of focus), four tabs whose camera swings to their own shot (Body and
-## Shroud full length, Hollow a close-up of the head, Glider pulled back to the canopy), every choice as a tile with
+## Wardrobe full length, Hollow a close-up of the head, Glider pulled back to the canopy), every choice as a tile with
 ## a picture of you wearing it (LookThumbs) or a swatch you can hover to try on, a reaction and a flash of light when
 ## you pick one, and gliders in their rarity colours. Drag (or A / D) turns the turntable, the wheel zooms. The hatch
 ## screen opens it (a new game, or Change your look) and saves the locker's look on `finished`.
@@ -12,31 +12,35 @@ extends Node3D
 
 signal finished
 
-const TABS := ["Body", "Hollow", "Shroud", "Glider"]
-const TAB_ICONS := {"Body": "ruler", "Hollow": "eye", "Shroud": "cloak", "Glider": "updraft"}
+const TABS := ["Body", "Hollow", "Wardrobe", "Glider"]
+const TAB_ICONS := {"Body": "ruler", "Hollow": "eye", "Wardrobe": "cloak", "Glider": "updraft"}
 ## The look keys each tab shows, in order (the rows come from Unmasked.ROWS and Shrouds.ROWS; "accent" is the
-## trim's colour, "Match" first, and "shroud" starts with "None"). The Body tab adds the frame sliders. The Glider
+## trim's colour, "Match" first). The Body tab adds the frame sliders; the Wardrobe tab starts with a row of
+## pieces per slot (Wardrobe: earned ones to wear, the rest locked, saying how to earn them). The Glider
 ## tab lists Gliders.LIST instead.
 const TAB_KEYS := {
 	"Body": ["gender", "void", "line"],
 	"Hollow": ["hollow", "glow", "ghost", "aura"],
-	"Shroud": ["shroud", "colour", "accent", "hood", "trim", "accessory"]
+	"Wardrobe": ["colour", "accent", "hood", "trim"]
 }
+const LOCKED_TINT := Color(1, 1, 1, 0.55)  # a piece not earned yet: dimmed, with a lock
+const WEAR := "wear/"  # a pick key's prefix for a Wardrobe slot: "wear/top" = the piece worn as the top
 const AT := Vector3(0.8, 0, 1.6)  # m: the turntable's centre on the hatch dais
 const TOP := 0.07  # m: the turntable's top, where your feet stand
 ## Each tab's shot, from the turntable's centre: [camera, the point it looks at] (m), and its field of view (deg).
-## The look point sits left of you so you stand right of the panel; Body and Shroud show you head to toe (Shroud from
-## a three-quarter angle so the cloak's shape reads), Hollow is a close-up of the head, Glider pulls back to the canopy.
+## The look point sits left of you so you stand right of the panel; Body and Wardrobe show you head to toe
+## (Wardrobe from a three-quarter angle so the cloak's shape reads), Hollow is a close-up of the head, Glider pulls
+## back to the canopy.
 const SHOTS := {
 	"Body": [Vector3(-0.75, 1.2, 3.15), Vector3(-0.6, 0.98, 0), 40.0],
 	"Hollow": [Vector3(-0.4, 1.58, 1.55), Vector3(-0.28, 1.47, 0), 32.0],
-	"Shroud": [Vector3(-1.5, 1.15, 2.85), Vector3(-0.55, 0.92, 0), 40.0],
+	"Wardrobe": [Vector3(-1.5, 1.15, 2.85), Vector3(-0.55, 0.92, 0), 40.0],
 	"Glider": [Vector3(-1.05, 1.75, 4.3), Vector3(-0.85, 1.75, 0), 44.0]
 }
 const CAM_EASE := 5.0  # 1/s: how fast the camera settles on a zoom
 const SWING_S := 0.55  # s: the camera's swing from one tab's shot to the next
 ## The reaction to a pick on each tab: an emote HunterAnim plays (Glider has none: you are hanging in the air).
-const REACT := {"Body": "accept", "Hollow": "laugh", "Shroud": "thanks"}
+const REACT := {"Body": "accept", "Hollow": "laugh", "Wardrobe": "thanks"}
 const REACT_S := 1.4  # s a reaction plays before the idle takes back over
 const LIST_STAGGER := 0.03  # s between each row fading in on a new tab
 const LIST_FADE := 0.18  # s one row takes to fade in
@@ -48,10 +52,14 @@ const THUMB_FRAME := {
 	"hollow": "head",
 	"ghost": "head",
 	"aura": "body",
-	"shroud": "body",
 	"hood": "head",
 	"trim": "bust",
-	"accessory": "bust"
+	WEAR + "head": "head",
+	WEAR + "top": "bust",
+	WEAR + "bottom": "body",
+	WEAR + "feet": "body",
+	WEAR + "back": "body",
+	WEAR + "accessory": "bust"
 }
 const ZOOM_MIN := 0.6  # x the shot's distance, wheel in
 const ZOOM_MAX := 1.35  # ... wheel out
@@ -70,6 +78,8 @@ const TILE := Vector2(94, 116)  # px: a named choice, its picture over its name
 const THUMB := Vector2(86, 80)  # px: the picture on a tile
 const SWATCH := 34.0  # px: a colour choice
 const GLIDER_PIC := Vector2(64, 54)  # px: the picture of you under a glider, on its tile
+
+static var open_on := ""  # the tab the next locker opens on (the farm menu's Wardrobe), then back to Body
 
 var look: Dictionary = {}
 var tab := "Body"
@@ -103,6 +113,11 @@ var _react_t := 99.0  # s since the last pick's reaction began
 static func open(host: Node3D, ui_root: Control, cam: Camera3D, fx: Fx, start: Dictionary) -> LookLocker:
 	var lk := LookLocker.new()
 	lk.look = start.duplicate(true)
+	if not lk.look.has("wear"):
+		lk.look["wear"] = {}  # (a new Empty: bare until it earns clothes)
+	if open_on != "":
+		lk.tab = open_on
+		open_on = ""
 	MasteryLook.refresh(lk.look)  # a Relic's new mark shows up (kept) the first time you look
 	lk._cam = cam
 	lk._fov0 = cam.fov
@@ -113,7 +128,7 @@ static func open(host: Node3D, ui_root: Control, cam: Camera3D, fx: Fx, start: D
 	lk._build_stage()
 	lk._build_panel(ui_root)
 	lk._rebuild_model(lk.look)
-	lk._look_at = AT + SHOTS["Body"][1]
+	lk._look_at = AT + SHOTS[lk.tab][1]
 	return lk
 
 
@@ -162,7 +177,12 @@ func pick(key: String, value: Variant) -> void:
 	if key == "glider":
 		if not Gliders.equip(String(value)):
 			return
-	look[key] = value
+	if key.begins_with(WEAR):
+		if value != "" and not Wardrobe.owned(String(value)):
+			return
+		look = Wardrobe.wearing(look, key.trim_prefix(WEAR), String(value))
+	else:
+		look[key] = value
 	_trial = {}
 	_rebuild_model(look)
 	_fill()
@@ -413,12 +433,14 @@ func _fill() -> void:
 	if tab == "Glider":
 		_glider_grid()
 		return
+	if tab == "Wardrobe":
+		_wear_rows()
 	for key in TAB_KEYS[tab]:
 		var row := _row(String(key))
 		if row.is_empty():
 			continue
 		_list.add_child(UI.section(String(row[1])))
-		_list.add_child(_grid(String(key), row[2], int(look.get(key, 0)), 1 if key in ["accent", "shroud"] else 0))
+		_list.add_child(_grid(String(key), row[2], int(look.get(key, 0)), 1 if key == "accent" else 0))
 		if key == "gender":
 			_frame_rows()
 	if tab == "Body":
@@ -476,8 +498,6 @@ func _row(key: String) -> Array:
 		return ["accent", "Trim colour", ["Match"] + Unmasked.COLOURS]
 	if key == "hood" and not Shrouds.has_hood(int(look["shroud"])):
 		return []
-	if key == "shroud":
-		return ["shroud", "Shroud", ["None"] + Shrouds.LABELS]
 	for row in Unmasked.ROWS + Shrouds.ROWS:
 		if row[0] == key:
 			return row
@@ -528,8 +548,7 @@ func _pic(key: String, val: Variant, framing: String, px: Vector2) -> TextureRec
 	pic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	pic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	pic.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var wearing := look.duplicate(true)
-	wearing[key] = val
+	var wearing := _wearing(key, val)
 	_thumbs.want(wearing, framing, pic, "%s:%s" % [key, str(val)])
 	return pic
 
@@ -558,6 +577,36 @@ func _swatch(key: String, col: Color, on: bool, val: Variant) -> Control:
 	b.mouse_entered.connect(func(): Sfx.play("hover", null, -14.0, 0.05))
 	b.set_meta(UI.SFX_META, true)
 	return b
+
+
+## A row per Wardrobe slot: None, then every piece of it; an earned one goes on at a click, a locked one says how
+## to earn it (you can still hover any to see it on you).
+func _wear_rows() -> void:
+	var slots: Dictionary = Wardrobe.rules()["slots"]
+	for slot in Wardrobe.SLOTS:
+		var key := WEAR + String(slot)
+		var cur := String(look["wear"].get(slot, ""))
+		var flow := HFlowContainer.new()
+		flow.add_theme_constant_override("h_separation", 6)
+		flow.add_theme_constant_override("v_separation", 6)
+		flow.add_child(_wear_tile(key, {"id": "", "name": "None"}, cur == "", true))
+		for p in Wardrobe.pieces(slot):
+			flow.add_child(_wear_tile(key, p, cur == p["id"], Wardrobe.owned(String(p["id"]))))
+		_list.add_child(UI.section(String(slots[slot])))
+		_list.add_child(flow)
+
+
+func _wear_tile(key: String, p: Dictionary, on: bool, owned: bool) -> Control:
+	var id := String(p["id"])
+	var t := _tile(key, String(p["name"]), on, id)
+	if not owned:
+		t.modulate = LOCKED_TINT
+		t.tooltip_text = "%s. Earned: %s" % [p["name"], p["how"]]
+		t.add_child(UI.IconDot.new("lock", UI.FAINT, 14))
+	t.mouse_entered.connect(_try.bind(key, id))
+	t.focus_entered.connect(_try.bind(key, id))
+	t.mouse_exited.connect(_untry)
+	return t
 
 
 ## Every glider skin as a tile in its rarity's colour: owned ones glide on at a click, the rest say how to get
@@ -606,18 +655,27 @@ func _glider_how(gid: String) -> String:
 	return "%d gems at the glider rack" % int(Gliders.get_skin(gid).get("cost", 0))
 
 
-## A random person, still on your glider.
+## A random person, still on your glider and in your clothes.
 func _random() -> void:
 	var lk := Unmasked.random_look()
 	lk["glider"] = look.get("glider", "classic")
+	lk["wear"] = look["wear"].duplicate()
 	lk["features"] = look.get("features", {})  # what your Relics left on you stays as you set it
 	set_look(lk)
 
 
 ## Tries a choice on the model while it's hovered (or focused).
 func _try(key: String, val: Variant) -> void:
-	_trial = look.duplicate(true)
-	_trial[key] = val
+	_trial = _wearing(key, val)
+
+
+## The look with `key` set to `val` (a Wardrobe slot's piece put on).
+func _wearing(key: String, val: Variant) -> Dictionary:
+	if key.begins_with(WEAR):
+		return Wardrobe.wearing(look, key.trim_prefix(WEAR), String(val))
+	var out := look.duplicate(true)
+	out[key] = val
+	return out
 
 
 func _untry() -> void:

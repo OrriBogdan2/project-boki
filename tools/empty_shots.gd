@@ -1,11 +1,12 @@
 extends RefCounted
 ## --empty-shots --shots-dir=<dir>: review screenshots of the Empty creator (Male / Female, three heights,
 ## builds, hollow styles), the Relics viewer and the first-Relic moment (xvfb with a renderer). Add
-## --only=creator|viewer|mask|shroud|feet|gait|farm|eggs|sex to take one group (eggs: the egg pick, then the black
-## mystery egg picked; shroud: the creator from front, side and back,
+## --only=creator|viewer|mask|shroud|feet|gait|farm|eggs|sex|wardrobe to take one group (eggs: the egg pick, then
+## the black mystery egg picked; shroud: the creator from front, side and back,
 ## the aura levels and shroud styles; feet: the soles of three extreme bodies, standing and walking;
 ## farm: the Empty at home from every side and above; gait: three bodies running past floor posts, not run by default;
-## sex: both bodies from the front, three-quarter and side, and in every shroud).
+## sex: both bodies from the front, three-quarter and side, and in every shroud; wardrobe, not run by default: the
+## bare Empty, three slider extremes, earned outfits and the Wardrobe tab).
 
 const HATCH := "res://scripts/ui/hatch.gd"  # the creator scene script every group builds
 const LOOKS := {
@@ -27,6 +28,21 @@ const FEET_WALK_SHOTS := 3   # walking shots...
 const FEET_EVERY := 7        # ...this many frames apart: about a third of a step each at FEET_WALK
 const GAIT_SHOTS := 8        # frames of the gait strip
 const GAIT_EVERY := 4        # frames (60 fps) between its shots: 8 x 4 = half a second, about two strides
+## The wardrobe group's looks (Wardrobe ids by slot; the frame's sliders at their ends).
+const LOW := {"waist": 0.0, "chest": 0.0, "arms": 0.0, "legs": 0.0, "tone": 0.0}
+const HIGH := {"waist": 1.0, "chest": 1.0, "arms": 1.0, "legs": 1.0, "tone": 1.0}
+const MIXED := {"waist": 0.0, "chest": 1.0, "arms": 1.0, "legs": 1.0, "tone": 1.0, "height": 1.0}
+const FIELD := {"top": "work_shirt", "bottom": "field_shorts", "feet": "field_boots", "head": "field_hood",
+	"accessory": "long_scarf"}
+const CLOAKED := {"top": "long_shirt", "bottom": "plain_trousers", "feet": "wrapped_soles", "back": "hooded_cloak",
+	"accessory": "belt_pouches"}
+const WARDROBE_LOOKS := {
+	"wardrobe_bare_male": {}, "wardrobe_bare_female": {"gender": 0},
+	"wardrobe_sliders_low_female": {"gender": 0, "frame": LOW}, "wardrobe_sliders_high_male": {"frame": HIGH},
+	"wardrobe_sliders_mixed_female": {"gender": 0, "frame": MIXED},
+	"wardrobe_first_day": {"wear": {"top": "plain_tunic", "bottom": "plain_trousers"}},
+	"wardrobe_field_outfit_female": {"gender": 0, "wear": FIELD}, "wardrobe_cloaked": {"wear": CLOAKED},
+}
 
 var dir := ""
 var only := ""
@@ -62,6 +78,8 @@ func run(main_node: Node) -> void:
 		await _eggs(tree)
 	if only in ["", "sex"]:
 		await _sexes(tree)
+	if only == "wardrobe":
+		await _wardrobe(tree)
 	print("EMPTYSHOTS done in %s" % dir)
 	tree.quit(0)
 
@@ -187,6 +205,32 @@ func _shroud(tree: SceneTree) -> void:
 		hx.locker.set_look(lk)
 		hx.locker.set_yaw(PI * 0.8)
 		await _shot(tree, "creator_style_%s" % String(Unmasked.SHROUDS[style]).to_lower(), 0.8)
+	hx.queue_free()
+	await tree.process_frame
+
+## The creator's Body shot of each WARDROBE_LOOKS look (front and three-quarter), then the Wardrobe tab with the
+## first day's pieces earned.
+func _wardrobe(tree: SceneTree) -> void:
+	_fresh()
+	var hx = load(HATCH).new()
+	hx.edit_only = true
+	main.add_child(hx)
+	await _shot(tree, "creator_warmup", 2.5)
+	var views := {"front": PI, "three_quarter": PI * 0.8}
+	for file in WARDROBE_LOOKS:
+		var lk := Unmasked.default_look()
+		var want: Dictionary = WARDROBE_LOOKS[file]
+		lk.merge(want, true)
+		lk["frame"] = EmptyFrame.clean(want.get("frame", {}))
+		lk["wear"] = want.get("wear", {})
+		hx.locker.set_look(lk)
+		for view in views:
+			hx.locker.set_yaw(views[view])
+			await _shot(tree, "%s_%s" % [file, view], 0.8)
+	Save.d["wardrobe"]["owned"] = ["plain_tunic", "plain_trousers", "hooded_cloak"]
+	hx.locker.set_look(Wardrobe.wearing(Unmasked.default_look(), "top", "plain_tunic"))
+	hx.locker.show_tab("Wardrobe")
+	await _shot(tree, "wardrobe_tab", 1.2)
 	hx.queue_free()
 	await tree.process_frame
 

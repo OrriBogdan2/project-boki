@@ -434,6 +434,15 @@ func open_more() -> void:
 				close()
 				Game.goto("hatch", {"create": true})
 		)
+		_menu_item(
+			v,
+			"Wardrobe",
+			"cloak",
+			func():
+				close()
+				LookLocker.open_on = "Wardrobe"
+				Game.goto("hatch", {"create": true})
+		)
 	if ctx == "home" and scr:
 		_menu_item(
 			v,

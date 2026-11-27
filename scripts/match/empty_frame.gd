@@ -1,10 +1,11 @@
 class_name EmptyFrame
 extends RefCounted
-## The Empty's body frame: five sliders (height, build, shoulders, hips, head size), each 0..1 and mapped onto the
-## range its sex allows (content/rules/empty_creator.json "frame"). Applied to the hunter rig by shape().
+## The Empty's body frame: ten sliders (height, build, shoulders, hips, head size, waist, chest, arms, leg length,
+## muscle tone), each 0..1 and mapped onto the range its sex allows (content/rules/empty_creator.json "frame").
+## Applied to the hunter rig by shape() (leg length and build by into(), before the rig is built).
 
 const RULES_PATH := "res://content/rules/empty_creator.json"
-const KEYS := ["height", "build", "shoulders", "hips", "head"]
+const KEYS := ["height", "build", "shoulders", "hips", "head", "waist", "chest", "arms", "legs", "tone"]
 const NEUTRAL := 0.5
 const STEP := 0.001  # sliders are saved to this step, so a save reads back the same body
 const BULK_PER_WIDTH := 0.85  # a wider build also thickens the limbs and torso, this much as fast
@@ -49,6 +50,12 @@ static func factor(lk: Dictionary, key: String) -> float:
 	return lerpf(float(span[0]), float(span[1]), float(clean(lk.get("frame"))[key]))
 
 
+## The frame's part of the hunter rig's params (Models.hunter): the build's width and the legs' length.
+static func into(lk: Dictionary, u: Dictionary) -> void:
+	lk["build"] = factor(u, "build")
+	lk["limbs"] = factor(u, "legs")
+
+
 ## How much thicker the limbs and torso are (the race bulk Models.hunter reads).
 static func bulk(lk: Dictionary) -> float:
 	return 1.0 + (factor(lk, "build") - 1.0) * BULK_PER_WIDTH
@@ -64,12 +71,14 @@ static func shape(c: Dictionary, lk: Dictionary) -> void:
 	var shoulders := factor(lk, "shoulders")
 	var chest := lerpf(1.0, shoulders, CHEST_PER_SHOULDER)
 	var hips := factor(lk, "hips")
+	var arms := Vector3(factor(lk, "arms"), 1.0, factor(lk, "arms"))
+	var tone := Vector3(factor(lk, "tone"), 1.0, factor(lk, "tone"))
 	for ch in torso.get_children():
 		var mi := ch as MeshInstance3D
 		if mi == null:
 			continue
 		if mi.mesh == HeroKit.torso(fem):
-			mi.mesh = Unmasked.figure(fem)
+			mi.mesh = Unmasked.figure(fem, factor(lk, "waist"), factor(lk, "chest"))
 			mi.scale.x *= chest
 		elif mi.material_override == c["m"]["pants"] and is_equal_approx(mi.position.y, HIPS_Y):
 			mi.scale.x *= hips
@@ -77,10 +86,19 @@ static func shape(c: Dictionary, lk: Dictionary) -> void:
 	for sd in ["L", "R"]:
 		var piv := (c["arms"][sd] as Array)[0] as Node3D
 		piv.position.x *= shoulders
-		piv.scale = ARM_F if fem else ARM_M
+		_thicken(piv, (ARM_F if fem else ARM_M) * arms * tone)  # (on the meshes: HunterAnim sets the joints' bases)
+		_thicken((c["arms"][sd] as Array)[1], (ARM_F if fem else ARM_M) * arms)
 		(c["p" + sd.to_lower()] as Node3D).position.x *= shoulders
 	var legs := torso.get_parent().get_node("Legs")
 	for nm in ["LegL", "LegR"]:
 		var leg := legs.get_node(nm) as Node3D
 		leg.position.x *= hips
 		leg.scale = LEG_F if fem else Vector3.ONE
+		_thicken(leg, tone)
+
+
+## The parts on a joint (an upper arm, a forearm, a thigh) this much thicker.
+static func _thicken(joint: Node3D, k: Vector3) -> void:
+	for ch in joint.get_children():
+		if ch is MeshInstance3D:
+			(ch as MeshInstance3D).scale *= k

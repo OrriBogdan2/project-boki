@@ -143,8 +143,8 @@ func _model(main: Node) -> void:
 		names[g] = true
 	ok(Unmasked.GHOSTS.size() >= 10 and names.size() == Unmasked.GHOSTS.size() and drawn == names.size(),
 		"%d distinct ghost face marks, each one reaching the void shader" % drawn)
-	var woman := _build({"unmasked": true, "gender": 0})
-	var man := _build({"unmasked": true, "gender": 1})
+	var woman := _build({"unmasked": true, "gender": 0, "shroud": 0})  # (the Hooded Cloak: a new Empty is bare)
+	var man := _build({"unmasked": true, "gender": 1, "shroud": 0})
 	var w_sh := (woman.get_node("Rig/Torso/ArmLPivot") as Node3D).position.x
 	var m_sh := (man.get_node("Rig/Torso/ArmLPivot") as Node3D).position.x
 	var hem := -0.35       # m, torso space: just above the cloak's hem

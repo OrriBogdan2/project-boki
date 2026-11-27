@@ -3,7 +3,7 @@ extends RefCounted
 ## icons; each tab's camera shot (Hollow closes in on the head, Glider pulls back); hovering a choice tries it on
 ## the model without keeping it; the set (LookSet: key, glow rim and kicker, a curved wall and stones behind you) and
 ## every named choice's tile picture slot (LookThumbs) for any model; a tab's rows fade in while the camera swings
-## (Shroud full length from three-quarters, its own field of view); a pick's reaction (an emote) and the rim's
+## (Wardrobe full length from three-quarters, its own field of view); a pick's reaction (an emote) and the rim's
 ## flash; picking one keeps it, pops the model and flashes the turntable; the hood row only on a cut with a hood;
 ## the dais, satchel and lantern are the Meshy pieces; glider tiles in their rarity colours, a locked one never
 ## equips; the wheel zooms within its limits and a drag turns the turntable; Looks good saves the look and takes the
@@ -12,6 +12,7 @@ extends RefCounted
 ## it on a GPU worker with --fixed-fps 30). Never writes the save.
 
 const TOUR_FRAMES := 450  # 15 s at 30 fps
+const BACK := "wear/back:"  # the Wardrobe tab's cloak tiles (LookLocker.WEAR + slot)
 
 var bad := 0
 var main: Node
@@ -31,6 +32,9 @@ func run(main_node: Node, mode: String) -> void:
 	Save.d = Save.fresh()
 	Save.d["tutorial"]["intro"] = true
 	Save.d["look"] = Unmasked.default_look()
+	Save.d["wardrobe"]["owned"] = (Wardrobe.rules()["pieces"] as Array).map(
+		func(p: Dictionary) -> String: return p["id"]
+	)
 	hx = load("res://scripts/ui/hatch.gd").new()
 	hx.edit_only = true
 	main.add_child(hx)
@@ -97,7 +101,7 @@ func _tabs() -> void:
 		locker.model.position.y > LookLocker.TOP and locker.model.get_node("Rig/Torso/Glider").visible,
 		"under the open glider you hang over the turntable"
 	)
-	locker.show_tab("Shroud")
+	locker.show_tab("Wardrobe")
 	await _frames(2)
 
 
@@ -115,10 +119,10 @@ func _presentation() -> void:
 		stones.size() == LookSet.STONES.size() and lset.find_children("*", "CPUParticles3D", false, false).size() == 1,
 		"a backdrop with depth: standing stones behind you and motes drifting up"
 	)
-	var tiles := _opts("shroud:")
+	var tiles := _opts(BACK)
 	ok(
 		tiles.all(func(t): return t.find_child("Pic", true, false) is TextureRect),
-		"every named choice has a picture of you wearing it (%d shroud tiles)" % tiles.size()
+		"every named choice has a picture of you wearing it (%d cloak tiles)" % tiles.size()
 	)
 	ok(
 		LookThumbs.FRAMES.has(String(LookLocker.THUMB_FRAME["ghost"])) and LookLocker.THUMB_FRAME["ghost"] == "head",
@@ -131,7 +135,7 @@ func _presentation() -> void:
 	var head := locker.model.global_position + Vector3(0, 1.5, 0)
 	ok(
 		locker._cam.global_position.distance_to(head) > 2.4 and is_equal_approx(locker._cam.fov, 40.0),
-		"Shroud frames you head to toe"
+		"Wardrobe frames you head to toe"
 	)
 	var rim_e: float = lset._rim.light_energy
 	locker.pick("colour", 2)
@@ -140,33 +144,34 @@ func _presentation() -> void:
 
 
 func _try_and_pick() -> void:
-	var tile := _opt("shroud:3")
+	var tile := _opt(BACK + "long_coat")
 	tile.mouse_entered.emit()
 	await _frames(4)
-	var tried := locker.look.duplicate(true)
-	tried["shroud"] = 3
+	var tried := Wardrobe.wearing(locker.look, "back", "long_coat")
 	ok(
-		locker._shown == tried.hash() and int(locker.look["shroud"]) == 0,
+		locker._shown == tried.hash() and int(locker.look["shroud"]) == Shrouds.NONE,
 		"hovering Long Coat tries it on, not keeping it"
 	)
 	tile.mouse_exited.emit()
 	await _frames(4)
 	ok(locker._shown == locker.look.hash(), "leaving the tile puts your own shroud back")
 	var radial: int = hx.fx.radial
-	locker.pick("shroud", 3)
+	locker.pick(LookLocker.WEAR + "back", "long_coat")
 	await _frames(3)
 	ok(int(locker.look["shroud"]) == 3 and locker.model.scale.x > 1.0, "picking it keeps it and the model pops")
 	ok(hx.fx.radial >= radial + 2, "the turntable flashes a ring and a burst")
-	ok(_opt("shroud:3").get_theme_stylebox("panel") != _opt("shroud:0").get_theme_stylebox("panel"), "the pick is lit")
+	ok(
+		_opt(BACK + "long_coat").get_theme_stylebox("panel") != _opt(BACK + "wrap").get_theme_stylebox("panel"),
+		"the pick is lit"
+	)
 
 
 func _hood() -> void:
-	locker.pick("shroud", 1)
+	locker.pick(LookLocker.WEAR + "back", "wrap")
 	ok(_opts("hood:").is_empty(), "a cut without a hood shows no hood row")
-	locker.pick("shroud", 3)
-	locker.pick("shroud", 0)
+	locker.pick(LookLocker.WEAR + "back", "hooded_cloak")
 	ok(_opts("hood:").size() == 2, "a hooded cut shows it")
-	locker.pick("shroud", 3)
+	locker.pick(LookLocker.WEAR + "back", "long_coat")
 	ok(
 		_opts("accent:").size() == Unmasked.COLOURS.size() + 1 and _opt("accent:-1") != null,
 		"trim colour: Match, then the colours"
@@ -182,8 +187,8 @@ func _props() -> void:
 		locker._turn.get_children().any(func(c): return c is MeshInstance3D and c.mesh == dais),
 		"the turntable is the carved dais (art/look/dais.glb)"
 	)
-	for a in [[2, "satchel"], [4, "lantern"]]:
-		locker.pick("accessory", a[0])
+	for a in [["satchel_strap", "satchel"], ["lantern_hook", "lantern"]]:
+		locker.pick(LookLocker.WEAR + "accessory", a[0])
 		var prop := LookProps.mesh(String(a[1]))
 		var worn := locker.model.find_child(LookProps.NODE, true, false) as MeshInstance3D
 		var leather := locker.model.find_children("*", "MeshInstance3D", true, false).filter(
@@ -198,7 +203,7 @@ func _props() -> void:
 			),
 			"the %s is worn as its vertex-painted Meshy piece, on a material the body already wears" % a[1]
 		)
-	locker.pick("accessory", 0)
+	locker.pick(LookLocker.WEAR + "accessory", "")
 
 
 func _gliders() -> void:
@@ -280,13 +285,13 @@ func _tour() -> void:
 		145: ["try", "glow:3"],
 		160: ["pick", "glow", 3],
 		180: ["pick", "hollow", 2],
-		205: ["tab", "Shroud"],
-		225: ["try", "shroud:4"],
-		238: ["try", "shroud:8"],
-		250: ["pick", "shroud", 1],
+		205: ["tab", "Wardrobe"],
+		225: ["try", BACK + "poncho"],
+		238: ["try", BACK + "cowl_feathers"],
+		250: ["pick", LookLocker.WEAR + "back", "wrap"],
 		260: ["pick", "colour", 5],
-		270: ["pick", "accessory", 2],
-		305: ["pick", "accessory", 4],
+		270: ["pick", LookLocker.WEAR + "accessory", "satchel_strap"],
+		305: ["pick", LookLocker.WEAR + "accessory", "lantern_hook"],
 		340: ["yaw", 0.0],
 		341: ["tab", "Glider"],
 		352: ["try", "glider:ember"],
