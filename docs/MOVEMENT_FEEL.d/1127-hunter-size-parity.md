@@ -7,9 +7,11 @@ has none: the owner made him different on purpose. Visual only: hit radius, hurt
 and ranges keep their size (the reference's own hurtbox is one shared 0.43 m x 1.76 m shape whatever the model).
 
 Method: crown (top of the skull, hair, horns, ears and props left out; `--hunter-size-sheet`) over the feet in metres
-at the match camera, against the reference model's height. The reference only gives the unposed model height with
-its weapons in, no skull height: where a weapon or hat stands above its head the true skull is lower than that number,
-so the scale is an upper bound there. `match_k` = reference height / our crown height at k = 1.
+at the match camera, against the reference model's body height with its weapons and loose props taken off (bind pose;
+the 11-26 lineup measure). The reference's listed model height keeps the weapons in (Cinder's 1.61 m is 1.17 m of
+body, Meeko's 2.34 m is 1.80 m), so that number is not used. The reference body still keeps hair and hats, ours does
+not: where a hat or tall hair tops the reference head (Motley) the scale is an upper bound.
+`match_k` = reference body height / our crown height at k = 1.
 
 Camera: pitch 66 deg both sides; the reference lens is 59 deg horizontal (35.3 vertical at 16:9), arm 30.2 m at its
 widest; ours is 32 deg vertical at 23 m x 1.4572 = 33.5 m, 34.2 m of ground across on both sides. Same px per m, so
