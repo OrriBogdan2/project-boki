@@ -7,28 +7,66 @@ extends RefCounted
 ## meshes whose names say weapon, prop or similar are left out), plus the head-top anchor when the model has one.
 ## --list-meshes prints every mesh with its own skinned top. Needs a renderer.
 
-const ORDER := ["archer", "juggernaut", "gunslinger", "bulwark", "rimewright", "ashwick", "dolm", "mage",
-	"dredge", "tender", "thief", "ostra", "gil"]
-const GAP := 2.0              # m between Hunters (centre to centre)
-const CAM_PITCH := 66.0       # degrees: the default match camera (CamRig STYLES "default")
+const ORDER := [
+	"archer",
+	"juggernaut",
+	"gunslinger",
+	"bulwark",
+	"rimewright",
+	"ashwick",
+	"dolm",
+	"mage",
+	"dredge",
+	"tender",
+	"thief",
+	"ostra",
+	"gil"
+]
+const GAP := 2.0  # m between Hunters (centre to centre)
+const CAM_PITCH := 66.0  # degrees: the default match camera (CamRig STYLES "default")
 const CAM_DIST := 23.0
 const CAM_FOV := 32.0
 const SHOT_W := 2560
 const SHOT_H := 720
-const PROP_WORDS := ["weapon", "prop", "sword", "hammer", "bow", "staff", "gun", "pistol", "shield", "axe", "blade",
-	"orb", "wand", "torch", "lance", "scythe", "dagger", "knife", "cannon", "tool", "lantern", "book", "trowel"]
+const PROP_WORDS := [
+	"weapon",
+	"prop",
+	"sword",
+	"hammer",
+	"bow",
+	"staff",
+	"gun",
+	"pistol",
+	"shield",
+	"axe",
+	"blade",
+	"orb",
+	"wand",
+	"torch",
+	"lance",
+	"scythe",
+	"dagger",
+	"knife",
+	"cannon",
+	"tool",
+	"lantern",
+	"book",
+	"trowel"
+]
 
 var holder: Node3D
 var cam: Camera3D
 var tree: SceneTree
 var heroes: Array = []
 
+
 func run(main: Node) -> void:
 	tree = main.get_tree()
 	var out := ""
 	var list_meshes := OS.get_cmdline_user_args().has("--list-meshes")
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--shots-dir="): out = a.substr(12)
+		if a.begins_with("--shots-dir="):
+			out = a.substr(12)
 	if out == "":
 		out = "user://lineup"
 	DirAccess.make_dir_recursive_absolute(out)
@@ -41,7 +79,7 @@ func run(main: Node) -> void:
 		var id: String = ORDER[i]
 		var h := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 		h.set_meta("anim_seed", 1)
-		h.rotation.y = PI                    # (the export faces -Z: PI turns each to face the camera)
+		h.rotation.y = PI  # (the export faces -Z: PI turns each to face the camera)
 		h.position = Vector3((i - (ORDER.size() - 1) * 0.5) * GAP, 0, 0)
 		holder.add_child(h)
 		var ring := h.get_node_or_null("TeamRing") as Node3D
@@ -49,7 +87,7 @@ func run(main: Node) -> void:
 			ring.visible = false
 		heroes.append(h)
 	for k in 30:
-		await tree.process_frame       # (past the title's fade, and the models settle)
+		await tree.process_frame  # (past the title's fade, and the models settle)
 	var syncs: Array = []
 	for h in heroes:
 		var sync := (h as Node).get_node_or_null("Warden/Sync")
@@ -60,7 +98,7 @@ func run(main: Node) -> void:
 			if clips:
 				clips.force = {"clip": "idle", "t": 0.0}
 	await _play(syncs, 12, 0.0)
-	await _play(syncs, 1, 1.1)           # (a held idle frame, a little past the first)
+	await _play(syncs, 1, 1.1)  # (a held idle frame, a little past the first)
 	# the table
 	print("LINEUP_TABLE id | all_top_m | body_top_m | head_anchor_m | width_m | scale_y | meshes")
 	for i in heroes.size():
@@ -69,8 +107,12 @@ func run(main: Node) -> void:
 		var body := _skinned_top(h, true, false, "")
 		var anchor := WardenGlb.anchor(h, "anchor_head_top")
 		var head := "%.2f" % (anchor.global_position.y - h.global_position.y) if anchor else "-"
-		print("LINEUP_ROW %s | %.2f | %.2f | %s | %.2f | %.3f | %d" % [ORDER[i], all.y, body.y, head, all.x,
-			h.scale.y, int(all.z)])
+		print(
+			(
+				"LINEUP_ROW %s | %.2f | %.2f | %s | %.2f | %.3f | %d"
+				% [ORDER[i], all.y, body.y, head, all.x, h.scale.y, int(all.z)]
+			)
+		)
 	# 1. front: straight on, the whole row
 	var span := (ORDER.size() - 1) * GAP + 3.0
 	cam.fov = 30.0
@@ -99,6 +141,7 @@ func run(main: Node) -> void:
 	print("LINEUP_SHOT_DONE")
 	tree.quit()
 
+
 ## Steps every Hunter's clip sync n times (dt seconds, 1/30 when 0), holding idle.
 func _play(syncs: Array, n: int, t: float) -> void:
 	for k in n:
@@ -110,17 +153,20 @@ func _play(syncs: Array, n: int, t: float) -> void:
 				(s as Node).call("_process", 1.0 / 30.0)
 		await tree.process_frame
 
+
 func _grab(path: String) -> void:
 	await RenderingServer.frame_post_draw
 	var img := tree.root.get_texture().get_image()
 	img.save_png(path)
 
+
 func _stage(main: Node) -> void:
 	holder = Node3D.new()
 	main.add_child(holder)
 	var env := WorldEnvironment.new()
-	env.environment = Look.environment({"top": Color("2a4a8a"), "mid": Color("6a8ad0"), "horizon": Color("ffd2a8"),
-		"stars": 0.0})
+	env.environment = Look.environment(
+		{"top": Color("2a4a8a"), "mid": Color("6a8ad0"), "horizon": Color("ffd2a8"), "stars": 0.0}
+	)
 	holder.add_child(env)
 	Look.lights(holder, Color("fff1dc"), 1.0, Vector3(-50, 145, 0), 40.0)
 	var ground := MeshInstance3D.new()
@@ -133,6 +179,7 @@ func _stage(main: Node) -> void:
 	cam = Camera3D.new()
 	holder.add_child(cam)
 	cam.make_current()
+
 
 ## A 1 m grid on the ground (thin lines, every 5th darker), 40 m x 8 m around the row.
 func _grid() -> void:
@@ -170,6 +217,7 @@ func _grid() -> void:
 	rmi.mesh = rim
 	holder.add_child(rmi)
 
+
 ## [width (m), top y above the Hunter's feet (m), mesh count] of the visible meshes' skinned bounds; body_only leaves
 ## out meshes whose node name says weapon or prop.
 func _skinned_top(h: Node3D, body_only: bool, list: bool, id: String) -> Vector3:
@@ -202,6 +250,7 @@ func _skinned_top(h: Node3D, body_only: bool, list: bool, id: String) -> Vector3
 	if n == 0:
 		return Vector3.ZERO
 	return Vector3(hi.x - lo.x, hi.y - h.global_position.y, n)
+
 
 ## A mesh's world bounds as drawn: skinned meshes through their skeleton's current pose (a skinned AABB read off the
 ## mesh would be the rest pose), others through their transform.
