@@ -67,10 +67,7 @@ func tender() -> void:
 	held = _pick(m, pc, ally, kit)
 	pc.hurt(_breaker(pc), tgt, {"src": "burn"})
 	sc.step(m, 0.1)
-	ok(
-		"mm carry: a burn tick past the shield drops them",
-		held and not CareUtil.is_carried(ally) and kit.lock_t > 3.8
-	)
+	ok("mm carry: a burn tick past the shield drops them", held and not CareUtil.is_carried(ally) and kit.lock_t > 3.8)
 	held = _pick(m, pc, ally, kit)
 	pc.stun_t = 0.5
 	sc.step(m, 0.1)
