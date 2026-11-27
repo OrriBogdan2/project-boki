@@ -87,7 +87,7 @@
 		"grip": {"hips": {"part": [-0.001, 0.412, 0.337], "bone": [0.001, 0.021, -0.161]},
 			"hand.R": {"part": [-0.12, -0.057, 0.02], "bone": [0.003, 0.12, 0.03], "turn": [2.3528, -0.0066, 0.9028]}},
 		"anchors": {"anchor_head_top": "head_end", "anchor_chest": "Spine02", "anchor_gun_R": "RightHand"},
-		"plants": {"walk": {"L": [0.3], "R": [0.683]}, "run": {"L": [0.083], "R": [0.417]}, "crouch": {"L": [0.133], "R": [0.717]}},
+		"plants": {"walk": {"L": [0.3], "R": [0.683]}, "run": {"L": [0.083], "R": [0.433]}, "crouch": {"L": [0.133], "R": [0.717]}},
 		"clips": {"idle": "Idle", "walk": "walk", "run": "run", "jump": "Jump_Run", "attack": "Attack", "crouch": "Crouch_Walk_with_Torch"},
 		"kmoves": {"gil_dive": {"clip": "run", "hold_from": 0.0, "rate": 1.4, "body": true}, "gil_surface": {"clip": "Jump_Run", "rate": 1.6, "body": true},
 			"gil_spin": {"clip": "Idle", "hold_from": 0.0, "body": true}},
