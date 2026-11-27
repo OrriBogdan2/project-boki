@@ -124,4 +124,6 @@ func _vex_recoil(m: Match, tap: bool, delay: float) -> void:
 	h.inp["jump"] = false
 	h.inp["glide"] = false
 	h.inp["glide_btn"] = false
-	ok(recoil and open >= 0 and float(open) * Match.DT <= OPEN_S, "gunslinger E recoil then %s glide %.0f ms in: opened at +%d" % ["tap" if tap else "hold", delay * 1000.0, open])
+	var how := "tap" if tap else "hold"
+	var msg := "gunslinger E recoil then %s glide %.0f ms in: opened at +%d" % [how, delay * 1000.0, open]
+	ok(recoil and open >= 0 and float(open) * Match.DT <= OPEN_S, msg)

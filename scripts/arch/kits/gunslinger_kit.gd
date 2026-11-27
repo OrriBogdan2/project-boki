@@ -852,7 +852,8 @@ func _fire_needle() -> void:
 	vfx("e_fire", palm, Vector2(to.x, to.z).normalized(), {"len": Vector2(to.x, to.z).length(), "r": beam_width()})
 	h.impulse(-d * float(ed.get("recoil", 6.0)))  # the recoil shoves her back a step
 	h.knock_t = 0.0  # (no KNOCKED state: it cannot open the glider)
-	h.kb_t = -9.0  # her own recoil is no hit: a glide press cancels it at once (0180, owner: glide never dropped after attacks)
+	# her own recoil is no hit: a glide press cancels it at once (0180, owner: glide never dropped after attacks)
+	h.kb_t = -9.0
 	commit_end = float(m.time) + E_RECOVER
 	var hits := 0
 	var dmg0: float = float(ed["dmg"]) * power("kin")
