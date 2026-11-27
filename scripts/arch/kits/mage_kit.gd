@@ -72,6 +72,18 @@ func _hide_fresh_round() -> void:
 			Oomph.hide_orb(shots[i])
 			return
 
+## The Wirerun's charge guards her like its streak: hits land at `guard` of their damage and knock, and
+## _tick_wire keeps shots passing through her. A stun still cuts the charge.
+func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array:
+	if wire.is_empty():
+		return [dmg, o]
+	var g := float(dash_def()["guard"])
+	o = o.duplicate()
+	for k in ["kb", "lift"]:
+		if o.has(k):
+			o[k] = o[k] * g
+	return [dmg * g, o]
+
 ## A rival went down: she pops her gum at them.
 func on_knock(_t: Hunter, mine: bool) -> void:
 	if mine:
@@ -421,6 +433,7 @@ func _tick_wire(dt: float) -> void:
 		_end_wire(false)
 		h.do_jump()
 		return
+	h.phase_t = maxf(h.phase_t, dt * 2.0)      # shots pass through her while she charges, as in the streak
 	# no control of your own while you hold it: the keys do nothing, momentum drifts you, height holds
 	h.inp["move"] = Vector2.ZERO
 	h.inp["jump"] = false

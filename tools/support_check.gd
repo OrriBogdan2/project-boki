@@ -11,10 +11,13 @@ var n := 0
 var mode := "all"
 const DT := 1.0 / 60.0
 
+
 func ok(name: String, cond: bool, info := "") -> void:
 	n += 1
 	print("SUPPORT %-46s %s  %s" % [name, "PASS" if cond else "FAIL", info])
-	if not cond: fails += 1
+	if not cond:
+		fails += 1
+
 
 ## A flat strip, the player as `arch` on team T, an ally (bot, idle) 3m behind, a rival dummy `dist` ahead.
 ## kin_species gives the player that Boki (the merge checks); otherwise the player has none.
@@ -22,60 +25,99 @@ func setup(arch: String, dist := 6.0, kin_species := "") -> Array:
 	var cls := Arch.weight(arch)
 	var m := Match.new()
 	main.add_child(m)
-	var opts := {"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true,
-		"cls": cls, "arch": arch, "weapon": Arch.signature(arch)}
+	var opts := {
+		"training": true,
+		"teams": 1,
+		"squad": 1,
+		"tier": 0,
+		"length": 1e9,
+		"seed": 4242,
+		"no_drop": true,
+		"cls": cls,
+		"arch": arch,
+		"weapon": Arch.signature(arch)
+	}
 	if kin_species != "":
 		opts["demo_kin"] = kin_species
 	m.start(opts)
 	m.set_process(false)
 	var P: Hunter = m.player
-	for mb in m.mobs: mb.queue_free()
+	for mb in m.mobs:
+		mb.queue_free()
 	m.mobs.clear()
 	var W = m.world
-	var hx := int(floor(P.pos.x)); var hz := int(floor(P.pos.z))
+	var hx := int(floor(P.pos.x))
+	var hz := int(floor(P.pos.z))
 	var hi: int = W.idx(hx, hz)
 	var lv: int = int(W.level[hi]) if W.kind[hi] != World.T_VOID else 0
 	for dz in range(-10, 11):
 		for dx in range(-12, 26):
-			if not W.inb(hx + dx, hz + dz): continue
+			if not W.inb(hx + dx, hz + dz):
+				continue
 			var i: int = W.idx(hx + dx, hz + dz)
-			W.kind[i] = World.T_GROUND; W.level[i] = lv; W.island[i] = W.island[hi]
-			W.stairs.erase(i); W.walls.erase(i); W.props.erase(i); W.bush.erase(i)
-	for b in m.breaks: b["dead"] = true      # crates and kegs off the strip too: shots here are about the kit
+			W.kind[i] = World.T_GROUND
+			W.level[i] = lv
+			W.island[i] = W.island[hi]
+			W.stairs.erase(i)
+			W.walls.erase(i)
+			W.props.erase(i)
+			W.bush.erase(i)
+	for b in m.breaks:
+		b["dead"] = true  # crates and kegs off the strip too: shots here are about the kit
 	var home := Vector3(hx + 0.5, lv * World.LEVEL, hz + 0.5)
-	P.teleport(home); P.vel = Vector3.ZERO
+	P.teleport(home)
+	P.vel = Vector3.ZERO
 	P.set_arch(arch)
 	P.unlock_all()
 	P.lvl = 6
 	P.dashes = P.max_dashes()
 	if P.kin and kin_species == "":
 		var o: Kin = P.kin
-		o.dead = true; m.kins.erase(o); o.queue_free(); P.kin = null
-	var A: Hunter = m.make_hunter("A", P.team, "medium", "Ally", "idle", {}, home + Vector3(-2.5, 0, 1.5), {"arch": "none"})
-	var T: Hunter = m.make_hunter("T", P.team + 5, "medium", "Target", "idle", {}, home + Vector3(dist, 0, 0), {"arch": "none"})
-	T.max_hp = 10000.0; T.hp = T.max_hp; T.armor = 0.0; T.max_armor = 0.0
-	A.armor = 0.0; A.max_armor = 0.0
-	for i in 5: m.step(DT)
+		o.dead = true
+		m.kins.erase(o)
+		o.queue_free()
+		P.kin = null
+	var A: Hunter = m.make_hunter(
+		"A", P.team, "medium", "Ally", "idle", {}, home + Vector3(-2.5, 0, 1.5), {"arch": "none"}
+	)
+	var T: Hunter = m.make_hunter(
+		"T", P.team + 5, "medium", "Target", "idle", {}, home + Vector3(dist, 0, 0), {"arch": "none"}
+	)
+	T.max_hp = 10000.0
+	T.hp = T.max_hp
+	T.armor = 0.0
+	T.max_armor = 0.0
+	A.armor = 0.0
+	A.max_armor = 0.0
+	for i in 5:
+		m.step(DT)
 	aim_at(P, T.pos)
 	return [m, P, A, T, home]
 
+
 func aim_at(P: Hunter, p: Vector3) -> void:
-	P.inp["aim"] = p + Vector3(0, 0.9, 0); P.inp["aim_y"] = p.y
+	P.inp["aim"] = p + Vector3(0, 0.9, 0)
+	P.inp["aim_y"] = p.y
+
 
 func step(m: Match, secs: float, each := Callable()) -> void:
 	var t := 0.0
 	while t < secs:
-		if each.is_valid(): each.call()
-		for mb in m.mobs: mb.queue_free()
+		if each.is_valid():
+			each.call()
+		for mb in m.mobs:
+			mb.queue_free()
 		m.mobs.clear()
 		m.step(DT)
 		t += DT
+
 
 func down(m: Match, A: Hunter) -> void:
 	A.hp = 0.0
 	m.knock(A, null, {})
 	A.ctrl = "idle"
 	A.down_hp = 60.0
+
 
 func run(mn: Node, md := "all") -> void:
 	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
@@ -112,6 +154,7 @@ func run(mn: Node, md := "all") -> void:
 	print("SUPPORT DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
+
 ## Upgrade parity (docs/heroes/<id>.md): per rank [RMB cd, dash recharge, E cd, RMB power, E power, air dash cd]
 ## against the source's tier II / III+IV numbers.
 func _ranks(arch: String) -> void:
@@ -120,43 +163,82 @@ func _ranks(arch: String) -> void:
 	var P: Hunter = r[1]
 	var K: ArchKit = P.ak
 	var up: Array = []
-	for sl in ["sec", "dash", "kin"]: P.slot_lv[sl] = 1
+	for sl in ["sec", "dash", "kin"]:
+		P.slot_lv[sl] = 1
 	var ps := K.power("sec")
 	var pk := K.power("kin")
 	for rk in [1, 2, 3]:
-		for sl in ["sec", "dash", "kin"]: P.slot_lv[sl] = rk
+		for sl in ["sec", "dash", "kin"]:
+			P.slot_lv[sl] = rk
 		var cd_e: float = K.e_def()["cooldown"] * K.cd_k("kin")
 		var pe: float = K.heal_k() if K is TenderKit else K.power("kin") / pk
 		var cd_r: float = K.rmb_def()["cooldown"] * K.cd_k("sec")
 		up.append([cd_r, P.dash_regen(), cd_e, K.power("sec") / ps, pe, K.long_dash_cd()])
 	var near := func(a: float, b: float) -> bool: return absf(a - b) < 0.06
 	if arch == "tender":
-		ok("upgrade parity: Burrseed damage +40% (rank 2), cooldown 10.5 -> 10.5 -> 7.8",
-				near.call(up[1][3], 1.4) and near.call(up[2][3], 1.4)
-				and near.call(up[1][0], 10.5) and near.call(up[2][0], 7.76), str(up))
-		ok("upgrade parity: Relay Step recharge 7 -> 6.25 -> 5.5, air glide 14 -> 12.5 -> 11",
-				near.call(up[1][1], 6.25) and near.call(up[2][1], 5.5)
-				and near.call(up[1][5], 12.5) and near.call(up[2][5], 11.0), str(up))
-		ok("upgrade parity: Hearthlight healing +22.5% / +50%, cooldown 11 -> 11 -> 8.25",
-				near.call(up[1][4], 1.225) and near.call(up[2][4], 1.5)
-				and near.call(up[1][2], 11.0) and near.call(up[2][2], 8.25), str(up))
+		ok(
+			"upgrade parity: Burrseed damage +40% (rank 2), cooldown 10.5 -> 10.5 -> 7.8",
+			(
+				near.call(up[1][3], 1.4)
+				and near.call(up[2][3], 1.4)
+				and near.call(up[1][0], 10.5)
+				and near.call(up[2][0], 7.76)
+			),
+			str(up)
+		)
+		ok(
+			"upgrade parity: Relay Step recharge 7 -> 6.25 -> 5.5, air glide 14 -> 12.5 -> 11",
+			(
+				near.call(up[1][1], 6.25)
+				and near.call(up[2][1], 5.5)
+				and near.call(up[1][5], 12.5)
+				and near.call(up[2][5], 11.0)
+			),
+			str(up)
+		)
+		ok(
+			"upgrade parity: Hearthlight healing +22.5% / +50%, cooldown 11 -> 11 -> 8.25",
+			(
+				near.call(up[1][4], 1.225)
+				and near.call(up[2][4], 1.5)
+				and near.call(up[1][2], 11.0)
+				and near.call(up[2][2], 8.25)
+			),
+			str(up)
+		)
 	else:
-		ok("upgrade parity: Ice Spear cooldown 10.2 -> 8.7 -> 7.2, damage +15% / +30%",
-				near.call(up[1][0], 8.71) and near.call(up[2][0], 7.22)
-				and near.call(up[1][3], 1.15) and near.call(up[2][3], 1.3), str(up))
-		ok("upgrade parity: Skate recharge 13 -> 11.5 -> 10",
-				near.call(up[1][1], 11.5) and near.call(up[2][1], 10.0), str(up))
-		ok("upgrade parity: Rink Wall cooldown 17 -> 14.9 -> 12.75, no rank damage on the wall",
-				near.call(up[1][2], 14.88) and near.call(up[2][2], 12.75)
-				and up[1][4] == 1.0 and up[2][4] == 1.0, str(up))
+		ok(
+			"upgrade parity: Ice Spear cooldown 10.2 -> 8.7 -> 7.2, damage +15% / +30%",
+			(
+				near.call(up[1][0], 8.71)
+				and near.call(up[2][0], 7.22)
+				and near.call(up[1][3], 1.15)
+				and near.call(up[2][3], 1.3)
+			),
+			str(up)
+		)
+		ok(
+			"upgrade parity: Skate recharge 13 -> 11.5 -> 10",
+			near.call(up[1][1], 11.5) and near.call(up[2][1], 10.0),
+			str(up)
+		)
+		ok(
+			"upgrade parity: Rink Wall cooldown 17 -> 14.9 -> 12.75, no rank damage on the wall",
+			near.call(up[1][2], 14.88) and near.call(up[2][2], 12.75) and up[1][4] == 1.0 and up[2][4] == 1.0,
+			str(up)
+		)
 		var hps: Array = []
 		for rk in [1, 3]:
 			P.slot_lv["kin"] = rk
 			K._raise_wall(Vector2(1, 0), 0.0)
 			hps.append(float(K.wall["hp0"]))
-		ok("upgrade parity: rank 3 (tier IV) Rink Wall is %d HP tougher" % int(K.e_def()["hp_rank3"]),
-				absf(hps[1] - hps[0] - float(K.e_def()["hp_rank3"]) * K.power("kin")) < 0.5, str(hps))
+		ok(
+			"upgrade parity: rank 3 (tier IV) Rink Wall is %d HP tougher" % int(K.e_def()["hp_rank3"]),
+			absf(hps[1] - hps[0] - float(K.e_def()["hp_rank3"]) * K.power("kin")) < 0.5,
+			str(hps)
+		)
 	await _free(m)
+
 
 ## The shared overhead combo tag checks (tools/combo_mark_check.gd) for this kit.
 func _combo_tag(arch: String) -> void:
@@ -164,20 +246,30 @@ func _combo_tag(arch: String) -> void:
 	ac.main = main
 	await load("res://tools/combo_mark_check.gd").new().run(ok, ac, arch)
 
+
 func _free(m: Match) -> void:
 	m.queue_free()
 	await main.get_tree().process_frame
 
+
 # ------------------------------------------------------------------ Tender
 func _tender_support() -> void:
 	var r := setup("tender")
-	var m: Match = r[0]; var P: Hunter = r[1]; var A: Hunter = r[2]; var T: Hunter = r[3]
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var A: Hunter = r[2]
+	var T: Hunter = r[3]
 	var K: TenderKit = P.ak
-	ok("tender: kit wired, medium, no R", K is TenderKit and P.cls == "medium" and Arch.def("tender").get("r", {}).is_empty())
+	ok(
+		"tender: kit wired, medium, no R",
+		K is TenderKit and P.cls == "medium" and Arch.def("tender").get("r", {}).is_empty()
+	)
 	# --- heal an ally in the ring over its life, flare at the end
 	A.hp = A.max_hp * 0.4
 	var h0 := A.hp
-	P.inp["sig"] = true; step(m, 0.05); P.inp["sig"] = false
+	P.inp["sig"] = true
+	step(m, 0.05)
+	P.inp["sig"] = false
 	ok("Hearthlight: lit, a ring is up", K.in_e() and K.cd["e"] > 5.0)
 	step(m, 1.3)
 	var mid := A.hp
@@ -185,58 +277,125 @@ func _tender_support() -> void:
 	step(m, 1.6)
 	ok("Hearthlight: flares at the end", not K.in_e() and A.hp > mid + 10.0, "-> %.1f" % A.hp)
 	# --- parity: no self-heal factor, she is healed like any ally (the source gives none)
-	P.hp = P.max_hp * 0.4; var p0 := P.hp; A.hp = A.max_hp
+	P.hp = P.max_hp * 0.4
+	var p0 := P.hp
+	A.hp = A.max_hp
 	K.cd["e"] = 0.0
-	P.inp["sig"] = true; step(m, 0.05); P.inp["sig"] = false; step(m, 3.0)
+	P.inp["sig"] = true
+	step(m, 0.05)
+	P.inp["sig"] = false
+	step(m, 3.0)
 	ok("Hearthlight: heals you in full, like an ally", (P.hp - p0) > 22.0, "+%.1f" % (P.hp - p0))
 	# --- a stun does not put it out (only the ultimate's channel breaks on a stun)
 	K.cd["e"] = 0.0
-	P.inp["sig"] = true; step(m, 0.05); P.inp["sig"] = false
-	P.stun_t = 0.5; step(m, 0.1)
+	P.inp["sig"] = true
+	step(m, 0.05)
+	P.inp["sig"] = false
+	P.stun_t = 0.5
+	step(m, 0.1)
 	ok("Hearthlight: a stun on you does not put it out", K.in_e())
 	# --- toss latches on the first teammate it passes
-	K.cd["e"] = 0.0; P.stun_t = 0.0
-	A.teleport(P.pos + Vector3(4, 0, 0)); step(m, 0.05)
+	K.cd["e"] = 0.0
+	P.stun_t = 0.0
+	A.teleport(P.pos + Vector3(4, 0, 0))
+	step(m, 0.05)
 	aim_at(P, A.pos)
-	P.inp["sig"] = true; step(m, 0.05); P.inp["sig"] = false; step(m, 0.2)
-	P.inp["sig"] = true; step(m, 0.05); P.inp["sig"] = false; step(m, 0.6)
-	ok("Hearthlight: tossed, latches onto a teammate", String(K.hearth.get("mode", "")) == "latched" and K.hearth.get("who") == A, str(K.hearth.get("mode", "")))
+	P.inp["sig"] = true
+	step(m, 0.05)
+	P.inp["sig"] = false
+	step(m, 0.2)
+	P.inp["sig"] = true
+	step(m, 0.05)
+	P.inp["sig"] = false
+	step(m, 0.6)
+	ok(
+		"Hearthlight: tossed, latches onto a teammate",
+		String(K.hearth.get("mode", "")) == "latched" and K.hearth.get("who") == A,
+		str(K.hearth.get("mode", ""))
+	)
 	step(m, 3.0)
 	# --- downed teammate heals five times over
 	down(m, A)
-	A.teleport(P.pos + Vector3(1.0, 0, 0.5)); step(m, 0.02)
-	K.cd["e"] = 0.0; K.lock_t = 10.0
+	A.teleport(P.pos + Vector3(1.0, 0, 0.5))
+	step(m, 0.02)
+	K.cd["e"] = 0.0
+	K.lock_t = 10.0
 	var d0 := A.down_hp
-	P.inp["sig"] = true; step(m, 0.05); P.inp["sig"] = false; step(m, 1.3)
-	ok("Hearthlight: a downed teammate drinks it five times over", A.down_hp > d0 + 10.0, "%.0f -> %.0f" % [d0, A.down_hp])
+	P.inp["sig"] = true
+	step(m, 0.05)
+	P.inp["sig"] = false
+	step(m, 1.3)
+	ok(
+		"Hearthlight: a downed teammate drinks it five times over",
+		A.down_hp > d0 + 10.0,
+		"%.0f -> %.0f" % [d0, A.down_hp]
+	)
 	step(m, 2.0)
 	# --- carry
-	K.lock_t = 0.0; K.cd["e"] = 99.0
+	K.lock_t = 0.0
+	K.cd["e"] = 99.0
 	A.down_hp = 60.0
-	A.teleport(P.pos + Vector3(0.6, 0, 0)); step(m, 0.1)
+	A.teleport(P.pos + Vector3(0.6, 0, 0))
+	step(m, 0.1)
 	ok("Carrier: running into a downed teammate carries them", CareUtil.is_carried(A) and K.carrying().size() == 1)
-	ok("Carrier: no shield of ours and no slow while carrying", P.shield <= 0.01 and absf(K.move_k() - 1.0) < 0.01, "shield %.0f k %.2f" % [P.shield, K.move_k()])
+	var sh_want := float(K.d["passive"]["shield"]) * LevelGrowth.hp(P)
+	ok(
+		"Carrier: a carry shield while carrying, and no slow",
+		absf(P.shield - sh_want) < 0.5 and absf(K.move_k() - 1.0) < 0.01,
+		"shield %.1f want %.1f k %.2f" % [P.shield, sh_want, K.move_k()]
+	)
 	var dh := A.down_hp
-	P.teleport(P.pos + Vector3(5, 0, 0)); step(m, 2.0)
-	ok("Carrier: the carried teammate rides along and does not bleed", A.flat_dist(P) < 1.0 and A.down_hp >= dh - 0.5, "dist %.2f down_hp %.1f -> %.1f" % [A.flat_dist(P), dh, A.down_hp])
-	P.inp["crouch"] = true; step(m, 0.1); P.inp["crouch"] = false; step(m, 0.1)
+	P.teleport(P.pos + Vector3(5, 0, 0))
+	step(m, 2.0)
+	ok(
+		"Carrier: the carried teammate rides along and does not bleed",
+		A.flat_dist(P) < 1.0 and A.down_hp >= dh - 0.5,
+		"dist %.2f down_hp %.1f -> %.1f" % [A.flat_dist(P), dh, A.down_hp]
+	)
+	P.inp["crouch"] = true
+	step(m, 0.1)
+	P.inp["crouch"] = false
+	step(m, 0.1)
 	ok("Carrier: crouch (never F) sets them down", not CareUtil.is_carried(A) and K.carrying().is_empty())
 	# --- carry then a stun drops them
 	T.teleport(P.pos + Vector3(14, 0, 0))
-	P.slot_lv["dash"] = 3; P.ex_cd = 5.0
-	A.teleport(P.pos + Vector3(0.4, 0, 0)); K.lock_t = 0.0; step(m, 0.1)
+	P.slot_lv["dash"] = 3
+	P.ex_cd = 5.0
+	A.teleport(P.pos + Vector3(0.4, 0, 0))
+	K.lock_t = 0.0
+	step(m, 0.1)
 	var carried_again := CareUtil.is_carried(A)
-	ok("Relay Step rank 3: picking up a teammate refreshes the air dash", carried_again and P.ex_cd < 0.01, "ex_cd %.2f" % P.ex_cd)
-	P.stun_t = 0.5; step(m, 0.1)
-	ok("Carrier: a stun drops them and locks pickup", carried_again and not CareUtil.is_carried(A) and K.lock_t > 3.0, "again %s lock %.1f" % [str(carried_again), K.lock_t])
-	# --- a hit drops them too, and costs you no stun of your own
-	P.stun_t = 0.0; K.lock_t = 0.0
-	A.teleport(P.pos + Vector3(0.4, 0, 0)); step(m, 0.1)
+	ok(
+		"Relay Step rank 3: picking up a teammate refreshes the air dash",
+		carried_again and P.ex_cd < 0.01,
+		"ex_cd %.2f" % P.ex_cd
+	)
+	P.stun_t = 0.5
+	step(m, 0.1)
+	ok(
+		"Carrier: a stun drops them and locks pickup",
+		carried_again and not CareUtil.is_carried(A) and K.lock_t > 3.0,
+		"again %s lock %.1f" % [str(carried_again), K.lock_t]
+	)
+	# --- a hit past the shield drops them and stuns her; a small one is soaked
+	P.stun_t = 0.0
+	K.lock_t = 0.0
+	A.teleport(P.pos + Vector3(0.4, 0, 0))
+	step(m, 0.1)
 	var carried_third := CareUtil.is_carried(A)
-	P.hurt(5.0, T, {}); step(m, 0.1)
-	ok("Carrier: a hit drops them with a 4s lock and no stun on you",
-		carried_third and not CareUtil.is_carried(A) and K.lock_t > 3.0 and P.stun_t <= 0.0,
-		"lock %.1f stun %.2f" % [K.lock_t, P.stun_t])
+	P.hurt(P.shield * 0.3, T, {})
+	step(m, 0.1)
+	ok(
+		"Carrier: a hit the shield soaks keeps them",
+		carried_third and CareUtil.is_carried(A) and K.lock_t <= 0.0 and P.stun_t <= 0.0
+	)
+	P.hurt(P.shield + 30.0, T, {})
+	step(m, 0.1)
+	ok(
+		"Carrier: a hit past the shield drops them with a 4s lock and stuns her",
+		not CareUtil.is_carried(A) and K.lock_t > 3.0 and P.stun_t >= float(K.d["passive"]["break_stun"]) - 0.15,
+		"lock %.1f stun %.2f" % [K.lock_t, P.stun_t]
+	)
 	# --- the drop set: a stun or any damage; a root holds; 4s no re-pick
 	P.stun_t = 0.0
 	K.lock_t = 0.0
@@ -248,25 +407,30 @@ func _tender_support() -> void:
 	step(m, 0.1)
 	ok("Carrier: a root holds them", held and CareUtil.is_carried(A))
 	P.root_t = 0.0
-	P.hurt(10.0, T, {"src": "primary"})
+	P.hurt(P.shield + 30.0, T, {"src": "primary"})
 	step(m, 0.1)
 	var lock0 := K.lock_t
-	ok("Carrier: a rival's hit drops them, 4s lock, no stun on you",
-		held and not CareUtil.is_carried(A) and lock0 > 3.8 and P.stun_t <= 0.0, "lock %.2f" % lock0)
+	ok(
+		"Carrier: a rival's hit past the shield drops them, 4s lock, she is stunned",
+		held and not CareUtil.is_carried(A) and lock0 > 3.8 and P.stun_t > 0.0,
+		"lock %.2f stun %.2f" % [lock0, P.stun_t]
+	)
 	A.teleport(P.pos + Vector3(0.4, 0, 0))
 	var locked := true
 	for i in 8:
 		A.down_hp = 60.0
-		A.revive = 0.0       # standing beside a Wisp revives it on its own: keep it a Wisp for the lock test
+		A.revive = 0.0  # standing beside a Wisp revives it on its own: keep it a Wisp for the lock test
 		step(m, 0.5)
 		if i < 7:
 			locked = locked and A.downed and not CareUtil.is_carried(A)
-	ok("Carrier: no re-pick for 4s after a drop, then they can be scooped up",
-		locked and CareUtil.is_carried(A), "lock %.2f" % K.lock_t)
-	P.hurt(10.0, null, {"src": "mob"})
+	ok(
+		"Carrier: no re-pick for 4s after a drop, then they can be scooped up",
+		locked and CareUtil.is_carried(A),
+		"lock %.2f" % K.lock_t
+	)
+	P.hurt(P.shield + 30.0, null, {"src": "mob"})
 	step(m, 0.1)
-	ok("Carrier: damage from any source drops them",
-		not CareUtil.is_carried(A) and K.lock_t > 3.8)
+	ok("Carrier: damage past the shield from any source drops them", not CareUtil.is_carried(A) and K.lock_t > 3.8)
 	K.lock_t = 0.0
 	# --- rank 3 flare: the revive went back to Hearth Call (X); the flare tops the bleed-out bar up instead
 	P.stun_t = 0.0
@@ -281,37 +445,74 @@ func _tender_support() -> void:
 	step(m, 0.05)
 	P.inp["sig"] = false
 	step(m, 3.2)
-	ok("Hearthlight rank 3: the flare no longer revives (Hearth Call does), it heals the downed", A.downed and A.down_hp > 40.0,
-		"down_hp %.0f" % A.down_hp)
+	ok(
+		"Hearthlight rank 3: the flare no longer revives (Hearth Call does), it heals the downed",
+		A.downed and A.down_hp > 40.0,
+		"down_hp %.0f" % A.down_hp
+	)
 	var boost3 := K.throw_boost()
 	P.slot_lv["kin"] = 1
-	ok("Hearthlight rank 3: the thrown light's healing boost doubles (50% -> 100%, still 1s)",
-		absf(boost3 - 1.0) < 0.01 and absf(K.throw_boost() - 0.5) < 0.01 and float(K.e_def().get("boost_t", 1.0)) == 1.0,
-		"r3 %.2f r1 %.2f" % [boost3, K.throw_boost()])
+	ok(
+		"Hearthlight rank 3: the thrown light's healing boost doubles (50% -> 100%, still 1s)",
+		(
+			absf(boost3 - 1.0) < 0.01
+			and absf(K.throw_boost() - 0.5) < 0.01
+			and float(K.e_def().get("boost_t", 1.0)) == 1.0
+		),
+		"r3 %.2f r1 %.2f" % [boost3, K.throw_boost()]
+	)
 	m.queue_free()
 	# --- the dash through a teammate
-	r = setup("tender"); m = r[0]; P = r[1]; A = r[2]; T = r[3]; K = P.ak
-	A.teleport(P.pos + Vector3(2.0, 0, 0)); step(m, 0.05)
+	r = setup("tender")
+	m = r[0]
+	P = r[1]
+	A = r[2]
+	T = r[3]
+	K = P.ak
+	A.teleport(P.pos + Vector3(2.0, 0, 0))
+	step(m, 0.05)
 	K.cd["e"] = 8.0
-	P.inp["move"] = Vector2(1, 0); aim_at(P, P.pos + Vector3(5, 0, 0))
+	P.inp["move"] = Vector2(1, 0)
+	aim_at(P, P.pos + Vector3(5, 0, 0))
 	P.dashes = P.max_dashes()
-	P.inp["dash"] = true; step(m, 0.05); P.inp["dash"] = false
-	ok("Relay Step: through a teammate refunds nothing", P.dashes <= P.max_dashes() - 0.95 and K.cd["e"] > 7.9, "dashes %.2f e %.1f" % [P.dashes, K.cd["e"]])
+	P.inp["dash"] = true
+	step(m, 0.05)
+	P.inp["dash"] = false
+	ok(
+		"Relay Step: through a teammate refunds nothing",
+		P.dashes <= P.max_dashes() - 0.95 and K.cd["e"] > 7.9,
+		"dashes %.2f e %.1f" % [P.dashes, K.cd["e"]]
+	)
 	m.queue_free()
+
 
 # ------------------------------------------------------------------ Rimewright
 func _rime_support() -> void:
 	var r := setup("rimewright", 5.0)
-	var m: Match = r[0]; var P: Hunter = r[1]; var A: Hunter = r[2]; var T: Hunter = r[3]
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var A: Hunter = r[2]
+	var T: Hunter = r[3]
 	var K: RimewrightKit = P.ak
-	ok("rimewright: kit wired, light, no R", K is RimewrightKit and P.cls == "light" and Arch.def("rimewright").get("r", {}).is_empty())
+	ok(
+		"rimewright: kit wired, light, no R",
+		K is RimewrightKit and P.cls == "light" and Arch.def("rimewright").get("r", {}).is_empty()
+	)
 	# --- the Rink Wall shields a teammate who touches it
 	var dir := P.aim_dir()
-	A.teleport(P.pos + Vector3(dir.x, 0, dir.y) * 5.0 + Vector3(0, 0, 0.5)); step(m, 0.05)
-	P.inp["sig"] = true; step(m, 0.05); P.inp["sig"] = false
+	A.teleport(P.pos + Vector3(dir.x, 0, dir.y) * 5.0 + Vector3(0, 0, 0.5))
+	step(m, 0.05)
+	P.inp["sig"] = true
+	step(m, 0.05)
+	P.inp["sig"] = false
 	step(m, 0.5)
 	ok("Rink Wall: raised ahead", not K.wall.is_empty() and m.verbs.walls.size() >= 1)
-	A.hp = A.max_hp * 0.5; var ah := A.hp
+	A.hp = A.max_hp * 0.5
+	var ah := A.hp
 	step(m, 1.5)
-	ok("Rink Wall: no squad shield or heal (she copies her source: ice control only)", A.shield < 0.5 and A.hp <= ah + 0.01, "shield %.1f hp %.1f -> %.1f" % [A.shield, ah, A.hp])
+	ok(
+		"Rink Wall: no squad shield or heal (she copies her source: ice control only)",
+		A.shield < 0.5 and A.hp <= ah + 0.01,
+		"shield %.1f hp %.1f -> %.1f" % [A.shield, ah, A.hp]
+	)
 	m.queue_free()
