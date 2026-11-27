@@ -288,7 +288,7 @@
 				"id": "out",
 				"needs": ["toy"],
 				"title": "Head out or stay",
-				"hints": {"go": "Press {interact} at the portal to head out, or press Stay to play on."},
+				"hints": {"go": "{interact} at the portal heads out, or Stay. Waystone: Wayseed + leaning Boki."},
 				"world": {"go": "Portal"},
 				"boki": "Out there, or more play? Your call!"
 			}
