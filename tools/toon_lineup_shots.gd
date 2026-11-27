@@ -10,20 +10,16 @@ extends "res://tools/vv_shots.gd"
 ## pixels, from the shot minus the empty spot). Pairs with --toon-consistency-check, which judges the materials.
 
 const COLS := 10
+## The shared coat look's values for what a species' own "coat" override changes (WardenGlb.PAINTED dark_lift).
+const PLAIN_LOOK := {
+	"desat": 0.0, "dark_lift": 0.07, "albedo_flat": 0.0, "albedo_flat_gain": 1.0, "albedo_flat_contrast": 1.0
+}
 const DIFF_MIN := 0.12  # colour-balance shift from the empty spot that makes a pixel the model's
 
 var crop_px := Vector2i(170, 170)  # px of the screen round the model, drawn at `zoom`
 var zoom := 2.5
 var ids: Array = []
 var world: Node3D  # what the models are added to: the match, or the farm
-## The shared coat look's values for what a species' own "coat" override changes (WardenGlb.PAINTED dark_lift).
-const PLAIN_LOOK := {
-	"desat": 0.0,
-	"dark_lift": 0.07,
-	"albedo_flat": 0.0,
-	"albedo_flat_gain": 1.0,
-	"albedo_flat_contrast": 1.0
-}
 var ab := PackedStringArray()  # --ab: [species, atlas path]
 var turn := 0.0  # --turn, degrees
 
@@ -106,9 +102,7 @@ func _spawn(row: Array, at: Vector3) -> Node3D:
 	else:
 		var arch := String(row[1])
 		var look := PlayerLook.neutral()
-		node = Models.hunter(
-			Arch.weight(arch), Data.TEAM_COLORS[0], Arch.signature(arch), "", look, arch
-		)
+		node = Models.hunter(Arch.weight(arch), Data.TEAM_COLORS[0], Arch.signature(arch), "", look, arch)
 	node.position = at
 	node.rotation.y = deg_to_rad(turn)
 	world.add_child(node)
@@ -128,9 +122,7 @@ func _swap_atlas(node: Node3D, path: String) -> void:
 	img.generate_mipmaps()
 	for n in node.find_children("*", "", true, false):
 		if n is BokiRig and (n as BokiRig)._coat != null:
-			(n as BokiRig)._coat.set_shader_parameter(
-				"albedo_tex", ImageTexture.create_from_image(img)
-			)
+			(n as BokiRig)._coat.set_shader_parameter("albedo_tex", ImageTexture.create_from_image(img))
 	if "--ab-plain" in OS.get_cmdline_user_args():  # (the old atlas as the shared look drew it, no coat override)
 		_apply_look(node, PLAIN_LOOK)
 
@@ -141,10 +133,7 @@ func _apply_look(node: Node, look: Dictionary) -> void:
 	for mi in node.find_children("*", "MeshInstance3D", true, false):
 		for s in (mi as MeshInstance3D).get_surface_override_material_count():
 			var mat := (mi as MeshInstance3D).get_active_material(s)
-			if (
-				mat is ShaderMaterial
-				and (mat as ShaderMaterial).get_shader_parameter("use_tex") == true
-			):
+			if mat is ShaderMaterial and (mat as ShaderMaterial).get_shader_parameter("use_tex") == true:
 				var tex: Texture2D = (mat as ShaderMaterial).get_shader_parameter("albedo_tex")
 				var coat := tex.resource_path.contains("atlas")
 				for k in look:
@@ -173,9 +162,7 @@ func _model_stats(img: Image, empty: Image, at: Vector3) -> Dictionary:
 			var b := empty.get_pixel(x, y)
 			var la := maxf(a.get_luminance(), 0.001)
 			var lb := maxf(b.get_luminance(), 0.001)
-			var hue_shift := (
-				Vector3(a.r / la - b.r / lb, a.g / la - b.g / lb, a.b / la - b.b / lb).length()
-			)
+			var hue_shift := Vector3(a.r / la - b.r / lb, a.g / la - b.g / lb, a.b / la - b.b / lb).length()
 			if hue_shift > DIFF_MIN:
 				sum += la
 				lums.append(la)
@@ -208,15 +195,9 @@ func _write(shots: Array) -> void:
 	for i in shots.size():
 		var crop: Image = shots[i][1]
 		crop.convert(Image.FORMAT_RGB8)  # blit_rect between formats draws nothing
-		sheet.blit_rect(
-			crop,
-			Rect2i(Vector2i.ZERO, crop.get_size()),
-			Vector2i((i % COLS) * w, int(i / COLS) * h)
-		)
+		sheet.blit_rect(crop, Rect2i(Vector2i.ZERO, crop.get_size()), Vector2i((i % COLS) * w, int(i / COLS) * h))
 		var st: Dictionary = shots[i][2]
-		var row := [
-			shots[i][0][0], _label(shots[i][0]), st["lum"], st["sat"], st["n"], st["p10"], st["p90"]
-		]
+		var row := [shots[i][0][0], _label(shots[i][0]), st["lum"], st["sat"], st["n"], st["p10"], st["p90"]]
 		f.store_line("%s\t%s\t%.3f\t%.3f\t%d\t%.3f\t%.3f" % row)
 	f.close()
 	sheet.save_png(dir.path_join("lineup_sheet.png"))

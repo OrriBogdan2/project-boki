@@ -31,6 +31,7 @@ var arena_offs: Array = []  # --arena-offs
 var row_spacing := 1.0  # m between the models in the row (the row camera backs off by it)
 # name, Crofthorn coat uniforms put over the game's ("_atlas": a coat atlas to draw)
 var passes: Array = [["after", {}]]
+var _last_empty: Image  # the frame before the row was spawned
 
 
 func run(main_node: Node) -> void:
@@ -84,7 +85,7 @@ func run(main_node: Node) -> void:
 	var base: Vector3 = await _stage_cam()
 	var spacing := 1.0 if cam_mode == "farm" else 1.3
 	row_spacing = spacing
-	var tag := cam_mode + ("_close" if close else "")
+	var shot_tag := cam_mode + ("_close" if close else "")
 	for pass_i in passes:
 		var state: String = pass_i[0]
 		for si in spots.size():
@@ -102,15 +103,15 @@ func run(main_node: Node) -> void:
 				_apply_look(croft, look)
 			await _settle(1.2)
 			if not tele_only:
-				_shoot(tag, state, si)
+				_shoot(shot_tag, state, si)
 			if cam_mode == "farm" or si == 0 or not arena_offs.is_empty():
 				await _tele(state, si)
-	var f := FileAccess.open(dir.path_join("coat_stats_%s.tsv" % tag), FileAccess.WRITE)
+	var f := FileAccess.open(dir.path_join("coat_stats_%s.tsv" % shot_tag), FileAccess.WRITE)
 	f.store_line("cam\tstate\tspot\tspecies\tlum_std\tlum\tsat\tpixels")
 	for r in rows:
 		f.store_line(r)
 	f.close()
-	print("CROFTFLAT %s done in %s" % [tag, dir])
+	print("CROFTFLAT %s done in %s" % [shot_tag, dir])
 	main.get_tree().quit(0)
 
 
@@ -154,10 +155,10 @@ func _clear_row() -> void:
 	nodes.clear()
 
 
-func _shoot(tag: String, state: String, si: int) -> void:
+func _shoot(shot_tag: String, state: String, si: int) -> void:
 	var img := main.get_viewport().get_texture().get_image()
-	img.save_png(dir.path_join("%s_s%d_%s.png" % [tag, si, state]))
-	_measure(tag, state, si, img)
+	img.save_png(dir.path_join("%s_s%d_%s.png" % [shot_tag, si, state]))
+	_measure(shot_tag, state, si, img)
 
 
 func _tele(state: String, si: int) -> void:
@@ -181,9 +182,7 @@ func _tele(state: String, si: int) -> void:
 		tele_cam.look_at(g, Vector3.UP)
 		tele_cam.current = true
 		await _settle(0.3)
-		main.get_viewport().get_texture().get_image().save_png(
-			dir.path_join("tele_%s_s%d_%s.png" % [view, si, state])
-		)
+		main.get_viewport().get_texture().get_image().save_png(dir.path_join("tele_%s_s%d_%s.png" % [view, si, state]))
 	base_cam.current = true
 	await _settle(0.1)
 
@@ -203,7 +202,7 @@ func _spawn(row: Array, at: Vector3) -> Node3D:
 
 ## Each model's own pixels, found against the frame with the models hidden (self.empty), a pixel belonging to the
 ## nearest model; a pixel with a background pixel two steps away is an edge or an ink line and is left out.
-func _measure(tag: String, state: String, si: int, img: Image) -> void:
+func _measure(shot_tag: String, state: String, si: int, img: Image) -> void:
 	var cam := main.get_viewport().get_camera_3d()
 	var centres: Array = []
 	for n in nodes:
@@ -237,12 +236,7 @@ func _measure(tag: String, state: String, si: int, img: Image) -> void:
 				if nearest != i or mask[y * w + x] == 0:
 					continue
 				var at := y * w + x
-				if (
-					mask[at - 2] == 0
-					or mask[at + 2] == 0
-					or mask[at - 2 * w] == 0
-					or mask[at + 2 * w] == 0
-				):
+				if mask[at - 2] == 0 or mask[at + 2] == 0 or mask[at - 2 * w] == 0 or mask[at + 2 * w] == 0:
 					continue
 				var col := img.get_pixel(x, y)
 				lums.append(col.get_luminance())
@@ -256,8 +250,5 @@ func _measure(tag: String, state: String, si: int, img: Image) -> void:
 		for l in lums:
 			var_sum += (float(l) - mean) * (float(l) - mean)
 		var std := sqrt(var_sum / n)
-		var row := [tag, state, si, species[i], std, mean, sat / n, lums.size()]
+		var row := [shot_tag, state, si, species[i], std, mean, sat / n, lums.size()]
 		rows.append("%s\t%s\t%d\t%s\t%.3f\t%.3f\t%.3f\t%d" % row)
-
-
-var _last_empty: Image
