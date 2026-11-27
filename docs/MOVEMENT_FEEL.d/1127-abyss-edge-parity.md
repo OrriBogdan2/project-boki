@@ -10,7 +10,7 @@ the law is `scripts/match/mantle_carry.gd` (MantleCarry), wired in `scripts/matc
 |---|---|---|---|---|---|
 | 37 | Abyss fall cap | 12 -> 10 m/s from 1 to 16.5 m under the lip, an ease-in curve (0.25 of the way: 0.063; half: 0.254; 0.75: 0.576) | the same ends, but linear (hunter_move.gd:251, hunter_move.json:13-16) | ease-in (u^2, within 0.013 of the curve's keys); lip to the point of no return 1.97 s (ref 1.97 s) | MATCH |
 | 38 | Point of no return | 17.5 m under the ground level, gliding or not | 17.5 m, plus 1.5 m for a glider with heat (tuning.json:130, hunter.gd:1931) | 17.5 m for everyone | MATCH |
-| 39 | Warning tint / sound | tint from 0.25 m down, full 3.5 m before the end; sound from 3 m | tint from 4 m (abyss_danger.json:3, owner 11-17 rule) | unchanged | OFF (owner 11-17 tint rule; needs an owner call) |
+| 39 | Warning tint / sound | tint from 0.25 m down, full 3.5 m before the end; sound from 3 m | tint from 4 m, full at the kill depth; sound with the tint (abyss_danger.json:3, abyss_fx.gd:54) | tint from 0.25 m, full 3.5 m above the kill depth (14 m down); sound from 3 m (the owner's 11-17 ask was "graded + rising sound"; the 4 m was a worker's number) | MATCH (ends; the curve between is ours: its keys are not decoded) |
 | 40 | Recovery | touching an island's side over the abyss while falling, gliding or dashing: one launch straight up at 9 + 16.5 x (lip height over the feet / 17.5) m/s (9-25.5), cooldown after; the glider's own floor pull under the lip: 10 -> 40 m/s^2 over 0-20 m deeper, cap 15.5 m/s, stops dead at its top | a continuous glider lift 22 + 7/m m/s^2, cap 18.2, brake + 4.5 m/s bounce (hunter.gd:824-832, tuning.json:117-125); an opening spring +6 m/s (glide_lift.gd:14); a side caught you only down to 4.5 m (tuning.json:128); a slow float up the face (lrise) | the one-shot launch at any depth over the abyss (MantleCarry.launch); glider lift on the reference law, letting go at the lip + 0.6 m; no spring | MATCH (lift: INFERRED, see unknowns) |
 | 40b | Full mantle (lip >= 3 m above the feet) | held 0.1 s with no gravity, rising at 0.25 x your speed, all sideways speed gone; then the launch | (none) | the same (MantleCarry.step, hunter.gd vertical) | MATCH |
 | 41 | Updraft | a glider in it: 10 m/s^2 up; once rising at 5 m/s or more it fades to 0 over 7.5 m above the floor target; cap 15.5 m/s; glide gravity 0.025 g | 9 m/s target at 45 m/s^2 (hunter.gd:1672) | the reference law (HunterMove.updraft_vy) | MATCH (the floor target over the abyss is INFERRED) |
@@ -50,7 +50,7 @@ simulation here ignores the wall. Speed at landing is 5.28 m/s (run speed) in bo
 
 - The height the reference's glider floor pull aims at over abyss cells (its height map there is not decoded):
   ours aims at the nearest lip + 0.6 m. If the reference's abyss cells sit deep, its glider would sink there instead.
-- The curve of the push toward head-on walls (suction) and the tint/sound curves (keys not in the files).
+- The tint/sound curve shapes between their ends (the curve assets' keys are not in the files).
 - Which world way the near-kill fudge looks: the reference's name says south-side falls, its line goes +Y;
   ours looks north (screen up). INFERRED.
 - The reference's floor offset is on the capsule centre (1.5 m); ours is the feet (0.6 m, from its 0.88 m half height).
