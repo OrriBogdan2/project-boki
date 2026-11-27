@@ -15,6 +15,7 @@ const FIGHT_FRAMES := 10
 const SOLO_LAYER := 1 << 19  # render layer 20: the Hunters' bodies drawn alone for ClarityContrast's silhouette
 const FIGHT_PX := Vector2i(1920, 1080)  # the fight frames' size (the window: stretch is off)
 const TOASTS := ["Fever is lit", "Bond full!  R: Venom Fusion"]  # the two the baseline found over the top centre
+const WAYPOINT_AHEAD := 4.0  # m beside you that the fight's waypoint ping stands: on screen, mid-field
 const RUN_S := 1.6  # s the scene plays before the picture (the downed teammate's Boki reacts)
 
 
@@ -107,11 +108,19 @@ func _fights(main: Node, dir: String) -> void:
 	var read: Array = []  # every shown Hunter on every frame (ClarityRead rows)
 	var reads := PackedStringArray(["fight\tframe\tside\tbox\tbody\tkept\tplate"])  # the same, for clarity_read.tsv
 	var chatter := [0]  # frames with fight-time Boki text (callout pins, others' lines): 0 is the rule
+	var waypoint := [0, 0]  # frames judged, and of those with a waypoint's words drawn (0 is the rule in a fight)
 	main.get_window().size = FIGHT_PX
 	for f in ClarityFight.FIGHTS.size():
 		var on_frame := func(fm: Match, i: int) -> void:
 			var lane: MsgLane = fm.hud.msgs
 			lane.clear()
+			if i == 0:  # a squad ping beside you all fight: its pin stands mid-field (frame 0 draws it first)
+				var ping := {"pos": fm.player.pos, "by": fm.player, "team": fm.player.team, "col": Color.WHITE}
+				fm.pings.append(ping.merged({"t": 0.0, "life": 1e9}))
+			(fm.pings[-1] as Dictionary)["pos"] = fm.player.pos + Vector3(WAYPOINT_AHEAD, 0, 0)
+			if i > 0:
+				waypoint[0] += 1
+				waypoint[1] += int(SafeArea.seen.has("waypoint_text"))
 			fm.hud.toast(TOASTS[i % TOASTS.size()], Color("ffd23f"))  # a toast is up on every frame
 			var sz: Vector2 = fm.hud.c.size
 			var third := Rect2(sz.x / 3.0, 0.0, sz.x / 3.0, sz.y / 3.0)
@@ -170,6 +179,7 @@ func _fights(main: Node, dir: String) -> void:
 	var keys := frames.keys()
 	keys.sort_custom(func(a, b): return frames[a] > frames[b])
 	var n_frames := FIGHT_FRAMES * ClarityFight.FIGHTS.size()
+	print("CLARITYWAYPOINT %d/%d fight frames with waypoint words mid-field" % [waypoint[1], waypoint[0]])
 	print("CLARITYCHATTER %d/%d frames with fight-time Boki text" % [chatter[0], n_frames])
 	for k: String in keys.slice(0, 40):
 		print("CLARITYTOP %d/%d %s" % [frames[k], FIGHT_FRAMES * ClarityFight.FIGHTS.size(), k])
