@@ -9,32 +9,57 @@ extends RefCounted
 ## back into the procedural model and on again, and its idle and run stay its own (not another Warden's).
 
 ## Every node HunterAnim binds (HunterAnim._init) that a body mesh can hang on.
-const ANIM_PARTS := ["Rig", "Rig/Torso", "Rig/Torso/HeadPivot", "Rig/Torso/ArmLPivot", "Rig/Torso/ArmLPivot/Elbow",
-	"Rig/Torso/ArmLPivot/Elbow/Hand", "Rig/Torso/ArmRPivot", "Rig/Torso/ArmRPivot/Elbow",
+const ANIM_PARTS := [
+	"Rig",
+	"Rig/Torso",
+	"Rig/Torso/HeadPivot",
+	"Rig/Torso/ArmLPivot",
+	"Rig/Torso/ArmLPivot/Elbow",
+	"Rig/Torso/ArmLPivot/Elbow/Hand",
+	"Rig/Torso/ArmRPivot",
+	"Rig/Torso/ArmRPivot/Elbow",
 	"Rig/Torso/ArmRPivot/Elbow/Hand",
-	"Rig/Legs/LegL", "Rig/Legs/LegL/Knee", "Rig/Legs/LegR", "Rig/Legs/LegR/Knee", "Rig/Torso/PauldronL",
-	"Rig/Torso/PauldronR", "Rig/Torso/Skirt", "Rig/Torso/Cape", "Rig/Torso/Scarf", "Rig/Torso/Tail", "Rig/Torso/Wings"]
+	"Rig/Legs/LegL",
+	"Rig/Legs/LegL/Knee",
+	"Rig/Legs/LegR",
+	"Rig/Legs/LegR/Knee",
+	"Rig/Torso/PauldronL",
+	"Rig/Torso/PauldronR",
+	"Rig/Torso/Skirt",
+	"Rig/Torso/Cape",
+	"Rig/Torso/Scarf",
+	"Rig/Torso/Tail",
+	"Rig/Torso/Wings"
+]
 ## Each kit-move channel and the bones it moves (relative to their parent bone). The blade channels only
 ## drive bladed weapons, so they are not asserted on other Wardens.
 const CHANNEL_BONES := {
-	"p": ["hips"], "y": ["hips"], "r": ["hips"], "fx": ["root"], "fy": ["root"], "fz": ["root"],
-	"lift": ["root", "hips"], "sq": ["root", "hips"],
+	"p": ["hips"],
+	"y": ["hips"],
+	"r": ["hips"],
+	"fx": ["root"],
+	"fy": ["root"],
+	"fz": ["root"],
+	"lift": ["root", "hips"],
+	"sq": ["root", "hips"],
 	"legs": ["thigh.L", "shin.L", "thigh.R", "shin.R"],
-	"fl": ["upper_arm.L", "forearm.L", "hand.L"], "fr": ["upper_arm.R", "forearm.R", "hand.R"],
+	"fl": ["upper_arm.L", "forearm.L", "hand.L"],
+	"fr": ["upper_arm.R", "forearm.R", "hand.R"],
 	"gp": ["upper_arm.L", "forearm.L", "upper_arm.R", "forearm.R"],
 	"wa": ["upper_arm.L", "forearm.L", "upper_arm.R", "forearm.R"],
 	"wo": ["upper_arm.L", "forearm.L", "upper_arm.R", "forearm.R"],
 }
 ## A channel's weight: it only plays when that is above zero.
 const CHANNEL_WEIGHT := {"legs": "lw", "fl": "hw", "fr": "rw"}
-const KEYED := 0.04            # a channel value this big counts as keyed (rad, m, or squash)
-const MOVED := 0.004           # a bone moved: this many m, or rad of turn, from its pose with no move
-const EXACT := 0.0005          # m: a bone sits on its rig node's retargeted pose
+const KEYED := 0.04  # a channel value this big counts as keyed (rad, m, or squash)
+const MOVED := 0.004  # a bone moved: this many m, or rad of turn, from its pose with no move
+const EXACT := 0.0005  # m: a bone sits on its rig node's retargeted pose
 const SLOT_MAX := 8
-const MOTION_BONES := ["hips", "thigh.L", "shin.L", "thigh.R", "shin.R", "upper_arm.L", "forearm.L", "upper_arm.R",
-	"forearm.R", "head"]
-const OWN_MOTION := 0.05       # rad: two Wardens' idle or run joint angles differ by more than this on average
-const TRIS_MAX := 80000         # the game budget (RIG_CONTRACT "Budget"): a v95 master's own mesh, ~60k, plus its props
+const MOTION_BONES := [
+	"hips", "thigh.L", "shin.L", "thigh.R", "shin.R", "upper_arm.L", "forearm.L", "upper_arm.R", "forearm.R", "head"
+]
+const OWN_MOTION := 0.05  # rad: two Wardens' idle or run joint angles differ by more than this on average
+const TRIS_MAX := 80000  # the game budget (RIG_CONTRACT "Budget"): a v95 master's own mesh, ~60k, plus its props
 ## Wardens whose approved hair is white (Sable: her v2 turnaround, owner 11-11 "pink hair"): the hair slot's paint,
 ## as drawn (after its look's desat), stays under this HSV saturation, and no hair or eye pick moves her colours.
 const WHITE_HAIR := {"thief": 0.08}
@@ -43,10 +68,13 @@ var bad := 0
 var n := 0
 var holder: Node3D
 
+
 func ok(cond: bool, what: String) -> void:
 	n += 1
 	print("WARDENGLB %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(main: Node) -> void:
 	holder = Node3D.new()
@@ -56,10 +84,11 @@ func run(main: Node) -> void:
 	ok(unmapped.is_empty(), "every rig node HunterAnim poses has a bone (unmapped %s)" % str(unmapped))
 	var vex := WardenGlb.art("gunslinger")
 	ok(
-		WardenGlb.path("gunslinger") == "res://art/wardens/%s/%s.glb" % [vex, vex]
-				and (vex == "vex" or vex.begins_with("vex_") and WardenGlb.variant("vex") == vex),
-		"a Warden's file is art/wardens/<name>/<name>.glb, named as its art (Vex: %s; a variant only when picked)"
-				% vex
+		(
+			WardenGlb.path("gunslinger") == "res://art/wardens/%s/%s.glb" % [vex, vex]
+			and (vex == "vex" or vex.begins_with("vex_") and WardenGlb.variant("vex") == vex)
+		),
+		"a Warden's file is art/wardens/<name>/<name>.glb, named as its art (Vex: %s; a variant only when picked)" % vex
 	)
 	ok(
 		not WardenGlb.has_model("") and not WardenGlb.has_model("no_such_warden"),
@@ -70,9 +99,9 @@ func run(main: Node) -> void:
 	var native: Array = []
 	for a in Arch.ids():
 		var m := _model(a)
-		var head := m.get_node_or_null("Rig/Torso/HeadPivot/Head") as MeshInstance3D      # (a .glb's has none)
+		var head := m.get_node_or_null("Rig/Torso/HeadPivot/Head") as MeshInstance3D  # (a .glb's has none)
 		if WardenNative.on(a):
-			native.append(a)        # (on Meshy's own skeleton, not the contract: --warden-native-check)
+			native.append(a)  # (on Meshy's own skeleton, not the contract: --warden-native-check)
 		elif WardenGlb.has_model(a):
 			if bool(m.get_meta("glb", false)) and m.has_node("Warden") and head == null:
 				loaded.append(a)
@@ -81,13 +110,13 @@ func run(main: Node) -> void:
 		elif not bool(m.get_meta("glb", true)) and not m.has_node("Warden") and head != null and head.visible:
 			fallback.append(a)
 		m.free()
-	ok(fallback.size() + loaded.size() + native.size() == Arch.ids().size(),
-			"every Warden builds: %d from their .glb %s, %d procedural (the fallback), %d on Meshy's skeleton" % [
-				loaded.size(),
-				str(loaded),
-				fallback.size(),
-				native.size()
-			])
+	ok(
+		fallback.size() + loaded.size() + native.size() == Arch.ids().size(),
+		(
+			"every Warden builds: %d from their .glb %s, %d procedural (the fallback), %d on Meshy's skeleton"
+			% [loaded.size(), str(loaded), fallback.size(), native.size()]
+		)
+	)
 	ok("gunslinger" in loaded, "Vex (gunslinger) is drawn from her .glb")
 	for a in loaded:
 		_contract(a)
@@ -103,28 +132,37 @@ func run(main: Node) -> void:
 		_own_look(a)
 		_white_hair(a)
 		await _halo(main, a)
-	if "dolm" in loaded:      # (Tenzo on Meshy's skeleton: his stones are in the mesh, no orbit bones)
+	for a in loaded + native:
+		_far_line(a)
+	if "dolm" in loaded:  # (Tenzo on Meshy's skeleton: his stones are in the mesh, no orbit bones)
 		_stones_look()
 	print("WARDENGLB %d checks, %d failed" % [n, bad])
 	print("WARDENGLB_DONE %s" % ("PASS" if bad == 0 else "FAIL"))
 	main.get_tree().quit()
+
 
 func _model(a: String) -> Node3D:
 	var m := Models.hunter(Arch.weight(a), Data.TEAM_COLORS[0], Arch.signature(a), "", PlayerLook.neutral(), a)
 	holder.add_child(m)
 	return m
 
+
 func _skel(m: Node3D) -> Skeleton3D:
 	return WardenGlb.skeleton(m.get_node("Warden"))
+
 
 ## The armature is the contract's, built where the rig's nodes rest; the budget.
 func _contract(a: String) -> void:
 	var m := _model(a)
 	var sk := _skel(m)
 	var bad_bones: Array = WardenSkeleton.mismatches(sk, WardenGlb.neutral_rest(a), WardenGlb.EXTRA.get(a, {}))
-	ok(bad_bones.is_empty(),
+	ok(
+		bad_bones.is_empty(),
+		(
 			"%s: the .glb's armature is the contract's (+ variant bones %s): names, parents, bones on rig nodes %s"
-			% [a, str(WardenGlb.EXTRA.get(a, {}).keys()), str(bad_bones)])
+			% [a, str(WardenGlb.EXTRA.get(a, {}).keys()), str(bad_bones)]
+		)
+	)
 	var tris := 0
 	var slots := {}
 	var unskinned := 0
@@ -132,8 +170,10 @@ func _contract(a: String) -> void:
 		var mesh := (mi as MeshInstance3D).mesh
 		# (props on an orbit ride their bone unskinned: WardenGlb.Orbits turns them; so do companions WardenCompanions
 		# cut out of the body, Meeko's sun and cloud)
-		var orbit := String(mi.get_parent().name).begins_with(WardenGlb.Orbits.PREFIX) \
-				or String(mi.name).begins_with(WardenCompanions.PREFIX)
+		var orbit := (
+			String(mi.get_parent().name).begins_with(WardenGlb.Orbits.PREFIX)
+			or String(mi.name).begins_with(WardenCompanions.PREFIX)
+		)
 		if (mi as MeshInstance3D).skin == null and not orbit:
 			unskinned += 1
 		for si in mesh.get_surface_count():
@@ -142,10 +182,15 @@ func _contract(a: String) -> void:
 			slots[String(src.resource_name).get_slice("-", 0) if src else ""] = true
 	_ink_shells(m, a)
 	var unknown := slots.keys().filter(func(s): return not WardenGlb.SLOTS.has(s))
-	ok(unskinned == 0 and tris <= TRIS_MAX and slots.size() <= SLOT_MAX and unknown.is_empty(),
+	ok(
+		unskinned == 0 and tris <= TRIS_MAX and slots.size() <= SLOT_MAX and unknown.is_empty(),
+		(
 			"%s: skinned (%d meshes not), %d triangles (at most %d), slots %s (at most %d, all toon slots)"
-			% [a, unskinned, tris, TRIS_MAX, str(slots.keys()), SLOT_MAX])
+			% [a, unskinned, tris, TRIS_MAX, str(slots.keys()), SLOT_MAX]
+		)
+	)
 	m.free()
+
 
 ## Every kit move of every table, played on this Warden: after each key, every bone is exactly where its rig
 ## node's pose retargets it, and each channel the key drives has moved its bones.
@@ -159,8 +204,17 @@ func _kmoves(a: String) -> void:
 	var worst := 0.0
 	var count := 0
 	var dead: Array = []
-	for t in [HunterAnim.KMOVES, KMovesPair.MOVES, KMovesVV.MOVES, KMovesStone.MOVES, MergeMoves.MOVES,
-			KMovesCare.MOVES, KMovesPin.MOVES, KMovesBjorn.MOVES, KMovesDJ.MOVES]:
+	for t in [
+		HunterAnim.KMOVES,
+		KMovesPair.MOVES,
+		KMovesVV.MOVES,
+		KMovesStone.MOVES,
+		MergeMoves.MOVES,
+		KMovesCare.MOVES,
+		KMovesPin.MOVES,
+		KMovesBjorn.MOVES,
+		KMovesDJ.MOVES
+	]:
 		for mv in t:
 			count += 1
 			var moved := {}
@@ -176,7 +230,7 @@ func _kmoves(a: String) -> void:
 				var now := _local_poses(sk)
 				for ch in _keyed(k[1]):
 					if an.hold == "palm" and ch in ["gp", "wa", "wo"]:
-						continue      # (nothing held: the weapon's channels move no hand)
+						continue  # (nothing held: the weapon's channels move no hand)
 					keyed[ch] = true
 					for b in CHANNEL_BONES[ch]:
 						if _moved(still.get(b), now.get(b)):
@@ -184,16 +238,22 @@ func _kmoves(a: String) -> void:
 			for ch in keyed:
 				if not moved.has(ch):
 					dead.append("%s:%s" % [mv, ch])
-	ok(worst <= EXACT, "%s: across %d kit moves every bone sits on its rig node's retargeted pose (worst %.5f m)"
-			% [a, count, worst])
-	ok(dead.is_empty(), "%s: every keyed channel of every kit move moves the bones it drives (dead: %s)"
-			% [a, str(dead)])
+	ok(
+		worst <= EXACT,
+		"%s: across %d kit moves every bone sits on its rig node's retargeted pose (worst %.5f m)" % [a, count, worst]
+	)
+	ok(
+		dead.is_empty(),
+		"%s: every keyed channel of every kit move moves the bones it drives (dead: %s)" % [a, str(dead)]
+	)
 	m.free()
+
 
 func _drive(an: HunterAnim, sync: WardenGlb.Sync, mv: String, tt: float) -> void:
 	for k in 20:
 		an.update(1.0 / 60.0, {"fired": 99.0, "face": 0.0, "grounded": true, "kmove": mv, "kmove_t": tt})
 	sync.apply()
+
 
 ## The channels a key plays: keyed past KEYED, with their weight on.
 func _keyed(key: Dictionary) -> Array:
@@ -204,7 +264,7 @@ func _keyed(key: Dictionary) -> Array:
 		var v = key[ch]
 		var amount := 0.0
 		if ch in ["fx", "fy", "fz"]:
-			amount = absf(fposmod(float(v) + PI, TAU) - PI)      # (a whole turn ends where it began)
+			amount = absf(fposmod(float(v) + PI, TAU) - PI)  # (a whole turn ends where it began)
 		elif v is Vector3:
 			amount = (v as Vector3).length()
 		elif v is Array:
@@ -216,6 +276,7 @@ func _keyed(key: Dictionary) -> Array:
 			out.append(ch)
 	return out
 
+
 ## Each contract bone's pose relative to its parent bone.
 func _local_poses(sk: Skeleton3D) -> Dictionary:
 	var out := {}
@@ -224,6 +285,7 @@ func _local_poses(sk: Skeleton3D) -> Dictionary:
 		if bi >= 0:
 			out[b] = sk.get_bone_pose(bi)
 	return out
+
 
 func _moved(a, b) -> bool:
 	if a == null or b == null:
@@ -234,6 +296,7 @@ func _moved(a, b) -> bool:
 	var turn := rel.get_rotation_quaternion().get_angle()
 	var grow := (ta.basis.get_scale() - tb.basis.get_scale()).length()
 	return ta.origin.distance_to(tb.origin) > MOVED or turn > MOVED or grow > MOVED
+
 
 ## The anchor empties are on their bones and move with them.
 func _anchors(main: Node, a: String) -> void:
@@ -246,13 +309,14 @@ func _anchors(main: Node, a: String) -> void:
 			missing.append(nm)
 		elif not an.get_parent() is BoneAttachment3D:
 			off_bone.append(nm)
-	ok(missing.is_empty() and off_bone.is_empty(),
-			"%s: the anchor empties ride bone attachments (missing %s, not on a bone %s)"
-			% [a, str(missing), str(off_bone)])
+	ok(
+		missing.is_empty() and off_bone.is_empty(),
+		"%s: the anchor empties ride bone attachments (missing %s, not on a bone %s)" % [a, str(missing), str(off_bone)]
+	)
 	var top := WardenGlb.anchor(m, "anchor_head_top")
 	if top != null:
 		var clips: WardenClips = (m.get_node("Warden/Sync") as WardenGlb.Sync).clips
-		if clips:        # (a Hero with clips: hand the head to the rig, or this measures the idle clip's sway)
+		if clips:  # (a Hero with clips: hand the head to the rig, or this measures the idle clip's sway)
 			clips.force = {"proc": true}
 			clips.proc_w = 1.0
 		await main.get_tree().process_frame
@@ -264,6 +328,7 @@ func _anchors(main: Node, a: String) -> void:
 		var d := top.global_position.distance_to(before)
 		ok(d > 0.05, "%s: anchor_head_top follows the head as it nods (%.3f m)" % [a, d])
 	m.free()
+
 
 ## Every surface on the hero toon shader with the atlas, and in the model's hit-flash list.
 func _shading(a: String) -> void:
@@ -279,7 +344,7 @@ func _shading(a: String) -> void:
 			surfaces += 1
 			var sm := (mi as MeshInstance3D).get_surface_override_material(si) as ShaderMaterial
 			if sm and sm.shader in [WardenMood.FACE_SHADER, WardenMood.ATLAS_SHADER]:
-				continue        # (a face drawn on glass or from the mood atlas: no toon surface)
+				continue  # (a face drawn on glass or from the mood atlas: no toon surface)
 			var src := (mi as MeshInstance3D).mesh.surface_get_material(si) as BaseMaterial3D
 			var atlas := src != null and src.albedo_texture != null
 			if atlas:
@@ -293,7 +358,7 @@ func _shading(a: String) -> void:
 			# a textured surface shows its atlas; a flat-painted one (hand-modelled, no atlas) its own colour
 			var shows := false
 			if sm and sm.shader == WardenGlb.FLAME:
-				shows = true      # (fire: no paint of its own)
+				shows = true  # (fire: no paint of its own)
 			elif sm and atlas:
 				shows = sm.get_shader_parameter("use_tex") == true and sm.get_shader_parameter("albedo_tex") != null
 			elif sm and src:
@@ -302,29 +367,41 @@ func _shading(a: String) -> void:
 			var shader_ok := sm != null and sm.shader in [Models.HERO, WardenGlb.VOID, WardenGlb.CARD, WardenGlb.FLAME]
 			if not shader_ok or not shows or not sm in mats:
 				wrong += 1
-	ok(surfaces > 0 and wrong == 0,
-			"%s: all %d surfaces on the hero toon shader (%d with an atlas, rest flat), in the hit flash (%d not)" \
-			% [a, surfaces, textured, wrong])
+	ok(
+		surfaces > 0 and wrong == 0,
+		(
+			"%s: all %d surfaces on the hero toon shader (%d with an atlas, rest flat), in the hit flash (%d not)"
+			% [a, surfaces, textured, wrong]
+		)
+	)
 	ok(no_relief == 0, "%s: all %d of its normal maps reach the shader (%d lost)" % [a, relief, no_relief])
 	print("WARDENGLB %s normal-mapped surfaces: %d" % [a, relief])
 	m.free()
+
 
 ## The hit radius and the ring that shows it are the same with the .glb as without, and the .glb brings no
 ## collision of its own.
 func _hitbox(a: String) -> void:
 	var with := _model(a)
 	var ring_w := (with.get_node("TeamRing") as Node3D).global_transform.basis.get_scale().x
-	var shapes := with.get_node("Warden").find_children("*", "CollisionObject3D", true, false).size() \
-			+ with.get_node("Warden").find_children("*", "CollisionShape3D", true, false).size()
+	var shapes := (
+		with.get_node("Warden").find_children("*", "CollisionObject3D", true, false).size()
+		+ with.get_node("Warden").find_children("*", "CollisionShape3D", true, false).size()
+	)
 	with.free()
 	WardenGlb._measuring = true
 	var without := _model(a)
 	var ring_p := (without.get_node("TeamRing") as Node3D).global_transform.basis.get_scale().x
 	without.free()
 	WardenGlb._measuring = false
-	ok(absf(ring_w - ring_p) < 0.0001 and shapes == 0,
+	ok(
+		absf(ring_w - ring_p) < 0.0001 and shapes == 0,
+		(
 			"%s: hit ring %.3f with the .glb, %.3f without (hit radius %.2f m), no collision in the .glb"
-			% [a, ring_w, ring_p, Arch.hit_r(a, Data.CLASSES[Arch.weight(a)])])
+			% [a, ring_w, ring_p, Arch.hit_r(a, Data.CLASSES[Arch.weight(a)])]
+		)
+	)
+
 
 ## A .glb that carries its weapon: it is in the hands (under the Gun node, whose Muzzle stays where the shots
 ## leave), the procedural weapon is hidden, and its magazine (if it has one apart) is the Gun's Mag.
@@ -345,6 +422,7 @@ func _stones_look() -> void:
 	ok(off < 0.3, "dolm: the seeing-stones turn to what they watch (%.2f rad off)" % off)
 	m.free()
 
+
 func _springs(a: String) -> void:
 	var m := _model(a)
 	var sync := m.get_node("Warden/Sync") as WardenGlb.Sync
@@ -353,7 +431,7 @@ func _springs(a: String) -> void:
 		return
 	var sk := _skel(m)
 	sync.springs.calm = true
-	sync.clips = null      # (the chains alone: a clip's idle keeps moving what they hang from)
+	sync.clips = null  # (the chains alone: a clip's idle keeps moving what they hang from)
 	sync._process(1.0 / 60.0)
 	var lag := 0.0
 	for i in 6:
@@ -363,8 +441,13 @@ func _springs(a: String) -> void:
 	for i in 240:
 		sync._process(1.0 / 60.0)
 	var rest := _spring_off(sk, sync)
-	ok(lag > 0.02 and rest < 0.016, "%s: %d spring chains trail a sideways move (tip %.3f m off) and settle (%.4f m)"
-			% [a, sync.springs.chains.size(), lag, rest])
+	ok(
+		lag > 0.02 and rest < 0.016,
+		(
+			"%s: %d spring chains trail a sideways move (tip %.3f m off) and settle (%.4f m)"
+			% [a, sync.springs.chains.size(), lag, rest]
+		)
+	)
 	# wings fold back while she skates (the root's WING_FOLD meta): each wing tip swings behind its root
 	var wings: Array = sync.springs.chains.filter(func(ch): return bool(ch["wing"]))
 	if not wings.is_empty():
@@ -376,9 +459,12 @@ func _springs(a: String) -> void:
 		var back := 1.0
 		for i in open.size():
 			back = minf(back, (shut[i] as Vector3).z - (open[i] as Vector3).z)
-		ok(back > 0.08, "%s: %d wings fold back while skating (tips at least %.3f m further back)"
-				% [a, wings.size(), back])
+		ok(
+			back > 0.08,
+			"%s: %d wings fold back while skating (tips at least %.3f m further back)" % [a, wings.size(), back]
+		)
 	m.free()
+
 
 ## Props on an orbit (RIG_CONTRACT "Orbits"): over a second each circles its pivot (moves, at the same distance
 ## from it), so the turning is the loader's, not baked into the .glb. (No orbit: nothing to check.)
@@ -403,10 +489,15 @@ func _orbits(a: String) -> void:
 		moved = minf(moved, nd.global_position.distance_to(b[1]))
 		var r0 := Vector2(b[1].x - c.x, b[1].z - c.z).length()
 		drift = maxf(drift, absf(Vector2(nd.global_position.x - c.x, nd.global_position.z - c.z).length() - r0))
-	ok(moved > 0.05 and drift < 0.01,
+	ok(
+		moved > 0.05 and drift < 0.01,
+		(
 			"%s: %d orbit props circle their bone (each moved at least %.3f m in 1s, radius kept to %.4f m)"
-			% [a, before.size(), moved, drift])
+			% [a, before.size(), moved, drift]
+		)
+	)
 	m.free()
+
 
 ## A model's own look (content/rules/warden_look.json) reaches its surfaces: every surface of a slot it names
 ## carries that slot's values. (No entry: nothing to check.)
@@ -431,16 +522,20 @@ func _own_look(a: String) -> void:
 				var want: Variant = WardenGlb._param(want_all[k])
 				var got: Variant = sm.get_shader_parameter(k)
 				seen += 1
-				var same: bool = got.is_equal_approx(want) if want is Color else is_equal_approx(float(got),
-						float(want))
+				var same: bool = (
+					got.is_equal_approx(want) if want is Color else is_equal_approx(float(got), float(want))
+				)
 				if k == "albedo" and want is Color:
 					# (a look's albedo composes with the player's pick: the look's colour x a tint within TINT_MAX)
 					same = _within_tint(got as Color, want as Color)
 				if not same:
 					wrong.append("%s.%s" % [slot, k])
-	ok(seen > 0 and wrong.is_empty(), "%s: its own look (warden_look.json) is on its surfaces (%d values, wrong %s)"
-			% [a, seen, str(wrong)])
+	ok(
+		seen > 0 and wrong.is_empty(),
+		"%s: its own look (warden_look.json) is on its surfaces (%d values, wrong %s)" % [a, seen, str(wrong)]
+	)
 	m.free()
+
 
 func _white_hair(a: String) -> void:
 	if not WHITE_HAIR.has(a):
@@ -461,16 +556,20 @@ func _white_hair(a: String) -> void:
 			if img.is_compressed():
 				img.decompress()
 			for uv in mesh.surface_get_arrays(si)[Mesh.ARRAY_TEX_UV] as PackedVector2Array:
-				var c := img.get_pixel(clampi(int(uv.x * img.get_width()), 0, img.get_width() - 1),
-						clampi(int(uv.y * img.get_height()), 0, img.get_height() - 1))
+				var c := img.get_pixel(
+					clampi(int(uv.x * img.get_width()), 0, img.get_width() - 1),
+					clampi(int(uv.y * img.get_height()), 0, img.get_height() - 1)
+				)
 				sum += Vector3(c.r, c.g, c.b)
 				texels += 1
 	m.free()
 	var paint := Vector3.ZERO if texels == 0 else sum / texels
 	var drawn := paint.lerp(Vector3.ONE * paint.dot(Vector3(0.3, 0.59, 0.11)), desat)
 	var sat := Color(drawn.x, drawn.y, drawn.z).s
-	ok(texels > 0 and sat <= float(WHITE_HAIR[a]), "%s: the hair reads white, paint saturation %.3f as drawn (max %.2f)"
-			% [a, sat, WHITE_HAIR[a]])
+	ok(
+		texels > 0 and sat <= float(WHITE_HAIR[a]),
+		"%s: the hair reads white, paint saturation %.3f as drawn (max %.2f)" % [a, sat, WHITE_HAIR[a]]
+	)
 	var base := MantleLook.params(a, PlayerLook.neutral())
 	var moved: Array = []
 	for pick in Models.LOOK_HAIR.size():
@@ -478,10 +577,13 @@ func _white_hair(a: String) -> void:
 		lk["hair_col"] = pick
 		lk["eyes"] = pick % PlayerLook.pick_list("eyes").size()
 		var got := MantleLook.params(a, lk)
-		if not (got["hair_col"] as Color).is_equal_approx(base["hair_col"]) \
-				or not (got["eye_col"] as Color).is_equal_approx(base["eye_col"]):
+		if (
+			not (got["hair_col"] as Color).is_equal_approx(base["hair_col"])
+			or not (got["eye_col"] as Color).is_equal_approx(base["eye_col"])
+		):
 			moved.append(pick)
 	ok(moved.is_empty(), "%s: no hair or eye pick tints her hair or eyes (moved by %s)" % [a, str(moved)])
+
 
 func _within_tint(got: Color, want: Color) -> bool:
 	var lo := 1.0 - WardenGlb.TINT_MAX - 0.001
@@ -492,9 +594,11 @@ func _within_tint(got: Color, want: Color) -> bool:
 			return false
 	return true
 
+
 ## The tips of the wing chains (skeleton space: behind is +Z).
 func _wing_tips(sk: Skeleton3D, wings: Array) -> Array:
 	return wings.map(func(ch): return sk.get_bone_global_pose(int((ch["ids"] as Array)[-1])).origin)
+
 
 ## A model's glow halos (warden_look.json "halos") hang on their anchors outside the .glb (the skin, the bounds
 ## and the slot checks never see them) and follow the head when it nods, the body when it turns and leans (a
@@ -525,7 +629,7 @@ func _halo(main: Node, a: String) -> void:
 			ap.rotation.x += 0.6
 	(m.get_node("Rig/Torso") as Node3D).rotation.y += 0.5
 	(m.get_node("Rig/Torso/Aim") as Node3D).rotation.x = 0.4
-	(m.get_node("Rig/Torso") as Node3D).rotation.x = 0.3      # (and leans: Pip's lantern)
+	(m.get_node("Rig/Torso") as Node3D).rotation.x = 0.3  # (and leans: Pip's lantern)
 	sync.apply()
 	await main.get_tree().process_frame
 	for hs in hl:
@@ -538,9 +642,13 @@ func _halo(main: Node, a: String) -> void:
 			inside += 1
 		off = maxf(off, mi.global_position.distance_to(an.global_position))
 		moved = maxf(moved, mi.global_position.distance_to(rest[mi]))
-	ok(found == hl.size() and inside == 0 and off < 0.001 and moved > 0.01,
+	ok(
+		found == hl.size() and inside == 0 and off < 0.001 and moved > 0.01,
+		(
 			"%s: %d glow halos on their anchors (off %.4f m), outside the .glb, follow nod/twist/lean/arms/aim (%.3f m)"
-			% [a, found, off, moved])
+			% [a, found, off, moved]
+		)
+	)
 	m.free()
 
 
@@ -559,10 +667,12 @@ func _spring_off(sk: Skeleton3D, sync: WardenGlb.Sync) -> float:
 			var ln := 0.0
 			for j in range(1, ids.size()):
 				ln += sk.get_bone_global_rest(int(ids[j])).origin.distance_to(
-						sk.get_bone_global_rest(int(ids[j - 1])).origin)
+					sk.get_bone_global_rest(int(ids[j - 1])).origin
+				)
 			at = root + (sk.global_transform.basis.inverse() * Vector3.DOWN).normalized() * ln
 		worst = maxf(worst, at.distance_to(sk.get_bone_global_pose(tip).origin))
 	return worst
+
 
 func _weapon(a: String) -> void:
 	var m := _model(a)
@@ -571,30 +681,40 @@ func _weapon(a: String) -> void:
 	if weapon == null:
 		m.free()
 		return
-	var off := gun.get_node_or_null(WardenGlb.WEAPON_OFF) as Node3D     # (a twin hold's second weapon)
-	var own := func(mi: Node) -> bool: return mi == weapon or weapon.is_ancestor_of(mi) \
-			or (off != null and (mi == off or off.is_ancestor_of(mi)))
+	var off := gun.get_node_or_null(WardenGlb.WEAPON_OFF) as Node3D  # (a twin hold's second weapon)
+	var own := func(mi: Node) -> bool:
+		return mi == weapon or weapon.is_ancestor_of(mi) or (off != null and (mi == off or off.is_ancestor_of(mi)))
 	# a hammer is seated on its swing pivot (meta hammer_pivot), its block round the point BjornFx finds the head
 	var pivot: Node3D = null
 	for c in gun.get_children():
 		if c.has_meta("hammer_pivot"):
 			pivot = c
 	if pivot:
-		ok(weapon.get_parent() == pivot and weapon.get_aabb().has_point(Vector3(0, 0, -0.62)),
+		ok(
+			weapon.get_parent() == pivot and weapon.get_aabb().has_point(Vector3(0, 0, -0.62)),
+			(
 				"%s's weapon rides the hammer pivot (the kit's swings) with its head round (0, 0, -0.62) (%s)"
-				% [a, str(weapon.get_aabb())])
+				% [a, str(weapon.get_aabb())]
+			)
+		)
 	var shown := gun.find_children("*", "MeshInstance3D", true, false).filter(
-			func(mi): return (mi as Node3D).is_visible_in_tree() and not own.call(mi))
+		func(mi): return (mi as Node3D).is_visible_in_tree() and not own.call(mi)
+	)
 	var mag := gun.get_node_or_null("Mag") as MeshInstance3D
-	var own_mag := mag != null and mag.has_meta("glb")      # (the loader moved the .glb's weapon_mag here)
+	var own_mag := mag != null and mag.has_meta("glb")  # (the loader moved the .glb's weapon_mag here)
 	# its own magazine is the Mag; a weapon modelled whole leaves the Mag node empty
 	var mag_ok := mag != null and (mag.mesh != null and mag in shown if own_mag else mag.mesh == null)
 	var stray := shown.filter(func(mi): return mi != mag)
 	var left := str(stray.map(func(mi): return mi.name))
-	ok(gun.has_node("Muzzle") and stray.is_empty() and mag_ok,
+	ok(
+		gun.has_node("Muzzle") and stray.is_empty() and mag_ok,
+		(
 			"%s holds its own weapon (in the Gun with the Muzzle, procedural parts left %s, its magazine the Mag: %s)"
-			% [a, left, str(mag_ok)])
+			% [a, left, str(mag_ok)]
+		)
+	)
 	m.free()
+
 
 ## A .glb shield (Breaker's prow) rides the left hand's Shield node in place of the procedural one.
 func _shield(a: String) -> void:
@@ -605,11 +725,14 @@ func _shield(a: String) -> void:
 		m.free()
 		return
 	var shown := holder_v.find_children("*", "MeshInstance3D", true, false).filter(
-			func(mi): return (mi as Node3D).is_visible_in_tree() and mi != sh)
-	ok(shown.is_empty() and sh.transform.is_equal_approx(Transform3D.IDENTITY),
-			"%s holds its own shield on the left hand's Shield node (procedural parts left %s)"
-			% [a, str(shown.size())])
+		func(mi): return (mi as Node3D).is_visible_in_tree() and mi != sh
+	)
+	ok(
+		shown.is_empty() and sh.transform.is_equal_approx(Transform3D.IDENTITY),
+		"%s holds its own shield on the left hand's Shield node (procedural parts left %s)" % [a, str(shown.size())]
+	)
 	m.free()
+
 
 ## The skeleton is shared names and layout only: each Warden keeps its own motion. Over an idle and a run
 ## cycle, this Warden's bones and another Warden's (its rig driving the same contract skeleton) take
@@ -640,17 +763,48 @@ func _own_motion(a: String, other: String) -> void:
 					diff += qa.angle_to(qb)
 					samples += 1
 		var mean := diff / maxf(1.0, samples)
-		ok(mean > OWN_MOTION, "%s keeps its own %s: its joint angles differ from %s's by %.2f rad on average"
-				% [a, gait, other, mean])
+		ok(
+			mean > OWN_MOTION,
+			"%s keeps its own %s: its joint angles differ from %s's by %.2f rad on average" % [a, gait, other, mean]
+		)
 	o_sync.free()
 	m.free()
 	o.free()
+
 
 ## The model's own meshes: not WardenMerge's ink shells, which draw the ink pass its surfaces gave up.
 func _body_meshes(m: Node) -> Array:
 	var shells := WardenMerge.inks(m)
 	return m.get_node("Warden").find_children("*", "MeshInstance3D", true, false).filter(
-			func(mi): return not mi in shells)
+		func(mi): return not mi in shells
+	)
+
+
+## At the match camera one line goes round the whole figure (WardenGlb.INK_FAR_PX): every painted ink, as a pass
+## or a joined shell, carries it, and the hair (no line close up) carries it alone (far_only).
+func _far_line(a: String) -> void:
+	var m := _model(a)
+	var inks: Array = WardenMerge.inks(m).map(func(sh): return sh.material_override)
+	var hair := 0
+	for mi in _body_meshes(m):
+		for si in (mi as MeshInstance3D).mesh.get_surface_count():
+			var sm := (mi as MeshInstance3D).get_active_material(si) as ShaderMaterial
+			var src := (mi as MeshInstance3D).mesh.surface_get_material(si) as BaseMaterial3D
+			if sm and sm.next_pass is ShaderMaterial and (sm.next_pass as ShaderMaterial).shader == Models.OUTLINE:
+				inks.append(sm.next_pass)
+				hair += int(src != null and String(src.resource_name).begins_with("hair-"))
+	var painted := 0
+	var unlined := 0
+	for ink: ShaderMaterial in inks:
+		if ink == null or ink.get_shader_parameter("ink_mask") != true:
+			continue
+		painted += 1
+		var px: Variant = ink.get_shader_parameter("far_px")
+		unlined += int(not (px is float and is_equal_approx(px, WardenGlb.INK_FAR_PX)))
+	ok(unlined == 0, "%s: all %d painted inks draw the match-camera line (%d without)" % [a, painted, unlined])
+	print("WARDENGLB %s hair surfaces with the far line: %d" % [a, hair])
+	m.free()
+
 
 ## Each ink shell is its body's skinned copy on the outline shader, and no surface of that body still wears
 ## the same ink as a pass (it would draw twice).
@@ -661,13 +815,24 @@ func _ink_shells(m: Node, a: String) -> void:
 		var body := shell.get_parent() as MeshInstance3D
 		var ink := shell.material_override as ShaderMaterial
 		var twice := range(body.mesh.get_surface_count()).any(
-				func(si): return body.get_active_material(si).next_pass == ink)
-		if ink == null or ink.shader != Models.OUTLINE or not _same_skin(shell.skin, body.skin) or twice \
-				or shell.get_node(shell.skeleton) != body.get_node(body.skeleton):
+			func(si): return body.get_active_material(si).next_pass == ink
+		)
+		if (
+			ink == null
+			or ink.shader != Models.OUTLINE
+			or not _same_skin(shell.skin, body.skin)
+			or twice
+			or shell.get_node(shell.skeleton) != body.get_node(body.skeleton)
+		):
 			bad_v.append(shell.name)
-	ok(bad_v.is_empty(),
+	ok(
+		bad_v.is_empty(),
+		(
 			"%s: %d ink shells, each one draw for its body's line, skinned like it, ink not also a pass %s"
-			% [a, shells.size(), str(bad_v)])
+			% [a, shells.size(), str(bad_v)]
+		)
+	)
+
 
 ## Two skins with the same bind poses (WardenBulk thins each mesh's skin as its own copy, the ink shell's too).
 func _same_skin(a: Skin, b: Skin) -> bool:

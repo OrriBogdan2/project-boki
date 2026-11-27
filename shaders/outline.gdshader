@@ -15,6 +15,13 @@ uniform float far_thin = 0.0;
 // (far_cut and the glow shell go by the size on screen, as hero_toon's match_d: in match-camera metres, so a
 // close-up camera far off with a narrow lens keeps the line)
 uniform float far_cut = 0.0;
+// A painted Hunter's silhouette line at the match camera (WardenGlb INK_FAR_PX): from 8 to 18 m (as far_cut) the line
+// becomes far_px pixels of a 720 px tall view wide, past the ink room, and is pushed far_push m back along the view so
+// the body hides every inner piece's shell (belts, buckles, strands) and only the outline against the ground shows.
+// 0: the old line (far_cut decides).
+uniform float far_px = 0.0;
+uniform float far_push = 0.0;
+uniform bool far_only = false;  // that line and nothing closer (a Hunter's hair: its strands poke through a near line)
 // A glow piece's halo at the match camera (WardenGlb, the glow slot's own shell): the shell in the piece's painted
 // colour (glow_tex x glow_col x glow_k), glow_px screen pixels wide, growing in from glow_near to glow_far m away
 // and none closer (close-ups keep the lens itself): a 3 cm lens or a thin crack reads as a glow, not one pixel.
@@ -57,11 +64,17 @@ void vertex() {
 	} else {
 		if (ink_mask) { w = min(w, COLOR.a * INK_ROOM); }
 		w *= 1.0 - far_thin * smoothstep(8.0, 18.0, d);
+		w = mix(w, far_px * px / length(MODEL_MATRIX[0].xyz), step(0.0001, far_px) * smoothstep(8.0, 18.0, far_d));
 	}
 	w *= mix(SHELL_THIN, 1.0, min(shell, 1.0)) * (1.0 + SHELL_SWELL * max(shell - 1.0, 0.0));
 	line_px = w * length(MODEL_MATRIX[0].xyz) * abs(PROJECTION_MATRIX[1][1]) * max(ink_px_h, 1.0)
 		/ (PROJECTION_MATRIX[3][3] > 0.5 ? 2.0 : 2.0 * d);
 	VERTEX += NORMAL * w;
+	if (far_px > 0.0 && !glow_shell) {
+		vec4 vv = MODELVIEW_MATRIX * vec4(VERTEX, 1.0);
+		vv.xyz += normalize(vv.xyz) * far_push * smoothstep(8.0, 18.0, far_d);
+		POSITION = PROJECTION_MATRIX * vv;
+	}
 }
 void fragment() {
 	if (glow_shell) {
@@ -69,8 +82,10 @@ void fragment() {
 		ALBEDO = min(texture(glow_tex, UV).rgb * glow_col.rgb * glow_k, vec3(1.0));
 	} else {
 		// ink room 0 = no line there: the shell's back face would otherwise show black on a folded thin part (the fin)
-		if (ink_mask && ink_a < 0.004) { discard; }
-		if (far_cut > 0.0 && smoothstep(8.0, 18.0, far_d) >= far_cut) { discard; }
+		// (the match camera's silhouette line goes round those too: pushed back, the body hides the back face)
+		float far_on = step(0.0001, far_px) * smoothstep(8.0, 18.0, far_d);
+		if (((ink_mask && ink_a < 0.004) || far_only) && far_on < 0.5) { discard; }
+		if (far_px <= 0.0 && far_cut > 0.0 && smoothstep(8.0, 18.0, far_d) >= far_cut) { discard; }
 		if (line_px < min_px) { discard; }
 		ALBEDO = mix(mix(shell_from.rgb, color.rgb, min(shell, 1.0)), vec3(1.0), max(shell - 1.0, 0.0));
 	}

@@ -10,10 +10,12 @@ const CHECKS := {
 	"--range-screen-check": ["res://tools/range_screen_check.gd", "range_screen_check", null],  # ability ends on screen
 	"--muzzle-check": ["res://tools/muzzle_check.gd", "muzzle_check", null],  # shots leave the weapon or hand
 	"--fog-ab-shots": ["res://tools/fog_ab_shots.gd", "fog_ab_shots", null],  # GPU: sight fog on/off, same frame
+	"--standout-shots": ["res://tools/standout_shots.gd", "standout_shots", null],  # GPU: Hunters vs 3 grounds
 	"--fx-hunter-cap-check": ["res://tools/fx_hunter_cap_check.gd", "fx_hunter_cap_check", null],  # glow sphere cap
 	"--boki-type-colour-check": ["res://tools/boki_type_colour_check.gd", "boki_type_colour_check", null],
 	"--boki-type-hit-check": ["res://tools/boki_type_hit_check.gd", "boki_type_hit_check", "check"],  # Juice.flash_col
 	"--boki-type-hit-shots": ["res://tools/boki_type_hit_check.gd", "boki_type_hit_check", "shots"],  # --shots-dir
 	"--summon-pop-shots": ["res://tools/summon_pop_shots.gd", "summon_pop_shots", null],  # --shots-dir=<dir>
+	"--hunter-scale-shots": ["res://tools/hunter_scale_shots.gd", "hunter_scale_shots", null],  # GPU: match size px
 	"--tenzo-stone-shots": ["res://tools/tenzo_stone_shots.gd", "tenzo_stone_shots", null],  # GPU: Tenzo stone stills
 }

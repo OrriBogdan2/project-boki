@@ -184,7 +184,7 @@ const WEAPON_MUZZLE := "weapon_muzzle"  # an empty on its mouth, a child of it: 
 const LOOK_PATH := "res://content/rules/warden_look.json"
 const HALO := preload("res://shaders/warden_halo.gdshader")
 
-## The match-zoom read (ext/warden-matchzoom; hero_toon.gdshader far_*, outline.gdshader far_cut and glow_shell),
+## The match-zoom read (ext/warden-matchzoom; hero_toon.gdshader far_*, outline.gdshader far_px and glow_shell),
 ## on a painted atlas: from 8 to 18 m (by size on screen) the pale fresnel drops to a third, the gloss, sheen and
 ## light rims go, the rest is anti-aliased, stray texels are clamped to their coarser mip, rim_far becomes a broad
 ## band in the signature colour and whatever glows is a step brighter. A Hunter's warden_look.json "painted" or
@@ -192,7 +192,11 @@ const HALO := preload("res://shaders/warden_halo.gdshader")
 const FAR_LOOK := {
 	"far_fres": 0.35, "far_spec": 0.0, "far_aa": 1.0, "far_clamp": 0.8, "far_rim_soft": 1.0, "far_glow": 0.6
 }
-const INK_FAR_CUT := 0.55  # the ink gone from ~13.5 m (outline.gdshader far_cut): a sub-pixel line is dark dots
+## The ink at the match camera: one dark line round the whole figure (outline.gdshader far_px, far_push), px of a
+## 720 px tall view, and m pushed back along the view so the body hides its inner pieces' shells (only the edge
+## against the ground shows): with no line there a Hunter had no edge on a light ground.
+const INK_FAR_PX := 1.5
+const INK_FAR_PUSH := 0.3
 
 ## The glow slot's halo shell at the match camera (outline.gdshader glow_shell): eyes, lenses and cracks read as a
 ## glow there, not a pixel. A Hunter's "glow_shell" overrides these ({"glow_px": 0}: none).
@@ -215,7 +219,7 @@ static var _variants = null  # art name -> the design variant the command line p
 static var _look = null  # content/rules/warden_look.json, read once (look())
 
 static var _misfits := {}  # .glb path -> the bones that don't fit the rig ([] when it fits)
-static var _far_inks := {}  # [ink shell, the Hunter's "ink" as JSON] -> that shell with its far_cut
+static var _far_inks := {}  # [ink shell, the Hunter's "ink" as JSON, far only] -> that shell with its far line
 
 
 ## Starts reading every Warden model a match may dress a Hunter in (as the loading screen comes up): the first
@@ -667,7 +671,7 @@ static func _param(v: Variant) -> Variant:
 
 
 ## A surface's match-zoom read (FAR_LOOK), after its own look; and the Hunter's warden_look.json keys:
-## "no_ink" (material tags or slots without the ink shell: thin crossbows, a gum bubble), "ink" {"far_cut",
+## "no_ink" (material tags or slots without the ink shell: thin crossbows, a gum bubble), "ink" {"far_px",
 ## "far_thin", "color"} for its ink shell, "glow_shell" for the glow pieces' halo.
 static func _far_look(m: ShaderMaterial, src: BaseMaterial3D, slot: String, tag: String, own: Dictionary) -> void:
 	if m.shader != Models.HERO or not (src and src.albedo_texture):
@@ -679,20 +683,12 @@ static func _far_look(m: ShaderMaterial, src: BaseMaterial3D, slot: String, tag:
 		if not set_by.has(k):
 			m.set_shader_parameter(k, FAR_LOOK[k])
 	var ink := m.next_pass as ShaderMaterial
+	var no_ink: Array = own.get("no_ink", [])
 	if ink and ink.get_shader_parameter("ink_mask") == true:
-		var no_ink: Array = own.get("no_ink", [])
-		if tag in no_ink or slot in no_ink:
-			m.next_pass = null
-		else:
-			var own_ink: Dictionary = own.get("ink", {})
-			var key := [ink, JSON.stringify(own_ink)]
-			if not _far_inks.has(key):
-				var far := ink.duplicate() as ShaderMaterial
-				far.set_shader_parameter("far_cut", INK_FAR_CUT)
-				for k in own_ink:
-					far.set_shader_parameter(k, _param(own_ink[k]))
-				_far_inks[key] = far
-			m.next_pass = _far_inks[key]
+		m.next_pass = null if tag in no_ink or slot in no_ink else _far_ink(ink, own.get("ink", {}), false)
+	elif ink == null and slot == "hair" and not (tag in no_ink or slot in no_ink):
+		# (the hair has no line close up, its ragged strands poked through it; far off it needs the silhouette)
+		m.next_pass = _far_ink(_painted_ink(), own.get("ink", {}), true)
 	if slot == "glow" and m.next_pass == null:
 		var cfg: Dictionary = GLOW_SHELL.merged(own.get("glow_shell", {}), true)
 		if float(cfg["glow_px"]) > 0.0:
@@ -703,6 +699,21 @@ static func _far_look(m: ShaderMaterial, src: BaseMaterial3D, slot: String, tag:
 			for k in cfg:
 				sh.set_shader_parameter(k, _param(cfg[k]))
 			m.next_pass = sh
+
+
+## The painted ink `ink` with the match camera's silhouette line (INK_FAR_PX) and the Hunter's own "ink" keys,
+## one per kind; `only`: that line alone, nothing closer (outline.gdshader far_only).
+static func _far_ink(ink: ShaderMaterial, own_ink: Dictionary, only: bool) -> ShaderMaterial:
+	var key := [ink, JSON.stringify(own_ink), only]
+	if not _far_inks.has(key):
+		var far := ink.duplicate() as ShaderMaterial
+		far.set_shader_parameter("far_px", INK_FAR_PX)
+		far.set_shader_parameter("far_push", INK_FAR_PUSH)
+		far.set_shader_parameter("far_only", only)
+		for k in own_ink:
+			far.set_shader_parameter(k, _param(own_ink[k]))
+		_far_inks[key] = far
+	return _far_inks[key]
 
 
 ## Every surface onto a hero-toon material for its slot: the baked atlas as its albedo, the baked AO in the

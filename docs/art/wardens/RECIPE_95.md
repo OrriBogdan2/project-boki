@@ -136,7 +136,8 @@ The shared painted look (WardenGlb.PAINTED) does two things for every model, so 
 - ext/warden-matchzoom, the speckle fringe (ORCH 15:15): from 8 to 18 m the pale fresnel drops to a third
   (`far_fres`), gloss, sheen and the lights' rims go (`far_spec`: the white dots on metal), what is left is
   anti-aliased (`far_aa`), stray texels are clamped to their coarser mip (`far_clamp`: no wider blur, no mud), the
-  ink is gone from ~13.5 m (`INK_FAR_CUT`), alpha cards fade edge-on and keep their coverage face-on
+  ink becomes one dark 1.5 px (720p) line round the whole figure, hair included, pushed back so inner pieces'
+  shells hide behind the body (`INK_FAR_PX`, `INK_FAR_PUSH`; was cut from ~13.5 m), alpha cards fade edge-on and keep their coverage face-on
   (warden_card `far_edge`, `far_alpha`), `rim_far` is a broad saturated band in `rim_far_color` (`far_rim_soft`),
   and every glow-slot piece gets a 1.4 px halo shell there (`GLOW_SHELL`) and a brighter glow (`far_glow`).
   Per-part opt-outs: `no_ink` (material tags) in the model's warden_look.json; `ink`, `glow_shell` to tune.
