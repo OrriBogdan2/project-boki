@@ -8,16 +8,15 @@ Sable corner brackets, Motley a harlequin diamond, Gil a ring with a fin. With t
 Hunter's colour lifted by tuning `look_lift` (dark colours still read on dark ground); the dot keeps the plain accent.
 Every look is strokes only, at most 3 px past the plain ring, and opens with bloom.
 
-The ammo no longer draws at the cursor (tuning `reticle.ammo_at_cursor`, default 0): next to the ring it read as a
-second ring on most Hunters, and the reference game keeps ammo in the weapon panel, not at the cursor; ours is in the
-HUD's weapon panel too. Set it to 1 to bring the thin ammo arc back. The other gauge arcs (resource, charge, and the
-AimKit charge ring) draw only their filled part over a thin dark edge (`Reticle.arc`, edge only with the outline
-setting on): the black full-length track they used to sit on read as a shadow ring round the reticle. Kael's blade tick
-above his shackle arcs is part of his look. The gauge arcs sit clear of the look (charge at 16 px, resource at 21 px, a
-quarter-circle, thinner strokes) so they read as gauges, not as a second ring.
+The ammo no longer draws at the cursor (the arc and its tuning keys are gone): next to the ring it read as a second ring
+on most Hunters; the ammo is in the HUD's weapon panel. The gauges (resource, charge, warm-up, spin-up and the AimKit
+charge) are short bars under the reticle (`Reticle.bar`, tuning `bar_w`/`bar_y`/`bar_step`: charge in slot 0, resource
+in slot 1), filled part only over a thin dark edge: a gauge that wrapped the ring read as a second ring (art-gate, twice).
+Only the AimKit charge "body" mode still draws a ring, round the Hunter, not the cursor. Kael's blade tick above his
+shackle arcs is part of his look.
 Checks: `--reticle-check` (every Hunter's look is known and its own; every look draws).
 Proof (real GPU, `--resolution 1920x1080`): `--reticle-looks-shots` (dark/light/grass swatch rows, labelled, at rest)
-and `--reticle-proof-shots` (every Hunter full frame at rest and firing on flower-free grass, contact sheets of 3 tiles a row with 2.7x zoom).
+and `--reticle-proof-shots` (every Hunter full frame at rest and firing on flower-free grass, contact sheets of 3 tiles a row with 2.2x zoom).
 Shots: `docs/shots/reticle_looks_1126b_swatches.png` (dark/light/grass at rest), `reticle_looks_1126b_sheet1.png` and
-`_sheet2.png` (every Hunter on a meadow at 1920x1080, tile = full frame, 2.7x zoom at rest and firing, cursor on flower-free grass). The 26 full
+`_sheet2.png` (every Hunter on a meadow at 1920x1080, tile = full frame, 2.2x zoom at rest and firing, cursor on flower-free grass). The 26 full
 frames are in `/home/boki/gens/reticle-looks-1126b/`. A cursor sitting on grass at rest is the same size and colour as on dark/light.

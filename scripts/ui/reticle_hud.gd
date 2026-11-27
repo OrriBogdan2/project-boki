@@ -37,13 +37,13 @@ func draw(c: CanvasItem, p: Hunter, at: Vector2, time: float) -> void:
 	if p.ak and p.ak.has_gauge():
 		var rc := p.ak.res_col()
 		var full := p.ak.tell == "full"
-		_arc(c, at, _t("res_r"), PI * 1.75, PI * 0.5, p.ak.res_frac(), rc, 0.95 if full else 0.7, full)
+		_bar(c, at, 1, p.ak.res_frac(), rc, 0.95 if full else 0.7, full)
 	_states(c, p, at, time, accent)
 	if rt.tick_t > 0.0:
 		_hit(c, at, spread, hc, k)
 
 
-## The charge, warm-up or spin-up arc (one at a time; the ammo shows in the HUD's weapon panel, not here).
+## The charge, warm-up or spin-up bar (one at a time; the ammo shows in the HUD's weapon panel, not here).
 func _states(c: CanvasItem, p: Hunter, at: Vector2, time: float, accent: Color) -> void:
 	var r := _t("charge_r")
 	var ck := p.atk.charge_k()
@@ -51,23 +51,20 @@ func _states(c: CanvasItem, p: Hunter, at: Vector2, time: float, accent: Color) 
 		var full := ck >= 1.0
 		if full and not _full:
 			_flare_at = time
-		_arc(c, at, r, -PI * 0.5, TAU, ck, accent.lightened(0.45) if not full else Color.WHITE, 1.0, full)
+		_bar(c, at, 0, ck, accent.lightened(0.45) if not full else Color.WHITE, 1.0, full)
 		_flare(c, at, r, time, accent)
 	elif p.warm_t > 0.0:
 		var warm := 1.0 - p.warm_t / maxf(0.01, float(p.wpn.get("warmup", 0.6)))
-		_arc(c, at, r, -PI * 0.5, TAU, warm, p.wpn["color"], 1.0, false)
+		_bar(c, at, 0, warm, p.wpn["color"], 1.0, false)
 	elif p.wpn.has("spin_up") and p.spin > 0.0 and p.spin < 1.0:
-		_arc(c, at, r, -PI * 0.5, TAU, p.spin, _tc("col_warm_up"), 1.0, false)
+		_bar(c, at, 0, p.spin, _tc("col_warm_up"), 1.0, false)
 	_full = ck >= 1.0
 
 
-## One arc of `span` radians from `from`: the fraction `frac` of it, in `col` (nothing when empty).
-func _arc(
-	c: CanvasItem, at: Vector2, r: float, from: float, span: float, frac: float, col: Color, a: float, bold: bool
-) -> void:
+## One gauge bar in `slot` under the reticle: the fraction `frac` of it, in `col` (nothing when empty).
+func _bar(c: CanvasItem, at: Vector2, slot: int, frac: float, col: Color, a: float, bold: bool) -> void:
 	if frac > 0.0:
-		var w := _t("arc_w_full") if bold else _t("arc_w")
-		Reticle.arc(c, at, r, from, from + span * clampf(frac, 0.0, 1.0), Color(col, a), w)
+		Reticle.bar(c, at, slot, frac, Color(col, a), _t("arc_w_full") if bold else _t("arc_w"))
 
 
 ## The ring that snaps out when a charge reaches full (out-cubic, fading).

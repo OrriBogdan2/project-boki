@@ -4,7 +4,7 @@ extends RefCounted
 ## size, colour, opacity and a dark outline. The default is each Hunter's own small look (ReticleLooks, else a
 ## thin ring broken into four arcs) with a centre dot; it opens with weapon bloom, and on a hit it flashes. With
 ## the "hunter" colour (the default) the look, the dot and the aim arcs take the Hunter's own accent (Arch.color).
-## ReticleHud draws it first each frame; the aim states (ammo ring, charge arcs, hit tick and the AimKit
+## ReticleHud draws it first each frame; the aim states (gauge bars under it, hit tick and the AimKit
 ## cursor states on their own layer) draw on top of it. Every number is in content/rules/tuning.json "reticle".
 ## One instance per HUD also owns the hit tick's state (`new(match)`, `tick`): see below.
 
@@ -173,6 +173,18 @@ static func arc(c: CanvasItem, at: Vector2, r: float, from: float, to: float, co
 	if bool(style()["outline"]):
 		c.draw_arc(at, r, from, to, 32, Color(0, 0, 0, t("edge_a") * col.a), width + t("edge_w") * 2.0, true)
 	c.draw_arc(at, r, from, to, 32, col, width, true)
+
+
+## A gauge bar under the reticle (a gauge never wraps the ring, which would read as a second ring): `slot` 0 sits
+## under the ring, 1 under that. Only the filled part (`frac` of the bar, from the left) draws, over a thin dark edge
+## when the outline is on.
+static func bar(c: CanvasItem, at: Vector2, slot: int, frac: float, col: Color, width: float) -> void:
+	var y := at.y + t("bar_y") + slot * t("bar_step")
+	var x0 := at.x - t("bar_w") * 0.5
+	var x1 := x0 + t("bar_w") * clampf(frac, 0.0, 1.0)
+	if bool(style()["outline"]):
+		c.draw_line(Vector2(x0, y), Vector2(x1, y), Color(0, 0, 0, t("edge_a") * col.a), width + t("edge_w") * 2.0)
+	c.draw_line(Vector2(x0, y), Vector2(x1, y), col, width)
 
 
 ## The strokes of a shape (no dot): a broken ring, a full ring, a cross or a Hunter's look.

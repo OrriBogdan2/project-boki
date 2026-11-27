@@ -1,11 +1,11 @@
 class_name AimReticle
 extends Control
 ## The cursor states of AimKit (docs/AIMKIT.md), for the local player only, drawn on the crosshair:
-## - charge ring: a thin arc that fills with the charge (0..1) at 26 px, outside the HUD's ammo ring (no track);
+## - charge: a thin bar under the cursor that fills with the charge (0..1) (a ring round the Hunter in "body" mode);
 ## - full-charge flare: on reaching full, a ring that snaps out and fades plus a 4-point glint (0.28 s);
 ## - perfect-window star: a gold 4-point star with a soft ring, held for one footage frame (0.12 s).
 
-const R := 26.0  # px: the charge ring's radius, outside the HUD's ammo and resource arcs (Reticle "res_r")
+const R := 26.0  # px: the full-charge flare ring starts here (outside the reticle)
 const R_BODY := 44.0  # px: the ring round the hunter instead (charge "at": "body"), clear of the model
 const FLARE_T := 0.28  # s: the full-charge flare
 const PERFECT_T := 0.12  # s: the perfect-window star (one 5 fps footage frame, enough to register)
@@ -53,7 +53,10 @@ func _draw() -> void:
 			var full := k >= 1.0
 			var fill := Color(col.lerp(Color.WHITE, 0.4), 0.95) if full else Color(col, 0.8)
 			var w := Reticle.t("arc_w_full") if full else Reticle.t("arc_w")
-			Reticle.arc(self, mp, rr, -PI * 0.5, -PI * 0.5 + TAU * minf(1.0, k), fill, w)
+			if on_body:
+				Reticle.arc(self, mp, rr, -PI * 0.5, -PI * 0.5 + TAU * minf(1.0, k), fill, w)
+			else:
+				Reticle.bar(self, mp, 0, k, fill, w)
 	var ft := float(r["flare"])
 	if ft > 0.0:
 		var t := 1.0 - ft / FLARE_T  # 0 -> 1 over the flare

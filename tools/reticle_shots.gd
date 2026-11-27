@@ -7,7 +7,7 @@ extends RefCounted
 ##   --reticle-looks-shots: every Hunter's own look (ReticleLooks) at rest at 4x on dark, light and grass swatch
 ##     rows with row labels, one column per hunter (reticle_looks_1126b_swatches.png)
 ##   --reticle-proof-shots: for the owner, on a real GPU at 1920x1080 (set --resolution): every Hunter's full frame
-##     at rest and firing on flower-free match grass, and contact sheets of 3 tiles a row, 2.7x zoom
+##     at rest and firing on flower-free match grass, and contact sheets of 3 tiles a row, 2.2x zoom
 ##   --ping-shots: your ping on an enemy (red, "Enemy") and a teammate's loot ping off screen (edge arrow),
 ##     with the minimap
 ##   --hit-marker-shots: the hit tick on a landed hit and the knock tick, each full frame and 3x crop
@@ -36,8 +36,8 @@ const TILES_PER_SHEET := 9  # Hunters on one contact sheet (rows of 3)
 const TILE_W := 640  # px: one tile of the contact sheet
 const TILE_GAP := 8
 const TILE_NAME_H := 60  # px: the Hunter's name band
-const ZOOM_CROP := Vector2i(120, 75)  # px round the cursor, shown 2.7x under the tile
-const TILE_ZOOM_H := 200  # px: ZOOM_CROP at 2.7x
+const ZOOM_CROP := Vector2i(144, 90)  # px round the cursor, shown 2.2x (the gauge bars sit below the ring)
+const TILE_ZOOM_H := 200  # px: ZOOM_CROP at 2.2x
 const TILE_H := TILE_NAME_H + 360 + TILE_ZOOM_H  # name, the 16:9 frame at tile width, the zoom crops
 
 var main: Node
@@ -172,7 +172,7 @@ func _draw_looks(cv: Control) -> void:
 
 
 ## Every Hunter in a normal match at the default match camera, 1920x1080 on a real GPU: the reticle mid-screen over
-## grass at rest and then firing (the fire action held, bloom open: the gauge arcs show). Each full frame is saved
+## grass at rest and then firing (the fire action held, bloom open: the gauge bars show). Each full frame is saved
 ## (reticle_looks_1126b_<id>_rest.png, _fire.png) and then the contact sheets, TILES_PER_SHEET Hunters each.
 func _proof() -> void:
 	Settings.reset_all()
@@ -261,7 +261,7 @@ func _flower_points() -> Array:
 	return pts
 
 
-## One tile per Hunter: its name large, the rest frame scaled to the tile width, and under it 2.7x crops round the
+## One tile per Hunter: its name large, the rest frame scaled to the tile width, and under it 2.2x crops round the
 ## reticle at rest and firing (a tile: [name, colour, rest image, fire image, rest texture, fire texture]).
 func _draw_tiles(cv: Control, tiles: Array) -> void:
 	var font := ThemeDB.fallback_font
@@ -278,7 +278,7 @@ func _draw_tiles(cv: Control, tiles: Array) -> void:
 			var src := Rect2(cursor - Vector2(ZOOM_CROP) / 2.0, Vector2(ZOOM_CROP))
 			cv.draw_texture_rect_region(t[4 + j], Rect2(at, Vector2(TILE_W / 2.0, TILE_ZOOM_H)), src)
 			cv.draw_string(
-				font, at + Vector2(8, 22), ["rest", "firing: gauge arcs show"][j], HORIZONTAL_ALIGNMENT_LEFT, -1, 20
+				font, at + Vector2(8, 22), ["rest", "firing: gauge bars show"][j], HORIZONTAL_ALIGNMENT_LEFT, -1, 20
 			)
 
 

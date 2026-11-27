@@ -11,7 +11,7 @@ cursor state plus `MANIFEST.txt`).
 | `aim_draw.gd` (`AimDraw`) | One node per match. Rebuilds every telegraph into one ArrayMesh each frame (AimGeo's packed arrays, one call per surface) |
 | `aim_shapes.gd` (`AimShapes`) | The shape builders and the quiet default look |
 | `aim_geo.gd` (`AimGeo`) | Triangle helpers (ribbons, rings, sectors, chevrons, stars) that sit each vertex on the ground |
-| `aim_reticle.gd` (`AimReticle`) | The cursor states: charge ring (filled part only, no track), full flare, perfect star |
+| `aim_reticle.gd` (`AimReticle`) | The cursor states: charge bar under the cursor (filled part only), full flare, perfect star |
 | `scripts/ui/reticle.gd`, `reticle_hud.gd` (`Reticle`, `ReticleHud`) | The cursor reticle under them: the broken ring that opens with bloom, the dot in the Hunter's accent (`Arch.color`, the Hunter's own colour: Vex green, Sparkle pink, Tenzo blue), the ammo / resource / charge arcs, the hit tick (raised by `hud.reticle`, one per landed hit, gold on a crit, longer on a knock). Thin strokes with a dark edge; numbers in `content/rules/tuning.json` "reticle" |
 | `aim_reach.gd` (`AimReach`) | The range preview of a ground-target slot: a faint max-range ring and the landing disc |
 
@@ -208,8 +208,8 @@ AimKit.perfect(h)                    # the perfect-window star: gold 4-point sta
 AimKit.reticle(h)                    # {charge, flare, perfect, at}, for checks
 ```
 Params: `col` (charge ring colour, default the hero colour), `col2` (flare colour), and `col` on
-`perfect` (gold by default). The states run on real time, so they show through hit stop. The ring sits
-at 26 px, outside the HUD's 22 px ammo ring and inside its 30 px resource arc.
+`perfect` (gold by default). The states run on real time, so they show through hit stop. The charge is a bar under
+the cursor (slot 0; the resource bar is slot 1), and the flare ring starts at 26 px.
 
 ## 3b. The body's aim across terraces (pose only)
 `inp["aim_y"]` is the height of what the cursor is on; the shot climbs or dips to it (`Match.AIM_DY_MAX`, rises under 0.3 m stay flat). The body now follows the same number: `AimPitch.of(h)` is `atan2(rise, max(1.5 m, distance))` clamped to +-20 degrees (`AimPitch.MAX`), 0 on flat ground and past `AIM_DY_MAX`. `HunterAnim` eases it (10/s) and weights it by the aim (LMB hold, casts, kit moves; not dashes, glides, dives, ledges, rolls or downed). The spine takes half (the Torso, or the hips bone on a .glb: the thighs do not follow, so the feet stay planted), the arms and weapon the other half (`WardenAim` after the clips, for the .glb; the procedural rig in `_upper`). Projectiles and telegraphs are unchanged: this is the pose, not the hit. The 20 degree clamp is ours: the briefs hold no footage measurement of the source's aim lean (open: measure it). Remote players show flat (`aim_y` is not synced, no Net change). Proof: `--aim-pitch-check`.
