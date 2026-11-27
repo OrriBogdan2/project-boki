@@ -48,7 +48,7 @@
   ],
   [
    "glide",
-   "Jump, then HOLD %J to glide"
+   "Jump, then hold %J again to glide"
   ],
   [
    "wallkick",
@@ -145,7 +145,7 @@
   "default": "Back at your last stop. Try again",
   "dash": "Back at your last stop. Dash from the glowing pad",
   "exdash": "Back at your last stop. Jump from the pad, then dash",
-  "glide": "Back at your last stop. Jump, then hold %J to glide",
+  "glide": "Back at your last stop. Jump, then hold %J again",
   "sec": "Back at your last stop. Use %A away from the edge",
   "shoot": "Back at your last stop. Fight with solid ground behind you",
   "gkey": "Back at your last stop. Tap %T and let %s go in first",

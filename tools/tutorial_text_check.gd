@@ -21,9 +21,13 @@ const JARGON := {
 	"ultimate": "pick_ult",
 	"capture": ""
 }
-## Steps whose action is a HOLD (the glider shuts when Space is let go; the uplink starts after
-## Exits.START_HOLD of interact): none of their lines (banner, detail, retry) may tell the player to press.
-const HOLD_STEPS := ["glide", "uplink"]
+## Steps whose action is a HOLD (the uplink starts after Exits.START_HOLD of interact): none of their lines
+## (banner, detail, retry) may tell the player to press.
+const HOLD_STEPS := ["uplink"]
+## Steps whose action is a second press held (the glider opens only on a FRESH press in the air, Hunter
+## _glide_armed, and shuts when it is let go): a banner or retry naming the key must say "again" and the hold.
+## Holding Space on from the jump opens nothing, so "Jump, then hold Space" leaves a new player falling.
+const AGAIN_HOLD_STEPS := ["glide"]
 
 var bad := 0
 var main: Node
@@ -90,6 +94,17 @@ func _hold_words(where: String, text: String) -> void:
 		ok(low.contains("hold") or low.contains("held"), "%s: names the key but not the hold: %s" % [where, text])
 
 
+## A second-press-held line: names the key, says it is pressed again in the air, and held.
+func _again_hold_words(where: String, text: String) -> void:
+	var low := text.to_lower()
+	ok(text.contains("%J"), "%s: does not name the glide key: %s" % [where, text])
+	ok(low.contains("again"), "%s: the glider needs a second press in the air, not said: %s" % [where, text])
+	ok(
+		low.contains("hold") or low.contains("held"),
+		"%s: the glider shuts on let-go, hold not said: %s" % [where, text]
+	)
+
+
 func _steps(file: String, rows: Array, id_of: Callable, texts_of: Callable) -> void:
 	var seen := {}
 	for row in rows:
@@ -124,6 +139,12 @@ func run(m: Node) -> void:
 	for row in tut["steps"]:
 		if String(row[0]) in HOLD_STEPS:
 			_hold_words("tutorial %s title" % row[0], String(row[1]))
+	for row in tut["steps"]:
+		if String(row[0]) in AGAIN_HOLD_STEPS:
+			_again_hold_words("tutorial %s title" % row[0], String(row[1]))
+	for sid in AGAIN_HOLD_STEPS:
+		if tut["retry"].has(sid):
+			_again_hold_words("tutorial %s retry" % sid, String(tut["retry"][sid]))
 	for sid in HOLD_STEPS:
 		for sec in ["detail", "retry"]:
 			if tut[sec].has(sid):
