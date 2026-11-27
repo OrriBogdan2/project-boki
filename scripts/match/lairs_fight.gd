@@ -176,9 +176,13 @@ func _boss_dead(l_v: Dictionary, b: Boss, credit: Ent) -> void:
 	var bite := GardenItems.lair_drop(m.rng.randf(), m.rng.randi())
 	if bite != "":
 		m.spawn_val(Loot.valuable(bite), at + Vector3(-1.1, 0, 0.2))
-	var treat := GardenItems.treat_drop(m.rng.randf(), m.rng.randi())
-	if treat != "":
-		m.spawn_val(Loot.valuable(treat), at + Vector3(-1.1, 0, -0.9))
+	else:
+		# one garden prize a pile: no bite, so maybe a luck treat. Own generator, so the match's draws stay as they were
+		var tr := RandomNumberGenerator.new()
+		tr.seed = hash([m.rng.seed, at])
+		var treat := GardenItems.treat_drop(tr.randf(), tr.randi())
+		if treat != "":
+			m.spawn_val(Loot.valuable(treat), at + Vector3(-1.1, 0, 0.2))
 	var zone := GardenZones.seed_zone_for(m.world.biome_at(at.x, at.z))
 	if zone != "" and not ls.wayseed_given:
 		ls.wayseed_given = true

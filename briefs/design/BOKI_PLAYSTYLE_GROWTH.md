@@ -121,8 +121,9 @@ its favourite rare treat or toy. Numbers: `content/rules/luck.json` (code: `scri
 - **Luck only speeds.** It never makes a point on its own (no gain, no roll), never passes the stat's cap or
   the total cap (the extra stops at `StatBudget.room`), and the garden still gives 0 stat points, treat or not.
 - **Where treats come from.** Four common treats (Puffberry, Nutty Crisp, Dewdrop Jelly, Sugar Twig) and two
-  rare ones (Moon Fig, Starfruit Tart) drop on expeditions (`garden_items.json` `treat_drop`): a lair pile holds
-  a rare one 6% of the time and a common one 30%; wardens and glimmers drop one 10% of kills (brutes 3%), 15%
+  rare ones (Moon Fig, Starfruit Tart) drop on expeditions (`garden_items.json` `treat_drop`): a lair pile with no
+  stat bite holds a rare one 6% of the time and a common one 30% (one garden prize a pile, so about 4% and 20%
+  of lairs; common treats are worth 40 like a bite, so a pile stays "all good"); wardens and glimmers drop one 10% of kills (brutes 3%), 15%
   of those a rare one. They are carried home like stat bites and eaten from the feed menu.
 - **Discovery.** The first favourite treat it eats is a big happy reaction (sparkle, jump, voice) and is
   written on its card ("Fav treat: Loves moon fig"). The card also shows a clover row, "Luck up for next 3

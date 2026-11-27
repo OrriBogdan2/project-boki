@@ -123,7 +123,7 @@ const VALUABLES := {
 		# luck treats (family luck in garden_items.json; Luck): a Boki eats one for a lucky streak of stat gains
 		"name": "Puffberry",
 		"col": Color("ff9fb8"),
-		"value": 30,
+		"value": 40,
 		"rar": 2,
 		"bag": true,
 		"desc": "A soft, puffy berry. At home a Boki eats it for a lucky streak of stat gains."
@@ -132,7 +132,7 @@ const VALUABLES := {
 	{
 		"name": "Nutty Crisp",
 		"col": Color("d9a066"),
-		"value": 30,
+		"value": 40,
 		"rar": 2,
 		"bag": true,
 		"desc": "A crunchy nut biscuit. At home a Boki eats it for a lucky streak of stat gains."
@@ -141,7 +141,7 @@ const VALUABLES := {
 	{
 		"name": "Dewdrop Jelly",
 		"col": Color("9fe0f0"),
-		"value": 30,
+		"value": 40,
 		"rar": 2,
 		"bag": true,
 		"desc": "A wobbly jelly. At home a Boki eats it for a lucky streak of stat gains."
@@ -150,7 +150,7 @@ const VALUABLES := {
 	{
 		"name": "Sugar Twig",
 		"col": Color("e8d8a0"),
-		"value": 30,
+		"value": 40,
 		"rar": 2,
 		"bag": true,
 		"desc": "A twig dipped in sugar. At home a Boki eats it for a lucky streak of stat gains."

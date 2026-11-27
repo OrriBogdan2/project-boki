@@ -70,10 +70,10 @@ No weapon is ever found or swapped: every hunter carries one signature weapon. I
 | Shellbark Chew | 40 | A tough bark chew. At home a Boki eats it for Guard. |
 | Zipseed | 40 | A seed that rattles. At home a Boki eats it for Speed. |
 | Hushpearl | 40 | A calm little pearl. At home a Boki eats it for Focus. |
-| Puffberry | 30 | A soft, puffy berry. At home a Boki eats it for a lucky streak of stat gains. |
-| Nutty Crisp | 30 | A crunchy nut biscuit. At home a Boki eats it for a lucky streak of stat gains. |
-| Dewdrop Jelly | 30 | A wobbly jelly. At home a Boki eats it for a lucky streak of stat gains. |
-| Sugar Twig | 30 | A twig dipped in sugar. At home a Boki eats it for a lucky streak of stat gains. |
+| Puffberry | 40 | A soft, puffy berry. At home a Boki eats it for a lucky streak of stat gains. |
+| Nutty Crisp | 40 | A crunchy nut biscuit. At home a Boki eats it for a lucky streak of stat gains. |
+| Dewdrop Jelly | 40 | A wobbly jelly. At home a Boki eats it for a lucky streak of stat gains. |
+| Sugar Twig | 40 | A twig dipped in sugar. At home a Boki eats it for a lucky streak of stat gains. |
 | Moon Fig | 90 | A rare fig that glows at night. A Boki that loves it gets the luckiest streak of all. |
 | Starfruit Tart | 90 | A rare tart with a star on top. A Boki that loves it gets the luckiest streak of all. |
 | Glasswater Wayseed | 150 | A seed that wants clear water. Carry it to the Waystone with a Boki leaning Water, Ice or Crystal. |
