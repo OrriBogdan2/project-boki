@@ -5,7 +5,11 @@ extends RefCounted
 ## loosened; the ride code reads mount speed as a plain multiplier, so no minimum speed is needed).
 ## Never touches the save.
 
+<<<<<<< /tmp/r.3691459
+const TARGET_TOTAL := 141  # live and data-only species (the 39 evolved forms got data and a model 11-18)
+=======
 const TARGET_TOTAL := 89  # the 50 roster species and the 39 evolved forms that got data and a model 11-18
+>>>>>>> /tmp/o.3691459
 const BODY_PLAY := 0.95   # the scale Kin draws a model at (kin.gd), times the rig frame's "top" and the data's fit
 const MAX_HEIGHT := 1.2   # m in the world: no Boki towers over a hunter
 const MIN_GROWTH := 1.0   # an evolved form drawn at least as tall as the form it comes from

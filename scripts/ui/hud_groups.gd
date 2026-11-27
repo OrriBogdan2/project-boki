@@ -4,8 +4,10 @@ extends RefCounted
 ## content/rules/hud_groups.json. When each block shows is HudReveal's (content/rules/hud_reveal.json); this only
 ## counts. Reads the match and the Hud only; draws nothing.
 
+
 static func rules() -> Dictionary:
 	return Content.rules("hud_groups")
+
 
 ## The clock/status strip under the minimap: a save's first expeditions hold it back until the first Ways Out beat (a
 ## seat within ways_out_lead_s of opening, open, taken or lost; or you are out) or your first kill or knock
@@ -22,9 +24,11 @@ static func clock_shown(m: Match) -> bool:
 		HudReveal.see("beat_clock")
 	return beat
 
+
 ## The glider ring (Hud._draw_glider_heat) draws only while you glide or the meter is not full.
 static func glider_shown(p: Hunter) -> bool:
 	return not (p.dropping or p.downed or p.riding) and (p.gliding or p.glide_fuel < 0.99)
+
 
 ## The ids of the groups on screen now: the always-on blocks plus the ones that come and go.
 static func on_screen(hud) -> Array:
