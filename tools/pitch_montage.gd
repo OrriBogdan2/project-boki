@@ -281,7 +281,7 @@ func _inventory(h: Node) -> void:
 			var sz: Vector3 = mi.get_aabb().size * mi.global_transform.basis.get_scale()
 			tall = maxf(tall, sz.y)
 			wide = maxf(wide, maxf(sz.x, sz.z))
-		var flat := not meshes.is_empty() and tall < 0.12 and wide > 0.8 and not w._is_stone(h, n3)
+		var flat: bool = not meshes.is_empty() and tall < 0.12 and wide > 0.8 and not w._is_stone(h, n3)
 		print("PITCH near-pad %s %s at %s meshes=%d %s tall=%.2f wide=%.2f%s" % [
 			n3.name, n3.get_class(), n3.position - pad, meshes.size(), kinds.keys(), tall, wide, " HIDE" if flat else ""])
 		if flat:
