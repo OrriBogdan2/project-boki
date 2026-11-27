@@ -6,10 +6,12 @@ extends RefCounted
 ## swallowed whole. When it breaks the merge ends early (no ultimate) and the Boki pops out beside you.
 ## The values live in Hunter.merge_st {shell, shell_max}; other games get them in the hunter snapshot (KinNet).
 
+
 static func size_for(cls: String, form: Dictionary) -> float:
 	var base: Dictionary = MergeForm.data()["shell_base"]
 	var k := float((form["def"] as Dictionary).get("shell_k", 1.0))
 	return roundf(float(base.get(cls, base["medium"])) * k)
+
 
 ## The form went live: raise the shell.
 static func start(h: Hunter) -> void:
@@ -18,11 +20,13 @@ static func start(h: Hunter) -> void:
 	st["shell"] = mx
 	st["shell_max"] = mx
 
+
 ## [current, max] of the shell this hunter wears ([0, 0] when none). Remote hunters read the synced meta.
 static func view(h: Hunter) -> Vector2:
 	if not h.merge_st.is_empty():
 		return Vector2(float(h.merge_st.get("shell", 0.0)), float(h.merge_st.get("shell_max", 0.0)))
 	return Vector2(float(h.get_meta("shell", 0.0)), float(h.get_meta("shell_max", 0.0)))
+
 
 ## Hunter._mitigate: the hit goes into the shell first. Returns what is left for the rest of the defences (0 while it holds).
 ## Falls and heat go through (as they do past a kin shield). A hit the shell took still counts as a hit
@@ -43,4 +47,4 @@ static func absorb(h: Hunter, d: float, opts := {}, by: Ent = null) -> float:
 	h.m.fx.burst(h.pos + Vector3(0, 1.0, 0), col, 3, 2.5, 0.25)
 	if float(st["shell"]) <= 0.0:
 		KinMerge.end(h, "shell")
-	return 0.0          # (Hunter._mitigate turns this into the token 0.01)
+	return 0.0  # (Hunter._mitigate turns this into the token 0.01)
