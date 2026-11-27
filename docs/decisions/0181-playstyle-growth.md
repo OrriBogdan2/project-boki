@@ -24,5 +24,6 @@ drill runs go from 2 to 1 (`care.json` `train_runs.daily`); the alternative 0 is
 ## Consequences
 No save bump: `rec["style_day"]` and `rec["run_frac"]` are lazy (an older record starts from none). No Net
 change (farm records, paid on the result the client already applies). `Evo.learn` is gone (one caller). Mutation
-rolls keep their rng call order, but the stray chance now comes from the tier (0.5 for a Balanced Boki, was 0.3).
+rolls keep their rng call order, but the stray chance now comes from the tier (0.3 for a Balanced Boki, as before, so wild Boki roll the same
+stray draws and the match layouts the sweep checks stay as they were).
 Checks: `--playstyle-check` (new), `--evo-path-check`, `--results-boki-line-check`, `--train-runs-check`.

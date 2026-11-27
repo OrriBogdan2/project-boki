@@ -21,6 +21,7 @@ func ok(cond: bool, what: String) -> void:
 func _boki(nm: String) -> Dictionary:
 	var rec := Save.new_kin("zapple", nm)
 	Care.ensure(rec)
+	Evo.ensure(rec)  # evolution fields a loaded record already has; the card only reads them
 	rec["level"] = 6
 	for s in Care.STATS:
 		rec["stats"][s] = 20

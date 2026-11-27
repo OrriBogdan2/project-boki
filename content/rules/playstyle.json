@@ -47,7 +47,7 @@
 	},
 	"extraction_doc": "Affinity points per unit of what the Boki did on an expedition (Match kin_runs stats): hits it landed, knockouts, times it revived you, getting out (won 1), skills used, wild Boki caught, times it was thrown.",
 	"tiers": [
-		{"at": 0, "word": "Balanced", "focus": 0.25, "path_pips": 0, "stray": 0.5, "signature": false},
+		{"at": 0, "word": "Balanced", "focus": 0.25, "path_pips": 0, "stray": 0.3, "signature": false},
 		{"at": 20, "word": "Leans", "focus": 0.4, "path_pips": 1, "stray": 0.3, "signature": false},
 		{"at": 60, "word": "Strongly", "focus": 0.55, "path_pips": 2, "stray": 0.15, "signature": true},
 		{"at": 150, "word": "Devoted", "focus": 0.7, "path_pips": 3, "stray": 0.05, "signature": true}
