@@ -508,9 +508,6 @@ archetypes/dredge.json:e.angle	110.0
 archetypes/dredge.json:e.cooldown	7.0
 archetypes/dredge.json:e.dive	28.0
 archetypes/dredge.json:e.dmg	25.0
-archetypes/dredge.json:e.hop	1.8
-archetypes/dredge.json:e.hop_from	0.14
-archetypes/dredge.json:e.hop_t	0.2
 archetypes/dredge.json:e.quake_r	3.2
 archetypes/dredge.json:e.radius	3.0
 archetypes/dredge.json:e.rank3_stun	0.2
@@ -540,6 +537,7 @@ archetypes/dredge.json:resource.back_k	0.5
 archetypes/dredge.json:resource.heal_knock	0.16
 archetypes/dredge.json:resource.max	10
 archetypes/dredge.json:resource.per_stack	0.025
+archetypes/dredge.json:rmb.arrive_stun	0.9
 archetypes/dredge.json:rmb.charges	1
 archetypes/dredge.json:rmb.cooldown	12.0
 archetypes/dredge.json:rmb.dmg	6.0
@@ -630,6 +628,7 @@ archetypes/gil.json:lmb.tide.dmg[0]	10.0
 archetypes/gil.json:lmb.tide.dmg[1]	22.0
 archetypes/gil.json:lmb.tide.full	0.8
 archetypes/gil.json:lmb.tide.kb	6.0
+archetypes/gil.json:lmb.tide.kb_full	10.0
 archetypes/gil.json:lmb.tide.reach	1.6
 archetypes/gil.json:lmb.tide.time	0.2
 archetypes/gil.json:lmb.tide.w	1.4
@@ -751,9 +750,10 @@ archetypes/gunslinger.json:rmb.burr.hit_dmg	22.0
 archetypes/gunslinger.json:rmb.burr.lane_w	0.72
 archetypes/gunslinger.json:rmb.burr.push	11.0
 archetypes/gunslinger.json:rmb.burr.range	10.5
+archetypes/gunslinger.json:rmb.burr.rattle_k	0.2
 archetypes/gunslinger.json:rmb.burr.speed	26.0
 archetypes/gunslinger.json:rmb.burr.wall_daze	0.6
-archetypes/gunslinger.json:rmb.burr.wall_stun	0.7
+archetypes/gunslinger.json:rmb.burr.wall_stun	1.2
 archetypes/gunslinger.json:rmb.charges	1
 archetypes/gunslinger.json:rmb.cooldown	6.5
 archetypes/gunslinger.json:turn.e.early	30.0
@@ -770,6 +770,7 @@ archetypes/gunslinger.json:x.per_rank.tick_dmg[0]	0.7
 archetypes/gunslinger.json:x.per_rank.tick_dmg[1]	0.7
 archetypes/gunslinger.json:x.radius	3.4
 archetypes/gunslinger.json:x.range	14.0
+archetypes/gunslinger.json:x.rattle_k	0.2
 archetypes/gunslinger.json:x.slow	0.3
 archetypes/gunslinger.json:x.slow_t	0.6
 archetypes/gunslinger.json:x.tick	0.5
