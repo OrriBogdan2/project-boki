@@ -1,5 +1,5 @@
 extends RefCounted
-## --farm-3d-sizes --shots-dir=<dir> [--view=1920x1080]: the real farm scene with five hunters (Albert is the farm's own
+## --farm-3d-sizes --shots-dir=<dir> [--view=1920x1080] [--albert-k=1.08]: the real farm scene with five hunters (Albert is the farm's own
 ## avatar; Kael, Sparkle, Meeko and Cinder are built as a match builds a hunter) at their match size (own model size x
 ## Hunter.VIS_SCALE x body.match_k: the reference's height) and the four Boki, all idle, HUD, marks and particles
 ## hidden.
@@ -50,6 +50,7 @@ var layout := "farm"  # farm | row | mid
 var anims: Array = []  # one HunterAnim per hunter (Albert's is the farm's own, h.p_anim)
 var cam_at := Vector3.ZERO  # the free camera's position: everyone turns to it
 var scales: Array[Vector3] = []  # each hunter's drawn scale: its own model size x a match's VIS_SCALE x match_k
+var albert_k := 1.0  # --albert-k=<x>: Albert's extra size in this tool only (game data unchanged)
 var cam_side := 1.0  # +1: the eye camera swings to +x, Albert at +x end of the row; -1 the other way
 
 
@@ -60,6 +61,8 @@ func run(main_node: Node) -> void:
 		var arg := String(a)
 		if arg.begins_with("--shots-dir="):
 			dir = arg.substr(12)
+		if arg.begins_with("--albert-k="):
+			albert_k = float(arg.substr(11))
 		if arg.begins_with("--view="):
 			view = Vector2i(int(arg.get_slice("x", 0).substr(7)), int(arg.get_slice("x", 1)))
 	DirAccess.make_dir_recursive_absolute(dir)
@@ -145,6 +148,8 @@ func _place() -> void:
 			cls, Data.TEAM_COLORS[0], Arch.signature(ARCHES[i]), "", Unmasked.mask_look(), ARCHES[i]
 		)
 		m.scale *= Hunter.VIS_SCALE * Arch.match_k(ARCHES[i])  # as a match draws it: the reference's height
+		if i == 0:
+			m.scale *= albert_k  # --albert-k=<x>: the owner's "Albert tallest" look, this tool only
 		scales.append(m.scale)
 		h.add_child(m)
 		hunters.append(m)
@@ -216,8 +221,9 @@ func _shot(name: String) -> void:
 	await _wait(1.0)
 	_clear_foreground()
 	await RenderingServer.frame_post_draw
-	main.get_viewport().get_texture().get_image().save_png(dir.path_join(name + ".png"))
-	_write_labels(name)
+	var img := main.get_viewport().get_texture().get_image()
+	img.save_png(dir.path_join(name + ".png"))
+	_write_labels(name, img.get_size())
 
 
 ## Hides the trees, bushes and rocks (the farm draws them as multimeshes) that stand among the group or in the
@@ -246,22 +252,28 @@ func _in_the_way(centre: Vector2, from: Vector2, line: Vector2) -> bool:
 
 
 ## <name>.json: where each character's feet are on the still, in px, for the sheet's name labels.
-func _write_labels(shot: String) -> void:
+func _write_labels(shot: String, size: Vector2i) -> void:
 	var cam := main.get_viewport().get_camera_3d()
 	var px := {}
 	for i in hunters.size():
-		var p := cam.unproject_position(hunters[i].global_position)
-		px[NAMES[i]] = [p.x, p.y]
+		px[NAMES[i]] = _on_still(cam, hunters[i].global_position, size)
 	for j in h.kins.size():
-		var p := cam.unproject_position((h.kins[j]["node"] as Node3D).global_position)
-		px[KinLib.kin(SPECIES[j]).display_name] = [p.x, p.y]
+		px[KinLib.kin(SPECIES[j]).display_name] = _on_still(cam, (h.kins[j]["node"] as Node3D).global_position, size)
 	var f := FileAccess.open(dir.path_join(shot + ".json"), FileAccess.WRITE)
 	f.store_string(JSON.stringify(px))
 	f.close()
 
 
+## A world point in px on the saved still. Through the camera's own matrices, not unproject_position: on the GPU box
+## that answered in a 1280x720 space while the still was 1920x1080, so every name tag sat 2/3 of the way to the corner.
+func _on_still(cam: Camera3D, at: Vector3, size: Vector2i) -> Array:
+	var v := cam.get_camera_transform().affine_inverse() * at
+	var c := cam.get_camera_projection() * Vector4(v.x, v.y, v.z, 1.0)
+	return [(c.x / c.w * 0.5 + 0.5) * size.x, (0.5 - c.y / c.w * 0.5) * size.y]
+
+
 func _write_heights() -> void:
-	var out := {"hunters": {}, "boki": {}, "group": [group.x, group.z]}
+	var out := {"hunters": {}, "boki": {}, "group": [group.x, group.z], "albert_k": albert_k}
 	for i in hunters.size():
 		var m := hunters[i]
 		var lean := m.basis
@@ -270,7 +282,8 @@ func _write_heights() -> void:
 		var hi := 0.0
 		for wp in pts:
 			hi = maxf(hi, wp.y)
-		var crown := HunterCrown.crown(m, pts, Hunter.VIS_SCALE * Arch.match_k(ARCHES[i]), hi) - m.global_position.y
+		var k := Hunter.VIS_SCALE * Arch.match_k(ARCHES[i]) * (albert_k if i == 0 else 1.0)
+		var crown := HunterCrown.crown(m, pts, k, hi) - m.global_position.y
 		m.basis = lean
 		out["hunters"][NAMES[i]] = {
 			"body": snappedf(crown, 0.01), "full": snappedf(hi - m.global_position.y, 0.01), "scale": m.scale.y

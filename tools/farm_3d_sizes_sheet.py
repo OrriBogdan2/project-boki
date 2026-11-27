@@ -9,6 +9,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 src, out = sys.argv[1], sys.argv[2]
 hs = json.load(open(src + "/heights.json"))
+AK = float(hs.get("albert_k", 1.0))  # --albert-k: Albert drawn this much over his match size (this tool only)
 F = "/usr/share/fonts/truetype/dejavu/DejaVuSans%s.ttf"
 big, mid, small, tag = (ImageFont.truetype(F % "-Bold", s) for s in (34, 26, 22, 24))
 # Reference body height (m, weapons off): our crown at match_k 1 x the archetype's body.match_k, from the size-parity
@@ -19,6 +20,9 @@ MATCH = {"Albert": 2.096, "Kael": 2.002, "Sparkle": 2.145, "Meeko": 1.759, "Cind
 TOL = 0.03
 GREEN, GREY, RED = (40, 170, 70), (150, 150, 150), (210, 50, 50)
 BOKI_CM = {"Vespyx": "cindle", "Mycroll": "burrlet", "Prismander": "puddlet", "Crofthorn": "heatherhorn"}
+MATCH["Albert"] *= AK
+TALL = {n: r["body"] for n, r in hs["hunters"].items()}
+TALL.update({n: hs["boki"][sp]["body"] for n, sp in BOKI_CM.items()})
 
 W, H = 1280, 720
 shots = [("1  Farm camera, close third person", "1_farm_cam"), ("2  Eye level, one row", "2_eye_row"),
@@ -35,6 +39,7 @@ for i, (label, f) in enumerate(shots):
     placed = []  # label boxes so far: a label that would touch one drops a row lower
     for who, (px, py) in sorted(json.load(open(f"{src}/{f}.json")).items(), key=lambda kv: kv[1][0]):
         px, py = px * sc, py * sc
+        who = f"{who} {TALL[who]:.2f} m" if who in TALL else who
         w = tile.textlength(who, font=tag)
         lvl = 0
         while True:
@@ -78,9 +83,11 @@ for who, sp in BOKI_CM.items():
     d.text((x0 + cols[3], y), f"{r['full']:.2f} m", font=mid, fill="white")
     y += 40
 y += 18
-for n in ["Heights are the top of the skull over the feet; hair, ears and weapon left out. With weapon: tallest point.",
+for n in (["Heights are the top of the skull over the feet; hair, ears and weapon left out. With weapon: tallest point.",
           "reference = reference body height, weapons off. match idle = the same sizes in a match (green edge: within 3%).",
-          "farm pose = measured on these stills: the farm's idle stands straighter than a match's idle clip."]:
+          "farm pose = measured on these stills: the farm's idle stands straighter than a match's idle clip."]
+          + ([f"Albert drawn x{AK:.2f} over his reference size here (owner: Albert the tallest); game data unchanged."]
+             if AK != 1.0 else [])):
     d.text((x0 + 24, y), n, font=ImageFont.truetype(F % "", 20), fill=(200, 200, 200))
     y += 28
 sheet.save(out)
