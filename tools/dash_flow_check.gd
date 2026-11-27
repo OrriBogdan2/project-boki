@@ -256,7 +256,9 @@ func _ready_up(m: Match) -> void:
 		if not busy and hunter.roll_t <= 0.0 and k.dash_left() <= 0.0 and hunter.grounded and i > 30:
 			break
 		m.step(Match.DT)
-	if k.e_t > 0.0:
+	# Haul's chain still hooked or arriving would turn the next E into its pull
+	var chain: Variant = k.get("warchain")
+	if k.e_t > 0.0 or (chain != null and String(chain.state) != "ready"):
 		# an E that waits for its recast (Motley's seed) would turn the next E press into that recast: a new kit
 		hunter.set_arch(hunter.arch)
 	for wall in m.verbs.walls.duplicate():
