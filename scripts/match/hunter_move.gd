@@ -5,6 +5,7 @@ extends RefCounted
 ## ([game data]: the reference's movement settings, uu converted to metres).
 
 const CHASE_BONUS := 0.18  # share of run speed: heading at whoever took your kin
+const GLIDE_GRAV_K := 0.025  # [game data] share of gravity on an open glider
 
 static var _rules: Dictionary = MoveRules.data()
 static var _phys: Dictionary = _rules["physics"]
@@ -62,7 +63,6 @@ static var jump_trim_in := Vector2(float(_phys["jump_trim_in"][0]), float(_phys[
 static var jump_trim_to := Vector2(float(_phys["jump_trim_to"][0]), float(_phys["jump_trim_to"][1])) * body_scale
 
 
-
 static func rules() -> Dictionary:
 	return _rules
 
@@ -95,16 +95,19 @@ static func walk(hv: Vector2, want: Vector2, acc: float, grip: float, dt: float)
 		return brake(hv, grip, dt)
 	return Loco.accel_to(hv, want, acc * grip, 0.0, brake_rate(hv.length()) * grip, dt)
 
+
 ## A standing body whose ground drops `drop` metres in a step stays on it (down a flight, a ramp or a stone):
 ## more than step_down is a fall.
 static func sticks(drop: float) -> bool:
 	return drop <= step_down
+
 
 ## The height a hunter stands at for the camera: the ground under it, or where it last stood over the void,
 ## so a jump or a fall moves the view only with the ground (Cam.follow).
 static func stand_y(h: Hunter) -> float:
 	var g := h.ground()
 	return g if g > World.VOID + 1.0 else h.last_gy
+
 
 ## The one rule for ground speed: the move-speed bonuses (shares of run speed) add, the slows and
 ## states multiply that total, and nothing passes speed_cap ([game data] MaxMoveSpeed 700 uu/s).
@@ -240,7 +243,8 @@ static func fall(h: Hunter, dt: float) -> void:
 
 
 ## The fastest this hunter falls (m/s): fall_max, easing to abyss_fall_max as it sinks from
-## abyss_slow_from to abyss_slow_to metres under an island's lip over the abyss (time to recover). A kit's
+## abyss_slow_from to abyss_slow_to metres under an island's lip over the abyss (time to recover), slowly at first.
+## A kit's
 ## plunge (ArchKit.dive_speed, like Breah's air Quakefall) outruns it.
 static func fall_cap(h: Hunter) -> float:
 	if h.ak and h.ak.dive_speed() > 0.0:
@@ -248,7 +252,19 @@ static func fall_cap(h: Hunter) -> float:
 	if not h.below_lip:
 		return fall_max
 	var k := clampf((h.lip_y - h.pos.y - abyss_slow_from) / (abyss_slow_to - abyss_slow_from), 0.0, 1.0)
-	return lerpf(fall_max, abyss_fall_max, k)
+	return lerpf(fall_max, abyss_fall_max, k * k)  # [game data] an ease-in (u^2 within 0.013 of its keys)
+
+
+## A glider's vertical speed after a step in an updraft [game data], `above` metres over the nearest lip:
+## edge_mantle updraft's force, which fades to nothing over its fade metres above the lift's top once you rise
+## at its from speed or faster; never faster than glide_up_cap; the glide's own light gravity on top.
+static func updraft_vy(vy: float, above: float, dt: float) -> float:
+	var r: Dictionary = MantleCarry.rules
+	var u: Array = r["updraft"]
+	var acc := float(u[0])
+	if vy >= float(u[1]):
+		acc *= 1.0 - clampf((above - float(r["floor_rise"])) / float(u[2]), 0.0, 1.0)
+	return minf(vy + (acc - GLIDE_GRAV_K * Hunter.H_GRAV) * dt, float(r["glide_up_cap"]))
 
 
 ## Vertical speed after one step up a ledge's face, `left` metres under its lip. Within HunterFeel.mantle_reach it's the
