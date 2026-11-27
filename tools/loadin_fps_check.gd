@@ -322,9 +322,11 @@ func _split_frame(wall: float, now: int) -> void:
 	var ph := "plan" if split_m.skydrop and split_m.skydrop.planning else "ground"
 	if ph == "ground" and p and (p.dropping or p.gliding):
 		ph = "air"
+	elif ph == "plan" and split_m.hud and split_m.hud.map_open():
+		ph = "plan-map"
 	split_n[ph] = int(split_n.get(ph, 0)) + 1
 	stamp_ph = ph
-	if not inventoried and not headless and ph == "plan" and frames.size() > 0 and int(frames[-1][3]) > MAP_OBJECTS:
+	if not inventoried and not headless and ph.begins_with("plan") and frames.size() > 0 and int(frames[-1][3]) > MAP_OBJECTS:
 		inventoried = true
 		_inventory()
 	_add(ph, "draw", draw)

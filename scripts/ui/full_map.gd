@@ -36,6 +36,7 @@ var _dragged := false
 var _roster: Array = []        # [Rect2, Hunter] squad rows you can click to pass the lead
 var hover := MapHover.new()    # the tooltip under the resting cursor
 var hot_line := ""             # the hot zone's first-time line under the map (HotZone.take_plan_line)
+var cover := MapCover.new()    # while it plans the drop, the 3D behind it is not drawn
 
 func _init(h, match_node: Match) -> void:
 	hud = h
@@ -50,11 +51,14 @@ func open(by_plan := false) -> void:
 	zoom_to = 1.0
 	center = Vector2(m.world.w, m.world.h) * 0.5
 	hot_line = m.biomes.hot.take_plan_line(m) if by_plan and m.biomes else ""
+	if m.skydrop and m.skydrop.planning:
+		cover.cover(m.get_viewport())
 
 func close() -> void:
 	if is_open: Sfx.play("ui_close", null, -8.0)
 	is_open = false
 	auto = false
+	cover.uncover()
 	hot_line = ""
 	_press = Vector2.INF
 
@@ -176,6 +180,7 @@ func draw(sz: Vector2) -> void:
 	var v := view()
 	var kk := rect.size.x / v.size.x
 	var team: int = m.player.team if m.player else -9
+	cover.draw(c, sz, m.skydrop != null and m.skydrop.planning)
 	c.draw_rect(Rect2(Vector2.ZERO, sz), Color(0.01, 0.02, 0.05, 0.92))      # (dark enough that the HUD behind doesn't read through)
 	# the header: the plan's title (no countdown: the minimap and the ship's own line say enough), or just the map
 	var planning: bool = m.skydrop != null and m.skydrop.planning
