@@ -16,6 +16,7 @@ const CHECKS := {
 	# parse every kin grammar file (=<root> for another folder)
 	"--grammar-check": ["res://tools/grammar_check.gd", "grammar_check", null],
 	"--hero-reel": ["res://tools/hero_reel.gd", "hero_reel", null],  # private pitch footage (GPU)
+	"--loadin-fps-check": ["res://tools/loadin_fps_check.gd", "loadin_fps_check", "advisory"],
 	"--shader-check": ["res://tools/shader_check.gd", "shader_check", null],  # shaders compile
 	"--step-up-check": ["res://tools/step_up_check.gd", "step_up_check", null],  # lips walked over
 }
