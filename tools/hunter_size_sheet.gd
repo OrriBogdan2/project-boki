@@ -9,7 +9,7 @@ extends "res://tools/hunter_scale_shots.gd"
 ## "panel" stands the hero close in a fixed camera, so every hero shares one px/m. Needs a renderer (jobq --needs gpu).
 ## --silhouette adds, at the base size (match_k 1), the hero's silhouette as the player sees it: drawn alone in one flat
 ## colour on its own render layer, at SIL_YAWS facings, with the character lean on and off, the held weapon in and
-## out, and "crown" (weapon in, nothing above the head's crown: back poles). One HSIL row per hero and case: area in
+## out, and "crown" (weapon out and nothing above the head's crown: no back poles). One HSIL row per hero and case: area in
 ## m2 and screen height in m (the view plane at the hero, so both read
 ## against the reference's idle silhouettes at its 66 deg camera), the mean over the facings and the facing-camera one.
 ## The facing-camera mask is saved as <dir>/<hero>_sil_<lean|flat>_<case>.png. Floating companions are not the hero.
@@ -135,7 +135,7 @@ func _silhouette(hero: String, lean: String) -> void:
 	var to_cam := m.cam.global_position - p.position
 	to_cam.y = 0.0
 	to_cam = to_cam.normalized()
-	# area, height; facing 0's area, height. "crown": weapon in, nothing above the head's crown (back poles, banners)
+	# area, height; facing 0's area, height. "crown": weapon out, nothing above the head's crown (back poles)
 	var sums := {"all": [0.0, 0.0, 0.0, 0.0], "body": [0.0, 0.0, 0.0, 0.0], "crown": [0.0, 0.0, 0.0, 0.0]}
 	for i in SIL_YAWS:
 		var face := to_cam.rotated(Vector3.UP, TAU * i / SIL_YAWS)
@@ -152,7 +152,7 @@ func _silhouette(hero: String, lean: String) -> void:
 		var c := HunterCrown.crown(p.model, pts, p.vis_k, hi)
 		var cap := m.cam.unproject_position(p.position + m.cam.char_lean() * Vector3(0, c - p.position.y, 0)).y
 		for case in ["all", "body", "crown"]:
-			var got: Array = await _mask(p.model, flat, case == "body", cap if case == "crown" else -1e9)
+			var got: Array = await _mask(p.model, flat, case != "all", cap if case == "crown" else -1e9)
 			var area: float = got[0] / (ppm * ppm)
 			var tall: float = got[1] / ppm
 			sums[case][0] += area / SIL_YAWS
