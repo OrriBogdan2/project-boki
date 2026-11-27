@@ -5,24 +5,27 @@ extends RefCounted
 ## trims its sparring bot. A knocked rival is back at its corner after a beat; the guide never bleeds out.
 
 const KEYS := ["fire", "dash", "jump", "sig", "sec", "ult", "gear1", "gear2", "throw"]
-const BESIDE := 2.4          # m to your side the guide keeps when she follows
-const FOLLOW_SLACK := 1.2    # m she lets you drift before she walks after you
-const STRAFE_HZ := 0.9       # rad/s of a strafing rival's side-to-side
-const WILD_AHEAD := 5.0      # m in front of you the wild Boki turns up
-const WILD_HP := 0.3         # of its health the wild Boki arrives with (two or three hits)
-const KEEP_R := 12.9         # m from the ring's centre: past this a hunter is in or over the wall (its tiles start ~12)
-const BACK_R := 11.5         # m from the centre such a hunter is put back at
+const BESIDE := 2.4  # m to your side the guide keeps when she follows
+const FOLLOW_SLACK := 1.2  # m she lets you drift before she walks after you
+const STRAFE_HZ := 0.9  # rad/s of a strafing rival's side-to-side
+const WILD_AHEAD := 5.0  # m in front of you the wild Boki turns up
+const WILD_HP := 0.3  # of its health the wild Boki arrives with (two or three hits)
+const KEEP_R := 12.9  # m from the ring's centre: past this a hunter is in or over the wall (its tiles start ~12)
+const STAND_R := 11.9  # m from the centre: the furthest spot she stands at (never in the wall)
+const BACK_R := 11.5  # m from the centre such a hunter is put back at
 
 var tu: DuoTutorial
 var m: Match
 var foe_mode := "still"
 var guide_mode := "follow"
-var _down_t := {}            # rival -> s it has been down
-var kept := 0                # times a hunter was put back inside the ring (a hard knock over the wall)
+var _down_t := {}  # rival -> s it has been down
+var kept := 0  # times a hunter was put back inside the ring (a hard knock over the wall)
+
 
 func _init(owner_tut: DuoTutorial) -> void:
 	tu = owner_tut
 	m = owner_tut.m
+
 
 ## The guide: an archetype other than yours, on your team, no Boki of her own (one less thing to read).
 func spawn_guide(at: Vector3) -> Hunter:
@@ -33,6 +36,7 @@ func spawn_guide(at: Vector3) -> Hunter:
 	g.face = 0.0
 	return g
 
+
 ## Rival i (content: name, archetype) at its corner, dealing foe_dmg of a bot's usual damage.
 func spawn_foe(i: int, at: Vector3) -> Hunter:
 	var pick: Array = tu.cfg["foes"][i]
@@ -40,12 +44,14 @@ func spawn_foe(i: int, at: Vector3) -> Hunter:
 	(f.ai["diff"] as Dictionary)["dmg"] = float(tu.cfg["foe_dmg"])
 	return f
 
+
 func _bot(team: int, arch: String, pname: String, at: Vector3, diff: String) -> Hunter:
 	var kit := {"arch": arch, "weapon": Arch.signature(arch)}
 	var h := m.make_hunter(m.next_id("duo"), team, Arch.weight(arch), pname, "bot", {}, at, kit)
 	h.ai = m.bot_brain.new_mind(m.rng, float(Data.BOT_DIFF[diff]["skill"]), Data.BOT_DIFF[diff].duplicate())
 	h.tonics = 0
 	return h
+
 
 ## The capture beat's wild Boki, a few steps in front of you, already roughed up.
 func spawn_wild() -> Kin:
@@ -57,9 +63,11 @@ func spawn_wild() -> Kin:
 	k.hp = k.max_hp * WILD_HP
 	return k
 
+
 ## Knocks the wild Boki out for you (the stall help): the guide's bonk.
 func daze(k: Kin) -> void:
 	k.hurt(k.hp + 1.0, tu.guide)
+
 
 ## A beat starts: what the rivals and the guide may do in it.
 func begin(foes_how: String, guide_how: String) -> void:
@@ -68,14 +76,18 @@ func begin(foes_how: String, guide_how: String) -> void:
 	if guide_mode == "down" and not tu.guide.downed:
 		m.knock(tu.guide, tu.foes[0], {})
 
+
 func tick(dt: float) -> void:
 	for i in tu.foes.size():
 		_foe(tu.foes[i], i, dt)
 	_guide()
 	for h in [m.player, tu.guide] + tu.foes:
 		_keep_in(h)
+	for h in [tu.guide] + tu.foes:
+		_no_finish(h)
 	if m.truce:
-		m.truce.offers.clear()      # (sparring partners don't offer a truce)
+		m.truce.offers.clear()  # (sparring partners don't offer a truce)
+
 
 ## The ring is closed: a hunter knocked into or over the wall lands back on the floor beside it.
 func _keep_in(h: Hunter) -> void:
@@ -87,10 +99,20 @@ func _keep_in(h: Hunter) -> void:
 	h.teleport(Vector3(back.x, m.world.ground_at(back.x, back.y), back.y))
 	h.vel = Vector3.ZERO
 
+
+## Nobody loses here: a guide or rival bot that holds interact over a knocked hunter never gets to stomp it (the
+## execution would cost a life and land it by the drop, outside the ring); the knocked one is back up instead.
+func _no_finish(h: Hunter) -> void:
+	if h.stomp.is_empty():
+		return
+	Life.end_stomp(m, h, "gone")
+	h.finish_t = 0.0
+
+
 func _foe(f: Hunter, i: int, dt: float) -> void:
-	f.reveal_t = maxf(f.reveal_t, 0.3)       # (always in sight: nothing hides in a sparring ring)
+	f.reveal_t = maxf(f.reveal_t, 0.3)  # (always in sight: nothing hides in a sparring ring)
 	if f.downed:
-		f.down_hp = Data.MATCH["down_hp"]      # (never finished: a respawn would land it outside the ring)
+		f.down_hp = Data.MATCH["down_hp"]  # (never finished: a respawn would land it outside the ring)
 		_down_t[f] = float(_down_t.get(f, 0.0)) + dt
 		if float(_down_t[f]) >= float(tu.cfg["knock_hold"]):
 			_back_up(f, i)
@@ -112,11 +134,13 @@ func _foe(f: Hunter, i: int, dt: float) -> void:
 		"fight":
 			f.inp["ult"] = false
 
+
 ## In a poke beat the rivals take turns: one short burst each, then a rest to slide in.
 func _bursting(i: int) -> bool:
 	var on := float(tu.cfg["poke_on"])
 	var cycle := on + float(tu.cfg["poke_off"])
 	return fmod(m.time + i * cycle * 0.5, cycle) < on
+
 
 func _back_up(f: Hunter, i: int) -> void:
 	_down_t.erase(f)
@@ -126,11 +150,12 @@ func _back_up(f: Hunter, i: int) -> void:
 	if foe_mode in ["fight", "full"]:
 		tu.bark("foe_back")
 
+
 func _guide() -> void:
 	var g := tu.guide
 	g.reveal_t = maxf(g.reveal_t, 0.3)
 	if g.downed:
-		g.down_hp = Data.MATCH["down_hp"]      # (she waits for you: no bleeding out)
+		g.down_hp = Data.MATCH["down_hp"]  # (she waits for you: no bleeding out)
 		if guide_mode != "down":
 			m.revive_hunter(g, null)
 		return
@@ -151,18 +176,24 @@ func _guide() -> void:
 				g.inp["aim"] = tu.focus.pos + Vector3(0, 0.9, 0)
 				_mark(tu.focus)
 
+
 ## Where the guide stands when she follows: at your side, square to where you aim.
 func _beside() -> Vector3:
 	var p := m.player
 	var fwd := p.aim_dir()
 	var side := Vector2(-fwd.y, fwd.x) * BESIDE
-	return Vector3(p.pos.x + side.x, p.pos.y, p.pos.z + side.y)
+	var at := Vector2(p.pos.x + side.x, p.pos.z + side.y) - DuoTutorial.RING_C
+	if at.length() > STAND_R:
+		at = at.normalized() * STAND_R  # (you stand near the rim: she waits on the floor)
+	return Vector3(DuoTutorial.RING_C.x + at.x, p.pos.y, DuoTutorial.RING_C.y + at.y)
+
 
 ## Her enemy ping follows the rival she marked.
 func _mark(f: Hunter) -> void:
 	for pg in m.pings:
 		if pg.get("by") == tu.guide:
 			pg["pos"] = Vector3(f.pos.x, f.pos.y, f.pos.z)
+
 
 func _nearest_foe(h: Hunter) -> Hunter:
 	var best: Hunter = null
@@ -171,9 +202,11 @@ func _nearest_foe(h: Hunter) -> Hunter:
 			best = f
 	return best
 
+
 func _toward(h: Hunter, at: Vector3, slack: float) -> Vector2:
 	var d := Vector2(at.x - h.pos.x, at.z - h.pos.z)
 	return d.normalized() if d.length() > slack else Vector2.ZERO
+
 
 static func _hush(h: Hunter) -> void:
 	for k in KEYS:
