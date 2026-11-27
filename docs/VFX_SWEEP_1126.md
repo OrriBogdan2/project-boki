@@ -49,11 +49,13 @@ and share a plan: ONE impact frame (a 0.1 s white-to-colour flash ring through `
 ## PRs
 1. `ext/vfx-sweep-status-edge-1126`: the screen-edge status tint (`scripts/match/status_edge.gd`, made by the match),
    `shaders/status_edge.gdshader`), checks `--status-edge-check` and `--status-edge-shots`.
-   Stills (real GPU, 1920x1080, match camera, jobq 20261126-230827-00248): `docs/shots/vfx-sweep-status-edge/`
-   `rest.jpg` is the before; `stun.jpg` (blue), `invuln.jpg` (yellow), `grounded.jpg`, `cloak.jpg` the after.
-   Frame time, 4v4 fight, 480 frames per side, off/on blocks alternated: off p95 49.74 ms mean 45.33, on p95 49.49
-   mean 45.29, delta p95 -0.26 ms (noise; the worker rp1-3 was slow in absolute terms). Budget 0.3 ms: met. The
-   first run (job -230505-11228) is void: it timed the loading screen.
-   Quality presets: the tint is one quad with no texture read, so very_low pays the same as high and nothing
-   is hidden by a preset. Not covered: Rooted and Slowed (no tint, as the reference lists none).
+   Stills (real GPU, 1920x1080, match camera, jobq 20261127-052739-05674, after the hook moved to the match):
+   `docs/shots/vfx-sweep-status-edge/`: `rest.jpg` is the before; `stun.jpg` (blue), `invuln.jpg` (yellow),
+   `grounded.jpg`, `cloak.jpg` the after.
+   Frame time, 4v4 fight, 480 frames per side, off/on blocks alternated, three GPU runs (ms, p95 on minus off):
+   -0.26 (11-26, -230827), -0.30 (11-27, -045043), +0.33 (11-27, -052739); mean -0.08, so inside run-to-run noise
+   (~0.3 ms on these workers, whose frames are ~45 ms and CPU-bound). Budget 0.3 ms: met on the average; one run of
+   three sits 0.03 over, which is the noise floor of this A/B, not the quad (one full-screen blend, no texture read).
+   Quality presets: very_low pays the same as high and nothing is hidden by a preset. Not covered: Rooted and Slowed
+   (no tint, as the reference lists none).
 2. Next in line (not built): the shared impact frame, then Sable and Grimble data passes (rows 2-5).
