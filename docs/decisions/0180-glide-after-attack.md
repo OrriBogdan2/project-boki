@@ -1,4 +1,4 @@
-# 0178: The glider is never eaten by an attack's recovery
+# 0180: The glider is never eaten by an attack's recovery
 
 - **Status:** accepted
 - **Date:** 2026-11-26
