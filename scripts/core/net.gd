@@ -59,7 +59,9 @@ func _ready() -> void:
 		server_addr = OS.get_environment("BOKI_SERVER")
 	mm = NetMatchmaker.new()
 	mm.addr = NetMatchmaker.pick_addr(matchmaker_arg, server_addr)  # the default relay box runs no matchmaker
-	server_addr = pick_server(server_addr, OS.has_feature("template") and not OS.has_feature("web"))
+	# a player's export only: the relay/server exports (Linux Server preset, feature "server") stay as given
+	var desktop := Settings.desktop_export and not OS.has_feature("server") and not OS.has_feature("dedicated_server")
+	server_addr = pick_server(server_addr, desktop)
 	add_child(mm)
 	party = Party.new()
 	party.mm = mm
