@@ -9,9 +9,9 @@ extends "res://tools/hunter_scale_shots.gd"
 ## "panel" stands the hero close in a fixed camera, so every hero shares one px/m. Needs a renderer (jobq --needs gpu).
 ## --silhouette adds, at the base size (match_k 1), the hero's silhouette as the player sees it: drawn alone in one flat
 ## colour on its own render layer, at SIL_YAWS facings, with the character lean on and off, the held weapon in and
-## out, and "crown" (weapon out and nothing above the head's crown: no back poles). One HSIL row per hero and case: area in
-## m2 and screen height in m (the view plane at the hero, so both read
-## against the reference's idle silhouettes at its 66 deg camera), the mean over the facings and the facing-camera one.
+## out, and "crown" (weapon out and nothing above the head's crown: no back poles). One HSIL row per hero and case:
+## area in m2 and screen height in m (the view plane at the hero, so both read against the reference's idle
+## silhouettes at its 66 deg camera), the mean over the facings and the facing-camera one.
 ## The facing-camera mask is saved as <dir>/<hero>_sil_<lean|flat>_<case>.png. Floating companions are not the hero.
 
 const PASSES := [  # [label, draw at the archetype's own match_k (else 1), wheel zoom]
