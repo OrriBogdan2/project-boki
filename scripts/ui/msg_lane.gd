@@ -21,6 +21,7 @@ const FADE_OUT := 0.35          # s
 const CARD_PAD_X := 12          # px of padding either side of a card's line
 const GAP := 6.0                # px between two cards
 const CLOSE_UP := 12.0          # 1/s: how fast the cards below slide up when one goes
+const TEXT_PX := &"msg_lane_px"  # Label3D meta: [text, font, font size, wrap px, its measured size] (label_rect)
 const WIDE := 0.45              # of the screen width: the widest a card gets before its line wraps
 const FIGHT_SHOWN := 1          # urgent lines on show at most while the player is in a fight
 const FIGHT_LIFE := 2.0         # s: the longest a line already up lives once a fight starts (a hint's own life aside)
@@ -111,23 +112,36 @@ func bottom() -> float:
 
 ## Fades a world label (a lair's name board, a farm marker) while any of `rects` covers it on screen.
 static func yield_label(lbl: Label3D, cam: Camera3D, rects: Array[Rect2], delta: float) -> void:
+	yield_at(lbl, cam, rects, delta)
+
+## yield_label (`over`: its rects); returns the label's box on screen (at Vector2.INF if hidden or behind the camera).
+static func yield_at(lbl: Label3D, cam: Camera3D, over: Array[Rect2], delta: float) -> Rect2:
+	var mine := Rect2(Vector2.INF, Vector2.ZERO)
 	var want := 0.0
-	if not rects.is_empty() and lbl.is_visible_in_tree() and not cam.is_position_behind(lbl.global_position):
-		var mine := label_rect(lbl, cam)
-		for r in rects:
+	if lbl.is_visible_in_tree() and not cam.is_position_behind(lbl.global_position):
+		mine = label_rect(lbl, cam)
+		for r in over:
 			if r.intersects(mine):
 				want = 1.0
-	if lbl.transparency == want:
-		return
-	lbl.transparency = move_toward(lbl.transparency, want, delta * 6.0)
-	lbl.modulate.a = 1.0 - lbl.transparency            # (the outline ignores transparency on some renderers)
-	lbl.outline_modulate.a = 1.0 - lbl.transparency
+				break
+	if lbl.transparency != want:
+		lbl.transparency = move_toward(lbl.transparency, want, delta * 6.0)
+		lbl.modulate.a = 1.0 - lbl.transparency            # (the outline ignores transparency on some renderers)
+		lbl.outline_modulate.a = 1.0 - lbl.transparency
+	return mine
 
 ## A billboarded Label3D's box on screen, in px, from its text and font (centred on its position).
 static func label_rect(lbl: Label3D, cam: Camera3D) -> Rect2:
 	var f: Font = lbl.font if lbl.font else ThemeDB.fallback_font
 	var wrap_px := lbl.width if lbl.autowrap_mode != TextServer.AUTOWRAP_OFF else -1.0
-	var px := f.get_multiline_string_size(lbl.text, HORIZONTAL_ALIGNMENT_CENTER, wrap_px, lbl.font_size)
+	# (measured once per text: shaping it again every frame was most of the HUD's label spacing cost)
+	var was: Array = lbl.get_meta(TEXT_PX, [])
+	var px: Vector2
+	if was.size() == 5 and was[0] == lbl.text and was[1] == f and was[2] == lbl.font_size and was[3] == wrap_px:
+		px = was[4]
+	else:
+		px = f.get_multiline_string_size(lbl.text, HORIZONTAL_ALIGNMENT_CENTER, wrap_px, lbl.font_size)
+		lbl.set_meta(TEXT_PX, [lbl.text, f, lbl.font_size, wrap_px, px])
 	var half := px * lbl.pixel_size * lbl.global_basis.get_scale().x * 0.5
 	var b := cam.global_basis
 	var o := lbl.global_position

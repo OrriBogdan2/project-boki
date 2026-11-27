@@ -41,7 +41,6 @@ static func _add_numbers(m, covers: Array[Rect2]) -> void:
 ## Fades each label under `covers`; one still showing then covers the labels after it (list order is priority).
 static func yield_group(group: Array[Label3D], cam: Camera3D, covers: Array[Rect2], delta: float) -> void:
 	for lbl in group:
-		MsgLane.yield_label(lbl, cam, covers, delta)
-		var on_screen := lbl.is_visible_in_tree() and not cam.is_position_behind(lbl.global_position)
-		if lbl.transparency < SHOWN_BELOW and on_screen:
-			covers.append(MsgLane.label_rect(lbl, cam))
+		var box := MsgLane.yield_at(lbl, cam, covers, delta)
+		if lbl.transparency < SHOWN_BELOW and box.position.is_finite():  # (on screen: shown and in front)
+			covers.append(box)
