@@ -64,7 +64,7 @@ const FIXED := {
 ## Sounds past SYNC_MAX that are right where they play (on their own event; the reason is in SFX_TIMING.md):
 ## arch -> move -> [sound]. Any other own sound past SYNC_MAX fails its kit's row.
 const KNOWN := {
-	"archer": {"e": ["pin_rain"]},
+	"archer": {"e": ["pin_hail", "pin_rain"]},
 	"ashwick": {"lhold": ["ashwick_tank_hiss", "lw_roar"], "e": ["lw_shield"], "r": ["lw_jet", "lw_jet_land"]},
 	"dolm": {"lhold": ["br_punch", "dolm_rock_crunch"], "hold": ["dolm_rock_crunch"], "r": ["br_spine", "br_slam"]},
 	"dredge":

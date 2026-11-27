@@ -49,7 +49,7 @@ dolm_rock_crunch (played from the arch's ready cue, not a strike).
 | ROW | archer | lhold | - | 500 | 533 | pin_draw@17 (wind-up), archer_thread_twang@500 (+0), pin_loose@517 (-7), pin_arrow_hit@533 (+0) |
 | ROW | archer | rmb | - | - | - |  |
 | ROW | archer | hold | 517 heavy | 500 | 533 | pin_heavy_draw@17 (wind-up), pin_heavy@500 (+0), pin_heavy_burst@500 (+0), archer_hit@533 (+0) |
-| ROW | archer | e | - | 0 | 383 | pin_hail@0 (+0), pin_rain@367 (-17), pin_patter@383 (+0), archer_hit@383 (+0) |
+| ROW | archer | e | - | - | 383 | pin_hail@0 (-383 !), pin_rain@367 (-17), pin_patter@383 (+0), archer_hit@383 (+0) |
 | ROW | archer | r | - | 0 | 17 | pin_super_hit@17+30 (+30), archer_hit@17 (+0) |
 | ROW | ashwick | lmb | 33 lance_end | - | - | lw_pilot@0 (wind-up), ashwick_tank_hiss@17 (-17) |
 | ROW | ashwick | lhold | - | - | 400 | lw_pilot@0 (wind-up), lw_roar@300 (-100 !), ashwick_hit@400 (+0), ashwick_tank_hiss@500 (+100 !) |

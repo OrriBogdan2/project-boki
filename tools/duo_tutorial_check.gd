@@ -42,6 +42,7 @@ func _play(main: Node, arch: String) -> void:
 	var skipped: Array = []
 	var still_shots := 0
 	var outside := 0
+	var out_prev: Array = []
 	var t := 0.0
 	while t < RUN_MAX and not (tu.finished and tu.end_t > 1.5):
 		DuoTutorialDrive.drive(m, tu)
@@ -55,9 +56,14 @@ func _play(main: Node, arch: String) -> void:
 			skipped.append(tu.id())
 		if tu.id() in STILL_BEATS:
 			still_shots += tu.foes.filter(func(f): return f.inp.get("fire", false)).size()
+		var out_now: Array = []
 		for h in [p, tu.guide] + tu.foes:
 			if Vector2(h.pos.x - DuoTutorial.RING_C.x, h.pos.z - DuoTutorial.RING_C.y).length() > RING_R:
-				outside += 1
+				out_now.append(h)
+				# (one step over the wall is the ring putting it back next tick: only a second step out in a row counts)
+				if out_prev.has(h):
+					outside += 1
+		out_prev = out_now
 	var ids: Array = tu.beats.map(func(b): return String(b["id"]))
 	print("DUOTUT %s: %.1f s, reached %s, skipped %s, put back in the ring %d times" % [arch, t, str(reached),
 		str(skipped), tu.cast.kept])
