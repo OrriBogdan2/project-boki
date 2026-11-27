@@ -79,8 +79,8 @@ static func popups(gs: Dictionary) -> Array:
 
 
 ## The pairs the owner reported (11-26), each judged on its own so a regression names them: the frame-rate counter
-## against every popup, and the minimap against every popup (the practice stations' above
-## all). Each entry is [a, b, overlaps].
+## against every popup, and the minimap against every popup (the practice stations' above all
+## among them). Each entry is [a, b, overlaps].
 static func pairs(gs: Dictionary) -> Array:
 	var out: Array = []
 	var map: Array = gs.get("drawn minimap", [])
