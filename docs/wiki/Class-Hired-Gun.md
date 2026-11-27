@@ -63,25 +63,25 @@ What the in-game kit card (K) says.
 | Loop | Mid-range rifleman: Daze a foe with the coin's cone, then shred them while it lasts. |
 | Passive: Hot Streak | Knocking a hunter down returns Slipstep; landed abilities give lifesteal. |
 | Dash: Slipstep | Tap to skid, hold to slide further; keep shooting throughout. |
-| RMB: Coin Blast | Flick a coin that Dazes; hitting a wall blasts a cone back. |
+| RMB: Coin Blast | Flick a coin that Dazes; a wall blasts a cone back that stuns foes it slams into terrain. |
 | E: Palm Lance | Stand still 0.6s, then fire a beam from your palm through walls. |
 | Hunter ultimate: Cinderfall | A shell lands at your cursor after 1.6s, then burns the patch. |
 | Weapon: Quill Rifle | Full-auto rifle; Dazed foes take 76% more. |
 
 ### Abilities in full
 
-**Hot Streak (passive).** Knocking a hunter down gives Slipstep back at once. Each ability that lands (a Coin Blast, Palm Lance) lights Fever for 3.5s, one flat level however many foes it hits: while it burns your damage heals you for 6%, rifle included. Your rifle does 76% more to a Dazed foe (the numbers turn big and gold).
+**Hot Streak (passive).** Knocking a hunter down gives Slipstep back at once. Each ability that lands (a Coin Blast, Palm Lance) lights Fever for 3.5s, one flat level however many foes it hits: while it burns your damage heals you for 6%, rifle included. Your rifle does 76% more to a Dazed foe (the numbers turn big and gold); Coin Blast, Palm Lance and Cinderfall do 20% more.
 
 **Slipstep (dash, Shift, 8.5s cooldown).** Tap: a 4.8m skid that bleeds off over 0.45s, the way you're moving (not where you aim). Hold: a 7m low slide that takes 40% longer to come back, with no refund for letting go early. You keep shooting through either, and the body keeps aiming. A knock gives it back. In the air a tap slides 2/3 of the full hold's distance (4.7m) and uses the same single dash.
 
 **Coin Blast (RMB, 6.5s cooldown).**
 
-- *Tap:* Tap the ability key: she flicks a gold coin off her thumb on the press. The coin flies 10.5m along your aim, past the cursor, and goes off on the first foe it strikes: 22 damage and Dazed 1.4s.
-- *Resource full:* Where it hits a wall it sticks and a 6m, 100° cone shows back toward you for 0.9s. Then it blasts: 16 damage, a big shove along the cone, Dazed 1.4s. A hunter shoved into more terrain is stunned 0.7s and Dazed 0.6s longer. At the lane's end on nothing, on the ground or from the air, it fizzles: no damage, no cone.
+- *Tap:* Tap the ability key: she flicks a gold coin off her thumb on the press. The coin flies 10.5m along your aim, past the cursor, and goes off on the first foe it strikes: 22 damage (20% more if it is already Dazed) and Dazed 1.4s.
+- *Resource full:* Where it hits a wall it sticks and a 6m, 100° cone shows back toward you for 0.9s. Then it blasts: 16 damage (20% more on a foe already Dazed), a big shove along the cone, Dazed 1.4s. A hunter shoved into more terrain is stunned 1.2s and Dazed 0.6s longer. At the lane's end on nothing, on the ground or from the air, it fizzles: no damage, no cone.
 
 **Palm Lance (E, 11.5s cooldown).** Stand still and charge for 0.6s: a wide line out to 18m narrows to a thin core. The line locks to where you pressed and creeps round toward your aim at 30 degrees a second at most, so a flick can't drag it; your view pulls out along it the further you aim, not at all inside 5m. Then a heavy beam, 1.8m wide, fires from her open palm through cover and everything in its line: 24 damage, 20% more on a Dazed foe, and a Dazed hunter hit is Skewered. The recoil shoves you back a step and you take 0.6s to recover before you can move or act again. Hitting a hunter takes 20% off its cooldown (30% per hunter hit at rank 3).
 
-**Cinderfall (hunter ultimate, from level 6, 42s cooldown).** Tap: fire a shell straight up. It comes down 1.6s later exactly where your cursor was (up to 14m), and everyone sees its 3.4m disc fill until it lands. The impact deals 24 to everyone on the disc, 50% more in the hot centre. Then the patch burns for 3s: 3.5 every 0.5s and a 30% slow to anyone standing in it. You keep moving as you fire (a brief slow while the rifle points up), then shoot freely while it falls. Landing the impact on an enemy hunter fills your Boki bond; the burn does not.
+**Cinderfall (hunter ultimate, from level 6, 42s cooldown).** Tap: fire a shell straight up. It comes down 1.6s later exactly where your cursor was (up to 14m), and everyone sees its 3.4m disc fill until it lands. The impact deals 24 to everyone on the disc, 50% more in the hot centre and 20% more on a Dazed foe. Then the patch burns for 3s: 3.5 every 0.5s and a 30% slow to anyone standing in it. You keep moving as you fire (a brief slow while the rifle points up), then shoot freely while it falls. Landing the impact on an enemy hunter fills your Boki bond; the burn does not.
 
 ### Ranks
 
