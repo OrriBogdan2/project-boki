@@ -20,6 +20,10 @@ const MIN_GAP_M := 2.2  # m: no Boki is ever nearer the Hunter than this, all cl
 const AVOID_M := 3.4  # m: a Boki the Hunter is not walking to bends its path away from this close
 const TREE_GAP_M := 2.8  # m: the staged Boki and the Hunter's legs keep this far off every tree trunk
 ## m the whole staged group slides sideways, in the order tried, until its walk clears every tree
+const TIP_FLIP := 0.15  # rad the view may tip up over a wall before the view-turn is reversed
+const ORBIT_RAD := 0.9  # rad the view turns over a zone take
+## the turn is the other way where the first one swung the view behind the portal ring (it tipped top-down)
+const ORBIT_DIR := {"glasswater": -1.0}
 const SHIFTS := [0.0, 2.5, -2.5, 4.5, -4.5, 6.5, -6.5, 8.5, -8.5]
 ## the hub's market stall and games board (east of the Waystone) and its Burrow mound (west) are primitive-built: out of the
 ## film (rects: x z width depth)
@@ -150,7 +154,7 @@ func zone_take(zone: String) -> void:
 	await _wait(1.0)
 	rig.mark(zone)
 	var t0 := _frames
-	_orbit_start(0.9, ZONE_TAKE_S - 1.0)
+	_orbit_start(ORBIT_RAD * float(ORBIT_DIR.get(zone, 1.0)), ZONE_TAKE_S - 1.0)
 	var n := 0
 	while _frames - t0 < int(ZONE_TAKE_S * FPS):  # Boki to Boki and round again: the Hunter is walking nearly all take
 		await _walk(_boki_at(n % 3), STOP_M)
@@ -186,6 +190,7 @@ func ask_take() -> void:
 	var tries := 0
 	while not h.life._ask(k) and tries < 2000:
 		tries += 1
+	_show.append(k["node"])  # (the asker may not be one of the staged Boki: its bubble would float alone)
 	rig.mark("ask")
 	await _walk(h.hway.pad["pos"], 3.0)
 	await _wait(6.0)
@@ -671,9 +676,12 @@ func _keys(mv: Vector2) -> void:
 # a slow right-drag turn of the view: `turn` radians over `secs`, one step a frame (while walking or waiting)
 var _turn_left := 0
 var _turn_px := 0.0
+var _flip_at := -999  # the frame of the last reversal (a tipped view takes a moment to settle)
+var _flips := 0  # times this take the turn was reversed off a wall
 
 
 func _orbit_start(turn: float, secs: float) -> void:
+	_flips = 0
 	_turn_left = int(secs * FPS)
 	_turn_px = -turn / float(FarmCam.rules()["orbit_per_px"]) / float(_turn_left)
 	var press := InputEventMouseButton.new()
@@ -685,6 +693,11 @@ func _orbit_start(turn: float, secs: float) -> void:
 func _orbit_step() -> void:
 	if _turn_left <= 0:
 		return
+	if h.farm_cam.tip > TIP_FLIP and _flips < 2 and _frames - _flip_at > FPS:  # the turn swung the view behind a wall (it tipped top-down): turn back
+		_turn_px = -_turn_px
+		_flips += 1
+		_flip_at = _frames
+		print("PITCH orbit flipped at tip=%.2f" % h.farm_cam.tip)
 	var move := InputEventMouseMotion.new()
 	move.relative = Vector2(_turn_px, 0.0)
 	h._unhandled_input(move)
