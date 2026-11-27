@@ -50,6 +50,11 @@ func _addresses() -> void:
 	ok(NetMatchmaker.pick_addr("mm.example:9000", "10.0.0.5:7777") == "mm.example:9000", "--matchmaker= wins")
 	ok(NetMatchmaker.pick_addr("", "10.0.0.5:7777") == "10.0.0.5:8080", "else the --server= host on 8080")
 	ok(NetMatchmaker.pick_addr("", "") == "", "no address, no matchmaker")
+	var exported := Net.pick_server("", true)
+	ok(exported == Net.DEFAULT_RELAY, "an exported desktop build with no --server= plays on the live relay")
+	ok(Net.pick_server("10.0.0.5:7777", true) == "10.0.0.5:7777", "--server= wins over the default relay")
+	ok(Net.pick_server("", false) == "", "editor runs and checks stay offline without --server=")
+	ok(Net.server_addr == "" and not Net.native_available(), "this check run (not an export) is offline")
 	ok(Net.mm != null and Net.party != null and Net.party.mm == Net.mm, "Net holds the matchmaker and the party")
 
 func _gate(a: Party) -> void:
