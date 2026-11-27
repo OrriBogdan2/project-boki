@@ -61,7 +61,10 @@ def main():
         for pi in map(int, opt["prims"].split(",")):
             dp, sp = D["meshes"][0]["primitives"][pi], S["meshes"][0]["primitives"][pi]
             for k in attrs:
-                assert D["accessors"][dp["attributes"][k]]["count"] == S["accessors"][sp["attributes"][k]]["count"], (pi, k)
+                assert D["accessors"][dp["attributes"][k]]["count"] == S["accessors"][sp["attributes"][k]]["count"], (
+                    pi,
+                    k,
+                )
                 port_acc(dp["attributes"][k], sp["attributes"][k])
                 n += 1
     if "anims" in opt:

@@ -139,8 +139,10 @@ def main():
     ww[ww < 1e-6] = 0
     pr["attributes"]["JOINTS_0"] = add_acc(j, b, top.astype(np.uint16), 5123, "VEC4")
     pr["attributes"]["WEIGHTS_0"] = add_acc(j, b, ww.astype(np.float32), 5126, "VEC4")
-    print("weights: root %d, mid %d, tip %d verts (w>0.5)" % ((full[:, tj] > 0.5).sum(), (full[:, -2] > 0.5).sum(),
-                                                              (full[:, -1] > 0.5).sum()))
+    print(
+        "weights: root %d, mid %d, tip %d verts (w>0.5)"
+        % ((full[:, tj] > 0.5).sum(), (full[:, -2] > 0.5).sum(), (full[:, -1] > 0.5).sum())
+    )
     keys(a, j, b, P, full, tail, pi, ti, new, pinv, [head] + jpos)
     j["buffers"][0]["byteLength"] = len(b)
     write(a.dst, j, prune(j, b))
@@ -164,7 +166,9 @@ def keys(a, j, b, P, full, tail, pi, ti, new, pinv, heads):
     for an in j["animations"]:
         an["channels"] = [c for c in an["channels"] if c["target"]["node"] != ti]
         hs = next((c for c in an["channels"] if c["target"]["node"] == pi), None)
-        times = acc(j, b, an["samplers"][hs["sampler"]]["input"])[:, 0].copy() if hs else np.array([0.0, 1.0], np.float32)
+        times = (
+            acc(j, b, an["samplers"][hs["sampler"]]["input"])[:, 0].copy() if hs else np.array([0.0, 1.0], np.float32)
+        )
         length = max(float(times.max()), 1e-3)
         period = length / max(1, round(length / sper))
         pitch = per.get(an["name"], base)
@@ -192,15 +196,18 @@ def keys(a, j, b, P, full, tail, pi, ti, new, pinv, heads):
                     break
             lift[f] = extra
         n = len(lift)
-        lift = np.array([lift[max(0, i - 2):i + 3].max() for i in range(n)])
-        lift = np.array([lift[max(0, i - 2):i + 3].mean() for i in range(n)])
+        lift = np.array([lift[max(0, i - 2) : i + 3].max() for i in range(n)])
+        lift = np.array([lift[max(0, i - 2) : i + 3].mean() for i in range(n)])
         for k, node in enumerate(bones):
             q = np.array([local(k, f, lift[f]) for f in range(n)], np.float32)
             ti_ = add_acc(j, b, times.astype(np.float32).reshape(-1, 1), 5126, "SCALAR", True)
             oi = add_acc(j, b, q, 5126, "VEC4")
             an["samplers"].append({"input": ti_, "output": oi, "interpolation": "LINEAR"})
             an["channels"].append({"sampler": len(an["samplers"]) - 1, "target": {"node": node, "path": "rotation"}})
-        print("clip %s: %d keys, pitch %s yaw %.0f, lift max %.0f mean %.1f" % (an["name"], n, pitch[:3], yaw, lift.max(), lift.mean()))
+        print(
+            "clip %s: %d keys, pitch %s yaw %.0f, lift max %.0f mean %.1f"
+            % (an["name"], n, pitch[:3], yaw, lift.max(), lift.mean())
+        )
 
 
 if __name__ == "__main__":

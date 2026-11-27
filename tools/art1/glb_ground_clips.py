@@ -14,7 +14,6 @@ Run: python3 tools/art1/glb_ground_clips.py IN.glb OUT.glb --root=Hips --feet=Le
 
 import argparse
 import os
-import struct
 import sys
 
 import numpy as np
@@ -34,8 +33,14 @@ def aa(ax, rad):
 def qmul(a, b):
     x1, y1, z1, w1 = a
     x2, y2, z2, w2 = b
-    return np.array([w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2, w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2,
-                     w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2, w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2])
+    return np.array(
+        [
+            w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2,
+            w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2,
+            w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2,
+            w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2,
+        ]
+    )
 
 
 def smooth_up(v, win, loop):
@@ -45,9 +50,9 @@ def smooth_up(v, win, loop):
         return v.copy()
     pad = (lambda x: np.r_[x[-win:], x, x[:win]]) if loop else (lambda x: np.r_[[x[0]] * win, x, [x[-1]] * win])
     p = pad(v)
-    mx = np.array([p[i:i + 2 * win + 1].max() for i in range(n)])
+    mx = np.array([p[i : i + 2 * win + 1].max() for i in range(n)])
     p = pad(mx)
-    return np.array([p[i:i + 2 * win + 1].mean() for i in range(n)])
+    return np.array([p[i : i + 2 * win + 1].mean() for i in range(n)])
 
 
 def channel(j, anim, node, path):
@@ -108,7 +113,6 @@ def main(argv):
     feet = np.where(np.isin(dom_name, a.feet.split(",")))[0]
     tail = np.where(np.isin(dom_name, a.tail_bones.split(",")))[0] if a.tail else np.array([], int)
     root = idx[a.root]
-    jroot = rig.joints.index(root)
     no_loop = set(a.no_loop.split(","))
     for anim in j["animations"]:
         if a.clips and anim["name"] not in a.clips.split(","):
@@ -117,7 +121,7 @@ def main(argv):
         _, ts = channel(j, anim, root, "translation")
         off_t, n_t = acc_view(j, ts["output"])
         T = gc.accessor(j, b, ts["input"])[:, 0].astype(float)
-        tr = np.frombuffer(bytes(b[off_t:off_t + 12 * n_t]), "<f4").reshape(-1, 3).astype(float)
+        tr = np.frombuffer(bytes(b[off_t : off_t + 12 * n_t]), "<f4").reshape(-1, 3).astype(float)
         low0 = lowest(rig, mesh, anim, T, feet)
         lift = smooth_up(np.maximum(0.0, a.floor - low0), a.win, loop)
         line = f"{anim['name']:24s} feet low median {np.median(low0) * 100:+5.1f} min {low0.min() * 100:+5.1f} cm"
@@ -125,7 +129,7 @@ def main(argv):
             # model space is the armature's space (identity here): the root's parent must not rotate/scale
             tr2 = tr.copy()
             tr2[:, 1] += lift
-            b[off_t:off_t + 12 * n_t] = tr2.astype("<f4").tobytes()
+            b[off_t : off_t + 12 * n_t] = tr2.astype("<f4").tobytes()
             low1 = lowest(rig, mesh, anim, T, feet)
             line += f" -> lift max {lift.max() * 100:4.1f} cm, low median {np.median(low1) * 100:+5.1f} min {low1.min() * 100:+5.1f}"
         if len(tail):
@@ -134,8 +138,13 @@ def main(argv):
             line += f" | tail min {tlow0.min() * 100:+5.1f} cm, under {np.mean(tlow0 < 0) * 100:3.0f}% keys"
             if not a.report and tlow0.min() < a.tail_floor:
                 c, s = channel(j, anim, tn, "rotation")
-                q_in = gc.channel_at(gc.accessor(j, b, s["input"])[:, 0].astype(float),
-                                     gc.accessor(j, b, s["output"]).astype(float), s.get("interpolation", "LINEAR"), "rotation", T)
+                q_in = gc.channel_at(
+                    gc.accessor(j, b, s["input"])[:, 0].astype(float),
+                    gc.accessor(j, b, s["output"]).astype(float),
+                    s.get("interpolation", "LINEAR"),
+                    "rotation",
+                    T,
+                )
                 ang = np.zeros(len(T))
                 parent = rig.parent[tn]
                 jpar = rig.joints.index(parent)
@@ -152,7 +161,9 @@ def main(argv):
                     need = (lowt < a.tail_floor) & (ang < np.radians(a.tail_max) - 1e-6)
                     if not need.any():
                         break
-                    ang = np.minimum(smooth_up(np.where(need, ang + np.radians(2), ang), 1, loop), np.radians(a.tail_max))
+                    ang = np.minimum(
+                        smooth_up(np.where(need, ang + np.radians(2), ang), 1, loop), np.radians(a.tail_max)
+                    )
                     new = []
                     for f in range(len(T)):
                         Gp = S[f, jpar] @ ibm_inv_p
@@ -166,7 +177,7 @@ def main(argv):
                         ax_l = Rp.T @ (ax_w / np.linalg.norm(ax_w))
                         new.append(qmul(aa(ax_l, ang[f]), q_in[f]))
                     # recompute from the original keys each pass, so the axis follows the current pose only once
-                    b[off_q:off_q + 16 * len(T)] = np.array(new, "<f4").tobytes()
+                    b[off_q : off_q + 16 * len(T)] = np.array(new, "<f4").tobytes()
                 tlow1 = lowest(rig, mesh, anim, T, tail)
                 line += f" -> pitch max {np.degrees(ang.max()):4.1f} deg, tail min {tlow1.min() * 100:+5.1f} cm"
         print(line)
