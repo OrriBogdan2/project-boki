@@ -223,7 +223,7 @@ func _cast(m: Match, home: Vector3, state: String, key: String) -> Dictionary:
 			h.vel = Vector3(3, 0, 0)
 			h.inp["glide"] = true
 			h.inp["glide_btn"] = true
-			_steps(m, 20)
+			_steps(m, int(HunterFeel.glide_engage / Match.DT) + 4)      # (the glider opens after the hold)
 			h.inp["glide_btn"] = false
 		_steps(m, 3)
 	h.ak.anim_id = ""

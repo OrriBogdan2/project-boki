@@ -3,7 +3,7 @@ extends RefCounted
 ## No data, frame or wiki line shows these pairs, so each follows DECISIONS 11-07 "every interaction is chainable"
 ## and DashFlow's default (a missing row combines): the second press goes now and the first runs on. Run inside
 ## --archer-combo-check (tools/archer_bulwark_combo_check.gd).
-const LIFT := 4.0            # m she is lifted before opening a glider, so it stays open through a row
+const LIFT := 5.0            # m she is lifted before opening a glider (the press is held HunterFeel.glide_engage first)
 const DRAW_S := 0.4          # s of draw before the second press (past the tap, short of Empowered)
 var C                        # the combo check (ok, step, aim_at)
 var m: Match
@@ -55,8 +55,8 @@ func _open_glide() -> void:
 	C.step(m, 0.08)
 	P.pos.y += LIFT
 	P.inp["glide"] = true
-	P.do_jump()
-	C.step(m, 0.05)
+	P.do_jump()        # (a press in the air: held, it opens the glider after HunterFeel.glide_engage)
+	C.step(m, HunterFeel.glide_engage + 0.1)
 
 
 func _hold_fire(secs: float) -> void:
