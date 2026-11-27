@@ -298,6 +298,7 @@ const FRAME := {
 		"tail_tip": Vector3(0, 0.26, 0.231),
 		"tip_bone": "hips",
 		"hip": 0.232,
+		"coat": {"tex_sat": 0.85},
 		"marks":
 		{
 			"left flank": Vector3(-0.0654, 0.267, 0.0477),
