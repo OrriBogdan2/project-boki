@@ -161,6 +161,7 @@ func _states(main: Node, a: String) -> void:
 	_twist(a, nat)
 	_blends(a)
 	await _kmoves(main, a, m, nat)
+	_own_moves(a, m, nat)
 	_moves(a, nat)
 	_only_meshy(a, m)
 	await _orbits(main, a, nat)
@@ -215,8 +216,8 @@ func _drop_poses(a: String, m: Node3D, nat: WardenNative) -> void:
 
 
 ## Every surface wears the game's hero-toon material (not Meshy's PBR), and the hit flashes see them (meta "mats"); a
-## flame slot's surface (Cinder's heel jets, WardenProps) wears the toon pass's flame shader instead, and a mood face
-## off an atlas (Meeko's companions, WardenMood: a see-through decal the opaque hero-toon cannot draw) its atlas shader.
+## flame slot's surface (Cinder's heel jets, WardenProps) wears the toon pass's flame shader instead, a card slot's
+## (see-through wings) the card shader, and a mood face (Meeko's sun and cloud) its face shader.
 func _toon(a: String, m: Node3D) -> void:
 	var surfaces := 0
 	var toon := 0
@@ -224,19 +225,10 @@ func _toon(a: String, m: Node3D) -> void:
 		for si in (mi as MeshInstance3D).mesh.get_surface_count():
 			surfaces += 1
 			var sm := (mi as MeshInstance3D).get_surface_override_material(si) as ShaderMaterial
-			var game := (
-				sm != null and (sm.shader == Models.HERO or sm.shader == WardenGlb.FLAME or _atlas_face(a, mi, si, sm))
-			)
-			toon += int(game and (m.get_meta("mats", []) as Array).has(sm))
+			var game := sm != null and sm.shader in [Models.HERO, WardenGlb.FLAME, WardenGlb.CARD]
+			var face := sm != null and sm.shader == WardenMood.FACE_SHADER
+			toon += int(face or (game and (m.get_meta("mats", []) as Array).has(sm)))
 	ok(surfaces > 0 and toon == surfaces, "%s: hero-toon on %d of %d surfaces" % [a, toon, surfaces])
-
-
-## A mood face the data lists ("mood" "faces": eyes-mood_<tag>) on WardenMood's atlas shader.
-func _atlas_face(a: String, mi: MeshInstance3D, si: int, sm: ShaderMaterial) -> bool:
-	var src := mi.mesh.surface_get_material(si)
-	var tag := String(src.resource_name).trim_prefix("eyes-mood_") if src else ""
-	var faces: Dictionary = WardenClips.data(WardenGlb.art(a)).get("mood", {}).get("faces", {})
-	return sm.shader == WardenMood.ATLAS_SHADER and faces.has(tag)
 
 
 ## The crouch's arm bones play the walk's arm keys (Meshy's crouch holds a torch out); its legs keep the crouch.
@@ -263,8 +255,8 @@ func _crouch_arms(a: String, nat: WardenNative) -> void:
 ## second (data "hit") within a frame: "peak" speed = the blade tip's fastest second, low = its lowest (first second
 ## within 2 cm of it), reach = the first second it stands within 2 cm of its farthest from the hips.
 func _moves(a: String, nat: WardenNative) -> void:
-	for km: String in nat.moves.moves:
-		var mv: Dictionary = nat.moves.moves[km]
+	for km: String in nat.moves.rows:
+		var mv: Dictionary = nat.moves.rows[km]
 		var clip := String(mv["clip"])
 		ok(nat.player.has_animation(clip), "%s: %s plays its own clip %s" % [a, km, clip])
 		if not mv.has("hit"):
@@ -504,6 +496,86 @@ func _synthetic_clips(main: Node, a: String, m: Node3D, nat: WardenNative) -> vo
 	src.free()
 
 
+## The Hunter's own clips for its kit moves (data "kmoves", Cinder's hands): each plays instead of Meshy's one swing,
+## on the kit's clock, with its pose where the move says: the lance's hand held out ahead, the sighting hand up at the
+## eye, the push's palm ahead on the bolt's frame, the cloak's arms flung wide on the blast frame, the flight leaning
+## in with the take-off clip then the loop, the landing clip; an upper clip lets go once played out.
+func _own_moves(a: String, m: Node3D, nat: WardenNative) -> void:
+	if not nat.moves.rows.has("as_lance"):
+		return
+	var s := {"grounded": true}
+	m.set_meta(WardenClips.STATE, s)
+	var swing := String(nat.plays["attack"])
+	var before := _at(m, nat, s, "as_aim", 0.0)
+	var held := _at(m, nat, s, "as_lance", 0.6)
+	var lance := nat.player.get_animation("cn_u_lance_loop")
+	var own: bool = nat.player.current_animation != swing and nat.upper.clip == lance and nat.upper.w >= 1.0
+	ok(own, "%s: the lance holds its own clip over Meshy's idle (no swing; weight %.2f)" % [a, nat.upper.w])
+	var reach: Vector3 = held["hand"]
+	ok(reach.z < -0.2 and reach.y > 0.8, "%s: the lance's hand is held out ahead (%s)" % [a, reach])
+	s["vel"] = Vector3(0.0, 0.0, -4.6)
+	var leg := nat.skel.find_bone("LeftUpLeg")
+	_at(m, nat, s, "as_lance", 0.6)
+	var stride := nat.skel.get_bone_pose_rotation(leg)
+	_at(m, nat, s, "as_lance", 0.7)
+	var running: bool = nat.player.current_animation == String(nat.plays["run"])
+	ok(
+		running and not stride.is_equal_approx(nat.skel.get_bone_pose_rotation(leg)),
+		"%s: the legs keep running under the lance (%s)" % [a, nat.player.current_animation]
+	)
+	s.erase("vel")
+	var sight := _at(m, nat, s, "as_aim", 0.35)
+	var up: float = sight["hand"].y - held["hand"].y
+	ok(up > 0.1, "%s: the sighting hand rises to the eye (%.2f m over the lance's)" % [a, up])
+	var fire := _at(m, nat, s, "as_shot", 0.0)
+	var push := _at(m, nat, s, "as_shot", 0.1)
+	var out_at: Vector3 = fire["muzzle"]
+	ok(out_at.z < -0.2 and out_at.y > 1.0, "%s: the bolt leaves her palm on its frame (%s)" % [a, out_at])
+	var from_z: float = fire["hand"].z
+	var to_z: float = push["hand"].z
+	ok(to_z < from_z - 0.03, "%s: the palm pushes on (%.2f to %.2f)" % [a, from_z, to_z])
+	var blast := _at(m, nat, s, "as_cloak", 0.05)
+	var span: float = blast["span"]
+	ok(span > before["span"] + 0.4, "%s: both arms wide on the blast frame (%.2f m across)" % [a, span])
+	_at(m, nat, s, "as_cloak", 1.0)
+	_at(m, nat, s, "as_cloak", 1.0)
+	ok(nat.upper.w <= 0.0, "%s: the cloak clip lets go once played out" % a)
+	_at(m, nat, s, "lw_jet", 0.1)
+	var clip := nat.player.current_animation
+	ok(clip == "cn_f_takeoff", "%s: Flue Flight takes off (%s)" % [a, clip])
+	var fly := _at(m, nat, s, "lw_jet", 0.9)
+	ok(nat.player.current_animation == "cn_f_fly", "%s: then the flight loop (%s)" % [a, nat.player.current_animation])
+	var lean: float = fly["lean"]
+	ok(lean > before["lean"] + 0.25, "%s: flying leans into it (head %.2f m ahead of the hips)" % [a, lean])
+	_at(m, nat, s, "lw_land", 0.1)
+	ok(nat.player.current_animation == "cn_f_land", "%s: the landing clip (%s)" % [a, nat.player.current_animation])
+	_at(m, nat, s, "", 0.0)
+	clip = nat.player.current_animation
+	ok(clip != "cn_f_land", "%s: back to the legs' own clip (%s)" % [a, clip])
+
+
+## The state with kit move `km` `kt` s in, run on 0.1 s twice: the right hand, the muzzle (model frame: forward is -Z),
+## the hands' span and the head's lead over the hips.
+func _at(m: Node3D, nat: WardenNative, s: Dictionary, km: String, kt: float) -> Dictionary:
+	s["kmove"] = km
+	s["kmove_t"] = kt
+	nat.call("_process", 0.1)
+	nat.call("_process", 0.1)
+	var hand := m.to_local(nat.hand_position())
+	var left := _bone_in(m, nat, "LeftHand")
+	var head := _bone_in(m, nat, "Head")
+	var hips := _bone_in(m, nat, "Hips")
+	var out := {"hand": hand, "span": hand.distance_to(left), "lean": hips.z - head.z}
+	if nat.mouth:
+		out["muzzle"] = m.to_local(nat._now(nat.mouth))
+	return out
+
+
+## Meshy's bone `bone` this frame, in the model's frame.
+func _bone_in(m: Node3D, nat: WardenNative, bone: String) -> Vector3:
+	return m.to_local(nat.skel.global_transform * nat.skel.get_bone_global_pose(nat.skel.find_bone(bone)).origin)
+
+
 ## Each kit move the data gives a clip (data "kmoves"): the clip is there, plays on the move and is no T-pose; a hold
 ## loop stays inside [hold_from, end] while the move lasts and is gone the frame it ends; a release has the string
 ## drawn on its first frame and back on the bow on the next (the arrow leaves within a frame of the kit's fire time).
@@ -512,6 +584,8 @@ func _kmoves(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
 	var string_bi := nat.skel.find_bone("StringMid")
 	for km in kms:
 		var mv: Dictionary = kms[km]
+		if bool(mv.get("upper", false)):
+			continue  # (a layer over the legs' clip: _moves)
 		var clip := String(mv["clip"])
 		mv["fade"] = 0.0  # (the blend from the calm pose would be in every reading)
 		ok(

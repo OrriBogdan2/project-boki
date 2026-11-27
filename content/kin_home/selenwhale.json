@@ -1,0 +1,14 @@
+{
+	"id": "selenwhale",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/selenwhale.json.",
+	"work": {
+		"craft": 1,
+		"frost": 3,
+		"mend": 2
+	},
+	"shiny": {
+		"belly": "#fce1a3",
+		"color": "#e4cc94",
+		"glow": "#ffb489"
+	}
+}
