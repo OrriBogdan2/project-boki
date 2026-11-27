@@ -4,7 +4,7 @@ extends RefCounted
 ## match builds a hunter) at their match size (Hunter.drawn_k: the reference's height) and the four Boki at Home's
 ## own farm size, all idle and facing the camera, HUD, marks and particles hidden.
 ## Writes 1_farm_cam.png (the farm's close third-person view: one row with Albert, the camera's target, in the middle
-## and the Boki a step nearer in the gaps), 2_eye_row.png (eye level, one row), 3_mid.png and
+## and the three starters a step nearer under the gaps), 2_eye_row.png (eye level, one row), 3_mid.png and
 ## heights.json (metres as drawn: crown and with extras, per hunter and per Boki). Needs a renderer for the stills.
 
 const WARDEN_SKIN := preload("res://tools/warden_skin.gd")
@@ -23,9 +23,12 @@ const ROW_STEP := 1.45  # m between neighbours in the one row of nine (eye shot)
 const ROW_ORDER := ["h0", "b0", "h1", "b1", "h2", "b2", "h3", "b3", "h4"]  # Albert at the end nearest the 3/4 camera
 const HUNTER_X := [-5.0, -2.5, 0.0, 2.5, 5.0]  # m across the group (mid shot back row), Albert far left
 const BOKI_X := [-3.75, 1.25, 3.75, -1.25]  # m (cindle, burrlet, puddlet, heatherhorn): in the gaps, a row nearer
-const FARM_X := [-3.8, -1.9, 1.9, 3.8]  # m: Kael, Sparkle, Meeko, Cinder in the farm-cam row, Albert at 0 between them
-const FARM_BOKI_X := [2.85, -0.95, 0.95, -2.85]  # m: the Boki in the row's gaps (Crofthorn between the tall two)
-const FARM_BOKI_NEAR := 1.4  # m the Boki stand nearer the farm camera (south) than the hunters
+const FARM_X := [-4.0, -2.15, 2.15, 4.0]  # m: Kael, Sparkle, Meeko, Cinder; Albert at 0
+## m: the three starters (cindle, burrlet, puddlet) under the row's gaps, clear of Albert's hammer and shield. Crofthorn
+## (1.75 m, 1.6 m across the horns) has no gap that wide at the close camera, so it waits out of this shot (x -12) and
+## stands with the hunters in the eye-level and mid shots.
+const FARM_BOKI_X := [-2.3, 1.0, 2.5, -12.0]
+const FARM_BOKI_NEAR := 1.6  # m the Boki stand nearer the farm camera (south) than the hunters: low on the still
 const BOKI_FRONT := 2.2  # m the Boki stand nearer the camera than the hunters
 const FACE_BOKI := 0.18  # rad: a small turn either side of the camera, so it is not stiff but the face reads
 const CLEAR_HALF_W := 6.0  # m either side of the camera-to-group line that scenery is hidden in
@@ -162,9 +165,9 @@ func _place() -> void:
 	_layout()
 
 
-## farm: one row across the farm camera's view, Albert (its target) in the middle, two a side, the Boki a step nearer
-## in the gaps. row: all nine in one line, hunters and Boki alternating, Albert at the camera's end. mid: the hunters
-## in a back row, Boki a row nearer, Albert a step in front.
+## farm: one row across the farm camera's view, Albert (its target) in the middle, two a side, the starters a step
+## nearer under the gaps (Crofthorn out of shot: FARM_BOKI_X). row: all nine in one line, hunters and Boki
+## alternating, Albert at the camera's end. mid: the hunters in a back row, Boki a row nearer, Albert a step in front.
 func _layout() -> void:
 	var spots := {}  # node -> ground position
 	var albert := group
@@ -390,6 +393,8 @@ func _hide_marks() -> void:
 	for i in hunters.size():
 		for g in hunters[i].find_children("Glider", "Node3D", true, false):
 			(g as Node3D).visible = false  # folded away on the ground, as in play
+		for c in hunters[i].find_children(WardenCompanions.PREFIX + "*", "Node3D", true, false):
+			(c as Node3D).visible = false  # Meeko's sun and cloud drift over the next hunter; not body height
 		hunters[i].rotation.y = _face_to(hunters[i].position)
 	for j in h.kins.size():
 		var n := h.kins[j]["node"] as Node3D
