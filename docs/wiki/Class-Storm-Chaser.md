@@ -66,7 +66,7 @@ What the in-game kit card (K) says.
 | RMB: Storm Rod | Throw a copper rod: knocks back, adds Static, stuns on walls. |
 | E: Skycall | Drop a circle; 0.8s later lightning drags foes inside and grounds them. |
 | Hunter ultimate: Kitefall | Launch up, then strike down at your cursor; the enemy you hit spreads its Static + 1 to everyone near. |
-| Weapon: Coilcaster | Finger bolts every 0.65s; each hit adds 1 Static. |
+| Weapon: Coilcaster | Finger bolts every 0.55s; each hit adds 1 Static. |
 
 ### Abilities in full
 
