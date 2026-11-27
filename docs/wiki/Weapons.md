@@ -11,7 +11,7 @@ Numbers are per shot or swing before any upgrades. Class kits that run their own
 |---|---|---|---|---|---|---|---|
 | Arc Shots | the Silver Thief | light | 13 | 0.45s | none | 8.5m | A spinning shot from alternating hands every 0.45s. It always flies its full 8.5m along your aim, whatever the cursor distance, and fizzles at the end if it hits nothing. |
 | Burst Rifle | none | medium | 7 | 0.45s | none | 10.5m | Three rounds per pull. Accurate at range. |
-| Coilcaster | the Storm Chaser | light | 9 | 0.648s | none | 13m | No gun: a copper coil at each wrist. She points and a jagged bolt cracks from her fingertip, left hand then right, out to full range. |
+| Coilcaster | the Storm Chaser | light | 9 | 0.55s | none | 13m | No gun: a copper coil at each wrist. She points and a jagged bolt cracks from her fingertip, left hand then right, out to full range. |
 | Torch Lance | the Ashen Kiss | heavy | 2.7 | 0.1s | none | 6.1m | Hold to pour fire from your hand 6m ahead: the stream trails behind a sweep, narrow at the palm and billowing at the end. It burns as long as you hold. It builds Char; at full Char the foe goes Ablaze. |
 | Greatsword | the Unbroken | heavy | 11 | 0.5s | none | 3.4m | A slow, huge 3-hit combo, strongest on the tip. Hold 1s for a slam that stuns and throws people far. |
 | Hoar Fan | the Snowglide | light | 4 | 0.18s | none | 10m | A folding fan of ice slats. Hold for a barrage of slow ice darts (one every 0.18s) that fly out along your aim and curve in onto the foe right at your cursor (a foe away from it pulls on nothing: you aim) toward the end of their flight: one hold is one burst: let go and it ends on three large darts that hit twice as hard, fly faster and reach further, then a 0.5s pause before the next. Eight on one foe Shatter them. While skating they fly as fast, thick beams that hit twice as hard and home in the same way. |
@@ -88,7 +88,7 @@ Found as glowing perk orbs during an expedition: walk into one to take it. Chest
 | Featherfall | Your glider lasts 60% longer. | 1 |
 | Scavenger | Gems you pick up are worth 25% more. | 2 |
 | Tough Skin | +15 max health, healed right away. | 3 |
-| Overcharge | Your bond ultimate charges 30% faster. | 1 |
+| Overcharge | Your bond meter fills 30% faster. | 1 |
 | Keen Edge | 8% more damage. | 3 |
 | Fleet Foot | 6% faster on foot. | 2 |
 | Plating | +20 max armor. | 2 |

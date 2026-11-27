@@ -5,17 +5,21 @@ extends RefCounted
 ## graphics warm-up stages in order, and is full when the screen leaves.
 
 const LOADING := "res://scripts/ui/loading.gd"
-const TIMEOUT_S := 240.0       # a real load that takes longer than this is hung
-const MAX_STEP := 0.25         # the most the bar may move in one frame (of a frame under HITCH_S)
-const HITCH_S := 0.2           # a longer frame may carry the bar further: the load itself stalled
-const REAL_LOAD := {"teams": 6, "squad": 1, "tier": 0, "seed": 7, "autoplay": true, "probe": true,
-	"god": true, "plan_t": 3.0}
+const TIMEOUT_S := 240.0  # a real load that takes longer than this is hung
+const MAX_STEP := 0.25  # the most the bar may move in one frame (of a frame under HITCH_S)
+const HITCH_S := 0.2  # a longer frame may carry the bar further: the load itself stalled
+const REAL_LOAD := {
+	"teams": 6, "squad": 1, "tier": 0, "seed": 7, "autoplay": true, "probe": true, "god": true, "plan_t": 3.0
+}
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("LOADING %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -25,12 +29,13 @@ func run(main: Node) -> void:
 		Save.d["roster"].append(tk)
 		Save.d["active"] = tk["uid"]
 	_hunters()
-	await _shots(main)
+	_layout()
 	await _real_load(main)
 	print("LOADING DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
-## Every Hunter: a splash that loads, a tip (none about the Blight when it is off), the map's name and mode line.
+
+## Every Hunter: a splash that loads, a tip from the tip set (also with the Blight off), the map's name.
 func _hunters() -> void:
 	var ids := Arch.ids()
 	ok(ids.size() >= 12, "every Hunter (%d)" % ids.size())
@@ -40,40 +45,34 @@ func _hunters() -> void:
 		var tex: Texture2D = ld.splash
 		var loads: bool = ld.splash_path != "" and tex != null and tex.get_width() > 0
 		ok(loads, "%s: its splash loads (%s)" % [ak, ld.splash_path])
-		ok(ld.tip != "", "%s: a tip" % ak)
-		ok(ld.title != "" and ld.mode_line != "", "%s: the map's name and a mode line (%s)" % [ak, ld.title])
+		ok(ld.tip != "" and _tip_set().has(ld.tip), "%s: a tip from the tip set" % ak)
+		ok(ld.map_name != "", "%s: the map's name (%s)" % [ak, ld.map_name])
+		ok(loads and absf(tex.get_width() * 9.0 - tex.get_height() * 16.0) < 16.0, "%s: its splash is 16:9" % ak)
 		ld.free()
 		var calm: Node = load(LOADING).new()
 		calm.setup({"teams": 10, "squad": 3, "tier": 0, "arch": ak, "blight": false})
 		ok(calm.tip != "" and not calm.tip.contains("Blight"), "%s: no Blight tip when the Blight is off" % ak)
 		calm.free()
 
-## With --shots-dir=<dir> [--size=WxH]: the screen for a trio mid-load, as <dir>/loading_<W>x<H>.png.
-func _shots(main: Node) -> void:
-	var dir := ""
-	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--shots-dir="):
-			dir = a.substr(12)
-		if a.begins_with("--size="):
-			var wh := a.substr(7).split("x")
-			main.get_window().size = Vector2i(int(wh[0]), int(wh[1]))
-	if dir == "":
-		return
-	DirAccess.make_dir_recursive_absolute(dir)
-	if main.fade != null:
-		await main.fade.reveal(0.01)
-	var ld: Node = load(LOADING).new()
-	var opts := {"teams": 10, "squad": 3, "tier": 0, "arch": "gunslinger", "seed": 3}
-	Prematch.deal_mates(opts)
-	ld.setup(opts)
-	main.add_child(ld)
-	ld.want = 0.6
-	ld.set_stage("graphics")
-	for i in 40:
-		await main.get_tree().process_frame
-	var win := main.get_window().size
-	main.get_viewport().get_texture().get_image().save_png(dir.path_join("loading_%dx%d.png" % [win.x, win.y]))
-	ld.queue_free()
+
+## The bottom-left stack (title block, tip, bar) and the squad row at three window sizes, with a raid line
+## shown: all inside the window, none on another, the squad above the title block.
+func _layout() -> void:
+	for sz in [Vector2(1024, 640), Vector2(1280, 720), Vector2(1920, 1080)]:
+		var ld: Node = load(LOADING).new()
+		ld.setup({"teams": 10, "squad": 3, "tier": 0, "arch": "mage", "seed": 7})
+		ld.raid = "fog"
+		var lay: Dictionary = ld.layout(sz)
+		var squad: Rect2 = lay["squad"]
+		var block: Rect2 = lay["block"]
+		var tip: Rect2 = lay["tip"]
+		var bar: Rect2 = lay["bar"]
+		var inside := Rect2(Vector2.ZERO, sz).encloses(block) and Rect2(Vector2.ZERO, sz).encloses(bar)
+		ok(inside and squad.position.y >= 0.0, "%dx%d: the text and bar are inside the window" % [sz.x, sz.y])
+		var apart := squad.end.y < block.position.y and block.end.y < tip.position.y and tip.end.y < bar.position.y
+		ok(apart, "%dx%d: squad, title block, tip and bar are stacked apart (%s)" % [sz.x, sz.y, lay])
+		ld.free()
+
 
 func _screen(main: Node) -> Node:
 	for ch in main.get_children():
@@ -81,6 +80,7 @@ func _screen(main: Node) -> Node:
 		if sc and String(sc.resource_path) == LOADING:
 			return ch
 	return null
+
 
 ## A real load: the bar's target and what it shows, every frame the screen is up.
 func _real_load(main: Node) -> void:
@@ -91,15 +91,12 @@ func _real_load(main: Node) -> void:
 	var shown: Array = []          # [prog, want, frame seconds, stage] per frame
 	var stages: Array = []
 	var waited := 0.0
-	var left := [-1.0]             # the bar as the screen leaves the tree (its last frame runs after our last sample)
 	while waited < TIMEOUT_S:
 		await tree.process_frame
 		var dt := tree.root.get_process_delta_time()
 		waited += dt
 		var ld := _screen(main)
 		if ld:
-			if left[0] < 0.0 and shown.is_empty():
-				ld.tree_exiting.connect(func() -> void: left[0] = float(ld.prog))
 			shown.append([float(ld.prog), float(ld.want), dt, String(ld.stage_label)])
 			if stages.is_empty() or stages[-1] != String(ld.stage_label): stages.append(String(ld.stage_label))
 		elif not shown.is_empty() and main.current is Match and (main.current as Match).is_processing():
@@ -114,29 +111,30 @@ func _real_load(main: Node) -> void:
 	for i in range(1, shown.size()):
 		if shown[i][0] < shown[i - 1][0]: back += 1
 		if shown[i][1] < shown[i - 1][1]: want_back += 1
-		# a sample is taken before that frame's _process: the step into sample i ran in frame i - 1; the Ready stage
-		# runs the rest of the bar full inside FILL_T by design, so a frame longer than that carries it all
-		var ready: bool = shown[i][3] == "Ready"
-		if shown[i][0] - shown[i - 1][0] > MAX_STEP and shown[i - 1][2] < HITCH_S and not ready:
+		if shown[i][0] - shown[i - 1][0] > MAX_STEP and shown[i][2] < HITCH_S:
 			jumps += 1
-			var at := [i, shown[i][3], shown[i - 1][0], shown[i][0], shown[i - 1][2]]
+			var at := [i, shown[i][3], shown[i - 1][0], shown[i][0], shown[i][2]]
 			print("LOADING jump at frame %d (%s): %.2f -> %.2f in %.3f s" % at)
 	ok(back == 0, "the bar never goes backwards (%d frames did)" % back)
 	ok(want_back == 0, "the stage target never goes backwards (%d frames did)" % want_back)
 	ok(jumps == 0, "the bar never jumps more than %d%% in a normal frame (%d did)" % [int(MAX_STEP * 100.0), jumps])
 	var last: float = shown[-1][0] if not shown.is_empty() else 0.0
-	if left[0] >= 0.0:
-		last = left[0]
 	ok(last >= 0.99, "the bar is full when the screen leaves (%.2f)" % last)
 	var names := ["Building the map", "Spawning", "Preparing graphics", "Ready"]
 	var at := -1
 	var order_ok := true
 	for s in stages:
 		var k := names.find(s)
-		if k < at: order_ok = false
+		if k < at:
+			order_ok = false
 		at = maxi(at, k)
 	# headless has nothing to warm up (Match.warm_up returns at once), so its graphics stage never shows
 	var warm_seen := stages.has("Preparing graphics") or DisplayServer.get_name() == "headless"
 	var seen := ", ".join(stages)
 	var complete := order_ok and at == names.size() - 1 and warm_seen
 	ok(complete, "the stages come in order, graphics warm-up included: " + seen)
+
+
+## Every tip in content/rules/tips.json as the loading screen shows it (keys filled in).
+func _tip_set() -> Array:
+	return TipPick.rules()["tips"].map(func(t): return TipPick.render(String(t["text"])))

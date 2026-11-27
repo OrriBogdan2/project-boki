@@ -28,7 +28,6 @@ const FOLD_T := 0.033                  # s into the `lunge` clip where the ball 
 const CHAIN_GRACE := 0.08              # s the ball stays closed past the gap, for a press a frame or two late
 const ARM_THICK := 0.7                 # m, the stretched arm's girth at the shoulder end
 const HAUL_T := 0.26                   # s per hand-over-hand haul (dr_reel); the arm swells on each
-const FEET_R := 0.25                   # m past touching: a foe in reach this little ahead stops the Anchor's hop
 const SNAP_T := 0.14                   # s the stretched arm takes to snap back to his shoulder after a miss or the reel
 const GHOST_STEP := 0.4                # m between the samples that find the stretch of arm inside rock
 const DRIP_T := 0.07                   # s between sludge drips off the stretched arm
@@ -561,8 +560,7 @@ func cast_e() -> bool:
 	slam_dir = e_at if e_at != Vector2.ZERO else h.aim_dir()
 	play("dr_anchor")
 	KitWindup.play(self, "e", "dr_anchor_wind", -3.0)
-	var lands := h.pos + Vector3(slam_dir.x, 0, slam_dir.y) * float(ed["hop"])    # where the hop leaves him
-	vfx("anchor_fist", lands, slam_dir, {"r": float(ed["radius"])})
+	vfx("anchor_fist", h.pos, slam_dir, {"r": float(ed["radius"])})
 	return true
 
 func use_e() -> void:
@@ -585,7 +583,6 @@ func _tick_wind(dt: float) -> void:
 		KitWindup.broken(self, "e")
 		return
 	h.face = atan2(-slam_dir.x, -slam_dir.y)
-	_hop(ed, float(ed["windup"]) - wind)
 	var k := 1.0 - wind / float(ed["windup"])
 	AimKit.cone(h, "e_tell", slam_tell(k))
 	if wind <= 0.0:
@@ -593,34 +590,6 @@ func _tick_wind(dt: float) -> void:
 		e_plant = false
 		AimKit.hide(h, "e_tell")
 		_anchor()
-
-## The hop of the footage's second frame (0222): he springs about one body height forward along the locked slam
-## direction, `hop` metres over `hop_t` seconds from `hop_from` seconds into the wind-up, so the fist lands on the
-## far end of it. Skipped mid-barge or in the air (the barge and the dive own the motion there).
-func _hop(ed: Dictionary, t: float) -> void:
-	if float(ed["hop"]) <= 0.0 or t < float(ed["hop_from"]) or t >= float(ed["hop_from"]) + float(ed["hop_t"]):
-		return
-	if not h.grounded or h.roll_t > 0.0:
-		return
-	if _foe_at_feet():
-		var fwd := maxf(0.0, Vector2(h.vel.x, h.vel.z).dot(slam_dir))     # the hop so far stops dead too
-		h.vel.x -= slam_dir.x * fwd
-		h.vel.z -= slam_dir.y * fwd
-		return
-	var v: Vector2 = slam_dir * (float(ed["hop"]) / float(ed["hop_t"]))
-	h.vel.x = v.x
-	h.vel.z = v.y
-
-## A foe inside the slam's cone already level with his front (one hauled to his feet): hopping on would carry him past
-## it or shove him round its body and swing the locked cone off it, so he slams from where he stands.
-func _foe_at_feet() -> bool:
-	var half := deg_to_rad(float(e_def()["angle"])) * 0.5
-	for f in foes_in(h.pos, float(e_def()["radius"])):
-		var to := Vector2((f as Ent).pos.x - h.pos.x, (f as Ent).pos.z - h.pos.z)
-		var ahead := to.dot(slam_dir)
-		if ahead < h.r + (f as Ent).r + FEET_R and (to.length() < 0.05 or absf(slam_dir.angle_to(to)) <= half):
-			return true
-	return false
 
 ## The slam's telegraph at progress `k`: a thin outline of the cone (radius, angle, locked direction) the slam hits.
 func slam_tell(k: float) -> Dictionary:

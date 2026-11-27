@@ -207,7 +207,7 @@ func _slam_tell() -> void:
 			% [float(tell.get("len", 0.0)), float(tell.get("deg", 0.0)), float(tell.get("fill", -1.0)), fist_up]
 		)
 	)
-	# the hop carries the drawn cone with him: wait it out, then place the foes in the cone
+	# the cone stays put with him: wait out the wind-up, then place the foes in the cone
 	while k.wind > 0.03:
 		ak.step(m, ak.DT)
 	t.teleport(p.pos + in_off)
@@ -566,8 +566,8 @@ func _all() -> void:
 	var early_dmg: float = ak.dmg(t) - hp0
 	ak.step(m, 0.2)
 	ok(
-		"anchor: hops ~1 bh forward, the damage lands on the slam frame (~0.38s), not at the cast",
-		early == 0 and early_dmg == 0.0 and k.anchors == 1 and p.flat_dist(at0) > 0.8 and p.flat_dist(at0) < 2.0,
+		"anchor: he stays put, the damage lands on the slam frame (~0.38s), not at the cast",
+		early == 0 and early_dmg == 0.0 and k.anchors == 1 and p.flat_dist(at0) < 0.3,
 		"anchors at 0.3s %d (dmg %.0f), moved %.1f m" % [early, early_dmg, p.flat_dist(at0)]
 	)
 	ok(

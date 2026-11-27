@@ -62,6 +62,8 @@ func _draw_panels() -> void:
 		HudScale.begin(hud, "feed", sz)
 		if HudReveal.on(m, "feed"):
 			KillFeed.draw(hud, sz)
+		else:
+			KillFeed.clear()      # (nothing up: no rows for the message cards to keep off)
 		HudScale.begin(hud, "minimap", sz)
 		hud._draw_minimap(sz)
 		if p and not p.out and not p.extracted:
