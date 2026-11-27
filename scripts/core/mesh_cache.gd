@@ -8,24 +8,27 @@ extends RefCounted
 ## A cache made with MeshCache.new(false) holds other things on the same terms (value()/hold()): a species' clips,
 ## its paws, its .glb, which every new species in a match added for good (--match-repeat-check).
 
-const IDLE_SWEEPS := 2          # sweeps (match starts) in a row a key went unasked before it goes
+const IDLE_SWEEPS := 2  # sweeps (match starts) in a row a key went unasked before it goes
 
 static var _all: Array[MeshCache] = []
 static var _lock := Mutex.new()  # PreviewBuild's worker fills these while the main thread reads and sweeps
 
-var _meshes := {}               # key -> Mesh
-var _idle := {}                 # key -> sweeps in a row since a build last asked for it
-var _counted := true            # meshes: entries() counts them
+var _meshes := {}  # key -> Mesh
+var _idle := {}  # key -> sweeps in a row since a build last asked for it
+var _counted := true  # meshes: entries() counts them
+
 
 func _init(meshes := true) -> void:
 	_counted = meshes
 	_all.append(self)
+
 
 func has(key: Variant) -> bool:
 	_lock.lock()
 	var found := _meshes.has(key)
 	_lock.unlock()
 	return found
+
 
 ## The cached mesh for key (it must be there: has()), counted as asked for.
 func mesh(key: Variant) -> Mesh:
@@ -35,11 +38,13 @@ func mesh(key: Variant) -> Mesh:
 	_lock.unlock()
 	return m
 
-func put(key: Variant, m: Variant) -> void:   # a Mesh (any value in a new(false) cache)
+
+func put(key: Variant, m: Variant) -> void:  # a Mesh (any value in a new(false) cache)
 	_lock.lock()
 	_meshes[key] = m
 	_idle.erase(key)
 	_lock.unlock()
+
 
 ## The cached mesh for key counted as asked for, or null: one locked step (a sweep can't land between has() and mesh()).
 func read(key: Variant) -> Mesh:
@@ -49,6 +54,7 @@ func read(key: Variant) -> Mesh:
 		_idle.erase(key)
 	_lock.unlock()
 	return m
+
 
 ## Stores m under key unless another thread stored one first; returns the mesh the cache holds. A miss is built outside
 ## the lock, so two threads may both build it: the first one stays.
@@ -61,6 +67,7 @@ func keep(key: Variant, m: Mesh) -> Mesh:
 	_lock.unlock()
 	return held
 
+
 ## The value held for key counted as asked for, or null (a cache of other things than meshes: new(false)).
 func value(key: Variant) -> Variant:
 	_lock.lock()
@@ -69,6 +76,7 @@ func value(key: Variant) -> Variant:
 		_idle.erase(key)
 	_lock.unlock()
 	return v
+
 
 ## Stores v under key unless another thread stored one first; returns the value the cache holds (keep(), any value).
 func hold(key: Variant, v: Variant) -> Variant:
@@ -80,6 +88,7 @@ func hold(key: Variant, v: Variant) -> Variant:
 	_lock.unlock()
 	return held
 
+
 ## Meshes held over every cache (--match-repeat-check reads it).
 static func entries() -> int:
 	var n := 0
@@ -89,6 +98,7 @@ static func entries() -> int:
 			n += c._meshes.size()
 	_lock.unlock()
 	return n
+
 
 ## Ages every cache's keys by one sweep and drops the ones idle IDLE_SWEEPS times in a row. Returns how many went.
 static func sweep() -> int:

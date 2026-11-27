@@ -14,9 +14,7 @@ const SETTLE_PX := 0.5  # the Hunter's screen box moved less than this between f
 const FIGHT_S := 2.0  # s of match time with a dummy hit every 0.5 s before the fight shot
 const OWN_DRAWN := ["plate", "grip_icons"]  # your own plate and its grip icons: part of your Hunter, by design
 const STATIONS := ["bench", "toast", "drills"]  # the popups to open one at a time (station())
-const STATION_GROUP := {
-	"bench": "ParityBench/", "toast": "toast #", "drills": "MoveDrills/"
-}  # (the group name each station's popup shows up under)
+const STATION_GROUP := {"bench": "ParityBench/", "toast": "toast #", "drills": "MoveDrills/"}  # (the group name each station's popup shows up under)
 const HUD := "Hud"
 const FPS := "fps_counter"  # the frame-rate readout's group (Overlay.fps_lbl, on its own layer above the match)
 const FPS_MODE := 2  # Settings show_fps: 2 = the performance overlay, the largest readout

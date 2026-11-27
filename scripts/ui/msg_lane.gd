@@ -12,39 +12,41 @@ extends Control
 
 enum { LOW, NORMAL, HIGH, URGENT }
 const MAX_SHOWN := 2
-const LIFE := [1.8, 2.4, 3.2, 3.2]   # s on show for LOW, NORMAL, HIGH, URGENT, fades included
-const PX := [15, 17, 20, 20]         # font px for LOW, NORMAL, HIGH, URGENT
-const STALE := 3.0              # s a LOW line may wait before it's dropped
-const WAIT_CAP := 6             # lines waiting at most: past it the oldest of the lowest priority goes
-const FADE_IN := 0.15           # s
-const FADE_OUT := 0.35          # s
-const CARD_PAD_X := 12          # px of padding either side of a card's line
-const GAP := 6.0                # px between two cards
-const CLOSE_UP := 12.0          # 1/s: how fast the cards below slide up when one goes
+const LIFE := [1.8, 2.4, 3.2, 3.2]  # s on show for LOW, NORMAL, HIGH, URGENT, fades included
+const PX := [15, 17, 20, 20]  # font px for LOW, NORMAL, HIGH, URGENT
+const STALE := 3.0  # s a LOW line may wait before it's dropped
+const WAIT_CAP := 6  # lines waiting at most: past it the oldest of the lowest priority goes
+const FADE_IN := 0.15  # s
+const FADE_OUT := 0.35  # s
+const CARD_PAD_X := 12  # px of padding either side of a card's line
+const GAP := 6.0  # px between two cards
+const CLOSE_UP := 12.0  # 1/s: how fast the cards below slide up when one goes
 const TEXT_PX := &"msg_lane_px"  # Label3D meta: [text, font, font size, wrap px, its measured size] (label_rect)
-const WIDE := 0.45              # of the screen width: the widest a card gets before its line wraps
-const FIGHT_SHOWN := 1          # urgent lines on show at most while the player is in a fight
-const FIGHT_LIFE := 2.0         # s: the longest a line already up lives once a fight starts (a hint's own life aside)
+const WIDE := 0.45  # of the screen width: the widest a card gets before its line wraps
+const FIGHT_SHOWN := 1  # urgent lines on show at most while the player is in a fight
+const FIGHT_LIFE := 2.0  # s: the longest a line already up lives once a fight starts (a hint's own life aside)
 
-var top := 100.0                ## px from the top of the screen where the column starts
-var right_edge := 0.0           ## 0: the column is centred; else its right edge, in px
-var max_w := 0.0                ## px: the widest a card gets (the tutorial's column); 0: WIDE of the screen
-var avoid := Rect2()            ## screen area (the player's hunter, HunterZone) a card never covers: it slides aside
-var reserved: Array = []        ## screen rects (SafeArea.reserved: fps readout, minimap) a card slides aside from
-var keep_off: Array[Rect2] = [] ## other HUD blocks a card slides aside of (the kill feed's rows)
-var fight := false              ## true while the player is in a fight (Hud sets it): only URGENT comes in
-var max_shown := MAX_SHOWN      ## lines on show at once (a match's TopStack sets 1: one card at a time)
-var one_hint := false           ## true: one hint (own-life line) on show at a time (a match's TopStack sets it)
-var hold := false:              ## true: nothing but URGENT comes in (the tutorial banner has the floor)
+var top := 100.0  ## px from the top of the screen where the column starts
+var right_edge := 0.0  ## 0: the column is centred; else its right edge, in px
+var max_w := 0.0  ## px: the widest a card gets (the tutorial's column); 0: WIDE of the screen
+var avoid := Rect2()  ## screen area (the player's hunter, HunterZone) a card never covers: it slides aside
+var reserved: Array = []  ## screen rects (SafeArea.reserved: fps readout, minimap) a card slides aside from
+var keep_off: Array[Rect2] = []  ## other HUD blocks a card slides aside of (the kill feed's rows)
+var fight := false  ## true while the player is in a fight (Hud sets it): only URGENT comes in
+var max_shown := MAX_SHOWN  ## lines on show at once (a match's TopStack sets 1: one card at a time)
+var one_hint := false  ## true: one hint (own-life line) on show at a time (a match's TopStack sets it)
+var hold := false:  ## true: nothing but URGENT comes in (the tutorial banner has the floor)
 	set(v):
 		hold = v
 		_promote()
 var _shown: Array[Dictionary] = []
 var _waiting: Array[Dictionary] = []
 
+
 func _init() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+
 
 ## The lane on `host`, made (on top of its other children) the first time.
 static func of(host: Control) -> MsgLane:
@@ -55,6 +57,7 @@ static func of(host: Control) -> MsgLane:
 	host.add_child(lane)
 	return lane
 
+
 ## Puts a line in the lane. `life` 0 uses the priority's own; a hint passes a longer one.
 func push(text: String, col: Color, prio := NORMAL, life := 0.0) -> void:
 	if text == "" or (prio == LOW and fight):
@@ -62,21 +65,23 @@ func push(text: String, col: Color, prio := NORMAL, life := 0.0) -> void:
 	for e in _shown:
 		if e["text"] == text:
 			_bump(e)
-			e["t"] = minf(float(e["t"]), FADE_IN)      # a repeat starts its time again
+			e["t"] = minf(float(e["t"]), FADE_IN)  # a repeat starts its time again
 			return
 	for e in _waiting:
 		if e["text"] == text:
 			_bump(e)
 			return
 	var life_s := life if life > 0.0 else float(LIFE[prio])
-	_waiting.append({"text": text, "col": col, "prio": prio, "life": life_s, "own_life": life > 0.0, "n": 1, "t": 0.0,
-		"wait": 0.0})
+	_waiting.append(
+		{"text": text, "col": col, "prio": prio, "life": life_s, "own_life": life > 0.0, "n": 1, "t": 0.0, "wait": 0.0}
+	)
 	Sfx.play("ui_toast", null, -4.0, 0.03)
 	if _waiting.size() > WAIT_CAP:
 		_waiting.remove_at(_lowest())
 	if get_parent() is Control:
-		get_parent().move_child(self, -1)      # over the panels opened since
+		get_parent().move_child(self, -1)  # over the panels opened since
 	_promote()
+
 
 ## Removes every line, on show or waiting.
 func clear() -> void:
@@ -85,9 +90,11 @@ func clear() -> void:
 	_shown.clear()
 	_waiting.clear()
 
+
 ## Lines on show plus lines waiting.
 func count() -> int:
 	return _shown.size() + _waiting.size()
+
 
 ## The lines on show now, top to bottom, as they read ("Ember  x3").
 func texts() -> Array[String]:
@@ -96,9 +103,11 @@ func texts() -> Array[String]:
 		out.append(_label_text(e))
 	return out
 
+
 ## How many lines are waiting for a free row.
 func waiting() -> int:
 	return _waiting.size()
+
 
 ## The cards on show, top to bottom, in screen px.
 func rects() -> Array[Rect2]:
@@ -107,13 +116,16 @@ func rects() -> Array[Rect2]:
 		out.append((e["box"] as Control).get_rect())
 	return out
 
+
 ## Where the column ends now (its top when nothing shows).
 func bottom() -> float:
 	return top if _shown.is_empty() else (_shown.back()["box"] as Control).get_rect().end.y
 
+
 ## Fades a world label (a lair's name board, a farm marker) while any of `rects` covers it on screen.
 static func yield_label(lbl: Label3D, cam: Camera3D, rects: Array[Rect2], delta: float) -> void:
 	yield_at(lbl, cam, rects, delta)
+
 
 ## yield_label (`over`: its rects); returns the label's box on screen (at Vector2.INF if hidden or behind the camera).
 static func yield_at(lbl: Label3D, cam: Camera3D, over: Array[Rect2], delta: float) -> Rect2:
@@ -127,9 +139,10 @@ static func yield_at(lbl: Label3D, cam: Camera3D, over: Array[Rect2], delta: flo
 				break
 	if lbl.transparency != want:
 		lbl.transparency = move_toward(lbl.transparency, want, delta * 6.0)
-		lbl.modulate.a = 1.0 - lbl.transparency            # (the outline ignores transparency on some renderers)
+		lbl.modulate.a = 1.0 - lbl.transparency  # (the outline ignores transparency on some renderers)
 		lbl.outline_modulate.a = 1.0 - lbl.transparency
 	return mine
+
 
 ## A billboarded Label3D's box on screen, in px, from its text and font (centred on its position).
 static func label_rect(lbl: Label3D, cam: Camera3D) -> Rect2:
@@ -150,6 +163,7 @@ static func label_rect(lbl: Label3D, cam: Camera3D) -> Rect2:
 	var c := cam.unproject_position(o + b.x * half.x - b.y * half.y)
 	return Rect2(a, c - a).abs()
 
+
 func _process(delta: float) -> void:
 	if _shown.is_empty() and _waiting.is_empty():
 		return
@@ -166,6 +180,7 @@ func _process(delta: float) -> void:
 			_waiting.remove_at(i)
 	_promote()
 	_layout(delta)
+
 
 ## Moves waiting lines onto free rows, the most important first (oldest first within a priority);
 ## while `hold` or `fight` is on only URGENT lines move. `max_shown` is 1 in a match: one card at a time
@@ -192,6 +207,7 @@ func _promote() -> void:
 		_shown.append(e)
 		_layout(0.0)
 
+
 ## Stacks the cards down the column. A card slides up into a freed row, never past the one above.
 func _layout(delta: float) -> void:
 	var want := top
@@ -203,7 +219,8 @@ func _layout(delta: float) -> void:
 		var x := (size.x - box.size.x) * 0.5 if right_edge <= 0.0 else right_edge - box.size.x
 		var y := want if not e.has("placed") else lerpf(box.position.y, want, k)
 		# the right rail never slides down through the feed above it (only up, into a freed row)
-		if right_edge > 0.0: y = maxf(y, want)
+		if right_edge > 0.0:
+			y = maxf(y, want)
 		e["placed"] = true
 		y = maxf(y, above + GAP)
 		x += HunterZone.slide(Rect2(Vector2(x, y), box.size), avoid)
@@ -217,12 +234,14 @@ func _layout(delta: float) -> void:
 		var t := float(e["t"])
 		box.modulate.a = clampf(t / FADE_IN, 0.0, 1.0) * clampf((_life(e) - t) / FADE_OUT, 0.0, 1.0)
 
+
 ## One card: the menu's glass with a line in the message's colour.
 ## How long line `e` lives now: its own life, cut to FIGHT_LIFE in a fight unless it asked for its own.
 func _life(e: Dictionary) -> float:
 	if fight and not bool(e["own_life"]):
 		return minf(float(e["life"]), FIGHT_LIFE)
 	return float(e["life"])
+
 
 func _card(e: Dictionary) -> PanelContainer:
 	var px: int = PX[int(e["prio"])]
@@ -233,11 +252,12 @@ func _card(e: Dictionary) -> PanelContainer:
 	var l := UI.label(_label_text(e), px, e["col"], UI.big)
 	l.add_theme_constant_override("outline_size", 4)
 	l.add_theme_color_override("font_outline_color", Color(0.04, 0.03, 0.08, 0.6))
-	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART      # a long line wraps at a sane width, never word by word
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART  # a long line wraps at a sane width, never word by word
 	_fit(l, px)
 	c.add_child(l)
 	c.modulate.a = 0.0
 	return c
+
 
 func _bump(e: Dictionary) -> void:
 	e["n"] = int(e["n"]) + 1
@@ -245,6 +265,7 @@ func _bump(e: Dictionary) -> void:
 		var l := (e["box"] as Control).get_child(0) as Label
 		l.text = _label_text(e)
 		_fit(l, PX[int(e["prio"])])
+
 
 ## The label as wide as its line, up to WIDE of the screen (past that it wraps).
 func _fit(l: Label, px: int) -> void:
@@ -254,8 +275,10 @@ func _fit(l: Label, px: int) -> void:
 		widest = minf(widest, max_w - 2.0 * CARD_PAD_X)
 	l.custom_minimum_size.x = minf(natural + 2.0, widest)
 
+
 func _label_text(e: Dictionary) -> String:
 	return String(e["text"]) if int(e["n"]) < 2 else "%s  x%d" % [e["text"], e["n"]]
+
 
 ## The waiting line to drop when too many wait: the oldest of the lowest priority.
 func _lowest() -> int:

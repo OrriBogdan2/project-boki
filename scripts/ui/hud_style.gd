@@ -60,8 +60,8 @@ const KEY_FS := 12  # key label size
 ## the menu panels all read it; decision: docs/UI_FIRST15.md section 3 (the alternative, a fixed
 ## 24 px margin, keeps the blocks inside the 5% band).
 const SAFE_FRAC := 0.05
-const MINIMAP_PX := 196.0      # px: the ground minimap's side
-const KEY_REACH := 10.0        # px a key pill hangs below its slot: the weapon card keeps that clear above the margin
+const MINIMAP_PX := 196.0  # px: the ground minimap's side
+const KEY_REACH := 10.0  # px a key pill hangs below its slot: the weapon card keeps that clear above the margin
 
 ## The one table of floating-number kinds: what a number counted, its colour, its size against a plain hit
 ## (Fx.NUM_SCALE) and whether it wears the crit outline. Fx draws from it; --dmg-number-check reads it.
@@ -87,9 +87,11 @@ static var _boxes := {}
 static func safe_pad(sz: Vector2) -> Vector2:
 	return (sz * SAFE_FRAC).round()
 
+
 ## The ground minimap's rect (top left, on the safe margin); riding, the drop map is larger (Hud._draw_minimap).
 static func minimap_rect(sz: Vector2) -> Rect2:
 	return Rect2(safe_pad(sz), Vector2(MINIMAP_PX, MINIMAP_PX))
+
 
 ## The window less its safe margin: everything that matters sits inside this rect.
 static func safe_rect(sz: Vector2) -> Rect2:
