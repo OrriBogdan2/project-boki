@@ -114,6 +114,8 @@ func ret_of(h: Hunter) -> Dictionary:
 
 ## True when a telegraph the local player sees (a disc, lane or cone) lies over the ground point `p`.
 func covers(p: Vector3) -> bool:
+	if entries.is_empty():
+		return false
 	var q := Vector2(p.x, p.z)
 	var me = m.get("player")
 	for e in entries.values():
