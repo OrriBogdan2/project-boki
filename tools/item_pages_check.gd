@@ -6,10 +6,12 @@ extends RefCounted
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("ITEMPAGES %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -26,11 +28,13 @@ func run(main: Node) -> void:
 	print("ITEMPAGES DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _texts(n: Node) -> Array:
 	var out: Array = []
 	for l in n.find_children("*", "Label", true, false):
 		out.append((l as Label).text)
 	return out
+
 
 func _tiles(host: Node) -> Array:
 	for ch in host.get_children():
@@ -39,12 +43,14 @@ func _tiles(host: Node) -> Array:
 	ItemPages.grid(host as VBoxContainer, func(_id): pass)
 	return host.find_children("*", "GridContainer", true, false)[0].get_children()
 
+
 func _hidden(host: Node, _log: Array) -> void:
 	var tiles := _tiles(host)
 	var silent := true
 	for t in tiles:
 		silent = silent and _texts(t).is_empty() and (t as Control).tooltip_text == ""
 	ok(tiles.size() == GardenItems.ids().size() and silent, "unowned: a silhouette tile each, no text or tooltip")
+
 
 func _revealed(host: Node, _log: Array) -> void:
 	Save.add_item("thumpnut", 1)
@@ -58,6 +64,7 @@ func _revealed(host: Node, _log: Array) -> void:
 	var shown := ["Thumpnut", "Power", "Stump Shove prize", "Not used yet"].all(func(w): return words.contains(w))
 	ok(shown, "its page shows name, what it nudges, where it comes from and that nobody took it yet")
 	page.free()
+
 
 func _taken() -> void:
 	var rec := Save.new_kin("cindle", "Pip")
@@ -76,6 +83,7 @@ func _taken() -> void:
 		GardenItems.apply(rec, "thumpnut")
 	var keep := int(GardenItems.rules()["log_keep"])
 	ok(GardenItems.uses("thumpnut").size() == keep, "the log keeps only the newest few")
+
 
 func _stars(host: Node) -> void:
 	var fam := "stat"
@@ -96,6 +104,7 @@ func _stars(host: Node) -> void:
 	ItemPages.detail(page, "thumpnut")
 	ok(_texts(page).has("★"), "completed family: the page has the star")
 	page.free()
+
 
 func _in_inventory() -> void:
 	Overlay.inv_tab = "Field Book"
