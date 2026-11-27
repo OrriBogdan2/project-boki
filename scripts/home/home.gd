@@ -1159,6 +1159,8 @@ func _exit_tree() -> void:
 	ZoneLayout.leave()
 	SeeThrough.off()
 	Sfx.clear_amb_layers()
+	if hb:
+		hb.release()
 
 ## Boki on the farm are drawn bigger than in a match: the farm's camera sits much further back than the
 ## expedition's (HOME_ACROSS_REF framing at zoom 1.2), and at match size a Boki was a speck beside
