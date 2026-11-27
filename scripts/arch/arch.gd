@@ -29,6 +29,13 @@ static func hit_r(id: String, cdat: Dictionary) -> float:
 static func hit_h(id: String) -> float:
 	return float(body(id).get("hit_h", HIT_H_DEFAULT))
 
+
+## The model's tallest point, back props and horns included (m over its feet at its own size, before the match's
+## drawn size): the body's top_h, else its hurtbox height. A plate hangs clear over it (HudPlate.up).
+static func top_h(id: String) -> float:
+	return float(body(id).get("top_h", hit_h(id)))
+
+
 ## Sets a hunter's hurtbox radius (`r`, what shots and abilities hit) and its separate body collision radius.
 static func apply_body(h: Hunter) -> void:
 	h.r = hit_r(h.arch, h.cdat)

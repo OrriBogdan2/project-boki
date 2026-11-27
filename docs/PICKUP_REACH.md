@@ -17,7 +17,8 @@ Tags as in sv/FEEL.md. `[kits]` = `ext/agent-briefs:sv/briefs/kits.md`, `[physic
 |---|---|---|---|---|---|---|
 | Consumables (tonic, belt items) | walk over `[est]` | ~2 m magnet `[est]` | walk over | `walk` 2.2 / 2.0, pulled in at 6 + 6x(2.2 - d) m/s, taken within 0.6 of the chest, 0.5 s after landing | every one in reach flies in, no order | numbers moved to rules; no pull through a wall |
 | Armour shards | walk over `[est]` | same | walk over | same `walk` rule | same | same |
-| Gems, seeds | walk over `[est]` (gold) | same | walk over | same `walk` rule | same | same |
+| Gems | walk over `[est]` (gold); the target feel reaches 4 m | same | walk over | own `gem` rule: 4.0 / 2.0, same pull and grab as `walk` | same | gems reach further than the rest |
+| Seeds | walk over `[est]` | same | walk over | same `walk` rule | same | same |
 | Rift key, chest key | n/a in the source | | walk over (a full stack leaves it glinting) | same `walk` rule (keys.json `pickup_pull` was a dead copy of it: removed) | same | same |
 | Weapon tuning | n/a (REFERENCE has no tunings) | | walk over | `tune` 1.1 / 1.0 | first in list | numbers moved to rules; wall blocks |
 | Gear (gloves, armour, boots, passives) | interact key `[est]` (an upgrade may auto-equip; not settled, see Open) | the piece under the cursor `[est]` | interact key (press) | `interact` 1.5 / 1.2 | **nearest the cursor** (was nearest the hunter) | cursor order; wall blocks |
