@@ -17,7 +17,7 @@ the law is `scripts/match/mantle_carry.gd` (MantleCarry), wired in `scripts/matc
 | 42 | Dry-ground ledge climb | none (mantles only over the abyss) | our rise (lrise) | kept (terrace rule) | OFF (rule) |
 | 43 | Edge pop (mini mantle, lip < 3 m) | speed zeroed, launch at once at the row-40 speed + 5 m/s; for 0.75 s a forward push toward max(0.6 x the speed you came in with, 3.5 x 1.16) easing to half, gained at 8 x the shortfall per s along a heading that turns from your entry to your keys; over the top while rising faster than 2 m/s, pulled down at 5 x the excess (x 1 - 0.35 by the end) | float up the face, then +2.6 m/s pop (tuning.json:148); a jump in the window: +0.9 m peak, 7.5 m/s (tuning.json:151-152, hunter.gd:2282) | over the abyss: the reference law exactly. Dry ground: a jump in the rise is the same launch (the forward goal capped at 1.2 x run, owner 11-11); the untimed top-out is ours | MATCH (abyss) / ours on dry ground |
 | 44 | Mantle cooldown | 1.0 s from the launch (so 1.1 s from the touch on a full mantle); your own dash cuts it to 0.1 s | ledge_cd 0.45 (tuning.json:132), mantle_cd set but never read | 1.0 s from the launch gates abyss mantles; a dash cuts it to 0.1 s; dry-ground climbs keep ledge_cd 0.45 | MATCH (abyss) |
-| 45 | Wall catch | the capsule's hit on the side; the near-kill fudge: falling within 3 m of the point of no return, a line 4 m straight one way (north) | 0.75 m sideways reach (tuning.json:129) | kept; plus the fudge (3 m, 4 m, north only) | CLOSE (the reference also has a pull toward head-on walls, 2.5-20 m/s^2, not ported) |
+| 45 | Wall catch / suction | the capsule's hit on the side; suction: falling (not gliding) over the abyss with the cooldown idle, a head-on side (within 40 degrees) up to 2.5 m x (0.425 to 1 by speed 2-3.5 m/s) ahead pulls you in at 2.5-20 m/s^2 by a curve over 0.5-3 m (1/.75/.46/.25/.11/0); 0-1.5 m under its top, within 1.5 m and rising at 2.5 m/s or less, also up at 25-175 m/s^2 x a curve over 0.5-1.5 m (1/.99/.96/.77/.32/0); the near-kill fudge: within 3 m of the point of no return, a line 4 m one way | 0.75 m sideways reach (tuning.json:129), no pull | kept the reach; the fudge (3 m, 4 m, north only); the suction (MantleCarry.suction) on the reference law | MATCH (the lift's "under its top" uses the nearest lip; the fudge's world direction: see unknowns) |
 | 46 | Float-up | none | `_grapple` (hunter.gd:2304), never armed (nothing sets `grap`) | deleted | MATCH (gone) |
 | - | Glider after a mantle | shut for the mantle and 0.3 s after | could reopen at once | shut 0.7 s after the launch | MATCH |
 
@@ -34,22 +34,28 @@ the law is `scripts/match/mantle_carry.gd` (MantleCarry), wired in `scripts/matc
 
 | Case | Launch up m/s ours / ref | Apex over the catch m | Land past the lip m | Air s | Before (main) |
 |---|---|---|---|---|---|
-| abyss 1.6 m | 15.52 / 15.52 | 3.90 / 3.90 | 4.73 / 4.83 | 1.17 / 1.15 | float up + pop 7.8 m/s, apex 0.4 m over the lip, 2.06 m in |
-| abyss 8.2 m | 16.73 / 16.73 | 9.61 / 9.59 | 3.92 / 6.15 | 1.70 / 1.68 | lost to the abyss (side caught only to 4.5 m) |
-| abyss 16.2 m | 24.26 / 24.26 | 20.11 / 20.09 | 6.91 / 10.37 | 2.50 / 2.48 | lost to the abyss |
-| edge pop 2 / 5 / 9 m/s | 14.50 / 14.50 | 2.84 / 2.84 | 4.85-4.92 / 4.47-4.69 | 1.10 / 1.08 | pop 0.41 m over the lip, 2.4-2.5 m in, 0.73 s |
+| abyss 1.6 m | 15.52 / 15.52 | 3.90 / 3.90 | 4.73 / 4.24 | 1.17 / 1.15 | float up + pop 7.8 m/s, apex 0.4 m over the lip, 2.06 m in |
+| abyss 8.2 m | 16.73 / 16.73 | 9.61 / 9.59 | 3.91 / 2.45 | 1.70 / 1.68 | lost to the abyss (side caught only to 4.5 m) |
+| abyss 16.2 m | 24.26 / 24.26 | 20.11 / 20.09 | 6.90 / 5.53 | 2.50 / 2.48 | lost to the abyss |
+| edge pop 2 / 5 / 9 m/s | 14.50 / 14.50 | 2.84 / 2.84 | 4.86-4.93 / 4.28-4.50 | 1.10 / 1.08 | pop 0.41 m over the lip, 2.4-2.5 m in, 0.73 s |
 | fall, lip to no return | | | | 1.97 / 1.97 | 2.00 |
 | glider lift from 3 / 8 / 14 m | | | | 0.67, 0.90, 1.17 / same | 0.63 from 3 m, then a 1.6 m bounce over the lip |
 
-Landing distance differs by up to 3.5 m on the full mantles: ours steers onto the top at our air
-steering (owner ruling) but our wall holds you until your feet clear the lip, while the reference's
-simulation here ignores the wall. Speed at landing is 5.28 m/s (run speed) in both (kept on landing in both; the
-16 m run then meets the test island's far edge, so its 0.25 s-later speed is not a measurement).
+Launch speed, apex and air time are within 2% everywhere. Landing distance is ours 0.4-1.5 m longer in every
+case (8-60%): the reference model here now has the island's side blocking you until your feet clear the lip, as
+ours does (before 11-27 b it had no wall and read 6.15 / 10.37 m), so what is left is our air steering, ~4x the
+reference's by owner ruling (row 16), steering you farther onto the top. Speed at landing is 5.28 m/s (run
+speed) in both (kept on landing in both; the 16 m run then meets the test island's far edge, so its 0.25 s-later
+speed is not a measurement).
+
+Suction (`--abyss-edge-check`): pulled in at 18.15 / 7.93 / 4.99 m/s^2 from 0.75 / 1.75 / 2.4 m at 4.5 m/s (ref the
+same to 0.01); 1 m under the top and 1 m out, up at 96.4 m/s^2 (ref 96.4); none at 55 degrees off, gliding or on
+cooldown; a 1.5 m/s drift from 2.2 m out is caught after 1.20 s (main: 0.75 m reach only).
 
 ### Unknowns
 
-- The height the reference's glider floor pull aims at over abyss cells (its height map there is not decoded):
-  ours aims at the nearest lip + 0.6 m. If the reference's abyss cells sit deep, its glider would sink there instead.
+- The height the reference's glider floor pull and the suction's lift aim at over abyss cells (its height map there is not
+  decoded): ours uses the nearest lip (+ 0.6 m for the glider). If the reference's abyss cells sit deep, its glider would sink there instead.
 - The tint/sound curve shapes between their ends (the curve assets' keys are not in the files).
 - Which world way the near-kill fudge looks: the reference's name says south-side falls, its line goes +Y;
   ours looks north (screen up). INFERRED.
