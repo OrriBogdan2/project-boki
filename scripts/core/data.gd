@@ -58,8 +58,8 @@ const MATCH_PLAYERS := 30
 const SOLO_PLAYERS := 20
 ## The expedition modes a player can queue for, as shown on the expedition panel and the online lobby.
 const MODES := ["trios", "solos"]
-## The one line each mode's card reads (ModeCards): who is in it.
-const MODE_LINES := {"trios": "10 squads of 3", "solos": "20 Hunters, every one for themself"}
+## The one line each mode's card reads (ModeCards): who is in it and how big the map plays.
+const MODE_LINES := {"trios": "10 squads of 3, bigger map", "solos": "20 Hunters, every one for themself, smaller map"}
 
 const CLASSES := {
 	"light":
@@ -212,13 +212,7 @@ const PERKS := {
 	"quickhands":
 	{"name": "Quick Hands", "desc": "Reload 30% faster.", "icon": "medkit", "col": Color("ffd27a"), "max": 1},
 	"secondwind":
-	{
-		"name": "Second Wind",
-		"desc": "Dropping below 30% health instantly refreshes your dash (once every 45s).",
-		"icon": "dash",
-		"col": Color("bfe6ff"),
-		"max": 1
-	},
+	{"name": "Second Wind", "desc": "Dropping below 30% health instantly refreshes your dash (once every 45s).", "icon": "dash", "col": Color("bfe6ff"), "max": 1},
 	"featherfall":
 	{
 		"name": "Featherfall",
@@ -246,7 +240,7 @@ const PERKS := {
 	"overcharge":
 	{
 		"name": "Overcharge",
-		"desc": "Your bond ultimate charges 30% faster.",
+		"desc": "Your bond meter fills 30% faster.",
 		"icon": "bond",
 		"col": Color("ffd23f"),
 		"max": 1
@@ -1238,9 +1232,5 @@ const BUILDINGS := {
 }
 
 const MATCH := {
-	"extract_time": 4.0,  # seconds standing in an exit's circle to leave; a hit from another hunter resets it
-	"revive_time": 3.0,
-	"kin_revive_time": 5.0,
-	"bleed": 2.5,  # downed health lost per second
-	"down_hp": 100.0,  # so about 40 seconds downed before you bleed out
+	"down_hp": 100.0,  # the pool a downed hunter bleeds out of (it drains over 15 seconds)
 }

@@ -8,10 +8,9 @@ extends RefCounted
 
 const WORDS := ["Sealed Lair", "Heart Gate", "Uplink", "Heart ring"]
 const LINE_FS := 13
-const WORD_PX := 11  # a seat's word on the full map
+const WORD_PX := 11             # a seat's word on the full map
 
-static var _sites: Array[Vector3] = [Vector3.INF, Vector3.INF, Vector3.INF, Vector3.INF]  # reused every frame
-
+static var _sites: Array[Vector3] = [Vector3.INF, Vector3.INF, Vector3.INF, Vector3.INF]    # reused every frame
 
 ## Where each seat stands (Vector3.INF where the map has none): Sealed Lair, Heart Gate, Uplink, Heart ring.
 static func sites(m: Match) -> Array[Vector3]:
@@ -29,7 +28,6 @@ static func sites(m: Match) -> Array[Vector3]:
 			_sites[2] = qs.uplink.ref["pos"]
 	return _sites
 
-
 ## A badge's colour: a state tone (SideColor: locked cool blue-grey, open cream, lost dim crimson), or the using
 ## squad's colour as the viewer sees it (squad or rival; a seat taken by nobody in particular goes locked-grey).
 static func color_of(s: Dictionary) -> Color:
@@ -45,7 +43,6 @@ static func color_of(s: Dictionary) -> Color:
 	var squad := SideColor.of_team(s["viewer"], s["team"])
 	return squad.darkened(0.25) if int(s["st"]) == WaysOutHud.St.TAKEN else squad
 
-
 ## How much of the badge's ring is lit, 0..1: a locked seat fills up to its opening, an open one with a shut time
 ## drains toward it, every other state is a full ring.
 static func fraction(i: int, s: Dictionary) -> float:
@@ -60,7 +57,6 @@ static func fraction(i: int, s: Dictionary) -> float:
 				return clampf(t / (shut - _open_at(i, q)), 0.0, 1.0)
 	return 1.0
 
-
 ## Session seconds at which seat `i` opens.
 static func _open_at(i: int, q: Dictionary) -> float:
 	match i:
@@ -72,12 +68,11 @@ static func _open_at(i: int, q: Dictionary) -> float:
 			return q["uplink_open_s"]
 	return Heart.r("final_s")
 
-
 ## The short word under a badge on the full map.
 static func word(i: int, s: Dictionary) -> String:
 	var who := ""
 	if int(s["team"]) >= 0:
-		who = " · " + WaysOutHud.state_word(s).to_lower()  # (whose: ours or rival)
+		who = " · " + WaysOutHud.state_word(s).to_lower()      # (whose: ours or rival)
 	match int(s["st"]):
 		WaysOutHud.St.LOCKED:
 			return "%s %s" % [WORDS[i], _clock(float(s["t"]))]
@@ -89,10 +84,8 @@ static func word(i: int, s: Dictionary) -> String:
 			return "%s taken%s" % [WORDS[i], who]
 	return "%s lost" % WORDS[i]
 
-
 static func _clock(t: float) -> String:
 	return "%d:%02d" % [int(int(t) / 60.0), int(t) % 60]
-
 
 ## One badge: a dark underlay, a faint track, the lit arc from the top, a pulse while open, a strike once taken or lost.
 static func badge(c: Control, pv: Vector2, r: float, i: int, s: Dictionary, now: float) -> void:
@@ -110,16 +103,15 @@ static func badge(c: Control, pv: Vector2, r: float, i: int, s: Dictionary, now:
 	elif f > 0.0:
 		c.draw_arc(pv, r, -PI * 0.5, -PI * 0.5 + TAU * f, 32, col, w, true)
 	if st == WaysOutHud.St.USE and int(s["team"]) >= 0:
-		WaysOutHud.pip(c, pv, r * 0.35, col, WaysOutHud.rival(s), true)  # the squad's disc or a rival's diamond
+		WaysOutHud.pip(c, pv, r * 0.35, col, WaysOutHud.rival(s), true)      # the squad's disc or a rival's diamond
 	if st == WaysOutHud.St.TAKEN or st == WaysOutHud.St.LOST:
 		c.draw_line(pv + Vector2(-r, r) * 0.7, pv + Vector2(r, -r) * 0.7, col, w, true)
-
 
 # ------------------------------------------------------------------ the maps
 static func minimap(hud, inner: Rect2, to_map: Callable, on_map: Callable) -> void:
 	var m: Match = hud.m
 	if m.heart == null:
-		return  # (no Ways Out: the tutorial, training, a duel)
+		return      # (no Ways Out: the tutorial, training, a duel)
 	var at := sites(m)
 	var sd := WaysOutHud.seats(m)
 	var goal := ExtractGoal.pick(m, HudReveal.newcomer(m))
@@ -133,26 +125,23 @@ static func minimap(hud, inner: Rect2, to_map: Callable, on_map: Callable) -> vo
 				MapNames.put(WORDS[i], pv + Vector2(0, 22), 10, HudStyle.INK, HudStyle.BIG, true, 3)
 		elif int(sd[i]["st"]) <= WaysOutHud.St.USE:
 			hud.edge_mini.add(pv - inner.get_center(), color_of(sd[i]), EdgeMarker.PRIO_GOAL)
-	MapNames.flush(hud.c)  # (the boxes the place names and the train took in this draw stay taken)
+	MapNames.flush(hud.c)      # (the boxes the place names and the train took in this draw stay taken)
 	if m.heart_raid:
-		HeartRaidHud.minimap(hud, to_map, on_map)  # the coming wave's gates
-
+		HeartRaidHud.minimap(hud, to_map, on_map)      # the coming wave's gates
 
 ## A seat badge's radius on the full map at its zoom `k` (px).
 static func badge_r(k: float) -> float:
 	return clampf(8.0 + k * 0.8, 12.0, 18.0)
-
 
 ## Where seat i's word sits from its badge on the full map: over the Heart Gate (its own name is under it),
 ## under the rest. FullMap reserves its spot before it places the names.
 static func word_dy(i: int, r: float) -> float:
 	return -r - 16.0 if i == 1 else r + 30.0
 
-
 static func full_map(fm) -> void:
 	var m: Match = fm.m
 	if m.heart == null:
-		return  # (no Ways Out: the tutorial, training, a duel)
+		return      # (no Ways Out: the tutorial, training, a duel)
 	var at := sites(m)
 	var sd := WaysOutHud.seats(m)
 	var area: Rect2 = fm.rect.grow(-14.0)
@@ -164,9 +153,8 @@ static func full_map(fm) -> void:
 		if area.has_point(pv):
 			badge(fm.hud.c, pv, r, i, sd[i], m.time)
 			QuestRace.draw(m, fm.hud.c, pv + Vector2(0, r + 9.0), QuestRace.read(m, i))
-			fm.label(word(i, sd[i]), pv + Vector2(0, word_dy(i, r)), WORD_PX, color_of(sd[i]), true)  # (reserved)
+			fm.label(word(i, sd[i]), pv + Vector2(0, word_dy(i, r)), WORD_PX, color_of(sd[i]), true)    # (reserved)
 	draw_line(fm.hud, Vector2(fm.rect.get_center().x, fm.rect.position.y + 22.0))
-
 
 # ------------------------------------------------------------------ the dead and the watching
 ## Seats still to be had: locked, open or in use.
@@ -175,7 +163,6 @@ static func ways_left(m: Match) -> int:
 	for s in WaysOutHud.seats(m):
 		n += 1 if int(s["st"]) <= WaysOutHud.St.USE else 0
 	return n
-
 
 ## The seat (index into the four) your squad is nearest, and how far: living squadmates count, or you
 ## where you fell when none is left. {"i": -1} when no seat is left.
@@ -191,7 +178,6 @@ static func nearest(m: Match, team: int) -> Dictionary:
 		_nearest_to(best, m.player.pos, at, sd)
 	return best
 
-
 static func _nearest_to(best: Dictionary, p: Vector3, at: Array[Vector3], sd: Array) -> void:
 	for i in 4:
 		if at[i] == Vector3.INF or int(sd[i]["st"]) > WaysOutHud.St.USE:
@@ -200,7 +186,6 @@ static func _nearest_to(best: Dictionary, p: Vector3, at: Array[Vector3], sd: Ar
 		if d < best["d"]:
 			best["i"] = i
 			best["d"] = d
-
 
 ## "Ways out left: N" plus the nearest seat, or "" while you are still in the match.
 static func line(m: Match) -> String:
@@ -212,7 +197,6 @@ static func line(m: Match) -> String:
 	if near["i"] >= 0 and Life.has_mates(m, p):
 		s += "  ·  your squad is nearest the %s, %d m" % [String(WORDS[near["i"]]).to_lower(), int(near["d"])]
 	return s
-
 
 ## The line on a dark pill centred on `mid` (the HUD under the strip, the full map's top); nothing while you play.
 static func draw_line(hud, mid: Vector2) -> void:

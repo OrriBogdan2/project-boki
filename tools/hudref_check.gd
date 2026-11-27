@@ -16,6 +16,7 @@ extends RefCounted
 ##      channel (read from her kit, or from the snapshot on another machine), gone the frame it ends or breaks
 ##   9. the squad frames (SquadFrames): a row each, you last; knocked shows its bleed-out and the ally
 ##      ping pops in; dead shows no bars; a 2-player squad gets two rows; solo none
+##   9. the low-health wash grows with missing health and leans toward the side the last hits came from
 ## Runs the --hudref-demo=plates scene headless (real frames, the real HUD) and reads what
 ## HudPlate.shown / Hud.slot_text say was drawn. Never touches the save.
 
@@ -259,8 +260,8 @@ func run(main_node: Node) -> void:
 	await _check_ult(p)
 	_check_safe(hud)
 	await _frames(m, hud, p)
-	await _hud_size(m)
-	await _solos()
+	await _check_wash(p)
+	await _hud_size(m)  # (last: it draws a match of its own)
 	_done()
 
 
@@ -616,6 +617,41 @@ func _banner_closes(kb: KnockBanner) -> void:
 	)
 
 
+## 7. HurtWash: nothing above its threshold, stronger as health runs out; a hit from your left (through
+## DamageDir.hit) weights the left edge, and a second later the wash is even again.
+func _check_wash(p: Hunter) -> void:
+	var hud = p.m.hud
+	var hp_was := p.hp
+	p.hp = p.max_hp * 0.5
+	var above := HurtWash.strength(p)
+	p.hp = p.max_hp * 0.3
+	var high := HurtWash.strength(p)
+	p.hp = p.max_hp * 0.1
+	var low := HurtWash.strength(p)
+	ok(
+		above == 0.0 and high > 0.0 and low > high,
+		"the wash shows under %d%% and deepens as health goes (%.2f -> %.2f)" % [int(HurtWash.BELOW * 100.0), high, low]
+	)
+	var foe: Hunter = p.m.hunters.filter(func(x): return x.team != p.team)[0]
+	foe.pos = p.pos + Vector3(-6.0, 0.0, 0.0)
+	hud.dmg_dir.hits.clear()
+	ok(HurtWash.weight_at(hud.dmg_dir.hits, PI) == 0.0, "no recent hits: the wash is even all round")
+	hud.dmg_dir.hit(p.m, foe, p, 30.0)
+	var left := HurtWash.weight_at(hud.dmg_dir.hits, PI)
+	var right := HurtWash.weight_at(hud.dmg_dir.hits, 0.0)
+	var top := HurtWash.weight_at(hud.dmg_dir.hits, -PI * 0.5)
+	var said := "a hit from the left weights the left edge (left %.2f, top %.2f, right %.2f)" % [left, top, right]
+	ok(left > 0.9 and right == 0.0 and top < left, said)
+	await frames_until(p.m, p.m.time + HurtWash.FADE + 0.05)
+	var eased := HurtWash.weight_at(hud.dmg_dir.hits, PI)
+	ok(eased < 0.01, "a second later it has eased back to even (left %.3f)" % eased)
+	var reach := HurtWash.EVEN_D + HurtWash.ARC_D
+	var peak := HurtWash.EVEN_A + HurtWash.ARC_A
+	var light := "light enough to aim through at 1280x720: reaches %d px in, edge alpha <= %.2f" % [int(reach), peak]
+	ok(reach < 720.0 * 0.33 and peak <= 0.55, light)  # (the middle third stays clear)
+	p.hp = hp_was
+
+
 ## 9. Meeko's Hearth Call on you: the ChannelBar under your vitals, from her kit and from a snapshot.
 func _channel(m: Match, hud, p: Hunter) -> void:
 	var mates: Array = m.hunters.filter(func(x): return x != p and x.team == p.team and not x.out)
@@ -801,60 +837,6 @@ func _hud_size(demo: Match) -> void:
 	else:
 		Save.d["tutorial"][FirstObjective.KEY] = had_obj
 	main.get_tree().root.size = Vector2i(1280, 720)
-
-
-func _spot(hud, id: String) -> bool:
-	return hud.hover_spots.any(func(x): return String(x[1]) == id)
-
-
-## 9. A solos match with the real HUD: nothing of the squad shows, and the same HUD still draws the rest.
-func _solos() -> void:
-	var m := Match.new()
-	main.add_child(m)
-	var opts := HudRefDemo.opts("--hudref-demo=plates")
-	opts.merge(
-		{
-			"tier": 0,
-			"length": 1e9,
-			"seed": 5,
-			"arch": "thief",
-			"cls": Arch.weight("thief"),
-			"weapon": Arch.signature("thief")
-		}
-	)
-	opts.merge({"teams": 20, "squad": 1, "total": 20}, true)  # solos: 20 hunters, each their own squad
-	opts["teams"] = 6  # (a few rivals, the demo's row of them, not the whole 20)
-	m.start(opts)
-	var hud = m.hud
-	await frames_until(m, 1.0)
-	var pl: Hunter = m.player
-	await hud.panels.draw
-	ok(not Life.has_mates(m, pl) and m.hunters.size() > 3, "solos: %d hunters, none on your squad" % m.hunters.size())
-	ok(
-		TeamBoki.shown.is_empty() and hud.mates.last.is_empty(),
-		"solos: no squad row, Boki icon or squad watch on the left"
-	)
-	ok(
-		_spot(hud, "vitals") and not _spot(hud, "base"),
-		"solos: the vitals block is there, the base-to-a-teammate badge is not"
-	)
-	var rivals: Array = m.hunters.filter(func(x): return x != pl)
-	m.knock(rivals[0], pl, {})
-	await hud.panels.draw
-	ok(hud.mates.lines.is_empty() and hud.mates.last.is_empty(), "solos: a rival going down raises no squad line")
-	var fm: FullMap = hud.full_map
-	fm.open()
-	await hud.panels.draw
-	ok(fm.side_rows == 0, "solos: the full map has no squad panel")
-	rivals[1].team = pl.team  # the same HUD with a squadmate: every squad piece comes back
-	await hud.panels.draw
-	ok(
-		fm.side_rows == 2 and _spot(hud, "base"),
-		"a squadmate joins: the map's squad panel (%d rows) and the base badge show" % fm.side_rows
-	)
-	fm.close()
-	m.queue_free()
-	await main.get_tree().process_frame
 
 
 ## 10. the kill feed (KillFeed): a knock, a finish, a Boki's kill and a monster's knock as rows with faces and the

@@ -7,43 +7,40 @@ extends RefCounted
 ## the drop, with the countdown and the squad's drop order. The match keeps going behind it.
 
 const SIDE_W := 268.0
-const NOTE_H := 14.0  # px a legend row grows by for its first-time line (Glossary)
+const NOTE_H := 14.0             # px a legend row grows by for its first-time line (Glossary)
 const INK := Color("f3eee2")
 const MUTED := Color("a9b0bf")
 const GOLD := Color("f2c84a")
 const BAD := Color("ff5a4a")
 const SEA := Color(0.05, 0.07, 0.13, 0.96)
-const LINE_K := 1.1  # a place name's step when it moves off a marker, x its size
-const ISLAND_REACH := 1.0  # x its island's radius: how far a region name may move (to the edge, no further)
-const MIN_LINES := 2.0  # x a name's line step: the least a name moves, so a small island still has lines
-const SMALL_REACH := 2.2  # x its size: how far a small place name may move
-const NUDGES_X := [0.0, -1.5, 1.5]  # x its size: on each line, a name also tries a little left and right
-const MARKER_PAD := 8.0  # px a place name keeps between its text and a marker's centre (a marker's radius)
-const LABEL_TRIES := 3  # lines a countdown may step (down or up) to find a free spot
+const LINE_K := 1.1            # a place name's step when it moves off a marker, x its size
+const ISLAND_REACH := 1.0      # x its island's radius: how far a region name may move (to the edge, no further)
+const MIN_LINES := 2.0         # x a name's line step: the least a name moves, so a small island still has lines
+const SMALL_REACH := 2.2       # x its size: how far a small place name may move
+const NUDGES_X := [0.0, -1.5, 1.5]     # x its size: on each line, a name also tries a little left and right
+const MARKER_PAD := 8.0        # px a place name keeps between its text and a marker's centre (a marker's radius)
+const LABEL_TRIES := 3         # lines a countdown may step (down or up) to find a free spot
 
-var hud  # the Hud that draws it
+var hud            # the Hud that draws it
 var m: Match
 var is_open := false
-var auto := false  # opened by the planning phase (closes when the ship sets off)
+var auto := false              # opened by the planning phase (closes when the ship sets off)
 var zoom := 1.0
-var center := Vector2.ZERO  # the world point (x, z) at the middle of the map
-var rect := Rect2()  # where the map is on screen
-var side_rows := 0  # squad rows the side panel drew last frame (checks read it)
-var _taken: Array = []  # Rect2s of the names drawn this frame: a name never prints over another
-var _spots := PackedVector2Array()  # this frame's marker centres (_obstacles): place names keep off them
+var center := Vector2.ZERO     # the world point (x, z) at the middle of the map
+var rect := Rect2()            # where the map is on screen
+var _taken: Array = []         # Rect2s of the names drawn this frame: a name never prints over another
+var _spots := PackedVector2Array()    # this frame's marker centres (_obstacles): place names keep off them
 var _press := Vector2.INF
 var _press_center := Vector2.ZERO
 var _dragged := false
-var _roster: Array = []  # [Rect2, Hunter] squad rows you can click to pass the lead
-var hover := MapHover.new()  # the tooltip under the resting cursor
-var hot_line := ""  # the hot zone's first-time line under the map (HotZone.take_plan_line)
-
+var _roster: Array = []        # [Rect2, Hunter] squad rows you can click to pass the lead
+var hover := MapHover.new()    # the tooltip under the resting cursor
+var hot_line := ""             # the hot zone's first-time line under the map (HotZone.take_plan_line)
 
 func _init(h, match_node: Match) -> void:
 	hud = h
 	m = match_node
 	center = Vector2(m.world.w, m.world.h) * 0.5
-
 
 func open(by_plan := false) -> void:
 	is_open = true
@@ -54,10 +51,8 @@ func open(by_plan := false) -> void:
 	center = Vector2(m.world.w, m.world.h) * 0.5
 	hot_line = m.biomes.hot.take_plan_line(m) if by_plan and m.biomes else ""
 
-
 func close() -> void:
-	if is_open:
-		Sfx.play("ui_close", null, -8.0)
+	if is_open: Sfx.play("ui_close", null, -8.0)
 	is_open = false
 	auto = false
 	hot_line = ""
@@ -71,7 +66,6 @@ func _layout(sz: Vector2) -> void:
 	s = maxf(s, 300.0)
 	rect = Rect2(Vector2(roundf(sz.x * 0.5 - s * 0.5), top), Vector2(s, s))
 
-
 func view() -> Rect2:
 	var full := Vector2(m.world.w, m.world.h)
 	var vs := full / zoom
@@ -79,21 +73,17 @@ func view() -> Rect2:
 	center.y = clampf(center.y, vs.y * 0.5, full.y - vs.y * 0.5)
 	return Rect2(center - vs * 0.5, vs)
 
-
 func k() -> float:
 	return rect.size.x / view().size.x
-
 
 func to_screen(p3: Vector3) -> Vector2:
 	var v := view()
 	return rect.position + (Vector2(p3.x, p3.z) - v.position) * (rect.size.x / v.size.x)
 
-
 func to_world(sp: Vector2) -> Vector3:
 	var v := view()
 	var q := v.position + (sp - rect.position) / (rect.size.x / v.size.x)
 	return Vector3(q.x, 0, q.y)
-
 
 ## The wheel sets where the zoom is heading; draw() eases toward it, keeping the point under the
 ## cursor in place, so zooming glides instead of jumping.
@@ -101,13 +91,10 @@ var zoom_to := 1.0
 var _zoom_sp := Vector2.ZERO
 var _zoom_wp := Vector3.ZERO
 var _last_us := 0
-
-
 func _zoom_at(sp: Vector2, f: float) -> void:
 	zoom_to = clampf(zoom_to * f, 1.0, 4.0)
 	_zoom_sp = sp
 	_zoom_wp = to_world(sp)
-
 
 func _ease_zoom() -> void:
 	var now := Time.get_ticks_usec()
@@ -119,7 +106,6 @@ func _ease_zoom() -> void:
 	view()
 	var after := to_world(_zoom_sp)
 	center += Vector2(_zoom_wp.x - after.x, _zoom_wp.z - after.z)
-
 
 # ------------------------------------------------------------------ input
 ## Mouse on the map: returns true when the map used the event.
@@ -136,13 +122,10 @@ func input(ev: InputEvent) -> bool:
 			if mb.pressed:
 				for rs in _roster:
 					if (rs[0] as Rect2).has_point(mb.position):
-						if m.skydrop and m.player:
-							m.skydrop.pass_lead(m.player, rs[1])
+						if m.skydrop and m.player: m.skydrop.pass_lead(m.player, rs[1])
 						return true
 				if rect.has_point(mb.position):
-					_press = mb.position
-					_press_center = center
-					_dragged = false
+					_press = mb.position; _press_center = center; _dragged = false
 				return true
 			if _press != Vector2.INF:
 				if not _dragged and rect.has_point(mb.position):
@@ -156,7 +139,7 @@ func input(ev: InputEvent) -> bool:
 		return true
 	if ev is InputEventMouseMotion and _press != Vector2.INF:
 		if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-			_press = Vector2.INF  # the release went to a window over the map: the drag still ends with the button
+			_press = Vector2.INF      # the release went to a window over the map: the drag still ends with the button
 			return true
 		var mm := ev as InputEventMouseMotion
 		if (mm.position - _press).length() > 6.0:
@@ -166,14 +149,11 @@ func input(ev: InputEvent) -> bool:
 		return true
 	return false
 
-
 func ping_at(p: Vector3) -> void:
 	if m.player == null or m.player.out:
 		return
-	p.x = clampf(p.x, 0.5, m.world.w - 0.5)
-	p.z = clampf(p.z, 0.5, m.world.h - 0.5)
+	p.x = clampf(p.x, 0.5, m.world.w - 0.5); p.z = clampf(p.z, 0.5, m.world.h - 0.5)
 	m.squad_ping(m.player, p)
-
 
 ## A save's first expedition, while the ship waits: the plan screen is only the map, the timer and the jump
 ## prompt. Holding the scoreboard key brings back the squad, the legend and the ways out.
@@ -182,12 +162,10 @@ func plain_plan() -> bool:
 	var first: bool = m.guide != null and int(Save.d.get("first_guide", 0)) <= 1
 	return planning and first and not Input.is_action_pressed("scores")
 
-
 ## The groups on screen: the header, the map, and the three side panels unless the plan is plain.
 func groups() -> PackedStringArray:
 	var all := ["header", "map", "squad", "legend", "ways out"]
 	return PackedStringArray(all.slice(0, 2) if plain_plan() else all)
-
 
 # ------------------------------------------------------------------ drawing
 func draw(sz: Vector2) -> void:
@@ -198,7 +176,7 @@ func draw(sz: Vector2) -> void:
 	var v := view()
 	var kk := rect.size.x / v.size.x
 	var team: int = m.player.team if m.player else -9
-	c.draw_rect(Rect2(Vector2.ZERO, sz), Color(0.01, 0.02, 0.05, 0.92))  # (dark enough that the HUD behind doesn't read through)
+	c.draw_rect(Rect2(Vector2.ZERO, sz), Color(0.01, 0.02, 0.05, 0.92))      # (dark enough that the HUD behind doesn't read through)
 	# the header: the plan's title (no countdown: the minimap and the ship's own line say enough), or just the map
 	var planning: bool = m.skydrop != null and m.skydrop.planning
 	if planning:
@@ -216,17 +194,13 @@ func draw(sz: Vector2) -> void:
 	c.draw_rect(rect, SEA)
 	var tex_view := v.intersection(Rect2(Vector2.ZERO, Vector2(w.w, w.h)))
 	if tex_view.size.x > 0.0:
-		c.draw_texture_rect_region(
-			hud.map_tex(),
-			Rect2(rect.position + (tex_view.position - v.position) * kk, tex_view.size * kk),
-			hud.map_region(tex_view)
-		)
+		c.draw_texture_rect_region(hud.map_tex(), Rect2(rect.position + (tex_view.position - v.position) * kk, tex_view.size * kk), hud.map_region(tex_view))
 	_grid(c, v, kk)
 	HazardMap.draw(c, m, to_screen, rect, Vector3.ZERO, HazardMap.FULL_SHIELD)
 	c.draw_rect(rect, Color(0.85, 0.8, 1.0, 0.35), false, 2.0)
 	_shrines(c, kk)
 	var saved: Vector3 = hud.mm_circ
-	hud.mm_circ = Vector3.ZERO  # the shared map helpers clip to a rectangle here
+	hud.mm_circ = Vector3.ZERO          # the shared map helpers clip to a rectangle here
 	_labels(c, kk)
 	if m.skytrain:
 		hud.train_map.draw(hud, m.skytrain, rect, v, kk, true)
@@ -252,7 +226,6 @@ func draw(sz: Vector2) -> void:
 	_squad(c, team)
 	BokiHud.map_kin(c, m, to_screen, func(pv: Vector2, _pad: float) -> bool: return rect.has_point(pv))
 	_roster.clear()
-	side_rows = 0
 	if plain_plan():
 		_plain_hint(sz)
 	else:
@@ -264,22 +237,18 @@ func draw(sz: Vector2) -> void:
 		hud._ctext(Vector2(rect.get_center().x, rect.end.y + 32.0), hot_line, 15, HotZone.COL, hud.big)
 	_cursor(c)
 
-
 ## The one line of a plain plan, on the map's foot: the jump key, and the key that brings the rest back.
 func _plain_hint(sz: Vector2) -> void:
 	hud._rounded(_plain_pill(sz), Color(0.04, 0.05, 0.08, 0.88), 10)
 	hud._ctext(Vector2(sz.x * 0.5, rect.end.y - 24), _plain_line(), 16, INK, hud.big)
 
-
 func _plain_line() -> String:
 	var keys := [Settings.key_cap("jump"), Settings.key_cap("scores")]
 	return "Press %s to jump  ·  hold %s for the legend and ways out" % keys
 
-
 func _plain_pill(sz: Vector2) -> Rect2:
 	var w: float = hud.big.get_string_size(_plain_line(), HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x + 32.0
 	return Rect2(Vector2(sz.x * 0.5 - w * 0.5, rect.end.y - 46), Vector2(w, 34))
-
 
 ## Shrines: a small pale-green obelisk, dimmed once someone has used it.
 func _shrines(c: Control, kk: float) -> void:
@@ -289,32 +258,18 @@ func _shrines(c: Control, kk: float) -> void:
 		if rect.grow(-4.0).has_point(pv):
 			shrine_glyph(c, pv, s, bool(sh.get("used", false)))
 
-
 func shrine_glyph(c: Control, pv: Vector2, s: float, used := false) -> void:
 	var col := Color("9ff0c4") if not used else Color(0.6, 0.66, 0.64, 0.6)
-	var pts := PackedVector2Array(
-		[
-			pv + Vector2(0, -s * 1.3),
-			pv + Vector2(s * 0.55, -s * 0.2),
-			pv + Vector2(s * 0.45, s * 0.8),
-			pv + Vector2(-s * 0.45, s * 0.8),
-			pv + Vector2(-s * 0.55, -s * 0.2)
-		]
-	)
+	var pts := PackedVector2Array([pv + Vector2(0, -s * 1.3), pv + Vector2(s * 0.55, -s * 0.2), pv + Vector2(s * 0.45, s * 0.8), pv + Vector2(-s * 0.45, s * 0.8), pv + Vector2(-s * 0.55, -s * 0.2)])
 	var back := PackedVector2Array()
-	for q in pts:
-		back.append(pv + (q - pv) * 1.35)
+	for q in pts: back.append(pv + (q - pv) * 1.35)
 	c.draw_colored_polygon(back, Color(0, 0, 0, 0.6))
 	c.draw_colored_polygon(pts, col)
 
-
 func _map_title() -> String:
-	if m.world.layout_id == "skyreach":
-		return "SKYREACH"
-	if m.world.layout_id == "hollowcrown":
-		return "THE HOLLOW CROWN"
+	if m.world.layout_id == "skyreach": return "SKYREACH"
+	if m.world.layout_id == "hollowcrown": return "THE HOLLOW CROWN"
 	return "THE ISLANDS"
-
 
 ## A faint grid with letters and numbers along the edges, for callouts ("dropping C4").
 func _grid(c: Control, v: Rect2, kk: float) -> void:
@@ -334,7 +289,6 @@ func _grid(c: Control, v: Rect2, kk: float) -> void:
 		if cy > rect.position.y + 6 and cy < rect.end.y - 6:
 			hud._text(Vector2(rect.position.x + 5, cy + 4), str(i + 1), 11, Color(1, 1, 1, 0.3), hud.big)
 
-
 ## Region and place names (authored maps); on generated maps each island's role.
 ## Region names always, big; place names, perches, chokepoints and rail stops as icons, with their
 ## names once you zoom in or where they don't run into a name already drawn (so the overview reads
@@ -346,8 +300,7 @@ func _labels(c: Control, kk: float) -> void:
 	_taken.clear()
 	_obstacles()
 	var regions := {}
-	for isl in w.islands:
-		regions[String(isl.get("name", ""))] = isl
+	for isl in w.islands: regions[String(isl.get("name", ""))] = isl
 	var later: Array = []
 	for lb in w.labels:
 		var pv := to_screen(lb["pos"])
@@ -369,35 +322,16 @@ func _labels(c: Control, kk: float) -> void:
 		var nm := String(lb["name"])
 		match String(lb["kind"]):
 			"perch":
-				c.draw_colored_polygon(
-					PackedVector2Array([pv + Vector2(0, -9), pv + Vector2(7, 4), pv + Vector2(-7, 4)]),
-					Color(0, 0, 0, 0.6)
-				)
-				c.draw_colored_polygon(
-					PackedVector2Array([pv + Vector2(0, -7), pv + Vector2(5, 2.5), pv + Vector2(-5, 2.5)]),
-					Color("9af0ff")
-				)
+				c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -9), pv + Vector2(7, 4), pv + Vector2(-7, 4)]), Color(0, 0, 0, 0.6))
+				c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -7), pv + Vector2(5, 2.5), pv + Vector2(-5, 2.5)]), Color("9af0ff"))
 				var hm := "%dm" % int(round(float(lb.get("height", 0.0))))
-				if (
-					not label("%s  %s" % [nm, hm] if zoomed else hm, pv + Vector2(0, 17), 10, Color("c8f6ff"), zoomed)
-					and zoomed
-				):
+				if not label("%s  %s" % [nm, hm] if zoomed else hm, pv + Vector2(0, 17), 10, Color("c8f6ff"), zoomed) and zoomed:
 					label(hm, pv + Vector2(0, 17), 10, Color("c8f6ff"), true)
 			"rail":
-				pass  # (the halts are TrainMap's)
+				pass      # (the halts are TrainMap's)
 			"choke":
-				c.draw_colored_polygon(
-					PackedVector2Array(
-						[pv + Vector2(0, -5), pv + Vector2(5, 0), pv + Vector2(0, 5), pv + Vector2(-5, 0)]
-					),
-					Color(0, 0, 0, 0.55)
-				)
-				c.draw_colored_polygon(
-					PackedVector2Array(
-						[pv + Vector2(0, -3.5), pv + Vector2(3.5, 0), pv + Vector2(0, 3.5), pv + Vector2(-3.5, 0)]
-					),
-					Color("ffb36a")
-				)
+				c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -5), pv + Vector2(5, 0), pv + Vector2(0, 5), pv + Vector2(-5, 0)]), Color(0, 0, 0, 0.55))
+				c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -3.5), pv + Vector2(3.5, 0), pv + Vector2(0, 3.5), pv + Vector2(-3.5, 0)]), Color("ffb36a"))
 				if zoomed:
 					label(nm, pv + Vector2(0, 15), 10, Color(1.0, 0.82, 0.63, 0.9))
 			_:
@@ -409,7 +343,6 @@ func _labels(c: Control, kk: float) -> void:
 			var pv2 := to_screen(Vector3(cc.x, 0, cc.y))
 			if rect.has_point(pv2):
 				hud._ctext(pv2, String(isl["role"]).capitalize(), 11, Color(INK, 0.6), hud.big)
-
 
 ## Draws a centred name unless it would overlap one already drawn this frame (force draws it anyway).
 ## Returns whether it drew. The halts and the Heart draw their names through it too.
@@ -423,7 +356,6 @@ func label(txt: String, at: Vector2, px: int, col: Color, force := false) -> boo
 	hud._ctext(at, txt, px, col, hud.big)
 	return true
 
-
 ## A name that has to show (a countdown): the first free line from `at` stepping down (`dir` 1) or up (-1),
 ## else `at` itself.
 func label_near(txt: String, at: Vector2, px: int, col: Color, dir := 1.0) -> void:
@@ -432,11 +364,9 @@ func label_near(txt: String, at: Vector2, px: int, col: Color, dir := 1.0) -> vo
 			return
 	label(txt, at, px, col, true)
 
-
 func _label_rect(txt: String, at: Vector2, px: int) -> Rect2:
 	var tw: float = hud.big.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x
 	return Rect2(at + Vector2(-tw * 0.5 - 3.0, -px * 0.95), Vector2(tw + 6.0, px * 1.25))
-
 
 ## What place names keep off this frame: every marker's centre (spawn spots, each one shown scouted or not,
 ## ways out, Ways Out seats) and the words pinned to a spot, reserved before any name is placed (each seat's
@@ -460,14 +390,10 @@ func _obstacles() -> void:
 			if at[i] != Vector3.INF:
 				var pv := to_screen(at[i])
 				_spots.append(pv)
-				_taken.append(
-					_label_rect(
-						WaysOutMap.word(i, sd[i]), pv + Vector2(0, WaysOutMap.word_dy(i, r)), WaysOutMap.WORD_PX
-					)
-				)
+				_taken.append(_label_rect(WaysOutMap.word(i, sd[i]), pv + Vector2(0, WaysOutMap.word_dy(i, r)),
+						WaysOutMap.WORD_PX))
 	if m.biomes and not m.biomes.hot.zone.is_empty():
 		_taken.append(_label_rect(HotZone.CAPTION, m.biomes.hot.caption_at(self, k()), HotZone.CAPTION_PX))
-
 
 ## Where a place name goes: the first line from its spot (0, one up, one down, two up...) within `reach` px,
 ## nudged a little sideways if need be, that is clear of every marker and of the names already placed; when
@@ -487,7 +413,6 @@ func _clear_spot(txt: String, at: Vector2, px: int, reach: float) -> Vector2:
 				least = n
 	return best
 
-
 ## How many names placed this frame overlap `r`, and how many markers sit within MARKER_PAD of it.
 func _hits(r: Rect2) -> int:
 	var n := 0
@@ -499,7 +424,6 @@ func _hits(r: Rect2) -> int:
 		if padded.has_point(s):
 			n += 1
 	return n
-
 
 func _spawns(c: Control, team: int, kk: float) -> void:
 	var sp: SpawnPlan = m.spawn_plan
@@ -515,22 +439,15 @@ func _spawns(c: Control, team: int, kk: float) -> void:
 		var col: Color = def.get("col", Color.WHITE)
 		marker(c, String(def.get("shape", "star")), pv, s, col, st)
 
-
 ## A spawn marker in one of its states: "unknown" (faint, with a ?), "active", "empty" (a cross),
 ## "taken" (a tick). Shared with the legend.
 func marker(c: Control, shape: String, pv: Vector2, s: float, col: Color, st: String) -> void:
 	var a := 1.0
 	var ic := col
 	match st:
-		"unknown":
-			a = 0.5
-			ic = Color(col, 0.55)
-		"empty":
-			a = 0.4
-			ic = Color(0.6, 0.62, 0.68, 0.5)
-		"taken":
-			a = 0.55
-			ic = Color(0.7, 0.72, 0.78, 0.7)
+		"unknown": a = 0.5; ic = Color(col, 0.55)
+		"empty": a = 0.4; ic = Color(0.6, 0.62, 0.68, 0.5)
+		"taken": a = 0.55; ic = Color(0.7, 0.72, 0.78, 0.7)
 	if st == "active":
 		var ph := fmod(Time.get_ticks_msec() / 1000.0 * 0.8, 1.0)
 		c.draw_arc(pv, s * (1.5 + ph * 0.9), 0, TAU, 28, Color(col, 0.6 * (1.0 - ph)), 2.0, true)
@@ -544,15 +461,7 @@ func marker(c: Control, shape: String, pv: Vector2, s: float, col: Color, st: St
 			c.draw_line(pv + Vector2(-s, -s), pv + Vector2(s, s), Color(BAD, 0.75), 2.0)
 			c.draw_line(pv + Vector2(-s, s), pv + Vector2(s, -s), Color(BAD, 0.75), 2.0)
 		"taken":
-			c.draw_polyline(
-				PackedVector2Array(
-					[pv + Vector2(-s * 0.7, 0), pv + Vector2(-s * 0.15, s * 0.6), pv + Vector2(s * 0.85, -s * 0.7)]
-				),
-				Color("8fe0a0"),
-				2.5,
-				true
-			)
-
+			c.draw_polyline(PackedVector2Array([pv + Vector2(-s * 0.7, 0), pv + Vector2(-s * 0.15, s * 0.6), pv + Vector2(s * 0.85, -s * 0.7)]), Color("8fe0a0"), 2.5, true)
 
 ## Category icons: a paw (rare kin), a chest (vault), a crate (cache), a skull (boss lair), else a star.
 func icon(c: Control, shape: String, p: Vector2, s: float, col: Color) -> void:
@@ -561,17 +470,7 @@ func icon(c: Control, shape: String, p: Vector2, s: float, col: Color) -> void:
 			Icons.draw(c, "paw", p, s, col)
 		"vault":
 			c.draw_rect(Rect2(p + Vector2(-s, -s * 0.2), Vector2(s * 2.0, s * 1.1)), col)
-			c.draw_colored_polygon(
-				PackedVector2Array(
-					[
-						p + Vector2(-s, -s * 0.3),
-						p + Vector2(-s * 0.8, -s * 0.85),
-						p + Vector2(s * 0.8, -s * 0.85),
-						p + Vector2(s, -s * 0.3)
-					]
-				),
-				col
-			)
+			c.draw_colored_polygon(PackedVector2Array([p + Vector2(-s, -s * 0.3), p + Vector2(-s * 0.8, -s * 0.85), p + Vector2(s * 0.8, -s * 0.85), p + Vector2(s, -s * 0.3)]), col)
 			c.draw_rect(Rect2(p + Vector2(-s * 0.2, -s * 0.45), Vector2(s * 0.4, s * 0.5)), Color(0, 0, 0, 0.7))
 		"crate":
 			var r := Rect2(p - Vector2(s, s) * 0.85, Vector2(s, s) * 1.7)
@@ -590,12 +489,10 @@ func icon(c: Control, shape: String, p: Vector2, s: float, col: Color) -> void:
 				pts.append(p + Vector2(cos(a), sin(a)) * s * (1.0 if i % 2 == 0 else 0.45))
 			c.draw_colored_polygon(pts, col)
 
-
 func _ship(c: Control) -> void:
 	if m.ship.is_empty() or m.ship.get("gone", false):
 		return
-	var a := to_screen(m.ship["a"])
-	var b := to_screen(m.ship["b"])
+	var a := to_screen(m.ship["a"]); var b := to_screen(m.ship["b"])
 	var l := a.distance_to(b)
 	var d := 0.0
 	while d < l:
@@ -603,18 +500,11 @@ func _ship(c: Control) -> void:
 		d += 14.0
 	var sp := to_screen(m.ship_pos())
 	var dir: Vector3 = m.ship["dir"]
-	var fw := Vector2(dir.x, dir.z).normalized()
-	var sd := Vector2(-fw.y, fw.x)
+	var fw := Vector2(dir.x, dir.z).normalized(); var sd := Vector2(-fw.y, fw.x)
 	sp = Vector2(clampf(sp.x, rect.position.x + 8, rect.end.x - 8), clampf(sp.y, rect.position.y + 8, rect.end.y - 8))
-	c.draw_colored_polygon(
-		PackedVector2Array([sp + fw * 13.0, sp - fw * 8.0 + sd * 8.0, sp - fw * 4.0, sp - fw * 8.0 - sd * 8.0]),
-		Color(0, 0, 0, 0.6)
-	)
-	c.draw_colored_polygon(
-		PackedVector2Array([sp + fw * 11.0, sp - fw * 6.0 + sd * 6.5, sp - fw * 3.0, sp - fw * 6.0 - sd * 6.5]), GOLD
-	)
+	c.draw_colored_polygon(PackedVector2Array([sp + fw * 13.0, sp - fw * 8.0 + sd * 8.0, sp - fw * 4.0, sp - fw * 8.0 - sd * 8.0]), Color(0, 0, 0, 0.6))
+	c.draw_colored_polygon(PackedVector2Array([sp + fw * 11.0, sp - fw * 6.0 + sd * 6.5, sp - fw * 3.0, sp - fw * 6.0 - sd * 6.5]), GOLD)
 	hud._ctext(sp + Vector2(0, -14), "SKYSHIP", 10, GOLD, hud.big)
-
 
 ## A rolling session's other drop waves: their skyships and routes, in amber (anyone can see a ship).
 func _wave_ships(c: Control) -> void:
@@ -623,26 +513,18 @@ func _wave_ships(c: Control) -> void:
 	for s in m.ships:
 		if s.get("gone", false) or s.get("node") == null:
 			continue
-		var a := to_screen(s["a"])
-		var b := to_screen(s["b"])
+		var a := to_screen(s["a"]); var b := to_screen(s["b"])
 		var l := a.distance_to(b)
 		var d := 0.0
 		while d < l:
 			c.draw_line(a.lerp(b, d / l), a.lerp(b, minf(1.0, (d + 6.0) / l)), Color(1.0, 0.72, 0.35, 0.4), 2.0, true)
 			d += 12.0
 		var sp := to_screen(m.ship_pos_of(s))
-		sp = Vector2(
-			clampf(sp.x, rect.position.x + 8, rect.end.x - 8), clampf(sp.y, rect.position.y + 8, rect.end.y - 8)
-		)
+		sp = Vector2(clampf(sp.x, rect.position.x + 8, rect.end.x - 8), clampf(sp.y, rect.position.y + 8, rect.end.y - 8))
 		var dir: Vector3 = s["dir"]
-		var fw := Vector2(dir.x, dir.z).normalized()
-		var sd := Vector2(-fw.y, fw.x)
-		c.draw_colored_polygon(
-			PackedVector2Array([sp + fw * 11.0, sp - fw * 6.0 + sd * 6.5, sp - fw * 3.0, sp - fw * 6.0 - sd * 6.5]),
-			Color("ffb64a")
-		)
+		var fw := Vector2(dir.x, dir.z).normalized(); var sd := Vector2(-fw.y, fw.x)
+		c.draw_colored_polygon(PackedVector2Array([sp + fw * 11.0, sp - fw * 6.0 + sd * 6.5, sp - fw * 3.0, sp - fw * 6.0 - sd * 6.5]), Color("ffb64a"))
 		hud._ctext(sp + Vector2(0, -14), "DROP WAVE", 10, Color("ffb64a"), hud.big)
-
 
 ## Hunters with a bounty on them (a rolling session): everyone sees where they are.
 func _bounties(c: Control, team: int) -> void:
@@ -655,7 +537,6 @@ func _bounties(c: Control, team: int) -> void:
 		if rect.has_point(pv):
 			hud.bounty_marker(c, pv, 1.25)
 			hud._ctext(pv + Vector2(0, -16), "LV %d" % h.lvl, 10, Color("ffb64a"), hud.big)
-
 
 ## A lair fight you heard: the boss's icon at the lair, a pulsing ring and what's going on there
 ## (the fight and its seal's clock, or that the boss has fallen and the gate's clock).
@@ -684,7 +565,6 @@ func _lair_alerts(c: Control) -> void:
 			t = "FIGHT  ·  %s" % Lairs.clock(m.lairs.lock_left(l))
 		hud._ctext(pv + Vector2(0, 30), t, 11, col, hud.big)
 
-
 func _pings(c: Control, team: int) -> void:
 	for pg in m.pings:
 		var pt = pg.get("team", null)
@@ -701,26 +581,15 @@ func _pings(c: Control, team: int) -> void:
 			var tip := pv
 			var head := pv + Vector2(0, -20 + bob)
 			c.draw_arc(tip, 9.0, 0, TAU, 24, Color(col, 0.7), 2.0, true)
-			c.draw_colored_polygon(
-				PackedVector2Array([tip, head + Vector2(-8, 3), head + Vector2(8, 3)]), Color(0, 0, 0, 0.6)
-			)
+			c.draw_colored_polygon(PackedVector2Array([tip, head + Vector2(-8, 3), head + Vector2(8, 3)]), Color(0, 0, 0, 0.6))
 			c.draw_circle(head, 10.0, Color(0, 0, 0, 0.6))
 			c.draw_circle(head, 8.0, col)
-			c.draw_colored_polygon(
-				PackedVector2Array([tip + Vector2(0, -2), head + Vector2(-6, 4), head + Vector2(6, 4)]), col
-			)
-			hud._ctext(
-				head + Vector2(0, 5),
-				by.pname.substr(0, 1).to_upper() if is_instance_valid(by) else "?",
-				12,
-				Color(0.06, 0.06, 0.1),
-				hud.big
-			)
+			c.draw_colored_polygon(PackedVector2Array([tip + Vector2(0, -2), head + Vector2(-6, 4), head + Vector2(6, 4)]), col)
+			hud._ctext(head + Vector2(0, 5), by.pname.substr(0, 1).to_upper() if is_instance_valid(by) else "?", 12, Color(0.06, 0.06, 0.1), hud.big)
 		else:
 			var a := clampf(4.0 - float(pg["t"]), 0.0, 1.0)
 			c.draw_arc(pv, 6.0 + sin(float(pg["t"]) * 8.0) * 1.5, 0, TAU, 20, Color(col, a), 2.0, true)
 			c.draw_circle(pv, 3.0, Color(col, a))
-
 
 ## Rivals your squad can see right now (nobody else: the map is no wallhack), and betrayers.
 func _enemies(c: Control, team: int) -> void:
@@ -739,7 +608,6 @@ func _enemies(c: Control, team: int) -> void:
 		c.draw_circle(pv, 6.0, Color(0, 0, 0, 0.6))
 		c.draw_circle(pv, 4.5, Color("f4f1e6") if allied and not marked else SideColor.foe())
 
-
 func _squad(c: Control, team: int) -> void:
 	for h in m.hunters:
 		if m.player == null or h.team != team or h.out or h.extracted:
@@ -751,17 +619,10 @@ func _squad(c: Control, team: int) -> void:
 		var col := m.mate_col(h)
 		if h == m.player and not h.riding:
 			var d: Vector2 = h.aim_dir() if not h.dropping else Vector2(h.vel.x, h.vel.z).normalized()
-			if d.length() < 0.1:
-				d = Vector2.UP
+			if d.length() < 0.1: d = Vector2.UP
 			var side := Vector2(-d.y, d.x)
-			c.draw_colored_polygon(
-				PackedVector2Array([pv + d * 12.0, pv - d * 6.0 + side * 8.0, pv - d * 3.0, pv - d * 6.0 - side * 8.0]),
-				Color(0, 0, 0, 0.7)
-			)
-			c.draw_colored_polygon(
-				PackedVector2Array([pv + d * 10.0, pv - d * 5.0 + side * 6.5, pv - d * 2.5, pv - d * 5.0 - side * 6.5]),
-				INK
-			)
+			c.draw_colored_polygon(PackedVector2Array([pv + d * 12.0, pv - d * 6.0 + side * 8.0, pv - d * 3.0, pv - d * 6.0 - side * 8.0]), Color(0, 0, 0, 0.7))
+			c.draw_colored_polygon(PackedVector2Array([pv + d * 10.0, pv - d * 5.0 + side * 6.5, pv - d * 2.5, pv - d * 5.0 - side * 6.5]), INK)
 		elif not h.riding:
 			c.draw_circle(pv, 6.5, Color(0, 0, 0, 0.6))
 			c.draw_circle(pv, 5.0, col)
@@ -773,44 +634,20 @@ func _squad(c: Control, team: int) -> void:
 		if rect.has_point(dv):
 			BokiHud.map_dot(c, dv, dk, 7.0, m.time)
 
-
 func crown(c: Control, p: Vector2, col: Color) -> void:
-	var pts := PackedVector2Array(
-		[
-			p + Vector2(-7, 4),
-			p + Vector2(-7, -3),
-			p + Vector2(-3.5, 0),
-			p + Vector2(0, -5),
-			p + Vector2(3.5, 0),
-			p + Vector2(7, -3),
-			p + Vector2(7, 4)
-		]
-	)
+	var pts := PackedVector2Array([p + Vector2(-7, 4), p + Vector2(-7, -3), p + Vector2(-3.5, 0), p + Vector2(0, -5), p + Vector2(3.5, 0), p + Vector2(7, -3), p + Vector2(7, 4)])
 	var back := PackedVector2Array()
-	for q in pts:
-		back.append(p + (q - p) * 1.3)
+	for q in pts: back.append(p + (q - p) * 1.3)
 	c.draw_colored_polygon(back, Color(0, 0, 0, 0.6))
 	c.draw_colored_polygon(pts, col)
-
 
 ## The match hides the system cursor (it draws its own crosshair), so the map draws its own too.
 func _cursor(c: Control) -> void:
 	var mp := c.get_local_mouse_position()
 	if not rect.has_point(mp):
-		var arrow := PackedVector2Array(
-			[
-				mp,
-				mp + Vector2(0, 17),
-				mp + Vector2(4.5, 13),
-				mp + Vector2(8, 20),
-				mp + Vector2(10.5, 19),
-				mp + Vector2(7.5, 12),
-				mp + Vector2(13, 12)
-			]
-		)
+		var arrow := PackedVector2Array([mp, mp + Vector2(0, 17), mp + Vector2(4.5, 13), mp + Vector2(8, 20), mp + Vector2(10.5, 19), mp + Vector2(7.5, 12), mp + Vector2(13, 12)])
 		var back := PackedVector2Array()
-		for q in arrow:
-			back.append(mp + (q - mp) * 1.18 + Vector2(-1, -1.5))
+		for q in arrow: back.append(mp + (q - mp) * 1.18 + Vector2(-1, -1.5))
 		c.draw_colored_polygon(back, Color(0, 0, 0, 0.8))
 		c.draw_colored_polygon(arrow, INK)
 		return
@@ -824,7 +661,6 @@ func _cursor(c: Control) -> void:
 		var wp := to_world(mp)
 		var dist := int(round(Vector2(wp.x - m.player.pos.x, wp.z - m.player.pos.z).length()))
 		hud._text(mp + Vector2(14, 22), "%dm" % dist, 12, Color(INK, 0.8), hud.big)
-
 
 ## The legend, right of the map: every spawn category on this map and how much your squad knows.
 func _legend(c: Control, sz: Vector2, team: int) -> void:
@@ -847,32 +683,16 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 		var def: Dictionary = sp.cats[cat]
 		var col: Color = def.get("col", Color.WHITE)
 		var all: Array = sp.of(cat)
-		var live := 0
-		var found := 0
-		var gone := 0
+		var live := 0; var found := 0; var gone := 0
 		for cnd in all:
-			if cnd["active"]:
-				live += 1
+			if cnd["active"]: live += 1
 			var st := sp.state_for(cnd, team)
-			if st == "active":
-				found += 1
-			elif st == "taken":
-				gone += 1
+			if st == "active": found += 1
+			elif st == "taken": gone += 1
 		var announce: bool = def.get("announce", false)
-		marker(
-			c,
-			String(def.get("shape", "star")),
-			Vector2(r.position.x + 26, y),
-			8.0,
-			col,
-			"active" if announce or found > 0 else "unknown"
-		)
+		marker(c, String(def.get("shape", "star")), Vector2(r.position.x + 26, y), 8.0, col, "active" if announce or found > 0 else "unknown")
 		hud._text(Vector2(r.position.x + 48, y - 2), String(def.get("name", cat)), 15, col, hud.big)
-		var line := (
-			("%d here this match%s" % [live, ("  ·  %d taken" % gone) if gone > 0 else ""])
-			if announce
-			else ("%d possible spots  ·  %d found" % [all.size(), found + gone])
-		)
+		var line := ("%d here this match%s" % [live, ("  ·  %d taken" % gone) if gone > 0 else ""]) if announce else ("%d possible spots  ·  %d found" % [all.size(), found + gone])
 		hud._text(Vector2(r.position.x + 48, y + 15), line, 11, INK)
 		if notes[ci] != "":
 			hud._text(Vector2(r.position.x + 48, y + 29), String(notes[ci]), 11, MUTED)
@@ -905,13 +725,7 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 			row_y += 22
 		if not m.beacons.is_empty():
 			ReviveHud.beacon_glyph(c, Vector2(r2.position.x + 26, row_y), 5.0, {}, 0.0)
-			hud._text(
-				Vector2(r2.position.x + 48, row_y + 5),
-				"Revive beacon (your squad back)" if Life.has_mates(m, m.player) else "Revive beacon",
-				12,
-				INK
-			)
-
+			hud._text(Vector2(r2.position.x + 48, row_y + 5), "Revive beacon (your squad back)", 12, INK)
 
 ## Left of the map: your squad, who leads the drop, and the keys for it.
 func _side(c: Control, sz: Vector2) -> void:
@@ -923,7 +737,7 @@ func _side(c: Control, sz: Vector2) -> void:
 		return
 	var x0 := rect.position.x - 22.0 - wv
 	if not Life.has_mates(m, p):
-		return  # solos: no squad panel, no ping or lead keys (the drop prompt has your jump key)
+		return          # solos: no squad panel, no ping or lead keys (the drop prompt has your jump key)
 	var squad: Array = m.hunters.filter(func(x): return x.team == p.team)
 	var in_drop: bool = p.riding or p.dropping
 	var r := Rect2(Vector2(x0, rect.position.y), Vector2(wv, 48 + squad.size() * 44 + (118 if in_drop else 40)))
@@ -935,7 +749,6 @@ func _side(c: Control, sz: Vector2) -> void:
 	var y := r.position.y + 50.0
 	var i_lead: bool = m.skydrop != null and m.skydrop.is_lead(p)
 	for h in squad:
-		side_rows += 1
 		var row := Rect2(Vector2(r.position.x + 8, y), Vector2(wv - 16, 38))
 		var col := m.mate_col(h)
 		var lead: bool = m.skydrop != null and m.skydrop.is_lead(h)
@@ -944,30 +757,17 @@ func _side(c: Control, sz: Vector2) -> void:
 		hud._rounded(row, Color(1, 1, 1, 0.1 if hov else 0.04), 8, Color(col, 0.5 if hov else 0.0), 1 if hov else 0)
 		c.draw_circle(row.position + Vector2(18, 19), 9.0, col)
 		hud._ctext(row.position + Vector2(18, 24), h.pname.substr(0, 1).to_upper(), 13, Color(0.06, 0.06, 0.1), hud.big)
-		hud._text(
-			row.position + Vector2(34, 17),
-			h.pname.substr(0, 14) + ("  (you)" if h == p else ""),
-			14,
-			INK if not h.out else MUTED,
-			hud.big
-		)
+		hud._text(row.position + Vector2(34, 17), h.pname.substr(0, 14) + ("  (you)" if h == p else ""), 14, INK if not h.out else MUTED, hud.big)
 		var sub := ""
-		if h.out:
-			sub = "Out"
-		elif h.extracted:
-			sub = "Extracted"
-		elif lead and in_drop:
-			sub = "Leads the drop"
-		elif h.rocket != null:
-			sub = "Riding the rocket"
-		elif h.riding:
-			sub = "Aboard the ship"
-		elif h.dropping:
-			sub = "Falling" if h.diving else "Gliding"
+		if h.out: sub = "Out"
+		elif h.extracted: sub = "Extracted"
+		elif lead and in_drop: sub = "Leads the drop"
+		elif h.rocket != null: sub = "Riding the rocket"
+		elif h.riding: sub = "Aboard the ship"
+		elif h.dropping: sub = "Falling" if h.diving else "Gliding"
 		var pg: Dictionary = {}
 		for q in m.pings:
-			if q.get("by") == h:
-				pg = q
+			if q.get("by") == h: pg = q
 		if not pg.is_empty() and not h.out:
 			sub += ("  ·  " if sub != "" else "") + "pinged %s" % _grid_ref(pg["pos"])
 		hud._text(row.position + Vector2(34, 32), sub, 11, GOLD if lead and in_drop else MUTED)
@@ -990,10 +790,7 @@ func _side(c: Control, sz: Vector2) -> void:
 			keys.append(["pass_lead", "Let a squadmate lead"])
 		for kk in keys:
 			var cap := Settings.key_cap(String(kk[0]))
-			var kr := Rect2(
-				Vector2(r.position.x + 14, y),
-				Vector2(maxf(28.0, hud.big.get_string_size(cap, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x + 14.0), 24)
-			)
+			var kr := Rect2(Vector2(r.position.x + 14, y), Vector2(maxf(28.0, hud.big.get_string_size(cap, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x + 14.0), 24))
 			hud._rounded(kr, Color(1, 1, 1, 0.12), 5, Color(1, 1, 1, 0.3), 1)
 			hud._ctext(kr.get_center() + Vector2(0, 5), cap, 13, INK, hud.big)
 			hud._text(Vector2(kr.end.x + 8, y + 17), String(kk[1]), 12, INK)
@@ -1002,7 +799,6 @@ func _side(c: Control, sz: Vector2) -> void:
 			hud._text(Vector2(r.position.x + 14, y + 10), "or click a squadmate to make them leader", 11, MUTED)
 	else:
 		hud._text(Vector2(r.position.x + 14, y + 14), "Pings last %ds" % int(Match.SQUAD_PING_T), 11, MUTED)
-
 
 func _grid_ref(p: Vector3) -> String:
 	var cell := m.world.w / 8.0
