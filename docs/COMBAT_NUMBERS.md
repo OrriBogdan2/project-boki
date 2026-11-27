@@ -37,4 +37,7 @@ A shot's explosion (`Match._boom`, `Blast`, `content/rules/blast.json`) lands by
 ## Healing
 - **Healing cut:** a heal a Hunter gives another Hunter lands at x0.65 (`heal_given_k`, content/rules/combat.json). Healing yourself, a pickup, a Boki's heal or a field with no caster is whole. Anti-Heal (x0.3 left) multiplies on top: 0.195 of a 40-hp heal given to a blighted friend is 7.8 hp.
 - **Health recovery:** every Hunter wins back 0.1% of max health each 0.1 s (about 1%/s: 1.9 hp/s at 190 hp), paused 4 s after it takes a hit (`regen` in the same file). Silent: no number or glow, the bar just fills. Anti-Heal cuts it. Asserted by `--heal-parity-check`.
-- **Not built (no number in the notes):** a heal block in the closing zone, and a "no healing at all" Anti-Heal variant.
+- **The tide blocks healing:** a Hunter outside the tide ring (`Heart.tide_r`) gets no heal and no recovery (`HealRules.in_storm`).
+- **Anti-Heal switch:** `anti_heal_on` true = a blighted target gets 30% of a heal; false = none at all.
+- **Remote copies never recover locally:** their health comes from their own game's snapshot (a local tick would dip back and flash the bar as a hit).
+- **Not built:** recovery switched off per mode (the notes name one reference mode with no counterpart here).

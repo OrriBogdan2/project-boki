@@ -1,6 +1,7 @@
 extends RefCounted
 ## --heal-parity-check: the healing cut (heals given to another Hunter x0.65, self-heal whole), Anti-Heal on top
-## (0.65 x 0.3), and Hunter health recovery (0.1% of max every 0.1 s, paused 4 s after a hit). Headless.
+## (0.65 x 0.3; nothing with the Anti-Heal switch off), Hunter health recovery (0.1% of max every 0.1 s, paused 4 s
+## after a hit; never on a remote copy), and no healing outside the tide ring. Headless.
 
 const HEAL := 40.0  # hp of the test heal
 
@@ -25,7 +26,7 @@ func run(main: Node) -> void:
 	Save.d = Save.fresh()
 	var m := Match.new()
 	main.add_child(m)
-	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "heart": true})
 	m.set_process(false)
 	var others: Array = m.hunters.filter(func(x: Hunter) -> bool: return x != m.player)
 	var a: Hunter = m.player
@@ -46,7 +47,24 @@ func run(main: Node) -> void:
 	b.heal(HEAL, a)
 	var both := 10.0 + HEAL * given_k * (1.0 - b.blight_k)
 	ok(is_equal_approx(b.hp, both), "Anti-Heal on top: %.1f of %.0f (0.195 x)" % [b.hp - 10.0, HEAL])
+	var rules := HealRules.rules()
+	rules["anti_heal_on"] = false
+	b.hp = 10.0
+	b.heal(HEAL, a)
+	ok(is_equal_approx(b.hp, 10.0), "Anti-Heal switch off: a blighted target gets no healing (%.1f)" % (b.hp - 10.0))
+	rules["anti_heal_on"] = true
 	b.blight_t = 0.0
+	# the storm: no healing outside the tide ring
+	ok(m.heart != null and m.heart.site != Vector3.INF, "the test match has a Heart and its tide")
+	var home := b.pos
+	b.pos = m.heart.site + Vector3(Heart.tide_r(m) + 20.0, 0.0, 0.0)
+	b.hp = 10.0
+	b.heal(HEAL)
+	ok(HealRules.in_storm(b) and is_equal_approx(b.hp, 10.0), "out in the tide: no heal (%.1f)" % (b.hp - 10.0))
+	b.hurt_at = -99.0
+	_run(m, b, 1.0)
+	ok(is_equal_approx(b.hp, 10.0), "out in the tide: no recovery either")
+	b.pos = home
 	# health recovery
 	b.hurt_at = m.time
 	b.regen_acc = 0.0
@@ -68,6 +86,11 @@ func run(main: Node) -> void:
 	_run(m, b, 1.0)
 	ok(is_equal_approx(b.hp, 100.0), "a downed Hunter does not recover")
 	b.downed = false
+	b.remote = true
+	b.hp = 100.0
+	_run(m, b, 1.0)
+	ok(is_equal_approx(b.hp, 100.0), "a remote copy does not recover (its own game does; no snapshot dip)")
+	b.remote = false
 	var fx_before: int = m.fx.get_child_count()
 	_run(m, b, 1.0)
 	ok(m.fx.get_child_count() == fx_before, "recovery ticks spawn no number or glow")

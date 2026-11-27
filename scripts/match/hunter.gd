@@ -1339,8 +1339,7 @@ func heal(n: float, from: Node = null) -> void:
 		m.net_event(["heal", nid, n])
 		m.fx.healed(self, minf(n, max_hp - hp))     # its own game heals it; the heal shows here now
 		return
-	if blight_t > 0.0:
-		n *= 1.0 - blight_k   # blighted: healing barely takes
+	n *= HealRules.target_k(self)   # blighted: healing barely takes; in the tide: none
 	var before := hp
 	hp = minf(max_hp, hp + n)
 	m.fx.healed(self, hp - before)
