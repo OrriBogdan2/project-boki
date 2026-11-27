@@ -46,7 +46,6 @@ var card_layer: CanvasLayer = null
 var menu_layer: CanvasLayer = null
 var keys_node: Node = null
 var grounds: Grounds = null     # the stations on the sky perches and the duel ring (arena layout only)
-var _cb: Callable
 
 func setup(match_node: Match, which: String) -> void:
 	m = match_node
