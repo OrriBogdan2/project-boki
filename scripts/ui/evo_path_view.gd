@@ -9,7 +9,8 @@ const BAR_H := 14.0                          # px: the tug bar's height
 const UNKNOWN := Color(0.05, 0.05, 0.07)     # an unmet form's shape
 const MET := Color(0.36, 0.38, 0.46)         # a met form's shape (no art yet to draw it)
 const SIDES := [Color("ff9a6a"), Color("7ac8ff")]   # left and right end of the bar
-const SOURCE_NAMES := {"stat": "stat lead", "lean": "lean", "tokens": "tokens", "care": "care", "ribbons": "ribbons"}
+const SOURCE_NAMES := {"stat": "stat lead", "lean": "lean", "tokens": "tokens", "care": "care", "ribbons": "ribbons",
+		"play": "how it plays"}
 
 ## Adds the meter (or the Ink preview) to v. refresh() redraws the card after Evolve.
 static func block(rec: Dictionary, v: VBoxContainer, refresh: Callable) -> void:

@@ -1,11 +1,12 @@
 class_name EvoPath
 ## The path meter of a branching final (briefs/design/GARDEN_MODERN.md section 3, docs/decisions/0022).
-## Each final of a line is one end; pips come from five sources (stat lead, element lean, worn path tokens,
-## care, Cup Ribbons), all tuned in content/rules/evo_paths.json. The end with more pips is the form; a tie
-## goes to the stat lead, and with that tied too the Boki waits. Ink lines have no pips, only a preview.
+## Each final of a line is one end; pips come from six sources (stat lead, element lean, worn path tokens,
+## care, Cup Ribbons, tuned in content/rules/evo_paths.json, and its leaning, PlayStyle.path_pips). The end
+## with more pips is the form; a tie goes to the stat lead, and with that tied too the Boki waits. Ink lines
+## have no pips, only a preview.
 ## The swap itself is Evo's (docs/decisions/0024): the meter only picks the end, at the level evolve.json gives.
 
-const SOURCES := ["stat", "lean", "tokens", "care", "ribbons"]
+const SOURCES := ["stat", "lean", "tokens", "care", "ribbons", "play"]
 
 static func rules() -> Dictionary:
 	return Content.rules("evo_paths")
@@ -25,7 +26,8 @@ static func pips(rec: Dictionary) -> Array:
 	for i in ends.size():
 		var e: Dictionary = ends[i]
 		var counts := {"stat": int(rules()["pips"]["stat_lead"]) if lead == i else 0, "lean": _lean(rec, e),
-				"tokens": _tokens(rec, e), "care": _care(rec, e), "ribbons": _ribbons(rec, e)}
+				"tokens": _tokens(rec, e), "care": _care(rec, e), "ribbons": _ribbons(rec, e),
+				"play": PlayStyle.path_pips(rec, String(e["path"]))}
 		var list := []
 		for s in SOURCES:
 			if int(counts[s]) > 0:
