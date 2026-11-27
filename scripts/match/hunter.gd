@@ -123,6 +123,7 @@ var seeds := {}
 var caught: Array = []        # kin records caught this match
 var kills := 0
 var knocks := 0
+var assists := 0             # takedowns a teammate got that your hit or CC helped (DashReset)
 var dmg_done := 0.0
 var belt: Array = UtilityBelt.empty()    # the utility belt on 1-4: four slots of {id, n, cd} (UtilityBelt)
 var belt_free: Dictionary = {}                # issued charges, used first and never taken home
@@ -1524,7 +1525,7 @@ func sim(dt: float) -> void:
 	atk.tick_burst(dt)
 	atk.tick_weapon(dt)
 	swing_t = maxf(0.0, swing_t - dt)
-	if inp["ult"]:
+	if inp["ult"] and MergeForm.enabled():  # (no fusion in the game: the Fusion input is dead, no deny pulse)
 		use_ultimate()
 	atk.trigger(dt)
 	inp["kin_ab"] = false

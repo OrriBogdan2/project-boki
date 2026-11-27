@@ -25,6 +25,7 @@ func run(main_node: Node) -> void:
 	_bag()
 	_fencer()
 	_tide()
+	_tide_wall()
 	_vials()
 	_hold_and_air()
 	_beach()
@@ -182,6 +183,30 @@ func _tide() -> void:
 	ok("Tide Lunge: full charge soaks (one splash mark)", K.marks_on(T) == 1, "%d" % K.marks_on(T))
 	ok("Tide Lunge: the release plays its pose and look",
 		int(HeroVfx.of(m).plays.get("tide_lunge", 0)) > 0 and int(HeroVfx.of(m).plays.get("tide_hit", 0)) > 0)
+
+## Tide Lunge into a wall (gil.md): only a full charge knocks the foe fast enough (over 8 m/s) for the shared wall
+## slam (Hunter's body slam, docs/KNOCK_WALLS.md: 0.9 s stun); a part charge pushes it into the rock and nothing more.
+func _tide_wall() -> void:
+	var rec := {}
+	for hold_s in [0.6, 1.2]:
+		_reset(3.0)
+		var w := HeroZones.rock(m, T, T.pos + Vector3(1.6, 0, 0), Vector2(1, 0), "gtw", 4.0, 30.0, 999.0, false)
+		P.inp["fire"] = true
+		step(m, hold_s, func(): P.inp["fire"] = true)
+		var k := K.tide_k()
+		P.inp["fire"] = false
+		var top := {"v": 0.0, "stun": 0.0}
+		step(m, 0.8, func():
+			top["v"] = maxf(top["v"], Vector2(T.vel.x, T.vel.z).length())
+			top["stun"] = maxf(top["stun"], T.stun_t))
+		m.verbs.walls.erase(w)
+		rec[k >= 1.0] = [k, top["v"], top["stun"]]
+	var part: Array = rec.get(false, [0.0, 0.0, 9.0])
+	var full: Array = rec.get(true, [0.0, 0.0, 0.0])
+	ok("Tide Lunge into a rock: a part charge pushes the foe, no wall stun", part[2] < 0.3,
+		"k %.2f, %.1f m/s, stun %.2f s" % part)
+	ok("Tide Lunge into a rock: a full charge slams the foe into it (the shared 0.9 s wall stun)",
+		full[1] > 8.0 and full[2] >= 0.85, "k %.2f, %.1f m/s, stun %.2f s" % full)
 
 func _vials() -> void:
 	var want := {"thunder": "stun", "slime": "slow", "fire": "burn", "zeep": "lift"}
