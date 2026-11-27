@@ -1,4 +1,4 @@
-# 0178: The skyship ride is a map screen
+# 0181: The skyship ride is a map screen
 
 - **Status:** accepted
 - **Date:** 2026-11-26
@@ -17,3 +17,5 @@ Option 2. `RideView.tick` (from `Hud._process`) keeps the drop map open while yo
 ## Consequences
 - No sim, Net, save or map change: the match, the ship, bots and spawns run as before; only drawing changes.
 - `--drop-feel-check` part 6 asserts it; `--loadin-fps-check` prints a per-phase table and the build steps.
+- Amended 2026-11-27 (ext/drop-ride-stream-1126): with 3D off the ride still spent ~10 ms a frame on hunter visuals (headless, 30 players). `RideView.render_hunters` draws each hunter every 4th frame while 3D is off (staggered, catching up the skipped time through `Ent.lod_dt` like far monsters), and monsters near the camera lose their every-frame pass then. When 3D comes back every hunter is drawn that frame. Sim, Net and save untouched; `--drop-feel-check` asserts both.
+- Not done: building the world (terrain, grass, walls) in behind the map. The grass pass draws from the same random stream as later passes, so deferring it would move the art; it needs its own seeded stream first.

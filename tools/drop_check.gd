@@ -101,7 +101,8 @@ func _ride_view() -> void:
 	RideView.render_hunters(m, 0.016, 1.0)
 	var skipped := m.hunters.filter(func(e): return e.lod_dt > 0.0).size()
 	var drawn := m.hunters.size() - skipped
-	ok(drawn > 0 and skipped > drawn, "ride view: 3D off, a few hunters drawn a frame (%d of %d)" % [drawn, m.hunters.size()])
+	var few := "ride view: 3D off, a few hunters drawn a frame (%d of %d)" % [drawn, m.hunters.size()]
+	ok(drawn > 0 and skipped > drawn, few)
 	vp.disable_3d = false
 	RideView.render_hunters(m, 0.016, 1.0)
 	ok(m.hunters.all(func(e): return e.lod_dt == 0.0), "ride view: 3D back on, every hunter drawn and caught up")

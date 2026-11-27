@@ -1,6 +1,6 @@
 class_name RideView
 extends RefCounted
-## The skyship ride as a map screen (docs/decisions/0178-ride-map-view.md). From the plan until your rocket
+## The skyship ride as a map screen (docs/decisions/0181-ride-map-view.md). From the plan until your rocket
 ## launches, the drop map is the whole view: the 3D world behind it is not drawn (from the ship's height it was
 ## ~16k objects and ~1.3k draws for a picture the dark map covers), the match and the ship run as always. The
 ## launch closes the map and the 3D view comes back on the rocket (DropRocket, Cam.skydive). Closing the map
