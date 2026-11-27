@@ -429,8 +429,6 @@ archetypes/dolm.json:rmb.slam.core_k	1.2
 archetypes/dolm.json:rmb.slam.dive_speed	26.0
 archetypes/dolm.json:rmb.slam.dmg[0]	14.0
 archetypes/dolm.json:rmb.slam.dmg[1]	30.0
-archetypes/dolm.json:rmb.slam.dunk_k	0.4
-archetypes/dolm.json:rmb.slam.dunk_void	20.0
 archetypes/dolm.json:rmb.slam.glide_dive_speed	32.5
 archetypes/dolm.json:rmb.slam.hop	2.5
 archetypes/dolm.json:rmb.slam.leap	3.2
@@ -440,6 +438,8 @@ archetypes/dolm.json:rmb.slam.lunges	1
 archetypes/dolm.json:rmb.slam.radius[0]	3.82
 archetypes/dolm.json:rmb.slam.radius[1]	4.5
 archetypes/dolm.json:rmb.slam.reach	1.6
+archetypes/dolm.json:rmb.slam.spike.bonus	0.4
+archetypes/dolm.json:rmb.slam.spike.vy	22.0
 archetypes/dolm.json:rmb.slam.stun[0]	0.5
 archetypes/dolm.json:rmb.slam.stun[1]	1.2
 archetypes/dolm.json:rmb.slam.time	0.25
@@ -514,6 +514,7 @@ archetypes/dredge.json:e.hop_t	0.2
 archetypes/dredge.json:e.quake_r	3.2
 archetypes/dredge.json:e.radius	3.0
 archetypes/dredge.json:e.rank3_stun	0.2
+archetypes/dredge.json:e.spike.vy	16.0
 archetypes/dredge.json:e.stun	1.1
 archetypes/dredge.json:e.windup	0.38
 archetypes/dredge.json:gun.armor_k	0.66
@@ -585,13 +586,15 @@ archetypes/gil.json:dash.dmg	4.0
 archetypes/gil.json:dash.knockup	0.5
 archetypes/gil.json:dash.lift	8.0
 archetypes/gil.json:dash.radius	2.2
+archetypes/gil.json:dash.steer	4.4
 archetypes/gil.json:dash.time	0.55
 archetypes/gil.json:e.cooldown	12.0
 archetypes/gil.json:e.dmg	10.0
 archetypes/gil.json:e.every	0.25
 archetypes/gil.json:e.knockup	1.0
 archetypes/gil.json:e.lift	9.0
-archetypes/gil.json:e.move_k	0.7
+archetypes/gil.json:e.move_k[0]	0.55
+archetypes/gil.json:e.move_k[1]	1.0
 archetypes/gil.json:e.range[0]	7.0
 archetypes/gil.json:e.range[1]	11.0
 archetypes/gil.json:e.speed[0]	14.0
