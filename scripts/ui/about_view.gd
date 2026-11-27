@@ -5,7 +5,7 @@ extends RefCounted
 ## when, original trainer, serial, parents, edition). Used on the kin card's About tab, the Nesting
 ## Nook and the Kin Burrow. See docs/BOKI_IDENTITY.md.
 
-## Field notes, not collection stats (docs/POSITIONING.md on the design branch): plain sentences
+## Field notes, not collection stats: plain sentences
 ## in the card's own ink, no rarity colours or badges. What's rare about a Boki shows on the Boki.
 
 static func size_line(rec: Dictionary) -> String:
