@@ -15,7 +15,8 @@ extends RefCounted
 
 const DOWN_COL := Color("ff7a6a")
 const LABEL_PX := 14  # font px (1080p) of the order and carry labels over the G slot: the smallest that reads
-const LABEL_GAP := 4.0  # px: the lowest label's baseline above the G slot, and half the step to the label over it
+const LABEL_GAP := 4.0  # px: the label's baseline above the G slot
+const LABEL_LIGHT := 0.6  # how far the Boki's colour is lightened toward white for that label: dark tints do not read
 
 ## Stolen wisp rows (stolen_wisps) above the Boki box
 const STOLEN_W := 168.0  # px: a row's width, right edge on the box's right edge
@@ -309,16 +310,7 @@ static func cg_slots(h_v, p: Hunter, x: float, y: float, s: float) -> float:
 	if hf > 0.0 and hf < 1.0 or bool(p.inp.get("g_fired", false)) and Input.is_action_pressed("throw"):
 		h_v.c.draw_arc(gr.get_center(), 22.0, -PI / 2, -PI / 2 + TAU * hf, 28, Color("cfe8ff"), 3.0, true)
 	var mode := String(KinFollow.NAMES.get(k.cmd, "Follow")).to_upper()
-	if k.ks and (not k.ks.carry_passives.is_empty() or not k.ks.carry_on_shot.is_empty()):
-		# its carried bonuses: on while it is on you, greyed while it is out beside you
-		var on := p.kin_carry_on()
-		h_v._ctext(
-			Vector2(gr.get_center().x, gr.position.y - LABEL_PX - LABEL_GAP * 2.0),
-			"CARRY ON" if on else "CARRY OFF",
-			LABEL_PX,
-			Color(k.sp["color"], 0.95) if on else Color(h_v.INK, 0.4),
-			h_v.big
-		)
+	var mode_free := not (down or in_form or k.resting())  # (those say their own word)
 	if down:
 		h_v._rounded(gr, Color(0.3, 0.02, 0.02, 0.5), 12)
 		h_v._ctext(gr.get_center() + Vector2(0, 4), str(int(ceil(k.down_t))), 14, DOWN_COL, h_v.big)
@@ -330,13 +322,15 @@ static func cg_slots(h_v, p: Hunter, x: float, y: float, s: float) -> float:
 		h_v._rounded(gr, Color(0.04, 0.04, 0.06, 0.72), 8)
 		h_v._ctext(gr.get_center() + Vector2(0, 4), str(int(ceil(k.rest_t))), 14, Color(h_v.INK, 0.8), h_v.big)
 		mode = "RESTING"
-	h_v._ctext(
-		Vector2(gr.get_center().x, gr.position.y - LABEL_GAP),
-		mode,
-		LABEL_PX,
-		DOWN_COL if down else (Color(h_v.INK, 0.5) if in_form else Color(k.sp["color"], 0.95)),
-		h_v.big
-	)
+	var centre := gr.get_center().x
+	if mode_free and k.ks and (not k.ks.carry_passives.is_empty() or not k.ks.carry_on_shot.is_empty()):
+		# its carried bonuses (on while it is on you, off while it is out beside you) share the order's line,
+		# centred over the C and G slots: one line clear of the vitals block's bars
+		mode = ("CARRY ON" if p.kin_carry_on() else "CARRY OFF") + " - " + mode
+		centre = (cr.get_center().x + centre) * 0.5
+	var tint := Color(k.sp["color"]).lerp(Color.WHITE, LABEL_LIGHT)
+	var col := DOWN_COL if down else (Color(h_v.INK, 0.6) if in_form else tint)
+	h_v._ctext(Vector2(centre, gr.position.y - LABEL_GAP), mode, LABEL_PX, col, h_v.big)
 	if KinWheel.is_open(p):
 		wheel(h_v, p)
 	return x + 42.0
