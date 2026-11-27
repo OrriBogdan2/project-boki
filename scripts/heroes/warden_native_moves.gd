@@ -1,8 +1,9 @@
 class_name WardenNativeMoves
 extends RefCounted
 ## The kit moves a native Hunter has its own clip for (data "kmoves" in warden_native.json, docs/art/wardens/
-## MESHY_NATIVE.md): {kmove: {"clip": name, "hold_from": s, "rate": x, "fade": s}}. While the kit's move is on the body
-## the clip is laid at the move's own clock (state "kmove_t"), so a release move starts at the frame the arrow leaves.
+## MESHY_NATIVE.md): {kmove: {"clip": name, "from": s, "hold_from": s, "rate": x, "fade": s}}. While the kit's move
+## is on the body the clip is laid at the move's own clock (state "kmove_t"), so a release move starts at the frame
+## the arrow leaves.
 ## A clip with "hold_from" loops from there to its end for as long as the move lasts and not a frame longer: the kit
 ## ends the draw move the moment the hold input goes, and the body falls back to the walk clips. A move with "body":
 ## true also carries its keyed whole-body channels (HunterAnim.KMOVES "lift" and the spin "fy") on the model's root over
@@ -69,9 +70,10 @@ func pose(s: Dictionary, glb: Node3D) -> void:
 	bodied = true
 
 
-## The clip time at move clock `t`: the hold loop wraps from "hold_from", a clip with none stops on its last frame.
+## The clip time at move clock `t`: the clip opens at "from" (a clip whose strike is late in it, Albert's throw);
+## the hold loop wraps from "hold_from", a clip with none stops on its last frame.
 static func at(m: Dictionary, t: float, length: float) -> float:
-	var pos := t * float(m.get("rate", 1.0))
+	var pos := float(m.get("from", 0.0)) + t * float(m.get("rate", 1.0))
 	var hold := float(m.get("hold_from", -1.0))
 	if hold >= 0.0 and pos > hold and length > hold:
 		return hold + fposmod(pos - hold, length - hold)

@@ -66,7 +66,6 @@ const FIXED := {
 const KNOWN := {
 	"archer": {"e": ["pin_rain"]},
 	"ashwick": {"lhold": ["ashwick_tank_hiss", "lw_roar"], "e": ["lw_shield"], "r": ["lw_jet", "lw_jet_land"]},
-	"bulwark": {"lmb": ["bjorn_throw"]},  # (Meshy-native Albert: his clip hand is under STRIKE_MIN; the kit releases it)
 	"dolm": {"lhold": ["br_punch", "dolm_rock_crunch"], "hold": ["dolm_rock_crunch"], "r": ["br_spine", "br_slam"]},
 	"dredge":
 	{"rmb": ["dredge_coin_jingle", "dr_let_go"], "hold": ["dredge_coin_jingle", "dr_let_go"], "r": ["dr_blast_end"]},
@@ -246,10 +245,13 @@ func measure(arch: String, mv: String) -> Dictionary:
 	for f in 20:
 		_frame(m, p)
 	var sk := _skel(p)
+	var nat := _native(p)
 	var hands: Array = []
 	for nm in ["hand.R", "hand.L"]:
 		if sk and sk.find_bone(nm) >= 0:
 			hands.append(sk.find_bone(nm))
+	if nat and nat.hand >= 0:
+		hands = [nat.hand]  # (a Meshy-native Hunter: the weapon hand's bone, in the world)
 	var prev := {}
 	var out := {"snd": [], "hit": [], "shot": [], "strike": -1.0, "clip": "", "rise": -1.0}
 	var rocks := _rocks(p)
@@ -285,16 +287,18 @@ func measure(arch: String, mv: String) -> Dictionary:
 					out["shot"].append(t)
 		if _rocks(p) > rocks and float(out["rise"]) < 0.0:
 			out["rise"] = t
-		var c := _clips(p)
+		var clip := _clip_name(p)
 		var v := 0.0
 		for bi: int in hands:
 			var o := sk.get_bone_global_pose(bi).origin
+			if nat:
+				o = sk.global_transform * o
 			v = maxf(v, o.distance_to(prev.get(bi, o)) / DT)
 			prev[bi] = o
-		if f >= 2 and c and c.cur != "" and v > fastest:
+		if f >= 2 and clip != "" and v > fastest:
 			fastest = v
 			out["strike"] = t
-			out["clip"] = c.cur
+			out["clip"] = clip
 	m.queue_free()
 	return out
 
@@ -306,6 +310,10 @@ func _frame(m: Match, p: Hunter) -> void:
 		var sync: Node = p.model.get_node("Warden/Sync")
 		sync.set_process(false)
 		sync.call("_process", DT)
+	var nat := _native(p)
+	if nat:  # (a Meshy-native Hunter: its clips advance in WardenNative._process, stepped here as Sync is)
+		nat.set_process(false)
+		nat.call("_process", DT)
 
 
 ## Rocks Tenzo has raised: Stone Row's and Basalt Spine's.
@@ -314,13 +322,31 @@ static func _rocks(h: Hunter) -> int:
 	return k.rocks_made + k.spine.rocks_raised if k else 0
 
 
-func _clips(h: Hunter) -> WardenClips:
+## The clip on the body now: the contract model's hand-keyed one, or a Meshy-native Hunter's playing clip.
+func _clip_name(h: Hunter) -> String:
+	var nat := _native(h)
+	if nat:
+		return nat.player.assigned_animation if nat.player.is_playing() else ""
 	if not (h.model and h.model.has_node("Warden/Sync")):
+		return ""
+	var c := h.model.get_node("Warden/Sync").get("clips") as WardenClips
+	return c.cur if c else ""
+
+
+## A Meshy-native Hunter's model, for a kit that asserts its sound on the clip's strike (FIXED): the contract's
+## Sync is not there, so its weapon hand's bone and playing clip are what is read. (The other natives play Meshy's
+## one Attack clip on every cast, whose swing the kits' sounds were never timed to: Ashwick's hiss, Tender's hearth.)
+func _native(h: Hunter) -> WardenNative:
+	var fixed: Dictionary = FIXED.get(h.arch, {})
+	if not fixed.values().any(func(v: Array) -> bool: return v[1] == "strike"):
 		return null
-	return h.model.get_node("Warden/Sync").get("clips") as WardenClips
+	return h.model.get_node_or_null(^"Warden/Native") as WardenNative if h.model else null
 
 
 func _skel(h: Hunter) -> Skeleton3D:
+	var nat := _native(h)
+	if nat:
+		return nat.skel
 	if not (h.model and h.model.has_node("Warden")):
 		return null
 	var all := h.model.get_node("Warden").find_children("*", "Skeleton3D", true, false)
