@@ -6,6 +6,8 @@ extends RefCounted
 ## the skinned bounds of every visible mesh ("all": weapon and props included) and of the body meshes alone ("body":
 ## meshes whose names say weapon, prop or similar are left out), plus the head-top anchor when the model has one.
 ## --list-meshes prints every mesh with its own skinned top. Needs a renderer.
+## --export-glb=<dir> writes each Hunter as a posed .glb plus ours.json instead of the shots
+## (tools/lineup_glb_export.gd).
 
 const ORDER := [
 	"archer",
@@ -113,6 +115,15 @@ func run(main: Node) -> void:
 				% [ORDER[i], all.y, body.y, head, all.x, h.scale.y, int(all.z)]
 			)
 		)
+	var glb_dir := ""
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--export-glb="):
+			glb_dir = a.substr(13)
+	if glb_dir != "":
+		preload("res://tools/lineup_glb_export.gd").export_all(heroes, ORDER, glb_dir, PROP_WORDS)
+		print("LINEUP_GLB_DONE")
+		tree.quit()
+		return
 	# 1. front: straight on, the whole row
 	var span := (ORDER.size() - 1) * GAP + 3.0
 	cam.fov = 30.0
