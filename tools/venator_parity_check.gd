@@ -437,8 +437,8 @@ func _needle(m: Match, p: Hunter, k: GunslingerKit, t: Hunter, home: Vector3) ->
 		cam.follow(p.pos, c.DT, false)
 		m.step(c.DT)
 	var wide_ok := float(k.e_def()["width"]) >= OLD_NEEDLE_W * 1.5
-	c.ok("Vex cast-move: rooted through the Longneedle cast (footage: still through its 0.6 s cast bar)",
-			float(rec["mk"]) == 0.0 and is_equal_approx(float(k.e_def()["self_slow"]), 1.0),
+	c.ok("Vex cast-move: past the launch she walks the Longneedle cast slowed, never rooted",
+			is_equal_approx(float(rec["mk"]), 1.0 - float(k.e_def()["self_slow"])) and float(rec["mk"]) > 0.0,
 			"move_k %.2f" % float(rec["mk"]))
 	c.ok("Vex item 68: the beam hits a line at least 1.5x as wide, and drawn that wide",
 			wide_ok and k.needle_hits > hits0 and absf(k.beam_width() - float(k.e_def()["width"]) * 2.0) < 0.001,
@@ -456,7 +456,6 @@ func _needle(m: Match, p: Hunter, k: GunslingerKit, t: Hunter, home: Vector3) ->
 	p.ctrl = "idle"
 	cam.cast_left = 0.0
 	k.cd["e"] = 0.0
-	k.commit_end = 0.0
 	k.use_e()
 	c.ac.step(m, 0.1)
 	var quiet := cam.cast_left <= 0.0 and not k.needle.is_empty()

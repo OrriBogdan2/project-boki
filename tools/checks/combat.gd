@@ -18,6 +18,8 @@ const CHECKS := {
 	"--barrier-sight-check": ["res://tools/barrier_sight_check.gd", "barrier_sight_check", null],
 	# Sparkle's Kitefall spreads the landed-on foe's Static + 1 to the rest
 	"--sparkle-r-spread-check": ["res://tools/sparkle_r_spread_check.gd", "sparkle_r_spread_check", null],
+	# owner 11-26: per hero and slot, how long a cast holds the walk and whether it shoves them back (Vex E asserted)
+	"--self-lock-check": ["res://tools/self_lock_check.gd", "self_lock_check", null],
 	# Vex's Slipstep: one plain dash, no pips, no Second Wind
 	"--vex-dash-check": ["res://tools/vex_dash_check.gd", "vex_dash_check", null],
 	"--camps-check": ["res://tools/camps_check.gd", "camps_check", null],  # fixed camps and their XP

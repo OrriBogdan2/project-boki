@@ -4,7 +4,7 @@ extends RefCounted
 ## DashFlow's default (a missing row combines): the second press goes now and the first runs on. Run inside
 ## --gunslinger-combo-check through tools/venator_parity_check.gd.
 const MAG := 30  # rounds in the drum
-const RECOIL_S := 0.4  # s the beam's recoil shove keeps the glider shut (Hunter: a shove waits 0.4 s)
+const OPEN_S := 0.15  # s: a held glider opens this soon after the beam (no shove keeps it shut, owner 11-26)
 const LIFT := 4.0  # m she is lifted before opening a glider, so it stays open through a row
 var C  # the combo check (ok, ac, helpers)
 var m: Match
@@ -130,8 +130,8 @@ func _needle_rows() -> void:
 	var open_at := float(n["open"])
 	P.inp["glide"] = false
 	C.ok(
-		"Vex cancel E wind-up + glide: waits, as owner 162b asks: shut in the charge, held it opens after the recoil",
-		beam and bool(n["glide"]) and open_at >= 0.0 and open_at <= RECOIL_S + 0.1,
+		"Vex cancel E wind-up + glide: waits, as owner 162b asks: shut in the charge, held it opens at the beam",
+		beam and bool(n["glide"]) and open_at >= 0.0 and open_at <= OPEN_S,
 		"shut %s, open %.2f s after the beam" % [n["glide"], open_at]
 	)
 
