@@ -71,6 +71,14 @@ check: `--base-life-check`.
   do not pull). A trait moves at most `week_cap` per drift week (`rec["drift"] = {day, moved}`, optional, no
   migration). Crossing a band in `bands` writes one journal line ("is getting braver", same shape as
   `CareJournal.note`).
+- Raising leans (`docs/decisions/0179-raising-leans.md`; `scripts/home/base_axes.gd`, `content/rules/base_axes.json`,
+  checks `--base-life-check` and `--garden-sim-check`): the first care of each kind in a farm day (`Care.care_day`)
+  steps three axes saved in `rec["raised"]` (bold: shy..bold, busy: lazy..busy, gentle: rough..gentle, each -1..1,
+  capped at `cap`; save v22 gives old Boki the zero lean). `BaseLife.choose` scales its odds by `BaseAxes.mult`: a
+  lazy Boki naps on its own now and then, a busy one plays toys more, a bold or rough one chases (tag) more and clings
+  to you less. Crossing +-`band` writes a journal line ("is getting bolder"). `--garden-sim-check` has a row per care
+  style after 10 days (briefs/design/GARDEN_MODERN_BALANCE.md). Not done: the idle habit poses (`KinHabit`) do not
+  read the lean yet.
 - Parents (GARDEN.md section 6): `Care.breed` saves who gave what in `rec["gifts"]` (`Parentage`; the parents' uids
   are already `rec["lineage"]["parents"]`; old babies have no gifts: read with `.get`, no migration). A young (not
   yet Grown) Boki adds `parent_weight` to its liking for a parent when it picks whom to greet and whom to nap beside
