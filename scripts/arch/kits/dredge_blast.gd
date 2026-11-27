@@ -8,43 +8,50 @@ extends RefCounted
 ## after the first wave stops the second. A slug that hits, knocks or kills an enemy hunter fills
 ## the Boki bond (HeroUlt.landed: the best event of the cast counts, not each slug).
 
-const MUZZLE := 0.9                 # m in front of his chest where the slugs leave his hands
-const RECOVER := 0.3                # s the slowed walk lasts after the last wave
-const WAVE_COL := [Color("ff9a14"), Color("ffd24a")]     # wave 1 saturated brass, wave 2 pale gold
-const WAVE_DARK := [Color("5a2e04"), Color("5a4a10")]    # each slug's dark core
+const MUZZLE := 0.9  # m in front of his chest where the slugs leave his hands
+const GUN_REACH := 4.0  # m ahead the gun arm points (past its length: it stays straight, never stretches)
+const GUN_UP := 1.25  # m above his feet that point is (a level arm at shoulder height)
+const RECOVER := 0.3  # s the slowed walk lasts after the last wave
+const WAVE_COL := [Color("ff9a14"), Color("ffd24a")]  # wave 1 saturated brass, wave 2 pale gold
+const WAVE_DARK := [Color("5a2e04"), Color("5a4a10")]  # each slug's dark core
 const WAVE_PITCH := [1.0, 0.82]
 ## Clarity (docs/COMBAT_CLARITY.md): the fan is the true area in his gold (dredge.json "color", AimKit's default) at
 ## AimKit's own low fill; nothing that only decorates may stand over the bodies inside it.
 ## s each slug's look hangs at the fan edge fading. Like the source's orbs (f35-f38) the looks always fly the
 ## whole fan, even when the slug itself stops on a foe up close, so the wave reads as a fan.
 const SLUG_HOLD := 0.35
-const WAVE_HOLD := 0.25             # s a wave's wedge stays lit after its front reaches the rim
+const WAVE_HOLD := 0.25  # s a wave's wedge stays lit after its front reaches the rim
 
 var k: DredgeKit
 var h: Hunter
 var m: Node
-var blast := {}                     # hold: the charge and its waves {t, dir, fired}
-var hold: CastHold                  # his slowed walk while it charges and fires
-var casts := 0                      # (tests)
+var blast := {}  # hold: the charge and its waves {t, dir, fired}
+var hold: CastHold  # his slowed walk while it charges and fires
+var casts := 0  # (tests)
 var waves := 0
 var slug_hits := 0
 var stopped := 0
-var last_wave_hits: Array = []      # slug hits per wave of the last cast
+var last_wave_hits: Array = []  # slug hits per wave of the last cast
+
 
 func _init(kit: DredgeKit) -> void:
 	k = kit
 	h = kit.h
 	m = kit.m
 
+
 func xd() -> Dictionary:
 	return k.x_def()
+
 
 func running() -> bool:
 	return not blast.is_empty()
 
+
 ## Is he still charging (no wave out yet)?
 func charging() -> bool:
 	return running() and int(blast["fired"]) == 0
+
 
 func start() -> bool:
 	if running():
@@ -57,9 +64,33 @@ func start() -> bool:
 	m.sfx("dr_blast_charge", h.pos, -2.0, 1.0)
 	return true
 
+
 ## His share of run speed while it runs: slow through the charge, slower while the waves go.
 func move_k() -> float:
 	return hold.slow_k if running() else 1.0
+
+
+## The point his gun arm holds out toward (WardenReach.GUN_TIP) while it charges and fires: far ahead on the fan's
+## middle line, so the straight arm and the gun in his fist point where the slugs go. INF: the arm is free.
+func gun_tip() -> Vector3:
+	if not running():
+		return Vector3.INF
+	return _gun_tip(blast["dir"])
+
+
+## The same on another game's copy, which runs no blast: while the synced move is "dr_blast" and the cast's
+## length (charge, waves, recovery) has not run out, along his synced facing.
+func net_gun_tip() -> Vector3:
+	var x := xd()
+	var cast := float(x["charge"]) + float(x["gap"]) * (int(x["waves"]) - 1) + RECOVER
+	if k.anim_id != "dr_blast" or m.time - k.anim_at > cast:
+		return Vector3.INF
+	return _gun_tip(Vector2(-sin(h.face), -cos(h.face)))  # (Hunter.face = atan2(-aim.x, -aim.y))
+
+
+func _gun_tip(d2: Vector2) -> Vector3:
+	return h.pos + Vector3(d2.x * GUN_REACH, GUN_UP, d2.y * GUN_REACH)
+
 
 ## A Boki merge: the charge or the waves left never fire.
 func drop() -> void:
@@ -69,6 +100,7 @@ func drop() -> void:
 	AimKit.hide(h, "x_fan")
 	k.play("")
 
+
 func tick(dt: float) -> void:
 	if not running():
 		return
@@ -77,7 +109,7 @@ func tick(dt: float) -> void:
 		return
 	var x := xd()
 	blast["t"] = float(blast["t"]) + dt
-	blast["dir"] = h.aim_dir()          # the fan and the waves follow the cursor
+	blast["dir"] = h.aim_dir()  # the fan and the waves follow the cursor
 	var t := float(blast["t"])
 	var charge := float(x["charge"])
 	if t < charge:
@@ -92,7 +124,8 @@ func tick(dt: float) -> void:
 		_wave(fired)
 	if int(blast["fired"]) >= n and t >= charge + float(x["gap"]) * (n - 1) + RECOVER:
 		blast = {}
-		m.sfx("dr_blast_end", h.pos, -4.0, 1.0)          # the spent brass rattling down: it is over
+		m.sfx("dr_blast_end", h.pos, -4.0, 1.0)  # the spent brass rattling down: it is over
+
 
 ## Interrupted: nothing more fires. Stopped before the first wave, it comes back soon (the counterplay).
 func _stop() -> void:
@@ -104,13 +137,25 @@ func _stop() -> void:
 	k.play("")
 	m.sfx("warn", h.pos, -4.0, 0.8)
 
+
 ## The charge: the fan grows out from his front over 1.1s, brass sparks crackle between his fists.
 func _charge_looks(kc: float) -> void:
 	var x := xd()
 	var grow := 1.0 - pow(1.0 - kc, 2.0)
 	var reach := maxf(0.6, float(x["range"]) * grow)
-	AimKit.cone(h, "x_fan", {"dir": blast["dir"], "len": reach, "deg": float(x["fan_deg"]),
-		"fill": kc, "all": true, "hot": 0.15 * kc, "soft": true})
+	AimKit.cone(
+		h,
+		"x_fan",
+		{
+			"dir": blast["dir"],
+			"len": reach,
+			"deg": float(x["fan_deg"]),
+			"fill": kc,
+			"all": true,
+			"hot": 0.15 * kc,
+			"soft": true
+		}
+	)
 	if not k.tells_visible() or randf() > 0.5:
 		return
 	var hand_l := _hand(-1.0)
@@ -118,10 +163,12 @@ func _charge_looks(kc: float) -> void:
 	m.fx.bolt(hand_l, hand_r + Vector3(0, randf_range(-0.2, 0.2), 0), Color(WAVE_COL[1], 0.9))
 	k.vfx("blast_charge", (hand_l + hand_r) * 0.5, null, {"k": kc})
 
+
 func _hand(side: float) -> Vector3:
 	var d2: Vector2 = blast["dir"]
 	var f := Vector3(d2.x, 0, d2.y)
 	return h.pos + Vector3(0, 1.1, 0) + f * 0.5 + f.cross(Vector3.UP) * 0.3 * side
+
 
 ## One wave: six slugs fanned evenly across the locked fan, out to its edge.
 func _wave(i: int) -> void:
@@ -146,10 +193,11 @@ func _wave(i: int) -> void:
 		var cb := func(_s: Dictionary, _at: Vector3, e: Ent, why: String) -> void: _slug_hit(i, e, why, dmg)
 		m.spawn_shot(h, at, d * speed, 0.0, life, float(x["size"]), WAVE_COL[i % 2], {"kx": cb})
 		var slug: Dictionary = m.shots[-1]
-		if shown and slug["node"]:       # the volley is this slug's look: the plain sphere goes back to Match's pool
+		if shown and slug["node"]:  # the volley is this slug's look: the plain sphere goes back to Match's pool
 			(slug["node"] as Node3D).visible = false
 			slug["node"] = null
 	_wave_fx(i, at, dir)
+
 
 func _slug_hit(wave: int, e: Ent, why: String, dmg: float) -> void:
 	if e == null or not is_instance_valid(e) or e.dead or e.team == h.team or not (why in ["hit", "pass"]):
@@ -162,6 +210,7 @@ func _slug_hit(wave: int, e: Ent, why: String, dmg: float) -> void:
 	m.fx.burst(e.pos + Vector3(0, 0.6, 0), Color("ffe08a"), 4, 2.0, 0.5, -4.0, 0.8, Vector3.UP, 20.0)
 	HeroUlt.landed(k, e)
 
+
 ## A wave goes: a small flash at his fists, the fan's lit front, a heavy thump. The wedge is the exact area (his gold
 ## rim over a faint inside); its front runs out to the rim in the slugs' flight time (_wave_front), so the wave
 ## reads as a sweep that lands with the hits. The bodies in it stay in view (the inside is under 0.25 alpha).
@@ -171,6 +220,7 @@ func _wave_fx(i: int, at: Vector3, dir: Vector2) -> void:
 	m.sfx("dr_blast", h.pos, 0.0, WAVE_PITCH[i % 2])
 	k.net_ring(at, float(xd()["range"]) * 0.5, WAVE_COL[i % 2])
 
+
 ## The latest wave's wedge `e` s after it fired: the front covers 0..1 of the reach as the slugs fly, then the
 ## rim flashes hot and holds WAVE_HOLD. Re-drawn each tick (AimDraw keeps an entry that long after a refresh).
 func _wave_front(e: float) -> void:
@@ -179,5 +229,17 @@ func _wave_front(e: float) -> void:
 	if e > life + WAVE_HOLD:
 		return
 	var f := clampf(e / life, 0.0, 1.0)
-	AimKit.cone(h, "x_fan", {"dir": blast["dir"], "len": float(x["range"]), "deg": float(x["fan_deg"]),
-		"fill": maxf(f, 0.01), "all": true, "soft": true, "hot": 1.0 - 0.5 * f, "dur": WAVE_HOLD})
+	AimKit.cone(
+		h,
+		"x_fan",
+		{
+			"dir": blast["dir"],
+			"len": float(x["range"]),
+			"deg": float(x["fan_deg"]),
+			"fill": maxf(f, 0.01),
+			"all": true,
+			"soft": true,
+			"hot": 1.0 - 0.5 * f,
+			"dur": WAVE_HOLD
+		}
+	)

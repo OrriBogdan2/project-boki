@@ -75,6 +75,7 @@ var heart_w := 0.0  # how far the Heartspark carry (WardenCarry.hold_mote) holds
 var torso_bi := -1  # Meshy's bone standing in for the rig's torso (WardenSkeleton.find "hips": Spine02)
 var torso_off := Transform3D()  # that bone's frame -> the rig torso's, at rest (shown_torso)
 var mouth: Node3D  # the copied weapon_muzzle (on a bone, a part or the sun): where the Gun's Muzzle sits each frame
+var reaches: Array = []  # arms the kit lays toward a point (WardenReach.make_all: Grimble's Deep Reach and gun arm)
 var gunprop: WardenGunProp  # Grimble's one gun (data "holster"): hip at rest, hand while he aims
 var springs := WardenSprings.new()  # loose parts (data "springs": Sable's coat tails) swinging on Meshy's bones
 var props: WardenProps  # the contract's parts Meshy's mesh lacks (data "props": Kael's sword, Cinder's heel jets)
@@ -201,6 +202,7 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	var to_m := _to_contract(glb)
 	props = WardenProps.carry(art_id, skel, to_m, d)
 	gunprop = WardenGunProp.make(model, skel, to_m, d.get("holster", {}))
+	reaches = WardenReach.make_all(skel, WardenClips.data(art_id), d.get("holster", {}))
 	_copy_anchors(glb)
 	var c_xf: Transform3D = contract(art_id).get("sk_m", Transform3D.IDENTITY)
 	companions = WardenCompanions.detach(glb, skel, WardenClips.data(art_id), to_m.affine_inverse() * c_xf)
@@ -247,6 +249,8 @@ func _process(dt: float) -> void:
 		_loco(s)
 	var hips := WardenSkeleton.find(skel, "root")
 	skel.set_bone_pose_scale(hips, skel.get_bone_rest(hips).basis.get_scale())  # (Meshy keys no scale: no old squash)
+	for r: WardenReach in reaches:
+		r.rest_scale()
 	player.advance(dt)
 	moves.pose(s, get_parent() as Node3D)
 	upper.lay(dt)
@@ -266,6 +270,8 @@ func _process(dt: float) -> void:
 		wall.step(dt)
 	if drop_pose:
 		drop_pose.step(dt)
+	for r: WardenReach in reaches:
+		r.apply(dt, root.get_meta(r.meta, Vector3.INF))
 	var land: Vector2 = root.get_meta(WardenClips.FEEL, Vector2.ZERO)  # (HunterAnim's land_k by weight class)
 	WardenClips.lay_feel(root, skel, hips, land.x * WardenClips.LAND_SQUASH, 0.0)
 	springs.step(dt)

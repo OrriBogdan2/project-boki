@@ -35,6 +35,7 @@ const DRIP_T := 0.07                   # s between sludge drips off the stretche
 const REEL_TURN := 20.0                # 1/s: how fast he turns onto the body he reels (the walk's own facing rate)
 const SWING := 6.0                     # 1/s: how fast a reeled body turns onto its new heading (lower swings wider)
 const GRIP_UP := 0.95                  # m above a body's feet where the hand holds it
+const SHOT_FAN_T := 0.2                # s a fired volley's fan stays lit on the ground (everyone sees where it flew)
 const CHASE := 1.5                     # x the hook's speed: another game's copy of the hand catches up to his last row
 
 var coins := DredgeCoins.new()  # the hoard's spill on a hit
@@ -240,9 +241,9 @@ func _drop_holds() -> void:
 		_end_pull(false)
 	broadside.drop()
 
-## The scattergun: each new volley rocks the body back, flashes the muzzle and dresses its slugs (gold
-## streaks that hang as brass dots where they stop). One aim line lies on the ground from his body out to the
-## slug range, drawn per frame toward the cursor; the whole volley flies in a tight group along it.
+## The scattergun: each new volley rocks the body back, flashes the muzzle, lights its fan on the ground for
+## SHOT_FAN_T and dresses its slugs (gold streaks that hang as brass dots where they stop). The two edges of the
+## fan (`fan_deg`, out to the slug range) lie on the ground toward the cursor while he aims, drawn per frame.
 func _tick_gun() -> void:
 	if not slug_sd.is_empty() and not HeroSfx.fly(m, h, "dr_slug_fly", slug_sd):
 		slug_sd = {}
@@ -255,7 +256,8 @@ func _tick_gun() -> void:
 	if not pull.is_empty() or h.downed:
 		return
 	var w: Dictionary = h.wpn
-	AimKit.vee(h, "spread", {"len": float(w["range"]), "k": 1.0, "col": Color("fff4d8"), "alpha": 0.8, "follow": true})
+	AimKit.cone(h, "spread", {"len": float(w["range"]), "deg": float(w["fan_deg"]), "edges": true, "follow": true,
+		"col": Color("fff4d8"), "alpha": 0.8})
 
 func _dress_volley() -> void:
 	play("dr_shot")
@@ -265,6 +267,8 @@ func _dress_volley() -> void:
 	var d2 := h.aim_dir()
 	var mz := ShotOrigin.muzzle_at(h, h.wpn["muzzle"], d2)      # the blunderbuss's mouth, where the slugs start too
 	vfx("shot", mz, d2)
+	AimKit.cone(h, "shot_fan", {"dir": d2, "len": float(h.wpn["range"]), "deg": float(h.wpn["fan_deg"]), "all": true,
+		"soft": true, "hot": 1.0, "dur": SHOT_FAN_T})
 	if not tells_visible():
 		return
 	var key := "%s_%d" % [h.nid, h.shot_n]
@@ -291,6 +295,7 @@ func _tick_looks(dt: float) -> void:
 func _tick_model(_dt: float) -> void:
 	if h.model:
 		h.model.set_meta(WardenReach.TIP, arm_tip)
+		h.model.set_meta(WardenReach.GUN_TIP, broadside.gun_tip())
 		coins.tick(h, m.time, tells_visible())
 	shown_tip = arm_tip
 	arm_tip = Vector3.INF
@@ -308,7 +313,8 @@ func net_reach_in(w: Array) -> void:
 	wire = w
 
 ## Another game's Grimble, every frame: his arm reaches where his row says, to the held body's copy, or in flight
-## after the row's tip at CHASE x the hook's speed (never past it: the next row may say it caught someone there).
+## after the row's tip at CHASE x the hook's speed (never past it: the next row may say it caught someone there);
+## his gun arm holds out through a synced Brass Broadside (DredgeBlast.net_gun_tip).
 func sound_tick(dt: float) -> void:
 	if not h.remote or h.model == null:
 		return
@@ -322,6 +328,7 @@ func sound_tick(dt: float) -> void:
 	else:
 		net_tip = Vector3.INF
 	h.model.set_meta(WardenReach.TIP, net_tip)
+	h.model.set_meta(WardenReach.GUN_TIP, broadside.net_gun_tip())
 
 # ------------------------------------------------------------------ RMB: Deep Reach
 func fire_rmb(c: Dictionary) -> void:

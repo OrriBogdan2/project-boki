@@ -446,7 +446,7 @@ func _all() -> void:
 		p.wid == "shotgun" and p.cls == "heavy" and p.max_dashes() >= 3.0,
 		"%s %s" % [p.wid, p.cls]
 	)
-	# --- the scattergun: a shot every 0.5s, one aim line
+	# --- the scattergun: a shot every 0.5s, the fan edges as aim
 	reset.call()
 	t.teleport(home + Vector3(0, 0, 9.0))
 	ak.aim_at(p, home + Vector3(2.0, 0, 0))
@@ -468,15 +468,15 @@ func _all() -> void:
 		"volleys %d in 1.05s" % (k.volleys - v0)
 	)
 	ok(
-		"gun: one aim line lies on the ground out to the slug range",
-		cone_seen and cone.get("kind") == "vee" and absf(float(cone.get("len", 0.0)) - 6.3) < 0.3,
+		"gun: the fan edges lie on the ground out to the slug range",
+		cone_seen and cone.get("kind") == "cone" and absf(float(cone.get("len", 0.0)) - 6.3) < 0.3,
 		"len %.1f kind %s" % [float(cone.get("len", 0.0)), cone.get("kind", "none")]
 	)
 	ok("gun: each shot rocks the body back (dr_shot)", k.anim_id == "dr_shot")
 	ak.step(m, 1.0)
-	ok("gun: idle, the same one aim line shows", AimKit.shown(p, "spread"))
+	ok("gun: idle, the same fan edges show", AimKit.shown(p, "spread"))
 	p.ammo = int(p.wpn["mag"])
-	# --- every volley is tight, so its slugs shred armor (content gun.armor_k)
+	# --- every slug shreds armor (content gun.armor_k)
 	var armor0: float = t.armor
 	var max_armor0: float = t.max_armor
 	reset.call()

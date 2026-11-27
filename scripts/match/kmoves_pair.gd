@@ -371,7 +371,7 @@ const MOVES := {
 		[0.2, {}]]},
 	# Brass Broadside (X, 2.1s): hunched over his fists while the charge builds (1.1s, deeper at the end), a
 	# two-fisted shove at wave 1 (overshoot), a short rewind, the second shove at 1.7s, then he straightens up
-	"dr_blast": {"keys": [
+	"dr_blast": {"gun_up": true, "keys": [
 		[0.0, {}],
 		[0.15, {"p": 0.35, "sq": 0.3, "lift": -0.12, "lw": 1.0, "legs": [0.7, -1.1, 0.7, -1.1],
 			"fl": Vector3(-0.15, 0.1, 0.25), "hw": 1.0}],
