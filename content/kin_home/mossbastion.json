@@ -1,0 +1,14 @@
+{
+	"id": "mossbastion",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/mossbastion.json.",
+	"work": {
+		"bloom": 3,
+		"forage": 2,
+		"mend": 1
+	},
+	"shiny": {
+		"belly": "#8c7ec3",
+		"color": "#5d5484",
+		"glow": "#706bff"
+	}
+}

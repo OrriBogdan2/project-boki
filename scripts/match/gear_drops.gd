@@ -88,6 +88,9 @@ static func run_table(m, name: String, at: Vector3, rng: RandomNumberGenerator, 
 	var ink := InkDrops.roll(m, name, at, ctx)
 	if not ink.is_empty():
 		made.append(ink)
+	var bite := BiteDrops.roll(m, name, at, ctx)
+	if not bite.is_empty():
+		made.append(bite)
 	return made
 
 ## What a bot starts with: a few slots filled, by its difficulty (what a player may bring: boots and
