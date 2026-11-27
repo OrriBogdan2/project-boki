@@ -15,7 +15,6 @@ var m: Match
 var bar: PanelContainer = null
 var bar_btns := {}             # id -> Button
 var bench: ParityBench = null  # the parity bench panel (the areas with dummies)
-var recast: RecastDrill = null # the two-step drill station (the same areas)
 var picker: CanvasLayer = null # the hero picker, while open
 var picker_page := ""          # "heroes" | "kit"
 var drills: MoveDrills = null  # the Training Area's movement drills
@@ -41,7 +40,6 @@ static func attach(match_node: Match) -> Practice:
 	match_node.add_child(p)
 	p.bench = ParityBench.attach(match_node)
 	p.drills = MoveDrills.attach(p)
-	p.recast = RecastDrill.attach(p)
 	p._build_bar()
 	KitDrill.attach(p)
 	return p
@@ -58,8 +56,6 @@ func items() -> Array:
 		out.append(["menu", "Duel", "gear", func(): if not m.paused: m.duel.open_menu(), "B"])
 	if bench:
 		out.append(["bench", "Bench", "gear", func(): bench.toggle(), ""])
-	if recast:
-		out.append(["recast", "Two-step", "burst", func(): recast.toggle(), ""])
 	out.append(["leave", "Skip" if m.opts.get("tutorial", false) else "Leave", "back", func(): leave(m, true), ""])
 	return out
 
@@ -105,12 +101,8 @@ static func leave(match_node: Match, extracted: bool) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if m == null or m.over:
 		return
-	if picker != null:
-		if event.is_action_pressed("menu"):
-			if picker_page == "kit": PracticeHero.open(self)
-			else: PracticeHero.close(self)
-			get_viewport().set_input_as_handled()
-		elif event.is_action_pressed("kit_card") and hover_arch != "":
+	if picker != null:      # (Esc closes it, or goes back from a kit page: PanelClose)
+		if event.is_action_pressed("kit_card") and hover_arch != "":
 			PracticeHero.kit(self, hover_arch)
 			get_viewport().set_input_as_handled()
 		elif event.is_action_pressed("hero"):

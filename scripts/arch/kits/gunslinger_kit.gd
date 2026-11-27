@@ -10,10 +10,10 @@ extends ArchKit
 ## back toward you for its fuse, then blasts, shoving
 ## everyone in it along the cone (toward you), hurting and Dazing them too. At the lane's end on no foe and no wall
 ## it is a dud: a puff and nothing else. The rifle does +76% to a Dazed foe, in big
-## gold numbers, and the string doesn't decay on them. Slipstep goes where you move and you keep
+## gold numbers, and the string doesn't decay on them; Coin Blast, Palm Lance and
+## Cinderfall do +20%. Slipstep goes where you move and you keep
 ## shooting. Palm Lance: planted a beat, then a slow walk while the line narrows, the aim turning only so fast,
-## then a long beam through walls. A knock gives Slipstep back (Hot Streak); abilities that land add a little
-## lifesteal (Fever).
+## then a long beam through walls. A knock gives Slipstep back (Hot Streak); abilities that land add a little lifesteal (Fever).
 
 # Her green fire: the slots of content/vfx/gunslinger.json's palette that the telegraphs and the charge's mesh
 # use; every effect is a recipe in that file (HeroVfx, docs/HERO_VFX.md).
@@ -150,6 +150,7 @@ const SLIDE_LOOP_FROM := 0.367 / 1.25
 const SLIDE_LOOP_T := 0.133 / 1.25  # s, one period of it
 const OVER := 2.0  # s: older than any of her clips (the longest runs 1.07 s): a move aged this far
 # is over to the clips (the kit's anim_id is read as long as it is set)
+
 
 ## Walking out of the slide's stand-up once the skid has ended: the legs are hers again and the walk blends in
 ## (WardenClips.FADE_LOCO) in place of the clip's stand-still pose, the source's Ghost walking off.
@@ -632,7 +633,7 @@ func _direct_hit(b: Dictionary, victim: Ent, at: Vector3) -> void:
 		n.visible = false
 	direct_hits += 1
 	var o := {"src": "abil", "ab": "utility", "tags": ["utility", "burr"]}
-	victim.hurt(float(bd["hit_dmg"]) * power("sec"), h, o)
+	victim.hurt(float(bd["hit_dmg"]) * power("sec") * dazed_k(victim, bd), h, o)
 	daze(victim, float(bd["cone_rattle"]))
 	_confirm_hit(victim, at, b["dir"])
 
@@ -646,10 +647,15 @@ func _confirm_hit(victim: Ent, at: Vector3, dir: Vector2) -> void:
 		m.sfx("crit", at, -2.0, 0.8)
 
 
-## Dazed: the foe takes more from the rifle and Longneedle (rattle_k in the data). The status draws its own
-## crown of stars over the head (KitStatus).
+## Dazed: the foe takes more from the rifle, Coin Blast, Palm Lance and Cinderfall (rattle_k in the data). The
+## status draws its own crown of stars over the head (KitStatus).
 func daze(foe: Ent, seconds: float) -> void:
 	KitStatus.apply(foe, "rat", seconds)
+
+
+## The damage factor a slot's data `sd` gives a hit on `foe`: 1 + its rattle_k while the foe is Dazed, else 1.
+static func dazed_k(foe: Ent, sd: Dictionary) -> float:
+	return 1.0 + float(sd.get("rattle_k", 0.0)) if KitStatus.rattled(foe) else 1.0
 
 
 ## It meets a wall and sticks: the cone points back the way it came. On a placed wall `on` it rides
@@ -704,7 +710,7 @@ func _cone(at: Vector3, out: Vector2, bd: Dictionary) -> void:
 		var away := (out * 0.6 + to.normalized() * 0.4).normalized() if to.length() > 0.2 else out
 		var o := {"src": "abil", "ab": "utility", "tags": ["utility", "burr"], "kb": away * float(bd["push"])}
 		o["lift"] = 2.0
-		f.hurt(float(bd["cone_dmg"]) * power("sec"), h, o)
+		f.hurt(float(bd["cone_dmg"]) * power("sec") * dazed_k(f, bd), h, o)
 		daze(f, float(bd["cone_rattle"]))  # the training dummy too
 		if f is Hunter and KnockWall.hit(m, f, away, 2.4, h):
 			wall_slams += 1
@@ -839,7 +845,7 @@ func _fire_needle() -> void:
 		if absf(f.pos.y - h.pos.y) > 2.6:
 			continue
 		var rat := KitStatus.rattled(f)
-		var dmg: float = dmg0 * ((1.0 + float(ed["rattle_k"])) if rat else 1.0)
+		var dmg: float = dmg0 * dazed_k(f, ed)
 		var o := {"src": "abil", "ab": "k1", "tags": ["k1", "needle"]}
 		if rat:
 			ComboMark.payoff(m, h, f)
