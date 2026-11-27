@@ -380,7 +380,7 @@ func _hint_lines() -> void:
 		"ability": ["signature", "ultimate"],
 		"ability (kit)": ["throw", "ultimate"],
 		"ult": ["ultimate"],
-		"stagger": ["signature", "ultimate", "gear1"],
+		"stagger": ["secondary", "signature", "hunter_ult", "gear1"],  # X is the Fuse, not an ability
 		"overheat_lift": ["jump"]
 	}
 	var lines := {}

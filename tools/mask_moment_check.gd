@@ -9,8 +9,8 @@ extends RefCounted
 ##      back (impact, ripple, the Hunter's model in place), the name and title, the scene's camera back; it can't
 ##      be skipped. The whisper and the name each stay on screen at least MaskBeat.read_s (3 s, or 60 ms a
 ##      character)
-##   3. the next time a press moves on one beat and holding it skips to the end (DECISIONS 11-11: click = next,
-##      hold = skip); the farm's short cut keeps the body you had
+##   3. the next time a tap moves on one beat and holding it HoldSkip.HOLD_S skips to the end (DECISIONS 11-11: click =
+##      next, hold = skip; the prologue's HoldSkip); the farm's short cut keeps the body you had
 ## With --shots-dir=<dir>: mask_beat_1_buildup, _2_rise, _3_black, _4_memory, _5_reveal, and one frame every
 ## 0.25 s from the black to the snap back, named with the beat's clock (mask_memory_<s>.png); a renderer is
 ## needed. --mask-id=<archetype> plays another Hunter's Relic (Vex's by default).
@@ -22,13 +22,15 @@ var bad := 0
 var shots := ""
 var host: Node3D
 var scene_cam: Camera3D
-var hid := "gunslinger"      # whose Relic goes on
-var _frame_at := -1.0        # s on the beat's clock the last timed frame was saved
+var hid := "gunslinger"  # whose Relic goes on
+var _frame_at := -1.0  # s on the beat's clock the last timed frame was saved
+
 
 func ok(cond: bool, what: String) -> void:
 	print("MASKBEAT %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(m: Node) -> void:
 	main = m
@@ -48,6 +50,7 @@ func run(m: Node) -> void:
 	print("MASKBEAT DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _data() -> void:
 	var r := Content.rules(MaskBeat.RULES)
 	var missing: Array = []
@@ -61,15 +64,20 @@ func _data() -> void:
 	for s in full["memory_s"]:
 		total += float(s)
 	var panel := float((full["memory_s"] as Array).reduce(func(a, b): return a + float(b), 0.0))
-	ok(total >= 12.0 and total <= 15.0 and float(full["black_s"]) >= 0.5 and float(full["black_s"]) <= 1.0,
-			"the full beat runs %.1f s with %.2f s of black" % [total, float(full["black_s"])])
-	ok(panel >= 4.5 and panel <= 6.0 and (full["memory_s"] as Array).size() == 3,
-			"the memories run %.1f s over %d frames, the last held" % [panel, (full["memory_s"] as Array).size()])
+	ok(
+		total >= 12.0 and total <= 15.0 and float(full["black_s"]) >= 0.5 and float(full["black_s"]) <= 1.0,
+		"the full beat runs %.1f s with %.2f s of black" % [total, float(full["black_s"])]
+	)
+	ok(
+		panel >= 4.5 and panel <= 6.0 and (full["memory_s"] as Array).size() == 3,
+		"the memories run %.1f s over %d frames, the last held" % [panel, (full["memory_s"] as Array).size()]
+	)
 	var short: Dictionary = r["short"]
 	var quick := float((short["memory_s"] as Array).reduce(func(a, b): return a + float(b), 0.0))
 	ok(quick >= 3.0 and quick <= 4.0, "the short cut's memories run %.1f s" % quick)
 	var missing_art: Array = Arch.ids().filter(func(a): return Portraits.memory_frames(a).size() < 2)
 	ok(missing_art.is_empty(), "every Hunter has memory frames (%s)" % str(missing_art))
+
 
 ## A stage: a lit floor, a camera, and you (the Empty) facing it with Vex's Mask hovering beside your face.
 func _stage() -> Array:
@@ -94,6 +102,7 @@ func _stage() -> Array:
 	relic.global_position = (you.get_node("Rig/Torso/HeadPivot") as Node3D).global_position + Vector3(0.55, -0.1, 0.6)
 	return [you, relic]
 
+
 func _first_time() -> void:
 	var tree := main.get_tree()
 	Save.d = Save.fresh()
@@ -101,7 +110,7 @@ func _first_time() -> void:
 	var parts := _stage()
 	var got := [null]
 	var t0 := Time.get_ticks_msec()
-	var beat := MaskBeat.play(parts[1], parts[0], func(b): got[0] = b, true, true)      # (asked quick: still full)
+	var beat := MaskBeat.play(parts[1], parts[0], func(b): got[0] = b, true, true)  # (asked quick: still full)
 	var planned := _planned_s(beat)
 	var panel_s := float(beat._memory_lens.reduce(func(a, b): return a + float(b), 0.0))
 	# s: [the beat's own (the frames' deltas), the longest frame, the whisper on screen, the name on screen, the panel]
@@ -120,39 +129,61 @@ func _first_time() -> void:
 			_timed_frame(clock[0])
 	tree.process_frame.connect(tick)
 	await tree.process_frame
-	ok(not MaskBeat.seen() and beat.skip_hint == null and beat.cam.current and not beat.short,
-			"the first time: no skip, its own camera, the full cut even on the farm")
-	ok(beat._frames.size() == beat._memory_lens.size() and beat._frames.size() >= 2,
-			"%d memory frames: %s" % [beat._frames.size(), str(beat._frames)])
+	ok(
+		not MaskBeat.seen() and not beat.hold_skip.can_skip and beat.cam.current and not beat.short,
+		"the first time: no skip, its own camera, the full cut even on the farm"
+	)
+	ok(
+		beat._frames.size() == beat._memory_lens.size() and beat._frames.size() >= 2,
+		"%d memory frames: %s" % [beat._frames.size(), str(beat._frames)]
+	)
 	var cam_from := beat.cam.global_position
 	await _until(tree, beat, "rise")
-	ok(beat.cam.global_position.distance_to(beat._head) < cam_from.distance_to(beat._head) - 0.3,
-			"build-up: the camera has eased in on you")
+	ok(
+		beat.cam.global_position.distance_to(beat._head) < cam_from.distance_to(beat._head) - 0.3,
+		"build-up: the camera has eased in on you"
+	)
 	await _shot(tree, "mask_beat_1_buildup")
 	await tree.create_timer(float(beat._times["rise_s"]) * 0.65).timeout
-	ok(beat.phase == "rise" and beat._ghost != null and beat.mask.global_position.distance_to(beat._head) < 1.0,
-			"the Mask rises to the face and a ghostly face flickers over yours")
+	ok(
+		beat.phase == "rise" and beat._ghost != null and beat.mask.global_position.distance_to(beat._head) < 1.0,
+		"the Mask rises to the face and a ghostly face flickers over yours"
+	)
 	await _shot(tree, "mask_beat_2_rise")
 	await _until(tree, beat, "black")
-	ok(beat.black.color.a >= 1.0 and not beat._swell.playing and not beat._heart.playing,
-			"contact: black, and the swell and heartbeat cut off")
+	ok(
+		beat.black.color.a >= 1.0 and not beat._swell.playing and not beat._heart.playing,
+		"contact: black, and the swell and heartbeat cut off"
+	)
 	ok(String(beat.body.get_meta("arch", "")) == hid, "behind the black you have become %s" % hid)
 	await _shot(tree, "mask_beat_3_black")
 	await _until(tree, beat, "memory")
 	await tree.create_timer(0.12).timeout
 	var face := beat.memory.texture
-	ok(beat.memory.visible and face != null and beat.memory.modulate.a < 0.5,
-			"the memories: the first comes up out of the black")
+	ok(
+		beat.memory.visible and face != null and beat.memory.modulate.a < 0.5,
+		"the memories: the first comes up out of the black"
+	)
 	await tree.create_timer(float(beat._memory_lens[0])).timeout
-	ok(beat.memory.texture != face and beat.whisper_line.text != "" and beat.memory.scale.x > 1.0
-			and beat.memory_prev.visible and beat.memory_prev.texture == face,
-			"a cross-fade to the next, pushing in, and the whisper: \"%s\"" % beat.whisper_line.text)
-	var press := InputEventAction.new()
-	press.action = "interact"
-	press.pressed = true
-	beat._unhandled_input(press)
+	ok(
+		(
+			beat.memory.texture != face
+			and beat.whisper_line.text != ""
+			and beat.memory.scale.x > 1.0
+			and beat.memory_prev.visible
+			and beat.memory_prev.texture == face
+		),
+		'a cross-fade to the next, pushing in, and the whisper: "%s"' % beat.whisper_line.text
+	)
+	_tap(beat)
+	beat._unhandled_input(_key(true))
+	beat.hold_skip._process(HoldSkip.HOLD_S * 1.5)
+	beat._unhandled_input(_key(false))
 	await tree.process_frame
-	ok(beat.phase == "memory" and beat._memory_i == 1, "a press during the memories changes nothing the first time")
+	ok(
+		beat.phase == "memory" and beat._memory_i == 1 and beat.hold_skip.modulate.a == 0.0,
+		"a tap or a hold during the memories changes nothing the first time (and no ring shows)"
+	)
 	await _shot(tree, "mask_beat_4_memory")
 	await _until(tree, beat, "reveal")
 	ok(beat.black.color.a == 0.0 and beat._ripple != null, "the snap back: the world again, a ripple of light")
@@ -166,19 +197,28 @@ func _first_time() -> void:
 	var secs := float(clock[0])
 	var whisper := String(Content.rules(MaskBeat.RULES)["whispers"][hid])
 	var title := HunterViewer.display_name(hid)
-	for line in [[whisper, clock[2]], [title, clock[3]]]:      # (to a frame: a phase ends on one)
-		ok(float(line[1]) >= MaskBeat.read_s(line[0]) - float(clock[1]) and MaskBeat.read_s(line[0]) >= 3.0,
-				"\"%s\" stays up %.2f s (reading time %.2f s)" % [line[0], line[1], MaskBeat.read_s(line[0])])
-	ok(absf(float(clock[4]) - panel_s) <= 0.3 + 2.0 * float(clock[1]),
-			"the panel was up %.2f s of the %.2f s planned" % [clock[4], panel_s])
-	ok(got[0] != null and String((got[0] as Node3D).get_meta("arch", "")) == hid,
-			"done hands back the Hunter's model, standing where you stood")
-	if shots == "":      # (a phase ends on a frame: a slow rasterizer stretches each by up to one frame)
-		ok(secs >= planned - 0.3 and secs <= planned + 6.0 * float(clock[1]),
-				"it ran %.1f s of the %.1f s planned (longest frame %.2f s)" % [secs, planned, clock[1]])
+	for line in [[whisper, clock[2]], [title, clock[3]]]:  # (to a frame: a phase ends on one)
+		ok(
+			float(line[1]) >= MaskBeat.read_s(line[0]) - float(clock[1]) and MaskBeat.read_s(line[0]) >= 3.0,
+			'"%s" stays up %.2f s (reading time %.2f s)' % [line[0], line[1], MaskBeat.read_s(line[0])]
+		)
+	ok(
+		absf(float(clock[4]) - panel_s) <= 0.3 + 2.0 * float(clock[1]),
+		"the panel was up %.2f s of the %.2f s planned" % [clock[4], panel_s]
+	)
+	ok(
+		got[0] != null and String((got[0] as Node3D).get_meta("arch", "")) == hid,
+		"done hands back the Hunter's model, standing where you stood"
+	)
+	if shots == "":  # (a phase ends on a frame: a slow rasterizer stretches each by up to one frame)
+		ok(
+			secs >= planned - 0.3 and secs <= planned + 6.0 * float(clock[1]),
+			"it ran %.1f s of the %.1f s planned (longest frame %.2f s)" % [secs, planned, clock[1]]
+		)
 	ok(scene_cam.current and MaskBeat.seen(), "the scene's camera is back and the beat is marked seen")
 	host.queue_free()
 	await tree.process_frame
+
 
 func _again() -> void:
 	var tree := main.get_tree()
@@ -187,26 +227,39 @@ func _again() -> void:
 	var got := [null]
 	var beat := MaskBeat.play(parts[1], you, func(b): got[0] = b, false, true)
 	await tree.process_frame
-	var key := Settings.key_cap("interact")
-	ok(beat.skip_hint != null and _texts(beat.skip_hint).any(func(s): return String(s).contains(key)),
-			"seen before: a skip hint with the interact key")
-	var press := InputEventAction.new()
-	press.action = "interact"
-	press.pressed = true
-	beat._unhandled_input(press)
+	ok(beat.hold_skip.can_skip, "seen before: the hold-to-skip ring is on")
+	_tap(beat)
 	await tree.process_frame
-	ok(beat.phase == "black" and got[0] == null,
-			"a press moves on one beat, to the black (%s), and doesn't skip it all" % beat.phase)
-	Input.action_press("interact")
-	beat._unhandled_input(press)
+	ok(
+		beat.phase == "black" and got[0] == null,
+		"a tap moves on one beat, to the black (%s), and doesn't skip it all" % beat.phase
+	)
+	_tap(beat)
 	await tree.process_frame
-	ok(beat.phase == "memory" and got[0] == null, "the next press: on to the memory")
-	await tree.create_timer(MaskBeat.HOLD_SKIP_S + 0.15).timeout
-	Input.action_release("interact")
-	ok(got[0] == you and is_instance_valid(you) and scene_cam.current,
-			"holding it skips the rest; the farm's cut keeps the body you had")
+	ok(beat.phase == "memory" and got[0] == null, "the next tap: on to the memory")
+	beat._unhandled_input(_key(true))
+	beat.hold_skip._process(HoldSkip.HOLD_S * 0.5)
+	ok(got[0] == null and beat.hold_skip.held != null, "holding fills the ring and skips nothing yet")
+	beat.hold_skip._process(HoldSkip.HOLD_S)
+	ok(
+		got[0] == you and is_instance_valid(you) and scene_cam.current,
+		"holding it %.1f s skips the rest; the farm's cut keeps the body you had" % HoldSkip.HOLD_S
+	)
 	host.queue_free()
 	await tree.process_frame
+
+
+func _key(down: bool) -> InputEventKey:
+	var ev := InputEventKey.new()
+	ev.keycode = KEY_SPACE
+	ev.pressed = down
+	return ev
+
+
+func _tap(beat: MaskBeat) -> void:
+	beat._unhandled_input(_key(true))
+	beat._unhandled_input(_key(false))
+
 
 ## The seconds the beat's phases add up to.
 func _planned_s(beat: MaskBeat) -> float:
@@ -216,10 +269,12 @@ func _planned_s(beat: MaskBeat) -> float:
 		total += float(s)
 	return total
 
+
 func _until(tree: SceneTree, beat: MaskBeat, phase: String) -> void:
 	var t0 := Time.get_ticks_msec()
 	while beat.phase != phase and Time.get_ticks_msec() - t0 < 8000:
 		await tree.process_frame
+
 
 ## A frame every 0.25 s of the beat's clock while the memories are up (the black to the snap back).
 func _timed_frame(at: float) -> void:
@@ -228,11 +283,13 @@ func _timed_frame(at: float) -> void:
 	_frame_at = at
 	main.get_tree().root.get_texture().get_image().save_png(shots.path_join("mask_memory_%05.2fs.png" % at))
 
+
 func _shot(tree: SceneTree, file: String) -> void:
 	if shots == "":
 		return
 	await tree.process_frame
 	tree.root.get_texture().get_image().save_png(shots.path_join(file + ".png"))
+
 
 func _texts(n: Node) -> Array:
 	var out: Array = []
