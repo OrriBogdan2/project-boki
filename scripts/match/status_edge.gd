@@ -1,8 +1,8 @@
 class_name StatusEdge
 extends CanvasLayer
-## The local player's status as a screen-edge tint (the match makes one, under the HUD's widgets): stunned or knocked is blue,
-## untouchable (a long invulnerable window: a revive, a landing, an ultimate) is yellow, Grounded is half-strength
-## yellow, cloaked is a dark blue. The centre stays clear. One shader, no screen read, hidden when nothing applies.
+## The local player's status as a screen-edge tint (the match makes one, under the HUD's widgets): stunned or
+## knocked is blue, untouchable (a long invulnerable window: a revive, a landing, an ultimate) is yellow, Grounded is
+## half-strength yellow, cloaked is a dark blue. The centre stays clear. One shader, no screen read, hidden when idle.
 
 const SHADER: Shader = preload("res://shaders/status_edge.gdshader")
 const STUN := Color(0.30, 0.55, 1.0)  # stunned, knocked up
