@@ -17,6 +17,8 @@ const MIN_FPS := 30.0  # no frame after the loading screen runs slower than this
 const AVG_FPS := 60.0  # the average over the look window
 const BURST_NODES := 400  # nodes one frame may add after the loading screen (headless-safe spawn limit)
 const SOFTWARE_RES := Vector2i(640, 360)
+const FightScene := preload("res://tools/perf/fight_scene.gd")
+const MAP_OBJECTS := 20000  # (--loadin-split) objects in a frame that mean the planning map is open: inventory it once
 
 var out_path := ""
 var csv_path := ""
@@ -44,6 +46,10 @@ var taken := {}  # script file -> nodes whose _process the check calls itself
 var split_m: Match
 var t_pre := 0
 var t_post := 0
+var inventoried := false
+var draws_seen: Array = []  # (--loadin-split) the last few [pre, post] draw clocks, matched to the renderer's stamps
+var stamp_frame := -1
+var stamp_ph := "plan"  # the phase the stamps are added to
 var last_split := 0  # usec of the last split frame (a draw older than it was already counted)
 
 
@@ -87,7 +93,7 @@ func _ready() -> void:
 	process_priority = -100
 	if split:
 		RenderingServer.frame_pre_draw.connect(func(): t_pre = Time.get_ticks_usec())
-		RenderingServer.frame_post_draw.connect(func(): t_post = Time.get_ticks_usec())
+		RenderingServer.frame_post_draw.connect(_on_post_draw)
 	if not headless:
 		RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)
 	Save.no_write = true
@@ -317,6 +323,10 @@ func _split_frame(wall: float, now: int) -> void:
 	if ph == "ground" and p and (p.dropping or p.gliding):
 		ph = "air"
 	split_n[ph] = int(split_n.get(ph, 0)) + 1
+	stamp_ph = ph
+	if not inventoried and not headless and ph == "plan" and frames.size() > 0 and int(frames[-1][3]) > MAP_OBJECTS:
+		inventoried = true
+		_inventory()
 	_add(ph, "draw", draw)
 	var v0 := _vsum()
 	var t0 := Time.get_ticks_usec()
@@ -348,3 +358,47 @@ func _vsum() -> int:
 	for k in Match.vprof:
 		t += int(Match.vprof[k])
 	return t
+
+
+func _on_post_draw() -> void:
+	t_post = Time.get_ticks_usec()
+	draws_seen.append([t_pre, t_post])
+	if draws_seen.size() > 8:
+		draws_seen.pop_front()
+	var rd := RenderingServer.get_rendering_device()
+	if rd == null or rd.get_captured_timestamps_count() < 2 or rd.get_captured_timestamps_frame() == stamp_frame:
+		return
+	stamp_frame = rd.get_captured_timestamps_frame()
+	var first := rd.get_captured_timestamp_cpu_time(0)
+	var last := rd.get_captured_timestamp_cpu_time(rd.get_captured_timestamps_count() - 1)
+	for d in draws_seen:
+		if d[0] <= first and last <= d[1]:
+			_add(stamp_ph, "draw: before viewports", first - d[0])
+			_add(stamp_ph, "draw: viewports", last - first)
+			_add(stamp_ph, "draw: after viewports", d[1] - last)
+			return
+
+
+## (--loadin-split) What the camera sees the first time the planning map is open: the bench's scene inventory,
+## and the visible things (and shadow casters) by who made them.
+func _inventory() -> void:
+	FightScene.new().report(get_tree().root, split_m, get_viewport(), "loadin plan-map")
+	var cam := get_viewport().get_camera_3d()
+	var by := {}
+	var cast := {}
+	var n := 0
+	for g in get_tree().root.find_children("*", "GeometryInstance3D", true, false):
+		var gi := g as GeometryInstance3D
+		if not gi.is_visible_in_tree() or cam == null:
+			continue
+		var box := gi.global_transform * gi.get_aabb()
+		if not cam.is_position_in_frustum(box.get_center()):
+			continue
+		n += 1
+		var k := "%s<%s" % [gi.get_class(), FightScene.owner_name(gi)]
+		by[k] = int(by.get(k, 0)) + 1000
+		if gi.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF:
+			cast[k] = int(cast.get(k, 0)) + 1000
+	print("LOADIN plan-map: %d things in view; cam at %s, far %.0f" % [n, str(cam.global_position) if cam else "-", cam.far if cam else 0.0])
+	print("LOADIN plan-map in view by owner (count): " + _top(by, 1))
+	print("LOADIN plan-map shadow casters by owner (count): " + _top(cast, 1))
