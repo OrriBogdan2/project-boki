@@ -255,9 +255,9 @@ static func _hit_opts(e: Dictionary, ctx: Dictionary, kb: Vector2, caster: Node)
 static func _hits(f: Ent, at: Vector3, r: float) -> bool:
 	return Vector2(f.pos.x - at.x, f.pos.z - at.z).length() < r + f.r and absf(f.pos.y - at.y) < 2.2
 
-static func _heal(t: Node, n: float) -> void:
+static func _heal(t: Node, n: float, caster: Node = null) -> void:
 	if t is Hunter:
-		(t as Hunter).heal(n)
+		(t as Hunter).heal(n, caster)
 	elif t is Ent and not t.dead and t.hp > 0.0:
 		t.hp = minf(t.max_hp, t.hp + n)
 
@@ -459,7 +459,7 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 				if t is Hunter: AbilityFx.cast(m, t, "launch", t.pos, Vector2.ZERO, col)
 		"heal":
 			for t in _targets(e, caster):
-				_heal(t, float(e.get("amount", 20.0)) * _heal_k(caster))
+				_heal(t, float(e.get("amount", 20.0)) * _heal_k(caster), caster)
 				m.fx.burst(t.pos + Vector3(0, 1.0, 0), Color("8fe0a0"), 12, 2.5, 0.5, -3.0)
 		"shield":
 			for t in _targets(e, caster):
@@ -639,7 +639,7 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 				var who_l: Array = [h]
 				if h.kin and h.kin.state in ["active", "giant"] and h.kin.flat_dist(at) < rad + 0.5: who_l.append(h.kin)
 				for t in who_l:
-					if float(e.get("heal", 0.0)) > 0.0: _heal(t, float(e["heal"]) * _heal_k(caster))
+					if float(e.get("heal", 0.0)) > 0.0: _heal(t, float(e["heal"]) * _heal_k(caster), caster)
 					if float(e.get("shield", 0.0)) > 0.0 and "shield" in t:
 						ShieldSrc.give(t, float(e["shield"]) * _heal_k(caster), ShieldSrc.HEAL)
 						if "shield_t" in t: t.shield_t = maxf(float(t.shield_t), float(e.get("time", 4.0)))

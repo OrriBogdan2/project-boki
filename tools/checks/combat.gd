@@ -33,8 +33,9 @@ const CHECKS := {
 	"--native-hitbox-check": ["res://tools/native_hitbox_check.gd", "native_hitbox_check", null],
 	"--native-hitbox-shots": ["res://tools/native_hitbox_shots.gd", "native_hitbox_shots", null],
 	"--boss-check": ["res://tools/boss_check.gd", "boss_check", null],  # boss lairs: dial, wards, phases, the Rare Egg
-	# Anti-Heal leaves 30% of a heal (content/rules/combat.json)
+	# Anti-Heal leaves 30% of a heal; heal cut x0.65; Hunter recovery (content/rules/combat.json)
 	"--anti-heal-check": ["res://tools/anti_heal_check.gd", "anti_heal_check", null],
+	"--heal-parity-check": ["res://tools/heal_parity_check.gd", "heal_parity_check", null],
 	"--bot-spacing-shots": ["res://tools/bot_spacing_shots.gd", "bot_spacing_shots", null],  # --shots-dir=<dir>, GPU
 	"--stolen-extract-check": ["res://tools/stolen_extract_check.gd", "stolen_extract_check", null],  # extract, saves
 }
