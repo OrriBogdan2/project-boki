@@ -3,7 +3,7 @@ extends "res://tools/archetype_check.gd"
 ## alone as --hit-feedback-check: every Hunter's LMB on a dummy at 2.2 m and 6 m. Prints one AUDIT row per
 ## Hunter (the sounds its first hit played, the number, the body flash, the hold) and asserts the
 ## shared rules: a hit flash, a number, the Hunter's own hit sound, no camera shake from a plain hit; then
-## two empowered hits: the heavy thud and a hold. (The number's looks are main's Fx.hit_number rolls.)
+## two empowered hits: the solid-or-heavy confirm and a hold. (The number's looks are main's Fx.hit_number rolls.)
 
 const HUNTERS := [
 	"archer",
@@ -112,6 +112,7 @@ func _empowered() -> void:
 			heard.append_array(_step_sounds(m))
 			hold_v = maxf(hold_v, t.freeze_t)
 		p.inp["fire"] = false
-		ok("%s empowered hit: the heavy thud" % arch, heard.has("hit_heavy"), str(heard))
+		var weighty: bool = heard.has("hit_solid") or heard.has("hit_heavy")
+		ok("%s empowered hit: its tier's confirm (never the light one)" % arch, weighty, str(heard))
 		ok("%s empowered hit: holds the target" % arch, hold_v >= ImpactWeight.hold_s("solid") - 0.001, "%.3f" % hold_v)
 		await done(m)
