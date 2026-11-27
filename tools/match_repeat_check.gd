@@ -6,7 +6,8 @@ extends RefCounted
 ## after those, one more match may add at most MESH_GROWTH cached meshes and OBJ_GROWTH objects, no orphan node
 ## may be left, and a mesh the sweep dropped must come back the same. Static memory is reported, not judged:
 ## the Warden and Boki model caches (WardenGlb, BokiRig) grow with each Hero and species first seen, up to the
-## roster. Headless; never touches the save.
+## roster. The objects judged leave out MODEL_OBJ per Boki species model first cached after the warm-up (a
+## bigger roster meets more new species a match). Headless; never touches the save.
 ##   godot --headless -- --match-repeat-check [--repeat-cycles=8]
 ## On a GPU (jobq --needs gpu) the video and texture memory lines include the painted map (MapPaint).
 
@@ -18,6 +19,7 @@ const FRAME_EVERY := 30         # match steps between frames, so deferred frees 
 const HOME_FRAMES := 30         # frames on the farm before the counts are read
 const MESH_GROWTH := 60         # cached meshes one more match may add (~420 a match before MeshCache)
 const OBJ_GROWTH := 400         # objects one more match may add (~750 a match before MeshCache)
+const MODEL_OBJ := 130          # objects one newly cached Boki species model holds (main 11-27: +776 for 6, ~129)
 
 var main: Node
 var bad := 0
@@ -73,6 +75,7 @@ func _home() -> void:
 func _counts() -> Dictionary:
 	return {
 		"objects": int(Performance.get_monitor(Performance.OBJECT_COUNT)),
+		"models": BokiRig.cached_models(),
 		"nodes": int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT)),
 		"orphans": int(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)),
 		"resources": int(Performance.get_monitor(Performance.OBJECT_RESOURCE_COUNT)),
@@ -85,16 +88,18 @@ func _counts() -> Dictionary:
 func _fmt(r: Dictionary) -> String:
 	return "objects %d nodes %d orphans %d resources %d cached meshes %d static %.1f MB video %.1f MB" % [r["objects"],
 			r["nodes"], r["orphans"], r["resources"], r["meshes"], r["mem_mb"], r["vram_mb"]] \
-			+ " textures %.1f MB (build %d ms)" % [r["tex_mb"], r["build_ms"]]
+			+ " textures %.1f MB boki models %d (build %d ms)" % [r["tex_mb"], r["models"], r["build_ms"]]
 
 func _judge(rows: Array) -> void:
 	var a: Dictionary = rows[WARM - 1]
 	var b: Dictionary = rows[-1]
 	var n := rows.size() - WARM
 	var meshes := (int(b["meshes"]) - int(a["meshes"])) / float(n)
-	var obj := (int(b["objects"]) - int(a["objects"])) / float(n)
+	var models := int(b["models"]) - int(a["models"])
+	var obj := (int(b["objects"]) - int(a["objects"]) - MODEL_OBJ * models) / float(n)
 	_ok(meshes <= MESH_GROWTH, "cached meshes per match after the warm-up: %+.0f (limit %d)" % [meshes, MESH_GROWTH])
-	_ok(obj <= OBJ_GROWTH, "objects per match after the warm-up: %+.0f (limit %d)" % [obj, OBJ_GROWTH])
+	_ok(obj <= OBJ_GROWTH, "objects per match after the warm-up, past %d new species models: %+.0f (limit %d)" % [
+			models, obj, OBJ_GROWTH])
 	_ok(int(b["orphans"]) == 0, "orphan nodes after the last match: %d" % int(b["orphans"]))
 	print("REPEAT static memory per match after the warm-up: %+.1f MB, video %+.1f MB" % [
 			(float(b["mem_mb"]) - float(a["mem_mb"])) / n, (float(b["vram_mb"]) - float(a["vram_mb"])) / n])

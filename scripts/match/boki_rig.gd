@@ -1793,6 +1793,11 @@ var _gait_w := 0.0  # how far the planted timing is blended in
 
 
 ## True when this species has a rigged model.
+## How many species models the rig cache holds (--match-repeat-check: its growth is the roster, not a leak).
+static func cached_models() -> int:
+	return _scenes.size()
+
+
 static func has(kin_id: String) -> bool:
 	return enabled and FRAME.has(kin_id) and ResourceLoader.exists(PATH % [kin_id, kin_id])
 
