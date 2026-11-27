@@ -2,8 +2,8 @@ class_name WardenNativeMoves
 extends RefCounted
 ## The kit moves a native Hunter has its own clip for (data "kmoves" in warden_native.json, docs/art/wardens/
 ## MESHY_NATIVE.md): {kmove: {"clip": name, "then": name, "hold": bool, "hold_from": s, "rate": x, "fade": s,
-## "upper": bool, "body": bool}}. The clips come from <art>_clips.glb by name like the slot clips (WardenNative._borrow_clips); a row
-## whose clip no file has is dropped. While the kit's move is on the body its clip is laid at the move's own clock
+## "upper": bool, "body": bool}}. The clips come from <art>_clips.glb by name like the slot clips
+## (WardenNative._borrow_clips); a row whose clip no file has is dropped. While the kit's move is on the body its clip is laid at the move's own clock
 ## (state "kmove_t"), so a release move starts at the frame the arrow leaves. Past the clip's end: "hold_from" loops
 ## the clip from there to its end, "then" loops a second clip, "hold" keeps the last pose (a full-body row's default),
 ## and an upper row without either is over (the legs' clips show again). An "upper" row is laid on WardenNativeUpper,
