@@ -876,8 +876,8 @@ archetypes/juggernaut.json:rmb.drop.ahead	0.8
 archetypes/juggernaut.json:rmb.drop.cooldown	7.2
 archetypes/juggernaut.json:rmb.drop.core	1.2
 archetypes/juggernaut.json:rmb.drop.core_k	0.5
-archetypes/juggernaut.json:rmb.drop.dive_speed	24.0
-archetypes/juggernaut.json:rmb.drop.dive_t[0]	0.12
+archetypes/juggernaut.json:rmb.drop.dive_speed	30.0
+archetypes/juggernaut.json:rmb.drop.dive_t[0]	0.08
 archetypes/juggernaut.json:rmb.drop.dive_t[1]	0.35
 archetypes/juggernaut.json:rmb.drop.dmg	18.0
 archetypes/juggernaut.json:rmb.drop.down	0.45
