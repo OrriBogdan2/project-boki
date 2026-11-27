@@ -512,7 +512,7 @@ func _ready_rest() -> void:
 				get_tree().create_timer(0.3).timeout.connect(func():
 					var before := sc.scroll_vertical
 					if "--no-keep-scroll" in dbg: set_meta("no_keep_scroll", true)
-					Save.d["exp_rolling"] = not Save.d.get("exp_rolling", false)
+					Save.d["exp_mode"] = "solos" if Data.saved_mode() == "trios" else "trios"
 					_open_expedition()
 					get_tree().create_timer(0.5).timeout.connect(func():
 						var sc2 := _panel_scroll()
@@ -1091,7 +1091,7 @@ func _process(delta: float) -> void:
 	crouch_look.tick(cam, crouch_grounded, panel_open == "" and train.is_empty() and not building_now and not chat_open)
 	kin_frame.tick(d, ppos, panel_open != "", cam.zoom_to)
 	cam.dist_mul *= kin_frame.closer()
-	farm_cam.tick(cam, d, not building_now and train.is_empty() and not FarmSpotlight.showing())
+	farm_cam.tick(cam, d, not building_now and train.is_empty() and not FarmSpotlight.showing(), games)
 	var focus := kin_frame.frame(Vector3(ppos.x + mover.lag.x, minf(py + mover.lag.y, 0.0), ppos.z + mover.lag.z))
 	var lean := panel_open == "" and train.is_empty() and not kin_frame.framing() and not farm_cam.third()
 	cam.follow(hob.chat.frame(focus) if hob else focus, d, lean)
@@ -1281,6 +1281,7 @@ func _move_player(d: float) -> void:
 	else:
 		var want := mv * run * (HunterMove.sneak_speed if crouching else 1.0)
 		hv = HunterMove.walk(hv, want, HunterMove.accel(String(Save.d.get("arch", ""))), 1.0, d)
+	hv = mover.trim.step(hv, air and not gliding and dash_t <= 0.0, d)
 	# the island's edge doesn't hold you: walk off it and you fall (glide back, or the abyss returns you)
 	var guard := false
 	var p0 := ppos
@@ -1313,7 +1314,7 @@ func _move_player(d: float) -> void:
 			wedge_t = 0.0
 			unstick()
 	gh = _ground_h(ppos.x, ppos.z)
-	air = py > gh + 0.001 or pvy > 0.0
+	air = pvy > 0.0 or (py > gh + 0.001 and (air or not HunterMove.sticks(py - gh)))     # down a flight: still standing
 	# jump; in the air, a second press (or the glide key) opens the glider; holding Space never does
 	var over := py - gh if gh > World.VOID + 1.0 else INF
 	var jump := mover.jump(can_act and lfl.is_empty() and mover.pressed(&"jump")
@@ -1324,6 +1325,7 @@ func _move_player(d: float) -> void:
 		if dash_t > 0.0:      # out of a dash, as in a match: the dash ends, the jump carries Loco.dash_jump_keep of it
 			dash_t = 0.0
 			pvel *= Loco.dash_jump_keep
+		mover.trim.start(Vector2(pvel.x, pvel.z))
 		Sfx.play("jump", null, -12.0)
 	elif air and can_act:
 		var holding := Input.is_action_pressed("jump") or Input.is_action_pressed("glide")
@@ -1331,7 +1333,7 @@ func _move_player(d: float) -> void:
 		if not gliding and press and loco.go(Loco.S.GLIDING):
 			dash_t = 0.0      # a press mid-dash ends it that frame: the glide carries the dash's velocity
 			gliding = true
-			pvy = Loco.glide_start(pvy)
+			pvy = Loco.glide_start(pvy, over)
 			Sfx.play("whoosh", null, -10.0, 0.1, 0.8)
 		elif gliding and not holding:
 			gliding = false
@@ -2174,10 +2176,10 @@ func _find_interact() -> void:
 		create_tween().tween_property(prompt_box, "modulate:a", 1.0, 0.12)
 	prompt_box.reset_size()
 	var vp := get_viewport().get_visible_rect().size
-	if on_kin:
-		CareLine.place(prompt_box, cam, (best["k"]["node"] as Node3D).global_position, vp)
-		return
 	var py_at := minf(vp.y - 110.0, (root_ui.get_node("Hints") as Control).global_position.y - prompt_box.size.y - 6.0)
+	if on_kin:
+		CareLine.place(prompt_box, cam, (best["k"]["node"] as Node3D).global_position, vp, py_at)
+		return
 	prompt_box.position = Vector2((vp.x - prompt_box.size.x) * 0.5, py_at)
 	_keep_off_hub(prompt_box)
 
@@ -3043,8 +3045,6 @@ func _fetch_step(k: Dictionary, d: float) -> void:
 				var rec: Dictionary = k["rec"]
 				var loves_fetch: bool = rec["likes"]["play"] == "fetch"
 				Care.change(rec, "joy", 24.0 if loves_fetch else 14.0)
-				if Care.play_train(rec, "fetch") > 0:
-					_toast("+1 Speed  (%d of %d)" % [int(rec["stats"]["speed"]), Care.stat_cap(rec)])
 				Care.change(rec, "energy", -6.0)
 				Care.change(rec, "clean", -4.0)
 				_garden_xp(rec, "fetch")
@@ -3525,9 +3525,7 @@ func _start_match() -> void:
 		if not (kk as Dictionary).is_empty() and KinBox.is_boxed(kk): KinBox.bring_out(kk)
 	Save.d["cls"] = Data.class_of_save()
 	Save.save_game()
-	# about 20 hunters a match, whatever the squad size (your squadmates are bots)
-	var o := {"teams": int(ceil(Data.MATCH_PLAYERS / 3.0)), "squad": 3}
-	o["total"] = Data.MATCH_PLAYERS
+	var o := Data.mode_opts(Data.saved_mode())      # its squads and hunters (bots fill the places nobody took)
 	if raid_squad > 0:
 		o = HeartRaid.opts(raid_squad, HeartRaidPick.difficulty)      # Heart Raid: one squad, no rivals
 	o["tier"] = exp_tier
@@ -4959,7 +4957,7 @@ func _open_train(rec: Dictionary) -> void:
 		b.disabled = int(rec["stats"][s]) >= Care.stat_cap(rec)
 		row.add_child(b)
 		v.add_child(row)
-	v.add_child(UI.label("Each drill uses energy and food  ·  Energy %d  ·  Full %d" % [int(Care.need(rec, "energy")), int(Care.need(rec, "food"))], 13, UI.MUTED))
+	v.add_child(UI.label("A drill pays stat bites  ·  %s  ·  Energy %d  ·  Full %d" % [TrainRuns.line("drill"), int(Care.need(rec, "energy")), int(Care.need(rec, "food"))], 13, UI.MUTED))
 
 # ---- kin as individuals: personal space, turns to talk, and a personality in how they move
 

@@ -8,8 +8,8 @@
 			"gate_doc": "Expedition difficulty: the Data.TIERS index (0 The Meadow, 1 Dusk Isles, 2 The Hollow).",
 			"tiers": {
 				"common": {"gate": 0, "species": ["burrlet", "cindle", "pebbit", "puddlet", "wisplet", "zapple", "basaltoad", "casquebill", "gibbelle", "hoarheron", "kilnbadger", "murmurling", "nacrolin", "opalisk", "orchisloth", "sentrikat", "threadwyrm", "tuatrune"]},
-				"rare": {"gate": 1, "species": ["floenatee", "goliathite", "limpetor", "moundvark", "scaldamus", "spatewader"]},
-				"very_rare": {"gate": 2, "species": ["cindowary", "glaciyak", "heatherhorn", "lilybara", "nimbostrich"]}
+				"rare": {"gate": 1, "species": ["floenatee", "goliathite", "limpetor", "moundvark", "scaldamus", "spatewader", "sporcupine", "vespox", "glassolotl", "lanceron", "forgebrock", "tidalisk", "eclipsowl", "howlop", "gongrowl", "vaultara", "gravitank", "anchorhorn", "murmuron", "strobolin", "barostorm"]},
+				"very_rare": {"gate": 2, "species": ["cindowary", "glaciyak", "heatherhorn", "lilybara", "nimbostrich", "geysirbara", "dreadnoyak", "glaciatee", "thunderstrich", "cisternmander", "effigoon", "crofthollow", "citadoad"]}
 			},
 			"legendary": {
 				"per_match": 0.2,
@@ -23,7 +23,7 @@
 			"gate_doc": "Heart Raid difficulty level, 0 the easiest. The mode has no levels yet.",
 			"tiers": {
 				"common": {"gate": 0, "species": ["moonloris", "velvorm"]},
-				"rare": {"gate": 1, "species": ["squalltross", "umbrathere"]},
+				"rare": {"gate": 1, "species": ["squalltross", "umbrathere", "lanternlong", "pipeworth"]},
 				"very_rare": {"gate": 2, "species": ["duskapi"]}
 			}
 		},
@@ -33,8 +33,8 @@
 			"gate_doc": "Garden zones open (garden_zones.json; 1 = only the start zone). A visitor still needs its own zone open (garden_visitor.json groups).",
 			"tiers": {
 				"common": {"gate": 1, "species": ["glomwort", "marchleaf", "mossgrade"]},
-				"rare": {"gate": 2, "species": ["glintmole", "kindlewren", "lodestick", "rimeshrew"]},
-				"very_rare": {"gate": 3, "species": ["caecilith", "gloamshell", "kestrike", "nettlynx", "selenfin", "thrumbird"]}
+				"rare": {"gate": 2, "species": ["glintmole", "kindlewren", "lodestick", "rimeshrew", "shinobant", "scythant", "glomworth", "mossbastion"]},
+				"very_rare": {"gate": 3, "species": ["caecilith", "gloamshell", "kestrike", "nettlynx", "selenfin", "thrumbird", "seamwyrm", "geodemole", "embrook", "arcestrel", "thistlynx", "lyrewing", "gloamspire", "lodestaff", "rimefang", "selenwhale"]}
 			}
 		}
 	}

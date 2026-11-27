@@ -2,7 +2,8 @@ extends RefCounted
 ## --raising-check: one Boki raised at home, never taken on an expedition, through farm days. Care
 ## builds trust once a farm day per kind (Care.care_day, content/rules/care.json care_day_s), so a
 ## stay-at-home Boki keeps growing closer; repeating the same care in one day adds no trust and no
-## duplicate memory; old saves drop the once-per-expedition stamps. Fetch trains Speed. Meals lean
+## duplicate memory; old saves drop the once-per-expedition stamps. Play is joy only: a game of fetch lifts joy and
+## trains no stat, and spamming fetch and pets leaves every stat where it was. Meals lean
 ## its colour on the spot (Evo.eat, Evo.lean) and the last few meals decide it. A new bond rank
 ## plays its moment once (KinBondMoment); the rank a Boki arrives with doesn't, panel up or not. Home after an hour
 ## away, it runs over to say hello (KinWelcome); after a minute it doesn't. Never touches the real
@@ -47,23 +48,26 @@ func _old_save_stamps() -> void:
 		"an old save's once-per-expedition stamps are dropped on load")
 
 ## Play is practice: a game of fetch trains Speed while it has the energy, not when it's worn out.
+## Owner ruling 11-26: play (fetch, pet) is joy and bond only, never stat points (stats come from stat bites).
 func _fetch_trains(home, k: Dictionary) -> void:
 	var rec: Dictionary = k["rec"]
 	rec["needs"]["energy"] = 80.0
-	var sp0 := int(rec["stats"]["speed"])
+	rec["needs"]["joy"] = 30.0
+	var st0: Dictionary = (rec["stats"] as Dictionary).duplicate()
+	_fetch_once(home, k)
+	ok(not k.has("fetch") and Care.need(rec, "joy") > 30.0 and rec["stats"] == st0,
+		"a finished game of fetch lifts joy (%.0f) and trains no stat" % Care.need(rec, "joy"))
+	for i in 20:      # spam: energy topped up every time, as snacks and naps would
+		rec["needs"]["energy"] = 100.0
+		_fetch_once(home, k)
+		home._pet_kin(k)
+	ok(rec["stats"] == st0, "spamming fetch and pets 20 times gives 0 stat points %s" % str(rec["stats"]))
+
+func _fetch_once(home, k: Dictionary) -> void:
 	home._play_with_kin(k)
 	for i in 600:
 		if not k.has("fetch"): break
 		home._move_kin(0.05)
-	ok(not k.has("fetch") and int(rec["stats"]["speed"]) == sp0 + 1,
-		"a finished game of fetch trains Speed (%d -> %d)" % [sp0, int(rec["stats"]["speed"])])
-	rec["needs"]["energy"] = Care.PLAY_TRAIN_ENERGY - 5.0
-	home._play_with_kin(k)
-	for i in 600:
-		if not k.has("fetch"): break
-		home._move_kin(0.05)
-	ok(not k.has("fetch") and int(rec["stats"]["speed"]) == sp0 + 1,
-		"a worn-out Boki plays but doesn't learn (%d)" % int(rec["stats"]["speed"]))
 
 func _body_col(k: Dictionary) -> Color:
 	var mats: Array = (k["node"] as Node3D).get_meta("mats", [])

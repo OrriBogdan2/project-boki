@@ -30,3 +30,6 @@ rules in `content/rules/`; this page is the short list of what we aim for. Check
 - **Aim line:** the aim laser is 8.5 m long.
 - **Damage numbers on one target:** you and two teammates focusing one dummy for 3 s print at most 3 numbers over one spot (4 before the slide-apart rule in docs/HUD.md, Damage numbers). Asserted by `--dmg-number-check` ("trio focus").
 - **Dash cooldowns:** per kit in the archetype JSON; a held dash is longer on a longer cooldown (`dash_hold_for_ex`).
+
+## Blasts: falloff and cover (11-26)
+A shot's explosion (`Match._boom`, `Blast`, `content/rules/blast.json`) lands by distance from its centre: full damage to a quarter of the radius, then 89% at half, 54% at three quarters and 33% at the edge (straight lines between those points; it was a straight 100% to 55%). Knockback and lift follow the same share. A body with rock or a cliff between it and the blast takes nothing (`World.los` at chest height); a shot with `"boom_open"` skips the cover test. Held by `--blast-parity-check`. Not covered yet: data-driven "area" effects (flat damage, no cover) and distance fall-off for ordinary shots.

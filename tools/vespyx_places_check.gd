@@ -135,7 +135,7 @@ func _use_glb(path: String) -> void:
 		n.owner = root
 	var ps := PackedScene.new()
 	print("VESPYX_PLACES glb=%s read=%d pack=%d" % [path, err, ps.pack(root)])
-	BokiRig._scenes[BokiRig.PATH % [species, species]] = ps
+	BokiRig._scenes.put(BokiRig.PATH % [species, species], ps)
 	tag = "oldglb_"
 
 
