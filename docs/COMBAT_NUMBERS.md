@@ -30,3 +30,21 @@ rules in `content/rules/`; this page is the short list of what we aim for. Check
 - **Aim line:** the aim laser is 8.5 m long.
 - **Damage numbers on one target:** you and two teammates focusing one dummy for 3 s print at most 3 numbers over one spot (4 before the slide-apart rule in docs/HUD.md, Damage numbers). Asserted by `--dmg-number-check` ("trio focus").
 - **Dash cooldowns:** per kit in the archetype JSON; a held dash is longer on a longer cooldown (`dash_hold_for_ex`).
+
+## Shot damage by distance
+
+A weapon's primary names a curve class (`"falloff"`, and for a sniper `"ramp"`); the classes are in `content/rules/shot_falloff.json`
+and `ShotFalloff` turns them into the shot's `farf` / `near` keys, read in `Match._shot_apply`. Full damage up to `start`, a straight
+line down to `floor` x damage at `end`, the floor beyond. Ramp-up goes from `from` x damage (up to `start`) to full at `end`.
+Metres are for a weapon whose range reaches the class end; a shorter weapon squeezes the same curve into its own range.
+
+| Class | start - end (m) | floor | Weapons |
+|---|---|---|---|
+| short | 8 - 14 | 25% | smg |
+| medium | 10 - 17.5 | 40% | rifle, quill rifle, burst rifle, arc bolts |
+| long | 12.5 - 17.5 | 40% | sniper, coilcaster, spellstaff |
+| minigun | 7 - 14 | 50% | minigun |
+| bow | 12.5 - 17.5 | 50% | longbow |
+
+Ramp-up (sniper, long): half damage up to 1.5 m, full at 9 m. No fall-off: the shotgun (the reference gives its slugs a fixed stop
+range only, see `docs/heroes/dredge.md`), melee, fire and kit abilities. A kit ability's shots take a class only when its data names one.

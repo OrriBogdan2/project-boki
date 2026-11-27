@@ -10,6 +10,7 @@
 		"speed": 46,
 		"kb": 0.9,
 		"spread": 0.087,
+		"falloff": "short",
 		"range": 7.0,
 		"size": 0.13,
 		"color": "#99ffff",
@@ -17,8 +18,6 @@
 		"bloom_deg": 1.0,
 		"bloom_max_deg": 6.0,
 		"bloom_recover": 20.0,
-		"far_start": 0.6,
-		"far_mult": 0.6,
 		"desc": "Fast and loose. Spread grows the longer you hold it, and damage drops off at the far end.",
 		"kick": 0.05,
 		"tracer": 1.0

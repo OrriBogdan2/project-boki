@@ -11,6 +11,7 @@
 		"mag": 30,
 		"kb": 1.0,
 		"spread": 0.03,
+		"falloff": "medium",
 		"range": 11.0,
 		"size": 0.13,
 		"color": "#b8f03c",
