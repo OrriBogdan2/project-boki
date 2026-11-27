@@ -1,6 +1,7 @@
 extends "res://tools/gameplay_media.gd"
 ## --hunter-scale-shots --shots-dir=<dir> [--hero=arch,arch]: each hero standing on the same open ground, shot at the
-## old match size (every hunter at Hunter.VIS_SCALE 1.12) and at its own body.match_k, as <dir>/<hero>_<before|after>.png
+## old match size (every hunter at Hunter.VIS_SCALE 1.12) and at its own body.match_k, as
+## <dir>/<hero>_<before|after>.png
 ## (no HUD) and <hero>_<before|after>_hud.png (with the overhead plate). Prints a HSCALE row per hero: on-screen
 ## body height in px at 1080p (feet to the top of the head), the model scale, and the hit radius (must not change).
 ## --gaps (no renderer needed): every archetype, at the old and the new size, prints a GAP row with the model's top

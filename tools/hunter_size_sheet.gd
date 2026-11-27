@@ -1,8 +1,9 @@
 extends "res://tools/hunter_scale_shots.gd"
 ## --hunter-size-sheet --shots-dir=<dir> [--hero=arch,arch]: how big each hunter is at the match camera, for a size
-## side-by-side. Each hero idles alone on open floor. One HSIZE row per hero and pass (match_k 1 = main's size, own =
-## the archetype's body.match_k, zoom = the wheel's factor): the crown's height over the feet in m as drawn, the same on screen
-## in px at 1080p, and px per m. The crown is the top of the skull: hair tips, ears, horns and the glider do not count
+## side-by-side. Each hero idles alone on open floor. One HSIZE row per hero and pass (match_k 1 = main's size, own
+## = the archetype's body.match_k, zoom = the wheel's factor): the crown's height over the feet in m as drawn, the
+## same on screen in px at 1080p, and px per m. The crown is the top of the skull: hair tips, ears, horns and the
+## glider do not count
 ## (the highest slice of the head that is at least CROWN_KEEP as wide as the head). "top" is the highest body point
 ## of all (hair and ears in). The "panel" pass stands the hero close in a fixed camera, shot with no HUD
 ## (<dir>/<hero>_panel.png), so every hero shares one px/m. Needs a renderer (jobq --needs gpu).
