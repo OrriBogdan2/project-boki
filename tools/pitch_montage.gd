@@ -10,12 +10,13 @@ const HOME_AWAY_M := 7.0  # m from the Waystone Motley starts (home farm)
 const PAD_AWAY_M := 5.5  # m from a return pad Motley is set down again, facing it
 const STONE_MID_M := 0.9  # m from the stone's middle he must reach before the light takes him (the ring's standing stones stop him nearer)
 const ENTER_S := 3.5  # s at most to reach it
-const STROLL_S := 2.6  # s of walking in a world after he lands, from one Boki to the next
+const STROLL_S := 2.7  # s of walking in a world after he lands
+const STROLL_AHEAD_M := 9.0  # m the walk on is aimed past the pad (the view's up on landing)
 const STEP_S := 0.5  # s the Waystone's light is up before the ink wipe (rules hop_fade_s)
 const EMERGE_S := 0.45  # s he takes to step out of the light on the other side
 const AWAY_RAD := [0.52, -0.52, 0.0, 1.05, -1.05, 1.57, -1.57, 2.1, -2.1, 2.6, -2.6, 3.14]  # tried in order: 0 = south of the stone
 const LEVEL_TIP := 0.1  # rad: a view tipped more than this over a wall is not filmed
-const MONTAGE_AT := [Vector2(-1.7, 3.3), Vector2(1.9, 4.3)]  # (m right, m ahead) of the landing: two Boki close enough to read
+const MONTAGE_AT := [Vector2(-2.4, 3.6), Vector2(2.5, 5.0)]  # (m right, m ahead) of the landing: two Boki either side of the straight walk on, close enough to read
 const HUSHWOOD_CLOCK := 0.74  # Hushwood's own hour is deep dusk (0.78, daylight 0.3): the film shows it at 0.7 daylight, warm and readable
 const ZONE_ORDER := ["glasswater", "cinderstep", "hushwood", "ridge"]
 const PILLAR_H := 3.6
@@ -38,6 +39,7 @@ func play() -> void:
 	await w._load(GardenZones.HUB)
 	_s0 = w.h.player.scale
 	await _jump(HOME_AWAY_M)
+	_partner_aside()
 	w.rig.mark("montage")
 	await w._wait(0.3)
 	for z in ZONE_ORDER:
@@ -111,6 +113,16 @@ func _trial(stone: Vector3) -> float:
 	return top
 
 
+## The partner stands off to the side of the walk in, not in the ring.
+func _partner_aside() -> void:
+	var stone: Vector3 = w.h.hway.node.position
+	var dir := (stone - w.h.ppos).normalized()
+	var at: Vector3 = w.h.world.free_spot_near(stone + Vector3(-dir.z, 0.0, dir.x) * 3.6 - dir * 0.6, [], 1.5, 1.1, 3.0)
+	for pin in w._pins:
+		pin[1] = at
+		((pin[0] as Dictionary)["node"] as Node3D).position = at
+
+
 func _boki_near(at: Vector3) -> bool:
 	for n in w._show:
 		var p: Vector3 = (n as Node3D).global_position
@@ -173,13 +185,15 @@ func _through(zone: String) -> void:
 	here.queue_free()
 
 
-## After landing: walks on toward the first Boki and then the second, so the world and its Boki are read.
+## After landing: walks straight on between the two Boki (they stand either side of the way), so the world and its
+## Boki are read; the way is cleared of props first.
 func _stroll() -> void:
-	var t0: int = w._frames
-	await w._walk(w._boki_at(0), 2.5, STROLL_S - EMERGE_S)
-	var left := (STROLL_S - EMERGE_S) - float(w._frames - t0) / FPS
-	if left > 0.3:
-		await w._walk(w._boki_at(1), 2.5, left)
+	var h: Node = w.h
+	var goal: Vector3 = h.world.free_spot_near(
+		h.hway.node.position + Vector3(0.0, 0.0, -STROLL_AHEAD_M), [], 1.2, 0.9, 3.0
+	)
+	w._clear_path(h.ppos, [goal])
+	await w._walk(goal, 0.5, STROLL_S - EMERGE_S)
 	await w._wait(0.15)
 
 
