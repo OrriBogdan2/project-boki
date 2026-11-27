@@ -1,0 +1,14 @@
+{
+	"id": "citadoad",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/citadoad.json.",
+	"work": {
+		"haul": 1,
+		"stone": 3,
+		"timber": 2
+	},
+	"shiny": {
+		"belly": "#546284",
+		"color": "#466c60",
+		"glow": "#87abff"
+	}
+}
