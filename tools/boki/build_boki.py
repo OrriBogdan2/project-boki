@@ -40,8 +40,10 @@ SPECS = {"cindle": ("vespyx", "vespyx_paint", "vespyx_anim"), "puddlet": ("prism
          "glomwort": ("glomwort", "glomwort", "glomwort_anim"),
          "gibbelle": ("glomwort", "glomwort", "glomwort_anim"),     # a scan (boki_scan) on the simplest rig there is
          "goliathite": ("glomwort", "glomwort", "goliathite_anim"),   # scans too: every lobe on root, the body rides it
+         "gibbelle": ("glomwort", "glomwort", "gibbelle_anim"),     # a scan (boki_scan) on the simplest rig there is
+         "goliathite": ("glomwort", "glomwort", "glomwort_anim"),   # scans too: every lobe on root, the body rides it
          "hoarheron": ("glomwort", "glomwort", "glomwort_anim"),
-         "floenatee": ("glomwort", "glomwort", "glomwort_anim"),
+         "floenatee": ("glomwort", "glomwort", "floenatee_anim"),
          **{i: ("glomwort",) * 2 + ("glomwort_anim",)
            for i in boki_scan.AUTO if boki_scan.AUTO[i] is boki_scan.BORROWED},
          "heatherhorn": ("glomwort", "glomwort", "heatherhorn_anim"),
@@ -53,6 +55,7 @@ SPECS = {"cindle": ("vespyx", "vespyx_paint", "vespyx_anim"), "puddlet": ("prism
          **{i: ("glomwort", "glomwort", i + "_anim") for i in ("squalltross", "threadwyrm", "tuatrune", "velvorm")},
          "nacrolin": ("glomwort", "glomwort", "nacrolin_anim"),         # its own clips over the borrowed rig
          "nimbostrich": ("glomwort", "glomwort", "nimbostrich_anim"),
+         "glaciyak": ("glomwort", "glomwort", "glaciyak_anim"),      # its own clips over the borrowed rig
          "kestrike": ("kestrike", "kestrike", "kestrike_anim"),
          "kindlewren": ("kindlewren", "kindlewren", "kindlewren_anim"),
          "lodestick": ("lodestick", "lodestick", "lodestick_anim"),
