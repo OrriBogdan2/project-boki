@@ -6,16 +6,22 @@ Hunters more than 10% off the reference on screen, so every archetype now carrie
 has none: the owner made him different on purpose. Visual only: hit radius, hurtbox height, body collision, speeds
 and ranges keep their size (the reference's own hurtbox is one shared 0.43 m x 1.76 m shape whatever the model).
 
-Method: crown (top of the skull, hair, horns, ears and props left out; `--hunter-size-sheet`) over the feet in metres
-at the match camera, against the reference model's body height with its weapons and loose props taken off (bind pose;
-the 11-26 lineup measure). The reference's listed model height keeps the weapons in (Cinder's 1.61 m is 1.17 m of
-body, Meeko's 2.34 m is 1.80 m), so that number is not used. The reference body still keeps hair and hats, ours does
-not: where a hat or tall hair tops the reference head (Motley) the scale is an upper bound.
-`match_k` = reference body height / our crown height at k = 1.
+Method (11-27, second pass): size on screen, as the player sees it. Each hunter idles in combat (its real idle,
+weapon drawn) at the match camera, at 8 facings; its silhouette (everything the model draws: weapon, hair, ears, back
+props) is read in metres of the view plane at the hunter: on-screen height and area, the mean of the 8 facings. The
+reference is measured the same way off its own idle clips at its 66 deg camera. Size = sqrt(height x sqrt(area)), so a
+thin pole or a floating rock moves it less than height alone. The owner's reads hold on this measure (the healer
+smallest bar the pet, under the sniper; the samurai not small, 20th of 25), and on height or area alone; the first
+pass's bind-pose body height had the healer 3rd smallest and the samurai 7th, and the listed model height counts ears.
+`match_k` = reference size / ours at k = 1 (`--hunter-size-sheet --silhouette`, HSIL "lean all" rows). Caveat:
+reference props that are loose meshes (a shield, a dagger, a bird) are not in its silhouette, ours are (Albert and
+Sable read a little small for it).
 
 Camera: pitch 66 deg both sides; the reference lens is 59 deg horizontal (35.3 vertical at 16:9), arm 30.2 m at its
-widest; ours is 32 deg vertical at 23 m x 1.4572 = 33.5 m, 34.2 m of ground across on both sides. Same px per m, so
-metres match on screen too; nothing to change.
+widest; ours is 32 deg vertical at 23 m x 1.4572 = 33.5 m, 34.2 m of ground across on both sides: same px per m
+across. Up the screen ours is taller: `CamRig.CHAR_LEAN` (20 deg) tips bodies back, so one metre of hunter reads
+1.3-1.75x as tall as with no lean; the reference has none. `match_k` is set with the lean on (what the player sees);
+with the lean off every hunter would want 9-26% more.
 
 What follows a Hunter's size (all read `Arch.match_k`): overhead and hover plates and their anchors (`Hud._head`,
 `HunterZone.rect_of`, the `CamRig` plate lean; a plate sits at its own offset or 0.6 m over the model's tallest
