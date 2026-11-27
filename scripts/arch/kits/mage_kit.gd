@@ -20,6 +20,7 @@ const FINGER_AHEAD := 0.3            # ... and ahead of where a round starts (x 
 const MARK_LIFT := 0.5               # m the Static marker sits above the HP bar
 const RMB_KEY := 0.06               # s into the rmb clip: the throw (tools/art1/ryzz_clips.py)
 const ECHO_GAP := 0.045              # s between her after-images on the Wirerun and the air dash
+const HOLD_KNOCK := 1.5              # steps of knock the Wirerun hold keeps on her: her drift bleeds as a knock's
 const STATIC_GAP := 0.35             # s between the Static sparks' puffs on a marked foe (each lives as long)
 const LIVE_CRAWL_HZ := 7.0           # arcs a second crawling down a Live foe
 
@@ -414,10 +415,16 @@ func _tick_wire(dt: float) -> void:
 		_end_wire(false)                # the charge was spent on the press: cut, it's gone
 		KitWindup.broken(self, "dash")
 		return
+	if not h.grounded and bool(h.inp.get("jump", false)) and h.knock_t <= dt * HOLD_KNOCK:
+		# Space in the air hold (DECISIONS 11-08, Shift cancels into glide for every Hunter): cut, the charge stays
+		# spent as on any cut, and the press opens the glider at the drift she had
+		_end_wire(false)
+		h.do_jump()
+		return
 	# no control of your own while you hold it: the keys do nothing, momentum drifts you, height holds
 	h.inp["move"] = Vector2.ZERO
 	h.inp["jump"] = false
-	h.knock_t = maxf(h.knock_t, dt * 1.5)
+	h.knock_t = maxf(h.knock_t, dt * HOLD_KNOCK)
 	if bool(wire["air"]):
 		h.vel.y = 0.0
 		h.pos.y = float(wire["y"])
