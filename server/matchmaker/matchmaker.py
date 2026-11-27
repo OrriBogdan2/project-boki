@@ -6,7 +6,7 @@
 
 Settings (env file, overridden by the environment): REGION, PUBLIC_HOST, HTTP_HOST, HTTP_PORT, SERVER_CMD,
 SERVER_VERSION, PORT_MIN, PORT_MAX, FILL_TIMEOUT_DUEL/ARENA/TRIO, TRIO_SLOTS, TOKEN_TTL_S, READY_TIMEOUT_S,
-TOKENS_DIR. See ../README.md.
+TOKENS_DIR, FEEDBACK_PATH, SOCIAL_DB, SOCIAL_OWNERS. See ../README.md.
 """
 import argparse
 import os
@@ -21,6 +21,7 @@ from mm.api import make_server, run_ticker  # noqa: E402
 from mm.core import Matchmaker  # noqa: E402
 from mm.launcher import Launcher  # noqa: E402
 from mm.log import log  # noqa: E402
+from mm.social import SocialStore  # noqa: E402
 
 
 def build(cfg: config.Config) -> Matchmaker:
@@ -37,7 +38,8 @@ def build(cfg: config.Config) -> Matchmaker:
 
 def serve(cfg: config.Config) -> None:
     core = build(cfg)
-    httpd = make_server(core, cfg.http_host, cfg.http_port, cfg.feedback_path)
+    store = SocialStore(cfg.social_db, cfg.social_owners) if cfg.social_db else None
+    httpd = make_server(core, cfg.http_host, cfg.http_port, cfg.feedback_path, store)
     stop = threading.Event()
     ticker = threading.Thread(target=run_ticker, args=(core, cfg.tick_s, stop), name="ticker", daemon=True)
     ticker.start()
