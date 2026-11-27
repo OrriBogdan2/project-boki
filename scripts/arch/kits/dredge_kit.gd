@@ -534,8 +534,8 @@ func _end_pull(arrived: bool) -> void:
 		arrivals += 1
 		var rdf := rmb_def()
 		if not ally:
-			# the foe stays stunned through the Anchor's wind-up: Deep Reach then Anchor Drop is a sure stun
-			(f as Ent).stun_t = maxf((f as Ent).stun_t, float(rdf["arrive_stun"]))
+			# the foe lands Grounded (no jump, dash or glide) through the Anchor's wind-up, not stunned
+			KitStatus.apply(f, "gnd", float(rdf["arrive_ground"]), 0.0, true, "", h.nid)
 			payoff_fx((f as Ent).pos, col_of(rdf), "dredge_coin_jingle", h.aim_dir(), f)
 	var queued := e_queued
 	e_queued = false
