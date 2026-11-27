@@ -106,6 +106,10 @@ func run(main_node: Node) -> void:
 		await main.fade.reveal(0.01)
 	h.day_t = DAY_T
 	RenderingServer.frame_pre_draw.connect(_hide_marks)
+	var pin := Pin.new()
+	pin.t = self
+	pin.process_priority = 100000  # after Home's own _process, which puts the avatar back on its focus point
+	h.add_child(pin)
 	await _wait(1.0)
 	_place()
 	await _wait(2.5)
@@ -478,6 +482,26 @@ func _start_anims() -> void:
 		anims[i] = HunterAnim.new(hunters[i])
 
 
+## Holds Albert and the Boki on their marks each frame, after Home's own _process (a move made at frame_pre_draw is
+## flushed to the renderer only after Home has set it back next frame).
+class Pin:
+	extends Node
+	var t
+
+	func _process(_d: float) -> void:
+		t.pin()
+
+
+func pin() -> void:
+	if not is_instance_valid(h) or hunters.is_empty():
+		return
+	h.player.position = albert_at
+	for j in h.kins.size():
+		if pins.has(j):
+			(h.kins[j]["node"] as Node3D).position = pins[j]
+			h.kins[j]["pos"] = pins[j]
+
+
 ## After Home's own pose each frame: everyone faces the camera (the Boki at Home's own size), UI and marks gone.
 func _hide_marks() -> void:
 	if not is_instance_valid(h) or hunters.is_empty():
@@ -488,12 +512,8 @@ func _hide_marks() -> void:
 		for c in hunters[i].find_children(WardenCompanions.PREFIX + "*", "Node3D", true, false):
 			(c as Node3D).visible = false  # Meeko's sun and cloud drift over the next hunter; not body height
 		hunters[i].rotation.y = _face_to(hunters[i].position)
-	h.player.position = albert_at
 	for j in h.kins.size():
 		var n := h.kins[j]["node"] as Node3D
-		if pins.has(j):
-			n.position = pins[j]
-			h.kins[j]["pos"] = pins[j]
 		n.rotation.y = _face_to(n.position) + FACE_BOKI * (1.0 if j % 2 == 0 else -1.0)
 	h.ui.visible = false
 	for ring in h.find_children("TeamRing", "MeshInstance3D", true, false):
