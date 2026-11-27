@@ -7,7 +7,7 @@ extends RefCounted
 ##   --reticle-looks-shots: every Hunter's own look (ReticleLooks) at rest at 4x on dark, light and grass swatch
 ##     rows with row labels, one column per hunter (reticle_looks_1126b_swatches.png)
 ##   --reticle-proof-shots: for the owner, on a real GPU at 1920x1080 (set --resolution): every Hunter's full frame
-##     at rest and firing over the match's grass, and contact sheets of 3 tiles a row with a 2x zoom
+##     at rest and firing on flower-free match grass, and contact sheets of 3 tiles a row, 2.7x zoom
 ##   --ping-shots: your ping on an enemy (red, "Enemy") and a teammate's loot ping off screen (edge arrow),
 ##     with the minimap
 ##   --hit-marker-shots: the hit tick on a landed hit and the knock tick, each full frame and 3x crop
@@ -30,13 +30,14 @@ const LOOK_ROWS := [["dark ground", "1b1f1c"], ["light ground", "ece6cc"], ["gra
 const PROOF_AT := Vector2(0.6, 0.56)  # the proof's cursor: mid-screen, just off the Hunter the camera follows
 const PROOF_SCAN := 600  # world units each way the meadow search covers, in steps of PROOF_STEP
 const PROOF_STEP := 6
+const PROOF_CLEAR := 2.5  # world units: no flower this close to where the cursor rests (it read as a stray mark)
 const PROOF_RES := Vector2i(1920, 1080)  # the full-screen proof frames
 const TILES_PER_SHEET := 9  # Hunters on one contact sheet (rows of 3)
 const TILE_W := 640  # px: one tile of the contact sheet
 const TILE_GAP := 8
 const TILE_NAME_H := 60  # px: the Hunter's name band
-const ZOOM_CROP := Vector2i(160, 100)  # px round the cursor, shown 2x under the tile
-const TILE_ZOOM_H := 200  # px: ZOOM_CROP at 2x
+const ZOOM_CROP := Vector2i(120, 75)  # px round the cursor, shown 2.7x under the tile
+const TILE_ZOOM_H := 200  # px: ZOOM_CROP at 2.7x
 const TILE_H := TILE_NAME_H + 360 + TILE_ZOOM_H  # name, the 16:9 frame at tile width, the zoom crops
 
 var main: Node
@@ -171,7 +172,7 @@ func _draw_looks(cv: Control) -> void:
 
 
 ## Every Hunter in a normal match at the default match camera, 1920x1080 on a real GPU: the reticle mid-screen over
-## grass at rest and then firing (the fire action held, bloom open). Each full frame is saved
+## grass at rest and then firing (the fire action held, bloom open: the gauge arcs show). Each full frame is saved
 ## (reticle_looks_1126b_<id>_rest.png, _fire.png) and then the contact sheets, TILES_PER_SHEET Hunters each.
 func _proof() -> void:
 	Settings.reset_all()
@@ -179,23 +180,26 @@ func _proof() -> void:
 	_pin_reticle()
 	main.get_viewport().gui_disable_input = true
 	m.player.teleport(_meadow_spot())
+	await _frame(30)
+	var aim := _cursor_ground() - m.player.pos  # (the cursor rests this far from the Hunter on the ground)
+	m.player.teleport(_meadow_spot(aim, _flower_points()))
 	var tiles := []
 	for id in Arch.ids():
 		m.player.reclass(Arch.weight(String(id)), String(id), Arch.signature(String(id)))
 		Match._trim_shadows(m.player)
 		await main.get_tree().create_timer(2.5).timeout
 		var rest := await _frame(12)
-		var fire := await _frame(12, _hold_fire)
+		var firing := await _frame(12, _hold_fire)
 		Input.action_release("fire")
-		for st in [["rest", rest], ["fire", fire]]:
+		for st in [["rest", rest], ["fire", firing]]:
 			var img: Image = st[1]
 			if img.get_size() != PROOF_RES:
 				push_error("RETICLESHOTS frame is %s, not %s" % [img.get_size(), PROOF_RES])
 				main.get_tree().quit(1)
 				return
 			img.save_png(dir.path_join("reticle_looks_1126b_%s_%s.png" % [id, st[0]]))
-		tiles.append([String(Arch.def(id).get("base_name", id)), Arch.color(String(id)), rest, fire])
-		tiles[-1].append_array([ImageTexture.create_from_image(rest), ImageTexture.create_from_image(fire)])
+		tiles.append([String(Arch.def(id).get("base_name", id)), Arch.color(String(id)), rest, firing])
+		tiles[-1].append_array([ImageTexture.create_from_image(rest), ImageTexture.create_from_image(firing)])
 		print("RETICLESHOTS proof %s ammo %d" % [id, m.player.ammo])
 	for part in ceili(tiles.size() / float(TILES_PER_SHEET)):
 		var chunk := tiles.slice(part * TILES_PER_SHEET, (part + 1) * TILES_PER_SHEET)
@@ -206,8 +210,9 @@ func _proof() -> void:
 	print("RETICLESHOTS proof sheets done")
 
 
-## A free spot well inside a meadow island (the match's plain grass), the first found on a coarse scan.
-func _meadow_spot() -> Vector3:
+## A free spot well inside a meadow island (the match's plain grass), the first found on a coarse scan. With `aim`
+## (where the cursor rests, from the Hunter) and `flowers` (their x, z), the cursor also rests on flower-free grass.
+func _meadow_spot(aim := Vector3.ZERO, flowers := []) -> Vector3:
 	var w := m.world
 	for x in range(-PROOF_SCAN, PROOF_SCAN, PROOF_STEP):
 		for z in range(-PROOF_SCAN, PROOF_SCAN, PROOF_STEP):
@@ -215,20 +220,49 @@ func _meadow_spot() -> Vector3:
 			for d: Vector2 in [Vector2.ZERO, Vector2(12, 0), Vector2(-12, 0), Vector2(0, 12), Vector2(0, -12)]:
 				var q := Vector2(x, z) + d
 				inside = inside and not w.is_void(q.x, q.y) and w.biome_at(q.x, q.y) == "meadow"
+			var rest := Vector2(x + aim.x, z + aim.z)
+			for f: Vector2 in flowers:
+				inside = inside and f.distance_to(rest) > PROOF_CLEAR
 			if inside:
 				return w.free_spot_near(Vector3(x, w.ground_at(x, z), z), [], 1.0, 0.5, 4.0)
 	push_error("RETICLESHOTS no meadow spot found")
 	return m.player.pos
 
 
-## Holds the fire action and the weapon's bloom, so the frame shows the reticle in use.
+## Holds the fire action and the weapon's bloom, so the frame shows the reticle in use (charge and resource arcs too).
 func _hold_fire() -> void:
 	Input.action_press("fire")
 	m.player.recoil = 1.0
 
 
-## One tile per Hunter: its name large, the rest frame scaled to the tile width, and under it 2x crops round the
-## reticle at rest and firing (a tile is [name, colour, rest image, fire image, rest texture, fire texture]).
+## Where the cursor rests on the ground (the camera's ray through it, at the Hunter's height).
+func _cursor_ground() -> Vector3:
+	var vp := main.get_viewport()
+	var cam := vp.get_camera_3d()
+	var px := vp.get_visible_rect().size * cursor_at
+	var from := cam.project_ray_origin(px)
+	var dir := cam.project_ray_normal(px)
+	return from + dir * ((m.player.pos.y - from.y) / dir.y)
+
+
+## The x, z of every flower in the world's flower batches.
+func _flower_points() -> Array:
+	var pts := []
+	var flower := Models.flower_mesh()
+	var stack: Array = [m.world]
+	while not stack.is_empty():
+		var n: Node = stack.pop_back()
+		stack.append_array(n.get_children())
+		var mmi := n as MultiMeshInstance3D
+		if mmi and mmi.multimesh and mmi.multimesh.mesh == flower:
+			for i in mmi.multimesh.instance_count:
+				var o := (mmi.global_transform * mmi.multimesh.get_instance_transform(i)).origin
+				pts.append(Vector2(o.x, o.z))
+	return pts
+
+
+## One tile per Hunter: its name large, the rest frame scaled to the tile width, and under it 2.7x crops round the
+## reticle at rest and firing (a tile: [name, colour, rest image, fire image, rest texture, fire texture]).
 func _draw_tiles(cv: Control, tiles: Array) -> void:
 	var font := ThemeDB.fallback_font
 	cv.draw_rect(Rect2(Vector2.ZERO, cv.size), Color(0.07, 0.07, 0.08))
@@ -243,7 +277,9 @@ func _draw_tiles(cv: Control, tiles: Array) -> void:
 			var at := o + Vector2(j * TILE_W / 2.0, TILE_NAME_H + shot.y)
 			var src := Rect2(cursor - Vector2(ZOOM_CROP) / 2.0, Vector2(ZOOM_CROP))
 			cv.draw_texture_rect_region(t[4 + j], Rect2(at, Vector2(TILE_W / 2.0, TILE_ZOOM_H)), src)
-			cv.draw_string(font, at + Vector2(8, 22), ["rest", "firing"][j], HORIZONTAL_ALIGNMENT_LEFT, -1, 20)
+			cv.draw_string(
+				font, at + Vector2(8, 22), ["rest", "firing: gauge arcs show"][j], HORIZONTAL_ALIGNMENT_LEFT, -1, 20
+			)
 
 
 ## Draws `painter` on a Control in a SubViewport of `size` and returns what it drew.
