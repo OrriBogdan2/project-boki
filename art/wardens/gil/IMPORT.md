@@ -147,3 +147,8 @@ LMB, RMB, E + recast, X + leap, hit, death).
 - Fix (rig only, no mesh/UV/texture change): Crouch_Walk_with_Torch now carries walk's 24 arm tracks, baked as WardenNative._arms_swapped does (times x 1.031). RightForeArm is re-pitched per key so the bill sits 6 deg above level, heading kept (tool: gens/hunter-round-1124/gil/r21/tools/crouchfix.py). `crouch_arms_from` dropped for gil only.
 - Probe after: crouch bill y +0.10 at every sample, tip above the hips. geo_check: worst 12.0 cm, held worst 5.6, hands ok (same as r20). Crouch hand_L>thigh_L 5.4 cm is walk's left arm on the crouch, as the runtime mix already played.
 - art-gate (3-row match sheets, r21 | r20 | live): GAME 7.3, r20 7.0, live 5.0, PASS.
+
+## Left-hand clear r22 (gil_meshy.glb anim only), 2026-11-27
+- Why: the art-gate caution on r21: geo_check hand_L>thigh_L 5.4 cm and forearm_L>thigh_L 4.1 cm in the crouch walk (live 0.0 / 2.6), because walk's left arm now rides the crouch's forward-bent hip.
+- Fix: Crouch_Walk_with_Torch LeftArm rotated 10 deg about world z per key (tool: gens/hunter-round-1124/gil/r22/tools/leftfix.py). No mesh/UV/texture change.
+- geo_check after: no hand/forearm pair worse than live; worst 12.0 cm, held worst 5.6 (shin_R>thigh_L, same as r19-r21, live 13.4). Hands ok.
