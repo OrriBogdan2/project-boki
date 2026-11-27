@@ -18,8 +18,8 @@ func _part_lmb() -> void:
 		[0.15, 0.3, 0.45, 0.6, 0.8, 1.0, 1.3, 1.6, 1.9], func(): return (P.pos + T.pos) * 0.5), 2.0)
 	await _go(GAP)
 
-## The dummy stands 7.8 m out: two quick embers die short of him (7.43 m), then after a 1 s pause the ready cue
-## shows and the bigger ember flies 1.25x further and reaches him.
+## The dummy stands 7.8 m out: two quick embers fly 7.43 m and just clip him (owner 11-26: +10%), then after a 1 s
+## pause the ready cue shows and the bigger ember flies 1.25x further (9.3 m) through him.
 func _part_wait() -> void:
 	await _reset(7.8)
 	var cast := func(t: float):
