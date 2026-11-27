@@ -412,13 +412,14 @@ func _breah() -> void:
 		KitLooks.of(m).skins_live("rock") >= 1 or K.launches - l0 == 3
 	)
 	ok(
-		"data: rocks carry no slow, only the Rock Hop's rolling rock does",
-		not K.rock_def().has("slow_t") and float(K.dash_def()["slow_t"]) > 0.0
+		"data: a punched rock slows 0.85x for 0.8 s, the Rock Hop's rolling rock harder and longer",
+		absf(float(K.rock_def()["slow_k"]) - 0.15) < 0.001 and absf(float(K.rock_def()["slow_t"]) - 0.8) < 0.001
+		and float(K.dash_def()["slow_t"]) > float(K.rock_def()["slow_t"])
 	)
 	step(m, 0.6)
 	ok(
-		"combo: launched rocks burst on the foe and shred it, no slow (ROCKFALL)",
-		dmg(T) >= 10.0 and T.vuln_t > 0.0 and T.slow_t <= 0.0 and K.launch_pay >= 1,
+		"combo: launched rocks burst on the foe, shred it and slow it 15% (ROCKFALL)",
+		dmg(T) >= 10.0 and T.vuln_t > 0.0 and T.slow_t > 0.0 and absf(T.slow_k - 0.15) < 0.01 and K.launch_pay >= 1,
 		"took %.1f vuln %.1f slow %.2f pay %d" % [dmg(T), T.vuln_t, T.slow_t, K.launch_pay]
 	)
 	ok(
