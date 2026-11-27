@@ -6,6 +6,7 @@ extends RefCounted
 ##   4. the lane shows one card at a time (none in a fight but urgent ones); a small line never sits beside
 ##      another and is dropped in a fight
 ##   5. armour breaking (yours or theirs) and a wall slam toast nothing: the bar and the number already say it
+##   6. every archetype has its model's top (body.top_h) and its plate hangs clear over it at the match's drawn size
 ## Never touches the save.
 
 var bad := 0
@@ -47,6 +48,7 @@ func run(main_node: Node) -> void:
 	_cards(m, zone)
 	_lane_budget(m)
 	_no_duplicate_toasts(m)
+	_plates_clear_tops(m)
 	m.queue_free()
 	print("HZONE DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -160,3 +162,26 @@ func _no_duplicate_toasts(m: Match) -> void:
 	m.on_armor_break(m.player, foe)
 	m.on_wall_slam(m.player, Vector2.RIGHT)
 	ok(lane.count() == 0, "armour breaking and a wall slam add no toast (%s)" % str(lane.texts()))
+
+
+## The plate's bottom edge sits at or over every archetype's tallest point (back props, horns), whatever the drawn size.
+func _plates_clear_tops(m: Match) -> void:
+	var feet := m.player.position
+	var vis_k := Hunter.VIS_SCALE * m.cam.hunter_scale
+	var worst := 1e9
+	var missing: Array[String] = []
+	for id in Arch.ids():
+		if not Arch.body(id).has("top_h"):
+			missing.append(id)
+		var top := Arch.top_h(id) * vis_k
+		var up := HudPlate.up_of(id, vis_k, 0.0) * CamRig.match_hunter_scale
+		var gap := _screen_y(m, feet, top) - _screen_y(m, feet, up) - 17.0  # px: the plate hangs 17 px under its anchor
+		worst = minf(worst, gap)
+	ok(missing.is_empty(), "every archetype has body.top_h in its data (missing: %s)" % str(missing))
+	var k := 1080.0 / m.get_viewport().get_visible_rect().size.y  # viewport px to 1080p px
+	var msg := "a plate's bottom clears the tallest point of all %d archetypes (worst %.0f px at 1080p)"
+	ok(worst >= 0.0, msg % [Arch.ids().size(), worst * k])
+
+
+func _screen_y(m: Match, feet: Vector3, up: float) -> float:
+	return m.cam.unproject_position(feet + m.cam.char_lean() * Vector3(0, up, 0)).y
