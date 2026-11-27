@@ -80,7 +80,9 @@ static func _boss_at(dn: DayNight, t: float) -> Vector3:
 static func _camp(hud, pv: Vector2, s: float, sp: Dictionary, up: bool, left: float) -> void:
 	var c: Control = hud.c
 	var night: bool = sp["mode"] == "night"
-	var col := (DayNight.NIGHT_COL if night else DayNight.DAY_COL) if up else DIM
+	var col := DIM
+	if up:
+		col = DayNight.NIGHT_COL if night else DayNight.DAY_COL
 	c.draw_circle(pv, s * 1.35, Color(0, 0, 0, 0.7))
 	c.draw_arc(pv, s * 1.35, 0, TAU, 20, col, 1.5, true)
 	Icons.draw(c, "moon" if night else "sun", pv, s * 0.8, col)
