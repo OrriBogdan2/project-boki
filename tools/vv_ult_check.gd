@@ -196,18 +196,18 @@ func _mage_merge(m: Match, P: Hunter, K: MageKit, home: Vector3) -> void:
 			"y +%.1f" % (P.pos.y - home.y))
 	KinMerge.end(P, "test")
 
-## Item 72: the highest Static among the foes the strike hits goes to every foe it hits (then the ult's own
-## stack, capped at 4); a foe outside the strike gets nothing; no stacked foe, nothing spreads.
+## The Static spread (the owner's rule; the full cases are --sparkle-r-spread-check): the landed-on foe gains the
+## ult's own stack, the other gains its Static + 1, capped at 4; with no Static anywhere each simply gains 1.
 func _mage_spread(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: MageKit, home: Vector3) -> void:
 	var spot := home + Vector3(5, 0, 0)
 	var far := T2.pos
 	var got := _kitefall_with(m, P, T, T2, K, home, spot, 3, 0)
-	ok("Kitefall: stacks {3, 0} -> both at 4 (the highest, plus the ult's own, capped)",
+	ok("Kitefall: stacks {3, 0} -> both at 4 (3 + the ult's own; the other 3 + 1, capped)",
 			got == [4, 4], str(got))
 	got = _kitefall_with(m, P, T, T2, K, home, spot, 1, 0)
 	ok("Kitefall: stacks {1, 0} -> both at 2", got == [2, 2], str(got))
 	got = _kitefall_with(m, P, T, T2, K, home, spot, 0, 0)
-	ok("Kitefall: no stacked foe -> nothing spreads, each gets only the ult's 1", got == [1, 1], str(got))
+	ok("Kitefall: no stacked foe -> each gets 1 (the ult's own; the spread of 0 + 1)", got == [1, 1], str(got))
 	ac.fresh(T2)
 	T2.teleport(far)
 	K.sparks.clear()
