@@ -4,6 +4,7 @@ extends RefCounted
 ## no HUD): 11 hop (hub -> Glasswater, one take), 12-15 one establishing walk per zone, 16 three back-to-back hops.
 
 const FPS := 60
+const PitchMontage := preload("res://tools/pitch_montage.gd")  # shot 16, and its light column (shot 17)
 const DAY_T := 0.45  # farm clock: mid-morning all film long
 const LEG_S := 6.0  # s at most to a goal
 const ZONE_TAKE_S := 8.0  # s a zone's walk lasts at least
@@ -64,13 +65,18 @@ const CAST := {
 	],
 }
 
-## Shot 17: a Boki that would thrive elsewhere walks ahead of the Hunter to the return pad and waits there with its
-## bubble; the Hunter follows (never nearer than STOP_M), presses E, and it walks onto the pad and blinks out.
-## (r10: the Boki was pinned to its staged spot and the Hunter landed on the pad, so nothing moved.)
-const ASK_BACK := 9.0  # m up-view of the pad the Hunter starts (the pad is straight ahead in the view)
-const ASK_BACKS := [9.0, 7.5, 10.5, 6.0]  # m up-view tried, in order, until the view there is level
-const ASK_BESIDE := 2.6  # m left of the asking Boki the Hunter walks (the view sees both, side by side)
-const ASK_SIDE := [0.0, 2.0, -2.0, 4.0, -4.0]  # m sideways tried until the walk to the pad clears every tree
+## Shot 17: a Boki that would thrive elsewhere asks (its bubble) and walks to the return pad side by side with the
+## Hunter; at the pad you press E, a column of the wanted zone's colour stands on the pad and it shrinks into it and is gone.
+## (r10: the Boki was pinned and nothing moved; r11: it walked in front of the Hunter, the bubble sat at the skyline and
+## the clip ended on 2.5 s of the Hunter standing alone.)
+const ASK_BACKS := [6.5, 7.5, 5.5, 8.5]  # m down-view of the pad the pair starts, tried in order until the view is level
+const ASK_BESIDE := 2.6  # m between the Hunter and the asking Boki, abreast (its bubble, at ASK_SAY_SCALE, stays off the Hunter)
+const ASK_SIDE := [0.0, 1.5, -1.5, 3.0, -3.0, 4.5, -4.5]  # m sideways tried until both walks clear every tree
+const ASK_SETTLE_S := 3.0  # s at most the view gets to come to rest after the set-down (the take starts on a still view)
+const ASK_SAY_Y := 1.3  # m over the Boki its bubble sits in the film (the game's 1.75 read as floating at the skyline)
+const ASK_SAY_SCALE := 0.8  # the bubble's text size in the film (narrower: it stays over the Boki)
+const ASK_SEND_S := 0.7  # s from E until the sent Boki has shrunk into the light (then the game blinks it out)
+const ASK_TO := "cinderstep"  # where Skateron wants to go (a fire lean)
 ## Up to three of the zone's Boki stand in an open arc ahead of the Hunter, clear of every prop; the others are out of the
 ## film (hidden), so each shot has 2-3 readable Boki and none inside a sign or post.
 ## Props that stay in the film (course scenery is hidden, see COURSE_NAMES): a staged Boki is moved off any of them.
@@ -83,6 +89,9 @@ var h: Node = null  # the Home on screen now (it is a new one after every hop)
 var hud := false  # --pitch-hud: the farm's HUD is filmed (the other version has none)
 var _keep_say: Label3D = null  # shot 17: the asker's own bubble (no other words over the world)
 var _keep: Node3D = null  # shot 17 films the return pad (the stone the ask is about), though it is built of discs
+var _shrink: Node3D = null  # shot 17: the sent Boki, drawn at _shrink_k of its size (it goes into the light)
+var _shrink_s0 := Vector3.ONE
+var _shrink_k := 1.0
 var _pins: Array = []  # [kin record, where it stands]: a staged Boki is held there for the whole take (no wandering off, no errand)
 var _cleared: Array = []  # props hidden off the Hunter's walk (kept hidden every frame)
 var _show: Array = []  # the Boki nodes that are in the film (all the others are hidden)
@@ -110,7 +119,7 @@ func play(shot: int) -> void:
 		11:
 			await hop_take("glasswater")
 		16:
-			await load("res://tools/pitch_montage.gd").new(self).play()
+			await PitchMontage.new(self).play()
 		17:
 			await ask_take()
 		18:
@@ -193,46 +202,50 @@ func ask_take() -> void:
 	var fwd2 := Vector2(0.0, -1.0).rotated(h.cam.yaw)
 	var fwd := Vector3(fwd2.x, 0.0, fwd2.y)
 	var right := Vector3(-fwd.z, 0.0, fwd.x)
-	var sg := 1.0  # the Hunter walks on the side of Skateron that ends further from a prop (the Expeditions ring)
-	var props := _props()
-	var room := [99.0, 99.0]
-	for i in 2:
-		var end: Vector3 = pad - right * ASK_BESIDE * (1.0 - 2.0 * i)
-		for q in props:
-			room[i] = minf(room[i], Vector2(end.x - q.x, end.z - q.z).length())
-	if room[1] > room[0]:
-		sg = -1.0
 	_pins.clear()  # Skateron walks (every other Boki is out of the film)
 	_show.clear()
 	_show.append(k["node"])
-	var start := pad - fwd * ASK_BACK
-	var found := false
-	for back in ASK_BACKS:  # the first start whose view is level (a wall behind it tips the view top-down)
+	var start := Vector3.INF
+	var kat := Vector3.INF
+	var sg := 1.0  # Skateron walks on the Hunter's right (1) or left (-1)
+	for back in ASK_BACKS:  # the first start whose view is level and full, there and at the pad (see _view_ok)
 		for dx in ASK_SIDE:
-			var cand: Vector3 = h.world.free_spot_near(pad - fwd * back + right * dx, [], 1.2, 0.9)
-			if not _trees_clear(cand, [pad]):
-				continue
-			_place(cand)
-			await _wait(0.5)
-			if h.farm_cam.tip < 0.05:
-				start = cand
-				found = true
-				print("PITCH ask start back=%.1f side=%.1f walk_side=%.0f" % [back, dx, sg])
+			for side in [1.0, -1.0]:
+				var mid: Vector3 = pad - fwd * back + right * dx
+				var c_h: Vector3 = h.world.free_spot_near(mid - right * ASK_BESIDE * 0.5 * side, [], 1.2, 0.9)
+				var c_k: Vector3 = h.world.free_spot_near(mid + right * ASK_BESIDE * 0.5 * side, [c_h], 1.2, 0.9)
+				var end_h: Vector3 = pad - right * ASK_BESIDE * side
+				if not (_trees_clear(c_h, [end_h]) and _trees_clear(c_k, [pad])):
+					continue
+				if not await _view_ok(c_h, end_h):
+					continue
+				start = c_h
+				kat = c_k
+				sg = side
+				print("PITCH ask start back=%.1f side=%.1f boki_side=%.0f" % [back, dx, sg])
 				break
-		if found:
+			if start != Vector3.INF:
+				break
+		if start != Vector3.INF:
 			break
+	if start == Vector3.INF:
+		rig.fail("no level start for the ask")
+		return
+	var end_h: Vector3 = pad - right * ASK_BESIDE * sg
 	_place(start)
-	var at: Vector3 = h.world.free_spot_near(start + (pad - start).normalized() * 3.6 + right * 1.2 * sg, [], 1.2, 0.9)
 	k.erase("job")
-	k["pos"] = at
-	k["goal"] = at
-	(k["node"] as Node3D).position = at
-	_clear_path(start, [at, pad])
+	k["pos"] = kat
+	k["goal"] = kat
+	(k["node"] as Node3D).position = kat
+	_pins.append([k, kat])  # held beside the Hunter while the view settles
+	_clear_path(start, [end_h])
+	_clear_path(kat, [pad])
 	_keep = h.hway.node
 	_cleared.erase(_keep)
 	_keep.visible = true
-	await _wait(1.8)  # (the view settles after the move: it starts tipped top-down)
+	await _settle()
 	rig.mark("ask")
+	_pins.clear()
 	var tries := 0
 	while not h.life._ask(k) and tries < 2000:
 		tries += 1
@@ -240,18 +253,24 @@ func ask_take() -> void:
 		rig.fail("Skateron did not ask")
 		return
 	_keep_say = k.get("say") as Label3D
+	_keep_say.position.y = ASK_SAY_Y
+	_keep_say.pixel_size *= ASK_SAY_SCALE
 	var n := 0
-	while n < int(7.0 * FPS):  # walk beside it to the pad (behind it, the Hunter hid it)
+	var k_still := 0  # frames Skateron has stood at the pad
+	var done := 0  # frames both have stood (the Hunter beside the pad)
+	while n < int(8.0 * FPS) and done < int(0.4 * FPS):  # abreast of it all the way (its pace)
 		var p3: Vector3 = (k["node"] as Node3D).global_position
+		var aim: Vector3 = p3 - right * ASK_BESIDE * sg
+		var to := Vector2(aim.x - h.ppos.x, aim.z - h.ppos.z)
 		var off := Vector2(p3.x - h.ppos.x, p3.z - h.ppos.z)
-		var to := Vector2(p3.x - right.x * ASK_BESIDE * sg - h.ppos.x, p3.z - right.z * ASK_BESIDE * sg - h.ppos.z)
-		var go := to.length() > 0.6 and off.length() > MIN_GAP_M + 0.3
-		_keys(to.normalized().rotated(h.cam.yaw) if go else Vector2.ZERO)
+		var pace := clampf((to.length() - 0.25) / 1.2, 0.0, 1.0) if off.length() > MIN_GAP_M + 0.3 else 0.0
+		_keys(to.normalized().rotated(h.cam.yaw) * pace if pace > 0.05 else Vector2.ZERO)
 		await rig.main.get_tree().process_frame
 		_tidy()
 		n += 1
-		if n > FPS and Vector2(p3.x - pad.x, p3.z - pad.z).length() < 2.2 and (to.length() <= 0.8 or not go):
-			break
+		var moving: bool = (k["node"] as Node3D).global_position.distance_to(p3) > 0.004
+		k_still = k_still + 1 if n > FPS and not moving else 0
+		done = done + 1 if k_still > int(0.3 * FPS) and pace <= 0.05 else 0
 	_keys(Vector2.ZERO)
 	var kp: Vector3 = (k["node"] as Node3D).global_position
 	print(
@@ -260,10 +279,61 @@ func ask_take() -> void:
 			% [start.distance_to(h.ppos), kp.distance_to(pad), n]
 		)
 	)
-	await _wait(2.2)  # it waits at the pad, the bubble reads
+	await _wait(1.2)  # it waits at the pad, the bubble reads
 	rig.mark("send")
-	h._kin_act(k)  # E: send it where it wants to go
-	await _wait(3.0)
+	_keep_say = null  # E: the bubble goes, a column of Cinderstep's colour stands round it, it shrinks into it ...
+	var col := Color(String(GardenZones.info(ASK_TO).get("colour", "c9c2b2")))
+	var lights = PitchMontage.new(self)
+	_shrink = k["node"]
+	_shrink_s0 = _shrink.scale
+	var foot: Vector3 = _shrink.global_position
+	var pillar: MeshInstance3D = lights._pillar(h, Vector3(foot.x, pad.y, foot.z), col)
+	var steps := int(ASK_SEND_S * FPS)
+	for i in steps:
+		var f := float(i + 1) / float(steps)
+		_shrink_k = lerpf(1.0, 0.05, smoothstep(0.3, 1.0, f))
+		lights._set_pillar(pillar, PitchMontage.PILLAR_A * minf(1.0, f * 2.2))
+		await rig.main.get_tree().process_frame
+		_tidy()
+	h._kin_act(k)  # ... and the game sends it (its burst, and it is gone)
+	await _wait(0.1)
+	_shrink = null
+	print("PITCH ask sent: in_roster_here=%s" % h.kins.has(k))
+	var fade := int(0.8 * FPS)
+	for i in fade:
+		lights._set_pillar(pillar, PitchMontage.PILLAR_A * (1.0 - smoothstep(0.1, 1.0, float(i + 1) / fade)))
+		await rig.main.get_tree().process_frame
+		_tidy()
+	pillar.queue_free()
+	await _wait(0.6)
+
+
+## Is the view level and at its full distance both where the Hunter starts and where it stops (a wall, cliff or a hidden
+## prop's collider behind it tips the view top-down or pulls it in to a close-up of the Hunter's back)?
+func _view_ok(from: Vector3, to: Vector3) -> bool:
+	var far := 0.0
+	for at in [from, to]:
+		_place(at)
+		await _wait(0.6)
+		var d: float = h.cam.global_position.distance_to(h.player.global_position)
+		if h.farm_cam.tip > 0.05 or d < far * 0.85:
+			return false
+		far = d
+	return true
+
+
+## Waits until the farm view has stopped moving after a set-down (or ASK_SETTLE_S), so a take starts on a still view.
+func _settle() -> void:
+	var last: Vector3 = h.cam.global_position
+	var calm := 0
+	var left := int(ASK_SETTLE_S * FPS)
+	while left > 0 and calm < int(0.4 * FPS):
+		await rig.main.get_tree().process_frame
+		_tidy()
+		var now: Vector3 = h.cam.global_position
+		calm = calm + 1 if now.distance_to(last) < 0.002 and h.farm_cam.tip < 0.05 else 0
+		last = now
+		left -= 1
 
 
 ## Shot 18 (headless, no film): from which side the walk up to the Waystone keeps the view level (the farm view
@@ -547,6 +617,8 @@ func _tidy() -> void:
 
 
 func _pre_draw() -> void:
+	if is_instance_valid(_shrink):
+		_shrink.scale = _shrink_s0 * _shrink_k
 	var c: Node = rig.main.current
 	if is_instance_valid(c) and c.get("ppos") != null and c.get("player") != null:
 		_hide_marks(c)
@@ -655,6 +727,10 @@ func _hide_marks(c: Node) -> void:
 	var air := c.get_node_or_null(ZoneAir.NAME) as Node3D
 	if air != null:
 		air.visible = false
+	for n in c.get_children():  # a chore's fetch ball (a small red sphere on the ground or in a Boki's mouth)
+		var mi := n as MeshInstance3D
+		if mi != null and mi.mesh is SphereMesh and (mi.mesh as SphereMesh).radius < 0.3:
+			mi.visible = false
 	for ball in c.find_children("Ball", "Node3D", true, false):  # a toy's ball (the red ball) rolls about wherever it likes
 		(ball as Node3D).visible = false
 	var crack := c.get_node_or_null("crack") as Node3D  # (Cinderstep's glowing ground cracks read as flat yellow strips)
