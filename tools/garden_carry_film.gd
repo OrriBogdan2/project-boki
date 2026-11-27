@@ -12,6 +12,7 @@ const DAY_T := 0.72  # farm clock: golden hour (low honey sun)
 const DEADLINE_S := 1500.0
 const HUNTER_CLASS := "medium"
 const RUN_OFF := 1.25  # rad off her back-line in the run shot: a three-quarter side view, her face turned to us
+const CARRY_PACE := 0.8  # stick in the carry run: the followers keep up
 const HEAD_S := 0.55  # s of each take that the dissolve eats at its start and at its end
 const CLEAR_MARGIN := 0.45  # m of bare ground kept round a bed or building (grass blades are wide)
 const DNA_PARTS := ["Tuft", "TailTuft", "Birthmark"]  # plain sphere parts of a Boki's unique look
@@ -260,8 +261,9 @@ func _turn_view(yaw: float, secs: float) -> void:
 	_yaw_rate = 1.0 / (secs * 0.5)
 
 
-## The hunter runs for `secs` toward `goal` (ground point), the view keeping `off` rad off his back-line.
-func _run(goal: Vector3, secs: float, off: float, stop_at := 0.6) -> void:
+## The hunter runs for `secs` toward `goal` (ground point), the view keeping `off` rad off the back-line; `pace` scales
+## the stick; the Boki in `pull` keep running (not walking) at the hunter's heels.
+func _run(goal: Vector3, secs: float, off: float, stop_at := 0.6, pace := 1.0, pull: Array = []) -> void:
 	var left := int(secs * FPS)
 	while left > 0:
 		var to := Vector2(goal.x - h.ppos.x, goal.z - h.ppos.z)
@@ -269,8 +271,12 @@ func _run(goal: Vector3, secs: float, off: float, stop_at := 0.6) -> void:
 			break
 		_yaw_goal = _view_behind(to, off)
 		_yaw_rate = 1.8
-		_keys(to.normalized().rotated(h.cam.yaw))
+		_keys(to.normalized().rotated(h.cam.yaw) * pace)
+		var was: Vector3 = h.ppos
 		await _wait(1.0 / FPS)
+		var mine := Vector2(h.ppos.x - was.x, h.ppos.z - was.z).length() * FPS
+		for i in pull:  # as HomeCarry._lead: a led Boki goes at your pace, never under its gallop
+			h.kins[i]["led"] = maxf(mine, BokiRig.RUN_SPEED) * 1.1
 		left -= 1
 	_keys(Vector2.ZERO)
 
@@ -352,7 +358,7 @@ func _shot_run(meadow: Vector3) -> void:
 	for i in 4:
 		_put(i, meadow + Vector3([0.0, 1.6, -1.2, 0.4][i], 0, [0.0, 1.3, 1.5, -1.6][i]))
 	_stand(from, meadow, RUN_OFF)
-	_view(34.0, 16.0, 0.6, 0.9)
+	_view(34.0, 16.0, 0.75, 0.9)
 	_mark("run", true)
 	await _wait(HEAD_S)
 	h.life.machine(h.kins[0]).go(BaseLife.S.ROAM, "film")
@@ -376,7 +382,7 @@ func _shot_lift(meadow: Vector3) -> void:
 	_put(2, meadow + Vector3(0.0, 0, -2.4))
 	_put(3, meadow + Vector3(1.6, 0, 1.4))
 	_put(0, h.ppos + Vector3(-sin(h.pface), 0, -cos(h.pface)) * 1.0)
-	_view(32.0, 14.0, 0.4, 0.8)
+	_view(32.0, 14.0, 0.55, 0.9)
 	await _wait(HEAD_S + 0.5)
 	h.carry.press_hold(k)
 	await _wait(1.6)
@@ -407,7 +413,7 @@ func _shot_carry(meadow: Vector3) -> void:
 		_call_over(i, 20.0)
 	await _wait(HEAD_S)
 	for leg in 3:  # the followers are called over again each leg so they stay at his heels
-		await _run(goal, 3.4, PI + 0.4, 1.0)
+		await _run(goal, 3.4 / CARRY_PACE, PI + 0.4, 1.0, CARRY_PACE, [1, 2, 3])
 		for i in range(1, 4):
 			_call_over(i, 20.0)
 		if leg == 1:
@@ -426,7 +432,7 @@ func _shot_set_down(meadow: Vector3) -> void:
 	_put(1, h.ppos + Vector3(2.5, 0, -1.5))
 	_put(2, h.ppos + Vector3(2.0, 0, 1.8))
 	_put(3, h.ppos + Vector3(3.2, 0, 0.2))
-	_view(32.0, 17.0, 0.62, 0.95)
+	_view(32.0, 15.0, 0.85, 1.0)
 	await _wait(HEAD_S + 0.5)
 	h.carry.drop()
 	await _wait(0.8)
