@@ -161,8 +161,9 @@ func _fire_rock(start: Vector3, dir: Vector2, dmg: float, src: String, skin: Str
 	rock_sd = m.shots[-1]
 	m.sfx("br_launch", start, -3.0, 1.0)
 
-## Where a launched rock ends: it bursts, shreds and slows what it caught and splashes whoever is next
-## to it. A rock bursting on someone a rock already burst on inside the repeat window deals less.
+## Where a launched rock ends: it bursts, shreds and slows what it caught (the slow rows of `rock`, or of `dash`
+## for a Rock Hop rock) and splashes whoever is next to it. A rock bursting on someone a rock already burst on
+## inside the repeat window deals less.
 func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String, src: String) -> void:
 	var rd := rock_def()
 	var x: Dictionary = s["x"]
@@ -172,9 +173,8 @@ func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String, src: String) ->
 	var blast := float(rd["blast"])
 	vfx("rock_burst", AimMode.ground(m, at), (s["vel"] as Vector2).normalized())
 	m.sfx("br_burst", at, -3.0, 1.0)
-	var slow := {}
-	if src == "dash":
-		slow = {"slow": float(dash_def()["slow_t"]), "slow_k": float(dash_def()["slow_k"])}
+	var slow_def := dash_def() if src == "dash" else rd
+	var slow := {"slow": float(slow_def["slow_t"]), "slow_k": float(slow_def["slow_k"])}
 	var ult_cast := int(x.get("ult", 0))
 	var splash_dmg := float(s["dmg"]) * 0.6
 	if e != null and is_instance_valid(e) and e.team != h.team:
