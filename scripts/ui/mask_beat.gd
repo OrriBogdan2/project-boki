@@ -86,7 +86,6 @@ var _heart_i := 0
 var _heart_wait := 0.0
 var _anim: HunterAnim
 var _memory_i := -1
-var _fov := 70.0
 
 static func play(relic: MaskRelic, who: Node3D, done: Callable, swap_body := true, quick := false) -> MaskBeat:
 	var b := MaskBeat.new()
@@ -146,8 +145,7 @@ func _take_camera() -> void:
 	_was_cam = get_viewport().get_camera_3d()
 	cam = Camera3D.new()
 	_from = _was_cam.global_transform if _was_cam else Transform3D(Basis(), _head + _front * 4.0)
-	_fov = _was_cam.fov if _was_cam else 60.0
-	cam.fov = _fov
+	cam.fov = _was_cam.fov if _was_cam else 60.0
 	add_child(cam)
 	cam.global_transform = _from
 	cam.current = true
@@ -410,8 +408,6 @@ func _reveal(dt: float) -> void:
 		_ripple.scale = Vector3.ONE * (0.5 + RIPPLE_M * 2.0 * (1.0 - pow(1.0 - k, 3.0)))
 		var col := Color(Arch.color(id).lightened(0.3), 1.0 - k)
 		(_ripple.material_override as ShaderMaterial).set_shader_parameter("color", col)
-	var punch := float(_rules["punch_fov"]) * (1.0 - smoothstep(0.0, 0.5, t))
-	cam.fov = _fov - punch
 	_ease_camera(float(_times["push_in"]) * lerpf(1.0, 0.7, smoothstep(0.0, 0.8, t)))
 	var back := smoothstep(_reveal_s - HAND_BACK_S, _reveal_s, t)
 	if back > 0.0 and is_instance_valid(_was_cam):
