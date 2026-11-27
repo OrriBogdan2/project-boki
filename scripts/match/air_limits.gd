@@ -65,11 +65,6 @@ static func fold_at_touchdown(h: Hunter, dt: float) -> void:
 		h.glide_dive.on = false
 		h.m.fx.dust(h.pos, 5)
 
-<<<<<<< HEAD
-## True while an ability or attack keeps the glider shut: its own action or its recovery pose, which a fresh glide
-## press (armed) cuts short.
-=======
-
 ## True while the glider can't open: an ability or attack animation runs (glide_locked), or the ground is too close.
 static func glide_shut(h: Hunter) -> bool:
 	return glide_locked(h) or too_low(h)
@@ -81,8 +76,8 @@ static func too_low(h: Hunter) -> bool:
 	return not h.over_void() and HunterMove.too_low(h.vel.y, h.pos.y - h.ground())
 
 
-## True while an ability or attack animation runs, so the glider can't open yet.
->>>>>>> origin/ext/move-parity-1126
+## True while an ability or attack keeps the glider shut: its own action or its recovery pose, which a fresh glide
+## press (armed) cuts short.
 static func glide_locked(h: Hunter) -> bool:
 	return hard_locked(h) or (h.ak != null and move_running(h.ak, h) and not h.glide_armed())
 
