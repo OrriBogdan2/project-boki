@@ -106,16 +106,23 @@ static func bank(e: Dictionary) -> void:
 		Save.add_item(String(e["id"]), 1)
 
 ## Pays one finished match to the Boki you backed (`mine`) against `foe`. Returns what the card shows:
-## {game, won, items (entries), first, round (name of the round won), crown, ribbon, reset, keepsake (name or "")}.
+## {game, won, items (entries), first, round (name of the round won), crown, ribbon, reset, keepsake (name or ""),
+## charged, runs ("Races left today: N")}. A win uses one limited race run (TrainRuns); with none left it was a
+## friendly: no prize, no cup step (charged false). A loss pays nothing, so it uses no run.
 static func settle(id: String, mine: Dictionary, foe: Dictionary, won: bool, now := -1.0,
 		rng: RandomNumberGenerator = null) -> Dictionary:
 	var out := {"game": id, "won": won, "items": [], "first": false, "round": "", "crown": false,
-			"ribbon": false, "reset": false, "keepsake": ""}
+			"ribbon": false, "reset": false, "keepsake": "", "charged": true, "runs": ""}
 	if now < 0.0:
 		now = Time.get_unix_time_from_system()
 	if not won:
 		GardenXp.play(id, mine, false, false)
 		out["reset"] = _runs(id).erase(String(mine["uid"]))
+		out["runs"] = TrainRuns.line("race", now)
+		return out
+	out["charged"] = TrainRuns.spend("race", now)
+	out["runs"] = TrainRuns.line("race", now)
+	if not out["charged"]:
 		return out
 	var dice := rng
 	if dice == null:
@@ -191,6 +198,10 @@ static func rows(res: Dictionary, font := 0) -> Array:
 		out.append(["Cup: beat the %s round" % res["round"], UI.TEAL])
 	elif res["reset"]:
 		out.append(["The cup run starts over", UI.MUTED])
+	if not res.get("charged", true):
+		out.append([TrainRuns.empty_line("race"), UI.MUTED])
+	elif String(res.get("runs", "")) != "":
+		out.append([res["runs"], UI.MUTED])
 	if font > 0:
 		for r in out:
 			r.insert(1, font)

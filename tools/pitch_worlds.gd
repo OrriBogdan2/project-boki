@@ -27,8 +27,8 @@ const ORBIT_DIR := {"glasswater": -1.0}
 const SHIFTS := [0.0, 2.5, -2.5, 4.5, -4.5, 6.5, -6.5, 8.5, -8.5]
 ## the hub's market stall and games board (east of the Waystone) and its Burrow mound (west) are primitive-built: out of the
 ## film (rects: x z width depth)
-const HUB_FIXTURES := [Rect2(43.0, 30.5, 5.0, 7.5), Rect2(32.0, 34.5, 3.0, 3.0)]
-const PLAIN_DECO := ["snack_patch", "toy_dig"]  # a zone's primitive-built beds (planter, dig patch): out of the film
+const HUB_FIXTURES := [Rect2(43.0, 30.5, 5.0, 7.5), Rect2(32.0, 34.5, 3.0, 3.0), Rect2(37.0, 28.5, 3.0, 2.0)]  # stall, burrow door, the block house
+const PLAIN_DECO := ["snack_patch", "toy_dig", "toy_ball", "toy_stone", "toy_post", "toy_tub"]  # a zone's primitive-built beds and toys (the red ball, the post, the tub): out of the film
 const PATH_GAP := 2.2  # m: a prop this close to the Hunter's walk (landing -> Boki 0 -> 1 -> 2) is out of the film
 const ZONES := ["glasswater", "cinderstep", "hushwood", "ridge"]
 const ZONE_OF_SHOT := {12: "glasswater", 13: "cinderstep", 14: "hushwood", 15: "ridge"}
@@ -87,6 +87,7 @@ var _pins: Array = []  # [kin record, where it stands]: a staged Boki is held th
 var _cleared: Array = []  # props hidden off the Hunter's walk (kept hidden every frame)
 var _show: Array = []  # the Boki nodes that are in the film (all the others are hidden)
 var _min_gap := 99.0  # m: the nearest any shown Boki came to the Hunter this take
+var _stage_at: Array = STAGE_AT  # (m right, m ahead) of the landing where this take stages its Boki
 var _cuts := 0  # hops filmed so far this take
 var _frames := 0  # frames this take has run (Engine.get_frames_drawn stays 0 headless)
 # a slow right-drag turn of the view: `turn` radians over `secs`, one step a frame (while walking or waiting)
@@ -109,7 +110,7 @@ func play(shot: int) -> void:
 		11:
 			await hop_take("glasswater")
 		16:
-			await montage()
+			await load("res://tools/pitch_montage.gd").new(self).play()
 		17:
 			await ask_take()
 		18:
@@ -182,23 +183,6 @@ func zone_take(zone: String) -> void:
 		n += 1
 
 
-## Shot 16: hub -> zone -> hub -> zone, each hop the moment you arrive (the wipes are cut out by the encoder).
-func montage() -> void:
-	await _load(GardenZones.HUB)
-	_place(HubWaystone.HUB_AT + STONE_SIDE * 6.0)
-	await _wait(0.5)
-	rig.mark("montage")
-	await _walk(HubWaystone.HUB_AT, 1.8)
-	await _hop("glasswater")
-	await _wait(0.9)
-	await _hop(GardenZones.HUB)
-	_place(HubWaystone.HUB_AT + STONE_SIDE * 5.0)  # lands on the clear side
-	await _wait(0.4)
-	await _walk(HubWaystone.HUB_AT, 1.8)
-	await _hop("ridge")
-	await _wait(1.8)
-
-
 func ask_take() -> void:
 	for rec in Save.d["roster"]:
 		if String(rec["name"]) == "Skateron":
@@ -238,9 +222,7 @@ func ask_take() -> void:
 		if found:
 			break
 	_place(start)
-	var at: Vector3 = h.world.free_spot_near(
-		start + (pad - start).normalized() * 3.6 + right * 1.2 * sg, [], 1.2, 0.9
-	)
+	var at: Vector3 = h.world.free_spot_near(start + (pad - start).normalized() * 3.6 + right * 1.2 * sg, [], 1.2, 0.9)
 	k.erase("job")
 	k["pos"] = at
 	k["goal"] = at
@@ -262,19 +244,13 @@ func ask_take() -> void:
 	while n < int(7.0 * FPS):  # walk beside it to the pad (behind it, the Hunter hid it)
 		var p3: Vector3 = (k["node"] as Node3D).global_position
 		var off := Vector2(p3.x - h.ppos.x, p3.z - h.ppos.z)
-		var to := Vector2(
-			p3.x - right.x * ASK_BESIDE * sg - h.ppos.x, p3.z - right.z * ASK_BESIDE * sg - h.ppos.z
-		)
+		var to := Vector2(p3.x - right.x * ASK_BESIDE * sg - h.ppos.x, p3.z - right.z * ASK_BESIDE * sg - h.ppos.z)
 		var go := to.length() > 0.6 and off.length() > MIN_GAP_M + 0.3
 		_keys(to.normalized().rotated(h.cam.yaw) if go else Vector2.ZERO)
 		await rig.main.get_tree().process_frame
 		_tidy()
 		n += 1
-		if (
-			n > FPS
-			and Vector2(p3.x - pad.x, p3.z - pad.z).length() < 2.2
-			and (to.length() <= 0.8 or not go)
-		):
+		if n > FPS and Vector2(p3.x - pad.x, p3.z - pad.z).length() < 2.2 and (to.length() <= 0.8 or not go):
 			break
 	_keys(Vector2.ZERO)
 	var kp: Vector3 = (k["node"] as Node3D).global_position
@@ -303,9 +279,7 @@ func probe() -> void:
 			var n := 0
 			var goal := HubWaystone.HUB_AT
 			while n < 6 * FPS and Vector2(goal.x - h.ppos.x, goal.z - h.ppos.z).length() > 1.6:
-				var way := Vector2(goal.x - h.ppos.x, goal.z - h.ppos.z).normalized().rotated(
-					h.cam.yaw
-				)
+				var way := Vector2(goal.x - h.ppos.x, goal.z - h.ppos.z).normalized().rotated(h.cam.yaw)
 				_keys(way)
 				await rig.main.get_tree().process_frame
 				top = maxf(top, h.farm_cam.tip)
@@ -326,15 +300,8 @@ func probe() -> void:
 				continue
 			var p: Vector3 = (k["node"] as Node3D).global_position
 			var c := FarmWater.nearest(Save.d, Vector2(p.x, p.z))
-			var wet := (
-				Vector2(c.x + 0.5, c.y + 0.5).distance_to(Vector2(p.x, p.z)) if c.x >= 0 else 99.0
-			)
-			print(
-				(
-					"PROBE   %s at %s water_m=%.1f dist=%.1f"
-					% [k["rec"]["name"], p, wet, p.distance_to(h.ppos)]
-				)
-			)
+			var wet := Vector2(c.x + 0.5, c.y + 0.5).distance_to(Vector2(p.x, p.z)) if c.x >= 0 else 99.0
+			print("PROBE   %s at %s water_m=%.1f dist=%.1f" % [k["rec"]["name"], p, wet, p.distance_to(h.ppos)])
 
 
 # ------------------------------------------------------------------ moving about
@@ -347,11 +314,7 @@ func _load(zone: String) -> void:
 
 ## Waits for the Home that a screen change builds, then dresses it for film.
 func _arrived() -> void:
-	while (
-		not is_instance_valid(rig.main.current)
-		or rig.main.current == h
-		or rig.main.current.get("building") == true
-	):
+	while not is_instance_valid(rig.main.current) or rig.main.current == h or rig.main.current.get("building") == true:
 		await rig.main.get_tree().process_frame
 	h = rig.main.current
 	await rig.main.get_tree().process_frame
@@ -371,20 +334,9 @@ func _props() -> Array:
 		kin_nodes.append(k["node"])
 	for n in h.get_children():
 		var n3 := n as Node3D
-		if (
-			n3 == null
-			or not n3.visible
-			or n3 == h.player
-			or n3 in kin_nodes
-			or n3.get_script() != null
-		):
+		if n3 == null or not n3.visible or n3 == h.player or n3 in kin_nodes or n3.get_script() != null:
 			continue
-		if (
-			_is_course(n3)
-			or _is_placeholder(n3)
-			or n3.get_child_count() == 0
-			or n3.position.length() < 1.0
-		):
+		if _is_course(n3) or _is_placeholder(n3) or n3.get_child_count() == 0 or n3.position.length() < 1.0:
 			continue
 		if n3.find_children("*", "MeshInstance3D", true, false).is_empty():
 			continue
@@ -419,20 +371,15 @@ func _stage() -> void:
 	var awake: Array = h.kins.filter(func(k): return not k.has("indoors"))
 	var mine: Array = awake.filter(func(k): return GardenZones.zone_of(k["rec"]) == zone)
 	for k in awake:  # a zone with fewer than three residents borrows the rest: the film shows 2-3 Boki, readable
-		if mine.size() < STAGE_AT.size() and not (k in mine):
+		if mine.size() < _stage_at.size() and not (k in mine):
 			mine.append(k)
-	print(
-		(
-			"PITCH stage zone=%s kins=%d staged=%d"
-			% [zone, h.kins.size(), mini(STAGE_AT.size(), mine.size())]
-		)
-	)
+	print("PITCH stage zone=%s kins=%d staged=%d" % [zone, h.kins.size(), mini(_stage_at.size(), mine.size())])
 	var fwd2 := Vector2(0.0, -1.0).rotated(h.cam.yaw)  # the view's "up", on the ground
 	var fwd := Vector3(fwd2.x, 0.0, fwd2.y)
 	var right := Vector3(-fwd.z, 0.0, fwd.x)
 	var placed: Array = []
 	for dx in SHIFTS:  # the first sideways slide whose walk (landing -> Boki 0 -> 1 -> 2 -> 0) stays clear of every tree
-		placed = _spots(mini(STAGE_AT.size(), mine.size()), right * dx, fwd, right)
+		placed = _spots(mini(_stage_at.size(), mine.size()), right * dx, fwd, right)
 		if _trees_clear(h.ppos, placed):
 			print("PITCH stage shift=%.1f" % dx)
 			break
@@ -454,7 +401,7 @@ func _stage() -> void:
 func _spots(n: int, slide: Vector3, fwd: Vector3, right: Vector3) -> Array:
 	var placed: Array = []
 	for i in n:
-		var at: Vector3 = h.ppos + slide + right * STAGE_AT[i].x + fwd * STAGE_AT[i].y
+		var at: Vector3 = h.ppos + slide + right * _stage_at[i].x + fwd * _stage_at[i].y
 		placed.append(_clear_of_props(h.world.free_spot_near(at, placed, 1.5, 1.1)))
 	return placed
 
@@ -488,6 +435,7 @@ func _hide_fixtures(zone: String) -> void:
 		var n3 := n as Node3D
 		if (
 			n3 == null
+			or not n3.visible
 			or n3 == h.player
 			or n3 in kin_nodes
 			or n3 == h.get("world")
@@ -505,10 +453,7 @@ func _hide_fixtures(zone: String) -> void:
 			var tiles := 0  # flat box tiles (a zone game's course, e.g. Cinderstep's stepping slabs)
 			for m in n3.find_children("*", "MeshInstance3D", true, false):
 				hide = hide or (m as MeshInstance3D).mesh is PrismMesh
-				if (
-					(m as MeshInstance3D).mesh is BoxMesh
-					and (m as MeshInstance3D).get_aabb().size.y < 0.05
-				):
+				if (m as MeshInstance3D).mesh is BoxMesh and (m as MeshInstance3D).get_aabb().size.y < 0.05:
 					tiles += 1
 			hide = hide or tiles >= 4
 		if hide:
@@ -537,6 +482,7 @@ func _clear_path(start: Vector3, stops: Array) -> void:
 			or n3 == h.player
 			or n3 in kin_nodes
 			or n3.get_script() != null
+			or _is_stone(h, n3)
 		):
 			continue
 		var meshes: Array = n3.find_children("*", "MeshInstance3D", true, false)
@@ -546,10 +492,7 @@ func _clear_path(start: Vector3, stops: Array) -> void:
 			continue
 		var big := false  # ground, cliffs and ponds stay; props and lone trees on the walk go (Motley walked through a trunk)
 		for m in meshes:
-			var sz: Vector3 = (
-				(m as MeshInstance3D).get_aabb().size
-				* (m as Node3D).global_transform.basis.get_scale()
-			)
+			var sz: Vector3 = (m as MeshInstance3D).get_aabb().size * (m as Node3D).global_transform.basis.get_scale()
 			big = big or maxf(sz.x, sz.z) > 4.5 or sz.y > 7.0
 		if big:
 			continue
@@ -594,6 +537,8 @@ func _tidy() -> void:
 			_min_gap = minf(_min_gap, Vector2(at.x - c.ppos.x, at.z - c.ppos.z).length())
 	if _frames % 10 == 0 and c.get("farm_cam") != null and c.farm_cam.tip > 0.05:  # the view tipped up over a wall
 		print("PITCH_TIP frame=%d tip=%.2f at=%s" % [_frames, c.farm_cam.tip, c.ppos])
+	if _frames % 30 == 0 and c == h:  # (a toy's node is rebuilt a moment after the zone loads: hidden again)
+		_hide_fixtures(GardenZones.current())
 	c.day_t = DAY_T
 	c.talk_cd = 1e9  # no chatter bubbles
 	for k in c.kins:
@@ -649,6 +594,22 @@ func _is_placeholder(n: Node3D) -> bool:
 	return (has_label and not round_part and meshes.size() <= 5) or only_cyl or plain
 
 
+## The Waystone (a zone's return pad) is what the hop goes through: it stays in the film, whatever its parts are.
+func _is_stone(c: Node, n: Node3D) -> bool:
+	return c.get("hway") != null and n == c.hway.node
+
+
+## The Expeditions ring (a black ring on a glass disc: it blocks the frame and is not the Waystone), the glider rack
+## beside it, and a zone's flat stepped slabs (scatter "terrace").
+func _is_stand_in(c: Node, n: Node3D) -> bool:
+	if n.get_node_or_null("Ring") != null and n.get_node_or_null("Disc") != null:
+		return true
+	if n is MultiMeshInstance3D:
+		return String(n.name).begins_with("terrace")
+	var rack: Vector3 = c.spots.get("rack", Vector3.INF)
+	return n.get_script() == null and Vector2(n.position.x - rack.x, n.position.z - rack.z).length() < 2.2
+
+
 func _hide_marks(c: Node) -> void:
 	if not is_instance_valid(c.get("player")):
 		return
@@ -662,7 +623,8 @@ func _hide_marks(c: Node) -> void:
 			and n3 != c.player
 			and n3 != _keep
 			and not (n3 in kin_nodes)
-			and _is_placeholder(n3)
+			and not _is_stone(c, n3)
+			and (_is_placeholder(n3) or _is_stand_in(c, n3))
 		):
 			n3.visible = false
 	for n in c.get_children():
@@ -693,6 +655,8 @@ func _hide_marks(c: Node) -> void:
 	var air := c.get_node_or_null(ZoneAir.NAME) as Node3D
 	if air != null:
 		air.visible = false
+	for ball in c.find_children("Ball", "Node3D", true, false):  # a toy's ball (the red ball) rolls about wherever it likes
+		(ball as Node3D).visible = false
 	var crack := c.get_node_or_null("crack") as Node3D  # (Cinderstep's glowing ground cracks read as flat yellow strips)
 	if crack != null:
 		crack.visible = false
@@ -701,11 +665,7 @@ func _hide_marks(c: Node) -> void:
 		ring.visible = false
 	for q in c.player.find_children("*", "MeshInstance3D", true, false):
 		var mi := q as MeshInstance3D
-		if (
-			mi.mesh is QuadMesh
-			or String(mi.name).begins_with("orbit_cards")
-			or String(mi.name).begins_with("Halo")
-		):
+		if mi.mesh is QuadMesh or String(mi.name).begins_with("orbit_cards") or String(mi.name).begins_with("Halo"):
 			mi.visible = false
 	if c.get("ui") != null:
 		(c.ui as CanvasLayer).visible = hud
@@ -777,8 +737,8 @@ func _dry(p: Vector3) -> bool:
 
 
 ## Walks to within `near` m of `goal` (xz) with the real keys, each frame turned into the view's own terms.
-func _walk(goal: Vector3, near: float) -> void:
-	var left := int(LEG_S * FPS)
+func _walk(goal: Vector3, near: float, secs := LEG_S) -> void:
+	var left := int(secs * FPS)
 	while left > 0 and Vector2(goal.x - h.ppos.x, goal.z - h.ppos.z).length() > near:
 		_keys(_steer(goal).rotated(h.cam.yaw))
 		await rig.main.get_tree().process_frame
