@@ -685,7 +685,7 @@ func _fill_menu(v: VBoxContainer) -> void:
 				_fill_menu(v),
 			MENU_PICK_W
 		)
-		b.add_theme_font_size_override("font_size", 11)
+		b.add_theme_font_size_override("font_size", 12)
 		b.clip_text = true  # a long name never widens the grid (and the panel past a 16:10 window): it trims
 		b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		b.tooltip_text = nm  # the tooltip has it whole
