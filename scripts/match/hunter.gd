@@ -2717,9 +2717,14 @@ func set_model(n: Node3D) -> void:
 	vis_k = 1.0
 	fit_scale()
 
-## Puts VIS_SCALE x match_k x the camera's hunter_scale on the model (again when the Settings camera changes).
+## The size a match draws a hunter of this archetype at, before the camera's hunter_scale: VIS_SCALE x match_k.
+## The farm draws your avatar at it too, so a hunter is the same height at home as in a match.
+static func drawn_k(arch_id: String) -> float:
+	return VIS_SCALE * Arch.match_k(arch_id)
+
+## Puts drawn_k x the camera's hunter_scale on the model (again when the Settings camera changes).
 func fit_scale() -> void:
-	var k: float = VIS_SCALE * Arch.match_k(arch) * (m.cam.hunter_scale if m and m.cam else 1.0)
+	var k: float = drawn_k(arch) * (m.cam.hunter_scale if m and m.cam else 1.0)
 	if is_equal_approx(k, vis_k):
 		return
 	model.scale *= k / vis_k

@@ -1,6 +1,7 @@
 extends RefCounted
 ## --farm-cam-check: the farm's close third-person view (FarmCam, content/rules/camera.json "farm").
-##   0. in the farm it settles at the rules' pitch, lens and distance, behind you, and the bodies are not leaned back
+##   0. in the farm it settles at the rules' pitch, lens and distance, behind you, and the bodies are not leaned back;
+##      your avatar is drawn at its match size (Hunter.drawn_k), so a hunter is as tall at home as in a match
 ##   1. W walks away from the camera at every orbit angle (keys turned to the view)
 ##   2. a wall behind you pulls the camera in (and nothing it passes is inside the ground or the wall), and it backs
 ##      out again when the wall goes
@@ -83,6 +84,9 @@ func _third_part(r: Dictionary) -> void:
 	)
 	ok(cam.global_position.z > cam.focus.z, "the camera is south of you with the view at yaw 0 (looking north)")
 	ok(cam.char_lean() == Basis(), "bodies are not tipped back at this low angle")
+	var want: float = Hunter.drawn_k(Arch.of_save()) * cam.hunter_scale
+	var got: float = home.player.scale.y
+	ok(absf(got - want) < 0.01, "your avatar is drawn at its match size (x%.3f, match x%.3f)" % [got, want])
 	ok(home.cam.get_viewport().get_camera_3d() == cam, "it is the farm's current camera")
 
 

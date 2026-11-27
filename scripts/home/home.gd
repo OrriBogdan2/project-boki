@@ -1138,8 +1138,9 @@ func _apply_cam_settings() -> void:
 	cam.apply_settings()
 	cam.dist_mul = CamRig.style_across(HOME_ACROSS_REF) / CamRig.style_across(cam.style_id)
 	if player and is_instance_valid(player):
-		# (a hero swap's pop rides on the base scale of 1, so it can't get stuck stretched)
-		player.scale = player.get_meta("pop", Vector3.ONE) as Vector3
+		# drawn at its match size (Hunter.drawn_k); a hero swap's pop rides on top, so it can't get stuck stretched
+		var k := Hunter.drawn_k(Arch.of_save()) * cam.hunter_scale
+		player.scale = (player.get_meta("pop", Vector3.ONE) as Vector3) * k
 
 ## Trees between the camera and you (or your active Boki) thin out, as in a match (SeeThrough).
 func _see_through() -> void:
