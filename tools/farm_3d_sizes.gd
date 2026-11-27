@@ -3,9 +3,10 @@ extends RefCounted
 ## (Albert is the farm's own avatar, drawn at the size Home gives it; Kael, Sparkle, Meeko and Cinder are built as a
 ## match builds a hunter) at their farm size (Arch.farm_k: the owner's canon height) and the four Boki at Home's
 ## own farm size, all idle and facing the camera, HUD, marks and particles hidden.
-## Writes 1_farm_cam.png (the farm's close third-person view: one row with Albert, the camera's target, in the middle
-## and the three starters a step nearer under the gaps), 2_eye_row.png (eye level, one row), 3_mid.png and
-## heights.json (metres as drawn: crown and with extras, per hunter and per Boki). Needs a renderer for the stills.
+## Writes 1_farm_cam.png (the farm's close third-person camera: the five hunters and three starters on one arc the same
+## distance from it, Albert in the middle), 2_eye_row.png (eye level, all nine on one arc, Crofthorn too) and
+## heights.json (metres as drawn: crown and with extras, per hunter and per Boki); each shot's <name>.json (name tags,
+## px) and a box and overlap log (FARM3D boxes/overlaps/facing). Headless: the same layout and logs, no stills.
 
 const WARDEN_SKIN := preload("res://tools/warden_skin.gd")
 const NOT_BODY := [
@@ -29,10 +30,21 @@ const ARCHES := ["bulwark", "juggernaut", "mage", "tender", "ashwick"]  # Albert
 const NAMES := ["Albert", "Kael", "Sparkle", "Meeko", "Cinder"]
 const SPECIES: PackedStringArray = ["cindle", "burrlet", "puddlet", "heatherhorn"]
 const BOKI_NAMES := ["Ash", "Moss", "Dew", "Haggis"]
-const ROW_STEP := 1.75  # m of arc between neighbours in the one row of nine (eye shot): hunters and Boki alternate
+## m: each one's half width in the eye row (Albert with hammer and shield, Crofthorn's horns) and the gap between
+const ROW_HALF := {
+	"h0": 1.4,
+	"h1": 0.6,
+	"h2": 0.45,
+	"h3": 0.5,
+	"h4": 0.5,
+	"b0": 0.35,
+	"b1": 0.35,
+	"b2": 0.35,
+	"b3": 0.85
+}
+const ROW_GAP := 0.4
+const SETTLE_S := 4.0  # s the fresh idles run before the eye shot (a turn on the spot steps round in that time)
 const ROW_ORDER := ["h1", "b0", "h2", "b1", "h0", "b2", "h3", "b3", "h4"]  # Albert in the middle
-const HUNTER_X := [-5.0, -2.5, 0.0, 2.5, 5.0]  # m across the group (mid shot back row), Albert far left
-const BOKI_X := [-3.75, 1.25, 3.75, -1.25]  # m (cindle, burrlet, puddlet, heatherhorn): in the gaps, a row nearer
 ## Farm shot: everyone on one arc round the farm camera, so all stand the same distance from it and the still reads
 ## their real sizes side by side. The camera is the farm's own close 3P rig aimed at its usual focus (the player
 ## point); the row stands FARM_BACK beyond that point, where all eight fit across its view.
@@ -42,9 +54,8 @@ const FARM_BACK := 2.0  # m the arc stands beyond the camera's focus
 const FARM_ANG := [0.0, -32.0, -18.5, 21.5, 35.0]
 ## degrees for the three starters (cindle, burrlet, puddlet) in the gaps of the same arc. Crofthorn (1.6 m across the
 ## horns) has no gap that wide at the close camera, so it waits out of this shot (x -12) and stands with the hunters in
-## the eye-level and mid shots.
+## the eye-level shot.
 const FARM_BOKI_ANG := [-24.5, 14.5, 28.0, 0.0]
-const BOKI_FRONT := 2.2  # m the Boki stand nearer the camera than the hunters
 const FACE_BOKI := 0.18  # rad: a small turn either side of the camera, so it is not stiff but the face reads
 const CLEAR_HALF_W := 6.0  # m either side of the camera-to-group line that scenery is hidden in
 const CLEAR_ROW_W := 8.0  # m either side of the group that scenery is hidden in, front to back CLEAR_ROW_D
@@ -53,9 +64,7 @@ const EYE_FOV := 40.0
 const EYE_DIST := 15.0  # m from the row's middle
 const EYE_YAW := 0.0  # rad: straight on, the row on an arc round the camera so all nine stand the same distance off
 const EYE_HEIGHT := 1.4  # m above the ground
-const MID_FOV := 40.0
-const MID_BACK := 11.0  # m from the group
-const MID_UP := 4.5  # m above the ground
+const MID_BACK := 11.0  # m: the clear-spot search also keeps this much open ground in front of the group
 
 var main: Node
 var h
@@ -63,7 +72,7 @@ var dir := "farm_3d_sizes"
 var group := Vector3.ZERO  # ground point the group stands on
 var hunters: Array[Node3D] = []
 var cam3: Camera3D
-var layout := "farm"  # farm | row | mid
+var layout := "farm"  # farm | row
 var anims: Array = []  # one HunterAnim per hunter (Albert's is the farm's own, h.p_anim)
 var cam_at := Vector3.ZERO  # the free camera's position: everyone turns to it
 var scales: Array[Vector3] = []  # the four others' drawn scale: own model size x Arch.farm_k (Albert's is Home's)
@@ -124,19 +133,10 @@ func run(main_node: Node) -> void:
 	cam_at = mid + Vector3(sin(EYE_YAW) * EYE_DIST * cam_side, EYE_HEIGHT, cos(EYE_YAW) * EYE_DIST)
 	_free_camera(cam_at, mid + Vector3(0, 1.0, 0), EYE_FOV)
 	_start_anims()  # a fresh idle facing this camera, not the last one
-	await _wait(1.5)
+	await _wait(SETTLE_S)
 	_log("2_eye_row")
 	await _shot("2_eye_row")
 	_log("after 2")
-	layout = "mid"
-	_layout()
-	cam_at = group + Vector3(0.0, MID_UP, MID_BACK)
-	_free_camera(cam_at, group + Vector3(0, 0.9, 1.0), MID_FOV)
-	_start_anims()
-	await _wait(1.5)
-	_log("3_mid")
-	await _shot("3_mid")
-	_log("after 3")
 	_write_heights()
 	main.get_tree().quit()
 
@@ -186,7 +186,7 @@ func _place() -> void:
 
 ## farm: one arc round the farm camera, Albert in the middle, two hunters a side, the starters in the gaps (Crofthorn
 ## out of shot: FARM_BOKI_ANG). row: all nine on one arc round the eye-level camera, hunters and Boki alternating,
-## Albert in the middle. mid: the hunters in a back row, Boki a row nearer, Albert a step in front.
+## Albert in the middle.
 func _layout() -> void:
 	var spots := {}  # node -> ground position
 	var albert := group
@@ -202,18 +202,18 @@ func _layout() -> void:
 			albert = spots[0]
 		"row":
 			var eye := group + Vector3(0, 0, EYE_DIST)
-			for slot in ROW_ORDER.size():
-				var ang := rad_to_deg((slot - 4) * ROW_STEP / EYE_DIST)
-				var id := String(ROW_ORDER[slot])
-				var n := int(id.substr(1))
-				spots[n if id.begins_with("h") else 10 + n] = eye + _on_arc(ang, EYE_DIST)
+			var total := -ROW_GAP
+			for id in ROW_ORDER:
+				total += float(ROW_HALF[id]) * 2.0 + ROW_GAP
+			var along := -total * 0.5  # m of arc from the left end, centred on the camera's line
+			for id in ROW_ORDER:
+				along += float(ROW_HALF[id])
+				var n := int(String(id).substr(1))
+				spots[n if String(id).begins_with("h") else 10 + n] = (
+					eye + _on_arc(rad_to_deg(along / EYE_DIST), EYE_DIST)
+				)
+				along += float(ROW_HALF[id]) + ROW_GAP
 			albert = spots[0]
-		"mid":
-			albert = group + Vector3(HUNTER_X[0], 0, 1.2)
-			for i in range(1, 5):
-				spots[i] = group + Vector3(HUNTER_X[i], 0, 0)
-			for j in 4:
-				spots[10 + j] = group + Vector3(BOKI_X[j], 0, BOKI_FRONT)
 	albert_at = albert
 	var focus := group if layout == "farm" else albert
 	h.ppos = focus  # the farm camera's focus; Albert is moved onto his mark after Home's own pose (_hide_marks)
@@ -288,6 +288,13 @@ func _log_overlaps(shot: String, size: Vector2i) -> void:
 		rows.append("%s x%.0f-%.0f y%.0f-%.0f" % [n, r.position.x, r.end.x, r.position.y, r.end.y])
 	print("FARM3D boxes ", shot, ": ", "; ".join(rows))
 	print("FARM3D overlaps ", shot, ": ", ", ".join(hits) if hits else "none")
+	var turns := []
+	for i in hunters.size():
+		var want := _face_to(hunters[i].position)
+		var fwd := hunters[i].global_basis.z  # the model's front (+z: faces the way it was turned to)
+		var got := atan2(fwd.x, fwd.z)
+		turns.append("%s %.0f" % [NAMES[i], rad_to_deg(wrapf(got - want, -PI, PI))])
+	print("FARM3D facing off ", shot, " (deg): ", ", ".join(turns))
 
 
 ## A character's box on the still: its visible meshes' world bounds through the camera; on screen only.
