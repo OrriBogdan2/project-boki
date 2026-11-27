@@ -13,7 +13,8 @@ extends ArchKit
 ## gold numbers, and the string doesn't decay on them; Coin Blast, Palm Lance and
 ## Cinderfall do +20%. Slipstep goes where you move and you keep
 ## shooting. Palm Lance: planted a beat, then a slow walk while the line narrows, the aim turning only so fast,
-## then a long beam through walls. A knock gives Slipstep back (Hot Streak); abilities that land add a little lifesteal (Fever).
+## then a long beam through walls. A knock gives Slipstep back (Hot Streak); abilities that land add a little
+## lifesteal (Fever).
 
 # Her green fire: the slots of content/vfx/gunslinger.json's palette that the telegraphs and the charge's mesh
 # use; every effect is a recipe in that file (HeroVfx, docs/HERO_VFX.md).
