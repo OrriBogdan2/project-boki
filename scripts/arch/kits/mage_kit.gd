@@ -727,7 +727,7 @@ func _coil_hit(f: Ent, dir: Vector2, k: float) -> void:
 			break
 	if other != null or KnockWall.hit(m, f, dir, reach, h):
 		slams += 1
-		var stn := float(cd_["stun"])
+		var stn := lerpf(float(cd_["stun"][0]), float(cd_["stun"][1]), k)        # s: a longer hold stuns longer
 		var slam := {"src": "abil", "ab": "utility", "tags": ["utility", "slam"], "stun": stn, "dr": true}
 		f.hurt(0.1, h, slam)
 		m.sfx("ab_wall", f.pos, -2.0, 1.3)
