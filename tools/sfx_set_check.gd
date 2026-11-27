@@ -180,6 +180,7 @@ func run(main: Node) -> void:
 	_inv_cues()
 	_steps(main)
 	preload("res://tools/sfx_climb_rows.gd").new().run(main, ok)
+	_slug_hits(main)
 	_rank_cues()
 	_barks()
 	_ambience()
@@ -2030,6 +2031,81 @@ func _impact_ok(types: Dictionary, t: String) -> bool:
 func _type_of(id: String) -> String:
 	return String(KinLib.species(id).get("type", ""))
 
+## 17. Grimble's slugs sound where they land (11-22, content/vfx/dredge.json "slug_hit", MissFx.shot_landed): a Hunter
+## (his own dredge_hit), a monster (dr_slug_mob) and a wall or crate (dr_slug_wall), each once per volley, so a
+## seven-slug scattergun is at most 3 voices; the player's own hits on bodies stay Match.on_damage's (no double),
+## running out of range says nothing, and a Hunter with no such move stays silent.
+func _slug_hits(main: Node) -> void:
+	var m := Match.new()
+	main.add_child(m)
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "arch": "dredge",
+			"cls": Arch.weight("dredge"), "weapon": Arch.signature("dredge")})
+	m.set_process(false)
+	var me: Hunter = m.player
+	var rival: Hunter = null
+	for h in m.hunters:
+		if h.team != me.team:
+			rival = h
+			break
+	var mob := Mob.new()
+	var want := {"hunter": "dredge_hit", "mob": "dr_slug_mob", "wall": "dr_slug_wall"}
+	for who in ["rival", "player"]:
+		var by: Hunter = rival if who == "rival" else me
+		by.arch = "dredge"
+		for surface in want:
+			var e: Ent = null
+			if surface == "hunter": e = me if who == "rival" else rival
+			elif surface == "mob": e = mob
+			var heard := _slug_land(m, by, e, "wall" if surface == "wall" else "hit", "t_%s_%s" % [who, surface])
+			var exp: Array = [] if who == "player" and surface != "wall" else [want[surface]]
+			ok(heard == exp, "slug hit: the %s's slug on a %s plays %s (%s)" % [who, surface, exp, heard])
+		var volley := _slug_volley(m, by, mob)
+		var one: Array = [] if who == "player" else ["dr_slug_mob"]
+		ok(volley == one, "slug hit: %s's seven-slug volley on one monster sounds %s, once" % [who, volley])
+		var mixed := _slug_volley(m, by, rival if who == "player" else me, true)
+		ok(mixed.size() <= 3, "slug hit: a mixed volley is at most 3 voices (%s)" % [mixed])
+	ok(_slug_land(m, rival, null, "expire", "t_range").is_empty(), "slug hit: out of range says nothing")
+	ok(_slug_land(m, rival, null, "caught", "t_caught").is_empty(), "slug hit: a caught slug says nothing here")
+	rival.arch = "gunslinger"
+	ok(_slug_land(m, rival, mob, "hit", "t_vex").is_empty(), "slug hit: a Hunter with no slug_hit move says nothing")
+	rival.arch = "dredge"
+	var moves: Dictionary = HeroVfx.data("dredge")["moves"]
+	var names := (moves["slug_hit"]["sfx"] as Array).map(func(sf): return String(sf["n"]))
+	var levelled := names.all(func(n): return Sfx.ensure(n) and (n == "dredge_hit" or n.begins_with("dr_slug_")))
+	ok(levelled, "slug hit: its look plays only Grimble's own files that exist %s" % [names])
+	mob.free()
+	m.queue_free()
+
+## The cues one slug landing on `e` (null: nothing, with `why`) asks for, in order.
+func _slug_land(m: Match, by: Hunter, e: Ent, why: String, pg: String) -> Array:
+	var s := {"x": {"pg": pg}, "by": by, "vel": Vector2(1, 0), "pos": by.pos}
+	Sfx.cue_log = []
+	MissFx.shot_landed(m, s, by.pos + Vector3(3, 1, 0), e, why)
+	var out := []
+	for c in Sfx.cue_log:
+		out.append(c[0])
+	Sfx.cue_log = null
+	return out
+
+## Seven slugs of one volley: all on `e` (a monster), or with `mixed` on a Hunter, a monster and a wall in turn.
+func _slug_volley(m: Match, by: Hunter, e: Ent, mixed := false) -> Array:
+	MissFx._landed.clear()
+	Sfx.cue_log = []
+	var s := {"x": {"pg": "t_volley"}, "by": by, "vel": Vector2(1, 0), "pos": by.pos}
+	for i in 7:
+		var tgt: Ent = e
+		var why := "hit"
+		if mixed:
+			tgt = [e, Mob.new(), null][i % 3]
+			why = "wall" if tgt == null else "hit"
+		MissFx.shot_landed(m, s, by.pos + Vector3(3, 1, 0), tgt, why)
+		if mixed and tgt is Mob:
+			tgt.free()
+	var out := []
+	for c in Sfx.cue_log:
+		out.append(c[0])
+	Sfx.cue_log = null
+	return out
 
 ## 10. What you can see you can hear: the cue at the side edge of the reference view (half of CamRig.style_across)
 ## is within -12 dB and on the clear bus, 10 m further is at least 4 dB quieter, past 30 m nothing plays.
