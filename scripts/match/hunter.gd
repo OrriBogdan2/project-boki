@@ -2850,7 +2850,7 @@ func render(delta: float, alpha: float) -> void:
 		else:
 			see = int(m.time * 14.0) % 3 != 0
 	model.visible = see and not HunterWisp.hides(self)    # a critter or a Wisp stands in
-	if every == 1 or posed:      # (the looks follow state, not time: a pose-throttled hunter updates them when posed)
+	if every == 1 or posed or BodyTell.pending(self):      # (the looks follow state, not time: a pose-throttled hunter updates them when posed, or at once on a new cast and while a tint shows)
 		ShieldLook.tick(self)
 		SideRings.tick(self)
 		BodyTell.tick(self, delta)
