@@ -1717,9 +1717,9 @@ var abyss_fx: CanvasLayer = null
 
 
 ## A point `up` metres above a hunter's feet, following the body's lean toward the camera
-## (CamRig.char_lean), so bars and names stay just over the head (`up` grows with the match's Hunter size).
-func _head(h: Node3D, up: float) -> Vector3:
-	up *= CamRig.match_hunter_scale
+## (CamRig.char_lean), so bars and names stay just over the head (`up` grows with the Hunter's match_k).
+func _head(h: Hunter, up: float) -> Vector3:
+	up *= Arch.match_k(h.arch)
 	return h.position + (m.cam.char_lean() * Vector3(0, up, 0) if m.cam else Vector3(0, up, 0))
 
 ## Health right above your hunter, where your eyes already are.

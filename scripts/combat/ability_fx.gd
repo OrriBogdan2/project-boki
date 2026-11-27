@@ -172,7 +172,7 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary) -> void
 	if mine and not o.get("tick", false):
 		var row := impact_row(cat)
 		m.sfx(String(row[0]), target.pos, float(row[1]) - (0.0 if target == p else 2.0), float(row[2]))
-	var head := target.pos + Vector3(0, 1.9 * CamRig.match_hunter_scale if target is Hunter else 1.3, 0)
+	var head := target.pos + Vector3(0, 1.9 * Arch.match_k((target as Hunter).arch) if target is Hunter else 1.3, 0)
 	var stun := float(o.get("stun", 0.0)); var root := float(o.get("root", 0.0)); var slow := float(o.get("slow", 0.0))
 	if stun > 0.0:
 		fx.spark(head, Vector3.UP, BodyTell.STUN_COL.lightened(0.4), 10, 4.0, 180.0, 0.35, 0.0, 0.8)

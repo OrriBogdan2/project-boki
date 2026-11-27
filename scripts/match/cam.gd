@@ -53,7 +53,6 @@ const CHAR_LEAN := deg_to_rad(20.0)
 ## The default preset is measured from the source's footage: docs/MOVEMENT_FEEL.md, "Camera calibration" and
 ## "Camera framing vs the source".
 static var rules: Dictionary = _load_rules()
-static var match_hunter_scale: float = rules["match_hunter_scale"]  # x the base Hunter drawn size in a match
 
 ## Settings "Camera" presets: pitch in degrees, distance, vertical field of view, rise (the view aims that far
 ## above you).
@@ -261,7 +260,9 @@ func _cast_room(dir: Vector2, zoom_k: float) -> float:
 	room -= edge
 	if hud_keep.is_empty() or room <= 0.0:
 		return room
-	var plate_up: float = HunterZone.PLATE_UP * hunter_scale * match_hunter_scale
+	var plate_up := HunterZone.PLATE_UP * hunter_scale
+	if target is Hunter:
+		plate_up *= Arch.match_k((target as Hunter).arch)
 	var plate := (char_lean() * Vector3(0.0, plate_up, 0.0)).rotated(Vector3.UP, -yaw)
 	plate.y += lift - rise
 	var lens_at := Vector3(d, t, wide)
