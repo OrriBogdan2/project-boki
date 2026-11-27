@@ -81,7 +81,7 @@ static func draw(h, sz: Vector2, p: Hunter) -> void:
 		var fl := BokiHud.shell_flash(h, p)
 		if fl > 0.0:
 			BokiHud.shell_bar(h, ar.grow_individual(0, 2, 0, 2), 0.0, p.get_meta("shell_break_col", Color.WHITE), fl)
-		if p.armor > 0.5 and p.armor_tier > 0:  # the tier's name waits until the first tier-up (TermHints says what it is)
+		if p.armor > 0.5 and p.armor_tier > 0:  # the tier's name waits for the first tier-up (TermHints)
 			var tn := String(Hunter.ARMOR_TIERS[p.armor_tier][0]).to_upper()
 			var tw := TextCache.width(HudStyle.BIG, tn, 9)
 			HudStyle.text(c, Vector2(x0 + w - tw, ar.position.y - 5.0), tn, 9, Color(p.armor_col(), 0.75))
