@@ -4,16 +4,18 @@ extends RefCounted
 ## tile gap, or a single piece well clear of everyone, is fine; and a Boki that loads into a pocket (an old
 ## save) is set on open ground. Never touches the real save.
 
-const REST_DX := 9     # tiles east of the ring where the other Boki stays out in the open
-const PEN := 2          # tiles from the middle of the test ring to its fence (a 5x5 ring)
+const REST_DX := 9  # tiles east of the ring where the other Boki stays out in the open
+const PEN := 2  # tiles from the middle of the test ring to its fence (a 5x5 ring)
 
 var bad := 0
 var main: Node
+
 
 func ok(cond: bool, what: String) -> void:
 	print("PLACECLEAR %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func _save() -> void:
 	var d := Save.fresh()
@@ -23,6 +25,7 @@ func _save() -> void:
 	d["active"] = d["roster"][0]["uid"]
 	d["tutorial"] = {"hatched": true, "intro": true}
 	Save.d = d
+
 
 ## The middle of a 5x5 block of open ground at least `from` tiles from the landing (nothing standing in it).
 ## The farm is random: the tile past the ring's gap and the tile where the other Boki rests must be reachable too.
@@ -44,12 +47,14 @@ func _open_block(hb: HomeBuild, from: Vector3) -> Vector2i:
 				best_d = d
 	return best
 
+
 func _block_free(hb: HomeBuild, c: Vector2i) -> bool:
 	for dz in range(-PEN, PEN + 1):
 		for dx in range(-PEN, PEN + 1):
 			if hb.cell_reason(c + Vector2i(dx, dz)) != "":
 				return false
 	return true
+
 
 func _ring(c: Vector2i, gap := false) -> Array:
 	var out: Array = []
@@ -59,15 +64,18 @@ func _ring(c: Vector2i, gap := false) -> Array:
 				out.append(c + Vector2i(dx, dz))
 	return out
 
+
 ## Puts the held fence's ghost on `cells`; the ghost's verdict is hb.ghost_ok / hb.why.
 func _ghost(hb: HomeBuild, cells: Array) -> void:
 	hb.cells = cells
 	hb._check_cells()
 
+
 func _stand(home, c: Vector2i) -> void:
 	var k: Dictionary = home.kins[0]
 	k["pos"] = Vector3(c.x + 0.5, 0, c.y + 0.5)
 	(k["node"] as Node3D).position = k["pos"]
+
 
 func run(m: Node) -> void:
 	main = m
@@ -88,22 +96,24 @@ func run(m: Node) -> void:
 	home.ppos = PlaceClearance.start(home)
 	_stand(home, c)
 	var rest := Vector3(c.x + REST_DX + 0.5, 0, c.y + 0.5)
-	home.kins[1]["pos"] = rest      # the other Boki stays out in the open, away from the ring
+	home.kins[1]["pos"] = rest  # the other Boki stays out in the open, away from the ring
 	# 1. a ring of fence round a Boki shuts it in
 	_ghost(hb, _ring(c))
 	var shut := "This would shut %s in" % name0
-	ok(not hb.ghost_ok and hb.why == shut, "a fence ring round %s turns the ghost blocked: \"%s\"" % [name0, hb.why])
+	ok(not hb.ghost_ok and hb.why == shut, 'a fence ring round %s turns the ghost blocked: "%s"' % [name0, hb.why])
 	# 2. the same ring with a one tile gap is a legal tight path
 	_ghost(hb, _ring(c, true))
-	ok(hb.ghost_ok and hb.why == "", "the ring with a one tile gap is fine (the way out stays open): \"%s\"" % hb.why)
+	ok(hb.ghost_ok and hb.why == "", 'the ring with a one tile gap is fine (the way out stays open): "%s"' % hb.why)
 	# 3. a pocket in a corner: the fence fills the open ground round a Boki standing in an island corner
 	var corner := _corner(hb)
 	ok(corner.x >= 0, "an island corner to test on (%s)" % str(corner))
 	_stand(home, corner)
 	var pocket: Array = _open_neighbours(hb, corner)
 	_ghost(hb, pocket)
-	ok(not pocket.is_empty() and not hb.ghost_ok and hb.why == shut,
-		"closing the corner pocket round %s is refused: \"%s\" (%d tiles)" % [name0, hb.why, pocket.size()])
+	ok(
+		not pocket.is_empty() and not hb.ghost_ok and hb.why == shut,
+		'closing the corner pocket round %s is refused: "%s" (%d tiles)' % [name0, hb.why, pocket.size()]
+	)
 	var gap := _way_out(hb, corner, pocket)
 	pocket.erase(gap)
 	_ghost(hb, pocket)
@@ -115,7 +125,7 @@ func run(m: Node) -> void:
 	home.ppos = Vector3(c.x + 0.5, 0, c.y + 1.5)
 	_stand(home, Vector2i(c.x + REST_DX, c.y))
 	_ghost(hb, _ring(c))
-	ok(not hb.ghost_ok and hb.why == "This would shut you in", "a ring round you is refused: \"%s\"" % hb.why)
+	ok(not hb.ghost_ok and hb.why == "This would shut you in", 'a ring round you is refused: "%s"' % hb.why)
 	home.ppos = PlaceClearance.start(home)
 	# 5. a Boki that loads inside a pocket (an old save) is set on open ground
 	for t in _ring(c):
@@ -136,6 +146,7 @@ func run(m: Node) -> void:
 	print("PLACECLEAR done %d fail" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 ## A ground tile whose 3x3 holds at least three tiles of non-ground (an island corner), and none standing on.
 func _corner(hb: HomeBuild) -> Vector2i:
 	var w: World = hb.h.world
@@ -154,6 +165,7 @@ func _corner(hb: HomeBuild) -> Vector2i:
 				return c
 	return Vector2i(-1, -1)
 
+
 ## The pocket tile that opens onto the ground outside the 3x3 round c (the way out).
 func _way_out(hb: HomeBuild, c: Vector2i, pocket: Array) -> Vector2i:
 	for t in pocket:
@@ -162,6 +174,7 @@ func _way_out(hb: HomeBuild, c: Vector2i, pocket: Array) -> Vector2i:
 			if maxi(absi(n.x - c.x), absi(n.y - c.y)) >= 2 and hb.cell_reason(n) == "":
 				return t
 	return Vector2i(-1, -1)
+
 
 ## The 3x3 tiles round c a fence could stand on.
 func _open_neighbours(hb: HomeBuild, c: Vector2i) -> Array:

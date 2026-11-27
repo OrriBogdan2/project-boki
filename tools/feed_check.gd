@@ -6,7 +6,7 @@ extends RefCounted
 ## leans through Evo.eat, and a full Boki stays out.
 ## Also the hand-feed verb (BaseHandFeed, base_mode): a trusting Boki eats from your hand in 3 s and the snack is
 ## used once, a shy one needs two tries, a full one sniffs and leaves, the prompt says what to hold.
-## And the shape lean (Lean.size, Evo.dress): ten meals of a heavy type and ten of a light one grow and slim the
+## And the shape lean (Lean.size, Unique.dress): ten meals of a heavy type and ten of a light one grow and slim the
 ## same Boki gradually, tint it toward the type, and the Boki card's lean line says so.
 ## Prints FEED ok/FAIL lines and "FEED DONE, failures: N". Never touches the real save.
 
