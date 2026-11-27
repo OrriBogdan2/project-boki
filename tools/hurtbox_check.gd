@@ -6,7 +6,7 @@ extends "res://tools/hitbox_size_check.gd"
 ## touches the save.
 
 const WARDENS := preload("res://tools/warden_model_check.gd").WARDENS
-const MEDIUM_HEIGHT := 1.732  # m, a medium hunter drawn (head top 1.546 x Hunter.VIS_SCALE 1.12)
+const MEDIUM_HEIGHT := 1.732  # m, a medium hunter drawn (its hitbox height; drawn size may exceed it)
 const SIZE_PULL := 0.3  # how much of a height's distance from the medium counts toward the radius
 const EDGE := 0.05  # m, the shot's miss or hit distance from the circle
 const TOP_PAD := 0.9  # m over the head a shot still hits (Match.shot_band)
