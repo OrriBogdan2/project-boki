@@ -18,6 +18,7 @@ const FADE := 0.15  # s: one clip into the next
 const GLIDE_OUT := 0.2  # s: the glide clip back into the next one (it opens at once)
 const DASH_IN := 0.25  # s: the dash clip over the body
 const RATE_MIN := 0.6  # the walk, run and sneak clips' slowest rate, of their keyed pace
+const KEYED_DRAW := 1.12  # x its own size the model was drawn at when the *_mps in warden_native.json were keyed
 const RATE_MAX := 1.8  # and their fastest: a quicker stride keeps the feet nearer the ground speed
 const ATTACK_AGAIN := 0.6  # share of the attack clip after which a new hit starts it over
 const LEGS_RUN := ["walk", "run", "crouch"]  # the states where the legs carry him (they turn to his way)
@@ -60,6 +61,7 @@ var hit_prev := 99.0  # the state's s since a hit, last frame
 var land_prev := 0.0  # the state's landing squash, last frame
 ## The state counters last frame; cast -1: none read yet (the first state read is the baseline, no new hit)
 var last := {"kmove": "", "swing_n": 0, "cast": -1.0, "recoil": 0.0}
+var pose_held_t := 0.0  # s held by SimLod.pose_every (WardenGlb.POSE_HELD), stepped at the next posed frame
 var followers: Array = []  # [orbit holder, Meshy bone]: the holder keeps the bone's move from its rest
 var orbits := WardenOrbits.new()  # the contract model's orbit props (Tenzo's seeing-stones) riding Meshy's bones
 ## The contract path's bone layers, laid over Meshy's clips on Meshy's bones (WardenSkeleton.find names them): the hit
@@ -217,6 +219,12 @@ func _ready() -> void:
 
 func _process(dt: float) -> void:
 	_hide_rig_weapon()
+	if int(root.get_meta(WardenGlb.POSE_HELD, -1)) == Engine.get_process_frames():
+		pose_held_t += dt  # SimLod.pose_every held the pose (as WardenSync): the next posed frame catches it up
+		_place_gun()  # (the body still moves under it)
+		return
+	dt += pose_held_t
+	pose_held_t = 0.0
 	var s: Dictionary = root.get_meta(WardenClips.STATE, {})
 	attack_left -= dt
 	var one := _one_shot(s)
@@ -241,6 +249,7 @@ func _process(dt: float) -> void:
 	var hips := WardenSkeleton.find(skel, "root")
 	skel.set_bone_pose_scale(hips, skel.get_bone_rest(hips).basis.get_scale())  # (Meshy keys no scale: no old squash)
 	player.advance(dt)
+	moves.pose(s, get_parent() as Node3D)
 	upper.lay(dt)
 	twist.step(dt, s, cur in LEGS_RUN)
 	steps.step(cur if xt < 0.0 else "")
@@ -268,16 +277,21 @@ func _process(dt: float) -> void:
 		companions.step(dt)
 	if mood:
 		mood.step(dt)
-	if gun and gun.is_inside_tree() and hand >= 0:
-		gun.global_position = hand_position()
-		var mz := gun.get_node_or_null(^"Muzzle") as Node3D
-		if mz and mouth:  # (as WardenSync puts it on a skinned weapon's mouth: Cinder's palm)
-			mz.global_position = _now(mouth)
+	_place_gun()
 	for f in followers:
 		var b: int = f[1]
 		(f[0] as Node3D).position = (skel.get_bone_global_pose(b).origin - skel.get_bone_global_rest(b).origin)
 	orbits.look = root.get_meta(WardenGlb.ORBIT_LOOK, Vector3.INF)
 	orbits.step(dt)
+
+
+## The held gun in Meshy's hand, and its muzzle on a skinned weapon's mouth.
+func _place_gun() -> void:
+	if gun and gun.is_inside_tree() and hand >= 0:
+		gun.global_position = hand_position()
+		var mz := gun.get_node_or_null(^"Muzzle") as Node3D
+		if mz and mouth:  # (as WardenSync puts it on a skinned weapon's mouth: Cinder's palm)
+			mz.global_position = _now(mouth)
 
 
 ## The Heartspark carry on Meshy's arms (WardenClips._heart's layer): the off hand (the Hero's clip data "heart_hand")
@@ -439,7 +453,14 @@ func _shot_rate(st: String) -> float:
 
 ## The loop's rate for this ground speed against the speed it was keyed at (data, m/s), clamped to the clip's range.
 func _rate(ground: float, key: String, lo: float) -> float:
-	return clampf(ground / float(d.get(key, 1.5)), lo, RATE_MAX)
+	return clampf(ground / (float(d.get(key, 1.5)) * _stride_k()), lo, RATE_MAX)
+
+
+## How much further a cycle covers than the keyed speeds say: they were measured with the model drawn KEYED_DRAW
+## times its own size (a match's old size), and a match now draws it larger (Hunter.VIS_SCALE); elsewhere 1.
+func _stride_k() -> float:
+	var drawn := root.scale.y / float(root.get_meta("look_scale", root.scale.y))
+	return maxf(drawn / KEYED_DRAW, 1.0)
 
 
 func _clip_len(st: String) -> float:

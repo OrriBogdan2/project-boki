@@ -53,6 +53,7 @@ const CHAR_LEAN := deg_to_rad(20.0)
 ## The default preset is measured from the source's footage: docs/MOVEMENT_FEEL.md, "Camera calibration" and
 ## "Camera framing vs the source".
 static var rules: Dictionary = _load_rules()
+static var match_hunter_scale: float = rules["match_hunter_scale"]  # x the base Hunter drawn size in a match
 
 ## Settings "Camera" presets: pitch in degrees, distance, vertical field of view, rise (the view aims that far
 ## above you).
@@ -88,6 +89,7 @@ var target: Node3D = null
 var shake_amp := 0.0  # a shake in progress (see Shake: only big hits on you)
 var shake_left := 0.0
 var shake_total := 0.0  # seconds of shake run so far (the shake check reads it)
+var shake_off := Vector3.ZERO  # m: the offset the last frame put on the view (zero unless a shake runs)
 var zoom := 1.0
 var zoom_to := 1.0
 var user_zoom: float = CamWheel.far(true)  # the mouse wheel (CamWheel), widest at the start; times the match's zoom
@@ -226,11 +228,6 @@ func pull_back(a: float) -> void:
 	pull = maxf(pull, a)
 
 
-## No-op: camera punches are gone (item 50). Kept only so the reserved merge files, which still call it, compile.
-func punch(_a: float) -> void:
-	pass
-
-
 ## Asked each step of an aimed cast: push out by `zoom_k` and frame the line of `reach` metres along `dir`.
 func cast_view(dir: Vector2, zoom_k: float, reach: float) -> void:
 	cast_left = CAST_HOLD
@@ -260,7 +257,8 @@ func _cast_room(dir: Vector2, zoom_k: float) -> float:
 	room -= edge
 	if hud_keep.is_empty() or room <= 0.0:
 		return room
-	var plate := (char_lean() * Vector3(0.0, HunterZone.PLATE_UP * hunter_scale, 0.0)).rotated(Vector3.UP, -yaw)
+	var plate_up: float = HunterZone.PLATE_UP * hunter_scale * match_hunter_scale
+	var plate := (char_lean() * Vector3(0.0, plate_up, 0.0)).rotated(Vector3.UP, -yaw)
 	plate.y += lift - rise
 	var lens_at := Vector3(d, t, wide)
 	var home := _box_at(0.0, plate, view, lens_at, turned)
@@ -463,15 +461,15 @@ func follow(p: Vector3, delta: float, mouse_lead := true, stand_y := INF) -> voi
 	top = move_toward(top, top_to, delta * (0.9 if top_to < top else 2.0))
 	chase = move_toward(chase, chase_to, delta * 0.7)
 	yaw = lerp_angle(yaw, yaw_to, minf(1.0, delta * 1.6))
-	var shake := Vector3.ZERO
+	shake_off = Vector3.ZERO
 	if shake_left > 0.0:
 		var s := shake_amp * float(rr[4])
-		shake = Vector3(Sfx.rng.randf_range(-s, s), Sfx.rng.randf_range(-s, s) * 0.5, Sfx.rng.randf_range(-s, s))
+		shake_off = Vector3(Sfx.rng.randf_range(-s, s), Sfx.rng.randf_range(-s, s) * 0.5, Sfx.rng.randf_range(-s, s))
 		shake_total += minf(delta, shake_left)
 		shake_left = maxf(0.0, shake_left - delta)
 		if shake_left <= 0.0:
 			shake_amp = 0.0
-	_apply(shake)
+	_apply(shake_off)
 	Sfx.listener = focus
 
 

@@ -59,8 +59,14 @@ const T := {
 	# touchdown speed / run speed (UE ProcessLanded zeroes only Z, so you land with what you carried)
 	"land_carry_hop_held": ["~", [0.98, 1.02], "x", "[game data] a 1 m hop, keys held: lands at run speed"],
 	"land_carry_drop4_held": ["~", [0.98, 1.02], "x", "[game data] a 4-terrace (3.2 m) drop, keys held: run speed"],
-	# the glide's extra over run bleeds at tuning.json air.drag 2/s, the owner's 11-08 model (decision 0052)
-	"land_carry_glide_held": ["~", [0.98, 1.07], "x", "glider let go 2 m up, keys held: the glide speed bleeds off"],
+	"land_carry_glide_held":
+	[
+		# the glide's extra over run bleeds at tuning.json air.drag 2/s, the owner's 11-08 model (decision 0052)
+		"~",
+		[1.12, 1.28],
+		"x",
+		"glider let go 2 m up, keys held: the 7.0 m/s glide speed (x body_scale) bleeds off toward the run"
+	],
 	"dash_exit_run": ["~", [0.95, 1.05], "x", "[game data] no hard stop: hands over at run speed"],
 	"brake_cast_gap_m": ["<=", 0.05, "m", "[game data] a let-go brakes the same under a cast"],
 	"dash_exit_slide_m": ["~", [0.2, 0.5], "m", "[game data] then the walking stop"],
@@ -111,14 +117,15 @@ const T := {
 	"flue_lift_hold_s": ["~", [0.13, 0.2], "s", "[footage] Felix hangs at the ring"],
 	"flue_hover_m": ["~", [0.4, 0.5], "m", "[footage] flies low: her 0.45 m by the hang's end"],
 	"flue_turn_deg_s": ["~", [85.0, 95.0], "deg/s", "[footage] peaks ~85-100 deg/s (cast 1: 52-67)"],
-	"coyote_frames": [">=", 6.0, "frames", "FeelConfig coyote_time 0.1s (walked off a rim over the void)"],
+	"coyote_frames": [">=", 14.0, "frames", "[game data] coyote 0.25 s (walked off a rim over the void)"],
 	"jump_buffer_frames": [">=", 7.0, "frames", "FeelConfig jump_buffer 0.12s (7 steps)"],
-	"coyote_jump_050ms": [">=", 1.0, "yes", "ran off a rim, jump 0.05s later: inside the 0.12s coyote [est]"],
-	"coyote_jump_100ms": [">=", 1.0, "yes", "ran off a rim, jump 0.10s later: inside the 0.12s coyote [est]"],
-	"coyote_jump_150ms": ["<=", 0.0, "yes", "ran off a rim, jump 0.15s later: past the coyote, no jump [est]"],
+	"coyote_jump_100ms": [">=", 1.0, "yes", "ran off a rim, jump 0.10s later: inside the 0.25s coyote [game data]"],
+	"coyote_jump_200ms": [">=", 1.0, "yes", "ran off a rim, jump 0.20s later: inside the 0.25s coyote [game data]"],
+	"coyote_jump_300ms": ["<=", 0.0, "yes", "ran off a rim, jump 0.30s later: past the coyote, no jump [game data]"],
 	"buffer_jump_050ms": [">=", 1.0, "yes", "jump 0.05s before landing goes off on landing: 0.12s buffer [est]"],
 	"buffer_jump_100ms": [">=", 1.0, "yes", "jump 0.10s before landing goes off on landing: 0.12s buffer [est]"],
-	"buffer_jump_150ms": ["<=", 0.0, "yes", "jump 0.15s before landing (3m): past the buffer, no jump [est]"],
+	"buffer_jump_150ms":
+	[">=", 1.0, "yes", "[game data] jump 0.15s before landing (3m), ~1.25m up: under land_buffer_h, kept"],
 	"freefall_1s_depth": ["~", [6.8, 8.0], "m", "[game data] gravity 1470 uu/s2, cap 1200 uu/s: 7.1m"],
 	"abyss_fall_vy_deep": ["~", [10.0, 10.8], "m/s", "[game data] AbyssFallSlowSpeedLimit 12 to 10 m/s"],
 	"abyss_fall_t": [">=", 1.8, "s", "[game data] off the lip to AbyssHeight (17.5m) in ~2s"],
@@ -127,12 +134,13 @@ const T := {
 	"glide_open_hold_s": ["<=", 0.12, "s", "tap/hold split for Space; a tap is ~0.1s"],
 	"glide_open_button_frames": ["<=", 1.0, "frames", "dedicated glide button: no tap/hold ambiguity"],
 	"glide_catch_t": ["<=", 0.20, "s", "[guide] opens 'instantly'; the catch rate is ours (max locked)"],
-	"glide_start_vy": ["~", [0.85, 1.4], "m/s", "[game data] GlideStartFallSpeedMin: opened rising, it falls"],
-	"glide_speed": ["~", [5.22, 6.38], "m/s", "[game data] MaxGlide 500 uu/s x body_scale 1.16 +-10%"],
-	"glide_sink": ["~", [1.38, 1.42], "m/s", "hunter_move.json glide_sink (ours: no footage to count)"],
+	"glide_start_vy": ["~", [-2.5, -1.5], "m/s", "[game data] opened rising ~0.6m up: keeps up to 2.5 m/s of the rise"],
+	"glide_speed": ["~", [7.31, 8.93], "m/s", "[game data] settled glide 700 uu/s x body_scale 1.16 +-10%"],
+	"glide_sink": ["~", [1.24, 1.26], "m/s", "[game data] GlideMinZVelocity -125 uu/s"],
 	"glide_overheat_s": ["~", [8.95, 9.05], "s", "hunter_move.json glide_heat_s (owner 11-02 over footage)"],
 	"glide_turn90_t": ["~", [0.3, 0.6], "s", "[game data] GlideTargetXYForce 162,500 / Mass 100: turn inertia"],
-	"glide_reverse_t": ["~", [0.45, 0.8], "s", "[game data] the same 16.25 m/s^2 brakes a reversal in ~0.6 s"],
+	"glide_reverse_t":
+	["~", [0.65, 1.0], "s", "[game data] 16.25 m/s^2 against the 7.0 m/s cruise: a reversal in ~0.83 s"],
 	"glide_brake_ratio": ["<=", 0.80, "x", "steering against heading brakes momentum (speed vs letting go)"],
 	"glide_high_sink": ["~", [3.3, 3.6], "m/s", "[game data] GlideDownwardForce: above 8.5m"],
 	"glide_high_swoop_x": ["~", [2.4, 2.6], "x", "[game data] SwoopSpeedTransferRatio 2.5, the pull's sink"],
@@ -140,7 +148,7 @@ const T := {
 	"dive_vy_t": ["~", [0.6, 0.9], "s", "[game data] GlideDiveZForceMax 350,000 / Mass 100 = 35 m/s^2"],
 	"dive_steer_ratio": ["~", [0.2, 0.3], "x", "[game data] GlideDiveXYForceMultiplier 0.25 of the glide steer"],
 	"dive_cancel_h": ["~", [2.9, 3.5], "m", "[game data] GlideDiveCancelDistance 350 uu, the glide catches"],
-	"sneak_speed": ["~", [0.499, 0.501], "x", "[data] SneakSpeedMultiplier 0.5 of run_v speed"],
+	"sneak_speed": ["~", [0.399, 0.401], "x", "[game data] SneakSpeedMultiplier 0.4 of run_v speed"],
 	"dive_timeout_s": ["~", [9.9, 10.1], "s", "[game data] GlideDiveTimeout 10 s of holding ends the plunge"],
 	"swoop_x": ["~", [2.4, 2.6], "x", "[game data] SwoopSpeedTransferRatio 2.5, a dive's sink"],
 	"swoop_fade_s": ["~", [1.45, 1.55], "s", "[game data] SwoopSpeedFadeTime 1.5 s"],
@@ -149,7 +157,8 @@ const T := {
 	"dashglide_open_speed":
 	[">=", 12.0, "m/s", "[wiki] gliding right after a lateral impulse keeps momentum and increases glide speed"],
 	"dashglide_1s_speed": [">=", 10.5, "m/s", "[owner 11-13] the glide carries the dash"],
-	"dashglide_2s_speed": ["~", [7.0, 9.0], "m/s", "[owner 11-13] still fast, bleeding back"],
+	"dashglide_2s_speed":
+	["~", [9.7, 12.6], "m/s", "[owner 11-13] still fast, bleeding back (1.2-1.55 x the cruise, as 7-9 was of 5.8)"],
 	"dashglide_3s_over": ["<=", 1.5, "m/s", "[owner 11-08 item 9] back toward cruise: 3 s on, this over it"],
 	"dashglide_reopen_frames": ["<=", 1.0, "frames", "glider is back the step the dash ends while glide is held"],
 	"reglide_frames": ["<=", 1.0, "frames", "glide-cancel then re-hold reopens at once"],
@@ -254,9 +263,9 @@ const T := {
 	# measures 6.56% where the old reference, the default medium Warden at plain size, measured 6.07%, so the
 	"hunter_screen_pct":
 	[
-		# range moved up by that 0.46; the camera did not change)
+		# range moved up by that 0.46; the camera did not change; x1.10 for match_hunter_scale, 5.45..6.65 -> 6.0..7.3)
 		"~",
-		[5.45, 6.65],
+		[6.0, 7.3],
 		"%",
 		"medium hunter, feet to head straight up, as a share of screen height (camcal: its on-screen silhouette ~10.5%, as in gameplay frames; feelfix leans characters back 20 deg toward the camera, which shortens the straight-up measure from ~6.9% to ~5.5%)"
 	],
@@ -370,7 +379,7 @@ const STAND_DEG := 20.0  # widest allowed miss of the cursor, degrees
 const GLIDE_WALL_DEG := [0.0, 30.0, 60.0]
 const GLIDE_WALL_H := 2.5  # m up the glider starts: under a ruin wall's top, airborne a second after the hit
 const GLIDE_WALL_ROCK_H := 1.85  # m: a rock blocks a body within 1.9 m of its base (Verbs.wall_blocks), so lower
-const GLIDE_WALL_ROCK_LEN := 12.0  # m: a test rock long enough to slide along (a real one is 1.3 m)
+const GLIDE_WALL_ROCK_LEN := 18.0  # m: a test rock long enough to slide along (a real one is 1.3 m)
 const GLIDE_WALL_OUT := 1.0  # m in front of the face the glider starts
 
 ## No landing draws a ring or a burst (DECISIONS: none on landings): the hop, a fall, a glide's end, a glide dive,
@@ -892,10 +901,10 @@ func _jump_grace(land_f: int) -> void:
 				m.step(DT)
 				if not p_v.grounded:
 					break
-			_steps(late - 1)
+			_steps(roundi(2.0 * ms / 1000.0 / DT) - 1)  # the coyote window is 0.25 s: tried at 0.10, 0.20, 0.30
 			p_v.inp["jump"] = true
 			m.step(DT)
-			rec("coyote_jump_%03dms" % ms, 1.0 if p_v.vel.y > Hunter.JUMP_V * 0.9 else 0.0)
+			rec("coyote_jump_%03dms" % (2 * ms), 1.0 if p_v.vel.y > Hunter.JUMP_V * 0.9 else 0.0)
 		_reset(flat + Vector3(0, 3.0, 0), false)
 		var jumped := false
 		for i in land_f + 4:
@@ -976,7 +985,7 @@ func _glide() -> void:
 	_reset(flat)
 	p_v.inp["jump"] = true
 	m.step(DT)
-	_steps(3)
+	_steps(6)  # (past glide_floor_rise: lower, a rising glider can't open)
 	var rise := p_v.vel.y
 	p_v.inp["jump"] = true
 	p_v.inp["glide"] = true
@@ -2336,9 +2345,9 @@ func _ledge_run(wl: Dictionary, mode: String) -> Dictionary:
 	var at: Vector2 = wl["at"]
 	var top: float = wl["top"]
 	if mode == "glide":
-		# gliding in 3m back, aimed at the face's upper half (the sink takes a little off on the way)
-		var st := at - n * 3.0
-		_reset(Vector3(st.x, top - 0.3 + 0.6 * HunterMove.glide_sink, st.y), false)
+		# gliding in from 5 m back at the face's upper half (the sink takes ~0.75 m off, so it is no step-up)
+		var st := at - n * 5.0
+		_reset(Vector3(st.x, top - 0.75 + 6.0 * HunterMove.glide_sink / HunterMove.glide_cruise, st.y), false)
 		p_v.last_gy = wl["low"]
 		p_v.gliding = true
 		p_v.vel = Vector3(n.x, 0.0, n.y) * HunterMove.glide_cruise
@@ -2390,7 +2399,7 @@ func _glide_wall() -> void:
 			var at := Vector3(mid.x, gy, mid.y)
 			rock = HeroZones.rock(m, m.hunters[1], at, -n, "gwall", GLIDE_WALL_ROCK_LEN, 30.0, 999.0, false)
 		else:
-			for dz in range(-5, 6):
+			for dz in range(-14, 15):
 				for dx in range(3, 6 if what == "cliff" else 4):
 					var ci := w.idx(x0 + dx, z0 + dz)
 					carved.append([ci, w.level[ci], w.kind[ci]])
@@ -2401,12 +2410,14 @@ func _glide_wall() -> void:
 						w.walls[ci] = true
 		var t := (-n).rotated(PI / 2.0)  # along the wall, the way a positive angle slides
 		var h0 := GLIDE_WALL_ROCK_H if what == "tenzo rock" else GLIDE_WALL_H
+		# the glider's own pull into a wall builds up to 3 steps before the wall takes it (a grid cell at an angle)
+		var into_max := 3.5 * HunterMove.glide_accel * DT
 		for deg in GLIDE_WALL_DEG:
 			var r := _glide_wall_hit(mid, n, t, gy + h0, deg)
 			var tag := "glide_wall %s %d deg" % [what, int(deg)]
 			ok(r["hit"], "%s: the glider met the wall" % tag)
 			ok(r["open"], "%s: the glider stays open on the wall" % tag)
-			ok(r["into"] < 0.5, "%s: it stays pressed on the wall (%.2f m/s into it at most)" % [tag, r["into"]])
+			ok(r["into"] < into_max, "%s: it stays pressed on the wall (%.2f m/s into it at most)" % [tag, r["into"]])
 			bounce = maxf(bounce, r["out"])
 			if deg > 0.0 and r["hit"]:
 				var row := [tag, r["tan"], r["tan0"], r["slow"]]
