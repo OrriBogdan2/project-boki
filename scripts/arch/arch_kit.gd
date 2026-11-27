@@ -921,6 +921,9 @@ func play_hold(move: String, t: float) -> void:
 ## True when the kit draws its own dash after-images; the hunter then skips the shared team-colour pill.
 func own_dash_trail() -> bool: return false
 
+## True while the kit's dash must lay no shared DashStreak ribbon (Gil's swim: the ribbon reads as a teal box at his waist).
+func hides_dash_streak() -> bool: return false
+
 ## True when the kit draws its own aim line; the shared pale weapon line then stays hidden.
 func own_aim_line() -> bool: return false
 

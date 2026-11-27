@@ -67,9 +67,9 @@ func _heights(m: Match, t: TimeTrial) -> void:
 	var kick := _gate(t, "kick")
 	var kick_top := m.world.ground_at(kick.at.x, kick.at.z)
 	var glide_top := t.pad_land.y
-	var cap := Hunter.JUMP_V * Hunter.JUMP_V / (2.0 * Hunter.H_GRAV) + HunterFeel.mantle_reach
+	var cap := HunterMove.JUMP_TIERS * World.LEVEL + 0.05
 	ok("kick tower is out of a plain jump's reach", kick_top > cap, "%.1f m vs %.1f" % [kick_top, cap])
-	ok("glide tower is out of a wall kick's reach", glide_top > WallMoves.HOP_CLIMB_CAP + cap, "%.1f m" % glide_top)
+	ok("glide tower is out of a wall kick's reach", glide_top > cap + World.LEVEL, "%.1f m" % glide_top)
 
 
 func _gate(t: TimeTrial, move: String) -> TimeTrial.Gate:
