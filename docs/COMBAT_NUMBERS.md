@@ -33,3 +33,8 @@ rules in `content/rules/`; this page is the short list of what we aim for. Check
 
 ## Blasts: falloff and cover (11-26)
 A shot's explosion (`Match._boom`, `Blast`, `content/rules/blast.json`) lands by distance from its centre: full damage to a quarter of the radius, then 89% at half, 54% at three quarters and 33% at the edge (straight lines between those points; it was a straight 100% to 55%). Knockback and lift follow the same share. A body with rock or a cliff between it and the blast takes nothing (`World.los` at chest height); a shot with `"boom_open"` skips the cover test. Held by `--blast-parity-check`. Not covered yet: data-driven "area" effects (flat damage, no cover) and distance fall-off for ordinary shots.
+
+## Healing
+- **Healing cut:** a heal a Hunter gives another Hunter lands at x0.65 (`heal_given_k`, content/rules/combat.json). Healing yourself, a pickup, a Boki's heal or a field with no caster is whole. Anti-Heal (x0.3 left) multiplies on top: 0.195 of a 40-hp heal given to a blighted friend is 7.8 hp.
+- **Health recovery:** every Hunter wins back 0.1% of max health each 0.1 s (about 1%/s: 1.9 hp/s at 190 hp), paused 4 s after it takes a hit (`regen` in the same file). Silent: no number or glow, the bar just fills. Anti-Heal cuts it. Asserted by `--heal-parity-check`.
+- **Not built (no number in the notes):** a heal block in the closing zone, and a "no healing at all" Anti-Heal variant.
