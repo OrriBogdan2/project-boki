@@ -1205,15 +1205,18 @@ func _anchor_spike() -> void:
 	pl.ak.use_e()
 	var t := 0.0
 	while kit.anchors == 0 and t < 1.0:
-		tg.pos.y = home.y + 1.2      # held in the air until the slam frame
+		tg.pos.y = home.y + 1.2  # held in the air until the slam frame
 		tg.vel = Vector3.ZERO
 		tg.grounded = false
 		m.step(ak.DT)
 		t += ak.DT
 	var vy := tg.vel.y
-	for i in 6:      # the cone's hit lands within a few frames of the slam
+	for i in 6:  # the cone's hit lands within a few frames of the slam
 		m.step(ak.DT)
 		vy = minf(vy, tg.vel.y)
 	# the data's 16 m/s, which a hunter's fall cap (HunterMove.fall_max, 12) clamps on its next tick
-	ok("anchor spike: the ground Anchor Drop drives a foe in the air down (at the fall cap at once)",
-		kit.anchors == 1 and vy <= -HunterMove.fall_max + 0.5, "anchors %d vy %.1f" % [kit.anchors, vy])
+	ok(
+		"anchor spike: the ground Anchor Drop drives a foe in the air down (at the fall cap at once)",
+		kit.anchors == 1 and vy <= -HunterMove.fall_max + 0.5,
+		"anchors %d vy %.1f" % [kit.anchors, vy]
+	)
