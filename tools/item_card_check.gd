@@ -21,6 +21,7 @@ func ok(cond: bool, what: String) -> void:
 func _boki(nm: String) -> Dictionary:
 	var rec := Save.new_kin("zapple", nm)
 	Care.ensure(rec)
+	Evo.ensure(rec)  # the path meter fills these in; a card must change nothing past them
 	rec["level"] = 6
 	for s in Care.STATS:
 		rec["stats"][s] = 20
