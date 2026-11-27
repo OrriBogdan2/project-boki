@@ -47,7 +47,9 @@ const SKYDIVE_TURN_H := 8.0  # m above the ground: below this the view turns bac
 ## faces and bodies (as in the reference footage) instead of the tops of hats, without changing the
 ## world's framing. Faded out for the bird's-eye and the
 ## ship's chase view. The world is drawn at the style's pitch; characters read as if at ~pitch - lean.
-const CHAR_LEAN := deg_to_rad(20.0)
+## 0: the reference draws its hunters upright at its pitch; a 20 deg tip made ours read 1.3-1.75x
+## taller on screen than theirs. Motion leans (stride start, landing) are the body's own and stay.
+const CHAR_LEAN := 0.0
 
 ## The numbers (Settings "Camera" presets, "Camera follow" cursor lean, the edge kept) are in content/rules/camera.json.
 ## The default preset is measured from the source's footage: docs/MOVEMENT_FEEL.md, "Camera calibration" and
@@ -84,7 +86,7 @@ static var pose_far_m: float = rules["pose_far_m"]  # m (flat) from the focus: o
 static var edge: float = rules["lean_edge_m"]  # m the cursor lean and a cast keep between you and the screen's edge
 
 var focus := Vector3.ZERO
-var target: Node3D = null
+var target: Node3D = null  # the hunter the view is on (MatchCam.update): its plate height bounds the lean (_cast_room)
 var shake_amp := 0.0  # a shake in progress (see Shake: only big hits on you)
 var shake_left := 0.0
 var shake_total := 0.0  # seconds of shake run so far (the shake check reads it)
@@ -257,8 +259,9 @@ func _cast_room(dir: Vector2, zoom_k: float) -> float:
 	if hud_keep.is_empty() or room <= 0.0:
 		return room
 	var plate_up := HunterZone.PLATE_UP * hunter_scale
-	if target is Hunter:
-		plate_up *= Arch.match_k((target as Hunter).arch)
+	if target is Hunter:  # the plate where HunterZone.rect_of puts it (HudPlate.up: over the model's top)
+		var th := target as Hunter
+		plate_up = HudPlate.up(th, HunterZone.PLATE_UP * float(th.cdat["scale"])) * Arch.match_k(th.arch)
 	var plate := (char_lean() * Vector3(0.0, plate_up, 0.0)).rotated(Vector3.UP, -yaw)
 	plate.y += lift - rise
 	var lens_at := Vector3(d, t, wide)

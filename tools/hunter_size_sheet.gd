@@ -13,6 +13,9 @@ extends "res://tools/hunter_scale_shots.gd"
 ## area in m2 and screen height in m (the view plane at the hero, so both read against the reference's idle
 ## silhouettes at its 66 deg camera), the mean over the facings and the facing-camera one.
 ## The facing-camera mask is saved as <dir>/<hero>_sil_<lean|flat>_<case>.png. Floating companions are not the hero.
+## --lineup=arch,arch,...: those heroes side by side on open floor, each LINEUP_W x its drawn height wide, at its own
+## match_k, idling at the match camera's widest zoom: one frame, <dir>/lineup.png (no HUD), and a LINEUP row per
+## hero (feet x,y px).
 
 const PASSES := [  # [label, draw at the archetype's own match_k (else 1), wheel zoom]
 	["main", false, 1.4572],  # main today: every hunter at the base size, the wheel starting at its widest
@@ -28,6 +31,7 @@ const SIL_TURN := 30  # match steps the hero gets to turn to a facing
 const SIL_ZOOM := 0.45  # the panel's close view: more px for the mask, same metres
 const SIL_DIFF := 0.2  # summed RGB step from the empty frame that counts as the hero
 const SIL_WEAPONS := ["Gun", "Shield"]  # the held weapon (out for the "body" cases)
+const LINEUP_W := 0.75  # a hero's slot in the --lineup row, x its drawn height (top_h x match_k): props out to the side
 const SIL_PAD := 0.6  # share of the body's screen box added all round the box the mask reads (weapons reach out)
 
 
@@ -35,9 +39,12 @@ func run(main_node: Node) -> void:
 	main = main_node
 	var heroes: Array = Arch.ids()
 	var sil := false
+	var row: Array = []
 	for a in OS.get_cmdline_user_args():
 		if String(a) == "--silhouette":
 			sil = true
+		if String(a).begins_with("--lineup="):
+			row = String(a).substr(9).split(",")
 		if String(a).begins_with("--hero="):
 			heroes = String(a).substr(7).split(",")
 		if String(a).begins_with("--shots-dir="):
@@ -46,6 +53,10 @@ func run(main_node: Node) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	Save.no_write = true
 	Settings.v["tips"] = false
+	if not row.is_empty():
+		await _lineup(row)
+		main.get_tree().quit(0)
+		return
 	for hero in heroes:
 		await _start(hero, "cindle")
 		for h in m.hunters:
@@ -228,3 +239,96 @@ func _mask(model: Node3D, flat: Material, no_weapon: bool, cap_y := -1e9) -> Arr
 				low = maxi(low, y)
 				mask.set_pixel(x, y, Color.WHITE)
 	return [px / (sc * sc), maxi(low - top + 1, 0) / sc, mask]
+
+
+## The --lineup frame (see the header): every hero is a bot that only stands (no brain); the player stands hidden.
+func _lineup(row: Array) -> void:
+	await _start(String(row[0]), "cindle")
+	for h in m.hunters:
+		h.out = h != m.player
+	var mids: Array = []  # each hero's centre along the row, from the row's left end
+	var span := 0.0
+	for i in row.size():
+		var w := LINEUP_W * Hunter.VIS_SCALE * Arch.match_k(row[i]) * float(Arch.body(row[i]).get("top_h", 1.9))
+		mids.append(span + w * 0.5)
+		span += w
+	var at := _row_spot(m.player.pos, span)
+	_bare_floor(at)
+	var spots: Array = []
+	for i in row.size():
+		var x: float = at.x + float(mids[i]) - span * 0.5
+		spots.append(Vector3(x, m.world.ground_at(x, at.z), at.z))
+	var line: Array = []
+	for i in row.size():
+		var h := _hunter("line%d" % i, m.player.team, String(row[i]), "cindle", spots[i])
+		h.ctrl = "local"
+		line.append(h)
+	m.player.teleport(at)  # the player stands hidden mid-row: its drop reticle and glider stay out of the frame
+	m.cam.user_zoom = PASSES[0][2]
+	m.cam.zoom = PASSES[0][2]
+	m.cam.zoom_to = PASSES[0][2]
+	m.cam.snap(at)
+	for i in WARM_UP:
+		_purge()
+		for j in line.size():
+			var h: Hunter = line[j]
+			if i % 20 == 0:
+				h.teleport(spots[j])
+				h.vel = Vector3.ZERO
+			h.inp["aim"] = h.pos + Vector3(0.0, 0.9, 8.0)  # facing the camera
+		m.step(STEP)
+		m.cam.follow(at, STEP, false)
+		for h in m.hunters:
+			h.render(STEP, 1.0)
+		m.player.visible = false
+		for k in m.kins:
+			k.model.visible = false
+		_clean()
+	m.hud.visible = false
+	await _save("lineup.png")
+	var k := float(SIZE.y) / main.get_viewport().get_visible_rect().size.y
+	for h in line:
+		var feet := m.cam.unproject_position(h.position) * k
+		print(
+			(
+				"LINEUP %s: k %.3f, feet at %.0f,%.0f px, %.1f m off its spot"
+				% [h.arch, Arch.match_k(h.arch), feet.x, feet.y, h.pos.distance_to(spots[line.find(h)])]
+			)
+		)
+
+
+## The spot nearest `p` with open floor `span` m long in x and no void next to it (roomy first, then just clear),
+## so no hunter in the row stands off the island.
+func _row_spot(p: Vector3, span: float) -> Vector3:
+	var w: World = m.world
+	var half := int(ceil(span / 2.0))
+	for room in [[3, 2], [1, 1], [0, 0]]:
+		var best := Vector3.INF
+		var best_d := 1e9
+		for z in range(int(p.z) - 40, int(p.z) + 41):
+			for x in range(int(p.x) - 40, int(p.x) + 41):
+				var d := Vector2(x + 0.5 - p.x, z + 0.5 - p.z).length()
+				if d >= best_d or not _row_open(w, x, z, half, room[0], room[1]):
+					continue
+				best_d = d
+				best = Vector3(x + 0.5, 0.0, z + 0.5)
+		if best_d < 1e9:
+			print(
+				(
+					"ROW %d m of floor (%d m deep, %d m from the void), %.1f m from the spawn"
+					% [half * 2 + 1, room[0] * 2 + 1, room[1], best_d]
+				)
+			)
+			return _ground(best)
+	print("ROW none found: the arena spot")
+	return _arena_spot(p)
+
+
+func _row_open(w: World, x: int, z: int, half: int, deep: int, edge: int) -> bool:
+	for dz in range(-deep, deep + 1):
+		for dx in range(-half, half + 1):
+			if w.tile_kind(x + dx + 0.5, z + dz + 0.5) != World.T_GROUND:
+				return false
+			if edge > 0 and w.edge_dist(x + dx, z + dz, edge) <= edge:
+				return false
+	return true

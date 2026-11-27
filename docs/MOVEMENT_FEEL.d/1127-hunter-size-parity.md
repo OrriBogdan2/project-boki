@@ -13,22 +13,25 @@ reference is measured the same way off its own idle clips at its 66 deg camera. 
 thin pole or a floating rock moves it less than height alone. The owner's reads hold on this measure (the healer
 smallest bar the pet, under the sniper; the samurai not small, 20th of 25), and on height or area alone; the first
 pass's bind-pose body height had the healer 3rd smallest and the samurai 7th, and the listed model height counts ears.
-`match_k` = reference size / ours at k = 1 (`--hunter-size-sheet --silhouette`, HSIL "lean all" rows). Caveat:
-reference props that are loose meshes (a shield, a dagger, a bird) are not in its silhouette, ours are. Albert is
-sized on the HSIL "lean crown" row (nothing above the head's crown): his back poles reach 1.4 m over his head and
-made him read 0.84 when his body wants 1.14. Sable's dagger moves her by 1%, under the ~4% run-to-run spread of
-the idle, so she keeps the "lean all" value.
+`match_k` = reference size / ours at k = 1 (`--hunter-size-sheet --silhouette`, the mean of its two HSIL passes,
+which differ by idle phase only: +-2.5%). Loose props are left out on both sides (the reference's are separate
+meshes, out of its silhouette): Albert is sized on the HSIL "crown" row (nothing above the head's crown), since his
+back poles reach 1.4 m over his head (sized on height alone, his arms-out hammer idle drew him twice the reference's
+size: k 1.624, size +15% without the poles); Sable on the "body" row (held weapons hidden). The other 11 use the "all" row. With these, all 13 stand in the reference's
+order of size, smallest to largest.
 
 Camera: pitch 66 deg both sides; the reference lens is 59 deg horizontal (35.3 vertical at 16:9), arm 30.2 m at its
 widest; ours is 32 deg vertical at 23 m x 1.4572 = 33.5 m, 34.2 m of ground across on both sides: same px per m
-across. Up the screen ours is taller: `CamRig.CHAR_LEAN` (20 deg) tips bodies back, so one metre of hunter reads
-1.3-1.75x as tall as with no lean; the reference has none. `match_k` is set with the lean on (what the player sees);
-with the lean off every hunter would want 9-26% more.
+across. Bodies stand upright like the reference's (`CamRig.CHAR_LEAN` 0; a
+20 deg tip-back made one metre of hunter read 1.3-1.75x as tall as theirs). Leans that come from moving (stride
+start, landing, glider tilt) are the body's own and stay.
 
 What follows a Hunter's size (all read `Arch.match_k`): overhead and hover plates and their anchors (`Hud._head`,
-`HunterZone.rect_of`, the `CamRig` plate lean; a plate sits at its own offset or 0.6 m over the model's tallest
-point (`body.top_h`, `HudPlate.up`), whichever is higher, so a bigger body does not float its plate), stun stars, vulnerable sparks, glider heat smoke, a shoulder Boki's bubble, Sparkle's fingertip.
+`HunterZone.rect_of`, the `CamRig` plate lean (`CamRig.target`, set by `MatchCam.update`); a plate sits at its own
+offset or 1.0 m over the model's tallest point (`body.top_h`, `HudPlate.up`; upright, its 17 px hang and some air), whichever is higher, so a bigger body does not float its plate), stun stars, vulnerable sparks, glider heat smoke, a shoulder Boki's bubble, Sparkle's fingertip.
 Meshy-native stride follows the model scale (`WardenNative._stride_k`).
 
 `--hunter-size-sheet --shots-dir=<dir>` (GPU) prints one HSIZE row per hunter for main's size and the parity size;
 `--hunter-scale-shots` shoots both with the plate and `--gaps` (no renderer) prints the plate-over-model gaps.
+`--hunter-size-sheet --lineup=<arch,...>` (GPU) draws those hunters side by side at their match size in one
+game-camera frame (`lineup.png`).
