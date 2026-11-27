@@ -1179,6 +1179,9 @@ static func build(kin_id: String, flex_node: Node3D, c: Dictionary, mats: Array)
 	rig.species = kin_id
 	rig._feel = BODY_FEEL[KinPuppet.BODY.get(kin_id, "blob")]
 	rig.model = model_root
+	var fit := KinSize.fit(kin_id, model_root)
+	flex_node.get_parent().get_parent().set_meta("fit", fit)  # (root: KinPuppet scales Flex by it as well)
+	flex_node.scale = Vector3.ONE * fit
 	rig._dress(c, mats)
 	if FRAME[kin_id].get("hover", false):
 		rig._shadow = _ground_shadow(flex_node)
@@ -1302,6 +1305,7 @@ func _keep_flex(dt: float) -> void:
 	flex.scale = (
 		Vector3(girth * wide, _flinch.tall * (1.0 - squat), lerpf(1.0, girth, 0.5) * wide)
 		* Vector3(1.0 + sq * 0.6, 1.0 - sq, 1.0 + sq * 0.6)
+		* float(root.get_meta("fit", 1.0))
 	)
 	flex.position = Vector3(0, _flex_y, 0) + _flinch.shove
 	var body := flex.get_parent() as Node3D
@@ -1508,9 +1512,9 @@ func _swim_clip() -> String:
 	return "swim" if _swimmer else "paddle"
 
 
-## m of it under the water when it floats: SWIM_LINE of its height (FRAME "top") at its size in the world.
+## m of it under the water when it floats: SWIM_LINE of its height (KinSize.height) at its size in the world.
 func _afloat() -> float:
-	return SWIM_LINE * float(FRAME[species]["top"]) * flex.global_basis.y.length()
+	return SWIM_LINE * KinSize.height(species) * flex.global_basis.y.length()
 
 
 ## m the model rises off the bed: afloat in deep water, onto the surface for one that hovers.
