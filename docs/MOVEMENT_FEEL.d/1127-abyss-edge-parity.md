@@ -43,7 +43,8 @@ the law is `scripts/match/mantle_carry.gd` (MantleCarry), wired in `scripts/matc
 
 Landing distance differs by up to 3.5 m on the full mantles: ours steers onto the top at our air
 steering (owner ruling) but our wall holds you until your feet clear the lip, while the reference's
-simulation here ignores the wall. Speed at landing is 5.28 m/s (run speed) in both.
+simulation here ignores the wall. Speed at landing is 5.28 m/s (run speed) in both (kept on landing in both; the
+16 m run then meets the test island's far edge, so its 0.25 s-later speed is not a measurement).
 
 ### Unknowns
 
