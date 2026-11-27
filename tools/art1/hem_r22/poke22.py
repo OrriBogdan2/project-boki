@@ -15,7 +15,7 @@ sk=bd=None; parts=[]
 for m in j['meshes']:
     for p in m['primitives']:
         mn=j['materials'][p['material']]['name']
-        if mn=='skirt-meshy': sk=prim_data(p)
+        if mn in ('skirt-meshy','cloth-skirtmeshy'): sk=prim_data(p)   # r32 renamed the slot
         elif mn in ('body-retex','leg-meshy'): parts.append(prim_data(p))
 P=np.vstack([q[0] for q in parts]); J=np.vstack([np.pad(q[1],((0,0),(0,8-q[1].shape[1]))) for q in parts]); W=np.vstack([np.pad(q[2],((0,0),(0,8-q[2].shape[1]))) for q in parts])
 def skin(S,P,J,W):
