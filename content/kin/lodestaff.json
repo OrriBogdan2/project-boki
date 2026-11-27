@@ -115,11 +115,5 @@
 		"cm": 44,
 		"kg": 9.0,
 		"fit": 1.07
-	},
-	"roster": {
-		"art": "new",
-		"line": "lodestick",
-		"stage": 2,
-		"from": "lodestick"
 	}
 }

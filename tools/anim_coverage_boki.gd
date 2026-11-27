@@ -56,11 +56,7 @@ static func rows(main: Node) -> Dictionary:
 
 
 static func _passes(state: String, st: Array) -> bool:
-	return (
-		st[0]
-		and (state == "sleep" or float(st[1]) >= BokiClipCover.STILL_DEG)
-		and (state == "idle" or st[2])
-	)
+	return st[0] and (state == "sleep" or float(st[1]) >= BokiClipCover.STILL_DEG) and (state == "idle" or st[2])
 
 
 static func _cell(state: String, st: Array, sigs: Dictionary) -> String:
@@ -71,9 +67,7 @@ static func _cell(state: String, st: Array, sigs: Dictionary) -> String:
 
 ## state -> [has the clip, deg its bones turn over it, leaves the idle pose, motion signature].
 static func _states(player: AnimationPlayer) -> Dictionary:
-	var idle := (
-		BokiClipCover.sample(player.get_animation("idle")) if player.has_animation("idle") else {}
-	)
+	var idle := BokiClipCover.sample(player.get_animation("idle")) if player.has_animation("idle") else {}
 	var out := {}
 	for s in COLS:
 		var c: String = PLAYS[s]
@@ -82,10 +76,7 @@ static func _states(player: AnimationPlayer) -> Dictionary:
 			continue
 		var smp := BokiClipCover.sample(player.get_animation(c))
 		out[s] = [
-			true,
-			BokiClipCover.motion(smp),
-			BokiClipCover.off_idle(smp, idle) > BokiClipCover.NEAR_IDLE_DEG,
-			_sig(smp)
+			true, BokiClipCover.motion(smp), BokiClipCover.off_idle(smp, idle) > BokiClipCover.NEAR_IDLE_DEG, _sig(smp)
 		]
 	return out
 
@@ -112,10 +103,7 @@ static func worst(rows_v: Dictionary) -> Array:
 
 static func _rank(row: Array, id: String) -> String:
 	var dex := FieldBook.number(id)
-	return (
-		"%02d%02d%03d%s"
-		% [99 - row.count("missing"), 99 - row.count("shared"), dex if dex > 0 else 999, id]
-	)
+	return "%02d%02d%03d%s" % [99 - row.count("missing"), 99 - row.count("shared"), dex if dex > 0 else 999, id]
 
 
 ## Backlog-ready lines for the n worst species.

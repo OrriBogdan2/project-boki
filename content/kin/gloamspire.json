@@ -119,11 +119,5 @@
 		"cm": 44,
 		"kg": 9.0,
 		"fit": 1.09
-	},
-	"roster": {
-		"art": "new",
-		"line": "gloamshell",
-		"stage": 2,
-		"from": "gloamshell"
 	}
 }

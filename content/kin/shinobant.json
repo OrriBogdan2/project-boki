@@ -115,11 +115,5 @@
 		"cm": 44,
 		"kg": 9.0,
 		"fit": 0.81
-	},
-	"roster": {
-		"art": "new",
-		"line": "marchleaf",
-		"stage": 2,
-		"from": "marchleaf"
 	}
 }

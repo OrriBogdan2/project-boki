@@ -125,11 +125,5 @@
 		"cm": 60,
 		"kg": 30.0,
 		"fit": 1.3
-	},
-	"roster": {
-		"art": "new",
-		"line": "rimeshrew",
-		"stage": 2,
-		"from": "rimeshrew"
 	}
 }

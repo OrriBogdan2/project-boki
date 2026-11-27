@@ -16,16 +16,7 @@ extends RefCounted
 const FIRST := ["vitals", "abilities", "summon_ring", "objective"]
 # (beat_clock also comes on the first Ways Out beat or kill, HudGroups.clock_shown)
 const LATER := [
-	"beat_clock",
-	"belt",
-	"counters",
-	"feed",
-	"gear",
-	"squad",
-	"perks",
-	"weather",
-	"pace_tags",
-	"plate_colours"
+	"beat_clock", "belt", "counters", "feed", "gear", "squad", "perks", "weather", "pace_tags", "plate_colours"
 ]
 
 var bad := 0
@@ -41,14 +32,7 @@ func _match(main: Node, opts: Dictionary) -> Match:
 	var m := Match.new()
 	main.add_child(m)
 	var o := {
-		"teams": 3,
-		"squad": 1,
-		"tier": 0,
-		"length": 1e9,
-		"seed": 7301,
-		"no_drop": true,
-		"heart": true,
-		"god": true
+		"teams": 3, "squad": 1, "tier": 0, "length": 1e9, "seed": 7301, "no_drop": true, "heart": true, "god": true
 	}
 	o.merge(opts, true)
 	m.start(o)
@@ -87,10 +71,7 @@ func run(main: Node) -> void:
 		int(pips.get("from_match", 1)) == 0 and String(pips.get("first", "")) == "seat_open",
 		"the seat pips wait for the first open seat"
 	)
-	ok(
-		LATER.all(func(k): return int(g.get(k, {}).get("from_match", 0)) == 4),
-		"the rest is from match 4"
-	)
+	ok(LATER.all(func(k): return int(g.get(k, {}).get("from_match", 0)) == 4), "the rest is from match 4")
 	# ---------------------------------------------------------------- 2. a fresh save at matches 1, 3, 4
 	var m := _match(main, {})
 	m.time = 30.0
@@ -100,10 +81,7 @@ func run(main: Node) -> void:
 		shown.sort()
 		var expect: Array = FIRST.duplicate() if n < 4 else FIRST + LATER
 		expect.sort()
-		ok(
-			HudReveal.match_no() == n and shown == expect,
-			"match %d shows %s" % [n, ", ".join(shown)]
-		)
+		ok(HudReveal.match_no() == n and shown == expect, "match %d shows %s" % [n, ", ".join(shown)])
 	ok(not HudReveal.on(m, "seat_pips"), "match 4: the seat pips still wait for an open seat")
 	var clk: Dictionary = g["beat_clock"]
 	ok(
@@ -113,15 +91,9 @@ func run(main: Node) -> void:
 	# the in-group holdbacks (belt slots 3 to 6 while empty, the locked ultimate tiles until level 6) wait on a slot or
 	# a level, never a match number: hidden at match 1 and 4 alike, shown with Tab
 	for k in ["belt_spare", "ult_tiles"]:
-		ok(
-			int(g[k].get("from_match", 1)) == 0 and not HudReveal.on(m, k),
-			"%s waits for its slot or level" % k
-		)
+		ok(int(g[k].get("from_match", 1)) == 0 and not HudReveal.on(m, k), "%s waits for its slot or level" % k)
 	Input.action_press("scores")
-	ok(
-		HudReveal.on(m, "belt_spare") and HudReveal.on(m, "ult_tiles"),
-		"Tab shows the held-back tiles"
-	)
+	ok(HudReveal.on(m, "belt_spare") and HudReveal.on(m, "ult_tiles"), "Tab shows the held-back tiles")
 	Input.action_release("scores")
 	# ---------------------------------------------------------------- 3. Tab, Show full HUD, an older save
 	Save.d["matches"] = 0
@@ -141,21 +113,11 @@ func run(main: Node) -> void:
 	# ---------------------------------------------------------------- 4. the seat pips through the real HUD
 	m.hud.panels.queue_redraw()
 	await _frames(main, 3)
-	ok(
-		not Save.d["hud_reveal"].has("seat_pips"),
-		"every seat locked at 0:30: no pips, nothing remembered"
-	)
-	ok(
-		not HudGroups.clock_shown(m) and not Save.d["hud_reveal"].has("beat_clock"),
-		"0:30, no kill: the clock waits"
-	)
+	ok(not Save.d["hud_reveal"].has("seat_pips"), "every seat locked at 0:30: no pips, nothing remembered")
+	ok(not HudGroups.clock_shown(m) and not Save.d["hud_reveal"].has("beat_clock"), "0:30, no kill: the clock waits")
 	m.player.kills = 1
 	ok(
-		(
-			HudGroups.clock_shown(m)
-			and HudReveal.on(m, "beat_clock")
-			and not HudReveal.on(m, "counters")
-		),
+		HudGroups.clock_shown(m) and HudReveal.on(m, "beat_clock") and not HudReveal.on(m, "counters"),
 		"the first kill brings the clock; the counters still wait for match 4"
 	)
 	m.player.kills = 0
@@ -187,10 +149,7 @@ func run(main: Node) -> void:
 	m = _match(main, {"training": true})
 	ok(not HudReveal.staged(m) and _shown(m).size() == g.size(), "training shows the full HUD")
 	# ---------------------------------------------------------------- 6. parity with the old HudGroups rules
-	ok(
-		float(HudReveal.groups()["seat_pips"]["lead_s"]) == 30.0,
-		"the Ways Out strip still comes 30 s before a seat"
-	)
+	ok(float(HudReveal.groups()["seat_pips"]["lead_s"]) == 30.0, "the Ways Out strip still comes 30 s before a seat")
 	m.opts.erase("training")
 	var p: Hunter = m.player
 	Settings.set_v("tips", true, false)
@@ -203,9 +162,7 @@ func run(main: Node) -> void:
 			Save.d["matches"] = n - 1
 			var was_new: bool = n - 1 < 3  # the old HudGroups.NEW_PLAYER_MATCHES
 			var train: bool = mode == "training"
-			var kit_old: bool = (
-				not Record.clean() and mode != "tutorial" and not p.out and (not was_new or train)
-			)
+			var kit_old: bool = not Record.clean() and mode != "tutorial" and not p.out and (not was_new or train)
 			var same: bool = (
 				HudReveal.own_numbers_shown(p, false) == (not was_new)
 				and HudReveal.own_numbers_shown(p, true)

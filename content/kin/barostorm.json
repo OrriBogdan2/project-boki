@@ -121,11 +121,5 @@
 		"cm": 60,
 		"kg": 30.0,
 		"fit": 1.46
-	},
-	"roster": {
-		"art": "new",
-		"line": "sentrikat",
-		"stage": 2,
-		"from": "sentrikat"
 	}
 }
