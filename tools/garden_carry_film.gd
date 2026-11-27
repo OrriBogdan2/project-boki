@@ -158,7 +158,7 @@ func _tidy_scene() -> void:
 				sz.y + 2.0 * CLEAR_MARGIN
 			)
 		)
-	for ch in h.get_children():  # the Ferry and Expeditions stands and the portal ring fill the meadow: not in this film
+	for ch in h.get_children():  # the Ferry and Expeditions stands and the portal ring: not in this film
 		var ring := ch.get_node_or_null("Ring") as MeshInstance3D
 		if ring != null and ring.mesh is TorusMesh:
 			(ch as Node3D).visible = false
@@ -196,7 +196,8 @@ func _wait(secs: float) -> void:
 		await main.get_tree().process_frame
 		_frames += 1
 		h.day_t = DAY_T
-		CamRig.rules["farm"]["rise"] = _rise + maxf(float(h.py) - float(h._ground_h(h.ppos.x, h.ppos.z)), 0.0) * 0.9
+		var up := maxf(float(h.py) - float(h._ground_h(h.ppos.x, h.ppos.z)), 0.0)
+		CamRig.rules["farm"]["rise"] = _rise + up * 0.9
 		if _zoom_goal >= 0.0:
 			h.cam.zoom_to = move_toward(h.cam.zoom_to, _zoom_goal, _zoom_rate / FPS)
 		if not is_nan(_yaw_goal):
