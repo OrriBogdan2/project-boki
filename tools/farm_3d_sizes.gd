@@ -13,19 +13,22 @@ const ARCHES := ["bulwark", "juggernaut", "mage", "tender", "rimewright"]  # Alb
 const NAMES := ["Albert", "Kael", "Sparkle", "Meeko", "Neve"]
 const SPECIES: PackedStringArray = ["cindle", "burrlet", "puddlet", "heatherhorn"]
 const BOKI_NAMES := ["Ash", "Moss", "Dew", "Haggis"]
-const HUNTER_X := [-5.0, -2.5, 0.0, 2.5, 5.0]  # m across the group (eye and overview shots), Albert far left
+const ROW_STEP := 1.45  # m between neighbours in the one row of nine (eye shot): hunters and Boki alternate
+const ROW_ORDER := ["h0", "b0", "h1", "b1", "h2", "b2", "h3", "b3", "h4"]  # Albert at the end nearest the 3/4 camera
+const HUNTER_X := [-5.0, -2.5, 0.0, 2.5, 5.0]  # m across the group (mid shot back row), Albert far left
 const BOKI_X := [-3.75, 1.25, 3.75, -1.25]  # m (cindle, burrlet, puddlet, heatherhorn): in the gaps, a row nearer
 const WALK_X := [-2.7, -0.9, 0.9, 2.7]  # m: the four others in the farm-cam shot, Albert walking behind them
 const WALK_BOKI_X := [-1.8, 0.0, 1.8, 3.9]
 const WALK_AHEAD := 3.8  # m the row stands in front of Albert (farm-cam shot)
 const BOKI_FRONT := 2.2  # m the Boki stand nearer the camera than the hunters
-const FACE_BOKI := 0.35  # rad: a quarter turn off the camera, so a side view reads
-const EYE_FOV := 38.0
-const EYE_DIST := 12.5  # m from the group
-const EYE_HEIGHT := 1.5  # m above the ground
-const OVER_FOV := 45.0
-const OVER_BACK := 60.0  # m south of the group
-const OVER_UP := 55.0  # m above the ground
+const FACE_BOKI := 0.18  # rad: a small turn either side of the camera, so it is not stiff but the face reads
+const EYE_FOV := 40.0
+const EYE_DIST := 15.0  # m from the row's middle
+const EYE_YAW := 0.5  # rad: the 3/4 view, the camera swung round to Albert's end of the row
+const EYE_HEIGHT := 1.4  # m above the ground
+const MID_FOV := 40.0
+const MID_BACK := 11.0  # m from the group
+const MID_UP := 4.5  # m above the ground
 
 var main: Node
 var h
@@ -34,6 +37,11 @@ var group := Vector3.ZERO  # ground point the group stands on
 var hunters: Array[Node3D] = []
 var cam3: Camera3D
 var walking := true  # farm-cam shot: Albert is the avatar seen from behind; else the whole group faces the camera
+var layout := "farm"  # farm | row | mid
+var anims: Array = []  # one HunterAnim per hunter (Albert's is the farm's own, h.p_anim)
+var cam_at := Vector3.ZERO  # the free camera's position: everyone turns to it
+var farm_scale := 1.0
+var cam_side := 1.0  # +1: the eye camera swings to +x, Albert at +x end of the row; -1 the other way
 
 
 func run(main_node: Node) -> void:
@@ -70,19 +78,30 @@ func run(main_node: Node) -> void:
 	await _wait(1.0)
 	_place()
 	await _wait(2.5)
+	if DisplayServer.get_name() == "headless":
+		_write_heights()
+		main.get_tree().quit()
+		return
+	_log("1_farm_cam")
 	await _shot("1_farm_cam")
-	walking = false
+	_log("after 1")
+	layout = "row"
 	_layout()
-	await _wait(1.0)
-	_free_camera(group + Vector3(0, OVER_UP, OVER_BACK), group, OVER_FOV)
-	await _wait(0.5)
-	await _shot("2_overview")
-	_free_camera(group + Vector3(2.0, 20.0, 24.0), group + Vector3(0, 0, -2.0), OVER_FOV)
-	await _wait(0.5)
-	await _shot("2b_overview_near")
-	_free_camera(group + Vector3(0, EYE_HEIGHT, EYE_DIST), group + Vector3(0, 1.0, 0), EYE_FOV)
-	await _wait(0.5)
-	await _shot("3_eye")
+	var mid := group + Vector3(0, 0, 0)
+	cam_at = mid + Vector3(sin(EYE_YAW) * EYE_DIST * cam_side, EYE_HEIGHT, cos(EYE_YAW) * EYE_DIST)
+	_free_camera(cam_at, mid + Vector3(0, 1.0, 0), EYE_FOV)
+	await _wait(1.5)
+	_log("2_eye_row")
+	await _shot("2_eye_row")
+	_log("after 2")
+	layout = "mid"
+	_layout()
+	cam_at = group + Vector3(0.0, MID_UP, MID_BACK)
+	_free_camera(cam_at, group + Vector3(0, 0.9, 1.0), MID_FOV)
+	await _wait(1.5)
+	_log("3_mid")
+	await _shot("3_mid")
+	_log("after 3")
 	_write_heights()
 	main.get_tree().quit()
 
@@ -107,42 +126,62 @@ func _make_save() -> void:
 
 
 ## The farm draws you as the Unmasked, so Albert is built here like the other four (as a match builds a hunter) and
-## takes the avatar's place and scale.
+## takes the avatar's place and scale. Each of the four gets a HunterAnim, so it idles as it does in play.
 func _place() -> void:
 	group = h.world.free_spot_near(_clear_spot(Vector3(56.0, 0, 29.0)), [], 0.8)
 	var old: Node3D = h.player
+	farm_scale = old.scale.y
 	for i in ARCHES.size():
 		var cls := Arch.weight(ARCHES[i])
 		var m: Node3D = Models.hunter(cls, Data.TEAM_COLORS[0], Arch.weapon_for(ARCHES[i], cls, ""), "", {}, ARCHES[i])
 		m.scale = old.scale
 		h.add_child(m)
 		hunters.append(m)
+		anims.append(null if i == 0 else HunterAnim.new(m))
 	h.player = hunters[0]
 	old.queue_free()
 	h.farm_cam.yaw = 0.0
-	h.cam.zoom_to = CamWheel.far()
-	h.cam.zoom = h.cam.zoom_to
 	_layout()
 
 
-## walking: Albert at the group's spot, facing north as the farm shows him, the others in a row ahead of him facing
-## the camera. Otherwise all five in one row and the Boki a step nearer.
+## farm: Albert at the group's spot facing north as the farm shows him, the other four in a row ahead of him facing the
+## camera. row: all nine in one line, hunters and Boki alternating, Albert at the camera's end. mid: the hunters in a
+## back row, Boki a row nearer, Albert a step in front.
 func _layout() -> void:
-	var xs: Array = WALK_X if walking else HUNTER_X
-	var bx: Array = WALK_BOKI_X if walking else BOKI_X
-	var ahead := -WALK_AHEAD if walking else 0.0
-	var albert := group + Vector3(0, 0, WALK_AHEAD if walking else 0.0)
-	if not walking:
-		albert = group + Vector3(HUNTER_X[0], 0, 0)
+	var spots := {}  # node -> ground position
+	var albert := group
+	match layout:
+		"farm":
+			albert = group + Vector3(0, 0, WALK_AHEAD)
+			for i in range(1, 5):
+				spots[i] = group + Vector3(WALK_X[i - 1], 0, -WALK_AHEAD)
+			for j in 4:
+				spots[10 + j] = group + Vector3(WALK_BOKI_X[j], 0, -WALK_AHEAD + BOKI_FRONT)
+		"row":
+			for slot in ROW_ORDER.size():
+				var x := (4 - slot) * ROW_STEP * cam_side
+				var id := String(ROW_ORDER[slot])
+				var n := int(id.substr(1))
+				if id.begins_with("h"):
+					spots[n] = group + Vector3(x, 0, 0)
+				else:
+					spots[10 + n] = group + Vector3(x, 0, 0.2)
+			albert = spots[0]
+		"mid":
+			albert = group + Vector3(HUNTER_X[0], 0, 1.2)
+			for i in range(1, 5):
+				spots[i] = group + Vector3(HUNTER_X[i], 0, 0)
+			for j in 4:
+				spots[10 + j] = group + Vector3(BOKI_X[j], 0, BOKI_FRONT)
 	h.ppos = albert
 	h.player.position = albert
-	h.pface = 0.0 if walking else PI
+	h.pface = 0.0 if layout == "farm" else PI
 	h.cam.snap(albert)
-	for i in range(1, ARCHES.size()):
-		hunters[i].position = group + Vector3(xs[i - 1 if walking else i], 0, ahead)
+	for i in range(1, 5):
+		hunters[i].position = spots[i]
 	for j in h.kins.size():
 		var k: Dictionary = h.kins[j]
-		k["pos"] = group + Vector3(bx[j], 0, ahead + BOKI_FRONT)
+		k["pos"] = spots[10 + j]
 		k["goal"] = k["pos"]
 		k["t"] = 600.0
 		(k["node"] as Node3D).position = k["pos"]
@@ -168,97 +207,187 @@ func _shot(name: String) -> void:
 
 
 func _write_heights() -> void:
-	var out := {
-		"hunter_scale": hunters[0].global_basis.y.length(),
-		"hunters": {},
-		"parts": {},
-		"boki": {},
-		"group": [group.x, group.z]
-	}
+	var match_k := Hunter.VIS_SCALE
+	var out := {"farm_scale": farm_scale, "match_scale": match_k, "hunters": {}, "boki": {}, "group": [group.x, group.z]}
 	for i in hunters.size():
-		out["hunters"][NAMES[i]] = _parts(hunters[i])[0][3]
-		out["parts"][NAMES[i]] = _parts(hunters[i])
+		var m := hunters[i]
+		var body := _top(m, ["head_graft", "Mesh_0", "breaker"], false)
+		var full := _top(m, [], true)
+		out["hunters"][NAMES[i]] = {
+			"body": body, "full": full, "match_body": body * match_k / farm_scale, "match_full": full * match_k / farm_scale
+		}
 	for j in h.kins.size():
-		out["boki"][SPECIES[j]] = _height_m((h.kins[j]["node"] as Node3D).find_child("Rig", true, false))
+		var n := h.kins[j]["node"] as Node3D
+		out["boki"][SPECIES[j]] = {"body": _top(n, ["Body"], false), "full": _top(n, [], true)}
 	var f := FileAccess.open(dir.path_join("heights.json"), FileAccess.WRITE)
-	f.store_string(JSON.stringify(out))
+	f.store_string(JSON.stringify(out, "  "))
 	f.close()
 	print("FARM3D ", JSON.stringify(out))
 
 
-## Per mesh: [name, parent name, bottom m, top m] above the model's feet, tallest first.
-func _parts(model: Node3D) -> Array:
-	var rows := []
+const NOT_BODY := ["Glider", "TeamRing", "Companion", "prop_", "Gun", "Shield", "Halo", "hammer", "Bloom", "Shell", "Aura"]
+
+
+## Height (m above the model's feet, as drawn) of the top of the named body meshes (names empty: of every visible mesh
+## that is not a weapon, prop, sail or pet). A skinned mesh's box is its bind pose, so no idle pose moves it. Hair that
+## is part of the body mesh stays in `body`; a separate hair, ear or horn piece only counts in `full` (names given: only
+## those, ink copies excluded).
+func _top(model: Node3D, names: Array, anything: bool) -> float:
+	var top := 0.0
 	for n in model.find_children("*", "MeshInstance3D", true, false):
 		var mi := n as MeshInstance3D
-		if mi.mesh == null or _under(mi, "Glider"):
+		if mi.mesh == null or not mi.is_visible_in_tree():
+			continue
+		var nm := String(mi.name)
+		if anything:
+			if _skip(mi):
+				continue
+		elif not names.has(nm):
 			continue
 		var bb: AABB = mi.global_transform * mi.get_aabb()
-		rows.append(
-			[
-				String(mi.name),
-				String(mi.get_parent().name),
-				snappedf(bb.position.y - model.global_position.y, 0.01),
-				snappedf(bb.end.y - model.global_position.y, 0.01)
-			]
-		)
-	rows.sort_custom(func(a, b): return a[3] > b[3])
-	return rows.slice(0, 8)
+		top = maxf(top, bb.end.y - model.global_position.y)
+	return snappedf(top, 0.01)
 
 
-func _under(n: Node, node_name: String) -> bool:
+func _skip(mi: Node) -> bool:
+	var n := mi
 	while n != null:
-		if String(n.name) == node_name:
-			return true
+		for bad in NOT_BODY:
+			if String(n.name).contains(bad):
+				return true
 		n = n.get_parent()
 	return false
-
-
-## Standing height (m) of a model as drawn: its bind-pose box (KinSize.box, so no idle pose moves it) times its world scale.
-func _height_m(model: Node3D) -> float:
-	return KinSize.box(model).y * model.global_basis.y.length()
 
 
 func _wait(secs: float) -> void:
 	for _i in maxi(1, roundi(secs * FPS)):
 		await main.get_tree().process_frame
 		h.day_t = DAY_T
+		h.pvel = Vector3.ZERO
+		h.dash_t = 0.0
 		for j in h.kins.size():
 			h.kins[j]["hop"] = 0.0
 			h.kins[j]["joy_t"] = 0.0
+		_pose_hunters(1.0 / FPS)
+
+
+## The camera everyone turns to: the free camera, or in the farm shot the farm's own.
+func _eye() -> Vector3:
+	return h.cam.global_position if layout == "farm" else cam_at
+
+
+func _face_to(p: Vector3) -> float:
+	var e := _eye()
+	return atan2(-(e.x - p.x), -(e.z - p.z))
+
+
+## Idle for the four that are not the farm's avatar (Albert's own HunterAnim runs in Home), all turned to the camera.
+func _pose_hunters(d: float) -> void:
+	var scl := Vector3.ONE * farm_scale
+	for i in range(1, hunters.size()):
+		var face := _face_to(hunters[i].position)
+		hunters[i].basis = h.cam.char_basis(face, scl)
+		anims[i].update(d, {"vel": Vector3.ZERO, "face": face, "grounded": true, "idle_break": true})
+	if layout != "farm":
+		h.pface = _face_to(hunters[0].position)
 
 
 ## After Home's own pose each frame: everyone faces the camera, the Boki at the non-active farm size, UI and marks gone.
 func _hide_marks() -> void:
-	if not is_instance_valid(h):
+	if not is_instance_valid(h) or hunters.is_empty():
 		return
 	for i in hunters.size():
 		for g in hunters[i].find_children("Glider", "Node3D", true, false):
 			(g as Node3D).visible = false  # folded away on the ground, as in play
-		if i > 0 or not walking:
-			hunters[i].rotation.y = PI
+		if i > 0 or layout != "farm":
+			hunters[i].rotation.y = _face_to(hunters[i].position)
 	for j in h.kins.size():
 		var n := h.kins[j]["node"] as Node3D
-		n.rotation.y = FACE_BOKI * (1.0 if j % 2 == 0 else -1.0)
+		n.rotation.y = _face_to(n.position) + FACE_BOKI * (1.0 if j % 2 == 0 else -1.0)
 		n.scale = Vector3.ONE * 0.9 * float(n.get_meta("evo_scale", 1.0)) * h.FARM_BOKI_SCALE
 	h.ui.visible = false
+	for ring in h.find_children("TeamRing", "MeshInstance3D", true, false):
+		(ring as Node3D).visible = false  # the orange discs under the hunters' feet
 	for kind in ["Label3D", "Sprite3D", "GPUParticles3D", "CPUParticles3D"]:
 		for n in h.find_children("*", kind, true, false):
 			(n as Node3D).visible = false
 
 
+## The ground point with the fewest trees, rocks, buildings and edges in the box the shots look at (the group, the
+## ground behind it for the camera's background and the ground in front of it for the camera), over the whole island.
 func _clear_spot(near: Vector3) -> Vector3:
 	var best := near
-	var best_n := 99999
-	for cx in range(int(near.x) - 8, int(near.x) + 9):
-		for cz in range(int(near.z) - 8, int(near.z) + 9):
+	var best_n := 999999
+	var wd = h.world
+	var objs: Array[Vector2] = []  # buildings, signs, fences, the portal: nodes standing on the farm, and its named spots
+	for c in h.get_children():
+		if c is Node3D and not c is Camera3D and not c is Light3D and (c as Node3D).position.length() > 1.0 and c.get_child_count() > 0:
+			objs.append(Vector2((c as Node3D).position.x, (c as Node3D).position.z))
+	for key in h.spots:
+		var sp: Vector3 = h.spots[key]
+		if sp.x > -100.0:
+			objs.append(Vector2(sp.x, sp.z))
+	for cx in range(14, int(wd.w) - 14, 2):
+		for cz in range(14, int(wd.h) - 14, 2):
 			var n := 0
-			for sx in range(cx - 8, cx + 9):
-				for sz in range(cz - 6, cz + 9):
-					if h.world.is_block(sx + 0.5, sz + 0.5) or h.world.is_void(sx + 0.5, sz + 0.5):
-						n += 1
-			n = n * 10 + int(Vector2(cx - near.x, cz - near.z).length())
+			for sx in range(cx - 10, cx + 11):
+				for sz in range(cz - 10, cz + 17):
+					var dz := sz - cz
+					var bad: bool = wd.is_block(sx + 0.5, sz + 0.5) or wd.occupy(sx + 0.5, sz + 0.5, 0.9, 0.0, true) != 0.0
+					var off: bool = wd.is_void(sx + 0.5, sz + 0.5)
+					if dz >= -3 and dz <= 4 and absi(sx - cx) <= 8:
+						n += 30 if bad or off else 0  # where the characters stand
+					elif dz < -3:
+						n += 4 if bad else 0  # the background: trees there only clutter
+					elif dz > 4:
+						n += (6 if bad else 0) + (1 if off else 0)  # where the cameras stand
+			for o in objs:
+				if o.x > cx - 12.0 and o.x < cx + 12.0 and o.y > cz - 10.0 and o.y < cz + 17.0:
+					n += 40
+			var sides := [0, 0]
+			for si in 2:
+				var sg := 1.0 if si == 0 else -1.0
+				var c0 := Vector3(cx + 0.5, 0, cz + 0.5)
+				var cams := [c0 + Vector3(sin(EYE_YAW) * EYE_DIST * sg, 0, cos(EYE_YAW) * EYE_DIST), c0 + Vector3(0, 0, MID_BACK)]
+				for cm in cams:
+					for tx in [-5.8, 0.0, 5.8]:
+						var tg := c0 + Vector3(tx, 0, 0)
+						for t in range(1, 24):
+							var q: Vector3 = cm.lerp(tg, t / 24.0)
+							if wd.is_block(q.x, q.z) or wd.occupy(q.x, q.z, 0.8, 0.0, true) != 0.0:
+								sides[si] += 6
+							for o in objs:
+								if Vector2(o.x - q.x, o.y - q.z).length() < 1.6:
+									sides[si] += 6
+			n += mini(sides[0], sides[1])
+			var side := 1.0 if sides[0] <= sides[1] else -1.0
+			n = n * 10 + int(Vector2(cx - near.x, cz - near.z).length() * 0.1)
 			if n < best_n:
 				best_n = n
 				best = Vector3(cx + 0.5, 0, cz + 0.5)
+				cam_side = side
+	if "--map" in OS.get_cmdline_user_args():
+		for z in range(0, int(wd.h)):
+			var line := ""
+			for x in range(0, int(wd.w)):
+				var c := "."
+				if wd.is_void(x + 0.5, z + 0.5):
+					c = " "
+				elif wd.is_block(x + 0.5, z + 0.5):
+					c = "#"
+				elif wd.occupy(x + 0.5, z + 0.5, 0.9, 0.0, true) != 0.0:
+					c = "o"
+				for o in objs:
+					if int(o.x) == x and int(o.y) == z:
+						c = "@"
+				line += c
+			print("MAP%02d %s" % [z, line])
+	print("FARM3D clear spot ", best, " score ", best_n / 10)
 	return best
+
+
+func _log(tag: String) -> void:
+	var rows := []
+	for i in hunters.size():
+		rows.append("%s %.1f,%.1f" % [NAMES[i], hunters[i].global_position.x - group.x, hunters[i].global_position.z - group.z])
+	print("FARM3D ", tag, " ppos ", h.ppos - group, " ", "; ".join(rows))
