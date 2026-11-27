@@ -1,9 +1,12 @@
 extends RefCounted
 ## --lineup-shot --export-glb=<dir>: writes each Hunter of the lineup as one static .glb, posed in the held idle frame,
 ## at the size a match draws it (Models.hunter's scale x Hunter.VIS_SCALE), facing +Z, with the glb's own textures
-## (no team tint, no toon shader), plus <dir>/ours.json: per Hunter the body top (props left out, PROP_WORDS) and
-## the top with weapon and props, the head-top anchor (else the body top), in metres above the feet.
+## (no team tint, no toon shader), plus <dir>/ours.json: per Hunter the body top (props left out, PROP_WORDS), the
+## top with weapon and props (prop_h) and the crown (crown_h = head_h: the head-top anchor, else the body top), in
+## metres above the feet. The page shows crown_h as the body height and prop_h as the second number.
 ## For the admin height lineup page (/admin/lineup3d).
+
+const CROWN_R := 0.12  # m: the column under the head-top anchor whose body-mesh top is the crown
 
 
 ## Exports every Hunter in heroes (ids in the same order) and the table. prop_words: mesh-name words that mark a prop.
@@ -18,7 +21,9 @@ static func export_all(heroes: Array, ids: Array, dir: String, prop_words: Array
 	f.close()
 
 
-static func _export_one(h: Node3D, id: String, dir: String, k: float, prop_words: Array) -> Dictionary:
+static func _export_one(
+	h: Node3D, id: String, dir: String, k: float, prop_words: Array
+) -> Dictionary:
 	var root := Node3D.new()
 	root.name = id
 	var base := Transform3D(Basis.from_scale(Vector3.ONE * k), Vector3.ZERO)
@@ -28,7 +33,12 @@ static func _export_one(h: Node3D, id: String, dir: String, k: float, prop_words
 	for node in h.find_children("*", "MeshInstance3D", true, false):
 		var m := node as MeshInstance3D
 		var low := String(h.get_path_to(m)).to_lower()
-		if not m.is_visible_in_tree() or m.mesh == null or low.begins_with("teamring") or low.contains("shadow"):
+		if (
+			not m.is_visible_in_tree()
+			or m.mesh == null
+			or low.begins_with("teamring")
+			or low.contains("shadow")
+		):
 			continue
 		if low.contains("ring"):
 			continue
@@ -44,6 +54,11 @@ static func _export_one(h: Node3D, id: String, dir: String, k: float, prop_words
 		out.mesh = _plain(src, m)
 		out.transform = base * m.global_transform
 		root.add_child(out)
+		# a loose prop resting on the floor sinks in the idle frame (Albert's hammer, 0.3 m): stood on the floor. A prop
+		# on a hand bone stays put (Kael's sword tip dips 0.13 m; lifting it would pull it out of his hand).
+		if prop and not low.contains("hand") and _bottom(out) < -0.05:
+			print("LINEUP_GLB_LIFT %s %s %.3f" % [id, low, -_bottom(out)])
+			out.position.y -= _bottom(out)
 		var top := _top(out)
 		tops.y = maxf(tops.y, top)
 		if not prop:
@@ -58,9 +73,16 @@ static func _export_one(h: Node3D, id: String, dir: String, k: float, prop_words
 	var err := doc.append_from_scene(root, st)
 	if err == OK:
 		err = doc.write_to_filesystem(st, path)
-	root.free()
+	# body height = the crown: the head-top anchor (no hat, ears, flag poles or props, even ones baked into the body
+	# mesh like Albert's flags or Meeko's ears), lowered to the body mesh's top straight under it when the anchor
+	# floats above the head (Albert's sits 9 cm over his helmet); no anchor: the top of the non-prop meshes
 	var anchor := WardenGlb.anchor(h, "anchor_head_top")
-	var head: float = (anchor.global_position.y - h.global_position.y) * k if anchor else tops.x
+	var head: float = tops.x
+	if anchor:
+		var a := base * anchor.global_position
+		var under := _column_top(root, Vector2(a.x, a.z), CROWN_R)
+		head = minf(a.y, under) if under > 0.0 else a.y
+	root.free()
 	var src_glb := WardenGlb.path(id) if WardenGlb.uses_model(id) else "(procedural)"
 	print(
 		(
@@ -74,6 +96,8 @@ static func _export_one(h: Node3D, id: String, dir: String, k: float, prop_words
 		"file": id + ".glb",
 		"src": src_glb,
 		"head_h": snappedf(head, 0.001),
+		"crown_h": snappedf(head, 0.001),
+		"prop_h": snappedf(maxf(tops.y, head), 0.001),
 		"body_h": snappedf(tops.x, 0.001),
 		"all_h": snappedf(tops.y, 0.001),
 		"tris": tris,
@@ -125,6 +149,29 @@ static func _material(m: MeshInstance3D, s: int) -> Material:
 				out.albedo_color = col
 			return out
 	return out
+
+
+## The highest body-mesh vertex within r (in xz) of at, in root space; -INF when none.
+static func _column_top(root: Node3D, at: Vector2, r: float) -> float:
+	var top := -INF
+	for mi in root.get_children():
+		if not (mi as Node).name.begins_with("body_"):
+			continue
+		for s in (mi as MeshInstance3D).mesh.get_surface_count():
+			for v in (mi as MeshInstance3D).mesh.surface_get_arrays(s)[Mesh.ARRAY_VERTEX]:
+				var w: Vector3 = (mi as MeshInstance3D).transform * v
+				if Vector2(w.x, w.z).distance_to(at) <= r:
+					top = maxf(top, w.y)
+	return top
+
+
+## The lowest vertex of a placed mesh, in its parent's space.
+static func _bottom(mi: MeshInstance3D) -> float:
+	var low := INF
+	for s in mi.mesh.get_surface_count():
+		for v in mi.mesh.surface_get_arrays(s)[Mesh.ARRAY_VERTEX]:
+			low = minf(low, (mi.transform * v).y)
+	return low
 
 
 ## The highest vertex of a placed mesh, in its parent's space.
