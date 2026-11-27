@@ -8,7 +8,8 @@ signal closed
 ## The settings body's held height: as tall as the window allows on every tab (most tabs need more than a
 ## 720p window has, and scroll), so switching tabs never resizes the panel.
 const SETTINGS_H := INF
-const SETTINGS_W := 760  # px: wide enough for all eight tabs in the real (not Light) Rubik weight, so no tab resizes the panel
+## The settings page width (px): all eight tabs fit in Rubik's real weight (not Light), so no tab resizes the panel.
+const SETTINGS_W := 760
 const SETTINGS_TABS := ["Main", "Controls", "Gameplay", "Camera", "Audio", "Video", "Accessibility", "Demo"]
 const MAIN_TABS := 2  # the first tabs are always shown; the rest wait behind "More..."
 const BASIC_KEY_GROUPS := 2  # Moving and Fighting; the other key groups wait behind "More keys"
