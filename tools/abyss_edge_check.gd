@@ -21,7 +21,9 @@ const WAIT := Vector2(0.1, 0.25)  # s held before a full launch, rising at this 
 # mini mantle: s, keep, min m/s (body scale), push /s, soft cap m/s, pull down /s, its fade
 const MINI := [0.75, 0.6, 3.5 * 1.16, 8.0, 2.0, 5.0, 0.35]
 const AIR := 7.5 * 1.16  # m/s^2 air steering, capped at run speed (body scale)
-const FALL_KEYS := [[0.0, 0.0], [0.1, 0.0099], [0.25, 0.0629], [0.5, 0.2541], [0.75, 0.5755], [1.0, 1.0]]
+const FALL_KEYS := [
+	[0.0, 0.0], [0.1, 0.0099], [0.25, 0.0629], [0.5, 0.2541], [0.75, 0.5755], [1.0, 1.0]
+]
 const LIFT := [10.0, 40.0, 20.0, 15.5]  # glider under the lip: m/s^2 from, to, over m deeper; m/s cap
 
 var bad := 0
@@ -112,7 +114,9 @@ func _reset(at: Vector3, v: Vector3, gy: float) -> void:
 func _ours(e: Dictionary, lip_h: float, v_in: float, vy0: float) -> Dictionary:
 	var dir: Vector2 = e["dir"]
 	var top: float = e["top"]
-	var start := Vector3(e["ex"] + dir.x * (h.r + 0.25), top - lip_h, e["ez"] + dir.y * (h.r + 0.25))
+	var start := Vector3(
+		e["ex"] + dir.x * (h.r + 0.25), top - lip_h, e["ez"] + dir.y * (h.r + 0.25)
+	)
 	_reset(start, Vector3(-dir.x * v_in, vy0, -dir.y * v_in), top)
 	var r := {
 		"depth": lip_h,
@@ -158,10 +162,14 @@ func _ours(e: Dictionary, lip_h: float, v_in: float, vy0: float) -> Dictionary:
 	return r
 
 
-## The reference's law, the same start: launch, mini push, pull-down over the top, air steering at AIR to run speed.
+## The reference's law, the same start: launch, mini push, pull-down over the top, air steering at AIR to run speed;
+## the side blocks you (no sideways speed) until your feet are over the lip.
 func _ref(lip_h: float, v_in: float, run_v: float, x0: float) -> Dictionary:
 	var is_mini := lip_h < MINI_H
-	var vz := lerpf(LAUNCH.x, LAUNCH.y, clampf(lip_h / DEPTH, 0.0, 1.0)) + (MINI_BONUS if is_mini else 0.0)
+	var vz := (
+		lerpf(LAUNCH.x, LAUNCH.y, clampf(lip_h / DEPTH, 0.0, 1.0))
+		+ (MINI_BONUS if is_mini else 0.0)
+	)
 	var z := -lip_h
 	var x := x0
 	var vx := 0.0
@@ -171,6 +179,7 @@ func _ref(lip_h: float, v_in: float, run_v: float, x0: float) -> Dictionary:
 		z += WAIT.y * v_in * WAIT.x
 		t += WAIT.x
 	var goal0 := maxf(v_in * MINI[1], MINI[2])
+	var cleared := false
 	var s := 0.0
 	while s < 4.0:
 		s += DT
@@ -186,6 +195,11 @@ func _ref(lip_h: float, v_in: float, run_v: float, x0: float) -> Dictionary:
 		z += (vz - 0.5 * G * DT) * DT
 		vz -= G * DT
 		x += vx * DT
+		if z >= 0.0:
+			cleared = true
+		if not cleared and x > x0:
+			x = x0  # the island's side: the body slides up it until the feet clear the lip, as ours (and UE's) does
+			vx = 0.0
 		r["apex"] = maxf(float(r["apex"]), z)
 		if vz < 0.0 and z <= 0.0 and x > 0.0:
 			r["land"] = x
@@ -244,11 +258,17 @@ func _row(what: String, o: Dictionary, rf: Dictionary) -> void:
 			% [what, rf["vz"], rf["apex"], rf["land"], rf["t"], rf["v_land"], AIR]
 		)
 	)
-	ok(_near(float(o["vz"]), float(rf["vz"])), "%s: launch %.2f vs %.2f m/s" % [what, o["vz"], rf["vz"]])
+	ok(
+		_near(float(o["vz"]), float(rf["vz"])),
+		"%s: launch %.2f vs %.2f m/s" % [what, o["vz"], rf["vz"]]
+	)
 	var d := float(o["depth"])
 	ok(
 		_near(float(o["apex"]) + d, float(rf["apex"]) + d),
-		"%s: apex %.2f vs %.2f m over the catch" % [what, float(o["apex"]) + d, float(rf["apex"]) + d]
+		(
+			"%s: apex %.2f vs %.2f m over the catch"
+			% [what, float(o["apex"]) + d, float(rf["apex"]) + d]
+		)
 	)
 	ok(float(o["land"]) > 0.0, "%s: lands on the island (%.2f m past the lip)" % [what, o["land"]])
 
@@ -256,7 +276,17 @@ func _row(what: String, o: Dictionary, rf: Dictionary) -> void:
 func run(main: Node) -> void:
 	m = Match.new()
 	main.add_child(m)
-	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "autoplay": true})
+	m.start(
+		{
+			"teams": 2,
+			"squad": 1,
+			"tier": 0,
+			"length": 1e9,
+			"seed": 77,
+			"no_drop": true,
+			"autoplay": true
+		}
+	)
 	m.set_process(false)
 	for mb in m.mobs:
 		mb.queue_free()
@@ -290,6 +320,7 @@ func run(main: Node) -> void:
 	for v_in in [2.0, 5.0, 9.0]:
 		var o := _ours(e, 0.5, v_in, -2.0)
 		_row("edge pop %.0f m/s" % v_in, o, _ref(o["depth"], v_in, h.base_speed, x0))
+	_suction(e)
 	var cd := h.mantle_cd
 	print("AEDGE mantle cooldown left at the end of the last run: %.2fs" % cd)
 	# the free fall from the lip, far from any side: time to the point of no return
@@ -307,7 +338,10 @@ func run(main: Node) -> void:
 			lost = t
 	var rft := _ref_fall_t()
 	ok(_near(kill_d, DEPTH), "point of no return %.2f m under the lip (ref %.1f)" % [kill_d, DEPTH])
-	ok(lost > 0.0 and _near(lost, rft), "off the lip to the point of no return in %.2fs (ref %.2fs)" % [lost, rft])
+	ok(
+		lost > 0.0 and _near(lost, rft),
+		"off the lip to the point of no return in %.2fs (ref %.2fs)" % [lost, rft]
+	)
 	# the glider's lift from three depths out in the open
 	for depth in [3.0, 8.0, 14.0]:
 		_reset(out_at - Vector3(0.0, depth, 0.0), Vector3.ZERO, float(e["top"]))
@@ -329,8 +363,75 @@ func run(main: Node) -> void:
 			not h.out and _near(lt, rl),
 			"glider from %.0fm under the lip: at the lip in %.2fs (ref %.2fs)" % [depth, lt, rl]
 		)
-		ok(top_vy <= 0.5, "...and the lift lets go at its top (%.2f m/s up 10 steps later, ref 0)" % top_vy)
+		ok(
+			top_vy <= 0.5,
+			"...and the lift lets go at its top (%.2f m/s up 10 steps later, ref 0)" % top_vy
+		)
 	_done(main)
+
+
+## The wall suction vs the reference law: the pull per step at three distances from a head-on side (and the
+## upward pull just under its top), none at a glance, gliding or on cooldown; then a live drift in from 2.2 m.
+func _suction(e: Dictionary) -> void:
+	var dir: Vector2 = e["dir"]
+	var top: float = e["top"]
+	var ex: float = e["ex"]
+	var ez: float = e["ez"]
+	# the island side's plane along dir (the edge cell's outer boundary)
+	var face := Vector2(ex, ez) - dir * 0.2
+	var fx := floorf(face.x) + (1.0 if dir.x > 0.0 else 0.0)
+	var fz := floorf(face.y) + (1.0 if dir.y > 0.0 else 0.0)
+	var face_at := Vector2(fx if dir.x != 0.0 else ex, fz if dir.y != 0.0 else ez)
+	var bs := HunterMove.body_scale
+	var fc := [1.0, 0.7513, 0.4623, 0.248, 0.1075, 0.0]
+	var uc := [1.0, 0.9909, 0.9609, 0.771, 0.3166, 0.0]
+	for dist in [0.75, 1.75, 2.4]:
+		var at: Vector2 = face_at + dir * float(dist)
+		_reset(Vector3(at.x, top - 4.0, at.y), Vector3.ZERO, top)
+		var hv := -dir * 4.5
+		var got: float = (MantleCarry.suction(h, hv, DT) - hv).dot(-dir) / DT
+		var want := (
+			lerpf(2.5, 20.0, MantleCarry._curve(fc, clampf((dist - 0.5) / 2.5, 0.0, 1.0))) * bs
+		)
+		ok(
+			_near(got, want),
+			(
+				"suction %.2fm from a side at 4.5 m/s: pulled in at %.2f m/s^2 (ref %.2f)"
+				% [dist, got, want]
+			)
+		)
+	var at2 := face_at + dir * 1.0
+	_reset(Vector3(at2.x, top - 1.0, at2.y), Vector3(0.0, -1.0, 0.0), top)
+	MantleCarry.suction(h, -dir * 4.5, DT)
+	var up := (h.vel.y + 1.0) / DT
+	var up_want := lerpf(25.0, 175.0, 1.0 / 1.5) * MantleCarry._curve(uc, 0.5)
+	ok(
+		_near(up, up_want),
+		"1 m under the top, 1 m from it: pulled up at %.2f m/s^2 (ref %.2f)" % [up, up_want]
+	)
+	var glance := (-dir).rotated(deg_to_rad(55.0)) * 4.5
+	_reset(Vector3(at2.x, top - 4.0, at2.y), Vector3.ZERO, top)
+	ok(
+		MantleCarry.suction(h, glance, DT) == glance,
+		"a side met 55 degrees off: no pull (ref: head-on within 40)"
+	)
+	h.gliding = true
+	ok(MantleCarry.suction(h, -dir * 4.5, DT) == -dir * 4.5, "gliding: no pull")
+	h.gliding = false
+	h.mantle_cd = 0.5
+	ok(MantleCarry.suction(h, -dir * 4.5, DT) == -dir * 4.5, "mantle cooldown running: no pull")
+	# live: drifting in at 1.5 m/s from 2.2 m out, 4 m under the top, keys idle
+	var live := face_at + dir * 2.2
+	_reset(Vector3(live.x, top - 4.0, live.y), Vector3(-dir.x * 1.5, -2.0, -dir.y * 1.5), top)
+	var t := 0.0
+	var caught := -1.0
+	while t < 2.0 and caught < 0.0:
+		m.step(DT)
+		t += DT
+		if h.mantle_cd > 0.5:
+			caught = t
+	print("AEDGE suction live: drifting in at 1.5 m/s from 2.2 m out, caught after %.2fs" % caught)
+	ok(caught > 0.0, "a slow drift toward a side over the abyss is pulled in and caught")
 
 
 func _done(main: Node) -> void:

@@ -37,6 +37,7 @@ static func step(h: Hunter, hv: Vector2, dt: float) -> Vector2:
 		h.carry_mini = {}
 		return Vector2.ZERO
 	hv = _mini_push(h, hv, dt)
+	hv = suction(h, hv, dt)
 	if not h.lfloat.is_empty():
 		hv = hv.limit_length(maxf(exit_cap(h), hv.length() - RISE_BLEED * dt))
 	h.carry_v = maxf(hv.length(), h.carry_v - PEAK_DECAY * dt)
@@ -66,8 +67,113 @@ static func _mini_push(h: Hunter, hv: Vector2, dt: float) -> Vector2:
 	var top: float = h.lip_y if h.over_void() else h.ground()
 	var soft := float(rules["mini_soft_cap"])
 	if h.pos.y > top and h.vel.y > soft:
-		h.vel.y -= (h.vel.y - soft) * float(rules["mini_down"]) * (1.0 - float(rules["mini_fade"]) * p) * dt
+		h.vel.y -= (
+			(h.vel.y - soft)
+			* float(rules["mini_down"])
+			* (1.0 - float(rules["mini_fade"]) * p)
+			* dt
+		)
 	return hv
+
+
+## The wall suction [game data] (rules "suction"): falling (not gliding) over the abyss with the mantle cooldown
+## idle, a line from your feet along your sideways speed finds the island side you're heading into (within
+## head_on degrees of straight in) up to trace m away (x near_k at speed[0] m/s or slower, full at speed[1]):
+## you're pulled on toward it at force[0..1] m/s^2 by force_curve over dist[0..1] m (strongest close in). Under
+## its top by up_h m or less, within up_dist[1] m of it and rising no faster than up_vy m/s, you're also pulled
+## up at up[0..1] m/s^2 (deeper is stronger) x up_curve over up_dist. Touching the side then launches you.
+static func suction(h: Hunter, hv: Vector2, dt: float) -> Vector2:
+	if (
+		h.grounded
+		or h.gliding
+		or h.downed
+		or h.out
+		or h.stun_t > 0.0
+		or h.mantle_cd > 0.0
+		or not h.lfloat.is_empty()
+	):
+		return hv
+	var sp := hv.length()
+	if sp < 0.05 or not h.over_void():
+		return hv
+	var r: Dictionary = rules["suction"]
+	var bs := HunterMove.body_scale
+	var spd: Array = r["speed"]
+	var s_frac := clampf(
+		(sp - float(spd[0]) * bs) / ((float(spd[1]) - float(spd[0])) * bs), 0.0, 1.0
+	)
+	var near_k := float(r["near_k"])
+	var reach := float(r["trace"]) * (near_k + (1.0 - near_k) * s_frac)
+	var dir := hv / sp
+	var hit := _wall_ahead(h, dir, reach)
+	if hit.is_empty():
+		return hv
+	var dist := float(hit["d"])
+	var fd: Array = r["dist"]
+	var fo: Array = r["force"]
+	var uf := clampf((dist - float(fd[0])) / (float(fd[1]) - float(fd[0])), 0.0, 1.0)
+	hv += dir * lerpf(float(fo[0]), float(fo[1]), _curve(r["force_curve"], uf)) * bs * dt
+	var under := float(hit["top"]) - h.pos.y
+	var ud: Array = r["up_dist"]
+	if (
+		under >= 0.0
+		and under <= float(r["up_h"])
+		and dist <= float(ud[1])
+		and h.vel.y <= float(r["up_vy"])
+	):
+		var up: Array = r["up"]
+		var k := _curve(
+			r["up_curve"], clampf((dist - float(ud[0])) / (float(ud[1]) - float(ud[0])), 0.0, 1.0)
+		)
+		h.vel.y += lerpf(float(up[0]), float(up[1]), under / float(r["up_h"])) * k * dt
+	return hv
+
+
+## The first island side (a ground tile whose top is above your feet, not a smooth sheer cliff) along `dir`
+## within `reach` m of your feet, facing you within the suction's head_on angle: {d: m to it, top: its height}.
+static func _wall_ahead(h: Hunter, dir: Vector2, reach: float) -> Dictionary:
+	var w: World = h.m.world
+	var cos_on := cos(deg_to_rad(float(rules["suction"]["head_on"])))
+	var x := h.pos.x
+	var z := h.pos.z
+	var cx := int(floor(x))
+	var cz := int(floor(z))
+	var sx := 1 if dir.x > 0.0 else -1
+	var sz := 1 if dir.y > 0.0 else -1
+	var tx := ((cx + (1 if sx > 0 else 0)) - x) / dir.x if absf(dir.x) > 1e-6 else INF
+	var tz := ((cz + (1 if sz > 0 else 0)) - z) / dir.y if absf(dir.y) > 1e-6 else INF
+	var dtx := absf(1.0 / dir.x) if absf(dir.x) > 1e-6 else INF
+	var dtz := absf(1.0 / dir.y) if absf(dir.y) > 1e-6 else INF
+	while minf(tx, tz) <= reach:
+		var along_x := tx < tz
+		var d := tx if along_x else tz
+		if along_x:
+			cx += sx
+			tx += dtx
+		else:
+			cz += sz
+			tz += dtz
+		if not w.inb(cx, cz):
+			return {}
+		var i := w.idx(cx, cz)
+		if w.kind[i] != World.T_GROUND or w.sheer.has(i):
+			continue
+		var top := w.level[i] * World.LEVEL
+		if top <= h.pos.y + 0.05:
+			continue
+		if absf(dir.x if along_x else dir.y) < cos_on:
+			return {}  # a side met at a glance: no pull
+		return {"d": d, "top": top}
+	return {}
+
+
+## A curve sampled at x = 0, 0.1, 0.25, 0.5, 0.75, 1 (the data's keys), read linearly at `x`.
+static func _curve(keys: Array, x: float) -> float:
+	var xs := [0.0, 0.1, 0.25, 0.5, 0.75, 1.0]
+	for i in range(1, xs.size()):
+		if x <= xs[i]:
+			return lerpf(float(keys[i - 1]), float(keys[i]), (x - xs[i - 1]) / (xs[i] - xs[i - 1]))
+	return float(keys[-1])
 
 
 ## The mantle's launch speed (m/s up) from a lip `lip_h` metres above your feet: `is_mini` adds the mini mantle's bonus.
@@ -156,7 +262,9 @@ static func exit(h: Hunter, hv: Vector2, n: Vector2, mv: Vector2, v_in: float) -
 	var d := mv.normalized() if mv.length() > 0.3 else n
 	if d.dot(n) < 0.0:
 		return hv.limit_length(cap)  # steering back off the ledge: your keys win
-	var floor_v := maxf(v_in * HunterMove.mantle_launch_keep, HunterMove.mantle_launch(h.base_speed))
+	var floor_v := maxf(
+		v_in * HunterMove.mantle_launch_keep, HunterMove.mantle_launch(h.base_speed)
+	)
 	var want := minf(floor_v, minf(maxf(v_in, h.base_speed), cap))
 	var along := hv.dot(d)
 	if along < want:
