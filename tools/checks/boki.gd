@@ -7,10 +7,11 @@ extends RefCounted
 const CHECKS := {
 	"--boki-keys-check": ["res://tools/boki_keys_check.gd", "boki_keys_check", null],  # quick Boki command keys
 	"--boki-everywhere-check": ["res://tools/boki_everywhere_check.gd", "boki_everywhere_check", null],  # Boki in .pck
+	"--boki-size-shots": ["res://tools/boki_size_shots.gd", "boki_size_shots", null],  # Boki beside Vex, true size
 	"--wisp-proc-check": ["res://tools/wisp_proc_check.gd", "wisp_proc_check", null],  # carried passive chirp + tip
 	"--bot-summon-check": ["res://tools/bot_summon_check.gd", "bot_summon_check", null],  # bots press Summon
 	"--kin-size-check": ["res://tools/kin_size_check.gd", "kin_size_check", null],  # Boki stand at their data height
-	"--boki-size-shots": ["res://tools/boki_size_shots.gd", "boki_size_shots", null],  # px heights, hero + 4 Boki
+	"--boki-size-proof": ["res://tools/boki_size_proof.gd", "boki_size_proof", null],  # px heights, hero + 4 Boki
 	"--farm-3d-sizes": ["res://tools/farm_3d_sizes.gd", "farm_3d_sizes", null],  # real farm, hunters + Boki, 3 stills
 	"--wisp-default-check": ["res://tools/wisp_default_check.gd", "wisp_default_check", null],  # wisps + C for all
 	"--wisp-summon-shots": ["res://tools/wisp_summon_shots.gd", "wisp_summon_shots", null],  # --shots-dir=<dir>
