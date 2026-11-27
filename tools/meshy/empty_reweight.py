@@ -6,7 +6,7 @@ tears the cloak open when the rig moves; the cloak that hangs from the shoulders
 their swing. First a cloth/trim vertex further than SLEEVE_NEAR from an arm gives up its arm weight (all of it from
 SLEEVE_FAR): it takes the mean weights of the nearest vertices that are not on an arm. Then every cloth/trim vertex takes the distance-weighted mean of the weights of
 all vertices within RADIUS of it (the other pieces count too: a sleeve follows its hand), SMOOTH_PASSES times, then
-keeps its strongest 4 bones. Only the WEIGHTS_0 and JOINTS_0 buffers of the .glb change, in place.
+keeps its strongest 4 bones. Before that the hood's vertices (above the neck) move onto the Head bone (pin_head). Only the WEIGHTS_0 and JOINTS_0 buffers of the .glb change, in place.
 
     python3 tools/meshy/empty_reweight.py art/wardens/empty_f/empty_f_meshy.glb [radius_m] [passes]
 """
@@ -66,6 +66,18 @@ def pin_to_body(dense, pos, mask, names, heads):
     dense[freed] = new
 
 
+def pin_head(dense, pos, names, heads):
+    """The hood and what it holds turn with the head: above the neck every vertex (any material) moves toward the Head
+    bone alone, all of it half way from the neck to the head bone up (Meshy bound the hood to the spine and neck)."""
+    head = names.index("Head")
+    low = heads["neck"][1]
+    span = 0.5 * (heads["Head"][1] - low) + 0.01
+    t = np.clip((pos[:, 1] - low) / span, 0.0, 1.0)[:, None]
+    only_head = np.zeros_like(dense)
+    only_head[:, head] = 1.0
+    dense[:] = dense * (1.0 - t) + only_head * t
+
+
 def main():
     path = sys.argv[1]
     radius = float(sys.argv[2]) if len(sys.argv) > 2 else RADIUS
@@ -94,6 +106,7 @@ def main():
     heads = {n: np.linalg.inv(ibm[i].T)[:3, 3] for i, n in enumerate(names)}
     mask = np.concatenate([np.full(c, s) for c, s in zip(counts, smooth)])
     pin_to_body(dense, all_pos, mask, names, heads)
+    pin_head(dense, all_pos, names, heads)
     pairs = cKDTree(all_pos).query_ball_point(all_pos[mask], radius)
     idx = np.flatnonzero(mask)
     for _ in range(passes):

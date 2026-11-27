@@ -45,6 +45,7 @@ func run(main_node: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	Save.d["tutorial"]["intro"] = true
+	await _frames(60)  # (the title screen's fade is over before the first still)
 	if part in ["all", "locker", "tabs"]:
 		await _locker(part)
 	if part in ["all", "motion"]:
