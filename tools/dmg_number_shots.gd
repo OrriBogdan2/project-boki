@@ -40,8 +40,8 @@ func run(main_node: Node) -> void:
 		if f == 70:
 			_take("dmgnum_0_ticks", lines, "Mid-fight: five rivals taking ticks, reticle on the nearest")
 	_take("dmgnum_1_end", lines, "After two seconds of ticks, a crit and a heavy hit")
-	await _kinds(lines)
 	await _sizes(lines)
+	await _kinds(lines)
 	await _trio(lines)
 	var cap := FileAccess.open(dir.path_join("captions.txt"), FileAccess.WRITE)
 	for l in lines:

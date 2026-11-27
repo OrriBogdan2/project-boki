@@ -24,6 +24,7 @@ static func after(e: Ent, by: Ent, was: Vector2, opts: Dictionary) -> void:
 	at(h, by, was.y - h.kin_shield, HudStyle.NUM_SHIELD)
 
 
+
 static func at(h: Hunter, by: Ent, soaked: float, col: Color) -> void:
 	if soaked <= 0.0:
 		return

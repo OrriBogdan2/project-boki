@@ -61,6 +61,7 @@ const KEY_FS := 12  # key label size
 ## 24 px margin, keeps the blocks inside the 5% band).
 const SAFE_FRAC := 0.05
 const KEY_REACH := 10.0  # px a key pill hangs below its slot: the weapon card keeps that clear above the margin
+
 ## The one table of floating-number kinds: what a number counted, its colour, its size against a plain hit
 ## (Fx.NUM_SCALE) and whether it wears the crit outline. Fx draws from it; --dmg-number-check reads it.
 ## Every pair must differ by colour or size, readable at match zoom.
@@ -75,6 +76,10 @@ const NUM_STYLE := {
 	"heal": {"col": HEAL, "k": 1.0, "crit": false},
 	"hurt": {"col": HURT, "k": 1.0, "crit": false},
 }
+
+static var _italic: FontVariation
+# style boxes are made once per look and reused (dozens of frames are drawn every frame)
+static var _boxes := {}
 
 
 ## The margin on each side for a window of size `sz` (x for left and right, y for top and bottom).
@@ -228,9 +233,6 @@ static func num_style(kind: String) -> Dictionary:
 	return NUM_STYLE[kind]
 
 
-static var _italic: FontVariation
-
-
 ## BIG slanted into a bold italic (the knock banners' words, the squad rows' KNOCKED / DEAD tags).
 static func big_italic() -> Font:
 	if _italic == null:
@@ -238,10 +240,6 @@ static func big_italic() -> Font:
 		_italic.base_font = BIG
 		_italic.variation_transform = Transform2D(Vector2(1.0, ITALIC_SLANT), Vector2(0.0, 1.0), Vector2.ZERO)
 	return _italic
-
-
-# style boxes are made once per look and reused (dozens of frames are drawn every frame)
-static var _boxes := {}
 
 
 ## A cached rounded style box (bg, corner radius, border colour and width): for widgets drawing their own shapes.

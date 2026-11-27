@@ -8,8 +8,8 @@ extends RefCounted
 ## 3 s no more than DmgNumberTrio.MAX_OVERLAP numbers print over one spot. Prints DMGNUM PASS/FAIL.
 
 const Trio := preload("res://tools/dmg_number_trio.gd")
-## One hit of every kind through the real damage paths: the number it prints reads in its style (HudStyle),
-## and any two kinds differ by colour (RGB distance >= KIND_DIST) or size (>= KIND_PX px at the same 30 dmg).
+
+## Any two number kinds differ by colour (RGB distance >= KIND_DIST) or size (>= KIND_PX px at the same 30 dmg).
 const KIND_DIST := 0.2
 const KIND_PX := 3
 
@@ -35,11 +35,11 @@ func run(main_node: Node) -> void:
 	var pl: Hunter = m.player
 	var foes := m.hunters.filter(func(x): return x.team != pl.team)
 	ok(not foes.is_empty(), "setup: a rival")
-	_ticks(m, fx, pl, foes[0])
+	_ticks(fx, pl, foes[0])
 	_sizes(fx)
 	_reticle(fx)
 	_pool(fx)
-	_kinds_read(m, fx, pl, foes[0])
+	_kinds_read(fx, pl, foes[0])
 	m.queue_free()
 	await _trio()
 	print("DMGNUM DONE, failures: %d" % fails)
@@ -51,7 +51,7 @@ func _live(fx: Fx) -> Array:
 
 
 ## 10 burn-style ticks (a quarter second apart) through the real damage path.
-func _ticks(_m: Match, fx: Fx, src: Hunter, foe: Hunter) -> void:
+func _ticks(fx: Fx, src: Hunter, foe: Hunter) -> void:
 	foe.max_hp = 1e6
 	foe.hp = 1e6
 	fx.nums.clear()
@@ -182,7 +182,8 @@ func _read(fx: Fx) -> Dictionary:
 	}
 
 
-func _kinds_read(_m: Match, fx: Fx, pl: Hunter, foe: Hunter) -> void:
+## One hit of every kind through the real damage paths: the number it prints reads in its style (HudStyle).
+func _kinds_read(fx: Fx, pl: Hunter, foe: Hunter) -> void:
 	Settings.set_v("damage_numbers", true, false)
 	foe.max_hp = 1e6
 	pl.max_hp = 1e6
@@ -198,10 +199,10 @@ func _kinds_read(_m: Match, fx: Fx, pl: Hunter, foe: Hunter) -> void:
 		fx.nums.clear()
 		fx.set_process(false)
 		prep.call()
-		if name != "heal":
-			who.hurt(30.0, by, opts)
-		else:
+		if name == "heal":
 			fx.healed(who, 30.0)
+		else:
+			who.hurt(30.0, by, opts)
 		got[name] = _read(fx)
 		ok(not (got[name] as Dictionary).is_empty(), "kind %s prints a number" % name)
 	land.call("hit", func(): pass, foe, pl, {"src": "shot"})
