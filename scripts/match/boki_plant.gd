@@ -13,7 +13,7 @@ const STEP_MIN := 0.1  # m/s at clip speed 1: a paw sweeping back slower than th
 const REPEAT := 0.05  # of its reach: a paw back this close a part-loop on is stepping again (a scurry)
 const NOT_LEG := ["root", "hips", "spine", "neck", "head"]
 
-static var _cache := {}  # "species clip" -> BokiPlant
+static var _cache := MeshCache.new(false)  # "species clip" -> BokiPlant (aged)
 
 var anim: Animation
 var legs: Array[Leg] = []
@@ -38,9 +38,11 @@ class Leg:
 ## The planted paws of `species`' `clip` in `model`, read from the clip once per species.
 static func of(species: String, model: Node3D, skel: Skeleton3D, clip: String) -> BokiPlant:
 	var key := "%s %s" % [species, clip]
-	if not _cache.has(key):
-		_cache[key] = BokiPlant.new(model, skel, model.find_child("AnimationPlayer", true, false).get_animation(clip))
-	return _cache[key]
+	var p = _cache.value(key)
+	if p == null:
+		var ap := model.find_child("AnimationPlayer", true, false) as AnimationPlayer
+		p = _cache.hold(key, BokiPlant.new(model, skel, ap.get_animation(clip)))
+	return p
 
 
 func _init(model: Node3D, skel: Skeleton3D, clip_anim: Animation) -> void:
