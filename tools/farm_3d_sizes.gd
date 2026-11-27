@@ -89,6 +89,8 @@ func run(main_node: Node) -> void:
 	await _wait(1.0)
 	_place()
 	await _wait(2.5)
+	_start_anims()
+	await _wait(2.0)
 	if DisplayServer.get_name() == "headless":
 		_write_heights()
 		main.get_tree().quit()
@@ -152,7 +154,7 @@ func _place() -> void:
 		scales.append(m.scale)
 		h.add_child(m)
 		hunters.append(m)
-		anims.append(null if i == 0 else HunterAnim.new(m))
+		anims.append(null)  # (_start_anims, once the camera has settled)
 	h.player = hunters[0]
 	hunters[0].set_meta("pop", Vector3.ONE * albert_k)  # --albert-k=<x>: rides on Home's size, this tool only
 	old.queue_free()
@@ -367,8 +369,18 @@ func _pose_hunters(d: float) -> void:
 	for i in range(1, hunters.size()):
 		var face := _face_to(hunters[i].position)
 		hunters[i].basis = h.cam.char_basis(face, scales[i])
-		anims[i].update(d, {"vel": Vector3.ZERO, "face": face, "grounded": true, "idle_break": true})
+		if anims[i] != null:
+			anims[i].update(d, {"vel": Vector3.ZERO, "face": face, "grounded": true, "idle_break": true})
 	h.pface = _face_to(hunters[0].position)
+
+
+## A HunterAnim takes its first facing from the model, and legs it then lags by turn on the spot (TurnStep): one made
+## before the hunter was turned to the settled camera stood with its back to it for seconds. Made here, it starts
+## facing the camera.
+func _start_anims() -> void:
+	for i in range(1, hunters.size()):
+		hunters[i].basis = h.cam.char_basis(_face_to(hunters[i].position), scales[i])
+		anims[i] = HunterAnim.new(hunters[i])
 
 
 ## After Home's own pose each frame: everyone faces the camera (the Boki at Home's own size), UI and marks gone.
