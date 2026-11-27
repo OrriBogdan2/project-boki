@@ -1,6 +1,6 @@
 shader_type spatial;
 // Albert's raised aegis (AegisWall): his figurehead hatch shield (art-refs/albert_hero_1114 turnaround) grown into a
-// curved wall: dark hull planks with a carved panel in the middle, an iron frame, strap and rivets, and the sea's
+// curved wall: dark hull planks with a carved panel in the middle, an iron frame and rivets at the sides, and the sea's
 // cyan light glowing in the gaps between the planks (as on his body). Four surfaces of one mesh (`kind`): 0 the
 // planked face, 1 the boards' darker back a hand inside it, 2 the iron rim along the top, 3 the soft ground contact. UV.x runs once along the arc, UV.y 0 at
 // the foot / near edge to 1 at the top / far edge. Both faces are drawn alike, so the wall reads from either side.
@@ -10,7 +10,7 @@ uniform vec4 rim_color : source_color = vec4(0.44, 0.42, 0.39, 1.0);  // the iro
 uniform vec4 sea : source_color = vec4(0.12, 0.88, 0.8, 1.0);         // the light between the planks (model_glow core)
 const float CLEAR_IN = 0.9;        // the wall is thinnest within this many metres of its middle...
 const float CLEAR_OUT = 1.9;       // ...and full again beyond this
-const float MIDDLE_ALPHA = 0.3 ;   // the planks' share of their opacity left in the middle
+const float MIDDLE_ALPHA = 0.42;   // the planks' share of their opacity left in the middle
 uniform float kind = 0.0;
 uniform float glow = 0.3;          // 0.3 at rest, up to ~1.6 on a block
 uniform float plank_m = 0.36;      // a plank's width (m)

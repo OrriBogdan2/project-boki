@@ -7,26 +7,34 @@ extends "res://tools/archer_bulwark_combo_check.gd"
 
 const BURST_KIN := "cindle"
 const EXIT := preload("res://tools/ult_exit.gd")
-const MERGE_OPEN := 1.0        # s of the merge counted after the ult: its landing and its first attacks
+const MERGE_OPEN := 1.0  # s of the merge counted after the ult: its landing and its first attacks
+
 
 ## Holds LMB on `at` for `secs`.
 func hold_fire(m: Match, P: Hunter, at: Vector3, secs: float) -> void:
-	step(m, secs, func():
-		P.inp["fire"] = true
-		aim_at(P, at))
+	step(
+		m,
+		secs,
+		func():
+			P.inp["fire"] = true
+			aim_at(P, at)
+	)
+
 
 ## What the bond meter owes the current ult cast (KinBond.from_ult keeps the best event per cast id).
 func best(P: Hunter) -> float:
 	var c: Dictionary = P.get_meta("bond_cast", {})
 	return float(c.get("got", 0.0)) if String(c.get("id", "")) == HeroUlt.cast_id(P.ak) else 0.0
 
+
 ## Presses X the way the match does (main's HunterKeys.ult_pressed: the level gate, then the kit's cast_ult).
 func press_x(m: Match, P: Hunter) -> void:
 	HunterKeys.ult_pressed(P)
 	m.step(DT)
 
+
 ## Holds LMB until one more beam has gone (or `cap` s pass).
-func beam(m: Match, P: Hunter, K: ArcherKit, at: Vector3, cap := 1.8) -> void:   # recover 1.0
+func beam(m: Match, P: Hunter, K: ArcherKit, at: Vector3, cap := 1.8) -> void:  # recover 1.0
 	var f0 := K.ult.fired
 	var t := 0.0
 	while K.ult.fired == f0 and t < cap:
@@ -36,14 +44,16 @@ func beam(m: Match, P: Hunter, K: ArcherKit, at: Vector3, cap := 1.8) -> void:  
 		t += DT
 	P.inp["fire"] = false
 
+
 ## A full-health light hunter at the caster's level: the burst cap's target.
 func light_target(T: Hunter, P: Hunter) -> void:
 	T.max_hp = 124.0 * (1.0 + LevelGrowth.hp_pct(int(P.lvl)))
 	fresh(T)
 	T.armor = 0.0
 
+
 func pin() -> void:
-	var r := setup("archer", 7.0, BURST_KIN, true)      # a Boki at hand: KinBond fills the meter only with one ready
+	var r := setup("archer", 7.0, BURST_KIN, true)  # a Boki at hand: KinBond fills the meter only with one ready
 	var m: Match = r[0]
 	var P: Hunter = r[1]
 	var T: Hunter = r[2]
@@ -72,66 +82,114 @@ func pin() -> void:
 	var bow := K.bow_mouth()
 	HunterKeys.ult_pressed(P)
 	var flying := m.shots.filter(func(sh): return sh["by"] == P and String(sh["x"].get("ab", "")) == "ultimate")
-	ok("pin ult cast: the first arrow leaves the frame X is pressed, two more empowered for 6s",
+	ok(
+		"pin ult cast: the first arrow leaves the frame X is pressed, two more empowered for 6s",
 		K.ult.active() and K.ult.left == 2 and K.ult.fired == 1 and flying.size() == 1,
-		"left %d fired %d shots %d" % [K.ult.left, K.ult.fired, flying.size()])
+		"left %d fired %d shots %d" % [K.ult.left, K.ult.fired, flying.size()]
+	)
 	var d0 := Vector2(T.pos.x - bow.x, T.pos.z - bow.z).normalized()
-	ok("pin ult cast: it leaves from the bow's mouth toward the cursor",
-		flying.size() == 1 and (flying[0]["pos"] as Vector3).distance_to(bow) < 0.01
-			and (flying[0]["vel"] as Vector2).normalized().distance_to(d0) < 0.02,
-		"at %s bow %s" % [str(flying[0]["pos"]) if flying.size() == 1 else "-", str(bow)])
-	ok("pin ult: one X press is one cast (main's X path only)", int(P.used.get("x", 0)) == casts0 + 1,
-		"casts +%d" % (int(P.used.get("x", 0)) - casts0))
-	ok("pin ult cooldown: 36s from the cast",
+	ok(
+		"pin ult cast: it leaves from the bow's mouth toward the cursor",
+		(
+			flying.size() == 1
+			and (flying[0]["pos"] as Vector3).distance_to(bow) < 0.01
+			and (flying[0]["vel"] as Vector2).normalized().distance_to(d0) < 0.02
+		),
+		"at %s bow %s" % [str(flying[0]["pos"]) if flying.size() == 1 else "-", str(bow)]
+	)
+	ok(
+		"pin ult: one X press is one cast (main's X path only)",
+		int(P.used.get("x", 0)) == casts0 + 1,
+		"casts +%d" % (int(P.used.get("x", 0)) - casts0)
+	)
+	ok(
+		"pin ult cooldown: 36s from the cast",
 		absf(float(K.cd["x"]) - float(xd["cooldown"])) < 0.1,
-		"%.1f" % float(K.cd["x"]))
-	ok("pin ult anim: the press plays the loose (pin_ult_loose), no cast wind-up before the shot",
-		K.anim_id == "pin_ult_loose", K.anim_id)
+		"%.1f" % float(K.cd["x"])
+	)
+	ok(
+		"pin ult anim: the press plays the loose (pin_ult_loose), no cast wind-up before the shot",
+		K.anim_id == "pin_ult_loose",
+		K.anim_id
+	)
 	var cue: Dictionary = (HeroVfx.data("archer")["moves"]["ult_cast"]["sfx"] as Array)[0]
-	ok("pin ult sound: the cast cue plays for everyone on the map (no distance cut, loud for rivals too)",
-		HeroVfx.of(m).plays.get("ult_cast", 0) == 1 and cue["at"] == "all" and float(cue["other"]) >= float(cue["db"]))
+	ok(
+		"pin ult sound: the cast cue plays for everyone on the map (no distance cut, loud for rivals too)",
+		HeroVfx.of(m).plays.get("ult_cast", 0) == 1 and cue["at"] == "all" and float(cue["other"]) >= float(cue["db"])
+	)
 	ok("pin ult look: nothing is hit the instant it is loosed", dmg(T) == 0.0 and dmg(T2) == 0.0)
 	ok("pin ult bond: nothing for the cast alone", best(P) <= 0.0 and P.ult < 0.01, "%.3f" % P.ult)
 	var t_fire1 := m.time
-	m.step(DT)          # (the kit skins its new shot on its next step)
-	ok("pin ult look: the shot is a travelling arrow (a skinned projectile at the data speed, not an instant lane)",
-		K.fx.live.size() == 1 and float(xd["speed"]) >= 80.0
-		and absf((flying[0]["vel"] as Vector2).length() - float(xd["speed"])) < 0.5,
-		"%d shots, %d arrows" % [flying.size(), K.fx.live.size()])
+	m.step(DT)  # (the kit skins its new shot on its next step)
+	ok(
+		"pin ult look: the shot is a travelling arrow (a skinned projectile at the data speed, not an instant lane)",
+		(
+			K.fx.live.size() == 1
+			and float(xd["speed"]) >= 80.0
+			and absf((flying[0]["vel"] as Vector2).length() - float(xd["speed"])) < 0.5
+		),
+		"%d shots, %d arrows" % [flying.size(), K.fx.live.size()]
+	)
 	step(m, 0.1)
 	var lane := AimKit.entry(P, "x")
-	ok("pin ult telegraph: the beam's lane out to 18m from the bow and the crosshair ring at her feet",
-		AimKit.shown(P, "x") and AimKit.shown(P, "x_ring") and absf(float(lane.get("len", 0.0)) - 18.0) < 0.1
-			and (lane.get("from", Vector2.ZERO) as Vector2).distance_to(Vector2(bow.x, bow.z)) < 0.6,
-		"lane %s ring %s" % [str(lane.get("len")), AimKit.shown(P, "x_ring")])
-	ok("pin ult look: hits land after flight time (7m foe by 0.1s, the 16m foe still ahead of it)",
-		dmg(T) > 0.0 and dmg(T2) == 0.0, "took %.0f / %.0f" % [dmg(T), dmg(T2)])
+	ok(
+		"pin ult telegraph: the beam's lane out to 18m from the bow and the crosshair ring at her feet",
+		(
+			AimKit.shown(P, "x")
+			and AimKit.shown(P, "x_ring")
+			and absf(float(lane.get("len", 0.0)) - 18.0) < 0.1
+			and (lane.get("from", Vector2.ZERO) as Vector2).distance_to(Vector2(bow.x, bow.z)) < 0.6
+		),
+		"lane %s ring %s" % [str(lane.get("len")), AimKit.shown(P, "x_ring")]
+	)
+	ok(
+		"pin ult look: hits land after flight time (7m foe by 0.1s, the 16m foe still ahead of it)",
+		dmg(T) > 0.0 and dmg(T2) == 0.0,
+		"took %.0f / %.0f" % [dmg(T), dmg(T2)]
+	)
 	step(m, 0.1)
 	var want := float(xd["dmg"]) * ap
-	ok("pin ult payoff: the beam pierces both foes, 16m out too (1.5x her Empowered range)",
-		dmg(T) > want * 0.6 and dmg(T2) > want * 0.9, "took %.0f / %.0f (want %.0f)" % [dmg(T), dmg(T2), want])
+	ok(
+		"pin ult payoff: the beam pierces both foes, 16m out too (1.5x her Empowered range)",
+		dmg(T) > want * 0.6 and dmg(T2) > want * 0.9,
+		"took %.0f / %.0f (want %.0f)" % [dmg(T), dmg(T2), want]
+	)
 	ok("pin ult small: the bow needs no draw at all (the arrow out at the press)", P.draw_t < 0.0)
 	# holding fire: the next arrow waits through the 1.0 s recover, then goes the instant it is up
 	hold_fire(m, P, T.pos, 0.5)
-	ok("pin ult small: held fire waits through the 1.0 s recover after an arrow", K.ult.fired == 1,
-		"fired %d" % K.ult.fired)
+	ok(
+		"pin ult small: held fire waits through the 1.0 s recover after an arrow",
+		K.ult.fired == 1,
+		"fired %d" % K.ult.fired
+	)
 	P.inp["fire"] = false
-	ok("pin ult small: armor shredded by 10 on top of the hit",
+	ok(
+		"pin ult small: armor shredded by 10 on top of the hit",
 		T.armor <= 30.0 - float(xd["shred"]) + 0.01,
-		"armor %.1f" % T.armor)
-	ok("pin ult bond: a beam that hits a hunter sends from_ult hit (0.6 into the meter)",
-		absf(best(P) - 0.6) < 0.001 and P.ult >= 0.6, "best %.2f meter %.3f" % [best(P), P.ult])
+		"armor %.1f" % T.armor
+	)
+	ok(
+		"pin ult bond: a beam that hits a hunter sends from_ult hit (0.6 into the meter)",
+		absf(best(P) - 0.6) < 0.001 and P.ult >= 0.6,
+		"best %.2f meter %.3f" % [best(P), P.ult]
+	)
 	ok("pin ult anim: the beam plays pin_ult_loose", K.anim_id == "pin_ult_loose", K.anim_id)
 	ok("pin ult small: the beam knocks back", T.vel.x > 0.5 or T.pos.x > home.x + 7.05, "vel %.2f" % T.vel.x)
 	# a miss pays nothing
 	var b0 := best(P)
 	beam(m, P, K, home + Vector3(0, 0, 12))
 	var cadence := m.time - t_fire1
-	ok("pin ult cadence: 1.0 s from beam to beam with fire held (the recover, no nock: owner 11-08)",
-		K.ult.fired == 2 and absf(cadence - float(xd["recover"])) < 0.06, "%.2f s" % cadence)
+	ok(
+		"pin ult cadence: 1.0 s from beam to beam with fire held (the recover, no nock: owner 11-08)",
+		K.ult.fired == 2 and absf(cadence - float(xd["recover"])) < 0.06,
+		"%.2f s" % cadence
+	)
 	step(m, 0.2)
-	ok("pin ult bond: a beam that misses pays nothing", best(P) == b0 and K.ult.fired == 2,
-		"owed %.2f -> %.2f" % [b0, best(P)])
+	ok(
+		"pin ult bond: a beam that misses pays nothing",
+		best(P) == b0 and K.ult.fired == 2,
+		"owed %.2f -> %.2f" % [b0, best(P)]
+	)
 	ok("pin ult small: she can move between shots", K.move_k() > 0.9, "move_k %.2f" % K.move_k())
 	# the last beam executes a hunter it leaves under 12%
 	T.max_hp = 150.0
@@ -141,16 +199,25 @@ func pin() -> void:
 	beam(m, P, K, T.pos)
 	ok("pin ult anim: the last beam plays pin_ult_final", K.anim_id == "pin_ult_final", K.anim_id)
 	step(m, 0.2)
-	ok("pin ult payoff: the last beam finishes a hunter left under 12%",
+	ok(
+		"pin ult payoff: the last beam finishes a hunter left under 12%",
 		K.ult.executes == 1 and (T.downed or T.dead or T.hp <= 0.0),
-		"executes %d hp %.0f downed %s" % [K.ult.executes, T.hp, T.downed])
-	ok("pin ult bond: the execute's knock is the cast's best event (0.7, not added per hit)",
-		absf(best(P) - 0.7) < 0.001, "best %.2f" % best(P))
-	ok("pin ult ends after the third shot, the telegraph goes",
-		not K.ult.active() and not AimKit.shown(P, "x"), "left %d" % K.ult.left)
+		"executes %d hp %.0f downed %s" % [K.ult.executes, T.hp, T.downed]
+	)
+	ok(
+		"pin ult bond: the execute's knock is the cast's best event (0.7, not added per hit)",
+		absf(best(P) - 0.7) < 0.001,
+		"best %.2f" % best(P)
+	)
+	ok(
+		"pin ult ends after the third shot, the telegraph goes",
+		not K.ult.active() and not AimKit.shown(P, "x"),
+		"left %d" % K.ult.left
+	)
 	await done(m)
 	await _pin_window()
 	await _pin_burst()
+
 
 ## The window, the cooldown, the bow coming back, Spirit Walk between shots, a wall, a merge.
 func _pin_window() -> void:
@@ -165,8 +232,11 @@ func _pin_window() -> void:
 	step(m, 0.3)
 	press_x(m, P)
 	step(m, 6.1)
-	ok("pin ult small: unused shots go when the 6s window ends (only the press's arrow went)",
-		not K.ult.active() and K.ult.fired == 1, "fired %d" % K.ult.fired)
+	ok(
+		"pin ult small: unused shots go when the 6s window ends (only the press's arrow went)",
+		not K.ult.active() and K.ult.fired == 1,
+		"fired %d" % K.ult.fired
+	)
 	press_x(m, P)
 	ok("pin ult cooldown: no recast while it recharges", not K.ult.active())
 	hold_fire(m, P, T.pos, 1.0)
@@ -179,26 +249,34 @@ func _pin_window() -> void:
 	P.dashes = P.max_dashes()
 	P.inp["dash"] = true
 	step(m, 0.3)
-	ok("pin ult small: Spirit Walk between shots keeps them", K.ult.active() and K.ult.left == 2 and K.spirit.active(),
-		"left %d" % K.ult.left)
+	ok(
+		"pin ult small: Spirit Walk between shots keeps them",
+		K.ult.active() and K.ult.left == 2 and K.spirit.active(),
+		"left %d" % K.ult.left
+	)
 	# a wall stops the beam
 	fresh(T)
 	_wall_at(m, home + Vector3(4, 0, 0), lv, 0)
 	beam(m, P, K, T.pos)
 	step(m, 0.2)
-	ok("pin ult small: a wall stops the beam (the foe behind it untouched)",
+	ok(
+		"pin ult small: a wall stops the beam (the foe behind it untouched)",
 		K.ult.fired == 3 and dmg(T) <= 0.01,
-		"took %.0f" % dmg(T))
+		"took %.0f" % dmg(T)
+	)
 	_clear_wall(m, home + Vector3(4, 0, 0), lv, 0)
 	# a merge inside the window: it ends with no beam (fire held through the merge looses nothing)
 	step(m, 0.9)
 	merge_now(P)
 	hold_fire(m, P, T.pos, 0.5)
 	P.inp["fire"] = false
-	ok("pin ult merge: the empowered window drops with no beam",
+	ok(
+		"pin ult merge: the empowered window drops with no beam",
 		not K.ult.active() and K.ult.fired == 3,
-		"fired %d" % K.ult.fired)
+		"fired %d" % K.ult.fired
+	)
 	await done(m)
+
 
 ## Burst cap: all three beams on a full-health light hunter, then straight into a merge (its landing and
 ## first attacks, MERGE_OPEN s).
@@ -219,13 +297,16 @@ func _pin_burst() -> void:
 	merge_now(P)
 	hold_fire(m, P, T.pos, MERGE_OPEN)
 	P.inp["fire"] = false
-	ok("pin ult burst: three beams then a merge leave a full-health light hunter standing",
+	ok(
+		"pin ult burst: three beams then a merge leave a full-health light hunter standing",
 		not T.downed and not T.dead and T.hp > 0.0 and K.ult.fired == 3,
-		"ult %.0f, with the merge %.0f of %.0f" % [after_ult, dmg(T), T.max_hp])
+		"ult %.0f, with the merge %.0f of %.0f" % [after_ult, dmg(T), T.max_hp]
+	)
 	await done(m)
 
+
 func bjorn() -> void:
-	var r := setup("bulwark", 7.0, BURST_KIN, true)      # a Boki at hand: KinBond fills the meter only with one ready
+	var r := setup("bulwark", 7.0, BURST_KIN, true)  # a Boki at hand: KinBond fills the meter only with one ready
 	var m: Match = r[0]
 	var P: Hunter = r[1]
 	var T: Hunter = r[2]
@@ -245,31 +326,48 @@ func bjorn() -> void:
 	aim_at(P, T.pos)
 	var casts0 := int(P.used.get("x", 0))
 	press_x(m, P)
-	ok("bjorn ult: one X press is one cast (main's X path only)", int(P.used.get("x", 0)) == casts0 + 1,
-		"casts +%d" % (int(P.used.get("x", 0)) - casts0))
+	ok(
+		"bjorn ult: one X press is one cast (main's X path only)",
+		int(P.used.get("x", 0)) == casts0 + 1,
+		"casts +%d" % (int(P.used.get("x", 0)) - casts0)
+	)
 	step(m, 0.1)
-	ok("bjorn ult cast: planted, hammer up (bul_ult_wind)",
+	ok(
+		"bjorn ult cast: planted, hammer up (bul_ult_wind)",
 		K.ult.phase == "wind" and K.anim_id == "bul_ult_wind" and K.move_k() == 0.0,
-		"%s %s move %.2f" % [K.ult.phase, K.anim_id, K.move_k()])
+		"%s %s move %.2f" % [K.ult.phase, K.anim_id, K.move_k()]
+	)
 	var c0 := AimKit.entry(P, "x")
 	var lane_len := float(xd["cells"]) * float(xd["cell_len"])
-	ok("bjorn ult telegraph: one outlined lane (the gameplay box: cells x cell_len by width) for all, with its crack",
-		AimKit.shown(P, "x") and bool(c0.get("all", false)) and absf(float(c0.get("len", 0.0)) - lane_len) < 0.01
-			and absf(float(c0.get("width", 0.0)) - float(xd["width"])) < 0.01 and K.ult._crack.visible,
-		str(c0.keys()))
+	ok(
+		"bjorn ult telegraph: one outlined lane (the gameplay box: cells x cell_len by width) for all, with its crack",
+		(
+			AimKit.shown(P, "x")
+			and bool(c0.get("all", false))
+			and absf(float(c0.get("len", 0.0)) - lane_len) < 0.01
+			and absf(float(c0.get("width", 0.0)) - float(xd["width"])) < 0.01
+			and K.ult._crack.visible
+		),
+		str(c0.keys())
+	)
 	var crack_mat := K.ult._crack.material_override as ShaderMaterial
 	var heat0: float = crack_mat.get_shader_parameter("power")
 	var t_now: float = K.ult.t
-	K.ult.t = 0.35                      # glance at the crack late in the wind-up, then put the clock back
+	K.ult.t = 0.35  # glance at the crack late in the wind-up, then put the clock back
 	K.ult._glow_crack()
 	var heat1: float = crack_mat.get_shader_parameter("power")
 	K.ult.t = t_now
 	K.ult._glow_crack()
-	ok("bjorn ult telegraph: the crack glows brighter as the slam nears",
-		heat1 > heat0 + 0.2, "%.2f -> %.2f" % [heat0, heat1])
-	ok("bjorn ult cooldown: 40 s from the cast (0.8 x the data's 50 s)",
+	ok(
+		"bjorn ult telegraph: the crack glows brighter as the slam nears",
+		heat1 > heat0 + 0.2,
+		"%.2f -> %.2f" % [heat0, heat1]
+	)
+	ok(
+		"bjorn ult cooldown: 40 s from the cast (0.8 x the data's 50 s)",
 		absf(float(K.cd["x"]) - float(xd["cooldown"])) < 0.2,
-		"%.1f" % float(K.cd["x"]))
+		"%.1f" % float(K.cd["x"])
+	)
 	ok("bjorn ult bond: nothing for the cast alone", best(P) <= 0.0 and P.ult < 0.05, "%.3f" % P.ult)
 	P.inp["fire"] = true
 	step(m, 0.05)
@@ -278,36 +376,55 @@ func bjorn() -> void:
 	step(m, 0.3)
 	ok("bjorn ult anim: the slam (bul_ult_slam) at 0.4s", K.ult.slams == 1 and K.anim_id == "bul_ult_slam", K.anim_id)
 	step(m, 0.35)
-	var stunned := T.stun_t > 0.0       # the strike's stun; its cell erupts (the slow) after the "lead" s streak
-	ok("bjorn ult: a stun marker circles over each foe it stunned",
-		KitLooks.of(m).crowned(T), "stunned %s" % (T.stun_t > 0.0))
-	ok("bjorn ult: the racing fissure struck every foe on the lane before its cell erupts (data: stuns struck targets)",
-		K.ult.hit.size() >= 2, "struck %d" % K.ult.hit.size())
+	var stunned := T.stun_t > 0.0  # the strike's stun; its cell erupts (the slow) after the "lead" s streak
+	ok(
+		"bjorn ult: a stun marker circles over each foe it stunned",
+		KitLooks.of(m).crowned(T),
+		"stunned %s" % (T.stun_t > 0.0)
+	)
+	ok(
+		"bjorn ult: the racing fissure struck every foe on the lane before its cell erupts (data: stuns struck targets)",
+		K.ult.hit.size() >= 2,
+		"struck %d" % K.ult.hit.size()
+	)
 	step(m, 0.3)
 	var want := (float(xd["dmg"]) + float(xd["strike_dmg"])) * ap
-	ok("bjorn ult payoff: each foe on the lane struck (stun) and thrown once (4 + 18, a heavy slow)",
+	ok(
+		"bjorn ult payoff: each foe on the lane struck (stun) and thrown once (4 + 18, a heavy slow)",
 		stunned and T.slow_t > 0.0 and absf(dmg(T) - want) < want * 0.35 and dmg(T2) > want * 0.6,
-		"took %.0f / %.0f (want %.0f) stunned %s slow %.2f" % [dmg(T), dmg(T2), want, stunned, T.slow_t])
-	ok("bjorn ult bond: two hunters thrown, the cast pays its best event once (hit, 0.6)",
+		"took %.0f / %.0f (want %.0f) stunned %s slow %.2f" % [dmg(T), dmg(T2), want, stunned, T.slow_t]
+	)
+	ok(
+		"bjorn ult bond: two hunters thrown, the cast pays its best event once (hit, 0.6)",
 		absf(best(P) - 0.6) < 0.001 and HeroUlt.cast_id(K).begins_with("bulwark_") and P.ult >= 0.6,
-		"best %.2f cast %s meter %.3f" % [best(P), HeroUlt.cast_id(K), P.ult])
+		"best %.2f cast %s meter %.3f" % [best(P), HeroUlt.cast_id(K), P.ult]
+	)
 	step(m, 0.4)
-	ok("bjorn ult small: a scar stays on the lane and slows a foe on it",
-		not K.ult.scar.is_empty() and K.ult.phase == "", "scar %s" % str(K.ult.scar.keys()))
+	ok(
+		"bjorn ult small: a scar stays on the lane and slows a foe on it",
+		not K.ult.scar.is_empty() and K.ult.phase == "",
+		"scar %s" % str(K.ult.scar.keys())
+	)
 	fresh(T)
 	T.teleport(home + Vector3(5, 0, 0))
 	step(m, 0.2)
-	ok("bjorn ult small: the scar slows 20%",
+	ok(
+		"bjorn ult small: the scar slows 20%",
 		T.slow_t > 0.0 and absf(T.slow_k - float(xd["scar_slow"])) < 0.01,
-		"slow %.2f" % T.slow_k)
+		"slow %.2f" % T.slow_k
+	)
 	step(m, 10.0)
 	ok("bjorn ult small: the scar fades after 10s", K.ult.scar.is_empty())
 	await done(m)
 	await _bjorn_more()
 	await _bjorn_burst()
 	var got: Dictionary = await EXIT.run(self, "bulwark")
-	ok("bjorn ult exit: Shift, LMB and jump pressed 0.1s before the plant ends go on its first free step",
-		EXIT.on_time(got), EXIT.said(got))
+	ok(
+		"bjorn ult exit: Shift, LMB and jump pressed 0.1s before the plant ends go on its first free step",
+		EXIT.on_time(got),
+		EXIT.said(got)
+	)
+
 
 ## One jump press 0.1 s into the wind-up: committed to the cast (hero sheet bjorn.md "Ultimate": f25-f31), he
 ## rises no higher than the Faultline hop ("leap_h" over the cast's ground) and the press isn't kept for the
@@ -325,14 +442,21 @@ func _jump_in_plant(m: Match, P: Hunter, K: BulwarkKit) -> void:
 		top = maxf(top, P.pos.y)
 	step(m, 0.1)
 	top = maxf(top, P.pos.y)
-	ok("bjorn ult small: in the cast, a jump in the wind-up is ignored, not buffered (no rise past the hop)",
-		top < y0 + hop + 0.02 and P.grounded, "rose %.2f m (hop %.2f m)" % [top - y0, hop])
+	ok(
+		"bjorn ult small: in the cast, a jump in the wind-up is ignored, not buffered (no rise past the hop)",
+		top < y0 + hop + 0.02 and P.grounded,
+		"rose %.2f m (hop %.2f m)" % [top - y0, hop]
+	)
 	P.inp["jump"] = true
 	m.step(DT)
 	P.inp["jump"] = false
 	step(m, 0.1)
-	ok("bjorn ult small: free once the fissure runs, a jump goes", P.pos.y > y0 + 0.3,
-		"%.2f m up, %s" % [P.pos.y - y0, K.ult.phase])
+	ok(
+		"bjorn ult small: free once the fissure runs, a jump goes",
+		P.pos.y > y0 + 0.3,
+		"%.2f m up, %s" % [P.pos.y - y0, K.ult.phase]
+	)
+
 
 ## A miss, the wall stop, an interrupt, a merge in the wind-up.
 func _bjorn_more() -> void:
@@ -349,9 +473,11 @@ func _bjorn_more() -> void:
 	press_x(m, P)
 	_jump_in_plant(m, P, K)
 	step(m, 0.9)
-	ok("bjorn ult bond: a Faultline that hits nobody pays nothing",
+	ok(
+		"bjorn ult bond: a Faultline that hits nobody pays nothing",
 		K.ult.slams == 1 and best(P) == 0.0 and HeroUlt.cast_id(K) != "",
-		"owed %.2f" % best(P))
+		"owed %.2f" % best(P)
+	)
 	press_x(m, P)
 	ok("bjorn ult cooldown: no recast while it recharges", K.ult.phase == "")
 	# a raised ledge 6 m out stops the fissure: the foe beyond is safe
@@ -369,9 +495,11 @@ func _bjorn_more() -> void:
 	press_x(m, P)
 	P.stun_t = 0.3
 	step(m, 0.6)
-	ok("bjorn ult small: a stun in the wind-up interrupts it (cooldown back to 8s)",
-		K.ult.interrupts == 1 and K.ult.slams == 2
-			and float(K.cd["x"]) <= 8.0, "slams %d cd %.1f" % [K.ult.slams, float(K.cd["x"])])
+	ok(
+		"bjorn ult small: a stun in the wind-up interrupts it (cooldown back to 8s)",
+		K.ult.interrupts == 1 and K.ult.slams == 2 and float(K.cd["x"]) <= 8.0,
+		"slams %d cd %.1f" % [K.ult.slams, float(K.cd["x"])]
+	)
 	step(m, 0.5)
 	# a merge in the wind-up: no slam
 	K.cd["x"] = 0.0
@@ -379,10 +507,13 @@ func _bjorn_more() -> void:
 	step(m, 0.1)
 	merge_now(P)
 	step(m, 0.6)
-	ok("bjorn ult merge: the wind-up drops with no slam",
+	ok(
+		"bjorn ult merge: the wind-up drops with no slam",
 		K.ult.phase == "" and K.ult.slams == 2,
-		"slams %d" % K.ult.slams)
+		"slams %d" % K.ult.slams
+	)
 	await done(m)
+
 
 ## Burst cap: a Faultline then straight into a merge and its attacks on a full-health light hunter.
 func _bjorn_burst() -> void:
@@ -400,7 +531,9 @@ func _bjorn_burst() -> void:
 	merge_now(P)
 	hold_fire(m, P, T.pos, MERGE_OPEN)
 	P.inp["fire"] = false
-	ok("bjorn ult burst: a Faultline then a merge leave a full-health light hunter standing",
+	ok(
+		"bjorn ult burst: a Faultline then a merge leave a full-health light hunter standing",
 		not T.downed and not T.dead and T.hp > 0.0 and K.ult.slams == 1 and after_ult > 0.0,
-		"ult %.0f, with the merge %.0f of %.0f" % [after_ult, dmg(T), T.max_hp])
+		"ult %.0f, with the merge %.0f of %.0f" % [after_ult, dmg(T), T.max_hp]
+	)
 	await done(m)
