@@ -71,8 +71,11 @@ static func _build(species: String, player: AnimationPlayer, skel: Skeleton3D) -
 	out["settle"] = _clip(skel, pose, "settle", idle, sleep, SETTLE_SECS)
 	out["wake"] = _clip(skel, pose, "wake", sleep, idle, WAKE_SECS)
 	out["nap"] = _own(sleep) if own_sleep else _clip(skel, pose, "nap", sleep, null, sleep.length)
-	out["munch"] = _own(eat) if BokiClipCover.passes(eat, idle) else _clip(skel, pose, "munch", idle, null, il,
-			BokiHomePoses.cycles("munch", il))
+	out["munch"] = (
+		_own(eat)
+		if BokiClipCover.passes(eat, idle)
+		else _clip(skel, pose, "munch", idle, null, il, BokiHomePoses.cycles("munch", il))
+	)
 	for n in ["nudge", "climb", "splash", "swim", "paddle"]:
 		out[n] = _clip(skel, pose, n, idle, null, il, BokiHomePoses.cycles(n, il))
 	var impact := float(BaseTumble.rules()["impact_s"])
@@ -93,11 +96,13 @@ static func _build(species: String, player: AnimationPlayer, skel: Skeleton3D) -
 		out["flare"] = _clip(skel, pose, "flare", idle, null, float(BokiFly.rules()["flare_s"]))
 	return out
 
+
 ## A baked clip played as it is, looped.
 static func _own(clip: Animation) -> Animation:
 	var anim := clip.duplicate() as Animation
 	anim.loop_mode = Animation.LOOP_LINEAR
 	return anim
+
 
 ## `a` is the base (and `b` what it turns into over the clip, for settle and wake).
 static func _clip(
