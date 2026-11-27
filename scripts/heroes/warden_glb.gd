@@ -594,19 +594,12 @@ static func neutral_rest(arch: String) -> Dictionary:
 ## Builds the Warden's procedural model in the neutral look to read its rig rest (what WardenRest bakes).
 static func measure_rest(arch: String) -> Dictionary:
 	_measuring = true
-	var m := rest_model(arch)
+	var m := Models.hunter(Arch.weight(arch), Data.TEAM_COLORS[0], Arch.signature(arch), "", PlayerLook.neutral(), arch)
 	_measuring = false
 	var rest: Dictionary = m.get_meta("rig_rest")
 	m.free()
 	return rest
 
-
-## The procedural model a Warden's rig rest is measured on: in the neutral look, or for an Empty model (EmptyGlb)
-## the default Empty of its sex.
-static func rest_model(arch: String) -> Node3D:
-	if arch in EmptyGlb.KEYS:
-		return Models.hunter("medium", Data.TEAM_COLORS[0], "", "", EmptyGlb.rest_look(arch))
-	return Models.hunter(Arch.weight(arch), Data.TEAM_COLORS[0], Arch.signature(arch), "", PlayerLook.neutral(), arch)
 
 ## A model's own shading over the shared painted look (content/rules/warden_look.json, keyed by its art name:
 ## a design variant has its own): "painted" sets hero-toon parameters on all of its surfaces, "slots" per toon

@@ -1,12 +1,12 @@
 extends RefCounted
 ## --empty-3d-shots --shots-dir=<dir> [--part=locker|motion|tabs|home]: GPU stills of the Empty's 3D models at
-## 1920x1080 (EmptyGlb). locker: the look locker's model of each sex from the front, three-quarters and back,
+## 1600x900 (EmptyGlb). locker: the look locker's model of each sex from the front, three-quarters and back,
 ## and the hood down (procedural) with a colour dye; tabs: the locker's four tabs with their tile grids; motion:
-## each sex idle, running and jumping on the shared rig (Warden/Sync fed the match's state) from the
-## three-quarter and the side, whole and close on the shoulders, hips and knees; home: each sex standing in the
-## hub, as the player sees it. Never writes the save.
+## each sex idle, running and jumping on Meshy's skeleton (Warden/Native fed the match's state) from the
+## three-quarter and the side, whole and close on the shoulders, hips and knees; home: each sex standing, running
+## and jumping in the hub, as the player sees it. Never writes the save.
 
-const SIZE := Vector2i(1920, 1080)
+const SIZE := Vector2i(1600, 900)
 const SEXES := ["f", "m"]  # Unmasked "gender" 0 and 1
 const YAWS := {"back": 0.0, "q": 2.5, "front": PI}  # the locker turntable's turn (0 shows the back)
 ## [state name, the match's state for it, s of it before the first still]
@@ -19,6 +19,8 @@ const STATES := [
 const VIEWS := [["whole", 4.4, 0.8], ["shoulders", 1.7, 1.15], ["hips", 1.7, 0.7], ["knees", 1.7, 0.35]]
 const MOTION_YAWS := {"q": 35.0, "side": 90.0}  # deg: the model's turn to the camera
 const FPS := 30.0
+const RUN_FRAMES := 75  # frames of the stick held forward before the home run still
+const JUMP_FRAMES := 14  # frames after the jump key before the home jump still
 
 var main: Node
 var tree: SceneTree
@@ -121,8 +123,8 @@ func _motion() -> void:
 		model.set_meta("anim_seed", 1)
 		holder.add_child(model)
 		(model.get_node("Rig/Torso/Aim/Gun") as Node3D).visible = false  # (the empty-handed Gun's magazine)
-		print("EMPTY_3D sex %s glb=%s" % [SEXES[sex], model.get_meta("glb", false)])
-		var poser := model.get_node("Warden/Sync")
+		print("EMPTY_3D sex %s native=%s" % [SEXES[sex], model.has_node("Warden/Native")])
+		var poser := model.get_node("Warden/Native")
 		poser.set_process(false)
 		for yaw in MOTION_YAWS:
 			model.rotation.y = deg_to_rad(float(MOTION_YAWS[yaw]))
@@ -167,5 +169,14 @@ func _home() -> void:
 		home.cam.zoom = 0.55
 		await _frames(30)
 		await _grab("home_%s_close" % SEXES[sex])
+		Input.action_press("up")  # (the stick forward: the Empty runs; then jumps)
+		await _frames(RUN_FRAMES)
+		await _grab("home_%s_run" % SEXES[sex])
+		Input.action_release("up")
+		await _frames(30)
+		Input.action_press("jump")
+		await _frames(JUMP_FRAMES)
+		await _grab("home_%s_jump" % SEXES[sex])
+		Input.action_release("jump")
 		home.queue_free()
 		await _frames(10)

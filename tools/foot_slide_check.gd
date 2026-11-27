@@ -67,7 +67,13 @@ const SKATE_RUN_S := 1.35
 const NATIVE_WALK := 2.0
 ## Native loops that print OPEN, not FAIL: their clips step too short for the speed at the fastest loop rate
 ## (WardenNative.RATE_MAX), so no data rate plants them (Meeko's trot, Gil's and Motley's sneak; DEBT.md).
-const NATIVE_OPEN := {"tender": ["walk", "run", "crouch"], "gil": ["crouch"], "ostra": ["crouch"]}
+const NATIVE_OPEN := {
+	"tender": ["walk", "run", "crouch"],
+	"gil": ["crouch"],
+	"ostra": ["crouch"],
+	"empty_f": ["crouch"],
+	"empty_m": ["crouch"]
+}
 
 var bad := 0
 var holder: Node3D
@@ -171,7 +177,11 @@ func _hero(main: Node, id: String) -> bool:
 ## Native Hunter `id` (WardenNative) at walk, run and crouch speed: one NATIVE line each (Meshy's clips step even
 ## where the contract model hovers: Neve, Motley).
 func _native(main: Node, id: String) -> bool:
-	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
+	var m: Node3D
+	if id in EmptyGlb.KEYS:  # (the player's Empty at home: its own look, the default class's speed)
+		m = Models.hunter("medium", Data.TEAM_COLORS[0], "", "", EmptyGlb.rest_look(id))
+	else:
+		m = Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 	holder.add_child(m)
 	var nat := m.get_node("Warden/Native") as WardenNative
 	nat.set_process(false)

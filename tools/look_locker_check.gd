@@ -12,6 +12,7 @@ extends RefCounted
 ## it on a GPU worker with --fixed-fps 30). Never writes the save.
 
 const TOUR_FRAMES := 450  # 15 s at 30 fps
+const HOOD_TOL := 0.06  # m: the void head's centre from the egg in the hood (the idle clip turns the head a little)
 
 var bad := 0
 var main: Node
@@ -169,22 +170,31 @@ func _model3d() -> void:
 	for sex in [1, 0]:
 		locker.pick("gender", sex)
 		var w := locker.model.get_node_or_null("Warden")
-		ok(bool(locker.model.get_meta("glb", false)) and w != null
-				and w.scene_file_path.ends_with("%s.glb" % EmptyGlb.KEYS[sex]), "sex %d wears its 3D model" % sex)
+		ok(
+			(
+				bool(locker.model.get_meta(WardenNative.META, false))
+				and w != null
+				and w.scene_file_path.ends_with("%s_meshy.glb" % EmptyGlb.KEYS[sex])
+			),
+			"sex %d wears its 3D model on Meshy's skeleton" % sex
+		)
 		var hollow := locker.model.find_child("Hollow", true, false) as Node3D
 		ok(hollow != null and hollow.is_visible_in_tree(), "sex %d keeps the void head over it" % sex)
-		# (in the head pivot's own frame, against the egg in the pivot's rest: the stance and idle move the pivot)
-		var at := (hollow.get_parent() as Node3D).transform * hollow.transform * (hollow as MeshInstance3D).get_aabb()
-		var rest: Transform3D = WardenGlb.neutral_rest(EmptyGlb.KEYS[sex])["head"]
-		var want := rest.affine_inverse() * (EmptyGlb.EGG[sex][0] as Vector3)
-		ok(at.get_center().distance_to(want) < 0.03, "sex %d: the void head sits in the hood" % sex)
-		ok(not locker.model.get_node("Rig/Torso").get_children().any(_body_shows),
-				"sex %d: the procedural body is hidden" % sex)
+		# (in the model's frame, against the egg as fitted: the idle clip turns the head a little)
+		var at := WardenGlb.model_xf(locker.model, hollow) * (hollow as MeshInstance3D).get_aabb()
+		var want := (EmptyGlb.EGG[sex][0] as Vector3) * (w as Node3D).scale.y
+		ok(at.get_center().distance_to(want) < HOOD_TOL, "sex %d: the void head sits in the hood" % sex)
+		ok(
+			not locker.model.get_node("Rig/Torso").get_children().any(_body_shows),
+			"sex %d: the procedural body is hidden" % sex
+		)
 	locker.pick("colour", 5)
-	ok(_cloth_albedo().is_equal_approx(EmptyGlb._ratio(Unmasked.COLOURS[5], EmptyGlb.CLOTH_PAINT)),
-			"the shroud colour dyes the cloak")
+	ok(
+		_cloth_albedo().is_equal_approx(EmptyGlb._ratio(Unmasked.COLOURS[5], EmptyGlb.CLOTH_PAINT)),
+		"the shroud colour dyes the cloak"
+	)
 	locker.pick("shroud", 1)
-	ok(not bool(locker.model.get_meta("glb", false)), "another cut is the procedural Empty")
+	ok(not bool(locker.model.get_meta(WardenNative.META, false)), "another cut is the procedural Empty")
 	locker.pick("shroud", 0)
 	locker.pick("colour", int(Unmasked.default_look()["colour"]))
 

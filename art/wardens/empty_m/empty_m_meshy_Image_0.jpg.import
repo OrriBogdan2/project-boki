@@ -2,26 +2,24 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cha3svuphmhlx"
-path.bptc="res://.godot/imported/empty_m_Image_0.jpg-de54c68fe89b7e617cd165992895f967.bptc.ctex"
-path.astc="res://.godot/imported/empty_m_Image_0.jpg-de54c68fe89b7e617cd165992895f967.astc.ctex"
+uid="uid://3kf7r1uaq5ch"
+path="res://.godot/imported/empty_m_meshy_Image_0.jpg-aae28a23b8a55611263ca0454c8c0e31.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 generator_parameters={
-"md5": "aac9a4eac2549c60a4d4b12ff1b4dd85"
+"md5": "6d0dab0695fef9bb2bea2b049e9b39b7"
 }
 
 [deps]
 
-source_file="res://art/wardens/empty_m/empty_m_Image_0.jpg"
-dest_files=["res://.godot/imported/empty_m_Image_0.jpg-de54c68fe89b7e617cd165992895f967.bptc.ctex", "res://.godot/imported/empty_m_Image_0.jpg-de54c68fe89b7e617cd165992895f967.astc.ctex"]
+source_file="res://art/wardens/empty_m/empty_m_meshy_Image_0.jpg"
+dest_files=["res://.godot/imported/empty_m_meshy_Image_0.jpg-aae28a23b8a55611263ca0454c8c0e31.ctex"]
 
 [params]
 
-compress/mode=2
-compress/high_quality=true
+compress/mode=0
+compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0

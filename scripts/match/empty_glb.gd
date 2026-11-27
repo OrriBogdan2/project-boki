@@ -1,7 +1,7 @@
 class_name EmptyGlb
 extends RefCounted
-## The Empty in 3D: a Meshy model of the Hooded Cloak cut for each sex (art/wardens/empty_f, empty_m), skinned to
-## the shared Warden rig (docs/art/wardens/RIG_CONTRACT.md). Models.hunter builds the procedural Empty as before
+## The Empty in 3D: a Meshy model of the Hooded Cloak cut for each sex (art/wardens/empty_f, empty_m), on Meshy's
+## own skeleton and clips (WardenNative, docs/art/wardens/MESHY_NATIVE.md). Models.hunter builds the procedural Empty as before
 ## (its rig, the void head with its hollow, ghost and glow, the aura), then this dresses it in the .glb of its sex
 ## (WardenGlb.dress), hides the procedural body under it and dyes the cloak to the look's shroud and accent colours.
 ## The model has only that cut: another cut, the hood down, a trim pattern or an accessory keeps the procedural
@@ -19,10 +19,6 @@ const KEEP := ["Head", "Aura"]
 ## (the procedural head is about twice its size).
 const EGG := [[Vector3(0.0, 1.242, -0.09), 0.264], [Vector3(0.0, 1.235, -0.11), 0.25]]
 const EGG_COVER := 1.06  # x the egg's height: the void shell just covers the painted egg
-## The frame each model was fitted on, by sex as KEYS (the Average body before EmptyFrame's sliders: its build width
-## and shoulders' spread; the female's default build is now 0.95, which moved her arms 15 mm off the model's bones).
-## Its rest look is that frame, so its bones match the rig; every slider frame, the default too, reshapes it from there.
-const FIT := {"build": [1.0, 1.0], "shoulders": [0.85, 1.1]}
 
 
 ## The .glb this Empty look wears ("" for the procedural Empty).
@@ -35,18 +31,11 @@ static func key(appearance: Dictionary) -> String:
 	return k if WardenGlb.has_model(k) else ""
 
 
-## The look a model key's rig rest is measured in (WardenGlb.measure_rest): the default Empty of that sex, its
-## frame as the model was fitted (FIT).
+## The default Empty of a model key's sex, in the Hooded Cloak: the look the model's head size is measured against.
 static func rest_look(k: String) -> Dictionary:
 	var lk := Unmasked.default_look()
-	var sex := KEYS.find(k)
-	lk["gender"] = sex
+	lk["gender"] = KEYS.find(k)
 	lk["shroud"] = CUT
-	var frame: Dictionary = lk["frame"]
-	for key in FIT:
-		var span: Array = EmptyFrame.rules()["frame"][key]["f" if sex == 0 else "m"]
-		frame[key] = inverse_lerp(float(span[0]), float(span[1]), float(FIT[key][sex]))
-	lk["frame"] = EmptyFrame.clean(frame)
 	return lk
 
 
@@ -57,7 +46,7 @@ static func dress(root: Node3D, appearance: Dictionary, lk: Dictionary) -> void:
 	if k == "" or not WardenGlb.will_dress(k):
 		return
 	WardenGlb.dress(root, k, lk)
-	if not bool(root.get_meta("glb", false)):
+	if not bool(root.get_meta(WardenNative.META, false)):
 		return
 	_hide_body(root.get_node("Rig") as Node3D)
 	var size := EmptyFrame.factor(Unmasked.clean(appearance), "head") / EmptyFrame.factor(rest_look(k), "head")
@@ -75,16 +64,36 @@ static func _hide_body(n: Node3D) -> void:
 		_hide_body(c as Node3D)
 
 
-## The void head (the procedural Head and the hollow shell on it) scaled and moved onto the model's painted egg;
-## `size` is the look's head-size slider against the rest look's, so the slider still sizes the head in the hood.
+## The void head (the procedural Head and the hollow shell on it) scaled and moved onto the model's painted egg and
+## hung on Meshy's Head bone, so it turns with the model's clips; `size` is the look's head-size slider against the rest
+## look's, so the slider still sizes the head in the hood. The egg's numbers are for the model as fitted, times how far
+## the rig's height scaled it (the glb's scale; 1 in the rest look).
 static func _into_hood(root: Node3D, sex: int, size: float) -> void:
 	var head := root.get_node("Rig/Torso/HeadPivot/Head") as Node3D
 	var hollow := head.get_node("Hollow") as MeshInstance3D
+	var fitted := (root.get_node("Warden") as Node3D).scale.y
 	var box := WardenGlb.model_xf(root, hollow) * hollow.get_aabb()
-	head.scale *= float(EGG[sex][1]) * EGG_COVER * size / box.size.y
+	head.scale *= float(EGG[sex][1]) * fitted * EGG_COVER * size / box.size.y
 	box = WardenGlb.model_xf(root, hollow) * hollow.get_aabb()
-	var pivot := WardenGlb.model_xf(root, head.get_parent() as Node3D)
-	head.position += pivot.basis.inverse() * (EGG[sex][0] - box.get_center())
+	var xf := WardenGlb.model_xf(root, head)
+	xf.origin += (EGG[sex][0] as Vector3) * fitted - box.get_center()
+	_hang(root, head, "Head", xf)
+	var aura := root.get_node_or_null("Rig/Torso/Aura") as Node3D
+	if aura:
+		_hang(root, aura, "Spine02", WardenGlb.model_xf(root, aura))
+
+
+## Puts the procedural node `nd` (at `xf` in the model's frame, at rest) on Meshy's bone `bone`: it rides the clips.
+static func _hang(root: Node3D, nd: Node3D, bone: String, xf: Transform3D) -> void:
+	var skel := WardenGlb.skeleton(root.get_node("Warden") as Node3D)
+	var at := BoneAttachment3D.new()
+	at.name = bone + "Hang"
+	at.bone_name = bone
+	skel.add_child(at)
+	nd.reparent(at, false)
+	nd.transform = (
+		(WardenGlb.model_xf(root, skel) * skel.get_bone_global_rest(skel.find_bone(bone))).affine_inverse() * xf
+	)
 
 
 ## The cloak takes the shroud colour and the hem band the accent (or, matching the shroud, its own lighter shade):

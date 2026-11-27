@@ -24,20 +24,17 @@ func run(main: Node) -> void:
 			"parent": String(WardenSkeleton.PARENT[b])}
 	sk.free()
 	WardenGlb._measuring = true      # (the crown is the procedural head's: a .glb Warden builds none)
-	var pm := WardenGlb.rest_model(arch)
+	var neutral := PlayerLook.neutral()
+	var pm := Models.hunter(Arch.weight(arch), Data.TEAM_COLORS[0], Arch.signature(arch), "", neutral, arch)
 	WardenGlb._measuring = false
 	var head := pm.get_node("Rig/Torso/HeadPivot/Head") as MeshInstance3D
-	var xf := head.transform
-	if head.has_node("Hollow"):      # (an Empty: its head mesh goes, the void shell over it stays: EmptySlim)
-		head = head.get_node("Hollow")
-		xf *= head.transform
 	var land := {
-		"crown": ((rest["head"] as Transform3D) * xf * head.mesh.get_aabb()).end.y,
+		"crown": ((rest["head"] as Transform3D) * head.transform * head.mesh.get_aabb()).end.y,
 		"knee": (rest["shin.L"] as Transform3D).origin.y,
 		"sole": 0.0,
 	}
 	pm.free()
-	var m := WardenGlb.rest_model(arch)
+	var m := Models.hunter(Arch.weight(arch), Data.TEAM_COLORS[0], Arch.signature(arch), "", PlayerLook.neutral(), arch)
 	var gun := m.get_node("Rig/Torso/Aim/Gun") as Node3D
 	var box := AABB()
 	var first := true

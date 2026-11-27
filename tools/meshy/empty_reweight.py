@@ -1,6 +1,6 @@
 """Knit the Empty's cloak to the rig: pin it to the body, then smooth the skin weights across the model's cracks.
 
-The Empty models (art/wardens/empty_f, empty_m) are a Meshy surface decimated to 60k: it has ~18k open edges, so
+The Empty models (art/wardens/empty_f, empty_m _meshy.glb: Meshy's own rig) are a Meshy surface decimated to 60k: it has ~18k open edges, so
 neighbouring cloak vertices across a crack carry unrelated weights (thigh against arm against hips) and the skin
 tears the cloak open when the rig moves; the cloak that hangs from the shoulders is bound to the arms and follows
 their swing. First a cloth/trim vertex further than SLEEVE_NEAR from an arm gives up its arm weight (all of it from
@@ -8,7 +8,7 @@ SLEEVE_FAR): it takes the mean weights of the nearest vertices that are not on a
 all vertices within RADIUS of it (the other pieces count too: a sleeve follows its hand), SMOOTH_PASSES times, then
 keeps its strongest 4 bones. Only the WEIGHTS_0 and JOINTS_0 buffers of the .glb change, in place.
 
-    python3 tools/meshy/empty_reweight.py art/wardens/empty_f/empty_f.glb [radius_m] [passes]
+    python3 tools/meshy/empty_reweight.py art/wardens/empty_f/empty_f_meshy.glb [radius_m] [passes]
 """
 
 import json
@@ -18,8 +18,8 @@ import sys
 import numpy as np
 from scipy.spatial import cKDTree
 
-ARM_BONES = ("upper_arm.L", "upper_arm.R", "forearm.L", "forearm.R", "hand.L", "hand.R", "pauldron.L", "pauldron.R")
-ARM_SEGMENTS = (("upper_arm.L", "hand.L"), ("upper_arm.R", "hand.R"))  # shoulder to hand, the sleeve's axis
+ARM_BONES = ("LeftShoulder", "LeftArm", "LeftForeArm", "LeftHand", "RightShoulder", "RightArm", "RightForeArm", "RightHand")
+ARM_SEGMENTS = (("LeftArm", "LeftHand"), ("RightArm", "RightHand"))  # shoulder to hand, the sleeve's axis
 SLEEVE_TIP = 0.12  # m: the sleeve's axis runs this far below the hand bone (the fingers)
 SLEEVE_NEAR = 0.12  # m: from the arm's axis a vertex keeps its arm weight
 SLEEVE_FAR = 0.2  # m: and further than this it has none

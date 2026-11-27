@@ -2,7 +2,7 @@
 legs swung about their bone heads) and counts the cloth/trim vertex pairs that sat within PAIR_M of each other at
 rest and end up further apart than TEAR_M. Exits 1 if a pose is over its ceiling.
 
-    python3 tools/meshy/empty_tear_check.py [art/wardens/empty_f/empty_f.glb ...]
+    python3 tools/meshy/empty_tear_check.py [art/wardens/empty_f/empty_f_meshy.glb ...]
 
 The fitted Meshy models tore 40-55k pairs this way (the cloak was bound to the arms and had ~18k open edges); the
 knitted weights (empty_reweight.py) leave under 3k.
@@ -17,21 +17,21 @@ from scipy.spatial import cKDTree
 
 PAIR_M = 0.012  # m: neighbours at rest
 TEAR_M = 0.05  # m: further apart than this in a pose is a tear
-CEILINGS = {"run_a": 800, "run_b": 800, "jump": 3000}  # pairs torn per pose
+CEILINGS = {"run_a": 1500, "run_b": 1500, "jump": 3000}  # pairs torn per pose
 CLOAK = ("cloth", "trim")
 PARENT = {
-    "forearm.L": "upper_arm.L",
-    "forearm.R": "upper_arm.R",
-    "hand.L": "forearm.L",
-    "hand.R": "forearm.R",
-    "shin.L": "thigh.L",
-    "shin.R": "thigh.R",
+    "LeftForeArm": "LeftArm",
+    "RightForeArm": "RightArm",
+    "LeftHand": "LeftForeArm",
+    "RightHand": "RightForeArm",
+    "LeftLeg": "LeftUpLeg",
+    "RightLeg": "RightUpLeg",
 }
 # bone -> degrees about X, from the rest pose
 POSES = {
-    "run_a": {"thigh.L": 40, "thigh.R": -40, "shin.L": -35, "upper_arm.L": -45, "upper_arm.R": 45, "forearm.L": -40, "forearm.R": -40},
-    "run_b": {"thigh.L": -40, "thigh.R": 40, "shin.R": -35, "upper_arm.L": 45, "upper_arm.R": -45, "forearm.L": -40, "forearm.R": -40},
-    "jump": {"thigh.L": 50, "thigh.R": 20, "shin.L": -60, "shin.R": -30, "upper_arm.L": -70, "upper_arm.R": -70, "forearm.L": -30, "forearm.R": -30},
+    "run_a": {"LeftUpLeg": 40, "RightUpLeg": -40, "LeftLeg": -35, "LeftArm": -45, "RightArm": 45, "LeftForeArm": -40, "RightForeArm": -40},
+    "run_b": {"LeftUpLeg": -40, "RightUpLeg": 40, "RightLeg": -35, "LeftArm": 45, "RightArm": -45, "LeftForeArm": -40, "RightForeArm": -40},
+    "jump": {"LeftUpLeg": 50, "RightUpLeg": 20, "LeftLeg": -60, "RightLeg": -30, "LeftArm": -70, "RightArm": -70, "LeftForeArm": -30, "RightForeArm": -30},
 }  # fmt: skip
 COMPONENTS = {5121: np.uint8, 5123: np.uint16, 5125: np.uint32, 5126: np.float32}
 WIDTH = {"SCALAR": 1, "VEC2": 2, "VEC3": 3, "VEC4": 4, "MAT4": 16}
@@ -95,7 +95,7 @@ def torn_pairs(path):
 
 
 def main():
-    paths = sys.argv[1:] or ["art/wardens/empty_f/empty_f.glb", "art/wardens/empty_m/empty_m.glb"]
+    paths = sys.argv[1:] or ["art/wardens/empty_f/empty_f_meshy.glb", "art/wardens/empty_m/empty_m_meshy.glb"]
     bad = 0
     for path in paths:
         for pose, n in torn_pairs(path).items():

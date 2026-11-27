@@ -102,6 +102,18 @@ the parts' length as the contract clips key Cinder's jet bones (x0.06 at rest, x
 in Meshy's mesh (Meeko's sun and cloud, surfaces named as in `warden_anim/<art>.json` "companions") are cut out and
 circle her as on the contract path, the data's skeleton space carried onto Meshy's.
 
+## The Empty (the player's own body)
+`empty_f` and `empty_m` (EmptyGlb.KEYS, not Hunters) are on this path: `art/wardens/empty_{f,m}/empty_{f,m}_meshy.glb`,
+the Hooded Cloak models rigged by Meshy's auto-rig (5 credits each, the model uploaded as a .glb: the rig comes in
+centimetres, `tools/meshy/rig_to_metres.py` puts it in metres) with Meshy's clips (idle 0, walk and run from the rig task,
+jump 13, attack 4, crouch 520, pick-up 281/276, sit 32/33; 3 credits each). `tools/meshy/empty_reweight.py` knits the
+cloak's skin weights (Meshy's own tore it open in a run: `tools/meshy/empty_tear_check.py` counts the torn pairs).
+EmptyGlb hangs the void head on Meshy's `Head` bone and the aura on `Spine02`, hides the procedural body and dyes the
+cloak and hem. Data `acts` plays the pick-up clip for the farm's lift, pat and feed. No sit, glide, dash or interact
+clip is used: sit has no farm verb; glide and dash fall back to the jump and run clips. The body sliders other than
+height and head size do not reshape the cloak (the bones are Meshy's). Any other shroud cut is the procedural Empty.
+The old contract-rig models (`empty_{f,m}.glb`) are gone.
+
 ## Clip slots (per-move and per-state clips)
 Data `clips` may add any of these keys beside idle, walk, run, jump, attack and crouch. Each names a clip; a missing key
 plays today's clip, so nothing changes until a Hunter's clips land (`WardenNative._one_shot` / `_held`).

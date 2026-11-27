@@ -690,20 +690,17 @@ Source `art/wardens/ryzz/ryzz_meshy.glb` uploaded (original UV, meshy-7), the tu
 (see `art/wardens/ryzz/IMPORT.md`, "Meshy-native model").
 
 
-## The Empty (2026-11-20, ext/empty-3d-1119): the player's own body in 3D
-Art names `empty_f` / `empty_m` (EmptyGlb.KEYS), not Wardens: no archetype, no WardenGlb.ART line. The Meshy runs are
-the 11-17 multi-image runs with enhancement off (`~/meshy/empty-3d-1117/run_{F,M}_off`, task ids in task.json),
-graded against the 1115b picks (F_A, M_A): M_on had bare see-through hands, F_on a poncho cut. No Cycles rebake (a
-4096 bake did not finish in an hour on a loaded worker): the run is pre-decimated to 150k with its own UVs and the
-paint scaled to 4096 (`~/meshy/empty-3d-1119/tools/prep.py`), then `fit_warden.py` with
-`art/wardens/src/empty_{f,m}_fit.json` on the rig `--warden-rig-json --warden=empty_f|empty_m` writes (measured on
-the default Empty of that sex, WardenGlb.rest_model). The game's chibi rig (hips 0.44, crown 1.53) shortens the legs
-and grows the hood: closer to the 2D picks than the Meshy proportions. The male's front cloak panels follow the
-arms down into crossed strips unless weight_rules pins them to the hips. Only the Hooded Cloak, hood up, plain trim,
-no accessory has a model; every other shroud choice stays procedural (EmptyGlb.key).
-The fitted Meshy surface is cracked (about 18k open edges after the 60k decimate) and the cloak that hangs from the
-shoulders was bound to the arms, so the skin tore it open in a run and the ink shell's back faces showed through as
-black shards. `tools/meshy/empty_reweight.py` (run once on each fitted .glb) frees the cloak from the arms away from
-the sleeves and smooths its weights across the cracks (0.08 m, 4 passes); `content/rules/warden_look.json` draws the
-cloth and trim without the ink shell (`no_ink`; the boots and hands keep it). `tools/meshy/empty_tear_check.py`
-poses a run and a jump and counts torn neighbour pairs: 42k-54k before, under 2.8k after.
+## The Empty (2026-11-27, ext/empty-3d-1119): the player's own body in 3D, on Meshy's own skeleton
+Art names `empty_f` / `empty_m` (EmptyGlb.KEYS), not Wardens: no archetype, no WardenGlb.ART line. The geometry is the
+11-17 multi-image Meshy runs with enhancement off (`~/meshy/empty-3d-1117/run_{F,M}_off`), pre-decimated to 150k with
+their own UVs and the paint scaled to 4096 (`~/meshy/empty-3d-1119/tools/prep.py`), then fitted (74k / 73k tris). Since
+11-27 they are not on the shared contract rig: the fitted mesh (skin stripped, turned to face +Z) was uploaded to Meshy's
+auto-rig (`meshy_task.py rig OUT model.glb --height H`, 5 credits), the clips came from `animations` (3 credits each,
+`~/meshy/empty-native-1127/anim.py`), `tools/meshy/rig_to_metres.py` turned the centimetre rig into metres and
+`tools/meshy/native_pack.py` packed `art/wardens/empty_{f,m}/empty_{f,m}_meshy.glb` as for the Hunters
+(MESHY_NATIVE.md "The Empty"). `tools/meshy/empty_reweight.py` (run once on each packed .glb) frees the cloak from the arms
+away from the sleeves and smooths its weights across the cracks of the surface (about 18k open edges), and
+`content/rules/warden_look.json` draws cloth and trim without the ink shell (`no_ink`: its back faces showed through the
+cracks as black shards). `tools/meshy/empty_tear_check.py` poses a run and a jump and counts torn neighbour pairs.
+Only the Hooded Cloak, hood up, plain trim, no accessory has a model; every other shroud choice stays procedural
+(EmptyGlb.key).
