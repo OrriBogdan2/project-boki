@@ -97,12 +97,13 @@ static func boki(hud, p: Hunter, r: Rect2) -> void:
 		DexView.draw_type(hud.c, t, r.position + Vector2(12, 12), BOX * 0.16, 0.35 if down else 1.0)
 	else:
 		DexView.draw_type(hud.c, t, ctr + Vector2(0, -2), BOX * 0.3, 0.35 if down else 1.0)
-	# the bond meter as a thin ring; bright and pulsing once the Merge is ready
+	# the bond meter as a thin ring; bright and pulsing only while the Fusion key fuses right now (the FUSE tag)
 	var bond := clampf(p.ult, 0.0, 1.0)
+	var tag := BokiHud.tag(p)
 	if fusion:
 		hud.c.draw_arc(ctr, BOX * 0.5 + 3.0, 0, TAU, 36, Color(1, 1, 1, 0.08), 2.0, true)
 	if bond > 0.0:
-		var full := KinMerge.ready(p)
+		var full := tag == "FUSE"
 		var a := 0.7 + 0.3 * sin(float(hud.m.time) * 6.0) if full else 0.85
 		hud.c.draw_arc(
 			ctr, BOX * 0.5 + 3.0, -PI / 2, -PI / 2 + TAU * bond, 36, Color(HudStyle.GOLD, a), 3.0 if full else 2.0, true
@@ -115,11 +116,13 @@ static func boki(hud, p: Hunter, r: Rect2) -> void:
 	var frac := clampf(k.hp / maxf(1.0, k.max_hp), 0.0, 1.0)
 	var bar := Rect2(r.position + Vector2(6, BOX - 6.0 - BAR_H), Vector2(BOX - 12.0, BAR_H))
 	hud._bar(bar, 0.0 if down else frac, SideColor.ally())
-	var tag := BokiHud.tag(p)
-	shown = {"tag": tag, "bond": int(bond * 100.0), "frac": frac}
+	# after a Fusion the key waits merge_cd: its seconds, muted, instead of a percent (a full bar there is not ready)
+	var fill := "%ds" % ceili(p.merge_cd) if p.merge_cd > 0.0 else "%d%%" % int(bond * 100.0)
+	shown = {"tag": tag, "bond": int(bond * 100.0), "frac": frac, "lit": tag == "FUSE"}
+	shown["fill"] = fill if tag == "" else ""
 	if tag == "" and fusion:
 		var pct_at := Vector2(ctr.x + 7.0, r.position.y + 14.0)
-		HudStyle.ctext(hud.c, pct_at, "%d%%" % int(bond * 100.0), 10, Color(HudStyle.INK, 0.8))
+		HudStyle.ctext(hud.c, pct_at, fill, 10, Color(HudStyle.INK, 0.5 if p.merge_cd > 0.0 else 0.8))
 	elif tag != "":
 		BokiHud.chip(hud, r, tag, HudStyle.HURT if tag in ["RESCUE", "TOO FAR"] else tc)
 	if fusion:
