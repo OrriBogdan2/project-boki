@@ -14,8 +14,10 @@ thin pole or a floating rock moves it less than height alone. The owner's reads 
 smallest bar the pet, under the sniper; the samurai not small, 20th of 25), and on height or area alone; the first
 pass's bind-pose body height had the healer 3rd smallest and the samurai 7th, and the listed model height counts ears.
 `match_k` = reference size / ours at k = 1 (`--hunter-size-sheet --silhouette`, HSIL "lean all" rows). Caveat:
-reference props that are loose meshes (a shield, a dagger, a bird) are not in its silhouette, ours are (Albert and
-Sable read a little small for it).
+reference props that are loose meshes (a shield, a dagger, a bird) are not in its silhouette, ours are. Albert is
+sized on the HSIL "lean crown" row (nothing above the head's crown): his back poles reach 1.4 m over his head and
+made him read 0.84 when his body wants 1.14. Sable's dagger moves her by 1%, under the ~4% run-to-run spread of
+the idle, so she keeps the "lean all" value.
 
 Camera: pitch 66 deg both sides; the reference lens is 59 deg horizontal (35.3 vertical at 16:9), arm 30.2 m at its
 widest; ours is 32 deg vertical at 23 m x 1.4572 = 33.5 m, 34.2 m of ground across on both sides: same px per m
