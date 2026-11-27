@@ -48,6 +48,20 @@ class Body:
         self.drop = rig.hips_t[1] - rig.pos("LeftUpLeg")[1]  # Hips bone over the hip joints
         self.wide = float(np.linalg.norm(rig.pos("LeftArm") - rig.pos("RightArm")))
         self.toe = {s: rig.bind[rig.id[s + "Foot"]][:3, :3] @ Y for s in ("Left", "Right")}
+        # riders: a second root bone at a hand in the bind pose (Vex's Gun; Meshy keys it to follow the hand)
+        self.riders = {}
+        for j in rig.joints:
+            if rig.par.get(j) in rig.name or j == rig.root:
+                continue
+            for h in ("RightHand", "LeftHand"):
+                if np.linalg.norm(rig.bind[j][:3, 3] - rig.pos(h)) < 0.15:
+                    hb = rig.bind[rig.id[h]]
+                    self.riders[j] = (
+                        rig.id[h],
+                        hb[:3, :3].T @ rig.bind[j][:3, :3],
+                        hb[:3, :3].T @ (rig.bind[j][:3, 3] - hb[:3, 3]),
+                    )
+                    break
 
 
 def lerp(a, b, k):
@@ -70,6 +84,8 @@ def pose(b, q):
     turn = {k: (q["lean"] * v, 0.0, 0.0) for k, v in split.items()}
     turn["neck"] = (q["head"] * 0.5, q.get("look", 0.0) * 0.45, 0.0)
     turn["Head"] = (q["head"] * 0.5, q.get("look", 0.0) * 0.55, 0.0)
+    if q.get("wrist", 0.0):  # (the weapon hand flexed: a blade or barrel gripped across the fist points down)
+        turn["RightHand"] = (q["wrist"], 0.0, 0.0)
     base = {"turn": turn, "hips": hips}
     pre = L.fk(rig, base)[1]
     ik, aim = [], {}
@@ -102,6 +118,7 @@ def pose(b, q):
 
 
 STAND = dict(lean=0.0, head=0.0, back=0.0, kneel=0.0, sit=0.0, hands=0.0, fling=0.0, crouch=0.01)
+CALM = dict(STAND, wrist=65.0)  # the casual stand: the weapon hanging tip-down by the leg
 # the knocked-down beat: shoved back off the hit, the knees give, down on both, slumped onto the hands
 HIT = dict(STAND, lean=-12.0, head=-10.0, back=0.06, fling=0.8, crouch=0.12)
 KNEES = dict(STAND, lean=10.0, head=10.0, back=0.04, kneel=1.0, fling=0.3, hands=0.35)
@@ -121,7 +138,7 @@ def clips(art):
     if art not in OWN_DASH:
         out[art + "_dash"] = (DASH_LEN, [(0.0, PUSH, "lin"), (0.45, LUNGE, "snap"), (1.0, LUNGE, "lin")])
     if art in CASUAL:
-        out[art + "_idle"] = (IDLE_LEN, [(0.0, STAND, "lin"), (IDLE_LEN, STAND, "lin")])
+        out[art + "_idle"] = (IDLE_LEN, [(0.0, CALM, "lin"), (IDLE_LEN, CALM, "lin")])
     return out
 
 
@@ -139,14 +156,20 @@ def at(art, name, t):
 
 
 def sample(b, art, name):
-    """(times, {joint: [local quats]}, [hips translations]) of a clip at 30 fps."""
+    """(times, {joint: [local quats]}, [hips translations], {rider joint: [translations]}) of a clip at 30 fps."""
     length = clips(art)[name][0]
     n = int(round(length * L.FPS)) + 1
     times = [i / L.FPS for i in range(n)]
     rots = {j: [] for j in b.rig.joints}
-    hips = []
+    hips, moves = [], {j: [] for j in b.riders}
     for t in times:
         loc, pos = L.fk(b.rig, pose(b, at(art, name, t)))
+        for j, (h, r_rel, p_rel) in b.riders.items():  # (a root bone: its local is its world)
+            w = np.eye(3)
+            for c in L.chain(b.rig, h):
+                w = w @ loc[c]
+            loc[j] = w @ r_rel
+            moves[j].append(pos[h] + w @ p_rel)
         for j in b.rig.joints:
             rots[j].append(L.quat(loc[j]))
         hips.append(pos[b.rig.root])
@@ -154,7 +177,7 @@ def sample(b, art, name):
         for i in range(1, n):
             if np.dot(rots[j][i], rots[j][i - 1]) < 0:
                 rots[j][i] = -rots[j][i]
-    return times, rots, hips
+    return times, rots, hips, moves
 
 
 def anims(rig, art):
@@ -192,7 +215,7 @@ def append_glb(path, rig, extra):
         js["accessors"].append(a)
         return len(js["accessors"]) - 1
 
-    for name, times, rots, hips in extra:
+    for name, times, rots, hips, moves in extra:
         t_acc = add(times, "SCALAR", len(times))
         chans, samplers = [], []
         for j in rig.joints:
