@@ -14,8 +14,8 @@ coils at both wrists and a copper rod mast flying a pennant. Palette: teal and h
 
 ## Scaling
 Damage is the source's share of the standard target (source health is roughly 8 to 10 times ours: 1285 source HP, 154 ours;
-docs/TTK.md, pinned in content/rules/kit_parity.json; 83386bb77c 11-11): bolt 9 every 0.648s (the cadence is owner items
-70 and 116; 90 every 0.8 s is 8.75% of the target a second, 9 every 0.648 s is 9.0%); Storm Rod 16 to 26.7 (Voltaic
+docs/TTK.md, pinned in content/rules/kit_parity.json; 83386bb77c 11-11): bolt 9 every 0.55 s (the cadence is owner items
+70 and 116; 90 every 0.8 s is 8.75% of the target a second, 9 every 0.648 s was 9.0%, 9 every 0.55 s is 10.6%); Storm Rod 16 to 26.7 (Voltaic
 Spear 133, read as the uncharged throw; the full hold keeps our 5:3); Skycall 19.4 (Lightning Strike 162); Wirerun pass
 18.3 (Surge 153), doubled through a full-Static foe, plus a Blowout of 16 + 18% of their health (about 5.7 bolts on a
 Light; the source detonation is about 9). Cooldowns follow the source ratio spear : Surge : javelin = 7 : 6.7 : 9.2, at
@@ -53,7 +53,7 @@ Source vs ours per slot; [data] = the game data, [footage] = hero-ref/vireo.md a
 |---|---|---|---|
 | LMB beats | alternating hands: a torso twist and one arm flung out, back to the wide arms-out stance; gold sparks at the feet [footage 0003-0020] | `mage_lmb_l` / `mage_lmb_r`: out at 0.03 s, settled by 0.35 s; sparks at the feet; a fan of splinters back toward her on impact | matches; asserted |
 | LMB tracking | faces the cursor [footage] | each bolt leaves along the cursor of its step and the body faces it, while walking and with the cursor sweeping 60 deg/s | matches; asserted |
-| LMB cadence | one bolt every 0.8 s held, no magazine [data card, footage] | 0.648 s (owner items 70, 116), mag 99 | matches; asserted |
+| LMB cadence | one bolt every 0.8 s held, no magazine [data card, footage] | 0.55 s (owner items 70, 116), mag 99 | matches; asserted |
 | LMB range and speed | always to max range (about 7.5 bh) past the cursor, about 18 bh/s [footage]; one target [data] | 13 m past the cursor, 37 m/s, stops on the first foe (audit fix) | matches; asserted |
 | RMB spear | hold, summoned spear by the shoulder, body flash at full, overarm throw; fixed lane [footage] | Storm Rod: the same beats, fixed 13 m lane | matches |
 | E Lightning Strike | place, then pick the pull direction; 0.8 s countdown; Grounded slide [footage] | Skycall: place, hold and drag, release (audit: was a 0.3 s flick), 0.8 s countdown, slide and Grounded 1.5 s | matches |
@@ -73,7 +73,7 @@ so any edit here would conflict. Suggestions for after they merge are in the las
 | 1 | Orbs drop on every spear hit, at once | closed | `_coil_hit()` drops one at the impact after `mote_t` 0.05 on any foe, dummies too; check "an orb at the impact the moment it hits". Orbs are pickups that give Wirerun back (owner items 71, 74) |
 | 2 | Surge cooldown starts on press | closed | `on_dash()` spends the charge on the press (22ceca1e1), `_end_wire(false)` keeps it spent on a cut; check "Wirerun: the cooldown starts on the press" (dashes 1.00 to 0.00) |
 | 3 | LMB line and bolt to max range, arrow tick | closed | `coilcaster.json` `"aim": "max"`, 13 m past the cursor; check "LMB: aim line to full range past a near cursor" |
-| 4 | LMB cadence, ammo, pierce | owner override (cadence), closed (rest) | 0.648 s not 0.8 s (owner items 70, 116); mag 99; no pierce (audit 0ea0810, asserted) |
+| 4 | LMB cadence, ammo, pierce | owner override (cadence), closed (rest) | 0.55 s not 0.8 s (owner items 70, 116); mag 99; no pierce (audit 0ea0810, asserted) |
 | 5 | RMB is a held, summoned spear | closed | `mage_rmb_hold` and `mage_rmb`, rod in hand, body flash at full (`rmb_hold_tick`); checks "the rod is in the hand", "full at 1s: the body flash" |
 | 6 | RMB fixed max-range lane | closed | `_coil()` reads one fixed `range` 13 m (charge only scales damage and push), lane `width` 0.3 with rails (22ceca1e1); check "a fixed 13m double-rail lane (no growth)" 13.0 / 13.0 |
 | 7 | Surge end marker | closed | `_tick_wire()`: end circle `end_r` 2.25 m (4.5 m across, about 2.5 bh) with ticks and star, rails lane 0.35 wide; check "rails lane and the ticked end ring show". Lane length changes to 7 to 11 m in ext/sparkle-dash-feel (owner 11-08) |
@@ -144,7 +144,7 @@ nothing from a glide (`Hunter.can_fire`).
 
 | First (phase) | Second | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|---|
-| LMB bolt (0.648 s cadence) | LMB | one bolt per 0.8 s held | next bolt on the cadence while held | owner (items 70, 116: faster than the 0.8 s card) | `LMB: ...` lines |
+| LMB bolt (0.55 s cadence) | LMB | one bolt per 0.8 s held | next bolt on the cadence while held | owner (items 70, 116: faster than the 0.8 s card) | `LMB: ...` lines |
 | LMB held | RMB, E | not shown ("she stood still in every LMB shot") | both: the bolts keep leaving while the rod is held | unsettled | [F] 0003-0020, open question 5 |
 | RMB tap (under 0.33 s) | RMB | "Cast time increased from 0.25 >>> 0.33 seconds"; earlier "minimum cast time 0.2 >>> 0.4" | the throw **waits** to 0.33 s; a second press is denied (one charge), no queue | match | [W] patches 05.03.25, 20.11.24; `small: ...` |
 | RMB held (rod) | LMB, E | not shown | both | unsettled | |
@@ -283,7 +283,7 @@ were worked out from the clip lengths and the kit's timers; every "after" cell i
 
 | Move | Source (s) | Ours before | Ours after | Status |
 |---|---|---|---|---|
-| `mage_lmb` bolt | one arm fling per shot, a wide stance between [f3-15]; the source's rate is 0.8 | clip 0.35, release key 0.06; a bolt every 0.648 | measured: bolt 0.02 after the press, one every 0.650 | matches (the cadence 0.648 is owner item 116, kept) |
+| `mage_lmb` bolt | one arm fling per shot, a wide stance between [f3-15]; the source's rate is 0.8 | clip 0.35, release key 0.06; a bolt every 0.55 | measured: bolt 0.02 after the press, one every 0.650 | matches (the cadence 0.55 is owner item 116, kept) |
 | `mage_rmb_hold` | spear up on the press, body flash at 1.0 s, throw at 1.2 s [f43-49] | hold pose in at 0.1, flash 1.0, auto throw 1.2 | measured: flash 1.00, throw clip and bolt 1.20 | matches |
 | `mage_rmb` release (held to the flash) | the throw one frame after the flash [f48-49] | release key 0.06 on the let-go | measured: let go at 1.0, throw clip and bolt 1.02 | matches |
 | `mage_rmb` tap (let go before 0.33 s) | no tap in the footage; the throw leaves with the arm | by reading: throw clip played at the let-go, its release key (0.06) 0.23 s ahead of the bolt (min 0.33) | the clip starts so its release key lands on the bolt: throw clip 0.30, key 0.36, bolt 0.35 | fixed; asserted |
@@ -316,7 +316,7 @@ Suggestions (ours, not built):
 - Wirerun tap: a 0.2 s minimum crouch before the dash (the source's crouch), at the cost of input delay.
 - RMB tap: the rod is hidden at the let-go, so a tap holds the arm on the hold pose without the rod for about 0.17 s;
   keeping the rod up until the throw would close it.
-- Bolt cadence: the source is 0.8 s; ours is 0.648 (owner item 116), the card says so.
+- Bolt cadence: the source is 0.8 s; ours is 0.55 (owner item 116), the card says so.
 
 ## Engine notes
 - Kit `scripts/arch/kits/mage_kit.gd`; pooled looks `scripts/arch/kits/vv_fx.gd` + `shaders/vv_fx.gdshader`;

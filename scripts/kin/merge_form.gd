@@ -15,9 +15,15 @@ extends RefCounted
 static func data() -> Dictionary:
 	return Content.rules("merge_forms")
 
-## Fusion (X) is switched off by default (docs/decisions/0159): nothing starts one and no screen mentions it.
+## There is no fusion in the game (docs/decisions/0159): `fusion_enabled` is a dev flag, off. Off,
+## nothing starts one, no screen mentions it and the Fusion action has no key.
 static func enabled() -> bool:
 	return bool(data().get("fusion_enabled", false))
+
+## The dev flag (checks, screenshot demos): switches Fusion and its X key together (Settings.fusion_key).
+static func set_enabled(on: bool) -> void:
+	data()["fusion_enabled"] = on
+	Settings.fusion_key()
 
 static func type_of(k: Kin) -> String:
 	var t := String(k.sp.get("type", "none"))

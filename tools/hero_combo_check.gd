@@ -214,8 +214,8 @@ func _mage() -> void:
 	ok("LMB: alternating hands (left, then right)",
 			a1 == "mage_lmb_l" and K.anim_id == "mage_lmb_r",
 			"%s %s" % [a1, K.anim_id])
-	ok("LMB: one bolt every 0.648s (item 116), no magazine to speak of",
-			is_equal_approx(float(P.wpn["rate"]), 0.648) and int(P.wpn["mag"]) >= 99)
+	ok("LMB: one bolt every 0.55s (item 116, then 0.648 x 0.85), no magazine to speak of",
+			is_equal_approx(float(P.wpn["rate"]), 0.55) and int(P.wpn["mag"]) >= 99)
 	# 2. Static: a weapon hit is 1, the marker shows the count; the 4th is Live
 	ac.fresh(T)
 	T.teleport(home + Vector3(5, 0, 0))
