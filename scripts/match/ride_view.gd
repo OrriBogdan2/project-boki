@@ -6,6 +6,12 @@ extends RefCounted
 ## launch closes the map and the 3D view comes back on the rocket (DropRocket, Cam.skydive). Closing the map
 ## with its key brings the 3D ride view back, as before.
 
+## Frames apart a hunter is drawn while the 3D view is off (OFF_EVERY), and the skipped time past which it is drawn
+## anyway. Hunters are staggered by id so each frame draws about a quarter of them.
+const OFF_EVERY := 4
+const OFF_MAX_DT := 0.25
+
+
 
 ## True while the player waits on the skyship for the plan or the launch.
 static func aboard(m: Match) -> bool:
@@ -42,12 +48,6 @@ static func tick(m: Match, map: FullMap) -> void:
 	var vp := m.get_viewport()
 	if vp.disable_3d != off:
 		vp.disable_3d = off
-
-
-## Frames apart a hunter is drawn while the 3D view is off (OFF_EVERY), and the skipped time past which it is drawn
-## anyway. Hunters are staggered by id so each frame draws about a quarter of them.
-const OFF_EVERY := 4
-const OFF_MAX_DT := 0.25
 
 
 ## Match._process: every hunter's visuals each frame, but while the 3D view is off (the ride map covers the screen)
