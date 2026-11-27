@@ -53,6 +53,8 @@ const AIM_Y := 0.5  # Aim sits this high on the torso
 const GROUND_CLEAR := 0.05  # no part of a weapon ever goes nearer the ground than this (m)
 const FALL_SLUMP := 1.1  # rad: a knocked-down body with no death clip slumps this far over its knee
 const GLIDE_BANK := 0.436  # rad (25 deg): the roll into a glider turn at full steer
+const GLIDE_SWAY := 0.06  # rad: the hanging legs' sway under the glider, both together
+const GLIDE_SWAY_RATE := 1.6  # rad/s of that sway (a slow swing in the wind)
 const GLIDE_BANK_EASE := 8.0  # 1/s: how fast that roll follows the turn, and settles out of it
 const DIVE_PITCH := 1.15  # rad: the whole body nose-down in a dive (the skydive, the glider's)
 const AIR_TILT := &"air_tilt"  # root meta, a Quaternion in the model's space about BODY_C: the air tilt
@@ -1098,11 +1100,14 @@ func update(dt: float, s: Dictionary) -> void:
 	kl = lerpf(kl, -2.1, roll_k)
 	hr = lerpf(hr, 1.4, roll_k)
 	kr = lerpf(kr, -2.0, roll_k)
-	# gliding: legs dangle and paddle a little
-	hl = lerpf(hl, 0.35 + sin(t * 3.2 + seed_ph) * 0.12, glide_k)
-	kl = lerpf(kl, -0.5 + sin(t * 3.2 + 1.0 + seed_ph) * 0.15, glide_k)
-	hr = lerpf(hr, 0.6 - sin(t * 3.2 + seed_ph) * 0.12, glide_k)
-	kr = lerpf(kr, -0.7 - sin(t * 3.2 + 1.0 + seed_ph) * 0.15, glide_k)
+	# gliding: the legs hang together under the canopy, trailing a little, and sway as one (a paddle read as a walk)
+	var g_sway := sin(t * GLIDE_SWAY_RATE + seed_ph) * GLIDE_SWAY
+	hl = lerpf(hl, -0.16 + g_sway, glide_k)
+	kl = lerpf(kl, -0.32 + g_sway, glide_k)
+	hr = lerpf(hr, -0.12 + g_sway, glide_k)
+	kr = lerpf(kr, -0.28 + g_sway, glide_k)
+	wl = lerpf(wl, 0.0, glide_k)
+	wr = lerpf(wr, 0.0, glide_k)
 	# swimming: a flutter kick
 	var kick := HunterSwim.legs(swim_ph, spd, KMovesStone.gait(arch))
 	hl = lerpf(hl, kick.x, swim_k)

@@ -1,0 +1,30 @@
+{
+	"doc": "The glide and glider-dive poses every Hunter on Meshy's skeleton shares (scripts/heroes/warden_glide_pose.gd, docs/art/wardens/MESHY_NATIVE.md). Each pose names Meshy's bones (the Left ones; the Right ones mirror) and the way each points to its child, in the body's frame: x the body's left, y up (hips to head), z forward (toes), each Hunter's frame read off its own rest skeleton, so one pose fits every body (a bone's child: the mean of its children's heads). tilt: deg that bone pitches about the body's left-right axis (+: its top forward). sway: [deg, phase rad] that bone's direction swings about the body's left-right axis once per loop (legs together, never in turn: no stride). A Hunter's data clips glide / dive override the pose (WardenNative).",
+	"poses": {
+		"glide": {
+			"length": 2.4,
+			"bones": {
+				"LeftArm": [0.62, 0.72, 0.1],
+				"LeftForeArm": [0.12, 1.0, 0.12],
+				"LeftHand": [0.05, 1.0, 0.25],
+				"LeftUpLeg": [0.04, -0.95, -0.22],
+				"LeftLeg": [0.02, -0.9, -0.4],
+				"LeftFoot": [0.0, -0.9, 0.42]
+			},
+			"sway": {"LeftUpLeg": [5.0, 0.0], "LeftLeg": [6.0, 0.5], "LeftForeArm": [2.0, 1.2]}
+		},
+		"dive": {
+			"length": 0.8,
+			"tilt": {"Head": -35.0},
+			"bones": {
+				"LeftArm": [0.38, -0.9, -0.22],
+				"LeftForeArm": [0.22, -0.95, -0.25],
+				"LeftHand": [0.15, -0.95, -0.25],
+				"LeftUpLeg": [0.03, -1.0, -0.06],
+				"LeftLeg": [0.0, -1.0, -0.08],
+				"LeftFoot": [0.0, -0.95, 0.3]
+			},
+			"sway": {"LeftForeArm": [3.0, 0.0], "LeftLeg": [2.5, 1.6]}
+		}
+	}
+}

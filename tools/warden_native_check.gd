@@ -5,7 +5,7 @@ extends RefCounted
 ## stands as tall as the contract model, faces the way the Hunter faces, keeps the hit ring, hides the rig's procedural
 ## weapon, puts the aim node on Meshy's hand, hangs the anchor empties on Meshy's bones and wears the drop poses (the
 ## landing squash: --land-weight-check). Every other Warden keeps the contract path. The clip slots (data "clips": lmb,
-## lmb_hold, rmb, e, r, dash, glide, land, hit, downed, stomp): each is picked by its state or move, a missing one
+## lmb_hold, rmb, e, r, dash, glide, dive, land, hit, downed, stomp): each is picked by its state or move, a missing one
 ## plays today's clip, a clips file's clips load onto Meshy's bones, and no switch shows the T-pose.
 
 const HEIGHT_TOL := 0.03  # share: the head stands this close to the contract model's head height
@@ -32,6 +32,7 @@ const SLOT_CASES := {
 	"r": [{"cast": 5.0, "cast_slot": "ult"}, {"cast": 0.0, "cast_slot": "ult", "kmove": "x"}, "attack"],
 	"dash": [{}, {"rolling": true}, "idle"],
 	"glide": [{"grounded": false}, {"grounded": false, "gliding": true}, "jump"],
+	"dive": [{"grounded": false}, {"grounded": false, "diving": true}, "jump"],
 	"land": [{}, {"feel": Vector2(0.8, 0.0)}, "idle"],
 	"hit": [{"hit_t": 99.0}, {"hit_t": 0.0, "hit_k": Oomph.HEAVY_FLINCH}, "idle"],  # (a stagger; a chip hit only leans)
 	"downed": [{}, {"fall": 0.5}, "idle"],
@@ -445,15 +446,17 @@ func _back(a: String, tw: WardenNativeTwist) -> void:
 	ok(tw.dir > 0.99, "%s: standing, the clip plays forwards again" % a)
 
 
-## The clip blends: the glide opens at once and lets go over 0.2 s, the dash comes in over 0.25 s, the rest 0.15 s.
+## The clip blends: the glide opens at once and lets go over 0.2 s, the dash comes in over 0.25 s, the dive over 0.3 s, the rest 0.15 s.
 func _blends(a: String) -> void:
 	var got := [
 		WardenNative.blend_s("run", "glide"),
 		WardenNative.blend_s("glide", "run"),
 		WardenNative.blend_s("run", "dash"),
-		WardenNative.blend_s("run", "jump")
+		WardenNative.blend_s("run", "jump"),
+		WardenNative.blend_s("jump", "dive"),
+		WardenNative.blend_s("dive", "run")
 	]
-	ok(got == [0.0, 0.2, 0.25, 0.15], "%s: blends glide in/out, dash in, other: %s" % [a, got])
+	ok(got == [0.0, 0.2, 0.25, 0.15, 0.3, 0.3], "%s: blends glide in/out, dash in, dive in/out 0.3, other: %s" % [a, got])
 
 
 ## A clips file (made here: a skeleton under another node name, one clip named SYNTH) lends its clip to a slot.
@@ -474,6 +477,7 @@ func _synthetic_clips(main: Node, a: String, m: Node3D, nat: WardenNative) -> vo
 	sp.add_animation_library(&"", lib)
 	src.add_child(sp)
 	nat.plays["dash"] = SYNTH
+	nat.player.stop()  # (a clip added to a playing player's library can crash its next advance in Godot 4.6.2)
 	nat.borrow(src)
 	var got := nat.player.get_animation(SYNTH) if nat.player.has_animation(SYNTH) else null
 	var home := nat.player.get_node(nat.player.root_node)
