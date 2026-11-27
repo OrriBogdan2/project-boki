@@ -44,6 +44,7 @@ static func drive(m: Match) -> void:
 		print("TUT step ", tu.step, " ", tu.id(), " t=", snapped(m.time, 0.1), " mobs=", live, " lv=", m.player.lvl,
 			" pts=", m.player.skill_pts, " kin=", m.player.kin != null, " seen=", tu.seen.keys())
 		last_step = tu.step
+		_runup = false
 	var p := m.player
 	_rest_t = _rest_t + Match.DT if p.inp["move"] == Vector2.ZERO else 0.0      # (last frame's stick)
 	for k in KEYS:
