@@ -38,7 +38,7 @@ func run(main: Node) -> void:
 	var rifle := _wpn("rifle")
 	var sniper := _wpn("sniper")
 	_curve(m, foe, sniper, "sniper", 10.0, {0.2: 0.5, 5.25: 0.75, 15.0: 0.7, 16.0: 0.58})
-	_curve(m, foe, _wpn("lantern_crook"), "crook", 2.0, {0.3: 1.0, 4.75: 1.0, 6.75: 1.0 - 0.5 * 2.0 / 4.75, 8.4: 0.616})
+	_curve(m, foe, _wpn("lantern_crook"), "crook", 2.0, {0.3: 1.0, 4.75: 1.0, 7.43: 1.0 - 0.5 * 2.68 / 4.75, 9.29: 0.522})
 	_curve(m, foe, rifle, "rifle", 2.0, {9.5: 1.0})
 	print("FALLOFF DONE, failures: %d" % bad)
 	main.get_tree().quit()
