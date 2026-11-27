@@ -77,6 +77,16 @@ walk, run, air, attack, crouch, the extract beat) in order, at the same pace per
 one-frame snap of the hand. A freshly dressed model reads its first filled state as the baseline (no phantom attack
 from old counters) and poses its idle at once (no rest T-pose frame).
 
+## Footsteps
+Steps sound on the plants of the Meshy feet you see, not on the hidden rig's stride (`HunterAnim` phase, which ran at
+another cadence than Meshy's walk: ~1.0 vs ~1.5 steps/s at walk speed, up to ~20 frames off a visible plant).
+`scripts/heroes/warden_native_steps.gd` (`WardenNativeSteps`) reads data `plants` {walk, run, crouch: {L, R: seconds
+into Meshy's clip}} and bumps the model's `WardenSteps.STEPS` as the contract path's `WardenSteps` does; `HunterAnim`
+hands it on as `stepped`. No `plants` entry (Motley hovers): the old stride. `--step-sync-check` has native rows per
+Hunter: the plants read off Meshy's `LeftFoot`/`RightFoot` in each clip, the data within one frame of them, every step
+heard at two walk, two run and a sneak speed within one frame after a plant of that foot, the feet alternating through
+a walk-run ramp, no step standing. Swap a clip and the check names the new plants to paste into the data.
+
 ## Weapons and orbit props
 Meshy's mesh carries the weapons (Sable's two pistols, Tenzo's one stone arm), so the rig's Gun and HunterAnim's
 Offhand (the twin hold's left piece, the fist hold's second gauntlet) stay hidden: shown, they floated beside the body
@@ -102,8 +112,8 @@ plays today's clip, so nothing changes until a Hunter's clips land (`WardenNativ
 | `rmb`, `e`, `r` | the kit move or cast of that slot (state `cast_slot` secondary, utility, ult; a kit move starting within `SLOT_CAST` of a cast takes its slot) | `attack` |
 | `hit` | one-shot when a stagger lands (state `hit_t` jumps back with `hit_k` at Oomph.HEAVY_FLINCH; a chip hit only leans) | the loop clip plays on |
 | `land` | one-shot on a hard landing (`WardenClips.FEEL` landing >= `LAND_MIN`) | the loop clip |
-| `dash` | while the state `rolling` (a dash or kit rush) lasts | the air or ground clip |
-| `glide` | while `gliding` (loops) | `jump` |
+| `dash` | while the state `rolling` (a dash or kit rush) lasts (blends in over 0.25 s) | the air or ground clip |
+| `glide` | while `gliding` (loops; opens at once, lets go over 0.2 s) | `jump` |
 | `downed` | while the knocked-down beat runs (`fall` >= 0; holds its last frame) | the loop clip |
 | `stomp` | while the stomp cycle runs (`stomp` >= 0; loops) | the loop clip |
 Swing, cast, `hit` and `land` are one-shots: they own the body for their length (a new one restarts a clip once 60% is
@@ -153,6 +163,12 @@ Meshy's files (`tools/meshy/sable_hybrid/README.md`: pistol/hand lock, coat/arm 
 contact-band smoothing, coat chains hung by gravity with floor and thigh collision). Torn frames (glbstretch, 15 fps):
 raw Meshy rig 100% Attack, 93% Jump, 100% Crouch, 89% run, 67% walk; this file 0% in all six clips.
 Game states with no Meshy clip (fall, land, glide, climb, mantle, hit, emote, aim twist) play the nearest of the six.
+Strafing and back-pedalling: Meshy has one forward run, so `WardenNativeTwist` turns the hips to the way he goes (the torso bone takes
+the turn back in world space, through the bent spine between, so the body stays on the aim without tipping) up to `WardenClips.TWIST_MAX` (~96 deg). More than 120 deg off the aim (it reverses at 130
+and goes forwards again inside 110: no flicker at the edge) the run clip plays in reverse instead, the rate keeping its stride matched to the
+ground speed, and the legs turn only by what is left to dead behind the aim (none at 180 deg, from either side). The clip's direction
+(`WardenNativeTwist.dir`) eases between +1 and -1, so the crossing is a blend. `--native-upper-shots --mode=back` prints STRIDE (the planted foot's
+sweep against his travel, 1 = along it, -1 = backwards to it).
 
 ## Native hunter pack (Sparkle, Tenzo, Cinder, Kael, Motley, Meeko)
 Their rigged Meshy files carry 300k-tri meshes. `tools/meshy/native_hunters/pack.sh <art> <rigged.glb> <decimated.glb> [clip glbs]`
