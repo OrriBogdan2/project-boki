@@ -4,26 +4,33 @@ extends RefCounted
 ## (the full bot lobby, the Hollow for tier2, the --hunter pick), the demo save is never written and
 ## the player's own save file is left byte for byte as it was. Errors show as SCRIPT ERROR lines.
 
-const RUN_SECS := 3.0       # how long each preset plays once it is up
-const BOOT_SECS := 40.0     # the most a screen may take to come up (a match builds a world)
+const RUN_SECS := 3.0  # how long each preset plays once it is up
+const BOOT_SECS := 40.0  # the most a screen may take to come up (a match builds a world)
 
 var bad := 0
 var main: Node
 
+
 func ok(cond: bool, what: String) -> void:
 	print("DEMOCHECK %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func _wait(secs: float) -> void:
 	await main.get_tree().create_timer(secs).timeout
 
+
 ## True once the preset's screen is up (a home built, or a match with its hunters).
 func _up(preset: String) -> bool:
 	var c: Node = main.current
-	if not is_instance_valid(c): return false
-	if preset in ["farm", "care"]: return c.get("building") == false and not (c.get("kins") as Array).is_empty()
+	if not is_instance_valid(c):
+		return false
+	if preset in ["farm", "care"]:
+		return c.get("building") == false and not (c.get("kins") as Array).is_empty()
 	# (built: Match turns its process on at build.finish; hunters spawn over frames, so the first one is not "up")
 	return c is Match and c.player != null and not c.hunters.is_empty() and c.is_processing()
+
 
 func _boot(preset: String, args: PackedStringArray) -> bool:
 	Demo.setup(preset)
@@ -38,6 +45,7 @@ func _boot(preset: String, args: PackedStringArray) -> bool:
 		await _wait(0.25)
 		t += 0.25
 	return _up(preset)
+
 
 func run(m: Node) -> void:
 	main = m

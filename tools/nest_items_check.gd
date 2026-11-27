@@ -10,10 +10,12 @@ const EGGS := 500
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("NESTITEMS %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func _parents(rng: RandomNumberGenerator, i: int) -> Array:
 	var kin: Array = Data.common_kin()
@@ -28,6 +30,7 @@ func _parents(rng: RandomNumberGenerator, i: int) -> Array:
 		out.append(r)
 	return out
 
+
 ## Lay an egg with the items placed, hatch it on seed i: [egg, baby].
 func _egg(a: Dictionary, b: Dictionary, i: int) -> Array:
 	var egg := {}
@@ -38,14 +41,17 @@ func _egg(a: Dictionary, b: Dictionary, i: int) -> Array:
 	NestItems.hatched(baby, egg, a, b)
 	return [egg, baby]
 
+
 func _has_habit(baby: Dictionary, parent: Dictionary, top: String) -> bool:
 	return baby["dna"]["quirk"] == parent["dna"]["quirk"] and float(baby["traits"][top]) == float(parent["traits"][top])
+
 
 func _stock(thread: int, locket: int, shell: int) -> void:
 	Save.d["items"]["heirloom_thread"] = thread
 	Save.d["items"]["likeness_locket"] = locket
 	Save.d["items"]["lullaby_shell"] = shell
 	Save.d[NestItems.SET_KEY] = {}
+
 
 func run(m: Node) -> void:
 	Save.no_write = true
@@ -60,6 +66,7 @@ func run(m: Node) -> void:
 	print("NESTITEMS done, %d failed" % bad)
 	m.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _rules() -> void:
 	var ids := ["heirloom_thread", "likeness_locket", "lullaby_shell", "hatchling_down"]
 	var fine := true
@@ -68,6 +75,7 @@ func _rules() -> void:
 	ok(fine, "the four nest items are in content/rules/garden_items.json with sources")
 	var shell_try := GardenItems.preview(Save.new_kin("cindle", "T"), "lullaby_shell")
 	ok(not GardenItems.fed("heirloom_thread") and not shell_try["ok"], "Thread, Locket and Shell are placed, not fed")
+
 
 func _threads() -> void:
 	var rng := RandomNumberGenerator.new()
@@ -95,6 +103,7 @@ func _threads() -> void:
 		ok(exact == EGGS, "%d Thread(s): %d of %d eggs take exactly %d of 5 gifts, previewed" % [n, exact, EGGS, 3 + n])
 		ok(copied == EGGS and spent == n * EGGS, "%d Thread(s): gifts equal the parent's, %d used up per egg" % [n, n])
 
+
 func _locket() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 12
@@ -108,15 +117,18 @@ func _locket() -> void:
 		NestItems.wear("species", String(wearer["uid"]))
 		var line: Array = NestItems.preview_lines(p[0], p[1])
 		var baby: Dictionary = _egg(p[0], p[1], i)[1]
-		var kind := Data.egg_species(String(wearer["species"]))      # (the wearer's line's first form: an egg's kind)
+		var kind := Data.egg_species(String(wearer["species"]))  # (the wearer's line's first form: an egg's kind)
 		var named: bool = line.size() == 1 and line[0].contains(Data.KIN[kind]["name"])
 		worn += int(baby["species"] == kind and named)
 		used += 1 - int(Save.d["items"]["likeness_locket"])
 		_stock(0, 0, 0)
 		from_a += 1 if _egg(p[0], p[1], i)[1]["species"] == p[0]["species"] else 0
 	ok(worn == EGGS and used == EGGS, "Locket: %d of %d babies are the wearer's species, one used each" % [worn, EGGS])
-	ok(from_a > int(EGGS / 4.0) and from_a < int(EGGS * 3 / 4.0),
-			"without a Locket it is about 50/50 (%d of %d)" % [from_a, EGGS])
+	ok(
+		from_a > int(EGGS / 4.0) and from_a < int(EGGS * 3 / 4.0),
+		"without a Locket it is about 50/50 (%d of %d)" % [from_a, EGGS]
+	)
+
 
 func _shell() -> void:
 	var rng := RandomNumberGenerator.new()
@@ -140,6 +152,7 @@ func _shell() -> void:
 		plain += int(_has_habit(_egg(p[0], p[1], i)[1], wearer, top))
 	ok(exact == EGGS and used == EGGS, "Shell: %d of %d babies have the wearer's habit and top trait" % [exact, EGGS])
 	ok(plain < int(EGGS / 10.0), "without a Shell that exact match is rare (%d of %d)" % [plain, EGGS])
+
 
 func _down() -> void:
 	Save.d = Save.fresh()
@@ -167,6 +180,7 @@ func _down() -> void:
 	full["trust"] = 100.0
 	ok(not Care.feed(full, "hatchling_down")["ok"] and float(full["trust"]) == 100.0, "at full trust it is not used")
 
+
 func _rows() -> void:
 	var p := _parents(RandomNumberGenerator.new(), 3)
 	var box := VBoxContainer.new()
@@ -179,6 +193,7 @@ func _rows() -> void:
 	box.free()
 	_feed_menu_lines(p[0])
 
+
 ## The feed menu lists every nest item in the bag with the line "Goes in the Nook" (and no Feed button).
 func _feed_menu_lines(rec: Dictionary) -> void:
 	var nest: Array = GardenItems.ids().filter(func(id): return not GardenItems.fed(id))
@@ -188,13 +203,18 @@ func _feed_menu_lines(rec: Dictionary) -> void:
 	var menu := VBoxContainer.new()
 	GardenItemRows.add_bag(menu, rec, [], func(_id): pass, func(_res): pass)
 	var lines: Array = menu.find_children("*", "Label", true, false).map(func(l): return (l as Label).text)
-	var shown := nest.filter(func(id): return lines.has("Goes in the Nook") and lines.any(
-			func(t): return t.begins_with(GardenItems.item_name(id))))
+	var shown := nest.filter(
+		func(id):
+			return lines.has("Goes in the Nook") and lines.any(func(t): return t.begins_with(GardenItems.item_name(id)))
+	)
 	var feedable := menu.find_children("*", "Button", true, false).size()
 	var all_lined: bool = shown.size() == nest.size() and lines.count("Goes in the Nook") == nest.size()
-	ok(nest.size() == 3 and all_lined and feedable == 0,
-			"feed menu: each of the %d nest items has a 'Goes in the Nook' line, no Feed" % nest.size())
+	ok(
+		nest.size() == 3 and all_lined and feedable == 0,
+		"feed menu: each of the %d nest items has a 'Goes in the Nook' line, no Feed" % nest.size()
+	)
 	menu.free()
+
 
 func _old_save() -> void:
 	Save.d = Save.fresh()
