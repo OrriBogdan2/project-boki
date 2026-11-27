@@ -56,7 +56,12 @@ var _layer: Node2D  # the items' parent, right under Hud.c
 ## How high over this hunter's feet their plate sits: the archetype's optional `plate_offset` (in its
 ## content/archetypes JSON, so taller and shorter heroes clear their own heads), else PLATE_OFFSET.
 static func plate_offset(h: Hunter) -> float:
-	return float(Arch.def(h.arch).get("plate_offset", PLATE_OFFSET))
+	return arch_offset(h.arch)
+
+
+## The same for an archetype id (--warden-native-check measures the head under it before any Hunter is built).
+static func arch_offset(arch: String) -> float:
+	return float(Arch.def(arch).get("plate_offset", PLATE_OFFSET))
 
 
 ## `base` m over the feet (before the match's Hunter size, as Hud._head takes it), raised so the plate hangs clear over
