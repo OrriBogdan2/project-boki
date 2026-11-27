@@ -1,10 +1,10 @@
 extends RefCounted
-## --empty-3d-shots --shots-dir=<dir> [--part=locker|motion|tabs|home]: GPU stills of the Empty's 3D models (EmptyGlb) at
-## 1920x1080. locker: the look locker's model of each sex from the front, three-quarters and back, and the hood
-## down (procedural) with a colour dye; tabs: the locker's four tabs with their tile grids; motion: each sex
-## idle, running and jumping on the shared rig (Warden/Sync fed the match's state) from the three-quarter and the
-## side, whole and close on the shoulders, hips and knees; home: each sex standing in the hub, as the player
-## sees it. Never writes the save.
+## --empty-3d-shots --shots-dir=<dir> [--part=locker|motion|tabs|home]: GPU stills of the Empty's 3D models at
+## 1920x1080 (EmptyGlb). locker: the look locker's model of each sex from the front, three-quarters and back,
+## and the hood down (procedural) with a colour dye; tabs: the locker's four tabs with their tile grids; motion:
+## each sex idle, running and jumping on the shared rig (Warden/Sync fed the match's state) from the
+## three-quarter and the side, whole and close on the shoulders, hips and knees; home: each sex standing in the
+## hub, as the player sees it. Never writes the save.
 
 const SIZE := Vector2i(1920, 1080)
 const SEXES := ["f", "m"]  # Unmasked "gender" 0 and 1
