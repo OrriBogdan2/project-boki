@@ -146,6 +146,7 @@ func _median(xs: Array) -> float:
 	return float(s[int(s.size() / 2.0)])
 
 
+
 func _band() -> void:
 	for key in res:
 		var ts: Array = res[key].values().map(func(r): return r[0])
