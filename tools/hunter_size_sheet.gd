@@ -9,7 +9,8 @@ extends "res://tools/hunter_scale_shots.gd"
 ## "panel" stands the hero close in a fixed camera, so every hero shares one px/m. Needs a renderer (jobq --needs gpu).
 ## --silhouette adds, at the base size (match_k 1), the hero's silhouette as the player sees it: drawn alone in one flat
 ## colour on its own render layer, at SIL_YAWS facings, with the character lean on and off, the held weapon in and
-## out. One HSIL row per hero and case: area in m2 and screen height in m (the view plane at the hero, so both read
+## out, and "crown" (weapon in, nothing above the head's crown: back poles). One HSIL row per hero and case: area in
+## m2 and screen height in m (the view plane at the hero, so both read
 ## against the reference's idle silhouettes at its 66 deg camera), the mean over the facings and the facing-camera one.
 ## The facing-camera mask is saved as <dir>/<hero>_sil_<lean|flat>_<case>.png. Floating companions are not the hero.
 
@@ -134,7 +135,8 @@ func _silhouette(hero: String, lean: String) -> void:
 	var to_cam := m.cam.global_position - p.position
 	to_cam.y = 0.0
 	to_cam = to_cam.normalized()
-	var sums := {"all": [0.0, 0.0, 0.0, 0.0], "body": [0.0, 0.0, 0.0, 0.0]}  # area, height; facing 0's area, height
+	# area, height; facing 0's area, height. "crown": weapon in, nothing above the head's crown (back poles, banners)
+	var sums := {"all": [0.0, 0.0, 0.0, 0.0], "body": [0.0, 0.0, 0.0, 0.0], "crown": [0.0, 0.0, 0.0, 0.0]}
 	for i in SIL_YAWS:
 		var face := to_cam.rotated(Vector3.UP, TAU * i / SIL_YAWS)
 		for _s in SIL_TURN:
@@ -143,8 +145,14 @@ func _silhouette(hero: String, lean: String) -> void:
 		var mid := p.position + Vector3(0, 1.0, 0)
 		var right := m.cam.global_transform.basis.x
 		var ppm := (m.cam.unproject_position(mid + right) - m.cam.unproject_position(mid)).length()
-		for case in ["all", "body"]:
-			var got: Array = await _mask(p.model, flat, case == "body")
+		var pts := _body_points(p.model)
+		var hi := -1e9
+		for wp in pts:
+			hi = maxf(hi, wp.y)
+		var c := HunterCrown.crown(p.model, pts, p.vis_k, hi)
+		var cap := m.cam.unproject_position(p.position + m.cam.char_lean() * Vector3(0, c - p.position.y, 0)).y
+		for case in ["all", "body", "crown"]:
+			var got: Array = await _mask(p.model, flat, case == "body", cap if case == "crown" else -1e9)
 			var area: float = got[0] / (ppm * ppm)
 			var tall: float = got[1] / ppm
 			sums[case][0] += area / SIL_YAWS
@@ -164,8 +172,9 @@ func _silhouette(hero: String, lean: String) -> void:
 
 
 ## [hero px, mask rows tall (both in viewport px, as unproject_position), mask image] for `model` drawn flat alone
-## (`no_weapon`: the held weapon hidden). Only the screen box round the body's points (plus SIL_PAD) is read.
-func _mask(model: Node3D, flat: Material, no_weapon: bool) -> Array:
+## (`no_weapon`: the held weapon hidden; nothing above viewport row `cap_y` counts). Only the screen box round the
+## body's points (plus SIL_PAD) is read.
+func _mask(model: Node3D, flat: Material, no_weapon: bool, cap_y := -1e9) -> Array:
 	var keep := []
 	var stack: Array = [model]
 	while not stack.is_empty():
@@ -202,7 +211,7 @@ func _mask(model: Node3D, flat: Material, no_weapon: bool) -> Array:
 	var sc := float(lit.get_width()) / main.get_viewport().get_visible_rect().size.x  # image px per viewport px
 	box = Rect2(box.position * sc, box.size * sc)
 	var x0 := clampi(int(box.position.x), 0, lit.get_width() - 1)
-	var y0 := clampi(int(box.position.y), 0, lit.get_height() - 1)
+	var y0 := clampi(int(maxf(box.position.y, cap_y * sc)), 0, lit.get_height() - 1)
 	var x1 := clampi(int(box.end.x), x0 + 1, lit.get_width())
 	var y1 := clampi(int(box.end.y), y0 + 1, lit.get_height())
 	var mask := Image.create(lit.get_width(), lit.get_height(), false, Image.FORMAT_L8)
