@@ -113,12 +113,16 @@ func _reel() -> void:
 		"stun min %.2f, dashes %.0f/%.0f, shots %d" % [stun_min, t_v.dashes, dash0, t_v.shot_n - shots0]
 	)
 	ok(
-		"reel parity: he arrives stunned, not Grounded, held through the Anchor wind-up (arrive_stun)",
-		t_v.stun_t > 0.0 and not KitStatus.grounded(t_v),
-		"stun %.2f" % t_v.stun_t
+		"reel parity: he lands Grounded, held through the Anchor wind-up (arrive_ground), the stun ends with the reel",
+		KitStatus.grounded(t_v) and t_v.stun_t <= float(k.rmb_def()["stop_gap"]) + 0.3,
+		"stun %.2f gnd %.2f" % [t_v.stun_t, KitStatus.grounded_left(t_v)]
 	)
-	ak.step(m, float(k.rmb_def()["arrive_stun"]) + 0.05)
-	ok("reel parity: ... and acts again after it", t_v.stun_t <= 0.0, "stun %.2f" % t_v.stun_t)
+	ak.step(m, float(k.rmb_def()["arrive_ground"]) + 0.05)
+	ok(
+		"reel parity: ... and is free again after it",
+		t_v.stun_t <= 0.0 and not KitStatus.grounded(t_v),
+		"stun %.2f gnd %.2f" % [t_v.stun_t, KitStatus.grounded_left(t_v)]
+	)
 	ok("reel parity: Grimble can't jump or start the X while he reels", not jumped and not acted)
 	await ak.done(m)
 
