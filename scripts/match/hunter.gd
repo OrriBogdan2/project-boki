@@ -2862,9 +2862,10 @@ func render(delta: float, alpha: float) -> void:
 		else:
 			see = int(m.time * 14.0) % 3 != 0
 	model.visible = see and not HunterWisp.hides(self)    # a critter or a Wisp stands in
-	ShieldLook.tick(self)
-	SideRings.tick(self)
-	BodyTell.tick(self, delta)
+	if every == 1 or posed or BodyTell.pending(self):      # (the looks follow state, not time: a pose-throttled hunter updates them when posed, or at once on a new cast and while a tint shows)
+		ShieldLook.tick(self)
+		SideRings.tick(self)
+		BodyTell.tick(self, delta)
 	var ring := model.get_node("TeamRing") as MeshInstance3D
 	ring.visible = not downed
 	_render_balloon(delta)
