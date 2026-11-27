@@ -1,6 +1,6 @@
 class_name BaseAxes
 extends RefCounted
-## Raising leans a Boki (docs/decisions/0178-raising-leans.md). Care moves three axes, each -1..1 in
+## Raising leans a Boki (docs/decisions/0179-raising-leans.md). Care moves three axes, each -1..1 in
 ## rec["raised"]: bold (shy..bold), busy (lazy..busy), gentle (rough..gentle). BaseLife.choose scales the odds of
 ## its nap, play, chase and cling picks by mult(). Tuning: content/rules/base_axes.json.
 

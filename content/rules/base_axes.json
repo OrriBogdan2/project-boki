@@ -1,5 +1,5 @@
 {
-	"desc": "Raising leans (docs/decisions/0178-raising-leans.md, scripts/home/base_axes.gd): care moves three personality axes, each -1..1 in rec['raised'] (bold: shy..bold, busy: lazy..busy, gentle: rough..gentle); BaseLife.choose reads them. tools/garden_sim.py reads this same file for its care-style rows.",
+	"desc": "Raising leans (docs/decisions/0179-raising-leans.md, scripts/home/base_axes.gd): care moves three personality axes, each -1..1 in rec['raised'] (bold: shy..bold, busy: lazy..busy, gentle: rough..gentle); BaseLife.choose reads them. tools/garden_sim.py reads this same file for its care-style rows.",
 	"steps": {
 		"fed": {"busy": -0.04},
 		"petted": {"gentle": 0.06, "bold": -0.02},
