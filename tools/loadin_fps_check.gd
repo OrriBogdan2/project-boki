@@ -92,7 +92,9 @@ func _ready() -> void:
 	t0_us = Time.get_ticks_usec()
 	last_us = t0_us
 	# the Play button's options (Home._start_match), made to play itself so the ride and drop run
-	var o := {"teams": ceili(Data.MATCH_PLAYERS / 3.0), "squad": 3, "total": Data.MATCH_PLAYERS, "tier": 0}
+	var o := {
+		"teams": ceili(Data.MATCH_PLAYERS / 3.0), "squad": 3, "total": Data.MATCH_PLAYERS, "tier": 0
+	}
 	o.merge({"seed": seed_v, "autoplay": true, "probe": true, "god": true})
 	Game.main.show_screen("match", o)
 
@@ -107,7 +109,9 @@ func _process(_delta: float) -> void:
 	last_cpu = cpu_now
 	var cur = Game.main.current
 	var loading: bool = Game.main._ld != null and is_instance_valid(Game.main._ld)
-	var ready_now: bool = cur is Match and (cur as Match).is_processing() and (cur as Match).hud != null
+	var ready_now: bool = (
+		cur is Match and (cur as Match).is_processing() and (cur as Match).hud != null
+	)
 	if shown_us == 0 and ready_now and not loading:
 		shown_us = now
 		loading_ms = (now - t0_us) / 1000.0
@@ -132,7 +136,11 @@ func _process(_delta: float) -> void:
 			[
 				wall,
 				0 if shown_us > 0 else 1,
-				int(RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)),
+				int(
+					RenderingServer.get_rendering_info(
+						RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME
+					)
+				),
 				int(Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME)),
 				int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT)),
 				Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0,
@@ -145,10 +153,14 @@ func _process(_delta: float) -> void:
 				ph,
 				1 if get_viewport().disable_3d else 0,
 				(
-					RenderingServer.viewport_get_measured_render_time_cpu(get_viewport().get_viewport_rid())
+					RenderingServer.viewport_get_measured_render_time_cpu(
+						get_viewport().get_viewport_rid()
+					)
 					+ RenderingServer.get_frame_setup_time_cpu()
 				),
-				RenderingServer.viewport_get_measured_render_time_gpu(get_viewport().get_viewport_rid()),
+				RenderingServer.viewport_get_measured_render_time_gpu(
+					get_viewport().get_viewport_rid()
+				),
 			]
 		)
 	)
@@ -215,7 +227,9 @@ func _pct(sorted_ms: Array, p: float) -> float:
 func _top(prof: Dictionary, n: int) -> String:
 	var ks := prof.keys()
 	ks.sort_custom(func(a, b): return prof[a] > prof[b])
-	return ", ".join(ks.slice(0, 22).map(func(k): return "%s %.2f" % [k, float(prof[k]) / 1000.0 / n]))
+	return ", ".join(
+		ks.slice(0, 22).map(func(k): return "%s %.2f" % [k, float(prof[k]) / 1000.0 / n])
+	)
 
 
 ## One line per drop phase: frames, avg / p99 / worst ms, draws, objects, main-thread cpu, peak memory.
@@ -252,9 +266,13 @@ func _phase_lines(j: Array) -> Array:
 			var nf := float(pp["#frames"])
 			var ks := pp.keys().filter(func(k): return k != "#frames")
 			ks.sort_custom(func(a, b): return pp[a] > pp[b])
-			var tops: Array = ks.slice(0, 10).map(func(k): return "%s %.1f" % [k, pp[k] / 1000.0 / nf])
+			var tops: Array = ks.slice(0, 10).map(
+				func(k): return "%s %.1f" % [k, pp[k] / 1000.0 / nf]
+			)
 			pf += "\nLOADIN   top ms a frame: " + ", ".join(tops)
-		var vals := [ph, fs.size(), sum / n, _pct(ms, 0.99), _pct(ms, 1.0), draws / n, objs / n, cpu / n, mem]
+		var vals := [
+			ph, fs.size(), sum / n, _pct(ms, 0.99), _pct(ms, 1.0), draws / n, objs / n, cpu / n, mem
+		]
 		vals.append_array([off, rcpu / n, rgpu / n])
 		lines.append(pf % vals)
 	return lines
@@ -300,10 +318,30 @@ func _finish() -> void:
 	var ff := "LOADIN first %.0f s after the screen: %d frames, avg %.1f fps, min %.1f fps (worst %.0f ms), "
 	ff += "p99 %.1f ms, p50 %.1f ms, %d frames under %.0f fps"
 	var min_fps := 1000.0 / maxf(worst_ms, 0.001)
-	lines.append(ff % [look_s, w.size(), avg_fps, min_fps, worst_ms, _pct(w, 0.99), _pct(w, 0.5), slow, MIN_FPS])
+	lines.append(
+		(
+			ff
+			% [
+				look_s,
+				w.size(),
+				avg_fps,
+				min_fps,
+				worst_ms,
+				_pct(w, 0.99),
+				_pct(w, 0.5),
+				slow,
+				MIN_FPS
+			]
+		)
+	)
 	var ranked := j.duplicate()
 	ranked.sort_custom(func(a, b): return float(a[0]) > float(b[0]))
-	lines.append("LOADIN worst frames after the screen (ms; draws, objects, nodes, phys, proc, mem, vram, steps):")
+	(
+		lines
+		. append(
+			"LOADIN worst frames after the screen (ms; draws, objects, nodes, phys, proc, mem, vram, steps):"
+		)
+	)
 	for f in ranked.slice(0, 10):
 		var wf := "LOADIN   %6.0f ms  %d draws %d obj %d nodes  phys %.1f proc %.1f  mem %.0f vram %.0f"
 		wf += "  %d steps  cpu %.1f  %s"
@@ -328,11 +366,18 @@ func _finish() -> void:
 	var sf2 := "LOADIN sim steps %d in %d frames (%.1f a frame; 1.0 is real time)"
 	lines.append(sf2 % [steps_total, w.size(), per_frame])
 	lines.append("LOADIN where the sim goes (ms a frame): " + _top(Match.prof, maxi(w.size(), 1)))
-	lines.append("LOADIN where a frame's visuals go (ms a frame): " + _top(Match.vprof, maxi(w.size(), 1)))
+	lines.append(
+		"LOADIN where a frame's visuals go (ms a frame): " + _top(Match.vprof, maxi(w.size(), 1))
+	)
 	var burst := 0
 	for i in range(1, j.size()):
 		burst = maxi(burst, int(j[i][4]) - int(j[i - 1][4]))
-	lines.append("LOADIN most nodes added in one frame after the screen: %d (limit %d)" % [burst, BURST_NODES])
+	lines.append(
+		(
+			"LOADIN most nodes added in one frame after the screen: %d (limit %d)"
+			% [burst, BURST_NODES]
+		)
+	)
 	# the deck lift reads boot soles (a CPU skin of every boot vertex): only your squad's riders, and not every frame
 	var sole_reads := BootSole.reads - sole_reads0
 	var sole_limit := (ceili(float(w.size()) / SkyDeck.SOLE_EVERY) + 2) * 3

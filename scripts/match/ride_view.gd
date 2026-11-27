@@ -12,7 +12,6 @@ const OFF_EVERY := 4
 const OFF_MAX_DT := 0.25
 
 
-
 ## True while the player waits on the skyship for the plan or the launch.
 static func aboard(m: Match) -> bool:
 	var p := m.player
@@ -44,7 +43,9 @@ static func tick(m: Match, map: FullMap) -> void:
 	var waiting := aboard(m)
 	if map.is_open and map.auto and not waiting:
 		map.close()
-	var off: bool = m.warmed and map.is_open and waiting and not (m.intro != null and m.intro.running())
+	var off: bool = (
+		m.warmed and map.is_open and waiting and not (m.intro != null and m.intro.running())
+	)
 	var vp := m.get_viewport()
 	if vp.disable_3d != off:
 		vp.disable_3d = off
