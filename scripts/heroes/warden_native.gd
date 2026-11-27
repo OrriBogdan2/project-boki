@@ -347,8 +347,8 @@ func _loco(s: Dictionary) -> void:
 	var ground := Vector2(vel.x, vel.z).length()
 	var held := _held(s)
 	if held == "downed":  # (the knocked-down beat, HunterFall: as far into the collapse as the beat is, out or not)
-		_play(held, 0.0)
-		player.seek(float(s["fall"]) * _clip_len(held), true)
+		_play(held, 1.0)  # (at rate 1, then put back by this frame's step: a rate of 0 would freeze the fade in)
+		player.seek(maxf(0.0, float(s["fall"]) * _clip_len(held) - get_process_delta_time()), true)
 	elif bool(s.get("dead", false)):
 		_play("idle", 0.0)
 	elif held != "":

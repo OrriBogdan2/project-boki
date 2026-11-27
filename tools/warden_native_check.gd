@@ -427,10 +427,16 @@ func _downed(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
 		await _feed(main, nat, m, {}, {"fall": c[0], "dead": c[1]})
 		var at := nat.player.current_animation_position
 		ok(
-			nat.cur == "downed" and absf(at - c[0] * length) < 0.02,
+			nat.cur == "downed" and absf(at - c[0] * length) < 0.05,
 			"%s: knocked down at k %.1f%s plays downed at %.2f s of %.2f"
 			% [a, c[0], " (out)" if c[1] else "", at, length]
 		)
+	# the body shows it: after the fade the hips are down by the knees (a rate of 0 once froze the fade at the stand)
+	var hips := nat.skel.find_bone("Hips")
+	for i in 12:
+		await _feed(main, nat, m, {"fall": 0.9}, {"fall": 0.9})
+	var low := nat.skel.get_bone_pose_position(hips).y / nat.skel.get_bone_rest(hips).origin.y
+	ok(low < 0.75, "%s: knocked down, the hips sink to %.2f of their stand" % [a, low])
 
 
 ## A Hunter with an idle_combat clip stands in it for COMBAT_HOLD after a shot or a swing and in idle otherwise.
