@@ -13,7 +13,7 @@ const OUT := "res://art/portraits/"
 const PORTRAIT_PX := 512      # px: the biggest place a portrait shows is the HUD's 112x132 slot (at 2x)
 const SPLASH_W := 960         # px: the kit card's banner is 862 px wide
 const QUALITY := 0.88         # JPEG quality: no visible banding on the painted gradients
-## The art pass names each Warden; the game knows them by archetype id (docs/art/concepts/README.md).
+## The art pass names each Warden; the game knows them by archetype id.
 const ART_NAMES := {
 	"bulwark": "breaker", "archer": "lisette", "juggernaut": "kael", "thief": "sable", "mage": "ryzz",
 	"dolm": "tarek", "ostra": "motley", "ashwick": "cinder", "gunslinger": "vex", "tender": "pip",
