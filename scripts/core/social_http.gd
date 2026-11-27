@@ -65,6 +65,10 @@ func _hello(cb: Callable) -> void:
 		"/social/hello",
 		{},
 		func(d: Dictionary) -> void:
+			if d.get("error") == "not_member":  # the store forgot this token: the next hello makes a new player
+				_token = ""
+				cfg.erase_section_key(base, "token")
+				cfg.save(TOKEN_FILE)
 			var fresh := Social.txt_of(d.get("token"), "", 128)
 			if fresh != "":
 				_token = fresh

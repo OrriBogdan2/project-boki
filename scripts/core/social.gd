@@ -33,7 +33,7 @@ const CLAN_CAP := 24                # members a clan shows (the store query's li
 const OUT_CAP := 48                 # removals one founder or officer keeps on record (oldest drop first)
 const SHOWCASE_CAP := 12            # Boki on a clan base's showcase wall, one per member
 const STRANDED_DAYS := 3.0          # a listing that vanished without a sale is handed back after this
-const HELLO_RETRY_S := [2.0, 4.0, 8.0, 16.0, 30.0]  # seconds before asking a silent store again (a slow start can drop the first)
+const HELLO_RETRY_S := [2.0, 4.0, 8.0, 16.0, 30.0]  # s before asking a silent store again (a slow start drops one)
 
 func _ready() -> void:
 	open(SocialHttp.pick_url())
