@@ -15,28 +15,59 @@ const HUNTER_CLASS := "medium"
 ## (m right, m ahead) of the Hunter's landing where the staged Boki stand
 ## (far enough apart that the Hunter walks, not stands, for most of a take)
 const STAGE_AT := [Vector2(-2.0, 3.6), Vector2(2.4, 5.6), Vector2(-0.8, 7.6)]
-const STOP_M := 2.2  # m the Hunter stops short of a Boki (big Boki like Frigatee overlapped at 1.5)
+const STOP_M := 2.9  # m the Hunter stops short of a Boki (it slides ~0.5 m after the keys lift: never under MIN_GAP_M)
+const MIN_GAP_M := 2.2  # m: no Boki is ever nearer the Hunter than this, all clip long (the steering keeps STOP_M)
+const AVOID_M := 3.4  # m: a Boki the Hunter is not walking to bends its path away from this close
+const TREE_GAP_M := 2.8  # m: the staged Boki and the Hunter's legs keep this far off every tree trunk
+## m the whole staged group slides sideways, in the order tried, until its walk clears every tree
+const SHIFTS := [0.0, 2.5, -2.5, 4.5, -4.5, 6.5, -6.5, 8.5, -8.5]
+## the hub's market stall and games board (east of the Waystone) and its Burrow mound (west) are primitive-built: out of the
+## film (rects: x z width depth)
+const HUB_FIXTURES := [Rect2(43.0, 30.5, 5.0, 7.5), Rect2(32.0, 34.5, 3.0, 3.0)]
+const PLAIN_DECO := ["snack_patch", "toy_dig"]  # a zone's primitive-built beds (planter, dig patch): out of the film
 const PATH_GAP := 2.2  # m: a prop this close to the Hunter's walk (landing -> Boki 0 -> 1 -> 2) is out of the film
 const ZONES := ["glasswater", "cinderstep", "hushwood", "ridge"]
 const ZONE_OF_SHOT := {12: "glasswater", 13: "cinderstep", 14: "hushwood", 15: "ridge"}
 ## species, name, the lean type the zone loves
 const CAST := {
-	"glasswater": [["floenatee", "Frigatee", "ice"], ["hoarheron", "Skateron", "ice"],
-		["puddlet", "Prismander", "crystal"], ["rimeshrew", "Rimeshrew", "ice"]],
-	"cinderstep": [["kilnbadger", "Anvilbrock", "fire"], ["scaldamus", "Chuggamus", "fire"],
-		["kindlewren", "Kindlewren", "fire"], ["limpetor", "Buckleron", "steel"]],
-	"hushwood": [["gloamshell", "Gloamshell", "dark"], ["caecilith", "Zippelith", "dark"],
-		["umbrathere", "Umbrathere", "psychic"], ["nettlynx", "Nettlynx", "poison"]],
-	"ridge": [["kestrike", "Kestrike", "electric"], ["thrumbird", "Thrumbird", "sound"],
-		["zapple", "Echolop", "sound"], ["nimbostrich", "Boltstrich", "electric"]],
+	"glasswater":
+	[
+		["floenatee", "Frigatee", "ice"],
+		["hoarheron", "Skateron", "ice"],
+		["puddlet", "Prismander", "crystal"],
+		["rimeshrew", "Rimeshrew", "ice"]
+	],
+	"cinderstep":
+	[
+		["kilnbadger", "Anvilbrock", "fire"],
+		["scaldamus", "Chuggamus", "fire"],
+		["kindlewren", "Kindlewren", "fire"],
+		["limpetor", "Buckleron", "steel"]
+	],
+	"hushwood":
+	[
+		["gloamshell", "Gloamshell", "dark"],
+		["caecilith", "Zippelith", "dark"],
+		["umbrathere", "Umbrathere", "psychic"],
+		["nettlynx", "Nettlynx", "poison"]
+	],
+	"ridge":
+	[
+		["kestrike", "Kestrike", "electric"],
+		["thrumbird", "Thrumbird", "sound"],
+		["zapple", "Echolop", "sound"],
+		["nimbostrich", "Boltstrich", "electric"]
+	],
 }
 
 var rig
 var h: Node = null  # the Home on screen now (it is a new one after every hop)
+var hud := false  # --pitch-hud: the farm's HUD is filmed (the other version has none)
 var keep_say := false  # shot 17 keeps the Boki's bubble
 var _pins: Array = []  # [kin record, where it stands]: a staged Boki is held there for the whole take (no wandering off, no errand)
 var _cleared: Array = []  # props hidden off the Hunter's walk (kept hidden every frame)
 var _show: Array = []  # the Boki nodes that are in the film (all the others are hidden)
+var _min_gap := 99.0  # m: the nearest any shown Boki came to the Hunter this take
 var _cuts := 0  # hops filmed so far this take
 var _frames := 0  # frames this take has run (Engine.get_frames_drawn stays 0 headless)
 
@@ -48,10 +79,8 @@ func _init(r) -> void:
 func play(shot: int) -> void:
 	RenderingServer.frame_pre_draw.connect(_pre_draw)  # (Home shows its icons again in its own frame: hide after it)
 	_save()
-	Record.set_level(2)
-	var farm_view: Dictionary = CamRig.rules["farm"]
-	farm_view["dist_min"] = 3.0  # a closer view than the game's: the Hunter and its Boki fill the frame
-	farm_view["dist_max"] = 4.8
+	hud = OS.get_cmdline_user_args().has("--pitch-hud")  # the second version of every clip: the game's clean HUD stays on
+	Record.set_level(1 if hud else 2)
 	match shot:
 		11:
 			await hop_take("glasswater")
@@ -63,6 +92,7 @@ func play(shot: int) -> void:
 			await probe()
 		_:
 			await zone_take(String(ZONE_OF_SHOT[shot]))
+	print("PITCH gap_min=%.2f m (a shown Boki to the Hunter, ground distance)" % _min_gap)
 
 
 ## A throwaway save: every zone open, 4 Boki with art living in each, the partner Ash in all.
@@ -180,8 +210,12 @@ func probe() -> void:
 				top = maxf(top, h.farm_cam.tip)
 				n += 1
 			_keys(Vector2.ZERO)
-			print("PROBE hub dir=%d r=%.0f tip_max=%.2f end=%.1f yaw=%.2f" % [i, r, top,
-				Vector2(goal.x - h.ppos.x, goal.z - h.ppos.z).length(), h.cam.yaw])
+			print(
+				(
+					"PROBE hub dir=%d r=%.0f tip_max=%.2f end=%.1f yaw=%.2f"
+					% [i, r, top, Vector2(goal.x - h.ppos.x, goal.z - h.ppos.z).length(), h.cam.yaw]
+				)
+			)
 	for z in ZONES:
 		await _load(z)
 		await _wait(2.0)
@@ -246,7 +280,7 @@ func _clear_of_props(at: Vector3) -> Vector3:
 	var best := at
 	var best_d := -1.0
 	for ring in [0.0, 0.9, 1.8, 2.7]:
-		for i in (1 if ring == 0.0 else 10):
+		for i in 1 if ring == 0.0 else 10:
 			var cand := at + Vector3(ring, 0, 0).rotated(Vector3.UP, TAU * i / 10.0)
 			cand = h.world.free_spot_near(cand, [], 1.2, 0.9)
 			var d := 99.0
@@ -275,11 +309,14 @@ func _stage() -> void:
 	var fwd := Vector3(fwd2.x, 0.0, fwd2.y)
 	var right := Vector3(-fwd.z, 0.0, fwd.x)
 	var placed: Array = []
-	for i in mini(STAGE_AT.size(), mine.size()):
+	for dx in SHIFTS:  # the first sideways slide whose walk (landing -> Boki 0 -> 1 -> 2 -> 0) stays clear of every tree
+		placed = _spots(mini(STAGE_AT.size(), mine.size()), right * dx, fwd, right)
+		if _trees_clear(h.ppos, placed):
+			print("PITCH stage shift=%.1f" % dx)
+			break
+	for i in placed.size():
 		var k: Dictionary = mine[i]
-		var at: Vector3 = h.ppos + right * STAGE_AT[i].x + fwd * STAGE_AT[i].y
-		at = _clear_of_props(h.world.free_spot_near(at, placed, 1.5, 1.1))
-		placed.append(at)
+		var at: Vector3 = placed[i]
 		k.erase("job")
 		k["pos"] = at
 		k["goal"] = at
@@ -288,6 +325,61 @@ func _stage() -> void:
 		_show.append(k["node"])
 		_pins.append([k, at])
 	_clear_path(h.ppos, placed)
+	_hide_fixtures(zone)
+
+
+## Where the first `n` Boki stand with the group slid `slide` sideways: open ground, clear of props, apart from each other.
+func _spots(n: int, slide: Vector3, fwd: Vector3, right: Vector3) -> Array:
+	var placed: Array = []
+	for i in n:
+		var at: Vector3 = h.ppos + slide + right * STAGE_AT[i].x + fwd * STAGE_AT[i].y
+		placed.append(_clear_of_props(h.world.free_spot_near(at, placed, 1.5, 1.1)))
+	return placed
+
+
+## Does the walk start -> stops[0] -> stops[1] -> ... -> stops[0] keep TREE_GAP_M off every tree trunk?
+func _trees_clear(start: Vector3, stops: Array) -> bool:
+	var pts: Array = [start] + stops
+	if stops.size() > 1:
+		pts.append(stops[0])
+	for t in h.world.tree_spots:
+		var q := Vector2(t.x, t.z)
+		for i in pts.size() - 1:
+			var a := Vector2(pts[i].x, pts[i].z)
+			var b := Vector2(pts[i + 1].x, pts[i + 1].z)
+			if Geometry2D.get_closest_point_to_segment(q, a, b).distance_to(q) < TREE_GAP_M:
+				return false
+	return true
+
+
+## Plain-box stand-ins are not filmed (the repo has no stall, board, hut or planter model to swap in: the vendor packs hold
+## dungeon and halloween sets only): the hub's market stall and games board, a zone's roofed hut and its snack-patch bed.
+func _hide_fixtures(zone: String) -> void:
+	var kin_nodes: Array = []
+	for k in h.kins:
+		kin_nodes.append(k["node"])
+	var beds: Array = []
+	for d in GardenZones.info(zone).get("build", {}).get("deco", []):
+		if String(d[0]) in PLAIN_DECO:
+			beds.append(Vector2(float(d[1]) + 1.0, float(d[2]) + 1.0))
+	for n in h.get_children():
+		var n3 := n as Node3D
+		if n3 == null or n3 == h.player or n3 in kin_nodes or n3 == h.get("world") or n3.get_script() != null:
+			continue
+		var at := Vector2(n3.position.x, n3.position.z)
+		var hide: bool = false
+		if h.zone == GardenZones.HUB and n3.position.length() > 1.0:
+			for r in HUB_FIXTURES:
+				hide = hide or (r as Rect2).has_point(at)
+		for b in beds:
+			hide = hide or at.distance_to(b) < 1.0
+		if h.zone != GardenZones.HUB:
+			for m in n3.find_children("*", "MeshInstance3D", true, false):
+				hide = hide or (m as MeshInstance3D).mesh is PrismMesh
+		if hide:
+			print("PITCH fixture-hide %s at %s" % [n3.name, n3.position])
+			n3.visible = false
+			_cleared.append(n3)
 
 
 ## Hides every prop within PATH_GAP of the Hunter's walk, so it never stops beside a crate or target.
@@ -352,6 +444,10 @@ func _tidy() -> void:
 	if not is_instance_valid(c) or c.get("ppos") == null:
 		return
 	_frames += 1
+	for n in _show:
+		if is_instance_valid(n):
+			var at: Vector3 = (n as Node3D).global_position
+			_min_gap = minf(_min_gap, Vector2(at.x - c.ppos.x, at.z - c.ppos.z).length())
 	if _frames % 10 == 0 and c.get("farm_cam") != null and c.farm_cam.tip > 0.05:  # the view tipped up over a wall
 		print("PITCH_TIP frame=%d tip=%.2f at=%s" % [_frames, c.farm_cam.tip, c.ppos])
 	c.day_t = DAY_T
@@ -371,14 +467,11 @@ func _pre_draw() -> void:
 			if not is_instance_valid(nv):  # (the Home of a finished hop is freed: its Boki with it)
 				continue
 			var node := nv as Node3D
-			if true:
-				if node.position.distance_to(pin[1]) > 0.4:
-					print("PITCH pin drift %s %.1f m" % [k["rec"]["name"], node.position.distance_to(pin[1])])
-				node.position = pin[1]
-				k["pos"] = pin[1]
-				k["goal"] = pin[1]
-				k["t"] = 600.0
-				k.erase("job")
+			node.position = pin[1]
+			k["pos"] = pin[1]
+			k["goal"] = pin[1]
+			k["t"] = 600.0
+			k.erase("job")
 
 
 ## Every frame: no word or glyph over the world (signs, names, bubbles), no billboard icon (a heart, z, work mark), no
@@ -466,7 +559,7 @@ func _hide_marks(c: Node) -> void:
 		if mi.mesh is QuadMesh or String(mi.name).begins_with("orbit_cards") or String(mi.name).begins_with("Halo"):
 			mi.visible = false
 	if c.get("ui") != null:
-		(c.ui as CanvasLayer).visible = false
+		(c.ui as CanvasLayer).visible = hud
 
 
 func _wait(secs: float) -> void:
@@ -507,13 +600,24 @@ func _hop(zone: String) -> void:
 
 ## The nth Boki living in `zone` (not the partner), where it stands now.
 func _resident_at(zone: String, n := 0) -> Vector3:
-	var out: Array = h.kins.filter(func(k): return GardenZones.zone_of(k["rec"]) == zone and not k.has("indoors") \
-		and _dry((k["node"] as Node3D).global_position))
+	var out: Array = h.kins.filter(
+		func(k):
+			return (
+				GardenZones.zone_of(k["rec"]) == zone
+				and not k.has("indoors")
+				and _dry((k["node"] as Node3D).global_position)
+			)
+	)
 	if out.is_empty():
 		return h.ppos + Vector3(0, 0, -4)
 	var me: Vector3 = h.ppos
-	out.sort_custom(func(a, b): return (a["node"] as Node3D).global_position.distance_to(me) \
-		< (b["node"] as Node3D).global_position.distance_to(me))
+	out.sort_custom(
+		func(a, b):
+			return (
+				(a["node"] as Node3D).global_position.distance_to(me)
+				< (b["node"] as Node3D).global_position.distance_to(me)
+			)
+	)
 	return (out[mini(n, out.size() - 1)]["node"] as Node3D).global_position
 
 
@@ -527,13 +631,31 @@ func _dry(p: Vector3) -> bool:
 func _walk(goal: Vector3, near: float) -> void:
 	var left := int(LEG_S * FPS)
 	while left > 0 and Vector2(goal.x - h.ppos.x, goal.z - h.ppos.z).length() > near:
-		var way := Vector2(goal.x - h.ppos.x, goal.z - h.ppos.z).normalized().rotated(h.cam.yaw)
-		_keys(way)
+		_keys(_steer(goal).rotated(h.cam.yaw))
 		await rig.main.get_tree().process_frame
 		_tidy()
 		_orbit_step()
 		left -= 1
 	_keys(Vector2.ZERO)
+
+
+## The way to `goal`, bent round any other staged Boki that is within AVOID_M (so none comes within MIN_GAP_M).
+func _steer(goal: Vector3) -> Vector2:
+	var me := Vector2(h.ppos.x, h.ppos.z)
+	var dir := (Vector2(goal.x, goal.z) - me).normalized()
+	for n in _show:
+		var p3: Vector3 = (n as Node3D).global_position
+		var p := Vector2(p3.x, p3.z)
+		var d := me.distance_to(p)
+		if d >= AVOID_M or p.distance_to(Vector2(goal.x, goal.z)) < 0.5:
+			continue
+		var away := (me - p) / maxf(d, 0.01)
+		var side := dir.orthogonal()
+		if side.dot(away) < 0.0:
+			side = -side
+		var k := clampf((AVOID_M - d) / (AVOID_M - MIN_GAP_M - 0.2), 0.0, 1.0)
+		dir = (dir + (side + away) * 1.6 * k).normalized()
+	return dir
 
 
 func _keys(mv: Vector2) -> void:
