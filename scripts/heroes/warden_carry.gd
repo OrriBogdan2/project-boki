@@ -8,36 +8,39 @@ extends RefCounted
 ## hold). Two-bone arm IK on the contract bones (RIG_CONTRACT), so one layer fits all 12 bodies;
 ## no clip is authored for it. The socket (world position) is left on the model for KinDowned.scoop_pose.
 
-const MOVE := "rs_carry"           # HunterAnim pose id (KinDowned.rescue_pose) that carries; "rs_done" eases it out
-const MOVES := [MOVE, "rs_done"]   # the pose ids the clips leave to this layer, legs and torso stay on the loco clips
+const MOVE := "rs_carry"  # HunterAnim pose id (KinDowned.rescue_pose) that carries; "rs_done" eases it out
+const MOVES := [MOVE, "rs_done"]  # the pose ids the clips leave to this layer, legs and torso stay on the loco clips
 const HOME_ACTS := ["carry", "pack"]  # HunterAnim state "act" at home (HomeCarry): a Boki in the arms, on the back
-const SOCKET := "carry_socket"     # model meta: world position the Boki rides at
-const MOTE := "heart_mote"         # model meta: world position of the Heartspark held in the off hand
-const MOTE_REACH := 0.12           # arm lengths: the mote floats this far above the held wrist
-const FADE := 0.25                 # s: the layer eases in and out
-const LEAN := 0.13                 # rad: the torso leans back about the hips
-const REACH_FWD := 0.55            # arm lengths: how far in front of the shoulders the cradle sits (data "carry_fwd")
-const REACH_DOWN := 0.5            # arm lengths: and how far below them
-const HANDS_APART := 0.34          # arm lengths: the two wrists, apart under the Boki
-const SOCKET_UP := 0.12            # arm lengths: the Boki sits this far above the wrists
-const POLE_DOWN := 0.7             # the elbow bends down ...
-const POLE_OUT := 0.5              # ... and a little out
-const BACK_FWD := -0.3             # arm lengths: the Boki on the back, its hands this far behind the shoulders ...
-const BACK_DOWN := 0.8             # ... and this far below them (at the hips)
-const BACK_APART := 0.7            # arm lengths: the wrists, apart under its legs
-const BACK_UP := 0.4               # arm lengths: it sits this far above the wrists, against the back
-const BACK_LEAN := -0.2            # rad: the torso leans forward under it
-const STOW_SCALE := 0.001          # a stowed weapon bone shrinks to this
+const SOCKET := "carry_socket"  # model meta: world position the Boki rides at
+const MOTE := "heart_mote"  # model meta: world position of the Heartspark held in the off hand
+const MOTE_REACH := 0.12  # arm lengths: the mote floats this far above the held wrist
+const FADE := 0.25  # s: the layer eases in and out
+const LEAN := 0.13  # rad: the torso leans back about the hips
+const REACH_FWD := 0.55  # arm lengths: how far in front of the shoulders the cradle sits (data "carry_fwd")
+const REACH_DOWN := 0.5  # arm lengths: and how far below them
+const HANDS_APART := 0.34  # arm lengths: the two wrists, apart under the Boki
+const SOCKET_UP := 0.12  # arm lengths: the Boki sits this far above the wrists
+const POLE_DOWN := 0.7  # the elbow bends down ...
+const POLE_OUT := 0.5  # ... and a little out
+const BACK_FWD := -0.3  # arm lengths: the Boki on the back, its hands this far behind the shoulders ...
+const BACK_DOWN := 0.8  # ... and this far below them (at the hips)
+const BACK_APART := 0.7  # arm lengths: the wrists, apart under its legs
+const BACK_UP := 0.4  # arm lengths: it sits this far above the wrists, against the back
+const BACK_LEAN := -0.2  # rad: the torso leans forward under it
+const STOW_SCALE := 0.001  # a stowed weapon bone shrinks to this
 const ARMS := ["upper_arm", "forearm", "hand"]
-const HAND_REACH := 0.1            # m: a hand's skin lies this near its head; a piece on it reaching past is a weapon
-const RIGID := 0.99                # a vertex with this much weight on one hand moves with it alone
+const HAND_REACH := 0.1  # m: a hand's skin lies this near its head; a piece on it reaching past is a weapon
+const RIGID := 0.99  # a vertex with this much weight on one hand moves with it alone
+const RIGID_SET := 0.9  # a vertex with this much weight on a hand and its fingers moves with the hand
 const KEEP_FLAGS := Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS | Mesh.ARRAY_FLAG_COMPRESS_ATTRIBUTES
 
-static var _bare := {}             # a body mesh -> the same mesh without the weapons modelled into its hands
+static var _bare := {}  # a body mesh -> the same mesh without the weapons modelled into its hands
+
 
 ## Does this pose id hand the arms to the layer?
 static func owns(km: String) -> bool:
 	return km in MOVES
+
 
 ## Lays the carry over the skeleton's current pose at weight w (0..1) and returns the socket in world space; fwd is
 ## how far in front of the shoulders the cradle sits (arm lengths: a broad body's own, from its data). `back`: the
@@ -48,7 +51,7 @@ static func apply(skel: Skeleton3D, root: Node3D, w: float, fwd := REACH_FWD, ba
 	var ahead := to_skel * Vector3.FORWARD
 	var up := to_skel * Vector3.UP
 	var hips := WardenSkeleton.find(skel, "hips")
-	var keep := {}      # bone index -> its local rotation before the layer
+	var keep := {}  # bone index -> its local rotation before the layer
 	var idx := _arms(skel)
 	for bi in idx.values():
 		keep[bi] = skel.get_bone_pose_rotation(bi)
@@ -59,7 +62,9 @@ static func apply(skel: Skeleton3D, root: Node3D, w: float, fwd := REACH_FWD, ba
 	var mid := (sh_l + sh_r) * 0.5
 	var across := (sh_r - sh_l).normalized()
 	var reach := _reach(skel, idx)
-	var cradle := mid + ahead * (BACK_FWD if back else fwd) * reach - up * (BACK_DOWN if back else REACH_DOWN) * reach
+	var fore := BACK_FWD if back else fwd
+	var low := BACK_DOWN if back else REACH_DOWN
+	var cradle := mid + ahead * fore * reach - up * low * reach
 	var apart := BACK_APART if back else HANDS_APART
 	for s in ["L", "R"]:
 		var out := across * (-1.0 if s == "L" else 1.0)
@@ -68,6 +73,7 @@ static func apply(skel: Skeleton3D, root: Node3D, w: float, fwd := REACH_FWD, ba
 	for bi in keep:
 		skel.set_bone_pose_rotation(bi, (keep[bi] as Quaternion).slerp(skel.get_bone_pose_rotation(bi), w))
 	return skel.global_transform * (cradle + up * (BACK_UP if back else SOCKET_UP) * reach)
+
 
 ## The Heartspark carry: the off hand (side "L" or "R") lifts to the cradle's height and holds the mote at the chest,
 ## the other arm and the legs stay on the clips so the main arm still fires and casts. Returns the mote in world space.
@@ -90,6 +96,7 @@ static func hold_mote(skel: Skeleton3D, root: Node3D, w: float, side: String, fw
 		skel.set_bone_pose_rotation(bi, (keep[bi] as Quaternion).slerp(skel.get_bone_pose_rotation(bi), w))
 	return skel.global_transform * (wrist + up * MOTE_REACH * reach)
 
+
 ## Bone indices of both arms, keyed "upper_arm.L".
 static func _arms(skel: Skeleton3D) -> Dictionary:
 	var idx := {}
@@ -98,11 +105,13 @@ static func _arms(skel: Skeleton3D) -> Dictionary:
 			idx["%s.%s" % [b, s]] = WardenSkeleton.find(skel, "%s.%s" % [b, s])
 	return idx
 
+
 ## The torso tips back about the hips' own point (right is the model's right in skeleton space).
 static func _lean(skel: Skeleton3D, hips: int, right: Vector3, rad: float) -> void:
 	var pose := skel.get_bone_global_pose(hips)
 	pose.basis = Basis(right, rad) * pose.basis
 	skel.set_bone_global_pose(hips, pose)
+
 
 ## Mean arm length (shoulder to elbow to wrist), the unit every offset above is in.
 static func _reach(skel: Skeleton3D, idx: Dictionary) -> float:
@@ -113,6 +122,7 @@ static func _reach(skel: Skeleton3D, idx: Dictionary) -> float:
 		var wr := skel.get_bone_global_pose(idx["hand." + s]).origin
 		total += sh.distance_to(el) + el.distance_to(wr)
 	return total * 0.5
+
 
 ## One arm to a wrist target: the elbow where the pole points, then each bone turned the shortest way to it.
 static func _arm(skel: Skeleton3D, idx: Dictionary, s: String, target: Vector3, pole: Vector3) -> void:
@@ -134,11 +144,13 @@ static func _arm(skel: Skeleton3D, idx: Dictionary, s: String, target: Vector3, 
 	var from := (skel.get_bone_global_pose(ha).origin - skel.get_bone_global_pose(fa).origin).normalized()
 	_turn(skel, fa, from, (shoulder + along * dist - new_elbow).normalized())
 
+
 ## Bone bi turned the shortest way from one direction to another about its own head (its children follow).
 static func _turn(skel: Skeleton3D, bi: int, from: Vector3, to: Vector3) -> void:
 	var pose := skel.get_bone_global_pose(bi)
 	pose.basis = Basis(Quaternion(from, to)) * pose.basis
 	skel.set_bone_global_pose(bi, pose)
+
 
 ## Puts the named weapon bones away (w = how far the layer is in).
 static func stow(skel: Skeleton3D, bones: Array, w: float) -> void:
@@ -147,9 +159,10 @@ static func stow(skel: Skeleton3D, bones: Array, w: float) -> void:
 		if bi >= 0:
 			skel.set_bone_pose_scale(bi, Vector3.ONE * lerpf(1.0, STOW_SCALE, clampf(w * 2.0, 0.0, 1.0)))
 
+
 ## The skinned meshes on this skeleton whose weapon is modelled into one of `hands` or is one of `surfaces` (by name):
 ## [[MeshInstance3D, its mesh, the mesh without that weapon]]. The bare copy is built once a session per mesh.
-static func held(skel: Skeleton3D, hands: Array, surfaces: Array = []) -> Array:
+static func held(skel: Skeleton3D, hands: Array, surfaces: Array = [], far := 0.0) -> Array:
 	var out: Array = []
 	if hands.is_empty() and surfaces.is_empty():
 		return out
@@ -159,26 +172,31 @@ static func held(skel: Skeleton3D, hands: Array, surfaces: Array = []) -> Array:
 		if m == null or mi.skin == null:
 			continue
 		if not _bare.has(m):
-			_bare[m] = _strip(m, mi.skin, skel, hands, surfaces)
+			_bare[m] = _strip(m, mi.skin, skel, hands, surfaces, far)
 		if _bare[m] != m:
 			out.append([mi, m, _bare[m]])
 	return out
+
 
 ## Shows each held() mesh without its weapon (on) or whole.
 static func hold(meshes: Array, on: bool) -> void:
 	for h in meshes:
 		(h[0] as MeshInstance3D).mesh = h[2] if on else h[1]
 
+
 ## A copy of m without its hand-held pieces and the named surfaces' triangles (m itself when it has none): same
 ## vertices, same surfaces, fewer triangles.
-static func _strip(m: ArrayMesh, skin: Skin, skel: Skeleton3D, hands: Array, surfaces: Array) -> ArrayMesh:
+static func _strip(m: ArrayMesh, skin: Skin, skel: Skeleton3D, hands: Array, surfaces: Array, far: float) -> ArrayMesh:
 	var head := hand_heads(skin, skel, hands)
+	var reach := hand_set(skin, skel, head) if far > 0.0 else {}
 	var out := ArrayMesh.new()
 	var dropped := false
 	for si in m.get_surface_count():
 		var arrays := m.surface_get_arrays(si)
 		if arrays[Mesh.ARRAY_INDEX] != null and arrays[Mesh.ARRAY_BONES] != null:
 			var tris := PackedInt32Array() if m.surface_get_name(si) in surfaces else _keep(arrays, head)
+			if far > 0.0:
+				tris = _near(arrays, tris, reach, far)
 			dropped = dropped or tris.size() < (arrays[Mesh.ARRAY_INDEX] as PackedInt32Array).size()
 			arrays[Mesh.ARRAY_INDEX] = tris if not tris.is_empty() else PackedInt32Array([0, 0, 0])
 		var flags := m.surface_get_format(si) & KEEP_FLAGS
@@ -186,6 +204,7 @@ static func _strip(m: ArrayMesh, skin: Skin, skel: Skeleton3D, hands: Array, sur
 		out.surface_set_material(si, m.surface_get_material(si))
 		out.surface_set_name(si, m.surface_get_name(si))
 	return out if dropped else m
+
 
 ## The skin bind index of each named hand -> the hand's head in mesh space.
 static func hand_heads(skin: Skin, skel: Skeleton3D, hands: Array) -> Dictionary:
@@ -198,6 +217,50 @@ static func hand_heads(skin: Skin, skel: Skeleton3D, hands: Array) -> Dictionary
 				head[b] = skin.get_bind_pose(b).affine_inverse().origin
 	return head
 
+
+## The skin bind index of each bone on a named hand or below it (the fingers) -> that hand's head in mesh space.
+static func hand_set(skin: Skin, skel: Skeleton3D, heads: Dictionary) -> Dictionary:
+	var root_head := {}  # hand bone -> its head
+	var bone_of := {}  # bind index -> bone
+	for b in skin.get_bind_count():
+		var nm := skin.get_bind_name(b)
+		bone_of[b] = skel.find_bone(nm) if nm != &"" else skin.get_bind_bone(b)
+		if heads.has(b):
+			root_head[bone_of[b]] = heads[b]
+	var out := {}
+	for b in bone_of:
+		var bone: int = bone_of[b]
+		while bone >= 0 and not root_head.has(bone):
+			bone = skel.get_bone_parent(bone)
+		if bone >= 0:
+			out[b] = root_head[bone]
+	return out
+
+
+## `tris` minus each triangle whose three vertices ride a hand (or its fingers) and lie more than `far` m from it: a
+## weapon welded to the body mesh, which the piece test above cannot tell from the hand.
+static func _near(arrays: Array, tris: PackedInt32Array, members: Dictionary, far: float) -> PackedInt32Array:
+	var pos: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+	var bones: PackedInt32Array = arrays[Mesh.ARRAY_BONES]
+	var wts: PackedFloat32Array = arrays[Mesh.ARRAY_WEIGHTS]
+	var per := int(bones.size() / float(pos.size()))
+	var gone := PackedByteArray()
+	gone.resize(pos.size())
+	for v in pos.size():
+		var share := 0.0
+		var hand := Vector3.ZERO
+		for k in per:
+			if members.has(bones[v * per + k]):
+				share += wts[v * per + k]
+				hand = members[bones[v * per + k]]
+		gone[v] = 1 if share >= RIGID_SET and pos[v].distance_to(hand) > far else 0
+	var out := PackedInt32Array()
+	for t in range(0, tris.size(), 3):
+		if not (gone[tris[t]] == 1 and gone[tris[t + 1]] == 1 and gone[tris[t + 2]] == 1):
+			out.append_array([tris[t], tris[t + 1], tris[t + 2]])
+	return out
+
+
 ## The surface's triangles minus each piece that rides one of the hands alone and reaches past HAND_REACH from it.
 static func _keep(arrays: Array, head: Dictionary) -> PackedInt32Array:
 	var idx: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
@@ -208,6 +271,7 @@ static func _keep(arrays: Array, head: Dictionary) -> PackedInt32Array:
 		if float(reach.get(piece[idx[t]], 0.0)) <= HAND_REACH:
 			out.append_array([idx[t], idx[t + 1], idx[t + 2]])
 	return out
+
 
 ## The pieces of a surface that ride the hands in `head` (hand_heads) alone, each -> how far it reaches from its hand
 ## (m). A piece with a vertex on anything else is part of the body.
@@ -231,10 +295,11 @@ static func on_hands(arrays: Array, head: Dictionary, piece: Array[int]) -> Dict
 		reach.erase(p)
 	return reach
 
+
 ## Each vertex's piece (union-find over the triangles' edges and over vertices at the same point: a UV seam splits
 ## the vertices, not the piece).
 static func pieces(idx: PackedInt32Array, pos: PackedVector3Array) -> Array[int]:
-	var up: Array[int] = []       # (an Array, not a packed one: _join writes into it)
+	var up: Array[int] = []  # (an Array, not a packed one: _join writes into it)
 	up.assign(range(pos.size()))
 	var at := {}
 	for v in pos.size():
@@ -249,8 +314,10 @@ static func pieces(idx: PackedInt32Array, pos: PackedVector3Array) -> Array[int]
 		up[v] = _top(up, v)
 	return up
 
+
 static func _join(up: Array[int], a: int, b: int) -> void:
 	up[_top(up, a)] = _top(up, b)
+
 
 static func _top(up: Array[int], v: int) -> int:
 	while up[v] != v:

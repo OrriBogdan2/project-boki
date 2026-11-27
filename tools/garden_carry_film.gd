@@ -13,7 +13,8 @@ const DEADLINE_S := 1500.0
 const HUNTER_CLASS := "medium"
 const RUN_OFF := 1.25  # rad off her back-line in the run shot: a three-quarter side view, her face turned to us
 const FACE_OFF := 2.5  # rad off her back-line late in the run: in front of her, a little aside, so her face shows
-const CARRY_PACE := 0.8  # stick in the carry run: the followers keep up
+const CARRY_PACE := 0.6  # stick in the carry run: a jog the followers keep up with at a walk (no gallop, no air time)
+const FOLLOW_GAP := 1.1  # m: the closest a follower stays to the hunter's feet (none runs through her legs)
 const HEAD_S := 0.55  # s of each take that the dissolve eats at its start and at its end
 const CLEAR_MARGIN := 0.45  # m of bare ground kept round a bed or building (grass blades are wide)
 const DNA_PARTS := ["Tuft", "TailTuft", "Birthmark"]  # plain sphere parts of a Boki's unique look
@@ -280,10 +281,23 @@ func _run(goal: Vector3, secs: float, off: float, stop_at := 0.6, pace := 1.0, p
 		var was: Vector3 = h.ppos
 		await _wait(1.0 / FPS)
 		var mine := Vector2(h.ppos.x - was.x, h.ppos.z - was.z).length() * FPS
-		for i in pull:  # as HomeCarry._lead: a led Boki goes at your pace, never under its gallop
-			h.kins[i]["led"] = maxf(mine, BokiRig.RUN_SPEED) * 1.1
+		for i in pull:  # as HomeCarry._lead: a led Boki goes at your pace
+			h.kins[i]["led"] = maxf(mine, BokiRig.WALK_SPEED) * 1.1
+			_keep_clear(h.kins[i])
 		left -= 1
 	_keys(Vector2.ZERO)
+
+
+## A follower stands on the ground and no nearer the hunter than FOLLOW_GAP (pushed straight out from her).
+func _keep_clear(k: Dictionary) -> void:
+	var p: Vector3 = k["pos"]
+	var away := Vector2(p.x - h.ppos.x, p.z - h.ppos.z)
+	if away.length() < FOLLOW_GAP:
+		var out := away.normalized() if away.length() > 0.01 else Vector2.from_angle(h.pface)
+		p = Vector3(h.ppos.x + out.x * FOLLOW_GAP, p.y, h.ppos.z + out.y * FOLLOW_GAP)
+	p.y = maxf(h.world.ground_at(p.x, p.z), 0.0)
+	k["pos"] = p
+	(k["node"] as Node3D).position = p
 
 
 func _jump() -> void:

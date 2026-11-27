@@ -1,8 +1,8 @@
 extends RefCounted
 ## --home-carry-pose-check: at home every Hunter (Meshy's own skeleton or the contract one) holds a Boki the way
 ## HomeCarry asks (state "act" "carry" in the arms, "pack" on the back): both wrists come to the socket the Boki rides
-## at (left on the model for HomeCarry), the weapon modelled into a hand leaves the shown mesh, a garden verb ("holster")
-## puts the weapon away without bringing the arms in, and it all lets go afterwards. Headless; never touches the save.
+## at (left on the model for HomeCarry), the weapon in the hand is not drawn, a garden verb ("holster") puts the
+## weapon away without bringing the arms in, and it all lets go afterwards. Headless; never touches the save.
 
 const DT := 1.0 / 30.0
 const SETTLE := 20  # frames: the layer eases in over WardenCarry.FADE
@@ -27,8 +27,21 @@ func run(main: Node) -> void:
 	WardenNative.contract_only = false
 	holder = Node3D.new()
 	main.add_child(holder)
-	for id in ["gunslinger", "archer", "bulwark", "ashwick", "dolm", "dredge", "gil", "juggernaut", "mage", "ostra",
-			"rimewright", "tender", "thief"]:
+	for id in [
+		"gunslinger",
+		"archer",
+		"bulwark",
+		"ashwick",
+		"dolm",
+		"dredge",
+		"gil",
+		"juggernaut",
+		"mage",
+		"ostra",
+		"rimewright",
+		"tender",
+		"thief"
+	]:
 		await _hero(id)
 	print("HOMECARRYPOSE done, %d failures" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -64,9 +77,12 @@ func _hero(id: String) -> void:
 	var held := _hand_piece(sk)
 	ok(held <= HAND_PIECE_M, "%s: no weapon rides a hand into the Boki (%.2f m, %.2f at rest)" % [id, held, bare])
 	var dd: Dictionary = WardenClips.data(WardenGlb.art(id))
-	if not (dd.get("carry_drop", []) + dd.get("carry_drop_surfaces", []) as Array).is_empty():
-		ok(_drawn(sk) < tris_rest, "%s: the weapon modelled into a hand leaves the shown mesh (%d of %d triangles)"
-				% [id, _drawn(sk), tris_rest])
+	var props: Dictionary = WardenNative.entry(WardenGlb.art(id)).get("props", {})
+	if dd.has("carry_drop_surfaces") or dd.has("carry_hide") or dd.has("carry_drop_far") or props.has("hand.R"):
+		ok(
+			_drawn(sk) < tris_rest,
+			"%s: the weapon in the hand is not drawn (%d of %d triangles)" % [id, _drawn(sk), tris_rest]
+		)
 	s["act"] = "pack"
 	_step(layer)
 	var back: Vector3 = m.get_meta(WardenCarry.SOCKET, Vector3.INF)
@@ -79,8 +95,10 @@ func _hero(id: String) -> void:
 	ok(_hand_piece(sk) <= HAND_PIECE_M, "%s: and puts the weapon away (%.2f m on a hand)" % [id, _hand_piece(sk)])
 	s.erase("holster")
 	_step(layer)
-	ok(not m.has_meta(WardenCarry.SOCKET) and _hand_piece(sk) >= bare - 0.001,
-			"%s: it lets go (no socket, weapon back: %.2f m on a hand, %.2f at rest)" % [id, _hand_piece(sk), bare])
+	ok(
+		not m.has_meta(WardenCarry.SOCKET) and _hand_piece(sk) >= bare - 0.001,
+		"%s: it lets go (no socket, weapon back: %.2f m on a hand, %.2f at rest)" % [id, _hand_piece(sk), bare]
+	)
 	m.free()
 
 
@@ -89,17 +107,17 @@ func _step(layer: Node) -> void:
 		layer.call("_process", DT)
 
 
-## The triangles the visible skinned meshes draw (an emptied surface keeps one degenerate triangle).
+## The triangles the Hero's visible meshes draw (an emptied surface keeps one degenerate triangle).
 func _drawn(sk: Skeleton3D) -> int:
 	var n := 0
-	for mi: MeshInstance3D in sk.find_children("*", "MeshInstance3D", true, false):
-		if mi.skin != null and mi.visible and mi.mesh != null:
+	for mi: MeshInstance3D in sk.get_parent().find_children("*", "MeshInstance3D", true, false):
+		if mi.is_visible_in_tree() and mi.mesh is ArrayMesh:
 			for si in mi.mesh.get_surface_count():
 				n += mi.mesh.surface_get_array_index_len(si) / 3
 	return n
 
 
-## The longest piece a visible skinned mesh draws riding a hand alone (a weapon): WardenCarry.on_hands over its triangles.
+## The longest piece a visible skinned mesh draws riding a hand alone (a weapon): WardenCarry.on_hands.
 func _hand_piece(sk: Skeleton3D) -> float:
 	var most := 0.0
 	for n in sk.find_children("*", "MeshInstance3D", true, false):
@@ -114,7 +132,7 @@ func _hand_piece(sk: Skeleton3D) -> float:
 			var idx: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
 			var piece := WardenCarry.pieces(idx, arrays[Mesh.ARRAY_VERTEX])
 			var reach := WardenCarry.on_hands(arrays, head, piece)
-			for t in range(0, idx.size(), 3):  # (a stripped mesh keeps the weapon's vertices: only drawn triangles count)
+			for t in range(0, idx.size(), 3):  # (a stripped mesh keeps the weapon's vertices: count drawn triangles)
 				if idx[t] != idx[t + 1]:
 					most = maxf(most, float(reach.get(piece[idx[t]], 0.0)))
 	return most

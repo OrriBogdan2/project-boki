@@ -3,6 +3,8 @@
 	"blink": {"turn": {"lid.R": [-0.82, 0.0, 0.0], "lid.L": [-0.82, 0.0, 0.0]}},
 	"skinned_weapon": true,
 	"carry_drop_surfaces": ["metal-v95b"],
+	"carry_drop": ["hand.L", "hand.R"],
+	"carry_drop_far": 0.1,
 	"extra_bones": {"lid.L": "head", "lid.R": "head", "brow.L": "head", "brow.R": "head", "mouth.L": "head", "mouth.R": "head", "foot.L": "shin.L", "foot.R": "shin.R"},
 	"blade": {"root": "anchor_blade_root", "tip": "weapon_muzzle"},
 	"free_arm": {"vault_r": "L", "vault_l": "R"},

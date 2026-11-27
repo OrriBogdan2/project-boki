@@ -1,15 +1,17 @@
 class_name WardenCarryLayer
 extends RefCounted
-## One Hero's carry layer state (WardenCarry's maths, eased in and out), shared by the contract path (WardenClips) and
-## Meshy's own skeleton (WardenNative). Two things ease separately: the arms (`arms_w`: both hands cradle the Boki at the
-## socket) and the weapon (`away_w`: the data's "carry_stow" bones put away, a weapon modelled into a hand left off the
-## shown mesh). A garden verb or a tool puts the weapon away without bringing the arms in.
+## One Hero's carry layer state (WardenCarry's maths, eased in and out), shared by the contract path (WardenClips)
+## and Meshy's own skeleton (WardenNative). Two things ease separately: the arms (`arms_w`: both hands cradle the
+## Boki at the socket) and the weapon (`away_w`: the data's "carry_stow" bones put away, a weapon modelled into a
+## hand left off the shown mesh). A garden verb or a tool puts the weapon away without bringing the arms in.
 
-var data: Dictionary                # "carry_stow", "carry_fwd", "carry_drop", "carry_drop_surfaces", "carry_back"
-var arms_w := 0.0                   # how far the arms hold the Boki
-var away_w := 0.0                   # how far the weapon is put away
-var drop: Array = []                # WardenCarry.held: the body meshes whose weapon is in a hand (built when first needed)
-var hands: Array = []               # the hands to look for that weapon on when the data names none
+var data: Dictionary  # "carry_stow", "carry_fwd", "carry_drop" (+ "carry_drop_far" m), "carry_drop_surfaces",
+# "carry_hide" (mesh nodes of a weapon cut out of the body)
+var arms_w := 0.0  # how far the arms hold the Boki
+var away_w := 0.0  # how far the weapon is put away
+var drop: Array = []  # WardenCarry.held: the body meshes whose weapon is in a hand (built when first needed)
+var hands: Array = []  # the hands to look for that weapon on when the data names none
+var _hide: Array[MeshInstance3D] = []
 var _built := false
 var _stowed := false
 
@@ -37,8 +39,19 @@ func step(skel: Skeleton3D, root: Node3D, arms: bool, away: bool, back: bool, dt
 		return false
 	if not _built:
 		_built = true
-		drop = WardenCarry.held(skel, data.get("carry_drop", hands), data.get("carry_drop_surfaces", []))
+		drop = WardenCarry.held(
+			skel,
+			data.get("carry_drop", hands),
+			data.get("carry_drop_surfaces", []),
+			float(data.get("carry_drop_far", 0.0))
+		)
+		for nm in data.get("carry_hide", []):
+			var mi := skel.find_child(String(nm), true, false) as MeshInstance3D
+			if mi:
+				_hide.append(mi)
 	_stowed = away_w > 0.0
 	WardenCarry.stow(skel, data.get("carry_stow", []), away_w)
 	WardenCarry.hold(drop, away_w >= 0.5)
+	for mi in _hide:
+		mi.visible = away_w < 0.5
 	return not _stowed
