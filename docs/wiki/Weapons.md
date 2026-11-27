@@ -27,7 +27,7 @@ Numbers are per shot or swing before any upgrades. Class kits that run their own
 | Sniper | none | light | 36 | 1.5s | none | 16m | Winds up for 0.6s with a laser showing, then hits hard. Weak point-blank, full damage from half range. |
 | Spellstaff | none | medium | 9.5 | 0.55s | none | 10m | An orb bolt every 0.45s, 10m. Every 4th bolt hits 50% harder. |
 | Swordfish | the Novice Mage | light | 9.2 | 0.32s | none | 2.5m | Two quick thrusts and a longer lunge. Every thrust steps you in; the third slows. |
-| Tether Lantern | the Void Jester | medium | 14.5 | 0.6s | none | 12.25m | A quick teal orb every 0.6s, flying its full 12.25m. Every orb passes through walls. The longer you wait between shots (up to 1.4s) the bigger, brighter, faster and harder the next one; a full orb also slows. |
+| Tether Lantern | the Void Jester | medium | 14.5 | 0.6s | none | 12.25m | A thrown card every 0.6s, flying its full 12.25m; cards stop at walls and a new one is drawn after each throw. Wait 1s or more between shots and the next is a void orb that passes through walls, bigger, brighter, faster and harder the longer you wait (up to 1.4s); a full orb also slows. |
 | War Hammer & Aegis | the Barnacle Knight | heavy | 11 | 0.55s | none | 2.4m | Tap to throw the hammer: it flies to the cursor (up to 9m), passes through foes, stays planted under a gold beacon (your team sees foes near it) and comes back when you tap again, hitting on the way. Hold to spin it up into a Crushing Blow (full at 1.25s: 66 damage, a big knock): a flaming crescent in front that carries you forward. Ability raises the aegis. |
 | Twin Blades | none | light | 7 | 0.3s | none | 2.3m | Tap for a quick 3-hit combo. Hold 0.5s for a spinning double slash all around you. |
 
@@ -88,7 +88,7 @@ Found as glowing perk orbs during an expedition: walk into one to take it. Chest
 | Featherfall | Your glider lasts 60% longer. | 1 |
 | Scavenger | Gems you pick up are worth 25% more. | 2 |
 | Tough Skin | +15 max health, healed right away. | 3 |
-| Overcharge | Your bond ultimate charges 30% faster. | 1 |
+| Overcharge | Your bond meter fills 30% faster. | 1 |
 | Keen Edge | 8% more damage. | 3 |
 | Fleet Foot | 6% faster on foot. | 2 |
 | Plating | +20 max armor. | 2 |
