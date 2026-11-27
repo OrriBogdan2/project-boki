@@ -101,14 +101,16 @@ static func _near_lock(m, h, id: String) -> Dictionary:
 ## The belt item lying within reach that doesn't fit on this hunter's belt ({} for none).
 static func blocked_pickup(h) -> Dictionary:
 	for p in h.m.pickups:
+		var pos: Vector3 = p["pos"]      # (in reach first: most of the ground's loot is far from any one hunter)
+		var gap := Vector2(h.pos.x - pos.x, h.pos.z - pos.z)
+		if gap.length_squared() >= SWAP_R * SWAP_R or absf(h.pos.y - pos.y) >= 2.0:
+			continue
 		var id := UtilityBelt.item_of(String(p["kind"]))
 		if not UtilityBelt.is_item(id) or UtilityBelt.has_room(h, id) or float(p["t"]) < 0.5:
 			continue
 		if is_key(id) and held(h, id) >= cap(id):
 			continue      # a full stack of the same key: nothing to swap for
-		var pos: Vector3 = p["pos"]
-		if Vector2(h.pos.x - pos.x, h.pos.z - pos.z).length() < SWAP_R and absf(h.pos.y - pos.y) < 2.0:
-			return p
+		return p
 	return {}
 
 ## A slot key pressed beside something that doesn't fit: that slot's items go on the ground and the
