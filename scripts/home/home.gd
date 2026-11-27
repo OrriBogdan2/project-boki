@@ -3251,7 +3251,7 @@ func _open_kin(rec: Dictionary) -> void:
 			c1.add_child(UI.section("Growing toward"))
 			c1.add_child(UI.label(String(Evo.AFF[lead]["name"]), UI.T_HEAD, Evo.AFF[lead]["tint"], UI.big))
 			c1.add_child(UI.label("Mutation at level %d" % next_mut, UI.T_SMALL, UI.MUTED))
-			c1.add_child(UI.para("What you feed it and how you raise it decides which way it grows.", 12, UI.FAINT))
+			c1.add_child(UI.para(PlayStyle.line(rec), 12, UI.FAINT))
 			var ln := Evo.lean(rec)
 			if String(ln[0]) != "":
 				var lean_t := "Its meals lean it %s: %d%%" % [Lean.face(ln[0])["name"], int(100.0 * float(ln[1]))]

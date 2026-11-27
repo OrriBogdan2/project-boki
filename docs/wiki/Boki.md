@@ -89,6 +89,13 @@ sentences, and a grown, Devoted Boki talks freely.
   and at the Training post's timing drill, which are limited runs: a few a day, plus one more of each
   per match ("Races left today: 2"). Play (fetch, brushing, petting) is joy and bond only, never stats.
   Toys give at most 3 points a day.
+- **Expeditions and leaning.** Every expedition a Boki goes on grows its stats (more when you get out);
+  the results card lists the points. How you play with it gives it a leaning: Fierce, Steadfast, Curious
+  or Swift. Toys, garden games, drills and care lean it a little each day; what it does on expeditions
+  (hits, knockouts, revives, skills, catches, throws) leans it most. The leaning's stat (Power, Guard,
+  Focus, Speed) takes the larger share of what expeditions teach, up to 70% when it is Devoted, and the
+  leaning steers its final form and which body parts it grows. Its card shows the line, for example
+  "Strongly Fierce: it fights hard. Power takes 55% of what expeditions teach it."
 - **Life stages.** Hatchling, Youngling (level 4), Grown (8), Elder (16).
 - **Evolution.** How you raise it decides what it grows into. It builds four affinities (Fierce,
   Steadfast, Curious, Swift) from what it eats, what it does in matches and its personality, and every

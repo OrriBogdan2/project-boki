@@ -413,8 +413,8 @@ The Dash, the Boki base's first minigame (briefs/design/GARDEN.md 5.1, scripts/h
 | friend_step | 0.05 |
 | close_s | 0.6 |
 | result_doc | The last one home and the winner grow apart by rival_step; two non-rivals home within close_s of each other grow closer by friend_step. |
-| train | {"great": 2, "good": 1, "dojo": 1, "happy_at": 60.0, "happy_mult": 1.25, "min_food": 12.0, "food": 6.0, "joy_great": 4.0, "joy_else": -2.0} |
-| train_doc | The Training post's solo lap (base_race.gd solo): Speed points per cheer grade (a miss is 0), +dojo per cheer that was not a miss with a Dojo built, x happy_mult at joy >= happy_at; the Boki needs min_food Full to start and spends food and the race's energy; joy moves by joy_great with any great cheer, else joy_else. Capped by level (Care.stat_cap). |
+| train | {"min_food": 12.0, "food": 6.0, "joy_great": 4.0, "joy_else": -2.0} |
+| train_doc | The Training post's solo lap (base_race.gd solo): it pays Speed stat bites into the bag and uses one limited drill run (TrainRuns.pay_drill, care.json train_runs), never raw points. The Boki needs min_food Full to start and spends food and the race's energy; joy moves by joy_great with any great cheer, else joy_else. |
 | twists | [{"id": "sprint", "game": "dash", "name": "Sprint week", "note": "Straights are quicker", "mult": {"straight": 1.3}}, {"id": "night_seek", "game": "seek", "name": "Night Seek", "note": "The hunt is after dark", "night": true}, {"id": "seven_up", "game": "volley", "name": "Seven-up", "note": "First to 7 points", "to_win": 7}, {"id": "mud", "game": "dash", "name": "Mud week", "note": "The climb is heavy going", "mult": {"climb": 0.8}}, {"id": "high_tide", "game": "dash", "name": "High tide", "note": "The water runs deep and slow", "mult": {"water": 0.75}}, {"id": "two_streams", "game": "dash", "name": "Two streams", "note": "A second water stretch", "swap": {"at": 3, "kind": "water", "mult": 0.7}}, {"id": "gusty", "game": "dash", "name": "Gusty week", "note": "Jumps carry further", "mult": {"jump": 1.3}}, {"id": "wild", "game": "dash", "name": "Wild week", "note": "Anyone can win: wobble doubles", "wobble": 0.5}] |
 | twists_doc | The weekly event: one format a week, picked by the real week number (unix days / 7) mod the list, no server, shown on the race post and pinned with the winner's photo to the showcase wall. 'game' is the minigame it tweaks (dash, seek, volley); other games play as usual that week. Tweaks: 'mult' multiplies everyone's Dash pace on that stretch kind; 'wobble' replaces the Dash wobble; 'swap' {at, kind, mult} changes one Dash stretch; 'night' forces the Seek's night rule; 'to_win' replaces the Volley's points to win. |
 | week_s | 604800 |
@@ -984,6 +984,8 @@ Raising a Boki at home (scripts/core/care.gd). natural_death: false means neglec
 | care_day_s_doc | Seconds before the same kind of care (petting, fetch, a meal, a chat, training) builds trust again: one farm day (home.gd DAY_LEN). Before 11-09 it was once per expedition, so a Boki raised only at home stopped growing closer. |
 | stat_budget | {"cap_base": 12, "cap_per_level": 6, "cap_max": 100, "total_cap": 240, "grow_max": 0.12, "bands": [[50, 1.0], [80, 0.5], [100, 0.25]], "loose_rate": 2, "expedition_stat_points": 25} |
 | stat_budget_doc | grow_max: extra body size at the full total_cap (StatBudget.growth, read by Evo.dress as evo_scale), 0.12 = 12% taller; it follows the square root of total/total_cap, so 60 points already show 6%. Caps and diminishing gains for the four stats (StatBudget, decision 0022). A stat's cap is min(cap_max, cap_base + cap_per_level x level); the four together stop at total_cap. bands: [last point of the band, share of each gain that counts]. loose_rate: points a respec set loose come back this many a gain, ignoring bands. expedition_stat_points: match_mods reads at most this many points of each stat; minigames read all. |
+| train_runs | {"daily": {"race": 1, "drill": 1}, "per_match": {"race": 1, "drill": 1}, "match_max_day": 2, "bank_max": 4, "names": {"race": "Races", "drill": "Drills"}, "drill_bites": {"hit": 1, "perfect": 2, "dojo": 1}} |
+| train_runs_doc | Limited runs (TrainRuns, the stat economy in briefs/design/GARDEN_MODERN_BALANCE.md). daily: charges each kind tops up to at the start of a day (race = a win in any garden game GardenPrizes pays: Dash, Shove, Seek, Volley...; a loss pays nothing and uses none; drill = the Training post drill or training lap). per_match: charges a finished match adds, at most match_max_day matches a day; a kind never banks past bank_max. drill_bites: stat bites a charged drill or lap puts in the bag (hit = at least one mark hit, perfect = every mark great, dojo = extra with a Dojo). A win with no charge left still plays as a friendly and pays nothing (no prize, no cup step); a drill with no mark hit uses no charge. |
 | run_payoff | {"stats_w": 0.75, "lean_w": 0.25, "carry_max": 0.15, "summon_max": 0.1} |
 | run_payoff_doc | How raising pays off on runs (RunPayoff, decision 0079). score 0..1 = stats_w x (expedition stat points / their max) + lean_w x lean strength (Evo.lean). Carry passive amounts x (1 + score x carry_max); summon window x (1 + score x summon_max). The carry passive still stops at its per-stat carry cap (KinParts.OWNER_STATS), so this never lifts a Boki past the cap a wild one has. |
 
@@ -1182,7 +1184,7 @@ Decor with a purpose (briefs/design/GARDEN_MODERN.md section 5 rank 7; scripts/h
 
 ## evo_paths (`content/rules/evo_paths.json`)
 
-Path meter for branching finals (scripts/core/evo_path.gd; briefs/design/GARDEN_MODERN.md section 3; docs/decisions/0022). Lines are keyed by the species that branches in content/rules/evolve.json; the swap, its level and the Ink lines are Evo's (decision 0024). Each end: form id (art at art/kin/<form>/<form>.glb, missing = the Boki waits), path (the affinity of its path tokens, garden_items.json), stat (its key stat, Care.STATS), type (its second type, lean.json), traits (any at trait_at or more gives a care pip), sports (games whose Cup Ribbons count, garden_prizes.json ids). The end with more pips wins; tie: the stat lead; still tied: undecided.
+Path meter for branching finals (scripts/core/evo_path.gd; briefs/design/GARDEN_MODERN.md section 3; docs/decisions/0022). Lines are keyed by the species that branches in content/rules/evolve.json; the swap, its level and the Ink lines are Evo's (decision 0024). Each end: form id (art at art/kin/<form>/<form>.glb, missing = the Boki waits), path (the affinity of its path tokens, garden_items.json), stat (its key stat, Care.STATS), type (its second type, lean.json), traits (any at trait_at or more gives a care pip), sports (games whose Cup Ribbons count, garden_prizes.json ids). Its leaning adds pips to the end of its path too (playstyle.json tiers, path_pips). The end with more pips wins; tie: the stat lead; still tied: undecided.
 
 | Setting | Value |
 |---|---|
@@ -1343,6 +1345,8 @@ Shaping items (scripts/core/garden_items.gd; design briefs/design/GARDEN_MODERN.
 |---|---|
 | lair_drop | {"chance": 0.35, "ids": ["thumpnut", "shellbark_chew", "zipseed", "hushpearl"]} |
 | lair_drop_doc | The expedition's lair pile: chance 0..1 that a boss pile also holds one of these stat bites (picked at random). They are carried home as treasure marked bag (Loot.VALUABLES) and banked in the garden bag; the match is the only place this is rolled. |
+| kill_drop | {"chance": {"skitter": 0.02, "spitter": 0.02, "bomber": 0.02, "sentinel": 0.08, "brute": 0.2, "warden": 0.4, "glimmer": 0.4}, "bite": {"skitter": "zipseed", "spitter": "hushpearl", "bomber": "thumpnut", "sentinel": "shellbark_chew", "brute": "thumpnut", "warden": "any", "glimmer": "any"}, "any": ["thumpnut", "shellbark_chew", "zipseed", "hushpearl"]} |
+| kill_drop_doc | Stat bites from kills in a match (BiteDrops, scripts/match/bite_drops.gd, called from GearDrops.run_table; the stat economy in briefs/design/GARDEN_MODERN_BALANCE.md). chance: 0..1 per kill by drop table (absent = never; lair bosses use lair_drop). bite: the bite that table drops, so what you hunt decides the stat (quick skitters Speed, spitters Focus, bombers and brutes Power, sentinels Guard); any = one of the any list at random. A match has about 40 small kills and a few guards, so this is about 1 to 2 bites a match. Carried out like any treasure, banked in the garden bag. |
 | pip | 6 |
 | pip_doc | Affinity points one worn path token adds to its path when a form is chosen (Evo.leading); the same as one meal of that path's food. |
 | max_tokens | 3 |
@@ -2278,6 +2282,25 @@ Ground pickup reach (scripts/match/pickup_reach.gd, docs/PICKUP_REACH.md). Each 
 | bot | {"radius": 1.4, "height": 1.0} |
 | interact | {"radius": 1.5, "height": 1.2} |
 
+## playstyle (`content/rules/playstyle.json`)
+
+Playstyle growth (scripts/core/play_style.gd, briefs/design/BOKI_PLAYSTYLE_GROWTH.md, decision 0181). How a Boki is played with builds its four affinities (Evo: fierce, steadfast, curious, swift). The affinity in the lead is its leaning; how far it leads the next one sets the tier. The leaning decides which stat takes the larger share of what an expedition teaches (run_growth), adds pips to that end of a path meter (EvoPath) and sets which body parts its mutations roll (Evo.on_level). The garden gives leaning points, never stat points.
+
+| Setting | Value |
+|---|---|
+| stat | {"fierce": "power", "steadfast": "guard", "curious": "focus", "swift": "speed"} |
+| stat_doc | The stat each affinity focuses (Care.STATS). |
+| garden | {"day_cap": 10, "care": {"petted": {"steadfast": 1}, "talked": {"curious": 1}, "played": {"swift": 1}, "pet_win": {"fierce": 1}}, "toy": {"toy_ball": {"swift": 1}, "toy_post": {"fierce": 1}, "toy_tub": {"curious": 1}, "toy_stone": {"steadfast": 1}, "toy_dig": {"curious": 1}}, "game": {"dash": {"swift": 2}, "relay": {"swift": 2}, "kite": {"swift": 2}, "shove": {"fierce": 1, "steadfast": 1}, "seek": {"curious": 2}, "echo": {"curious": 2}, "lantern": {"curious": 2}, "volley": {"curious": 1, "swift": 1}, "show": {}}, "drill": {"power": {"fierce": 2}, "guard": {"steadfast": 2}, "speed": {"swift": 2}, "focus": {"curious": 2}}} |
+| garden_doc | Affinity points per garden activity. care: the first care of each kind in a farm day (Care.care_day; a meal leans by its food in Evo.eat, training by its drill). toy: one finished play at a toy. game: one finished garden game, won or lost (GardenPrizes ids). drill: one Training post drill of that stat, or a training lap (speed). day_cap: most points one Boki takes from the garden in a day, so a day at home weighs about as much as one expedition. |
+| extraction | {"hits": {"fierce": 0.4}, "kos": {"fierce": 3.0}, "revives": {"steadfast": 6.0}, "won": {"steadfast": 2.0}, "skills": {"curious": 0.6}, "caught": {"curious": 4.0}, "throws": {"swift": 0.8}} |
+| extraction_doc | Affinity points per unit of what the Boki did on an expedition (Match kin_runs stats): hits it landed, knockouts, times it revived you, getting out (won 1), skills used, wild Boki caught, times it was thrown. |
+| tiers | [{"at": 0, "word": "Balanced", "focus": 0.25, "path_pips": 0, "stray": 0.5, "signature": false}, {"at": 20, "word": "Leans", "focus": 0.4, "path_pips": 1, "stray": 0.3, "signature": false}, {"at": 60, "word": "Strongly", "focus": 0.55, "path_pips": 2, "stray": 0.15, "signature": true}, {"at": 150, "word": "Devoted", "focus": 0.7, "path_pips": 3, "stray": 0.05, "signature": true}] |
+| tiers_doc | at: affinity points the leaning leads the next affinity by (Evo.scores). word: the tier in player words. focus: share of an expedition's stat units its leaning's stat takes (the other three split the rest evenly; 0.25 = even). path_pips: pips for the end of a path meter whose path is its leaning. stray: chance a mutation comes from a random affinity's parts, not its leaning's. signature: its leaning's signature part can roll. |
+| signature | {"fierce": "horns", "steadfast": "shell", "curious": "third_eye", "swift": "wings"} |
+| signature_doc | The part of each affinity (Evo.AFF parts) only a Boki strongly of that leaning can grow. |
+| run_growth | {"extracted": 6.0, "lost": 2.0, "second_k": 0.7} |
+| run_growth_doc | Stat units (StatBudget.add units: 1 unit = 1 point below 50, less above) a Boki earns for one expedition it went on: extracted when you got out, lost when you did not; the second Boki you brought earns second_k of it. Split over the four stats by its tier's focus. |
+
 ## portraits (`content/rules/portraits.json`)
 
 
@@ -2605,6 +2628,8 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 | go_timeout | 20 |
 | joy_gain | 3 |
 | stat_gain | 1 |
+| day_cap | 3 |
+| day_cap_doc | Most stat points one Boki gains from toys in a day, at home and while you are away together (HomeToys.day_room; the stat economy in briefs/design/GARDEN_MODERN_BALANCE.md). Past it a toy play is joy only. |
 | max_players | 2 |
 | fav_after | 3 |
 | fav_after_doc | Plays at toys before a Boki crowns its most-used toy as its favourite (FavToy). |
