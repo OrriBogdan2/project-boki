@@ -376,7 +376,7 @@ func _knock_extras(g: Hunter, b: Hunter) -> void:
 func _glide_spike(g: Hunter, b: Hunter, spike: Callable, what: String) -> void:
 	var at := home + Vector3(4.0, 10.0, -3.0)
 	_fresh(b)
-	_glide(b, at)
+	_glide(b, at, GlideSpike.slam_heat)      # 11-27: a slam burns half the heat and spikes what it empties
 	await _run(0.2)
 	stun_on = b
 	stun_max = 0.0
@@ -387,7 +387,7 @@ func _glide_spike(g: Hunter, b: Hunter, spike: Callable, what: String) -> void:
 	ok(b.grounded and bot_stun >= GlideSpike.land_stun - 0.05, "glide spike: %s spikes a gliding bot" % what,
 		"stun %.2f grounded %s" % [bot_stun, b.grounded])
 	b.teleport(home + Vector3(-6.0, 0, 9.0))
-	Net.lobby_emit("dn", {"c": "glide", "at": [at.x, at.y, at.z]})
+	Net.lobby_emit("dn", {"c": "glide", "at": [at.x, at.y, at.z], "fuel": GlideSpike.slam_heat})
 	var t := 0.0
 	while not g.gliding and t < 5.0:
 		await _run(0.1)
@@ -419,13 +419,13 @@ func _glide_dive(g: Hunter) -> void:
 	ok(not g.plunging(), "glide dive: the pose ends when the player's dive ends", "%.1f s" % t)
 	await _place(g, home + PARK)
 
-## A body gliding at `at` with a cool glider and the glide held.
-static func _glide(t_v: Hunter, at: Vector3) -> void:
+## A body gliding at `at` with `fuel` heat left (a cool glider by default) and the glide held.
+static func _glide(t_v: Hunter, at: Vector3, fuel := 1.0) -> void:
 	t_v.teleport(at)
 	t_v.grounded = false
 	t_v.gliding = true
 	t_v.inp["glide"] = true
-	t_v.glide_fuel = 1.0
+	t_v.glide_fuel = fuel
 	t_v.glide_cd = 0.0
 	t_v.shot_down = false
 
@@ -553,7 +553,7 @@ func _on_msg(topic: String, data, _from: String) -> void:
 		"glide":
 			if m and m.player:
 				_fresh(m.player)
-				_glide(m.player, _v(data["at"]))
+				_glide(m.player, _v(data["at"]), float(data.get("fuel", 1.0)))
 		"dive":
 			if m and m.player:
 				_fresh(m.player)

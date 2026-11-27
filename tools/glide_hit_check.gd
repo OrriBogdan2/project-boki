@@ -11,6 +11,7 @@ extends "res://tools/abyss_check.gd"
 const SHOT := 10.0          # damage of the test shot
 const KNOCK := 12.0         # m/s of the test shove (a hard knock is over 4)
 const STUN := 0.5           # s of the test stun
+const HOLD_S := 0.5         # s a press is held to open the glider (11-27: glide_engage 0.4 s, then a step or two)
 
 const AIR_HEROES := ["archer", "juggernaut", "gunslinger", "bulwark"]
 const AIR_HIT_AT := 0.05    # s into the state the hit lands; in an air dash, the first step its i-frames are over
@@ -38,15 +39,16 @@ func _glide(fuel: float) -> void:
 	_steps(0.1)
 	h.glide_fuel = fuel
 
-## Lets go of glide for a step, then presses it (the glide button too) for up to `t` s: true if it opens.
-func _press_opens(t: float) -> bool:
+## Lets go of glide for a step, then presses it (the glide button too, a fresh press: it opens after the hold) for
+## up to `t` s: true if it opens. `btn` false is the scripted hold, which opens when the air time is long enough.
+func _press_opens(t: float, btn := true) -> bool:
 	h.inp["glide"] = false
 	h.inp["glide_btn"] = false
 	m.step(Match.DT)
 	var left := t
 	while left > 0.0 and not h.gliding:
 		h.inp["glide"] = true
-		h.inp["glide_btn"] = true
+		h.inp["glide_btn"] = btn
 		m.step(Match.DT)
 		left -= Match.DT
 	h.inp["glide_btn"] = false
@@ -73,11 +75,15 @@ func _shot() -> void:
 
 func _spike() -> void:
 	_glide(1.0)
+	h.pos.y += 60.0      # 11-27: the spike falls at 80 m/s after its 0.18 s freeze, so start high enough to see it
 	h.glide_fuel = 0.5 * SHOT * HunterMove.hit_heat_per_dmg
 	h.hurt(SHOT, foe)
 	ok(not h.gliding and h.shot_down and h.stun_t > 0.0, "a shot that fills the heat spikes: glider shut, stunned")
-	ok(h.vel.y <= -6.0, "...plummeting (%.1f m/s)" % h.vel.y)
-	ok(not _press_opens(0.5), "...and a press can't reopen it in the air")
+	ok(absf(h.vel.y) < 1.0, "...hanging for its %.2f s freeze (%.1f m/s)" % [GlideSpike.air_stun, h.vel.y])
+	_steps(GlideSpike.air_stun + 0.1)
+	ok(h.vel.y <= -0.9 * GlideSpike.fall_vy,
+		"...then plummeting at the spike's %.0f m/s (%.1f m/s)" % [GlideSpike.fall_vy, h.vel.y])
+	ok(not _press_opens(0.3), "...and a press can't reopen it in the air")
 	var t := 0.0
 	var landed_stun := -1.0
 	while t < 4.0 and landed_stun < 0.0:
@@ -109,7 +115,7 @@ func _knock() -> void:
 	_reset(spot, Vector3(0, -2.0, 0))
 	h.air_t = 1.0
 	h.impulse(Vector2(KNOCK * h.mass(), 0.0))
-	ok(not _press_opens(0.3), "a shut glider doesn't open in the first 0.3 s of a hard knock")
+	ok(not _press_opens(0.3, false), "a shut glider doesn't open in the first 0.3 s of a hard knock")
 
 func _stun() -> void:
 	_glide(1.0)
@@ -120,7 +126,7 @@ func _stun() -> void:
 	ok(h.vel.y < -2.0 * HunterMove.glide_sink, "...and the body falls (%.1f m/s)" % h.vel.y)
 	ok(not _press_opens(0.1), "...a press during the stun doesn't open it")
 	_wait_stun()
-	ok(_press_opens(Match.DT), "...a press opens it the step the stun is over")
+	ok(_press_opens(HOLD_S), "...a press held 0.4 s opens it once the stun is over")
 	# Grimble's arm: stunned for the whole reel, so the glider is shut until it lets go
 	_glide(1.0)
 	var to := spot + Vector3(6.0, 0.0, 0.0)
@@ -134,7 +140,7 @@ func _stun() -> void:
 		m.step(Match.DT)
 		t += Match.DT
 	_wait_stun()
-	ok(_press_opens(Match.DT), "...a press opens it once the reel and its stun are over")
+	ok(_press_opens(HOLD_S), "...a press held 0.4 s opens it once the reel and its stun are over")
 
 ## The air-knock hits, from the content: Kael's LMB, his RMB Smash push, Albert's full Crushing Blow, a stun.
 func _air_hits() -> Dictionary:

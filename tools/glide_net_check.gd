@@ -1,5 +1,5 @@
 extends "res://tools/displace_net_check.gd"
-## --glide-net-check: the glide button's instant open (inp.glide_btn, local input only) reaches the other game.
+## --glide-net-check: the glide button's open (inp.glide_btn, local only; held 0.4 s) reaches the other game.
 ## Two real games over the desktop relay (the --displace-net-check harness): the guest's hunter falls from HIGH
 ## and, FALL_S into the fall, presses the glide button (or, for comparison, a second Space press) and holds it.
 ## The guest owns its hunter, so the open is decided on its own game; the host's copy only mirrors the
@@ -10,7 +10,8 @@ extends "res://tools/displace_net_check.gd"
 ## stays within JUMP_CM of the guest's own biggest step (NetSmooth keeps the curve off a speed the snapshots
 ## don't show). Lines: GNET ok|FAIL <what>, GNET <mode> rows.
 
-const HIGH := 14.0           # m above the strip: a fall long enough to press mid-fall and glide a while
+const HIGH := 24.0           # m above the strip: a fall long enough to press mid-fall, hold 0.4 s and glide a while
+const OPEN_FRAMES := Vector2i(22, 27)      # steps a press is held before the glider opens (glide_engage, 0.4 s = 24)
 const FALL_S := 0.5          # s of falling before the press
 const HOLD_S := 0.8          # s the press is held
 const CLOSE_S := 0.5         # s the guest falls on after letting go (the glider closes on the first of them)
@@ -67,8 +68,9 @@ func _host() -> void:
 		# median: one loaded-box hitch does not decide it
 		med[mode] = (sorted[int(DROPS / 2.0) - 1] + sorted[int(DROPS / 2.0)]) / 2.0
 		print("%s %s: guest open frames after the press %s; host copy lag (s) %s" % [tag, mode, frames, lags])
-		ok(frames.max() <= (1 if mode == "btn" else 99) and frames.min() >= 1,
-			"%s: the guest's own glider opens mid-fall (button: on the press step)" % mode, str(frames))
+		ok(frames.max() <= OPEN_FRAMES.y and frames.min() >= OPEN_FRAMES.x,
+			"%s: the guest's own glider opens mid-fall once the press is held 0.4 s (frames %d to %d)"
+			% [mode, OPEN_FRAMES.x, OPEN_FRAMES.y], str(frames))
 		ok(lags.max() < 9.0, "%s: the host's copy opens on every drop" % mode, str(lags))
 		ok(med[mode] <= LAG_TOL and lags.max() <= WORST_S,
 			"%s: the host's copy opens within %.3f s (%.1f frames) of the guest's own (median; every drop < %.1f s)"

@@ -11,7 +11,7 @@ const SHOT := 10.0  # a player's hit on the overheated glider
 ## key -> [op, target, unit, note], as move_feel_check's T.
 const T := {
 	"overheat_burn_s": ["~", [0.030, 0.036], "hp/s", "[?] health share burnt a second (hunter_move overheat_burn)"],
-	"spike_fall_vy": ["~", [5.95, 6.05], "m/s", "[?] heat spike's plunge (hunter_move glide_spike.fall_vy)"],
+	"spike_fall_vy": ["~", [79.0, 81.0], "m/s", "[notes 11-25] hangs 0.18 s, then SET to 8000 uu/s down"],
 	"pad_vy": ["~", [16.95, 17.05], "m/s", "[?] Spring pad launch up (hunter_move jump_pad.vy)"],
 	"pad_apex_m": ["~", [9.0, 10.5], "m", "[?] pad apex at [game data] gravity 14.7"],
 }
@@ -24,11 +24,13 @@ static func run(c) -> void:
 	var y: float = h.pos.y
 	h.hp = h.max_hp
 	h.heat_burn = 0.0
+	h.air_t = HunterFeel.glide_engage  # the 0.4 s hold served, so the whole window counts as overheated glide
 	h.inp["jump"] = true
 	for i in int(BURN_S / c.DT):
 		h.inp["glide"] = true
 		h.inp["move"] = Vector2.ZERO
-		h.glide_fuel = 0.0
+		if h.gliding:
+			h.glide_fuel = 0.0  # (once open: an empty tank would refuse the opening)
 		c.m.step(c.DT)
 		h.pos.y = y
 	c.rec("overheat_burn_s", (h.max_hp - h.hp) / h.max_hp / BURN_S, T)
@@ -36,6 +38,11 @@ static func run(c) -> void:
 	c.ok(h.gliding, "the overheated glider is still open before the spike shot")
 	h.hurt(SHOT, c.m.hunters[1])
 	c.ok(h.shot_down and not h.gliding, "a shot on the overheated glider spikes it")
+	for i in 30:  # the body hangs 0.18 s first (vy 0); read the fall after that
+		c._clear_inp()
+		c.m.step(c.DT)
+		if h.vel.y < -1.0:
+			break
 	c.rec("spike_fall_vy", -h.vel.y, T)
 	c._clear_inp()
 	# Spring pad from a standstill on flat ground: the launch speed and the apex above the pad.

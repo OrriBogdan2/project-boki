@@ -226,5 +226,6 @@ func _hold_to_open() -> void:
 	ok(not bool(steps["tap_open"]), "feathering: a tap does not reopen it")
 	var again: float = (int(steps["open2"]) - int(1.6 / Match.DT)) * Match.DT
 	print("PARITY feathering reopen takes %.2f s of hold" % again)
-	ok(int(steps["open2"]) >= 0 and absf(again - GLIDE_HOLD) <= 0.06, "feathering: holding again reopens it after the hold (%.2f s)" % again)
+	ok(int(steps["open2"]) >= 0 and absf(again - GLIDE_HOLD) <= 0.06,
+		"feathering: holding again reopens it after the hold (%.2f s)" % again)
 
