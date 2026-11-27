@@ -88,3 +88,12 @@ UVs match, refs = turnaround front/side/back), pasted ONLY inside the r1 void UV
 spring, face, gloves and bells keep the live texels. The emission layer is re-derived from the new void albedo (r1 formula; r3 stars and
 box-mouth glow kept). Mesh, skin, rig and clips are byte-identical to r4 (all 2821 accessors). `ostra_meshy_comp_B.jpg` is the new embedded albedo.
 Recipe: /home/boki/gens/hunter-round-1124/motley/r5/tools/{pad.py,mkfix7.py,compact.py} (pad.py live.glb tex.png pad.png; mkfix7.py r4.glb pad.png out; compact.py).
+
+**r12 (2026-11-27, job 20261127-180721-a1):** the void read electric indigo/hot pink at the match camera; its albedo is now the
+Meshy void retexture w28 (r8 round) histogram-matched in full to the turnaround void crops, darkened x0.55, saturation x0.75, red x1.22
+(hue back to violet), emission rebuilt hue-locked violet (swirl 0.12, box-mouth 0.06) with 400 sparse star dots. Only texels inside
+the void UV mask change (mask rebuilt from the r7->r10 void diff: /home/boki/gens/hunter-round-1124/motley/r12/void_uvmask_rec.png).
+All 2822 accessors (mesh, skin, rig, clips) byte-identical to r10; glb compacted 10.0 -> 7.3 MB. Game view, side, void pixels
+(live -> r12): value 0.71 -> 0.64, hue 273 -> 267 (turnaround 270), pink share 15% -> 12%. (Lowering painted rim_far 0.5 -> 0.08 was
+tested: no measurable change, so the look rule is unchanged.) Recipe: /home/boki/gens/hunter-round-1124/motley/r12/tools/mk12.py
+r10.glb ../r8/mx/w28/tex0_base_color.png c5.glb --match=1.0 --dark=0.55 --sat=0.75 --red=1.22 --swirl=0.12 --star=0.55 --nstars=400 --srad=4 --mouth=0.06
