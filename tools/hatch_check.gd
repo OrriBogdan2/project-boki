@@ -1,5 +1,5 @@
 extends RefCounted
-## --hatch-check: hatching is a small, personal moment (docs/POSITIONING.md). An egg (EggHatch)
+## --hatch-check: hatching is a small, personal moment. An egg (EggHatch)
 ## cracks; the shell shrinks away within a second of the top coming off, and the Boki hops out, looks
 ## around, turns to look at you and bounces, all inside 2.5 s after the pop, and the shell throws no bursts, rings or flashes. The closer look after
 ## it (KinReveal) has no flash, rays, fanfare or rarity colours: the Boki finds you and calls to you,
@@ -14,24 +14,43 @@ extends RefCounted
 ## line (NameStep): a suggestion from the species name, the dice, Keep, a rude name refused, skipping keeps the
 ## suggestion, save and load, and your first catch named on the results screen. Never touches the real save.
 
-const MAX_FRAMES := 6000      # (a hang guard counted in frames, not seconds)
+const MAX_FRAMES := 6000  # (a hang guard counted in frames, not seconds)
+const HATCH_GD := "res://scripts/ui/hatch.gd"
 var bad := 0
 var main: Node
 
+
 func ok(cond: bool, what: String) -> void:
 	print("HATCH %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 ## Records what the egg asks the effects layer for.
-class FxSpy extends Fx:
+class FxSpy:
+	extends Fx
 	var got_bursts: Array = []
 	var got_rings := 0
+
 	func _ready() -> void:
 		pass
-	func burst(_at: Vector3, col: Color, amount := 14, _speed := 4.0, _life := 0.5, _grav := 12.0, _size := 1.0, _dir := Vector3.UP, _spread := 180.0) -> void:
+
+	func burst(
+		_at: Vector3,
+		col: Color,
+		amount := 14,
+		_speed := 4.0,
+		_life := 0.5,
+		_grav := 12.0,
+		_size := 1.0,
+		_dir := Vector3.UP,
+		_spread := 180.0
+	) -> void:
 		got_bursts.append([col, amount])
+
 	func ring(_at: Vector3, _radius: float, _col: Color, _dur := 0.35, _order := 0) -> void:
 		got_rings += 1
+
 
 func run(m: Node) -> void:
 	main = m
@@ -41,7 +60,8 @@ func run(m: Node) -> void:
 	# ---------------------------------------------------------------- 1. the egg
 	var holder := Node3D.new()
 	main.add_child(holder)
-	var cam := Camera3D.new(); cam.position = Vector3(0, 2.0, 5.0)
+	var cam := Camera3D.new()
+	cam.position = Vector3(0, 2.0, 5.0)
 	holder.add_child(cam)
 	cam.make_current()
 	cam.look_at(Vector3(0, 0.4, 0))
@@ -50,14 +70,29 @@ func run(m: Node) -> void:
 	var sp := "cindle"
 	var egg := EggHatch.new(sp, spy, 0.32, 0.42, 1.0, {"species": sp})
 	holder.add_child(egg)
-	var seen := {"t_pop": -1.0, "t_shell": -1.0, "t_done": -1.0, "ymin": 1e9, "ymax": -1e9, "popped": false, "done": false, "clock": 0.0, "face_err": 9.0, "looked_away": false}
-	egg.popped.connect(func(k: Node3D):
-		seen["popped"] = true
-		var want := EggHatch._yaw_to(k.global_position, cam.global_position)
-		seen["face_err"] = absf(wrapf(k.rotation.y - want, -PI, PI)))
-	egg.done.connect(func():
-		seen["done"] = true
-		seen["t_done"] = float(seen["clock"]))
+	var seen := {
+		"t_pop": -1.0,
+		"t_shell": -1.0,
+		"t_done": -1.0,
+		"ymin": 1e9,
+		"ymax": -1e9,
+		"popped": false,
+		"done": false,
+		"clock": 0.0,
+		"face_err": 9.0,
+		"looked_away": false
+	}
+	egg.popped.connect(
+		func(k: Node3D):
+			seen["popped"] = true
+			var want := EggHatch._yaw_to(k.global_position, cam.global_position)
+			seen["face_err"] = absf(wrapf(k.rotation.y - want, -PI, PI))
+	)
+	egg.done.connect(
+		func():
+			seen["done"] = true
+			seen["t_done"] = float(seen["clock"])
+	)
 	egg.start()
 	var frames := 0
 	while not seen["done"] and frames < MAX_FRAMES:
@@ -65,26 +100,45 @@ func run(m: Node) -> void:
 		frames += 1
 		seen["clock"] = float(seen["clock"]) + tree.root.get_process_delta_time()
 		if is_instance_valid(egg.kin_node):
-			if seen["t_pop"] < 0.0: seen["t_pop"] = float(seen["clock"])
+			if seen["t_pop"] < 0.0:
+				seen["t_pop"] = float(seen["clock"])
 			seen["ymin"] = minf(float(seen["ymin"]), egg.kin_node.global_position.y)
 			seen["ymax"] = maxf(float(seen["ymax"]), egg.kin_node.global_position.y)
 			if seen["t_shell"] < 0.0 and egg.cap.scale.x < 0.02 and egg.cup.scale.x < 0.02:
 				seen["t_shell"] = float(seen["clock"])
 			if not seen["popped"]:
 				var want2 := EggHatch._yaw_to(egg.kin_node.global_position, cam.global_position)
-				if absf(wrapf(egg.kin_node.rotation.y - want2, -PI, PI)) > 0.8: seen["looked_away"] = true
+				if absf(wrapf(egg.kin_node.rotation.y - want2, -PI, PI)) > 0.8:
+					seen["looked_away"] = true
 	ok(seen["done"], "the egg hatches all the way through (%.1f s)" % float(seen["clock"]))
 	var shell_s: float = float(seen["t_shell"]) - float(seen["t_pop"])
 	ok(seen["t_shell"] > 0.0 and shell_s < 1.0, "the shell is gone %.2f s after the pop (want under 1 s)" % shell_s)
-	var beat_s: float = float(seen["t_done"]) - float(seen["t_pop"])   # game seconds (the clock sums frame deltas)
+	var beat_s: float = float(seen["t_done"]) - float(seen["t_pop"])  # game seconds (the clock sums frame deltas)
 	ok(beat_s > 0.0 and beat_s < 2.5, "the whole hop-look-face-bounce beat takes %.2f s (want under 2.5 s)" % beat_s)
-	ok(float(seen["ymax"]) - float(seen["ymin"]) > 0.15, "the Boki hops (%.2f m of height)" % (float(seen["ymax"]) - float(seen["ymin"])))
+	ok(
+		float(seen["ymax"]) - float(seen["ymin"]) > 0.15,
+		"the Boki hops (%.2f m of height)" % (float(seen["ymax"]) - float(seen["ymin"]))
+	)
 	ok(seen["looked_away"], "it looks around before it finds you")
-	ok(seen["popped"] and float(seen["face_err"]) < 0.25, "then it looks right at you (off by %.2f rad)" % float(seen["face_err"]))
+	ok(
+		seen["popped"] and float(seen["face_err"]) < 0.25,
+		"then it looks right at you (off by %.2f rad)" % float(seen["face_err"])
+	)
 	ok(spy.got_rings == 0, "no ring bursts round the egg (%d)" % spy.got_rings)
 	var big := spy.got_bursts.filter(func(b): return int(b[1]) > 8)
-	var gold := spy.got_bursts.filter(func(b): return (b[0] as Color).is_equal_approx(Color("fff6c0")) or (b[0] as Color).is_equal_approx(UI.GOLD))
-	ok(big.is_empty() and gold.is_empty(), "only a few flakes of shell, no sparkle showers (%d bursts, largest %d)" % [spy.got_bursts.size(), spy.got_bursts.map(func(b): return int(b[1])).max() if not spy.got_bursts.is_empty() else 0])
+	var gold := spy.got_bursts.filter(
+		func(b): return (b[0] as Color).is_equal_approx(Color("fff6c0")) or (b[0] as Color).is_equal_approx(UI.GOLD)
+	)
+	ok(
+		big.is_empty() and gold.is_empty(),
+		(
+			"only a few flakes of shell, no sparkle showers (%d bursts, largest %d)"
+			% [
+				spy.got_bursts.size(),
+				spy.got_bursts.map(func(b): return int(b[1])).max() if not spy.got_bursts.is_empty() else 0
+			]
+		)
+	)
 	holder.queue_free()
 	await tree.process_frame
 	await _nest_reveal(sp)
@@ -93,20 +147,22 @@ func run(m: Node) -> void:
 	rec["shimmer"] = true
 	rec["rare"] = true
 	var rv := KinReveal.new(sp, rec)
-	var twin := Node3D.new()      # (the same Boki out in the world behind)
+	var twin := Node3D.new()  # (the same Boki out in the world behind)
 	rv.twin = twin
 	main.add_child(twin)
 	main.add_child(rv)
 	var named := {"go": false}
 	rv.proceed.connect(func(): named["go"] = true)
-	for i in 4: await tree.process_frame
+	for i in 4:
+		await tree.process_frame
 	ok(not ("rays" in rv) and not ("flash" in rv) and not rv.has_method("_jingle"), "no light rays, flash or fanfare")
 	ok(rv.name_btn.disabled and not rv.met, "it can't be named before it has met you")
 	ok(not twin.visible and KinReveal.DIM.a >= 0.9, "the world behind is greyed out and its copy of the Boki is hidden")
 	var hot: Array = []
 	for n in rv.find_children("*", "ColorRect", true, false):
 		var c := (n as ColorRect).color
-		if c.a > 0.7 and c.get_luminance() > 0.5: hot.append(n.name)
+		if c.a > 0.7 and c.get_luminance() > 0.5:
+			hot.append(n.name)
 	ok(hot.is_empty(), "nothing flashes white (%s)" % [hot])
 	frames = 0
 	while not rv.met and frames < MAX_FRAMES:
@@ -115,14 +171,23 @@ func run(m: Node) -> void:
 	ok(rv.met and not rv.name_btn.disabled, "after it looks at you, you can name it (%d frames)" % frames)
 	var face := wrapf(rv.kin.rotation.y + rv.turn.rotation.y - PI, -PI, PI)
 	ok(absf(face) < 0.2, "it faces you (off by %.2f rad)" % face)
-	ok(rv.sub_lbl.text.to_lower().contains("looking at you") and not rv.title_lbl.text.contains("!") and not rv.title_lbl.text.contains("RARE"),
-		"quiet words: \"%s\" / \"%s\"" % [rv.title_lbl.text, rv.sub_lbl.text])
+	ok(
+		(
+			rv.sub_lbl.text.to_lower().contains("looking at you")
+			and not rv.title_lbl.text.contains("!")
+			and not rv.title_lbl.text.contains("RARE")
+		),
+		'quiet words: "%s" / "%s"' % [rv.title_lbl.text, rv.sub_lbl.text]
+	)
 	var sparkle := rv.kin.get_node_or_null("FurSparkle") as CPUParticles3D
 	ok(sparkle != null and sparkle.amount <= 8, "a shimmer is a faint sparkle in its coat")
 	var labels: Array = rv.info.find_children("*", "Label", true, false)
 	var golden := labels.filter(func(l): return (l as Label).get_theme_color("font_color").is_equal_approx(UI.GOLD))
 	ok(golden.is_empty(), "no gold rarity text on its card (%d)" % golden.size())
-	ok(labels.any(func(l): return (l as Label).text.contains("egg was guarded by")), "a rare one gets a line of provenance")
+	ok(
+		labels.any(func(l): return (l as Label).text.contains("egg was guarded by")),
+		"a rare one gets a line of provenance"
+	)
 	var waited := _end_state(rv)
 	rv._go()
 	frames = 0
@@ -130,11 +195,13 @@ func run(m: Node) -> void:
 		await tree.process_frame
 		frames += 1
 	ok(named["go"], "Name it hands over to naming")
-	for i in 40: await tree.process_frame
+	for i in 40:
+		await tree.process_frame
 	ok(twin.visible, "the world's Boki is back once the look is over")
 	twin.queue_free()
 	await _skip_row(tree, waited)
 	await _hold_row(tree)
+	await _egg_cards(tree)
 	await _naming(tree)
 	await _first_mask(tree)
 	await _name_card(tree)
@@ -142,14 +209,19 @@ func run(m: Node) -> void:
 	print("HATCH CHECK DONE, failures: %d" % bad)
 	tree.quit()
 
+
 ## What the Boki's card looks like once it has met you, to compare waiting with skipping.
 func _end_state(rv: KinReveal) -> Dictionary:
 	return {
-		"met": rv.met, "ready": rv.ready_to_name, "can_name": not rv.name_btn.disabled,
-		"title": rv.title_lbl.text, "sub": rv.sub_lbl.text.contains("looking at you"),
+		"met": rv.met,
+		"ready": rv.ready_to_name,
+		"can_name": not rv.name_btn.disabled,
+		"title": rv.title_lbl.text,
+		"sub": rv.sub_lbl.text.contains("looking at you"),
 		"faces": absf(wrapf(rv.kin.rotation.y + rv.turn.rotation.y - PI, -PI, PI)) < 0.2,
 		"turned_up": absf(rv.kin.get_node("Body").rotation.x) < 0.01,
 	}
+
 
 # ---------------------------------------------------------------- 2b. skipping the beat
 ## From the last knock: a tap before SKIP_ARM_S counts for nothing; then one tap moves one beat (the egg opens and
@@ -166,8 +238,10 @@ func _skip_row(tree: SceneTree, waited: Dictionary) -> void:
 	await _armed(tree, hx)
 	ok(hx.hold_skip != null and hx.stage == "hatching", "the ring is there after %.1f s" % hx.SKIP_ARM_S)
 	_tap(hx)
-	ok(hx.stage == "reveal" and hx.reveal != null and not hx.reveal.met,
-			"one tap: the egg is open, the Boki has not met you yet")
+	ok(
+		hx.stage == "reveal" and hx.reveal != null and not hx.reveal.met,
+		"one tap: the egg is open, the Boki has not met you yet"
+	)
 	_tap(hx)
 	var rv := hx.reveal as KinReveal
 	ok(rv != null and rv.met and hx.stage == "reveal", "a second tap: the Boki revealed, its card up")
@@ -196,11 +270,87 @@ func _skip_row(tree: SceneTree, waited: Dictionary) -> void:
 	var rec: Dictionary = Save.d["roster"][0] if not Save.d["roster"].is_empty() else {}
 	var same: bool = rec.get("species", "") == sp and rec.get("name", "") == "Ember" and rec.get("starter", false)
 	var saved: bool = Save.d["active"] == rec.get("uid", "") and Save.d["tutorial"].get("hatched", false)
-	ok(Save.d["roster"].size() == 1 and same and saved,
-		"the same Boki is saved: your %s, Ember, first of the roster" % sp)
+	ok(
+		Save.d["roster"].size() == 1 and same and saved,
+		"the same Boki is saved: your %s, Ember, first of the roster" % sp
+	)
 	ok(Unique.sex(rec) == sex, "and it keeps the sex the reveal showed")
 	hx.queue_free()
-	for i in 3: await tree.process_frame
+	for i in 3:
+		await tree.process_frame
+
+
+# ---------------------------------------------------------------- 2c. the egg pick: who is in each egg
+func _card_text(card: Node, node_name: String) -> String:
+	var n: Node = card.find_child(node_name, true, false)
+	if n is Label:
+		return (n as Label).text
+	return " ".join(n.find_children("*", "Label", true, false).map(func(l): return (l as Label).text)) if n else ""
+
+
+func _egg_cards(tree: SceneTree) -> void:
+	tree.root.size = Vector2i(1280, 720)
+	Save.d = Save.fresh()
+	Save.d["tutorial"] = {"intro": true}
+	Save.d["look"] = Unmasked.default_look()
+	var hx = load(HATCH_GD).new()
+	main.add_child(hx)
+	for i in 4:
+		await tree.process_frame
+	hx._looks_good()
+	var secret: String = hx.egg_defs[3]["species"]
+	ok(
+		hx.stage == "pick" and secret != "mystery" and Data.KIN.has(secret),
+		"the mystery egg's species is rolled when the pick opens (%s)" % secret
+	)
+	var cards: Array = hx.bottom.get_child(0).get_children()
+	# main hides the mystery egg's card until it is the picked one (EggHover gives its hint): three starter cards
+	ok(cards.size() == 3, "three starter egg cards, each with its Boki's name line (%d)" % cards.size())
+	for i in mini(cards.size(), 3):
+		var sp: String = hx.egg_defs[i]["species"]
+		var card: Node = cards[i]
+		var pic: CanvasItem = card.find_child("Picture", true, false)
+		var type_line := "%s type" % DexView.type_name(DexView.type_of(sp))
+		ok(_card_text(card, "TypeChip") == type_line, "card %d shows its type '%s'" % [i, type_line])
+		var want := String(Data.KIN[sp]["name"])
+		ok(_card_text(card, "BokiName") == want, "starter card %d shows its Boki's name (%s)" % [i, sp])
+		ok(pic != null and pic.modulate.get_luminance() > 0.5, "starter card %d's picture is in full colour" % i)
+	hx._pick(3)
+	await tree.process_frame  # (the old row is freed at the end of the frame)
+	var pick_cards: Array = hx.bottom.get_child(0).get_children()
+	var myst: Array = pick_cards.filter(
+		func(c): return c.find_child("BokiName", true, false) and _card_text(c, "BokiName") == "???"
+	)
+	var secret_name := String(Data.KIN[secret]["name"])
+	var mpic: CanvasItem = myst[0].find_child("Picture", true, false) if myst.size() == 1 else null
+	ok(
+		(
+			myst.size() == 1
+			and not (
+				" "
+				. join(myst[0].find_children("*", "Label", true, false).map(func(l): return (l as Label).text))
+				. contains(secret_name)
+			)
+		),
+		"picked, the mystery card shows with no name"
+	)
+	ok(mpic != null and mpic.modulate.is_equal_approx(DexView.SILHOUETTE), "the mystery card shows a silhouette")
+	ok(
+		myst.size() == 1 and _card_text(myst[0], "TypeChip") == "%s type" % DexView.type_name(DexView.type_of(secret)),
+		"the mystery card shows its real type"
+	)
+	hx._pick(3)
+	ok(
+		(
+			hx.stage == "warm"
+			and hx.egg_defs[3]["species"] == secret
+			and (hx.eggs[3]["egg"] as EggHatch).species == secret
+		),
+		"the egg that hatches is the species the card showed (%s)" % secret
+	)
+	hx.queue_free()
+	await tree.process_frame
+
 
 ## Holding a press HoldSkip.HOLD_S skips both beats at once (the prologue's input path): the ring fills first.
 func _hold_row(tree: SceneTree) -> void:
@@ -218,7 +368,9 @@ func _hold_row(tree: SceneTree) -> void:
 	await tree.process_frame
 	ok(hx.hold_skip == null, "and the ring is gone")
 	hx.queue_free()
-	for i in 3: await tree.process_frame
+	for i in 3:
+		await tree.process_frame
+
 
 ## A new hatch scene knocked to the hatching beat (null if it never got there).
 func _hatching(tree: SceneTree):
@@ -227,7 +379,8 @@ func _hatching(tree: SceneTree):
 	Save.d["look"] = Unmasked.default_look()
 	var hx = load("res://scripts/ui/hatch.gd").new()
 	main.add_child(hx)
-	for i in 4: await tree.process_frame
+	for i in 4:
+		await tree.process_frame
 	hx._looks_good()
 	hx.chosen = 0
 	hx._start_hatch()
@@ -245,11 +398,13 @@ func _hatching(tree: SceneTree):
 		return null
 	return hx
 
+
 func _armed(tree: SceneTree, hx: Node) -> void:
 	var frames := 0
 	while hx.hold_skip == null and frames < MAX_FRAMES:
 		await tree.process_frame
 		frames += 1
+
 
 func _key(down: bool) -> InputEventKey:
 	var ev := InputEventKey.new()
@@ -257,9 +412,11 @@ func _key(down: bool) -> InputEventKey:
 	ev.pressed = down
 	return ev
 
+
 func _tap(hx: Node) -> void:
 	hx._unhandled_input(_key(true))
 	hx._unhandled_input(_key(false))
+
 
 # ---------------------------------------------------------------- the naming line (NameStep)
 func _naming(tree: SceneTree) -> void:
@@ -273,12 +430,16 @@ func _naming(tree: SceneTree) -> void:
 		seen[step.suggestion] = true
 		if not (step.box.text == step.suggestion and step.suggestion.begins_with(KinNames.root("cindle"))):
 			seen["bad"] = true
-	ok(not seen.has("bad") and seen.size() >= 3,
-		"the dice gives other names from the same root (%s)" % ", ".join(seen.keys()))
+	ok(
+		not seen.has("bad") and seen.size() >= 3,
+		"the dice gives other names from the same root (%s)" % ", ".join(seen.keys())
+	)
 	step.box.text = "Shitbag"
 	step.keep()
-	ok(got.is_empty() and step.note.visible and step.box.text == step.suggestion,
-		"a rude name isn't kept: a plain line says so")
+	ok(
+		got.is_empty() and step.note.visible and step.box.text == step.suggestion,
+		"a rude name isn't kept: a plain line says so"
+	)
 	step.box.text = "  Nib "
 	step.keep()
 	ok(got == [["Nib", true]] and not step.box.editable, "Keep keeps what you typed (%s)" % str(got))
@@ -298,62 +459,52 @@ func _naming(tree: SceneTree) -> void:
 	main.add_child(results)
 	results.add_child(results._first_catch_name(rec))
 	var catch_steps: Array = results.find_children("*", "VBoxContainer", true, false).filter(
-			func(c): return c is NameStep)
+		func(c): return c is NameStep
+	)
 	if catch_steps.size() == 1:
 		(catch_steps[0] as NameStep).box.text = "Fizz"
 		(catch_steps[0] as NameStep).keep()
-	ok(catch_steps.size() == 1 and String(rec["name"]) == "Fizz",
-		"your first catch is named on the results screen (%s)" % rec["name"])
+	ok(
+		catch_steps.size() == 1 and String(rec["name"]) == "Fizz",
+		"your first catch is named on the results screen (%s)" % rec["name"]
+	)
 	results.queue_free()
 	await tree.process_frame
 
+
 # ---------------------------------------------------------------- 3. the first Relic
 func _first_mask(tree: SceneTree) -> void:
-	tree.root.size = Vector2i(1280, 720)      # (the smallest screen we lay out for; 1920x1080 scales to it)
+	tree.root.size = Vector2i(1280, 720)  # (the smallest screen we lay out for; 1920x1080 scales to it)
 	Save.d = Save.fresh()
 	Save.d["tutorial"] = {"intro": true}
 	Save.d["look"] = Unmasked.default_look()
 	var hx = load("res://scripts/ui/hatch.gd").new()
 	main.add_child(hx)
-	for i in 4: await tree.process_frame
+	for i in 4:
+		await tree.process_frame
 	hx._looks_good()
 	ok(hx.stage == "pick" and ClassUnlock.needs_starters(), "the eggs come before any Relic (stage %s)" % hx.stage)
 	var kin := Models.kin("cindle", {"level": 1})
 	hx.add_child(kin)
 	hx.kin_node = kin
 	hx.chosen = 0
-	hx._show_name()
-	var steps: Array = hx.bottom.find_children("*", "VBoxContainer", true, false).filter(func(c): return c is NameStep)
-	var step: NameStep = steps[0] if steps.size() == 1 else NameStep.new("cindle")
-	var egg_sp := String(hx.egg_defs[0]["species"])
-	ok(steps.size() == 1 and step.box.text == step.suggestion and step.suggestion.begins_with(KinNames.root(egg_sp))
-		and Data.default_kin_name(egg_sp).begins_with(KinNames.root(egg_sp)),
-		"the first hatch suggests a name from its species' name (%s from %s)"
-		% [step.suggestion, Data.default_kin_name(egg_sp)])
-	var first_name := step.suggestion
-	hx._finish("cindle", step.chosen(), "Orri", true)
+	hx._finish("cindle", "Ember", "Orri", true)
 	await tree.process_frame
-	ok(String(Save.d["roster"][0]["name"]) == first_name,
-		"heading out without typing keeps the suggestion (%s)" % Save.d["roster"][0]["name"])
-	var file := "user://hatch_check_name.json"
-	var fa := FileAccess.open(file, FileAccess.WRITE)
-	fa.store_string(JSON.stringify(Save.d))
-	fa.close()
-	var kept_d: Dictionary = Save.d
-	Save.load_from(file)
-	ok(String(Save.d["roster"][0]["name"]) == first_name, "its name comes back after save and load")
-	Save.d = kept_d
-	DirAccess.remove_absolute(file)
 	var cards: Array = hx.ui.find_children("*", "PanelContainer", true, false).filter(
-			func(c): return c.has_meta("mask_card"))
+		func(c): return c.has_meta("mask_card")
+	)
 	var offered: Array = cards.map(func(c): return String(c.get_meta("mask_card")))
-	ok(hx.stage == "mask" and offered == ["archer", "juggernaut", "gunslinger"] and ClassUnlock.needs_starters(),
-		"naming the Boki leads to the pick of Lace, Kael and Vex (%s)" % str(offered))
+	ok(
+		hx.stage == "mask" and offered == ["archer", "juggernaut", "gunslinger"] and ClassUnlock.needs_starters(),
+		"naming the Boki leads to the pick of Lace, Kael and Vex (%s)" % str(offered)
+	)
 	var worn: Array = hx.get_children().filter(func(c): return c is MaskMoment)
-	ok(worn.is_empty() and not ClassUnlock.choose_starters(["thief"]),
-		"nothing is worn before the pick, and no one else can be picked")
+	ok(
+		worn.is_empty() and not ClassUnlock.choose_starters(["thief"]),
+		"nothing is worn before the pick, and no one else can be picked"
+	)
 	var shots_dir := ""
-	for arg in OS.get_cmdline_user_args():      # --shots-dir=<dir>: the pick screen as hatch_pick.png
+	for arg in OS.get_cmdline_user_args():  # --shots-dir=<dir>: the pick screen as hatch_pick.png
 		if String(arg).begins_with("--shots-dir="):
 			shots_dir = String(arg).substr(12)
 	if shots_dir != "":
@@ -361,19 +512,39 @@ func _first_mask(tree: SceneTree) -> void:
 		if main.fade:
 			main.fade.reveal(0.05)
 		await _shot(tree, shots_dir, "hatch_pick.png")
-	var offer_root: Control = hx.ui.find_children("*", "VBoxContainer", true, false).filter(
-			func(c): return c.has_meta("mask_offer"))[0]
-	ok(_button(offer_root, "Take Vex") == null and _button(offer_root, "Take Lace") == null,
-		"there is no bottom Take button: the card itself picks")
-	_click(cards[2])      # (a click on Vex's card asks before it takes him)
+	var offer_root: Control = hx.ui.find_children("*", "VBoxContainer", true, false).filter(func(c): return c.has_meta("mask_offer"))[0]
+	ok(
+		_button(offer_root, "Take Vex") == null and _button(offer_root, "Take Lace") == null,
+		"there is no bottom Take button: the card itself picks"
+	)
+	_click(cards[2])  # (a click on Vex's card asks before it takes him)
 	await tree.process_frame
 	var ask := _ask(hx)
-	ok(ask != null and _texts(ask).has("Take Vex?") and _button(ask, "Yes, take Vex") != null
-		and _button(ask, "Back") != null, "clicking Vex's card asks \"Take Vex?\" with Yes and Back")
-	ok(ask != null and not ask.find_children("*", "Control", true, false).filter(
-			func(p): return p.has_meta("portrait_art")).is_empty(), "the question shows his portrait")
-	ok(ClassUnlock.needs_starters() and hx.get_children().filter(func(c): return c is MaskMoment).is_empty(),
-		"asking takes nothing yet")
+	ok(
+		(
+			ask != null
+			and _texts(ask).has("Take Vex?")
+			and _button(ask, "Yes, take Vex") != null
+			and _button(ask, "Back") != null
+		),
+		'clicking Vex\'s card asks "Take Vex?" with Yes and Back'
+	)
+	ok(
+		(
+			ask != null
+			and not (
+				ask
+				. find_children("*", "Control", true, false)
+				. filter(func(p): return p.has_meta("portrait_art"))
+				. is_empty()
+			)
+		),
+		"the question shows his portrait"
+	)
+	ok(
+		ClassUnlock.needs_starters() and hx.get_children().filter(func(c): return c is MaskMoment).is_empty(),
+		"asking takes nothing yet"
+	)
 	if shots_dir != "":
 		await _shot(tree, shots_dir, "hatch_pick_ask.png")
 	_button(ask, "Back").pressed.emit()
@@ -386,7 +557,7 @@ func _first_mask(tree: SceneTree) -> void:
 	await tree.process_frame
 	await tree.process_frame
 	ok(_ask(hx) == null and ClassUnlock.needs_starters(), "Esc is Back")
-	cards[2].gui_input.emit(_action_event("ui_accept"))      # (Enter on a focused card asks too)
+	cards[2].gui_input.emit(_action_event("ui_accept"))  # (Enter on a focused card asks too)
 	await tree.process_frame
 	ok(_ask(hx) != null and _texts(_ask(hx)).has("Take Vex?"), "Enter on a card asks as well")
 	_button(_ask(hx), "Yes, take Vex").pressed.emit()
@@ -396,20 +567,28 @@ func _first_mask(tree: SceneTree) -> void:
 		hx.queue_free()
 		return
 	var moment: MaskMoment = moments[0]
-	ok(Arch.of_save() == "gunslinger" and ClassUnlock.open_ids() == ["gunslinger"] and Save.d["roster"].size() == 1,
-		"your first Relic is Vex, with your new Boki (%s)" % Arch.of_save())
+	ok(
+		Arch.of_save() == "gunslinger" and ClassUnlock.open_ids() == ["gunslinger"] and Save.d["roster"].size() == 1,
+		"your first Relic is Vex, with your new Boki (%s)" % Arch.of_save()
+	)
 	var frames := 0
 	while moment.phase != "wait" and frames < MAX_FRAMES:
 		await tree.process_frame
 		frames += 1
 	var head := (moment.you.get_node("Rig/Torso/HeadPivot") as Node3D).global_position
-	ok(moment.phase == "wait" and moment.relic.global_position.distance_to(head) < 1.5,
-		"Vex's Relic drifts in from the crystal and waits by your face")
-	ok(absf(moment.kin.global_position.y) < 0.05 and moment.kin.position.distance_to(MaskMoment.BOKI_AT) < 0.1,
-		"your Boki stands beside you")
+	ok(
+		moment.phase == "wait" and moment.relic.global_position.distance_to(head) < 1.5,
+		"Vex's Relic drifts in from the crystal and waits by your face"
+	)
+	ok(
+		absf(moment.kin.global_position.y) < 0.05 and moment.kin.position.distance_to(MaskMoment.BOKI_AT) < 0.1,
+		"your Boki stands beside you"
+	)
 	var words := _texts(moment.prompt)
-	ok(words.has(MaskMoment.BUTTON) and words.has(Settings.key_cap("interact")) and not str(words).contains("Take"),
-		"one button: Put on the Relic, with the interact key (%s)" % str(words))
+	ok(
+		words.has(MaskMoment.BUTTON) and words.has(Settings.key_cap("interact")) and not str(words).contains("Take"),
+		"one button: Put on the Relic, with the interact key (%s)" % str(words)
+	)
 	var press := InputEventAction.new()
 	press.action = "interact"
 	press.pressed = true
@@ -418,25 +597,37 @@ func _first_mask(tree: SceneTree) -> void:
 	while moment.phase != "intro" and frames < MAX_FRAMES:
 		await tree.process_frame
 		frames += 1
-	for i in 6: await tree.process_frame
-	ok(moment.phase == "intro" and String(moment.you.get_meta("arch")) == "gunslinger",
-		"the Relic goes on and you become Vex")
+	for i in 6:
+		await tree.process_frame
+	ok(
+		moment.phase == "intro" and String(moment.you.get_meta("arch")) == "gunslinger",
+		"the Relic goes on and you become Vex"
+	)
 	var viewer := moment.intro.find_children("*", "HunterViewer", true, false)
 	var clips := moment.intro.find_children("*", "AbilityClip", true, false)
-	ok(viewer.size() == 1 and _texts(moment.intro).has(HunterViewer.display_name("gunslinger"))
-		and HunterViewer.display_name("gunslinger") == "Vex the Hired Gun", "then Vex the Hired Gun")
+	ok(
+		(
+			viewer.size() == 1
+			and _texts(moment.intro).has(HunterViewer.display_name("gunslinger"))
+			and HunterViewer.display_name("gunslinger") == "Vex the Hired Gun"
+		),
+		"then Vex the Hired Gun"
+	)
 	ok(clips.size() == HunterViewer.CLIP_SLOTS.size(), "with a clip for each ability (%d)" % clips.size())
 	var gender := RegEx.create_from_string("(?i)\\b(female|male|she|her|he|his|woman|man)\\b")
 	var said: Array = _texts(moment.intro).filter(func(t): return gender.search(String(t)) != null)
 	ok(said.is_empty(), "no gender or pronouns in the Relic's info (%s)" % str(said))
-	for i in 40: await tree.process_frame      # (the panel's pop-in has settled)
+	for i in 40:
+		await tree.process_frame  # (the panel's pop-in has settled)
 	var screen := Rect2(Vector2.ZERO, Vector2(1280, 720))
 	screen = screen.intersection(moment.intro.get_viewport().get_visible_rect())
 	var panel_r: Rect2 = (viewer[0] as Control).get_global_rect().merge(moment.go_button.get_global_rect())
 	ok(screen.encloses(panel_r), "the intro fits on a 1280x720 screen (%s)" % str(panel_r))
 	ok(moment.go_button.text == MaskMoment.GO, "and goes on: %s" % moment.go_button.text)
 	hx.queue_free()
-	for i in 3: await tree.process_frame
+	for i in 3:
+		await tree.process_frame
+
 
 ## The naming card (hatch.gd _show_name): no Label may collapse to a sliver (a wrapping label in a row with no
 ## width wrapped one letter per line and ran off the top of the screen), and the whole card fits the screen
@@ -453,14 +644,16 @@ func _name_card(tree: SceneTree) -> void:
 		Save.d["look"] = Unmasked.default_look()
 		var hx = load("res://scripts/ui/hatch.gd").new()
 		main.add_child(hx)
-		for i in 4: await tree.process_frame
+		for i in 4:
+			await tree.process_frame
 		hx._looks_good()
 		hx.chosen = 0
 		hx.stage = "name"
 		hx._show_name()
 		if main.fade:
 			main.fade.reveal(0.05)
-		for i in 60: await tree.process_frame
+		for i in 60:
+			await tree.process_frame
 		var screen: Rect2 = hx.get_viewport().get_visible_rect()
 		var bad_l: Array = []
 		var seen_l := 0
@@ -472,19 +665,25 @@ func _name_card(tree: SceneTree) -> void:
 			var r := lab.get_global_rect()
 			if r.size.x < 80.0 or lab.get_line_count() >= 6 or not screen.encloses(r):
 				bad_l.append("%s %s x%d" % [lab.text.left(16), r, lab.get_line_count()])
-		ok(seen_l > 6 and bad_l.is_empty(), "name card %s: labels 80+ px wide, under 6 lines, on screen (%d) %s"
-				% [str(sz), seen_l, str(bad_l)])
+		ok(
+			seen_l > 6 and bad_l.is_empty(),
+			"name card %s: labels 80+ px wide, under 6 lines, on screen (%d) %s" % [str(sz), seen_l, str(bad_l)]
+		)
 		var card: Rect2 = (hx.bottom.get_child(0) as Control).get_global_rect()
 		ok(screen.encloses(card), "name card %s fits the screen (%s in %s)" % [str(sz), str(card), str(screen)])
-		ok(card.position.x >= screen.size.x * 0.45 and not hx.top_box.visible,
-			"name card %s sits right of the Boki, with no stale title over it" % str(sz))
+		ok(
+			card.position.x >= screen.size.x * 0.45 and not hx.top_box.visible,
+			"name card %s sits right of the Boki, with no stale title over it" % str(sz)
+		)
 		var foc: Control = hx.get_viewport().gui_get_focus_owner()
 		ok(foc is LineEdit and hx.bottom.is_ancestor_of(foc), "name card %s: typing goes into the name box" % str(sz))
 		if dir != "":
 			DirAccess.make_dir_recursive_absolute(dir)
 			tree.root.get_texture().get_image().save_png(dir.path_join("name_%dx%d.png" % [sz.x, sz.y]))
 		hx.queue_free()
-		for i in 3: await tree.process_frame
+		for i in 3:
+			await tree.process_frame
+
 
 ## A pair's egg appearing in the Nesting Nook (NestReveal): one soft ring, one small sparkle burst in
 ## the egg's type colour, and one wobble that settles back upright.
@@ -496,20 +695,28 @@ func _nest_reveal(sp: String) -> void:
 	NestReveal.play(spy, nest, sp)
 	var col := DexView.type_col(DexView.type_of(sp))
 	var tinted := spy.got_bursts.filter(
-		func(b): return (b[0] as Color).is_equal_approx(col.lightened(0.3)) and int(b[1]) <= 14)
-	ok(spy.got_rings == 1 and spy.got_bursts.size() == 1 and tinted.size() == 1,
-		"a new nest egg: one glow ring and one small sparkle in its type colour (%d rings, %d bursts)"
-		% [spy.got_rings, spy.got_bursts.size()])
+		func(b): return (b[0] as Color).is_equal_approx(col.lightened(0.3)) and int(b[1]) <= 14
+	)
+	ok(
+		spy.got_rings == 1 and spy.got_bursts.size() == 1 and tinted.size() == 1,
+		(
+			"a new nest egg: one glow ring and one small sparkle in its type colour (%d rings, %d bursts)"
+			% [spy.got_rings, spy.got_bursts.size()]
+		)
+	)
 	var shell: Node3D = nest.get_node("Shell")
 	var tip := 0.0
 	var t0 := Time.get_ticks_msec()
 	while Time.get_ticks_msec() - t0 < int(NestReveal.WOBBLE_S * 1000.0) + 300:
 		tip = maxf(tip, absf(shell.rotation.z))
 		await main.get_tree().process_frame
-	ok(tip > NestReveal.WOBBLE * 0.5 and is_zero_approx(shell.rotation.z),
-		"and it wobbles once (tips %.2f rad), then sits upright (%.3f)" % [tip, shell.rotation.z])
+	ok(
+		tip > NestReveal.WOBBLE * 0.5 and is_zero_approx(shell.rotation.z),
+		"and it wobbles once (tips %.2f rad), then sits upright (%.3f)" % [tip, shell.rotation.z]
+	)
 	nest.queue_free()
 	spy.queue_free()
+
 
 ## A left click on a control.
 func _click(c: Control) -> void:
@@ -518,11 +725,13 @@ func _click(c: Control) -> void:
 	ev.pressed = true
 	c.gui_input.emit(ev)
 
+
 func _action_event(action: String) -> InputEventAction:
 	var ev := InputEventAction.new()
 	ev.action = action
 	ev.pressed = true
 	return ev
+
 
 ## The open "Take <name>?" question of the first-Relic pick, or null.
 func _ask(hx: Node) -> Control:
@@ -532,23 +741,31 @@ func _ask(hx: Node) -> Control:
 				return c
 	return null
 
+
 func _button(root: Node, text: String) -> Button:
 	for b in root.find_children("*", "Button", true, false):
 		if (b as Button).text == text and not (b as Button).disabled:
 			return b
 	return null
 
+
 func _shot(tree: SceneTree, dir: String, file: String) -> void:
-	for i in 60: await tree.process_frame
+	for i in 60:
+		await tree.process_frame
 	DirAccess.make_dir_recursive_absolute(dir)
 	tree.root.get_texture().get_image().save_png(dir.path_join(file))
 
+
 func _texts(n: Node) -> Array:
 	var out: Array = []
-	if n is Label: out.append((n as Label).text)
-	elif n is Button: out.append((n as Button).text)
-	for c in n.get_children(): out.append_array(_texts(c))
+	if n is Label:
+		out.append((n as Label).text)
+	elif n is Button:
+		out.append((n as Button).text)
+	for c in n.get_children():
+		out.append_array(_texts(c))
 	return out
+
 
 # ---------------------------------------------------------------- 4. a bred egg's parents row
 ## A bred egg's hatch card shows both parents and marks each trait with the parent it came from;
@@ -556,7 +773,8 @@ func _texts(n: Node) -> Array:
 func _parents_row(tree: SceneTree) -> void:
 	var a := Save.new_kin("cindle", "Ash")
 	var b := Save.new_kin("puddlet", "Bri")
-	for p in [a, b]: Save.d["roster"].append(p)
+	for p in [a, b]:
+		Save.d["roster"].append(p)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 7
 	var baby := Care.breed(a, b, rng)

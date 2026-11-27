@@ -14,9 +14,11 @@ const ARCH_H := 3.5  # [m] and no higher above its foot than this
 const ARCH_W := 3.5  # [m] the arch's opening
 const PAD_R := 0.8  # [m] how close to the pad's middle you step to be thrown (as Match._update_pads)
 const MOVE_TAG := {"dash": "DASH", "kick": "WALL KICK", "pad": "JUMP PAD", "glide": "GLIDE"}
+const LEAVE_MARGIN := 8.0  # [m] the course's area is its start, gates, pad and finish boxed, plus this on every side
+const CLOCK_Y := 184.0  # [px] the run clock's top: under the kit drill panel (down to ~175) and over the hunter's plate
+const CLOCK_W := 440.0  # [px] its width (centred): clear of the minimap, the practice panels and the top-right readouts
 const NEXT_COL := Color("ffd25a")  # the gate you go through next
 const ARCH_COL := Color("8fe3c8")
-const CLOCK_Y := 188.0  # [px] the run clock's top: clear of the kit drill panel and the HUD's top-right lines
 
 var m: Match
 var gates: Array[Gate] = []
@@ -30,6 +32,7 @@ var next_i := 0  # the gate you go through next (gates.size(): on to the finish)
 var run_arch := ""  # the Hunter the run counts for
 var last_time := 0.0  # [s] the last finished run (tests read it)
 var clock: Label = null
+var area := Rect2()  # [m] the course's footprint on the floor plan (x, z); leaving it cancels a run
 
 var _nag_i := -1  # the dash gate you were told to dash through, so it's said once
 var _next_mat: Material = null
@@ -92,6 +95,7 @@ func build(layer: CanvasLayer, grounds: Grounds) -> void:
 	finish = _on_ground(Grounds.v3(t["finish"]))
 	pad_at = _on_ground(Grounds.v3(t["pad"]["at"]))
 	pad_land = _on_ground(Grounds.v3(t["pad"]["land"]))
+	area = _area()
 	_next_mat = Models.toon(NEXT_COL, true, 0.6)
 	for i in gates.size():
 		_place_gate(i, grounds)
@@ -103,18 +107,30 @@ func build(layer: CanvasLayer, grounds: Grounds) -> void:
 	m.add_child(pad)
 	clock = Label.new()
 	clock.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	clock.add_theme_font_size_override("font_size", 26)
+	clock.add_theme_font_size_override("font_size", 22)
 	clock.add_theme_color_override("font_color", NEXT_COL)
 	clock.add_theme_color_override("font_outline_color", Color.BLACK)
 	clock.add_theme_constant_override("outline_size", 8)
-	clock.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)  # centred, under the kit drill's top panel
+	clock.custom_minimum_size = Vector2(CLOCK_W, 0)
+	clock.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE)
+	clock.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	clock.offset_top = CLOCK_Y
-	clock.offset_bottom = CLOCK_Y + 32.0
 	clock.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	clock.visible = false
 	layer.add_child(clock)
 	_light(0)
 	show_best()
+
+
+## The floor-plan box round every point the trial block names (start, gates, pad, finish), grown by LEAVE_MARGIN.
+func _area() -> Rect2:
+	var pts: Array[Vector3] = [start, finish, pad_at, pad_land]
+	for g in gates:
+		pts.append(g.at)
+	var box := Rect2(Vector2(start.x, start.z), Vector2.ZERO)
+	for p in pts:
+		box = box.expand(Vector2(p.x, p.z))
+	return box.grow(LEAVE_MARGIN)
 
 
 func _on_ground(p: Vector3) -> Vector3:
@@ -159,19 +175,27 @@ func show_best() -> void:
 		return
 	_shown_arch = m.player.arch
 	var b := best(_shown_arch)
-	_best_lb.text = "TIME TRIAL\nBest  %s" % (_fmt(b) if b > 0.0 else "none yet")
+	var best_s := _fmt(b) if b > 0.0 else "none yet"
+	_best_lb.text = "TIME TRIAL\nPass the gates in order, fastest time wins\nBest  %s" % best_s
 
 
 static func _fmt(secs: float) -> String:
 	return "%d:%05.2f" % [floori(secs / 60.0), fmod(secs, 60.0)]
 
 
-## Ends a run without a time (a fall, a Hunter swap).
+## Ends a run without a time (a fall, a Hunter swap, leaving the course).
 func stop() -> void:
 	running = false
 	if clock:
 		clock.visible = false
 	_light(0)
+
+
+## Ends a run because the player walked off the course.
+func _cancel() -> void:
+	stop()
+	if m.hud:
+		m.hud.toast("Trial cancelled - left the course", NEXT_COL)
 
 
 ## Per frame (from Grounds.tick): the pad, the start arch, the next gate, the finish, the clock.
@@ -193,6 +217,9 @@ func tick(dt: float) -> void:
 		clock.visible = true
 	if not running:
 		return
+	if not area.has_point(Vector2(p_v.pos.x, p_v.pos.z)):
+		_cancel()
+		return
 	run_t += dt
 	if next_i < gates.size():
 		_try_gate(p_v)
@@ -200,7 +227,7 @@ func tick(dt: float) -> void:
 		_finish(p_v)
 		return
 	clock.text = (
-		"%s   ·   gate %d / %d   ·   best %s"
+		"%s  ·  gate %d / %d  ·  best %s"
 		% [
 			_fmt(run_t),
 			mini(next_i + 1, gates.size()),

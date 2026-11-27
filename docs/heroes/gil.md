@@ -17,6 +17,11 @@ footage and no source row. Every number below is the live data (`content/archety
 | X, Tidal Wave (level 6) | tap | surfs a wave 14 m down the aim, untargetable; every foe it rolls over is knocked up then slowed; lands with a shield | 14 m in 1 s, 3.6 m wide, 18 damage, knockup 1 s, then 50% slow (2 s after the knockup), shield 40 for 3 s; 90 s |
 | R | | the Boki Merge (not a hero ability) | |
 
+**Hold LMB, Tide Lunge** (`lmb.tide`): held past 0.25 s he draws back (walking at 50%), full at 0.8 s; let go to drive
+2 -> 5 m down the line, 10 -> 22 damage to each foe once, 0.55 s after. A part charge knocks 6; a full charge soaks
+(a splash mark) and knocks 10 (`kb_full`), past the shared 8 m/s wall-slam speed, so a foe driven into a cliff,
+rock or wall close behind is stunned 0.9 s (docs/KNOCK_WALLS.md). Checked by "Tide Lunge into a rock: ..." (2 lines).
+
 ### Grab Bag potions (`rmb.vials`)
 | Potion | Radius | Damage | Effect | Mark |
 |---|---|---|---|---|
