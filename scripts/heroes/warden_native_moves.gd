@@ -2,13 +2,15 @@ class_name WardenNativeMoves
 extends RefCounted
 ## The kit moves a native Hunter has its own clip for (data "kmoves" in warden_native.json, docs/art/wardens/
 ## MESHY_NATIVE.md): {kmove: {"clip": name, "then": name, "hold": bool, "hold_from": s, "rate": x, "fade": s,
-## "upper": bool}}. The clips come from <art>_clips.glb by name like the slot clips (WardenNative._borrow_clips); a row
+## "upper": bool, "body": bool}}. The clips come from <art>_clips.glb by name like the slot clips (WardenNative._borrow_clips); a row
 ## whose clip no file has is dropped. While the kit's move is on the body its clip is laid at the move's own clock
 ## (state "kmove_t"), so a release move starts at the frame the arrow leaves. Past the clip's end: "hold_from" loops
 ## the clip from there to its end, "then" loops a second clip, "hold" keeps the last pose (a full-body row's default),
 ## and an upper row without either is over (the legs' clips show again). An "upper" row is laid on WardenNativeUpper,
 ## the torso, head and arms over whatever the legs play (walk, run, idle, the air); any other row is a full-body clip
-## on the main player that owns the body while it shows.
+## on the main player that owns the body while it shows. A row with "body": true also carries its keyed whole-body
+## channels (HunterAnim.KMOVES "lift" and the spin "fy") on the model's root over the clip, for what no Meshy clip
+## keys (Gil sunk to the waist in Ground Swim, his Riptide turn winding up).
 
 const FADE := 0.06  # s: the previous clip into a full-body move's, unless the row says
 const KEY := "km:%s"  # the name a move's clip has in WardenNative.plays
@@ -19,11 +21,14 @@ var rows: Dictionary  # kit move id -> its row
 var cur := ""  # the full-body move playing now ("" none)
 var prev_t := 0.0  # its clock last frame (a clock that goes back is the same move again)
 var upper_on := false  # an upper row is on the upper layer
+var bodied := false  # a "body" move moved the root last frame (it goes home once the move ends)
+var size := 1.0  # Meshy's body against the rig's (data "size"): the keyed lift, in the rig's metres, scales with it
 
 
 func _init(p: AnimationPlayer, data: Dictionary) -> void:
 	player = p
 	rows = data.get("kmoves", {})
+	size = float(data.get("size", 1.0))
 
 
 ## The clips by their plays key: {"km:arc_draw": clip name, "km:lw_jet>": its loop}.
@@ -103,3 +108,19 @@ func lay(mv: Dictionary, up: WardenNativeUpper) -> void:
 	elif upper_on:
 		up.stop()
 	upper_on = on
+
+
+## The root of the Meshy model (`glb`, turned PI to face -Z) under a "body" move: down by its keyed lift (times size),
+## turned by its spin. Call every frame after the clips advance; a frame with no such move puts the root back once.
+func pose(s: Dictionary, glb: Node3D) -> void:
+	var km := String(s.get("kmove", ""))
+	if not (rows.has(km) and bool(rows[km].get("body", false))):
+		if bodied:
+			glb.position.y = 0.0
+			glb.rotation.y = PI
+			bodied = false
+		return
+	var k := HunterAnim.km_sample(km, float(s.get("kmove_t", 0.0)))
+	glb.position.y = float(k.get("lift", 0.0)) * size
+	glb.rotation.y = PI + float(k.get("fy", 0.0))
+	bodied = true
