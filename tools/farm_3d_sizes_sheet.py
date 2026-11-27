@@ -2,6 +2,7 @@
 """Size sheet from --farm-3d-sizes output: python3 -I tools/farm_3d_sizes_sheet.py <shots dir> <out.png>
 The dir holds 1_farm_cam.png, 2_eye_row.png, 3_mid.png (+ their .json name spots) and heights.json.
 Plain player names burned onto the stills, measured heights in a table; a green row edge = within 3% of the reference."""
+
 import json
 import sys
 
@@ -25,11 +26,16 @@ TALL = {n: r["body"] for n, r in hs["hunters"].items()}
 TALL.update({n: hs["boki"][sp]["body"] for n, sp in BOKI_CM.items()})
 
 W, H = 1280, 720
-shots = [("1  Farm camera, close third person", "1_farm_cam"), ("2  Eye level, one row", "2_eye_row"),
-         ("3  Mid distance", "3_mid")]
+shots = [
+    ("1  Farm camera, close third person", "1_farm_cam"),
+    ("2  Eye level, one row", "2_eye_row"),
+    ("3  Mid distance", "3_mid"),
+]
 sheet = Image.new("RGB", (W * 2, H * 2 + 90), (24, 24, 28))
 d = ImageDraw.Draw(sheet)
-d.text((20, 20), "Farm, hunters and Boki at their sizes (idle, real GPU, 1920x1080 stills at 2/3)", font=big, fill="white")
+d.text(
+    (20, 20), "Farm, hunters and Boki at their sizes (idle, real GPU, 1920x1080 stills at 2/3)", font=big, fill="white"
+)
 for i, (label, f) in enumerate(shots):
     im = Image.open(f"{src}/{f}.png").convert("RGB")
     sc = W / im.width
@@ -45,8 +51,9 @@ for i, (label, f) in enumerate(shots):
         while True:
             ty = py + 6 + lvl * 34
             box = (px - w / 2 - 6, ty, px + w / 2 + 6, ty + 32)
-            if not any(box[0] < o[2] + 4 and o[0] < box[2] + 4 and box[1] < o[3] + 2 and o[1] < box[3] + 2
-                       for o in placed):
+            if not any(
+                box[0] < o[2] + 4 and o[0] < box[2] + 4 and box[1] < o[3] + 2 and o[1] < box[3] + 2 for o in placed
+            ):
                 break
             lvl += 1
         placed.append(box)
@@ -83,11 +90,15 @@ for who, sp in BOKI_CM.items():
     d.text((x0 + cols[3], y), f"{r['full']:.2f} m", font=mid, fill="white")
     y += 40
 y += 18
-for n in (["Heights are the top of the skull over the feet; hair, ears and weapon left out. With weapon: tallest point.",
-          "reference = reference body height, weapons off. match idle = the same sizes in a match (green edge: within 3%).",
-          "farm pose = measured on these stills: the farm's idle stands straighter than a match's idle clip."]
-          + ([f"Albert drawn x{AK:.2f} over his reference size here (owner: Albert the tallest); game data unchanged."]
-             if AK != 1.0 else [])):
+for n in [
+    "Heights are the top of the skull over the feet; hair, ears and weapon left out. With weapon: tallest point.",
+    "reference = reference body height, weapons off. match idle = the same sizes in a match (green edge: within 3%).",
+    "farm pose = measured on these stills: the farm's idle stands straighter than a match's idle clip.",
+] + (
+    [f"Albert drawn x{AK:.2f} over his reference size here (owner: Albert the tallest); game data unchanged."]
+    if AK != 1.0
+    else []
+):
     d.text((x0 + 24, y), n, font=ImageFont.truetype(F % "", 20), fill=(200, 200, 200))
     y += 28
 sheet.save(out)

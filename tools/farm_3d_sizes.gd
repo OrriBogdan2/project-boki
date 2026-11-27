@@ -9,17 +9,7 @@ extends RefCounted
 
 const WARDEN_SKIN := preload("res://tools/warden_skin.gd")
 const NOT_BODY := [
-	"Glider",
-	"TeamRing",
-	"Companion",
-	"prop_",
-	"Gun",
-	"Shield",
-	"Halo",
-	"hammer",
-	"Bloom",
-	"Shell",
-	"Aura"
+	"Glider", "TeamRing", "Companion", "prop_", "Gun", "Shield", "Halo", "hammer", "Bloom", "Shell", "Aura"
 ]
 const FPS := 30
 const ISLAND_SEED := 11
@@ -33,8 +23,8 @@ const ROW_STEP := 1.45  # m between neighbours in the one row of nine (eye shot)
 const ROW_ORDER := ["h0", "b0", "h1", "b1", "h2", "b2", "h3", "b3", "h4"]  # Albert at the end nearest the 3/4 camera
 const HUNTER_X := [-5.0, -2.5, 0.0, 2.5, 5.0]  # m across the group (mid shot back row), Albert far left
 const BOKI_X := [-3.75, 1.25, 3.75, -1.25]  # m (cindle, burrlet, puddlet, heatherhorn): in the gaps, a row nearer
-const FARM_X := [-4.6, -2.3, 2.3, 4.6]  # m: Kael, Sparkle, Meeko, Cinder in the farm-cam row, Albert at 0 between them
-const FARM_BOKI_X := [-3.45, -1.15, 1.15, 3.45]  # m: the Boki in the row's gaps, so none stands over a hunter
+const FARM_X := [-3.8, -1.9, 1.9, 3.8]  # m: Kael, Sparkle, Meeko, Cinder in the farm-cam row, Albert at 0 between them
+const FARM_BOKI_X := [2.85, -0.95, 0.95, -2.85]  # m: the Boki in the row's gaps (Crofthorn between the tall two)
 const FARM_BOKI_NEAR := 1.4  # m the Boki stand nearer the farm camera (south) than the hunters
 const BOKI_FRONT := 2.2  # m the Boki stand nearer the camera than the hunters
 const FACE_BOKI := 0.18  # rad: a small turn either side of the camera, so it is not stiff but the face reads
@@ -248,9 +238,7 @@ func _clear_foreground() -> void:
 		for i in mmi.multimesh.instance_count:
 			var at := mmi.global_transform * mmi.multimesh.get_instance_transform(i).origin
 			if _in_the_way(Vector2(at.x, at.z), from, line):
-				mmi.multimesh.set_instance_transform(
-					i, Transform3D(Basis.from_scale(Vector3.ZERO), at)
-				)
+				mmi.multimesh.set_instance_transform(i, Transform3D(Basis.from_scale(Vector3.ZERO), at))
 
 
 func _in_the_way(centre: Vector2, from: Vector2, line: Vector2) -> bool:
@@ -268,9 +256,7 @@ func _write_labels(shot: String, size: Vector2i) -> void:
 	for i in hunters.size():
 		px[NAMES[i]] = _on_still(cam, hunters[i].global_position, size)
 	for j in h.kins.size():
-		px[KinLib.kin(SPECIES[j]).display_name] = _on_still(
-			cam, (h.kins[j]["node"] as Node3D).global_position, size
-		)
+		px[KinLib.kin(SPECIES[j]).display_name] = _on_still(cam, (h.kins[j]["node"] as Node3D).global_position, size)
 	var f := FileAccess.open(dir.path_join(shot + ".json"), FileAccess.WRITE)
 	f.store_string(JSON.stringify(px))
 	f.close()
@@ -298,9 +284,7 @@ func _write_heights() -> void:
 		var crown := HunterCrown.crown(m, pts, k, hi) - m.global_position.y
 		m.basis = lean
 		out["hunters"][NAMES[i]] = {
-			"body": snappedf(crown, 0.01),
-			"full": snappedf(hi - m.global_position.y, 0.01),
-			"scale": m.scale.y
+			"body": snappedf(crown, 0.01), "full": snappedf(hi - m.global_position.y, 0.01), "scale": m.scale.y
 		}
 	for j in h.kins.size():
 		var n := h.kins[j]["node"] as Node3D
@@ -365,9 +349,10 @@ func _wait(secs: float) -> void:
 		_pose_hunters(1.0 / FPS)
 
 
-## The camera everyone turns to: the free camera, or in the farm shot the farm's own.
+## The camera everyone turns to: the free camera, or in the farm shot the farm's own (the Camera3D, not its rig's
+## pivot, which is at Albert).
 func _eye() -> Vector3:
-	return h.cam.global_position if layout == "farm" else cam_at
+	return main.get_viewport().get_camera_3d().global_position if layout == "farm" else cam_at
 
 
 func _face_to(p: Vector3) -> float:
@@ -377,12 +362,12 @@ func _face_to(p: Vector3) -> float:
 
 ## Idle for the four that are not the farm's avatar (Albert's own HunterAnim runs in Home), all turned to the camera.
 func _pose_hunters(d: float) -> void:
+	if hunters.is_empty():
+		return
 	for i in range(1, hunters.size()):
 		var face := _face_to(hunters[i].position)
 		hunters[i].basis = h.cam.char_basis(face, scales[i])
-		anims[i].update(
-			d, {"vel": Vector3.ZERO, "face": face, "grounded": true, "idle_break": true}
-		)
+		anims[i].update(d, {"vel": Vector3.ZERO, "face": face, "grounded": true, "idle_break": true})
 	h.pface = _face_to(hunters[0].position)
 
 
@@ -432,8 +417,7 @@ func _clear_spot(near: Vector3) -> Vector3:
 				for sz in range(cz - 10, cz + 17):
 					var dz := sz - cz
 					var bad: bool = (
-						wd.is_block(sx + 0.5, sz + 0.5)
-						or wd.occupy(sx + 0.5, sz + 0.5, 0.9, 0.0, true) != 0.0
+						wd.is_block(sx + 0.5, sz + 0.5) or wd.occupy(sx + 0.5, sz + 0.5, 0.9, 0.0, true) != 0.0
 					)
 					var off: bool = wd.is_void(sx + 0.5, sz + 0.5)
 					if dz >= -3 and dz <= 4 and absi(sx - cx) <= 8:
@@ -451,8 +435,7 @@ func _clear_spot(near: Vector3) -> Vector3:
 				var sg := 1.0 if si == 0 else -1.0
 				var c0 := Vector3(cx + 0.5, 0, cz + 0.5)
 				var cams := [
-					c0 + Vector3(sin(EYE_YAW) * EYE_DIST * sg, 0, cos(EYE_YAW) * EYE_DIST),
-					c0 + Vector3(0, 0, MID_BACK)
+					c0 + Vector3(sin(EYE_YAW) * EYE_DIST * sg, 0, cos(EYE_YAW) * EYE_DIST), c0 + Vector3(0, 0, MID_BACK)
 				]
 				for cm in cams:
 					for tx in [-5.8, 0.0, 5.8]:
@@ -495,13 +478,6 @@ func _log(tag: String) -> void:
 	var rows := []
 	for i in hunters.size():
 		rows.append(
-			(
-				"%s %.1f,%.1f"
-				% [
-					NAMES[i],
-					hunters[i].global_position.x - group.x,
-					hunters[i].global_position.z - group.z
-				]
-			)
+			"%s %.1f,%.1f" % [NAMES[i], hunters[i].global_position.x - group.x, hunters[i].global_position.z - group.z]
 		)
 	print("FARM3D ", tag, " ppos ", h.ppos - group, " ", "; ".join(rows))
