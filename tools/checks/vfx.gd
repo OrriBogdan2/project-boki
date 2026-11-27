@@ -16,5 +16,8 @@ const CHECKS := {
 	"--boki-type-hit-shots": ["res://tools/boki_type_hit_check.gd", "boki_type_hit_check", "shots"],  # --shots-dir
 	"--edge-pulse-shots": ["res://tools/edge_pulse_shots.gd", "edge_pulse_shots", null],  # GPU: hit edge stills + ms
 	"--summon-pop-shots": ["res://tools/summon_pop_shots.gd", "summon_pop_shots", null],  # --shots-dir=<dir>
+	"--status-edge-check": ["res://tools/status_edge_check.gd", "status_edge_check", "check"],  # edge tint
+	"--status-edge-shots": ["res://tools/status_edge_check.gd", "status_edge_check", "shots"],  # GPU: stills + 4v4 ms
+	"--hunter-scale-shots": ["res://tools/hunter_scale_shots.gd", "hunter_scale_shots", null],  # GPU: match size px
 	"--tenzo-stone-shots": ["res://tools/tenzo_stone_shots.gd", "tenzo_stone_shots", null],  # GPU: Tenzo stone stills
 }

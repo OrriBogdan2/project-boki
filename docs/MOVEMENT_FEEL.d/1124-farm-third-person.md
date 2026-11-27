@@ -12,6 +12,11 @@ flag are in `content/rules/camera.json` "farm": **`"third_person": false` puts t
 - **Walls:** the view is pulled in along itself so it never sits inside the ground, a building, a tree or a rock (the
   placed blocks under buildings are only 1.2 m tall for climbing, so `building_m` / `tree_m` say how tall they are to
   the camera), and backs out again at 5 m/s. Fences and benches are low and do not pull it.
+- **Walls, props and games (follow-up):** the portal ring and the glider rack count as walls (rules `props`), a
+  building's roof counts 0.8 m past its tile. With a wall close behind, the camera keeps `wall_min_m` (2.6 m) from you
+  by tipping the view up (to `wall_pitch_deg`) instead of closing in until the face fills the screen. A minigame
+  round (Volley, Fetch, Echo Steps) tips the view up to 48 degrees and draws it back 1.6x so the court shows; Kite Tow's
+  13 m loop is too wide for that and blends to the top-down view for the flight.
 - **Back to top-down:** build mode, the training sessions and a tutorial spotlight (it lights a Boki or building that
   may be behind the camera) blend to the Settings view over 0.8 s and back.
 - **Not touched:** matches, the tutorial arena and expeditions (their `MatchCam` / `CamRig` use is unchanged; `lean_scale`

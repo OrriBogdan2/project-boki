@@ -20,6 +20,7 @@ extends RefCounted
 const BUDGET_PATH := "res://ops/hud-budget.json"
 const FIGHT_S := 5.0  # s of match time before the HUD is judged
 const RIVAL_GAP := 5.0  # m between the player and the rival dropped beside them
+const HIT_BEFORE_S := 1.0  # s before FIGHT_S that the player lands one real hit on the rival
 const FIGHT_EXTRA_S := 15.0  # s more a Hunter scene may wait for a hit given or taken
 const CAST_S := 0.3  # s after the cast or ult press that the HUD is judged
 const MATE_GAP := 30.0  # m behind the player the teammate waits, away from the rival
@@ -129,9 +130,12 @@ func _scene(arch: String, moment: String, size: Vector2i, statuses: bool, shots:
 		var at := m.player.pos - Vector3(MATE_GAP, 0.0, 0.0)
 		mate.ctrl = "idle"  # out of the fight, so the rival does not finish them into a deathbox
 		mate.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
+	var hit_at := int((FIGHT_S - HIT_BEFORE_S) / Match.DT)
 	for i in int((FIGHT_S + (FIGHT_EXTRA_S if arch != "" else 0.0)) / Match.DT):
 		m.step(Match.DT)
 		m.hud.loot.tick(Match.DT)  # pickup rows age with the match clock too (a busy box ran frames slower)
+		if i == hit_at:  # one landed hit before judging: the fight never hangs on the seed's AI
+			rival.hurt(10.0, m.player)
 		if i % 20 == 0:
 			await main.get_tree().process_frame
 		if arch != "" and m.time >= FIGHT_S and m.hud.in_fight():
@@ -153,6 +157,8 @@ func _scene(arch: String, moment: String, size: Vector2i, statuses: bool, shots:
 			)
 		for i in int(CAST_S / Match.DT):
 			m.step(Match.DT)
+		if not m.hud.in_fight():
+			m.player.hurt_at = m.time  # no hit landed (or the ult froze the clock): still a fight (god mode takes none)
 	m.hud.panels.queue_redraw()
 	await main.get_tree().process_frame
 	_hud = m.hud
@@ -163,6 +169,10 @@ func _scene(arch: String, moment: String, size: Vector2i, statuses: bool, shots:
 	var seen := await _record_draws()
 	var zone := HunterZone.rect(m)
 	var counts := _counts(m, seen)
+	var by_group: Array = []
+	for g: String in seen:
+		by_group.append("%s %d" % [g, (seen[g] as Array).size()])
+	print("HUDCLUTTER   %sdrawn panels by group: %s" % [tag, ", ".join(by_group)])
 	ok(
 		m.hud.in_fight(),
 		"%sthe HUD is judged in a fight (a hit given or taken within %d s)" % [tag, int(m.hud.MSG_FIGHT_S)]

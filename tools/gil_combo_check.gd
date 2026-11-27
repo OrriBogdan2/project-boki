@@ -25,6 +25,7 @@ func run(main_node: Node) -> void:
 	_bag()
 	_fencer()
 	_tide()
+	_tide_wall()
 	_vials()
 	_hold_and_air()
 	_beach()
@@ -182,6 +183,30 @@ func _tide() -> void:
 	ok("Tide Lunge: full charge soaks (one splash mark)", K.marks_on(T) == 1, "%d" % K.marks_on(T))
 	ok("Tide Lunge: the release plays its pose and look",
 		int(HeroVfx.of(m).plays.get("tide_lunge", 0)) > 0 and int(HeroVfx.of(m).plays.get("tide_hit", 0)) > 0)
+
+## Tide Lunge into a wall (gil.md): only a full charge knocks the foe fast enough (over 8 m/s) for the shared wall
+## slam (Hunter's body slam, docs/KNOCK_WALLS.md: 0.9 s stun); a part charge pushes it into the rock and nothing more.
+func _tide_wall() -> void:
+	var rec := {}
+	for hold_s in [0.6, 1.2]:
+		_reset(3.0)
+		var w := HeroZones.rock(m, T, T.pos + Vector3(1.6, 0, 0), Vector2(1, 0), "gtw", 4.0, 30.0, 999.0, false)
+		P.inp["fire"] = true
+		step(m, hold_s, func(): P.inp["fire"] = true)
+		var k := K.tide_k()
+		P.inp["fire"] = false
+		var top := {"v": 0.0, "stun": 0.0}
+		step(m, 0.8, func():
+			top["v"] = maxf(top["v"], Vector2(T.vel.x, T.vel.z).length())
+			top["stun"] = maxf(top["stun"], T.stun_t))
+		m.verbs.walls.erase(w)
+		rec[k >= 1.0] = [k, top["v"], top["stun"]]
+	var part: Array = rec.get(false, [0.0, 0.0, 9.0])
+	var full: Array = rec.get(true, [0.0, 0.0, 0.0])
+	ok("Tide Lunge into a rock: a part charge pushes the foe, no wall stun", part[2] < 0.3,
+		"k %.2f, %.1f m/s, stun %.2f s" % part)
+	ok("Tide Lunge into a rock: a full charge slams the foe into it (the shared 0.9 s wall stun)",
+		full[1] > 8.0 and full[2] >= 0.85, "k %.2f, %.1f m/s, stun %.2f s" % full)
 
 func _vials() -> void:
 	var want := {"thunder": "stun", "slime": "slow", "fire": "burn", "zeep": "lift"}
@@ -494,7 +519,7 @@ func _numbers() -> void:
 	_passive_numbers()
 	_rank_numbers()
 
-## Fencer: 7 / 7 / 11 a thrust, 0.32 s between thrusts and 0.48 s after the lunge, the chain resets after 0.75 s.
+## Fencer: 9.2 / 9.2 / 14.5 a thrust (TTK 11-12), 0.32 s between thrusts, 0.48 s after the lunge, reset 0.75 s.
 func _lmb_numbers() -> void:
 	_reset(2.0)
 	K.combo_n = 0
@@ -511,8 +536,9 @@ func _lmb_numbers() -> void:
 	P.inp["fire"] = false
 	var hit := [float(by_n.get(1, 0.0)), float(by_n.get(2, 0.0)) - float(by_n.get(1, 0.0)),
 		float(by_n.get(3, 0.0)) - float(by_n.get(2, 0.0))]
-	ok("numbers LMB: 7, 7, then 11 on the lunge (+0.1 for the slow)",
-		absf(hit[0] - 7.0) < 0.2 and absf(hit[1] - 7.0) < 0.2 and absf(hit[2] - 11.1) < 0.2, str(hit))
+	ok("numbers LMB: 9.2, 9.2, then 14.5 on the lunge (+0.1 for the slow)",
+		absf(hit[0] - 9.2) < 0.2 and absf(hit[1] - 9.2) < 0.2 and absf(hit[2] - 14.6) < 0.2,
+		str(hit))
 	ok("numbers LMB: 0.32 s between thrusts, 0.48 s after the lunge",
 		absf(float(cds.get(1, 0.0)) - 0.32) < 0.02 and absf(float(cds.get(3, 0.0)) - 0.48) < 0.02, str(cds))
 	step(m, 0.8)

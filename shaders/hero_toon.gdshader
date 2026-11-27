@@ -57,6 +57,14 @@ uniform float fres = 0.0;          // coloured fresnel rim, independent of the l
 uniform vec4 fres_color : source_color = vec4(0.75, 0.86, 1.0, 1.0);
 uniform float fres_tint = 0.5;     // 0 = fres_color, 1 = a lightened version of the surface's own colour
 uniform float top_light = 0.0;     // surfaces facing up (what the match camera sees most) lift a little     // a soft broad highlight on every surface facing the light
+// a drawn face off an atlas (WardenMood, Meeko's companions: albedo_tex holds the cells of atlas_grid, the mesh's UV
+// running 0..1 over a cell): from_cell fades into to_cell by k, blink shows blink_cell. atlas_grid.x 0 = not a face
+uniform ivec2 atlas_grid = ivec2(0);
+uniform int from_cell = 0;
+uniform int to_cell = 0;
+uniform int blink_cell = -1;
+uniform float blink = 0.0;
+uniform float k = 1.0;
 // a painted atlas (WardenGlb) at the match camera (~23 m): its colours this much brighter and richer, fading in
 // from 8 to 18 m away (close-ups keep the paint's own values)
 uniform float far_lift = 0.0;
@@ -178,6 +186,16 @@ void fragment() {
 	float far_p = smoothstep(8.0, 18.0, match_d(VERTEX, PROJECTION_MATRIX));
 	if (use_tex) {
 		vec3 tx = texture(albedo_tex, UV).rgb;
+		if (atlas_grid.x > 0) {
+			vec2 g = vec2(atlas_grid);
+			vec2 uv = clamp(UV, 0.0, 1.0);
+			int to_c = (blink > 0.5 && blink_cell >= 0) ? blink_cell : to_cell;
+			vec4 fa = texture(albedo_tex, (vec2(float(from_cell % atlas_grid.x), float(from_cell / atlas_grid.x)) + uv) / g);
+			vec4 fb = texture(albedo_tex, (vec2(float(to_c % atlas_grid.x), float(to_c / atlas_grid.x)) + uv) / g);
+			vec4 fc = mix(fa, fb, k);
+			if (fc.a < 0.5) { discard; }
+			tx = fc.rgb;
+		}
 		if (far_smooth > 0.0 && far_k > 0.001) {
 			vec3 tc = texture(albedo_tex, UV, far_smooth_bias).rgb;
 			if (far_clamp > 0.0) {
