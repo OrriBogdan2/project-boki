@@ -7273,6 +7273,34 @@
     "growl"
    ],
    "seconds": 0.91
+  },
+  "Strobolin": {
+   "file": "audio/cries/strobolin.wav",
+   "display_name": "Strobolin",
+   "line": "Spanglin",
+   "stage": 3,
+   "stages": 3,
+   "branch": "",
+   "types": "Crystal/Psychic",
+   "voice": "glassy ah vib puff",
+   "motif": [
+    0,
+    -3,
+    -6
+   ],
+   "notes": [
+    0,
+    -3,
+    -6
+   ],
+   "shape": "final",
+   "tint": [
+    "puff",
+    "bell",
+    "shimmer",
+    "buzz"
+   ],
+   "seconds": 0.93
   }
  },
  "lines": {
@@ -7538,7 +7566,8 @@
   ],
   "Spanglin": [
    "Spanglin",
-   "Mirrolin"
+   "Mirrolin",
+   "Strobolin"
   ],
   "Rattlebub": [
    "Rattlebub",

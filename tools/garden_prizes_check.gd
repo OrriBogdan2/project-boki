@@ -19,13 +19,18 @@ func ok(cond: bool, what: String) -> void:
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
-	Save.d = Save.fresh()
+	_fresh()
 	_tables()
 	_first_win()
 	_cup()
 	_visible()
 	print("GARDENPRIZES DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## A fresh save with races to spare: this plays many wins a day, and the run limits are --train-runs-check's.
+func _fresh() -> void:
+	Save.d = Save.fresh()
+	TrainRuns.state()["race"] = 9999
 
 func _boki(power: int) -> Dictionary:
 	var rec := Save.new_kin("cindle", "T-%d" % power)
@@ -66,7 +71,7 @@ func _first_win() -> void:
 	ok(other["first"], "first win is per game")
 
 func _cup() -> void:
-	Save.d = Save.fresh()
+	_fresh()
 	var me := _boki(20)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 11
@@ -98,7 +103,7 @@ func _cup() -> void:
 
 ## The cup compares the game's own stat (Speed for the Dash), not the stat total.
 func _own_stat(rng: RandomNumberGenerator, t: float) -> void:
-	Save.d = Save.fresh()
+	_fresh()
 	var me := _boki(20)
 	me["stats"]["speed"] = 60
 	var big := _boki(40)                      # a far bigger total, but slower than Pip
