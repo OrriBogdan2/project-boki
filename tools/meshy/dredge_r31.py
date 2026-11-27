@@ -27,9 +27,7 @@ this file only exports the mesh and swaps the image. numpy + PIL.
 
 import argparse
 import io
-import json
 import os
-import struct
 import sys
 
 import numpy as np
@@ -59,9 +57,17 @@ def pack_export(o):
         P[:, [0, 2]] *= -1
         N[:, [0, 2]] *= -1
     P -= np.r_[0.0, P[:, 1].min(), 0.0].astype(np.float32)
-    out = {"asset": {"version": "2.0"}, "scene": 0, "scenes": [{"nodes": [0]}], "nodes": [{"mesh": 0}],
-           "buffers": [{}], "bufferViews": [], "accessors": [], "materials": [{"name": "pack"}],
-           "meshes": [{"primitives": [{"attributes": {}, "indices": 0, "material": 0}]}]}
+    out = {
+        "asset": {"version": "2.0"},
+        "scene": 0,
+        "scenes": [{"nodes": [0]}],
+        "nodes": [{"mesh": 0}],
+        "buffers": [{}],
+        "bufferViews": [],
+        "accessors": [],
+        "materials": [{"name": "pack"}],
+        "meshes": [{"primitives": [{"attributes": {}, "indices": 0, "material": 0}]}],
+    }
     ob = bytearray()
 
     def put(arr, ctype, typ, minmax=False):
@@ -73,8 +79,11 @@ def pack_export(o):
 
     prim = out["meshes"][0]["primitives"][0]
     prim["indices"] = put(F.reshape(-1), 5125, "SCALAR")
-    prim["attributes"] = {"POSITION": put(P, 5126, "VEC3", True), "NORMAL": put(N, 5126, "VEC3"),
-                          "TEXCOORD_0": put(UV, 5126, "VEC2")}
+    prim["attributes"] = {
+        "POSITION": put(P, 5126, "VEC3", True),
+        "NORMAL": put(N, 5126, "VEC3"),
+        "TEXCOORD_0": put(UV, 5126, "VEC2"),
+    }
     ob += b"\0" * (-len(ob) % 4)
     out["buffers"][0]["byteLength"] = len(ob)
     write(o.out, out, ob)
@@ -87,7 +96,9 @@ def pack_tex(o):
     tex = {js["materials"][p["material"]]["pbrMetallicRoughness"]["baseColorTexture"]["index"] for p in prims}
     assert len(tex) == 1, "pack prims use more than one texture"
     t = tex.pop()
-    users = [m for m in js["materials"] if m.get("pbrMetallicRoughness", {}).get("baseColorTexture", {}).get("index") == t]
+    users = [
+        m for m in js["materials"] if m.get("pbrMetallicRoughness", {}).get("baseColorTexture", {}).get("index") == t
+    ]
     assert all(m["name"] == o.mat for m in users), "pack texture shared with another material"
     _, _, _, img = meshy_part(o.meshy)
     old = js["images"][js["textures"][t]["source"]]
@@ -97,8 +108,10 @@ def pack_tex(o):
     im = img.resize((size, size), Image.LANCZOS) if img.size[0] != size else img
     jb = io.BytesIO()
     im.save(jb, "JPEG", quality=90)
-    js["images"][js["textures"][t]["source"]] = {"bufferView": add_view(js, b, np.frombuffer(jb.getvalue(), np.uint8)),
-                                                 "mimeType": "image/jpeg"}
+    js["images"][js["textures"][t]["source"]] = {
+        "bufferView": add_view(js, b, np.frombuffer(jb.getvalue(), np.uint8)),
+        "mimeType": "image/jpeg",
+    }
     b = compact(js, b)
     write(o.out, js, b)
     print("wrote %s: pack image %d px -> %d px from %s" % (o.out, w, size, o.meshy))
@@ -204,13 +217,15 @@ def _open_verts(js, b, prs, box=True):
     _, inv = np.unique(np.round(np.concatenate(Ps) / 1e-4).astype(np.int64), axis=0, return_inverse=True)
     inv = inv.ravel()
     off = np.cumsum([0] + [len(P) for P in Ps])
-    G = np.concatenate([inv[off[k] + acc(js, b, pr["indices"]).reshape(-1, 3).astype(np.int64)] for k, pr in enumerate(prs)])
+    G = np.concatenate(
+        [inv[off[k] + acc(js, b, pr["indices"]).reshape(-1, 3).astype(np.int64)] for k, pr in enumerate(prs)]
+    )
     E = np.sort(np.concatenate([G[:, [0, 1]], G[:, [1, 2]], G[:, [2, 0]]]), 1)
     u, c = np.unique(E, axis=0, return_counts=True)
     hot = np.zeros(inv.max() + 1, bool)
     hot[u[c == 1].ravel()] = True
     lo, hi = map(np.array, OPEN_BOX) if box else (np.full(3, -np.inf), np.full(3, np.inf))
-    return [hot[inv[off[k]:off[k + 1]]] & ((Ps[k] >= lo) & (Ps[k] <= hi)).all(1) for k in range(len(prs))]
+    return [hot[inv[off[k] : off[k + 1]]] & ((Ps[k] >= lo) & (Ps[k] <= hi)).all(1) for k in range(len(prs))]
 
 
 def backing(o):
@@ -225,8 +240,11 @@ def backing(o):
     pz, _ = g.poses(js, b, js["skins"][0])
     prims = js["meshes"][0]["primitives"]
     whole = set(o.whole.split(",")) if o.whole else set()
-    todo = [(pi, pr) for pi, pr in enumerate(prims) if "COLOR_0" in pr["attributes"]
-            and js["materials"][pr["material"]]["name"] in set(FOLD_MATS) | whole]
+    todo = [
+        (pi, pr)
+        for pi, pr in enumerate(prims)
+        if "COLOR_0" in pr["attributes"] and js["materials"][pr["material"]]["name"] in set(FOLD_MATS) | whole
+    ]
     opn = _open_verts(js, b, [pr for _, pr in todo]) if o.open else [None] * len(todo)
     for (pi, pr), ov in zip(todo, opn):
         mat = js["materials"][pr["material"]]["name"]
@@ -247,11 +265,16 @@ def backing(o):
         if ov is not None:
             Co[ov, 3] = 0.0  # (the shell's flap past an open edge)
         pr["attributes"] = dict(pr["attributes"], COLOR_0=add_acc(js, b, Co, 5126, "VEC4"))
-        bk = dict(pr, attributes=dict(pr["attributes"], COLOR_0=add_acc(js, b, Cb, 5126, "VEC4")),
-                  indices=add_acc(js, b, F[zone][:, [0, 2, 1]].astype(np.uint32).ravel(), 5125, "SCALAR", 34963))
+        bk = dict(
+            pr,
+            attributes=dict(pr["attributes"], COLOR_0=add_acc(js, b, Cb, 5126, "VEC4")),
+            indices=add_acc(js, b, F[zone][:, [0, 2, 1]].astype(np.uint32).ravel(), 5125, "SCALAR", 34963),
+        )
         prims.append(bk)
-        print("prim %d %s: %d tris, %d fold in a clip, %s open verts, backing %d" % (
-            pi, mat, len(F), flip.sum(), "-" if ov is None else ov.sum(), zone.sum()))
+        print(
+            "prim %d %s: %d tris, %d fold in a clip, %s open verts, backing %d"
+            % (pi, mat, len(F), flip.sum(), "-" if ov is None else ov.sum(), zone.sum())
+        )
     js["buffers"][0]["byteLength"] = len(b)
     glb_add_clips.write(o.out, js, b)
 
@@ -260,8 +283,15 @@ def _qmul(a, b):
     """Quaternion product a*b, glTF order (x, y, z, w), rows broadcast."""
     ax, ay, az, aw = np.moveaxis(np.asarray(a, float), -1, 0)
     bx, by, bz, bw = np.moveaxis(np.asarray(b, float), -1, 0)
-    return np.stack([aw * bx + ax * bw + ay * bz - az * by, aw * by - ax * bz + ay * bw + az * bx,
-                     aw * bz + ax * by - ay * bx + az * bw, aw * bw - ax * bx - ay * by - az * bz], -1)
+    return np.stack(
+        [
+            aw * bx + ax * bw + ay * bz - az * by,
+            aw * by - ax * bz + ay * bw + az * bx,
+            aw * bz + ax * by - ay * bx + az * bw,
+            aw * bw - ax * bx - ay * by - az * bz,
+        ],
+        -1,
+    )
 
 
 def abduct(o):
@@ -317,10 +347,17 @@ def pack_ink(o):
         zone = (low | ov)[F].any(1)
         Cb = C.copy()
         Cb[:, 3] = 0.0  # (the backing's own shell, coincident with the pack face, would z-fight black)
-        prims.append(dict(pr, attributes=dict(pr["attributes"], COLOR_0=add_acc(js, b, Cb, 5126, "VEC4")), indices=add_acc(js, b, F[zone][:, [0, 2, 1]].astype(np.uint32).ravel(), 5125,
-                                               "SCALAR", 34963)))
-        print("prim %d %s: %d tris, ink off on %d verts (%d open), backing %d" % (pi, PACK, len(F), (low | ov).sum(),
-                                                                                ov.sum(), zone.sum()))
+        prims.append(
+            dict(
+                pr,
+                attributes=dict(pr["attributes"], COLOR_0=add_acc(js, b, Cb, 5126, "VEC4")),
+                indices=add_acc(js, b, F[zone][:, [0, 2, 1]].astype(np.uint32).ravel(), 5125, "SCALAR", 34963),
+            )
+        )
+        print(
+            "prim %d %s: %d tris, ink off on %d verts (%d open), backing %d"
+            % (pi, PACK, len(F), (low | ov).sum(), ov.sum(), zone.sum())
+        )
     js["buffers"][0]["byteLength"] = len(b)
     glb_add_clips.write(o.out, js, b)
 
@@ -341,8 +378,13 @@ def main():
     ap.add_argument("--size", type=int, default=2048, help="pack image size cap (px)")
     ap.add_argument("--goo", action="store_true")
     ap.add_argument("--knee", action="store_true")
-    ap.add_argument("--box", action="append", default=[], type=lambda v: [float(x) for x in v.split(",")],
-                    help="--relax r34: x0,y0,z0,x1,y1,z1 rest box of skin+dome, fade from every face (repeatable)")
+    ap.add_argument(
+        "--box",
+        action="append",
+        default=[],
+        type=lambda v: [float(x) for x in v.split(",")],
+        help="--relax r34: x0,y0,z0,x1,y1,z1 rest box of skin+dome, fade from every face (repeatable)",
+    )
     ap.add_argument("--target", type=float, default=3.0, help="x rest length: masked edges over this relax")
     ap.add_argument("--passes", type=int, default=60)
     ap.add_argument("--ink-off", action="store_true", help="--backing: no ink room on the folded originals either")

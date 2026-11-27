@@ -28,7 +28,9 @@ import skin_relax  # noqa: E402
 SHOULDER = ((-0.45, 1.12, -0.45), (-0.02, 1.85, 0.30))
 TARGET = 2.0  # x rest length: edges in the box over this are relaxed
 PASSES = 80
-RAMP = 0.08  # m: inside the box's lower and spine-side faces the new weights fade in over this (no seam where they meet)
+RAMP = (
+    0.08  # m: inside the box's lower and spine-side faces the new weights fade in over this (no seam where they meet)
+)
 
 
 def weld(prims, bones):
@@ -52,9 +54,16 @@ def _report(tag, s, pz, mask):
     byclip = {}
     for (c, _), r in zip(pz, per):
         byclip[c] = max(byclip.get(c, 0.0), float(r))
-    print("%s: box edges >2x %d >3x %d >5x %d | worst per clip %s" % (
-        tag, (worst[inbox] > 2).sum(), (worst[inbox] > 3).sum(), (worst[inbox] > 5).sum(),
-        " ".join("%s %.2f" % (c.split("|")[-1][:10], v) for c, v in sorted(byclip.items()))))
+    print(
+        "%s: box edges >2x %d >3x %d >5x %d | worst per clip %s"
+        % (
+            tag,
+            (worst[inbox] > 2).sum(),
+            (worst[inbox] > 3).sum(),
+            (worst[inbox] > 5).sum(),
+            " ".join("%s %.2f" % (c.split("|")[-1][:10], v) for c, v in sorted(byclip.items())),
+        )
+    )
     return worst
 
 
@@ -117,7 +126,13 @@ def horns(out, src):
         top[wt == 0] = top[0]
 
         def gap(J, W):
-            r = [np.linalg.norm(_skinned_pts(root[None], J, W, m)[0] - _skinned_pts(goo["pos"][near], goo["joints"][near], goo["weights"][near], m).mean(0)) for _, m in pz]
+            r = [
+                np.linalg.norm(
+                    _skinned_pts(root[None], J, W, m)[0]
+                    - _skinned_pts(goo["pos"][near], goo["joints"][near], goo["weights"][near], m).mean(0)
+                )
+                for _, m in pz
+            ]
             r0 = np.linalg.norm(root - goo["pos"][near].mean(0))
             return max(abs(x - r0) for x in r)
 
@@ -131,9 +146,18 @@ def horns(out, src):
             o = wt_at + v * wt_st
             bin_[o : o + 16] = wt.astype("<f4").tobytes()
         names = [j["nodes"][i]["name"] for i in skin["joints"]]
-        print("horn prim %d root %s: %d goo verts; %s -> %s; root drift off the goo %.1f -> %.1f cm (all clips)" % (
-            k, np.round(root, 2).tolist(), near.sum(), names[h["joints"][0, 0]],
-            " ".join("%s %.2f" % (names[a], b) for a, b in zip(top, wt) if b > 0), 100 * before, 100 * after))
+        print(
+            "horn prim %d root %s: %d goo verts; %s -> %s; root drift off the goo %.1f -> %.1f cm (all clips)"
+            % (
+                k,
+                np.round(root, 2).tolist(),
+                near.sum(),
+                names[h["joints"][0, 0]],
+                " ".join("%s %.2f" % (names[a], b) for a, b in zip(top, wt) if b > 0),
+                100 * before,
+                100 * after,
+            )
+        )
     glb_add_clips.write(out, j, bin_)
 
 
