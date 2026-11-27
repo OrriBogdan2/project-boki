@@ -72,6 +72,8 @@ Data-only options (`breed_options` in content/rules/garden_xp.json, read by the 
 
 Even the best option is 4 to 6 hours of play to a first egg. A 30 minute egg needs both a far larger XP rate and a
 Grown level near 2 (roughly 10x the XP, or a Nook that takes Youngling kin); that is a design call.
+Food shapes the body too (`Lean.size`, `content/rules/lean.json` `size`): at full lean a heavy type (Rock, Dragon, Steel) swells up to 15% and a light one (Bug, Flying, Fairy) slims up to 15%, in step with the tint, by lean strength. `Evo.dress` applies it as the model's `evo_scale`; the Boki card's lean line says it (", 8% bigger"). `--feed-check` feeds ten meals each way; `--lean-shots --foods=pebblenut,sapjelly --meals=10` shows it.
+
 ## Base-only breeding
 
 Hold a shaping item (Hold on it in the bag) and walk up to a Boki, or point at its row in the Boki's feed menu:
