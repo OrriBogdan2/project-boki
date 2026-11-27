@@ -115,6 +115,7 @@ static func settle(id: String, mine: Dictionary, foe: Dictionary, won: bool, now
 			"ribbon": false, "reset": false, "keepsake": "", "charged": true, "runs": ""}
 	if now < 0.0:
 		now = Time.get_unix_time_from_system()
+	PlayStyle.garden(mine, "game", id, now)
 	if not won:
 		GardenXp.play(id, mine, false, false)
 		out["reset"] = _runs(id).erase(String(mine["uid"]))

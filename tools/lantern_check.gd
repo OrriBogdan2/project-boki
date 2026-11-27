@@ -219,6 +219,7 @@ func _settle() -> void:
 		var known: bool = Data.CROPS.has(id) if e["kind"] == "snack" else GardenItems.item_name(id) != id
 		ok(known, "table entry %s exists" % e["id"])
 	var me := _kin("Me", 20)
+	TrainRuns.state()["race"] = 9  # two wins in a row today: the run limits are --train-runs-check's
 	var gems := int(Save.d["gems"])
 	var res := LanternMatch.settle(_done(me, {}, int(LanternMatch.rules()["solo_goal"]), 0))
 	var two: bool = res["prize"]["items"].size() == 2 and res["prize"]["first"]

@@ -352,7 +352,7 @@ static func settle_solo(rec: Dictionary, grades: Array) -> Dictionary:
 	Care.change(rec, "energy", -float(rules()["energy"]))
 	Care.change(rec, "food", -float(t_v["food"]))
 	Care.change(rec, "joy", float(t_v["joy_great"]) if grades.has("great") else float(t_v["joy_else"]))
-	Evo.add(rec, "swift", 2.0)
+	PlayStyle.garden(rec, "drill", "speed")
 	if int(pay["bites"]) > 0:
 		Save.remember(rec, "trained", "ran a training lap of the Dash with you", 1.0)
 	return pay
