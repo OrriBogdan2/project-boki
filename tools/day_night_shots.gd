@@ -1,6 +1,6 @@
 extends RefCounted
 ## --day-night-shots --shots-dir=<dir>: the game camera at a night camp by day, at dusk and at night, with
-## the HUD (phase row, minimap icons) and the same spot from higher up. Run under a renderer; files are
+## the HUD (phase row, minimap icons), then the full map at night. Run under a renderer; files are
 ## <dir>/dn_<name>.png.
 
 var main: Node
@@ -23,6 +23,7 @@ func run(main_node: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	Econ.ensure()
+	Settings.v["hud_full"] = true  # (the whole HUD, not the first-run reveal)
 	var m := Match.new()
 	main.add_child(m)
 	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1800.0, "seed": 21, "no_drop": true, "day_night": true})
@@ -43,5 +44,8 @@ func run(main_node: Node) -> void:
 		dn.tick()
 		me.hp = me.max_hp
 		await _grab(String(shot[0]))
+	m.hud.open_map(false)
+	await _grab("map_night")
+	m.hud.close_map()
 	m.over = true
 	main.get_tree().quit(0)
