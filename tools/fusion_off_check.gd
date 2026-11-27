@@ -135,8 +135,17 @@ func _off_match() -> void:
 ## full meters and the slot open for everyone; C every 2.5 s (its cooldown cleared), so the wisp goes out, is sent
 ## back, folds and comes out again while X and R mash.
 func _off_wisps() -> void:
-	_match({"training": false, "teams": 4, "squad": 1, "length": 600.0, "no_drop": true, "boki_wisps": true,
-			"arch": "bulwark"})
+	_match(
+		{
+			"training": false,
+			"teams": 4,
+			"squad": 1,
+			"length": 600.0,
+			"no_drop": true,
+			"boki_wisps": true,
+			"arch": "bulwark"
+		}
+	)
 	var p := m.player
 	var fused := 0
 	var states := {}
@@ -149,25 +158,32 @@ func _off_wisps() -> void:
 			h.lvl = maxi(h.lvl, int(Hunter.ULT_AT[0]))
 		p.inp["ult"] = true
 		if i % 15 == 0:
-			if p.ak: p.ak.cd["r"] = 0.0
+			if p.ak:
+				p.ak.cd["r"] = 0.0
 			HunterKeys.ult_pressed(p)
 		if i % 150 == 75:
-			if p.kin and (p.kin as Kin).summon: (p.kin as Kin).summon.cd = 0.0      # (cycle faster than its cooldown)
+			if p.kin and (p.kin as Kin).summon:
+				(p.kin as Kin).summon.cd = 0.0  # (cycle faster than its cooldown)
 			KinSummon.press(p)
 		m.step(Match.DT)
 		var k: Kin = p.kin
 		if k:
 			var out := k.summon != null and k.summon.out()
 			states["wisp" if k.wisp else k.state] = true
-			if out and not was_out: summons += 1
+			if out and not was_out:
+				summons += 1
 			was_out = out
 		for h in m.hunters:
 			var hk = h.kin
 			if not h.merge_st.is_empty() or (hk != null and is_instance_valid(hk) and (hk as Kin).state == "fused"):
 				fused += 1
 	var merges := int(m.kstat["ult"])
-	print("FUSIONOFF wisps 60s: fusion frames %d, merges %d, player Boki states %s, summons %d"
-			% [fused, merges, str(states.keys()), summons])
+	print(
+		(
+			"FUSIONOFF wisps 60s: fusion frames %d, merges %d, player Boki states %s, summons %d"
+			% [fused, merges, str(states.keys()), summons]
+		)
+	)
 	ok(fused == 0 and merges == 0, "off: 60 s of X, R and C with wisps and bots, 0 fusions (%d frames)" % fused)
 	ok(states.has("wisp") and states.has("active") and summons >= 2, "off: C still summons the wisp (%d)" % summons)
 
