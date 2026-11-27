@@ -193,7 +193,7 @@ Measured by casting every slot at 2 m (rising from a jump), at 9 m (falling) and
 | Storm Rod, then an orb next to the foe | the orb adds no Static (it is only a pickup) | `--mage-combo-check` |
 | Walking over a resting orb | picks it up, the dash is back; an orb out of reach stays | `--mage-combo-check` |
 | Wirerun through an orb | 2 Static on everyone near it, no reset | `--mage-combo-check` |
-| Storm Rod into a wall / another foe | stun (both) | `--mage-combo-check` |
+| Storm Rod into a wall / another foe | stun (both), 0.4 -> 1.0 s with the charge | `--mage-combo-check` |
 | Skycall dragged toward you | foes pulled in, Grounded (no dashing), 1 Static | `--mage-combo-check` |
 | Skycall over a rival's orb | flung, now yours | `--mage-combo-check` |
 | Skycall Grounded on you | no Wirerun | `--mage-combo-check` |
