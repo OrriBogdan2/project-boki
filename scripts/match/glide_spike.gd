@@ -11,7 +11,7 @@ extends RefCounted
 ## data carries a `spike` block, {"bonus": extra damage share, "vy": m/s down}, read through dunks().
 ## Numbers: content/rules/hunter_move.json "glide_spike".
 
-const AIR_GAP := 0.35          # m: a body this far over its ground (or gliding) is in the air for a spike block
+const AIR_GAP := 0.35  # m: a body this far over its ground (or gliding) is in the air for a spike block
 
 static var _r: Dictionary = MoveRules.data()["glide_spike"]
 static var land_stun: float = _r["land_stun"]

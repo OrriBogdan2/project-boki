@@ -33,6 +33,8 @@ const LANE := Rect2i(-6, -2, 11, 5)  # tiles round the drop spot the runs cross 
 
 var bad := 0
 var arcs := {}  # mode -> [air steps, apex m] of the running jump
+var m: Match  # the match mode under test (one Hunter._physics)
+var h: Hunter
 
 var m: Match
 var h: Hunter
@@ -102,8 +104,6 @@ func _unlay(w: World, old: Array) -> void:
 
 
 # ---------------------------------------------------------------- the match modes (one Hunter._physics)
-
-
 func _reset(at: Vector3, v: Vector3, standing: bool) -> void:
 	# a mode that respawns mobs (the Training Area) must not walk one into the faller: it nudges its position
 	if is_instance_valid(m):
@@ -219,13 +219,13 @@ func _match_mode(main: Node, mode: String) -> void:
 				% [mode, up, r[1], r[2], r[3], HunterMove.slide(r[2])]
 			)
 		)
-	_jump(mode, at, run_v)
+	_jump(mode, at)
 	_flight(mode, at, run_v)
 	m.queue_free()
 	await main.get_tree().process_frame
 
 
-func _jump(mode: String, at: Vector3, _run: float) -> void:
+func _jump(mode: String, at: Vector3) -> void:
 	_reset(at + Vector3(-3.5, 0, 0), Vector3.ZERO, true)
 	h.inp["move"] = Vector2(1, 0)
 	for i in 20:

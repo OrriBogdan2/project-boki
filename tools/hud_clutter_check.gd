@@ -102,7 +102,7 @@ func _scene(arch: String, moment: String, size: Vector2i, statuses: bool, shots:
 		for i in 3:
 			await main.get_tree().process_frame
 	if moment == "fusion":
-		Content.rules("merge_forms")["fusion_enabled"] = true  # (shipped off; this scene is the form's HUD)
+		MergeForm.set_enabled(true)  # (shipped off; this scene is the form's HUD)
 	Save.d = Save.fresh()
 	if arch != "":
 		Save.d.erase("hud_reveal")  # the full HUD, as a veteran sees it (a new player's is staged, HudReveal)
@@ -182,7 +182,7 @@ func _scene(arch: String, moment: String, size: Vector2i, statuses: bool, shots:
 	if scene_bad > 0:
 		failed.append(tag.trim_suffix(": ") if tag != "" else "plain")
 		print("HUDCLUTTER FAIL SCENE %s (%d failing lines)" % [tag.trim_suffix(": "), scene_bad])
-	Content.rules("merge_forms")["fusion_enabled"] = false
+	MergeForm.set_enabled(false)
 	m.queue_free()
 	await main.get_tree().process_frame
 
