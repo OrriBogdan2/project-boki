@@ -146,9 +146,17 @@ func _on_hit(by, t, d, _tags) -> void:
 			dm["last"] = float(d)
 			dm["quiet"] = 0.0
 			TrainingSfx.cue(TrainingSfx.DUMMY_HIT, (t as Hunter).pos)
+			if drill and t == drill.thrower and tools:
+				drill.arm()      # the dodge drill only runs once you hit the Strafer (no unasked red lane)
 	if t == bot or dummies.any(func(x): return x["h"] == t):
 		hits_all.append([m.time, float(d)])
 		dealt += float(d)
+
+## A dummy's label before you hit it (the Strafer's says what hitting it starts: DodgeDrill.label).
+func _idle_label(kind: String) -> String:
+	if kind == "strafe":
+		return drill.label() if drill and tools else "STRAFER"
+	return "DUMMY" if kind == "still" else "TRAINING DUMMY  ·  slam me into the pillar"
 
 static func dps_of(hits: Array, now: float, win := 4.0) -> float:
 	var s := 0.0
@@ -221,7 +229,7 @@ func tick(dt: float) -> void:
 			hs.pop_front()
 		var lb: Label3D = dm["label"]
 		var dps := dps_of(hs, m.time)
-		lb.text = "DPS %d   ·   last %d\ntotal %d" % [int(round(dps)), int(round(float(dm["last"]))), int(round(float(dm["total"])))] if float(dm["total"]) > 0.0 else {"still": "DUMMY", "strafe": "STRAFER", "heavy": "TRAINING DUMMY  ·  slam me into the pillar"}[dm["kind"]]
+		lb.text = "DPS %d   ·   last %d\ntotal %d" % [int(round(dps)), int(round(float(dm["last"]))), int(round(float(dm["total"])))] if float(dm["total"]) > 0.0 else _idle_label(dm["kind"])
 	while not hits_all.is_empty() and m.time - float(hits_all[0][0]) > 6.0:
 		hits_all.pop_front()
 	# the sparring bot and you always see each other (the view cone never hides a sparring partner)
