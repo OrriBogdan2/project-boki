@@ -146,9 +146,13 @@ func _input(event: InputEvent) -> void:
 		if event.is_action_pressed(ACTIONS[slot]) and not event.is_echo():
 			on_press(ACTIONS[slot])
 
-func _process(dt: float) -> void:
+## The panel's home: centred under the top margin, clear of the minimap and the frame-rate readout.
+func _place() -> void:
 	var sz: Vector2 = m.hud.c.size
 	SafeArea.place(_panel, Vector2((sz.x - _panel.get_combined_minimum_size().x) * 0.5, PANEL_Y), sz)
+
+func _process(dt: float) -> void:
+	_place()
 	if done_t >= 0.0:
 		done_t += dt
 		if done_t >= DONE_S:
@@ -184,6 +188,7 @@ func build_ui() -> void:
 	bottom.add_child(skip)
 	if m.hud:
 		m.hud.ui_extra.append(skip)       # the mouse is over UI here: no shooting, the pointer shows
+		_place()      # (before the first frame: unplaced, the Skip button sits at the corner under a mouse parked there)
 
 func _label(parent: Node, col: Color, px: int, wrap_w := 0.0) -> Label:
 	var l := Label.new()
