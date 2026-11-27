@@ -75,6 +75,7 @@ func _locker(part: String) -> void:
 		locker.pick(kv[0], kv[1])
 	for sex in 2:
 		locker.pick("gender", sex)
+		await _frames(150)  # (the pick's reaction, a sign held up, is over)
 		if part == "tabs":
 			for t in ["Body", "Hollow", "Shroud", "Glider"]:
 				locker.show_tab(t)
@@ -84,15 +85,15 @@ func _locker(part: String) -> void:
 		locker.show_tab("Body")
 		for yaw in YAWS:
 			locker.set_yaw(YAWS[yaw])
-			await _frames(60)
+			await _frames(150)
 			await _grab("locker_%s_%s" % [SEXES[sex], yaw])
 		locker.pick("colour", 5)
 		locker.pick("hood", 0)
 		locker.set_yaw(YAWS["q"])
-		await _frames(60)
+		await _frames(150)
 		await _grab("locker_%s_hood_down_dyed" % SEXES[sex])
 		locker.pick("hood", 1)
-		await _frames(60)
+		await _frames(150)
 		await _grab("locker_%s_dyed_3d" % SEXES[sex])
 		locker.pick("colour", int(Unmasked.default_look()["colour"]))
 	hx.queue_free()
@@ -119,9 +120,8 @@ func _motion() -> void:
 		var model := Models.hunter("medium", Data.TEAM_COLORS[0], "", "", lk)
 		model.set_meta("anim_seed", 1)
 		holder.add_child(model)
+		(model.get_node("Rig/Torso/Aim/Gun") as Node3D).visible = false  # (the empty-handed Gun's magazine)
 		print("EMPTY_3D sex %s glb=%s" % [SEXES[sex], model.get_meta("glb", false)])
-		var poser := model.get_node("Warden/Sync")
-		poser.set_process(false)
 		var poser := model.get_node("Warden/Sync")
 		poser.set_process(false)
 		for yaw in MOTION_YAWS:
@@ -144,6 +144,11 @@ func _motion() -> void:
 func _home() -> void:
 	for sex in 2:
 		var d := Save.fresh()
+		var kin := Save.new_kin("glomwort", "Glomwort")
+		Care.ensure(kin)
+		d["roster"].append(kin)
+		d["roster"][0]["starter"] = true
+		d["active"] = kin["uid"]
 		d["tutorial"] = {"hatched": true, "intro": true, "day1_done": true}
 		var lk := Unmasked.default_look()
 		lk["gender"] = sex
@@ -152,7 +157,7 @@ func _home() -> void:
 		HomeLayout.ensure(d)
 		var home = await main._hb_home()
 		for i in 900:
-			if home.root_ui != null and home.player != null:
+			if home.root_ui != null and home.player != null and home.hb != null:
 				break
 			await tree.process_frame
 		home._close_panel()
