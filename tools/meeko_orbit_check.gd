@@ -69,7 +69,8 @@ func _cut(m: Node3D, wc: WardenCompanions) -> void:
 		var face := false
 		for si in part.node.mesh.get_surface_count():
 			var o := part.node.get_surface_override_material(si) as ShaderMaterial
-			face = face or (o != null and o.shader == Models.HERO and o.get_shader_parameter("atlas_grid") != Vector2i.ZERO)
+			var atlas := o != null and o.shader == Models.HERO
+			face = face or (atlas and o.get_shader_parameter("atlas_grid") != Vector2i.ZERO)
 		ok(face, "%s's face is still drawn off the mood atlas (hero-toon)" % part.id)
 
 func _pos(m: Node3D, part: WardenCompanions.Part) -> Vector3:
