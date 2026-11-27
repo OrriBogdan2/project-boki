@@ -465,7 +465,7 @@ func _line_cost(a: Vector3, b: Vector3) -> int:
 	var n := 0
 	for s in 25:
 		var q := a.lerp(b, s / 24.0)
-		for o in [Vector2.ZERO, Vector2(0.7, 0), Vector2(-0.7, 0), Vector2(0, 0.7), Vector2(0, -0.7)]:
+		for o: Vector2 in [Vector2.ZERO, Vector2(0.7, 0), Vector2(-0.7, 0), Vector2(0, 0.7), Vector2(0, -0.7)]:
 			var x := q.x + o.x
 			var z := q.z + o.y
 			if h.world.is_block(x, z) or h.world.is_void(x, z) or h.water.depth(x, z) > 0:
@@ -478,10 +478,10 @@ func _bed_path(meadow: Vector3) -> Array:
 	var c := _beds_mid(meadow)
 	var best: Array = [meadow + Vector3(7.0, 0, 5.0), meadow + Vector3(-12.0, 0, 5.0)]
 	var best_n := 1 << 30
-	for side in [Vector2(0, 1), Vector2(0, -1), Vector2(1, 0), Vector2(-1, 0)]:
+	for side: Vector2 in [Vector2(0, 1), Vector2(0, -1), Vector2(1, 0), Vector2(-1, 0)]:
 		var along := Vector2(-side.y, side.x)
 		var mid := c + Vector3(side.x, 0, side.y) * (2.2 + BED_SIDE)
-		for flip in [1.0, -1.0]:
+		for flip: float in [1.0, -1.0]:
 			var a := mid + Vector3(along.x, 0, along.y) * 7.0 * flip
 			var b := mid - Vector3(along.x, 0, along.y) * 9.0 * flip
 			var n := _line_cost(a, b)
