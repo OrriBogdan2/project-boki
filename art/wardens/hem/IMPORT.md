@@ -1,3 +1,12 @@
+# Hem (Lace) r34 (2026-11-27, ext/lace-r13-slit)
+
+Corset re-tone: the corset's near-black texels in the body atlas (`texD2`, Godot extracts it to `hem_meshy_texD2.jpg`) lifted to
+crimson, keeping each texel's shading and the silver filigree (`tools/art1/hem_r34/corset34.py r33.glb retone out.glb ylo=1.0
+dark=95 gain=1.15 crim=165,32,55`; mask = body faces dominated by Hips/Spine*, porcelain texels kept). Part-lock: all 1675
+accessors byte-identical to r33, only the `texD2` image changed. A Meshy body retexture (--original-uv) was tried first: Meshy
+re-packs the UVs, and the corset it painted was blotchy black with purple specks after transfer, so it was not used.
+Art gate: game 7.2 (r33 7.1) vs live 4.5; close-up torso 7.0 (live 6.0).
+
 # Hem (Lace) r33 (2026-11-27, ext/lace-r13-slit)
 
 Right fist (fused Meshy mitten) replaced by a Meshy image-to-3d open porcelain doll hand, rigid on `RightHand`, tinted to the
