@@ -43,9 +43,25 @@ func run(main_node: Node) -> void:
 	_static_styles(src)
 	_theme_builds_clean()
 	_sentences_wrap()
+	_weights()
 	await _screens()
 	print("UIPOLISH DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+
+## The weight axis really bites: the heavier faces set the same text wider than the Light default
+## (a "wght" string key is ignored and leaves Rubik Light; UI.weight() keys by the OpenType tag).
+func _weights() -> void:
+	UI.theme()
+	var text := "Training Grounds"
+	var light := UI.body.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 32).x
+	var semi := UI.semi.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 32).x
+	var heavy := FontVariation.new()
+	heavy.base_font = UI.body
+	heavy.variation_opentype = UI.weight(700)
+	var wide := heavy.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 32).x
+	ok("UI.semi is heavier than Rubik's Light default", semi > light + 1.0, "%.1f vs %.1f px" % [semi, light])
+	ok("weight 700 is heavier than 560", wide > semi + 1.0, "%.1f vs %.1f px" % [wide, semi])
 
 
 func _sentences_wrap() -> void:
@@ -151,7 +167,7 @@ func _migration() -> void:
 	for k in Settings.REMOVED:
 		cf.set_value("s", k, true)
 	cf.set_value("s", "music", 0.42)
-	cf.set_value("s", "audio_v", 2)      # (a file already on the perceptual volume curve)
+	cf.set_value("s", "audio_v", 2)  # (a file already on the perceptual volume curve)
 	cf.save(Settings.path)
 	var fresh: Node = load("res://scripts/core/settings.gd").new()
 	main.add_child(fresh)
@@ -165,9 +181,11 @@ func _migration() -> void:
 	ok("...and keeps the others", kept and is_equal_approx(float(fresh.get_v("music")), 0.42))
 	ok("a config from before Text size loads at 100%", is_equal_approx(float(fresh.get_v("text_size")), 1.0))
 	var stray := [Settings.snap_text_size(1.1), Settings.snap_text_size(9.0), Settings.snap_text_size("big")]
-	ok("Text size keeps its three choices and snaps stray values",
-			Settings.TEXT_SIZES.all(func(x): return Settings.snap_text_size(x) == x) and stray == [1.0, 1.5, 1.0],
-			str(stray))
+	ok(
+		"Text size keeps its three choices and snaps stray values",
+		Settings.TEXT_SIZES.all(func(x): return Settings.snap_text_size(x) == x) and stray == [1.0, 1.5, 1.0],
+		str(stray)
+	)
 	main.remove_child(fresh)
 	fresh.free()
 	if had:
