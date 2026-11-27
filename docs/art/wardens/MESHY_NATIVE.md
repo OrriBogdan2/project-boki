@@ -26,12 +26,25 @@ contract (RIG_CONTRACT.md). The game adapts to Meshy: its bones are never rename
 - HunterAnim still poses the hidden rig and hands over its state (`WardenClips.STATE`); the AnimationPlayer plays:
   idle `Idle`, walk `walk`, run `run`, air `Jump_Run`, any new swing/cast/kit move `Attack` (or its clip slot below), crouch
   `Crouch_Walk_with_Torch` (rate follows ground speed; standing still holds the crouch pose).
+- Own move clips (data `clip_files` + `kmoves`, 11-23, Kael first): a clips-only file beside the model
+  (`art/wardens/<art>/<art>_clips.glb`, the rig's nodes with no mesh; WardenClipFile adds its clips to Meshy's library
+  by bone name) holds clips keyed on Meshy's skeleton, and `kmoves` (WardenNativeMoves, see Kit-move clips) maps a kit move (`kmove`) to one: `clip`, `fade` (a clip with no
+  `hold_from` stays on its last pose while the kit holds the move), and for the check `hit` (the kit's hit second) with
+  `peak` (`speed`, `low`, `reach`: how the clip's hit pose is measured). The clip's clock is the kit's (`kmove_t`),
+  so its hit pose lands on the kit's hit. A move with no entry still plays `Attack`. Kael's are made by
+  `python3 -I tools/art1/kael_native_clips.py` (poses as body-frame numbers: hips, chest, feet, sword hand and blade
+  direction, solved with two-bone IK by `tools/art1/meshy_rig.py`; the blade runs along the right hand bone). Timing and
+  poses: docs/heroes/juggernaut.md "Native clips". `--warden-native-check` sweeps each clip and asserts the hit pose
+  within one frame of the kit's hit; `--clip-shots --states` presses each mapped move.
 - Crouch arms (`crouch_arms_from`): Meshy's only crouch holds a torch out in front, which read in game as Sable's
   pistol and Tenzo's stone arm floating off the body. The crouch plays a copy (`<clip>_arms`, added beside Meshy's
   clips at load) whose arm bones (every bone below Meshy's `LeftShoulder`/`RightShoulder`, data `arm_roots`) take
   the walk clip's keys, time-scaled to the crouch loop; hips, spine and legs keep Meshy's crouch.
 - Size: Meshy's head bone is scaled onto the rig's head pivot (the contract model's head height). Hit ring and
-  hitbox are the rig's, unchanged.
+  hitbox are the rig's, unchanged. Data `size` (as Dredge's 1.09) then scales a body whose visible height stood over
+  10% off the owner's height chart (hit_h, plus the headwear the chart allows over the head; drawn as a match draws it, x1.12): Kael 1.2,
+  Pip 0.79, Gil 0.69. The contract's parts, anchors and companions are placed as for the unfitted body and grow with
+  it (`WardenNative._to_contract`). The hitbox never changes: its numbers are parity rows.
 - Facing: Meshy faces +Z; the model is turned 180 deg to face -Z like every Hunter.
 - Anchors (`anchors`): `anchor_head_top`, `anchor_chest`, `anchor_gun_R` are BoneAttachment3D nodes on Meshy bones,
   found by `WardenGlb.anchor`. The rig's Gun (aim and muzzle) rides Meshy's `RightHand` bone each frame.
@@ -48,6 +61,11 @@ keep the armature Z up, so their Hips keys are carried into the rig's Y-up frame
 
 ## Checks
 `--warden-native-check` (switch, bones, facing, height, each state's clip, weapon hidden, anchors, toon surfaces,
+crouch arms, only Meshy's model draws (no rig mesh such as the Offhand), each data orbit rides its bone and turns);
+`--warden-glb-check` counts native Hunters apart.
+`--native-hitbox-check` measures each one's visible body (skinned vertices at idle, no weapon, orbits or companions)
+against hit_h and the hit ring and fails past 10% on height; `--native-hitbox-shots` draws each inside its hurtbox.
+Renders: `--clip-shots --warden=<arch> --states [--match]`.
 crouch arms, only Meshy's model draws (no rig mesh such as the Offhand), each data orbit rides its bone and turns,
 the drop poses hold --clip-check's bars); `--land-weight-check` measures every native Hunter's squash off the model
 (head height against the same frames unsquashed: depth and seconds within 10% of the contract numbers, feet on the
@@ -58,6 +76,16 @@ online-feel proxy at 100 ms each way, the other player's copy plays the same sta
 walk, run, air, attack, crouch, the extract beat) in order, at the same pace per state, with no stalled loop and no
 one-frame snap of the hand. A freshly dressed model reads its first filled state as the baseline (no phantom attack
 from old counters) and poses its idle at once (no rest T-pose frame).
+
+## Footsteps
+Steps sound on the plants of the Meshy feet you see, not on the hidden rig's stride (`HunterAnim` phase, which ran at
+another cadence than Meshy's walk: ~1.0 vs ~1.5 steps/s at walk speed, up to ~20 frames off a visible plant).
+`scripts/heroes/warden_native_steps.gd` (`WardenNativeSteps`) reads data `plants` {walk, run, crouch: {L, R: seconds
+into Meshy's clip}} and bumps the model's `WardenSteps.STEPS` as the contract path's `WardenSteps` does; `HunterAnim`
+hands it on as `stepped`. No `plants` entry (Motley hovers): the old stride. `--step-sync-check` has native rows per
+Hunter: the plants read off Meshy's `LeftFoot`/`RightFoot` in each clip, the data within one frame of them, every step
+heard at two walk, two run and a sneak speed within one frame after a plant of that foot, the feet alternating through
+a walk-run ramp, no step standing. Swap a clip and the check names the new plants to paste into the data.
 
 ## Weapons and orbit props
 Meshy's mesh carries the weapons (Sable's two pistols, Tenzo's one stone arm), so the rig's Gun and HunterAnim's
@@ -84,8 +112,8 @@ plays today's clip, so nothing changes until a Hunter's clips land (`WardenNativ
 | `rmb`, `e`, `r` | the kit move or cast of that slot (state `cast_slot` secondary, utility, ult; a kit move starting within `SLOT_CAST` of a cast takes its slot) | `attack` |
 | `hit` | one-shot when a stagger lands (state `hit_t` jumps back with `hit_k` at Oomph.HEAVY_FLINCH; a chip hit only leans) | the loop clip plays on |
 | `land` | one-shot on a hard landing (`WardenClips.FEEL` landing >= `LAND_MIN`) | the loop clip |
-| `dash` | while the state `rolling` (a dash or kit rush) lasts | the air or ground clip |
-| `glide` | while `gliding` (loops) | `jump` |
+| `dash` | while the state `rolling` (a dash or kit rush) lasts (blends in over 0.25 s) | the air or ground clip |
+| `glide` | while `gliding` (loops; opens at once, lets go over 0.2 s) | `jump` |
 | `downed` | while the knocked-down beat runs (`fall` >= 0; holds its last frame) | the loop clip |
 | `stomp` | while the stomp cycle runs (`stomp` >= 0; loops) | the loop clip |
 Swing, cast, `hit` and `land` are one-shots: they own the body for their length (a new one restarts a clip once 60% is
@@ -126,7 +154,7 @@ after it, so it does not fight a clip that already turns the head. `--look-at-ch
 
 ## Not on the native path (yet)
 Death, stun, ledge, emote and clips for moves beyond the slots above (Meshy gave six); the contract's per-hunter extras (Tenzo's
-ground rings, Sparkle's blink, Sable's braid springs); 300k-tri meshes vs the 80k contract budget.
+ground rings, Sparkle's blink, Sable's braid springs; loose parts only through data "springs" below); 300k-tri meshes vs the 80k contract budget.
 
 ## Sable: hybrid rig (Meshy rig, scripted weight fixes)
 `art/wardens/sable/sable_meshy.glb`: 78,000 tris (master decimated BEFORE rigging, budget 80k), Meshy's 42 bones with
@@ -135,6 +163,12 @@ Meshy's files (`tools/meshy/sable_hybrid/README.md`: pistol/hand lock, coat/arm 
 contact-band smoothing, coat chains hung by gravity with floor and thigh collision). Torn frames (glbstretch, 15 fps):
 raw Meshy rig 100% Attack, 93% Jump, 100% Crouch, 89% run, 67% walk; this file 0% in all six clips.
 Game states with no Meshy clip (fall, land, glide, climb, mantle, hit, emote, aim twist) play the nearest of the six.
+Strafing and back-pedalling: Meshy has one forward run, so `WardenNativeTwist` turns the hips to the way he goes (the torso bone takes
+the turn back in world space, through the bent spine between, so the body stays on the aim without tipping) up to `WardenClips.TWIST_MAX` (~96 deg). More than 120 deg off the aim (it reverses at 130
+and goes forwards again inside 110: no flicker at the edge) the run clip plays in reverse instead, the rate keeping its stride matched to the
+ground speed, and the legs turn only by what is left to dead behind the aim (none at 180 deg, from either side). The clip's direction
+(`WardenNativeTwist.dir`) eases between +1 and -1, so the crossing is a blend. `--native-upper-shots --mode=back` prints STRIDE (the planted foot's
+sweep against his travel, 1 = along it, -1 = backwards to it).
 
 ## Native hunter pack (Sparkle, Tenzo, Cinder, Kael, Motley, Meeko)
 Their rigged Meshy files carry 300k-tri meshes. `tools/meshy/native_hunters/pack.sh <art> <rigged.glb> <decimated.glb> [clip glbs]`
@@ -201,3 +235,32 @@ chain out in the attack): geo_check held pairs over 1 cm 33 -> 0. `warden_native
 
 Grimble has no hit clip: a hit is the Hips flinch spring (WardenFlinch) over the playing clip.
 The gun's hip is data (`holster.hip.pos`, x +0.17 = his left, where the gauntlet draws it).
+
+## Loose parts: spring chains on Meshy's bones (data "springs", pilot: Sable's coat tails)
+A hunter's loose parts (tails, coat tails, skirts, capes) used to ride the clip's keys. `WardenNative` now builds `WardenSprings`
+chains on Meshy's own bones when the hunter's entry in `content/rules/warden_native.json` has `"springs": [{"bones": [root ..
+tip], "hang": true, "floor": m}]` (no key = clip keys only, as before). The root's parent carries it; the tip bone rides its
+parent; the others are a rope in world space (momentum, pull to the rest shape, link lengths kept: `WardenSprings.step`).
+`hang` pulls toward straight down from the root, `floor` keeps the joints that many metres over the ground. The layer runs
+after the clip and the other bone layers and before the props. ON for Sable only: her two chains Bone_009 .. 007 and
+Bone_013 .. 011 (no Blender change: Meshy's rig already has them and the weights carry the coat tails and moth wings).
+`--warden-native-check` asserts the chain count per hunter, the stream-back in a run and the link lengths;
+`--native-springs-shots --warden=thief [--no-springs]` films run, turn, lunge and stop at the match camera and eye level.
+Proof: `/home/boki/gens/native-springs-1126/` (sheets sable_coat_springs_*.jpg, MP4, raw frames).
+Seen: in the deep lunge and the stop the tails hang down and stay inside the silhouette (the clip's baked keys fan them out
+over the thighs); in a run they trail more; at the match camera (fov 8, 66 deg down) the change is too small to read.
+Known gaps: no leg collision (a back leg can pass through a tail), both tails can drift to the same side in a turn.
+
+### Plan: Cinder tail, Lace skirt, Kael cape (not built; glbs untouched)
+1. Cinder tail: bones Bone_016 (child of Hips) -> Bone_006, 11 bones, already weighted; the tail lies out on the floor. A
+   rest-shape chain (no `hang`), `floor` on. Needs one new thing in WardenSprings: push-out from the thigh and shin joints
+   (data "avoid": [bone names], radius) so the tail stops passing through the legs; measure it with a check that samples every
+   joint against the leg capsules in run, lunge and stop.
+2. Lace skirt: `hem_meshy.glb` has eight single bones SkirtSw0..7 round the Hips, no chains. Either add a 2-bone hem
+   chain under each in Blender (rig step, weights split by height; no visible change) and hang them with `floor` plus the
+   same leg push-out, or add a one-bone "swing" mode (spring on the bone's rotation). Check first whether her lace_* clips key
+   SkirtSw (a spring would fight keys); then lower the clip's weight on them.
+3. Kael cape: `kael_meshy.glb` has no cape bones (the cape rides Spine and the shoulders). Add three chains of three bones
+   under Spine02 in Blender (rig step), re-weight the cape's vertices down the chain, hang them with a back plane so they do
+   not enter the body. Check that no job is rigging Kael's sword or clips (ext/anim-kael-native-clips).
+Order: Cinder (no glb change), Lace, Kael. Each: flag in the data, the same shots tool, a check line per hunter.

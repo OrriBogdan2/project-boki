@@ -258,7 +258,11 @@ def carry_check(head, gated, main):
     if not tree:
         return False, "merge-tree conflicts", None
     # head already holds main (a bulk rebase, a driver job): the head itself is the merge, no extra commit
-    commit = head if is_ancestor(main, head) else commit_merge(tree, head, main, f"Merge origin/main {main[:10]} into PR (regate-bot, carried)")
+    commit = (
+        head
+        if is_ancestor(main, head)
+        else commit_merge(tree, head, main, f"Merge origin/main {main[:10]} into PR (regate-bot, carried)")
+    )
     if not commit:
         return False, "commit-tree failed", None
     x = selected(gated, commit)
@@ -403,8 +407,11 @@ if __name__ == "__main__":
         rows = []
         for r in history(a.since, a.until):
             rows.append(r)
-            print(f"{r['c'][:10]} same={'Y' if r['same'] else 'n'} strict={'Y' if r['strict'] else 'n'} "
-                  f"loose={'Y' if r['loose'] else 'n'} {r['why'][:100]}", flush=True)
+            print(
+                f"{r['c'][:10]} same={'Y' if r['same'] else 'n'} strict={'Y' if r['strict'] else 'n'} "
+                f"loose={'Y' if r['loose'] else 'n'} {r['why'][:100]}",
+                flush=True,
+            )
         for label, sub in (("all", rows), ("same-head", [r for r in rows if r["same"]])):
             n, st, lo = len(sub), sum(r["strict"] for r in sub), sum(r["loose"] for r in sub)
             print(f"history {label}: {n} re-gates, strict carries {st}, loose carries {lo}, left to run {n - lo}")

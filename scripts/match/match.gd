@@ -7,6 +7,7 @@ const DT := 1.0 / 60.0
 
 var opts := {}
 var world: World
+var layout := {}              # the authored map's data (empty on a generated one)
 var skytrain: SkyTrain = null   # the loop train, on maps that have one
 var fx: Fx
 var cam: CamRig
@@ -326,7 +327,7 @@ func _start(o: Dictionary) -> void:
 	add_child(world)
 	Sfx.occlusion.world = world
 	# real expeditions are on a hand-made map, and so is the tutorial (a small calm one); training keeps a generated one
-	var layout := {}
+	layout = {}
 	# --procgen (or opts.procedural): the old island generator instead, as a fallback
 	if big and not o.get("procedural", false) and not "--procgen" in OS.get_cmdline_user_args():
 		layout = WideLayout.pick(o, rolling != null, tier)     # a rolling session gets the wide Skyreach; otherwise the expedition map
@@ -475,6 +476,7 @@ func _start(o: Dictionary) -> void:
 	hud.visible = false
 	await hud.setup(self)
 	hud.process_mode = hud_mode
+	SquadChat.attach(hud, opts, self)
 	hud.visible = true
 	if player and player.dropping and tut == null:
 		hud.toast("Steer to choose where you land", Color("f3eee2"))
@@ -697,9 +699,10 @@ func bot_kin_record() -> Dictionary:
 func _spawn_hunters() -> void:
 	var n_teams := int(opts.get("teams", 4))
 	var squad := int(opts.get("squad", 1))
-	# one starting island per squad, spread out as far as possible
+	# one starting island per squad, spread out as far as possible, inside the play space the match starts with
+	var spawns: Array = Heart.in_play(layout, opts, world.spawns)
 	var by_isl := {}
-	for sp in world.spawns:
+	for sp in spawns:
 		var ii := world.island_of(sp.x, sp.z)
 		if not by_isl.has(ii): by_isl[ii] = sp
 	var pool: Array = by_isl.values()
@@ -716,7 +719,7 @@ func _spawn_hunters() -> void:
 		spots.append(pool[best]); pool.remove_at(best)
 	# more squads than islands: share the bigger islands, still as far apart as possible
 	if spots.size() < n_teams:
-		var rest: Array = world.spawns.filter(func(q): return not spots.has(q))
+		var rest: Array = spawns.filter(func(q): return not spots.has(q))
 		while spots.size() < n_teams and rest.size() > 0:
 			var best := 0; var bd := -1.0
 			for i in rest.size():
@@ -725,7 +728,7 @@ func _spawn_hunters() -> void:
 				if dmin > bd: bd = dmin; best = i
 			spots.append(rest[best]); rest.remove_at(best)
 	if spots.is_empty():
-		spots = world.spawns.duplicate()
+		spots = spawns.duplicate()
 	if tut:
 		spots = [tut.stop("land")]
 	var taken: Array = [Save.d.get("name", "Hunter")]
@@ -826,7 +829,7 @@ func make_bot(t: int, at: Vector3, names: Array, mate := {}) -> Hunter:
 ## Every match starts in the sky. Hunters glide down from above their squad's side of the map
 ## and steer to wherever they want to land.
 func _start_drop(h: Hunter, at: Vector3) -> void:
-	if h == player and cam: cam.user_zoom = CamWheel.far()      # spawn, respawn: the widest view
+	if h == player and cam: cam.user_zoom = CamWheel.far(true)      # spawn, respawn: the widest view
 	if opts.get("no_drop", false):
 		return
 	if big and time < 1.0:
@@ -1102,7 +1105,7 @@ func _spawn_breakables() -> void:
 				spawn_gear(gid, 2, q2)
 				break
 		# the duel ring: a glowing pad next to where you start (scripts/match/duel_ring.gd)
-		if not opts.get("duel", false):
+		if not opts.get("duel", false) and not opts.get("test_zone", false):      # (the Test Zone has no pad: a clean start)
 			for off in [Vector3(3.6, 0, 2.6), Vector3(-3.6, 0, 2.6), Vector3(3.6, 0, -1.0), Vector3(0, 0, 4.0)]:
 				var dq: Vector3 = player.pos + off
 				if world.is_void(dq.x, dq.z) or world.is_block(dq.x, dq.z):
@@ -1613,7 +1616,7 @@ func squad_ping(h: Hunter, p: Vector3, from_net := false, kind := "", foe: Hunte
 	PingInput.make_room(self, h)
 	pings.append({"pos": p, "col": PingInput.color(kind), "t": 0.0, "by": h, "team": h.team,
 		"life": PingInput.life(kind), "kind": kind, "foe": foe})
-	if player and h.team == player.team:
+	if player and h.team == player.team and Life.has_mates(self, h):
 		sfx("ping", null, -6.0, 1.15)
 	if net_on and not from_net:
 		net_event(["sping", h.nid, p.x, p.y, p.z, kind, foe.nid if foe else ""])
@@ -1662,7 +1665,7 @@ func kin_ping(k: Kin, p: Vector3, col: Color, label: String) -> Dictionary:
 			pings.erase(pg); break
 	var pg := {"pos": p, "col": col, "t": 0.0, "life": 5.0, "kin": k, "label": label, "team": k.team}
 	pings.append(pg)
-	if k.owner_h == player or (player and k.team == player.team):
+	if (k.owner_h == player or (player and k.team == player.team)) and Life.has_mates(self, player):
 		sfx("ping", null, -9.0, 1.3)
 	return pg
 
@@ -2350,7 +2353,7 @@ func on_wild_dazed(k: Kin) -> void:
 func on_stag_open(mb: Mob) -> void:
 	if player and not player.out and player.flat_dist(mb) < 14.0:
 		MobSfx.stagger_open(self, mb)
-		_tip("stagger", TipText.stagger(String(mb.md["name"])))
+		_tip("stagger", TipText.stagger())
 
 ## Someone landed an ability in a stagger window. Runs where the monster lives (the host online).
 var stag_n := 0
@@ -2526,6 +2529,10 @@ func drop(kind_s: String, at: Vector3, v: int, key := "", pid := "", vel0 = null
 		net_event(["drop", pid, kind_s, v, key, _r(at.x), _r(at.y), _r(at.z), _r(v0.x), _r(v0.y), _r(v0.z)])
 
 func _update_pickups(dt: float) -> void:
+	var walk: Dictionary = PickupReach.rules()["walk"]      # (read once a step, not per pickup and hunter)
+	var settle := float(walk["settle"])
+	var reach := float(walk["radius"])
+	var reach_h := float(walk["height"])
 	for p in pickups.duplicate():
 		p["t"] += dt
 		var pos: Vector3 = p["pos"]
@@ -2535,10 +2542,12 @@ func _update_pickups(dt: float) -> void:
 			if dk > World.VOID + 1.0 and (g < dk or g > pos.y + 0.9): g = dk
 		var v: Vector3 = p["vel"]
 		var grabbed := false
-		if p["t"] > PickupReach.settle():
+		if p["t"] > settle:
 			for h in hunters:
 				if h.out or h.extracted or h.downed or h.remote:
 					continue
+				if Vector2(pos.x - h.pos.x, pos.z - h.pos.z).length() >= reach or absf(h.pos.y - pos.y) >= reach_h:
+					continue      # (PickupReach.near's own first test, here: no call for each far pickup and hunter)
 				if net_on and not is_host and h != player:
 					continue
 				if p["kind"] == "ckey" and not KeyChest.has_room(h):
@@ -3058,7 +3067,8 @@ func _boom(s: Dictionary, at: Vector3) -> void:
 	for e in _shot_targets(s):
 		var d := Vector2(e.pos.x - at.x, e.pos.z - at.z).length()
 		if d < radius + e.r and absf(e.pos.y + 0.5 - at.y) < 2.0:
-			var f := 1.0 - 0.45 * minf(1.0, d / radius)
+			var f := Blast.share(world, at, e, radius, x.get("boom_open", false))
+			if f <= 0.0: continue
 			var dir := Vector2(e.pos.x - at.x, e.pos.z - at.z).normalized()
 			var o := {"src": "boom", "kb": dir * float(x.get("boom_kb", 8.0)) * f, "lift": (7.0 if not small else 1.5) * f, "at": at}
 			if x.has("ab"): o["ab"] = x["ab"]
@@ -3566,7 +3576,7 @@ func step(dt: float) -> void:
 		player.inp["aim"] = player.pos + Vector3(cos(time * 0.6), 0.9, sin(time * 0.6)) * 4.0
 	if opts.get("merge_demo", false) and player and time > 0.8 and not train.has("_merge"):
 		train["_merge"] = true
-		Content.rules("merge_forms")["fusion_enabled"] = true
+		MergeForm.set_enabled(true)
 		player.slot_lv["ult"] = maxi(1, int(player.slot_lv["ult"]))
 		player.ult = 1.0
 		player.merge_cd = 0.0
@@ -4265,6 +4275,7 @@ func _catch(h: Hunter, k: Kin) -> void:
 	k.visible = false
 	var rec: Dictionary = k.rec.duplicate(true)
 	rec["caught_at"] = where_at(k.pos)       # provenance: where it was caught (Save.register)
+	rec["caught_at"]["hunter"] = HeroTitle.base_name(h.arch)      # and who carried it out
 	if k.lost_from != "":
 		# someone's lost kin: it keeps who it is, and we remember who has it now
 		rec["lost_from"] = k.lost_from
@@ -4285,7 +4296,7 @@ func _catch(h: Hunter, k: Kin) -> void:
 		net_event(["caught", k.nid, h.nid, rec, (k.lost_owner as Hunter).nid if k.lost_owner is Hunter else ""])
 	KinTrack.on_caught(self, h, k, rec)
 	if h == player:
-		add_feed("%s is in your box (%d/%d). Extract to bring it home." % [Data.KIN[k.species]["name"], h.caught.size(), Capture.box_cap()])
+		Capture.announce(self, h, rec)
 		if player.kin and player.kin.state != "downed":
 			BokiChatter.say(self, player.kin, "caught")
 
@@ -4556,6 +4567,7 @@ func _extract(h: Hunter, how := "", where := "") -> void:
 		if opts.get("tut_test", false):
 			print("TUT DONE extracted by %s at %s, t=%.1f" % [how, where, time])
 			get_tree().create_timer(0.5).timeout.connect(func(): get_tree().quit())
+	KinSteal.on_extract(self, h)
 	_check_last()
 
 func _update_rules(dt: float) -> void:
@@ -4981,12 +4993,8 @@ func _net_apply(e: Ent, it: Array, t_owner := -1.0) -> void:
 		"m":
 			var mb: Mob = e
 			mb.face = it[5]; mb.hp = it[6]; mb.max_hp = it[7]
-			var st: int = int(it[8])
-			if st >= 0 and st < MOB_STATES.size():
-				if mb.st == "idle" and st == 1: MobNotice.woke(mb)
-				mb.st = MOB_STATES[st]
+			mb.follow(int(it[8]), it[12])
 			mb.atk_dir = Vector2(it[10], it[11])
-			mb.st_t = it[12]
 			mb.net_vel = Vector3(it[13], 0, it[14])
 			if it.size() > 16:
 				mb.stag_open = float(it[15]); mb.stagger_t = float(it[16])
@@ -5056,7 +5064,6 @@ func _net_ev(x, from: String) -> void:
 				"ucast": UltCue.net_in(self, x)       # an ultimate went off in another game
 				"hcast": HostileCue.net_in(self, x)   # a rival's E or R went off in another game
 				"snd": SfxCast.net_in(self, x)        # a sound a Hunter of another game made
-				"whop": WallMoves.scuff(self, Vector3(x[2], x[3], x[4]), float(x[5]))      # a wall hop (item 149)
 		"xp": KillXp.net_in(self, x)
 		"stomp": Life.net_stomp(self, x)      # a stomp began or ended in another game
 		"knock":
@@ -5255,7 +5262,7 @@ func _net_ev(x, from: String) -> void:
 			if player and String(x[2]) == player.nid and typeof(x[3]) == TYPE_DICTIONARY:
 				var rec: Dictionary = x[3]
 				player.caught.append(rec)
-				add_feed("%s is in your box (%d/%d). Extract to bring it home." % [Data.KIN.get(String(rec.get("species", "cindle")), Data.KIN["cindle"])["name"], mini(player.caught.size(), Capture.box_cap()), Capture.box_cap()])
+				Capture.announce(self, player, rec)
 			var cap = ents_by_id.get(String(x[2]), null)
 			var own = ents_by_id.get(String(x[4]), null) if x.size() > 4 else null
 			if cap is Hunter and own is Hunter and typeof(x[3]) == TYPE_DICTIONARY:
@@ -5356,7 +5363,7 @@ func _tips() -> void:
 	if belt_tip: _tip(belt_tip[0], belt_tip[1])
 	if _tip_t > 14.0:
 		_tip("ability", TipText.ability(player.ak != null, tut == null and duo == null))
-	if player.ult >= 1.0 and player.kin and tut == null and duo == null:
+	if player.ult >= 1.0 and player.kin and tut == null and duo == null and MergeForm.enabled():
 		var ud := KinMerge.def_for(player.kin)
 		if ud and player.ak == null: _tip("ult", TipText.bond_full(ud.display_name, false))
 		elif ud and int(player.slot_lv.get("ult", 0)) > 0: _tip("ult", TipText.bond_full(ud.display_name, true))
@@ -5366,11 +5373,13 @@ func _tips() -> void:
 	var hunter_tip := hunter_hints.next(self)
 	if hunter_tip: _tip(hunter_tip[0], hunter_tip[1])
 	if player.gliding and player.glide_fuel <= 0.001 and player.over_void():
-		_tip("overheat_lift", "Your glider is burning but still lifts. Keep holding %s." % Settings.key_cap("jump"))
+		_tip("overheat_lift", TipText.overheat_lift())
 	var heart_tip := heart.tip_for(player) if heart else []
 	if heart_tip: _tip(heart_tip[0], heart_tip[1])
 	var ex := ExpeditionTips.next(self)
 	if ex: _tip(ex[0], ex[1])
+	var carry := CarryHints.swap(self)
+	if carry: _tip(carry[0], carry[1])
 	var k: Kin = player.kin
 	if k == null:
 		return
@@ -5378,11 +5387,11 @@ func _tips() -> void:
 	if proc_tip != "": _tip("proc", proc_tip)
 	if k.state == "active":
 		var a1 := k.runner.def_of("k1")
-		_tip("skill", "Stun a foe with %s's %s, then shoot it: combo" % [k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability"])
+		_tip("skill", TipText.skill(k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability"))
 	FirstCapture.tick(self)   # the first-capture hint (its own key-cap text) replaces the old "catch" scan tip
 	if exits and not interact.is_empty() and interact["kind"] == "exit":
-		_tip("exit_uplink", "Start the uplink, hold the outpost, then take the lift")
-	if player.downed: _tip("down", "Down  ·  a trusting Boki may pick you up")
+		_tip("exit_uplink", TipText.exit_uplink())
+	if player.downed: _tip("down", TipText.down())
 
 # ------------------------------------------------------------------ aim indicators
 # ---- ability previews: hold E, R or Q to see the reach and where it lands

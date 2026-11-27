@@ -595,11 +595,6 @@ func _tab_gameplay(v: VBoxContainer) -> void:
 	_group(v, "Boki")
 	var talk := [["quiet", "Quiet"], ["normal", "Normal"], ["chatty", "Chatty"]]
 	_choice(v, "How much your Boki talks", "kin_chatter", talk, Callable(), "Quiet: only danger. Chatty: all of it")
-	var wisp_hint := (
-		"In expeditions your Boki rides as a little wisp at your shoulder, its carry bonus always on. "
-		+ "Off: it walks beside you"
-	)
-	_toggle(v, "Boki ride as wisps", "boki_wisps", wisp_hint)
 	if admin_allowed():
 		_group(v, "Admin")
 		_toggle(v, "Pre-match lobby", "lobby_enabled", "The 30 s lobby before each expedition. Off: plain loading")
@@ -650,12 +645,16 @@ func _tab_controls(v: VBoxContainer) -> void:
 	if not MergeForm.enabled():
 		named.erase("ultimate")  # (X stays reserved, but no row offers it while Fusion is off)
 	var shown := {}
+	var psc = Game.main.screen_node() if Game.main else null
+	var solo: bool = psc is Match and (psc as Match).player != null and not Life.has_mates(psc, (psc as Match).player)
+	for an in ["base", "ping", "pass_lead", "separate"] + MateLook.ACTIONS if solo else []:
+		shown[an] = true  # solos: the keys that need a squadmate are not listed (they stay bound for trios)
 	var extra: Array = []
 	for g in groups:
 		var first_extra := v.get_child_count()
-		_group(v, String(g[0]))
+		_group(v, "Map" if solo and g[0] == "Squad and map" else String(g[0]))
 		for an in g[1]:
-			if not named.has(an):
+			if not named.has(an) or shown.has(an):
 				continue
 			shown[an] = true
 			_bind_row(v, an, named[an])
@@ -677,6 +676,7 @@ func _tab_camera(v: VBoxContainer) -> void:
 	var styles: Array = CamRig.styles.keys().map(func(k): return [k, CamRig.styles[k]["name"]])
 	_choice(v, "Camera", "cam_style", styles, Callable(), "How high and how wide the camera looks down on you")
 	var follow := [
+		["pan", "Cursor pan"],
 		["centred", "Centred on you"],
 		["lean", "Cursor lean"],
 		["standard", "Standard dynamic"],

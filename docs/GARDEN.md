@@ -94,6 +94,11 @@ Chew, Zipseed, Hushpearl) with `lair_drop.chance` in `content/rules/garden_items
 the feed menu with the exact preview. The use writes the Boki card's journal line (`CareJournal` -> `JournalCard`):
 "ate Thumpnut: Power +3 (4 to 7)". `--garden-items-check` (loot part) proves the whole path; `--loot-nudge-shots` shows the card.
 
+The first time you come home with a garden item kind you never had, the nearest free Boki (not the most curious) walks up
+(`ComeLook` kind `item`, flag `loot_react_<id>` in Save.d tutorial, so once per kind per save and no migration), reacts by its
+traits (curious sniffs, timid hides and says `look_shy`, the rest puff up and say `look_item`) and its journal keeps one line:
+"sniffed the new Thumpnut". No pop-up. `--come-look-check` (two kinds, then plain loot) and a react row in `--garden-day-played-check`.
+
 ## Balance: 30 days for four players
 
 `python3 tools/garden_sim.py` plays 30 garden days, 200 seeds each, for four players (5 minutes plus a run, 30 minutes plus two runs, home only 30, home only 5) on the live care, prize, item, evolution, toy and race rules (`content/rules/garden_sim.json` holds the sim's own guesses). Every number must sit inside `bands` in that file; `--garden-sim-check` and the brief `briefs/design/GARDEN_MODERN_BALANCE.md` (tables regenerated with `--write`) keep it so.
@@ -150,21 +155,20 @@ milestones ("Defeat a boss in a lair"). Both rows now wait for the first match w
 showed `BaseFetch` had no `playing()`, so `GardenMusic.tick` errored every 0.5 s with Fetch Cup in `Home.games`
 (zone music never switched): added. Result: 0 nags, 0 script errors, exit 0.
 
-**Zones open after 30 min of garden-only play: 1 of 5** (the start zone; `Black Market placed false, matches 0`).
+**Zones open after 30 min of garden-only play: 1 of 5** (the start zone; `Black Market placed false, matches 0`). Since fixed on ext/garden-market-no-match: the building now stands at once in base mode (open question 1).
 The Black Market is the only blocker left. A zone opens with two keys, a Wayseed and a leaning Boki
 (`GardenZones.keys`); a Wayseed comes from only two places, the Black Market's weekly stock (the building is
 placed once `matches >= 1`, `home.gd _fs_arrivals`) or a lair (an expedition). Nothing else gates a zone.
 `--garden-unlock-pace-check` passes (garden player: 2nd zone day 3, 5th day 12) because it buys the Wayseed
-without the building. Open question 1 is still the fix.
+without the building. Open question 1 is the fix (done).
 
-1. **Old Pell's Black Market never stands on a new island.** `home.gd _fs_arrivals` places it (and the
-   Challenge House) only once `matches >= 1`. The zone cards say a Wayseed comes from the Black Market
-   (`black_market.gd` stocks one for the next locked zone every `wayseed_days`), so a player who never
-   extracts keeps one zone of five: after 30 min the check prints `Black Market placed false, zones open
-   1 of 5`. `--garden-unlock-pace-check` does not see it: it buys the Wayseed without the building.
-   Fix options: (a) in base mode `_fs_arrivals` places the Black Market straight away (one condition;
-   the Challenge House stays after the first expedition); (b) a Wayseed stall at the hub's Waystone.
-   Default if nobody decides: (a).
+1. **Old Pell's Black Market (decided: (a), done).** `home.gd _fs_arrivals` used to place it (and the
+   Challenge House) only once `matches >= 1`, so a player who never extracts could never buy a Wayseed.
+   In base mode the Black Market now stands at once; the Challenge House still waits for the first
+   expedition. `--garden-only-pass-check` printed `Black Market placed false, zones open 1 of 5` before and
+   prints `Black Market placed true, zones open 1 of 5` after: the building is there, but the bot does not
+   buy, and a Wayseed is stocked only every `wayseed_days` (30 min is under that). The other option, (b) a
+   Wayseed stall at the hub's Waystone, was not built.
 2. **Hunter unlock goals in the Goals card.** (`mastery` rows and farm milestones now wait for the first match; only `unlock` is left.) Eleven Hunters unlock by match challenges ("Knock 3 enemies
    into walls") and show as `unlock` rows after the home rows. A Boki at the level cap loses its
    "Raise ... to level N" row, and then the first line of the card is one of these. Options: hide the
@@ -216,6 +220,10 @@ change on: its new colour or the path token. Interact there gives the item; walk
 hold, and the item stays in the bag. The card does no math of its own: it reads `GardenItems.preview`/`after`,
 `EvoPath.pips` and `StatBudget`. `ItemHold` (scripts/home/item_hold.gd) owns the held item; distances and times are
 in content/rules/garden_items.json `hold`. Check: `--item-card-check`; shots: `--item-card-shots --shots-dir=<dir>`.
+
+## A Boki carried home from a match (`CarryArrival`)
+
+DECISIONS 2026-11-11 "carry 2 in, 1 extra out": the Boki you claim in a match rides out in the carry-out slot. When it comes home it is an event, not a list entry: it stands at the arrival point (where you appear), up to three residents come to look (`ComeLook`, same as any new Boki), its memory gets `came home from <map> with <Hunter>` (the Hunter's base name, stored in `origin.where.hunter`), and a short card says where it came from and where it went. If the garden already has its out-cap (`KinBox.farm_cap()`) the Boki goes to the Burrow, nobody walks over, and the card says so. The pending list lives in memory only: a game closed between the results screen and the garden keeps the memory line and loses the card. No save migration (`origin.where.hunter` is read with a default). Check: `--come-look-check`.
 
 ## Fishing derby
 `scripts/home/fishing_derby.gd`: at the Glint Fishing rock (when the shared store answers) you choose to fish alone or race
