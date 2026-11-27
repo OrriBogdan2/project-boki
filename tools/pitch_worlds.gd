@@ -433,7 +433,14 @@ func _hide_fixtures(zone: String) -> void:
 			beds.append(Vector2(float(d[1]) + 1.0, float(d[2]) + 1.0))
 	for n in h.get_children():
 		var n3 := n as Node3D
-		if n3 == null or n3 == h.player or n3 in kin_nodes or n3 == h.get("world") or n3.get_script() != null:
+		if (
+			n3 == null
+			or not n3.visible
+			or n3 == h.player
+			or n3 in kin_nodes
+			or n3 == h.get("world")
+			or n3.get_script() != null
+		):
 			continue
 		var at := Vector2(n3.position.x, n3.position.z)
 		var hide: bool = false
@@ -530,6 +537,8 @@ func _tidy() -> void:
 			_min_gap = minf(_min_gap, Vector2(at.x - c.ppos.x, at.z - c.ppos.z).length())
 	if _frames % 10 == 0 and c.get("farm_cam") != null and c.farm_cam.tip > 0.05:  # the view tipped up over a wall
 		print("PITCH_TIP frame=%d tip=%.2f at=%s" % [_frames, c.farm_cam.tip, c.ppos])
+	if _frames % 30 == 0 and c == h:  # (a toy's node is rebuilt a moment after the zone loads: hidden again)
+		_hide_fixtures(GardenZones.current())
 	c.day_t = DAY_T
 	c.talk_cd = 1e9  # no chatter bubbles
 	for k in c.kins:

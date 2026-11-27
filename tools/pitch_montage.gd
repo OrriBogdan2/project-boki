@@ -8,17 +8,19 @@ extends RefCounted
 const FPS := 60
 const HOME_AWAY_M := 7.0  # m from the Waystone Motley starts (home farm)
 const PAD_AWAY_M := 5.5  # m from a return pad Motley is set down again, facing it
-const STONE_MID_M := 0.5  # m from the stone's middle he must reach before the light takes him
-const STROLL_S := 2.0  # s of walking in a world after he lands
+const STONE_MID_M := 0.9  # m from the stone's middle he must reach before the light takes him (the ring's standing stones stop him nearer)
+const ENTER_S := 3.5  # s at most to reach it
+const STROLL_S := 2.6  # s of walking in a world after he lands, from one Boki to the next
 const STEP_S := 0.5  # s the Waystone's light is up before the ink wipe (rules hop_fade_s)
 const EMERGE_S := 0.45  # s he takes to step out of the light on the other side
 const AWAY_RAD := [0.52, -0.52, 0.0, 1.05, -1.05, 1.57, -1.57, 2.1, -2.1, 2.6, -2.6, 3.14]  # tried in order: 0 = south of the stone
 const LEVEL_TIP := 0.1  # rad: a view tipped more than this over a wall is not filmed
-const MONTAGE_AT := [Vector2(-1.9, 4.0), Vector2(2.0, 5.2)]  # (m right, m ahead) of the landing: two Boki close enough to read
-const HUSHWOOD_CLOCK := 0.68  # Hushwood's own hour is dusk (0.78): the film shows it in the late afternoon light, readable
+const MONTAGE_AT := [Vector2(-1.7, 3.3), Vector2(1.9, 4.3)]  # (m right, m ahead) of the landing: two Boki close enough to read
+const HUSHWOOD_CLOCK := 0.74  # Hushwood's own hour is deep dusk (0.78, daylight 0.3): the film shows it at 0.7 daylight, warm and readable
 const ZONE_ORDER := ["glasswater", "cinderstep", "hushwood", "ridge"]
 const PILLAR_H := 3.6
-const PILLAR_R := 0.8
+const PILLAR_R := 0.7
+const PILLAR_A := 0.45  # its strongest see-through
 
 var w  # tools/pitch_worlds.gd
 var _cuts := 0
@@ -120,7 +122,7 @@ func _boki_near(at: Vector3) -> bool:
 ## Walks up to the stone and into its ring, up to the middle.
 func _into_stone() -> void:
 	var stone: Vector3 = w.h.hway.node.position
-	await w._walk(stone, STONE_MID_M)
+	await w._walk(stone, STONE_MID_M, ENTER_S)
 
 
 ## Steps through the light: the pillar rises round him as the stone lights, he keeps walking and goes into it; the mark
@@ -138,7 +140,7 @@ func _through(zone: String) -> void:
 	var steps := roundi(STEP_S * FPS)
 	for i in steps:
 		var f := float(i + 1) / float(steps)
-		_set_pillar(pillar, 0.7 * minf(1.0, f * 2.5))
+		_set_pillar(pillar, PILLAR_A * minf(1.0, f * 2.5))
 		h.player.scale = _s0 * lerpf(1.0, 0.04, smoothstep(0.3, 1.0, f))
 		w._keys(Vector2(0.0, -1.0))
 		await w.rig.main.get_tree().process_frame
@@ -157,12 +159,12 @@ func _through(zone: String) -> void:
 		w._tidy()
 		h.player.scale = _s0 * 0.04
 	var here := _pillar(h, h.hway.node.position, col)
-	_set_pillar(here, 0.7)
+	_set_pillar(here, PILLAR_A)
 	w.rig.mark("cut%d_in" % _cuts)
 	var n := roundi(EMERGE_S * FPS)
 	for i in n:
 		var f := float(i + 1) / float(n)
-		_set_pillar(here, 0.7 * (1.0 - smoothstep(0.4, 1.0, f)))
+		_set_pillar(here, PILLAR_A * (1.0 - smoothstep(0.4, 1.0, f)))
 		h.player.scale = _s0 * lerpf(0.04, 1.0, smoothstep(0.0, 0.8, f))
 		w._keys(Vector2(0.0, -1.0))
 		await w.rig.main.get_tree().process_frame
@@ -171,10 +173,14 @@ func _through(zone: String) -> void:
 	here.queue_free()
 
 
-## After landing: walks on toward the first of the two Boki, so the world and its Boki are read.
+## After landing: walks on toward the first Boki and then the second, so the world and its Boki are read.
 func _stroll() -> void:
-	await w._walk(w._boki_at(0), 2.4, STROLL_S - EMERGE_S)
-	await w._wait(0.2)
+	var t0: int = w._frames
+	await w._walk(w._boki_at(0), 2.5, STROLL_S - EMERGE_S)
+	var left := (STROLL_S - EMERGE_S) - float(w._frames - t0) / FPS
+	if left > 0.3:
+		await w._walk(w._boki_at(1), 2.5, left)
+	await w._wait(0.15)
 
 
 ## A soft column of the zone's colour standing on the stone (film-only; the game's own light-up is its burst).
