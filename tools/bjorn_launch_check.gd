@@ -11,6 +11,9 @@ const FAR := Vector3(30.0, 0, 6.0)      # the dummy parked out of the way
 ## the shared ground acceleration (HunterFeel.ground_accel, ~0.055 s from a stand)
 const FULL_STRIDE := 0.12
 
+var _held_first := -1.0   # the glide hold's first step: the speed a held press leaves him at
+var _held_pre := -1.0     # the step before the glider opens
+
 func bjorn() -> void:
 	await _ult_walk()
 	await _window()
@@ -220,22 +223,30 @@ func _launch_flat() -> void:
 	P.inp["fire"] = false
 	step(m, 0.08)
 	var open := _glide_open(m, P, true)
-	# a jump out of a dash-fast launch sheds to jump_trim_to (JumpTrim, 11-26): the floor is that, not 70%
+	# a jump out of a dash-fast launch sheds to jump_trim_to (JumpTrim, 11-26): the floor is that, not 70%. The glider
+	# opens after its 0.4 s hold (11-27), so the hand-off is judged on the first held step (the speed the press
+	# leaves him at) and the open itself must not cut the flight before it (the wait costs only air drag)
 	var floor_v := minf(K.launch.speed * 0.7, HunterMove.jump_trim_to.x)
 	ok("bjorn #49: glide pressed during the launch jumps out into a glide at >= 70% (or the trim floor)",
-		open >= floor_v, "glide opens at %.1f of %.1f m/s" % [open, K.launch.speed])
+		open >= 0.0 and _held_first >= floor_v and open >= _held_pre * 0.7,
+		"held press leaves him at %.1f, the glider opens at %.1f (the step before %.1f) of %.1f m/s" % [
+			_held_first, open, _held_pre, K.launch.speed])
 	await done(m)
 
 ## Steps until the glider opens (glide held when `hold`), returning his planar speed on that step (-1: never).
 func _glide_open(m: Match, P: Hunter, hold: bool) -> float:
+	_held_first = -1.0
+	_held_pre = -1.0
 	for i in 90:
 		P.inp["glide"] = hold
 		P.inp["glide_btn"] = hold
 		m.step(DT)
+		if i == 0: _held_first = _planar(P)
 		if P.gliding:
 			P.inp["glide"] = false
 			P.inp["glide_btn"] = false
 			return _planar(P)
+		_held_pre = _planar(P)
 	P.inp["glide"] = false
 	P.inp["glide_btn"] = false
 	return -1.0
