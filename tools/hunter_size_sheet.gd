@@ -145,6 +145,14 @@ func _measure(hero: String, label: String) -> void:
 	)
 
 
+## Where the crown (world height `c`, read off the leaned body, so it is already leaned) sits: on the leaned centre
+## line through the feet, at the distance along it that has height `c`.
+func _crown_at(c: float) -> Vector3:
+	var p := m.player
+	var up: Vector3 = m.cam.char_lean() * Vector3.UP
+	return p.position + up * ((c - p.position.y) / maxf(up.y, 0.5))
+
+
 ## On-screen height of the hero's crown on the centre line (the head top over the feet through the character's lean),
 ## in view-plane metres at the hero (the same ruler as the HSIL rows), and viewport px per metre at the hero.
 func _centre_h() -> Array:
@@ -158,7 +166,7 @@ func _centre_h() -> Array:
 		hi = maxf(hi, wp.y)
 	var c := HunterCrown.crown(p.model, pts, p.vis_k, hi)
 	var feet := m.cam.unproject_position(p.position)
-	var head := m.cam.unproject_position(p.position + m.cam.char_lean() * Vector3(0, c - p.position.y, 0))
+	var head := m.cam.unproject_position(_crown_at(c))
 	return [(feet.y - head.y) / ppm, ppm, c - p.position.y, feet]
 
 
@@ -216,7 +224,7 @@ func _silhouette(hero: String, lean: String) -> void:
 			hi = maxf(hi, wp.y)
 		var c := HunterCrown.crown(p.model, pts, p.vis_k, hi)
 		cl += float(_centre_h()[0]) / SIL_YAWS
-		var cap := m.cam.unproject_position(p.position + m.cam.char_lean() * Vector3(0, c - p.position.y, 0)).y
+		var cap := m.cam.unproject_position(_crown_at(c)).y
 		for case in ["all", "body", "crown"]:
 			var got: Array = await _mask(p.model, flat, case != "all", cap if case == "crown" else -1e9)
 			var area: float = got[0] / (ppm * ppm)
