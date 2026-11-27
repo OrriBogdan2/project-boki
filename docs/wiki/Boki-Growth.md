@@ -231,7 +231,7 @@ Five stats from 0 to 31, fixed for life. A bred egg takes 3 from its parents; a 
 
 ## Trained stats
 
-Trained at the Training post with a timing drill.
+Raised by giving stat bites (carried home from expeditions, won in a few limited races and drills a day).
 
 | Stat | Per point | Drill |
 |---|---|---|

@@ -3047,8 +3047,6 @@ func _fetch_step(k: Dictionary, d: float) -> void:
 				var rec: Dictionary = k["rec"]
 				var loves_fetch: bool = rec["likes"]["play"] == "fetch"
 				Care.change(rec, "joy", 24.0 if loves_fetch else 14.0)
-				if Care.play_train(rec, "fetch") > 0:
-					_toast("+1 Speed  (%d of %d)" % [int(rec["stats"]["speed"]), Care.stat_cap(rec)])
 				Care.change(rec, "energy", -6.0)
 				Care.change(rec, "clean", -4.0)
 				_garden_xp(rec, "fetch")
@@ -4961,7 +4959,7 @@ func _open_train(rec: Dictionary) -> void:
 		b.disabled = int(rec["stats"][s]) >= Care.stat_cap(rec)
 		row.add_child(b)
 		v.add_child(row)
-	v.add_child(UI.label("Each drill uses energy and food  ·  Energy %d  ·  Full %d" % [int(Care.need(rec, "energy")), int(Care.need(rec, "food"))], 13, UI.MUTED))
+	v.add_child(UI.label("A drill pays stat bites  ·  %s  ·  Energy %d  ·  Full %d" % [TrainRuns.line("drill"), int(Care.need(rec, "energy")), int(Care.need(rec, "food"))], 13, UI.MUTED))
 
 # ---- kin as individuals: personal space, turns to talk, and a personality in how they move
 
