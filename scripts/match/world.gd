@@ -1210,13 +1210,16 @@ func build_meshes() -> void:
 	await _stage("world.terrain")
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	_island_roots(st)
+	await _island_roots(st)
+	await _slice()
 	var roots := st.commit()
 	var mat: ShaderMaterial = terrain_material().duplicate()
 	if tm == null:
 		tm = TerrainMesh.new(self)
 		tm._fill_grid()
-	var heights: ImageTexture = tm.height_texture()
+	await _slice()
+	var heights: ImageTexture = await tm.height_texture()
+	await _slice()
 	mat.set_shader_parameter("height_tex", heights)
 	add_child(FxGround.new(heights, Vector2(w, h)))     # compat soft effect edges (soft_fade.gdshaderinc)
 	mat.set_shader_parameter("map_size", Vector2(w, h))
@@ -1224,7 +1227,7 @@ func build_meshes() -> void:
 	mat.set_shader_parameter("depth_k", DepthCues.k())
 	mat.set_shader_parameter("paint2", 1.0 if Flora.v2() else 0.0)
 	if Flora.on():
-		var bt := _biome_textures()
+		var bt: Array = await _biome_textures()
 		mat.set_shader_parameter("biome_tex", bt[0])
 		mat.set_shader_parameter("path_tex", bt[1])
 		mat.set_shader_parameter("use_biome", true)
@@ -1244,7 +1247,7 @@ func build_meshes() -> void:
 	await _decorate()
 	if Flora.on() and islands.size() > 1 and not "--no-landmarks" in OS.get_cmdline_user_args():
 		landmarks = Landmarks.new(self)
-		landmarks.build(_deco)
+		await landmarks.build(_deco)
 	await _stage("world.landmarks")
 	var air := CurrentFx.new()     # the wind roads' and updrafts' look
 	air.name = "Air"
@@ -1259,6 +1262,7 @@ func _biome_textures() -> Array:
 	var pi := Image.create(w, h, false, Image.FORMAT_RG8)
 	var lip_paint := Color("dccb9c"); var sheer_paint := Color("7d7896")
 	for z in h:
+		if z % 16 == 0: await _slice()
 		for x in w:
 			var i := idx(x, z)
 			if kind[i] == T_VOID:
@@ -1467,6 +1471,7 @@ static func terrain_material() -> ShaderMaterial:
 func _island_roots(st: SurfaceTool) -> void:
 	var rr := RandomNumberGenerator.new(); rr.seed = rng.seed + 29
 	for ii in islands.size():
+		await _slice()
 		var cells: Array = islands[ii].get("cells", [])
 		if cells.is_empty():
 			cells = []
@@ -2265,10 +2270,11 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 		on_bridge.y = ground_at(on_bridge.x, on_bridge.z) if not is_void(on_bridge.x, on_bridge.z) else on_b.y
 		links.append({"from": a, "to": b, "take": on_bridge, "land": on_b, "bridge": true})
 		links.append({"from": b, "to": a, "take": on_b, "land": on_bridge, "bridge": true})
-	if L.has("train"):
-		_build_train(L["train"], neck)
 	await _slice()
-	_authored_blockers(defs, neck)
+	if L.has("train"):
+		await _build_train(L["train"], neck)
+	await _slice()
+	await _authored_blockers(defs, neck)
 	lair_defs.clear()
 	await _slice()
 	for LD in L.get("lairs", []):
@@ -2282,7 +2288,10 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 		await _slice()
 		var arcs: Array = islands[ii].get("sheer_arcs", [])
 		var cen2: Vector2 = islands[ii]["c"]
+		var ci := 0
 		for cell in islands[ii]["cells"]:
+			ci += 1
+			if ci % 512 == 0: await _slice()      # (a big island is thousands of cells)
 			var i := idx(cell.x, cell.y)
 			if neck.has(i) and kind[i] != T_VOID and edge_dist(cell.x, cell.y, 1) != 1:
 				paint[i] = Color("958f8a")      # the middle of a bridge: the same stone path
@@ -2310,7 +2319,10 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 	for ii in islands.size():
 		await _slice()
 		var e: Array = []
+		var ci := 0
 		for cell in islands[ii]["cells"]:
+			ci += 1
+			if ci % 512 == 0: await _slice()      # (a big island is thousands of cells)
 			if kind[idx(cell.x, cell.y)] != T_VOID and edge_dist(cell.x, cell.y, 1) == 1 and not neck.has(idx(cell.x, cell.y)):
 				e.append(cell)
 		edges_of[ii] = e
@@ -2430,7 +2442,7 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 	_place_stairs()
 
 func _build_train(T: Dictionary, neck: Dictionary) -> void:
-	TrainRoute.build(self, T, neck)
+	await TrainRoute.build(self, T, neck)
 
 ## Where the track is a given arc length round the loop (wraps), and its heading there.
 func train_at(s: float) -> Vector3:
@@ -2442,6 +2454,7 @@ func _authored_blockers(defs: Array, neck: Dictionary) -> void:
 	for ii in defs.size():
 		if ii >= islands.size():
 			break
+		await _slice()
 		var D: Dictionary = defs[ii]
 		for Wd in D.get("walls", []):
 			for q in _wall_tiles(Wd):

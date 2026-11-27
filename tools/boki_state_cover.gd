@@ -80,7 +80,7 @@ func species(main: Node, id: String) -> void:
 		if row.get("proc", false):
 			ok(_flinches(k, rig), "%s: a hit springs its body (KinFlinch)" % id)
 	for clip: String in used:
-		ok(_moves(rig, clip), "%s: %s leaves the bind pose and moves" % [id, clip])
+		ok(_moves(rig, clip, clip == "nap"), "%s: %s leaves the bind pose and moves" % [id, clip])
 	k.queue_free()
 
 
@@ -108,7 +108,8 @@ func _play(k: Node3D, rig: BokiRig, row: Dictionary) -> String:
 
 ## False for a clip that never leaves the bind pose (a T-pose) or holds one pose (frozen). A one-shot may start and
 ## end on the bind pose, so only the farthest sampled frame counts.
-func _moves(rig: BokiRig, clip: String) -> bool:
+## `may_hold`: a sleep clip may hold one pose (BokiClipCover allows it).
+func _moves(rig: BokiRig, clip: String, may_hold := false) -> bool:
 	var skel := rig.skeleton()
 	rig.clip = ""  # play it afresh, so no fade from the clip before blends in
 	rig.set_clip(clip, 0.0)
@@ -128,7 +129,7 @@ func _moves(rig: BokiRig, clip: String) -> bool:
 				first_at.append(at)
 			else:
 				spread = maxf(spread, maxf(q.angle_to(first[b]), at.distance_to(first_at[b]) / MOVE_M * Check.T_POSE))
-	return far >= Check.T_POSE and spread >= Check.T_POSE
+	return far >= Check.T_POSE and (may_hold or spread >= Check.T_POSE)
 
 
 func _flinches(k: Node3D, rig: BokiRig) -> bool:

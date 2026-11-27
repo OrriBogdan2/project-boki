@@ -515,10 +515,8 @@ static func extra_skeleton(root: Node3D) -> Skeleton3D:
 ## Starts reading a Warden's .glb on a loader thread, so the build that needs it later doesn't wait on the disk.
 static func fetch(arch: String) -> void:
 	var p := path(arch)
-	if not uses_model(arch) or _scenes.has(p) or not BackgroundWork.can_read_ahead():
-		return
-	if ResourceLoader.load_threaded_get_status(p) == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
-		BackgroundWork.request(p)
+	if uses_model(arch) and not _scenes.has(p) and BackgroundWork.can_read_ahead():
+		BackgroundWork.read_ahead(p)
 
 
 ## Starts reading the .glb files a match's build dresses (your Warden and your dealt squadmates', opts "mates"),
@@ -535,15 +533,39 @@ static func fetch_for(opts: Dictionary) -> void:
 			fetch(String(a))
 
 
+## Reads a Warden's model now when no loader thread has it; true when that took the main thread.
+static func warm(arch: String) -> bool:
+	if not uses_model(arch) or _scenes.has(path(arch)) or BackgroundWork.asked(path(arch)):
+		return false
+	_scene(arch)
+	_parts_held.clear()
+	return true
+
+
+## The files a Warden's model reads before its scene (its 4096 px textures: on the RTX 4090 bench one model's read
+## was a 500-850 ms frame, nearly all of it GPU uploads), not read yet. Match._warm_model reads them a frame each
+## (read_part), then the scene finds them in the cache. [] when warm() has nothing to do.
+static func parts(arch: String) -> Array:
+	var out: Array = []
+	if not uses_model(arch) or _scenes.has(path(arch)) or BackgroundWork.asked(path(arch)):
+		return out
+	for d in ResourceLoader.get_dependencies(path(arch)):
+		var dp := d.get_slice("::", 2) if d.contains("::") else d
+		if dp != "" and not ResourceLoader.has_cached(dp):
+			out.append(dp)
+	return out
+
+static var _parts_held: Array = []  # read_part's resources, held (so cached) until warm() reads the scene
+
+static func read_part(p: String) -> void:
+	_parts_held.append(load(p))
+
+
 ## Whether a Warden's model can be built without waiting on the disk (fetch() starts the read when it hasn't).
 static func fetched(arch: String) -> bool:
 	fetch(arch)
 	var p := path(arch)
-	return (
-		not uses_model(arch)
-		or _scenes.has(p)
-		or ResourceLoader.load_threaded_get_status(p) != ResourceLoader.THREAD_LOAD_IN_PROGRESS
-	)
+	return not uses_model(arch) or _scenes.has(p) or BackgroundWork.done(p)
 
 
 ## Whether the Warden's neutral rig rest is known yet (else the next build measures it first: a build of its own).
@@ -554,8 +576,7 @@ static func has_rest(arch: String) -> bool:
 static func _scene(arch: String) -> PackedScene:
 	var p := path(arch)
 	if not _scenes.has(p):
-		var asked := ResourceLoader.load_threaded_get_status(p) != ResourceLoader.THREAD_LOAD_INVALID_RESOURCE
-		_scenes[p] = BackgroundWork.take(p) if asked else load(p)
+		_scenes[p] = BackgroundWork.take(p)
 	return _scenes[p] as PackedScene
 
 

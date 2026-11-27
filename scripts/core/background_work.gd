@@ -4,6 +4,7 @@ extends RefCounted
 ## Whatever is still out when the game quits is finished first: a quit with threads mid-read crashes the engine.
 
 static var _reads := {}       # path -> true while a threaded read is requested and not yet taken
+static var _queue: Array[String] = []   # read_ahead() paths not requested yet, in order
 static var _tasks := {}       # worker task id -> true while it is added and not yet joined
 static var _hooked := false
 
@@ -22,10 +23,45 @@ static func request(path: String) -> void:
 	ResourceLoader.load_threaded_request(path)
 	_reads[path] = true
 
-## The resource a request() read; waits if it is still reading.
+## Queues `path` to read on a loader thread once the reads queued before it are done: one at a time, a frame
+## apart. With a match's ~32 .glb reads out at once, the main thread's build stalled until they were all done and
+## the GL driver uploaded their textures and meshes in one frame (M5 GL 592 ms, item 33).
+static func read_ahead(path: String) -> void:
+	if _reads.has(path) or path in _queue:
+		return
+	_queue.append(path)
+	var tree := Engine.get_main_loop() as SceneTree
+	if not tree.process_frame.is_connected(_next_read):
+		tree.process_frame.connect(_next_read)
+	_next_read()
+
+## Whether `path` is queued or requested and not taken yet.
+static func asked(path: String) -> bool:
+	return _reads.has(path) or path in _queue
+
+## Whether `path` can be taken without waiting: not queued or still reading.
+static func done(path: String) -> bool:
+	var reading := ResourceLoader.load_threaded_get_status(path) == ResourceLoader.THREAD_LOAD_IN_PROGRESS
+	return not reading and not path in _queue
+
+## The resource a request() or read_ahead() read; waits if it is still reading, and reads it now (on the main
+## thread) if it is not requested yet.
 static func take(path: String) -> Resource:
+	_queue.erase(path)
+	if not _reads.has(path):
+		return load(path)
 	_reads.erase(path)
 	return ResourceLoader.load_threaded_get(path)
+
+## Each frame: starts the next queued read once no read_ahead() read is still going.
+static func _next_read() -> void:
+	for p in _reads:
+		if ResourceLoader.load_threaded_get_status(p) == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+			return
+	if _queue.is_empty():
+		(Engine.get_main_loop() as SceneTree).process_frame.disconnect(_next_read)
+		return
+	request(_queue.pop_front())
 
 ## Runs `work` on a worker thread (join() collects it).
 static func add_task(work: Callable) -> int:
@@ -41,6 +77,7 @@ static func join(id: int) -> void:
 
 ## Finishes everything still out (what a quit runs).
 static func drain() -> void:
+	_queue.clear()
 	for id in _tasks.keys():
 		join(int(id))
 	for path in _reads.keys():
