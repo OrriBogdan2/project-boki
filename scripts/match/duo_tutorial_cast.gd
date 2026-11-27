@@ -11,6 +11,7 @@ const STRAFE_HZ := 0.9       # rad/s of a strafing rival's side-to-side
 const WILD_AHEAD := 5.0      # m in front of you the wild Boki turns up
 const WILD_HP := 0.3         # of its health the wild Boki arrives with (two or three hits)
 const KEEP_R := 12.9         # m from the ring's centre: past this a hunter is in or over the wall (its tiles start ~12)
+const STAND_R := 11.9        # m from the centre: the furthest spot she stands at (never in the wall)
 const BACK_R := 11.5         # m from the centre such a hunter is put back at
 
 var tu: DuoTutorial
@@ -74,6 +75,8 @@ func tick(dt: float) -> void:
 	_guide()
 	for h in [m.player, tu.guide] + tu.foes:
 		_keep_in(h)
+	for h in [tu.guide] + tu.foes:
+		_no_finish(h)
 	if m.truce:
 		m.truce.offers.clear()      # (sparring partners don't offer a truce)
 
@@ -86,6 +89,14 @@ func _keep_in(h: Hunter) -> void:
 	var back := DuoTutorial.RING_C + off.normalized() * BACK_R
 	h.teleport(Vector3(back.x, m.world.ground_at(back.x, back.y), back.y))
 	h.vel = Vector3.ZERO
+
+## Nobody loses here: a guide or rival bot that holds interact over a knocked hunter never gets to stomp it (the
+## execution would cost a life and land it by the drop, outside the ring); the knocked one is back up instead.
+func _no_finish(h: Hunter) -> void:
+	if h.stomp.is_empty():
+		return
+	Life.end_stomp(m, h, "gone")
+	h.finish_t = 0.0
 
 func _foe(f: Hunter, i: int, dt: float) -> void:
 	f.reveal_t = maxf(f.reveal_t, 0.3)       # (always in sight: nothing hides in a sparring ring)
@@ -156,7 +167,10 @@ func _beside() -> Vector3:
 	var p := m.player
 	var fwd := p.aim_dir()
 	var side := Vector2(-fwd.y, fwd.x) * BESIDE
-	return Vector3(p.pos.x + side.x, p.pos.y, p.pos.z + side.y)
+	var at := Vector2(p.pos.x + side.x, p.pos.z + side.y) - DuoTutorial.RING_C
+	if at.length() > STAND_R:
+		at = at.normalized() * STAND_R      # (you stand near the rim: she waits on the floor)
+	return Vector3(DuoTutorial.RING_C.x + at.x, p.pos.y, DuoTutorial.RING_C.y + at.y)
 
 ## Her enemy ping follows the rival she marked.
 func _mark(f: Hunter) -> void:

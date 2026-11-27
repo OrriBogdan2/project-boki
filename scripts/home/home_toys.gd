@@ -239,6 +239,7 @@ func _finish(k: Dictionary, t: Dictionary) -> void:
 		h.life.sfx.toy_done(rec, k["pos"])
 	GardenFirstDay.mark("toy", h)
 	h._garden_xp(rec, "toy")      # play raises the Boki (docs/GARDEN_FIRST_HOUR.md item 7)
+	FarmTutorial.event("played")
 	if gained > 0:
 		h.fx.burst(k["pos"] + Vector3(0, 0.9, 0), Care.STATS[stat]["col"], 7, 2.0, 0.5)
 	_stop(k)
