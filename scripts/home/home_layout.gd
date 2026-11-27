@@ -132,6 +132,8 @@ const CATALOG := {
 		"desc": "Cook what you grow into treats for your Boki."},
 	"market_stall": {"name": "Market stall", "cat": "Buildings", "gems": 30, "size": [3, 2], "block": true, "fixture": "stall", "max": 1,
 		"desc": "Somewhere to trade on the island (the Market is always on the hub bar too)."},
+	"vet_booth": {"name": "Vet booth", "cat": "Buildings", "gems": 20, "size": [2, 1], "block": true, "max": 1,
+		"desc": "A free check-up for every Boki (health, likes, mood) and a cure for the weak or sick, for gems."},
 	"nesting_nook": {"name": "Nesting Nook", "cat": "Buildings", "gems": 60, "wood": 8, "size": [4, 2], "block": true, "fixture": "nook", "max": 1,
 		"desc": "Where two close Boki leave an egg, with the Incubator beside it for Rare Eggs."},
 	"boki_burrow": {"name": "Boki Burrow", "cat": "Buildings", "gems": 40, "wood": 6, "stone": 4, "size": [3, 2], "block": true, "fixture": "burrow", "max": 1,
