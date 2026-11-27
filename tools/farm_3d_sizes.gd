@@ -225,7 +225,7 @@ func _clear_foreground() -> void:
 	var from := Vector2(cam.global_position.x, cam.global_position.z)
 	var to := Vector2(group.x, group.z)
 	var line := to - from
-	var chars: Array[Node] = hunters.duplicate()
+	var chars: Array = hunters.duplicate()
 	for k in h.kins:
 		chars.append(k["node"])
 	for n in h.find_children("*", "MeshInstance3D", true, false):
