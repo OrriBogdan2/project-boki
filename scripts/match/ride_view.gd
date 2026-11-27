@@ -7,7 +7,7 @@ extends RefCounted
 ## with its key brings the 3D ride view back, as before.
 
 ## Frames apart a hunter is drawn while the 3D view is off (OFF_EVERY), and the skipped time past which it is drawn
-## anyway. Hunters are staggered by id so each frame draws about a quarter of them.
+## anyway. Hunters are staggered by their place in the list so each frame draws a quarter of them.
 const OFF_EVERY := 4
 const OFF_MAX_DT := 0.25
 
@@ -58,8 +58,9 @@ static func tick(m: Match, map: FullMap) -> void:
 static func render_hunters(m: Match, delta: float, alpha: float) -> void:
 	var off := m.get_viewport().disable_3d
 	var f := Engine.get_process_frames()
-	for e in m.hunters:
-		if not off or e.lod_dt + delta > OFF_MAX_DT or (f + e.get_instance_id()) % OFF_EVERY == 0:
+	for i in m.hunters.size():
+		var e: Hunter = m.hunters[i]
+		if not off or e.lod_dt + delta > OFF_MAX_DT or (f + i) % OFF_EVERY == 0:
 			e.render(delta + e.lod_dt, alpha)
 			e.lod_dt = 0.0
 		else:

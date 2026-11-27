@@ -191,6 +191,7 @@ func draw(sz: Vector2) -> void:
 		hud._ctext(Vector2(sz.x * 0.5, 44), _map_title(), 28, INK, hud.big)
 		var hint := "Click to ping  ·  right click takes your ping down  ·  " if Life.has_mates(m, m.player) else ""
 		hud._ctext(Vector2(sz.x * 0.5, 66), "%swheel zooms  ·  %s closes" % [hint, Settings.key_cap("map")], 13, MUTED)
+	Prof.begin("fm_base")
 	# the map itself: the painted map (MapPaint), framed
 	hud._rounded(rect.grow(9.0), Color(0, 0, 0, 0.45), 10)
 	c.draw_rect(rect, SEA)
@@ -200,6 +201,8 @@ func draw(sz: Vector2) -> void:
 	_grid(c, v, kk)
 	HazardMap.draw(c, m, to_screen, rect, Vector3.ZERO, HazardMap.FULL_SHIELD)
 	c.draw_rect(rect, Color(0.85, 0.8, 1.0, 0.35), false, 2.0)
+	Prof.end()
+	Prof.begin("fm_labels")
 	_shrines(c, kk)
 	var saved: Vector3 = hud.mm_circ
 	hud.mm_circ = Vector3.ZERO          # the shared map helpers clip to a rectangle here
@@ -209,6 +212,8 @@ func draw(sz: Vector2) -> void:
 	if m.exits:
 		ExitMark.full_map(self)
 	hud.mm_circ = saved
+	Prof.end()
+	Prof.begin("fm_marks")
 	ShopLegend.markers(self, c)
 	_spawns(c, team, kk)
 	ReviveHud.full_map(self)
@@ -219,6 +224,8 @@ func draw(sz: Vector2) -> void:
 	WaysOutMap.full_map(self)
 	if m.zone:
 		m.zone.full_map(self, kk)
+	Prof.end()
+	Prof.begin("fm_units")
 	_lair_alerts(c)
 	_ship(c)
 	_wave_ships(c)
@@ -227,6 +234,8 @@ func draw(sz: Vector2) -> void:
 	_bounties(c, team)
 	_squad(c, team)
 	BokiHud.map_kin(c, m, to_screen, func(pv: Vector2, _pad: float) -> bool: return rect.has_point(pv))
+	Prof.end()
+	Prof.begin("fm_side")
 	_roster.clear()
 	if plain_plan():
 		_plain_hint(sz)
@@ -237,6 +246,7 @@ func draw(sz: Vector2) -> void:
 	hover.draw(self)
 	if hot_line != "":
 		hud._ctext(Vector2(rect.get_center().x, rect.end.y + 32.0), hot_line, 15, HotZone.COL, hud.big)
+	Prof.end()
 	_cursor(c)
 
 ## The one line of a plain plan, on the map's foot: the jump key, and the key that brings the rest back.
