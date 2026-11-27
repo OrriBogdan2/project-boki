@@ -481,7 +481,7 @@ func open_sfx_tester() -> void:
 
 
 func _show_settings() -> void:
-	var v := _page("settings", "Settings", 720, true)
+	var v := _page("settings", "Settings", 760, true)
 	UI.hold(v, SETTINGS_H)
 	more_tabs = more_tabs or SETTINGS_TABS.find(tab) >= MAIN_TABS
 	var shown: Array = SETTINGS_TABS.slice(0, SETTINGS_TABS.size() if more_tabs else MAIN_TABS)
