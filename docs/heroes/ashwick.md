@@ -11,6 +11,10 @@ casting (right) hand (`AshwickKit.tip()`); the rules' numbers, range and timing 
 heels and tail (`AshwickJet.jet_points`, the one place to swap the look); the flight itself is unchanged. Where the tables below
 say gun, nozzle, tank or hose, read hand, palm and stream: they describe the source footage.
 
+**Native clips (Nov 2026):** on Meshy's own skeleton she has her own clips for LMB (hand-fire spool and hold), Cinder
+Shot (aim, push), Furnace Cloak (arms wide on the blast frame), Flue Flight (take-off, flight loop, landing); the kit's
+timings and numbers are unchanged. See docs/art/wardens/MESHY_NATIVE.md, "Own clips for kit moves".
+
 ## Research summary
 Sources (gameplay facts only, written in our own words):
 - The reference hero's public kit page (see the Inspired-by table in docs/ARCHETYPES.md), patch notes on that page.

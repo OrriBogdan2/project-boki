@@ -37,15 +37,20 @@ static func full_map(fm) -> void:
 			_nest(fm.hud, pv, ICON_S, n, m.blight.nests)
 
 
+## The nest's badge: a dark disc, a ring and the egg (the map key draws it too).
+static func glyph(c: Control, pv: Vector2, s: float, col: Color = COL) -> void:
+	c.draw_circle(pv, s * 1.35, Color(0, 0, 0, 0.7))
+	c.draw_arc(pv, s * 1.35, 0, TAU, 20, col, 1.5, true)
+	Icons.draw(c, "egg", pv, s * 0.8, col)
+
+
 static func _nest(hud, pv: Vector2, s: float, n: Dictionary, nst: BlightNests) -> void:
 	var c: Control = hud.c
 	var cooling := nst.cooling(n)
 	var col := DIM if cooling else COL
 	if n["stir_at"] != INF and fmod(Time.get_ticks_msec() / 1000.0, 0.3) < 0.15:
 		col = Color.WHITE
-	c.draw_circle(pv, s * 1.35, Color(0, 0, 0, 0.7))
-	c.draw_arc(pv, s * 1.35, 0, TAU, 20, col, 1.5, true)
-	Icons.draw(c, "egg", pv, s * 0.8, col)
+	glyph(c, pv, s, col)
 	var k := int(n["stock"])
 	for i in k:
 		c.draw_circle(pv + Vector2((i - (k - 1) * 0.5) * s * 0.45, s * 1.35 + 2.5), maxf(0.9, s * 0.14), col)
