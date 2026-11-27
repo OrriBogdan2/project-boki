@@ -28,6 +28,7 @@ var _zoom_goal := -1.0
 var _zoom_rate := 0.0
 var _yaw_goal := NAN  # the view turns toward this over time (rad/s _yaw_rate)
 var _yaw_rate := 0.0
+var _rise := 0.85  # the take's aim height; the aim rides up with a jump (the farm view keeps its focus on the ground)
 var _heartbeat := {}  # the Boki that cling to the hunter (kept in the greet run)
 
 
@@ -195,6 +196,7 @@ func _wait(secs: float) -> void:
 		await main.get_tree().process_frame
 		_frames += 1
 		h.day_t = DAY_T
+		CamRig.rules["farm"]["rise"] = _rise + maxf(float(h.py) - float(h._ground_h(h.ppos.x, h.ppos.z)), 0.0) * 0.9
 		if _zoom_goal >= 0.0:
 			h.cam.zoom_to = move_toward(h.cam.zoom_to, _zoom_goal, _zoom_rate / FPS)
 		if not is_nan(_yaw_goal):
@@ -244,6 +246,7 @@ func _put(i: int, at: Vector3) -> void:
 func _view(fov: float, pitch_deg: float, zoom: float, rise := 0.85) -> void:
 	CamRig.rules["farm"]["fov"] = fov
 	CamRig.rules["farm"]["rise"] = rise
+	_rise = rise
 	h.farm_cam.pitch = deg_to_rad(pitch_deg)
 	h.cam.zoom_to = CamWheel.near() + zoom * (CamWheel.far() - CamWheel.near())
 	h.cam.zoom = h.cam.zoom_to
