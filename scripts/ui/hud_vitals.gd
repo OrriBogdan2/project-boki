@@ -4,13 +4,14 @@ extends RefCounted
 ## level and a bar toward the next level) along its top edge, then to its right your health as a big
 ## number over a thick segmented bar, armour as a strip over it with its number and
 ## tier, your shield as a strip over the top of health (ShieldStrip), the merged form's shell, and the
-## archetype resource under that. The ability row sits below the bars (Hud._draw_abilities). Look: HudStyle.
+## archetype resource under that, then any crowd control on you (SelfCcLine). The ability row sits
+## below the bars (Hud._draw_abilities). Look: HudStyle.
 ## Hud keeps the state that checks read (lvl_pop, xp_pop, armor_lerp, hover_spots); this only draws.
 
 const BAR_W := 318.0  # px: health / armour width
 const HP_H := 16.0  # px: the health bar
 const AR_H := 5.0  # px: the armour strip above it
-const LVL_POP := 0.35  # s: the level-up burst round the portrait
+const LVL_POP := 0.35  # s: the level number's gold fade after a level-up
 const XP_POP := 0.4  # s: the pop of the level number and bar when XP lands
 const NOTE_UP := 24.0  # px: the armour hint's baseline over the LV row's (its 24 px card clears LV and the XP bar)
 const NUM_PX := 16  # px: the run level number's size at rest
@@ -84,10 +85,14 @@ static func draw(h, sz: Vector2, p: Hunter) -> void:
 			var acol: Color = p.armor_col().lerp(Color.WHITE, h.plates.armor_flash_of(p))
 			c.draw_rect(Rect2(ar.position, Vector2(ar.size.x * af, ar.size.y)), acol)
 	ArmorHud.bar(h, x0, ar.position.y - 3, w, p)  # progress to the next armour tier, a hairline above the strip
+	var cc_y := hr.end.y + 4
 	if p.ak and p.ak.has_gauge():
-		h._draw_res_bar(x0, hr.end.y + 4, w, p)
+		h._draw_res_bar(x0, cc_y, w, p)
+		cc_y += 12.0
+	SelfCcLine.draw(c, Vector2(x0, cc_y), w, p)
 	xp_row(h, pr, x0, w, p)
 	_hidden_tag(h, sz, p)
+	h.lvl_cue.card(h, x0, y0 - 32.0)  # clear of the XP tracker on the block's top edge
 
 
 ## HIDDEN / CROUCHED / SPOTTED over the middle of the bar when you're in grass or crouching.
@@ -131,7 +136,7 @@ static func level_row(pr: Rect2) -> Rect2:
 ## The XP tracker on the block's top edge, just above the health number: LV and the run level, then a
 ## thin bar toward Hunter.XP_TO. XP landing (camp or kill) pops the number, brightens the bar and
 ## fills it smoothly (through a level-up too); unspent skill points pulse the whole bar gold, and a
-## level-up bursts a gold ring round the portrait.
+## level-up turns the number gold (the rest of the moment is LevelUpCue's, over the vitals).
 static func xp_row(h, pr: Rect2, x0: float, w: float, p: Hunter) -> void:
 	var c: CanvasItem = h.c
 	var gold := HudStyle.GOLD
@@ -141,9 +146,6 @@ static func xp_row(h, pr: Rect2, x0: float, w: float, p: Hunter) -> void:
 	h.lvl_seen = p.lvl
 	h.lvl_pop = maxf(0.0, h.lvl_pop - dt)
 	var lk: float = 1.0 - h.lvl_pop / LVL_POP
-	if h.lvl_pop > 0.0:
-		h._rounded(pr.grow(6.0 + lk * 22.0), Color(0, 0, 0, 0), 16, Color(gold, 1.0 - lk), 4)
-		h._rounded(pr.grow(2.0 + lk * 10.0), Color(gold, 0.18 * (1.0 - lk)), 14)
 	var fill := xp_step(h, p, dt)
 	var pop: float = h.xp_pop / XP_POP
 	var sc := 1.0 + NUM_POP * sin((1.0 - pop) * PI) if pop > 0.0 else 1.0
