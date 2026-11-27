@@ -12,7 +12,8 @@ The ammo no longer draws at the cursor (the arc and its tuning keys are gone): n
 on most Hunters; the ammo is in the HUD's weapon panel. The gauges (resource, charge, warm-up, spin-up and the AimKit
 charge) are short bars under the reticle (`Reticle.bar`, tuning `bar_w`/`bar_y`/`bar_step`: charge in slot 0, resource
 in slot 1), filled part only over a thin dark edge: a gauge that wrapped the ring read as a second ring (art-gate, twice).
-Only the AimKit charge "body" mode still draws a ring, round the Hunter, not the cursor. Kael's blade tick above his
+No gauge wraps the ring any more. Two brief flashes still pop a ring round the reticle: the full-charge flare (0.18 s, a melee hold
+filling) and the crit/knock pulse; the AimKit charge "body" mode draws its ring round the Hunter, not the cursor. Kael's blade tick above his
 shackle arcs is part of his look.
 Checks: `--reticle-check` (every Hunter's look is known and its own; every look draws).
 Proof (real GPU, `--resolution 1920x1080`): `--reticle-looks-shots` (dark/light/grass swatch rows, labelled, at rest)

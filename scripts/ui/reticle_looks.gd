@@ -80,11 +80,14 @@ static func strokes(c: CanvasItem, at: Vector2, look: String, ring: float, k: fl
 		"harlequin":
 			_ring_poly(c, at, ring + 2.0 * k, 4, -PI * 0.5, col, w)
 		"fin":
+			# (one stroke: ring from the fin's foot round to its back, out to the tip and home, so no joint shows)
 			var top := -PI * 0.5
-			c.draw_arc(at, ring, top + 0.15, top + TAU - 0.75, 24, col, w, true)
-			var fin := PackedVector2Array([at + _polar(top - 0.75, ring), at + Vector2(2.8 * k, -ring - 2.6 * k)])
-			fin.append(at + _polar(top + 0.15, ring))
-			c.draw_polyline(fin, col, w, true)
+			var pts := PackedVector2Array()
+			for i in 25:
+				pts.append(at + _polar(lerpf(top + 0.15, top + TAU - 0.75, i / 24.0), ring))
+			pts.append(at + Vector2(2.8 * k, -ring - 2.6 * k))
+			pts.append(pts[0])
+			c.draw_polyline(pts, col, w, true)
 
 
 static func _polar(a: float, r: float) -> Vector2:
