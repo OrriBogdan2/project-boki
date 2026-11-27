@@ -1,9 +1,10 @@
 class_name KinWants
 extends RefCounted
 ## What a Boki wants, readable at a glance. The most urgent need floats over it as one thought
-## bubble with an icon (food bowl, Zzz, bath, ball or heart); the more urgent, the bigger and
-## livelier. A few bubbles at most show at once, a Boki that gets what it wanted answers with a
-## little heart, and walking up to it names the want and what the interact key does about it.
+## bubble with an icon (food bowl, Zzz, bath, ball or heart, a sad face when its mood is very low); the
+## more urgent, the bigger and livelier. A few bubbles at most show at once, a Boki that gets what it
+## wanted answers with a little heart, and walking up to it names the want and what the interact key
+## does about it. A content Boki you walk up to smiles at you for a moment (a smaller, calm bubble).
 
 ## A need under this is a want (matches Care.want).
 const WANT_BELOW := 38.0
@@ -15,7 +16,17 @@ const MAX_SHOWN := 3
 const SPACING := 1.8
 ## A mild want only shows this close to you (tiles).
 const MILD_RANGE := 9.0
-const ICONS := ["bowl", "zzz", "bath", "ball", "heart"]
+const ICONS := ["bowl", "zzz", "bath", "ball", "heart", "sad", "happy"]
+## Every need at least this (points of 100) and it is content: it may smile at you.
+const HAPPY_ABOVE := 70.0
+## It smiles when you come this close (tiles): near enough that you see its face at the farm camera.
+const HAPPY_RANGE := 4.0
+## How long the smile stays up (s).
+const HAPPY_S := 2.5
+## Before the same Boki smiles at you again (s), so a crowd of happy Boki is not a field of bubbles.
+const HAPPY_AGAIN_S := 40.0
+## The smile's size against a want's (a mild want is 1.1 and up).
+const HAPPY_SIZE := 0.85
 
 ## 0 when nothing is wanted, up to 1 when a need is empty.
 static func urgency(rec: Dictionary) -> float:
@@ -25,14 +36,26 @@ static func urgency(rec: Dictionary) -> float:
 	return clampf((WANT_BELOW - Care.need(rec, w)) / WANT_BELOW, 0.05, 1.0)
 
 ## The icon for what the Boki wants ("" for nothing). A low mood is a ball for a Boki that likes
-## fetch and a heart for the rest.
+## fetch and a heart for the rest; a very low one (urgent) is a sad face.
 static func icon(rec: Dictionary) -> String:
 	match Care.want(rec):
 		"food": return "bowl"
 		"energy": return "zzz"
 		"clean": return "bath"
-		"joy": return "ball" if String(rec["likes"]["play"]) == "fetch" else "heart"
+		"joy":
+			if Care.need(rec, "joy") < URGENT_BELOW:
+				return "sad"
+			return "ball" if String(rec["likes"]["play"]) == "fetch" else "heart"
 	return ""
+
+## True when it wants nothing and every need is at least HAPPY_ABOVE.
+static func content(rec: Dictionary) -> bool:
+	if Care.want(rec) != "":
+		return false
+	for n in Care.NEEDS:
+		if Care.need(rec, n) < HAPPY_ABOVE:
+			return false
+	return true
 
 ## The best food you have for it: its favourite first, then anything it doesn't hate. "" for none.
 static func best_food(rec: Dictionary) -> String:
@@ -69,7 +92,7 @@ static func line(rec: Dictionary, pond: bool) -> String:
 			return "%s is hungry: give food" % nm
 		"energy": return "%s is sleepy: tuck it in" % nm
 		"clean": return "%s is dirty: %s" % [nm, "give a bath" if pond else "brush it"]
-		"joy": return "%s is lonely: pet it" % nm
+		"joy": return ("%s is sad: pet it" if Care.need(rec, "joy") < URGENT_BELOW else "%s is lonely: pet it") % nm
 	return "Pet " + nm
 
 ## Every frame: shows the most urgent wants, hides the rest, and plays the happy answer.
@@ -88,8 +111,25 @@ static func update(home: Node, dt: float, now: float) -> void:
 	for k in cands:
 		if _may_show(k, shown, home.ppos):
 			shown.append(k)
+	_smiles(home, dt, shown)
 	for k in home.kins:
 		_pose(home, k, shown.has(k), dt, now)
+
+## A content Boki you walk up to smiles once (HAPPY_S), then not again for HAPPY_AGAIN_S. Wants come first.
+static func _smiles(home: Node, dt: float, shown: Array) -> void:
+	for k in home.kins:
+		k["smile_t"] = maxf(float(k.get("smile_t", 0.0)) - dt, 0.0)
+		k["smile_again"] = maxf(float(k.get("smile_again", 0.0)) - dt, 0.0)
+		if not home.visit.is_empty() or not _free_to_show(k) or not content(k["rec"]):
+			k["smile_t"] = 0.0
+			continue
+		var at: Vector3 = k["pos"]
+		var near := Vector2(at.x - home.ppos.x, at.z - home.ppos.z).length() <= HAPPY_RANGE
+		if float(k["smile_t"]) <= 0.0 and near and float(k["smile_again"]) <= 0.0:
+			k["smile_t"] = HAPPY_S
+			k["smile_again"] = HAPPY_AGAIN_S
+		if float(k["smile_t"]) > 0.0 and _may_show(k, shown, home.ppos):
+			shown.append(k)
 
 static func _free_to_show(k: Dictionary) -> bool:
 	if k.has("indoors") or k.has("fetch") or k.has("bath") or k.get("busy", false):
@@ -129,17 +169,21 @@ static func _pose(home: Node, k: Dictionary, shown: bool, dt: float, now: float)
 		k["bubble"] = bub
 		k["bubble_k"] = 0.0
 	var goal := 0.0
-	if shown:
+	var want_icon := icon(k["rec"])
+	if shown and want_icon == "":
+		want_icon = "happy"
+		goal = HAPPY_SIZE
+	elif shown:
 		var u := urgency(k["rec"])
 		goal = 1.1 + u
 		if Care.need(k["rec"], Care.want(k["rec"])) < URGENT_BELOW:
 			goal *= 1.0 + 0.1 * sin(now * 7.0)
+	k["bubble_icon"] = want_icon
 	var grow := lerpf(float(k["bubble_k"]), goal, 1.0 - exp(-9.0 * dt))
 	k["bubble_k"] = grow
 	bub.visible = grow > 0.03
 	if not bub.visible:
 		return
-	var want_icon := icon(k["rec"])
 	for nm in ICONS:
 		(bub.get_node(nm) as Node3D).visible = nm == want_icon
 	bub.position = Vector3(0.25, 1.5 + sin(now * 2.2) * 0.04, 0)
@@ -158,6 +202,8 @@ static func bubble() -> Node3D:
 	_bath(root)
 	_ball(root)
 	_heart(root)
+	_face(root, "sad", Color("7aa6e8"), -1.0)
+	_face(root, "happy", Color("ffd35a"), 1.0)
 	return root
 
 static func _node(root: Node3D, nm: String) -> Node3D:
@@ -211,3 +257,19 @@ static func _heart(root: Node3D) -> void:
 	lbl.position = Vector3(0, 0, -0.12)
 	lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	root.add_child(lbl)
+
+## A round face: two eyes and a mouth of dots, curved up (smile 1) or down (-1); the sad one has a tear.
+static func _face(root: Node3D, nm: String, col: Color, smile: float) -> void:
+	var n := _node(root, nm)
+	var ink := Models.toon(Color("3a2a2a"), false)
+	const FRONT := -0.19  # (the face's front, toward the camera: the bubble looks at it down -z)
+	Models.part(n, Models.sphere(0.1, 12), Models.toon(col, false, 0.2), Vector3(0, 0, -0.1))
+	for x in [-0.035, 0.035]:
+		Models.part(n, Models.sphere(0.014, 6), ink, Vector3(x, 0.025, FRONT))
+	for i in 5:
+		var x := -0.04 + 0.02 * i
+		var y := -0.035 + smile * (0.03 * pow(x / 0.04, 2.0) - 0.012)
+		Models.part(n, Models.sphere(0.009, 5), ink, Vector3(x, y, FRONT))
+	if smile < 0.0:
+		Models.part(n, Models.sphere(0.016, 6), Models.toon(Color("e8f6ff"), false, 0.3), Vector3(0.055, -0.005, FRONT),
+			Vector3(1, 1.4, 1))
