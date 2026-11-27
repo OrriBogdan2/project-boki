@@ -100,6 +100,40 @@ Not solved here: with bites and earned runs all aimed at one stat, about 9 exped
 level cap (12 + 6 a level) slows that. If the road should be longer, lower `train_runs.per_match` or the bite
 chances (both data).
 
+## Lucky bonus (owner idea 2026-11-27)
+
+Owner: treats could also raise the chance of bonus stats, +2 instead of +1, when you get lucky; give a Boki
+its favourite rare treat or toy. Numbers: `content/rules/luck.json` (code: `scripts/core/luck.gd`).
+
+| | |
+|---|---|
+| Base chance | 8% for every point gained |
+| Any luck treat eaten | +12% for its next 3 stat gains (a rare treat it has no special love for: +18%) |
+| Its favourite treat | +25% (hidden: each Boki has one, fixed by its id) |
+| Its favourite treat, when that one is rare | +40% (about 1 Boki in 4 has a rare favourite) |
+| Played at its favourite toy (FavToy) | +6% on its next expedition only |
+| Cap | 50% in all |
+
+- **What rolls.** Each whole point a Boki gains from an expedition (`PlayStyle.run_growth`) or from a stat
+  bite (`GardenItems.apply`) rolls the chance; a lucky point is worth one more. A "gain" for the treat buff is
+  one bite eaten or one stat's growth from an expedition. The roll is seeded from the Boki's id and its roll
+  count, so a rerun agrees.
+- **Luck only speeds.** It never makes a point on its own (no gain, no roll), never passes the stat's cap or
+  the total cap (the extra stops at `StatBudget.room`), and the garden still gives 0 stat points, treat or not.
+- **Where treats come from.** Four common treats (Puffberry, Nutty Crisp, Dewdrop Jelly, Sugar Twig) and two
+  rare ones (Moon Fig, Starfruit Tart) drop on expeditions (`garden_items.json` `treat_drop`): a lair pile holds
+  a rare one 6% of the time and a common one 30%; wardens and glimmers drop one 10% of kills (brutes 3%), 15%
+  of those a rare one. They are carried home like stat bites and eaten from the feed menu.
+- **Discovery.** The first favourite treat it eats is a big happy reaction (sparkle, jump, voice) and is
+  written on its card ("Fav treat: Loves moon fig"). The card also shows a clover row, "Luck up for next 3
+  gains: lucky chance 33%". Its favourite toy is the one it plays most (FavToy, as before).
+- **Where you see it.** A lucky stat bite says "Lucky! +2 instead of +1" in the feed toast with a clover
+  sparkle and a happy Boki; the results card lists "Power +4 (Lucky! +2 instead of +1)" in gold.
+- **Not built.** Regional treats ("each region drops its own") are not in the game yet, so the drops are by
+  lair and kill table. Alternative if treats feel too easy to get: lower `treat_drop.lair` and the kill chances.
+- **Check.** `--playstyle-check`: base rate over 10,000 seeded rolls, the 50% cap with a rare favourite and the
+  toy, no gain without a source, caps held over lucky bites and expeditions, the first-try discovery.
+
 ## Built and not built
 
 Built (this branch): leaning points from garden activities and expeditions, the day cap, tiers, stat focus

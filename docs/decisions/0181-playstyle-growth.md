@@ -26,3 +26,12 @@ No save bump: `rec["style_day"]` and `rec["run_frac"]` are lazy (an older record
 change (farm records, paid on the result the client already applies). `Evo.learn` is gone (one caller). Mutation
 rolls keep their rng call order, but the stray chance now comes from the tier (0.5 for a Balanced Boki, was 0.3).
 Checks: `--playstyle-check` (new), `--evo-path-check`, `--results-boki-line-check`, `--train-runs-check`.
+
+## Addendum (2026-11-27): lucky stat gains
+Owner: luck treats and favourites should sometimes make a stat point worth +2. `Luck` (content/rules/luck.json)
+rolls each point an expedition or a stat bite pays: base 8%, a treat adds 12-40% for its next 3 gains (its
+hidden favourite more, a rare favourite most), its favourite toy 6% for the next expedition, 50% in all. It only
+doubles a point already earned and stops at the caps, so garden play still pays 0 stat points. Six luck treats
+join garden_items.json (family luck) and drop from lairs and kills. No save bump: rec.luck, rec.luck_toy and
+rec.luck_n are lazy.
+
