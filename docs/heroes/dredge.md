@@ -29,8 +29,8 @@ ranks in the source or ours. R is left to decision 0022.
 Source hero 1531 HP against our heavy 193 HP: damage about x0.13. The data pass (SERVER_UPDATE7, owner's tooltip data) copies
 durations and counts as they are (the 0.2s stun step, the 50% cooldown cut, the +100% over the abyss) and leaves the damage
 and cooldown numbers that already follow the ratios below. Numbers follow the source's ratios, not its raw values:
-- the gun fires every 0.5s (the footage and card), with each slug's damage halved so the damage per second holds;
-- the Anchor hits about 1.8x a point-blank volley (25 vs 7 x 2 = 14), stuns about 1.1s (the footage shows 1.2-1.4s);
+- the gun fires every 0.5s (the footage and card), with each slug's damage cut so the damage per second holds (3.5 a slug since the 11-24 owner change, 2 before);
+- the Anchor hits about 1.0x a point-blank volley (25 vs 7 x 3.5 = 24.5; 1.8x before 11-24, the footage's ratio is 1.8x), stuns about 1.1s (the footage shows 1.2-1.4s);
 - cooldowns keep the source's order and ratios: Deep Reach 12s : Anchor 7s : Barge 5s per charge (3 charges at 10s, chained a beat apart).
 
 ## Per-slot table
@@ -85,16 +85,16 @@ at a dummy, asserted in `tools/dredge_gun_range_check.gd` ("gun range ..."):
 
 | Range | 6 degree volley | Why |
 |---|---|---|
-| 2 m | 7 of 7, 14.0 | the group is about 0.2 m across |
-| 5.5 m | 7 of 7, 14.0 | about 0.5 m across, inside the dummy's reach |
-| 5.8 m (inside the stop range) | 7 of 7, 14.0 | the same: nothing is lost to distance |
+| 2 m | 7 of 7, 24.5 | the group is about 0.2 m across |
+| 5.5 m | 7 of 7, 24.5 | about 0.5 m across, inside the dummy's reach |
+| 5.8 m (inside the stop range) | 7 of 7, 24.5 | the same: nothing is lost to distance |
 
-Grimble LMB line and group (ext/grimble-lmb-line-1118, owner 11-17): one aim line instead of the two cone edges, and all 7 slugs in a 6 degree group (was 10 degrees waited, up to 30 with bloom). The bloom is gone (`bloom_*` removed from `shotgun.json`, the rank 3 "a dash resets the spread" with it), so every volley is tight and every slug shreds armor (it was the waited volley only). Slugs, damage per slug and the 0.5 s rate are unchanged; the reliable total at range goes up: a fired-in-a-row volley at 5.5 m landed 3 of 7 (8.9), now 7 of 7 (14.0), so held fire is up to 57% stronger at range. Owner decides the balance.
+Grimble LMB line and group (ext/grimble-lmb-line-1118, owner 11-17): one aim line instead of the two cone edges, and all 7 slugs in a 6 degree group (was 10 degrees waited, up to 30 with bloom). The bloom is gone (`bloom_*` removed from `shotgun.json`, the rank 3 "a dash resets the spread" with it), so every volley is tight and every slug shreds armor (it was the waited volley only). Slugs, damage per slug and the 0.5 s rate are unchanged; the reliable total at range goes up: a fired-in-a-row volley at 5.5 m landed 3 of 7 (8.9), now 7 of 7 (14.0), so held fire is up to 57% stronger at range. Owner decides the balance. Pellet 2 -> 3.5 on 11-24 (`8495f5a6b8`, owner playtest: hard to do damage): a volley is 24.5, which is the footage's 193 x 0.13 (source hero 1531 HP against our 193), so the gun now matches the source in absolute terms; the Anchor (25) and Broadside (48) stayed on the old ratios and sit at 1.0x and 2.0x the gun against the footage's 1.8x (349 against 193) and 3.9x. Left for the owner.
 
 Earlier, Grimble LMB vs the source (ext/grimble-lmb-sv-1117): the firing fan was 45 (bloom 24 to +35), now the footage's 30 (bloom 20 to +20; rest stays the owner's 10); the bloom drew in at 150 degrees/s, now 90 so it still takes about a quarter second; the slugs started on a ring 0.6 m round his chest at 1.2 m up, now all from one muzzle point 0.25 m ahead at 0.85 m (the hip blunderbuss; the muzzle flash is the same point); the slugs stopped 6.7 m from his body, now 6.1 (the footage's 6.3). Unchanged, matching: 7 slugs, 0.5 s rate, no ammo or reload, no range falloff, firing walk 0.8.
 
 Earlier: the fan was 30 at rest and 45 at full bloom; the footage rests at 20 and blooms to 30 (no owner note), so `fan_deg` 20,
-`bloom_max_deg` 10 (the volleys after the aimed first one). Not fixed, for the owner: Brass Broadside's slugs (6 a wave, 4 each, no falloff) hit 3.4x a gun volley
+`bloom_max_deg` 10 (the volleys after the aimed first one). Not fixed, for the owner: Brass Broadside's slugs (6 a wave, 4 each, no falloff) hit 2.0x a gun volley (3.4x until the 11-24 pellet 2 -> 3.5)
 where the footage reads about 3.9x (756 against 193); the burst cap above holds them down, and its fan is 105 against the footage's 100-120.
 
 ## Footage gaps, Nov 9 re-check
@@ -139,7 +139,7 @@ gives no reel numbers, so the speeds come from the footage.
 | Reel time | [W] until it arrives or 3 s; [F] a 5 bh catch takes about 1.0 s | 0.92 s for a 9 m catch, 3 s at most | "reel parity: a 5 bh catch arrives in about 1 s" |
 | Where it stops | [F] 0130: adjacent, in front of him | `rmb.stop_gap` 0.1 m of air between the bodies, on the reel line (1.5 m centre to centre, 0.63 m of air) | "reel parity: the body stops adjacent ...", "... in front of him ..." |
 | The foe while reeled | [F] 0127, 0147: STUNNED the whole pull | stunned (0.2 s kept on each step): no jump, dash, cast or shot | "reel parity: the foe is stunned the whole reel ..." |
-| The foe on arrival | [D] no landing rule; [W] "briefly Grounded upon reaching him" | data wins: not Grounded, the stun's 0.2 s tail runs out | "reel parity: he arrives stunned, not Grounded ...", "... and acts again after it" |
+| The foe on arrival | [D] no landing rule; [W] "briefly Grounded upon reaching him" | the wiki wins (owner rule 11-27, the reference is right): Grounded for `arrive_ground` 0.9 s, no stun after the reel | "reel parity: he lands Grounded ...", "... and is free again after it" |
 | Grimble while reeling | [W] only the dash and air dash; [F] GROUNDED, chain ring, braced side-on; [O] item 31 and the Nov 3 audit: a 20% shuffle | gun, RMB, E and X locked; no jump or glide; the barge works; 20% shuffle that swings the body; no cancel (no source shows one) | "reel parity: Grimble can't jump or start the X ...", "reel: ... denied", "reel: the barge still works", "reel audit: ..." |
 | A miss | [D] the cooldown cut is on an enemy hit only (rank IV -50%; [W] says -33%, data wins) | the whole cooldown, even at rank 3; the arm flies 11.5 m in 0.51 s (a 20% walk, height held), snaps back in 0.14 s, walk and gun back at once | "miss: the whole cooldown is spent ...", "miss: his walk and the gun are back ..." |
 
@@ -278,7 +278,7 @@ Measured by casting every slot at 2 m (rising from a jump), at 9 m (falling) and
 | Fire a burst, pause briefly, part-way, then 1s | volley 1 a tight 7-slug cluster, 2-3 fanned wider; after 0.3s off still fanned; after 0.65s part-way; after 1s the tight cluster again, all 7 landing on a foe 5.5m ahead | "gun: a waited volley is all seven slugs packed in a tight cluster on the aim line, not one slug"; "gun: firing again at once fans the slugs wide"; "gun: a short pause keeps the fan wide"; "gun: holding off past the fire rate draws the fan in part-way (no snap)"; "gun: after a longer pause the volley is the tight cluster again"; "gun: every slug of a waited cluster lands on a foe 5.5m ahead" (`tools/dredge_gun_check.gd`) |
 | Hold the gun | a shot every 0.5s, the spread's edge lines out to 6.3m, the body rocks back; idle, the tight cone; the lines glide per frame | "gun: a shot every half second"; "gun: the spread's edge lines lie on the ground out to the slug range"; "gun: each shot rocks the body back (dr_shot)"; "gun: idle, the edge lines close in on the tight cluster"; "aimer: after a shot the fan widens over frames, no jump"; "aimer: the glide is the same at 60 and 240 frames a second"; "aimer: the edge lines start at the drawn body and point at this frame's aim" |
 | Deep Reach hit | reel begins; you are Grounded, they are stunned; the stretched arm shows | "abyssal hand: hooks the first foe, reel begins"; "reel: Grimble is Grounded while he reels, the foe is stunned"; "reel: the stretched arm is drawn (through rocks)" |
-| Wait for the arrival | foe lands at your feet (not Grounded); your Grounded ends | "abyssal hand: foe arrives at your feet and does not land Grounded"; "reel: Grimble's own Grounded ends with the reel" |
+| Wait for the arrival | foe lands at your feet Grounded (no jump, dash or glide) for 0.9 s, not stunned; your Grounded ends | "reel parity: he lands Grounded"; "reel: Grimble's own Grounded ends with the reel" |
 | During the reel: RMB, E, the gun | denied (only the barge works); an E on a foe is not cast in the reel, it waits and goes on the arrival (tester 11-19) | "reel: a second Deep Reach is denied"; "reel: E is not cast while reeling (it waits for the arrival)"; "reel: the gun is locked" |
 | Hook into slam (tester 11-19: "hook into slam doesn't hit") | E pressed mid-reel: the Anchor Drop starts the frame the foe arrives, locked onto it, and he stands planted through its 0.38 s wind-up; any Anchor's forward hop stops once a foe in the cone is level with his front (with a move key held, the hop shoved him round the hauled foe and the locked cone swung off it: 6 damage, the slam missed) | `--tester-feedback-check` "grimble: hook, mid-reel E / mid-reel E, strafing / E after, strafing" |
 | During the reel: barge | works; the reel continues | "reel: the barge still works" |
