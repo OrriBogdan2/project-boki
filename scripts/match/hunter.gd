@@ -2049,8 +2049,10 @@ func _update_glide(dt: float) -> void:
 	_glide_armed = (_glide_armed or (btn_down and not _glide_btn_held)) and held and not grounded
 	if not _glide_armed:
 		_press_in_dash = false
-	elif _glide_press_t == 0.0:
-		_press_in_dash = _in_dash_press()      # (11-27) the press's own moment, not the 0.4 s later when it opens
+	elif _glide_press_t <= dt:
+		# the press's own moment (this step and the next: a Shift on the same frame starts its dash after this
+		# update), not the 0.4 s later when it opens
+		_press_in_dash = _press_in_dash or _in_dash_press()
 	_glide_press_t = _glide_press_t + dt if _glide_armed else 0.0
 	var want: bool = held or auto_glide or (_glide_armed and not gliding)
 	_glide_btn_held = btn_down
