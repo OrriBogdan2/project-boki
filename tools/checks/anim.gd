@@ -15,6 +15,7 @@ const CHECKS := {
 	"--stretch-7-check": ["res://tools/stretch_check.gd", "stretch_check", "gil"],
 	# GPU: posed hunter clip frames, --geo-dir= --shots-dir=
 	"--geo-shots": ["res://tools/geo_shots.gd", "geo_shots", null],
+	"--empty-3d-shots": ["res://tools/empty_3d_shots.gd", "empty_3d_shots", null],  # GPU: the Empty's 3D models
 	"--native-upper-shots": ["res://tools/native_upper_shots.gd", "native_upper_shots", null],
 	"--warden-native-check": ["res://tools/warden_native_check.gd", "warden_native_check", null],  # Meshy skeleton
 	"--native-springs-shots": ["res://tools/native_springs_shots.gd", "native_springs_shots", null],
