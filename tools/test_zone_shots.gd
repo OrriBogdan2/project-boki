@@ -29,7 +29,7 @@ static func groups(m: Match) -> Dictionary:
 		layers.append(m.hud)
 	for layer: CanvasLayer in layers:
 		if layer == m.arena.menu_layer:
-			continue      # the L menu is a modal on a dimmed screen: it is drawn over the HUD on purpose
+			continue  # the L menu is a modal on a dimmed screen: it is drawn over the HUD on purpose
 		var found := SafeArea.groups_of(layer, sz)
 		for g: String in found:
 			out["%s/%s" % [layer.name, g]] = found[g]
@@ -42,7 +42,9 @@ static func groups(m: Match) -> Dictionary:
 ## "<a> overlaps <b>" lines for the groups, and each group that sits on your Hunter.
 static func overlaps(m: Match) -> Array:
 	var gs := groups(m)
-	var found: Array = SafeArea.problems(gs, Vector2(m.hud.c.size)).filter(func(p): return " overlaps " in String(p))
+	var found: Array = SafeArea.problems(gs, Vector2(m.hud.c.size)).filter(
+		func(p): return " overlaps " in String(p)
+	)
 	var zone := HunterZone.rect(m)
 	for g: String in gs:
 		for r: Rect2 in gs[g]:
@@ -119,7 +121,7 @@ func _zone(size: Vector2i) -> void:
 		if i % 30 == 0:
 			dm.hurt(80.0, m.player)
 	await _stage(m, "fight", size)
-	if m.arena.has_method("set_tools"):      # (the old Test Zone had no such switch: its tools were always on)
+	if m.arena.has_method("set_tools"):  # (the old Test Zone had no such switch: its tools were always on)
 		m.arena.set_tools(true)
 	await _stage(m, "tools", size)
 	m.arena.open_menu()
@@ -132,7 +134,12 @@ func _zone(size: Vector2i) -> void:
 func _stage(m: Match, stage: String, size: Vector2i) -> void:
 	var found: Array = await judge(main.get_tree(), m)
 	var tag := "%s %dx%d" % [stage, size.x, size.y]
-	print("TZSHOT %s: %d overlaps (window %s, HUD %s)" % [tag, found.size(), main.get_window().size, m.hud.c.size])
+	print(
+		(
+			"TZSHOT %s: %d overlaps (window %s, HUD %s)"
+			% [tag, found.size(), main.get_window().size, m.hud.c.size]
+		)
+	)
 	for f in found:
 		print("TZSHOT   %s | %s" % [tag, f])
 	if dir != "":
