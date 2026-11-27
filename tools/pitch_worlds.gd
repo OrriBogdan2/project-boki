@@ -68,6 +68,7 @@ const CAST := {
 ## bubble; the Hunter follows (never nearer than STOP_M), presses E, and it walks onto the pad and blinks out.
 ## (r10: the Boki was pinned to its staged spot and the Hunter landed on the pad, so nothing moved.)
 const ASK_BACK := 9.0  # m up-view of the pad the Hunter starts (the pad is straight ahead in the view)
+const ASK_BACKS := [9.0, 7.5, 10.5, 6.0]  # m up-view tried, in order, until the view there is level
 const ASK_BESIDE := 2.6  # m left of the asking Boki the Hunter walks (the view sees both, side by side)
 const ASK_SIDE := [0.0, 2.0, -2.0, 4.0, -4.0]  # m sideways tried until the walk to the pad clears every tree
 ## Up to three of the zone's Boki stand in an open arc ahead of the Hunter, clear of every prop; the others are out of the
@@ -208,19 +209,37 @@ func ask_take() -> void:
 	var fwd2 := Vector2(0.0, -1.0).rotated(h.cam.yaw)
 	var fwd := Vector3(fwd2.x, 0.0, fwd2.y)
 	var right := Vector3(-fwd.z, 0.0, fwd.x)
-	var start := pad - fwd * ASK_BACK
-	for dx in ASK_SIDE:
-		var cand: Vector3 = h.world.free_spot_near(pad - fwd * ASK_BACK + right * dx, [], 1.2, 0.9)
-		if _trees_clear(cand, [pad]):
-			start = cand
-			print("PITCH ask side=%.1f" % dx)
-			break
+	var sg := 1.0  # the Hunter walks on the side of Skateron that ends further from a prop (the Expeditions ring)
+	var props := _props()
+	var room := [99.0, 99.0]
+	for i in 2:
+		var end: Vector3 = pad - right * ASK_BESIDE * (1.0 - 2.0 * i)
+		for q in props:
+			room[i] = minf(room[i], Vector2(end.x - q.x, end.z - q.z).length())
+	if room[1] > room[0]:
+		sg = -1.0
 	_pins.clear()  # Skateron walks (every other Boki is out of the film)
 	_show.clear()
 	_show.append(k["node"])
+	var start := pad - fwd * ASK_BACK
+	var found := false
+	for back in ASK_BACKS:  # the first start whose view is level (a wall behind it tips the view top-down)
+		for dx in ASK_SIDE:
+			var cand: Vector3 = h.world.free_spot_near(pad - fwd * back + right * dx, [], 1.2, 0.9)
+			if not _trees_clear(cand, [pad]):
+				continue
+			_place(cand)
+			await _wait(0.5)
+			if h.farm_cam.tip < 0.05:
+				start = cand
+				found = true
+				print("PITCH ask start back=%.1f side=%.1f walk_side=%.0f" % [back, dx, sg])
+				break
+		if found:
+			break
 	_place(start)
 	var at: Vector3 = h.world.free_spot_near(
-		start + (pad - start).normalized() * 3.6 + right * 1.2, [], 1.2, 0.9
+		start + (pad - start).normalized() * 3.6 + right * 1.2 * sg, [], 1.2, 0.9
 	)
 	k.erase("job")
 	k["pos"] = at
@@ -244,7 +263,7 @@ func ask_take() -> void:
 		var p3: Vector3 = (k["node"] as Node3D).global_position
 		var off := Vector2(p3.x - h.ppos.x, p3.z - h.ppos.z)
 		var to := Vector2(
-			p3.x - right.x * ASK_BESIDE - h.ppos.x, p3.z - right.z * ASK_BESIDE - h.ppos.z
+			p3.x - right.x * ASK_BESIDE * sg - h.ppos.x, p3.z - right.z * ASK_BESIDE * sg - h.ppos.z
 		)
 		var go := to.length() > 0.6 and off.length() > MIN_GAP_M + 0.3
 		_keys(to.normalized().rotated(h.cam.yaw) if go else Vector2.ZERO)
