@@ -2707,10 +2707,10 @@ func _anim_state(stretch: float) -> void:
 	else:
 		s.erase("air_h")
 
-## (movefeel) Hunters are drawn a little larger in a match so they read on screen (owner: SUPERVIVE's
-## heroes "feel more important"), times the camera style's hunter_scale. Visual only: the hitbox (r),
+## (movefeel) Hunters are drawn a little larger in a match so they read on screen (1.12 times
+## camera.json match_hunter_scale), times the camera style's hunter_scale. Visual only: the hitbox (r),
 ## the TeamRing hit circle under your feet, shot heights and the balloon marker are unchanged.
-const VIS_SCALE := 1.12
+static var VIS_SCALE: float = 1.12 * CamRig.match_hunter_scale  # base 1.12 x camera.json match_hunter_scale
 var vis_k := 1.0       # the scale fit_scale last put on this model
 func set_model(n: Node3D) -> void:
 	super.set_model(n)
@@ -2865,4 +2865,4 @@ func render(delta: float, alpha: float) -> void:
 		vuln_fx_t -= delta
 		if vuln_fx_t <= 0.0:
 			vuln_fx_t = 0.22
-			m.fx.burst(pos + Vector3(0, 2.05, 0), Color("ff6a4a"), 3, 1.2, 0.3, -1.0, 0.8)
+			m.fx.burst(pos + Vector3(0, 2.05 * CamRig.match_hunter_scale, 0), Color("ff6a4a"), 3, 1.2, 0.3, -1.0, 0.8)
