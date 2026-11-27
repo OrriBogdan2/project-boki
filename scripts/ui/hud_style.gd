@@ -44,15 +44,15 @@ const ITALIC_SLANT := 0.22  # glyph x shift per unit of height: BIG leaned into 
 const HP_PER_SEG := 17.0  # health per segment: classes (124, 145, 193) read 8, 9, 12 segments (source: 8-12)
 const MAX_SEGS := 12  # more than this and each segment doubles (stays readable on huge pools)
 const SEG_GAP := 2.0  # px between segments
-const PLATE_W := 76.0  # overhead health bar width (rivals and allies); was 100
-const PLATE_W_SELF := 108.0  # your own overhead bar
+const PLATE_W := 96.0  # overhead bar width: framed, 100 px of the 1280 canvas = 7.8% (the reference's ~150 px)
+const PLATE_W_SELF := 96.0  # your own overhead bar: the same width as everyone's, as in the reference
 const PLATE_HP_H := 9.0  # overhead health bar height
 const PLATE_AR_H := 3.0  # overhead armour strip under it
 const PLATE_PAD := 2.0  # frame around the bars
 const PLATE_NAME_FS := 13
-## Where the row of small icons under a plate starts, below the plate's anchor point (the
-## loadout icons go here): the bars end at +PLATE_HP_H + PLATE_AR_H + pads, then the dash pips.
-const PLATE_ICON_ROW := 22.0
+## Where the row of small icons over a plate starts, from the plate's anchor point (the loadout icons go here): over
+## the name (its 13 px sit from -19 to -6), so nothing hangs between the plate and the head under it.
+const PLATE_ICON_ROW := -38.0
 const SLOT_RAD := 9  # ability slot corner radius
 const KEY_FS := 12  # key label size
 ## The one screen-edge margin: the share of the window's width and height kept clear on every side
@@ -98,6 +98,24 @@ static func role_col(viewer: Hunter, h: Hunter) -> Color:
 	if viewer == null or h == viewer:
 		return SideColor.you()
 	return SideColor.ally() if h.team == viewer.team else SideColor.foe()
+
+
+## The overhead plates' health colour for a role: yours and your squad's yellow, rivals' their red (the reference's
+## plates). A colour-vision palette with no "plate_mate" keeps its own you / ally colours there.
+static func plate_fill(role: Color) -> Color:
+	if role == SideColor.foe():
+		return role
+	return SideColor.palette().get("plate_mate", role)
+
+
+## A whole number with thousands commas, as the reference's health reads ("1,844").
+static func num(n: int) -> String:
+	var s := str(absi(n))
+	var out := ""
+	while s.length() > 3:
+		out = "," + s.right(3) + out
+		s = s.left(s.length() - 3)
+	return ("-" if n < 0 else "") + s + out
 
 
 ## Health fill for a role at a fraction of max: yours and allies' warm toward LOW under half, and

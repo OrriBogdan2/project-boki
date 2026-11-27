@@ -255,9 +255,9 @@ const T := {
 	"view_across_m":
 	[
 		"~",
-		[22.0, 25.0],
+		[34.0, 34.4],
 		"m",
-		"ground across a 16:9 screen at the focus (camcal: ~17 hunter silhouettes across, as in gameplay frames)"
+		"ground across 16:9 at the focus, the match's start notch (reference: 30.2 m arm, 59 deg lens, 34.2)"
 	],
 	# (the reference body is the plain medium hunter since Vex took her own proportions: at the same camera it
 	# measures 6.56% where the old reference, the default medium Warden at plain size, measured 6.07%, so the
@@ -2773,7 +2773,7 @@ func _screen_scale() -> void:
 			% [rad_to_deg(cam.pitch), cam.dist, cam.fov, int(vw), int(vh), ref.scale.y, now[2]]
 		)
 	)
-	rec("view_across_m", 2.0 * cam.dist * tan(hfov * 0.5))
+	rec("view_across_m", 2.0 * cam.dist * CamWheel.far(true) * tan(hfov * 0.5))  # the match starts at the widest notch
 	rec("hunter_screen_pct", now[1] / h16 * 100.0)
 	rec("hunter_feet_below_pct", (float(now[3]) - vh * 0.5) / h16 * 100.0)
 	for id in FRAME_HEROES:
@@ -2804,13 +2804,13 @@ func _screen_scale() -> void:
 	ref.free()
 	cam.dist = d0
 	cam.snap(p_v.pos)
-	_source_scale(cam, vh, hfov)
+	_source_scale(cam, vh)
 
 
 ## The same measures under the source_scale test style (content/rules/camera.json, off by default): the
 ## source's ground across and its Hunter size together, then back to the reference style. The MFEEL source
 ## line is the bigger body against what keeps its size (docs/MOVEMENT_FEEL.md "Source scale flag").
-func _source_scale(cam: CamRig, vh: float, hfov: float) -> void:
+func _source_scale(cam: CamRig, vh: float) -> void:
 	cam.use_style("source_scale")
 	p_v.render(DT, 1.0)  # Hunter.fit_scale picks the style's hunter_scale up
 	cam.snap(p_v.pos)
@@ -2818,6 +2818,7 @@ func _source_scale(cam: CamRig, vh: float, hfov: float) -> void:
 		cam.follow(p_v.position, DT, false)
 	var ref := _stand_in("", MantleLook.at_home(PlayerLook.neutral()))
 	var now := _model_span(cam, ref)
+	var hfov := 2.0 * atan(tan(deg_to_rad(cam.lens) * 0.5) * CamRig.frame_aspect)  # its own lens (not the default)
 	rec("source_view_across_m", 2.0 * cam.dist * tan(hfov * 0.5))
 	# (shares of a 16:9 screen's height, as the reference rows above: the window here is not 16:9)
 	var h16 := vh * tan(deg_to_rad(cam.lens) * 0.5) / tan(deg_to_rad(cam.fov) * 0.5)

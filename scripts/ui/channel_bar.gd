@@ -50,7 +50,7 @@ static func draw(h_v, sz: Vector2, p: Hunter) -> void:
 	var frac := clampf(left / total, 0.0, 1.0)
 	shown[from.nid] = {"left": left, "frac": frac}
 	var o: Vector2 = h_v._hud_origin(sz)
-	var y: float = o.y + h_v.HUD_PORTRAIT.y + 3.0
+	var y: float = o.y + h_v.HUD_PORTRAIT.y + HudVitals.VITALS_H + 3.0
 	h_v._draw_portrait(Rect2(Vector2(o.x, y - 4.0), Vector2(ICON, ICON)), from, "", COL)
 	var bar := Rect2(Vector2(o.x + ICON + 8.0, y), Vector2(HudVitals.BAR_W + h_v.HUD_PORTRAIT.x - ICON - 8.0, BAR_H))
 	h_v._rounded(bar.grow(2.0), HudStyle.SHADE, 4)

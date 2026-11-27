@@ -371,9 +371,10 @@ func _draw_world_labels() -> void:
 			continue
 		if cam.is_position_behind(h.position) or LabelCull.ride_skip(h):
 			continue
-		var sp := LabelCull.at(self, _head(h, HudPlate.up(h, HudPlate.plate_offset(h))))
+		var sp := LabelCull.at(self, _head(h, HudPlate.plate_offset(h)))
 		if not sp.is_finite():
 			continue
+		sp = HudPlate.screen_at(cam, h, HudPlate.plate_offset(h))
 		LabelCull.mark(h)
 		LabelClash.claim(sp, LabelClash.PLATE)
 		_nameplate(sp, h)
@@ -995,12 +996,12 @@ func _hud_tick(delta: float) -> void:
 	kit_fade = move_toward(kit_fade, 0.0 if hide_kit else 1.0, delta / KIT_FADE_S)
 	dmg_dir.tick(delta)
 
-## The bottom-left cluster (HudVitals draws the portrait and bars; the ability row sits under them).
-const HUD_PORTRAIT := Vector2(112, 132)
-const HUD_REACH := 16.0      # px the level coin and the name line reach past the portrait (left and below)
+## The bottom-left cluster (HudVitals draws the portrait and bars under it; the ability row sits right of the bars).
+const HUD_PORTRAIT := Vector2(80, 92)  # px: about the reference bust (130 x 150 of 1920 x 1080)
+const HUD_REACH := 16.0      # px the level coin and the kin card reach past the portrait on the left
 func _hud_origin(sz: Vector2) -> Vector2:
 	var pad := HudStyle.safe_pad(sz)
-	return Vector2(pad.x + HUD_REACH, sz.y - pad.y - HUD_REACH - HUD_PORTRAIT.y)
+	return Vector2(pad.x + HUD_REACH, sz.y - pad.y - HUD_PORTRAIT.y - HudVitals.VITALS_H)
 
 var lvl_pop := 0.0
 var lvl_seen := -1
@@ -1082,8 +1083,8 @@ func _draw_abilities(sz: Vector2, p: Hunter) -> void:
 	var o := _hud_origin(sz)
 	var s := 50.0
 	var gap := 10.0
-	var x := o.x + HUD_PORTRAIT.x + 16.0
-	var y := o.y + 66.0
+	var x := o.x + HudVitals.BAR_W + 16.0
+	var y := o.y + HudVitals.VITALS_H + 22.0
 	var k: Kin = p.kin
 	var util: AbilityDef = p.runner.def_of("utility") if p.runner else null
 	# right click: the weapon's ability
@@ -1118,8 +1119,8 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 	var o := _hud_origin(sz)
 	var s := 50.0
 	var gap := 10.0
-	var x := o.x + HUD_PORTRAIT.x + 16.0
-	var y := o.y + 74.0
+	var x := o.x + HudVitals.BAR_W + 16.0
+	var y := o.y + HudVitals.VITALS_H + 30.0
 	var k: Kin = p.kin
 	var info := p.slot_info("sec")
 	var sr := Rect2(Vector2(x, y), Vector2(s, s))
@@ -1706,10 +1707,10 @@ func _head(h: Node3D, up: float) -> Vector3:
 ## Health right above your hunter, where your eyes already are.
 func _draw_overhead(p: Hunter) -> void:
 	var cam := m.cam
-	var at := _head(p, HudPlate.up(p, 2.7 * float(p.cdat["scale"])))
+	var at := _head(p, 2.7 * float(p.cdat["scale"]))
 	if cam.is_position_behind(at) or p.downed or p.riding:
 		return
-	var sp := cam.unproject_position(at)
+	var sp := HudPlate.screen_at(cam, p, 2.7 * float(p.cdat["scale"]))
 	var vr: Rect2 = cam.get_viewport().get_visible_rect().grow(200.0)
 	if not sp.is_finite() or not vr.has_point(sp):
 		return      # off screen, or a degenerate camera (headless, mid-teleport): huge/NaN coords can't triangulate

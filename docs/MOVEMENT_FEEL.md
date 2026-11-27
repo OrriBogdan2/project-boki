@@ -286,7 +286,7 @@ Owner: "still zoomed in too much. Start zoomed out as far as it allows, then the
   - The match (and the practice areas) start, and every respawn (`Match._start_drop`) restart, at the widest wheel view: 1.6x the style's distance, 36.8 m back, about 37 m of ground across (the source's 35-39 m, which the old 23 m view never showed).
   - The wheel steps 0.1 per notch between 0.55 (close) and 1.6; it does nothing while paused, in the map / swap / pack panels, with the hero picker open, or if the player bound the wheel to an action.
   - Holding Ctrl (Sneak, on the ground) eases the view to 1.6 x 1.4 = 2.24x wherever the wheel was left, and back on release, at the camera's usual ease (no pop). The glider and height stack on top but never past the 2.4x cap.
-  - Cost: the pose LOD (`pose_far_m` 40 m) and the far plane (`120 x zoom + 30`) already scale with the view; the check holds the Ctrl view's furthest ground corner inside both. Fog is 0.0015 density (3% at 20 m): the wide view is not fogged out. The sun's shadows reach 60 m from the camera, so at the Ctrl view the top edge of the screen loses its shadows; the wheel's own widest view keeps them.
+  - Cost: the pose LOD (`pose_far_m` 56 m; 40 m before the 35.3° lens, whose Ctrl view reaches 53.9 m) and the far plane (`120 x zoom + 30`) already scale with the view; the check holds the Ctrl view's furthest ground corner inside both. Fog is 0.0015 density (3% at 20 m): the wide view is not fogged out. The sun's shadows reach 60 m from the camera, so at the Ctrl view the top edge of the screen loses its shadows; the wheel's own widest view keeps them.
 
 ## Move pass: wall moves, ledges that answer, a springier abyss (`--wallmove-check`)
 

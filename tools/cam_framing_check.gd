@@ -76,6 +76,11 @@ func _style(cam: CamRig) -> void:
 	var pitch := rad_to_deg(cam.pitch)
 	ok(_inside(pitch, src["pitch_deg"]), "pitch %.1f deg inside the source's %s" % [pitch, str(src["pitch_deg"])])
 	ok(_inside(cam.lens, src["fov_deg"]), "lens %.1f deg inside the source's %s" % [cam.lens, str(src["fov_deg"])])
+	var arm := cam.dist * CamWheel.far(true)  # the match starts at the wheel's widest notch
+	ok(
+		_inside(arm, src["start_arm_m"]),
+		"the match starts %.1f m back, inside the source's %s" % [arm, str(src["start_arm_m"])]
+	)
 	cam.snap(Vector3.ZERO)
 	var feet := (cam.unproject_position(Vector3.ZERO).y - VIEW.y * 0.5) / VIEW.y * 100.0
 	ok(
@@ -119,7 +124,7 @@ func _pan(cam: CamRig) -> void:
 	ok(inside == Vector3.ZERO, "pan: nothing inside the deadzone")
 	var side := cam.cursor_pan(Vector2(VIEW.x, mid.y), Vector3.ZERO)
 	ok(absf(side.x - 5.5) < 0.01 and absf(side.z) < 0.01, "pan: 5.5 m at the right edge (%.2f)" % side.x)
-	cam.zoom = 1.457
+	cam.zoom = CamWheel.far(true)
 	var up := cam.cursor_pan(Vector2(mid.x, 0.0), Vector3.ZERO)
 	var down := cam.cursor_pan(Vector2(mid.x, VIEW.y), Vector3.ZERO)
 	ok(up.z < -6.0 and up.z >= -7.251, "pan: %.2f m up at the top edge (7.25 at most, the screen's room)" % -up.z)

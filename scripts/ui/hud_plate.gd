@@ -13,7 +13,7 @@ extends RefCounted
 ##   name .......................... sp.y - 7
 ##   frame (armour + health) ....... sp.y .. sp.y + PAD*2 + HP_H + 1 + AR_H
 ##   status row (others) ........... right of the frame, on its vertical centre (row, draw_row)
-##   loadout icon row (others) ..... sp.y + HudStyle.PLATE_ICON_ROW and down: left free here
+##   loadout icon row (others) ..... sp.y + HudStyle.PLATE_ICON_ROW, over the name: left free here
 
 const CHIP_HOLD := 0.4  # s the lost chunk stays after the last hit
 const CHIP_DRAIN := 1.6  # of the bar per second once it drains (plus an ease-out)
@@ -40,7 +40,8 @@ const STOPS := ["status_stunned", "status_rooted", "status_grounded"]  # what st
 const RING_KEY := 0.04  # a status ring repaints its plate in steps this big (of its 0..1)
 const MARK_FOR := {"mark_daze": "status_dazed", "fireball": "status_burning"}
 const PLATE_OFFSET := 2.35  # m over the feet where a plate sits unless the archetype sets its own
-const CLEAR_M := 0.6  # m: a plate's 17 px hang and a little air over the model's top (33 px per m up, default camera)
+const HANG := 21.5  # px a plate reaches under its anchor: the 17 px frame and the level badge's 4.5 px under it
+const AIR := 6.0  # px kept clear between a plate's lowest pixel and the head under it (9 px at 1080p)
 
 ## nid -> {chip, hold, frac, armor, flash, brk, down, burst, seen, tot (the status row's ring clocks)}
 var st := {}
@@ -59,15 +60,23 @@ static func plate_offset(h: Hunter) -> float:
 	return float(Arch.def(h.arch).get("plate_offset", PLATE_OFFSET))
 
 
-## `base` m over the feet (before the match's Hunter size, as Hud._head takes it), raised so the plate hangs clear over
-## h's tallest point: back props and horns grow with the drawn size, the plate's size on screen does not.
-static func up(h: Hunter, base: float) -> float:
-	return up_of(h.arch, h.vis_k, base)
+## Where h's plate anchors on screen: `base` m over the feet (before the match's Hunter size, as Hud._head takes it),
+## raised in screen px so the plate's lowest pixel sits AIR px over the model's crown as drawn (top_y).
+static func screen_at(cam: CamRig, h: Hunter, base: float) -> Vector2:
+	var xf := h.model.global_transform if h.model else Transform3D(Basis(), h.position)
+	return screen_at_xf(cam, h.position, xf, h.arch, base)
 
 
-## up() for hunter archetype `arch` drawn at model scale `vis_k`.
-static func up_of(arch: String, vis_k: float, base: float) -> float:
-	return maxf(base, (Arch.top_h(arch) * vis_k + CLEAR_M) / CamRig.match_hunter_scale)
+## screen_at for an `arch` model drawn with transform `xf` over feet at `feet`.
+static func screen_at_xf(cam: CamRig, feet: Vector3, xf: Transform3D, arch: String, base: float) -> Vector2:
+	var sp := cam.unproject_position(feet + cam.char_lean() * Vector3(0, base * CamRig.match_hunter_scale, 0))
+	return Vector2(sp.x, minf(sp.y, top_y(cam, xf, arch) - HANG - AIR))
+
+
+## The screen y of the crown (Arch.crown: the highest point of the head, hair, horns or back prop, in the model's own
+## space) of an `arch` model drawn with transform `xf`: it turns, leans and squashes with the body.
+static func top_y(cam: CamRig, xf: Transform3D, arch: String) -> float:
+	return cam.unproject_position(xf * Arch.crown(arch)).y
 
 
 ## A rival you can see but who is hiding (crouched, or in tall grass or smoke) shows no plate or hover card: you see a
@@ -444,7 +453,8 @@ func _paint_plate(c: CanvasItem, a: Dictionary) -> void:
 	HudStyle.plate_frame(c, frame, Color(role, 0.55), fl)
 	var ar := Rect2(Vector2(x0, sp.y + HudStyle.PLATE_PAD), Vector2(w, HudStyle.PLATE_AR_H))  # armour above health
 	var hr := Rect2(Vector2(x0, ar.end.y + 1.0), Vector2(w, HudStyle.PLATE_HP_H))
-	HudStyle.seg_bar(c, hr, h.hp, h.max_hp, HudStyle.hp_fill(role, frac, m.time), ch, shield_frac(h), fl * 0.6)
+	var fill := HudStyle.hp_fill(HudStyle.plate_fill(role), frac, m.time)
+	HudStyle.seg_bar(c, hr, h.hp, h.max_hp, fill, ch, shield_frac(h), fl * 0.6)
 	var has_ar := _armor(c, h, ar, s)
 	var pop := float(s["lvl_pop"]) / LVL_POP_T
 	level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), h.lvl, role, pop, LevelGap.of(m.player, h))
@@ -525,10 +535,10 @@ func _paint_self(c: CanvasItem, a: Dictionary) -> void:
 	HudStyle.plate_frame(c, frame, Color(SideColor.you(), 0.5), fl)
 	var ar := Rect2(Vector2(x0, sp.y + HudStyle.PLATE_PAD), Vector2(w, HudStyle.PLATE_AR_H))  # armour above health
 	var hr := Rect2(Vector2(x0, ar.end.y + 1.0), Vector2(w, HudStyle.PLATE_HP_H))
-	var fill := HudStyle.hp_fill(SideColor.you(), frac, m.time)
+	var fill := HudStyle.hp_fill(HudStyle.plate_fill(SideColor.you()), frac, m.time)
 	HudStyle.seg_bar(c, hr, p.hp, p.max_hp, fill, ch, shield_frac(p), fl * 0.6)
 	var has_ar := _armor(c, p, ar, s)
-	HudStyle.text(c, Vector2(frame.end.x + 5.0, hr.end.y + 1.0), str(int(ceil(p.hp))), 13, Color(1, 1, 1, 0.92))
+	HudStyle.text(c, Vector2(frame.end.x + 5.0, hr.end.y + 1.0), HudStyle.num(ceili(p.hp)), 13, Color(1, 1, 1, 0.92))
 	var pop := float(s["lvl_pop"]) / LVL_POP_T
 	level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), p.lvl, SideColor.you(), pop)
 	var items: Array = a["row"]

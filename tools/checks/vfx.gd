@@ -18,5 +18,6 @@ const CHECKS := {
 	"--status-edge-check": ["res://tools/status_edge_check.gd", "status_edge_check", "check"],  # edge tint
 	"--status-edge-shots": ["res://tools/status_edge_check.gd", "status_edge_check", "shots"],  # GPU: stills + 4v4 ms
 	"--hunter-scale-shots": ["res://tools/hunter_scale_shots.gd", "hunter_scale_shots", null],  # GPU: match size px
+	"--ref-parity-shots": ["res://tools/ref_parity_shots.gd", "ref_parity_shots", null],  # GPU: match start, measured
 	"--tenzo-stone-shots": ["res://tools/tenzo_stone_shots.gd", "tenzo_stone_shots", null],  # GPU: Tenzo stone stills
 }
