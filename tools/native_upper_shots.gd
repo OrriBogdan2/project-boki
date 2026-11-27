@@ -1,12 +1,33 @@
 extends "res://tools/clip_shots.gd"
-## --native-upper-shots --shots-dir=<dir> [--size=480] [--ids=a,b]: each native Hunter running at 4.6 m/s with a swing
-## pressed 0.3 s in, a side view, a frame every 1/30 s to 1.2 s: <dir>/<id>/f###.png. Needs a renderer.
+## --native-upper-shots --shots-dir=<dir> [--size=480] [--ids=a,b] [--mode=swing|left|right|back] [--view=match|eye]
+## [--zoom=1.0]: each native Hunter
+## running at 4.6 m/s, a frame every 1/30 s to 1.2 s: <dir>/<id>/f###.png. swing: a side view, a swing pressed 0.3 s in.
+## left, right (strafe) and back: aim -Z (up the screen at --view=match, the game's angle), moving -X, +X, +Z. --view=
+## match (default) or eye (a front three-quarter view at eye level). Prints STRIDE <id> <cos>: the median cosine of the
+## lower foot's sweep (against the body) to the way he goes; 1 = the legs step along it, 0 = side-on, -1 = backwards
+## to it. Needs a renderer.
 
 const DT := 1.0 / 30.0
 const PRESS := 0.3  # s into the run the swing starts
 const SECS := 1.2
 const RUN := 4.6  # m/s
 const IDS := ["mage", "juggernaut", "archer", "dredge"]
+## mode -> [velocity, the Hunter's yaw]
+const MODES := {
+	"swing": [Vector3(0, 0, -RUN), 90.0],
+	"left": [Vector3(-RUN, 0, 0), 0.0],
+	"right": [Vector3(RUN, 0, 0), 0.0],
+	"back": [Vector3(0, 0, RUN), 0.0],
+}
+## view -> [fov, the camera, what it looks at]
+const VIEWS := {
+	"swing": [30.0, Vector3(5.0, 1.2, 0.0), Vector3(0, 0.9, 0)],
+	"match": [6.5, Vector3(0.0, 21.0, 9.4), Vector3(0, 0.8, 0)],
+	"eye": [30.0, Vector3(3.0, 1.3, -4.5), Vector3(0, 0.9, 0)],
+}
+var mode := "swing"
+var view := "match"
+var zoom := 1.0  # the lens widens by this much (a tall Hunter)
 
 
 func run(main: Node) -> void:
@@ -18,6 +39,12 @@ func run(main: Node) -> void:
 			out = a.substr(12)
 		if a.begins_with("--size="):
 			frame_px = int(a.substr(7))
+		if a.begins_with("--mode="):
+			mode = a.substr(7)
+		if a.begins_with("--view="):
+			view = a.substr(7)
+		if a.begins_with("--zoom="):
+			zoom = float(a.substr(7))
 		if a.begins_with("--ids="):
 			ids = a.substr(6).split(",")
 	if main.get("fade") != null:
@@ -25,9 +52,10 @@ func run(main: Node) -> void:
 	main.get_window().size = Vector2i(frame_px, frame_px)
 	main.get_viewport().size = Vector2i(frame_px, frame_px)
 	_stage(main)
-	cam.fov = 30.0
-	cam.position = Vector3(5.0, 1.2, 0.0)
-	cam.look_at(Vector3(0, 0.9, 0))
+	var v: Array = VIEWS["swing" if mode == "swing" else view]
+	cam.fov = v[0] * zoom
+	cam.position = v[1]
+	cam.look_at(v[2] + Vector3(0, 0.5 * (zoom - 1.0), 0))
 	for id in ids:
 		await _hunter(String(id), out.path_join(String(id)))
 	print("NATIVE_UPPER_SHOTS_DONE")
@@ -37,25 +65,38 @@ func run(main: Node) -> void:
 func _hunter(id: String, dir: String) -> void:
 	var model := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 	model.set_meta("anim_seed", 1)
-	model.rotation.y = deg_to_rad(90.0)
+	model.rotation.y = deg_to_rad(float(MODES[mode][1]))
 	holder.add_child(model)
 	for k in 30:
 		await tree.process_frame
 	var poser := model.get_node("Warden/Native")
 	poser.set_process(false)
 	DirAccess.make_dir_recursive_absolute(dir)
-	var base := {"grounded": true, "face": model.rotation.y, "cast": 99.0, "vel": Vector3(0, 0, -RUN)}
+	var base := {"grounded": true, "face": model.rotation.y, "cast": 99.0, "vel": MODES[mode][0]}
 	for k in 20:
 		model.set_meta(WardenClips.STATE, base)
 		poser.call("_process", DT)
+	var sk: Skeleton3D = poser.get("skel")
+	var feet := [WardenSkeleton.find(sk, "foot.L"), WardenSkeleton.find(sk, "foot.R")]
+	var prev := []
+	var strides := []
 	for i in int(SECS / DT):
 		var s := base.duplicate()
-		if i * DT >= PRESS:
+		if mode == "swing" and i * DT >= PRESS:
 			s["swing_n"] = 1
 			s["combo"] = 0
 			s["cast"] = 0.0
 		model.set_meta(WardenClips.STATE, s)
 		poser.call("_process", DT)
+		var now := feet.map(func(b: int) -> Vector3: return sk.global_transform * sk.get_bone_global_pose(b).origin)
+		if prev.size() == 2:
+			var lo := 0 if now[0].y < now[1].y else 1
+			var sweep := Vector2(prev[lo].x - now[lo].x, prev[lo].z - now[lo].z)
+			if sweep.length() > 0.002:
+				strides.append(sweep.normalized().dot(Vector2(MODES[mode][0].x, MODES[mode][0].z).normalized()))
+		prev = now
 		await _grab(dir.path_join("f%03d.png" % i))
+	strides.sort()
+	print("STRIDE %s %.2f" % [id, strides[strides.size() / 2]])
 	model.queue_free()
 	await tree.process_frame
