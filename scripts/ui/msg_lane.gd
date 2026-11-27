@@ -1,12 +1,12 @@
 class_name MsgLane
 extends Control
-## The one lane for short messages on screen: toasts, pickups, level-ups, hints and the lines the
+## The one lane for short messages on screen: toasts, pickups, hints and the lines the
 ## tutorial holds back. Every screen has one (the match HUD, the farm, the town, a house; UI.toast finds
 ## or makes it). Messages stack down a fixed column under `top`, so two never sit on top of each other;
 ## a repeat of one on show or waiting merges into it ("Ember  x3"); at most `max_shown` show at once
-## (`max_shown`) and the rest wait, the most important first; each lives a short while (FIGHT_LIFE at most
-## once a fight starts). A low-priority line only shows on an empty lane (never beside another card), is dropped
-## outright in a fight, and is dropped if it waits too long.
+## (FIGHT_SHOWN in a fight, see `fight`) and the rest wait, the most important first; each lives a
+## short while (FIGHT_LIFE at most in a fight). A low-priority line only shows on an empty lane (never
+## beside another card), is dropped outright in a fight, and is dropped if it waits too long.
 ## URGENT is for what a fight needs now (your Boki is down, you are being stomped): it alone passes `hold`
 ## and `fight`; everything else queues until the fight is over and then shows, one row at a time.
 
@@ -21,6 +21,7 @@ const FADE_OUT := 0.35          # s
 const CARD_PAD_X := 12          # px of padding either side of a card's line
 const GAP := 6.0                # px between two cards
 const CLOSE_UP := 12.0          # 1/s: how fast the cards below slide up when one goes
+const TEXT_PX := &"msg_lane_px"  # Label3D meta: [text, font, font size, wrap px, its measured size] (label_rect)
 const WIDE := 0.45              # of the screen width: the widest a card gets before its line wraps
 const FIGHT_SHOWN := 1          # urgent lines on show at most while the player is in a fight
 const FIGHT_LIFE := 2.0         # s: the longest a line already up lives once a fight starts (a hint's own life aside)
@@ -29,8 +30,10 @@ var top := 100.0                ## px from the top of the screen where the colum
 var right_edge := 0.0           ## 0: the column is centred; else its right edge, in px
 var max_w := 0.0                ## px: the widest a card gets (the tutorial's column); 0: WIDE of the screen
 var avoid := Rect2()            ## screen area (the player's hunter, HunterZone) a card never covers: it slides aside
+var keep_off: Array[Rect2] = [] ## other HUD blocks a card slides aside of (the kill feed's rows)
 var fight := false              ## true while the player is in a fight (Hud sets it): only URGENT comes in
 var max_shown := MAX_SHOWN      ## lines on show at once (a match's TopStack sets 1: one card at a time)
+var one_hint := false           ## true: one hint (own-life line) on show at a time (a match's TopStack sets it)
 var hold := false:              ## true: nothing but URGENT comes in (the tutorial banner has the floor)
 	set(v):
 		hold = v
@@ -125,7 +128,14 @@ static func yield_label(lbl: Label3D, cam: Camera3D, rects: Array[Rect2], delta:
 static func label_rect(lbl: Label3D, cam: Camera3D) -> Rect2:
 	var f: Font = lbl.font if lbl.font else ThemeDB.fallback_font
 	var wrap_px := lbl.width if lbl.autowrap_mode != TextServer.AUTOWRAP_OFF else -1.0
-	var px := f.get_multiline_string_size(lbl.text, HORIZONTAL_ALIGNMENT_CENTER, wrap_px, lbl.font_size)
+	# (measured once per text: shaping it again every frame was most of the HUD's label spacing cost)
+	var was: Array = lbl.get_meta(TEXT_PX, [])
+	var px: Vector2
+	if was.size() == 5 and was[0] == lbl.text and was[1] == f and was[2] == lbl.font_size and was[3] == wrap_px:
+		px = was[4]
+	else:
+		px = f.get_multiline_string_size(lbl.text, HORIZONTAL_ALIGNMENT_CENTER, wrap_px, lbl.font_size)
+		lbl.set_meta(TEXT_PX, [lbl.text, f, lbl.font_size, wrap_px, px])
 	var half := px * lbl.pixel_size * lbl.global_basis.get_scale().x * 0.5
 	var b := cam.global_basis
 	var o := lbl.global_position
@@ -152,13 +162,19 @@ func _process(delta: float) -> void:
 
 ## Moves waiting lines onto free rows, the most important first (oldest first within a priority);
 ## while `hold` or `fight` is on only URGENT lines move. `max_shown` is 1 in a match: one card at a time
-## (a home or scripted beat's lines still stack two).
+## (a home or scripted beat's lines still stack two). With `one_hint` on, one hint (a line with its own life)
+## at a time: the next waits for it.
 func _promote() -> void:
 	while not _waiting.is_empty() and _shown.size() < (FIGHT_SHOWN if fight else max_shown):
-		var best := 0
+		var hint_up := one_hint and _shown.any(func(e: Dictionary) -> bool: return bool(e["own_life"]))
+		var best := -1
 		for i in _waiting.size():
-			if int(_waiting[i]["prio"]) > int(_waiting[best]["prio"]):
+			if hint_up and bool(_waiting[i]["own_life"]):
+				continue
+			if best < 0 or int(_waiting[i]["prio"]) > int(_waiting[best]["prio"]):
 				best = i
+		if best < 0:
+			return
 		if (hold or fight) and int(_waiting[best]["prio"]) < URGENT:
 			return
 		if int(_waiting[best]["prio"]) == LOW and not _shown.is_empty():
@@ -184,6 +200,8 @@ func _layout(delta: float) -> void:
 		e["placed"] = true
 		y = maxf(y, above + GAP)
 		x += HunterZone.slide(Rect2(Vector2(x, y), box.size), avoid)
+		for r: Rect2 in keep_off:
+			x += HunterZone.slide(Rect2(Vector2(x, y), box.size), r)
 		box.position = Vector2(x, y)
 		above = y + box.size.y
 		want += box.size.y + GAP

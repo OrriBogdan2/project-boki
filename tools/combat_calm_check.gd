@@ -1,11 +1,11 @@
 extends RefCounted
 ## --combat-calm-check: the combat HUD stays calm. Hit or hitting back: toasts and hints queue and
 ## only an urgent line shows; once 3 s pass without a hit they show one at a time, under the top row, never in
-## the centre 40% of the screen or over the hunter. A level-up skips its gold wash in a fight and its line
-## waits; the "Spend point" word on a locked slot waits too (a draw path, not asserted). Never touches the save.
+## the centre 40% of the screen or over the hunter; a rival's name shows only under the mouse; the world
+## hover card stays shut in a fight. Never touches the save.
 
-const CENTRE := 0.4      # of the screen's width and height: the middle nothing pops into
-const QUIET_S := 3.1     # s without a hit that end a fight (Hud.MSG_FIGHT_S is 3)
+const CENTRE := 0.4  # of the screen's width and height: the middle nothing pops into
+const QUIET_S := 3.1  # s without a hit that end a fight (Hud.MSG_FIGHT_S is 3)
 
 var bad := 0
 var main: Node
@@ -29,7 +29,9 @@ func run(main_node: Node) -> void:
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
 	_lane(m)
-	_level_up(m)
+	await _level_card(m)
+	_names(m)
+	_hover_card(m)
 	m.queue_free()
 	print("CALM DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -71,21 +73,36 @@ func _lane(m: Match) -> void:
 	lane.clear()
 
 
-func _level_up(m: Match) -> void:
-	var lane: MsgLane = m.hud.msgs
-	lane.clear()
-	m.hud.flash_t = 0.0
+func _level_card(m: Match) -> void:
 	m.player.hurt_at = m.time
-	m.hud._place_msgs()
 	m.hud.level_up(2, {})
-	lane._process(0.1)
-	ok(m.hud.flash_t == 0.0, "a level-up in a fight: no gold wash (%.2f)" % m.hud.flash_t)
-	ok(lane.texts().is_empty() and lane.waiting() == 1, "... and its line waits (%s)" % str(lane.texts()))
+	for i in 30:
+		await main.get_tree().process_frame
+	var cue: LevelUpCue = m.hud.lvl_cue
+	ok(cue.t == LevelUpCue.LIFE, "the level-up card waits while you fight (%.2f s left)" % cue.t)
 	m.time += QUIET_S
-	m.hud._place_msgs()
-	lane._process(0.1)
-	var up := lane.texts()
-	ok(up.size() == 1 and String(up[0]).begins_with("LEVEL 2"), "it shows once quiet (%s)" % str(up))
-	m.hud.level_up(4, {})
-	ok(m.hud.flash_t > 0.0, "out of a fight an even level still washes gold")
-	lane.clear()
+	for i in 30:
+		await main.get_tree().process_frame
+	ok(cue.t < LevelUpCue.LIFE, "... and runs once it is quiet (%.2f s left)" % cue.t)
+
+
+func _names(m: Match) -> void:
+	var foe: Hunter = m.hunters.filter(func(h): return h.team != m.player.team)[0]
+	foe.pos = m.player.pos + Vector3(3, 0, 0)  # well inside the old 9 m "close enough to read" range
+	var far: Vector2 = m.hud.c.size * 0.9
+	ok(not m.hud._np_show_name(far, foe), "a rival's name stays hidden with the mouse away, even up close")
+	var near: Vector2 = m.hud.c.get_local_mouse_position()
+	ok(m.hud._np_show_name(near, foe), "... and shows under the mouse")
+	foe.downed = true
+	ok(m.hud._np_show_name(far, foe), "a downed rival's plate still says who")
+	foe.downed = false
+
+
+func _hover_card(m: Match) -> void:
+	var hv: HudHover = m.hud.hover
+	hv._wh_still = 1.0  # the cursor has rested long enough
+	m.player.hurt_at = m.time
+	ok(hv.world_tip_waits(), "the world hover card stays shut in a fight, even with the cursor resting")
+	m.time += QUIET_S
+	hv._wh_still = 1.0
+	ok(Record.clean() or not hv.world_tip_waits(), "... and opens again once it is quiet")

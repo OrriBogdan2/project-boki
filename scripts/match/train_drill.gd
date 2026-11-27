@@ -3,9 +3,10 @@ extends RefCounted
 ## The Training Area checklist (content/rules/training_drill.json), worded with the player's own keys.
 
 
-## [[id, what to do, action], ...]
+## [[id, what to do, action], ...]; no Fusion row (there is no fusion in the game: MergeForm's dev flag only).
 static func rows() -> Array:
-	return Content.rules("training_drill")["rows"]
+	var rows_v: Array = Content.rules("training_drill")["rows"]
+	return rows_v.filter(func(t): return String(t[2]) != "ultimate" or MergeForm.enabled())
 
 
 ## A row's line: "{key}" is the cap of the row's own action (Settings.key_cap), so a rebind shows.
