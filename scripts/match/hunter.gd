@@ -852,7 +852,8 @@ func can_glide() -> bool:
 ## A press just after the dash (DashGlide.fresh) counts as one in it, past the kit's wind-down (decision 0061).
 ## A glide press made in an air dash, or inside its grace after it, counts as a press in the dash.
 func _in_dash_press() -> bool:
-	return (roll_t > 0.0 and move_kind == "dash") or (roll_t <= 0.0 and dash_glide.fresh(self))
+	return (roll_t > 0.0 and move_kind == "dash") or (ak != null and ak.in_dash()) \
+			or (roll_t <= 0.0 and dash_glide.fresh(self))
 
 func _dash_into_glide() -> bool:
 	if grounded or dropping or downed or shot_down or stun_t > 0.0 or (ak != null and ak.no_glide()) \
@@ -864,6 +865,7 @@ func _dash_into_glide() -> bool:
 		return false
 	roll_t = 0.0
 	glide_cd = 0.0
+	fly_t = 0.0        # (a kit's dash flight, e.g. the hop's tail past its own end, goes with the press)
 	shove = {}
 	if Vector2(vel.x, vel.z).length() > HunterMove.glide_cruise * 1.25:
 		_glide_boost_fx()
