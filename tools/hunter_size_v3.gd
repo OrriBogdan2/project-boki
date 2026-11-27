@@ -1,11 +1,11 @@
 extends "res://tools/hunter_size_sheet.gd"
 ## --hunter-size-v3 --shots-dir=<dir> --k-file=<json {"<arch>": k}> [--hero=a,b] [--verify]: each hunter alone on open
-## floor at the game camera in a 5760x3240 frame, drawn at k 1 (live, <hero>_v3live.png) and at its k from the file
+## floor at the game camera in a 3840x2160 frame, drawn at k 1 (live, <hero>_v3live.png) and at its k from the file
 ## (<hero>_v3new.png). One HFRM row per frame (crown height on screen, px per m, feet px). --verify reads the new-k
 ## body silhouette (HSIL lean rows, 8 facings) so the target on-screen height can be checked.
 ## Needs a renderer (jobq --needs gpu).
 
-const FRAME := Vector2i(5760, 3240)
+const FRAME := Vector2i(3840, 2160)
 const GAME_ZOOM := 1.4572
 
 
