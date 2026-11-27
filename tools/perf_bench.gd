@@ -17,6 +17,10 @@ extends RefCounted
 ##   [--bench-zone=<garden zone id or all>]  adds a "zone_<id>" part per zone: nine Boki out (6 residents,
 ##   the partner, 2 visitors), judged against the budget in content/rules/garden_zones.json ("BENCH budget"
 ##   lines say ok or FAIL, and the run exits 1 on any FAIL); the hub part is judged against the hub budget
+##   [--bench-garden] [--bench-boki=10,20,30]  (only the garden: each --bench-zone zone with each Boki count out, then
+##   the hub; --bench-isolate adds the cost split per zone part; frame p50/p95 per part, docs/GARDEN_PERF.md.
+##   Budget lines are FAIL-checked only at 9 Boki)
+##   [--bench-hub]  (only the hub part, with its budget and draw owners)
 ##   [--bench-fight]  (only the fight worst case instead, tools/perf_fight.gd: three trios, every E and R, a camp)
 ##   [--boki-wisps=on|off]  every Boki rides as a wisp (KinWisp) or walks, whatever the setting says
 ##   [--bench-ab]  (one process, one GPU: the match part as walking pets, wisps, pets again; "BENCH AB" lines)
@@ -84,6 +88,10 @@ var base_secs := 60.0
 var pipes_draw := 0  # pipelines built at draw time so far (the hitch lines print each frame's new ones)
 var out_path := ""
 var zone := ""
+var boki_counts: Array = [BOKI_OUT]  # --bench-boki=a,b,c: Boki out in each garden zone part
+var ui_was: Array = []  # [node, visible] of the screen UI _budget hid (--bench-isolate shows it again)
+var isolate := false  # --bench-isolate: each zone part also gets the cost split (tools/perf/garden_isolate.gd)
+var garden_only := false  # --bench-garden: the zone parts and the hub only
 var tracy_dir := ""
 var hunters := 6
 var trios := 0  # --bench-trios: bot trios in the expedition (0: the usual 6 Hunters in pairs)
@@ -100,7 +108,7 @@ var vp: RID
 
 func run(main_node: Node) -> void:
 	var args := OS.get_cmdline_user_args()
-	if "--bench-probe" in args:      # the two own-setup parts: their window, save and camera, not setup()'s
+	if "--bench-probe" in args:  # the two own-setup parts: their window, save and camera, not setup()'s
 		main_node.add_child(load("res://tests/perf_probe.gd").new())
 		return
 	if "--bench-hunter-gpu" in args:
@@ -118,6 +126,14 @@ func run(main_node: Node) -> void:
 		await _ab()
 		_finish()
 		return
+	if garden_only:
+		await _garden()
+		_finish()
+		return
+	if "--bench-hub" in args:
+		await _farm("hub", {"zone": GardenZones.HUB})
+		_finish()
+		return
 	await _match()
 	await _heart_final()
 	await _farm("farm", {})
@@ -127,7 +143,8 @@ func run(main_node: Node) -> void:
 	if zone == "all":
 		zones = GardenZones.built()
 	for id in zones:
-		await _zone(id)
+		for n in boki_counts:
+			await _zone(id, n)
 	_finish()
 
 
@@ -148,6 +165,12 @@ func setup(main_node: Node) -> void:
 			view = Vector2i(int(wh[0]), int(wh[1]))
 		if a.begins_with("--bench-zone="):
 			zone = a.substr(13)
+		if a.begins_with("--bench-boki="):
+			boki_counts = Array(a.substr(13).split(",")).map(func(x): return int(x))
+		if a == "--bench-isolate":
+			isolate = true
+		if a == "--bench-garden":
+			garden_only = true
 		if a.begins_with("--tracy="):
 			tracy_dir = a.substr(8)
 		if a.begins_with("--bench-hunters="):
@@ -172,14 +195,16 @@ func _finish() -> void:
 	var win := main.get_window()
 	print(
 		(
-			"BENCH quality=%s renderer=%s adapter=%s window=%dx%d 3d_scale=%.2f"
+			"BENCH quality=%s renderer=%s adapter=%s window=%dx%d 3d_scale=%.2f display=%s vsync=%d"
 			% [
 				Settings.quality(),
 				RenderingServer.get_current_rendering_method(),
 				RenderingServer.get_video_adapter_name(),
 				win.size.x,
 				win.size.y,
-				win.scaling_3d_scale
+				win.scaling_3d_scale,
+				DisplayServer.get_name(),
+				DisplayServer.window_get_vsync_mode()
 			]
 		)
 	)
@@ -475,18 +500,31 @@ func _frames(part: String) -> void:
 
 
 ## A garden zone with nine Boki out (GARDEN.md 10.6: 6 residents, the partner, 2 visitors), as a farm part.
-func _zone(id: String) -> void:
+func _zone(id: String, boki := BOKI_OUT) -> void:
 	var nav := NavCheck.new()
 	nav.main = main
 	nav.zone = "" if id == GardenZones.start() else id
 	FarmUnlocks.rules()["base_mode"] = true
 	nav._save()
-	for i in BOKI_OUT - Save.d["roster"].size():
+	for i in boki - Save.d["roster"].size():
 		var rec := Save.new_kin(VISITORS[i % VISITORS.size()], "V%d" % i)
 		Care.ensure(rec)
 		rec["zone"] = id
 		Save.d["roster"].append(rec)
-	await _farm("zone_" + id, {"zone": id})
+	var part := "zone_" + id + ("" if boki == BOKI_OUT else "_b%d" % boki)
+	await _farm(part, {"zone": id})
+	if isolate:
+		await load("res://tools/perf/garden_isolate.gd").new(main).run(part, ui_was)
+
+
+## --bench-garden: every --bench-zone zone with each --bench-boki count out, then the hub (nobody lives there, so
+## its cost does not move with the count: it runs once with the biggest roster saved, all of them in the zone).
+func _garden() -> void:
+	var ids: Array = [zone] if zone != "" and zone != "all" else GardenZones.built()
+	for id in ids:
+		for n in boki_counts:
+			await _zone(id, n)
+	await _farm("hub", {"zone": GardenZones.HUB})
 
 
 ## A part against GARDEN.md 10.6 (the hub against its own column). Draws and objects are the scene itself: the
@@ -500,8 +538,10 @@ func _budget(part: String, fl: Array) -> void:
 		var all := main.get_tree().root.find_children("*", cls, true, false)
 		emit += all.filter(func(n): return n.emitting and n.is_visible_in_tree()).size()
 	var home = main.current
+	ui_was = [[home.root_ui, home.root_ui.visible]]
 	home.root_ui.visible = false
 	for cl in home.find_children("*", "CanvasLayer", true, false):
+		ui_was.append([cl, cl.visible])
 		cl.visible = false
 	for i in 8:
 		await main.get_tree().process_frame
@@ -521,13 +561,16 @@ func _budget(part: String, fl: Array) -> void:
 	print("BENCH %s boki out: %d, draws with the UI: %.0f" % [part, home.kins.size(), _avg(fl, "draws")])
 	var held: Dictionary = GardenZones.rules()["ratchet"].get(Settings.quality(), {}).get(part, {})
 	var bad := false
+	var judged: bool = home.kins.size() <= BOKI_OUT  # a bigger crowd is measured, not judged
 	for k in got:
 		var over: bool = float(got[k]) > float(b[k])
 		var limit: float = float(held.get(k, b[k]))  # a measured ceiling stands in until the target is met
 		var good: bool = float(got[k]) <= limit
-		bad = bad or not good
+		bad = bad or (not good and judged)
 		var verdict := "ok"
-		if not good:
+		if not good and not judged:
+			verdict = "over (%d Boki, not judged)" % home.kins.size()
+		elif not good:
 			verdict = "FAIL (past the held %.1f)" % limit
 		elif over:
 			verdict = "over target, held at %.1f" % limit
@@ -665,6 +708,7 @@ func _frame(part: String, i: int, wall: float, script_ms: float) -> Dictionary:
 		)
 	)
 	return f
+
 
 ## Times the HUD's canvas draw (it redraws every frame) by wrapping its draw callback, as tests/perf_probe.gd does.
 func _hook_hud(m: Match) -> void:
@@ -889,10 +933,12 @@ func _meshes() -> void:
 	_owners()
 
 
-## Draw passes per piece of the open scene (its direct children, the grouping the draw fixes work on): a
-## visible mesh or MultiMesh costs one pass per surface, two where its material has an outline next_pass.
+## Draw passes per piece of the open scene (its direct children and where they stand, the grouping the draw fixes
+## work on): a mesh or MultiMesh the camera can see costs one pass per surface, two where its material has an outline
+## next_pass. Copies sharing a mesh and material draw as one instanced call, so only the first is charged.
 func _owners() -> void:
 	var by := {}
+	var seen := {}
 	var scene: Node = main.current
 	for n in scene.find_children("*", "GeometryInstance3D", true, false):
 		var gi := n as GeometryInstance3D
@@ -903,17 +949,31 @@ func _owners() -> void:
 			mesh = gi.multimesh.mesh
 		if mesh == null or not gi.is_visible_in_tree():
 			continue
+		var cam := main.get_viewport().get_camera_3d()
+		var box := gi.global_transform * gi.get_aabb()
+		if cam and not cam.is_position_in_frustum(box.get_center()) and not cam.is_position_in_frustum(box.position):
+			continue  # (a rough cull: the draws are what the camera sees)
 		var passes := 0
 		for si in mesh.get_surface_count():
 			var mat: Material = gi.material_override if gi.material_override else mesh.surface_get_material(si)
+			var pair := [mesh, mat]
+			if seen.has(pair):
+				continue
+			seen[pair] = true
 			passes += 2 if mat and mat.next_pass else 1
 		var top: Node = gi
 		var under: Node = gi  # the level below `top`: the home's world root holds most pieces
 		while top.get_parent() != scene:
 			under = top
 			top = top.get_parent()
-		var key := "%s/%s" % [String(top.name).rstrip("0123456789@"), String(under.name).rstrip("0123456789@")]
+		var at: Vector3 = (top as Node3D).global_position if top is Node3D else Vector3.ZERO
+		var key := "%s@%d,%d/%s" % [_plain_name(top), roundi(at.x), roundi(at.z), _plain_name(under)]
 		by[key] = int(by.get(key, 0)) + passes
 	var ks := by.keys()
 	ks.sort_custom(func(a, b): return by[a] > by[b])
-	print("BENCH draw passes by owner: " + ", ".join(ks.slice(0, 20).map(func(k): return "%s %d" % [k, by[k]])))
+	print("BENCH draw passes by owner: " + ", ".join(ks.slice(0, 40).map(func(k): return "%s %d" % [k, by[k]])))
+
+
+## A node's name without Godot's auto-numbering.
+func _plain_name(n: Node) -> String:
+	return String(n.name).rstrip("0123456789@")

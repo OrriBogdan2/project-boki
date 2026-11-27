@@ -40,7 +40,7 @@ const KIT_FILES := {
 	"mage": ["mage_"],
 	"ostra": ["ostra_"],
 	"rimewright": ["rimewright_"],
-	"tender": ["tender_"],
+	"tender": ["tender_", "care_look"],
 	"thief": ["thief_"]
 }
 ## The synthetic recipes the runtime parts play: one layer of every kind.
@@ -87,12 +87,20 @@ const MEEKO_HEALS := [
 	"heal_stars", "hearth", "hearth_land", "hearth_motes", "bloom", "call", "call_land", "call_plus", "mended"
 ]
 const MEEKO_HURTS := [
-	"cast", "cast_trail", "kindled", "seed_aim", "seed_cast", "seed_trail", "seed_stick", "seed_field", "seed_burst",
+	"cast",
+	"cast_trail",
+	"kindled",
+	"seed_aim",
+	"seed_cast",
+	"seed_trail",
+	"seed_stick",
+	"seed_field",
+	"seed_burst",
 	"seed_root"
 ]
 const SHOT_TRAILS := {"archer": "fire_tap", "mage": "lmb_trail"}
 const TRAIL_MIN := 0.45  # m across at the head, so a shot trail reads at match zoom (the hairlines were 0.26)
-const FIRE_HUE := Vector2(0.04, 0.2)    # hue (0..1) of orange through yellow: Kael's red keys stay out of it
+const FIRE_HUE := Vector2(0.04, 0.2)  # hue (0..1) of orange through yellow: Kael's red keys stay out of it
 ## Moves a kit doesn't name in full: every Hero's own, built from a kind, or played by a shared look (rock crumble).
 const CALLED_ELSEWHERE := [
 	"hurt",
@@ -113,6 +121,17 @@ const CALLED_ELSEWHERE := [
 const SOFT_SHADERS := ["ld_fx", "ld_fx_glow", "hero_vfx", "hero_vfx_mote"]
 
 const DT_FILL := 1.0 / 60.0  # s per step while timing the Faultline fill
+const STATUSES := ["burn", "chill", "slow", "stun", "root", "gnd", "daze", "static", "antiheal", "sick"]
+const RIG_PARTS := 16  # meshes one status look may use (30 Hunters each with a few stay cheap)
+const BOKI_CC := ["stun", "root", "slow", "daze"]
+const NO_RING := {
+	"ashwick": ["flashover"],
+	"dredge": ["anchor_slam", "reel"],
+	"gil": ["dive", "tide_lunge", "beached", "wave_land"],
+	"gunslinger": ["e_fire"],
+	"juggernaut": ["slam_hit"],
+}
+const NO_SCORCH := {"dolm": ["row_tell"], "rimewright": ["rime", "rime_melt"]}
 var bad := 0
 var flow := preload("res://tools/dash_flow_check.gd").new()
 
@@ -163,6 +182,7 @@ func run(main: Node) -> void:
 	await _scarf(main)
 	await _rime_ends(main)
 	_dots(m)
+	_decor_rings()
 	await _sable_ring(main)
 	await preload("res://tools/hero_cat_fence_check.gd").new().run(main, ok)
 	await _rocket(main)
@@ -245,6 +265,7 @@ func _recipes(arch: String) -> void:
 				loops.append(s["n"])
 	ok(loops.is_empty(), "%s: every sound is a one-shot, nothing can outlive the match %s" % [arch, loops])
 
+
 ## Kael's black-red: his red keys and the model's crack colour stay out of orange and yellow
 ## (Cinder owns fire). The Gilded Riposte's gold keys stay gold on purpose.
 func _looks(arch: String) -> void:
@@ -252,8 +273,21 @@ func _looks(arch: String) -> void:
 		return
 	var pal: Dictionary = HeroVfx.data(arch)["palette"]
 	var cols := {"model_glow.core": Arch.def(arch).get("model_glow", {}).get("core", "")}
-	for k: String in ["main", "hot", "char", "smoke", "red", "wave", "peak", "chain", "chain_iron",
-			"chain_hot", "chain_hook", "haul", "haul_hot"]:
+	for k: String in [
+		"main",
+		"hot",
+		"char",
+		"smoke",
+		"red",
+		"wave",
+		"peak",
+		"chain",
+		"chain_iron",
+		"chain_hot",
+		"chain_hook",
+		"haul",
+		"haul_hot"
+	]:
 		cols[k] = pal.get(k, "")
 	var warm: Array = []
 	for k: String in cols:
@@ -261,6 +295,7 @@ func _looks(arch: String) -> void:
 		if c.s > 0.3 and c.v > 0.25 and c.h > FIRE_HUE.x and c.h < FIRE_HUE.y:
 			warm.append(k)
 	ok(warm.is_empty(), "%s: no red key is orange or yellow %s" % [arch, warm])
+
 
 func _sound_exists(sname: String) -> bool:
 	return ResourceLoader.exists("res://audio/%s.wav" % sname) or ResourceLoader.exists("res://audio/%s_1.wav" % sname)
@@ -640,18 +675,24 @@ func _meeko_field() -> void:
 		"Hearthlight thrown": float(hd["thrown_fill"]) * 1.1 * rim_k,
 	}
 	for what: String in inside:
-		ok(inside[what] <= ZONE_CORE_A, "Meeko's %s: inside alpha at most %.2f to the rim (%.2f)" % [
-			what, ZONE_CORE_A, inside[what]])
+		ok(
+			inside[what] <= ZONE_CORE_A,
+			"Meeko's %s: inside alpha at most %.2f to the rim (%.2f)" % [what, ZONE_CORE_A, inside[what]]
+		)
 	var hurt := Color(String(d["palette"][fd["col"]]))
-	ok(
-		not _heal_hue(hurt),
-		"Meeko's root field: the hurt colour, not her heal green (%s)" % hurt.to_html(false)
-	)
+	ok(not _heal_hue(hurt), "Meeko's root field: the hurt colour, not her heal green (%s)" % hurt.to_html(false))
 	var ring: Array = (d["moves"]["seed_burst"]["fx"] as Array).filter(func(l): return l["p"] == "ring")
 	ok(
 		ring.size() == 1 and ring[0]["size"] == "r" and absf(float(ring[0]["size_x"]) * 0.9 - 1.0) < 0.01,
 		"Meeko's root field: the burst's ring lands on the burst radius"
 	)
+	var hit: Array = d["moves"]["ember_hit"]["fx"]
+	ok(
+		hit.any(func(l): return l["p"] == "chunk") and hit.any(func(l): return l["p"] == "ember"),
+		"Meeko's Ember Cast hit: a leaf chunk-and-spark burst"
+	)
+	var call_ring: Array = (d["moves"]["call"]["fx"] as Array).filter(func(l): return l["p"] == "ring")
+	ok(call_ring.size() == 1 and call_ring[0]["size"] == "r", "Meeko's Hearth Call: a ring at the tether's reach")
 
 
 ## Meeko's heals and hurts read apart (COMBAT_CLARITY): every heal look is her leaf green family and its motes rise,
@@ -818,7 +859,7 @@ func _core_kinds(main: Node, m: Match, v: HeroVfx, p: Hunter) -> void:
 
 
 ## Lace's tap shots and Sparkle's finger bolts: thick at match zoom with a bright head, the body in the Hunter's colour;
-## Lace's short and sharp, Sparkle's soft, sparkly and longer; Lace's drawn arrows stay above the tap; a head fits the
+## Lace's long and sharp, Sparkle's a wider, blunter streak; Lace's drawn arrows stay above the tap; a head fits the
 ## circle its shot hits in (the hit sizes are the weapons'). Flying: the head is part of the trail's own mesh, a pooled
 ## node keeps no look of the last Hunter's, and a volley makes no node once the pool is warm. The stock orb under such a
 ## round stays hidden (Oomph.hide_orb).
@@ -842,12 +883,12 @@ func _shot_trails(m: Match, v: HeroVfx, p: Hunter) -> void:
 	var tap := _ribbon_of("archer", "fire_tap")
 	var bolt := _ribbon_of("mage", "lmb_trail")
 	ok(
-		reach["archer"] < reach["mage"] and not tap.get("soft", false) and float(tap.get("head_len", 1.0)) >= 2.0,
-		"Lace's is short and sharp: %.1f m, a pointed head" % reach["archer"]
+		not tap.get("soft", false) and float(tap.get("head_len", 1.0)) >= 2.0,
+		"Lace's is sharp: %.1f m of trail, a pointed head" % reach["archer"]
 	)
 	ok(
-		bolt.get("soft", false) and float(bolt.get("head_len", 1.0)) <= 1.2,
-		"Sparkle's is soft and sparkly: %.1f m, a round head" % reach["mage"]
+		float(bolt["size"]) > float(tap["size"]) and float(bolt.get("head_len", 1.0)) < float(tap["head_len"]),
+		"Sparkle's is a wider, blunter streak than Lace's: %.1f m of trail" % reach["mage"]
 	)
 	var sizes := ["fire_tap", "fire_arrow", "fire_super"].map(func(mv): return float(_ribbon_of("archer", mv)["size"]))
 	ok(sizes[0] < sizes[1] and sizes[1] < sizes[2], "Lace's drawn arrows stay thicker than the tap %s" % [sizes])
@@ -1114,8 +1155,6 @@ func _dots(m: Match) -> void:
 
 # ------------------------------------------------------------------ status looks
 ## The statuses the source makes readable on a body: each has a look in content/rules/status_looks.json.
-const STATUSES := ["burn", "chill", "slow", "stun", "root", "gnd", "daze", "static", "antiheal", "sick"]
-const RIG_PARTS := 16  # meshes one status look may use (30 Hunters each with a few stay cheap)
 
 
 ## Puts `st` on `F` the way the game does (its timers, KitStatus, a kit's keep) or takes it off.
@@ -1193,7 +1232,6 @@ func _statuses(m: Match, p: Hunter) -> void:
 
 ## The crowd control a summoned Boki takes (docs/specs/SUMMON_CC.md) on its body: the Hunter's look, colours and
 ## pace, sized to the Boki (over its head, round its body), from the pool; Grounded never lands so shows nothing.
-const BOKI_CC := ["stun", "root", "slow", "daze"]
 
 
 func _boki_statuses(m: Match, p: Hunter) -> void:
@@ -1476,6 +1514,22 @@ func _streak_span(v: HeroVfx, fps: float) -> float:
 	dot.queue_free()
 	_clear(v)
 	return span
+
+
+## DECISIONS "a ground ring means gameplay": the moves that are a dash, a landing, a reset or a cast with no area
+## carry no ring layer, and no scorch under a wind-up (docs/VFX_QUALITY.md, "Ground ring audit").
+
+
+func _decor_rings() -> void:
+	for table: Dictionary in [NO_RING, NO_SCORCH]:
+		var kind := "ring" if table == NO_RING else "scorch"
+		for arch: String in table:
+			var file := FileAccess.get_file_as_string("res://content/vfx/%s.json" % arch)
+			var moves: Dictionary = JSON.parse_string(file)["moves"]
+			for move: String in table[arch]:
+				var layers: Array = (moves[move] as Dictionary).get("fx", []) if moves.has(move) else []
+				var n := layers.filter(func(l: Dictionary): return l["p"] == kind).size()
+				ok(n == 0, "%s/%s draws no %s layer (a decoration, not an area)" % [arch, move, kind])
 
 
 ## Sable's Encore ring: at 0.2s of its 0.4s grow it is about half the full radius (growth, not a pop), and it and the

@@ -14,7 +14,7 @@
 	"howto": ["Play: mid-range lightning; stack Static, then run through.", "Combo: 3 bolts plus {secondary}, then {dash} through them.", "Avoid: dashing through a foe under 4 Static."],
 	"silhouette": "the copper rod mast and kite pennant on the back",
 	"hint": {"lmb": "Hold {fire} for bolts; each hit adds a Static", "rmb": "Hold {secondary} to summon a rod, release to throw it", "e": "Press {signature}, drag, release: lightning pulls foes in", "dash": "Tap {dash} to zap, hold to charge a longer Wirerun"},
-	"card": {"role_word": "Skirmisher", "loop": "Ranged lightning skirmisher: charge one foe to 4 Static, then Wirerun through them.", "dash": "Tap for a short zap, hold to charge a longer streak.", "passive": "Hits stack Static; the 4th calls a sky bolt.", "rmb": "Throw a copper rod: knocks back, adds Static, stuns on walls.", "e": "Drop a circle; 0.8s later lightning drags foes inside and grounds them.", "x": "Launch up, then strike down at your cursor, knocking everyone back.", "weapons": {"coilcaster": "Finger bolts every 0.65s; each hit adds 1 Static."}, "chips": {"dash": ["18.3 dmg"], "rmb": ["16-26.7 dmg"], "e": ["19.4 dmg"], "x": ["22 dmg"]}},
+	"card": {"role_word": "Skirmisher", "loop": "Ranged lightning skirmisher: charge one foe to 4 Static, then Wirerun through them.", "dash": "Tap for a short zap, hold to charge a longer streak.", "passive": "Hits stack Static; the 4th calls a sky bolt.", "rmb": "Throw a copper rod: knocks back, adds Static, stuns on walls.", "e": "Drop a circle; 0.8s later lightning drags foes inside and grounds them.", "x": "Launch up, then strike down at your cursor, adding Static to everyone near.", "weapons": {"coilcaster": "Finger bolts every 0.65s; each hit adds 1 Static."}, "chips": {"dash": ["18.3 dmg"], "rmb": ["16-26.7 dmg"], "e": ["19.4 dmg"], "x": ["9 dmg"]}},
 	"signature": "coilcaster",
 	"resource": {
 		"id": "sparks",
@@ -48,7 +48,7 @@
 		"speed": 43.0,
 		"dmg": 18.3,
 		"width": 0.9,
-		"desc": "Press and hold: the run is charged at once (its cooldown starts on the press). A lane grows 6.02 to 10.48m over 0.6s, its end marked by a big ring; you can't steer yourself while you hold it, you keep your height, and any speed you had keeps drifting you. Let go and you streak along it as lightning at a steady 43m/s (shots pass through you), carrying that drift (at most a run's speed), and come out of it at a run, in the air too. Every foe you cross takes 20 and gains 1 Static. A foe at 4 Static takes double, a Blowout, and Wirerun is back at once. A run that came back (a Blowout or a charge orb, used within 5s) goes 1.5x further and charges in 0.45s.",
+		"desc": "Press and hold: the run is charged at once (its cooldown starts on the press). A lane grows 6.02 to 10.48m over 0.6s, its end marked by a big ring; you can't steer yourself while you hold it, you keep your height, and any speed you had keeps drifting you. Let go and you streak along it as lightning at a steady 43m/s (shots pass through you), carrying that drift (at most a run's speed), and come out of it at a run, in the air too. Every foe you cross takes 18.3 and gains 1 Static. A foe at 4 Static takes double, a Blowout, and Wirerun is back at once. A run that came back (a Blowout or a charge orb, used within 5s) goes 1.5x further and charges in 0.45s.",
 		"auto": 0.9,
 		"full_mult": 2.0,
 		"end_r": 2.25,
@@ -126,7 +126,7 @@
 		"pull_reach": 9.0,
 		"stacks": 1
 	},
-	"x": {
+	"x": {"per_rank": {"cooldown": [-5, -5], "dmg": [4.5, 0.0]},
 		"ground": {"range": "range", "r": "radius"},
 		"name": "Kitefall",
 		"card_range": "range",
@@ -148,7 +148,7 @@
 		"push": 0.0,
 		"lift": 0.0,
 		"stacks": 1,
-				"desc": "Crouch, then launch straight up and hang in the air, invulnerable, while a gold ring (8 body heights) shows where you can come down. Press again or attack to strike down as a bolt at your cursor inside the ring; with no second press you come down there by yourself after 2s. Everyone within 2.7m of the landing takes 22 and gains 1 Static, and if any of them has Static, all of them take the highest count among them first (lightning arcs between them). Landing it on an enemy hunter fills your Boki bond."
+				"desc": "Crouch, then launch straight up and hang in the air, invulnerable, while a gold ring (8 body heights) shows where you can come down. Press again or attack to strike down as a bolt at your cursor inside the ring; with no second press you come down there by yourself after 2s. Everyone within 2.7m of the landing takes 9 and gains 1 Static, and if any of them has Static, all of them take the highest count among them first (lightning arcs between them). Landing it on an enemy hunter fills your Boki bond."
 	},
 	"order": [
 		"sec",
@@ -164,8 +164,8 @@
 	"rank_cd": {"sec": [1, 0.9, 0.8], "dash": [1, 0.9167, 0.8333], "kin": [1, 1, 0.75]},
 	"rank_dmg": {"sec": [1, 1.2, 1.9], "dash": [1, 1, 1], "kin": [1, 1.25, 1.5]},
 	"rank3": {"sec": "+50% damage on top", "kin": "cooldown a quarter shorter", "dash": "the run's own hit deals double"},
-	"rank2": {"sec": "Rank 2: cooldown 8s -> 7.2s, damage +20%.", "dash": "Rank 2: recharge 8s -> 7.3s.", "kin": "Rank 2: damage +25%."},
-	"rank_next": {"sec": "Rank 3: cooldown 8s -> 6.4s, damage +90% in all (+40%, then +50% on top).", "kin": "Rank 3: cooldown 10.5s -> 7.9s (a quarter off), damage +50%.", "dash": "Rank 3: recharge 8s -> 6.7s; the run's own hit deals double."},
+	"rank2": {"ult": "Rank 2: Kitefall cooldown 42s -> 37s, damage 9 -> 13.5. The Fusion lasts 30% longer.", "sec": "Rank 2: cooldown 8s -> 7.2s, damage +20%.", "dash": "Rank 2: recharge 8s -> 7.3s.", "kin": "Rank 2: damage +25%."},
+	"rank_next": {"ult": "Rank 3: Kitefall cooldown 42s -> 32s, damage 9 -> 13.5.", "sec": "Rank 3: cooldown 8s -> 6.4s, damage +90% in all (+40%, then +50% on top).", "kin": "Rank 3: cooldown 10.5s -> 7.9s (a quarter off), damage +50%.", "dash": "Rank 3: recharge 8s -> 6.7s; the run's own hit deals double."},
 	"turn": {
 		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/vireo.md:72 'she faces the cursor'"},
 		"rmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/vireo.md:90 the throw follows the cursor's direction; no turn limit shown; turn rate while held: match 1280 (ext/hero-ref-footage vireo 0043-0048, 0057-0062: no cursor swing in the hold)"},

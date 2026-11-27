@@ -9,30 +9,99 @@ extends Node
 ## See docs/BOKI_IDENTITY.md.
 
 const VERSION := 22
-const UNNAMED := "Hunter"      # the name of a player who never typed one (the results line then drops it)
+
+const UNNAMED := "Hunter"  # the name of a player who never typed one (the results line then drops it)
+
 const MAX_MEMORY := 40
+
 const SLOTS := 6
+
 const LOG_CAP := 200
+
+const SettingsScript := preload("res://scripts/core/settings.gd")  # where the last slot is remembered (file_path)
+
 ## Upgrades, oldest first: MIGRATIONS[n] turns a version-n save into version n + 1.
-const MIGRATIONS := {1: "_migrate_1_to_2", 2: "_migrate_2_to_3", 3: "_migrate_3_to_4", 4: "_migrate_4_to_5",
-		5: "_migrate_5_to_6", 6: "_migrate_6_to_7", 7: "_migrate_7_to_8",
-		8: "_migrate_8_to_9", 9: "_migrate_9_to_10", 10: "_migrate_10_to_11",
-		11: "_migrate_11_to_12", 12: "_migrate_12_to_13", 13: "_migrate_13_to_14", 14: "_migrate_14_to_15",
-		15: "_migrate_15_to_16", 16: "_migrate_16_to_17", 17: "_migrate_17_to_18", 18: "_migrate_18_to_19",
-		19: "_migrate_19_to_20", 20: "_migrate_20_to_21", 21: "_migrate_21_to_22"}
+const MIGRATIONS := {
+	1: "_migrate_1_to_2",
+	2: "_migrate_2_to_3",
+	3: "_migrate_3_to_4",
+	4: "_migrate_4_to_5",
+	5: "_migrate_5_to_6",
+	6: "_migrate_6_to_7",
+	7: "_migrate_7_to_8",
+	8: "_migrate_8_to_9",
+	9: "_migrate_9_to_10",
+	10: "_migrate_10_to_11",
+	11: "_migrate_11_to_12",
+	12: "_migrate_12_to_13",
+	13: "_migrate_13_to_14",
+	14: "_migrate_14_to_15",
+	15: "_migrate_15_to_16",
+	16: "_migrate_16_to_17",
+	17: "_migrate_17_to_18",
+	18: "_migrate_18_to_19",
+	19: "_migrate_19_to_20",
+	20: "_migrate_20_to_21",
+	21: "_migrate_21_to_22"
+}
+
+# ------------------------------------------------------------------ ids
+const B32 := "0123456789abcdefghjkmnpqrstvwxyz"
+
+const HOW_EVENT := {
+	"wild": "caught",
+	"taken": "caught",
+	"egg": "hatched",
+	"boss_egg": "hatched",
+	"starter": "hatched",
+	"event": "caught",
+	"market": "traded",
+	"shelter": "adopted",
+	"transfer": "received",
+	"unknown": "registered"
+}
+
+## Checks that play on a copy of the save (they used to be listed in main.gd).
+const NO_SAVE_FLAGS := [
+	"--archetype-check",
+	"--kit-combo-check",
+	"--mage-combo-check",
+	"--gunslinger-combo-check",
+	"--zone-check",
+	"--dolm-combo-check",
+	"--ostra-combo-check",
+	"--hero-combo-check",
+	"--archer-combo-check",
+	"--bulwark-combo-check",
+	"--arena-check",
+	"--dredge-combo-check",
+	"--ashwick-combo-check",
+]
+
+static var _crypto: Crypto = null
+
+static var _id_rng: RandomNumberGenerator = null
 
 var d: Dictionary = {}
-var slot := 1                 # which save file is in play
+
+var slot := 1  # which save file is in play
+
+var no_write := _tool_run()  # headless checks play with a save without touching the real file
+
+var newer := false  # the slot holds a save from a newer game: never overwrite it
+
 
 func _ready() -> void:
 	# the last save you played comes back (remembered next to the settings)
 	var cf := ConfigFile.new()
-	if cf.load("user://settings.cfg") == OK:
+	if cf.load(SettingsScript.file_path()) == OK:
 		slot = clampi(int(cf.get_value("save", "slot", 1)), 1, SLOTS)
 	load_game()
 
+
 static func path_for(n: int) -> String:
 	return "user://kinfall_save.json" if n == 1 else "user://kinfall_save_%d.json" % n
+
 
 ## What a save file holds, for the save list.
 func slot_info(n: int) -> Dictionary:
@@ -43,18 +112,25 @@ func slot_info(n: int) -> Dictionary:
 	if typeof(parsed) != TYPE_DICTIONARY or (parsed.get("roster", []) as Array).is_empty():
 		return out
 	var when := Time.get_datetime_dict_from_unix_time(int(FileAccess.get_modified_time(p)))
-	return {"exists": true, "name": String(parsed.get("name", "Hunter")), "kin": (parsed.get("roster", []) as Array).size(),
-		"gems": int(parsed.get("gems", 0)), "matches": int(parsed.get("matches", 0)),
-		"when": "%d-%02d-%02d" % [when["year"], when["month"], when["day"]]}
+	return {
+		"exists": true,
+		"name": String(parsed.get("name", "Hunter")),
+		"kin": (parsed.get("roster", []) as Array).size(),
+		"gems": int(parsed.get("gems", 0)),
+		"matches": int(parsed.get("matches", 0)),
+		"when": "%d-%02d-%02d" % [when["year"], when["month"], when["day"]]
+	}
+
 
 func use_slot(n: int) -> void:
 	save_game()
 	slot = clampi(n, 1, SLOTS)
 	load_game()
 	var cf := ConfigFile.new()
-	cf.load("user://settings.cfg")
+	cf.load(SettingsScript.file_path())
 	cf.set_value("save", "slot", slot)
-	cf.save("user://settings.cfg")
+	cf.save(SettingsScript.file_path())
+
 
 func delete_slot(n: int) -> void:
 	for q in _copies(path_for(n)):
@@ -64,6 +140,7 @@ func delete_slot(n: int) -> void:
 		d = fresh()
 		newer = false
 
+
 func fresh() -> Dictionary:
 	# a new save has no kin yet: the first thing you do is pick an egg and hatch it
 	return {
@@ -71,64 +148,67 @@ func fresh() -> Dictionary:
 		"name": UNNAMED,
 		"gems": 60,
 		"cls": "medium",
-		"classes": ClassUnlock.fresh(),   # which Hunters are open, the creation pick, challenges and mastery
+		"classes": ClassUnlock.fresh(),  # which Hunters are open, the creation pick, challenges and mastery
 		"active": "",
 		"roster": [],
-		"sleepovers": [],     # Boki visiting a friend for a day: {rec, to, name, t}, + clan on a loan (Sleepover)
-		"drills": {},         # best pass time in seconds per movement drill (MoveDrills)
-		"zones": GardenZones.fresh(),   # the garden's zones: which are open (GardenZones)
+		"sleepovers": [],  # Boki visiting a friend for a day: {rec, to, name, t}, + clan on a loan (Sleepover)
+		"drills": {},  # best pass time in seconds per movement drill (MoveDrills)
+		"zones": GardenZones.fresh(),  # the garden's zones: which are open (GardenZones)
 		"seeds": {"tidebloom": 2, "emberberry": 1},
 		"crops": {},
-		"snack_picks": 0,     # snack patch batches picked; 0 = the first batch ripens early (SnackPatch.first_grow_secs)
-		"items": {"tonic": 1}.merged(GardenFirstDay.rules()["start_items"]),   # plus the first-day kibble
+		"snack_picks": 0,  # snack patch batches picked; 0 = the first batch ripens early (SnackPatch.first_grow_secs)
+		"items": {"tonic": 1}.merged(GardenFirstDay.rules()["start_items"]),  # plus the first-day kibble
 		"treat": "",
 		"plots": _empty_plots(4),
 		"plot_cap": 4,
-		"game_board": {},     # garden minigame results (MinigameHub); older saves start empty
+		"game_board": {},  # garden minigame results (MinigameHub); older saves start empty
 		"matches": 0,
 		"extracts": 0,
 		"settings": {"volume": 0.8, "cam_lead": 1.0},
-		"tutorial": {"gfd": {"did": {}, "paid": false}},      # the first-day list (GardenFirstDay)
-		"hud_reveal": {},     # HUD groups whose first event happened (HudReveal); absent = an older save, full HUD
-		"time_trial": {},           # Hunter id -> personal best on the Training Grounds course (s)
-		"farm_builder": 1,    # Hob and the farm tutorial are known to this save (FarmBuilder.migrate)
-		"first_guide": 0,     # Extractions that have had the first-match guide (FirstMatchGuide.migrate)
+		"tutorial": {"gfd": {"did": {}, "paid": false}},  # the first-day list (GardenFirstDay)
+		"hud_reveal": {},  # HUD groups whose first event happened (HudReveal); absent = an older save, full HUD
+		"time_trial": {},  # Hunter id -> personal best on the Training Grounds course (s)
+		"farm_builder": 1,  # Hob and the farm tutorial are known to this save (FarmBuilder.migrate)
+		"first_guide": 0,  # Extractions that have had the first-match guide (FirstMatchGuide.migrate)
 		"buildings": [],
 		"music": [],
 		"guild_perks": [],
-		"clan": {},           # my clan: {id, role, corner_seed, joined}; empty when in none (id equals guild_id)
+		"clan": {},  # my clan: {id, role, corner_seed, joined}; empty when in none (id equals guild_id)
 		"bridges": [],
 		"gh_plots": _empty_plots(4),
 		"stats": {"kills": 0, "best_kills": 0, "best_gems": 0, "caught": 0, "knocks": 0},
-		"lost_kin": [],       # your kin left behind on expeditions: at the Ransom House or held by a rival
-		"rivals": {},         # rival hunters you've dealt with: how greedy they are, how they feel about you
-		"offers": [],         # rivals asking to buy back kin you took from them
-		"ransom_log": [],     # what happened at the Ransom House, newest last
-		"armory": [],         # gear brought home (Loot items); see Econ
-		"arm_lvl": 0, "scrap": 0,
-		"belt_pick": ["tonic", "armor_kit", "", ""],   # the utility for the next expedition, one per belt slot (Equal)
-		"raid_belt": {},      # utility charges out on an expedition right now (put back if it never ended)
-		"loadout": {},        # what you take on the next expedition: slot -> armory uid
-		"valuables": {},      # treasure to sell, and Soul Embers
-		"raid_out": [],       # loadout pieces out on an expedition right now
-		"feeders": [],        # troughs on the farm: {id, kind, x, z, food: [keys], auto}
-		"feeder_inv": {},     # feeders bought but not set down yet
-		"furniture": {"journal": 1, "gramophone": 1},   # house pieces in storage: the empty house's two useful ones
-		"graves": [],         # kin that died, with their memories (Econ.kin_dies)
-		"farm_lvl": 0,        # Kin Cottage expansions: room for 6 / 8 / 10 / 12 kin out on the farm (KinBox)
-		"box_v": true,        # the Kin Burrow is set up (old saves get their overflow boxed once)
-		"profile": {"id": new_id("p"), "name": "Hunter"},   # this save's trainer: original trainer on every kin it registers
-		"serials": {},        # species -> the last serial handed out on this save (global once there's a server)
-		"log": [],            # append-only event log, newest last, at most LOG_CAP
-		"market": MarketSave.fresh(),   # your stall, auctions, the shelter, transfers, the Black Market's stock
-		"goods": {},          # market goods: rare materials, trophies, dyes (Goods)
+		"lost_kin": [],  # your kin left behind on expeditions: at the Ransom House or held by a rival
+		"rivals": {},  # rival hunters you've dealt with: how greedy they are, how they feel about you
+		"offers": [],  # rivals asking to buy back kin you took from them
+		"ransom_log": [],  # what happened at the Ransom House, newest last
+		"armory": [],  # gear brought home (Loot items); see Econ
+		"arm_lvl": 0,
+		"scrap": 0,
+		"belt_pick": ["tonic", "armor_kit", "", ""],  # the utility for the next expedition, one per belt slot (Equal)
+		"raid_belt": {},  # utility charges out on an expedition right now (put back if it never ended)
+		"loadout": {},  # what you take on the next expedition: slot -> armory uid
+		"valuables": {},  # treasure to sell, and Soul Embers
+		"raid_out": [],  # loadout pieces out on an expedition right now
+		"feeders": [],  # troughs on the farm: {id, kind, x, z, food: [keys], auto}
+		"feeder_inv": {},  # feeders bought but not set down yet
+		"furniture": {"journal": 1, "gramophone": 1},  # house pieces in storage: the empty house's two useful ones
+		"graves": [],  # kin that died, with their memories (Econ.kin_dies)
+		"farm_lvl": 0,  # Kin Cottage expansions: room for 6 / 8 / 10 / 12 kin out on the farm (KinBox)
+		"box_v": true,  # the Kin Burrow is set up (old saves get their overflow boxed once)
+		"profile": {"id": new_id("p"), "name": "Hunter"},  # this save's trainer: original trainer on every kin it registers
+		"serials": {},  # species -> the last serial handed out on this save (global once there's a server)
+		"log": [],  # append-only event log, newest last, at most LOG_CAP
+		"market": MarketSave.fresh(),  # your stall, auctions, the shelter, transfers, the Black Market's stock
+		"goods": {},  # market goods: rare materials, trophies, dyes (Goods)
 	}
+
 
 func _empty_plots(n: int) -> Array:
 	var a := []
 	for i in n:
 		a.append({"crop": "", "stage": 0})
 	return a
+
 
 ## A new kin record. seed: where its inborn rolls (Unique) come from; leave it out for a fresh one
 ## from the system's random bytes, or pass one made from a match seed (Match.kin_seed) so wild and
@@ -138,22 +218,25 @@ func new_kin(species: String, kname := "", seed := -1) -> Dictionary:
 	var tr := {}
 	for k in sp["traits"]:
 		tr[k] = clampf(float(sp["traits"][k]) + randf_range(-0.15, 0.15), 0.05, 0.95)
-	randi()      # the old id used one global roll here: kept so the global random stream doesn't shift
+	randi()  # the old id used one global roll here: kept so the global random stream doesn't shift
 	var rec := {
 		"uid": new_id(),
 		"species": species,
 		"name": kname if kname != "" else Data.default_kin_name(species),
-		"level": 1, "xp": 0,
+		"level": 1,
+		"xp": 0,
 		"traits": tr,
 		"trust": 35.0,
 		"memory": [],
-		"bonds": {},          # uid -> -1..1, friends and rivals on the base (BaseLife)
-		"matches": 0, "wins": 0, "kos": 0,
+		"bonds": {},  # uid -> -1..1, friends and rivals on the base (BaseLife)
+		"matches": 0,
+		"wins": 0,
+		"kos": 0,
 		"born": int(Time.get_unix_time_from_system()),
 		"dna": Unique.roll(seed if seed >= 0 else Unique.fresh_seed()),
-		"edition": null,      # reserved for limited editions (see docs/BOKI_IDENTITY.md)
+		"edition": null,  # reserved for limited editions (see docs/BOKI_IDENTITY.md)
 	}
-	if seed >= 0:       # seeded: IVs from the seed, not the clock-based uid, so every run matches
+	if seed >= 0:  # seeded: IVs from the seed, not the clock-based uid, so every run matches
 		var ivr := RandomNumberGenerator.new()
 		ivr.seed = hash("%d|ivs" % seed)
 		rec["ivs"] = Care.roll_ivs(ivr)
@@ -162,10 +245,6 @@ func new_kin(species: String, kname := "", seed := -1) -> Dictionary:
 	Care.ensure(rec)
 	return rec
 
-# ------------------------------------------------------------------ ids
-const B32 := "0123456789abcdefghjkmnpqrstvwxyz"
-static var _crypto: Crypto = null
-static var _id_rng: RandomNumberGenerator = null
 
 static func _b32(bytes: PackedByteArray, chars: int) -> String:
 	var out := ""
@@ -182,24 +261,30 @@ static func _b32(bytes: PackedByteArray, chars: int) -> String:
 		out += B32[v]
 	return out
 
+
 ## A collision-proof id that never changes: prefix + creation time in milliseconds (9 base-32
 ## characters, so ids sort by age) + 64 random bits (13 characters) from the system's random bytes,
 ## never the global random stream. "b" for kin, "p" for a save profile. 23 characters for kin.
 static func new_id(prefix := "b") -> String:
-	if _crypto == null: _crypto = Crypto.new()
+	if _crypto == null:
+		_crypto = Crypto.new()
 	var rnd := _crypto.generate_random_bytes(8)
 	if rnd.size() < 8:
 		# no system randomness (shouldn't happen): a dedicated generator, never the global one
 		if _id_rng == null:
-			_id_rng = RandomNumberGenerator.new(); _id_rng.randomize()
+			_id_rng = RandomNumberGenerator.new()
+			_id_rng.randomize()
 		rnd = PackedByteArray()
-		for i in 8: rnd.append(_id_rng.randi() & 255)
+		for i in 8:
+			rnd.append(_id_rng.randi() & 255)
 	var ms := int(Time.get_unix_time_from_system() * 1000.0)
 	var tb := PackedByteArray()
 	tb.resize(6)
-	for i in 6: tb[i] = (ms >> (8 * (5 - i))) & 255     # 48 bits, the top 45 used
+	for i in 6:
+		tb[i] = (ms >> (8 * (5 - i))) & 255  # 48 bits, the top 45 used
 	var t := _b32(tb, 10).substr(1)
 	return prefix + t + _b32(rnd, 13)
+
 
 # ------------------------------------------------------------------ provenance
 ## This save's trainer (made on first use; the name follows the save's).
@@ -209,24 +294,30 @@ func profile() -> Dictionary:
 	d["profile"]["name"] = String(d.get("name", "Hunter"))
 	return d["profile"]
 
+
 ## Appends to the event log (caught, hatched, traded, evolved, renamed, released, died, revived...).
 func log_event(ev: String, rec: Dictionary, extra := {}) -> void:
 	if typeof(d.get("log", null)) != TYPE_ARRAY:
 		d["log"] = []
-	var e := {"t": int(Time.get_unix_time_from_system()), "ev": ev, "uid": String(rec.get("uid", "")),
-		"sp": String(rec.get("species", "")), "name": String(rec.get("name", ""))}
-	for k in extra: e[k] = extra[k]
+	var e := {
+		"t": int(Time.get_unix_time_from_system()),
+		"ev": ev,
+		"uid": String(rec.get("uid", "")),
+		"sp": String(rec.get("species", "")),
+		"name": String(rec.get("name", ""))
+	}
+	for k in extra:
+		e[k] = extra[k]
 	var lg: Array = d["log"]
 	lg.append(e)
 	while lg.size() > LOG_CAP:
 		lg.pop_front()
 
+
 ## A placeholder for trading (no trades exist yet): logs it and hands the kin a new trainer.
 func log_trade(rec: Dictionary, from_name: String) -> void:
 	log_event("traded", rec, {"from": from_name})
 
-const HOW_EVENT := {"wild": "caught", "taken": "caught", "egg": "hatched", "boss_egg": "hatched", "starter": "hatched",
-	"event": "caught", "market": "traded", "shelter": "adopted", "transfer": "received", "unknown": "registered"}
 
 ## Gives a kin joining this collection its provenance, once: where it came from (rec["origin"],
 ## set where it was made, or `how` / `where` here), when, its original trainer, its serial within
@@ -239,20 +330,27 @@ func register(rec: Dictionary, how := "", where := {}) -> void:
 	var o = rec.get("origin", null)
 	if typeof(o) != TYPE_DICTIONARY:
 		o = {}
-	if how != "": o["how"] = how
-	if not o.has("how"): o["how"] = "unknown"
-	if not where.is_empty(): o["where"] = where
-	if not o.has("where"): o["where"] = {"place": "home"} if String(o["how"]) in ["egg", "boss_egg", "starter"] else {}
-	if not o.has("t"): o["t"] = int(Time.get_unix_time_from_system())
+	if how != "":
+		o["how"] = how
+	if not o.has("how"):
+		o["how"] = "unknown"
+	if not where.is_empty():
+		o["where"] = where
+	if not o.has("where"):
+		o["where"] = {"place": "home"} if String(o["how"]) in ["egg", "boss_egg", "starter"] else {}
+	if not o.has("t"):
+		o["t"] = int(Time.get_unix_time_from_system())
 	rec["origin"] = o
-	if not rec.has("born"): rec["born"] = int(o["t"])
+	if not rec.has("born"):
+		rec["born"] = int(o["t"])
 	if typeof(rec.get("ot", null)) != TYPE_DICTIONARY:
 		var p := profile()
 		rec["ot"] = {"id": String(p["id"]), "name": String(p["name"])}
 	if typeof(rec.get("lineage", null)) != TYPE_DICTIONARY:
 		var names: Array = (rec.get("parents", []) as Array).duplicate()
 		rec["lineage"] = {"parents": [], "names": names, "gen": 1 if not names.is_empty() else 0}
-	if not rec.has("edition"): rec["edition"] = null
+	if not rec.has("edition"):
+		rec["edition"] = null
 	if typeof(d.get("serials", null)) != TYPE_DICTIONARY:
 		d["serials"] = {}
 	var sp := String(rec.get("species", ""))
@@ -260,21 +358,34 @@ func register(rec: Dictionary, how := "", where := {}) -> void:
 	d["serials"][sp] = n
 	rec["serial"] = n
 	var extra := {"how": String(o["how"]), "serial": n}
-	if rec.has("parents"): extra["bred"] = true        # an egg of two of your Boki (ClanInfo.last_deed)
+	if rec.has("parents"):
+		extra["bred"] = true  # an egg of two of your Boki (ClanInfo.last_deed)
 	log_event(String(HOW_EVENT.get(String(o["how"]), "registered")), rec, extra)
+
 
 ## Everyone in the collection has provenance (anything that came in without it gets it now).
 func register_all() -> void:
 	for r in d.get("roster", []):
-		if typeof(r) == TYPE_DICTIONARY and not r.has("serial"): register(r)
-	for L in d.get("lost_kin", []):
-		if typeof(L) == TYPE_DICTIONARY and typeof(L.get("rec", null)) == TYPE_DICTIONARY and not L["rec"].has("serial"): register(L["rec"])
+		if typeof(r) == TYPE_DICTIONARY and not r.has("serial"):
+			register(r)
+	for l in d.get("lost_kin", []):
+		if (
+			typeof(l) == TYPE_DICTIONARY
+			and typeof(l.get("rec", null)) == TYPE_DICTIONARY
+			and not l["rec"].has("serial")
+		):
+			register(l["rec"])
+
 
 ## "#0042 of Vespyx" ("" before it has a serial).
 static func serial_text(rec: Dictionary) -> String:
 	if not rec.has("serial"):
 		return ""
-	return "#%04d of %s" % [int(rec["serial"]), String(Data.KIN.get(String(rec.get("species", "")), {}).get("name", "Boki"))]
+	return (
+		"#%04d of %s"
+		% [int(rec["serial"]), String(Data.KIN.get(String(rec.get("species", "")), {}).get("name", "Boki"))]
+	)
+
 
 # ------------------------------------------------------------------ migrations
 ## Upgrades a parsed save of any older version to VERSION, in place. Returns false if it can't
@@ -292,22 +403,27 @@ func migrate(data: Dictionary) -> bool:
 		data["v"] = v
 	return true
 
+
 ## v5 -> v6: Hunter unlocks. A save that predates them had every Hunter, so it keeps them all (ClassUnlock).
 func _migrate_5_to_6(data: Dictionary) -> void:
 	ClassUnlock.migrate(data)
 
+
 ## v8 -> v9: reserved for ext/mantle-look (nothing to change here).
 func _migrate_8_to_9(_data: Dictionary) -> void:
 	pass
+
 
 ## v9 -> v10: Hob and the farm tutorial. A save that has played skips the tutorial and keeps every
 ## blueprint it could already build (FarmBuilder.migrate, keyed by its own "farm_builder" field).
 func _migrate_9_to_10(data: Dictionary) -> void:
 	FarmBuilder.migrate(data)
 
+
 ## v10 -> v11: the house starts empty; a played house keeps its furniture, now all movable (HouseSave).
 func _migrate_10_to_11(data: Dictionary) -> void:
 	HouseSave.migrate(data)
+
 
 ## v11 -> v12: evolution by species (Evo, docs/decisions/0024: levels and forms are kept, levels stop at the
 ## cap, each Boki keeps its old form name) and base life (every Boki starts with no friends or rivals,
@@ -319,6 +435,7 @@ func _migrate_11_to_12(data: Dictionary) -> void:
 		if not r.has("bonds"):
 			r["bonds"] = {}
 
+
 ## v12 -> v13: garden zones (Bramblebank is open and every Boki lives there, GardenZones) and shaping items
 ## (every Boki gets its worn-token slots and loose points, Care.ensure). A v12 save from either line gets the
 ## other half of v12 first (every step only adds what is missing).
@@ -328,10 +445,12 @@ func _migrate_12_to_13(data: Dictionary) -> void:
 	for r in data.get("roster", []):
 		Care.ensure(r)
 
-## v13 -> v14: carry 2 in (docs/decisions/0061-carry-pick.md). The lead is the current partner ("active"), the
+
+## v13 -> v14: carry 2 in (docs/decisions/0146-carry-pick.md). The lead is the current partner ("active"), the
 ## second starts empty: a save that auto-picked or once chose a second no longer brings one until you pick.
 func _migrate_13_to_14(data: Dictionary) -> void:
 	data["active2"] = ""
+
 
 ## v14 -> v15: the movement drills keep a best time per drill (MoveDrills). The 12 -> 13 step runs again
 ## first: a dev save from the line that used v13 for first-time hints gets the garden half it skipped.
@@ -342,9 +461,11 @@ func _migrate_14_to_15(data: Dictionary) -> void:
 	if typeof(data.get("drills", null)) != TYPE_DICTIONARY:
 		data["drills"] = {}
 
+
 ## v15 -> v16: the combat tutorial resumes (TutorialResume); a save that is past it is marked finished.
 func _migrate_15_to_16(data: Dictionary) -> void:
 	TutorialResume.migrate(data)
+
 
 ## v16 -> v17: clans grow out of guilds. A save already in a guild becomes a plain member of the clan
 ## with the same id; everyone else gets the empty dict (Social.clan_for). A clan it already has stays.
@@ -355,9 +476,11 @@ func _migrate_16_to_17(data: Dictionary) -> void:
 	var who := String(data.get("profile", {}).get("id", ""))
 	data["clan"] = Social.clan_for(gid, who, "member", 0.0) if gid != "" else {}
 
+
 ## v17 -> v18: the XP first-time lines have their "seen" flags (XpHints).
 func _migrate_17_to_18(data: Dictionary) -> void:
 	XpHints.migrate(data)
+
 
 ## v18 -> v19: sleepovers. No Boki is away: d["sleepovers"] = [] (Sleepover). A dev save from the save chain
 ## line (v14-v18 there, before main took v14 for carry 2) skipped the carry step: it gets an empty second here.
@@ -367,6 +490,7 @@ func _migrate_18_to_19(data: Dictionary) -> void:
 	if not data.has("active2"):
 		data["active2"] = ""
 
+
 ## v19 -> v20: matches played per Hunter (the Stats tab, HunterStats). A dev save from the integ-1113-D1 line
 ## (its v15 was this step, before main's v15 drills) skipped the drills: it gets the empty dict here.
 func _migrate_19_to_20(data: Dictionary) -> void:
@@ -374,13 +498,16 @@ func _migrate_19_to_20(data: Dictionary) -> void:
 	if typeof(data.get("drills", null)) != TYPE_DICTIONARY:
 		data["drills"] = {}
 
+
 ## v20 -> v21: a Hunter the save has already played gets none of its first-time hints (HunterHints).
 func _migrate_20_to_21(data: Dictionary) -> void:
 	HunterHints.migrate(data)
 
+
 ## v21 -> v22: the Training Grounds' time trial. Every Hunter starts with no personal best (TimeTrial).
 func _migrate_21_to_22(data: Dictionary) -> void:
 	TimeTrial.migrate(data)
+
 
 ## v6 -> v7: equal footing in matches. Armor and kit pieces in the armory become gems and farm
 ## materials, the glove-turned-utility pieces become stash charges, backpack upgrades are refunded,
@@ -388,29 +515,37 @@ func _migrate_21_to_22(data: Dictionary) -> void:
 func _migrate_6_to_7(data: Dictionary) -> void:
 	EqualMigrate.migrate(data)
 
+
 ## v7 -> v8: the market. Boki are never sold for gems: open Drift Pens and web market Boki listings
 ## go back to their owners' rosters, and the market's fields get their defaults (MarketSave).
 func _migrate_7_to_8(data: Dictionary) -> void:
 	MarketSave.migrate(data)
+
 
 ## v4 -> v5: the gear model. Stored weapons become scrap, gloves become gear items, the loadout
 ## moves to five gear slots (GearSave).
 func _migrate_4_to_5(data: Dictionary) -> void:
 	GearSave.migrate(data)
 
+
 ## v3 -> v4: the Field Book. Every species you own counts as seen, and each entry gets its "places" list.
 func _migrate_3_to_4(data: Dictionary) -> void:
 	FieldBook.migrate(data)
+
 
 ## v2 -> v3: every Boki's sex, written into its rolls (from its own seed, so it's what it always
 ## would have been).
 func _migrate_2_to_3(data: Dictionary) -> void:
 	for r in data.get("roster", []):
-		if typeof(r) == TYPE_DICTIONARY: Unique.ensure_sex(r)
-	for L in data.get("lost_kin", []):
-		if typeof(L) == TYPE_DICTIONARY and typeof(L.get("rec", null)) == TYPE_DICTIONARY: Unique.ensure_sex(L["rec"])
+		if typeof(r) == TYPE_DICTIONARY:
+			Unique.ensure_sex(r)
+	for l in data.get("lost_kin", []):
+		if typeof(l) == TYPE_DICTIONARY and typeof(l.get("rec", null)) == TYPE_DICTIONARY:
+			Unique.ensure_sex(l["rec"])
 	for g in data.get("graves", []):
-		if typeof(g) == TYPE_DICTIONARY and typeof(g.get("rec", null)) == TYPE_DICTIONARY: Unique.ensure_sex(g["rec"])
+		if typeof(g) == TYPE_DICTIONARY and typeof(g.get("rec", null)) == TYPE_DICTIONARY:
+			Unique.ensure_sex(g["rec"])
+
 
 ## v1 -> v2: lasting ids, inborn rolls and provenance for every kin. Each kin's tastes and IVs
 ## (which older saves worked out from the old id) are written down first, so changing the id
@@ -420,60 +555,86 @@ func _migrate_2_to_3(data: Dictionary) -> void:
 func _migrate_1_to_2(data: Dictionary) -> void:
 	var recs: Array = []
 	for r in data.get("roster", []):
-		if typeof(r) == TYPE_DICTIONARY: recs.append(r)
-	for L in data.get("lost_kin", []):
-		if typeof(L) == TYPE_DICTIONARY and typeof(L.get("rec", null)) == TYPE_DICTIONARY: recs.append(L["rec"])
+		if typeof(r) == TYPE_DICTIONARY:
+			recs.append(r)
+	for l in data.get("lost_kin", []):
+		if typeof(l) == TYPE_DICTIONARY and typeof(l.get("rec", null)) == TYPE_DICTIONARY:
+			recs.append(l["rec"])
 	for g in data.get("graves", []):
-		if typeof(g) == TYPE_DICTIONARY and typeof(g.get("rec", null)) == TYPE_DICTIONARY: recs.append(g["rec"])
+		if typeof(g) == TYPE_DICTIONARY and typeof(g.get("rec", null)) == TYPE_DICTIONARY:
+			recs.append(g["rec"])
 	var remap := {}
 	for r in recs:
 		var old := String(r.get("uid", ""))
-		Care.ensure(r)          # likes and IVs from the old id, written down
-		Unique.ensure(r)        # inborn rolls from the old id
+		Care.ensure(r)  # likes and IVs from the old id, written down
+		Unique.ensure(r)  # inborn rolls from the old id
 		if old == "" or old.begins_with("b"):
 			continue
 		if not remap.has(old):
 			remap[old] = new_id()
 	for g in data.get("graves", []):
 		# a grave keeps the id too, even when its record copy is missing
-		if typeof(g) == TYPE_DICTIONARY and String(g.get("uid", "")) != "" and not remap.has(String(g["uid"])) and not String(g["uid"]).begins_with("b"):
+		if (
+			typeof(g) == TYPE_DICTIONARY
+			and String(g.get("uid", "")) != ""
+			and not remap.has(String(g["uid"]))
+			and not String(g["uid"]).begins_with("b")
+		):
 			remap[String(g["uid"])] = new_id()
 	_rewrite_ids(data, remap)
 	var inv := {}
-	for k in remap: inv[remap[k]] = k
+	for k in remap:
+		inv[remap[k]] = k
 	for r in recs:
-		if inv.has(String(r.get("uid", ""))): r["legacy_uid"] = inv[String(r["uid"])]
+		if inv.has(String(r.get("uid", ""))):
+			r["legacy_uid"] = inv[String(r["uid"])]
 	for g in data.get("graves", []):
-		if typeof(g) == TYPE_DICTIONARY and inv.has(String(g.get("uid", ""))): g["legacy_uid"] = inv[String(g["uid"])]
+		if typeof(g) == TYPE_DICTIONARY and inv.has(String(g.get("uid", ""))):
+			g["legacy_uid"] = inv[String(g["uid"])]
 	# provenance: what can be told from the old record; serials in the order they were got
 	if typeof(data.get("profile", null)) != TYPE_DICTIONARY:
 		data["profile"] = {"id": new_id("p"), "name": String(data.get("name", "Hunter"))}
-	if typeof(data.get("serials", null)) != TYPE_DICTIONARY: data["serials"] = {}
-	if typeof(data.get("log", null)) != TYPE_ARRAY: data["log"] = []
+	if typeof(data.get("serials", null)) != TYPE_DICTIONARY:
+		data["serials"] = {}
+	if typeof(data.get("log", null)) != TYPE_ARRAY:
+		data["log"] = []
 	var order: Array = recs.duplicate()
 	order.sort_custom(func(a, b): return float(a.get("got_t", 0.0)) < float(b.get("got_t", 0.0)))
 	var hold := d
-	d = data       # register() works on the save being migrated
+	d = data  # register() works on the save being migrated
 	for r in order:
 		var how := "unknown"
-		if r.get("starter", false): how = "starter"
-		elif r.get("rare", false) or String(r.get("from_boss", "")) != "": how = "boss_egg"
-		elif r.has("parents"): how = "egg"
+		if r.get("starter", false):
+			how = "starter"
+		elif r.get("rare", false) or String(r.get("from_boss", "")) != "":
+			how = "boss_egg"
+		elif r.has("parents"):
+			how = "egg"
 		else:
 			for m in r.get("memory", []):
-				if typeof(m) != TYPE_DICTIONARY: continue
-				if String(m.get("kind", "")) == "caught": how = "wild"
-				elif String(m.get("kind", "")) == "taken": how = "taken"
-				elif String(m.get("kind", "")) == "market": how = "market"
-		var o := {"how": how, "where": {}, "t": int(float(r.get("got_t", 0.0)))}     # t 0: from before records were kept
-		if how == "boss_egg": o["where"] = {"place": "home", "lair": String(r.get("from_boss", ""))}
-		elif how in ["egg", "starter"]: o["where"] = {"place": "home"}
+				if typeof(m) != TYPE_DICTIONARY:
+					continue
+				if String(m.get("kind", "")) == "caught":
+					how = "wild"
+				elif String(m.get("kind", "")) == "taken":
+					how = "taken"
+				elif String(m.get("kind", "")) == "market":
+					how = "market"
+		var o := {"how": how, "where": {}, "t": int(float(r.get("got_t", 0.0)))}  # t 0: from before records were kept
+		if how == "boss_egg":
+			o["where"] = {"place": "home", "lair": String(r.get("from_boss", ""))}
+		elif how in ["egg", "starter"]:
+			o["where"] = {"place": "home"}
 		r["origin"] = o
-		if not r.has("born"): r["born"] = int(o["t"])
+		if not r.has("born"):
+			r["born"] = int(o["t"])
 		r.erase("serial")
 		register(r)
 	d = hold
-	data["log"].append({"t": int(Time.get_unix_time_from_system()), "ev": "migrated", "from": 1, "to": 2, "kin": recs.size()})
+	data["log"].append(
+		{"t": int(Time.get_unix_time_from_system()), "ev": "migrated", "from": 1, "to": 2, "kin": recs.size()}
+	)
+
 
 ## Every string in the save equal to an old id (as a value or a key) becomes the new one.
 static func _rewrite_ids(node, remap: Dictionary):
@@ -482,9 +643,11 @@ static func _rewrite_ids(node, remap: Dictionary):
 		for k in dct.keys():
 			var v = dct[k]
 			var nv = _rewrite_ids(v, remap)
-			if typeof(v) == TYPE_STRING and remap.has(v): nv = remap[v]
+			if typeof(v) == TYPE_STRING and remap.has(v):
+				nv = remap[v]
 			var nk = k
-			if typeof(k) == TYPE_STRING and remap.has(k): nk = remap[k]
+			if typeof(k) == TYPE_STRING and remap.has(k):
+				nk = remap[k]
 			if nk != k:
 				dct.erase(k)
 			dct[nk] = nv
@@ -492,13 +655,17 @@ static func _rewrite_ids(node, remap: Dictionary):
 	if typeof(node) == TYPE_ARRAY:
 		var arr: Array = node
 		for i in arr.size():
-			if typeof(arr[i]) == TYPE_STRING and remap.has(arr[i]): arr[i] = remap[arr[i]]
-			else: _rewrite_ids(arr[i], remap)
+			if typeof(arr[i]) == TYPE_STRING and remap.has(arr[i]):
+				arr[i] = remap[arr[i]]
+			else:
+				_rewrite_ids(arr[i], remap)
 		return arr
 	return node
 
+
 func load_game() -> void:
 	load_from(path_for(slot))
+
 
 ## Loads a save file into d (fresh if there's none), upgrading an older one (a copy of the old
 ## file is written beside it first, <path>.bak-v<n>, unless no_write).
@@ -513,31 +680,33 @@ func load_from(p: String) -> void:
 	if v > VERSION:
 		# from a newer game: leave it alone, and never write over it
 		newer = true
-		push_warning("Save: %s is from a newer version (%d > %d); not loaded, and won't be overwritten" % [p, v, VERSION])
+		push_warning(
+			"Save: %s is from a newer version (%d > %d); not loaded, and won't be overwritten" % [p, v, VERSION]
+		)
 		return
 	if v < VERSION:
 		if not no_write:
 			var bak := FileAccess.open(p + ".bak-v%d" % v, FileAccess.WRITE)
-			if bak: bak.store_string(text)
+			if bak:
+				bak.store_string(text)
 		if not migrate(parsed):
 			return
-	Care.migrate_habits(parsed)      # a record without a habit gets one: holds at any save version
-	BokiQuirks.migrate(parsed)      # a rare-trait kind with no trait roll yet rolls once
-	FirstMatchGuide.migrate(parsed)      # keyed by its own field too
-	CrouchHint.migrate(parsed)      # (the crouch hint is for new players)
-	FarmBuilder.migrate(parsed)      # keyed by its own field: holds if another branch also took v8
-	FirstCapture.migrate(parsed)      # likewise: no version step
-	FirstObjective.migrate(parsed)      # likewise
+	Care.migrate_habits(parsed)  # a record without a habit gets one: holds at any save version
+	BokiQuirks.migrate(parsed)  # a rare-trait kind with no trait roll yet rolls once
+	FirstMatchGuide.migrate(parsed)  # keyed by its own field too
+	CrouchHint.migrate(parsed)  # (the crouch hint is for new players)
+	FarmBuilder.migrate(parsed)  # keyed by its own field: holds if another branch also took v8
+	FirstCapture.migrate(parsed)  # likewise: no version step
+	FirstObjective.migrate(parsed)  # likewise
 	if not parsed.has("snack_picks"):
-		parsed["snack_picks"] = 1      # an older save had its first snack batch: no early 60 s one
+		parsed["snack_picks"] = 1  # an older save had its first snack batch: no early 60 s one
 	for k in parsed:
 		d[k] = parsed[k]
-	Unmasked.migrate(d)      # an old detailed look becomes the closest Unmasked
+	Unmasked.migrate(d)  # an old detailed look becomes the closest Unmasked
 	# JSON numbers come back as floats; plots and roster are fine with that.
 	register_all()
-	Evo.catch_up(d.get("roster", []))     # Boki that were waiting for their next form's art
+	Evo.catch_up(d.get("roster", []))  # Boki that were waiting for their next form's art
 
-var no_write := _tool_run()   # headless checks play with a save without touching the real file
 
 ## Tooling runs (--no-save, checks that ask for it, screenshots) never write the real save file,
 ## from the very first frame (other autoloads may save while starting up).
@@ -549,23 +718,7 @@ static func _tool_run() -> bool:
 			if String(a).begins_with(pre):
 				return true
 	return false
-## Checks that play on a copy of the save (they used to be listed in main.gd).
-const NO_SAVE_FLAGS := [
-	"--archetype-check",
-	"--kit-combo-check",
-	"--mage-combo-check",
-	"--gunslinger-combo-check",
-	"--zone-check",
-	"--dolm-combo-check",
-	"--ostra-combo-check",
-	"--hero-combo-check",
-	"--archer-combo-check",
-	"--bulwark-combo-check",
-	"--arena-check",
-	"--dredge-combo-check",
-	"--ashwick-combo-check",
-]
-var newer := false            # the slot holds a save from a newer game: never overwrite it
+
 
 func save_game() -> void:
 	register_all()
@@ -582,9 +735,11 @@ func save_game() -> void:
 		DirAccess.rename_absolute(full, full + ".prev")
 	DirAccess.rename_absolute(full + ".tmp", full)
 
+
 ## A save file and the two copies a save leaves beside it while swapping (newest first).
 static func _copies(p: String) -> Array:
 	return [p, p + ".tmp", p + ".prev"]
+
 
 ## The newest whole save among a file's copies, "" if none (docs/decisions/0061).
 static func _whole_text(p: String) -> String:
@@ -594,10 +749,12 @@ static func _whole_text(p: String) -> String:
 			return text
 	return ""
 
+
 func reset() -> void:
 	d = fresh()
 	newer = false
 	save_game()
+
 
 # --- roster helpers ---
 func kin(uid: String) -> Dictionary:
@@ -606,9 +763,10 @@ func kin(uid: String) -> Dictionary:
 			return k
 	return {}
 
+
 func active_kin() -> Dictionary:
 	var k := kin(str(d.get("active", "")))
-	if k.is_empty() or not KinLoss.selectable(k):     # (a held Boki stays home: KinLoss)
+	if k.is_empty() or not KinLoss.selectable(k):  # (a held Boki stays home: KinLoss)
 		k = {}
 		for r in d["roster"]:
 			if KinLoss.selectable(r):
@@ -616,6 +774,7 @@ func active_kin() -> Dictionary:
 				d["active"] = k["uid"]
 				break
 	return k
+
 
 ## The second Boki you carry, or {} when you picked none (or the pick is gone, held or the lead). CarryPick sets it.
 func second_kin() -> Dictionary:
@@ -625,28 +784,35 @@ func second_kin() -> Dictionary:
 		return {}
 	return k
 
+
 func remember(k: Dictionary, kind: String, text: String, trust_delta := 0.0) -> void:
 	if k.is_empty():
 		return
 	var mem: Array = k["memory"]
 	var m := int(d.get("matches", 0))
 	# the same care again since the last expedition stays one memory (the trust still counts)
-	var again := mem.slice(-6).any(func(e):
-		return int(e.get("m", -1)) == m and String(e.get("kind", "")) == kind and String(e.get("text", "")) == text)
+	var again := mem.slice(-6).any(
+		func(e):
+			return int(e.get("m", -1)) == m and String(e.get("kind", "")) == kind and String(e.get("text", "")) == text
+	)
 	if not again:
 		mem.append({"m": m, "kind": kind, "text": text})
 	while mem.size() > MAX_MEMORY:
 		mem.pop_front()
 	Care.trust_add(k, trust_delta, Time.get_unix_time_from_system())
 
+
 func has_building(b: String) -> bool:
 	return d.get("buildings", []).has(b)
+
 
 func has_bridge(b: String) -> bool:
 	return d.get("bridges", []).has(b)
 
+
 func add_item(key: String, n: int) -> void:
 	d["items"][key] = int(d["items"].get(key, 0)) + n
+
 
 func add_seed(key: String, n: int) -> void:
 	d["seeds"][key] = int(d["seeds"].get(key, 0)) + n

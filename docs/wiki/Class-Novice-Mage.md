@@ -19,7 +19,7 @@ throws whatever potion comes out of his bag next, and chains crowd control until
 1. **Left click** (Fencer): two quick swordfish thrusts and a longer lunge. Each steps you forward; the third
    slows.
 2. **RMB** (Grab Bag, two charges): throw the next potion from a shuffled bag (Thunder, Slime, Air, Fire, and
-   a rare Super Zeep). The HUD shows which one is next. Hold for 50% more range; in the air it drops at your feet.
+   a rare Geyser). The HUD shows which one is next. Hold for 50% more range; in the air it drops at your feet.
 3. **Shift** (Ground Swim): dive and swim about 6m under the ground. Surfacing next to foes knocks them up.
 4. **E** (Riptide): spin and hit everything around you. Press E again to send a waterspout down the line; the
    longer the spin, the wider and faster the spout.
@@ -71,7 +71,7 @@ What the in-game kit card (K) says.
 
 ### Abilities in full
 
-**Fish Out of Water (passive).** Each different potion effect (shock, slime, gust, fire, Super Zeep) and a full Tide Lunge (soak) puts a splash mark on the foe it hits. Three different marks within 5s Beach them: stunned 0.75s, then the marks clear. Each foe can be Beached once every 8s.
+**Fish Out of Water (passive).** Each different potion effect (shock, slime, gust, fire, Geyser) and a full Tide Lunge (soak) puts a splash mark on the foe it hits. Three different marks within 5s Beach them: stunned 0.75s, then the marks clear. Each foe can be Beached once every 8s.
 
 **Ground Swim (dash, Shift, 8s cooldown).** Dive into the ground and swim about 4.5m in 0.55s, the fin cutting the surface (you can still be hit). Surfacing next to foes (2.2m) knocks them up for half a second.
 
@@ -93,6 +93,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | cooldown 5s -> 4.5s per charge, damage +15%. | cooldown 5s -> 4s, damage +30%. |
 | Dash (Shift) | cooldown 8s -> 7s, surfacing radius +0.3m. | cooldown 8s -> 6s. |
 | E | cooldown 12s -> 10.8s, damage +15%. | cooldown 12s -> 9.6s, damage +30%. |
+| R (ultimate) |  | Tidal Wave does not change (Gil has no source R tiers). |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > RMB > E > Glove (Q).
 

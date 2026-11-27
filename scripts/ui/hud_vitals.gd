@@ -7,15 +7,20 @@ extends RefCounted
 ## archetype resource under that. The ability row sits below the bars (Hud._draw_abilities). Look: HudStyle.
 ## Hud keeps the state that checks read (lvl_pop, xp_pop, armor_lerp, hover_spots); this only draws.
 
-const BAR_W := 318.0       # px: health / armour width
-const HP_H := 16.0         # px: the health bar
-const AR_H := 5.0          # px: the armour strip above it
-const LVL_POP := 0.35      # s: the level-up burst round the portrait
-const XP_POP := 0.4        # s: the pop of the level number and bar when XP lands
-const XP_H := 6.0          # px: the XP bar's height
-const BAR_X := 44.0        # px: where the XP bar starts, right of the LV number
-const XP_FILL_K := 6.0     # 1/s: how fast the shown XP closes on the real XP
+const BAR_W := 318.0  # px: health / armour width
+const HP_H := 16.0  # px: the health bar
+const AR_H := 5.0  # px: the armour strip above it
+const LVL_POP := 0.35  # s: the level-up burst round the portrait
+const XP_POP := 0.4  # s: the pop of the level number and bar when XP lands
+const NOTE_UP := 24.0  # px: the armour hint's baseline over the LV row's (its 24 px card clears LV and the XP bar)
+const NUM_PX := 16  # px: the run level number's size at rest
+const NUM_POP := 0.35  # the number's extra size at the peak of an XP pop
+const NUM_CAP := 0.72  # of the font size: how tall its digits stand over the baseline
+const XP_H := 6.0  # px: the XP bar's height
+const BAR_X := 44.0  # px: where the XP bar starts, right of the LV number
+const XP_FILL_K := 6.0  # 1/s: how fast the shown XP closes on the real XP
 const XP_FILL_MIN := 25.0  # XP/s: the slowest the fill moves, so small gains still finish
+
 
 static func draw(h, sz: Vector2, p: Hunter) -> void:
 	var c: CanvasItem = h.c
@@ -48,11 +53,11 @@ static func draw(h, sz: Vector2, p: Hunter) -> void:
 		var at := "%d" % int(ceil(p.armor))
 		var aw := TextCache.width(HudStyle.BIG, at, 15)
 		HudStyle.text(c, Vector2(x0 + w - aw, y0 + 1), at, 15, p.armor_col())
-		if p.armor_tier > 0:          # the tier's name waits until the first tier-up (TermHints says what it is)
+		if p.armor_tier > 0:  # the tier's name waits until the first tier-up (TermHints says what it is)
 			var tn := String(Hunter.ARMOR_TIERS[p.armor_tier][0]).to_upper()
 			var tw := TextCache.width(HudStyle.BIG, tn, 10)
 			HudStyle.text(c, Vector2(x0 + w - aw - 8 - tw, y0), tn, 10, Color(p.armor_col(), 0.75))
-	ArmorHud.note(h, Vector2(x0, y0 - 26))
+	ArmorHud.note(h, note_at(pr))  # above the LV / XP row, never on it
 	# armour on top (the merged form's shell while merged), health thick and segmented under it, the chip and flash
 	# shared with your overhead plate
 	var ar := Rect2(Vector2(x0, y0 + 6), Vector2(w, AR_H))
@@ -78,11 +83,12 @@ static func draw(h, sz: Vector2, p: Hunter) -> void:
 			HudStyle.strip(c, ar, h.armor_lerp, HudStyle.CHIP)
 			var acol: Color = p.armor_col().lerp(Color.WHITE, h.plates.armor_flash_of(p))
 			c.draw_rect(Rect2(ar.position, Vector2(ar.size.x * af, ar.size.y)), acol)
-	ArmorHud.bar(h, x0, ar.position.y - 3, w, p)    # progress to the next armour tier, a hairline above the strip
-	if p.ak and p.ak.has_meter():
+	ArmorHud.bar(h, x0, ar.position.y - 3, w, p)  # progress to the next armour tier, a hairline above the strip
+	if p.ak and p.ak.has_gauge():
 		h._draw_res_bar(x0, hr.end.y + 4, w, p)
 	xp_row(h, pr, x0, w, p)
 	_hidden_tag(h, sz, p)
+
 
 ## HIDDEN / CROUCHED / SPOTTED over the middle of the bar when you're in grass or crouching.
 static func _hidden_tag(h, sz: Vector2, p: Hunter) -> void:
@@ -98,16 +104,29 @@ static func _hidden_tag(h, sz: Vector2, p: Hunter) -> void:
 		bg = Color(0.05, 0.12, 0.06, 0.85) if grass else Color(0.08, 0.09, 0.12, 0.85)
 	var tw := TextCache.width(HudStyle.BIG, txt, 13)
 	var hr := Rect2(Vector2(sz.x * 0.5 - tw * 0.5 - 12, h._hud_origin(sz).y + 46.0), Vector2(tw + 24, 20))
-	var back := HudScale.begin(h, "status", sz)      # (centred above the bottom row, not part of the left block)
+	var back := HudScale.begin(h, "status", sz)  # (centred above the bottom row, not part of the left block)
 	h._rounded(hr, bg, 10)
 	HudStyle.text(h.c, hr.position + Vector2(12, 15), txt, 13, fg)
 	HudScale.begin(h, back, sz)
+
 
 ## The block's top-right corner: the XP bar's right end and top (popped and shaded). A centre-lane line that
 ## reaches left of it rises above it (HeartHud's Blight line on a narrow 1240 px logical screen).
 static func corner(h, sz: Vector2) -> Vector2:
 	var o: Vector2 = h._hud_origin(sz)
 	return Vector2(o.x + h.HUD_PORTRAIT.x + 16.0 + BAR_W, o.y - 5.0 - 9.0 - 3.0)
+
+
+## Where the armour hint's baseline sits: its box is over the LV / XP row, never on it.
+static func note_at(pr: Rect2) -> Vector2:
+	return Vector2(pr.end.x + 16.0, pr.position.y - 5.0 - NOTE_UP)
+
+
+## The LV / XP row at its tallest (the number popped to its peak), as drawn by xp_row.
+static func level_row(pr: Rect2) -> Rect2:
+	var top := NUM_PX * (1.0 + NUM_POP) * NUM_CAP
+	return Rect2(Vector2(note_at(pr).x, pr.position.y - 5.0 - top), Vector2(BAR_W, top + 5.0))
+
 
 ## The XP tracker on the block's top edge, just above the health number: LV and the run level, then a
 ## thin bar toward Hunter.XP_TO. XP landing (camp or kill) pops the number, brightens the bar and
@@ -127,11 +146,11 @@ static func xp_row(h, pr: Rect2, x0: float, w: float, p: Hunter) -> void:
 		h._rounded(pr.grow(2.0 + lk * 10.0), Color(gold, 0.18 * (1.0 - lk)), 14)
 	var fill := xp_step(h, p, dt)
 	var pop: float = h.xp_pop / XP_POP
-	var sc := 1.0 + 0.35 * sin((1.0 - pop) * PI) if pop > 0.0 else 1.0
+	var sc := 1.0 + NUM_POP * sin((1.0 - pop) * PI) if pop > 0.0 else 1.0
 	var base_y := pr.position.y - 5.0
 	HudStyle.text(c, Vector2(x0, base_y), "LV", 11, HudStyle.MUTED)
 	var num_col := HudStyle.INK.lerp(gold, maxf(pop, 1.0 - lk if h.lvl_pop > 0.0 else 0.0))
-	HudStyle.text(c, Vector2(x0 + 19.0, base_y), lvl_text(p), int(16.0 * sc), num_col)
+	HudStyle.text(c, Vector2(x0 + 19.0, base_y), lvl_text(p), int(NUM_PX * sc), num_col)
 	var bar_x := x0 + BAR_X
 	var rank_ready := p.skill_pts > 0 and Hunter.SLOT_MAX.keys().any(func(s): return p.can_level(s))
 	var pip_w := 22.0 if rank_ready else 0.0
@@ -146,6 +165,7 @@ static func xp_row(h, pr: Rect2, x0: float, w: float, p: Hunter) -> void:
 		c.draw_circle(pts_at, 8.0 + pulse, gold)
 		var pts_txt := "+%d" % p.skill_pts if p.skill_pts > 1 else "+"
 		HudStyle.ctext(c, pts_at + Vector2(0, 4), pts_txt, 11, Color(0.1, 0.07, 0.02), 0)
+
 
 ## Advances the shown XP toward p.xp (so the bar fills through a level-up), starts the gain pop when
 ## XP lands (once per gain) and returns the bar's fill 0..1 within the shown level.
@@ -164,6 +184,7 @@ static func xp_step(h, p: Hunter, dt: float) -> float:
 		return 1.0
 	var a := float(Hunter.XP_TO[i - 1])
 	return clampf((h.xp_shown - a) / (float(Hunter.XP_TO[i]) - a), 0.0, 1.0)
+
 
 static func lvl_text(p: Hunter) -> String:
 	return str(p.lvl)

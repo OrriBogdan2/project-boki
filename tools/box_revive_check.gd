@@ -52,6 +52,9 @@ func _roomy() -> Vector3:
 			for dz in range(-8, 9, 2):
 				if m.world.is_void(g.x + dx, g.z + dz) or absf(m.world.ground_at(g.x + dx, g.z + dz) - g.y) > 0.3:
 					flat = false
+				else:        # a solid (a stall, a prop) in reach would shove the reviver off the box
+					var at := Vector2(g.x + dx, g.z + dz)
+					flat = flat and m.world.push_out_blocks(at.x, at.y, 0.6, g.y).distance_to(at) < 0.01
 		if flat and m.beacons.all(func(bc): return g.distance_to(bc["pos"]) > 12.0):
 			return g
 	return m.world.random_ground()
@@ -260,6 +263,15 @@ func _beacon(a: Hunter, b: Hunter, c: Hunter, foe: Hunter) -> void:
 		"the beacon brings back both dead teammates at once after %.1fs (want %.1fs)" % [took, Beacons.time_s()])
 	ok(bc["used"] and not bc["lit"] and not Sfx.loop_on(key), "single use, and quiet again")
 	ok(b.sick_t > 0.0 and c.sick_t > 0.0, "with resurrection sickness")
+	# reference tuning: 3 s after coming back, no stun / root / slow lands; after that they do
+	b.inv_t = 0.0
+	b.hurt(1.0, foe, {"src": "abil", "stun": 1.0, "root": 1.0, "slow": 1.0})
+	ok(b.stun_t == 0.0 and b.root_t == 0.0 and b.slow_t == 0.0 and b.hp < b.max_hp,
+		"a revived Hunter takes the hit but no stun, root or slow (%.1fs guard)" % b.cc_guard_t)
+	_run(float(Life.R["cc_guard"]) + 0.2)
+	b.inv_t = 0.0
+	b.hurt(1.0, foe, {"src": "abil", "stun": 1.0, "root": 1.0, "slow": 1.0})
+	ok(b.stun_t > 0.0 and b.root_t > 0.0 and b.slow_t > 0.0, "and after the guard ends they land again")
 	# a "used" event from another game brings back the dead Hunters this game owns
 	var bc2: Dictionary = m.beacons[1]
 	m.eliminate(b, null, "finished")

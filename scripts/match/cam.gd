@@ -1,7 +1,7 @@
 class_name CamRig
 extends Camera3D
-## The match camera: high, far and narrow, centred on you (the footage shows no cursor lean: docs/MOVEMENT_FEEL.md
-## "Camera lead"). Only the Standard and Dynamic follow presets lean toward the cursor.
+## The match camera: high, far and narrow. By default it slides toward the cursor ("pan", the target feel's data);
+## Centred and Locked stay on you, the other presets lean as their rows say (docs/MOVEMENT_FEEL.md "Camera lead").
 
 const HEIGHT := 27.0
 const BACK := 17.5
@@ -13,10 +13,10 @@ const GLIDE_LEAD_MAX := 1.8  # ...capped (m)
 const GLIDE_LEAD_EASE := 6.0  # 1/s: the lean's spring (critically damped), so it eases in and out with no kick at
 # the glider opening or closing (a plain lerp started at full speed)
 
-## The view in play. Gliding opens it up and height pulls it back further, so you see where you'll
-## land; a plunge (GlideDive) holds it open rather than closing in as you drop. Jumps and falls without
-## the glider never change the framing. Landing eases it back (follow eases zoom toward this, no pop).
-const GLIDE_ZOOM := 1.25  # x the distance under the glider [spec] +15..25% boom in the air
+## The view in play. Gliding opens it up (zoom.match.glide_m) and height pulls it back further, so you see where you'll
+## land; a plunge (GlideDive) holds it open rather than closing in as you drop. Below the map's lip the abyss opens it
+## up too (zoom.match.abyss). Jumps and falls without the glider never change the framing. Landing eases it back
+## (follow eases zoom toward this, no pop).
 const ALT_ZOOM_FROM := 4.0  # m above the ground where height starts pulling the view back...
 const ALT_ZOOM_SPAN := 24.0  # ...m more for each +100%...
 const ALT_ZOOM_MAX := 0.7  # ...up to +70%
@@ -63,10 +63,12 @@ static var scout: Dictionary = rules["scout"]
 ## ground, a wider screen less ahead and behind, a narrower one more (frame_fov).
 static var frame_aspect: float = rules["frame_aspect"]
 
-## Cursor panning: [deadzone, maxzone, pan distance, camera speed, quadratic easing]. Centred (the default)
+## Cursor panning: [deadzone, maxzone, pan distance, camera speed, quadratic easing]. Pan (the default) slides toward
+## the cursor on a critically damped spring (the speed is its omega) over an ellipse of reaches (pan_ext); Centred
 ## stays on you; lean leans toward the cursor in proportion to how far it is from YOU, past a deadzone, eased,
 ## and capped so you never leave the screen (lean_to). Locked stays centred on you.
 static var follow_v: Dictionary = rules["follow"]
+static var pan_ext: Dictionary = rules["pan"]  # m the pan reaches sideways (side_m) and at the bottom edge (down_m)
 
 ## Follow across, the source's (content/rules/camera.json "trail" [footage]): tight at a run, trailing a
 ## dash and easing in at a steady deceleration, cut on a teleport. Softer up and down (FOLLOW_Y) so falls and
@@ -86,7 +88,7 @@ var shake_left := 0.0
 var shake_total := 0.0  # seconds of shake run so far (the shake check reads it)
 var zoom := 1.0
 var zoom_to := 1.0
-var user_zoom: float = CamWheel.far()  # the mouse wheel (CamWheel), widest at the start; times the match's zoom
+var user_zoom: float = CamWheel.far(true)  # the mouse wheel (CamWheel), widest at the start; times the match's zoom
 var lead := 1.0
 var pull := 0.0  # a quick pull-back (a dash into a glide)
 var top := 0.0  # 0 = the usual angle, 1 = looking straight down (the opening drop)
@@ -99,8 +101,11 @@ var yaw := 0.0  # turned around the focus (0 = looking north); only the skyship 
 var yaw_to := 0.0
 var chase := 0.0  # 0 = the usual angle, 1 = low behind-the-ship view
 var chase_to := 0.0
-var follow_mode := "centred"
+var follow_mode := "pan"
 var pan := Vector3.ZERO
+var pan_v := Vector3.ZERO  # m/s: how fast the pan spring moves
+var zoom_v := 0.0  # 1/s: how fast the arm spring moves (only with zoom_omega)
+var zoom_omega := 0.0  # rad/s of the arm length's critically damped spring; 0 = the old exponential ease (the farm)
 var base := Vector3.ZERO  # the followed point, before the cursor pan
 var last_want := Vector3.ZERO  # the followed point last frame (the cut test)
 var lead_vel := Vector3.ZERO
@@ -131,13 +136,26 @@ var dist_mul := 1.0
 ## style, see Hunter.fit_scale).
 var hunter_scale := 1.0
 
+## How much of CHAR_LEAN the bodies get: the farm's low third-person view (FarmCam) fades it out; a match keeps 1.
+var lean_scale := 1.0
+
 
 func air_zoom(h: Hunter, alt: float) -> float:
-	var z := GLIDE_ZOOM if h.gliding else 1.0
 	# Ctrl on the ground: a wide look around, past the wheel's range wherever the wheel was left
-	z *= CamWheel.look_zoom(user_zoom, h.crouch and h.grounded)
+	var z := CamWheel.look_zoom(user_zoom, h.crouch and h.grounded, true)
+	var more := float(CamWheel.rules(true)["glide_m"]) if h.gliding else 0.0
+	z += (more + _abyss_m(h.lip_y - h.pos.y)) / dist
 	z = minf(z * (1.0 + clampf((alt - ALT_ZOOM_FROM) / ALT_ZOOM_SPAN, 0.0, ALT_ZOOM_MAX)), CamWheel.cap())
 	return maxf(z, zoom) if h.glide_dive.on else z
+
+
+## Metres the arm grows `deep` metres under the map's lip: a ramp over the abyss rows' from_m..to_m, none for less.
+static func _abyss_m(deep: float) -> float:
+	var ab: Dictionary = CamWheel.rules(true)["abyss"]
+	if deep < float(ab["from_m"]):
+		return 0.0
+	var t := minf(1.0, (deep - float(ab["from_m"])) / (float(ab["to_m"]) - float(ab["from_m"])))
+	return lerpf(float(ab["add_from_m"]), float(ab["add_to_m"]), t)
 
 
 static func _load_rules() -> Dictionary:
@@ -162,6 +180,8 @@ func use_style(id: String) -> void:
 ## alone: the home has no match Hunters to scale, so it keeps the Supervive view.
 func apply_settings() -> void:
 	follow_mode = String(Settings.get_v("cam_follow"))
+	if follow_mode == "pan":
+		follow_mode = "centred"  # the cursor pan is the match's: the farm's camera stays as it was
 	var sty := String(Settings.get_v("cam_style"))
 	if (styles.get(sty, {}) as Dictionary).has("hunter_scale"):
 		sty = "default"
@@ -193,6 +213,7 @@ func snap(p: Vector3) -> void:
 	base = p
 	last_want = p
 	pan = Vector3.ZERO
+	pan_v = Vector3.ZERO
 	lead_off = Vector3.ZERO
 	lead_v = Vector3.ZERO
 	_apply(Vector3.ZERO)
@@ -329,7 +350,7 @@ func cast_wide() -> float:
 
 func rumble(amp: float, secs: float) -> void:
 	shake_amp = maxf(shake_amp, amp)
-	shake_left = maxf(shake_left, minf(secs, Shake.MAX_SECS))
+	shake_left = maxf(shake_left, minf(secs, Shake.door("max_secs")))
 
 
 ## The cursor lean for a cursor `rel` metres from you on the ground: a share of the distance past the
@@ -362,7 +383,13 @@ func cursor_pan(at: Vector2, p: Vector3) -> Vector3:
 	var f := clampf((l - float(fm[0])) / (float(fm[1]) - float(fm[0])), 0.0, 1.0)
 	if fm[4]:
 		f *= f
-	return Vector3(rel.x / l, 0, rel.y / l).rotated(Vector3.UP, yaw) * f * float(fm[2]) * lead
+	var way := Vector2(rel.x / l, rel.y / l)
+	if follow_mode != "pan":
+		return Vector3(way.x, 0, way.y).rotated(Vector3.UP, yaw) * f * float(fm[2]) * lead
+	var vert := float(pan_ext["down_m"]) if way.y > 0.0 else float(fm[2])
+	var reach := Vector3(float(pan_ext["side_m"]) * way.x, 0, vert * way.y)
+	var want := reach.rotated(Vector3.UP, yaw) * f * lead
+	return want.limit_length(maxf(0.0, _cast_room(Vector2(want.x, want.z).normalized(), 0.0)))
 
 
 func skydive(p: Vector3, heading: float, alt: float, delta: float) -> void:
@@ -380,13 +407,17 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 	var lean_k := float(rr[2])
 	var fm: Array = follow_v.get(follow_mode, follow_v["centred"])
 	var want_pan := cursor_pan(get_viewport().get_mouse_position(), p) if mouse_lead else Vector3.ZERO
-	if follow_mode == "centred" and mouse_lead:
-		pan = pan.lerp(want_pan, 1.0 - exp(-float(fm[3]) * lean_k * delta))
-	if follow_mode == "centred" and mouse_lead:
-		pass  # (eased above)
+	if follow_mode == "pan" and mouse_lead:
+		var gone := pan - want_pan  # a critically damped spring: no overshoot however slow the frame
+		var kick := pan_v + gone * float(fm[3]) * lean_k
+		var damp := exp(-float(fm[3]) * lean_k * delta)
+		pan = want_pan + (gone + kick * delta) * damp
+		pan_v = (pan_v - kick * float(fm[3]) * lean_k * delta) * damp
 	elif not mouse_lead or float(fm[3]) <= 0.0:
+		pan_v = Vector3.ZERO
 		pan = want_pan if mouse_lead else pan.lerp(Vector3.ZERO, minf(1.0, delta * 6.0))
 	else:
+		pan_v = Vector3.ZERO
 		pan = pan.lerp(want_pan, 1.0 - exp(-float(fm[3]) * lean_k * delta))
 	if follow_mode == "dynamic" and mouse_lead and not Record.clean():
 		pan = want_pan
@@ -411,7 +442,14 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 	_tick_cast(delta)
 	_tick_scout(delta, mouse_lead)
 	focus = base + pan.lerp(cast_pan, cast_k).lerp(scout_pan, scout_k) + lead_off
-	zoom = lerpf(zoom, zoom_to, 1.0 - exp(-float(rr[3]) * delta))
+	if zoom_omega > 0.0 and not Record.clean():
+		var gone := zoom - zoom_to  # the arm length's critically damped spring
+		var kick := zoom_v + gone * zoom_omega
+		var damp := exp(-zoom_omega * delta)
+		zoom = zoom_to + (gone + kick * delta) * damp
+		zoom_v = (zoom_v - kick * zoom_omega * delta) * damp
+	else:
+		zoom = lerpf(zoom, zoom_to, 1.0 - exp(-float(rr[3]) * delta))
 	top = move_toward(top, top_to, delta * (0.9 if top_to < top else 2.0))
 	chase = move_toward(chase, chase_to, delta * 0.7)
 	yaw = lerp_angle(yaw, yaw_to, minf(1.0, delta * 1.6))
@@ -464,15 +502,15 @@ func _apply(shake: Vector3) -> void:
 func char_lean() -> Basis:
 	var k := top * top * (3.0 - 2.0 * top)
 	var c := chase * chase * (3.0 - 2.0 * chase)
-	var a := CHAR_LEAN * (1.0 - k) * (1.0 - c)
+	var a := CHAR_LEAN * (1.0 - k) * (1.0 - c) * lean_scale
 	if a < 0.001:
 		return Basis()
 	return Basis(Vector3.RIGHT.rotated(Vector3.UP, yaw + Record.orbit_yaw), -a)
 
 
-## A body's basis: leaned toward the camera (char_lean), then turned to `face`, keeping its scale.
-func char_basis(face: float, scl: Vector3) -> Basis:
-	return char_lean() * Basis(Vector3.UP, face).scaled_local(scl)
+## A body's basis: leaned toward the camera (char_lean) unless `lean` is off, then turned to `face`, keeping its scale.
+func char_basis(face: float, scl: Vector3, lean := true) -> Basis:
+	return (char_lean() if lean else Basis()) * Basis(Vector3.UP, face).scaled_local(scl)
 
 
 ## The mouse's ray into the world: [origin, direction]. A ground-targeted move reads this, not inp["aim"] (that is the
@@ -493,6 +531,8 @@ func _plane_at(mp: Vector2, y: float) -> Vector3:
 	if absf(d.y) < 0.0001:
 		return focus
 	var t := (y - o.y) / d.y
+	if t < 0.0:
+		return focus  # looking above the horizon: no ground there (the low farm view)
 	return o + d * t
 
 

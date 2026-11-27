@@ -104,7 +104,7 @@ the farm top bar (y 24) and key hints (y 679). Decide the safe-area size before 
 Retired terms (Warden, Mantle, Bearer, Merge, Unmasked) were not seen on any first-15 screen. Terms that appear before any line explains them:
 - **Creator:** Shroud, Hollow, Glow, Ghost, Aura (shown on screen 05; "You are one of the Empty" is the only line).
 - **Hatch:** egg types Venom / Prism / Spore, "BOLD / GENTLE / CURIOUS" tags (06).
-- **Tutorial HUD (from the first frame):** Fever (resource bar), FIGHTING / FOLLOW (status under the portrait), COMMON / UNCOMMON (armour tier), AUTO, "from Boki",
+- **Tutorial HUD (from the first frame):** Fever (buff icon), FIGHTING / FOLLOW (status under the portrait), COMMON / UNCOMMON (armour tier), AUTO, "from Boki",
   "CARRY OFF FOLLOW", "Relics / Leave" bar and the key `J`, the glider strip (4 unlabeled icons), belt slots 1-4, Q V X, "Box 0/3", seeds, the weapon class label
   "THE HIRED GUN · MEDIUM". Toasts name perks before any perk is explained: "Kindling!", "LEVEL 6 · Deep Magazine", "Quick Feed, Hotload".
 - **Results:** Knocks, Armor "Uncommon", Tidebloom seeds, "Into your armory", the name line "Hunter the Hired Gun" (the default player name is "Hunter").
@@ -281,8 +281,8 @@ Not changed (still on screen, each one group): the key row (folds after 3 uses o
 `ExpFold.first_visit()` (`scripts/home/exp_fold.gd`): true while the first Where is the only one open (`extracts` below the second Where's unlock).
 Then the **expedition panel** shows the picked Relic, the open Where and Start; "All Relics (n)", "Locked drops (n)" and "More: Boki, match and modes"
 fold the other Relics, the locked Wheres, and Boki you bring, loadout, Match, Conditions and the Training Grounds / Play online links (the links
-move from the footer into that fold). The **Relics page** shows the picked and the open or ready Relics; "Locked Relics (n)" folds the rest. With a
-second Where open nothing is folded. The Relics tiles are now 2 columns of 214 px (was 3 of 140 px, names wrapped to two lines), so each full name
+move from the footer into that fold). The **Relics page** (Hunters screen) never folds: every Hunter shows, locked ones dim with their
+challenge progress (11-23: a new save showed one tile and a "Locked Relics" button; the owner read it as one Hunter). The Relics tiles are now 2 columns of 214 px (was 3 of 140 px, names wrapped to two lines), so each full name
 fits on one line. `--relics-fold-check` asserts the folds and that no Relic name is cut or wrapped at 1280x720 on either screen.
 
 Shots (1280x720, software renderer on rpc4, the same save as section 1): [expedition before](shots/ui-relics-grid/before_expedition.jpg) /

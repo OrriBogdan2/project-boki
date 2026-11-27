@@ -3,10 +3,35 @@ extends RefCounted
 ## The loading screen's last step (Match.warm_up): draws what the match will draw, so the GPU builds its
 ## shaders before play.
 
+## Stand-ins drawn in the first batch of warm_up; later batches grow while a batch's frames stay
+## cheap and shrink when one costs more than FRAME_MS over a plain frame (a first draw is
+## where a GPU compiles a shader), down to BATCH_MIN. Only how many frames the warm-up takes depends
+## on it. From a cold shader cache a batch of 8 was a 400-560 ms frame on an RTX 4070, but batches of 1-2
+## doubled an M5's warm-up (eight frames a batch, each ~30 ms with the map loaded; item 33).
+const BATCH := 4
+
+const BATCH_MIN := 2
+
+const FRAME_MS := 45.0
+
+const SWEEP_PER_FRAME := 2
+
+const MOB_DEPTH := -600.0  # m: under every island and the void floor, so no view draws them
+
+## The render layer warm_up's stand-ins draw on (nothing else in the game uses it).
+const LAYER := 1 << 19
+
+static var _mat_keys := {}
+
+## A shader by its code (the same on every launch, unlike its instance id: WarmStamp keeps these keys).
+static var _code_hashes := {}
+
 var m: Match
+
 
 func _init(match_node: Match) -> void:
 	m = match_node
+
 
 ## Under the loading screen: draws every material in the match once on tiny stand-ins (a batch a
 ## frame, see _batches), then the m.world once from far above (every island, prop, wall, cloud
@@ -22,7 +47,8 @@ func run(progress := Callable()) -> void:
 	var keep := [m.cam.global_transform, m.cam.fov, m.cam.far]
 	var ctr := Vector3(m.world.w * 0.5, 0.0, m.world.h * 0.5)
 	var ground := ctr
-	if m.player and m.player.ai.has("land"): ground = m.player.ai["land"]
+	if m.player and m.player.ai.has("land"):
+		ground = m.player.ai["land"]
 	ground.y = m.world.ground_at(ground.x, ground.z) if not m.world.is_void(ground.x, ground.z) else 0.0
 	var views := [
 		[ctr + Vector3(0, maxf(m.world.w, m.world.h) * 1.05, maxf(m.world.w, m.world.h) * 0.4), ctr, 62.0, 900.0],
@@ -50,20 +76,25 @@ func run(progress := Callable()) -> void:
 				pn.call("_make_stars")
 				break
 		break
-	if m.player: m.player.warm_marker()      # and the hit-marker balloon over a Hunter
-	if m.ways_vfx: m.ways_vfx.prebuild()     # and the way-out seats' beacons (built on the match's first tick)
-	if m.fx: KinTypeTrail.of(m.fx)     # and the Boki type trails (made when the first Boki is drawn)
-	var seen := WarmStamp.warm_keys()      # what an earlier launch drew and the disk caches still hold
+	if m.player:
+		m.player.warm_marker()  # and the hit-marker balloon over a Hunter
+	if m.ways_vfx:
+		m.ways_vfx.prebuild()  # and the way-out seats' beacons (built on the match's first tick)
+	if m.fx:
+		KinTypeTrail.of(m.fx)  # and the Boki type trails (made when the first Boki is drawn)
+	var seen := WarmStamp.warm_keys()  # what an earlier launch drew and the disk caches still hold
 	var stamped := seen.size()
 	var t0 := Time.get_ticks_msec()
 	var batch_cb := func(f: float) -> void:
-		if progress.is_valid(): progress.call(0.7 * f)
-	var later: Array = []      # (stand-ins for the planning phase: _sweep_later)
+		if progress.is_valid():
+			progress.call(0.7 * f)
+	var later: Array = []  # (stand-ins for the planning phase: _sweep_later)
 	var mob_warm := _mob_stand_ins(later)
-	var aim_warm := _aim_stand_in()      # (item 94c: the aim kit's one material draws only once somebody aims)
+	var aim_warm := _aim_stand_in()  # (item 94c: the aim kit's one material draws only once somebody aims)
 	var batched: bool = await _batches(batch_cb, seen)
 	var t_first := Time.get_ticks_msec()
-	if is_instance_valid(aim_warm): aim_warm.queue_free()
+	if is_instance_valid(aim_warm):
+		aim_warm.queue_free()
 	# the mob and shader stand-ins stay, out of sight and still: freeing them cost the first view frame 0.5-0.7 s
 	# (rp2g, cold cache), and their shaders stay built for the mobs and effects that use them later
 	mob_warm.visible = false
@@ -104,13 +135,15 @@ func run(progress := Callable()) -> void:
 		m.fx.end_telegraph(tg)
 		if not m.is_inside_tree():
 			return
-		if progress.is_valid(): progress.call(0.7 + 0.2 * (vi + 1) / views.size())
+		if progress.is_valid():
+			progress.call(0.7 + 0.2 * (vi + 1) / views.size())
 	HeroVfx.of(m).prewarm_end()
 	var t_views := Time.get_ticks_msec()
 	# and the materials that only exist now (the effects just shown, the shots), the same way: a
 	# telegraph is held up for it (the views' own are gone by now)
 	var late_cb := func(f: float) -> void:
-		if progress.is_valid(): progress.call(0.9 + 0.1 * f)
+		if progress.is_valid():
+			progress.call(0.9 + 0.1 * f)
 	var late_at := m.cam.global_position - m.cam.global_transform.basis.z * 6.0
 	var tg_late := m.fx.telegraph_circle(late_at, 1.5, Color(1, 0.3, 0.2))
 	# (and a still copy of a melee swoosh: the real one frees itself in a fifth of a second)
@@ -124,16 +157,23 @@ func run(progress := Callable()) -> void:
 	if not batched:
 		return
 	m.fx.end_telegraph(tg_late)
-	if swoosh: swoosh.queue_free()
-	for sm in shown: (sm as MeshInstance3D).visible = false
-	if m.muzzle_light: m.muzzle_light.light_energy = 0.0
+	if swoosh:
+		swoosh.queue_free()
+	for sm in shown:
+		(sm as MeshInstance3D).visible = false
+	if m.muzzle_light:
+		m.muzzle_light.light_energy = 0.0
 	RenderingServer.global_shader_parameter_set("vis_on", 0.0)
 	m.cam.global_transform = keep[0]
 	m.cam.fov = keep[1]
 	m.cam.far = keep[2]
 	var t_end := Time.get_ticks_msec()
-	PerfLog.note("warm-up ms: stand-ins %d, views %d, late %d (%d of %d keys warm from the stamp)"
-			% [t_first - t0, t_views - t_first, t_end - t_views, stamped, seen.size()])
+	PerfLog.note(
+		(
+			"warm-up ms: stand-ins %d, views %d, late %d (%d of %d keys warm from the stamp)"
+			% [t_first - t0, t_views - t_first, t_end - t_views, stamped, seen.size()]
+		)
+	)
 	WarmStamp.save(seen)
 	PerfLog.mark("build.warm_up")
 	# the benchmark: a few frames of the opening view
@@ -142,7 +182,8 @@ func run(progress := Callable()) -> void:
 	for i in 8:
 		await m.get_tree().process_frame
 		var now := Time.get_ticks_usec()
-		if i >= 2: times.append((now - last) / 1000.0)
+		if i >= 2:
+			times.append((now - last) / 1000.0)
 		last = now
 	times.sort()
 	if not times.is_empty():
@@ -157,20 +198,14 @@ func run(progress := Callable()) -> void:
 			m.add_child(dot)
 			dot.position = Vector3(0, MOB_DEPTH, 0)
 			await _batches(func(_f: float) -> void: pass, {})
-			if is_instance_valid(dot): dot.queue_free()
+			if is_instance_valid(dot):
+				dot.queue_free()
 			WarmStamp.save(seen)
 	await DashPace.rehearse(m)
 	PerfLog.skip()
-	if not later.is_empty(): _sweep(m, later)      # (not awaited: it runs on into the planning phase)
+	if not later.is_empty():
+		_sweep(m, later)  # (not awaited: it runs on into the planning phase)
 
-## Stand-ins drawn in the first batch of warm_up; later batches grow while a batch's frames stay
-## cheap and shrink when one costs more than FRAME_MS over a plain frame (a first draw is
-## where a GPU compiles a shader), down to BATCH_MIN. Only how many frames the warm-up takes depends
-## on it. From a cold shader cache a batch of 8 was a 400-560 ms frame on an RTX 4070, but batches of 1-2
-## doubled an M5's warm-up (eight frames a batch, each ~30 ms with the map loaded; item 33).
-const BATCH := 4
-const BATCH_MIN := 2
-const FRAME_MS := 45.0
 
 ## The stand-ins of warm_up, a batch a frame, each batch drawn once under each light setup.
 ## False if the match went away meanwhile.
@@ -190,11 +225,13 @@ func _mob_stand_ins(later: Array) -> Node3D:
 	else:
 		for mk: Callable in makers:
 			var nd: Node3D = mk.call()
-			if nd: holder.add_child(nd)
+			if nd:
+				holder.add_child(nd)
 	# and a squad's drop rocket (built at launch, in the ride), and the soft dot's particles
 	holder.add_child(DropRocket.model(Color.WHITE))
 	holder.add_child(_dot_stand_in())
 	return holder
+
 
 ## What _mob_stand_ins makes, one Callable (-> Node3D or null) each: a model of each roaming mob kind not in the
 ## match yet, the kit effect libraries' own shaders, which a kit's first cast built mid-play (LDFx on the bench's
@@ -207,7 +244,8 @@ func _makers() -> Array:
 	var out: Array = []
 	var have := {}
 	for mb in m.mobs:
-		if is_instance_valid(mb): have[(mb as Mob).mkind] = true
+		if is_instance_valid(mb):
+			have[(mb as Mob).mkind] = true
 	for k in Data.MOBS:
 		var md: Dictionary = Data.MOBS[k]
 		if have.has(k) or md.get("boss", false) or md.get("ward", false):
@@ -219,14 +257,17 @@ func _makers() -> Array:
 		out.append(func() -> Node3D: return _shader_quad(fn))
 	return out
 
+
 ## A kit effect library's spatial shaders on quads, each with an emitter per particle shader of the library.
 static func _lib_quads(lib: Script) -> Node3D:
 	var box := Node3D.new()
 	var spatial: Array[Shader] = []
 	var particles: Array[Shader] = []
 	for v in lib.get_script_constant_map().values():
-		if v is Shader and (v as Shader).get_mode() == Shader.MODE_SPATIAL: spatial.append(v)
-		elif v is Shader and (v as Shader).get_mode() == Shader.MODE_PARTICLES: particles.append(v)
+		if v is Shader and (v as Shader).get_mode() == Shader.MODE_SPATIAL:
+			spatial.append(v)
+		elif v is Shader and (v as Shader).get_mode() == Shader.MODE_PARTICLES:
+			particles.append(v)
 	for sh in spatial:
 		var mi := MeshInstance3D.new()
 		mi.mesh = _fx_quad(sh)
@@ -242,13 +283,16 @@ static func _lib_quads(lib: Script) -> Node3D:
 			box.add_child(p)
 	return box
 
+
 ## The shader files of res://shaders (their imported names).
 static func _shader_files() -> PackedStringArray:
 	var out := PackedStringArray()
 	for f in DirAccess.get_files_at("res://shaders"):
 		var fn := f.trim_suffix(".remap")
-		if fn.ends_with(".gdshader"): out.append(fn)
+		if fn.ends_with(".gdshader"):
+			out.append(fn)
 	return out
+
 
 ## A stand-in for one shader file: a quad with it (a particle shader in an emitter), or null.
 static func _shader_quad(fn: String) -> Node3D:
@@ -270,6 +314,7 @@ static func _shader_quad(fn: String) -> Node3D:
 		return p
 	return null
 
+
 ## True when _makers' stand-ins wait for the planning phase. On Forward+ and Mobile a new shader compiles on the
 ## first frame that draws 3D after its material exists, seen or not: under the loading screen the mob models and
 ## the ~80 shader files were two frames of 0.5-1 s (rp2g, cold cache), for mobs that spawn after landing and
@@ -277,10 +322,8 @@ static func _shader_quad(fn: String) -> Node3D:
 ## instead, a few a frame, before anyone can land, fight or cast. Compatibility compiles a shader only when it
 ## draws, so there they stay among the stand-ins.
 func _sweep_later() -> bool:
-	return RenderingServer.get_current_rendering_driver_name() != "opengl3" and m.skydrop != null \
-			and m.skydrop.planning
+	return RenderingServer.get_current_rendering_driver_name() != "opengl3" and m.skydrop != null and m.skydrop.planning
 
-const SWEEP_PER_FRAME := 2
 
 ## The stand-ins _sweep_later held back, SWEEP_PER_FRAME a frame, below the map, kept and still.
 static func _sweep(mt: Match, makers: Array) -> void:
@@ -296,9 +339,19 @@ static func _sweep(mt: Match, makers: Array) -> void:
 			if not is_instance_valid(mt) or not mt.is_inside_tree():
 				return
 		var nd: Node3D = (makers[i] as Callable).call()
-		if nd: holder.add_child(nd)
-	PerfLog.note("warm-up: %d stand-ins built in the planning phase over %d ms%s" % [makers.size(),
-			Time.get_ticks_msec() - t0, "" if mt.skydrop == null or mt.skydrop.planning else " (past its end)"])
+		if nd:
+			holder.add_child(nd)
+	PerfLog.note(
+		(
+			"warm-up: %d stand-ins built in the planning phase over %d ms%s"
+			% [
+				makers.size(),
+				Time.get_ticks_msec() - t0,
+				"" if mt.skydrop == null or mt.skydrop.planning else " (past its end)"
+			]
+		)
+	)
+
 
 ## Particles drawn with FxDot's material (a Boki wisp's trail): its shader is made again with other code when the
 ## settings go low (Settings.lite), so after a quality step the redraw needs a new one of these.
@@ -310,6 +363,7 @@ func _dot_stand_in() -> CPUParticles3D:
 	p.material_override = FxDot.material()
 	return p
 
+
 static func _fx_quad(sh: Shader) -> QuadMesh:
 	var q := QuadMesh.new()
 	var mt := ShaderMaterial.new()
@@ -317,10 +371,9 @@ static func _fx_quad(sh: Shader) -> QuadMesh:
 	q.material = mt
 	return q
 
-const MOB_DEPTH := -600.0      # m: under every island and the void floor, so no view draws them
 
 ## The aim kit (AimKit: every kit's aim lines, rings and the Hem draw's fill line and perfect circle) draws one
-## ImmediateMesh that is empty until a Hunter aims, so the scan below never sees its material and the first
+## ArrayMesh that is empty until a Hunter aims, so the scan below never sees its material and the first
 ## aim after landing compiled its shader mid-play. A one-triangle mesh with the same material and vertex
 ## format stands in for it for the warm-up.
 func _aim_stand_in() -> MeshInstance3D:
@@ -339,6 +392,7 @@ func _aim_stand_in() -> MeshInstance3D:
 	mi.visible = false
 	m.add_child(mi)
 	return mi
+
 
 func _batches(progress: Callable, seen: Dictionary) -> bool:
 	# the camera sees only the stand-ins meanwhile (their own render layer), from the scan on: the
@@ -418,7 +472,8 @@ func _batches(progress: Callable, seen: Dictionary) -> bool:
 				worst = maxf(worst, (now - t0) / 1000.0)
 				t0 = now
 		batches += 1
-		for px in pxs: (px as Node).queue_free()
+		for px in pxs:
+			(px as Node).queue_free()
 		i += batch.size()
 		progress.call(float(i) / list.size())
 		var extra := worst - plain
@@ -431,16 +486,19 @@ func _batches(progress: Callable, seen: Dictionary) -> bool:
 		if is_instance_valid(lights[li]):
 			(lights[li] as Light3D).layers = keep_layers[li]
 			(lights[li] as Light3D).light_cull_mask = keep_cull[li]
-	for l in wl: (l as Node).queue_free()
+	for l in wl:
+		(l as Node).queue_free()
 	m.cam.cull_mask = keep_mask
 	PerfLog.note("warm-up: %d stand-ins in %d batches" % [list.size(), batches])
 	return m.is_inside_tree()
 
-## The render layer warm_up's stand-ins draw on (nothing else in the game uses it).
-const LAYER := 1 << 19
+
 func _to_layer(px: Node) -> void:
-	if px is VisualInstance3D: (px as VisualInstance3D).layers = LAYER
-	for ch in px.get_children(): _to_layer(ch)
+	if px is VisualInstance3D:
+		(px as VisualInstance3D).layers = LAYER
+	for ch in px.get_children():
+		_to_layer(ch)
+
 
 ## One instance of each material and kind of geometry in the match (see _key) not in seen yet,
 ## for warm_up's stand-ins (adds them to seen). Walks the tree a slice at a time so the loading
@@ -458,7 +516,8 @@ func _sources(seen: Dictionary) -> Array:
 		var n = stack.pop_back()
 		if not is_instance_valid(n):
 			continue
-		for ch in (n as Node).get_children(): stack.append(ch)
+		for ch in (n as Node).get_children():
+			stack.append(ch)
 		if n is Skeleton3D:
 			# skinned meshes run a skinning shader of their own, first when one is drawn: a copy of
 			# one rig of each make (its meshes follow it, their skeleton path is relative)
@@ -478,6 +537,7 @@ func _sources(seen: Dictionary) -> Array:
 			break
 	return list
 
+
 ## What decides which shader variants an instance compiles: the kind of geometry and each surface's
 ## shader (a StandardMaterial3D by the features its generated shader depends on). Empty: draws nothing.
 static func _key(gi: GeometryInstance3D) -> String:
@@ -487,7 +547,8 @@ static func _key(gi: GeometryInstance3D) -> String:
 		mesh = (gi as MeshInstance3D).mesh
 	elif gi is MultiMeshInstance3D:
 		var mm := (gi as MultiMeshInstance3D).multimesh
-		if mm == null: return ""
+		if mm == null:
+			return ""
 		mesh = mm.mesh
 		kind += "%d%d%d" % [mm.transform_format, int(mm.use_colors), int(mm.use_custom_data)]
 	elif gi is CPUParticles3D:
@@ -499,9 +560,18 @@ static func _key(gi: GeometryInstance3D) -> String:
 		kind += ">" + _mat_key(gp.process_material)
 	elif gi is Label3D or gi is Sprite3D:
 		var sb := gi as GeometryInstance3D
-		var parts: Array = [kind, sb.get("billboard"), sb.get("shaded"), sb.get("double_sided"),
-				sb.get("no_depth_test"), sb.get("fixed_size"),
-			sb.get("alpha_cut"), sb.get("texture_filter"), sb.get("transparent"), _mat_key(sb.material_override)]
+		var parts: Array = [
+			kind,
+			sb.get("billboard"),
+			sb.get("shaded"),
+			sb.get("double_sided"),
+			sb.get("no_depth_test"),
+			sb.get("fixed_size"),
+			sb.get("alpha_cut"),
+			sb.get("texture_filter"),
+			sb.get("transparent"),
+			_mat_key(sb.material_override)
+		]
 		return str(parts)
 	else:
 		return ""
@@ -520,14 +590,15 @@ static func _key(gi: GeometryInstance3D) -> String:
 		mats.append("+" + _mat_key(gi.material_overlay))
 	return kind + ":" + ",".join(mats)
 
-static var _mat_keys := {}
+
 static func _mat_key(mt: Material) -> String:
 	if mt == null:
 		return "default"
 	var id := mt.get_instance_id()
 	if _mat_keys.has(id):
 		return _mat_keys[id]
-	if _mat_keys.size() > 20000: _mat_keys.clear()
+	if _mat_keys.size() > 20000:
+		_mat_keys.clear()
 	var s := ""
 	if mt is ShaderMaterial:
 		var sh: Shader = (mt as ShaderMaterial).shader
@@ -550,12 +621,14 @@ static func _mat_key(mt: Material) -> String:
 	_mat_keys[id] = s
 	return s
 
+
 ## A tiny copy of an instance that draws with the same shaders.
 func _proxy(src: Node3D) -> Node3D:
 	if src is Skeleton3D:
 		var rig := src.duplicate(0) as Skeleton3D
 		for ch in rig.get_children():
-			if not (ch is MeshInstance3D): ch.free()
+			if not (ch is MeshInstance3D):
+				ch.free()
 			else:
 				(ch as MeshInstance3D).visibility_range_end = 0.0
 				(ch as MeshInstance3D).visible = true
@@ -578,9 +651,12 @@ func _proxy(src: Node3D) -> Node3D:
 		mm.use_custom_data = smm.use_custom_data
 		mm.mesh = smm.mesh
 		mm.instance_count = 1
-		if mm.transform_format == MultiMesh.TRANSFORM_3D: mm.set_instance_transform(0, Transform3D())
-		else: mm.set_instance_transform_2d(0, Transform2D())
-		if mm.use_colors: mm.set_instance_color(0, Color.WHITE)
+		if mm.transform_format == MultiMesh.TRANSFORM_3D:
+			mm.set_instance_transform(0, Transform3D())
+		else:
+			mm.set_instance_transform_2d(0, Transform2D())
+		if mm.use_colors:
+			mm.set_instance_color(0, Color.WHITE)
 		var p := MultiMeshInstance3D.new()
 		p.multimesh = mm
 		px = p
@@ -588,9 +664,11 @@ func _proxy(src: Node3D) -> Node3D:
 		# particles, labels, sprites: a copy with their own settings (a label shows every digit, so the
 		# glyphs damage numbers use are in the font's atlas before the first hit)
 		px = gsrc.duplicate(0) as GeometryInstance3D
-		for ch in px.get_children(): ch.free()
+		for ch in px.get_children():
+			ch.free()
 		px.visible = true
-		if px is Label3D: (px as Label3D).text = "0123456789!"
+		if px is Label3D:
+			(px as Label3D).text = "0123456789!"
 		if px is GPUParticles3D:
 			var gq := px as GPUParticles3D
 			gq.amount = mini(gq.amount, 4)
@@ -615,6 +693,7 @@ func _proxy(src: Node3D) -> Node3D:
 	px.visibility_range_begin = 0.0
 	return px
 
+
 ## The lights a stand-in can be lit by in play: an omni like the muzzle flash and the lamps, and a
 ## spot like the sky train's headlight, both covering the grid of stand-ins.
 func _lights() -> Array:
@@ -636,8 +715,6 @@ func _lights() -> Array:
 	return [o, sp]
 
 
-## A shader by its code (the same on every launch, unlike its instance id: WarmStamp keeps these keys).
-static var _code_hashes := {}
 static func _code_hash(sh: Shader) -> String:
 	if sh == null:
 		return "0"
