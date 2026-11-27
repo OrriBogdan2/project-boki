@@ -1,7 +1,7 @@
 class_name HudPanels
 extends Control
 ## The HUD's fixed panels (top bar, boss bar, kill feed, minimap, vitals, ability and weapon slots, gear, Boki card,
-## squad, perks) on their own canvas under the Hud's, redrawn REDRAW_HZ times a second instead of every
+## squad, perks, the buff stack) on their own canvas under the Hud's, redrawn REDRAW_HZ times a second instead of every
 ## frame: item 94, they cost 6-11 ms a frame on the owner's PC (the canvas keeps its last drawing in
 ## between). Everything that moves with the world or the mouse (labels, crosshair, prompts, hit flashes)
 ## stays on Hud.c, redrawn every frame. While this draws, Hud.c points at this canvas, so the panel
@@ -90,6 +90,8 @@ func _draw_panels() -> void:
 		else:
 			m.spectate.draw(hud, sz)
 	HudScale.close(hud)
+	if p and not p.riding and not DropHud.aboard(p) and not (m.tut and m.tut.intro):
+		hud.buffs.draw(hud, p, size)  # (BuffStack: what is on you, down the right edge, with its hover cards)
 	SafeArea.begin("")
 	HudScale.pass_end()
 	hud.c = main_canvas
