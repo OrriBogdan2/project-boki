@@ -43,6 +43,10 @@ const ROWS := [
 ]
 const NO_ACCENT := -1
 const NONE := -1               # look["shroud"] for no cloak: the bare void body shows (an accessory may still be worn)
+## The least HSV value of each cloth material (the model's m keys): the creator's shroud colours are dark, and under
+## the sun's far side the cloth drew as black. CLOTH_FILL is the share of its own colour it lights itself with.
+const CLOTH_VALUE := {"body": 0.55, "cloak": 0.45}
+const CLOTH_FILL := 0.22
 
 static func has_hood(style: int) -> bool:
 	return int(_style(style)["hood"]) >= 0
@@ -71,6 +75,7 @@ static func dress(c: Dictionary, lk: Dictionary) -> void:
 	var style := int(set_["style"])
 	if style == NONE and int(set_["accessory"]) == 0:
 		return
+	_light_cloth(c["m"], Unmasked.colour(lk))
 	var t := ShroudTailor.new(c, set_)
 	t.bulk = float(Unmasked.race(lk)["bulk"])
 	if style != NONE:
@@ -81,6 +86,14 @@ static func dress(c: Dictionary, lk: Dictionary) -> void:
 	fit["waist"] *= t.girth(float(fit["belt"]))           # (the cloth under it is cut to ShroudTailor.FIGURE)
 	ShroudExtras.accessory(t, int(set_["accessory"]), fit)
 	t.finish()
+
+## The cloth in the shroud's own hue, at least as bright as CLOTH_VALUE, and lit a little from within.
+static func _light_cloth(m: Dictionary, col: Color) -> void:
+	for tone: String in CLOTH_VALUE:
+		var mat := m[tone] as ShaderMaterial
+		mat.set_shader_parameter("albedo", Color.from_hsv(col.h, col.s, maxf(col.v, CLOTH_VALUE[tone])))
+	for tone in ["body", "cloak", "trim"]:
+		(m[tone] as ShaderMaterial).set_shader_parameter("own_ambient", Vector3.ONE * CLOTH_FILL)
 
 ## The finished model's rest pose, for the bones: Models.hunter calls it once the body is at its final proportions.
 static func bind(model: Node3D) -> void:
