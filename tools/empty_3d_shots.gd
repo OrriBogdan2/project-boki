@@ -17,7 +17,7 @@ const STATES := [
 ]
 ## [view, camera distance (m), the height it looks at (m)]
 const VIEWS := [["whole", 4.4, 0.8], ["shoulders", 1.7, 1.15], ["hips", 1.7, 0.7], ["knees", 1.7, 0.35]]
-const MOTION_YAWS := {"q": 35.0, "side": 90.0}  # deg: the model's turn to the camera
+const MOTION_YAWS := {"front": 180.0, "q": 35.0, "side": 90.0}  # deg: the model's turn to the camera
 const FPS := 30.0
 const RUN_FRAMES := 75  # frames of the stick held forward before the home run still
 const JUMP_FRAMES := 14  # frames after the jump key before the home jump still
@@ -103,7 +103,7 @@ func _locker(part: String) -> void:
 	await _frames(5)
 
 
-## Each sex on the stage: the model posed by its poser frame by frame.
+## Each sex on the stage: the model's Native node plays each state fed to it, as in game.
 func _motion() -> void:
 	var holder := Node3D.new()
 	main.add_child(holder)
@@ -125,17 +125,13 @@ func _motion() -> void:
 		holder.add_child(model)
 		(model.get_node("Rig/Torso/Aim/Gun") as Node3D).visible = false  # (the empty-handed Gun's magazine)
 		print("EMPTY_3D sex %s native=%s" % [SEXES[sex], model.has_node("Warden/Native")])
-		var poser := model.get_node("Warden/Native")
-		poser.set_process(false)
 		for yaw in MOTION_YAWS:
 			model.rotation.y = deg_to_rad(float(MOTION_YAWS[yaw]))
 			for st in STATES:
 				var s: Dictionary = (st[1] as Dictionary).duplicate()
 				s["face"] = model.rotation.y
 				model.set_meta(WardenClips.STATE, s)
-				for k in int(float(st[2]) * FPS):
-					poser.call("_process", 1.0 / FPS)
-				await _frames(3)  # (the skeleton's draw catches up with the pose just set)
+				await _frames(int(float(st[2]) * FPS))  # (the model's Native node plays the state in real time)
 				for view in VIEWS:
 					cam.position = Vector3(0.0, float(view[2]) + 0.1, float(view[1]))
 					cam.look_at(Vector3(0.0, float(view[2]), 0.0))

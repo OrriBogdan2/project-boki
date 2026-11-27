@@ -19,8 +19,8 @@ const KEEP := ["Head", "Aura"]
 ## front, from the game shots). The void head is fitted onto it, so the hood frames the void face as in the art
 ## (the procedural head is about twice its size).
 const EGG := [[Vector3(0.0, 1.242, -0.09), 0.264], [Vector3(0.0, 1.235, -0.11), 0.25]]
-const EGG_COVER := 1.2  # x the egg's height: the void shell stands over the painted egg (Meshy's hood is closer to it)
-const EGG_FRONT := Vector3(0.0, 0.0, -0.08)  # m: the void shell sits this far ahead of the painted egg, over it
+const EGG_COVER := 1.0  # x the egg's height: the void shell is the painted egg's size, over it
+const EGG_FRONT := Vector3(0.0, 0.0, -0.01)  # m: the void shell sits this far ahead of the painted egg, over it
 
 
 ## The .glb this Empty look wears ("" for the procedural Empty).
