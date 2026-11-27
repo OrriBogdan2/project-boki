@@ -1,15 +1,19 @@
 extends "res://tools/toon_lineup_farm_shots.gd"
 ## --crofthorn-flat-shots --shots-dir=<dir> [--cam=farm|combat] [--close] [--spots=x:z;x:z] [--species=a,b,c,d]
-## [--fullres=WxH]: Crofthorn standing in a row with three other Boki on the real farm (third-person camera) or at
-## the match camera. Per spot it writes the whole frame at native size (1920x1080 unless --fullres, no resize):
+## [--fullres=WxH] [--arena-offs=x:z;x:z]: Crofthorn standing in a row with three other Boki on the real farm
+## (third-person camera) or at the match camera. Per spot it writes the whole frame at native size (1920x1080
+## unless --fullres, no resize):
 ## <dir>/<cam>[_close]_s<i>_{after,before}.png, plus two close cameras on Crofthorn (3/4 front and 3/4 from behind, the
-## spine) as <dir>/tele_{front,back}_s<i>_{after,before}.png, rendered by a real camera 1.1 m away, not a crop.
+## spine) as <dir>/tele_{front,back}_s<i>_{after,before}.png, rendered by a real camera 1.1 m away, not a crop, and
+## the whole row with Crofthorn 3/4 front (tele_row_s<i>_*.png, a real camera a few metres off).
 ## "after" is the game's look; "before" (--before-atlas=<file>) draws the coat atlas the game had before, with no
 ## override. <dir>/coat_stats_<cam>.tsv: luminance std-dev, mean luminance and saturation of each model's own pixels
 ## (edge pixels left out). Needs a renderer (jobq submit --needs gpu).
 
 const TELE_FOV := 30.0
-const TELE_VIEWS := {"front": Vector3(0.55, 0.5, 1.0), "back": Vector3(-0.5, 0.95, -0.85)}
+const TELE_VIEWS := {
+	"front": Vector3(0.55, 0.5, 1.0), "back": Vector3(-0.5, 0.95, -0.85), "row": Vector3(0.3, 0.32, 1.0)
+}
 const CROFT := "heatherhorn"
 
 var cam_mode := "farm"
@@ -23,6 +27,8 @@ var tele_cam: Camera3D
 var base_cam: Camera3D  # the scene's own camera, put back after a close camera
 var rows: Array = []
 var tele_only := false
+var arena_offs: Array = []  # --arena-offs
+var row_spacing := 1.0  # m between the models in the row (the row camera backs off by it)
 # name, Crofthorn coat uniforms put over the game's ("_atlas": a coat atlas to draw)
 var passes: Array = [["after", {}]]
 
@@ -45,6 +51,13 @@ func run(main_node: Node) -> void:
 			for s in arg.substr(8).split(";"):
 				var xz := s.split(":")
 				spots.append(Vector2(float(xz[0]), float(xz[1])))
+		if arg.begins_with("--arena-offs="):  # the match: rows this far (x:z m) from the arena's spot, one per entry
+			arena_offs = []
+			for s in arg.substr(13).split(";"):
+				var xz := s.split(":")
+				arena_offs.append(Vector2(float(xz[0]), float(xz[1])))
+	if cam_mode != "farm" and not arena_offs.is_empty():
+		spots = arena_offs
 	close = "--close" in OS.get_cmdline_user_args()
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--variants="):  # name:albedo_flat:lod:contrast:desat:dark_lift:gain;...
@@ -70,6 +83,7 @@ func run(main_node: Node) -> void:
 	main.get_viewport().size = full
 	var base: Vector3 = await _stage_cam()
 	var spacing := 1.0 if cam_mode == "farm" else 1.3
+	row_spacing = spacing
 	var tag := cam_mode + ("_close" if close else "")
 	for pass_i in passes:
 		var state: String = pass_i[0]
@@ -89,7 +103,7 @@ func run(main_node: Node) -> void:
 			await _settle(1.2)
 			if not tele_only:
 				_shoot(tag, state, si)
-			if cam_mode == "farm" or si == 0:
+			if cam_mode == "farm" or si == 0 or not arena_offs.is_empty():
 				await _tele(state, si)
 	var f := FileAccess.open(dir.path_join("coat_stats_%s.tsv" % tag), FileAccess.WRITE)
 	f.store_line("cam\tstate\tspot\tspecies\tlum_std\tlum\tsat\tpixels")
@@ -121,6 +135,8 @@ func _move_to(si: int, base: Vector3) -> Vector3:
 		farm.ppos = spot + Vector3(0, 0, 2.4)
 		farm.player.position = farm.ppos
 		farm.cam.snap(farm.ppos)
+	elif not arena_offs.is_empty():
+		spot = base + Vector3(arena_offs[si].x, 0, arena_offs[si].y)
 	return spot
 
 
@@ -152,9 +168,16 @@ func _tele(state: String, si: int) -> void:
 		tele_cam.fov = TELE_FOV
 		tele_cam.near = 0.05
 		(world if world != null else main).add_child(tele_cam)
+	var mid := Vector3.ZERO
+	for n in nodes:
+		mid += (n as Node3D).global_position / nodes.size()
 	for view in TELE_VIEWS:
 		var g := croft.global_position + Vector3(0, 0.3, 0)
-		tele_cam.global_position = g + (TELE_VIEWS[view] as Vector3) * 1.1
+		var off := (TELE_VIEWS[view] as Vector3) * 1.1
+		if view == "row":  # the whole row, Crofthorn 3/4 front among the others (a real camera, not a crop)
+			g = mid + Vector3(0, 0.3, 0)
+			off = (TELE_VIEWS[view] as Vector3).normalized() * ((nodes.size() - 1) * row_spacing * 1.25 + 0.9)
+		tele_cam.global_position = g + off
 		tele_cam.look_at(g, Vector3.UP)
 		tele_cam.current = true
 		await _settle(0.3)
