@@ -1437,8 +1437,15 @@ func _clear_line(m: Match, h: Hunter, a: Vector2, b: Vector2) -> bool:
 	var n := int(d.length() / 0.4) + 1
 	var side := Vector2(-d.y, d.x).normalized() * 0.32
 	var w: World = m.world
+	var was_y := w.ground_at(a.x, a.y)
 	for k in range(1, n + 1):
 		var p := a + d * (float(k) / n)
+		# a smooth sheer rim above the step (authored maps, Hunter's ledge rule) can't be mantled: the walk goes
+		# round it (straight at the tutorial's sheer Lookout terrace the bot hopped against its face for good)
+		var gy := w.ground_at(p.x, p.y)
+		if gy > was_y + World.STEP and w.is_sheer(int(floor(p.x)), int(floor(p.y))):
+			return false
+		was_y = gy
 		# a rock in the way, or the abyss (straight at a goal across a bay in the island, the edge guard
 		# turned the bot aside every frame and it shuffled on the spot instead of taking the way round)
 		if w.tile_kind(p.x, p.y) != World.T_GROUND:
