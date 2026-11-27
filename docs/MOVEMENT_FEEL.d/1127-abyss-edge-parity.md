@@ -50,7 +50,7 @@ speed is not a measurement).
 
 Suction (`--abyss-edge-check`): pulled in at 18.15 / 7.93 / 4.99 m/s^2 from 0.75 / 1.75 / 2.4 m at 4.5 m/s (ref the
 same to 0.01); 1 m under the top and 1 m out, up at 96.4 m/s^2 (ref 96.4); none at 55 degrees off, gliding or on
-cooldown; a 1.5 m/s drift from 2.2 m out is caught after 1.20 s (main: 0.75 m reach only).
+cooldown; a 1.5 m/s drift from 2.2 m out is caught after 1.20 s.
 
 ### Unknowns
 
