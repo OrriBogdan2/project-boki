@@ -137,3 +137,19 @@ stands, and the change below is measured headless (CPU scripts only, rpc8, a loa
     stand within 6 m or off screen; on the ground after the drop nearly every rival is unseen).
   So on a slow PC the saving is about 1 ms a frame per uninvolved rival in view; a wide view over a fight across the
   field (6-10 of them) is where it pays. The real-GPU number for it needs the rp1 pods back.
+
+## 2026-11-26 pass (owner: "8 fps on the load in for the expedition")
+
+`--loadin-fps-check` plays the first 30 s after the loading screen of a real expedition in real time (1920x1080, 30
+players, the squad of 3 aboard the skyship), logging every frame (wall ms, draws, objects, nodes, sim steps, main-thread
+cpu from `/proc/thread-self/schedstat`, `Match.vprof` sections). `--hitch-check` / `--load-check` fast-forward with 6
+teams, which is why they never saw it.
+
+- Cause: `Hunter.render` -> `SkyDeck.lift` -> `BootSole.low` skinned every boot vertex in GDScript, every frame, for all 30
+  riders; only the squad of 3 is drawn on the deck. 214-227 ms a frame in the visual `hunters` section (about 7 ms a rider).
+- Fix: `BootSole.low` folds the skeleton row and each bone's pose into one row per used bind index per call (a dot per vertex
+  instead of a full transform); `SkyDeck.lift` skips riders that are not drawn and re-reads a shown rider's soles every
+  `SOLE_EVERY` (3) renders. `hunters` is 6-11 ms a frame after. The check fails when the reads exceed that budget.
+- RTX 4090 pod, seeds 4101 / 77, 30 s: avg 7.3 / 3.4 fps -> 24.2 / 11.2; main-thread cpu a frame 136 / 284 ms -> 40 / 77 ms.
+  Not met yet: the 60 fps target. About 40 ms a frame of main-thread cpu remains, mostly outside the profiled sections
+  (render submission for 16-32k objects, 1.6-2.4k draws; other scripts).

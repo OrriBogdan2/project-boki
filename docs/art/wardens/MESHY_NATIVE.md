@@ -112,8 +112,8 @@ plays today's clip, so nothing changes until a Hunter's clips land (`WardenNativ
 | `rmb`, `e`, `r` | the kit move or cast of that slot (state `cast_slot` secondary, utility, ult; a kit move starting within `SLOT_CAST` of a cast takes its slot) | `attack` |
 | `hit` | one-shot when a stagger lands (state `hit_t` jumps back with `hit_k` at Oomph.HEAVY_FLINCH; a chip hit only leans) | the loop clip plays on |
 | `land` | one-shot on a hard landing (`WardenClips.FEEL` landing >= `LAND_MIN`) | the loop clip |
-| `dash` | while the state `rolling` (a dash or kit rush) lasts | the air or ground clip |
-| `glide` | while `gliding` in the air (loops) | the shared glide pose (`WardenGlidePose`) |
+| `dash` | while the state `rolling` (a dash or kit rush) lasts (blends in over 0.25 s) | the air or ground clip |
+| `glide` | while `gliding` in the air (loops; opens at once, lets go over 0.2 s) | the shared glide pose (`WardenGlidePose`) |
 | `dive` | while `diving` (the glider's dive; loops) | the shared dive pose |
 | `downed` | while the knocked-down beat runs (`fall` >= 0; holds its last frame) | the loop clip |
 | `stomp` | while the stomp cycle runs (`stomp` >= 0; loops) | the loop clip |
@@ -123,8 +123,8 @@ Hunter has them without a clip file. The data names Meshy's Left bones (the Righ
 to the mean of its children, in the body's frame read off that skeleton's rest (x left, y hips to head, z toes): the
 glide hangs the body under the canopy with both hands up on the lines and the legs together, trailing, swaying as one
 (no stride); the dive sweeps the arms back along the body, legs straight, the head tipped up (HunterAnim's air tilt
-pitches the body nose-down and banks it into turns, as before). A data `glide`/`dive` clip still wins. They fade in and
-out over `AIR_FADE` (0.3 s). The farm's swim also sends `gliding`, on the ground: that keeps the loop clips.
+pitches the body nose-down and banks it into turns, as before). A data `glide`/`dive` clip still wins. The dive fades in and
+out over `AIR_FADE` (0.3 s); the glide opens at once and lets go over 0.2 s (`blend_s`). The farm's swim also sends `gliding`, on the ground: that keeps the loop clips.
 `--glide-anim-check`: all 13 Hunters glide on their glide clip (never walk, run, idle or jump), hands over the
 shoulders, feet within 2.2 hip widths and not ahead of the hips; dive on the dive clip, hands under the shoulders; run
 again on touchdown; Breaker (contract path) on its clips' glide layer; the farm avatar (the Empty, procedural rig)
@@ -176,6 +176,12 @@ Meshy's files (`tools/meshy/sable_hybrid/README.md`: pistol/hand lock, coat/arm 
 contact-band smoothing, coat chains hung by gravity with floor and thigh collision). Torn frames (glbstretch, 15 fps):
 raw Meshy rig 100% Attack, 93% Jump, 100% Crouch, 89% run, 67% walk; this file 0% in all six clips.
 Game states with no Meshy clip (fall, land, climb, mantle, hit, emote, aim twist) play the nearest of the six.
+Strafing and back-pedalling: Meshy has one forward run, so `WardenNativeTwist` turns the hips to the way he goes (the torso bone takes
+the turn back in world space, through the bent spine between, so the body stays on the aim without tipping) up to `WardenClips.TWIST_MAX` (~96 deg). More than 120 deg off the aim (it reverses at 130
+and goes forwards again inside 110: no flicker at the edge) the run clip plays in reverse instead, the rate keeping its stride matched to the
+ground speed, and the legs turn only by what is left to dead behind the aim (none at 180 deg, from either side). The clip's direction
+(`WardenNativeTwist.dir`) eases between +1 and -1, so the crossing is a blend. `--native-upper-shots --mode=back` prints STRIDE (the planted foot's
+sweep against his travel, 1 = along it, -1 = backwards to it).
 
 ## Native hunter pack (Sparkle, Tenzo, Cinder, Kael, Motley, Meeko)
 Their rigged Meshy files carry 300k-tri meshes. `tools/meshy/native_hunters/pack.sh <art> <rigged.glb> <decimated.glb> [clip glbs]`
