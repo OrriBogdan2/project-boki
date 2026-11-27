@@ -152,6 +152,22 @@ yaw and pitch, the head the rest. It is off for the same states as the contract 
 plays for any swing, cast or kit move): the layer eases out as that clip takes the body (`owned`, over `FADE`) and back in
 after it, so it does not fight a clip that already turns the head. `--look-at-check` runs it on every native Hunter.
 
+## Ability clips: Tenzo, Motley, Sable, Gil (`tools/meshy/ability_clips.py`)
+`python3 tools/meshy/ability_clips.py <tarek|ostra|sable|gil> [--sheet DIR]` writes `art/wardens/<art>/<art>_clips.glb`
+(skeleton and clips, no mesh) from poses keyed on Meshy's own skeleton (`clip_rig.py`: torso turns, two-bone arm and leg
+reaches, planted feet; nothing retargeted). Data `slot_rate` (1.0 for these four) plays the slot clips at the speed they
+were keyed; `attack_rate` stays for Meshy's own Attack clip. Contact frames sit where the kit fires (the contract
+clips' own, content/rules/warden_anim/<art>.json, and the kit's cast times):
+| Hunter | Slot: clip (length) | Contact |
+|---|---|---|
+| Tenzo | `lmb` throw (0.55 s), `lmb_hold` punch (0.6), `rmb` slam (1.4), `e` Stone Row (0.93), `r` Basalt Spine (1.4) | stone arm (Meshy's left): throw out 0.07 s, punch 0.05 s, smash 0.75 s; a glide slam plays the same `rmb` clip |
+| Motley | `lmb` orb (0.4), `lmb_hold` charged orb (0.5), `rmb` Snap (0.5), `e` Brimseed lob (0.8), `r` Nightwell (1.0) | orb 0.06 s, Snap 0.12 s, seed 0.25 s, Nightwell: locked cast ends on the palms driven down at 1.0 s, then free movement |
+| Sable | `lmb` dagger (0.45), `rmb` Bola (0.73), `e` Shadow Knife (0.47), `r` Encore (2.0), `dash` Vault cartwheel (0.48) | dagger 0.1 s, Bola one whirl then out at 0.24 s, knife 0.1 s, a blade every 0.2 s |
+| Gil | `lmb` thrust (0.32), `lmb_hold` Tide Lunge (0.5), `rmb` potion (0.45), `e` Riptide spin (2.0), `r` Tidal Wave ride (1.0), `dash` swim (0.55) | thrust 0.08 s, lunge 0.08 s, potion 0.15 s |
+Open: the clips play from their first frame on the press, so a held LMB shows Meshy's idle until the release; the
+three-hit chain and Sable's alternating hands use one clip each; Sable's cartwheel is always to her right.
+`--clip-shots --warden=<arch> --states` also plays each slot once (log lines `SLOT`).
+
 ## Not on the native path (yet)
 Death, stun, ledge, emote and clips for moves beyond the slots above (Meshy gave six); the contract's per-hunter extras (Tenzo's
 ground rings, Sparkle's blink, Sable's braid springs; loose parts only through data "springs" below); 300k-tri meshes vs the 80k contract budget.
