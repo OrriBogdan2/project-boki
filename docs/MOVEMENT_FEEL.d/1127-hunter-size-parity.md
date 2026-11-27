@@ -15,9 +15,9 @@ smallest bar the pet, under the sniper; the samurai not small, 20th of 25), and 
 pass's bind-pose body height had the healer 3rd smallest and the samurai 7th, and the listed model height counts ears.
 `match_k` = reference size / ours at k = 1 (`--hunter-size-sheet --silhouette`, the mean of its two HSIL passes,
 which differ by idle phase only: +-2.5%). Loose props are left out on both sides (the reference's are separate
-meshes, out of its silhouette): Albert is sized on on-screen height alone of the HSIL "crown" row (nothing above the
-head's crown), since his back poles reach 1.4 m over his head and his arms-out hammer idle swells his area; Sable on
-the "body" row (held weapons hidden). The other 11 use the "all" row. With these, all 13 stand in the reference's
+meshes, out of its silhouette): Albert is sized on the HSIL "crown" row (nothing above the head's crown), since his
+back poles reach 1.4 m over his head (sized on height alone, his arms-out hammer idle drew him twice the reference's
+size: k 1.624, size +15% without the poles); Sable on the "body" row (held weapons hidden). The other 11 use the "all" row. With these, all 13 stand in the reference's
 order of size, smallest to largest.
 
 Camera: pitch 66 deg both sides; the reference lens is 59 deg horizontal (35.3 vertical at 16:9), arm 30.2 m at its
