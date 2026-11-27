@@ -891,11 +891,18 @@ func _draw_waypoint(at: Vector3, label: String, col: Color, prio := EdgeMarker.P
 		c.draw_circle(p, 24.0, Color(0, 0, 0, 0.5))
 		c.draw_colored_polygon(PackedVector2Array([p + Vector2(0, -20), p + Vector2(16, 0), p + Vector2(0, 20), p + Vector2(-16, 0)]), col)
 		c.draw_colored_polygon(PackedVector2Array([p + Vector2(-12, 27), p + Vector2(12, 27), p + Vector2(0, 46)]), col)
-		_ctext(p + Vector2(0, 70), "%s  ·  %dm" % [label, dist], 22, col, big)
+		if BokiChatter.calm(m):      # (in a fight the pin is a bare icon: its words would sit mid-field)
+			var words := "%s  ·  %dm" % [label, dist]
+			var w := TextCache.width(big, words, 22)
+			SafeArea.note_as("waypoint_text", Rect2(p + Vector2(-w * 0.5, 48), Vector2(w, 28)))
+			_ctext(p + Vector2(0, 70), words, 22, col, big)
 		var gp := cam.unproject_position(at + Vector3(0, 0.05, 0))      # a ring on the ground under it
 		c.draw_arc(gp, 28.0 + bob, 0, TAU, 28, Color(col, 0.85), 4.0, true)
 	else:
-		edge_world.add(d, col, prio, label, dist)
+		if BokiChatter.calm(m):
+			edge_world.add(d, col, prio, label, dist)
+		else:      # (a fight: the edge arrow loses its words too)
+			edge_world.add(d, col, prio)
 
 
 ## Over each exit nearby: its name and what it's doing. Your squad's own uplink gets a waypoint from
