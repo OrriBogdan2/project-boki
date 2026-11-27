@@ -18,6 +18,7 @@ const TURNED := 0.03  # rad: a bone this far off its rest is posed
 const CALM_CAST := 99.0  # s since the last cast: Hunter._anim_state always sends "cast" (WardenNative baselines on it)
 const KIT_ARM_FRAMES := 12  # frames a kit arm is held out before its stretch is read (a stretch must not compound)
 const KIT_ARM_STRETCH := 12.0  # x: the forearm of a 3 m reach is never longer than this
+const FOREARM_SKIN_BACK := 0.77  # x forearm length: Grimble's forearm.R skin reaches 0.18 of 0.235 m behind the elbow
 const SYNTH := "Zz_Clip"  # the test clip a synthetic clips file carries
 const STRING_PULL := 0.08  # m, Meshy scale: the string is drawn this far off the bow at a release move's first frame
 const STRING_BACK := 0.03  # and this near it a frame later
@@ -328,6 +329,7 @@ func _kit_arms(main: Node, m: Node3D, nat: WardenNative) -> void:
 		var label := info % [nat.art_id, "hook" if r.meta == WardenReach.TIP else "gun", KIT_ARM_FRAMES, fore, wrist]
 		ok(fore >= 0.99 and fore <= KIT_ARM_STRETCH and absf(wrist - 1.0) < 0.05, label)
 	for r: WardenReach in nat.reaches:
+		r.rest_scale()  # (as WardenNative's frame does before the clips)
 		r.apply(1.0, tips[r])
 		var shoulder := sk.get_bone_global_pose(r.bones[0]).origin
 		var elbow := sk.get_bone_global_pose(r.bones[1]).origin
@@ -336,6 +338,15 @@ func _kit_arms(main: Node, m: Node3D, nat: WardenNative) -> void:
 		if r.meta == WardenReach.TIP:
 			var off := (sk.global_transform * hand).distance_to(tips[r])
 			ok(off < 0.5, "%s: the hook arm's hand reaches its tip (%.2f m off)" % [nat.art_id, off])
+			# the forearm's skin behind its elbow (FOREARM_SKIN_BACK) stays there: nothing flung out behind him
+			var r0 := sk.get_bone_global_rest(r.bones[1])
+			var rest_len := r0.origin.distance_to(sk.get_bone_global_rest(r.bones[2]).origin)
+			var fore_xf := sk.get_bone_global_pose(r.bones[1])
+			var pivot := fore_xf * Vector3(0.0, -FOREARM_SKIN_BACK * rest_len / r0.basis.get_scale().y, 0.0)
+			var deep := (pivot - shoulder).dot(arm.normalized())
+			var want := r0.origin.distance_to(sk.get_bone_global_rest(r.bones[0]).origin) - FOREARM_SKIN_BACK * rest_len
+			var info := "%s: the stretched forearm leaves no skin behind the elbow (%.2f m along the arm, rest %.2f)"
+			ok(deep >= want - 0.02, info % [nat.art_id, deep * unit, want * unit])
 		else:
 			var own := shoulder.distance_to(elbow) + elbow.distance_to(hand)
 			var level := absf(arm.y) < 0.05 * arm.length()

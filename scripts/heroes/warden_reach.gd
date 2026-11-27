@@ -7,7 +7,8 @@ extends RefCounted
 ## line whatever the body plays (no flailing); it eases in from the clip's wind-up and back to the clips after.
 ## Data "reach": {"bones": [upper arm, forearm, hand], "grip": m from the hand joint to the middle of what it grips,
 ## "max_stretch": how far the forearm may stretch (default: as far as the tip), "level": the arm lies level whatever
-## the tip's height}. A second instance, data "gun_reach" on the meta GUN_TIP, holds his gun arm straight out along the
+## the tip's height, "back": x the forearm's length its skin reaches behind the elbow (Meshy's weights): the stretch
+## pivots there, so that skin stays put instead of flying out behind him}. A second instance, data "gun_reach" on the meta GUN_TIP, holds his gun arm straight out along the
 ## aim without stretching (Brass Broadside); `aim` turns its hand so the gun's muzzle points down the arm.
 
 const TIP := "reach_tip"  # root meta: the world point the hand reaches to; unset (or INF) when the arm is home
@@ -21,6 +22,7 @@ var skel: Skeleton3D
 var bones: Array = []  # [upper arm, forearm, hand] bone indices
 var grip := 0.0  # m: wrist to the middle of the hand's grip
 var max_stretch := 99.0  # x the forearm's length it may stretch to
+var back := 0.0  # x the forearm's length behind the elbow the stretch pivots on (data "back")
 var meta := TIP  # the root meta that holds this arm's tip
 var level := false  # the arm lies level (the tip's height is the shoulder's)
 var aim := Vector3.ZERO  # the hand's own direction that points down the line (ZERO: the bone's length)
@@ -42,6 +44,7 @@ static func make(sk: Skeleton3D, d: Dictionary, key := "reach") -> WardenReach:
 	r.grip = float(rd["grip"])
 	r.max_stretch = float(rd.get("max_stretch", 99.0))
 	r.level = bool(rd.get("level", false))
+	r.back = float(rd.get("back", 0.0))
 	return r
 
 
@@ -62,11 +65,12 @@ static func make_all(sk: Skeleton3D, d: Dictionary, holster: Dictionary) -> Arra
 	return out
 
 
-## Before the clips advance, on a skeleton whose clips key no scale (Meshy's): the arm's stretch of the last frame goes,
-## or each frame would stretch the stretched arm again.
+## Before the clips advance, on a skeleton whose clips key no scale and no arm position (Meshy's): the arm's stretch and
+## the forearm's shift (`back`) of the last frame go, or each frame would stretch the stretched arm again.
 func rest_scale() -> void:
 	for bi: int in bones:
 		skel.set_bone_pose_scale(bi, skel.get_bone_rest(bi).basis.get_scale())
+		skel.set_bone_pose_position(bi, skel.get_bone_rest(bi).origin)
 
 
 ## The hand points its `rest_dir` (a direction in the skeleton's rest pose, as the gun socket's muzzle) down the arm.
@@ -105,12 +109,14 @@ func apply(dt: float, world_tip: Vector3) -> void:
 	if to.length() < 0.01:
 		return
 	var dir := to.normalized()
-	# the forearm stretches to put the grip on the tip; nearer than the arm's own length it just points there
-	var stretch := clampf((to.length() - own) / fore_len + 1.0, 1.0, max_stretch)
+	# the forearm stretches to put the grip on the tip; nearer than the arm's own length it just points there. It
+	# stretches about a point `back` behind the elbow: its bone sits back * (stretch - 1) ahead of the elbow
+	var stretch := clampf((to.length() - own) / (fore_len * (1.0 + back)) + 1.0, 1.0, max_stretch)
 	var elbow := shoulder + dir * upper_len
+	var fore_at := elbow + dir * fore_len * back * (stretch - 1.0)
 	_lay(bones[0], now[0], shoulder, dir, 1.0)
-	_lay(bones[1], now[1], elbow, dir, stretch)
-	_lay(bones[2], now[2], elbow + dir * fore_len * stretch, dir, 1.0, aim)
+	_lay(bones[1], now[1], fore_at, dir, stretch)
+	_lay(bones[2], now[2], fore_at + dir * fore_len * stretch, dir, 1.0, aim)
 
 
 ## Bone `bi` (the clip's pose `now`) laid at `at` along `dir` (its +Y), turned the shortest way so it keeps the
