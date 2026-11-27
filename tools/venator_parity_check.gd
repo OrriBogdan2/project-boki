@@ -23,7 +23,7 @@ func run(m: Match, p: Hunter, k: GunslingerKit, t: Hunter, home: Vector3) -> voi
 	_tracking(m, p, home)
 	_dash_aim(m, p, k, home)
 	_drum(m, p, k, home)
-	_falloff(m, p, k, home)
+	_falloff(m, p, home)
 	_shift_charges(p)
 	_brackets(m, p, home)
 	_rifle_pose()
@@ -132,7 +132,7 @@ func _drum(m: Match, p: Hunter, k: GunslingerKit, home: Vector3) -> void:
 
 ## The rifle's falloff: each round of a string carries its share of full damage (100% down to the 50% floor over
 ## the first ten rounds) and the look thins with it; a pause starts the string over.
-func _falloff(m: Match, p: Hunter, k: GunslingerKit, home: Vector3) -> void:
+func _falloff(m: Match, p: Hunter, home: Vector3) -> void:
 	p.teleport(home)
 	p.ammo = MAG
 	c.ac.step(m, 0.6)
@@ -141,7 +141,7 @@ func _falloff(m: Match, p: Hunter, k: GunslingerKit, home: Vector3) -> void:
 	var share: Array[float] = []
 	var seen := p.shot_n
 	for i in 200:
-		if share.size() >= 12:
+		if share.size() >= 20:
 			break
 		p.inp["fire"] = true
 		m.step(c.DT)
@@ -159,21 +159,19 @@ func _falloff(m: Match, p: Hunter, k: GunslingerKit, home: Vector3) -> void:
 			break
 	p.inp["fire"] = false
 	var restart := _last_share(m, p)
-	var floor_k := 1.0 - float(p.wpn["sustain_loss"])
-	c.ok("Vex LMB: damage decays over the first 10 rounds to 50%, then holds; a pause starts the string over",
-			share.size() == 12 and is_equal_approx(share[0], 1.0) and is_equal_approx(share[10], floor_k)
-			and is_equal_approx(share[11], floor_k) and share[5] < share[0] and share[5] > share[10]
+	var edge := int(float(MAG) * float(p.wpn["low_mag_at"]))
+	var low_k := float(p.wpn["low_mag_dmg"])
+	c.ok("Vex LMB: full damage with half a drum or more, %d%% under it; a pause starts over" % int(low_k * 100),
+			share.size() == 20 and is_equal_approx(share[0], 1.0) and is_equal_approx(share[MAG - edge - 1], 1.0)
+			and is_equal_approx(share[MAG - edge], low_k) and is_equal_approx(share[19], low_k)
 			and is_equal_approx(restart, 1.0), "shares %s, after a pause %.2f" % [share, restart])
-	c.ok("Vex LMB: the look thins with the round (full at round 1, thinnest at the floor)",
-			is_equal_approx(k._faded(share[0]), 0.0) and is_equal_approx(k._faded(share[10]), 1.0)
-			and k._faded(share[5]) > 0.0 and k._faded(share[5]) < 1.0,
-			"faded %.2f / %.2f / %.2f" % [k._faded(share[0]), k._faded(share[5]), k._faded(share[10])])
+
 
 func _last_share(m: Match, p: Hunter) -> float:
 	var shots: Array = m.get("shots")
 	for i in range(shots.size() - 1, -1, -1):
 		if shots[i]["by"] == p:
-			return float((shots[i]["x"] as Dictionary).get("sus_k", -1.0))
+			return float(shots[i]["dmg"]) / (float(p.wpn["dmg"]) * m.dmg_mult(p))
 	return -1.0
 
 ## Item 109: a dash east with the cursor north, LMB held from before it to after it. Every round leaves north, none
