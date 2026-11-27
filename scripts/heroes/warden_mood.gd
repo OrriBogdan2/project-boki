@@ -80,6 +80,10 @@ func _setup(glb: Node3D) -> void:
 				am.set_shader_parameter("blink_cell", int(d.get("blink_cell", -1)))
 				atlas.append([am, d["faces"][tag]])
 				(mi as MeshInstance3D).set_surface_override_material(si, am)
+				# a hero surface: the hit flash and the looks that walk meta "mats" reach the face too
+				var mats: Array = root.get_meta("mats", [])
+				mats.append(am)
+				root.set_meta("mats", mats)
 			elif d.get("tex_faces", {}).has(nm):
 				var glass := (mi as MeshInstance3D).get_surface_override_material(si) as ShaderMaterial
 				_tex_face(glass, d["tex_faces"][nm])

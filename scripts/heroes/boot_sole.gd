@@ -7,7 +7,6 @@ extends RefCounted
 
 const FOOT_SHARE := 0.5  # a boot vertex: this much of its skin weight on the foot, toe and shin bones
 const META := "boot_sole"  # model meta: [[mesh, arrays, boot ids, weights, used bind ids]]
-
 ## Reads so far (tooling: --loadin-fps-check counts them, a rider's read is a CPU skin of its boot vertices).
 static var reads := 0
 
