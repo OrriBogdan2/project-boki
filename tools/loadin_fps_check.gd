@@ -13,9 +13,12 @@ extends Node
 const MIN_FPS := 30.0  # no frame after the loading screen runs slower than this
 const AVG_FPS := 60.0  # the average over the look window
 const BURST_NODES := 400  # nodes one frame may add after the loading screen (headless-safe spawn limit)
+const SHOT_AFTER := 90  # frames into a phase the still is taken (the ride map has drawn by then)
 const LAND_S := 2.0  # s after touchdown that count as the landing hitch window
 const SOFTWARE_RES := Vector2i(640, 360)
 
+var shots_dir := ""  # --loadin-shots=dir: one still per phase (plan, ride, rocket, fall), SHOT_AFTER frames in
+var shot_seen := {}  # phase -> frames seen so far
 var out_path := ""
 var csv_path := ""
 var seed_v := 4101
@@ -60,6 +63,8 @@ func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--loadin-out="):
 			out_path = a.substr(13)
+		elif a.begins_with("--loadin-shots="):
+			shots_dir = a.substr(15)
 		elif a.begins_with("--loadin-csv="):
 			csv_path = a.substr(13)
 		elif a.begins_with("--loadin-seed="):
@@ -116,6 +121,7 @@ func _process(_delta: float) -> void:
 	var ph := _phase(cur) if shown_us > 0 else "load"
 	if shown_us > 0:
 		_add_prof(ph)
+		_shot(ph)
 	var step := ""
 	for mk in marks:
 		step += "%s %.0f " % [mk[1], mk[2]]
@@ -150,6 +156,15 @@ func _process(_delta: float) -> void:
 	elif (now - t0_us) / 1e6 > 300.0:
 		print("LOADIN stuck: no match after 300 s")
 		get_tree().quit(1)
+
+
+## One screenshot per drop phase, taken SHOT_AFTER frames in.
+func _shot(ph: String) -> void:
+	shot_seen[ph] = int(shot_seen.get(ph, 0)) + 1
+	var live := ph in ["plan", "ride", "rocket", "fall"]
+	if shots_dir != "" and not headless and live and shot_seen[ph] == SHOT_AFTER:
+		DirAccess.make_dir_recursive_absolute(shots_dir)
+		get_viewport().get_texture().get_image().save_png("%s/%s.png" % [shots_dir, ph])
 
 
 ## What this frame's sim and visual sections cost (Match.prof / Match.vprof are running totals), summed per phase.
