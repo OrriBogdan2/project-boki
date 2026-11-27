@@ -49,7 +49,6 @@ static var _rules := {}
 var m: Match
 var site := Vector3.INF
 var gate := Vector3.INF
-var start_r := INF  # m round the Heart the tide starts at (start_r_of: the map's play_space for the mode)
 var ways_scale := 1.0  # the map's "ways_scale": tide radii and gate_dist stretch with it (1.412 on the 2x map)
 var start_r := INF  # m round the Heart the tide starts at (start_r_of: the map's play_space for the mode)
 var state := S.ASLEEP
