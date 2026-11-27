@@ -11,10 +11,12 @@ const WEEK := 604800.0
 var bad := 0
 var main: Node
 
+
 func ok(cond: bool, what: String) -> void:
 	print("GARDENPRIZES %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(m: Node) -> void:
 	main = m
@@ -27,15 +29,18 @@ func run(m: Node) -> void:
 	print("GARDENPRIZES DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 ## A fresh save with races to spare: this plays many wins a day, and the run limits are --train-runs-check's.
 func _fresh() -> void:
 	Save.d = Save.fresh()
 	TrainRuns.state()["race"] = 9999
 
+
 func _boki(power: int) -> Dictionary:
 	var rec := Save.new_kin("cindle", "T-%d" % power)
 	rec["stats"] = {"power": power, "guard": power, "speed": power, "focus": power}
 	return rec
+
 
 func _tables() -> void:
 	ok(GardenPrizes.ids().size() == 9, "nine games: dash, shove, seek, volley, show, echo, relay, lantern, kite")
@@ -55,6 +60,7 @@ func _tables() -> void:
 	var rounds: Array = GardenPrizes.rules()["cup"]["rounds"]
 	ok(rounds.size() == 3 and rounds[2]["name"] == "Crown", "the cup is three rounds ending in the Crown")
 
+
 func _first_win() -> void:
 	var me := _boki(20)
 	var foe := _boki(5)
@@ -69,6 +75,7 @@ func _first_win() -> void:
 	ok(c["first"], "the next day's first win pays again")
 	var other := GardenPrizes.settle("shove", me, foe, true, 10.0 * DAY, rng)
 	ok(other["first"], "first win is per game")
+
 
 func _cup() -> void:
 	_fresh()
@@ -101,17 +108,20 @@ func _cup() -> void:
 	_own_stat(rng, t + 7.0 * WEEK)
 	_loss_and_games(rng, t + 3.0 * WEEK)
 
+
 ## The cup compares the game's own stat (Speed for the Dash), not the stat total.
 func _own_stat(rng: RandomNumberGenerator, t: float) -> void:
 	_fresh()
 	var me := _boki(20)
 	me["stats"]["speed"] = 60
-	var big := _boki(40)                      # a far bigger total, but slower than Pip
+	var big := _boki(40)  # a far bigger total, but slower than Pip
 	big["stats"]["speed"] = 30
-	var fast := _boki(5)                      # a small total, but 1.15x Pip's Speed
+	var fast := _boki(5)  # a small total, but 1.15x Pip's Speed
 	fast["stats"]["speed"] = 69
-	ok(GardenPrizes.cup_stat("dash", me) == "speed" and GardenPrizes.cup_stat("shove", me) == "power",
-			"the Dash runs on Speed, the Shove on Power")
+	ok(
+		GardenPrizes.cup_stat("dash", me) == "speed" and GardenPrizes.cup_stat("shove", me) == "power",
+		"the Dash runs on Speed, the Shove on Power"
+	)
 	ok(GardenPrizes.cup_stat("show", me) == "speed", "the Show compares the backed Boki's best stat")
 	var r1 := GardenPrizes.settle("dash", me, big, true, t, rng)
 	ok(r1["round"] == "", "Dash: a bigger total with less Speed is no round")
@@ -121,6 +131,7 @@ func _own_stat(rng: RandomNumberGenerator, t: float) -> void:
 	ok(pick == fast, "the Dash rival is the fastest, not the biggest total")
 	ok(GardenPrizes.strongest([me, big, fast], me) == big, "...with no game named it is still the biggest total")
 
+
 ## Echo Steps' first Crown also gives Chimegrass; the next one does not.
 func _echo_crown(rng: RandomNumberGenerator, t: float) -> void:
 	var me := _boki(20)
@@ -129,6 +140,7 @@ func _echo_crown(rng: RandomNumberGenerator, t: float) -> void:
 			GardenPrizes.settle("echo", me, _boki(foe_power), true, t + week * WEEK, rng)
 		ok(int(Save.d["items"].get("chimegrass", 0)) == 1, "Echo Steps Crown %d: Chimegrass once in all" % (week + 1))
 	ok(GardenPrizes.ribbon_count(me, "echo") == 2, "...and the Echo Steps Cup Ribbon each time")
+
 
 func _loss_and_games(rng: RandomNumberGenerator, t: float) -> void:
 	var me := _boki(20)
@@ -142,6 +154,7 @@ func _loss_and_games(rng: RandomNumberGenerator, t: float) -> void:
 	ok(GardenPrizes.stage(other, "volley") == 1 and GardenPrizes.stage(me, "volley") == 0, "cup runs are per Boki")
 	var strong := _boki(30)
 	ok(GardenPrizes.strongest([me, strong, other], me) == strong, "the Dash judges against its strongest rival")
+
 
 func _visible() -> void:
 	var rec := _boki(20)
@@ -157,9 +170,20 @@ func _visible() -> void:
 	v.free()
 	var board := VBoxContainer.new()
 	PrizeBoard.fill(board, rec)
-	ok(board.get_child_count() == 4 * GardenPrizes.ids().size(),
-			"the board lists table, first-win item and cup for each game")
+	ok(
+		board.get_child_count() == 4 * GardenPrizes.ids().size(),
+		"the board lists table, first-win item and cup for each game"
+	)
 	board.free()
-	var rows := GardenPrizes.rows({"game": "dash", "items": [{"kind": "snack", "id": "puffcorn"}], "first": true,
-			"round": "", "ribbon": true, "reset": false, "keepsake": ""})
+	var rows := GardenPrizes.rows(
+		{
+			"game": "dash",
+			"items": [{"kind": "snack", "id": "puffcorn"}],
+			"first": true,
+			"round": "",
+			"ribbon": true,
+			"reset": false,
+			"keepsake": ""
+		}
+	)
 	ok(rows.size() == 2, "a Crown result card shows the prize and the ribbon")

@@ -12,10 +12,12 @@ extends RefCounted
 var bad := 0
 var main: Node
 
+
 func ok(cond: bool, what: String) -> void:
 	print("RAISING %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func _new_save() -> Dictionary:
 	var d := Save.fresh()
@@ -28,24 +30,30 @@ func _new_save() -> Dictionary:
 	HomeLayout.ensure(d)
 	return first
 
+
 ## Moves every care stamp back a whole farm day, as if one had passed.
 func _next_day(rec: Dictionary) -> void:
 	var day := float(Content.rules("care")["care_day_s"])
 	for kind in rec.get("care_day", {}):
 		rec["care_day"][kind] = float(rec["care_day"][kind]) - day - 1.0
-	if rec.has("trust_acts"):      # the trust taper's window is a farm day too (Care.trust_taper)
+	if rec.has("trust_acts"):  # the trust taper's window is a farm day too (Care.trust_taper)
 		rec["trust_acts"]["t0"] = float(rec["trust_acts"]["t0"]) - day - 1.0
+
 
 func _memories(rec: Dictionary, kind: String) -> int:
 	return (rec["memory"] as Array).filter(func(e): return e["kind"] == kind).size()
+
 
 func _old_save_stamps() -> void:
 	var rec := Save.new_kin("puddlet")
 	for old in ["pet_m", "played", "fed_m", "trained_m", "talked"]:
 		rec[old] = 3
 	Care.ensure(rec)
-	ok(not rec.has("pet_m") and not rec.has("played") and not rec.has("talked"),
-		"an old save's once-per-expedition stamps are dropped on load")
+	ok(
+		not rec.has("pet_m") and not rec.has("played") and not rec.has("talked"),
+		"an old save's once-per-expedition stamps are dropped on load"
+	)
+
 
 ## Play is practice: a game of fetch trains Speed while it has the energy, not when it's worn out.
 ## Owner ruling 11-26: play (fetch, pet) is joy and bond only, never stat points (stats come from stat bites).
@@ -55,23 +63,29 @@ func _fetch_trains(home, k: Dictionary) -> void:
 	rec["needs"]["joy"] = 30.0
 	var st0: Dictionary = (rec["stats"] as Dictionary).duplicate()
 	_fetch_once(home, k)
-	ok(not k.has("fetch") and Care.need(rec, "joy") > 30.0 and rec["stats"] == st0,
-		"a finished game of fetch lifts joy (%.0f) and trains no stat" % Care.need(rec, "joy"))
-	for i in 20:      # spam: energy topped up every time, as snacks and naps would
+	ok(
+		not k.has("fetch") and Care.need(rec, "joy") > 30.0 and rec["stats"] == st0,
+		"a finished game of fetch lifts joy (%.0f) and trains no stat" % Care.need(rec, "joy")
+	)
+	for i in 20:  # spam: energy topped up every time, as snacks and naps would
 		rec["needs"]["energy"] = 100.0
 		_fetch_once(home, k)
 		home._pet_kin(k)
 	ok(rec["stats"] == st0, "spamming fetch and pets 20 times gives 0 stat points %s" % str(rec["stats"]))
 
+
 func _fetch_once(home, k: Dictionary) -> void:
 	home._play_with_kin(k)
 	for i in 600:
-		if not k.has("fetch"): break
+		if not k.has("fetch"):
+			break
 		home._move_kin(0.05)
+
 
 func _body_col(k: Dictionary) -> Color:
 	var mats: Array = (k["node"] as Node3D).get_meta("mats", [])
 	return (mats[0] as ShaderMaterial).get_shader_parameter("albedo")
+
 
 ## Food is the quick lever: two Emberberries show on the model at once, and a run of another food
 ## turns it the other way.
@@ -88,17 +102,24 @@ func _meals_lean(home, k: Dictionary) -> void:
 		await main.get_tree().create_timer(1.6).timeout
 	var c1 := _body_col(k)
 	var ln := Evo.lean(rec)
-	ok(String(ln[0]) == "fierce" and float(rec["aff"]["fierce"]) == aff0 + 2.0 * Evo.FOOD_AFF,
-		"two Emberberries lean it Fierce (%.0f%%) and still grow the affinity" % (100.0 * float(ln[1])))
+	ok(
+		String(ln[0]) == "fierce" and float(rec["aff"]["fierce"]) == aff0 + 2.0 * Evo.FOOD_AFF,
+		"two Emberberries lean it Fierce (%.0f%%) and still grow the affinity" % (100.0 * float(ln[1]))
+	)
 	var d0 := Vector3(c0.r - fierce.r, c0.g - fierce.g, c0.b - fierce.b).length()
 	var d1 := Vector3(c1.r - fierce.r, c1.g - fierce.g, c1.b - fierce.b).length()
 	ok(d1 < d0 - 0.02, "and the model on the farm turns toward the Fierce colour at once (%.3f -> %.3f)" % [d0, d1])
 	for meal in 4:
 		Evo.eat(rec, "tidebloom")
-	ok(String(Evo.lean(rec)[0]) == "swift" and float(rec["lean"]["fierce"]) < 2.0 * Evo.FOOD_AFF,
-		"four Tideblooms later the last meals decide: it leans %s" % String(Evo.lean(rec)[0]))
-	ok(Evo.eat(rec, "kibble") == "" and String(Evo.lean(Save.new_kin("cindle"))[0]) == "",
-		"plain food leaves the lean alone, and a new Boki has none")
+	ok(
+		String(Evo.lean(rec)[0]) == "swift" and float(rec["lean"]["fierce"]) < 2.0 * Evo.FOOD_AFF,
+		"four Tideblooms later the last meals decide: it leans %s" % String(Evo.lean(rec)[0])
+	)
+	ok(
+		Evo.eat(rec, "kibble") == "" and String(Evo.lean(Save.new_kin("cindle"))[0]) == "",
+		"plain food leaves the lean alone, and a new Boki has none"
+	)
+
 
 ## Home after an hour away: it notices you, runs over and says hello. A minute away: nothing.
 func _welcome(home, k: Dictionary) -> void:
@@ -107,7 +128,8 @@ func _welcome(home, k: Dictionary) -> void:
 	await main.get_tree().create_timer(KinWelcome.START_S + 0.2).timeout
 	var noticed: bool = k.has("called_t") and k.has("welcome")
 	for i in 200:
-		if not k.has("called_t"): break
+		if not k.has("called_t"):
+			break
 		home._move_kin(0.05)
 	var dist := Vector2(k["pos"].x - home.ppos.x, k["pos"].z - home.ppos.z).length()
 	var said: bool = k.has("say") and (k["say"] as Label3D).visible
@@ -115,6 +137,7 @@ func _welcome(home, k: Dictionary) -> void:
 	KinWelcome.start(home, 60.0)
 	await main.get_tree().create_timer(KinWelcome.START_S + 0.2).timeout
 	ok(not k.has("called_t"), "back from a minute in a menu: no rush")
+
 
 ## The expedition panel's line: good care reads as a bonus, a run-down Boki as a cost.
 func _care_line(rec: Dictionary) -> void:
@@ -124,8 +147,11 @@ func _care_line(rec: Dictionary) -> void:
 	rec["needs"] = {"food": 10.0, "energy": 10.0, "joy": 10.0, "clean": 10.0}
 	var poor := Care.care_line(rec)
 	rec["needs"] = kept
-	ok(good.contains("+10% health") and poor.contains("-18% damage"),
-		"the expedition panel says what raising does: \"%s\" / \"%s\"" % [good, poor])
+	ok(
+		good.contains("+10% health") and poor.contains("-18% damage"),
+		'the expedition panel says what raising does: "%s" / "%s"' % [good, poor]
+	)
+
 
 ## Raising pays off on runs (RunPayoff, decision 0079): trained stats and the food lean scale the
 ## carry passive and the summon window, capped at carry_max / summon_max; whole-number passives don't scale.
@@ -143,19 +169,29 @@ func _run_payoff() -> void:
 		rec["stats"][st] = full * 3
 	ok(is_equal_approx(RunPayoff.score(rec), stats_only), "points past the expedition cap add nothing")
 	rec["lean"] = {"fire": Evo.LEAN_FULL}
-	ok(is_equal_approx(RunPayoff.carry_mult(rec), 1.0 + float(r["carry_max"]))
-		and is_equal_approx(RunPayoff.summon_mult(rec), 1.0 + float(r["summon_max"])),
-		"fully trained and leaned: carry x%.2f, summon x%.2f" % [RunPayoff.carry_mult(rec), RunPayoff.summon_mult(rec)])
+	ok(
+		(
+			is_equal_approx(RunPayoff.carry_mult(rec), 1.0 + float(r["carry_max"]))
+			and is_equal_approx(RunPayoff.summon_mult(rec), 1.0 + float(r["summon_max"]))
+		),
+		"fully trained and leaned: carry x%.2f, summon x%.2f" % [RunPayoff.carry_mult(rec), RunPayoff.summon_mult(rec)]
+	)
 	var m := RunPayoff.carry_mult(rec)
-	ok(is_equal_approx(RunPayoff.amount({"stat": "armor", "amount": 0.1}, m), 0.1 * m)
-		and RunPayoff.amount({"stat": "extra_jumps", "amount": 1}, m) == 1.0, "float passives scale, whole jumps don't")
+	ok(
+		(
+			is_equal_approx(RunPayoff.amount({"stat": "armor", "amount": 0.1}, m), 0.1 * m)
+			and RunPayoff.amount({"stat": "extra_jumps", "amount": 1}, m) == 1.0
+		),
+		"float passives scale, whole jumps don't"
+	)
 	var card := RunPayoff.line(rec)
-	ok(card == "Raised for runs: carry passive +15%", "the Boki card says it: \"%s\"" % card)
+	ok(card == "Raised for runs: carry passive +15%", 'the Boki card says it: "%s"' % card)
+
 
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
-	FarmUnlocks.rules()["base_mode"] = false      # the pre-garden affinity (--lean-check: the garden)
+	FarmUnlocks.rules()["base_mode"] = false  # the pre-garden affinity (--lean-check: the garden)
 	_old_save_stamps()
 	var rec := _new_save()
 	rec["needs_t"] = Time.get_unix_time_from_system() - 3600.0
@@ -165,10 +201,12 @@ func run(m: Node) -> void:
 	await _welcome(home, k)
 	home._close_panel()
 	rec.erase("bond_seen")
-	home.panel_open = "away"      # the away report is up after an hour: the rank is still noted
+	home.panel_open = "away"  # the away report is up after an hour: the rank is still noted
 	KinBondMoment.tick(home)
-	ok(int(rec.get("bond_seen", -1)) == Care.bond_index(rec),
-		"the rank it arrives with is where it starts, even under a panel (%s)" % Care.bond(rec)[1])
+	ok(
+		int(rec.get("bond_seen", -1)) == Care.bond_index(rec),
+		"the rank it arrives with is where it starts, even under a panel (%s)" % Care.bond(rec)[1]
+	)
 	home._close_panel()
 	KinBondMoment.tick(home)
 	ok(home.panel_open == "", "and once the panel is gone it plays no moment for it")
@@ -177,14 +215,18 @@ func run(m: Node) -> void:
 	var t1 := float(rec["trust"])
 	ok(t1 > t0, "petting builds trust (%.1f -> %.1f)" % [t0, t1])
 	home._pet_kin(k)
-	ok(is_equal_approx(float(rec["trust"]), t1),
-		"petting again the same farm day adds no trust (%.1f)" % float(rec["trust"]))
+	ok(
+		is_equal_approx(float(rec["trust"]), t1),
+		"petting again the same farm day adds no trust (%.1f)" % float(rec["trust"])
+	)
 	var pets := _memories(rec, "petted")
 	_next_day(rec)
 	home._pet_kin(k)
 	var pets2 := _memories(rec, "petted")
-	ok(float(rec["trust"]) > t1,
-		"the next farm day petting builds trust again, no expedition needed (%.1f)" % float(rec["trust"]))
+	ok(
+		float(rec["trust"]) > t1,
+		"the next farm day petting builds trust again, no expedition needed (%.1f)" % float(rec["trust"])
+	)
 	ok(pets == 1 and pets2 == 1, "the same care before the next expedition is one memory (%d, %d)" % [pets, pets2])
 	_fetch_trains(home, k)
 	_care_line(rec)
@@ -197,20 +239,30 @@ func run(m: Node) -> void:
 		Care.care_day(rec, "talked")
 		if Care.care_day(rec, "played"):
 			Save.remember(rec, "played", "played fetch with you on the farm", 1.5)
-	ok(int(Save.d["matches"]) == 0 and Care.bond_index(rec) >= 2,
-		"a week of farm days of care, no expedition: %s (trust %.0f)" % [Care.bond(rec)[1], float(rec["trust"])])
+	ok(
+		int(Save.d["matches"]) == 0 and Care.bond_index(rec) >= 2,
+		"a week of farm days of care, no expedition: %s (trust %.0f)" % [Care.bond(rec)[1], float(rec["trust"])]
+	)
 	var heard: Array = []
 	var log_cue := func(n, _at, _db, _p): heard.append(n)
 	Sfx.played.connect(log_cue)
-	k["busy"] = false      # the fetch trains above can leave it mid-game; this tick is about the rank
+	k["busy"] = false  # the fetch trains above can leave it mid-game; this tick is about the rank
 	var bond_cues := int(GardenSfx.heard.get("garden_bond_up", 0))
 	KinBondMoment.tick(home)
 	Sfx.played.disconnect(log_cue)
-	ok(home.panel_open == "Ember is now Close" and int(rec["bond_seen"]) == 2,
-		"reaching Close plays its moment: \"%s\"" % home.panel_open)
-	ok(heard.count("garden_bond_up") == 1 and int(GardenSfx.heard.get("garden_bond_up", 0)) == bond_cues + 1
-		and not heard.has("unlock") and not heard.has("garden_friends"),
-		"a rank-up plays one rising chime of its own, no stock unlock (%s)" % [heard])
+	ok(
+		home.panel_open == "Ember is now Close" and int(rec["bond_seen"]) == 2,
+		'reaching Close plays its moment: "%s"' % home.panel_open
+	)
+	ok(
+		(
+			heard.count("garden_bond_up") == 1
+			and int(GardenSfx.heard.get("garden_bond_up", 0)) == bond_cues + 1
+			and not heard.has("unlock")
+			and not heard.has("garden_friends")
+		),
+		"a rank-up plays one rising chime of its own, no stock unlock (%s)" % [heard]
+	)
 	home._close_panel()
 	KinBondMoment.tick(home)
 	ok(home.panel_open == "", "and only once")
