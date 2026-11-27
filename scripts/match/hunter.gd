@@ -834,7 +834,12 @@ static func abyss_lift_vy(vy: float, depth: float, dt: float, k := 1.0) -> float
 ## Real keys only open the glider with a fresh press in the air (a second Space, or the glide button). Opening uses
 ## the press up, so a fold (heal, dash, a knock) stays shut until a new press; release or landing clears it too.
 var _glide_armed := false
+var _glide_hold_t := 0.0      # s a let-go glide press stays armed (Loco.press_buffer)
 var _glide_btn_held := false
+
+func glide_armed() -> bool:
+	return _glide_armed
+
 
 func can_glide() -> bool:
 	return not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed and stun_t <= 0.0 \
@@ -2033,10 +2038,13 @@ func _update_glide(dt: float) -> void:
 	# an overheated glider stays open until you land or get hit again; a knock carries an open one (0055)
 	var can: bool = (lfloat.is_empty() or (bool(inp.get("glide", false)) and not bool(lfloat.get("g0", true)))) and not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed and stun_t <= 0.0 \
 		and (gliding or m.time - kb_t > 0.4) and pad.is_empty() and not shot_down
-	var want: bool = inp.get("glide", false) or auto_glide
+	var held: bool = inp.get("glide", false)
 	var btn_down: bool = inp.get("glide_btn", false)
-	# a fresh button press arms through a lock (a wind-down) as a second Space does: held, it opens as the lock ends
-	_glide_armed = (_glide_armed or (btn_down and not _glide_btn_held)) and bool(inp.get("glide", false)) and not grounded
+	# a fresh button press arms through a lock (a wind-down) as a second Space does: it opens as the lock ends, even
+	# if let go meanwhile (a tap is kept Loco.press_buffer, never eaten by an attack's recovery)
+	_glide_hold_t = Loco.press_buffer if held else maxf(0.0, _glide_hold_t - dt)
+	_glide_armed = (_glide_armed or (btn_down and not _glide_btn_held)) and (held or _glide_hold_t > 0.0) and not grounded
+	var want: bool = held or auto_glide or (_glide_armed and not gliding)
 	var was_btn := _glide_btn_held
 	_glide_btn_held = btn_down
 	var hold_opens: bool = auto_glide or _glide_armed or not inp.get("glide_press_only", false)
@@ -2707,10 +2715,10 @@ func _anim_state(stretch: float) -> void:
 	else:
 		s.erase("air_h")
 
-## (movefeel) Hunters are drawn a little larger in a match so they read on screen (owner: SUPERVIVE's
-## heroes "feel more important"), times the camera style's hunter_scale. Visual only: the hitbox (r),
+## (movefeel) Hunters are drawn a little larger in a match so they read on screen (1.12 times
+## camera.json match_hunter_scale), times the camera style's hunter_scale. Visual only: the hitbox (r),
 ## the TeamRing hit circle under your feet, shot heights and the balloon marker are unchanged.
-const VIS_SCALE := 1.12
+static var VIS_SCALE: float = 1.12 * CamRig.match_hunter_scale  # base 1.12 x camera.json match_hunter_scale
 var vis_k := 1.0       # the scale fit_scale last put on this model
 func set_model(n: Node3D) -> void:
 	super.set_model(n)
@@ -2854,9 +2862,10 @@ func render(delta: float, alpha: float) -> void:
 		else:
 			see = int(m.time * 14.0) % 3 != 0
 	model.visible = see and not HunterWisp.hides(self)    # a critter or a Wisp stands in
-	ShieldLook.tick(self)
-	SideRings.tick(self)
-	BodyTell.tick(self, delta)
+	if every == 1 or posed or BodyTell.pending(self):      # (the looks follow state, not time: a pose-throttled hunter updates them when posed, or at once on a new cast and while a tint shows)
+		ShieldLook.tick(self)
+		SideRings.tick(self)
+		BodyTell.tick(self, delta)
 	var ring := model.get_node("TeamRing") as MeshInstance3D
 	ring.visible = not downed
 	_render_balloon(delta)
@@ -2865,4 +2874,4 @@ func render(delta: float, alpha: float) -> void:
 		vuln_fx_t -= delta
 		if vuln_fx_t <= 0.0:
 			vuln_fx_t = 0.22
-			m.fx.burst(pos + Vector3(0, 2.05, 0), Color("ff6a4a"), 3, 1.2, 0.3, -1.0, 0.8)
+			m.fx.burst(pos + Vector3(0, 2.05 * CamRig.match_hunter_scale, 0), Color("ff6a4a"), 3, 1.2, 0.3, -1.0, 0.8)
