@@ -16,6 +16,7 @@ Everything you can place in build mode (B), from `HomeLayout.CATALOG`. Costs are
 | Nesting Nook | 60 gems, 8 wood | 4x2 | Where two close Boki leave an egg, with the Incubator beside it for Rare Eggs. (one only) |
 | Boki Burrow | 40 gems, 6 wood, 4 stone | 3x2 | Where Boki who aren't out on the farm curl up and sleep. (one only) |
 | Training post | 35 gems, 6 wood | 2x2 | Train a Boki's moves against the dummy. (one only) |
+| Lessons hall | 40 gems, 6 wood | 3x2 | Leave a Boki for a song, dance or drawing lesson. It comes back with a stat point and a new habit. (one only) |
 | Graveyard | 25 gems, 6 stone | 4x6 | A quiet corner for Boki who died. Their graves wait here (and the Soul Shrine can bring one back). (one only) |
 
 ## Work
