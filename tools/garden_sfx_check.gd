@@ -32,17 +32,19 @@ extends RefCounted
 ##      apart breathe once (Sfx.MIN_GAP)
 ## Never touches the real save.
 
-const SETTLE_FRAMES := 900       # frames to wait at most for the home to build
-const SIM_S := 400.0             # s of game time at most for one game
-const WAIT_S := 1.4              # real s for the countdown and the loser's huff to land
+const SETTLE_FRAMES := 900  # frames to wait at most for the home to build
+const SIM_S := 400.0  # s of game time at most for one game
+const WAIT_S := 1.4  # real s for the countdown and the loser's huff to land
 
 var bad := 0
 var main: Node
+
 
 func ok(cond: bool, what: String) -> void:
 	print("GARDENSFX %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(m: Node) -> void:
 	main = m
@@ -55,6 +57,7 @@ func run(m: Node) -> void:
 	print("GARDENSFX DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _play_cap() -> void:
 	var sfx := PlaySfx.new()
 	var rec := _kin("zapple", "Pip")
@@ -63,8 +66,10 @@ func _play_cap() -> void:
 	GardenSfx.heard.clear()
 	for i in 10:
 		sfx.tag_end(rec, Vector3(float(i), 0.0, 0.0))
-	ok(_count("garden_cheer_good") == PlaySfx.MAX_CUES and sfx.dropped == 10 - PlaySfx.MAX_CUES,
-			"play: ten cues at once play %d, %d held back" % [PlaySfx.MAX_CUES, sfx.dropped])
+	ok(
+		_count("garden_cheer_good") == PlaySfx.MAX_CUES and sfx.dropped == 10 - PlaySfx.MAX_CUES,
+		"play: ten cues at once play %d, %d held back" % [PlaySfx.MAX_CUES, sfx.dropped]
+	)
 	GardenZones.here = "play_cap_other"
 	sfx.tag_end(rec, Vector3.ZERO)
 	ok(_count("garden_cheer_good") == PlaySfx.MAX_CUES + 1, "play: another zone has its own allowance")
@@ -76,12 +81,14 @@ func _play_cap() -> void:
 	GardenZones.here = here
 	GardenSfx.heard.clear()
 
+
 func _kin(sp: String, kname: String) -> Dictionary:
 	var k := Save.new_kin(sp, kname)
 	k["level"] = 5
 	Care.ensure(k)
 	k["needs"]["energy"] = 90.0
 	return k
+
 
 func _names() -> void:
 	var sized := {}
@@ -96,15 +103,38 @@ func _names() -> void:
 			if not Sfx.ensure(p + tail):
 				silent.append(p + tail)
 	ok(silent.is_empty(), "every cheer, fanfare and huff sound exists (missing %s)" % [silent])
-	var cues: Array = ["glint_cast", "glint_plop", "glint_water", "glint_bite", "glint_reel", "tumble_push",
-			"tumble_ringout", "echo_hit", "echo_miss", "echo_streak", "show_reveal", "show_crowd",
-			"relay_handoff", "relay_fumble", "relay_finish", "kite_flap", "kite_ring", "kite_updraft", "kite_finish",
-			"lantern_flip", "lantern_match", "lantern_miss", "lantern_win", "garden_snack_ripe"]
+	var cues: Array = [
+		"glint_cast",
+		"glint_plop",
+		"glint_water",
+		"glint_bite",
+		"glint_reel",
+		"tumble_push",
+		"tumble_ringout",
+		"echo_hit",
+		"echo_miss",
+		"echo_streak",
+		"show_reveal",
+		"show_crowd",
+		"relay_handoff",
+		"relay_fumble",
+		"relay_finish",
+		"kite_flap",
+		"kite_ring",
+		"kite_updraft",
+		"kite_finish",
+		"lantern_flip",
+		"lantern_match",
+		"lantern_miss",
+		"lantern_win",
+		"garden_snack_ripe"
+	]
 	for texture in SnackPatch.rules()["pick_textures"]:
 		cues.append("garden_snack_" + texture)
 	for move in BaseTumble.rules()["moves"]:
 		cues.append("tumble_clash_" + move)
 	ok(cues.all(func(c): return Sfx.ensure(c)), "every game and snack patch cue exists (%d)" % cues.size())
+
 
 func _fishing() -> void:
 	var rec := _kin("zapple", "Pip")
@@ -144,15 +174,23 @@ func _fishing() -> void:
 	for c in landed:
 		sizes[GlintSfx.size_of(c["catch"], c["rare"])] += 1
 	ok(run_v.casts.size() == 5, "fishing: the scripted session is five casts (%d)" % run_v.casts.size())
-	ok(GlintSfx.heard.get("glint_cast", 0) == 5 and GlintSfx.heard.get("glint_plop", 0) == 5,
-			"fishing: one whip and one plop per cast (%s)" % [GlintSfx.heard])
-	ok(bites == hooked.size() and GlintSfx.heard.get("glint_bite", 0) == bites,
-			"fishing: one bite tick per hook (%d)" % bites)
+	ok(
+		GlintSfx.heard.get("glint_cast", 0) == 5 and GlintSfx.heard.get("glint_plop", 0) == 5,
+		"fishing: one whip and one plop per cast (%s)" % [GlintSfx.heard]
+	)
+	ok(
+		bites == hooked.size() and GlintSfx.heard.get("glint_bite", 0) == bites,
+		"fishing: one bite tick per hook (%d)" % bites
+	)
 	ok(GlintSfx.heard.get("glint_water", 0) == 5, "fishing: the water bed starts once per wait")
-	ok(GlintSfx.heard.get("glint_reel", 0) >= hooked.size() and not hooked.is_empty(),
-			"fishing: the reel loop runs on every reel")
-	ok(bed_bus == GlintSfx.BED_BUS and reel_bus == "SFX",
-			"fishing: the bed is on %s, the ratchet on %s" % [bed_bus, reel_bus])
+	ok(
+		GlintSfx.heard.get("glint_reel", 0) >= hooked.size() and not hooked.is_empty(),
+		"fishing: the reel loop runs on every reel"
+	)
+	ok(
+		bed_bus == GlintSfx.BED_BUS and reel_bus == "SFX",
+		"fishing: the bed is on %s, the ratchet on %s" % [bed_bus, reel_bus]
+	)
 	ok(line_at, "fishing: the loops sit at the line")
 	var stings := {}
 	for size in sizes:
@@ -162,13 +200,16 @@ func _fishing() -> void:
 	var fast := Sfx.ensure("glint_bite") and Sfx.ensure("glint_catch_small") and Sfx.ensure("glint_catch_large")
 	ok(fast, "fishing: the bite and the catch stings exist")
 
+
 func _seeded(n: int) -> RandomNumberGenerator:
 	var r := RandomNumberGenerator.new()
 	r.seed = n
 	return r
 
+
 func _count(sname: String) -> int:
 	return int(GardenSfx.heard.get(sname, 0))
+
 
 func _total(prefix: String) -> int:
 	var n := 0
@@ -186,6 +227,7 @@ func _voices() -> int:
 func _wait() -> void:
 	await main.get_tree().create_timer(WAIT_S).timeout
 
+
 func _press(bar: TimingBar, off: float, game) -> void:
 	bar.m = clampf(bar.zone + off, 0.0, 1.0)
 	var e := InputEventAction.new()
@@ -193,14 +235,17 @@ func _press(bar: TimingBar, off: float, game) -> void:
 	e.pressed = true
 	game.input(e)
 
+
 ## Sound after the start: tick, tick, go.
 func _countdown(game: String) -> void:
 	var beats := [_count("garden_count"), _count("garden_go")]
 	ok(beats == [2, 1], "%s: countdown tick, tick, go (%s)" % [game, beats])
 
+
 func _results(game: String) -> void:
 	var got := [_total("garden_win_"), _total("garden_sulk_")]
 	ok(got == [1, 1], "%s: one fanfare and one huff (%s)" % [game, got])
+
 
 func _games() -> void:
 	var rules: Dictionary = FarmUnlocks.rules()
@@ -252,6 +297,7 @@ func _games() -> void:
 	home.queue_free()
 	await main.get_tree().process_frame
 
+
 func _shove(home) -> void:
 	var sh: BaseShove = home.hshove
 	sh.use()
@@ -267,12 +313,13 @@ func _shove(home) -> void:
 	ok(_count("garden_thud") <= 1 and _count("garden_creak") <= 1, "shove: at most one thump and one creak")
 	_results("shove")
 
+
 func _dash(home) -> void:
 	var race: BaseRace = home.hrace
-	Save.d["tutorial"]["first_race"] = true      # the real race, not the one-time practice lap (race_check)
+	Save.d["tutorial"]["first_race"] = true  # the real race, not the one-time practice lap (race_check)
 	race.use()
 	var runners: int = race.runners.size()
-	var offs := [0.0, (TimingBar.GOOD + TimingBar.GREAT) * 0.5, 0.9]      # a perfect, a good and a missed press
+	var offs := [0.0, (TimingBar.GOOD + TimingBar.GREAT) * 0.5, 0.9]  # a perfect, a good and a missed press
 	var t := 0.0
 	while race.run != null and t < SIM_S:
 		if race.run.can_cheer() and not offs.is_empty():
@@ -283,10 +330,15 @@ func _dash(home) -> void:
 	_countdown("dash")
 	var presses := [_count("garden_cheer_perfect"), _count("garden_cheer_good"), _count("garden_cheer_miss")]
 	ok(presses == [1, 1, 1], "dash: a perfect, a good and a missed press each cheer once (%s)" % [presses])
-	ok(_count("garden_finish") == runners and _count("garden_crowd") == 1,
+	ok(
+		_count("garden_finish") == runners and _count("garden_crowd") == 1,
+		(
 			"dash: a swish for each of %d runners and one crowd (%d, %d)"
-			% [runners, _count("garden_finish"), _count("garden_crowd")])
+			% [runners, _count("garden_finish"), _count("garden_crowd")]
+		)
+	)
 	_results("dash")
+
 
 func _seek(home) -> void:
 	var sk: BaseSeek = home.hseek
@@ -301,9 +353,12 @@ func _seek(home) -> void:
 		t += 0.1
 	await _wait()
 	_countdown("seek")
-	ok(_count("garden_sniff") == 1 and looped and not Sfx.loop_on("seek_sniff"),
-			"seek: the sniffing loop starts once and stops with the hunt (%d)" % _count("garden_sniff"))
+	ok(
+		_count("garden_sniff") == 1 and looped and not Sfx.loop_on("seek_sniff"),
+		"seek: the sniffing loop starts once and stops with the hunt (%d)" % _count("garden_sniff")
+	)
 	_results("seek")
+
 
 func _volley(home) -> void:
 	var vb: BaseVolley = home.hvolley
@@ -322,12 +377,13 @@ func _volley(home) -> void:
 	ok(hits > 0 and bats == hits, "volley: one seed bat per hit (%d bats, %d hits)" % [bats, hits])
 	_results("volley")
 
+
 func _tumble(home) -> void:
 	var tb: BaseTumble = home.htumble
 	var moves: Array = BaseTumble.rules()["moves"].keys()
-	TumbleTeach.mark()        # the real bout, not the one-time practice exchange (tumble_check)
+	TumbleTeach.mark()  # the real bout, not the one-time practice exchange (tumble_check)
 	tb.use()
-	var want := {}                # move -> exchanges it should decide
+	var want := {}  # move -> exchanges it should decide
 	var pushes := 0
 	var out := false
 	var t := 0.0
@@ -348,16 +404,21 @@ func _tumble(home) -> void:
 	_countdown("tumble")
 	var got := moves.map(func(m): return _count("tumble_clash_" + m))
 	var need := moves.map(func(m): return int(want.get(m, 0)))
-	ok(not need.has(0) and got == need, "tumble: one clash in the deciding move per exchange, %s (%s, want %s)"
-			% [moves, got, need])
-	ok(_count("tumble_push") == pushes, "tumble: one push scuff per exchange won (%d of %d)"
-			% [_count("tumble_push"), pushes])
+	ok(
+		not need.has(0) and got == need,
+		"tumble: one clash in the deciding move per exchange, %s (%s, want %s)" % [moves, got, need]
+	)
+	ok(
+		_count("tumble_push") == pushes,
+		"tumble: one push scuff per exchange won (%d of %d)" % [_count("tumble_push"), pushes]
+	)
 	ok(out and _count("tumble_ringout") == 1, "tumble: one ring-out as the loser leaves the ring")
 	_results("tumble")
 
+
 func _echo(home) -> void:
 	var es: EchoSteps = home.hecho
-	Save.d["tutorial"]["echo_practice"] = true        # not the first dance: the full versus, not the slow practice
+	Save.d["tutorial"]["echo_practice"] = true  # not the first dance: the full versus, not the slow practice
 	es.use()
 	var r: EchoSteps.Run = es.run
 	var every := int(EchoSteps.rules()["cheer_every"])
@@ -371,7 +432,7 @@ func _echo(home) -> void:
 				var pt := r.at(r.first + i)
 				if pt > t and pt <= nt:
 					var s: int = i % 4 if r.pattern[i] < 0 else r.pattern[i]
-					r.press(pt, s if r.round_i == 0 else (s + 1) % 4)        # all right, then all wrong
+					r.press(pt, s if r.round_i == 0 else (s + 1) % 4)  # all right, then all wrong
 		r.step(nt)
 		for e in r.events:
 			var side: int = e[1]
@@ -389,11 +450,16 @@ func _echo(home) -> void:
 		t = nt
 	es._end(true)
 	var got := {"hit": _count("echo_hit"), "miss": _count("echo_miss"), "streak": _count("echo_streak")}
-	ok(want["hit"] > 0 and want["miss"] > 0 and want["streak"] > 0 and got == want,
+	ok(
+		want["hit"] > 0 and want["miss"] > 0 and want["streak"] > 0 and got == want,
+		(
 			"echo: one sparkle per hit, one miss per miss, one streak run every %d in a row (%s, want %s)"
-			% [every, got, want])
+			% [every, got, want]
+		)
+	)
 	ok(_count("garden_go") == 1 and _count("garden_finish") == 1, "echo: the start and the finish once each")
 	ok(es.voices.size() == 4 and es.voices[0].stream is AudioStreamWAV, "echo: the four stone notes are generated")
+
 
 func _show(home) -> void:
 	var sr: ShowRing = home.hshow
@@ -412,10 +478,13 @@ func _show(home) -> void:
 		t += 0.1
 	await _wait()
 	_countdown("show")
-	ok(presses > 3 and _total("garden_cheer_") == presses, "show: a crowd cheer for each of %d presses (%d)"
-			% [presses, _total("garden_cheer_")])
+	ok(
+		presses > 3 and _total("garden_cheer_") == presses,
+		"show: a crowd cheer for each of %d presses (%d)" % [presses, _total("garden_cheer_")]
+	)
 	ok(_count("show_reveal") == 1 and _count("show_crowd") == 1, "show: the judges' reveal and the crowd once each")
 	_results("show")
+
 
 func _relay(home) -> void:
 	var rc: BaseRelay = home.hrace.relay
@@ -424,7 +493,7 @@ func _relay(home) -> void:
 	var t := 0.0
 	while rc.run != null and t < SIM_S:
 		if rc.run.can_press():
-			_press(rc.bar, 0.0 if rc.run.grades.is_empty() else 0.9, rc)      # one great hand-off, one missed
+			_press(rc.bar, 0.0 if rc.run.grades.is_empty() else 0.9, rc)  # one great hand-off, one missed
 		lost = rc.run.lost.duplicate(true)
 		rc.tick(0.1)
 		t += 0.1
@@ -436,10 +505,14 @@ func _relay(home) -> void:
 		for s in team:
 			want[0 if float(s) <= clean_s else 1] += 1
 	var got := [_count("relay_handoff"), _count("relay_fumble")]
-	ok(want[0] > 0 and want[1] > 0 and got == want, "relay: clean and fumbled hand-offs each sound once (%s, want %s)"
-			% [got, want])
+	ok(
+		want[0] > 0 and want[1] > 0 and got == want,
+		"relay: clean and fumbled hand-offs each sound once (%s, want %s)" % [got, want]
+	)
 	ok(_count("relay_finish") == 2, "relay: one finish for each team home (%d)" % _count("relay_finish"))
 	_results("relay")
+
+
 ## Driven by hand in one frame, so the home's own tick can't land between the steps.
 func _chimes(home) -> void:
 	var hc: HomeChimes = home.chimes
@@ -466,8 +539,10 @@ func _chimes(home) -> void:
 	hc.tick(gap)
 	Care.add_stat(rec, "speed", 1)
 	hc.tick(0.3)
-	ok(_total("garden_chime_") == 4, "chimes: a drill's stat and level and a stat 0.3 s on merge into one (%s)"
-			% [GardenSfx.heard])
+	ok(
+		_total("garden_chime_") == 4,
+		"chimes: a drill's stat and level and a stat 0.3 s on merge into one (%s)" % [GardenSfx.heard]
+	)
 	k["nap_t"] = 5.0
 	Care.add_stat(rec, "focus", 1)
 	hc.tick(gap)
@@ -475,8 +550,17 @@ func _chimes(home) -> void:
 	hc.tick(gap)
 	ok(_total("garden_chime_") == 4, "chimes: nothing while the Boki sleeps, nor once it wakes")
 	var p := HomeChimes.PITCH
-	ok(Sfx.ensure("garden_chime_stat") and Sfx.ensure("garden_chime_level") and Sfx.ensure("garden_chime_evolve")
-			and p["small"] > p["medium"] and p["medium"] > p["large"], "chimes: all three exist, small sings higher")
+	ok(
+		(
+			Sfx.ensure("garden_chime_stat")
+			and Sfx.ensure("garden_chime_level")
+			and Sfx.ensure("garden_chime_evolve")
+			and p["small"] > p["medium"]
+			and p["medium"] > p["large"]
+		),
+		"chimes: all three exist, small sings higher"
+	)
+
 
 ## The partner stands in the open with this trust and joy, awake or asleep, and is called with a tap.
 func _answer(home, trust: float, joy: float, asleep: bool) -> Dictionary:
@@ -493,35 +577,58 @@ func _answer(home, trust: float, joy: float, asleep: bool) -> Dictionary:
 	home.life.whistle.release()
 	return k
 
+
 func _whistle(home) -> void:
 	var w: BaseWhistle = home.life.whistle
 	var tap: AudioStreamWAV = Sfx.streams[BaseWhistle.TAP]
 	var hold: AudioStreamWAV = Sfx.streams[BaseWhistle.HOLD]
 	ok(tap.data.size() < hold.data.size() and tap.data.size() > 0, "whistle: the hold whistle is longer than the tap")
 	_answer(home, 90.0, 80.0, false)
-	ok(_count(BaseWhistle.TAP) == 1 and _count(BaseWhistle.HOLD) == 0, "whistle: a tap is one short whistle (%s)"
-			% [GardenSfx.heard])
+	ok(
+		_count(BaseWhistle.TAP) == 1 and _count(BaseWhistle.HOLD) == 0,
+		"whistle: a tap is one short whistle (%s)" % [GardenSfx.heard]
+	)
 	w.press()
 	w.step(float(w.r["hold_s"]) + 0.05)
 	w.release()
-	ok(_count(BaseWhistle.TAP) == 2 and _count(BaseWhistle.HOLD) == 1, "whistle: a hold adds one rising whistle (%s)"
-			% [GardenSfx.heard])
+	ok(
+		_count(BaseWhistle.TAP) == 2 and _count(BaseWhistle.HOLD) == 1,
+		"whistle: a hold adds one rising whistle (%s)" % [GardenSfx.heard]
+	)
 	var sp := String(home.kins[0]["rec"]["species"])
 	_answer(home, 90.0, 80.0, false)
-	ok(w.eagerness(home.kins[0]["rec"]) >= float(w.r["happy_at"]) and _count(KinVoice.cue(sp, "happy")) == 1
-			and _voices() == 1 and _total("garden_sulk_") == 0, "whistle: a trusting, glad Boki answers happy (%s)"
-			% [GardenSfx.heard])
+	ok(
+		(
+			w.eagerness(home.kins[0]["rec"]) >= float(w.r["happy_at"])
+			and _count(KinVoice.cue(sp, "happy")) == 1
+			and _voices() == 1
+			and _total("garden_sulk_") == 0
+		),
+		"whistle: a trusting, glad Boki answers happy (%s)" % [GardenSfx.heard]
+	)
 	_answer(home, 25.0, 40.0, false)
-	ok(w.eagerness(home.kins[0]["rec"]) < float(w.r["happy_at"]) and _count(KinVoice.cue(sp, "unsure")) == 1
-			and _voices() == 1, "whistle: a lukewarm Boki answers unsure (%s)" % [GardenSfx.heard])
+	ok(
+		(
+			w.eagerness(home.kins[0]["rec"]) < float(w.r["happy_at"])
+			and _count(KinVoice.cue(sp, "unsure")) == 1
+			and _voices() == 1
+		),
+		"whistle: a lukewarm Boki answers unsure (%s)" % [GardenSfx.heard]
+	)
 	var rec: Dictionary = _answer(home, 90.0, 5.0, false)["rec"]
-	ok(w.sulky(rec) and _count("garden_sulk_" + GardenSfx.size_word(rec)) == 1 and _voices() == 0,
-			"whistle: a sulky Boki grumbles (%s)" % [GardenSfx.heard])
+	ok(
+		w.sulky(rec) and _count("garden_sulk_" + GardenSfx.size_word(rec)) == 1 and _voices() == 0,
+		"whistle: a sulky Boki grumbles (%s)" % [GardenSfx.heard]
+	)
 	for joy in [80.0, 5.0]:
 		_answer(home, 90.0, joy, true)
-		ok(_voices() == 0 and _total("garden_sulk_") == 0, "whistle: a sleeping Boki (joy %.0f) says nothing (%s)"
-				% [joy, GardenSfx.heard])
+		ok(
+			_voices() == 0 and _total("garden_sulk_") == 0,
+			"whistle: a sleeping Boki (joy %.0f) says nothing (%s)" % [joy, GardenSfx.heard]
+		)
 	home.kins[0]["nap_t"] = 0.0
+
+
 ## 1 when `sname` started since the last ask, else 0 (clears Sfx's own last start, so the next one counts).
 func _started(sname: String) -> int:
 	var n := 1 if Sfx.last_played.has(sname) else 0
@@ -529,17 +636,20 @@ func _started(sname: String) -> int:
 	Sfx.recent.erase(sname)
 	return n
 
+
 ## Wakes every Boki into Roam, so none lies down beside another instead of where it is.
 func _wake_all(home) -> void:
 	for k in home.kins:
 		k["nap_t"] = 0.0
 		home.life.machine(k).go(BaseLife.S.ROAM, "check")
 
+
 ## HomeVoice's gaps cleared and the listener on `k`: only Sfx's own MIN_GAP stands between its cues.
 func _hear(k: Dictionary) -> void:
 	HomeVoice._until.clear()
 	HomeVoice._last.clear()
 	Sfx.listener = k["pos"]
+
 
 ## Synchronous throughout (OS.delay_msec for the real-time gaps), so no frame lets BaseLife move on its own.
 func _life(home) -> void:
@@ -558,7 +668,7 @@ func _life(home) -> void:
 	BaseFeed.tick(home, k, 0.1)
 	eats += _started("boki_eat")
 	ok(Care.need(rec, "food") > 30.0 and eats == 1, "life: a snack from the pantry plays boki_eat once (%d)" % eats)
-	var unheld: Array = home.kins.filter(func(kk): return not BaseLife._taken(kk))      # (not held by a game's result)
+	var unheld: Array = home.kins.filter(func(kk): return not BaseLife._taken(kk))  # (not held by a game's result)
 	ok(not unheld.is_empty(), "life: a Boki is free to nap")
 	if unheld.is_empty():
 		return
@@ -567,13 +677,15 @@ func _life(home) -> void:
 	_started("boki_sleep")
 	life._nap(sleeper, "tired")
 	var naps := _started("boki_sleep")
-	var walk := maxf(float(life.r_v["spot_walk"]), BaseLife.PILE_WALK) + 3.0     # s: the walk to a nap spot or a pile
+	var walk := maxf(float(life.r_v["spot_walk"]), BaseLife.PILE_WALK) + 3.0  # s: the walk to a nap spot or a pile
 	for i in int(walk / 0.1):
 		_hear(sleeper)
 		life._tick(sleeper, 0.1)
 		naps += _started("boki_sleep")
-	ok(life.machine(sleeper).is_in(BaseLife.S.NAP) and float(sleeper["nap_t"]) > 0.0 and naps == 1,
-			"life: a nap plays boki_sleep once as it lies down, nothing more while it sleeps (%d)" % naps)
+	ok(
+		life.machine(sleeper).is_in(BaseLife.S.NAP) and float(sleeper["nap_t"]) > 0.0 and naps == 1,
+		"life: a nap plays boki_sleep once as it lies down, nothing more while it sleeps (%d)" % naps
+	)
 	OS.delay_msec(500)
 	var starts := {}
 	for kk in home.kins:
@@ -581,5 +693,7 @@ func _life(home) -> void:
 		life._lie_down(kk)
 		starts[int(Sfx.last_played.get("boki_sleep", -1))] = true
 		OS.delay_msec(100)
-	ok(starts.size() == 1 and not starts.has(-1),
-			"life: three lying down 0.1 s apart breathe once (%s)" % [starts.keys()])
+	ok(
+		starts.size() == 1 and not starts.has(-1),
+		"life: three lying down 0.1 s apart breathe once (%s)" % [starts.keys()]
+	)

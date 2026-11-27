@@ -10,21 +10,25 @@ var m: Match
 var main: Node
 var g: FirstMatchGuide
 
+
 func ok(cond: bool, what: String) -> void:
 	print("FMGUIDE %s %s" % ["PASS" if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(mn: Node) -> void:
 	main = mn
 	Save.no_write = true
 	_save_flag()
-	for id in ["archer", "juggernaut", "gunslinger"]:      # Lace, Kael, Vex: the guide is the same for all
+	for id in ["archer", "juggernaut", "gunslinger"]:  # Lace, Kael, Vex: the guide is the same for all
 		_walk(id)
 	_mates()
 	_first_ult()
 	_first_summon()
 	print("FMGUIDE DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 func _save_flag() -> void:
 	Save.d["first_guide"] = 0
@@ -51,8 +55,10 @@ func _save_flag() -> void:
 	ok(int(kept["first_guide"]) == 0, "the field is never overwritten")
 	ok(int(Save.fresh()["first_guide"]) == 0, "a new save starts at 0")
 
+
 func _skips(key: String) -> bool:
 	return FirstMatchGuide.for_match(null, {key: true}) == null
+
 
 func _tick(secs: float) -> void:
 	var t := 0.0
@@ -60,12 +66,21 @@ func _tick(secs: float) -> void:
 		g.tick(0.1)
 		t += 0.1
 
+
 func _walk(hunter: String) -> void:
 	Save.d["first_guide"] = 0
 	m = Match.new()
 	main.add_child(m)
-	var o := {"teams": 2, "squad": 1, "tier": 0, "length": 1000.0, "seed": 4242, "demo_kin": "cindle",
-			"arch": hunter, "cls": Arch.weight(hunter)}
+	var o := {
+		"teams": 2,
+		"squad": 1,
+		"tier": 0,
+		"length": 1000.0,
+		"seed": 4242,
+		"demo_kin": "cindle",
+		"arch": hunter,
+		"cls": Arch.weight(hunter)
+	}
 	m.start(o)
 	m.set_process(false)
 	print("FMGUIDE hunter ", hunter)
@@ -133,12 +148,13 @@ func _walk(hunter: String) -> void:
 	ok(g.line == "", "after extracting nothing shows")
 	p.extracted = false
 	if m.skydrop:
-		m.skydrop.planning = false      # (the ship waits for you to plan the drop, and the match with it)
+		m.skydrop.planning = false  # (the ship waits for you to plan the drop, and the match with it)
 	g._gap = 0.0
 	m.step(Match.DT)
 	ok(g.line != "" or g.shown.size() > 0, "Match.step ticks the guide")
 	_fit()
 	m.queue_free()
+
 
 func _mates() -> void:
 	m.queue_free()
@@ -157,12 +173,15 @@ func _mates() -> void:
 			h.pos = p.pos + Vector3(300 if h.team != p.team else 60, 0, 0)
 	g.shown = {"land": true, "send": true}
 	_tick(1.6)
-	ok(g.id == "mates" and g.line.begins_with("Hold %s to pick a teammate" % Settings.key_cap("base")),
-			"squads, teammates far off: hold B to base to one (%s)" % g.line)
+	ok(
+		g.id == "mates" and g.line.begins_with("Hold %s to pick a teammate" % Settings.key_cap("base")),
+		"squads, teammates far off: hold B to base to one (%s)" % g.line
+	)
 	BaseWheel.open(p, Vector2(640, 360), BaseRecall.mates(m, p))
 	_tick(0.2)
 	p.inp.erase("bwheel")
 	ok(g.line == "", "opening the wheel clears it")
+
 
 ## The plane ride and the drop: no guide line, and no first-time tip card, however due they are.
 func _no_hints_in_flight(p: Hunter) -> void:
@@ -176,6 +195,7 @@ func _no_hints_in_flight(p: Hunter) -> void:
 		ok(m.hud.msgs.count() == 0, "%s: no hint card" % st)
 		p.set(st, false)
 
+
 func _fit() -> void:
 	var strip := TutorialStrip.rect(Vector2(1280, 720))
 	var w := strip.size.x - strip.size.y
@@ -188,6 +208,7 @@ func _fit() -> void:
 		var gone := txt.contains("slip away")
 		ok(not gone, "%s is not the squad or landing line" % row[0])
 
+
 # ------------------------------------------------------------------ 5. the first-ready ult hint
 func _first_ult() -> void:
 	var p: Hunter = m.player
@@ -198,7 +219,7 @@ func _first_ult() -> void:
 	seen.erase(FirstUltHint.KEY)
 	p.downed = false
 	p.dropping = false
-	p.riding = false      # (a match now starts aboard the skyship)
+	p.riding = false  # (a match now starts aboard the skyship)
 	p.lvl = int(Hunter.ULT_AT[0]) - 1
 	p.ak.cd["x"] = 0.0
 	m._tip_t = 2.0
@@ -246,12 +267,23 @@ func _first_ult() -> void:
 		var line := FirstUltHint.short_line(String(xd.get("desc", "")))
 		ok(line != "" and line.length() <= FirstUltHint.LINE_MAX + 1, "%s: a short line (%s)" % [f, line])
 
+
 # ------------------------------------------------------------------ 6. the first-summon hint
 func _first_summon() -> void:
 	m = Match.new()
 	main.add_child(m)
-	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1000.0, "seed": 4242, "demo_kin": "cindle",
-			"no_drop": true, "boki_wisps": true})
+	m.start(
+		{
+			"teams": 2,
+			"squad": 1,
+			"tier": 0,
+			"length": 1000.0,
+			"seed": 4242,
+			"demo_kin": "cindle",
+			"no_drop": true,
+			"boki_wisps": true
+		}
+	)
 	m.set_process(false)
 	var p: Hunter = m.player
 	var k: Kin = p.kin
@@ -269,8 +301,10 @@ func _first_summon() -> void:
 	k.summon.cd = 0.0
 	var before: int = m.hud.msgs.count()
 	m._tips()
-	var want := "Press %s to call %s out for %d s, then it rests %d s" % [Settings.key_cap("summon"),
-			k.rec.get("name", "your Boki"), roundi(k.summon.dur), roundi(k.summon.cd_base)]
+	var want := (
+		"Press %s to call %s out for %d s, then it rests %d s"
+		% [Settings.key_cap("summon"), k.rec.get("name", "your Boki"), roundi(k.summon.dur), roundi(k.summon.cd_base)]
+	)
 	ok(TipText.summon(k) == want, "the key cap, the name and both times (%s)" % want)
 	ok(bool(seen.get("first_summon", false)) and m.hud.msgs.count() > before, "ready: one hint through the lane")
 	before = m.hud.msgs.count()

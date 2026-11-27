@@ -9,20 +9,24 @@ extends RefCounted
 
 const ID := "snack_patch"
 
-var h                                    # the Home screen
+var h  # the Home screen
 var _look_t := 0.0
 var _ripe := false
+
 
 func _init(home) -> void:
 	h = home
 
+
 static func rules() -> Dictionary:
 	return Content.rules("snack_patch")
+
 
 ## base_mode saves keep one patch: a missing one waits in storage to be put down.
 static func grant(d: Dictionary) -> void:
 	if FarmUnlocks.base_mode() and HomeLayout.count_of(ID, d) == 0:
 		HomeLayout.of(d)["inv"][ID] = 1
+
 
 ## The snacks this island's patch grows: its zone theme's list, else the start garden's four, plus the season's snack
 ## (GardenSeasons) when that list lacks it.
@@ -31,9 +35,11 @@ static func snacks(d: Dictionary, now := -1.0) -> Array:
 	var season := GardenSeasons.snack(Time.get_unix_time_from_system() if now < 0.0 else now)
 	return own if own.has(season) else own + [season]
 
+
 ## The zone theme's own list, else the start garden's four.
 static func zone_snacks(d: Dictionary) -> Array:
 	return rules()["zone_snacks"].get(String(HomeLayout.of(d)["theme"]), rules()["snacks"])
+
 
 ## Where the zones are not built, one more food every ripening so every snack gets grown: the next, in
 ## zone-list order, that the patch's own list lacks (rot on the entry counts ripenings). "" on a zone.
@@ -47,6 +53,7 @@ static func extra(d: Dictionary, e: Dictionary, now := -1.0) -> String:
 		rest.append_array((zones[z] as Array).filter(func(s): return not own.has(s)))
 	return String(rest[int(e.get("rot", 0)) % rest.size()])
 
+
 ## The placed patch's deco entry, or {}.
 static func entry(d: Dictionary) -> Dictionary:
 	for e in HomeLayout.of(d).get("deco", []):
@@ -54,8 +61,10 @@ static func entry(d: Dictionary) -> Dictionary:
 			return e
 	return {}
 
+
 static func ripe(e: Dictionary, now: float) -> bool:
 	return not e.is_empty() and now - float(e.get("t", now)) >= grow_secs(e)
+
 
 ## Seconds the patch takes to ripen in the zone you are in (shorter with a Sunny patch, DecorComfort, and with a
 ## watered patch `e`: BaseChore's Tide chore). A save's first batch (Save.d snack_picks 0, the starter gift) takes
@@ -64,19 +73,22 @@ static func grow_secs(e := {}) -> float:
 	var base := float(rules()["grow_secs"])
 	if int(Save.d.get("snack_picks", 1)) <= 0:
 		base = minf(base, float(rules()["first_grow_secs"]))
-	return base * DecorComfort.value("bright", "grow", 1.0) \
-		* (float(rules()["water_mult"]) if watered(e) else 1.0)
+	return base * DecorComfort.value("bright", "grow", 1.0) * (float(rules()["water_mult"]) if watered(e) else 1.0)
+
 
 ## Watered since the last pick (the entry's "wt", unix seconds): a pick makes it dry again.
 static func watered(e: Dictionary) -> bool:
 	return e.has("wt") and e.has("t") and float(e["wt"]) >= float(e["t"])
 
+
 ## A patch that is down, still growing and dry: what a Tide Boki walks to.
 static func dry(e: Dictionary, now: float) -> bool:
 	return not e.is_empty() and e.has("t") and not watered(e) and not ripe(e, now)
 
+
 static func water(e: Dictionary, now: float) -> void:
 	e["wt"] = now
+
 
 ## The crunch a snack makes when picked: "crisp", "juicy", "hard" or "soft", by its lean type (pick_textures).
 static func texture(snack: String) -> String:
@@ -85,6 +97,7 @@ static func texture(snack: String) -> String:
 		if (rules()["pick_textures"][t] as Array).has(type):
 			return String(t)
 	return "crisp"
+
 
 ## Picks the ripe snacks into the pantry. Returns the snack ids picked ([] when not ripe).
 static func harvest(d: Dictionary, now: float) -> Array:
@@ -102,10 +115,12 @@ static func harvest(d: Dictionary, now: float) -> Array:
 		shelve(d, String(s))
 	return got
 
+
 ## Puts n of a snack on the pantry shelf: crops (Data.CROPS) and prepared foods (Care.foods_v) have their own stores.
 static func shelve(d: Dictionary, snack: String, n := 1) -> void:
 	var store: Dictionary = d["crops"] if Data.CROPS.has(snack) else d["items"]
 	store[snack] = int(store.get(snack, 0)) + n
+
 
 ## Part of the deco signature, so the model changes when it ripens or the season turns.
 static func sig(e: Dictionary) -> String:
@@ -113,6 +128,7 @@ static func sig(e: Dictionary) -> String:
 		return ""
 	var now := Time.get_unix_time_from_system()
 	return ("r" if ripe(e, now) else "") + GardenSeasons.snack(now)
+
 
 ## Little beds, one per snack (the season's too), each with its snack's colour: sprouts while growing, fat berries
 ## once ripe.
@@ -130,6 +146,7 @@ static func model(e: Dictionary) -> Node3D:
 			Models.part(n, Models.sphere(0.13, 8), Models.toon(Care.food_col(grown[i])), at + Vector3(0, 0.5, 0))
 	return n
 
+
 func tick(d: float) -> void:
 	_look_t -= d
 	if _look_t > 0.0 or not FarmUnlocks.base_mode() or not h.visit.is_empty():
@@ -138,11 +155,11 @@ func tick(d: float) -> void:
 	var now := Time.get_unix_time_from_system()
 	var e := entry(Save.d)
 	if not e.is_empty() and not e.has("t"):
-		e["t"] = now          # the timer starts when it is put down
+		e["t"] = now  # the timer starts when it is put down
 	var now_ripe := ripe(e, now)
 	if now_ripe != _ripe:
 		_ripe = now_ripe
-		h.hb.apply(false)          # redraws the patch in its new stage
+		h.hb.apply(false)  # redraws the patch in its new stage
 		if now_ripe and not _on_it(e):
 			GardenSfx.snack_ripe(HomeLayout.deco_center(e))
 	if now_ripe and _on_it(e):
@@ -152,6 +169,7 @@ func tick(d: float) -> void:
 		h._toast("Picked: " + ", ".join(got.map(func(s): return Care.food_name(s))))
 		GardenSfx.snack_pick(h, HomeLayout.deco_center(e), got)
 		h.fx.burst(HomeLayout.deco_center(e) + Vector3(0, 0.5, 0), Color("ffe08a"), 10, 1.5, 0.4)
+
 
 func _on_it(e: Dictionary) -> bool:
 	var c := HomeLayout.deco_center(e)
