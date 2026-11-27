@@ -31,7 +31,7 @@ const GOAL_KINDS := {
 	"team": ["revives"],
 	"exploration": ["chests", "rings"],
 	"extraction": ["extracts", "close_out", "best_haul"],
-	"boki": ["caught", "kin_hits", "merged_knocks"],
+	"boki": ["caught", "kin_hits", "boki_knocks"],
 }
 ## Keys that would make a reward more than a look ("stat" in a goal is what it counts, not a reward).
 const POWER_KEYS := ["hp", "health", "dmg", "damage", "speed", "cooldown", "cd", "perk", "ability", "rank",
@@ -426,13 +426,25 @@ func _feats() -> void:
 	me.grounded = false
 	feats._on_hit(me, rival2, 5.0, ["primary"])
 	ok(int(me.stats.get("air_hits", 0)) == 1, "a hit while off the ground is an air hit")
-	me.merge_st = {"t": 1.0}
+	var bk := Kin.new()
+	me.kin = bk
+	bk.wisp = true
+	bk.state = "wisp"
 	me.hp = me.max_hp * 0.3
 	rival2.downed = true
 	feats._watch_knock(me, rival2, false)
-	ok(int(me.stats.get("merged_knocks", 0)) == 1 and int(me.stats.get("lowhp_knocks", 0)) == 1,
-			"a knock while merged and under half health counts for both")
-	for e in [me, rival, rival2, rival3, feats, m]: (e as Node).free()
+	ok(int(me.stats.get("boki_knocks", 0)) == 0 and int(me.stats.get("lowhp_knocks", 0)) == 1,
+			"a knock under half health counts; with the Boki riding as a wisp it is no Boki knock")
+	bk.wisp = false
+	bk.state = "active"
+	rival3.downed = true
+	feats._watch_knock(me, rival3, false)
+	ok(int(me.stats.get("boki_knocks", 0)) == 1, "a knock with your Boki out (summoned) is a Boki knock")
+	var cu := ClassUnlock.rules()
+	ok(not JSON.stringify(cu).contains("fused") and not cu["stats"].has("merged_knocks"),
+			"no challenge or mastery goal needs a Fusion (there is none, owner 11-26)")
+	me.kin = null
+	for e in [me, rival, rival2, rival3, bk, feats, m]: (e as Node).free()
 
 # ---------------------------------------------------------------- 6. migration
 func _migration() -> void:
