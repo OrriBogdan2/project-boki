@@ -38,7 +38,8 @@ var last_time := -1.0  # Match.time last frame
 var sole_reads0 := 0  # BootSole.reads when the screen went
 var last_cpu := 0.0  # cpu_ms() at the last frame
 var split := false  # --loadin-split: time the scripts' _process by file and the draw
-var split_us := {}  # section -> usec summed over the frames after the screen
+var split_us := {}  # phase -> {section -> usec summed over that phase's frames}
+var split_n := {}  # phase -> frames
 var taken := {}  # script file -> nodes whose _process the check calls itself
 var split_m: Match
 var t_pre := 0
@@ -241,7 +242,9 @@ func _finish() -> void:
 	var rf := "LOADIN render a frame (ms avg): cpu %.1f (culling + draw submission), frame setup %.1f, gpu %.1f"
 	lines.append(rf % [rs[0] / maxi(j.size(), 1), rs[1] / maxi(j.size(), 1), rs[2] / maxi(j.size(), 1)])
 	if split:
-		lines.append("LOADIN split (ms a frame): " + _top(split_us, maxi(j.size(), 1)))
+		for ph in split_us:
+			var n := int(split_n.get(ph, 1))
+			lines.append("LOADIN split %s, %d frames (ms a frame): %s" % [ph, n, _top(split_us[ph], n)])
 	var per_frame := float(steps_total) / maxi(w.size(), 1)
 	var sf2 := "LOADIN sim steps %d in %d frames (%.1f a frame; 1.0 is real time)"
 	lines.append(sf2 % [steps_total, w.size(), per_frame])
@@ -308,11 +311,20 @@ func _split_frame(wall: float, now: int) -> void:
 	var draw := t_post - t_pre if t_post > t_pre and t_pre > last_split else 0
 	last_split = now
 	var used := draw
-	split_us["draw"] = int(split_us.get("draw", 0)) + draw
+	# by phase: planning on the deck, in the air (the jump, the glide down), on the ground
+	var p := split_m.player
+	var ph := "plan" if split_m.skydrop and split_m.skydrop.planning else "ground"
+	if ph == "ground" and p and (p.dropping or p.gliding):
+		ph = "air"
+	split_n[ph] = int(split_n.get(ph, 0)) + 1
+	_add(ph, "draw", draw)
+	var v0 := _vsum()
 	var t0 := Time.get_ticks_usec()
 	split_m._process(dt)
 	var t1 := Time.get_ticks_usec()
-	split_us["Match._process"] = int(split_us.get("Match._process", 0)) + t1 - t0
+	var vis := _vsum() - v0
+	_add(ph, "match visuals", vis)
+	_add(ph, "match steps+rest", t1 - t0 - vis)
 	used += t1 - t0
 	for k in taken:
 		var a := Time.get_ticks_usec()
@@ -320,6 +332,19 @@ func _split_frame(wall: float, now: int) -> void:
 			if is_instance_valid(n) and n.is_inside_tree():
 				n._process(dt)
 		var b := Time.get_ticks_usec()
-		split_us[k] = int(split_us.get(k, 0)) + b - a
+		_add(ph, k, b - a)
 		used += b - a
-	split_us["rest"] = int(split_us.get("rest", 0)) + maxi(0, int(wall * 1000.0) - used)
+	_add(ph, "rest", maxi(0, int(wall * 1000.0) - used))
+
+
+func _add(ph: String, k: String, us: int) -> void:
+	var d: Dictionary = split_us.get(ph, {})
+	d[k] = int(d.get(k, 0)) + us
+	split_us[ph] = d
+
+
+func _vsum() -> int:
+	var t := 0
+	for k in Match.vprof:
+		t += int(Match.vprof[k])
+	return t
