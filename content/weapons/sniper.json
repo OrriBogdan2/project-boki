@@ -18,7 +18,7 @@
 		"sfx": "gun_sniper",
 		"warmup": 0.6,
 		"fire_slow": 0.6,
-		"desc": "Winds up for 0.6s with a laser showing, then hits hard. Weak point-blank, full damage from about 8m, fading past 11m.",
+		"desc": "Winds up for 0.6s with a laser showing, then hits hard. Weak point-blank, full damage from 9m, fading past 12.5m.",
 		"kick": 0.2,
 		"push": 2.0,
 		"tracer": 1.6

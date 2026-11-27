@@ -1,9 +1,9 @@
 extends RefCounted
 ## --shot-falloff-check: a weapon's shot loses damage with the distance it flew, and a ramp-up weapon starts weak
-## (ShotFalloff, content/rules/shot_falloff.json; applied in Match._shot_apply).
-##  1. The classes: the rifle's falloff is the medium curve squeezed into its range, the sniper's ramp is the long ramp.
-##  2. In play: the same shot lands on a foe up close, half way down the slope and at the weapon's range;
-##     the damage ratios follow the curve.
+## (ShotFalloff, content/rules/shot_falloff.json, reference metres; applied in Match._shot_apply).
+##  1. The classes: the sniper gets the long falloff and ramp, Meeko's crook the seraph curve, in metres as they are.
+##  2. In play: the same shot lands on a foe up close, mid-slope and at the weapon's range; the ratios follow the
+##     curve, and the rifle (9.5 m, before the medium start at 10 m) does full damage at its range.
 ##  3. Every weapon names only classes that exist, and none keeps the old close_mult/far_mult keys.
 ## Never touches the save.
 
@@ -37,8 +37,9 @@ func run(main: Node) -> void:
 			break
 	var rifle := _wpn("rifle")
 	var sniper := _wpn("sniper")
-	_curve(m, foe, rifle, "falloff: rifle")
-	_curve(m, foe, sniper, "ramp + falloff: sniper")
+	_curve(m, foe, sniper, "sniper", 10.0, {0.2: 0.5, 5.25: 0.75, 15.0: 0.7, 16.0: 0.58})
+	_curve(m, foe, _wpn("lantern_crook"), "crook", 2.0, {0.3: 1.0, 4.75: 1.0, 6.75: 1.0 - 0.5 * 2.0 / 4.75, 8.4: 0.616})
+	_curve(m, foe, rifle, "rifle", 2.0, {9.5: 1.0})
 	print("FALLOFF DONE, failures: %d" % bad)
 	main.get_tree().quit()
 
@@ -48,21 +49,14 @@ func _wpn(id: String) -> Dictionary:
 
 
 func _data() -> void:
-	var ex := {}
-	ShotFalloff.add(ex, _wpn("rifle"), 9.5)
-	var k := 9.5 / 17.5
-	ok(ex.has("farf") and not ex.has("near"), "rifle: a falloff, no ramp")
-	var fa: Array = ex["farf"]
-	var squeezed: bool = absf(float(fa[0]) - 10.0 * k) < 0.01 and absf(float(fa[2]) - 9.5) < 0.01
-	ok(squeezed and is_equal_approx(float(fa[1]), 0.4), "rifle: medium curve squeezed to 9.5 m, floor 0.4")
 	var sx := {}
-	ShotFalloff.add(sx, _wpn("sniper"), 16.0)
-	var ramp_ok: bool = sx.has("near") and sx["near"].size() == 3 and is_equal_approx(float(sx["near"][0]), 0.5)
-	ok(ramp_ok, "sniper: a ramp from half damage")
-	var long_end := 17.5
-	var ks := 16.0 / long_end
-	var sq: bool = absf(float(sx["near"][2]) - 1.5 * ks) < 0.01 and absf(float(sx["near"][1]) - 9.0 * ks) < 0.01
-	ok(sq, "sniper: long ramp squeezed to 16 m")
+	ShotFalloff.add(sx, _wpn("sniper"))
+	ok(sx.get("farf", []) == [12.5, 0.4, 17.5], "sniper: long falloff, 12.5-17.5 m to 40%% (%s)" % [sx.get("farf")])
+	var ramp_say := "sniper: long ramp, half damage to 1.5 m, full at 9 m (%s)" % [sx.get("near")]
+	ok(sx.get("near", []) == [0.5, 1.5, 9.0], ramp_say)
+	var cx := {}
+	ShotFalloff.add(cx, _wpn("lantern_crook"))
+	ok(cx.get("farf", []) == [4.75, 0.5, 9.5] and not cx.has("near"), "crook: seraph 4.75-9.5 m to 50%, no ramp")
 	var cls: Dictionary = ShotFalloff.data()
 	var clean := true
 	for f in DirAccess.get_files_at("res://content/weapons"):
@@ -75,10 +69,10 @@ func _data() -> void:
 	ok(clean, "every weapon names a known class; no old close_mult / far_mult keys")
 
 
-## Damage the foe loses to one `dmg` shot of `w` (its extras from ShotFalloff) that flew `trav` m before landing.
+## Damage the foe loses to one 10-damage shot of `w` (its extras from ShotFalloff) that flew `trav` m.
 func _lost(m: Match, foe: Hunter, w: Dictionary, trav: float) -> float:
 	var extra := {}
-	ShotFalloff.add(extra, w, float(w["range"]))
+	ShotFalloff.add(extra, w)
 	foe.hp = foe.max_hp
 	foe.armor = 0.0
 	foe.hurt_at = -100.0
@@ -89,27 +83,13 @@ func _lost(m: Match, foe: Hunter, w: Dictionary, trav: float) -> float:
 	return foe.max_hp - foe.hp
 
 
-func _curve(m: Match, foe: Hunter, w: Dictionary, what: String) -> void:
+## The shot of `w` at each distance in `want` ({metres: share of full damage}); `full_at` is a distance with no curve.
+func _curve(m: Match, foe: Hunter, w: Dictionary, what: String, full_at: float, want: Dictionary) -> void:
 	for i in 3:
-		_lost(m, foe, w, 5.0)  # (the first hits on a fresh hunter are softened: not what is measured here)
-	var rng := float(w["range"])
-	var ref := _lost(m, foe, w, 0.0 if w.has("ramp") else 0.5)
-	ok(ref > 0.0, "%s: a shot hurts (%.2f hp)" % [what, ref])
-	var mid: Dictionary = ShotFalloff.data()["falloff"][w["falloff"]]
-	var k := minf(1.0, rng / float(mid["end"]))
-	var full := ref
-	if w.has("ramp"):
-		full = _lost(m, foe, w, 8.0)  # past the ramp, before the falloff: the full damage
-	var near := _lost(m, foe, w, 0.2)
-	var far := _lost(m, foe, w, rng)
-	var half := _lost(m, foe, w, (float(mid["start"]) * k + rng) * 0.5)
-	var floor_k: float = float(mid["floor"])
-	var far_say := "%s: at its range the shot does the floor share (%.2f of full, want %.2f)"
-	ok(absf(far / full - floor_k) < 0.02, far_say % [what, far / full, floor_k])
-	var want_half := (1.0 + floor_k) * 0.5
-	var half_say := "%s: half way down the slope it does %.2f of full (want %.2f)"
-	ok(absf(half / full - want_half) < 0.03, half_say % [what, half / full, want_half])
-	if w.has("ramp"):
-		ok(absf(near / full - 0.5) < 0.03, "%s: up close it does half damage (%.2f)" % [what, near / full])
-	else:
-		ok(absf(near / full - 1.0) < 0.02, "%s: up close it does full damage (%.2f)" % [what, near / full])
+		_lost(m, foe, w, full_at)  # (the first hits on a fresh hunter are softened: not what is measured here)
+	var full := _lost(m, foe, w, full_at)
+	ok(full > 0.0, "%s: a shot hurts (%.2f hp at %.1f m)" % [what, full, full_at])
+	for d in want:
+		var got := _lost(m, foe, w, float(d)) / maxf(0.01, full)
+		var say := "%s: at %.2f m it does %.2f of full (want %.2f)" % [what, d, got, want[d]]
+		ok(absf(got - float(want[d])) < 0.03, say)

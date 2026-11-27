@@ -18,7 +18,7 @@
 		"bloom_deg": 1.0,
 		"bloom_max_deg": 6.0,
 		"bloom_recover": 20.0,
-		"desc": "Fast and loose. Spread grows the longer you hold it, and damage drops off at the far end.",
+		"desc": "Fast and loose. Spread grows the longer you hold it.",
 		"kick": 0.05,
 		"tracer": 1.0
 	},

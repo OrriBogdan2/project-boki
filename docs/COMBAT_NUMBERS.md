@@ -34,17 +34,20 @@ rules in `content/rules/`; this page is the short list of what we aim for. Check
 ## Shot damage by distance
 
 A weapon's primary names a curve class (`"falloff"`, and for a sniper `"ramp"`); the classes are in `content/rules/shot_falloff.json`
-and `ShotFalloff` turns them into the shot's `farf` / `near` keys, read in `Match._shot_apply`. Full damage up to `start`, a straight
-line down to `floor` x damage at `end`, the floor beyond. Ramp-up goes from `from` x damage (up to `start`) to full at `end`.
-Metres are for a weapon whose range reaches the class end; a shorter weapon squeezes the same curve into its own range.
+in the reference's metres. `ShotFalloff.add` puts them on the shot (`farf` / `near`) and `Match._shot_apply` multiplies by
+`ShotFalloff.mult`: full damage up to `start`, a straight line down to `floor` x damage at `end`, the floor beyond. Ramp-up goes
+from `from` x damage (up to `start`) to full at `end`. A weapon whose range ends before its class start never falls off.
 
-| Class | start - end (m) | floor | Weapons |
-|---|---|---|---|
-| short | 8 - 14 | 25% | smg |
-| medium | 10 - 17.5 | 40% | rifle, quill rifle, burst rifle, arc bolts |
-| long | 12.5 - 17.5 | 40% | sniper, coilcaster, spellstaff |
-| minigun | 7 - 14 | 50% | minigun |
-| bow | 12.5 - 17.5 | 50% | longbow |
+| Class | start - end (m) | floor | Weapons (range) | share at max range |
+|---|---|---|---|---|
+| very_short | 2.5 - 6.5 | 25% | - | - |
+| short | 8 - 14 | 25% | smg (7) | 100% |
+| medium | 10 - 17.5 | 40% | quill rifle (Vex, 11), burst rifle (10.5), rifle (9.5), arc bolts (Sable, 8.5) | 92%, 96%, 100%, 100% |
+| long | 12.5 - 17.5 | 40% | sniper (16), coilcaster (Sparkle, 13), spellstaff (10) | 58%, 94%, 100% |
+| very_long | 7.5 - 17 | 50% | - | - |
+| seraph | 4.75 - 9.5 | 50% | lantern crook (Meeko, 6.75; 8.4 after a 1 s pause) | 79% (62%) |
+| minigun | 7 - 14 | 50% | minigun (10) | 79% |
+| bow | 12.5 - 17.5 | 50% | longbow (Lace, 12) | 100% |
 
 Ramp-up (sniper, long): half damage up to 1.5 m, full at 9 m. No fall-off: the shotgun (the reference gives its slugs a fixed stop
-range only, see `docs/heroes/dredge.md`), melee, fire and kit abilities. A kit ability's shots take a class only when its data names one.
+range only, see `docs/heroes/dredge.md`), melee, fire and kit abilities. Asserted by `--shot-falloff-check`.
