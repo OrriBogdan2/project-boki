@@ -12,7 +12,7 @@ func run(main_node: Node) -> void:
 	var t_v: Hunter = r[2]
 	var home: Vector3 = r[3]
 	var k: DolmKit = p.ak
-	t_v.teleport(home + Vector3(0, 0, 40))      # out of every lane
+	t_v.teleport(home + Vector3(0, 0, 40))  # out of every lane
 	# a row of three rocks along +z, Tenzo stood behind it aiming down the row
 	_row(m, p, k, home)
 	var near: Vector3 = k.rock_mid(_nearest(m, p))
@@ -66,7 +66,7 @@ func _row(m: Match, p: Hunter, k: DolmKit, home: Vector3) -> void:
 		HeroZones.remove_rock(m, w)
 	p.teleport(home)
 	p.vel = Vector3.ZERO
-	aim_at(p, home + Vector3(10, 0, 0))      # Stone Row: three rocks side by side across the aim
+	aim_at(p, home + Vector3(10, 0, 0))  # Stone Row: three rocks side by side across the aim
 	k.cd["e"] = 0.0
 	k.use_e()
 	step(m, 0.3)
