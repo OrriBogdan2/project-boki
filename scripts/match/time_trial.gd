@@ -288,6 +288,6 @@ func _pad(p_v: Hunter) -> void:
 	if not p_v.pad.is_empty() or p_v.vel.y > 0.5 or p_v.flat_dist(pad_at) > PAD_R:
 		return
 	if p_v.pos.y - pad_at.y < 0.4 and p_v.pos.y - pad_at.y > -0.3:
-		p_v.pad_launch(pad_land)
+		UtilityUse.pad_throw(p_v, pad_land)
 		m.sfx("jump", p_v.pos, -2.0, 0.8)
 		m.fx.burst(p_v.pos + Vector3(0, 0.3, 0), ARCH_COL, 16, 5.0, 0.5, 2.0)
