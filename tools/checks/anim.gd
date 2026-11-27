@@ -5,6 +5,8 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	# a Meshy-native rig holds its clips on frames SimLod skipped the pose
+	"--native-pose-hold-check": ["res://tools/native_pose_hold_check.gd", "native_pose_hold_check", null],
 	# no clip stretches a skinned edge past 1.3x
 	"--stretch-1-check": ["res://tools/stretch_check.gd", "stretch_check", "bulwark,gunslinger"],
 	"--stretch-2-check": ["res://tools/stretch_check.gd", "stretch_check", "rimewright,dredge"],
@@ -15,9 +17,12 @@ const CHECKS := {
 	"--stretch-7-check": ["res://tools/stretch_check.gd", "stretch_check", "gil"],
 	# GPU: posed hunter clip frames, --geo-dir= --shots-dir=
 	"--geo-shots": ["res://tools/geo_shots.gd", "geo_shots", null],
+	# every Hunter faces its aim (skeleton forward vs aim, 4 aims); --shots-dir= adds front-view shots
+	"--facing-check": ["res://tools/facing_check.gd", "facing_check", null],
 	"--native-upper-shots": ["res://tools/native_upper_shots.gd", "native_upper_shots", null],
 	"--warden-native-check": ["res://tools/warden_native_check.gd", "warden_native_check", null],  # Meshy skeleton
 	"--native-springs-shots": ["res://tools/native_springs_shots.gd", "native_springs_shots", null],
+	"--gil-swim-spin-shots": ["res://tools/gil_swim_spin_shots.gd", "gil_swim_spin_shots", null],  # Gil GPU frames
 	"--tenzo-press-strip": ["res://tools/tenzo_press_strip.gd", "tenzo_press_strip", null],  # Tenzo LMB press frames
 	"--live-audit": ["res://tools/live_audit.gd", "live_audit", null],  # Hunters as played, GPU renders
 	# Meeko's sun and cloud: clear of the posed body in every state; GPU shots (--shots-dir=<dir> [--eye=<m>])
