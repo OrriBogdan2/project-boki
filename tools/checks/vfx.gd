@@ -17,5 +17,6 @@ const CHECKS := {
 	"--summon-pop-shots": ["res://tools/summon_pop_shots.gd", "summon_pop_shots", null],  # --shots-dir=<dir>
 	"--hunter-scale-shots": ["res://tools/hunter_scale_shots.gd", "hunter_scale_shots", null],  # GPU: match size px
 	"--hunter-size-sheet": ["res://tools/hunter_size_sheet.gd", "hunter_size_sheet", null],  # GPU: our size per hunter
+	"--hunter-size-v3": ["res://tools/hunter_size_v3.gd", "hunter_size_v3", null],  # GPU: live vs new k frames
 	"--tenzo-stone-shots": ["res://tools/tenzo_stone_shots.gd", "tenzo_stone_shots", null],  # GPU: Tenzo stone stills
 }
