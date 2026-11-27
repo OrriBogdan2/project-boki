@@ -13,7 +13,7 @@ extends RefCounted
 
 const RULES_PATH := "res://content/rules/wall_kick.json"
 const KICK_RISE := 0.8  # m of extra jump height: one terrace (World.LEVEL)
-const HOP_CLIMB_CAP := 1.6  # m above the take-off ground a hop may still start (a plain jump's apex)
+const HOP_CLIMB_CAP := 1.95  # m above the take-off ground a hop may still start (a plain jump's 1.91m apex)
 const FACE_REACH := 0.4  # m past the body a wall you face (not touching) still answers a hop
 const FACE_RISE := 0.5  # m of ground above your feet that counts as a wall to hop on
 const KICK_PRESS := 0.4  # keys this far into the wall (dot, ~66 degrees) climb it
@@ -118,8 +118,12 @@ func _at_wall(h: Hunter) -> bool:
 ## glider slides, never rebounds or stops dead, and nothing closes the canopy; the glide force
 ## (Hunter.GLIDE_ACCEL) then settles the slide at cruise x sin(angle off the normal). The source dump has no
 ## glide-wall row of its own [?]. Everyone else gets WALL_BACK of it. Measured by --move-feel-check glide_wall_*.
-static func stopped(h: Hunter, v: float) -> float:
-	return 0.0 if h.gliding else v * WALL_BACK
+## Rising past a lip already within a step of your feet (`top`, under the ledge catch's floor), the speed waits
+## at the face and carries on over it a step later: a jump that clips a terrace's edge doesn't die on it.
+static func stopped(h: Hunter, v: float, top: float) -> float:
+	if h.gliding:
+		return 0.0
+	return v if h.vel.y > 0.0 and top - h.pos.y <= World.STEP + 0.05 else v * WALL_BACK
 
 
 ## Called the step a wall stopped you in the air, with the velocity you hit it at and the wall's top.
@@ -127,8 +131,8 @@ static func stopped(h: Hunter, v: float) -> float:
 func hit(h: Hunter, hit_v: Vector2, wall_top: float) -> void:
 	if h.grounded or h.gliding or h.remote or h.dropping or h.mantling() or h.m.time - h.kb_t < BOUNCE_KNOCK_QUIET:
 		return
-	var ramming := h.roll_t > 0.0 and not h.shove.is_empty()      # (a shove outlives the dash: only its run is a ram)
-	if wall_top - h.pos.y <= HunterFeel.mantle_reach or ramming or not h.charge.is_empty():
+	var ramming := h.roll_t > 0.0 and not h.shove.is_empty()  # (a shove outlives the dash: only its run is a ram)
+	if wall_top - h.pos.y <= HunterMove.ledge_reach(h) or ramming or not h.charge.is_empty():
 		return
 	var into := -hit_v.dot(h.wall_n)
 	if into < BOUNCE_MIN_INTO or into > hit_v.length() * cos(deg_to_rad(BOUNCE_HEAD_ON_DEG)):
