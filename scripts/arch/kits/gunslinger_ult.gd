@@ -154,7 +154,8 @@ func _impact(s: Dictionary) -> void:
 	for f in kit.foes_in(at, r, 2.6):
 		var core: bool = Vector2(f.pos.x - at.x, f.pos.z - at.z).length() <= inner + f.r * 0.5
 		var o := {"src": "abil", "ab": "ult", "tags": ["ult", "cinderfall"], "crit": core}
-		f.hurt(dmg * (1.0 + float(xd["core_k"]) if core else 1.0), h, o)
+		var core_k := 1.0 + float(xd["core_k"]) if core else 1.0
+		f.hurt(dmg * core_k * GunslingerKit.dazed_k(f, xd), h, o)
 		HeroUlt.landed(kit, f)
 		n += 1
 		if core:
