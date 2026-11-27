@@ -1191,6 +1191,8 @@ rank 3 a third charge (level 2); Warchain rank 3 refunds 33% when it hooks a foe
   (ours: 6s Enraged). Online, Grounded, blight and Shred go through Net event `["kst", nid, kind,
   seconds, k]` (`KitStatus`); **Net.VERSION 0.6.0 -> 0.7.0**. The kit move id rides the hunter snapshot
   from **Net.VERSION 0.15.0**.
+  The same event carries kind `sil` (Silenced: no abilities, gear, belt, base recall or glider); see
+  docs/decisions/0180-silence-immunity-slow-pairs.md.
 
 ### Numbers against the other four (TTK)
 

@@ -5,6 +5,8 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	# silence, granted immunity and cleanse, and per-strength slow timers (reference tuning)
+	"--cc-silence-check": ["res://tools/cc_silence_check.gd", "cc_silence_check", null],
 	# a blast: falloff curve by distance, no damage through rock, the armour ring pitched by the shell left
 	"--blast-parity-check": ["res://tools/blast_parity_check.gd", "blast_parity_check", null],
 	"--move-speed-check": ["res://tools/move_speed_check.gd", "move_speed_check", null],  # run, walk, crouch per Hunter
