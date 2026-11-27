@@ -1333,6 +1333,8 @@ func heal(n: float) -> void:
 		return
 	if blight_t > 0.0:
 		n *= 1.0 - blight_k   # blighted: healing barely takes
+	if sick_t > 0.0:
+		n *= Life.R["sickness_heal"]
 	var before := hp
 	hp = minf(max_hp, hp + n)
 	m.fx.healed(self, hp - before)

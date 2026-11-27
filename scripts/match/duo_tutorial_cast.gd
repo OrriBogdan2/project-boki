@@ -133,6 +133,8 @@ func _guide() -> void:
 		g.down_hp = Data.MATCH["down_hp"]      # (she waits for you: no bleeding out)
 		if guide_mode != "down":
 			m.revive_hunter(g, null)
+		elif g.get_meta("stomped", false):
+			g.teleport(_beside())      # (a rival on her wisp blocks the revive: she drifts to your side)
 		return
 	match guide_mode:
 		"wait":
