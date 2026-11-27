@@ -2,8 +2,8 @@ extends RefCounted
 ## --abyss-check: islands are solid all the way down, and the abyss is short.
 ##   1. falling beside an island just below its lip, pushing in: you catch the ledge and climb up
 ##   2. knocked into an island's side from below with no keys held: you catch it too
-##   3. deeper than the grab reach: you slide down the face (no snag) and the abyss takes you
-##      within a short drop below the lip
+##   3. deep under the lip, pushing in: the side still launches you onto the top (no snag); out of
+##      reach of any side the abyss takes you within a short drop below the lip
 ##   4. dashing, gliding and being knocked toward an island from below never puts you inside or
 ##      under it
 ##   5. sheer cliffs still don't catch you as you fall past them
@@ -19,6 +19,7 @@ var bad := 0
 ## How far under the lowest lip around a hunter is lost (movefeel: the hunter's abyss is deeper than the
 ## monsters' World.ABYSS_DEPTH; it was 6m, the old checks' "< 7m")
 var KILL_DEPTH := World.ABYSS_DEPTH + HunterFeel.abyss_extra
+const DEEP := 8.0  # m under the lip: a full (not mini) mantle launch
 var m: Match
 var w: World
 var h: Hunter
@@ -102,7 +103,7 @@ func _run(sec: float, drive: Callable) -> Dictionary:
 			r["low"] = h.pos.y
 			r["low_at"] = h.pos
 		r["inside"] = maxf(float(r["inside"]), _inside(h))
-		if h.mantling():
+		if h.mantling() or h.mantle_cd > 0.5:      # (over the void: the mantle launch, MantleCarry)
 			r["mantled"] = true
 			r["clip"] = maxf(float(r["clip"]), _inside(h))
 		elif not h.grounded and h.pad.is_empty() and not h.mantling():
@@ -165,25 +166,32 @@ func run(main: Node) -> void:
 		kn += 1
 		if r["mantled"] and r["landed"]: kgood += 1
 	ok(kgood == kn, "knocked into an island's side from below, no keys: climbed %d of %d" % [kgood, kn])
-	# ---------------------------------------------------------------- 3. too deep: slide, then the abyss
+	# ---------------------------------------------------------------- 3. deep: a side still launches you
 	var dn := 0; var dgood := 0; var worst_drop := 0.0; var worst_t := 0.0; var stuck := 0; var grabbed := 0
 	for e in edges:
 		var dir: Vector2 = e["dir"]; var top: float = e["top"]
-		_reset(Vector3(e["ex"] + dir.x * (h.r + 0.6), top - (HunterFeel.mantle_reach_abyss + 0.1), e["ez"] + dir.y * (h.r + 0.6)), Vector3(0, -4.0, 0))
+		_reset(Vector3(e["ex"] + dir.x * (h.r + 0.6), top - DEEP, e["ez"] + dir.y * (h.r + 0.6)), Vector3(0, -4.0, 0))
 		h.last_gy = top
 		var r := _run(6.0, func(_t): h.inp["move"] = -dir)
+		if r["mantled"] and r["landed"] and absf(h.pos.y - top) < 0.6: grabbed += 1
+		stuck = maxi(stuck, int(r["stuck"]))
+		# and out of reach of any side (keys idle), the abyss takes you
+		_reset(Vector3(e["ex"] + dir.x * 3.0, top - DEEP, e["ez"] + dir.y * 3.0), Vector3(0, -4.0, 0))
+		h.last_gy = top
+		r = _run(6.0, func(_t): h.inp["move"] = Vector2.ZERO)
 		dn += 1
-		if r["mantled"]: grabbed += 1
-		if r["fell"]: dgood += 1
+		# [game data] near the point of no return a side straight north within 4m still catches you (the fudge)
+		var north: bool = dir == Vector2(0, 1)
+		if r["fell"] != north: dgood += 1
 		# the kill line (Hunter.abyss_kill_y) reads the lowest lip around where the hunter is, not the edge tile
 		var lip := _ref(Vector3(e["ex"], top, e["ez"]))
 		if r.has("low_at"): lip = minf(lip, _ref(Vector3(r["low_at"].x, top, r["low_at"].z)))
-		worst_drop = maxf(worst_drop, lip - float(r["low"]))
-		worst_t = maxf(worst_t, float(r["t"]))
-		stuck = maxi(stuck, int(r["stuck"]))
-	ok(grabbed == 0, "%.1fm below the lip: no ledge grab (%d grabbed)" % [HunterFeel.mantle_reach_abyss + 0.1, grabbed])
-	ok(dgood == dn and worst_drop < KILL_DEPTH + 1.0 and worst_t < 2.4, "below the grab reach the abyss takes you: %d of %d, deepest %.1fm below the lowest lip around, within %.2fs" % [dgood, dn, worst_drop, worst_t])
-	ok(stuck < 6, "sliding down the face never snags (longest hang %d frames)" % stuck)
+		if r["fell"]:
+			worst_drop = maxf(worst_drop, lip - float(r["low"]))
+			worst_t = maxf(worst_t, float(r["t"]))
+	ok(grabbed == dn, "%.1fm below the lip, pushing in: launched onto the top %d of %d" % [DEEP, grabbed, dn])
+	ok(dgood == dn and worst_drop < KILL_DEPTH + 1.0 and worst_t < 2.4, "out of reach of any side the abyss takes you: %d of %d, deepest %.1fm below the lowest lip around, within %.2fs" % [dgood, dn, worst_drop, worst_t])
+	ok(stuck < 6, "rising up the face never snags (longest hang %d frames)" % stuck)
 	# a plain walk off the edge: how far below the lip before the abyss
 	var e0: Dictionary = edges[0]
 	var d0: Vector2 = e0["dir"]

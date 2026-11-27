@@ -171,7 +171,7 @@ const T := {
 	"airdash_dive_speed": [">=", 0.0, "m/s", "[?] speed the dash ends on (reference)"],
 	"abyss_lift_t":
 	["<=", 1.0, "s", "[footage] back at island level (balloon line, 0.5m under the lip) ~1s after opening 4m deep"],
-	"abyss_bounce_m": [">=", 1.5, "m", "[est] a bouncy lift from 6m deep"],
+	"abyss_bounce_m": ["~", [0.4, 0.8], "m", "[game data] from 6m deep the lift lets go at its top (0.6m up)"],
 	"abyss_kill_depth": ["~", [17.0, 18.0], "m", "[game data] AbyssHeight -1750 uu: 17.5m under ground level"],
 	"abyss_recover_depth": [">=", 15.0, "m", "deepest a terminal fall can still glide out"],
 	"abyss_tint_lip": ["<=", 0.02, "", "no tint gliding at island level"],
@@ -2020,8 +2020,7 @@ func _abyss_updraft() -> void:
 func _kill_y() -> float:
 	if p_v.has_method("abyss_kill_y"):
 		return p_v.call("abyss_kill_y")
-	var fl: float = w.abyss_floor(p_v.pos.x, p_v.pos.z, p_v.last_gy)
-	return fl - (HunterFeel.abyss_glide_room if p_v.gliding and p_v.glide_fuel > 0.001 else 0.0)
+	return w.abyss_floor(p_v.pos.x, p_v.pos.z, p_v.last_gy)
 
 
 func _abyss_depths(g: Vector3, d: Vector2) -> void:
@@ -2057,6 +2056,7 @@ func _abyss_depths(g: Vector3, d: Vector2) -> void:
 	# step off the lip and fall: the slow-fall band, and how long until the point of no return
 	_reset(Vector3(out.x, lip - 0.6, out.z), false)
 	p_v.last_gy = g.y
+	p_v.mantle_cd = 99.0  # (the fall itself: no side catches it; --abyss-edge-check covers the catches)
 	var kill_y := _kill_y()
 	var t_fall := 0.0
 	var vy_deep := 0.0

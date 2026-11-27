@@ -94,6 +94,9 @@ func _fresh(at: Vector3, grounded: bool, v := Vector3.ZERO) -> void:
 		me.ak.spirit.end("merge")
 	me.set_arch(arch)
 	me.unlock_all()
+	# the last cases' ice walls and barriers go too: whether one still stands here depended on the match clock
+	for wl in m.verbs.walls.duplicate():
+		m.verbs._break_wall(wl)
 	me.out = false
 	me.downed = false
 	me.hp = me.max_hp
