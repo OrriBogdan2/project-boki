@@ -233,12 +233,7 @@ func _lockout(m: Match, p: Hunter, t_v: Hunter, at: Vector3, first: Dictionary, 
 	)
 
 
-<<<<<<< /tmp/r.3691459
-## A first knock carrying a longer wall stun (Shoulder Charge's 1.2 s) doesn't lend it to the second: the second's
-## slam stuns what the same chain without it does (its own impact speed, KnockWall.slam_stun; decision 0181).
-=======
 ## A first knock carrying a longer wall stun (Shoulder Charge's 1.2 s) doesn't lend it to the second.
->>>>>>> /tmp/o.3691459
 func _stale_wallstun(m: Match, p: Hunter, t: Hunter, at: Vector3, first: Dictionary, second: Dictionary) -> void:
 	var long := first.duplicate()
 	long["wallstun"] = 1.2
