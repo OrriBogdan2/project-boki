@@ -12,6 +12,11 @@ const HEIGHT_TOL := 0.03  # share: the head stands this close to the contract mo
 const UPRIGHT := 0.25  # m, Meshy scale: the head stays this far over the hips in every state (a clip in a wrong frame)
 const BLADE := 1.38  # Meshy units: a held sword's tip from the hand bone, along its Y (Kael's: warden_props)
 const PROBE := 1.0 / 240.0  # s: the step the move clips are swept at
+## m: the plate's bars hang 17 px under its anchor (0.52 m at the match camera), so under this they cover the head
+const PLATE_GAP_MIN := 0.55
+const PLATE_GAP_MAX := 0.85  # m: any more and the plate floats off its Hunter (the glider's bank rolls the head away)
+const PLATE_SAMPLES := 6  # poses read over a clip's cycle
+const PLATE_STEP_FRAMES := 8  # 30 fps frames between them
 const CONTRACT_BONES := ["hips", "upper_arm.L", "thigh.L"]
 const POSED_MIN := 10  # bones turned off Meshy's T-pose rest in a playing clip (the T-pose turns none)
 const TURNED := 0.03  # rad: a bone this far off its rest is posed
@@ -70,6 +75,7 @@ func run(main: Node) -> void:
 		_bones(a)
 		_height(a)
 		await _states(main, a)
+		_plate_gap(a)
 	print("WARDENNATIVE DONE %d checks, %d failed" % [n, bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -331,6 +337,42 @@ func _orbits(main: Node, a: String, nat: WardenNative) -> void:
 				% [a, orb, want[orb], props.size(), far, moved]
 			)
 		)
+
+
+## The plate floats a small, even gap over the highest drawn part of the model in the standing, running, crouching and
+## gliding poses, sampled over a cycle: never inside the head, never adrift above it.
+func _plate_gap(a: String) -> void:
+	var m := _model(a)
+	var nat := m.get_node("Warden/Native") as WardenNative
+	var gap := PlateGap.new(m)
+	var plate := HudPlate.arch_offset(a)
+	var cases := [
+		["idle", {"grounded": true}, Quaternion.IDENTITY],
+		["run", {"grounded": true, "vel": Vector3(0.0, 0.0, -4.6)}, Quaternion.IDENTITY],
+		["crouch", {"grounded": true, "crouch": 1.0}, Quaternion.IDENTITY],
+		[
+			"glide",
+			{"grounded": false, "gliding": true, "vel": Vector3(0.0, -1.0, -6.0)},
+			Quaternion(Vector3.BACK, HunterAnim.GLIDE_BANK)
+		],
+	]
+	for c in cases:
+		m.set_meta(WardenClips.STATE, c[1])
+		m.set_meta(HunterAnim.AIR_TILT, c[2])
+		var lo := INF
+		var hi := -INF
+		for i in PLATE_SAMPLES:
+			for f in PLATE_STEP_FRAMES:
+				nat._process(1.0 / 30.0)
+			var top := gap.top()
+			lo = minf(lo, plate - top)
+			hi = maxf(hi, plate - top)
+		print("PLATEGAP %s %s plate %.2f gap %.3f .. %.3f (%s)" % [a, c[0], plate, lo, hi, gap.tallest])
+		ok(
+			lo >= PLATE_GAP_MIN and (c[0] == "glide" or hi <= PLATE_GAP_MAX),
+			"%s: %s: the plate %.2f m up clears the %s by %.2f..%.2f m" % [a, c[0], plate, gap.tallest, lo, hi]
+		)
+	m.free()
 
 
 ## Plays state `s` for two frames (`calm` first, so the counters take it as their baseline) from a clean slate.
