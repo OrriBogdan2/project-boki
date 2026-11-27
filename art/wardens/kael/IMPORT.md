@@ -183,3 +183,14 @@ Scripts: `/home/boki/gens/hunter-round-1124/kael/hair/scripts/` (`hairmask.py GL
   silver 170,171,180 with luminance gamma 1.35 (was neutral 199,193,195; p10 154 -> 125) so strands separate at the game
   camera (a lilac 178,163,169 try rendered PINK at the game camera under the warm sun: keep hair neutral-to-cool);
   off-arm red skin: r25 glossy white streaks wiped, thin tapered white vein lines redrawn (r23 vein field). `grade28.py`.
+
+## Round 31 (2026-11-27, job 20261127-224151-a4): sword back on live's seat
+- Why r23-r30 never beat live: the r23/r25 grip across the fist rotated the blade ~70 deg away from what the Meshy clips
+  were authored for (idle blade out sideways, attack across the head, tail through the legs); r28/r29 wrist offsets
+  could not undo it. Round 31 drops that seat: kael.glb sword POSITION/NORMAL + the four sword anchor nodes
+  (anchor_blade_root/mid, anchor_chain, weapon_muzzle) = origin/main's (r21 Meshy sword steel texture kept), the Attack
+  clip's RightHand rotation keys in kael_meshy.glb = origin/main's, and content/rules/warden_anchors.json (kael) +
+  warden_anim/kael.json = origin/main's. The sword pose is now identical to live.
+- kael_meshy.glb Image_0 = the r29 texels (even trousers 80,66,70 gamma 0.45, off-arm white veins W 2.2/1.4 texel).
+  The r28 texels (B) were rendered too: trousers read maroon at eye level, so A was kept.
+- Scripts: /home/boki/gens/hunter-round-1124/kael/r31/scripts (build31.py, anchors31.py, animdiff.py).
