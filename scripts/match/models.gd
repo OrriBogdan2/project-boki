@@ -726,8 +726,6 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 		glider.add_child(gmi)
 	var ring := MeshInstance3D.new(); ring.name = "TeamRing"; ring.mesh = flat_quad(1.0)
 	ring.material_override = SideRings.mat(team_col, 0.16); ring.position = Vector3(0, 0.04, 0)
-	# (a see-through quad still casts a solid square shadow: under a jumping Hunter it was the "black square")
-	ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	root.add_child(ring)
 	# the head and everything on it turn and nod together from the neck
 	var head := Node3D.new(); head.name = "HeadPivot"
