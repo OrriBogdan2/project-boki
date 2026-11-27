@@ -43,6 +43,7 @@ func play() -> void:
 	w._stage_at = MONTAGE_AT
 	await w._load(GardenZones.HUB)
 	_s0 = w.h.player.scale
+	_inventory(w.h)
 	await _jump(HOME_AWAY_M, AWAY_RAD)
 	_partner_aside()
 	w.rig.mark("montage")
@@ -180,6 +181,7 @@ func _through(zone: String) -> void:
 		await w.rig.main.get_tree().process_frame
 		w._tidy()
 		h.player.scale = _s0 * 0.04
+	_inventory(h)
 	var here := _pillar(h, h.hway.node.position, col)
 	_set_pillar(here, PILLAR_A)
 	w.rig.mark("cut%d_in" % _cuts)
@@ -252,3 +254,36 @@ func _pillar(parent: Node, at: Vector3, col: Color) -> MeshInstance3D:
 func _set_pillar(mi: MeshInstance3D, a: float) -> void:
 	var m := mi.material_override as StandardMaterial3D
 	m.albedo_color = Color(m.albedo_color, clampf(a, 0.0, 1.0))
+
+
+## Prints what stands visible within 7 m of the pad (name, class, meshes, size), and hides a flat ground stand-in there
+## (every mesh under 0.12 m tall: a coloured slab or patch, not the pad itself, not a Boki).
+func _inventory(h: Node) -> void:
+	var pad: Vector3 = h.hway.node.position
+	var kin_nodes: Array = []
+	for k in h.kins:
+		kin_nodes.append(k["node"])
+	for n in h.get_children():
+		var n3 := n as Node3D
+		if n3 == null or not n3.visible or n3 == h.player or n3 in kin_nodes or n3 == h.get("world"):
+			continue
+		if Vector2(n3.global_position.x - pad.x, n3.global_position.z - pad.z).length() > 7.0:
+			continue
+		var meshes: Array = n3.find_children("*", "MeshInstance3D", true, false)
+		if n3 is MeshInstance3D:
+			meshes.append(n3)
+		var kinds := {}
+		var tall := 0.0
+		var wide := 0.0
+		for m in meshes:
+			var mi := m as MeshInstance3D
+			kinds[mi.mesh.get_class() if mi.mesh != null else "-"] = true
+			var sz: Vector3 = mi.get_aabb().size * mi.global_transform.basis.get_scale()
+			tall = maxf(tall, sz.y)
+			wide = maxf(wide, maxf(sz.x, sz.z))
+		var flat := not meshes.is_empty() and tall < 0.12 and wide > 0.8 and not w._is_stone(h, n3)
+		print("PITCH near-pad %s %s at %s meshes=%d %s tall=%.2f wide=%.2f%s" % [
+			n3.name, n3.get_class(), n3.position - pad, meshes.size(), kinds.keys(), tall, wide, " HIDE" if flat else ""])
+		if flat:
+			n3.visible = false
+			w._cleared.append(n3)
