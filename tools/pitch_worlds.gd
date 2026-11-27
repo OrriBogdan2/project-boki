@@ -68,6 +68,7 @@ var rig
 var h: Node = null  # the Home on screen now (it is a new one after every hop)
 var hud := false  # --pitch-hud: the farm's HUD is filmed (the other version has none)
 var keep_say := false  # shot 17 keeps the Boki's bubble
+var _keep: Node3D = null  # shot 17 films the return pad (the stone the ask is about), though it is built of discs
 var _pins: Array = []  # [kin record, where it stands]: a staged Boki is held there for the whole take (no wandering off, no errand)
 var _cleared: Array = []  # props hidden off the Hunter's walk (kept hidden every frame)
 var _show: Array = []  # the Boki nodes that are in the film (all the others are hidden)
@@ -179,7 +180,13 @@ func montage() -> void:
 	await _wait(1.8)
 
 
-## Shot 17: a Boki that would thrive elsewhere goes to wait at the return pad with its bubble.
+## Shot 17: a Boki that would thrive elsewhere walks ahead of the Hunter to the return pad and waits there with its
+## bubble; the Hunter follows (never nearer than STOP_M), presses E, and it walks onto the pad and blinks out.
+## (r10: the Boki was pinned to its staged spot and the Hunter landed on the pad, so nothing moved.)
+const ASK_BACK := 9.0  # m up-view of the pad the Hunter starts (the pad is straight ahead in the view)
+const ASK_SIDE := [0.0, 2.0, -2.0, 4.0, -4.0]  # m sideways tried until the walk to the pad clears every tree
+
+
 func ask_take() -> void:
 	for rec in Save.d["roster"]:
 		if String(rec["name"]) == "Skateron":
@@ -187,12 +194,66 @@ func ask_take() -> void:
 	keep_say = true
 	await _load("glasswater")
 	var k: Dictionary = h.kins.filter(func(o): return String(o["rec"]["name"]) == "Skateron")[0]
+	var pad: Vector3 = h.hway.pad["pos"]
+	var fwd2 := Vector2(0.0, -1.0).rotated(h.cam.yaw)
+	var fwd := Vector3(fwd2.x, 0.0, fwd2.y)
+	var right := Vector3(-fwd.z, 0.0, fwd.x)
+	var start := pad - fwd * ASK_BACK
+	for dx in ASK_SIDE:
+		var cand: Vector3 = h.world.free_spot_near(pad - fwd * ASK_BACK + right * dx, [], 1.2, 0.9)
+		if _trees_clear(cand, [pad]):
+			start = cand
+			print("PITCH ask side=%.1f" % dx)
+			break
+	_pins.clear()  # Skateron walks (every other Boki is out of the film)
+	_show.clear()
+	_show.append(k["node"])
+	_place(start)
+	var at: Vector3 = h.world.free_spot_near(
+		start + (pad - start).normalized() * 3.6 + right * 1.2, [], 1.2, 0.9
+	)
+	k.erase("job")
+	k["pos"] = at
+	k["goal"] = at
+	(k["node"] as Node3D).position = at
+	_clear_path(start, [at, pad])
+	_keep = h.hway.node
+	_cleared.erase(_keep)
+	_keep.visible = true
+	await _wait(0.8)
+	rig.mark("ask")
 	var tries := 0
 	while not h.life._ask(k) and tries < 2000:
 		tries += 1
-	rig.mark("ask")
-	await _walk(h.hway.pad["pos"], 3.0)
-	await _wait(6.0)
+	if not h.life.machine(k).is_in(BaseLife.S.REACT):
+		rig.fail("Skateron did not ask")
+		return
+	var n := 0
+	while n < int(7.0 * FPS):  # follow it to the pad, STOP_M behind
+		var p3: Vector3 = (k["node"] as Node3D).global_position
+		var off := Vector2(p3.x - h.ppos.x, p3.z - h.ppos.z)
+		_keys(off.normalized().rotated(h.cam.yaw) if off.length() > STOP_M + 0.3 else Vector2.ZERO)
+		await rig.main.get_tree().process_frame
+		_tidy()
+		n += 1
+		if (
+			n > FPS
+			and Vector2(p3.x - pad.x, p3.z - pad.z).length() < 2.2
+			and off.length() <= STOP_M + 0.4
+		):
+			break
+	_keys(Vector2.ZERO)
+	var kp: Vector3 = (k["node"] as Node3D).global_position
+	print(
+		(
+			"PITCH ask hunter_walked=%.1f m boki_to_pad=%.1f m frames=%d"
+			% [start.distance_to(h.ppos), kp.distance_to(pad), n]
+		)
+	)
+	await _wait(2.2)  # it waits at the pad, the bubble reads
+	rig.mark("send")
+	h._kin_act(k)  # E: send it where it wants to go
+	await _wait(3.0)
 
 
 ## Shot 18 (headless, no film): from which side the walk up to the Waystone keeps the view level (the farm view
@@ -208,7 +269,9 @@ func probe() -> void:
 			var n := 0
 			var goal := HubWaystone.HUB_AT
 			while n < 6 * FPS and Vector2(goal.x - h.ppos.x, goal.z - h.ppos.z).length() > 1.6:
-				var way := Vector2(goal.x - h.ppos.x, goal.z - h.ppos.z).normalized().rotated(h.cam.yaw)
+				var way := Vector2(goal.x - h.ppos.x, goal.z - h.ppos.z).normalized().rotated(
+					h.cam.yaw
+				)
 				_keys(way)
 				await rig.main.get_tree().process_frame
 				top = maxf(top, h.farm_cam.tip)
@@ -229,8 +292,15 @@ func probe() -> void:
 				continue
 			var p: Vector3 = (k["node"] as Node3D).global_position
 			var c := FarmWater.nearest(Save.d, Vector2(p.x, p.z))
-			var wet := Vector2(c.x + 0.5, c.y + 0.5).distance_to(Vector2(p.x, p.z)) if c.x >= 0 else 99.0
-			print("PROBE   %s at %s water_m=%.1f dist=%.1f" % [k["rec"]["name"], p, wet, p.distance_to(h.ppos)])
+			var wet := (
+				Vector2(c.x + 0.5, c.y + 0.5).distance_to(Vector2(p.x, p.z)) if c.x >= 0 else 99.0
+			)
+			print(
+				(
+					"PROBE   %s at %s water_m=%.1f dist=%.1f"
+					% [k["rec"]["name"], p, wet, p.distance_to(h.ppos)]
+				)
+			)
 
 
 # ------------------------------------------------------------------ moving about
@@ -243,7 +313,11 @@ func _load(zone: String) -> void:
 
 ## Waits for the Home that a screen change builds, then dresses it for film.
 func _arrived() -> void:
-	while not is_instance_valid(rig.main.current) or rig.main.current == h or rig.main.current.get("building") == true:
+	while (
+		not is_instance_valid(rig.main.current)
+		or rig.main.current == h
+		or rig.main.current.get("building") == true
+	):
 		await rig.main.get_tree().process_frame
 	h = rig.main.current
 	await rig.main.get_tree().process_frame
@@ -269,9 +343,20 @@ func _props() -> Array:
 		kin_nodes.append(k["node"])
 	for n in h.get_children():
 		var n3 := n as Node3D
-		if n3 == null or not n3.visible or n3 == h.player or n3 in kin_nodes or n3.get_script() != null:
+		if (
+			n3 == null
+			or not n3.visible
+			or n3 == h.player
+			or n3 in kin_nodes
+			or n3.get_script() != null
+		):
 			continue
-		if _is_course(n3) or _is_placeholder(n3) or n3.get_child_count() == 0 or n3.position.length() < 1.0:
+		if (
+			_is_course(n3)
+			or _is_placeholder(n3)
+			or n3.get_child_count() == 0
+			or n3.position.length() < 1.0
+		):
 			continue
 		if n3.find_children("*", "MeshInstance3D", true, false).is_empty():
 			continue
@@ -308,7 +393,12 @@ func _stage() -> void:
 	for k in awake:  # a zone with fewer than three residents borrows the rest: the film shows 2-3 Boki, readable
 		if mine.size() < STAGE_AT.size() and not (k in mine):
 			mine.append(k)
-	print("PITCH stage zone=%s kins=%d staged=%d" % [zone, h.kins.size(), mini(STAGE_AT.size(), mine.size())])
+	print(
+		(
+			"PITCH stage zone=%s kins=%d staged=%d"
+			% [zone, h.kins.size(), mini(STAGE_AT.size(), mine.size())]
+		)
+	)
 	var fwd2 := Vector2(0.0, -1.0).rotated(h.cam.yaw)  # the view's "up", on the ground
 	var fwd := Vector3(fwd2.x, 0.0, fwd2.y)
 	var right := Vector3(-fwd.z, 0.0, fwd.x)
@@ -368,7 +458,13 @@ func _hide_fixtures(zone: String) -> void:
 			beds.append(Vector2(float(d[1]) + 1.0, float(d[2]) + 1.0))
 	for n in h.get_children():
 		var n3 := n as Node3D
-		if n3 == null or n3 == h.player or n3 in kin_nodes or n3 == h.get("world") or n3.get_script() != null:
+		if (
+			n3 == null
+			or n3 == h.player
+			or n3 in kin_nodes
+			or n3 == h.get("world")
+			or n3.get_script() != null
+		):
 			continue
 		var at := Vector2(n3.position.x, n3.position.z)
 		var hide: bool = false
@@ -400,7 +496,13 @@ func _clear_path(start: Vector3, stops: Array) -> void:
 		kin_nodes.append(k["node"])
 	for n in h.get_children():
 		var n3 := n as Node3D
-		if n3 == null or not n3.visible or n3 == h.player or n3 in kin_nodes or n3.get_script() != null:
+		if (
+			n3 == null
+			or not n3.visible
+			or n3 == h.player
+			or n3 in kin_nodes
+			or n3.get_script() != null
+		):
 			continue
 		var meshes: Array = n3.find_children("*", "MeshInstance3D", true, false)
 		if n3 is MeshInstance3D:
@@ -409,7 +511,10 @@ func _clear_path(start: Vector3, stops: Array) -> void:
 			continue
 		var big := false  # ground, cliffs and ponds stay; props and lone trees on the walk go (Motley walked through a trunk)
 		for m in meshes:
-			var sz: Vector3 = (m as MeshInstance3D).get_aabb().size * (m as Node3D).global_transform.basis.get_scale()
+			var sz: Vector3 = (
+				(m as MeshInstance3D).get_aabb().size
+				* (m as Node3D).global_transform.basis.get_scale()
+			)
 			big = big or maxf(sz.x, sz.z) > 4.5 or sz.y > 7.0
 		if big:
 			continue
@@ -522,7 +627,13 @@ func _hide_marks(c: Node) -> void:
 		kin_nodes.append(k["node"])
 	for n in c.get_children():
 		var n3 := n as Node3D
-		if n3 != null and n3 != c.player and not (n3 in kin_nodes) and _is_placeholder(n3):
+		if (
+			n3 != null
+			and n3 != c.player
+			and n3 != _keep
+			and not (n3 in kin_nodes)
+			and _is_placeholder(n3)
+		):
 			n3.visible = false
 	for n in c.get_children():
 		if _is_course(n):
@@ -560,7 +671,11 @@ func _hide_marks(c: Node) -> void:
 		ring.visible = false
 	for q in c.player.find_children("*", "MeshInstance3D", true, false):
 		var mi := q as MeshInstance3D
-		if mi.mesh is QuadMesh or String(mi.name).begins_with("orbit_cards") or String(mi.name).begins_with("Halo"):
+		if (
+			mi.mesh is QuadMesh
+			or String(mi.name).begins_with("orbit_cards")
+			or String(mi.name).begins_with("Halo")
+		):
 			mi.visible = false
 	if c.get("ui") != null:
 		(c.ui as CanvasLayer).visible = hud
