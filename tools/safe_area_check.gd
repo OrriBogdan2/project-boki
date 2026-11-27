@@ -139,7 +139,7 @@ func _judge(screen: String, win: Vector2i, groups: Dictionary, sz: Vector2, root
 
 
 func _hud() -> void:
-	Save.d["matches"] = HudGroups.NEW_PLAYER_MATCHES  # the whole HUD: a new save gets it staged (HudReveal)
+	Save.d["matches"] = 3  # match 4: every from_match group shows (content/rules/hud_reveal.json)
 	m = Match.new()
 	main.add_child(m)
 	m.start({"teams": 4, "squad": 3, "tier": 0, "length": 1500.0, "seed": 7, "demo_kin": "cindle"})
