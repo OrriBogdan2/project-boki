@@ -190,7 +190,6 @@ func ask_take() -> void:
 	var tries := 0
 	while not h.life._ask(k) and tries < 2000:
 		tries += 1
-	_show.append(k["node"])  # (the asker may not be one of the staged Boki: its bubble would float alone)
 	rig.mark("ask")
 	await _walk(h.hway.pad["pos"], 3.0)
 	await _wait(6.0)
