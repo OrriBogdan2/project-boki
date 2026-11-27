@@ -66,6 +66,8 @@ func _day(zone: String) -> void:
 		home._move_kin(DT)
 		home._care_tick(DT)
 		home.hsp.tick(DT)
+		for tw in main.get_tree().get_processed_tweens():  # a cutscene (an evolution) plays on farm time too
+			tw.custom_step(DT)
 		t += DT
 		_watch(label, t)
 		if int(t / DT) % FRAME_EVERY == 0:
