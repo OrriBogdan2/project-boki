@@ -22,6 +22,7 @@ straight through them is a Blowout that gives your dash back at once.
 4. **Coilshot** (RMB): hold to charge a heavy round that throws the first foe back. Into a wall or another foe, they are stunned. A hit on a hunter drops a charge mote; pick it up for your dash back.
 5. **Skycall** (E): mark a spot, and a moment later lightning flings everyone there along your aim and grounds them (no dashing). It steals a rival's mote too.
 6. There is no R: the Boki Merge takes that key.
+6. A knock heals you for 15% of your health. There is no R ultimate yet. X fuses you with your Boki.
 
 ## Combos and interactions
 
@@ -65,7 +66,7 @@ What the in-game kit card (K) says.
 | RMB: Storm Rod | Throw a copper rod: knocks back, adds Static, stuns on walls. |
 | E: Skycall | Drop a circle; 0.8s later lightning drags foes inside and grounds them. |
 | Hunter ultimate: Kitefall | Launch up, then strike down at your cursor, adding Static to everyone near. |
-| Weapon: Coilcaster | Finger bolts every 0.65s; each hit adds 1 Static. |
+| Weapon: Coilcaster | Finger bolts every 0.55s; each hit adds 1 Static. |
 
 ### Abilities in full
 
