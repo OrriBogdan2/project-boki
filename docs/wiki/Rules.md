@@ -1067,8 +1067,9 @@ Hunter unlocks and mastery (docs/decisions/0005). A new save picks one of `start
 
 | Setting | Value |
 |---|---|
-| doc | The one 'in combat' rule (scripts/match/in_combat.gd). A Hunter or a Boki is in combat for window_s seconds after it deals or takes damage in a fight: a hit on or from a Hunter, a Boki, a monster or Blight. Healing, falls, wall slams, heat, friendly fire and damage to yourself don't count. A Boki's fight is its owner's too. Hunter shield refill, a Boki's own mending, the drive music, a Boki's 10 Hz think out of combat and a Boki's refused orders all read it, so they switch on the same frame. (Far bots' 20 Hz step is SimLod's, not this window: far fights are slowed on purpose.) The source publishes no combat timer [gap]: 5 s is the old Hunter regen wait, kept as the one shared value. Channels (a recall, an exit call, a rune, a box revive) are not on this window: the source cancels them on the hit itself, so they read Hunter.hurt_at. |
+| doc | Combat rules. window_s: the one 'in combat' rule (scripts/match/in_combat.gd). A Hunter or a Boki is in combat for window_s seconds after it deals or takes damage in a fight: a hit on or from a Hunter, a Boki, a monster or Blight. Healing, falls, wall slams, heat, friendly fire and damage to yourself don't count. A Boki's fight is its owner's too. Hunter shield refill, a Boki's own mending, the drive music, a Boki's 10 Hz think out of combat and a Boki's refused orders all read it, so they switch on the same frame. (Far bots' 20 Hz step is SimLod's, not this window: far fights are slowed on purpose.) The source publishes no combat timer [gap]: 5 s is the old Hunter regen wait, kept as the one shared value. anti_heal_cut: how much of a heal Anti-Heal (blight) takes away when the source gives no amount of its own: 0.7 leaves 30% of every heal (the target feel is 0.3; was 0.6, 40% left). Channels (a recall, an exit call, a rune, a box revive) are not on this window: the source cancels them on the hit itself, so they read Hunter.hurt_at. |
 | window_s | 5 |
+| anti_heal_cut | 0.7 |
 
 ## dash_feel (`content/rules/dash_feel.json`)
 
@@ -1099,6 +1100,16 @@ Decor with a purpose (briefs/design/GARDEN_MODERN.md section 5 rank 7; scripts/h
 | need_doc | Decorations of one comfort tag a zone needs before that tag's effect is on. |
 | effects | {"cosy": {"name": "Snug naps", "does": "naps restore joy", "nap_joy": 6.0, "nap_joy_doc": "Joy per minute a napping Boki gains (without it a nap only slows joy's fall, Care.tick)."}, "bright": {"name": "Sunny patch", "does": "the snack patch ripens faster", "grow": 0.75, "grow_doc": "Share of snack_patch.json grow_secs the patch takes to ripen."}, "wild": {"name": "Wild welcome", "does": "wild visitors come more often", "visit": 2.0, "visit_doc": "Times garden_visitor.json chance a look brings a visitor."}, "quiet": {"name": "Calm air", "does": "fewer squabbles", "clash": 0.5, "clash_doc": "Times base_life.json clash, the chance two hot tempers squabble."}} |
 | effects_doc | One per tag: name and does are shown on the zone card; the number is the effect's size. |
+
+## depth_cues (`content/rules/depth_cues.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | Height cues under a hunter (scripts/match/depth_cues.gd, briefs/CAMERA_DEPTH.md). shadow: the soft disc on the ground under a hunter keeps full strength up to fade_from_m above the ground, fades out linearly and is gone at gone_at_m (a body high in the air no longer paints a dark spot far below it). ring: while a hunter is airborne, min_m to max_m above the ground, a ring of diameter_m lies on the ground under it, so a glider's height still reads once its shadow has faded. Colours are linear RGB (the target feel): own is gold, a teammate is blue, an enemy is red. |
+| shadow | {"fade_from_m": 0.5, "gone_at_m": 10.0} |
+| ring | {"min_m": 1.5, "max_m": 50.0, "diameter_m": 3.0, "thickness": 0.1, "alpha": 0.85, "own": [0.885, 0.664, 0.0], "ally": [0.0, 0.711, 1.0], "enemy": [1.0, 0.0, 0.0]} |
 
 ## drop_poses (`content/rules/drop_poses.json`)
 
@@ -2248,11 +2259,12 @@ How a Boki answers a pat by personality (scripts/home/pet_react.gd, used by home
 
 ## pickup (`content/rules/pickup.json`)
 
-Ground pickup reach (scripts/match/pickup_reach.gd, docs/PICKUP_REACH.md). Each rule is a flat radius and a height (m) a hunter must be within, and nothing may stand between them and the thing: a rock, higher ground or a kit wall blocks a pickup as it blocks sight. walk: consumables, armor shards, gems, seeds, Rift and chest keys fly to you as you pass (no key); pull_speed + (radius - distance) x pull_gain m/s, taken when within grab m of your chest, settle s after they land. tune: a weapon tuning taken by walking over it. bot: a bot walking over a tuning or a gear piece better than its own. interact: gear and treasure, taken with the interact key; of several in reach the key takes the one nearest the cursor.
+Ground pickup reach (scripts/match/pickup_reach.gd, docs/PICKUP_REACH.md). Each rule is a flat radius and a height (m) a hunter must be within, and nothing may stand between them and the thing: a rock, higher ground or a kit wall blocks a pickup as it blocks sight. walk: consumables, armor shards, gems, seeds, Rift and chest keys fly to you as you pass (no key); pull_speed + (radius - distance) x pull_gain m/s, taken when within grab m of your chest, settle s after they land. gem: the same rule for gems alone, with the wider 4 m reach (the target feel: gems come to you from across a room). tune: a weapon tuning taken by walking over it. bot: a bot walking over a tuning or a gear piece better than its own. interact: gear and treasure, taken with the interact key; of several in reach the key takes the one nearest the cursor.
 
 | Setting | Value |
 |---|---|
 | walk | {"radius": 2.2, "height": 2.0, "settle": 0.5, "pull_speed": 6.0, "pull_gain": 6.0, "grab": 0.6} |
+| gem | {"radius": 4.0, "height": 2.0, "pull_speed": 6.0, "pull_gain": 6.0, "grab": 0.6} |
 | tune | {"radius": 1.1, "height": 1.0} |
 | bot | {"radius": 1.4, "height": 1.0} |
 | interact | {"radius": 1.5, "height": 1.2} |
@@ -2608,7 +2620,7 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 | Setting | Value |
 |---|---|
 | doc | The Training Area checklist (Match.train_rows, scripts/match/train_drill.gd): [id, what to do, the action whose key cap the HUD shows beside it ("" for none)]. Never write a key in the text: the HUD prints the live cap in front of each line; {key} puts that same cap inside a line. |
-| rows | [["move", "Walk around", "up"], ["dash", "Dash", "dash"], ["glide", "Jump, then press {key} again in the air and hold to glide", "jump"], ["shoot", "Shoot a target dummy", "fire"], ["ability", "Use your ability", "signature"], ["ult", "Fuse with your Boki ({key}: open from the start here)", "ultimate"], ["secondary", "Use your weapon's ability", "secondary"], ["glove", "Use your glove (pick one up from the rack first)", "gear1"], ["crouch", "Sneak: slower, steadier aim, harder to spot", "crouch"], ["throw", "Sic your Boki at a dummy", "throw"], ["combo", "Land a combo: shoot a foe your Boki just stunned or rooted", "fire"], ["tonic", "Heal with a tonic (belt slot 1)", "util1"], ["stagger", "Stagger a big dummy: hit it with an ability while it has a purple ring", "signature"], ["smash", "Break a crate or pot", "fire"], ["weapon", "Take a found weapon off the ground", "interact"], ["ledge", "Dash off an edge and float back up", ""], ["dodge", "Dodge the Strafer's red shot 3 times: dash through it or out of it", "dash"]] |
+| rows | [["move", "Walk around", "up"], ["dash", "Dash", "dash"], ["glide", "Jump, then press {key} again in the air and hold to glide", "jump"], ["shoot", "Shoot a target dummy", "fire"], ["ability", "Use your ability", "signature"], ["ult", "Fuse with your Boki ({key}: open from the start here)", "ultimate"], ["secondary", "Use your weapon's ability", "secondary"], ["glove", "Use your glove (pick one up from the rack first)", "gear1"], ["crouch", "Sneak: slower, steadier aim, harder to spot", "crouch"], ["throw", "Sic your Boki at a dummy", "throw"], ["combo", "Land a combo: shoot a foe your Boki just stunned or rooted", "fire"], ["tonic", "Heal with a tonic (belt slot 1)", "util1"], ["stagger", "Stagger a big dummy: hit it with an ability while it has a purple ring", "signature"], ["smash", "Break a crate or pot", "fire"], ["weapon", "Take a found weapon off the ground", "interact"], ["ledge", "Dash off an edge and float back up", ""], ["dodge", "Hit the Strafer, then dodge its red shot 3 times: dash through it or out of it", "dash"]] |
 
 ## truce (`content/rules/truce.json`)
 
