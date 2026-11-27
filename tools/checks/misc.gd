@@ -19,6 +19,7 @@ const CHECKS := {
 	"--loadin-fps-check": ["res://tools/loadin_fps_check.gd", "loadin_fps_check", "advisory"],
 	"--modes-check": ["res://tools/modes_check.gd", "modes_check", null],  # solos and the play space (0084)
 	"--step-up-check": ["res://tools/step_up_check.gd", "step_up_check", null],  # lips walked over
+	"--modes-check": ["res://tools/modes_check.gd", "modes_check", null],  # solos and the play space (0084)
 	"--traversal-parity-check": ["res://tools/traversal_parity_check.gd", "traversal_parity_check", null],  # ref rows
 	"--fall-parity-check": ["res://tools/fall_parity_check.gd", "fall_parity_check", null],  # fall parity
 }

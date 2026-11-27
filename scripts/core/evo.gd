@@ -279,8 +279,10 @@ static func catch_up(roster: Array) -> Array:
 	return out
 
 ## The form names version-11 saves gave every 4 levels (e.g. "Cindfang"), so migrate can keep them.
+## These are the names those saves already hold, not today's species names: the six first species keep their
+## old roots; the later species (cairnback, zephyrak, hivara) have no v11 saves, so theirs start from the shown name.
 const V11_ROOTS := {"cindle": "Cind", "puddlet": "Pud", "burrlet": "Burr", "zapple": "Zap", "pebbit": "Peb",
-	"wisplet": "Wisp"}
+	"wisplet": "Wisp", "cairnback": "Cairn", "zephyrak": "Zeph", "hivara": "Hiv"}
 const V11_SUFFIX := {
 	"fierce": ["fang", "claw", "maw", "rend", "fury"],
 	"steadfast": ["shell", "ward", "keep", "bulwark", "aegis"],
