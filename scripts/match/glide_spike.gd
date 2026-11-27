@@ -25,6 +25,7 @@ static var reopen_cd: float = _r["reopen_cd"]
 static var slam_min: float = _r["slam_min"]
 static var cool_by: float = _r["cool_by"]
 
+
 ## A heat spike: the glider folds and the body hangs frozen for air_stun, then plunge() sets it falling.
 static func shoot_down(h: Hunter) -> void:
 	h.gliding = false
@@ -37,9 +38,11 @@ static func shoot_down(h: Hunter) -> void:
 	if h.is_local() and h.m.hud:
 		h.m.hud.toast_small("GLIDER SHOT DOWN", Color("ff9a5a"))
 
+
 ## One air step of a spiked body: no fall while the freeze lasts, then its speed is set to fall_vy straight down.
 static func plunge(h: Hunter) -> void:
 	h.vel.y = 0.0 if h.stun_t > 0.0 else -fall_vy
+
 
 ## A slam on a body this game owns: it falls at least `vy` (negative) fast. A slam at slam_min m/s or more
 ## burns slam_heat of the victim's heat and blocks its refill for regen_stun; a glider left empty is spiked
@@ -55,12 +58,19 @@ static func slam(e: Ent, vy: float) -> void:
 			return
 	e.vel.y = minf(e.vel.y, vy)
 
+
 ## True when a slam down at `vy` spikes this body: a glider (not in the opening drop) driven down at slam_min or
 ## more whose heat the slam empties (slam_heat of the tank). Read on any game (the snapshot carries `gliding`), so
 ## the caster can credit it.
 static func spikes(e: Ent, vy: float) -> bool:
-	return e is Hunter and (e as Hunter).gliding and not (e as Hunter).dropping and -vy >= slam_min \
+	return (
+		e is Hunter
+		and (e as Hunter).gliding
+		and not (e as Hunter).dropping
+		and -vy >= slam_min
 		and (e as Hunter).glide_fuel <= slam_heat + 0.001
+	)
+
 
 ## True when a strike carrying the spike block `sp` dunks `f`: the block is set and `f` is in the air. The
 ## caller adds the bonus, keeps the hit from lifting, and after the hit drives it down: Displace.spike(f, -vy).
@@ -69,6 +79,7 @@ static func dunks(f: Ent, sp: Dictionary) -> bool:
 	if sp.is_empty() or f.grounded:
 		return false
 	return (f is Hunter and (f as Hunter).gliding) or f.pos.y > f.ground() + AIR_GAP
+
 
 ## The spiker's reward [wiki]: a gliding Hunter's own glider cools, and the spike counts in its (or its
 ## Boki's owner's) stats.
@@ -80,10 +91,11 @@ static func credit(by: Ent) -> void:
 	elif by is Kin and (by as Kin).owner_h:
 		(by as Kin).owner_h.add_stat("spikes")
 
+
 ## A spiked body touches the ground: the landing stun and the extra damage.
 static func land(h: Hunter) -> void:
 	h.shot_down = false
 	h.stun_t = maxf(h.stun_t, land_stun)
-	h.glide_regen_t = land_stun + regen_stun      # the landing stun, then the regen stun
+	h.glide_regen_t = land_stun + regen_stun  # the landing stun, then the regen stun
 	h.hurt(land_dmg, h.last_hit_by, {"src": "fall"})
 	h.m.fx.dust(h.pos, 12)

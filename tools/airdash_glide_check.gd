@@ -29,19 +29,34 @@ const WIND_LATE := 18  # steps after an air Rampage: past Brall's press grace, i
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("AIRGLIDE %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
 
+
 ## A fresh match as `arch`, high above a flat, empty patch of ground.
 func _match(main: Node, arch: String) -> Match:
 	var m := Match.new()
 	main.add_child(m)
-	m.start({
-		"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true,
-		"cls": Arch.weight(arch), "arch": arch, "weapon": Arch.signature(arch),
-	})
+	(
+		m
+		. start(
+			{
+				"training": true,
+				"teams": 2,
+				"squad": 1,
+				"tier": 0,
+				"length": 1e9,
+				"seed": 77,
+				"no_drop": true,
+				"cls": Arch.weight(arch),
+				"arch": arch,
+				"weapon": Arch.signature(arch),
+			}
+		)
+	)
 	m.set_process(false)
 	for mob in m.mobs:
 		mob.queue_free()
@@ -57,6 +72,7 @@ func _match(main: Node, arch: String) -> Match:
 		m.step(Match.DT)
 	return m
 
+
 ## One step with a player's keys: east held, glide pressed on `press` (a second Space) and held after.
 func _step(m: Match, f: int, press: int) -> float:
 	var hunter: Hunter = m.player
@@ -64,10 +80,11 @@ func _step(m: Match, f: int, press: int) -> float:
 	hunter.inp["aim"] = hunter.pos + Vector3(8, 0.9, 0)
 	hunter.inp["jump"] = f == press
 	hunter.inp["glide"] = f >= press
-	hunter.inp["glide_btn"] = f >= press      # the raw key (cancels Sparkle's Wirerun)
+	hunter.inp["glide_btn"] = f >= press  # the raw key (cancels Sparkle's Wirerun)
 	var p0 := hunter.pos
 	m.step(Match.DT)
 	return Vector2(hunter.pos.x - p0.x, hunter.pos.z - p0.z).length() / Match.DT
+
 
 ## Dashes east in the air; `when` = "none" (no press), "mid", "after" or "late" (timed on `base`, a "none" run).
 ## Returns {dash_0, dash_f (its first and last steps; -1: this hunter's air Shift is not a dash), exit (the speed on
@@ -86,8 +103,9 @@ func _air_dash(m: Match, when: String, base := {}) -> Dictionary:
 		press = int((int(base["dash_0"]) + int(base["dash_f"]) + 1) / 2.0)
 	elif when != "none":
 		press = int(base["dash_f"]) + (1 if when == "after" else LATE)
-	var r := {"dash_0": -1, "dash_f": -1, "exit": 0.0, "press": press, "open": -1, "open_v": 0.0, "pre_v": 0.0,
-			"worst": 0.0}
+	var r := {
+		"dash_0": -1, "dash_f": -1, "exit": 0.0, "press": press, "open": -1, "open_v": 0.0, "pre_v": 0.0, "worst": 0.0
+	}
 	var speeds: Array[float] = []
 	for f in 150:
 		var v := _step(m, f, press)
@@ -106,6 +124,7 @@ func _air_dash(m: Match, when: String, base := {}) -> Dictionary:
 		for f in range(maxi(1, int(r["open"])), speeds.size()):
 			r["worst"] = maxf(float(r["worst"]), absf(speeds[f] - speeds[f - 1]))
 	return r
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -128,15 +147,22 @@ func run(main: Node) -> void:
 			await main.get_tree().process_frame
 			var tag := "%s %s: press @%d opens @%d" % [arch, when, int(r["press"]), int(r["open"])]
 			var due := maxi(int(r["press"]) + HOLD, int(base["dash_f"]) + 1)  # the hold served, or the dash over
-			ok(int(r["open"]) >= int(r["press"]) + HOLD and int(r["open"]) <= due + 1,
-					tag + " (the hold served: due @%d)" % due)
+			ok(
+				int(r["open"]) >= int(r["press"]) + HOLD and int(r["open"]) <= due + 1,
+				tag + " (the hold served: due @%d)" % due
+			)
 			var cap := float(STEP_DV_OWN.get(arch, STEP_DV))
 			ok(float(r["worst"]) <= cap, "%s, worst step %.1f m/s" % [tag, float(r["worst"])])
 			if when != "late":
 				var pre_v := float(r["pre_v"])
 				var open_v := float(r["open_v"])
-				ok(open_v >= pre_v * KEEP, "%s at %.1f m/s, the step before %.1f m/s (%.0f%%; dash exit %.1f)" % [
-						tag, open_v, pre_v, 100.0 * open_v / maxf(0.01, pre_v), float(r["exit"])])
+				ok(
+					open_v >= pre_v * KEEP,
+					(
+						"%s at %.1f m/s, the step before %.1f m/s (%.0f%%; dash exit %.1f)"
+						% [tag, open_v, pre_v, 100.0 * open_v / maxf(0.01, pre_v), float(r["exit"])]
+					)
+				)
 	await _rage_rows(main)
 	print("AIRGLIDE DONE, failures: %d" % bad)
 	main.get_tree().quit()
@@ -192,12 +218,20 @@ func _rage_rows(main: Node) -> void:
 	for btn in [false, true]:
 		var by := "glide button" if btn else "second Space"
 		var r: Array = await _rage_chain(main, false, 1, 8, btn)
-		ok(int(r[1]) == int(r[0]) + HOLD, "Brall Rampage, jump, %s: press @%d opens @%d (hold %d)" % [
-				by, r[0], r[1], HOLD])
+		ok(
+			int(r[1]) == int(r[0]) + HOLD,
+			"Brall Rampage, jump, %s: press @%d opens @%d (hold %d)" % [by, r[0], r[1], HOLD]
+		)
 		r = await _rage_chain(main, true, 4, 8, btn)
-		ok(int(r[1]) == int(r[0]) + HOLD and float(r[2]) >= float(r[3]) * KEEP,
-				"Brall Smash Lunge, jump, %s: press @%d opens @%d at %.1f m/s (the step before %.1f)" % [
-						by, r[0], r[1], r[2], r[3]])
+		ok(
+			int(r[1]) == int(r[0]) + HOLD and float(r[2]) >= float(r[3]) * KEEP,
+			(
+				"Brall Smash Lunge, jump, %s: press @%d opens @%d at %.1f m/s (the step before %.1f)"
+				% [by, r[0], r[1], r[2], r[3]]
+			)
+		)
 		r = await _rage_chain(main, false, -1, WIND_LATE, btn)
-		ok(int(r[1]) >= int(r[0]) + HOLD and int(r[1]) - int(r[0]) <= HOLD + wait,
-				"Brall air Rampage, %s in the wind-down: press @%d opens @%d (<= %d)" % [by, r[0], r[1], HOLD + wait])
+		ok(
+			int(r[1]) >= int(r[0]) + HOLD and int(r[1]) - int(r[0]) <= HOLD + wait,
+			"Brall air Rampage, %s in the wind-down: press @%d opens @%d (<= %d)" % [by, r[0], r[1], HOLD + wait]
+		)

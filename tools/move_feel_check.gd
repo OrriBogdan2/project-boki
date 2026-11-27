@@ -1196,7 +1196,7 @@ func _glide_dive() -> void:
 		var was := p_v.glide_dive.on
 		m.step(DT)
 		if p_v.glide_dive.on and t_on < 0.0:
-			t_on = i * DT        # the plunge starts when the glider opens (after the 0.4 s hold): 10 s from there
+			t_on = i * DT  # the plunge starts when the glider opens (after the 0.4 s hold): 10 s from there
 		if was and not p_v.glide_dive.on and t_off < 0.0:
 			t_off = i * DT - maxf(t_on, 0.0)
 	rec("dive_timeout_s", t_off)
@@ -1990,10 +1990,10 @@ func _abyss_updraft() -> void:
 		_reset(Vector3(g.x + d.x * 4.0, g.y - 4.0, g.z + d.y * 4.0), false)
 		p_v.last_gy = g.y
 		p_v.vel.y = -8.0
-		p_v.air_t = HunterFeel.glide_engage    # the 0.4 s hold served: these rows time the lift from the open
+		p_v.air_t = HunterFeel.glide_engage  # the 0.4 s hold served: these rows time the lift from the open
 		p_v.update_lip()
 		var lip := p_v.lip_y
-		p_v.inp["jump"] = false    # (a jump press in the air arms the 0.4 s hold from zero; the hold is served above)
+		p_v.inp["jump"] = false  # (a jump press in the air arms the 0.4 s hold from zero; the hold is served above)
 		var tl := -1.0
 		for i in 150:
 			p_v.inp["glide"] = true

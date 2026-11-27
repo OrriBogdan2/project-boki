@@ -11,17 +11,18 @@ extends "res://tools/abyss_check.gd"
 ## the horizontal speed on the opening steps never passes the speed just before (SPEED_SLACK).
 ## Prints "ACHECK ok|FAIL ..." and "ACHECK DONE, failures: N".
 
-const OPEN_STEPS := 8   # steps from the opening whose speed must not pass the speed just before it
-const RUN_MIN := 4.0    # m/s: the slowest speed that counts as the run in the jump rows
-const SPEED_SLACK := 0.15       # m/s: float noise in the per-step position delta
-const SECS := 2.0       # how long each scenario runs
+const OPEN_STEPS := 8  # steps from the opening whose speed must not pass the speed just before it
+const RUN_MIN := 4.0  # m/s: the slowest speed that counts as the run in the jump rows
+const SPEED_SLACK := 0.15  # m/s: float noise in the per-step position delta
+const SECS := 2.0  # how long each scenario runs
 # (11-27: a press is held 0.4 s before it opens, so the scenarios run longer in the air than the old one-step open)
-const HIGH := 30.0      # m: a start in the air, well above the ground, for the in-air presses
-const HOLD := 24        # steps a press is held before the glider opens (HunterFeel.glide_engage 0.4 s, 11-27)
-const SNAP_S := 0.1     # s between a player's snapshots (Net.tick's send_t)
-const BUTTONS := {"juggernaut": "RMB", "archer": "LMB", "bulwark": "LMB"}      # Kael, Lace, Albert
+const HIGH := 30.0  # m: a start in the air, well above the ground, for the in-air presses
+const HOLD := 24  # steps a press is held before the glider opens (HunterFeel.glide_engage 0.4 s, 11-27)
+const SNAP_S := 0.1  # s between a player's snapshots (Net.tick's send_t)
+const BUTTONS := {"juggernaut": "RMB", "archer": "LMB", "bulwark": "LMB"}  # Kael, Lace, Albert
 ## A held Shift that drops a Space press by design (MOVEMENT_FEEL "Dash into glide")
 const SWALLOWS := {}
+
 
 ## A training match as `arch` ("" keeps the default kit), the player on an empty patch of ground.
 func _start(main: Node, arch: String) -> void:
@@ -32,7 +33,8 @@ func _start(main: Node, arch: String) -> void:
 		opts.merge({"cls": Arch.weight(arch), "arch": arch, "weapon": Arch.signature(arch)})
 	m.start(opts)
 	m.set_process(false)
-	for mb in m.mobs: mb.queue_free()
+	for mb in m.mobs:
+		mb.queue_free()
 	m.mobs.clear()
 	w = m.world
 	h = m.player
@@ -44,16 +46,19 @@ func _start(main: Node, arch: String) -> void:
 			o.teleport(h.pos + Vector3(60, 0, 60))
 	m.opts["god"] = true
 
+
 ## One scenario: stand on flat ground (or `lift` m above it), then step SECS with `script` (Callable(i) -> void)
 ## setting inputs each step. Returns {t: seconds the glider was open, opens: how many times it opened,
 ## hs: horizontal m/s of each step, first: the step it first opened (-1 never)}.
 func _scenario(script: Callable, lift := 0.3) -> Dictionary:
 	_reset(w.random_ground() + Vector3(0, 0.3, 0), Vector3.ZERO)
-	for i in 60: m.step(Match.DT)        # 1s on the ground: the last scenario's attack animation ends
+	for i in 60:
+		m.step(Match.DT)  # 1s on the ground: the last scenario's attack animation ends
 	if lift > 0.3:
 		_reset(h.pos + Vector3(0, lift, 0), Vector3.ZERO)
-		h.coyote = 0.0           # the ground's grace would make the first press a jump
-		for i in 2: m.step(Match.DT)      # the locomotion state leaves GROUNDED (a glide from it is refused)
+		h.coyote = 0.0  # the ground's grace would make the first press a jump
+		for i in 2:
+			m.step(Match.DT)  # the locomotion state leaves GROUNDED (a glide from it is refused)
 	h.inp["glide_press_only"] = true
 	h.inp["aim"] = h.pos + Vector3(8, 0.9, 0)
 	var out := {"t": 0.0, "opens": 0, "hs": [], "first": -1}
@@ -69,21 +74,25 @@ func _scenario(script: Callable, lift := 0.3) -> Dictionary:
 			out["t"] += Match.DT
 			if not was:
 				out["opens"] += 1
-				if out["first"] < 0: out["first"] = i
+				if out["first"] < 0:
+					out["first"] = i
 		was = h.gliding
 	h.inp["fire"] = false
 	h.inp["sec_hold"] = false
 	_reset(h.pos, Vector3.ZERO)
 	return out
 
+
 ## Holds `button` ("LMB" or "RMB") from step `from`: the press on that step, held after it.
 func _hold(button: String, i: int, from: int) -> void:
-	if i < from: return
+	if i < from:
+		return
 	if button == "LMB":
 		h.inp["fire"] = true
 	else:
 		h.inp["sec"] = i == from
 		h.inp["sec_hold"] = true
+
 
 func _base_cases() -> void:
 	var held := func(i: int) -> void:
@@ -96,7 +105,7 @@ func _base_cases() -> void:
 	ok(_scenario(held_fire)["t"] == 0.0, "LMB held, jump and hold Space for 2s: never glides")
 	var held_btn := func(i: int) -> void:
 		h.inp["glide"] = true
-		h.inp["jump"] = i == 5          # the button goes down on the ground, then the jump
+		h.inp["jump"] = i == 5  # the button goes down on the ground, then the jump
 		h.inp["glide_btn"] = true
 	ok(_scenario(held_btn)["t"] == 0.0, "glide button held since before the jump: never glides")
 	var double := func(i: int) -> void:
@@ -130,6 +139,7 @@ func _base_cases() -> void:
 			h.roll_speed = 14.0
 	ok(_scenario(dash_hold)["t"] == 0.0, "Space held since the jump, an air dash ending: still no glider")
 
+
 ## A glide button press 0.5s into a fall, at each phase of the snapshot clock: a remote copy fed only by the
 ## snapshots (Match._ser -> _net_apply, as Net.tick sends them) opens on the first one after the local open.
 func _remote_case() -> void:
@@ -153,17 +163,23 @@ func _remote_case() -> void:
 				s = m._ser(h)
 				s[1] = R.nid
 				m._net_apply(R, s, m.time)
-			if h.gliding and local < 0: local = i
-			if R.gliding and remote < 0: remote = i
+			if h.gliding and local < 0:
+				local = i
+			if R.gliding and remote < 0:
+				remote = i
 		lags.append(remote - local if local >= 0 and remote >= 0 else 99)
-		ok(local - press >= HOLD - 1 and local - press <= HOLD + 1,
-			"glide button 0.5s into a fall (phase %d): opens after the 0.4 s hold (+%d steps)" % [phase, local - press])
+		ok(
+			local - press >= HOLD - 1 and local - press <= HOLD + 1,
+			"glide button 0.5s into a fall (phase %d): opens after the 0.4 s hold (+%d steps)" % [phase, local - press]
+		)
 	var worst: int = lags.max()
 	ok(worst < snap, "the remote copy opens <= 1 Net tick (%d steps) behind the local open: %s steps" % [snap, lags])
-	for k in ["glide", "glide_btn"]: h.inp[k] = false
+	for k in ["glide", "glide_btn"]:
+		h.inp[k] = false
 	m.hunters.erase(R)
 	m.ents_by_id.erase(R.nid)
 	R.queue_free()
+
 
 ## Kael's RMB, Lace's and Albert's LMB held never become a glide.
 func _button_cases(arch: String) -> void:
@@ -181,10 +197,13 @@ func _button_cases(arch: String) -> void:
 	var gliding := func(i: int) -> void:
 		h.inp["glide"] = true
 		h.inp["jump"] = i == 0
-		_hold(b, i, HOLD + 6)      # (the glider opens at HOLD; the button goes down 6 steps after it)
+		_hold(b, i, HOLD + 6)  # (the glider opens at HOLD; the button goes down 6 steps after it)
 	var r := _scenario(gliding, HIGH)
-	ok(r["opens"] == 1, "%s: gliding, then %s held with Space: opens once, never again after a fold (%d)"
-		% [arch, b, r["opens"]])
+	ok(
+		r["opens"] == 1,
+		"%s: gliding, then %s held with Space: opens once, never again after a fold (%d)" % [arch, b, r["opens"]]
+	)
+
 
 ## Every Hunter, player keys, high in the air moving east: Shift, then a fresh Space press 0.07s into the move
 ## and, separately, 1s after it (the move is over). Both open the glider, the first by the move's end.
@@ -203,6 +222,7 @@ func _shift_case(arch: String) -> void:
 	ok(after["t"] > 0.3, "%s: a fresh Space press 1s after the air Shift glides" % arch)
 	ok(r["t"] > 0.3, "%s: Space pressed 0.07s into the air Shift and held glides %.2fs of 1.93s" % [arch, r["t"]])
 
+
 ## The dash/glide sweep (DECISIONS 11-08: Shift cancels into a glide at once for every Hunter). Each pattern is the
 ## frames Shift goes down, how many frames it is then held, and where it starts: "air" high up, or "ground" (the
 ## press is then a jump out of the move on the ground and a fresh Space press SWEEP_GAP steps later, in the air).
@@ -212,20 +232,23 @@ const SWEEP := {
 	"air hold": {"taps": [0], "hold": 50, "lift": 40.0},
 	"ground tap": {"taps": [0], "hold": 0, "lift": 0.0},
 	"ground chain": {"taps": [0, 15, 30], "hold": 0, "lift": 0.0},
-	"ground hold": {"taps": [0], "hold": 50, "lift": 0.0}}
-const SWEEP_AT := [0.25, 0.5, 0.75]     # where in the move a press lands
-const SWEEP_LANE := 12                  # m of flat ground east of the start (a dash, or a hop chain's first hops)
-const SWEEP_GAP := 12                   # steps from a ground move's jump to the fresh press
-const SWEEP_HIGH := 1.2                 # m: a ground move's jump is still this high at the fresh press (not landing)
-const SWEEP_LEVEL := 0.1                # m: the ground under the press is the start's (past that the lane has ended)
-const SWEEP_STAY := 8                   # steps the opened glider must stay open (a kit's wind-down must not fold it)
-const SWEEP_OPEN := 1 + HOLD            # steps from the fresh press to the glider: the press step plus the hold (11-27)
+	"ground hold": {"taps": [0], "hold": 50, "lift": 0.0}
+}
+const SWEEP_AT := [0.25, 0.5, 0.75]  # where in the move a press lands
+const SWEEP_LANE := 12  # m of flat ground east of the start (a dash, or a hop chain's first hops)
+const SWEEP_GAP := 12  # steps from a ground move's jump to the fresh press
+const SWEEP_HIGH := 1.2  # m: a ground move's jump is still this high at the fresh press (not landing)
+const SWEEP_LEVEL := 0.1  # m: the ground under the press is the start's (past that the lane has ended)
+const SWEEP_STAY := 8  # steps the opened glider must stay open (a kit's wind-down must not fold it)
+const SWEEP_OPEN := 1 + HOLD  # steps from the fresh press to the glider: the press step plus the hold (11-27)
 ## Motley's Shift on the ground is the Trade's aim (a held aim before the lob, no travel), and the lob moves him by
 ## teleport: a jump out of it is not a dash to cancel, so only his air rows (the sling and drift) are swept.
 const SWEEP_SKIP := {"ostra": "ground"}
 ## A dash that ends in an attack keeps the glider shut for that attack's wind-down (the no-glider-in-an-attack
 ## rule): Albert's 360 Smash spin lands as his dash ends.
 const SWEEP_WINDDOWN := {"bulwark": BulwarkKit.WINDDOWN}
+
+
 ## One probe of a Shift pattern moving east, the player's press on step `press` (-1: none). Returns {busy: steps
 ## the move kept a roll running or the glider shut, open: steps from the fresh press to the open glider (1 = the
 ## press step, 0 = never), before/after: horizontal m/s the step before that press / the step it opened}.
@@ -241,26 +264,27 @@ func _sweep_probe(pat: Dictionary, press: int) -> Dictionary:
 	if air:
 		_reset(h.pos + Vector3(0, float(pat["lift"]), 0), Vector3.ZERO)
 		h.coyote = 0.0
-		for i in 2: m.step(Match.DT)
+		for i in 2:
+			m.step(Match.DT)
 	h.inp["glide_press_only"] = true
 	h.inp["move"] = Vector2(1, 0)
 	h.inp["aim"] = h.pos + Vector3(8, 0.9, 0)
 	h.dashes = h.max_dashes()
 	h.ex_cd = 0.0
-	var fresh := press if air or press < 0 else press + SWEEP_GAP       # the press that must open the glider
+	var fresh := press if air or press < 0 else press + SWEEP_GAP  # the press that must open the glider
 	var jumped_out := false
 	var ground0 := h.ground()
 	var out := {"busy": 0, "open": 0, "before": 0.0, "after": 0.0, "jumped": true, "stayed": true}
 	for i in 100 + HOLD:
-		var shifting: bool = press < 0 or i < press        # no more Shift taps once the player presses
+		var shifting: bool = press < 0 or i < press  # no more Shift taps once the player presses
 		h.inp["dash"] = shifting and i in pat["taps"]
-		h.inp["dash_down"] = i < int(pat["hold"]) or h.inp["dash"]       # a held Shift stays held
+		h.inp["dash_down"] = i < int(pat["hold"]) or h.inp["dash"]  # a held Shift stays held
 		h.inp["jump"] = i == fresh or (not air and i == press)
 		h.inp["glide"] = press >= 0 and i >= (fresh if air else press) and (air or i == press or i >= fresh)
 		if i == press and not air:
-			jumped_out = h.roll_t > 0.0 or h.ak.in_dash()       # the jump comes out of a move, not between two
+			jumped_out = h.roll_t > 0.0 or h.ak.in_dash()  # the jump comes out of a move, not between two
 		if i == fresh:
-			h.dash_buf = 0.0            # a queued Shift would fire after the glider opens and fold it (by design)
+			h.dash_buf = 0.0  # a queued Shift would fire after the glider opens and fold it (by design)
 			out["before"] = Vector2(h.vel.x, h.vel.z).length()
 			# (a ground move needs a jump out of it, still high at the press: no landing, and still over the lane's
 			# own ground, not a ledge or dip the move has reached, which would mantle or drop it instead)
@@ -274,7 +298,7 @@ func _sweep_probe(pat: Dictionary, press: int) -> Dictionary:
 			h.inp["dash"] = false
 			for k in SWEEP_STAY:
 				m.step(Match.DT)
-			out["stayed"] = h.gliding or h.grounded or h.stun_t > 0.0       # (landed, or a wall stunned it)
+			out["stayed"] = h.gliding or h.grounded or h.stun_t > 0.0  # (landed, or a wall stunned it)
 			break
 		if press < 0 and (h.roll_t > 0.0 or AirLimits.glide_locked(h) or h.ak.in_dash()):
 			out["busy"] = i + 1
@@ -285,6 +309,7 @@ func _sweep_probe(pat: Dictionary, press: int) -> Dictionary:
 	for k in ["dash", "dash_down", "glide", "jump", "move"]:
 		h.inp[k] = false if k != "move" else Vector2.ZERO
 	return out
+
 
 ## Every Hunter, every pattern: a fresh press at 25/50/75% of the move opens the glider within SWEEP_OPEN steps.
 func _sweep_case(arch: String) -> void:
@@ -312,26 +337,31 @@ func _sweep_case(arch: String) -> void:
 		else:
 			ok(not shut, "sweep " + line)
 
+
 ## The fastest of the OPEN_STEPS steps from the opening, less the speed of the step before it: <= SPEED_SLACK.
 func _gain(r: Dictionary) -> float:
 	var at: int = r["first"]
-	if at < 1: return INF
+	if at < 1:
+		return INF
 	var top := 0.0
 	for k in range(at, mini(at + OPEN_STEPS, r["hs"].size())):
 		top = maxf(top, r["hs"][k])
 	return top - r["hs"][at - 1]
+
 
 ## Every Hunter opens the glider from a jump at run speed, right after an air Shift and in a fall: no gain.
 ## The stick lets go at the press: the glide's own steering is not the opening.
 func _flat_case(arch: String) -> void:
 	var on_ground := {"seen": false}
 	var jump := func(i: int) -> void:
-		if i == 30: on_ground["seen"] = h.grounded
-		h.inp["move"] = Vector2(1, 0) if i < 42 + HOLD else Vector2.ZERO      # (the stick lets go as the glider opens)
+		if i == 30:
+			on_ground["seen"] = h.grounded
+		h.inp["move"] = Vector2(1, 0) if i < 42 + HOLD else Vector2.ZERO  # (the stick lets go as the glider opens)
 		# (11-27: a flat jump is over before a 0.4 s hold opens the glider: the press is made up high, at its speed)
-		if i == 42: h.pos.y += 20.0
+		if i == 42:
+			h.pos.y += 20.0
 		h.inp["jump"] = i == 30 or i == 42
-		h.inp["glide"] = i == 30 or i >= 42      # run, jump, let go, fresh press and hold
+		h.inp["glide"] = i == 30 or i >= 42  # run, jump, let go, fresh press and hold
 	var dash_end := func(i: int) -> void:
 		h.inp["move"] = Vector2(1, 0) if i < 12 else Vector2.ZERO
 		h.inp["dash"] = i == 0
@@ -342,8 +372,9 @@ func _flat_case(arch: String) -> void:
 		h.inp["jump"] = i == 20
 		h.inp["glide"] = i >= 20
 	var r := _scenario(jump)
-	for tries in 8:      # the run east may leave the ground early or meet a slope or wall: take another patch
-		if on_ground["seen"] and r["first"] > 0 and r["hs"][r["first"] - 1] >= RUN_MIN: break
+	for tries in 8:  # the run east may leave the ground early or meet a slope or wall: take another patch
+		if on_ground["seen"] and r["first"] > 0 and r["hs"][r["first"] - 1] >= RUN_MIN:
+			break
 		r = _scenario(jump)
 	var at: int = maxi(r["first"], 1)
 	var run: float = r["hs"][at - 1]
@@ -354,6 +385,7 @@ func _flat_case(arch: String) -> void:
 	ok(_gain(r) <= SPEED_SLACK, end_line % [arch, _gain(r)])
 	r = _scenario(fall, 30.0)
 	ok(_gain(r) <= SPEED_SLACK, "%s: the glider opening from a fall adds no speed (gain %.2f m/s)" % [arch, _gain(r)])
+
 
 func run(main: Node) -> void:
 	Save.no_write = true

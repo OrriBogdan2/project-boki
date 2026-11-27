@@ -226,7 +226,7 @@ func _measure_match(m: Match, p: Hunter, f: Vector3) -> Dictionary:
 	m.step(DT)
 	p.inp["jump"] = false
 	p.inp["move"] = right
-	mfc._steps(HOLD_STEPS)      # 11-27: a glide press opens the glider once held HunterFeel.glide_engage s
+	mfc._steps(HOLD_STEPS)  # 11-27: a glide press opens the glider once held HunterFeel.glide_engage s
 	mfc.ok(p.gliding, "one profile: the glider opens in the air (match)")
 	mfc._steps(36)
 	out["glide_v"] = _hv(p).length()
@@ -297,7 +297,7 @@ func _garden() -> Dictionary:
 	hm._move_player(DT)
 	await main.get_tree().process_frame
 	_hold(Vector2(1, 0))
-	await _gsteps(hm, HOLD_STEPS + 36)      # held until it opens (HunterFeel.glide_engage), then the same 36 steps
+	await _gsteps(hm, HOLD_STEPS + 36)  # held until it opens (HunterFeel.glide_engage), then the same 36 steps
 	Input.action_release("glide")
 	mfc.ok(hm.gliding, "one profile: the glider opens in the air (garden)")
 	out["glide_v"] = Vector2(hm.pvel.x, hm.pvel.z).length()

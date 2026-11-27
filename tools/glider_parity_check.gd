@@ -10,28 +10,31 @@ extends "res://tools/abyss_check.gd"
 ##      (it closes at once), hold again
 ## Prints "ACHECK ok|FAIL ..." and "ACHECK DONE, failures: N".
 
-const SPIKE_FREEZE := 0.18      # s the spiked body hangs (the reference's spike stun hold)
-const SPIKE_FALL := 80.0        # m/s the body is then set falling (8000 uu/s)
-const LAND_STUN := 0.7          # s stunned on landing
-const REGEN_STUN := 1.5         # s the heat stays unrefilled after a slam's heat / the landing stun
-const SLAM_HEAT := 0.5          # of the max heat a slam burns off its victim
-const GLIDE_S := 6.25           # s a level glide lasts (500 fuel at 80 a second)
-const GLIDE_HOLD := 0.4         # s a press must be held before the glider opens
-const HIGH := 60.0              # m: a start high enough to watch a whole spiked fall
+const SPIKE_FREEZE := 0.18  # s the spiked body hangs (the reference's spike stun hold)
+const SPIKE_FALL := 80.0  # m/s the body is then set falling (8000 uu/s)
+const LAND_STUN := 0.7  # s stunned on landing
+const REGEN_STUN := 1.5  # s the heat stays unrefilled after a slam's heat / the landing stun
+const SLAM_HEAT := 0.5  # of the max heat a slam burns off its victim
+const GLIDE_S := 6.25  # s a level glide lasts (500 fuel at 80 a second)
+const GLIDE_HOLD := 0.4  # s a press must be held before the glider opens
+const HIGH := 60.0  # m: a start high enough to watch a whole spiked fall
+
 
 func run(main: Node) -> void:
 	m = Match.new()
 	main.add_child(m)
 	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "autoplay": true})
 	m.set_process(false)
-	for mb in m.mobs: mb.queue_free()
+	for mb in m.mobs:
+		mb.queue_free()
 	m.mobs.clear()
 	w = m.world
 	h = m.hunters[0]
 	h.set_arch("")
 	for o in m.hunters:
 		o.ctrl = "idle"
-		if o != h: o.teleport(w.random_ground())
+		if o != h:
+			o.teleport(w.random_ground())
 	h.ctrl = "local"
 	for kk in [h.kin, h.kin2]:
 		if kk:
@@ -52,9 +55,11 @@ func run(main: Node) -> void:
 	print("ACHECK DONE, failures: %d" % bad)
 	main.get_tree().quit()
 
+
 func _line(what: String, got: float, want: float, tol: float) -> void:
 	print("PARITY %s: %.3f (want %.3f)" % [what, got, want])
 	ok(absf(got - want) <= tol, "%s %.3f (want %.3f +-%.2f)" % [what, got, want, tol])
+
 
 ## A glider `o` over the marker, `fuel` heat left, nothing else on it.
 func _glider(o: Hunter, fuel: float, up := 12.0) -> void:
@@ -74,11 +79,12 @@ func _glider(o: Hunter, fuel: float, up := 12.0) -> void:
 	h.gliding = true
 	h.glide_fuel = 0.2
 
+
 ## Seconds the spiked body hangs (|vy| under 1 m/s), and its fall speed once it falls.
 func _spike_fall(o: Hunter) -> void:
 	_glider(o, 0.0, HIGH)
 	o.glide_fuel = 0.0
-	o.hurt(1.0, h, {})            # any player hit on an overheated glider spikes it
+	o.hurt(1.0, h, {})  # any player hit on an overheated glider spikes it
 	ok(o.shot_down, "an overheated glider is spiked")
 	var hang := 0.0
 	var fall := 0.0
@@ -94,6 +100,7 @@ func _spike_fall(o: Hunter) -> void:
 	_line("spike freeze (s)", hang, SPIKE_FREEZE, 0.04)
 	_line("spike fall speed (m/s)", fall, SPIKE_FALL, 2.0)
 	o.inp["glide"] = false
+
 
 ## One slam of a full glider: the heat it burns, whether it spikes, what the slammer pays.
 func _slam_heat(o: Hunter) -> void:
@@ -114,6 +121,7 @@ func _slam_heat(o: Hunter) -> void:
 	_line("a slam under the minimum burns", 1.0 - o.glide_fuel, 0.0, 0.001)
 	o.inp["glide"] = false
 
+
 ## Seconds the heat stays empty on the ground after a spike landing (the 0.7 s stun, then the regen stun), and
 ## after a slam's heat (from the slam).
 func _regen_after_landing(o: Hunter) -> void:
@@ -126,7 +134,8 @@ func _regen_after_landing(o: Hunter) -> void:
 		o.inp["glide"] = false
 		m.step(Match.DT)
 		t += Match.DT
-		if o.grounded and landed < 0.0: landed = t
+		if o.grounded and landed < 0.0:
+			landed = t
 		if landed >= 0.0 and o.glide_fuel > 0.001:
 			refill = t - landed
 			break
@@ -148,6 +157,7 @@ func _regen_after_landing(o: Hunter) -> void:
 			break
 	_line("heat refill starts after a slam's heat (s)", start, REGEN_STUN, 0.12)
 
+
 ## A level glide from a cool tank: seconds until it overheats.
 func _glide_length() -> void:
 	var lane := w.random_ground()
@@ -164,6 +174,7 @@ func _glide_length() -> void:
 		h.pos.y = y
 	h.inp["glide"] = false
 	_line("level glide, cool to overheated (s)", t, GLIDE_S, 0.15)
+
 
 ## A real player's press (press_only): jump, then a second press held `hold` s. Returns the seconds from the press to
 ## the glider opening (-1 if it never opened within the hold plus 1 s).
@@ -187,9 +198,11 @@ func _hold_press(hold: float, btn := false) -> float:
 	h.inp["glide"] = false
 	h.inp["glide_btn"] = false
 	h.inp["jump"] = false
-	for i in 6: m.step(Match.DT)       # let go: a glider that opened closes before the next row
+	for i in 6:
+		m.step(Match.DT)  # let go: a glider that opened closes before the next row
 	h.inp["glide_press_only"] = false
 	return opened
+
 
 func _hold_to_open() -> void:
 	var held := _hold_press(1.0)
@@ -214,10 +227,14 @@ func _hold_to_open() -> void:
 		h.inp["glide"] = down
 		h.inp["glide_btn"] = down
 		m.step(Match.DT)
-		if h.gliding and int(steps["open1"]) < 0 and t < 0.9: steps["open1"] = i
-		if not down and t >= 0.6 and t < 1.0 and not h.gliding and int(steps["closed"]) < 0: steps["closed"] = i
-		if t >= 1.0 and t < 1.6 and h.gliding: steps["tap_open"] = true
-		if t >= 1.6 and h.gliding and int(steps["open2"]) < 0: steps["open2"] = i
+		if h.gliding and int(steps["open1"]) < 0 and t < 0.9:
+			steps["open1"] = i
+		if not down and t >= 0.6 and t < 1.0 and not h.gliding and int(steps["closed"]) < 0:
+			steps["closed"] = i
+		if t >= 1.0 and t < 1.6 and h.gliding:
+			steps["tap_open"] = true
+		if t >= 1.6 and h.gliding and int(steps["open2"]) < 0:
+			steps["open2"] = i
 		i += 1
 	h.inp["glide"] = false
 	h.inp["glide_btn"] = false
@@ -227,6 +244,7 @@ func _hold_to_open() -> void:
 	ok(not bool(steps["tap_open"]), "feathering: a tap does not reopen it")
 	var again: float = (int(steps["open2"]) - int(1.6 / Match.DT)) * Match.DT
 	print("PARITY feathering reopen takes %.2f s of hold" % again)
-	ok(int(steps["open2"]) >= 0 and absf(again - GLIDE_HOLD) <= 0.06,
-		"feathering: holding again reopens it after the hold (%.2f s)" % again)
-
+	ok(
+		int(steps["open2"]) >= 0 and absf(again - GLIDE_HOLD) <= 0.06,
+		"feathering: holding again reopens it after the hold (%.2f s)" % again
+	)

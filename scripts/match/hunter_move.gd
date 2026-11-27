@@ -62,7 +62,6 @@ static var jump_trim_in := Vector2(float(_phys["jump_trim_in"][0]), float(_phys[
 static var jump_trim_to := Vector2(float(_phys["jump_trim_to"][0]), float(_phys["jump_trim_to"][1])) * body_scale
 
 
-
 static func rules() -> Dictionary:
 	return _rules
 
@@ -95,16 +94,19 @@ static func walk(hv: Vector2, want: Vector2, acc: float, grip: float, dt: float)
 		return brake(hv, grip, dt)
 	return Loco.accel_to(hv, want, acc * grip, 0.0, brake_rate(hv.length()) * grip, dt)
 
+
 ## A standing body whose ground drops `drop` metres in a step stays on it (down a flight, a ramp or a stone):
 ## more than step_down is a fall.
 static func sticks(drop: float) -> bool:
 	return drop <= step_down
+
 
 ## The height a hunter stands at for the camera: the ground under it, or where it last stood over the void,
 ## so a jump or a fall moves the view only with the ground (Cam.follow).
 static func stand_y(h: Hunter) -> float:
 	var g := h.ground()
 	return g if g > World.VOID + 1.0 else h.last_gy
+
 
 ## The one rule for ground speed: the move-speed bonuses (shares of run speed) add, the slows and
 ## states multiply that total, and nothing passes speed_cap ([game data] MaxMoveSpeed 700 uu/s).

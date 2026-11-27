@@ -6,7 +6,7 @@ extends RefCounted
 ## Holding Space never does it (DECISIONS 11-08). Runs inside --mage-combo-check and reports through its ok().
 
 const DT := 1.0 / 60.0
-const UP := 4.0                  # m off the ground: the glider needs over 1.5 m left after its 0.4 s hold to open
+const UP := 4.0  # m off the ground: the glider needs over 1.5 m left after its 0.4 s hold to open
 
 var hc: RefCounted
 var ac: RefCounted
@@ -15,10 +15,12 @@ var P: Hunter
 var T: Hunter
 var K: MageKit
 var home: Vector3
-var floaty := true               # the foe floats at her height (Wirerun rows); off for Kitefall, from the ground
+var floaty := true  # the foe floats at her height (Wirerun rows); off for Kitefall, from the ground
+
 
 func ok(what: String, cond: bool, info := "") -> void:
 	hc.ok(what, cond, info)
+
 
 func run(combo_check: RefCounted, archetype_check: RefCounted) -> void:
 	hc = combo_check
@@ -36,6 +38,7 @@ func run(combo_check: RefCounted, archetype_check: RefCounted) -> void:
 	_hang()
 	await ac.done(m)
 
+
 ## Up in the air, still, with Wirerun ready and the foe in its lane.
 func _lift() -> void:
 	_keys(false, false)
@@ -51,21 +54,33 @@ func _lift() -> void:
 	T.inv_t = 0.0
 	ac.aim_at(P, T.pos)
 
+
 ## Steps `secs` with the foe held up beside her: the lane is a hit only within 1.4 m up or down, and the glider needs
 ## more than the landing buffer of height to open, so she is lifted UP and the foe stands in the air at her height.
 func _stp(secs: float, each := Callable()) -> void:
-	ac.step(m, secs, func():
-		if floaty:
-			T.pos.y = home.y + UP - 0.3
-			T.vel.y = 0.0
-		if each.is_valid(): each.call())
+	ac.step(
+		m,
+		secs,
+		func():
+			if floaty:
+				T.pos.y = home.y + UP - 0.3
+				T.vel.y = 0.0
+			if each.is_valid():
+				each.call()
+	)
+
 
 ## The glide key held for the glider's own hold (HunterFeel.glide_engage) and one step: the press that ends a state is
 ## the one that opens the glider, so it lands when the hold is served. `charging` keeps the Wirerun key down meanwhile.
 func _press_glide(charging := false) -> void:
-	_stp(HunterFeel.glide_engage + DT, func():
-		_keys(false, true)
-		if charging: P.inp["dash_down"] = true)
+	_stp(
+		HunterFeel.glide_engage + DT,
+		func():
+			_keys(false, true)
+			if charging:
+				P.inp["dash_down"] = true
+	)
+
 
 ## Space (glide) and the glide key (glide_btn), the way match.gd reads real keys.
 func _keys(space: bool, glide_key: bool) -> void:
@@ -73,12 +88,13 @@ func _keys(space: bool, glide_key: bool) -> void:
 	P.inp["glide"] = space or glide_key
 	P.inp["glide_btn"] = glide_key
 
+
 ## The same streak with no glide press hits the foe in its lane (so the rows below can see a missed hit).
 func _control() -> void:
 	_release()
 	_stp(0.5)
-	ok("glider: with no glide press the streak hits the foe below its lane", ac.dmg(T) > 0.0,
-			"took %.0f" % ac.dmg(T))
+	ok("glider: with no glide press the streak hits the foe below its lane", ac.dmg(T) > 0.0, "took %.0f" % ac.dmg(T))
+
 
 ## A short Wirerun charge in the air, let go: the streak starts.
 func _release() -> void:
@@ -87,6 +103,7 @@ func _release() -> void:
 	P.do_dash()
 	_stp(0.1, func(): P.inp["dash_down"] = true)
 	P.inp["dash_down"] = false
+
 
 func _charge() -> void:
 	_lift()
@@ -99,12 +116,18 @@ func _charge() -> void:
 	_keys(false, false)
 	_stp(DT)
 	_press_glide(true)
-	ok("glider: the glide key mid-charge ends the Wirerun and opens the glider, the charge stays spent",
-			K.wire.is_empty() and K.run_t <= 0.0 and P.gliding and P.dashes < 1.0,
-			"wire %s glide %s dashes %.2f" % [not K.wire.is_empty(), P.gliding, P.dashes])
+	ok(
+		"glider: the glide key mid-charge ends the Wirerun and opens the glider, the charge stays spent",
+		K.wire.is_empty() and K.run_t <= 0.0 and P.gliding and P.dashes < 1.0,
+		"wire %s glide %s dashes %.2f" % [not K.wire.is_empty(), P.gliding, P.dashes]
+	)
 	_stp(0.5, func(): _keys(false, true))
-	ok("glider: no streak and no hit after the charge's cancel", K.run_t <= 0.0 and ac.dmg(T) == 0.0,
-			"took %.0f" % ac.dmg(T))
+	ok(
+		"glider: no streak and no hit after the charge's cancel",
+		K.run_t <= 0.0 and ac.dmg(T) == 0.0,
+		"took %.0f" % ac.dmg(T)
+	)
+
 
 func _streak() -> void:
 	_release()
@@ -112,15 +135,23 @@ func _streak() -> void:
 	var streaking := K.run_t > 0.0
 	_press_glide()
 	var hv := Vector2(P.vel.x, P.vel.z).length()
-	ok("glider: the glide key mid-streak ends the Wirerun and opens the glider, the charge stays spent",
-			streaking and K.run_t <= 0.0 and P.roll_t <= 0.0 and P.gliding and P.dashes < 1.0 and P.model.visible,
-			"was streaking %s run_t %.2f glide %s dashes %.2f" % [streaking, K.run_t, P.gliding, P.dashes])
-	ok("glider: the glide after the streak goes on at most at run speed (the streak's own hand-over)",
-			hv <= P.base_speed * HunterMove.dash_exit_run + 0.01, "%.1f m/s" % hv)
+	ok(
+		"glider: the glide key mid-streak ends the Wirerun and opens the glider, the charge stays spent",
+		streaking and K.run_t <= 0.0 and P.roll_t <= 0.0 and P.gliding and P.dashes < 1.0 and P.model.visible,
+		"was streaking %s run_t %.2f glide %s dashes %.2f" % [streaking, K.run_t, P.gliding, P.dashes]
+	)
+	ok(
+		"glider: the glide after the streak goes on at most at run speed (the streak's own hand-over)",
+		hv <= P.base_speed * HunterMove.dash_exit_run + 0.01,
+		"%.1f m/s" % hv
+	)
 	_stp(0.5, func(): _keys(false, true))
-	ok("glider: no hit and no landing after the streak's cancel",
-			ac.dmg(T) == 0.0 and K.anim_id != "mage_dash_land" and P.gliding,
-			"took %.0f anim %s" % [ac.dmg(T), K.anim_id])
+	ok(
+		"glider: no hit and no landing after the streak's cancel",
+		ac.dmg(T) == 0.0 and K.anim_id != "mage_dash_land" and P.gliding,
+		"took %.0f anim %s" % [ac.dmg(T), K.anim_id]
+	)
+
 
 func _hang() -> void:
 	_lift()
@@ -137,15 +168,23 @@ func _hang() -> void:
 	var hanging := U.phase() == MageUlt.AIR
 	_keys(true, false)
 	ac.step(m, 0.1)
-	ok("glider: Space held in the hang leaves Kitefall hanging", hanging and U.phase() == MageUlt.AIR and not P.gliding,
-			U.phase())
+	ok(
+		"glider: Space held in the hang leaves Kitefall hanging",
+		hanging and U.phase() == MageUlt.AIR and not P.gliding,
+		U.phase()
+	)
 	_keys(false, false)
 	m.step(DT)
 	var y0 := P.pos.y
 	_press_glide()
-	ok("glider: the glide key in the hang ends Kitefall into a glide from up there, the cooldown stays spent",
-			not U.running() and P.gliding and P.pos.y > y0 - 1.6 and float(K.cd["x"]) > 0.0,
-			"phase '%s' glide %s y %.1f -> %.1f cd %.1f" % [U.phase(), P.gliding, y0, P.pos.y, float(K.cd["x"])])
+	ok(
+		"glider: the glide key in the hang ends Kitefall into a glide from up there, the cooldown stays spent",
+		not U.running() and P.gliding and P.pos.y > y0 - 1.6 and float(K.cd["x"]) > 0.0,
+		"phase '%s' glide %s y %.1f -> %.1f cd %.1f" % [U.phase(), P.gliding, y0, P.pos.y, float(K.cd["x"])]
+	)
 	ac.step(m, 1.0, func(): _keys(false, true))
-	ok("glider: no strike after Kitefall's cancel", U.hits == hits0 and ac.dmg(T) == 0.0 and P.gliding,
-			"hits %d took %.0f" % [U.hits - hits0, ac.dmg(T)])
+	ok(
+		"glider: no strike after Kitefall's cancel",
+		U.hits == hits0 and ac.dmg(T) == 0.0 and P.gliding,
+		"hits %d took %.0f" % [U.hits - hits0, ac.dmg(T)]
+	)
