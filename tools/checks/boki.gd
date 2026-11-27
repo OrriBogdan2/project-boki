@@ -7,7 +7,11 @@ extends RefCounted
 const CHECKS := {
 	"--boki-keys-check": ["res://tools/boki_keys_check.gd", "boki_keys_check", null],  # quick Boki command keys
 	"--boki-everywhere-check": ["res://tools/boki_everywhere_check.gd", "boki_everywhere_check", null],  # Boki in .pck
+<<<<<<< /tmp/r.3691459
+	"--boki-size-pair-shots": ["res://tools/boki_size_pair_shots.gd", "boki_size_pair_shots", null],  # Boki beside Vex
+=======
 	"--boki-size-shots": ["res://tools/boki_size_shots.gd", "boki_size_shots", null],  # Boki beside Vex, true size
+>>>>>>> /tmp/o.3691459
 	"--wisp-proc-check": ["res://tools/wisp_proc_check.gd", "wisp_proc_check", null],  # carried passive chirp + tip
 	"--bot-summon-check": ["res://tools/bot_summon_check.gd", "bot_summon_check", null],  # bots press Summon
 	"--wisp-default-check": ["res://tools/wisp_default_check.gd", "wisp_default_check", null],  # wisps + C for all
