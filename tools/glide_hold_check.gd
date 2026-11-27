@@ -231,7 +231,12 @@ const SWEEP_WINDDOWN := {"bulwark": BulwarkKit.WINDDOWN}
 ## press step, 0 = never), before/after: horizontal m/s the step before that press / the step it opened}.
 func _sweep_probe(pat: Dictionary, press: int) -> Dictionary:
 	_reset(_open_lane(SWEEP_LANE) + Vector3(0, 0.3, 0), Vector3.ZERO)
-	for i in 40: m.step(Match.DT)
+	# (settle: with the 0.4 s hold the glider opens while the previous probe's move is still running, and a kit's
+	# dash outlives the teleport; the next probe starts from a Hunter with no move left)
+	for i in 240:
+		m.step(Match.DT)
+		if i >= 39 and not h.ak.in_dash() and h.roll_t <= 0.0 and h.dash_buf <= 0.0 and not h.gliding:
+			break
 	var air: bool = pat["lift"] > 0.0
 	if air:
 		_reset(h.pos + Vector3(0, float(pat["lift"]), 0), Vector3.ZERO)
