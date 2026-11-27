@@ -132,4 +132,7 @@ func report() -> void:
 static func reach(mode: String) -> float:
 	if mode == "glide":
 		return 99.0
-	return Hunter.JUMP_V * Hunter.JUMP_V / (2.0 * Hunter.H_GRAV) + HunterFeel.mantle_reach
+	return minf(
+		Hunter.JUMP_V * Hunter.JUMP_V / (2.0 * Hunter.H_GRAV) + HunterFeel.mantle_reach,
+		HunterMove.JUMP_TIERS * World.LEVEL + 0.05
+	)
