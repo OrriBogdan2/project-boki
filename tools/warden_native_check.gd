@@ -428,7 +428,8 @@ func _downed(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
 		var at := nat.player.current_animation_position
 		ok(
 			nat.cur == "downed" and absf(at - c[0] * length) < 0.02,
-			"%s: knocked down at k %.1f%s plays downed at %.2f s of %.2f" % [a, c[0], " (out)" if c[1] else "", at, length]
+			"%s: knocked down at k %.1f%s plays downed at %.2f s of %.2f"
+			% [a, c[0], " (out)" if c[1] else "", at, length]
 		)
 
 
