@@ -90,7 +90,7 @@ func _setup_input() -> void:
 	_key("jump", [KEY_SPACE])
 	_key("glide", [], MOUSE_BUTTON_XBUTTON2)  # press Mouse 5 (the front side button) in the air and hold to glide, like a second Space press; never jumps
 	_key("hunter_ult", [KEY_R])               # the hunter's own ultimate (level 6, see ArchKit.cast_ult)
-	_key("ultimate", [KEY_X])                 # Fuse with your Boki (level 6, a full bond meter); X again releases
+	_key("ultimate", [])                      # Fusion: no key, no fusion in the game (dev flag: Settings.fusion_key)
 	_key("util1", [KEY_1])                    # utility belt slot 1 (a tonic to start)
 	_key("scores", [KEY_TAB])
 	_key("menu", [KEY_ESCAPE])

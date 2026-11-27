@@ -302,7 +302,7 @@ const ACTIONS := [
 	["throw", "Boki: tap to send out or call back, hold for the order wheel"],
 	["summon", "Summon your Boki out of its wisp (wisps on); again: back"],
 	["hunter_ult", "Hunter ultimate"],
-	["ultimate", "Fuse with your Boki (needs a full bond meter)"],
+	["ultimate", "Fuse with your Boki (dev flag only: there is no fusion in the game)"],
 	["mate_look_1", "Look at teammate 1 (hold)"],
 	["mate_look_2", "Look at teammate 2 (hold)"],
 	["mate_look_3", "Look at teammate 3 (hold; 4-player squads)"],
@@ -901,6 +901,8 @@ func _bind(action: String, list: Array) -> void:
 	if not InputMap.has_action(action):
 		return
 	InputMap.action_erase_events(action)
+	if action == "ultimate" and not MergeForm.enabled():
+		return  # no fusion in the game: the Fusion action holds no key (a saved one is kept for the dev flag)
 	for s in list:
 		var parts := String(s).split(":")
 		if parts.size() != 2:
@@ -913,6 +915,12 @@ func _bind(action: String, list: Array) -> void:
 			var m := InputEventMouseButton.new()
 			m.button_index = int(parts[1])
 			InputMap.action_add_event(action, m)
+
+
+## Fusion's key follows the dev flag (MergeForm.set_enabled): X (or the saved keys) while it is on, none while off.
+func fusion_key() -> void:
+	_defaults_keys["ultimate"] = ["key:%d" % KEY_X] if MergeForm.enabled() else []
+	_bind("ultimate", v["keys"].get("ultimate", _defaults_keys["ultimate"]))
 
 
 ## The saved form of a key or mouse button ("key:69", "mouse:2"), or "" for anything else.

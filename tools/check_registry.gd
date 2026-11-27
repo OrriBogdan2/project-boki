@@ -1059,7 +1059,7 @@ static func run(main: Node, args: PackedStringArray) -> bool:
 	if flag == "":
 		return false
 	var e: Array = checks[flag]
-	Content.rules("merge_forms")["fusion_enabled"] = true  # (checks run with Fusion on)
+	MergeForm.set_enabled(true)  # (checks run with the Fusion dev flag on; the game ships it off)
 	seed(hash(flag))
 	for a in args:
 		if String(a).begins_with("--rng-seed="):

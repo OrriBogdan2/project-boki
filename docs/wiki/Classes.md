@@ -82,7 +82,7 @@ A new save picks 1 of 3 starters (the Red Stitch, the Unbroken, the Hired Gun) a
 | [the Scrap King](Class-Scrap-King.md) | medium | Make it out carrying 8 items | 8 |
 | [the Dawnfox](Class-Dawnfox.md) | hard | Revive 4 teammates, once 6 Hunters are open | 4 |
 | [the Silver Thief](Class-Silver-Thief.md) | medium | Land 12 hits while in the air | 12 |
-| [the Void Jester](Class-Void-Jester.md) | hard | Knock down 3 hunters while fused with your Boki, once 8 Hunters are open | 3 |
+| [the Void Jester](Class-Void-Jester.md) | hard | Knock down 3 hunters while your Boki is out, once 8 Hunters are open | 3 |
 | [the Novice Mage](Class-Novice-Mage.md) | easy | Stun 4 enemies | 4 |
 
 ### Mastery
@@ -96,7 +96,7 @@ Each Hunter has its own mastery goals, counted only in expeditions played as tha
 | the Red Stitch | Fly through 8 air rings | 8 | Glider: Paper Crane |
 | the Red Stitch | Make it out after being knocked down | 1 | Title: Last Arrow |
 | the Unbroken | Knock 10 enemies into walls | 10 | Colours: Forge Red |
-| the Unbroken | Knock down 2 hunters while fused | 2 | Emote: Chest Thump |
+| the Unbroken | Knock down 2 hunters while your Boki is out | 2 | Emote: Chest Thump |
 | the Unbroken | Open 8 chests | 8 | Banner: Broken Chain |
 | the Unbroken | Make it out after being knocked down | 1 | Title: the Unbowed |
 | the Hired Gun | Land 30 hits from 12 m or more | 30 | Colours: Dust Rider |
@@ -135,8 +135,8 @@ Each Hunter has its own mastery goals, counted only in expeditions played as tha
 | the Silver Thief | Land 25 hits while in the air | 25 | Colours: Midnight Silk |
 | the Silver Thief | Stun 6 enemies | 6 | Emote: Twirl |
 | the Silver Thief | Make it out carrying 6 items | 6 | Title: Light Fingers |
-| the Silver Thief | Knock down a hunter while fused | 1 | Glider: Dusk Moth |
-| the Void Jester | Knock down 4 hunters while fused | 4 | Skin: Void Bloom |
+| the Silver Thief | Knock down a hunter while your Boki is out | 1 | Glider: Dusk Moth |
+| the Void Jester | Knock down 4 hunters while your Boki is out | 4 | Skin: Void Bloom |
 | the Void Jester | Stun 15 enemies | 15 | Trail: Lantern Motes |
 | the Void Jester | Make it out carrying 8 items | 8 | Title: Swapkeeper |
 | the Void Jester | Fly through 15 air rings | 15 | Glider: Lantern Moth |
