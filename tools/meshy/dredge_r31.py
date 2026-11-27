@@ -362,6 +362,93 @@ def pack_ink(o):
     glb_add_clips.write(o.out, js, b)
 
 
+def seam_weld(o):
+    """r36, review D1 (black slit + ragged dark edges on the goo-side shoulder cap, held in Idle/Crouch y270) and D2
+    (torn blotches at the goo root, Attack f81-83): the socket dome (skin-native-dome) meets the skin on shared
+    positions, but its seam vertices carry other weights (dome: RightShoulder; skin: headfront/Head/RightShoulder), so
+    the seam opens in every clip (rest 0; Idle 8 cm, run 10 cm, Attack 27 cm) and the ink shell shows through. The
+    r28 weld keys on position AND weights, so the stretch metric never saw it. Fix: each dome seam vertex takes the
+    weights of the skin vertex it sits on; dome vertices within --ramp m of the seam fade from those to their own
+    (smoothstep). Skin weights are untouched (--skin-too: coincident skin vertices take their group mean). Every prim sharing the dome's weight accessor (its backing) follows."""
+    from scipy.spatial import cKDTree
+
+    js, b = glb_add_clips.read(o.inp)
+    prims = js["meshes"][0]["primitives"]
+    nb = len(js["skins"][0]["joints"])
+    names = [js["materials"][p["material"]]["name"] for p in prims]
+
+    def dense(pr):
+        J = acc(js, b, pr["attributes"]["JOINTS_0"]).astype(int)
+        W = acc(js, b, pr["attributes"]["WEIGHTS_0"]).astype(float)
+        D = np.zeros((len(J), nb))
+        np.add.at(D, (np.repeat(np.arange(len(J)), J.shape[1]), J.ravel()), W.ravel())
+        return D
+
+    from scipy.sparse import coo_matrix
+    from scipy.sparse.csgraph import connected_components
+
+    def put(pr, D, done):
+        J4 = np.argsort(-D, 1)[:, :4]
+        W4 = np.take_along_axis(D, J4, 1)
+        W4 /= W4.sum(1, keepdims=True)
+        J4[W4 == 0] = 0
+        ja = add_acc(js, b, J4.astype(np.uint16), 5123, "VEC4")
+        wa = add_acc(js, b, W4.astype(np.float32), 5126, "VEC4")
+        done[pr["attributes"]["WEIGHTS_0"]] = (ja, wa)
+
+    to, seen, done = [p for p, n in zip(prims, names) if n == "skin-native"], set(), {}
+    SP, SD = [], []
+    for pr in to:
+        if pr["attributes"]["WEIGHTS_0"] in seen:
+            continue  # (a backing: same vertices)
+        seen.add(pr["attributes"]["WEIGHTS_0"])
+        P = acc(js, b, pr["attributes"]["POSITION"]).astype(float)
+        D = dense(pr)
+        if o.skin_too:  # coincident skin vertices (UV splits) with other weights tear too: each takes the group mean
+            pq = cKDTree(P).query_pairs(2e-4, output_type="ndarray")
+            pq = pq[np.abs(D[pq[:, 0]] - D[pq[:, 1]]).sum(1) > 1e-3]
+            if len(pq):
+                _, lab = connected_components(coo_matrix((np.ones(len(pq)), (pq[:, 0], pq[:, 1])), (len(P), len(P))))
+                hit = np.zeros(len(P), bool)
+                hit[pq.ravel()] = True
+                M = np.zeros((lab.max() + 1, nb))
+                np.add.at(M, lab[hit], D[hit])
+                M /= np.bincount(lab[hit], minlength=len(M))[:, None].clip(1)
+                D[hit] = M[lab[hit]]
+                put(pr, D, done)
+                print("skin-native: %d coincident verts with split weights -> group mean" % hit.sum())
+        SP.append(P)
+        SD.append(D)
+    SP, SD = np.concatenate(SP), np.concatenate(SD)
+    tree = cKDTree(SP)
+    for pr, n in zip(prims, names):
+        if n != o.seam_mat or pr["attributes"]["WEIGHTS_0"] in done:
+            continue
+        P = acc(js, b, pr["attributes"]["POSITION"]).astype(float)
+        D = dense(pr)
+        d, i = tree.query(P)
+        seam = d < 2e-4
+        Ds = D.copy()
+        Ds[seam] = SD[i[seam]]
+        dd, k = cKDTree(P[seam]).query(P)
+        t = np.clip(dd / o.ramp, 0.0, 1.0)[:, None] if o.ramp > 0 else (dd > 0)[:, None].astype(float)
+        t = t * t * (3 - 2 * t)
+        N = (1 - t) * Ds[np.where(seam)[0][k]] + t * D
+        N[seam] = SD[i[seam]]
+        put(pr, N, done)
+        print(
+            "%s: %d verts, %d on the skin seam, %d in the %.2f m fade"
+            % (n, len(P), seam.sum(), (t[:, 0] < 1).sum() - seam.sum(), o.ramp)
+        )
+    for pr in prims:
+        w = pr["attributes"].get("WEIGHTS_0")
+        if w in done:
+            pr["attributes"] = dict(pr["attributes"], JOINTS_0=done[w][0], WEIGHTS_0=done[w][1])
+    b = compact(js, b)
+    js["buffers"][0]["byteLength"] = len(b)
+    glb_add_clips.write(o.out, js, b)
+
+
 def main():
     ap = argparse.ArgumentParser()
     grp = ap.add_mutually_exclusive_group(required=True)
@@ -371,6 +458,7 @@ def main():
     grp.add_argument("--backing", action="store_true")
     grp.add_argument("--abduct", type=float, help="r33: deg the goo shoulder turns out in --clips")
     grp.add_argument("--pack-ink", action="store_true", help="r33: no ink + backing on the pack base and open rim")
+    grp.add_argument("--seam-weld", action="store_true", help="r36: dome seam takes the skin's weights (D1/D2)")
     ap.add_argument("out")
     ap.add_argument("inp")
     ap.add_argument("meshy", nargs="?")
@@ -394,8 +482,17 @@ def main():
     ap.add_argument("--mat", default=PACK, help="--pack-export/--pack-tex: the material (r33: metal-fist)")
     ap.add_argument("--clips", default="run", help="--abduct: comma list of clips")
     ap.add_argument("--bone", default="RightArm", help="--abduct: the goo shoulder (Meshy Right = goo side)")
+    ap.add_argument("--seam-mat", default="skin-native-dome", help="--seam-weld: the material welded onto skin-native")
+    ap.add_argument("--skin-too", action="store_true", help="--seam-weld: coincident skin verts share their weights")
+    ap.add_argument("--ramp", type=float, default=0.05, help="--seam-weld: m the new weights fade over into the dome")
     o = ap.parse_args()
-    stages = (("pack_export", pack_export), ("pack_tex", pack_tex), ("backing", backing), ("pack_ink", pack_ink))
+    stages = (
+        ("pack_export", pack_export),
+        ("pack_tex", pack_tex),
+        ("backing", backing),
+        ("pack_ink", pack_ink),
+        ("seam_weld", seam_weld),
+    )
     run = next((f for k, f in stages if getattr(o, k)), abduct if o.abduct is not None else relax)
     run(o)
 
