@@ -312,7 +312,7 @@ func _mage_116(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: MageKit, home: Vec
 ## Items 116.2 and 116b: the bolt rate, and the Wirerun after a reset (further, charged quicker), press and hold.
 func _mage_116b(m: Match, P: Hunter, T: Hunter, K: MageKit, home: Vector3) -> void:
 	var pd: Dictionary = P.wpn
-	ok("LMB: the bolts 10% faster (0.72 x 0.9)", absf(float(pd["rate"]) - 0.648) < 0.001, str(pd["rate"]))
+	ok("LMB: the bolts another 15% faster (0.648 x 0.85)", absf(float(pd["rate"]) - 0.55) < 0.001, str(pd["rate"]))
 	var dd := K.dash_def()
 	var far := float(dd["dist"][1])
 	var hold := float(dd["hold"])

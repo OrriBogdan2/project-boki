@@ -12,6 +12,9 @@ still layer on top in Juice. Each is levelled to the old `hit` tick (-18 dB RMS)
   hit_blunt   blunt           a low thud with a dull crack, no ring
   hit_magic   magic           a glassy zap: bright inharmonic partials falling in pitch
   hit_thrown  thrown          a light double tick, a pebble and a small clink
+
+The hit-weight tiers' own confirm layers (ImpactWeight.of_hit, Juice.hit): hit_light (a small high tick) and
+hit_solid (a mid thud); the heavy tier's is hit_heavy (sfx_combat.py).
 """
 
 import os, sys
@@ -22,6 +25,10 @@ from sfx_lib import N, mix, at, kick, click, crack, ring, bpf
 
 S.reseed(5603)
 HIT_DB = -18.0  # dB RMS: the level of the shared `hit` tick these replace
+TIER_DB = {
+    "hit_light": -18.0,
+    "hit_solid": -17.0,
+}  # dB RMS: both inside the impact category (-16 dB +-3); the layer volumes are confirm_db
 
 
 def gun(i):
@@ -86,7 +93,30 @@ def thrown(i):
     )
 
 
+def tier_light(i):
+    """Light tier: a small high tick, short and thin (a poke)."""
+    d = 0.1
+    return mix(
+        click(0.002, 4500, 13000) * 1.5,
+        crack(d, 2800, 9000, 0.008) * 1.6,
+        kick(420 + 25 * i, 240, d, 0.004, 0.012, 1.6) * 0.2,
+    )
+
+
+def tier_solid(i):
+    """Solid tier: a mid thud with a dry crack, between the light tick and the heavy thwack."""
+    d = 0.2
+    return mix(
+        click(0.003, 2200, 9000) * 1.6,
+        kick(210 + 12 * i, 85, d, 0.01, 0.04, 2.8) * 0.75,
+        crack(d, 220, 1800, 0.022) * 2.2,
+    )
+
+
 def main():
+    # The heavy tier's take is `hit_heavy` (sfx_combat.py); these two sit under it in pitch and weight.
+    for name, make in (("hit_light", tier_light), ("hit_solid", tier_solid)):
+        S.C.takes(name, make, 3, rms_db=TIER_DB[name], peak_db=S.PEAK_DB)
     for name, make in (
         ("hit_gun", gun),
         ("hit_bow", bow),

@@ -84,9 +84,17 @@ def node_matrices(js):
 
     def walk(i, parent):
         nd = js["nodes"][i]
-        m = parent @ (np.array(nd["matrix"]).reshape(4, 4).T if "matrix" in nd else g.local_matrix(
-            {"rotation": nd.get("rotation", [0, 0, 0, 1]), "scale": nd.get("scale", [1, 1, 1]),
-             "translation": nd.get("translation", [0, 0, 0])}))
+        m = parent @ (
+            np.array(nd["matrix"]).reshape(4, 4).T
+            if "matrix" in nd
+            else g.local_matrix(
+                {
+                    "rotation": nd.get("rotation", [0, 0, 0, 1]),
+                    "scale": nd.get("scale", [1, 1, 1]),
+                    "translation": nd.get("translation", [0, 0, 0]),
+                }
+            )
+        )
         out[i] = m
         for c in js["nodes"][i].get("children", []):
             walk(c, m)
@@ -247,8 +255,10 @@ def root_skin(js, b, nb, NP, nd, h, a, z):
     sk = (SD[idx] * wgt[..., None]).sum(1) / wgt.sum(1, keepdims=True)
     out = nd.copy()
     out[m] = f[m, None] * sk + (1 - f[m, None]) * nd[m]
-    print("root skin: %d goo verts blended to shoulder skin weights (full to %.2f m, none past %.2f m), mean skin dist %.3f m"
-          % (m.sum(), a, z, d[:, 0].mean()))
+    print(
+        "root skin: %d goo verts blended to shoulder skin weights (full to %.2f m, none past %.2f m), mean skin dist %.3f m"
+        % (m.sum(), a, z, d[:, 0].mean())
+    )
     return out
 
 
@@ -287,8 +297,10 @@ def horn_side(MP, UV, img):
     c = px[v, u]
     cream = (c.min(1) > 0.55) & (c.max(1) - c.min(1) < 0.3)
     ax = np.median(MP, 0)
-    print("meshy part: %d verts, cream (horn) verts %d, their mean x-offset %.3f" % (
-        len(MP), cream.sum(), (MP[cream, 0] - ax[0]).mean() if cream.any() else 0))
+    print(
+        "meshy part: %d verts, cream (horn) verts %d, their mean x-offset %.3f"
+        % (len(MP), cream.sum(), (MP[cream, 0] - ax[0]).mean() if cream.any() else 0)
+    )
     return (1 if cream.any() and (MP[cream, 0] - ax[0]).mean() > 0 else -1), cream
 
 
@@ -304,8 +316,9 @@ def rigid_horns(NP, F, cream, nd):
     WF = wi[F]
     e = np.r_[WF[:, [0, 1]], WF[:, [1, 2]], WF[:, [2, 0]]]
     both = wc[e[:, 0]] & wc[e[:, 1]]
-    ncomp, lab = connected_components(coo_matrix((np.ones(both.sum()), (e[both, 0], e[both, 1])), (nw, nw)),
-                                      directed=False)
+    ncomp, lab = connected_components(
+        coo_matrix((np.ones(both.sum()), (e[both, 0], e[both, 1])), (nw, nw)), directed=False
+    )
     mixed = wc[WF].any(1) & ~wc[WF].all(1)
     root = np.zeros(nw, bool)
     root[WF[mixed].ravel()] = True
@@ -347,13 +360,17 @@ def goo(o):
     if o.extend > 0:
         cl, s = extend(cl, s, o.extend)
     NP, k, h = fit(MP, cl, s, o.width, side, cream)
-    print("centreline %d pts, length %.2f m, top %s tip %s; lateral scale %.3f" % (
-        len(cl), s[-1], np.round(cl[0], 2), np.round(cl[-1], 2), k))
+    print(
+        "centreline %d pts, length %.2f m, top %s tip %s; lateral scale %.3f"
+        % (len(cl), s[-1], np.round(cl[0], 2), np.round(cl[-1], 2), k)
+    )
     for y in np.arange(1.6, 0.3, -0.2):
         m = np.abs(NP[:, 1] - y) < 0.04
         if m.any():
-            print("  new goo y%.1f: wx %.2f wz %.2f (old wx %.2f)" % (
-                y, np.ptp(NP[m, 0]), np.ptp(NP[m, 2]), np.ptp(P[np.abs(P[:, 1] - y) < 0.04, 0])))
+            print(
+                "  new goo y%.1f: wx %.2f wz %.2f (old wx %.2f)"
+                % (y, np.ptp(NP[m, 0]), np.ptp(NP[m, 2]), np.ptp(P[np.abs(P[:, 1] - y) < 0.04, 0]))
+            )
 
     d, idx = cKDTree(P).query(NP, NEAR)
     wgt = 1.0 / np.maximum(d, 1e-3)
@@ -387,13 +404,20 @@ def goo(o):
         mat = json.loads(json.dumps(js["materials"][pr["material"]]))
         mat["name"] = "leather-horn"
         js["materials"].append(mat)
-        horn_pr = {"attributes": dict(attrs), "material": len(js["materials"]) - 1,
-                   "indices": add_acc(js, b, F[hf].astype(np.uint32).ravel(), 5125, "SCALAR", 34963)}
+        horn_pr = {
+            "attributes": dict(attrs),
+            "material": len(js["materials"]) - 1,
+            "indices": add_acc(js, b, F[hf].astype(np.uint32).ravel(), 5125, "SCALAR", 34963),
+        }
         print("horn prim: %d of %d goo tris (leather-horn)" % (hf.sum(), len(F)))
 
     tex = js["textures"][js["materials"][pr["material"]]["pbrMetallicRoughness"]["baseColorTexture"]["index"]]
-    users = [m for m in js["materials"] if m.get("pbrMetallicRoughness", {}).get("baseColorTexture", {}).get("index")
-             == js["materials"][pr["material"]]["pbrMetallicRoughness"]["baseColorTexture"]["index"]]
+    users = [
+        m
+        for m in js["materials"]
+        if m.get("pbrMetallicRoughness", {}).get("baseColorTexture", {}).get("index")
+        == js["materials"][pr["material"]]["pbrMetallicRoughness"]["baseColorTexture"]["index"]
+    ]
     assert len(users) == 1 + (horn_pr is not None), "goo texture shared"
     jb = io.BytesIO()
     im = img.resize((2048, 2048), Image.LANCZOS) if img.size[0] > 2048 else img
@@ -420,7 +444,12 @@ def main():
     ap.add_argument("meshy")
     ap.add_argument("--width", type=float, default=0.30, help="goo body width (m, horns excluded)")
     ap.add_argument("--top", type=float, default=1.70)
-    ap.add_argument("--push", type=float, default=0.0, help="m: lower goo path moved out from the thigh (0.04/0.07 tried: clips got worse)")
+    ap.add_argument(
+        "--push",
+        type=float,
+        default=0.0,
+        help="m: lower goo path moved out from the thigh (0.04/0.07 tried: clips got worse)",
+    )
     ap.add_argument("--bendy-horns", action="store_true", help="horns keep the goo's per-vertex weights (r29a)")
     ap.add_argument("--keep-horns", action="store_true")
     ap.add_argument("--section", action="store_true", help="r30: weights by the old goo slab at the same arc length")
