@@ -26,6 +26,7 @@ static func run(c) -> void:
 	h.heat_burn = 0.0
 	h.air_t = HunterFeel.glide_engage  # the 0.4 s hold served, so the whole window counts as overheated glide
 	h.inp["jump"] = false  # a scripted jump press in the air would arm the hold from zero; air_t serves it
+	h.inp["glide_press_only"] = false  # scripted held glide, not a player's second press (that one arms from the press)
 	for i in int(BURN_S / c.DT):
 		h.inp["glide"] = true
 		h.inp["move"] = Vector2.ZERO
