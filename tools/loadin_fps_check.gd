@@ -183,8 +183,9 @@ func _shot(ph: String) -> void:
 ## What this frame's sim and visual sections cost (Match.prof / Match.vprof are running totals), summed per phase.
 func _add_prof(ph: String) -> void:
 	var acc: Dictionary = phase_prof.get_or_add(ph, {})
-	for src in [Match.prof, Match.vprof, Prof.us]:
-		var pre := "v:" if src == Match.vprof else ("z:" if src == Prof.us else "")
+	for pair in [["", Match.prof], ["v:", Match.vprof], ["z:", Prof.us]]:
+		var pre: String = pair[0]
+		var src: Dictionary = pair[1]
 		for k in src:
 			var key := pre + String(k)
 			acc[key] = float(acc.get(key, 0.0)) + float(src[k]) - float(prev_prof.get(key, 0.0))
