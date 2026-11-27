@@ -160,10 +160,10 @@ static func _aim_at(m: Match, at: Vector3) -> Vector3:
 	return at + Vector3(MISS_OFF if human and _miss else 0.0, 0.9, 0)
 
 ## In the air below a ledge's top: jump again every other step, the wall kick up it (pressed from the
-## take-off on, or the mantle climbs a low cliff first and the kick never counts).
+## take-off on, or the mantle climbs a low cliff first and the kick never counts). Not inside the coyote window: a
+## press there is a plain jump off the edge, not the kick.
 static func _kick_up(m: Match, top_y: float) -> void:
 	var p := m.player
-	# (not while the coyote window is open: off the ledge a press there is a ground jump, not the kick's second press)
 	if not p.grounded and p.coyote <= 0.0 and p.pos.y < top_y - 0.2:
 		p.inp["jump"] = int(m.time / Match.DT) % 2 == 0
 

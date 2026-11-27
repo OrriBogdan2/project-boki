@@ -62,6 +62,7 @@ static var jump_trim_in := Vector2(float(_phys["jump_trim_in"][0]), float(_phys[
 static var jump_trim_to := Vector2(float(_phys["jump_trim_to"][0]), float(_phys["jump_trim_to"][1])) * body_scale
 
 
+
 static func rules() -> Dictionary:
 	return _rules
 
