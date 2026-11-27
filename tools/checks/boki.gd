@@ -12,4 +12,5 @@ const CHECKS := {
 	"--wisp-default-check": ["res://tools/wisp_default_check.gd", "wisp_default_check", null],  # wisps + C for all
 	"--wisp-summon-shots": ["res://tools/wisp_summon_shots.gd", "wisp_summon_shots", null],  # --shots-dir=<dir>
 	"--summon-end-sfx-check": ["res://tools/summon_end_sfx_check.gd", "summon_end_sfx_check", null],  # end warning
+	"--playstyle-check": ["res://tools/playstyle_check.gd", "playstyle_check", null],  # leaning, stat focus
 }
