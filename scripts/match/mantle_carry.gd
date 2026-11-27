@@ -91,7 +91,8 @@ static func suction(h: Hunter, hv: Vector2, dt: float) -> Vector2:
 		or h.stun_t > 0.0
 		or h.mantle_cd > 0.0
 		or not h.lfloat.is_empty()
-	):
+		or h.knock_t > 0.0
+	):  # (ours) a knock flies on its own: a pull would feed our wall slam, not the catch
 		return hv
 	var sp := hv.length()
 	if sp < 0.05 or not h.over_void():
