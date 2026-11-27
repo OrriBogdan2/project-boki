@@ -19,6 +19,7 @@ var told := {}                      # uid -> the starve stage we last warned abo
                                     # walking in and out of the house doesn't repeat a warning you've had)
 var arm_pick := ""
 var arm_tab := "Armor"
+var hall: LessonHall                # the Lessons hall's walk-up, panel and clock (lesson_hall.gd)
 
 const SEAT_R := 1.05
 const QUEUE_R := 2.2
@@ -47,6 +48,7 @@ func move_graveyard() -> void:
 
 func _init(home) -> void:
 	h = home
+	hall = LessonHall.new(home)
 	if not (Save.d.get("starve_told") is Dictionary):
 		Save.d["starve_told"] = {}
 	told = Save.d["starve_told"]
@@ -112,6 +114,7 @@ func _feeder(fid: String) -> Dictionary:
 func tick(d: float) -> void:
 	if not h.visit.is_empty():
 		return
+	hall.tick(d)
 	if not carry.is_empty():
 		_carry_tick()
 	for g in gnodes:
@@ -178,11 +181,13 @@ func find(p2: Vector2, bd: float) -> Dictionary:
 	var gp0 := gate_pos()
 	var gd := p2.distance_to(Vector2(gp0.x, gp0.z))
 	if gd < 1.3 and gd < bd: best = {"kind": "graveyard"}
-	return best
+	return best if not best.is_empty() else hall.find(p2)
 
 func label(it: Dictionary) -> String:
 	match String(it["kind"]):
 		"place":
+			if it.has("hall"):
+				return hall.label()
 			var ok := _place_ok(_carry_spot())
 			return ("Set the %s down here" % Econ.FEEDERS[carry["kind"]]["name"]) if ok else "Can't set it down here (open ground, away from other feeders)"
 		"feeder":
@@ -195,7 +200,7 @@ func label(it: Dictionary) -> String:
 
 func use(it: Dictionary) -> void:
 	match String(it["kind"]):
-		"place": place()
+		"place": hall.use() if it.has("hall") else place()
 		"feeder": open_feeder(it["f"])
 		"bowl": FeedBowl.drop(h, it["e"])
 		"grave": open_grave(it["g"])

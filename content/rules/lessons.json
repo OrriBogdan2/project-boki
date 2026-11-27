@@ -1,0 +1,45 @@
+{
+	"desc": "The Lessons hall (scripts/home/lesson_hall.gd): leave a Boki for a timed lesson; it comes back with a stat point or two and a new habit it shows while it stands about (KinHabit). Time runs on the clock, so a lesson finishes while the game is closed.",
+	"reach": 1.4,
+	"reach_doc": "Tiles beyond the hall's edge from which you can press E at it.",
+	"max_students": 2,
+	"max_students_doc": "Boki in class at once.",
+	"trust": 1.5,
+	"trust_doc": "Trust a finished lesson adds (Save.remember).",
+	"lessons": {
+		"song": {
+			"name": "Song",
+			"stat": "guard",
+			"habit": "sing",
+			"habit_text": "sings to itself",
+			"gain": 2,
+			"secs": 600,
+			"gems": 8,
+			"colour": "ffd36a",
+			"desc": "Steady breathing and a steady voice: +2 Guard, and it hums while it stands about."
+		},
+		"dance": {
+			"name": "Dance",
+			"stat": "speed",
+			"habit": "dance",
+			"habit_text": "dances on the spot",
+			"gain": 2,
+			"secs": 900,
+			"gems": 10,
+			"colour": "ff9ec4",
+			"desc": "Quick feet: +2 Speed, and it sways and hops when it feels like it."
+		},
+		"drawing": {
+			"name": "Drawing",
+			"stat": "focus",
+			"habit": "doodle",
+			"habit_text": "doodles in the dirt",
+			"gain": 2,
+			"secs": 720,
+			"gems": 8,
+			"colour": "7fc4ff",
+			"desc": "Patient hands: +2 Focus, and it scratches little pictures in the dirt."
+		}
+	},
+	"lessons_doc": "Per lesson: stat (a Care.STATS key) gets gain points through Care.add_stat (the stat budget still caps it); habit is a KinHabit pose it learns; secs is the lesson's length; gems is the fee."
+}

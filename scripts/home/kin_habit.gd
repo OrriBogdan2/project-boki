@@ -2,15 +2,17 @@ class_name KinHabit
 extends RefCounted
 ## A farm Boki's body language while it stands about (home.gd calls step() every frame for each one). Now and then
 ## it does its own little habit: a spin, a sniff at the ground, a happy hop, sitting down, looking around or a
-## wiggle, rare and staggered so it reads as character, not a dance routine. react() plays a pose on cue, even
-## while the Boki is held looking at something: ComeLook's curious sniff, shy hide and proud puff. A pose only
-## moves the "Body" node and puts it back when it ends, so feeding and training poses keep theirs.
+## wiggle, rare and staggered so it reads as character, not a dance routine. A Boki that took a lesson at the
+## Lessons hall (LessonHall) also sings, dances or doodles. react() plays a pose on cue, even while the Boki is
+## held looking at something: ComeLook's curious sniff, shy hide and proud puff. A pose only moves the "Body"
+## node and puts it back when it ends, so feeding and training poses keep theirs.
 
 const HABITS := ["spin", "sniff", "hop", "sit", "look", "wiggle"]
 const POSE_S := 1.2              # s one habit or reaction lasts
 const FIRST_S := [4.0, 12.0]     # s before a Boki's first habit
 const GAP_S := [7.0, 16.0]       # s between habits, times its personality's rest
 const CUT_S := 3.0               # s at least until the next habit after one was cut short
+const LEARNED_SHARE := 0.5       # share of a habit time a Boki that took lessons (rec["habits"]) plays one of those
 
 ## Plays `pose` now: one of HABITS, "hide" (ducks and turns away) or "puff" (swells up, chest out).
 static func react(k: Dictionary, pose: String) -> void:
@@ -33,6 +35,7 @@ static func step(k: Dictionary, n: Node3D, moving: bool, d: float) -> void:
 	if q <= 0.0 and float(k["qt"]) <= 0.0:
 		k["qt"] = randf_range(GAP_S[0], GAP_S[1]) * float(k.get("pers", {}).get("rest", 1.0))
 		q = POSE_S
+		_pick_learned(k)
 	if q <= 0.0:
 		return
 	q -= d
@@ -41,6 +44,12 @@ static func step(k: Dictionary, n: Node3D, moving: bool, d: float) -> void:
 	_pose(body, pose, 1.0 - clampf(q / POSE_S, 0.0, 1.0))      # 0 -> 1 over the pose
 	if q <= 0.0:
 		_rest(k, body)
+
+## A Boki with lessons behind it plays one of the habits it learned (LessonHall) about half the time.
+static func _pick_learned(k: Dictionary) -> void:
+	var known: Array = k.get("rec", {}).get("habits", [])
+	if not known.is_empty() and randf() < LEARNED_SHARE:
+		k["q_as"] = known.pick_random()
 
 ## Walking, napping, bathing or fetching stops a pose; being held stops only a habit (a cued reaction plays on).
 static func _cut_short(k: Dictionary, moving: bool) -> bool:
@@ -67,6 +76,18 @@ static func _pose(body: Node3D, pose: String, t: float) -> void:
 			body.rotation.y = sin(t * TAU) * 0.7
 		"wiggle":
 			body.rotation.z = sin(t * TAU * 3.0) * 0.18 * e
+		"sing":
+			body.rotation.x = -e * 0.3
+			body.rotation.z = sin(t * TAU * 2.0) * 0.12 * e
+			body.position.y = e * 0.05
+		"dance":
+			body.rotation.y = sin(t * TAU) * 0.9
+			body.rotation.z = sin(t * TAU * 2.0) * 0.2
+			body.position.y = absf(sin(t * TAU * 2.0)) * 0.15
+		"doodle":
+			body.rotation.x = e * 0.45
+			body.rotation.y = sin(t * TAU * 4.0) * 0.2 * e
+			body.position.y = -e * 0.05
 		"hide":
 			body.rotation.y = e * 2.4
 			body.scale = Vector3(1.0 + e * 0.1, 1.0 - e * 0.3, 1.0 + e * 0.1)
