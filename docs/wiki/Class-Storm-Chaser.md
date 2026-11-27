@@ -65,7 +65,7 @@ What the in-game kit card (K) says.
 | Dash: Wirerun | Tap for a short zap, hold to charge a longer streak. |
 | RMB: Storm Rod | Throw a copper rod: knocks back, adds Static, stuns on walls. |
 | E: Skycall | Drop a circle; 0.8s later lightning drags foes inside and grounds them. |
-| Hunter ultimate: Kitefall | Launch up, then strike down at your cursor, adding Static to everyone near. |
+| Hunter ultimate: Kitefall | Launch up, then strike down at your cursor; the enemy you hit spreads its Static + 1 to everyone near. |
 | Weapon: Coilcaster | Finger bolts every 0.65s; each hit adds 1 Static. |
 
 ### Abilities in full
@@ -81,7 +81,7 @@ What the in-game kit card (K) says.
 
 **Skycall (E, 10.5s cooldown).** Press to drop a circle at your cursor (up to 11m); keep holding and drag the mouse to set the drag, let go to commit (up to 1s): toward you pulls them in, away throws them out (a tap: away from you). A pillar of light narrows over it for 0.8s, then lightning strikes: 19.4 damage, 1 Static, and everyone inside is slid along the ground about 3.4m that way (slow, easing out over about 1s) and Grounded for 1.5s (no dashing). Charge orbs it catches are flung about 6m the same way and become yours; one dragged toward you within 9m flies to you and gives Wirerun back.
 
-**Kitefall (hunter ultimate, from level 6, 42s cooldown).** Crouch, then launch straight up and hang in the air, invulnerable, while a gold ring (8 body heights) shows where you can come down. Press again or attack to strike down as a bolt at your cursor inside the ring; with no second press you come down there by yourself after 2s. Everyone within 2.7m of the landing takes 9 and gains 1 Static, and if any of them has Static, all of them take the highest count among them first (lightning arcs between them). Landing it on an enemy hunter fills your Boki bond.
+**Kitefall (hunter ultimate, from level 6, 42s cooldown).** Crouch, then launch straight up and hang in the air, invulnerable, while a gold ring (8 body heights) shows where you can come down. Press again or attack to strike down as a bolt at your cursor inside the ring; with no second press you come down there by yourself after 2s. Everyone within 2.7m of the landing takes 9. The enemy you land on (the one with the most Static) gains 1 Static, and lightning jumps from them to everyone else in the circle, giving each one more Static than that enemy had: 3 gives +4, 0 gives +1 (up to 4). Landing it on an enemy hunter fills your Boki bond.
 
 ### Ranks
 
