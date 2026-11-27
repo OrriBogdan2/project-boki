@@ -644,17 +644,25 @@ func _breah() -> void:
 		T.hp < 10.0 and float(K.cd["rmb"]) > 1.0 and K.ch_rmb < 1.0,
 		"cd %.2f charges %.2f" % [float(K.cd["rmb"]), K.ch_rmb]
 	)
-	# the dunk
-	reset.call()
-	T.teleport(home + Vector3(1.3, 0, 0))
-	T.pos.y += 2.0
-	T.grounded = false
-	var dn0 := K.dunks
-	K._slam(0.5, true)
-	ok(
-		"rmb: a foe in the air is dunked", K.dunks == dn0 + 1 and T.vel.y < -10.0,
-		"dunks %d vy %.1f" % [K.dunks, T.vel.y]
-	)
+	# the spike (docs/SPIKE_SLAM.md): the tap slam drives a foe in the air down for +40%; the dive landing does not
+	for tap_slam in [true, false]:
+		reset.call()
+		T.teleport(home + Vector3(1.3, 0, 0))
+		T.pos.y += 2.0
+		T.grounded = false
+		T.vel = Vector3.ZERO
+		var dn0 := K.dunks
+		var hp0 := T.hp
+		K._slam(0.0 if tap_slam else 0.5, not tap_slam)
+		var took := hp0 - T.hp
+		if tap_slam:
+			ok("rmb spike: the tap slam drives a foe in the air down (vy -22) for +40%",
+				K.dunks == dn0 + 1 and T.vel.y <= -21.0 and took >= 14.0 * 1.4 - 0.5,
+				"dunks +%d vy %.1f took %.1f" % [K.dunks - dn0, T.vel.y, took])
+		else:
+			ok("rmb spike: the dive landing does not spike a foe in the air (a dive)",
+				K.dunks == dn0 and T.vel.y > -10.0 and took > 0.0,
+				"dunks +%d vy %.1f took %.1f" % [K.dunks - dn0, T.vel.y, took])
 	_dunk_no_knock(m, P, T, home, K, reset)
 	_hop_glide(m, P, home, K, reset)
 	_glide_slam(m, P, K, reset)
@@ -1416,10 +1424,9 @@ func _chain_over(m: Match, P: Hunter, K: DolmKit, far: Vector3, each: Callable) 
 	step(m, 1.0, each)
 	aim_at(P, far)
 
-## The Volcano slam has no push (Volcano Crusher: a centre stun and a Dunk, no knock): a grounded foe at the centre
-## stays put, and the Dunk over the abyss still adds its bonus without one.
+## The Volcano slam has no push (Volcano Crusher: a centre stun and a spike, no knock): a grounded foe at the centre
+## stays put. (The abyss extra of the old Dunk is gone: the tap slam's spike has none, docs/SPIKE_SLAM.md.)
 func _dunk_no_knock(m: Match, _P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Callable) -> void:
-	var W: World = m.world
 	reset.call()
 	T.teleport(home + Vector3(1.0, 0, 0))
 	var at0 := T.pos
@@ -1428,34 +1435,7 @@ func _dunk_no_knock(m: Match, _P: Hunter, T: Hunter, home: Vector3, K: DolmKit, 
 	step(m, 0.6)
 	var moved := Vector2(T.pos.x - at0.x, T.pos.z - at0.z).length()
 	var still := moved < 0.05 and T.hp < 200.0
-	ok("rmb: the slam pushes nobody (stun and Dunk only, no knock)", still, "moved %.2f m" % moved)
-	var hits := []
-	for void_under in [false, true]:
-		reset.call()
-		T.teleport(home + Vector3(1.3, 0, 0))
-		T.pos.y += 2.0
-		T.grounded = false
-		T.hp = 200.0
-		var saved := {}
-		if void_under:
-			for dx in range(-2, 3):
-				for dz in range(-2, 3):
-					var i := W.idx(int(floor(T.pos.x)) + dx, int(floor(T.pos.z)) + dz)
-					saved[i] = [W.kind[i], W.level[i]]
-					W.kind[i] = World.T_VOID
-		var dn0 := K.dunks
-		var hp0 := T.hp
-		K._slam(0.5, true)
-		hits.append([K.dunks == dn0 + 1, hp0 - T.hp, T.vel.y])
-		for i in saved:
-			W.kind[i] = saved[i][0]
-			W.level[i] = saved[i][1]
-	ok(
-		"rmb: the Dunk over the abyss still fires without the push, with its bonus",
-		hits[0][0] and hits[1][0] and hits[0][2] < -10.0
-				and hits[1][1] - hits[0][1] > float(K.slam_def()["dunk_void"]) * 0.8,
-		"land %.1f void %.1f" % [hits[0][1], hits[1][1]]
-	)
+	ok("rmb: the slam pushes nobody (stun and spike only, no knock)", still, "moved %.2f m" % moved)
 
 ## What the ground does to a chain: the abyss, height, walls, the map's edge.
 func _hop_terrain(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Callable, reach: float) -> void:
