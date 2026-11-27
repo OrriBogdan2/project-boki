@@ -281,6 +281,12 @@ static func food_short(rec: Dictionary) -> String:
 	return "Loves %s" % Care.food_name(String(likes.get("food", ""))).to_lower()
 
 
+static func treat_short(rec: Dictionary) -> String:
+	if not (rec.get("known", []) as Array).has("treat"):
+		return "Not found yet"
+	return "Loves %s" % GardenItems.item_name(Luck.favourite(rec)).to_lower()
+
+
 static func origin_short(rec: Dictionary) -> String:
 	var o: Dictionary = rec.get("origin", {}) if typeof(rec.get("origin", null)) == TYPE_DICTIONARY else {}
 	var w: Dictionary = o.get("where", {}) if typeof(o.get("where", null)) == TYPE_DICTIONARY else {}
@@ -344,6 +350,10 @@ static func looks(rec: Dictionary, parent: Control) -> void:
 	var toy := FavToy.of(rec)
 	if toy != "":
 		_row(parent, "Fav toy", String(HomeLayout.CATALOG[toy]["name"]), UI.INK, null, toy)
+	_row(parent, "Fav treat", treat_short(rec), UI.INK, null, "clover")
+	var luck := Luck.line(rec)
+	if luck != "":
+		_row(parent, "Luck", luck, UI.GOOD, null, "clover")
 	PrizeBoard.add_ribbons(parent, rec)
 
 

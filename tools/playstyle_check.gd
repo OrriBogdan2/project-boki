@@ -24,6 +24,7 @@ func ok(cond: bool, what: String) -> void:
 ## even personality, no stats and no affinity.
 func _rec(named: String) -> Dictionary:
 	var rec := Save.new_kin("zapple", named)
+	rec["uid"] = "check_" + named  # a fixed id: its luck rolls are seeded from it
 	rec["level"] = EvoPath.level(rec)
 	Care.ensure(rec)
 	Evo.ensure(rec)
@@ -260,7 +261,11 @@ func _focus_and_road() -> void:
 		PlayStyle.run_growth(lost, false, true)
 		PlayStyle.run_growth(won, true, true)
 	ok(
-		StatBudget.total(lost) < StatBudget.total(won) and StatBudget.total(won) == int(10 * units),
+		(
+			StatBudget.total(lost) < StatBudget.total(won)
+			and StatBudget.total(won) >= int(10 * units)
+			and StatBudget.total(won) <= int(15 * units)
+		),  # (a lucky point is worth one more)
 		"10 runs: got out %d points, did not %d" % [StatBudget.total(won), StatBudget.total(lost)]
 	)
 
@@ -286,6 +291,177 @@ func _wired() -> void:
 	ok(text == "+30 XP, bond unchanged, Power +2", "the results line names the stat: %s" % text)
 
 
+## Lucky gains (scripts/core/luck.gd, content/rules/luck.json): the base rate, the cap, treats and toys, and that
+## luck only ever speeds a gain that happened: no source, no point; the caps still hold.
+func _luck() -> void:
+	var r := Luck.rules()
+	var rec := _rec("Lucky")
+	var hits := 0
+	for i in 10000:
+		hits += Luck.bonus(rec, 1, 1)
+	var rate := float(hits) / 10000.0
+	ok(
+		absf(rate - float(r["base"])) < 0.012,
+		"10000 seeded rolls with no buff: %.1f%% lucky (base %d%%)" % [rate * 100.0, roundi(float(r["base"]) * 100.0)]
+	)
+	var from_nothing := 0
+	for i in 2000:
+		from_nothing += Luck.bonus(rec, 0, 5)
+	ok(from_nothing == 0, "no point gained, no lucky point: luck alone gives nothing")
+	var room0 := 0
+	for i in 2000:
+		room0 += Luck.bonus(rec, 3, 0, true)
+	ok(room0 == 0, "a stat with no room left takes no lucky extra")
+	var peak := 0.0
+	for tier in r["tiers"]:
+		rec["luck"] = {"add": float(r["tiers"][tier]), "left": 3}
+		rec["luck_toy"] = true
+		peak = maxf(peak, Luck.chance(rec, true))
+	ok(
+		(
+			is_equal_approx(peak, float(r["cap"]))
+			and float(r["tiers"]["rare_fav"]) > float(r["tiers"]["fav"])
+			and float(r["tiers"]["fav"]) > float(r["tiers"]["rare_liked"])
+			and float(r["tiers"]["rare_liked"]) > float(r["tiers"]["liked"])
+		),
+		(
+			"tiers rise to the rare favourite; with the toy too the chance stops at %d%% (peak %.2f)"
+			% [roundi(float(r["cap"]) * 100.0), peak]
+		)
+	)
+	rec.erase("luck_toy")
+	var rare_favs := 0
+	for i in 2000:
+		var o := {"uid": "fav%d" % i}
+		rare_favs += 1 if bool(GardenItems.item(Luck.favourite(o))["effect"]["rare"]) else 0
+	var share := float(rare_favs) / 2000.0
+	ok(
+		absf(share - float(r["rare_fav"])) < 0.05,
+		"%.0f%% of Boki have a rare favourite treat (data %d%%)" % [share * 100.0, roundi(float(r["rare_fav"]) * 100.0)]
+	)
+	_luck_treats()
+
+
+## Treats: tier, the buff that lasts a few gains, the favourite learned on the first try, the drop tables.
+func _luck_treats() -> void:
+	var rec := _rec("Picky")
+	var fav := Luck.favourite(rec)
+	var other := String(Luck.treats(false)[0] if Luck.treats(false)[0] != fav else Luck.treats(false)[1])
+	ok(
+		Luck.favourite(rec) == fav and Luck.tier(rec, other) == "liked",
+		"its favourite treat %s is fixed; another common treat is just liked" % fav
+	)
+	ok(
+		not (rec["known"] as Array).has("treat") and Luck.line(rec) == "",
+		"nothing is known or running before it eats one"
+	)
+	var first := GardenItems.apply(rec, other)
+	ok(
+		(
+			bool(first["ok"])
+			and not bool(first["love"])
+			and Luck.left(rec) == int(Luck.rules()["charges"])
+			and Luck.line(rec).contains("next 3")
+		),
+		"a liked treat starts a buff: %s" % Luck.line(rec)
+	)
+	var weak := Luck.chance(rec)
+	var loved := GardenItems.apply(rec, fav)
+	ok(
+		bool(loved["love"]) and bool(loved["new"]) and Luck.chance(rec) > weak and (rec["known"] as Array).has("treat"),
+		"its favourite is a bigger buff and is found out on the first try"
+	)
+	ok(
+		not bool(GardenItems.apply(rec, fav)["new"]) and AboutView.treat_short(rec).contains("Loves"),
+		"the second time it is not news; the card names it"
+	)
+	var strong := Luck.chance(rec)
+	GardenItems.apply(rec, other)
+	ok(is_equal_approx(Luck.chance(rec), strong), "a weaker treat never lowers a stronger buff")
+	for i in int(Luck.rules()["charges"]):
+		Luck.bonus(rec, 1, 1)
+	ok(
+		Luck.left(rec) == 0 and is_equal_approx(Luck.chance(rec), float(Luck.rules()["base"])),
+		"after its gains the buff is gone and the base chance is back"
+	)
+	var toy_rec := _rec("Player")
+	Luck.toy_played(toy_rec)
+	ok(
+		Luck.chance(toy_rec, true) > Luck.chance(toy_rec) and Luck.line(toy_rec).contains("expedition"),
+		"its favourite toy buffs the next expedition only"
+	)
+	PlayStyle.run_growth(toy_rec, true, true)
+	ok(not toy_rec.has("luck_toy"), "the toy buff ends with that expedition")
+	var d: Dictionary = GardenItems.rules()["treat_drop"]
+	ok(
+		(
+			GardenItems.treat_drop(0.0, 1) in Luck.treats(true)
+			and GardenItems.treat_drop(float(d["lair_rare"]) + 0.01, 1) in Luck.treats(false)
+			and GardenItems.treat_drop(0.99, 0) == ""
+		),
+		"a lair pile holds a rare treat on the lowest rolls, a common one above, none above that"
+	)
+	ok(
+		(
+			GardenItems.kill_treat("warden", 0.0, 0) in Luck.treats(true)
+			and GardenItems.kill_treat("warden", 0.09, 0) in Luck.treats(false)
+			and GardenItems.kill_treat("skitter", 0.0, 0) == ""
+		),
+		"a warden can drop a treat (rarely a rare one), a skitter never"
+	)
+	var all_known := true
+	for id in Luck.treats(false) + Luck.treats(true):
+		all_known = (
+			all_known
+			and Loot.VALUABLES.get(id, {}).get("bag", false)
+			and String(Loot.VALUABLES[id]["name"]) == GardenItems.item_name(id)
+		)
+	ok(all_known, "every luck treat is carried home as bag treasure under its own name")
+
+
+## Luck on real gains: a stat never passes its cap, an expedition and a bite both report their lucky points.
+func _luck_gains() -> void:
+	var rec := _rec("Fed")
+	rec["level"] = 1
+	var cap := StatBudget.cap(rec)
+	var lucky_seen := 0
+	for i in 30:
+		rec["luck"] = {"add": 0.4, "left": 99}
+		var pv := GardenItems.apply(rec, "thumpnut")
+		lucky_seen += int(pv.get("lucky", 0))
+	ok(
+		int(rec["stats"]["power"]) <= cap and StatBudget.total(rec) <= int(StatBudget.rules()["total_cap"]),
+		"30 lucky bites: Power %d never passes its cap %d" % [int(rec["stats"]["power"]), cap]
+	)
+	ok(lucky_seen > 0, "a lucky bite reports its extra points (%d seen)" % lucky_seen)
+	var run := _rec("Runner")
+	var plain := _rec("Plain")
+	var lucky := {}
+	var extra := 0
+	for i in 40:
+		run["luck"] = {"add": 0.4, "left": 99}
+		run["level"] = 12
+		plain["level"] = 12
+		PlayStyle.run_growth(run, true, true, lucky)
+		extra += (
+			int(lucky.get("power", 0))
+			+ int(lucky.get("focus", 0))
+			+ int(lucky.get("guard", 0))
+			+ int(lucky.get("speed", 0))
+		)
+		lucky.clear()
+		PlayStyle.run_growth(plain, true, true)
+	ok(
+		StatBudget.total(run) > StatBudget.total(plain) and StatBudget.total(run) <= StatBudget.cap(run) * 4,
+		(
+			"40 lucky expeditions: %d points against %d without luck, extras reported: %d"
+			% [StatBudget.total(run), StatBudget.total(plain), extra]
+		)
+	)
+	var text := ResultsBokiLines.gain_text(30, 0.0, {"power": 3}, {"power": 1})
+	ok(text.contains("Lucky! +2 instead of +1"), "the results line shows the lucky pop: %s" % text)
+
+
 func run(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
@@ -294,5 +470,7 @@ func run(main: Node) -> void:
 	_raised_differently()
 	_focus_and_road()
 	_wired()
+	_luck()
+	_luck_gains()
 	print("PLAYSTYLE DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)

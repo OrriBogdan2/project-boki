@@ -39,6 +39,7 @@ func _texts(n: Node) -> String:
 
 func run(m: Node, mode: String = "check") -> void:
 	main = m
+	Luck.rules()["base"] = 0.0  # exact bite numbers below; luck is tested in --playstyle-check
 	Save.no_write = true
 	Save.d = Save.fresh()
 	if mode == "shots":

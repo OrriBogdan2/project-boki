@@ -118,6 +118,61 @@ const VALUABLES := {
 		"bag": true,
 		"desc": "A calm little pearl. At home a Boki eats it for Focus."
 	},
+	"puffberry":
+	{
+		# luck treats (family luck in garden_items.json; Luck): a Boki eats one for a lucky streak of stat gains
+		"name": "Puffberry",
+		"col": Color("ff9fb8"),
+		"value": 30,
+		"rar": 2,
+		"bag": true,
+		"desc": "A soft, puffy berry. At home a Boki eats it for a lucky streak of stat gains."
+	},
+	"nutty_crisp":
+	{
+		"name": "Nutty Crisp",
+		"col": Color("d9a066"),
+		"value": 30,
+		"rar": 2,
+		"bag": true,
+		"desc": "A crunchy nut biscuit. At home a Boki eats it for a lucky streak of stat gains."
+	},
+	"dewdrop_jelly":
+	{
+		"name": "Dewdrop Jelly",
+		"col": Color("9fe0f0"),
+		"value": 30,
+		"rar": 2,
+		"bag": true,
+		"desc": "A wobbly jelly. At home a Boki eats it for a lucky streak of stat gains."
+	},
+	"sugar_twig":
+	{
+		"name": "Sugar Twig",
+		"col": Color("e8d8a0"),
+		"value": 30,
+		"rar": 2,
+		"bag": true,
+		"desc": "A twig dipped in sugar. At home a Boki eats it for a lucky streak of stat gains."
+	},
+	"moon_fig":
+	{
+		"name": "Moon Fig",
+		"col": Color("c9b6ff"),
+		"value": 90,
+		"rar": 4,
+		"bag": true,
+		"desc": "A rare fig that glows at night. A Boki that loves it gets the luckiest streak of all."
+	},
+	"starfruit_tart":
+	{
+		"name": "Starfruit Tart",
+		"col": Color("ffd86a"),
+		"value": 90,
+		"rar": 4,
+		"bag": true,
+		"desc": "A rare tart with a star on top. A Boki that loves it gets the luckiest streak of all."
+	},
 	"wayseed_glasswater":
 	{
 		"name": "Glasswater Wayseed",

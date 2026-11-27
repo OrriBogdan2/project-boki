@@ -20,7 +20,8 @@ const TICK_S := 0.6                   # s between the soft ticks while a held it
 const ITEM := {"stat": "garden_item_bite", "stat_all": "garden_item_bite", "xp": "garden_item_bite",
 		"token": "garden_item_token", "stay": "garden_item_lock", "sweet": "garden_item_snack",
 		"rinse": "garden_item_wash", "aura": "garden_item_aura", "loose": "garden_item_unwind",
-		"trait": "garden_item_nudge", "twin": "garden_item_nudge", "down": "garden_item_nudge"}
+		"trait": "garden_item_nudge", "twin": "garden_item_nudge", "down": "garden_item_nudge",
+		"luck": "garden_item_snack"}
 const CUPS := ["garden_cup_sprout", "garden_cup_bloom", "garden_cup_crown"]      # by cup round, garden_prizes.json
 
 static var heard := {}                # cue name -> times played, for the checks

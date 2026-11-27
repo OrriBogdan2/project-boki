@@ -424,11 +424,12 @@ func _kin_after(
 		xp = int(xp * 1.5)
 	if add_xp(k, xp, out) > 0:
 		out["levelup"] = true
-	var grew := PlayStyle.run_growth(k, won, lead)  # the stat points this expedition taught it, by its leaning
+	var lucky := {}
+	var grew := PlayStyle.run_growth(k, won, lead, lucky)  # the stat points this expedition taught it, by its leaning
 	if lead:
 		out["trust_delta"] = float(k["trust"]) - before
 	# what the results screen lists for each Boki you brought: the XP, bond and stat points just applied above
-	var gains := {"kin": k, "xp": xp, "bond": float(k["trust"]) - before, "stats": grew}
+	var gains := {"kin": k, "xp": xp, "bond": float(k["trust"]) - before, "stats": grew, "lucky": lucky}
 	out["kin_gains"] = out.get("kin_gains", []) + [gains]
 
 

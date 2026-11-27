@@ -35,6 +35,29 @@ static func kill_drop(table: String, roll: float, pick: int) -> String:
 	return String(d["any"][pick % d["any"].size()]) if id == "any" else id
 
 
+## The luck treat a lair pile holds beside its gear, or "" (content treat_drop): the rare roll comes first, so a
+## rare treat is the hard-to-reach prize. roll in 0..1, pick any int.
+static func treat_drop(roll: float, pick: int) -> String:
+	var d: Dictionary = rules()["treat_drop"]
+	if roll < float(d["lair_rare"]):
+		return _treat_pick(true, pick)
+	return _treat_pick(false, pick) if roll < float(d["lair_rare"]) + float(d["lair"]) else ""
+
+
+## The luck treat a kill drops, or "" (content treat_drop kill / kill_rare). roll in 0..1, pick any int.
+static func kill_treat(table: String, roll: float, pick: int) -> String:
+	var d: Dictionary = rules()["treat_drop"]
+	var chance := float((d["kill"] as Dictionary).get(table, 0.0))
+	if roll >= chance:
+		return ""
+	return _treat_pick(roll < chance * float(d["kill_rare"]), pick)
+
+
+static func _treat_pick(rare: bool, pick: int) -> String:
+	var pool := Luck.treats(rare)
+	return String(pool[pick % pool.size()])
+
+
 ## The stat bite that raises `stat` (an item of family stat whose effect is that stat), "" if none.
 static func bite_for(stat: String) -> String:
 	for it in rules()["items"]:
@@ -80,6 +103,10 @@ static func preview(rec: Dictionary, id: String, pick := "") -> Dictionary:
 	match String(e["kind"]):
 		"stat":
 			return _stat(rec, String(e["stat"]), int(e["n"]))
+		"luck":
+			return _yes(
+				"lucky chance up for its next %d stat gains (more if it loves it)" % int(Luck.rules()["charges"]), {}
+			)
 		"xp":
 			return _xp(rec, int(e["n"]))
 		"token":
@@ -112,6 +139,11 @@ static func apply(rec: Dictionary, id: String, pick := "") -> Dictionary:
 	if not pv["ok"]:
 		return pv
 	var d: Dictionary = pv["deltas"]
+	var kind := String(item(id)["effect"]["kind"])
+	if kind == "luck":
+		pv.merge(Luck.eat(rec, id), true)
+	elif kind == "stat":
+		_lucky(rec, String(item(id)["effect"]["stat"]), pv)
 	if d.has("xp"):
 		Game.add_xp(rec, int(item(id)["effect"]["n"]), {})  # levels and forms follow
 	else:
@@ -130,6 +162,17 @@ static func after(rec: Dictionary, pv: Dictionary) -> Dictionary:
 	var then := rec.duplicate(true)
 	_write(then, pv["deltas"])
 	return then
+
+
+## A stat bite's lucky roll: each point it gives may be worth one more (Luck), up to the room the stat has left.
+static func _lucky(rec: Dictionary, stat: String, pv: Dictionary) -> void:
+	var span: Array = pv["deltas"]["stats." + stat]
+	var gain := int(span[1]) - int(span[0])
+	var extra := Luck.bonus(rec, gain, StatBudget.room(rec, stat) - gain)
+	if extra > 0:
+		span[1] = int(span[1]) + extra
+		pv["lucky"] = extra
+		pv["text"] += "  %s (%d to %d)" % [Luck.words(extra), int(span[0]), int(span[1])]
 
 
 static func _write(rec: Dictionary, deltas: Dictionary) -> void:
@@ -295,12 +338,13 @@ static func feed(rec: Dictionary, id: String) -> Dictionary:
 	var redraw := String(item(id)["effect"]["kind"]) in ["rinse", "sweet", "aura"]
 	return {
 		"ok": pv["ok"],
-		"love": false,
+		"love": pv.get("love", false),
 		"hate": false,
 		"full": false,
-		"new": false,
+		"new": pv.get("new", false),
 		"lean": "",
 		"id": id,
+		"lucky": pv.get("lucky", 0),
 		"text": "%s: %s" % [item_name(id), pv["text"]],
 		"look": redraw,
 		"deltas": pv["deltas"]

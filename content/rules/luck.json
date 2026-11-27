@@ -1,0 +1,15 @@
+{
+	"desc": "Lucky stat gains (scripts/core/luck.gd, briefs/design/BOKI_PLAYSTYLE_GROWTH.md 'Lucky bonus', owner 2026-11-27). Every whole point a Boki gains from an expedition (PlayStyle.run_growth) or a stat bite (GardenItems.apply) rolls a lucky chance to be worth +2. Luck only speeds a gain that already happened: it never adds a point on its own and never passes a stat cap, the total cap or a grade.",
+	"base": 0.08,
+	"base_doc": "Lucky chance per point gained with no buff (0..1).",
+	"cap": 0.5,
+	"cap_doc": "Highest lucky chance with every buff on.",
+	"tiers": {"liked": 0.12, "rare_liked": 0.18, "fav": 0.25, "rare_fav": 0.4},
+	"tiers_doc": "Chance added for a while by a luck treat (items of family luck): liked = any treat, rare_liked = a rare treat it has no special love for, fav = its favourite treat, rare_fav = its favourite when that treat is a rare one.",
+	"charges": 3,
+	"charges_doc": "Stat gains (a bite eaten, or one stat's growth from an expedition) a treat's buff lasts for. A stronger treat replaces a weaker one, a weaker one never lowers a stronger one.",
+	"toy": 0.06,
+	"toy_doc": "Chance added for the next expedition after a finished play at the Boki's favourite toy (FavToy). It ends when that expedition has paid its growth.",
+	"rare_fav": 0.25,
+	"rare_fav_doc": "Share of Boki whose hidden favourite treat is a rare one (picked from the Boki's id, so it never changes)."
+}

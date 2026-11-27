@@ -41,6 +41,7 @@ func _snap(rec: Dictionary) -> String:
 func run(m: Node) -> void:
 	FarmUnlocks.rules()["base_mode"] = false  # walks the old farm (base_mode is the shipped default)
 	main = m
+	Luck.rules()["base"] = 0.0  # exact bite numbers below; luck is tested in --playstyle-check
 	Save.no_write = true
 	Save.d = Save.fresh()
 	_rules()
@@ -67,7 +68,7 @@ func _rules() -> void:
 		fine = fine and not seen.has(id) and it["use"] in ["eaten", "worn"] and not (it["sources"] as Array).is_empty()
 		fine = fine and it.has("name") and it.has("family") and (it["effect"] as Dictionary).has("kind")
 		seen[id] = true
-	ok(seen.size() == 29 and fine, "29 items, unique ids, each with a name, family, use, one effect and sources")
+	ok(seen.size() == 35 and fine, "35 items, unique ids, each with a name, family, use, one effect and sources")
 	var q := false
 	var rec := _boki("cindle", 3, "power")
 	for id in GardenItems.ids():

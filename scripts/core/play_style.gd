@@ -74,8 +74,9 @@ static func focus(rec: Dictionary) -> Dictionary:
 
 
 ## The stat growth of one expedition it went on (lead: it was the first Boki you brought). Returns
-## {stat: whole points gained}; parts of a unit carry over to its next expedition.
-static func run_growth(rec: Dictionary, won: bool, lead: bool) -> Dictionary:
+## {stat: whole points gained, lucky extras included}; parts of a unit carry over to its next expedition.
+## `lucky` (if given) gets {stat: extra points} for the gains Luck made worth more.
+static func run_growth(rec: Dictionary, won: bool, lead: bool, lucky := {}) -> Dictionary:
 	var tune: Dictionary = rules()["run_growth"]
 	var units := float(tune["extracted"] if won else tune["lost"])
 	if not lead:
@@ -89,7 +90,12 @@ static func run_growth(rec: Dictionary, won: bool, lead: bool) -> Dictionary:
 		owed[stat] = maxf(0.0, due - whole)
 		var gained := Care.add_stat(rec, stat, whole) if whole > 0 else 0
 		if gained > 0:
-			out[stat] = gained
+			var extra := Luck.bonus(rec, gained, StatBudget.room(rec, stat), true)
+			rec["stats"][stat] = int(rec["stats"][stat]) + extra
+			if extra > 0:
+				lucky[stat] = extra
+			out[stat] = gained + extra
+	Luck.end_run(rec)
 	return out
 
 
