@@ -36,9 +36,6 @@ var arcs := {}  # mode -> [air steps, apex m] of the running jump
 var m: Match  # the match mode under test (one Hunter._physics)
 var h: Hunter
 
-var m: Match
-var h: Hunter
-
 
 func ok(cond: bool, what: String) -> void:
 	print("FCHECK %s %s" % ["ok  " if cond else "FAIL", what])
