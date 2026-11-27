@@ -113,8 +113,8 @@ plays today's clip, so nothing changes until a Hunter's clips land (`WardenNativ
 | `hit` | one-shot when a stagger lands (state `hit_t` jumps back with `hit_k` at Oomph.HEAVY_FLINCH; a chip hit only leans) and pushes the body against its facing (struck from the front) | the loop clip plays on |
 | `hit_back` | the same, when the hit pushes the body the way it faces (struck from behind); a Hunter with one of the two plays it for both | `hit` |
 | `land` | one-shot on a hard landing (`WardenClips.FEEL` landing >= `LAND_MIN`) | the loop clip |
-| `dash` | while the state `rolling` (a dash or kit rush) lasts | the air or ground clip |
-| `glide` | while `gliding` (loops) | `jump` |
+| `dash` | while the state `rolling` (a dash or kit rush) lasts (blends in over 0.25 s) | the air or ground clip |
+| `glide` | while `gliding` (loops; opens at once, lets go over 0.2 s) | `jump` |
 | `downed` | while the knocked-down beat runs (`fall` >= 0; holds its last frame) | the loop clip |
 | `stomp` | while the stomp cycle runs (`stomp` >= 0; loops) | the loop clip |
 Swing, cast, `hit` and `land` are one-shots: they own the body for their length (a new one restarts a clip once 60% is
@@ -185,6 +185,12 @@ Meshy's files (`tools/meshy/sable_hybrid/README.md`: pistol/hand lock, coat/arm 
 contact-band smoothing, coat chains hung by gravity with floor and thigh collision). Torn frames (glbstretch, 15 fps):
 raw Meshy rig 100% Attack, 93% Jump, 100% Crouch, 89% run, 67% walk; this file 0% in all six clips.
 Game states with no Meshy clip (fall, land, glide, climb, mantle, hit, emote, aim twist) play the nearest of the six.
+Strafing and back-pedalling: Meshy has one forward run, so `WardenNativeTwist` turns the hips to the way he goes (the torso bone takes
+the turn back in world space, through the bent spine between, so the body stays on the aim without tipping) up to `WardenClips.TWIST_MAX` (~96 deg). More than 120 deg off the aim (it reverses at 130
+and goes forwards again inside 110: no flicker at the edge) the run clip plays in reverse instead, the rate keeping its stride matched to the
+ground speed, and the legs turn only by what is left to dead behind the aim (none at 180 deg, from either side). The clip's direction
+(`WardenNativeTwist.dir`) eases between +1 and -1, so the crossing is a blend. `--native-upper-shots --mode=back` prints STRIDE (the planted foot's
+sweep against his travel, 1 = along it, -1 = backwards to it).
 
 ## Native hunter pack (Sparkle, Tenzo, Cinder, Kael, Motley, Meeko)
 Their rigged Meshy files carry 300k-tri meshes. `tools/meshy/native_hunters/pack.sh <art> <rigged.glb> <decimated.glb> [clip glbs]`
