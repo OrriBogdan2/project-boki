@@ -87,6 +87,28 @@ them; a prop named in the species' `GLOW_PIECES` wears the glow (Lunowl's dazzle
 `boki_coat` (atlas, ink), `boki_glow` (the species' glow), `boki_face` (lids, brows, mouth), `boki_eye`. Face LODs
 stay off (`FACE_LOD_BIAS`): Godot cuts them from the rest pose, where the lids lie folded.
 
+**The face overlay is per species** (`BokiRig.uses_overlay`, owner 11-24: the overlay eyes read as glued on). A species
+not listed in `content/rules/boki_eyes.json` drops the Face mesh at load and shows the coat's own painted eyes;
+expressions, blinks and eye looks stop with it. The 17 listed species have no usable eyes of their own under the
+overlay (most had them painted out by `boki_scan.py`'s `"cover"`) and keep the overlay until their eye-paint pass
+lands (rebake with `cover` 0 where the scan has eyes, else a Meshy eye retexture): remove the id from the list in that
+pass. `BokiRig.face_overlay = true` is the global override that brings the overlay back on every species (the face
+checks turn it on). `face.py` and the Face in each glb stay. `--boki-eyes-shots --shots-dir=<dir>` (GPU) renders each
+species' head as the game builds it, with the overlay forced on, and the match camera.
+
+**Eye-paint pass** (Meshy paints, no Blender painting): cindle and puddlet got eyes from a Meshy retexture on the
+coat's own UVs (`tools/boki/eye_blend.py` keeps the live coat and takes only the Meshy eye patch). Gibbelle,
+goliathite, floenatee, lilybara, burrlet, pebbit, selenfin and zapple got theirs from a Meshy image edit of a head
+render: `tools/boki/eye_headcam.py` (Blender renders only) draws the coat's head flat-lit from the front and both
+sides, Meshy repaints just the eyes from the dex face, and `tools/boki/eye_reproject.py` puts back only the texels the
+edit changed (`tools/boki/swap_atlas.py` puts the atlas into the glb). Sentrikat's come from its coat-UV
+retexture through `eye_blend.py --extract`: only the retexture's eye texels (colour far from its own skin round the
+eye, weighted by 3D distance from the eye, never filtered in UV space, as the atlas has one island per triangle), and
+its old painted eye blobs filled with the dark of its eye patch first. Still listed: hoarheron (its eye edit scored
+6.5: the side eye smears on 94 texels across the head), and duskapi, moundvark, murmurling, nacrolin, threadwyrm, whose
+head gets under 40 atlas texels across (gibbelle 284): too few for a readable eye
+until a UV pass gives the head more of the atlas.
+
 ### A summoned Boki (out of the wisp)
 
 The Boki bursting out of its wisp (decision 0039) is the same `Kin` and rig, so it plays the clips above. The burst
