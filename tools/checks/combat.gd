@@ -5,6 +5,9 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	"--air-rmb-feel-check": ["res://tools/air_rmb_feel_check.gd", "air_rmb_feel_check", null],  # Kael jump -> RMB
+	# the glider opens after any attack or ability, LMB or not (input buffer, every hunter)
+	"--glide-after-attack-check": ["res://tools/glide_after_attack_check.gd", "glide_after_attack_check", null],
 	# a blast: falloff curve by distance, no damage through rock, the armour ring pitched by the shell left
 	"--blast-parity-check": ["res://tools/blast_parity_check.gd", "blast_parity_check", null],
 	"--move-speed-check": ["res://tools/move_speed_check.gd", "move_speed_check", null],  # run, walk, crouch per Hunter
@@ -31,6 +34,8 @@ const CHECKS := {
 	"--native-hitbox-check": ["res://tools/native_hitbox_check.gd", "native_hitbox_check", null],
 	"--native-hitbox-shots": ["res://tools/native_hitbox_shots.gd", "native_hitbox_shots", null],
 	"--boss-check": ["res://tools/boss_check.gd", "boss_check", null],  # boss lairs: dial, wards, phases, the Rare Egg
+	# Anti-Heal leaves 30% of a heal (content/rules/combat.json)
+	"--anti-heal-check": ["res://tools/anti_heal_check.gd", "anti_heal_check", null],
 	"--bot-spacing-shots": ["res://tools/bot_spacing_shots.gd", "bot_spacing_shots", null],  # --shots-dir=<dir>, GPU
 	"--stolen-extract-check": ["res://tools/stolen_extract_check.gd", "stolen_extract_check", null],  # extract, saves
 }

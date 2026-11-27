@@ -314,7 +314,6 @@ func _draw_parts() -> void:
 		dmg_dir.draw(c, m, sz)
 		if not p.riding:
 			_draw_kit(sz, p)
-			buffs.draw(self, p, sz)       # after the kit tips so they never cover it
 		elif not map_open() and p.rocket == null:
 			_draw_ship_prompt(sz)
 		if (p.dropping or p.rocket != null) and not map_open():
@@ -364,6 +363,7 @@ func _draw_world_labels() -> void:
 	_draw_exit_labels()
 	_draw_lair_labels()
 	CampMark.world(self)
+	MapMarks.world(self)
 	_draw_truce_marks()
 	_draw_wisp_rings()
 	RecastCue.world(self, cam, m.player)      # two-step abilities: the recast marker and the payoff burst
@@ -699,6 +699,8 @@ func _draw_minimap(sz: Vector2) -> void:
 	HeartHud.minimap(self, inner, to_map, on_map)
 	NestMap.minimap(self, to_map, on_map, hold)
 	CampMark.minimap(self, to_map, on_map)
+	if m.player:
+		MapMarks.minimap(self, to_map, on_map, hold)
 	WaysOutMap.minimap(self, inner, to_map, on_map)
 	if m.zone: m.zone.minimap(self, to_map, on_map)
 	if m.spawn_plan and full_map and m.player:

@@ -31,6 +31,8 @@ extends RefCounted
 ##      a common Boki has none, and the match (first sight), Capture (claim) and EggHatch (hatch) play them
 ##  11. Meeko's Hearth Call channel loop (tend_call_loop): it plays on her and quieter on the ally, one of each
 ##      even when X is pressed again, and it is gone within one frame of every way the channel can end
+##  11. the hit confirm follows the hit-weight tier (tools/hit_tier_sfx_check.gd): one hit per tier lands and plays
+##      hit_light, hit_solid or hit_heavy by ImpactWeight.of_hit, three different sounds, each gapped
 ## Reads the files (and, for the Hearth Call loop, one short training match); never touches the save.
 ##  11. the rival-cast layer (HostileCue): every Hunter's E and R start it once; a rival's cast plays it, an ally's
 ##      does not, nor a rival's past its 30 m; E, R and X (UltCue) and other games' casts are wired to it
@@ -120,7 +122,7 @@ const WIRED := {
 	"boki_fuse_end": ["match/merge_xform.gd"],
 	"boki_fuse_tired": ["match/merge_xform.gd"],
 	"boki_unfuse": ["match/merge_xform.gd"],
-	"boki_eat": ["home/home.gd"],
+	"boki_eat": ["home/home.gd", "home/base_feed.gd"],
 	"boki_sleep": ["home/home.gd", "home/kin_indoors.gd"],
 	"wisp_burst": ["match/kin_summon.gd"],
 	"wisp_fold": ["match/kin_summon.gd"],
@@ -175,6 +177,7 @@ func run(main: Node) -> void:
 	load("res://tools/ability_beat_sfx_check.gd").new().run(main, ok)
 	await _held_fire(main)
 	_hit_ticks()
+	await load("res://tools/hit_tier_sfx_check.gd").new().run(main, ok)
 	_boss_moves()
 	_cc_cues()
 	_inv_cues()
