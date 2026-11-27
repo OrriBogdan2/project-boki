@@ -1,11 +1,15 @@
 extends RefCounted
 ## --farm-3d-sizes --shots-dir=<dir> [--view=1920x1080]: the real farm scene with five hunters (Albert is the farm's own
 ## avatar; Kael, Sparkle, Meeko and Cinder are built as a match builds a hunter) at their match size (own model size x
-## Hunter.VIS_SCALE x body.match_k: the reference's height) and the four Boki, all idle, HUD, marks and particles hidden.
+## Hunter.VIS_SCALE x body.match_k: the reference's height) and the four Boki, all idle, HUD, marks and particles
+## hidden.
 ## Writes 1_farm_cam.png (the farm's close third-person view), 2_eye_row.png (eye level, one row), 3_mid.png and
 ## heights.json (metres as drawn: crown and with extras, per hunter and per Boki). Needs a renderer for the stills.
 
 const WARDEN_SKIN := preload("res://tools/warden_skin.gd")
+const NOT_BODY := [
+	"Glider", "TeamRing", "Companion", "prop_", "Gun", "Shield", "Halo", "hammer", "Bloom", "Shell", "Aura"
+]
 const FPS := 30
 const ISLAND_SEED := 11
 const DAY_T := 0.72  # farm clock: golden hour
@@ -26,7 +30,7 @@ const BOKI_FRONT := 2.2  # m the Boki stand nearer the camera than the hunters
 const FACE_BOKI := 0.18  # rad: a small turn either side of the camera, so it is not stiff but the face reads
 const CLEAR_MAX_W := 9.0  # m: wider meshes are the ground
 const CLEAR_MIN_H := 1.0  # m: lower meshes are grass and flowers
-const CLEAR_HALF_W := 6.0  # m either side of the camera-to-group line that scenery is hidden in (the row is 11.6 m wide)
+const CLEAR_HALF_W := 6.0  # m either side of the camera-to-group line that scenery is hidden in
 const EYE_FOV := 40.0
 const EYE_DIST := 15.0  # m from the row's middle
 const EYE_YAW := 0.5  # rad: the 3/4 view, the camera swung round to Albert's end of the row
@@ -276,11 +280,6 @@ func _write_heights() -> void:
 	print("FARM3D ", JSON.stringify(out))
 
 
-const NOT_BODY := [
-	"Glider", "TeamRing", "Companion", "prop_", "Gun", "Shield", "Halo", "hammer", "Bloom", "Shell", "Aura"
-]
-
-
 ## Height (m above the model's feet, as drawn) of the top of a Boki's meshes: its "Body" mesh only, or (`anything`)
 ## every visible mesh that is not a prop, ring or pet (ears and tufts in).
 func _top(model: Node3D, anything: bool) -> float:
@@ -298,7 +297,7 @@ func _top(model: Node3D, anything: bool) -> float:
 	return snappedf(top, 0.01)
 
 
-## The posed vertices of a hunter's body meshes (a skinned mesh's real pose, not its bind box), no weapon, glider or pet.
+## The posed vertices of a hunter's body meshes (a skinned mesh's real pose, not its bind box), no weapon or pet.
 func _body_points(model: Node3D) -> PackedVector3Array:
 	var out := PackedVector3Array()
 	for n in model.find_children("*", "MeshInstance3D", true, false):
@@ -382,7 +381,7 @@ func _clear_spot(near: Vector3) -> Vector3:
 	var best := near
 	var best_n := 999999
 	var wd = h.world
-	var objs: Array[Vector2] = []  # buildings, signs, fences, the portal: nodes standing on the farm, and its named spots
+	var objs: Array[Vector2] = []  # buildings, signs, fences, the portal and the farm's named spots
 	for c in h.get_children():
 		if (
 			c is Node3D
@@ -411,7 +410,8 @@ func _clear_spot(near: Vector3) -> Vector3:
 					elif dz < -3:
 						n += 4 if bad else 0  # the background: trees there only clutter
 					elif dz > 4:
-						n += (6 if bad else 0) + (1 if off else 0)  # where the cameras stand
+						n += (6 if bad else 0)  # where the cameras stand
+						n += 1 if off else 0
 			for o in objs:
 				if o.x > cx - 12.0 and o.x < cx + 12.0 and o.y > cz - 10.0 and o.y < cz + 17.0:
 					n += 40

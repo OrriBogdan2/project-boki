@@ -8,7 +8,8 @@ const HEAD_R := 0.3  # m (at the drawn size) round the head's axis that the crow
 const HEAD_ROOM := 0.35  # m (at the drawn size) over the head bone that the crown is looked for in
 
 
-## The world y of the top of the skull of `model` drawn at scale `s` (`top`: the highest body point, used if no head bone): the highest 2 cm slice, in a column round the head bone, that is at least
+## The world y of the top of the skull of `model` drawn at scale `s` (`top`: the highest body point, used if there is
+## no head bone): the highest 2 cm slice, in a column round the head bone, that is at least
 ## CROWN_KEEP as wide as the head (the middle 90% of its points, so a lone spike or ear tip does not widen it).
 static func crown(model: Node3D, pts: PackedVector3Array, s: float, top: float) -> float:
 	var sk := _skeleton(model)
