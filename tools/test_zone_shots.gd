@@ -13,9 +13,9 @@ const SETTLE_MAX := 300  # frames at most to wait for the camera to stop easing 
 const SETTLE_PX := 0.5  # the Hunter's screen box moved less than this between frames: the camera has settled
 const FIGHT_S := 2.0  # s of match time with a dummy hit every 0.5 s before the fight shot
 const OWN_DRAWN := ["plate", "grip_icons"]  # your own plate and its grip icons: part of your Hunter, by design
-const STATIONS := ["bench", "two-step", "toast", "drills"]  # the popups to open one at a time (station())
+const STATIONS := ["bench", "toast", "drills"]  # the popups to open one at a time (station())
 const STATION_GROUP := {
-	"bench": "ParityBench/", "two-step": "RecastDrill/", "toast": "toast #", "drills": "MoveDrills/"
+	"bench": "ParityBench/", "toast": "toast #", "drills": "MoveDrills/"
 }  # (the group name each station's popup shows up under)
 const HUD := "Hud"
 const FPS := "fps_counter"  # the frame-rate readout's group (Overlay.fps_lbl, on its own layer above the match)
@@ -79,8 +79,8 @@ static func popups(gs: Dictionary) -> Array:
 
 
 ## The pairs the owner reported (11-26), each judged on its own so a regression names them: the frame-rate counter
-## against every popup, and the minimap against every popup (the practice stations' above all, the Two-step drill
-## among them). Each entry is [a, b, overlaps].
+## against every popup, and the minimap against every popup (the practice stations' above
+## all). Each entry is [a, b, overlaps].
 static func pairs(gs: Dictionary) -> Array:
 	var out: Array = []
 	var map: Array = gs.get("drawn minimap", [])
@@ -169,21 +169,12 @@ func _zone(size: Vector2i) -> void:
 	m.arena.open_menu()
 	await _stage(m, "menu", size)
 	m.arena.close_menu()
-	m.arena.set_arch(recast_hero())
 	await _popups(m, size, "zone")
 	m.queue_free()
 	await main.get_tree().process_frame
 
 
-## A Hunter with a two-step ability, so the Two-step drill has something to show.
-static func recast_hero() -> String:
-	for a: String in Arch.ids():
-		if not RecastDrill.slots(a).is_empty():
-			return a
-	return ""
-
-
-## Opens (or closes) one popup of the practice stations: the parity bench, the Two-step drill, a toast, and the
+## Opens (or closes) one popup of the practice stations: the parity bench, a toast, and the
 ## Drills banner (it runs on once started: the Training Area's drills only).
 static func station(m: Match, id: String, on: bool) -> void:
 	var pr := Practice.of(m)
@@ -191,12 +182,9 @@ static func station(m: Match, id: String, on: bool) -> void:
 		"bench":
 			if pr.bench.is_open() != on:
 				pr.bench.toggle()
-		"two-step":
-			if pr.recast.is_open() != on:
-				pr.recast.toggle()
 		"toast":
 			if on:
-				m.hud.toast("Practice stations: bench, Two-step drill, Drills", Color("f3eee2"))
+				m.hud.toast("Practice stations: bench, Drills", Color("f3eee2"))
 		"drills":
 			if on and pr.drills and pr.drills.state == MoveDrills.State.OFF:
 				pr.drills.press()
@@ -216,7 +204,7 @@ func _popups(m: Match, size: Vector2i, zone: String) -> void:
 func _grounds(size: Vector2i) -> void:
 	var m := Match.new()
 	main.add_child(m)
-	m.start(Match.arena_opts(recast_hero()))
+	m.start(Match.arena_opts())
 	if main.fade != null:
 		await main.fade.reveal(0.01)
 	main.set("current", m)
