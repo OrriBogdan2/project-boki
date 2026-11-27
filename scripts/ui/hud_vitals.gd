@@ -9,12 +9,12 @@ extends RefCounted
 ## Hud keeps the state that checks read (lvl_pop, xp_pop, armor_lerp, hover_spots); this only draws.
 
 const BAR_W := 154.0  # px: health / armour width (the reference's 230 px of 1920)
-const ARM_GAP := 5.0  # px: the portrait's bottom to the armour strip
-const NUM_DROP := 17.0  # px: the bar's bottom to the health number's baseline
+const ARM_GAP := 4.0  # px: the portrait's bottom to the armour strip
+const NUM_DROP := 16.0  # px: the bar's bottom to the health number's baseline
 const HP_PX := 20  # px: the health number
 const MAX_PX := 12  # px: the max health after it
 const ARM_PX := 14  # px: the armour number
-const VITALS_H := 64.0  # px: what the bars, the numbers under them and a resource or CC line add under the portrait
+const VITALS_H := 56.0  # px: what the bars, the numbers under them and a resource or CC line add under the portrait
 const HP_H := 16.0  # px: the health bar
 const AR_H := 5.0  # px: the armour strip above it
 const LVL_POP := 0.35  # s: the level number's gold fade after a level-up

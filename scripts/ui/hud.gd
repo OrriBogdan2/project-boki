@@ -997,7 +997,7 @@ func _hud_tick(delta: float) -> void:
 	dmg_dir.tick(delta)
 
 ## The bottom-left cluster (HudVitals draws the portrait and bars under it; the ability row sits right of the bars).
-const HUD_PORTRAIT := Vector2(88, 100)  # the reference bust's 130 x 150 px of 1920 x 1080
+const HUD_PORTRAIT := Vector2(80, 92)  # px: about the reference bust (130 x 150 of 1920 x 1080)
 const HUD_REACH := 16.0      # px the level coin and the kin card reach past the portrait on the left
 func _hud_origin(sz: Vector2) -> Vector2:
 	var pad := HudStyle.safe_pad(sz)
@@ -1084,7 +1084,7 @@ func _draw_abilities(sz: Vector2, p: Hunter) -> void:
 	var s := 50.0
 	var gap := 10.0
 	var x := o.x + HudVitals.BAR_W + 16.0
-	var y := o.y + HudVitals.VITALS_H + 30.0
+	var y := o.y + HudVitals.VITALS_H + 22.0
 	var k: Kin = p.kin
 	var util: AbilityDef = p.runner.def_of("utility") if p.runner else null
 	# right click: the weapon's ability
@@ -1120,7 +1120,7 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 	var s := 50.0
 	var gap := 10.0
 	var x := o.x + HudVitals.BAR_W + 16.0
-	var y := o.y + HudVitals.VITALS_H + 38.0
+	var y := o.y + HudVitals.VITALS_H + 30.0
 	var k: Kin = p.kin
 	var info := p.slot_info("sec")
 	var sr := Rect2(Vector2(x, y), Vector2(s, s))
