@@ -23,7 +23,7 @@
 	"unlock": {
 		"path_clear": {"level": 2}, "picket": {"level": 2}, "path_stone": {"level": 2}, "bush": {"level": 2}, "job_board": {"level": 2}, "lumber_camp": {"level": 2}, "quarry": {"level": 2}, "storage_chest": {"level": 2},
 		"market_stall": {"level": 3}, "boki_burrow": {"level": 3}, "tree": {"level": 3}, "lantern": {"level": 3}, "bench": {"level": 3}, "kin_bed": {"level": 3}, "hearth_oven": {"level": 3}, "workbench": {"level": 3},
-		"seed_garden": {"level": 4}, "workshop": {"level": 4}, "graveyard": {"level": 4}, "stone_wall": {"level": 4}, "hedge": {"level": 4}, "path_wood": {"level": 4}, "pine": {"level": 4}, "lamp_post": {"level": 4}, "rug": {"level": 4}, "cottage": {"level": 4},
+		"seed_garden": {"level": 4}, "workshop": {"level": 4}, "graveyard": {"level": 4}, "stone_wall": {"level": 4}, "hedge": {"level": 4}, "path_wood": {"level": 4}, "pine": {"level": 4}, "fruit_tree": {"level": 4}, "lamp_post": {"level": 4}, "rug": {"level": 4}, "cottage": {"level": 4},
 		"kiln": {"level": 5}, "spark_mill": {"level": 5}, "infirmary": {"level": 5}, "cold_store": {"level": 5}, "water": {"level": 5}, "rug_long": {"level": 5}, "banner": {"level": 5}, "pillar": {"level": 5},
 		"blossom_tree": {"milestone": "scan3"}, "kin_statue": {"milestone": "scan3"}, "fountain": {"milestone": "first_boss"}, "armory": {"milestone": "first_extract"}, "board": {"milestone": "first_run"}, "shrine": {"milestone": "first_boss"}
 	},

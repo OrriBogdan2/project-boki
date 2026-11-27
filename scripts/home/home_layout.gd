@@ -71,6 +71,8 @@ const CATALOG := {
 	"tree": {"name": "Leafy tree", "cat": "Garden", "gems": 20, "block": true, "comfort": "wild"},
 	"pine": {"name": "Pine tree", "cat": "Garden", "gems": 20, "block": true, "comfort": "wild"},
 	"blossom_tree": {"name": "Blossom tree", "cat": "Garden", "gems": 30, "block": true, "comfort": "wild"},
+	"fruit_tree": {"name": "Fruit tree", "cat": "Garden", "gems": 40, "block": true, "comfort": "wild",
+		"desc": "Grows from a sapling, then drops a fruit every few minutes. Walk up to pick it."},
 	"lantern": {"name": "Lantern", "cat": "Lights", "gems": 15, "light": true, "block": true, "comfort": "bright"},
 	"lamp_post": {"name": "Lamp post", "cat": "Lights", "gems": 20, "light": true, "block": true, "comfort": "bright"},
 	"bench": {"name": "Bench", "cat": "Furniture", "gems": 25, "size": [2, 1], "block": true, "top": 0.5,

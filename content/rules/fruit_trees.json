@@ -1,0 +1,15 @@
+{
+	"desc": "Fruit trees (scripts/home/fruit_tree.gd). A tree you put down grows from a sapling over grow_secs of real time (it keeps growing while you are away). Once grown it swells one fruit every fruit_secs, which drops to the grass; at most max_fallen lie there. Walking up to the tree picks them for the pantry; a hungry Boki walks to them and eats one first.",
+	"grow_secs": 900,
+	"grow_secs_doc": "Seconds from put down until the tree is grown and starts to fruit.",
+	"stage_at": [0.0, 0.4, 1.0],
+	"stage_at_doc": "Share of grow_secs at which the tree is a sapling, a young tree and grown.",
+	"stage_scale": [0.4, 0.7, 1.0],
+	"stage_scale_doc": "Model size per stage, 1.0 = a full tree.",
+	"fruit_secs": 300,
+	"fruit_secs_doc": "Seconds a grown tree takes to swell and drop one fruit; it stops while max_fallen lie on the grass.",
+	"max_fallen": 3,
+	"max_fallen_doc": "Most fruit waiting under one tree.",
+	"reach": 1.4,
+	"reach_doc": "Metres from the fallen fruit within which your feet pick it up."
+}
