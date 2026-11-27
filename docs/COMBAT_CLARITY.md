@@ -46,6 +46,8 @@ and off, the cast glint and ring, Boki bubbles and ability names in and out of a
 ## Toasts on the right rail (11-23)
 Toasts ("Fever is lit", "Bond full!") sit in the right rail under the alive counter and the kill feed (`TopStack.rail`), never in the top centre by the timer, level and HP. `--clarity-shots` pushes one on every fight frame and prints `CLARITYTOAST n/20`: n must be 0 (it was 20 before the rail).
 
+## Goal markers keep their words out of a fight (11-24)
+A goal waypoint ("Wild Boki 50m", Uplink, Beacon, Heart Gate) is the arrow or pin alone while you or a squadmate fights (`Hud._fight_on`, `EdgeMarker.fight`); the words and the distance come back when it is calm. Squad pings and ally arrows keep theirs, and the tutorial always does. Baseline problem 9: the word sat mid-field over the fight on 20/20 frames. `--edge-marker-check` holds it.
 ## Downed screen: one line for who, the tip clear of the card (11-24)
 Downed, the screen said who did it three times in the middle of the fight: "Knocked down by Kael", "You're down" and the card's "Downed by Kael with Warchain". The killcam line is now for a dead Hunter only (`Hud` draws `Match.killcam_text` when `p.out`); the downed screen is "You're down" plus the card. The "TIP" line was drawn through the card's two lines (and, moved under it, sat on your own wisp): it is now above "You're down" (`Hud._draw_downed`), where the screen is empty ground.
 ## First-time armour hint waits out the fight (11-24)
