@@ -5,6 +5,8 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	# a Meshy-native rig holds its clips on frames SimLod skipped the pose
+	"--native-pose-hold-check": ["res://tools/native_pose_hold_check.gd", "native_pose_hold_check", null],
 	# no clip stretches a skinned edge past 1.3x
 	"--stretch-1-check": ["res://tools/stretch_check.gd", "stretch_check", "bulwark,gunslinger"],
 	"--stretch-2-check": ["res://tools/stretch_check.gd", "stretch_check", "rimewright,dredge"],
@@ -20,6 +22,7 @@ const CHECKS := {
 	"--native-upper-shots": ["res://tools/native_upper_shots.gd", "native_upper_shots", null],
 	"--warden-native-check": ["res://tools/warden_native_check.gd", "warden_native_check", null],  # Meshy skeleton
 	"--native-springs-shots": ["res://tools/native_springs_shots.gd", "native_springs_shots", null],
+	"--gil-swim-spin-shots": ["res://tools/gil_swim_spin_shots.gd", "gil_swim_spin_shots", null],  # Gil GPU frames
 	"--tenzo-press-strip": ["res://tools/tenzo_press_strip.gd", "tenzo_press_strip", null],  # Tenzo LMB press frames
 	# LMB attack clip: its strike lands with the shot
 	"--lmb-anim-sync-check": ["res://tools/lmb_anim_sync_check.gd", "lmb_anim_sync_check", null],
