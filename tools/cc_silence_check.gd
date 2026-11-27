@@ -85,6 +85,9 @@ func _silence(m: Match, P: Hunter, foe: Hunter) -> void:
 	P.gliding = false
 	P.glide_cd = 0.0
 	P.stun_t = 0.0
+	P.pos.y = P.ground() + 12.0  # well off the ground, so only silence can shut the glider
+	P.vel.y = -2.0
+	ok(not AirLimits.glide_shut(P), "high in the air the glider is otherwise free")
 	ok(not P.can_glide(), "the glider will not open")
 	m.step(Match.DT)
 	ok(KitStatus.silenced(P), "a step does not end it early")
@@ -100,6 +103,9 @@ func _silence(m: Match, P: Hunter, foe: Hunter) -> void:
 	m.time += 2.5
 	ok(not KitStatus.silenced(P), "it ends on its own time")
 	P.grounded = false
+	P.glide_cd = 0.0
+	P.pos.y = P.ground() + 12.0
+	P.vel.y = -2.0
 	ok(P.can_glide(), "the glider opens again")
 	# a cleanse ends it
 	KitStatus.apply(P, "sil", 5.0)
