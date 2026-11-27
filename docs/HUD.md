@@ -106,6 +106,13 @@ never from the kit:
 | Boki | a Boki's hits | 78% | its type colour (`DexView.type_col`, the HUD badge's); crit, armour and hurt colours as for a hit | beside yours; its own number |
 | tick | burn and poison ticks, or any hit flagged `tick` | 62% | the burn colour (`DotLook.COL`) | lower on the body; one number per second |
 
+What a hit landed on is its own number too (one table, `HudStyle.NUM_STYLE`; `Fx.Num` SHIELD and HEAVY): a shield soaking
+it (Albert's aegis, the timed ward, the Boki owner shield: `HudStyle.NUM_SHIELD`, lavender, 85%) and a Fusion shell
+soaking it (`NUM_SHELL`, teal, 85%) print what they took (`SoakNumber`, also on a partly soaked hit), and an empowered
+hit (`heavy` / `payoff`: `NUM_EMPOWERED`, orange, 112%). Armour stays blue, a crit gold with the ember outline, a heal
+green with a `+`, damage you take red. No two kinds share a colour and a size. Check: `--dmg-number-check` (one of each
+kind through the real paths).
+
 Crits keep their colour, thick ember outline and bigger pop in the hit and Boki looks; armour keeps its colour.
 The size steps up with the damage (`Fx.SIZE_TIERS`, on our health scale since 11-24: a dart or a pellet 34 px, a rifle
 round or a slash 40, an ability hit 48, a heavy ability 58, an ult 70), so a big hit reads big next to the LMB.

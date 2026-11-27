@@ -20,6 +20,8 @@ const ORB_FULL_COL := Color("d8fff6")      # the orb's shot colour at full charg
 const GLOW_COL := Color("2ee6c0")          # the charge glow at his hand, starting...
 const GLOW_FULL_COL := HOT                  # ...and at full charge
 const GLOW_SIZE := Vector2(0.4, 1.25)      # the glow's scale (a mote is 0.4m wide at 1), starting and at full
+const CARD_DRAW := Vector2(0.12, 0.1)      # s: the next card shows in his hand this long after a throw, then
+                                           # grows in over this long
 const TRADE_COL := TEAL                    # the Trade's own end and aim (the dash slot's col, his pale teal)
 const TRADE_EDGE := SEA                    # its edge (the landing end) in his signature colour (VFX_QUALITY)
 const TRADE_LOOK_K := 1.65    # the Trade's lantern, times its old size (visual only:
@@ -208,6 +210,7 @@ func _tick_weapon() -> void:
 		shot_seen = h.shot_n
 		_orb_fired()
 	_set_charge(wait_charge())
+	_hold_card()
 	if charge > 0.0 and snap.is_empty():
 		var col := GLOW_COL.lerp(GLOW_FULL_COL, charge)
 		# (on his actual hand, where the 3D model holds its orb: at a fixed point in front of him the match
@@ -217,12 +220,22 @@ func _tick_weapon() -> void:
 		if charge >= KitLooks.ORB_HELD_K:      # the void orb is ready: teal motes and smoke drawn into his hand
 			HeroVfx.of(m).hold(h, "orb_ready", charge)
 
+## The next card in his hand: a fresh one is drawn just after each throw and held until the charge turns
+## the next shot into the void orb (from then the void motes gather in his hand instead).
+func _hold_card() -> void:
+	var since := float(m.time) - last_shot_t - CARD_DRAW.x
+	if since < 0.0 or charge >= KitLooks.ORB_HELD_K or not snap.is_empty():
+		KitLooks.of(m).release("os_card")
+		return
+	KitLooks.of(m).hold_on("os_card", "card", h, hand_pos(true), clampf(since / CARD_DRAW.y, 0.05, 1.0))
+
 ## A downed or eliminated Hunter is a Wisp: no charge, no motes, no aura. The wait starts over on revive.
 func _is_wisp() -> bool:
 	return h.downed or h.out or h.dead or h.gone
 
 func _go_dark() -> void:
 	KitLooks.of(m).release("os_charge")
+	KitLooks.of(m).release("os_card")
 	KitLooks.of(m).release("os_aura")
 	last_shot_t = m.time
 	if charge > 0.0:
@@ -244,7 +257,9 @@ func _set_charge(k: float) -> void:
 	elif k == charge:
 		return
 	var ld := lmb_def()
-	var shot_x: Dictionary = (base_wpn["shot_x"] as Dictionary).duplicate()
+	var shot_x: Dictionary = (base_wpn.get("shot_x", {}) as Dictionary).duplicate()
+	if k >= KitLooks.ORB_HELD_K:      # owner 11-26: only the void orb passes walls; a card stops at them
+		shot_x["pierce_terrain"] = true
 	if k >= 1.0:
 		shot_x["slow"] = float(ld["prime_slow_t"])
 		shot_x["slow_k"] = float(ld["prime_slow"])
@@ -271,6 +286,7 @@ func _orb_fired() -> void:
 	last_orb_c = charge
 	last_orb_r = float(h.wpn["size"])
 	KitLooks.of(m).release("os_charge")
+	KitLooks.of(m).release("os_card")
 	HeroVfx.of(m).trail(h, "orb_trail", KitLooks.of(m).skin_orb(h, charge, orb_size_k(charge)))
 	var held_orb := charge >= KitLooks.ORB_HELD_K
 	play("ostra_orb_hot" if held_orb else "ostra_orb")
