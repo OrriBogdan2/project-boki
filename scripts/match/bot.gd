@@ -151,6 +151,8 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			to = Vector2(land.x - h.pos.x, land.z - h.pos.z)
 		inp["move"] = to.normalized() if to.length() > 0.6 else Vector2.ZERO
 		return
+	if a.has("pad_fly") and PadFlight.steer_bot(m, h, dt):
+		return
 	# the sky train's horn: off the rails before it gets here
 	if m.skytrain and m.skytrain.eta(h) < SkyTrain.HORN_LEAD + 0.5:
 		inp["move"] = m.skytrain.step_off_dir(h)

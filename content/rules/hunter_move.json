@@ -56,11 +56,13 @@
 		"cool_by": 0.5
 	},
 	"jump_pad": {
-		"doc": "The Spring pad (UtilityUse.pad_launch, docs/MOVEMENT_FEEL.md \"Launch arcs\"). vy [?]: m/s straight up; the source has no launch number (wiki Jump_Pad, sv/DATA.md 9: arm 2 s, 30 s life only) and the one pad use on camera (venator.md Mini Nuke cast 2, f103 of the 10 fps ult cut, 559 s + 10.2 s) is not on disk to measure (/home/claude/svvid gone 11-23); ours, --move-feel-check pad_vy. min_hv [?]: m/s, the least a pad sends you on with (toward your aim if you stood still); ours. throw_dash, throw_carry_max: a map pad's throw (UtilityUse.pad_throw) carries the planar speed you bring for the whole flight (the reference's launches add to the planar velocity, replacing only the vertical; no pad number), x throw_dash [?] in a dash (wiki: a dash into a pad keeps its momentum plus a small boost), at most throw_carry_max [?] m/s; ours, --launch-arc-check map_*.",
+		"doc": "The Spring pad (UtilityUse.pad_launch, docs/MOVEMENT_FEEL.md \"Launch arcs\"). vy [?]: m/s straight up; the source has no launch number (wiki Jump_Pad, sv/DATA.md 9: arm 2 s, 30 s life only) and the one pad use on camera (venator.md Mini Nuke cast 2, f103 of the 10 fps ult cut, 559 s + 10.2 s) is not on disk to measure (/home/claude/svvid gone 11-23); ours, --move-feel-check pad_vy. min_hv [?]: m/s, the least a pad sends you on with (toward your aim if you stood still); ours. A map pad's throw (PadFlight.launch) is a launch as the reference's: it replaces your vertical speed and adds to your planar speed, then you fly free (keys, glider). throw_rise + throw_rise_k x run [?]: m of apex over the higher end (the old scripted arc's height; sets the up speed); the boost along the pad's facing is solved so a standing, no-key flight lands on the pad's spot. throw_dash [?]: x the planar speed you bring, in a dash (wiki: a dash into a pad keeps its momentum plus a small boost); throw_carry_max [?]: m/s of it carried, at most; ours, --launch-arc-check map_*.",
 		"vy": 17.0,
 		"min_hv": 6.0,
 		"throw_dash": 1.15,
-		"throw_carry_max": 14.0
+		"throw_carry_max": 14.0,
+		"throw_rise": 2.5,
+		"throw_rise_k": 0.12
 	},
 	"default": {"speed": 4.55, "accel": 54.0},
 	"bulwark": {"speed": 4.85, "accel": 47.0},

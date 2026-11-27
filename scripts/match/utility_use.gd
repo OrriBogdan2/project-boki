@@ -23,9 +23,6 @@ const MEND_ARMOR := 20.0
 ## Spring pad launch (content/rules/hunter_move.json "jump_pad", both [?]: no source number).
 static var pad_vy: float = MoveRules.data()["jump_pad"]["vy"]  # m/s up: ~9.8 m apex, ~2.3 s aloft
 static var pad_min_hv: float = MoveRules.data()["jump_pad"]["min_hv"]  # m/s on, at least (toward your aim)
-## Map pad throw (same file, "jump_pad"): the planar speed you bring that rides along, and its cap.
-static var throw_dash: float = MoveRules.data()["jump_pad"]["throw_dash"]  # x your speed, coming on in a dash
-static var throw_carry_max: float = MoveRules.data()["jump_pad"]["throw_carry_max"]  # m/s carried, at most
 
 
 ## One number of an item's "channel" data (time s, move = speed multiplier while channelling, heal hp).
@@ -150,56 +147,6 @@ static func pad_launch(h: Hunter, vy: float = -1.0, min_hv: float = -1.0) -> voi
 	h.roll_t = 0.0
 	h.grounded = false
 	h.glide_cd = 0.0
-
-
-## A map pad (World.pads, the time trial's) throws you on a scripted arc toward its landing, and how you
-## came on moves where you land: your planar speed rides along for the whole flight (x throw_dash in a
-## dash), so a dash in from the side lands you that far to the side, gliding in keeps the glide's speed and
-## standing on it lands you on its spot (the reference's launches add to the planar velocity and only
-## replace the vertical). The landing stays on the pad's island, on open ground clear of every pad.
-static func pad_throw(h: Hunter, to: Vector3) -> void:
-	var from := h.pos
-	var dur := clampf(Vector2(to.x - from.x, to.z - from.z).length() / 12.0, 0.7, 1.5)
-	var carry := Vector2(h.vel.x, h.vel.z) * (throw_dash if h.roll_t > 0.0 else 1.0)
-	var land := carried_land(h.m.world, to, carry.limit_length(throw_carry_max) * dur)
-	var d := Vector2(land.x - from.x, land.z - from.z).length()
-	h.pad = {"from": from, "to": land, "t": 0.0, "dur": dur, "h": maxf(from.y, land.y) - from.y + 2.5 + d * 0.12}
-	h.roll_t = 0.0
-	h.grap = {}
-	h.grounded = false
-
-
-## Where a throw toward `to` lands when it carries `shift` metres along: the farthest open tile on the
-## line back to `to`, or `to` itself (also when `to` is not open island ground, like a tower top).
-static func carried_land(w: World, to: Vector3, shift: Vector2) -> Vector3:
-	var isl := w.island_of(to.x, to.z)
-	if isl < 0 or w.tile_kind(to.x, to.z) != World.T_GROUND or absf(w.ground_at(to.x, to.z) - to.y) > 0.1:
-		return to
-	var n := ceili(shift.length() / 0.5)
-	for k in range(n, 0, -1):
-		var q := Vector2(to.x, to.z) + shift * (float(k) / n)
-		if _open_landing(w, isl, floori(q.x), floori(q.y), to.y):
-			return Vector3(floorf(q.x) + 0.5, w.ground_at(q.x, q.y), floorf(q.y) + 0.5)
-	return to
-
-
-## A tile a throw may end on: ground of island isl at height y (the landing's own terrace, so a throw onto
-## a tower or perch stays on it), no void or block next to it, 3 m from every pad.
-static func _open_landing(w: World, isl: int, x: int, z: int, y: float) -> bool:
-	if not w.inb(x, z) or w.island[w.idx(x, z)] != isl or w.kind[w.idx(x, z)] != World.T_GROUND:
-		return false
-	if absf(w.ground_at(x + 0.5, z + 0.5) - y) > 0.05:
-		return false
-	if w.edge_dist(x, z, 1) <= 1:
-		return false
-	for dz in range(-1, 2):
-		for dx in range(-1, 2):
-			if w.kind[w.idx(x + dx, z + dz)] == World.T_BLOCK:
-				return false
-	for pd in w.pads:
-		if Vector2(pd["pos"].x - x - 0.5, pd["pos"].z - z - 0.5).length() < 3.0:
-			return false
-	return true
 
 
 ## A drink or repair that did not finish: nothing is used up, and everyone sees and hears it spill.

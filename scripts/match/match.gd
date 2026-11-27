@@ -4021,7 +4021,7 @@ func _update_pads(dt: float) -> void:
 				continue
 			var p: Vector3 = pd["pos"]
 			if Vector2(h.pos.x - p.x, h.pos.z - p.z).length() < 0.8 and h.pos.y - p.y < 0.4 and h.pos.y - p.y > -0.3:
-				UtilityUse.pad_throw(h, pd["land"])
+				PadFlight.launch(h, pd["land"])
 				sfx("jump", h.pos, -2.0, 0.8)
 				fx.burst(h.pos + Vector3(0, 0.3, 0), Color("8fe3c8"), 16, 5.0, 0.5, 2.0)
 		for k in kins:

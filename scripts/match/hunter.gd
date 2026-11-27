@@ -58,7 +58,8 @@ var grap_cd := 0.0
 var grap: Dictionary = {}       # floating back up a ledge
 var push_t := 0.0
 var last_gy := 0.0             # ground height where you last stood
-var pad: Dictionary = {}        # jump-pad flight along a fixed arc
+var pad: Dictionary = {}        # a scripted flight (a ledge pop, a lip mantle)
+var launch_air := false        # in a map pad's launch: Loco.launch_step steers it (PadFlight)
 var kb_t := -9.0
 var sig_cd := 0.0
 var cloak_t := 0.0
@@ -1605,6 +1606,7 @@ func _physics(dt: float) -> void:
 	var cur := hv.length()
 	if stun_t > 0.0: HunterMove.cut_air_dash(self)
 	var in_dash := roll_t > 0.0      # (its last step, the hand-over to the run, included)
+	launch_air = launch_air and not (grounded or gliding or in_dash or knock_t > 0.0)
 	HunterMove.dash_off_ledge(self)
 	if roll_t > 0.0:
 		roll_t -= dt
@@ -1667,7 +1669,7 @@ func _physics(dt: float) -> void:
 		elif not lfloat.is_empty():
 			hv = Loco.accel_to(hv, mv * spd, AIR_ACCEL, HunterFeel.air_decel, HunterFeel.air_overspeed, dt)
 		else:
-			hv = Loco.air_step(hv, mv, spd, dt)     # strong WASD air control (owner 11-08), the farm's too
+			hv = Loco.launch_step(hv, mv, spd, dt) if launch_air else Loco.air_step(hv, mv, spd, dt)  # owner 11-08
 	hv = dash_glide.step(self, Vector2(vel.x, vel.z), hv, dt)
 	hv = MantleCarry.step(self, hv, dt)
 	vel.x = hv.x; vel.z = hv.y

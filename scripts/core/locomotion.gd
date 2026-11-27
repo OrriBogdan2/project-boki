@@ -26,6 +26,8 @@ static var air_counter := 0.0
 static var air_side := 0.0
 static var air_drag := 0.0
 static var air_idle_drag := 0.0
+static var launch_drag := 0.0  # a map pad's launch over the run cap (launch_step)
+static var launch_accel := 0.0
 static var glide_turn := 0.0
 static var glide_turn_fast := 0.0
 static var glide_brake := 0.0
@@ -58,6 +60,8 @@ static func load_tuning() -> bool:
 	air_side = a["side"]
 	air_drag = a["drag"]
 	air_idle_drag = a["idle_drag"]
+	launch_drag = a["launch_drag"]
+	launch_accel = a["launch_accel"]
 	var g: Dictionary = T["glide"]
 	glide_turn = g["turn"]
 	glide_turn_fast = g["turn_fast"]
@@ -145,6 +149,16 @@ static func air_step(hv: Vector2, keys: Vector2, cap: float, dt: float) -> Vecto
 		along = minf(along + a, maxf(along, cap * k))
 	across = across.move_toward(Vector2.ZERO, a * air_side)
 	return (wd * along + across).limit_length(maxf(s, cap))
+
+## One air step in a map pad's launch (PadFlight), the reference's falling step: over the run `cap` your speed
+## bleeds at launch_drag and the keys add launch_accel toward where they point, never past the speed you had, so
+## they bend the throw and brake it gently instead of stopping it. At or under the cap it is any jump (air_step).
+static func launch_step(hv: Vector2, keys: Vector2, cap: float, dt: float) -> Vector2:
+	var s := hv.length()
+	if s <= cap:
+		return air_step(hv, keys, cap, dt)
+	var bled := maxf(s * exp(-launch_drag * dt), cap)
+	return (hv * (bled / s) + keys.limit_length(1.0) * launch_accel * dt).limit_length(bled)
 
 ## Vertical speed the step the glider opens: falling at least HunterMove.glide_start_vy ([game data]
 ## GlideStartFallSpeedMin), so a rising jump is cut and an open never adds speed.
