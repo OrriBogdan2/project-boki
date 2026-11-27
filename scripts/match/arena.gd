@@ -155,19 +155,10 @@ func _spawn_dummies() -> void:
 		lb.font = UI.big
 		lb.position = Vector3(0, 3.4, 0)
 		d_v.add_child(lb)
-		dummies.append(
-			{
-				"h": d_v,
-				"kind": sp[0],
-				"at": at,
-				"label": lb,
-				"hits": [],
-				"total": 0.0,
-				"last": 0.0,
-				"quiet": 0.0,
-				"down_t": -1.0,
-			}
-		)
+		var entry := {"h": d_v, "kind": sp[0], "at": at, "label": lb, "hits": [], "total": 0.0, "last": 0.0}
+		entry["quiet"] = 0.0
+		entry["down_t"] = -1.0
+		dummies.append(entry)
 
 
 func _on_hit(by, t, d, _tags) -> void:
@@ -243,16 +234,16 @@ func tick(dt: float) -> void:
 		if not is_instance_valid(d_v):
 			continue
 		dm["quiet"] = float(dm["quiet"]) + dt
-		var R := Content.rules("practice_dummies")
+		var rules := Content.rules("practice_dummies")
 		if d_v.downed:
-			d_v.down_hp = 1e6            # (no bleeding out or finishing: a dummy only ever stands back up on its mark)
+			d_v.down_hp = 1e6  # (no bleeding out or finishing: a dummy only ever stands back up on its mark)
 			if float(dm["down_t"]) < 0.0:
 				dm["down_t"] = 0.0
 			dm["down_t"] = float(dm["down_t"]) + dt
-			if float(dm["down_t"]) >= float(R["respawn_s"]):
+			if float(dm["down_t"]) >= float(rules["respawn_s"]):
 				_respawn_dummy(dm)
-		elif float(dm["quiet"]) > float(R["heal_quiet_s"]):
-			d_v.hp = DUMMY_HP            # (left alone a long while: topped up, the meters stay)
+		elif float(dm["quiet"]) > float(rules["heal_quiet_s"]):
+			d_v.hp = DUMMY_HP  # (left alone a long while: topped up, the meters stay)
 		var hs: Array = dm["hits"]
 		while not hs.is_empty() and m.time - float(hs[0][0]) > 6.0:
 			hs.pop_front()
@@ -340,6 +331,7 @@ func _respawn_dummy(dm: Dictionary) -> void:
 	dm["down_t"] = -1.0
 	dm["quiet"] = 0.0
 	m.fx.ring(d_v.pos, 1.6, Color("9ee2a0"), 0.4)
+
 
 ## Back to your marks: you, the dummies and the bot, all healed, cooldowns and resources cleared.
 func reset() -> void:

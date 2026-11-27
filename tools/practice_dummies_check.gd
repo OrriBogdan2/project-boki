@@ -28,7 +28,13 @@ func run(main_node: Node) -> void:
 	var zone := TestZone.opts()
 	zone["weapon"] = "rifle"
 	var grounds := {
-		"training": true, "practice": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242,
+		"training": true,
+		"practice": true,
+		"teams": 1,
+		"squad": 1,
+		"tier": 0,
+		"length": 1e9,
+		"seed": 4242,
 		"no_drop": true,
 	}
 	for case in [["Test Zone", zone], ["Training Grounds", grounds]]:
@@ -44,61 +50,65 @@ func _zone(label: String, opts: Dictionary) -> void:
 	main.add_child(m)
 	m.start(opts.duplicate())
 	m.set_process(false)
-	var P: Hunter = m.player
-	var A: Arena = m.arena
-	var R := Content.rules("practice_dummies")
-	var rs := float(R["respawn_s"])
-	var three := A.dummies.size() == 3 and rs > 0.0
+	var pl: Hunter = m.player
+	var ar: Arena = m.arena
+	var rules := Content.rules("practice_dummies")
+	var rs := float(rules["respawn_s"])
+	var three := ar.dummies.size() == 3 and rs > 0.0
 	ok("%s: three dummies, respawn_s in the rules" % label, three, "respawn_s %.1f" % rs)
-	var dm: Dictionary = A.dummies[0]
-	var D: Hunter = dm["h"]
+	var dm: Dictionary = ar.dummies[0]
+	var dv: Hunter = dm["h"]
 	var at: Vector3 = dm["at"]
 	step(m, 0.3)
 	# a real basic attack (hold fire at it) and a couple of abilities
-	P.teleport(D.pos + Vector3(0, 0, 4.0))
-	var hp0 := D.hp
+	pl.teleport(dv.pos + Vector3(0, 0, 4.0))
+	var hp0 := dv.hp
 	for i in 90:
-		P.inp["aim"] = D.pos + Vector3(0, 0.9, 0)
-		P.inp["fire"] = true
+		pl.inp["aim"] = dv.pos + Vector3(0, 0.9, 0)
+		pl.inp["fire"] = true
 		m.step(DT)
-	P.inp["fire"] = false
-	ok("%s: basic attack takes HP off the dummy" % label, D.hp < hp0 - 5.0, "%.0f -> %.0f" % [hp0, D.hp])
-	var hp1 := D.hp
-	P.inp["aim"] = D.pos + Vector3(0, 0.9, 0)
-	if P.ak:
-		P.ak.use_e()
-		P.ak.ch_rmb = 1.0
-		P.ak.press_rmb()
+	pl.inp["fire"] = false
+	ok("%s: basic attack takes HP off the dummy" % label, dv.hp < hp0 - 5.0, "%.0f -> %.0f" % [hp0, dv.hp])
+	var hp1 := dv.hp
+	pl.inp["aim"] = dv.pos + Vector3(0, 0.9, 0)
+	if pl.ak:
+		pl.ak.use_e()
+		pl.ak.ch_rmb = 1.0
+		pl.ak.press_rmb()
 	step(m, 1.0)
-	printerr("PDUMMYCHECK %s: after abilities hp %.0f -> %.0f" % [label, hp1, D.hp])
-	var kept := D.hp <= hp1 + 0.1
-	ok("%s: HP does not climb back while it is being hit" % label, kept, "%.0f -> %.0f" % [hp1, D.hp])
+	printerr("PDUMMYCHECK %s: after abilities hp %.0f -> %.0f" % [label, hp1, dv.hp])
+	var kept := dv.hp <= hp1 + 0.1
+	ok("%s: HP does not climb back while it is being hit" % label, kept, "%.0f -> %.0f" % [hp1, dv.hp])
 	# hit it to 0
 	var total0 := float(dm["total"])
-	D.hurt(Arena.DUMMY_HP * 2.0, P, {"src": "shot"})
+	dv.hurt(Arena.DUMMY_HP * 2.0, pl, {"src": "shot"})
 	step(m, 0.1)
-	ok("%s: dummy is knocked down at 0 HP" % label, D.downed and D.hp <= 0.0, "hp %.0f downed %s" % [D.hp, D.downed])
+	ok(
+		"%s: dummy is knocked down at 0 HP" % label,
+		dv.downed and dv.hp <= 0.0,
+		"hp %.0f downed %s" % [dv.hp, dv.downed]
+	)
 	ok("%s: DPS label counted the damage" % label, float(dm["total"]) > total0)
 	# pushed off its mark, it is still down and not healed a second later
-	D.teleport(at + Vector3(2.5, 0, 0))
+	dv.teleport(at + Vector3(2.5, 0, 0))
 	step(m, rs - 1.0)
-	ok("%s: still down before respawn_s" % label, D.downed and D.hp <= 0.0, "hp %.0f" % D.hp)
+	ok("%s: still down before respawn_s" % label, dv.downed and dv.hp <= 0.0, "hp %.0f" % dv.hp)
 	step(m, 1.3)
-	var full := not D.downed and not D.out and is_equal_approx(D.hp, D.max_hp)
-	ok("%s: respawned alive at full HP" % label, full, "hp %.0f/%.0f" % [D.hp, D.max_hp])
-	var far := D.pos.distance_to(at)
+	var full := not dv.downed and not dv.out and is_equal_approx(dv.hp, dv.max_hp)
+	ok("%s: respawned alive at full HP" % label, full, "hp %.0f/%.0f" % [dv.hp, dv.max_hp])
+	var far := dv.pos.distance_to(at)
 	ok("%s: respawned on its own spot" % label, far < 0.5, "%.2f m from its mark" % far)
 	var txt: String = (dm["label"] as Label3D).text
 	ok("%s: DPS label keeps its total" % label, float(dm["total"]) > total0 and txt.begins_with("DPS"), txt)
 	# and it can be killed again
-	D.hurt(Arena.DUMMY_HP * 2.0, P, {"src": "shot"})
+	dv.hurt(Arena.DUMMY_HP * 2.0, pl, {"src": "shot"})
 	step(m, 0.1)
-	ok("%s: it can be knocked down again" % label, D.downed)
+	ok("%s: it can be knocked down again" % label, dv.downed)
 	# Reset dummies mid-down
-	A.reset()
-	var back := not D.downed and D.hp >= Arena.DUMMY_HP - 0.1 and D.pos.distance_to(at) < 0.5
+	ar.reset()
+	var back := not dv.downed and dv.hp >= Arena.DUMMY_HP - 0.1 and dv.pos.distance_to(at) < 0.5
 	ok("%s: Reset dummies stands it up at full HP" % label, back)
 	step(m, rs + 1.0)
-	ok("%s: no respawn left pending after Reset" % label, not D.downed and D.hp >= Arena.DUMMY_HP - 0.1)
+	ok("%s: no respawn left pending after Reset" % label, not dv.downed and dv.hp >= Arena.DUMMY_HP - 0.1)
 	m.queue_free()
 	Game.god = false
