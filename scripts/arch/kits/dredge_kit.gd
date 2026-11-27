@@ -458,7 +458,7 @@ func _grab(f: Ent, ally := false) -> void:
 	tow["swing"] = SWING
 	if not ally:
 		tow["stun"] = 0.2      # carried, stunned: they can't act or walk off the arm
-		KitStatus.apply(f, "sil", minf(float(rdf["pull_max"]), 4.0))  # reeled in: no abilities, glider or belt (reference tuning)
+		KitStatus.apply(f, "sil", minf(float(rdf["pull_max"]), 4.0))  # reeled in: silenced
 	pull = {"t": f, "tow": m.displace.tow(f, h, tow), "ally": ally, "wisp": wisp, "from": f.pos, "scoop": []}
 	scoop.erase(f)
 	for w in scoop:

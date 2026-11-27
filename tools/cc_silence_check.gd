@@ -41,9 +41,10 @@ func _slows(f: Hunter) -> void:
 	f.cleanse_cc()
 	f.add_slow(1.0, 0.6)
 	f.add_slow(3.0, 0.2)
-	ok(is_equal_approx(f.slow_k, 0.6) and is_equal_approx(f.slow_t, 1.0), "a weaker, longer slow does not lend its time to the strong one")
+	ok(is_equal_approx(f.slow_k, 0.6) and is_equal_approx(f.slow_t, 1.0), "weak and long lends no time to the strong")
 	f.tick_status(1.05)
-	ok(f.slow_t > 1.8 and is_equal_approx(f.slow_k, 0.2), "when the strong slow ends the weak one takes over (%.2f s, k %.2f)" % [f.slow_t, f.slow_k])
+	var took := f.slow_t > 1.8 and is_equal_approx(f.slow_k, 0.2)
+	ok(took, "the weak one takes over (%.2f s, k %.2f)" % [f.slow_t, f.slow_k])
 	f.tick_status(2.5)
 	ok(f.slow_t <= 0.0 and f.slow_k == 0.0 and f.slow2_t <= 0.0, "the weak one runs out on its own time")
 	# a stronger slow landing on a longer weak one: the weak one waits for it
@@ -58,7 +59,8 @@ func _slows(f: Hunter) -> void:
 	f.add_slow(2.0, 0.4)
 	ok(is_equal_approx(f.slow_t, 2.0) and f.slow2_t <= 0.0, "the same strength refreshes")
 	f.add_slow(3.0, 0.7)
-	ok(is_equal_approx(f.slow_k, 0.7) and is_equal_approx(f.slow_t, 3.0) and f.slow2_t <= 0.0, "stronger and longer leads, nothing waits")
+	var leads := is_equal_approx(f.slow_k, 0.7) and is_equal_approx(f.slow_t, 3.0)
+	ok(leads and f.slow2_t <= 0.0, "stronger and longer leads")
 	f.hurt(1.0, null, {"slow": 4.0, "slow_k": 0.3})
 	ok(is_equal_approx(f.slow_k, 0.7), "a hit's weaker slow does not weaken the running one")
 	f.cleanse_cc()
@@ -121,4 +123,4 @@ func _immunity(m: Match, P: Hunter, foe: Hunter) -> void:
 	foe.stun_t = 1.0
 	foe.add_slow(2.0, 0.5)
 	foe.cleanse_cc()
-	ok(foe.stun_t <= 0.0 and foe.slow_t <= 0.0 and not KitStatus.silenced(foe), "cleanse takes stun, slow and silence off")
+	ok(foe.stun_t <= 0.0 and foe.slow_t <= 0.0 and not KitStatus.silenced(foe), "cleanse clears stun, slow, silence")

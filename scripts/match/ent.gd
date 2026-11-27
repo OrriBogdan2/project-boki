@@ -42,7 +42,7 @@ var blight_t := 0.0  # venom's anti-heal: healing on this body is cut (blight_k)
 var guard_k := 0.0
 var slow_k := 0.0  # how much speed the current slow takes away (0 = the body's usual slow)
 var blight_k := InCombat.anti_heal_cut()  # how much healing the current blight cuts
-var slow2_t := 0.0  # a weaker slow that outlasts slow_t, waiting its turn: [slow2_t, slow2_k] take over when slow_t ends
+var slow2_t := 0.0  # a weaker, longer slow waiting its turn behind slow_t
 var slow2_k := 0.0
 var vuln_t := 0.0  # a vulnerable mark: takes vuln_k more damage (never above KinRules.VULN_MAX)
 var vuln_k := 0.0
@@ -319,7 +319,10 @@ func add_slow(secs: float, k := 0.0) -> void:
 
 ## Keeps the waiting slow that matters most: the stronger one, then the longer.
 func _wait_slow(secs: float, k: float) -> void:
-	if slow2_t <= 0.0 or _slow_rank(k) > _slow_rank(slow2_k) or (is_equal_approx(_slow_rank(k), _slow_rank(slow2_k)) and secs > slow2_t):
+	var better := slow2_t <= 0.0 or _slow_rank(k) > _slow_rank(slow2_k)
+	if is_equal_approx(_slow_rank(k), _slow_rank(slow2_k)) and secs > slow2_t:
+		better = true
+	if better:
 		slow2_t = secs
 		slow2_k = k
 
@@ -331,8 +334,13 @@ func _slow_rank(k: float) -> float:
 
 ## Cleanse: every crowd control comes off (slow, root, stun, silence, burn; grounded too).
 func cleanse_cc() -> void:
-	slow_t = 0.0; slow_k = 0.0; slow2_t = 0.0; slow2_k = 0.0
-	root_t = 0.0; stun_t = 0.0; burn_t = 0.0
+	slow_t = 0.0
+	slow_k = 0.0
+	slow2_t = 0.0
+	slow2_k = 0.0
+	root_t = 0.0
+	stun_t = 0.0
+	burn_t = 0.0
 	KitStatus.clear_cc(self)
 
 
