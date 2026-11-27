@@ -30,11 +30,18 @@ for i, (label, f) in enumerate(shots):
     im = im.resize((W, H), Image.LANCZOS)
     x, y = (i % 2) * W, 90 + (i // 2) * H
     tile = ImageDraw.Draw(im)
-    for who, (px, py) in json.load(open(f"{src}/{f}.json")).items():
+    rows = []  # right edge of the last label on each row: a label that would touch another drops to the next row
+    for who, (px, py) in sorted(json.load(open(f"{src}/{f}.json")).items(), key=lambda kv: kv[1][0]):
         px, py = px * sc, py * sc
         w = tile.textlength(who, font=tag)
-        tile.rectangle((px - w / 2 - 6, py + 6, px + w / 2 + 6, py + 38), fill=(0, 0, 0))
-        tile.text((px - w / 2, py + 8), who, font=tag, fill="white")
+        lvl = next((n for n, edge in enumerate(rows) if px - w / 2 - 8 > edge), len(rows))
+        if lvl == len(rows):
+            rows.append(0)
+        rows[lvl] = px + w / 2 + 6
+        ty = py + 6 + lvl * 34
+        tile.line((px, py, px, ty), fill="white", width=2)
+        tile.rectangle((px - w / 2 - 6, ty, px + w / 2 + 6, ty + 32), fill=(0, 0, 0))
+        tile.text((px - w / 2, ty + 2), who, font=tag, fill="white")
     sheet.paste(im, (x, y))
     d.rectangle((x, y, x + W, y + 40), fill=(0, 0, 0))
     d.text((x + 12, y + 6), label, font=small, fill="white")

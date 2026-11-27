@@ -18,11 +18,15 @@ const ROW_STEP := 1.45  # m between neighbours in the one row of nine (eye shot)
 const ROW_ORDER := ["h0", "b0", "h1", "b1", "h2", "b2", "h3", "b3", "h4"]  # Albert at the end nearest the 3/4 camera
 const HUNTER_X := [-5.0, -2.5, 0.0, 2.5, 5.0]  # m across the group (mid shot back row), Albert far left
 const BOKI_X := [-3.75, 1.25, 3.75, -1.25]  # m (cindle, burrlet, puddlet, heatherhorn): in the gaps, a row nearer
-const WALK_X := [-2.7, -0.9, 0.9, 2.7]  # m: the four others in the farm-cam shot, Albert walking behind them
-const WALK_BOKI_X := [-1.8, 0.0, 1.8, 3.9]
-const WALK_AHEAD := 3.8  # m the row stands in front of Albert (farm-cam shot)
+const WALK_X := [-4.2, -2.1, 2.1, 4.2]  # m: the four others in the farm-cam shot, level with Albert, two a side
+const WALK_BOKI_X := [-3.1, -1.0, 1.0, 3.1]  # m: the Boki between and ahead of them
+const WALK_AHEAD := 1.0  # m the others stand in front of Albert (farm-cam shot)
+const WALK_BOKI_AHEAD := 2.6  # m the Boki stand in front of the hunters (farm-cam shot)
 const BOKI_FRONT := 2.2  # m the Boki stand nearer the camera than the hunters
 const FACE_BOKI := 0.18  # rad: a small turn either side of the camera, so it is not stiff but the face reads
+const CLEAR_MAX_W := 9.0  # m: wider meshes are the ground
+const CLEAR_MIN_H := 1.0  # m: lower meshes are grass and flowers
+const CLEAR_HALF_W := 6.0  # m either side of the camera-to-group line that scenery is hidden in (the row is 11.6 m wide)
 const EYE_FOV := 40.0
 const EYE_DIST := 15.0  # m from the row's middle
 const EYE_YAW := 0.5  # rad: the 3/4 view, the camera swung round to Albert's end of the row
@@ -156,9 +160,9 @@ func _layout() -> void:
 		"farm":
 			albert = group + Vector3(0, 0, WALK_AHEAD)
 			for i in range(1, 5):
-				spots[i] = group + Vector3(WALK_X[i - 1], 0, -WALK_AHEAD)
+				spots[i] = group + Vector3(WALK_X[i - 1], 0, 0)
 			for j in 4:
-				spots[10 + j] = group + Vector3(WALK_BOKI_X[j], 0, -WALK_AHEAD + BOKI_FRONT)
+				spots[10 + j] = group + Vector3(WALK_BOKI_X[j], 0, -WALK_BOKI_AHEAD)
 		"row":
 			for slot in ROW_ORDER.size():
 				var x := (4 - slot) * ROW_STEP * cam_side
@@ -204,9 +208,33 @@ func _free_camera(at: Vector3, look: Vector3, fov: float) -> void:
 
 func _shot(name: String) -> void:
 	await _wait(1.0)
+	_clear_foreground()
 	await RenderingServer.frame_post_draw
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join(name + ".png"))
 	_write_labels(name)
+
+
+## Hides the scenery props (trees, rocks) that stand in a 2 m wide corridor between the camera and the group, so no
+## trunk covers anyone. Only meshes: the ground, water and the characters stay.
+func _clear_foreground() -> void:
+	var cam := main.get_viewport().get_camera_3d()
+	var from := Vector2(cam.global_position.x, cam.global_position.z)
+	var to := Vector2(group.x, group.z)
+	var line := to - from
+	var chars: Array[Node] = hunters.duplicate()
+	for k in h.kins:
+		chars.append(k["node"])
+	for n in h.find_children("*", "MeshInstance3D", true, false):
+		var mi := n as MeshInstance3D
+		if mi.mesh == null or not mi.visible:
+			continue
+		var bb := mi.global_transform * mi.get_aabb()
+		if bb.size.x > CLEAR_MAX_W or bb.size.y < CLEAR_MIN_H or chars.any(func(c): return c.is_ancestor_of(mi)):
+			continue
+		var at := Vector2(bb.get_center().x, bb.get_center().z) - from
+		var t := at.dot(line) / line.length_squared()
+		if t > 0.0 and t < 0.95 and absf(at.cross(line)) / line.length() < CLEAR_HALF_W + bb.size.x * 0.5:
+			mi.visible = false
 
 
 ## <name>.json: where each character's feet are on the still, in px, for the sheet's name labels.
@@ -228,11 +256,14 @@ func _write_heights() -> void:
 	var out := {"hunters": {}, "boki": {}, "group": [group.x, group.z]}
 	for i in hunters.size():
 		var m := hunters[i]
+		var lean := m.basis
+		m.basis = Basis.from_scale(m.scale)  # upright: the camera's lean tips the model and shortens it on screen
 		var pts := _body_points(m)
 		var hi := 0.0
 		for wp in pts:
 			hi = maxf(hi, wp.y)
 		var crown := HunterCrown.crown(m, pts, Hunter.VIS_SCALE * Arch.match_k(ARCHES[i]), hi) - m.global_position.y
+		m.basis = lean
 		out["hunters"][NAMES[i]] = {
 			"body": snappedf(crown, 0.01), "full": snappedf(hi - m.global_position.y, 0.01), "scale": m.scale.y
 		}
