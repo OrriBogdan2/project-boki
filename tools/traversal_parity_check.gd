@@ -96,40 +96,40 @@ func _dash_jump_trim() -> void:
 	var to := HunterMove.jump_trim_to
 	ok(near(lo.x, 8.0 * BODY, 1e-4) and near(lo.y, 16.0 * BODY, 1e-4), "trim from 8 m/s, full at 16 (x body)")
 	ok(near(to.x, 5.0 * BODY, 1e-4) and near(to.y, 7.0 * BODY, 1e-4), "trim to 5..7 m/s (x body)")
-	var tr := JumpTrim.new()
-	tr.start(Vector2(HunterMove.speed("default"), 0.0))
-	ok(tr.target < 0.0, "a run jump is not trimmed")
-	tr.start(Vector2(30.0, 0.0))
-	ok(near(tr.target, to.y, 1e-4), "a very fast jump settles at the high end (%.2f)" % tr.target)
+	var jtrim := JumpTrim.new()
+	jtrim.start(Vector2(HunterMove.speed("default"), 0.0))
+	ok(jtrim.target < 0.0, "a run jump is not trimmed")
+	jtrim.start(Vector2(30.0, 0.0))
+	ok(near(jtrim.target, to.y, 1e-4), "a very fast jump settles at the high end (%.2f)" % jtrim.target)
 	var v0 := Hunter.DASH_SPEED * Loco.dash_jump_keep
 	var air_s := 2.0 * Hunter.JUMP_V / Hunter.H_GRAV
 	var cap := HunterMove.speed("default")
 	var trimmed := _hop(v0, cap, air_s, true)
 	var free := _hop(v0, cap, air_s, false)
-	tr.start(Vector2(v0, 0.0))
-	var want := tr.target
+	jtrim.start(Vector2(v0, 0.0))
+	var want := jtrim.target
 	ok(want > to.x and want < to.y, "a dash-jump at %.1f m/s settles at %.2f m/s" % [v0, want])
 	ok(
 		trimmed.y >= to.x and trimmed.y <= want + 0.2,
 		"0.3 s in it goes %.2f m/s (untrimmed %.2f)" % [trimmed.y, free.y]
 	)
 	ok(trimmed.x < free.x - 1.0, "the hop covers %.2f m, not %.2f m" % [trimmed.x, free.x])
-	tr.start(Vector2(v0, 0.0))
-	tr.step(Vector2(v0, 0.0), false, DT)
-	ok(tr.target < 0.0, "landing ends the trim")
+	jtrim.start(Vector2(v0, 0.0))
+	jtrim.step(Vector2(v0, 0.0), false, DT)
+	ok(jtrim.target < 0.0, "landing ends the trim")
 
 
 ## A jump leaving at v0 m/s, keys held along it, for `air_s` seconds: x = metres covered, y = speed 0.3 s in.
 func _hop(v0: float, cap: float, air_s: float, trim: bool) -> Vector2:
-	var tr := JumpTrim.new()
+	var jtrim := JumpTrim.new()
 	var hv := Vector2(v0, 0.0)
 	if trim:
-		tr.start(hv)
+		jtrim.start(hv)
 	var dist := 0.0
 	var at := 0.0
 	var t := 0.0
 	while t < air_s:
-		hv = tr.step(Loco.air_step(hv, Vector2.RIGHT, cap, DT), true, DT)
+		hv = jtrim.step(Loco.air_step(hv, Vector2.RIGHT, cap, DT), true, DT)
 		dist += hv.length() * DT
 		t += DT
 		if at == 0.0 and t >= 0.3 - 1e-6:
