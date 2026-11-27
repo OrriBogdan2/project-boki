@@ -6,7 +6,7 @@ extends RefCounted
 
 const MIN_HALF_W := 40.0  # px: the zone is at least this far either side of the hunter's middle
 const BODY_HALF_K := 0.32  # of the hunter's height on screen: the half width
-const PLATE_UP := 3.2  # m over the feet (x its scale and match_hunter_scale, HudPlate.up): a typical overhead plate
+const PLATE_UP := 2.7  # m over the feet (x its scale and match_hunter_scale, HudPlate.up): the overhead plate
 const FEET_PAD := 10.0  # px under the feet
 const PLATE_PAD := 20.0  # px over the plate's top
 const NEAR_PX := 260.0  # px: a label farther than this from the zone is not measured

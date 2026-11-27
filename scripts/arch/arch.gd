@@ -30,8 +30,9 @@ static func hit_h(id: String) -> float:
 	return float(body(id).get("hit_h", HIT_H_DEFAULT))
 
 
-## The model's tallest point, back props and horns included (m over its feet at its own size, before the match's
-## drawn size): the body's top_h, else its hurtbox height. A plate hangs clear over it (HudPlate.up).
+## The model's tallest point as the match camera shows it, back props and horns included (m over its feet at its
+## own size, before the match's drawn size; a part reaching away from the camera counts as higher): the body's
+## top_h, else its hurtbox height. A plate hangs clear over it (HudPlate.up).
 static func top_h(id: String) -> float:
 	return float(body(id).get("top_h", hit_h(id)))
 

@@ -46,7 +46,7 @@ func run(main_node: Node) -> void:
 		var at := _arena_spot(m.player.pos)
 		_bare_floor(at)
 		var extra: Array = []
-		var wide_shot := wide and hero == WIDE_HERO
+		var wide_shot: bool = wide and hero == WIDE_HERO
 		if wide_shot:
 			extra = _wide_row(at)
 		elif stills and hero in STILLS:
