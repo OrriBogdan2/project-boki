@@ -1,0 +1,14 @@
+{
+	"id": "gravitank",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/gravitank.json.",
+	"work": {
+		"haul": 2,
+		"stone": 3,
+		"timber": 2
+	},
+	"shiny": {
+		"belly": "#466c60",
+		"color": "#544b36",
+		"glow": "#e8ff90"
+	}
+}
