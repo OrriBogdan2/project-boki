@@ -159,7 +159,7 @@ tuning: set its `size.cm` and `--write`. The kin's own roll (Unique, Evo growth,
 `FARM_BOKI_SCALE` (the same for every Boki, the active companion included) multiply on top.
 `--kin-size-check` measures every species with a model in its idle pose and asserts each reads within 5% of its data,
 the table is fresh (2%), no longest side is more than 2x off its data length (an outlier model to look at), the three
-starters (Vespyx, Prismander, Mycroll, 28 cm each) read within 1.12x of each other from each pitch on its own, in a
+starters (size A: Vespyx 30, Prismander 28, Mycroll 27 cm) read within 1.2x of each other from each pitch on its own, in a
 match and at the farm's scale (now 1.09x at both), and Heatherhorn (70 cm) reads at least 1.5x the biggest starter
 (now 2.5x). The starters' cm are not the 30/28/27 asked first: at those the silhouettes differed by 1.33x. `--boki-size-shots` renders the proof (the HUD frame, the game camera, an eye-level camera) and writes each
 one's measured box and the area it covers on screen. The portrait (`KinPortrait`) divides the fit out: its fixed frame
