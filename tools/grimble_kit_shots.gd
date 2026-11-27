@@ -3,7 +3,7 @@ extends "res://tools/vv_shots.gd"
 ## match (xvfb with a renderer), stills at the match camera: rmb_<tag>_{out,far,reel}.png (Deep Reach in flight, then
 ## the foe reeled in), lmb_<tag>_{shot,hang}.png (a volley just fired, then hanging at the stop range) and
 ## r_<tag>_{early,charge,wave}.png (Brass Broadside's charge and its first wave); rmb far and r charge also
-## from the side (_side.png). Run it on main and on the branch.
+## from the side (_side.png), r charge also from in front where he aims (_front.png). Run it on main and on the branch.
 
 const CROP := Vector2i(1000, 600)  # px round the point AHEAD m in front of him
 const AHEAD := 3.5  # m
@@ -67,23 +67,27 @@ func _r() -> void:
 	await _go(0.4, aim_at)
 	_save("r", "charge")
 	await _side("r", "charge")
+	await _side("r", "charge", "front", Vector3(4.5, 1.5, 1.2), Vector3(0.0, 1.2, 0.0))
 	await _go(0.4, aim_at)
 	_save("r", "wave")
 
 
-## The same moment from his right side at chest height (the match camera looks down on the arms).
-func _side(kind: String, part: String) -> void:
+## The same moment from his right side at chest height (the match camera looks down on the arms), or from `eye`
+## (m off him) looking at `at` (m off him).
+func _side(
+	kind: String, part: String, view := "side", eye := Vector3(2.0, 1.6, 6.5), at := Vector3(2.0, 1.3, 0.0)
+) -> void:
 	var cam := Camera3D.new()
 	main.add_child(cam)
 	cam.fov = 40.0
-	cam.global_position = P.pos + Vector3(2.0, 1.6, 6.5)
-	cam.look_at(P.pos + Vector3(2.0, 1.3, 0.0))
+	cam.global_position = P.pos + eye
+	cam.look_at(P.pos + at)
 	var live := main.get_viewport().get_camera_3d()
 	cam.make_current()
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
 	var img := main.get_viewport().get_texture().get_image()
-	img.save_png(dir.path_join("%s_%s_%s_side.png" % [kind, tag_name, part]))
+	img.save_png(dir.path_join("%s_%s_%s_%s.png" % [kind, tag_name, part, view]))
 	live.make_current()
 	cam.queue_free()
 
