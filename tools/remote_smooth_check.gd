@@ -90,6 +90,7 @@ var dir := ""
 var tag := "RSMOOTH"           # the prefix of every line (the move check reuses this harness)
 var flag := "--remote-smooth-check"   # the check's own flag; the guest runs it with =guest
 var one_way_ms := ONE_WAY_MS
+var relay: LagRelay = null     # the host's relay: Kitefall deals its draws again from its cast
 
 func ok(cond: bool, what: String, info := "") -> void:
 	print("%s %s %s  %s" % [tag, "ok  " if cond else "FAIL", what, info])
@@ -121,7 +122,7 @@ func run(main_node: Node) -> void:
 func _host() -> void:
 	dn.port = CheckChild.free_port(7990 + OS.get_process_id() % 40)
 	RenderingServer.render_loop_enabled = false
-	var relay := LagRelay.new()
+	relay = LagRelay.new()
 	relay.one_way = one_way_ms
 	relay.name = "Relay"
 	main.add_child(relay)
@@ -214,6 +215,8 @@ func _kitefall(truth: Array) -> void:
 	await _host_run(0.8, "move", truth)
 	var U: MageUlt = (P.ak as MageKit).ult
 	P.inp["aim"] = P.pos + KITE_OFF
+	relay.restart()                  # the fall gets the same draws whatever the run before it dealt: a snapshot lost in
+	# its 0.2 s is a jump no buffer can hide, and where the loss fell against the cast moved with the run's length
 	ok(U.cast(), "Kitefall goes off on the host")
 	await _host_run(0.9, "fall", truth)
 	ok(U.phase() == MageUlt.AIR, "Kitefall hangs", U.phase())
