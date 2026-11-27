@@ -50,6 +50,7 @@ func run(main: Node) -> void:
 	_glide_length()
 	_hold_to_open()
 	print("ACHECK DONE, failures: %d" % bad)
+	main.get_tree().quit()
 
 func _line(what: String, got: float, want: float, tol: float) -> void:
 	print("PARITY %s: %.3f (want %.3f)" % [what, got, want])
