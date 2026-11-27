@@ -156,6 +156,7 @@ func _states(main: Node, a: String) -> void:
 	ok(anchors.size() == 3, "%s: the anchors ride Meshy's bones (%s)" % [a, str(anchors)])
 	_toon(a, m)
 	_crouch_arms(a, nat)
+	await _downed(main, a, m, nat)  # (before _slots, which takes every slot out after its case)
 	await _slots(main, a, m, nat)
 	await _combat_idle(main, a, m, nat)
 	await _fall(main, a, m, nat)
@@ -417,6 +418,20 @@ func _fall(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
 		ok(late == c[2], "%s: %s starts the jump clip at %.2f s" % [a, c[0], nat.player.current_animation_position])
 
 
+## The knocked-down clip runs as far in as HunterFall's beat is (its share k of the clip), also once he is out.
+func _downed(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
+	if not nat.plays.has("downed"):
+		return
+	var length := nat.player.get_animation(String(nat.plays["downed"])).length
+	for c in [[0.2, false], [0.9, true]]:
+		await _feed(main, nat, m, {}, {"fall": c[0], "dead": c[1]})
+		var at := nat.player.current_animation_position
+		ok(
+			nat.cur == "downed" and absf(at - c[0] * length) < 0.02,
+			"%s: knocked down at k %.1f%s plays downed at %.2f s of %.2f" % [a, c[0], " (out)" if c[1] else "", at, length]
+		)
+
+
 ## A Hunter with an idle_combat clip stands in it for COMBAT_HOLD after a shot or a swing and in idle otherwise.
 func _combat_idle(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
 	if not nat.plays.has("idle_combat"):
@@ -520,6 +535,7 @@ func _synthetic_clips(main: Node, a: String, m: Node3D, nat: WardenNative) -> vo
 	sp.add_animation_library(&"", lib)
 	src.add_child(sp)
 	nat.plays["dash"] = SYNTH
+	nat.player.stop()  # (a clip added while one plays can leave the playback on a freed entry: Godot 4.6 crash)
 	nat.borrow(src)
 	var got := nat.player.get_animation(SYNTH) if nat.player.has_animation(SYNTH) else null
 	var home := nat.player.get_node(nat.player.root_node)
