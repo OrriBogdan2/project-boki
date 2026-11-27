@@ -163,17 +163,32 @@ func _hero_row(hero: String) -> float:
 	var feet := m.cam.unproject_position(p.position)
 	var top := _top(p.model)
 	var plate := HudPlate.screen_at(m.cam, p, 2.7 * float(p.cdat["scale"]))
-	var frame := HudPlate._frame_rect(0.0, 0.0, HudStyle.PLATE_W_SELF)
+	var plate_frame := HudPlate._frame_rect(0.0, 0.0, HudStyle.PLATE_W_SELF)
 	var rival := HudPlate.plate_offset(p) * CamRig.match_hunter_scale
 	var rp := HudPlate.screen_at(m.cam, p, HudPlate.plate_offset(p))
 	var rf := HudPlate._frame_rect(0.0, 0.0, HudStyle.PLATE_W)
 	var tall := (feet.y - top) * _k()
 	var fmt := "REFH %s: %.0f px tall (top %.2f m, top_h %.3f), own plate %.0f px wide, gap %.0f px"
 	fmt += "; as a rival (at %.2f m): %.0f px wide, gap %.0f px"
-	var own_gap := (top - plate.y - frame.size.y) * _k()
+	var own_gap := (top - plate.y - plate_frame.size.y) * _k()
 	var rival_gap := (top - rp.y - rf.size.y) * _k()
 	var top_m := _top_m(p.model) - p.position.y
-	print(fmt % [hero, tall, top_m, top_m / p.vis_k, frame.size.x * _k(), own_gap, rival, rf.size.x * _k(), rival_gap])
+	print(
+		(
+			fmt
+			% [
+				hero,
+				tall,
+				top_m,
+				top_m / p.vis_k,
+				plate_frame.size.x * _k(),
+				own_gap,
+				rival,
+				rf.size.x * _k(),
+				rival_gap
+			]
+		)
+	)
 	return tall
 
 
