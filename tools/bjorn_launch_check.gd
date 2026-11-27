@@ -675,6 +675,7 @@ func _aegis_shots(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: BulwarkKit) -> 
 	step(m, 0.4)
 	ok("bjorn audit: a shot from behind lands on him", P.hp < hp0, "hp %.0f -> %.0f" % [hp0, P.hp])
 	var cc := {"src": "abil", "stun": 1.0, "slow": 1.0, "root": 1.0}
+	P.slow_t = 0.0  # (the shot from behind staggered him: hit_flinch.json hit_slow, big_s, outlasts the 0.4 s step)
 	P.hurt(5.0, T, cc.duplicate())
 	ok("bjorn audit: a stun, slow and root riding a hit from the front are blocked with it",
 		P.stun_t == 0.0 and P.slow_t == 0.0 and P.root_t == 0.0,

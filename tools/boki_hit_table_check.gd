@@ -146,6 +146,8 @@ func _fire(m: Match, P: Hunter, t: Ent, home: Vector3, spot: Vector3, slot: Stri
 		if shoot: P.inp["fire"] = true
 		ak.aim_at(P, t.pos)
 		_still(t)
+		if t is Kin:      # a Boki mends once out of combat (InCombat window): the table is what the hit did, not what it healed
+			t.combat_at = m.time
 		for mb in m.mobs: mb.queue_free()      # (a monster wandering into a fan would take its slugs)
 		m.mobs.clear()
 		m.step(ak.DT)

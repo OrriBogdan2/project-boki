@@ -101,6 +101,9 @@ func _foe(f: Hunter, i: int, dt: float) -> void:
 			_hush(f)
 			f.inp["move"] = _toward(f, tu.foe_home(i), 0.6) if foe_mode == "hold" else Vector2.ZERO
 			f.inp["aim"] = p.pos + Vector3(0, 0.9, 0)
+			var g := tu.guide
+			if foe_mode == "hold" and g.downed and f.flat_dist(g) < float(Life.R["revive_radius"]) + 1.0:
+				f.inp["move"] = -f.dir_to(g)      # (a rival never stands on her wisp: that is a stomp, and nobody could revive her)
 		"strafe":
 			_hush(f)
 			f.inp["move"] = Vector2(sin(m.time * STRAFE_HZ + i * PI), 0.0)
