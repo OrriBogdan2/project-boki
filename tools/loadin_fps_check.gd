@@ -5,7 +5,10 @@ extends Node
 ## gone, with the engine's own monitors (draw calls, objects, nodes, physics, memory), and judges the
 ## frames after the screen: none may run under MIN_FPS and the average must reach AVG_FPS.
 ##   godot -- --loadin-fps-check [--loadin-out=report.txt] [--loadin-csv=frames.csv] [--loadin-seed=4101]
-##   [--loadin-res=1920x1080] [--loadin-secs=30]
+##   [--loadin-res=1920x1080] [--loadin-secs=30] [--loadin-split]
+## --loadin-split (a probe, not judged): after the screen the check calls Match._process and every other script
+## _process itself and times each by file, and times the draw from the renderer's pre/post-draw signals, so the
+## report names where a frame's main-thread time goes.
 ## Frame times swing with the box, so like --hitch-check it is "advisory" off a GPU host
 ## (docs/CHECKS_TIMING.md) and strict with --timing-strict. Headless draws nothing: only the frame
 ## count and node growth per frame are judged (the spawn burst limit).
@@ -34,6 +37,13 @@ var steps_total := 0  # sim steps taken after the screen
 var last_time := -1.0  # Match.time last frame
 var sole_reads0 := 0  # BootSole.reads when the screen went
 var last_cpu := 0.0  # cpu_ms() at the last frame
+var split := false  # --loadin-split: time the scripts' _process by file and the draw
+var split_us := {}  # section -> usec summed over the frames after the screen
+var taken := {}  # script file -> nodes whose _process the check calls itself
+var split_m: Match
+var t_pre := 0
+var t_post := 0
+var last_split := 0  # usec of the last split frame (a draw older than it was already counted)
 
 
 ## The calling thread's CPU time so far in ms (Linux schedstat; -1 elsewhere). A shared box stretches a frame's wall
@@ -65,6 +75,8 @@ func _ready() -> void:
 		elif a.begins_with("--loadin-res="):
 			var p := a.substr(13).split("x")
 			res = Vector2i(int(p[0]), int(p[1]))
+		elif a == "--loadin-split":
+			split = true
 	headless = DisplayServer.get_name() == "headless"
 	var adapter := RenderingServer.get_video_adapter_name().to_lower()
 	var soft := ["llvmpipe", "softpipe", "swiftshader", "swrast"]
@@ -72,6 +84,9 @@ func _ready() -> void:
 	if not headless:
 		get_window().size = SOFTWARE_RES if software else res
 	process_priority = -100
+	if split:
+		RenderingServer.frame_pre_draw.connect(func(): t_pre = Time.get_ticks_usec())
+		RenderingServer.frame_post_draw.connect(func(): t_post = Time.get_ticks_usec())
 	if not headless:
 		RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)
 	Save.no_write = true
@@ -104,6 +119,12 @@ func _process(_delta: float) -> void:
 		loading_ms = (now - t0_us) / 1000.0
 		sole_reads0 = BootSole.reads
 		Match.prof_on = true  # from here the sim and visual sections are summed (Match.prof, Match.vprof)
+		if split:
+			split_m = cur as Match
+			split_m.set_process(false)
+			_take_process(get_tree().root)
+	elif split and split_m != null and is_instance_valid(split_m):
+		_split_frame(wall, now)
 	var steps := 0
 	if shown_us > 0 and cur is Match:
 		if last_time >= 0.0:
@@ -219,6 +240,8 @@ func _finish() -> void:
 			rs[k] += float(f[12 + k])
 	var rf := "LOADIN render a frame (ms avg): cpu %.1f (culling + draw submission), frame setup %.1f, gpu %.1f"
 	lines.append(rf % [rs[0] / maxi(j.size(), 1), rs[1] / maxi(j.size(), 1), rs[2] / maxi(j.size(), 1)])
+	if split:
+		lines.append("LOADIN split (ms a frame): " + _top(split_us, maxi(j.size(), 1)))
 	var per_frame := float(steps_total) / maxi(w.size(), 1)
 	var sf2 := "LOADIN sim steps %d in %d frames (%.1f a frame; 1.0 is real time)"
 	lines.append(sf2 % [steps_total, w.size(), per_frame])
@@ -263,3 +286,40 @@ func _finish() -> void:
 			for f in frames:
 				fc.store_line("%.2f,%d,%d,%d,%d,%.2f,%.2f,%.0f,%.0f,%d,%.2f,%s,%.2f,%.2f,%.2f" % f)
 	get_tree().quit(0 if fails == 0 or advisory else 1)
+
+
+## (--loadin-split) Every node but this one and Match running a script _process: the engine stops calling it and
+## _split_frame calls it, timed per script file. Nodes made later stay with the engine (they land in "rest").
+func _take_process(n: Node) -> void:
+	if n != self and n != split_m and n.get_script() != null and n.is_processing() and n.has_method("_process"):
+		var k := String((n.get_script() as Script).resource_path).get_file()
+		if not taken.has(k):
+			taken[k] = []
+		taken[k].append(n)
+		n.set_process(false)
+	for c in n.get_children():
+		_take_process(c)
+
+
+## (--loadin-split) One frame: the last draw (pre to post-draw), Match._process, each taken script file, and the
+## rest of the wall time since the last frame (engine process, physics, other nodes, waits).
+func _split_frame(wall: float, now: int) -> void:
+	var dt := get_process_delta_time()
+	var draw := t_post - t_pre if t_post > t_pre and t_pre > last_split else 0
+	last_split = now
+	var used := draw
+	split_us["draw"] = int(split_us.get("draw", 0)) + draw
+	var t0 := Time.get_ticks_usec()
+	split_m._process(dt)
+	var t1 := Time.get_ticks_usec()
+	split_us["Match._process"] = int(split_us.get("Match._process", 0)) + t1 - t0
+	used += t1 - t0
+	for k in taken:
+		var a := Time.get_ticks_usec()
+		for n in taken[k]:
+			if is_instance_valid(n) and n.is_inside_tree():
+				n._process(dt)
+		var b := Time.get_ticks_usec()
+		split_us[k] = int(split_us.get(k, 0)) + b - a
+		used += b - a
+	split_us["rest"] = int(split_us.get("rest", 0)) + maxi(0, int(wall * 1000.0) - used)
