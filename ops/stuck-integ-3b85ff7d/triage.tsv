@@ -1,0 +1,490 @@
+branch	verdict	last_commit	ahead_of_main	conflict_files_vs_main
+ext/agent-briefs-rebased	conflict vs main: port or regate on its own PR	2026-11-09T17:13:05Z	1	1
+ext/airdash-anims-1108	conflict vs main: port or regate on its own PR	2026-11-13T19:59:14Z	4	15
+ext/albert-size-boop-rebased	conflict vs main: port or regate on its own PR	2026-11-09T11:49:22Z	83	9
+ext/anim-boki-eat-sleep-clips	merged into stuck-integ-3b85ff7d	2026-11-27T02:48:22Z	15	
+ext/anim-boki-hit-faint	conflict vs main: port or regate on its own PR	2026-11-12T22:19:30Z	5	5
+ext/anim-boki-own-clips-sttv	merged into stuck-integ-3b85ff7d	2026-11-26T15:16:09-05:00	14	
+ext/anim-boki-slide-starters	conflict vs main: port or regate on its own PR	2026-11-11T14:57:15Z	1	7
+ext/anim-boki-stop-turn	conflict vs main: port or regate on its own PR	2026-11-12T22:25:38Z	2	3
+ext/anim-bul-guard-remote	gone (branch deleted)			
+ext/anim-cancel-blend	gone (branch deleted)			
+ext/anim-cinder-native-clips	conflict vs main: port or regate on its own PR	2026-11-24T13:39:40Z	2	1
+ext/anim-clip-checks-data-w0246	conflict vs main: port or regate on its own PR	2026-11-11T18:16:17Z	144	137
+ext/anim-coverage-stomp	conflict vs main: port or regate on its own PR	2026-11-23T01:15:38Z	2	1
+ext/anim-dash-clips-motley-grimble	gone (branch deleted)			
+ext/anim-dash-drive-hold	superseded: merges clean, adds nothing over main	2026-11-26T11:07:17Z	8	
+ext/anim-dir-all-1112	conflict vs main: port or regate on its own PR	2026-11-13T00:45:27Z	22	36
+ext/anim-dirloops-pelvis	conflict vs main: port or regate on its own PR	2026-11-13T00:13:03Z	4	4
+ext/anim-downed	conflict vs main: port or regate on its own PR	2026-11-09T15:07:53Z	2	9
+ext/anim-empty-garden	conflict vs main: port or regate on its own PR	2026-11-11T08:37:29Z	4	17
+ext/anim-foot-slide-13	conflict vs main: port or regate on its own PR	2026-11-20T23:29:41Z	5	14
+ext/anim-gait-speed	conflict vs main: port or regate on its own PR	2026-11-11T03:22:24Z	2	15
+ext/anim-gil-clips	conflict vs main: port or regate on its own PR	2026-11-13T18:57:56Z	2	2
+ext/anim-gil-grabbag	gone (branch deleted)			
+ext/anim-land-beat	gone (branch deleted)			
+ext/anim-loco-starts	conflict vs main: port or regate on its own PR	2026-11-13T00:58:19Z	30	37
+ext/anim-meeko-crouch-stride	conflict vs main: port or regate on its own PR	2026-11-13T18:12:29Z	2	4
+ext/anim-meeko-tiptoe	conflict vs main: port or regate on its own PR	2026-11-13T18:12:32Z	3	5
+ext/anim-native-move-clips	conflict vs main: port or regate on its own PR	2026-11-24T09:21:55Z	2	2
+ext/anim-native-move-states	conflict vs main: port or regate on its own PR	2026-11-27T17:18:57Z	35	7
+ext/anim-result-poses	conflict vs main: port or regate on its own PR	2026-11-09T22:42:25Z	1	19
+ext/anim-results-stage-beats	conflict vs main: port or regate on its own PR	2026-11-13T01:09:42Z	155	141
+ext/anim-select-poses-v95	conflict vs main: port or regate on its own PR	2026-11-18T07:21:37Z	6	1
+ext/anim-skin-relax-b	gone (branch deleted)			
+ext/anim-skin-relax-slice	gone (branch deleted)			
+ext/anim-sparkle-neve-meeko-native	conflict vs main: port or regate on its own PR	2026-11-23T23:15:35Z	9	6
+ext/anim-sparkle-sky-hold	gone (branch deleted)			
+ext/anim-stomp-batch-a	gone (branch deleted)			
+ext/anim-stomp-per-hunter	conflict vs main: port or regate on its own PR	2026-11-12T22:48:22Z	13	17
+ext/anim-stop-start	gone (branch deleted)			
+ext/anim-stretch-starters	conflict vs main: port or regate on its own PR	2026-11-13T00:10:53Z	6	9
+ext/anim-summon-clips	gone (branch deleted)			
+ext/anim-swim-reds	gone (branch deleted)			
+ext/anim-tenzo-motley-sable-gil-native	conflict vs main: port or regate on its own PR	2026-11-24T04:16:56Z	9	6
+ext/anim-timing-gunslinger	conflict vs main: port or regate on its own PR	2026-11-10T13:45:28Z	41	74
+ext/anim-timing-vex-port	gone (branch deleted)			
+ext/anim-utility-poses-2	gone (branch deleted)			
+ext/anim-w0246-blender-rows	gone (branch deleted)			
+ext/art1-kael-2	conflict vs main: port or regate on its own PR	2026-11-06T02:51:33Z	33	31
+ext/barrier-block-parity	conflict vs main: port or regate on its own PR	2026-11-09T09:12:24Z	2	8
+ext/belt-move-port	conflict vs main: port or regate on its own PR	2026-11-12T21:56:15Z	154	173
+ext/blocked-hit-spark	conflict vs main: port or regate on its own PR	2026-11-22T17:18:35Z	1	1
+ext/body6-picks-apply	conflict vs main: port or regate on its own PR	2026-11-12T01:48:59Z	5	29
+ext/boki-downed-port	conflict vs main: port or regate on its own PR	2026-11-12T21:22:33Z	2	4
+ext/boki-downed-pose-rebased	conflict vs main: port or regate on its own PR	2026-11-10T08:53:21Z	13	5
+ext/boki-idle-batch-b	conflict vs main: port or regate on its own PR	2026-11-21T16:20:05Z	1	2
+ext/boki-idle-batch-c	conflict vs main: port or regate on its own PR	2026-11-21T16:18:09Z	1	2
+ext/boki-more-ingame-1118	conflict vs main: port or regate on its own PR	2026-11-19T11:19:33Z	15	6
+ext/boki-own-clips-b	merged into stuck-integ-3b85ff7d	2026-11-26T15:16:10-05:00	22	
+ext/boki-own-clips-c	conflict vs main: port or regate on its own PR	2026-11-24T18:25:40Z	6	3
+ext/boki-own-clips-f	conflict vs main: port or regate on its own PR	2026-11-22T12:20:14Z	4	3
+ext/boki-own-clips-g	conflict vs main: port or regate on its own PR	2026-11-22T12:20:19Z	4	1
+ext/boki-own-clips-h	conflict vs main: port or regate on its own PR	2026-11-22T12:20:12Z	9	4
+ext/bot-hazard-route	conflict vs main: port or regate on its own PR	2026-11-13T00:40:20Z	168	180
+ext/bot-kael-1111	gone (branch deleted)			
+ext/bots-human-1111-feel	gone (branch deleted)			
+ext/bot-stomp-1111	conflict vs main: port or regate on its own PR	2026-11-13T00:33:53Z	13	18
+ext/carry-two-1111	conflict vs main: port or regate on its own PR	2026-11-13T20:52:42Z	10	11
+ext/carry-two-in	gone (branch deleted)			
+ext/cc-stacking-rule	conflict vs main: port or regate on its own PR	2026-11-09T23:37:10Z	1	15
+ext/cinder-dash-clip	conflict vs main: port or regate on its own PR	2026-11-23T01:15:42Z	2	1
+ext/cinder-flue-clips	conflict vs main: port or regate on its own PR	2026-11-13T23:44:00Z	6	5
+ext/cinder-sable-polish-rebased	gone (branch deleted)			
+ext/combat-clarity-1111	gone (branch deleted)			
+ext/combat-grimble-ult-clarity	conflict vs main: port or regate on its own PR	2026-11-12T23:52:59Z	9	6
+ext/combat-hazard-ward-stack	conflict vs main: port or regate on its own PR	2026-11-13T00:37:40Z	157	237
+ext/combat-hitbox-zero-rows	in main	2026-11-25T22:43:34-05:00	0	
+ext/combat-motley-swept	conflict vs main: port or regate on its own PR	2026-11-13T01:22:46Z	4	26
+ext/combat-summon-share	gone (branch deleted)			
+ext/combat-ttk-five	gone (branch deleted)			
+ext/combat-ttk-parity-1112	conflict vs main: port or regate on its own PR	2026-11-12T23:36:19Z	2	9
+ext/combat-vex-cone-net	conflict vs main: port or regate on its own PR	2026-11-13T21:03:33Z	5	5
+ext/combat-w0246-bot-reds	conflict vs main: port or regate on its own PR	2026-11-13T00:37:56Z	7	30
+ext/combat-w0246-support-reds	gone (branch deleted)			
+ext/combat-zone-stage-dmg	gone (branch deleted)			
+ext/cooldown-gate-1111	gone (branch deleted)			
+ext/creator-preview	gone (branch deleted)			
+ext/creator-sex-distinct-shots	conflict vs main: port or regate on its own PR	2026-11-08T22:49:36Z	1	0
+ext/dash-no-rings-reel	gone (branch deleted)			
+ext/dredge-auto-rebased	gone (branch deleted)			
+ext/early-camps-bots	gone (branch deleted)			
+ext/early-hard-landing	conflict vs main: port or regate on its own PR	2026-11-12T19:30:10Z	19	39
+ext/extra-load-stall	conflict vs main: port or regate on its own PR	2026-11-23T12:44:55Z	32	1
+ext/farm-boki-xp-curve-port	conflict vs main: port or regate on its own PR	2026-11-27T14:46:35Z	54	2
+ext/farm-carry-boki	conflict vs main: port or regate on its own PR	2026-11-10T06:31:46Z	2	5
+ext/farm-carry-boki-rebased	gone (branch deleted)			
+ext/farm-carry-trail-0245	conflict vs main: port or regate on its own PR	2026-11-12T15:09:51Z	2	3
+ext/farm-demo-evolve-gate	gone (branch deleted)			
+ext/farm-feed-bowl	conflict vs main: port or regate on its own PR	2026-11-10T00:25:31Z	1	10
+ext/farm-feed-bowl-port	conflict vs main: port or regate on its own PR	2026-11-12T22:09:10Z	63	162
+ext/farm-games-picker-base	conflict vs main: port or regate on its own PR	2026-11-12T21:10:52Z	2	5
+ext/farm-garden-day-replay	merged into stuck-integ-3b85ff7d	2026-11-27T18:55:59Z	16	
+ext/farm-greet-home	conflict vs main: port or regate on its own PR	2026-11-12T21:54:29Z	2	8
+ext/farm-hunter-look-1125	in main	2026-11-26T15:15:51-05:00	0	
+ext/farm-leave-match-order	gone (branch deleted)			
+ext/farm-minkee-name	gone (branch deleted)			
+ext/farm-mood-icons-rebased	gone (branch deleted)			
+ext/farm-new-toy	conflict vs main: port or regate on its own PR	2026-11-12T22:25:30Z	6	11
+ext/farm-respec	conflict vs main: port or regate on its own PR	2026-11-12T20:58:51Z	2	7
+ext/farm-sick-recover-port	conflict vs main: port or regate on its own PR	2026-11-13T00:51:52Z	63	164
+ext/farm-stolen-homecoming	gone (branch deleted)			
+ext/farm-tut-ends	superseded: merges clean, adds nothing over main	2026-11-27T18:50:57Z	12	
+ext/farm-unmasked-feet	conflict vs main: port or regate on its own PR	2026-11-13T19:40:42Z	4	7
+ext/farm-w0246-flakes	gone (branch deleted)			
+ext/feel-buffers-leftovers	conflict vs main: port or regate on its own PR	2026-11-12T23:42:15Z	7	20
+ext/feel-buffers-tuning	conflict vs main: port or regate on its own PR	2026-11-13T00:41:34Z	5	16
+ext/feel-cast-into-cast-slice	gone (branch deleted)			
+ext/feel-chain-sweep-1111	gone (branch deleted)			
+ext/feel-cinder-poof-cancel	gone (branch deleted)			
+ext/feel-dash-wall-slide-rebased	conflict vs main: port or regate on its own PR	2026-11-12T19:51:24Z	11	423
+ext/feel-gil-sweeps	conflict vs main: port or regate on its own PR	2026-11-14T00:52:21Z	5	14
+ext/feel-online-kitefall	conflict vs main: port or regate on its own PR	2026-11-12T20:20:17Z	3	7
+ext/feel-remote-move-clear	conflict vs main: port or regate on its own PR	2026-11-12T20:27:27Z	2	4
+ext/feel-summon-on-g	conflict vs main: port or regate on its own PR	2026-11-12T18:59:26Z	7	19
+ext/feel-trigger-edge	conflict vs main: port or regate on its own PR	2026-11-09T22:45:56Z	3	5
+ext/feel-vex-e-recovery	conflict vs main: port or regate on its own PR	2026-11-11T22:31:18Z	3	12
+ext/feel-w0246-combo-reds	gone (branch deleted)			
+ext/feel-w0246-frame-reds	gone (branch deleted)			
+ext/feel-w0246-glide-reds	gone (branch deleted)			
+ext/feel-w0246-knock-reds	gone (branch deleted)			
+ext/feel-wisp-orbit-follow	gone (branch deleted)			
+ext/fold-anim-boki-1112	gone (branch deleted)			
+ext/game-rules-nov8	gone (branch deleted)			
+ext/garden-balance-apply	gone (branch deleted)			
+ext/garden-bramble-dupes	gone (branch deleted)			
+ext/garden-cinderstep	conflict vs main: port or regate on its own PR	2026-11-10T11:10:55Z	2	15
+ext/garden-cinderstep-zone-rebased	conflict vs main: port or regate on its own PR	2026-11-11T10:22:31Z	4	20
+ext/garden-deflake	gone (branch deleted)			
+ext/garden-horizon	gone (branch deleted)			
+ext/garden-hub-move	conflict vs main: port or regate on its own PR	2026-11-10T08:15:08Z	2	11
+ext/garden-hub-theme	conflict vs main: port or regate on its own PR	2026-11-10T11:28:54Z	3	14
+ext/garden-integrated-rebased	conflict vs main: port or regate on its own PR	2026-11-12T17:23:40Z	12	67
+ext/garden-items-form	conflict vs main: port or regate on its own PR	2026-11-12T22:14:24Z	61	162
+ext/garden-play-0246	conflict vs main: port or regate on its own PR	2026-11-13T01:22:57Z	63	193
+ext/garden-prizes-cups-rebased	gone (branch deleted)			
+ext/garden-race-ghost	conflict vs main: port or regate on its own PR	2026-11-13T18:45:52Z	2	5
+ext/garden-ridge-rebased	conflict vs main: port or regate on its own PR	2026-11-12T19:46:16Z	6	204
+ext/garden-sick-recover	conflict vs main: port or regate on its own PR	2026-11-13T01:19:28Z	64	159
+ext/garden-snacks-all-types-rebased	gone (branch deleted)			
+ext/garden-soak-zones	conflict vs main: port or regate on its own PR	2026-11-12T20:42:43Z	2	7
+ext/garden-trait-drift	conflict vs main: port or regate on its own PR	2026-11-09T16:20:52Z	1	8
+ext/garden-wishes-away-rebased	gone (branch deleted)			
+ext/garden-zone-cinderstep	conflict vs main: port or regate on its own PR	2026-11-10T10:38:59Z	4	17
+ext/glider-heat-parity	gone (branch deleted)			
+ext/grimble-fist-vfx-rebased	conflict vs main: port or regate on its own PR	2026-11-09T23:10:29Z	6	9
+ext/grimble-parity-verify	conflict vs main: port or regate on its own PR	2026-11-09T06:40:32Z	1	5
+ext/grimble-stretch-v2-rebased	gone (branch deleted)			
+ext/grimble-v95-rebased	gone (branch deleted)			
+ext/hatch-mask-polish-1111	conflict vs main: port or regate on its own PR	2026-11-12T21:51:16Z	4	14
+ext/heal-knock-source-rebased	conflict vs main: port or regate on its own PR	2026-11-13T21:16:01Z	2	5
+ext/herovfx-mode-clash	conflict vs main: port or regate on its own PR	2026-11-13T01:12:21Z	4	17
+ext/hires-splash-rotation	conflict vs main: port or regate on its own PR	2026-11-13T01:01:59Z	155	185
+ext/hitstop-parity	conflict vs main: port or regate on its own PR	2026-11-09T08:51:28Z	8	19
+ext/hud-ref-copy-2	conflict vs main: port or regate on its own PR	2026-11-12T23:22:14Z	3	12
+ext/hudreveal-fold	conflict vs main: port or regate on its own PR	2026-11-21T17:12:16Z	7	2
+ext/hunter-3d-vex-sparkle-1115	conflict vs main: port or regate on its own PR	2026-11-16T00:51:56Z	4	12
+ext/hunter-first-hints	conflict vs main: port or regate on its own PR	2026-11-09T13:08:46Z	1	24
+ext/hunter-first-hints-port	conflict vs main: port or regate on its own PR	2026-11-18T04:27:55Z	4	72
+ext/hunter-regen-meshy	conflict vs main: port or regate on its own PR	2026-11-10T09:03:06Z	4	9
+ext/hunter-revamp-af	gone (branch deleted)			
+ext/hunter-revamp-go	conflict vs main: port or regate on its own PR	2026-11-09T21:28:12Z	5	16
+ext/hunters3d-0246	conflict vs main: port or regate on its own PR	2026-11-12T21:10:57Z	22	36
+ext/hushwood-port	conflict vs main: port or regate on its own PR	2026-11-12T22:12:36Z	65	158
+ext/idle-archer-rebased	conflict vs main: port or regate on its own PR	2026-11-09T03:19:57Z	3	5
+ext/idle-dredge-rebased	gone (branch deleted)			
+ext/idle-gunslinger-rebased	conflict vs main: port or regate on its own PR	2026-11-09T03:07:07Z	2	5
+ext/idle-ostra	gone (branch deleted)			
+ext/idle-tender-rebased	gone (branch deleted)			
+ext/ingame-sync-sable	gone (branch deleted)			
+ext/integ-1113-D2	gone (branch deleted)			
+ext/integ-1113-D3	conflict vs main: port or regate on its own PR	2026-11-14T00:11:58Z	84	77
+ext/integ-ways-out-0245	gone (branch deleted)			
+ext/kael-cancels-1111	gone (branch deleted)			
+ext/kael-chainlunge-cleanup	gone (branch deleted)			
+ext/kael-drop-down	gone (branch deleted)			
+ext/kael-lunge-length-rebased-rebased	gone (branch deleted)			
+ext/kael-owner-1111	gone (branch deleted)			
+ext/kael-rmb-dash-turn	conflict vs main: port or regate on its own PR	2026-11-09T08:45:32Z	1	8
+ext/kael-rmb-line-1111	gone (branch deleted)			
+ext/kael-rmb-unlock-rebased	gone (branch deleted)			
+ext/knock-moment	gone (branch deleted)			
+ext/knock-rows-green	in main	2026-11-20T14:23:43Z	0	
+ext/landing-recovery	conflict vs main: port or regate on its own PR	2026-11-09T13:25:27Z	3	12
+ext/mantle-look-one-home	conflict vs main: port or regate on its own PR	2026-11-12T21:00:03Z	2	4
+ext/mantle-port-b	gone (branch deleted)			
+ext/match-cam-wide-1112	conflict vs main: port or regate on its own PR	2026-11-13T21:18:15Z	20	37
+ext/mc-	gone (branch deleted)			
+ext/mc-20261109-2230	gone (branch deleted)			
+ext/mc-20261110-0630	gone (branch deleted)			
+ext/mc-20261111-1706	gone (branch deleted)			
+ext/mc-integ-1112b	gone (branch deleted)			
+ext/mc-integ-1112d	gone (branch deleted)			
+ext/mc-integ-f1-1118	merged into stuck-integ-3b85ff7d	2026-11-27T18:44:26Z	133	
+ext/meeko-loops-rebake	conflict vs main: port or regate on its own PR	2026-11-13T01:09:43Z	149	139
+ext/meeko-rmb-verify-rebased-rebased	conflict vs main: port or regate on its own PR	2026-11-10T12:51:49Z	2	22
+ext/meeko-root-rebased	gone (branch deleted)			
+ext/menus-more	gone (branch deleted)			
+ext/merge-batch-19-1113	gone (branch deleted)			
+ext/merge-batch-20-1113	gone (branch deleted)			
+ext/merge-batch-25-1113	gone (branch deleted)			
+ext/merge-batch-6-1113	gone (branch deleted)			
+ext/merge-lane-artdata-1118-b	conflict vs main: port or regate on its own PR	2026-11-22T15:07:07Z	40	11
+ext/merge-lane-conflict-a-1124	in main	2026-11-27T13:42:14Z	0	
+ext/merge-lane-hunters8-1114	gone (branch deleted)			
+ext/merge-lane-M1-1121	conflict vs main: port or regate on its own PR	2026-11-21T17:12:22Z	43	32
+ext/merge-lane-M4-1121	in main	2026-11-26T07:36:17Z	0	
+ext/merge-lane-M5-1121	conflict vs main: port or regate on its own PR	2026-11-21T19:14:23Z	56	30
+ext/merge-lane-M7-1121	merged into stuck-integ-3b85ff7d	2026-11-27T19:06:43Z	125	
+ext/merge-lane-N1-1120	conflict vs main: port or regate on its own PR	2026-11-20T20:53:20Z	108	123
+ext/merge-lane-N1-1122	conflict vs main: port or regate on its own PR	2026-11-27T13:58:40Z	113	10
+ext/merge-lane-n19h-1119	conflict vs main: port or regate on its own PR	2026-11-27T01:21:46Z	1	1
+ext/merge-lane-N2-1120	conflict vs main: port or regate on its own PR	2026-11-23T10:57:04Z	127	101
+ext/merge-lane-N2-1122	merged into stuck-integ-3b85ff7d	2026-11-27T19:35:42Z	124	
+ext/merge-lane-n23a-1123	conflict vs main: port or regate on its own PR	2026-11-27T11:55:29Z	98	6
+ext/merge-lane-n23b-1123	conflict vs main: port or regate on its own PR	2026-11-23T11:20:29Z	69	18
+ext/merge-lane-n23c-1123	conflict vs main: port or regate on its own PR	2026-11-27T14:26:37Z	138	2
+ext/merge-lane-n23e-1123	conflict vs main: port or regate on its own PR	2026-11-23T17:14:20Z	81	19
+ext/merge-lane-N3-1120	conflict vs main: port or regate on its own PR	2026-11-20T20:22:59Z	30	34
+ext/merge-lane-N3-1122	conflict vs main: port or regate on its own PR	2026-11-27T14:46:20Z	109	3
+ext/merge-lane-uihud-1117	conflict vs main: port or regate on its own PR	2026-11-23T18:06:18Z	17	17
+ext/misc-ready-integ	conflict vs main: port or regate on its own PR	2026-11-08T11:53:48Z	11	19
+ext/move-rule-guard-0246	conflict vs main: port or regate on its own PR	2026-11-12T23:00:44Z	128	130
+ext/net-rejoin	conflict vs main: port or regate on its own PR	2026-11-12T18:36:00Z	2	3
+ext/no-dash-bursts-audit-rebased-rebased	gone (branch deleted)			
+ext/no-natural-death-1108	conflict vs main: port or regate on its own PR	2026-11-08T23:32:35Z	2	4
+ext/ostra-gait-rebased	gone (branch deleted)			
+ext/p02-port-1118	merged into stuck-integ-3b85ff7d	2026-11-27T16:16:52Z	61	
+ext/p17-port-1118	conflict vs main: port or regate on its own PR	2026-11-24T02:15:49Z	5	6
+ext/p19-models-split-1118	conflict vs main: port or regate on its own PR	2026-11-20T01:19:29Z	7	4
+ext/parity-albert-blow-stun	gone (branch deleted)			
+ext/parity-bulwark-guardcut	conflict vs main: port or regate on its own PR	2026-11-12T12:36:01Z	2	15
+ext/parity-kael-clips	conflict vs main: port or regate on its own PR	2026-11-08T02:34:51Z	1	9
+ext/parity-neve-dart-burst	conflict vs main: port or regate on its own PR	2026-11-12T02:14:47Z	1	10
+ext/parity-rider-sweep-0246	gone (branch deleted)			
+ext/parity-snowglide-rebased-rebased	conflict vs main: port or regate on its own PR	2026-11-09T03:55:06Z	8	710
+ext/parity-stranded-0246	conflict vs main: port or regate on its own PR	2026-11-13T01:25:40Z	156	262
+ext/parity-ttk-cinder-neve	gone (branch deleted)			
+ext/parity-verify-0245-slice	gone (branch deleted)			
+ext/particle-budget	conflict vs main: port or regate on its own PR	2026-11-09T08:14:52Z	6	9
+ext/perf-mob-cap	conflict vs main: port or regate on its own PR	2026-11-12T15:50:11Z	4	4
+ext/perf-occluder-pool-rows	gone (branch deleted)			
+ext/perf-train-0245-rebased	conflict vs main: port or regate on its own PR	2026-11-12T19:44:54Z	40	33
+ext/perf-visibility-ranges-rebased	conflict vs main: port or regate on its own PR	2026-11-12T15:08:15Z	2	2
+ext/portraits-unified	conflict vs main: port or regate on its own PR	2026-11-07T13:45:14Z	1	16
+ext/prematch-safe-720	conflict vs main: port or regate on its own PR	2026-11-13T18:07:55Z	3	3
+ext/r2a-tenzo-neve-grimble-1118	conflict vs main: port or regate on its own PR	2026-11-22T02:56:15Z	12	7
+ext/recast-buffer-expired	conflict vs main: port or regate on its own PR	2026-11-09T11:16:38Z	1	8
+ext/release-integ-0243-rebased	gone (branch deleted)			
+ext/release-integ-0243-rebased-rebased	conflict vs main: port or regate on its own PR	2026-11-09T03:50:41Z	2	711
+ext/release-integ-0244-a4alt	conflict vs main: port or regate on its own PR	2026-11-10T10:47:02Z	7	7
+ext/reset-cue-rebased	gone (branch deleted)			
+ext/revive-sickness-lamp	conflict vs main: port or regate on its own PR	2026-11-27T14:53:13Z	64	1
+ext/revive-source-numbers	conflict vs main: port or regate on its own PR	2026-11-13T20:11:29Z	4	29
+ext/rig-bakeoff-meshy-1117	conflict vs main: port or regate on its own PR	2026-11-17T23:56:43Z	11	11
+ext/rig-bakeoff-weights-1117	conflict vs main: port or regate on its own PR	2026-11-17T21:59:07Z	14	9
+ext/rimewright-skate-rebased	gone (branch deleted)			
+ext/scrapking-lmb-clips	conflict vs main: port or regate on its own PR	2026-11-08T21:52:52Z	1	0
+ext/sfx-biome-beds	conflict vs main: port or regate on its own PR	2026-11-12T21:55:45Z	4	5
+ext/sfx-boki-ability-impacts	conflict vs main: port or regate on its own PR	2026-11-12T23:44:01Z	6	9
+ext/sfx-boki-voices-3	conflict vs main: port or regate on its own PR	2026-11-12T23:09:23Z	62	127
+ext/sfx-coverage-world	conflict vs main: port or regate on its own PR	2026-11-12T22:25:35Z	9	26
+ext/sfx-extract-cues	gone (branch deleted)			
+ext/sfx-garden-games-rebased	conflict vs main: port or regate on its own PR	2026-11-10T09:17:57Z	2	20
+ext/sfx-garden-zone-music	conflict vs main: port or regate on its own PR	2026-11-12T22:33:28Z	3	10
+ext/sfx-grimble-slug-hits	merged into stuck-integ-3b85ff7d	2026-11-26T15:16:12-05:00	20	
+ext/sfx-heartspark	conflict vs main: port or regate on its own PR	2026-11-10T00:53:10Z	1	6
+ext/sfx-hit-tier-confirm	conflict vs main: port or regate on its own PR	2026-11-27T16:13:25Z	17	1
+ext/sfx-hunter-wisp-hum	conflict vs main: port or regate on its own PR	2026-11-10T12:24:46Z	1	12
+ext/sfx-kit-placeholders-2	conflict vs main: port or regate on its own PR	2026-11-12T21:05:22Z	8	28
+ext/sfx-listener-hunter	gone (branch deleted)			
+ext/sfx-loot-open	conflict vs main: port or regate on its own PR	2026-11-12T15:07:38Z	2	8
+ext/sfx-low-hp-filter-rebased	gone (branch deleted)			
+ext/sfx-mob-attacks	conflict vs main: port or regate on its own PR	2026-11-12T15:03:41Z	2	9
+ext/sfx-native-steps	in main	2026-11-26T15:32:20Z	0	
+ext/sfx-neve-skate	conflict vs main: port or regate on its own PR	2026-11-12T21:28:04Z	4	14
+ext/sfx-pick-taken	gone (branch deleted)			
+ext/sfx-stomp	gone (branch deleted)			
+ext/sfx-stomp-1111	conflict vs main: port or regate on its own PR	2026-11-12T23:58:19Z	9	21
+ext/sfx-voice-cap	conflict vs main: port or regate on its own PR	2026-11-13T20:32:36Z	4	6
+ext/skin-relax-four	gone (branch deleted)			
+ext/skin-relax-slice	gone (branch deleted)			
+ext/slam-follow-keys	conflict vs main: port or regate on its own PR	2026-11-24T16:11:47Z	14	1
+ext/spike-on-glidespike	conflict vs main: port or regate on its own PR	2026-11-12T22:27:42Z	62	202
+ext/spike-slam-rebased	gone (branch deleted)			
+ext/split-rimewright-spear	conflict vs main: port or regate on its own PR	2026-11-12T20:22:04Z	2	3
+ext/split-ui	gone (branch deleted)			
+ext/step-sounds-unified-rebased	conflict vs main: port or regate on its own PR	2026-11-12T19:38:40Z	9	463
+ext/stomp-lock-1111	conflict vs main: port or regate on its own PR	2026-11-13T00:41:58Z	7	16
+ext/stuck-integ-09e533a4	conflict vs main: port or regate on its own PR	2026-11-14T04:23:57Z	15	21
+ext/stuck-integ-11014837	gone (branch deleted)			
+ext/stuck-integ-1afe8a57	in main	2026-11-27T07:36:59Z	0	
+ext/stuck-integ-1e7cf134	conflict vs main: port or regate on its own PR	2026-11-20T21:26:45Z	23	14
+ext/stuck-integ-33633bba	conflict vs main: port or regate on its own PR	2026-11-25T00:56:08Z	219	24
+ext/stuck-integ-38a28c4e	gone (branch deleted)			
+ext/stuck-integ-390f1ff8	conflict vs main: port or regate on its own PR	2026-11-24T15:30:03Z	225	42
+ext/stuck-integ-3b85ff7d	gone (branch deleted)			
+ext/stuck-integ-42241ff1	conflict vs main: port or regate on its own PR	2026-11-13T10:13:21Z	53	225
+ext/stuck-integ-4303fcaa	conflict vs main: port or regate on its own PR	2026-11-25T02:33:15Z	402	71
+ext/stuck-integ-4409db43	conflict vs main: port or regate on its own PR	2026-11-24T19:52:59Z	284	135
+ext/stuck-integ-4a904438	conflict vs main: port or regate on its own PR	2026-11-24T05:39:29Z	337	84
+ext/stuck-integ-4dec4626	conflict vs main: port or regate on its own PR	2026-11-20T10:25:30Z	26	17
+ext/stuck-integ-50964d2a	conflict vs main: port or regate on its own PR	2026-11-26T13:19:24Z	434	48
+ext/stuck-integ-5a53049c	conflict vs main: port or regate on its own PR	2026-11-23T22:51:41Z	178	46
+ext/stuck-integ-5f7f820f	conflict vs main: port or regate on its own PR	2026-11-22T13:30:47Z	187	200
+ext/stuck-integ-80eeac26	conflict vs main: port or regate on its own PR	2026-11-26T14:29:59Z	149	10
+ext/stuck-integ-86b7d6eb	conflict vs main: port or regate on its own PR	2026-11-13T10:13:23Z	25	187
+ext/stuck-integ-8fc48065	conflict vs main: port or regate on its own PR	2026-11-27T12:35:31Z	336	9
+ext/stuck-integ-a56f6457	conflict vs main: port or regate on its own PR	2026-11-25T19:33:06Z	292	32
+ext/stuck-integ-a6af81f7	conflict vs main: port or regate on its own PR	2026-11-12T02:58:38Z	256	110
+ext/stuck-integ-aeb8eb0f	conflict vs main: port or regate on its own PR	2026-11-15T05:37:12Z	90	32
+ext/stuck-integ-b7a5717c	conflict vs main: port or regate on its own PR	2026-11-10T14:30:12Z	54	161
+ext/stuck-integ-b996ff59	conflict vs main: port or regate on its own PR	2026-11-23T17:47:49Z	65	29
+ext/stuck-integ-c14ccd66	gone (branch deleted)			
+ext/stuck-integ-c2a69297	conflict vs main: port or regate on its own PR	2026-11-14T18:29:11Z	167	464
+ext/stuck-integ-c70a5076	conflict vs main: port or regate on its own PR	2026-11-26T08:06:36Z	546	53
+ext/stuck-integ-d1b03416	conflict vs main: port or regate on its own PR	2026-11-21T20:28:57Z	397	328
+ext/stuck-integ-d2f36c16	conflict vs main: port or regate on its own PR	2026-11-12T18:26:04Z	69	107
+ext/stuck-integ-d4379965	conflict vs main: port or regate on its own PR	2026-11-12T17:10:55Z	22	163
+ext/stuck-integ-dcde0252	merged into stuck-integ-3b85ff7d	2026-11-26T15:15:30-05:00	192	
+ext/stuck-integ-e2561d23	conflict vs main: port or regate on its own PR	2026-11-09T16:59:58Z	9	26
+ext/stuck-integ-e28956f8	gone (branch deleted)			
+ext/stuck-integ-e804806c	conflict vs main: port or regate on its own PR	2026-11-23T15:26:17Z	246	65
+ext/stuck-integ-ed6637f4	not scanned (merge-tree over 60 s): union train on its own PR path	2026-11-23T08:02:42Z	353	
+ext/stuck-integ-f44ae5a2	gone (branch deleted)			
+ext/stuck-integ-f60f9dd7	gone (branch deleted)			
+ext/stuck-integ-f6bd2b7c	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-14T00:54:02Z	8	
+ext/stuck-integ-fb8a2ad6	conflict vs main: port or regate on its own PR	2026-11-26T02:34:34Z	432	77
+ext/summon-clips-port	gone (branch deleted)			
+ext/summon-kill-credit-rebased	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T18:02:39Z	27	
+ext/summon-pve-rules-rebased	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T20:19:46Z	7	
+ext/summon-share-port	gone (branch deleted)			
+ext/supervive-impact	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-09T07:48:25Z	7	
+ext/sv-private-1112	gone (branch deleted)			
+ext/telegraph-drawn-hit-port	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-13T01:10:06Z	106	
+ext/tenzo-press-windup	superseded: merges clean, adds nothing over main	2026-11-25T23:28:58-05:00	1	
+ext/train-auto-1124-1907-b912-2	superseded: merges clean, adds nothing over main	2026-11-26T13:34:08Z	6	
+ext/train-moving-dummies-rebased	gone (branch deleted)			
+ext/ttk-fix-1124	in main	2026-11-26T14:15:03Z	0	
+ext/ttk-kael	gone (branch deleted)			
+ext/tut-air-rings	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-13T20:25:40Z	3	
+ext/tut-beat-retry	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-10T07:43:15Z	1	
+ext/tut-beat-retry-port	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T21:57:58Z	34	
+ext/tut-beat-retry-rebased	gone (branch deleted)			
+ext/tut-creator-first	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-11T12:32:03Z	2	
+ext/tut-dive-hint	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-10T16:33:18Z	1	
+ext/tut-duel-hint-port	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-11T23:08:39Z	32	
+ext/tut-duel-ring-rebased	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-11T06:08:50Z	2	
+ext/tut-eight-steps	gone (branch deleted)			
+ext/tut-event-hints-rebased	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-11T06:15:22Z	4	
+ext/tut-first-camp	gone (branch deleted)			
+ext/tut-first-fuse	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T16:27:22Z	12	
+ext/tut-first-games	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-10T13:19:57Z	2	
+ext/tut-first-games-port	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T22:15:49Z	64	
+ext/tut-first-utility	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-11T06:26:07Z	3	
+ext/tut-garden-first-day-rebased	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-10T21:38:50Z	3	
+ext/tut-hints-blight-camp-box	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-13T01:39:08Z	4	
+ext/tut-hot-zone-line	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-10T16:39:16Z	1	
+ext/tut-hud-pointers	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T23:32:09Z	5	
+ext/tut-keycap-audit	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T21:15:21Z	2	
+ext/tut-last-hit-xp	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T21:27:12Z	5	
+ext/tut-lead-swap-hint	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-13T20:11:37Z	15	
+ext/tut-lookout-kick	gone (branch deleted)			
+ext/tut-no-ripe-timer-1111	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T21:41:41Z	34	
+ext/tutorial-idle-check	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-09T12:11:28Z	1	
+ext/tutorial-wall-kick-step	in main	2026-11-26T12:55:13Z	0	
+ext/tut-playthrough-gate	gone (branch deleted)			
+ext/tut-retry-port	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T21:59:32Z	35	
+ext/tut-revive-hint	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-11T06:08:19Z	1	
+ext/tut-rocket-hint	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T21:24:46Z	2	
+ext/tut-signature-drills	gone (branch deleted)			
+ext/tut-solo-words	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T22:25:57Z	17	
+ext/tut-start-here-rebased-rebased	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-11T06:19:27Z	6	
+ext/tut-station-goals-rebased	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T17:34:51Z	8	
+ext/tut-step-count	conflict vs main: port or regate on its own PR	2026-11-20T06:30:13Z	13	18
+ext/tut-summon-killed	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T20:15:49Z	6	
+ext/tut-summon-pad	gone (branch deleted)			
+ext/tut-summon-station	gone (branch deleted)			
+ext/tut-wall-kick-hint	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-10T18:00:30Z	1	
+ext/tut-ways-out	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-10T19:34:05Z	4	
+ext/tut-xp-share	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T19:50:31Z	6	
+ext/tut-zoom-hint	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-13T19:31:44Z	4	
+ext/ui-ability-text-one-v3	gone (branch deleted)			
+ext/ui-aspect-sweep	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-13T01:28:56Z	152	
+ext/ui-banner-queue	gone (branch deleted)			
+ext/ui-banner-queue-calm	gone (branch deleted)			
+ext/ui-boki-box-carry	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T22:57:54Z	163	
+ext/ui-boki-box-hazard	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-13T21:04:52Z	10	
+ext/ui-boki-next-form	gone (branch deleted)			
+ext/ui-clutter-zone-1116	gone (branch deleted)			
+ext/ui-declutter-1111	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T21:56:23Z	3	
+ext/ui-dex-filters	gone (branch deleted)			
+ext/ui-dex-legendary-order	gone (branch deleted)			
+ext/ui-dmg-number-kinds	in main	2026-11-27T07:43:05Z	0	
+ext/ui-expedition-first	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-13T18:59:47Z	4	
+ext/ui-font-wght-tag	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-13T00:11:30Z	4	
+ext/ui-fusion-hud	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T15:07:24Z	3	
+ext/ui-hud-reveal-1110	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T19:34:55Z	6	
+ext/ui-hud-scale	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-13T19:02:34Z	6	
+ext/ui-interact-port	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-13T01:15:20Z	158	
+ext/ui-knock-callout	gone (branch deleted)			
+ext/ui-level-gap	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T20:50:07Z	21	
+ext/ui-loading-bar-steady	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-13T01:11:24Z	104	
+ext/ui-loot-compare	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T22:12:20Z	156	
+ext/ui-native-plate-height	merged into stuck-integ-3b85ff7d	2026-11-27T13:55:21Z	16	
+ext/ui-next-form-port	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T22:28:31Z	156	
+ext/ui-overload-1115	in main	2026-11-18T15:36:14Z	0	
+ext/ui-plate-status-row	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T22:07:24Z	5	
+ext/ui-portal-boki-card	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T19:36:14Z	4	
+ext/ui-prematch-margin	gone (branch deleted)			
+ext/ui-results-first	gone (branch deleted)			
+ext/ui-ride-pick	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-13T01:49:54Z	4	
+ext/ui-safe-area-one	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-13T21:41:41Z	4	
+ext/ui-settings-trim	gone (branch deleted)			
+ext/ui-squad-killer	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T23:44:47Z	2	
+ext/ui-stolen-wisps	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-09T22:06:46Z	5	
+ext/ui-stomp-picker	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T23:52:28Z	8	
+ext/ui-stomp-ring	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-13T00:12:44Z	11	
+ext/ui-stomp-state	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T23:54:39Z	7	
+ext/ui-summon-card	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T21:29:21Z	21	
+ext/ui-text-size	gone (branch deleted)			
+ext/ui-tip-card-one-prompt	gone (branch deleted)			
+ext/ui-trios-only-text	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T20:48:27Z	4	
+ext/ui-void-masks-v3	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T17:44:16Z	5	
+ext/ui-w0246-boki-reds	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-13T01:29:37Z	152	
+ext/ui-w0246-layout-reds	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-13T01:31:37Z	155	
+ext/utility-parity-0246	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-11T21:59:26Z	115	
+ext/util-tonic-lamp	gone (branch deleted)			
+ext/util-tonic-lamp-rebased	gone (branch deleted)			
+ext/verify-stomp-break-sweep	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T23:59:11Z	11	
+ext/verify-ttk-0246	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-13T10:13:08Z	131	
+ext/verify-tut-starters-0246	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T22:23:51Z	36	
+ext/verify-w0246-audio	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T22:46:09Z	7	
+ext/vex-body7-1111	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T21:18:44Z	2	
+ext/vex-dash-charge-port	gone (branch deleted)			
+ext/vex-greenfire-1108	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-13T21:08:56Z	3	
+ext/vfx-air-rings-read	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T23:13:09Z	11	
+ext/vfx-albert-gap8	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-11T09:23:02Z	2	
+ext/vfx-archer-strips	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-08T21:39:49Z	1	
+ext/vfx-carry-wisps	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T22:18:57Z	107	
+ext/vfx-cinder-ignite-orb	gone (branch deleted)			
+ext/vfx-colour-audit	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-13T01:22:33Z	5	
+ext/vfx-dash-no-rings	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-13T10:12:48Z	126	
+ext/vfx-dolm-shots	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-08T21:20:03Z	2	
+ext/vfx-gil-colour	gone (branch deleted)			
+ext/vfx-grimble-data	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-13T00:32:56Z	18	
+ext/vfx-grimble-fist-port	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T23:33:52Z	18	
+ext/vfx-kael-hold-arc	gone (branch deleted)			
+ext/vfx-kael-kit	gone (branch deleted)			
+ext/vfx-lace-impact	gone (branch deleted)			
+ext/vfx-lace-spirit-walk	gone (branch deleted)			
+ext/vfx-lowpreset-read	gone (branch deleted)			
+ext/vfx-mage-strips	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-08T22:49:49Z	1	
+ext/vfx-meeko-c-column	gone (branch deleted)			
+ext/vfx-meeko-kindle	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-09T22:17:49Z	2	
+ext/vfx-meeko-palette	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T22:27:35Z	6	
+ext/vfx-meeko-weight-rebased-rebased	gone (branch deleted)			
+ext/vfx-mob-telegraphs	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T19:59:07Z	4	
+ext/vfx-motley-kit	gone (branch deleted)			
+ext/vfx-motley-port	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-13T00:52:20Z	151	
+ext/vfx-origin-v2-rebased	gone (branch deleted)			
+ext/vfx-pass	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-09T07:43:50Z	23	
+ext/vfx-pass-triage	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T22:57:06Z	11	
+ext/vfx-quality-motley	gone (branch deleted)			
+ext/vfx-rival-read	superseded: merges clean, adds nothing over main	2026-11-26T05:47:06Z	1	
+ext/vfx-sable-data	gone (branch deleted)			
+ext/vfx-stolen-wisps-rebased	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T15:10:31Z	2	
+ext/vfx-strips-tender	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-08T21:23:26Z	1	
+ext/vfx-summon-ring	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T15:48:26Z	54	
+ext/vfx-telegraph-timing-rebased	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T22:24:06Z	29	
+ext/vfx-tenzo-data	gone (branch deleted)			
+ext/vfx-tenzo-punch-hold	gone (branch deleted)			
+ext/vfx-vex-tracer	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-13T01:18:11Z	4	
+ext/w0246-combat-b	gone (branch deleted)			
+ext/w0246-misc	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-13T00:23:55Z	101	
+ext/wisp-look-1112	gone (branch deleted)			
+ext/wisp-merge-from-wisp-rebased	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T17:38:55Z	13	
+ext/wisp-passive-stack-rebased	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T17:51:16Z	23	
+ext/wisp-summon-key-c	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-13T21:15:54Z	21	
+ext/wisp-summon-leash-rebased	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T17:44:31Z	21	
+ext/women-body-1111	not rescanned: unchanged since the 11-18 triage (ops/stuck-integ-8a30c285), conflict vs main	2026-11-12T20:58:59Z	3	
