@@ -113,7 +113,7 @@ static func blocks_glide(h: Hunter) -> bool:
 
 ## A Shift dash that meets a ledge in reach hands over to the mantle: what's left of the dash is dropped (the
 ## source's mini-mantle sets your speed from here, exit()), and the dash's speed takes you up the face, capped
-## at HunterFeel.lrise_speed, instead of the suction's slow pull (SV footage: dash at a rim, on top ~0.2 s later
+## at HunterFeel.lrise_speed, instead of the suction's slow pull ([footage] dash at a rim, on top ~0.2 s later
 ## at dash-trail speed, no stop). 0 when you aren't dashing.
 static func dash_rise(h: Hunter) -> float:
 	if h.roll_t <= 0.0 or h.move_kind != "dash":
