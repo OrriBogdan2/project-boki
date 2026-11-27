@@ -7,10 +7,10 @@ extends RefCounted
 ## after you hit the Strafer.
 
 const DT := 1.0 / 60.0
-const STAND := 3.0             # m in front of a dummy you stand (inside the Strafer's drill reach)
-const LONG := 2.5              # m: a mesh this long one way...
-const THIN := 2.0              # m: ...and at most this the other two is a line or a lane
-const FROM := 1.5              # m: an end this close to a dummy starts at it
+const STAND := 3.0  # m in front of a dummy you stand (inside the Strafer's drill reach)
+const LONG := 2.5  # m: a mesh this long one way...
+const THIN := 2.0  # m: ...and at most this the other two is a line or a lane
+const FROM := 1.5  # m: an end this close to a dummy starts at it
 
 var main: Node
 var fails := 0
@@ -44,7 +44,7 @@ func run(main_node: Node) -> void:
 			var d_v: Hunter = x["h"]
 			m.player.teleport(d_v.pos + Vector3(0, 0, STAND))
 			var found := []
-			for i in 4:      # 4 x 0.75 s: past the drill's first lane (DodgeDrill.FIRST_AT 1.5 s + its wind-up)
+			for i in 4:  # 4 x 0.75 s: past the drill's first lane (DodgeDrill.FIRST_AT 1.5 s + its wind-up)
 				await _run(m, 0.75)
 				_scan(m, ds, found)
 			ok("as %s beside the %s dummy: no line from a dummy" % [a, x["kind"]], found.is_empty(), ", ".join(found))
