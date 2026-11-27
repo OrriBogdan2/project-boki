@@ -6,11 +6,17 @@ extends "res://tools/hunter_scale_shots.gd"
 ## and the model's top: negative = the plate sits in the head), REFHUD (the vitals portrait, the health bar and the
 ## ability row as % of the screen) and REFMEAN (the mean and range of the heights). --stills also saves
 ## <dir>/<tag>_<hero>.png for the four STILLS heroes: the hero with a squad mate on its left and a Grimble rival on its
-## right (both idle), HUD on, so the own, ally and rival plates read side by side. Needs a renderer (xvfb or jobq gpu).
+## right (both idle), HUD on, so the own, ally and rival plates read side by side. --wide (with --stills and
+## --hero=gunslinger) saves <dir>/<tag>_wide.png instead: WIDE_HERO mid-row with three mates and three rivals out to
+## +-14 m, to show how much ground the start notch frames. Needs a renderer (xvfb or jobq gpu).
 
 const STILLS := ["juggernaut", "gunslinger", "ostra", "rimewright"]  # Kael, Vex, Motley, Neve
 const RIVAL := "dredge"  # Grimble: the tallest plate to clear
 const SIDE_M := 3.2  # m either side of the hero the still's mate and rival stand
+const WIDE_HERO := "gunslinger"  # --wide: this hero stands mid-row between three squad mates and three rivals
+const WIDE_ROW := [
+	[-14.0, "juggernaut"], [-8.5, "ostra"], [-4.0, "mage"], [4.0, "dredge"], [8.5, "thief"], [14.0, "rimewright"]
+]
 
 
 func run(main_node: Node) -> void:
@@ -18,6 +24,7 @@ func run(main_node: Node) -> void:
 	var heroes: Array = Arch.ids()
 	var tag := "now"
 	var stills := OS.get_cmdline_user_args().has("--stills")
+	var wide := stills and OS.get_cmdline_user_args().has("--wide")
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--hero="):
 			heroes = String(a).substr(7).split(",")
@@ -39,7 +46,10 @@ func run(main_node: Node) -> void:
 		var at := _arena_spot(m.player.pos)
 		_bare_floor(at)
 		var extra: Array = []
-		if stills and hero in STILLS:
+		var wide_shot := wide and hero == WIDE_HERO
+		if wide_shot:
+			extra = _wide_row(at)
+		elif stills and hero in STILLS:
 			var mate := "gunslinger" if hero != "gunslinger" else "juggernaut"
 			var team := m.player.team
 			extra.append(_idle("ref_mate", team, mate, at + Vector3(-SIDE_M, 0.0, 0.6)))
@@ -49,7 +59,7 @@ func run(main_node: Node) -> void:
 			_cam_row()
 		tall.append(_hero_row(hero))
 		if not extra.is_empty():
-			await _save("%s_%s.png" % [tag, hero])
+			await _save("%s_%s.png" % [tag, "wide" if wide_shot else hero])
 		if hero == heroes[0]:
 			_hud_row()
 		m.queue_free()
@@ -59,6 +69,15 @@ func run(main_node: Node) -> void:
 		mean += t / tall.size()
 	print("REFMEAN %d heroes: mean %.0f px, %.0f..%.0f px (target 100..112)" % [tall.size(), mean, tall[0], tall[-1]])
 	main.get_tree().quit(0)
+
+
+## WIDE_ROW's hunters: the first three on the hero's squad, the rest rivals, all idle, spread over the row.
+func _wide_row(at: Vector3) -> Array:
+	var out: Array = []
+	for i in WIDE_ROW.size():
+		var team := (m.player.team + (0 if i < 3 else 1)) % 2
+		out.append(_idle("ref_w%d" % i, team, WIDE_ROW[i][1], at + Vector3(WIDE_ROW[i][0], 0.0, 0.6 if i % 2 == 0 else -0.6)))
+	return out
 
 
 ## An idle hunter of `arch` (no brain: it stands where it is put) for the stills.
@@ -128,12 +147,12 @@ func _hero_row(hero: String) -> float:
 	var rp := m.cam.unproject_position(p.position + m.cam.char_lean() * Vector3(0, rival, 0))
 	var rf := HudPlate._frame_rect(0.0, 0.0, HudStyle.PLATE_W)
 	var tall := (feet.y - top) * _k()
-	var fmt := "REFH %s: %.0f px tall (top %.2f m), own plate %.0f px wide, gap %.0f px"
+	var fmt := "REFH %s: %.0f px tall (top %.2f m, top_h %.3f), own plate %.0f px wide, gap %.0f px"
 	fmt += "; as a rival (at %.2f m): %.0f px wide, gap %.0f px"
 	var own_gap := (top - plate.y - frame.size.y) * _k()
 	var rival_gap := (top - rp.y - rf.size.y) * _k()
 	var top_m := _top_m(p.model) - p.position.y
-	print(fmt % [hero, tall, top_m, frame.size.x * _k(), own_gap, rival, rf.size.x * _k(), rival_gap])
+	print(fmt % [hero, tall, top_m, top_m / p.vis_k, frame.size.x * _k(), own_gap, rival, rf.size.x * _k(), rival_gap])
 	return tall
 
 

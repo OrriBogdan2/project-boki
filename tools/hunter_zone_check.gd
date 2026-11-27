@@ -8,6 +8,8 @@ extends RefCounted
 ##   6. every archetype has its model's top (body.top_h) and its plate hangs clear over it at the match's drawn size
 ## Never touches the save.
 
+const MIN_GAP_PX := 8.0  # px at 1080p: the least air between a plate's bottom and the model's top
+
 var bad := 0
 var main: Node
 
@@ -175,8 +177,8 @@ func _plates_clear_tops(m: Match) -> void:
 		worst = minf(worst, gap)
 	ok(missing.is_empty(), "every archetype has body.top_h in its data (missing: %s)" % str(missing))
 	var k := 1080.0 / m.get_viewport().get_visible_rect().size.y  # viewport px to 1080p px
-	var msg := "a plate's bottom clears the tallest point of all %d archetypes (worst %.0f px at 1080p)"
-	ok(worst >= 0.0, msg % [Arch.ids().size(), worst * k])
+	var msg := "a plate's bottom clears the tallest point of all %d archetypes by 8 px (worst %.0f px at 1080p)"
+	ok(worst * k >= MIN_GAP_PX, msg % [Arch.ids().size(), worst * k])
 
 
 func _screen_y(m: Match, feet: Vector3, up: float) -> float:
