@@ -800,6 +800,8 @@ archetypes/juggernaut.json:dash.dist	4.5
 archetypes/juggernaut.json:dash.dodge_rage	15.0
 archetypes/juggernaut.json:dash.hit_dmg	6.0
 archetypes/juggernaut.json:dash.hit_kb	0.0
+archetypes/juggernaut.json:dash.lock_deg	35.0
+archetypes/juggernaut.json:dash.lock_t	0.8
 archetypes/juggernaut.json:dash.time	0.17
 archetypes/juggernaut.json:dash.tip_dmg	12.0
 archetypes/juggernaut.json:dash.tip_kb	0.0
