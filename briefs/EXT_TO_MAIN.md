@@ -11497,3 +11497,4 @@ READY ext/abyss-edge-parity-1127 196f405e36 (re-merged origin/main cb8941b9cb, c
 READY ext/lmb-anim-sync-1126 b0131c6267 (LMB attack clips land with the shot, 13 hunters + held variants within 50 ms; PR #1066)
 READY ext/online-desktop-relay-1127 d9788e98b47 (itch desktop build plays online via live boki-1 relay by default; party check +4)
 READY ext/online-desktop-relay-1127 38a295f76e (Net: itch/desktop build with no --server= plays online on the live relay; party check +4 asserts)
+READY ext/parity-recheck-kael caefa08aabd (Kael parity re-check)
