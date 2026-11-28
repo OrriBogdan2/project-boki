@@ -40,7 +40,7 @@ const NAMES := [
 ]
 const TABLE := {
 	S.ROAM: [S.EAT, S.NAP, S.PLAY, S.PLAY_WITH, S.WATCH, S.REACT, S.MENTOR, S.CHORE, S.LEAD, S.APPROACH, S.GREET],
-	S.GREET: [S.ROAM, S.NAP],  # you came back (BaseGreet): a look, or a run over
+	S.GREET: [S.ROAM, S.NAP, S.APPROACH],  # you came back (BaseGreet), or it trails you: your hand still calls it
 	S.APPROACH: [S.HAND_EAT, S.DONE],  # your hand (BaseHandFeed): walks over, then eats or sniffs and leaves
 	S.HAND_EAT: [S.DONE],
 	S.DONE: [S.ROAM],

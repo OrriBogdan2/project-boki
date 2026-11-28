@@ -363,7 +363,7 @@ func _hand_cases() -> void:
 				)
 				ok(float(k["trust"]) > trust0, "trusting: trust went up")
 				ok(_lean(k) > lean0, "trusting: the snack's own lean built (%.1f -> %.1f)" % [lean0, _lean(k)])
-				ok(fsm.is_in(BaseLife.S.ROAM) and not e.has("hand"), "trusting: back to its day, the hand is empty")
+				ok(_its_day(fsm, e) and not e.has("hand"), "trusting: back to its day, the hand is empty")
 			"shy":
 				ok(Econ.pantry(SNACK) == 2 and float(k["trust"]) == trust0, "shy: the first try is a hesitant look")
 				ok(not fsm.is_in(BaseLife.S.EAT) and e.has("hand_shy"), "shy: it remembers being asked")
@@ -379,8 +379,13 @@ func _hand_cases() -> void:
 					Econ.pantry(SNACK) == 2 and is_equal_approx(Care.need(k, "food"), food0),
 					"full: sniffed, snack kept"
 				)
-				ok(fsm.is_in(BaseLife.S.ROAM), "full: it left")
+				ok(_its_day(fsm, e), "full: it left")
 		ok(fsm.refused == 0, "%s: no machine refusal (%d)" % [who, fsm.refused])
 		home.queue_free()
 		await main.get_tree().process_frame
 	rules["base_mode"] = false
+
+
+## Back to its own day: roaming, or (your partner) trailing you again (BaseGreet.trail).
+func _its_day(fsm: Fsm, e: Dictionary) -> bool:
+	return fsm.is_in(BaseLife.S.ROAM) or (fsm.is_in(BaseLife.S.GREET) and e.get("life_greet", {}).has("trail"))
