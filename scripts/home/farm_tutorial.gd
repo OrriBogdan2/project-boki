@@ -201,7 +201,8 @@ static func detect() -> void:
 	if not active():
 		return
 	if base():
-		if did("eat") or did("toy") or Save.d["roster"].any(func(r): return not (r.get("lean", {}) as Dictionary).is_empty()):
+		var fed: bool = Save.d["roster"].any(func(r): return not (r.get("lean", {}) as Dictionary).is_empty())
+		if fed or did("eat") or did("toy"):
 			mark("meet")  # fed (or past it: an old save mid-tutorial), so it has been met and petted
 			mark("pet")
 			mark("eat")

@@ -259,7 +259,7 @@
 				"id": "pet",
 				"needs": ["meet"],
 				"title": "Pet it",
-				"hints": {"go": "Click your Boki (or press {details} next to it) and choose Pet. Give it a good scratch."},
+				"hints": {"go": "Click your Boki ({details}), choose Pet and give it a good scratch."},
 				"world": {"go": "Pet your Boki"},
 				"boki": "Scratches? Yes please!"
 			},

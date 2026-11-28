@@ -9,8 +9,9 @@ extends RefCounted
 ##      Done (not Feed) is the page's filled button until the trough step
 ##   5. in the world: Hob stands by the house and is talked to, the house is a free site that Boki
 ##      and the player build, save and load mid-build, skipping still puts the house down
-##   5. base_mode: the five-step base tutorial (meet, pet, feed and the lean, toy, name), your Boki leading each step, a Skip on screen at every step, resume after save and load,
-##      the farm guides retired
+##   5. base_mode: the five-step base tutorial (meet, pet, feed and the lean, toy, name), your Boki
+##      leading each step, a Skip on screen at every step, resume after save and load, the farm guides
+##      retired, old mid-tutorial saves finishing
 ##   6. the hub's first visit (HubFirstVisit): the Waystone marker, the one line on the first locked zone's
 ##      card, each once per save, and neither on a skipped save
 ## Never touches the real save.
@@ -215,7 +216,10 @@ func _base_old_saves() -> void:
 	for id in ["meet", "patch", "eat", "toy"]:
 		FarmTutorial.state()["did"][id] = true
 	FarmTutorial.detect()
-	ok(FarmTutorial.current() == "name" and FarmTutorial.did("pet"), "old save waiting at 'head out': only the name is left")
+	ok(
+		FarmTutorial.current() == "name" and FarmTutorial.did("pet"),
+		"old save waiting at 'head out': only the name is left"
+	)
 	var g := int(Save.d["gems"])
 	FarmTutorial.event("name")
 	var paid: bool = int(Save.d["gems"]) == g + int(FarmTutorial.option("end_gems"))
@@ -330,6 +334,8 @@ func _base_world() -> void:
 		guide.target("toy") == FarmTutorial.toy_spot() and _on_no_isle([guide.target("toy")]),
 		"toy: the marker is on the toy, not a side isle"
 	)
+	for held in ["hold_t", "look", "called_t"]:
+		k.erase(held)  # the pat's hold and look are over
 	_lead_tick(home, k)
 	var leading: bool = home.life.machine(k).is_in(BaseLife.S.LEAD)
 	ok(k.has("play") and not leading, "a toy down: it leaves the lead to go and play")
@@ -338,13 +344,19 @@ func _base_world() -> void:
 	home.life.machine(k).go(BaseLife.S.ROAM, "check")
 	home.ppos = k["node"].position + Vector3(1, 0, 0)
 	guide._poll()
-	ok(home.panel_open == "Name your Boki" and FarmTutorial.current() == "name", "name: the naming card opens by itself")
+	ok(
+		home.panel_open == "Name your Boki" and FarmTutorial.current() == "name",
+		"name: the naming card opens by itself"
+	)
 	var step := TutNameCard.open(home)
 	var gems1 := int(Save.d["gems"])
 	step.box.text = "Pip"
 	step.keep()
 	var named_ok: bool = String(k["rec"]["name"]) == "Pip" and not FarmTutorial.active()
-	ok(named_ok and int(Save.d["gems"]) == gems1 + int(FarmTutorial.option("end_gems")), "Keep renames it and ends the tutorial")
+	ok(
+		named_ok and int(Save.d["gems"]) == gems1 + int(FarmTutorial.option("end_gems")),
+		"Keep renames it and ends the tutorial"
+	)
 	home.queue_free()
 	await main.get_tree().process_frame
 	home = await _home(1)

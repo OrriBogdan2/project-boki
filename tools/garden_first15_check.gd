@@ -8,22 +8,23 @@ extends "res://tools/new_player_flow_check.gd"
 ## them is a gap: each 10 s window with no guidance is listed, and a gap of GAP_FAIL_S or more fails.
 ## Never touches the real save.
 
-const STEP_S := 0.05      # s of garden time per step
-const WINDOW_S := 10.0      # s: a window with no guidance at all is logged
-const REACT_S := 8.0      # s a player takes to do what a prompt says
-const RACE_MAX_S := 120.0      # s of race time a run may take
-const GAP_FAIL_S := 20.0      # s with no guidance that fails the check
+const STEP_S := 0.05  # s of garden time per step
+const WINDOW_S := 10.0  # s: a window with no guidance at all is logged
+const REACT_S := 8.0  # s a player takes to do what a prompt says
+const RACE_MAX_S := 120.0  # s of race time a run may take
+const GAP_FAIL_S := 20.0  # s with no guidance that fails the check
 ## Goals rows that need a match are no guidance for a player who stays home.
 const HOME_SOURCES := ["first_day", "garden", "milestone", "level"]
 
-var sim_s := 900.0      # s of garden time played (15 minutes)
+var sim_s := 900.0  # s of garden time played (15 minutes)
 var home
-var clock := 0.0      # s of garden time played so far
-var log_rows: Array = []      # one text row per 10 s window with no guidance
-var gap_s := 0.0      # s since guidance was last on screen
+var clock := 0.0  # s of garden time played so far
+var log_rows: Array = []  # one text row per 10 s window with no guidance
+var gap_s := 0.0  # s since guidance was last on screen
 var worst_gap := 0.0
 var empty_windows := 0
-var ranges: Array = []      # the same windows as [from, to] pairs, touching ones merged
+var ranges: Array = []  # the same windows as [from, to] pairs, touching ones merged
+
 
 func run(m: Node) -> void:
 	main = m
@@ -41,10 +42,12 @@ func run(m: Node) -> void:
 	print("G15 DONE, failures: %d" % bad)
 	tree.quit(1 if bad > 0 else 0)
 
+
 func _verdicts() -> void:
 	ok(_is_screen("home.gd") and int(Save.d.get("matches", 0)) == 0, "the play never left the garden for a match")
 	var what := "never %.0f s without a prompt, goal or target (worst %.1f s)"
 	ok(worst_gap < GAP_FAIL_S, what % [GAP_FAIL_S, worst_gap])
+
 
 ## A new player who skips the match tutorial on the naming card: eggs, name, garden (no Relic yet).
 func _skip_to_garden() -> void:
@@ -61,7 +64,8 @@ func _skip_to_garden() -> void:
 	home = main.current
 	await _wait(func(): return home.panel_host != null, "the garden builds")
 	home._close_panel()
-	home.set_process(false)      # the bot steps the garden itself, 20 steps a second of garden time
+	home.set_process(false)  # the bot steps the garden itself, 20 steps a second of garden time
+
 
 ## What is on screen to guide the player now: the names of the kinds, empty for nothing.
 func guidance() -> Array:
@@ -82,6 +86,7 @@ func guidance() -> Array:
 				out.append("goal: " + String(r["text"]))
 				break
 	return out
+
 
 func _play() -> void:
 	var t := 0.0
@@ -121,16 +126,22 @@ func _play() -> void:
 		if int(t) % 5 == 0:
 			await tree.process_frame
 
+
 ## The player does the next thing the garden asks of them: the tutorial step, else the first open Goals line.
 func _act() -> void:
 	var rec: Dictionary = home.kins[0]["rec"]
 	if FarmTutorial.active():
 		match FarmTutorial.current():
-			"meet": FarmTutorial.event("meet")
-			"pet": home._pet_kin(home.kins[0])
-			"eat": home._after_feed(home.kins[0], "emberberry", Care.feed(rec, "emberberry"))
-			"toy": _place_toy()
-			"name": FarmTutorial.event("name")
+			"meet":
+				FarmTutorial.event("meet")
+			"pet":
+				home._pet_kin(home.kins[0])
+			"eat":
+				home._after_feed(home.kins[0], "emberberry", Care.feed(rec, "emberberry"))
+			"toy":
+				_place_toy()
+			"name":
+				FarmTutorial.event("name")
 		return
 	for r in GardenFirstDay.rows():
 		if r["done"]:
@@ -138,16 +149,20 @@ func _act() -> void:
 		var rules: Array = GardenFirstDay.rules()["rows"]
 		var line: Dictionary = rules.filter(func(l): return l["text"] == r["text"])[0]
 		match String(line["id"]):
-			"feed": GardenFirstDay.mark("feed", home)
-			"race": _race()
+			"feed":
+				GardenFirstDay.mark("feed", home)
+			"race":
+				_race()
 		return
 
+
 func _race() -> void:
-	home.hrace.solo(home.kins[0]["rec"])      # a lone Boki runs the Training post
+	home.hrace.solo(home.kins[0]["rec"])  # a lone Boki runs the Training post
 	var t := 0.0
 	while home.hrace.run != null and t < RACE_MAX_S:
 		home.hrace.tick(0.1)
 		t += 0.1
+
 
 func _place_toy() -> void:
 	var lay := HomeLayout.ensure(Save.d)
@@ -155,6 +170,7 @@ func _place_toy() -> void:
 	var toy := {"u": HomeLayout._next_uid(lay), "id": "toy_ball", "x": int(at.x) - 3, "z": int(at.z) - 6, "r": 0}
 	(lay["deco"] as Array).append(toy)
 	home._sync_fixtures()
+
 
 ## Adds the window [from, to] to the log; windows that touch run together as one range.
 func _log_window(from: float, to: float) -> void:

@@ -14,12 +14,13 @@ static func open(h) -> NameStep:
 	var step := NameStep.new(String(rec["species"]))
 	v.add_child(step)
 	step.focus()
-	step.named.connect(func(nm: String, kept: bool):
-		if kept and nm != String(rec["name"]):
-			Save.log_event("renamed", rec, {"from": rec["name"]})
-			rec["name"] = nm
-		FarmTutorial.event("name")
-		if kept:
-			h._close_panel()
+	step.named.connect(
+		func(nm: String, kept: bool):
+			if kept and nm != String(rec["name"]):
+				Save.log_event("renamed", rec, {"from": rec["name"]})
+				rec["name"] = nm
+			FarmTutorial.event("name")
+			if kept:
+				h._close_panel()
 	)
 	return step
