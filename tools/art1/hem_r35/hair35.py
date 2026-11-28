@@ -122,7 +122,9 @@ def cut(a):
         for t3 in Fo + 1: f.write('f %d/%d %d/%d %d/%d\n' % (t3[0], t3[0], t3[1], t3[1], t3[2], t3[2]))
     # texture: Meshy luminance x live hair colour (median of the live hair texels)
     lc = np.median(fc[lhair], 0); I = np.asarray(MI).astype(float); lum = I.mean(2, keepdims=True)
-    ml = np.median(c[used].mean(1)); T = np.clip(lum / max(ml, 1) * lc, 0, 255).astype(np.uint8)
+    ml = np.median(c[used].mean(1)); T = np.clip(lum / max(ml, 1) * lc, 0, 255)
+    if a.tint < 1: T = np.clip(a.tint * T + (1 - a.tint) * I * a.gain, 0, 255)  # r36: keep Meshy's brown waves
+    T = T.astype(np.uint8)
     Image.fromarray(T).resize((a.tex, a.tex), Image.LANCZOS).save(a.outdir + '/hair_tex.jpg', quality=90)
     print('live hair colour %s, meshy hair median lum %.0f; hair y %.3f..%.3f' % (lc.round(), ml, Q[:, 1].min(), Q[:, 1].max()))
 
@@ -165,6 +167,11 @@ def add(a):
     # shoulders -> Spine (hair hangs off the back, not the clavicles)
     for sh in ('LeftShoulder', 'RightShoulder'):
         Wd[:, names.index('Spine')] += Wd[:, names.index(sh)]; Wd[:, names.index(sh)] = 0
+    # r36: hair below the nape follows the chest, not the neck/head (head pitch drove nape hair into the back in Jump_Run)
+    if a.nape > 0:
+        nw = np.clip((Q[:, 1] - a.nape) / 0.06, 0, 1)
+        for h in ('neck', 'Head', 'head_end', 'headfront'):
+            if h in names: c = names.index(h); Wd[:, names.index('Spine')] += (1 - nw) * Wd[:, c]; Wd[:, c] *= nw
     # roots (top of the new hair, under the nape hair) follow the head
     yt = Q[:, 1].max(); hw = np.clip((Q[:, 1] - (yt - a.headband)) / a.headband, 0, 1)[:, None]
     Wd /= Wd.sum(1, keepdims=True); hd = np.zeros(nj); hd[names.index('Head')] = 1; Wd = (1 - hw) * Wd + hw * hd
@@ -207,7 +214,7 @@ def vote_rows(X, F, it):
 ap = argparse.ArgumentParser(); sp = ap.add_subparsers(dest='cmd')
 c1 = sp.add_parser('cut'); c1.add_argument('base'); c1.add_argument('meshy'); c1.add_argument('outdir')
 c1.add_argument('--cut', type=float, default=1.62); c1.add_argument('--gap', type=float, default=0.012); c1.add_argument('--frac', type=float, default=0.54)
-c1.add_argument('--vote', type=int, default=8); c1.add_argument('--thr', type=float, default=0.5); c1.add_argument('--halfw', type=float, default=0.13); c1.add_argument('--zback', type=float, default=-0.128); c1.add_argument('--taper', type=float, default=0.12); c1.add_argument('--squeeze', type=float, default=0.3); c1.add_argument('--maxdepth', type=float, default=0.035); c1.add_argument('--fullbody', type=int, default=1); c1.add_argument('--front', type=float, default=0.0); c1.add_argument('--hang', type=float, default=1.25); c1.add_argument('--headgap', type=float, default=0.004); c1.add_argument('--headgap_y', type=float, default=1.50); c1.add_argument('--floor', type=float, default=1.05); c1.add_argument('--minpart', type=int, default=200); c1.add_argument('--tex', type=int, default=1024)
+c1.add_argument('--vote', type=int, default=8); c1.add_argument('--thr', type=float, default=0.5); c1.add_argument('--halfw', type=float, default=0.13); c1.add_argument('--zback', type=float, default=-0.128); c1.add_argument('--taper', type=float, default=0.12); c1.add_argument('--squeeze', type=float, default=0.3); c1.add_argument('--maxdepth', type=float, default=0.035); c1.add_argument('--fullbody', type=int, default=1); c1.add_argument('--front', type=float, default=0.0); c1.add_argument('--hang', type=float, default=1.25); c1.add_argument('--headgap', type=float, default=0.004); c1.add_argument('--headgap_y', type=float, default=1.50); c1.add_argument('--floor', type=float, default=1.05); c1.add_argument('--minpart', type=int, default=200); c1.add_argument('--tex', type=int, default=1024); c1.add_argument('--tint', type=float, default=1.0); c1.add_argument('--gain', type=float, default=1.0)
 c2 = sp.add_parser('add'); c2.add_argument('base'); c2.add_argument('hair'); c2.add_argument('tex'); c2.add_argument('out')
-c2.add_argument('--headband', type=float, default=0.08); c2.add_argument('--rough', type=float, default=0.75)
+c2.add_argument('--headband', type=float, default=0.08); c2.add_argument('--nape', type=float, default=0.0); c2.add_argument('--rough', type=float, default=0.75)
 a = ap.parse_args(); {'cut': cut, 'add': add}[a.cmd](a)
