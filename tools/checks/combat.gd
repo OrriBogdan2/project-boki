@@ -16,6 +16,7 @@ const CHECKS := {
 	"--kit-cc-scale-check": ["res://tools/kit_cc_scale_check.gd", "kit_cc_scale_check", null],
 	"--kit-refund-check": ["res://tools/kit_refund_check.gd", "kit_refund_check", null],  # refund/reset loops (11-27)
 	"--mob-fsm-check": ["res://tools/mob_fsm_check.gd", "mob_fsm_check", null],  # monster + boss machines (M9)
+	"--mob-cap-check": ["res://tools/mob_cap_check.gd", "mob_cap_check", null],  # monster activity cap per preset
 	"--cc-measure-check": ["res://tools/cc_measure_check.gd", "cc_measure_check", null],
 	"--utility-parity-check": ["res://tools/utility_parity_check.gd", "utility_parity_check", null],  # belt vs source
 	"--vex-daze-check": ["res://tools/vex_daze_check.gd", "vex_daze_check", null],  # Daze team, coin wall stun
