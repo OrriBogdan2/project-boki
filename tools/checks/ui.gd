@@ -11,6 +11,8 @@ const CHECKS := {
 	"--test-zone-shots": ["res://tools/test_zone_shots.gd", "test_zone_shots", null],  # --shots-dir=<dir>, GPU
 	"--shops-check": ["res://tools/shops_check.gd", "shops_check", null],  # in-match shops, the map legend
 	"--reticle-hunters-shots": ["res://tools/reticle_shots.gd", "reticle_shots", "hunters"],
+	"--reticle-looks-shots": ["res://tools/reticle_shots.gd", "reticle_shots", "looks"],
+	"--reticle-proof-shots": ["res://tools/reticle_shots.gd", "reticle_shots", "proof"],
 	"--combat-calm-check": ["res://tools/combat_calm_check.gd", "combat_calm_check", null],  # fight HUD
 	"--combat-hud-shots": ["res://tools/combat_hud_shots.gd", "combat_hud_shots", null],  # GPU
 	"--levelup-reel": ["res://tools/levelup_reel.gd", "levelup_reel", null],  # movie writer: a level-up mid-fight

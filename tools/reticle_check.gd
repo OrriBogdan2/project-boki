@@ -1,10 +1,11 @@
 extends RefCounted
 ## --reticle-check: the aiming reticle (Reticle) and its settings (Settings > Gameplay > Reticle).
-##   1. the defaults: the small broken ring with a dot, the Hunter's colour on the dot, full opacity,
+##   1. the defaults: the Hunter's own small look with a dot, in the Hunter's colour, full opacity,
 ##      outlined, smaller than the old cross (13 px out from the cursor)
 ##   2. set every option: the settings file holds them (they belong to the player, not the run save) and
 ##      the reticle's draw style follows
-##   3. every shape and colour draws without errors, with and without the outline
+##   3. every shape and colour draws without errors, with and without the outline, and so does every
+##      Hunter's look; every Hunter has its own look (content/archetypes "reticle"), no two the same
 ##   4. the Hunter's accent is its own colour (Vex green, Sparkle pink, Tenzo blue), and in the Arena
 ##      every Hunter's reticle with its aim states draws, a hit confirm starts, picks crit and armour colours,
 ##      and runs out
@@ -166,12 +167,40 @@ func run(main: Node) -> void:
 		await main.get_tree().process_frame
 	var all_n := Reticle.SHAPES.size() * Reticle.COLORS.size() * 2
 	ok(drawn[0] == all_n, "every shape x colour x outline draws (%d)" % drawn[0])
+	await _looks(main)
 	canvas.queue_free()
 	Settings.reset_all()
 	await _hunters(main)
 	await _holds(main)
 	print("RETICLE CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+
+## 3. every Hunter's look: its own, known, and drawn with and without the outline.
+func _looks(main: Node) -> void:
+	Settings.reset_all()
+	var seen := {}
+	for id in Arch.ids():
+		var look := Reticle.look_of(String(id))
+		ok(ReticleLooks.has(look) and not seen.has(look), "%s's reticle look is its own: %s" % [id, look])
+		seen[look] = true
+	var canvas := Control.new()
+	main.add_child(canvas)
+	var drawn := [0]
+	canvas.draw.connect(
+		func():
+			for look in ReticleLooks.LOOKS:
+				for outline in [true, false]:
+					Settings.v["reticle_outline"] = outline
+					Reticle.draw(canvas, Vector2(40, 40), 3.0, Color.RED, Color(1, 1, 1, 0.5), String(look))
+					drawn[0] += 1
+	)
+	canvas.queue_redraw()
+	for i in 3:
+		await main.get_tree().process_frame
+	ok(drawn[0] == ReticleLooks.LOOKS.size() * 2, "every look x outline draws (%d)" % drawn[0])
+	canvas.queue_free()
+	Settings.reset_all()
 
 
 ## Holds one slot of `kit` for HOLD_SECS and reads the cursor ring each step: [first, max, rising, flared].
