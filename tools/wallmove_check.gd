@@ -18,18 +18,20 @@ extends RefCounted
 ## "WCHECK DONE, failures: N".
 
 const DT := Match.DT
-const DANCE_S := 8.0            # s of wall dancing (a hop is ~0.66 s from the cap to its apex and back)
-const LIFT_PEAK_MIN := 0.6      # m above the lip the lift must float to (a lift used to stop at the lip)
-const LIFT_HANG_MIN := 0.25     # s spent near the top of the lift (|vertical speed| < 1 m/s, above the lip)
+const DANCE_S := 8.0  # s of wall dancing (a hop is ~0.66 s from the cap to its apex and back)
+const LIFT_PEAK_MIN := 0.6  # m above the lip the lift must float to (a lift used to stop at the lip)
+const LIFT_HANG_MIN := 0.25  # s spent near the top of the lift (|vertical speed| < 1 m/s, above the lip)
 var bad := 0
 var m: Match
 var w: World
 var h: Hunter
 
+
 func ok(cond: bool, msg: String) -> void:
 	print("WCHECK %s %s" % ["ok  " if cond else "FAIL", msg])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	_start(main)
@@ -46,6 +48,7 @@ func run(main: Node) -> void:
 	_hunters(main)
 	print("WCHECK DONE, failures: ", bad)
 	main.get_tree().quit()
+
 
 ## A two-team match with one local hunter (h) alone on the map: no mobs, no Boki, everyone else far away.
 func _start(main: Node) -> void:
@@ -72,11 +75,16 @@ func _start(main: Node) -> void:
 	h.kin2 = null
 	w = m.world
 
+
 ## 5. Every Hunter: kick and bounce from a run, a jump, the dash and each ability's recovery (own file).
 func _hunters(main: Node) -> void:
-	load("res://tools/wallmove_hunters_check.gd").new().run(main, func(a: String, blocked: Array) -> void:
-		var what := "" if blocked.is_empty() else ": " + ", ".join(blocked)
-		ok(blocked.is_empty(), "%s: wall kick and bounce, nothing blocked%s" % [a, what]))
+	load("res://tools/wallmove_hunters_check.gd").new().run(
+		main,
+		func(a: String, blocked: Array) -> void:
+			var what := "" if blocked.is_empty() else ": " + ", ".join(blocked)
+			ok(blocked.is_empty(), "%s: wall kick and bounce, nothing blocked%s" % [a, what])
+	)
+
 
 func _reset(at: Vector3, grounded: bool, v := Vector3.ZERO) -> void:
 	h.out = false
@@ -103,13 +111,13 @@ func _reset(at: Vector3, grounded: bool, v := Vector3.ZERO) -> void:
 	h.air_t = 0.0 if grounded else 0.5
 	h.wall_moves.land()
 	h.wall_touch_t = 0.0
-	h.glide_lift.kicked = false
 	h.glide_lift.hang_t = 0.0
 	h.shot_down = false
 	h.root_t = 0.0
 	for k in ["glide", "jump", "dash", "fire"]:
 		h.inp[k] = false
 	h.inp["move"] = Vector2.ZERO
+
 
 ## Raises 5x3 blocks `ups` terraces high beside flat open ground (one per call count): {at, n, low, top}.
 func _carve(ups: int, count: int) -> Array:
@@ -140,9 +148,18 @@ func _carve(ups: int, count: int) -> Array:
 			for dx in range(1, 4):
 				w.level[w.idx(x0 + dx, z0 + dz)] = lv + ups
 		var face := Vector2(x0 + 1.0, z0 + 0.5)
-		out.append({"at": face - Vector2(1, 0) * (h.r + 0.02), "n": Vector2(1, 0),
-			"low": lv * World.LEVEL, "top": (lv + ups) * World.LEVEL, "x0": x0, "z0": z0})
+		out.append(
+			{
+				"at": face - Vector2(1, 0) * (h.r + 0.02),
+				"n": Vector2(1, 0),
+				"low": lv * World.LEVEL,
+				"top": (lv + ups) * World.LEVEL,
+				"x0": x0,
+				"z0": z0
+			}
+		)
 	return out
+
 
 # ---------------------------------------------------------------- 1. wall kick
 ## Jump at the wall pushing in; with `kick`, press jump again on the way down (spammed: it must fire once).
@@ -173,6 +190,7 @@ func _attempt(wl: Dictionary, kick: bool, spam := true, mash := false) -> Dictio
 			break
 	return {"peak": peak - float(wl["low"]), "top": on_top, "kicks": int(h.stats.get("wall_kicks", 0)) - kicks0}
 
+
 func _kick(w4: Dictionary, w5: Dictionary, w5b: Dictionary) -> void:
 	var a4 := _attempt(w4, false)
 	var k4 := _attempt(w4, true, false)
@@ -181,16 +199,23 @@ func _kick(w4: Dictionary, w5: Dictionary, w5b: Dictionary) -> void:
 	var plain := _attempt(w5, false)
 	var kicked := _attempt(w5, true, false)
 	var gain: float = kicked["peak"] - plain["peak"]
-	ok(kicked["kicks"] == 1 and gain > 0.7 and gain < 1.1,
-		"a kick: +%.2fm over a plain jump (%.2fm to %.2fm)" % [gain, plain["peak"], kicked["peak"]])
+	ok(
+		kicked["kicks"] == 1 and gain > 0.7 and gain < 1.1,
+		"a kick: +%.2fm over a plain jump (%.2fm to %.2fm)" % [gain, plain["peak"], kicked["peak"]]
+	)
 	var danced := _attempt(w5, true)
-	ok(danced["kicks"] >= 3 and not danced["top"] and not h.gliding,
-		"spammed: %d kicks, a 5-terrace wall (4.0m) still sheer (peak %.2fm), no glider" % [
-			danced["kicks"], danced["peak"]])
+	ok(
+		danced["kicks"] >= 3 and not danced["top"] and not h.gliding,
+		(
+			"spammed: %d kicks, a 5-terrace wall (4.0m) still sheer (peak %.2fm), no glider"
+			% [danced["kicks"], danced["peak"]]
+		)
+	)
 	var again := _attempt(w5b, true, false)
 	var same := absf(again["peak"] - kicked["peak"]) < 0.15
 	ok(again["kicks"] == 1 and same, "the next jump kicks the same: %.2fm" % again["peak"])
 	_diminish(w5, danced)
+
 
 ## Chained kicks keep less each time (content/rules/wall_kick.json), and the ground resets the chain.
 ## `danced` is the timed run (a press each fall). A press every step must not climb past it: a climb never
@@ -199,9 +224,13 @@ func _diminish(wl: Dictionary, danced: Dictionary) -> void:
 	var curve := WallMoves._curve
 	var mashed := _attempt(wl, true, true, true)
 	ok(curve == [1.0, 0.6, 0.3], "the curve is 100%%, 60%%, 30%% (%s)" % [curve])
-	ok(mashed["kicks"] >= 3 and not mashed["top"] and mashed["peak"] < danced["peak"] + 0.2,
-		"mashed kicks on a 5-terrace wall (4.0m) stay sheer: peak %.2fm (timed %.2fm), %d kicks" % [
-			mashed["peak"], danced["peak"], mashed["kicks"]])
+	ok(
+		mashed["kicks"] >= 3 and not mashed["top"] and mashed["peak"] < danced["peak"] + 0.2,
+		(
+			"mashed kicks on a 5-terrace wall (4.0m) stay sheer: peak %.2fm (timed %.2fm), %d kicks"
+			% [mashed["peak"], danced["peak"], mashed["kicks"]]
+		)
+	)
 	_attempt(wl, true)
 	ok(h.wall_moves.chain > 1, "a dance builds a chain (%d)" % h.wall_moves.chain)
 	for i in 120:
@@ -209,6 +238,7 @@ func _diminish(wl: Dictionary, danced: Dictionary) -> void:
 		m.step(DT)
 	ok(h.grounded and h.wall_moves.chain == 0, "touching the ground resets the chain")
 	ok(is_equal_approx(h.wall_moves.kick_share(), 1.0), "the next kick is at 100% again")
+
 
 # ---------------------------------------------------------------- 1b. tall climb
 ## Lace's passive ([game data] bCanWallJump, climb_tall in hunter_move.json): a plain jump facing a
@@ -222,13 +252,24 @@ func _tall(w4: Dictionary) -> void:
 		var hero := "Lace" if a == "archer" else "Vex"
 		var tall := a == "archer"
 		var r := _attempt(w4, false)
-		ok(r["top"] == tall and r["kicks"] == 0, "%s: a jump facing a 4-terrace wall %s (peak %.2fm, no kick)" % [
-			hero, "climbs it" if tall else "doesn't climb it", r["peak"]])
+		ok(
+			r["top"] == tall and r["kicks"] == 0,
+			(
+				"%s: a jump facing a 4-terrace wall %s (peak %.2fm, no kick)"
+				% [hero, "climbs it" if tall else "doesn't climb it", r["peak"]]
+			)
+		)
 		for back in [false, true]:
 			var y := _walk_off(w4, back)
-			ok(y < 0.1, "%s walks off the 4-terrace top%s and lands below (%.2fm)" % [
-				hero, ", turning back into the face," if back else "", y])
+			ok(
+				y < 0.1,
+				(
+					"%s walks off the 4-terrace top%s and lands below (%.2fm)"
+					% [hero, ", turning back into the face," if back else "", y]
+				)
+			)
 	h.reclass(cls0, arch0)
+
 
 ## Walks off the wall's top (back: keys turn into the face once airborne). Returns the landing height
 ## over the low ground (the top's height if she never left it or was lifted back up).
@@ -244,6 +285,7 @@ func _walk_off(wl: Dictionary, back: bool) -> float:
 		if h.grounded and i > 10 and h.pos.y < float(wl["top"]) - 0.5:
 			break
 	return h.pos.y - float(wl["low"])
+
 
 ## Facing the wall, no keys: Space on every fall for DANCE_S. Ten hops, ten scuffs, the glider never opens.
 func _dance(wl: Dictionary) -> void:
@@ -265,6 +307,7 @@ func _dance(wl: Dictionary) -> void:
 	ok(kicks >= 10 and not opened, "a wall dance: %d hops in %.0fs facing the wall, no glider" % [kicks, DANCE_S])
 	ok(WallMoves.scuffs - scuffs0 == kicks, "every hop scuffs (%d of %d)" % [WallMoves.scuffs - scuffs0, kicks])
 
+
 ## A standing jump at a one-terrace ledge, keys into it: on top.
 func _stand_mantle(wl: Dictionary) -> void:
 	var n: Vector2 = wl["n"]
@@ -279,6 +322,7 @@ func _stand_mantle(wl: Dictionary) -> void:
 			on_top = true
 			break
 	ok(on_top, "a standing jump mantles a %.1fm ledge" % (float(wl["top"]) - float(wl["low"])))
+
 
 # ---------------------------------------------------------------- 2. wall bounce
 ## Airborne at `speed` against the 4-terrace wall, `deg` off its normal. Returns the velocity after contact.
@@ -300,13 +344,16 @@ func _hit(wl: Dictionary, deg: float, speed: float, dash := false, grounded_dash
 			out = h.roll_dir * h.roll_speed
 	return out
 
+
 func _bounce(wl: Dictionary) -> void:
 	var n: Vector2 = wl["n"]
 	var ang := _hit(wl, 45.0, 10.0)
 	var tan0 := 10.0 * sin(deg_to_rad(45.0))
 	var along := absf(ang.dot(Vector2(-n.y, n.x)))
-	ok(ang.dot(-n) > 5.0 and along > tan0 * 0.7,
-		"a 45 degree hit rebounds: away %.1f, along %.1f m/s, kept %.0f%%" % [ang.dot(-n), along, ang.length() * 10.0])
+	ok(
+		ang.dot(-n) > 5.0 and along > tan0 * 0.7,
+		"a 45 degree hit rebounds: away %.1f, along %.1f m/s, kept %.0f%%" % [ang.dot(-n), along, ang.length() * 10.0]
+	)
 	var head := _hit(wl, 0.0, 10.0)
 	ok(head.dot(-n) < 2.0, "head-on it doesn't bounce (away %.1f m/s)" % head.dot(-n))
 	var dash := _hit(wl, 40.0, 20.0, true)
@@ -318,13 +365,14 @@ func _bounce(wl: Dictionary) -> void:
 	var slow := _hit(wl, 45.0, 5.0)
 	ok(slow.dot(-n) < 2.0, "a walking-speed jump brushing a wall doesn't ricochet (away %.1f m/s)" % slow.dot(-n))
 
+
 # ---------------------------------------------------------------- 3. ledges
 ## Plays `frames` steps (keys by `drive`) and returns {top, mantled}.
 func _ledge_try(wl: Dictionary, y_off: float, v: Vector3, drive: Callable) -> Dictionary:
 	var n: Vector2 = wl["n"]
 	var at: Vector2 = (wl["at"] as Vector2) - n * 0.05
 	_reset(Vector3(at.x, wl["low"] + y_off, at.y), false, v)
-	h.last_gy = float(wl["low"]) + 6.0      # launched from a much higher place: the ledge is still ahead of you
+	h.last_gy = float(wl["low"]) + 6.0  # launched from a much higher place: the ledge is still ahead of you
 	h.air_t = 0.8
 	var mantled := false
 	for i in 90:
@@ -334,6 +382,7 @@ func _ledge_try(wl: Dictionary, y_off: float, v: Vector3, drive: Callable) -> Di
 		if h.grounded and absf(h.pos.y - float(wl["top"])) < 0.1:
 			return {"top": true, "mantled": mantled}
 	return {"top": false, "mantled": mantled}
+
 
 func _ledges(wl: Dictionary) -> void:
 	var glide_keys := func(i: int, n: Vector2) -> void:
@@ -345,12 +394,9 @@ func _ledges(wl: Dictionary) -> void:
 		h.vel.x = n.x * 6.0 if i < 6 else h.vel.x
 		h.inp["move"] = Vector2.ZERO
 		h.inp["glide"] = i < 4
-	var fall := func(_i: int, n: Vector2) -> void:
-		h.inp["move"] = n
-	var along := func(_i: int, n: Vector2) -> void:
-		h.inp["move"] = Vector2(-n.y, n.x)
-	var away := func(_i: int, n: Vector2) -> void:
-		h.inp["move"] = -n
+	var fall := func(_i: int, n: Vector2) -> void: h.inp["move"] = n
+	var along := func(_i: int, n: Vector2) -> void: h.inp["move"] = Vector2(-n.y, n.x)
+	var away := func(_i: int, n: Vector2) -> void: h.inp["move"] = -n
 	var r1 := _ledge_try(wl, 0.8, Vector3.ZERO, glide_keys)
 	ok(r1["top"], "pushing into a 2-terrace ledge and releasing the glider puts you on top")
 	var r2 := _ledge_try(wl, 0.8, Vector3.ZERO, glide_nokeys)
@@ -360,6 +406,7 @@ func _ledges(wl: Dictionary) -> void:
 	var r4 := _ledge_try(wl, 1.0, Vector3(0, -6.0, 0), along)
 	var r5 := _ledge_try(wl, 1.0, Vector3(0, -6.0, 0), away)
 	ok(not r4["mantled"] and not r5["mantled"], "keys along or away from the wall never pull you up it")
+
 
 # ---------------------------------------------------------------- 4. abyss lift
 func _rim() -> Dictionary:
@@ -374,6 +421,7 @@ func _rim() -> Dictionary:
 			if open and not w.is_void(g.x, g.z):
 				return {"at": g, "dir": d}
 	return {}
+
 
 func _lift() -> void:
 	var edge := _rim()
@@ -399,6 +447,7 @@ func _lift() -> void:
 	ok(peak >= LIFT_PEAK_MIN, "the lift floats %.2fm above the lip (want >= %.1fm)" % [peak, LIFT_PEAK_MIN])
 	ok(hang * DT >= LIFT_HANG_MIN, "and hangs %.2fs near the top (want >= %.2fs)" % [hang * DT, LIFT_HANG_MIN])
 
+
 # ---------------------------------------------------------------- 5. guards from review
 ## One open-kick signature: a single step where vertical speed jumps by several m/s.
 func _spring_count(tap: bool) -> int:
@@ -419,10 +468,11 @@ func _spring_count(tap: bool) -> int:
 		last_vy = h.vel.y
 	return springs
 
+
 func _guards(low_wall: Dictionary, high_wall: Dictionary) -> void:
 	var taps := _spring_count(true)
 	ok(taps <= 1, "tap-open, release, tap-open springs once, not each time (%d springs)" % taps)
-	ok(h.vel.y <= HunterFeel.abyss_lift_cap + 0.01, "the spring never beats the lift cap (%.1f m/s)" % h.vel.y)
+	ok(h.vel.y <= MantleCarry.rules["glide_up_cap"] + 0.01, "the spring never beats the lift cap (%.1f m/s)" % h.vel.y)
 	var edge := _rim()
 	var g: Vector3 = edge["at"]
 	var d: Vector2 = edge["dir"]
@@ -441,6 +491,7 @@ func _guards(low_wall: Dictionary, high_wall: Dictionary) -> void:
 	_one_kick(high_wall)
 	_blocked(low_wall)
 
+
 func _stunned(wl: Dictionary) -> void:
 	for mode in ["stun", "root"]:
 		var fall := func(_i: int, n: Vector2) -> void:
@@ -451,6 +502,7 @@ func _stunned(wl: Dictionary) -> void:
 				h.root_t = 1.0
 		var r := _ledge_try(wl, 1.0, Vector3(0, -6.0, 0), fall)
 		ok(not r["mantled"], "a %s player falling against a 2-terrace ledge doesn't grab it" % mode)
+
 
 ## A push-off and then a climb kick both go (item 149: no once-per-airtime); a kick folds a held glide.
 func _one_kick(wl: Dictionary) -> void:
@@ -468,8 +520,10 @@ func _one_kick(wl: Dictionary) -> void:
 	var vy0 := h.vel.y
 	h.inp["jump"] = true
 	m.step(DT)
-	ok(pushed > 5.0 and h.vel.y > vy0 + 0.5,
-		"a push-off (%.1f m/s) then a climb kick (vy %.1f to %.1f)" % [pushed, vy0, h.vel.y])
+	ok(
+		pushed > 5.0 and h.vel.y > vy0 + 0.5,
+		"a push-off (%.1f m/s) then a climb kick (vy %.1f to %.1f)" % [pushed, vy0, h.vel.y]
+	)
 	_reset(Vector3(at.x, wl["low"] + 1.0, at.y), false, Vector3.ZERO)
 	h.wall_touch_t = 0.2
 	h.wall_n = -n
@@ -485,12 +539,12 @@ func _one_kick(wl: Dictionary) -> void:
 	var arc := h.vel.y < v1 - Hunter.H_GRAV * DT * 1.5
 	ok(not h.gliding and arc, "a kick folds the glider while you rise (vy %.1f to %.1f)" % [v1, h.vel.y])
 
+
 ## Ledge tiles that are blocked (rocks, trees) are never mantled onto.
 func _blocked(wl: Dictionary) -> void:
 	for dz in range(-2, 3):
 		for dx in range(1, 4):
 			w.kind[w.idx(int(wl["x0"]) + dx, int(wl["z0"]) + dz)] = World.T_BLOCK
-	var fall := func(_i: int, n: Vector2) -> void:
-		h.inp["move"] = n
+	var fall := func(_i: int, n: Vector2) -> void: h.inp["move"] = n
 	var r := _ledge_try(wl, 1.0, Vector3(0, -6.0, 0), fall)
 	ok(not r["mantled"], "a blocked ledge tile is never mantled onto")

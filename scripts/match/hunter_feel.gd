@@ -10,26 +10,13 @@ static var air_decel: float = _t["air_decel"]
 static var air_overspeed: float = _t["air_overspeed"]
 static var glide_grav: float = _t["glide_grav"]
 static var glide_engage: float = _t["glide_engage"]
-## The abyss lift [wiki: "a rapid upward impulse to ground level, then a rapid deceleration"], scaled
-## by how deep you are; in the owner's words, "pull you up faster based on how low in the abyss you are": a gentle
-## lift just under the lip, a hard surge from deep down. See Hunter.abyss_lift_vy.
-static var abyss_lift: float = _t["abyss_lift"]
-static var abyss_lift_per_m: float = _t["abyss_lift_per_m"]
-static var abyss_lift_max: float = _t["abyss_lift_max"]
-static var abyss_lift_max_per_m: float = _t["abyss_lift_max_per_m"]
-static var abyss_lift_cap: float = _t["abyss_lift_cap"]
-static var abyss_brake_dist: float = _t["abyss_brake_dist"]
-static var abyss_brake: float = _t["abyss_brake"]
-static var abyss_lip_vy: float = _t["abyss_lip_vy"]
-static var abyss_brake_gain: float = _t["abyss_brake_gain"]
+## The abyss lift and the mantle launch: content/rules/hunter_move.json edge_mantle (Hunter.abyss_lift_vy, MantleCarry).
 static var mantle_reach: float = _t["mantle_reach"]
 static var tall_climb_extra: float = _t["tall_climb_extra"]
 static var mantle_reach_abyss: float = _t["mantle_reach_abyss"]
 static var wall_catch_reach: float = _t["wall_catch_reach"]
-static var abyss_glide_room: float = _t["abyss_glide_room"]
 static var ledge_reach: float = _t["ledge_reach"]
 static var ledge_cd: float = _t["ledge_cd"]
-static var float_speed: float = _t["float_speed"]
 static var glide_fall: float = _t["glide_fall"]
 ## The opening drop, battle-royale style: a fast skydive you steer freely, then the glider opens by
 ## itself near the ground (or earlier on jump) for a slower, floatier last stretch.
@@ -53,6 +40,7 @@ static var fling_height: float = _t["fling_height"]
 static var fling_speed: float = _t["fling_speed"]
 static var fling_early_height: float = _t["fling_early_height"]
 static var abyss_extra: float = _t["abyss_extra"]
+
 
 static func _load() -> Dictionary:
 	var d: Variant = JSON.parse_string(FileAccess.get_file_as_string(Loco.PATH))

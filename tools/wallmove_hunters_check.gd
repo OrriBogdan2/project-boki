@@ -94,6 +94,9 @@ func _fresh(at: Vector3, grounded: bool, v := Vector3.ZERO) -> void:
 		me.ak.spirit.end("merge")
 	me.set_arch(arch)
 	me.unlock_all()
+	# the last cases' ice walls and barriers go too: whether one still stands here depended on the match clock
+	for wl in m.verbs.walls.duplicate():
+		m.verbs._break_wall(wl)
 	me.out = false
 	me.downed = false
 	me.hp = me.max_hp
@@ -125,7 +128,6 @@ func _fresh(at: Vector3, grounded: bool, v := Vector3.ZERO) -> void:
 	me.air_t = 0.0 if grounded else 0.5
 	me.dashes = me.max_dashes()
 	me.wall_moves.land()
-	me.glide_lift.kicked = false
 	me.glide_lift.hang_t = 0.0
 	for k in ["glide", "jump", "dash", "fire", "sig", "sec", "skill", "sec_hold"]:
 		me.inp[k] = false
