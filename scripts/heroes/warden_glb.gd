@@ -61,7 +61,8 @@ const EXTRA := {}
 const KEEP := ["Gun", "Glider", "TeamRing", "Shield", "Shoulder", "Halo", "Focus"]
 
 ## glTF material name -> the toon shader's painted surface (RIG_CONTRACT "Materials").
-## "brass" is metal split off by its colour, so a model's look can lift it alone at the match camera (Vex r3f).
+## "brass" is metal split off by its colour, so a model's look can lift it alone at the match camera (Vex r3f);
+## "trim" is cloth split off so it dyes apart (the Empty's hem band: EmptyGlb).
 const SLOTS := {
 	"skin": 4,
 	"hair": 5,
@@ -76,7 +77,8 @@ const SLOTS := {
 	"void": 0,
 	"card": 0,
 	"ice": 1,
-	"flame": 0
+	"flame": 0,
+	"trim": 1
 }
 
 ## Slots a MantleLook colour pick tints: slot -> [the pick in Models.hunter's look, the Warden's own colour].

@@ -410,12 +410,19 @@ func _build_set() -> void:
 	pt.gravity = Vector3(0, -0.25, 0)
 	pt.angular_velocity_min = -90.0
 	pt.angular_velocity_max = 90.0
-	var pq := QuadMesh.new()
-	pq.size = Vector2(0.09, 0.06)
+	# petals: a rounded lens, not a flat quad (one drifting by the camera read as a floating pink slab), faded out
+	# within 3 m of the camera
+	var pq := SphereMesh.new()
+	pq.radius = 0.045
+	pq.height = 0.018
+	pq.radial_segments = 10
+	pq.rings = 3
 	var pmat := StandardMaterial3D.new()
 	pmat.albedo_color = Color("ffb3d0")
-	pmat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	pmat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	pmat.distance_fade_mode = BaseMaterial3D.DISTANCE_FADE_PIXEL_DITHER
+	pmat.distance_fade_min_distance = 1.5
+	pmat.distance_fade_max_distance = 3.0
 	pq.material = pmat
 	pt.mesh = pq
 	add_child(pt)

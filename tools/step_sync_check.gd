@@ -60,7 +60,11 @@ func ok(cond: bool, msg: String) -> void:
 
 
 func _hero(main: Node, id: String) -> void:
-	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
+	var m: Node3D
+	if id in EmptyGlb.KEYS:  # (the player's Empty: its model's own look, no Hunter)
+		m = Models.hunter("medium", Data.TEAM_COLORS[0], "", "", EmptyGlb.rest_look(id))
+	else:
+		m = Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 	holder.add_child(m)
 	for k in 5:
 		await main.get_tree().process_frame

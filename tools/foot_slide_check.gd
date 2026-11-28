@@ -89,7 +89,7 @@ func run(main: Node) -> void:
 		if await _hero(main, String(id)):
 			done += 1
 	WardenNative.contract_only = false
-	for id in ids:
+	for id in ids + EmptyGlb.KEYS.filter(func(k): return k not in ids):  # (the player's Empty is native too)
 		if WardenNative.on(String(id)) and await _native(main, String(id)):
 			done += 1
 	print("FOOT_SLIDE_DONE ", done, " FAIL ", bad)
@@ -171,7 +171,11 @@ func _hero(main: Node, id: String) -> bool:
 ## Native Hunter `id` (WardenNative) at walk, run and crouch speed: one NATIVE line each (Meshy's clips step even
 ## where the contract model hovers: Neve, Motley).
 func _native(main: Node, id: String) -> bool:
-	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
+	var m: Node3D
+	if id in EmptyGlb.KEYS:  # (the player's Empty at home: its own look, the default class's speed)
+		m = Models.hunter("medium", Data.TEAM_COLORS[0], "", "", EmptyGlb.rest_look(id))
+	else:
+		m = Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 	holder.add_child(m)
 	var nat := m.get_node("Warden/Native") as WardenNative
 	nat.set_process(false)

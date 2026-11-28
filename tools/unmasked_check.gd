@@ -33,6 +33,23 @@ func _verts(n: Node) -> int:
 func _build(lk: Dictionary) -> Node3D:
 	return Models.hunter("medium", Data.TEAM_COLORS[0], "smg", "", lk)
 
+## The procedural Empty even for a look with a 3D model (EmptyGlb), for checks that measure its own meshes.
+func _proc(lk: Dictionary) -> Node3D:
+	WardenGlb._measuring = true
+	var m := _build(lk)
+	WardenGlb._measuring = false
+	return m
+
+## How far a 3D Empty's skinned arm bone sits from its spine under the look's sliders (the pose WardenSync gives
+## it from the rig), 0 if none.
+## How wide the 3D Empty's skin is cut (WardenBulk): the first bone's bind pose scale across, 0 for a procedural body.
+func _glb_width(m: Node3D) -> float:
+	var glb := m.get_node_or_null("Warden")
+	if glb == null:
+		return 0.0
+	var mi := glb.find_children("*", "MeshInstance3D", true, false)[0] as MeshInstance3D
+	return mi.skin.get_bind_pose(0).basis.get_scale().x
+
 func _in_lists(u: Dictionary) -> bool:
 	for row in Unmasked.ROWS:
 		if int(u[row[0]]) < 0 or int(u[row[0]]) >= (row[2] as Array).size():
@@ -170,10 +187,19 @@ func _model(main: Node) -> void:
 		and float(st["empty_f"]["pose"]["hip"]) > 3.0 * float(st["empty_m"]["pose"]["hip"])
 		and float(st["empty_m"]["gait"]["width"]) > 2.0 * float(st["empty_f"]["gait"]["width"]),
 		"and her own stance (weight on one hip, feet close); his is square and wide")
-	var slight := _build({"unmasked": true, "frame": {"build": 0.0}})
-	var sturdy := _build({"unmasked": true, "frame": {"build": 1.0}})
-	ok(_width(sturdy) > _width(base) * 1.08 and _width(base) > _width(slight) * 1.06,
-		"build changes the body's mass (%.2f / %.2f / %.2f m wide)" % [_width(slight), _width(base), _width(sturdy)])
+	var slight := _proc({"unmasked": true, "frame": {"build": 0.0}})
+	var sturdy := _proc({"unmasked": true, "frame": {"build": 1.0}})
+	var mid := _proc(Unmasked.default_look())
+	ok(_width(sturdy) > _width(mid) * 1.08 and _width(mid) > _width(slight) * 1.06,
+		"build changes the body's mass (%.2f / %.2f / %.2f m wide)" % [_width(slight), _width(mid), _width(sturdy)])
+	mid.free()
+	var arms := []
+	for b in [0.0, 1.0]:
+		var g := _build({"unmasked": true, "frame": {"build": b}})
+		arms.append(_glb_width(g))
+		g.free()
+	ok(arms[0] > 0.0 and arms[1] > arms[0] * 1.05,
+		"and the 3D Empty's skin follows it (EmptyGlb: bind width %.3f / %.3f)" % arms)
 	for n in [styled, woman, man, slight, sturdy]:
 		n.free()
 	var marked := _build({"unmasked": true, "marks": [{"x": 0.0, "y": 0.9, "col": "#ff4040"}]})
@@ -356,7 +382,9 @@ func _shroud() -> void:
 	var shapes := [_shape_of(cloak), _shape_of(wrapped), _shape_of(tatters)]
 	ok(shapes[0] != shapes[1] and shapes[1] != shapes[2] and shapes[0] != shapes[2],
 		"the three shroud styles are different shapes (%s)" % str(shapes))
-	var hem := _bounds(cloak.get_node("Rig/Torso/ShroudBones"))
+	var proc := _proc({"unmasked": true, "shroud": 0, "colour": 5})      # (the 3D Empty hides it under its own cloak)
+	var hem := _bounds(proc.get_node("Rig/Torso/ShroudBones"))
+	proc.free()
 	ok(hem.size.y > 0.3, "a drape hangs from the hips to the ankles over the legs (%.2f m long)" % hem.size.y)
 	for n in [cloak, other, wrapped, tatters]:
 		n.free()

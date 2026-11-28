@@ -1,17 +1,18 @@
 extends RefCounted
-## --look-locker-check: making yourself in the LookLocker (scripts/ui/look_locker.gd). The four tabs with their
-## icons; each tab's camera shot (Hollow closes in on the head, Glider pulls back); hovering a choice tries it on
-## the model without keeping it; the set (LookSet: key, glow rim and kicker, a curved wall and stones behind you) and
-## every named choice's tile picture slot (LookThumbs) for any model; a tab's rows fade in while the camera swings
-## (Shroud full length from three-quarters, its own field of view); a pick's reaction (an emote) and the rim's
-## flash; picking one keeps it, pops the model and flashes the turntable; the hood row only on a cut with a hood;
-## the dais, satchel and lantern are the Meshy pieces; glider tiles in their rarity colours, a locked one never
-## equips; the wheel zooms within its limits and a drag turns the turntable; Looks good saves the look and takes the
-## locker down.
+## --look-locker-check: making yourself in the LookLocker (scripts/ui/look_locker.gd). Your 3D model (EmptyGlb); the
+## four tabs with their icons; each tab's camera shot (Hollow closes in on the head, Glider pulls back); hovering a
+## choice tries it on the model without keeping it; the set (LookSet: key, glow rim and kicker, a curved wall and
+## stones behind you) and every named choice's tile picture slot (LookThumbs) for any model; a tab's rows fade in
+## while the camera swings (Shroud full length from three-quarters, its own field of view); a pick's reaction (an
+## emote) and the rim's flash; picking one keeps it, pops the model and flashes the turntable; the hood row only on
+## a cut with a hood; the dais, satchel and lantern are the Meshy pieces; glider tiles in their rarity colours, a
+## locked one never equips; the wheel zooms within its limits and a drag turns the turntable; Looks good saves the
+## look and takes the locker down.
 ## --look-tour --shots-dir=<dir>: the same screen toured for the media (every frame a JPG in <dir>/frames, run
 ## it on a GPU worker with --fixed-fps 30). Never writes the save.
 
 const TOUR_FRAMES := 450  # 15 s at 30 fps
+const HOOD_TOL := 0.03  # m: the void head's centre from the egg in the hood
 
 var bad := 0
 var main: Node
@@ -43,6 +44,7 @@ func run(main_node: Node, mode: String) -> void:
 	await _tabs()
 	await _presentation()
 	await _try_and_pick()
+	_model3d()
 	_hood()
 	_props()
 	await _gliders()
@@ -158,6 +160,62 @@ func _try_and_pick() -> void:
 	ok(int(locker.look["shroud"]) == 3 and locker.model.scale.x > 1.0, "picking it keeps it and the model pops")
 	ok(hx.fx.radial >= radial + 2, "the turntable flashes a ring and a burst")
 	ok(_opt("shroud:3").get_theme_stylebox("panel") != _opt("shroud:0").get_theme_stylebox("panel"), "the pick is lit")
+
+
+## The Hooded Cloak, hood up, plain, is the 3D model of your sex (EmptyGlb), the procedural body hidden under it and
+## the void head kept; the shroud colour dyes its cloak; another cut is the procedural Empty again.
+func _model3d() -> void:
+	for kv in [["shroud", 0], ["hood", 1], ["trim", 0], ["accessory", 0]]:  # (the picks before chose others)
+		locker.pick(kv[0], kv[1])
+	for sex in [1, 0]:
+		locker.pick("gender", sex)
+		var w := locker.model.get_node_or_null("Warden")
+		ok(
+			(
+				bool(locker.model.get_meta(WardenNative.META, false))
+				and w != null
+				and w.scene_file_path.ends_with("%s_meshy.glb" % EmptyGlb.KEYS[sex])
+			),
+			"sex %d wears its 3D model on Meshy's skeleton" % sex
+		)
+		var hollow := locker.model.find_child("VoidHead", true, false) as MeshInstance3D
+		ok(hollow != null and hollow.is_visible_in_tree(), "sex %d keeps the void head over it" % sex)
+		# (the skinned shell's mesh sits in the skin's space, at rest: centred on the painted egg, its front (+Z) a
+		# little ahead of the paint)
+		var at := hollow.mesh.get_aabb()
+		var want: Vector3 = EmptyGlb.EGG[sex][0]
+		var c := at.get_center()
+		var got := Vector3(c.x, c.y, at.end.z - EmptyGlb.EGG_AHEAD)
+		var off := got.distance_to(want)
+		ok(off < HOOD_TOL, "sex %d: the void head sits in the hood (%.3f m off)" % [sex, off])
+		ok(
+			not locker.model.get_node("Rig/Torso").get_children().any(_body_shows),
+			"sex %d: the procedural body is hidden" % sex
+		)
+	locker.pick("colour", 5)
+	ok(
+		_cloth_albedo().is_equal_approx(EmptyGlb._ratio(Unmasked.COLOURS[5], EmptyGlb.CLOTH_PAINT)),
+		"the shroud colour dyes the cloak"
+	)
+	locker.pick("shroud", 1)
+	ok(not bool(locker.model.get_meta(WardenNative.META, false)), "another cut is the procedural Empty")
+	locker.pick("shroud", 0)
+	locker.pick("colour", int(Unmasked.default_look()["colour"]))
+
+
+func _body_shows(c: Node) -> bool:
+	var kept := String(c.name) in EmptyGlb.KEEP + WardenGlb.KEEP
+	return c is MeshInstance3D and (c as MeshInstance3D).visible and not kept
+
+
+func _cloth_albedo() -> Color:
+	for mi in locker.model.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
+		var mesh := (mi as MeshInstance3D).mesh
+		for si in mesh.get_surface_count():
+			var src := mesh.surface_get_material(si)
+			if src and String(src.resource_name).begins_with("cloth-"):
+				return (mi as MeshInstance3D).get_surface_override_material(si).get_shader_parameter("albedo")
+	return Color.BLACK
 
 
 func _hood() -> void:

@@ -34,6 +34,8 @@ const LAND_MIN := 0.3  # a landing this hard (WardenClips.FEEL, 0..1) plays the 
 ## An animation-only file beside the model: the clips the data names, matched by name.
 const CLIPS_FILE := "%s/%s/%s_clips.glb"
 const ARMS_CLIP := "%s_arms"  # the crouch with another clip's arms (data "crouch_arms_from"), added beside Meshy's
+# Slot prefix of data "acts": the farm verb (HunterAnim "act": lift, pat, feed) -> the clip held while it lasts.
+const ACT := "act_"
 const BOKI_SLOTS := ["k1", "k2"]  # cast slots that are the riding Boki's ability, not the Hunter's (no attack clip)
 const ARM_ROOTS := ["LeftShoulder", "RightShoulder"]  # Meshy's bones whose chains are the arms (data "arm_roots")
 ## Set by the checks of the contract path (clips, rig, look-at, strides): every Hunter builds its contract model.
@@ -156,6 +158,8 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	process_priority = 10  # (after Match renders the hunters: HunterAnim.update)
 	player = glb.find_children("*", "AnimationPlayer", true, false)[0] as AnimationPlayer
 	plays = (d["clips"] as Dictionary).duplicate()
+	for act: String in d.get("acts", {}):
+		plays[ACT + act] = d["acts"][act]
 	if d.has("clip_files"):  # (clips-only files: Hero moves keyed on Meshy's skeleton, beside the .glb)
 		var lib_name := player.find_animation_library(player.get_animation(String(plays["idle"])))
 		WardenClipFile.add(player.get_animation_library(lib_name), glb, WardenGlb.skeleton(glb), d["clip_files"])
@@ -164,7 +168,8 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	skel = WardenGlb.skeleton(glb)
 	own_casts = bool(d.get("own_casts", false))
 	_borrow_clips()
-	for st in SLOTS + moves.clips().keys():  # (a slot whose clip is nowhere plays today's clip)
+	var acts := plays.keys().filter(func(k): return String(k).begins_with(ACT))
+	for st in SLOTS + moves.clips().keys() + acts:  # (a slot whose clip is nowhere plays today's clip)
 		if plays.has(st) and not player.has_animation(String(plays[st])):
 			push_warning("warden_native %s: slot %s names clip %s, which no file has" % [art_id, st, plays[st]])
 			plays.erase(st)
@@ -350,7 +355,7 @@ func _loco(s: Dictionary) -> void:
 	if bool(s.get("dead", false)):
 		_play("idle", 0.0)
 	elif held != "":
-		_play(held, 1.0)
+		_play(held, float(d.get("act_rate", 1.0)) if held.begins_with(ACT) else 1.0)
 	elif not bool(s.get("grounded", true)):
 		_play("jump", float(d.get("jump_rate", 1.0)))
 	elif float(s.get("crouch", 0.0)) > 0.5:
@@ -373,7 +378,8 @@ func _held(s: Dictionary) -> String:
 		return "glide"
 	if plays.has("dash") and bool(s.get("rolling", false)):
 		return "dash"
-	return ""
+	var act := ACT + String(s.get("act", ""))
+	return act if plays.has(act) else ""
 
 
 ## The clip a new one-shot starts this frame ("" none): a stagger (a chip hit only leans: WardenFlinch), a swing,

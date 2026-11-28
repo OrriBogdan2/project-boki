@@ -1,12 +1,13 @@
 """One game .glb for a Hunter on Meshy's own skeleton (docs/art/wardens/MESHY_NATIVE.md): Meshy's rig (or its
 weight-fixed hybrid) plus Meshy's own clips from its other files, bones untouched (no retarget, no rename).
 
-  python3 tools/meshy/native_pack.py OUT.glb BASE.glb [CLIPS.glb[=name] ...] [--in-place=clip,...] [--max-tex=2048] [--max-tex-maps=1024]
+  python3 tools/meshy/native_pack.py OUT.glb BASE.glb [CLIPS.glb[=name] ...] [--in-place=clip,...] [--centre-hips=1] [--max-tex=2048] [--max-tex-maps=1024]
 
 - BASE keeps its nodes, skin, meshes and materials byte for byte; its own animations stay.
 - Each CLIPS file adds its animations (renamed to `name` when it has one clip), its channels matched to BASE's
   nodes by name. Meshy's animate files turn the armature +90 deg about X (Z up) where the rig is Y up: the clip
   keys of the armature's children (Hips) are carried into the rig's frame, so the pose in the world is the same.
+- --centre-hips=1: every clip's Hips swing about the rest's X/Z (see centre_hips).
 - --in-place: those clips' Hips drift along the ground (start to end) is taken out, so the game moves the body.
 - --max-tex: colour textures larger than this (px) are scaled down (JPEG q90, PNG stays PNG); --max-tex-maps: the
   same for the normal and metal/roughness maps (they read at match distance only as shading).
@@ -173,6 +174,21 @@ def in_place(out, clip, hips):
             out.chunks[2 * acc["bufferView"] + 1] = v.astype(np.float32).tobytes()
 
 
+def centre_hips(out, hips):
+    """Every clip's Hips keys swing about the rest's X/Z (a rig made from an uploaded .glb: Meshy's library clips key the
+    hips about their own centre, up to 0.3 m off a cloaked figure's)."""
+    rest = np.array(out.js["nodes"][hips]["translation"])
+    for a in out.js.get("animations", []):
+        for c in a["channels"]:
+            if c["target"]["node"] != hips or c["target"]["path"] != "translation":
+                continue
+            acc = out.js["accessors"][a["samplers"][c["sampler"]]["output"]]
+            v = np.frombuffer(out.chunks[2 * acc["bufferView"] + 1], np.float32).reshape(-1, 3).copy()
+            v[:, [0, 2]] += (rest - v.mean(0))[[0, 2]]
+            acc["min"], acc["max"] = v.min(0).tolist(), v.max(0).tolist()
+            out.chunks[2 * acc["bufferView"] + 1] = v.astype(np.float32).tobytes()
+
+
 def colour_images(js):
     """Images used as a material's base colour."""
     out = set()
@@ -219,6 +235,8 @@ def main(args):
         add_clips(out, path, rename, base_names, base_parent)
     for clip in filter(None, opts.get("--in-place", "").split(",")):
         in_place(out, clip, base_names["Hips"])
+    if "--centre-hips" in opts:
+        centre_hips(out, base_names["Hips"])
     shrink_textures(out, int(opts.get("--max-tex", "2048")), int(opts.get("--max-tex-maps", "1024")))
     out.write(files[0])
     print(files[0], [a["name"] for a in out.js.get("animations", [])], f"{out.size / 1e6:.1f} MB bin")

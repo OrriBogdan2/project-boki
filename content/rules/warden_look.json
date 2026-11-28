@@ -737,5 +737,7 @@
 				0.42
 			]
 		}
-	}
+	},
+	"empty_f": {"no_ink": ["cloth", "trim"]},
+	"empty_m": {"no_ink": ["cloth", "trim"]}
 }
