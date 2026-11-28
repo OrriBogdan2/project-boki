@@ -15,7 +15,7 @@ The creator itself is the LookLocker (`scripts/ui/look_locker.gd`, opened by `ha
 | Body frame: 5 sliders, per-sex ranges, stance | `scripts/match/empty_frame.gd`, `content/rules/empty_creator.json` |
 | The void body: skin-side parts in one void material with an ink line | `scripts/match/empty_void.gd`, `shaders/void_body.gdshader` |
 | No cloak (the bare body shows) | `Shrouds.NONE` (`look["shroud"] = -1`), the first Shroud tile |
-| UI | the Body tab of the LookLocker: Sex, Body tint, Outline colour, the five sliders |
+| UI | the Body tab of the LookLocker: Sex, Body tint, Outline colour, the five sliders. A new save sees a short first pass (Sex, Height, Build, Shroud colour) and "More" for the full locker (`LookLocker.short`) |
 | Check | `--empty-creator-check` (`tools/empty_creator_check.gd`) |
 
 **Frame.** Sex picks the frame; five sliders (Height, Build, Shoulders, Hips, Head size, `look["frame"]`, each 0..1)

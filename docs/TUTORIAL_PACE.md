@@ -165,7 +165,15 @@ Everything else in the run is unchanged within noise (the table in section 2 dif
 Still to make:
 
 1. **First Relic (95 s, a 14.2 s wait):** cut the Relic page's text or let the click go on while it is read. The put-on beat is a story cut-scene (DECISIONS 11-11).
-2. **Creator:** collapse the 10 option rows to the first 3 on a new save (looks, build, colour) with "More" for the rest.
+2. **Creator: done** (ext/creator-first-rows). A new save opens the LookLocker short (`LookLocker.short`, `FIRST_KEYS`):
+   Sex, the Height and Build sliders and the shroud's colour, then one "More" that opens the full locker (tabs, every
+   row, the name). Nothing is removed. Change your look and a returning player (a save with a look) get the full list.
+   `--tutorial-pace-check`, same seed, origin/main c78b7cba28 vs the branch: "hatch: card and look" **26.5 s -> 24.8 s**
+   (reading 26.3 -> 24.6 s; run total 851 -> 849 s). The reading saved is small (about 6 words: the Body / Outline
+   headings, three slider names, "Your name"), as the tool counts labels, not buttons or tiles; the bigger cut is in
+   choices on screen: 4 tabs, 8 Body rows and the name box -> 4 rows and More. Shots: `docs/shots/creator-first-rows/`
+   (1280x720, 1920x1080, short and after More; `--first15-shots --part=creator`). Asserted in `--new-player-flow-check`
+   and `--empty-creator-check`.
 3. **Pre-match countdown (25 s):** the squad's turns run while you wait; show the squad list or let a done pick end your own wait.
 4. **Ship (16.8 s aboard):** the prompt and the drop plan are on screen; the pace drive jumps at the bots' planned time and so counts it as idle. Model a player who launches on reading the prompt.
 5. **Results (30 s of reading):** show 3 numbers first, the lists behind a "More".
