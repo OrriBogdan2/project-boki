@@ -409,7 +409,7 @@ func _buses() -> void:
 		var bi := AudioServer.get_bus_index(bn)
 		var to := StringName(SfxMix.BUSES[bn])
 		ok(bi > 0 and AudioServer.get_bus_send(bi) == to, "bus %s sends to %s" % [bn, to])
-	var want := {"kin_happy": "Boki", "click": "UI", "ashwick_hurt": "Voice", "v_brute": "Voice", "rifle": "SFX"}
+	var want := {"kin_happy": "Boki", "click": "UI", "ashwick_hurt": "Voice", "v_brute": "Voice", "gun_rifle": "SFX"}
 	for sname in want:
 		ok(Sfx.mix.bus_for(sname, false, false) == StringName(want[sname]), "%s plays on %s" % [sname, want[sname]])
 	ok(Sfx.mix.bus_for("kin_happy", false, true) == &"SFXFar", "a far sound of any kind is low-passed")
@@ -964,8 +964,15 @@ func _abyss() -> void:
 			"...gliding: whoosh, then the catch %s" % [glide]
 		)
 		var hot := _walk(am, p, rim, true, true)
+		# the strain loop starts as the lift turns upward (vel.y > 0), a few frames before the catch
+		# sting (vel.y > CATCH_VY), so only the whoosh is first and the order of the other two is free
 		ok(
-			hot.find("abyss_catch") == 1 and hot.has("strain"),
+			(
+				hot.find("abyss_whoosh") == 0
+				and hot.has("abyss_catch")
+				and hot.has("strain")
+				and not hot.has("abyss_fallout")
+			),
 			"...an overheated glider lifting: the catch and the strain loop %s" % [hot]
 		)
 		_teammate(am, other, rim)

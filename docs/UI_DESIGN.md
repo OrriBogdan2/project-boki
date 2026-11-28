@@ -224,9 +224,10 @@ UI.footer_primary(v, "Buy", buy, 160, "gem")      # primary + Enter keycap; UI.p
   owns the bottom of the screen.
 - New home panels: `var v := _new_panel("Kin Box", 900)` then fill `v` with the helpers above.
 - Fit: the interface lays out in a 1240x720 space that `Settings._apply_ui_scale` scales to the window, so
-  panels need no per-screen size rules. `--garden-fit-check` opens the garden's newer panels (zone cards,
-  games board, wishes, games picker, Nook preview, Boki card Family tab) at 720p, 1080p, 2560x1080, a
-  960x540 window and Interface size at its top (1.1), and fails on anything clipped or outside the window's safe margin.
+  panels need no per-screen size rules. `--garden-fit-check` opens the garden's HUD and panels (zone cards,
+  games board, wishes, games picker, Nook preview, Boki card Family tab, feed menu, build bar) at 720p, 1080p,
+  2560x1080, 3440x1440, a 960x540 window and Interface size at its top (1.1), and fails on anything clipped or
+  outside the window's safe margin, HUD blocks that overlap, and a HUD card taller than its content.
   Add a new garden panel to its `screens`.
 
 ## The Esc menu (DECISIONS 2026-11-08, "UI is too much for a new player")

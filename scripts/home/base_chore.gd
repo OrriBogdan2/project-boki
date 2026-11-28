@@ -2,24 +2,26 @@ class_name BaseChore
 extends RefCounted
 ## The Chore state of base life (GARDEN.md section 4): a work knack (scripts/core/work.gd) becomes something a Boki
 ## does because of who it is, not a Job Board. Ember minds the egg in the Nook (the rest of its home hatch time
-## halves, once per egg), Mend cheers up a glum friend (joy up) and Haul fetches the ball back to the toy spot.
-## Watering waits for the snack patch. Save: Save.d["egg"]["minded"] is an optional key, no migration.
+## halves, once per egg), Mend cheers up a glum friend (joy up) and Haul fetches the ball back to the toy spot,
+## Tide waters a dry snack patch (it ripens sooner). Save: Save.d["egg"]["minded"] is an optional key, no migration.
 ## BaseLife runs this from its machine: k["life_chore"] = {kind, ...}.
 ## Each chore ends with one journal line on the Boki, in the shape CareJournal.note writes (rec["journal"]).
 
-const KINDS := {"ember": "mind", "mend": "cheer", "haul": "fetch"}      # knack -> chore
-const GLUM_AT := 40.0       # joy need below which a Boki counts as glum
-const CHEER_JOY := 18.0     # joy a cheered-up Boki gains
-const CHEER_BOND := 0.05    # added to both Boki's bond when one cheers the other up
-const AT_EGG := 1.8         # m: a Boki this close to the egg is minding it (the egg sits 1 m inside the Nook)
-const AT_BALL := 0.6        # m: close enough to pick up or put down the ball
-const BALL_FAR := 4.5       # m: how far from the toy spot the ball lies
-const HATCH_CUT := 0.5      # share of the egg's remaining home hatch time that is left after minding
-const STALL_S := 8.0        # s a walking Boki may go without getting STALL_GAIN nearer before it gives the chore up
-const STALL_GAIN := 0.5     # m nearer its goal that count as getting somewhere
-const JOURNAL_KEEP := 20    # lines kept per Boki (CareJournal.KEEP)
+const KINDS := {"ember": "mind", "mend": "cheer", "haul": "fetch", "tide": "water"}  # knack -> chore
+const GLUM_AT := 40.0  # joy need below which a Boki counts as glum
+const CHEER_JOY := 18.0  # joy a cheered-up Boki gains
+const CHEER_BOND := 0.05  # added to both Boki's bond when one cheers the other up
+const AT_EGG := 1.8  # m: a Boki this close to the egg is minding it (the egg sits 1 m inside the Nook)
+const AT_PATCH := 1.8  # m: close enough to the patch's centre to water it (the patch is 2 m wide)
+const AT_BALL := 0.6  # m: close enough to pick up or put down the ball
+const BALL_FAR := 4.5  # m: how far from the toy spot the ball lies
+const HATCH_CUT := 0.5  # share of the egg's remaining home hatch time that is left after minding
+const STALL_S := 8.0  # s a walking Boki may go without getting STALL_GAIN nearer before it gives the chore up
+const STALL_GAIN := 0.5  # m nearer its goal that count as getting somewhere
+const JOURNAL_KEEP := 20  # lines kept per Boki (CareJournal.KEEP)
 
-## The chore this Boki would do now ("" for none): its best knack among Ember, Mend and Haul whose chore can run.
+
+## The chore this Boki would do now ("" for none): its best knack among Ember, Mend, Haul and Tide whose chore can run.
 static func pick(life: BaseLife, k: Dictionary) -> String:
 	for kn in Work.list(k["rec"]):
 		var kind := String(KINDS.get(kn[0], ""))
@@ -27,18 +29,33 @@ static func pick(life: BaseLife, k: Dictionary) -> String:
 			return kind
 	return ""
 
+
 static func can_do(life: BaseLife, k: Dictionary, kind: String) -> bool:
 	match kind:
 		"mind":
 			var egg: Dictionary = Save.d.get("egg", {})
-			var nook_here: bool = life.h.NEST_AT.x > -100.0 and is_instance_valid(life.h.nest)      # a Nook here
-			return nook_here and not egg.is_empty() and not egg.get("rare", false) and not egg.get("minded", false) \
+			var nook_here: bool = life.h.NEST_AT.x > -100.0 and is_instance_valid(life.h.nest)  # a Nook here
+			return (
+				nook_here
+				and not egg.is_empty()
+				and not egg.get("rare", false)
+				and not egg.get("minded", false)
 				and not life.h._egg_ready()
+			)
 		"cheer":
 			return not glum(life, k).is_empty()
 		"fetch":
 			return not life.toy_spots().is_empty()
+		"water":
+			var at := _patch_at()
+			var now := Time.get_unix_time_from_system()
+			return (
+				FarmUnlocks.base_mode()
+				and SnackPatch.dry(SnackPatch.entry(Save.d), now)
+				and life.h.world.island_of(k["pos"].x, k["pos"].z) == life.h.world.island_of(at.x, at.z)
+			)
 	return false
+
 
 ## Starts the chosen chore: where it is going and what it carries.
 static func begin(life: BaseLife, k: Dictionary, kind: String) -> void:
@@ -46,6 +63,8 @@ static func begin(life: BaseLife, k: Dictionary, kind: String) -> void:
 	match kind:
 		"mind":
 			k["goal"] = life.h.nest.position
+		"water":
+			k["goal"] = _patch_at()
 		"cheer":
 			c["to"] = glum(life, k)
 		"fetch":
@@ -54,15 +73,22 @@ static func begin(life: BaseLife, k: Dictionary, kind: String) -> void:
 			c["carry"] = false
 	k["life_chore"] = c
 
+
 static func tick(life: BaseLife, k: Dictionary, m: Fsm, dt: float) -> void:
 	var c: Dictionary = k["life_chore"]
 	var done := false
 	match String(c["kind"]):
-		"mind": done = _mind(life, k, m, dt)
-		"cheer": done = _cheer(life, k, c)
-		"fetch": done = _fetch(life, k, c)
+		"mind":
+			done = _mind(life, k, m, dt)
+		"cheer":
+			done = _cheer(life, k, c)
+		"fetch":
+			done = _fetch(life, k, c)
+		"water":
+			done = _water(life, k, m, dt)
 	if done or KinAvoid.shut(k) or m.since >= float(life.r_v["max"]["chore"]) or _stalled(k, c, m.since):
 		m.go(BaseLife.S.ROAM, "%s done" % c["kind"] if done else "%s gave up" % c["kind"])
+
 
 ## Boxed in on the way (by a parked Boki beside a toy: it wobbles, so KinAvoid's pin test never fires) and no
 ## nearer its goal for STALL_S s. Standing at the egg or the friend it came for is not stalling.
@@ -74,8 +100,10 @@ static func _stalled(k: Dictionary, c: Dictionary, since: float) -> bool:
 		c["best_t"] = since
 	return since - float(c.get("best_t", 0.0)) > STALL_S
 
+
 static func label(k: Dictionary) -> String:
 	return String(k["life_chore"]["kind"]) if k.has("life_chore") else ""
+
 
 ## Leaving the state (done or called away): the ball goes, the chore is forgotten.
 static func end(k: Dictionary) -> void:
@@ -84,6 +112,7 @@ static func end(k: Dictionary) -> void:
 		(ball as Node).queue_free()
 	k.erase("life_chore")
 
+
 ## A glum Boki on this one's island that the farm isn't driving: the glummest, or {} for none.
 static func glum(life: BaseLife, k: Dictionary) -> Dictionary:
 	var here: int = life.h.world.island_of(k["pos"].x, k["pos"].z)
@@ -91,11 +120,17 @@ static func glum(life: BaseLife, k: Dictionary) -> Dictionary:
 	var low := GLUM_AT
 	for o in life.h.kins:
 		var joy := Care.need(o["rec"], "joy")
-		if o != k and joy < low and not BaseLife._taken(o) and not o.has("life_chore") \
-				and life.h.world.island_of(o["pos"].x, o["pos"].z) == here:
+		if (
+			o != k
+			and joy < low
+			and not BaseLife._taken(o)
+			and not o.has("life_chore")
+			and life.h.world.island_of(o["pos"].x, o["pos"].z) == here
+		):
 			low = joy
 			best = o
 	return best
+
 
 static func _mind(life: BaseLife, k: Dictionary, m: Fsm, dt: float) -> bool:
 	var egg: Dictionary = Save.d.get("egg", {})
@@ -105,7 +140,7 @@ static func _mind(life: BaseLife, k: Dictionary, m: Fsm, dt: float) -> bool:
 	k["goal"] = at
 	if Vector2(at.x - k["pos"].x, at.z - k["pos"].z).length() > AT_EGG:
 		return false
-	k["hop"] = float(k.get("hop", 0.0)) + dt * 4.0       # warms it, bobbing
+	k["hop"] = float(k.get("hop", 0.0)) + dt * 4.0  # warms it, bobbing
 	if m.since < float(life.r_v["chore_mind"]):
 		return false
 	var left := float(egg.get("t", 0.0)) - Time.get_unix_time_from_system()
@@ -115,10 +150,37 @@ static func _mind(life: BaseLife, k: Dictionary, m: Fsm, dt: float) -> bool:
 	life.h._emote(k, "♥")
 	return true
 
+
+## Walks to the patch, stands over it for chore_water s, then waters it. Gives up (done, no line) if it was watered
+## or picked meanwhile.
+static func _water(life: BaseLife, k: Dictionary, m: Fsm, dt: float) -> bool:
+	var e := SnackPatch.entry(Save.d)
+	if not SnackPatch.dry(e, Time.get_unix_time_from_system()):
+		return true
+	var at := _patch_at()
+	k["goal"] = at
+	if Vector2(at.x - k["pos"].x, at.z - k["pos"].z).length() > AT_PATCH:
+		return false
+	k["hop"] = float(k.get("hop", 0.0)) + dt * 4.0  # splashing
+	if m.since < float(life.r_v["chore_water"]):
+		return false
+	SnackPatch.water(e, Time.get_unix_time_from_system())
+	life.h.fx.burst(at + Vector3(0, 0.5, 0), Color("4ab0ff"), 8, 1.2, 0.4)
+	life.h._emote(k, "♪")
+	_note(k, "watered the snack patch: it ripens sooner")
+	return true
+
+
+## Where the patch is (its centre), or far away when none is down.
+static func _patch_at() -> Vector3:
+	var e := SnackPatch.entry(Save.d)
+	return HomeLayout.deco_center(e) if not e.is_empty() else Vector3(-9999, 0, -9999)
+
+
 static func _cheer(life: BaseLife, k: Dictionary, c: Dictionary) -> bool:
 	var to: Dictionary = c["to"]
 	if BaseLife._taken(to) or Care.need(to["rec"], "joy") >= GLUM_AT:
-		return true       # it cheered up already, or the farm has it
+		return true  # it cheered up already, or the farm has it
 	k["goal"] = to["pos"]
 	if BaseLife._dist(k, to) > AT_EGG:
 		return false
@@ -129,6 +191,7 @@ static func _cheer(life: BaseLife, k: Dictionary, c: Dictionary) -> bool:
 	_note(k, "cheered up %s" % to["rec"]["name"])
 	return true
 
+
 static func _fetch(life: BaseLife, k: Dictionary, c: Dictionary) -> bool:
 	var ball: Node3D = c["ball"]
 	var pos: Vector3 = k["pos"]
@@ -138,7 +201,7 @@ static func _fetch(life: BaseLife, k: Dictionary, c: Dictionary) -> bool:
 			c["carry"] = true
 		return false
 	ball.position = pos + Vector3(0, 0.75, 0)
-	var spot: Vector3 = life.h.toys.stand(k, c["toy"], 0.0)      # asked again each step: a Boki may lie down on it
+	var spot: Vector3 = life.h.toys.stand(k, c["toy"], 0.0)  # asked again each step: a Boki may lie down on it
 	k["goal"] = spot
 	if Vector2(spot.x - pos.x, spot.z - pos.z).length() > AT_BALL:
 		return false
@@ -146,6 +209,7 @@ static func _fetch(life: BaseLife, k: Dictionary, c: Dictionary) -> bool:
 	life.h._emote(k, "★")
 	_note(k, "fetched the ball back")
 	return true
+
 
 ## The ball lies BALL_FAR m from the toy spot, on ground.
 static func _drop_ball(life: BaseLife, spot: Vector3) -> Node3D:
@@ -157,6 +221,7 @@ static func _drop_ball(life: BaseLife, spot: Vector3) -> Node3D:
 	life.h.add_child(ball)
 	ball.position = at + Vector3(0, 0.16, 0)
 	return ball
+
 
 static func _note(k: Dictionary, words: String) -> void:
 	var rec: Dictionary = k["rec"]

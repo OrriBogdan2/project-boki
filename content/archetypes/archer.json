@@ -6,6 +6,7 @@
 	"personality": "Malgrave's royal seamstress, who stitched the fallen into the court's Relics. She deserted and now hunts Malgrave's loyalists, leaving a red-threaded needle at every kill.\nHer own shadow came loose when she stitched her first Relic; it's only a wrong-looking shadow, not a pet.",
 	"weight": "light",
 	"color": "#d41e2e",
+	"plate_offset": 2.37,
 	"body": {
 		"size": 1.054,
 		"hit_r": 0.408, "top_h": 1.69, "hit_h": 1.85, "body_r": 0.392,

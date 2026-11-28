@@ -75,6 +75,7 @@ func run(m: Node, mode := "") -> void:
 	_tutorial_rules()
 	_tracker_rules()
 	await _world()
+	await _skip_at_each_step()
 	await _spotlight()
 	await _build_spotlight()
 	await _farm2()
@@ -1208,6 +1209,57 @@ func _world() -> void:
 	)
 	home2.queue_free()
 	await main.get_tree().process_frame
+
+
+# ------------------------------------------------------------------ 5b. Skip at every step
+## Skip with steps 0..n-1 done, for each n, on the farm's twelve steps and on the base's four: the tutorial is
+## over and nothing of it stays on screen or in the save (line, marker, spotlight, Hob calling you over), the
+## house (farm) or a toy (base) is down, and the Goals card, the Boki you were given, the incubator, the first
+## zone and the hub all work, also after a save and load.
+func _skip_at_each_step() -> void:
+	for base in [false, true]:
+		Content.rules("farm_build")["base_mode"] = base
+		var ids: Array = FarmTutorial.steps().map(func(s): return String(s["id"]))
+		for n in ids.size():
+			await _skip_at(base, ids, n)
+	Content.rules("farm_build")["base_mode"] = false
+
+
+func _skip_at(base: bool, ids: Array, n: int) -> void:
+	var home = await _home(1)
+	for i in n:
+		FarmTutorial.mark(ids[i])
+	if not base and ids.slice(0, n).has("house"):
+		home.guide.place_house()
+	home.guide.tick(0.6)
+	var at := "%s skip at step %d (%s)" % ["base" if base else "farm", n + 1, ids[n]]
+	ok(FarmTutorial.active() and FarmTutorial.current() != "", at + ": a step is up first")
+	home.guide.skip()
+	home.guide.tick(0.6)
+	ok(not FarmTutorial.active() and FarmTutorial.current() == "" and FarmTutorial.state()["skipped"], at + ": over")
+	ok(
+		not is_instance_valid(home.guide.hint_box) and not is_instance_valid(home.guide.marker),
+		at + ": no line or marker is left"
+	)
+	ok(not FarmSpotlight.showing() and not home.hob.chat.busy(), at + ": no spotlight, no talk")
+	home.hob.call_t = 0.0
+	home.hob._call_out(0.1)
+	ok(home.hob.call_t <= 0.0, at + ": Hob does not call you over")
+	if base:
+		var hub_home := GardenZones.landing({}) == GardenZones.HUB
+		ok(home.toys.toys().size() == 1 and hub_home, at + ": a toy is down, the hub is home")
+	else:
+		var tools: bool = HomeGather.has_tool("axe") and HomeGather.has_tool("pickaxe")
+		ok(not FarmHob.house_entry().is_empty() and tools, at + ": the house and the tools are there")
+	ok(GoalTracker.lines().size() > 0 and is_instance_valid(home.guide.tracker), at + ": the Goals card has rows")
+	ok(not Save.active_kin().is_empty() and Save.d["roster"].size() == 1, at + ": your Boki is still yours")
+	ok(Incubator.slots() > 0 and Incubator.free_slots() > 0, at + ": the incubator has a free slot")
+	ok(GardenZones.is_open(GardenZones.start()), at + ": the first zone is open")
+	home.queue_free()
+	await main.get_tree().process_frame
+	Save.d = JSON.parse_string(JSON.stringify(Save.d))
+	var seen := HubFirstVisit.wanted("marker") or HubFirstVisit.wanted("line")
+	ok(not FarmTutorial.active() and not seen, at + ": still over after save and load")
 
 
 # ------------------------------------------------------------------ 5. round 2: Challenge House, water, rivers

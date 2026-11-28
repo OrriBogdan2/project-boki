@@ -24,6 +24,8 @@ static var shown := {}
 
 ## Draws the three boxes left of the weapon card `wr`, bottom-aligned with it. Returns their rect.
 static func draw(hud, p: Hunter, wr: Rect2) -> Rect2:
+	if not HudReveal.on(hud.m, "summon_ring"):
+		return Rect2(wr.position, Vector2.ZERO)  # the gloves and Boki box wait for the summon_ring reveal
 	var y := wr.end.y - BOX
 	var x0 := wr.position.x - EDGE - 3.0 * BOX - 2.0 * GAP
 	for i in Gloves.SLOTS:
@@ -73,7 +75,7 @@ static func boki(hud, p: Hunter, r: Rect2) -> void:
 	var fusion := MergeForm.enabled()
 	if has_boki and fusion and (int(p.slot_lv["ult"]) <= 0 or KinMerge.active(p)):
 		if p.lvl < int(Hunter.ULT_AT[0]) and not KinMerge.active(p) and not HudReveal.on(hud.m, "ult_tiles"):
-			return      # the locked Merge tile waits for level 6 (HudReveal "ult_tiles")
+			return  # the locked Merge tile waits for level 6 (HudReveal "ult_tiles")
 		BokiHud.r_slot(hud, p, r)
 		return
 	var key := Settings.key_cap("ultimate")
