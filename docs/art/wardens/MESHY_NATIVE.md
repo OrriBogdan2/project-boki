@@ -113,6 +113,13 @@ cloak and hem. Data `acts` plays the pick-up clip for the farm's lift, pat and f
 clip is used: sit has no farm verb; glide and dash fall back to the jump and run clips. The body sliders other than
 height and head size do not reshape the cloak (the bones are Meshy's). Any other shroud cut is the procedural Empty.
 The old contract-rig models (`empty_{f,m}.glb`) are gone.
+Facing (11-28): Meshy's auto-rig takes the uploaded mesh's +Z as the front and puts `headfront` there whatever the
+mesh shows. The 11-27 uploads had the painted face on -Z, so both rigs were backwards (clips walked the cloak
+backwards). Upload with the face on +Z (check where the painted face is, not `headfront`); `--empty-native-check`
+asserts EmptyGlb.EGG's face sits ahead of the Head bone. The male is a new Meshy model since 11-28
+(`~/meshy/empty-male-1128`: multi-image from four renders of the old male, enhancement on); the female is her old mesh
+re-rigged. Re-rig a bad weight set rather than over-smoothing: rigs of one upload differ (female 24/44/1063 torn pairs
+vs 464/738/1272).
 
 ## Clip slots (per-move and per-state clips)
 Data `clips` may add any of these keys beside idle, walk, run, jump, attack and crouch. Each names a clip; a missing key
