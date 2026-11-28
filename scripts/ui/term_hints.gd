@@ -17,7 +17,7 @@ static func watch(h, p: Hunter) -> void:
 		_say(h, seen, "term_armor", "Armor tier up: hitting foes fills it, and each tier adds plates")
 	if p.kin != null and p.kin.state == "active" and not seen.get("term_boki", false):
 		var orders := "hold %s for orders" % Settings.key_cap("throw")
-		_say(h, seen, "term_boki", "Your Boki fights and uses its move by itself (AUTO)  ·  " + orders)
+		_say(h, seen, "term_boki", "Your Boki fights and uses the move without you (AUTO)  ·  " + orders)
 
 
 static func _say(h, seen: Dictionary, key: String, text: String) -> void:

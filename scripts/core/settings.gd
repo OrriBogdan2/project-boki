@@ -300,7 +300,7 @@ const ACTIONS := [
 	["gear2", "Glove 2 (in a match; at home it plays fetch)"],
 	["signature", "Hunter utility"],
 	["throw", "Boki: tap to send out or call back, hold for the order wheel"],
-	["summon", "Summon your Boki out of its wisp (wisps on); again: back"],
+	["summon", "Summon your Boki out of the wisp (wisps on); again: back"],
 	["hunter_ult", "Hunter ultimate"],
 	["ultimate", "Fuse with your Boki (dev flag only: there is no fusion in the game)"],
 	["mate_look_1", "Look at teammate 1 (hold)"],

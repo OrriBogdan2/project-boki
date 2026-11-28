@@ -281,7 +281,7 @@ static func merge(ms: MergeSpec, giant := false) -> Array:
 	for st in ms.on_start: out.append("As it starts: " + stage(st))
 	for pl in ms.pulses: out.append("Every %ss: %s" % [n(float(pl["every"])), stage(pl["stage"])])
 	var fdash: Dictionary = MergeForm.data()["fallback"]["dash"]
-	out.append("%s, %s: your dash leaves your Boki type's trail (its rider on what you pass), then %ss of haste."
+	out.append("%s, %s: your dash leaves your Boki type's trail (a rider on what you pass), then %ss of haste."
 		% [Settings.key_cap("dash"), String(fdash["name"]), n(float(fdash["haste_s"]))])
 	out.append("%s again: a basic burst that ends the Fusion." % Settings.key_cap("ultimate"))
 	for slot in ms.merged:
@@ -305,7 +305,7 @@ static func form_lines(ms: MergeSpec, fd: Dictionary) -> Array:
 	out.append("%s, %s: %s" % [Settings.key_cap("signature"), a["e"]["name"], a["e"]["desc"]])
 	out.append("%s, %s: %s" % [Settings.key_cap("dash"), a["dash"]["name"], a["dash"]["desc"]])
 	out.append("%s again, %s: %s It ends the Fusion with a burst of speed and a shield, and your Boki rests %ss. Ready %ss in." % [Settings.key_cap("ultimate"), fd["r"]["name"], fd["r"]["desc"], n(float(MergeForm.data()["release_rest_s"])), n(float(MergeForm.data()["ult_lock_s"]))])
-	out.append("Your Boki's own ability is off while fused. Your Boki is part of you until it ends.")
+	out.append("Your Boki's own ability is off while fused. Your Boki is part of you until the Fusion ends.")
 	return out
 
 ## The aiming shape shown while E is held (Match._update_indicators): [kind, reach, size(, "front")].

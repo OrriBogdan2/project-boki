@@ -11,24 +11,26 @@ class_name Ransom
 const BROKER := "Old Pell"
 const SELL_AFTER := 6  # expeditions the house waits before selling an unclaimed kin to a rival
 const VOICE_ACCEPT := [
-	"Done. It's been fretting for you.",
-	"Pleasure doing business. Mind you keep hold of it this time.",
-	"Agreed. I'll fetch it from the back."
+	"Done. {He}'s been fretting for you.",
+	"Pleasure doing business. Mind you keep hold of {him} this time.",
+	"Agreed. I'll fetch {him} from the back."
 ]
-const VOICE_COUNTER := ["Mm. I could do %d.", "Not quite. Make it %d and it's yours.", "You'll have to come up. %d."]
+const VOICE_COUNTER := ["Mm. I could do %d.", "Not quite. Make it %d and {he}'s yours.", "You'll have to come up. %d."]
 const VOICE_INSULT := [
-	"Insulting. The price just went up.", "Is that a joke? Try again, properly.", "I feed it every day, you know."
+	"Insulting. The price just went up.", "Is that a joke? Try again, properly.", "I feed {him} every day, you know."
 ]
 const VOICE_DONE := [
 	"I'm done haggling today. The price is the price.",
 	"No more offers this time. Pay or come back after your next expedition."
 ]
 const RIVAL_ACCEPT := [
-	"Fine, take it. It kept looking for you anyway.", "Deal. It never really liked me.", "Gems are gems. It's yours."
+	"Fine, take {him}. {He} kept looking for you anyway.",
+	"Deal. {He} never really liked me.",
+	"Gems are gems. {He}'s yours."
 ]
-const RIVAL_COUNTER := ["%d. Not a gem less.", "I'd part with it for %d.", "Make it %d and we're square."]
+const RIVAL_COUNTER := ["%d. Not a gem less.", "I'd part with {him} for %d.", "Make it %d and we're square."]
 const RIVAL_REFUSE := ["Not for that. Not even close.", "You'll have to do better than that.", "Ha. No."]
-const RIVAL_DONE := ["I'm not talking about this anymore.", "Find me out there if you want it so badly."]
+const RIVAL_DONE := ["I'm not talking about this anymore.", "Find me out there if you want {him} so badly."]
 
 
 ## What a kin is worth to the people who trade them.
@@ -99,7 +101,8 @@ static func lose(k: Dictionary, fate: String, holder: String, tier: int) -> void
 	if fate == "rival":
 		note_log("%s was taken home by %s." % [k.get("name", "Your Boki"), holder])
 	else:
-		note_log("Nobody came for %s. It's waiting at the Black Market." % k.get("name", "Your Boki"))
+		var gone := "Nobody came for %s. {He}'s waiting at the Black Market." % k.get("name", "Your Boki")
+		note_log(KinSpeak.about(k, gone))
 
 
 ## Back on your roster, remembering what happened.
@@ -129,13 +132,18 @@ static func pay(L: Dictionary) -> bool:
 	if String(L["where"]) == "rival":
 		var rv := rival(String(L["holder"]))
 		rv["deals"] = int(rv["deals"]) + 1
-	restore(L, "paid %d gems for it" % cost)
+	restore(L, KinSpeak.about(L["rec"], "paid %d gems for {him}" % cost))
 	Save.save_game()
 	return true
 
 
 ## Haggling. Returns {result: accept|counter|refuse|done, line, ask}.
 ## A message to the captor rides along with an offer (shown to them online; kept in the log).
+## One of a broker's or rival's lines, with {he}/{him} for the kin on the ledger.
+static func _voiced(L: Dictionary, lines: Array) -> String:
+	return KinSpeak.about(L["rec"], String(lines.pick_random()))
+
+
 static func offer(L: Dictionary, gems: int, message := "") -> Dictionary:
 	var rival_side := String(L["where"]) == "rival"
 	var said := Social.say_of(message, "", 140).strip_edges()
@@ -143,7 +151,7 @@ static func offer(L: Dictionary, gems: int, message := "") -> Dictionary:
 		note_log('You offered %s %d gems: "%s"' % [L["holder"], gems, said])
 	if int(L.get("patience", 0)) <= 0:
 		return {
-			"result": "done", "line": (RIVAL_DONE if rival_side else VOICE_DONE).pick_random(), "ask": int(L["ask"])
+			"result": "done", "line": _voiced(L, RIVAL_DONE if rival_side else VOICE_DONE), "ask": int(L["ask"])
 		}
 	if gems > int(Save.d["gems"]):
 		return {"result": "refuse", "line": "You don't have that many gems.", "ask": int(L["ask"])}
@@ -156,7 +164,7 @@ static func offer(L: Dictionary, gems: int, message := "") -> Dictionary:
 			rv["deals"] = int(rv["deals"]) + 1
 		restore(L, "talked %s down to %d gems" % [L["holder"] if rival_side else BROKER, gems])
 		Save.save_game()
-		return {"result": "accept", "line": (RIVAL_ACCEPT if rival_side else VOICE_ACCEPT).pick_random(), "ask": gems}
+		return {"result": "accept", "line": _voiced(L, RIVAL_ACCEPT if rival_side else VOICE_ACCEPT), "ask": gems}
 	L["patience"] = int(L["patience"]) - 1
 	if gems < int(flr * 0.6):
 		# a lowball offer annoys them
@@ -167,14 +175,14 @@ static func offer(L: Dictionary, gems: int, message := "") -> Dictionary:
 		Save.save_game()
 		return {
 			"result": "refuse",
-			"line": (RIVAL_REFUSE if rival_side else VOICE_INSULT).pick_random(),
+			"line": _voiced(L, RIVAL_REFUSE if rival_side else VOICE_INSULT),
 			"ask": int(L["ask"])
 		}
 	var nask := maxi(flr, int(round(ask - (ask - gems) * 0.4)))
 	L["ask"] = nask
 	Save.save_game()
 	var lines: Array = RIVAL_COUNTER if rival_side else VOICE_COUNTER
-	return {"result": "counter", "line": String(lines.pick_random()) % nask, "ask": nask}
+	return {"result": "counter", "line": _voiced(L, lines) % nask, "ask": nask}
 
 
 ## Called once per expedition: prices drift, the house sells kin nobody claims, rivals get bored
@@ -193,7 +201,8 @@ static func tick(rivals_seen: Array) -> Array:
 				L["holder"] = buyer
 				L["waited"] = 0
 				price(L)
-				news.append("%s sold %s to %s. Nobody came for it in time." % [BROKER, nm, buyer])
+				var sold := "%s sold %s to %s. Nobody came for {him} in time." % [BROKER, nm, buyer]
+				news.append(KinSpeak.about(L["rec"], sold))
 				note_log(news[-1])
 			else:
 				var keep_p := int(L.get("patience", 3))
@@ -208,7 +217,8 @@ static func tick(rivals_seen: Array) -> Array:
 				L["holder"] = BROKER
 				L["waited"] = 0
 				price(L)
-				news.append("%s got tired of %s and left it at the Black Market." % [was_h, nm])
+				var tired := "%s got tired of %s and left {him} at the Black Market." % [was_h, nm]
+				news.append(KinSpeak.about(L["rec"], tired))
 				note_log(news[-1])
 			else:
 				price(L)
