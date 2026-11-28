@@ -40,6 +40,7 @@ func run(main_node: Node) -> void:
 	for kit in ["juggernaut", "ashwick", "rimewright", "dredge"]:
 		await _kit(m, p, kit)
 	await _rebound(m, p)
+	await _grounded(m, p)
 	m.free()
 	_rebound_tutorial()
 	print("ABILITY BAR CHECK DONE, failures: ", bad)
@@ -137,6 +138,28 @@ func _airborne(m: Match, p: Hunter, hid: int, kit: String) -> void:
 		p.grounded = true
 		await _drawn(m.hud)
 		ok(DashSlot.shown[hid]["air_text"] == "", "Grimble on the ground: no air countdown")
+
+## Grounded greys the dash slot and the Space hint with the plate's icon and a ring on KitStatus's clock, and
+## both clear when the time runs out.
+func _grounded(m: Match, p: Hunter) -> void:
+	_pick(m, p, "thief", 1)
+	await _drawn(m.hud)
+	var free := not GroundedRead.shown.has("dash") and not GroundedRead.shown.has("jump")
+	ok(free, "grounded: a free player's bar is untouched")
+	KitStatus.apply(p, "gnd", 2.0, 0.0, false)
+	await _drawn(m.hud)
+	var sh: Dictionary = GroundedRead.shown.get("dash", {})
+	ok(absf(float(sh.get("frac", 0.0)) - 1.0) < 0.05, "grounded: the dash slot greys with a full ring (%s)" % sh)
+	ok(GroundedRead.shown.has("jump"), "grounded: the Space hint greys too")
+	var gap := absf(float(sh.get("left", 0.0)) - KitStatus.grounded_left(p))
+	ok(gap < 0.05, "grounded: the ring reads KitStatus's time left")
+	m.time += 1.0
+	await _drawn(m.hud)
+	var half: float = float(GroundedRead.shown.get("dash", {}).get("frac", -1.0))
+	ok(absf(half - 0.5) < 0.08, "grounded: the ring is half empty after 1 of 2 s (%.2f)" % half)
+	m.time += 1.5
+	await _drawn(m.hud)
+	ok(not GroundedRead.shown.has("dash") and not GroundedRead.shown.has("jump"), "grounded: both icons clear on time")
 
 ## E is the "signature" action (bar slot k1) and R the "hunter_ult" action (bar slot x; "ultimate" is the
 ## Fusion key on slot r): E goes to mouse 4 ("M4"), R to N. The bar's pills and tooltips must follow.

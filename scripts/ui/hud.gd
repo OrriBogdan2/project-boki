@@ -309,7 +309,9 @@ func _draw_parts() -> void:
 	if p and not p.out and not p.extracted:
 		_draw_overhead(p)
 		_draw_glider_heat(p)
-		HoldPrompt.air_tap(c, m.cam, _head(p, 2.25 * float(p.cdat["scale"])))      # a tapped Space: "Hold"
+		var head := _head(p, 2.25 * float(p.cdat["scale"]))
+		if not GroundedRead.jump(c, plates, m.cam, head, p):      # Grounded: the Space hint greys out
+			HoldPrompt.air_tap(c, m.cam, head)      # a tapped Space: "Hold"
 	if p:
 		dmg_dir.draw(c, m, sz)
 		if not p.riding:
