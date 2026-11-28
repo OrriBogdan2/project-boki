@@ -985,6 +985,19 @@ func _all() -> void:
 		k.res == 1.0 and absf(p.max_hp - mh0 * 1.025) < 0.5 and p.hp > mh0 * 0.5 + mh0 * 0.15,
 		"res %.0f maxhp %.1f hp %.1f" % [k.res, p.max_hp, p.hp]
 	)
+	# ours-only heal (the reference passive gives max health only): 16% on top of the stack's +2.5%
+	ok(
+		"passive: the knock heal is 16% of max health (ours-only, the data has none)",
+		absf(p.hp - (mh0 * 0.525 + p.max_hp * 0.16)) < 0.5,
+		"hp %.1f maxhp %.1f" % [p.hp, p.max_hp]
+	)
+	var hp_k := p.hp
+	DashReset.takedown(p, t)
+	ok(
+		"passive: with the takedown reset's 5% a knock heals 21% in all, no more",
+		absf(p.hp - (hp_k + p.max_hp * 0.05)) < 0.5,
+		"hp %.1f -> %.1f" % [hp_k, p.hp]
+	)
 	var hp1 := p.hp
 	k.on_knock(t, false)
 	ok("passive: an assist stacks but does not heal", k.res == 2.0 and p.hp <= hp1 + p.max_hp * 0.03 + 0.5)
