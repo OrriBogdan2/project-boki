@@ -883,7 +883,7 @@ func _mend_tick() -> void:
 		if o.downed:
 			continue
 		ticks_healed += 1
-		o.heal(heal)
+		o.heal(heal, h)
 
 func _mend_burst() -> void:
 	var ed := e_def()
@@ -899,7 +899,7 @@ func _mend_burst() -> void:
 			kickstarts += 1
 			HeroVfx.of(m).play(h, "mend_revive", o.pos, Vector2.ZERO)
 		elif not o.downed:
-			o.heal(heal)
+			o.heal(heal, h)
 			if o == h and not wall.is_empty():
 				shield_hp = minf(shield_max(), shield_hp + float(ed["shield"]))
 				if m.verbs.walls.has(wall):

@@ -299,6 +299,7 @@ func zedran(a) -> void:
 			p.pos.distance_to(p0) < 0.1 and k.busy(), "moved %.2f" % p.pos.distance_to(p0))
 	# invulnerable: hits do nothing and can't stun; each one blocked (two at most) makes the answer harder
 	var hp0 := p.hp
+	p.hurt_at = m.time  # health recovery waits 4 s after a hit: only the guard decides hp here
 	p.hurt(30.0, t2, {"src": "shot", "stun": 1.0})
 	a_x.step(m, 0.1)
 	p.hurt(30.0, t2, {"src": "shot"})

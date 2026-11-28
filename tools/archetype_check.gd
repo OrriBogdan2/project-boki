@@ -658,7 +658,7 @@ func _bulwark() -> void:
 			wl[i] = lv if dx < 1 else lv + 3
 	W.kind = wk; W.level = wl
 	T.teleport(home + Vector3(2.2, 0, 0)); fresh(T); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; K.crushed_at = {}
-	P.teleport(home); aim_at(P, T.pos); P.hp = P.max_hp - 40.0
+	P.teleport(home); aim_at(P, T.pos); P.hp = P.max_hp - 40.0; P.hurt_at = m.time  # recovery waits 4 s after a hit
 	var c0 := K.crushes; var hp0 := P.hp
 	K.lock_t = 0.0; P.dashes = P.max_dashes()
 	step(m, 0.2)
@@ -709,6 +709,7 @@ func _bulwark() -> void:
 	ok("bulwark dash with the shield up: Shield Charge", K.st.get("last_dash") == "charge" and inv > 0.15 and P.flat_dist(home) > 3.0, "inv %.2f moved %.1f" % [inv, P.flat_dist(home)])
 	# E: Mending Ground: the column comes down for 1s, then the zone heals over time and ends in a burst
 	P.teleport(home); P.hp = P.max_hp - 100.0; hp0 = P.hp
+	P.hurt_at = m.time + 3.0  # recovery waits 4 s after a hit: the delay shows only the zone's heal
 	P.inp["aim"] = home + Vector3(1, 0, 0)
 	P.ak.use_e()
 	step(m, 0.5)

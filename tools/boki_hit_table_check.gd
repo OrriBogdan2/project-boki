@@ -109,6 +109,9 @@ func _reset(m: Match, P: Hunter, t: Ent, home: Vector3, spot: Vector3, hp_k: flo
 	for st in STATUS:
 		t.set(st + "_t", 0.0)
 	t.cc_immune_t = 0.0
+	if t is Hunter:
+		# no health recovery on the target: it would eat the BIG_HP hit being measured
+		(t as Hunter).regen_acc = -1.0e9
 	t.dr = {}
 	t.dr_stun = false
 	t.set_meta("marks", {})
@@ -146,6 +149,9 @@ func _fire(m: Match, P: Hunter, t: Ent, home: Vector3, spot: Vector3, slot: Stri
 		if shoot: P.inp["fire"] = true
 		ak.aim_at(P, t.pos)
 		_still(t)
+		if t is Kin:
+			# a summoned Boki mends once out of combat (4 s): that would eat the long ult's damage
+			(t as Kin).combat_at = m.time
 		for mb in m.mobs: mb.queue_free()      # (a monster wandering into a fan would take its slugs)
 		m.mobs.clear()
 		m.step(ak.DT)

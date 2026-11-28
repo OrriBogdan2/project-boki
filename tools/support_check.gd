@@ -502,6 +502,7 @@ func _rime_support() -> void:
 	ok("Rink Wall: raised ahead", not K.wall.is_empty() and m.verbs.walls.size() >= 1)
 	A.hp = A.max_hp * 0.5
 	var ah := A.hp
+	A.hurt_at = m.time + 3.0  # recovery waits 4 s after a hit: only the wall could heal here
 	step(m, 1.5)
 	ok(
 		"Rink Wall: no squad shield or heal (she copies her source: ice control only)",

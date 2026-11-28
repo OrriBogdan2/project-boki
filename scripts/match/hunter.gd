@@ -82,6 +82,7 @@ var stolen_carry := false      # carrying someone else's kin: it struggles, slow
 var chase: Hunter = null       # whoever has your kin: you run faster toward them
 var box_t := 0.0               # holding interact at a deathbox
 var box_rev_at := -9.0         # last time we were channelling a deathbox revive (BoxRevive)
+var regen_acc := 0.0           # seconds toward the next health-recovery tick (HealRules)
 var hurt_at := -9.0            # last time a hit landed (channels like a box revive break on it)
 var hit_k := 1.0               # how hard the last hit was (Oomph): scales the flinch
 var hit_shake := 0.0           # the model's hit-shake left (Oomph.render_hit)
@@ -1330,15 +1331,15 @@ func _kin_riders(extra: Dictionary) -> void:
 			extra["fx_hit"] = [{"type": "chain", "count": int(os["chain"]), "first": 5.0, "dmg": float(wpn["dmg"]) * 0.5, "color": Color(wpn["color"]).to_html(false), "skip_here": true}]
 			extra["fx_ctx"] = {"slot": "ult", "ability": "merge"}
 
-func heal(n: float) -> void:
+func heal(n: float, from: Node = null) -> void:
 	if downed or out:
 		return
+	n = HealRules.given(n, from, self)
 	if remote:
 		m.net_event(["heal", nid, n])
 		m.fx.healed(self, minf(n, max_hp - hp))     # its own game heals it; the heal shows here now
 		return
-	if blight_t > 0.0:
-		n *= 1.0 - blight_k   # blighted: healing barely takes
+	n *= HealRules.target_k(self)   # blighted: healing barely takes; in the tide: none
 	var before := hp
 	hp = minf(max_hp, hp + n)
 	m.fx.healed(self, hp - before)
@@ -1422,6 +1423,7 @@ func sim(dt: float) -> void:
 	var regen := owner_stat("regen") + kin_pt("owner_regen")
 	if regen > 0.0 and not downed and hp < max_hp:
 		hp = minf(max_hp, hp + regen * dt * (1.0 - blight_k if blight_t > 0.0 else 1.0))
+	HealRules.regen_tick(self, dt)
 	KinRegen.owner_shield_tick(self, dt)
 	if is_local():
 		WarnSfx.low_hp(self, dt)
