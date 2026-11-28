@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://doqi65ur2fxx5"
-path="res://.godot/imported/gear_armor_Image_0.jpg-bfbd8f4f000894f21d0cca0507405d44.ctex"
+path.s3tc="res://.godot/imported/gear_armor_Image_0.jpg-bfbd8f4f000894f21d0cca0507405d44.s3tc.ctex"
+path.etc2="res://.godot/imported/gear_armor_Image_0.jpg-bfbd8f4f000894f21d0cca0507405d44.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "e1ee70b2a8d3d578d09f3ee9dec23258"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/items/gear_armor_Image_0.jpg"
-dest_files=["res://.godot/imported/gear_armor_Image_0.jpg-bfbd8f4f000894f21d0cca0507405d44.ctex"]
+dest_files=["res://.godot/imported/gear_armor_Image_0.jpg-bfbd8f4f000894f21d0cca0507405d44.s3tc.ctex", "res://.godot/imported/gear_armor_Image_0.jpg-bfbd8f4f000894f21d0cca0507405d44.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
