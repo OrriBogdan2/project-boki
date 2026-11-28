@@ -104,6 +104,7 @@ func run(main_node: Node) -> void:
 	_reel_takes_over(m, p_v, t, open, reel, _hit(side * sparkle, -1.0))
 	await _lockout(m, p_v, t, walled, _hit(Vector2(1, 0) * vex, 2.0), _hit(side * vex, 2.0))
 	await _stale_wallstun(m, p_v, t, walled, _hit(Vector2(1, 0) * kael, -1.0), _hit(side * albert, 2.5))
+	_same_knock(m, p_v, open)
 	print("KNOCKCHAIN TABLE | pair | after 2nd knock (m) | 2nd knock alone (m) | 1st knock's carry (m) | wall stun |")
 	for w in rows:
 		print(
@@ -188,6 +189,55 @@ func _watch(m: Match, t_v: Hunter, out: Dictionary) -> void:
 		prev = t_v.wslam_t
 		out["stun"] = maxf(float(out["stun"]), t_v.stun_t)
 	await main.get_tree().process_frame
+
+
+## The resist formula (docs/KNOCK_WALLS.md "Knock formula"): a knock divides by max(1 + knockback_resist, 0.5)
+## and by the class mass. Albert, Kael (heavy, 1.35) and Meeko (medium) each take Lace's full Heavy Shot while
+## carrying a Goliathite (knockback_resist 0.5, the data's value): each flies at push / 1.5 / mass (the subtract
+## form would give push x 0.5 / mass), the two heavies land together and Meeko lands further.
+func _same_knock(m: Match, p: Hunter, at: Vector3) -> void:
+	var push := float((Arch.def("archer")["rmb"]["pin"]["push"] as Array)[1])
+	var got := {}
+	var i := 0
+	for who in [["Albert", "bulwark"], ["Kael", "juggernaut"], ["Meeko", "tender"]]:
+		var spot: Vector3 = at + Vector3(0, 0, 3.0 * i)
+		i += 1
+		var t: Hunter = m.make_hunter(who[0], 5, Arch.weight(who[1]), who[0], "idle", {}, spot, {"arch": who[1]})
+		t.max_hp = 10000.0
+		t.hp = t.max_hp
+		t.armor = 0.0
+		t.max_armor = 0.0
+		var rec := Save.new_kin("goliathite")
+		rec["trust"] = 95.0
+		var k: Kin = m.give_kin(t, rec)
+		k.stow()
+		k.settle = 1.0
+		k.brain.think_t = 1e9
+		_place(m, p, t, spot)
+		var resist := t.owner_stat("knockback_resist")
+		var from := t.pos
+		_apply(m, p, t, _hit(Vector2(1, 0) * push, -1.0))
+		var v := Vector2(t.vel.x, t.vel.z).length()
+		ak.step(m, SETTLE)
+		var want := push / maxf(1.0 + resist, 0.5) / t.mass()
+		ok("%s carries the Goliathite's knockback resist" % who[0], resist > 0.3, "resist %.2f" % resist)
+		ok(
+			"%s: Heavy Shot flies at push / (1 + resist) / mass" % who[0],
+			absf(v - want) < SPD_TOL,
+			"%.3f m/s want %.3f (mass %.2f, resist %.2f)" % [v, want, t.mass(), resist]
+		)
+		got[who[0]] = (t.pos - from).length()
+		t.teleport(spot + Vector3(0, 0, 40.0))
+	ok(
+		"Albert and Kael (both heavy) land the same knock together",
+		absf(float(got["Albert"]) - float(got["Kael"])) < DIST_TOL,
+		"Albert %.2f m, Kael %.2f m" % [got["Albert"], got["Kael"]]
+	)
+	ok(
+		"Meeko (medium) lands the same knock further than the heavies",
+		float(got["Meeko"]) > float(got["Albert"]) * 1.15,
+		"Meeko %.2f m vs Albert %.2f m" % [got["Meeko"], got["Albert"]]
+	)
 
 
 ## The other order: a reel starting on a knocked body takes over its flight.
