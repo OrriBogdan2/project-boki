@@ -12,6 +12,8 @@ const CHECKS := {
 	"--blast-parity-check": ["res://tools/blast_parity_check.gd", "blast_parity_check", null],
 	"--move-speed-check": ["res://tools/move_speed_check.gd", "move_speed_check", null],  # run, walk, crouch per Hunter
 	"--kit-refund-check": ["res://tools/kit_refund_check.gd", "kit_refund_check", null],  # refund/reset loops (11-27)
+	# every Hunter's invulnerable / shot-proof window: hit inside and outside it (KIT_PARITY.d/1128-invuln-windows.md)
+	"--invuln-window-check": ["res://tools/invuln_window_check.gd", "invuln_window_check", null],
 	"--mob-fsm-check": ["res://tools/mob_fsm_check.gd", "mob_fsm_check", null],  # monster + boss machines (M9)
 	"--utility-parity-check": ["res://tools/utility_parity_check.gd", "utility_parity_check", null],  # belt vs source
 	"--vex-daze-check": ["res://tools/vex_daze_check.gd", "vex_daze_check", null],  # Daze team, coin wall stun
