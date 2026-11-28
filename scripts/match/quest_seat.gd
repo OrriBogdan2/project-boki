@@ -66,7 +66,7 @@ func _force(to: S, why: String, t := -1) -> void:
 				var nm := String(ref.get("name", ""))
 				m.add_feed("%s is open: %s, first squad to finish it leaves" % [title().capitalize(), nm])
 				m.ping(at, col)
-				m.sfx("horn", null, -6.0, 0.8)
+				m.sfx("ways_open", null, HeartSfx.CALL_DB)
 				if m.hud and m.player and not m.player.out and not m.player.extracted:
 					var dw := m.direction_word(m.player.pos, at)
 					m.hud.toast("%s IS OPEN  ·  %s %s" % [title().to_upper(), nm, dw], col)

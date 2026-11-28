@@ -28,8 +28,8 @@ func run(main_node: Node) -> void:
 				n["last"] = 0.0
 				n["vel"] = Vector3.ZERO
 	await _go(0.3, hold)
-	m.fx.hit_number(P, T, 34.0, Color("ff6a5a"), false)
-	m.fx.hit_number(P, T, 61.0, Color("ffd24a"), true)
+	m.fx.damage_number(P, T, 34.0, {}, P)
+	m.fx.damage_number(P, T, 61.0, {"crit": true}, P)
 	m.fx.healed(P, 18.0)
 	m.fx.word(P.pos + Vector3(0, 1.3, 0), "COMBO", Color.WHITE)
 	for t in [
@@ -44,7 +44,9 @@ func run(main_node: Node) -> void:
 	m.hud.toast("LEVEL 4  ·  +1 skill point", Color("ffd24a"))
 	await _go(0.8, hold)
 	var img := main.get_viewport().get_texture().get_image()
-	var at := Rect2i(Vector2i(img.get_size() / 2) - CROP / 2, CROP).intersection(Rect2i(Vector2i.ZERO, img.get_size()))
+	var at := Rect2i(Vector2i(Vector2(img.get_size()) / 2.0) - Vector2i(Vector2(CROP) / 2.0), CROP).intersection(
+		Rect2i(Vector2i.ZERO, img.get_size())
+	)
 	img.get_region(at).save_png(dir.path_join("zone_%s.png" % tag_name))
 	img.save_png(dir.path_join("zone_full_%s.png" % tag_name))
 	var f := FileAccess.open(dir.path_join("zone_lane_%s.txt" % tag_name), FileAccess.WRITE)

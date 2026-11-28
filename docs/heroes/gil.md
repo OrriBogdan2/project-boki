@@ -10,12 +10,17 @@ footage and no source row. Every number below is the live data (`content/archety
 | Slot | Input | What it does | Numbers (live) |
 |---|---|---|---|
 | Passive, Fish Out of Water | none | each different potion effect (shock, slime, gust, fire, geyser) puts a splash mark on the foe it hits; three different marks inside the window Beach them (a stun, "BEACHED!"), then the marks clear | window 5 s, 3 marks, stun 0.75 s, once per foe every 8 s; the Fencer, Riptide, Ground Swim and the wave mark nothing |
-| LMB, Fencer (swordfish) | hold | two quick thrusts and a longer lunge, each stepping him in; the lunge slows | 7 / 7 / 11 damage, reach 2.5 / 2.5 / 3.2 m, arc 50 / 50 / 34 deg, step 0.7 / 0.7 / 1.3 m, knockback 1.2; 0.32 s between thrusts, 0.48 s after the lunge; the chain restarts after 0.75 s idle; the lunge slows 30% for 0.5 s (a 0.1 hit carries it) |
+| LMB, Fencer (swordfish) | hold | two quick thrusts and a longer lunge, each stepping him in; the lunge slows | 9.2 / 9.2 / 14.5 damage (7 / 7 / 11 until the 11-12 TTK change), reach 2.5 / 2.5 / 3.2 m, arc 50 / 50 / 34 deg, step 0.7 / 0.7 / 1.3 m, knockback 1.2; 0.32 s between thrusts, 0.48 s after the lunge; the chain restarts after 0.75 s idle; the lunge slows 30% for 0.5 s (a 0.1 hit carries it) |
 | RMB, Grab Bag | press (no hold: holding does nothing more); in the air it drops | throws the next potion from a shuffled bag in an arc to the cursor; the next one shows on the slot and glows in his hand | 2 charges, 5 s each; 8 m at most; flight 0.35 s + 0.03 s a metre (0.59 s at 8 m); in the air: straight down, 0.25 s; the bag is 2 Thunder, 2 Slime, 2 Air, 2 Fire, 1 Geyser, reshuffled when empty |
-| Shift, Ground Swim | tap | dives and swims the shared dash direction, the fin cutting the ground; still hittable; surfacing knocks nearby foes up. The air dash (long dash) is a plain travel with no dive or surfacing | 6 m in 0.4 s (the shared dash feel's time scale), surfacing radius 2.2 m, 4 damage, lift 8, knockup 0.5 s; 8 s a charge |
-| E, Riptide | tap, then E again (or wait) | spins with the swordfish, hitting around him, then sends a waterspout down the aim; the longer the spin, the longer, wider and faster the spout | spin up to 2 s, radius 2.2 m, a tick every 0.25 s rising 2 -> 5 (8 ticks: 2.0 ... 4.8), he walks at 70%; spout 7 -> 11 m long, 1.2 -> 2.2 m wide, 14 -> 22 m/s, 10 damage, lift 9, knockup 1 s, each foe once; 12 s |
+| Shift, Ground Swim | tap | sinks to the waist and swims a crawl through the ground, starting the shared dash direction and turning with the move keys (none held: the cursor); the wake breaks the ground along his path; still hittable; surfacing knocks nearby foes up. The air dash (long dash) is a plain travel with no dive or surfacing | 4.5 m in 0.55 s (the shared dash feel's time scale), turning up to 4.4 rad/s (dash.steer, ours: no source dash steers), surfacing radius 2.2 m, 4 damage, lift 8, knockup 0.5 s; 8 s a charge |
+| E, Riptide | tap, then E again (or wait) | spins with the swordfish, hitting around him, then sends a waterspout down the aim; the longer the spin, the longer, wider and faster the spout | spin up to 2 s, radius 2.2 m, a tick every 0.25 s rising 2 -> 5 (8 ticks: 2.0 ... 4.8), he walks at 55% rising to 100% as the spin fills, the spin clip winds up from 2 to 7 turns a second; his own hits never hold him (no freeze-frame, no shake); spout 7 -> 11 m long, 1.2 -> 2.2 m wide, 14 -> 22 m/s, 10 damage, lift 9, knockup 1 s, each foe once; 12 s |
 | X, Tidal Wave (level 6) | tap | surfs a wave 14 m down the aim, untargetable; every foe it rolls over is knocked up then slowed; lands with a shield | 14 m in 1 s, 3.6 m wide, 18 damage, knockup 1 s, then 50% slow (2 s after the knockup), shield 40 for 3 s; 90 s |
 | R | | the Boki Merge (not a hero ability) | |
+
+**Hold LMB, Tide Lunge** (`lmb.tide`): held past 0.25 s he draws back (walking at 50%), full at 0.8 s; let go to drive
+2 -> 5 m down the line, 10 -> 22 damage to each foe once, 0.55 s after. A part charge knocks 6; a full charge soaks
+(a splash mark) and knocks 10 (`kb_full`), past the shared 8 m/s wall-slam speed, so a foe driven into a cliff,
+rock or wall close behind is stunned 0.9 s (docs/KNOCK_WALLS.md). Checked by "Tide Lunge into a rock: ..." (2 lines).
 
 ### Grab Bag potions (`rmb.vials`)
 | Potion | Radius | Damage | Effect | Mark |
@@ -41,8 +46,8 @@ this: see F6.
 | RMB x3 | two throws, the third does nothing; a charge back 5 s after the first | "numbers RMB: ..." (3 lines) |
 | Three different potions on one foe in 5 s | Beached 0.75 s, then 8 s before the next | "Fish Out of Water: ..." (4 lines) |
 | Two potions, wait 5 s, a third | no Beach (the old marks dropped) | "numbers passive: marks last 5 s (two, a 5 s wait, a third: no Beach)" |
-| Shift near a foe | 6 m under the ground, hittable, a knockup where he surfaces | "Ground Swim: ..." (4 lines); "numbers Shift: ..." (3 lines) |
-| E | the spin hurts round him, rising | "Riptide: E starts the spin"; "Riptide: the spin hurts foes around him"; "numbers E: 8 spin ticks, 2 at first, rising, under 5"; "numbers E: he moves at 70% while he spins" |
+| Shift near a foe | 4.5 m waist-deep, steerable, hittable, a knockup where he surfaces | "Ground Swim: ..." (6 lines); "Ground Swim steer: ..." (2 lines); "numbers Shift: ..." (3 lines) |
+| E | the spin hurts round him, rising | "Riptide: E starts the spin"; "Riptide: the spin hurts foes around him"; "numbers E: 8 spin ticks, 2 at first, rising, under 5"; "numbers E: he moves at 55% as the spin starts, near full speed as it fills"; "numbers E: the spin clip winds up with the fill ..."; "numbers E: no screen shake ..." |
 | E, then E again / E and wait 2 s | the spout runs the line, knocks up 1 s; a full spin makes the biggest spout | "Riptide recast: ..."; "Riptide: at 2 s the spout goes on its own"; "Riptide: a longer spin makes a wider spout"; "numbers E: a full 2 s spin sends an 11 m, 2.2 m wide, 22 m/s spout"; "numbers E: the spout does 10 ..." |
 | X | untargetable for the ride, knockup then slow, a shield on landing, 90 s | "Tidal Wave: ..." (5 lines); "numbers X: ..." (4 lines) |
 | Ranks 2 and 3 | the shared steps | "numbers ranks: ..." (3 lines) |

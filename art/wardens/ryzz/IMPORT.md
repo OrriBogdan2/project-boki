@@ -46,3 +46,121 @@ Carried onto the v95 swap by `python3 tools/art1/glb_add_clips.py <this glb> <ex
 Merge 11-15 (ext/merge-lane-anim-hard2-1115): main's glb (45 clips, idle, pigtails) with only the key-pose-read `lmb_l` put back from the branch (`glb_add_clips.py <main ryzz.glb> <branch ryzz.glb> =lmb_l`, then `glb_compact.py`); the other 44 clips are main's byte for byte.
 
 Doll pass A (2026-11-18, ext/sparkle-dollA-game-1118, owner pick): `/home/boki/meshy/sparkle-doll-1118/A_face_skin_bust_hips.glb` (new face with smirk, violet-magenta eyes, matte skin; bust -14%, thighs -7%, hips -3%; same tris/UVs as the v95 `cand_A.glb`) swapped in with `python3 tools/art1/v95_to_game.py` (keep_uv own-paint swap, spec `art/wardens/src/ryzz_v95.json`, 60k tris; work dir `~/meshy/v95/_ingame_doll1118/`). Rig, 49 clips and anchors kept from the previous glb; `ryzz_v95.jpg`, `ryzz_v95b.jpg`, `ryzz_v95c.jpg` are the new textures. Height unchanged (y -0.014..1.684 vs -0.014..1.685).
+
+Gum onto the lips (2026-11-20, ext/ryzz-gum-mouth, owner 11-20 "why is sparkles gum still on her forehead?"): doll pass A
+put a face ~12 cm lower than the old one onto the kept rig, and the kept bubble (bone `gum`, 138 vertices skinned whole to
+it, child `anchor_gum`) stayed where the old lips were: on her hairline in every clip (it shows at 0.72 scale in idle/run,
+grows to 1.25 in `gum`, the laugh emote and `mage_gum`). `python3 tools/art1/glb_prop_move.py ryzz.glb ryzz.glb Body gum
+0 1.419 -0.119` puts the bone's head (glTF metres, Y up) just behind her lips (bubble from the lips, as on the splash); its
+inverse bind and the 47 clips' gum translation keys shift with it, nothing else changes. v95_to_game keeps a fixed-offset
+`move_bones` out of re-runs, so a re-swap keeps this spot; a new face needs the same step at its lips. The lid/brow/mouth
+bones and `anchor_eye_glow` also sit at the old face's height, but no vertex is weighted to them and no look uses the anchor.
+
+No-gum version (2026-11-20, ext/ryzz-gum-mouth, owner 11-20 "want TWO versions"): the look-only design variant
+`ryzz_nogum` (`content/rules/warden_look.json` `"ryzz_nogum": {"hide_bones": ["gum"]}`, no .glb of its own) is this
+same model with the `gum` bone shrunk away every frame (WardenSync), and no gum fidget (MageGum). Pick it with
+`--warden-variant=ryzz_nogum`; shipping it as the default would move `hide_bones` onto `"ryzz"`.
+
+## Meshy-native model (ryzz_meshy.glb), polish 2026-11-24 (ext/sparkle-native-polish-1124)
+`meshy_native` in `content/rules/warden_native.json` draws her from this glb (blob 8a64d9b5666 before this round, 79,980 tris,
+66 Meshy joints, 6 clips); `ryzz.glb` (the contract) is not drawn and not touched.
+
+Source: the hybrid-rig round-1 pick `~/gens/meshy-skel-pack-1121/Sparkle/hybrid/Sparkle_hybrid_rig.glb` (Meshy rig task
+`01a1fc24-71e6-70e7-9410-4a59826594ac` on the owner's doll pick A of 11-18), packed by
+`tools/meshy/native_hunters/pack.sh ryzz RIG.glb DECIMATED.glb` (decimate 35 % head keep, graft, `native_pack.py
+--max-tex=2048 --max-tex-maps=1024`; Image_0 head, Image_3 body, Image_6 face_donor base colour, 2048 px JPEG q90 4:2:0).
+
+This round changes three images and the shirt tail's skin weights, nothing else (mesh, UVs, skeleton, inverse binds, clips,
+materials and Image_0 are byte-equal to the live glb; `tools/art1/glb_image_swap.py` + a DCT-level splice):
+- Image_3 (body), masks built by rasterising the glb's triangles into UV space with the vertex position / dominant bone as the
+  selector, then a colour gate: copper (pack and torso back, plus the ribbed arm coils: local luma std > 0.03; 556,756 texels):
+  value x0.75, saturation pulled into 0.58-0.70, hue +14 deg (texture mean V 0.66 -> 0.50, H 9 -> 23); boot leather (below
+  y 0.27 m, not sole V < 0.10, not laces V > 0.55; 480,312 texels): V 0.25 -> 0.37, H 339 -> 3; fishnet: the smooth no-net band
+  and a smudge in the right-thigh island refilled from the lattice above (shift found by line-mask matching, seam-cloned).
+- Image_6 (face_donor): a pink bolt (H 331, S 0.54, V 0.83, 1.1 mm core, soft edge) under the character's left eye, placed by 3D
+  position on the front-most surface only (3,901 texels). Both eyes and everything else untouched: the iris boxes plus 60 px
+  are cmp-equal to live.
+- Body prim JOINTS_0/WEIGHTS_0: the 3,031 shirt-tail verts below the knot (y < 1.02 m) ramp LeftUpLeg -> Hips, 0 % at the knot, 30 %
+  at the tip, faded over 10 mesh rings. 50 % tore nothing but sank the tip into the thigh in Attack (1.6 cm from the axis);
+  30 % keeps it 7.0 cm out.
+Meshy retexture (original UV, 3 tasks, 45 credits, ids in docs/art/wardens/PIPELINE.md) kept the copper at the live level
+(V 0.66-0.72) and the boots at 0.27-0.30, so it was not used.
+The masks and scripts are in the job folder (`~/gens/hunter-round-1124/sparkle/tools/`: masks_body.py, grade.py, face.py,
+tail.py, jpgsplice.py, assemble.py); rerun `assemble.py LABEL body.png face.png` for any new grade.
+
+Limits: at the match camera (>= 8 m) the toon look's `far_lift` brightens the copper back to V ~0.92-0.98, so the grade shows in
+the close views (copper vs skin value gap 0.08 -> 0.29 at eye level) and the boots, much less at the match camera; the look
+(`content/rules/warden_look.json`) is the other lever and is not changed here. Scratch test (not shipped): `"far_lift": 0.0` in
+`ryzz.painted` on top of this glb moves the copper-vs-skin value gap at the match camera from -0.10 / +0.03 (idle / run) to +0.15 / +0.16
+(turnaround 0.22); it also changes every other colour on her at that range, so it is an owner call.
+
+### Follow-up, same branch (glb b70b92c4333b, supersedes the tail and "clips byte-equal" lines above)
+- Image_3: the two dark spots and the smear on the fishnet inner leg are covered with netting cloned from the outer side of the same
+  leg (6,881 texels, 149 of 16,384 MCUs spliced). The copper and boot grades are unchanged from the round above.
+- Shirt tail: LeftUpLeg -> Hips ramp as above with the fade at 0.03 (`tail2.py 0.30 0.03`); glbstretch is identical to live in all six clips (the
+  first version stretched more than live in Jump and Crouch). JOINTS_0 is equal to live, only WEIGHTS_0 differs.
+- Forearm rotation keys nudged 6-12 deg where a hand entered the body (`arm.py`): Attack L, Jump L and R, walk L. Frames deeper than 8 mm:
+  Attack L 5 -> 0, Jump L 2 -> 0, Jump R 1 -> 0, walk L 2 -> 0. No other animation channel differs from live.
+Scripts: `~/gens/hunter-round-1124/sparkle/o/tools/` (build.sh, tail2.py, arm.py).
+
+### Round 1124o-2, same branch (glb 292acacd05df, supersedes the copper/boot grade lines above)
+- Image_3: back to the live texels everywhere except the fishnet inner-leg fix from the follow-up above (DCT splice, 220 MCUs from the
+  follow-up atlas, all other MCUs bit-exact live). This drops the copper pack grade and the red boot grade (the review flagged both as pixel
+  recolours); they need an AI masked edit, which this round could not run (Meshy balance 6 credits, every edit HTTP 402).
+- Side torso / armpit weights: the crouch and attack tears at bind x 0.09-0.22, y 1.17-1.28 come from LeftArm/RightArm + Spine02 weights next
+  to Hips + Spine02 weights. Weights diffused along the welded mesh edge graph (10 iterations, 5 cm Gaussian fade around the stretched verts,
+  top 4 kept). Stretched-edge frames (edge >3x bind and >6% height): Attack 10/42 -> 0/42, Crouch 16/16 -> 0/16, the other clips stay 0.
+  Largest edge gain: Attack 26.7 -> 11.9 cm, Crouch 20.5 -> 12.3 cm. JOINTS_0/WEIGHTS_0 change only near the armpits.
+- geo_check vs live: PASS; held clip frames 6 (live) -> 0, held worst 3.83 cm (follow-up) -> 0.4 cm.
+Scripts: `~/gens/hunter-round-1124/sparkle/p2/tools/` (armpit_g.py, vis.py, ctree.sh, submit.sh).
+
+### Round 1124o-3, same branch (glb d9e0dbfb1f55, 79,980 tris, on top of 292acacd05df)
+- Image_3: copper pack, coils, bronze rods, shoulder straps and both boots repainted by Meshy nano-banana-pro edits of flat unlit views
+  (A1, B2, C3, D2), projected back onto the atlas (z-buffer, diff masks) and spliced at JPEG MCU level. Image_0 to Image_2 and Image_4 to
+  Image_6 are byte-identical; the face, eyes, hair, skin and top texels keep their old values.
+- Attack: LeftArm/RightArm rotation keys bent around t .87 s and 1.8 s (`p3/atk/S6.spec`), so the forearms pass outside the head.
+  geo_check worst 8.2 -> 1.8 cm, frames 25 -> 13. No other channel differs from 292acacd05df.
+Scripts: `~/gens/hunter-round-1124/sparkle/p3/tools/` (views.py, proj.py, swap.sh, atk.py).
+
+### Round 1124o-4, same branch (glb 0234e266a0eb, 79,980 tris, on top of d9e0dbfb1f55)
+- Material slots: WardenGlb takes a part's toon slot from the material name before "-". The names matched no slot, so hair, skin and boots
+  all got the painted defaults plus the ink outline shell, which drew the black flecks in the hair. The three materials are now split into
+  `hair-*`, `skin-*` and `leather-*` pieces plus the body (8 primitives, same vertices, triangles, weights and clips).
+- Image_3: repainted by Meshy nano-banana-pro edits of flat unlit views, projected back (texture set t6; gens and log in
+  `gen_log.tsv`). Image_0 and Image_6 (face, eyes) are byte-identical.
+- Not shipped: COLOR_0 alpha 0 everywhere removes the last outline dots, but also hides the shield shell, which reuses the ink width
+  (outline.gdshader `ink_mask`, ShieldLook). Per-vertex room (a port of fit_warden ink_room) still left dots on the silhouette.
+Scripts: `~/gens/hunter-round-1124/sparkle/p4/tools/` (slot.py, verify.py, room.py, addcol.py).
+
+### Round 1124o-6 (glb 5f84decbb8a9, 79,980 tris, on top of 0234e266a0eb)
+- Stance (approved doll A / 1118 turnaround): only rotation and root-translation keys of Idle, Attack and Crouch_Walk_with_Torch differ.
+  Mesh, weights, textures, walk, run and Jump_Run are byte-identical. `WardenNative._fit` fixes the height, so bones are not lengthened.
+- Idle: fore-aft foot gap .56-.61 -> about .10, hip about 1.01 -> 1.08, hands off the thigh (Rhand-Rleg pairs 17 -> 0).
+- Attack: hip dip and lunge width reduced, the slam stays (Lhand-Rhand pairs 114 -> 0; inner-thigh pairs 383 -> 590, Larm-head 5 -> 9).
+- Crouch: hip .83-.90 -> .88-.95, torso lean 37-40 -> 16-18 degrees, footsteps unchanged (inner-thigh pairs 323 -> 338).
+- glbstretch worst edge ratio: Idle 6.1 -> 5.2, Attack 14.3 -> 14.3, Crouch 12.1 -> 11.7.
+Scripts and recipe: `~/gens/hunter-round-1124/sparkle/p6/tools/` (stance.py, spread.py, crouch.py; recipe in PLAN-1124o.md).
+
+### Round 1124o-7 (glb f0d37d6438d9, 79,980 tris; replaces 5f84decbb8a9 on this branch)
+- Build chain: bustfit (bust = splash size) -> packrig (pack and rods rigid) -> hemrig (arm pull off the hem band) -> packfit (side hoses
+  tucked .65) -> rekey (head lifted, loose fists, uneven arms, calmer attack bow) -> hem (Meshy hem edit into Image_3) -> minmax.
+- Positions and weights of bust, pack and hem band differ; Image_3 differs only on the crop-top hem (0 arm texels changed).
+- geo_check: worst 3.2 cm, held worst 1.7 cm (hair>torso); hands L sep .51, R sep .54. art-gate GAME 6.7, LIVE GAME 5.0 (not a pass).
+- Open: side hoses read as netting at game view, patch on the side of the top in attack back 2, lace too fine.
+Scripts: `~/gens/hunter-round-1124/sparkle/p7/tools/`.
+
+### Round 1124o-11 (glb 18a6a71e41ab, 79,965 tris; on top of P1 9a1d6d3fbbd0)
+- Gutter pad on all 7 images (push-pull fill of every texel outside its material group's UV islands, +1 texel margin).
+  Why: hero_toon blends far fragments toward a +1-mip sample, and Meshy filled the gutters with red-brown, so at match distance
+  the hair, face and body edges averaged in gutter colour (the "red wash / mud" art-gate notes at the match camera).
+- Hair Image_0 at mip 4: texels tinted >12/255 41% -> 11%, mean error 20.4 -> 5.0; mip 5 68% -> 17%. Face Image_6 mip 4 27% -> 5%.
+  Body Image_3 mip 4 15% -> 7%. Drawn texels change only by the JPEG re-encode (q97, mean 0.3-3.7/255).
+- Mesh, UV, skin, clips byte-identical. The extracted ryzz_meshy_Image_N.jpg files hold the same bytes as the embedded images.
+Scripts: `~/gens/hunter-round-1124/sparkle/p11/tools/` (padall.py, bleed.py).
+
+## 11-27 round 14: turnaround eyes on the stance body
+- Face Image_6 only: the chest-face branch eye repaint (eyes open, lavender, toward the turnaround; owner 11-26 "face like the turnaround")
+  transplanted into the stance face texture, then gutter-padded over its UV coverage (q97). Mesh, UV, skin, clips and other images byte-identical.
+- Bust stays the stance body (one step smaller than live, owner 11-26). geo_check PASS (worst clip 3.0 cm, hands ok).
+- art-gate game view: GAME 6.5, LIVE GAME 4.8 (stance alone 6.0). Open: grey panels at the crop-top bust sides (on the stance body too).
+Scripts: `~/gens/hunter-round-1124/sparkle/p14/tools/` (pad6.py).

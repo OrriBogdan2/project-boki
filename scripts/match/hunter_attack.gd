@@ -5,18 +5,20 @@ extends RefCounted
 ## charged attacks, and reloads. The weapon state the animation, HUD, Net and kits read (shot_n, wbloom,
 ## warm_t, spin, mel_hold, swing_t, combo_i...) stays on Hunter; this keeps only its own timers.
 
-const SWAY := [0.0, 0.6, -0.4, 1.0, -0.8, 0.3, -1.0, 0.5]   # fixed sway pattern, x spread per shot
+const SWAY := [0.0, 0.6, -0.4, 1.0, -0.8, 0.3, -1.0, 0.5]  # fixed sway pattern, x spread per shot
 
 var h: Hunter
 var fire_was := false
-var swing_buf := 0.0           # a tap that came in mid-swing, played as soon as the swing ends
-var lunge_n := 0               # lunges in a row; each one in a short window goes 25% less far
+var swing_buf := 0.0  # a tap that came in mid-swing, played as soon as the swing ends
+var lunge_n := 0  # lunges in a row; each one in a short window goes 25% less far
 var lunge_at := -9.0
-var burst_left := 0            # rounds of the current burst still to fire
-var burst_t := 0.0             # s until the next round of the burst
+var burst_left := 0  # rounds of the current burst still to fire
+var burst_t := 0.0  # s until the next round of the burst
+
 
 func _init(hunter: Hunter) -> void:
 	h = hunter
+
 
 func can_fire() -> bool:
 	if Capture.active(h):
@@ -25,22 +27,24 @@ func can_fire() -> bool:
 		return false
 	var busy: bool = h.drink_t > 0.0 or h.downed or h.stun_t > 0.0
 	if h.ak and h.roll_t > 0.0 and h.ak.fires_in_dash() and not busy:
-		return true          # shooting from a held slide
+		return true  # shooting from a held slide
 	var glide_shut: bool = h.gliding and not (h.ak and h.ak.fires_in_glide())
 	return not (busy or h.roll_t > 0.0 or h.out or h.grap.size() > 0 or glide_shut or h.charge.size() > 0)
+
 
 ## Called every frame with the attack key's state; decides what that means for this weapon.
 func trigger(dt: float) -> void:
 	var held: bool = h.inp["fire"]
 	if h.ak and h.ak.lmb_override(held, dt):
-		return          # the archetype runs this weapon's attack itself (the Bulwark's mace: throw / smash)
+		return  # the archetype runs this weapon's attack itself (the Bulwark's mace: throw / smash)
 	if h.wpn.get("melee", false):
 		swing_buf = maxf(0.0, swing_buf - dt)
 		if swing_buf > 0.0 and h.fire_cd <= 0.0 and can_fire():
 			swing_buf = 0.0
 			fire()
 		if h.ctrl != "local" or not h.wpn.has("charge_time"):
-			if held: fire()
+			if held:
+				fire()
 			return
 		# tap for the combo, hold to charge
 		var ct := float(h.wpn["charge_time"])
@@ -48,7 +52,8 @@ func trigger(dt: float) -> void:
 		fire_was = held
 		if held:
 			if not can_fire() or h.fire_cd > 0.0:
-				if pressed: swing_buf = 0.3     # tapped mid-swing: it plays when this one ends
+				if pressed:
+					swing_buf = 0.3  # tapped mid-swing: it plays when this one ends
 				return
 			h.mel_hold += dt
 			if h.mel_hold >= ct + 0.35:
@@ -58,8 +63,10 @@ func trigger(dt: float) -> void:
 			if h.mel_hold >= ct and can_fire():
 				_charged_attack()
 			elif h.mel_hold > 0.0:
-				if h.fire_cd > 0.0: swing_buf = 0.3
-				else: fire()
+				if h.fire_cd > 0.0:
+					swing_buf = 0.3
+				else:
+					fire()
 			h.mel_hold = 0.0
 		return
 	if h.wpn.has("draw"):
@@ -78,14 +85,15 @@ func trigger(dt: float) -> void:
 	if held:
 		fire()
 
+
 ## A bow: hold to draw, let go to loose. Only the button coming up looses a player's arrow: a cooldown
 ## never looses it, and a stun or glide cancels the draw with no shot (a dash too, unless its DashFlow hold
 ## row keeps it). A bot lets go by itself.
 func _trigger_bow(held: bool, dt: float) -> void:
 	if h.draw_t >= 0.0 and not can_fire() and h.ak and h.ak.flow.pauses_hold("lmb"):
 		if held:
-			h.draw_t += dt * h.ak.draw_rate()      # a dash whose row keeps the draw: it charges on through it,
-		return          # and a release in it looses when it ends
+			h.draw_t += dt * h.ak.draw_rate()  # a dash whose row keeps the draw: it charges on through it,
+		return  # and a release in it looses when it ends
 	var can_draw: bool = can_fire() and h.ammo > 0
 	if h.draw_t >= 0.0 and not held:
 		_loose()
@@ -96,6 +104,7 @@ func _trigger_bow(held: bool, dt: float) -> void:
 	if held and can_draw and (h.draw_t >= 0.0 or h.fire_cd <= 0.0):
 		_draw_step(dt)
 
+
 func _draw_step(dt: float) -> void:
 	var top := float((h.wpn["draw"][-1] as Array)[0])
 	if h.draw_t < 0.0:
@@ -105,12 +114,13 @@ func _draw_step(dt: float) -> void:
 	if h.ctrl == "bot" and h.draw_t >= top + 0.05:
 		_loose()
 
+
 ## Looses a drawn arrow: the draw stage reached sets damage, range and speed.
 func _loose() -> void:
 	var t := h.draw_t
 	h.draw_t = -1.0
 	if not can_fire() or h.ammo <= 0 or t < float(h.wpn.get("draw_min", 0.0)):
-		return          # (let go inside draw_min it is a mashed click: no arrow, the next press draws afresh)
+		return  # (let go inside draw_min it is a mashed click: no arrow, the next press draws afresh)
 	var stages: Array = h.wpn.get("draw", [])
 	var dmg := float(h.wpn.get("draw_early", 15.0))
 	var rng := float(h.wpn["range"])
@@ -133,10 +143,12 @@ func _loose() -> void:
 	if t >= float((stages[-1] as Array)[0]) if not stages.is_empty() else false:
 		h.m.fx.flash(h.pos + Vector3(h.aim_dir().x * 0.7, 1.0, h.aim_dir().y * 0.7), keep["color"], 0.5, 0.06)
 
+
 func charge_k() -> float:
 	if not h.wpn.get("melee", false) or not h.wpn.has("charge_time") or h.mel_hold <= 0.12:
 		return 0.0
 	return clampf(h.mel_hold / float(h.wpn["charge_time"]), 0.0, 1.0)
+
 
 func fire_slow() -> float:
 	if h.draw_t >= 0.0:
@@ -145,6 +157,7 @@ func fire_slow() -> float:
 	if not firing:
 		return 1.0
 	return float(h.wpn.get("fire_slow", 1.0 if h.wpn.get("melee", false) else 0.8))
+
 
 func fire() -> void:
 	if not can_fire() or h.fire_cd > 0.0 or h.warm_t > 0.0:
@@ -167,6 +180,7 @@ func fire() -> void:
 		return
 	_release()
 
+
 ## The round actually leaving the gun (straight away, or once a wind-up ends).
 func _release() -> void:
 	var rate: float = h.wpn["rate"] * (1.0 - minf(0.5, h.owner_stat("fire_rate") + h.buff("fire_rate")))
@@ -179,6 +193,7 @@ func _release() -> void:
 	burst_t = float(h.wpn.get("burst_gap", 0.07))
 	emit_shot()
 	Oomph.on_fire(h)
+
 
 func tick_weapon(dt: float) -> void:
 	if h.warm_t > 0.0:
@@ -195,13 +210,14 @@ func tick_weapon(dt: float) -> void:
 		h.sus_n = 0
 	if not h.strike_at_end.is_empty():
 		if h.roll_t > 0.0 and not h.downed and h.stun_t <= 0.0:
-			# the lunge curves to follow your aim
-			h.roll_dir = h.roll_dir.slerp(h.aim_dir(), minf(1.0, dt * 6.0)).normalized()
+			# the lunge curves to follow your aim (10% a 60 Hz step, at any step)
+			h.roll_dir = h.roll_dir.slerp(h.aim_dir(), 1.0 - exp(-6.32 * dt)).normalized()
 		else:
 			var st: Dictionary = h.strike_at_end
 			h.strike_at_end = {}
 			if not h.downed and h.stun_t <= 0.0:
 				strike(float(st["dmg"]), float(st["reach"]), float(st["arc"]), float(st["kb"]), st)
+
 
 ## Burst weapons fire the rest of their burst on a short timer (see Hunter.sim).
 func tick_burst(dt: float) -> void:
@@ -221,6 +237,7 @@ func tick_burst(dt: float) -> void:
 	emit_shot()
 	Oomph.on_fire(h)
 
+
 ## Melee: a wedge in front of you, a short step into it, and a combo whose last hit lands hardest.
 ## Swing again within the combo window to keep it going. Hold to charge a heavier attack instead.
 func _swing() -> void:
@@ -229,8 +246,9 @@ func _swing() -> void:
 	if h.m.time - h.swing_at > float(h.wpn["rate"]) + float(h.wpn.get("combo_reset", 0.6)):
 		h.combo_i = 0
 	var step := h.combo_i % cn
-	var dmg: float = (float(cd[step]) if cd.size() > 0
-		else float(h.wpn["dmg"]) * float((h.wpn.get("combo", [1.0]) as Array)[step]))
+	var dmg: float = (
+		float(cd[step]) if cd.size() > 0 else float(h.wpn["dmg"]) * float((h.wpn.get("combo", [1.0]) as Array)[step])
+	)
 	var last: bool = step == cn - 1
 	h.combo_i += 1
 	h.swing_at = h.m.time
@@ -239,6 +257,7 @@ func _swing() -> void:
 	# right click (and in a deliberate held charge where a weapon has one)
 	var kb := float(h.wpn["kb"]) * (1.5 if last else 1.0)
 	strike(dmg, float(h.wpn["range"]), float(h.wpn.get("arc", 100.0)), kb, {"heavy": last})
+
 
 ## A step forward with the swing. Lunges close together get 25% shorter each time.
 func lunge(dist: float) -> void:
@@ -257,6 +276,7 @@ func lunge(dist: float) -> void:
 	h.vel.x = hv.x
 	h.vel.z = hv.y
 
+
 func _charged_attack() -> void:
 	h.mel_hold = 0.0
 	h.combo_i = 0
@@ -264,11 +284,15 @@ func _charged_attack() -> void:
 	h.fire_cd = float(h.wpn["rate"]) * 1.8
 	var w: Dictionary = h.wpn
 	var lunging: bool = w.has("charged_lunge")
-	var st := {"dmg": float(w.get("charged_dmg", float(w["dmg"]) * 2.5)),
+	var st := {
+		"dmg": float(w.get("charged_dmg", float(w["dmg"]) * 2.5)),
 		"reach": float(w.get("charged_reach", float(w["range"]) * (0.85 if lunging else 1.0))),
 		"arc": float(w.get("charged_arc", float(w.get("arc", 100.0)) * (0.5 if lunging else 1.0))),
 		"kb": float(w.get("charged_kb", float(w["kb"]) * 2.0)),
-		"stun": float(w.get("charged_stun", 0.0)), "heavy": true, "charged": true}
+		"stun": float(w.get("charged_stun", 0.0)),
+		"heavy": true,
+		"charged": true
+	}
 	if lunging:
 		# a lunging stab: you travel, and the hit lands where the lunge ends (charged lunges don't decay)
 		var t := 0.2
@@ -283,6 +307,7 @@ func _charged_attack() -> void:
 	else:
 		strike(float(st["dmg"]), float(st["reach"]), float(st["arc"]), float(st["kb"]), st)
 
+
 func strike(dmg: float, reach: float, arc_deg: float, kb: float, o := {}) -> void:
 	h.idle_fire = 0.0
 	h.reveal_t = maxf(h.reveal_t, 1.2)
@@ -295,12 +320,15 @@ func strike(dmg: float, reach: float, arc_deg: float, kb: float, o := {}) -> voi
 	var arc := deg_to_rad(arc_deg)
 	var a0 := atan2(dir.y, dir.x)
 	var y := h.pos.y + 0.95 * float(h.cdat["scale"])
-	var extra := {"kb": kb, "swing": "%s_%d" % [h.nid, h.swing_n], "melee": true,
-		"kbi": float(h.wpn.get("kb_influence", 0.3))}
+	var extra := {
+		"kb": kb, "swing": "%s_%d" % [h.nid, h.swing_n], "melee": true, "kbi": float(h.wpn.get("kb_influence", 0.3))
+	}
 	if h.wpn.has("tip_bonus"):
 		extra["tip"] = [reach * 0.7, float(h.wpn["tip_bonus"])]
-	if float(o.get("stun", 0.0)) > 0.0: extra["stun"] = float(o["stun"])
-	if h.crit_t > 0.0: extra["crit"] = true
+	if float(o.get("stun", 0.0)) > 0.0:
+		extra["stun"] = float(o["stun"])
+	if h.crit_t > 0.0:
+		extra["crit"] = true
 	h._kin_riders(extra)
 	Loot.rider(h, extra, dmg * h.m.dmg_mult(h))
 	# the swing is a fan of very short, invisible strikes, so walls and terraces block it like shots
@@ -308,13 +336,22 @@ func strike(dmg: float, reach: float, arc_deg: float, kb: float, o := {}) -> voi
 	for i in rays:
 		var aa := a0 - arc * 0.5 + arc * float(i) / float(rays - 1)
 		var st := Vector3(h.pos.x + cos(aa) * 0.25, y, h.pos.z + sin(aa) * 0.25)
-		h.m.spawn_shot(h, st, Vector2(cos(aa), sin(aa)) * 40.0, dmg * h.m.dmg_mult(h),
-			maxf(0.02, (reach - 0.25) / 40.0), 0.22, h.wpn["color"], extra)
-	if not o.get("own_look", false):      # a kit drawing its own swing (Gil's thrusts are no arc)
+		h.m.spawn_shot(
+			h,
+			st,
+			Vector2(cos(aa), sin(aa)) * 40.0,
+			dmg * h.m.dmg_mult(h),
+			maxf(0.02, (reach - 0.25) / 40.0),
+			0.22,
+			h.wpn["color"],
+			extra
+		)
+	if not o.get("own_look", false):  # a kit drawing its own swing (Gil's thrusts are no arc)
 		h.m.fx.slash(Vector3(h.pos.x, y - 0.15, h.pos.z), a0, arc, reach, h.wpn["color"], heavy)
 	Oomph.on_fire(h, true)
 	var vol := 0.0 if o.get("charged", false) else -4.0
 	h.m.sfx(h.wpn["sfx"], h.pos, vol, (0.8 if heavy else 1.15) + randf() * 0.1)
+
 
 func emit_shot() -> void:
 	var dir := h.aim_dir()
@@ -335,21 +372,23 @@ func emit_shot() -> void:
 	var start := Vector3(h.pos.x + cos(a) * 0.6, shot_y, h.pos.z + sin(a) * 0.6)
 	var spd: float = h.wpn["speed"]
 	if h.has_meta("zero_spread_t") and h.m.time < float(h.get_meta("zero_spread_t")):
-		spread = 0.0            # a Thief's SMG right after a Shadow Step
+		spread = 0.0  # a Thief's SMG right after a Shadow Step
 		a = atan2(dir.y, dir.x)
-	var mz: Dictionary = h.wpn.get("muzzle", {})      # a skinned gun's mouth: its slugs stop `range` from the body
+	var mz: Dictionary = h.wpn.get("muzzle", {})  # a skinned gun's mouth: its slugs stop `range` from the body
 	var rng: float = (float(h.wpn["range"]) + rng_add) * h.shot_range_k - float(mz.get("fwd", 0.0))
 	h.shot_range_k = 1.0
 	var life: float = rng / spd
 	var dmg: float = float(h.wpn["dmg"]) * h.m.dmg_mult(h)
 	if h.wpn.has("nth"):
 		h.nth_n += 1
-		if h.nth_n % int(h.wpn["nth"][0]) == 0: dmg *= 1.0 + float(h.wpn["nth"][1])
-	if h.wpn.has("sustain_loss"):
-		dmg *= 1.0 - float(h.wpn["sustain_loss"]) * minf(1.0, float(h.sus_n) / float(h.wpn.get("sustain_rounds", 10)))
+		if h.nth_n % int(h.wpn["nth"][0]) == 0:
+			dmg *= 1.0 + float(h.wpn["nth"][1])
+	var loss := float(h.wpn.get("sustain_loss", 0.0))
+	var sus_k := 1.0 - loss * minf(1.0, float(h.sus_n) / float(h.wpn.get("sustain_rounds", 10)))
+	dmg *= sus_k  # the string's decay; the round carries its share (a kit sizes its look by it)
 	h.sus_n += 1
-	var extra := {"kb": h.wpn["kb"], "tracer": float(h.wpn.get("tracer", 1.0))}
-	extra.merge(h.wpn.get("shot_x", {}), true)      # a weapon's own shot rules (Tether Lantern: through terrain)
+	var extra := {"kb": h.wpn["kb"], "tracer": float(h.wpn.get("tracer", 1.0)), "sus_k": sus_k}
+	extra.merge(h.wpn.get("shot_x", {}), true)  # a weapon's own shot rules (Tether Lantern: through terrain)
 	if h.wpn.has("decel"):
 		# slugs slow down and stop at the weapon's range: v^2 = 2 a d
 		extra["decel"] = float(h.wpn["decel"])
@@ -360,8 +399,8 @@ func emit_shot() -> void:
 	if h.wpn.has("far_mult"):
 		extra["farf"] = [rng * float(h.wpn.get("far_start", 0.6)), float(h.wpn["far_mult"]), rng]
 	if AimMode.take(h) == AimMode.CURSOR:
-		life = AimMode.dist(h, rng) / spd      # lands at the cursor, clamped to range (scripts/match/aim/aim_mode.gd)
-	if h.wpn.get("pierce", false):      # through everyone in line (Sparkle's bolts)
+		life = AimMode.dist(h, rng) / spd  # lands at the cursor, clamped to range (scripts/match/aim/aim_mode.gd)
+	if h.wpn.get("pierce", false):  # through everyone in line (Sparkle's bolts)
 		extra["pierce"] = true
 		extra["hitset"] = {}
 	if h.wpn.has("boom"):
@@ -371,11 +410,15 @@ func emit_shot() -> void:
 		extra["crit"] = true
 	Loot.rider(h, extra, dmg)
 	h._kin_riders(extra)
+	ShotOrigin.draw_from(extra, h, "lmb")  # drawn from the bow, the gun's mouth or the hand
 	if pel > 1:
 		# a shotgun throws the same fixed fan every time, wider with each shot in a row. However
 		# few slugs land, the first one on a target still does a good share of the whole volley
-		var fan: float = (deg_to_rad(float(h.wpn.get("fan_deg", 23.0)) + h.wbloom) if h.wpn.has("fan_deg")
-			else float(h.wpn.get("fan", 0.4)))
+		var fan: float = (
+			deg_to_rad(float(h.wpn.get("fan_deg", 23.0)) + h.wbloom)
+			if h.wpn.has("fan_deg")
+			else float(h.wpn.get("fan", 0.4))
+		)
 		extra["pg"] = "%s_%d" % [h.nid, h.shot_n]
 		extra["pn"] = pel
 		extra["pf"] = float(h.wpn.get("pellet_floor", 1.0 / pel))

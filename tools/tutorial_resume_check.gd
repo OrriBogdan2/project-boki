@@ -1,5 +1,5 @@
 extends RefCounted
-## --tutorial-resume-check: quitting the combat tutorial part-way (docs/decisions/0022-tutorial-resume.md).
+## --tutorial-resume-check: quitting the combat tutorial part-way (docs/decisions/0115-tutorial-resume.md).
 ##   1. the save: the v11 -> v12 migration, and when Continue goes back into the tutorial
 ##   2. a full run remembers each finished beat in the save
 ##   3. quit after each beat and come back: it carries on at the next one, at the last stop, with the
@@ -109,10 +109,12 @@ func _resume_each() -> void:
 		while want < steps.size() and not tu.applies(String(steps[want][0])):
 			want += 1
 		var tag := "after '%s'" % beat
+		ok(want > 0, "%s: resumes past the landing (step_after %d)" % [tag, want])
 		ok(tu.step == want, "%s: carries on at '%s' (is '%s')" % [tag, String(steps[want][0]), tu.id()])
 		var stop := tu.respawn()
 		var far: bool = m.player.pos.distance_to(stop) > 6.0
-		ok(not far or tu.id() in ["chest", "goexit", "key", "gkey"], "%s: back at the last stop" % tag)
+		var away_ok: bool = tu.id() in ["chest", TutorialResume.OUTPOST_START, "key", "gkey"]
+		ok(not far or away_ok, "%s: back at the last stop" % tag)
 		ok(m.player.kin != null, "%s: your Boki is with you" % tag)
 		if tu.id() == "chest":
 			ok(m.player.chest_keys > 0, "%s: the chest key is in hand" % tag)

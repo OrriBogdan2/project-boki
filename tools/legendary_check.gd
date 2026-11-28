@@ -19,11 +19,13 @@ const MAPS := ["hollowcrown", "skyreach"]
 var fails := 0
 var n := 0
 
+
 func ok(label: String, cond: bool, info := "") -> void:
 	n += 1
 	print("LEGENDARY %-62s %s  %s" % [label, "PASS" if cond else "FAIL", info])
 	if not cond:
 		fails += 1
+
 
 func run(main: Node) -> void:
 	_data()
@@ -37,6 +39,7 @@ func run(main: Node) -> void:
 	print("LEGENDARY DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit()
 
+
 func _data() -> void:
 	var roster: Array = Legendary.rules()["roster"]
 	ok("roster is rare species", roster.all(func(sp): return Data.is_rare(String(sp))), str(roster))
@@ -44,6 +47,7 @@ func _data() -> void:
 		var list: Array = World.load_layout(map_id).get("legendaries", [])
 		var fits := list.size() >= 1 and list.size() <= 3 and list.all(func(sp): return roster.has(sp))
 		ok("%s lists 1-3 legendaries from the roster" % map_id, fits, str(list))
+
 
 func _rate(layout: Dictionary, label: String) -> void:
 	var cfg := Legendary.config(layout)
@@ -68,12 +72,14 @@ func _rate(layout: Dictionary, label: String) -> void:
 	var eligible: Array = cfg["eligible"]
 	ok("%s: every eligible legendary turns up" % label, seen.size() == eligible.size(), str(seen.keys()))
 
+
 func _override() -> void:
 	var none := {"chance": 0.0, "eligible": ["hivara"]}
 	var sure := Legendary.config({"legendary_spawn_chance": 1.0, "legendaries": ["hivara"]})
 	var rolled_none := range(200).any(func(s): return Legendary.roll(s, none) != "")
 	var rolled_all := range(200).all(func(s): return Legendary.roll(s, sure) == "hivara")
 	ok("map chance 0 never spawns, 1 always spawns", not rolled_none and rolled_all)
+
 
 func _spot() -> void:
 	var cands: Array = []
@@ -90,17 +96,19 @@ func _spot() -> void:
 	var far_one := Legendary.pick_spot(cands.slice(0, 2), [Vector3(100, 0, 0)], 1)
 	ok("no point far enough: takes the farthest", far_one["pos"].x == 0.0)
 
+
 func _legendaries(m: Match) -> Array:
 	return m.kins.filter(func(k): return is_instance_valid(k) and k.has_meta("legendary"))
+
 
 func _live(main: Node) -> void:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
 	m.set_process(false)
 	var plan := m.spawn_plan
 	if plan.legend == "":
-		plan.legend = "hivara"      # this seed didn't roll one; the rate is checked above
+		plan.legend = "hivara"  # this seed didn't roll one; the rate is checked above
 	var delay := float(Legendary.rules()["delay_s"])
 	for i in 30:
 		m.step(Match.DT)
@@ -122,6 +130,7 @@ func _live(main: Node) -> void:
 	m.queue_free()
 	await main.get_tree().process_frame
 
+
 func _sounds(m: Match, pres: LegendPresence, k: Kin) -> void:
 	ok("sounds: the roar played once when it turned up", pres.roars == 1, "%d roars" % pres.roars)
 	ok("sounds: the presence loop runs while it is wild", Sfx.loop_on(LegendPresence.LOOP_KEY))
@@ -129,7 +138,7 @@ func _sounds(m: Match, pres: LegendPresence, k: Kin) -> void:
 		m.step(Match.DT)
 	ok("sounds: still one roar after four more seconds", pres.roars == 1, "%d roars" % pres.roars)
 	var sting_at := int(Sfx.last_played.get("leg_sting", -1))
-	k.dead = true      # what the "caught" event does, and a defeat
+	k.dead = true  # what the "caught" event does, and a defeat
 	for i in 30:
 		m.step(Match.DT)
 	ok("sounds: capture stops the loop", not Sfx.loop_on(LegendPresence.LOOP_KEY))
@@ -140,8 +149,10 @@ func _sounds(m: Match, pres: LegendPresence, k: Kin) -> void:
 	ok("sounds: each legendary's roar is its theme's or the shared one", all_there, str(themed))
 	ok("sounds: a theme with no roar falls back to the shared roar", LegendPresence.roar_name("cindle") == "leg_roar")
 
+
 func _flat(a: Vector3, b: Vector3) -> float:
 	return Vector2(a.x - b.x, a.z - b.z).length()
+
 
 func _dex() -> void:
 	var order := FieldBook.entries()

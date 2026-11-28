@@ -8,6 +8,7 @@ class_name Life
 ## Everything here runs on whichever game owns the hunter (local and bots); remote hunters only
 ## show what their owner sends.
 
+const NET_GRACE := 2.0     # s past stomp_time a copy of another game's stomp waits for its "done" before it is dropped
 const STOMP_ROOT := 0.12   # s: the stomper's own hold on its feet, topped up every frame; a root above it is CC
 
 const R := {
@@ -22,12 +23,13 @@ const R := {
 	"stomp_commit": 0.2,        # [design] hold interact this long on an enemy wisp to start the stomp...
 	"stomp_time": 2.4,          # [footage] ...then you're locked in for this long, three stomps and done
 	"stomp_cycle": 0.7,         # one foot-lift-and-slam
-	"kin_revive_time": 6.0,     # [design] your kin pulling you up (as long as Supervive's Guardian Angel self-revive)
+	"kin_revive_time": 6.0,     # [design] your kin pulling you up (as long as the reference game's self-revive)
 	"box_revive_hp": 0.25,      # [design] same as a wisp revive
 	"soul_time": 90.0,          # [design] box revive window
 	"loot_time": 1.0,           # [design] bots: hold interact to take everything from a box (you get a loot window)
 	"sickness_time": 12.0,      # [patch 1.0] resurrection sickness
 	"sickness_dmg": 0.75,       # [patch 1.0] -25% damage dealt
+	"cc_guard": 3.0,            # [reference tuning] s after a revive or beacon return that no stun, root or slow lands
 }
 
 const BOX_BODY := Color("5a5560")     # Models.deathbox's body before its owner tint
@@ -48,7 +50,7 @@ static func box_value(b: Dictionary) -> int:
 	v += (b["caught"] as Array).size() * 15
 	for st in (b.get("belt", []) as Array): v += int(st["n"]) * 4
 	for c in Pack._box_things(b):
-		v += Loot.value(c["it"]) / 2
+		v += int(Loot.value(c["it"]) / 2.0)
 	return v
 
 static func box_color(b: Dictionary) -> Color:
@@ -69,6 +71,11 @@ static func box_rarity(b: Dictionary) -> int:
 ## Is anyone on this team still in the fight (standing or a wisp)?
 static func team_alive(m: Match, team: int) -> bool:
 	return m.hunters.any(func(x): return x.team == team and not x.out and not x.extracted)
+
+## Does `h` have a squadmate in this match (alive or not)? Solos: never, so no squad UI shows.
+static func has_mates(m: Match, h: Hunter) -> bool:
+	return h != null and m.hunters.any(func(x): return x != h and x.team == h.team)
+
 
 static func team_standing(m: Match, team: int) -> bool:
 	return m.hunters.any(func(x): return x.team == team and not x.out and not x.extracted and not x.downed)
@@ -147,20 +154,50 @@ static func wisp_hit(o: Hunter, by: Ent, dmg: float, opts: Dictionary) -> float:
 ## Holding interact on an enemy wisp commits you to stomping it out: a fixed animation you can't
 ## cancel or move out of. You can still be shot, and hard CC breaks it (cc_break; the wisp
 ## lives), and if the wisp drifts away (off a ledge, say) your stomps miss and it gets away.
+## Online the stomper's game decides and sends ["stomp", stomper, wisp, "go" | why]; the other games
+## play the stomp (the pose, the thumps, the crack on a break) and the wisp's own game executes it on "done".
 static func start_stomp(m: Match, h: Hunter, o: Hunter) -> void:
 	h.stomp = {"o": o, "t": 0.0, "hits": 0}
 	h.finish_t = 0.0
 	trace(m, "stomp start %s on %s" % [h.pname, o.pname])
+	m.sfx("stomp_windup", h.pos, -2.0)     # positional: both squads in reach hear it commit
 	if o == m.player and m.hud:
 		m.hud.msgs.push("%s is stomping you! Drift away or get help" % h.pname, Color("ff6a5a"), MsgLane.URGENT)
+	if not h.remote:
+		m.net_event(["stomp", h.nid, o.nid, "go"])
 
 static func end_stomp(m: Match, h: Hunter, why: String) -> void:
 	if h.stomp.is_empty():
 		return
+	var o: Hunter = h.stomp["o"]
 	trace(m, "stomp end %s (%s)" % [h.pname, why])
 	h.stomp = {}
+	if not h.remote:
+		m.net_event(["stomp", h.nid, o.nid if o else "", why])
 	if why == "broken":
-		m.sfx("whoosh", h.pos, -6.0, 1.3)
+		_cracked(m, h, o)
+
+## A broken stomp is heard: a crack at the stomper for everyone in reach, and a relief chime for the
+## saved wisp's squad wherever they are (docs/AUDIO.md "Stomp sounds").
+static func _cracked(m: Match, h: Hunter, o: Hunter) -> void:
+	m.sfx("stomp_crack", h.pos)
+	if o and m.player and o.team == m.player.team:
+		m.sfx("stomp_relief")
+
+## ["stomp", stomper, wisp, "go" | why] from the stomper's game. On "done" the wisp's own game executes it.
+static func net_stomp(m: Match, x: Array) -> void:
+	var h := m.ents_by_id.get(String(x[1]), null) as Hunter
+	var o := m.ents_by_id.get(String(x[2]), null) as Hunter
+	if h == null or not h.remote:
+		return
+	if String(x[3]) == "go":
+		if o and o.downed and not o.out:
+			start_stomp(m, h, o)
+		return
+	var done := String(x[3]) == "done" and not h.stomp.is_empty()
+	end_stomp(m, h, String(x[3]))
+	if done and o and not o.remote and o.downed and not o.out:
+		m.eliminate(o, h, "executed")
 
 ## What breaks a stomp (DECISIONS 2026-11-11): the stomper downed or out, or hard CC: a stun, a knock, a
 ## root (the stomp's own hold on its feet is STOMP_ROOT, so only a bigger root counts), Grounded, or a tow
@@ -177,7 +214,10 @@ static func cc_break(m: Match, h: Hunter) -> String:
 
 static func tick_stomps(m: Match, dt: float) -> void:
 	for h in m.hunters:
-		if h.stomp.is_empty() or h.remote:
+		if h.stomp.is_empty():
+			continue
+		if h.remote:
+			_tick_copy(m, h, dt)
 			continue
 		var o: Hunter = h.stomp["o"]
 		var why := cc_break(m, h)
@@ -191,28 +231,40 @@ static func tick_stomps(m: Match, dt: float) -> void:
 		h.root_t = maxf(h.root_t, STOMP_ROOT)
 		var face := Vector2(o.pos.x - h.pos.x, o.pos.z - h.pos.z)
 		if face.length() > 0.05: h.inp["aim"] = Vector3(o.pos.x, o.pos.y, o.pos.z)
-		var t0 := float(h.stomp["t"])
-		var t1 := t0 + dt
-		h.stomp["t"] = t1
-		var cyc: float = R["stomp_cycle"]
-		var hit_at := cyc * 0.7
 		var near: bool = h.flat_dist(o) <= float(R["revive_radius"]) + 0.5 and absf(h.pos.y - o.pos.y) < 1.6
-		if fmod(t0, cyc) < hit_at and fmod(t1, cyc) >= hit_at:
-			# a foot comes down
+		if _advance(m, h, dt):
 			h.stomp["hits"] = int(h.stomp["hits"]) + 1
-			m.fx.dust(h.pos, 10)
-			m.sfx("thump", h.pos, -2.0, 0.85)
 			if near:
 				m.fx.burst(o.pos + Vector3(0, 0.5, 0), Color("ff6a5a"), 10, 3.0, 0.35, -4.0)
 				o.down_hp -= Data.MATCH["down_hp"] * 0.12
-		if t1 >= float(R["stomp_time"]):
+		if float(h.stomp["t"]) >= float(R["stomp_time"]):
 			if near:
 				end_stomp(m, h, "done")
 				m.eliminate(o, h, "executed")
 				m.fx.burst(o.pos + Vector3(0, 0.8, 0), Color("ff6a5a"), 20, 4.0, 0.5, -3.0)
-				m.sfx("crit", o.pos, -2.0, 0.7)
+				m.sfx("stomp_finish", o.pos)
 			else:
 				end_stomp(m, h, "missed")
+
+## The copy of a stomper in another game: the pose and thumps run on its own clock; its game says how it ends
+## (end_stomp from net_stomp), and a stomp that outlasts its time by NET_GRACE is dropped.
+static func _tick_copy(m: Match, h: Hunter, dt: float) -> void:
+	_advance(m, h, dt)
+	if float(h.stomp["t"]) > float(R["stomp_time"]) + NET_GRACE:
+		end_stomp(m, h, "gone")
+
+## Runs the stomp's clock by dt; true on the frame a foot comes down (dust and a thump play here).
+static func _advance(m: Match, h: Hunter, dt: float) -> bool:
+	var t0 := float(h.stomp["t"])
+	var t1 := t0 + dt
+	h.stomp["t"] = t1
+	var cyc: float = R["stomp_cycle"]
+	var hit_at := cyc * 0.7
+	if fmod(t0, cyc) >= hit_at or fmod(t1, cyc) < hit_at:
+		return false
+	m.fx.dust(h.pos, 10)
+	m.sfx("thump", h.pos, -2.0, 0.85)
+	return true
 
 # ------------------------------------------------------------------ deathboxes
 ## Where a box goes: where you fell, or the last solid ground before the abyss.
@@ -365,8 +417,8 @@ static func take_item(m: Match, h: Hunter, b: Dictionary, it: Dictionary) -> voi
 			var i := int(it["i"])
 			if i < (b["caught"] as Array).size():
 				var rec: Dictionary = b["caught"][i]
-				if not (h == m.player and String(rec.get("lost_from", "")) == "you") and not Capture.room(h):
-					Capture.full_note(m, h)         # no room in your box: the capsule stays in the deathbox
+				if not (h == m.player and String(rec.get("lost_from", "")) == "you") and not Capture.room(h, rec):
+					Capture.full_note(m, h, rec)         # no slot for it: the capsule stays in the deathbox
 					return
 				(b["caught"] as Array).remove_at(i)
 				if h == m.player and String(rec.get("lost_from", "")) == "you":
@@ -374,6 +426,7 @@ static func take_item(m: Match, h: Hunter, b: Dictionary, it: Dictionary) -> voi
 					m.add_feed("%s is back with you!" % rec.get("name", "Your Boki"))
 				else:
 					h.caught.append(rec)
+					CarrySfx.from_box(m, h, b)
 					if String(rec.get("lost_from", "")) != "" and String(rec.get("lost_from", "")) != h.pname:
 						h.stolen_carry = true
 		"belt":
@@ -471,14 +524,14 @@ static func loot_box(m: Match, h: Hunter, b: Dictionary) -> void:
 			m.give_kin(h, rec)
 			m.add_feed("%s is back with you!" % rec.get("name", "Your Boki"))
 			continue
-		if not Capture.room(h):
-			left.append(rec)               # the box is full: this capsule stays in the deathbox
+		if not Capture.room(h, rec):
+			left.append(rec)               # no slot for it: this capsule stays in the deathbox
+			Capture.full_note(m, h, rec)
 			continue
 		h.caught.append(rec)
+		CarrySfx.from_box(m, h, b)
 		if String(rec.get("lost_from", "")) != "" and String(rec.get("lost_from", "")) != h.pname:
 			h.stolen_carry = true
-	if not left.is_empty():
-		Capture.full_note(m, h)
 	b["caught"] = left
 	var belt_left: Array = []
 	for st in (b.get("belt", []) as Array):
@@ -528,6 +581,7 @@ static func bring_back(m: Match, o: Hunter, at: Vector3, hp_frac: float, sick: b
 	o.inv_t = 1.5
 	o.vel = Vector3.ZERO
 	o.stun_t = 0.0
+	o.cc_guard_t = R["cc_guard"]
 	o.grap = {}; o.pad = {}; o.charge = {}; o.roll_t = 0.0
 	o.gliding = false; o.glide_fuel = 1.0
 	o.sick_t = R["sickness_time"] if sick else 0.0

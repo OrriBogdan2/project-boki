@@ -4,8 +4,7 @@ extends RefCounted
 ## the save remembers it. Standing on the pad ends the beam; the pad opens the ring's two choices. A new
 ## match on the same save: no hint.
 
-# the Training Grounds the farm Esc menu opens (Home._start_training): the one with the duel pad
-const GROUNDS := {"training": true, "practice": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242}
+# The match is the Training Grounds the farm Esc menu, the title and the expedition panel all open (Match.arena_opts).
 
 var main: Node
 var bad := 0
@@ -21,7 +20,7 @@ func run(mn: Node) -> void:
 	main = mn
 	Save.no_write = true
 	Save.d["tutorial"].erase(DuelRingHint.SAVE_KEY)
-	var m := await _match()
+	var m := _match()
 	ok(m.duel_pad != Vector3.INF and m.duel_hint != null, "first match: a pad and a live hint")
 	if m.duel_hint == null:
 		main.get_tree().quit(1)
@@ -52,7 +51,7 @@ func run(mn: Node) -> void:
 	ok(not m.paused and ring.layer.is_queued_for_deletion(), "Back gives the match back")
 	m.queue_free()
 	await main.get_tree().process_frame
-	var again := await _match()
+	var again := _match()
 	ok(again.duel_hint == null, "same save, new match: no hint")
 	again.queue_free()
 	print("DUELHINT %s" % ("PASS" if bad == 0 else "FAIL"))
@@ -62,6 +61,6 @@ func run(mn: Node) -> void:
 func _match() -> Match:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(GROUNDS)
+	m.start(Match.arena_opts())
 	m.set_process(false)
 	return m

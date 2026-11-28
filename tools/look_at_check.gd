@@ -5,6 +5,8 @@ extends RefCounted
 ## HunterMove.turn_rate: the head leads, inside the clamp, never past the aim, and is back at rest when the body
 ## arrives. A 170 degree swing stays inside the clamp. An aim held off the body is followed in yaw and pitch. A dash,
 ## a stun, an emote, no aim (a knock, a remote Hunter) and a full-body kit clip switch it off.
+## Then the same on every Meshy-native Hunter (WardenNative: the head, with a share of the neck and chest of Meshy's
+## skeleton, turns by the same figure; the attack clip owns the head like a full-body kit clip does).
 ## Never touches the save.
 
 const DT := 1.0 / 60.0
@@ -19,8 +21,9 @@ const CLIP_MIN := 0.4                  # s: a kit clip long enough to take the w
 
 var bad := 0
 var holder: Node3D
-var sync: WardenGlb.Sync       # the Hunter's model
+var sync: Node                 # the Hunter's model's driver: WardenGlb.Sync, or WardenNative on Meshy's skeleton
 var probe: Probe
+var skel: Skeleton3D           # the Hunter's own bones
 var face := 0.0                # rad: the body's facing, both twins
 var bone_err := 0.0            # rad: the worst the measured bone was off the layer's figure, this Hunter
 
@@ -30,6 +33,7 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 func run(main: Node) -> void:
+	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	Save.no_write = true
 	holder = Node3D.new()
 	main.add_child(holder)
@@ -39,6 +43,13 @@ func run(main: Node) -> void:
 	for id in ids:
 		casts += _hunter(String(id))
 	ok(casts > 0, "a full-body kit clip was played on %d Hunters" % casts)
+	WardenNative.contract_only = false
+	var native := ids.filter(func(a): return WardenNative.on(String(a)))
+	ok(not native.is_empty(), "Meshy-native Hunters: %s" % str(native))
+	var ncasts := 0
+	for id in native:
+		ncasts += _hunter(String(id))
+	ok(ncasts == native.size(), "the attack clip took the head on %d of %d native Hunters" % [ncasts, native.size()])
 	print("LOOK_AT_CHECK_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -56,14 +67,19 @@ func _model(id: String) -> bool:
 	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 	m.set_meta("anim_seed", 1)
 	holder.add_child(m)
-	sync = m.get_node_or_null("Warden/Sync") as WardenGlb.Sync
+	sync = m.get_node_or_null("Warden/Sync")
+	if sync == null:
+		sync = m.get_node_or_null("Warden/Native")
 	if sync == null or sync.head_look == null or sync.head_look.bone < 0:
 		return false
 	sync.set_process(false)
 	probe = Probe.new()
 	probe.root = sync.head_look.root
-	probe.skel = sync.head_look.skel
+	skel = sync.head_look.skel
+	probe.skel = skel
 	probe.bone = sync.head_look.bone
+	probe.neck = sync.head_look.neck
+	probe.chest = sync.head_look.chest
 	sync.head_look = probe
 	return true
 
@@ -89,7 +105,7 @@ func _hunter(id: String) -> int:
 
 ## One frame on this state; `look` is the aim (ZERO: none).
 func _frame(look: Vector3, extra := {}) -> void:
-	var s := {"face": face, "grounded": true, "fired": 99.0, "vel": Vector3.ZERO}
+	var s := {"face": face, "grounded": true, "fired": 99.0, "cast": 99.0, "vel": Vector3.ZERO}
 	s.merge(extra)
 	s[WardenLookAt.LOOK] = look
 	sync.root.rotation.y = face
@@ -107,8 +123,8 @@ func _shown() -> Vector2:
 
 ## The head bone's turn over the frame's look-at, in the model's frame (rad: x about its up, + his left; y up).
 func _bone() -> Vector2:
-	var after := sync.skel.get_bone_global_pose(probe.bone).basis.orthonormalized()
-	var to_model := WardenGlb.model_xf(sync.root, sync.skel).basis.orthonormalized()
+	var after := skel.get_bone_global_pose(probe.bone).basis.orthonormalized()
+	var to_model := WardenGlb.model_xf(sync.root, skel).basis.orthonormalized()
 	var fwd := (to_model * after * probe.before.inverse() * to_model.inverse()) * Vector3.FORWARD
 	return Vector2(atan2(-fwd.x, -fwd.z), asin(clampf(fwd.y, -1.0, 1.0)))
 
@@ -186,6 +202,8 @@ func _off_checks(id: String) -> int:
 		for f in OFF_FRAMES + 1:
 			_frame(_aim(face + SWING) if bool(off[2]) else Vector3.ZERO, off[1])
 		ok(_shown() == Vector2.ZERO and absf(_bone_yaw()) < 0.001, "%s: off for %s" % [id, off[0]])
+	if sync is WardenNative:  # (Meshy's attack clip plays for a swing as for a kit move: it owns the head)
+		return _swing_clip()
 	var move := _full_body_move()
 	if move == "":
 		return 0
@@ -207,3 +225,16 @@ func _full_body_move() -> String:
 		if sync.clips.move_len(mv) >= CLIP_MIN:
 			return String(id)
 	return ""
+
+## A new swing on a native Hunter: Meshy's attack clip plays, and takes the head from the layer for as long as it runs.
+func _swing_clip() -> int:
+	sync.attack_left = 0.0
+	sync.last["swing_n"] = 0
+	_stand(SWING, SETTLE)
+	var turned := absf(_shown().x)
+	for f in ceili(CLIP_MIN / DT):
+		_frame(_aim(face + SWING), {"swing_n": 1})
+	ok(turned > 0.1 and _shown() == Vector2.ZERO,
+			"%s: off under Meshy's attack clip (turned %.0f deg before)" % [sync.art_id, rad_to_deg(turned)])
+	_stand(0.0, SETTLE)
+	return 1

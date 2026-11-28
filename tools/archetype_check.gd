@@ -184,6 +184,7 @@ func done(m: Match) -> void:
 
 func run(main_node: Node) -> void:
 	main = main_node
+	MergeForm.set_enabled(true)      # (the kits' bonded R and the controls here use Fusion)
 	var only := ""
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--ak-only="): only = String(a).substr(10)
@@ -207,6 +208,7 @@ func run(main_node: Node) -> void:
 	_data()
 	_health()
 	_roster()
+	_gauge()
 	await _thief()
 	await _archer()
 	await _mage()
@@ -226,6 +228,23 @@ func run(main_node: Node) -> void:
 ## more than 1.25x either way. The scales differ, so only the ratio is compared.
 const SOURCE_HP := {"gunslinger": 1225, "juggernaut": 1290, "archer": 1100, "ashwick": 1290, "tender": 1290, "dolm": 1290,
 		"dredge": 1445, "rimewright": 1290, "ostra": 1150, "bulwark": 1475, "mage": 1290, "thief": 1290}
+
+## The HUD's passive gauge (the bar under health and the reticle arc) is opt-in by data: "gauge": true, only on the
+## fill-up meters (Rage, Swell). Fever, self stacks and foe marks show as a buff icon or on the foe, never a bar.
+func _gauge() -> void:
+	var want := ["juggernaut", "ostra"]
+	var got: Array = []
+	for a in Arch.ORDER:
+		var txt := FileAccess.get_file_as_string("res://content/archetypes/%s.json" % a)
+		var rd: Dictionary = JSON.parse_string(txt).get("resource", {})
+		if bool(rd.get("gauge", false)):
+			got.append(a)
+			ok("gauge: %s is a fill-up meter" % a, String(rd.get("kind", "")) == "meter")
+	got.sort()
+	ok("gauge: only Kael and Motley draw the passive gauge", got == want, str(got))
+	var rows := BuffStack.rows_v.map(func(r): return String(r["id"]))
+	var icons := ["fever", "rocks", "salvage"].all(func(i): return rows.has(i))
+	ok("gauge: Fever, Rocks and Salvage show as buff-row icons instead", icons, str(rows))
 
 ## Every list of all the Hunters holds the same ids as Arch.ORDER (a new Hunter missing from one shows here).
 func _roster() -> void:
@@ -292,7 +311,7 @@ func _data() -> void:
 	var rk_ok := true
 	for a in Arch.ids():
 		for sl in ["sec", "dash", "kin", "ult"]:
-			if sl == "ult" and not Arch.def(a).has("r"): continue      # Sparkle and Vex have no R (Boki Merge owns it)
+			if sl == "ult" and not Arch.def(a).get("x", {}).has("per_rank"): continue  # source R tiers only (Gil: none)
 			var r2 := String(Arch.def(a).get("rank2", {}).get(sl, ""))
 			if not (r2.begins_with("Rank 2: ") and (r2.contains("->") or r2.contains("%"))): rk_ok = false
 	ok("ranks: every ability has a concrete rank 2", rk_ok)
@@ -422,7 +441,7 @@ func _archer() -> void:
 	P.inp["fire"] = false
 	step(m, 0.5)
 	ok("archer: an arrow into a pinned foe is a plain tap (no Deadeye)",
-		dmg(T) - dd0 > 0.0 and dmg(T) - dd0 < 30.0 and K.ready_label() == "", "dealt %.0f" % (dmg(T) - dd0))
+		dmg(T) - dd0 > 0.0 and dmg(T) - dd0 < 30.0, "dealt %.0f" % (dmg(T) - dd0))
 	# Spirit Walk: a dodge roll, then walking through a rock column (terrain still blocks)
 	P.teleport(home); P.vel = Vector3.ZERO; P.dashes = P.max_dashes()
 	P.inp["move"] = Vector2(0, 1)
@@ -573,7 +592,8 @@ func _burr_terrain(m: Match, P: Hunter, T: Hunter, K: GunslingerKit, home: Vecto
 		tap(m, P)
 		step(m, 0.8)
 		return K.direct_hits - hits
-	shape.call(func(dx: int) -> int: return clampi((dx - 2) / 2, 0, 2), [3, 5], -1)      # flights on tiles 3 and 5
+	shape.call(func(dx: int) -> int: return clampi(int((dx - 2) / 2.0), 0, 2), [3, 5],
+			-1)      # flights on tiles 3 and 5
 	var top := Vector3(home.x + 8.0, (lv + 2) * World.LEVEL, home.z)
 	var climbed: int = shoot.call(top)
 	var info := "hits %d took %.0f" % [climbed, dmg(T)]
@@ -609,7 +629,7 @@ func _bulwark() -> void:
 	var php := P.hp
 	m.spawn_shot(T, T.pos + Vector3(-0.6, 0.95, 0), Vector2(-30, 0), 30.0, 0.5, 0.15, Color.RED, {})
 	step(m, 0.3, func(): P.inp["sec_hold"] = true)
-	ok("bulwark RMB hold: shield blocks + Guard, no swing", not K.wall.is_empty() and P.hp >= php and K.res >= 10.0 and not P.atk.can_fire(), "guard %.0f hp %.0f" % [K.res, P.hp])
+	ok("bulwark RMB hold: shield blocks, no swing", not K.wall.is_empty() and P.hp >= php and not P.atk.can_fire(), "hp %.0f" % P.hp)
 	P.inp["sec_hold"] = false
 	step(m, 0.1)
 	ok("bulwark RMB release: lowered", K.wall.is_empty())
@@ -619,8 +639,8 @@ func _bulwark() -> void:
 	tap(m, P)
 	step(m, 0.3)
 	ok("bulwark RMB tap: no Bash any more", K.last_variant == "tap" and absf(T.pos.x - x0) < 0.2 and dmg(T) <= 0.0 and K.ch_rmb >= 1.0, "pushed %.1f" % (T.pos.x - x0))
-	T.teleport(home + Vector3(1.8, 0, 0)); fresh(T); K.res = 60.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; step(m, 1.0); fresh(T)
-	ok("bulwark resource full: Shield Slam armed", K.full_ready() and K.ready_label() != "")
+	T.teleport(home + Vector3(1.8, 0, 0)); fresh(T); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; step(m, 1.0); fresh(T)
+	ok("bulwark: the source kit has no Guard meter and no Shield Slam; the Bash is on 6 s", not K.has_meter() and not K.d["rmb"].has("slam") and float(K.rmb_def()["cooldown"]) == 6.0)
 	# hold to block, let go: the aegis just comes down (the foe at its face got only the aegis's 2 m push, no Bash)
 	x0 = T.pos.x
 	hold(m, P, 0.5)

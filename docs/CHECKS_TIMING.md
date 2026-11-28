@@ -42,6 +42,11 @@ then 6 fails on the same base tree (docs/GATE_0244.md). So the rule:
   each through jobq and treats a non-zero exit or a `FAIL` line as red:
   `jobq submit --needs gpu --tree <tree> --out hitch-gpu -- --hitch-check --timing-strict`
   `jobq submit --needs gpu --tree <tree> --out load-gpu -- --load-check --timing-strict`
+  `jobq submit --needs gpu --tree <tree> --out fight-p99-gpu -- --fight-p99-check --quality=medium --bench-view=1920x1080 --timing-strict`
+  (`--fight-p99-check`: the `--bench-fight` p99 against its row in `tools/perf.tsv`, fails above +10%; no row for the adapter prints the row to add)
+  `jobq submit --needs gpu --tree <tree> --out loadin-gpu -- --loadin-fps-check --timing-strict`
+  (`--loadin-fps-check`: the first 30 s of a real expedition in real time at 1080p, 30 players; `GPU_HOST` is the legacy
+  file that only shrinks, so this one strict run is listed here and run by hand or by the gate's operator)
 - `--timing-strict` on any machine makes a fail a fail again (use it when you profile on a quiet box).
 - A new timing check (wall-clock frame or load budgets) gets `"advisory"` and a `GPU_HOST` line too.
   Checks that only count things (build steps, nodes, draw calls) stay strict everywhere; hitch-check's

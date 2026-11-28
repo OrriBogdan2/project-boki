@@ -18,29 +18,40 @@ func run(main: Node) -> void:
 	Econ.ensure()
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 4, "squad": 1, "tier": 0, "length": 1e9, "seed": 12, "no_drop": true,
-		"arch": "thief", "cls": Arch.weight("thief"), "weapon": Arch.signature("thief")})
+	m.start(
+		{
+			"teams": 4,
+			"squad": 1,
+			"tier": 0,
+			"length": 1e9,
+			"seed": 12,
+			"no_drop": true,
+			"arch": "thief",
+			"cls": Arch.weight("thief"),
+			"weapon": Arch.signature("thief")
+		}
+	)
 	m.set_process(false)
-	var P: Hunter = m.player
-	var rivals: Array = m.hunters.filter(func(x): return x.team != P.team)
-	P.lvl = 4
+	var p: Hunter = m.player
+	var rivals: Array = m.hunters.filter(func(x): return x.team != p.team)
+	p.lvl = 4
 	rivals[0].lvl = 2
 	rivals[1].lvl = 3
 	rivals[2].lvl = 6
-	var below := LevelGap.of(P, rivals[0])
+	var below := LevelGap.of(p, rivals[0])
 	ok(below == -2 and LevelGap.band(below) == -1, "two below: cool band")
 	ok(LevelGap.tint(below) == LevelGap.COOL, "two below: the blue entry")
-	ok(LevelGap.band(LevelGap.of(P, rivals[1])) == 0, "one below: plain")
-	var above := LevelGap.of(P, rivals[2])
+	ok(LevelGap.band(LevelGap.of(p, rivals[1])) == 0, "one below: plain")
+	var above := LevelGap.of(p, rivals[2])
 	ok(above == 2 and LevelGap.band(above) == 1, "two above: warm band")
 	ok(LevelGap.tint(above) == LevelGap.WARM, "two above: the orange entry")
 	ok(LevelGap.band(1) == 0 and LevelGap.band(0) == 0 and LevelGap.band(-1) == 0, "within one level: plain")
 	ok(LevelGap.band(9) == 1 and LevelGap.band(-9) == -1, "far above and far below keep their side")
-	ok(LevelGap.of(P, P) == 0 and LevelGap.of(null, rivals[2]) == 0, "yourself and no viewer: plain")
+	ok(LevelGap.of(p, p) == 0 and LevelGap.of(null, rivals[2]) == 0, "yourself and no viewer: plain")
 	var mate := Hunter.new()
-	mate.team = P.team
+	mate.team = p.team
 	mate.lvl = 9
-	ok(LevelGap.of(P, mate) == 0, "a teammate keeps their plain level at any gap")
+	ok(LevelGap.of(p, mate) == 0, "a teammate keeps their plain level at any gap")
 	mate.free()
 	var dl := absf(LevelGap.WARM.get_luminance() - LevelGap.COOL.get_luminance())
 	ok(dl > 0.25, "warm and cool differ in luminance, not hue alone")

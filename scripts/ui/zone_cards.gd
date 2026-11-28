@@ -33,7 +33,11 @@ static func open(h, here: String) -> void:
 			row.add_child(_card(String(z["name"]), Color(String(z["colour"])), lines, func(): h.hway.hop(id),
 					"You are here" if id == here else "Go", id != here))
 		else:
-			var lines: Array = [UI.para(lock_line(id), 12, UI.MUTED)]
+			var lock := UI.para(lock_line(id), 12, UI.MUTED)
+			# Where each key comes from, on hover: the card itself keeps one line.
+			lock.tooltip_text = "\n".join(key_hints(id))
+			lock.mouse_filter = Control.MOUSE_FILTER_PASS
+			var lines: Array = [lock]
 			if here == GardenZones.HUB and h.hhints != null:
 				lines.append_array(HubFirstVisit.card_line(id))
 			var keys := GardenZones.keys_for(id)
@@ -41,18 +45,23 @@ static func open(h, here: String) -> void:
 			var pick := func(): h.hway.hop(id)     # refused: the knock and what it still needs
 			if ready:
 				pick = func(): h.hway.attune(id)
-			row.add_child(_card(String(z["name"]), UI.FAINT, lines, pick, "Wake it" if ready else "Locked", true))
+			var card: Control = _card(String(z["name"]), UI.FAINT, lines, pick, "Wake it" if ready else "Locked", true)
+			card.tooltip_text = "\n".join(key_hints(id))  # where each key comes from, off the one-line card
+			row.add_child(card)
 
-## The hub's games board: which game each zone hosts and whether it is open, this week's Dash twist and
-## the showcase wall's winners.
+## The hub's games board: every game of every open zone as one button (a press travels there and starts it,
+## MinigameHub.start), the sleeping zones, this week's Dash twist and the showcase wall's winners.
 static func board(h) -> void:
 	var v: VBoxContainer = h._new_panel("Games board", 420.0)
-	for id in GardenZones.ids():
-		var z := GardenZones.info(id)
-		var open := GardenZones.is_open(id)
+	for g in MinigameHub.listed(h):
+		var zone := String(GardenZones.info(String(g["zone"]))["name"])
+		var b := UI.ghost("%s · %s" % [g["name"], zone], func(): MinigameHub.start(h, g), 380.0)
+		b.tooltip_text = "%s\n%s" % [g["rule"], MinigameHub.summary(String(g["id"]))]
+		v.add_child(b)
+	for id in GardenZones.ids().filter(func(id): return not GardenZones.is_open(id)):
 		var row := UI.hbox(10)
-		row.add_child(UI.label(String(z["name"]), 15, Color(String(z["colour"])) if open else UI.FAINT))
-		row.add_child(UI.label(String(z["game"]), 13, UI.INK) if open else UI.label("asleep", 13, UI.MUTED))
+		row.add_child(UI.label(String(GardenZones.info(id)["name"]), 15, UI.FAINT))
+		row.add_child(UI.label("asleep", 13, UI.MUTED))
 		v.add_child(row)
 	var tw := BaseRace.twist()
 	v.add_child(UI.label("This week: %s. %s" % [tw["name"], tw["note"]], 14, UI.GOLD))
@@ -99,6 +108,15 @@ static func lock_line(id: String) -> String:
 		return food[0].to_upper() + food.substr(1) + "."
 	var seed := "Find its Wayseed in a run's lair or at the trader"
 	return seed + "." if keys["lean"] else seed + ", and " + food + "."
+
+## Where to get each key, one plain line each: the Wayseed's sources and prices, and which Boki is closest.
+static func key_hints(id: String) -> Array:
+	var best := GardenZones.closest(id)
+	var lean := "Feed a Boki meals of those types."
+	if not best.is_empty():
+		lean = "Closest: %s, %s %d of %d." % [best["rec"]["name"], String(best["type"]).capitalize(), int(best["lean"]),
+				int(GardenZones.rules()["lean_key"])]
+	return ["From " + String(GardenZones.rules()["wayseed_from"]) % BlackMarket.seed_terms() + ".", lean]
 
 ## An open zone's card body: its Boki with their moods, who woke it, today's game,
 ## its decor effects (DecorComfort) and your best at it.

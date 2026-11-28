@@ -36,7 +36,8 @@ var _count: Label
 ## Adds the drill to a practice area that has dummies, once per save (Practice.attach calls this).
 static func attach(p: Practice) -> void:
 	var o := p.m.opts
-	if o.get("tutorial", false) or o.get("duel", false) or bool(Save.d["tutorial"].get(SAVE_KEY, false)):
+	var quiet: bool = o.get("tutorial", false) or o.get("duel", false) or o.get("test_zone", false)
+	if quiet or bool(Save.d["tutorial"].get(SAVE_KEY, false)):
 		return
 	var k := KitDrill.new()
 	k.name = NAME
@@ -177,6 +178,7 @@ func build_ui() -> void:
 	var skip := Button.new()
 	skip.text = "Skip drill"
 	skip.pressed.connect(_skip)
+	UI.sfx(skip)
 	bottom.add_child(skip)
 	if m.hud:
 		m.hud.ui_extra.append(skip)       # the mouse is over UI here: no shooting, the pointer shows

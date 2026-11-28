@@ -40,7 +40,7 @@ func run(main: Node) -> void:
 func _hunter(main: Node, arch: String, out: String) -> void:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true,
+	m.start({"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true,
 		"cls": Arch.weight(arch), "arch": arch, "weapon": Arch.signature(arch)})
 	m.set_process(false)
 	m.hud.visible = false
@@ -105,7 +105,7 @@ func _dash(m: Match, h: Hunter, sync: Node, at: Array, dir: String, out: String)
 			sync.call("_process", Match.DT)
 		if i % EVERY != 0:
 			continue
-		var fr := i / EVERY
+		var fr := int(i / float(EVERY))
 		var off := rad_to_deg(wrapf(h.face - atan2(-h.roll_dir.x, -h.roll_dir.y), -PI, PI))
 		var turn := rad_to_deg(cl.head_turn) if cl else 0.0
 		var clip := cl.cur if cl else "proc"

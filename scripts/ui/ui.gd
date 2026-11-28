@@ -50,6 +50,8 @@ const T_CAPS := 12       # section eyebrows (Rubik bold, spaced)
 const GAP := 12          # between things in a group
 const GAP_BIG := 20      # between groups
 const PAD := 26          # inside a panel
+const WRAP_MIN_W := 120.0      # least width of a wrapping Label: ~16 characters, never a column of letters
+                               # (not more: it must fit inside the narrow fixed cards, 150 px zone and cradle cards)
 
 static var big: Font = preload("res://fonts/LilitaOne-Regular.ttf")
 static var body: Font = preload("res://fonts/Rubik.ttf")
@@ -156,15 +158,31 @@ static func label(text: String, size := 16, col := INK, font: Font = null) -> La
 	l.add_theme_color_override("font_color", col)
 	if font:
 		l.add_theme_font_override("font", font)
-	# short labels sit on one line; only real sentences wrap (a wrapping label in a row collapses to nothing)
-	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART if text.length() > 48 else TextServer.AUTOWRAP_OFF
+	# short labels sit on one line; only real sentences wrap (see wrapped)
+	if text.length() > 48:
+		wrapped(l)
+	else:
+		l.autowrap_mode = TextServer.AUTOWRAP_OFF
+	return l
+
+## Makes a label wrap, with a minimum width. A wrapping Label reports ~0 minimum width (it can break at any
+## letter), so a row or card sized by its content gave it nothing and it broke one letter per line
+## (the Name-your-Boki line); EXPAND_FILL only shares out spare room, and there is none. min_w is the floor.
+static func wrapped(l: Label, min_w := WRAP_MIN_W) -> Label:
+	wrap_text(l)
+	l.custom_minimum_size.x = maxf(l.custom_minimum_size.x, min_w)
+	return l
+
+## Makes l wrap at words and take the row's free width: a wrapping label has no width of its own, so in a row
+## without it it collapses to one letter per line (the Soul Shrine's vertical text). wrapped() adds a floor.
+static func wrap_text(l: Label) -> Label:
+	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	return l
 
 ## Body text that wraps: the usual muted line under a heading.
 static func para(text: String, size := T_SMALL, col := MUTED) -> Label:
-	var l := label(text, size, col)
-	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	return l
+	return wrapped(label(text, size, col))
 
 static func title(text: String, size := 34, col := INK) -> Label:
 	var l := label(text, size, col, big)
@@ -178,11 +196,23 @@ const HOVER_GROW := 1.03     # a pointed-at button's scale
 const BACK_WORDS := {"Back": "ui_back", "Close": "ui_back", "Cancel": "ui_back", "✕": "ui_back",
 	"Leave it  (Esc)": "ui_back"}
 
+const SFX_META := "btn_sfx"   # marks a Button that makes the hover and click sounds (--ui-sfx-check)
+
+## For a Button that has its own look and cannot be a Ui.button (a colour swatch, a ring cap): the same hover tick
+## and click tap, no new sounds. Skip `click` when its handler already plays its own cue.
+static func sfx(b: Button, click := true) -> Button:
+	b.set_meta(SFX_META, true)
+	b.mouse_entered.connect(func(): if not b.disabled: Sfx.play("hover", null, -14.0, 0.05))
+	if click:
+		b.pressed.connect(func(): Sfx.play("click"))
+	return b
+
 ## The secondary button (an outline). icon: an Icons id drawn at its left. Hover lights the neon
 ## edge and grows it 3% (UI_STYLE.md: only things you can press glow and grow); pressing sinks it a
 ## touch, in about 70 ms.
 static func button(text: String, cb: Callable, minw := 0.0, icon := "") -> Button:
 	var b := Button.new()
+	b.set_meta(SFX_META, true)
 	b.text = text
 	if cb.is_valid():
 		var snd: String = BACK_WORDS.get(text, "click")
@@ -238,6 +268,11 @@ static func ghost(text: String, cb: Callable, minw := 0.0, icon := "") -> Button
 	b.theme_type_variation = "Ghost"
 	return b
 
+## Gives this button its own press sound ("" for none, when the action plays its own once it lands).
+static func sounding(b: Button, sound: String) -> Button:
+	b.set_meta("snd", sound)
+	return b
+
 ## A red-outlined button for things that can't be undone (pair it with confirm()).
 static func danger(text: String, cb: Callable, minw := 0.0, icon := "") -> Button:
 	var b := button(text, cb, minw, icon)
@@ -282,8 +317,8 @@ static func set_icon(b: Button, icon: String, px := 16) -> void:
 		var x := ml
 		if b.alignment == HORIZONTAL_ALIGNMENT_CENTER and b.text != "":
 			# the icon sits just left of centred text
-			var f := b.get_theme_font("font"); var fs := b.get_theme_font_size("font_size")
-			var tw := f.get_string_size(b.text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+			var f := b.get_theme_font("font"); var loc_fs := b.get_theme_font_size("font_size")
+			var tw := f.get_string_size(b.text, HORIZONTAL_ALIGNMENT_LEFT, -1, loc_fs).x
 			var gap := float(b.get_theme_constant("h_separation"))
 			x = ml + maxf(0.0, (b.size.x - ml - mr - tw - px - gap) * 0.5)
 		var col := b.get_theme_color("font_disabled_color" if b.disabled else ("font_hover_color" if b.is_hovered() else "font_color"))
@@ -339,6 +374,9 @@ static func draw_icon(c: CanvasItem, id: String, at: Vector2, s: float, col: Col
 			for k in 4:
 				var p0 := at + Vector2(-0.6 + k * 0.3, 0.2 - k * 0.3) * s
 				c.draw_line(p0, p0 + Vector2(0.18, 0.18) * s, Color(0, 0, 0, 0.5), maxf(1.0, w * 0.6), true)
+		"ring":        # the summon timer: a faint full ring with a bright three-quarter arc
+			c.draw_arc(at, 0.8 * s, 0.0, TAU, 24, Color(col, 0.3), w, true)
+			c.draw_arc(at, 0.8 * s, -PI / 2.0, PI, 18, col, w, true)
 		"pin":
 			c.draw_circle(at + Vector2(0, -0.3) * s, 0.5 * s, col)
 			c.draw_colored_polygon(PackedVector2Array([at + Vector2(-0.42, -0.05) * s, at + Vector2(0.42, -0.05) * s, at + Vector2(0, 0.9) * s]), col)
@@ -460,11 +498,11 @@ static func frame(bg: Color, rad := R_CTRL, edge := Color(0, 0, 0, 0), edge_w :=
 static func _tile_face(on: bool, hover: bool, col: Color, pad: float) -> UiFrame:
 	var tint := col if on else Color.WHITE
 	var alpha := 0.13 if on else 0.04
-	var fill := Color(tint, alpha + (0.05 if hover else 0.0))
+	var fill_node := Color(tint, alpha + (0.05 if hover else 0.0))
 	var glow := 1.0 if on else 0.0
 	if hover:
 		glow += 0.5
-	var f := UiTorn.make(fill, 2.5, glow)
+	var f := UiTorn.make(fill_node, 2.5, glow)
 	f.edge_w = 2 if on else 1
 	if on:
 		f.edge = Color(col, 0.9)
@@ -697,8 +735,8 @@ static var _hold := {}          # menu key -> a fixed body height asked for with
 
 ## Fixes a menu's body height (its tallest tab or item), so switching tabs or items never resizes
 ## the panel. Call it each time the menu is built, with the same height.
-static func hold(body: Control, h: float) -> void:
-	var p := _shell_of(body)
+static func hold(body_text: Control, h: float) -> void:
+	var p := _shell_of(body_text)
 	var key := String(p.get_meta("key", "")) if p else ""
 	if key != "":
 		_hold[key] = h
@@ -707,14 +745,14 @@ static func hold(body: Control, h: float) -> void:
 ## has been while open) and, only if the window is too small for it, scrolls. margin: room the panel
 ## needs besides the body (on top of the HudStyle safe margin it keeps clear above and below). Returns the wrapper to add where the content would have gone.
 static func paged(content: VBoxContainer, margin: float, key: String, head: Control = null, width_hint := 600.0, foot: Control = null) -> VBoxContainer:
-	var wrap := vbox(8)
+	var wrap_mode := vbox(8)
 	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var sc := ScrollContainer.new()
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	sc.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 	sc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	sc.add_child(content)
-	wrap.add_child(sc)
+	wrap_mode.add_child(sc)
 	var state := {"busy": false, "t0": 0}
 	var fit := func() -> void:
 		if state["busy"] or not is_instance_valid(content) or not content.is_inside_tree():
@@ -739,26 +777,26 @@ static func paged(content: VBoxContainer, margin: float, key: String, head: Cont
 	content.minimum_size_changed.connect(refit)
 	content.child_entered_tree.connect(func(_c): refit.call())
 	if foot: foot.visibility_changed.connect(refit)
-	wrap.tree_entered.connect(func():
+	wrap_mode.tree_entered.connect(func():
 		_live[key] = int(_live.get(key, 0)) + 1
 		state["t0"] = Time.get_ticks_msec()
 		refit.call()
 		# (by instance id: a lambda that captured the wrapper itself errors when it's freed first,
 		# "Lambda capture at index 0 was freed", e.g. a menu closed within the 0.35 s)
-		var wid := wrap.get_instance_id()
-		wrap.get_tree().create_timer(0.35).timeout.connect(func(): if is_instance_id_valid(wid): refit.call())
-		var vpt := wrap.get_viewport()
+		var wid := wrap_mode.get_instance_id()
+		wrap_mode.get_tree().create_timer(0.35).timeout.connect(func(): if is_instance_id_valid(wid): refit.call())
+		var vpt := wrap_mode.get_viewport()
 		if vpt and not vpt.size_changed.is_connected(refit): vpt.size_changed.connect(refit))
-	wrap.tree_exiting.connect(func():
+	wrap_mode.tree_exiting.connect(func():
 		_live[key] = int(_live.get(key, 1)) - 1
 		# closed for good (not just rebuilt this frame): forget its size
 		var ml := Engine.get_main_loop() as SceneTree
 		if ml: ml.process_frame.connect(func():
 			if int(_live.get(key, 0)) <= 0:
 				_tall.erase(key); _page_of.erase(key); _hold.erase(key), CONNECT_ONE_SHOT)
-		var vpt := wrap.get_viewport()
+		var vpt := wrap_mode.get_viewport()
 		if vpt and vpt.size_changed.is_connected(refit): vpt.size_changed.disconnect(refit))
-	return wrap
+	return wrap_mode
 
 ## How tall a control will be at a given width, worked out from the text itself so wrapped labels
 ## measure right before the layout has run (they report huge heights until then).
@@ -771,13 +809,13 @@ static func est_h(c: Control, w: float) -> float:
 		if l.autowrap_mode == TextServer.AUTOWRAP_OFF:
 			return l.get_combined_minimum_size().y
 		var f := l.get_theme_font("font")
-		var fs := l.get_theme_font_size("font_size")
+		var loc_fs := l.get_theme_font_size("font_size")
 		var ls := float(l.get_theme_constant("line_spacing"))
 		var lines := 0
-		for para in l.text.split("\n"):
-			var tw := f.get_string_size(para, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+		for para_text in l.text.split("\n"):
+			var tw := f.get_string_size(para_text, HORIZONTAL_ALIGNMENT_LEFT, -1, loc_fs).x
 			lines += maxi(1, int(ceil(tw / maxf(20.0, w - 4.0) + 0.0001)))
-		return maxf(own, lines * (f.get_height(fs) + ls))
+		return maxf(own, lines * (f.get_height(loc_fs) + ls))
 	if c is GridContainer:
 		var g := c as GridContainer
 		var cols := maxi(1, g.columns)
@@ -884,7 +922,7 @@ static func scroll_panel(title_txt: String, width: float, on_close: Callable, cl
 	var tabs_slot := vbox(0)
 	tabs_slot.visible = false
 	top.add_child(tabs_slot)
-	var body := vbox(GAP)
+	var body_text := vbox(GAP)
 	var foot := hbox(10)
 	foot.visible = false
 	foot.alignment = BoxContainer.ALIGNMENT_END
@@ -899,11 +937,11 @@ static func scroll_panel(title_txt: String, width: float, on_close: Callable, cl
 		var sc := ScrollContainer.new()
 		sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 		sc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		body_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var pad := MarginContainer.new(); pad.add_theme_constant_override("margin_right", 14)
 		pad.add_theme_constant_override("margin_left", 3); pad.add_theme_constant_override("margin_top", 3); pad.add_theme_constant_override("margin_bottom", 3)
 		pad.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		pad.add_child(body)
+		pad.add_child(body_text)
 		sc.add_child(pad)
 		outer.add_child(sc)
 		var fit := func() -> void:
@@ -914,15 +952,15 @@ static func scroll_panel(title_txt: String, width: float, on_close: Callable, cl
 				# held: the same on every tab
 				var want := float(_hold.get(title_txt, pad.get_combined_minimum_size().y))
 				sc.custom_minimum_size.y = minf(want, room)
-		body.minimum_size_changed.connect(func(): fit.call_deferred())
+		body_text.minimum_size_changed.connect(func(): fit.call_deferred())
 		top.minimum_size_changed.connect(func(): fit.call_deferred())
 		foot.visibility_changed.connect(func(): fit.call_deferred())
 		sc.tree_entered.connect(func(): fit.call_deferred())
-		body.set_meta("scroll", sc)
+		body_text.set_meta("scroll", sc)
 	else:
-		outer.add_child(paged(body, MENU_CHROME, title_txt, top, width - PAD * 2.0, foot))
+		outer.add_child(paged(body_text, MENU_CHROME, title_txt, top, width - PAD * 2.0, foot))
 	outer.add_child(foot)
-	body.set_meta("shell", p)
+	body_text.set_meta("shell", p)
 	p.set_meta("key", title_txt)
 	p.set_meta("title", t); p.set_meta("sub", sub); p.set_meta("extra", extra)
 	p.set_meta("tabs", tabs_slot); p.set_meta("foot", foot); p.set_meta("foot_left", foot_left); p.set_meta("foot_right", foot_right)
@@ -934,10 +972,12 @@ static func scroll_panel(title_txt: String, width: float, on_close: Callable, cl
 	p.custom_minimum_size.x = width
 	# keyboard and pad users start on the first thing they can press
 	p.tree_entered.connect(func(): focus_first(p))
-	return [p, body]
+	if on_close.is_valid():
+		PanelClose.attach(p, on_close)
+	return [p, body_text]
 
-static func _shell_of(body: Control) -> PanelContainer:
-	var n: Node = body
+static func _shell_of(body_text: Control) -> PanelContainer:
+	var n: Node = body_text
 	while n:
 		if n.has_meta("shell"): return n.get_meta("shell")
 		if n.has_meta("foot"): return n as PanelContainer
@@ -945,8 +985,8 @@ static func _shell_of(body: Control) -> PanelContainer:
 	return null
 
 ## A short line under a panel's title.
-static func subtitle(body: Control, txt: String) -> void:
-	var p := _shell_of(body)
+static func subtitle(body_text: Control, txt: String) -> void:
+	var p := _shell_of(body_text)
 	if p == null: return
 	var s: Label = p.get_meta("sub")
 	s.text = txt
@@ -964,13 +1004,13 @@ static func title_tab() -> UiTorn:
 	return f
 
 ## Changes a panel's title.
-static func set_title(body: Control, txt: String) -> void:
-	var p := _shell_of(body)
+static func set_title(body_text: Control, txt: String) -> void:
+	var p := _shell_of(body_text)
 	if p: (p.get_meta("title") as Label).text = txt
 
 ## Puts a small control (a Boki's sex icon) right after the panel's title.
-static func title_icon(body: Control, c: Control) -> void:
-	var p := _shell_of(body)
+static func title_icon(body_text: Control, c: Control) -> void:
+	var p := _shell_of(body_text)
 	if p == null: return
 	var t: Label = p.get_meta("title")
 	var row: HBoxContainer = p.get_meta("title_row") if p.has_meta("title_row") else null
@@ -990,16 +1030,16 @@ static func title_icon(body: Control, c: Control) -> void:
 	row.add_child(c)
 
 ## A row next to the close X for chips and small things (gems, stored count).
-static func head_extra(body: Control) -> HBoxContainer:
-	var p := _shell_of(body)
+static func head_extra(body_text: Control) -> HBoxContainer:
+	var p := _shell_of(body_text)
 	return p.get_meta("extra") if p else hbox()
 
 ## Tabs under the title (a segmented control). Returns the tabs control.
-static func shell_tabs(body: Control, names: Array, cur: String, cb: Callable, counts := {}) -> Control:
-	var p := _shell_of(body)
+static func shell_tabs(body_text: Control, names: Array, cur: String, cb: Callable, counts := {}) -> Control:
+	var p := _shell_of(body_text)
 	var tb := tabs(names, cur, cb, counts)
 	if p == null:
-		body.add_child(tb)
+		body_text.add_child(tb)
 		return tb
 	var slot: VBoxContainer = p.get_meta("tabs")
 	for ch in slot.get_children(): ch.queue_free()
@@ -1008,21 +1048,21 @@ static func shell_tabs(body: Control, names: Array, cur: String, cb: Callable, c
 	return tb
 
 ## The footer's action row (bottom right). Add buttons to it; the primary goes last.
-static func footer(body: Control) -> HBoxContainer:
-	var p := _shell_of(body)
+static func footer(body_text: Control) -> HBoxContainer:
+	var p := _shell_of(body_text)
 	if p == null:
 		var h := hbox(10); h.alignment = BoxContainer.ALIGNMENT_END
-		body.add_child(h)
+		body_text.add_child(h)
 		return h
 	(p.get_meta("foot") as Control).visible = true
 	return p.get_meta("foot_right")
 
 ## The footer's main button: primary, with an Enter keycap. Hosts press it on Enter when nothing
 ## else has focus (press_primary).
-static func footer_primary(body: Control, text: String, cb: Callable, minw := 0.0, icon := "") -> Button:
+static func footer_primary(body_text: Control, text: String, cb: Callable, minw := 0.0, icon := "") -> Button:
 	var b := with_key(primary(text, cb, minw, icon), "Enter")
-	footer(body).add_child(b)
-	var p := _shell_of(body)
+	footer(body_text).add_child(b)
+	var p := _shell_of(body_text)
 	if p: p.set_meta("primary", b)
 	return b
 
@@ -1037,8 +1077,8 @@ static func press_primary(host: Node) -> bool:
 	return false
 
 ## The footer's left side: hints and notes that go with the actions.
-static func footer_left(body: Control) -> HBoxContainer:
-	var p := _shell_of(body)
+static func footer_left(body_text: Control) -> HBoxContainer:
+	var p := _shell_of(body_text)
 	if p == null: return hbox()
 	(p.get_meta("foot") as Control).visible = true
 	return p.get_meta("foot_left")
@@ -1086,6 +1126,7 @@ static func confirm(host: Control, head: String, text: String, yes_txt: String, 
 	row.add_child(danger(yes_txt, yes_cb) if dangerous else primary(yes_txt, yes_cb))
 	v.add_child(row)
 	layer.set_meta("modal", true)
+	PanelClose.attach(p, layer.queue_free)
 	host.add_child(layer)
 	pop_in(p)
 	no.grab_focus.call_deferred()

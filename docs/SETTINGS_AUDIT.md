@@ -22,13 +22,13 @@ the next time the game starts, and `--uipolish-check` asserts that.
 | `tips` | Gameplay > Combat | `hud.gd` | renamed "Tips during expeditions" |
 | `kin_chatter` | Gameplay > Boki | `kin_companion.gd` | renamed "How much your Boki talks" |
 | `mod_mode` | Gameplay > Admin (admin only) | `game.gd` | |
-| `lobby_enabled` | Gameplay > Admin (admin only) | `prematch.gd`, `game.gd` | on by default: the pre-match lobby (load wait, then pick turns) before each expedition; off shows the plain loading screen (docs/decisions/0019-prematch-lobby.md) |
+| `lobby_enabled` | Gameplay > Admin (admin only) | `prematch.gd`, `game.gd` | on by default: the pre-match lobby (load wait, then pick turns) before each expedition; off shows the plain loading screen (docs/decisions/0106-prematch-lobby.md) |
 | `bot_diff` | Admin tools page | `match.gd`, `duel.gd` | the duplicate row in Gameplay is gone: the Admin tools page already sets it |
 | `cast_on_press` | Controls > How keys behave | `match.gd` | moved from Gameplay: it's about how a key press acts |
 | `dash_to_cursor` | Controls > How keys behave | `hunter.gd` | moved from Gameplay |
 | `crouch_toggle` | Controls > How keys behave | `match.gd`, `home.gd` | moved from Gameplay, renamed "Tap to sneak" (the action is Sneak) |
-| `keys`, `keys_v`, `keys2_v` ... `keys5_v` | Controls (bindings) | `settings.gd`, `key_migrate.gd` | internal version markers stay; step 5 moved middle mouse from the Boki key to Ping |
-| `reticle_shape`, `reticle_size`, `reticle_col`, `reticle_alpha`, `reticle_outline` | Gameplay > Reticle | `reticle.gd` | the aiming reticle's style (`--reticle-check`) |
+| `keys`, `keys_v`, `keys2_v` ... `keys7_v` | Controls (bindings) | `settings.gd`, `key_migrate.gd` | internal version markers stay; step 5 moved middle mouse from the Boki key to Ping, step 6 gave glove 2 Mouse 4, step 7 moved the Boki key G to C |
+| `reticle_shape`, `reticle_size`, `reticle_col`, `reticle_alpha`, `reticle_outline` | Gameplay > Reticle | `reticle.gd` | the aiming reticle's style; `reticle_col` defaults to `hunter` (pale ring, dot and arcs in the Hunter's accent) (`--reticle-check`) |
 | `cam_style` | Camera | `cam.gd`, `match.gd` | new Camera tab (was a Gameplay group) |
 | `cam_follow` | Camera | `cam.gd`, `match.gd` | |
 | `cam_lead` | Camera | `match.gd` -> `cam.gd` | |
@@ -39,7 +39,7 @@ the next time the game starts, and `--uipolish-check` asserts that.
 | `hunter_barks` | Audio > Sounds | `hunter_barks.gd` | your Hunter's voice callouts and your squad's "Boki down" (on by default) |
 | `mute_unfocused` | Audio > Window | `settings.gd` | |
 | `soundtrack`, `music_shuffle`, `track_<place>` | Audio > Music | `soundtrack.gd`, `music_dir.gd` | 11-11: soundtrack style (Classic Adventure default), shuffle, a track per place |
-| `fullscreen` | Main | `settings.gd` | |
+| `fullscreen` | Main | `settings.gd` | exported desktop builds start fullscreen (video_v 5 reset the old `false` that never was a choice); on Windows the engine creates the window fullscreen (`project.godot` `window/size/mode.windows=3`); the Settings switch shows the window as it is but never rewrites the saved choice; F11 / Alt+Enter flip it; `--window-mode-check` (incl. real clicks on Settings at 5 window sizes) |
 | `vsync`, `max_fps` | Video > Display | `settings.gd` | |
 | `quality` | Main (Graphics quality) | `settings.gd` | `quality_found`, `video_v` stay internal |
 | `msaa`, `shadows` | Video > Quality | `settings.gd` | |
@@ -65,3 +65,11 @@ Main (or the last tab you used); its Controls entry opens Controls. No key was r
 `--settings-trim-check` asserts that every key still has a row, that each row saves to `settings.cfg` and that a fresh
 load keeps every value. Labels: "Anti-aliasing" is "Smooth edges", "Frame rate limit" is "Frame rate cap", "Frame rate"
 is "Show frame rate", "Height cues" is "Show heights clearly".
+
+**Search.** A box under the tab bar (`SettingsSearch`) lists the rows of every tab, behind "More..." and "More keys"
+too, whose label holds the typed text. The hits are the rows the tabs build (no copies), each with its tab's name beside
+it. Clicking a tab or pressing Esc clears the search (Esc with an empty box leaves Settings). `--settings-trim-check`
+covers the filter; `--settings-size-check` holds the panel's size inside the safe area at 720p and two ultrawides, with
+and without a search.
+
+`--menu-fit-check` opens every Esc page and Settings tab at 1280x720, 1920x1080 and 2560x1080 with Text size 100% and 150% (and the largest Interface size) and fails on a panel leaving the window, a control outside its panel, cut-off text or two overlapping controls. Add `--shots-dir=<dir>` under `xvfb-run` with a renderer to save every state as a png.

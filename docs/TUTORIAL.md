@@ -6,6 +6,8 @@ drivers. It is **advisory**: it prints one `TUTT` row per step and only a stall 
 playtest. DECISIONS 2026-11-08 ask for a match tutorial of about 8 steps and a garden one of 4 to 5, one banner line each, with a
 visible Skip; the tables show how far the line is from that (section 5).
 
+**Gate check (absolute, not advisory):** `--tutorial-playthrough-check` (`tools/tutorial_playthrough_check.gd`) plays prologue, hatch, starter pick and the whole course on a fresh save, then the whole garden (farm) tutorial with the dead-air check's farm player (12 steps, house hammered, crop picked), prints a `TUTPLAY` row (step, game seconds) per step, and fails if any step takes over 40 s of game time or the course does not reach the lift and results. About 20-90 s wall headless (21 s on rpg7, 88 s on a gpu worker, 2026-11-20): the hatch and Relic screens run at 4x speed, game time unchanged. It is listed in `tools/gate_absolute.txt`: the gate (`ops/regate-bot/suite_speed.py`, `ops/suite-load-gate/suite-fast.sh`) runs every flag there on every PR and reports a red on the PR side as NEW-RED even when main is red too, so it must stay green on main. The starter is Vex; `-- --starter=archer|juggernaut|gunslinger` plays it as Lace or Kael (2026-11-23, 3 runs each: Lace 86-90 s, Vex 85-93 s, Kael 106-118 s of course time, no step over 21 s but Kael's `sec`/`kin` at 9-19 s). Lace used to fall off the pack camp's edge and restart the step: TutorialDrive's stuck-hop fired on the first stride after a long wait (`pack_wait`).
+
 Columns: **Time** is sim seconds of the instant-reacting `TutorialDrive` (no reading, no misses; screens: wall seconds; farm and
 garden: the driver ticks them off at once, so n/a). **Read s** = words / 3.5 + 0.45 s, the pace of `docs/TUTORIAL_PACE.md` (add it to
 Time for a person). **Words** = the banner line plus the plain-words line under it (screens: every visible label and button,
@@ -43,10 +45,10 @@ plain text: fixed (section 4).
 | Step | Time s | Kind | Words | Read s | Keys named | Flags | Text on screen |
 |---|---|---|---|---|---|---|---|
 | land | 3.7 | sim | 5 | 1.9 | WASD | - | Steer down to the meadow |
+| shoot | 2.3 | sim | 11 | 3.6 | LMB | - | Shoot the monsters down Full-auto rifle. Dazed foes take 90% more. |
 | points | 3.5 | sim | 19 | 5.9 | - | - | You start with 1 ability point Choose wisely: every level gives one more. Monsters give XP when they fall. |
 | pick_sec | 0.6 | sim | 12 | 3.9 | RMB | - | Unlock Burr Charge Fire the charge from your cannon; its blast Dazes. |
 | sec | 0.6 | sim | 6 | 2.2 | RMB | - | Hit the monsters with Burr Charge |
-| shoot | 2.3 | sim | 11 | 3.6 | LMB | - | Now shoot them down Full-auto rifle. Dazed foes take 90% more. |
 | pick_dash | 0.6 | sim | 10 | 3.3 | SHIFT | - | Level 2! Unlock Slipstep Skid or slide, and keep shooting. |
 | dash | 3.8 | sim | 4 | 1.6 | SHIFT | - | Dash across the gap |
 | exdash | 2.2 | sim | 5 | 1.9 | SHIFT | - | Jump, then dash in mid-air |
@@ -130,21 +132,33 @@ on "there is a skiff to take" (the known skiff red, `docs/GATE_0245.md`), so no 
 ## 5. Follow-ups (not fixed)
 1. The match tutorial is 23 steps (decision: about 8); 262 words, about 85 s of reading on top of 104 s of play. `pick_*`, `points`,
    `ranks` and the three gap steps are the obvious merges.
-2. No visible Skip on the match tutorial panel: it is only in the pause menu ("Skip the tutorial") and on the naming card.
+2. No visible Skip on the match tutorial panel: it is only in the pause menu ("Skip tutorial") and on the naming card.
 3. Done: `kin` and `ult` no longer nag and take 1 to 7 s (section 2, the slowest three).
 4. `glove` stalled for the whole 900 s course in 2 of 9 runs (not seen on the repeat); it needs a seeded repro. Seen again on the slowest-three branch (1 of 3 baseline timing runs, 2 of 8 fight-check starter runs after; the same
    in both), and a trace caught the bot walking off the bridge into the void on the way to the glove. Separately, `--tutorial-fight-check`
-   sometimes reports "missing kick": the bot can reach the lookout without a wall kick (2 of 8 runs).
+   sometimes reported "missing kick": the bot reached the lookout without a wall kick (2 of 8 runs). Done 2026-11-22
+   (`ext/tutorial-wall-kick-step`): the lookout cannot be made kick-only by its shape (a plain jump into the 2.4 m cliff
+   climbed it with a ledge catch for all three starters, 16 of 16 tries; marking the cliff sheer stopped that but left a
+   kick nothing to finish with, and an air dash or glide into the face still snapped to the top), so the `wallkick` step
+   itself now needs a kick: it ends when you stand on the lookout and have kicked during the step. The test bot walks off
+   and kicks again if it got up without one (`--tutorial-fight-check` puts it on top with no kick and asserts the step stays open).
+   2026-11-20 (`ext/tut-glove-stall`): the glove stall did not come back on main: 24 of 24 `--tutorial-playthrough-check`
+   runs passed, glove 5.7 to 7.3 s, no void fall in the 8 traced runs. What did stall, every time, was `--tutorial-fight-check`'s second and third
+   starters, stuck on `land` for the whole course: the first starter left its beat in the save, and the resume went to
+   `TutorialResume.OUTPOST_START`, "goexit", a step the Ways Out course no longer has, so it fell back to step 0 and
+   landing resumed again for ever. A player who quit after `wayout`, `uplink` or `defend` and pressed Continue was
+   locked there the same way. Now it resumes at `wayout`. `--tutorial-resume-check` checks that every beat resumes past the landing
+   (3 FAIL before, 0 after), and the fight check starts each starter from the top (11 FAIL -> 3, the 3 left were "missing kick" for all three; gone, see above).
 5. Taking a second Relic from Hob (juggernaut) and then starting an expedition played as the saved pick of the tutorial Relic
    (`gunslinger`): the flow check's own `Arch.of_save()` says it, unverified by hand.
 6. The farm tutorial is 11 steps and 219 words (decision: 4 to 5); take `ext/tut-garden-no-gather`.
-7. The Mask page is 83 words and the egg screen 218: the largest text blocks of the first minutes.
+7. Done: the first Relic's page shows each ability's key and name only (about 25 words, was 83); the egg cards and the knock card are one short line each, and the knock screen hides the sub line (was 218 words). The Relics screen keeps the full lines.
 # Tutorial guidance, garden only
 
 ## Garden first 15 (`--garden-first-15-check`)
 
 The game is playable without extraction, and in the first visit the player must never be left without
-a next step. The check plays a fresh save that skips the match tutorial ("Skip the tutorial" on the
+a next step. The check plays a fresh save that skips the match tutorial ("Skip tutorial" on the
 naming card), takes the first Relic and lands on the garden (`base_mode` on). A bot then plays 15
 minutes of garden time, never opens a match, and every second asks what is on screen to guide the
 player:
@@ -175,9 +189,11 @@ Fixes (Goals tracker, no new screen):
 - "See a nap pile" and "Pair two Boki in the Nook" stay off the card while you have one Boki, so the
   top line is never something you cannot do. They show as soon as a second Boki is on the farm.
 
-Left open (not fixed here): a one-Boki save has no garden way to a second Boki before the market
-stall is level 2 (the Shelter), and a visitor needs a built zone. The level row covers the gap, but
-breeding stays out of reach for a while.
+Fixed (ext/garden-second-boki): on a base_mode farm the Shelter opens at market stall level 1
+(`market.json shelter.base_open_level`, `Shelter.open_level()`), so a one-Boki save can adopt a stray for
+20 gems on day one (the first farm entry gives 200). Asserted in `--garden-first-day-check`. Other farms still open it at level 2.
+Alternative not taken: a starter visitor who stays (needs a built zone and 2 residents, so it is slower and rolls on chance).
+The level row still covers the wait for breeding, which stays out of reach for a while.
 # Match tutorial: steps and hints audit (origin/main fb360f614, 2026-11-12)
 
 Owner decision 2026-11-08: the match tutorial is about 8 steps (land+move, dash+glide, shoot, E, send your Boki, a fight,
@@ -233,3 +249,77 @@ Hub: `HubHints`. Farm: `FarmKeyHints` and the farm tutorial.
 
 Not changed here: porting the cut is a core change to the tutorial and its checks and collides with the open `ext/tut-*`
 branches above, so it needs the owner's order (merge those hint branches first, then cut the course).
+
+## Playtest fixes, 11-17 (`--tutorial-playtest-check`, `--tutorial-playtest-shots`)
+
+The owner's first-match playtest on the PC build, and what each fix is:
+
+- **Every line names its key.** The token `%K` in a step's line or detail is the step's own key cap (the real bound key,
+  `Settings.key_cap`; the WASD keys on `land`, Alt + E on `ranks`). Unlock steps read "Press RMB to unlock Burr Charge".
+  `%Y` and `%Z` (TutorialText) are the Ultimate's key (R, `hunter_ult`) and its name. The **Fusion** (X, `ultimate`) is a
+  different thing: `pick_ult` unlocks it ("Press X to unlock Fusion"), `ult` uses it, and its second line says the Ultimate
+  is R. The point on `pick_ult` goes to the Fusion; the hunter's Ultimate opens by level alone.
+- **The Boki send (`gkey`).** Its camp has fixed posts in the open (map `course.gkey.foes`, `Tutorial.foe_spot`), level
+  ground with no cliff or wall in the line from the lookout. The monsters are `held` (Mob.held): they stand still, notice
+  nobody and the Boki leaves them alone until the send lands (`TutorialCamps.release`). Before, they spawned at random
+  6 m from the player on the lookout, walked at him and jammed against its cliff, and the Boki fought them on its own
+  first, so a G tap read as "call back" and never counted. A send now registers for any launch, a leap that lands within
+  `SEND_R` of a monster, or the Boki on one; a tutorial Boki never refuses a send (`Kin.consider_throw`).
+- **The Climb step (`wallkick`)** ends on the lookout only after a wall kick this step (`seen["kick"]`), so a jump that
+  catches the ledge does not skip it.
+- **The lookout (`crouch`).** `Tutorial.on_lookout` counts the whole top and its rim (`LOOKOUT_R`, `LOOKOUT_DROP`); the
+  check crouches at all four far edges and at the foot of the cliff.
+- **The marker never covers its label.** `EdgeMarker._label_at` seats a label clear of its arrow by the label's own
+  half-extent (a wide label beside a sideways arrow sat under its point: "Glove" read as "love").
+  `TutorialStrip.layout` is the one place the strip's widths are worked out, so the check can read them.
+
+# First-time hints show once per save (`--hint-once-check`, 2026-11-22)
+
+`--hint-once-check` starts three short matches (two teams, bots idle) on one save, arms the same triggers in each (a keg
+close by, the hero ultimate ready after a fight's first hits, the Blight's tide, a quest seat, the Heart, a knock), and
+records every line that reaches the message lane. Between matches the save is written and read back through
+`Save.load_from`. It fails on a line shown twice, in one match or across matches, on a seen flag lost in the round
+trip, and on a knock card past its showings. Result on main c303669761: 0 repeats (13 lines in match 1, 2 in match 2,
+1 in match 3; the later ones are the next Hunter slot hint and the second knock card). No hint needed a fix.
+It also fails when `Match.tip_once` forgets a key (checked by hand: 3 matches then show 40 lines).
+
+All of these are `Match._tip` lines (the key is in `Save.d.tutorial`, set the first time it is asked for) unless noted.
+Never in the tutorial course, the arena, training, with tips off, or while dropping.
+
+| Hint | Trigger | Save key |
+|---|---|---|
+| move | 1 s after landing | `move` |
+| ability | 14 s in | `ability` |
+| first keg | an unbroken powder keg within 8 m, no other prompt up | `keg` |
+| first ultimate | the hero ultimate ready (level gate, no cooldown), not in the first 2 s of a fight | `hero_ult` |
+| Ways Out: tide | the Blight's tide first closes (also lights the edge arrow for 8 s) | `ways_tide` |
+| Ways Out: quest | a quest seat opens | `ways_quest` |
+| Ways Out: Heart | the Heart wakes (charging, ready or carried) | `ways_heart` |
+| Heart spark, carry | the charged spark lies free; you carry it | `heart_spark`, `heart_carry` |
+| Blight closing | the ring's edge within 20 m of you, or you out in it | `blight` |
+| first kill, deathbox, wall kick | a monster kill; a lootable deathbox; a jump into a climbable wall | `camp`, `deathbox`, `wallkick` |
+| Hunter slots | a foe within 9 m, one line per 8 s: primary, RMB, E, dash | `hh_<hunter>_<slot>` |
+| belt items | first ground pickup; tonic at low health; armor kit when armour breaks | `belt_<item>` |
+| first capture | the first capturable wild Boki in range | `first_capture` |
+| sight wedge | a rival hidden only by the wedge | `vision` |
+| duel ring | near the duel pad | `duel_ring` |
+| status effects | first stun, root or grounded on you | `cc_stun`, `cc_root`, `cc_grounded` |
+| first knock card | you go down in a real Extraction of the first-match guide | `knock_tip` (a count) |
+
+The knock card is the one hint that shows more than once on purpose: once per match, at most `showings` times (2,
+`content/rules/knock_tip.json`) per save, counted in `knock_tip`. The check pins both.
+The first-summon line (`first_summon`, key once per save) is on `ext/tut-first-summon`, not on main; when it lands, add
+a wisp-ready trigger to `_play` so it is counted too.
+## Telegraphed first camp
+
+The first camp of a run (`TutorialCamps.spawn`) does not appear at once: a ring on the ground and a clock (`CampMark`, drawn in
+the world and on the minimap like the nest marker) count down `TELEGRAPH_T` (3 s) on the spots the monsters then stand on. No
+step ends and no camp is re-spawned while it counts (`alive()` counts it). Step order is unchanged; the fight beats take about
+3 s longer. `--tutorial-fight-check` asserts the marker shows for 3 s with no monster out, then the monsters stand on its spots.
+
+## Low-end PCs: the course at 30 fps and with stalls (`--tutorial-low-fps`)
+Every step runs on the match's fixed 60 Hz step (`Match.step`) and the garden on `FarmStep`, so a slow frame never skips
+a step. `--tutorial-check[=<arch>] --tutorial-low-fps` plays the course again on the Low preset in the game's own frame
+loop, at a 30 fps cap and at 60 fps with a 100 ms stall every 5th frame: same steps in order, none past 2x the
+fixed-step time + 5 s. `--farm-tutorial-check --tutorial-low-fps` does the same for the garden's five steps (meet, patch,
+eat, toy, out). Key taps surviving the same rates are `--low-fps-input-check`.

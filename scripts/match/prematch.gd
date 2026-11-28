@@ -1,6 +1,6 @@
 class_name Prematch
 extends RefCounted
-## The pre-match lobby's rules (docs/decisions/0019-prematch-lobby.md): before an expedition everyone
+## The pre-match lobby's rules (docs/decisions/0106-prematch-lobby.md): before an expedition everyone
 ## loads in, then each squad picks its Hunters in turn (TURN seconds each, no two on a squad alike),
 ## then the picks lock and the match loads. The screen is PrematchView; the loading screen shows the
 ## same squad (squad_of). Settings > lobby_enabled (an admin setting) skips all of it.
@@ -54,7 +54,7 @@ func teach_line() -> String:
 		return ""
 	if pick == "":
 		return "Pick a Hunter before 0:00, or we pick one for you."
-	return "Your squad sees your pick. It locks in at 0:00."
+	return "It locks in at 0:00." if squad.size() == 1 else "Your squad sees your pick. It locks in at 0:00."
 
 ## A real expedition (offline or online), not training, the tutorial, the arena or a demo.
 static func expedition(o: Dictionary) -> bool:

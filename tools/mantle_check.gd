@@ -101,7 +101,7 @@ func _rims() -> void:
 			tried += 1
 			var top := w.ground_at(at.x, at.z)
 			# hanging in the air against the face, 2.5m below the lip, pushing back toward the island
-			# (the side of an island catches you up to Hunter.MANTLE_REACH_ABYSS below its lip; see --abyss-check)
+			# (the side of an island catches you up to HunterFeel.mantle_reach_abyss below its lip; see --abyss-check)
 			var edge_x := at.x; var edge_z := at.z
 			while not w.is_void(edge_x + dir.x * 0.25, edge_z + dir.y * 0.25):
 				edge_x += dir.x * 0.25; edge_z += dir.y * 0.25
@@ -333,7 +333,7 @@ func _sheer() -> void:
 	var sheer_keys: Array = w.sheer.keys()
 	for trial in 12:
 		var i: int = sheer_keys[(trial * 37) % sheer_keys.size()]
-		var gx := float(i % w.w) + 0.5; var gz := float(i / w.w) + 0.5
+		var gx := float(i % w.w) + 0.5; var gz := float(int(i / float(w.w))) + 0.5
 		var dir := Vector2.ZERO
 		for d in [Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1)]:
 			if w.is_void(gx + d.x, gz + d.y): dir = d; break
@@ -377,7 +377,7 @@ func _dash_rims() -> void:
 		h.reclass(Arch.weight(id), id)
 		_rim_level(face, floor_lv)
 		_dash_trial(id, true, float(wl["low"]), face, n, 0.0)     # (a class swap's first Shift is lost: throw one)
-		var reach := Hunter.MANTLE_REACH + (Hunter.TALL_CLIMB_EXTRA if HunterMove.climbs_tall(h) else 0.0)
+		var reach := HunterFeel.mantle_reach + (HunterFeel.tall_climb_extra if HunterMove.climbs_tall(h) else 0.0)
 		for rim in DASH_RIMS:
 			var lv := maxi(1, int(round(rim / World.LEVEL)))
 			var built := lv * World.LEVEL
@@ -467,7 +467,7 @@ const GLIDE_RIM_S := 1.5                 # s: one approach
 ## A glider flying head-on into a terrace face, keys pushing in, at full glide speed and overheated (half
 ## speed). Each row: "mantle" (over the top), "bump" (thrown back), "slide" (along the face) or "fall" (sank
 ## away), the first state the glider handed over to, and whether it is open after. A rim in reach
-## (Hunter.MANTLE_REACH, more for the tall climbers) is a mantle out of GLIDING straight into MANTLING, the glider
+## (HunterFeel.mantle_reach, more for the tall climbers) is a mantle out of GLIDING straight into MANTLING, the glider
 ## folded and not reopened by the held key, on at least the source's mini-mantle speed; out of reach the glider
 ## stays open and sinks down the face.
 func _glide_rims() -> void:
@@ -478,7 +478,7 @@ func _glide_rims() -> void:
 	for arch in GLIDE_HEROES:
 		h.reclass(Arch.weight(arch), arch)     # (set_arch alone keeps the class and falls back to its default hero)
 		ok(h.arch == arch, "glide rims: the hunter is %s (is %s)" % [arch, h.arch])
-		var reach := Hunter.MANTLE_REACH + (Hunter.TALL_CLIMB_EXTRA if HunterMove.climbs_tall(h) else 0.0)
+		var reach := HunterFeel.mantle_reach + (HunterFeel.tall_climb_extra if HunterMove.climbs_tall(h) else 0.0)
 		for rise in GLIDE_RISES:
 			for slow in [false, true]:
 				# (the glider sinks on the way in: a first run finds how far, the second starts that much higher)
@@ -523,7 +523,7 @@ func _flat_around(x0: int, z0: int, lv: int) -> bool:
 func _glide_rim(cut: Dictionary, rise: float, slow: bool, sink: float) -> Dictionary:
 	var face := float(cut["x"])
 	var top := float(cut["top"])
-	var gs := Hunter.GLIDE_SPEED * (0.5 if slow else 1.0)
+	var gs := HunterMove.glide_cruise * (HunterMove.overheat_speed if slow else 1.0)
 	_reset(Vector3(face - h.r - 1.0, top - rise + sink, float(cut["z"])), Vector3(gs, 0.0, 0.0))
 	h.last_gy = top - 4.8
 	h.glide_fuel = 0.0 if slow else 1.0

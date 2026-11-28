@@ -6,6 +6,8 @@
 	"go_timeout": 20.0,
 	"joy_gain": 3.0,
 	"stat_gain": 1,
+	"day_cap": 3,
+	"day_cap_doc": "Most stat points one Boki gains from toys in a day, at home and while you are away together (HomeToys.day_room; the stat economy in briefs/design/GARDEN_MODERN_BALANCE.md). Past it a toy play is joy only.",
 	"max_players": 2,
 	"fav_after": 3,
 	"fav_after_doc": "Plays at toys before a Boki crowns its most-used toy as its favourite (FavToy).",

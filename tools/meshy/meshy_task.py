@@ -8,6 +8,9 @@ repo, chmod 600). It is never printed or written anywhere else.
   meshy_task.py create OUT_DIR img1.png [img2 ...] [options]      one image: image-to-3d, 2-4: multi-image-to-3d
   meshy_task.py fetch OUT_DIR TASK_ID [--api multi-image-to-3d]
   meshy_task.py retexture OUT_DIR (TASK_ID | model.glb) front.png [more views] [--model meshy-7] [--original-uv]
+      [--prompt "..."]
+  meshy_task.py rig OUT_DIR (TASK_ID | model.glb) [--height 1.7] [--no-fingers]   auto-rig, 5 credits (a task id sends
+      include_fingers unless --no-fingers; an uploaded .glb is rigged without finger bones: its 24-bone skin weights)
   meshy_task.py remesh OUT_DIR TASK_ID [--polycount 40000] [--topology quad]
   meshy_task.py edit OUT_DIR ref.png [more refs] --prompt "..." [--model nano-banana-pro]   image-to-image
 
@@ -84,6 +87,9 @@ def fetch(out, tid, api):
     for fmt, u in (t.get("model_urls") or {}).items():
         if fmt in ("glb", "pre_remeshed_glb") and u:
             download(u, os.path.join(out, fmt + ".glb"))
+    for name, u in (t.get("result") or {}).items():       # rigging outputs: rigged_character_glb_url ...
+        if isinstance(u, str) and u.startswith("http"):
+            download(u, os.path.join(out, name.replace("_url", "") + "." + u.split("?")[0].rsplit(".", 1)[-1]))
     for i, tex in enumerate(t.get("texture_urls") or []):
         for name, u in tex.items():
             if u:
@@ -93,6 +99,9 @@ def fetch(out, tid, api):
             download(u, os.path.join(out, "thumb_%s.png" % name))
     for i, u in enumerate(t.get("image_urls") or []):
         download(u, os.path.join(out, "image%d.png" % i))
+    for name, u in (t.get("result") or {}).items():  # (a rigging task: rigged_character.glb)
+        if name.endswith("_glb_url") and u:
+            download(u, os.path.join(out, name[: -len("_glb_url")] + ".glb"))
     print("done; credits", t.get("consumed_credits"), "->", out)
 
 
@@ -131,6 +140,11 @@ def create(o):
             [data_uri(p) for p in o.texture_refs[:4]] if multi else data_uri(o.texture_refs[0])
     post(o.out, "multi-image-to-3d" if multi else "image-to-3d", body,
          {"images": o.images, "texture_refs": o.texture_refs})
+    if o.detail_image:
+        # (multi-image caps the geometry at 2k: a second single-image 4k task keeps a hand's or a head's fine shapes)
+        d = argparse.Namespace(**vars(o))
+        d.images, d.out, d.geometry, d.detail_image = [o.detail_image], os.path.join(o.out, "detail"), "4k", ""
+        create(d)
 
 
 def retexture(o):
@@ -140,6 +154,9 @@ def retexture(o):
             "enable_original_uv": o.original_uv, "enable_pbr": False, "target_formats": ["glb"]}
     if o.model != "meshy-n1":
         body["texture_resolution"] = o.texture_res
+    if o.prompt:  # (Meshy: text_style_prompt and multiview_image_urls are mutually exclusive)
+        body["text_style_prompt"] = o.prompt
+        del body["multiview_image_urls"]
     if o.source.lower().endswith(".glb"):
         body["model_url"] = "data:application/octet-stream;base64," + base64.b64encode(open(o.source, "rb").read()).decode()
     else:
@@ -153,6 +170,19 @@ def edit(o):
     body = {"ai_model": o.model, "prompt": o.prompt, "reference_image_urls": [data_uri(p) for p in o.images[:5]],
             "aspect_ratio": o.aspect}
     post(o.out, "image-to-image", body, {"images": o.images})
+
+
+def rig(o):
+    """Humanoid auto-rig, 5 credits. A task id rigs that task's model and sends include_fingers (finger bones with
+    Mixamo names; separated fingers rig best, mitten hands get fewer bones) unless --no-fingers. A .glb is uploaded
+    (data URI; textured humanoid, <= 380k triangles, facing +Z) and rigged to Meshy's plain 24-bone skeleton with no
+    finger bones (v95_swap's `meshy_weights` maps those 24): OUT_DIR gets rigged_character.glb, the same mesh skinned."""
+    body = {"height_meters": o.height}
+    if o.source.lower().endswith(".glb"):
+        body["model_url"] = "data:application/octet-stream;base64," + base64.b64encode(open(o.source, "rb").read()).decode()
+    else:
+        body.update(input_task_id=o.source, animation_type="biped", include_fingers=not o.no_fingers)
+    post(o.out, "rigging", body, {"source": o.source})
 
 
 def remesh(o):
@@ -172,6 +202,8 @@ def main():
     c.add_argument("--texture-model", default="meshy-7", help="meshy-7 (PBR, up to 8k) or meshy-n1 (2k base colour)")
     c.add_argument("--texture-res", default="8k")
     c.add_argument("--texture-refs", nargs="*", default=[], help="1-4 texture reference views (front first)")
+    c.add_argument("--detail-image", default="", help="after the task, a single-image 4k pass on this view (a hand or head"
+                    " close-up or the front) into OUT_DIR/detail, for the detail a 2k multi-image mesh lacks")
     c.add_argument("--polycount", type=int, default=0, help="remesh to this many faces; 0 keeps the dense mesh")
     c.add_argument("--topology", default="triangle")
     c.add_argument("--pbr", default="on")
@@ -184,16 +216,22 @@ def main():
     r = sub.add_parser("retexture")
     r.add_argument("out")
     r.add_argument("source", help="a task id, or a .glb to upload")
-    r.add_argument("images", nargs="+")
+    r.add_argument("images", nargs="*")
     r.add_argument("--model", default="meshy-7")
     r.add_argument("--texture-res", default="8k")
     r.add_argument("--original-uv", action="store_true")
+    r.add_argument("--prompt", default="", help="text_style_prompt: the material wanted, next to the views")
     e = sub.add_parser("edit")
     e.add_argument("out")
     e.add_argument("images", nargs="+")
     e.add_argument("--prompt", required=True)
     e.add_argument("--model", default="nano-banana-pro")
     e.add_argument("--aspect", default="1:1")
+    g = sub.add_parser("rig")
+    g.add_argument("out")
+    g.add_argument("source", help="a task id, or a .glb to upload")
+    g.add_argument("--height", type=float, default=1.7, help="the character's height (m)")
+    g.add_argument("--no-fingers", action="store_true", help="include_fingers=false (task ids)")
     m = sub.add_parser("remesh")
     m.add_argument("out")
     m.add_argument("task")
@@ -210,6 +248,8 @@ def main():
         retexture(o)
     elif o.cmd == "edit":
         edit(o)
+    elif o.cmd == "rig":
+        rig(o)
     else:
         remesh(o)
 

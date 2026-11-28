@@ -141,7 +141,7 @@ static func cast(m: Node, caster: Node, delivery: String, at: Vector3, dir2: Vec
 			fx.spark(at + Vector3(0, 0.9, 0), Vector3.UP, hot, 14, 8.0, 180.0, 0.25, 0.0, 1.0)
 
 ## An area landing (a slam, a mine going off, an ability's burst): a shockwave the size of what it
-## covers, rubble and dust, and a shake that fades with distance (§5.5 leap landing / big area).
+## covers, rubble and dust; no shake (shake.json area_slam: a slam, gust or wave that doesn't explode).
 ## `sound` false: the caller plays its own (a Fusion form's hit, MergeSfx).
 static func land(m: Node, caster: Node, at: Vector3, r: float, col: Color, sound := true) -> void:
 	if m == null or m.get("fx") == null or _far(m, at):
@@ -157,8 +157,6 @@ static func land(m: Node, caster: Node, at: Vector3, r: float, col: Color, sound
 	if r >= 1.5:
 		if sound:
 			m.sfx("ab_slam", at, (-2.0 if r > 2.0 else -5.0) + _vol(m, caster, at), clampf(1.25 - r * 0.08, 0.85, 1.2))
-		if r >= 3.0 and caster is Ent and not _mine(m, caster):
-			Shake.incoming_big(m, at, 0.5, caster as Ent)
 
 ## What an ability hit does to the one it hit, readable at a glance and by ear (Juice.hit calls this
 ## for every ability hit): the category's impact sound, then the moment a status lands: a stun bursts
@@ -174,7 +172,7 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary) -> void
 	if mine and not o.get("tick", false):
 		var row := impact_row(cat)
 		m.sfx(String(row[0]), target.pos, float(row[1]) - (0.0 if target == p else 2.0), float(row[2]))
-	var head := target.pos + Vector3(0, 1.9 if target is Hunter else 1.3, 0)
+	var head := target.pos + Vector3(0, 1.9 * CamRig.match_hunter_scale if target is Hunter else 1.3, 0)
 	var stun := float(o.get("stun", 0.0)); var root := float(o.get("root", 0.0)); var slow := float(o.get("slow", 0.0))
 	if stun > 0.0:
 		fx.spark(head, Vector3.UP, BodyTell.STUN_COL.lightened(0.4), 10, 4.0, 180.0, 0.35, 0.0, 0.8)
