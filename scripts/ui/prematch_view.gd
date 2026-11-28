@@ -146,7 +146,7 @@ func _build_chat(root: Control) -> void:
 	chat_in.focus_exited.connect(_show_chat_line.bind(false))
 	chat_in.gui_input.connect(func(e): if e.is_action_pressed("ui_cancel"): chat_in.release_focus())
 	row.add_child(chat_in)
-	talk_btn = UI.button("", Callable())
+	talk_btn = UI.sounding(UI.button("", Callable()), "")    # push to talk: held, not clicked
 	talk_btn.button_down.connect(func(): _talk(true))
 	talk_btn.button_up.connect(func(): _talk(false))
 	row.add_child(talk_btn)
