@@ -39,6 +39,12 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 
+## DECISIONS 2026-11-07: "Mask" is Relic in every player line (ids, files and folders keep the old word).
+func _no_mask(where: String, text: String) -> void:
+	var re := RegEx.create_from_string("\\b(?i:masks?)\\b")
+	ok(re.search(text) == null, "%s: 'Mask' in a player line (say Relic): %s" % [where, text])
+
+
 func _lint(where: String, text: String, seen_intro: Dictionary) -> void:
 	var words := text.split(" ", false)
 	ok(words.size() <= MAX_WORDS, "%s: %d words (max %d): %s" % [where, words.size(), MAX_WORDS, text])
@@ -48,6 +54,7 @@ func _lint(where: String, text: String, seen_intro: Dictionary) -> void:
 	for m in raw.search_all(text):
 		var w := m.get_string(1)
 		ok(false, "%s: raw key '%s' (use a key_cap token): %s" % [where, w, text])
+	_no_mask(where, text)
 	var low := text.to_lower()
 	for term in JARGON:
 		var r := RegEx.create_from_string("\\b%s\\b" % term)
@@ -161,6 +168,12 @@ func run(m: Node) -> void:
 				out.append(["hint " + h, r["hints"][h]])
 			return out
 	)
+	for w in Content.rules("words")["words"]:
+		_no_mask("words " + String(w["term"]), String(w["line"]))
+	for t in Content.rules("farm_builder")["talk"]["intro"]:
+		_no_mask("hob intro", String(t["text"]))
+	for l in load("res://scripts/ui/loading.gd").LORE:
+		_no_mask("loading lore", String(l))
 	for line in HomeNotices.fixed_lines():
 		ok(String(line).length() <= MAX_NOTICE_CHARS, "notice line over %d chars: %s" % [MAX_NOTICE_CHARS, line])
 	print("TUTTEXT %s (%d problems)" % ["ok" if bad == 0 else "FAIL", bad])
