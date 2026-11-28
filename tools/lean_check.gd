@@ -94,6 +94,42 @@ func _anchors() -> void:
 	ok(rigged >= 10 and missing.is_empty(),
 		"every rigged species (%d) has the lean's anchors (missing: %s)" % [rigged, missing])
 
+## The Boki card's Raising block (RaisingView): the lean, a word pair a raised axis, best friend and rival.
+func _raising(tree: SceneTree) -> void:
+	Save.d = Save.fresh()
+	var rec := Save.new_kin("puddlet", "Prisma")
+	var pal := Save.new_kin("zapple", "Zed")
+	var foe := Save.new_kin("cindle", "Rex")
+	var meh := Save.new_kin("zapple", "Meh")
+	Save.d["roster"].append_array([rec, pal, foe, meh])
+	var ends: Dictionary = Content.rules("base_axes")["ends"]
+	ok(
+		BaseAxes.AXES.all(func(a: String) -> bool: return (ends[a] as Array).size() == 2),
+		"every raised axis has two end words"
+	)
+	ok(
+		RaisingView.bond_pick(rec, true).is_empty() and RaisingView.bond_pick(rec, false).is_empty(),
+		"no bonds: no friend or rival"
+	)
+	rec["bonds"] = {pal["uid"]: 0.8, foe["uid"]: -0.7, meh["uid"]: 0.3, "gone": 0.95}
+	ok(
+		RaisingView.bond_pick(rec, true) == pal and RaisingView.bond_pick(rec, false) == foe,
+		"best friend and rival are the strongest owned bonds"
+	)
+	Evo.eat(rec, "emberberry")
+	rec["raised"]["bold"] = 0.5
+	var box := VBoxContainer.new()
+	RaisingView.block(rec, box, tree)
+	var words: Array = box.find_children("*", "Label", true, false).map(func(l: Label) -> String: return l.text)
+	for w in ["Leans Fire", "shy", "bold", "lazy", "rough", "gentle", "Best friend", "Zed", "Rival", "Rex"]:
+		ok(words.any(func(t: String) -> bool: return t.contains(w)), "the block says '%s'" % w)
+	var tips: Array = [2, 3].map(func(i: int) -> String: return (box.get_child(i) as Control).tooltip_text)
+	ok(
+		tips[0] == "Leans bold" and String(tips[1]).begins_with("Not"),
+		"a lean past the band names its side; a flat axis says so"
+	)
+	box.free()
+
 func run(main: Node) -> void:
 	Save.no_write = true
 	_data()
@@ -104,5 +140,6 @@ func run(main: Node) -> void:
 		"base_mode off: meals lean the old way")
 	FarmUnlocks.rules()["base_mode"] = true
 	_raise()
+	_raising(main.get_tree())
 	print("LEAN DONE, failures: %d" % bad)
 	main.get_tree().quit()

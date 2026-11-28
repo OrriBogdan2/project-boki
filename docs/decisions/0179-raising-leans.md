@@ -24,3 +24,8 @@ its nap, play, chase (tag) and cling odds by `BaseAxes.mult` (rules `weights`). 
 Save v22 -> v23 (`BaseAxes.migrate` gives every kin the zero lean). Golden `save_v23_*` (renumbered from v22 in merge lane M3: main took v22 for the time trial). No Net change (a farm
 record, never synced). Checks: `--base-life-check` (axes part), `--garden-sim-check` (a row per care style after
 10 days), `--save-compat-check`.
+
+## Seen on the Boki card
+The Growth tab's Raising block (`RaisingView`) shows the leading food lean, each axis as a word pair with a marker
+(words in rules `ends`, lit past `band`), and the best friend and rival (strongest owned `bonds` past `friend_at` /
+`rival_at`). It reads the save only. Checked in `--lean-check`.
