@@ -23,7 +23,7 @@ A player's saved look (folk, gender, Slim/Average/Sturdy body, face, colours, ou
 ## Consequences
 - New: `scripts/core/player_look.gd`, `scripts/match/mantle_look.gd`, `scripts/ui/creator_panel.gd`, `content/rules/mantle_look.json`, `tools/mantle_look_check.gd` (`--mantle-look-check`, in `CheckRegistry`).
 - Changed: `save.gd` (v8), `models.gd` (wiring; the old look helpers moved to `PlayerLook`), `hunter_anim.gd` (hip height), `hatch.gd` (the old discrete creator replaced by the step), home/interior/town call sites (`MantleLook.at_home`), bot looks (`PlayerLook.random`).
-- Every Hunter now wears its class colour (the Warden's palette) instead of the player's outfit. Warden genders follow item 39 (`robot` builds on the male body). Once ext/class-titles lands, gender lives in the archetype JSON as well; `--mantle-look-check` fails if the two disagree (DEBT: keep one home).
+- Every Hunter now wears its class colour (the Warden's palette) instead of the player's outfit. Warden genders follow item 39 and live in one place, the archetype JSON (`gender`); `MantleLook.warden` reads them from there.
 - No voice pitch slider: the hunters have no voice lines yet.
 
 ## At the art integ (ext/art-integ, Nov 4)
