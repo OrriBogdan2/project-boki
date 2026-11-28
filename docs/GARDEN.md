@@ -141,7 +141,7 @@ Expedition XP still fits: the halved curve makes a won run (90 XP) a level or tw
 
 ## Open questions: gates for a player who never extracts
 
-Found by `--garden-only-pass-check` (30 minutes of garden time on a fresh save that skips the match
+Found by `--garden-only-pass-check` (2 hours of garden time on a fresh save that skips the match
 tutorial and never starts an expedition; it logs every line that points at an expedition and fails on a
 new one) plus a read of the garden code. Text and order nags are fixed on this branch (below). These
 need a design call:
@@ -154,6 +154,46 @@ milestones ("Defeat a boss in a lair"). Both rows now wait for the first match w
 (`GoalTracker._home_only`); open question 2 below is closed for `mastery`, the `unlock` rows stay. The run also
 showed `BaseFetch` had no `playing()`, so `GardenMusic.tick` errored every 0.5 s with Fetch Cup in `Home.games`
 (zone music never switched): added. Result: 0 nags, 0 script errors, exit 0.
+
+**Re-run for 2 hours (11-28, ext/garden-only-2h).** The bot now plays like a garden-only player: it puts the
+patch down and harvests it on farm time, feeds the snack that leans toward the zone it works on, adopts a
+stray at the Shelter (20 gems), runs the Dash with two rested Boki (and cheers), buys Old Pell's Wayseed when his
+stock holds one and the gems cover it, wakes a zone when both keys are in hand, and pairs at Grown. Farm days
+are 300 s: Pell's week follows them (`MarketSave.skew_days`). Run it with `godot --headless --path . -- --garden-only-pass-check`
+(the flag goes after `--`; about 3 min of wall time). It prints a status line every 10 min, the minute each zone opened and each dead end.
+Result of the last two runs (the games are not seeded, so the minutes move between runs):
+
+| Zone | Opened at (garden min; two last runs) |
+|---|---|
+| Bramble Bank (start) | 0 |
+| Glasswater | 36 |
+| Cinderstep | 41 to 42 |
+| Hushwood | 68 to 93 |
+| Kitewind Ridge | never in 2 h (needs the 5th Wayseed: 110 gems, 18 held at min 120) |
+
+No nag, no gap without guidance, 0 script errors, `matches` stays 0. Wayseeds bought at min 0, 25 and 92 (each one's price waits on gems, then on Pell's 3-day stock: 57 looks at "no Wayseed in stock" after min 92). The
+other runs: 3 of 5 open at 2 h (Glasswater min 16 to 37, Cinderstep min 29 to 65). Dead ends the bot met, all design gaps (open list 6 to 9 below), none a text nag:
+
+6. **A one-Boki garden earns no gems.** Every game that pays gems (Dash, Shove, Fetch, Volley, Seek, Tumble, Kite,
+   Show Ring) needs two rested Boki out on the base; with one the Dash says "needs two rested Boki". Before the
+   bot adopted a second Boki it bought two Wayseeds (200 gems at the start, 110 each), sat at 10 gems for the rest of
+   the 2 h and looked at "Wayseed costs 110 gems, the bot has 10" 705 times: 3 of 5 zones, never a 4th. The way out is the
+   Shelter's stray (20 gems, `market.json shelter.stray_fee`, open at stall level 1 in base mode), but nothing tells a
+   new player that the second Boki is what pays. Options: the first-day rows point at the Shelter once a
+   Wayseed is bought; or a solo game that pays a few gems. Default: unchanged.
+7. **Gem pace is the zone pace.** With two Boki the Dash pays 2 gems a run and 14 for a win (`base_race.json`):
+   the bot made about 8 to 14 gems per 10 min, so one Wayseed (110) is 1 to 2 h of Dash on its own; the first two came from the 200
+   starting gems. `--garden-unlock-pace-check` models 20 gems a day (garden_gems) and puts the 5th zone on
+   day 12; this run ends at 4 of 5 after 2 h (24 farm days), and `garden_sim.py` for 5 days says a home-only
+   player (30 min a day) has 1.0 zones open on day 5, the pace check says the 2nd zone on day 3. The two models
+   disagree: one of them is off; not changed here.
+8. **Nobody reaches Grown (level 8) in 2 h, so no pair.** The bot's first Boki was level 5 at 2 h (`garden_pace`
+   says Grown at 190 min of one sitting), so the Nook step never ran: `grown at min -1`. `--base-breed-check`
+   still covers the gates. Its first comment says the Shelter needs a tier 2 stall; in base mode it opens at stall level 1.
+9. **A run where the Dash stopped for good (cause not traced).** In two of the four runs the bot saw "needs two rested
+   Boki" 480 times from min 8 and gems stayed at 32 from min 60 to 120 (3 of 5 zones). In the final run both Boki
+   showed energy 90 to 100 at every status line and the Dash ran. A Boki asleep or indoors at night is not
+   rested (`BaseRace.entrants`), which may be all it was; the status line now prints each Boki's energy and flags.
 
 **Zones open after 30 min of garden-only play: 1 of 5** (the start zone; `Black Market placed false, matches 0`). Since fixed on ext/garden-market-no-match: the building now stands at once in base mode (open question 1).
 The Black Market is the only blocker left. A zone opens with two keys, a Wayseed and a leaning Boki
