@@ -40,6 +40,10 @@ animation clip (checked 11-23: all twelve, bosses and Blight included, are skinn
 move the pivots and `MobGlb` copies them onto the bones, so every cell is `proc`. `n/a` is an attack the kind never makes
 (glimmer, `attack: none`; it flees). A clip that ever appears in a mob .glb is printed as `UNMAPPED` by the check, since
 nothing plays a clip on a mob. Warden shares the brute tables (`MobAnim.base_kind`).
+Hit and death strips at the match camera: `jobq submit --needs gpu --tree <tree> --out shots -- --mob-pose-shots --react
+--shots-dir=shots` (`mob_react_<kind>.png`: four hit frames, then four death frames). From above, a pitch (`rx`), a rise
+(`py`) or a height squash (`sy`) hardly shows: spitter, sentinel and glimmer were re-keyed (11-28) with yaw, side
+roll, xz scale and a recoil step (`pz`) so the flinch and the death read on screen.
 
 Bind rows (v95 swaps, `tools/warden_states_check.gd`, run by `--warden-clips-check`): each Hunter's game .glb is
 driven through all 15 Hunter states plus the stun, the root and the knocked-down beat (18 in all), and fails on a T-pose (every contract bone within 2 deg of rest), a state that
