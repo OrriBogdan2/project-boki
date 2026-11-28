@@ -172,6 +172,8 @@ it); the flash on other clients is the flag dropping. Not shown while downed, ou
 `--ult-glow-shots --shots-dir=<dir>`.
 
 ## Missed shots
+Sable's hits (`content/vfx/thief.json`): the Bola's first catch plays `bola_wrap` (a flare, a lit sweep, a `hollow` ring of 1.6 m and stars at the foe), a two-foe tangle adds a 2.0 m `hollow` ring to `bola_tangle`, and the Shadow Knife's stick plays `knife_stick`: on a foe a flare, a sweep and stars, and always a `hollow` ring the size of the blink's arrival circle (`e.ring_r` 2.7 m, passed as the move's `r`; a ground ring means gameplay, so it is the arrival point and no hit area). Hit areas, damage and timing are the kit's and unchanged.
+
 A projectile that ends on nothing says where: `MissFx` (called from `Match._shot_end`, and by Sable's Bola) draws one pooled
 puff of DJFx in the Hunter's kit colour, small and solid on terrain or a wall, wider and fainter where the shot ran out of
 range. Every LMB and RMB shot ends there. The puffs are made at load (`DJFx.warm_puffs`), at most `DJFx.POOL_CAP` live (the
