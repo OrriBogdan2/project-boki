@@ -11564,3 +11564,4 @@ READY ext/lace-rmb-tap aad1a7dfb5c9a8d15561443fca3733da3a931382 (Lace RMB tap fi
 READY ext/ttk-rerun-1128 94e78aafd9 (TTK table re-read on main)
 READY ext/sfx-loudness-pass f14ffd171f (per-bus LUFS table + tools, 19 outliers re-rendered; sfx-set/audio-settings/match-audio/health green)
 READY ext/sable-run-cadence 0922fe5125ab47930393cdcabcd1379e98bd96dc (Sable run cadence in band)
+READY ext/mob-hit-death-keys 704973ee2e1ab7e1e77e9a4994f6d0aa2b5927dc (mob hit/death re-keyed)
