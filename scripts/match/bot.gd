@@ -3,6 +3,14 @@ extends RefCounted
 ## Bot hunters. They fight, farm monsters, open chests, catch kin, revive teammates and head for a
 ## way out (charge an uplink, or the Heart), and the scrappier ones go and crash a rival's uplink.
 
+const NO_Y := -1.0e9   # _grid_path_in's height cache: not read yet
+const OFF_Y := -2.0e9  # ...: no walkable ground there for this search
+const _DX: Array[int] = [1, -1, 0, 0]
+const _DY: Array[int] = [0, 0, 1, -1]
+
+var _path_hz := false    # the last _grid_path_in turned a tile down for its hazard (without h it could go another way)
+var _path_open := false  # the last _grid_path_in failed but a wider window or more steps could still find a way
+
 
 func new_mind(rng: RandomNumberGenerator, skill: float, diff := {}) -> Dictionary:
 	return {
@@ -1504,13 +1512,6 @@ func _has_hazards(m: Match) -> bool:
 	return tz != null and not tz.areas.is_empty()
 
 
-var _path_hz := false    # the last _grid_path_in turned a tile down for its hazard (without h it could go another way)
-var _path_open := false  # the last _grid_path_in failed but a wider window or more steps could still find a way
-
-const NO_Y := -1.0e9   # _grid_path_in's height cache: not read yet
-const OFF_Y := -2.0e9  # ...: no walkable ground there for this search
-const _DX: Array[int] = [1, -1, 0, 0]
-const _DY: Array[int] = [0, 0, 1, -1]
 
 
 ## A* over walkable tiles (4 ways, a step costs 1) in a window `slack` tiles round the trip, no farther than

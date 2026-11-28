@@ -34,6 +34,8 @@ const POSE_SLOW := 2       # frames per pose of a rival past POSE_SLOW_M while t
 const POSE_SLOW_M := 6.0   # m (flat) from the camera's focus: nearer rivals keep every frame however slow it runs
 const SLOW_FPS := 36.0     # fps the match is slow under (two frames of 60 Hz and more a frame)
 const EASE_FPS := 50.0     # fps it is quick again over (the gap keeps the rate from flapping)
+const UNHEARD_M := 40.0   # m from the listener: past Sfx.hear_range (30) and a step or splash (StepReach, 20)
+const CATCH_UP_S := 0.5   # s of banked time a Hunter's pose catches up at most when it shows again
 
 static var slow := false       # the match runs slow (SLOW_FPS): rivals in view are posed every POSE_SLOW frames
 static var force_slow := -1    # checks and --match-profile's A/B: 0 never slow, 1 always, -1 the fps decides
@@ -101,10 +103,6 @@ static func pose_every(m: Match, h: Hunter) -> int:
 	if d2 > CamRig.pose_far_m * CamRig.pose_far_m:
 		return POSE_FAR
 	return POSE_SLOW if _slow() and d2 > POSE_SLOW_M * POSE_SLOW_M else 1
-
-
-const UNHEARD_M := 40.0   # m from the listener: past Sfx.hear_range (30) and a step or splash (StepReach, 20)
-const CATCH_UP_S := 0.5   # s of banked time a Hunter's pose catches up at most when it shows again
 
 
 ## A Hunter nobody sees (hidden by sight, out, gone) and nobody hears: Hunter.render skips its pose, looks and fx
