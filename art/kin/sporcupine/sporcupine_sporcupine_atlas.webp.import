@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dw1uoisbg68pu"
-path="res://.godot/imported/sporcupine_sporcupine_atlas.webp-448e65c8ef7e07aba6a17eae6835bffd.ctex"
+path.s3tc="res://.godot/imported/sporcupine_sporcupine_atlas.webp-448e65c8ef7e07aba6a17eae6835bffd.s3tc.ctex"
+path.etc2="res://.godot/imported/sporcupine_sporcupine_atlas.webp-448e65c8ef7e07aba6a17eae6835bffd.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "baa0136855b25a15d5b24f44889e83f4"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/sporcupine/sporcupine_sporcupine_atlas.webp"
-dest_files=["res://.godot/imported/sporcupine_sporcupine_atlas.webp-448e65c8ef7e07aba6a17eae6835bffd.ctex"]
+dest_files=["res://.godot/imported/sporcupine_sporcupine_atlas.webp-448e65c8ef7e07aba6a17eae6835bffd.s3tc.ctex", "res://.godot/imported/sporcupine_sporcupine_atlas.webp-448e65c8ef7e07aba6a17eae6835bffd.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
