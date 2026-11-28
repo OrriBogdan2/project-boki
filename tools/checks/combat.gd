@@ -5,6 +5,7 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	"--air-rmb-feel-check": ["res://tools/air_rmb_feel_check.gd", "air_rmb_feel_check", null],  # Kael jump -> RMB
 	# the glider opens after any attack or ability, LMB or not (input buffer, every hunter)
 	"--glide-after-attack-check": ["res://tools/glide_after_attack_check.gd", "glide_after_attack_check", null],
 	# a blast: falloff curve by distance, no damage through rock, the armour ring pitched by the shell left
@@ -12,6 +13,7 @@ const CHECKS := {
 	"--move-speed-check": ["res://tools/move_speed_check.gd", "move_speed_check", null],  # run, walk, crouch per Hunter
 	# 0179: wall stuns scale with the charge and the impact speed
 	"--kit-cc-scale-check": ["res://tools/kit_cc_scale_check.gd", "kit_cc_scale_check", null],
+	"--kit-refund-check": ["res://tools/kit_refund_check.gd", "kit_refund_check", null],  # refund/reset loops (11-27)
 	"--mob-fsm-check": ["res://tools/mob_fsm_check.gd", "mob_fsm_check", null],  # monster + boss machines (M9)
 	"--utility-parity-check": ["res://tools/utility_parity_check.gd", "utility_parity_check", null],  # belt vs source
 	"--vex-daze-check": ["res://tools/vex_daze_check.gd", "vex_daze_check", null],  # Daze team, coin wall stun
@@ -39,4 +41,5 @@ const CHECKS := {
 	"--anti-heal-check": ["res://tools/anti_heal_check.gd", "anti_heal_check", null],
 	"--bot-spacing-shots": ["res://tools/bot_spacing_shots.gd", "bot_spacing_shots", null],  # --shots-dir=<dir>, GPU
 	"--stolen-extract-check": ["res://tools/stolen_extract_check.gd", "stolen_extract_check", null],  # extract, saves
+	"--tenzo-rmb-air-check": ["res://tools/tenzo_rmb_air_check.gd", "hero_pair_check", null],  # RMB from every footing
 }
