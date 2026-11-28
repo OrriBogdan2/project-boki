@@ -205,17 +205,22 @@ class Run:
 	var cheer_mult := 1.0           # your last cheer, for the backed Boki's next stretch
 	var bumped := {}                # "i-j-stretch": rivals already bumped there
 	var duo := {}                   # runner index -> duo friend's index it handed off cleanly with
+	var laps := 1                   # the Grand Dash runs the loop several times (BaseRaceCup)
+	var boost_t := 0.0              # s left of your cheer button's boost (Grand Dash)
+	var cd_t := 0.0                 # s until the cheer button works again (Grand Dash)
 
-	func _init(runners: Array, back: int, r: RandomNumberGenerator, twist := {}) -> void:
+	func _init(runners: Array, back: int, r: RandomNumberGenerator, twist := {}, lap_count := 1) -> void:
 		r_x = BaseRace.rules()
 		tw = twist
 		recs = runners
 		backed = back
 		rng = r
+		laps = lap_count
 		var at := 0.0
-		for s in BaseRace.course(GardenZones.here):
-			at += float(s["len"])
-			ends.append(at)
+		for _l in laps:
+			for s in BaseRace.course(GardenZones.here):
+				at += float(s["len"])
+				ends.append(at)
 		for i in recs.size():
 			dist.append(0.0)
 			stretch.append(0)
@@ -226,7 +231,7 @@ class Run:
 
 	func _roll(i: int) -> void:
 		var w := float(tw.get("wobble", r_x["dash_wobble"]))
-		var p := BaseRace.stretch_pace(recs[i], int(stretch[i]), tw) * rng.randf_range(1.0 - w, 1.0 + w)
+		var p := BaseRace.stretch_pace(recs[i], leg(i), tw) * rng.randf_range(1.0 - w, 1.0 + w)
 		if i == backed and int(stretch[i]) > 0:
 			p *= cheer_mult
 			cheer_mult = 1.0
@@ -237,9 +242,22 @@ class Run:
 			duo[i] = mate
 		pace[i] = p
 
-	## One press a mark, while your Boki runs the stretch before it.
+	## The stretch of the lap runner i is on (the stretch count runs on through every lap).
+	func leg(i: int) -> int:
+		return int(stretch[i]) % (ends.size() / laps)
+
+	## The Grand Dash's cheer button: a short boost for your Boki, then a cooldown.
+	func can_boost() -> bool:
+		return laps > 1 and cd_t <= 0.0 and float(done_t[backed]) < 0.0
+
+	func boost() -> void:
+		boost_t = float(BaseRaceCup.rules()["boost_s"])
+		cd_t = float(BaseRaceCup.rules()["cooldown_s"])
+
+	## One press a mark, while your Boki runs the stretch before it (the one-lap Dash only).
 	func can_cheer() -> bool:
-		return float(done_t[backed]) < 0.0 and cheered == int(stretch[backed]) and cheered < ends.size() - 1
+		var marking := cheered == int(stretch[backed]) and cheered < ends.size() - 1
+		return laps == 1 and float(done_t[backed]) < 0.0 and marking
 
 	func cheer(grade: String) -> void:
 		cheer_mult = float(r_x["cheer"][grade])
@@ -272,6 +290,8 @@ class Run:
 		var eff: Array = []
 		for i in recs.size():
 			eff.append(float(pace[i]) * (float(r_x["bump_slow"]) if float(bump_t[i]) > 0.0 else 1.0))
+			if i == backed and boost_t > 0.0:
+				eff[i] = float(eff[i]) * float(BaseRaceCup.rules()["boost"])
 			bump_t[i] = maxf(0.0, float(bump_t[i]) - dt)
 		var pulled := eff.duplicate()
 		for i in recs.size():
@@ -281,6 +301,8 @@ class Run:
 		for i in recs.size():
 			if _running(i):
 				_advance(i, float(pulled[i]), dt)
+		boost_t = maxf(0.0, boost_t - dt)
+		cd_t = maxf(0.0, cd_t - dt)
 		_bumps()
 
 	func _running(i: int) -> bool:
@@ -491,11 +513,10 @@ func use() -> void:
 	var ks := entrants()
 	if not ks.is_empty() and _offer():
 		_practice(ks[0])
-	elif ks.size() < 2:
-		h._toast("The Dash needs two rested Boki out on the base")
-		return
+	elif ks.is_empty():
+		h._toast("The Dash needs a rested Boki out on the base")
 	else:
-		_begin(ks)
+		_begin(ks, ks.size() < 2)
 
 func _offer() -> bool:
 	return Settings.get_v("tips") and not Record.clean() and not Save.d["tutorial"].get("first_race", false)
@@ -524,8 +545,9 @@ func solo(rec: Dictionary) -> void:
 		solo_rec = rec
 		_begin([k])
 
-func _begin(ks: Array) -> void:
-	runners = ks
+## `cup`: the Grand Dash, three laps with bots filling the lanes (BaseRaceCup); only the real Boki get beats.
+func _begin(ks: Array, cup := false) -> void:
+	runners = ks.duplicate()
 	cheers = []
 	var recs: Array = []
 	for k in ks:
@@ -535,11 +557,19 @@ func _begin(ks: Array) -> void:
 		beats.stop()                 # last race's finish clips still playing
 	beats = RaceBeats.new(ks)
 	var back := maxi(0, recs.find(Save.active_kin()))
-	run = Run.new(recs, back, RandomNumberGenerator.new(), tweak("dash"))
+	if cup:
+		for b in BaseRaceCup.bots(recs[0]):
+			recs.append(b)
+			runners.append(BaseRaceCup.entry(b, runners.size() - 1))
+			h.add_child(runners[-1]["node"])
+	var laps: int = int(BaseRaceCup.rules()["laps"]) if cup else 1
+	run = Run.new(recs, back, RandomNumberGenerator.new(), tweak("dash"), laps)
 	run.rng.randomize()
 	bar = TimingBar.new()
 	bar.open(h.root_ui, "Press %s at each mark to cheer" % Settings.key_cap("interact"))
 	_bar_label("")
+	if cup:
+		bar.lbl.text = "Grand Dash: press %s to cheer (boost, then a cooldown)" % Settings.key_cap("interact")
 	_place_runners()
 	var marks: Array = []
 	for i in range(1, 4):
@@ -569,7 +599,11 @@ func input(event: InputEvent) -> bool:
 		return true
 	if not TimingBar.is_press(event):
 		return false
-	if run.can_cheer():
+	if run.can_boost():
+		run.boost()
+		GardenSfx.crowd("great", runners[run.backed]["pos"])
+		h._emote(runners[run.backed], "★", true)
+	elif run.can_cheer():
 		var r := bar.press()
 		run.cheer(r)
 		cheers.append(r)
@@ -596,7 +630,7 @@ func tick(d: float) -> void:
 	bar.step(d)
 	_place_runners()
 	var home_done: bool = float(run.done_t[run.backed]) >= 0.0
-	cue.update(3 if home_done else int(run.stretch[run.backed]), run.can_cheer(), d)
+	cue.update(3 if home_done else run.leg(run.backed), run.can_cheer(), d)
 	_hear_laps()
 	if run.over():
 		_end(true)
@@ -620,15 +654,16 @@ func _place_runners() -> void:
 	var st: Array = stretches(run.tw)
 	var lane := float(rules()["lane"])
 	for i in runners.size():
-		var s := int(run.stretch[i])
-		var into := float(run.dist[i]) - (float(run.ends[s - 1]) if s > 0 else 0.0)
+		var g := int(run.stretch[i])
+		var s: int = run.leg(i)
+		var into := float(run.dist[i]) - (float(run.ends[g - 1]) if g > 0 else 0.0)
 		var p := track_at(s, clampf(into / float(st[s]["len"]), 0.0, 1.0), lane * (i - (runners.size() - 1) * 0.5))
 		var n: Node3D = runners[i]["node"]
 		n.position = p
 		n.rotation.y = heading(s, clampf(into / float(st[s]["len"]), 0.0, 1.0))
 		runners[i]["pos"] = p
 		if winged(runners[i]["rec"]):
-			var left := (float(run.ends[s]) - float(run.dist[i])) / maxf(float(run.pace[i]), 0.01)
+			var left := (float(run.ends[g]) - float(run.dist[i])) / maxf(float(run.pace[i]), 0.01)
 			var vent: bool = st[s].has("vent")
 			var gap: bool = String(st[s]["kind"]) == "jump" or vent      # it glides the gap or rides a vent
 			n.set_meta("aloft", gap and BokiFly.glides(left))
@@ -659,8 +694,12 @@ func _lift(kind: String, f: float) -> float:
 func _end(finished: bool) -> void:
 	finished = finished and not practice      # a practice lap never pays out
 	var res := {}
-	if finished and solo_rec.is_empty():
+	var cup := run.laps > 1
+	if finished and solo_rec.is_empty() and not cup:
 		res = settle(run)
+	for k in runners:
+		if k["rec"].has("bot"):
+			k["node"].queue_free()
 	if finished:
 		beats.end()
 	else:
@@ -670,7 +709,9 @@ func _end(finished: bool) -> void:
 	cue = null
 	if finished:
 		GardenFirstDay.mark("race", h)
-		if solo_rec.is_empty():
+		if cup:
+			_cup_card(BaseRaceCup.settle(run))
+		elif solo_rec.is_empty():
 			_race_card(res, pin(res["win"], "dash"))
 			GardenSfx.result(h, res)
 			h._emote(h._kin_entry(res["win"]), "♥", true)
@@ -704,6 +745,14 @@ func _grades() -> Array:
 	while out.size() < 3:
 		out.append("miss")
 	return out
+
+func _cup_card(res: Dictionary) -> void:
+	var place: int = res["place"]
+	var head := "Place %d in the Grand Dash" % (place + 1)
+	if place == 0:
+		head = "%s wins the Grand Dash!" % res["win"]["name"]
+	show_card(head, [["Prototype: three laps against bots", UI.MUTED], ["+%d gems" % res["gems"], UI.GOLD]]
+			+ GardenPrizes.rows(res["prize"]))
 
 func _race_card(res: Dictionary, pinned: bool) -> void:
 	var win: Dictionary = res["win"]
