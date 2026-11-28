@@ -11589,3 +11589,4 @@ READY ext/vfx-meeko-albert-rings 19e39c8a9a40e989e3b7dd86db61f848f126d835 (Meeko
 READY ext/vex-daze-leftovers fba848a9b1 (docs only: neither Vex Daze leftover has a source row, nothing built; fragment 1128-vex-daze-leftovers.md)
 READY ext/sable-dagger-slow 5135cdce39 (bulk-rebase: origin/main merged in mechanically, was e415755d82; union 0 gen 1 files; the branch's own READY checks still apply)
 READY ext/vex-daze-leftovers 6745c72ce8 (Vex Daze leftovers: both source-silent, docs note + check results, no code change)
+READY ext/kit-parity-stale-snaps 2755cf0e9b (KIT_PARITY snapshots labelled)
