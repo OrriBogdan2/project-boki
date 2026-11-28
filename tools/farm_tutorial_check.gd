@@ -1119,7 +1119,7 @@ func _world() -> void:
 	var line: PanelContainer = home.guide.tracker
 	var n_rows := GoalTracker.lines().size()
 	ok(
-		is_instance_valid(line) and line.get_parent() == home.root_ui and line.get_child(0).get_child_count() == 1,
+		is_instance_valid(line) and line.get_parent() == home.corners and line.get_child(0).get_child_count() == 1,
 		'after it the Goals card is one "Next:" line'
 	)
 	ok(
