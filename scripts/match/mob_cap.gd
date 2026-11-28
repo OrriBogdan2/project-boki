@@ -7,14 +7,16 @@ extends RefCounted
 ## activity limit only: online matches and bot runs use the High cap, and a monster with a bot or another
 ## Hunter at its side is never put to sleep, so nobody is handicapped by it.
 
-const RADIUS := 60.0         # m around the local player that the cap counts
-const EVERY := 0.5           # s between recounts
+const RADIUS := 60.0  # m around the local player that the cap counts
+const EVERY := 0.5  # s between recounts
 
 var m: Match
 var _t := 0.0
 
+
 func _init(match_node: Match) -> void:
 	m = match_node
+
 
 ## The cap that applies to this match. A "client_cap" match (--perf-bench) keeps the preset's own cap
 ## even with bots playing, since it measures what this client's preset costs.
@@ -22,6 +24,7 @@ func limit() -> int:
 	var fair: bool = Net.online() or (m.opts.get("autoplay", false) and not m.opts.get("client_cap", false))
 	var preset := "high" if fair else Settings.quality()
 	return int(Settings.QUALITY[preset]["mob_cap"])
+
 
 func tick(dt: float) -> void:
 	_t -= dt
@@ -45,11 +48,13 @@ func tick(dt: float) -> void:
 	for i in range(maxi(room, 0), idle.size()):
 		(idle[i] as Mob).capped = true
 
+
 func _hunter_beside(mb: Mob) -> bool:
 	for h in m.hunters:
 		if h != m.player and not h.out and mb.flat_dist(h) < Mob.NAP_M:
 			return true
 	return false
+
 
 ## The monsters the cap is holding asleep right now (tests).
 func sleeping() -> int:

@@ -243,8 +243,8 @@ func _cursor_ground() -> Vector3:
 	var cam := vp.get_camera_3d()
 	var px := vp.get_visible_rect().size * cursor_at
 	var from := cam.project_ray_origin(px)
-	var dir := cam.project_ray_normal(px)
-	return from + dir * ((m.player.pos.y - from.y) / dir.y)
+	var ray := cam.project_ray_normal(px)
+	return from + ray * ((m.player.pos.y - from.y) / ray.y)
 
 
 ## Hides the aim line and the kit's aim telegraphs (they aim at the desktop's real mouse, not at the pinned cursor, so

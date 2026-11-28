@@ -12,16 +12,19 @@ const VIEWS := {"sky": [Vector3(0, 150, 60), 70.0], "play": [Vector3(0, 22, 14),
 var main: Node
 var fails := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("FARRANGES %s %s" % ["PASS" if cond else "FAIL", what])
 	if not cond:
 		fails += 1
 
+
 func run(main_node: Node) -> void:
 	main = main_node
 	var shots := ""
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--far-shots="): shots = a.substr(12)
+		if a.begins_with("--far-shots="):
+			shots = a.substr(12)
 	var keep_q = Settings.v.get("quality", "auto")
 	for p in PRESETS:
 		if not Settings.QUALITY.has(p):
@@ -32,15 +35,16 @@ func run(main_node: Node) -> void:
 	print("FARRANGES DONE, failures: %d" % fails)
 	main.get_tree().quit(1 if fails > 0 else 0)
 
+
 func _preset(p: String, shots: String) -> void:
-	var T: Dictionary = Data.TIERS[0]
+	var tier: Dictionary = Data.TIERS[0]
 	var w := World.new()
-	w.biome = T["biome"].duplicate()
-	w.clouds = T["clouds"]
+	w.biome = tier["biome"].duplicate()
+	w.clouds = tier["clouds"]
 	main.add_child(w)
 	w.generate_authored(World.load_layout(World.layout_for_tier(0)), 9)
 	await w.build_meshes()
-	var sv := SubViewport.new()      # the title screen owns the main viewport, so look through our own
+	var sv := SubViewport.new()  # the title screen owns the main viewport, so look through our own
 	sv.size = Vector2i(1280, 720)
 	sv.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	main.add_child(sv)
@@ -66,6 +70,7 @@ func _preset(p: String, shots: String) -> void:
 	if ResourceLoader.exists("res://scripts/perf/far_ranges.gd"):
 		_asserts(p, w)
 	w.free()
+
 
 func _asserts(p: String, w: Node) -> void:
 	var row: Dictionary = load("res://scripts/perf/far_ranges.gd").BIG[p]
@@ -104,6 +109,7 @@ func _asserts(p: String, w: Node) -> void:
 		ok(limited[cls] == want, "%s: %d of %d %s batches have a range" % [p, limited[cls], seen[cls], cls])
 	ok(wrong_end == 0, "%s: a cliff batch with a far version ends at the near range" % p)
 	ok(unlimited or limited["cliff"] == seen["cliff"], "%s: every cliff batch has a range" % p)
+
 
 func _tris(m: Mesh) -> int:
 	var t := 0

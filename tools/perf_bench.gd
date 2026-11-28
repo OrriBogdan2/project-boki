@@ -104,7 +104,7 @@ var rows := PackedStringArray()
 var hud_us := 0
 var added := {}  # node name -> count, nodes that entered the tree this frame (named on a hitch)
 var vp: RID
-var slept := 0           # most monsters the preset's MobCap held asleep at once (sampled once a second)
+var slept := 0  # most monsters the preset's MobCap held asleep at once (sampled once a second)
 
 
 func run(main_node: Node) -> void:
@@ -280,7 +280,12 @@ func _start(part: String, extra: Dictionary) -> Match:
 	var o := Match.demo_opts()
 	o.merge(
 		{
-			"raid": "ash", "blight": true, "no_drop": true, "god": true, "autoplay": true, "client_cap": true,
+			"raid": "ash",
+			"blight": true,
+			"no_drop": true,
+			"god": true,
+			"autoplay": true,
+			"client_cap": true,
 			"demo_kin": "cindle"
 		},
 		true

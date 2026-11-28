@@ -7,11 +7,11 @@ extends RefCounted
 ## Cliffs also get a far version past `near`: coarse-LOD copies batched over FAR_CHUNK-tile blocks (nine
 ## near batches become one draw), faded in as the detailed batches fade out.
 
-const SMALL := 130.0         # m at High: grass, flowers, pebbles (x Settings q("draw"))
-const BUSH := 160.0          # m at High: tall grass and undergrowth (x q("draw"))
-const FADE := 10.0           # m a batch takes to dither out (or in)
-const FAR_CHUNK := 96        # tiles: the far cliff version batches over blocks this wide
-const MIN_LOD_TRIS := 240    # a mesh under this has nothing to simplify
+const SMALL := 130.0  # m at High: grass, flowers, pebbles (x Settings q("draw"))
+const BUSH := 160.0  # m at High: tall grass and undergrowth (x q("draw"))
+const FADE := 10.0  # m a batch takes to dither out (or in)
+const FAR_CHUNK := 96  # tiles: the far cliff version batches over blocks this wide
+const MIN_LOD_TRIS := 240  # a mesh under this has nothing to simplify
 const BIG_CLASSES := ["tree", "rock", "cliff"]
 ## Per preset, in metres from the camera, 0 = never dropped. `near`: where cliffs swap to the far version.
 const BIG := {
@@ -21,16 +21,19 @@ const BIG := {
 	"low": {"tree": 130.0, "rock": 115.0, "cliff": 150.0, "near": 100.0},
 	"very_low": {"tree": 100.0, "rock": 85.0, "cliff": 115.0, "near": 70.0},
 }
+static var _lod_cache := {}  # mesh -> [with LODs, coarsest LOD or null]
+
 
 ## The class of one scatter batch: its group's "far" hint ("tree", "rock" or "cliff"), or the name.
-static func class_of(label: String, chunk: int, hint := "") -> String:
+static func class_of(label: String, chunk: int, far_hint := "") -> String:
 	if label.begins_with("Bushes"):
 		return "bush"
-	if hint in BIG_CLASSES:
-		return hint
+	if far_hint in BIG_CLASSES:
+		return far_hint
 	if label.begins_with("Grass") or label.begins_with("Flowers") or label.begins_with("Pebbles") or chunk >= 32:
 		return "small"
 	return "rock"
+
 
 ## The "far" hint of a flora batch of this kind (pillars count as boulders).
 static func hint(kind: String) -> String:
@@ -38,16 +41,21 @@ static func hint(kind: String) -> String:
 		return "rock"
 	return kind if kind in BIG_CLASSES else ""
 
+
 ## The draw distance in metres for a class (0 = unlimited).
 static func end_of(cls: String) -> float:
 	var k := float(Settings.q("draw"))
 	match cls:
-		"small": return SMALL * k
-		"bush": return BUSH * k
+		"small":
+			return SMALL * k
+		"bush":
+			return BUSH * k
 	return float(_row()[cls])
+
 
 static func _row() -> Dictionary:
 	return BIG.get(Settings.quality(), BIG["high"])
+
 
 ## Hides `gi` past `end` m (not at all when end is 0), dithering out over FADE.
 static func limit(gi: GeometryInstance3D, end: float) -> void:
@@ -57,14 +65,18 @@ static func limit(gi: GeometryInstance3D, end: float) -> void:
 	gi.visibility_range_end_margin = FADE
 	gi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 
+
 ## Big scatter meshes get level-of-detail versions (fewer triangles far away), made once per mesh.
-static var _lod_cache := {}
+
+
 static func with_lods(m: Mesh) -> Mesh:
 	return _lods(m)[0]
+
 
 ## The far version of a mesh: its coarsest LOD as a mesh of its own, or null when it has none.
 static func coarse(m: Mesh) -> Mesh:
 	return _lods(m)[1]
+
 
 ## [mesh with LODs, coarsest LOD alone or null] for one mesh (cached).
 static func _lods(m: Mesh) -> Array:
@@ -80,8 +92,14 @@ static func _lods(m: Mesh) -> Array:
 	if tris >= MIN_LOD_TRIS and am.get_blend_shape_count() == 0:
 		var im := ImporterMesh.new()
 		for si in am.get_surface_count():
-			im.add_surface(am.surface_get_primitive_type(si), MeshArrays.of(am, si), [], {},
-				am.surface_get_material(si), am.surface_get_name(si))
+			im.add_surface(
+				am.surface_get_primitive_type(si),
+				MeshArrays.of(am, si),
+				[],
+				{},
+				am.surface_get_material(si),
+				am.surface_get_name(si)
+			)
 		if im.get_method_argument_count("generate_lods") >= 3:
 			im.call("generate_lods", 25.0, 60.0, [])
 		else:
@@ -89,6 +107,7 @@ static func _lods(m: Mesh) -> Array:
 		out = [im.get_mesh(), _coarsest(im, am)]
 	_lod_cache[m] = out
 	return out
+
 
 static func _coarsest(im: ImporterMesh, am: ArrayMesh) -> Mesh:
 	var far := ArrayMesh.new()
@@ -100,6 +119,7 @@ static func _coarsest(im: ImporterMesh, am: ArrayMesh) -> Mesh:
 		arrays[Mesh.ARRAY_INDEX] = im.get_surface_lod_indices(si, lods - 1)
 		far.add_surface_from_arrays(am.surface_get_primitive_type(si), arrays)
 	return far
+
 
 ## Cliff batch: the detailed MultiMesh gets `near` as its range, and the coarse copies of the same
 ## instances (items = [transform, colour]) are added in FAR_CHUNK blocks from there outward.
@@ -114,7 +134,8 @@ static func add_far_cliffs(parent: Node3D, items: Array, mesh: Mesh, mat: Materi
 	for it in items:
 		var o: Vector3 = (it[0] as Transform3D).origin
 		var key := Vector2i(int(o.x) / FAR_CHUNK, int(o.z) / FAR_CHUNK)
-		if not by.has(key): by[key] = []
+		if not by.has(key):
+			by[key] = []
 		by[key].append(it)
 	for key in by:
 		var list: Array = by[key]

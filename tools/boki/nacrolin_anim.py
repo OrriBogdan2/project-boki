@@ -1,6 +1,7 @@
 """Nacrolin's (Mirrolin's) own clips on the scan rig it shares with Glomwort (root, hips, spine, neck, head): a timid
 pangolin that creeps low with its head tucked, scurries when pushed, and curls into a mirror-tiled ball for its
 hop, its ram and its disco-ball spell."""
+
 import math
 
 import glomwort_anim
@@ -8,7 +9,7 @@ from boki_clips import LOOK_UP, TAU, add, s, seq
 
 BONES = glomwort_anim.BONES
 HIDE_AT = glomwort_anim.HIDE_AT
-HEAD_LOW = -0.12    # its head hangs low, under the level a Boki looks up from (rx)
+HEAD_LOW = -0.12  # its head hangs low, under the level a Boki looks up from (rx)
 
 
 def curl(p, k):
@@ -121,14 +122,16 @@ def pet(t):
 
 
 CLIPS = dict(glomwort_anim.CLIPS)
-CLIPS.update({
-    "idle": (3.2, True, idle),
-    "walk": (0.9, True, walk),
-    "run": (0.5, True, run),
-    "hop": (1.0, True, tuck_hop),
-    "carry": (1.0, True, carry),
-    "pet": (2.4, True, pet),
-    "attack": (0.9, False, ram),
-    "ability": (1.6, False, disco),
-    "sleep": (4.0, True, curled_up),
-})
+CLIPS.update(
+    {
+        "idle": (3.2, True, idle),
+        "walk": (0.9, True, walk),
+        "run": (0.5, True, run),
+        "hop": (1.0, True, tuck_hop),
+        "carry": (1.0, True, carry),
+        "pet": (2.4, True, pet),
+        "attack": (0.9, False, ram),
+        "ability": (1.6, False, disco),
+        "sleep": (4.0, True, curled_up),
+    }
+)
