@@ -12,10 +12,14 @@ extends RefCounted
 ## (--no-moves: the same moves without its own clips, Meshy's Attack for each: the "before"). --contract: the contract
 ## model even for a Meshy-native Hunter (the live look); --cam-y=<m>: the camera's height (eye level, knee level)
 ## looking at --at.
+## --fig-h=<m> (with --states --views): the views sized to a figure <m> tall, FIGURE_FRAC printed; --frame-pass,
+## --aim-<view>=, --clip-aims=: hunter-proof's framing; --all-clips: every clip it plays too, <dir>/states_<view>/clip_<name>/
+## (clip_shots_proof.gd).
 ## --drop: every Hero in a row wearing the drop poses (WardenDropPose), <dir>/drop/<pose>_<view>.png.
 ## Needs a renderer. ffmpeg makes the GIFs and sheets.
 
 const ClipCheck := preload("res://tools/clip_check.gd")
+const Proof := preload("res://tools/clip_shots_proof.gd")
 
 ## --states: [state, the match's state for it (WardenClips.STATE), s it is held]
 const STATE_SHOTS := [
@@ -39,6 +43,7 @@ var holder: Node3D
 var cam: Camera3D
 var tree: SceneTree
 var frame_px := 480
+var proof: RefCounted  # clip_shots_proof.gd (--states --views): the cameras for hunter-proof
 
 
 func run(main: Node) -> void:
@@ -122,16 +127,22 @@ func run(main: Node) -> void:
 		for a in OS.get_cmdline_user_args():
 			if a.begins_with("--views="):
 				views = Array(a.substr(8).split(",", false))
+		proof = Proof.new(self)
+		var fig_h := Proof.arg_float("--fig-h=", 0.0)
 		if views.is_empty():
 			await _states(model, fps, out)
 		for v in views:
-			var vw: Array = STATE_VIEWS[v]
-			cam.fov = float(vw[0])
-			cam.position = vw[1]
-			cam.look_at(vw[2])
+			var vw: Array = Proof.aimed(v, STATE_VIEWS[v] if fig_h <= 0.0 else Proof.view(v, fig_h))
+			proof.use_view(v, vw)
 			if ring:
 				ring.visible = v == "match"
+			if OS.get_cmdline_user_args().has("--frame-pass"):
+				await proof.frame_pass_empty(model, v, vw, out.path_join("states_" + String(v)))
+			elif fig_h > 0.0:
+				await proof.report_fraction(model, v, fps)
 			await _states(model, fps, out, "states_" + String(v))
+			if OS.get_cmdline_user_args().has("--all-clips"):
+				await proof.all_clips(model, fps, out.path_join("states_" + String(v)))
 		print("CLIP_SHOTS_DONE")
 		tree.quit()
 		return
@@ -234,7 +245,11 @@ func _states(model: Node3D, fps: float, out: String, sub := "states") -> void:
 		native.moves = WardenNativeMoves.new(native.player, {})  # (no rows: Meshy's swing for each)
 		native.own_casts = false
 	var i := 0
+	var rows: Array[String] = []  # manifest.tsv: clip name, first frame, frames (hunter-proof cuts the film by it)
 	for st in STATE_SHOTS:
+		var first := i
+		if proof:
+			proof.aim(st[0])
 		var s: Dictionary = (st[1] as Dictionary).duplicate()
 		s["face"] = model.rotation.y
 		s["cast"] = 99.0  # no recent cast: a native swing needs the counters
@@ -247,7 +262,11 @@ func _states(model: Node3D, fps: float, out: String, sub := "states") -> void:
 			poser.call("_process", 1.0 / fps)
 			await _grab(dir.path_join("f%03d.png" % i))
 			i += 1
-	i = await _native_moves(model, poser, fps, dir, i)
+		rows.append("%s\t%d\t%d" % [st[0], first, i - first])
+	i = await _native_moves(model, poser, fps, dir, i, rows)
+	var man := FileAccess.open(dir.path_join("manifest.tsv"), FileAccess.WRITE)
+	man.store_string("\n".join(rows) + "\n")
+	man.close()
 	print("STATES ", ", ".join(STATE_SHOTS.map(func(st): return "%s %.1fs" % [st[0], st[2]])))
 	if native and not (native.d.get("kmoves", {}) as Dictionary).is_empty():
 		await _native_move_dirs(model, native, fps, out)
@@ -273,15 +292,18 @@ func _native_move_dirs(model: Node3D, native: WardenNative, fps: float, out: Str
 
 ## --states on a Meshy-native model, then each kit move it has a clip for (data "kmoves"), pressed standing: its clip's
 ## length (a hold loop: one and a half laps) and 0.3 s of the move gone (the walk clips back, the loop with it).
-func _native_moves(model: Node3D, poser: Node, fps: float, dir: String, i: int) -> int:
+func _native_moves(model: Node3D, poser: Node, fps: float, dir: String, i: int, rows: Array[String]) -> int:
 	var moves: WardenNativeMoves = poser.get("moves")
 	if moves == null:
 		return i
 	for km in moves.rows:
 		var mv: Dictionary = moves.rows[km]
+		if proof:
+			proof.aim(km)
 		var len_s: float = poser.player.get_animation(String(poser.plays[WardenNativeMoves.KEY % km])).length
 		var hold := float(mv.get("hold_from", -1.0))
 		var secs: float = len_s if hold < 0.0 else hold + 1.5 * (len_s - hold)
+		var first := i
 		for k in int((secs + 0.3) * fps):
 			var s := {"grounded": true, "face": model.rotation.y}
 			if k / fps < secs:
@@ -291,6 +313,7 @@ func _native_moves(model: Node3D, poser: Node, fps: float, dir: String, i: int) 
 			poser.call("_process", 1.0 / fps)
 			await _grab(dir.path_join("f%03d.png" % i))
 			i += 1
+		rows.append("%s (kit move)\t%d\t%d" % [km, first, i - first])
 	return i
 
 
