@@ -34,6 +34,10 @@ func run(main: Node) -> void:
 			for tap in [false, true]:
 				for delay in DELAYS_S:
 					_trial(m, hero, slot, tap, delay)
+		if hero == "gunslinger":
+			for tap in [false, true]:
+				for delay in DELAYS_S:
+					_vex_recoil(m, tap, delay)
 		m.queue_free()
 		await main.get_tree().process_frame
 	print("GLIDEAFTER DONE, failures: %d" % bad)
@@ -88,3 +92,38 @@ func _trial(m: Match, hero: String, slot: String, tap: bool, delay: float) -> vo
 	else:
 		var wait := float(open - lock_last - 1) * Match.DT
 		ok(open >= 0 and wait <= OPEN_S, "%s: %.2f s lock, opened at +%d" % [what, lock_s, open])
+
+
+## Vex's E recoil (the 0.6 s after the beam leaves, Loco.press_buffer aside): the E charges until it fires, then a
+## glide press DELAYS_S into the recoil must open the glider within OPEN_S (the recoil is cancelled, 0180).
+func _vex_recoil(m: Match, tap: bool, delay: float) -> void:
+	var h: Hunter = m.player
+	flow._ready_up(m)
+	h.teleport(h.pos + Vector3(0, HEIGHT, 0))
+	h.grounded = false
+	h.glide_fuel = 1.0
+	h.inp["glide_press_only"] = true
+	flow._press("e")
+	var k: ArchKit = h.ak
+	for i in 200:
+		m.step(Match.DT)
+		if k.commit_left() > 0.0:
+			break
+	for i in int(round(delay / Match.DT)):
+		m.step(Match.DT)
+	var open := -1
+	var recoil := k.commit_left() > 0.0 or delay == 0.0
+	for i in 40:
+		h.inp["jump"] = i == 0
+		h.inp["glide"] = i < TAP_STEPS if tap else true
+		h.inp["glide_btn"] = h.inp["glide"]
+		m.step(Match.DT)
+		if h.gliding:
+			open = i
+			break
+	h.inp["jump"] = false
+	h.inp["glide"] = false
+	h.inp["glide_btn"] = false
+	var how := "tap" if tap else "hold"
+	var msg := "gunslinger E recoil then %s glide %.0f ms in: opened at +%d" % [how, delay * 1000.0, open]
+	ok(recoil and open >= 0 and float(open) * Match.DT <= OPEN_S, msg)

@@ -294,6 +294,8 @@ func cc_left(slot: String) -> float:
 		var ground := 0.0 if DredgeKit.reeling(h) else KitStatus.grounded_left(h)
 		return maxf(stop, maxf(h.root_t, ground))
 	if slot == "jump":
+		if not h.grounded:
+			stop = h.stun_t  # an air jump press is the glide press: a recovery never eats it (0180: Vex's E recoil)
 		return maxf(stop, KitStatus.grounded_left(h))
 	return stop
 
