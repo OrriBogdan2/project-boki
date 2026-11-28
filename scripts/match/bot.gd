@@ -582,6 +582,7 @@ func can_hit(m: Match, h: Hunter, tgt: Ent) -> bool:
 
 const RV_RANGE := 70.0  # how far a bot will go for a downed squadmate
 const RV_DANGER := 3.2  # a rival this close gets fought before the revive
+const RV_DANGER_KEEP := 0.8  # m of lead the rival already fought gets over a nearer one
 const RV_ON := 1.1  # stand this close (the revive ring is Life.R["revive_radius"])
 
 
@@ -622,9 +623,12 @@ func _revive_plan(m: Match, h: Hunter) -> Dictionary:
 			):
 				continue
 			var d := h.flat_dist(o)
-			if d < RV_DANGER and d < dd and absf(o.pos.y - h.pos.y) < 2.0:
+			# (the one already fought stays the danger unless another is clearly nearer: between two rivals
+			# the nearest flipped every step and the bot turned back and forth, --bot-sanity-check seed 3)
+			var dk := d - (RV_DANGER_KEEP if o == h.ai.get("tgt") else 0.0)
+			if d < RV_DANGER and dk < dd and absf(o.pos.y - h.pos.y) < 2.0:
 				dz = o
-				dd = d
+				dd = dk
 		for mb in m.mobs:
 			if mb.dead or (mb is Boss and (mb as Boss).dormant):
 				continue
@@ -1443,7 +1447,7 @@ func _clear_line(m: Match, h: Hunter, a: Vector2, b: Vector2) -> bool:
 	var ww := w.w
 	var wh := w.h
 	var hazards := _has_hazards(m)
-	var last := Vector3i(-2147483648, 0, 0)  # the last sample's tiles: one on the same three reads the same
+	var last := Vector3i(-2147483648, 0, 0)  # the last sample's tiles: one on the same three reads the same (not with hazards: they test the exact spot)
 	for k in range(1, n + 1):
 		var p := a + d * (float(k) / n)
 		# a rock in the way, or the abyss (straight at a goal across a bay in the island, the edge guard
@@ -1455,7 +1459,7 @@ func _clear_line(m: Match, h: Hunter, a: Vector2, b: Vector2) -> bool:
 		var rx := floori(p.x - side.x)
 		var rz := floori(p.y - side.y)
 		var at := Vector3i(cz * ww + cx, lz * ww + lx, rz * ww + rx)
-		if at == last and cx >= 0 and cx < ww and lx >= 0 and lx < ww and rx >= 0 and rx < ww:
+		if not hazards and at == last and cx >= 0 and cx < ww and lx >= 0 and lx < ww and rx >= 0 and rx < ww:
 			continue
 		last = at
 		var ci := at.x if cx >= 0 and cz >= 0 and cx < ww and cz < wh else -1
