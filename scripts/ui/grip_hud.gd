@@ -71,9 +71,10 @@ static func boki(hud, p: Hunter, r: Rect2) -> void:
 	var k: Kin = p.kin
 	var has_boki := k != null and is_instance_valid(k)
 	var fusion := MergeForm.enabled()
+	var locked := int(p.slot_lv["ult"]) <= 0 and p.lvl < int(Hunter.ULT_AT[0]) and not KinMerge.active(p)
+	if fusion and locked and not HudReveal.on(hud.m, "ult_tiles"):
+		return  # the locked or empty Merge tile waits for level 6 (HudReveal "ult_tiles")
 	if has_boki and fusion and (int(p.slot_lv["ult"]) <= 0 or KinMerge.active(p)):
-		if p.lvl < int(Hunter.ULT_AT[0]) and not KinMerge.active(p) and not HudReveal.on(hud.m, "ult_tiles"):
-			return      # the locked Merge tile waits for level 6 (HudReveal "ult_tiles")
 		BokiHud.r_slot(hud, p, r)
 		return
 	var key := Settings.key_cap("ultimate")
