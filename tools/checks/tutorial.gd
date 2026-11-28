@@ -10,5 +10,6 @@ const CHECKS := {
 	"--tutorial-frame-gunslinger-check": ["res://tools/tutorial_frame_check.gd", "tutorial_frame_check", "gunslinger"],
 	"--tut-first-evolve-check": ["res://tools/tut_first_evolve_check.gd", "tut_first_evolve_check", null],
 	"--tutorial-boki-video": ["res://tools/tutorial_boki_video.gd", "tutorial_boki_video", null],
+	"--tutorial-recast-cue-check": ["res://tools/tutorial_recast_cue_check.gd", "tutorial_recast_cue_check", null],
 	"--goals-next-check": ["res://tools/goals_next_check.gd", "goals_next_check", null],
 }
