@@ -139,9 +139,7 @@ func _measure(hero: String, label: String) -> void:
 			hi = maxf(hi, wp.y)
 		var c := HunterCrown.crown(p.model, pts, p.vis_k, hi)
 		var feet := m.cam.unproject_position(p.position)
-		var head := m.cam.unproject_position(
-			p.position + m.cam.char_lean() * Vector3(0, c - p.position.y, 0)
-		)
+		var head := m.cam.unproject_position(p.position + m.cam.char_lean() * Vector3(0, c - p.position.y, 0))
 		top += (hi - p.position.y) / SAMPLES
 		crown += (c - p.position.y) / SAMPLES
 		px += (feet.y - head.y) * k / SAMPLES
@@ -183,21 +181,14 @@ func _silhouette(hero: String, lean: String) -> void:
 		for wp in pts:
 			hi = maxf(hi, wp.y)
 		var c := HunterCrown.crown(p.model, pts, p.vis_k, hi)
-		var cap := (
-			m
-			. cam
-			. unproject_position(p.position + m.cam.char_lean() * Vector3(0, c - p.position.y, 0))
-			. y
-		)
+		var cap := m.cam.unproject_position(p.position + m.cam.char_lean() * Vector3(0, c - p.position.y, 0)).y
 		for case in ["all", "body", "crown", "bare"]:
 			var how: Material = flat
 			if case == "bare":
 				_shrink_props(p.model, true)
 				var sc := (c - p.position.y) / BARE_CROWN
 				how = _clip_flat(c + BARE_DOME * sc, p.position, -face, sc)
-			var got: Array = await _mask(
-				p.model, how, case != "all", cap if case == "crown" else -1e9
-			)
+			var got: Array = await _mask(p.model, how, case != "all", cap if case == "crown" else -1e9)
 			if case == "bare":
 				_shrink_props(p.model, false)
 			var area: float = got[0] / (ppm * ppm)
@@ -344,12 +335,7 @@ func _lineup(row: Array) -> void:
 	var mids: Array = []  # each hero's centre along the row, from the row's left end
 	var span := 0.0
 	for i in row.size():
-		var w := (
-			LINEUP_W
-			* Hunter.VIS_SCALE
-			* Arch.match_k(row[i])
-			* float(Arch.body(row[i]).get("top_h", 1.9))
-		)
+		var w := LINEUP_W * Hunter.VIS_SCALE * Arch.match_k(row[i]) * float(Arch.body(row[i]).get("top_h", 1.9))
 		mids.append(span + w * 0.5)
 		span += w
 	var at := _row_spot(m.player.pos, span)
@@ -395,20 +381,11 @@ func _lineup(row: Array) -> void:
 		var feet := m.cam.unproject_position(h.position) * k
 		var mid: Vector3 = h.position + Vector3(0, 1.0, 0)
 		var right := m.cam.global_transform.basis.x
-		var ppm := (
-			(m.cam.unproject_position(mid + right) - m.cam.unproject_position(mid)).length() * k
-		)
+		var ppm := (m.cam.unproject_position(mid + right) - m.cam.unproject_position(mid)).length() * k
 		print(
 			(
 				"LINEUP %s: k %.3f, feet at %.0f,%.0f px, %.1f m off its spot, %.1f px/m"
-				% [
-					h.arch,
-					Arch.match_k(h.arch),
-					feet.x,
-					feet.y,
-					h.pos.distance_to(spots[line.find(h)]),
-					ppm
-				]
+				% [h.arch, Arch.match_k(h.arch), feet.x, feet.y, h.pos.distance_to(spots[line.find(h)]), ppm]
 			)
 		)
 		if cutouts:
