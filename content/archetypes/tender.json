@@ -59,7 +59,10 @@
 		"dist": 3.15,
 		"time": 0.23,
 		"invuln": 0.12,
-		"desc": "A quick skip about 3m where you move; in the air, a long floaty glide of about 10m (its own 14s cooldown).",
+		"ally_r": 1.1,
+		"refund": 0.5,
+		"e_refund": 1.0,
+		"desc": "A quick skip about 3m where you move; in the air, a long floaty glide of about 10m (its own 14s cooldown). Pass a teammate on the way and half the dash comes back, and Hearthlight's cooldown drops 1s.",
 		"air": {
 			"dist": 10.5,
 			"time": 0.95,
