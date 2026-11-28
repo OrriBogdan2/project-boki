@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://gu3ar8g766i"
-path="res://.godot/imported/bloom_Image_0.webp-d75f96506524ee9c1e96c5ba9f384253.ctex"
+path.s3tc="res://.godot/imported/bloom_Image_0.webp-d75f96506524ee9c1e96c5ba9f384253.s3tc.ctex"
+path.etc2="res://.godot/imported/bloom_Image_0.webp-d75f96506524ee9c1e96c5ba9f384253.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "0340c883edd7b17938efff65b478542d"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/eggs/bloom_Image_0.webp"
-dest_files=["res://.godot/imported/bloom_Image_0.webp-d75f96506524ee9c1e96c5ba9f384253.ctex"]
+dest_files=["res://.godot/imported/bloom_Image_0.webp-d75f96506524ee9c1e96c5ba9f384253.s3tc.ctex", "res://.godot/imported/bloom_Image_0.webp-d75f96506524ee9c1e96c5ba9f384253.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
