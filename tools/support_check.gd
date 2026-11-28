@@ -339,8 +339,8 @@ func _tender_support() -> void:
 	step(m, 0.1)
 	ok("Carrier: running into a downed teammate carries them", CareUtil.is_carried(A) and K.carrying().size() == 1)
 	ok(
-		"Carrier: no shield of ours and no slow while carrying",
-		P.shield <= 0.01 and absf(K.move_k() - 1.0) < 0.01,
+		"Carrier: no shield of ours; she walks at passive.carry_move while carrying (catalog Soulpack 0.7x)",
+		P.shield <= 0.01 and absf(K.move_k() - float(K.d["passive"]["carry_move"])) < 0.01,
 		"shield %.0f k %.2f" % [P.shield, K.move_k()]
 	)
 	var dh := A.down_hp
