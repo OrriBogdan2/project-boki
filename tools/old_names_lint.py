@@ -4,6 +4,7 @@
 Final names: Vex, Albert, Sparkle, Kael, Lace, Cinder, Grimble, Meeko, Neve, Tenzo, Motley, Sable, Gil.
 Ids, files and folders keep the old names, so only player text is read: string values in content/**/*.json
 (not the doc/id/source keys) and string literals in scripts/**/*.gd and scenes (comments are skipped).
+Also (owner rule 11-27) fails on he/him/his near a female hunter or she/her near a male one (same sentence).
 Usage: python3 tools/old_names_lint.py      exit 1 and list file:line when a retired name is shown to players.
 """
 
@@ -43,8 +44,62 @@ def json_strings(o, path, out):
         out.append(f"{path}: {o[:90]}")
 
 
+FEMALE = "Cinder Lace Neve Meeko Sable Vex Sparkle Malgrave".split()
+MALE = "Kael Albert Grimble Motley Tenzo Gil".split()
+HUNTER = re.compile(r"\b(%s)\b" % "|".join(FEMALE + MALE))
+HE = re.compile(r"\b(he|him|his|himself|He|Him|His)\b")
+SHE = re.compile(r"\b(she|her|hers|herself|She|Her|Hers)\b")
+PRON_COUNT = {}
+
+
+def pronoun_hits(text):
+    """Owner rule 11-27: a sentence naming only female hunters must not say he/him/his, only male ones not she/her.
+    Returns [(hunter, snippet)]; a sentence naming both sexes, or using both he and she, is skipped (pronoun could point either way)."""
+    out = []
+    for sent in re.split(r"(?<=[.!?;])\s+|\n|\|", text):
+        names = set(HUNTER.findall(sent))
+        f = names & set(FEMALE)
+        m = names & set(MALE)
+        if HE.search(sent) and SHE.search(sent):
+            continue
+        if f and not m and HE.search(sent):
+            out += [(n, sent) for n in f]
+        elif m and not f and SHE.search(sent):
+            out += [(n, sent) for n in m]
+    return out
+
+
+def note_pron(where, text, found):
+    for n, sent in pronoun_hits(text):
+        PRON_COUNT[n] = PRON_COUNT.get(n, 0) + 1
+        found.append(f"{where}: PRONOUN {n}: {sent.strip()[:90]}")
+
+
+def json_pron(o, path, found):
+    if isinstance(o, dict):
+        for k, v in o.items():
+            if k not in SKIP_KEYS:
+                json_pron(v, path, found)
+    elif isinstance(o, list):
+        for v in o:
+            json_pron(v, path, found)
+    elif isinstance(o, str):
+        note_pron(path, o, found)
+
+
 def main():
     found = []
+    for p in tracked(("docs/heroes/",), (".md",)) + ["docs/KIT_PARITY.md"]:
+        try:
+            for n, line in enumerate(open(os.path.join(ROOT, p), encoding="utf-8"), 1):
+                note_pron(f"{p}:{n}", line, found)
+        except OSError:
+            pass
+    for p in tracked(("content/",), (".json",)):
+        try:
+            json_pron(json.load(open(os.path.join(ROOT, p), encoding="utf-8")), p, found)
+        except (ValueError, OSError):
+            pass
     for p in tracked(("content/",), (".json",)):
         try:
             json_strings(json.load(open(os.path.join(ROOT, p), encoding="utf-8")), p, found)
@@ -57,8 +112,11 @@ def main():
             for s in STRING.findall(line):
                 if hit(s):
                     found.append(f"{p}:{n}: {s[:90]}")
+                note_pron(f"{p}:{n}", s, found)
     for f in found:
         print("OLDNAME", f)
+    if PRON_COUNT:
+        print("PRONOUN per hunter:", ", ".join(f"{k} {v}" for k, v in sorted(PRON_COUNT.items())))
     print("OLDNAMES FAIL (%d)" % len(found) if found else "OLDNAMES ok")
     sys.exit(1 if found else 0)
 

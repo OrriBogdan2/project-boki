@@ -7,4 +7,4 @@ A scavenger who crawled into Malgrave's vault after it woke and never came out p
 
 One eye is stitched shut; the other squints through a brass monocle at whatever he's pricing. His teeth are scrap metal, with one gold tooth. He carries his hoard on his back (chests, coins, bells, lanterns) and calls himself king of whatever's left.
 
-**Relic:** His brass monocle. He priced every treasure in Malgrave's vault through it. (proposed)
+**Relic:** His brass monocle. Grimble priced every treasure in Malgrave's vault through it. (proposed)

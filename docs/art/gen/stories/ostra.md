@@ -3,8 +3,8 @@
 
 _Class: ostra. Faction: The Void Jester._
 
-Malgrave's court jester. He laughed the night the Hunters were sealed, so Malgrave sealed him in a toy box and threw it into the Void. He came back as a jack-in-the-box: a jester on a brass spring, rising from a hovering box.
+Malgrave's court jester. He laughed the night the Hunters were sealed, so Malgrave sealed Motley in a toy box and threw it into the Void. He came back as a jack-in-the-box: a jester on a brass spring, rising from a hovering box.
 
 He steals his victims' laughter, his bells ring only when he swaps, and he belongs to no one.
 
-**Relic:** His jack-in-the-box. Malgrave sealed him in it and threw it into the Void. (locked)
+**Relic:** His jack-in-the-box. Malgrave sealed Motley in it and threw it into the Void. (locked)
