@@ -8,10 +8,13 @@ extends RefCounted
 ##   channel  rx ry rz (rotation), px py pz (position), sx sy sz sxz sa (scale: x, y, z, x and z, all), wy (spin rad/s);
 ##            all are offsets from the pivot's rest pose
 ##   keys     flat [phase, value, phase, value ...] from 0 to 1, value in rad, m, scale or rad/s
-## Phases: idle, walk, run and stagger loop (walk/run by gait distance); windup is windup_k(), the same number the
-## ground telegraph fills with, so the body gathers exactly as the tell fills; strike runs the blow plus its
+## Phases: idle, walk, run and stagger loop (walk/run by gait distance, gait_step); windup is windup_k(), the same
+## number the ground telegraph fills with, so the body gathers exactly as the tell fills; strike runs the blow plus its
 ## follow-through; flinch is the hit-react, layered over idle, walk and run for FLINCH_S after each hit; death runs
-## DEATH_S. run is walk at RUN_AMP when it has no table of its own.
+## DEATH_S. run is walk at RUN_AMP; the amplitude blends from walk to run with the speed (run_amp).
+## Each kind's map also carries its gait: "stride" is the ground one cycle covers when the feet do not skate (the
+## leg swing measured on the glb by --mob-anim-check; a hop for the legless), "gait_hz" the cycles/s the moves were
+## keyed to read at. gait_step runs the cycle at speed / stride, held to RATE_MIN..RATE_MAX x gait_hz.
 ## Tables are baked once into 32-sample curves; a frame is table lookups only, no allocation.
 
 const IDLE := 0
@@ -26,18 +29,20 @@ const STATES := ["idle", "walk", "run", "windup", "strike", "stagger", "flinch",
 const LOOPS := [true, true, true, false, false, true, false, false]
 ## 1/s: how fast a pivot follows its target in each state
 const RATE := [8.0, 14.0, 14.0, 40.0, 45.0, 12.0, 60.0, 30.0]
+const GAIT_FOLLOW := 25.0  # 1/s per cycle/s: the walk's pivots follow at least this x its rate (keeps the swing)
 
 const LUNGE_S := 0.2  # s: a skitter's lunge, then LUNGE_REC of recovery
 const LUNGE_REC := 0.45  # s
 const RECOVER_S := {"spit": 0.5, "volley": 0.6, "slam": 0.8}  # s: follow-through after the blow, by attack
 const DEATH_S := 0.32  # s: the death move, then the monster is gone
-const RUN_SPEED := 3.6  # m/s: above this the run table plays
-const RUN_AMP := 1.4  # run = walk x this when a kind has no run table
+const WALK_SPEED := 2.2  # m/s: up to here the walk plays at its keyed amplitude
+const RUN_SPEED := 3.6  # m/s: from here the run plays (the amplitude blends between the two)
+const RUN_AMP := 1.4  # run = walk x this
+const RATE_MIN := 0.6  # x gait_hz: the slowest a gait cycles (a crawl skates rather than freeze-frames)
+const RATE_MAX := 1.6  # x gait_hz: the fastest (a sprint skates rather than strobes)
 ## s per idle loop
 const IDLE_S := {"brute": 5.0, "spitter": 3.0, "skitter": 2.5, "bomber": 2.2, "sentinel": 4.0, "glimmer": 2.0}
 const STAGGER_S := 2.0  # s per stagger loop
-## m of ground per gait cycle: Mob.anim advances with the distance walked, so the feet keep pace with the floor
-const STRIDE_M := {"skitter": 1.8, "spitter": 2.3, "brute": 2.8, "bomber": 2.8, "sentinel": 1.0, "glimmer": 2.3}
 const HIT_RATE := 30.0  # 1/s: pivots follow this fast while the hit-react layer plays
 const FLINCH_S := 0.22  # s: the hit-react plays over idle, walk and run for this long after a hit
 const FAR_M := 30.0  # m from the camera focus: beyond this the body is not posed
@@ -81,6 +86,8 @@ const EARS := ["EarL", "EarR"]
 const MOVES := {
 	"skitter":
 	{
+		"stride": 0.53,
+		"gait_hz": 5.0,
 		"idle":
 		[
 			[SK_A, "ry", [0, 0.04, 0.5, -0.04, 1, 0.04], 0.0],
@@ -137,6 +144,8 @@ const MOVES := {
 	},
 	"spitter":
 	{
+		"stride": 2.3,
+		"gait_hz": 0.96,
 		"idle":
 		[
 			[["Bulb"], "sy", [0, -0.1, 0.5, -0.07, 1, -0.1], 0.0],
@@ -195,6 +204,8 @@ const MOVES := {
 	},
 	"brute":
 	{
+		"stride": 1.42,
+		"gait_hz": 1.2,
 		"idle":
 		[
 			[["Torso"], "sxz", [0, 0, 0.5, 0.025, 1, 0], 0.0],
@@ -258,6 +269,8 @@ const MOVES := {
 	},
 	"bomber":
 	{
+		"stride": 2.8,
+		"gait_hz": 1.57,
 		"idle":
 		[
 			[["Puff"], "sa", [0, 0, 0.5, 0.04, 1, 0], 0.0],
@@ -333,6 +346,8 @@ const MOVES := {
 	},
 	"sentinel":
 	{
+		"stride": 1.0,
+		"gait_hz": 1.0,
 		"idle":
 		[
 			[["Crystal"], "py", [0, 0, 0.5, 0.08, 1, 0], 0.0],
@@ -389,6 +404,8 @@ const MOVES := {
 	},
 	"glimmer":
 	{
+		"stride": 2.3,
+		"gait_hz": 2.57,
 		"idle":
 		[
 			[["Body"], "py", [0, 0, 0.5, 0.03, 1, 0], 0.0],
@@ -491,7 +508,13 @@ static func table(kind: String) -> Dictionary:
 					mask[slot] |= KIND_BIT[ch]
 			out.append([targets, signs, _bake(tr[2], LOOPS[s]), float(tr[3])])
 		states.append(out)
-	var d := {"slots": slots, "mask": mask, "states": states}
+	var d := {
+		"slots": slots,
+		"mask": mask,
+		"states": states,
+		"stride": float(MOVES[k]["stride"]),
+		"gait_hz": float(MOVES[k]["gait_hz"])
+	}
 	_baked[k] = d
 	return d
 
@@ -526,6 +549,25 @@ static func strike_k(attack: String, st: String, st_t: float) -> float:
 		return clampf(1.0 - left / total, 0.0, 1.0)
 	var len_s := float(RECOVER_S.get(attack, 0.0))
 	return clampf(1.0 - st_t / len_s, 0.0, 1.0) if len_s > 0.0 else 0.0
+
+
+## The walk's amplitude at this speed: 1 up to WALK_SPEED, RUN_AMP from RUN_SPEED, blended between.
+static func run_amp(spd: float) -> float:
+	return lerpf(1.0, RUN_AMP, clampf((spd - WALK_SPEED) / (RUN_SPEED - WALK_SPEED), 0.0, 1.0))
+
+
+## Cycles/s the gait runs at this speed: the rate that plants the feet (speed over the stride at this amplitude),
+## held to RATE_MIN..RATE_MAX x the gait's keyed rate. The hold is the skate that remains.
+static func gait_hz(mb: Mob, spd: float) -> float:
+	var d := table(mb.mkind)
+	var hz: float = spd / (float(d["stride"]) * run_amp(spd))
+	var keyed: float = d["gait_hz"]
+	return clampf(hz, keyed * RATE_MIN, keyed * RATE_MAX)
+
+
+## Radians to add to Mob.anim this frame.
+static func gait_step(mb: Mob, spd: float, delta: float) -> float:
+	return gait_hz(mb, spd) * TAU * delta
 
 
 static func state_of(mb: Mob) -> int:
@@ -611,10 +653,14 @@ static func pose(mb: Mob, delta: float) -> bool:
 	var state := state_of(mb)
 	var ph := phase_of(mb, state, rig.desync)
 	var amp := 1.0
+	var rate := float(RATE[state])
 	var trs: Array = rig.def["states"][state]
-	if trs.is_empty() and state == RUN:
-		trs = rig.def["states"][WALK]
-		amp = RUN_AMP
+	if state == WALK or state == RUN:
+		var spd := Vector2(mb.vel.x, mb.vel.z).length()
+		amp = run_amp(spd)
+		rate = maxf(rate, gait_hz(mb, spd) * GAIT_FOLLOW)
+		if trs.is_empty():
+			trs = rig.def["states"][WALK]
 	var acc := rig.acc
 	acc.fill(0.0)
 	_layer(acc, trs, ph, LOOPS[state], amp)
@@ -624,7 +670,7 @@ static func pose(mb: Mob, delta: float) -> bool:
 	rig.hit_t = maxf(0.0, rig.hit_t - delta)
 	if rig.hit_t > 0.0 and state <= RUN:  # a hit shows on the body without dropping the gait or the breath
 		_layer(acc, rig.def["states"][FLINCH], 1.0 - rig.hit_t / FLINCH_S, false, 1.0)
-	var a := 1.0 - exp(-maxf(float(RATE[state]), HIT_RATE if rig.hit_t > 0.0 else 0.0) * delta)
+	var a := 1.0 - exp(-maxf(rate, HIT_RATE if rig.hit_t > 0.0 else 0.0) * delta)
 	for k in rig.nodes.size():
 		var n := rig.nodes[k]
 		var b := k * STRIDE
