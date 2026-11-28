@@ -100,7 +100,8 @@ func _looks(main: Node) -> void:
 	print("RAID clear look: sun %.2f %s rot %s fog %.4f sat %.3f contrast %.2f" % [sun.light_energy, sun.light_color.to_html(false), str(sun.rotation_degrees), e.fog_density, e.adjustment_saturation, e.adjustment_contrast])
 	ok(is_equal_approx(sun.light_energy, 1.18) and sun.light_color.is_equal_approx(Color("ffb27a")) and is_equal_approx(e.fog_density, 0.0042) and is_equal_approx(e.adjustment_contrast, 1.12), "the clear evening keeps the demo look")
 	ok(m.raid_fx == null, "no weather particles on a clear evening")
-	ok(_blue_lead(e.fog_light_color) <= 0.1, "the haze is not blue (fog light blue minus red %.2f)" % _blue_lead(e.fog_light_color))
+	var lead := _blue_lead(e.fog_light_color)
+	ok(lead <= 0.1, "the haze is not blue (fog light blue minus red %.2f)" % lead)
 	var sat_clear := e.adjustment_saturation
 	m.queue_free()
 	var m2 := _match(main, {"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 5102, "no_drop": true, "raid": "ash"})
