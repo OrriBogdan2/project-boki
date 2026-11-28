@@ -299,20 +299,29 @@ func _encore(m: Match, P: Hunter, K: ThiefKit, home: Vector3) -> void:
 func _run(m: Match, P: Hunter, K: ThiefKit, home: Vector3) -> void:
 	_settle(m, P, K, home, 0.3)
 	P.inp["move"] = Vector2(0, 1)
-	for f in 40:
+	for f in 60:                                   # (a second: the blend is all the way out of the idle)
 		_frame(m, P)
 	var c := _clips(P)
 	var speed := Vector2(P.vel.x, P.vel.z).length()
 	var hz := _stride_hz(c, P, speed)
 	P.inp["move"] = Vector2.ZERO
-	print("TIME run: %.2f m/s, stride %.2f Hz (sheet %.1f Hz)" % [speed, hz, SOURCE_STRIDE])
+	var clip_len := c.lib.get_animation(String(c.d["loco"]["run"]["f"])).length
+	var tree_hz := float(c.tree.get("parameters/loco_rate/scale")) / clip_len
+	print("TIME run: %.2f m/s (%.2f at the model's scale), stride %.2f Hz (sheet %.1f Hz); tree %.2f Hz at blend %s"
+			% [speed, _body_mps(c, speed), hz, SOURCE_STRIDE, tree_hz, c.loco_pos])
 	A.ok("Sable timing run: the stride matches the sheet's (about 2.3 Hz)", absf(hz - SOURCE_STRIDE) < 0.2,
 			"%.2f Hz at %.2f m/s" % [hz, speed])
 	_settle(m, P, K, home, 0.6)
 
-## Gait cycles a second at this speed: the run clip's length and the rate WardenClips plays it at (WardenGait.plan:
-## the speed over the clip's foot speed, clamped).
+## Gait cycles a second at this speed, running straight ahead: the run clip's length and the rate WardenClips plays it
+## at (WardenGait.plan: the speed over the clip's foot speed, clamped). The speed goes in at the model's own scale, as
+## WardenClips plans it (the match draws her bigger: the raw match speed read 1.23x too many cycles, 2.51 Hz for a
+## 2.04 Hz run, 11-28). The tree itself plays her aim-strafe loop here (she faces the foe), so it is printed, not read.
 func _stride_hz(c: WardenClips, _P: Hunter, speed: float) -> float:
 	var lc: Dictionary = c.d["loco"]
 	var clip_len := c.lib.get_animation(String(lc["run"]["f"])).length
-	return c.gait.plan(speed, lc, Vector2(0, 1), 1.0) / clip_len   # running straight ahead, all the way to the run
+	return c.gait.plan(_body_mps(c, speed), lc, Vector2(0, 1), 1.0) / clip_len
+
+## The match speed `speed` at the model's own scale (WardenClips._loco: "foot_mps" is read on the model).
+func _body_mps(c: WardenClips, speed: float) -> float:
+	return speed * c.look_y / maxf(absf(c.root.scale.y), 0.01)
