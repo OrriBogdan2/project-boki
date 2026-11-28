@@ -94,8 +94,8 @@ static func _trail_tick(life: BaseLife, k: Dictionary, m: Fsm) -> void:
 	if m.since >= float(r["check_s"]):
 		m.go(BaseLife.S.ROAM, "needs")
 		return
-	if h.hway != null and h.hway.hopping != "":
-		pass  # the Waystone is lit for the hop: wait where it stands
+	if (h.hway != null and h.hway.hopping != "") or h.world.island_of(h.ppos.x, h.ppos.z) < 0:
+		pass  # the Waystone is lit for the hop, or you are over the void: wait where it stands
 	elif _lost(h, pos, to, r):
 		h._start_leap(k, h.world.free_spot_near(h.ppos + _away(h, to) * float(r["settle_m"]), [], 1.0))
 	elif to.length() > float(r["max_m"]):
@@ -111,7 +111,8 @@ static func _trail_tick(life: BaseLife, k: Dictionary, m: Fsm) -> void:
 	if goal == pos:
 		k.erase("led")
 	else:
-		k["led"] = clampf(maxf(speed * 1.1, float(r["walk_mps"])), float(r["walk_mps"]), float(r["run_mps"]))
+		var hurry := maxf(0.0, to.length() - float(r["max_m"]))  # 1 m/s more for each m past the band
+		k["led"] = clampf(speed * 1.1 + hurry, float(r["walk_mps"]), float(r["run_mps"]))
 
 
 ## On another island or past the leash: it leaps to you.
