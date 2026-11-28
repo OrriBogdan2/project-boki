@@ -127,7 +127,8 @@ func _wants() -> void:
 			k["rec"]["needs"][n] = 80.0
 		k["rec"]["needs_t"] = Time.get_unix_time_from_system() + 9999.0
 	home._update_bubbles(0.5)
-	ok(home.kins.all(func(k): return not k["bubble"].visible), "nothing needed: no bubbles")
+	var calm := func(k): return not k["bubble"].visible or String(k.get("bubble_icon", "")) == "happy"
+	ok(home.kins.all(calm), "nothing needed: no want bubbles (a content Boki beside you may smile)")
 	a["rec"]["needs"]["food"] = 10.0
 	b["rec"]["needs"]["energy"] = 30.0
 	b["pos"] = a["pos"] + Vector3(0.6, 0, 0)
