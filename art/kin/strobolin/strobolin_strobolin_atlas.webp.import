@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://duynnibt0kove"
-path="res://.godot/imported/strobolin_strobolin_atlas.webp-24844ad1762b4a163576fe22c87d6feb.ctex"
+path.s3tc="res://.godot/imported/strobolin_strobolin_atlas.webp-24844ad1762b4a163576fe22c87d6feb.s3tc.ctex"
+path.etc2="res://.godot/imported/strobolin_strobolin_atlas.webp-24844ad1762b4a163576fe22c87d6feb.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "26b9c1af71e4d1ed23d7e4a789029066"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/strobolin/strobolin_strobolin_atlas.webp"
-dest_files=["res://.godot/imported/strobolin_strobolin_atlas.webp-24844ad1762b4a163576fe22c87d6feb.ctex"]
+dest_files=["res://.godot/imported/strobolin_strobolin_atlas.webp-24844ad1762b4a163576fe22c87d6feb.s3tc.ctex", "res://.godot/imported/strobolin_strobolin_atlas.webp-24844ad1762b4a163576fe22c87d6feb.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cw1euj7wylmmu"
-path="res://.godot/imported/eclipsowl_eclipsowl_normal.webp-304c8bc22a6c98a9a661a1dd4e4f8ad2.ctex"
+path.s3tc="res://.godot/imported/eclipsowl_eclipsowl_normal.webp-304c8bc22a6c98a9a661a1dd4e4f8ad2.s3tc.ctex"
+path.etc2="res://.godot/imported/eclipsowl_eclipsowl_normal.webp-304c8bc22a6c98a9a661a1dd4e4f8ad2.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "bbb0a851443eb624b97cc4fdc5c6f513"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/eclipsowl/eclipsowl_eclipsowl_normal.webp"
-dest_files=["res://.godot/imported/eclipsowl_eclipsowl_normal.webp-304c8bc22a6c98a9a661a1dd4e4f8ad2.ctex"]
+dest_files=["res://.godot/imported/eclipsowl_eclipsowl_normal.webp-304c8bc22a6c98a9a661a1dd4e4f8ad2.s3tc.ctex", "res://.godot/imported/eclipsowl_eclipsowl_normal.webp-304c8bc22a6c98a9a661a1dd4e4f8ad2.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
