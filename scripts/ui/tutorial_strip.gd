@@ -20,6 +20,10 @@ const ARROW_W := 0.53           # of the strip's height: the way-to-go arrow and
 const GAP := 8.0                # px kept under whatever already sits at the top-centre (`below`)
 const CHIME := "ui_open"        # the UI set's panel-drop sound, played once as a new objective's pulse starts
 const FIGHT_S := 3.0            # s after your last hurt that still counts as a fight (the chime ducks)
+const TWICE_T := 1.4            # s one loop of the two-press demo on a "press it again" cap (the glide step)
+const TWICE_TAP := 0.14         # s the demo's first press stays down (the jump: a tap)
+const TWICE_DOWN := 0.38        # s into the loop the second press goes down and stays held (the glide) ...
+const TWICE_UP := 1.1           # ... until here, then both keys are up for the rest of the loop
 
 ## Where the strip sits for a screen size: under the safe margin, and under `below` (the bottom of the
 ## Ways Out strip in a real match, WaysOutHud.bottom) when that is lower, so it never covers the zone clocks.
@@ -50,8 +54,17 @@ static func shown(sz: Vector2, age: float, below := 0.0) -> Rect2:
 	r.position.y -= pow(1.0 - k, 3.0) * (r.end.y + 4.0)
 	return r
 
-## Draws the strip on any CanvasItem. `line` has: text, key_cap, count ("1/3" or ""), dist ("12m" or "") and
-## dir (a Vector2 for the arrow, ZERO for none). `age` is the seconds since the objective changed;
+## The two-press demo `t` s into it: 1 while the first press is down, 2 while the second is held, else 0.
+static func twice_press(t: float) -> int:
+	var k := fposmod(t, TWICE_T)
+	if k < TWICE_TAP:
+		return 1
+	return 2 if k >= TWICE_DOWN and k < TWICE_UP else 0
+
+## Draws the strip on any CanvasItem. `line` has: text, key_cap, count ("1/3" or ""), dist ("12m" or ""),
+## dir (a Vector2 for the arrow, ZERO for none) and, for a "press it again" step, twice_t (the seconds the
+## two-press demo has run: the cap goes down for a tap, then for a held second press, a dot lighting for each).
+## `age` is the seconds since the objective changed;
 ## `alpha` fades the whole strip.
 static func paint(ci: CanvasItem, font: Font, r: Rect2, line: Dictionary, age: float, alpha := 1.0) -> void:
 	var g := glow(age)
@@ -74,9 +87,17 @@ static func paint(ci: CanvasItem, font: Font, r: Rect2, line: Dictionary, age: f
 		_arrow(ci, Vector2(lay["arrow_end"], mid), r.size.y, line["dir"], alpha)
 	if lay.has("cap_rect"):
 		var cr: Rect2 = lay["cap_rect"]
-		ci.draw_style_box(_box(Color(0.93, 0.95, 0.98, alpha), 8, Color(0, 0, 0, 0), 0), cr)
+		var press := twice_press(float(line["twice_t"])) if line.has("twice_t") else 0
+		var sink := Vector2(0.0, r.size.y * 0.05) if press > 0 else Vector2.ZERO
+		var face := Color(0.62, 0.68, 0.76, alpha) if press > 0 else Color(0.93, 0.95, 0.98, alpha)
+		ci.draw_style_box(_box(face, 8, Color(0, 0, 0, 0), 0), Rect2(cr.position + sink, cr.size))
 		var ink := Color(0.06, 0.08, 0.12, alpha)
-		_text(ci, font, lay["cap_at"], String(line["key_cap"]), px, ink, false)
+		_text(ci, font, lay["cap_at"] + sink, String(line["key_cap"]), px, ink, false)
+		if line.has("twice_t"):
+			for i in 2:  # (one dot per press, under the cap)
+				var dot := Vector2(cr.get_center().x + (i - 0.5) * r.size.y * 0.24, cr.end.y + r.size.y * 0.1)
+				var dot_col := Color(GOLD, alpha) if press == i + 1 else Color(MINT, alpha * 0.3)
+				ci.draw_circle(dot, r.size.y * 0.045, dot_col)
 	_text(ci, font, lay["text_at"], String(line.get("text", "")), lay["text_px"], Color(GOLD, alpha))
 
 ## Where everything in the strip sits (the one place its widths are worked out, so a check can read them): from the

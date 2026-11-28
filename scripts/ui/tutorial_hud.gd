@@ -76,6 +76,8 @@ static func _keep_sign_clear(h, sz: Vector2, tu: Tutorial) -> void:
 ## detail goes to the message lane when the step opens: Tutorial.)
 static func _bar(h, r: Rect2, tu: Tutorial, dir: Vector2) -> void:
 	var line := {"text": tu.text, "key_cap": tu.key_cap, "count": tu.progress_text(), "dir": dir}
+	if tu.id() == "glide":
+		line["twice_t"] = tu.t  # (the second press opens the glider: the cap shows it)
 	if dir != Vector2.ZERO:
 		var gap := Vector2(tu.target.x - tu.m.player.pos.x, tu.target.z - tu.m.player.pos.z)
 		line["dist"] = "%dm" % int(round(gap.length()))
