@@ -36,7 +36,7 @@ func _farm(rich: bool) -> void:
 	Econ.ensure()
 	Save.d["tutorial"]["hatched"] = true
 	Save.d["cls"] = "medium"
-	Save.d["matches"] = HudGroups.NEW_PLAYER_MATCHES      # the whole HUD: a new save gets it staged (HudReveal)
+	Save.d["matches"] = int(HudReveal.groups()["kit_card"]["from_match"]) - 1  # the whole HUD (HudReveal)
 	var rec := Save.new_kin("cindle", "Pip", 77)
 	Save.d["roster"] = [rec]
 	Save.d["active"] = rec["uid"]
