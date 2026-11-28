@@ -100,6 +100,17 @@ The first time you come home with a garden item kind you never had, the nearest 
 (`ComeLook` kind `item`, flag `loot_react_<id>` in Save.d tutorial, so once per kind per save and no migration), reacts by its
 traits (curious sniffs, timid hides and says `look_shy`, the rest puff up and say `look_item`) and its journal keeps one line:
 "sniffed the new Thumpnut". No pop-up. `--come-look-check` (two kinds, then plain loot) and a react row in `--garden-day-played-check`.
+## Ghost laps on the Dash (no live netcode)
+
+Every Dash lap at home is taped (`RaceGhost.Tape`: each runner's distance every 0.1 s). The fastest
+lap on each course is kept in `Save.d["ghosts"]` (`RaceGhost.keep_best`); a course is the lap's
+stretch layout, so the weekly "Two streams" loop has its own. A lap is about 0.5 KB of save (cm moved
+per tick as base64 bytes; the longest kept, 120 s, is 1.7 KB). The visit snapshot carries the laps
+(`Social.profile_doc`, cleaned by `RaceGhost.clean`). A visitor at the friend's race post runs their
+partner against the faded ghost, the owner's name over it, cheering at the marks as in any Dash; a win
+sends a `race` gift (`RaceGhost.beat_gift`) and the friend finds the winner pinned to their showcase
+wall when they come home (`RaceGhost.take_gift`). Old saves and older snapshots have no key: no laps.
+`--race-check` holds it: a replayed lap stays within 0.05 s of the real runner all the way round.
 
 ## Balance: 30 days for four players
 
