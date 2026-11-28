@@ -16,12 +16,14 @@ procedural: a downed Hunter is a Wisp, docs/decisions/0019, so a death clip is r
 (`HunterAnim.stomp_k`, no clip anywhere). strafe, crouch and upper are the blends: the 4-way walk and run rings, the
 crouch layer, and kit moves that play on the upper body over the legs. Boki: the .glb clips idle, walk, run, attack,
 ability (cast) and hop (jump: a cheer, and any leap, throw or dive in the air, `kact` hop from `Kin.render`; a
-species without a hop clip runs through the air); a hit and a landing spring `KinFlinch`; a downed Boki topples
-onto its side (`Kin.render`).
+species without a hop clip runs through the air); a hit springs `KinFlinch` (squash and shove toward the blow, plus a short hop-back that grows with the damage and shrinks
+with mass), as does a landing; a downed Boki topples onto its side over 0.4 s with a soft overshoot, then breathes
+(`KinDowned.fall_roll`, `KinDowned.breath`, called from `Kin.render`); a revive pops it up stretched and lifted
+(`KinFlinch.pop`, from `KinDowned.come_round`). All of it is by body plan and mass, so it holds for every species.
 No Bokidex .glb (all 48 in `art/kin/<id>/<id>.glb`, checked 11-20) carries a hit, flinch, faint or death clip: each has the same
 13 (ability, attack, carry, chop, eat, hop, idle, mine, pet, run, sleep, tend, walk). So the starters' `hit` and `death`
 stay `proc` (`KinFlinch`, the downed topple) and nothing is mapped; when a species gets such a clip, map it in the rig
-with a 0.1 s blend and keep `KinFlinch` as the fallback. `--boki-flinch-shots --video` renders each starter's hit and faint.
+with a 0.1 s blend and keep `KinFlinch` as the fallback. `--boki-flinch-shots --video` renders each starter's hit, fall and revive in one sequence; `--boki-react-check` asserts the hop, the pop and the topple.
 
 Boki garden states (`tools/anim_coverage_boki.gd`): every species with a rigged .glb in the game (a `BokiRig.FRAME`
 row and `art/kin/<id>/<id>.glb`, the Bokidex 3D models, 48 today) through idle, walk, run, attack, cast (`ability`),

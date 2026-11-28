@@ -183,8 +183,8 @@ func _hunter_row(art: String) -> Array:
 
 
 ## Boki: the glb carries idle, walk, run, attack, ability, hop (see BokiRig._state_clip). Hits, landings and dashes
-## spring KinFlinch's Flex over the clip (found by the call in the source); a downed Boki topples onto its side
-## (Kin.render).
+## spring KinFlinch's Flex over the clip (found by the call in the source); a downed Boki topples onto its side over
+## KinDowned.FALL_S and breathes (Kin.render), and its revive pops it up (KinFlinch.pop, KinDowned.come_round).
 ## Jump is the hop clip only when Kin.render asks for it in the air (kact hop): without that a leap runs.
 ## Glide: a carried Boki spreads its legs (BokiHomeClips' glide, played when Kin.render sets kact glide); `_boki_air`
 ## checks the live rig plays it.
@@ -200,7 +200,7 @@ func _boki_row(id: String) -> Array:
 		_cell(clips.has("run")),
 		_cell(clips.has("attack")),
 		flinch.call("res://scripts/arch/oomph.gd", "KinFlinch.hit("),
-		"proc",
+		flinch.call("res://scripts/match/kin.gd", "KinDowned.fall_roll("),
 		jump,
 		flinch.call("res://scripts/match/kin.gd", "KinFlinch.land("),
 		_cell(clips.has("glide"), kin_src.contains('act = "glide"')),

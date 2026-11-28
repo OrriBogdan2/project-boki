@@ -2,8 +2,9 @@ extends RefCounted
 ## --boki-flinch-shots --shots-dir=<dir> [--px=384] [--dash]: a strip per species of a Boki taking a big hit (KinFlinch)
 ## from the side: rest, then AT seconds after it. <dir>/flinch_<species>.png and flinch_all.png. Needs a renderer.
 ## --dash: the 3 starter Boki set off on a dash to the right instead (side view, KinFlinch.dash), files dash_*.png.
-## --video: the 3 starter Boki, one frame sequence each (30 fps) of the big hit and of fainting (the downed topple
-## Kin.render gives Body), <dir>/<id>_<hit|faint>/f%03d.png; encode with ffmpeg -framerate 30 -i f%03d.png.
+## --video: the 3 starter Boki, one frame sequence each (30 fps): a big hit (hop-back), going down (the topple and
+## breathing Kin.render gives Body), then the revive pop; <dir>/<id>_story/f%03d.png; encode with
+## ffmpeg -framerate 30 -i f%03d.png.
 
 const SPECIES := ["cindle", "zapple", "wisplet", "zephyrak", "basaltoad", "puddlet"]
 const STARTERS := ["burrlet", "cindle", "puddlet"]
@@ -11,10 +12,11 @@ const AT := [-0.05, 0.05, 0.1, 0.2, 0.3, 0.6]       # s from the hit, left to ri
 const STEP := 1.0 / 60.0
 const BIG := 0.35
 const VIDEO_FPS := 30
-const VIDEO_S := 1.4                # s of each video clip; the hit or the faint lands 0.3 s in
-const VIDEO_LEAD := 0.3
-const FAINT_ROLL := 1.4             # rad Body rolls onto its side (Kin.render, downed)
-const FAINT_RATE := 6.0             # 1/s the roll eases in at (Kin.render)
+const HIT_AT := 0.3                 # s into a video clip: the big hit
+const DOWN_AT := 1.4                # s: it goes down
+const REVIVE_AT := 3.4              # s: it pops back up
+const VIDEO_S := 4.4                # s of each video clip
+const UP_RATE := 8.0                # 1/s the roll eases back to upright at (Kin.render)
 
 var main: Node
 var out := "/tmp/boki_flinch"
@@ -37,8 +39,7 @@ func run(m: Node) -> void:
 	Save.no_write = true
 	if video:
 		for id in STARTERS:
-			for what in ["hit", "faint"]:
-				await _video(id, what)
+			await _video(id)
 		print("BOKI_FLINCH_SHOTS_DONE")
 		main.get_tree().quit()
 		return
@@ -116,29 +117,36 @@ func _step(pup: KinPuppet, rig: BokiRig) -> void:
 		rig.advance(STEP)
 		rig._process(STEP)
 
-## A frame sequence of `id` taking the big hit, or fainting: dazed, Body rolled onto its side.
-func _video(id: String, what: String) -> void:
+## A frame sequence of `id` taking the big hit, going down and being revived (the Kin.render calls, by hand).
+func _video(id: String) -> void:
 	var st := _stage(id)
 	var vp: SubViewport = st[0]
 	var k: Node3D = st[1]
 	var body: Node3D = k.get_node("Body")
-	var dir := out.path_join("%s_%s" % [id, what])
+	var dir := out.path_join("%s_story" % id)
 	DirAccess.make_dir_recursive_absolute(dir)
-	var dt := 1.0 / VIDEO_FPS
-	var fired := false
 	for _w in int(0.6 / STEP):
 		_step(st[2], st[3])
+	var time := 0.0
 	for f in int(VIDEO_S * VIDEO_FPS):
-		if f * dt >= VIDEO_LEAD and not fired:
-			fired = true
-			if what == "hit":
-				KinFlinch.hit(k, Vector3(1, 0, 0), BIG, KinLib.kin(id).mass)
-			else:
-				k.set_meta("dazed", true)
-				k.set_meta("starry", true)
+		var t := f / float(VIDEO_FPS)
+		if f == int(HIT_AT * VIDEO_FPS):
+			KinFlinch.hit(k, Vector3(1, 0, 0), BIG, KinLib.kin(id).mass)
+		if f == int(DOWN_AT * VIDEO_FPS):
+			k.set_meta("dazed", true)
+			k.set_meta("starry", true)
+		if f == int(REVIVE_AT * VIDEO_FPS):
+			k.set_meta("dazed", false)
+			k.set_meta("starry", false)
+			KinFlinch.pop(k, KinLib.kin(id).mass)
 		for _s in 2:
-			if fired and what == "faint":
-				body.rotation.z = lerpf(body.rotation.z, FAINT_ROLL, STEP * FAINT_RATE)
+			time += STEP
+			body.scale = Vector3.ONE
+			if t >= REVIVE_AT:
+				body.rotation.z = lerpf(body.rotation.z, 0.0, STEP * UP_RATE)
+			elif t >= DOWN_AT:
+				body.rotation.z = KinDowned.fall_roll(t - DOWN_AT)
+				body.scale = KinDowned.breath(t - DOWN_AT, time)
 			_step(st[2], st[3])
 		for n in 3:
 			await RenderingServer.frame_post_draw
