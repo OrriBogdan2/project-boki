@@ -39,7 +39,7 @@ What the in-game kit card (K) says.
 |---|---|
 | Loop | Controller: stuns from range, drops a growing bomb on the stunned, and trades places to set it up. |
 | Passive: Swell | Hits fill Swell; full, you are Swollen 9s and everything grows. |
-| Dash: Lantern Trade | Lob a lantern; foes in its circle swap places with you. |
+| Dash: Lantern Trade | Lob a lantern; foes in its circle swap places with you and are slowed 40% for 3s. |
 | RMB: Shard Snap | Shard bundle that stuns the first foe, longer the further it flew. |
 | E: Brimseed | Plant a bomb that grows for 6.5s; press again to pop it. |
 | Hunter ultimate: Nightwell | Open a well that stuns and pulls in everything for 3.5s. |
@@ -49,7 +49,7 @@ What the in-game kit card (K) says.
 
 **Swell (passive).** Damage you deal fills Swell (ten times as fast against hunters). Full Swell makes you Swollen for 9s, wrapped in a light-teal sphere: your seed grows larger and faster, Trade lands sooner, your Snap hits 44% harder. You float: lava, spore pods and other ground hazards pass you by.
 
-**Lantern Trade (dash, Shift, 9.5s cooldown).** Hold the dash key to see both ends, let go (or tap) to lob a lantern to the cursor, up to 12m (past that, at 12m toward it), over ground, walls or the abyss; aimed at a cliff or a high ledge it lands on top, and never inside a wall or rock. You hover at your height until it lands, even over the abyss, drifting at 68% speed, with a sigil marking each end. 1.8s later you are there, keeping your height (on a ledge, standing on it), and everyone in its 1.9m circle (foes, allies and Boki) is sent to where you are when it lands, each keeping its place in the circle. Swollen: 1.25s.
+**Lantern Trade (dash, Shift, 9.5s cooldown).** Hold the dash key to see both ends, let go (or tap) to lob a lantern to the cursor, up to 12m (past that, at 12m toward it), over ground, walls or the abyss; aimed at a cliff or a high ledge it lands on top, and never inside a wall or rock. You hover at your height until it lands, even over the abyss, drifting at 68% speed, with a sigil marking each end. 1.8s later you are there, keeping your height (on a ledge, standing on it), and everyone in its 1.9m circle (foes, allies and Boki) is sent to where you are when it lands, each keeping its place in the circle; a swapped foe is slowed 40% for 3s. Swollen: 1.25s.
 
 **Shard Snap (RMB, 10s cooldown).**
 

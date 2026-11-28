@@ -84,6 +84,8 @@ Every row the 0.24.4 re-audit left open, branch ready or `[?]` was re-read again
 | Tenzo | Ridge 12 m vs 18-21.6 | **done** `ext/parity-tenzo-ridge` f5f84aef1 | no line (re-measured, f0579) |
 | Neve | RMB range, E slide max `[?]` | **owner** | not determinable; zone 2.2 and burst 2.7 pinned by ext/ranges-source-rest (no line) |
 | Motley | Brimseed fizzles at 10 s | **done** `ext/motley-seed-fizzle` 9f521695a | ext/w0246-combat-a |
+| Motley | Snap self speed burst (+50 cast, +100 hit) | **match on main** (rank 3 = the data's rank IV, 10.8% / 21.5% for 2 s, `snap.boost`; asserted in `--ostra-combo-check`) | CATALOG-13-1127 section 9 read kit text only |
+| Motley | Swap slows the swapped enemy 0.6x for 3 s | **done** `ext/motley-snap-swap` (`dash.foe_slow` 0.4, `foe_slow_t` 3.0, `KitStatus` Disoriented: strongest slow counts; asserted in `--ostra-combo-check`) | no line |
 | Motley | Orb slow 10% vs 6% | **done** `ext/parity-motley-orb-slow` f47bc5c35 | no line; the card tooltip (game data) outranks the wiki |
 | Motley | "Floats" `[?]` | **done** `ext/parity-motley-float` f48366abc | ext/w0246-combat-b-wip only |
 | Motley | RMB range 13, R cast range 10 `[?]` | **owner** | not determinable (ext/ranges-source-rest) |
