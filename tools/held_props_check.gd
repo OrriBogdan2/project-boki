@@ -17,7 +17,7 @@ const REF := {"juggernaut": 0.61, "gil": 0.71, "dredge": 0.0}
 const TOL := 0.25                # +/- of the reference
 const FLOAT_CM := 3.0            # the fist further than this from the prop's surface: it floats
 const AXIS_CM := 5.0             # a haft's axis further than this from the fist: not in the palm
-const CROSS_DEG := 65.0          # the haft this far off the knuckle line: along the hand, out of the wrist, not in the palm
+const CROSS_DEG := 65.0          # the haft further off the knuckle line: along the hand (out of the wrist)
 const HOLD_POSES := {
 	"juggernaut": [["idle", {}], ["run", {"vel": 4.6}], ["LMB 1", {"kmove": "jug_slash_r", "kmove_t": 0.1}],
 		["LMB 2", {"kmove": "jug_slash_l", "kmove_t": 0.1}],
