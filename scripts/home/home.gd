@@ -3162,7 +3162,7 @@ func _open_kin(rec: Dictionary) -> void:
 	var v := _new_panel(("%s the %s%s" % [rec["name"], kpre, Evo.form_name(rec)]) if kpre != "" else Data.kin_title(String(rec["name"]), Evo.form_name(rec)), 820)
 	UI.hold(v, KIN_CARD_H)
 	UI.title_icon(v, UI.sex_icon(rec, 22.0))
-	UI.subtitle(v, "Level %d  ·  %s Boki  ·  %s  ·  %s nature" % [int(rec["level"]), String(sp["type"]).capitalize(), Care.stage_name(rec), Care.nature(rec)])
+	UI.subtitle(v, "Level %d  ·  %s  ·  %s Boki  ·  %s  ·  %s nature" % [int(rec["level"]), KinSpeak.about(rec, "{he}/{him}"), String(sp["type"]).capitalize(), Care.stage_name(rec), Care.nature(rec)])
 	var hx := UI.head_extra(v)
 	hx.add_child(VoidPortrait.of(rec, get_tree(), 84.0))
 	if partner: hx.add_child(UI.tag("Partner", UI.ACCENT))
@@ -3197,40 +3197,10 @@ func _open_kin(rec: Dictionary) -> void:
 			AboutView.looks(rec, c1)
 			c2.add_child(UI.section("Where it's from"))
 			AboutView.history(rec, c2)
-		"Care":
-			var bd: Array = Care.bond(rec)
-			var nb: Array = Care.next_bond(rec)
-			c1.add_child(UI.section("Bond  ·  %s" % bd[1]))
-			var lo := float(bd[0]); var hi := float(nb[0]) if nb.size() > 0 else 100.0
-			row.call(c1, "Trust", clampf((float(rec["trust"]) - lo) / maxf(1.0, hi - lo), 0.0, 1.0), Color("ffb3c6"), ("next: %s" % nb[1]) if nb.size() > 0 else "max")
-			c1.add_child(UI.para(String(bd[2]), 12, UI.MUTED))
-			c1.add_child(UI.spacer(4))
-			var starving := Care.starve_stage(rec) != ""
-			c1.add_child(UI.section(Care.condition_name(rec), Color("ff9a7a") if starving else UI.PINK))
-			if starving:
-				c1.add_child(UI.para(String(Care.STARVE_INFO[Care.starve_stage(rec)][1]), 12, Color("ffb0a0")))
-			for n in Care.NEEDS:
-				row.call(c1, Care.NEED_INFO[n]["name"], Care.need(rec, n) / 100.0, Care.NEED_INFO[n]["col"], str(int(Care.need(rec, n))))
-			c2.add_child(UI.section("Likes"))
-			ZoneAffinity.add_line(c2, rec)
-			var known: Array = rec["known"]
-			var lk: Dictionary = rec["likes"]
-			c2.add_child(UI.kv("Loves", Care.food_name(lk["food"]) if known.has("food") else "???", UI.INK if known.has("food") else UI.FAINT))
-			c2.add_child(UI.kv("Won't eat", Care.food_name(lk["hates"]) if known.has("hates") else "???", UI.INK if known.has("hates") else UI.FAINT))
-			c2.add_child(UI.kv("Favourite game", Care.PLAY_NAMES[lk["play"]] if known.has("play") else "???", UI.INK if known.has("play") else UI.FAINT))
-			if known.size() < 3: c2.add_child(UI.para("Feed it and play with it to find out.", 12, UI.FAINT))
 			JournalCard.add(rec, c2)
-			c2.add_child(UI.spacer(2))
-			WorkView.card_section(self, rec, c2, func(): _open_kin(rec))
-			var mem: Array = rec.get("memory", [])
-			if mem.size() > 0:
-				c2.add_child(UI.spacer(4))
-				c2.add_child(UI.section("Remembers"))
-				for i in range(maxi(0, mem.size() - 1), mem.size()):
-					var t := String(mem[i]["text"])
-					c2.add_child(UI.para("\u201c%s\u201d" % (t.substr(0, 1).to_upper() + t.substr(1)), 13, UI.INK.darkened(0.1)))
-			if String(rec.get("title", "")) != "":
-				c2.add_child(UI.para("%s %s  ·  came back from the Soul Shrine" % [rec["name"], rec["title"]], 12, Color("bff8ec")))
+			BokiCard.remembers(rec, c2)
+		"Care":
+			BokiCard.fill(self, rec, c1, c2, func(): _open_kin(rec))
 		"Training":
 			c1.add_child(UI.section("Stats", UI.FAINT.lightened(0.2)))
 			StatBudgetView.fill(c1, rec, stat_glint.lit_for(rec))

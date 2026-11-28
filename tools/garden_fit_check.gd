@@ -9,12 +9,17 @@ extends RefCounted
 ## the real save.
 
 const SettingsScript := preload("res://scripts/core/settings.gd")
-const SIZES := [[Vector2i(1280, 720), 1.0], [Vector2i(1920, 1080), 1.0], [Vector2i(2560, 1080), 1.0],
-		[Vector2i(960, 540), 1.0], [Vector2i(1280, 720), SettingsScript.UI_SCALE_MAX]]      # [window, "ui_scale"]
-const SAFE_MIN := 16.0       # px (logical), the least gap from a panel to the window's edge (as UI.scroll_panel)
-const SLACK := 1.5           # px a control may stick out of its panel (rounding of the torn frames)
-const SETTLE := 8            # frames for a panel and its scroll to size themselves
-const GROWN := 8             # level at which a Boki can go in the Nook
+const SIZES := [
+	[Vector2i(1280, 720), 1.0],
+	[Vector2i(1920, 1080), 1.0],
+	[Vector2i(2560, 1080), 1.0],
+	[Vector2i(960, 540), 1.0],
+	[Vector2i(1280, 720), SettingsScript.UI_SCALE_MAX]
+]  # [window, "ui_scale"]
+const SAFE_MIN := 16.0  # px (logical), the least gap from a panel to the window's edge (as UI.scroll_panel)
+const SLACK := 1.5  # px a control may stick out of its panel (rounding of the torn frames)
+const SETTLE := 8  # frames for a panel and its scroll to size themselves
+const GROWN := 8  # level at which a Boki can go in the Nook
 
 var bad := 0
 var main: Node
@@ -27,13 +32,16 @@ var screens := {
 	"wishes": func(): _wishes(),
 	"games_picker": func(): MinigameHub.open(home),
 	"nook_preview": func(): _nook(),
-	"boki_card_family": func(): _boki_card(),
+	"boki_card": func(): _boki_card("Care"),
+	"boki_card_family": func(): _boki_card("Family"),
 }
+
 
 func ok(cond: bool, what: String) -> void:
 	print("GARDENFIT %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(m: Node) -> void:
 	main = m
@@ -47,8 +55,10 @@ func run(m: Node) -> void:
 	nav._save()
 	_dress_save()
 	home = await nav._open_home()
-	ok(not home.hg.demo_place("training_post", HomeLayout.LANDING + Vector3(5.0, 0, 3.0)).is_empty(),
-			"a Training post placed (the picker lists its games)")
+	ok(
+		not home.hg.demo_place("training_post", HomeLayout.LANDING + Vector3(5.0, 0, 3.0)).is_empty(),
+		"a Training post placed (the picker lists its games)"
+	)
 	await _frames(2)
 	ok(not MinigameHub.listed(home).is_empty(), "the picker has games to list")
 	if main.get("fade") != null:
@@ -64,6 +74,8 @@ func run(m: Node) -> void:
 			await _frames(SETTLE)
 			var tag := "%dx%d%s_%s" % [px.x, px.y, "" if user_scale == 1.0 else "_ui%s" % user_scale, id]
 			_scan(tag)
+			if id == "boki_card":
+				_card_facts(tag, user_scale == 1.0)
 			if shots_dir != "":
 				var img := main.get_viewport().get_texture().get_image()
 				img.save_png(shots_dir.path_join(tag + ".png"))
@@ -72,9 +84,11 @@ func run(m: Node) -> void:
 	print("GARDENFIT DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _frames(n: int) -> void:
 	for i in n:
 		await main.get_tree().process_frame
+
 
 ## Six Boki, two Grown friends (the first with a record of parents), three with wishes, a Dash winner on the wall.
 func _dress_save() -> void:
@@ -82,13 +96,18 @@ func _dress_save() -> void:
 	for i in 2:
 		roster[i]["level"] = GROWN
 		roster[i]["trust"] = 60.0
-	roster[0]["lineage"] = {"parents": [], "names": ["Pennyroyal the Wandering", "Bartholomew-Longname"], "gen": 3,
-			"nest": {"gifts": 2, "species": true, "habit": true}}
+	roster[0]["lineage"] = {
+		"parents": [],
+		"names": ["Pennyroyal the Wandering", "Bartholomew-Longname"],
+		"gen": 3,
+		"nest": {"gifts": 2, "species": true, "habit": true}
+	}
 	for i in range(2, 5):
 		for n in roster[i]["needs"]:
 			roster[i]["needs"][n] = 5.0
 	Save.d.erase("wishes")
 	Save.d["showcase"] = [{"name": "Pennyroyal the Wandering", "date": "day 12", "twist": "Low-gravity gust week"}]
+
 
 func _wishes() -> void:
 	var v: VBoxContainer = home._new_panel("Today's wishes", 520)
@@ -102,13 +121,46 @@ func _wishes() -> void:
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		v.add_child(l)
 
+
 func _nook() -> void:
 	home.nook_pick = [Save.d["roster"][0]["uid"], Save.d["roster"][1]["uid"]]
 	home._open_nook()
 
-func _boki_card() -> void:
-	home.kin_tab = "Family"
+
+func _boki_card(tab: String) -> void:
+	home.kin_tab = tab
 	home._open_kin(Save.d["roster"][0])
+
+
+## Nothing on the open panel scrolls (at the plain Interface size): no scroll area is taller inside than shown.
+func _no_scroll(tag: String) -> void:
+	var panel: Control = home.panel_host.get_children().filter(func(c): return not c.is_queued_for_deletion())[-1]
+	var over: Array = []
+	for sc: ScrollContainer in panel.find_children("*", "ScrollContainer", true, false):
+		if sc.is_visible_in_tree() and sc.get_child(0).get_combined_minimum_size().y > sc.size.y + SLACK:
+			over.append(sc.name)
+	ok(over.is_empty(), "%s: nothing scrolls (%s)" % [tag, over])
+
+
+## The one-card Care tab shows level and XP to go, hunger and mood icons, the bond ring and a he/she mark.
+func _card_facts(tag: String, plain: bool) -> void:
+	var panel: Control = home.panel_host.get_children().filter(func(c): return not c.is_queued_for_deletion())[-1]
+	if plain:
+		_no_scroll(tag)
+	var words := ""
+	for l: Label in panel.find_children("*", "Label", true, false):
+		words += l.text + "\n"
+	ok(words.contains("XP to level") or words.contains("Top level"), "%s: level and XP to the next level" % tag)
+	ok(words.contains("she/her") or words.contains("he/him"), "%s: name line says he or she" % tag)
+	ok(
+		not (" it " in words),
+		"%s: never calls a Boki 'it' (%s)" % [tag, words.substr(maxi(0, words.find(" it ") - 20), 40)]
+	)
+	var rings: Array = panel.find_children("*", "Control", true, false).filter(func(c): return c is BokiCard.Ring)
+	ok(rings.size() == 1 and rings[0].pct.ends_with("%"), "%s: one bond ring with its percent" % tag)
+	var glyphs: Array = panel.find_children("*", "Control", true, false).filter(func(c): return c is Icons.Glyph)
+	ok(glyphs.size() >= 2, "%s: hunger and mood icons (%d)" % [tag, glyphs.size()])
+
 
 ## Checks the open panel against the window and its own frame.
 func _scan(tag: String) -> void:
@@ -128,7 +180,7 @@ func _scan(tag: String) -> void:
 		var p := c.get_parent()
 		while p != panel and p != null:
 			if p is ScrollContainer:
-				limit = Rect2(p.global_position.x, -1e6, p.size.x, 2e6)      # scrolls down, never sideways
+				limit = Rect2(p.global_position.x, -1e6, p.size.x, 2e6)  # scrolls down, never sideways
 				break
 			p = p.get_parent()
 		if not limit.grow(SLACK).encloses(c.get_global_rect()):
@@ -138,12 +190,18 @@ func _scan(tag: String) -> void:
 	var texts: Array = cut.slice(0, 3).map(func(c): return c.text)
 	ok(cut.is_empty(), "%s: no text cut short (%d: %s)" % [tag, cut.size(), texts])
 
+
 ## A one-line label or button that clips or ellipsizes a text wider than itself.
 func _cut_short(c: Control) -> bool:
 	if not c.is_visible_in_tree() or c.size.x <= 0.0 or not (c is Label or c is Button) or c.text == "":
 		return false
-	if c is Label and (c.autowrap_mode != TextServer.AUTOWRAP_OFF or (not c.clip_text
-			and c.text_overrun_behavior == TextServer.OVERRUN_NO_TRIMMING)):
+	if (
+		c is Label
+		and (
+			c.autowrap_mode != TextServer.AUTOWRAP_OFF
+			or (not c.clip_text and c.text_overrun_behavior == TextServer.OVERRUN_NO_TRIMMING)
+		)
+	):
 		return false
 	if c is Button and not c.clip_text and c.text_overrun_behavior == TextServer.OVERRUN_NO_TRIMMING:
 		return false
