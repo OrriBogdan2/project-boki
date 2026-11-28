@@ -21,6 +21,11 @@ chain: drills, tutorial resume, clans, XP hints, sleepovers) are the newest pair
 populated farm (kin, bonds, incubator egg, home layout). `save_v15_*` are dev saves from the integ-1113-D1 line, whose v15 was the
 per-Hunter stats step (main's v15 is the drills); they load through v15 -> v20 like any v15 file.
 
+`--save-3p-check` loads the 0.24.4-0.24.6 saves (v12 chain fixture, v13/v14 goldens), as saved and with old non-blocking lamps
+ringed round a Boki and the landing, into the close third-person farm: Boki and you must stand on open ground, buildings keep a
+reachable door, and no saved Boki is dropped. Boki positions are not saved; the load sets you or a Boki off a block or out of
+a pocket (`PlaceClearance.free_trapped`, called after the farm is built).
+
 ## Changing a format on purpose
 Per AGENTS.md section 4 an old save must still load, so a format change ships with a migration:
 1. Bump `Save.VERSION` and add `_migrate_N_to_M` in `scripts/core/save.gd` (`MIGRATIONS`). Settings keep their own

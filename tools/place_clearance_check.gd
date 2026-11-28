@@ -64,6 +64,13 @@ func _stand(home, c: Vector2i) -> void:
 	k["pos"] = Vector3(c.x + 0.5, 0, c.y + 0.5)
 	(k["node"] as Node3D).position = k["pos"]
 
+## An open tile 9+ tiles along the row from the ring (not a rim tree: the load now sets a Boki out of a block too).
+func _rest_spot(hb: HomeBuild, c: Vector2i) -> Vector3:
+	for dx in range(9, 20):
+		if hb.cell_reason(c + Vector2i(dx, 0)) == "":
+			return Vector3(c.x + dx + 0.5, 0, c.y + 0.5)
+	return Vector3(c.x + 9.5, 0, c.y + 0.5)
+
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
@@ -82,7 +89,7 @@ func run(m: Node) -> void:
 	var name1: String = home.kins[1]["rec"]["name"]
 	home.ppos = PlaceClearance.start(home)
 	_stand(home, c)
-	var rest := Vector3(c.x + 9.5, 0, c.y + 0.5)
+	var rest := _rest_spot(hb, c)
 	home.kins[1]["pos"] = rest      # the other Boki stays out in the open, away from the ring
 	# 1. a ring of fence round a Boki shuts it in
 	_ghost(hb, _ring(c))
