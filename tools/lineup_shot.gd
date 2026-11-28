@@ -65,8 +65,8 @@ func run(main: Node) -> void:
 	print("LINEUP_TABLE id | all_top_m | body_top_m | head_anchor_m | width_m | scale_y | meshes")
 	for i in heroes.size():
 		var h := heroes[i] as Node3D
-		var all := _skinned_top(h, false, list_meshes, ORDER[i])
-		var body := _skinned_top(h, true, false, "")
+		var all := skinned_top(h, false, list_meshes, ORDER[i])
+		var body := skinned_top(h, true, false, "")
 		var anchor := WardenGlb.anchor(h, "anchor_head_top")
 		var head := "%.2f" % (anchor.global_position.y - h.global_position.y) if anchor else "-"
 		print("LINEUP_ROW %s | %.2f | %.2f | %s | %.2f | %.3f | %d" % [ORDER[i], all.y, body.y, head, all.x,
@@ -172,7 +172,7 @@ func _grid() -> void:
 
 ## [width (m), top y above the Hunter's feet (m), mesh count] of the visible meshes' skinned bounds; body_only leaves
 ## out meshes whose node name says weapon or prop.
-func _skinned_top(h: Node3D, body_only: bool, list: bool, id: String) -> Vector3:
+func skinned_top(h: Node3D, body_only: bool, list: bool, id: String) -> Vector3:
 	var lo := Vector3(INF, INF, INF)
 	var hi := Vector3(-INF, -INF, -INF)
 	var n := 0
@@ -190,7 +190,7 @@ func _skinned_top(h: Node3D, body_only: bool, list: bool, id: String) -> Vector3
 				prop = true
 		if body_only and prop:
 			continue
-		var bb := _mesh_bounds(m)
+		var bb := mesh_bounds(m)
 		if bb.size == Vector3.ZERO and bb.position == Vector3.ZERO:
 			continue
 		if list:
@@ -205,7 +205,7 @@ func _skinned_top(h: Node3D, body_only: bool, list: bool, id: String) -> Vector3
 
 ## A mesh's world bounds as drawn: skinned meshes through their skeleton's current pose (a skinned AABB read off the
 ## mesh would be the rest pose), others through their transform.
-func _mesh_bounds(m: MeshInstance3D) -> AABB:
+func mesh_bounds(m: MeshInstance3D) -> AABB:
 	var skel := m.get_node_or_null(m.skeleton) as Skeleton3D if m.skin != null else null
 	if skel == null:
 		return m.global_transform * m.get_aabb()
