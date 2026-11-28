@@ -82,7 +82,7 @@
 		"seed_burst": {"fx": [
 			{"p": "flare", "y": 0.8, "size": 1.0, "grow": 1.15, "life": 0.15, "c": "ember", "c2": "ember_hot",
 				"c3": "ember"},
-			{"p": "ring", "size": "r", "size_x": 1.11, "life": 0.5, "c": "ember", "c2": "ember_hot", "c3": "ember_lit"},
+			{"p": "ring", "size": "r", "size_x": 1.11, "hollow": true, "life": 0.5, "c": "ember", "c2": "ember_hot", "c3": "ember_lit"},
 			{"p": "ember", "y": 1.6, "n": 18, "shape": "arc", "arc": 360, "w": 0.2, "radius": "r", "radius_x": 0.9,
 				"speed": 2.0, "spread": 0.3, "grav": 12.0, "drag": 0.5, "life": 0.45, "size": 0.12, "c": "ember",
 				"c2": "ember_hot"}
