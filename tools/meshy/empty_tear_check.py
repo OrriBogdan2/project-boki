@@ -53,7 +53,7 @@ def read(doc, blob, index):
 
 
 def swing(head, degrees):
-    a = np.radians(degrees)
+    a = -np.radians(degrees)  # (+: a thigh or arm forward, to +Z: the packs face +Z as Meshy's rig does)
     rot = np.eye(4)
     rot[1:3, 1:3] = [[np.cos(a), -np.sin(a)], [np.sin(a), np.cos(a)]]
     to_head = np.eye(4)
