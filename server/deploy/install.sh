@@ -99,6 +99,8 @@ FILL_TIMEOUT_DUEL=20
 FILL_TIMEOUT_ARENA=30
 FILL_TIMEOUT_TRIO=20
 TOKENS_DIR=/run/boki
+SOCIAL_DB=/var/lib/boki/social.db
+SOCIAL_OWNERS=
 ENV
 fi
 run chown root:boki "$ENV_FILE"

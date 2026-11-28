@@ -162,5 +162,4 @@ answer to a tap on a hold action). The match's real movement is in `scripts/matc
 | `gen_sfx.py`, `sfx_combat.py`, `gen_train_sfx.py`, `gen_ambience.py`, `compose.py`, `gen_music.py`, `sfx_stats.py` | Sound and music generators |
 | `make_skyreach.py` | Builds `content/maps/skyreach.json` |
 | `gen_names.py`, `rebrand.py` | Name pools; the Kinfall to Project Boki text pass |
-| `build_web.sh`, `mkshell.py`, `shell.html` | The web build wrapper |
 | `vendor_assets.sh`, `vendor_gltf.py` | Bringing in CC0 models |

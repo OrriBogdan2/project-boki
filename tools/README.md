@@ -76,7 +76,6 @@ After any generator: `godot --headless --import`. Also after checking out a bran
 | `health.py` | God-file line budgets and duplicate-content checks (`--strict` fails the ship) | `python3 tools/health.py --strict` |
 | `style_lint.py` | Style ratchet for `.gd` (docs/STYLE.md) | `python3 tools/style_lint.py --file scripts/x.gd` |
 | `py_help_check.py` | Every Python tool answers `--help` | `python3 tools/py_help_check.py` |
-| `mkshell.py` | The page around a Godot web export (gzipped wasm and pck) | `python3 tools/mkshell.py ../build/web ../build/site` |
 | `udp_delay.py` | UDP delay proxy for online-feel runs | `python3 tools/udp_delay.py 9000 9001 60` |
 | `rebrand.py` | Player-facing text rename pass | `python3 tools/rebrand.py --help` |
 | `../server/matchmaker/matchmaker.py` | The matchmaker service (tests: `python3 -m unittest discover -s server/matchmaker/tests`) | `python3 server/matchmaker/matchmaker.py --help` |

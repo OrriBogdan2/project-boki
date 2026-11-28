@@ -19,7 +19,7 @@ What it touches (player-facing text only):
     one (use_custom_user_dir + custom_user_dir_name) so user:// and players' saves don't move.
   * export_presets.cfg: exported file names (ProjectBoki.exe / .zip) and product names.
   * README.md prose (not code); headings that name the game in docs/*.md, CONTENT.md,
-    CONTRIBUTING.md; the visible text of the web shell (tools/shell.html); the heading the
+    CONTRIBUTING.md; the heading the
     abilities doc generator writes; the boot splash logo (art/splash.png) is redrawn once.
 
 What it never touches: identifiers, file paths, node names, class names, dictionary keys,
@@ -145,7 +145,6 @@ JSON_TEXT_KEYS = {"name", "desc", "flavor", "tip", "tips", "play", "blurb", "tit
 
 MD_FULL = ["README.md"]                                              # prose rebranded
 MD_HEADINGS = ["docs/**/*.md", "CONTENT.md", "CONTRIBUTING.md"]       # only headings naming the game
-HTML_FILES = ["tools/shell.html"]
 PY_HEADING_FILES = ["tools/gen_abilities_doc.py"]
 
 
@@ -683,28 +682,6 @@ class Run:
             out.append(new)
         self.commit(rel, src, "\n".join(out))
 
-    # -- web shell
-    def do_html(self):
-        for rel in HTML_FILES:
-            if not os.path.exists(os.path.join(self.root, rel)):
-                continue
-            src = self.read(rel)
-            parts = re.split(r"(<script\b.*?</script>)", src, flags=re.S | re.I)
-            outp = []
-            for p in parts:
-                if p.lower().startswith("<script"):
-                    outp.append(p)
-                    continue
-                # visible text only: leave attribute values and tags alone
-                outp.append(re.sub(r">([^<]*)<", lambda m: ">" + rewrite_game_name(m.group(1)) + "<", p))
-            new = "".join(outp)
-            if new != src:
-                a, b = src.split("\n"), new.split("\n")
-                for i, (x, y) in enumerate(zip(a, b), 1):
-                    if x != y:
-                        self.change(rel, i, x.strip()[:160], y.strip()[:160], "html")
-            self.commit(rel, src, new)
-
     # -- boot splash
     def do_splash(self):
         import hashlib
@@ -812,7 +789,6 @@ def main():
     r.do_project()
     r.do_export()
     r.do_markdown()
-    r.do_html()
     r.do_py()
     r.do_splash()
 

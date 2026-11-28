@@ -56,10 +56,10 @@ container) does the whole release from a feature branch:
 
 ## Export presets
 
-`export_presets.cfg` has **Web** (`../build/web/index.html`), **Windows**
-(`../build/win/ProjectBoki.exe`), **macOS** (`../build/mac/ProjectBoki.zip`) and **Linux**
-(`../build/linux/ProjectBoki.x86_64`). ship.sh passes its own output paths. The web build is for
-prototyping only (`tools/build_web.sh` wraps it with `tools/shell.html`).
+`export_presets.cfg` has **Windows** (`../build/win/ProjectBoki.exe`), **macOS**
+(`../build/mac/ProjectBoki.zip`), **Linux** (`../build/linux/ProjectBoki.x86_64`) and **Linux Server**
+(the headless match server). ship.sh passes its own output paths. Desktop is the only client: there is
+no web build.
 
 ## Pull request checks
 

@@ -1,7 +1,7 @@
 extends Node
 ## Everything players share: island snapshots others can visit, gifts, guilds and their projects,
-## and the town's market (seeds and crops; Boki are never sold) and notice board. Backed by the page's shared store in the web version
-## (see tools/shell.html); unavailable in desktop builds, where these features say so instead.
+## and the town's market (seeds and crops; Boki are never sold) and notice board. Backed by the social store on the
+## matchmaker service (SocialHttp, server/matchmaker/mm/social.py); with no store address these features say so instead.
 ##
 ## Everything read from the store was written by other players, so it is untrusted: every read
 ## goes through the clean_* functions below before the game touches it, and nothing that adds
@@ -11,15 +11,16 @@ signal ready_changed(ok: bool)
 signal clan_removed(clan_name: String)   # my game found I was removed from my clan (and left it)
 
 var ok := false            # the store answered
-var mode := ""             # "db" (shared with everyone the page is shared with) or "local" (this browser)
+var mode := ""             # "db": the shared store
 var me := ""
-var is_owner := false      # the artifact's owner (admin tools are theirs)
+var is_owner := false      # a player the server lists as the game's owner (admin tools are theirs)
 var guild: Dictionary = {}         # my guild, cleaned, plus "id"
 var guild_progress: Dictionary = {} # project -> gems put in
-var _keep: Array = []
+var _http: SocialHttp = null
+var _hellos := 0                    # hellos the store left unanswered
 var _last_publish := -1e9
 var _busy := {}                     # operations in flight, so a double click can't run one twice
-var store_stub := Callable()        # checks only: answers the store calls as (method, args, cb) without a page
+var store_stub := Callable()        # checks only: answers the store calls as (method, args, cb) without a server
 
 const PROJECTS := {
 	"hall": {"name": "Guild Hall", "goal": 600, "perk": "+10% gems from every expedition you make it out of."},
@@ -32,22 +33,40 @@ const CLAN_CAP := 24                # members a clan shows (the store query's li
 const OUT_CAP := 48                 # removals one founder or officer keeps on record (oldest drop first)
 const SHOWCASE_CAP := 12            # Boki on a clan base's showcase wall, one per member
 const STRANDED_DAYS := 3.0          # a listing that vanished without a sale is handed back after this
+const HELLO_RETRY_S := [2.0, 4.0, 8.0, 16.0, 30.0]  # s before asking a silent store again (a slow start drops one)
 
 func _ready() -> void:
-	if not OS.has_feature("web") or JavaScriptBridge.get_interface("kinBridge") == null:
+	open(SocialHttp.pick_url())
+
+## Connects to the store at url ("" = none) and says hello; ready_changed(true) once it answers.
+func open(url: String) -> void:
+	if url == "" or _http != null:
 		return
+	_http = SocialHttp.new()
+	_http.base = url
+	add_child(_http)
+	_hello()
+
+func _hello() -> void:
 	_call("storeInit", [], func(txt: String):
-		var d = JSON.parse_string(txt)
-		if typeof(d) == TYPE_DICTIONARY and txt_of(d.get("me")) != "":
-			ok = true
-			mode = txt_of(d.get("mode"))
-			me = txt_of(d.get("me"))
-			is_owner = d.get("owner", false) == true
-			ready_changed.emit(true)
-			refresh_guild())
+		var d = JSON.parse_string(txt) if txt != "" else null
+		if typeof(d) != TYPE_DICTIONARY or txt_of(d.get("me")) == "":
+			get_tree().create_timer(HELLO_RETRY_S[mini(_hellos, HELLO_RETRY_S.size() - 1)]).timeout.connect(_hello)
+			_hellos += 1
+			return
+		ok = true
+		mode = txt_of(d.get("mode"))
+		me = txt_of(d.get("me"))
+		is_owner = d.get("owner", false) == true
+		ready_changed.emit(true)
+		refresh_guild())
 
 func available() -> bool:
 	return ok
+
+## A store is set up (it may still not be answering).
+func has_store() -> bool:
+	return _http != null or store_stub.is_valid()
 
 func busy(op: String) -> bool:
 	return _busy.has(op)
@@ -92,25 +111,15 @@ func _call(method: String, args: Array, cb: Callable) -> void:
 	if store_stub.is_valid():
 		store_stub.call(method, args, cb)
 		return
-	var js = JavaScriptBridge.get_interface("kinBridge")
-	if js == null:
+	if _http == null:
 		cb.call_deferred("")
 		return
-	var holder := []
-	var f := JavaScriptBridge.create_callback(func(a):
-		_keep.erase(holder[0])
-		cb.call(str(a[0]) if a.size() > 0 else ""))
-	holder.append(f)
-	_keep.append(f)
-	# named calls only: Object.call() on a JavaScriptObject would look for a JS method called "call"
-	match method:
-		"storeInit": js.storeInit(f)
-		"dbGet": js.dbGet(args[0], f)
-		"dbSet": js.dbSet(args[0], args[1], f)
-		"dbDel": js.dbDel(args[0], f)
-		"dbAdd": js.dbAdd(args[0], args[1], f)
-		"dbQuery": js.dbQuery(args[0], args[1], f)
-		"dbClaim": js.dbClaim(args[0], f)
+	_http.ask(method, args, cb)
+
+## Lists me in a town room with presence (null leaves it); cb gets the others as [{id, p}], unchecked.
+func hub(room: String, presence, cb: Callable) -> void:
+	if _http != null and ok:
+		_http.hub(room, presence, cb)
 
 func get_doc(path: String, cb: Callable) -> void:
 	_call("dbGet", [path], func(t: String):

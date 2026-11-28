@@ -14,7 +14,7 @@ Your Boki live with you on a floating-island farm. Each species is built from on
 2. Open Godot, choose **Import**, and pick this folder's `project.godot`.
 3. Press **F5** to play.
 
-Desktop builds use Forward+; the web and mobile builds use the Compatibility renderer.
+Desktop builds use Forward+.
 
 ## Controls
 
@@ -42,7 +42,7 @@ Desktop builds use Forward+; the web and mobile builds use the Compatibility ren
 | B | Base to a teammate (squads): a 3s channel, broken by moving, attacking or any hit; you arrive weakened for 3s (half damage, CC, healing and shields); 40s cooldown |
 | 1-4 | Utility belt (a tonic and an armor kit to start) |
 | F | Catch a dazed Boki, revive a teammate, open a chest, take a found weapon or glove |
-| Ctrl | Sneak (hold; tap to toggle on the web version, since Ctrl+W closes browser tabs) |
+| Ctrl | Sneak (hold) |
 | Tab | Scoreboard |
 | M | Full map (click to ping) |
 | Esc | Menu: settings, controls, save files |
@@ -112,27 +112,27 @@ Code: `scripts/match/kin.gd`, `scripts/core/bridge.gd`.
   - Hot-tempered Boki sometimes ignore a recall to finish a kill.
   - When you go down, it decides how fast to come and revive you, based on loyalty and trust.
   - It calls out hunters you can't see and wild Boki nearby.
-- **Memory.** Notable moments are saved on the Boki. On the web build, conversations and personal voice lines are written by Claude from its traits, trust and memories. Offline it uses stock lines.
+- **Memory.** Notable moments are saved on the Boki. Its conversations and voice lines are stock lines picked for it.
 
 ## Online
 
-Open the game with `#online` at the end of its link to go straight to the lobby, or use **Play online with friends** at the portal.
+Use **Play online with friends** at the portal.
 
-- Matches run over the artifact's room capability. Locally they fall back to a BroadcastChannel between browser tabs.
+- Matches run on our headless match servers, found through the matchmaker (`server/README.md`).
 - Each player's game owns their hunter and Boki. The host's game owns monsters, bots, loot and wild Boki.
 - Hits on something you don't own are sent to its owner.
 
-Code: `scripts/core/net.gd`, the `# online` section of `scripts/match/match.gd`, and `tools/shell.html`.
+Code: `scripts/core/net.gd`, and the `# online` section of `scripts/match/match.gd`.
 
 ## Shared places
 
-The ferry at home goes to places other players share. They need the web version, where the page's shared store holds them; desktop builds say so instead.
+The ferry at home goes to places other players share. They live in the social store on our matchmaker service (`server/matchmaker`, `/social` routes); a game that can't reach it says so instead.
 
 - **Visiting.** Your island is published as a snapshot. Friends can walk around it, pet your Boki (they remember the visit) and leave seeds or crops at your house.
 - **The town.** A market for seeds and crops (the seller is paid when an item sells), a notice board, the guild registry, and the portal to online expeditions. Everyone in town right now walks around with you.
 - **Guild isles.** Each member gets a cottage with their partner Boki outside. Members put gems into four projects (Hall, Forge, Boki Shrine, Lighthouse) and each finished one gives every member a perk on expeditions.
 
-Anything read from the shared store is untrusted and cleaned before use (`Social.clean_island`), and market payouts are only paid for listings your own save made. Code: `scripts/core/social.gd`, `scripts/social/town.gd`, and the store functions in `tools/shell.html`.
+Anything read from the shared store is untrusted and cleaned before use (`Social.clean_island`), and market payouts are only paid for listings your own save made. Code: `scripts/core/social.gd`, `scripts/social/town.gd`, `scripts/core/social_http.gd`, and the store in `server/matchmaker/mm/social.py`.
 
 ## Music
 
@@ -154,7 +154,7 @@ scripts/social/  town.gd (the town and guild isles)
 scripts/ui/      hud.gd, results.gd, lobby.gd, ui.gd
 shaders/         toon, outline, telegraph, ring, clouds, glow
 audio/           sound effects from tools/gen_sfx.py, music from tools/compose.py
-tools/           web export wrapper, sound generator, test hooks
+tools/           sound generator, test hooks
 ```
 
 Every character and prop is built from simple meshes in `models.gd`. Swapping in real art means replacing those builder functions with scenes.
@@ -174,10 +174,6 @@ Frame hitches need a renderer: `--hitch-check` plays a seeded expedition through
 ```
 XDG_DATA_HOME=/tmp/cold xvfb-run -a godot --path . --rendering-driver opengl3 -- --hitch-check
 ```
-
-## Web build
-
-`tools/build_web.sh` exports the Web preset (no threads) and wraps it for publishing. The engine is gzipped so every file stays under 15MB, and `tools/shell.html` inflates it in the browser.
 
 ## Contributing
 

@@ -1,21 +1,24 @@
-"""The HTTP side: GET /health, POST /queue, GET/DELETE /queue/<ticket>, POST /queue/<ticket>/pick, the /party routes. JSON in, JSON out."""
+"""The HTTP side: GET /health, POST /queue, GET/DELETE /queue/<ticket>, POST /queue/<ticket>/pick, the /party routes,
+the /social routes (mm/social.py). JSON in, JSON out."""
 import json
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-from . import feedback
+from . import feedback, social
 from .core import Matchmaker
 from .log import log
 
 MAX_BODY = 4096          # bytes; a queue request is a few names
 MEMBER_HEADER = "X-Boki-Member"   # the party member secret: a header, because the logged path must not hold it
+PLAYER_HEADER = "X-Boki-Player"   # the social token, a header for the same reason
 STATUS = {"version": 409, "mode": 400, "bad_request": 400, "not_found": 404, "gone": 404, "full": 409, "busy": 409,
           "not_ready": 409, "not_member": 403, "not_leader": 403, "rate_limited": 429,
-          "no_match": 404, "unknown": 400, "loading": 409, "turn": 409, "taken": 409}
+          "no_match": 404, "unknown": 400, "loading": 409, "turn": 409, "taken": 409, "not_yours": 403}
 
 
-def make_server(core: Matchmaker, host: str, port: int, feedback_path: str = "/var/lib/boki/feedback.jsonl") -> ThreadingHTTPServer:
-    """An HTTP server bound to host:port (port 0 picks a free one) answering with `core`."""
+def make_server(core: Matchmaker, host: str, port: int, feedback_path: str = "/var/lib/boki/feedback.jsonl",
+                store: social.SocialStore = None) -> ThreadingHTTPServer:
+    """An HTTP server bound to host:port (port 0 picks a free one) answering with `core` (and `store` for /social)."""
 
     class Handler(BaseHTTPRequestHandler):
         protocol_version = "HTTP/1.1"
@@ -32,6 +35,8 @@ def make_server(core: Matchmaker, host: str, port: int, feedback_path: str = "/v
         def do_POST(self):
             if self.path == "/feedback":
                 return self._feedback()
+            if self.path in ("/social/hello", "/social/db", "/social/hub") and store is not None:
+                return self._social()
             if self.path.endswith("/pick"):
                 return self._pick()
             if self.path != "/queue":
@@ -104,6 +109,23 @@ def make_server(core: Matchmaker, host: str, port: int, feedback_path: str = "/v
                 log("feedback_error", error=repr(e))
                 return self._reply(500, {"error": "store_failed"})
             self._reply(200, {"ok": True})
+
+        def _social(self):
+            body = self._json_body(social.MAX_DOC + 1024)
+            if body is None:
+                return self._reply(400, {"error": "bad_request"})
+            token = self.headers.get(PLAYER_HEADER, "")
+            if self.path == "/social/hello":
+                out = store.hello(token, self.client_address[0])
+            else:
+                me = store.player(token)
+                if not me:
+                    out = {"error": "not_member"}
+                elif self.path == "/social/hub":
+                    out = store.hub(me, body.get("room"), body.get("p"))
+                else:
+                    out = store.op(me, body)
+            self._reply(STATUS.get(out.get("error"), 200), out)
 
         def _json_body(self, limit: int = MAX_BODY):
             try:

@@ -5,7 +5,7 @@ points at library files. Run with python3 -I.
   sfx_pack.py build MANIFEST LIB PACK GAME   cut each slot's pick into PACK/audio (needs numpy, ffmpeg): the cue
                                              plus its takes (re-pitched copies, as many as GAME has)
   sfx_pack.py tester MANIFEST LIB PACK       cut every candidate of the tester slots into PACK/audio/sfxtest/<slot>_<letter>.wav
-  sfx_pack.py apply PACK GAME                copy the pack over GAME/audio (tools/build_web.sh, before the export)
+  sfx_pack.py apply PACK GAME                copy the pack over GAME/audio (before an export)
   sfx_pack.py restore PACK GAME              put GAME/audio back: git checkout the replaced files, delete audio/sfxtest
   sfx_pack.py check MANIFEST GAME [PACK]     every pick names a game cue that exists (and, with PACK, has its file there)"""
 
