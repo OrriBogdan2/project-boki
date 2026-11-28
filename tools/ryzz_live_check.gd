@@ -23,6 +23,18 @@ func _frame(m: Match, h: Hunter) -> void:
 		if h.visible or h.out:
 			sync.call("_process", DT)
 
+## The fingertip anchor where the hand is now. A check frame never reaches the tree's idle step, so the
+## BoneAttachment3D under it keeps the pose of its last skeleton update: it is refreshed from the skeleton here.
+func _tip(h: Hunter, left: bool) -> Node3D:
+	var tip := WardenGlb.anchor(h.model, "anchor_finger_L" if left else "weapon_muzzle")
+	var at: Node = tip
+	while at != null and not (at is BoneAttachment3D):
+		at = at.get_parent()
+	if at != null:
+		(at as BoneAttachment3D).get_skeleton().force_update_all_bone_transforms()
+		(at as BoneAttachment3D).on_skeleton_update()
+	return tip
+
 func _clips(h: Hunter) -> WardenClips:
 	return h.model.get_node("Warden/Sync").get("clips") as WardenClips
 
@@ -66,8 +78,8 @@ func run(main: Node) -> void:
 		_run(m, P, 54, seen)
 	ok(seen.has("lmb_l") and seen.has("lmb_r"), "the finger bolts play lmb_l and lmb_r")
 	# item 139: nothing but the model is drawn (the old wrist coil and forearm rings read as a gun); the bolts leave the
-	# fingertip of the hand that fires, left then right (0.25 m: her body size went 1.098 -> 1.235 with the
-	# hunter-heights pass, so the same hand sits 12-22 % further out; previously 0.2 m)
+	# fingertip of the hand that fires, left then right, within 0.25 m on the ground (her drawn size and the two
+	# clips put the right hand a little short of the left one)
 	var strays: Array = []
 	for mi in P.model.find_children("*", "MeshInstance3D", true, false):
 		var n := String(P.model.get_path_to(mi))
@@ -93,7 +105,7 @@ func run(main: Node) -> void:
 		var sd: Dictionary = m.get("shots")[-1] if not (m.get("shots") as Array).is_empty() else {}
 		var from: Vector3 = sd.get("start", Vector3.ZERO)
 		_run(m, P, 5, seen)         # (the release key: the arm is out)
-		var tip := WardenGlb.anchor(P.model, "anchor_finger_L" if left else "weapon_muzzle")
+		var tip := _tip(P, left)
 		if fired and tip != null:
 			var off := Vector2(from.x - tip.global_position.x, from.z - tip.global_position.z).length()
 			print("LIVE shot %s: %.3f m from its fingertip" % [sides[-1], off])
