@@ -68,6 +68,7 @@ static func make(hunter: Hunter, arch_id: String) -> ArchKit:
 	k.ch_rmb = float(k.rmb_def().get("charges", 1))
 	k.flow = DashFlow.new(k)
 	k._setup()
+	OnFree.cut_with(hunter, k)    # the kit and its parts point at each other (--match-repeat-check)
 	return k
 
 const OWN_LOOK_SKIP := ["boom", "ping", "whoosh", "throw"]     # KinExec's delivery sounds (see run_own)

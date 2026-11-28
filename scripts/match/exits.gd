@@ -38,6 +38,7 @@ var hints := ZoneHint.new()   # the fading "more teammates fuel it faster" tip
 
 func setup(match_node: Match) -> void:
 	m = match_node
+	OnFree.cut_with(m, self)        # its parts point back at it (--match-repeat-check)
 	flow = ExitsFlow.new(self)
 	look = ExitsLook.new(self)
 	if m.opts.get("training", false) or m.opts.get("duel", false) or HeartRaid.on(m.opts):

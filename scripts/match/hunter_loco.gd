@@ -17,6 +17,7 @@ var _scripted := false   # a scripted glider (the drop, a check, the net) is not
 
 func _init(hunter: Hunter) -> void:
 	h = hunter
+	OnFree.call_on(hunter, fsm.unbind)   # the hooks below hold this, and this holds fsm (--match-repeat-check)
 	fsm.guard(Loco.S.GLIDING, _glide_ok)
 	fsm.on_exit(Loco.S.GLIDING, _glide_folded)
 	fsm.on_exit(Loco.S.DASHING, func(_to: int) -> void: dash_left = minf(dash_left, 0.0))     # (an overrun stays)
