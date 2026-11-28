@@ -31,6 +31,9 @@ const HOLD_POSES := {
 }
 const HANDS := {"juggernaut": "RightHand", "gil": "RightHand", "dredge": "LeftHand"}  # warden_native.json "hand"
 const PALM := 0.25               # forearm lengths from the wrist to the palm's middle (a rig without finger bones)
+const GRIP_TIP := 20.0           # deg: the hilt across the knuckles, tipped this far toward the fingers
+const GRIP_PER_BLADE := 0.25     # Kael's hilt behind the guard per blade length (kael_pieces: 0.15 / 0.61)
+const FIST_AT := 0.75            # the fist's middle: this far from the wrist to the middle knuckle
 const MAX_VERTS := 4000          # vertices sampled per prop
 
 var fails := 0
@@ -102,6 +105,10 @@ func _hero(id: String, out: String, _sheets: String) -> void:
 			fails += 1
 		if out != "":
 			frames.append([p[0], await _hand_shots(h, sk, hand_name, tall)])
+		if p[0] == "idle" and "--held-frame" in OS.get_cmdline_user_args():
+			print("HELD frame %s aabb %s" % [props[0].name, (props[0] as MeshInstance3D).mesh.get_aabb()])
+		if p[0] == "idle" and "--held-fit" in OS.get_cmdline_user_args():
+			_fit_grip(sk, hand_name, props[0])
 	if out != "" and not frames.is_empty():
 		DirAccess.make_dir_recursive_absolute(out)
 		_sheet(frames).save_png(out.path_join(id + "_hand.png"))
@@ -125,13 +132,14 @@ func _skel(h: Node3D) -> Skeleton3D:
 			best = sk
 	return best
 
-## The hunter's standing height (m): the bounds of everything drawn but the props.
+## The hunter's standing height (m): the bounds of the skinned body meshes (hair and hat included).
 func _height(h: Node3D) -> float:
 	var box := AABB()
 	var first := true
 	for n in h.find_children("*", "MeshInstance3D", true, false):
 		var mi := n as MeshInstance3D
-		if not mi.is_visible_in_tree() or mi.mesh == null or _is_prop(mi):
+		# (the skinned body only: FX cards and the team ring are not the hunter)
+		if not mi.is_visible_in_tree() or mi.mesh == null or _is_prop(mi) or not (mi.get_parent() is Skeleton3D):
 			continue
 		var b := mi.global_transform * mi.get_aabb()
 		box = b if first else box.merge(b)
@@ -193,45 +201,69 @@ func _measure(sk: Skeleton3D, hand: String, props: Array) -> Array:
 			b = p
 	var axis := (b - a).normalized()
 	var length := a.distance_to(b)
+	var blade_dir := Vector3.ZERO
 	# (a sword's FX empties ride it, WardenProps: its blade, guard to tip, is what the art's size is measured on)
 	for mi: MeshInstance3D in props:
 		var r := mi.find_child("anchor_blade_root", true, false) as Node3D
 		var t := mi.find_child(WardenGlb.WEAPON_MUZZLE, true, false) as Node3D
 		if r != null and t != null:
 			length = r.global_position.distance_to(t.global_position)
+			blade_dir = (t.global_position - r.global_position).normalized()
+			c = r.global_position
 	var hh := _bone_at(sk, hand)
 	var mid := _bone_at(sk, hand + "Middle1")
 	var idx := _bone_at(sk, hand + "Index1")
 	var pinky := _bone_at(sk, hand + "Pinky1")
-	var fist := (hh + mid) * 0.5
+	var fist := hh.lerp(mid, FIST_AT)
 	if mid == Vector3.INF:
-		# (no finger bones, Meshy's plain rig: the palm's middle lies along the hand bone, a quarter forearm out)
+		# (no finger bones, Meshy's plain rig: the palm's middle lies on along the forearm's line, a quarter forearm out)
 		var hi := sk.find_bone(hand)
 		var fore := hh.distance_to(_bone_at(sk, sk.get_bone_name(sk.get_bone_parent(hi))))
-		var along := (sk.get_node("probe_" + hand.validate_node_name()) as Node3D).global_basis.y.normalized()
+		var along := (hh - _bone_at(sk, sk.get_bone_name(sk.get_bone_parent(hi)))).normalized()  # (the forearm's line)
 		fist = hh + along * fore * PALM
 	var surf := INF
 	for p in pts:
 		surf = minf(surf, p.distance_to(fist))
-	# (the haft's line: the part's own longest bounds axis through its centre, not the tip-to-fin-tip diameter)
-	var mi0 := props[0] as MeshInstance3D
-	var lb := mi0.mesh.get_aabb()
-	var li := lb.get_longest_axis_index()
-	var gb := mi0.global_basis
-	var ax := gb.x if li == 0 else (gb.y if li == 1 else gb.z)
-	axis = ax.normalized() if ax.length() > 0.0 else axis
+	# (the haft's line: the sword's blade root -> tip, else the tip-to-tail diameter)
+	if blade_dir != Vector3.ZERO:
+		axis = blade_dir
 	var on := Geometry3D.get_closest_point_to_segment(fist, c - axis * length, c + axis * length)
 	var cross := -1.0  # (no finger bones: no knuckle line)
 	if idx != Vector3.INF and pinky != Vector3.INF:
 		cross = rad_to_deg(acos(clampf(absf(axis.dot((idx - pinky).normalized())), 0.0, 1.0)))
 	return [length, surf * 100.0, fist.distance_to(on) * 100.0, cross]
 
+## --held-fit: the "grip" data (WardenProps) that lays a sword's hilt across the knuckle line, tipped GRIP_TIP toward
+## the fingers (a diagonal hammer grip), its middle at the fist, with the blade out of the thumb side. Prints it.
+func _fit_grip(sk: Skeleton3D, hand: String, mi: MeshInstance3D) -> void:
+	var r := mi.find_child("anchor_blade_root", true, false) as Node3D
+	var t := mi.find_child(WardenGlb.WEAPON_MUZZLE, true, false) as Node3D
+	var idx := _bone_at(sk, hand + "Index1")
+	if r == null or t == null or idx == Vector3.INF:
+		print("HELD fit: needs a blade's anchors and finger bones")
+		return
+	var at := mi.get_parent() as Node3D
+	var to_b := at.global_transform.affine_inverse()
+	var hh := to_b * _bone_at(sk, hand)
+	var mid := to_b * _bone_at(sk, hand + "Middle1")
+	var knuck := (to_b * idx - to_b * _bone_at(sk, hand + "Pinky1")).normalized()
+	var fwd := (mid - hh).normalized()
+	var want := (knuck * cos(deg_to_rad(GRIP_TIP)) + fwd * sin(deg_to_rad(GRIP_TIP))).normalized()
+	var now := (to_b * t.global_position - to_b * r.global_position).normalized()
+	var ax := now.cross(want)
+	var turn := ax.normalized() * now.angle_to(want) if ax.length() > 0.0001 else Vector3.ZERO
+	# (the hilt's middle, in the part's frame, under the base turn the part has before "grip")
+	var hilt := r.position + (r.position - t.position) * GRIP_PER_BLADE * 0.5
+	var fist := hh.lerp(mid, FIST_AT)
+	print("HELD fit %s: \"grip\": {\"part\": [%.4f, %.4f, %.4f], \"bone\": [%.4f, %.4f, %.4f], \"turn\": [%.4f, %.4f, %.4f]}"
+			% [mi.name, hilt.x, hilt.y, hilt.z, fist.x, fist.y, fist.z, turn.x, turn.y, turn.z])
+
 ## Front and side close shots at the hand.
 func _hand_shots(h: Node3D, sk: Skeleton3D, hand: String, tall: float) -> Image:
 	var at := _bone_at(sk, hand)
 	var mid := _bone_at(sk, hand + "Middle1")
 	if mid != Vector3.INF:
-		at = (at + mid) * 0.5
+		at = at.lerp(mid, FIST_AT)
 	var imgs: Array = []
 	# (front, then from the holding hand's own side)
 	var side := -PI * 0.5 if hand.begins_with("Right") else PI * 0.5
