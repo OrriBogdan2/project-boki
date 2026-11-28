@@ -187,7 +187,8 @@ func _model3d() -> void:
 		var want: Vector3 = EmptyGlb.EGG[sex][0]
 		var c := at.get_center()
 		var got := Vector3(c.x, c.y, at.end.z - EmptyGlb.EGG_AHEAD)
-		ok(got.distance_to(want) < HOOD_TOL, "sex %d: the void head sits in the hood (%.3f m off)" % [sex, got.distance_to(want)])
+		var off := got.distance_to(want)
+		ok(off < HOOD_TOL, "sex %d: the void head sits in the hood (%.3f m off)" % [sex, off])
 		ok(
 			not locker.model.get_node("Rig/Torso").get_children().any(_body_shows),
 			"sex %d: the procedural body is hidden" % sex

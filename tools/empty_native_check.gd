@@ -51,7 +51,7 @@ func _one(main: Node, key: String) -> void:
 	# backwards, as the 11-27 packs did)
 	var rest_head := sk.get_bone_global_rest(sk.find_bone("Head")).origin
 	var face_z: float = (EmptyGlb.EGG[EmptyGlb.KEYS.find(key)][0] as Vector3).z - rest_head.z
-	ok(face_z > FACE_AHEAD, "%s: the painted face is on the rig's front (%.3f m ahead of the Head bone)" % [key, face_z])
+	ok(face_z > FACE_AHEAD, "%s: the painted face is on the rig's front (%.3f m ahead of Head)" % [key, face_z])
 	ok(CLIPS.all(func(c): return nat.player.has_animation(c)), "%s: the file carries %s" % [key, str(CLIPS)])
 	var cases := [
 		["idle", {"grounded": true}],
