@@ -11532,3 +11532,4 @@ READY ext/mob-clip-sheets 9a9926dbe2 (mob/boss clip audit doc + strip tools; bos
 READY ext/ult-rank-rows-reconcile ac991f0ac3 (docs: Lace and Cinder ult ranks are built and match the table; 11-22 recheck rows marked superseded; --ult-rank-check 0 failures)
 READY ext/garden-only-2h 410a152738 (garden-only bot plays 2h: adopts stray, runs Dash, buys Wayseeds, opens 4 of 5 zones; GARDEN.md gaps 6-9)
 READY ext/sfx-glider-heat a6f9a77a72 (your glider ticks once under 25% heat and crackles on a loop while the tank is empty; yours only, read by bar fraction)
+READY ext/recast-buffer-sweep 0987e96b9c (recast presses buffered in every kit via the shared buffer: Sparkle Kitefall, Neve Rimelock, Gil spout+wave, Albert hammer; new --recast-buffer-check per-kit sweep)
