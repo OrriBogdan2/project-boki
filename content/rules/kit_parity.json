@@ -82,6 +82,7 @@
 		{"hero": "ostra", "slot": "RMB", "field": "rmb.snap.dmg", "per": "e.dmg", "value": 0.759, "tol": 0.02, "evidence": "D Void Snap 277 vs Unstable Anomaly 365 (the orb is --ttk-check's, item 117)"},
 		{"hero": "ostra", "slot": "RMB", "field": "rmb.snap.swollen_k", "value": 0.44, "tol": 0.01, "evidence": "D Void Snap Empowered 399 vs 277 = +44%"},
 		{"hero": "ostra", "slot": "E", "field": "e.dmg_max_k", "value": 3.5, "tol": 0.0, "evidence": "D Unstable Anomaly: up to 3.5x based on held time"},
-		{"hero": "ostra", "slot": "E", "field": "e.burn", "per": "e.dmg", "value": 0.685, "tol": 0.02, "evidence": "D Unstable Anomaly upg: 250 dmg/s DoT vs the 365 bomb"}
+		{"hero": "ostra", "slot": "E", "field": "e.burn", "per": "e.dmg", "value": 0.685, "tol": 0.02, "evidence": "D Unstable Anomaly upg: 250 dmg/s DoT vs the 365 bomb"},
+		{"hero": "thief", "slot": "E", "field": "e.slow_t", "value": 4.0, "tol": 0.0, "evidence": "D Farstep Dagger: slow 0.5x lasts 4 s"}
 	]
 }

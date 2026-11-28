@@ -534,9 +534,15 @@ func thief(a) -> void:
 	p_v.ak.use_e()
 	a_x.step(m, 0.35)
 	a_x.ok(
-		"dancer E: the dagger sticks in a foe (slow 50%, damage)",
-		not k.knife.is_empty() and k.knife.get("target") == t_v and t_v.slow_t > 0.0 and a_x.dmg(t_v) >= 7.0,
-		"slow %.2f dmg %.0f" % [t_v.slow_t, a_x.dmg(t_v)]
+		"dancer E: the dagger sticks in a foe (slow 50% for 4s, damage)",
+		(
+			not k.knife.is_empty()
+			and k.knife.get("target") == t_v
+			and absf(t_v.slow_t - 4.0) < 0.5
+			and absf(t_v.slow_k - 0.5) < 0.001
+			and a_x.dmg(t_v) >= 7.0
+		),
+		"slow %.2f x%.2f dmg %.0f" % [t_v.slow_t, t_v.slow_k, a_x.dmg(t_v)]
 	)
 	a_x.step(m, 6.1)
 	a_x.ok(
@@ -1813,8 +1819,8 @@ func combos(a) -> void:
 	a_x.step(m, 0.35)
 	a_x.ok(
 		"combo dancer: Knife in a foe (Knife rank 3) = Vault reset + refund",
-		p_v.dashes >= 0.99 and float(tk.cd["e"]) < 10.0,
-		"dashes %.2f e cd %.1f" % [p_v.dashes, float(tk.cd["e"])]
+		p_v.dashes >= 0.99 and absf(float(tk.cd["e"]) - 5.35) < 0.3,
+		"dashes %.2f e cd %.2f" % [p_v.dashes, float(tk.cd["e"])]
 	)
 	p_v.ak.use_e()
 	a_x.step(m, 0.05)
