@@ -8,6 +8,7 @@ extends RefCounted
 const FIGHT_T := 6.0  # s of boss fight watched
 const TURN_T := 1.5  # s the bot gets to turn on the player after the player's hit
 const REPICK_T := 0.5  # s for the bot's next think to drop a target it had before the seal (a think is <= 0.5 s)
+const BOT_KIN := "nacrolin"  # the bot's Boki (what seed 21 rolled before the roster grew)
 
 var bad := 0
 var m: Match
@@ -33,6 +34,21 @@ func _spot(h: Hunter, at: Vector3) -> void:
 	h.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
 	h.vel = Vector3.ZERO
 
+
+## Swaps h's Boki for a `sp` one built from the same seed, level and trust.
+func _pin_kin(h: Hunter, sp: String) -> void:
+	var old: Kin = h.kin
+	if old == null or old.species == sp:
+		return
+	var rec := Save.new_kin(sp, "", int(old.rec["dna"]["seed"]))
+	rec["level"] = int(old.rec["level"])
+	rec["trust"] = float(old.rec["trust"])
+	old.dead = true
+	m.kins.erase(old)
+	m.ents_by_id.erase(old.nid)
+	old.queue_free()
+	h.kin = null
+	m.give_kin(h, rec)
 
 func run(main: Node) -> void:
 	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
@@ -61,6 +77,9 @@ func run(main: Node) -> void:
 	# strafes loosely)
 	b.ai["diff"] = (Data.BOT_DIFF["medium"] as Dictionary).duplicate()
 	b.ai["skill"] = float(b.ai["diff"]["skill"])
+	# (its Boki is a roll over the common roster too, so every new species shifts it, and a Boki that pulls the
+	# bot elsewhere puts the player in the line of its shots at the boss: pin it, same seed and level)
+	_pin_kin(b, BOT_KIN)
 	for h in m.hunters:
 		h.ctrl = "bot" if h == b else "idle"
 		h.inp["move"] = Vector2.ZERO

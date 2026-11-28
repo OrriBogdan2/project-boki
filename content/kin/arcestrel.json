@@ -7,6 +7,7 @@
 		"Copper wire"
 	],
 	"theme": "storm",
+	"type2": "tempest",
 	"flavor": "Falcon with lightning-rod crest and coil talons.",
 	"colors": {
 		"belly": "#b46c6c",
@@ -118,6 +119,12 @@
 		"temper": "Proud",
 		"desc": "Something proud is in here.",
 		"play": "Fast, darting and always on the move."
+	},
+	"roster": {
+		"art": "new",
+		"line": "kestrike",
+		"stage": 2,
+		"from": "kestrike"
 	},
 	"size": {
 		"cm": 50,

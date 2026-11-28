@@ -115,6 +115,12 @@
 		"desc": "Something private is in here.",
 		"play": "Pins foes down and breaks up their pushes."
 	},
+	"roster": {
+		"art": "new",
+		"line": "gloamshell",
+		"stage": 2,
+		"from": "gloamshell"
+	},
 	"size": {
 		"cm": 44,
 		"kg": 9.0,

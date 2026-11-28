@@ -7,6 +7,7 @@
 		"Split geode"
 	],
 	"theme": "stone",
+	"type2": "prism",
 	"flavor": "Geodemole has grown heavy enough to sit up on its haunches, and the geode on its back has split along the top with amethyst pushing out of the crack. Crystal plates are creeping down its forearms. It still sorts the stones it digs up by colour, as it did when small.",
 	"colors": {
 		"belly": "#fce4cc",
@@ -113,6 +114,12 @@
 		"temper": "Shy",
 		"desc": "Something shy is in here.",
 		"play": "Pins foes down and breaks up their pushes."
+	},
+	"roster": {
+		"art": "new",
+		"line": "glintmole",
+		"stage": 2,
+		"from": "glintmole"
 	},
 	"size": {
 		"cm": 50,
