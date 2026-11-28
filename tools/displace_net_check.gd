@@ -36,6 +36,7 @@ var replies: Array = []  # what the guest said back: {"c", "pos"}
 var stop := false
 var building := false  # the guest is building its match (the host says start until it hears from it)
 var stun_max := 0.0  # the longest stun seen on the watched body since its last place (guest: its own)
+var shot_seen := false  # guest: its player was spiked out of the air at some step since its last _fresh
 var stun_on: Ent = null
 var watch: Ent = null  # the first tow on this body, as the host's mirror of it (seen)
 var seen := {}
@@ -473,10 +474,12 @@ func _glide_spike(g: Hunter, b: Hunter, spike: Callable, what: String) -> void:
 	b.teleport(home + Vector3(-6.0, 0, 9.0))
 	Net.lobby_emit("dn", {"c": "glide", "at": [at.x, at.y, at.z], "fuel": GlideSpike.slam_heat})
 	var t := 0.0
-	while not g.gliding and t < 5.0:
+	# (the host's copy of the guest takes its glide flag and its place from a snapshot: wait for it to be up there
+	# gliding, or a spike lands on a copy still standing on its old spot and is not an airborne spike)
+	while not (g.gliding and g.pos.y > at.y - 2.0) and t < 5.0:
 		await _run(0.1)
 		t += 0.1
-	ok(g.gliding, "glide spike: the host sees the player gliding")
+	ok(g.gliding and g.pos.y > at.y - 2.0, "glide spike: the host sees the player gliding up there")
 	await spike.call(g)
 	await _run(1.8)
 	await _ask()
@@ -695,7 +698,7 @@ func _say() -> void:
 				"air": 0.0 if p_v.grounded else 1.0,
 				"vx": p_v.vel.x,
 				"vy": p_v.vel.y,
-				"shot": p_v.shot_down,
+				"shot": shot_seen,
 				"chan": _chan(p_v)
 			}
 		)
@@ -779,6 +782,7 @@ func _build(d: Dictionary) -> void:
 
 func _fresh(t_v: Hunter) -> void:
 	stun_max = 0.0
+	shot_seen = false
 	t_v.max_hp = 10000.0
 	t_v.hp = t_v.max_hp
 	t_v.armor = 0.0
@@ -832,6 +836,8 @@ func _stepped() -> void:
 	var sb: Ent = stun_on if stun_on else m.player
 	if sb:
 		stun_max = maxf(stun_max, sb.stun_t)
+	if m.player and m.player.shot_down:
+		shot_seen = true
 
 
 ## A lightning rod's strike (BiomeRun._hit_area) at `at` on this game. Hazards run on every game.
