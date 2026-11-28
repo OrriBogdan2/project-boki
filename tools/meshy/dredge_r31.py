@@ -10,7 +10,7 @@
                                                           skin/dome/goo (see backing()), ink off on the folds
   dredge_r31.py --strap-sink OUT.glb IN.glb [--sink M] [--sink-k N]   r37: strap band ends sink under the skin
   dredge_r31.py --fist-export OUT.glb IN.glb               r38: fist + skin cuff faces as one mesh (Meshy, no orig UV)
-  dredge_r31.py --fist-cuff OUT.glb IN.glb MESHY.glb      r38: that Meshy mesh + image as the metal-fist prim, cuff
+  dredge_r31.py --fist-cuff OUT.glb IN.glb MESHY.glb [--fist-grade R,G,B]  r38: that Meshy mesh + image as the metal-fist prim, cuff
                                                           faces out of the skin (see fist_cuff())
   dredge_r31.py --relax OUT.glb IN.glb [--goo] [--knee] [--box B] [--target X] [--passes N]
                                                           skin weights blended toward their neighbours (r28's relax
@@ -543,6 +543,35 @@ def fist_export(o):
     print("wrote %s: fist+cuff %d verts %d tris" % (o.out, len(P), len(F)))
 
 
+def _fist_grade(im, UV, F, target):
+    """r38: Meshy's fist+cuff image is lit bright in its own thumbnail but its texels are dark (face-centroid median
+    ~57/255) and the toon metal slot darkens it again, so in game the gauntlet read as a black blob. Fill the black
+    UV gutters with the nearest island colour (mips at the match camera averaged them in), then, given target
+    "R,G,B", a per-channel gamma so the median texel under the face centroids lands on it (lifts the gaps without
+    clipping the rivet highlights)."""
+    from PIL import ImageDraw
+    from scipy.ndimage import distance_transform_edt
+
+    H, Wd = im.size[1], im.size[0]
+    mk = Image.new("L", (Wd, H), 0)
+    dr = ImageDraw.Draw(mk)
+    for t in UV[F] * (Wd, H):
+        dr.polygon([tuple(p) for p in t], fill=255, outline=255)
+    a = np.asarray(im).astype(float)
+    inside = np.asarray(mk) > 0
+    _, (iy, ix) = distance_transform_edt(~inside, return_indices=True)
+    a = a[iy, ix]
+    if target:
+        c = UV[F].mean(1)
+        s = a[np.clip((c[:, 1] * H).astype(int), 0, H - 1), np.clip((c[:, 0] * Wd).astype(int), 0, Wd - 1)]
+        med = np.clip(np.median(s, 0), 1, 254) / 255
+        g = np.log(np.array([float(v) for v in target.split(",")]) / 255) / np.log(med)
+        a = 255 * (a / 255) ** g
+        print("fist grade: median %s -> %s, gamma %s" % ((med * 255).round(), target, g.round(3)))
+    print("fist gutter: %.1f%% of texels filled" % (100 * (~inside).mean()))
+    return Image.fromarray(np.clip(a + 0.5, 0, 255).astype(np.uint8))
+
+
 def fist_cuff(o):
     """r38, review (r37 game 6.0): the gauntlet reads two-tone, a brown Meshy fist under a pale lavender cuff (skin
     atlas texels), against the 2D's one grey iron. The metal-fist prim becomes Meshy's retextured fist+cuff mesh
@@ -584,7 +613,8 @@ def fist_cuff(o):
     users = [m for m in js["materials"] if m.get("pbrMetallicRoughness", {}).get("baseColorTexture", {}).get("index") == t]
     assert all(m["name"] == "metal-fist" for m in users), "fist texture shared"
     size = min(o.size, img.size[0])
-    im = img.resize((size, size), Image.LANCZOS) if img.size[0] != size else img
+    im = img.convert("RGB").resize((size, size), Image.LANCZOS) if img.size[0] != size else img.convert("RGB")
+    im = _fist_grade(im, MUV, MF, o.fist_grade)
     jb = io.BytesIO()
     im.save(jb, "JPEG", quality=90)
     js["images"][js["textures"][t]["source"]] = {
@@ -615,6 +645,7 @@ def main():
     ap.add_argument("meshy", nargs="?")
     ap.add_argument("--turn", action="store_true")
     ap.add_argument("--size", type=int, default=2048, help="pack image size cap (px)")
+    ap.add_argument("--fist-grade", default="", help="r38 --fist-cuff: R,G,B the fist's median texel is graded to")
     ap.add_argument("--goo", action="store_true")
     ap.add_argument("--knee", action="store_true")
     ap.add_argument(
