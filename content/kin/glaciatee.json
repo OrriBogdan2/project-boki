@@ -126,5 +126,12 @@
 		"cm": 82,
 		"kg": 67.0,
 		"fit": 1.99
+	},
+	"type2": "tide",
+	"roster": {
+		"art": "new",
+		"line": "coolatee",
+		"stage": 3,
+		"from": "floenatee"
 	}
 }

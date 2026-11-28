@@ -120,5 +120,12 @@
 		"cm": 64,
 		"kg": 10.3,
 		"fit": 1.55
+	},
+	"type2": "dark",
+	"roster": {
+		"art": "new",
+		"line": "zapple",
+		"stage": 2,
+		"from": "zapple"
 	}
 }

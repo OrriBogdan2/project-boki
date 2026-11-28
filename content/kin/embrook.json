@@ -124,5 +124,12 @@
 		"cm": 50,
 		"kg": 8.0,
 		"fit": 1.21
+	},
+	"type2": "tempest",
+	"roster": {
+		"art": "new",
+		"line": "kindlewren",
+		"stage": 2,
+		"from": "kindlewren"
 	}
 }

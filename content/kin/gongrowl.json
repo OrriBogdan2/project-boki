@@ -118,5 +118,12 @@
 		"cm": 75,
 		"kg": 33.0,
 		"fit": 1.79
+	},
+	"type2": "titan",
+	"roster": {
+		"art": "locked",
+		"line": "gibbelle",
+		"stage": 2,
+		"from": "gibbelle"
 	}
 }

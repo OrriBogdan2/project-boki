@@ -115,5 +115,12 @@
 		"cm": 50,
 		"kg": 8.0,
 		"fit": 0.81
+	},
+	"type2": "bloom",
+	"roster": {
+		"art": "new",
+		"line": "marchleaf",
+		"stage": 2,
+		"from": "marchleaf"
 	}
 }

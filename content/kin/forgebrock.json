@@ -125,5 +125,12 @@
 		"cm": 60,
 		"kg": 20.0,
 		"fit": 1.46
+	},
+	"type2": "titan",
+	"roster": {
+		"art": "new",
+		"line": "tinbrock",
+		"stage": 3,
+		"from": "kilnbadger"
 	}
 }

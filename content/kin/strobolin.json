@@ -124,5 +124,11 @@
 		"cm": 107,
 		"kg": 70.0,
 		"fit": 1.71
+	},
+	"roster": {
+		"art": "new",
+		"line": "nacrolin",
+		"stage": 2,
+		"from": "nacrolin"
 	}
 }

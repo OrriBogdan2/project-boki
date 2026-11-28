@@ -121,5 +121,12 @@
 		"cm": 94,
 		"kg": 135.5,
 		"fit": 2.07
+	},
+	"type2": "tide",
+	"roster": {
+		"art": "new",
+		"line": "dribbara",
+		"stage": 3,
+		"from": "lilybara"
 	}
 }

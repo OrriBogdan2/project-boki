@@ -117,5 +117,12 @@
 		"cm": 40,
 		"kg": 6.6,
 		"fit": 0.97
+	},
+	"type2": "tide",
+	"roster": {
+		"art": "new",
+		"line": "puddlet",
+		"stage": 2,
+		"from": "puddlet"
 	}
 }

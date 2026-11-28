@@ -118,5 +118,11 @@
 		"cm": 44,
 		"kg": 9.0,
 		"fit": 1.1
+	},
+	"roster": {
+		"art": "new",
+		"line": "glomwort",
+		"stage": 2,
+		"from": "glomwort"
 	}
 }
