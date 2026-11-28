@@ -11512,3 +11512,4 @@ READY ext/farm-hunger-pace 5f7086ecf9b6c40d02325717c84e66d3e86925a6 (one meal cl
 READY ext/boss-windup-sync cf912de296 (boss wind-up sync probe: ground tell, body tell, strike key, blow frame; lead keys on slam, dash, spit)
 READY ext/garden-prop-textures e8ff106d97cff9f48e8806cfe7c8034e384a2c1e (4 prop textures to VRAM compressed + GARDEN_PERF inventory)
 READY ext/ui-boki-pronoun-lint b935d1436d5d5dd81ba7789ce1dcebf0cf9b609a (--tg-text-check fails a Boki called it: 21 + 24 hits fixed with {he}/{him}; health OK)
+READY ext/garden-prop-textures fea63489622033b7262ccaca168aacf7a7a44c91 (232 garden 3D textures to VRAM compressed, texture-budget fails 414 -> 178; GARDEN_PERF inventory + blurry list)
