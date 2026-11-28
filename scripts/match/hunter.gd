@@ -8,9 +8,9 @@ const H_GRAV := 14.7             # m/s^2 [game data] DefaultGravityZ -1470 uu/s^
 # ---- movement feel (movefeel, Oct 31 2026): every value and its source is in docs/MOVEMENT_FEEL.md,
 # measured by --move-feel-check. Snappy first: input acts the step it arrives, falls hit the
 # footage depth, the glider opens and steers at once and keeps the momentum you bring into it.
-# m/s: [game data] JumpZVelocity is 7.5 (1.9m up); ours stops ~1.5m up so jump + mantle still tops
-# out under four terraces (the wall kick's job) on our 0.8m terraces
-const JUMP_V := 6.8
+# m/s: [game data] JumpZVelocity 750 uu/s, 1.91m up; jump + mantle still tops out under four terraces
+# (HunterMove.ledge_reach: the wall kick's job)
+const JUMP_V := 7.5
 # one-step presses, cleared after each sim step
 const PRESS_KEYS := ["dash", "jump", "sig", "util1", "util2", "util3", "util4", "util5", "util6", "ult", "sec",
 		"gear1", "gear2", "skill", "swap"]
@@ -1767,12 +1767,12 @@ func _physics(dt: float) -> void:
 	var b1: float = _occ(nx, pos.z, guard)
 	if b1 == 0.0: pos.x = nx
 	elif grounded and b1 > 0.0 and b1 - pos.y <= World.LEVEL + 0.05: step_up = b1
-	elif b1 > 0.0 or b1 == -1.0: vel.x = 0.0 if b1 == -1.0 else WallMoves.stopped(self, vel.x)
+	elif b1 > 0.0 or b1 == -1.0: vel.x = 0.0 if b1 == -1.0 else WallMoves.stopped(self, vel.x, b1)
 	var nz := tgt.y
 	var b2: float = _occ(pos.x, nz, guard)
 	if b2 == 0.0: pos.z = nz
 	elif grounded and b2 > 0.0 and b2 - pos.y <= World.LEVEL + 0.05: step_up = maxf(step_up, b2)
-	elif b2 > 0.0 or b2 == -1.0: vel.z = 0.0 if b2 == -1.0 else WallMoves.stopped(self, vel.z)
+	elif b2 > 0.0 or b2 == -1.0: vel.z = 0.0 if b2 == -1.0 else WallMoves.stopped(self, vel.z, b2)
 	if step_up > 0.0 and mv.length() > 0.3:
 		# walking into a single terrace steps you up it smoothly, no hop
 		pos.y = step_up
@@ -2093,7 +2093,7 @@ func _try_ledge_grab(dt: float) -> void:
 	var w: World = m.world
 	var mv: Vector2 = inp["move"]
 	var reach := 0.0
-	var max_rise := HunterFeel.mantle_reach + (HunterFeel.tall_climb_extra if HunterMove.climbs_tall(self) else 0.0)
+	var max_rise := HunterMove.ledge_reach(self)
 	if grounded:
 		# as in Supervive, walking into a wall doesn't climb it: jump, and you mantle at the top.
 		# Bots still lean their way up so their paths work.

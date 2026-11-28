@@ -150,39 +150,31 @@ func _anim(k: Dictionary, stat: String, r: String) -> void:
 	h._emote(k, {"great": "★", "good": "♪", "miss": "?"}[r])
 
 
+## A drill pays stat bites into the bag (TrainRuns.pay_drill: limited runs a day), never raw points.
 func _finish() -> void:
 	var k: Dictionary = h.train["k"]
 	var rec: Dictionary = k["rec"]
 	var stat: String = h.train["stat"]
+	var grades: Array = h.train["results"]
 	var pts := 0
-	for r in h.train["results"]:
+	for r in grades:
 		pts += {"great": 3, "good": 2, "miss": 0}[r]
-		if r != "miss" and Save.has_building("dojo"):
-			pts += 1
-	var mult := 1.0
-	if Care.need(rec, "joy") >= 60.0:
-		mult *= 1.25
-	if Care.need(rec, "energy") < 35.0:
-		mult *= 0.7
-	var gained := Care.add_stat(rec, stat, int(round(pts * mult)))
+	var pay := TrainRuns.pay_drill(stat, grades)
 	Care.change(rec, "energy", -18.0)
 	Care.change(rec, "food", -6.0)
-	Care.change(rec, "joy", 4.0 if (h.train["results"] as Array).has("great") else -2.0)
+	Care.change(rec, "joy", 4.0 if grades.has("great") else -2.0)
 	var aff: String = {"power": "fierce", "guard": "steadfast", "speed": "swift", "focus": "curious"}[stat]
 	Evo.add(rec, aff, 2.0)
 	h._garden_xp(rec, "drill", pts)
 	var sname := String(Care.STATS[stat]["name"]).to_lower()
-	if gained > 0:
-		CareJournal.note(rec, "trained %s at the Training post: +%d" % [sname, gained])
+	var paid := int(pay["bites"]) > 0
+	if paid:
+		CareJournal.note(rec, "trained %s at the Training post: +%d %s" % [sname, pay["bites"], pay["id"]])
 	if Care.care_day(rec, "trained"):
 		Save.remember(rec, "trained", "trained %s with you at the Training post" % sname, 1.0)
 	Save.save_game()
-	var shown := int(rec["stats"][stat])
-	var msg := "No gain this time. Try again after a rest"
-	if gained > 0:
-		msg = "+%d %s  (%d of %d)" % [gained, Care.STATS[stat]["name"], shown, Care.stat_cap(rec)]
-	h._toast(msg)
-	h._say(k, BokiLines.say(rec, "trained" if gained > 0 else "train_miss"))
+	h._toast(String(pay["text"]))
+	h._say(k, BokiLines.say(rec, "trained" if paid else "train_miss"))
 	k["busy"] = false
 	k["t"] = 1.5
 	h.train["bar"].close()
