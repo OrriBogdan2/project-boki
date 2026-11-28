@@ -5,6 +5,7 @@ his head" (owner 11-19). Its rest pose and every clip that holds it at rest now 
 and `pounce` (which roll the ball round him in root space) are re-keyed into the hips' space so they look the same.
 Run once on the glb as committed before this change (git checkout it to redo):
     python3 tools/art1/grimble_ball_on_hips.py art/wardens/dredge/dredge.glb [out.glb]"""
+
 import sys
 
 import numpy as np
@@ -12,14 +13,18 @@ import numpy as np
 sys.path.insert(0, __file__.rsplit("/", 1)[0])
 from grimble_barge_clips import read, write  # noqa: E402
 
-HOLD_EPS = 1e-4     # a ball track that moves less than this (m or quaternion units) over a clip is "held at rest"
+HOLD_EPS = 1e-4  # a ball track that moves less than this (m or quaternion units) over a clip is "held at rest"
 
 
 def quat_mat(q):
     x, y, z, w = q
-    return np.array([[1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w)],
-                     [2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w)],
-                     [2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y)]])
+    return np.array(
+        [
+            [1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w)],
+            [2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w)],
+            [2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y)],
+        ]
+    )
 
 
 def mat_quat(m):
@@ -51,7 +56,7 @@ def accessor(j, bin_, i):
     v = j["bufferViews"][ac["bufferView"]]
     nc = {"SCALAR": 1, "VEC3": 3, "VEC4": 4}[ac["type"]]
     o = v.get("byteOffset", 0) + ac.get("byteOffset", 0)
-    raw = np.frombuffer(bytes(bin_[o:o + 4 * ac["count"] * nc]), dtype="<f4")
+    raw = np.frombuffer(bytes(bin_[o : o + 4 * ac["count"] * nc]), dtype="<f4")
     return ac, o, raw.reshape(ac["count"], nc).astype(float)
 
 
@@ -107,11 +112,11 @@ def build(j, bin_):
                     new[k] = m[:3, 3] if path == "translation" else mat_quat(m[:3, :3])
             if path == "rotation":
                 for k in range(1, len(new)):
-                    if new[k] @ new[k - 1] < 0:      # one hemisphere, so a key never turns the long way round
+                    if new[k] @ new[k - 1] < 0:  # one hemisphere, so a key never turns the long way round
                         new[k] = -new[k]
             writes.append((o, new))
         for o, new in writes:
-            bin_[o:o + new.size * 4] = new.astype("<f4").tobytes()
+            bin_[o : o + new.size * 4] = new.astype("<f4").tobytes()
     return j, bin_
 
 

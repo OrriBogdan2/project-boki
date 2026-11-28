@@ -60,6 +60,7 @@ static func place(h) -> void:
 		_sheet(h, shallow)
 	quiet_landmarks(h)
 	_scatter(h, B["scatter"], shallow)
+	ZoneVents.dress(h)
 
 static func _sheet(h, tiles: Rect2) -> void:
 	var m := MeshInstance3D.new()

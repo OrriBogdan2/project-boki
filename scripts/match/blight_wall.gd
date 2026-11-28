@@ -2,7 +2,9 @@ class_name BlightWall
 extends RefCounted
 ## The tide ring in the world (docs/decisions/0023): the wall of Blight closing on the Heart. One
 ## open cylinder, scaled to Heart.tide_r every frame, that reads from far off; the shader is unshaded
-## and alpha-only, so the low preset pays for it like a ring on the ground. Presets with Settings
+## and alpha-only, so the low preset pays for it like a ring on the ground. The wall reads from both
+## sides: a crisp edge line where the ground ends, a body that leans in over the safe side and thins
+## out with distance (so it never fills the view), light falling down the face. Presets with Settings
 ## q("fx") above RICH_FX add drifting bands and a patch of embers rising off the stretch of wall
 ## nearest the local player (a handful of CPU particles, scaled by the same fx knob as Fx).
 
@@ -24,6 +26,7 @@ func _init(parent: Node3D) -> void:
 	_mat.shader = SHADER
 	_mat.set_shader_parameter("rich", 1.0 if rich else 0.0)
 	_mat.set_shader_parameter("ground", -BASE_Y / (TOP_Y - BASE_Y))
+	_mat.set_shader_parameter("height_m", TOP_Y - BASE_Y)
 	wall = MeshInstance3D.new()
 	wall.name = "BlightWall"
 	wall.mesh = _cylinder()

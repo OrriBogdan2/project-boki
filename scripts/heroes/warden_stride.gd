@@ -19,6 +19,14 @@ const FLIGHT_FROM := 0.12  # of a foot's way: it lifts before it travels (the so
 const FLIGHT_TO := 0.88  # and has landed before the last of it
 const FREEZE_AT := 0.96  # of the slide: its spot stops following the body (the drawn body lags its speed a little)
 const CROUCH_MAX := 0.3  # a sneak or slide dip is not a stop
+const REVERSE_BRAKE := 1.2  # x the walking brake: a speed falling faster is the keys pushing against the run
+const TURN_MAX_S := 0.45  # s: the longest a reversal takes new locks
+const TURN_HOLD_S := 0.6  # s: no lock outlasts this
+const TURN_CAUGHT := 0.2  # the loops' blend this near its goal has caught the reversal up: no new locks
+const TURN_DOWN_M := 0.06  # m over the foot's standing height: the loop's foot is down (a lock takes it there)
+const TURN_UP_M := 0.15  # m: the loop's foot has lifted well off (its lock lets go: the swing hides the catch-up)
+const TURN_REACH := 1.5  # of the leg's length: past this a locked foot lets go (the leg stays stretched up to it)
+const TURN_RELEASE := 12.0  # 1/s: a lifted lock eases back onto the loop's foot
 
 static var _rules = null
 # (loaded when first used, not named as a type: a type reference would compile HunterMove ahead of Hunter and
@@ -52,6 +60,12 @@ var swing := 0  # which foot swings in the slide; the other stays planted
 var pin_w := 0.0
 var stop_w := 0.0  # 0..1: the weight shifted back
 var lean_w := 0.0  # 0..1 of the start lean
+var turn_t := -1.0  # s since a reversal began (-1: none)
+var turn_face := 0.0  # the facing last frame (rad)
+var turn_lock: Array = [false, false]  # per foot: held on the ground
+var turn_w: Array = [0.0, 0.0]  # per foot: how much
+var turn_at: Array = [Vector3.ZERO, Vector3.ZERO]  # model space: where, carried back as the body moves and turns
+var turn_floor := 0.0  # model space: the feet's standing height
 
 
 static func make(model: Node3D, sk: Skeleton3D, art_name: String) -> WardenStride:
@@ -80,6 +94,9 @@ func step(dt: float, s: Dictionary, clips: WardenClips) -> void:
 	if not _owns_body(s, clips):
 		_reset(spd)
 		return
+	var face := float(s.get("face", 0.0))
+	if turn_t < 0.0 and phase == 0 and last_spd >= walk * 0.85 and _reversing(spd, dt):
+		_turn_begin(face)
 	if spd > run * CARRY:
 		carried = true
 	elif spd >= run * 0.9 and spd <= run * 1.02 and absf(spd - last_spd) < 0.02:
@@ -88,7 +105,7 @@ func step(dt: float, s: Dictionary, clips: WardenClips) -> void:
 		peak = spd
 		_record_idle(clips)
 	peak = maxf(peak, spd) if phase == 0 else peak
-	if phase == 0 and not carried and idle_known and peak >= walk * 0.85 and spd < peak - BRAKE_DROP:
+	if phase == 0 and turn_t < 0.0 and not carried and idle_known and peak >= walk * 0.85 and spd < peak - BRAKE_DROP:
 		_begin(vel, spd)
 	if phase in [1, 2]:
 		low = minf(low, spd)
@@ -100,6 +117,8 @@ func step(dt: float, s: Dictionary, clips: WardenClips) -> void:
 	else:
 		_stop(dt, spd)
 	_pose()
+	if turn_t >= 0.0:
+		_turn(dt, vel, face, clips)
 
 
 ## Nothing but the loops moves him: no action, no air, no dash, no crouch, nothing keyed.
@@ -119,12 +138,71 @@ func _owns_body(s: Dictionary, clips: WardenClips) -> bool:
 ## Everything off in this frame (a dash a frame after a stop shows nothing of it).
 func _reset(spd: float) -> void:
 	phase = 0
+	turn_t = -1.0
+	turn_lock = [false, false]
+	turn_w = [0.0, 0.0]
 	pin_w = 0.0
 	stop_w = 0.0
 	lean_w = 0.0
 	shown = spd
 	peak = spd
 	last_spd = spd
+
+
+## A reversal (the stick flipped at a run, docs/MOVEMENT_FEEL.md "Run turn"): the speed falls faster than the walking
+## brake would stop him, so the keys push against the run. The speed is through zero in 0.1 s and back the other way
+## by 0.2 s, far quicker than the loops' blend can follow (it passes the idle and drags the planted foot).
+func _reversing(spd: float, dt: float) -> bool:
+	return spd < last_spd and last_spd - spd > _move.brake_rate(last_spd) * REVERSE_BRAKE * dt
+
+
+## A reversal locks the feet on the ground while the loops' blend catches it up: from here each foot the loop puts
+## down is held where it landed until the loop lifts it again.
+func _turn_begin(face: float) -> void:
+	var inv := root.global_transform.affine_inverse()
+	var f := _feet()
+	turn_floor = minf((inv * f[0]).y, (inv * f[1]).y)
+	if idle_known:
+		turn_floor = minf((idle_feet[0] as Vector3).y, (idle_feet[1] as Vector3).y)
+	turn_face = face
+	turn_t = 0.0
+	turn_lock = [false, false]
+	turn_w = [0.0, 0.0]
+
+
+## The locked feet stay on the ground: each spot is carried back along the body's velocity and round against its turn
+## (model space; the model is drawn at the body). A lock lets go as the loop lifts its foot, or the leg cannot reach
+## the spot, easing back onto the loop's foot at RELEASE; none is taken once the blend has caught up or after
+## TURN_MAX_S.
+func _turn(dt: float, vel: Vector3, face: float, clips: WardenClips) -> void:
+	turn_t += dt
+	var dyaw := wrapf(face - turn_face, -PI, PI)
+	turn_face = face
+	var carry := Basis(Vector3.UP, -face) * Vector3(vel.x, 0.0, vel.z) * dt
+	var xf := root.global_transform
+	var inv := xf.affine_inverse()
+	var open := turn_t < TURN_MAX_S and clips.loco_pos.distance_to(clips.loco_goal) > TURN_CAUGHT
+	var f := _feet()  # (the loop's feet: the locks are laid on after)
+	var held := false
+	for i in 2:
+		var at: Vector3 = inv * f[i]
+		turn_at[i] = Basis(Vector3.UP, -dyaw) * (turn_at[i] as Vector3) - carry
+		if turn_lock[i]:
+			var ends := _leg_ends(legs[i])
+			var hip: Vector3 = inv * (skel.global_transform * (ends[0] as Vector3))
+			var leg := (ends[0] as Vector3).distance_to(ends[1]) * 2.0
+			var up := TURN_UP_M if open else TURN_DOWN_M  # (once the blend has caught up, any lift lets go)
+			if at.y > turn_floor + up or hip.distance_to(turn_at[i]) > leg * TURN_REACH or turn_t > TURN_HOLD_S:
+				turn_lock[i] = false
+		elif open and at.y < turn_floor + TURN_DOWN_M and float(turn_w[i]) <= 0.0:
+			turn_lock[i] = true
+			turn_at[i] = at
+		turn_w[i] = 1.0 if turn_lock[i] else move_toward(float(turn_w[i]), 0.0, TURN_RELEASE * dt)
+		if float(turn_w[i]) > 0.0:
+			held = true
+			_plant(i, xf * (turn_at[i] as Vector3), float(turn_w[i]))
+	if not open and not held:
+		turn_t = -1.0
 
 
 func _record_idle(clips: WardenClips) -> void:

@@ -6,7 +6,6 @@ extends RefCounted
 ## The expected numbers are written out here, not read from LevelGrowth, so a curve change fails.
 ## Never touches the save.
 
-var bad := 0
 const LEVELS := [1, 5, 10]
 const AP := {1: 1.0, 5: 1.156, 10: 1.351}  # ability power: 1 + 0.039 x (level - 1)
 const HP := {1: 1.0, 5: 1.24, 10: 1.54}  # max health: 1 + 0.06 x (level - 1)
@@ -31,6 +30,8 @@ const KIT_HEAL := ["tender", "bulwark"]
 const MAXHP_SHIELD := ["bulwark", "ashwick"]
 const SHIELD_NAME := {"bulwark": "aegis shield_max", "ashwick": "cloak shield (max health)"}
 
+var bad := 0
+
 
 func ok(what: String, cond: bool, info := "") -> void:
 	if cond:
@@ -48,19 +49,19 @@ func run(main: Node) -> void:
 	main.add_child(m)
 	var opts := {"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 31, "no_drop": true}
 	opts.merge({"arch": "thief", "cls": Arch.weight("thief")})
-	await m.start(opts)
+	m.start(opts)
 	m.set_process(false)
-	var P: Hunter = m.player
-	var tip := LevelGrowth.tip(P)
+	var pc: Hunter = m.player
+	var tip := LevelGrowth.tip(pc)
 	var named := tip.contains("+6% max health") and tip.contains("+3.9% ability power")
 	ok("the level badge names the per-level growth", named, tip)
 	for a in Arch.ORDER:
-		P.reclass(Arch.weight(a), a)
+		pc.reclass(Arch.weight(a), a)
 		var base := {}
 		for lvl in LEVELS:
-			P.lvl = lvl
-			LevelGrowth.apply(P)
-			var got := _read(P, String(a))
+			pc.lvl = lvl
+			LevelGrowth.apply(pc)
+			var got := _read(pc, String(a))
 			if lvl == 1:
 				base = got
 			var shield_k: float = HP[lvl] if MAXHP_SHIELD.has(a) else AP[lvl]
@@ -75,19 +76,19 @@ func run(main: Node) -> void:
 
 
 ## The numbers the slots read at the hunter's current level.
-func _read(P: Hunter, a: String) -> Dictionary:
-	var k := P.ak
-	var heal: float = Effects._heal_k(P)
+func _read(pc: Hunter, a: String) -> Dictionary:
+	var k := pc.ak
+	var heal: float = Effects._heal_k(pc)
 	if a == "tender":
 		heal = (k as TenderKit).heal_k()
 	elif a == "bulwark":
 		heal = (k as BulwarkKit).heal_k()
-	var shield: float = Effects._heal_k(P)
+	var shield: float = Effects._heal_k(pc)
 	if a == "bulwark":
 		shield = (k as BulwarkKit).shield_max()
 	elif a == "ashwick":
-		shield = P.max_hp  # Furnace Cloak, rank-3 Soot Ram: a share of max health
-	return {"dmg": k.power(String(DMG_SLOT[a])), "heal": heal, "shield": shield, "hp": P.max_hp - P.kin_hp_added}
+		shield = pc.max_hp  # Furnace Cloak, rank-3 Soot Ram: a share of max health
+	return {"dmg": k.power(String(DMG_SLOT[a])), "heal": heal, "shield": shield, "hp": pc.max_hp - pc.kin_hp_added}
 
 
 func _what(a: String, k: String) -> String:

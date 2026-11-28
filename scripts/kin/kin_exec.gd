@@ -30,8 +30,25 @@ static func moves_caster(ab: AbilitySpec) -> bool:
 
 ## A fresh context for a cast.
 static func make_cx(m: Node, caster: Ent, kin: Ent, owner: Ent, aim: Vector3, power: float, slot: String, ability_id: String, chain: Array = []) -> Dictionary:
-	return {"m": m, "caster": caster, "kin": kin, "owner": owner, "team": int(caster.team) if caster else -1, "aim": aim,
+	var cx := {"m": m, "caster": caster, "kin": kin, "owner": owner, "team": int(caster.team) if caster else -1, "aim": aim,
 		"power": power, "slot": slot, "ability": ability_id, "chain": chain + [ability_id], "depth": 1, "k": 1.0}
+	# Every cast a Hunter makes draws in that Hunter's slot colour, whichever path built the context
+	# (a kit, a merge, a hand-built stage); the category colours stay for Boki and generic casts.
+	if is_hunter_cast(cx):
+		cx["hero_col"] = Arch.color((caster as Hunter).arch)
+	return cx
+
+## Is this cast a Hunter's (a Hunter with an archetype as the caster)? Such a cast never reaches the
+## generic category colours (--hero-vfx-check pins it).
+static func is_hunter_cast(cx: Dictionary) -> bool:
+	var who = cx.get("caster")
+	return who is Hunter and (who as Hunter).arch != ""
+
+## The generic colour a cast falls back to (Boki and generic casts only). A Hunter's cast must never get
+## here: make_cx sets "hero_col" for it, so this asserts if some path built its context another way.
+static func generic_col(cx: Dictionary, col: Color) -> Color:
+	assert(not is_hunter_cast(cx), "a Hunter's cast fell back to the generic category colour (no hero_col)")
+	return col
 
 ## Casts every top-level stage of an ability.
 static func cast(ab: AbilitySpec, cx: Dictionary) -> void:
@@ -170,12 +187,12 @@ static func _color(st: StageSpec, cx: Dictionary) -> Color:
 	if cx.has("hero_col"):
 		return cx["hero_col"]
 	if not st.effects.is_empty():
-		return KinRules.effects_color(st.effects)
+		return generic_col(cx, KinRules.effects_color(st.effects))
 	for ev in st.then:
 		for sub in st.then[ev]:
 			if not (sub as StageSpec).effects.is_empty():
-				return KinRules.effects_color((sub as StageSpec).effects)
-	return KinRules.cat_color("sustain" if st.delivery.type == "wall" else "utility")
+				return generic_col(cx, KinRules.effects_color((sub as StageSpec).effects))
+	return generic_col(cx, KinRules.cat_color("sustain" if st.delivery.type == "wall" else "utility"))
 
 static func _height(u) -> float:
 	if u is Hunter: return 0.95
@@ -270,9 +287,12 @@ static func _shoot(st: StageSpec, cx: Dictionary, start: Vector3, dv: Vector2, s
 		extra["bounce"] = int(cx["wall_bounce"])      # ricochets off walls (an archetype's trick shot)
 	if cx.has("shot_crit"):
 		extra["crit"] = true
+	if cx.get("drawn", false):
+		extra["drawn"] = true      # the kit draws it (Grimble's arm): no ball, and no "s" copy for other games
 	if bool(p.get("rope", false)):
 		extra["rope"] = true
 		extra["deco"] = "hook"
+	ShotOrigin.draw_from(extra, cx["caster"], String(cx.get("fire_from", "")))      # the slot's hand or weapon
 	m.spawn_shot(cx["caster"], start, dv * spd, 0.0, rng / spd, size, col, extra)
 
 ## What a projectile does when it touches someone ("pass" or "hit") and when it ends.
@@ -444,7 +464,9 @@ static func _burst(st: StageSpec, cx: Dictionary) -> void:
 		if r <= KinParts.BIG_RADIUS:
 			m.fx.burst(at + Vector3(0, 0.4, 0), col, int(clampf(r * 10.0, 8.0, 30.0)), 5.0, 0.45, 6.0, 1.1)
 			m.sfx("boom", at, -3.0 if r > 2.0 else -7.0, 1.3 - minf(0.5, r * 0.1))
-			if r > 2.0: m.shake(0.3, at)
+			if r > 2.0:      # a Boki's own burst never shakes its owner's camera (DASHES §5.5)
+				var cause: Ent = cx["owner"] if cx["owner"] else cx["caster"]
+				Shake.big(m, at, "explosion", cause)
 		else:
 			m.sfx("ping", at, -2.0, 1.1)
 		_hit(st.effects, st, _foes_near(cx, at, r), cx, at, r)
@@ -525,7 +547,8 @@ static func _trap(st: StageSpec, cx: Dictionary) -> void:
 			_then(st, "on_trigger", cx, tat, d, f)
 		var end := func(tat: Vector3) -> void:
 			if is_instance_valid(cx["caster"]): _then(st, "on_end", cx, tat, d)
-		m.verbs.add_trap(cx["caster"], q, {"radius": float(p["radius"]), "arm": float(p["arm"]), "time": float(p["duration"]), "color": col.to_html(false), "kx": fire, "kx_end": end}, {})
+		m.verbs.add_trap(cx["caster"], q, {"radius": float(p["radius"]), "arm": float(p["arm"]), "time": float(p["duration"]), "color": col.to_html(false), "kx": fire, "kx_end": end,
+			"max_live": int(p.get("max_live", 0)), "group": String(cx.get("ability", ""))}, {})
 
 static func _wall(st: StageSpec, cx: Dictionary) -> void:
 	var m: Node = cx["m"]
@@ -805,7 +828,7 @@ static func apply_foe(effs: Array, f: Ent, cx: Dictionary, center: Vector3, st: 
 	if cats.has("control"):
 		col = KinRules.cat_color("control")
 	elif cats.has("damage"):
-		col = cx.get("hero_col", KinRules.cat_color("damage"))
+		col = cx["hero_col"] if cx.has("hero_col") else generic_col(cx, KinRules.cat_color("damage"))
 	m.fx.burst(f.pos + Vector3(0, 0.8, 0), col, 6, 2.5, 0.3)
 	# an archetype ability's own follow-up on what it hit (Marks, Shadow Step windows, wall pins)
 	var cb = cx.get("on_foe")

@@ -71,13 +71,13 @@ func _island(main: Node, seed: int) -> void:
 		"seed %d: a running jump tops every face tried (%d of %d; missed at %s)"
 			% [seed, topped, faces.size(), str(missed)])
 	if not faces.is_empty():
-		ok(await _walk_off(hm, faces[0]), "seed %d: from the top you walk off it back onto the meadow" % seed)
+		ok(_walk_off(hm, faces[0]), "seed %d: from the top you walk off it back onto the meadow" % seed)
 	var shut := _shut_in(w, hb)
 	ok(shut.is_empty(),
 		"seed %d: a Boki reaches every open tile from the landing (%d shut in: %s)"
 			% [seed, shut.size(), str(shut.slice(0, 6))])
 	var t0: int = ridge[0]
-	var c0 := Vector2i(t0 % w.w, t0 / w.w)
+	var c0 := Vector2i(t0 % w.w, int(t0 / float(w.w)))
 	ok(hb._brush_ok(c0, "wild") and hb.clear_wild(c0) and w.level[t0] == 0 and not hb.cliff_t.has(t0),
 		"seed %d: Clear the wild levels a ridge tile" % seed)
 	hm.queue_free()
@@ -94,7 +94,7 @@ func _faces(w: World, hb: HomeBuild, ridge: Array) -> Array:
 				continue
 			out.append({"tile": Vector2i(i % w.w, i / w.w), "n": Vector2(dv), "at": at})
 			break
-	var step := maxi(1, out.size() / MAX_FACES)
+	var step := maxi(1, int(out.size() / float(MAX_FACES)))
 	var picked: Array = []
 	for j in range(0, out.size(), step):
 		picked.append(out[j])
@@ -173,7 +173,8 @@ func _shut_in(w: World, hb: HomeBuild) -> Array:
 			q.append(j)
 	var out: Array = []
 	for i in w.kind.size():
-		if w.island[i] == 0 and not hb._solid_tile(w, i) and not seen.has(i): out.append(Vector2i(i % w.w, i / w.w))
+		if w.island[i] == 0 and not hb._solid_tile(w, i) and not seen.has(i): out.append(Vector2i(i % w.w,
+				int(i / float(w.w))))
 	return out
 
 ## A fresh save on the farm-start island of this seed, its Home loaded and paused (steps are driven here).
@@ -225,7 +226,7 @@ func _media(main: Node, seed: int, dir: String) -> void:
 	# 2. a running jump onto a ridge, a stop on top, then off the far side
 	var faces := _faces(w, hb, hb.cliff_t.keys())
 	if not faces.is_empty():
-		var f: Dictionary = faces[faces.size() / 2]
+		var f: Dictionary = faces[int(faces.size() / 2.0)]
 		var n: Vector2 = f["n"]
 		_place(hm, (f["at"] as Vector2) - n * 2.0)
 		var over := false

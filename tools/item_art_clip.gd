@@ -21,7 +21,7 @@ func run(main_node: Node) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
 	m.set_process(false)
 	player = m.player
 	for mb in m.mobs:
@@ -55,4 +55,4 @@ func _circle(item: String, at: Vector3) -> void:
 			h.render(DT, 1.0)
 		await main.get_tree().process_frame
 		if i % 2 == 0:
-			main.get_viewport().get_texture().get_image().save_png(dir.path_join("%s_%03d.png" % [item, i / 2]))
+			main.get_viewport().get_texture().get_image().save_png(dir.path_join("%s_%03d.png" % [item, int(i / 2.0)]))

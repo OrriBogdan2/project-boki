@@ -24,7 +24,9 @@ func run(main: Node) -> void:
 	var m := Models.hunter(Arch.weight("tender"), Data.TEAM_COLORS[0], Arch.signature("tender"), "",
 		PlayerLook.neutral(), "tender")
 	holder.add_child(m)
-	var sync := m.get_node_or_null("Warden/Sync")
+	var sync := m.get_node_or_null("Warden/Native")  # (the live Meshy model; the contract one: Warden/Sync)
+	if sync == null:
+		sync = m.get_node_or_null("Warden/Sync")
 	ok(sync != null and sync.get("companions") != null, "Meeko's model has floating companions")
 	if sync == null or sync.get("companions") == null:
 		_done(main)
@@ -67,8 +69,9 @@ func _cut(m: Node3D, wc: WardenCompanions) -> void:
 		var face := false
 		for si in part.node.mesh.get_surface_count():
 			var o := part.node.get_surface_override_material(si) as ShaderMaterial
-			face = face or (o != null and o.shader == WardenMood.ATLAS_SHADER)
-		ok(face, "%s's face is still on the mood atlas shader" % part.id)
+			var atlas := o != null and o.shader == Models.HERO
+			face = face or (atlas and o.get_shader_parameter("atlas_grid") != Vector2i.ZERO)
+		ok(face, "%s's face is still drawn off the mood atlas (hero-toon)" % part.id)
 
 func _pos(m: Node3D, part: WardenCompanions.Part) -> Vector3:
 	return m.to_local(part.node.global_position)
@@ -218,6 +221,7 @@ func _trail(m: Node3D, sync: Node, wc: WardenCompanions, cfg: Dictionary) -> voi
 	var sun: WardenCompanions.Part = wc.parts[0]
 	var near: float = muzzle.global_position.distance_to(sun.node.global_position) if muzzle else 9.0
 	ok(near < 0.2, "the sun's muzzle empty rides the sun (%.3f m from it)" % near)
+	_glow_on_sun(m, sun, "live")
 	var base := wc.centre
 	var sc := maxf(wc.skel.global_basis.y.length(), 0.01)
 	var worst := 0.0
@@ -243,3 +247,16 @@ func _trail(m: Node3D, sync: Node, wc: WardenCompanions, cfg: Dictionary) -> voi
 
 func _lag(m: Node3D, wc: WardenCompanions) -> float:
 	return (wc._target() - wc.centre).length()
+
+
+## Her glow (warden_look.json "lights"/"halos" on anchor_sun, the empty her lantern hung on): wherever it is drawn it
+## rides the sun, and no light is left where a lantern hung.
+func _glow_on_sun(m: Node3D, sun: WardenCompanions.Part, path: String) -> void:
+	var glow := WardenGlb.anchor(m, "anchor_sun")
+	var gd: float = glow.global_position.distance_to(sun.node.global_position) if glow else 9.0
+	ok(gd < 0.2, "%s: anchor_sun rides the sun (%.3f m from it)" % [path, gd])
+	var far := 0.0
+	var lights := m.find_children("*", "OmniLight3D", true, false)
+	for l: OmniLight3D in lights:
+		far = maxf(far, l.global_position.distance_to(sun.node.global_position))
+	ok(far < 0.2, "%s: no glow light off the sun (%d lights, worst %.3f m off)" % [path, lights.size(), far])

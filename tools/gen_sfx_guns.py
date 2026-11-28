@@ -9,6 +9,7 @@ SMG: a tiny high pop, almost no tail. Rifle: a mid crack with a short slap. Burs
 metallic crack with a bolt clack after it. Shotgun: a low, wide blast and a thick tail. Sniper: the
 sharpest crack, a deep body and a long rolling report. Original synthesis, no samples.
 """
+
 import sfx_lib as S
 from sfx_lib import mix, at, kick, click, crack, sub, tail, reflections, ring
 
@@ -44,7 +45,13 @@ def shotgun(i):
     body = kick(150 + 8 * i, 48, d, 0.025, 0.09, 3.4) * 0.8
     blast = crack(d, 150, 3200, 0.06) * 3.4
     taps = ((0.05, 0.4, 1200), (0.1, 0.3, 900), (0.17, 0.2, 700), (0.26, 0.1, 500))
-    return mix(click(0.006, 1800, 8000) * 2.0, body, blast, sub(62, 36, d, 0.12) * 0.5, reflections(tail(0.85, 1200, 0.2) * 1.5, taps))
+    return mix(
+        click(0.006, 1800, 8000) * 2.0,
+        body,
+        blast,
+        sub(62, 36, d, 0.12) * 0.5,
+        reflections(tail(0.85, 1200, 0.2) * 1.5, taps),
+    )
 
 
 def sniper(i):
@@ -55,9 +62,41 @@ def sniper(i):
     return mix(crk, body, sub(58, 32, d, 0.18) * 0.5, reflections(tail(1.4, 1100, 0.38, 0.01) * 1.5, taps))
 
 
-S.takes_cat('gun_smg', smg, 2, 'fire')
-S.takes_cat('gun_rifle', rifle, 2, 'fire')
-S.takes_cat('gun_burst', burst, 2, 'fire')
-S.takes_cat('gun_shotgun', shotgun, 2, 'heavy_fire')
-S.takes_cat('gun_sniper', sniper, 1, 'heavy_fire')
-print('pickup gun shots written')
+S.takes_cat("gun_smg", smg, 2, "fire")
+S.takes_cat("gun_rifle", rifle, 2, "fire")
+S.takes_cat("gun_burst", burst, 2, "fire")
+S.takes_cat("gun_shotgun", shotgun, 2, "heavy_fire")
+S.takes_cat("gun_sniper", sniper, 1, "heavy_fire")
+
+
+# Hold takes (FireSfx plays <shot>_hold from the 2nd round of a held burst; the 1st keeps the full crack above).
+# Written last so the shots above keep their noise (one seeded generator). The same voice, a crack and a kick
+# with a 40-70 ms tail instead of 0.1-0.35 s: at 12 rounds a second the takes no longer pile into a smear.
+def smg_hold(i):
+    d = 0.11
+    body = kick(470 + 20 * i, 210, d, 0.004, 0.012, 2.0) * 0.45
+    snap = crack(d, 2400, 9000 + 300 * i, 0.007) * 2.4
+    return mix(click(0.002, 4000, 12000) * 1.4, body, snap, tail(0.06, 3200, 0.02) * 0.5)
+
+
+def stock_smg_hold(i):
+    # the minigun's weapon row names the stock 'smg' (sfx_combat.py): same voice as that shot, held
+    d = 0.12
+    body = kick(300 + 12 * i, 120, d, 0.006, 0.02, 2.4) * 0.5
+    snap = crack(d, 900, 5000 + 300 * i, 0.01) * 2.6
+    mid = crack(d, 250, 900, 0.016) * 2.0
+    return mix(click(0.003, 3000, 10000) * 1.6, body, snap, mid, tail(0.07, 2200, 0.025) * 0.7)
+
+
+def rifle_hold(i):
+    d = 0.17
+    body = kick(260 + 10 * i, 95, d, 0.01, 0.03, 2.6) * 0.6
+    snap = crack(d, 900, 6000 + 200 * i, 0.012) * 2.6
+    low = crack(d, 200, 900, 0.022) * 1.8
+    return mix(click(0.004, 2800, 11000) * 1.6, body, snap, low, tail(0.1, 2000, 0.035) * 0.8)
+
+
+S.takes_hold("gun_smg_hold", smg_hold, 3, "fire")
+S.takes_hold("smg_hold", stock_smg_hold, 3, "fire")
+S.takes_hold("gun_rifle_hold", rifle_hold, 3, "fire")
+print("pickup gun shots written")

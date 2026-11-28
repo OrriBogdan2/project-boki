@@ -26,7 +26,7 @@ func run(main_node: Node) -> void:
 	Econ.ensure()
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 12, "no_drop": true, "arch": "juggernaut",
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 12, "no_drop": true, "arch": "juggernaut",
 		"cls": Arch.weight("juggernaut"), "weapon": Arch.signature("juggernaut")})
 	m.set_process(false)
 	var fade = main.get("fade")
@@ -59,7 +59,7 @@ func run(main_node: Node) -> void:
 	if fade != null:
 		await fade.reveal(0.01)
 	home._move_player(0.001)
-	var hb := Rect2i(sz.x / 2 - 200, sz.y - 190, 400, 190)
+	var hb := Rect2i(int(sz.x / 2.0) - 200, sz.y - 190, 400, 190)
 	home.dash.charges = float(home._dodge()["charges"])
 	await _grab("home_2_charges", hb)
 	home.dash.charges = 1.45

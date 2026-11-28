@@ -13,10 +13,12 @@ const WEEK := 604800.0
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("SEASONS %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(m: Node) -> void:
 	Save.no_write = true
@@ -30,8 +32,10 @@ func run(m: Node) -> void:
 	print("SEASONS DONE, failures: %d" % bad)
 	m.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _seasons() -> Array:
 	return GardenSeasons.rules()["seasons"]
+
 
 ## The first week at or after `from` whose season is `zone`.
 func _week_of(zone: String, from := 0) -> int:
@@ -40,19 +44,23 @@ func _week_of(zone: String, from := 0) -> int:
 		w += 1
 	return w
 
+
 func _data() -> void:
 	var zones := {}
 	for s in _seasons():
 		zones[s["zone"]] = true
 		var tw := GardenSeasons.twist(s["game"], _week_of(s["zone"]))
-		ok(tw.get("id", "") == s["twist"] and tw["game"] == s["game"], "%s: twist %s is a %s twist" % [
-				s["zone"], s["twist"], s["game"]])
+		ok(
+			tw.get("id", "") == s["twist"] and tw["game"] == s["game"],
+			"%s: twist %s is a %s twist" % [s["zone"], s["twist"], s["game"]]
+		)
 		var crop: bool = Data.CROPS.has(s["snack"]) and not SnackPatch.rules()["snacks"].has(s["snack"])
 		var what := "%s: snack %s is a crop the patch lacks" % [s["zone"], s["snack"]]
 		ok(crop and GardenPrizes.ids().has(s["game"]), what)
 	ok(zones.size() == 5 and _seasons().size() == 5, "five zones take turns")
 	var real := zones.keys().all(func(z): return GardenZones.ids().has(z))
 	ok(real, "each season's zone is a garden zone: %s" % [zones.keys()])
+
 
 func _rotation() -> void:
 	var weeks := int(GardenSeasons.rules()["weeks"])
@@ -67,11 +75,14 @@ func _rotation() -> void:
 	ok(held, "one season holds for %d weeks" % weeks)
 	var i0 := _seasons().find(first)
 	var next := GardenSeasons.season(start + weeks)
-	ok(next == _seasons()[(i0 + 1) % _seasons().size()], "then the next zone in the list (%s -> %s)" % [
-			first["zone"], next["zone"]])
+	ok(
+		next == _seasons()[(i0 + 1) % _seasons().size()],
+		"then the next zone in the list (%s -> %s)" % [first["zone"], next["zone"]]
+	)
 	ok(GardenSeasons.season(start + weeks * _seasons().size()) == first, "and it wraps round after every zone")
 	var day_before := GardenSeasons.season(BaseRace.week_now(start * WEEK - 1.0))
 	ok(day_before != first, "the second before the season starts belongs to the last one")
+
 
 func _twists() -> void:
 	for s in _seasons():
@@ -91,6 +102,7 @@ func _twists() -> void:
 	ok(BaseRace.tweak(BaseRace.twist(clash)["game"], clash) == BaseRace.twist(clash), "the weekly format wins its game")
 	_runs()
 
+
 ## The season twists reach the games' own Runs.
 func _runs() -> void:
 	var water := 0
@@ -106,10 +118,12 @@ func _runs() -> void:
 	ok(volley.to_win == 7, "Glasswater: Spark Volley is first to 7")
 	ok(GardenSeasons.twist("seek", _week_of("hushwood")).get("night", false), "Hushwood: the Seek is at night")
 
+
 func _rec(n: String) -> Dictionary:
 	var k := Save.new_kin("zapple", n)
 	Care.ensure(k)
 	return k
+
 
 func _snacks() -> void:
 	var grow := float(SnackPatch.rules()["grow_secs"])
@@ -125,9 +139,12 @@ func _snacks() -> void:
 		for o in _seasons():
 			if o["snack"] != s["snack"]:
 				others = others and not got.has(o["snack"])
-		ok(got.count(s["snack"]) == 1 and int(d["crops"][s["snack"]]) == 1,
-				"%s season: the patch grows %s" % [s["zone"], s["snack"]])
+		ok(
+			got.count(s["snack"]) == 1 and int(d["crops"][s["snack"]]) == 1,
+			"%s season: the patch grows %s" % [s["zone"], s["snack"]]
+		)
 		ok(others, "%s season: no other season's snack" % s["zone"])
+
 
 ## GardenSfx.zone_in as Home opens: the sting once on entering the zone in season (from the hub or another zone).
 func _sting() -> void:
@@ -149,6 +166,7 @@ func _sting() -> void:
 	ok(heard.call() == before + 1, "with the garden off: no sting")
 	build["base_mode"] = was_base
 
+
 ## Crowns three cup rounds in `game` at time t; returns the Crown's result.
 func _crown(me: Dictionary, game: String, t: float) -> Dictionary:
 	var rng := RandomNumberGenerator.new()
@@ -160,8 +178,10 @@ func _crown(me: Dictionary, game: String, t: float) -> Dictionary:
 		res = GardenPrizes.settle(game, me, foe, true, t, rng)
 	return res
 
+
 func _keepsake() -> void:
 	Save.d = Save.fresh()
+	TrainRuns.state()["race"] = 9999  # three wins in a row: the race-run limit is --train-runs-check's
 	var me := _rec("Crowned")
 	me["stats"] = {"power": 20, "guard": 20, "speed": 20, "focus": 20}
 	var hush: Dictionary = _seasons().filter(func(s): return s["zone"] == "hushwood")[0]
@@ -169,8 +189,10 @@ func _keepsake() -> void:
 	var res := _crown(me, "seek", t)
 	var rows := GardenPrizes.rows(res)
 	var shown: bool = rows.any(func(r): return String(r[0]).ends_with(hush["keepsake"]["name"]))
-	ok(res["crown"] and res["keepsake"] == hush["keepsake"]["name"] and shown, "Hushwood season: the Seek Crown " +
-			"gives the %s and the card shows it" % hush["keepsake"]["name"])
+	ok(
+		res["crown"] and res["keepsake"] == hush["keepsake"]["name"] and shown,
+		"Hushwood season: the Seek Crown " + "gives the %s and the card shows it" % hush["keepsake"]["name"]
+	)
 	ok(me["keepsakes"].has(hush["keepsake"]["id"]), "the Boki keeps it (rec.keepsakes)")
 	var again := _crown(me, "seek", t + WEEK)
 	ok(again["crown"] and again["keepsake"] == "", "a second Crown the same season: ribbon again, no keepsake")

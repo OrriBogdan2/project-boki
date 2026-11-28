@@ -194,7 +194,6 @@ func make(a: int, b: int) -> void:
 		if h.team == a or h.team == b:
 			h.ai.erase("betray")
 			if h.ai.get("tgt") is Ent and allied(h.team, (h.ai["tgt"] as Ent).team): h.ai["tgt"] = null
-	m.add_feed("%s and %s made a truce" % [squad_name(a), squad_name(b)])
 	m.sfx("unlock", null, -8.0, 1.1)
 	if m.player and (_mine(a) or _mine(b)) and m.hud:
 		m.hud.toast("Truce with %s: don't shoot each other, and you can share a way out" % squad_name(b if _mine(a) else a), Color("f4f1e6"))
@@ -205,8 +204,6 @@ func end(k: String, why: String) -> void:
 		return
 	pacts.erase(k)
 	events.append("ended %s %s" % [k, why])
-	if why != "":
-		m.add_feed(why)
 
 # ------------------------------------------------------------------ breaking it
 ## Every hit in the match comes through here (Match.on_damage). A real attack on a truce partner

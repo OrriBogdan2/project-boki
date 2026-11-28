@@ -12,14 +12,15 @@ extends RefCounted
 ## (Hunter.gear / gear_cd, Kin.runner, Kin.state, KinMerge.ready); draws on the HUD's canvas.
 ## Look: HudStyle (the same slot frames and key pills as the ability row).
 
-const BOX := 54.0             # px, each box
-const GAP := 8.0              # px between boxes
-const EDGE := 12.0            # px between the last box and the weapon card
-const BOND_FLASH_S := 0.8     # s: how long the bond ring brightens after an ultimate fills it (KinBond)
-const BAR_H := 4.0            # px: the Boki's health bar along the bottom inside its box
+const BOX := 54.0  # px, each box
+const GAP := 8.0  # px between boxes
+const EDGE := 12.0  # px between the last box and the weapon card
+const BOND_FLASH_S := 0.8  # s: how long the bond ring brightens after an ultimate fills it (KinBond)
+const BAR_H := 4.0  # px: the Boki's health bar along the bottom inside its box
 
 ## What the Boki box drew last: {"tag": short word, "bond": percent shown, "frac": health 0..1}
 static var shown := {}
+
 
 ## Draws the three boxes left of the weapon card `wr`, bottom-aligned with it. Returns their rect.
 static func draw(hud, p: Hunter, wr: Rect2) -> Rect2:
@@ -33,38 +34,55 @@ static func draw(hud, p: Hunter, wr: Rect2) -> Rect2:
 	BokiHud.stolen_wisps(hud, p, br)
 	return Rect2(Vector2(x0, y), Vector2(3.0 * BOX + 2.0 * GAP, BOX))
 
+
 static func rar_col(g: Dictionary) -> Color:
 	return Data.RARITY[clampi(int(g.get("rar", 0)), 0, Data.RARITY.size() - 1)]["color"]
+
 
 static func _glove(hud, p: Hunter, i: int, r: Rect2) -> void:
 	var g := Gloves.worn(p, i)
 	var key := Gloves.key_cap(i)
 	var id := "gear%d" % i
 	if g.is_empty() or not Gear.ALL.has(String(g["id"])):
-		return      # an empty glove slot is not drawn: the frame appears with the first glove
+		return  # an empty glove slot is not drawn: the frame appears with the first glove
 	var gid := String(g["id"])
 	var gd: Dictionary = Gear.ALL[gid]
 	var cd := float(p.gear_cd[i])
 	var active := Gear.active(gid)
-	hud._ab_slot(id, r, Gear.icon_of(gid), key if active else "", gd["col"], Gloves.cd_frac(p, i), cd, active
-			and cd <= 0.0 and not p.downed)
+	hud._ab_slot(
+		id,
+		r,
+		Gear.icon_of(gid),
+		key if active else "",
+		gd["col"],
+		Gloves.cd_frac(p, i),
+		cd,
+		active and cd <= 0.0 and not p.downed
+	)
 	# the rarity frame (passive gloves say so instead of a key)
 	var rar_frame := HudStyle.box(Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 2, Color(rar_col(g), 0.95), 2)
 	hud.c.draw_style_box(rar_frame, r.grow(2.0))
 	if not active:
 		HudStyle.ctext(hud.c, Vector2(r.get_center().x, r.end.y + 4), "PASSIVE", 10, Color(HudStyle.INK, 0.6))
 
+
 ## The Merge box: your Boki. Also used by nothing else; the overhead row has its own small version.
 static func boki(hud, p: Hunter, r: Rect2) -> void:
 	var k: Kin = p.kin
 	var has_boki := k != null and is_instance_valid(k)
-	if has_boki and (int(p.slot_lv["ult"]) <= 0 or KinMerge.active(p)):
+	var fusion := MergeForm.enabled()
+	if has_boki and fusion and (int(p.slot_lv["ult"]) <= 0 or KinMerge.active(p)):
+		if p.lvl < int(Hunter.ULT_AT[0]) and not KinMerge.active(p) and not HudReveal.on(hud.m, "ult_tiles"):
+			return      # the locked Merge tile waits for level 6 (HudReveal "ult_tiles")
 		BokiHud.r_slot(hud, p, r)
 		return
 	var key := Settings.key_cap("ultimate")
-	HudSlot.shown_keys["r"] = key
-	hud.hover_spots.append([r, "r"])
+	if fusion:
+		HudSlot.shown_keys["r"] = key
+		hud.hover_spots.append([r, "r"])
 	if not has_boki:
+		if not fusion:
+			return
 		HudStyle.slot_frame(hud.c, r, HudStyle.MUTED, "off")
 		HudStyle.key_pill(hud.c, Vector2(r.get_center().x, r.end.y), key, HudStyle.MUTED)
 		return
@@ -81,12 +99,14 @@ static func boki(hud, p: Hunter, r: Rect2) -> void:
 		DexView.draw_type(hud.c, t, ctr + Vector2(0, -2), BOX * 0.3, 0.35 if down else 1.0)
 	# the bond meter as a thin ring; bright and pulsing once the Merge is ready
 	var bond := clampf(p.ult, 0.0, 1.0)
-	hud.c.draw_arc(ctr, BOX * 0.5 + 3.0, 0, TAU, 36, Color(1, 1, 1, 0.08), 2.0, true)
+	if fusion:
+		hud.c.draw_arc(ctr, BOX * 0.5 + 3.0, 0, TAU, 36, Color(1, 1, 1, 0.08), 2.0, true)
 	if bond > 0.0:
 		var full := KinMerge.ready(p)
 		var a := 0.7 + 0.3 * sin(float(hud.m.time) * 6.0) if full else 0.85
-		hud.c.draw_arc(ctr, BOX * 0.5 + 3.0, -PI / 2, -PI / 2 + TAU * bond, 36, Color(HudStyle.GOLD, a),
-				3.0 if full else 2.0, true)
+		hud.c.draw_arc(
+			ctr, BOX * 0.5 + 3.0, -PI / 2, -PI / 2 + TAU * bond, 36, Color(HudStyle.GOLD, a), 3.0 if full else 2.0, true
+		)
 	var flash := 1.0 - (float(hud.m.time) - float(p.get_meta("bond_flash_at", -9.0))) / BOND_FLASH_S
 	if flash > 0.0:
 		hud.c.draw_arc(ctr, BOX * 0.5 + 5.0, 0, TAU, 36, Color(1.0, 0.85, 0.3, 0.9 * flash), 3.0, true)
@@ -97,12 +117,14 @@ static func boki(hud, p: Hunter, r: Rect2) -> void:
 	hud._bar(bar, 0.0 if down else frac, SideColor.ally())
 	var tag := BokiHud.tag(p)
 	shown = {"tag": tag, "bond": int(bond * 100.0), "frac": frac}
-	if tag == "":
+	if tag == "" and fusion:
 		var pct_at := Vector2(ctr.x + 7.0, r.position.y + 14.0)
 		HudStyle.ctext(hud.c, pct_at, "%d%%" % int(bond * 100.0), 10, Color(HudStyle.INK, 0.8))
-	else:
+	elif tag != "":
 		BokiHud.chip(hud, r, tag, HudStyle.HURT if tag in ["RESCUE", "TOO FAR"] else tc)
-	HudStyle.key_pill(hud.c, Vector2(ctr.x, r.end.y), key, HudStyle.MUTED if down else tc)
+	if fusion:
+		HudStyle.key_pill(hud.c, Vector2(ctr.x, r.end.y), key, HudStyle.MUTED if down else tc)
+
 
 ## The hover text for a glove box (hud ids "gear0", "gear1").
 static func tip(p: Hunter, i: int) -> Array:
@@ -120,11 +142,13 @@ static func tip(p: Hunter, i: int) -> Array:
 	var gd: Dictionary = Gear.ALL[gid]
 	var rn := String(Data.RARITY[clampi(int(g.get("rar", 0)), 0, Data.RARITY.size() - 1)]["name"])
 	out.append([gd["name"], gd["col"]])
-	out.append(["%s %s glove  ·  %s" % [rn, "active" if Gear.active(gid) else "passive",
-			key if Gear.active(gid) else "always on"], HudStyle.MUTED, 12])
+	var state_word := "active" if Gear.active(gid) else "passive"
+	var when := key if Gear.active(gid) else "always on"
+	out.append(["%s %s glove  ·  %s" % [rn, state_word, when], HudStyle.MUTED, 12])
 	out.append([Gear.desc_of(gid, int(g.get("rar", 1))), HudStyle.INK, 14])
 	out.append([Gear.stat_text(gid, int(g.get("rar", 1))), HudStyle.MUTED, 13])
 	return out
+
 
 ## The kit panel's glove rows: [key, name, description, colour] for each glove slot.
 static func kit_lines(p: Hunter) -> Array:
@@ -133,9 +157,21 @@ static func kit_lines(p: Hunter) -> Array:
 		var g := Gloves.worn(p, i)
 		if not g.is_empty() and Gear.ALL.has(String(g["id"])):
 			var gdd: Dictionary = Gear.ALL[String(g["id"])]
-			out.append([Gloves.key_cap(i), String(gdd["name"]), Gear.desc_of(String(g["id"]), int(g.get("rar", 1))),
-					gdd["col"]])
+			out.append(
+				[
+					Gloves.key_cap(i),
+					String(gdd["name"]),
+					Gear.desc_of(String(g["id"]), int(g.get("rar", 1))),
+					gdd["col"]
+				]
+			)
 		else:
-			out.append([Gloves.key_cap(i), "Glove (empty)",
-					"Find gloves in chests, vaults and on bosses. Either kind of glove fits.", HudStyle.MUTED])
+			out.append(
+				[
+					Gloves.key_cap(i),
+					"Glove (empty)",
+					"Find gloves in chests, vaults and on bosses. Either kind of glove fits.",
+					HudStyle.MUTED
+				]
+			)
 	return out

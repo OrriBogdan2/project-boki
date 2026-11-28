@@ -24,7 +24,8 @@ static func fill(box: Control, rec: Dictionary, lit := {}) -> void:
 	box.add_child(head)
 	for s in Care.STATS:
 		box.add_child(_row(rec, s, lit))
-	var tip := "Train at the yard to raise them. Past 50 points a gain counts half, past 80 a quarter."
+	var tip := "Give stat bites from Feed to raise them: carry them home from expeditions,"
+	tip += " or win them in races and drills (a few runs a day)."
 	box.add_child(UI.para(tip, 12, UI.FAINT))
 
 static func _row(rec: Dictionary, s: String, lit: Dictionary) -> Control:

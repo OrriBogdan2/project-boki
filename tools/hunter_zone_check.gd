@@ -3,8 +3,10 @@ extends RefCounted
 ##   1. the zone is a real screen area round the hunter's body and plate
 ##   2. a damage number you take, a heal number and a floating word all end up clear of it (HunterZone via Fx)
 ##   3. a message card dropped right on the hunter slides aside; the knock banner does too
-##   4. the lane shows 2 cards (1 in a fight); a small line never sits beside another and is dropped in a fight
+##   4. the lane shows one card at a time (none in a fight but urgent ones); a small line never sits beside
+##      another and is dropped in a fight
 ##   5. armour breaking (yours or theirs) and a wall slam toast nothing: the bar and the number already say it
+##   6. every archetype has its model's top (body.top_h) and its plate hangs clear over it at the match's drawn size
 ## Never touches the save.
 
 var bad := 0
@@ -46,6 +48,7 @@ func run(main_node: Node) -> void:
 	_cards(m, zone)
 	_lane_budget(m)
 	_no_duplicate_toasts(m)
+	_plates_clear_tops(m)
 	m.queue_free()
 	print("HZONE DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -72,7 +75,7 @@ func _label_boxes(m: Match) -> Array[Rect2]:
 func _numbers(m: Match, zone: Rect2) -> void:
 	var foe: Hunter = m.hunters.filter(func(x): return x != m.player)[0]
 	m.player.hp = m.player.max_hp
-	m.fx.hit_number(m.player, foe, 31.0, Color.WHITE, false)  # damage you take: over your own head
+	m.fx.damage_number(m.player, foe, 31.0, {}, m.player)  # damage you take: over your own head
 	m.fx.healed(m.player, 12.0)
 	m.fx.word(m.player.pos + Vector3(0, 1.3, 0), "COMBO", Color.WHITE)
 	m.fx.number(m.player.pos + Vector3(0, 1.0, 0), 80.0, Color.RED, true)
@@ -92,6 +95,7 @@ func _cards(m: Match, zone: Rect2) -> void:
 	lane.clear()
 	lane.fight = false
 	lane.top = zone.position.y + 4.0  # the column starts right on the hunter
+	lane.right_edge = 0.0  # (centred: the match's own lane sits on the right rail, TopStack.rail)
 	lane.avoid = zone
 	lane.push("Bramble Isle  ·  low ground, lots of cover", Color.GOLD)
 	lane._process(0.5)
@@ -124,7 +128,7 @@ func _lane_budget(m: Match) -> void:
 	for t in ["one", "two", "three"]:
 		lane.push(t, Color.WHITE)
 	lane._process(0.1)
-	ok(lane.texts().size() == 2 and MsgLane.MAX_SHOWN == 2, "at most 2 cards on show (%d)" % lane.texts().size())
+	ok(lane.texts().size() == 1 and lane.max_shown == 1, "a match shows one card at a time (%d)" % lane.texts().size())
 	lane.clear()
 	lane.push("big", Color.WHITE)
 	lane.push("small", Color.WHITE, MsgLane.LOW)
@@ -142,7 +146,10 @@ func _lane_budget(m: Match) -> void:
 	lane.push("one", Color.WHITE)
 	lane.push("two", Color.WHITE)
 	lane._process(0.1)
-	ok(lane.texts().size() == 1 and MsgLane.FIGHT_SHOWN == 1, "in a fight one card at most (%d)" % lane.texts().size())
+	ok(
+		lane.texts().is_empty() and lane.waiting() == 2,
+		"in a fight no card shows, both wait (%d)" % lane.texts().size()
+	)
 	lane.clear()
 	lane.fight = false
 
@@ -155,3 +162,26 @@ func _no_duplicate_toasts(m: Match) -> void:
 	m.on_armor_break(m.player, foe)
 	m.on_wall_slam(m.player, Vector2.RIGHT)
 	ok(lane.count() == 0, "armour breaking and a wall slam add no toast (%s)" % str(lane.texts()))
+
+
+## The plate's bottom edge sits at or over every archetype's tallest point (back props, horns), whatever the drawn size.
+func _plates_clear_tops(m: Match) -> void:
+	var feet := m.player.position
+	var vis_k := Hunter.VIS_SCALE * m.cam.hunter_scale
+	var worst := 1e9
+	var missing: Array[String] = []
+	for id in Arch.ids():
+		if not Arch.body(id).has("top_h"):
+			missing.append(id)
+		var top := Arch.top_h(id) * vis_k
+		var up := HudPlate.up_of(id, vis_k, 0.0) * CamRig.match_hunter_scale
+		var gap := _screen_y(m, feet, top) - _screen_y(m, feet, up) - 17.0  # px: the plate hangs 17 px under its anchor
+		worst = minf(worst, gap)
+	ok(missing.is_empty(), "every archetype has body.top_h in its data (missing: %s)" % str(missing))
+	var k := 1080.0 / m.get_viewport().get_visible_rect().size.y  # viewport px to 1080p px
+	var msg := "a plate's bottom clears the tallest point of all %d archetypes (worst %.0f px at 1080p)"
+	ok(worst >= 0.0, msg % [Arch.ids().size(), worst * k])
+
+
+func _screen_y(m: Match, feet: Vector3, up: float) -> float:
+	return m.cam.unproject_position(feet + m.cam.char_lean() * Vector3(0, up, 0)).y

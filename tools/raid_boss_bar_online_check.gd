@@ -9,12 +9,14 @@ extends "res://tools/displace_net_check.gd"
 ## Lines: RBAR ok|FAIL <what>.
 
 ## The bar is judged against the host's live hp: the raid squad hits the boss meanwhile.
-const HP_TOL := 0.02         # of max health: the guest's hp is up to one snapshot (0.1 s) old
+const HP_TOL := 0.02  # of max health: the guest's hp is up to one snapshot (0.1 s) old
 var home_at := Vector3.ZERO
+
 
 func _init() -> void:
 	tag = "RBAR"
 	guest_flag = "--raid-boss-bar-online-check=guest"
+
 
 ## A raid match takes seconds to build and blocks its game meanwhile (the host's relay with it): on a busy box
 ## that outlasts ENet's 5 s minimum timeout and the guest is dropped before it hears "start". Both ends of each
@@ -28,11 +30,13 @@ func _connect() -> bool:
 		_patient(1, null)
 	return up
 
+
 func _patient(id: int, relay: RelayServer) -> void:
 	var p: ENetMultiplayerPeer = relay.peer if relay else Net.enet.peer
 	var pp := p.get_peer(id)
 	if pp:
 		pp.set_timeout(32, 60000, 120000)
+
 
 ## Both games build the raid (the lobby's start: one team of two, the raid's options), not the training strip.
 func _build(d: Dictionary) -> void:
@@ -45,11 +49,12 @@ func _build(d: Dictionary) -> void:
 	o.merge({"net": d, "seed": SEED, "no_drop": true, "cls": "medium"}, true)
 	var nm := Match.new()
 	main.add_child(nm)
-	await nm.start(o)
+	nm.start(o)
 	nm.set_process(false)
 	nm.player.max_hp = 1.0e6
 	nm.player.hp = nm.player.max_hp
 	m = nm
+
 
 ## No monster sweep (the base's _run frees every mob, the boss with them): just step the match.
 func _run(secs: float) -> void:
@@ -59,36 +64,44 @@ func _run(secs: float) -> void:
 		t += DT
 		await main.get_tree().process_frame
 
+
 func _on_msg(topic: String, data, from: String) -> void:
 	if topic == "dn" and typeof(data) == TYPE_DICTIONARY and String(data.get("c", "")) == "bar":
 		_say_bar()
 		return
 	super._on_msg(topic, data, from)
 
+
 ## The guest's own view of the bar: what boss_for finds, its numbers, the phase the bar would print.
 func _say_bar() -> void:
-	var P := m.player
-	var b: Mob = m.lairs.boss_for(P)
+	var p := m.player
+	var b: Mob = m.lairs.boss_for(p)
 	var nm := String((b as Boss).md["name"]) if b is Boss else String(HeartRaid.rules()["boss"]["name"])
-	var rep := {"pos": [P.pos.x, P.pos.y, P.pos.z], "has": b != null, "plain": b != null and not (b is Boss),
-		"name": nm, "hud": m.hud != null}
+	var rep := {
+		"pos": [p.pos.x, p.pos.y, p.pos.z],
+		"has": b != null,
+		"plain": b != null and not (b is Boss),
+		"name": nm,
+		"hud": m.hud != null
+	}
 	if b != null:
 		rep["hp"] = b.hp
 		rep["max"] = b.max_hp
-		rep["phase"] = (b as Boss).phase if b is Boss else Boss.phase_at(b.hp, b.max_hp)      # as the bar prints it
+		rep["phase"] = (b as Boss).phase if b is Boss else Boss.phase_at(b.hp, b.max_hp)  # as the bar prints it
 	Net.lobby_emit("dn_r", rep)
+
 
 # ------------------------------------------------------------------ the host
 func _host() -> void:
-	var G := await _host_up()
-	if G == null:
+	var g := await _host_up()
+	if g == null:
 		return _finish()
 	var rd := m.heart_raid
 	ok(rd != null and rd.host(), "the host runs the raid")
 	var site := m.heart.site
 	home_at = m.world.free_spot_near(site + Vector3(-4, 0, 0), [], 1.0, 0.45, 4.0)
 	m.player.teleport(home_at)
-	await _place(G, m.world.free_spot_near(site + Vector3(-4, 0, 3), [], 1.0, 0.45, 4.0))
+	await _place(g, m.world.free_spot_near(site + Vector3(-4, 0, 3), [], 1.0, 0.45, 4.0))
 	rd._spawn_boss()
 	var b := rd.boss as Boss
 	ok(b != null and not b.dormant, "the host raises the boss")
@@ -101,17 +114,24 @@ func _host() -> void:
 		b.hp = b.max_hp * f
 		await _run(1.5)
 		r = await _bar()
-		ok(bool(r["has"]) and absf(float(r["hp"]) / float(r["max"]) - b.hp / b.max_hp) < HP_TOL,
+		ok(
+			bool(r["has"]) and absf(float(r["hp"]) / float(r["max"]) - b.hp / b.max_hp) < HP_TOL,
 			"guest: the bar's health is %d%% like the host's" % int(f * 100.0),
-			"%s / %s (host %.1f)" % [r.get("hp"), r.get("max"), b.hp])
-		ok(int(r.get("phase", -1)) == b.phase, "guest: the bar's phase (%d) is the host boss's (%d) at %d%%" % [
-			int(r.get("phase", -1)) + 1, b.phase + 1, int(f * 100.0)])
+			"%s / %s (host %.1f)" % [r.get("hp"), r.get("max"), b.hp]
+		)
+		ok(
+			int(r.get("phase", -1)) == b.phase,
+			(
+				"guest: the bar's phase (%d) is the host boss's (%d) at %d%%"
+				% [int(r.get("phase", -1)) + 1, b.phase + 1, int(f * 100.0)]
+			)
+		)
 	ok(b.phase == 2, "the host boss reached its third phase")
 	var away := m.world.free_spot_near(site + Vector3(float(rd.lair["half"]) + 14.0, 0, 0), [], 1.0, 0.45, 6.0)
-	await _place(G, away)
+	await _place(g, away)
 	r = await _bar()
 	ok(not bool(r["has"]), "guest: outside the boss's square no bar shows", str(r))
-	await _place(G, home_at + Vector3(0, 0, 2))
+	await _place(g, home_at + Vector3(0, 0, 2))
 	r = await _bar()
 	ok(bool(r["has"]), "guest: back in the square the bar shows again")
 	b.hurt(b.max_hp * 10.0, m.player, {})
@@ -119,6 +139,7 @@ func _host() -> void:
 	r = await _bar()
 	ok(not bool(r["has"]), "guest: the boss down, the bar goes", str(r))
 	_finish()
+
 
 func _bar() -> Dictionary:
 	replies.clear()

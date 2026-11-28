@@ -28,6 +28,7 @@ func ok(cond: bool, what: String) -> void:
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
+	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm
 	_rules()
 	_rigs()
 	await _building()
@@ -238,7 +239,7 @@ func _building() -> void:
 	var beats := 4
 	var hold_s := lead + beat * float(beats - 1) + 0.1
 	_set_mats(cost)
-	await _hammer_alone(home, e, hold_s)
+	_hammer_alone(home, e, hold_s)
 	var held_got := int(e["site"]["got"])
 	_reset_site(e, cost)
 	for i in beats:
@@ -297,7 +298,7 @@ func _stalling() -> void:
 	var hc := HomeLayout.deco_center(e)
 	home.ppos = hc + Vector3(2.0, 0, 2.2)
 	home.kins.clear()
-	await _hammer_alone(home, e, 14.0)
+	_hammer_alone(home, e, 14.0)
 	var stop_at := FarmSites.step_start(int(e["site"]["need"]), 2)
 	ok(int(e["site"]["got"]) == stop_at and FarmSites.stalled(e) and not home.tw.active(),
 			"with two quarters' worth the build stops at swing %d of %d" % [stop_at, int(e["site"]["need"])])
@@ -319,7 +320,7 @@ func _stalling() -> void:
 	ok(not home.tw.active() and int(e["site"]["got"]) == before,
 			"pressing at it does nothing but tell you what is missing")
 	_set_mats(cost)
-	await _hammer_alone(home, e, 14.0)
+	_hammer_alone(home, e, 14.0)
 	ok(not FarmSites.has_site(e), "bring the rest and hammering carries on to the end")
 	home.queue_free()
 	await main.get_tree().process_frame

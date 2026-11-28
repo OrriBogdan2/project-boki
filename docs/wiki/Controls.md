@@ -16,12 +16,12 @@ your Boki in a match; **R** turns a piece in build mode and reloads in a match.
 | Shift | Your class's dash |
 | Space | Jump; hold it in the air to glide |
 | Mouse 5 | Glide at once, without jumping (Mouse 4 works too) |
-| Q | Your active glove |
+| Q / V | Your two gloves |
 | E | Your class's utility |
 | R | Reload (it also reloads on its own after a short idle) |
 | X | Your hunter's own ultimate (from level 6; no hero has one yet) |
 | T | Fuse with your Boki (level 6, full bond meter). Press T again to fire the form's ultimate and release: a 3s afterglow (faster, with a small shield) and your Boki rests 6s beside you |
-| C | Your Boki's own ability: it hops off, casts and hops back |
+| C | Summon: your Boki bursts out of its wisp into the fight for a short window; C again sends it back (Boki wisps setting) |
 | G | Tap: Sic your Boki at the cursor, or Call it back if it is away. Hold: the order wheel (Chase, Guard, Return, Follow) |
 | Middle mouse or Alt+click | Ping for your squad: on an enemy hunter a red "Enemy" ping that follows them for 4 s, on loot a gold "Loot" ping, anywhere else a white spot. Two pings each: a third drops your oldest. With the map open, or while dropping in, it pings the point under the cursor |
 | F | Use: open, pick up, scan a knocked-out wild Boki (hold), revive a teammate, loot a deathbox, finish a downed rival |
@@ -49,7 +49,7 @@ your Boki in a match; **R** turns a piece in build mode and reloads in a match.
 | I | Inventory |
 | Ctrl | Crouch |
 
-The Arena has its own practice keys (reset, cooldowns off, class swap...): see [Arena and training](Arena-and-Training.md).
+The Training Grounds have their own practice keys (reset, cooldowns off, class swap...): see [Training Grounds](Arena-and-Training.md).
 
 ## Every default binding
 
@@ -71,6 +71,8 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | 2 | Utility belt slot 2 (an armor kit to start) | `util2` | yes |
 | 3 | Utility belt slot 3 | `util3` | yes |
 | 4 | Utility belt slot 4 | `util4` | yes |
+| 5 | Utility belt slot 5 | `util5` | yes |
+| 6 | Utility belt slot 6 | `util6` | yes |
 | Q | Glove 1 | `gear1` | yes |
 | V / Mouse 4 | Glove 2 (in a match; at home it plays fetch) | `gear2` | yes |
 | Ctrl | Sneak | `crouch` | yes |
@@ -83,7 +85,6 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | Space | Jump (hold to glide) | `jump` | yes |
 | Mouse 5 | Glide (hold in the air) | `glide` | yes |
 | R | Hunter ultimate | `hunter_ult` | yes |
-| X | Fuse with your Boki (needs a full bond meter) | `ultimate` | yes |
 | 1 | Utility belt slot 1 (a tonic to start) | `util1` | yes |
 | Tab | Scoreboard | `scores` | yes |
 | Esc | Menu | `menu` | no |

@@ -6,10 +6,11 @@ extends RefCounted
 ## the setting off a fight only hides it. Headless has no cursor to read back, so the asserts read
 ## CursorMode.current, which is the mode the game asked the OS for.
 
-var bad := 0
 const OPTS := {"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true}
 const CONFINED := Input.MOUSE_MODE_CONFINED_HIDDEN
 const SHOWN := Input.MOUSE_MODE_VISIBLE
+
+var bad := 0
 
 
 func ok(cond: bool, what: String) -> void:
@@ -27,7 +28,7 @@ func _start(main: Node, extra: Dictionary) -> Match:
 	o.merge(extra, true)
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(o)
+	m.start(o)
 	m.set_process(false)
 	await main.get_tree().process_frame
 	return m

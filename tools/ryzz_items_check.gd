@@ -32,9 +32,9 @@ func run(combo_check: RefCounted, archetype_check: RefCounted) -> void:
 	K = P.ak
 	_park()
 	_item_70()
-	await _item_71()
-	await _item_73()
-	await _item_74()
+	_item_71()
+	_item_73()
+	_item_74()
 	await ac.done(m)
 
 func _park() -> void:
@@ -49,16 +49,17 @@ func _park() -> void:
 func _item_70() -> void:
 	var dash: Dictionary = K.dash_def()
 	var wpn: Dictionary = P.wpn
-	ok("items 70, 116: autos every 0.648 s, bolt speed 37",
-			is_equal_approx(float(wpn["rate"]), 0.648)
+	ok("items 70, 116: autos every 0.55 s, bolt speed 37",
+			is_equal_approx(float(wpn["rate"]), 0.55)
 			and is_equal_approx(float(wpn["speed"]), 37.0), "%s %s" % [wpn["rate"], wpn["speed"]])
-	ok("item 70, 11-10 cut: Wirerun 5.6 to 9.75 m at 40 m/s, hold 0.6 s", is_equal_approx(float(dash["dist"][0]), 5.6)
-			and is_equal_approx(float(dash["dist"][1]), 9.75) and is_equal_approx(float(dash["speed"]), 40.0)
+	ok("item 70: Wirerun 6.02 to 10.48 m at 43 m/s, hold 0.6 s",
+			is_equal_approx(float(dash["dist"][0]), 6.02)
+			and is_equal_approx(float(dash["dist"][1]), 10.48) and is_equal_approx(float(dash["speed"]), 43.0)
 			and is_equal_approx(float(dash["hold"]), 0.6))
-	ok("item 70: the lane preview scales with the charge (full hold = 9.75 m)",
-			is_equal_approx(K.wire_len(0.6), 9.75) and is_equal_approx(K.wire_len(0.0), 5.6))
+	ok("item 70: the lane preview scales with the charge (full hold = 10.48 m)",
+			is_equal_approx(K.wire_len(0.6), 10.48) and is_equal_approx(K.wire_len(0.0), 6.02))
 	var text := String(Arch.def("mage")["card"]["weapons"]["coilcaster"])
-	ok("items 70, 116: the card says every 0.65s", text.contains("every 0.65s"), text)
+	ok("items 70, 116: the card says every 0.55s", text.contains("every 0.55s"), text)
 	_park()
 	P.fire_cd = 0.0
 	P.inp["fire"] = true
@@ -73,8 +74,8 @@ func _item_70() -> void:
 			shots.append(t)
 	P.inp["fire"] = false
 	var gap := shots[1] - shots[0] if shots.size() > 1 else 0.0
-	ok("items 70, 116: held fire shoots every 0.648 s",
-			shots.size() >= 3 and absf(gap - 0.648) < 0.05, "gap %.3f" % gap)
+	ok("items 70, 116: held fire shoots every 0.55 s",
+			shots.size() >= 3 and absf(gap - 0.55) < 0.05, "gap %.3f" % gap)
 
 # ------------------------------------------------------------------ item 71
 ## Casts Skycall on a circle at `at`, drags toward `drag_to`, lets go and runs the 0.8 s plus the fling.

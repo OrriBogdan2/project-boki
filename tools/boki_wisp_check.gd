@@ -3,27 +3,34 @@ extends RefCounted
 ## one mesh on the one shared material, its features are known parts (ears always, a tail tip when it has
 ## one), it wears its own colours (the shiny palette when it shimmers) with its glow on the rim, and the idle
 ## bounce moves and squashes it. The Model Room's ten (tests/kin_gallery.gd WISP_ROOM) all build and stay
-## under the particle budget. Prints PASS/FAIL.
+## under the particle budget. The summon pop (BokiWispPop) bursts and folds for every species, plain and
+## shiny: about 0.25 s, soft light only, eyes open last and close first. Prints PASS/FAIL.
 
 const Gallery := preload("res://tests/kin_gallery.gd")
-const PARTICLE_BUDGET := 300   # sparkles alive for ten wisps (DECISIONS 2026-11-09)
+const PARTICLE_BUDGET := 300  # sparkles alive for ten wisps (DECISIONS 2026-11-09)
 
-const COLOUR_STEP := 1.0 / 255.0   # vertex colours are stored 8 bits a channel
+const COLOUR_STEP := 1.0 / 255.0  # vertex colours are stored 8 bits a channel
 
 var bad := 0
+
 
 func run(main: Node) -> void:
 	for id in Data.KIN:
 		_species(String(id), {})
 		_species(String(id), {"shimmer": true})
+		_pop(String(id), {})
+		_pop(String(id), {"shimmer": true})
 	_room()
+	_pop_types()
 	print("BOKIWISP %s (%d fail)" % ["PASS" if bad == 0 else "FAIL", bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 func ok(cond: bool, what: String) -> void:
 	if not cond:
 		print("BOKIWISP FAIL ", what)
 		bad += 1
+
 
 func _species(id: String, rec: Dictionary) -> void:
 	var tag := id + (" shiny" if rec.get("shimmer", false) else "")
@@ -50,9 +57,65 @@ func _species(id: String, rec: Dictionary) -> void:
 	ok(body.scale.y < 1.0, tag + " squashes as it lands")
 	w.free()
 
+
+## The pop's light takes the Boki's type colour (DexView.type_col): its edge glow, read off the wisp's rim,
+## starts and ends on its own glow and is mostly the type colour at the fullest. Checked for every species and
+## spelled out for three types (ember, tempest teal, bloom), one species each.
+func _pop_types() -> void:
+	var seen := {}
+	for id in Data.KIN:
+		var t := DexView.type_of(String(id))
+		if not seen.has(t):
+			seen[t] = String(id)
+	for t in ["ember", "tempest", "bloom"]:
+		ok(seen.has(t), "a species has the " + t + " type")
+	for t in ["ember", "tempest", "bloom"]:
+		if seen.has(t):
+			var rim := _pop_rim(String(seen[t]), 0.3, true)
+			var want := DexView.type_col(t)
+			var own := Shiny.col(String(seen[t]), {}, "glow")
+			var hex := [own, rim, want].map(func(c: Color) -> String: return c.to_html(false))
+			print("BOKIWISP pop colour %s (%s): glow %s -> %s, type %s" % [t, seen[t], hex[0], hex[1], hex[2]])
+			var near := _dist(own, want) * (1.0 - BokiWispPop.TINT) + 0.02
+			ok(_dist(rim, want) <= near, "%s pop flashes %s" % [seen[t], t])
+	for id in Data.KIN:
+		var own := Shiny.col(String(id), {}, "glow")
+		var want := DexView.type_col(DexView.type_of(String(id)))
+		var tag := String(id) + " pop colour"
+		var far := _dist(own, want) + 0.001
+		var ends := _pop_flash(String(id), 0.0) + _pop_flash(String(id), 1.0)
+		ok(ends == 0.0, tag + " body flash is off at both ends")
+		ok(_pop_flash(String(id), 0.3) > 0.3, tag + " body flash is up when the wisp swells")
+		ok(_dist(_pop_rim(String(id), 0.0, true), own) < 0.02, tag + " starts on its own glow")
+		ok(_dist(_pop_rim(String(id), 1.0, true), own) < 0.02, tag + " ends on its own glow")
+		ok(_dist(_pop_rim(String(id), 0.3, true), want) <= far, tag + " moves to the type colour")
+		ok(_dist(_pop_rim(String(id), 0.4, false), want) <= far, tag + " fold moves to the type colour")
+
+
+func _pop_flash(id: String, u: float) -> float:
+	var pop := BokiWispPop.new(id, {})
+	pop.pose(u, true)
+	var f: float = (pop.wisp.get_node("Body") as GeometryInstance3D).get_instance_shader_parameter("flash")
+	pop.free()
+	return f
+
+
+func _pop_rim(id: String, u: float, burst: bool) -> Color:
+	var pop := BokiWispPop.new(id, {})
+	pop.pose(u, burst)
+	var c: Color = (pop.wisp.get_node("Body") as GeometryInstance3D).get_instance_shader_parameter("rim_col")
+	pop.free()
+	return c
+
+
+func _dist(a: Color, b: Color) -> float:
+	return maxf(maxf(absf(a.r - b.r), absf(a.g - b.g)), absf(a.b - b.b))
+
+
 ## Equal to within a step of the 8-bit vertex colour.
 func _same(a: Color, b: Color) -> bool:
 	return maxf(maxf(absf(a.r - b.r), absf(a.g - b.g)), absf(a.b - b.b)) <= COLOUR_STEP
+
 
 func _room() -> void:
 	var sparkles := 0
@@ -67,3 +130,42 @@ func _room() -> void:
 	var ten := BokiWispLook.TRAIL_AMOUNT * Gallery.WISP_ROOM.size()
 	ok(ten < PARTICLE_BUDGET, "ten wisps make %d sparkles, under %d" % [ten, PARTICLE_BUDGET])
 	print("BOKIWISP room: %d sparkles for the ones in this build, %d for ten" % [sparkles, ten])
+
+
+## The pop in both directions, sampled at its key moments; a pop makes the wisp and the Boki and nothing else.
+func _pop(id: String, rec: Dictionary) -> void:
+	var tag := id + (" shiny" if rec.get("shimmer", false) else "") + " pop"
+	var pop := BokiWispPop.new(id, rec)
+	pop.stand = Vector3(0, -1.4, 0)
+	ok(absf(BokiWispPop.DURATION - 0.25) < 0.05, tag + " lasts about 0.25 s")
+	var only := pop.get_child_count() == 2 and pop.get_node("Form").get_child_count() == 1
+	ok(only, tag + " is the wisp and the Boki only")
+	var lids := func() -> float: return pop._puppet.lids
+	pop.pose(0.0, true)
+	ok(pop.wisp.visible and pop.wisp.scale.x == 1.0 and not pop.form.visible, tag + " burst starts as the wisp")
+	pop.pose(0.4, true)
+	ok(pop.wisp.scale.x > 1.2, tag + " burst: the wisp swells")
+	pop.pose(0.75, true)
+	var landed := pop.form.position.is_equal_approx(pop.stand)
+	ok(pop.form.scale.x > 0.9 and landed, tag + " burst: the Boki is up and landed")
+	ok(lids.call() > 0.9, tag + " burst: the eyes are still shut when it lands")
+	pop.pose(0.8, true)
+	ok(not pop.wisp.visible, tag + " burst: the wisp has gone")
+	pop.pose(0.87, true)
+	ok(pop.form.scale.y < pop.form.scale.x, tag + " burst: it squashes on landing")
+	pop.pose(1.0, true)
+	ok(pop.form.scale.is_equal_approx(Vector3.ONE) and pop.form.position.is_equal_approx(pop.stand), tag + " settles")
+	ok(lids.call() == 0.0, tag + " burst ends with the eyes open")
+	pop.pose(0.0, false)
+	ok(pop.form.scale.is_equal_approx(Vector3.ONE) and not pop.wisp.visible, tag + " fold starts as the Boki")
+	ok(lids.call() == 0.0, tag + " fold starts with the eyes open")
+	pop.pose(0.15, false)
+	ok(lids.call() == 1.0 and pop.form.scale.x > 0.8, tag + " fold: the eyes close first")
+	pop.pose(0.6, false)
+	ok(not pop.form.visible and pop.wisp.visible, tag + " fold: the Boki is a wisp where it stood")
+	ok(pop.wisp.position.y < -0.5, tag + " fold: the wisp has not left yet")
+	pop.pose(1.0, false)
+	var home := pop.wisp.position == Vector3.ZERO and pop.wisp.scale.is_equal_approx(Vector3.ONE)
+	ok(home, tag + " fold ends: the wisp is back at the shoulder")
+	ok(not pop.form.visible, tag + " fold ends with no Boki showing")
+	pop.free()

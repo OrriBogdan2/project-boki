@@ -101,11 +101,15 @@ func _window(main: Node, m: Match, p: Hunter, q: Hunter) -> void:
 		keys.append(Settings.key_cap(k))
 	ok(keys.all(func(k): return caps.has(k)), "every glove and utility slot shows its key: %s" % [keys])
 	ok(caps.has("Armor") and caps.has("Boots") and caps.has("Glove"), "the other slots are named")
+	ok(caps.has("x2") and caps.has(UtilityBelt.name_of("medkit")), "a belt stack: plain name, its count apart")
 	var lp: LoadoutPanel = pc.find_children("*", "LoadoutPanel", true, false)[0]
 	lp.hover_demo("pack", 0)
 	await _frames(main, 2)
 	var tip: InvTip = pc.find_children("*", "InvTip", true, false)[0]
 	ok(_texts(tip).has("+28 armor") and _texts(tip).has("-22 health"), "pointing at the vest shows the compare card")
+	var card: Control = tip.get_child(0)
+	ok(view.encloses(card.get_global_rect()), "the compare card stays on screen")
+	lp = m.hud.pack_panel.find_children("*", "LoadoutPanel", true, false)[0]
 	await _drags(main, m, p, lp)
 	lp = await _reopen(main, m)
 	lp._hover = {"kind": "worn", "i": 2}
@@ -129,6 +133,10 @@ func _beside(main: Node, m: Match, p: Hunter, q: Hunter) -> void:
 	var texts := _texts(m.hud.loot_panel)
 	ok(not m.hud.pack_open() and texts.has("WORN") and texts.has(Loot.name_of(p.pack[0])),
 		"looting: one window, what you wear marked in place above your backpack (no second inventory window)")
+	var inside: Rect2 = m.hud.loot_panel.get_global_rect().grow(1.0)
+	var out: Array = m.hud.loot_panel.find_children("*", "Control", true, false).filter(func(c):
+		return (c as Control).is_visible_in_tree() and not inside.encloses((c as Control).get_global_rect()))
+	ok(out.is_empty(), "nothing in the deathbox window runs past its edge (%d out)" % out.size())
 	m.hud.close_loot()
 
 ## Press, hold and move (SlotDrag) with real input: the mouse drags armor on, a refused drop snaps back

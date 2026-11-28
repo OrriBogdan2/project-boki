@@ -7,7 +7,7 @@ so the wiki stays in step with the game.
 
 Plain Python 3, no Godot needed. Idempotent: running it twice changes nothing the second time.
 
-Sources: content/ (archetypes, dash_flow, classes, kin_v2, kin, abilities_v2, merges_v2, evolution_v2,
+Sources: content/ (archetypes, dash_flow, classes, kin, kin_home, abilities_v2, merges_v2, evolution_v2,
 mutations, gloves, weapons, abilities, maps, biomes, combos, rules) and a few constant tables read
 straight out of the GDScript (Data.CLASSES, Data.TIERS, Life.R, Care.BONDS, HomeLayout.CATALOG...).
 Those are parsed as literals; if one stops parsing, the script says which and carries on.
@@ -112,6 +112,8 @@ def gd_const(script, name):
                 if depth == 0: break
             j += 1
         txt = _strip_gd(src[i:j + 1])
+    # a long string wrapped as "..." + "..." (the line-length rule): Python reads adjacent strings as one
+    txt = re.sub(r'(?<!\\)"\s*\+\s*"', '" "', txt)
     try:
         return ast.literal_eval(txt)
     except Exception as e:
@@ -194,6 +196,25 @@ def block(name, key, body):
 
 # ------------------------------------------------------------------ shared data
 ARCH = content("archetypes")
+
+def fill_ability_text(root, o):
+    """Archetype texts hold {action} (the game fills the player's own key) and {slot.field} (a number from the same JSON): the wiki shows the default keys."""
+    keys = {"dash": "Shift", "secondary": "RMB", "signature": "E", "fire": "LMB"}
+    def one(m):
+        t = m.group(1)
+        if "." not in t:
+            return keys.get(t, m.group(0))
+        v = root
+        for part in t.split("."):
+            v = v[part]
+        return ("%.2f" % v).rstrip("0").rstrip(".")
+    if isinstance(o, dict):
+        return {k: fill_ability_text(root, v) for k, v in o.items()}
+    if isinstance(o, list):
+        return [fill_ability_text(root, v) for v in o]
+    return re.sub(r"\{([^}]+)\}", one, o) if isinstance(o, str) else o
+
+ARCH = {a: fill_ability_text(d, d) for a, d in ARCH.items()}
 ARCH_ORDER = gd_const("arch/arch.gd", "ORDER") or sorted(ARCH)
 CLASSES = gd_const("core/data.gd", "CLASSES") or {}
 MOVE = load_json(os.path.join(ROOT, "content", "rules", "hunter_move.json"))
@@ -204,8 +225,8 @@ def walk_speed(aid):
     return round(MOVE.get(aid, MOVE["default"])["speed"] * MOVE["body_scale"], 2)
 WEAPONS = content("weapons")
 ABIL1 = content("hunter_abilities")
-KIN2 = content("kin_v2")
-KIN1 = content("kin")
+KIN2 = content("kin")
+KIN1 = content("kin_home")
 AB2 = content("abilities_v2")
 MERGE = content("merges_v2")
 EVO = content("evolution_v2")
@@ -271,7 +292,7 @@ def gen_classes():
         if not d: continue
         cs = CLASSES.get(d["weight"], {})
         rows.append([link(class_page_name(aid), the(d["title"])), "%s / %s" % (num(cs.get("hp", "?")), num(cs.get("dashes", "?"))), wname(d["signature"] if "signature" in d else d["weapons"][0]),
-                     d["passive"]["name"], d["dash"]["name"], d["rmb"]["name"], d["e"]["name"], d["r"]["name"] if "r" in d else "none (Boki Fusion)"])
+                     d["passive"]["name"], d["dash"]["name"], d["rmb"]["name"], d["e"]["name"], d["r"]["name"] if "r" in d else "none yet"])
     cu = json.load(open(os.path.join(ROOT, "content", "rules", "class_unlock.json"), encoding="utf-8"))
     kinds = cu["reward_kinds"]
     cu_rows = []
@@ -296,12 +317,13 @@ def gen_classes():
     unlock += table(["Hunter", "Goal", "Target", "Reward"], m_rows)
     lv = []
     for i, t in enumerate(xp):
-        lv.append([str(i + 1), num(t), "R unlocks" if (i + 1) in ult_at[:1] else ("R rank 2" if (i + 1) in ult_at[1:] else "")])
+        lv.append([str(i + 1), num(t), "R unlocks" if (i + 1) in ult_at[:1] else ("R rank %d" % (ult_at.index(i + 1) + 1) if (i + 1) in ult_at else "")])
     body = "### All %d Hunters\n\n" % len(rows) + table(["Hunter", "Health / dashes", "Weapons", "Passive", "Dash", "RMB", "E", "R"], rows)
     body += "\n\n" + unlock
     body += "\n\n### Run levels\n\nEvery expedition starts at level 1 with one skill point and every ability locked. "
-    body += "Each level gives a point. Ranks per slot: %s. The ultimate opens at level %s (rank 2 at %s).\n\n" % (
-        ", ".join("%s %s" % (SLOT_NAMES.get(k, k), v) for k, v in slot_max.items()), num(ult_at[0]) if ult_at else "?", num(ult_at[1]) if len(ult_at) > 1 else "?")
+    body += "Each level gives a point. Ranks per slot: %s. The ultimate opens at level %s (%s).\n\n" % (
+        ", ".join("%s %s" % (SLOT_NAMES.get(k, k), v) for k, v in slot_max.items()), num(ult_at[0]) if ult_at else "?",
+        ", ".join("rank %d at %s" % (i + 2, num(v)) for i, v in enumerate(ult_at[1:])))
     body += table(["Level", "Total XP", ""], lv)
     block("Classes.md", "classes", body)
 
@@ -353,7 +375,7 @@ def gen_classes():
         b.append("### Ranks\n\nRank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the special.\n")
         rk = []
         for s in ("sec", "dash", "kin", "ult"):
-            if s == "ult" and "r" not in d: continue
+            if s == "ult" and "x" not in d: continue
             r2 = d.get("rank2", {}).get(s, "")
             r3 = d.get("rank_next", {}).get(s, "") or ("Rank 3: " + d["rank3"][s] if s in d.get("rank3", {}) and s != "ult" else "")
             if r2 or r3:
@@ -390,7 +412,7 @@ def gen_boki():
         themes.setdefault(k.get("theme", "?"), []).append(k["name"])
         src = "Starter egg" if kid in starters else ("Rare Egg from %s" % egg_of[kid] if kid in egg_of else "Wild, nest eggs")
         rows.append(["[%s](#%s)" % (k["name"], slug(k["name"])), " + ".join(k.get("animals", [])), k.get("theme", "").title(), k["body"].get("size", ""), k["ai"].get("role", ""), src])
-    body = "Every species, read from its grammar file (`content/kin_v2/<id>.json`) and its home file (`content/kin/<id>.json`). "
+    body = "Every species, read from its grammar file (`content/kin/<id>.json`) and its home file (`content/kin_home/<id>.json`). "
     body += "The id in brackets is the internal name the code and save files use.\n\n"
     body += table(["Boki", "Animals", "Type", "Size", "Fights as", "Where it comes from"], rows)
     body += "\n\n## Types\n\nA Boki's type is its theme in the grammar: it colours its abilities and decides which tags its abilities carry into your class kit (see " + link("Boki") + "). Types in use:\n\n"
@@ -405,7 +427,7 @@ def gen_boki():
         work = h.get("work") or work_fb.get(kid, {})
         info = [
             ["Type", k.get("theme", "").title()],
-            ["Body", "%s, reach %s, mass %s%s" % (k["body"].get("size", ""), num(k["body"].get("reach", "")), num(k["body"].get("mass", "")), ("; about %s cm, %s kg on average" % (num(h["size"]["cm"]), num(h["size"]["kg"]))) if h.get("size") else "")],
+            ["Body", "%s, reach %s, mass %s%s" % (k["body"].get("size", ""), num(k["body"].get("reach", "")), num(k["body"].get("mass", "")), ("; about %s cm, %s kg on average" % (num(k["size"]["cm"]), num(k["size"]["kg"]))) if k.get("size") else "")],
             ["Stat points", ", ".join("%s %s" % (stats_names.get(s, s), num(v)) for s, v in st.items())],
             ["Personality", ", ".join("%s %s" % (t, num(v)) for t, v in pers.items())],
             ["Fighting style", "%s; aggression %s, loyalty %s, caution %s" % (ai.get("role", ""), num(ai.get("aggression", "")), num(ai.get("loyalty", "")), num(ai.get("caution", "")))],
@@ -423,7 +445,7 @@ def gen_boki():
         for p in k.get("evolution", {}).get("paths", []):
             paths.append("%s: %s" % (p["affinity"].title(), " > ".join(EVO.get(n, {}).get("name", n) for n in p["nodes"])))
         if paths: body += "\n- Evolution paths: " + "; ".join(paths)
-    page("Boki-Species.md", "Boki species", body, ["content/kin_v2", "content/kin", "content/abilities_v2", "content/merges_v2", "content/evolution_v2"])
+    page("Boki-Species.md", "Boki species", body, ["content/kin", "content/kin_home", "content/abilities_v2", "content/merges_v2", "content/evolution_v2"])
 
     # growth: evolution, mutations, bonds, stages, IVs, training
     ev = load_json(os.path.join(ROOT, "content", "rules", "evolve.json"))
@@ -469,7 +491,7 @@ def gen_boki():
         gd_const("core/care.gd", "IV_INHERIT"), gd_const("core/care.gd", "IV_RARE_HIGH"), gd_const("core/care.gd", "IV_RARE_FLOOR"))
     b += table(["IV", "Affects", "Most it adds (at 31)"], [[v["name"], v["desc"], "+%d%%" % round(ivb.get(k, 0) * 100)] for k, v in ivs.items()])
     tr = gd_const("core/care.gd", "STATS") or {}
-    b += "\n\n## Trained stats\n\nTrained at the Training post with a timing drill.\n\n" + table(["Stat", "Per point", "Drill"], [[v["name"], v["desc"], v["drill"]] for v in tr.values()])
+    b += "\n\n## Trained stats\n\nRaised by giving stat bites (carried home from expeditions, won in a few limited races and drills a day).\n\n" + table(["Stat", "Per point", "Drill"], [[v["name"], v["desc"], v["drill"]] for v in tr.values()])
     nat = gd_const("core/care.gd", "NATURES") or {}
     if nat:
         b += "\n\n## Natures\n\nA Boki's nature comes from its two strongest traits.\n\n" + table(["Traits", "Nature"], [[k.replace("+", " + "), v] for k, v in nat.items()])
@@ -531,7 +553,7 @@ def _terrain_hazards(hz_at):
     """The map's terrain hazard areas (content/rules/terrain_hazards.json): what each does, where, and
     which Boki walks it safely."""
     R = json.load(open(os.path.join(ROOT, "content", "rules", "terrain_hazards.json"), encoding="utf-8"))["kinds"]
-    kin = content("kin_v2")
+    kin = content("kin")
     rows = []
     for kind, D in R.items():
         where = sorted({nm for k, nm in hz_at if k == kind})
@@ -583,7 +605,7 @@ def gen_maps():
             body += "### Rolled each match\n\n" + table(["What", "Live per match", "Candidate spots"], [[cat.get(c, c), "%s" % v["pick"][0] if v["pick"][0] == v["pick"][1] else "%s to %s" % tuple(v["pick"]), ", ".join(p[2] for p in v.get("points", []) if len(p) > 2)] for c, v in sp.items()]) + "\n"
         if m.get("legendaries"):
             chance = m.get("legendary_spawn_chance", content("rules")["legendary"]["chance"])
-            body += "\n**Legendary Boki:** a %d%% chance per match that one of %s turns up, partway in, at a quiet Rare Boki spot.\n" % (round(chance * 100), ", ".join(content("kin_v2")[k].get("name", k) for k in m["legendaries"]))
+            body += "\n**Legendary Boki:** a %d%% chance per match that one of %s turns up, partway in, at a quiet Rare Boki spot.\n" % (round(chance * 100), ", ".join(content("kin")[k].get("name", k) for k in m["legendaries"]))
     bio = content("biomes")
     body += "\n\n## Biomes\n\nEach region has a biome (`content/biomes/`): its colours, its monsters and its hazards.\n\n"
     rows = []
@@ -665,7 +687,7 @@ def gen_farm():
             rows.append([c.get("name", cid), num(c.get("grow", "")), num(c.get("price", "")), c.get("desc", "")])
         body += "\n\n## Crops\n\nA watered plant grows a stage every %s seconds at home, and every expedition grows everything a stage.\n\n" % num(gd_const("core/data.gd", "WATER_TIME") or "?")
         body += table(["Crop", "Stages", "Seed price (gems)", "What it's for"], rows)
-    page("Farm-Reference.md", "Farm reference", body, ["scripts/home/home_layout.gd", "scripts/core/work.gd", "scripts/home/home_gather.gd", "scripts/core/data.gd", "content/kin"])
+    page("Farm-Reference.md", "Farm reference", body, ["scripts/home/home_layout.gd", "scripts/core/work.gd", "scripts/home/home_gather.gd", "scripts/core/data.gd", "content/kin_home"])
 
 # ------------------------------------------------------------------ controls
 def gen_controls():
@@ -864,6 +886,118 @@ def _dash_jump_rows(hero, f):
         rows.append([hero, label, row.get("source", ""), ours, row.get("verdict", "[?]")])
     return rows
 
+def _const_s(path, name):
+    """A float `const name := 0.15` in a GDScript file (the shared DashFlow window when it is an alias)."""
+    text = open(os.path.join(ROOT, path), encoding="utf-8").read()
+    m = re.search(r"^const %s\s*:?=\s*([0-9.]+)" % name, text, re.M)
+    return float(m.group(1)) if m else _press_buffer()
+
+def _press_buffer():
+    """The one press window every kit shares (Loco.press_buffer, content/rules/tuning.json)."""
+    return float(load_json(os.path.join(ROOT, "content", "rules", "tuning.json"))["press_buffer"])
+
+# Measured by --dash-flow-check on main (11-20): s a buffered press went off past the dash's end (every buffer
+# row, 0.00-0.02 s), and Shift held in an ult's lock: [lock s, goes past the lock's end by s].
+BUFFER_SHIFT_IN_CAST = {"bulwark": (0.60, "+0.03"), "juggernaut": (0.73, "-0.10"), "ostra": (0.97, "+0.04")}
+
+NOT_CAST_THERE = {("dolm", "air", "e")}      # Rockwave needs the ground: the press has nothing to cast
+
+def _buffer_rows(flows):
+    """Every explicit `buffer` row of content/dash_flow: what the source says, how long ours holds the press."""
+    rows = []
+    for aid in ARCH_ORDER:
+        f = flows.get(aid, {})
+        hero = "%s (%s)" % (ARCH[aid]["base_name"], aid) if aid in ARCH else aid
+        for kind in ("ground", "air"):
+            for slot, label in DASH_SLOTS:
+                row = f.get("dash", {}).get(kind, {}).get(slot, {})
+                if row.get("mode") == "buffer":
+                    held = "the whole dash; goes 0.00-0.02 s after it ends"
+                    if (aid, kind, slot) in NOT_CAST_THERE:
+                        held = "the whole dash; the slot does not go off there at all, so nothing fires (skipped by the check)"
+                    rows.append([hero, "%s dash -> %s" % (kind, label), _src(row), held])
+        for slot, label in DASH_SLOTS:
+            row = f.get("into_dash", {}).get(slot, {})
+            if row.get("mode") == "buffer":
+                lock, past = BUFFER_SHIFT_IN_CAST[aid]
+                rows.append([hero, "%s -> dash" % label, _src(row),
+                             "the cast's lock (%.2f s); the dash goes %s s from its end" % (lock, past)])
+        for slot, label in DASH_SLOTS:
+            row = f.get("jump", {}).get(slot, {})
+            if row.get("mode") == "buffer":
+                rows.append([hero, "jump -> %s" % label, _src(row), "the whole jump; goes as she lands"])
+    return rows
+
+def gen_buffer_windows(flows):
+    """The press-window section of dash_interactions.md: the shared rule, the kit windows that are not it, and
+    every buffer row against its source (--dash-flow-check asserts the numbers)."""
+    shared = _press_buffer()
+    jump = load_json(os.path.join(ROOT, "content", "rules", "hunter_move.json"))["physics"]["jump_buffer_s"]
+    kit_rows = [
+        ["Gil, LMB in a thrust's recovery", _const_s("scripts/arch/kits/gil_kit.gd", "BUFFER"),
+         "Owner 11-11 (Gil's real thrusts, docs/heroes/gil.md): the next thrust goes when the click's window opens.",
+         "owner, kept"],
+        ["Shift in a Shift dash, a grapple or a pad flight", _const_s("scripts/match/hunter.gd", "DASH_BUFFER"),
+         "[?] ours, no source (docs/CHAIN_SWEEP.md): a tail past the dash's end, on top of the dash left (at most %.1f s)."
+         " It only matters when the dash is still refused at the end, so it is kept." % _const_s("scripts/match/hunter.gd", "DASH_KEEP"),
+         "[?] kept"],
+        ["Jump press before a landing", jump,
+         "[?] ours: the movement data's jump fields are encrypted (docs/MOVEMENT_FEEL.md, jump buffer row); "
+         "`--move-feel-check` asserts 0.10 s lands a jump and 0.15 s does not.", "[?] kept"],
+        ["Recast press before its window", _const_s("scripts/arch/arch_kit.gd", "RECAST_BUFFER"),
+         "Owner 11-08 two-step abilities (docs/INPUT_MODES.md).", "same as the shared window"],
+        ["Kael, a slash or Smash in a heavy move or the ult's guard", _const_s("scripts/arch/kits/juggernaut_kit.gd", "BUFFER"),
+         "It was 0.12 s with no source (\"ours, no footage\", docs/heroes/juggernaut.md); now the shared window, "
+         "`--dash-flow-check` asserts it.", "fixed: the shared window"],
+    ]
+    body = ("\n\n## Press windows: how long a press is held\n\n"
+            "Measured on main with `--dash-flow-check`. **Shared rule** (`Loco.press_buffer` = %.2f s): a press made in a dash "
+            "whose row says buffer is held for the whole dash and goes the step it ends; if the kit is still busy it "
+            "waits at most %.2f s more, then goes through the slot's own path (it casts, or answers with its deny cue). A "
+            "press made in a cast lock or crowd control is held only in the lock's last %.2f s, an earlier one is dropped "
+            "(docs/decisions/0022-cc-exit-buffer.md). A press in a mantle waits for the top, one mid-jump whose jump row "
+            "says buffer for the landing. A hold let go in a dash goes when the dash ends. Every dash pair with no row "
+            "buffers the same way. A hold animation never shows without its hold input (`--hold-pose-check`).\n\n"
+            "`[?]` rows stay as they are. Windows that are not the shared one, each with its source line:\n\n"
+            % (shared, shared, shared))
+    body += table(["Press", "Window (s)", "Source", "Verdict"],
+                  [[a, "%.2f" % b, c, d] for a, b, c, d in kit_rows])
+    body += "\n\nEvery `buffer` row in `content/dash_flow` (the hold rows are keep or cancel: none buffers):\n\n"
+    body += table(["Hero", "Pair", "Source", "Held for (measured)"], _buffer_rows(flows))
+    return body
+CAST_SLOTS = [("lmb", "LMB tap"), ("lmb_hold", "LMB hold"), ("rmb", "RMB"), ("e", "E"), ("x", "ult (X)")]
+
+def _cast_ours(row, phase):
+    mode = row.get(phase, "?")
+    return "queued, goes %.2f s later" % row.get(phase + "_wait", 0) if mode == "queue" else {
+        "fire": "fires at once", "cancel": "fires at once, ends it", "drop": "dropped"}.get(mode, mode)
+
+def _cast_tables(flows):
+    """One "Cast into cast" table per hero with into_cast rows: a press in another ability's wind-up and recovery."""
+    out = ""
+    names = dict(CAST_SLOTS)
+    for aid in ARCH_ORDER:
+        firsts = flows.get(aid, {}).get("into_cast")
+        if not firsts:
+            continue
+        rows = []
+        for first, label in CAST_SLOTS:
+            moves = firsts.get(first, {})
+            at = moves.get("at", ["?", "?"])
+            for second, row in ((k, v) for k, v in moves.items() if k != "at"):
+                rows.append(["%s during %s" % (names.get(second, second), label),
+                             "%s (%s s in)" % (_cast_ours(row, "windup"), at[0]),
+                             "%s (%s s in)" % (_cast_ours(row, "recovery"), at[1]), row.get("source", "")])
+        out += "\n### %s (%s)\n\n" % (ARCH.get(aid, {}).get("base_name", aid), aid) + table(
+            ["Pair", "Ours, wind-up", "Ours, recovery", "Source"], rows)
+    if not out:
+        return ""
+    return ("\n## Cast into cast\n\nThe second ability pressed during the first one's wind-up and its recovery (the times "
+            "are seconds after the first press), read from `into_cast` in `content/dash_flow/<hero>.json` and asserted by "
+            "`--cast-into-cast-check`, which also asserts the first move still comes (a press that ends it reads "
+            "\"ends it\"; none did in the measuring runs). \"Source\" is what the footage shows; "
+            "`[?]` marks a pair it cannot settle.\n") + out
+
 def gen_dash_flow():
     """docs/heroes/dash_interactions.md: every hero x dash pair from content/dash_flow (DashFlow)."""
     flows = content("dash_flow")
@@ -895,7 +1029,12 @@ def gen_dash_flow():
             "LMB is a held input (source parity): held through a dash, RMB, E, the ult or a glove, fire resumes "
             "the frame that slot's lock ends, with no re-press, and a hold kit (a draw, a charge, a hose) is holding "
             "again by then with no stale release. `--held-fire-resume-check` measures it for every Hunter and slot; "
-            "the 'hold LMB through' rows below note where a hero's kit has its own say.\n\n")
+            "the 'hold LMB through' rows below note where a hero's kit has its own say.\n\n"
+            "An RMB or E pressed while a kit's own cast lock holds the body (Motley's Nightwell cast, Kael's Riposte "
+            "guard and cleave, Vex's Kitefall) is held like a press at a crowd control's end (docs/decisions/0118-cc-exit-buffer.md): "
+            "it goes on the first step the lock lets it, if that comes within `Loco.press_buffer` (tuning.json press_buffer, 0.15 s) of the press; "
+            "a lock that runs on past that answers with the deny cue. The footage shows no such press dropped "
+            "(`--cast-lock-buffer-check`).\n\n")
     body += table(["Hero", "Pair", "Source", "Ours"], rows)
     body += ("\n## Air dash against ground dash (owner item 183)\n\nEvery Hunter's air dash is its ground dash or a special "
              "one the source has, never the generic long dash on a charged press. \"same\" = the same move, clip and charge; "
@@ -918,7 +1057,9 @@ def gen_dash_flow():
              "`content/rules/mantle_press.json` by `DashFlow` while the hunter rises up a ledge. [?]: the source doesn't "
              "show it, so the press waits for the top (never a cancel). Q and any input without a row buffer too.\n\n")
     body += table(["Pair", "Source", "Ours"], _mantle_rows())
+    body += gen_buffer_windows(flows)
     body += gen_turn_table()
+    body += _cast_tables(flows)
     write("dash_interactions.md", "%s\n# Dash, jump and ability interactions\n\n_Generated from `content/dash_flow`._\n\n%s"
           % (NOTE, body), os.path.join(ROOT, "docs", "heroes"))
 

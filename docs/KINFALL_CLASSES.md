@@ -114,7 +114,7 @@ Notes on the table:
   start; let go in the middle to cancel (BaseWheel, sharing the G wheel's pick and dead zone).
 - A 5.5s channel (BaseRecall.CHANNEL_S) to that teammate. **Stationary**, like the reference's recall:
   moving, dashing, jumping, attacking or casting cancels it, and so does any damage (feedback toast,
-  a 4s lockout; no progress kept). A hit breaks it loudly: a red burst, "INTERRUPTED" and its own sound.
+  a 4s lockout; no progress kept). A hit breaks it loudly: a red burst and its own sound.
   Everyone, foes too, sees a filling ring on you and a filling circle plus "incoming" on the teammate.
 - You appear beside them with **recall weakness** for 3s: damage dealt ×0.5, the stun/root/slow you
   apply ×0.5, healing and shields you apply ×0.5 (a status icon with a timer on your nameplate).
@@ -132,7 +132,7 @@ Notes on the table:
 
 ## Camera and aim (Oct 2026)
 
-- Default follow is **Supervive**: centred on you, the cursor never moves the view (measured from the
+- Default follow is **Lean** (the target feel): centred on you, the cursor never moves the view (measured from the
   footage: docs/MOVEMENT_FEEL.md "Camera lead"). The Standard and Fully dynamic presets in Settings
   slide toward the cursor the way the source's own options do.
 - Sneaking (Ctrl) zooms the camera out to 1.45x, eased.

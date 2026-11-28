@@ -19,7 +19,7 @@ const SETTLE_S := 1.0  # s after the Trade for a hover to come down
 const KINDS := ["ledge", "high", "wall", "ceiling", "rim"]
 const DIRS := [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]
 
-var W: World
+var wd: World
 var rng := RandomNumberGenerator.new()
 var seen := {}  # kind -> throws made over all maps (a map may have none of a kind: the arena is flat)
 
@@ -57,24 +57,26 @@ func _map(id: String) -> void:
 			o["map"] = id
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(o)
+	m.start(o)
 	m.set_process(false)
-	W = m.world
+	wd = m.world
 	rng.seed = 1111
-	var P: Hunter = m.player
+	var pc: Hunter = m.player
 	for h in m.hunters:
-		if h != P:
+		if h != pc:
 			h.teleport(Vector3(-500, 50, -500))
 			h.out = true
-	P.set_arch("ostra")
-	P.unlock_all()
-	var cases := _cases(P.r)
+	if m.biomes:
+		m.biomes.hazards.clear()  # (a biome trap's stun cancels a Trade in flight: this checks landings only)
+	pc.set_arch("ostra")
+	pc.unlock_all()
+	var cases := _cases(pc.r)
 	for kind in KINDS:
 		var list: Array = cases[kind]
 		var good := 0
 		var why := ""
 		for c in list:
-			var res := _throw(m, P, c, kind)
+			var res := _throw(m, pc, c, kind)
 			if res == "":
 				good += 1
 			elif why == "":
@@ -86,30 +88,30 @@ func _map(id: String) -> void:
 
 
 ## Throws once; "" when he ends free (and on the ledge for ledge/high), else what went wrong.
-func _throw(m: Match, P: Hunter, c: Dictionary, kind: String) -> String:
-	var K := P.ak as OstraKit
-	K._drop_holds()
+func _throw(m: Match, pc: Hunter, c: Dictionary, kind: String) -> String:
+	var kit := pc.ak as OstraKit
+	kit._drop_holds()
 	var start: Vector3 = c["start"]
 	if kind == "ceiling":
 		start.y += 3.0
-	P.teleport(start)
-	P.vel = Vector3.ZERO
-	P.grounded = kind != "ceiling"
-	P.stun_t = 0.0
-	P.dashes = P.max_dashes()
-	aim_at(P, c["aim"])
-	P.inp["dash_down"] = false
-	var before := K.swaps
-	K.on_dash(false)
+	pc.teleport(start)
+	pc.vel = Vector3.ZERO
+	pc.grounded = kind != "ceiling"
+	pc.stun_t = 0.0
+	pc.dashes = pc.max_dashes()
+	aim_at(pc, c["aim"])
+	pc.inp["dash_down"] = false
+	var before := kit.swaps
+	kit.on_dash(false)
 	var t := 0.0
-	while (K.swaps == before or not K.swap.is_empty()) and t < WAIT_S:
+	while (kit.swaps == before or not kit.swap.is_empty()) and t < WAIT_S:
 		step(m, DT)
 		t += DT
-	if K.swaps == before:
+	if kit.swaps == before:
 		return "no Trade at %s" % str(c["aim"])
 	step(m, SETTLE_S)
-	var p := P.pos
-	if W.occupy(p.x, p.z, P.r, p.y, false) != 0.0 or W.is_block(p.x, p.z):
+	var p := pc.pos
+	if wd.occupy(p.x, p.z, pc.r, p.y, false) != 0.0 or wd.is_block(p.x, p.z):
 		return "stuck at %s (aim %s)" % [str(p), str(c["aim"])]
 	if c.has("top") and absf(p.y - float(c["top"])) > World.STEP:
 		return "y %.2f, ledge top %.2f (aim %s)" % [p.y, float(c["top"]), str(c["aim"])]
@@ -117,15 +119,15 @@ func _throw(m: Match, P: Hunter, c: Dictionary, kind: String) -> String:
 
 
 func _ctr(x: int, z: int) -> Vector3:
-	return Vector3(x + 0.5, W.ground_at(x + 0.5, z + 0.5), z + 0.5)
+	return Vector3(x + 0.5, wd.ground_at(x + 0.5, z + 0.5), z + 0.5)
 
 
 func _fits(p: Vector3, r: float) -> bool:
-	return not W.is_void(p.x, p.z) and W.occupy(p.x, p.z, r, p.y, false) == 0.0
+	return not wd.is_void(p.x, p.z) and wd.occupy(p.x, p.z, r, p.y, false) == 0.0
 
 
 func _plain(x: int, z: int) -> bool:
-	return W.inb(x, z) and W.kind[W.idx(x, z)] == World.T_GROUND and not W.stairs.has(W.idx(x, z))
+	return wd.inb(x, z) and wd.kind[wd.idx(x, z)] == World.T_GROUND and not wd.stairs.has(wd.idx(x, z))
 
 
 ## Up to PER_KIND cases of each kind, picked at random from every spot on the map that makes one:
@@ -134,8 +136,8 @@ func _cases(r: float) -> Dictionary:
 	var all := {}
 	for k in KINDS:
 		all[k] = []
-	for z in range(1, W.h - 1):
-		for x in range(1, W.w - 1):
+	for z in range(1, wd.h - 1):
+		for x in range(1, wd.w - 1):
 			if _plain(x, z):
 				for d in DIRS:
 					_spot(all, x, z, d, r)
@@ -153,19 +155,19 @@ func _cases(r: float) -> Dictionary:
 func _spot(all: Dictionary, x: int, z: int, d: Vector2i, r: float) -> void:
 	var a := _ctr(x, z)
 	var back := Vector3(a.x - d.x * RUN_UP, 0, a.z - d.y * RUN_UP)
-	back.y = W.ground_at(back.x, back.z)
+	back.y = wd.ground_at(back.x, back.z)
 	if not _fits(back, r) or absf(back.y - a.y) > World.STEP:
 		return
 	var bx := x + d.x
 	var bz := z + d.y
-	var b := W.idx(bx, bz)
+	var b := wd.idx(bx, bz)
 	var face := Vector3(a.x + d.x * 0.3, a.y, a.z + d.y * 0.3)  # 0.2 m short of the next tile
-	if W.kind[b] == World.T_BLOCK:
+	if wd.kind[b] == World.T_BLOCK:
 		all["wall"].append({"start": back, "aim": _ctr(bx, bz)})
 		all["ceiling"].append({"start": back, "aim": _ctr(bx, bz)})
-	elif W.kind[b] == World.T_VOID and _fits(a, r):
+	elif wd.kind[b] == World.T_VOID and _fits(a, r):
 		all["rim"].append({"start": back, "aim": face})
-	elif _plain(bx, bz) and _plain(bx + d.x, bz + d.y) and W.level[b] == W.level[W.idx(bx + d.x, bz + d.y)]:
+	elif _plain(bx, bz) and _plain(bx + d.x, bz + d.y) and wd.level[b] == wd.level[wd.idx(bx + d.x, bz + d.y)]:
 		var top := _ctr(bx, bz)
 		var top2 := _ctr(bx + d.x, bz + d.y)
 		if not _fits(top2, r) or not _fits(top, r):

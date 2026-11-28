@@ -29,6 +29,13 @@ static func hit_r(id: String, cdat: Dictionary) -> float:
 static func hit_h(id: String) -> float:
 	return float(body(id).get("hit_h", HIT_H_DEFAULT))
 
+
+## The model's tallest point, back props and horns included (m over its feet at its own size, before the match's
+## drawn size): the body's top_h, else its hurtbox height. A plate hangs clear over it (HudPlate.up).
+static func top_h(id: String) -> float:
+	return float(body(id).get("top_h", hit_h(id)))
+
+
 ## Sets a hunter's hurtbox radius (`r`, what shots and abilities hit) and its separate body collision radius.
 static func apply_body(h: Hunter) -> void:
 	h.r = hit_r(h.arch, h.cdat)
@@ -109,10 +116,10 @@ static func next_ranks(id: String, slot: String, cur: int) -> Array:
 	var r2: Dictionary = d.get("rank2", {})
 	var r3: Dictionary = d.get("rank_next", {})
 	var out: Array = []
-	var mx := 2 if slot == "ult" else 3
+	var mx := int(Hunter.SLOT_MAX.get(slot, 3))
 	if cur < mx and cur <= 1 and r2.has(slot):
 		out.append(["Rank 2", String(r2[slot]).trim_prefix("Rank 2: ").trim_prefix("Rank 2 (level 9): ")])
-	if slot != "ult" and cur < 3 and r3.has(slot):
+	if cur < 3 and r3.has(slot):
 		out.append(["Rank 3", String(r3[slot]).trim_prefix("Rank 3: ")])
 	return out
 
