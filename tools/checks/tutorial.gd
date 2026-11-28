@@ -12,4 +12,5 @@ const CHECKS := {
 	"--tutorial-boki-video": ["res://tools/tutorial_boki_video.gd", "tutorial_boki_video", null],
 	"--goals-next-check": ["res://tools/goals_next_check.gd", "goals_next_check", null],
 	"--farm-tut-3p-check": ["res://tools/farm_tut_3p_check.gd", "farm_tut_3p_check", null],
+	"--farm-tut-3p-shots": ["res://tools/farm_tut_3p_check.gd", "farm_tut_3p_check", null],
 }
