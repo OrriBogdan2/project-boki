@@ -6,7 +6,8 @@ travel (scaled to Meshy's leg), so planted feet stay planted. Names are `<art>_<
 Upper clips key only the torso, head and arms (the game lays them over the legs' clip, WardenNativeUpper).
 Run: python3 -I tools/meshy/native_retarget.py <art> [--moves] <clip>[:full][:stride=K] ... [--shot] [--out=FILE]
   stride=K: a full clip's feet travel K times as far fore and aft (a crouch walk too slow for the ground speed).
-  --moves: also every kit move of content/rules/warden_anim/<art>.json (prints the data's kmoves rows)
+  --moves: also every kit move of content/rules/warden_anim/<art>.json (prints the data's kmoves rows); --upper: all of
+  them as upper clips (a contract rig with no legs)
   e.g. native_retarget.py ryzz lmb_l lmb_r crouch_f:full ult:full      (--shot prints each clip's worst wrist miss)"""
 
 import json
@@ -179,7 +180,8 @@ def refs(ct, mr):
     ml = lambda a, b: float(np.linalg.norm(mr.pos(mr.rest, a) - mr.pos(mr.rest, b)))  # noqa: E731
     arm_c = cl("upper_arm.R", "forearm.R") + cl("forearm.R", "hand.R")
     arm_m = ml("RightArm", "RightForeArm") + ml("RightForeArm", "RightHand")
-    leg_c = cl("thigh.R", "shin.R") + cl("shin.R", "foot.R")
+    legless = "foot.R" not in ct.idx  # a hovering Hunter (Motley): no legs to scale
+    leg_c = 1.0 if legless else cl("thigh.R", "shin.R") + cl("shin.R", "foot.R")
     leg_m = ml("RightUpLeg", "RightLeg") + ml("RightLeg", "RightFoot")
     ankle = {}
     for s in "RL":
@@ -187,7 +189,7 @@ def refs(ct, mr):
         ankle[s] = (-a[0] if s == "R" else a[0], a[1], a[2])
     return {
         "ka": arm_m / arm_c,
-        "kl": leg_m / leg_c,
+        "kl": 1.0 if legless else leg_m / leg_c,
         "hips_y": float(ct.get(ct.rest, "hips")[1][1]),
         "ankle_rest": ankle,
         "hand_rest": {s: mr.rest[mr.idx[C.ARM[s][3]]][0] for s in "RL"},
@@ -226,13 +228,13 @@ def retarget(art, specs, out_path, shot=False):
     C.build(out_path, shot=False, defs=defs)
 
 
-def move_specs(art):
+def move_specs(art, upper_only=False):
     """The clip specs and the data's kmoves rows of the contract's own kit moves (content/rules/warden_anim/<art>.json):
     a row the contract lays on the legs' clip (upper, or "moving") stays an upper clip, any other is a full-body one."""
     rows = json.load(open("content/rules/warden_anim/%s.json" % art))["kmoves"]
     specs, out = {}, {}
     for km, r in rows.items():
-        up = r.get("upper") in (True, "moving")
+        up = upper_only or r.get("upper") in (True, "moving")
         specs.setdefault(r["clip"], r["clip"] + ("" if up else ":full"))
         out[km] = {"clip": "%s_%s" % (art, r["clip"])}
         if "hold_from" in r:
@@ -247,7 +249,7 @@ if __name__ == "__main__":
     art, specs = args[0], args[1:]
     rows = None
     if "--moves" in sys.argv:
-        more, rows = move_specs(art)
+        more, rows = move_specs(art, "--upper" in sys.argv)
         specs = more + specs
     out = next((a[6:] for a in sys.argv[1:] if a.startswith("--out=")), "art/wardens/%s/%s_clips.glb" % (art, art))
     retarget(art, specs, out, "--shot" in sys.argv)

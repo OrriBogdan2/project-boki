@@ -160,6 +160,7 @@ Meeko (pip, arch `tender`): the same with her 17 contract kit-move clips and `pi
 Neve (claire, arch `rimewright`): her 20 contract kit-move clips and `claire_crouch_f` (+1.4 cm/step).
 Sable (sable, arch `thief`): her 18 contract kit-move clips (`thf_*`) and `sable_crouch_f` (+0.4 cm/step); the pistols aim along the retargeted hands.
 Tenzo (tarek, arch `dolm`): his 19 contract kit-move clips (`breah_*`) and `tarek_crouch_f` with `crouch_f:full:stride=1.16` (his Meshy legs are 0.69 of the contract's, so the strides run too short for the ground speed at the 1.8x rate cap; stride=K lengthens the fore and aft travel: +0.1 cm/step, was +8.3). `own_casts` stays off (his punches and throws are melee).
+Motley (ostra): her 15 contract kit-move clips (`ostra_*`), all as upper clips (`--moves --upper`: her contract rig has no leg bones, she hovers, so there are no feet or legs to retarget); no crouch clip of her own, the torch crouch stays.
 
 ## Kit-move clips (data `kmoves`)
 A kit move (state `kmove`, the move's id) may have a clip of its own: `"kmoves": {kmove: {"clip": name, "hold_from": s,
