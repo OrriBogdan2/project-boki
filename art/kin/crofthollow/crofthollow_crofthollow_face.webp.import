@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bu5qdvq1yvj07"
-path="res://.godot/imported/crofthollow_crofthollow_face.webp-7ef4dab4c11eece1c60c19c6cd21ee3d.ctex"
+path.s3tc="res://.godot/imported/crofthollow_crofthollow_face.webp-7ef4dab4c11eece1c60c19c6cd21ee3d.s3tc.ctex"
+path.etc2="res://.godot/imported/crofthollow_crofthollow_face.webp-7ef4dab4c11eece1c60c19c6cd21ee3d.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "0b6f406c66d11e35584b56cc2fd73ee9"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/crofthollow/crofthollow_crofthollow_face.webp"
-dest_files=["res://.godot/imported/crofthollow_crofthollow_face.webp-7ef4dab4c11eece1c60c19c6cd21ee3d.ctex"]
+dest_files=["res://.godot/imported/crofthollow_crofthollow_face.webp-7ef4dab4c11eece1c60c19c6cd21ee3d.s3tc.ctex", "res://.godot/imported/crofthollow_crofthollow_face.webp-7ef4dab4c11eece1c60c19c6cd21ee3d.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

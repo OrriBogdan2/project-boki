@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://t34allvwgka8"
-path="res://.godot/imported/vaultara_vaultara_atlas.webp-d62d8b13775a71632e917dace3e39ccc.ctex"
+path.s3tc="res://.godot/imported/vaultara_vaultara_atlas.webp-d62d8b13775a71632e917dace3e39ccc.s3tc.ctex"
+path.etc2="res://.godot/imported/vaultara_vaultara_atlas.webp-d62d8b13775a71632e917dace3e39ccc.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "26344962305cb828df7354b00cfbb9ba"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/vaultara/vaultara_vaultara_atlas.webp"
-dest_files=["res://.godot/imported/vaultara_vaultara_atlas.webp-d62d8b13775a71632e917dace3e39ccc.ctex"]
+dest_files=["res://.godot/imported/vaultara_vaultara_atlas.webp-d62d8b13775a71632e917dace3e39ccc.s3tc.ctex", "res://.godot/imported/vaultara_vaultara_atlas.webp-d62d8b13775a71632e917dace3e39ccc.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
