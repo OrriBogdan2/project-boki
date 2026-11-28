@@ -11595,3 +11595,4 @@ READY ext/mob-glb-turnaround caf068017026cd943d70e38b6a4b345bf7a1db57 (tools: --
 READY ext/anim-starter-boki-hit-death 077455daa6 (starter Boki proc beats: hit hop-back, 0.4s downed topple + breathing, revive pop; react check + coverage note)
 READY ext/combat-lasthit-tell e20f6cbc2d (last-hit tell: boss/chief body pulse + gold bar at 15%, leading-squad bar strip via bat event, Net 0.24.30)
 READY ext/vfx-sable-bola-knife c87772a1375c961ca1f180144c759f1c5752684b (Sable Bola wrap hit frame + soft lane, Knife stick hit frame; knife arrival ring plays but not visible in strip, open)
+READY ext/mob-hit-death-keys ed35c3c20fc9701a2e1c9a36ac046d2b0067f733 (mob hit/death re-keyed; origin/main merged, mob_pose_shots keeps main's hit/death cells + --react strips; --check 0 failures, health style OK)
