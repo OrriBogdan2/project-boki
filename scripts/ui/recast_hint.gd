@@ -33,12 +33,15 @@ static func line(k: ArchKit, slot: String) -> String:
 	return String(TipPick.rules()["hints"]["recast"]).format({"key": RecastCue.key_of(slot), "verb": verb(k, slot)})
 
 
-## The kit's own verb for the recast on `slot`, from its ability text (FALLBACK_VERB when the text has none).
+## The kit's own verb for the recast on `slot`, from its ability text, else its card, else its key hint (Albert's
+## hammer has no LMB desc: "tap again to call it back"); FALLBACK_VERB when none has it.
 static func verb(k: ArchKit, slot: String) -> String:
 	var defs := {"e": k.e_def(), "x": k.x_def(), "dash": k.dash_def(), "lmb": k.lmb_def()}
 	var text := String((defs.get(slot, k.rmb_def()) as Dictionary).get("desc", ""))
 	if text == "":
 		text = String((k.d.get("card", {}) as Dictionary).get(slot, ""))
+	if text == "":
+		text = String((k.d.get("hint", {}) as Dictionary).get(slot, ""))
 	var found := _verb_re.search(text)
 	return found.get_string(1) if found != null else FALLBACK_VERB
 

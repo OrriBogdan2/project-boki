@@ -360,11 +360,14 @@ no kit draws its own recast HUD.
   and replayed through `recast_now(slot)` (Ostra's seed, Rimewright's wall, Bulwark's recall, the E lead).
 
 Kits reporting: Thief knife (E), Tender hearth (E), Ostra seed (E), Rimewright wall (E) and Rimelock (X),
-Juggernaut chain (E), Mage Kitefall (X), Ashwick flight (X), Bulwark hammer (LMB), Dolm hops (Shift), Gil Riptide (E).
+Juggernaut chain (E), Mage Kitefall (X), Ashwick flight (X), Bulwark hammer (LMB), Dolm hops (Shift), Gil Riptide (E)
+and Tidal Wave (X).
 Badges: Thief Marks, Mage Sparks, Gunslinger Daze, Rimewright Chill/Fan, Ashwick Char, Juggernaut slam.
 
 Checks: `--recast-cue-check` (each kit reports its window and the cue carries it, EXPIRED, the buffer, the
-badges, the payoff sounds: docs/AUDIO.md); `--recast-cue-shots --shots-dir=<dir>` (screenshots, run on a GPU through jobq).
+badges, the payoff sounds: docs/AUDIO.md); `--recast-buffer-check` (per kit and slot: a press 0.12 s before the window
+arms fires as it arms, 0.2 s before is dropped, left alone the slot shows EXPIRED with its tick, a per-kit table);
+`--recast-cue-shots --shots-dir=<dir>` (screenshots, run on a GPU through jobq).
 
 ## First real match: the HUD over time (DECISIONS 2026-11-08 "UI is too much")
 

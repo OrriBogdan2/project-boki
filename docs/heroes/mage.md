@@ -158,7 +158,7 @@ nothing from a glide (`Hunter.can_fire`).
 | Wirerun through a full-Static foe | Wirerun | "Surge is ready again at once"; "dashes straight back" | back at once | match | [F] 0133-0171; the dash rows |
 | E Skycall flick (held up to 1 s) | E release | "the video can't tell which" (release or second click) | the release commits; a tap commits away | match (the input is the data's "HOLD AND DRAG") | [D]; [F] 0184-0186 |
 | E flick or countdown (0.8 s) | any | not shown | free: LMB, RMB, X all go | unsettled | [F] 0181-0226 |
-| X Kitefall crouch (0.3 s) and climb | X | "REACTIVATE to crash down" | the second press is **queued** and lands her when the hang starts | match | [D]; [F] 0349-0395 |
+| X Kitefall crouch (0.3 s) and climb | X | "REACTIVATE to crash down" | a press in the last 0.15 s before the hang arms (min_air) waits in the shared recast buffer and lands her as it arms; earlier it is refused (DECISIONS 2026-11-08) | match | [D]; [F] 0349-0395 |
 | X hang (from 0.25 s, up to 1.7 s) | X | reactivate crashes down | lands at the cursor in 0.2 s | match | [D]; [F] "stayed up 1.2 to 1.8 s" |
 | X hang | LMB | not shown | **an attack press also lands her** (from 0.25 s in; a button already down at the cast does not) | ours (the source names only the reactivate) | `MageUlt._wants_down` |
 | X crouch to strike | RMB, E | not shown | **ignored** (`busy`), not buffered | unsettled | `MageKit.busy` |

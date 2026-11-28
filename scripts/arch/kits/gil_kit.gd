@@ -18,6 +18,7 @@ const LINE_FX_DT := 0.06
 const BOT_TAP := 0.1  # s a bot holds RMB for a tap (RMB has no hold: one press throws)
 const SWIM_FX_DT := 0.08  # s between the wake's ground breaks behind the swim (~0.65 m apart at its speed)
 
+const SPOUT_MIN := 0.12          # s into the spin before E again can let the spout go (earlier: buffered)
 var bag: Array = []  # the potions still in the bag; the last one is the next throw
 var rng := RandomNumberGenerator.new()
 var flying: Array = []  # thrown potions in the air: {at, from, t, left, v, id}
@@ -466,17 +467,23 @@ func e_recastable() -> bool:
 	return spin_t >= 0.0
 
 
-## The spin's window for RecastCue: the ring runs over the whole spin, and at its end the spout goes by itself.
+## The spin's window for RecastCue: the ring runs over the whole spin (armed from SPOUT_MIN on), and at its end
+## the spout goes by itself. Then the wave's: X again leaps off early (it lands by itself when it runs out).
 func recast_window() -> Dictionary:
-	if spin_t < 0.0:
-		return {}
-	return RecastCue.window("e", e_t, float(e_def()["spin_t"]), h.pos, true, true)
+	if spin_t >= 0.0:
+		return RecastCue.window("e", e_t, float(e_def()["spin_t"]), h.pos, spin_t >= SPOUT_MIN, true)
+	if untarget_t > 0.0 and not wave.is_empty():
+		return RecastCue.window("x", untarget_t, float(x_def()["time"]), h.pos, true, true)
+	return {}
 
 
+## E again lets the spout go; in the spin's first SPOUT_MIN the press waits in the shared recast buffer.
 func e_recast() -> bool:
 	if spin_t < 0.0:
 		return false
-	if spin_t >= 0.12:
+	if spin_t < SPOUT_MIN:
+		buffer_recast("e")
+	else:
 		_release_spout()
 	return true
 

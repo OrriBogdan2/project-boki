@@ -21,7 +21,8 @@ const WAIT := 4.0              # s the first step gets to open its window (Rimel
 
 ## [hero, slot]: each recast kit, from a fresh setup with the target 6m east; first() takes the first step.
 const CASES := [["thief", "e"], ["tender", "e"], ["ostra", "e"], ["rimewright", "e"], ["rimewright", "x"],
-	["juggernaut", "e"], ["mage", "x"], ["ashwick", "x"], ["bulwark", "lmb"], ["dolm", "dash"], ["gil", "e"]]
+	["juggernaut", "e"], ["mage", "x"], ["ashwick", "x"], ["bulwark", "lmb"], ["dolm", "dash"], ["gil", "e"],
+	["gil", "x"]]
 const RUN_OUT := 18.0          # s a window left alone gets to close (Brimseed: 6.5s grow + 10s at full, the longest)
 
 ## The first step of `slot` (also the shots' way in: tools/recast_cue_shots.gd).
@@ -81,8 +82,8 @@ func _window(hero: String, slot: String) -> void:
 	var line := RecastCue.hint_line(p.ak, slot)
 	ok("%s %s: the first-time hint reads '<KEY> again to <verb>'" % [hero, slot],
 			line.begins_with(key + " again to ") and line.length() > key.length() + 12 and line.length() <= 40, line)
-	if float(w.get("left", 0.0)) >= float(w.get("total", 0.0)) and hero == "bulwark":
-		await done(m)      # the hammer lies until called back (lmb.lie_t 0): no timer, nothing runs out
+	if float(w.get("left", 0.0)) >= float(w.get("total", 0.0)):
+		await done(m)      # no timer (Motley's seed waits at full size for the recast): nothing runs out
 		return
 	# left alone: the closing ticks play and the slot shows EXPIRED for about 0.6s (never closes silently)
 	var ticks := 0

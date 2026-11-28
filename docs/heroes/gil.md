@@ -65,7 +65,7 @@ listed: both (ArchKit has no shared cast lock); every press is ignored, not buff
 | E spin | RMB | both: the potion flies, the spin goes on | default | "cancel E spin + RMB: ..." |
 | E spin | Shift | locked: no swim, no charge spent | designed (`into_dash.e` lock) | "cancel E spin + Shift: ..." |
 | E spin | jump | both: he hops, still spinning | default | "cancel E spin + jump: ..." |
-| E spin | E | sends the spout (from 0.12 s; earlier the press is eaten) | designed | "recast E: ..." (see Recast windows) |
+| E spin | E | sends the spout (from 0.12 s; in the first 0.12 s the press waits in the shared recast buffer) | designed | "recast E: ..." (see Recast windows) |
 | E spin | X | the spout goes first, then the wave | designed (`_start_wave`) | "cancel E spin + X: ..." |
 | E spin | stunned | the spin goes on and keeps hitting through the stun (F5) | default | "cancel E spin + stunned: ..." |
 | E spin | Boki merge | it ends, no spout | designed (`_drop_holds`) | "cancel E spin + Boki merge ..." |
@@ -90,8 +90,8 @@ for every hero is in [dash_interactions.md](dash_interactions.md).
 ## Recast windows (the 2026-11-08 two-step rule)
 | Recast | Window | Ours |
 |---|---|---|
-| E Riptide | from 0.12 s to 2 s of spin; at 2 s it sends itself | `recast_window()` reports slot `e` at Gil while he spins; a press before 0.12 s does nothing and is not buffered (F2); the window's total is its time left (F1); the auto spout leaves EXPIRED on the slot (F1) |
-| X Tidal Wave | none | no window, a second X does nothing |
+| E Riptide | from 0.12 s to 2 s of spin; at 2 s it sends itself | `recast_window()` reports slot `e` at Gil while he spins; the window is unarmed (WAIT) before 0.12 s and a press there waits in the shared recast buffer (`buffer_recast`, ~0.15 s); the auto spout leaves EXPIRED on the slot |
+| X Tidal Wave | the whole ride (1 s) | `recast_window()` reports slot `x` at Gil while he surfs: X again leaps off early (`ult_recast`), the ride's end leaves EXPIRED |
 
 Check lines: "recast E: ..." (5), "recast X: Tidal Wave opens no recast window".
 
@@ -109,7 +109,8 @@ moves yet"), so his rig plays the generic poses and the swordfish uses the sword
   gil_kit.gd (`RecastCue.window("e", e_t, spin_t, h.pos, spin_t >= 0.12, true)`) plus a CASES entry.
 - **F2 two-step clarity, the early press.** An E press in the first 0.12 s of the spin returns true from `e_recast()`
   without sending the spout, so it is eaten: not buffered (the rule asks for ~0.15 s) and not shown as WAIT. The
-  `armed` flag in F1's fix lets the shared `RECAST_BUFFER` keep it.
+  `armed` flag in F1's fix lets the shared `RECAST_BUFFER` keep it. Fixed (ext/recast-buffer-sweep): the window is
+  unarmed before `SPOUT_MIN` and `e_recast()` hands the press to `buffer_recast("e")`; `--recast-buffer-check` holds it.
 - **F3 ability colour, the RMB slot.** `slot_info("sec")` paints the Grab Bag slot in the next potion's colour
   (blue, green, white, red, orange), so his RMB slot and its clip are not colour-coded to him (DECISIONS 2026-11-08:
   "every Hunter's abilities are colour-coded to them"). It is how the next potion shows. Alternative: keep the slot
