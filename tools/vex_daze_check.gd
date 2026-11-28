@@ -119,17 +119,17 @@ func _rifle() -> void:
 	var mag := int(p.wpn["mag"])
 	fresh(foe)
 	aim_at(p, foe.pos)
-	var first := _string(m, p, foe, 1.2)
+	var first := _string(m, p, foe, 2.0)
 	ok(
-		"rifle: a long string decays to 80% (front-loaded)",
-		first.size() > 12 and absf(float(first[-1]) / float(first[0]) - 0.8) < 0.02,
+		"rifle: past half a drum every round hits for 80% (the half-drum rule)",
+		first.size() > 20 and absf(float(first[-1]) / float(first[0]) - 0.8) < 0.02,
 		"%d rounds, %.2f -> %.2f" % [first.size(), first[0], first[-1]]
 	)
-	step(m, float(p.wpn["refill_after"]) + 0.05)
+	step(m, float(p.wpn["refill_after"]) + 0.8)  # long enough to top the drum up from below half
 	fresh(foe)
 	var again := _string(m, p, foe, 0.3)
 	ok(
-		"rifle: a short rest and the next string starts at full damage",
+		"rifle: a rest and the next string starts at full damage",
 		not again.is_empty() and is_equal_approx(float(again[0]), float(first[0])),
 		str(again)
 	)
