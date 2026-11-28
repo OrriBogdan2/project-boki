@@ -180,8 +180,8 @@
   {
    "id": "mantle_ledge",
    "priority": "LATER",
-   "what": "mantle, ledge hang, climb",
-   "game": "states.mantle/ledge; native plays nearest clip",
+   "what": "ledge pull-up, ledge hang, climb",
+   "game": "ledge states; native plays nearest clip",
    "stock_ok": true,
    "note": ""
   },
