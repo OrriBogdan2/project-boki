@@ -88,3 +88,22 @@ UVs match, refs = turnaround front/side/back), pasted ONLY inside the r1 void UV
 spring, face, gloves and bells keep the live texels. The emission layer is re-derived from the new void albedo (r1 formula; r3 stars and
 box-mouth glow kept). Mesh, skin, rig and clips are byte-identical to r4 (all 2821 accessors). `ostra_meshy_comp_B.jpg` is the new embedded albedo.
 Recipe: /home/boki/gens/hunter-round-1124/motley/r5/tools/{pad.py,mkfix7.py,compact.py} (pad.py live.glb tex.png pad.png; mkfix7.py r4.glb pad.png out; compact.py).
+
+**r12 (2026-11-27, job 20261127-180721-a1):** the void read electric indigo/hot pink at the match camera; its albedo is now the
+Meshy void retexture w28 (r8 round) histogram-matched in full to the turnaround void crops, darkened x0.55, saturation x0.75, red x1.22
+(hue back to violet), emission rebuilt hue-locked violet (swirl 0.12, box-mouth 0.06) with 400 sparse star dots. Only texels inside
+the void UV mask change (mask rebuilt from the r7->r10 void diff: /home/boki/gens/hunter-round-1124/motley/r12/void_uvmask_rec.png).
+All 2822 accessors (mesh, skin, rig, clips) byte-identical to r10; glb compacted 10.0 -> 7.3 MB. Game view, side, void pixels
+(live -> r12): value 0.71 -> 0.64, hue 273 -> 267 (turnaround 270), pink share 15% -> 12%. (Lowering painted rim_far 0.5 -> 0.08 was
+tested: no measurable change, so the look rule is unchanged.) Recipe: /home/boki/gens/hunter-round-1124/motley/r12/tools/mk12.py
+r10.glb ../r8/mx/w28/tex0_base_color.png c5.glb --match=1.0 --dark=0.55 --sat=0.75 --red=1.22 --swirl=0.12 --star=0.55 --nstars=400 --srad=4 --mouth=0.06
+
+**r14 (2026-11-28, job 20261128-022706-a4):** r12's void paste and 3 px feather also painted violet smudges on the box faces, ruff,
+hat horn and gloves: the r12 void UV mask covered ~7,000 triangles above the waist (ruff/head/hat) and its blur crossed island borders.
+The void is now the r13 f2 candidate (r12 void at 0.75x albedo, less pink), kept ONLY on void-mask triangles whose 3D centroid
+is below y=1.2 (the tail), with a 3 px gutter that may grow only into UV texels no other triangle uses. Every other texel (albedo and
+emission) is restored to live main (8905d8ca); 0.03% of UV outside the new mask differs from live. All accessors byte-identical
+to r12/live. Game view, side, void pixels (live -> r14): value 0.61 -> 0.64 at eye, pink share 21% -> ~9%. art-gate game sheet
+(side, real GPU): GAME 5.3 vs LIVE 4.5. Known open issue: the starfield still covers the black coat tails (they share the void mask
+below the waist). Recipe: /home/boki/gens/hunter-round-1124/motley/r14/tools/{mask14.py mask_k4.png, mk14.py ../r13/f2.glb live.glb
+k4.glb --mask=mask_k4.png}, then r11/tools/compact.py.
