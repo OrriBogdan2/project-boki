@@ -20,6 +20,13 @@ The parity reels (`--parity-reel`, one MP4 per Hunter with the keys shown, `docs
   with `HeroVfxZone` (a lit rim over a soft wash, the recipe's `"zone": {"rim", "in"}` colours) for that long.
   `--zone-net-check` asserts it host+guest; with `--shots-dir=` (GPU) the guest saves its frames
   (docs/shots/vfx-zones-remote).
+- **Ground ring and rising motes (11-28, sweep rows 8 and 14):** Meeko's Hearthlight disc is a thin band (`tender.json`
+  `hearth_disc` `rim_w` 0.1, was a flat 0.16) with a hot line on its very edge (`lit` 1.0, `hot` a palette slot, here
+  `leaf_hot`) over a soft glow that falls off inward (`care_disc.gdshader` pattern 5 with `lit`; other patterns are
+  untouched at `lit` 0). Albert's Mending Ground rises as light: `bulwark.json` `mend_fall` gains a layer of motes that
+  stream up off the marked ground while the column falls (count grows with the fall, `n_k`), and `mend_zone`'s motes
+  are bigger, more and streaked. Hit areas, radii and numbers are unchanged. `--zone-rings-perf` (GPU) is the 4v4
+  frame-time A/B.
 - `HeroVfx.of(m).hold(h, "move", k)`: something that lasts while the kit asks every tick (a blade heating). It follows its
   anchors and turns with the aim (a hose sweeping), and stops by itself when the asks stop, whichever way the move
   ended. Local. Particle layers, `string`, and surface layers: a surface (a cast's dark ring) stays at 85% of its

@@ -14,6 +14,8 @@ uniform float pattern = 0.0;
 uniform float spin = 0.0;        // radians: the sigil turns with it
 uniform float rim_w = 0.08;
 uniform float crack = 0.0;       // pattern 4: how bright the cracks glow (0..1)
+uniform vec4 hot : source_color = vec4(1.0);
+uniform float lit = 0.0;         // 0..1 pattern 5: a thin hot line on the very edge over a soft glow (the lit rim ring)
 uniform float flash = 0.0;       // 0..1 a short burst of light on the rim (the rink opening)
 
 float sigil(vec2 uv, float r, float a) {
@@ -61,6 +63,13 @@ void fragment() {
 	vec2 ruv = vec2(cos(a), sin(a)) * r;
 	float edge = smoothstep(1.0 - rim_w - 0.03, 1.0 - rim_w, r) * (1.0 - smoothstep(0.97, 1.0, r)) * (1.0 + 1.5 * flash);
 	float body = fill * (0.18 + 0.22 * r * r);
+	float core = 0.0;
+	if (lit > 0.0 && pattern > 4.5) {
+		// the lit rim ring: a thin hot core on the edge, a soft glow that falls off inward (no flat band)
+		core = smoothstep(1.0 - rim_w * 0.45 - 0.02, 1.0 - rim_w * 0.45, r) * (1.0 - smoothstep(0.985, 1.0, r)) * lit;
+		float glow = smoothstep(1.0 - rim_w * 2.0, 1.0 - rim_w * 0.5, r);
+		edge = max(edge * (1.0 - 0.55 * lit), glow * 0.55 * lit * (1.0 - smoothstep(0.985, 1.0, r)));
+	}
 	if (pattern > 3.5 && pattern < 4.5) {
 		// Rimelock rink: a clear middle, the veil gathering toward a lit rim (centre alpha = fill * 0.04 * 1.6)
 		body = fill * (0.04 + 0.5 * r * r * r * r);
@@ -75,6 +84,11 @@ void fragment() {
 	float inner = body + sg * 0.9;
 	float outer = edge + sw * 1.2;
 	vec3 body_col = pattern > 4.5 ? mix(color.rgb, rim.rgb, r * r * r) : color.rgb;
-	ALBEDO = (body_col * inner + rim.rgb * outer) / max(inner + outer, 0.001);
-	ALPHA = cel_cover(clamp((body * 1.6 + sg + edge * 1.2 + sw) * color.a, 0.0, 1.0), UV * 0.5);     // cel steps
+	vec3 outer_col = rim.rgb;
+	if (core > 0.0) {
+		outer += core * 1.4;
+		outer_col = mix(rim.rgb, hot.rgb, clamp(core * 1.4 / max(outer, 0.001), 0.0, 1.0));
+	}
+	ALBEDO = (body_col * inner + outer_col * outer) / max(inner + outer, 0.001);
+	ALPHA = cel_cover(clamp((body * 1.6 + sg + (edge * 1.2 + core * 1.4) + sw) * color.a, 0.0, 1.0), UV * 0.5);     // cel steps
 }

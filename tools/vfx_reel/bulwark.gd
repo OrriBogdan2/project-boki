@@ -161,8 +161,8 @@ func _part_mend() -> void:
 	var cast := func(t: float):
 		P.inp["sig"] = _at(t, 0.1)
 		_aim(T.pos)
-	await _go(6.0, cast, _sheet("mend", "E to its end: the last tick and the closing burst",
-		[1.2, 4.9, 5.05, 5.12, 5.2, 5.3, 5.4, 5.55, 5.8]), 2.5)
+	await _go(6.0, cast, _sheet("mend", "E: the column falls (0.3-1.05 s), rising motes, the closing burst",
+		[0.3, 0.55, 0.8, 1.05, 1.4, 2.4, 3.4, 5.12, 5.3]), 2.5)
 	await _go(GAP)
 
 func _part_r() -> void:

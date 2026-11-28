@@ -6,7 +6,7 @@
 	},
 	"field": {"col": "ember", "rim": "ember_lit", "vine": "ember", "fill": 0.3, "a": 0.9, "band": 0.14,
 		"motes_every": 0.3},
-	"hearth_disc": {"fill": 0.5, "thrown_fill": 0.38},
+	"hearth_disc": {"fill": 0.5, "thrown_fill": 0.38, "rim_w": 0.1, "lit": 1.0, "hot": "leaf_hot"},
 	"fire_from": {"rmb": "hand_r"},
 	"anchors": {
 		"hand_r": {"bone": "hand.R", "off": [0.0, 0.08, 0.0], "body": [0.18, 0.72, 0.5]},
