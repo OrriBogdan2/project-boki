@@ -8,6 +8,9 @@ extends "res://tools/move_feel_check.gd"
 const TOL := 0.05  # share of the target distance
 const GROUND := [3.4, 0.33]  # [footage] Felix's ram, m and s
 const AIR := [3.4, 0.28]  # the ram's length (it was 6.8 m); the lw_hop clip's 0.28 s kept
+const FOE_AT := 2.0  # m ahead: inside the ram's 3.4 m, so the first foe stops it
+const STUN := [0.9, 1.1]  # s: the reference dash stuns about 1 s (docs/KIT_PARITY.md "Crowd control")
+const KNOCK := [1.8, 2.2]  # m at rest: the push 7 row of "Knock distances" (2.01 m)
 const PEAK_MAX := 18.0  # m/s: the ram's own fitted peak (17.3); the poof was 24.3
 
 
@@ -16,6 +19,7 @@ func run(main: Node) -> void:
 	p_v.reclass(Arch.weight("ashwick"), "ashwick")
 	_one("ground", false, GROUND)
 	_one("air", true, AIR)
+	_hit_foe()
 	var plain := _jump_land(false)
 	var with := _jump_land(true)
 	var cap := float(GROUND[0]) * (1.0 + TOL)
@@ -63,6 +67,38 @@ func _one(tag: String, air: bool, want: Array) -> void:
 			% [tag, dash_m, dash_t, peak, float(want[0]), float(want[1]), PEAK_MAX]
 		)
 	)
+
+
+## The ram on a foe two metres ahead: the shared stun lands at about 1 s and the knock carries it as the table says.
+func _hit_foe() -> void:
+	_steps(30)
+	_reset(flat + Vector3(-4.0, 0, 0))
+	var foe: Hunter = m.hunters[1] if m.hunters[0] == p_v else m.hunters[0]
+	foe.reclass(Arch.weight("gunslinger"), "gunslinger")  # a medium body, as the knock table measures
+	foe.out = false
+	foe.teleport(p_v.pos + Vector3(FOE_AT, 0, 0))
+	foe.stun_t = 0.0
+	var x0 := foe.pos.x
+	p_v.inp["move"] = Vector2(1, 0)
+	p_v.inp["dash"] = true
+	var stun := 0.0
+	for i in 120:
+		m.step(DT)
+		p_v.inp["dash"] = false
+		if stun <= 0.0 and foe.stun_t > 0.0:
+			stun = foe.stun_t + DT
+		if i > 30 and _hv(foe).length() < 0.05:
+			break
+	var knock := foe.pos.x - x0
+	ok(
+		stun >= STUN[0] and stun <= STUN[1] and knock >= KNOCK[0] and knock <= KNOCK[1],
+		(
+			"Cinder Shift hit: stun %.2f s (want %.1f to %.1f), knock %.2f m (want %.1f to %.1f)"
+			% [stun, STUN[0], STUN[1], knock, KNOCK[0], KNOCK[1]]
+		)
+	)
+	foe.out = true
+	foe.teleport(Vector3(-500, 50, -500))
 
 
 ## A running jump (W held), Shift 0.2 s in when `shift`: the metres from take-off to landing.
