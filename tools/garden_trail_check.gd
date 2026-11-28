@@ -12,6 +12,7 @@ const SEED := 7
 const WALK := 3.2  # m/s you walk at
 const LAG := 0.8  # m of slack on the band while you accelerate or turn
 const STOP_S := 3.0  # s a partner has to settle after you stop
+const START_S := 12.0  # s the partner may take to start trailing (its think timer)
 const REST_SPEED := 0.3  # m/s: under this it counts as stopped
 
 var main: Node
@@ -98,7 +99,12 @@ func _stage(with_house: bool) -> void:
 	kin["pos"] = home.world.free_spot_near(home.ppos + Vector3(0, 0, 2.5), [], 0.8)
 	kin["node"].position = kin["pos"]
 	kin["goal"] = kin["pos"]
-	_run_for(1.0)
+	var waited := 0.0
+	while not kin.has("life_greet") and waited < START_S:
+		_run_for(DT)
+		waited += DT
+	ok(kin.has("life_greet"), "it starts trailing you within %.0f s (%.1f s)" % [START_S, waited])
+	_run_for(2.0)
 
 
 ## One step: you move at `dir` * speed (or stand), the farm steps.
@@ -158,7 +164,8 @@ func _straight_walk() -> void:
 		lo = minf(lo, _gap())
 		hi = maxf(hi, _gap())
 	var fits := lo >= float(r["min_m"]) - LAG and hi <= float(r["max_m"]) + LAG
-	ok(fits, "walking, it keeps %.1f..%.1f m from you (band %.0f..%.0f m)" % [lo, hi, r["min_m"], r["max_m"]])
+	var band := "walking, it keeps %.1f..%.1f m from you (band %.0f..%.0f m, %s)"
+	ok(fits, band % [lo, hi, r["min_m"], r["max_m"], (kin["life"] as Fsm).state_name()])
 	_run_for(STOP_S)
 	var settled := _gap() >= float(r["min_m"]) - 0.4 and _gap() <= float(r["max_m"]) + 0.4
 	var line := "you stop, it stops within %.0f s, %.1f m off (%.2f m/s)"
