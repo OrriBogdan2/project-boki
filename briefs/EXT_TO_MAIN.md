@@ -11498,3 +11498,4 @@ READY ext/lmb-anim-sync-1126 b0131c6267 (LMB attack clips land with the shot, 13
 READY ext/online-desktop-relay-1127 d9788e98b47 (itch desktop build plays online via live boki-1 relay by default; party check +4)
 READY ext/online-desktop-relay-1127 38a295f76e (Net: itch/desktop build with no --server= plays online on the live relay; party check +4 asserts)
 READY ext/parity-recheck-kael caefa08aabd (Kael parity re-check)
+READY ext/tut-relic-word 8afcff8fd0e7e053988f35ad76550ca9d9466506 (Mask -> Relic in loading lore, Words page, Hob intro; text check fails on Mask)
