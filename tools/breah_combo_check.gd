@@ -412,13 +412,14 @@ func _breah() -> void:
 		KitLooks.of(m).skins_live("rock") >= 1 or K.launches - l0 == 3
 	)
 	ok(
-		"data: rocks carry no slow, only the Rock Hop's rolling rock does",
-		not K.rock_def().has("slow_t") and float(K.dash_def()["slow_t"]) > 0.0
+		"data: a punched rock slows 0.85x for 0.8 s, the Rock Hop's rolling rock harder and longer",
+		absf(float(K.rock_def()["slow_k"]) - 0.15) < 0.001 and absf(float(K.rock_def()["slow_t"]) - 0.8) < 0.001
+		and float(K.dash_def()["slow_t"]) > float(K.rock_def()["slow_t"])
 	)
 	step(m, 0.6)
 	ok(
-		"combo: launched rocks burst on the foe and shred it, no slow (ROCKFALL)",
-		dmg(T) >= 10.0 and T.vuln_t > 0.0 and T.slow_t <= 0.0 and K.launch_pay >= 1,
+		"combo: launched rocks burst on the foe, shred it and slow it 15% (ROCKFALL)",
+		dmg(T) >= 10.0 and T.vuln_t > 0.0 and T.slow_t > 0.0 and absf(T.slow_k - 0.15) < 0.01 and K.launch_pay >= 1,
 		"took %.1f vuln %.1f slow %.2f pay %d" % [dmg(T), T.vuln_t, T.slow_t, K.launch_pay]
 	)
 	ok(
@@ -632,7 +633,7 @@ func _breah() -> void:
 		apk > apk1 and absf(d_l10 / maxf(0.01, d_l1) - apk / apk1) < 0.02,
 		"lvl1 %.2f lvl10 %.2f ap %.2f/%.2f" % [d_l1, d_l10, apk1, apk]
 	)
-	# data pass: a knock does not reset it (Volcano Crusher has no reset)
+	# a knock his blow lands makes it ready again at once (dolm_kit.gd on_knock)
 	reset.call()
 	T.teleport(home + Vector3(2.4, 0, 0))
 	aim_at(P, T.pos)
@@ -640,8 +641,8 @@ func _breah() -> void:
 	tap(m, P)
 	step(m, 0.5)
 	ok(
-		"data: a slam that knocks does not reset Quakefall",
-		T.hp < 10.0 and float(K.cd["rmb"]) > 1.0 and K.ch_rmb < 1.0,
+		"data: a slam that knocks makes Quakefall ready again",
+		T.hp < 10.0 and float(K.cd["rmb"]) <= 0.0 and K.ch_rmb >= 1.0,
 		"cd %.2f charges %.2f" % [float(K.cd["rmb"]), K.ch_rmb]
 	)
 	# the spike (docs/SPIKE_SLAM.md): the tap slam drives a foe in the air down for +40%; the dive landing does not
@@ -1009,8 +1010,9 @@ func _hop_glide(m: Match, P: Hunter, home: Vector3, K: DolmKit, reset: Callable)
 		step(m, 0.8)
 
 ## Owner 23:00 (reverses item 26's "the glider wins" for a press in a glide; the source allows it): Quakefall
-## pressed while gliding folds the glider and plunges at the glider's dive speed (data: 32.5 m/s down, sideways
-## speed x0.25), slamming where she lands; glide still held doesn't reopen it on the way down.
+## pressed while gliding folds the glider and plunges at the glider's dive speed (data: 32.5 m/s down), slamming
+## where she lands; glide still held doesn't reopen it on the way down. Owner 11-26: the plunge's sideways speed is
+## the arc's onto the cursor's spot (at most air_reach), no longer the glide's own x0.25.
 func _glide_slam(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
 	reset.call()
 	P.pos.y += 8.0
@@ -1023,11 +1025,11 @@ func _glide_slam(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
 		t += DT
 	var glided := P.gliding
 	var s0 := K.slams
-	var vx0 := absf(P.vel.x)
 	P.inp["move"] = Vector2.ZERO
+	var from := P.pos
 	tap(m, P)
 	var folded := not P.gliding and K.dive and K.dive_glide
-	var vx1 := absf(P.vel.x)
+	var spot := K.slam.air_to
 	var fall := 0.0
 	var vmin := 0.0
 	var reopened := false
@@ -1040,11 +1042,15 @@ func _glide_slam(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
 	P.inp["glide"] = false
 	P.inp["move"] = Vector2.ZERO
 	m.step(DT)
+	var reach := float(K.slam.feel()["air_reach"])
+	var off := Vector2(P.pos.x - spot.x, P.pos.z - spot.z).length()
+	var went := Vector2(P.pos.x - from.x, P.pos.z - from.z).length()
 	ok("glide slam: RMB in a glide folds the glider and plunges at the glider's dive speed (data 32.5 m/s)",
-		glided and folded and not reopened and vmin <= -30.0 and vx1 <= vx0 * 0.3 + 0.1,
-		"glided %s folded %s reopened %s vy %.1f vx %.1f -> %.1f" % [glided, folded, reopened, vmin, vx0, vx1])
-	ok("glide slam: she slams where she lands (about 0.3s down from 8m)", K.slams == s0 + 1 and P.grounded
-		and fall < 0.6, "slams +%d, %.2f s down" % [K.slams - s0, fall])
+		glided and folded and not reopened and vmin <= -30.0,
+		"glided %s folded %s reopened %s vy %.1f" % [glided, folded, reopened, vmin])
+	ok("glide slam: she slams on the circle's spot, at most air_reach on (about 0.5s down from 8m)",
+		K.slams == s0 + 1 and P.grounded and fall < 0.6 and off < 0.5 and went <= reach + 0.3,
+		"slams +%d, %.2f s down, %.2fm off the spot, %.2fm on" % [K.slams - s0, fall, off, went])
 	step(m, 0.8)
 
 ## Item 51: the Quake Fist charge carries through her air dash (it charges on, short of the auto punch) and a

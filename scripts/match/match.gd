@@ -7,6 +7,7 @@ const DT := 1.0 / 60.0
 
 var opts := {}
 var world: World
+var layout := {}              # the authored map's data (empty on a generated one)
 var skytrain: SkyTrain = null   # the loop train, on maps that have one
 var fx: Fx
 var cam: CamRig
@@ -326,7 +327,7 @@ func _start(o: Dictionary) -> void:
 	add_child(world)
 	Sfx.occlusion.world = world
 	# real expeditions are on a hand-made map, and so is the tutorial (a small calm one); training keeps a generated one
-	var layout := {}
+	layout = {}
 	# --procgen (or opts.procedural): the old island generator instead, as a fallback
 	if big and not o.get("procedural", false) and not "--procgen" in OS.get_cmdline_user_args():
 		layout = WideLayout.pick(o, rolling != null, tier)     # a rolling session gets the wide Skyreach; otherwise the expedition map
@@ -477,6 +478,7 @@ func _start(o: Dictionary) -> void:
 	hud.process_mode = hud_mode
 	SquadChat.attach(hud, opts, self)
 	hud.visible = true
+	add_child(StatusEdge.new(self))  # stun / untouchable / Grounded / cloak as a screen-edge tint
 	if player and player.dropping and tut == null:
 		hud.toast("Steer to choose where you land", Color("f3eee2"))
 	intro = SquadIntro.start(self)      # the squad on the deck first (0.24.4); it opens the map after
@@ -515,7 +517,8 @@ func _build_env() -> void:
 	var amb: Color = T["ambient"]
 	var cl: Array = T["clouds"]
 	env.environment = Look.environment({"top": sky.darkened(0.2), "mid": sky.lerp(amb, 0.35), "horizon": (cl[1] as Color).lerp(T["sun"], 0.5).lightened(0.15),
-		"below": cl[0], "ambient": amb, "ambient_energy": 0.5, "fog": (cl[1] as Color).lightened(0.12).lerp(Color("4a5aa8"), 0.35), "sun_col": T["sun"]})
+		"below": cl[0], "ambient": amb, "ambient_energy": 0.5, "fog": (cl[1] as Color).lightened(0.12).lerp(Color("4a5aa8"), 0.35), "sun_col": T["sun"],
+		"desktop_boost": float(Content.rules("match_grade")["desktop_saturation_boost"])})
 	add_child(env)
 	var sun := Look.lights(self, T["sun"], 1.0, Vector3(-55, -35, 0), 60.0)
 	sun.shadow_opacity = 0.8
@@ -698,9 +701,10 @@ func bot_kin_record() -> Dictionary:
 func _spawn_hunters() -> void:
 	var n_teams := int(opts.get("teams", 4))
 	var squad := int(opts.get("squad", 1))
-	# one starting island per squad, spread out as far as possible
+	# one starting island per squad, spread out as far as possible, inside the play space the match starts with
+	var spawns: Array = Heart.in_play(layout, opts, world.spawns)
 	var by_isl := {}
-	for sp in world.spawns:
+	for sp in spawns:
 		var ii := world.island_of(sp.x, sp.z)
 		if not by_isl.has(ii): by_isl[ii] = sp
 	var pool: Array = by_isl.values()
@@ -717,7 +721,7 @@ func _spawn_hunters() -> void:
 		spots.append(pool[best]); pool.remove_at(best)
 	# more squads than islands: share the bigger islands, still as far apart as possible
 	if spots.size() < n_teams:
-		var rest: Array = world.spawns.filter(func(q): return not spots.has(q))
+		var rest: Array = spawns.filter(func(q): return not spots.has(q))
 		while spots.size() < n_teams and rest.size() > 0:
 			var best := 0; var bd := -1.0
 			for i in rest.size():
@@ -726,7 +730,7 @@ func _spawn_hunters() -> void:
 				if dmin > bd: bd = dmin; best = i
 			spots.append(rest[best]); rest.remove_at(best)
 	if spots.is_empty():
-		spots = world.spawns.duplicate()
+		spots = spawns.duplicate()
 	if tut:
 		spots = [tut.stop("land")]
 	var taken: Array = [Save.d.get("name", "Hunter")]
@@ -1614,7 +1618,7 @@ func squad_ping(h: Hunter, p: Vector3, from_net := false, kind := "", foe: Hunte
 	PingInput.make_room(self, h)
 	pings.append({"pos": p, "col": PingInput.color(kind), "t": 0.0, "by": h, "team": h.team,
 		"life": PingInput.life(kind), "kind": kind, "foe": foe})
-	if player and h.team == player.team:
+	if player and h.team == player.team and Life.has_mates(self, h):
 		sfx("ping", null, -6.0, 1.15)
 	if net_on and not from_net:
 		net_event(["sping", h.nid, p.x, p.y, p.z, kind, foe.nid if foe else ""])
@@ -1663,7 +1667,7 @@ func kin_ping(k: Kin, p: Vector3, col: Color, label: String) -> Dictionary:
 			pings.erase(pg); break
 	var pg := {"pos": p, "col": col, "t": 0.0, "life": 5.0, "kin": k, "label": label, "team": k.team}
 	pings.append(pg)
-	if k.owner_h == player or (player and k.team == player.team):
+	if (k.owner_h == player or (player and k.team == player.team)) and Life.has_mates(self, player):
 		sfx("ping", null, -9.0, 1.3)
 	return pg
 
@@ -2527,6 +2531,9 @@ func drop(kind_s: String, at: Vector3, v: int, key := "", pid := "", vel0 = null
 		net_event(["drop", pid, kind_s, v, key, _r(at.x), _r(at.y), _r(at.z), _r(v0.x), _r(v0.y), _r(v0.z)])
 
 func _update_pickups(dt: float) -> void:
+	var walk: Dictionary = PickupReach.rules()["walk"]      # (read once a step, not per pickup and hunter)
+	var settle := float(walk["settle"])
+	var gem_rule: Dictionary = PickupReach.rules()["gem"]      # (gems reach further than the rest)
 	for p in pickups.duplicate():
 		p["t"] += dt
 		var pos: Vector3 = p["pos"]
@@ -2536,16 +2543,22 @@ func _update_pickups(dt: float) -> void:
 			if dk > World.VOID + 1.0 and (g < dk or g > pos.y + 0.9): g = dk
 		var v: Vector3 = p["vel"]
 		var grabbed := false
-		if p["t"] > PickupReach.settle():
+		if p["t"] > settle:
+			var rule := PickupReach.walk_rule(String(p["kind"]))
+			var reach_r: Dictionary = gem_rule if rule == "gem" else walk
+			var reach := float(reach_r["radius"])
+			var reach_h := float(reach_r["height"])
 			for h in hunters:
 				if h.out or h.extracted or h.downed or h.remote:
 					continue
+				if Vector2(pos.x - h.pos.x, pos.z - h.pos.z).length() >= reach or absf(h.pos.y - pos.y) >= reach_h:
+					continue      # (PickupReach.near's own first test, here: no call for each far pickup and hunter)
 				if net_on and not is_host and h != player:
 					continue
 				if p["kind"] == "ckey" and not KeyChest.has_room(h):
 					continue      # a full key stack leaves the key on the ground, glinting
-				if PickupReach.near(self, h, pos, "walk") and UtilityBelt.can_take(h, String(p["kind"])):
-					v = PickupReach.pull(h, pos)
+				if PickupReach.near(self, h, pos, rule) and UtilityBelt.can_take(h, String(p["kind"])):
+					v = PickupReach.pull(h, pos, rule)
 					if PickupReach.grabbed(h, pos):
 						_collect(h, p)
 						grabbed = true
@@ -3059,7 +3072,8 @@ func _boom(s: Dictionary, at: Vector3) -> void:
 	for e in _shot_targets(s):
 		var d := Vector2(e.pos.x - at.x, e.pos.z - at.z).length()
 		if d < radius + e.r and absf(e.pos.y + 0.5 - at.y) < 2.0:
-			var f := 1.0 - 0.45 * minf(1.0, d / radius)
+			var f := Blast.share(world, at, e, radius, x.get("boom_open", false))
+			if f <= 0.0: continue
 			var dir := Vector2(e.pos.x - at.x, e.pos.z - at.z).normalized()
 			var o := {"src": "boom", "kb": dir * float(x.get("boom_kb", 8.0)) * f, "lift": (7.0 if not small else 1.5) * f, "at": at}
 			if x.has("ab"): o["ab"] = x["ab"]
@@ -3567,7 +3581,7 @@ func step(dt: float) -> void:
 		player.inp["aim"] = player.pos + Vector3(cos(time * 0.6), 0.9, sin(time * 0.6)) * 4.0
 	if opts.get("merge_demo", false) and player and time > 0.8 and not train.has("_merge"):
 		train["_merge"] = true
-		Content.rules("merge_forms")["fusion_enabled"] = true
+		MergeForm.set_enabled(true)
 		player.slot_lv["ult"] = maxi(1, int(player.slot_lv["ult"]))
 		player.ult = 1.0
 		player.merge_cd = 0.0
@@ -5354,7 +5368,7 @@ func _tips() -> void:
 	if belt_tip: _tip(belt_tip[0], belt_tip[1])
 	if _tip_t > 14.0:
 		_tip("ability", TipText.ability(player.ak != null, tut == null and duo == null))
-	if player.ult >= 1.0 and player.kin and tut == null and duo == null:
+	if player.ult >= 1.0 and player.kin and tut == null and duo == null and MergeForm.enabled():
 		var ud := KinMerge.def_for(player.kin)
 		if ud and player.ak == null: _tip("ult", TipText.bond_full(ud.display_name, false))
 		elif ud and int(player.slot_lv.get("ult", 0)) > 0: _tip("ult", TipText.bond_full(ud.display_name, true))
