@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bdk6vf4ciobai"
-path="res://.godot/imported/updraft_vent_updraft_vent.jpg-c53bb28403535c86930ccb7d73038526.ctex"
+path.s3tc="res://.godot/imported/updraft_vent_updraft_vent.jpg-c53bb28403535c86930ccb7d73038526.s3tc.ctex"
+path.etc2="res://.godot/imported/updraft_vent_updraft_vent.jpg-c53bb28403535c86930ccb7d73038526.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "1a8d797238210044e8a5d2c868c9ff87"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/props/updraft_vent/updraft_vent_updraft_vent.jpg"
-dest_files=["res://.godot/imported/updraft_vent_updraft_vent.jpg-c53bb28403535c86930ccb7d73038526.ctex"]
+dest_files=["res://.godot/imported/updraft_vent_updraft_vent.jpg-c53bb28403535c86930ccb7d73038526.s3tc.ctex", "res://.godot/imported/updraft_vent_updraft_vent.jpg-c53bb28403535c86930ccb7d73038526.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

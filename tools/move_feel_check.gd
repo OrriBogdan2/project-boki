@@ -1822,11 +1822,16 @@ func _barge_chain() -> void:
 func _felt_dash(air: bool, hold := false, _long := false) -> Array:
 	_steps(30)  # past any chain gap from the dash before (Grimble's Barge would hold a press inside it)
 	_reset(flat + Vector3(-3.0, 6.0 if air else 0.0, 0), not air)
+	# the cursor ahead along the dash, where a player's is: a dash that steers to it once the keys lift (Gil's
+	# Ground Swim, 4.4 rad/s, 5bb8784a7d3) would otherwise bend toward wherever the last row left the cursor
+	var aim0: Vector3 = p_v.inp["aim"]
+	p_v.inp["aim"] = p_v.pos + Vector3(8, 0.9, 0)
 	p_v.inp["move"] = Vector2(1, 0)
 	p_v.inp["dash"] = true
 	p_v.inp["dash_down"] = hold
 	var start := Vector3.INF
 	var n := 0
+	var out := [0.0, 0.0]
 	for i in 150:
 		var before := p_v.pos
 		var left := minf(p_v.roll_t, DT)
@@ -1840,8 +1845,10 @@ func _felt_dash(air: bool, hold := false, _long := false) -> Array:
 		elif start != Vector3.INF:
 			var end := Vector2(p_v.pos.x, p_v.pos.z) - _hv(p_v) * (DT - left)
 			p_v.inp["dash_down"] = false
-			return [end.distance_to(Vector2(start.x, start.z)), n * DT + left]
-	return [0.0, 0.0]
+			out = [end.distance_to(Vector2(start.x, start.z)), n * DT + left]
+			break
+	p_v.inp["aim"] = aim0
+	return out
 
 
 ## Sable's Vault exit (briefs/hero-ref/dancer.md, docs/heroes/thief.md), keys held. Run on, the Cartwheel runs down

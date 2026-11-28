@@ -28,7 +28,7 @@ Not moved since 11-23 (re-read, same): Albert throw 12 / range 9, Crushing Blow 
 
 - **Grimble ratios after the 11-24 pellet change** (owner call; HARD 2/10, BLOCKS 1/10): Anchor (25) and Broadside (48) are 1.0x and 2.0x a gun volley, the source reads 1.8x and 3.9x. Source-ratio values would be Anchor about 44 and Broadside about 95; that is a large buff to a stun and an ultimate, so it was not made here.
 - **Meeko Kindle +60% against the footage's +45%** is the consequence of keeping Kindle's flat step when the ember went 8 -> 6 (owner, `docs/TTK.md`).
-- **`--gil-combo-check`, 3 failures on main, identical with and without this branch, not touched** (HARD 3/10, BLOCKS 2/10): "cancel X wave + E, RMB, LMB: nothing goes mid-ride" and "each waits and goes on landing" (RMB and LMB now fire mid-ride, E is refused: the 11-23 `into_cast`/Gil rows measure that, but `gil.md` and the check still say they wait), and "recast E: the window's total is its time left" (`GilKit.recast_window` passes the spin length as total and `auto` true). Either the doc and check follow the kit or the kit follows the doc; it is Gil's feel, so left for the owner.
+- ~~`--gil-combo-check`, 3 failures on main~~ **closed on `ext/gil-combo-red`**: the kit was right on all three (RMB and LMB fire mid-ride per gil.json's `fire` dash rows and `into_cast.x`, E is refused and not replayed, `recast_window` is finding F1's fix), so the check rows and `gil.md` follow the kit; 140 checks, 0 failures.
 - Source gaps `[?]` unchanged: Albert hammer range, Neve Spear clamp and Wall slide stop, Meeko Empowered effect, Meeko ally-pass refund.
 
 ### Checks (this branch)

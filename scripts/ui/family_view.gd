@@ -75,6 +75,12 @@ static func fill(rec: Dictionary, left: Control, right: Control, tree: SceneTree
 	for p in parents(rec):
 		left.add_child(_cell(p, tree, open))
 	left.add_child(UI.spacer(4))
+	var inherited := HatchParents.lines(rec)
+	if not inherited.is_empty():
+		left.add_child(UI.section("Inherited", UI.FAINT.lightened(0.2)))
+		for line in inherited:
+			left.add_child(UI.para(String(line), 13, UI.INK))
+		left.add_child(UI.spacer(4))
 	left.add_child(UI.section("Passed down", UI.FAINT.lightened(0.2)))
 	var lines := passed(rec)
 	if lines.is_empty():

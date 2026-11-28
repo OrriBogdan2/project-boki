@@ -1,13 +1,18 @@
 extends RefCounted
 ## --mob-anim-check: the sculpted monsters move in every state (MobAnim). For each kind: every state it can be in
 ## has keyed tracks that really move, name pivots the model has, and loop cleanly; the wind-up on the body is the
-## same fraction as the ground telegraph and lasts exactly as long; the posed pivot follows the key; and 30
-## monsters pose in under PERF_MS. Never touches the save.
+## same fraction as the ground telegraph and lasts exactly as long; the posed pivot follows the key; the feet of every
+## legged kind and lair boss keep pace with the floor; and 30 monsters pose in under PERF_MS. Never touches the save.
 
 const KINDS := ["skitter", "spitter", "brute", "warden", "bomber", "sentinel", "glimmer"]
 const MIN_MOVE := 0.02  # rad / m / scale: a state whose largest track moves less than this is static
 const PERF_MS := 0.5  # ms: posing 30 monsters in a frame
 const PERF_FRAMES := 300
+const BOSSES := ["colossus", "serpent", "brood"]
+const PACES := [["patrol", 0.3], ["slowed", 0.55], ["chase", 1.0], ["enraged", 1.25]]  # x data speed (Mob/Boss.sim)
+const SLIDE_K := 0.15  # the skate at chase pace may be this share of the stride
+const SETTLE_FRAMES := 60  # frames for the pivots to catch the walk before the skate is measured
+const CYCLE_FRAMES := 240
 const DT := 1.0 / 60.0
 
 var bad := 0
@@ -42,6 +47,8 @@ func run(main: Node) -> void:
 		_windup(m, k)
 	for k in KINDS:
 		_gait(m, k)
+	for k in BOSSES:
+		_boss_gait(m, k)
 	_perf(m)
 	m.queue_free()
 	print("MOBANIM DONE, failures: %d" % bad)
@@ -118,24 +125,18 @@ func _windup(m: Match, k: String) -> void:
 	ok(lean > 0.1, "%s: the wind-up lean shows on the body (%.3f rad, want > 0.1)" % [k, lean])
 
 
-## The legs follow the ground: a walking monster's gait advances one stride per STRIDE_M walked whatever its
-## speed, stands still when it stops, and a hit shows on the body without leaving the walk.
+## The feet keep pace with the floor. A scripted chase runs each kind at the speeds Mob.sim uses (PACES x its data
+## speed); over a gait cycle each foot the model has (its glb's Leg* bones) travels one stride in body space, and
+## the ground covered in that cycle must match it: the gap is the skate. Standing still freezes the gait and a hit
+## shows on the body without leaving the walk.
 func _gait(m: Match, k: String) -> void:
 	var p: Hunter = m.player
 	var mb := m.spawn_mob(k, p.pos + Vector3(6.0, 0, 0))
 	mb.tgt = null
-	mb.st = "idle"
-	var spd := maxf(float(Data.MOBS[k].get("speed", 3.0)), 1.0)
+	_skate_all(mb, k)
+	var spd := maxf(float(mb.md["speed"]), 1.0)
 	mb.vel = Vector3(spd, 0, 0)
-	mb.anim = 0.0
-	for i in 30:
-		mb.render(DT, 1.0)
-	var strides := mb.anim / TAU
-	var want := spd * 30.0 * DT / float(MobAnim.STRIDE_M.get(MobAnim.base_kind(k), 2.0))
-	ok(
-		absf(strides - want) < 0.001,
-		"%s: gait advances by distance walked (%.3f strides, want %.3f)" % [k, strides, want]
-	)
+	mb.render(DT, 1.0)
 	var before := mb.anim
 	mb.vel = Vector3.ZERO
 	for i in 10:
@@ -150,6 +151,100 @@ func _gait(m: Match, k: String) -> void:
 	)
 	mb.dead = true
 	mb.visible = false
+
+
+## A lair boss, woken and walked the same way (its legs are BossAnim's).
+func _boss_gait(m: Match, k: String) -> void:
+	var at: Vector3 = m.player.pos + Vector3(12.0, 0, 0)
+	var b := Boss.new()
+	b.init_boss(m, m.next_id("b"), k, at, 1.0, {"c": at, "boss": k})
+	m.add_child(b)
+	b.wake("check")
+	b.awake_t = 10.0
+	_skate_all(b, k)
+	b.queue_free()
+
+
+## Every pace: the skate at the chase pace must stay under SLIDE_K of the stride; the rest is reported.
+func _skate_all(mb: Mob, k: String) -> void:
+	var feet := _feet(mb.model)
+	if feet.is_empty():
+		print("MOBANIM note %s: no feet in its model, skate not measured" % k)
+		return
+	var spd0 := maxf(float(mb.md["speed"]), 1.0)
+	for pace in PACES:
+		var spd: float = spd0 * float(pace[1])
+		var r := _skate(mb, feet, spd)
+		var skate_cm: float = absf(r[0] - r[1]) * 100.0
+		var what := (
+			"%s %s %.2f m/s: skate %.1f cm per cycle (ground %.2f m, stride %.2f m, %.2f cycles/s)"
+			% [k, pace[0], spd, skate_cm, r[0], r[1], r[2]]
+		)
+		if pace[0] == "chase":
+			ok(skate_cm <= r[1] * SLIDE_K * 100.0, what)
+		else:
+			print("MOBANIM note %s" % what)
+
+
+## Walks mb on the spot at spd for CYCLE_FRAMES after a settle: [ground m per cycle, stride m, cycles/s]. The stride
+## is twice a foot's fore-aft extent in Body space: a foot is planted half the cycle and covers its extent then.
+func _skate(mb: Mob, feet: Array, spd: float) -> Array:
+	mb.vel = Vector3(0, 0, -spd)
+	mb.anim = 0.0
+	var glb := mb.model.get_node("MobGlb") as MobGlb
+	var body := mb.model.get_node("Body") as Node3D
+	for i in SETTLE_FRAMES:
+		mb.render(DT, 1.0)
+	var a0 := mb.anim
+	var lo := PackedFloat32Array()
+	var hi := PackedFloat32Array()
+	lo.resize(feet.size())
+	hi.resize(feet.size())
+	lo.fill(INF)
+	hi.fill(-INF)
+	for i in CYCLE_FRAMES:
+		mb.render(DT, 1.0)
+		glb.copy_pose()
+		var inv := body.global_transform.affine_inverse()
+		for f in feet.size():
+			var skel: Skeleton3D = feet[f][0]
+			var at: Vector3 = inv * (skel.global_transform * (skel.get_bone_global_pose(feet[f][1]) * feet[f][2]))
+			lo[f] = minf(lo[f], at.z)
+			hi[f] = maxf(hi[f], at.z)
+	var hz := (mb.anim - a0) / (CYCLE_FRAMES * DT) / TAU
+	var travel := 0.0
+	for f in feet.size():
+		travel += (hi[f] - lo[f]) / feet.size()
+	return [spd / maxf(hz, 0.001), travel * 2.0, hz]
+
+
+## The model's feet from its glb: for each Leg* bone, the lowest vertex it owns, in that bone's space:
+## [skeleton, bone, point].
+func _feet(model: Node3D) -> Array:
+	var sks := model.find_children("*", "Skeleton3D", true, false)
+	if sks.is_empty():
+		return []
+	var skel: Skeleton3D = sks[0]
+	var mi: MeshInstance3D = skel.find_children("*", "MeshInstance3D", true, false)[0]
+	var arr := mi.mesh.surface_get_arrays(0)
+	var vs: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+	var bn = arr[Mesh.ARRAY_BONES]
+	var wt = arr[Mesh.ARRAY_WEIGHTS]
+	var per: int = bn.size() / vs.size()
+	var low := {}
+	for v in vs.size():
+		var best := 0
+		for j in range(1, per):
+			if wt[v * per + j] > wt[v * per + best]:
+				best = j
+		var bi: int = bn[v * per + best]
+		if not low.has(bi) or vs[v].y < (low[bi] as Vector3).y:
+			low[bi] = vs[v]
+	var out: Array = []
+	for bi in skel.get_bone_count():
+		if skel.get_bone_name(bi).begins_with("Leg") and low.has(bi):
+			out.append([skel, bi, skel.get_bone_global_rest(bi).affine_inverse() * (low[bi] as Vector3)])
+	return out
 
 
 ## How far the first wind-up track's pivot is from where its key says it should be, as a share of that track's travel.
