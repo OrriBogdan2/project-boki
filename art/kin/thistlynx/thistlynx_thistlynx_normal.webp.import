@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cmur1heist82h"
-path="res://.godot/imported/thistlynx_thistlynx_normal.webp-3861e1b8144725c6ef75c35773da02db.ctex"
+path.s3tc="res://.godot/imported/thistlynx_thistlynx_normal.webp-3861e1b8144725c6ef75c35773da02db.s3tc.ctex"
+path.etc2="res://.godot/imported/thistlynx_thistlynx_normal.webp-3861e1b8144725c6ef75c35773da02db.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "604a1aaba3ad6299c3e39af9df930ed3"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/thistlynx/thistlynx_thistlynx_normal.webp"
-dest_files=["res://.godot/imported/thistlynx_thistlynx_normal.webp-3861e1b8144725c6ef75c35773da02db.ctex"]
+dest_files=["res://.godot/imported/thistlynx_thistlynx_normal.webp-3861e1b8144725c6ef75c35773da02db.s3tc.ctex", "res://.godot/imported/thistlynx_thistlynx_normal.webp-3861e1b8144725c6ef75c35773da02db.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dwjn5p1h4yuah"
-path="res://.godot/imported/thistlynx_thistlynx_face.webp-1e4cd9c0edd2326df06ec0bd760f7ab7.ctex"
+path.s3tc="res://.godot/imported/thistlynx_thistlynx_face.webp-1e4cd9c0edd2326df06ec0bd760f7ab7.s3tc.ctex"
+path.etc2="res://.godot/imported/thistlynx_thistlynx_face.webp-1e4cd9c0edd2326df06ec0bd760f7ab7.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "27cb6398c5b53c56b9fb640764691b32"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/thistlynx/thistlynx_thistlynx_face.webp"
-dest_files=["res://.godot/imported/thistlynx_thistlynx_face.webp-1e4cd9c0edd2326df06ec0bd760f7ab7.ctex"]
+dest_files=["res://.godot/imported/thistlynx_thistlynx_face.webp-1e4cd9c0edd2326df06ec0bd760f7ab7.s3tc.ctex", "res://.godot/imported/thistlynx_thistlynx_face.webp-1e4cd9c0edd2326df06ec0bd760f7ab7.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

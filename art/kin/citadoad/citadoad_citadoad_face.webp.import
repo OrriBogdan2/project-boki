@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ffmaui18t0rp"
-path="res://.godot/imported/citadoad_citadoad_face.webp-594f67a20b23c2b57680ef28266f7a36.ctex"
+path.s3tc="res://.godot/imported/citadoad_citadoad_face.webp-594f67a20b23c2b57680ef28266f7a36.s3tc.ctex"
+path.etc2="res://.godot/imported/citadoad_citadoad_face.webp-594f67a20b23c2b57680ef28266f7a36.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "13263ca71fca425c3e973c467a0bd4a2"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/citadoad/citadoad_citadoad_face.webp"
-dest_files=["res://.godot/imported/citadoad_citadoad_face.webp-594f67a20b23c2b57680ef28266f7a36.ctex"]
+dest_files=["res://.godot/imported/citadoad_citadoad_face.webp-594f67a20b23c2b57680ef28266f7a36.s3tc.ctex", "res://.godot/imported/citadoad_citadoad_face.webp-594f67a20b23c2b57680ef28266f7a36.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
