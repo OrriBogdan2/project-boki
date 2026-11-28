@@ -478,7 +478,7 @@ func _build_ui() -> void:
 	title.add_theme_constant_override("outline_size", 12)
 	title.add_theme_color_override("font_outline_color", Color(0.05, 0.03, 0.09, 0.85))
 	top.add_child(title)
-	var sub := UI.label("Every Boki is different, and remembers how you treat them.", 16, Color(1, 0.95, 0.88, 0.9))
+	var sub := UI.label("Each Boki is unique and remembers how you treat it.", 16, Color(1, 0.95, 0.88, 0.9))
 	sub.add_theme_constant_override("outline_size", 6)
 	sub.add_theme_color_override("font_outline_color", Color(0.05, 0.03, 0.09, 0.8))
 	sub_lbl = sub
@@ -606,7 +606,7 @@ func _show_create() -> void:
 		(e["holder"] as Node3D).visible = false
 	if sub_lbl:
 		sub_lbl.text = (
-			"You are one of the Empty. Drag (or hold %s / %s) to turn round, scroll to zoom."
+			"You are one of the Empty. Drag (or %s / %s) to turn, scroll to zoom."
 			% [Settings.key_cap("left"), Settings.key_cap("right")]
 		)
 	_top_over(0.73)  # over you, clear of the tall locker card on the left
@@ -626,7 +626,7 @@ func _looks_good() -> void:
 	for e in eggs:
 		(e["holder"] as Node3D).visible = true
 	if sub_lbl:
-		sub_lbl.text = "Every Boki is different, and remembers how you treat them."
+		sub_lbl.text = "Each Boki is unique and remembers how you treat it."
 	_top_over(0.5)
 	if edit_only or Save.d.get("tutorial", {}).get("hatched", false):
 		Game.goto("home")
@@ -757,7 +757,7 @@ func _start_hatch() -> void:
 	card.custom_minimum_size = Vector2(460, 0)
 	var v := UI.vbox(10)
 	card.add_child(v)
-	var knock := "Click (or press %s) to knock. The Boki inside wakes a little more."
+	var knock := "Click (or %s) to knock and wake the Boki inside."
 	var l := UI.label(knock % Settings.key_cap("jump"), 15)
 	UI.wrapped(l)
 	v.add_child(l)
@@ -903,7 +903,7 @@ func _show_name() -> void:
 			% [
 				Unique.sex_name(new_rec),
 				"she/her" if she else "he/him",
-				"A babbler for now; any name you give will stick."
+				"Still babbling; the name you give sticks."
 			]
 		),
 		16,

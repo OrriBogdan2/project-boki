@@ -171,7 +171,7 @@ func _build() -> void:
 	_place_card.call_deferred()      # once in the tree, so it is sized from its real fonts
 	# the hint under the kin
 	var keys := [Settings.key_cap("left"), Settings.key_cap("right")]
-	var turn := KinSpeak.about(rec, "Drag to turn {him} round  ·  %s / %s") % keys
+	var turn := KinSpeak.about(rec, "Drag (or %s / %s) to turn {him}") % keys
 	hint = UI.label(turn, 15, UI.MUTED)
 	hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
 	hint.offset_bottom = -40

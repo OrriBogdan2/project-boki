@@ -143,7 +143,7 @@ func show_result(r: Dictionary) -> void:
 		kept.add_child(_notes(HomeNotices.fill(HomeNotices.EGG_HOME, "a Rare Egg" if eggs_home == 1 else "%d Rare Eggs" % eggs_home), UI.GOLD))
 	if won and not haul.is_empty():
 		var gear_head := "Gear you kept, in the gear shed"
-		if not Save.has_building("armory"): gear_head = "Gear you found (build the armory on the farm to keep it)"
+		if not Save.has_building("armory"): gear_head = "Gear found (build the armory to keep it)"
 		kept.add_child(UI.section(gear_head))
 		var hf := HFlowContainer.new()
 		hf.add_theme_constant_override("h_separation", 8); hf.add_theme_constant_override("v_separation", 8)

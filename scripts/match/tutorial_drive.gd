@@ -20,6 +20,7 @@ const KEYS := [      # the action inputs
 
 static var _retreat := false   # a wall kick step bot that got up without a kick, walking off to retry
 static var human := false
+static var read_wps := READ_WPS  # the reading speed in use (--tutorial-pace-check --read-wps=2.5 for a slow reader)
 static var reading_t := 0.0      # s of reading and reacting still to go before the next input
 static var idle := false         # this frame the player did nothing (no stick, no key, no Boki command)
 static var reading := false      # and the idle frame was reading text
@@ -147,7 +148,7 @@ static func _read(tu: Tutorial) -> bool:
 	var line := tu.text + " " + tu.detail
 	if tu.text != "" and line != _read_line:
 		_read_line = line
-		reading_t += line.split(" ", false).size() / READ_WPS + REACT_S
+		reading_t += line.split(" ", false).size() / read_wps + REACT_S
 	reading = reading_t > 0.0
 	reading_t = maxf(0.0, reading_t - Match.DT)
 	idle = reading
