@@ -5,6 +5,8 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	# Lace needles in the draw hand as animation (LMB, RMB, Hemline fan, Finishing Touch fan)
+	"--lace-needle-anim-check": ["res://tools/lace_needle_anim_check.gd", "lace_needle_anim_check", null],
 	# a Meshy-native rig holds its clips on frames SimLod skipped the pose
 	"--native-pose-hold-check": ["res://tools/native_pose_hold_check.gd", "native_pose_hold_check", null],
 	# no clip stretches a skinned edge past 1.3x
