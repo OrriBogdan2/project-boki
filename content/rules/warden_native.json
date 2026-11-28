@@ -95,7 +95,7 @@
 			"jug_ult_recover": {"clip": "ult_recover", "fade": 0.03}}},
 	"gil": {"meshy_native": true, "size": 0.69, "hand": "RightHand",
 		"props": {"hand.R": ["metal-swordfish"]}, "tilt": {"hand.R": -45.0}, "scale": {"hand.R": [1.6, 2.0, 2.2]},
-		"grip": {"hand.R": {"part": [-0.11, -0.03, 0.0], "bone": [0.007, 0.115, 0.003], "turn": [-0.045, -0.233, 0.169]}},
+		"grip": {"hand.R": {"part": [-0.08, -0.03, 0.0], "bone": [0.007, 0.115, 0.003], "turn": [-0.045, -0.233, 0.169]}},
 		"anchors": {"anchor_head_top": "head_end", "anchor_chest": "Spine02", "anchor_gun_R": "RightHand"},
 		"plants": {"walk": {"L": [0.3], "R": [0.683]}, "run": {"L": [0.083], "R": [0.417]}, "crouch": {"L": [0.133], "R": [0.717]}},
 		"clips": {"idle": "Idle", "walk": "walk", "run": "run", "jump": "Jump_Run", "attack": "Attack", "crouch": "Crouch_Walk_with_Torch"},
