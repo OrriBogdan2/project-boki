@@ -59,9 +59,12 @@ archetypes/archer.json:rmb.pin.max_hold	3.0
 archetypes/archer.json:rmb.pin.push[0]	8.0
 archetypes/archer.json:rmb.pin.push[1]	12.0
 archetypes/archer.json:rmb.pin.range	14.0
+archetypes/archer.json:rmb.pin.range_k[0]	1.0
+archetypes/archer.json:rmb.pin.range_k[1]	1.2
 archetypes/archer.json:rmb.pin.range_rank3	3.0
 archetypes/archer.json:rmb.pin.speed	62.0
-archetypes/archer.json:rmb.pin.stun	1.2
+archetypes/archer.json:rmb.pin.stun[0]	0.6
+archetypes/archer.json:rmb.pin.stun[1]	1.2
 archetypes/archer.json:rmb.pin.wall	3.0
 archetypes/archer.json:rmb.pin.wall_mult	4.94
 archetypes/archer.json:x.cooldown	60.0
