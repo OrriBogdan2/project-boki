@@ -23,5 +23,5 @@ const CHECKS := {
 	"--modes-check": ["res://tools/modes_check.gd", "modes_check", null],  # solos and the play space (0084)
 	"--traversal-parity-check": ["res://tools/traversal_parity_check.gd", "traversal_parity_check", null],  # ref rows
 	"--fall-parity-check": ["res://tools/fall_parity_check.gd", "fall_parity_check", null],  # fall parity
-	"--r2-view": ["res://tools/r2_view.gd", "r2_view", null],  # GPU, --shots-dir= --wardens= [--close]: a Hunter as the player sees it
+	"--r2-view": ["res://tools/r2_view.gd", "r2_view", null],  # GPU: a Hunter as the player sees it (--shots-dir=)
 }
