@@ -8,7 +8,7 @@
 	"report_levels": [4, 8, 16],
 	"bands": {
 		"form_lv4_day": [1, 10],
-		"evolution_day": [3, 14],
+		"evolution_day": [1, 14],
 		"budget_full_day": [7, 30],
 		"stat_total": [216, 240],
 		"gems_day": [43, 300],
