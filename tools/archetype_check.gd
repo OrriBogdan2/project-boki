@@ -406,11 +406,12 @@ func _archer() -> void:
 	P.inp["fire"] = false
 	step(m, 0.5)
 	ok("archer weapon: Longbow full draw", dmg(T) >= 50.0, "took %.0f" % dmg(T))
-	# the Heavy Shot is hold only: a tap looses nothing and spends no charge
+	# a tap looses the uncharged Heavy Shot (source: release fires) and spends the charge
 	fresh(T); K.ch_rmb = 1.0
 	tap(m, P)
 	step(m, 0.3)
-	ok("archer RMB tap: nothing fires and the charge stays", dmg(T) <= 0.0 and T.root_t <= 0.0 and K.ch_rmb >= 1.0, "took %.0f charges %.1f" % [dmg(T), K.ch_rmb])
+	ok("archer RMB tap: the uncharged shot fires, takes the charge",
+		dmg(T) > 0.0 and dmg(T) < 20.0 and T.root_t <= 0.0 and K.ch_rmb < 1.0, "took %.0f charges %.1f" % [dmg(T), K.ch_rmb])
 	# Pinning Shot: pushed into a wall within 3m, pinned
 	fresh(T); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
 	if "--ak-debug" in OS.get_cmdline_user_args(): print("PIN build: T at %s P at %s vel %s" % [str(T.pos), str(P.pos), str(T.vel)])
