@@ -3,8 +3,8 @@ extends RefCounted
 ## The top of a Hunter's visible model as drawn now (skinned vertices through the skeleton's current pose), for
 ## --warden-native-check: how far a plate at HudPlate.plate_offset clears the head in each state.
 
-var _model: Node3D
 var tallest := ""  # the mesh that held the last top()
+var _model: Node3D
 var _meshes: Array = []  # [MeshInstance3D, [surface vertex arrays], [their bone indices], [their weights]]
 
 
@@ -52,7 +52,7 @@ func _surface_top(m: MeshInstance3D, arr: Array, xf: Array) -> float:
 		weights = arr[Mesh.ARRAY_WEIGHTS]
 	var skinned := not xf.is_empty() and weights.size() >= bones.size() and not bones.is_empty()
 	var per := int(bones.size() / float(maxi(verts.size(), 1)))
-	var top := -INF
+	var hi_y := -INF
 	for v in verts.size():
 		var y := 0.0
 		if skinned:
@@ -62,5 +62,5 @@ func _surface_top(m: MeshInstance3D, arr: Array, xf: Array) -> float:
 					y += ((xf[bones[v * per + k]] as Transform3D) * verts[v]).y * w
 		else:
 			y = (m.global_transform * verts[v]).y
-		top = maxf(top, y)
-	return top
+		hi_y = maxf(hi_y, y)
+	return hi_y
