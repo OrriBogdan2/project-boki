@@ -1,0 +1,5 @@
+{
+	"doc": "The practice dummies (the Test Zone and the Training Grounds). They lose HP like any foe and are knocked down at 0 (the normal knockout feedback); `respawn_s` later each stands back on its own mark at full HP. Their DPS label keeps its totals through a respawn (the Reset button clears them).",
+	"respawn_s": 3.0,
+	"heal_quiet_s": 12.0
+}

@@ -6,13 +6,14 @@ extends RefCounted
 ## What it gives you:
 ## - practice dummies (real hunters, so Marks, carries, wall slams and every ability work on them):
 ##   one that stands and watches you, one that strafes, a heavy one by a pillar to slam into; each
-##   shows its damage per second, last hit and total over its head, and heals up when left alone
+##   shows its damage per second, last hit and total over its head; it loses HP like a foe, is knocked
+##   down at 0 and stands on its mark at full HP after respawn_s (content/rules/practice_dummies.json)
 ## - the dodge drill: the strafer throws slow telegraphed shots until you dash clear of three (DodgeDrill)
 ## - a sparring bot you can switch Off / Idle / Moving / Fighting (N), and give any archetype
 ## - a reset (Backspace; X is the hero ultimate), cooldowns off (O: dash, RMB, E, R and the glove), the ultimate unlocked (U)
 ## - a quick swap without leaving: 2-9 pick one of the first eight archetypes (the loadout lists all); L opens the loadout (archetype, weapon,
 ##   Boki, glove, toggles), K the kit card
-## Nobody dies here: a downed player or bot is back up after a beat.
+## Nobody dies for good here: a downed player or bot is back up after a beat, a downed dummy after respawn_s.
 
 const KEYS_HINT := "K kit card   ·   L loadout   ·   2-9 first eight Hunters (L: all)   ·   Backspace reset   ·   N bot   ·   O cooldowns   ·   U ultimate"
 const BOT_MODES := ["off", "idle", "moving", "fighting"]
@@ -24,7 +25,8 @@ const MINIMAP_CLEAR := 50.0  # px the practice layout's key line shifts right so
 var m: Match
 var layout := "arena"  # "arena" (its own map) | "practice" (the training island)
 var home := Vector3.ZERO  # where you start (and reset to)
-var dummies: Array = []  # {h: Hunter, kind, at, label: Label3D, hits: [[t, d]], total, last, quiet}
+# {h: Hunter, kind, at, label: Label3D, hits: [[t, d]], total, last, quiet, down_t: secs knocked down (-1 = up)}
+var dummies: Array = []
 var drill: DodgeDrill = null
 var bot: Hunter = null
 var bot_mode := "off"
@@ -154,7 +156,17 @@ func _spawn_dummies() -> void:
 		lb.position = Vector3(0, 3.4, 0)
 		d_v.add_child(lb)
 		dummies.append(
-			{"h": d_v, "kind": sp[0], "at": at, "label": lb, "hits": [], "total": 0.0, "last": 0.0, "quiet": 0.0}
+			{
+				"h": d_v,
+				"kind": sp[0],
+				"at": at,
+				"label": lb,
+				"hits": [],
+				"total": 0.0,
+				"last": 0.0,
+				"quiet": 0.0,
+				"down_t": -1.0,
+			}
 		)
 
 
@@ -231,10 +243,16 @@ func tick(dt: float) -> void:
 		if not is_instance_valid(d_v):
 			continue
 		dm["quiet"] = float(dm["quiet"]) + dt
-		if d_v.downed or d_v.hp < DUMMY_HP * 0.25 or float(dm["quiet"]) > 3.0:
-			if d_v.downed:
-				m.revive_hunter(d_v, null)
-			d_v.hp = DUMMY_HP
+		var R := Content.rules("practice_dummies")
+		if d_v.downed:
+			d_v.down_hp = 1e6            # (no bleeding out or finishing: a dummy only ever stands back up on its mark)
+			if float(dm["down_t"]) < 0.0:
+				dm["down_t"] = 0.0
+			dm["down_t"] = float(dm["down_t"]) + dt
+			if float(dm["down_t"]) >= float(R["respawn_s"]):
+				_respawn_dummy(dm)
+		elif float(dm["quiet"]) > float(R["heal_quiet_s"]):
+			d_v.hp = DUMMY_HP            # (left alone a long while: topped up, the meters stay)
 		var hs: Array = dm["hits"]
 		while not hs.is_empty() and m.time - float(hs[0][0]) > 6.0:
 			hs.pop_front()
@@ -303,6 +321,26 @@ func _apply_ult() -> void:
 
 
 # ------------------------------------------------------------------ actions
+## A knocked-down dummy stands back up on its own mark at full HP.
+func _respawn_dummy(dm: Dictionary) -> void:
+	var d_v: Hunter = dm["h"]
+	if d_v.downed:
+		m.revive_hunter(d_v, null)
+	d_v.hp = DUMMY_HP
+	d_v.armor = 0.0
+	d_v.vel = Vector3.ZERO
+	d_v.stun_t = 0.0
+	d_v.root_t = 0.0
+	d_v.slow_t = 0.0
+	d_v.burn_t = 0.0
+	d_v.inv_t = 0.0
+	d_v.down_hp = 0.0
+	d_v.teleport(dm["at"])
+	d_v.set_meta("marks", {})
+	dm["down_t"] = -1.0
+	dm["quiet"] = 0.0
+	m.fx.ring(d_v.pos, 1.6, Color("9ee2a0"), 0.4)
+
 ## Back to your marks: you, the dummies and the bot, all healed, cooldowns and resources cleared.
 func reset() -> void:
 	var p_v: Hunter = m.player
@@ -334,6 +372,7 @@ func reset() -> void:
 			continue
 		if d_v.downed:
 			m.revive_hunter(d_v, null)
+		dm["down_t"] = -1.0
 		d_v.hp = DUMMY_HP
 		d_v.vel = Vector3.ZERO
 		d_v.stun_t = 0.0
