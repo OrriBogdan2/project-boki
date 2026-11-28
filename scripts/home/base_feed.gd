@@ -2,10 +2,11 @@ class_name BaseFeed
 extends RefCounted
 ## A hungry base Boki feeds itself (briefs/design/GARDEN.md section 2: bowls and snacks, never a penalty). A
 ## feeder with food comes first (HomeEcon.feed_goal, k["eat"]), then a feeding bowl you filled (FeedBowl);
-## with none to eat from it picks the ripe snack patch and eats one snack (the rest go to your pantry), or
-## fetches a snack from the pantry at the house door. With none of those it walks to a wild tree on its island
-## and eats the zone's fruit (a lesser meal: it fills, but builds no trust and no lean), so a garden left alone
-## never ends with every Boki pinned at the hungry floor. BaseLife runs the walk in its Eat state through tick()
+## with none to eat from it picks the ripe snack patch and eats one snack (the rest go to your pantry), or eats a
+## fruit fallen under a FruitTree, or fetches a snack from the pantry at the house door. With none of those it walks
+## to a wild tree on its island and eats the zone's fruit (a lesser meal: it fills, but builds no trust and no lean),
+## so a garden left alone never ends with every Boki pinned at the hungry floor. BaseLife
+## runs the walk in its Eat state through tick()
 ## (k["life_eat"] = {from, food, at}, a bowl's own fields on top); every meal goes through meal() (Care.feed),
 ## so the journal, the lean (Evo.eat) and the care day see it like any other.
 
@@ -26,8 +27,11 @@ static func pick(h, k: Dictionary) -> bool:
 	if FeedBowl.want(h, k):
 		return true
 	var e := SnackPatch.entry(Save.d)
+	var fruit := FruitTree.nearest_fallen(Save.d, k["pos"], String(rec.get("likes", {}).get("hates", "")))
 	if SnackPatch.ripe(e, Time.get_unix_time_from_system()):
 		k["life_eat"] = {"from": "patch", "food": "", "at": HomeLayout.deco_center(e)}
+	elif not fruit.is_empty():
+		k["life_eat"] = {"from": "fruit", "food": "", "at": fruit["at"], "tree": fruit["tree"]}
 	else:
 		var f := pantry(rec)
 		var tree := _tree_spot(h, k) if f == "" else Vector3.INF
@@ -80,6 +84,15 @@ static func tick(h, k: Dictionary, since: float) -> bool:
 		k.erase("life_eat")
 		k["t"] = randf_range(1.0, 2.0)
 		_wild_meal(h, k)
+		return false
+	if String(e["from"]) == "fruit":
+		k.erase("life_eat")
+		k["t"] = randf_range(1.0, 2.0)
+		food = FruitTree.take_one(Save.d, int(e["tree"]), String(rec.get("likes", {}).get("hates", "")))
+		if food == "":
+			h._emote(k, "?")
+		elif not meal(h, k, food).get("ok", false):
+			SnackPatch.shelve(Save.d, food)      # it would not eat it: to the pantry
 		return false
 	if String(e["from"]) == "patch":
 		var got := SnackPatch.harvest(Save.d, Time.get_unix_time_from_system())

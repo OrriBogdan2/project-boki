@@ -88,7 +88,7 @@ static func shelve(d: Dictionary, snack: String, n := 1) -> void:
 ## Part of the deco signature, so the model changes when it ripens or the season turns.
 static func sig(e: Dictionary) -> String:
 	if String(e["id"]) != ID:
-		return ""
+		return FruitTree.sig(e)
 	var now := Time.get_unix_time_from_system()
 	return ("r" if ripe(e, now) else "") + GardenSeasons.snack(now)
 
@@ -114,6 +114,7 @@ func tick(d: float) -> void:
 		return
 	_look_t = 0.2
 	var now := Time.get_unix_time_from_system()
+	FruitTree.tick(h, now)
 	var e := entry(Save.d)
 	if not e.is_empty() and not e.has("t"):
 		e["t"] = now          # the timer starts when it is put down
