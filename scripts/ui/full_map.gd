@@ -204,7 +204,6 @@ func draw(sz: Vector2) -> void:
 	_grid(c, v, kk)
 	HazardMap.draw(c, m, to_screen, rect, Vector3.ZERO, HazardMap.FULL_SHIELD)
 	c.draw_rect(rect, Color(0.85, 0.8, 1.0, 0.35), false, 2.0)
-	_shrines(c, kk)
 	var saved: Vector3 = hud.mm_circ
 	hud.mm_circ = Vector3.ZERO          # the shared map helpers clip to a rectangle here
 	_labels(c, kk)
@@ -213,7 +212,7 @@ func draw(sz: Vector2) -> void:
 	if m.exits:
 		ExitMark.full_map(self)
 	hud.mm_circ = saved
-	ShopLegend.markers(self, c)
+	MapMarks.full_map(self)
 	_spawns(c, team, kk)
 	ReviveHud.full_map(self)
 	if m.biomes:
@@ -257,13 +256,6 @@ func _plain_pill(sz: Vector2) -> Rect2:
 	return Rect2(Vector2(sz.x * 0.5 - w * 0.5, rect.end.y - 46), Vector2(w, 34))
 
 ## Shrines: a small pale-green obelisk, dimmed once someone has used it.
-func _shrines(c: Control, kk: float) -> void:
-	var s := clampf(4.0 + kk * 0.5, 5.0, 9.0)
-	for sh in m.shrines:
-		var pv := to_screen(sh["pos"])
-		if rect.grow(-4.0).has_point(pv):
-			shrine_glyph(c, pv, s, bool(sh.get("used", false)))
-
 func shrine_glyph(c: Control, pv: Vector2, s: float, used := false) -> void:
 	var col := Color("9ff0c4") if not used else Color(0.6, 0.66, 0.64, 0.6)
 	var pts := PackedVector2Array([pv + Vector2(0, -s * 1.3), pv + Vector2(s * 0.55, -s * 0.2), pv + Vector2(s * 0.45, s * 0.8), pv + Vector2(-s * 0.45, s * 0.8), pv + Vector2(-s * 0.55, -s * 0.2)])
@@ -722,7 +714,7 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 		hud._rounded(r2, Color(0.04, 0.05, 0.08, 0.88), 12)
 		hud._text(r2.position + Vector2(14, 22), "WAYS OUT", 14, Color("8fe3c8"), hud.big)
 		ExitMark.glyph(c, Vector2(r2.position.x + 26, r2.position.y + 42), 8.0, ExitMark.SAMPLE, 0.0)
-		hud._text(Vector2(r2.position.x + 48, r2.position.y + 47), "Extraction (green: open)", 12, INK)
+		hud._text(Vector2(r2.position.x + 48, r2.position.y + 47), "Extraction (solid: open)", 12, INK)
 		var row_y := r2.position.y + 42 + 22
 		if not m.shrines.is_empty():
 			shrine_glyph(c, Vector2(r2.position.x + 26, row_y), 5.5)
