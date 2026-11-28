@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dxxfv0se7cwko"
-path="res://.godot/imported/pipeworth_pipeworth_atlas.webp-585a3984475c36a8515ca4495910cc66.ctex"
+path.s3tc="res://.godot/imported/pipeworth_pipeworth_atlas.webp-585a3984475c36a8515ca4495910cc66.s3tc.ctex"
+path.etc2="res://.godot/imported/pipeworth_pipeworth_atlas.webp-585a3984475c36a8515ca4495910cc66.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "c20b3f66adbd65d38e140ddcf7303555"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/pipeworth/pipeworth_pipeworth_atlas.webp"
-dest_files=["res://.godot/imported/pipeworth_pipeworth_atlas.webp-585a3984475c36a8515ca4495910cc66.ctex"]
+dest_files=["res://.godot/imported/pipeworth_pipeworth_atlas.webp-585a3984475c36a8515ca4495910cc66.s3tc.ctex", "res://.godot/imported/pipeworth_pipeworth_atlas.webp-585a3984475c36a8515ca4495910cc66.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
