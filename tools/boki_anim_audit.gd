@@ -224,7 +224,8 @@ func _gait(rig: BokiRig, steps: Dictionary, id: String, grown: float, v: float) 
 	rig._pick_clip(0.016)
 	var length := rig.player.get_animation(rig.clip).length
 	var sc := rig.player.speed_scale
-	var slid := slip(steps[rig.clip], length, v / grown, sc)
+	# steps are model-local: the feet move them times the model's world scale (the size roll and KinSize's fit)
+	var slid := slip(steps[rig.clip], length, v / rig.model.global_basis.z.length(), sc)
 	var limit: float = OVER.get("%s %s" % [id, rig.clip], MAX_SLIDE)
 	var why := " (at full cadence)" if is_equal_approx(sc, BokiRig.MAX_CADENCE * length) else ""
 	var what := "%s x%.2f at %.1f m/s (%s x%.2f, %.1f steps/s)" % [id, grown, v, rig.clip, sc, sc / length]
