@@ -19,4 +19,5 @@ const CHECKS := {
 	"--status-edge-shots": ["res://tools/status_edge_check.gd", "status_edge_check", "shots"],  # GPU: stills + 4v4 ms
 	"--hunter-scale-shots": ["res://tools/hunter_scale_shots.gd", "hunter_scale_shots", null],  # GPU: match size px
 	"--tenzo-stone-shots": ["res://tools/tenzo_stone_shots.gd", "tenzo_stone_shots", null],  # GPU: Tenzo stone stills
+	"--marks-ab-shots": ["res://tools/marks_ab_check.gd", "marks_ab_check", null],  # GPU: 4v4 ms, Neve spear + Nightwell tell
 }
