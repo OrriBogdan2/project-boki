@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b8sihorupepoj"
-path="res://.godot/imported/citadoad_citadoad_atlas.webp-72aaa4d34689ebbaea502965bdad168d.ctex"
+path.s3tc="res://.godot/imported/citadoad_citadoad_atlas.webp-72aaa4d34689ebbaea502965bdad168d.s3tc.ctex"
+path.etc2="res://.godot/imported/citadoad_citadoad_atlas.webp-72aaa4d34689ebbaea502965bdad168d.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "55e9d2d35825c07fa69191ca37db0082"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/citadoad/citadoad_citadoad_atlas.webp"
-dest_files=["res://.godot/imported/citadoad_citadoad_atlas.webp-72aaa4d34689ebbaea502965bdad168d.ctex"]
+dest_files=["res://.godot/imported/citadoad_citadoad_atlas.webp-72aaa4d34689ebbaea502965bdad168d.s3tc.ctex", "res://.godot/imported/citadoad_citadoad_atlas.webp-72aaa4d34689ebbaea502965bdad168d.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
