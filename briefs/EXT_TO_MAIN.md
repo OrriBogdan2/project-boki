@@ -11506,3 +11506,4 @@ READY ext/boki-2d-style-audit 0007ac3ec1195e731160b62c537a504952ed4f1d (Boki 2D 
 READY ext/mob-gait-speed e4e5f595ad (mob+boss gait rate = speed/stride from anim-map data, clamped 0.6-1.6x, walk/run blend; skate at chase 157-333 cm -> 0-5 cm per cycle; --mob-anim-check measures it)
 READY ext/ui-boki-pronoun-lint e4e763ffc5 (--tg-text-check fails Boki 'it/its' text; 21 strings fixed)
 READY ext/ui-icon-colours 098c7f2910962119c60851bca1f866373715ca76 (recolour 35 off-colour hunter ability icons to hero colours; icon-art/kit-text/health green)
+READY ext/tut-glide-double-press 4f09345159dd5aa46c1022c073866f7f656fe53a (tutorial glide step: 'press Space again' words, Space cap demo of tap then held second press, passes only on a press-opened glider; --tutorial-check asserts Space held from the jump never opens or finishes it)
