@@ -625,13 +625,9 @@ func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vecto
 			p.y += SCORCH_LIFT
 			mt.set_shader_parameter("spin", float(layer.get("spin", 1.0)))
 			mt.set_shader_parameter("rim_only", bool(layer.get("thin", false)))
-			mt.set_shader_parameter("hollow", bool(layer.get("hollow", false)))
 	mi.global_position = p
 	mi.global_transform.basis = b * Basis.from_scale(s0)
 	_paint(mt, layer, h)
-	if kind == "ring":
-		var cam0 := get_viewport().get_camera_3d()
-		print("DBGRING p=", p, " s0=", s0, " vis=", mi.visible, " intree=", mi.is_inside_tree(), " layers=", mi.layers, " cam=", cam0.global_position if cam0 else null, " camlayers=", cam0.cull_mask if cam0 else -1, " mode=", mt.get_shader_parameter("mode"), " gain=", mt.get_shader_parameter("gain"), " t=", Time.get_ticks_msec())
 	var e := {"node": mi, "mat": mt, "t": 0.0, "dur": _num(layer, "life", o, 0.4), "b": b, "s0": s0, "s1": s1}
 	if layer.get("ride", false):  # it rides on the Hero (an anchor goes with the clip: a hop, a lunge)
 		e.merge({"ride": h, "layer": layer, "dir": dir, "off": p - _where(layer, h, h.pos, dir)})
@@ -1079,8 +1075,6 @@ func _process(delta: float) -> void:
 			live.remove_at(i)
 			continue
 		(e["mat"] as ShaderMaterial).set_shader_parameter("life", u)
-		if int((e["mat"] as ShaderMaterial).get_shader_parameter("mode")) == 8:
-			print("DBGRINGTICK u=", u, " vis=", (e["node"] as Node3D).is_visible_in_tree(), " pos=", (e["node"] as Node3D).global_position, " sc=", (e["node"] as Node3D).global_transform.basis.get_scale())
 		if e.has("ride") and is_instance_valid(e["ride"]):
 			var r: Hunter = e["ride"]
 			(e["node"] as Node3D).global_position = _where(e["layer"], r, r.pos, e["dir"]) + (e["off"] as Vector3)

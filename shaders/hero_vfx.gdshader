@@ -38,7 +38,6 @@ uniform float jag = 0.0;    // M_BOLT: how far the strike wanders sideways (shar
 uniform float core_w = 0.0;  // M_BOLT: the bright core's half width as a share of the strip (0: the thread/strike default)
 uniform float nose = 0.0;    // M_BOLT: the share of the strip over which it opens out of a point at A (0: full width from A)
 uniform float spin = 1.0;   // M_VORTEX: turns per second (negative: the other way)
-uniform bool hollow = false;    // M_RING: no dust flash inside the band, the zone rule (a lit rim, nothing filled)
 uniform bool rim_only = false;  // M_VORTEX: three comet arcs on the rim, no fill and no core
 uniform bool clean_streak = false;  // M_RIBBON "streak": a clean tracer (hot head, tail thins and cools, no burn-away)
 uniform bool stitch = false;  // M_SCORCH lane: a seam of cross-stitches instead of fire
@@ -327,7 +326,7 @@ vec4 ring(vec2 uv) {
 	float go = 1.0 - pow(1.0 - min(life / 0.55, 1.0), 3.0);    // races out, then slows
 	vec2 ring_v = cel_ring(uv, go, life, seed);
 	float d = length(uv * 2.0 - 1.0);
-	float fill = hard(go * 0.9 - mix(0.2, 0.03, go) - d) * (hollow ? 0.0 : 0.25) * (1.0 - hard(life - 0.35));   // a flash of dust inside
+	float fill = hard(go * 0.9 - mix(0.2, 0.03, go) - d) * 0.25 * (1.0 - hard(life - 0.35));   // a flash of dust inside
 	float fade = 1.0 - smoothstep(0.75, 1.0, life);
 	float a = (ring_v.x + fill * (1.0 - ring_v.x)) * fade;
 	vec3 c = mix(mix(col.rgb, col2.rgb, ring_v.y), mix(col2.rgb, peak.rgb, peak.a), ring_v.y * (1.0 - hard(life - 0.2)));
