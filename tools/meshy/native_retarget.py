@@ -4,9 +4,11 @@ reach from its shoulder, scaled to Meshy's arm), elbow side and hand direction a
 bones by the two-bone IK of cinder_native_clips.py (no Blender). A `full` clip also takes the hips' height and the ankles'
 travel (scaled to Meshy's leg), so planted feet stay planted. Names are `<art>_<clip>` (Meshy's own are Attack, walk ...).
 Upper clips key only the torso, head and arms (the game lays them over the legs' clip, WardenNativeUpper).
-Run: python3 -I tools/meshy/native_retarget.py <art> <clip>[:full] ... [--shot] [--out=FILE]
+Run: python3 -I tools/meshy/native_retarget.py <art> [--moves] <clip>[:full] ... [--shot] [--out=FILE]
+  --moves: also every kit move of content/rules/warden_anim/<art>.json (prints the data's kmoves rows)
   e.g. native_retarget.py ryzz lmb_l lmb_r crouch_f:full ult:full      (--shot prints each clip's worst wrist miss)"""
 
+import json
 import math
 import os
 import sys
@@ -218,9 +220,30 @@ def retarget(art, specs, out_path, shot=False):
     C.build(out_path, shot=False, defs=defs)
 
 
+def move_specs(art):
+    """The clip specs and the data's kmoves rows of the contract's own kit moves (content/rules/warden_anim/<art>.json):
+    a row the contract lays on the legs' clip (upper, or "moving") stays an upper clip, any other is a full-body one."""
+    rows = json.load(open("content/rules/warden_anim/%s.json" % art))["kmoves"]
+    specs, out = {}, {}
+    for km, r in rows.items():
+        up = r.get("upper") in (True, "moving")
+        specs.setdefault(r["clip"], r["clip"] + ("" if up else ":full"))
+        out[km] = {"clip": "%s_%s" % (art, r["clip"])}
+        if "hold_from" in r:
+            out[km]["hold_from"] = r["hold_from"]
+        if up:
+            out[km]["upper"] = True
+    return list(specs.values()), out
+
+
 if __name__ == "__main__":
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
-    out = next(
-        (a[6:] for a in sys.argv[1:] if a.startswith("--out=")), "art/wardens/%s/%s_clips.glb" % (args[0], args[0])
-    )
-    retarget(args[0], args[1:], out, "--shot" in sys.argv)
+    art, specs = args[0], args[1:]
+    rows = None
+    if "--moves" in sys.argv:
+        more, rows = move_specs(art)
+        specs = more + specs
+    out = next((a[6:] for a in sys.argv[1:] if a.startswith("--out=")), "art/wardens/%s/%s_clips.glb" % (art, art))
+    retarget(art, specs, out, "--shot" in sys.argv)
+    if rows:
+        print('"kmoves": ' + json.dumps(rows))

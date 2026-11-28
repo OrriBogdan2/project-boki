@@ -148,7 +148,7 @@ The fire leaves from `weapon_muzzle` on her right hand (the palm), which rides t
 
 ## Own clips retargeted from the contract file (Sparkle first)
 A Hunter whose hand-keyed contract clips (`art/wardens/<art>/<art>.glb`, RIG_CONTRACT.md) still fit her kit lays them on
-Meshy's skeleton with `python3 -I tools/meshy/native_retarget.py <art> <clip>[:full] ... [--shot]` (no Blender; the IK of
+Meshy's skeleton with `python3 -I tools/meshy/native_retarget.py <art> [--moves] <clip>[:full] ... [--shot]` (`--moves`: every kit move of `content/rules/warden_anim/<art>.json`, printing the data's `kmoves` rows; Sparkle: `ryzz --moves crouch_f:full`) (no Blender; the IK of
 `tools/meshy/cinder_native_clips.py`). Each clip is sampled at 30 fps on the contract rig: the torso lean and head turn go to
 Meshy's spine and neck, each wrist keeps its reach from its shoulder (scaled to Meshy's arm), elbow side, hand direction and
 roll; a `:full` clip also takes the hips' height and the ankles' travel (scaled to Meshy's leg, so a crouch's planted feet stay
