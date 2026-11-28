@@ -12,5 +12,7 @@ const CHECKS := {
 	"--bot-summon-check": ["res://tools/bot_summon_check.gd", "bot_summon_check", null],  # bots press Summon
 	"--wisp-default-check": ["res://tools/wisp_default_check.gd", "wisp_default_check", null],  # wisps + C for all
 	"--wisp-summon-shots": ["res://tools/wisp_summon_shots.gd", "wisp_summon_shots", null],  # --shots-dir=<dir>
+	"--match-grade-check": ["res://tools/match_grade_check.gd", "match_grade_check", null],  # grade data
+	"--hunter-grade-shots": ["res://tools/hunter_grade_shots.gd", "hunter_grade_shots", null],  # grade
 	"--summon-end-sfx-check": ["res://tools/summon_end_sfx_check.gd", "summon_end_sfx_check", null],  # end warning
 }
