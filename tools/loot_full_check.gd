@@ -7,15 +7,31 @@ extends RefCounted
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("LOOTFULL %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
 
+
 ## A deathbox dictionary holding `pack` things, like the ones Life makes.
 static func make_box(owner_h: Hunter, at: Vector3, pack: Array) -> Dictionary:
-	return {"owner": owner_h, "team": owner_h.team, "pos": at, "gems": 0, "seeds": {}, "caught": [], "belt": [],
-		"soul_until": 0.0, "prog": {}, "node": null, "empty": false, "gear": [], "pack": pack}
+	return {
+		"owner": owner_h,
+		"team": owner_h.team,
+		"pos": at,
+		"gems": 0,
+		"seeds": {},
+		"caught": [],
+		"belt": [],
+		"soul_until": 0.0,
+		"prog": {},
+		"node": null,
+		"empty": false,
+		"gear": [],
+		"pack": pack
+	}
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -35,8 +51,10 @@ func run(main: Node) -> void:
 	var bx := make_box(q, p.pos, [Loot.valuable("old_coin"), Loot.valuable("old_coin")])
 	var got := Life.smart_loot(m, p, bx)
 	ok(got == 0, "full pack, worse things in the box: smart loot took %d" % got)
-	ok(p.pack.size() == 2 and (bx["pack"] as Array).size() == 2,
-		"nothing moved (pack %d, box %d)" % [p.pack.size(), (bx["pack"] as Array).size()])
+	ok(
+		p.pack.size() == 2 and (bx["pack"] as Array).size() == 2,
+		"nothing moved (pack %d, box %d)" % [p.pack.size(), (bx["pack"] as Array).size()]
+	)
 	ok(LootFull.blocked(m, p, bx) == 2, "both things are counted as having no room")
 	var none := LootFull.smart_text(0, 2)
 	ok(none == "Inventory full, took nothing", "the report says so: %s" % none)
@@ -87,9 +105,12 @@ func run(main: Node) -> void:
 	m.hud.loot_panel.take(Life.box_items(m, p, bw)[0])
 	await main.get_tree().process_frame
 	var buttons: Array = m.hud.loot_panel.find_children("*", "Button", true, false).filter(
-		func(b): return (b as Button).text == "Swap")
-	ok(buttons.size() == p.pack.size(),
-		"clicking a thing that doesn't fit: a Swap on each of your %d things" % p.pack.size())
+		func(b): return (b as Button).text == "Swap"
+	)
+	ok(
+		buttons.size() == p.pack.size(),
+		"clicking a thing that doesn't fit: a Swap on each of your %d things" % p.pack.size()
+	)
 	(buttons[0] as Button).pressed.emit()
 	ok(p.pack.any(func(it): return String(it.get("id", "")) == "old_coin"), "Swap puts the held thing in your backpack")
 	m.hud.close_loot()
@@ -105,7 +126,7 @@ func run(main: Node) -> void:
 func _double_f(m: Match, p: Hunter, q: Hunter) -> void:
 	p.pack = [Loot.valuable("kin_idol"), Loot.valuable("sky_pearl")]
 	p.backpack = 0
-	m.boxes.clear()      # the nearest box wins the prompt: earlier sections' boxes sit on the same spot
+	m.boxes.clear()  # the nearest box wins the prompt: earlier sections' boxes sit on the same spot
 	var bx := make_box(q, p.pos, [Loot.valuable("old_coin")])
 	m.boxes.append(bx)
 	p.inp["interact"] = true
@@ -122,8 +143,10 @@ func _double_f(m: Match, p: Hunter, q: Hunter) -> void:
 	m._update_interact(0.016)
 	m.boxes.erase(bx)
 
+
 ## Most loose pickups one monster kill, one chest or one prop may leave (one per kind: gem, seed, tonic, armor, key).
 const MAX_PER_KILL := 5
+
 
 ## Ground drops are merged: each kind comes as one pickup holding the total. Counts what a whole map's
 ## monsters, chests and props leave on the ground (the numbers are printed for the perf notes).
@@ -142,8 +165,10 @@ func _merged_drops(m: Match, p_v: Hunter) -> void:
 			kinds[p["kind"]] = int(kinds.get(p["kind"], 0)) + 1
 		gems_by_kill = maxi(gems_by_kill, int(kinds.get("gem", 0)))
 	var from_mobs: int = m.pickups.size()
-	ok(worst <= MAX_PER_KILL and gems_by_kill <= 1,
-		"one kill makes at most %d pickups, one gem pile (worst %d, %d piles)" % [MAX_PER_KILL, worst, gems_by_kill])
+	ok(
+		worst <= MAX_PER_KILL and gems_by_kill <= 1,
+		"one kill makes at most %d pickups, one gem pile (worst %d, %d piles)" % [MAX_PER_KILL, worst, gems_by_kill]
+	)
 	var chest_n := 0
 	for c in m.chests:
 		var before: int = m.pickups.size()
@@ -161,9 +186,14 @@ func _merged_drops(m: Match, p_v: Hunter) -> void:
 	for p in m.pickups:
 		if p["kind"] == "gem":
 			total += int(p["v"])
-	print("LOOTFULL drops on this map: %d monsters -> %d pickups, %d chests -> %d, %d props -> %d" % [
-		m.mobs.size(), from_mobs, m.chests.size(), chest_n, m.breaks.size(), prop_n])
+	print(
+		(
+			"LOOTFULL drops on this map: %d monsters -> %d pickups, %d chests -> %d, %d props -> %d"
+			% [m.mobs.size(), from_mobs, m.chests.size(), chest_n, m.breaks.size(), prop_n]
+		)
+	)
 	print("LOOTFULL gem value on the ground %d, gear/treasure on the ground %d" % [total, m.wpicks.size()])
+
 
 ## Gear on the ground for a worn slot: the card over the prompt names the piece and slot it replaces,
 ## then one line per changed number marked better or worse; nothing for an empty slot or a valuable.
@@ -172,13 +202,17 @@ func _ground_compare(p: Hunter) -> void:
 	p.gear[slot] = {}
 	var at := {"kind": "weapon", "wp": {"gear": "windstep_boots", "rar": 3}}
 	ok(GroundCompare.lines(p, at).is_empty(), "ground gear for an empty slot: no compare card")
-	ok(GroundCompare.lines(p, {"kind": "weapon", "wp": {"item": Loot.valuable("old_coin"), "val": 1}}).is_empty(),
-		"a ground valuable: no compare card")
+	ok(
+		GroundCompare.lines(p, {"kind": "weapon", "wp": {"item": Loot.valuable("old_coin"), "val": 1}}).is_empty(),
+		"a ground valuable: no compare card"
+	)
 	p.gear[slot] = {"id": "windstep_boots", "rar": 0}
 	var ls := GroundCompare.lines(p, at)
 	var head := String(ls[0][0]) if ls.size() > 0 else ""
-	ok(ls.size() >= 2 and head.begins_with("Replaces ") and head.contains(InvText.slot_label(slot)),
-		"ground gear for a worn slot: names what it replaces and where (%s)" % head)
+	ok(
+		ls.size() >= 2 and head.begins_with("Replaces ") and head.contains(InvText.slot_label(slot)),
+		"ground gear for a worn slot: names what it replaces and where (%s)" % head
+	)
 	var better := ls.slice(1).filter(func(l): return String(l[0]).begins_with("▲"))
 	ok(better.size() == ls.size() - 1, "a higher rarity: every changed line has the up arrow (%d)" % better.size())
 	p.gear[slot] = {"id": "windstep_boots", "rar": 3}

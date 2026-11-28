@@ -172,8 +172,10 @@ func _compare_and_swap(p: Hunter, q: Hunter) -> void:
 	var blink := Loot.gear("blink", 3)
 	var lines: Array = InvText.compare(p, blink)
 	ok(lines.any(func(l): return String(l[0]).begins_with("▲")), "a better glove: its lines carry an up arrow")
-	ok(lines.any(func(l): return String(l[0]).contains(InvText.slot_label(GearCompare.slot_for(p, blink)))),
-		"the compare card names the slot it goes in and the key")
+	ok(
+		lines.any(func(l): return String(l[0]).contains(InvText.slot_label(GearCompare.slot_for(p, blink)))),
+		"the compare card names the slot it goes in and the key"
+	)
 	p.gear[3] = {"id": "boots", "rar": 3}
 	var worse: Array = InvText.compare(p, Loot.gear("boots", 0))
 	ok(worse.any(func(l): return String(l[0]).begins_with("▼")), "a worse pair of boots: a down arrow")
