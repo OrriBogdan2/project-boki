@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cbx8da5i68hdd"
-path="res://.godot/imported/gloamspire_gloamspire_atlas.webp-825c194a502710133fc4c260b1adeb17.ctex"
+path.s3tc="res://.godot/imported/gloamspire_gloamspire_atlas.webp-825c194a502710133fc4c260b1adeb17.s3tc.ctex"
+path.etc2="res://.godot/imported/gloamspire_gloamspire_atlas.webp-825c194a502710133fc4c260b1adeb17.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "345727a47517ff5128d70b1066eaf162"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/gloamspire/gloamspire_gloamspire_atlas.webp"
-dest_files=["res://.godot/imported/gloamspire_gloamspire_atlas.webp-825c194a502710133fc4c260b1adeb17.ctex"]
+dest_files=["res://.godot/imported/gloamspire_gloamspire_atlas.webp-825c194a502710133fc4c260b1adeb17.s3tc.ctex", "res://.godot/imported/gloamspire_gloamspire_atlas.webp-825c194a502710133fc4c260b1adeb17.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cna2ermgkoha6"
-path="res://.godot/imported/anchorhorn_anchorhorn_atlas.webp-77641b08ffccb196cfcff969f50b776f.ctex"
+path.s3tc="res://.godot/imported/anchorhorn_anchorhorn_atlas.webp-77641b08ffccb196cfcff969f50b776f.s3tc.ctex"
+path.etc2="res://.godot/imported/anchorhorn_anchorhorn_atlas.webp-77641b08ffccb196cfcff969f50b776f.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "c66966d98f897109bf93cd42b4329673"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/anchorhorn/anchorhorn_anchorhorn_atlas.webp"
-dest_files=["res://.godot/imported/anchorhorn_anchorhorn_atlas.webp-77641b08ffccb196cfcff969f50b776f.ctex"]
+dest_files=["res://.godot/imported/anchorhorn_anchorhorn_atlas.webp-77641b08ffccb196cfcff969f50b776f.s3tc.ctex", "res://.godot/imported/anchorhorn_anchorhorn_atlas.webp-77641b08ffccb196cfcff969f50b776f.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

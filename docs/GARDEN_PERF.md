@@ -264,21 +264,26 @@ partner's rig 35, world scatter about 21, the Waystone 9, Incubator 17, burrow 1
 not measured.
 
 ## Prop and building textures, close garden camera (ext/garden-prop-textures, 2026-11-28)
-Inventory of 3D-sampled prop textures (`art/props`, `art/vendor`). The garden buildings (house, stall, burrow, hub deco)
-are built from code with plain materials: they have no texture files, so nothing there can be blurry or over budget.
-There is no texel-density target written in this doc; the working target used here is 512 px/m on a wall-sized prop
-(the 512 px floor in the task brief).
+The garden buildings (house, stall, burrow, hub deco) are built from code with plain materials: no texture files, so
+nothing there can be blurry or over budget. The textures the close camera does show are the props, the Boki, the
+eggs, Hob and Pell, items and the look-locker dais. The 3D textures that were still lossless (the committed `.import`
+files carried `compress/mode=0` with `detect_3d`, which never fires headless) are now VRAM compressed with mips.
+`--texture-budget-check` failures: 414 -> 178 on this branch.
 
-| texture | px | import before | import after |
+| group | textures | px (longest) | VRAM before -> after (MB, RGBA8+mips vs ~1 B/px, computed) |
 |---|---|---|---|
-| props/chest, gust_fan, jump_pad, updraft_vent (1 jpg each) | 1024 | lossless, mips (RGBA8, ~5.6 MB each with mips) | VRAM compressed, mips (~0.7 MB each) |
-| vendor/dungeon, halloween, hexagon, skeletons `palette.png` | 1024 | VRAM compressed, mips | unchanged |
+| art/props chest, gust_fan, jump_pad, updraft_vent | 4 | 1024 | 22 -> 3 |
+| art/kin (atlas, normal 2048; eye, face 256) | 202 | 2048 | 1832 -> 458 (all loaded; one Boki is ~46 -> ~11) |
+| art/eggs | 17 | 512 | 24 -> 6 |
+| art/npcs (Hob, Pell, their props) | 4 | 2048 | 48 -> 12 |
+| art/items | 8 | 1024 | 45 -> 11 |
+| art/look dais | 1 | 1024 | 6 -> 1 |
 
-VRAM for the four props: ~22.4 MB -> ~2.8 MB (computed from format sizes, DXT1 with mips; not measured on a GPU).
-No texture is over the 2048 px source cap. Palettes are flat colour swatches, so a 1024 px palette is never blurry.
+None is over the 2048 px source cap. Not touched (not garden): 126 UI icons (the check wants them lossless: add
+`art/icons/` to its `UI_PREFIXES`), 12 mob and 40 warden Meshy textures (still lossless, hunters are art-sensitive).
 
-Blurry up close, ranked for an art round (no gens here): none of the prop textures is under 512 px. The four 1024 px
-props are small objects (under 2 m), about 500+ px/m: fine. Nothing flagged.
-
-Outside this scope: `--texture-budget-check` is red on 412 other textures on main (eggs, kin, warden Meshy jpgs, icons
-still lossless: the committed `.import` files carry `compress/mode=0` with `detect_3d`). Not touched here.
+Blurry up close, ranked for an art round (no gens here; texel density is source px over the model's width, so a
+rough upper bound on an atlas): 1. `updraft_vent` 1024 px over 3.2 m, about 320 px/m, under the 512 px/m wall-sized
+target (scene only: updrafts sit over the void, never close to the garden camera); everything else is at or over
+512 px/m (jump_pad about 680, gust_fan about 790, chest about 880, eggs 512 px on under 0.5 m, Boki atlases 2048 px
+on about 1 m). The 256 px eye and face maps are tiny patches on the Boki's head, fine.
