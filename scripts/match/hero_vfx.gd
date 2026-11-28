@@ -625,6 +625,7 @@ func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vecto
 			p.y += SCORCH_LIFT
 			mt.set_shader_parameter("spin", float(layer.get("spin", 1.0)))
 			mt.set_shader_parameter("rim_only", bool(layer.get("thin", false)))
+			mt.set_shader_parameter("hollow", bool(layer.get("hollow", false)))
 	mi.global_position = p
 	mi.global_transform.basis = b * Basis.from_scale(s0)
 	_paint(mt, layer, h)
