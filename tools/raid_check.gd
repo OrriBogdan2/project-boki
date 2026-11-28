@@ -88,6 +88,10 @@ func _sight(main: Node) -> void:
 	ok(float(res["night"][2]) < Match.VIEW_RANGE * 0.7 and is_equal_approx(float(res["clear"][2]), Match.VIEW_RANGE), "sight: %.1f at night, %.1f clear" % [float(res["night"][2]), float(res["clear"][2])])
 	ok(not res["clear"][5] and res["fog"][5], "fog drifts past the camera; a clear evening has nothing extra")
 
+## How far a colour leans blue over red (0-1).
+func _blue_lead(c: Color) -> float:
+	return c.b - c.r
+
 func _looks(main: Node) -> void:
 	# the clear evening is the look the game had before raid conditions: same sun, haze and grade
 	var m := _match(main, {"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 5102, "no_drop": true, "raid": "clear"})
@@ -96,6 +100,8 @@ func _looks(main: Node) -> void:
 	print("RAID clear look: sun %.2f %s rot %s fog %.4f sat %.3f contrast %.2f" % [sun.light_energy, sun.light_color.to_html(false), str(sun.rotation_degrees), e.fog_density, e.adjustment_saturation, e.adjustment_contrast])
 	ok(is_equal_approx(sun.light_energy, 1.18) and sun.light_color.is_equal_approx(Color("ffb27a")) and is_equal_approx(e.fog_density, 0.0042) and is_equal_approx(e.adjustment_contrast, 1.12), "the clear evening keeps the demo look")
 	ok(m.raid_fx == null, "no weather particles on a clear evening")
+	var lead := _blue_lead(e.fog_light_color)
+	ok(lead <= 0.1, "the haze is not blue (fog light blue minus red %.2f)" % lead)
 	var sat_clear := e.adjustment_saturation
 	m.queue_free()
 	var m2 := _match(main, {"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 5102, "no_drop": true, "raid": "ash"})
@@ -107,6 +113,7 @@ func _looks(main: Node) -> void:
 	var m3 := _match(main, {"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 5102, "no_drop": true, "raid": "night"})
 	var sun3: DirectionalLight3D = m3.get_node("Sun")
 	ok(sun3.light_energy < 0.6 and m3.env.environment.adjustment_saturation < sat_clear, "night is dark and desaturated")
+	ok(_blue_lead(m3.env.environment.fog_light_color) <= 0.1, "the night haze is not blue")
 	m3.queue_free()
 	var m4 := _match(main, {"training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
 	ok(m4.raid == "clear" and m4.blight == null, "training is clear, with no Blight")

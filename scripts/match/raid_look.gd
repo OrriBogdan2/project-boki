@@ -116,7 +116,7 @@ static func _apply(e: Environment, sun: DirectionalLight3D, fill: DirectionalLig
 				sm.set_shader_parameter("mid", Color("3a3f52"))
 				sm.set_shader_parameter("horizon", Color("7a7c88"))
 				sm.set_shader_parameter("below", Color("2a2d3a"))
-			e.fog_light_color = Color("5a6072")
+			e.fog_light_color = Color("5d6069")
 			e.fog_density = 0.011
 			e.fog_height = 1.0
 			e.fog_height_density = 0.3
@@ -161,7 +161,7 @@ static func _apply(e: Environment, sun: DirectionalLight3D, fill: DirectionalLig
 		fill.rotation_degrees = Vector3(-30.0, sun.rotation_degrees.y + 170.0, 0.0)
 	e.ambient_light_color = Color("7e80b8")
 	e.ambient_light_energy = 0.44
-	e.fog_light_color = Color("3c3462")
+	e.fog_light_color = Color("3c384f")
 	e.fog_light_energy = 1.0
 	e.fog_density = 0.0042
 	e.fog_sun_scatter = 0.3
@@ -210,7 +210,7 @@ static func _dusk(e: Environment, sun: DirectionalLight3D, fill: DirectionalLigh
 		fill.light_energy = 0.36
 	e.ambient_light_color = Color("6a5c9c")
 	e.ambient_light_energy = 0.4
-	e.fog_light_color = Color("2c2048")
+	e.fog_light_color = Color("2a2438")
 	e.fog_density = 0.0058
 	e.adjustment_saturation *= 0.88
 	e.glow_intensity *= 1.15
@@ -236,7 +236,7 @@ static func _night(e: Environment, sun: DirectionalLight3D, fill: DirectionalLig
 		fill.rotation_degrees = Vector3(-30.0, sun.rotation_degrees.y + 170.0, 0.0)
 	e.ambient_light_color = Color("4c5678")
 	e.ambient_light_energy = 0.32
-	e.fog_light_color = Color("0c1430")
+	e.fog_light_color = Color("101422")
 	e.fog_light_energy = 1.0
 	e.fog_density = 0.007
 	e.fog_sun_scatter = 0.05
