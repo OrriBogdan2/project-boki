@@ -21,7 +21,8 @@ const WAIT := 4.0              # s the first step gets to open its window (Rimel
 
 ## [hero, slot]: each recast kit, from a fresh setup with the target 6m east; first() takes the first step.
 const CASES := [["thief", "e"], ["tender", "e"], ["ostra", "e"], ["rimewright", "e"], ["rimewright", "x"],
-	["juggernaut", "e"], ["mage", "x"], ["ashwick", "x"], ["bulwark", "lmb"], ["dolm", "dash"], ["gil", "e"]]
+	["juggernaut", "e"], ["mage", "x"], ["ashwick", "x"], ["bulwark", "lmb"], ["dolm", "dash"], ["gil", "e"],
+	["gil", "x"]]
 const RUN_OUT := 18.0          # s a window left alone gets to close (Brimseed: 6.5s grow + 10s at full, the longest)
 
 ## The first step of `slot` (also the shots' way in: tools/recast_cue_shots.gd).
@@ -71,8 +72,8 @@ func _window(hero: String, slot: String) -> void:
 	var timed := not w.is_empty() and float(w["left"]) > 0.0 and float(w["total"]) > 0.0
 	var placed := at is Vector3 and (at as Vector3).is_finite()
 	ok("%s %s: reports its recast window" % [hero, slot], timed and placed, str(w))
-	var verb := RecastHint.verb(p.ak, slot)
-	ok("%s %s: the hint has the kit's own verb" % [hero, slot], verb != RecastHint.FALLBACK_VERB, verb)
+	var verb := String((p.ak.d.get("recast_hint", {}) as Dictionary).get(slot, ""))
+	ok("%s %s: the hint has the kit's own verb" % [hero, slot], verb != "", verb)
 	m.step(DT)
 	var cw: Dictionary = p.ak.cue.get("w", {})
 	var key := RecastCue.key_of(slot)
@@ -83,6 +84,9 @@ func _window(hero: String, slot: String) -> void:
 			line.begins_with(key + " again to ") and line.length() > key.length() + 12 and line.length() <= 40, line)
 	if float(w.get("left", 0.0)) >= float(w.get("total", 0.0)) and hero == "bulwark":
 		await done(m)      # the hammer lies until called back (lmb.lie_t 0): no timer, nothing runs out
+		return
+	if is_inf(float(w.get("left", 0.0))):
+		await done(m)      # Motley's Brimseed has no expiry (11-12): it sits until popped, so no tick and no EXPIRED
 		return
 	# left alone: the closing ticks play and the slot shows EXPIRED for about 0.6s (never closes silently)
 	var ticks := 0

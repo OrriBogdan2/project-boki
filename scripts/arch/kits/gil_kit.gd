@@ -466,11 +466,14 @@ func e_recastable() -> bool:
 	return spin_t >= 0.0
 
 
-## The spin's window for RecastCue: the ring runs over the whole spin, and at its end the spout goes by itself.
+## The window for RecastCue: the spin's ring runs over the whole spin, and at its end the spout goes by itself; the
+## Tidal Wave's runs over the surf (R again leaps off early; the wave ends by itself).
 func recast_window() -> Dictionary:
-	if spin_t < 0.0:
-		return {}
-	return RecastCue.window("e", e_t, float(e_def()["spin_t"]), h.pos, true, true)
+	if spin_t >= 0.0:
+		return RecastCue.window("e", e_t, float(e_def()["spin_t"]), h.pos, true, true)
+	if not wave.is_empty() and untarget_t > 0.0:
+		return RecastCue.window("x", untarget_t, float(x_def()["time"]), h.pos, true, true)
+	return {}
 
 
 func e_recast() -> bool:
