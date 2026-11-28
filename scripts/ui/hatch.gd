@@ -612,7 +612,9 @@ func _show_create() -> void:
 	_top_over(0.73)  # over you, clear of the tall locker card on the left
 	if locker:
 		locker.close()
-	locker = LookLocker.open(self, root_ui, cam, fx, Unmasked.clean(Save.d.get("look", {})))
+	# a new save gets the short first pass (LookLocker.short); Change your look and returning players the full list
+	var first := not edit_only and not Save.d.has("look")
+	locker = LookLocker.open(self, root_ui, cam, fx, Unmasked.clean(Save.d.get("look", {})), first)
 	locker.finished.connect(_looks_good)
 
 

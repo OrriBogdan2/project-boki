@@ -169,6 +169,11 @@ func _hatch() -> void:
 	_press(hx, String(hx.CARD_BUTTON))
 	await _wait(func(): return hx.stage == "create", "then you make yourself")
 	ok(_button(hx, "Random") != null, "with a Random button as well")
+	ok(
+		hx.locker.short and _button(hx, "More") != null
+		and hx.root_ui.find_children("Frame_*", "HSlider", true, false).size() == 2,
+		"a new save makes yourself short: Sex, Height, Build and colour, the rest under 'More'"
+	)
 	_press(hx, "Looks good")
 	await _wait(func(): return hx.stage == "pick", "then the eggs")
 	_begin("hatch: egg pick and knocks")

@@ -1,10 +1,10 @@
 extends RefCounted
-## --first15-shots --shots-dir=<dir> [--size=WxH] [--part=match|panels]: every screen of the first 15 minutes on a
-## fresh save (title, prologue, hatch card, creator, eggs, name, first Hunter, tutorial steps, results, farm, expedition
-## panel, Hunter pick, first expedition HUD, pause), one .jpg each plus <dir>/layout.txt with, per shot:
-## the screen's UI controls (nodes, not the HUD's own drawing) that cross the window edge or sit inside the
-## 5% margin. --part=match (first expedition and pause) or --part=panels (farm, expedition panel, Relics)
-## plays one part alone from a made-up save.
+## --first15-shots --shots-dir=<dir> [--size=WxH] [--part=match|panels|creator]: every screen of the first 15
+## minutes on a fresh save (title, prologue, hatch card, creator, eggs, name, first Hunter, tutorial steps, results,
+## farm, expedition panel, Hunter pick, first expedition HUD, pause), one .jpg each plus <dir>/layout.txt with, per
+## shot: the screen's UI controls (nodes, not the HUD's own drawing) that cross the window edge or sit inside the
+## 5% margin. --part=match (first expedition and pause) or --part=panels (farm, expedition panel, Relics) plays one
+## part alone from a made-up save; --part=creator shoots the fresh save's creator, short and after "More".
 ## Needs a real renderer (jobq submit --needs gpu).
 ## Never writes the save. The write-up is docs/UI_FIRST15.md.
 
@@ -43,6 +43,8 @@ func run(main_node: Node) -> void:
 		"panels":
 			_made_up_save()
 			await _farm()
+		"creator":
+			await _creator()
 		_:
 			await _front()
 			await _tutorial()
@@ -212,6 +214,18 @@ func _first_match() -> void:
 
 # ------------------------------------------------------------------ shots and layout
 ## Saves the window as <dir>/NN_<what>.jpg and appends what the layout scan found to the report.
+## --part=creator: the new save's short creator, then the full locker after "More".
+func _creator() -> void:
+	Save.d["tutorial"]["intro"] = true
+	main.show_screen("hatch", {})
+	await _wait(3.5)
+	var hx := _screen()
+	await _shot("creator")
+	hx.locker.more()
+	await _wait(1.0)
+	await _shot("creator_more")
+
+
 func _shot(what: String) -> void:
 	await _frames(2)
 	await RenderingServer.frame_post_draw

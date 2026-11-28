@@ -5,9 +5,11 @@ extends Node3D
 ## Shroud full length, Hollow a close-up of the head, Glider pulled back to the canopy), every choice as a tile with
 ## a picture of you wearing it (LookThumbs) or a swatch you can hover to try on, a reaction and a flash of light when
 ## you pick one, and gliders in their rarity colours. Drag (or A / D) turns the turntable, the wheel zooms. The hatch
-## screen opens it (a new game, or Change your look) and saves the locker's look on `finished`.
+## screen opens it (a new game, or Change your look) and saves the locker's look on `finished`. A new save opens it
+## short (`short`): only FIRST_KEYS, no tabs, no name, and one "More" button that opens the full locker (nothing is
+## left out, only folded: docs/TUTORIAL_PACE.md section 4). Change your look and returning players get the full list.
 ##
-##   var locker := LookLocker.open(self, root_ui, cam, fx, look)
+##   var locker := LookLocker.open(self, root_ui, cam, fx, look, short)
 ##   locker.finished.connect(func(): save(locker.look))
 
 signal finished
@@ -22,6 +24,8 @@ const TAB_KEYS := {
 	"Hollow": ["hollow", "glow", "ghost", "aura"],
 	"Shroud": ["shroud", "colour", "accent", "hood", "trim", "accessory"]
 }
+## The short first pass on a new save: Sex, the height and build sliders, and the shroud's colour.
+const FIRST_KEYS := ["gender", "height", "build", "colour"]
 const AT := Vector3(0.8, 0, 1.6)  # m: the turntable's centre on the hatch dais
 const TOP := 0.07  # m: the turntable's top, where your feet stand
 ## Each tab's shot, from the turntable's centre: [camera, the point it looks at] (m), and its field of view (deg).
@@ -73,6 +77,7 @@ const GLIDER_PIC := Vector2(64, 54)  # px: the picture of you under a glider, on
 
 var look: Dictionary = {}
 var tab := "Body"
+var short := false  # the first pass on a new save: FIRST_KEYS and "More" (see the class comment)
 var model: Node3D
 var _anim: HunterAnim
 var _cam: Camera3D
@@ -84,6 +89,7 @@ var _thumbs: LookThumbs
 var _panel: Control
 var _tabs: Control
 var _list: VBoxContainer
+var _name: Control  # the name row (hidden on the short first pass)
 var _look_at := Vector3.ZERO
 var _zoom := 1.0
 var _notch := 0.0  # rad dragged since the last notch sound
@@ -100,9 +106,12 @@ var _swing_fov := 40.0
 var _react_t := 99.0  # s since the last pick's reaction began
 
 
-static func open(host: Node3D, ui_root: Control, cam: Camera3D, fx: Fx, start: Dictionary) -> LookLocker:
+static func open(
+	host: Node3D, ui_root: Control, cam: Camera3D, fx: Fx, start: Dictionary, first := false
+) -> LookLocker:
 	var lk := LookLocker.new()
 	lk.look = start.duplicate(true)
+	lk.short = first
 	MasteryLook.refresh(lk.look)  # a Relic's new mark shows up (kept) the first time you look
 	lk._cam = cam
 	lk._fov0 = cam.fov
@@ -167,6 +176,18 @@ func pick(key: String, value: Variant) -> void:
 	_rebuild_model(look)
 	_fill()
 	_pop()
+
+
+## Opens the full locker from the short first pass: the tabs, every row and the name.
+func more() -> void:
+	short = false
+	_tabs.visible = true
+	_name.visible = true
+	_fill()
+	Sfx.play("whoosh", null, -16.0, 0.05, 1.2)
+	await get_tree().process_frame  # the card takes its taller size, then centres again (else it runs off the bottom)
+	if is_instance_valid(_panel):
+		_place()
 
 
 ## One notch sound per TURN_NOTCH of dragging you round: `acc` is the turn since the last one, returns the new one.
@@ -360,6 +381,7 @@ func _build_panel(ui_root: Control) -> void:
 	var v := UI.vbox(10)
 	card.add_child(v)
 	_tabs = _tab_row()
+	_tabs.visible = not short
 	v.add_child(_tabs)
 	var scroll := ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -368,17 +390,24 @@ func _build_panel(ui_root: Control) -> void:
 	_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(_list)
 	v.add_child(scroll)
-	v.add_child(_name_row())
+	_name = _name_row()
+	_name.visible = not short
+	v.add_child(_name)
 	var foot := UI.hbox(10)
 	foot.alignment = BoxContainer.ALIGNMENT_END
 	foot.add_child(UI.sounding(UI.ghost("Random", _random, 120, "swap"), "ui_dice"))
 	foot.add_child(UI.primary("Looks good", func(): finished.emit(), 200))
 	v.add_child(foot)
 	ui_root.add_child(card)
-	card.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT, Control.PRESET_MODE_MINSIZE, 48)
-	card.offset_top += 46  # clear of the title
-	card.offset_bottom += 46
+	_place()
 	_fill()
+
+
+## The card left of you, centred on its height.
+func _place() -> void:
+	_panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT, Control.PRESET_MODE_MINSIZE, 48)
+	_panel.offset_top += 46  # clear of the title
+	_panel.offset_bottom += 46
 
 
 ## The four tabs, big, each with its icon.
@@ -413,6 +442,9 @@ func _fill() -> void:
 	if tab == "Glider":
 		_glider_grid()
 		return
+	if short:
+		_first_rows()
+		return
 	for key in TAB_KEYS[tab]:
 		var row := _row(String(key))
 		if row.is_empty():
@@ -420,14 +452,29 @@ func _fill() -> void:
 		_list.add_child(UI.section(String(row[1])))
 		_list.add_child(_grid(String(key), row[2], int(look.get(key, 0)), 1 if key in ["accent", "shroud"] else 0))
 		if key == "gender":
-			_frame_rows()
+			_frame_rows(EmptyFrame.KEYS)
 	if tab == "Body":
 		_mastery_rows()
 
 
-## The frame's sliders (EmptyFrame): drag one and the model follows.
-func _frame_rows() -> void:
-	for k in EmptyFrame.KEYS:
+## The short first pass: FIRST_KEYS (a frame key is its slider), then "More" for everything else.
+func _first_rows() -> void:
+	for key in FIRST_KEYS:
+		if key in EmptyFrame.KEYS:
+			_frame_rows([key])
+			continue
+		var row := _row(String(key))
+		_list.add_child(UI.section(String(row[1])))
+		_list.add_child(_grid(String(key), row[2], int(look.get(key, 0)), 0))
+	var b := UI.ghost("More", more, 0, "plus")
+	b.name = "More"
+	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_list.add_child(b)
+
+
+## The frame's sliders (EmptyFrame) for these keys: drag one and the model follows.
+func _frame_rows(keys: Array) -> void:
+	for k in keys:
 		var hr := UI.hbox(8)
 		var l := UI.label(String(EmptyFrame.rules()["frame"][k]["label"]), UI.T_BODY, UI.MUTED)
 		l.custom_minimum_size.x = 120
