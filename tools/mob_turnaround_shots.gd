@@ -16,6 +16,7 @@ const VIEWS := {"front": 0.0, "three_q": 0.785, "side": -1.5708, "back": 3.1416}
 var cam: Camera3D
 var sun: DirectionalLight3D
 var backdrop: MeshInstance3D
+var studio := true  # false for the Blight: its bodies only draw on the live island
 var rows: Array = []
 
 
@@ -53,6 +54,7 @@ func _kind(kind: String) -> void:
 	p.teleport(_open_ground(p.pos) + Vector3(40, 0, 0))
 	await _frames(40)
 	var at := _open_ground(p.pos)
+	studio = not kind.begins_with("bl_")
 	var mb: Mob = _spawn(kind, at)
 	if mb == null:
 		print("MOBTURNAROUND skip %s: no spawn" % kind)
@@ -68,6 +70,7 @@ func _kind(kind: String) -> void:
 		box = AABB(mb.pos + Vector3(-0.6, 0, -0.6), Vector3(1.2, 0.8, 1.2))
 	var ctr := box.get_center() - mb.global_position  # (kept relative: a monster that drifts is followed)
 	_studio(mb.pos)
+	backdrop.visible = studio
 	_world_on(false, mb)
 	var dist := maxf(box.size.length(), 1.0) * 1.15 / tan(deg_to_rad(cam.fov * 0.5)) * 0.5
 	cam.make_current()
@@ -86,8 +89,9 @@ func _kind(kind: String) -> void:
 	(await _grab(mb)).save_png(dir.path_join("match.png"))
 	# the wind-up: the last frame of the real attack's tell, the 3/4 camera
 	if MobAnim.has_kind(kind) or kind.begins_with("bl_"):
-		backdrop.visible = true
+		backdrop.visible = studio
 		_world_on(false, mb)
+		p.visible = true  # (a hidden target is no target: the tell never starts)
 		cam.make_current()
 		p.teleport(at + Vector3(4.5, 0, 0))
 		mb.tgt = p
@@ -107,7 +111,7 @@ func _kind(kind: String) -> void:
 			last.save_png(dir.path_join("windup.png"))
 		else:
 			print("MOBTURNAROUND %s: no wind-up frame" % kind)
-	backdrop.visible = true
+	backdrop.visible = studio
 	_world_on(false, mb)
 	cam.make_current()
 	# the death move: 0.4 of DEATH_S in
@@ -184,6 +188,8 @@ func _bounds(n: Node3D) -> AABB:
 
 ## Shows or hides everything in the match but the monster and the studio (the world, props, grass, the Hunter).
 func _world_on(on: bool, keep: Node) -> void:
+	if not studio and keep != null:
+		return
 	for n in m.get_children():
 		if n is Node3D and n != keep and n != m.cam:
 			(n as Node3D).visible = on
