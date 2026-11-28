@@ -12,8 +12,9 @@ extends RefCounted
 ## (--no-moves: the same moves without its own clips, Meshy's Attack for each: the "before"). --contract: the contract
 ## model even for a Meshy-native Hunter (the live look); --cam-y=<m>: the camera's height (eye level, knee level)
 ## looking at --at.
-## --fig-h=<m> (with --states --views): the views sized to a figure <m> tall, FIGURE_FRAC printed; --measure: FIGURE_H
-## from the pixels; --all-clips: every clip it plays too, <dir>/states_<view>/clip_<name>/ (clip_shots_proof.gd).
+## --fig-h=<m> (with --states --views): the views sized to a figure <m> tall, FIGURE_FRAC printed; --frame-pass,
+## --aim-<view>=: hunter-proof's framing; --all-clips: every clip it plays too, <dir>/states_<view>/clip_<name>/
+## (clip_shots_proof.gd).
 ## --drop: every Hero in a row wearing the drop poses (WardenDropPose), <dir>/drop/<pose>_<view>.png.
 ## Needs a renderer. ffmpeg makes the GIFs and sheets.
 
@@ -120,27 +121,26 @@ func run(main: Node) -> void:
 		cam.look_at(Vector3(0, at_y, 0))
 	for k in 30:
 		await tree.process_frame  # (past the title's fade)
-	if OS.get_cmdline_user_args().has("--states") or OS.get_cmdline_user_args().has("--measure"):
+	if OS.get_cmdline_user_args().has("--states"):
 		var views: Array = []
 		for a in OS.get_cmdline_user_args():
 			if a.begins_with("--views="):
 				views = Array(a.substr(8).split(",", false))
 		var proof := Proof.new(self)
 		var fig_h := Proof.arg_float("--fig-h=", 0.0)
-		if OS.get_cmdline_user_args().has("--measure"):
-			await proof.measure(model, cam, fps)
-			views = []
-		elif views.is_empty():
+		if views.is_empty():
 			await _states(model, fps, out)
 		for v in views:
-			var vw: Array = STATE_VIEWS[v] if fig_h <= 0.0 else Proof.view(v, fig_h)
+			var vw: Array = Proof.aimed(v, STATE_VIEWS[v] if fig_h <= 0.0 else Proof.view(v, fig_h))
 			cam.fov = float(vw[0])
 			cam.position = vw[1]
 			cam.look_at(vw[2])
-			if fig_h > 0.0:
-				await proof.report_fraction(model, v, fps)
 			if ring:
 				ring.visible = v == "match"
+			if OS.get_cmdline_user_args().has("--frame-pass"):
+				await proof.frame_pass_empty(model, v, vw, out.path_join("states_" + String(v)))
+			elif fig_h > 0.0:
+				await proof.report_fraction(model, v, fps)
 			await _states(model, fps, out, "states_" + String(v))
 			if OS.get_cmdline_user_args().has("--all-clips"):
 				await proof.all_clips(model, fps, out.path_join("states_" + String(v)))

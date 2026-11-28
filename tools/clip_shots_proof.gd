@@ -1,7 +1,9 @@
 extends RefCounted
 ## --clip-shots --states helpers for `hunter-proof` (live vs candidate hunter proofs; see the tool's header):
 ## --fig-h=<m>: the three cameras sized to the figure (it fills FILL of the panel), FIGURE_FRAC <view> <share> printed
-## from the idle frame's pixels; --measure: print FIGURE_H <m> (the figure's height counted in pixels) and quit;
+## from the idle frame's pixels; --frame-pass: each camera WIDE times wider, shadows off, VIEW <view> <fov> <pos> <at>
+## printed and <dir>/empty.png (the stage without the Hunter), so hunter-proof finds every pixel the Hunter and its
+## props reach in any clip; --aim-<view>=<x>,<y>,<z>,<fov>: that camera from the same spot looks at x,y,z with that fov;
 ## --all-clips: every clip the Hunter plays (not only the six states), <dir>/clip_<name>/f###.png at the film's fps.
 ## Needs a renderer (a headless run draws nothing).
 
@@ -11,6 +13,7 @@ const EYE_DIST := 5.6  # m from the figure to the eye and knee cameras
 const GAME_CAM := Vector3(0.0, 21.0, 9.4)  # the match camera (clip_shots STATE_VIEWS)
 const FOOT := 0.9  # m of depth the match camera sees on top of the height (arms, weapon)
 const MAX_CLIP_S := 6.0  # s a long clip is filmed for
+const WIDE := 2.4  # --frame-pass: how much wider than the figure's own framing the cameras look
 const DIFF := 0.08  # luminance a pixel must differ from the empty stage to count as the figure
 const STATES := ["idle", "walk", "run", "jump", "attack", "crouch"]
 
@@ -76,15 +79,28 @@ func figure_rows(model: Node3D) -> int:
 	return 0 if top < 0 else bottom - top + 2
 
 
-## --measure: FIGURE_H <m> from the eye camera's pixels (the frame holds 2 * dist * tan(fov / 2) m at the figure).
-func measure(model: Node3D, cam: Camera3D, fps: float) -> void:
-	cam.fov = 30.0
-	cam.position = Vector3(0.0, 0.95, EYE_DIST)
-	cam.look_at(Vector3(0.0, 0.95, 0.0))
-	pose_idle(model, fps)
-	var rows := await figure_rows(model)
-	var frame_m := 2.0 * EYE_DIST * tan(deg_to_rad(cam.fov * 0.5))
-	print("FIGURE_H %.3f" % (float(rows) / shots.frame_px * frame_m))
+## The camera for view `v`: `vw` ([fov, camera, looks at]) as --aim-<v>= or --frame-pass changes it.
+static func aimed(v: String, vw: Array) -> Array:
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--aim-%s=" % v):
+			var n := a.get_slice("=", 1).split_floats(",")
+			return [n[3], vw[1], Vector3(n[0], n[1], n[2])]
+	if OS.get_cmdline_user_args().has("--frame-pass"):
+		return [minf(float(vw[0]) * WIDE, 120.0), vw[1], vw[2]]
+	return vw
+
+
+## --frame-pass: VIEW line, no shadows (they are not the Hunter), <dir>/empty.png with the Hunter hidden.
+func frame_pass_empty(model: Node3D, v: String, vw: Array, dir: String) -> void:
+	var c: Vector3 = vw[1]
+	var at: Vector3 = vw[2]
+	print("VIEW %s %.4f %.4f %.4f %.4f %.4f %.4f %.4f" % [v, vw[0], c.x, c.y, c.z, at.x, at.y, at.z])
+	for light in shots.holder.find_children("*", "Light3D", true, false):
+		(light as Light3D).shadow_enabled = false
+	DirAccess.make_dir_recursive_absolute(dir)
+	model.visible = false
+	await shots.call("_grab", dir.path_join("empty.png"))
+	model.visible = true
 
 
 ## FIGURE_FRAC <view> <the figure's share of the panel's height> for the camera as set.
