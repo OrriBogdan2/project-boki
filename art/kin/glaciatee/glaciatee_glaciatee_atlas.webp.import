@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bpabddr6h3gj0"
-path="res://.godot/imported/glaciatee_glaciatee_atlas.webp-8f3e7d8a1c5535618c8ab91442e97e99.ctex"
+path.s3tc="res://.godot/imported/glaciatee_glaciatee_atlas.webp-8f3e7d8a1c5535618c8ab91442e97e99.s3tc.ctex"
+path.etc2="res://.godot/imported/glaciatee_glaciatee_atlas.webp-8f3e7d8a1c5535618c8ab91442e97e99.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "693a95b0597d86e672918ab9123008e8"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/glaciatee/glaciatee_glaciatee_atlas.webp"
-dest_files=["res://.godot/imported/glaciatee_glaciatee_atlas.webp-8f3e7d8a1c5535618c8ab91442e97e99.ctex"]
+dest_files=["res://.godot/imported/glaciatee_glaciatee_atlas.webp-8f3e7d8a1c5535618c8ab91442e97e99.s3tc.ctex", "res://.godot/imported/glaciatee_glaciatee_atlas.webp-8f3e7d8a1c5535618c8ab91442e97e99.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
