@@ -75,6 +75,21 @@ func run(main: Node) -> void:
 	var sync := model.get_node("Warden/Sync")
 	sync.set_process(false)
 	var clips: WardenClips = sync.get("clips")
+	if OS.get_cmdline_user_args().has("--bind"):
+		for at in model.find_children("*", "AnimationTree", true, false):
+			(at as AnimationTree).active = false
+		await tree.create_timer(2.0).timeout
+		var bsk := WardenGlb.skeleton(model.get_node("Warden"))
+		bsk.reset_bone_poses()
+		DirAccess.make_dir_recursive_absolute(out.path_join("bind"))
+		for yy in [0, 90, 180, 270]:
+			model.rotation.y = deg_to_rad(float(yy))
+			for k in 4:
+				await tree.process_frame
+			await _grab(out.path_join("bind").path_join("y%03d.png" % yy))
+		print("CLIP_SHOTS_DONE")
+		tree.quit()
+		return
 	if OS.get_cmdline_user_args().has("--list-meshes"):
 		for mi in model.find_children("*", "MeshInstance3D", true, false):
 			if (mi as MeshInstance3D).is_visible_in_tree() and not String(model.get_path_to(mi)).begins_with("Warden"):
