@@ -14,7 +14,7 @@ const CHECKS := {
 	"--cliff-mantle-dusk-check": ["res://tools/cliff_mantle_check.gd", "cliff_mantle_check", 1],
 	"--drop-merge-audit": ["res://tools/drop_merge_check.gd", "drop_merge_check", "audit"],  # ground audit, not gated
 	"--fight-p99-check": ["res://tools/fight_p99_check.gd", "fight_p99_check", null],  # p99 vs tools/perf.tsv
-	"--far-ranges-check": ["res://tools/far_ranges_check.gd", "far_ranges_check", null],  # visibility ranges, far cliffs
+	"--far-ranges-check": ["res://tools/far_ranges_check.gd", "far_ranges_check", null],  # far cliffs
 	# parse every kin grammar file (=<root> for another folder)
 	"--grammar-check": ["res://tools/grammar_check.gd", "grammar_check", null],
 	"--hero-reel": ["res://tools/hero_reel.gd", "hero_reel", null],  # private pitch footage (GPU)

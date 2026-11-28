@@ -140,6 +140,7 @@ const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake", "warden_model
 ##   (x)  ·  fx_life: particle lifetime (x)  ·  volfog: volumetric fog  ·  light_m: lamps and glows fade out this
 ##   far from the camera (m, 0: their own)
 ##   ·  occ: the outline on your side where cover hides it (OcclusionOutline)
+##   ·  mob_cap: most monsters awake within 60 m of you (the rest sleep, see MobCap)
 const QUALITY := {
 	"very_low":
 	{
@@ -165,6 +166,7 @@ const QUALITY := {
 		"fx_life": 0.5,
 		"volfog": false,
 		"light_m": 40.0,
+		"mob_cap": 4,
 		"occ": false
 	},
 	"low":
@@ -191,6 +193,7 @@ const QUALITY := {
 		"fx_life": 0.7,
 		"volfog": false,
 		"light_m": 50.0,
+		"mob_cap": 6,
 		"occ": false
 	},
 	"medium":
@@ -217,6 +220,7 @@ const QUALITY := {
 		"fx_life": 1.0,
 		"volfog": false,
 		"light_m": 70.0,
+		"mob_cap": 12,
 		"occ": true
 	},
 	"high":
@@ -243,6 +247,7 @@ const QUALITY := {
 		"fx_life": 1.0,
 		"volfog": true,
 		"light_m": 0.0,
+		"mob_cap": 24,
 		"occ": true
 	},
 	"ultra":
@@ -269,6 +274,7 @@ const QUALITY := {
 		"fx_life": 1.0,
 		"volfog": true,
 		"light_m": 0.0,
+		"mob_cap": 32,
 		"occ": true
 	},
 }
