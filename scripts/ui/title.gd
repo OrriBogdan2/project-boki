@@ -9,6 +9,7 @@ var logo: Control
 var menu_col: VBoxContainer
 var stung := false
 
+const LOGO_BOOM_DB := -14.0     # dB, the impact under the logo horn
 const DISCORD := "https://discord.gg/nbeBaU7xt"        # the playtest server (never expires)
 
 func _ready() -> void:
@@ -21,9 +22,10 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	t += delta
 	if not stung and t > 0.7:
-		# the logo lands with a low horn under the music
+		# the logo lands with a low horn and a drum-hit boom, over the title track's tom intro
 		stung = true
 		Sfx.play("horn", null, -15.0, 0.0, 0.62)
+		Sfx.play("boom", null, LOGO_BOOM_DB, 0.0, 0.8)
 
 func _build_ui() -> void:
 	var ui := CanvasLayer.new(); add_child(ui)
@@ -85,8 +87,9 @@ func _build_ui() -> void:
 	# no subtext under the main button
 	col.add_child(UI.spacer(6 if has else 18))
 	var items: Array = []
-	# the Training Grounds: every archetype's kit against dummies and a sparring bot, no save needed
-	items.append(["Training Grounds", func(): Game.start_match(Match.arena_opts()), "knock"])
+	# the Training Grounds (the farm opens the same one): every kit against dummies and a sparring bot, no save needed
+	var hunter := Arch.of_save() if has else ""
+	items.append(["Training Grounds", func(): Game.start_match(Match.arena_opts(hunter)), "knock"])
 	if Overlay.admin_allowed():
 		items.append(["Test Zone", TestZone.start, "gear"])     # the owner's sandbox (AdminGate)
 	if has:

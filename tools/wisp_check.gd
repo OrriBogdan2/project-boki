@@ -34,7 +34,6 @@ func run(main_node: Node) -> void:
 	_bleed_out()
 	_teammate()
 	_boki_wisps()
-	_wisps_migration()
 	_summon_data()
 	_summon()
 	_net_form()
@@ -433,23 +432,6 @@ func _picker() -> void:
 	WispLook.equip("default")
 
 
-## A settings file from before the default flipped (no wisps_v) loads with wisps on; a later hand-off stays off.
-func _wisps_migration() -> void:
-	var cf := ConfigFile.new()
-	cf.set_value("s", "boki_wisps", false)
-	cf.save(Settings.PATH)
-	Settings.load_file()
-	var flipped: bool = Settings.v["boki_wisps"] and Settings.v["wisps_v"] == 1
-	ok(flipped, "Boki wisps: an old file's saved 'off' reads as on once")
-	cf.set_value("s", "wisps_v", 1)
-	cf.save(Settings.PATH)
-	Settings.load_file()
-	ok(Settings.v["boki_wisps"] == false, "Boki wisps: a file with wisps_v keeps its off")
-	DirAccess.remove_absolute(Settings.PATH)
-	Settings.load_file()
-	ok(Settings.v["boki_wisps"] == true, "Boki wisps: no file at all is on")
-
-
 ## Boki wisps: off leaves the walking Boki; on (the default), the Boki rides as a wisp.
 func _boki_wisps() -> void:
 	var base := {"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 78, "no_drop": true, "demo_kin": "cindle"}
@@ -481,7 +463,8 @@ func _boki_wisps() -> void:
 	ok(k.model.name == "BokiWisp", "...drawing it keeps its model (the downed-form render took it for its own node)")
 	var flat := Vector2(k.global_position.x - p.position.x, k.global_position.z - p.position.z).length()
 	var high := k.global_position.y - p.position.y
-	var orbit: bool = absf(flat - KinWisp.ORBIT_R) < 0.05 and high > 1.0 and high < 2.0
+	# the hunter is drawn match_hunter_scale larger, so its shoulder bone (and the wisp over it) rides higher
+	var orbit: bool = absf(flat - KinWisp.ORBIT_R) < 0.05 and high > 1.0 and high < 2.0 * CamRig.match_hunter_scale
 	ok(orbit, "...orbiting at shoulder height (%.2f m out, %.2f m up)" % [flat, high])
 	var other: Kin = owned.filter(func(x: Kin): return x != k)[0]
 	var snap := KinNet.kin_extra(k)

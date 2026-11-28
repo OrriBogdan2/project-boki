@@ -730,7 +730,8 @@ func _quiet_float(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
 
 ## Item 35: his own ground and air dash moves (the Trade's lob), ids no other hero's table has, and each one's
 ## Item 60: the orb charges smoothly with the wait since the last shot (damage, speed, size monotonic from 0 to the
-## window, capped after), every orb passes a wall between him and the foe at any charge, and a full orb slows.
+## window, capped after), only the void orb (charge from KitLooks.ORB_HELD_K) passes a wall between him and the
+## foe while a card stops at it (the owner's 11-26 rule), and a full orb slows.
 func _bolt_through_terrain() -> void:
 	var r := setup("ostra", 6.0)
 	var m: Match = r[0]
@@ -757,16 +758,17 @@ func _bolt_through_terrain() -> void:
 		step(m, 0.03)
 		var shots0 := P.shot_n
 		spds.append(float(P.wpn["speed"]))
+		dmgs.append(float(P.wpn["dmg"]))      # the shot's own damage (a card never reaches him past the wall)
+		var void_orb := K.charge >= KitLooks.ORB_HELD_K
 		P.fire_cd = 0.0
 		P.inp["fire"] = true
 		step(m, 0.05)
 		P.inp["fire"] = false
 		step(m, 0.9)
 		var d := dmg(T)
-		dmgs.append(d)
 		rads.append(K.last_orb_r)
 		slows.append(T.slow_t > 0.0)
-		if P.shot_n <= shots0 or d <= 0.5:
+		if P.shot_n <= shots0 or (d > 0.5) != void_orb:
 			through = false
 		step(m, 0.6)
 	var mono := true
@@ -788,7 +790,7 @@ func _bolt_through_terrain() -> void:
 		str(dmgs)
 	)
 	ok("item 60: a full orb hits for the data's +34% (353 vs 263)", absf(dmgs[4] / dmgs[0] - 1.34) < 0.06, str(dmgs))
-	ok("item 60: every orb passes the wall between him and the foe at any charge", through, str(dmgs))
+	ok("walls: the void orb passes the wall between him and the foe, a card stops at it", through, str(dmgs))
 	ok("item 60: only the full orb slows", slows[4] and slows[5] and not slows[0] and not slows[2], str(slows))
 	await done(m)
 

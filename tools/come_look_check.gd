@@ -60,7 +60,8 @@ func _gather(at: Vector3) -> void:
 		k["t"] = 5.0
 		k["hold_t"] = 0.0
 		k["say_t"] = 0.0
-		for key in ["nap_t", "job", "chase", "fetch", "bath", "going_in", "called_t"]:
+		# "play": a toy left from before
+		for key in ["nap_t", "job", "chase", "fetch", "bath", "going_in", "called_t", "play"]:
 			k.erase(key)
 	_entry("E")["nap_t"] = 60.0
 
@@ -91,6 +92,10 @@ func _watch(at: Vector3) -> Dictionary:
 			if l["k"].has("q_as"):
 				pose[nm] = l["k"]["q_as"]
 	return {"spoke": spoke, "stood": stood, "pose": pose}
+
+## How many come-look memory lines `nm` keeps (farm life in _watch may add others of its own: races, duos, fetch).
+func _look_mems(nm: String) -> int:
+	return (_entry(nm)["rec"]["memory"] as Array).filter(func(e): return String(e.get("kind", "")) == "look").size()
 
 func _mem_size(nm: String) -> int:
 	return (_entry(nm)["rec"]["memory"] as Array).size()
@@ -139,6 +144,93 @@ func _newcomer(rare: bool) -> void:
 	var same := others.keys().all(func(nm): return _mem_size(nm) == others[nm])
 	ok(same, "%s: nobody else wrote a line" % tag)
 
+## You come home: the expeditions count goes up and the farm looks.
+## The toys put down so far leave the farm: a Boki at play or fetching a ball is busy and writes its own journal lines.
+func _clear_toys() -> void:
+	var deco: Array = home.hb.L()["deco"]
+	for e in deco.duplicate():
+		if (home.toys.rules()["toys"] as Dictionary).has(String(e["id"])):
+			deco.erase(e)
+	for k in home.kins:
+		k.erase("play")
+
+func _trip() -> void:
+	Save.d["extracts"] = int(Save.d.get("extracts", 0)) + 1
+	FarmChatter._look_t = 0.0
+	FarmChatter.tick(home, 0.01)
+
+## You bring home the first `id`; `who`, the nearest Boki (not the most curious), alone walks up and reacts with
+## `pose`, says a line and keeps one journal line with `verb`; nobody writes a memory line and the flag is set.
+func _item_home(id: String, who: String, pose: String, verb: String) -> void:
+	_gather(home.ppos)
+	var k := _entry(who)
+	k["pos"] = home.world.free_spot_near(home.ppos + Vector3(1.5, 0, 0))
+	(k["node"] as Node3D).position = k["pos"]
+	var looks := _look_mems(who)
+	var jr: int = (k["rec"].get("journal", []) as Array).size()
+	Save.d["items"][id] = 1
+	_trip()
+	var tag := "new %s" % id
+	ok(ComeLook._looks.size() == 1 and ComeLook._looks[0]["kind"] == "item" and ComeLook._looks[0]["k"] == k,
+		"%s: only the nearest Boki (%s) walks up (%d)" % [tag, who, ComeLook._looks.size()])
+	var res := _watch(home.ppos)
+	ok(res["pose"].get(who, "") == pose and res["spoke"].has(who),
+		"%s: %s does a %s and says a line" % [tag, who, pose])
+	var line := CareJournal.text(k["rec"]["journal"][-1]) if not k["rec"].get("journal", []).is_empty() else ""
+	var named := line.contains(GardenItems.item_name(id))
+	ok((k["rec"]["journal"] as Array).size() == jr + 1 and line.begins_with(verb) and named,
+		"%s: one journal line '%s'" % [tag, line])
+	var seen: bool = Save.d["tutorial"].get(ComeLook.ITEM_KEY + id, false)
+	ok(_look_mems(who) == looks and seen, "%s: no memory line, kind marked seen" % tag)
+
+## A claimed Boki rides home (CarryArrival): `crowded` = the garden already has its cap out, so it goes to the Burrow.
+func _carried_home(crowded: bool) -> void:
+	var tag := "a carried-out Boki, garden %s" % ("full" if crowded else "has room")
+	var roster: Array = Save.d["roster"].slice(0, KinBox.farm_cap() if crowded else 5)
+	for r in roster:
+		r.erase("boxed")
+	Save.d["roster"] = roster
+	home._spawn_kin()
+	FarmChatter._known.clear()
+	for k in home.kins:
+		FarmChatter._known[String(k["rec"]["uid"])] = true
+	var rec := Save.new_kin(String(Data.KIN.keys()[8]), "Ridge")
+	rec["caught_at"] = {"map": "Skyreach", "hunter": "Albert"}
+	Game.apply_result({"extracted": true, "caught": [rec], "stats": {}})
+	var mine: Dictionary = Save.d["roster"][-1]
+	var uid := String(mine["uid"])
+	ok(CarryArrival.pending == [uid], "%s: the result marks it as carried home" % tag)
+	var memory := String(mine["memory"][-1]["text"])
+	ok(memory == "came home from Skyreach with Albert", "%s: its memory line is '%s'" % [tag, memory])
+	home._close_panel()
+	if not crowded:
+		home._spawn_kin()
+		_gather(home.ppos)
+	FarmChatter._look_t = 0.0
+	FarmChatter.tick(home, 0.01)
+	ok(CarryArrival.pending.is_empty(), "%s: the garden took the news" % tag)
+	var card := "%s came home" % mine["name"]
+	ok(home.panel_open == card, "%s: its arrival card opens ('%s')" % [tag, home.panel_open])
+	home._close_panel()
+	var words := " ".join(CarryArrival.card_lines(mine))
+	ok(words.contains("Skyreach") and words.contains("Albert"), "%s: the card names map and Hunter" % tag)
+	var says := "names" if crowded else "leaves out"
+	ok(words.contains("Burrow") == crowded, "%s: the card %s the Burrow" % [tag, says])
+	if crowded:
+		ok(KinBox.is_boxed(mine) and ComeLook._looks.all(func(l): return l["kind"] != "boki"),
+			"%s: it is in the Burrow: nobody comes to look at a Boki that is not there" % tag)
+		return
+	var who := {}
+	for k in home.kins:
+		if String(k["rec"]["uid"]) == uid:
+			who = k
+	var gap := (who["pos"] as Vector3).distance_to(home.ppos)
+	ok(not who.is_empty() and gap < 4.0, "%s: it stands at the arrival point (%.1f m)" % [tag, gap])
+	var came: Array = ComeLook._looks.map(func(l): return l["k"])
+	ok(came.size() == ComeLook.MAX_LOOKERS and not came.has(who), "%s: three residents come to look" % tag)
+	var res := _watch(who["pos"])
+	ok(res["spoke"].size() >= 1, "%s: they chatter (%s)" % [tag, ",".join(res["spoke"].keys())])
+
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
@@ -186,6 +278,7 @@ func run(m: Node) -> void:
 	ok(_mem_size("A") == before + 1 and _last_mem("A").contains("play ball"),
 			"a base toy: A keeps '%s'" % _last_mem("A"))
 	_watch(Vector3(tile.x + 0.5, 0, tile.y + 0.5))
+	_clear_toys()
 	# ------------------------------------------------ you arrive with loot
 	_gather(home.ppos)
 	Save.d["extracts"] = int(Save.d.get("extracts", 0)) + 1
@@ -199,5 +292,16 @@ func run(m: Node) -> void:
 	FarmChatter._look_t = 0.0
 	FarmChatter.tick(home, 0.01)
 	ok(ComeLook._looks.is_empty(), "the same trip is not news twice")
+	# ------------------------------------------------ a garden item kind you never had: the nearest Boki, once
+	await _item_home("thumpnut", "C", "puff", "puffed up at")
+	await _item_home("zipseed", "D", "hide", "hid from")
+	Save.d["items"]["thumpnut"] = 2
+	_gather(home.ppos)
+	_trip()
+	ok(ComeLook._looks.size() == 3 and ComeLook._looks[0]["kind"] == "loot",
+		"a Thumpnut again: plain loot news, not a second item look")
+	_watch(home.ppos)
+	await _carried_home(false)
+	await _carried_home(true)
 	print("COMELOOK done, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)

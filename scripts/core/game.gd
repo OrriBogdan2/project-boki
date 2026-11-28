@@ -63,8 +63,8 @@ func _setup_input() -> void:
 	_key("up", [KEY_W, KEY_UP]); _key("down", [KEY_S, KEY_DOWN])
 	_key("left", [KEY_A, KEY_LEFT]); _key("right", [KEY_D, KEY_RIGHT])
 	_key("fire", [], MOUSE_BUTTON_LEFT)
-	_key("secondary", [], MOUSE_BUTTON_RIGHT) # your archetype's right-click ability (its variants: tap, hold, air...)
-	# match keys (docs/ARCHETYPES.md): LMB weapon, RMB the archetype's ability, Shift the archetype's
+	_key("secondary", [], MOUSE_BUTTON_RIGHT) # your hunter's right-click ability (its variants: tap, hold, air...)
+	# match keys (docs/ARCHETYPES.md): LMB weapon, RMB the hunter's ability, Shift the hunter's
 	# dash, Space jump and glide (Mouse 5 glides too), Q your active glove, E the archetype's utility,
 	# R the hunter's ultimate, X Fuse with your Boki (a full bond meter), G send out / call back your Boki
 	# (hold G for the order wheel; the Boki casts its own ability), middle mouse ping, 1-4 the belt, F interact.
@@ -90,7 +90,7 @@ func _setup_input() -> void:
 	_key("jump", [KEY_SPACE])
 	_key("glide", [], MOUSE_BUTTON_XBUTTON2)  # press Mouse 5 (the front side button) in the air and hold to glide, like a second Space press; never jumps
 	_key("hunter_ult", [KEY_R])               # the hunter's own ultimate (level 6, see ArchKit.cast_ult)
-	_key("ultimate", [KEY_X])                 # Fuse with your Boki (level 6, a full bond meter); X again releases
+	_key("ultimate", [])                      # Fusion: no key, no fusion in the game (dev flag: Settings.fusion_key)
 	_key("util1", [KEY_1])                    # utility belt slot 1 (a tonic to start)
 	_key("scores", [KEY_TAB])
 	_key("menu", [KEY_ESCAPE])
@@ -185,7 +185,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 				nk["name"] = Data.default_kin_name(String(nk["species"]))
 				nk["memory"] = []
 				nk.erase("lost_from")
-				Save.remember(nk, "caught", "was scanned by you out in the islands and brought home")
+				Save.remember(nk, "caught", CarryArrival.line(nk["origin"]["where"]))
 			else:
 				# a rival's kin you took home: it still misses them. One that loved its old hunter
 				# (trust 80+) pines for a good while and is very slow to bond with you
@@ -201,9 +201,11 @@ func apply_result(r: Dictionary) -> Dictionary:
 			d["roster"].append(nk)
 			Save.register(nk)         # serial, original trainer, the event log
 			KinBox.route_new(nk)      # the farm if there's room; a repeat species goes to the Kin Burrow
+			CarryArrival.pending.append(nk["uid"])
 			Care.dex_got(nk)
 			out["caught"].append(nk)
 	if won: Heart.settle(r, out)   # the Heartspark's rare egg and materials (heart.gd)
+	KinSteal.settle(r, out)        # gems for stolen wisps brought out alive (kin_steal.gd)
 	WaysResult.settle(r, out)      # a squad that did not leave: placement pay
 	Equal.settle_belt(r)       # the utility you brought and found comes home with you, or is gone (equal.gd)
 	Backpacks.settle(r)        # and the backpack you wore out
@@ -313,6 +315,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 			if int(p["stage"]) == grow:
 				out["crops_ready"] += 1
 	out["class_unlock"] = ClassUnlock.after_match(r)     # Hunter challenges and mastery
+	out["train_runs"] = TrainRuns.after_match()      # a match earns a garden race and a drill run (limited)
 	Unmasked.migrate(Save.d)       # a mastery level reached shows on you at home (MasteryLook)
 	# the floor: nobody is left with no Boki and no way to play (Lifeline)
 	out["floor"] = Lifeline.check()
