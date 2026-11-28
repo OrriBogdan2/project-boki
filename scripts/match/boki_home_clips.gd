@@ -3,7 +3,8 @@ extends RefCounted
 ## Runtime clips for a rigged Boki's life at home (no Blender): settle, nap, wake, munch, nudge, climb, splash,
 ## swim, paddle, and the garden games' rush, brace, dodge (Tumble), stonehop, spin (Echo Steps), strut, pose, bow
 ## (Show Ring), crouch, burst, sulk (the Dash), timed by their rules, a glide (a Boki carried through your glide,
-## Kin.render; a flier's wings hold wide) and a flier's hover and flare (BokiFly), its wings and tail driving them.
+## Kin.render; a flier's wings hold wide; only for a .glb with no glide of its own: the starters bake theirs) and a
+## flier's hover and flare (BokiFly), its wings and tail driving them.
 ## Each is the species' baked idle (or sleep; the burst its run, the strut its walk) with BokiHomePoses' deltas laid
 ## over it, sampled into a new Animation, so every Boki keeps its own rest shape and idle motion. Built once per
 ## species and shared. The munch and the nap are the species' own baked eat and sleep clips when those pass
@@ -90,7 +91,8 @@ static func _build(species: String, player: AnimationPlayer, skel: Skeleton3D) -
 	out["crouch"] = _clip(skel, pose, "crouch", idle, null, RaceBeats.clip_s("crouch"))
 	out["burst"] = _clip(skel, pose, "burst", player.get_animation("run"), null, RaceBeats.clip_s("burst"))
 	out["sulk"] = _clip(skel, pose, "sulk", idle, null, RaceBeats.clip_s("sulk"))
-	out["glide"] = _clip(skel, pose, "glide", idle, null, il, BokiHomePoses.cycles("glide", il))
+	if not player.has_animation("glide"):    # a baked glide (the starters' .glb) wins; the pose is the fallback
+		out["glide"] = _clip(skel, pose, "glide", idle, null, il, BokiHomePoses.cycles("glide", il))
 	if BokiFly.flier(species):
 		out["hover"] = _clip(skel, pose, "hover", idle, null, il, BokiHomePoses.cycles("hover", il))
 		out["flare"] = _clip(skel, pose, "flare", idle, null, float(BokiFly.rules()["flare_s"]))
