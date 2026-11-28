@@ -75,7 +75,6 @@ const CHECKS := {
 	"--ways-out-palette-shots": ["res://tools/ways_out_palette_shots.gd", "ways_out_palette_shots", null],  # GPU
 	"--vision-check": ["res://tools/vision_check.gd", "vision_check", null],  # the sight wedge rule and shader
 	"--vision-shots": ["res://tools/vision_shots.gd", "vision_shots", null],  # GPU, --shots-dir=<dir>
-	"--fog-tint-shots": ["res://tools/fog_tint_shots.gd", "fog_tint_shots", null],  # GPU, --shots-dir=<dir> [--raid=]
 	"--colour-vision-check": ["res://tools/colour_vision_check.gd", "colour_vision_check", null],  # palettes
 	"--last-hit-colour-check": ["res://tools/last_hit_colour_check.gd", "last_hit_colour_check", null],
 	"--last-hit-colour-shots": ["res://tools/last_hit_colour_shots.gd", "last_hit_colour_shots", null],

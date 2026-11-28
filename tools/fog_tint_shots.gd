@@ -39,7 +39,8 @@ func run(mn: Node) -> void:
 			await main.get_tree().process_frame
 		var img := main.get_viewport().get_texture().get_image()
 		img.save_png(dir.path_join(String(spot[0]) + ".png"))
-		print("FOGTINT %s %s top_b-r=%+.1f all_b-r=%+.1f" % [raid, spot[0], _blue_red(img, 0.0, 0.33), _blue_red(img, 0.0, 1.0)])
+		var top := _blue_red(img, 0.0, 0.33)
+		print("FOGTINT %s %s top_b-r=%+.1f all_b-r=%+.1f" % [raid, spot[0], top, _blue_red(img, 0.0, 1.0)])
 	Game.god = false
 	main.get_tree().quit()
 
