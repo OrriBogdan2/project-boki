@@ -123,9 +123,11 @@ func _kind(kind: String) -> void:
 	# the death move held at 0.4 of DEATH_S, the dissolve parked (a slow frame would otherwise eat the body)
 	p.teleport(at + Vector3(60, 0, 0))
 	mb.hurt(mb.hp + mb.max_hp, p, {"src": "shot"})
+	var move_s: float = BossAnim.DEATH_S if mb is Boss else MobAnim.DEATH_S
 	for i in 6:
 		mb.set_meta("dis_lag", 5.0)
-		mb.death_t = MobAnim.DEATH_S * 0.4
+		mb.death_t = move_s * 0.4
+		_world_on(false, mb)  # (the kill's drops and reward cards are new nodes)
 		await _view(mb, ctr, dist, 0.785, 0.0)
 	(await _shot()).save_png(dir.path_join("death.png"))
 	print("MOBTURNAROUND %s h=%.2f hunter=%.2f" % [kind, box.size.y, hunter_h])
