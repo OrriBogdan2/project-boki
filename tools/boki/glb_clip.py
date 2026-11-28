@@ -8,6 +8,7 @@ the parent-rest-frame offset, props scale 0.001 unless "on". `--check=<clip>` re
 and prints the largest difference (proof the keys match a Blender build).
   ~/venv-img/bin/python tools/boki/glb_clip.py <id> <clip>[,<clip>] [--check=idle] [--dry]
 """
+
 import importlib
 import json
 import math
@@ -22,14 +23,20 @@ REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 sys.path.insert(0, HERE)
 SPECS = {"cindle": "vespyx_anim", "puddlet": "prismander_anim", "burrlet": "mycroll_anim"}
 FPS = 30
-CLIP_SCALE = 0.95      # boki_rig.CLIP_SCALE
+CLIP_SCALE = 0.95  # boki_rig.CLIP_SCALE
 
 
 def qmul(a, b):
     ax, ay, az, aw = a
     bx, by, bz, bw = b
-    return np.array([aw * bx + ax * bw + ay * bz - az * by, aw * by - ax * bz + ay * bw + az * bx,
-                     aw * bz + ax * by - ay * bx + az * bw, aw * bw - ax * bx - ay * by - az * bz])
+    return np.array(
+        [
+            aw * bx + ax * bw + ay * bz - az * by,
+            aw * by - ax * bz + ay * bw + az * bx,
+            aw * bz + ax * by - ay * bx + az * bw,
+            aw * bw - ax * bx - ay * by - az * bz,
+        ]
+    )
 
 
 def qinv(q):
@@ -53,10 +60,10 @@ def game_quat(rx, ry, rz):
 def read(path):
     d = open(path, "rb").read()
     jl = struct.unpack("<I", d[12:16])[0]
-    j = json.loads(d[20:20 + jl])
+    j = json.loads(d[20 : 20 + jl])
     off = 20 + jl
-    bl = struct.unpack("<I", d[off:off + 4])[0]
-    return j, bytearray(d[off + 8:off + 8 + bl])
+    bl = struct.unpack("<I", d[off : off + 4])[0]
+    return j, bytearray(d[off + 8 : off + 8 + bl])
 
 
 def write(path, j, bin_):
@@ -88,7 +95,7 @@ def read_acc(j, bin_, i):
     v = j["bufferViews"][a["bufferView"]]
     n = {"SCALAR": 1, "VEC3": 3, "VEC4": 4}[a["type"]]
     o = v.get("byteOffset", 0) + a.get("byteOffset", 0)
-    return np.frombuffer(bytes(bin_[o:o + a["count"] * n * 4]), np.float32).reshape(a["count"], n)
+    return np.frombuffer(bytes(bin_[o : o + a["count"] * n * 4]), np.float32).reshape(a["count"], n)
 
 
 class Rig:
@@ -186,8 +193,13 @@ def add_clip(j, bin_, rig, name, seconds, fn, hide_at, like, like_k):
         for path in ("translation", "rotation", "scale"):
             if path not in like.get(i, {}):
                 continue
-            anim["samplers"].append({"input": times, "interpolation": "LINEAR",
-                                     "output": accessor(j, bin_, k[i][path], "VEC4" if path == "rotation" else "VEC3")})
+            anim["samplers"].append(
+                {
+                    "input": times,
+                    "interpolation": "LINEAR",
+                    "output": accessor(j, bin_, k[i][path], "VEC4" if path == "rotation" else "VEC3"),
+                }
+            )
             anim["channels"].append({"sampler": len(anim["samplers"]) - 1, "target": {"node": i, "path": path}})
     j["animations"].append(anim)
     j["animations"].sort(key=lambda a: a["name"])
@@ -207,7 +219,7 @@ def check(j, bin_, rig, anim, name):
     for i, paths in have.items():
         for path, v in paths.items():
             mine = k[i][path]
-            if len(v) != len(mine):         # Blender keeps a constant channel as 2 keys
+            if len(v) != len(mine):  # Blender keeps a constant channel as 2 keys
                 v = np.repeat(v[:1], len(mine), 0)
             if path == "rotation":
                 d = 1 - np.abs(np.sum(v * mine, 1)).clip(0, 1)
@@ -215,8 +227,10 @@ def check(j, bin_, rig, anim, name):
             else:
                 err = float(np.abs(v - mine).max())
             worst[path] = max(worst[path], err)
-    print("CHECK %s: rotation %.3f deg, translation %.5f m, scale %.5f" % (
-        name, worst["rotation"], worst["translation"], worst["scale"]))
+    print(
+        "CHECK %s: rotation %.3f deg, translation %.5f m, scale %.5f"
+        % (name, worst["rotation"], worst["translation"], worst["scale"])
+    )
     return worst
 
 

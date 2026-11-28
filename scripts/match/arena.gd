@@ -22,6 +22,10 @@ const BOT_NAMES := {"off": "Off", "idle": "Idle", "moving": "Moving", "fighting"
 const DUMMY_HP := 3000.0
 const TEAM := 7
 const MINIMAP_CLEAR := 50.0  # px the practice layout's key line shifts right so it clears the minimap
+const MENU_MAX_H := 760.0  # px (logical UI): the tallest the panel gets on tall views
+const MENU_EDGE := 20.0  # px (logical UI): the gap kept between the panel and the screen edge
+const MENU_LEFT_W := 480.0  # px: the left column (Hunter, Boki, bot)
+const MENU_PICK_W := 92.0  # px: a Hunter or Boki button in the left column's five-wide grids
 
 var m: Match
 var layout := "arena"  # "arena" (its own map) | "practice" (the training island)
@@ -156,11 +160,21 @@ func _spawn_dummies() -> void:
 		lb.font = UI.big
 		lb.position = Vector3(0, 3.4, 0)
 		d_v.add_child(lb)
-		dummies.append(
-			{
-				"h": d_v, "kind": sp[0], "at": at, "label": lb, "hits": [], "total": 0.0, "last": 0.0, "quiet": 0.0,
-				"down_t": -1.0,
-			}
+		(
+			dummies
+			. append(
+				{
+					"h": d_v,
+					"kind": sp[0],
+					"at": at,
+					"label": lb,
+					"hits": [],
+					"total": 0.0,
+					"last": 0.0,
+					"quiet": 0.0,
+					"down_t": -1.0,
+				}
+			)
 		)
 
 
@@ -243,14 +257,14 @@ func tick(dt: float) -> void:
 		dm["quiet"] = float(dm["quiet"]) + dt
 		var R := Content.rules("practice_dummies")
 		if d_v.downed:
-			d_v.down_hp = 1e6            # (no bleeding out or finishing: a dummy only ever stands back up on its mark)
+			d_v.down_hp = 1e6  # (no bleeding out or finishing: a dummy only ever stands back up on its mark)
 			if float(dm["down_t"]) < 0.0:
 				dm["down_t"] = 0.0
 			dm["down_t"] = float(dm["down_t"]) + dt
 			if float(dm["down_t"]) >= float(R["respawn_s"]):
 				_respawn_dummy(dm)
 		elif float(dm["quiet"]) > float(R["heal_quiet_s"]):
-			d_v.hp = DUMMY_HP            # (left alone a long while: topped up, the meters stay)
+			d_v.hp = DUMMY_HP  # (left alone a long while: topped up, the meters stay)
 		var hs: Array = dm["hits"]
 		while not hs.is_empty() and m.time - float(hs[0][0]) > 6.0:
 			hs.pop_front()
@@ -338,6 +352,7 @@ func _respawn_dummy(dm: Dictionary) -> void:
 	dm["down_t"] = -1.0
 	dm["quiet"] = 0.0
 	m.fx.ring(d_v.pos, 1.6, Color("9ee2a0"), 0.4)
+
 
 ## Back to your marks: you, the dummies and the bot, all healed, cooldowns and resources cleared.
 func reset() -> void:
@@ -640,10 +655,6 @@ func toggle_card() -> void:
 
 # ---- the loadout panel (L): picks apply on the spot; the panel never changes size. It fits the view at the
 # default UI scale; the Boki list (every species) scrolls in what is left of the height.
-const MENU_MAX_H := 760.0  # px (logical UI): the tallest the panel gets on tall views
-const MENU_EDGE := 20.0  # px (logical UI): the gap kept between the panel and the screen edge
-const MENU_LEFT_W := 480.0  # px: the left column (Hunter, Boki, bot)
-const MENU_PICK_W := 92.0  # px: a Hunter or Boki button in the left column's five-wide grids
 
 
 func open_menu() -> void:

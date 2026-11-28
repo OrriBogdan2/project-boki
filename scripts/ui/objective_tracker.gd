@@ -62,7 +62,7 @@ static func world(hud) -> void:
 	_edge.begin(rim, hud.WORLD_ARROW)
 	if BokiChatter.calm(hud.m):
 		_edge.add(dir, COL, EdgeMarker.PRIO_GOAL, o.label(), p.flat_dist(at))
-	else:      # (a fight: the arrow carries no words)
+	else:  # (a fight: the arrow carries no words)
 		_edge.add(dir, COL, EdgeMarker.PRIO_GOAL)
 	_edge.draw(hud.c, hud.m.time)
 

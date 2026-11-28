@@ -521,7 +521,7 @@ func _show_settings() -> void:
 				_show_settings()
 		)
 	UI.footer_left(v).add_child(UI.ghost("Reset to defaults", cb_516))
-	if ctx == "title":     # owner 11-26: the title's Save Files and Help live here now
+	if ctx == "title":  # owner 11-26: the title's Save Files and Help live here now
 		UI.footer_left(v).add_child(UI.ghost("Save Files", open_saves, 0, "satchel"))
 		UI.footer_left(v).add_child(UI.ghost("Help", open_words, 0, "info"))
 	var done := UI.with_key(UI.primary("Done", back, 120), "Esc")

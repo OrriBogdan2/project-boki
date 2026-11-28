@@ -8,11 +8,13 @@ extends RefCounted
 var main: Node
 var dir := ""
 
+
 func _shot(shot_name: String, settle := 0.5) -> void:
 	await main.get_tree().create_timer(settle).timeout
 	await RenderingServer.frame_post_draw
 	main.get_viewport().get_texture().get_image().save_png("%s/%s.png" % [dir, shot_name])
 	print("TSHOT %s" % shot_name)
+
 
 func run(m: Node) -> void:
 	main = m
