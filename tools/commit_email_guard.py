@@ -38,7 +38,12 @@ def problem(email):
 def main(args):
     base = args[0] if args else os.environ.get("BOKI_BASE", "origin/main")
     head = args[1] if len(args) > 1 else os.environ.get("BOKI_HEAD", "HEAD")
-    r = subprocess.run(["git", "log", "--format=%H%x09%ae%x09%ce%x09%s", f"{base}..{head}"], capture_output=True, text=True, check=False)
+    r = subprocess.run(
+        ["git", "log", "--format=%H%x09%ae%x09%ce%x09%s", f"{base}..{head}"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
     if r.returncode:
         print(f"commit_email_guard: no {base}..{head} here, skipped")
         return 0
@@ -52,7 +57,9 @@ def main(args):
                 bad.append(f"FAILED: {sha[:10]} {role} <{mail}>: {why} ({subj[:60]})")
     print("\n".join(bad))
     if bad:
-        print("Fix: git config user.email noreply@anthropic.com (or orribogdan@gmail.com), then amend/rebase the commits above.")
+        print(
+            "Fix: git config user.email noreply@anthropic.com (or orribogdan@gmail.com), then amend/rebase the commits above."
+        )
     print(f"commit_email_guard: {n} commit(s) checked, {len(bad)} bad email(s)")
     return 1 if bad else 0
 
