@@ -11619,3 +11619,4 @@ READY ext/boki-starter-hit-faint 48686f151a (cindle/puddlet/burrlet hit 0.3s + f
 READY ext/mantle-ref-numbers 49f3402269 (mini-mantle +5 m/s lip, 0.75 s push, 3 m, 1.0 s cooldown in hunter_move.json; asserted in --mantle-fling-check; MOVEMENT_PARITY rows sourced)
 READY ext/farm-home-only-gates 0a0527ac96 (home road for expedition gates: home_gates.json, Goals rows, --garden-home-gates-check)
 READY ext/boki-clips-b2 60a3f37a20faae2b431179054c6d09d4a9ac195a (own clips for casquebill, cisternmander, citadoad, crofthollow: 4 modules + reclipped glbs, ANIM_COVERAGE shared->clip; no leg bones)
+READY ext/boki-clips-b1 2c7aee9ffd4f111487338ae74ec3d08c65fdfde9 (own clips for anchorhorn, arcestrel, barostorm, basaltoad: modules, re-keyed glbs, coverage cells shared -> clip)
