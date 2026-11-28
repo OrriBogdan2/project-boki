@@ -39,6 +39,8 @@ const STOPS := ["status_stunned", "status_rooted", "status_grounded"]  # what st
 ## A kit mark's icon -> the plain status it stands in for (Vex's Daze, Cinder's Ablaze): only the mark shows.
 const RING_KEY := 0.04  # a status ring repaints its plate in steps this big (of its 0..1)
 const MARK_FOR := {"mark_daze": "status_dazed", "fireball": "status_burning"}
+const SHRED_COL := Color("c9d6e8")  # a foe that takes more damage (Tenzo's rock, Sable's Primed shot)
+const BLIGHT_COL := Color("a5d86a")  # a foe whose healing is cut (Kael's Warchain, Cinder, Grimble's blast)
 const PLATE_OFFSET := 2.35  # m over the feet where a plate sits unless the archetype sets its own
 const CLEAR_M := 0.6  # m: a plate's 17 px hang and a little air over the model's top (33 px per m up, default camera)
 
@@ -214,6 +216,10 @@ static func statuses(e: Ent) -> Array:
 		out.append(["status_dazed", KitStatus.RATTLE_COL, "DAZED", KitStatus.rattled_left(e)])
 	if e.slow_t > 0.0:
 		out.append(["status_slowed", BodyTell.SLOW_COL, "SLOWED", e.slow_t])
+	if e.vuln_t > 0.0:
+		out.append(["status_shred", SHRED_COL, "SHRED", e.vuln_t])
+	if e.blight_t > 0.0:
+		out.append(["status_blight", BLIGHT_COL, "BLIGHT", e.blight_t])
 	if e.burn_t > 0.0:
 		out.append(["status_burning", Color("ff9a5a"), "BURNING", -1.0])
 	if hunter and hunter.weak_t > 0.0:
