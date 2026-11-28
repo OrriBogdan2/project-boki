@@ -160,6 +160,15 @@ no retarget; the string follows the drawing hand on `StringMid`): `lace_draw`, `
 `[hold_from, end]` while the move lasts and is gone when it ends; a release has the string drawn on its first frame and
 back on the bow a frame later.
 
+### Neve (claire)
+Her kit moves have their own clips (`art/wardens/claire/claire_clips.glb`, written by `tools/meshy/native_ability_clips.py`:
+Cinder's FK and two-bone IK, wrist targets in arm lengths, `own_casts` on). Beats are the kit's own (kmoves_care.gd); the
+poses are ours. `nv_u_*` are layers over the legs, `nv_f_*` own the body. `tm_dart_r/l` one-hand flicks (0.07 s),
+`tm_dart_heavy` two-handed sling, `tm_beam` (skating: both hands straight out), Cryo Spear `tm_spear_aim` (palms drawn in,
+held) then `tm_spear` a two-handed push, `tm_wall` (0.2 s tell crouch, then both palms shoved out low), Rimelock `tm_rime`,
+`tm_rime_carry` (skated in), `tm_rime_hold` (sealed crouch), `tm_rime_crash`, `tm_rime_break`. Not yet her own: `tm_freeze`,
+the skate (`tm_skate_go`, `tm_skate`, `tm_skate_air`, `tm_skate_stop`), `tm_shatter`, `tm_clench` (content/rules/anim_core_set.json).
+
 ## Look-at on Meshy's bones
 `WardenLookAt.make(model, skel, true)`: the same layer, limits (70 deg yaw, 25 deg pitch) and smoothing as the contract path,
 laid after the clip and the air tilt. The turn is shared down Meshy's chain so the head's total turn is the contract's
