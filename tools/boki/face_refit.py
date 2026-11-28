@@ -32,14 +32,17 @@ EYES = {
     "puddlet": ((0.080, 0.267), 1.29),
     "burrlet": ((0.070, 0.213), 1.0),
     "caecilith": ((0.0365, 0.405), 0.75),  # the sockets on the top of the head
-    "threadwyrm": ((0.1565, 0.066), 0.55),  # the painted face on the pale rope end (low, off-centre)
-    "thrumbird": ((0.040, 0.3475), 0.65),  # on the head side, behind the beak base
-    "zephyrak": ((-0.0063, 0.336), 0.45),  # on the head, at the top of the neck
+    "threadwyrm": ((0.165, 0.062), 0.75),  # on the pale rope end, centred on it, big enough for the match camera
+    "thrumbird": ((0.048, 0.3475), 0.60),  # on the head sides, clear of the bill (prongs at x -15..25 mm)
+    "zephyrak": ((-0.014, 0.336), 0.40),  # on the head, at the top of the neck, inside its outline (x -65..3 mm)
 }
-AXIS = {"threadwyrm": 0.1125, "zephyrak": -0.0275}  # x of the painted face's midline when it is off x = 0
+AXIS = {"threadwyrm": 0.13, "zephyrak": -0.031}  # x of the face's midline when it is off x = 0 (the head's own)
 FACING = {"threadwyrm": 0.12}
 REWEIGHT = {"threadwyrm"}
-MOUTH = {"zephyrak": 0.2}  # the mouth's own scale where the eyes' scale leaves it wider than the head
+MOUTH = {"threadwyrm": 0.55}  # the mouth's own scale where the eyes' scale leaves it wider than the head
+# no Face mouth: the coat has its own painted mouth (caecilith's zip grin, zephyrak's teeth) or the ref has none
+# (thrumbird's bill); the mouth and its corners collapse to a point inside the head, their blend shapes to zero
+NO_MOUTH = {"caecilith", "thrumbird", "zephyrak"}
 
 
 class Glb:
@@ -208,6 +211,14 @@ def refit(species):
         print("%s eye %s: %s -> %s" % (species, "LR"[sx > 0], np.round(c, 3), np.round(to, 3)))
     mid_from = (eye_from[-1] + eye_from[1]) / 2
     mid_to = (eye_to[-1] + eye_to[1]) / 2
+    if species in NO_MOUTH:  # brows are the 8-vertex pieces; the rest is the mouth and its corners
+        for p in [p for p in rest if len(p) != 8]:
+            m = fpos[p].mean(0)
+            z = surface_z(body, m[0], m[1])
+            fpos[p] = m + np.array([0.0, 0.0, 0.01 if z is None else z - m[2] + 0.01])
+            for t in fp.get("targets", []):
+                g.scale_morph(t["POSITION"], p, 0.0)
+        rest = [p for p in rest if len(p) == 8]
     for p in rest:  # brows ride their eye, the mouth and its corners the eyes' midpoint (move + scale)
         m = fpos[p].mean(0)
         sd = 1 if m[0] >= 0 else -1

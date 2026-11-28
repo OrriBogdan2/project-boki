@@ -70,12 +70,13 @@ var face := false
 ## LOCAL REVIEW ONLY (boki-face-polish-1124, not committed): eye-level views through a SubViewport on the match's
 ## own world (same lights, sky, ground; no HUD). front close, 3/4 close, eye-level whole body.
 func _face_shots(k: Node, sp: String) -> void:
-	var fm: MeshInstance3D = k.find_child("Face", true, false)
-	var body: MeshInstance3D = k.find_child("Body", true, false)
+	var fm := _mesh(k, "Face")
+	var body := _mesh(k, "Body")
 	if fm == null or body == null:
 		print("BOKIFACE %s: no Face/Body" % sp)
 		return
-	var c := fm.global_transform * fm.get_aabb().get_center()
+	var fc := _skinned(fm)
+	var c: Vector3 = fc[0]
 	var bb := body.global_transform * body.get_aabb()
 	var fwd := -(body.global_basis.z.normalized())
 	fwd.y = 0
@@ -91,20 +92,66 @@ func _face_shots(k: Node, sp: String) -> void:
 	cam.near = 0.01
 	vp.add_child(cam)
 	cam.current = true
+	var mc := main.get_viewport().get_camera_3d()
+	var back := mc.global_basis.z.normalized()
+	var dist := (mc.global_position - c).length()
 	var views := {
+		"game3x": [c + back * dist / 3.0, c, mc.fov],
+		"game1x": [c + back * dist, c, mc.fov],
 		"front": [c + fwd * face_r * 3.2, c],
 		"q": [c + (fwd.rotated(Vector3.UP, 0.6)) * face_r * 3.2 + Vector3(0, face_r * 0.3, 0), c],
 		"body": [c + fwd.rotated(Vector3.UP, 0.35) * bb.size.length() * 2.0, bb.get_center()],
 	}
 	for v in views:
 		cam.global_position = views[v][0]
+		cam.fov = views[v][2] if views[v].size() > 2 else 30.0
 		cam.look_at(views[v][1], Vector3.UP)
 		for i in 4:
 			await main.get_tree().process_frame
 		await RenderingServer.frame_post_draw
 		vp.get_texture().get_image().save_png(dir.path_join("face_%s_%s.png" % [sp, v]))
-	print("BOKIFACE %s: eye %s fwd %s r %.3f" % [sp, c, fwd, face_r])
+	print("BOKIFACE %s: eye %s fwd %s nrm %s r %.3f" % [sp, c, fwd, fc[1], face_r])
 	vp.queue_free()
+
+
+## The Face as posed now: [mean vertex, mean normal] in world space (CPU skinning, top weight per vertex).
+func _skinned(fm: MeshInstance3D) -> Array:
+	var skel := fm.get_node(fm.skeleton) as Skeleton3D
+	var sk := fm.skin
+	var sum := Vector3.ZERO
+	var nsum := Vector3.ZERO
+	var n := 0
+	for si in fm.mesh.get_surface_count():
+		var a := fm.mesh.surface_get_arrays(si)
+		var vs: PackedVector3Array = a[Mesh.ARRAY_VERTEX]
+		var ns: PackedVector3Array = a[Mesh.ARRAY_NORMAL]
+		var bs = a[Mesh.ARRAY_BONES]
+		var ws = a[Mesh.ARRAY_WEIGHTS]
+		var per: int = bs.size() / maxi(vs.size(), 1)
+		for i in vs.size():
+			var best := 0
+			for j in per:
+				if ws[i * per + j] > ws[i * per + best]:
+					best = j
+			var bi: int = bs[i * per + best]
+			var bone := sk.get_bind_bone(bi)
+			if bone < 0:
+				bone = skel.find_bone(sk.get_bind_name(bi))
+			var t := skel.global_transform * skel.get_bone_global_pose(bone) * sk.get_bind_pose(bi)
+			sum += t * vs[i]
+			nsum += t.basis * ns[i]
+			n += 1
+	return [sum / maxi(n, 1), nsum.normalized()]
+
+
+func _mesh(k: Node, nm: String) -> MeshInstance3D:
+	var n := k.find_child(nm, true, false)
+	if n is MeshInstance3D:
+		return n
+	if n != null:
+		for c in n.find_children("*", "MeshInstance3D", true, false):
+			return c
+	return null
 
 
 func _setup() -> void:
