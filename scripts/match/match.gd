@@ -5388,6 +5388,8 @@ func _tips() -> void:
 	var k: Kin = player.kin
 	if k == null:
 		return
+	var summon_tip := TipText.summon(k)
+	if summon_tip != "": _tip("first_summon", summon_tip)
 	var proc_tip := KinWispProc.tip(k)      # its carry passive just acted: name it once
 	if proc_tip != "": _tip("proc", proc_tip)
 	if k.state == "active":

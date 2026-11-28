@@ -74,6 +74,8 @@ func trigger(dt: float) -> void:
 		return
 	if h.wpn.has("spin_up"):
 		if held and can_fire() and h.ammo > 0:
+			if h.spin <= 0.0 and h.wpn.has("spin_sfx"):
+				h.m.sfx(h.wpn["spin_sfx"], h.pos, -4.0 if h.is_local() else -8.0)  # the barrels start to turn
 			h.spin = minf(1.0, h.spin + dt / float(h.wpn["spin_up"]))
 			if h.spin >= 1.0:
 				h.spun_t += dt
