@@ -1,0 +1,14 @@
+{
+	"id": "geodemole",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/geodemole.json.",
+	"work": {
+		"haul": 1,
+		"stone": 3,
+		"timber": 2
+	},
+	"shiny": {
+		"belly": "#a3eafc",
+		"color": "#3f5436",
+		"glow": "#c9ff6b"
+	}
+}
