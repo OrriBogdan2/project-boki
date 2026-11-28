@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://di57vg7ot7bup"
-path="res://.godot/imported/jump_pad_jump_pad.jpg-7897c0755724d5d0f1cbbb2da829f05c.ctex"
+path.s3tc="res://.godot/imported/jump_pad_jump_pad.jpg-7897c0755724d5d0f1cbbb2da829f05c.s3tc.ctex"
+path.etc2="res://.godot/imported/jump_pad_jump_pad.jpg-7897c0755724d5d0f1cbbb2da829f05c.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "0d2fe502173693b9fed877a0422f1ef4"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/props/jump_pad/jump_pad_jump_pad.jpg"
-dest_files=["res://.godot/imported/jump_pad_jump_pad.jpg-7897c0755724d5d0f1cbbb2da829f05c.ctex"]
+dest_files=["res://.godot/imported/jump_pad_jump_pad.jpg-7897c0755724d5d0f1cbbb2da829f05c.s3tc.ctex", "res://.godot/imported/jump_pad_jump_pad.jpg-7897c0755724d5d0f1cbbb2da829f05c.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
