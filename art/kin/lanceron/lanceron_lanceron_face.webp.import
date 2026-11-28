@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d1yc444hmkow6"
-path="res://.godot/imported/lanceron_lanceron_face.webp-f40d2ffe214097f06524617d7770e5fc.ctex"
+path.s3tc="res://.godot/imported/lanceron_lanceron_face.webp-f40d2ffe214097f06524617d7770e5fc.s3tc.ctex"
+path.etc2="res://.godot/imported/lanceron_lanceron_face.webp-f40d2ffe214097f06524617d7770e5fc.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "75ae0dd9b53d9e9bbe5f141030185aaa"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/lanceron/lanceron_lanceron_face.webp"
-dest_files=["res://.godot/imported/lanceron_lanceron_face.webp-f40d2ffe214097f06524617d7770e5fc.ctex"]
+dest_files=["res://.godot/imported/lanceron_lanceron_face.webp-f40d2ffe214097f06524617d7770e5fc.s3tc.ctex", "res://.godot/imported/lanceron_lanceron_face.webp-f40d2ffe214097f06524617d7770e5fc.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
