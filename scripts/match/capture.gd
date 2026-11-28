@@ -278,6 +278,7 @@ static func complete(m, h: Hunter, k: Kin) -> void:
 	_send(m, "scan_done", h, k, 1.0)
 	_pop(m, h, k)
 	m._catch(h, k)
+	RoostTrainer.scanned(m, h, k)  # (the Grounds are a training match: _catch keeps nothing, the drill ends)
 	if h.is_local():
 		UiSfx.captured()
 
