@@ -57,7 +57,7 @@ func teardown() -> void:
 
 func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 	if t != null and t.team != h.team and String(o.get("src", "")) == "shot" and not o.has("ab"):
-		_arrow_hit(t)
+		_arrow_hit(t, o.get("at", t.pos))
 
 func _tick(dt: float) -> void:
 	sense.tick(dt)
@@ -180,8 +180,8 @@ func on_take(_by: Ent, dmg: float, _o: Dictionary) -> void:
 		spirit.end("hit")
 
 ## One of the bow's arrows hit: the spent-arrow pool skips it; a Supercharged one bursts in an red X-star.
-func _arrow_hit(t: Ent) -> void:
-	fx.note_hit(t.pos)
+func _arrow_hit(t: Ent, at: Vector3) -> void:
+	fx.note_hit(at)          # (the contact, at the shot's height: the feet sit a body height under it)
 	var kind := ""
 	for sid in fx.live:
 		var e: Dictionary = fx.live[sid]
@@ -403,13 +403,7 @@ func cast_e() -> bool:
 	var center := h.pos
 	# the arrows go up first (everyone sees the arc), then the rain starts
 	AimKit.arc_wall(h, "e", {"center": center, "dir": dd, "radius": radius, "deg": arc_deg(), "thick": float(ed["width"]), "panels": 7, "all": true, "dur": tell_v, "col": col_of(ed), "lace": true})
-	for i in 5:
-		var u := (float(i) - 2.0) / 2.0 * deg_to_rad(arc_deg()) * 0.4
-		var dv := dd.rotated(u)
-		# (cosmetic: small and red so the five don't stack into one white blob at the bow; PinFx.lob draws
-		# the arrows going up)
-		var lob_v := dv * maxf(4.0, radius / tell_v)
-		m.spawn_shot(h, h.pos + Vector3(0, 1.4, 0), lob_v, 0.0, tell_v, 0.05, PinFx.THREAD, {"lob": 3.5, "cos": true})
+	# PinFx.lob draws her arrows going up (no shared shot rounds: their trails hung on as lines at the arc's ends)
 	fx.lob(h.pos + Vector3(0, 1.6, 0), dd)
 	vfx("hail_go", h.pos, dd)
 	play("arc_hail")
@@ -440,8 +434,6 @@ func _tick_rain(dt: float) -> void:
 	if float(rain["patter"]) <= 0.0:
 		rain["patter"] = randf_range(0.08, 0.14)
 		m.sfx("pin_patter", rain["c"], -12.0, randf_range(0.85, 1.25))
-	HeroVfx.of(m).hold(h, "rain", 0.0, {"at": rain["center"], "radius": rain["radius"], "deg": arc_deg(),
-			"dir_x": (rain["d"] as Vector2).x, "dir_y": (rain["d"] as Vector2).y})
 	var inside: Array = []
 	for f in m.foes_of(h.team):
 		if f.hittable() and _in_rain(f): inside.append(f)

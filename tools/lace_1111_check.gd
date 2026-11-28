@@ -233,18 +233,26 @@ func _hail_laced(m: Match, p: Hunter, _t: Hunter, k: ArcherKit, home: Vector3) -
 		if red(c) and not pinkish(c):
 			reds += 1
 	ok(
-		"E laces: every gap between the needle posts laced (an upright X and a ground X), all drawn across",
+		"E laces: every gap laced (its two edges and an X across the strip), all drawn across",
 		shown == k.fx.laces.size() and shown == (PinFx.POSTS - 1) * 4,
 		"%d of %d" % [shown, k.fx.laces.size()]
 	)
 	ok("E laces: red thread, none of it pink", reds == k.fx.laces.size(), "%d red" % reds)
-	var up_a: Dictionary = k.fx.laces[0]
-	var up_b: Dictionary = k.fx.laces[1]
+	var x_a: Dictionary = k.fx.laces[2]
+	var x_b: Dictionary = k.fx.laces[3]
+	var flat := k.fx.laces.all(func(l): return absf((l["b"] as Vector3).y - (l["a"] as Vector3).y) < 0.3)
 	ok(
-		"E laces: the upright pair crosses (one climbs as the other falls)",
-		(up_a["b"] as Vector3).y > (up_a["a"] as Vector3).y and (up_b["b"] as Vector3).y < (up_b["a"] as Vector3).y
+		"E laces: all lie flat on the ground (nothing upright zigzags across the view), each gap's X crosses",
+		flat and Geometry2D.segment_intersects_segment(
+			_flat(x_a["a"]), _flat(x_a["b"]), _flat(x_b["a"]), _flat(x_b["b"])) != null
 	)
+	var falls: int = k.fx.volley.filter(func(c): return String(c["phase"]) in ["fall", "stuck"]).size()
+	ok("E rain: her own arrows falling into the strip and standing in it", falls >= 4, "%d arrows" % falls)
 	for i in int((float(k.e_def()["time"]) + 0.3) / DT):
 		m.step(DT)
 		k.fx._process(DT)
 	ok("E laces: gone when the wall ends", not k.fx.laces.any(func(l): return (l["node"] as Node3D).visible))
+
+
+static func _flat(v: Vector3) -> Vector2:
+	return Vector2(v.x, v.z)

@@ -12,9 +12,10 @@ extends Node3D
 ##   over the shot the match moves (the round's own sphere is shrunk away)
 ## - spent arrows: one of the bow's arrows that lands with no hit stays stuck in the ground, thread attached,
 ##   for 4 s (the Heavy Shot leaves nothing: owner 11-08)
-## - the Rain of Arrows (Hail Wall): needle posts round the arc laced together like her corset, red thread
-##   criss-crossing between the posts and across the ground the wall covers (her laces, red, not a
-##   glowing band), arrows streaking down, blue burn flames on foes inside
+## - the Rain of Arrows (Hail Wall): the strip it covers laced flat on the ground like her corset seen from above
+##   (two red thread edges and a red X in every gap: solid thread, not a glowing band, nothing standing up to
+##   zigzag across the view), her own arrows lobbed up, then falling into the strip and sticking a moment,
+##   blue burn flames on foes inside. No dust or sparks: the arrows and the laces are the whole look.
 ## - the Spirit Walk screen tint while she is inside something (her own screen only)
 ## - the Spirit Walk body tint: her whole body darkens toward her deep orchid for the roll and the walk (every game)
 
@@ -22,11 +23,19 @@ const STARS := 8
 const BURSTS := 3
 const ARROWS := 10
 const SPENT := 8
-const STREAKS := 26
+const VOLLEY := 14             # the Hail Wall's arrows: up out of the bow, then falling and sticking (pooled)
 const FLAMES := 4
-const POSTS := 9               # the Hail Wall's needle posts (8 gaps, each laced)
-const LACE_W := 0.06           # m: a lace's thickness, a thread that still holds at the match camera
-const LACE_Y := Vector2(0.15, 0.9)  # m: where the upright laces cross between two posts, low and high
+const POSTS := 9               # the Hail Wall's eyelets along each edge (8 gaps, each laced)
+const LACE_W := 0.06           # m: an edge lace's thickness, a thread that still holds at the match camera
+const LACE_X_K := 0.7          # the X strands' thickness against an edge's (the edges carry the shape)
+const LACE_STEP := 0.5         # m of height between a lace's ends past which it is cut (a step, a prop, a dip)
+const FALL_T := 0.24           # s a Hail Wall arrow takes to come down
+const FALL_H := 4.0            # m above the strip it falls from (higher reads as a stray arrow off the strip)
+const STUCK_T := 0.7           # s it then stands in the ground
+const UP_T := 0.32             # s the cast's arrows take to fly up out of view
+const RAIN_EVERY := 0.06       # s between two falling arrows
+const RAIN_SCALE := 1.3        # the falling arrows' size (the bow's Empowered arrow is 1)
+const RAIN_TRAIL := 1.6        # m of trail behind a falling arrow (before RAIN_SCALE)
 const LACE_IN := 0.25          # s the laces take to draw across as the wall goes up
 const LACE_CLEAR := 0.8        # m of ground a lace keeps from a shown Hunter's feet, else it parts (COMBAT_CLARITY)
 ## her dash after-image: red fletch streaks left at hip, chest and shoulder height, how long each lasts
@@ -60,9 +69,8 @@ var hits: Array = []           # [pos, time] of shot hits (a shot that hit someo
 var bursts: Array = []         # fletch bursts {node, t, dur, size, pow}
 var bow_glint: MeshInstance3D  # the fletch glint at the bow hand while a stage is ready
 var rain := {}                 # the live wall: {center, dir, radius, deg, t, every}
-var posts: Array = []
 var laces: Array = []          # {node, a, b}: the Hail Wall's threads, a -> b in the world
-var streaks: Array = []        # {node, t, from, to}
+var volley: Array = []         # {node, t, phase ("up", "fall", "stuck"), from, to}
 var flames: Array = []         # {node, foe}
 var wisps: Array = []          # {node, t}
 var wisp_next := 0
@@ -95,26 +103,14 @@ func _ready() -> void:
 	for i in SPENT:
 		var n := _arrow_node()
 		spent.append({"node": n, "t": 0.0})
-	# the laces: solid toon thread (no added glow, so the red holds on bright grass); every other one in
-	# shade, the strand passing under
+	# the laces: solid toon thread (no added glow, so the red holds on bright grass); per gap the two edges and
+	# an X, its second strand in shade (passing under)
 	for i in (POSTS - 1) * 4:
-		var tone := THREAD if i % 2 == 0 else THREAD.darkened(0.3)
-		var lace := KitMeshes.inst(self, Models.box(LACE_W, LACE_W, 1.0), Models.toon(tone, false, 0.5))
-		laces.append({"node": lace, "a": Vector3.ZERO, "b": Vector3.ZERO})
-	for i in POSTS:
-		var p := KitMeshes.inst(self, Models.box(0.05, 1.0, 0.05), Models.glow_mat(Color(SILVER, 0.95)))
-		var fl := MeshInstance3D.new()
-		fl.mesh = Models.prism_tip()
-		fl.material_override = Models.glow_mat(Color(THREAD, 0.9))
-		fl.scale = Vector3(0.22, 0.24, 0.05)
-		fl.position = Vector3(0, 0.62, 0)
-		fl.rotation = Vector3(PI, 0, 0)
-		fl.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		p.add_child(fl)
-		posts.append(p)
-	for i in STREAKS:
-		var streak_node := KitMeshes.inst(self, KitMeshes.quad(0.07, 1.3), KitShaders.mat("streak", SILVER))
-		streaks.append({"node": streak_node, "t": 0.0})
+		var tone := THREAD.darkened(0.3) if i % 4 == 3 else THREAD
+		var lace := KitMeshes.inst(self, Models.box(LACE_W, LACE_W * 0.5, 1.0), Models.toon(tone, false, 0.5))
+		laces.append({"node": lace, "a": Vector3.ZERO, "b": Vector3.ZERO, "k": LACE_X_K if i % 4 >= 2 else 1.0})
+	for i in VOLLEY:
+		volley.append({"node": _arrow_node(), "t": 0.0, "phase": ""})
 	for i in WISPS:
 		var wisp := KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("streak", THREAD, true))
 		wisps.append({"node": wisp, "t": 0.0})
@@ -297,9 +293,29 @@ func tick_shots() -> void:
 		live.erase(sid)
 		var kind := String(e["kind"])
 		var at: Vector3 = e["pos"]
-		var hit := hits.any(func(hh): return (hh[0] as Vector3).distance_to(at) < 1.6)
-		if not hit and kind in ["tap", "arrow", "over"]:
+		if kind in ["tap", "arrow", "over"] and not _ended_on_body(e["s"], at):
 			_plant(at, (e["s"]["vel"] as Vector2), kind)
+
+## Whether shot `s`, last seen at `at`, ended on someone: a hit arrow leaves nothing on the floor, only a miss
+## plants one (the owner's rule). A hit our side dealt (note_hit, at the contact) counts, and so does a shot that
+## ended touching a body it could hit: that covers a hit soaked by a shield or a dodge, and another player's screen,
+## where the damage is the shooter's and on_deal never runs. Both look one step past `at` (the match may have
+## moved the shot on before it hit).
+func _ended_on_body(s: Dictionary, at: Vector3) -> bool:
+	var reach := (s["vel"] as Vector2).length() / maxf(1.0, float(Engine.physics_ticks_per_second)) + 0.3
+	var flat := func(a: Vector3, b: Vector3) -> float: return Vector2(a.x - b.x, a.z - b.z).length()
+	if hits.any(func(hh): return flat.call(hh[0] as Vector3, at) < reach + 0.6):
+		return true
+	var m: Match = h.m
+	var rivals := func(o: Ent) -> bool: return o.team != h.team and o.hittable()
+	var alive := func(o: Ent) -> bool: return not o.dead
+	var bodies: Array = m.hunters.filter(rivals) + m.kins.filter(rivals) + m.mobs.filter(alive)
+	for b in bodies:
+		var e: Ent = b
+		if flat.call(e.pos, at) < e.r + float(s["r"]) + Match.HIT_SLACK + reach and \
+				(m.shot_height_ok(e, at.y) or m.shot_from_above_ok(s, e, at.y)):
+			return true
+	return false
 
 ## A spent needle stuck in the ground where the shot ended, its thread lying behind it, gone after SPENT_T.
 func _plant(at: Vector3, v: Vector2, kind: String) -> void:
@@ -338,20 +354,45 @@ func afterimage(at: Vector3, yaw: float, body_scale: float) -> void:
 		n.scale = Vector3(1.3, 0.16, 1.0) * body_scale
 		w["t"] = WISP_T
 
-## Hail Wall's cast: red arrows streaking up out of the bow, lobbed toward `dir`.
+## Hail Wall's cast: five of her arrows flying up out of the bow, lobbed toward `dir`.
 func lob(at: Vector3, dir: Vector2) -> void:
-	var launched := 0
-	for c in streaks:
+	var vr := KitLooks.vis_rng
+	for i in 5:
+		var spread := Vector3(vr.randf_range(-0.6, 0.6), vr.randf_range(-0.3, 0.3), vr.randf_range(-0.6, 0.6))
+		_volley_arrow("up", at, at + Vector3(dir.x * 2.0, 5.5, dir.y * 2.0) + spread, UP_T)
+
+## Starts a free arrow of the volley flying `from` -> `to` over `t` s ("up" out of view, or "fall" into the strip).
+func _volley_arrow(phase: String, from: Vector3, to: Vector3, t: float) -> void:
+	for c in volley:
 		if float(c["t"]) > 0.0:
 			continue
-		var spread := Vector3(KitLooks.vis_rng.randf_range(-0.6, 0.6), 0, KitLooks.vis_rng.randf_range(-0.6, 0.6))
-		c["t"] = 0.32
-		c["from"] = at
-		c["to"] = at + Vector3(dir.x * 2.0, 5.5, dir.y * 2.0) + spread
-		c["up"] = true
-		launched += 1
-		if launched >= 5:
-			return
+		var n: Node3D = c["node"]
+		_dress(n, "arrow")
+		n.scale = Vector3.ONE * RAIN_SCALE
+		for f in ["Fin0", "Fin2"]:      # (red fletching: her red and white, no tan wings at this size)
+			(n.get_node(f) as MeshInstance3D).material_override.set_shader_parameter("albedo", THREAD)
+		var tr := n.get_node("Trail") as Node3D
+		tr.scale.x = RAIN_TRAIL
+		tr.position.z = RAIN_TRAIL * 0.5 + 0.2
+		n.visible = true
+		c["phase"] = phase
+		c["t"] = t
+		c["t0"] = t
+		c["from"] = from
+		c["to"] = to
+		_point(n, from, to - from)
+		return
+
+## Puts arrow `n` at `at`, its head toward `v`, its flat trail turned to face the camera.
+func _point(n: Node3D, at: Vector3, v: Vector3) -> void:
+	n.global_position = at
+	var cam := get_viewport().get_camera_3d() if get_viewport() else null
+	var up := Vector3.UP
+	if cam != null:
+		up = (cam.global_position - at).normalized()
+	if v.length() < 0.001 or absf(v.normalized().dot(up)) > 0.98:
+		up = Vector3.FORWARD
+	n.look_at(at + v, up)
 
 func _tick_wisps(delta: float) -> void:
 	for w in wisps:
@@ -370,30 +411,28 @@ func rain_on(center: Vector3, dir: Vector2, radius: float, deg: float, width: fl
 	var yaw := atan2(-dir.x, -dir.y)
 	var half := deg_to_rad(deg) * 0.5
 	var gaps := POSTS - 1
-	for i in POSTS:
-		var q := _arc_pt(center, yaw, radius, lerpf(-half, half, float(i) / gaps))
-		(posts[i] as Node3D).global_position = q + Vector3(0, 0.5, 0)
-		(posts[i] as Node3D).visible = true
-		if i == 0:
-			continue
+	var w := width * 0.5
+	var gnd := Vector3(0, 0.05, 0)
+	for i in range(1, POSTS):
 		var u0 := lerpf(-half, half, float(i - 1) / gaps)
 		var u1 := lerpf(-half, half, float(i) / gaps)
-		var p := _arc_pt(center, yaw, radius, u0)
-		var lo := Vector3(0, LACE_Y.x, 0)
-		var hi := Vector3(0, LACE_Y.y, 0)
-		var gnd := Vector3(0, 0.05, 0)
-		var w := width * 0.5
+		var in0 := _arc_pt(center, yaw, radius - w, u0) + gnd
+		var in1 := _arc_pt(center, yaw, radius - w, u1) + gnd
+		var out0 := _arc_pt(center, yaw, radius + w, u0) + gnd
+		var out1 := _arc_pt(center, yaw, radius + w, u1) + gnd
 		var n := (i - 1) * 4
-		# upright: an X between the two posts; on the ground: an X across the wall's depth
-		_lace(n, p + lo, q + hi)
-		_lace(n + 1, p + hi, q + lo)
-		_lace(n + 2, _arc_pt(center, yaw, radius - w, u0) + gnd, _arc_pt(center, yaw, radius + w, u1) + gnd)
-		_lace(n + 3, _arc_pt(center, yaw, radius + w, u0) + gnd, _arc_pt(center, yaw, radius - w, u1) + gnd)
+		# all flat on the ground: the inner and outer edge, then the X across the strip
+		_lace(n, in0, in1)
+		_lace(n + 1, out0, out1)
+		_lace(n + 2, in0, out1)
+		_lace(n + 3, out0, in1)
 	_pull_laces(0.0, 1.0)
 
+## Lace `i` runs a -> b; across a step in the ground it is cut (it would stand up as a tall line on screen).
 func _lace(i: int, a: Vector3, b: Vector3) -> void:
 	laces[i]["a"] = a
 	laces[i]["b"] = b
+	laces[i]["cut"] = absf(a.y - b.y) > LACE_STEP
 
 ## Every lace drawn `grow` (0..1) of the way from its start, `thick` (0..1) of its thickness.
 func _pull_laces(grow: float, thick: float) -> void:
@@ -401,14 +440,15 @@ func _pull_laces(grow: float, thick: float) -> void:
 		var n: MeshInstance3D = l["node"]
 		var a: Vector3 = l["a"]
 		var b: Vector3 = a.lerp(l["b"], maxf(grow, 0.01))
-		n.visible = true
+		n.visible = not l.get("cut", false)
 		n.global_position = (a + b) * 0.5
 		n.look_at(b, Vector3.UP if absf((b - a).normalized().y) < 0.98 else Vector3.RIGHT)
-		n.scale = Vector3(thick, thick, a.distance_to(b))
+		var k := thick * float(l.get("k", 1.0))
+		n.scale = Vector3(k, k, a.distance_to(b))
 
 ## A lace that runs within LACE_CLEAR of a shown Hunter's feet (ground distance), or crosses its box on screen (the
 ## camera looks down at a slant, so a lace on its side of a body cuts across it), is hidden while it does: the wall's
-## red threads never cut across a body (docs/COMBAT_CLARITY.md); the posts, flames and arrows still mark the wall.
+## red threads never cut across a body (docs/COMBAT_CLARITY.md); the rest of the laces and the arrows still mark it.
 func _part_laces() -> void:
 	var feet: Array[Vector2] = []
 	var zones: Array[Rect2] = []
@@ -429,7 +469,7 @@ func _part_laces() -> void:
 				break
 		if not near and not zones.is_empty():
 			near = _on_screen_box(a, b, zones)
-		(l["node"] as Node3D).visible = not near
+		(l["node"] as Node3D).visible = not near and not l.get("cut", false)
 
 
 ## Whether the line a -> b crosses any of the screen boxes `zones` (sampled every eighth of its length).
@@ -454,7 +494,10 @@ func _arc_pt(center: Vector3, yaw: float, radius: float, u: float) -> Vector3:
 
 func rain_off() -> void:
 	rain = {}
-	for p in posts: (p as Node3D).visible = false
+	for c in volley:
+		if String(c["phase"]) != "up":
+			c["t"] = 0.0
+			(c["node"] as Node3D).visible = false
 	for l in laces: (l["node"] as Node3D).visible = false
 	for f in flames:
 		(f["node"] as Node3D).visible = false
@@ -482,22 +525,18 @@ func _tick_rain(dt: float) -> void:
 	if float(rain["t"]) <= 0.0:
 		rain_off()
 		return
-	# arrows streaking down all along the arc
+	# her arrows falling into the strip (not in its last moment, so the last ones are gone as it ends)
 	rain["every"] = float(rain["every"]) - dt
-	if float(rain["every"]) <= 0.0:
-		rain["every"] = 0.035
-		var yaw := atan2(-(rain["dir"] as Vector2).x, -(rain["dir"] as Vector2).y)
-		var half := deg_to_rad(float(rain["deg"])) * 0.5
-		var depth := float(rain["radius"]) + KitLooks.vis_rng.randf_range(-0.45, 0.45)
-		var q := _arc_pt(rain["center"], yaw, depth, KitLooks.vis_rng.randf_range(-half, half))
-		for c in streaks:
-			if float(c["t"]) <= 0.0:
-				c["t"] = 0.32
-				c["to"] = q
-				var vr := KitLooks.vis_rng
-				c["from"] = q + Vector3(vr.randf_range(-0.8, 0.8), 6.5, vr.randf_range(-0.8, 0.8))
-				c["up"] = false
-				break
+	if float(rain["every"]) <= 0.0 and float(rain["t"]) > FALL_T + STUCK_T * 0.5:
+		rain["every"] = RAIN_EVERY
+		var vr := KitLooks.vis_rng
+		var d: Vector2 = rain["dir"]
+		var yaw := atan2(-d.x, -d.y)
+		var half := deg_to_rad(float(rain["deg"])) * 0.5 * 0.95
+		var depth := float(rain["radius"]) + vr.randf_range(-0.6, 0.6)
+		var q := _arc_pt(rain["center"], yaw, depth, vr.randf_range(-half, half))
+		var lean := (q - (rain["center"] as Vector3)).normalized() * 0.7      # (coming down away from her)
+		_volley_arrow("fall", q - Vector3(lean.x, -FALL_H, lean.z), q, FALL_T)
 	for f in flames:
 		var foe: Ent = f["foe"]
 		if foe != null and is_instance_valid(foe) and not foe.dead:
@@ -505,26 +544,33 @@ func _tick_rain(dt: float) -> void:
 		else:
 			(f["node"] as Node3D).visible = false
 
-func _tick_streaks(dt: float) -> void:
-	for c in streaks:
-		var n: MeshInstance3D = c["node"]
+## The volley: arrows flying up out of view, falling into the strip, then standing in it until they shrink away.
+func _tick_volley(dt: float) -> void:
+	for c in volley:
 		if float(c["t"]) <= 0.0:
-			n.visible = false
 			continue
+		var n: Node3D = c["node"]
 		c["t"] = float(c["t"]) - dt
-		var u := 1.0 - clampf(float(c["t"]) / 0.32, 0.0, 1.0)
 		var from: Vector3 = c["from"]
 		var to: Vector3 = c["to"]
-		var p := from.lerp(to, u * u)
-		n.visible = true
-		n.global_position = p + (from - to).normalized() * 0.6
-		var cam := get_viewport().get_camera_3d() if get_viewport() else null
-		n.rotation = Vector3(0, cam.global_rotation.y if cam else 0.0, 0)
-		if u >= 0.98:
-			n.visible = false
-			c["t"] = 0.0
-			if not c.get("up", false):
-				h.m.fx.spark(to + Vector3(0, 0.05, 0), Vector3.UP, SILVER, 3, 3.0, 70.0, 0.18, 8.0, 0.7)
+		var u := 1.0 - clampf(float(c["t"]) / maxf(0.01, float(c["t0"])), 0.0, 1.0)
+		match String(c["phase"]):
+			"up":
+				_point(n, from.lerp(to, 1.0 - (1.0 - u) * (1.0 - u)), to - from)
+				if float(c["t"]) <= 0.0: n.visible = false
+			"fall":
+				_point(n, from.lerp(to, u * u), to - from)
+				if float(c["t"]) <= 0.0:
+					# it lands: the head in the ground, no trail, a small red flash where it went in
+					c["phase"] = "stuck"
+					c["t"] = STUCK_T
+					c["t0"] = STUCK_T
+					(n.get_node("Trail") as Node3D).visible = false
+					_point(n, to + (to - from).normalized() * 0.15, to - from)     # (the head sunk in)
+					star(to + Vector3(0, 0.08, 0), 0.6, THREAD, 0.08, 0.0, 0.785, 1.2)
+			"stuck":
+				n.scale = Vector3.ONE * RAIN_SCALE * clampf(float(c["t"]) / 0.15, 0.0, 1.0)
+				if float(c["t"]) <= 0.0: n.visible = false
 
 # ------------------------------------------------------------------ Spirit Walk tint
 func tint_to(k: float) -> void:
@@ -565,7 +611,7 @@ func _process(_delta: float) -> void:
 			if float(c["t"]) <= 0.0: n2.visible = false
 	tick_shots()
 	_tick_rain(delta)
-	_tick_streaks(delta)
+	_tick_volley(delta)
 	var phasing: bool = h.ak is ArcherKit and (h.ak as ArcherKit).spirit.phasing()
 	wash_k = move_toward(wash_k, 1.0 if phasing else 0.0, delta * WASH_RATE)
 	h.wash = wash_k * WASH_MAX

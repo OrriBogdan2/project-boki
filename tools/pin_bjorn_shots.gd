@@ -117,6 +117,22 @@ const SHOTS := [
 		"No target: the arrow stuck in the ground at the cursor, glowing teal"
 	],
 	[
+		"pin_arrow_hit",
+		"archer",
+		"empowered_hit",
+		1.0,
+		3.0,
+		"Empowered arrow hits the dummy: the hit flash on the body, nothing left on the floor"
+	],
+	[
+		"pin_arrow_hit_after",
+		"archer",
+		"empowered_hit",
+		1.6,
+		3.0,
+		"0.7 s after the hit: the floor under and behind the dummy stays clear (a miss would plant an arrow)"
+	],
+	[
 		"pin_super_flight",
 		"archer",
 		"super_shot",
@@ -131,6 +147,14 @@ const SHOTS := [
 		1.43,
 		5.0,
 		"Supercharged hit: the teal X-star and a mint fletch burst on the dummy"
+	],
+	[
+		"pin_super_hit_after",
+		"archer",
+		"super_shot",
+		2.2,
+		5.0,
+		"0.8 s after a Supercharged hit: nothing left on the floor under the dummy"
 	],
 	[
 		"pin_heavy_hold",
@@ -174,12 +198,28 @@ const SHOTS := [
 		"Hail Wall cast: the bow raised high, green arrows lobbed up, the curved arc at the cursor distance"
 	],
 	[
+		"pin_hail_start",
+		"archer",
+		"hail",
+		0.9,
+		3.0,
+		"Hail Wall starts: the first arrows land on the arc and the wall goes up"
+	],
+	[
 		"pin_hail_rain",
 		"archer",
 		"hail",
 		1.8,
 		3.0,
-		"Hail Wall: seven green panels with fletch posts, arrows streaking down, blue burn flames on the dummy"
+		"Hail Wall mid: the wall along the arc, arrows streaking down, the dummy inside burning"
+	],
+	[
+		"pin_hail_end",
+		"archer",
+		"hail",
+		5.1,
+		3.0,
+		"Hail Wall ends: the wall thinning away in its last 0.3 s"
 	],
 	# ------------------------------------------------ Breaker
 	[
@@ -752,7 +792,7 @@ func take(main_node: Node, out: String) -> void:
 
 ## Where a shot's close-up looks: an impact at the target, anything else between the hero and the lead.
 func _close_focus(stem: String, lead: float) -> Vector3:
-	if stem.ends_with("_hit") or stem.ends_with("_impact"):
+	if stem.ends_with("_hit") or stem.ends_with("_hit_after") or stem.ends_with("_impact"):
 		return T.pos
 	return P.pos + Vector3(lead * 0.6, 0, 0)
 
@@ -858,6 +898,11 @@ func _input(what: String, t: float) -> void:
 		"empowered_miss":
 			T.teleport(home + Vector3(0, 0, 8.0))
 			_aim(home + Vector3(5.0, 0, 0))
+			P.inp["fire"] = t >= 0.0 and t < 0.82
+			K.res = 0.0
+		"empowered_hit":
+			T.teleport(home + Vector3(5.0, 0, 0))
+			_aim(T.pos)
 			P.inp["fire"] = t >= 0.0 and t < 0.82
 			K.res = 0.0
 		"super_shot":
