@@ -207,7 +207,7 @@ _Hedgehog + Toadstool_ (`burrlet`). A hedgehog whose quills are glowing toadstoo
 |  |  |
 |---|---|
 | Type | Spore |
-| Body | small, reach 1.3, mass 0.8; about 22 cm, 1.6 kg on average |
+| Body | small, reach 1.3, mass 0.8; about 28 cm, 1.6 kg on average |
 | Stat points | Health 6, Damage 2, Speed 6, Your max health 3, Your shield 3 |
 | Personality | bravery 0.55, loyalty 0.6, temper 0.4, curiosity 0.8 |
 | Fighting style | controller; aggression 0.5, loyalty 0.6, caution 0.45 |
@@ -288,7 +288,7 @@ _Fox + Scorpion_ (`cindle`). A sly fox with a scorpion's curled tail. Vespyx's s
 |  |  |
 |---|---|
 | Type | Venom |
-| Body | small, reach 1.3, mass 0.8; about 34 cm, 4.2 kg on average |
+| Body | small, reach 1.3, mass 0.8; about 28 cm, 4.2 kg on average |
 | Stat points | Health 4, Damage 3, Speed 9, Your max health 2, owner_move_speed 2 |
 | Personality | bravery 0.75, loyalty 0.5, temper 0.7, curiosity 0.5 |
 | Fighting style | bruiser; aggression 0.8, loyalty 0.4, caution 0.25 |
@@ -1369,7 +1369,7 @@ _Axolotl_ (`puddlet`). An axolotl whose frills grew into living crystal. Prisman
 |  |  |
 |---|---|
 | Type | Prism |
-| Body | small, reach 1.3, mass 0.8; about 26 cm, 2.1 kg on average |
+| Body | small, reach 1.3, mass 0.8; about 28 cm, 2.1 kg on average |
 | Stat points | Health 7, Damage 1, Speed 5, Your shield 4, owner_regen 3 |
 | Personality | bravery 0.45, loyalty 0.85, temper 0.2, curiosity 0.6 |
 | Fighting style | support; aggression 0.3, loyalty 0.9, caution 0.6 |

@@ -113,7 +113,7 @@
 		"play": "Shields you, dazzles foes. Gentle."
 	},
 	"size": {
-		"cm": 26,
+		"cm": 28,
 		"kg": 2.1,
 		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
 	}

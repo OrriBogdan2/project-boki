@@ -10,6 +10,8 @@ const CHECKS := {
 	"--boki-size-shots": ["res://tools/boki_size_shots.gd", "boki_size_shots", null],  # Boki beside Vex, true size
 	"--wisp-proc-check": ["res://tools/wisp_proc_check.gd", "wisp_proc_check", null],  # carried passive chirp + tip
 	"--bot-summon-check": ["res://tools/bot_summon_check.gd", "bot_summon_check", null],  # bots press Summon
+	"--kin-size-check": ["res://tools/kin_size_check.gd", "kin_size_check", null],  # Boki stand at their data height
+	"--boki-size-proof": ["res://tools/boki_size_proof.gd", "boki_size_proof", null],  # px heights, hero + 4 Boki
 	"--wisp-default-check": ["res://tools/wisp_default_check.gd", "wisp_default_check", null],  # wisps + C for all
 	"--wisp-summon-shots": ["res://tools/wisp_summon_shots.gd", "wisp_summon_shots", null],  # --shots-dir=<dir>
 	"--match-grade-check": ["res://tools/match_grade_check.gd", "match_grade_check", null],  # grade data
