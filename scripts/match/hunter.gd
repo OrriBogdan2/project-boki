@@ -2076,7 +2076,7 @@ func _update_glide(dt: float) -> void:
 			stats["glide_t"] = float(stats.get("glide_t", 0.0)) + dt
 	elif want and hold_opens and loco.can(Loco.S.GLIDING) and jump_at != m.time \
 			and (_glide_press_t if _glide_armed else air_t) >= HunterFeel.glide_engage \
-			and ((can and not AirLimits.glide_shut(self)) or (_glide_armed and _dash_into_glide())):
+			and ((can and not AirLimits.glide_shut(self)) or (_glide_armed and lfloat.is_empty() and _dash_into_glide())):
 		# a fresh press in the air (_glide_armed) held glide_engage s, or a pad's auto-glide, or scripted input: the
 		# glider opens (a dash an armed press was made in ends here; held scripted input never cuts a dash short).
 		# Space held since the jump never gets here (glide_press_only)
