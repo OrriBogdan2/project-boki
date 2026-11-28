@@ -460,7 +460,7 @@ While moving (source: she walks off a punch, throws on the move, moves while aim
   its face (moving into it, no jump) lifts her at 5 m/s with her walk carried on, so she rises onto the top and walks
   over it in about half a second (asserted at most 0.6s). Everyone else is stopped by it as by a full wall when walking;
   foes, bots and Boki are stopped jumping too, but an ally jumping against it is lifted over (owner 23:55, below);
-  another Tenzo's rocks are a wall to her too. A body that lands on
+  another Tenzo's rocks are a wall to him too. A body that lands on
   a rock from above still stands on it and can walk off.
 - Ally hop (owner 23:55, the source lets allies hop friendly walls): `StoneStand._ally_hop`; item 25 only stops allies walking.
 - A rock belongs to the Tenzo who raised it (Stone Row, Basalt Spine): the wall's `by`. He climbs it by walking: walking into

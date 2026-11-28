@@ -35,10 +35,10 @@ Each fallen Hunter's self is held in the object they were most bound to. Wearing
 | Cinder, the Ashen Kiss | The empty vial of Wyrm's blood | She drank what she was told to distil. An ember still glows at the bottom of the vial. | proposed |
 | Tenzo, the Stone Seer | A seeing-stone | One of the three stones that float around him. It is how he sees the world. | locked |
 | Sparkle, the Storm Chaser | The lightning rod | From the top of the spire where Rink, the boy she loved, fell. The storm struck them both there. | locked |
-| Grimble, the Scrap King | His brass monocle | He priced every treasure in Malgrave's vault through it. | proposed |
+| Grimble, the Scrap King | His brass monocle | Grimble priced every treasure in Malgrave's vault through it. | proposed |
 | Meeko, the Dawnfox | A glass globe of sun and rain | It holds her little sun and her raincloud. The shelter's last fire, kept alive all night. | proposed |
 | Sable, the Silver Thief | Her moth-wing knife | In her hand when she touched the Wyrmheart. | locked |
-| Motley, the Void Jester | His jack-in-the-box | Malgrave sealed him in it and threw it into the Void. | locked |
+| Motley, the Void Jester | His jack-in-the-box | Malgrave sealed Motley in it and threw it into the Void. | locked |
 | Gil, the Novice Mage | His old fishbowl pebble | The one thing he took from the bowl. He still isn't sure what it is for. | locked |
 
 ### Banter pairs

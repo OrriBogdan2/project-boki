@@ -43,7 +43,7 @@
 		"tender": {"relic": {"name": "A glass globe of sun and rain", "why": "It holds her little sun and her raincloud. The shelter's last fire, kept alive all night.", "status": "proposed"}},
 		"thief": {"relic": {"name": "Her moth-wing knife", "why": "In her hand when she touched the Wyrmheart.", "status": "locked"}},
 		"gil": {"relic": {"name": "His old fishbowl pebble", "why": "The one thing he took from the bowl. He still isn't sure what it is for.", "status": "locked"}},
-		"dredge": {"relic": {"name": "His brass monocle", "why": "He priced every treasure in Malgrave's vault through it.", "status": "proposed"}},
-		"ostra": {"relic": {"name": "His jack-in-the-box", "why": "Malgrave sealed him in it and threw it into the Void.", "status": "locked"}}
+		"dredge": {"relic": {"name": "His brass monocle", "why": "Grimble priced every treasure in Malgrave's vault through it.", "status": "proposed"}},
+		"ostra": {"relic": {"name": "His jack-in-the-box", "why": "Malgrave sealed Motley in it and threw it into the Void.", "status": "locked"}}
 	}
 }
