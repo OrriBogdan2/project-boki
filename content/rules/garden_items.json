@@ -515,7 +515,7 @@
 			"family": "luck",
 			"use": "eaten",
 			"effect": {"kind": "luck", "rare": false},
-			"sources": ["Expedition lair pile", "Warden drop"]
+			"sources": ["Expedition lair pile", "Hunter drop"]
 		},
 		{
 			"id": "nutty_crisp",
@@ -539,7 +539,7 @@
 			"family": "luck",
 			"use": "eaten",
 			"effect": {"kind": "luck", "rare": false},
-			"sources": ["Expedition lair pile", "Warden drop"]
+			"sources": ["Expedition lair pile", "Hunter drop"]
 		},
 		{
 			"id": "moon_fig",
@@ -555,7 +555,7 @@
 			"family": "luck",
 			"use": "eaten",
 			"effect": {"kind": "luck", "rare": true},
-			"sources": ["Expedition lair pile (rare)", "Warden drop (rare)"]
+			"sources": ["Expedition lair pile (rare)", "Hunter drop (rare)"]
 		}
 	]
 }
