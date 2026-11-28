@@ -240,7 +240,6 @@ if __name__ == '__main__':
     write_ogg('music_match', match_theme(), 0.8)
     write_ogg('music_title', title_theme(), 0.75)
     write_ogg('amb_home', birds(), 0.6)
-    write_ogg('amb_match', wind(14.0, True), 0.6)
     write_ogg('amb_rain', rain(), 0.55)
     for i in range(3):
         wav_out('step%d' % i, footstep(i), 0.7)
