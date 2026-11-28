@@ -6,6 +6,8 @@ extends Node3D
 ## It empowers the bow for "shots" (3) within "window" seconds: each LMB press after "recover" s looses the
 ## next arrow the instant it is pressed. Each flies "speed" m/s (the source's beam crosses its 18 m in about
 ## 0.2 s), pierces every foe out to "range" (1.5x her Empowered range), nudges and strips "shred" armor.
+## "pierce_terrain": it flies through terrain and Tenzo's rocks (the source's "pierce terrain and enemies");
+## placed walls, shields and ice still stop it (Blockers class "pierce", the Palm Lance's row).
 ## The last arrow hits harder and finishes a hunter it leaves under "execute" of their health. She can walk,
 ## roll and Spirit Walk between shots. The window ends after the last arrow or on time.
 ##
@@ -116,6 +118,7 @@ func _loose() -> void:
 	var dmg: float = base * k.m.dmg_mult(h) * LevelGrowth.ap(h)
 	var arrow := {"last": last}
 	var extra := {"src": "abil", "ab": "ultimate", "pierce": true, "hitset": {}, "kb": float(x.get("kb", 2.0)),
+		"pierce_terrain": bool(x.get("pierce_terrain", false)),
 		"tracer": 0.0,
 		"kx": func(_s: Dictionary, _at: Vector3, e: Ent, _why: String): _hit(e, arrow)}
 	k.m.spawn_shot(h, start, dir * spd, dmg, rng / spd, 0.3, PinFx.THREAD, extra)

@@ -124,7 +124,7 @@ footage can't settle the factor, ours is kept. Dashes and flights move the body 
 - Not built, waits on rule 2 decision: Hail Wall on wisps (proposal: bleed x2 and slow 35% inside the wall, no hit on the pool; docs/specs/DOWNED_ABILITIES.md rule 2, docs/decisions/0098).
 - Double-wall climb (hunter_move.json `climb_tall`, the data's bCanWallJump: Lace and Kael, the source's Myth and Brall; Hunter reach +0.9 m): a jump into a 4-terrace wall (3.2 m, two single 1.6 m walls, source 3 m) puts her on top; 5 terraces and her back to the wall do not. Facing is the keys pushed into the wall, as for every ledge. A Hunter without it (Vex) tops a single wall but not a double one. Asserted in --archer-combo-check (`combo archer: tall climb, ...`, tools/tall_climb_check.gd).
 - Not built: Hail Wall damaging wisps (our downed hunters take no ability damage).
-- Starpiercer: the beam is stopped by walls and terrain (the source pierces "destructibles"; ours has no destructible walls on the shot line), and a breakable prop ends it.
+- Starpiercer: the beam flies through terrain and Tenzo's rocks (`x.pierce_terrain`, the source's "pierce terrain and enemies", CATALOG-13-1127); placed walls, shields and ice stop it (Blockers class `pierce`), and a breakable prop ends it.
 - Starpiercer: the cooldown starts on the cast; unused shots are lost when the 6 s run out; a merge ends the window.
 - Starpiercer: each beam nocks for 0.5 s (the footage shows a 0.4-0.8 s draw; the fine print says no charge) and the next nock waits 1.0 s: 1.5 s a shot like the footage (f48/f63/f78), all three inside the 6 s window.
 - Starpiercer's execute is "finish a hunter left under 12% of max health" (the card's "execution damage" isn't defined anywhere we found).

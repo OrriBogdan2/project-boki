@@ -188,22 +188,32 @@ func _pin_window() -> void:
 	step(m, 0.3)
 	ok("pin ult small: Spirit Walk between shots keeps them", K.ult.active() and K.ult.left == 2 and K.spirit.active(),
 		"left %d" % K.ult.left)
-	# a wall stops the beam
+	# terrain does not stop the beam (the source's "pierce terrain and enemies"); a placed wall does
 	fresh(T)
 	_wall_at(m, home + Vector3(4, 0, 0), lv, 0)
 	beam(m, P, K, T.pos)
 	step(m, 0.2)
-	ok("pin ult small: a wall stops the beam (the foe behind it untouched)",
-		K.ult.fired == 3 and dmg(T) <= 0.01,
+	ok("pin ult small: the beam flies through a 3-terrace terrain wall (the foe behind it hit)",
+		K.ult.fired == 3 and dmg(T) > 0.0,      # (fired counts both casts: the press, then this beam)
 		"took %.0f" % dmg(T))
 	_clear_wall(m, home + Vector3(4, 0, 0), lv, 0)
+	fresh(T)
+	var foe_wall: Dictionary = m.verbs.add_wall(T, home + Vector3(4, 0, 0), Vector2(-1, 0),
+		{"length": 6.0, "hp": 5000.0, "time": 5.0}, 1.0)
+	beam(m, P, K, T.pos)
+	step(m, 0.2)
+	ok("pin ult small: a placed wall still stops the beam (Blockers pierce: the foe behind it untouched)",
+		K.ult.fired == 4 and dmg(T) <= 0.01,
+		"took %.0f" % dmg(T))
+	m.verbs.walls.erase(foe_wall)
+	if is_instance_valid(foe_wall.get("node")): (foe_wall["node"] as Node).queue_free()
 	# a merge inside the window: it ends with no beam (fire held through the merge looses nothing)
 	step(m, 0.9)
 	merge_now(P)
 	hold_fire(m, P, T.pos, 0.5)
 	P.inp["fire"] = false
 	ok("pin ult merge: the empowered window drops with no beam",
-		not K.ult.active() and K.ult.fired == 3,
+		not K.ult.active() and K.ult.fired == 4,
 		"fired %d" % K.ult.fired)
 	await done(m)
 
