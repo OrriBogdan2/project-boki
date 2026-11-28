@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d0jasmdlfdac1"
-path="res://.godot/imported/glassolotl_glassolotl_normal.webp-9910f1999500c8efceb722d906a0dae2.ctex"
+path.s3tc="res://.godot/imported/glassolotl_glassolotl_normal.webp-9910f1999500c8efceb722d906a0dae2.s3tc.ctex"
+path.etc2="res://.godot/imported/glassolotl_glassolotl_normal.webp-9910f1999500c8efceb722d906a0dae2.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "7f61ce816d3c8d9aea0a54d1ba310f8c"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/glassolotl/glassolotl_glassolotl_normal.webp"
-dest_files=["res://.godot/imported/glassolotl_glassolotl_normal.webp-9910f1999500c8efceb722d906a0dae2.ctex"]
+dest_files=["res://.godot/imported/glassolotl_glassolotl_normal.webp-9910f1999500c8efceb722d906a0dae2.s3tc.ctex", "res://.godot/imported/glassolotl_glassolotl_normal.webp-9910f1999500c8efceb722d906a0dae2.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
