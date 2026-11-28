@@ -140,12 +140,15 @@ func _kinds(lines: Array) -> void:
 			var k: String = sv[1][i]
 			var h: Hunter = foes[i]
 			match k:
-				"hit": h.hurt(30.0, P, {"src": "shot"})
+				"hit":
+					h.hurt(30.0, P, {"src": "shot"})
 				"armour":
 					h.armor = 200.0
 					h.hurt(30.0, P, {"src": "shot"})
-				"crit": h.hurt(30.0, P, {"src": "shot", "crit": true})
-				"empowered": h.hurt(30.0, P, {"src": "shot", "heavy": true})
+				"crit":
+					h.hurt(30.0, P, {"src": "shot", "crit": true})
+				"empowered":
+					h.hurt(30.0, P, {"src": "shot", "heavy": true})
 				"shield":
 					h.shield = 200.0
 					h.shield_t = 30.0
@@ -153,11 +156,12 @@ func _kinds(lines: Array) -> void:
 				"shell":
 					h.merge_st = {"shell": 200.0, "shell_max": 200.0, "form": {"glow": Color.RED}}
 					h.hurt(30.0, P, {"src": "shot"})
-					h.merge_st = {}          # (only the hit needs the shell: a bare dict would trip the merge's step)
+					h.merge_st = {}  # (only the hit needs the shell: a bare dict would trip the merge's step)
 				"heal":
 					h.hp = 900000.0
 					fx.healed(h, 30.0)
-				"hurt": P.hurt(30.0, h, {"src": "shot"})
+				"hurt":
+					P.hurt(30.0, h, {"src": "shot"})
 		for f in 24:
 			await _frame()
 		_take("dmgnum_3_kinds_" + String(sv[0]), lines, "One hit of every kind: " + ", ".join(sv[1]))

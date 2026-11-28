@@ -13,8 +13,15 @@ const BOWL_LIMIT := 30.0  # s of play the three hungry Boki have to eat in
 const STEP := 0.05  # s a simulated frame
 const HAND_DT := 0.25  # s per farm step
 const SNACK := "sapjelly"  # a snack of snacks.json: it gives joy and leans (kibble gives neither)
+const BOWL_SEED := 1127
+const HAND_SEED := 1128
+const BOWL_SPOTS := {  # where each Boki starts, from the bowl
+	"Bold": Vector3(-2.5, 0, 0.5),
+	"Greedy": Vector3(4.0, 0, 0.5),  # close: it must reach the bowl while Bold still sits there (the huff)
+	"Shy": Vector3(0.5, 0, -3.0),
+	"Full": Vector3(2.0, 0, 3.0)
+}
 const HAND_WITHIN := 3.0  # s a trusting Boki takes to eat from your hand
-const HOLD_THINK_S := 60.0  # s the hand cases hold the Boki's own think timer (each case runs ~12 s)
 
 var bad := 0
 var main: Node
@@ -125,6 +132,23 @@ func _long_starved(home: Node, k: Dictionary, tag: String) -> void:
 	ok(home.hecon.refuse_reason() != "", "%s: an empty belly again is refused again" % tag)
 
 
+## A spot on the home island where all four start places are free ground on that same island (the bowl only
+## calls a Boki on its own island): not a coast or a wall, where a start place is pushed aside or off the island.
+func _roomy_ground(home) -> Vector3:
+	var c: Vector3 = home.world.random_ground(0)
+	for _try in 60:
+		c = home.world.random_ground(0)
+		var fits := true
+		for off in BOWL_SPOTS.values():
+			var p: Vector3 = home.world.free_spot_near(c + off, [], 0.6)
+			if home.world.island_of(p.x, p.z) != home.world.island_of(c.x, c.z) or p.distance_to(c + off) > 0.8:
+				fits = false
+				break
+		if fits:
+			break
+	return c
+
+
 func _bowl_boki(sp: String, nm: String, bravery: float, food: float) -> Dictionary:
 	var r := Save.new_kin(sp, nm)
 	Care.ensure(r)
@@ -160,26 +184,22 @@ func _bowl() -> void:
 	Save.d["crops"]["emberberry"] = 5
 	HomeLayout.ensure(Save.d)
 	var home = await main._hb_home()
+	seed(BOWL_SEED)  # after the farm is built (it rolls its own dice): the rolls below repeat on every run
+	home.set_process(false)  # only the _move_kin steps below move the Boki (a loaded box's frames would too)
 	home.day_t = 0.45
 	home.ppos = Vector3(-500, 0, -500)  # you are away: nobody clings to you
-	var c: Vector3 = home.world.random_ground(0)
+	var c: Vector3 = _roomy_ground(home)
 	var bowl := {"id": FeedBowl.ID, "u": 990002, "x": int(c.x), "z": int(c.z), "r": 0}
 	Save.d["layout"]["deco"].append(bowl)
 	home.hb._sync_deco()
 	c = FeedBowl.at(bowl)
-	var spots := {
-		"Bold": Vector3(-2.5, 0, 0.5),
-		"Greedy": Vector3(5.5, 0, 0.5),
-		"Shy": Vector3(0.5, 0, -3.0),
-		"Full": Vector3(2.0, 0, 3.0)
-	}
 	var ks := {}
 	for k in home.kins:
 		for key in ["indoors", "leap", "exiting", "going_in", "called_t", "busy", "eat", "nap_go", "job"]:
 			k.erase(key)
 		k["nap_t"] = 0.0
 		k["t"] = 3.0
-		k["pos"] = home.world.free_spot_near(c + spots[k["rec"]["name"]], [], 0.6)
+		k["pos"] = home.world.free_spot_near(c + BOWL_SPOTS[k["rec"]["name"]], [], 0.6)
 		(k["node"] as Node3D).position = k["pos"]
 		ks[k["rec"]["name"]] = k
 	ok(ks.size() == 4 and home.hb.nodes.has(990002), "bowl: home puts the bowl and four Boki out")
@@ -250,6 +270,25 @@ func _run(home, secs: float) -> void:
 		t += HAND_DT
 
 
+## A spot for you with free ground of the same island 3 m east of it, where the Boki is put (no coast or wall
+## to push it aside or slow its walk to your hand).
+func _roomy_player(home) -> Vector3:
+	var p: Vector3 = home.world.random_ground(0)
+	for _try in 60:
+		p = home.world.random_ground(0)
+		var want := p + Vector3(3, 0, 0)
+		var q: Vector3 = home.world.free_spot_near(want, [], 0.8)
+		if home.world.island_of(q.x, q.z) == home.world.island_of(p.x, p.z) and q.distance_to(want) < 0.3:
+			break
+	return p
+
+
+func _place_by_player(home, e: Dictionary) -> void:
+	e["pos"] = home.world.free_spot_near(home.ppos + Vector3(3, 0, 0), [], 0.8)
+	(e["node"] as Node3D).position = e["pos"]
+	e["goal"] = e["pos"]
+
+
 func _lean(k: Dictionary) -> float:
 	var sum := 0.0
 	for v in k.get("lean", {}).values():
@@ -268,7 +307,7 @@ func _hand_cases() -> void:
 		k["likes"]["food"] = "pebblenut"
 		k["starter"] = true
 		k["trust"] = 5.0 if who == "shy" else 60.0
-		k["needs"]["food"] = 98.0 if who == "full" else 40.0
+		k["needs"]["food"] = 98.0 if who == "full" else 60.0  # not hungry: else it fetches its own snack
 		k["needs"]["joy"] = 50.0
 		Save.d["roster"].append(k)
 		Save.d["active"] = k["uid"]
@@ -277,19 +316,21 @@ func _hand_cases() -> void:
 		Save.d["items"].clear()  # a fresh save stocks kibble: the snack must be the only one to cycle to
 		Save.d["items"][SNACK] = 2
 		var home = await main._hb_home()
+		seed(HAND_SEED)
+		home.set_process(false)  # as in _bowl: the check steps the farm itself
 		home.day_t = 0.4
-		home.ppos = home.world.random_ground(0)
+		home.ppos = _roomy_player(home)
 		var e: Dictionary = home.kins[0]
-		e["pos"] = home.world.free_spot_near(home.ppos + Vector3(3, 0, 0), [], 0.8)
-		(e["node"] as Node3D).position = e["pos"]
-		e["goal"] = e["pos"]
+		_place_by_player(home, e)
 		await main.get_tree().process_frame
 		var hand: BaseHandFeed = home.life.hand
 		var fsm: Fsm = home.life.machine(e)
-		fsm.go(BaseLife.S.ROAM, "check")
-		# its own next pick waits out the case: a hungry Boki whose random think timer ran out fetched its own snack
-		# 1 s after a shy look (Roam>Eat), so the second offer was refused; hand feeding runs on the machine, not on t
-		e["t"] = HOLD_THINK_S
+		for _i in 240:  # whatever its first frames started (a nap, a toy) runs out; then it is ours
+			if fsm.go(BaseLife.S.ROAM, "check") or fsm.is_in(BaseLife.S.ROAM):
+				break
+			_run(home, HAND_DT)
+		fsm.refused = 0
+		fsm.refusals.clear()
 		ok(BaseHandFeed.hint() == "Hold %s to feed" % Settings.key_cap("interact"), "prompt text names the use key")
 		ok(not hand.offer(e), "%s: no snack selected, the hold does not feed" % who)
 		hand.cycle()
@@ -326,6 +367,7 @@ func _hand_cases() -> void:
 			"shy":
 				ok(Econ.pantry(SNACK) == 2 and float(k["trust"]) == trust0, "shy: the first try is a hesitant look")
 				ok(not fsm.is_in(BaseLife.S.EAT) and e.has("hand_shy"), "shy: it remembers being asked")
+				_place_by_player(home, e)  # it wandered for 5 s: the second try is asked from the same spot
 				hand.offer(e)
 				_run(home, 6.0)
 				ok(

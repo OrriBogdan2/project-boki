@@ -2,7 +2,7 @@
 """glb_image_swap.py IN.glb IMAGE_NAME NEW.jpg OUT.glb
 Put NEW.jpg in place of the embedded image named IMAGE_NAME, touching nothing else (mesh, skin, clips, materials).
 For a repaint on the same master (same mesh and UVs: Motley's r3 tail, 11-17), where a v95_to_game re-port would
-re-fit and re-weight the body. The BIN is rebuilt with the views in order; offsets after the image shift."""
+re-fit and re-weight the body. IMAGE_NAME may be "#N" (the Nth image) when names repeat. The BIN is rebuilt with the views in order; offsets after the image shift."""
 
 import json
 import struct
@@ -19,7 +19,8 @@ def load(f):
 
 def main(src, name, img, out):
     j, binary = load(src)
-    hit = [i for i in j["images"] if i.get("name") == name]
+    # "#N" = image index N (Meeko's native glb has two images named Image_0: body atlas #1, wing copy #4)
+    hit = [j["images"][int(name[1:])]] if name.startswith("#") else [i for i in j["images"] if i.get("name") == name]
     if len(hit) != 1:
         sys.exit("glb_image_swap: %d images named %s" % (len(hit), name))
     write(j, binary, hit[0]["bufferView"], open(img, "rb").read(), out)

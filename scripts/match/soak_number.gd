@@ -5,6 +5,7 @@ extends RefCounted
 ## number it shows only when the hit involves you, and obeys the damage-numbers setting. Hits the same
 ## shield soaks one after another add up (Fx.roll_key per colour).
 
+
 static func at(h: Hunter, by: Ent, soaked: float, col: Color) -> void:
 	var you: Hunter = h.m.player
 	var credit: Ent = (by as Kin).owner_h if by is Kin and (by as Kin).owner_h else by

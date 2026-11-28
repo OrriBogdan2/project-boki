@@ -7,12 +7,14 @@ extends RefCounted
 ## Hatchling Down drops at every hatch (drop_down) and is fed from the feed menu (GardenItems, kind "down").
 
 const SET_KEY := "nest_set"
-const DOWN_NAMES := "down_names"      # babies whose hatchling down is still in the bag, oldest first
+const DOWN_NAMES := "down_names"  # babies whose hatchling down is still in the bag, oldest first
+
 
 static func placed() -> Dictionary:
 	if not Save.d.has(SET_KEY):
 		Save.d[SET_KEY] = {}
 	return Save.d[SET_KEY]
+
 
 ## The item whose effect is nest `kind` ("gifts", "species" or "habit").
 static func item_of(kind: String) -> Dictionary:
@@ -21,20 +23,25 @@ static func item_of(kind: String) -> Dictionary:
 			return it
 	return {}
 
+
 static func held(kind: String) -> int:
 	return int(Save.d["items"].get(String(item_of(kind)["id"]), 0))
+
 
 ## Heirloom Threads on the pair: placed, no more than held or than the item allows.
 static func threads() -> int:
 	return mini(int(placed().get("gifts", 0)), mini(held("gifts"), int(item_of("gifts")["effect"]["max"])))
 
+
 static func add_threads(by: int) -> void:
 	var most := mini(held("gifts"), int(item_of("gifts")["effect"]["max"]))
 	placed()["gifts"] = clampi(threads() + by, 0, most)
 
+
 ## Puts the Locket ("species") or Shell ("habit") on the parent with this uid ("" takes it off).
 static func wear(kind: String, uid: String) -> void:
 	placed()[kind] = uid
+
 
 ## The parent wearing it among a and b ({} if none, or the item isn't in the bag).
 static func wearer(kind: String, a: Dictionary, b: Dictionary) -> Dictionary:
@@ -46,12 +53,17 @@ static func wearer(kind: String, a: Dictionary, b: Dictionary) -> Dictionary:
 			return parent
 	return {}
 
+
 ## What the placed items will do to an egg of a and b: inborn gifts from the parents, the species
 ## ("" for either), the parent whose habit and strongest trait pass exactly ({} for none).
 static func plan(a: Dictionary, b: Dictionary) -> Dictionary:
 	var locket := wearer("species", a, b)
-	return {"inherit": Care.IV_INHERIT + threads() * int(item_of("gifts")["effect"]["n"]),
-			"species": String(locket.get("species", "")), "habit_from": wearer("habit", a, b)}
+	return {
+		"inherit": Care.IV_INHERIT + threads() * int(item_of("gifts")["effect"]["n"]),
+		"species": String(locket.get("species", "")),
+		"habit_from": wearer("habit", a, b)
+	}
+
 
 ## The parent's strongest trait (the first of a tie).
 static func top_trait(rec: Dictionary) -> String:
@@ -60,6 +72,7 @@ static func top_trait(rec: Dictionary) -> String:
 		if best == "" or float(rec["traits"][t]) > float(rec["traits"][best]):
 			best = t
 	return best
+
 
 ## One line per placed item, the exact effect: the Nook shows these before the egg is made.
 static func preview_lines(a: Dictionary, b: Dictionary) -> Array:
@@ -79,6 +92,7 @@ static func preview_lines(a: Dictionary, b: Dictionary) -> Array:
 		out.append("%s: %s, exactly" % [item_of("habit")["name"], who])
 	return out
 
+
 ## The egg is laid: records the placed items on it (egg["sp"] follows a Locket) and uses them up.
 static func lay(egg: Dictionary, a: Dictionary, b: Dictionary) -> void:
 	var p := plan(a, b)
@@ -93,9 +107,11 @@ static func lay(egg: Dictionary, a: Dictionary, b: Dictionary) -> void:
 			Save.add_item(String(item_of(kind)["id"]), -int(used[kind]))
 	Save.d[SET_KEY] = {}
 
+
 ## Inborn gifts the baby takes from its parents (an egg laid before nest items has none recorded).
 static func inherit_n(egg: Dictionary) -> int:
 	return int(egg.get("inherit", Care.IV_INHERIT))
+
 
 ## The baby is out: a Lullaby Shell parent's habit and strongest trait pass exactly (no wobble).
 ## The items the egg was laid with are kept on the baby (lineage["nest"], shown on its Family tab).
@@ -111,6 +127,7 @@ static func hatched(baby: Dictionary, egg: Dictionary, a: Dictionary, b: Diction
 	var t := top_trait(parent)
 	baby["traits"][t] = float(parent["traits"][t])
 
+
 ## One Hatchling Down for every hatch, remembering whose.
 static func drop_down(baby: Dictionary) -> void:
 	Save.add_item("hatchling_down", 1)
@@ -118,10 +135,12 @@ static func drop_down(baby: Dictionary) -> void:
 		Save.d[DOWN_NAMES] = []
 	Save.d[DOWN_NAMES].append(String(baby["name"]))
 
+
 ## What the next Down fed to a Boki will be remembered as.
 static func memory_line() -> String:
 	var names: Array = Save.d.get(DOWN_NAMES, [])
 	return "it will remember %s's hatching" % names[0] if not names.is_empty() else "it will remember a hatching"
+
 
 static func take_memory() -> String:
 	var names: Array = Save.d.get(DOWN_NAMES, [])

@@ -181,6 +181,7 @@ func _crown(me: Dictionary, game: String, t: float) -> Dictionary:
 
 func _keepsake() -> void:
 	Save.d = Save.fresh()
+	TrainRuns.state()["race"] = 9999  # three wins in a row: the race-run limit is --train-runs-check's
 	var me := _rec("Crowned")
 	me["stats"] = {"power": 20, "guard": 20, "speed": 20, "focus": 20}
 	var hush: Dictionary = _seasons().filter(func(s): return s["zone"] == "hushwood")[0]

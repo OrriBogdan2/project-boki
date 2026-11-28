@@ -3,8 +3,8 @@ extends SkeletonModifier3D
 ## The inborn shapes (Unique.roll) on a rigged Boki: proportions and ear and tail shapes as a tweak over the clips, and
 ## the small extras (tufts, birthmark) on their bones. KinModels' bodies get these from Unique._variants.
 
-const LEVEL_GROW := 0.3        # as Evo.dress
-const SPLAY := 0.32            # rad, as Unique._variants
+const LEVEL_GROW := 0.3  # as Evo.dress
+const SPLAY := 0.32  # rad, as Unique._variants
 const FOLD := 0.8
 const KINK := 0.32
 const BOB := 0.7
@@ -13,9 +13,10 @@ const TUFT_SHAPE := Vector3(0.8, 1.4, 0.8)
 const PART_EXTRA := {}
 
 var skel: Skeleton3D
-var frame: Dictionary          # the species' row of BokiRig.FRAME
-var tweaks: Array = []         # [bone index, Basis] applied after the clip poses it
-var shown: Array = []          # [bone index, size] of grown parts: at rest, instead of collapsed
+var frame: Dictionary  # the species' row of BokiRig.FRAME
+var tweaks: Array = []  # [bone index, Basis] applied after the clip poses it
+var shown: Array = []  # [bone index, size] of grown parts: at rest, instead of collapsed
+
 
 ## Applies a Boki's rolls (`d`, Unique.of) to its skeleton. `mats` is Models.kin's material list.
 static func wear(skeleton: Skeleton3D, flex: Node3D, d: Dictionary, mats: Array, rec: Dictionary) -> void:
@@ -28,6 +29,7 @@ static func wear(skeleton: Skeleton3D, flex: Node3D, d: Dictionary, mats: Array,
 	mod._birthmark(d, mats)
 	mod._grown(rec.get("muts", []))
 
+
 func _process_modification_with_delta(_delta: float) -> void:
 	for s in shown:
 		var i: int = s[0]
@@ -38,8 +40,10 @@ func _process_modification_with_delta(_delta: float) -> void:
 		var pose := skel.get_bone_pose(i)
 		skel.set_bone_pose(i, Transform3D(pose.basis * (t[1] as Basis), pose.origin))
 
+
 func _bone_rest(bone: String) -> Basis:
 	return skel.get_bone_global_rest(skel.find_bone(bone)).basis.orthonormalized()
+
 
 ## Rotation in the creature's own axes as a tweak on a bone.
 func _turn(bone: String, axis: Vector3, angle: float) -> void:
@@ -48,10 +52,12 @@ func _turn(bone: String, axis: Vector3, angle: float) -> void:
 	var rest := _bone_rest(bone)
 	tweaks.append([skel.find_bone(bone), rest.inverse() * Basis(axis, angle) * rest])
 
+
 func _grow(bone: String, k: float) -> void:
 	if skel.find_bone(bone) < 0:
 		return
 	tweaks.append([skel.find_bone(bone), Basis.from_scale(Vector3.ONE * k)])
+
 
 func _proportions(flex: Node3D, d: Dictionary) -> void:
 	var ear := float(d.get("ear", 1.0))
@@ -62,6 +68,7 @@ func _proportions(flex: Node3D, d: Dictionary) -> void:
 		_grow("hleg1." + sd, limb)
 	_grow("tail1", float(d.get("tail", 1.0)))
 	flex.position.y += float(frame["hip"]) * (limb - 1.0) * 0.9
+
 
 func _shapes(d: Dictionary, mats: Array) -> void:
 	var tuft_m: Material = mats[1]
@@ -76,7 +83,7 @@ func _shapes(d: Dictionary, mats: Array) -> void:
 		"tufted":
 			var tuft := Models.sphere(0.03, 6)
 			var bone := "ear2." if skel.find_bone("ear2.L") >= 0 else "ear1."
-			var has_ears := skel.find_bone(bone + "L") >= 0      # (a rig without ear bones tufts its head)
+			var has_ears := skel.find_bone(bone + "L") >= 0  # (a rig without ear bones tufts its head)
 			var tip: Vector3 = frame["ear_tip"]
 			_stick(bone + "L" if has_ears else "head", tip * Vector3(-1, 1, 1), tuft, tuft_m, "Tuft", TUFT_SHAPE)
 			_stick(bone + "R" if has_ears else "head", tip, tuft, tuft_m, "Tuft", TUFT_SHAPE)
@@ -91,6 +98,7 @@ func _shapes(d: Dictionary, mats: Array) -> void:
 		"bobbed":
 			_grow("tail1", BOB)
 
+
 ## Evo's mutations: each is a part of the mesh on a bone of its own, bigger with its level.
 func _grown(muts: Array) -> void:
 	for m in muts:
@@ -104,6 +112,7 @@ func _grown(muts: Array) -> void:
 		for extra in PART_EXTRA.get(id, []):
 			_show(String(extra), 1.0)
 
+
 ## The bone a grown part shows on: tail_long stretches the tail (antennae on a body with no tail), the rest have a
 ## part_<id> bone of their own.
 static func part_bone(id: String, skeleton: Skeleton3D) -> String:
@@ -111,10 +120,12 @@ static func part_bone(id: String, skeleton: Skeleton3D) -> String:
 		return "part_" + id
 	return "tail1" if skeleton.find_bone("tail1") >= 0 else "part_antennae"
 
+
 func _show(bone: String, k: float) -> void:
 	var i := skel.find_bone(bone)
 	if i >= 0:
 		shown.append([i, k])
+
 
 func _birthmark(d: Dictionary, mats: Array) -> void:
 	var b: Variant = d.get("birth", [])
@@ -126,6 +137,7 @@ func _birthmark(d: Dictionary, mats: Array) -> void:
 	var mark := _stick("hips", at, Models.sphere(0.05, 8), Models.toon(col, false), "Birthmark", Vector3(0.9, 0.9, 0.9))
 	if mark:
 		mark.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+
 
 ## A small mesh on a bone, at `at` in the model's rest pose. Null when the skeleton lacks that bone.
 func _stick(bone: String, at: Vector3, mesh: Mesh, mat: Material, node_name: String, scl: Vector3) -> MeshInstance3D:

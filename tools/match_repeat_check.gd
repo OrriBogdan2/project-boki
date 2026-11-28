@@ -11,18 +11,21 @@ extends RefCounted
 ##   godot --headless -- --match-repeat-check [--repeat-cycles=8]
 ## On a GPU (jobq --needs gpu) the video and texture memory lines include the painted map (MapPaint).
 
-const CYCLES := 5               # expeditions in a run (--repeat-cycles= overrides)
-const WARM := 3                 # cycles that may fill the shared caches before growth counts
-const SIM_S := 20.0             # s of match time per expedition
-const DT := 1.0 / 60.0          # s per match step (Match.DT)
-const FRAME_EVERY := 30         # match steps between frames, so deferred frees and timers run
-const HOME_FRAMES := 30         # frames on the farm before the counts are read
-const MESH_GROWTH := 60         # cached meshes one more match may add (~420 a match before MeshCache)
-const OBJ_GROWTH := 400         # objects one more match may add (~750 a match before MeshCache)
-const MODEL_OBJ := 130          # objects one newly cached Boki species model holds (main 11-27: +776 for 6, ~129)
+const CYCLES := 5  # expeditions in a run (--repeat-cycles= overrides)
+const WARM := 3  # cycles that may fill the shared caches before growth counts
+const SIM_S := 20.0  # s of match time per expedition
+const DT := 1.0 / 60.0  # s per match step (Match.DT)
+const FRAME_EVERY := 30  # match steps between frames, so deferred frees and timers run
+const HOME_FRAMES := 30  # frames on the farm before the counts are read
+const MESH_GROWTH := 60  # cached meshes one more match may add (~420 a match before MeshCache)
+const OBJ_GROWTH := 450  # objects one more match may add (~750 a match before MeshCache)
+const MODEL_OBJ := 130  # objects one newly cached Boki species model holds (main 11-27: +776 for 6, ~129)
+# main 82009a8c90 measured +384..+420 (median 402, 6 runs, dummy renderer as the gate) and +290..+316 on
+# xvfb/llvmpipe: 400 sat inside main's own noise; 450 = main max + about one run-to-run spread (36)
 
 var main: Node
 var bad := 0
+
 
 func run(m: Node) -> void:
 	main = m
@@ -49,6 +52,7 @@ func run(m: Node) -> void:
 	print("REPEAT %s (%d failures)" % ["PASS" if bad == 0 else "FAIL", bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 ## Runs one expedition; returns the ms its build took (to the frame the Match appeared in).
 func _expedition(seed_v: int) -> int:
 	var t0 := Time.get_ticks_msec()
@@ -67,15 +71,16 @@ func _expedition(seed_v: int) -> int:
 			await main.get_tree().process_frame
 	return build_ms
 
+
 func _home() -> void:
 	main.show_screen("home", {})
 	for f in HOME_FRAMES:
 		await main.get_tree().process_frame
 
+
 func _counts() -> Dictionary:
 	return {
 		"objects": int(Performance.get_monitor(Performance.OBJECT_COUNT)),
-		"models": BokiRig.cached_models(),
 		"nodes": int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT)),
 		"orphans": int(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)),
 		"resources": int(Performance.get_monitor(Performance.OBJECT_RESOURCE_COUNT)),
@@ -83,12 +88,19 @@ func _counts() -> Dictionary:
 		"mem_mb": Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0,
 		"vram_mb": Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,
 		"tex_mb": Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0,
+		"models": BokiRig.cached_models(),
 	}
 
+
 func _fmt(r: Dictionary) -> String:
-	return "objects %d nodes %d orphans %d resources %d cached meshes %d static %.1f MB video %.1f MB" % [r["objects"],
-			r["nodes"], r["orphans"], r["resources"], r["meshes"], r["mem_mb"], r["vram_mb"]] \
-			+ " textures %.1f MB boki models %d (build %d ms)" % [r["tex_mb"], r["models"], r["build_ms"]]
+	return (
+		(
+			"objects %d nodes %d orphans %d resources %d cached meshes %d static %.1f MB video %.1f MB"
+			% [r["objects"], r["nodes"], r["orphans"], r["resources"], r["meshes"], r["mem_mb"], r["vram_mb"]]
+		)
+		+ " textures %.1f MB boki models %d (build %d ms)" % [r["tex_mb"], r["models"], r["build_ms"]]
+	)
+
 
 func _judge(rows: Array) -> void:
 	var a: Dictionary = rows[WARM - 1]
@@ -98,11 +110,18 @@ func _judge(rows: Array) -> void:
 	var models := int(b["models"]) - int(a["models"])
 	var obj := (int(b["objects"]) - int(a["objects"]) - MODEL_OBJ * models) / float(n)
 	_ok(meshes <= MESH_GROWTH, "cached meshes per match after the warm-up: %+.0f (limit %d)" % [meshes, MESH_GROWTH])
-	_ok(obj <= OBJ_GROWTH, "objects per match after the warm-up, past %d new species models: %+.0f (limit %d)" % [
-			models, obj, OBJ_GROWTH])
+	_ok(
+		obj <= OBJ_GROWTH,
+		"objects per match after the warm-up, past %d new species models: %+.0f (limit %d)" % [models, obj, OBJ_GROWTH]
+	)
 	_ok(int(b["orphans"]) == 0, "orphan nodes after the last match: %d" % int(b["orphans"]))
-	print("REPEAT static memory per match after the warm-up: %+.1f MB, video %+.1f MB" % [
-			(float(b["mem_mb"]) - float(a["mem_mb"])) / n, (float(b["vram_mb"]) - float(a["vram_mb"])) / n])
+	print(
+		(
+			"REPEAT static memory per match after the warm-up: %+.1f MB, video %+.1f MB"
+			% [(float(b["mem_mb"]) - float(a["mem_mb"])) / n, (float(b["vram_mb"]) - float(a["vram_mb"])) / n]
+		)
+	)
+
 
 ## A mesh the sweep dropped comes back the same when a build asks for it again (so a sweep never shows).
 func _rebuild_same() -> void:
@@ -111,6 +130,7 @@ func _rebuild_same() -> void:
 		MeshCache.sweep()
 	var b := Models.crystal(0.1234, 0.5678)
 	_ok(a != b and a.surface_get_arrays(0) == b.surface_get_arrays(0), "a swept mesh is rebuilt, the same")
+
 
 func _ok(cond: bool, what: String) -> void:
 	print("REPEAT %s %s" % ["ok  " if cond else "FAIL", what])
