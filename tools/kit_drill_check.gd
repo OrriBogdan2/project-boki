@@ -52,10 +52,10 @@ func _text() -> void:
 	ok(KitDrill.line("tender", "e").begins_with("Try "), "a Hunter outside the slice gets the generic line")
 
 ## Vex's drill (DECISIONS 'Starter masks'): held fire with no reload, the coin blast's knock, the still
-## charge and recoil of the beam, the target zone, tap vs hold on the dash with fire through it.
+## launch beat and walking charge of the beam, the target zone, tap vs hold on the dash with fire through it.
 func _vex_lines() -> void:
 	var want := {"lmb": ["hold", "no reload", "refills"], "rmb": ["coin", "knocks"],
-			"e": ["stand still", "0.6s", "recoil"], "x": ["zone", "cursor"], "dash": ["tap", "hold", "firing"]}
+			"e": ["plant", "0.6s", "walk"], "x": ["zone", "cursor"], "dash": ["tap", "hold", "firing"]}
 	for slot in want:
 		var text := KitDrill.line("gunslinger", slot).to_lower()
 		var miss: Array = want[slot].filter(func(w): return not text.contains(w))

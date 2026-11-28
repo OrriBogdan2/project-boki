@@ -258,7 +258,7 @@ func _ready_up(m: Match) -> void:
 			or k.rmb_down
 			or k.ult_running()
 			or _last_shot() >= 0
-			or k.commit_left() > 0.0  # (a move's committed recovery: Vex's E and X)
+			or k.commit_left() > 0.0  # (a kit's committed recovery)
 			or k.fire_wait() > 0.0
 		)  # (a kit's own cadence: Neve's burst pause would hold the next tap)
 		if not busy and hunter.roll_t <= 0.0 and k.dash_left() <= 0.0 and hunter.grounded and i > 30:
