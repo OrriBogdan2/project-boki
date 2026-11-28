@@ -66,6 +66,11 @@ func _frames(n: int) -> void:
 func _tick() -> void:
 	await main.get_tree().process_frame
 	reel_n += 1
+	# god only saves the player from the abyss: brood's spit and lob knocked them out, ended the match and froze
+	# m.time, so _grab waited forever (job 20261128-022153-03214, 51000 frames). Keep the player untouchable.
+	if m.player != null:
+		m.player.inv_t = 1.0
+		m.player.hp = m.player.max_hp
 	if walker != null:
 		walker.vel.x = WALK_MPS
 	if reel_b == null or reel_n % 2 == 1:
@@ -80,6 +85,10 @@ func _tick() -> void:
 ## Waits until `secs` after `t0` on match time, then crops the boss out of the screen into column `col` of row `row`.
 func _grab(strip: Image, b: Boss, t0: float, secs: float, col: int, row: int) -> void:
 	while m.time - t0 < secs:
+		if m.over:
+			push_error("BOSSANIMSHOT FAIL: the match ended mid-row")
+			main.get_tree().quit(1)
+			return
 		m.cam.focus = b.pos
 		await _tick()
 	var img := main.get_viewport().get_texture().get_image()
