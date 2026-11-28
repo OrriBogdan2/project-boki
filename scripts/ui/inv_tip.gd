@@ -13,6 +13,7 @@ const TITLE_FONT := 17
 var _window: Control
 var _card: PanelContainer
 var _owner_ctrl: Control
+var held_back := Callable()     # () -> bool: true while a drag carries something, so no card shows over it
 
 func _init(window: Control) -> void:
 	_window = window
@@ -34,9 +35,13 @@ func attach(ctrl: Control, lines_of: Callable, on_enter := Callable(), on_exit :
 func show_for(ctrl: Control, lines: Array) -> void:
 	_show(ctrl, lines)
 
+func _process(_dt: float) -> void:
+	if _card != null and held_back.is_valid() and held_back.call():
+		_hide(null)      # picked a thing up while its card was open
+
 func _show(ctrl: Control, lines: Array) -> void:
 	_hide(null)
-	if lines.is_empty() or not is_instance_valid(ctrl):
+	if lines.is_empty() or not is_instance_valid(ctrl) or (held_back.is_valid() and held_back.call()):
 		return
 	_owner_ctrl = ctrl
 	var col: Color = lines[0][1]

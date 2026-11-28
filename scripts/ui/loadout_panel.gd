@@ -9,9 +9,9 @@ extends Node
 
 const INK := Color("f3eee2")
 const MUTED := Color("a9b0bf")
-const TILE_H := 48.0
-const BADGE := 30.0
-const HEAD_H := 20.0       # the key-pill row of a tile: as tall with or without a key, so the names line up
+const TILE_H := 42.0
+const BADGE := 26.0
+const HEAD_H := 18.0       # the key-pill row of a tile: as tall with or without a key, so the names line up
 const ROW_H := 30.0        # one backpack line: a full pack fits a 720p window without scrolling
 
 var _m: Match
@@ -34,9 +34,11 @@ static func fill(m: Match, pc: PanelContainer, v: VBoxContainer, on_change: Call
 	pc.add_child(lp)
 	lp.add_child(lp._tip)
 	lp._drag = SlotDrag.attach(lp, lp._move)
+	lp._tip.held_back = lp._drag.carrying
 	return lp._fill(v)
 
 func _fill(v: VBoxContainer) -> Array:
+	v.add_theme_constant_override("separation", 4)      # a full loadout and pack fit the window without scrolling
 	var worn := UI.hbox(6)
 	for slot in Gear.SLOTS.size():
 		worn.add_child(_worn_tile(slot))
@@ -96,16 +98,16 @@ func _belt_tile(k: int) -> PanelContainer:
 	return t
 
 ## A slot: the key it answers to and what it is, then the icon and the name of what is in it, and how
-## many for a stack (`count` > 0), kept apart from the name so a long name never hides it.
+## many for a stack (`count` > 0) beside the icon, so a long name wraps on its own line and never hides it.
 func _tile(key: String, slot_name: String, icon: String, col: Color, item_name: String, count := 0) -> PanelContainer:
 	var t := PanelContainer.new()
 	var filled := icon != ""
 	t.add_theme_stylebox_override("panel", UI.frame(Color(col, 0.1 if filled else 0.04), 9,
-			Color(col, 0.65 if filled else 0.3), 2, 5, 5))
+			Color(col, 0.65 if filled else 0.3), 2, 5, 4))
 	t.custom_minimum_size = Vector2(10.0, TILE_H)
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	t.mouse_filter = Control.MOUSE_FILTER_STOP
-	var v := UI.vbox(2)
+	var v := UI.vbox(1)
 	t.add_child(v)
 	var head := UI.hbox(4)
 	head.custom_minimum_size.y = HEAD_H
@@ -114,18 +116,16 @@ func _tile(key: String, slot_name: String, icon: String, col: Color, item_name: 
 	var caption := UI.label(slot_name, 11, MUTED, UI.caps)
 	caption.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(caption)
+	if count > 0:
+		head.add_child(UI.label("x%d" % count, 12, INK, UI.big))
 	if icon != "":
 		head.add_child(Icons.Glyph.new(icon, col, 16.0))
 	v.add_child(head)
 	var nm := UI.label(item_name, 12, col if icon != "" else Color(MUTED, 0.7), UI.semi)
-	nm.clip_text = true
+	nm.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART      # a long name takes a second line, never cut
 	nm.custom_minimum_size.x = 10.0
 	nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var line := UI.hbox(4)
-	line.add_child(nm)
-	if count > 0:
-		line.add_child(UI.label("x%d" % count, 12, INK, UI.big))
-	v.add_child(line)
+	v.add_child(nm)
 	return t
 
 func _key_pill(key: String) -> Control:
@@ -159,7 +159,7 @@ func _perk_badges() -> HFlowContainer:
 func _pack_list(v: VBoxContainer) -> Array:
 	var sc := ScrollContainer.new()
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	var rows := UI.vbox(4)
+	var rows := UI.vbox(2)
 	rows.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	sc.add_child(rows)
 	v.add_child(sc)

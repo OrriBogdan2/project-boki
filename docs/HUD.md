@@ -159,8 +159,11 @@ for the squad rows). Verified 11-11:
 - Beside an open deathbox the window opens at the right edge with the box to its left, and gear rows in the box get
   the same compare card. Charms and a perk-orb cap are not in the game yet, so the window shows what exists.
 - An open deathbox does not open this window: the loot window (below) shows what you carry itself.
-- Check: `--inventory-check`; screenshots: `--inv-shots` (run with `--resolution`); 0.24.5 pass at 1280x720 and
-  3440x1440 in docs/shots/ui-inventory.
+- A full loadout (longest names, 6 of 6 pack, four belt items, five perk orbs) fits the window with no scroll and no
+  clipped name (belt names wrap to a second line); a hover card never opens over a thing being dragged.
+- Check: `--inventory-check` (its full-pack row runs 1280x720, 1600x900 and 1920x1080: safe margin, clipping, slots,
+  hover cards, drag); screenshots: `--inv-shots` (run with `--resolution`; the pack, the longest-name cards, a drag in
+  progress); 0.24.5 pass at 1280x720 and 3440x1440 in docs/shots/ui-inventory.
 
 ## Pop-up budget
 
