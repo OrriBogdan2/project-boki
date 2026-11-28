@@ -663,6 +663,10 @@ Vex body `01a1c20d-dbe6-747e`, `01a1c20d-dc12-71ff`, head `01a1c20d-db57-7423` (
 used: side by side with the shipped raws they read the same (no sharper face, hands or weapon), and the shipped raws
 already carry the fit's tuned landmarks, so each build keeps its old dense raw.
 
+### Gil r7, 2026-11-24 (Meshy create for the dorsal fin and head crest; about 330 credits against a 250 cap, balance 1619 after)
+Seven kept image-to-3D creates (4 fin, 3 crest; more tries in `~/gens/hunter-round-1124/gil/r7/creates`), 30 credits each, from the r4 A_sheet back and side views. Placement only in Blender (`tools/art1/gil_fin_crest.py`: weld, cut to 1,100/900 tris, size, 1024 paint, ink alpha, weight 1.0 to one bone). Skinned tail verts: `glb_add_bone.py --from` takes the weight from named donor bones and `--behind` limits it to verts behind a Z. No retexture was run (credit cap).
+r9 (11-24) dropped those parts and `gil_fin_crest.py`: the 630-vert "strand island" r7 cut from skin-v95 was live's own dorsal fin, so the cut left a 95-edge hole down the coat back and the hips-weighted Meshy fin floated off it. Before cutting an island from a native mesh, run a hole check (open edges by welded position) and look at it from the side at the game camera.
+
 ### Tenzo seeing-stones, round 25B, 2026-11-24 (jobs 20261124-093442-a2 and 20261124-101600-a3; cap 100, spent 194)
 6 `edit` tasks on the splash crop (art/brand/splash/field_tent_tenzo.jpg) x 9 credits + 4 image-to-3d `create` tasks x 35 =
 194 credits, all by job -093442-a2 (over its 100 cap). The kept rock: one create, decimated to 379 tris, cobalt texture,

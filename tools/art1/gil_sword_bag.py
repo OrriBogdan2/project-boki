@@ -82,6 +82,31 @@ def uv_affine(src_ob, dst_ob):
     return Matrix(M.tolist())
 
 
+def export_game(out, arm):
+    """The game .glb as every gil step writes it: the armature and the selected meshes, the clips, JPEG textures."""
+    bpy.context.view_layer.objects.active = arm
+    bpy.ops.export_scene.gltf(
+        filepath=out,
+        export_format="GLB",
+        use_selection=True,
+        export_apply=False,
+        export_animations=True,
+        export_animation_mode="ACTIONS",
+        export_skins=True,
+        export_yup=True,
+        export_materials="EXPORT",
+        export_image_format="JPEG",
+        export_jpeg_quality=92,
+        export_extras=False,
+        export_vertex_color="ACTIVE",
+        export_force_sampling=True,
+        export_frame_step=1,
+        export_optimize_animation_size=False,
+        export_def_bones=False,
+    )
+    print("GIL exported", out, flush=True)
+
+
 def main():
     game_path, master_path, out = sys.argv[sys.argv.index("--") + 1 :][:3]
     bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -191,27 +216,8 @@ def main():
 
     for o in bpy.data.objects:
         o.select_set(o.type != "MESH" or o in (body, src))
-    bpy.context.view_layer.objects.active = arm
-    bpy.ops.export_scene.gltf(
-        filepath=out,
-        export_format="GLB",
-        use_selection=True,
-        export_apply=False,
-        export_animations=True,
-        export_animation_mode="ACTIONS",
-        export_skins=True,
-        export_yup=True,
-        export_materials="EXPORT",
-        export_image_format="JPEG",
-        export_jpeg_quality=92,
-        export_extras=False,
-        export_vertex_color="ACTIVE",
-        export_force_sampling=True,
-        export_frame_step=1,
-        export_optimize_animation_size=False,
-        export_def_bones=False,
-    )
-    print("GIL exported", out, flush=True)
+    export_game(out, arm)
 
 
-main()
+if __name__ == "__main__":
+    main()

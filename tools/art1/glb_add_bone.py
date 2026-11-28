@@ -3,6 +3,9 @@ The node is copied from a source build (its rest under the same parent) and join
 rest inverse after the parent's). The parent's skin weight inside a zone moves onto it, as posekit.add_breath does in
 Blender, and its tracks in the named clips are copied in. Every other byte of the target stays the same.
 Run: python3 tools/art1/glb_add_bone.py <target.glb> <source.glb> <bone> [out.glb] --zone z0,z1,xh[,fade] [--clips a,b]
+[--from a,b] [--behind z]
+--from names the bones that give up weight (default: the parent); --behind keeps the glTF z (front +) below z, so a
+part that Meshy skinned to the thighs (Gil's tail) can move onto a bone of its own.
 --zone is in Blender's frame (Z up, metres: the glTF y). Weight ramps up from z0, down to z1 and in from |x| = xh, each
 over fade (0.08 for z, 0.05 for x), times the parent's weight: the shape of ostra_anim.rib_cage.
 A vertex with no free influence slot gives up its smallest other one (back to the parent) if that one is smaller."""
@@ -50,7 +53,7 @@ def zone_w(z0, z1, xh, fz=0.08, fx=0.05):
     return f
 
 
-def add_bone(tj, tb, sj, sb, bone, weight, clips):
+def add_bone(tj, tb, sj, sb, bone, weight, clips, donors=None, behind=None):
     tn = {n.get("name"): i for i, n in enumerate(tj["nodes"])}
     sn = {n.get("name"): i for i, n in enumerate(sj["nodes"])}
     if bone in tn:
@@ -82,6 +85,7 @@ def add_bone(tj, tb, sj, sb, bone, weight, clips):
         tj["accessors"].append({"bufferView": ibv, "componentType": 5126, "count": a["count"] + 1, "type": "MAT4"})
         sk["joints"].append(ni)
         bj = len(sk["joints"]) - 1
+        give = {sk["joints"].index(tn[d]) for d in donors} if donors else {pj}
         users = {mi for mi, n in enumerate(tj["nodes"]) if "mesh" in n and "skin" in n and tj["skins"][n["skin"]] is sk}
         done = set()
         for mi in sorted({tj["nodes"][u]["mesh"] for u in users}):
@@ -103,12 +107,12 @@ def add_bone(tj, tb, sj, sb, bone, weight, clips):
                 for v in range(ja["count"]):
                     jn = list(struct.unpack_from(jf, tb, jo + js * v))
                     wt = list(struct.unpack_from("<4f", tb, wo + 16 * v))
-                    k = next((k for k in range(4) if jn[k] == pj and wt[k] > 0), None)
+                    k = next((k for k in range(4) if jn[k] in give and wt[k] > 0), None)
                     if k is None:
                         continue
                     x, y, z = struct.unpack_from("<3f", tb, po + 12 * v)
                     w = weight(x, y) * wt[k]  # glTF y is Blender's z
-                    if w <= 0.001:
+                    if w <= 0.001 or (behind is not None and z >= behind):
                         continue
                     free = next((s for s in range(4) if wt[s] == 0), None)
                     if free is None:
@@ -159,12 +163,15 @@ if __name__ == "__main__":
     a = sys.argv[1:]
     z = [float(x) for x in a[a.index("--zone") + 1].split(",")]
     clips = a[a.index("--clips") + 1].split(",") if "--clips" in a else []
-    pos = [x for i, x in enumerate(a) if not x.startswith("--") and (i == 0 or a[i - 1] not in ("--zone", "--clips"))]
+    donors = a[a.index("--from") + 1].split(",") if "--from" in a else None
+    behind = float(a[a.index("--behind") + 1]) if "--behind" in a else None
+    opts = ("--zone", "--clips", "--from", "--behind")
+    pos = [x for i, x in enumerate(a) if not x.startswith("--") and (i == 0 or a[i - 1] not in opts)]
     target, source, bone = pos[:3]
     out = pos[3] if len(pos) > 3 else target
     tj, tb = G.read(target)
     sj, sb = G.read(source)
-    rep, cp = add_bone(tj, tb, sj, sb, bone, zone_w(*z), clips)
+    rep, cp = add_bone(tj, tb, sj, sb, bone, zone_w(*z), clips, donors, behind)
     G.write(out, tj, G.prune(tj, tb))
     for r in rep:
         print("mesh %s: %d verts, %d onto %s (%d gave up a small influence)" % (r[0], r[1], r[2], bone, r[3]))
