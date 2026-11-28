@@ -85,8 +85,6 @@ const NAMES := [
 	"k_fairy",
 	"k_crystal",
 	"k_sound",
-	"shotgun",
-	"sniper",
 	"hit_light",
 	"hit_solid",
 	"hit_heavy",
