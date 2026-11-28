@@ -243,6 +243,7 @@ func _swing_clip() -> int:
 			left = maxf(left, sync.attack_left)
 	var eased := low == 0.0 if left >= WardenNative.FADE else low < turned * 0.8
 	ok(turned > 0.1 and eased,
-			"%s: off under Meshy's attack clip (turned %.0f deg before, %.2f s of clip)" % [sync.art_id, rad_to_deg(turned), left])
+			"%s: off under Meshy's attack clip (turned %.0f deg before, %.2f s of clip)"
+			% [sync.art_id, rad_to_deg(turned), left])
 	_stand(0.0, SETTLE)
 	return 1
