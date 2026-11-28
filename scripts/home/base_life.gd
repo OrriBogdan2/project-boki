@@ -76,6 +76,7 @@ var acts := {}  # kind (play, nap, greet, squabble) -> how many a watcher has se
 var act_log: PackedStringArray = []  # "12s play Ash Crag", one line per social act (--base-life-check reads it)
 var whistle: BaseWhistle  # the whistle: your partner comes, hold for the nearest other Boki
 var hand: BaseHandFeed  # the selected snack, and feeding from your hand
+var routine: BaseRoutine  # what a free roaming Boki picks to do (favourite spot, shade, friend, water, you)
 var sfx := PlaySfx.new()  # the quiet cues of free play (tag, squabbles), capped per zone
 
 var _acc := 0.0
@@ -91,6 +92,7 @@ func _init(home) -> void:
 	r_v = Content.rules("base_life")
 	whistle = BaseWhistle.new(home, r_v)
 	hand = BaseHandFeed.new(home, r_v)
+	routine = BaseRoutine.new(self)
 
 
 static func nocturnal(rec: Dictionary) -> bool:
@@ -296,12 +298,8 @@ func choose(k: Dictionary) -> void:
 	if bored:
 		_nap(k, "bored")
 		return
-	var here: int = h.world.island_of(k["pos"].x, k["pos"].z)
-	var cling := float(pers.get("cling", 0.25)) * BaseAxes.mult(rec, "cling")
-	if randf() < cling and h.world.island_of(h.ppos.x, h.ppos.z) == here:
-		k["goal"] = h._seat(k, h.ppos, 1.5)
-	else:
-		k["goal"] = h.world.random_ground(maxi(here, 0))
+	if not routine.pick(k):
+		k["goal"] = h.world.random_ground(maxi(h.world.island_of(k["pos"].x, k["pos"].z), 0))
 
 
 # ------------------------------------------------------------------ per state
@@ -462,11 +460,18 @@ func _look_tick(k: Dictionary, m: Fsm) -> void:
 
 
 # ------------------------------------------------------------------ entering states
-func _nap(k: Dictionary, why: String) -> void:
+## `kind`: the nap spot kind it goes to first (garden_zones.json nap), alone, before its friends' places.
+func _nap(k: Dictionary, why: String, kind := "") -> void:
 	var m := machine(k)
 	if not m.go(S.NAP, why):
 		return
 	k.erase("eat")
+	if kind != "":
+		var shade := _free_spot(k, _spot_claims(), kind)
+		if not shade.is_empty():
+			k["life_spot"] = shade
+			k["t"] = float(r_v["spot_walk"])
+			return
 	var social := Care.need(k["rec"], "joy") >= GRUMPY
 	var claims := _spot_claims() if social else {}
 	var spot := _beside_friend(k, claims)
@@ -523,12 +528,14 @@ func _beside_friend(k: Dictionary, claims: Dictionary) -> Dictionary:
 	return {"i": best["life_spot"]["i"], "slot": 1, "pos": h.world.free_spot_near(on, [on], BESIDE, 0.45, SPOT_SNAP)}
 
 
-## The nearest free nap spot within reach on its island, or {}.
-func _free_spot(k: Dictionary, claims: Dictionary) -> Dictionary:
+## The nearest free nap spot (of `kind`, if given) within reach on its island, or {}.
+func _free_spot(k: Dictionary, claims: Dictionary, kind := "") -> Dictionary:
 	var spots := nap_spots()
 	var best := {}
 	var top := INF
 	for i in spots.size():
+		if kind != "" and spots[i][0] != kind:
+			continue
 		var tile := Vector3(float(spots[i][1]) + 0.5, 0.0, float(spots[i][2]) + 0.5)
 		var at: Vector3 = h.world.free_spot_near(tile, [], 1.0, 0.45, SPOT_SNAP)
 		var d := Vector2(at.x - k["pos"].x, at.z - k["pos"].z).length()

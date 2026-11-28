@@ -5,8 +5,9 @@ extends RefCounted
 ## stayed in one non-Nap state over STATE_MAX s, stood still STILL_MAX s off a nav point (its goal, a toy, its
 ## feeder or a place it is meant to rest), fell out of the zone, or a part over GARDEN.md 10.6's budget as far
 ## as a headless run can read it: nodes, emitting particle systems, and the script cost of a frame and of a
-## 10 Hz base-life step (draws, objects and the GPU frame are --perf-bench --bench-zone=all). Never touches the
-## real save.
+## 10 Hz base-life step (draws, objects and the GPU frame are --perf-bench --bench-zone=all). Bramblebank's day
+## also has to start every BaseRoutine pick (wander, favourite spot, midday shade, friend, water, sit by you) at
+## least once. Never touches the real save.
 
 const NavCheck := preload("res://tools/garden_nav_check.gd")
 const DAY_SECS := 1200.0  # s of game time: a 20-minute garden day
@@ -21,6 +22,7 @@ const PROGRESS := 0.12  # m moved in STILL_MAX s that counts as not still
 const AT_POINT := 1.5  # m from its goal: it has arrived on a nav point
 const FALL_Y := -2.0  # m: a Boki lower than this has fallen through the island
 const SEED := 5  # not 11: the toys' day cap shifted the seeded stream and B0 then met only 3 states
+const TRUSTING := 2  # Boki staged with high trust, so the sit-by-you routine can run
 const DAY_START := 0.3  # the farm clock at the start (morning)
 
 var bad := 0
@@ -74,6 +76,7 @@ func _day(zone: String) -> void:
 	var secs := float(Time.get_ticks_msec() - wall) / 1000.0
 	print("GARDENDAY %s: %.0f s of game time in %.1f s of wall time" % [label, t, secs])
 	_states(label, zone)
+	_routines(label, zone)
 	_budget(label, zone)
 	FarmUnlocks.rules()["base_mode"] = false
 	home.queue_free()
@@ -95,6 +98,8 @@ func _stage() -> void:
 	home.hg.demo_place(SnackPatch.ID, land + Vector3(5.0, 0, 5.0))
 	home._sync_fixtures()
 	ok(home.kins.size() == 6 and home.life != null, "Bramblebank: %d Boki live on a base_mode farm" % home.kins.size())
+	for k in home.kins.slice(0, TRUSTING):
+		k["rec"]["trust"] = 100.0
 	var stand: bool = home.toys.toys().size() == 3 and not SnackPatch.entry(Save.d).is_empty()
 	ok(stand, "Bramblebank: three toys and the snack patch stand")
 
@@ -160,6 +165,16 @@ func _states(label: String, zone: String) -> void:
 			visited.size() >= MIN_STATES,
 			"%s: %s visited %d states (%s)" % [label, k["rec"]["name"], visited.size(), names]
 		)
+
+
+## Every routine started at least once over the day (the hub has no base life).
+func _routines(label: String, zone: String) -> void:
+	if zone == "hub":
+		return
+	var ran: Dictionary = home.life.routine.ran
+	for id in BaseRoutine.IDS:
+		if id != "wander":
+			ok(int(ran.get(id, 0)) > 0, "%s: the %s routine started %d times" % [label, id, int(ran.get(id, 0))])
 
 
 ## The budget as far as a headless run reads it (GARDEN.md 10.6, garden_zones.json budget / budget_hub).
