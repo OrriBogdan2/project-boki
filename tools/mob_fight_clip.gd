@@ -41,15 +41,19 @@ func _fight(label: String, kinds: Array) -> void:
 		var a := -PI / 3.0 + (i - (kinds.size() - 1) * 0.5) * 0.5
 		var at := p.pos + Vector3(sin(a), 0, -cos(a)) * START_M
 		var mb := m.spawn_mob(String(kinds[i]), Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
-		mb.aggro(p, "check")
+		mb.tgt = p
+		mb._go(Mob.S.CHASE, "clip")
 		mobs.append(mb)
 	for f in END_FRAMES:
 		p.vel = Vector3.ZERO  # a blow never shoves the player off the island: the fight stays in frame
 		p.pos = anchor
 		var mid := p.pos
+		var alive := 1
 		for mb in mobs:
-			mid += mb.pos
-		mid /= float(mobs.size() + 1)
+			if is_instance_valid(mb):  # a dead one is freed once its dissolve ends
+				mid += mb.pos
+				alive += 1
+		mid /= float(alive)
 		m.cam.focus = m.cam.focus.lerp(mid, 0.1)
 		_clear_stage(mobs)
 		for mb in mobs:

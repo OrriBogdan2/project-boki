@@ -24,7 +24,8 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # vars.RUNNER = self-hosted moves this job to our own Linux runners (labels self-hosted,linux,boki); unset = GitHub-hosted.
+    runs-on: ${{ vars.RUNNER == 'self-hosted' && fromJSON('["self-hosted","linux","boki"]') || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -42,15 +43,7 @@ jobs:
           fi
 
       - name: Install Godot and export templates
-        run: |
-          set -e
-          base="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable"
-          curl -sSL -o godot.zip "$base/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
-          unzip -q godot.zip && mv Godot_v${GODOT_VERSION}-stable_linux.x86_64 /usr/local/bin/godot
-          curl -sSL -o tpl.tpz "$base/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
-          mkdir -p ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
-          unzip -q tpl.tpz -d tpl && mv tpl/templates/* ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable/
-          rm -rf tpl tpl.tpz godot.zip
+        run: tools/ci/ci_env.sh --templates
 
       - name: Import
         run: |
@@ -77,14 +70,15 @@ jobs:
       - name: Export game
         run: |
           set -e
+          rm -rf ../build   # a self-hosted runner keeps the previous run's files here
           mkdir -p ../build/win ../build/mac ../build/linux
           godot --headless --path . --export-release "Windows" ../build/win/ProjectBoki.exe
           godot --headless --path . --export-release "macOS" ../build/mac/ProjectBoki.zip
           godot --headless --path . --export-release "Linux" ../build/linux/ProjectBoki.x86_64
           mkdir -p dist
-          (cd ../build/win && zip -qr "$GITHUB_WORKSPACE/dist/ProjectBoki-windows.zip" .)
+          python3 -I tools/ci/zipdir.py "$GITHUB_WORKSPACE/dist/ProjectBoki-windows.zip" ../build/win
           cp ../build/mac/ProjectBoki.zip dist/ProjectBoki-macos.zip
-          (cd ../build/linux && zip -qr "$GITHUB_WORKSPACE/dist/ProjectBoki-linux.zip" .)
+          python3 -I tools/ci/zipdir.py "$GITHUB_WORKSPACE/dist/ProjectBoki-linux.zip" ../build/linux
 
       # The Sentry release and the native debug files (unwind info for the exported binaries and the addon's libraries;
       # the official export templates carry no symbols, see docs/SENTRY.md). Skipped without SENTRY_AUTH_TOKEN.
@@ -145,7 +139,7 @@ jobs:
           mkdir -p ../../build/launcher-win ../../build/launcher-mac
           godot --headless --path . --export-release "Windows" ../../build/launcher-win/ProjectBokiLauncher.exe
           godot --headless --path . --export-release "macOS" ../../build/launcher-mac/ProjectBokiLauncher.zip
-          (cd ../../build/launcher-win && zip -qr "$GITHUB_WORKSPACE/dist/ProjectBokiLauncher-windows.zip" .)
+          python3 -I "$GITHUB_WORKSPACE/tools/ci/zipdir.py" "$GITHUB_WORKSPACE/dist/ProjectBokiLauncher-windows.zip" ../../build/launcher-win
           cp ../../build/launcher-mac/ProjectBokiLauncher.zip "$GITHUB_WORKSPACE/dist/ProjectBokiLauncher-macos.zip"
 
       - name: Publish release

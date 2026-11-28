@@ -11,14 +11,14 @@ signal shown
 ## A line of the world's story shown under the tip (our own words; the canon is briefs/LORE_MASKS.md).
 const LORE := [
 	"Everyone born since the Hollowing is born without a face. We call ourselves the Empty.",
-	"A Mask holds the soul of a Hunter who stood against the Wyrm. Wear one and you remember what a self feels like.",
+	"A Relic holds the soul of a Hunter who stood against the Wyrm. Wear one and you remember what a self feels like.",
 	"Malgrave the Beloved never aged, and never forgot her vault. Under the Crown, it was always the Wyrm.",
 	"The Blight is the Wyrm's blood. It sours stone, grass and sky, and it follows whoever is loudest.",
 	"A thief once reached the Wyrmheart. Whatever she wished for, the whole land is still paying for it.",
-	"People once dug up Masks to smash them. Now they dig for the same relics to be whole again.",
+	"People once dug up Relics to smash them. Now they dig for the same ones to be whole again.",
 	"Skyfolk, beasts and humans all lost their faces alike. The sky doesn't ask who you were.",
 	"One wish waits in the Wyrmheart: remake the world, or rule it. Every Hunter wants it. So does the Wyrm.",
-	"Not every Mask has a face. Some are a compass, a jar, a pair of skates, and they remember just as much.",
+	"Not every Relic is a face. Some are a compass, a jar, a pair of skates, and they remember just as much.",
 	"Bring home what you carry. Out here, only what reaches the farm is truly yours.",
 ]
 ## What's being worked on, set by whoever builds the match (Main.show_screen, Match): shown by the spinner.
