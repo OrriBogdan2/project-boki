@@ -4,7 +4,9 @@ needs it for the bake): the .glb is read back into Blender, its actions are repl
 is exported again. A file that `auto_legs.py` gave real legs keeps its leg bones and its walk and run (the
 planted-paw trot): only the other clips are re-keyed, with the legs at rest as auto_legs keys them.
 
-  blender -b --factory-startup --python tools/boki/reclip.py -- --species=<id>
+  blender -b --factory-startup --python tools/boki/reclip.py -- --species=<id> [--only=hit,faint]
+
+--only keys just those clips (new, or replacing the file's own); every other clip stays as the file has it.
 """
 
 import os
@@ -49,6 +51,9 @@ def main():
     legs = {b + s for b in LEG_BONES.get(len(extra), ()) for s in (".L", ".R")}
     assert not extra or extra == legs, "unknown bones %s" % extra
     keep = {"walk", "run"} if extra else set()  # auto_legs' trot: the module's walk and run would glide the paws
+    only = next((a[7:].split(",") for a in sys.argv if a.startswith("--only=")), None)
+    if only:
+        keep = {a.name for a in bpy.data.actions} - set(only)
     boki_rig.HIDE_AT.clear()
     boki_rig.HIDE_AT.update(hidden_props(arm))
     boki_rig.SCALED = set(getattr(anim, "SCALED", ()))
@@ -58,8 +63,9 @@ def main():
             action.use_fake_user = True
         else:
             bpy.data.actions.remove(action)
-    boki_rig.make_clips(arm, {k: v for k, v in anim.CLIPS.items() if k not in keep})
-    print("RECLIP", species, "kept", sorted(keep), "re-keyed", sorted(set(anim.CLIPS) - keep))
+    keyed = {k: v for k, v in anim.CLIPS.items() if k not in keep}
+    boki_rig.make_clips(arm, keyed)
+    print("RECLIP", species, "kept", sorted(keep), "re-keyed", sorted(keyed))
     boki_rig.export(glb, tangents=True)
     glb_tangents.fix(glb)
 
