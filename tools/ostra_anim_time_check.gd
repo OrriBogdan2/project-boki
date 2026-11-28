@@ -213,8 +213,8 @@ func _float(m: Match, P: Hunter, K: OstraKit, home: Vector3) -> void:
 		wl = [minf(wl[0], g), maxf(wl[1], g)]
 	P.inp["move"] = Vector2.ZERO
 	print("TIME float walk gap %.3f..%.3f" % [wl[0], wl[1]])
-	# The model is drawn match_k times bigger (body.match_k, kin parity), so its hover grows with it: judge the gap at the
-	# base size, the way the source states it.
+	# The model is drawn match_k times bigger (body.match_k, kin parity), so its hover grows with it: judge the gap
+	# at the base size, the way the source states it.
 	var mk := Arch.match_k("ostra")
 	lo = [lo[0] / mk, lo[1] / mk]
 	var mid: float = (lo[0] + lo[1]) * 0.5

@@ -10,8 +10,8 @@ const AIM_OFF := 0.3  # rad: how far the cannon may sit off the aim mid slide
 const FLICK := 0.2  # m: how far past rest the coin hand reaches along her facing
 const PALM_UP := 1.2  # m: the raised palm above her feet while Palm Lance charges
 const PALM_OUT := 0.25  # m: the palm ahead of her while Palm Lance charges
-## m at her base size: the most the gun hand may rise over its rest height in a coin toss or a palm cast (was 0.15 m
-## as drawn at the old match_hunter_scale 1.10; her draw is body.match_k now, so the rise is read / match_k)
+## m at her base size: the most the gun hand may rise over its rest height in a coin toss or a palm cast; the rise
+## is read / body.match_k, her draw scale (0.136 = 0.15 m as drawn at a shared 1.10)
 const GUN_REST := 0.136
 
 var A

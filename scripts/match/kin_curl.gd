@@ -2,7 +2,8 @@ class_name KinCurl
 extends RefCounted
 ## A big Boki (a mount) curling up into a ball on your back (KinFollow.guard_tick: you glide or cross a gap it can't
 ## walk, or a traversal hop lands it on you) and back down to its flank. Kin.render draws the two ends; this eases
-## between them over CURL_S (longer when the hop is longer than HOP_V x CURL_S), the same for every species: its root, facing, size and the ball's pitch, from wherever it
+## between them over CURL_S (longer when the hop is longer than HOP_V x CURL_S), the same for every species: its
+## root, facing, size and the ball's pitch, from wherever it
 ## was last drawn off you, carried along with you (its seat moves with you, so the hop never trails your glide).
 ## --boki-curl-check dumps it per frame.
 
