@@ -13,7 +13,7 @@ extends RefCounted
 ## model even for a Meshy-native Hunter (the live look); --cam-y=<m>: the camera's height (eye level, knee level)
 ## looking at --at.
 ## --fig-h=<m> (with --states --views): the views sized to a figure <m> tall, FIGURE_FRAC printed; --frame-pass,
-## --aim-<view>=: hunter-proof's framing; --all-clips: every clip it plays too, <dir>/states_<view>/clip_<name>/
+## --aim-<view>=, --clip-aims=: hunter-proof's framing; --all-clips: every clip it plays too, <dir>/states_<view>/clip_<name>/
 ## (clip_shots_proof.gd).
 ## --drop: every Hero in a row wearing the drop poses (WardenDropPose), <dir>/drop/<pose>_<view>.png.
 ## Needs a renderer. ffmpeg makes the GIFs and sheets.
@@ -43,6 +43,7 @@ var holder: Node3D
 var cam: Camera3D
 var tree: SceneTree
 var frame_px := 480
+var proof: RefCounted  # clip_shots_proof.gd (--states --views): the cameras for hunter-proof
 
 
 func run(main: Node) -> void:
@@ -126,15 +127,13 @@ func run(main: Node) -> void:
 		for a in OS.get_cmdline_user_args():
 			if a.begins_with("--views="):
 				views = Array(a.substr(8).split(",", false))
-		var proof := Proof.new(self)
+		proof = Proof.new(self)
 		var fig_h := Proof.arg_float("--fig-h=", 0.0)
 		if views.is_empty():
 			await _states(model, fps, out)
 		for v in views:
 			var vw: Array = Proof.aimed(v, STATE_VIEWS[v] if fig_h <= 0.0 else Proof.view(v, fig_h))
-			cam.fov = float(vw[0])
-			cam.position = vw[1]
-			cam.look_at(vw[2])
+			proof.use_view(v, vw)
 			if ring:
 				ring.visible = v == "match"
 			if OS.get_cmdline_user_args().has("--frame-pass"):
@@ -249,6 +248,8 @@ func _states(model: Node3D, fps: float, out: String, sub := "states") -> void:
 	var rows: Array[String] = []  # manifest.tsv: clip name, first frame, frames (hunter-proof cuts the film by it)
 	for st in STATE_SHOTS:
 		var first := i
+		if proof:
+			proof.aim(st[0])
 		var s: Dictionary = (st[1] as Dictionary).duplicate()
 		s["face"] = model.rotation.y
 		s["cast"] = 99.0  # no recent cast: a native swing needs the counters
@@ -297,6 +298,8 @@ func _native_moves(model: Node3D, poser: Node, fps: float, dir: String, i: int, 
 		return i
 	for km in moves.rows:
 		var mv: Dictionary = moves.rows[km]
+		if proof:
+			proof.aim(km)
 		var len_s: float = poser.player.get_animation(String(poser.plays[WardenNativeMoves.KEY % km])).length
 		var hold := float(mv.get("hold_from", -1.0))
 		var secs: float = len_s if hold < 0.0 else hold + 1.5 * (len_s - hold)

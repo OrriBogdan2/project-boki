@@ -4,6 +4,7 @@ extends RefCounted
 ## from the idle frame's pixels; --frame-pass: each camera WIDE times wider, shadows off, VIEW <view> <fov> <pos> <at>
 ## printed and <dir>/empty.png (the stage without the Hunter), so hunter-proof finds every pixel the Hunter and its
 ## props reach in any clip; --aim-<view>=<x>,<y>,<z>,<fov>: that camera from the same spot looks at x,y,z with that fov;
+## --clip-aims=<view>|<clip>|<x>,<y>,<z>,<fov>;...: the same per clip (a clip not named there: the view's own aim);
 ## --all-clips: every clip the Hunter plays (not only the six states), <dir>/clip_<name>/f###.png at the film's fps.
 ## Needs a renderer (a headless run draws nothing).
 
@@ -17,11 +18,40 @@ const WIDE := 2.4  # --frame-pass: how much wider than the figure's own framing 
 const DIFF := 0.08  # luminance a pixel must differ from the empty stage to count as the figure
 const STATES := ["idle", "walk", "run", "jump", "attack", "crouch"]
 
-var shots: RefCounted  # the clip_shots run (its _grab, tree, frame_px)
+var shots: RefCounted  # the clip_shots run (its _grab, tree, frame_px, cam)
+var view_name := ""
+var view_cam: Array = []  # [fov, camera, looks at] of the view being filmed
+var clip_aims := {}  # "<view>|<clip>" -> [fov, looks at] (--clip-aims=)
 
 
 func _init(run: RefCounted) -> void:
 	shots = run
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--clip-aims="):
+			for item in a.substr(12).split(";", false):
+				var n := item.get_slice("|", 2).split_floats(",")
+				clip_aims[item.get_slice("|", 0) + "|" + item.get_slice("|", 1)] = [n[3], Vector3(n[0], n[1], n[2])]
+
+
+## Film view `v` with camera `vw` ([fov, camera, looks at]) until a clip has its own aim.
+func use_view(v: String, vw: Array) -> void:
+	view_name = v
+	view_cam = vw
+	_point(float(vw[0]), vw[2])
+
+
+## The camera for `clip` in the current view: its --clip-aims= entry, else the view's own.
+func aim(clip: String) -> void:
+	if view_cam.is_empty():
+		return  # (--states with no --views: clip_shots' own camera)
+	var a: Array = clip_aims.get(view_name + "|" + clip, [view_cam[0], view_cam[2]])
+	_point(float(a[0]), a[1])
+
+
+func _point(fov: float, at: Vector3) -> void:
+	shots.cam.fov = fov
+	shots.cam.position = view_cam[1]
+	shots.cam.look_at(at)
 
 
 static func arg_float(prefix: String, fallback: float) -> float:
@@ -104,10 +134,11 @@ func frame_pass_empty(model: Node3D, v: String, vw: Array, dir: String) -> void:
 
 
 ## FIGURE_FRAC <view> <the figure's share of the panel's height> for the camera as set.
-func report_fraction(model: Node3D, view_name: String, fps: float) -> void:
+func report_fraction(model: Node3D, v: String, fps: float) -> void:
+	aim("idle")
 	pose_idle(model, fps)
 	var rows := await figure_rows(model)
-	print("FIGURE_FRAC %s %.3f" % [view_name, float(rows) / shots.frame_px])
+	print("FIGURE_FRAC %s %.3f" % [v, float(rows) / shots.frame_px])
 
 
 ## Every clip the Hunter plays beyond the six states and the kit moves (those are filmed by --states).
@@ -120,6 +151,7 @@ func all_clips(model: Node3D, fps: float, dir: String) -> void:
 	var clips := p.get("clips") as WardenClips
 	for nm in clips.lib.get_animation_list():
 		var length := minf(clips.lib.get_animation(nm).length, MAX_CLIP_S)
+		aim(nm)
 		clips.force = {"clip": nm, "t": 0.0}
 		for k in 8:
 			p.call("_process", 1.0 / 30.0)
@@ -144,6 +176,7 @@ func _native_clips(native: WardenNative, fps: float, dir: String) -> void:
 		if nm in skip or nm in seen or not native.player.has_animation(nm):
 			continue
 		seen.append(nm)
+		aim(nm)
 		var length := minf(native.player.get_animation(nm).length, MAX_CLIP_S)
 		var sub := dir.path_join("clip_%s" % nm)
 		DirAccess.make_dir_recursive_absolute(sub)
