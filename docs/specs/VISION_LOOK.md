@@ -64,6 +64,13 @@ above, player controls below, found by row brightness). Numbers below are scaled
   haze by the fog share. The tier-0 void art around the islands is blue-violet in itself and is not part of
   the fog.
 
+- **The env haze is half-desaturated too (owner bug 11-23 "blue fog", 11-28).** The depth haze colours (`fog_light_color`
+  in `raid_look.gd`: clear, dusk, night, fog bank; the tier default in `match.gd`) leaned blue (clear +38 of 255 blue over
+  red); each moved about half way to its own grey at the same brightness, density untouched, so the depth fade is
+  the same. `--raid-check` asserts the haze leans at most 0.1 blue over red. `--fog-tint-shots --raid=<c>` (GPU) renders
+  the Hollow Crown in three biomes and prints mean blue minus red: the match frame was already neutral-to-warm (-28 to +5)
+  and moved 1-3 points, so the sight fog above was the blue the owner saw; sheet in gens/blue-fog-1128.
+
 - **The cone is 90 degrees (owner 11-23; 120 from 11-18).** Shots at 100, 120 and 140 on the same frame (`--vision-shots`, sheet in the job):
   see "Cone angle" below.
 - **The range circle is off screen.** Measured in the world it is the same size as ours (24 m), but our closer
