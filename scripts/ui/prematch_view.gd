@@ -9,7 +9,7 @@ const DIGITS_MIN := 48         # px, the smallest countdown digits
 const PULSE_RATE := 0.012      # radians per ms of the last-seconds throb (about 2 beats a second)
 const PULSE_GROW := 0.12       # the digits swell by this much at the top of a beat
 const TICK_FROM := 5.0        # s left on your turn when the countdown ticks each second
-const PULSE_FROM := 3.0       # s left on your turn when the countdown throbs red
+const PULSE_FROM := 5.0       # s left on your turn when the countdown throbs red (the last 5 s, same as the ticks)
 
 var pm: Prematch
 var voice := VoiceChat.new()
