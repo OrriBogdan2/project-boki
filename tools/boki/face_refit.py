@@ -32,17 +32,18 @@ EYES = {
     "puddlet": ((0.080, 0.267), 1.29),
     "burrlet": ((0.070, 0.213), 1.0),
     "caecilith": ((0.0365, 0.405), 0.75),  # the sockets on the top of the head
-    "threadwyrm": ((0.165, 0.062), 0.75),  # on the pale rope end, centred on it, big enough for the match camera
+    "threadwyrm": ((0.165, 0.075), 0.8),  # centred on the pale rope end, high on its upturned front (match camera)
     "thrumbird": ((0.048, 0.3475), 0.60),  # on the head sides, clear of the bill (prongs at x -15..25 mm)
     "zephyrak": ((-0.014, 0.336), 0.40),  # on the head, at the top of the neck, inside its outline (x -65..3 mm)
 }
 AXIS = {"threadwyrm": 0.13, "zephyrak": -0.031}  # x of the face's midline when it is off x = 0 (the head's own)
 FACING = {"threadwyrm": 0.12}
 REWEIGHT = {"threadwyrm"}
-MOUTH = {"threadwyrm": 0.55}  # the mouth's own scale where the eyes' scale leaves it wider than the head
-# no Face mouth: the coat has its own painted mouth (caecilith's zip grin, zephyrak's teeth) or the ref has none
+MOUTH = {}  # the mouth's own scale where the eyes' scale leaves it wider than the head
+# no Face mouth: the coat has its own painted mouth (zephyrak's teeth) or the ref has none
 # (thrumbird's bill); the mouth and its corners collapse to a point inside the head, their blend shapes to zero
-NO_MOUTH = {"caecilith", "thrumbird", "zephyrak"}
+NO_MOUTH = {"thrumbird", "threadwyrm", "zephyrak"}
+NO_BROWS = {"threadwyrm"}  # its first build squashed one brow to 8 mm and stretched the other to 150 mm: eyes only
 
 
 class Glb:
@@ -190,9 +191,10 @@ def refit(species):
     rest = [p for p in pieces if len(p) <= 50]
     eye_from, eye_to, groups = {}, {}, []  # per side, and the pieces that ride with it
     side = {}  # each eye's vertices and its lids', taken before anything moves
-    for sx in (-1, 1):
+    eyes = parts(epos, g.get(ep["indices"]).ravel())  # whole pieces by their mean: an eye vertex on x = 0 stays
+    for sx in (-1, 1):  # with its eye (thrumbird's sat on 0 and stretched a band across the face)
         side[sx] = (
-            np.where(np.sign(epos[:, 0]) == sx)[0],
+            np.concatenate([p for p in eyes if np.sign(epos[p, 0].mean()) == sx]),
             np.concatenate([p for p in lids if np.sign(fpos[p, 0].mean()) == sx]),
         )
     for sx in (-1, 1):
@@ -211,14 +213,17 @@ def refit(species):
         print("%s eye %s: %s -> %s" % (species, "LR"[sx > 0], np.round(c, 3), np.round(to, 3)))
     mid_from = (eye_from[-1] + eye_from[1]) / 2
     mid_to = (eye_to[-1] + eye_to[1]) / 2
-    if species in NO_MOUTH:  # brows are the 8-vertex pieces; the rest is the mouth and its corners
-        for p in [p for p in rest if len(p) != 8]:
+    def hidden(p):  # brows are the 8-vertex pieces; the rest is the mouth and its corners
+        return species in (NO_BROWS if len(p) == 8 else NO_MOUTH)
+
+    if any(hidden(p) for p in rest):
+        for p in [p for p in rest if hidden(p)]:
             m = fpos[p].mean(0)
             z = surface_z(body, m[0], m[1])
             fpos[p] = m + np.array([0.0, 0.0, 0.01 if z is None else z - m[2] + 0.01])
             for t in fp.get("targets", []):
                 g.scale_morph(t["POSITION"], p, 0.0)
-        rest = [p for p in rest if len(p) == 8]
+        rest = [p for p in rest if not hidden(p)]
     for p in rest:  # brows ride their eye, the mouth and its corners the eyes' midpoint (move + scale)
         m = fpos[p].mean(0)
         sd = 1 if m[0] >= 0 else -1
