@@ -10,17 +10,16 @@ extends RefCounted
 ##    launch (HunterMove.mantle_launch). Nor ever
 ##    above EXIT_K of your run speed, whatever you came in with or along the face: a dash or a launch
 ##    glancing off a ledge doesn't fling you off the top, and while you rise the speed above that bleeds
-##    at RISE_BLEED, so it doesn't slide you on along the face either. A jump in the rise (fling) goes
-##    no faster than its own speed. For
-##    MINI_S after it (SV MiniMantlePostLaunchDuration) that speed is held while you're still in the air
-##    and your keys don't pull back, so air drag doesn't take it straight back off you.
+##    at RISE_BLEED, so it doesn't slide you on along the face either. A jump in the rise (fling) leaves at
+##    the same speed (exit), up faster (fling_vy). For HunterMove.mantle_mini_s after it
+##    (SV MiniMantlePostLaunchDuration) that speed is held while you're still in the air and your
+##    keys don't pull back, so air drag doesn't take it straight back off you.
 ## The speed you came in with is a decaying peak (carry_v), so the wall that stopped you a step
 ## before the catch doesn't count as having stopped you.
 
 const APPROACH_DOT := 0.45     # keys or momentum this far into the face (cos ~63 degrees) catch a ledge
 const PUSH_SPEED := 2.0        # m/s into the face: momentum alone is a push
 const PEAK_DECAY := 6.0        # m/s per s: how fast the remembered approach speed fades
-const MINI_S := 0.75           # [game data] MiniMantlePostLaunchDuration
 const EXIT_K := 1.2            # x run speed: the fastest you leave a mantle (a little forward flow, never a launch)
 const RISE_BLEED := 60.0       # m/s per s: speed above exit_cap lost while rising up a face (19 m/s gone in ~0.2s)
 
@@ -84,17 +83,26 @@ static func exit(h: Hunter, hv: Vector2, n: Vector2, mv: Vector2, v_in: float) -
 	var d := mv.normalized() if mv.length() > 0.3 else n
 	if d.dot(n) < 0.0:
 		return hv.limit_length(cap)       # steering back off the ledge: your keys win
-	var floor_v := maxf(v_in * HunterMove.mantle_launch_keep, HunterMove.mantle_launch(h.base_speed))
-	var want := minf(floor_v, minf(maxf(v_in, h.base_speed), cap))
+	var want := mini_speed(v_in, h.base_speed)
 	var along := hv.dot(d)
 	if along < want:
 		hv += d * (want - along)
-	h.carry_mini = {"t": MINI_S, "v": want, "dir": d}
+	h.carry_mini = {"t": HunterMove.mantle_mini_s, "v": want, "dir": d}
 	return hv.limit_length(cap)
 
-## A jump during the ledge rise: at least `spd` toward d, and no faster than that (or exit_cap).
-static func fling(h: Hunter, hv: Vector2, d: Vector2, spd: float) -> Vector2:
-	var along := hv.dot(d)
-	if along < spd:
-		hv += d * (spd - along)
-	return hv.limit_length(maxf(spd, exit_cap(h)))
+## The speed a mantle leaves the lip at (m/s), from the speed you caught it with and your run speed: the source's
+## mini-mantle push target, max(MiniMantleXYSpeedTargetCoefficient x entry, MiniMantleXYSpeedTargetMin), never over
+## the entry (or run) speed nor exit_cap. The farm's fling reads it too.
+static func mini_speed(v_in: float, run: float) -> float:
+	var floor_v := maxf(v_in * HunterMove.mantle_launch_keep, HunterMove.mantle_launch(run))
+	return minf(floor_v, minf(maxf(v_in, run), run * EXIT_K))
+
+## A fling's up speed from `left` m under the lip (m/s): timed (in the window) on a ledge that started under
+## HunterMove.mantle_mini_h, it crosses the lip at mantle_mini_vy (SV MiniMantleZImpulseBonus +5 m/s; peaks
+## v^2 / 2g ~0.85 m over the top); early or on a taller ledge, it peaks HunterFeel.fling_early_height over.
+static func fling_vy(left: float, ledge_h: float, timed: bool) -> float:
+	var g2 := 2.0 * Hunter.H_GRAV
+	left = maxf(0.0, left)
+	if timed and ledge_h < HunterMove.mantle_mini_h:
+		return sqrt(g2 * left + HunterMove.mantle_mini_vy * HunterMove.mantle_mini_vy)
+	return sqrt(g2 * (left + HunterFeel.fling_early_height))

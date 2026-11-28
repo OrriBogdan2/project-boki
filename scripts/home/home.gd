@@ -1620,7 +1620,7 @@ func _mantle(x: float, z: float, top: float, air: bool) -> bool:
 	var n := Vector2(signf(x - ppos.x), 0.0) if absf(x - ppos.x) > absf(z - ppos.z) else Vector2(0.0, signf(z - ppos.z))
 	if _mv.length() < 0.3 or _mv.normalized().dot(n) < Hunter.LRISE_PUSH or not lfl.is_empty():
 		return false
-	lfl = {"lip": to.y, "n": n, "t": 0.0, "at": Vector2(ppos.x, ppos.z), "g0": Input.is_action_pressed("jump") or Input.is_action_pressed("glide")}
+	lfl = {"lip": to.y, "h": to.y - py, "n": n, "t": 0.0, "at": Vector2(ppos.x, ppos.z), "g0": Input.is_action_pressed("jump") or Input.is_action_pressed("glide")}
 	gliding = false
 	dash_t = 0.0
 	if to.y - py > 0.6 or side:
@@ -1630,7 +1630,7 @@ func _mantle(x: float, z: float, top: float, air: bool) -> bool:
 
 ## One step of rising up a ledge (the match's Hunter._ledge_rise): sets pvy while it lasts and
 ## returns true; false once it's over (moved off the face, dashed, glided, or timed out). A jump
-## near the top (HunterFeel.lrise_window) flings you higher and faster toward your keys.
+## near the top (HunterFeel.lrise_window) flings you higher (MantleCarry.fling_vy) toward your keys.
 func _ledge_float(d: float, mv: Vector2) -> bool:
 	lfl["t"] = float(lfl["t"]) + d
 	var n: Vector2 = lfl["n"]
@@ -1646,10 +1646,10 @@ func _ledge_float(d: float, mv: Vector2) -> bool:
 		var timed := left <= HunterFeel.lrise_window
 		lfl = {}
 		var hv := Vector2(pvel.x, pvel.z)
-		var spd := HunterFeel.fling_speed if timed else walk_speed()
+		var spd := MantleCarry.mini_speed(walk_speed(), walk_speed())     # the match's mantle exit speed
 		if hv.dot(dir) < spd: hv += dir * (spd - hv.dot(dir))
 		pvel = Vector3(hv.x, 0, hv.y)
-		pvy = sqrt(2.0 * GRAV * (maxf(0.0, left) + (HunterFeel.fling_height if timed else HunterFeel.fling_early_height)))
+		pvy = MantleCarry.fling_vy(left, float(lfl.get("h", 0.0)), timed)
 		Sfx.play("whoosh" if timed else "jump", null, -8.0, 0.1, 1.3)
 		return true
 	if left <= 0.0:

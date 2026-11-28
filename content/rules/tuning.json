@@ -84,7 +84,6 @@
 			"wall_catch_reach": "(movefeel) over the abyss below a lip, a wall this far from your side catches you (elsewhere 0.4)",
 			"abyss_glide_room": "a glider with heat left (lifting you out) gets this much more room",
 			"ledge_reach": "[E] m, a ledge this far above you can be climbed (walk into it)",
-			"ledge_cd": "[E] s, before another ledge climb may start",
 			"float_speed": "[E] m/s, the fastest a float (a lift's hang at the top) carries you sideways",
 			"glide_fall": "[O] m/s, the glider's sink with fuel (the readout's number)",
 			"dive_fall": "[est] a punchy skydive (was 11)",
@@ -103,9 +102,7 @@
 			"lrise_pop": "[est] up speed as you clear the lip with no jump (a ~0.25m pop)",
 			"lrise_off": "moved this far out from the face: you've let go",
 			"lrise_window": "[est] the fling window: the last this-many metres below the top (~0.12s)",
-			"fling_height": "[est] a fling timed in the window peaks this high over the top...",
-			"fling_speed": "[est] ...going this fast toward your keys (run speed is ~5)",
-			"fling_early_height": "[est] a jump before the window: only just over the top, at run speed",
+			"fling_early_height": "[est] a jump before the window, or on a ledge taller than hunter_move.json mantle_mini_h: only just over the top. The timed fling and the cooldown are hunter_move.json physics mantle_mini_* / mantle_cd [game data]",
 			"abyss_extra": "[game data] AbyssHeight: lost 17.5m under ground level (with World.ABYSS_DEPTH)"
 		},
 		"spirit_climb": 14.0,
@@ -129,7 +126,6 @@
 		"wall_catch_reach": 0.75,
 		"abyss_glide_room": 1.5,
 		"ledge_reach": 2.8,
-		"ledge_cd": 0.45,
 		"float_speed": 12.0,
 		"glide_fall": 1.7,
 		"dive_fall": 13.0,
@@ -148,8 +144,6 @@
 		"lrise_pop": 2.6,
 		"lrise_off": 0.9,
 		"lrise_window": 0.6,
-		"fling_height": 0.9,
-		"fling_speed": 7.5,
 		"fling_early_height": 0.2,
 		"abyss_extra": 11.5
 	}

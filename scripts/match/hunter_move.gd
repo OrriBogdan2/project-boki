@@ -39,6 +39,13 @@ static var mantle_vy_cap: float = _phys["mantle_vy_cap"]
 static var mantle_pull: float = _phys["mantle_pull"]
 static var mantle_launch_keep: float = _phys["mantle_launch_keep"]
 static var mantle_launch_min: float = _phys["mantle_launch_min"]
+## [game data] traversal-1126: MantleCooldown (s, from a ledge rise's start no other catch), MiniMantleZDiff (m, a
+## lower ledge is a mini-mantle), MiniMantleZImpulseBonus (m/s, a timed fling's lip speed) and
+## MiniMantlePostLaunchDuration (s, the exit speed held after the lip).
+static var mantle_cd: float = _phys["mantle_cd"]
+static var mantle_mini_h: float = _phys["mantle_mini_h"]
+static var mantle_mini_vy: float = _phys["mantle_mini_vy"]
+static var mantle_mini_s: float = _phys["mantle_mini_s"]
 static var dive_vy: float = _phys["dive_vy"]
 static var dive_accel: float = _phys["dive_accel"]
 static var dive_steer: float = _phys["dive_steer"]
