@@ -92,13 +92,13 @@ static func strip_rect(c: Control) -> Rect2:
 	return c.rect() if c is StripView else c.get_global_rect()
 
 
-## Is the prompt at `at` in view inside `frame`, and far enough off that its label is not huge?
-static func in_frame(cam: Camera3D, at: Vector3, frame: Rect2) -> bool:
-	return (
-		not cam.is_position_behind(at)
-		and cam.global_position.distance_to(at) >= float(rules()["near_m"])
-		and frame.has_point(cam.unproject_position(at))
-	)
+## Is the prompt at `at` in view inside `frame` (and off your `body` on screen), and far enough off that its label is
+## not huge?
+static func in_frame(cam: Camera3D, at: Vector3, frame: Rect2, body := Rect2()) -> bool:
+	if cam.is_position_behind(at) or cam.global_position.distance_to(at) < float(rules()["near_m"]):
+		return false
+	var px := cam.unproject_position(at)
+	return frame.has_point(px) and not body.has_point(px)
 
 
 ## Once a frame while the step's prompt is up: `at` is the target's feet, `prompt` where its world prompt hangs,
@@ -109,7 +109,7 @@ func sync(h, at: Vector3, prompt: Vector3, strips: Array) -> bool:
 	_sync_beam(h, at, r)
 	var cam: Camera3D = h.cam
 	var frame := frame(h, strips)
-	if in_frame(cam, prompt, frame):
+	if in_frame(cam, prompt, frame, player_box(cam, h.ppos)):
 		show_arrow(false)
 		return true
 	_make_arrow(h, float(r["arrow_px"]))

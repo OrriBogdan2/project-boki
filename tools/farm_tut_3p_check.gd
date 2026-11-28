@@ -126,9 +126,10 @@ func _step(id: String) -> void:
 				beam_off += 1
 			var strips := [home.guide.hint_box, home.guide.skip_row]
 			var frame := FarmTutPointer.frame(home, strips)
-			var in_view := FarmTutPointer.in_frame(cam, prompt, frame)
+			var body := FarmTutPointer.player_box(cam, home.ppos)
+			var in_view := FarmTutPointer.in_frame(cam, prompt, frame, body)
 			var feet := cam.unproject_position(tgt)
-			var shoulder := FarmTutPointer.player_box(cam, home.ppos).size.y > SHOULDER_FRAC * vp.y
+			var shoulder := body.size.y > SHOULDER_FRAC * vp.y
 			if (
 				facing and not in_view and not top and not shoulder
 				and not cam.is_position_behind(tgt) and frame.has_point(feet)
@@ -148,9 +149,10 @@ func _step(id: String) -> void:
 					or strips.any(func(c): return FarmTutPointer.strip_rect(c).has_point(ptr._arrow.position))
 				):
 					lost += 1
-			elif (
-				not cam.is_position_behind(prompt)
-				and FarmTutPointer.player_box(cam, home.ppos).has_point(cam.unproject_position(prompt))
+			if (
+				home.guide.marker.visible
+				and not cam.is_position_behind(prompt)
+				and body.has_point(cam.unproject_position(prompt))
 			):
 				covered += 1
 			var kind := "prompt" if in_view else "arrow"
