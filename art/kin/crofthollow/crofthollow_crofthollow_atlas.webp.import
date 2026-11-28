@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bobtecke4veif"
-path="res://.godot/imported/crofthollow_crofthollow_atlas.webp-8a3484471045b95292a19806f89c58cd.ctex"
+path.s3tc="res://.godot/imported/crofthollow_crofthollow_atlas.webp-8a3484471045b95292a19806f89c58cd.s3tc.ctex"
+path.etc2="res://.godot/imported/crofthollow_crofthollow_atlas.webp-8a3484471045b95292a19806f89c58cd.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "0f1c6bb3a3cdd212f8977edad1dbbe95"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/crofthollow/crofthollow_crofthollow_atlas.webp"
-dest_files=["res://.godot/imported/crofthollow_crofthollow_atlas.webp-8a3484471045b95292a19806f89c58cd.ctex"]
+dest_files=["res://.godot/imported/crofthollow_crofthollow_atlas.webp-8a3484471045b95292a19806f89c58cd.s3tc.ctex", "res://.godot/imported/crofthollow_crofthollow_atlas.webp-8a3484471045b95292a19806f89c58cd.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

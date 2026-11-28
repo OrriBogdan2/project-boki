@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bk60cv53ruadv"
-path="res://.godot/imported/lyrewing_lyrewing_face.webp-3b4c9941f6164277750e0a2d890640e8.ctex"
+path.s3tc="res://.godot/imported/lyrewing_lyrewing_face.webp-3b4c9941f6164277750e0a2d890640e8.s3tc.ctex"
+path.etc2="res://.godot/imported/lyrewing_lyrewing_face.webp-3b4c9941f6164277750e0a2d890640e8.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "74b4416e09548c64598da8a872940215"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/lyrewing/lyrewing_lyrewing_face.webp"
-dest_files=["res://.godot/imported/lyrewing_lyrewing_face.webp-3b4c9941f6164277750e0a2d890640e8.ctex"]
+dest_files=["res://.godot/imported/lyrewing_lyrewing_face.webp-3b4c9941f6164277750e0a2d890640e8.s3tc.ctex", "res://.godot/imported/lyrewing_lyrewing_face.webp-3b4c9941f6164277750e0a2d890640e8.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
