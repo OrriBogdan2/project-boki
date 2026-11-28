@@ -466,9 +466,10 @@ func _seed_lane() -> void:
 	AimKit.dotted(h, "rmb", {"len": float(sd["wind_lane"]), "width": width, "col": Color("e8f6c8")})
 
 
-## Her share of run speed during the wind-up.
+## Her share of run speed: the Burrseed wind-up, and carrying a teammate (passive.carry_move, [ref] Soulpack 0.7x).
 func move_k() -> float:
-	return float(rmb_def()["wind_move"]) if seed_aim else 1.0
+	var carry := float(d["passive"]["carry_move"]) if not carrying().is_empty() else 1.0
+	return carry * (float(rmb_def()["wind_move"]) if seed_aim else 1.0)
 
 
 func _tick_seed(dt: float) -> void:

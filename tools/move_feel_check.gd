@@ -602,6 +602,7 @@ func run(main: Node) -> void:
 	load("res://tools/move_feel_turn.gd").new(self).run()  # every kit's 180 stick flip at a run (~30 s, late too)
 	load("res://tools/move_feel_dash_turn.gd").new(self).run()  # every kit's body and LMB through a dash
 	load("res://tools/move_feel_hunters.gd").new(self).run()  # the movement review rows, every kit (late too)
+	load("res://tools/move_feel_fire_slow.gd").new(self).run()  # each Hunter's fire / charge / carry share of the run
 	await _no_fall_carry(main)  # it frees the match
 	await load("res://tools/move_one_profile_check.gd").new(self, main).run()  # one profile in every mode
 	print("MOVE FEEL CHECK DONE, failures: ", bad)
