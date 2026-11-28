@@ -29,7 +29,10 @@
   "tender_step_snow": "step",
   "tender_hurt": "grunt",
   "tender_down": "grunt",
-  "tender_death": "grunt"
+  "tender_death": "grunt",
+  "tender_recast_open": "ui",
+  "tender_recast_tick": "ui",
+  "tender_recast_end": "ui"
  },
  "signature": ["tender_lantern_chime", "tender_cheer"],
  "loops": ["tend_call_loop"],

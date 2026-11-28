@@ -27,7 +27,10 @@
 		"ostra_hover": "loop",
 		"ostra_hurt": "grunt",
 		"ostra_down": "grunt",
-		"ostra_death": "grunt"
+		"ostra_death": "grunt",
+		"ostra_recast_open": "ui",
+		"ostra_recast_tick": "ui",
+		"ostra_recast_end": "ui"
 	},
 	"signature": ["ostra_music_box", "ostra_spring_boing"],
 	"kit_files": ["ostra_well.gd"],

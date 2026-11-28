@@ -33,7 +33,10 @@
   "dolm_step_grass": "step",
   "dolm_step_stone": "step",
   "dolm_step_wood": "step",
-  "dolm_step_snow": "step"
+  "dolm_step_snow": "step",
+  "dolm_recast_open": "ui",
+  "dolm_recast_tick": "ui",
+  "dolm_recast_end": "ui"
  },
  "kit_files": ["breah_slam.gd", "breah_spine.gd"],
  "signature": ["dolm_rock_crunch"],

@@ -31,7 +31,10 @@
   "juggernaut_step_grass": "step",
   "juggernaut_step_stone": "step",
   "juggernaut_step_wood": "step",
-  "juggernaut_step_snow": "step"
+  "juggernaut_step_snow": "step",
+  "juggernaut_recast_open": "ui",
+  "juggernaut_recast_tick": "ui",
+  "juggernaut_recast_end": "ui"
  },
  "kit_files": ["juggernaut_chain.gd", "juggernaut_drop.gd", "juggernaut_ult.gd"],
  "signature": ["juggernaut_chain_rattle", "juggernaut_blade_hiss", "juggernaut_enrage"],

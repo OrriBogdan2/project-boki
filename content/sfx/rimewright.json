@@ -31,7 +31,10 @@
 		"rimewright_step_grass": "step",
 		"rimewright_step_stone": "step",
 		"rimewright_step_wood": "step",
-		"rimewright_step_snow": "step"
+		"rimewright_step_snow": "step",
+		"rimewright_recast_open": "ui",
+		"rimewright_recast_tick": "ui",
+		"rimewright_recast_end": "ui"
 	},
 	"signature": ["rimewright_skate_scrape", "rimewright_chime"],
 	"loops": ["rimewright_skate_glide", "rimewright_skate_hiss"],

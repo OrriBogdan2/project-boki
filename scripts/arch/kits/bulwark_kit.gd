@@ -723,6 +723,7 @@ func _lower() -> void:
 		if is_instance_valid(wall["node"]): (wall["node"] as Node3D).queue_free()
 	wall = {}
 	down_t = 0.0
+	m.sfx("bulwark_shield_down", h.pos, -6.0)
 	fx.aegis_hide()
 	if anim_id == "bul_guard": anim_id = ""
 

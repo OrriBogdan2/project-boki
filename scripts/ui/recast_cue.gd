@@ -9,7 +9,8 @@ extends RefCounted
 ##   wants less pop-up UI); no key or word on world objects (DECISIONS 2026-11-11);
 ##   a foe carrying your mark shows it in its plate's status row (HudPlate.row), and a flash goes off on it when the
 ##   payoff lands;
-##   sounds: a chime as the window opens, ticks before it closes, a low click when it runs out.
+##   sounds: a chime as the window opens, ticks before it closes, a low click when it runs out (each the Hunter's own
+##   <arch>_recast_open / _tick / _end when its set has one, else the shared chime and click).
 ## Only the local player's own cues show (track runs for the local hunter); key names come from the live InputMap.
 
 const KEYS := {"e": "signature", "x": "hunter_ult", "dash": "dash", "lmb": "fire", "sec": "secondary"}
@@ -33,13 +34,13 @@ static func track(k: ArchKit, dt: float) -> void:
 		var left0 := float(w["left"])
 		# a window shorter than a tick's mark skips it: no tick on top of the opening chime
 		cue["tick"] = TICKS.filter(func(t): return float(t) >= left0).size()
-		Sfx.play("ab_ready", null, -3.0, 0.0, 1.35)
+		_play(k, "recast_open", "ab_ready", -3.0, 1.0, 1.35)
 		_first_hint(k, String(w["slot"]))
 	elif w.is_empty() and was != "":
 		if float(cue.get("last", 1.0)) < RAN_OUT:    # ran out unused, even one that then fires itself: never silent
 			cue["exp_slot"] = was
 			cue["exp_t"] = EXPIRED_T
-			Sfx.play("click", null, -5.0, 0.0, 0.6)
+			_play(k, "recast_end", "click", -5.0, 1.0, 0.6)
 	if not w.is_empty():
 		var left := float(w["left"])
 		var n := int(cue.get("tick", 0))

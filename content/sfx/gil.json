@@ -30,7 +30,8 @@
   "gil_step_snow": "step",
   "gil_hurt": "grunt",
   "gil_down": "grunt",
-  "gil_death": "grunt"
+  "gil_death": "grunt",
+  "gil_recast_end": "ui"
  },
  "signature": ["gil_thrust", "gil_beached"]
 }
