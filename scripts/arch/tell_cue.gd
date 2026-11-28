@@ -33,6 +33,8 @@ static func rival(m: Node, h: Hunter) -> bool:
 ## AimDraw.put, the first step entry `e` under `id` shows. Ultimate telegraphs use ids "x..." and "ult..."
 ## (docs/AIMKIT.md), so those are skipped by id.
 static func aim(m: Node, h: Hunter, id: String, e: Dictionary) -> void:
+	if not bool(e.get("tell", true)):  # (AimKit "tell": false, a look that marks no landing hit)
+		return
 	if not e["all"] or id.begins_with("x") or id.begins_with("ult") or not (String(e["kind"]) in AREAS):
 		return
 	if not rival(m, h):
