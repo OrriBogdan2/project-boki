@@ -33,7 +33,6 @@ var bot_smash_t := 0.0
 var knock_until := 0.0         # a knock that can Crush is landing (blow, spin, charge, slam) until this time
 var crushed_at := {}           # foe id -> last Crush (one per 0.6s each)
 var crushes := 0               # Crushes landed (tests, demo)
-var block_dash := 0.0          # 360 Smash charge the aegis's blocks gave back (checks)
 var fx: BjornFx                # Breaker's pooled effects
 var ult: BjornUlt              # X: Faultline
 var launch: BjornLaunch        # the perfect swing's launch
@@ -105,9 +104,7 @@ func cd_k(slot: String) -> float:
 func heal_k() -> float:
 	return (1.0 + 0.25 * float(rank("kin") - 1)) * LevelGrowth.ap(h)
 
-func on_block(dmg: float, by) -> void:
-	if not wall.is_empty():
-		_block_hastens_smash(dmg)
+func on_block(_dmg: float, by) -> void:
 	if not wall.is_empty() or front_t > 0.0:
 		var d := h.aim_dir()
 		if by is Node3D and is_instance_valid(by):
@@ -115,20 +112,6 @@ func on_block(dmg: float, by) -> void:
 			if to.length() > 0.1: d = to.normalized()
 		fx.aegis_block(h.pos + Vector3(d.x * 0.95, 1.1, d.y * 0.95))
 		m.sfx("bjorn_block", h.pos, -5.0)
-
-## A blow the raised aegis takes gives the 360 Smash a share of its charge: a whole aegis's worth of damage
-## (shield.hp) gives "block_dash" charges (the reference's "blocking lowers the dash cooldown"). The dash's own
-## cue plays when a block is what makes it ready.
-func _block_hastens_smash(dmg: float) -> void:
-	var most := h.max_dashes()
-	if h.dashes >= most:
-		return
-	var sd: Dictionary = rmb_def()["shield"]
-	var was := h.dashes
-	h.dashes = minf(most, h.dashes + dmg / maxf(1.0, float(sd["hp"])) * float(sd.get("block_dash", 1.0)))
-	block_dash += h.dashes - was
-	if was < 1.0 and h.dashes >= 1.0:
-		DashReset.cue(h, "dash_hit")
 
 func _tick(dt: float) -> void:
 	lock_t = maxf(0.0, lock_t - dt)

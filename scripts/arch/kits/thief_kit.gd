@@ -35,7 +35,6 @@ const EMP_LINE := Color("ffc23a")      # the aim line while the next bolt is emp
 const AIM_LILAC := Color("d8c8ff")     # ... and otherwise
 const BOLA_HOT := Color("b07aff")      # the Bola's lane front and inner binding ring
 const BOLA_CORD := Color("b06aff")     # its violet lightning cord
-const SOFT_A := 1.2                     # the soft Bola lane: inside alpha 0.1 or less (zone rule)
 const EMP_RANGE_K := 1.12          # the empowered bolt flies 12% further (the source: 850 -> 950 units)
 const GLINT_POP_S := 0.22          # s the glint's flare takes to settle as the empowered bolt forms
 const GLINT_NET_EVERY := 1.1       # s between two glint pings online viewers get while it's empowered
@@ -680,12 +679,11 @@ func _tick_bola_cast(dt: float) -> void:
 		return
 	bola_cast["t"] = float(bola_cast["t"]) - dt
 	var k := 1.0 - clampf(float(bola_cast["t"]) / float(bd["cast"]), 0.0, 1.0)
-	# a soft strip with chevrons in the Bola's violet (the source's is white): lit rails over a faint inside
-	# (0.1 or less at the base, the VFX_QUALITY zone rule) so a foe in the lane stays readable; the fill front
-	# runs to the throw. Its width is the catch corridor for a foe of her size (_tick_bola: the reach past a foe's body)
+	# a strip with chevrons in the Bola's violet (the source's is white); the gold fill front runs to the throw.
+	# Its width is the catch corridor for a foe of her size (_tick_bola: the reach past a foe's body)
 	AimKit.lane(h, "rmb",
 			{"len": lane_len(), "width": float(bd["lane_w"]), "chevrons": 4, "tip": true, "fill": k,
-					"col": BOLA_CORD, "col2": BOLA_HOT, "alpha": SOFT_A, "soft": true})
+					"col": BOLA_CORD, "col2": BOLA_HOT, "alpha": 1.6})
 	_whirl_bola()
 	if float(bola_cast["t"]) <= 0.0:
 		bola_cast = {}

@@ -41,7 +41,6 @@ var punches := 0
 var boulders := 0
 var launches := 0
 var slams := 0
-var slam_resets := 0          # Quakefalls a knock made ready again (checks)
 var dunks := 0
 var wall_stuns := 0
 var guard_punches := 0         # punches that launched a rock of ours and gave a Shardskin stack
@@ -197,19 +196,6 @@ func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String, src: String) ->
 		splash.merge(slow)
 		f.hurt(f_dmg, h, splash)
 		KitStatus.apply(f, "vul", float(rd["shred_t"]), float(rd["shred"]))
-
-## A knock our blow landed makes Quakefall ready again at once (the reference's slam resets on a knock); an
-## assist does not. Nothing to give back while it is already up.
-func on_knock(_t: Hunter, mine: bool) -> void:
-	if not mine or float(cd["rmb"]) <= 0.0:
-		return
-	cd["rmb"] = 0.0
-	ch_rmb = float(rmb_charges())
-	slam_resets += 1
-	m.sfx("ab_ready", h.pos, -2.0, 0.8)
-	if h.is_local():
-		h._ab_feedback("sec", "ready")
-
 
 ## A Basalt Spine rock that reached a hunter inside the bond window fills the bond (judged a beat later, so
 ## a knock or kill from this very hit counts as one).
