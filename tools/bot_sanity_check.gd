@@ -110,6 +110,8 @@ func run(main_node: Node) -> void:
 				# (a ledge rise is a climb up a wall, not hanging in the air: it doesn't count)
 				if h.hit_marker() == "ring" and not h.gliding and h.lfloat.is_empty():
 					s["ring"] = float(s["ring"]) + Match.DT
+				if sd == 5 and h.nid == "p0" and m.time > 19.0 and m.time < 27.0 and int(m.time * 20) % 10 == 0:
+					print("DBG t=%.2f pos=%s vel=%s gr=%s cls=%s roll=%.2f knock=%.2f lf=%s grap=%s lip=%s dg=%s state=%s" % [m.time, h.pos.snapped(Vector3.ONE*0.01), h.vel.snapped(Vector3.ONE*0.01), h.grounded, h.cls, h.roll_t, h.knock_t, str(h.lfloat), str(h.grap), h.below_lip, str(h.dash_glide), str(h.get("state"))])
 				s["t"] = float(s["t"]) + Match.DT
 				if float(s["t"]) >= WIN:
 					var why: Array = []
