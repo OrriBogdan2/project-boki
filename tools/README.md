@@ -4,6 +4,9 @@ Checks (`*_check.gd`, registered in `tools/checks/<area>.gd`; the old `check_reg
 
 ## The gate: `tools/check.sh`
 
+## One check, isolated: `tools/run_check.sh --some-check`
+Runs a single Godot check the way the gate must: its own temp `XDG_DATA_HOME` and `XDG_CONFIG_HOME` (removed afterwards, so two checks at once never share user:// settings or keybindings), a timeout from `tools/check_timeouts.txt` (1200 s; the slow `--carry-pose-check` and `--heart-raid-nightmare-check` get 3000), and a verdict from the check's own `failures: N` line instead of Godot's exit code (a core dump at exit after `failures: 0` is a pass; `failures: N` is red even at exit 0). The gate runners in boki-tools (`suite-fast.sh`, `suite-pod`, ...) apply the same rules inline.
+
 It runs `health.py --strict` (god-file budgets, the style ratchet), then `lint_gate.py`. That covers gdlint, gdformat (120 columns), ruff, ruff format, vulture, glTF validation, Godot's unused-code and shadowing warnings, and `private-ref` (no outside game's name in any tracked text file or file name; the old code comments are baselined and go down when you touch a file), counted per file. Old debt sits in `lint_baseline.json` and may not grow, and a new file must be clean. See `check.sh`'s header for the flags. The suite and merge-candidate run `tools/check.sh --changed`: on top of the ratchet, every `.gd` a branch changes must be gdformat clean. This applies to branches cut after that rule landed.
 
 ## Formatting old files in batches
