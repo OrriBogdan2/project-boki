@@ -460,6 +460,8 @@ archetypes/dolm.json:rock.repeat_k	0.7
 archetypes/dolm.json:rock.repeat_t	0.8
 archetypes/dolm.json:rock.shred	0.15
 archetypes/dolm.json:rock.shred_t	3.0
+archetypes/dolm.json:rock.slow_k	0.15
+archetypes/dolm.json:rock.slow_t	0.8
 archetypes/dolm.json:rock.speed	22.0
 archetypes/dolm.json:rock.time	9.0
 archetypes/dolm.json:rock.top	2.2
@@ -542,7 +544,7 @@ archetypes/dredge.json:resource.back_k	0.5
 archetypes/dredge.json:resource.heal_knock	0.16
 archetypes/dredge.json:resource.max	10
 archetypes/dredge.json:resource.per_stack	0.025
-archetypes/dredge.json:rmb.arrive_stun	0.9
+archetypes/dredge.json:rmb.arrive_ground	0.9
 archetypes/dredge.json:rmb.charges	1
 archetypes/dredge.json:rmb.cooldown	12.0
 archetypes/dredge.json:rmb.dmg	6.0
