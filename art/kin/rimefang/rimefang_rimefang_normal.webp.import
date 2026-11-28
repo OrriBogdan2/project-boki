@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://vaam2pedugb0"
-path="res://.godot/imported/rimefang_rimefang_normal.webp-783ce0c814de5698afc0b4bfbad5cec9.ctex"
+path.s3tc="res://.godot/imported/rimefang_rimefang_normal.webp-783ce0c814de5698afc0b4bfbad5cec9.s3tc.ctex"
+path.etc2="res://.godot/imported/rimefang_rimefang_normal.webp-783ce0c814de5698afc0b4bfbad5cec9.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "34890385dbd41d0b9e8bed99cc3bc839"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/rimefang/rimefang_rimefang_normal.webp"
-dest_files=["res://.godot/imported/rimefang_rimefang_normal.webp-783ce0c814de5698afc0b4bfbad5cec9.ctex"]
+dest_files=["res://.godot/imported/rimefang_rimefang_normal.webp-783ce0c814de5698afc0b4bfbad5cec9.s3tc.ctex", "res://.godot/imported/rimefang_rimefang_normal.webp-783ce0c814de5698afc0b4bfbad5cec9.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

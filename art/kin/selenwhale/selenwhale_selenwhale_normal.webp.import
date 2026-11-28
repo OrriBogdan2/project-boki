@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://btj0t1qt7m5yp"
-path="res://.godot/imported/selenwhale_selenwhale_normal.webp-54682f1b3b258656f584e234a065d7f3.ctex"
+path.s3tc="res://.godot/imported/selenwhale_selenwhale_normal.webp-54682f1b3b258656f584e234a065d7f3.s3tc.ctex"
+path.etc2="res://.godot/imported/selenwhale_selenwhale_normal.webp-54682f1b3b258656f584e234a065d7f3.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "03b6133fdc415cd29a3101768b8c5dda"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/selenwhale/selenwhale_selenwhale_normal.webp"
-dest_files=["res://.godot/imported/selenwhale_selenwhale_normal.webp-54682f1b3b258656f584e234a065d7f3.ctex"]
+dest_files=["res://.godot/imported/selenwhale_selenwhale_normal.webp-54682f1b3b258656f584e234a065d7f3.s3tc.ctex", "res://.godot/imported/selenwhale_selenwhale_normal.webp-54682f1b3b258656f584e234a065d7f3.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

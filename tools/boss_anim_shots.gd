@@ -1,7 +1,7 @@
 extends RefCounted
 ## --boss-anim-shots --shots-dir=<dir> [--boss=<id>]: one strip per lair boss on a real GPU (jobq --needs gpu),
 ## boss_anim_<id>.png.
-## Each row is a move cropped at the match camera, left to right at fixed times: the wake, every attack's
+## Each row is a move cropped at the match camera, left to right at fixed times: idle, walk, the wake, every attack's
 ## wind-up into its strike (the fourth frame lands on the hit), the stagger, the phase change and the death.
 ## --reel-frames also saves every other drawn frame, cropped round the boss at the match camera, as
 ## <dir>/reel_<id>/NNNNN.jpg, for a clip made off the box: ffmpeg -framerate 30 -i <dir>/reel_<id>/%05d.jpg ...
@@ -10,6 +10,7 @@ const CROP := 460  # px, the square round the boss
 const SETTLE_S := 1.0  # s the camera gets to settle
 const FOE_AWAY := 5.0  # m the player stands from the boss
 const REEL := Vector2i(960, 640)  # px, each --reel-frames frame round the boss
+const WALK_MPS := 2.0  # m/s the boss is held moving in the walk row (BossAnim plays walk above 0.3)
 
 var main: Node
 var m: Match
@@ -17,6 +18,7 @@ var reel := false  # --reel-frames
 var reel_dir := ""  # where the boss being filmed has its frames
 var reel_b: Boss
 var reel_n := 0
+var walker: Boss  # the boss in the walk row, nudged along each frame
 
 
 func run(mn: Node) -> void:
@@ -64,6 +66,13 @@ func _frames(n: int) -> void:
 func _tick() -> void:
 	await main.get_tree().process_frame
 	reel_n += 1
+	# god only saves the player from the abyss: brood's spit and lob knocked them out, ended the match and froze
+	# m.time, so _grab waited forever (job 20261128-022153-03214, 51000 frames). Keep the player untouchable.
+	if m.player != null:
+		m.player.inv_t = 1.0
+		m.player.hp = m.player.max_hp
+	if walker != null:
+		walker.vel.x = WALK_MPS
 	if reel_b == null or reel_n % 2 == 1:
 		return
 	var img := main.get_viewport().get_texture().get_image()
@@ -76,6 +85,10 @@ func _tick() -> void:
 ## Waits until `secs` after `t0` on match time, then crops the boss out of the screen into column `col` of row `row`.
 func _grab(strip: Image, b: Boss, t0: float, secs: float, col: int, row: int) -> void:
 	while m.time - t0 < secs:
+		if m.over:
+			push_error("BOSSANIMSHOT FAIL: the match ended mid-row")
+			main.get_tree().quit(1)
+			return
 		m.cam.focus = b.pos
 		await _tick()
 	var img := main.get_viewport().get_texture().get_image()
@@ -89,6 +102,8 @@ func _grab(strip: Image, b: Boss, t0: float, secs: float, col: int, row: int) ->
 ## A move to film: its times in seconds from the trigger, or (negative) fractions of the hit.
 func _times(b: Boss, row_name: String) -> Array:
 	match row_name:
+		"idle", "walk":
+			return [0.2, 0.5, 0.8, 1.1, 1.4, 1.7]
 		"wake":
 			return [0.0, 0.3, 0.6, 0.9, 1.2, 1.5]
 		"stagger":
@@ -104,6 +119,8 @@ func _times(b: Boss, row_name: String) -> Array:
 func _trigger(b: Boss, row_name: String) -> void:
 	b.next_cd = 1e9
 	match row_name:
+		"idle", "walk":
+			walker = b if row_name == "walk" else null
 		"wake":
 			m.lairs.wake(b.lair, m.player)
 		"stagger":
@@ -131,7 +148,7 @@ func _boss(dir: String, id: String) -> void:
 	P.teleport(b.pos + Vector3(FOE_AWAY, 0.5, 0))
 	m.cam.focus = b.pos
 	await _frames(int(SETTLE_S * 60.0))
-	var rows: Array = ["wake"] + BossAnim.ATTACKS[id] + ["stagger", "phase", "death"]
+	var rows: Array = ["idle", "walk", "wake"] + BossAnim.ATTACKS[id] + ["stagger", "phase", "death"]
 	var strip := Image.create(CROP * 6, CROP * rows.size(), false, Image.FORMAT_RGBA8)
 	for r in rows.size():
 		var row_name: String = rows[r]
@@ -140,11 +157,13 @@ func _boss(dir: String, id: String) -> void:
 			b.stagger_t = 0.0
 		b.set_asleep(row_name == "wake")
 		b.awake_t = 5.0
+		walker = null
 		await _frames(30)
 		_trigger(b, row_name)
 		var t0 := m.time
 		var times := _times(b, row_name)
 		for c in times.size():
 			await _grab(strip, b, t0, float(times[c]), c, r)
+	walker = null
 	strip.save_png(dir.path_join("boss_anim_%s.png" % id))
 	print("BOSSANIMSHOT %s %s" % [id, str(rows)])

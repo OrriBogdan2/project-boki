@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://csu88vdaa3h5q"
-path="res://.godot/imported/nacrolin_nacrolin_eye.webp-37ea3dc5d51907a868039595ad83848d.ctex"
+path.s3tc="res://.godot/imported/nacrolin_nacrolin_eye.webp-37ea3dc5d51907a868039595ad83848d.s3tc.ctex"
+path.etc2="res://.godot/imported/nacrolin_nacrolin_eye.webp-37ea3dc5d51907a868039595ad83848d.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "d56fb5c3fd7bcd56940ba009491bc8ca"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/nacrolin/nacrolin_nacrolin_eye.webp"
-dest_files=["res://.godot/imported/nacrolin_nacrolin_eye.webp-37ea3dc5d51907a868039595ad83848d.ctex"]
+dest_files=["res://.godot/imported/nacrolin_nacrolin_eye.webp-37ea3dc5d51907a868039595ad83848d.s3tc.ctex", "res://.godot/imported/nacrolin_nacrolin_eye.webp-37ea3dc5d51907a868039595ad83848d.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
