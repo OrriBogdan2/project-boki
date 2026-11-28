@@ -178,9 +178,12 @@ func find(p2: Vector2, bd: float) -> Dictionary:
 	var gp0 := gate_pos()
 	var gd := p2.distance_to(Vector2(gp0.x, gp0.z))
 	if gd < 1.3 and gd < bd: best = {"kind": "graveyard"}
+	var vet := VetBooth.find(h, p2)  # the vet booth rides the "feeder" route home.gd already sends here
+	if not vet.is_empty() and float(vet["d"]) < bd: best = {"kind": "feeder", "vet": vet["e"]}
 	return best
 
 func label(it: Dictionary) -> String:
+	if it.has("vet"): return VetBooth.label()
 	match String(it["kind"]):
 		"place":
 			var ok := _place_ok(_carry_spot())
@@ -194,6 +197,9 @@ func label(it: Dictionary) -> String:
 	return ""
 
 func use(it: Dictionary) -> void:
+	if it.has("vet"):
+		VetBooth.open(h)
+		return
 	match String(it["kind"]):
 		"place": place()
 		"feeder": open_feeder(it["f"])

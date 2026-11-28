@@ -1,0 +1,7 @@
+{
+	"desc": "The garden's vet booth (scripts/home/vet_booth.gd), beside the market stall in the hub. A check-up is free: health, likes and mood of every Boki on the island. Curing a weak or sick Boki (Care.ailing, the hunger cure of KinAiling) costs cure_gems.",
+	"cure_gems": 12,
+	"cure_gems_doc": "Gems for one cure. A snack cures the same for free, so the booth is the quick way for a player with a bare pantry.",
+	"moods": [[80, "Delighted"], [55, "Content"], [30, "Low"], [0, "Glum"]],
+	"moods_doc": "[joy at least, word], highest first. Joy is the Boki's joy need, 0 to 100 (Care.NEEDS)."
+}

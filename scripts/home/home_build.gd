@@ -484,6 +484,8 @@ func _make_base(e: Dictionary) -> Node3D:
 		return FarmModels.toy(id)
 	if id == FeedBowl.ID:
 		return FeedBowl.model(e)
+	if id == VetBooth.ID:
+		return VetBooth.model(e)
 	if HomeLayout.CATALOG.get(id, {}).has("work"):
 		n = WorkModels.station(id, e, rng)       # a work station (scripts/home/work_models.gd)
 	if HomeLayout.CATALOG.get(id, {}).has("fixture"):

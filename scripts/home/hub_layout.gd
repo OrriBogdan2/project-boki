@@ -15,7 +15,7 @@ const BOARD_AT := Vector3(46.0, 0, 36.5)   # the games board, east of the stall
 const WALL_OFF := Vector3(0, 0, -2.4)      # m from the board to the Dash's showcase wall beside it
 ## [catalog id, tile x, tile z, turns]: the fixtures, with the tiles they stand on (south is turn 0).
 const DECO := [["house", 36, 28, 0], ["nesting_nook", 26, 30, 0], ["market_stall", 43, 32, 0],
-	["boki_burrow", 32, 35, 0]]
+	["boki_burrow", 32, 35, 0], ["vet_booth", 41, 32, 0]]
 const SHRINE := {"x": 31, "z": 30, "r": 0}        # the Soul Shrine's lot: you build it there
 ## Tile rects [x0, z0, x1, z1] kept free of wild trees and rocks: round the Waystone, the board and its wall.
 const CLEAR := [[36, 31, 41, 36], [45, 33, 47, 37]]
@@ -26,6 +26,7 @@ static func island() -> Dictionary:
 		Save.d["hub_layout"] = template()
 	var d := {"layout": Save.d["hub_layout"]}
 	HomeLayout.ensure(d)       # whole numbers after a reload
+	_add_missing(d["layout"])      # fixtures added since this hub was first built
 	(d["layout"]["inv"] as Dictionary).erase(SnackPatch.ID)      # (ensure grants the garden's snack patch)
 	var walkers: Array = [Save.active_kin(), minder()].filter(func(r): return not r.is_empty())
 	return {"hub": true, "name": "", "layout": d["layout"], "plots": [], "roster": walkers,
@@ -49,11 +50,17 @@ static func template() -> Dictionary:
 	L["seed"] = SEED
 	L["fs"] = 1
 	L["sk"] = SCALE
-	for f in DECO:
-		L["uid"] = int(L["uid"]) + 1
-		(L["deco"] as Array).append({"u": L["uid"], "id": f[0], "x": f[1], "z": f[2], "r": f[3]})
+	_add_missing(L)
 	L["b"]["shrine"] = SHRINE.duplicate()
 	return L
+
+## Puts every DECO fixture the layout lacks on it (a new hub gets all; an older one, the ones added later).
+static func _add_missing(lay: Dictionary) -> void:
+	for f in DECO:
+		if (lay["deco"] as Array).any(func(e): return String(e["id"]) == f[0]):
+			continue
+		lay["uid"] = int(lay["uid"]) + 1
+		(lay["deco"] as Array).append({"u": lay["uid"], "id": f[0], "x": f[1], "z": f[2], "r": f[3]})
 
 ## Does the hub hold catalog piece `id` instead of layout `L`? With the garden on, the hub's house, Nook (with
 ## its Incubator), stall and Burrow are the only ones: the save's own layout (the start zone's) builds none of
