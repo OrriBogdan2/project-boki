@@ -71,9 +71,9 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 
 | | idle | walk | run | attack | hit | death | jump | land | glide | dash | cast | stomp |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| burrlet | clip | clip | clip | clip | proc | proc | clip | proc | proc | proc | clip | missing |
-| cindle | clip | clip | clip | clip | proc | proc | clip | proc | proc | proc | clip | missing |
-| puddlet | clip | clip | clip | clip | proc | proc | clip | proc | proc | proc | clip | missing |
+| burrlet | clip | clip | clip | clip | proc | proc | clip | proc | clip | proc | clip | missing |
+| cindle | clip | clip | clip | clip | proc | proc | clip | proc | clip | proc | clip | missing |
+| puddlet | clip | clip | clip | clip | proc | proc | clip | proc | clip | proc | clip | missing |
 
 ### Boki garden states
 
@@ -92,18 +92,14 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | eclipsowl | shared | shared | shared | shared | shared | shared | proc | proc |
 | effigoon | shared | shared | shared | shared | shared | shared | proc | proc |
 | embrook | shared | shared | shared | shared | shared | shared | proc | proc |
-| floenatee | shared | shared | shared | shared | shared | shared | proc | proc |
 | forgebrock | shared | shared | shared | shared | shared | shared | proc | proc |
 | geodemole | shared | shared | shared | shared | shared | shared | proc | proc |
 | geysirbara | shared | shared | shared | shared | shared | shared | proc | proc |
-| gibbelle | shared | shared | shared | shared | shared | shared | proc | proc |
 | glaciatee | shared | shared | shared | shared | shared | shared | proc | proc |
-| glaciyak | shared | shared | shared | shared | shared | shared | proc | proc |
 | glassolotl | shared | shared | shared | shared | shared | shared | proc | proc |
 | gloamspire | shared | shared | shared | shared | shared | shared | proc | proc |
 | glomwort | shared | shared | shared | shared | shared | shared | proc | proc |
 | glomworth | shared | shared | shared | shared | shared | shared | proc | proc |
-| goliathite | shared | shared | shared | shared | shared | shared | proc | proc |
 | gongrowl | shared | shared | shared | shared | shared | shared | proc | proc |
 | gravitank | shared | shared | shared | shared | shared | shared | proc | proc |
 | howlop | shared | shared | shared | shared | shared | shared | proc | proc |
@@ -137,9 +133,11 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | vaultara | shared | shared | shared | shared | shared | shared | proc | proc |
 | velvorm | shared | shared | shared | shared | shared | shared | proc | proc |
 | vespox | shared | shared | shared | shared | shared | shared | proc | proc |
+| goliathite | clip | shared | shared | shared | shared | shared | proc | proc |
 | hoarheron | clip | shared | shared | shared | shared | shared | proc | proc |
 | nimbostrich | shared | clip | clip | shared | shared | shared | proc | proc |
 | orchisloth | shared | clip | clip | shared | shared | shared | proc | proc |
+| glaciyak | clip | shared | shared | clip | clip | clip | proc | proc |
 | limpetor | clip | shared | shared | clip | clip | clip | proc | proc |
 | moonloris | clip | shared | shared | clip | clip | clip | proc | proc |
 | cindle | clip | clip | clip | clip | clip | clip | proc | proc |
@@ -149,6 +147,8 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | pebbit | clip | clip | clip | clip | clip | clip | proc | proc |
 | wisplet | clip | clip | clip | clip | clip | clip | proc | proc |
 | caecilith | clip | clip | clip | clip | clip | clip | proc | proc |
+| floenatee | clip | clip | clip | clip | clip | clip | proc | proc |
+| gibbelle | clip | clip | clip | clip | clip | clip | proc | proc |
 | glintmole | clip | clip | clip | clip | clip | clip | proc | proc |
 | gloamshell | clip | clip | clip | clip | clip | clip | proc | proc |
 | heatherhorn | clip | clip | clip | clip | clip | clip | proc | proc |
