@@ -9,7 +9,7 @@ const SLOW := 0.033
 
 
 func parts() -> Array:
-	return ["boulder", "rocks", "dash", "quake", "r", "rmb_body", "r_void"]
+	return ["boulder", "punch", "rocks", "dash", "quake", "r", "rmb_body", "r_void"]
 
 
 func run(main_node: Node) -> void:
@@ -32,6 +32,16 @@ func _part_boulder() -> void:
 		),
 		3.5
 	)
+	await _go(GAP)
+
+
+func _part_punch() -> void:
+	await _reset(3.3)
+	var hold := func(t: float):
+		P.inp["fire"] = t > 0.1 and t < 1.3
+		_aim(T.pos)
+	var caption := "LMB held: the fist charges, then the punch lands on the dummy"
+	await _go(2.2, hold, _sheet("punch", caption, [0.9, 1.1, 1.25, 1.32, 1.38, 1.44, 1.52, 1.65, 1.9]), 1.5)
 	await _go(GAP)
 
 

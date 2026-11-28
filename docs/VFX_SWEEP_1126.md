@@ -58,4 +58,7 @@ and share a plan: ONE impact frame (a 0.1 s white-to-colour flash ring through `
    three sits 0.03 over, which is the noise floor of this A/B, not the quad (one full-screen blend, no texture read).
    Quality presets: very_low pays the same as high and nothing is hidden by a preset. Not covered: Rooted and Slowed
    (no tint, as the reference lists none).
-2. Next in line (not built): the shared impact frame, then Sable and Grimble data passes (rows 2-5).
+2. `ext/vfx-tenzo-vex-hitframes` (rows 12 and 13): Tenzo's punch hit and Vex's LMB tracer and hit, data only
+   (`content/vfx/dolm.json`, `gunslinger.json`) plus a `punch` part in Tenzo's reel. Strips
+   `docs/shots/vfx-tenzo-vex-hitframes/`; numbers in `docs/VFX_QUALITY.md` (Vex row 3, Tenzo row 9).
+3. Next in line (not built): the shared impact frame, then Sable and Grimble data passes (rows 2-5).

@@ -125,6 +125,11 @@ The HUD strip flashes white as it loses some. Reel: `--hero-vfx-reel --reel-only
   curl. The Hearthlight disc (`tender.json` `hearth_disc`) and the root field stay at most 0.25 alpha inside up to their
   rim; the bloom swirls only on its rim (`thin`). `--hero-vfx-check` rows "Meeko: heals leaf green and rising, hurts
   embers falling" and the inside-to-rim alpha rows.
+- **Hit frame (VFX sweep 11-28, rows 12-13):** an LMB's hit look opens with a short white core flare (0.05-0.07 s) under the
+  Hunter's coloured flare, then stars and sparks; never a ground ring (that means gameplay), and the hit area, damage and
+  timing stay the kit's. A tracer that thins with distance keeps its `size_k` on every layer, so widening it means raising the
+  base `size`, not dropping the falloff. Tenzo's `punch_hit` and Vex's `shot_hit` / `shot_trail` are the pattern;
+  `--hero-vfx-reel --reel-hero=dolm --reel-only=punch` and `--reel-hero=gunslinger --reel-only=lmb` draw them.
 - **Hunter colours stay apart:** every pair of archetype `color`s is at least 0.15 apart in OKLab
   (`--hunter-colour-gap-check`). Gil is sea teal `#2fa08c` (was `#4aa8ff`, 0.117 from Tenzo's blue). Nine older pairs
   under the bar wait for the owner (the check's `OPEN` list, docs/DEBT.md).
