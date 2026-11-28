@@ -71,7 +71,7 @@ const STATS := {
 		"col": Color("b9a6f5"),
 		"desc": "Skill recharges 0.3% faster a point",
 		"drill": "Still pond",
-		"means": "Focus: your Boki's skill recharges faster in a match, and it sniffs out scents faster in Seek"
+		"means": "Focus: your Boki's skill recharges faster in a match, and sniffs out scents faster in Seek"
 	},
 }
 

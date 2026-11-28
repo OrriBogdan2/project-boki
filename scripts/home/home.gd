@@ -4467,7 +4467,7 @@ func _open_nook() -> void:
 		_nook_pair(Save.kin(String(nook_pick[0])), Save.kin(String(nook_pick[1])), dv)
 	else:
 		_nook_intro(dv, egg_in)
-	UI.footer_left(v).add_child(UI.label("Click a Boki to see its IVs", UI.T_SMALL, UI.FAINT))
+	UI.footer_left(v).add_child(UI.label("Click a Boki to see the IVs", UI.T_SMALL, UI.FAINT))
 	if not egg_in:
 		var pr := UI.footer_primary(v, "Pair them" if nook_pick.size() < 2 else "Pair %s and %s" % [Save.kin(String(nook_pick[0]))["name"], Save.kin(String(nook_pick[1]))["name"]], func():
 			if nook_pick.size() < 2: return

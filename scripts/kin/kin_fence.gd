@@ -30,7 +30,7 @@ static func stages(list: Array, hunter_casts: bool, rescue: bool, path: String, 
 		if st.delivery and st.delivery.type in KinExec.MOVERS:
 			var origin := String(st.delivery.params.get("origin", "caster"))
 			if origin == "owner" or hunter_casts:
-				var why := "a Boki never moves its hunter: a %s from the hunter" % st.delivery.type
+				var why := "a Boki never moves the hunter: a %s from the hunter" % st.delivery.type
 				rep.err(path + ".delivery", why + " (make the Boki do it, or act on foes)")
 		effects(st.effects, hunter_casts, rescue, path + ".effects", rep)
 

@@ -1508,7 +1508,7 @@ func open_spawn_kin() -> void:
 			(
 				UI
 				. label(
-					"Adds a level 8 Boki with a Close bond to your farm (or the Boki Burrow, if it's a repeat or the farm is full).",
+					"Adds a level 8 Boki with a Close bond to your farm (or the Boki Burrow, if the Boki is a repeat or the farm is full).",
 					13,
 					UI.MUTED
 				)
