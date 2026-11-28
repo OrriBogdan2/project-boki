@@ -40,7 +40,8 @@ var shot_seen := 0  # the hunter's shot counter at the last ember we dressed
 var seed_aim := false  # the Burrseed wind-up is running (item 118; a merge start drops it)
 var seed_wind := 0.0  # s of it left
 var glide := {}  # the air dash's long glide: {t, top (m/s)} (a dash: dropped on merge)
-var stats := {"embers": 0, "emp": 0, "swirls": 0, "flares": 0, "calls": 0, "rescues": 0, "broken": 0}  # tests
+# the counters the checks read
+var stats := {"embers": 0, "emp": 0, "swirls": 0, "flares": 0, "calls": 0, "rescues": 0, "broken": 0, "relays": 0}
 var hearth_call := {}  # Hearth Call running: {who: Hunter, left, tick, fx} (a channel: dropped on merge)
 var ult_look: UltLook  # the tether (pooled, made on first use)
 
@@ -365,6 +366,7 @@ func on_dash(use_ex: bool) -> bool:
 	var dist := float(air["dist"]) if use_ex else float(dd["dist"])
 	var tt := float(air["time"]) if use_ex else float(dd["time"])
 	travel(dist, tt, {"invuln": float(dd.get("invuln", 0.12)), "dir": dash_dir()})
+	_relay_pass(use_ex, dist)
 	# the ground hop goes through the global dash feel (its data is set so the result is the source's 2 bh in
 	# 0.2 s); the glide is the source's own measured curve (dash.air), so the feel doesn't touch it
 	if use_ex:
@@ -381,6 +383,29 @@ func on_dash(use_ex: bool) -> bool:
 					m.fx.dust(h.pos, PUFF_N)
 		)
 	return true
+
+
+## A Relay Step whose line passes a standing teammate (within dash.ally_r of it) gives back dash.refund of
+## the hop's charge (of the glide's cooldown in the air) and winds Hearthlight back dash.e_refund seconds: the
+## reference's dash-through-ally refund. One teammate counts per dash.
+func _relay_pass(use_ex: bool, dist: float) -> void:
+	var dd := dash_def()
+	var reach := float(dd.get("ally_r", 1.1))
+	var from := Vector2(h.pos.x, h.pos.z)
+	var to := from + dash_dir() * dist
+	for o in CareUtil.mates(m, h, Vector3.INF, 1e9, false):
+		var at := Vector2(o.pos.x, o.pos.z)
+		var near := Geometry2D.get_closest_point_to_segment(at, from, to)
+		if at.distance_to(near) >= reach + o.r or absf(o.pos.y - h.pos.y) >= 2.0:
+			continue
+		stats["relays"] += 1
+		if use_ex:
+			h.ex_cd *= 1.0 - float(dd.get("refund", 0.5))
+		else:
+			h.dashes = minf(h.max_dashes(), h.dashes + float(dd.get("refund", 0.5)))
+		wind_back_hearth(float(dd.get("e_refund", 1.0)))
+		m.sfx("ab_ready", o.pos, -4.0, 1.1)
+		return
 
 
 ## The air dash is her long glide (dash.air): a quick ramp to a flat burst, then a float out at a share of

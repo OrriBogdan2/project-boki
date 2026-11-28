@@ -479,8 +479,8 @@ func _tender_support() -> void:
 	step(m, 0.05)
 	P.inp["dash"] = false
 	ok(
-		"Relay Step: through a teammate refunds nothing",
-		P.dashes <= P.max_dashes() - 0.95 and K.cd["e"] > 7.9,
+		"Relay Step: through a teammate gives half the hop back and 1s of Hearthlight",
+		P.dashes > P.max_dashes() - 0.55 and P.dashes < P.max_dashes() - 0.4 and absf(float(K.cd["e"]) - 7.0) < 0.1,
 		"dashes %.2f e %.1f" % [P.dashes, K.cd["e"]]
 	)
 	m.queue_free()
