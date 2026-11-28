@@ -111,6 +111,12 @@
 		"desc": "Something still is in here.",
 		"play": "Slippery and full of tricks."
 	},
+	"roster": {
+		"art": "todo",
+		"line": "lodestick",
+		"stage": 2,
+		"from": "lodestick"
+	},
 	"size": {
 		"cm": 44,
 		"kg": 9.0,
