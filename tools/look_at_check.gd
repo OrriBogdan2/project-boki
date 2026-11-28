@@ -232,9 +232,18 @@ func _swing_clip() -> int:
 	sync.last["swing_n"] = 0
 	_stand(SWING, SETTLE)
 	var turned := absf(_shown().x)
+	# (the clip owns the head once eased in over WardenNative.FADE. A swing that starts at its strike, data "lmb_lead",
+	# has little clip left, maybe less than FADE: there the head must be easing off while the clip plays, not zero yet)
+	var low := turned
+	var left := 0.0
 	for f in ceili(CLIP_MIN / DT):
 		_frame(_aim(face + SWING), {"swing_n": 1})
-	ok(turned > 0.1 and _shown() == Vector2.ZERO,
-			"%s: off under Meshy's attack clip (turned %.0f deg before)" % [sync.art_id, rad_to_deg(turned)])
+		if sync.attack_left > 0.0:
+			low = absf(_shown().x)
+			left = maxf(left, sync.attack_left)
+	var eased := low == 0.0 if left >= WardenNative.FADE else low < turned * 0.8
+	ok(turned > 0.1 and eased,
+			"%s: off under Meshy's attack clip (turned %.0f deg before, %.2f s of clip)"
+			% [sync.art_id, rad_to_deg(turned), left])
 	_stand(0.0, SETTLE)
 	return 1

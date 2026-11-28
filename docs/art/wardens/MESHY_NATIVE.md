@@ -118,6 +118,7 @@ plays today's clip, so nothing changes until a Hunter's clips land (`WardenNativ
 | `stomp` | while the stomp cycle runs (`stomp` >= 0; loops) | the loop clip |
 Swing, cast, `hit` and `land` are one-shots: they own the body for their length (a new one restarts a clip once 60% is
 played) and play at `attack_rate`, `hit` and `land` at 1.
+A basic attack starts mid-clip (data `lmb_lead`: `"shot"` for a swing or a shot, or the kit move's name, as seconds of the clip skipped): the kit lets the round go on the press, so the clip begins at the end of its wind-up and its strike frame (the weapon hand's fastest) lands with the round, not half a second after it. It blends in over 0.05 s. `--lmb-anim-sync-check` presses LMB for each Hunter and holds the clip's strike within 50 ms of the spawn; Lace's and Kael's kit moves and Albert's contract clips are laid on the kit's own clock. Cinder's lance is a held stream: the check holds the key and sets her hold clip's strike against the stream's first puff; Tenzo's held punch and Kael's held Searing Wave are checked held as well.
 A swing or cast while he moves on the ground, or is in the air, plays on the torso and arms only (`WardenNativeUpper`: Spine02
 and every bone above it, eased in 0.1 s and out 0.16 s) over the running legs; standing on the ground it owns the body as
 above, and `hit` and `land` always do. A hit wins over a swing, a swing over a landing.
