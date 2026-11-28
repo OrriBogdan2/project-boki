@@ -59,6 +59,13 @@ func _init(home) -> void:
 	h = home
 	entries = BuildEntries.new(self)
 
+
+## The farm is closing: let go of the catalog entries, which point back here (a RefCounted cycle that otherwise
+## kept this and everything it holds, the walk grid included, alive for good after every farm visit).
+func release() -> void:
+	entries.hb = null
+
+
 func L() -> Dictionary:
 	return HomeLayout.of(h._d())
 
