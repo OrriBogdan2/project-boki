@@ -161,7 +161,7 @@ I found no input-mode mismatch that is clear and not already covered by an owner
 changed and no combo check was added: a row marked match is asserted by the Hunter's existing `--<id>-combo-check`.
 
 **Follow-ups (not built, owner or a source read decides).**
-1. Lace RMB: a tap that fires uncharged (footage) against "a tap does nothing" (ours, data wins). Needs the owner's call; a change is `rmb.hold` handling in `archer_kit.gd` `fire_rmb`.
+1. Lace RMB: a tap that fires uncharged (footage). Closed on ext/lace-rmb-tap: a tap looses the minimum-charge shot (`archer_kit.gd` `fire_rmb`).
 2. Vex RMB: the footage lane-while-held against owner #112 TAP ONLY; stays tap-only unless the owner reverses it.
 3. Neve R late-recast window (0.75 s ours against about 0.3-0.5 s in the footage) and Sparkle R / RMB auto-land and auto-throw: read the source for a hard maximum.
 4. Kael E tether lifetime: the source never says; ours is 5 s.

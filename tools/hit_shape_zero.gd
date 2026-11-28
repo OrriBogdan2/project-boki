@@ -16,7 +16,6 @@ const GAP := 4  # slots: hits further apart than this belong to two things (a st
 ## Inputs that hurt nobody, by design (a heal, a shield, a wall, a move that only carries): the reason, and the
 ## window and presses the check gives them to prove it (a lane of dummies, nothing may lose health).
 const NO_DAMAGE := {
-	"archer:rmb": ["a quick tap does nothing and costs nothing (the Heavy Shot is the RMB hold row)", 1.0],
 	"archer:dash": ["Spirit Walk: a roll, then walking through rocks; the spirit orb hurts nobody", 3.5],
 	"gunslinger:dash": ["Slipstep: a skid, no hit", 1.5],
 	"thief:dash": ["Vault: a cartwheel; it only empowers the next shot (the E and LMB rows)", 1.5],

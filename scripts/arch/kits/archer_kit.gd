@@ -1,7 +1,8 @@
 class_name ArcherKit
 extends ArchKit
 ## Hem (id archer, light; docs/heroes/archer.md, hero sheet pin.md). Spirit Walk (Shift), the Heavy Shot
-## (RMB, hold only: a charged arrow that knocks the first foe back and stuns it into a wall), Hail Wall (E, a curved arc of rain at the cursor distance), and on X
+## (RMB, hold to charge, release to fire: a charged arrow that knocks the first foe back and stuns it into a
+## wall), Hail Wall (E, a curved arc of rain at the cursor distance), and on X
 ## Starpiercer (level 6, PinUlt: three empowered piercing beams). R is the Merge.
 ## The bow (PinDraw): hold to draw through two stages with a filling aim line and a perfect-timing circle; tap and
 ## Empowered shots land at the cursor, Supercharged ones fly past it to max range; let go right as a stage
@@ -228,8 +229,8 @@ func speed_bonus() -> float:
 	return float(dash_def().get("walk_k", 1.1)) - 1.0 + spirit.inside_boost()
 
 # ------------------------------------------------------------------ RMB: Heavy Shot
-## The press always starts a draw (in the air too): the Heavy Shot has no tap and no air variant. It drops a
-## bow draw under way with no arrow (one bow; the newer press wins, as with Starpiercer).
+## The press always starts a draw (in the air too): the Heavy Shot has no air variant, and a tap looses it
+## uncharged. It drops a bow draw under way with no arrow (one bow; the newer press wins, as with Starpiercer).
 func press_rmb() -> void:
 	if busy():
 		h._ab_feedback("sec", "deny")
@@ -318,10 +319,8 @@ func _rmb_dropped() -> void:
 func fire_rmb(c: Dictionary) -> void:
 	_drop_tele()
 	last_variant = String(c["variant"])
-	if not c.get("hold", false):
-		if anim_id == "arc_heavy_wind":
-			anim_id = ""           # a tap looses nothing and costs nothing: the draw it started is put away
-		return
+	# a tap (a release before the 0.15 s threshold) looses the minimum-charge arrow, as the source's "HOLD to charge,
+	# RELEASE to fire" does on any release: k = 0 below, so 16 damage, push 8, 14 m, the same charge and cooldown
 	if not spend_rmb(): return
 	var pd: Dictionary = rmb_def()["pin"]
 	play("arc_heavy")

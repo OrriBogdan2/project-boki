@@ -533,7 +533,7 @@ func _archer_combos() -> void:
 		w.down_hp = 0.0
 	T2.team = t2_team
 	step(m, 3.5)
-	# the Heavy Shot is hold only (data: Heartpiercer): one charge, 16 s, a tap looses nothing and costs nothing
+	# the Heavy Shot fires on any release (source: "HOLD to charge, RELEASE to fire"): a tap looses the uncharged shot
 	fresh(T)
 	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
@@ -544,11 +544,17 @@ func _archer_combos() -> void:
 	tap(m, P)
 	step(m, 0.3)
 	ok(
-		"combo archer: RMB tap looses nothing and costs no charge (no snare, no Tripwire)",
-		dmg(T) <= 0.0 and T.root_t <= 0.0 and K.ch_rmb >= 1.0 and K.last_variant == "tap" and not K.d["rmb"].has("snare"),
-		"took %.0f root %.2f charges %.1f variant %s" % [dmg(T), T.root_t, K.ch_rmb, K.last_variant]
+		"combo archer: RMB tap looses the uncharged Heavy Shot (16 damage), one charge, 16 s",
+		absf(dmg(T) - 16.0) < 0.6 and K.ch_rmb < 1.0 and K.last_variant == "tap" and not K.d["rmb"].has("snare")
+		and absf(float(K.cd["rmb"]) - 16.0) < 0.6 and K.anim_id == "arc_heavy",
+		"took %.0f charges %.1f variant %s cd %.1f anim %s" % [
+			dmg(T), K.ch_rmb, K.last_variant, float(K.cd["rmb"]), K.anim_id
+		]
 	)
-	# the draw shows from the press, as the source's charge does; let go before the hold and it is put away
+	# the draw shows from the press, as the source's charge does; the tap's release then looses it (not put away)
+	fresh(T)
+	K.ch_rmb = 1.0
+	K.cd["rmb"] = 0.0
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
 	m.step(DT)
@@ -556,11 +562,16 @@ func _archer_combos() -> void:
 	P.inp["sec_hold"] = false
 	step(m, 0.3)
 	ok(
-		"combo archer: RMB press draws at once; let go before the hold and the draw is put away, nothing looses",
-		drawn and K.anim_id != "arc_heavy_wind" and not K.pin_aim and dmg(T) <= 0.0 and K.ch_rmb >= 1.0,
-		"drawn %s anim %s aim %s took %.0f charges %.1f" % [drawn, K.anim_id, K.pin_aim, dmg(T), K.ch_rmb]
+		"combo archer: RMB press draws at once; let go before the hold and the shot looses uncharged",
+		drawn and not K.pin_aim and absf(dmg(T) - 16.0) < 0.6 and K.ch_rmb < 1.0,
+		"drawn %s aim %s took %.0f charges %.1f" % [drawn, K.pin_aim, dmg(T), K.ch_rmb]
 	)
-	# while the bow is drawn for the LMB, the Heavy Shot's draw waits for the hold: a quick tap leaves the LMB's alone
+	# a tap on a spent charge (cooldown) does nothing and shows the deny
+	fresh(T)
+	tap(m, P)
+	step(m, 0.3)
+	ok("combo archer: RMB tap on the cooldown looses nothing", dmg(T) <= 0.0, "took %.0f" % dmg(T))
+	# while the bow is drawn for the LMB, a quick RMB tap drops that draw (one bow) and looses the Heavy Shot
 	step(m, 0.3, func(): P.inp["fire"] = true)
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
@@ -568,7 +579,7 @@ func _archer_combos() -> void:
 	P.inp["sec_hold"] = false
 	step(m, 0.1, func(): P.inp["fire"] = true)
 	ok(
-		"combo archer: a quick RMB tap while the LMB draws leaves that draw on",
+		"combo archer: a quick RMB tap while the LMB draws: the held LMB draws afresh",
 		P.draw_t >= 0.0 and K.anim_id == "arc_draw" and not K.pin_aim,
 		"draw %.2f anim %s aim %s" % [P.draw_t, K.anim_id, K.pin_aim]
 	)
