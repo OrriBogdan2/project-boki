@@ -1439,16 +1439,31 @@ func _clear_line(m: Match, h: Hunter, a: Vector2, b: Vector2) -> bool:
 	var n := int(d.length() / 0.4) + 1
 	var side := Vector2(-d.y, d.x).normalized() * 0.32
 	var w: World = m.world
+	var kind := w.kind
+	var ww := w.w
+	var wh := w.h
 	var hazards := _has_hazards(m)
+	var last := Vector3i(-2147483648, 0, 0)  # the last sample's tiles: one on the same three reads the same
 	for k in range(1, n + 1):
 		var p := a + d * (float(k) / n)
 		# a rock in the way, or the abyss (straight at a goal across a bay in the island, the edge guard
 		# turned the bot aside every frame and it shuffled on the spot instead of taking the way round)
-		if w.tile_kind(p.x, p.y) != World.T_GROUND:
+		var cx := floori(p.x)
+		var cz := floori(p.y)
+		var lx := floori(p.x + side.x)
+		var lz := floori(p.y + side.y)
+		var rx := floori(p.x - side.x)
+		var rz := floori(p.y - side.y)
+		var at := Vector3i(cz * ww + cx, lz * ww + lx, rz * ww + rx)
+		if at == last and cx >= 0 and cx < ww and lx >= 0 and lx < ww and rx >= 0 and rx < ww:
+			continue
+		last = at
+		var ci := at.x if cx >= 0 and cz >= 0 and cx < ww and cz < wh else -1
+		var li := at.y if lx >= 0 and lz >= 0 and lx < ww and lz < wh else -1
+		var ri := at.z if rx >= 0 and rz >= 0 and rx < ww and rz < wh else -1
+		if ci < 0 or kind[ci] != World.T_GROUND:
 			return false
-		if w.tile_kind(p.x + side.x, p.y + side.y) == World.T_BLOCK:
-			return false
-		if w.tile_kind(p.x - side.x, p.y - side.y) == World.T_BLOCK:
+		if (li >= 0 and kind[li] == World.T_BLOCK) or (ri >= 0 and kind[ri] == World.T_BLOCK):
 			return false
 		# ground a Boki can't handle (main's TerrainHazards): the walk goes round it
 		if hazards and TerrainHazards.avoid(m, h, p.x, p.y):
@@ -1469,13 +1484,17 @@ const RING_GOALS := ["ring", "ring_in"]
 ## A walkable tile path from a to b (tile centres), [] when none: the tight window, then (wide) the wide one.
 ## No path leads deeper into the Blight's tide than the ring or where the bot stands (BotWays.path_r). With
 ## h, it keeps off hazard ground h's Boki can't handle, and only crosses it when there's no way round.
+## A search is only repeated (wide, or without the hazards) when the one before could have come out another
+## way: it ran into the window's edge or its step cap, or turned a tile down for its hazard.
 func _grid_path(m: Match, a: Vector2i, b: Vector2i, h: Hunter = null, wide := false) -> Array:
 	var cap := BotWays.path_r(m, Vector3(a.x + 0.5, 0.0, a.y + 0.5))
 	var p := _grid_path_in(m, a, b, h, PATH_SLACK, cap, PATH_STEPS)
-	if p.is_empty() and wide:
+	var hz := _path_hz
+	if p.is_empty() and wide and _path_open:
 		p = _grid_path_in(m, a, b, h, PATH_SLACK_RING, cap, PATH_STEPS_RING)
-	if p.is_empty() and h and _has_hazards(m):
-		return _grid_path(m, a, b, null, wide)      # (the same search again, without the hazards, only where there are some)
+		hz = hz or _path_hz
+	if p.is_empty() and h and hz:
+		return _grid_path(m, a, b, null, wide)  # (the same search without the hazards: one turned a tile down)
 	return p
 
 
@@ -1485,44 +1504,108 @@ func _has_hazards(m: Match) -> bool:
 	return tz != null and not tz.areas.is_empty()
 
 
-## Breadth-first search over walkable tiles in a window `slack` tiles round the trip, no farther than
-## `cap` from the Heart, opening at most `max_steps` tiles, returning tile centres.
+var _path_hz := false    # the last _grid_path_in turned a tile down for its hazard (without h it could go another way)
+var _path_open := false  # the last _grid_path_in failed but a wider window or more steps could still find a way
+
+const NO_Y := -1.0e9   # _grid_path_in's height cache: not read yet
+const OFF_Y := -2.0e9  # ...: no walkable ground there for this search
+const _DX: Array[int] = [1, -1, 0, 0]
+const _DY: Array[int] = [0, 0, 1, -1]
+
+
+## A* over walkable tiles (4 ways, a step costs 1) in a window `slack` tiles round the trip, no farther than
+## `cap` from the Heart, opening at most `max_steps` tiles, returning tile centres. A shortest path, the same
+## length as the breadth-first search it replaced; open tiles wait in buckets by estimated length (newest
+## first), so on open ground it walks straight at the goal instead of flooding the window (docs/PERF_EXPEDITION_1126.md).
 func _grid_path_in(m: Match, a: Vector2i, b: Vector2i, h: Hunter, slack: int, cap: float, max_steps: int) -> Array:
 	var w: World = m.world
+	_path_hz = false
+	_path_open = false
+	if not w.inb(a.x, a.y):
+		return []
 	var hc := Vector2(m.heart.site.x, m.heart.site.z) if cap < INF else Vector2.ZERO
 	var lo := Vector2i(mini(a.x, b.x) - slack, mini(a.y, b.y) - slack)
 	var hi := Vector2i(maxi(a.x, b.x) + slack, maxi(a.y, b.y) + slack)
-	var prev := {a: a}
-	var q: Array = [a]
-	var found := false
+	var lo_c := Vector2i(maxi(lo.x, 0), maxi(lo.y, 0))      # (the window inside the map: one slot per tile)
+	var hi_c := Vector2i(mini(hi.x, w.w - 1), mini(hi.y, w.h - 1))
+	var ww := hi_c.x - lo_c.x + 1
+	var g := PackedInt32Array()       # steps from a per window tile, -1 unseen
+	g.resize(ww * (hi_c.y - lo_c.y + 1))
+	g.fill(-1)
+	var par := PackedInt32Array()
+	par.resize(g.size())
+	var gy := PackedFloat32Array()    # ground height per window tile, read once (NO_Y: not yet)
+	gy.resize(g.size())
+	gy.fill(NO_Y)
+	var hazards := h != null and _has_hazards(m)
+	var block_goal := w.is_block(b.x + 0.5, b.y + 0.5)    # (a block goal is reached from any of the 8 tiles round it)
+	var near := 2 if block_goal else 0
+	var f0 := maxi(0, absi(a.x - b.x) + absi(a.y - b.y) - near)
+	var ai := (a.y - lo_c.y) * ww + a.x - lo_c.x
+	g[ai] = 0
+	par[ai] = ai
+	var bk: Array = [[ai]]            # bucket k: open tiles whose estimate is f0 + k (popped newest first)
+	var fi := 0
+	var found := -1
 	var steps := 0
-	while q.size() > 0 and steps < max_steps:
-		steps += 1
-		var cur: Vector2i = q.pop_front()
-		if cur == b or (absi(cur.x - b.x) <= 1 and absi(cur.y - b.y) <= 1 and w.is_block(b.x + 0.5, b.y + 0.5)):
-			b = cur
-			found = true
+	while steps < max_steps:
+		while fi < bk.size() and (bk[fi] as Array).is_empty():
+			fi += 1
+		if fi >= bk.size():
 			break
-		for dv in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
-			var nx: Vector2i = cur + dv
-			if prev.has(nx) or nx.x < lo.x or nx.y < lo.y or nx.x > hi.x or nx.y > hi.y or not w.inb(nx.x, nx.y):
+		var ci: int = (bk[fi] as Array).pop_back()
+		var cx := ci % ww + lo_c.x
+		var cy := ci / ww + lo_c.y
+		var cg := g[ci]
+		if cg + maxi(0, absi(cx - b.x) + absi(cy - b.y) - near) != f0 + fi:
+			continue                  # (filed again lower after a shorter way in: this copy is stale)
+		steps += 1
+		if (cx == b.x and cy == b.y) or (block_goal and absi(cx - b.x) <= 1 and absi(cy - b.y) <= 1):
+			found = ci
+			break
+		var c_y := gy[ci]
+		if c_y == NO_Y:
+			c_y = w.ground_at(cx + 0.5, cy + 0.5)
+		for d in 4:
+			var nx: int = cx + _DX[d]
+			var ny: int = cy + _DY[d]
+			if nx < lo_c.x or ny < lo_c.y or nx > hi_c.x or ny > hi_c.y:
+				if nx >= lo.x and ny >= lo.y and nx <= hi.x and ny <= hi.y:
+					continue          # (off the map)
+				if w.inb(nx, ny) and w.kind[w.idx(nx, ny)] == World.T_GROUND:
+					_path_open = true  # (ground past the window's edge: a wider one may find a way)
 				continue
-			var i := w.idx(nx.x, nx.y)
-			if w.kind[i] != World.T_GROUND or Vector2(nx.x + 0.5, nx.y + 0.5).distance_to(hc) > cap:
+			var ni := (ny - lo_c.y) * ww + nx - lo_c.x
+			if g[ni] >= 0 and g[ni] <= cg + 1:
 				continue
-			if absf(w.ground_at(nx.x + 0.5, nx.y + 0.5) - w.ground_at(cur.x + 0.5, cur.y + 0.5)) > 1.7:
+			var n_y := gy[ni]
+			if n_y == NO_Y:
+				if w.kind[w.idx(nx, ny)] != World.T_GROUND or Vector2(nx + 0.5, ny + 0.5).distance_to(hc) > cap:
+					n_y = OFF_Y       # (not walkable for this search: never read again)
+				else:
+					n_y = w.ground_at(nx + 0.5, ny + 0.5)
+				gy[ni] = n_y
+			if n_y == OFF_Y or absf(n_y - c_y) > 1.7:
 				continue
-			if h and TerrainHazards.avoid(m, h, nx.x + 0.5, nx.y + 0.5):
+			if hazards and TerrainHazards.avoid(m, h, nx + 0.5, ny + 0.5):
+				_path_hz = true
 				continue
-			prev[nx] = cur
-			q.append(nx)
-	if not found:
+			g[ni] = cg + 1
+			par[ni] = ci
+			var k := cg + 1 + maxi(0, absi(nx - b.x) + absi(ny - b.y) - near) - f0
+			while bk.size() <= k:
+				bk.append([])
+			(bk[k] as Array).append(ni)
+	if found < 0:
+		if steps >= max_steps:
+			_path_open = true
 		return []
 	var out: Array = []
-	var c := b
-	while c != a:
-		out.push_front(Vector2(c.x + 0.5, c.y + 0.5))
-		c = prev[c]
+	var c := found
+	while c != ai:
+		out.append(Vector2(c % ww + lo_c.x + 0.5, c / ww + lo_c.y + 0.5))
+		c = par[c]
+	out.reverse()
 	return out
 
 

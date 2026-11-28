@@ -103,6 +103,24 @@ static func pose_every(m: Match, h: Hunter) -> int:
 	return POSE_SLOW if _slow() and d2 > POSE_SLOW_M * POSE_SLOW_M else 1
 
 
+const UNHEARD_M := 40.0   # m from the listener: past Sfx.hear_range (30) and a step or splash (StepReach, 20)
+const CATCH_UP_S := 0.5   # s of banked time a Hunter's pose catches up at most when it shows again
+
+
+## A Hunter nobody sees (hidden by sight, out, gone) and nobody hears: Hunter.render skips its pose, looks and fx
+## (its Hero rig holds too: WardenGlb.POSE_HELD) and poses at once with the banked time when it shows again. Most
+## Hunters of a full expedition are like this at any time (docs/PERF_EXPEDITION_1126.md); the sim, the wisp
+## and the ult's readiness run on regardless.
+static func unheard(m: Match, h: Hunter) -> bool:
+	if h.visible or m.cam == null or h.is_local() or h.has_meta("fling"):
+		return false
+	var at: Vector3 = Sfx.listener
+	if Vector2(h.pos.x - at.x, h.pos.z - at.z).length_squared() <= UNHEARD_M * UNHEARD_M:
+		return false
+	h.model.set_meta(WardenGlb.POSE_HELD, Engine.get_process_frames())
+	return true
+
+
 ## Slow frames (the last second's fps under SLOW_FPS): a rival on screen past POSE_SLOW_M from the focus, not in a fight
 ## with your squad, is posed every POSE_SLOW frames until the fps is back over EASE_FPS. A PC that holds 50 fps sees no
 ## change; one at 25 fps gets back most of what those rivals' clips, springs and skeletons cost (docs/MATCH_PERF.md).
