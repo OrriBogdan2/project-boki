@@ -8,6 +8,8 @@ extends RefCounted
 ##      Boki in the Nook, and the list finishes by itself
 ##   5. a fresh base_mode save with one Boki gets a second one at once: the Shelter is open at market stall level 1 and
 ##      a stray costs less than the first-entry gems, so the three lines that need company (race, nap, pair) can be done
+##   7. the ready-egg arrival line (docs/GARDEN_DAY_PLAYED.md row I): once per ready egg (Save.d["egg_told"]), only
+##      where the Nook stands (the hub with the garden on), never on another zone's arrival; an old save has no key
 ##   6. the screen stays quiet (GardenHudGroups): day 1 in the hub and two zones shows at most 5 HUD groups and one
 ##      arrival card; day 5 (a journal, today's wishes) shows one arrival card, the wishes riding on the away card
 ## Never touches the real save.
@@ -46,11 +48,48 @@ func run(m: Node) -> void:
 	Save.no_write = true
 	_list()
 	_second_boki()
+	_egg_line()
 	await _bot()
 	await _lead_toy()
 	await _screens()
 	print("FIRSTDAY DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## Row I: the ready-egg line is shown once per egg and only at the Nook's zone.
+func _egg_line() -> void:
+	Save.d = _fresh_save()
+	var was_base: bool = Content.rules("farm_build").get("base_mode", true)
+	Content.rules("farm_build")["base_mode"] = true
+	ok(not Save.d.has("egg_told"), "egg line: an old save has no egg_told key (default: none told)")
+	var egg := Incubator.add("zapple")
+	(Incubator.find(String(egg["id"])) as Dictionary)["heat"] = Incubator.need()
+	var one := func() -> int: return CareJournal.arrival().filter(func(l): return "ready to hatch" in String(l)).size()
+	var was := GardenZones.here
+	GardenZones.here = "cinderstep"
+	ok(one.call() == 0, "egg line: arriving in Cinderstep (no Nook there) shows no ready-egg line")
+	GardenZones.here = "bramblebank"
+	ok(one.call() == 0, "egg line: arriving in Bramblebank (the hub holds the Nook) shows none")
+	ok(Save.d.get("egg_told", []).is_empty(), "egg line: a zone without the Nook does not use it up")
+	GardenZones.here = GardenZones.HUB
+	ok(one.call() == 1, "egg line: arriving at the hub shows the ready egg once")
+	ok(String(egg["id"]) in Save.d["egg_told"], "egg line: the egg's id is kept in the save")
+	ok(one.call() == 0, "egg line: the next arrival at the hub does not repeat it")
+	GardenZones.here = "cinderstep"
+	ok(one.call() == 0, "egg line: nor does another zone's arrival")
+	var egg2 := Incubator.add("zapple")
+	(Incubator.find(String(egg2["id"])) as Dictionary)["heat"] = Incubator.need()
+	GardenZones.here = GardenZones.HUB
+	ok(one.call() == 1, "egg line: a second ready egg gets its own line")
+	Incubator.eggs().clear()
+	CareJournal.arrival()
+	ok((Save.d["egg_told"] as Array).is_empty(), "egg line: told ids of eggs that are gone are dropped")
+	Content.rules("farm_build")["base_mode"] = false
+	GardenZones.here = ""
+	var egg3 := Incubator.add("zapple")
+	(Incubator.find(String(egg3["id"])) as Dictionary)["heat"] = Incubator.need()
+	ok(one.call() == 1 and one.call() == 0, "egg line: with the garden off, the one farm shows it once")
+	GardenZones.here = was
+	Content.rules("farm_build")["base_mode"] = was_base
 
 func _screens() -> void:
 	var gh := HudGroups.new()
