@@ -10,7 +10,8 @@ const RULES := {  # DECISIONS line (its date: [11-08], [11-11]; no date = "Movem
 	"hold": "Holding Space from the jump ... must never glide, no matter how long it is held. [11-08]",
 	"double": "Glide opens only on a double press: jump, then press Space again in the air and hold. [11-08]",
 	"start": "glide start adds no speed [11-08]",
-	"shift": "Shift cancels into glide for every Hunter: a press held glide_engage s in the dash opens it. [11-08, 11-27]",
+	"shift":
+	"Shift cancels into glide for every Hunter: a press held glide_engage s in the dash opens it. [11-08, 11-27]",
 	"heat": "An overheated glider still lifts you out of the abyss as strongly as a cool one, while it burns.",
 	"fall": "falling never converts into horizontal momentum [11-11]",
 	"air": "Match movement must have strong WASD air control [11-08]: accelerate toward input, strong counter-steer",

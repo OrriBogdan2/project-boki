@@ -181,7 +181,7 @@ func _trigger(m: Match, h: Hunter, ev: String) -> void:
 			h.pos.y += SOFT_FALL if ev == "soft landing" else HARD_FALL
 			h.grounded = false
 			h.shot_down = ev == "spiked landing"
-			# the spike lands inside the window now (80 m/s): its landing damage is a hit with its own spark, not movement
+			# the spike lands inside the window now (80 m/s): its landing damage has its own spark, not a movement one
 			spike_dmg = GlideSpike.land_dmg
 			GlideSpike.land_dmg = 0.0
 		"wall kick", "wall bounce", "mantle":
