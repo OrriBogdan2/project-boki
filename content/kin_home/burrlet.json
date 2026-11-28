@@ -1,0 +1,14 @@
+{
+	"id": "burrlet",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/burrlet.json.",
+	"work": {
+		"bloom": 3,
+		"forage": 2,
+		"ranch": 1
+	},
+	"shiny": {
+		"color": "#3a5a7a",
+		"belly": "#f4e0f0",
+		"glow": "#ff8ad8"
+	}
+}

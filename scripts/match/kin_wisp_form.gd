@@ -34,6 +34,7 @@ static func wants(k: Kin) -> bool:
 	var h := k.owner_h
 	return h != null and h.downed and not h.out and not k.dead and k.state in JOINS
 
+
 ## Knock time: a summoned, alive Boki becomes the guardian that may pull this Hunter up and keep the team in
 ## for GUARD_CAP s; summoning one after the knock does not count.
 static func mark(m: Match, h: Hunter) -> void:
@@ -46,6 +47,7 @@ static func mark(m: Match, h: Hunter) -> void:
 			k.remove_meta("guard_until")
 	h.set_meta("guarded", guarding(m, h))
 
+
 ## Does a guardian Boki of this downed Hunter still have a pull going (alive, in time, no enemy on the Wisp)?
 static func guarding(m: Match, h: Hunter) -> bool:
 	if h.get_meta("stomped", false):
@@ -56,12 +58,14 @@ static func guarding(m: Match, h: Hunter) -> bool:
 				return true
 	return false
 
+
 ## True once, the frame a Hunter's pull stops (time up or stomped): the team may be out.
 static func lapsed(m: Match, h: Hunter) -> bool:
 	var was := bool(h.get_meta("guarded", false))
 	var now := guarding(m, h)
 	h.set_meta("guarded", now)
 	return was and not now
+
 
 ## Leaves whatever it was doing and comes back to its Hunter.
 static func join(k: Kin) -> void:
@@ -89,11 +93,12 @@ static func join(k: Kin) -> void:
 	k.bark("revive")
 	_place(k, 1.0)
 
+
 ## Every step while it rides as a wisp (local Boki only).
 static func tick(k: Kin, dt: float) -> void:
 	var h := k.owner_h
 	if h == null or h.out or h.extracted:
-		return                   # (the death rules move it on: KinLoss)
+		return  # (the death rules move it on: KinLoss)
 	if not h.downed:
 		leave(k)
 		return
@@ -101,6 +106,7 @@ static func tick(k: Kin, dt: float) -> void:
 	k.set_meta("wisp_t", zt)
 	_place(k, clampf(zt / ZIP_S, 0.0, 1.0))
 	_pull_up(k, h, dt)
+
 
 ## Its Hunter is back up: onto the shoulder with the order it had.
 static func leave(k: Kin) -> void:
@@ -111,16 +117,25 @@ static func leave(k: Kin) -> void:
 	k.remove_meta("guard_until")
 	k.m.fx.ring(k.pos, POP_RING, Color(k.sp["color"], 0.8), 0.25)
 
+
 ## Pulling its Hunter up now (the bleed-out pauses while it does)?
 static func pulling(k: Kin) -> bool:
-	return k.state == STATE and k.has_meta("guard_until") and k.revive_wait <= 0.0 and k.hp > 0.0 \
-		and k.owner_h != null and not k.owner_h.get_meta("stomped", false)
+	return (
+		k.state == STATE
+		and k.has_meta("guard_until")
+		and k.revive_wait <= 0.0
+		and k.hp > 0.0
+		and k.owner_h != null
+		and not k.owner_h.get_meta("stomped", false)
+	)
+
 
 ## Where it circles: its own side of the Hunter (a second Boki rides opposite the first).
 static func orbit_at(k: Kin) -> Vector3:
 	var h := k.owner_h
 	var a: float = k.m.time * TAU * ORBIT_HZ + (PI if h.kin2 == k else 0.0)
 	return h.pos + Vector3(cos(a) * ORBIT_R, ORBIT_UP, sin(a) * ORBIT_R)
+
 
 static func _place(k: Kin, zip: float) -> void:
 	var to := orbit_at(k)
@@ -129,9 +144,10 @@ static func _place(k: Kin, zip: float) -> void:
 	k.prev = k.pos
 	k.grounded = false
 
+
 static func _pull_up(k: Kin, h: Hunter, dt: float) -> void:
 	if k.hp <= 0.0 or not k.has_meta("guard_until") or h.get_meta("stomped", false):
-		return                   # no guardian mark (not summoned at the knock), or an enemy on the Wisp
+		return  # no guardian mark (not summoned at the knock), or an enemy on the Wisp
 	k.revive_wait -= dt
 	if k.revive_wait > 0.0:
 		return
@@ -140,11 +156,16 @@ static func _pull_up(k: Kin, h: Hunter, dt: float) -> void:
 		k.m.revive_hunter(h, k)
 		k.note("revived", "pulled you back up when you were down", 4.0)
 
+
 # ------------------------------------------------------------------ the picture
 ## Draws it as its wisp while in the state (the Boki model hidden); true when it did. Back in any other
 ## state, the wisp node goes and the model comes back.
 static func render(k: Kin, model: Node3D) -> bool:
+	if k.wisp:
+		return false             # (a carried Boki wisp, KinWisp: its model is a "BokiWisp" too, not this node)
 	var node := k.get_node_or_null("BokiWisp") as Node3D
+	if node == model:
+		node = null  # (a riding Boki wisp's own model is named the same: not this state's node)
 	if k.state != STATE:
 		if node:
 			node.queue_free()

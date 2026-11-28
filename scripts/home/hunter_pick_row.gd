@@ -51,7 +51,7 @@ static func _card(home: Node, id: String, cur: String) -> PanelContainer:
 	col.add_child(UI.label(role_of(id), UI.T_SMALL, UI.MUTED if open else UI.FAINT))
 	if not open:
 		card.tooltip_text = ClassUnlock.requirement(id)
-	ClassCard.add_start_chip(card, id)
+	ClassCard.add_start_chip(card, id, col)
 	return card
 
 ## The portrait; locked, it is grey with a lock on it.
@@ -75,7 +75,7 @@ static func name_of(id: String) -> String:
 
 ## "Ranged marksman": the role, the part of the kit card's one-line loop before the colon.
 static func role_of(id: String) -> String:
-	return String(Arch.def(id).get("card", {}).get("loop", "")).get_slice(":", 0)
+	return AbilityText.loop(id).get_slice(":", 0)
 
 static func _pick(home: Node, id: String) -> void:
 	if not HeroGrid.save_pick(id):

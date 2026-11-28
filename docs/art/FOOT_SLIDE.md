@@ -178,3 +178,131 @@ really do: the lean also shortens a north-south step by 6 % (cos 20), so a perfe
 | Kael (`juggernaut`) | 0.80 / 0.90 | 0.47 / 0.30 (`side_foot_mps` [1.48, 3.98]) |
 | Sable (`thief`) | 1.29 / 1.28 | unchanged: the strafe loops step 2.5 m/s at rate 1 and the rate caps at 1.4 |
 
+## Back and strafe loops on their own speeds (Nov 18, ext/p11-port-1118)
+
+`WardenGait.plan` mixes `loco.back_foot_mps` in by how far the blend points back (next to `side_foot_mps`).
+`--foot-slide-check --fit-dirs` reads, at each Hunter's walk and run ring and in all four directions, the share of
+the body's speed a planted foot covers, and prints the foot speed that would plant it (the current one times that
+share; going from the run straight to a walk is a WardenStride let-go, so each walk read starts from a stand). One
+round of fits on main's v95 glbs, kept only where the sweep's worst slip fell (m/s):
+
+| Hunter | Worst before | Worst after | Bar |
+|---|---|---|---|
+| Sparkle (`mage`) | 2.16 (back 4.65) | 0.93 (back 4.65) | 1.55 -> 0.95 |
+| Kael (`juggernaut`) | 1.17 (left 4.55) | 0.92 (left 4.50) | 0.95 |
+| Sable (`thief`) | 1.18 (right 3.00) | 1.07 (left 2.50) | 1.5 -> 1.1 |
+| Vex (`gunslinger`) | 1.05 (left 4.55), wobble 1.06 | 0.97, wobble 0.98 | 1.0 |
+| Grimble (`dredge`) | 0.92 (back 3.50) | 0.73 (back 3.50) | 0.95 -> 0.75 |
+| Tenzo (`dolm`) | fwd 1.23, back 1.40 | fwd 0.49, back 0.79 (strafe 3.77 at the rate cap) | 2.7 |
+
+Not changed (the fit made them worse, or the clips cannot be fixed by a rate): Lace (`archer`, forward run covers
+0.64 of the speed, 4.63 m/s), Albert (`bulwark`, strafe loops cover 0.06-0.19: 5.33 m/s), Meeko (`tender`, 1.77 at
+fwd 2.50, mid-blend), Neve (`rimewright`, skates, no bar), Cinder (`ashwick`, already 0.97-1.00). These five stay red
+on main and here alike: their loops need re-keying (docs/DEBT.md).
+
+
+## The run's foot lock (Nov 19, ext/foot-slide-1118)
+
+The play probe (`tools/play_probe.sh`, its `skate` number: over a 1.5 s run from a standstill, the median of the
+slower foot's flat speed over the ground as a share of the body's) flagged Albert 91 %, Lace 78 %, Neve 66 %; the
+others read 16 to 45 %. Their run clips sweep the planted foot back unevenly: Albert's at rate 1.33 goes from about
+1 m/s at touchdown to 8 m/s at lift-off, down only about a fifth of the cycle. So no playback rate fits: sweeping
+the run `foot_mps` from 2.4 to 7.0 m/s left Albert at 76 to 110 %, Lace at 40 to 105 % and Neve at 61 to 74 %.
+
+`loco.foot_lock` ([walk, run], 0..1; WardenGait) holds a foot where it came down while it is in the lowest 60 % of
+its height range, the ground under it going back at the body's speed, by the legs' two-bone IK
+(`FootPlant.reach_bones`), at most 0.6 of the leg off the clip's ankle; lifted, it eases back onto the clip in about
+0.05 s. The ground's way is the blend's, so a run-and-aim Hunter's turned legs lock true (Lace). Albert, Lace and
+Neve have it on the run only ([0, 1]); idle, walk, crouch, air and moves are untouched (it fades with the legs'
+locomotion weight). Albert's hips in idle read the same every frame before and after (480 frames, max frame step
+2.28 mm; the 85 mm travel is his idle-to-stance blend at 4 s, unchanged).
+
+| Hunter | play probe run, before | after | `--foot-slide-check` SKATE (bar 45 %) |
+|---|---|---|---|
+| Albert (`bulwark`, 5.79 m/s) | 91 % | 40 % | 35 % |
+| Lace (`archer`, 5.44 m/s) | 78 % | 27 % | 8 % |
+| Neve (`rimewright`, 5.32 m/s) | 66 % (probe job) | 9 % | 0 % |
+
+The SKATE row runs each `foot_lock` Hunter forward at `HunterMove.speed` from a standstill, as the probe does, and
+fails above 45 %. The run start is the hard part: from a standstill Albert reads 76 % with the lock's band at 30 %
+of the height range and 39 % at 60 %. Wider bands or a larger pull trade one Hunter for another (a 0.8 pull: Albert
+31 %, Lace 15 to 30 %). The forward sweep rows barely move for Albert: they read the estimated ankle (`DEBT.md`,
+foot-slide readers), which sits past his real one.
+
+## The run at match scale: cm a planted foot travels a step (Nov 20, ext/anim-stride-foot-slide)
+
+A match draws every Hunter at `Hunter.VIS_SCALE` (1.12) and moves it at `HunterMove.speed` (the hunter_move.json row
+times `body_scale` 1.16, e.g. 5.39 m/s), but `WardenGait.plan` set the loco rate from the world speed over `foot_mps`,
+which `--anim-audit` reads on the model at its own scale: a 12 % bigger model covers 12 % more ground a cycle, so every
+run swept its planted foot 12 % too fast (Kael's grow scales it further). `WardenClips` now gives `plan` the speed at
+the model's own scale (`Models.hunter` stores it as the `look_scale` meta).
+
+`--foot-slide-check` prints a STEP line per Hunter for the forward run as a match shows it: the glb and its triangles,
+the cycle, the stride a planted foot sweeps a cycle at rate 1, the loco rate, the cadence, and how far a planted foot
+travels over the ground in one step (cm, + forward). A foot stands on the lower of its heel and toe (the sole's ends,
+`AnimAudit.sole_ends`) while that is within 3 cm of its lowest, sampled at 120 Hz (a 0.34 s run cycle plants a foot
+for a few 30 fps frames). FAIL past 5 cm. `foot_mps[1]` is fitted on it: the rate that plants the foot is the speed
+times the cycle over the stride. Where that rate alone ran a Hunter at 2.2 to 2.5 steps/s (Lace, Tenzo) or hit
+`RATE_MIN` (Neve), the run's stride stretch (`loco.stride[1]`) came down first.
+
+The glbs are the ones /home/boki/meshy/v95/<id>/current.json names (blob ids match on main c0aecb37d8). Neg = the
+foot slides back (the clip's sweep is faster than the body).
+
+| Hunter | glb (tris) | main cm/step (rate, steps/s) | after cm/step (rate, steps/s) | data change |
+|---|---|---|---|---|
+| Lace (`archer`) | hem (102,027) | -27.1 (1.42, 4.7) | -3.8 (1.27, 4.2) | scale fix only (foot lock; see below) |
+| Kael (`juggernaut`) | kael (112,322) | +5.8 (1.21, 3.6) | -0.7 (1.31, 3.9) | foot_mps 4.35 -> 3.6 |
+| Vex (`gunslinger`) | vex (120,190) | -1.4 (0.98, 3.4) | -0.5 (0.97, 3.4) | foot_mps 5.4 -> 4.88 (the scale fix alone read +6.8) |
+| Albert (`bulwark`) | breaker (108,541) | -9.0 (1.54, 6.2) | +0.3 (1.38, 5.5) | scale fix only (foot lock; see below) |
+| Neve (`rimewright`) | claire (95,552) | -28.6 (1.17, 6.9) | -1.0 (0.82, 4.8) | foot_mps 4.4 -> 5.6 (foot lock; see below) |
+| Cinder (`ashwick`) | cinder (109,187) | -6.1 (1.05, 6.3) | +1.9 (0.94, 5.6) | scale fix only |
+| Tenzo (`dolm`) | tarek (95,626) | -23.8 (1.08, 3.9) | +0.4 (0.79, 2.9) | stride run 1.2 -> 1.0, foot_mps 5.0 -> 6.11 |
+| Sparkle (`mage`) | ryzz (97,646) | -10.3 (1.29, 4.3) | +0.2 (1.05, 3.5) | foot_mps 4.19 -> 4.6 |
+| Grimble (`dredge`) | dredge (125,032) | -10.0 (1.08, 3.4) | +0.2 (0.96, 3.0) | scale fix only |
+| Meeko (`tender`) | pip (121,292) | -10.3 (1.16, 6.8) | -0.1 (0.82, 4.8) | foot_mps 4.55 -> 5.75 |
+| Sable (`thief`) | sable (115,114) | -14.4 (1.70, 5.4) | +0.4 (1.36, 4.3) | foot_mps 3.18 -> 3.55 |
+
+Motley hovers: no STEP line. `--anim-audit`'s run reading poses the model at its own scale
+but at 5.39 m/s and counts the lowest 30 % of the ankle's height as planted (late swing too), so it reads these runs
+differently: Neve 39 -> 25 %, Albert 43 -> 26 %, Lace 89 -> 75 %, Tenzo 25 -> 37 % (DEBT.md).
+
+Main's `loco.foot_lock` (Albert, Lace, Neve: the section above) landed before this merged, and the lock-off refit
+fought it: Lace's run with stride 1.1 read +23.4 cm a step and skate 8 -> 26 %, Albert's foot_mps 5.12 skate
+43 -> 54 % (bar 45), Neve's 8.51 skate 0 -> 38 % and her worst slip 1.28 -> 1.92 m/s. So those three keep main's
+data (only the scale fix moves their rate) and Neve alone was re-fit with the lock on: foot_mps 4.4 -> 5.0 -> 5.6
+read STEP -6.7 -> -5.3 -> -1.0 cm, worst slip 1.28 -> 1.12 -> 1.00, skate 0 -> 0 -> 1 %; she gets a SLIP bar
+(1.05). Kael, Vex, Tenzo, Sparkle and Sable keep main's --fit-dirs walk, back and strafe speeds with the STEP-fit
+run `foot_mps[1]`. Gil (main gave him Meeko's loco plants) now reads a STEP line: Meeko's run foot_mps 5.75 moved
+him -20.2 -> -16.6 cm and his worst slip 4.06 -> 2.65 m/s, but no rate plants clips retargeted onto gil.glb, so he
+is `STEP_OPEN` (prints OPEN, not FAIL) until his rig pass.
+
+## Native Hunters: per-Hunter stride (Nov 23, ext/anim-native-stride)
+
+Every Meshy-native Hunter (content/rules/warden_native.json) played its loops at the same `walk_mps` 1.4, `run_mps`
+4.6, `crouch_mps` 1.4 and `run_from` 3.0, whatever its legs and clips did. `--foot-slide-check` now also poses each
+native Hunter at the in-game size (`Hunter.VIS_SCALE`) holding walk (2.0 m/s), run (`HunterMove.speed`) and crouch
+(`sneak_speed` of it) and prints a NATIVE line: the loop's rate, the speed a planted foot sweeps at rate 1 ("loop":
+what `*_mps` should be) and how far a planted foot travels over the ground in one step (cm, + forward: the clip
+under-strides; same read as STEP). FAIL past 5 cm unless the loop is in `NATIVE_OPEN`.
+
+The loop speeds are measured, not guessed: each `*_mps` is that loop's planted-foot speed at rate 1; `run_from` is the
+middle of the gap between the walk's fastest rate (1.8 x `walk_mps`) and the run's slowest (0.6 x `run_mps`), where a
+rate clamp costs least. Slide per step, cm, before -> after (+ forward; the run rates of the stepping Hunters fall to 0.7 to 1.2 because the
+clips' strides are longer than the old data assumed, so the legs no longer race):
+
+| Hunter | walk (2.0 m/s) | run | crouch | rates after (walk/run/crouch) |
+|---|---|---|---|---|
+| Sparkle (`mage`) | -18.1 -> -0.3 | -36.9 -> +0.1 | -12.2 -> -0.1 | 0.96 / 0.69 / 1.32 |
+| Neve (`rimewright`) | -22.3 -> -0.3 | -22.6 -> -0.2 | -14.2 -> -0.5 | 1.10 / 0.83 / 1.57 |
+| Sable (`thief`) | -20.0 -> -0.2 | -17.7 -> -0.1 | -0.2 -> -0.2 | 1.14 / 0.89 / 1.80 |
+| Tenzo (`dolm`) | -12.9 -> +0.1 | -12.9 -> -0.0 | +2.5 -> +2.5 | 1.23 / 0.96 / 1.80 |
+| Cinder (`ashwick`) | -21.8 -> -0.7 | -18.0 -> +0.0 | -3.5 -> +0.0 | 1.12 / 0.89 / 1.69 |
+| Meeko (`tender`) | +35.2 -> +4.7 | +65.1 -> +38.4 | +25.7 -> +25.7 | 1.80 / 1.80 / 1.80 |
+| Lace (`archer`) | -33.8 -> -0.1 | -25.3 -> -0.2 | -15.3 -> -0.1 | 0.88 / 0.69 / 1.13 |
+| Kael (`juggernaut`) | -18.1 -> -0.2 | -19.9 -> +0.1 | -2.8 -> -0.1 | 1.16 / 0.87 / 1.71 |
+| Gil (`gil`) | -0.8 -> +0.2 | -4.3 -> +0.5 | +10.3 -> +10.3 | 1.38 / 1.04 / 1.80 |
+| Motley (`ostra`) | +6.0 -> -0.5 | +2.6 -> +0.2 | +15.1 -> +15.1 | 1.63 / 1.23 / 1.80 |
+
+Open (clip stride, not data): Meeko's trot sweeps only 0.4 to 0.8 m/s at rate 1, so even at the 1.8 rate cap she slides
+38 cm a step at her run; Gil's and Motley's sneak clips step too short for 2.7 m/s at the cap (10 and 15 cm). They print
+OPEN (`NATIVE_OPEN`) until their clips get a longer step.

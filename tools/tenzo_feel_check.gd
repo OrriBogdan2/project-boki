@@ -4,8 +4,8 @@ extends "res://tools/hero_pair_check.gd"
 ##     it is ground for everyone (over_void, landing, a mantle onto its edge), goes out over Net, cracks and
 ##     shakes before it crumbles, then is abyss again; over solid ground it changes nothing.
 ##   RMB hop: a planted wind-up, an eased lob that lands on the circle, falls faster than it rose, never moves
-##     a body's width in one step, stops short at a body instead of shoving it; the air plunge hangs a beat and
-##     then gathers speed.
+##     a body's width in one step, stops short at a body instead of shoving it; the air press pops a beat and
+##     then its fall gathers speed.
 
 
 func run(main_node: Node) -> void:
@@ -27,70 +27,70 @@ func fd() -> Dictionary:
 func _floor() -> void:
 	var r := setup("dolm", 9.0, 4)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var T: Hunter = r[2]
+	var p: Hunter = r[1]
+	var t_v: Hunter = r[2]
 	var home: Vector3 = r[3]
-	var K: DolmKit = P.ak
-	T.teleport(home + Vector3(0, 0, 5))
-	P.teleport(home + Vector3(7.5, -0.5, 0))
-	P.grounded = false
-	P.vel = Vector3(0, -3.0, 0)
-	aim_at(P, home + Vector3(12, 0, 0))
-	ok("setup: Tenzo is falling over the abyss", P.over_void() and not P.grounded)
-	HunterKeys.ult_pressed(P)
-	var g := m.world.ground_at(P.pos.x, P.pos.z)
+	var k: DolmKit = p.ak
+	t_v.teleport(home + Vector3(0, 0, 5))
+	p.teleport(home + Vector3(7.5, -0.5, 0))
+	p.grounded = false
+	p.vel = Vector3(0, -3.0, 0)
+	aim_at(p, home + Vector3(12, 0, 0))
+	ok("setup: Tenzo is falling over the abyss", p.over_void() and not p.grounded)
+	HunterKeys.ult_pressed(p)
+	var g := m.world.ground_at(p.pos.x, p.pos.z)
 	ok(
 		"R floor: the press turns the abyss under him to ground on the same frame, and he stands on its top",
 		(
-			K.spine.floors == 1
+			k.spine.floors == 1
 			and g > World.VOID + 1.0
-			and not P.over_void()
-			and absf(P.pos.y - g) < 0.01
-			and P.vel.y >= 0.0
-			and K.spine.running()
+			and not p.over_void()
+			and absf(p.pos.y - g) < 0.01
+			and p.vel.y >= 0.0
+			and k.spine.running()
 		),
-		"floors %d ground %.2f y %.2f void %s" % [K.spine.floors, g, P.pos.y, str(P.over_void())]
+		"floors %d ground %.2f y %.2f void %s" % [k.spine.floors, g, p.pos.y, str(p.over_void())]
 	)
 	m.step(DT)
-	ok("R floor: the next step he is grounded on it", P.grounded and absf(P.pos.y - g) < 0.01, "y %.2f" % P.pos.y)
+	ok("R floor: the next step he is grounded on it", p.grounded and absf(p.pos.y - g) < 0.01, "y %.2f" % p.pos.y)
 	step(m, 0.5)
-	ok("R floor: the rest of R carries on (the ridge goes up)", K.spine.casts == 1 and rocks(m).size() > 0)
+	ok("R floor: the rest of R carries on (the ridge goes up)", k.spine.casts == 1 and rocks(m).size() > 0)
 	# everyone: a foe dropped onto it stands; a foe hanging off its edge mantles up
-	var side := Vector3(P.pos.x, g, P.pos.z + float(fd()["r"]) - 0.3)
-	T.teleport(side + Vector3(0, 0.5, 0))
-	T.vel = Vector3.ZERO
+	var side := Vector3(p.pos.x, g, p.pos.z + float(fd()["r"]) - 0.3)
+	t_v.teleport(side + Vector3(0, 0.5, 0))
+	t_v.vel = Vector3.ZERO
 	step(m, 0.4)
 	ok(
 		"R floor: walkable for everyone (a foe lands and stands on it, not over the abyss)",
-		T.grounded and not T.over_void() and absf(T.pos.y - g) < 0.05,
-		"y %.2f g %.2f" % [T.pos.y, g]
+		t_v.grounded and not t_v.over_void() and absf(t_v.pos.y - g) < 0.05,
+		"y %.2f g %.2f" % [t_v.pos.y, g]
 	)
 	var tiles: Array = m.verbs.terrain[0]["tiles"]
 	var edge_z := -INF
 	for td in tiles:
-		edge_z = maxf(edge_z, float(int(td[0]) / m.world.w) + 1.0)
-	T.teleport(Vector3(P.pos.x, g - 0.6, edge_z + T.r + 0.15))
-	T.grounded = false
-	T.vel = Vector3.ZERO
-	T.last_gy = g
+		edge_z = maxf(edge_z, float(int(int(td[0]) / float(m.world.w))) + 1.0)
+	t_v.teleport(Vector3(p.pos.x, g - 0.6, edge_z + t_v.r + 0.15))
+	t_v.grounded = false
+	t_v.vel = Vector3.ZERO
+	t_v.last_gy = g
 	var t := 0.0
-	while t < 0.8 and not (T.grounded and absf(T.pos.y - g) < 0.05):
-		T.inp["move"] = Vector2(0, -1)
+	while t < 0.8 and not (t_v.grounded and absf(t_v.pos.y - g) < 0.05):
+		t_v.inp["move"] = Vector2(0, -1)
 		m.step(DT)
 		t += DT
-	T.inp["move"] = Vector2.ZERO
+	t_v.inp["move"] = Vector2.ZERO
 	ok(
 		"R floor: a body below its edge, pushing in, mantles onto it",
-		T.grounded and absf(T.pos.y - g) < 0.05,
-		"y %.2f g %.2f after %.2fs" % [T.pos.y, g, t]
+		t_v.grounded and absf(t_v.pos.y - g) < 0.05,
+		"y %.2f g %.2f after %.2fs" % [t_v.pos.y, g, t]
 	)
 	# the warning, then the crumble
 	var tz: Dictionary = m.verbs.terrain[0]
 	var node: Node3D = tz["node"]
-	var calm := node.get_node_or_null("Cracks") == null
+	var calm := not SpanLooks.cracked(node)
 	step(m, float(tz["t"]) - float(fd()["warn"]) + 0.3)
 	m.verbs.render(1.0)
-	var cracked := node.get_node_or_null("Cracks") != null
+	var cracked := SpanLooks.cracked(node)
 	var p0 := node.position
 	step(m, 0.1)
 	m.verbs.render(1.0)
@@ -99,12 +99,12 @@ func _floor() -> void:
 		calm and cracked and node.position.distance_to(p0) > 0.001,
 		"calm %s cracked %s" % [str(calm), str(cracked)]
 	)
-	P.teleport(Vector3(P.pos.x, g, P.pos.z))
+	p.teleport(Vector3(p.pos.x, g, p.pos.z))
 	step(m, float(fd()["warn"]))
 	ok(
 		"R floor: then it crumbles: the abyss is back and whoever stood on it falls",
-		m.verbs.terrain.is_empty() and m.world.is_void(P.pos.x, P.pos.z) and (not P.grounded or P.out or P.dead),
-		"terrain %d grounded %s" % [m.verbs.terrain.size(), str(P.grounded)]
+		m.verbs.terrain.is_empty() and m.world.is_void(p.pos.x, p.pos.z) and (not p.grounded or p.out or p.dead),
+		"terrain %d grounded %s" % [m.verbs.terrain.size(), str(p.grounded)]
 	)
 	await done(m)
 
@@ -113,26 +113,26 @@ func _floor() -> void:
 func _floor_net_and_ground() -> void:
 	var r := setup("dolm", 9.0, 4)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
+	var p: Hunter = r[1]
 	var home: Vector3 = r[3]
-	var K: DolmKit = P.ak
+	var k: DolmKit = p.ak
 	HeroZones.capture = true
 	HeroZones.sent.clear()
-	HunterKeys.ult_pressed(P)
+	HunterKeys.ult_pressed(p)
 	var tiles0 := m.verbs.terrain.size()
 	ok(
 		"R floor: over solid ground the press lays nothing and R is unchanged",
-		K.spine.floors == 0 and tiles0 == 0 and K.spine.running(),
-		"floors %d" % K.spine.floors
+		k.spine.floors == 0 and tiles0 == 0 and k.spine.running(),
+		"floors %d" % k.spine.floors
 	)
 	await done(m)
 	r = setup("dolm", 9.0, 4)
 	m = r[0]
-	P = r[1]
-	P.teleport(home + Vector3(6.5, 0, 0))
-	P.grounded = false
+	p = r[1]
+	p.teleport(home + Vector3(6.5, 0, 0))
+	p.grounded = false
 	HeroZones.sent.clear()
-	HunterKeys.ult_pressed(P)
+	HunterKeys.ult_pressed(p)
 	HeroZones.capture = false
 	var evs: Array = HeroZones.sent.filter(func(e): return e[1] == "bridge")
 	var r2 := setup("dolm", 9.0, 4)
@@ -161,56 +161,56 @@ func _floor_net_and_ground() -> void:
 func _hop() -> void:
 	var r := setup("dolm", 30.0)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
+	var p: Hunter = r[1]
 	var home: Vector3 = r[3]
-	var K: DolmKit = P.ak
-	var feel := K.slam.feel()
-	aim_at(P, home + Vector3(10, 0, 0))
-	P.inp["sec_hold"] = true
-	P.ak.press_rmb()
-	step(m, 0.25, func(): P.inp["sec_hold"] = true)
-	var aim_c := K.slam.center()
-	P.inp["sec_hold"] = false
+	var k: DolmKit = p.ak
+	var feel := k.slam.feel()
+	aim_at(p, home + Vector3(10, 0, 0))
+	p.inp["sec_hold"] = true
+	p.ak.press_rmb()
+	step(m, 0.25, func(): p.inp["sec_hold"] = true)
+	var aim_c := k.slam.center()
+	p.inp["sec_hold"] = false
 	m.step(DT)
-	var start := P.pos
+	var start := p.pos
 	var still := true
 	var t := 0.0
 	while t < float(feel["windup"]) - DT * 2.5:
 		m.step(DT)
 		t += DT
-		still = still and P.grounded and Vector2(P.pos.x - start.x, P.pos.z - start.z).length() < 0.01
+		still = still and p.grounded and Vector2(p.pos.x - start.x, p.pos.z - start.z).length() < 0.01
 	ok(
 		"RMB: the release winds up planted in a deep crouch before the hop (the tell)",
-		still and K.anim_id == "breah_windup" and K.slam.hops == 0,
-		"anim %s hops %d" % [K.anim_id, K.slam.hops]
+		still and k.anim_id == "breah_windup" and k.slam.hops == 0,
+		"anim %s hops %d" % [k.anim_id, k.slam.hops]
 	)
 	var path: Array = []
-	var prev := P.pos
-	var s0 := K.slams
+	var prev := p.pos
+	var s0 := k.slams
 	var up_t := -1.0
 	var air_t := 0.0
 	var big := 0.0
-	while K.slams == s0 and air_t < 2.0:
+	while k.slams == s0 and air_t < 2.0:
 		m.step(DT)
 		air_t += DT
-		var d := P.pos - prev
+		var d := p.pos - prev
 		big = maxf(big, d.length())
 		path.append(Vector2(d.x, d.z).length())
-		if up_t < 0.0 and P.vel.y < 0.0 and K.slam.hops == 1:
+		if up_t < 0.0 and p.vel.y < 0.0 and k.slam.hops == 1:
 			up_t = air_t
-		prev = P.pos
-	var n_ := path.size()
+		prev = p.pos
+	var n_v := path.size()
 	var early := 0.0
 	var late := 0.0
-	for i in n_ / 5:
+	for i in int(n_v / 5.0):
 		early += float(path[i + 1])
-		late += float(path[n_ - 2 - i])
+		late += float(path[n_v - 2 - i])
 	ok(
 		"RMB: the hop's ground speed eases (fast off the ground, settling into the landing)",
 		early > late * 2.0,
 		"first fifth %.2fm last fifth %.2fm" % [early, late]
 	)
-	var off := Vector2(P.pos.x - aim_c.x, P.pos.z - aim_c.z).length()
+	var off := Vector2(p.pos.x - aim_c.x, p.pos.z - aim_c.z).length()
 	ok(
 		"RMB: a weighty lob: it falls faster than it rose, and lands on the circle it showed",
 		up_t > 0.0 and air_t - up_t < up_t and off < 0.3,
@@ -226,68 +226,72 @@ func _hop_body() -> void:
 	for fast in [false, true]:
 		var r := setup("dolm", 1.9)
 		var m: Match = r[0]
-		var P: Hunter = r[1]
-		var T: Hunter = r[2]
+		var p: Hunter = r[1]
+		var t_v: Hunter = r[2]
 		var home: Vector3 = r[3]
-		var K: DolmKit = P.ak
-		aim_at(P, home + Vector3(10, 0, 0))
-		var t0 := T.pos
-		var hp0 := T.hp
-		P.inp["sec_hold"] = true
-		P.ak.press_rmb()
-		step(m, 0.25, func(): P.inp["sec_hold"] = true)
-		P.inp["sec_hold"] = false
+		var k: DolmKit = p.ak
+		aim_at(p, home + Vector3(10, 0, 0))
+		var t0 := t_v.pos
+		var hp0 := t_v.hp
+		p.inp["sec_hold"] = true
+		p.ak.press_rmb()
+		step(m, 0.25, func(): p.inp["sec_hold"] = true)
+		p.inp["sec_hold"] = false
 		m.step(DT)
 		if fast:
-			K.slam.wind_run = Vector2(60.0, 0.0)  # a 1m-per-step hop: only a swept test catches the body
-		var s0 := K.slams
+			k.slam.wind_run = Vector2(60.0, 0.0)  # a 1m-per-step hop: only a swept test catches the body
+		var s0 := k.slams
 		var shoved := 0.0
 		var t := 0.0
-		while K.slams == s0 and t < 2.0:
+		while k.slams == s0 and t < 2.0:
 			m.step(DT)
 			t += DT
-			if K.slams == s0:
-				shoved = maxf(shoved, T.pos.distance_to(t0))
+			if k.slams == s0:
+				shoved = maxf(shoved, t_v.pos.distance_to(t0))
 		ok(
 			(
 				"RMB%s: a body in the way stops the hop short: he lands in front and slams it, no shove, no pass"
 				% (" (60 m/s)" if fast else "")
 			),
-			K.slam.stops > 0 and P.pos.x < T.pos.x and shoved < 0.1 and T.hp < hp0,
-			"stops %d his x %.2f its x %.2f shoved %.2f dmg %.0f" % [K.slam.stops, P.pos.x, T.pos.x, shoved, hp0 - T.hp]
+			k.slam.stops > 0 and p.pos.x < t_v.pos.x and shoved < 0.1 and t_v.hp < hp0,
+			(
+				"stops %d his x %.2f its x %.2f shoved %.2f dmg %.0f"
+				% [k.slam.stops, p.pos.x, t_v.pos.x, shoved, hp0 - t_v.hp]
+			)
 		)
 		await done(m)
 
 
-## The air press: a beat hanging at the top, then the plunge gathers speed (no 26 m/s from the first frame).
+## The air press over ground: a beat at the top (a small pop), then the fall gathers speed (no 26 m/s from the
+## first frame) onto the spot it arcs to.
 func _dive() -> void:
 	var r := setup("dolm", 30.0)
 	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var K: DolmKit = P.ak
-	var feel := K.slam.feel()
-	P.teleport(P.pos + Vector3(0, 6.0, 0))
-	P.grounded = false
-	P.vel = Vector3.ZERO
+	var p: Hunter = r[1]
+	var k: DolmKit = p.ak
+	var feel := k.slam.feel()
+	p.teleport(p.pos + Vector3(0, 6.0, 0))
+	p.grounded = false
+	p.vel = Vector3.ZERO
 	m.step(DT)
-	P.inp["sec"] = true
+	p.inp["sec"] = true
 	m.step(DT)
-	P.inp["sec"] = false
-	var y0 := P.pos.y
-	step(m, float(feel["dive_hang"]) - DT * 1.5)
-	var hung := absf(P.pos.y - y0) < 0.05 and K.dive and K.dive_fall
+	p.inp["sec"] = false
+	var y0 := p.pos.y
+	step(m, float(feel["air_up"]) / Hunter.H_GRAV - DT * 1.5)
+	var hung := p.pos.y > y0 and k.dive and k.slam.air_on()
 	var vys: Array = []
-	var s0 := K.slams
+	var s0 := k.slams
 	var t := 0.0
-	while K.slams == s0 and t < 2.0:
+	while k.slams == s0 and t < 2.0:
 		m.step(DT)
 		t += DT
-		vys.append(-P.vel.y)
-	var cap := float(K.slam_def()["dive_speed"])
+		vys.append(-p.vel.y)
+	var cap := float(k.slam_def()["dive_speed"])
 	var ramps := vys.size() > 4 and float(vys[1]) < float(vys[3]) and float(vys[0]) < cap * 0.5
 	ok(
-		"RMB air: it hangs a beat, then the plunge gathers speed and slams where he lands",
-		hung and ramps and K.slams == s0 + 1,
+		"RMB air: a beat at the top, then the fall gathers speed and slams where he lands",
+		hung and ramps and k.slams == s0 + 1,
 		"hung %s ramps %s first %.1f m/s" % [str(hung), str(ramps), float(vys[0]) if vys.size() > 0 else 0.0]
 	)
 	await done(m)

@@ -11,13 +11,25 @@ const DT := 1.0 / 60.0
 var bad := 0
 var m: Match
 var main: Node
+var downs := 0  # boki_downed starts, one a step at most (_heard_down)
+
 
 func run(main_node: Node) -> void:
 	main = main_node
 	m = Match.new()
 	main.add_child(m)
-	m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 79, "no_drop": true, "demo_kin": "cindle",
-		"boki_wisps": true})
+	m.start(
+		{
+			"teams": 2,
+			"squad": 3,
+			"tier": 0,
+			"length": 1e9,
+			"seed": 79,
+			"no_drop": true,
+			"demo_kin": "cindle",
+			"boki_wisps": true
+		}
+	)
 	m.set_process(false)
 	for mb in m.mobs:
 		mb.queue_free()
@@ -28,19 +40,40 @@ func run(main_node: Node) -> void:
 	_frames(0.3)
 	_death()
 	m.queue_free()
+	Sfx.cue_log = null
 	print("SUMMONDEATH %s (%d fail)" % ["PASS" if bad == 0 else "FAIL", bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 func ok(cond: bool, what: String) -> void:
 	print("SDEATH %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
 
+
 func _frames(secs: float) -> void:
 	var t := 0.0
 	while t < secs:
 		m.step(DT)
 		t += DT
+		_heard_down()
+
+
+## Counts a boki_downed start into `downs` and clears Sfx's own last start: the steps run faster than real time,
+## so the real-time MIN_GAP would hide a repeat.
+func _heard_down() -> void:
+	if Sfx.last_played.has("boki_downed"):
+		downs += 1
+		Sfx.last_played.erase("boki_downed")
+		Sfx.recent.erase("boki_downed")
+
+
+## A fresh boki_downed count, heard from `at`.
+func _listen(at: Vector3) -> void:
+	Sfx.listener = at
+	_heard_down()
+	downs = 0
+
 
 ## The foe's Boki, summoned and ready to be hurt (its owner stands and stays put).
 func _summoned(f: Hunter) -> Kin:
@@ -50,8 +83,10 @@ func _summoned(f: Hunter) -> Kin:
 	_frames(0.05)
 	return k
 
+
 func _wisp_pings() -> int:
 	return m.sound_pings.filter(func(sp: Dictionary) -> bool: return sp["kind"] == "wisp").size()
+
 
 func _death() -> void:
 	var p: Hunter = m.player
@@ -63,18 +98,26 @@ func _death() -> void:
 	k.hurt(k.max_hp * 0.6, p)
 	ok(k.summon.out() and not k.wisp and not f.downed, "damage alone does not end the summon")
 	var pings := _wisp_pings()
-	k.teleport(f.pos + Vector3(12, 0, 0))          # (killed away from its owner, so there is a flight)
+	Sfx.cue_log = []
+	k.teleport(f.pos + Vector3(12, 0, 0))  # (killed away from its owner, so there is a flight)
+	_listen(k.pos)
 	k.hurt(k.max_hp * 5.0, p)
-	ok(k.wisp and k.state == "shoulder" and not KinSteal.loose(k) and k.owner_h == f,
-		"killed by a rival: back to a wisp, with its owner")
+	_heard_down()
+	ok(
+		k.wisp and k.state == "shoulder" and not KinSteal.loose(k) and k.owner_h == f,
+		"killed by a rival: back to a wisp, with its owner"
+	)
+	ok(_said("boki_downed"), "...it says boki_downed where it fell")
 	ok(absf(k.summon.cd - base * mult) < 0.01, "...the longer cooldown (%.1f s)" % k.summon.cd)
 	ok(f.reveal_t >= float(KinSummon.rules()["reveal_s"]) - 0.01, "...its owner is revealed for reveal_s")
 	ok(_wisp_pings() == pings + 1, "...and the killer's minimap gets a ping")
 	var from := k.summon.fly_from
 	var want := Vector2(from.x - f.pos.x, from.z - f.pos.z).length() / float(KinSummon.rules()["home_speed"])
-	ok(k.summon.fly > 0.0 and want > 0.2 and absf(k.summon.fly_len - want) < 0.05,
-		"...it flies home at home_speed (%.2f s)" % k.summon.fly_len)
-	m.step(DT)      # (the sim draws the streak: KinWisp.ride sets the wisp's spot each tick)
+	ok(
+		k.summon.fly > 0.0 and want > 0.2 and absf(k.summon.fly_len - want) < 0.05,
+		"...it flies home at home_speed (%.2f s)" % k.summon.fly_len
+	)
+	m.step(DT)  # (the sim draws the streak: KinWisp.ride sets the wisp's spot each tick)
 	ok(k.global_position.distance_to(k.summon.fly_from) < 1.0, "...the streak starts where it fell")
 	_frames(k.summon.fly_len + 0.1)
 	ok(k.summon.fly == 0.0 and k.state == "shoulder", "...and ends on its owner's shoulder")
@@ -89,8 +132,10 @@ func _death() -> void:
 
 	k = _summoned(f)
 	f.downed = true
+	Sfx.cue_log = []
 	k.hurt(k.max_hp * 5.0, p)
 	ok(k.wisp and KinSteal.loose(k), "owner downed, killed by a rival: a loose wisp")
+	ok(_said("boki_downed"), "...and it says boki_downed as it breaks loose")
 	ok(absf(k.summon.cd - base * mult) < 0.01, "...and the longer cooldown")
 	KinSteal.go_home(k)
 	k = _summoned(f)
@@ -114,5 +159,12 @@ func _death() -> void:
 	var row: Array = []
 	row.resize(KinNet.KIN_AT)
 	KinNet.apply_kin(other, row + KinNet.kin_extra(k))
-	ok(other.wisp and other.summon.left == 0.0 and absf(other.summon.cd - k.summon.cd) < 0.11,
-		"online: the snapshot shows the killed summon as a resting wisp")
+	ok(
+		other.wisp and other.summon.left == 0.0 and absf(other.summon.cd - k.summon.cd) < 0.11,
+		"online: the snapshot shows the killed summon as a resting wisp"
+	)
+
+
+## Did the cue log (Sfx.cue_log, started by the check) get this sound since it was last cleared?
+func _said(sound: String) -> bool:
+	return Sfx.cue_log != null and Sfx.cue_log.any(func(c: Array) -> bool: return c[0] == sound)

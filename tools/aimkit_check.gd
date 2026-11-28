@@ -14,22 +14,31 @@ var n := 0
 var ak = null
 const DT := 1.0 / 60.0
 
+
 func ok(name: String, cond: bool, info := "") -> void:
 	n += 1
 	print("AIMKIT %-58s %s  %s" % [name, "PASS" if cond else "FAIL", info])
-	if not cond: fails += 1
+	if not cond:
+		fails += 1
+
 
 func run(main_node: Node) -> void:
 	main = main_node
 	ak = load("res://tools/archetype_check.gd").new()
+	_disc_rim()
+	_sector_rows()
+	_kept_points()
 	ak.main = main
 	var shots := ""
 	for a in OS.get_cmdline_user_args():
-		if String(a).begins_with("--shots-dir="): shots = String(a).substr(12)
+		if String(a).begins_with("--shots-dir="):
+			shots = String(a).substr(12)
 	var r: Array = ak.setup("gunslinger", 6.0, "", true)
-	var m: Match = r[0]; var P: Hunter = r[1]; var T: Hunter = r[2]
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[2]
 	_aim_modes(m, P, T)
-	ak.step(m, 0.5)        # the rounds _aim_modes fired: Vex's firing brackets lapse, so only the shapes below show
+	ak.step(m, 0.5)  # the rounds _aim_modes fired: Vex's firing brackets lapse, so only the shapes below show
 	_shapes(m, P, T)
 	_seen(m, P, T)
 	_net(m, P, T)
@@ -48,9 +57,12 @@ func run(main_node: Node) -> void:
 	print("AIMKIT DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
+
 func _aim(P: Hunter, d: float) -> void:
-	P.inp["aim"] = P.pos + Vector3(d, 0.9, 0); P.inp["aim_y"] = P.pos.y
-	P.aim_dir()      # as a frame would: a cursor past the body sets the last good aim (feel-aim-near-body)
+	P.inp["aim"] = P.pos + Vector3(d, 0.9, 0)
+	P.inp["aim_y"] = P.pos.y
+	P.aim_dir()  # as a frame would: a cursor past the body sets the last good aim (feel-aim-near-body)
+
 
 ## Fire one round and read back how far it will fly (life x speed).
 func _shot_dist(m: Match, P: Hunter) -> float:
@@ -65,12 +77,20 @@ func _shot_dist(m: Match, P: Hunter) -> float:
 		var mz: Vector3 = s["muzzle"]
 		var st: Vector3 = s["start"]
 		lead = Vector2(mz.x - st.x, mz.z - st.z).length()
+		if (s["x"] as Dictionary).has("hand"):
+			# the drawn muzzle is the hand (ShotOrigin.draw_from); the sim still launches 0.6 m ahead of the body
+			lead = 0.6
 	return float(s["life0"]) * (s["vel"] as Vector2).length() - lead
+
 
 func _aim_modes(m: Match, P: Hunter, _T: Hunter) -> void:
 	var rng := float(P.wpn["range"])
 	_aim(P, 5.0)
-	ok("mode: cursor = the cursor distance inside range", is_equal_approx(AimMode.dist(P, 12.0), 5.0), "%.2f" % AimMode.dist(P, 12.0))
+	ok(
+		"mode: cursor = the cursor distance inside range",
+		is_equal_approx(AimMode.dist(P, 12.0), 5.0),
+		"%.2f" % AimMode.dist(P, 12.0)
+	)
 	_aim(P, 20.0)
 	ok("mode: cursor past range clamps to range", is_equal_approx(AimMode.dist(P, 12.0), 12.0))
 	_aim(P, 0.4)
@@ -86,11 +106,19 @@ func _aim_modes(m: Match, P: Hunter, _T: Hunter) -> void:
 	_aim(P, 5.0)
 	ok("mode: max = always the full range", is_equal_approx(AimMode.dist(P, 12.0, AimMode.MAX), 12.0))
 	var pt := AimMode.point(P, 12.0)
-	ok("mode: the landing point sits on the aim line at the cursor", Vector2(pt.x - P.pos.x, pt.z - P.pos.z).distance_to(Vector2(5, 0)) < 0.01 and absf(pt.y - P.pos.y) < 0.01, str(pt - P.pos))
+	ok(
+		"mode: the landing point sits on the aim line at the cursor",
+		Vector2(pt.x - P.pos.x, pt.z - P.pos.z).distance_to(Vector2(5, 0)) < 0.01 and absf(pt.y - P.pos.y) < 0.01,
+		str(pt - P.pos)
+	)
 	# the weapon defaults stay as they were: a plain gun flies its range, a boom weapon lands at the cursor
 	ok("default: a plain gun (quill rifle) is max range", AimMode.mode_of(P) == AimMode.MAX, AimMode.mode_of(P))
 	var d0 := _shot_dist(m, P)
-	ok("default: the rifle round flies its full range past a 5 m cursor", absf(d0 - rng) < 0.05, "%.2f of %.2f" % [d0, rng])
+	ok(
+		"default: the rifle round flies its full range past a 5 m cursor",
+		absf(d0 - rng) < 0.05,
+		"%.2f of %.2f" % [d0, rng]
+	)
 	P.shot_aim = AimMode.CURSOR
 	var d1 := _shot_dist(m, P)
 	ok("per shot: shot_aim = cursor lands it at the cursor", absf(d1 - 5.0) < 0.05, "%.2f" % d1)
@@ -100,21 +128,33 @@ func _aim_modes(m: Match, P: Hunter, _T: Hunter) -> void:
 	ok("per shot: cursor beyond range still stops at range", absf(_shot_dist(m, P) - rng) < 0.05)
 	_aim(P, 5.0)
 	var w0: Dictionary = P.wpn
-	var wb := w0.duplicate(); wb["boom"] = 1.2; wb["boom_kb"] = 2.0
-	wb.erase("aim")      # the default rule: a weapon with no "aim" of its own
+	var wb := w0.duplicate()
+	wb["boom"] = 1.2
+	wb["boom_kb"] = 2.0
+	wb.erase("aim")  # the default rule: a weapon with no "aim" of its own
 	P.wpn = wb
 	ok("default: a boom weapon is cursor-placed", AimMode.mode_of(P) == AimMode.CURSOR)
 	var db := _shot_dist(m, P)
 	var sx: Dictionary = m.shots.back()["x"]
-	ok("default: the boom round lands at the cursor and keeps its blast", absf(db - 5.0) < 0.05 and float(sx.get("boom", 0.0)) == 1.2, "%.2f" % db)
+	ok(
+		"default: the boom round lands at the cursor and keeps its blast",
+		absf(db - 5.0) < 0.05 and float(sx.get("boom", 0.0)) == 1.2,
+		"%.2f" % db
+	)
 	P.shot_aim = AimMode.MAX
 	ok("per shot: shot_aim = max sends a boom round to full range", absf(_shot_dist(m, P) - rng) < 0.05)
-	var wc := w0.duplicate(); wc["aim"] = "cursor"
+	var wc := w0.duplicate()
+	wc["aim"] = "cursor"
 	P.wpn = wc
-	ok("per weapon: \"aim\": \"cursor\" in the weapon data", AimMode.mode_of(P) == AimMode.CURSOR and absf(_shot_dist(m, P) - 5.0) < 0.05)
+	ok(
+		'per weapon: "aim": "cursor" in the weapon data',
+		AimMode.mode_of(P) == AimMode.CURSOR and absf(_shot_dist(m, P) - 5.0) < 0.05
+	)
 	P.wpn = w0
-	for s in m.shots: s["life"] = 0.0
+	for s in m.shots:
+		s["life"] = 0.0
 	m.step(DT)
+
 
 func _all_shapes(caster: Hunter, k: float, other: Hunter, all := false) -> void:
 	var a := {"all": all}
@@ -133,33 +173,68 @@ func _all_shapes(caster: Hunter, k: float, other: Hunter, all := false) -> void:
 	AimKit.span(caster, "span", a.merged({"len": 10.0}))
 	AimKit.star(caster, "star", a)
 
+
 const IDS := ["lane", "dotted", "vee", "cone", "circle", "sweet", "arc", "swap", "line", "span", "star"]
+
 
 func _shapes(m: Match, P: Hunter, T: Hunter) -> void:
 	var L := AimKit.layer(m)
 	_aim(P, 6.0)
 	_all_shapes(P, 0.5, T)
 	L.rebuild()
-	ok("show: every shape is up", IDS.all(func(i): return AimKit.shown(P, i)), str(IDS.filter(func(i): return not AimKit.shown(P, i))))
-	ok("show: all %d draw for their own player, in one mesh" % IDS.size(), L.built == IDS.size() and L.mi.visible and L.mesh.get_surface_count() == 1, "built %d verts %d" % [L.built, L.geo.v.size()])
+	ok(
+		"show: every shape is up",
+		IDS.all(func(i): return AimKit.shown(P, i)),
+		str(IDS.filter(func(i): return not AimKit.shown(P, i)))
+	)
+	ok(
+		"show: all %d draw for their own player, in one mesh" % IDS.size(),
+		L.built == IDS.size() and L.mi.visible and L.mesh.get_surface_count() == 1,
+		"built %d verts %d" % [L.built, L.geo.v.size()]
+	)
 	var e := AimKit.entry(P, "lane")
-	ok("lane: grows len0 -> len and narrows width -> width_to with k", is_equal_approx(float(e["len"]), 5.0) and is_equal_approx(float(e["width"]), 0.65), "len %.2f width %.2f" % [e["len"], e["width"]])
+	ok(
+		"lane: grows len0 -> len and narrows width -> width_to with k",
+		is_equal_approx(float(e["len"]), 5.0) and is_equal_approx(float(e["width"]), 0.65),
+		"len %.2f width %.2f" % [e["len"], e["width"]]
+	)
 	var v := AimKit.entry(P, "vee")
-	ok("vee: half open at k 0.5 (25 deg -> 6.25 deg a side), not merged", is_equal_approx(rad_to_deg(float(v["half"])), 6.25) and not v["merged"], "%.2f" % rad_to_deg(float(v["half"])))
+	ok(
+		"vee: half open at k 0.5 (25 deg -> 6.25 deg a side), not merged",
+		is_equal_approx(rad_to_deg(float(v["half"])), 6.25) and not v["merged"],
+		"%.2f" % rad_to_deg(float(v["half"]))
+	)
 	var sw := AimKit.entry(P, "sweet")
-	ok("sweet: the sweet spot grows 0.5 -> 1 bh (0.9 -> 1.8 m)", is_equal_approx(float(sw["core"]), 1.35) and is_equal_approx(float(sw["r"]), 4.5), "core %.2f r %.2f" % [sw["core"], sw["r"]])
+	ok(
+		"sweet: the sweet spot grows 0.5 -> 1 bh (0.9 -> 1.8 m)",
+		is_equal_approx(float(sw["core"]), 1.35) and is_equal_approx(float(sw["r"]), 4.5),
+		"core %.2f r %.2f" % [sw["core"], sw["r"]]
+	)
 	ok("arc: radius defaults to the cursor distance", is_equal_approx(float(AimKit.entry(P, "arc")["radius"]), 6.0))
 	var c := AimKit.entry(P, "circle")
 	ok("circle: lands on the cursor point", (c["at"] as Vector2).distance_to(Vector2(P.pos.x + 6.0, P.pos.z)) < 0.01)
-	ok("colour: the hero colour by default", (e["col"] as Color).is_equal_approx(AimKit.hero_col(P)) and AimKit.hero_col(P).is_equal_approx(Color(String(Arch.def("gunslinger")["color"]))))
+	ok(
+		"colour: the hero colour by default",
+		(
+			(e["col"] as Color).is_equal_approx(AimKit.hero_col(P))
+			and AimKit.hero_col(P).is_equal_approx(Color(String(Arch.def("gunslinger")["color"])))
+		)
+	)
 	# update: the same id again replaces it
 	_all_shapes(P, 1.0, T)
-	e = AimKit.entry(P, "lane"); v = AimKit.entry(P, "vee")
-	ok("update: the lane is full length, narrowest, hot at k 1", is_equal_approx(float(e["len"]), 8.0) and is_equal_approx(float(e["width"]), 0.3) and float(e["hot"]) == 1.0)
+	e = AimKit.entry(P, "lane")
+	v = AimKit.entry(P, "vee")
+	ok(
+		"update: the lane is full length, narrowest, hot at k 1",
+		is_equal_approx(float(e["len"]), 8.0) and is_equal_approx(float(e["width"]), 0.3) and float(e["hot"]) == 1.0
+	)
 	ok("update: the V has closed into one line", v["merged"] and float(v["half"]) == 0.0)
 	AimKit.lane(P, "lane", {"len": 3.0, "col": Color.RED})
 	e = AimKit.entry(P, "lane")
-	ok("update: a per-hero colour through col", (e["col"] as Color).is_equal_approx(Color.RED) and is_equal_approx(float(e["len"]), 3.0))
+	ok(
+		"update: a per-hero colour through col",
+		(e["col"] as Color).is_equal_approx(Color.RED) and is_equal_approx(float(e["len"]), 3.0)
+	)
 	ok("update: still one entry per id", L.entries.size() == IDS.size(), "%d" % L.entries.size())
 	# hide now, or stop calling and it expires
 	AimKit.hide(P, "lane")
@@ -167,29 +242,42 @@ func _shapes(m: Match, P: Hunter, T: Hunter) -> void:
 	AimKit.circle(P, "held", {"dur": 0.5})
 	ak.step(m, 0.25)
 	L.rebuild()
-	ok("expire: not refreshed for 0.25 s, the per-step shapes are gone", IDS.all(func(i): return not AimKit.shown(P, i)) and L.entries.size() == 1)
+	ok(
+		"expire: not refreshed for 0.25 s, the per-step shapes are gone",
+		IDS.all(func(i): return not AimKit.shown(P, i)) and L.entries.size() == 1
+	)
 	ok("expire: a dur 0.5 telegraph is still up at 0.25 s", AimKit.shown(P, "held"))
 	ak.step(m, 0.35)
 	L.rebuild()
-	ok("expire: and gone after 0.5 s; nothing left drawn", not AimKit.shown(P, "held") and L.entries.is_empty() and not L.mi.visible and L.mesh.get_surface_count() == 0)
+	ok(
+		"expire: and gone after 0.5 s; nothing left drawn",
+		not AimKit.shown(P, "held") and L.entries.is_empty() and not L.mi.visible and L.mesh.get_surface_count() == 0
+	)
 	# refreshed every step it stays up
 	var t := 0.0
 	while t < 0.5:
-		AimKit.lane(P, "keep"); m.step(DT); t += DT
+		AimKit.lane(P, "keep")
+		m.step(DT)
+		t += DT
 	ok("refresh: called every step, it stays up", AimKit.shown(P, "keep"))
 	AimKit.hide(P, "keep")
 
+
 func _seen(m: Match, P: Hunter, T: Hunter) -> void:
 	var L := AimKit.layer(m)
-	AimKit.lane(T, "aim")                              # a foe's own aim line: theirs only
+	AimKit.lane(T, "aim")  # a foe's own aim line: theirs only
 	AimKit.circle(T, "slam", {"self": true, "all": true, "r": 2.0})
 	L.rebuild()
 	ok("seen: a foe's aim telegraph isn't drawn for you", AimKit.shown(T, "aim") and L.built == 1)
 	var e: Dictionary = AimKit.entry(T, "slam")
-	ok("seen: their \"all\" area is drawn, in their own colour", L.built == 1 and (e["col"] as Color).is_equal_approx(AimKit.hero_col(T)))
+	ok(
+		'seen: their "all" area is drawn, in their own colour',
+		L.built == 1 and (e["col"] as Color).is_equal_approx(AimKit.hero_col(T))
+	)
 	AimKit.clear(T)
 	L.rebuild()
 	ok("clear: drops one hunter's set only", not AimKit.shown(T, "slam") and L.built == 0)
+
 
 ## Net (AimNet, event "tele"): every shape kind of a local hunter's `all` telegraph goes out once per
 ## SEND_GAP, crosses the wire as JSON and draws on the other game under its remote copy as the caster drew
@@ -202,12 +290,16 @@ func _net(m: Match, caster: Hunter, other: Hunter) -> void:
 	_all_shapes(caster, 0.5, other, true)
 	AimKit.lane(caster, "aim")
 	var ids := {}
-	for ev in AimNet.sent_log: ids[String(ev[2])] = ev
-	ok("net: one \"tele\" event per all telegraph, none for the aim lane", AimNet.sent_log.size() == IDS.size()
-		and ids.size() == IDS.size() and not ids.has("aim"), "%d sent" % AimNet.sent_log.size())
+	for ev in AimNet.sent_log:
+		ids[String(ev[2])] = ev
+	ok(
+		'net: one "tele" event per all telegraph, none for the aim lane',
+		AimNet.sent_log.size() == IDS.size() and ids.size() == IDS.size() and not ids.has("aim"),
+		"%d sent" % AimNet.sent_log.size()
+	)
 	var t := 0.0
 	while t < 0.5 - 0.001:
-		m.time += DT      # the clock only: a real step here moves the match the pool check counts
+		m.time += DT  # the clock only: a real step here moves the match the pool check counts
 		t += DT
 		_all_shapes(caster, 0.5, other, true)
 	var per := AimNet.sent_log.size() / float(IDS.size())
@@ -222,7 +314,8 @@ func _net(m: Match, caster: Hunter, other: Hunter) -> void:
 	ok("net: an event naming a hunter this game runs is ignored", not AimKit.shown(other, String(wire[0][2])))
 	other.remote = true
 	var before := AimNet.sent_log.size()
-	for ev in wire: AimNet.net_in(m, ev)
+	for ev in wire:
+		AimNet.net_in(m, ev)
 	ok("net: the remote copy's entries are not sent back", AimNet.sent_log.size() == before)
 	for id in IDS:
 		var mine := AimKit.entry(caster, id)
@@ -230,11 +323,16 @@ func _net(m: Match, caster: Hunter, other: Hunter) -> void:
 		var off := _unlike(mine, theirs)
 		ok("net %s: shows on the other game as the caster drew it" % String(mine.get("kind", id)), off == "", off)
 	var keep := float(AimKit.entry(other, "lane")["keep"])
-	ok("net: a received one outlives its keep by AimNet.LAG", is_equal_approx(keep,
-		float(AimKit.entry(caster, "lane")["keep"]) + AimNet.LAG))
+	ok(
+		"net: a received one outlives its keep by AimNet.LAG",
+		is_equal_approx(keep, float(AimKit.entry(caster, "lane")["keep"]) + AimNet.LAG)
+	)
 	layer.rebuild()
-	ok("net: both sets draw, the caster's and the remote copy's", layer.built == 2 * IDS.size(),
-		"built %d" % layer.built)
+	ok(
+		"net: both sets draw, the caster's and the remote copy's",
+		layer.built == 2 * IDS.size(),
+		"built %d" % layer.built
+	)
 	AimNet.sent_log.clear()
 	AimKit.hide(caster, "lane")
 	layer.rebuild()
@@ -259,6 +357,7 @@ func _net(m: Match, caster: Hunter, other: Hunter) -> void:
 	AimNet.capture = false
 	AimNet.sent_log.clear()
 
+
 ## "" when every drawn key of `b` matches `a` (to the wire's rounding), else the first that does not.
 func _unlike(a: Dictionary, b: Dictionary) -> String:
 	if a.is_empty() or b.is_empty():
@@ -272,43 +371,68 @@ func _unlike(a: Dictionary, b: Dictionary) -> String:
 		var y = b[k]
 		var same: bool
 		match typeof(x):
-			TYPE_VECTOR2: same = y is Vector2 and (x as Vector2).distance_to(y) < 0.002
-			TYPE_COLOR: same = y is Color and (x as Color).to_html(true) == (y as Color).to_html(true)
-			TYPE_FLOAT, TYPE_INT: same = absf(float(x) - float(y)) < 0.002
-			_: same = x == y
+			TYPE_VECTOR2:
+				same = y is Vector2 and (x as Vector2).distance_to(y) < 0.002
+			TYPE_COLOR:
+				same = y is Color and (x as Color).to_html(true) == (y as Color).to_html(true)
+			TYPE_FLOAT, TYPE_INT:
+				same = absf(float(x) - float(y)) < 0.002
+			_:
+				same = x == y
 		if not same:
 			return "%s: %s vs %s" % [k, x, y]
 	return ""
 
-## "soft" lanes and cones: the inside stays at or under AimShapes.SOFT_A even fully filled; the rim is lit.
+
+## "soft" lanes, cones and circles: the inside stays at or under AimShapes.SOFT_A even fully filled; the rim is lit.
 func _soft(P: Hunter) -> void:
 	AimKit.lane(P, "soft_lane", {"len": 7.0, "width": 2.2, "k": 1.0, "fill": 1.0, "soft": true, "tip": true})
 	AimKit.cone(P, "soft_cone", {"len": 4.0, "deg": 70.0, "inner": 0.0, "fill": 1.0, "soft": true, "all": true})
 	var lane := measure(AimKit.entry(P, "soft_lane"), 0.6, 1.08)
 	var cone := measure(AimKit.entry(P, "soft_cone"), 0.6, 3.98)
-	ok("soft lane: inside <= %.2f at the centre, rim lit (%.2f / %.2f)" % [AimShapes.SOFT_A, lane[0], lane[1]],
-			lane[0] > 0.0 and lane[0] <= AimShapes.SOFT_A + 0.001 and lane[1] >= 0.5)
-	ok("soft cone: inside <= %.2f at the centre, arc lit (%.2f / %.2f)" % [AimShapes.SOFT_A, cone[0], cone[1]],
-			cone[0] > 0.0 and cone[0] <= AimShapes.SOFT_A + 0.001 and cone[1] >= 0.5)
+	AimKit.circle(P, "soft_circle", {"r": 4.0, "band": 0.25, "alpha": 2.0, "soft": true, "all": true})
+	var circle := measure(AimKit.entry(P, "soft_circle"), 0.0, 3.9)
+	ok(
+		"soft lane: inside <= %.2f at the centre, rim lit (%.2f / %.2f)" % [AimShapes.SOFT_A, lane[0], lane[1]],
+		lane[0] > 0.0 and lane[0] <= AimShapes.SOFT_A + 0.001 and lane[1] >= 0.5
+	)
+	ok(
+		"soft cone: inside <= %.2f at the centre, arc lit (%.2f / %.2f)" % [AimShapes.SOFT_A, cone[0], cone[1]],
+		cone[0] > 0.0 and cone[0] <= AimShapes.SOFT_A + 0.001 and cone[1] >= 0.5
+	)
+	ok(
+		(
+			"soft circle: inside <= %.2f at the centre even at alpha 2, rim lit (%.2f / %.2f)"
+			% [AimShapes.SOFT_A, circle[0], circle[1]]
+		),
+		circle[0] > 0.0 and circle[0] <= AimShapes.SOFT_A + 0.001 and circle[1] >= 0.5
+	)
 	AimKit.hide(P, "soft_lane")
 	AimKit.hide(P, "soft_cone")
+	AimKit.hide(P, "soft_circle")
+
 
 ## [the drawn alpha at the shape's centre line `at` of the way along it, the alpha `edge` m out from the
-## middle] for a lane or cone entry `e` (its sideways edge for a lane, along the aim for a cone).
+## middle] for a lane or cone entry `e` (its sideways edge for a lane, along the aim for a cone); for a circle,
+## [the alpha at its centre, the alpha `edge` m out from it].
 static func measure(e: Dictionary, at: float, edge: float) -> Array:
 	if e.is_empty():
 		return [-1.0, -1.0]
 	var g := AimGeo.new()
 	AimShapes.build(g, e)
+	if e["kind"] == "circle":
+		var c: Vector2 = e["at"]
+		return [alpha_at(g, c), alpha_at(g, c + Vector2(edge, 0.0))]
 	var o: Vector2 = e["from"]
 	var u: Vector2 = e["dir"]
 	var mid := o + u * float(e["len"]) * at
 	var rim := mid + Vector2(-u.y, u.x) * edge if e["kind"] == "lane" else o + u * edge
 	return [alpha_at(g, mid), alpha_at(g, rim)]
 
+
 ## The alpha the triangles of `g` stack to over ground point `p` (each blended over the last).
 static func alpha_at(g: AimGeo, at: Vector2) -> float:
-	var p := at + Vector2(0.0013, 0.0007)        # off the shared triangle edges, so none counts twice
+	var p := at + Vector2(0.0013, 0.0007)  # off the shared triangle edges, so none counts twice
 	var clear := 1.0
 	for i in range(0, g.v.size(), 3):
 		var a := Vector2(g.v[i].x, g.v[i].z)
@@ -324,22 +448,54 @@ static func alpha_at(g: AimGeo, at: Vector2) -> float:
 		clear *= 1.0 - clampf(g.c[i].a * wa + g.c[i + 1].a * wb + g.c[i + 2].a * (1.0 - wa - wb), 0.0, 1.0)
 	return 1.0 - clear
 
+
 func _membership() -> void:
 	var o := Vector3.ZERO
-	ok("in_lane: inside / beside / past the end", AimMode.in_lane(o, Vector2(1, 0), 6.0, 1.0, Vector3(3, 0, 0.4)) and not AimMode.in_lane(o, Vector2(1, 0), 6.0, 1.0, Vector3(3, 0, 0.6)) and not AimMode.in_lane(o, Vector2(1, 0), 6.0, 1.0, Vector3(6.5, 0, 0)))
-	ok("in_cone: inside the angle, outside it, past the length", AimMode.in_cone(o, Vector2(1, 0), 4.0, 60.0, Vector3(2, 0, 1.0)) and not AimMode.in_cone(o, Vector2(1, 0), 4.0, 60.0, Vector3(1, 0, 1.0)) and not AimMode.in_cone(o, Vector2(1, 0), 4.0, 60.0, Vector3(4.5, 0, 0)))
-	ok("in_arc: on the band, inside it, beyond the ends", AimMode.in_arc(o, Vector2(1, 0), 5.0, 120.0, 0.9, Vector3(0, 0, 5.0).rotated(Vector3.UP, PI * 0.5 + 0.3)) and not AimMode.in_arc(o, Vector2(1, 0), 5.0, 120.0, 0.9, Vector3(3.8, 0, 0)) and not AimMode.in_arc(o, Vector2(1, 0), 5.0, 120.0, 0.9, Vector3(-5, 0, 0)))
-	ok("in_circle", AimMode.in_circle(Vector3(2, 0, 0), 1.0, Vector3(2.5, 3, 0.5)) and not AimMode.in_circle(Vector3(2, 0, 0), 1.0, Vector3(3.2, 0, 0)))
+	ok(
+		"in_lane: inside / beside / past the end",
+		(
+			AimMode.in_lane(o, Vector2(1, 0), 6.0, 1.0, Vector3(3, 0, 0.4))
+			and not AimMode.in_lane(o, Vector2(1, 0), 6.0, 1.0, Vector3(3, 0, 0.6))
+			and not AimMode.in_lane(o, Vector2(1, 0), 6.0, 1.0, Vector3(6.5, 0, 0))
+		)
+	)
+	ok(
+		"in_cone: inside the angle, outside it, past the length",
+		(
+			AimMode.in_cone(o, Vector2(1, 0), 4.0, 60.0, Vector3(2, 0, 1.0))
+			and not AimMode.in_cone(o, Vector2(1, 0), 4.0, 60.0, Vector3(1, 0, 1.0))
+			and not AimMode.in_cone(o, Vector2(1, 0), 4.0, 60.0, Vector3(4.5, 0, 0))
+		)
+	)
+	ok(
+		"in_arc: on the band, inside it, beyond the ends",
+		(
+			AimMode.in_arc(o, Vector2(1, 0), 5.0, 120.0, 0.9, Vector3(0, 0, 5.0).rotated(Vector3.UP, PI * 0.5 + 0.3))
+			and not AimMode.in_arc(o, Vector2(1, 0), 5.0, 120.0, 0.9, Vector3(3.8, 0, 0))
+			and not AimMode.in_arc(o, Vector2(1, 0), 5.0, 120.0, 0.9, Vector3(-5, 0, 0))
+		)
+	)
+	ok(
+		"in_circle",
+		(
+			AimMode.in_circle(Vector3(2, 0, 0), 1.0, Vector3(2.5, 3, 0.5))
+			and not AimMode.in_circle(Vector3(2, 0, 0), 1.0, Vector3(3.2, 0, 0))
+		)
+	)
+
 
 func _count(nd: Node) -> int:
 	var c := 1
-	for ch in nd.get_children(): c += _count(ch)
+	for ch in nd.get_children():
+		c += _count(ch)
 	return c
+
 
 func _pooling(m: Match, P: Hunter, T: Hunter) -> void:
 	var L := AimKit.layer(m)
 	_all_shapes(P, 0.0, T)
-	L.rebuild(); m.step(DT)
+	L.rebuild()
+	m.step(DT)
 	# the match's own growth over 300 steps with no telegraphs (effect pools filling, queued frees)
 	var b0 := _count(m)
 	for i in 300:
@@ -354,17 +510,23 @@ func _pooling(m: Match, P: Hunter, T: Hunter) -> void:
 		_aim(P, 3.0 + 6.0 * absf(sin(i * 0.05)))
 		_all_shapes(P, k, T)
 		AimKit.charge(P, k)
-		if i % 40 == 0: AimKit.perfect(P)
+		if i % 40 == 0:
+			AimKit.perfect(P)
 		m.step(DT)
 		L.rebuild()
 		L.tick_reticle(DT)
 		most = maxi(most, L.mesh.get_surface_count())
 	var after := _count(m)
-	ok("pool: 300 frames of every shape add no nodes to the match", after - before <= maxi(0, base), "%d -> %d (the match alone: %+d)" % [before, after, base])
+	ok(
+		"pool: 300 frames of every shape add no nodes to the match",
+		after - before <= maxi(0, base),
+		"%d -> %d (the match alone: %+d)" % [before, after, base]
+	)
 	ok("pool: the drawer is still its mesh and reticle layer (%d nodes)" % own, _count(L) == own and own <= 4)
 	ok("pool: one surface at most, ever", most == 1)
 	ok("pool: one drawer per match", m.get_children().filter(func(c): return c is AimDraw).size() == 1)
 	AimKit.clear(P)
+
 
 func _reticle(m: Match, P: Hunter) -> void:
 	var L := AimKit.layer(m)
@@ -376,7 +538,10 @@ func _reticle(m: Match, P: Hunter) -> void:
 	m.step(DT)
 	AimKit.charge(P, 1.0)
 	r = AimKit.reticle(P)
-	ok("full flare: reaching full fires the flare", float(r["flare"]) > 0.0 and is_equal_approx(float(r["charge"]), 1.0))
+	ok(
+		"full flare: reaching full fires the flare",
+		float(r["flare"]) > 0.0 and is_equal_approx(float(r["charge"]), 1.0)
+	)
 	L.tick_reticle(0.1)
 	AimKit.charge(P, 1.0)
 	ok("full flare: once, not again while held full", float(AimKit.reticle(P)["flare"]) < AimReticle.FLARE_T - 0.05)
@@ -386,42 +551,63 @@ func _reticle(m: Match, P: Hunter) -> void:
 	ok("perfect: the star flashes", float(AimKit.reticle(P)["perfect"]) > 0.0)
 	await main.get_tree().process_frame
 	L.tick_reticle(AimReticle.PERFECT_T + 0.01)
-	ok("perfect: gone after one footage frame (%.2f s)" % AimReticle.PERFECT_T, float(AimKit.reticle(P)["perfect"]) == 0.0)
+	ok(
+		"perfect: gone after one footage frame (%.2f s)" % AimReticle.PERFECT_T,
+		float(AimKit.reticle(P)["perfect"]) == 0.0
+	)
 	ok("perfect: the flash is short", AimReticle.PERFECT_T <= 0.15)
 	ak.step(m, 0.2)
 	L.tick_reticle(0.2)
 	ok("charge ring: not refreshed, it goes", AimKit.reticle(P)["charge"] < 0.0)
 
+
 func _cleanup(m: Match, P: Hunter) -> void:
 	var L := AimKit.layer(m)
 	_all_shapes(P, 0.5, P)
 	AimKit.circle(P, "long", {"dur": 5.0})
-	AimKit.charge(P, 0.7); AimKit.perfect(P)
+	AimKit.charge(P, 0.7)
+	AimKit.perfect(P)
 	P.ak.drop_holds()
 	L.rebuild()
 	var r := AimKit.reticle(P)
-	ok("drop_holds: every telegraph goes (dur ones too)", IDS.all(func(i): return not AimKit.shown(P, i)) and not AimKit.shown(P, "long") and L.built == 0)
-	ok("drop_holds: and the cursor states", r["charge"] < 0.0 and float(r["perfect"]) == 0.0 and float(r["flare"]) == 0.0)
-	# however a merge starts (KinMerge calls the kit's own _drop_holds on some paths), a merged hunter shows nothing
+	ok(
+		"drop_holds: every telegraph goes (dur ones too)",
+		IDS.all(func(i): return not AimKit.shown(P, i)) and not AimKit.shown(P, "long") and L.built == 0
+	)
+	ok(
+		"drop_holds: and the cursor states",
+		r["charge"] < 0.0 and float(r["perfect"]) == 0.0 and float(r["flare"]) == 0.0
+	)
+	# a merge no longer hides anything (docs/decisions/0100): a merged or merging hunter's telegraphs and cursor states show like any other
 	_all_shapes(P, 0.5, P)
-	AimKit.circle(P, "long", {"dur": 5.0})
 	AimKit.charge(P, 0.7)
 	P.merge_st = {"phase": "xform"}
-	L.rebuild(); L.tick_reticle(0.0)
-	var none: bool = IDS.all(func(i): return not AimKit.shown(P, i)) and not AimKit.shown(P, "long") and L.built == 0 and AimKit.reticle(P)["charge"] < 0.0
-	AimKit.lane(P, "lane"); AimKit.perfect(P)
 	L.rebuild()
-	ok("merge: a merging hunter's telegraphs and cursor states go, and new ones don't show", none and not AimKit.shown(P, "lane") and float(AimKit.reticle(P)["perfect"]) == 0.0 and L.entries.is_empty())
+	L.tick_reticle(0.0)
+	AimKit.lane(P, "lane")
+	AimKit.perfect(P)
+	L.rebuild()
+	ok(
+		"merge: a merging hunter's telegraphs and cursor states still show",
+		AimKit.shown(P, "lane") and float(AimKit.reticle(P)["perfect"]) > 0.0 and AimKit.reticle(P)["charge"] >= 0.0
+	)
 	P.merge_st = {}
-	# the base kit runs drop_holds every step while merged (ArchKit.tick); every kit's override runs first
-	var src := FileAccess.get_file_as_string("res://scripts/arch/arch_kit.gd")
-	ok("drop_holds: ArchKit's own merge paths call drop_holds, not _drop_holds", src.count("\t\tdrop_holds()") >= 2 and not src.contains("\t\t_drop_holds()"))
+
 
 ## Every ground-target slot ("ground" in content/archetypes) and the id of its landing mark: "<slot>_spot" is
 ## the held-key preview (Quick cast off, Match.aim_hold); the others are the kit's own aim hold.
 const GROUND := {
-	"gunslinger.x": "x_spot", "mage.e": "e_spot", "mage.x": "x_spot", "tender.e": "e_spot", "ostra.e": "e_spot",
-	"ostra.x": "x_spot", "rimewright.rmb": "rmb", "ostra.dash": "swap", "dolm.x": "x"}
+	"gunslinger.x": "x_spot",
+	"mage.e": "e_spot",
+	"mage.x": "x_spot",
+	"tender.e": "e_spot",
+	"ostra.e": "e_spot",
+	"ostra.x": "x_spot",
+	"rimewright.rmb": "rmb",
+	"ostra.dash": "swap",
+	"dolm.x": "x"
+}
+
 
 func _ground_slots() -> Array:
 	var out := []
@@ -432,6 +618,7 @@ func _ground_slots() -> Array:
 				out.append("%s.%s" % [f.get_basename(), slot])
 	out.sort()
 	return out
+
 
 func _ground_reach(m: Match, P: Hunter) -> void:
 	var want := GROUND.keys()
@@ -451,19 +638,29 @@ func _ground_reach(m: Match, P: Hunter) -> void:
 		_aim_slot(m, P, key, slot)
 		var ring := AimKit.entry(P, slot + "_reach")
 		var me := Vector2(P.pos.x, P.pos.z)
-		ok("reach %s: the ring sits round the caster at the data range" % key,
-				not ring.is_empty() and absf(float(ring.get("r", 0.0)) - g.x) < 0.01
-				and (ring.get("at", Vector2.INF) as Vector2).distance_to(me) < 0.05, "%.1f m" % g.x)
+		ok(
+			"reach %s: the ring sits round the caster at the data range" % key,
+			(
+				not ring.is_empty()
+				and absf(float(ring.get("r", 0.0)) - g.x) < 0.01
+				and (ring.get("at", Vector2.INF) as Vector2).distance_to(me) < 0.05
+			),
+			"%.1f m" % g.x
+		)
 		var mark := AimKit.entry(P, GROUND[key])
 		var at: Vector2 = mark.get("b" if GROUND[key] == "swap" else "at", Vector2.INF)
 		var r_ok := g.y <= 0.0 or absf(float(mark.get("r", 0.0)) - g.y) < 0.01
 		var out := at.distance_to(me)
-		ok("reach %s: the landing mark stops on the range, cursor at 2x" % key,
-				not mark.is_empty() and absf(out - g.x) < 0.2 and r_ok, "%.2f of %.1f" % [out, g.x])
+		ok(
+			"reach %s: the landing mark stops on the range, cursor at 2x" % key,
+			not mark.is_empty() and absf(out - g.x) < 0.2 and r_ok,
+			"%.2f of %.1f" % [out, g.x]
+		)
 		for k in ["sec_hold", "dash_down", "x_down"]:
 			P.inp[k] = false
 		ak.step(m, 0.5)
 	m.aim_hold = ""
+
 
 ## Aim one slot the way a player does: hold its key (Quick cast off), or the kit's own hold.
 func _aim_slot(m: Match, P: Hunter, key: String, slot: String) -> void:
@@ -491,3 +688,103 @@ func _aim_slot(m: Match, P: Hunter, key: String, slot: String) -> void:
 				ok("reach %s: Quick cast off, R holds to aim" % key, AimReach.holds(P.ak, "x"))
 			m.aim_hold = "signature" if slot == "e" else "hunter_ult"
 			m._update_indicators(1.0)
+
+
+## A sector over uneven ground is the same triangles as building every ring on its own (AimGeo.quad looks up all
+## four corners): each ring's inner row, carried on from the ring before, is the very points it would look up.
+func _sector_rows() -> void:
+	var w := World.new()
+	w.w = 32
+	w.h = 32
+	w.kind.resize(32 * 32)
+	w.level.resize(32 * 32)
+	for i in 32 * 32:
+		w.kind[i] = World.T_VOID if i % 29 == 0 else World.T_GROUND
+		w.level[i] = (i * 7) % 3
+	var g := AimGeo.new()
+	g.world = w
+	var want := AimGeo.new()
+	want.world = w
+	var ctr := Vector2(15.3, 16.7)
+	var r0 := 1.5
+	var r1 := 8.0
+	g.sector(ctr, r0, r1, 0.2, 2.6, Color.RED, Color.BLUE)
+	var segs := clampi(int(r1 * absf(2.6 - 0.2) / 0.5), 8, 48)
+	var rings := maxi(1, int(ceil((r1 - r0) / (AimGeo.STEP * 1.5))))
+	for j in rings:
+		var ra := lerpf(r0, r1, float(j) / rings)
+		var rb := lerpf(r0, r1, float(j + 1) / rings)
+		var ca := Color.RED.lerp(Color.BLUE, float(j) / rings)
+		var cb := Color.RED.lerp(Color.BLUE, float(j + 1) / rings)
+		for i in segs:
+			var t0 := lerpf(0.2, 2.6, float(i) / segs)
+			var t1 := lerpf(0.2, 2.6, float(i + 1) / segs)
+			var e0 := Vector2(cos(t0), sin(t0))
+			var e1 := Vector2(cos(t1), sin(t1))
+			want.quad(ctr + e0 * ra, ctr + e1 * ra, ctr + e1 * rb, ctr + e0 * rb, ca, cb)
+	var heights := {}
+	for p in g.v:
+		heights[snappedf(p.y, 0.01)] = true
+	ok(
+		"geo: a sector's rings are the ones quad builds ring by ring",
+		g.v == want.v and g.c == want.c,
+		"%d vs %d vertices, %d heights" % [g.v.size(), want.v.size(), heights.size()]
+	)
+	w.free()
+
+
+## A rebuild that repeats last frame's rings and sectors (kept ground points, new colours) is the very triangles a
+## fresh AimGeo builds, and a changed tile under them drops the kept points.
+func _kept_points() -> void:
+	var w := World.new()
+	w.w = 32
+	w.h = 32
+	w.kind.resize(32 * 32)
+	w.level.resize(32 * 32)
+	for i in 32 * 32:
+		w.kind[i] = World.T_VOID if i % 29 == 0 else World.T_GROUND
+		w.level[i] = (i * 7) % 3
+	var g := AimGeo.new()
+	g.world = w
+	var draw := func(geo: AimGeo, k: float) -> void:
+		geo.at_height(0.5)
+		geo.disc(Vector2(15.3, 16.7), 3.4, Color(1, 0, 0, k), Color(0, 0, 1, k * 0.5))
+		geo.sector(Vector2(15.3, 16.7), 1.5, 8.0, 0.2, 2.6, Color.RED, Color(0.2, 0.9, 0.1, k))
+		geo.ring(Vector2(10.1, 9.4), 2.2, 0.3, Color(1, 1, 0, k), 0.0, TAU, Color(0, 1, 1, k))
+		geo.ring(Vector2(10.1, 9.4), 2.2, 0.3, Color(1, 1, 0, k), 0.4, 1.1)
+	var same := true
+	var hits := 0
+	for frame in 4:
+		if frame == 3:
+			w.level[16 * 32 + 15] = 2 if w.level[16 * 32 + 15] != 2 else 0  # the ground changes under the disc
+		g.reset()
+		hits += g._pts_last.size()
+		draw.call(g, 0.3 + 0.2 * frame)
+		var fresh := AimGeo.new()
+		fresh.world = w
+		fresh.reset()
+		draw.call(fresh, 0.3 + 0.2 * frame)
+		same = same and g.v == fresh.v and g.c == fresh.c
+	ok(
+		"geo: a repeat frame's kept ring and sector points draw the same triangles as a fresh build",
+		same and hits == 8,
+		"kept shapes reused over frames 2-3: %d (want 8), the ground change drops them" % hits
+	)
+	w.free()
+
+
+## A disc's rim vertices sit on the angle grid (segs steps round), every ring cut at the same angles.
+func _disc_rim() -> void:
+	var g := AimGeo.new()
+	var ctr := Vector2(3.0, 4.0)
+	g.disc(ctr, 6.0, Color.WHITE)
+	var rim := 0
+	var on_grid := true
+	for p in g.v:
+		var q := Vector2(p.x, p.z) - ctr
+		if absf(q.length() - 6.0) < 0.001:
+			rim += 1
+			var steps := (fposmod(q.angle(), TAU) / TAU) * 48.0
+			on_grid = on_grid and absf(steps - roundf(steps)) < 0.001
+	ok("geo: a 6 m disc is 6 rings of 48 steps (1584 vertices)", g.v.size() == 1584, str(g.v.size()))
+	ok("geo: its rim vertices sit on the 48-step angle grid", rim > 0 and on_grid, "%d on the rim" % rim)

@@ -28,6 +28,10 @@ check: `--base-life-check`.
 - Readout: `BaseLife.readout()` (state, seconds in it, refusals, last transition, bonds per Boki, printed by the
   check). Each machine registers in `Fsm.live` as `boki:<name>`, so the F7 FsmReadout lists them once ext/fsm-m1
   lands.
+- You come back (`scripts/home/base_greet.gd`, the Greet state, base_life.json `notice`): a roaming Boki that had you more than
+  `far_m` away for `away_s` and sees you within `near_m` rolls once: `chance` + `rank_chance` x its bond rank + `cling_chance` x
+  its cling. A hit looks at you for `look_s`; from bond rank `run_rank` (Close) it runs to you (`slot_m`), follows at its walk for
+  `follow_s`, then goes back to roaming. No UI. `--base-life-check` seeds a Wary look, a Close run and follow, and the rank weight.
 - Toys: one system, `HomeToys` (home_toys.gd, k["play"], toys.json). It picks, walks, plays, squabbles and shares;
   `BaseLife.choose` asks `HomeToys.pick(k, true)` when a Boki is bored or curious, and the machine shows Play while
   HomeToys owns the Boki (so the history never says Roam while a Boki plays). A squabble at a toy adds
@@ -67,6 +71,14 @@ check: `--base-life-check`.
   do not pull). A trait moves at most `week_cap` per drift week (`rec["drift"] = {day, moved}`, optional, no
   migration). Crossing a band in `bands` writes one journal line ("is getting braver", same shape as
   `CareJournal.note`).
+- Raising leans (`docs/decisions/0179-raising-leans.md`; `scripts/home/base_axes.gd`, `content/rules/base_axes.json`,
+  checks `--base-life-check` and `--garden-sim-check`): the first care of each kind in a farm day (`Care.care_day`)
+  steps three axes saved in `rec["raised"]` (bold: shy..bold, busy: lazy..busy, gentle: rough..gentle, each -1..1,
+  capped at `cap`; save v22 gives old Boki the zero lean). `BaseLife.choose` scales its odds by `BaseAxes.mult`: a
+  lazy Boki naps on its own now and then, a busy one plays toys more, a bold or rough one chases (tag) more and clings
+  to you less. Crossing +-`band` writes a journal line ("is getting bolder"). `--garden-sim-check` has a row per care
+  style after 10 days (briefs/design/GARDEN_MODERN_BALANCE.md). Not done: the idle habit poses (`KinHabit`) do not
+  read the lean yet.
 - Parents (GARDEN.md section 6): `Care.breed` saves who gave what in `rec["gifts"]` (`Parentage`; the parents' uids
   are already `rec["lineage"]["parents"]`; old babies have no gifts: read with `.get`, no migration). A young (not
   yet Grown) Boki adds `parent_weight` to its liking for a parent when it picks whom to greet and whom to nap beside
@@ -79,11 +91,9 @@ check: `--base-life-check`.
   (`rec["lineage"]["nest"]`, written by `NestItems.hatched`). It only reads lineage and the roster: a Boki with none
   recorded is "wild", a parent you no longer have shows by name, and an owned ancestor opens its card. Check:
   `--family-tree-check`.
-- Next form (Growth tab): the Boki card's Growth tab opens with a Next form block (`scripts/ui/evo_view.gd`): its
-  level, an XP bar and one plain line from `Evo.next_way`: "Evolves at Lv N" (the bar holds its XP from Lv 1 to
-  there), "Needs a Tide Ink" ("an Ink" when the Ink picks the form) or "Evolves when traded" (the bar shows the next
-  level), "Its next form is coming soon" while the form it would take has no model (only forms with art count), or
-  "This is its last form". Check: `--evo-check`; shots: `--next-form-shots=<dir>` (GPU).
+- Next form (Growth tab): the Boki card's Growth tab opens with a Next form block (`scripts/ui/evo_next_form.gd`): one
+  plain line from the evolution data ("Evolves at Lv N" with an XP bar, "Needs a Tide Ink", "Evolves when traded", "Its next
+  form is coming soon" while the form has no art, "Fully grown"). Check: `--evo-check`.
 - Looks (rigged Boki): `HomeToys.pose` sets the `kact` meta from what a Boki is doing: `munch` at a feeder, and the
   toy's `clip` (toys.json: nudge, climb, splash) at a toy; Tumble's rush, brace and dodge, Echo Steps' stonehop and spin, and the Dash's crouch, burst and sulk (`scripts/home/race_beats.gd`) play on the same rigs. A napping Boki (`kstate` sleep) settles, naps and wakes (`scripts/match/boki_home_clips.gd`). A rigged Boki
   poses its own body, so the Body squash and toy bounce stay for the primitive ones only.
@@ -110,6 +120,10 @@ check: `--base-life-check`.
   a carry) brings it down first; a game sets it down at once. Up there it skips wading. Check: `--boki-rig-check`
   (two fliers on Kitewind Ridge for 120 s: never over 3 s on foot while roaming, hovering in the band, every landing
   flares, plus a bridge and a leap).
+  Updraft vents (`scripts/home/zone_vents.gd`, the ridge's `vents` in `garden_zones.json`): over one a roaming flier
+  rises at `vent_climb` to `vent_h` m and holds it, a roaming flier's next goal is a vent `vent_pull` of the time, and
+  The Dash's ridge track (`vent` on its top stretch, `vent_mult` in `base_race.json`) lifts winged runners through
+  the first vent. Two MultiMesh draws for all of them. Checks: `--garden-zones-check`, `--race-check`, `--boki-rig-check`.
   The rest wade through. A rigged Boki finds the deep middle `swim_depth` deep and floats there (BokiRig's swim
   state, docs/art/kin/RIGGED_BOKI.md): Water types swim level, the rest paddle head up. Check: `--wade-check`;
   `--garden-nav-check` has a stream in the sweep. **Clips for the anim lane** (none exist yet; the walk just slows and

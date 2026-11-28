@@ -1,6 +1,6 @@
 class_name DropRocket
 extends RefCounted
-## Owner 2026-11-11: the drop is a squad mini rocket (docs/decisions/0061-rocket-drop.md). When the drop leader
+## Owner 2026-11-11: the drop is a squad mini rocket (docs/decisions/0143-rocket-drop.md). When the drop leader
 ## launches, the whole squad still aboard the skyship rides one rocket down (a solo rides a one-seat one).
 ## The leader steers it and everyone else sees where it will hit (DropReticle). Doing nothing lands the squad
 ## together where it hits. Anyone can jump out early (detach): they free-fall slower than the rocket and can open
@@ -12,7 +12,7 @@ extends RefCounted
 ## Looks, the same on every machine: a thin exhaust trail in the squad colour (HeroVfx.streak, none at TRAIL_OFF), a
 ## small puff where someone jumps out (Fx.puff) and dust settling where it lands (Fx.settle). No ring, no blast.
 
-const FALL := 24.0             # m/s, the rocket's top dive speed (a hunter free-falls at Hunter.DIVE_FALL, 13)
+const FALL := 24.0             # m/s, the rocket's top dive speed (a hunter free-falls at HunterFeel.dive_fall, 13)
 const FALL_ACCEL := 20.0       # m/s^2, how fast it reaches FALL after leaving the ship
 const SPEED := 16.0            # m/s, top flat speed the leader steers it at
 const ACCEL := 20.0            # m/s^2, how fast it answers the leader's keys
@@ -58,7 +58,7 @@ static func launch(match_node: Match, l: Hunter) -> DropRocket:
 			if not h.remote:
 				h.teleport(r.pos)
 	var col: Color = Data.TEAM_COLORS[l.team % Data.TEAM_COLORS.size()]
-	r.node = _model(col)
+	r.node = model(col)
 	match_node.add_child(r.node)
 	r._place_node()
 	r.snd.start(r)
@@ -186,7 +186,7 @@ func detach(h: Hunter, dive := true) -> bool:
 	h.teleport(pos)
 	h.vel = vel
 	if not dive:
-		h.vel.y = Hunter.DEPLOY_POP
+		h.vel.y = HunterFeel.deploy_pop
 	snd.jump_out(self, h)
 	return true
 
@@ -258,7 +258,8 @@ func project() -> Dictionary:
 	return {"at": Vector3(p.x, 0.0, p.z), "void": true}
 
 ## A small rocket, nose along its local -Y (it dives nose first): a body, a nose cone, three fins and a flame.
-static func _model(col: Color) -> Node3D:
+## (WarmUp builds one under the map: its lit body and flame compiled mid-ride at the first launch.)
+static func model(col: Color) -> Node3D:
 	var root := Node3D.new()
 	var body := CylinderMesh.new()
 	body.top_radius = BODY_R

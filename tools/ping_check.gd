@@ -72,7 +72,7 @@ func _start(extra: Dictionary) -> void:
 	main.add_child(m)
 	var o := {"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242}
 	o.merge(extra, true)
-	await m.start(o)
+	m.start(o)
 	m.set_process(false)
 
 func _mate() -> Hunter:
@@ -89,63 +89,63 @@ func _screen(at: Vector3) -> Vector2:
 
 func _world() -> void:
 	await _start({"no_drop": true})
-	var P := m.player
+	var p := m.player
 	var mate := _mate()
 	ok(mate != null, "a bot teammate")
-	var foe: Hunter = m.hunters.filter(func(h): return h.team != P.team)[0]
+	var foe: Hunter = m.hunters.filter(func(h): return h.team != p.team)[0]
 	for h in m.hunters:
-		if h.team != P.team:
+		if h.team != p.team:
 			h.ctrl = "idle"      # (the bot teammate stays a bot: only bots take squad pings as goals)
-	var spot := m.world.free_spot_near(P.pos + Vector3(5, 0, 0), [], 1.0, 0.5, 8.0)
+	var spot := m.world.free_spot_near(p.pos + Vector3(5, 0, 0), [], 1.0, 0.5, 8.0)
 	foe.teleport(spot)
 	foe.unseen = false
 	foe.visible = true
-	m.cam.snap(P.pos)
+	m.cam.snap(p.pos)
 	var kind := PingInput.place_world(m, _screen(foe.pos + Vector3(0, 0.9, 0)))
 	var pg := _my_ping()
 	ok(kind == "enemy" and pg.get("kind") == "enemy", "on an enemy: an enemy ping (%s)" % kind)
 	ok((pg["col"] as Color).is_equal_approx(SideColor.foe()), "it is red")
-	ok(PingInput.label(pg, P) == "Enemy", "one word over it: %s" % PingInput.label(pg, P))
+	ok(PingInput.label(pg, p) == "Enemy", "one word over it: %s" % PingInput.label(pg, p))
 	ok(_goal_is(mate, pg), "the bot teammate takes it as its ping goal")
 	# loot: a deathbox, its owner moved away
 	var box := Life.drop_box(m, foe, "test")
-	foe.teleport(m.world.free_spot_near(P.pos + Vector3(-30, 0, -30), [], 1.0, 0.5, 20.0))
+	foe.teleport(m.world.free_spot_near(p.pos + Vector3(-30, 0, -30), [], 1.0, 0.5, 20.0))
 	kind = PingInput.place_world(m, _screen(box["pos"] + Vector3(0, 0.5, 0)))
 	pg = _my_ping()
-	ok(kind == "loot" and PingInput.label(pg, P) == "Loot", "on a deathbox: a loot ping (%s)" % kind)
+	ok(kind == "loot" and PingInput.label(pg, p) == "Loot", "on a deathbox: a loot ping (%s)" % kind)
 	ok(Vector2(pg["pos"].x, pg["pos"].z).distance_to(Vector2(box["pos"].x, box["pos"].z)) < 0.1, "on the box")
 	# bare ground, away from anything
-	_clear_near(P.pos + Vector3(0, 0, 6))
-	var ground: Vector3 = P.pos + Vector3(0, 0, 6)
+	_clear_near(p.pos + Vector3(0, 0, 6))
+	var ground: Vector3 = p.pos + Vector3(0, 0, 6)
 	ground.y = m.world.ground_at(ground.x, ground.z)
 	kind = PingInput.place_world(m, _screen(ground))
 	pg = _my_ping()
 	var off := Vector2(pg["pos"].x - ground.x, pg["pos"].z - ground.z).length()
 	ok(kind == "spot" and pg.get("kind") == "", "on the ground: a plain spot (%s)" % kind)
 	ok(off < 0.6, "under the cursor (%.2f m off)" % off)
-	ok(PingInput.label(pg, P) == "Your ping" and _goal_is(mate, pg), "your own spot, and the bot takes it")
+	ok(PingInput.label(pg, p) == "Your ping" and _goal_is(mate, pg), "your own spot, and the bot takes it")
 	# the key itself
-	m.unping(P, true)
+	m.unping(p, true)
 	Input.action_press("ping")
 	m._gather_input()
 	Input.action_release("ping")
 	ok(not _my_ping().is_empty(), "the ping key places a ping")
 	# a ping from the net keeps its kind
-	m.squad_ping(mate, P.pos, true, "loot")
+	m.squad_ping(mate, p.pos, true, "loot")
 	var theirs: Array = m.pings.filter(func(q): return q.get("by") == mate)
 	ok(theirs.size() == 1 and theirs[0]["kind"] == "loot", "a ping from the net keeps its kind")
-	_kinds_and_life(P, mate, foe, spot)
+	_kinds_and_life(p, mate, foe, spot)
 
 ## 4. colours by kind, the cap, the enemy ping following its hunter and expiring, Alt+click, the Net round trip.
-func _kinds_and_life(P: Hunter, mate: Hunter, foe: Hunter, spot: Vector3) -> void:
+func _kinds_and_life(p: Hunter, _mate_v: Hunter, foe: Hunter, spot: Vector3) -> void:
 	m.pings.clear()
 	foe.teleport(spot)
-	m.squad_ping(P, P.pos, false, "loot")
+	m.squad_ping(p, p.pos, false, "loot")
 	ok((_my_ping()["col"] as Color).is_equal_approx(PingInput.LOOT_COL), "a loot ping is gold")
-	m.squad_ping(P, P.pos)
+	m.squad_ping(p, p.pos)
 	ok((_my_ping()["col"] as Color).is_equal_approx(PingInput.SPOT_COL), "a ground ping is white")
-	m.squad_ping(P, foe.pos, false, "enemy", foe)
-	var mine: Array = m.pings.filter(func(q): return q.get("by") == P)
+	m.squad_ping(p, foe.pos, false, "enemy", foe)
+	var mine: Array = m.pings.filter(func(q): return q.get("by") == p)
 	ok(mine.size() == PingInput.CAP and mine[0]["kind"] == "" and mine[1]["kind"] == "enemy",
 		"a third ping drops the oldest: %d kept" % mine.size())
 	foe.teleport(m.world.free_spot_near(spot + Vector3(0, 0, 4), [], 1.0, 0.5, 8.0))
@@ -153,10 +153,10 @@ func _kinds_and_life(P: Hunter, mate: Hunter, foe: Hunter, spot: Vector3) -> voi
 	var pg := _my_ping()
 	ok(Vector2(pg["pos"].x - foe.pos.x, pg["pos"].z - foe.pos.z).length() < 0.01, "the enemy ping follows its hunter")
 	PingInput.tick(m, PingInput.ENEMY_T - 0.9)
-	ok(pg not in m.pings and m.pings.filter(func(q): return q.get("by") == P).size() == 1,
+	ok(pg not in m.pings and m.pings.filter(func(q): return q.get("by") == p).size() == 1,
 		"it is gone after %.0f s, the ground ping stays" % PingInput.ENEMY_T)
 	PingInput.tick(m, Match.SQUAD_PING_T)
-	var left := m.pings.filter(func(q): return q.get("by") == P)
+	var left := m.pings.filter(func(q): return q.get("by") == p)
 	ok(left.is_empty(), "the ground ping is gone after %.0f s" % Match.SQUAD_PING_T)
 	# Alt+click pings and does not shoot
 	var alt := InputEventKey.new()
@@ -167,7 +167,7 @@ func _kinds_and_life(P: Hunter, mate: Hunter, foe: Hunter, spot: Vector3) -> voi
 	Input.flush_buffered_events()
 	Input.action_press("fire")
 	m._gather_input()
-	ok(not _my_ping().is_empty() and not P.inp["fire"], "Alt+click pings and does not shoot")
+	ok(not _my_ping().is_empty() and not p.inp["fire"], "Alt+click pings and does not shoot")
 	Input.action_release("fire")
 	alt.pressed = false
 	Input.parse_input_event(alt)
@@ -177,14 +177,14 @@ func _kinds_and_life(P: Hunter, mate: Hunter, foe: Hunter, spot: Vector3) -> voi
 	var saved: Array = Net.out_events.duplicate()
 	Net.out_events.clear()
 	m.net_on = true
-	m.squad_ping(P, foe.pos, false, "enemy", foe)
+	m.squad_ping(p, foe.pos, false, "enemy", foe)
 	var sent: Array = JSON.parse_string(JSON.stringify(Net.out_events))
 	m.net_on = false
 	Net.out_events = saved
 	m.pings.clear()
 	for e in sent:
 		m._net_ev(e, "peer")
-	var got: Array = m.pings.filter(func(q): return q.get("by") == P)
+	var got: Array = m.pings.filter(func(q): return q.get("by") == p)
 	var one: Dictionary = got[0] if got.size() == 1 else {}
 	ok(one.get("kind") == "enemy" and one.get("foe") == foe, "Net: the peer gets the enemy ping on the same hunter")
 	ok(float(one.get("life", 0.0)) == PingInput.ENEMY_T, "Net: it lasts %.0f s there too" % PingInput.ENEMY_T)
@@ -204,7 +204,7 @@ func _goal_is(b: Hunter, pg: Dictionary) -> bool:
 # ------------------------------------------------------------------ 3. the drop
 func _drop() -> void:
 	await _start({})
-	var P := m.player
+	var p := m.player
 	var mate := _mate()
 	for i in 3:
 		m.step(Match.DT)
@@ -222,12 +222,12 @@ func _drop() -> void:
 	PingInput.place_map(m, fm.rect.position - Vector2(30, 30))
 	ok(_my_ping() == pg, "off the map: nothing moves")
 	m.skydrop.planning = false
-	m.ship_jump(P, true)
+	m.ship_jump(p, true)
 	for i in 30:
 		m.step(Match.DT)
-	ok(P.rocket != null, "riding the squad rocket down")
-	m.cam.snap(P.pos)
-	var sp := m.cam.unproject_position(P.pos)
+	ok(p.rocket != null, "riding the squad rocket down")
+	m.cam.snap(p.pos)
+	var sp := m.cam.unproject_position(p.pos)
 	var kind := PingInput.place_world(m, sp + Vector2(60, 40))
 	pg = _my_ping()
 	ok(kind == "spot" and not pg.is_empty(), "in the rocket: a ping under the cursor (%s)" % kind)

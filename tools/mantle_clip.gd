@@ -25,7 +25,7 @@ func run(mn: Node) -> void:
 	chk = load("res://tools/cliff_mantle_check.gd").new()
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
 	m.set_process(false)
 	if main.get("fade") != null:
 		await main.fade.reveal(0.01)       # the boot splash stays up when a tool starts the match by hand
@@ -46,7 +46,7 @@ func run(mn: Node) -> void:
 		if pool.is_empty():
 			print("MCLIP %s: no edge" % c[0])
 			continue
-		await _clip(m, pool[pool.size() / 2], String(c[1]), dir.path_join(String(c[0])), String(c[0]))
+		await _clip(m, pool[int(pool.size() / 2.0)], String(c[1]), dir.path_join(String(c[0])), String(c[0]))
 	print("MCLIP DONE")
 	main.get_tree().quit()
 

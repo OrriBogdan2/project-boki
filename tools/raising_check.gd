@@ -2,7 +2,8 @@ extends RefCounted
 ## --raising-check: one Boki raised at home, never taken on an expedition, through farm days. Care
 ## builds trust once a farm day per kind (Care.care_day, content/rules/care.json care_day_s), so a
 ## stay-at-home Boki keeps growing closer; repeating the same care in one day adds no trust and no
-## duplicate memory; old saves drop the once-per-expedition stamps. Fetch trains Speed. Meals lean
+## duplicate memory; old saves drop the once-per-expedition stamps. Play is joy only: a game of fetch lifts joy and
+## trains no stat, and spamming fetch and pets leaves every stat where it was. Meals lean
 ## its colour on the spot (Evo.eat, Evo.lean) and the last few meals decide it. A new bond rank
 ## plays its moment once (KinBondMoment); the rank a Boki arrives with doesn't, panel up or not. Home after an hour
 ## away, it runs over to say hello (KinWelcome); after a minute it doesn't. Never touches the real
@@ -32,6 +33,8 @@ func _next_day(rec: Dictionary) -> void:
 	var day := float(Content.rules("care")["care_day_s"])
 	for kind in rec.get("care_day", {}):
 		rec["care_day"][kind] = float(rec["care_day"][kind]) - day - 1.0
+	if rec.has("trust_acts"):      # the trust taper's window is a farm day too (Care.trust_taper)
+		rec["trust_acts"]["t0"] = float(rec["trust_acts"]["t0"]) - day - 1.0
 
 func _memories(rec: Dictionary, kind: String) -> int:
 	return (rec["memory"] as Array).filter(func(e): return e["kind"] == kind).size()
@@ -45,23 +48,26 @@ func _old_save_stamps() -> void:
 		"an old save's once-per-expedition stamps are dropped on load")
 
 ## Play is practice: a game of fetch trains Speed while it has the energy, not when it's worn out.
+## Owner ruling 11-26: play (fetch, pet) is joy and bond only, never stat points (stats come from stat bites).
 func _fetch_trains(home, k: Dictionary) -> void:
 	var rec: Dictionary = k["rec"]
 	rec["needs"]["energy"] = 80.0
-	var sp0 := int(rec["stats"]["speed"])
+	rec["needs"]["joy"] = 30.0
+	var st0: Dictionary = (rec["stats"] as Dictionary).duplicate()
+	_fetch_once(home, k)
+	ok(not k.has("fetch") and Care.need(rec, "joy") > 30.0 and rec["stats"] == st0,
+		"a finished game of fetch lifts joy (%.0f) and trains no stat" % Care.need(rec, "joy"))
+	for i in 20:      # spam: energy topped up every time, as snacks and naps would
+		rec["needs"]["energy"] = 100.0
+		_fetch_once(home, k)
+		home._pet_kin(k)
+	ok(rec["stats"] == st0, "spamming fetch and pets 20 times gives 0 stat points %s" % str(rec["stats"]))
+
+func _fetch_once(home, k: Dictionary) -> void:
 	home._play_with_kin(k)
 	for i in 600:
 		if not k.has("fetch"): break
 		home._move_kin(0.05)
-	ok(not k.has("fetch") and int(rec["stats"]["speed"]) == sp0 + 1,
-		"a finished game of fetch trains Speed (%d -> %d)" % [sp0, int(rec["stats"]["speed"])])
-	rec["needs"]["energy"] = Care.PLAY_TRAIN_ENERGY - 5.0
-	home._play_with_kin(k)
-	for i in 600:
-		if not k.has("fetch"): break
-		home._move_kin(0.05)
-	ok(not k.has("fetch") and int(rec["stats"]["speed"]) == sp0 + 1,
-		"a worn-out Boki plays but doesn't learn (%d)" % int(rec["stats"]["speed"]))
 
 func _body_col(k: Dictionary) -> Color:
 	var mats: Array = (k["node"] as Node3D).get_meta("mats", [])
@@ -149,6 +155,7 @@ func _run_payoff() -> void:
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
+	FarmUnlocks.rules()["base_mode"] = false      # the pre-garden affinity (--lean-check: the garden)
 	_old_save_stamps()
 	var rec := _new_save()
 	rec["needs_t"] = Time.get_unix_time_from_system() - 3600.0
@@ -192,9 +199,18 @@ func run(m: Node) -> void:
 			Save.remember(rec, "played", "played fetch with you on the farm", 1.5)
 	ok(int(Save.d["matches"]) == 0 and Care.bond_index(rec) >= 2,
 		"a week of farm days of care, no expedition: %s (trust %.0f)" % [Care.bond(rec)[1], float(rec["trust"])])
+	var heard: Array = []
+	var log_cue := func(n, _at, _db, _p): heard.append(n)
+	Sfx.played.connect(log_cue)
+	k["busy"] = false      # the fetch trains above can leave it mid-game; this tick is about the rank
+	var bond_cues := int(GardenSfx.heard.get("garden_bond_up", 0))
 	KinBondMoment.tick(home)
+	Sfx.played.disconnect(log_cue)
 	ok(home.panel_open == "Ember is now Close" and int(rec["bond_seen"]) == 2,
 		"reaching Close plays its moment: \"%s\"" % home.panel_open)
+	ok(heard.count("garden_bond_up") == 1 and int(GardenSfx.heard.get("garden_bond_up", 0)) == bond_cues + 1
+		and not heard.has("unlock") and not heard.has("garden_friends"),
+		"a rank-up plays one rising chime of its own, no stock unlock (%s)" % [heard])
 	home._close_panel()
 	KinBondMoment.tick(home)
 	ok(home.panel_open == "", "and only once")

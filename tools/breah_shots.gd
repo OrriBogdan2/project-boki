@@ -3,9 +3,10 @@ extends "res://tools/vv_shots.gd"
 ## (xvfb with a renderer), reusing the Sparkle/Vex shot rig (tools/vv_shots.gd). Strips are a 3-wide grid
 ## of crops round her at gameplay zoom; <dir>/captions.txt gets "file: caption" per file.
 
-const GRID_CROP := Vector2i(280, 200)    # px round the hero per strip frame (scaled 1.5x)
+const GRID_CROP := Vector2i(280, 200)  # px round the hero per strip frame (scaled 1.5x)
 const GRID_COLS := 3
-const PARTS := ["lmb", "rmb", "rocks", "dash", "spine", "climb", "glide", "ridge"]
+const PARTS := ["lmb", "rmb", "air", "rocks", "dash", "spine", "climb", "glide", "ridge"]
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -26,6 +27,7 @@ func run(main_node: Node) -> void:
 	print("BREAHSHOTS %d in %s" % [lines.size(), dir])
 	main.get_tree().quit(0)
 
+
 ## captions.txt keeps the other parts' lines and replaces the lines of the files just taken.
 func _write_captions() -> void:
 	var path := dir.path_join("captions.txt")
@@ -45,6 +47,7 @@ func _write_captions() -> void:
 		f.store_line("%s: %s" % [file, fresh[file]])
 	f.close()
 
+
 func _take(kind: String, file: String, caption: String, focus: Callable) -> void:
 	if kind == "full":
 		super._take(kind, file, caption, focus)
@@ -59,6 +62,7 @@ func _take(kind: String, file: String, caption: String, focus: Callable) -> void
 	(strips[strip_file] as Array).append(crop)
 	_save_strip(strip_file)
 
+
 func _save_strip(file: String) -> void:
 	var frames: Array = strips[file]
 	var w: int = (frames[0] as Image).get_width()
@@ -70,13 +74,14 @@ func _save_strip(file: String) -> void:
 	out.fill(Color(0.05, 0.05, 0.07))
 	for i in frames.size():
 		var fr: Image = frames[i]
-		var at := Vector2i((i % GRID_COLS) * (w + 4), (i / GRID_COLS) * (hh + 4))
+		var at := Vector2i((i % GRID_COLS) * (w + 4), (int(i / float(GRID_COLS))) * (hh + 4))
 		out.blit_rect(fr, Rect2i(Vector2i.ZERO, fr.get_size()), at)
 	out.save_png(dir.path_join(file))
 
+
 ## The boulder's burst and the punch's blow, each shot on the frames after the dummy is first hurt.
 func _breah_lmb() -> void:
-	Sfx.listener = P.pos          # (the rig has no listening camera; HeroVfx draws nothing far from it)
+	Sfx.listener = P.pos  # (the rig has no listening camera; HeroVfx draws nothing far from it)
 	await _reset(7.0)
 	_aim(T.pos)
 	var tap := func(t: float):
@@ -91,8 +96,10 @@ func _breah_lmb() -> void:
 	await _go(1.5, hold)
 	P.inp["fire"] = false
 
+
 var _hit_frame := -1
 var _frames := 0
+
 
 ## A close-up on the target 1, 3 and 6 frames after it is first hurt (the hit flash, then its debris).
 func _after_hit(file: String, what: String) -> void:
@@ -108,6 +115,7 @@ func _after_hit(file: String, what: String) -> void:
 		_hit_frame = -1
 		T.hp = T.max_hp
 
+
 ## Quakefall: the short hold, then the hop and the two-fist smash on landing; the tap.
 func _breah_rmb() -> void:
 	await _reset(6.0)
@@ -117,8 +125,10 @@ func _breah_rmb() -> void:
 	var hold_rmb := func(t: float): P.inp["sec_hold"] = t < 1.0
 	var marks := _strip(
 		"rmb_strip",
-		"Quakefall hold (RMB), gameplay zoom: the gathered crouch with the circle and its sweet spot; the push-off;"
-			+ " fists high at the top of the hop; swung down as he drops; the smash on landing; low in the crater",
+		(
+			"Quakefall hold (RMB), gameplay zoom: the gathered crouch with the circle and its sweet spot; the push-off;"
+			+ " fists high at the top of the hop; swung down as he drops; the smash on landing; low in the crater"
+		),
 		[0.2, 0.5, 0.75, 0.95, 1.06, 1.2]
 	)
 	marks.append([0.42, "full", "rmb_charge", "Quakefall charging (0.45s cap): the red circle a hop ahead"])
@@ -135,6 +145,28 @@ func _breah_rmb() -> void:
 	)
 	tap_marks.append([0.08, "full", "rmb_tap", "Quakefall tap: the slam ahead of him, no hop"])
 	await _go(0.6, Callable(), tap_marks)
+
+
+## Quakefall pressed at a jump's apex: the pop, the arc onto the cursor's spot 3m ahead, the slam.
+func _breah_air() -> void:
+	await _reset(9.0)
+	_aim(home + Vector3(4.0, 0, 0))
+	var jump := func(t: float):
+		P.inp["jump"] = t < DT
+		if t >= 0.44 and t < 0.44 + DT:
+			P.ak.press_rmb()
+	var marks := _strip(
+		"rmb_air_strip",
+		(
+			"Quakefall in the air (RMB at a jump's apex), gameplay zoom: the jump; the press, the circle on the"
+			+ " cursor's spot 3m ahead; the pop; the arc down onto it; the slam on the spot; the crater"
+		),
+		[0.3, 0.47, 0.6, 0.75, 0.93, 1.1]
+	)
+	marks.append([0.62, "full", "rmb_air", "Quakefall air arc: he pops and falls onto the circle 3m ahead"])
+	marks.append([0.95, "full", "rmb_air_land", "Quakefall air arc landing: the slam on the circle's spot"])
+	await _go(1.3, jump, marks)
+
 
 ## Stone Row at gameplay zoom, then the rocks crumbling.
 func _breah_rocks() -> void:
@@ -156,21 +188,25 @@ func _breah_rocks() -> void:
 	var walls: Array = m.verbs.walls.duplicate()
 	var strip := _focused(
 		_strip(
-			"crumble_strip", "A rock breaking (item 67): the crack, the columns slumping, the chips and dust",
+			"crumble_strip",
+			"A rock breaking (item 67): the crack, the columns slumping, the chips and dust",
 			[0.03, 0.1, 0.18, 0.26, 0.34, 0.5]
 		),
 		on_rocks
 	)
-	Engine.time_scale = 0.1      # (the crumble is a tween on real time; a software render takes longer per frame)
+	Engine.time_scale = 0.1  # (the crumble is a tween on real time; a software render takes longer per frame)
 	for w in walls:
-		if w.get("rock", false): w["t"] = 0.0
+		if w.get("rock", false):
+			w["t"] = 0.0
 	await _go(0.6, Callable(), strip)
 	Engine.time_scale = 1.0
+
 
 func _focused(marks: Array, focus: Callable) -> Array:
 	for mk in marks:
 		(mk as Array).append(focus)
 	return marks
+
 
 ## Her two dash moves: Rock Hop on the ground, the long dash in the air.
 func _breah_dash() -> void:
@@ -185,8 +221,11 @@ func _breah_dash() -> void:
 			K.on_dash(true)
 	var ground := _strip(
 		"dash_ground_strip",
-		"Rock Hop (ground dash), gameplay zoom: crouched on the rock as it bursts up; a low hop on the foot slab; the"
-			+ " next rock rising under him and the skid; hop 2 steered; hop 3 steered; the crash; the rock rolling on",
+		(
+			"Rock Hop (ground dash), gameplay zoom: crouched on the rock as it bursts up; a low hop on the foot slab;"
+			+ " the next rock rising under him and the skid; hop 2 steered; hop 3 steered; the crash;"
+			+ " the rock rolling on"
+		),
 		[0.04, 0.2, 0.42, 0.6, 0.85, 1.05, 1.3, 1.5, 1.7]
 	)
 	await _go(1.9, press, ground)
@@ -197,12 +236,15 @@ func _breah_dash() -> void:
 	P.do_dash()
 	var air := _strip(
 		"dash_air_strip",
-		"Air dash, gameplay zoom: the gather (fists in at the chest); the shoulder-first barge, lead fist low,"
+		(
+			"Air dash, gameplay zoom: the gather (fists in at the chest); the shoulder-first barge, lead fist low,"
 			+ " legs trailing; held through the push; braced, knees up, as it ends (0.23s). Reference: the source's"
-			+ " ground shove (footage 128.8-129.4 s, shoulder down behind the rock, fists forward), taken into the air",
+			+ " ground shove (footage 128.8-129.4 s, shoulder down behind the rock, fists forward), taken into the air"
+		),
 		[0.02, 0.07, 0.13, 0.19, 0.24]
 	)
 	await _go(0.4, Callable(), air)
+
 
 ## Basalt Spine: the ridge of real rocks, one rock deep, centre-out (tap across the aim). Aimed up the
 ## screen so the whole 21m lies across the view, as in the source's f0590.
@@ -215,14 +257,33 @@ func _breah_spine() -> void:
 	HunterKeys.ult_pressed(P)
 	var at_ridge := func(): return (P.ak as DolmKit).spine.center + Vector3(0, 0.6, 0)
 	var marks := [
-		[0.12, "full", "spine_cracks", "Basalt Spine released: the molten cracks along the line everyone sees for 0.2s",
-			at_ridge],
-		[0.42, "full", "spine_rising", "Basalt Spine rising centre-out: real rocks (Stone Row's own), one rock deep",
-			at_ridge],
-		[0.9, "full", "spine_up", "Basalt Spine up: 21m of punchable rocks across the aim, one rock deep, no land;"
-			+ " over the abyss they stand as ground", at_ridge],
+		[
+			0.12,
+			"full",
+			"spine_cracks",
+			"Basalt Spine released: the molten cracks along the line everyone sees for 0.2s",
+			at_ridge
+		],
+		[
+			0.42,
+			"full",
+			"spine_rising",
+			"Basalt Spine rising centre-out: real rocks (Stone Row's own), one rock deep",
+			at_ridge
+		],
+		[
+			0.9,
+			"full",
+			"spine_up",
+			(
+				"Basalt Spine up: 21m of punchable rocks across the aim, one rock deep, no land;"
+				+ " over the abyss they stand as ground"
+			),
+			at_ridge
+		],
 	]
 	await _go(1.0, Callable(), marks)
+
 
 ## Item 25: she walks into her own rock and rises over it, no jump.
 func _breah_climb() -> void:
@@ -234,13 +295,16 @@ func _breah_climb() -> void:
 	var walk := func(_t: float): P.inp["move"] = Vector2(1, 0)
 	var marks := _strip(
 		"climb_strip",
-		"Her own rock (item 25), gameplay zoom: she walks into it with no jump, rises up its face with her walk"
+		(
+			"Her own rock (item 25), gameplay zoom: she walks into it with no jump, rises up its face with her walk"
 			+ " carried on, stands on its top (the rock slides under her, her foot ring on its top) and walks on over"
-			+ " (about 0.6s to cross)",
+			+ " (about 0.6s to cross)"
+		),
 		[0.3, 0.42, 0.5, 0.6, 0.72, 0.9]
 	)
 	await _go(1.1, walk, marks)
 	P.inp["move"] = Vector2.ZERO
+
 
 ## Standing on the Basalt Spine, then walking along it (his feet on the rock tops: --rock-feet-check).
 func _breah_ridge() -> void:
@@ -266,13 +330,16 @@ func _breah_ridge() -> void:
 		P.inp["move"] = Vector2(ahead.x - P.pos.x, ahead.z - P.pos.z).normalized() if t > 0.5 else Vector2.ZERO
 	var marks := _strip(
 		"ridge_strip",
-		"Tenzo on his Basalt Spine at gameplay zoom: standing on a rock (two frames), then walking along the ridge"
-			+ " from rock to rock; his feet on the rock tops (--rock-feet-check)",
+		(
+			"Tenzo on his Basalt Spine at gameplay zoom: standing on a rock (two frames), then walking along the ridge"
+			+ " from rock to rock; his feet on the rock tops (--rock-feet-check)"
+		),
 		[0.25, 0.45, 0.7, 0.85, 1.0, 1.15]
 	)
 	marks.append([0.4, "full", "ridge_stand", "Standing on the ridge, the match camera", Callable()])
 	await _go(1.3, walk, marks)
 	P.inp["move"] = Vector2.ZERO
+
 
 ## Quakefall out of a glide (the owner's 23:00 answer): gliding, the press folds the glider, the plunge, the
 ## slam on landing.
@@ -286,9 +353,12 @@ func _breah_glide() -> void:
 			P.ak.press_rmb()
 	var marks := _strip(
 		"glide_slam_strip",
-		"Quakefall out of a glide (per the source and the owner): gliding; the press folds the glider at once; the"
-			+ " plunge at the glider's dive speed (32.5 m/s); the two-fist slam where she lands; the crater",
-		[0.4, 0.62, 0.68, 0.75, 0.85, 1.2]
+		(
+			"Quakefall out of a glide (per the source and the owner): gliding; the press folds the glider at once; the"
+			+ " arc onto the cursor's spot (up to 3m, at most the glider's dive speed); the two-fist slam there;"
+			+ " the crater"
+		),
+		[0.4, 0.62, 0.8, 1.05, 1.45, 1.7]
 	)
-	await _go(1.4, glide, marks)
+	await _go(1.9, glide, marks)
 	P.inp["glide"] = false

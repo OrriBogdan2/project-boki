@@ -7,6 +7,7 @@ extends "res://tools/hero_pair_check.gd"
 const TIME := preload("res://tools/ostra_anim_time_check.gd")        # his move timing against the footage frames
 
 func run(main_node: Node) -> void:
+	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	main = main_node
 	await _ostra()
 	await _bolt_through_terrain()
@@ -339,7 +340,7 @@ func _ostra() -> void:
 		"moved %.2f" % Vector2(P.pos.x - home.x, P.pos.z - home.z).length()
 	)
 	# item 17: he drifts slowly while the lantern flies, keeps his height over the abyss
-	await _hover(m, P, T, home, K)
+	_hover(m, P, T, home, K)
 	TIME.new(self).run(m, P, K, T, home)
 	_far_cast(m, P, home, K)
 	_air_cast(m, P, home, K)
@@ -347,7 +348,7 @@ func _ostra() -> void:
 	K.swollen_t = 5.0
 	ok("combo: Swollen Trade is quicker", absf(K.swap_time() - 1.25) < 0.01, "%.2f" % K.swap_time())
 	# owner: everyone in the landing circle goes to where he stood (two units both end up at the origin)
-	await _multi(m, P, T, home, K)
+	_multi(m, P, T, home, K)
 	# ---- E: the seed drops at the cursor, grows 6.5s, light column near full, the 0.3s recast floor
 	reset.call()
 	T.teleport(home + Vector3(6.0, 0, 0))
@@ -633,7 +634,7 @@ func _ostra() -> void:
 		"charge %.2f" % K.charge
 	)
 	_dash_moves(K)
-	_quiet_float(m, P, T, home)
+	await _quiet_float(m, P, T, home)
 	_ranks(P, K)
 	# ---- every move, sound and look exists
 	var moves := [
@@ -652,20 +653,33 @@ func _ostra() -> void:
 	)
 	await done(m)
 
+## A Hunter as `arch`, rebuilt the way the game builds one (reclass, not set_arch: the footsteps ride the model's own
+## anim and its clips, which set_arch leaves as the old archetype's), and given a few frames to build its clip rig.
+func _become(h: Hunter, arch: String) -> void:
+	h.reclass(h.cls, arch)
+	for k in 5:
+		await main.get_tree().process_frame
+
+## One game tick of the clip rig: headless a tick loop runs inside one engine frame, so the Warden's Sync node
+## (which plays the clips each frame) is stepped by hand, as the game's frames would.
+func _clips(h: Hunter) -> void:
+	var sync := h.model.get_node_or_null("Warden/Sync")
+	if sync:
+		sync._process(DT)
+
 ## Source: Void's passive "floats: no footstep noise" (sv/briefs/kits.md), the footage "no footsteps"
 ## (briefs/hero-ref/ostra.md). 3 s of floating walk plays no step sound, for him and for a Motley another game
 ## moves; a footed Hunter walking the same 3 s the same way does step (so the counter hears steps).
 func _quiet_float(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
 	var steps := func() -> int:
-		var n := 0
+		var n_v := 0
 		for k in Sfx.last_played.keys():
 			if String(k).contains("step_"):
-				n += 1
+				n_v += 1
 				Sfx.last_played.erase(k)
 				Sfx.recent.erase(k)
-		return n
-	var local_walk := func(arch: String) -> Array:
-		P.set_arch(arch)
+		return n_v
+	var local_walk := func() -> Array:
 		P.teleport(home)
 		P.vel = Vector3.ZERO
 		P.grounded = true
@@ -675,35 +689,40 @@ func _quiet_float(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
 		step(m, 3.0, func():
 			Sfx.listener = P.pos      # (the camera sets it each frame; headless it stays at the origin, out of hearing)
 			P.render(DT, 1.0)
+			_clips(P)
 			w[0] += steps.call()
 			if P.grounded and Vector2(P.vel.x, P.vel.z).length() > 4.0: w[1] += 1)
 		P.inp["move"] = Vector2.ZERO
 		return w
-	var walk: Array = local_walk.call("ostra")
-	var foot: Array = local_walk.call("thief")
-	P.set_arch("ostra")
+	await _become(P, "ostra")
+	var walk: Array = local_walk.call()
+	await _become(P, "thief")
+	var foot: Array = local_walk.call()
+	await _become(P, "ostra")
 	P.teleport(home)
 	ok(
 		"float: 3 s of his floating walk plays zero step sounds; a footed Hunter's same walk does step",
 		walk[0] == 0 and walk[1] >= 60 and foot[0] >= 3 and foot[1] >= 60,
 		"Motley %d steps (%d ticks walking), thief %d (%d)" % [walk[0], walk[1], foot[0], foot[1]]
 	)
-	var remote_steps := func(arch: String) -> int:
-		T.set_arch(arch)
+	var remote_steps := func() -> int:
 		T.remote = true
 		T.teleport(P.pos + Vector3(3.0, 0, 0))
-		var n := [0]
+		var n_v := [0]
 		for i in int(3.0 / DT):
 			T.vel = Vector3(5.0, 0, 0)
 			T.grounded = true
 			Sfx.listener = P.pos
 			T.render(DT, 1.0)
-			n[0] += steps.call()
+			_clips(T)
+			n_v[0] += steps.call()
 		T.remote = false
 		T.vel = Vector3.ZERO
-		return n[0]
-	var other: int = remote_steps.call("ostra")
-	var footed: int = remote_steps.call("thief")
+		return n_v[0]
+	await _become(T, "ostra")
+	var other: int = remote_steps.call()
+	await _become(T, "thief")
+	var footed: int = remote_steps.call()
 	ok(
 		"float: a remote Motley walking 3 s plays zero step sounds; a remote footed Hunter does step",
 		other == 0 and footed >= 5, "Motley %d, thief %d" % [other, footed]
@@ -711,7 +730,8 @@ func _quiet_float(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
 
 ## Item 35: his own ground and air dash moves (the Trade's lob), ids no other hero's table has, and each one's
 ## Item 60: the orb charges smoothly with the wait since the last shot (damage, speed, size monotonic from 0 to the
-## window, capped after), every orb passes a wall between him and the foe at any charge, and a full orb slows.
+## window, capped after), only the void orb (charge from KitLooks.ORB_HELD_K) passes a wall between him and the
+## foe while a card stops at it (the owner's 11-26 rule), and a full orb slows.
 func _bolt_through_terrain() -> void:
 	var r := setup("ostra", 6.0)
 	var m: Match = r[0]
@@ -738,16 +758,17 @@ func _bolt_through_terrain() -> void:
 		step(m, 0.03)
 		var shots0 := P.shot_n
 		spds.append(float(P.wpn["speed"]))
+		dmgs.append(float(P.wpn["dmg"]))      # the shot's own damage (a card never reaches him past the wall)
+		var void_orb := K.charge >= KitLooks.ORB_HELD_K
 		P.fire_cd = 0.0
 		P.inp["fire"] = true
 		step(m, 0.05)
 		P.inp["fire"] = false
 		step(m, 0.9)
 		var d := dmg(T)
-		dmgs.append(d)
 		rads.append(K.last_orb_r)
 		slows.append(T.slow_t > 0.0)
-		if P.shot_n <= shots0 or d <= 0.5:
+		if P.shot_n <= shots0 or (d > 0.5) != void_orb:
 			through = false
 		step(m, 0.6)
 	var mono := true
@@ -769,7 +790,7 @@ func _bolt_through_terrain() -> void:
 		str(dmgs)
 	)
 	ok("item 60: a full orb hits for the data's +34% (353 vs 263)", absf(dmgs[4] / dmgs[0] - 1.34) < 0.06, str(dmgs))
-	ok("item 60: every orb passes the wall between him and the foe at any charge", through, str(dmgs))
+	ok("walls: the void orb passes the wall between him and the foe, a card stops at it", through, str(dmgs))
 	ok("item 60: only the full orb slows", slows[4] and slows[5] and not slows[0] and not slows[2], str(slows))
 	await done(m)
 
@@ -779,9 +800,9 @@ func _bolt_through_terrain() -> void:
 ## docs/VFX_QUALITY.md: his zones are a lit rim and a soft inside (0.25 alpha at most at the centre), in his teal.
 func _zone_looks(m: Match) -> void:
 	const CORE_A := 0.25
-	var seed := HeroZones.seed_visual(m, "zone_test", Vector3.ZERO, 3.2, 1.0, OstraKit.TEAL)
-	var sm := (seed.get_node("Core") as MeshInstance3D).material_override as ShaderMaterial
-	ok("zones: the seed drum is clear inside, lit at its teal rim",
+	var seed_v := HeroZones.seed_visual(m, "zone_test", Vector3.ZERO, 3.2, 1.0, OstraKit.TEAL)
+	var sm := (seed_v.get_node("Core") as MeshInstance3D).material_override as ShaderMaterial
+	ok("zones: the seed globe is clear inside, lit at its teal rim",
 		HeroZones.SEED_A * (HeroZones.SEED_BODY + 0.1) <= CORE_A and sm.get_shader_parameter("rim") == OstraKit.SEA)
 	HeroZones.seed_pop(m, "zone_test")
 	var looks := KitLooks.of(m)
@@ -1049,7 +1070,11 @@ func _air_cast(m: Match, P: Hunter, home: Vector3, K: OstraKit) -> void:
 		K.cd["x"] = 0.0
 		ok("air %s: the well opens at the cursor on the floor" % how, K.cast_ult() and absf(K.well.center.y - gy) < 0.1)
 		K._drop_holds()
+		Sfx.cue_log = []
 		K.well._close()
+		ok("air %s: Nightwell's close plays its own cue (os_well_close)" % how,
+			Sfx.cue_log.any(func(e: Array) -> bool: return e[0] == "os_well_close"))
+		Sfx.cue_log = null
 	P.gliding = false
 	step(m, 0.5)
 

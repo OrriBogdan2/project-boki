@@ -9,7 +9,8 @@ extends RefCounted
 ## from trained Speed, joy, and a lean on its own stretch (the Tide knack swims, wings glide the gap);
 ## friends run side by side, rivals bump.
 ## The runners crouch on the line through the countdown, burst off it, and celebrate or sulk at the line (RaceBeats).
-## The result card: the winner gains joy and trust, the last one home sulks, you get a few gems,
+## The result card names what carried the winner (carried(): "Speed carried it"). The winner gains joy and
+## trust, the last one home sulks, you get a few gems,
 ## both remember it, and the two grow apart while close finishers grow closer (rec["bonds"]).
 ## The Training post folds in (GARDEN.md 5, "training is practising a minigame alone"): with base_mode
 ## on, "Train" runs a solo lap of the same loop (solo()); each cheer adds to Speed, see settle_solo().
@@ -20,6 +21,7 @@ extends RefCounted
 ## On the save: rec["bonds"] = {uid: -1..1} (missing = 0, so old saves need no migration).
 
 const POST_OFF := Vector3(2.2, 0, 0.4)      # m from the Training post to the race post
+const LOOP_MARGIN := 1.0                   # m a building keeps off the loop (loop_rect)
 const LOOP_OFF := Vector3(0.9, 0, -0.6)     # m from the race post to the loop's start line
 const CLIMB_H := 0.7                         # m, the top of the climb
 const JUMP_H := 0.6                          # m, the top of the jump's arc
@@ -89,15 +91,25 @@ static func post_spot() -> Array:
 
 ## The loop's points in the world when the zone has a post spot: what its scatter keeps clear.
 static func loop_points() -> Array:
-	var S := post_spot()
+	var s_v := post_spot()
 	var out: Array = []
-	if S.is_empty():
+	if s_v.is_empty():
 		return out
-	var line := Vector3(S[0], 0.0, S[1]) + LOOP_OFF
+	var line := Vector3(s_v[0], 0.0, s_v[1]) + LOOP_OFF
 	for s in course(GardenZones.here):
 		for q in s["pts"]:
 			out.append(line + Vector3(q[0], 0.0, q[1]))
 	return out
+
+## The ground the loop covers (tiles), with a lane's margin: what a building must stay off. Empty without a post.
+static func loop_rect() -> Rect2:
+	var pts := loop_points()
+	if pts.is_empty():
+		return Rect2()
+	var box := Rect2(pts[0].x, pts[0].z, 0.0, 0.0)
+	for q in pts:
+		box = box.expand(Vector2(q.x, q.z))
+	return box.grow(LOOP_MARGIN)
 
 static func lap() -> float:
 	var out := 0.0
@@ -130,21 +142,23 @@ static func stretches(tw := {}) -> Array:
 
 ## Its pace on stretch i before the wobble and your cheers (m/s).
 static func stretch_pace(rec: Dictionary, i: int, tw := {}) -> float:
-	var R := rules()
+	var r_v := rules()
 	var s: Dictionary = stretches(tw)[i]
 	var speed := float(rec.get("stats", {}).get("speed", 0))
-	var mood: Array = R["mood"]
-	var p := float(R["pace"]) * float(s["mult"]) * (1.0 + speed * float(R["speed_per_point"]))
+	var mood: Array = r_v["mood"]
+	var p := float(r_v["pace"]) * float(s["mult"]) * (1.0 + speed * float(r_v["speed_per_point"]))
 	p *= lerpf(float(mood[0]), float(mood[1]), Care.need(rec, "joy") / 100.0)
 	p *= float(tw.get("mult", {}).get(String(s["kind"]), 1.0))
 	var lean: Dictionary = rec.get("lean", {})
 	match String(s["kind"]):
 		"water":
 			var tide := maxf(Work.level(rec, "tide"), 4.0 * float(lean.get("water", 0.0)))
-			p *= 1.0 + float(R["swim_per_tide"]) * tide
+			p *= 1.0 + float(r_v["swim_per_tide"]) * tide
 		"jump":
 			var g := 1.0 if winged(rec) else clampf(float(lean.get("flying", 0.0)), 0.0, 1.0)
-			p *= lerpf(1.0, float(R["glide"]), g)
+			p *= lerpf(1.0, float(r_v["glide"]), g)
+	if s.has("vent") and winged(rec):
+		p *= float(r_v["vent_mult"])
 	return p
 
 ## Seconds for one lap with no wobble and no cheers: the lowest is the favourite.
@@ -155,9 +169,27 @@ static func expected_time(rec: Dictionary, tw := {}) -> float:
 		out += float(st[i]["len"]) / stretch_pace(rec, i, tw)
 	return out
 
+## The plain line naming what put `win` ahead of `other` ("Speed carried it"): the biggest of the two Boki's
+## raised Speed, mood (joy) and knack (swimming, gliding) gaps, or luck when the winner was not the favourite.
+static func carried(win: Dictionary, other: Dictionary, tw := {}) -> String:
+	var total := expected_time(other, tw) / expected_time(win, tw)
+	if total <= 1.0:
+		return "A lucky run carried it"
+	var spp := float(rules()["speed_per_point"])
+	var speed := (1.0 + float(win["stats"]["speed"]) * spp) / (1.0 + float(other["stats"]["speed"]) * spp)
+	var mood := _mood(win) / _mood(other)
+	var knack := total / (speed * mood)
+	if speed >= mood and speed >= knack:
+		return "Speed carried it"
+	return "A happy mood carried it" if mood >= knack else "Its knack carried it"
+
+static func _mood(rec: Dictionary) -> float:
+	var mood: Array = rules()["mood"]
+	return lerpf(float(mood[0]), float(mood[1]), Care.need(rec, "joy") / 100.0)
+
 ## The race itself: runners' distance along the lap, stepped in time.
 class Run:
-	var R: Dictionary
+	var r_x: Dictionary
 	var recs: Array
 	var backed := 0                 # index in recs: the Boki you cheer for
 	var rng: RandomNumberGenerator
@@ -175,7 +207,7 @@ class Run:
 	var duo := {}                   # runner index -> duo friend's index it handed off cleanly with
 
 	func _init(runners: Array, back: int, r: RandomNumberGenerator, twist := {}) -> void:
-		R = BaseRace.rules()
+		r_x = BaseRace.rules()
 		tw = twist
 		recs = runners
 		backed = back
@@ -193,7 +225,7 @@ class Run:
 			_roll(i)
 
 	func _roll(i: int) -> void:
-		var w := float(tw.get("wobble", R["wobble"]))
+		var w := float(tw.get("wobble", r_x["dash_wobble"]))
 		var p := BaseRace.stretch_pace(recs[i], int(stretch[i]), tw) * rng.randf_range(1.0 - w, 1.0 + w)
 		if i == backed and int(stretch[i]) > 0:
 			p *= cheer_mult
@@ -210,7 +242,7 @@ class Run:
 		return float(done_t[backed]) < 0.0 and cheered == int(stretch[backed]) and cheered < ends.size() - 1
 
 	func cheer(grade: String) -> void:
-		cheer_mult = float(R["cheer"][grade])
+		cheer_mult = float(r_x["cheer"][grade])
 		cheered += 1
 
 	func over() -> bool:
@@ -223,29 +255,29 @@ class Run:
 		return out
 
 	func friends(i: int, j: int) -> bool:
-		return BaseRace.bond(recs[i], recs[j]) >= float(R["friend_at"])
+		return BaseRace.bond(recs[i], recs[j]) >= float(r_x["friend_at"])
 
 	## A duo friend running alongside runner i (-1 if none): the hand-off into the next stretch is clean.
 	func _duo_mate(i: int) -> int:
 		for j in recs.size():
-			if j != i and _running(j) and _gap(i, j) < float(R["friend_near"]) and BaseDuo.friends(recs[i], recs[j]):
+			if j != i and _running(j) and _gap(i, j) < float(r_x["friend_near"]) and BaseDuo.friends(recs[i], recs[j]):
 				return j
 		return -1
 
 	func rivals(i: int, j: int) -> bool:
-		return BaseRace.bond(recs[i], recs[j]) <= float(R["rival_at"])
+		return BaseRace.bond(recs[i], recs[j]) <= float(r_x["rival_at"])
 
 	func step(dt: float) -> void:
 		t += dt
 		var eff: Array = []
 		for i in recs.size():
-			eff.append(float(pace[i]) * (float(R["bump_slow"]) if float(bump_t[i]) > 0.0 else 1.0))
+			eff.append(float(pace[i]) * (float(r_x["bump_slow"]) if float(bump_t[i]) > 0.0 else 1.0))
 			bump_t[i] = maxf(0.0, float(bump_t[i]) - dt)
 		var pulled := eff.duplicate()
 		for i in recs.size():
 			for j in recs.size():
-				if i != j and _running(i) and _running(j) and friends(i, j) and _gap(i, j) < float(R["friend_near"]):
-					pulled[i] = lerpf(float(pulled[i]), float(eff[j]), float(R["friend_pull"]))
+				if i != j and _running(i) and _running(j) and friends(i, j) and _gap(i, j) < float(r_x["friend_near"]):
+					pulled[i] = lerpf(float(pulled[i]), float(eff[j]), float(r_x["friend_pull"]))
 		for i in recs.size():
 			if _running(i):
 				_advance(i, float(pulled[i]), dt)
@@ -272,57 +304,58 @@ class Run:
 			for j in range(i + 1, recs.size()):
 				var key := "%d-%d-%d" % [i, j, int(stretch[i])]
 				if _running(i) and _running(j) and stretch[i] == stretch[j] and not bumped.has(key) \
-						and rivals(i, j) and _gap(i, j) < float(R["bump_near"]):
+						and rivals(i, j) and _gap(i, j) < float(r_x["bump_near"]):
 					bumped[key] = true
-					bump_t[i] = float(R["bump_s"])
-					bump_t[j] = float(R["bump_s"])
+					bump_t[i] = float(r_x["bump_s"])
+					bump_t[j] = float(r_x["bump_s"])
 
 ## Pays out a finished race: joy, trust, memories, gems and bonds. Returns what the card shows.
 static func settle(run: Run) -> Dictionary:
-	var R := rules()
+	var r_v := rules()
 	var order := run.order()
+	var pull := false           # two friends in the field: they run together (friend_pull)
+	for i in run.recs.size():
+		for j in range(i + 1, run.recs.size()):
+			pull = pull or run.friends(i, j)
 	var win: Dictionary = run.recs[order[0]]
 	var lose: Dictionary = run.recs[order[-1]]
 	for rec in run.recs:
-		Care.change(rec, "energy", -float(R["energy"]))
-	Care.change(win, "joy", float(R["win_joy"]))
-	Care.change(lose, "joy", float(R["lose_joy"]))
+		Care.change(rec, "energy", -float(r_v["energy"]))
+	Care.change(win, "joy", float(r_v["win_joy"]))
+	Care.change(lose, "joy", float(r_v["lose_joy"]))
 	MinigameHub.record("race", String(win["name"]))     # best Boki on the title's picker
-	Save.remember(win, "race", "won the Dash ahead of %s" % lose["name"], float(R["win_trust"]))
+	Save.remember(win, "race", "won the Dash ahead of %s" % lose["name"], float(r_v["win_trust"]))
 	Save.remember(lose, "race", "came last in the Dash, behind %s" % win["name"])
-	nudge_bond(win, lose, -float(R["rival_step"]))
+	nudge_bond(win, lose, -float(r_v["rival_step"]))
 	for n in range(1, order.size()):
 		var a: Dictionary = run.recs[order[n - 1]]
 		var b: Dictionary = run.recs[order[n]]
-		var close := float(run.done_t[order[n]]) - float(run.done_t[order[n - 1]]) < float(R["close_s"])
-		if close and bond(a, b) > float(R["rival_at"]) and not (a == win and b == lose):
-			nudge_bond(a, b, float(R["friend_step"]))
+		var close := float(run.done_t[order[n]]) - float(run.done_t[order[n - 1]]) < float(r_v["close_s"])
+		if close and bond(a, b) > float(r_v["rival_at"]) and not (a == win and b == lose):
+			nudge_bond(a, b, float(r_v["friend_step"]))
 	for i in run.duo:
 		BaseDuo.note_first(run.recs[i], run.recs[run.duo[i]], "handed off cleanly with")
 	var backed_won: bool = order[0] == run.backed
 	if backed_won: ClanBoard.add("cup")       # the garden cup for the clan board (until cups land)
-	var gems := int(R["gems_win"]) if backed_won else int(R["gems_ran"])
+	var gems := int(r_v["gems_win"]) if backed_won else int(r_v["gems_ran"])
 	Save.d["gems"] = int(Save.d["gems"]) + gems
 	var mine: Dictionary = run.recs[run.backed]
-	var prize := GardenPrizes.settle("dash", mine, GardenPrizes.strongest(run.recs, mine), backed_won)
-	return {"win": win, "lose": lose, "gems": gems, "backed_won": backed_won, "prize": prize}
+	var prize := GardenPrizes.settle("dash", mine, GardenPrizes.strongest(run.recs, mine, "dash"), backed_won)
+	var why := carried(win, run.recs[order[1]], run.tw)
+	return {"win": win, "lose": lose, "gems": gems, "backed_won": backed_won, "prize": prize, "pull": pull, "why": why}
 
-## Pays out a solo training lap (grades: three of great/good/miss). Returns the Speed gained.
-static func settle_solo(rec: Dictionary, grades: Array) -> int:
-	var T: Dictionary = rules()["train"]
-	var pts := 0
-	for g in grades:
-		if g != "miss":
-			pts += int(T[g]) + (int(T["dojo"]) if Save.has_building("dojo") else 0)
-	var mult := float(T["happy_mult"]) if Care.need(rec, "joy") >= float(T["happy_at"]) else 1.0
-	var gained := Care.add_stat(rec, "speed", int(round(pts * mult)))
+## Pays out a solo training lap (grades: three of great/good/miss): Speed bites into the bag, one limited
+## drill run (TrainRuns.pay_drill), never raw points. Returns the pay ({charged, bites, id, text}).
+static func settle_solo(rec: Dictionary, grades: Array) -> Dictionary:
+	var t_v: Dictionary = rules()["train"]
+	var pay := TrainRuns.pay_drill("speed", grades)
 	Care.change(rec, "energy", -float(rules()["energy"]))
-	Care.change(rec, "food", -float(T["food"]))
-	Care.change(rec, "joy", float(T["joy_great"]) if grades.has("great") else float(T["joy_else"]))
+	Care.change(rec, "food", -float(t_v["food"]))
+	Care.change(rec, "joy", float(t_v["joy_great"]) if grades.has("great") else float(t_v["joy_else"]))
 	Evo.add(rec, "swift", 2.0)
-	if gained > 0:
+	if int(pay["bites"]) > 0:
 		Save.remember(rec, "trained", "ran a training lap of the Dash with you", 1.0)
-	return gained
+	return pay
 
 # ------------------------------------------------------------------ on the base
 var h                          # the Home screen
@@ -436,16 +469,17 @@ func find(p2: Vector2) -> Dictionary:
 func label() -> String:
 	var fmt := String(tweak("dash").get("name", ""))
 	var back := "back %s" % Save.active_kin().get("name", "your partner")
-	return "Start a Dash, %s (%s)" % [fmt, back] if fmt else "Start a Dash (%s)" % back
+	var runs := TrainRuns.line("race")
+	return "Start a Dash, %s (%s)  ·  %s" % [fmt, back, runs] if fmt else "Start a Dash (%s)  ·  %s" % [back, runs]
 
 ## Up to 4 rested Boki out on the base, your partner first.
 func entrants() -> Array:
-	var R := rules()
+	var r_v := rules()
 	var out: Array = []
 	var ak := Save.active_kin()
 	for k in h.kins:
 		var rec: Dictionary = k["rec"]
-		if k.get("busy", false) or k.has("indoors") or Care.need(rec, "energy") < float(R["min_energy"]):
+		if k.get("busy", false) or k.has("indoors") or Care.need(rec, "energy") < float(r_v["min_energy"]):
 			continue
 		if rec == ak:
 			out.push_front(k)
@@ -478,10 +512,10 @@ func _practice(k: Dictionary) -> void:
 ## The Training post: your Boki runs the loop alone while you cheer at the three marks.
 func solo(rec: Dictionary) -> void:
 	var k: Dictionary = h._kin_entry(rec)
-	var T: Dictionary = rules()["train"]
+	var t_v: Dictionary = rules()["train"]
 	if k.is_empty() or k.get("busy", false) or k.has("indoors"):
 		h._toast("%s is not out on the base" % rec["name"])
-	elif Care.need(rec, "energy") < float(rules()["min_energy"]) or Care.need(rec, "food") < float(T["min_food"]):
+	elif Care.need(rec, "energy") < float(rules()["min_energy"]) or Care.need(rec, "food") < float(t_v["min_food"]):
 		h._toast(KinSpeak.about(rec, "%s is too tired or hungry to train. Nap or feed {him} first") % rec["name"])
 	elif int(rec["stats"]["speed"]) >= Care.stat_cap(rec):
 		h._toast(KinSpeak.about(rec, "%s can't train Speed any further until {he} levels up") % rec["name"])
@@ -519,6 +553,10 @@ func _begin(ks: Array) -> void:
 func _bar_label(last: String) -> void:
 	var who: String = run.recs[run.backed]["name"]
 	bar.lbl.text = "Cheer for %s  ·  mark %d of 3%s" % [who, mini(run.cheered + 1, 3), last]
+
+## True while a round is on (GardenMusic ducks the music for it).
+func playing() -> bool:
+	return run != null or relay.run != null
 
 ## A press: true when the race took it.
 func input(event: InputEvent) -> bool:
@@ -591,7 +629,12 @@ func _place_runners() -> void:
 		runners[i]["pos"] = p
 		if winged(runners[i]["rec"]):
 			var left := (float(run.ends[s]) - float(run.dist[i])) / maxf(float(run.pace[i]), 0.01)
-			n.set_meta("aloft", String(st[s]["kind"]) == "jump" and BokiFly.glides(left))      # it glides the gap
+			var vent: bool = st[s].has("vent")
+			var gap: bool = String(st[s]["kind"]) == "jump" or vent      # it glides the gap or rides a vent
+			n.set_meta("aloft", gap and BokiFly.glides(left))
+			if vent:
+				var f := clampf(into / float(st[s]["len"]), 0.0, 1.0)
+				n.position.y += float(BokiFly.rules()["vent_h"]) * sin(PI * f)
 
 ## A point on the loop: fraction f along stretch s, `side` m right of its middle line, on the ground.
 func track_at(s: int, f: float, side: float) -> Vector3:
@@ -668,22 +711,32 @@ func _race_card(res: Dictionary, pinned: bool) -> void:
 	var why := " for backing the winner" if res["backed_won"] else ""
 	show_card("%s wins the Dash!" % win["name"], [
 		["%s is beaming (+joy, +trust)" % win["name"], UI.INK],
+		[res["why"], UI.MUTED],
 		["%s sulks: \"came last in the Dash, behind %s\"" % [lose["name"], win["name"]], UI.MUTED],
-		["+%d gems%s" % [res["gems"], why], UI.GOLD]] + pin_rows(pinned) + GardenPrizes.rows(res["prize"]))
+		["+%d gems%s" % [res["gems"], why], UI.GOLD]] + pin_rows(pinned)
+			+ GardenPrizes.rows(res["prize"]) + pull_rows(res))
+
+## The result-card row when friends ran in the field: they pace each other, so Speed tells less (and the Crown
+## is judged on Speed, GardenPrizes.cup_stat).
+static func pull_rows(res: Dictionary) -> Array:
+	return [["Friends pull together: they run each other's pace", UI.MUTED]] if res.get("pull", false) else []
 
 ## The result-card row for a win that went on the wall (none when it did not).
-static func pin_rows(pinned: bool) -> Array:
-	return [["%s: pinned to the showcase wall" % twist()["name"], UI.MUTED]] if pinned else []
+## font 0 leaves the size out (show_card rows); Seek and Volley pass 14 (result_card rows).
+static func pin_rows(pinned: bool, font := 0) -> Array:
+	if not pinned:
+		return []
+	var row: Array = ["%s: pinned to the showcase wall" % twist()["name"], UI.MUTED]
+	if font > 0:
+		row.insert(1, font)
+	return [row]
 
-func _solo_card(gained: int) -> void:
-	var speed := int(solo_rec["stats"]["speed"])
+func _solo_card(pay: Dictionary) -> void:
 	var marks := ""
 	for g in _grades():
 		marks += {"great": " ★", "good": " ●", "miss": " ✕"}[g]
-	var line := "No gain this time. Try again after a rest"
-	if gained > 0:
-		line = "+%d Speed  (%d of %d)" % [gained, speed, Care.stat_cap(solo_rec)]
-	show_card("%s ran a training lap!" % solo_rec["name"], [[marks.strip_edges(), UI.INK], [line, UI.GOLD]])
+	var col: Color = UI.GOLD if int(pay["bites"]) > 0 else UI.MUTED
+	show_card("%s ran a training lap!" % solo_rec["name"], [[marks.strip_edges(), UI.INK], [pay["text"], col]])
 
 ## The result card at the top of the screen: a headline and a coloured line each.
 func show_card(title: String, lines: Array) -> void:
@@ -706,5 +759,6 @@ static func result_card(home, rows: Array) -> Control:
 	c.add_child(v)
 	for r in rows:
 		v.add_child(UI.label(r[0], r[1], r[2]))
+	PanelClose.attach(c, c.queue_free)
 	home.root_ui.add_child(c)
 	return c

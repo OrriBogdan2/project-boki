@@ -47,6 +47,7 @@ func _spot(hb: HomeBuild, p: Vector3, min_d := 0.0) -> Array:
 	return []
 
 func run(m: Node) -> void:
+	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm (base_mode is the shipped default)
 	main = m
 	Save.no_write = true
 	var t0 := Time.get_ticks_msec()
@@ -192,7 +193,7 @@ func run(m: Node) -> void:
 		hg.tick(0.05)
 	home.tw.test_hold = false
 	ok(not hb.wild_t.has(ti) and Work.mat("wood") >= 3, "holding the key, three hits and it's down: %d wood" % Work.mat("wood"))
-	var key := HomeLayout.key(ti % w.w, ti / w.w)
+	var key := HomeLayout.key(ti % w.w, int(ti / float(w.w)))
 	var rg: Dictionary = HomeLayout.of(Save.d)["regrow"]
 	ok(rg.has(key) and float(rg[key]["t"]) - Time.get_unix_time_from_system() > 600.0, "it grows back in %.0f minutes" % ((float(rg.get(key, {}).get("t", 0)) - Time.get_unix_time_from_system()) / 60.0))
 	var ri := -1
@@ -213,7 +214,7 @@ func run(m: Node) -> void:
 	home.ppos = HomeLayout.LANDING; home.player.position = home.ppos
 	for k in home.kins: k["pos"] = HomeLayout.LANDING
 	var n_back: int = hb.regrow_due(Time.get_unix_time_from_system() + 4000.0)
-	ok(n_back >= 1 and hb.wild_t.has(ti) and w.is_block(ti % w.w + 0.5, ti / w.w + 0.5), "later, the tree grows back where it stood (%d came back)" % n_back)
+	ok(n_back >= 1 and hb.wild_t.has(ti) and w.is_block(ti % w.w + 0.5, int(ti / float(w.w)) + 0.5), "later, the tree grows back where it stood (%d came back)" % n_back)
 	# the Training Grounds isle is gone: no island of its own, and the Esc menu opens the Grounds instead
 	ok(home.world.island_id(40.0, 56.0) != "training", "the farm has no Training Grounds isle")
 	var was: Node = main.get("current")
@@ -230,9 +231,9 @@ func run(m: Node) -> void:
 		if hb.wild_t[i] == "cliff": cl = i; break
 	if cl >= 0:
 		var lv: int = w.level[cl]
-		var chop: Dictionary = home.hg.find(Vector2(cl % w.w + 0.5, cl / w.w + 1.6))
+		var chop: Dictionary = home.hg.find(Vector2(cl % w.w + 0.5, int(cl / float(w.w)) + 1.6))
 		var tools_skip := int(chop.get("i", -1)) != cl
-		ok(lv > 0 and w.kind[cl] == World.T_GROUND and tools_skip and hb._brush_ok(Vector2i(cl % w.w, cl / w.w), "wild"),
+		ok(lv > 0 and w.kind[cl] == World.T_GROUND and tools_skip and hb._brush_ok(Vector2i(cl % w.w, int(cl / float(w.w))), "wild"),
 			"a ridge is ground to stand on (level %d): tools leave it, the Clear the wild brush levels it" % lv)
 	else:
 		print("FARMSTART  (this island has no cliff)")
@@ -249,7 +250,8 @@ func run(m: Node) -> void:
 	hb = home.hb; hg = home.hg; w = home.world
 	var hw: HomeWork = home.hw
 	var tree2: int = hg.nearest_wild(home.spots["house"], "tree")
-	var camp: Dictionary = hg.demo_place("lumber_camp", Vector3(tree2 % w.w + 0.5, 0, tree2 / w.w + 0.5), 0, 2.0)
+	var camp: Dictionary = hg.demo_place("lumber_camp", Vector3(tree2 % w.w + 0.5, 0, int(tree2 / float(w.w)) + 0.5), 0,
+			2.0)
 	var garden: Dictionary = hg.demo_place("seed_garden", home.spots["house"] + Vector3(-4, 0, 6), 0)
 	var kiln: Dictionary = hg.demo_place("kiln", home.spots["house"] + Vector3(4, 0, 6), 0)
 	ok(not camp.is_empty() and not garden.is_empty() and not kiln.is_empty(), "a Lumber Camp by the trees, a Seed Garden and a Kiln go down")
@@ -316,6 +318,23 @@ func run(m: Node) -> void:
 	var vs: float = home.ppos.x - x1
 	Input.action_release("right")
 	ok(vc > 0.5 and vc < vs * 0.75 and ck > 0.5, "crouching works on the farm: %.2f m/s crouched (pose %.2f) against %.2f standing" % [vc, ck, vs])
+	# ---------------------------------------------------------------- 6b. a bed you walk round
+	var bed: Vector3 = home.plots[0].position
+	home.ppos = bed + Vector3(-3.0, 0, 0)
+	home.py = 0.0
+	home.pvy = 0.0
+	Input.action_press("right")
+	for i in 60: home._move_player(0.05)
+	Input.action_release("right")
+	var dx: float = bed.x - home.ppos.x
+	ok(dx >= 0.85 and dx < 3.0, "walking at a crop bed stops at its edge (%.2f m from its middle)" % dx)
+	var patch: Dictionary = HomeLayout.fixtures(Save.d, "farm")[0]
+	hb.mesh_t = -1.0
+	patch["x"] = int(patch["x"]) + 2
+	hb.apply()
+	ok(hb.mesh_t >= 0.0, "moving a crop patch grows the grass again (off the bed's new tiles)")
+	patch["x"] = int(patch["x"]) - 2
+	hb.apply()
 	# ---------------------------------------------------------------- 7. a farm-start save keeps it all
 	var js := JSON.stringify(Save.d)
 	await _free(home)

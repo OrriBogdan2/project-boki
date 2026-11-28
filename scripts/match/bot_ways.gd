@@ -59,7 +59,7 @@ static func cap(m: Match) -> int:
 	for o in m.hunters:
 		teams[o.team] = true
 	var bots := teams.keys().filter(func(t): return bot_squad(m, t)).size()
-	return mini(int(knob("early_seats_cap_max")), bots / int(knob("early_seats_cap_per_bot_squads")))
+	return mini(int(knob("early_seats_cap_max")), int(bots / float(int(knob("early_seats_cap_per_bot_squads")))))
 
 
 ## The squad on (or out by) each early seat, -1 for none: [lair, spark, uplink].
@@ -133,7 +133,7 @@ static func _seat_goal(m: Match, h: Hunter, seat: String, own: bool) -> Variant:
 	if m.heart.state == Heart.S.DONE:
 		return "gone"
 	if m.heart.state == Heart.S.FINAL or t >= Heart.r("final_s") - FINAL_LEAD:
-		return [_around(m, m.heart.site, h, Heart.r("final_r") * 0.5), "ring"]
+		return [around(m, m.heart.site, h, Heart.r("final_r") * 0.5), "ring"]
 	return "wait"
 
 
@@ -152,10 +152,10 @@ static func _lair(m: Match, h: Hunter, t: float) -> Variant:
 static func _spark(m: Match, h: Hunter, t: float, own: bool) -> Variant:
 	var hr: Heart = m.heart
 	if hr.early_team >= 0 or not inside(m, hr.gate):
-		return "gone"      # (taken, or the end phase is closing over the Gate: no carrying the spark out into it)
+		return "gone"  # (taken, or the end phase is closing over the Gate: no carrying the spark out into it)
 	var c: Hunter = hr.carrier
 	if c and c.team == h.team:
-		return [hr.gate, "gate"] if c == h else [_around(m, hr.gate, h, ESCORT_R), "seat"]
+		return [hr.gate, "gate"] if c == h else [around(m, hr.gate, h, ESCORT_R), "seat"]
 	if c:
 		return [c.pos, "chase"] if own else "gone"
 	if t < knob("runner_at_s") - RUN_LEAD:
@@ -165,7 +165,7 @@ static func _spark(m: Match, h: Hunter, t: float, own: bool) -> Variant:
 	var no_rival := not _rival_near(m, h, hr.spark_pos, knob("runner_rival_r"))
 	if hr.spark_live() and not _delayed(m, h.team, "spark") and no_rival:
 		return [hr.spark_pos, "spark"]
-	return [_around(m, hr.site, h, WAIT_R), "seat"]  # charging, the delay, or a rival on it: wait by the Heart
+	return [around(m, hr.site, h, WAIT_R), "seat"]  # charging, the delay, or a rival on it: wait by the Heart
 
 
 static func _uplink(m: Match, h: Hunter, t: float, own: bool) -> Variant:
@@ -195,7 +195,7 @@ static func _rival_near(m: Match, h: Hunter, p: Vector3, r: float) -> bool:
 
 
 ## Each bot its own spot r metres round a point (on ground), so a squad spreads out.
-static func _around(m: Match, c: Vector3, h: Hunter, r: float) -> Vector3:
+static func around(m: Match, c: Vector3, h: Hunter, r: float) -> Vector3:
 	var a := float(hash(h.nid) % 12) / 12.0 * TAU
 	var p := c + Vector3(cos(a), 0.0, sin(a)) * r
 	if m.world.is_void(p.x, p.z) or m.world.is_block(p.x, p.z):
@@ -206,10 +206,9 @@ static func _around(m: Match, c: Vector3, h: Hunter, r: float) -> Vector3:
 # ------------------------------------------------------------------ the tide ring
 ## How far from the Heart a goal may lie: the ring RING_LOOK seconds on, less RING_KEEP (INF: no ring yet).
 static func safe_r(m: Match) -> float:
-	if m.heart == null or m.heart.site == Vector3.INF or m.sess_time() + RING_LOOK < Heart.r("tide_start_s"):
+	if m.heart == null or m.heart.site == Vector3.INF:
 		return INF
-	var k: float = m.heart.ways_scale
-	return Heart.ring_at(m.sess_time() + RING_LOOK, k) - RING_KEEP * k
+	return Heart.ring_in(m, RING_LOOK) - RING_KEEP * m.heart.ways_scale
 
 
 static func inside(m: Match, p: Vector3) -> bool:
@@ -233,20 +232,20 @@ static func keep_inside(m: Match, p: Vector3) -> Vector3:
 ## How far from the Heart a tile path from p may lead: the tide ring, or p's own distance when it stands
 ## farther out (INF: no ring). A path round a cliff to a ramp never runs out into the Blight.
 static func path_r(m: Match, p: Vector3) -> float:
-	var tr := Heart.tide_r(m)
-	if tr <= 0.0 or not on(m):
+	var trap := Heart.tide_r(m)
+	if trap <= 0.0 or not on(m):
 		return INF
-	return maxf(tr, Vector2(p.x - m.heart.site.x, p.z - m.heart.site.z).length())
+	return maxf(trap, Vector2(p.x - m.heart.site.x, p.z - m.heart.site.z).length())
 
 
 ## Near the ring's edge (in the end phase farther in: heart.json bots end_edge_m) or out in the tide: the
 ## spot to walk back in to (INF: fine where it is). Not while sealed in a lair (its walls hold the bot in;
 ## Lairs.bot_goal leads).
 static func ring_back(m: Match, h: Hunter) -> Vector3:
-	var tr := Heart.tide_r(m)
-	if tr <= 0.0 or (m.lairs and not m.lairs.sealed_lair(h).is_empty()):
+	var trap := Heart.tide_r(m)
+	if trap <= 0.0 or (m.lairs and not m.lairs.sealed_lair(h).is_empty()):
 		return Vector3.INF
 	var edge := maxf(RING_EDGE, knob("end_edge_m")) if Heart.end_phase(m) else RING_EDGE
-	if h.flat_dist(m.heart.site) < tr - edge * m.heart.ways_scale:
+	if h.flat_dist(m.heart.site) < trap - edge * m.heart.ways_scale:
 		return Vector3.INF
 	return keep_inside(m, h.pos)

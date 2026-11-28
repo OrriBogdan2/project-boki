@@ -1,42 +1,6 @@
 # Cinder (ashwick): import note, v95 swap of Cinder appeal4, bust candidate 5 (2026-11-11)
 
 
-## LIVE 11-19 (retry 4, PR #362): local weight smoothing on top of retry 3 (weights only)
-`cinder.glb` = retry 3's glb with JOINTS_0/WEIGHTS_0 changed on 4,518 vertices (positions, triangles, UVs, images, bones, clips
-byte-equal to live). Every edge still over 3.2x in any clip (552 sampled poses) gets a 3-ring region; each region gets a harmonic
-(Laplace, 1/length) weight solve from its border and is kept only if its own worst edge drops and no edge in it goes past 4x.
-Arm-tube and flank vertices below 1.10 m keep retry 3's rule (pure arm stays pure arm, torso flank gets no arm weight).
-Fixed by it: ankle/boot fronts (13.9x), crotch seam (12.4x), back of neck/shoulder (11.0x), hip/thigh bands.
-Numbers, live -> retry 3 -> retry 4 (edges >2 mm, all 46 glb clips every 0.05 s): edges over 3x median clip 3.50% -> 0.13% -> 0.06%,
-worst clip 4.63% -> 0.29% -> 0.12%; worst edge 152x -> 13.9x -> 8.6x (inner elbow crease at the gauntlet plate, LBS); median clip
-worst edge 68.9x -> 8.9x -> 6.5x. Godot `--stretch-check`: worst 7.60 -> 5.02 -> 5.02, median clip worst 4.79 -> 3.24 -> 3.12.
-In idle/stance the posed mesh differs from retry 3 by at most 3 cm on 83 vertices (the creases above). Script + evidence:
-`/home/boki/gens/cinder-rigfix-1119/retry4/` (tool/fix3.py r3.glb out.glb).
-Seam weld (same retry): the body and the head/hair piece are separate meshes that touch along the neck (y 1.356-1.367 m), and
-the crotch piece touches the body at y 0.77-0.86 m. Retry 3's neck band gave the two sides different weights, so a see-through slit
-opened across the neck (413 touching pairs over 1 cm apart, up to 4.7 cm, even in idle; live 63-101 pairs, up to 3.3 cm).
-`tool/fix6.py` gives every group of touching spots (<3 mm, pieces over 50 spots) one shared weight set and blends 4 rings into
-each piece harmonically: 0 pairs over 1 cm in all 54 clips (worst 0.3 cm; live 4,449 pair-opens summed over clips, worst 7.8 cm).
-
-## LIVE 11-19 (retry 3, PR #362): skinning fix, weights only (same vertices, triangles, UVs, images, bones and clips as live)
-`cinder.glb` = main's 11-18 glb (sha c4c7001f) with only JOINTS_0/WEIGHTS_0 changed: no vertex or triangle added, moved, cut or
-deleted, so the rest pose is live's. Every group of same-spot vertices that shared weights in live still shares one weight set, so no
-seam can open (largest same-spot drift in any clip 0.06 cm; live's open edges 1941 -> 1941).
-Why live tears: the scan's heat weights put the back of the upper arm, the elbow guard and the forearm mostly on `hips`, so the elbow
-skin stayed with the torso while the forearm followed its bone (black sheets at every elbow/forearm), and hand weight sat on hip skin.
-- Arm vs body is found by a min cut on the mesh below the armpit (y < 1.12 m): below the armpit the arm meets the body only where the
-  palm is fused into the thigh. Arm skin below 1.08 m follows only the arm chain (upper arm -> forearm smoothstep 1.05-0.97 m, wrist
-  blend into live's hand weights 0.84-0.78 m, 6 smoothing passes); body skin below the armpit has no arm weight.
-- Shoulder/armpit ring (within 24 cm of the shoulder joint, y 1.0-1.40 m): harmonic weights over the mesh (Laplace, 1/length), so
-  the arm/chest change is spread over the ring and raising an arm stretches the armpit smoothly instead of making a web.
-- Palm/thigh contact (8 cm each side): harmonic between the hand and the thigh. The palm is fused into the thigh (the thigh has no
-  skin under the palm), so a weights-only split would open a hole; this spreads the gap instead of spiking.
-- Hip/thigh band (y 0.56-1.0 m) and neck band (y 1.26-1.40 m, incl. the head seam): harmonic, replacing live's hard steps.
-- Hair/head pieces lose arm weight (97 verts); small floating islands (6, 274 spots) move rigidly.
-Numbers (live -> fixed): edges over 3x, all 46 clips every 0.05 s: median clip 3.50% -> 0.13%, worst clip 4.63% -> 0.29%, worst edge
-152x -> 13.9x. hunter_mesh_check: stretched tris worst clip 762 -> 96 (jet flame cones), median clip 287 -> 11, collapsed union 85 -> 66.
-Scripts + evidence: `/home/boki/gens/cinder-rigfix-1119/retry3/` (tool/fix2.py live.glb out.glb; labels arm_L/R.npy from tool/cut.py).
-
 ## LIVE 11-18: bust A (-20% chest volume, owner 11-18 ~00:20 EST "lets exchange it immediately")
 `cinder.glb` = main's depth1117 A_s18 game glb with the chest of `~/meshy/v95/Cinder/bust1118/bust_m20.glb` (job
 20261118-032222-a1; same topology as cand_A_s18, only chest vertices moved). No re-rig: the master's per-vertex chest
