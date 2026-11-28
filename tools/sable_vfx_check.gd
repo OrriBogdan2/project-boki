@@ -67,8 +67,6 @@ func _check() -> void:
 	for mv: String in MOVES:
 		hv.play(pl, mv, pl.pos + Vector3(3, 0, 0), Vector2.RIGHT, {"foe": true, "r": r_data})
 		ok(int(hv.plays.get(mv, 0)) == 1, "%s plays" % mv)
-		for e in hv.live:
-			print("DBG ", mv, " ", (e["node"] as Node3D).scale, " ", e["dur"], " ", (e["node"] as Node3D).global_position, " vis ", (e["node"] as Node3D).visible)
 
 
 func _perf() -> void:
