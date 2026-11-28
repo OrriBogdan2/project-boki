@@ -80,9 +80,9 @@ const SHIVER := [0.1, 0, 0.2, 0.15, 0.3, -0.15, 0.4, 0.15, 0.5, -0.15, 0.6, 0.1,
 # The match camera looks almost straight down, so the big moves also turn (ry), swell (s) and shift (pz): lean and
 # rise alone barely show from above.
 const SLAM_W := [
-	[B, "rx", [0, 0, 1, 0.4]],
-	[B, "py", [0, 0, 1, 0.35]],
-	[B, "ry", [0, 0, 1, 0.4]],
+	[B, "rx", [0, 0, 0.04, 0.08, 1, 0.4]],
+	[B, "py", [0, 0, 0.04, 0.07, 1, 0.35]],
+	[B, "ry", [0, 0, 0.04, 0.08, 1, 0.4]],
 	[B, "s", [0, 0, 1, 0.1]],
 ]
 const SLAM_S := [
@@ -202,7 +202,7 @@ const MOVES := {
 		"dash_windup":
 		[
 			[["Head"], "s", [0, 0, 1, 0.15]],
-			[["Head"], "pz", [0, 0, 1, 0.8]],
+			[["Head"], "pz", [0, 0, 0.05, 0.16, 1, 0.8]],
 			[["Head"], "py", [0, 0.05, 1, -0.35]],
 			[["Head"], "rx", [0, 0, 1, 0.55]],
 			[["Head/Jaw"], "rx", [0, 0.1, 1, 0.8]],
@@ -307,7 +307,7 @@ const MOVES := {
 		"spit_windup":
 		[
 			[B, "s", [0, 0, 1, 0.1]],
-			[B, "rx", [0, 0, 1, 0.3]],
+			[B, "rx", [0, 0, 0.03, 0.06, 1, 0.3]],
 			[B, "py", [0, 0, 1, -0.2]],
 			[["Head"], "rx", [0, 0, 1, 0.4]],
 			[BR_JAWS, "ry", [0, 0.15, 1, 0.75]],
