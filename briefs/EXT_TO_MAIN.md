@@ -11550,3 +11550,4 @@ READY ext/neve-ult-early 18826c0833 (KIT_PARITY note: Rimelock early recast 67% 
 READY ext/lace-ult-window 2c7daa1ee5 (Lace ult already has 6 s window + final_dmg bonus on main; adds third-beam damage assert in --archer-combo-check 236/0 and KIT_PARITY row, terrain pierce [?])
 READY ext/cinder-dash-stun 07778520d5 (Cinder Soot Ram hit stuns 1 s via dash.stun on the shared path; --cinder-shift-check asserts stun 1.00 s, knock 2.01 m)
 READY ext/vfx-zone-rims-meeko-sable a320daac1e (Meeko Burrseed burst + Hearth Call and Sable Bola lane drawn as lit rims over a faint inside; strips in docs/shots/vfx-zone-rims-meeko-sable)
+READY ext/kit-parity-catalog-rows ffb0aeab9a (docs-only: Catalog 11-27 parity table, 13 heroes + 15 patterns with verdict and file:line proof)
