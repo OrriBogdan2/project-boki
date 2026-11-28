@@ -102,8 +102,8 @@ take a stat from 0 to 100):
   Power, sentinels Guard, wardens and the Glimmerkin any. About 1.8 bites a match; the lair pile keeps its 35%.
 - **Play is joy and bond only.** Fetch, brushing and petting never raise a stat (`--raising-check` spams
   them and asserts 0).
-- **Limited runs.** A garden game win and a Training post drill or lap each use a run: 2 races and 2
-  drills a day, +1 of each per match (2 matches a day), banked up to 4. The count shows on the Dash
+- **Limited runs.** A garden game win and a Training post drill or lap each use a run: 1 race and 1
+  drill a day (2 until BOKI_PLAYSTYLE_GROWTH.md), +1 of each per match (2 matches a day), banked up to 4. The count shows on the Dash
   prompt, every result card and the Training panel ("Races left today: 2"). A win with no race left is a
   friendly (no prize, no cup step); a loss uses none. A drill pays bites, not points: 1, 2 if every mark
   was great, +1 with a Dojo; a drill with no mark hit uses no run.

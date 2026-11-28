@@ -1,0 +1,60 @@
+{
+	"desc": "Playstyle growth (scripts/core/play_style.gd, briefs/design/BOKI_PLAYSTYLE_GROWTH.md, decision 0181). How a Boki is played with builds its four affinities (Evo: fierce, steadfast, curious, swift). The affinity in the lead is its leaning; how far it leads the next one sets the tier. The leaning decides which stat takes the larger share of what an expedition teaches (run_growth), adds pips to that end of a path meter (EvoPath) and sets which body parts its mutations roll (Evo.on_level). The garden gives leaning points, never stat points.",
+	"stat": {"fierce": "power", "steadfast": "guard", "curious": "focus", "swift": "speed"},
+	"stat_doc": "The stat each affinity focuses (Care.STATS).",
+	"garden": {
+		"day_cap": 10,
+		"care": {
+			"petted": {"steadfast": 1},
+			"talked": {"curious": 1},
+			"played": {"swift": 1},
+			"pet_win": {"fierce": 1}
+		},
+		"toy": {
+			"toy_ball": {"swift": 1},
+			"toy_post": {"fierce": 1},
+			"toy_tub": {"curious": 1},
+			"toy_stone": {"steadfast": 1},
+			"toy_dig": {"curious": 1}
+		},
+		"game": {
+			"dash": {"swift": 2},
+			"relay": {"swift": 2},
+			"kite": {"swift": 2},
+			"shove": {"fierce": 1, "steadfast": 1},
+			"seek": {"curious": 2},
+			"echo": {"curious": 2},
+			"lantern": {"curious": 2},
+			"volley": {"curious": 1, "swift": 1},
+			"show": {}
+		},
+		"drill": {
+			"power": {"fierce": 2},
+			"guard": {"steadfast": 2},
+			"speed": {"swift": 2},
+			"focus": {"curious": 2}
+		}
+	},
+	"garden_doc": "Affinity points per garden activity. care: the first care of each kind in a farm day (Care.care_day; a meal leans by its food in Evo.eat, training by its drill). toy: one finished play at a toy. game: one finished garden game, won or lost (GardenPrizes ids). drill: one Training post drill of that stat, or a training lap (speed). day_cap: most points one Boki takes from the garden in a day, so a day at home weighs about as much as one expedition.",
+	"extraction": {
+		"hits": {"fierce": 0.4},
+		"kos": {"fierce": 3.0},
+		"revives": {"steadfast": 6.0},
+		"won": {"steadfast": 2.0},
+		"skills": {"curious": 0.6},
+		"caught": {"curious": 4.0},
+		"throws": {"swift": 0.8}
+	},
+	"extraction_doc": "Affinity points per unit of what the Boki did on an expedition (Match kin_runs stats): hits it landed, knockouts, times it revived you, getting out (won 1), skills used, wild Boki caught, times it was thrown.",
+	"tiers": [
+		{"at": 0, "word": "Balanced", "focus": 0.25, "path_pips": 0, "stray": 0.3, "signature": false},
+		{"at": 20, "word": "Leans", "focus": 0.4, "path_pips": 1, "stray": 0.3, "signature": false},
+		{"at": 60, "word": "Strongly", "focus": 0.55, "path_pips": 2, "stray": 0.15, "signature": true},
+		{"at": 150, "word": "Devoted", "focus": 0.7, "path_pips": 3, "stray": 0.05, "signature": true}
+	],
+	"tiers_doc": "at: affinity points the leaning leads the next affinity by (Evo.scores). word: the tier in player words. focus: share of an expedition's stat units its leaning's stat takes (the other three split the rest evenly; 0.25 = even). path_pips: pips for the end of a path meter whose path is its leaning. stray: chance a mutation comes from a random affinity's parts, not its leaning's. signature: its leaning's signature part can roll.",
+	"signature": {"fierce": "horns", "steadfast": "shell", "curious": "third_eye", "swift": "wings"},
+	"signature_doc": "The part of each affinity (Evo.AFF parts) only a Boki strongly of that leaning can grow.",
+	"run_growth": {"extracted": 6.0, "lost": 2.0, "second_k": 0.7},
+	"run_growth_doc": "Stat units (StatBudget.add units: 1 unit = 1 point below 50, less above) a Boki earns for one expedition it went on: extracted when you got out, lost when you did not; the second Boki you brought earns second_k of it. Split over the four stats by its tier's focus."
+}

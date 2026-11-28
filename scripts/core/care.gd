@@ -431,6 +431,7 @@ static func care_day(rec: Dictionary, kind: String) -> bool:
 		return false
 	days[kind] = now
 	BaseAxes.care(rec, kind)
+	PlayStyle.garden(rec, "care", kind)
 	return true
 
 

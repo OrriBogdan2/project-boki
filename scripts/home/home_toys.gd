@@ -278,6 +278,7 @@ func _finish(k: Dictionary, t: Dictionary) -> void:
 	var gained := Care.add_stat(rec, stat, gain) if gain > 0 else 0
 	day_used(rec, gained)
 	FavToy.log_play(rec, String(t["id"]), float(k["play"]["secs"]))
+	PlayStyle.garden(rec, "toy", String(t["id"]))
 	Care.change(rec, "joy", float(R["joy_gain"]))
 	if randf() < float(def.get("snack", 0.0)):
 		var item := String(R["snack_item"])

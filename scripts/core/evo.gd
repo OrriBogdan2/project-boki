@@ -9,22 +9,67 @@ class_name Evo
 ## Every 4 levels from level 2 it also gains a mutation: a cosmetic body part, or a bigger one.
 
 const AFF := {
-	"fierce": {"name": "Fierce", "tint": Color("e0503a"), "stat": "dmg", "amt": 0.05,
-		"why": "fights hard", "food": "emberberry", "parts": ["horns", "spikes", "fangs", "brow"]},
-	"steadfast": {"name": "Steadfast", "tint": Color("c9b27a"), "stat": "hp", "amt": 0.08,
-		"why": "looks after you", "food": "sunroot", "parts": ["plates", "shell", "brow", "club"]},
-	"curious": {"name": "Curious", "tint": Color("9a7af0"), "stat": "cd", "amt": 0.06,
-		"why": "explores and uses its skill", "food": "mindmint", "parts": ["antennae", "spots", "third_eye", "crest"]},
-	"swift": {"name": "Swift", "tint": Color("5ad0e0"), "stat": "speed", "amt": 0.05,
-		"why": "gets thrown around and moves fast", "food": "tidebloom", "parts": ["wings", "tail_long", "fins", "crest"]},
+	"fierce":
+	{
+		"name": "Fierce",
+		"tint": Color("e0503a"),
+		"stat": "dmg",
+		"amt": 0.05,
+		"why": "fights hard",
+		"food": "emberberry",
+		"parts": ["horns", "spikes", "fangs", "brow"]
+	},
+	"steadfast":
+	{
+		"name": "Steadfast",
+		"tint": Color("c9b27a"),
+		"stat": "hp",
+		"amt": 0.08,
+		"why": "looks after you",
+		"food": "sunroot",
+		"parts": ["plates", "shell", "brow", "club"]
+	},
+	"curious":
+	{
+		"name": "Curious",
+		"tint": Color("9a7af0"),
+		"stat": "cd",
+		"amt": 0.06,
+		"why": "explores and uses its skill",
+		"food": "mindmint",
+		"parts": ["antennae", "spots", "third_eye", "crest"]
+	},
+	"swift":
+	{
+		"name": "Swift",
+		"tint": Color("5ad0e0"),
+		"stat": "speed",
+		"amt": 0.05,
+		"why": "gets thrown around and moves fast",
+		"food": "tidebloom",
+		"parts": ["wings", "tail_long", "fins", "crest"]
+	},
 }
 
-const PART_NAMES := {"horns": "horns", "spikes": "back spikes", "fangs": "fangs", "brow": "an armored brow",
-	"plates": "armor plates", "shell": "a shell ring", "club": "a club tail", "antennae": "antennae",
-	"spots": "glowing spots", "third_eye": "a third eye", "crest": "a crest", "wings": "little wings",
-	"tail_long": "a long tail", "fins": "side fins"}
+const PART_NAMES := {
+	"horns": "horns",
+	"spikes": "back spikes",
+	"fangs": "fangs",
+	"brow": "an armored brow",
+	"plates": "armor plates",
+	"shell": "a shell ring",
+	"club": "a club tail",
+	"antennae": "antennae",
+	"spots": "glowing spots",
+	"third_eye": "a third eye",
+	"crest": "a crest",
+	"wings": "little wings",
+	"tail_long": "a long tail",
+	"fins": "side fins"
+}
 
-static var _parent := {}     # species id -> the species it evolves from (evolve.json)
+static var _parent := {}  # species id -> the species it evolves from (evolve.json)
+
 
 ## The first form of a species' line that the game has data for: itself when nothing it evolves from has data.
 ## Eggs only ever hatch this (Data.egg_species).
@@ -36,7 +81,7 @@ static func base_form(sp: String) -> String:
 				_parent[String(o["id"])] = String(from)
 	var base := sp
 	var cur := sp
-	for _hop in _parent.size():      # a line is a chain: this only stops a loop in the data
+	for _hop in _parent.size():  # a line is a chain: this only stops a loop in the data
 		if not _parent.has(cur):
 			break
 		cur = String(_parent[cur])
@@ -44,27 +89,31 @@ static func base_form(sp: String) -> String:
 			base = cur
 	return base
 
+
 ## Makes sure an older record has the fields evolution needs.
 static func ensure(rec: Dictionary) -> void:
 	if not rec.has("aff"):
 		rec["aff"] = {"fierce": 0.0, "steadfast": 0.0, "curious": 0.0, "swift": 0.0}
 	if not rec.has("forms"):
-		rec["forms"] = []          # one affinity per form taken
+		rec["forms"] = []  # one affinity per form taken
 	if not rec.has("muts"):
-		rec["muts"] = []           # [{id, lv, aff}]
+		rec["muts"] = []  # [{id, lv, aff}]
 	if not rec.has("was"):
-		rec["was"] = []            # the species it evolved from, oldest first
+		rec["was"] = []  # the species it evolved from, oldest first
+
 
 static func add(rec: Dictionary, aff: String, n: float) -> void:
 	ensure(rec)
 	rec["aff"][aff] = float(rec["aff"].get(aff, 0.0)) + n
 
+
 ## Food is the quick lever: a meal of an affinity's food grows that affinity and its lean, the colour
 ## it wears from the next meal on. The last few meals decide it: other leans fade as one grows.
-const FOOD_AFF := 6.0         # affinity points one meal of an affinity's food gives (as before)
-const LEAN_FULL := 24.0       # lean points for the full colour: four meals in a row
-const LEAN_FADE := 3.0        # what every other lean loses at each such meal
-const LEAN_TINT := 0.3        # body colour moved toward the lean's tint at full (a form: 0.1 each, 0.35 at most)
+const FOOD_AFF := 6.0  # affinity points one meal of an affinity's food gives (as before)
+const LEAN_FULL := 24.0  # lean points for the full colour: four meals in a row
+const LEAN_FADE := 3.0  # what every other lean loses at each such meal
+const LEAN_TINT := 0.3  # body colour moved toward the lean's tint at full (a form: 0.1 each, 0.35 at most)
+
 
 ## It ate food f: what it leans to now ("" for food with none). The food's affinity grows as it always did;
 ## the lean is the food's type with base_mode on (Lean), that affinity otherwise.
@@ -78,12 +127,13 @@ static func eat(rec: Dictionary, f: String) -> String:
 	if key == "":
 		return ""
 	var ln: Dictionary = rec.get_or_add("lean", {})
-	var held: Dictionary = rec.get("hold", {})      # a sweet's lean: other meals don't fade it (GardenItems)
+	var held: Dictionary = rec.get("hold", {})  # a sweet's lean: other meals don't fade it (GardenItems)
 	for other in ln:
 		if not held.has(other):
 			ln[other] = maxf(0.0, float(ln[other]) - LEAN_FADE)
 	ln[key] = minf(LEAN_FULL, float(ln.get(key, 0.0)) + FOOD_AFF + LEAN_FADE)
 	return key
+
 
 ## [affinity, 0..1]: the colour its meals lean it to and how strongly (["", 0.0] before any).
 static func lean(rec: Dictionary) -> Array:
@@ -96,8 +146,9 @@ static func lean(rec: Dictionary) -> Array:
 			best = af
 	return [best, clampf(most / LEAN_FULL, 0.0, 1.0)]
 
-## The affinity that wins right now: what it's been doing plus its personality.
-static func leading(rec: Dictionary) -> String:
+
+## Each affinity's score right now: what it's been doing, its personality and (tokens) its worn path tokens.
+static func scores(rec: Dictionary, tokens := true) -> Dictionary:
 	ensure(rec)
 	var tr: Dictionary = rec.get("traits", {})
 	var sp: Dictionary = Data.KIN.get(rec.get("species", "cindle"), {})
@@ -107,12 +158,26 @@ static func leading(rec: Dictionary) -> String:
 		"curious": float(rec["aff"]["curious"]) + float(tr.get("curiosity", 0.5)) * 10.0,
 		"swift": float(rec["aff"]["swift"]) + float(sp.get("speed", 6.5)) / 8.0 * 6.0,
 	}
-	for t in rec.get("path", []):
+	for t in rec.get("path", []) if tokens else []:
 		score[GardenItems.aff_of(t)] += float(GardenItems.rules()["pip"])
-	var best := "fierce"; var bv := -1e9
+	return score
+
+
+## The affinity that wins right now: the form it grows toward (worn path tokens count).
+static func leading(rec: Dictionary) -> String:
+	return top(scores(rec))
+
+
+## The affinity with the best score.
+static func top(score: Dictionary) -> String:
+	var best := "fierce"
+	var bv := -1e9
 	for k in ["fierce", "steadfast", "curious", "swift"]:
-		if score[k] > bv: bv = score[k]; best = k
+		if score[k] > bv:
+			bv = score[k]
+			best = k
 	return best
+
 
 ## The name it goes by: its species, or the form name an older save gave it (kept until it evolves).
 static func form_name(rec: Dictionary) -> String:
@@ -120,24 +185,30 @@ static func form_name(rec: Dictionary) -> String:
 	var old := String(rec.get("form_name", ""))
 	return old if old != "" else String(Data.KIN[rec.get("species", "cindle")]["name"])
 
+
 static func rules() -> Dictionary:
 	return Content.rules("evolve")
+
 
 ## The highest level a Boki can reach.
 static func cap() -> int:
 	return int(rules()["cap"])
 
+
 ## A final form: a species that evolves into nothing.
 static func is_final(species: String) -> bool:
 	return (rules()["lines"].get(species, {}).get("into", []) as Array).is_empty()
+
 
 ## One level more, never past the cap.
 static func level_up(rec: Dictionary) -> void:
 	rec["level"] = mini(int(rec.get("level", 1)) + 1, cap())
 
+
 ## Can a Boki take this species' shape? It needs data, a model and the rig's framing for it.
 static func has_art(id: String) -> bool:
 	return Data.KIN.has(id) and BokiRig.FRAME.has(id) and ResourceLoader.exists(BokiRig.PATH % [id, id])
+
 
 ## The species this Boki would evolve into by `how` ("level", "item" with an Ink id, "trade", or "path":
 ## the path meter's winner when the player presses Evolve), art or not; "" when that isn't a way it evolves.
@@ -156,20 +227,24 @@ static func next_for(rec: Dictionary, how: String, item := "") -> String:
 				if by_level and line.has("level") and int(rec.get("level", 1)) >= int(line["level"]):
 					fits.append(o)
 			"item":
-				if String(o.get("item", "")) == item: fits.append(o)
+				if String(o.get("item", "")) == item:
+					fits.append(o)
 			"trade":
-				if o.get("trade", false): fits.append(o)
+				if o.get("trade", false):
+					fits.append(o)
 	fits = fits.filter(func(o): return not o.has("trait") or BokiQuirks.has_trait(rec, String(o["trait"])))
 	if fits.is_empty():
 		return ""
 	for o in fits:
-		if o.has("trait"):      # a rare trait it carries decides the branch
+		if o.has("trait"):  # a rare trait it carries decides the branch
 			return String(o["id"])
 	var lead := leading(rec)
 	for o in fits:
-		var path = o.get("path", "")        # one affinity, or a list of them
-		if lead in path if path is Array else String(path) == lead: return String(o["id"])
+		var path = o.get("path", "")  # one affinity, or a list of them
+		if lead in path if path is Array else String(path) == lead:
+			return String(o["id"])
 	return String(fits[0]["id"])
+
 
 ## Its level form, for the Growth card: [species id, level, has art], or [] when no level evolves it.
 static func level_form(rec: Dictionary) -> Array:
@@ -181,6 +256,7 @@ static func level_form(rec: Dictionary) -> Array:
 	var to := next_for(at, "level")
 	return [] if to == "" else [to, int(line["level"]), has_art(to)]
 
+
 ## The Growth card's line for its next level form: when it comes, or that it waits on its art
 ## (DECISIONS 2026-11-08: never into a form whose model is not in the game).
 static func level_note(rec: Dictionary) -> String:
@@ -191,26 +267,37 @@ static func level_note(rec: Dictionary) -> String:
 	var nm := String(Data.KIN[f[0]]["name"]) if Data.KIN.has(f[0]) else String(f[0]).capitalize()
 	return ("Evolves into %s at level %d" if f[2] else "%s (level %d) waits on its art") % [nm, f[1]]
 
+
 ## Evolves it if `how` allows and the art exists. Returns the event, or {} if it didn't (or waits).
 static func try_evolve(rec: Dictionary, how: String, item := "") -> Dictionary:
 	ensure(rec)
 	var to := next_for(rec, how, item)
-	if to == "" or not has_art(to) or rec.get("stay", false):      # a worn Stayleaf: no new forms
+	if to == "" or not has_art(to) or rec.get("stay", false):  # a worn Stayleaf: no new forms
 		return {}
 	var before := form_name(rec)
 	var a := EvoPath.path_of(rec, to) if how == "path" else leading(rec)
 	var from_id := String(rec["species"])
 	rec["was"].append(from_id)
 	rec["species"] = to
-	rec["forms"].append(a)       # the next node on its affinity's path (KinLib.nodes_for)
+	rec["forms"].append(a)  # the next node on its affinity's path (KinLib.nodes_for)
 	rec.erase("form_name")
 	rec.erase("wait_told")
-	var ev := {"kind": "form", "aff": a, "from": before, "to": form_name(rec), "how": how, "item": item,
-		"from_id": from_id, "to_id": to, "lv": int(rec.get("level", 1))}
-	var part := Lean.grow_part(rec)      # its lean grows a part at the next form (GARDEN_MODERN 3.3)
+	var ev := {
+		"kind": "form",
+		"aff": a,
+		"from": before,
+		"to": form_name(rec),
+		"how": how,
+		"item": item,
+		"from_id": from_id,
+		"to_id": to,
+		"lv": int(rec.get("level", 1))
+	}
+	var part := Lean.grow_part(rec)  # its lean grows a part at the next form (GARDEN_MODERN 3.3)
 	if part != "":
 		ev["lean_part"] = part
 	return ev
+
 
 ## What an Ink would do to this Boki, before using it (its item card in the Feed menu shows this):
 ## {"state": "form" | "waits" | "none", "to": species id or "", "name": the form's name or "", "text"}.
@@ -224,10 +311,12 @@ static func ink_preview(rec: Dictionary, ink: String) -> Dictionary:
 		return {"state": "waits", "to": to, "name": nm, "text": "Would become %s, but %s waits for its art." % [nm, nm]}
 	return {"state": "form", "to": to, "name": nm, "text": "Becomes %s." % nm}
 
+
 ## The species a Boki is ready to become by level but can't yet because its art isn't in the game; "" if none.
 static func waiting(rec: Dictionary) -> String:
 	var to := next_for(rec, "level")
 	return to if to != "" and not has_art(to) else ""
+
 
 ## Uses one Ink from the market goods on it. Returns the event, or {} (and keeps the Ink) if it can't.
 static func use_ink(rec: Dictionary, ink: String) -> Dictionary:
@@ -238,6 +327,7 @@ static func use_ink(rec: Dictionary, ink: String) -> Dictionary:
 		Goods.take("good:" + ink)
 	return ev
 
+
 ## Called each time a kin gains a level. Returns what changed, or {} if nothing did.
 static func on_level(rec: Dictionary, rng: RandomNumberGenerator = null) -> Dictionary:
 	ensure(rec)
@@ -245,16 +335,17 @@ static func on_level(rec: Dictionary, rng: RandomNumberGenerator = null) -> Dict
 		return {}
 	var lv := int(rec.get("level", 1))
 	if rng == null:
-		rng = RandomNumberGenerator.new(); rng.seed = hash(str(rec.get("uid", "")) + str(lv))
+		rng = RandomNumberGenerator.new()
+		rng.seed = hash(str(rec.get("uid", "")) + str(lv))
 	var ev := try_evolve(rec, "level")
 	if not ev.is_empty():
 		return ev
 	if lv >= 2 and lv % 4 == 2:
 		var a := leading(rec)
-		# mostly from the leading affinity, sometimes from another one it's been building
-		if rng.randf() < 0.3:
+		# mostly from its leaning, sometimes from any affinity: the stronger the leaning, the rarer (PlayStyle)
+		if rng.randf() < float(PlayStyle.tier(rec)["stray"]):
 			a = ["fierce", "steadfast", "curious", "swift"][rng.randi_range(0, 3)]
-		var pool: Array = AFF[a]["parts"]
+		var pool := PlayStyle.parts(rec, a)
 		var part: String = pool[rng.randi_range(0, pool.size() - 1)]
 		for m in rec["muts"]:
 			if m["id"] == part:
@@ -264,6 +355,7 @@ static func on_level(rec: Dictionary, rng: RandomNumberGenerator = null) -> Dict
 		return {"kind": "mutate", "aff": a, "part": part}
 	return {}
 
+
 ## Boki that reached their level while their next form had no art evolve once it exists (on load).
 ## Returns the events; each is also queued on the Boki for the home island to play.
 static func catch_up(roster: Array) -> Array:
@@ -272,17 +364,28 @@ static func catch_up(roster: Array) -> Array:
 		var ev := try_evolve(rec, "level")
 		while not ev.is_empty():
 			ev["text"] = describe(ev, rec)
-			if not rec.has("pending_evo"): rec["pending_evo"] = []
+			if not rec.has("pending_evo"):
+				rec["pending_evo"] = []
 			rec["pending_evo"].append(ev)
 			out.append(ev)
 			ev = try_evolve(rec, "level")
 	return out
 
+
 ## The form names version-11 saves gave every 4 levels (e.g. "Cindfang"), so migrate can keep them.
 ## These are the names those saves already hold, not today's species names: the six first species keep their
 ## old roots; the later species (cairnback, zephyrak, hivara) have no v11 saves, so theirs start from the shown name.
-const V11_ROOTS := {"cindle": "Cind", "puddlet": "Pud", "burrlet": "Burr", "zapple": "Zap", "pebbit": "Peb",
-	"wisplet": "Wisp", "cairnback": "Cairn", "zephyrak": "Zeph", "hivara": "Hiv"}
+const V11_ROOTS := {
+	"cindle": "Cind",
+	"puddlet": "Pud",
+	"burrlet": "Burr",
+	"zapple": "Zap",
+	"pebbit": "Peb",
+	"wisplet": "Wisp",
+	"cairnback": "Cairn",
+	"zephyrak": "Zeph",
+	"hivara": "Hiv"
+}
 const V11_SUFFIX := {
 	"fierce": ["fang", "claw", "maw", "rend", "fury"],
 	"steadfast": ["shell", "ward", "keep", "bulwark", "aegis"],
@@ -290,12 +393,14 @@ const V11_SUFFIX := {
 	"swift": ["dart", "wing", "gale", "streak", "comet"],
 }
 
+
 ## Save v11 -> v12: levels and forms stay as they are (a level over the cap comes down to it), and
 ## each Boki keeps the form name it had. Safe to run twice.
 static func migrate(data: Dictionary) -> void:
 	var recs: Array = (data.get("roster", []) as Array).duplicate()
 	for L in data.get("lost_kin", []):
-		if typeof(L) == TYPE_DICTIONARY and typeof(L.get("rec")) == TYPE_DICTIONARY: recs.append(L["rec"])
+		if typeof(L) == TYPE_DICTIONARY and typeof(L.get("rec")) == TYPE_DICTIONARY:
+			recs.append(L["rec"])
 	for rec in recs:
 		if typeof(rec) != TYPE_DICTIONARY:
 			continue
@@ -312,8 +417,10 @@ static func migrate(data: Dictionary) -> void:
 		var extra := "" if n <= sfx.size() else " " + _roman(n - sfx.size() + 1)
 		rec["form_name"] = root + String(sfx[mini(n - 1, sfx.size() - 1)]) + extra
 
+
 static func _roman(n: int) -> String:
 	return ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"][clampi(n, 0, 10)] if n <= 10 else str(n)
+
 
 ## Gives a generated kin (wild or a bot's) the forms and parts it would have grown by its level.
 static func simulate(rec: Dictionary, rng: RandomNumberGenerator) -> void:
@@ -327,15 +434,10 @@ static func simulate(rec: Dictionary, rng: RandomNumberGenerator) -> void:
 		on_level(rec, rng)
 	rec["level"] = target
 
+
 ## (Forms no longer grow stats by a percentage: a form takes the next node on its affinity's
 ## evolution path, budget-neutral, see KinLib.nodes_for and docs/KIN_GRAMMAR.md.)
 
-## What a match taught it: called from Game.apply_result with the kin's match stats.
-static func learn(rec: Dictionary, st: Dictionary) -> void:
-	add(rec, "fierce", float(st.get("hits", 0)) * 0.4 + float(st.get("kos", 0)) * 3.0)
-	add(rec, "steadfast", float(st.get("revives", 0)) * 6.0 + float(st.get("won", 0)) * 2.0)
-	add(rec, "curious", float(st.get("skills", 0)) * 0.6 + float(st.get("caught", 0)) * 4.0)
-	add(rec, "swift", float(st.get("throws", 0)) * 0.8)
 
 static func describe(ev: Dictionary, rec: Dictionary) -> String:
 	var kname: String = rec.get("name", "Your Boki")
@@ -343,9 +445,16 @@ static func describe(ev: Dictionary, rec: Dictionary) -> String:
 	match String(ev["kind"]):
 		"form":
 			match String(ev.get("how", "level")):
-				"item": return "%s became a %s! The %s did it." % [kname, ev["to"], Goods.name_of("good:" + String(ev["item"]))]
-				"trade": return "%s became a %s on its way to a new keeper!" % [kname, ev["to"]]
-			var out := "%s became a %s! It grew %s because it %s." % [kname, ev["to"], String(a["name"]).to_lower(), a["why"]]
+				"item":
+					return (
+						"%s became a %s! The %s did it."
+						% [kname, ev["to"], Goods.name_of("good:" + String(ev["item"]))]
+					)
+				"trade":
+					return "%s became a %s on its way to a new keeper!" % [kname, ev["to"]]
+			var out := (
+				"%s became a %s! It grew %s because it %s." % [kname, ev["to"], String(a["name"]).to_lower(), a["why"]]
+			)
 			if ev.has("lean_part"):
 				var lean_name := String(Lean.face(lean(rec)[0])["name"]).to_lower()
 				out += " Its %s meals grew %s." % [lean_name, PART_NAMES[ev["lean_part"]]]
@@ -356,9 +465,11 @@ static func describe(ev: Dictionary, rec: Dictionary) -> String:
 			return "%s's %s grew bigger. (%s)" % [kname, PART_NAMES.get(ev["part"], ev["part"]), _perk(ev["aff"])]
 	return ""
 
+
 ## Body-part mutations are cosmetic (docs/KIN_GRAMMAR.md); forms take budget-neutral evolution nodes.
 static func _perk(_aff: String) -> String:
 	return "just for looks"
+
 
 ## Adds evolved parts, size and colour to a kin model built by Models.kin.
 static func dress(root: Node3D, rec: Dictionary) -> void:
@@ -388,7 +499,7 @@ static func dress(root: Node3D, rec: Dictionary) -> void:
 	if mats.size() > 0 and (forms.size() > 0 or String(ln[0]) != ""):
 		(mats[0] as ShaderMaterial).set_shader_parameter("albedo", base)
 	if body.has_node("BokiRig"):
-		return         # its grown parts are on the rig (BokiDna)
+		return  # its grown parts are on the rig (BokiDna)
 	var mats2: Array = root.get_meta("mats", [])
 	for m in muts:
 		var tint: Color = Lean.face(m["aff"])["tint"]
@@ -400,46 +511,118 @@ static func dress(root: Node3D, rec: Dictionary) -> void:
 		match String(m["id"]):
 			"horns":
 				for sx in [-1.0, 1.0]:
-					Models.part(body, Models.cyl(0.0, 0.06 * k, 0.28 * k), mat, Vector3(0.15 * sx, 0.68 + 0.05 * k, -0.08), Vector3.ONE, Vector3(-0.35, 0, -0.45 * sx))
+					Models.part(
+						body,
+						Models.cyl(0.0, 0.06 * k, 0.28 * k),
+						mat,
+						Vector3(0.15 * sx, 0.68 + 0.05 * k, -0.08),
+						Vector3.ONE,
+						Vector3(-0.35, 0, -0.45 * sx)
+					)
 			"spikes":
 				for i in 3:
-					Models.part(body, Models.cyl(0.0, 0.07 * k, 0.2 * k), mat, Vector3(0, 0.62 - i * 0.12, 0.12 + i * 0.12), Vector3.ONE, Vector3(0.6 + i * 0.3, 0, 0))
+					Models.part(
+						body,
+						Models.cyl(0.0, 0.07 * k, 0.2 * k),
+						mat,
+						Vector3(0, 0.62 - i * 0.12, 0.12 + i * 0.12),
+						Vector3.ONE,
+						Vector3(0.6 + i * 0.3, 0, 0)
+					)
 			"fangs":
 				for sx in [-1.0, 1.0]:
-					Models.part(body, Models.cyl(0.0, 0.025 * k, 0.09 * k), Models.toon(Color.WHITE), Vector3(0.06 * sx, 0.31, -0.33), Vector3.ONE, Vector3(PI, 0, 0))
+					Models.part(
+						body,
+						Models.cyl(0.0, 0.025 * k, 0.09 * k),
+						Models.toon(Color.WHITE),
+						Vector3(0.06 * sx, 0.31, -0.33),
+						Vector3.ONE,
+						Vector3(PI, 0, 0)
+					)
 			"brow":
-				Models.part(body, Models.box(0.36 * k, 0.07, 0.14), mat, Vector3(0, 0.55, -0.25), Vector3.ONE, Vector3(0.4, 0, 0))
+				Models.part(
+					body,
+					Models.box(0.36 * k, 0.07, 0.14),
+					mat,
+					Vector3(0, 0.55, -0.25),
+					Vector3.ONE,
+					Vector3(0.4, 0, 0)
+				)
 			"plates":
 				for i in 2:
-					Models.part(body, Models.box(0.34 * k, 0.06, 0.2), mat, Vector3(0, 0.6 - i * 0.14, 0.14 + i * 0.12), Vector3.ONE, Vector3(-0.5 - i * 0.3, 0, 0))
+					Models.part(
+						body,
+						Models.box(0.34 * k, 0.06, 0.2),
+						mat,
+						Vector3(0, 0.6 - i * 0.14, 0.14 + i * 0.12),
+						Vector3.ONE,
+						Vector3(-0.5 - i * 0.3, 0, 0)
+					)
 			"shell":
-				var t := TorusMesh.new(); t.inner_radius = 0.33; t.outer_radius = 0.33 + 0.07 * k
+				var t := TorusMesh.new()
+				t.inner_radius = 0.33
+				t.outer_radius = 0.33 + 0.07 * k
 				Models.part(body, t, mat, Vector3(0, 0.3, 0))
 			"club":
 				Models.part(body, Models.sphere(0.12 * k, 10), mat, Vector3(0, 0.22, 0.48))
 			"antennae":
 				for sx in [-1.0, 1.0]:
-					Models.part(body, Models.cyl(0.012, 0.012, 0.3 * k, 6), mat, Vector3(0.09 * sx, 0.78, -0.12), Vector3.ONE, Vector3(-0.3, 0, -0.25 * sx))
+					Models.part(
+						body,
+						Models.cyl(0.012, 0.012, 0.3 * k, 6),
+						mat,
+						Vector3(0.09 * sx, 0.78, -0.12),
+						Vector3.ONE,
+						Vector3(-0.3, 0, -0.25 * sx)
+					)
 					Models.part(body, Models.sphere(0.045 * k, 8), glow, Vector3(0.13 * sx, 0.78 + 0.15 * k, -0.18))
 			"spots":
 				for i in 4:
 					var a := TAU * i / 4.0 + 0.4
-					Models.part(body, Models.sphere(0.04 * k, 6), glow, Vector3(cos(a) * 0.33, 0.36 + sin(a * 2.0) * 0.06, sin(a) * 0.3 + 0.03))
+					Models.part(
+						body,
+						Models.sphere(0.04 * k, 6),
+						glow,
+						Vector3(cos(a) * 0.33, 0.36 + sin(a * 2.0) * 0.06, sin(a) * 0.3 + 0.03)
+					)
 			"third_eye":
 				Models.part(body, Models.sphere(0.045 * k, 8), glow, Vector3(0, 0.56, -0.29))
 			"crest":
 				for i in 3:
-					Models.part(body, Models.box(0.03, 0.16 * k - i * 0.03, 0.1), mat, Vector3(0, 0.72 - i * 0.02, -0.04 + i * 0.09), Vector3.ONE, Vector3(0.3, 0, 0))
+					Models.part(
+						body,
+						Models.box(0.03, 0.16 * k - i * 0.03, 0.1),
+						mat,
+						Vector3(0, 0.72 - i * 0.02, -0.04 + i * 0.09),
+						Vector3.ONE,
+						Vector3(0.3, 0, 0)
+					)
 			"wings":
 				for sx in [-1.0, 1.0]:
-					var w := Models.part(body, Models.sphere(0.16 * k, 10), mat, Vector3(0.26 * sx, 0.5, 0.18), Vector3(0.25, 1.0, 1.4), Vector3(0.3, 0.4 * sx, 0.5 * sx))
+					var w := Models.part(
+						body,
+						Models.sphere(0.16 * k, 10),
+						mat,
+						Vector3(0.26 * sx, 0.5, 0.18),
+						Vector3(0.25, 1.0, 1.4),
+						Vector3(0.3, 0.4 * sx, 0.5 * sx)
+					)
 					w.name = "Wing%d" % int(sx)
 			"tail_long":
 				for i in 3:
-					Models.part(body, Models.sphere(0.08 * k - i * 0.015, 8), mat, Vector3(0, 0.28 + i * 0.05, 0.36 + i * 0.13))
+					Models.part(
+						body, Models.sphere(0.08 * k - i * 0.015, 8), mat, Vector3(0, 0.28 + i * 0.05, 0.36 + i * 0.13)
+					)
 			"fins":
 				for sx in [-1.0, 1.0]:
-					Models.part(body, Models.sphere(0.12 * k, 8), mat, Vector3(0.34 * sx, 0.28, 0.0), Vector3(0.2, 0.7, 1.2), Vector3(0, 0, 0.3 * sx))
+					Models.part(
+						body,
+						Models.sphere(0.12 * k, 8),
+						mat,
+						Vector3(0.34 * sx, 0.28, 0.0),
+						Vector3(0.2, 0.7, 1.2),
+						Vector3(0, 0, 0.3 * sx)
+					)
 	root.set_meta("mats", mats2)
 	if root.has_meta("evo_scale"):
 		root.scale = Vector3.ONE * float(root.get_meta("evo_scale"))

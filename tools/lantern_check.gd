@@ -13,17 +13,19 @@ extends RefCounted
 ##      a cleared solo ring; on the panel each plays once on the tick after it, and a lost solo ends on the "aww"
 ## Never touches the real save.
 
-const RUNS := 40                 # seeded games per comparison
-const DT := 1.0 / 30.0           # s per step
-const SETTLE_FRAMES := 600       # frames to wait at most for the home to finish building
+const RUNS := 40  # seeded games per comparison
+const DT := 1.0 / 30.0  # s per step
+const SETTLE_FRAMES := 600  # frames to wait at most for the home to finish building
 
 var bad := 0
 var main: Node
+
 
 func ok(cond: bool, what: String) -> void:
 	print("LANTERN %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(m: Node) -> void:
 	main = m
@@ -39,6 +41,7 @@ func run(m: Node) -> void:
 	print("LANTERN DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _kin(kname: String, focus: int, curiosity := 0.5) -> Dictionary:
 	var k := Save.new_kin("zapple", kname)
 	k["level"] = 5
@@ -49,10 +52,12 @@ func _kin(kname: String, focus: int, curiosity := 0.5) -> Dictionary:
 	k["needs"]["energy"] = 90.0
 	return k
 
+
 func _rng(seed_: int) -> RandomNumberGenerator:
 	var r := RandomNumberGenerator.new()
 	r.seed = seed_
 	return r
+
 
 func _board() -> void:
 	var b := LanternMatch.Board.new(_kin("A", 0), {}, _rng(7))
@@ -71,6 +76,7 @@ func _board() -> void:
 		b.step(DT)
 	ok(flashed.size() == 6, "every pair flashed")
 	ok(range(12).all(func(i): return not b.lit(i)), "after the flash every cap is dark")
+
 
 func _picks() -> void:
 	var b := LanternMatch.Board.new(_kin("A", 0), {}, _rng(3))
@@ -96,8 +102,10 @@ func _picks() -> void:
 	var want := {"lantern_flip": 14, "lantern_miss": 1, "lantern_match": 6, "lantern_win": 1}
 	ok(said == want, "sounds: a flip per cap opened, a miss, a match per pair, the cleared ring's win (%s)" % [said])
 
+
 func _heard(sname: String) -> int:
 	return int(GardenSfx.heard.get(sname, 0))
+
 
 ## On the panel: a pair and a mismatch picked by hand, each sound heard once per event on the next tick.
 func _sounds(lm: LanternMatch) -> void:
@@ -115,13 +123,16 @@ func _sounds(lm: LanternMatch) -> void:
 	var got := [_heard("lantern_flip"), _heard("lantern_match"), _heard("lantern_miss")]
 	ok(got == [4, 1, 1] and b.heard.is_empty(), "on: four caps, one pair, one mismatch heard once each (%s)" % [got])
 
+
 func _past_flash(b: LanternMatch.Board) -> void:
 	while b.flash_t > 0.0:
 		b.step(DT)
 
+
 func _play_to(b: LanternMatch.Board, t: float) -> void:
 	while b.t < t:
 		b.step(DT)
+
 
 ## Plays a board to its end as a player who remembers nothing: on your turn open an unmatched cap, then the
 ## Boki's point if it has one (waiting a second for it), else another cap.
@@ -137,11 +148,13 @@ func _play(b: LanternMatch.Board, dice: RandomNumberGenerator) -> void:
 		b.pick(pick)
 		wait = 1.0 if b.open.size() == 1 and b.hint < 0 else 0.3
 
+
 ## A seeded solo game: [won, points per second of play, pairs found].
 func _solo(rec: Dictionary, seed_: int) -> Array:
 	var b := LanternMatch.Board.new(rec, {}, _rng(seed_))
 	_play(b, _rng(seed_ + 500))
 	return [b.won(), float(b.hints) / maxf(b.t, 1.0), b.pairs[0]]
+
 
 func _sniffs() -> void:
 	var plain := _kin("Plain", 0)
@@ -160,15 +173,18 @@ func _sniffs() -> void:
 			rate[i] += r[1] / RUNS
 			found[i] += r[2]
 	ok(rate[1] > rate[0] * 1.5, "Focus points more often: %.3f vs %.3f points/s" % [rate[1], rate[0]])
-	ok(found[1] > found[0] and wins[1] >= wins[0], "following a Focus Boki finds more: %d vs %d pairs, %d vs %d wins"
-			% [found[1], found[0], wins[1], wins[0]])
+	ok(
+		found[1] > found[0] and wins[1] >= wins[0],
+		"following a Focus Boki finds more: %d vs %d pairs, %d vs %d wins" % [found[1], found[0], wins[1], wins[0]]
+	)
+
 
 ## A seeded versus game against foe, you a player who missed the flash but remembers every cap opened
 ## since: the rival's pairs minus yours.
 func _vs(foe: Dictionary, seed_: int) -> int:
 	var b := LanternMatch.Board.new(_kin("You", 0), foe, _rng(seed_))
 	var dice := _rng(seed_ + 900)
-	var known := {}                  # cap -> pair, every cap opened in play
+	var known := {}  # cap -> pair, every cap opened in play
 	while not b.over():
 		b.step(DT)
 		for i in b.open:
@@ -176,14 +192,16 @@ func _vs(foe: Dictionary, seed_: int) -> int:
 		if b.over() or b.turn != 0 or b.flash_t > 0.0 or b.shut_t > 0.0:
 			continue
 		var can := range(12).filter(func(i): return b.can_open(i))
-		var sure := can.filter(func(i): return known.has(i) and known.has(b.partner(i)) \
-				and (b.open.is_empty() or b.open.has(b.partner(i))))
+		var sure := can.filter(
+			func(i): return known.has(i) and known.has(b.partner(i)) and (b.open.is_empty() or b.open.has(b.partner(i)))
+		)
 		var fresh := can.filter(func(i): return not known.has(i))
 		var from: Array = fresh if not fresh.is_empty() else can
 		if not sure.is_empty():
 			from = sure
 		b.pick(from[dice.randi_range(0, from.size() - 1)])
 	return b.pairs[1] - b.pairs[0]
+
 
 func _versus() -> void:
 	var lead := [0, 0]
@@ -202,6 +220,7 @@ func _versus() -> void:
 	_past_flash(b)
 	ok(b.pick(0) and b.pick(b.partner(0)) and b.turn == 0 and b.pairs == [1, 0], "a match keeps the turn")
 
+
 ## A finished board: you hold `mine` pairs, the rival `theirs`, the clock run out.
 func _done(me: Dictionary, foe: Dictionary, mine: int, theirs: int) -> LanternMatch.Board:
 	var b := LanternMatch.Board.new(me, foe, _rng(1))
@@ -209,16 +228,20 @@ func _done(me: Dictionary, foe: Dictionary, mine: int, theirs: int) -> LanternMa
 	b.t = float(LanternMatch.rules()["time_s"])
 	return b
 
+
 func _settle() -> void:
 	var table: Array = GardenPrizes.game("lantern")["table"]
 	var ids := table.map(func(e): return e["id"])
-	ok(ids.has("peekbox") and ids.has("hush_truffle") and ids.has("glowmoss_sprig"),
-			"the lantern table holds Peekbox, Glowmoss Sprig and Hush Truffle")
+	ok(
+		ids.has("peekbox") and ids.has("hush_truffle") and ids.has("glowmoss_sprig"),
+		"the lantern table holds Peekbox, Glowmoss Sprig and Hush Truffle"
+	)
 	for e in table:
 		var id := String(e["id"])
 		var known: bool = Data.CROPS.has(id) if e["kind"] == "snack" else GardenItems.item_name(id) != id
 		ok(known, "table entry %s exists" % e["id"])
 	var me := _kin("Me", 20)
+	TrainRuns.state()["race"] = 9  # two wins in a row today: the run limits are --train-runs-check's
 	var gems := int(Save.d["gems"])
 	var res := LanternMatch.settle(_done(me, {}, int(LanternMatch.rules()["solo_goal"]), 0))
 	var two: bool = res["prize"]["items"].size() == 2 and res["prize"]["first"]
@@ -234,11 +257,13 @@ func _settle() -> void:
 	var draw := LanternMatch.settle(_done(me, _kin("Even", 20), 3, 3))
 	ok(draw["draw"] and not draw["won"], "3 all is a draw, not a win")
 
+
 func _machine() -> void:
 	var lm := LanternMatch.new(null)
 	var stay: bool = not lm.go(LanternMatch.S.RESULT) and lm.state == LanternMatch.S.IDLE
 	ok(stay and lm.refused == 1, "IDLE -> RESULT refused")
 	ok(lm.go(LanternMatch.S.PLAY) and not lm.go(LanternMatch.S.PLAY) and lm.refused == 2, "PLAY -> PLAY refused")
+
 
 func _on_base() -> void:
 	var rules: Dictionary = FarmUnlocks.rules()
@@ -253,7 +278,7 @@ func _on_base() -> void:
 	d["layout"] = HomeLayout.fresh()
 	Save.d = d
 	HomeLayout.ensure(Save.d)
-	rules["base_mode"] = false      # base_mode is on in the shipped rules; the "off" half walks the old farm
+	rules["base_mode"] = false  # base_mode is on in the shipped rules; the "off" half walks the old farm
 	var off = await main._hb_home()
 	ok(off.hlantern == null, "off: no glowcap ring on the farm")
 	off.queue_free()
