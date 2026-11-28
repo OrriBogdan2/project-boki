@@ -534,3 +534,25 @@ Left for the owner (each needs a code or design change, not a json fix, and adds
 Pre-existing reds on main at 0b0b680df2, not from this branch: `--hero-vfx-check` 1 failed (Vex LMB rounds 0.154 m
 from the forearm, limit 0.15 m); `tools/health.py --strict` style ratchet (hud_hover.gd, ability_text_check.gd,
 check_registry.gd long lines).
+
+## Meeko Hearthlight rim and Albert Mending Ground motes (ext/vfx-meeko-albert-rings, 11-28, sweep rows 8 and 14)
+Sweep `docs/VFX_SWEEP_1126.md` row 8 (Meeko E: a thick flat green band, no rim) and row 14 (Albert E: the fall reads but
+is plain, no rising motes). Hit areas, radii, cooldowns and numbers are unchanged; both stay in their own colour
+(Meeko leaf green, Albert ivory).
+- Meeko: the band is 0.1 of the radius (was 0.16) with a hot edge line (`leaf_hot`) and a soft glow falling off inward;
+  the inside stays under the 0.25 zone rule (`--hero-vfx-check` rows "inside alpha at most 0.25"). Data: `tender.json`
+  `hearth_disc` (`rim_w`, `lit`, `hot`); shader: `care_disc.gdshader` pattern 5.
+- Albert: `bulwark.json` `mend_fall` gains a layer of ivory motes streaming up off the marked ground (grows with the
+  fall), `mend_zone`'s motes are bigger, more (16 to 26) and streaked.
+- Strips: `docs/art/vfx_meeko_albert_rings/before_after.jpg` (`--hero-vfx-reel --reel-hero=tender --reel-only=e` and
+  `--reel-hero=bulwark --reel-only=mend`, real GPU, match zoom). Grey border = live main, green = this branch. The
+  Albert reel part now samples the fall (0.3 to 1.05 s) and the zone, not only the closing burst.
+- Frame time (`--zone-rings-perf`, 4v4, Meeko and Albert casting E in view, old and new looks alternated, 3 rounds):
+  990 frames each side, p95 50.88 ms old, 50.68 ms new,
+  delta p95 -0.20 ms (budget: at most +0.3); mean 46.66 ms old, 47.40 ms new (+0.74 ms, in the run-to-run noise of the
+  software-GL pod, about 21 fps: only the p95 is budgeted). Job 20261128-075644-20669 on rp3g-3. Cap: `HeroVfx.MAX_LIVE`
+  (420) unchanged; the new layers are pooled GPU particle emitters of 14 and 26 motes, no per-frame allocation.
+- Red already on main d255acbee3 / 7e6d3b5bd6, unchanged by this branch: `--hero-vfx-check` 8 FAILs (Meeko heal-green
+  row, Tenzo rocks heat, archer bow x4, gunslinger forearm, scarf anchor), identical list on a clean main worktree and
+  here; `python3 tools/gen_wiki.py --check` out of date `docs/wiki/Rules.md` (also on main). `tools/health.py --strict`
+  is OK on this branch.
