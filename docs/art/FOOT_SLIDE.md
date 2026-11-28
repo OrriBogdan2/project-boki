@@ -262,6 +262,8 @@ foot slides back (the clip's sweep is faster than the body).
 | Meeko (`tender`) | pip (121,292) | -10.3 (1.16, 6.8) | -0.1 (0.82, 4.8) | foot_mps 4.55 -> 5.75 |
 | Sable (`thief`) | sable (115,114) | -14.4 (1.70, 5.4) | +0.4 (1.36, 4.3) | foot_mps 3.18 -> 3.55 |
 
+Sable's run was refitted on 11-28 for her cadence (KIT_PARITY row 10: 1.94 Hz slide-free at `stride` 1.5 against the sheet's 2.3): run `stride` 1.5 -> 1.37, `foot_mps` 3.55 -> 3.03, back 2.7 -> 2.4, side 2.56 -> 2.29; STEP +1.1 cm a step at rate 1.44 (2.27 Hz), `docs/KIT_PARITY.d/1123-parity-recheck-sable-motley.md`.
+
 Motley hovers: no STEP line. `--anim-audit`'s run reading poses the model at its own scale
 but at 5.39 m/s and counts the lowest 30 % of the ankle's height as planted (late swing too), so it reads these runs
 differently: Neve 39 -> 25 %, Albert 43 -> 26 %, Lace 89 -> 75 %, Tenzo 25 -> 37 % (DEBT.md).
