@@ -11543,3 +11543,4 @@ READY ext/stuck-integ-12ae25f6 c083b0da1d (supersedes: perf-visibility-ranges-re
 READY ext/kael-tap-execute ddeb8ad6e7f (docs only: KIT_PARITY row, Kael tap execute 1.5x under 35% already on main since 854d3590015, on the RMB tap)
 READY ext/vfx-blue-fog b7ad1a08f1 (env haze colours toward neutral; fog-tint-shots tool; raid-check haze assert; frame blue-red moves only 1-3 of 255)
 READY ext/boki-more-ingame-1118 40a240984b (bulk-rebase: origin/main merged in mechanically, was cd020fdc02; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/lace-spirit-end-rules 38ad752f48 (docs only: Lace Phase Walk damage-ends + end-inside rules already on main; KIT_PARITY rows marked)
