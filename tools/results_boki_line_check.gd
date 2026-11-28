@@ -18,6 +18,7 @@ func run(main_node: Node, mode := "check") -> void:
 	main = main_node
 	tree = main.get_tree()
 	Save.no_write = true
+	Luck.rules()["base"] = 0.0  # a lucky +2 adds a tail to the line (--playstyle-check tests luck)
 	if mode == "shots":
 		await _shots()
 	else:
