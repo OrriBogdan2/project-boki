@@ -138,12 +138,19 @@ func pin() -> void:
 	fresh(T)
 	T.hp = 40.0
 	T.armor = 0.0
+	var t2_before := dmg(T2)
 	beam(m, P, K, T.pos)
 	ok("pin ult anim: the last beam plays pin_ult_final", K.anim_id == "pin_ult_final", K.anim_id)
 	step(m, 0.2)
 	ok("pin ult payoff: the last beam finishes a hunter left under 12%",
 		K.ult.executes == 1 and (T.downed or T.dead or T.hp <= 0.0),
 		"executes %d hp %.0f downed %s" % [K.ult.executes, T.hp, T.downed])
+	var last_hit := dmg(T2) - t2_before
+	var final_want := float(xd["final_dmg"]) * ap
+	ok("pin ult payoff: the third beam hits for final_dmg (%.1f), harder than the first (%.1f)"
+		% [float(xd["final_dmg"]), float(xd["dmg"])],
+		last_hit > float(xd["dmg"]) * ap * 1.15 and absf(last_hit - final_want) < 0.1 * final_want,
+		"took %.1f (want %.1f)" % [last_hit, final_want])
 	ok("pin ult bond: the execute's knock is the cast's best event (0.7, not added per hit)",
 		absf(best(P) - 0.7) < 0.001, "best %.2f" % best(P))
 	ok("pin ult ends after the third shot, the telegraph goes",
@@ -181,22 +188,32 @@ func _pin_window() -> void:
 	step(m, 0.3)
 	ok("pin ult small: Spirit Walk between shots keeps them", K.ult.active() and K.ult.left == 2 and K.spirit.active(),
 		"left %d" % K.ult.left)
-	# a wall stops the beam
+	# terrain does not stop the beam (the source's "pierce terrain and enemies"); a placed wall does
 	fresh(T)
 	_wall_at(m, home + Vector3(4, 0, 0), lv, 0)
 	beam(m, P, K, T.pos)
 	step(m, 0.2)
-	ok("pin ult small: a wall stops the beam (the foe behind it untouched)",
-		K.ult.fired == 3 and dmg(T) <= 0.01,
+	ok("pin ult small: the beam flies through a 3-terrace terrain wall (the foe behind it hit)",
+		K.ult.fired == 3 and dmg(T) > 0.0,      # (fired counts both casts: the press, then this beam)
 		"took %.0f" % dmg(T))
 	_clear_wall(m, home + Vector3(4, 0, 0), lv, 0)
+	fresh(T)
+	var foe_wall: Dictionary = m.verbs.add_wall(T, home + Vector3(4, 0, 0), Vector2(-1, 0),
+		{"length": 6.0, "hp": 5000.0, "time": 5.0}, 1.0)
+	beam(m, P, K, T.pos)
+	step(m, 0.2)
+	ok("pin ult small: a placed wall still stops the beam (Blockers pierce: the foe behind it untouched)",
+		K.ult.fired == 4 and dmg(T) <= 0.01,
+		"took %.0f" % dmg(T))
+	m.verbs.walls.erase(foe_wall)
+	if is_instance_valid(foe_wall.get("node")): (foe_wall["node"] as Node).queue_free()
 	# a merge inside the window: it ends with no beam (fire held through the merge looses nothing)
 	step(m, 0.9)
 	merge_now(P)
 	hold_fire(m, P, T.pos, 0.5)
 	P.inp["fire"] = false
 	ok("pin ult merge: the empowered window drops with no beam",
-		not K.ult.active() and K.ult.fired == 3,
+		not K.ult.active() and K.ult.fired == 4,
 		"fired %d" % K.ult.fired)
 	await done(m)
 

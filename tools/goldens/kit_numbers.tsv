@@ -75,6 +75,7 @@ archetypes/archer.json:x.per_rank.dmg[0]	1.8
 archetypes/archer.json:x.per_rank.dmg[1]	1.8
 archetypes/archer.json:x.per_rank.final_dmg[0]	2.33
 archetypes/archer.json:x.per_rank.final_dmg[1]	2.33
+archetypes/archer.json:x.pierce_terrain	true
 archetypes/archer.json:x.range	18.0
 archetypes/archer.json:x.recover	1.0
 archetypes/archer.json:x.shots	3
