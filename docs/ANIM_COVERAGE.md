@@ -25,11 +25,13 @@ with a 0.1 s blend and keep `KinFlinch` as the fallback. `--boki-flinch-shots --
 
 Boki garden states (`tools/anim_coverage_boki.gd`): every species with a rigged .glb in the game (a `BokiRig.FRAME`
 row and `art/kin/<id>/<id>.glb`, the Bokidex 3D models, 48 today) through idle, walk, run, attack, cast (`ability`),
-hop, eat (the feeder's `munch`) and sleep (the garden `nap`), read off the clips of a live rig. `clip` is the species'
+hop, eat (the feeder's `munch`) and sleep (the garden `nap`), read off the clips of a live rig (`munch` and `nap` are
+the species' own baked eat and sleep clips when those pass the test below, BokiHomeClips). `clip` is the species'
 own clip; `shared` a clip whose motion (each bone's turn at 16 samples) is the same as another species' (the generic
-set every Meshy batch-1 model was built with: no motion of its own); `proc` a clip `BokiHomeClips` builds at runtime
-(munch from idle, nap from sleep); `missing` no clip, a clip that holds one pose (no bone turns 2 deg; not sleep), or
-one whose every pose sits within 3 deg of a pose idle passes through. Rows run worst first (most `missing`, then most
+set every Meshy batch-1 model was built with: no motion of its own); `proc` (eat and sleep only) a clip that fails the
+test, so `BokiHomeClips` builds the munch from idle and the nap from sleep instead (none today); `missing` no clip, a
+clip that holds one pose (no bone turns 2 deg; not sleep), or one whose every pose sits within 3 deg of a pose idle
+passes through (`BokiClipCover`). Rows run worst first (most `missing`, then most
 `shared`, then the lowest Field Book number), and the five worst are written out as backlog lines.
 
 Mobs (`tools/anim_coverage_mobs.gd`): the seven common monsters through idle, walk, attack (the wind-up tell, plus
@@ -149,7 +151,6 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | pebbit | clip | clip | clip | clip | clip | clip | clip | clip |
 | wisplet | clip | clip | clip | clip | clip | clip | clip | clip |
 | caecilith | clip | clip | clip | clip | clip | clip | clip | clip |
-| floenatee | clip | clip | clip | clip | clip | clip | clip | clip |
 | glintmole | clip | clip | clip | clip | clip | clip | clip | clip |
 | gloamshell | clip | clip | clip | clip | clip | clip | clip | clip |
 | heatherhorn | clip | clip | clip | clip | clip | clip | clip | clip |
@@ -161,11 +162,9 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | marchleaf | clip | clip | clip | clip | clip | clip | clip | clip |
 | mossgrade | clip | clip | clip | clip | clip | clip | clip | clip |
 | nettlynx | clip | clip | clip | clip | clip | clip | clip | clip |
-| nimbostrich | clip | clip | clip | clip | clip | clip | clip | clip |
 | rimeshrew | clip | clip | clip | clip | clip | clip | clip | clip |
 | selenfin | clip | clip | clip | clip | clip | clip | clip | clip |
 | thrumbird | clip | clip | clip | clip | clip | clip | clip | clip |
-| tuatrune | clip | clip | clip | clip | clip | clip | clip | clip |
 | umbrathere | clip | clip | clip | clip | clip | clip | clip | clip |
 | cairnback | clip | clip | clip | clip | clip | clip | clip | clip |
 | hivara | clip | clip | clip | clip | clip | clip | clip | clip |
@@ -236,5 +235,5 @@ Worst five, backlog-ready:
    models, 9116769e95: casquebill to velvorm in the table; hoarheron has its own idle only). Nothing is `missing` on
    any Boki, but the shared set is the same wobble on a heron, an okapi and a rope wyrm. That includes glomwort,
    whose `glomwort_anim.py` clips the batch-1 model replaced (docs/art/kin/RIGGED_BOKI.md still lists them). Eat and
-   sleep are `proc` on every Boki (munch and nap built from idle and sleep); the baked `eat` clip is never played.
+   sleep play each species' baked clip (the generic set on the shared Boki); the built munch and nap are the fallback.
 5. Hunter death clips are mostly unseen while the Wisp stands in for a death (DEBT: downed Wisp).
