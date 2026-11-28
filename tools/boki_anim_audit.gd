@@ -26,6 +26,7 @@ const UNKEYED := ["lilybara", "umbrathere"]
 const MAX_SLIDE := 0.25       # of the move speed: how fast a planted foot may slip against the ground
 const STRIDE_TOL := 0.05      # BokiRig.STRIDE vs the measured clip, as a fraction
 const FEETLESS := 0.1         # m/s: a foot that sweeps less than this is not stepping (it floats, glides or is tucked)
+const EXEMPT_SWEEP := 0.2     # m/s: an EXEMPT Boki's flippers may sweep this much (a seal's haul) and still not step
 const GLIDE_STRIDE := [1.5, 2.9]      # what such a Boki keeps: BokiRig.STRIDE before it was measured
 ## No stepping feet, so not gated: the check asserts these are exactly the ones whose feet do not sweep.
 const EXEMPT := {"thrumbird": "flyer", "selenfin": "flyer (fins)", "zephyrak": "serpent", "glomwort": "blob",
@@ -134,7 +135,7 @@ func _species(main: Node, id: String) -> void:
 	print("BOKIGAIT %s measured walk %.2f run %.2f m/s, %s, pop %.1f" % [id, measured[0], measured[1], seams, popped])
 	if id in BokiRig.CONTACT:
 		_contact(k, rig, id)
-	var feetless: bool = measured.min() < FEETLESS
+	var feetless: bool = measured.min() < (EXEMPT_SWEEP if id in EXEMPT else FEETLESS)
 	ok(feetless == (id in EXEMPT), "%s is %s" % [id, "EXEMPT " + EXEMPT[id] if id in EXEMPT else "gated"])
 	if feetless:
 		var shared: bool = BokiRig.STRIDE.get(id, GLIDE_STRIDE) == GLIDE_STRIDE
