@@ -66,8 +66,9 @@ func _kind(kind: String) -> void:
 	rows.append("%s\t%.2f\t%.2f\t%.2f\t%.2f" % [kind, box.size.y, box.size.x, box.size.z, hunter_h])
 	if box.size.length() < 0.2:  # a body the skinned bounds miss: a small box at its feet
 		box = AABB(mb.pos + Vector3(-0.6, 0, -0.6), Vector3(1.2, 0.8, 1.2))
-	var ctr := box.get_center()
+	var ctr := box.get_center() - mb.global_position  # (kept relative: a monster that drifts is followed)
 	_studio(mb.pos)
+	_world_on(false, mb)
 	var dist := maxf(box.size.length(), 1.0) * 1.15 / tan(deg_to_rad(cam.fov * 0.5)) * 0.5
 	cam.make_current()
 	for v in VIEWS:
@@ -76,6 +77,7 @@ func _kind(kind: String) -> void:
 	# the match camera, a Hunter one body-width beside the monster
 	p.teleport(at + Vector3(box.size.x * 0.5 + 1.2, 0, 0.3))
 	backdrop.visible = false  # (the match frame shows the real island)
+	_world_on(true, mb)
 	m.cam.make_current()
 	for i in 30:
 		_hold(mb)
@@ -85,6 +87,7 @@ func _kind(kind: String) -> void:
 	# the wind-up: the last frame of the real attack's tell, the 3/4 camera
 	if MobAnim.has_kind(kind) or kind.begins_with("bl_"):
 		backdrop.visible = true
+		_world_on(false, mb)
 		cam.make_current()
 		p.teleport(at + Vector3(4.5, 0, 0))
 		mb.tgt = p
@@ -105,6 +108,7 @@ func _kind(kind: String) -> void:
 		else:
 			print("MOBTURNAROUND %s: no wind-up frame" % kind)
 	backdrop.visible = true
+	_world_on(false, mb)
 	cam.make_current()
 	# the death move: 0.4 of DEATH_S in
 	p.teleport(at + Vector3(60, 0, 0))
@@ -117,6 +121,7 @@ func _kind(kind: String) -> void:
 	print("MOBTURNAROUND %s h=%.2f hunter=%.2f" % [kind, box.size.y, hunter_h])
 	if is_instance_valid(mb):
 		mb.visible = false
+	_world_on(true, null)
 	await _frames(40)
 
 
@@ -141,8 +146,10 @@ func _hold(mb: Mob) -> void:
 ## Aims the free camera at `ctr`, `yaw` round from the monster's front.
 func _view(mb: Mob, ctr: Vector3, dist: float, yaw: float, pitch: float) -> void:
 	var a: float = mb.model.global_rotation.y + PI + yaw  # the model's front is -z: its camera sits that way
-	cam.global_position = ctr + Vector3(sin(a) * cos(pitch), sin(pitch), cos(a) * cos(pitch)) * dist
-	cam.look_at(ctr)
+	var c := mb.global_position + ctr
+	backdrop.position = mb.global_position
+	cam.global_position = c + Vector3(sin(a) * cos(pitch), sin(pitch), cos(a) * cos(pitch)) * dist
+	cam.look_at(c)
 	await main.get_tree().process_frame
 
 
@@ -173,6 +180,14 @@ func _bounds(n: Node3D) -> AABB:
 		out = bb if first else out.merge(bb)
 		first = false
 	return out
+
+
+## Shows or hides everything in the match but the monster and the studio (the world, props, grass, the Hunter).
+func _world_on(on: bool, keep: Node) -> void:
+	for n in m.get_children():
+		if n is Node3D and n != keep and n != m.cam:
+			(n as Node3D).visible = on
+	m.player.visible = on
 
 
 ## A flat #E8E8EE dome and floor round the monster, so the world's props stay out of the views.
