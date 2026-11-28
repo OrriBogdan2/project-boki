@@ -126,7 +126,7 @@ func _case(c: String) -> void:
 		fresh(dummy)
 	match c:
 		"ground_tap", "ground_hold", "terrace_hold", "wall_hold":
-			pass  # pressed from the ground: no setup
+			pass
 		"apex", "air_hit", "terrace_air", "wall_air":
 			_jump()
 			_to_apex()
