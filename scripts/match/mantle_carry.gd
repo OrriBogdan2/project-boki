@@ -67,12 +67,7 @@ static func _mini_push(h: Hunter, hv: Vector2, dt: float) -> Vector2:
 	var top: float = h.lip_y if h.over_void() else h.ground()
 	var soft := float(rules["mini_soft_cap"])
 	if h.pos.y > top and h.vel.y > soft:
-		h.vel.y -= (
-			(h.vel.y - soft)
-			* float(rules["mini_down"])
-			* (1.0 - float(rules["mini_fade"]) * p)
-			* dt
-		)
+		h.vel.y -= ((h.vel.y - soft) * float(rules["mini_down"]) * (1.0 - float(rules["mini_fade"]) * p) * dt)
 	return hv
 
 
@@ -100,9 +95,7 @@ static func suction(h: Hunter, hv: Vector2, dt: float) -> Vector2:
 	var r: Dictionary = rules["suction"]
 	var bs := HunterMove.body_scale
 	var spd: Array = r["speed"]
-	var s_frac := clampf(
-		(sp - float(spd[0]) * bs) / ((float(spd[1]) - float(spd[0])) * bs), 0.0, 1.0
-	)
+	var s_frac := clampf((sp - float(spd[0]) * bs) / ((float(spd[1]) - float(spd[0])) * bs), 0.0, 1.0)
 	var near_k := float(r["near_k"])
 	var reach := float(r["trace"]) * (near_k + (1.0 - near_k) * s_frac)
 	var dir := hv / sp
@@ -116,16 +109,9 @@ static func suction(h: Hunter, hv: Vector2, dt: float) -> Vector2:
 	hv += dir * lerpf(float(fo[0]), float(fo[1]), _curve(r["force_curve"], uf)) * bs * dt
 	var under := float(hit["top"]) - h.pos.y
 	var ud: Array = r["up_dist"]
-	if (
-		under >= 0.0
-		and under <= float(r["up_h"])
-		and dist <= float(ud[1])
-		and h.vel.y <= float(r["up_vy"])
-	):
+	if under >= 0.0 and under <= float(r["up_h"]) and dist <= float(ud[1]) and h.vel.y <= float(r["up_vy"]):
 		var up: Array = r["up"]
-		var k := _curve(
-			r["up_curve"], clampf((dist - float(ud[0])) / (float(ud[1]) - float(ud[0])), 0.0, 1.0)
-		)
+		var k := _curve(r["up_curve"], clampf((dist - float(ud[0])) / (float(ud[1]) - float(ud[0])), 0.0, 1.0))
 		h.vel.y += lerpf(float(up[0]), float(up[1]), under / float(r["up_h"])) * k * dt
 	return hv
 
@@ -265,9 +251,7 @@ static func exit(h: Hunter, hv: Vector2, n: Vector2, mv: Vector2, v_in: float) -
 	var d := mv.normalized() if mv.length() > 0.3 else n
 	if d.dot(n) < 0.0:
 		return hv.limit_length(cap)  # steering back off the ledge: your keys win
-	var floor_v := maxf(
-		v_in * HunterMove.mantle_launch_keep, HunterMove.mantle_launch(h.base_speed)
-	)
+	var floor_v := maxf(v_in * HunterMove.mantle_launch_keep, HunterMove.mantle_launch(h.base_speed))
 	var want := minf(floor_v, minf(maxf(v_in, h.base_speed), cap))
 	var along := hv.dot(d)
 	if along < want:
