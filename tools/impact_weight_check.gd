@@ -172,6 +172,9 @@ func _kit_tags() -> void:
 func _presses(m: Match, hero: String) -> void:
 	var h: Hunter = flow.hunter
 	dealt = {}
+	if h.ak is GilKit:  # Gil's bag is seeded by his instance id: a fixed order keeps his RMB row from flaking (11)
+		(h.ak as GilKit).rng.seed = hash("gil_bag_impact")
+		(h.ak as GilKit)._refill()
 	for slot in SLOTS:
 		flow._ready_up(m)
 		var dummy := _dummy(m)
