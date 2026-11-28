@@ -24,7 +24,7 @@ const HUM_DB := -6.0             # dB: the hover's hum loop
 const CAM_PULL := 0.45           # how far the camera eases back while she hangs in the air
 
 var kit: MageKit
-var leap := {}                 # the running cast: {phase, t, from, base, top, land, high, queued, fire_free}
+var leap := {}                 # the running cast: {phase, t, from, base, top, land, high, fire_free}
 var casts := 0                 # (tests)
 var hits := 0                  # foes the strikes hit (tests)
 var last := {}                 # (tests) the last strike: {at, hits, bond}
@@ -70,7 +70,6 @@ func cast() -> bool:
 		return false
 	var from := kit.ground(h.pos)
 	leap = {"phase": CROUCH, "t": 0.0, "from": from, "land": from}
-	leap["queued"] = false
 	leap["fire_free"] = not bool(h.inp.get("fire", false))
 	casts += 1
 	kit.play("mage_x")
@@ -88,14 +87,18 @@ func window() -> Dictionary:
 	var hover := float(xd["hover"])
 	return RecastCue.window("x", hover - t, hover, leap["land"], t >= float(xd["min_air"]), true)
 
-## A second press while she hangs brings her down; pressed during the climb it waits for the hang.
+## A second press while she hangs brings her down. Pressed before the hang arms (the crouch, the climb, the
+## hang's first min_air) it waits in the shared recast buffer (ArchKit.buffer_recast, ~0.15 s) and goes as it arms.
 func recast() -> bool:
 	match phase():
 		CROUCH, RISE:
-			leap["queued"] = true
+			kit.buffer_recast("x")
 			return true
 		AIR:
-			_slam()
+			if float(leap["t"]) < float(data()["min_air"]):
+				kit.buffer_recast("x")
+			else:
+				_slam()
 			return true
 	return false
 
@@ -148,14 +151,12 @@ func _next(p: String) -> void:
 	leap["phase"] = p
 	leap["t"] = 0.0
 
-## The hang ends on a queued press, a fresh attack press, or when the hover time is up (she comes down at the cursor).
+## The hang ends on a fresh attack press or when the hover time is up (she comes down at the cursor).
 func _wants_down(t: float, xd: Dictionary) -> bool:
 	var fire := bool(kit.h.inp.get("fire", false))
 	if not fire:
 		leap["fire_free"] = true
 	var hung := t >= float(xd["min_air"])
-	if hung and bool(leap["queued"]):
-		return true
 	if hung and fire and bool(leap["fire_free"]):
 		return true
 	return t >= float(xd["hover"])

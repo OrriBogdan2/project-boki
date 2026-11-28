@@ -111,7 +111,7 @@ func _kitefall() -> void:
 	while t < 4.0 and k.ult.phase() != MageUlt.AIR:
 		ak.step(m, 1.0 / 60.0)
 		t += 1.0 / 60.0
-	ak.step(m, 1.0 / 60.0)
+	ak.step(m, float(k.ult.data()["min_air"]))  # X is taken from min_air into the hang (earlier: buffered)
 	ok("kitefall: she hangs, X would bring her down", k.ult.phase() == MageUlt.AIR)
 	_on("kitefall", m, k.ult.leap["land"], "hunter_ult", k.col_of(k.x_def()))
 	_quiet("kitefall: coming down, no marker", m, k.ult.recast)

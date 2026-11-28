@@ -49,4 +49,5 @@ const CHECKS := {
 	"--bot-spacing-shots": ["res://tools/bot_spacing_shots.gd", "bot_spacing_shots", null],  # --shots-dir=<dir>, GPU
 	"--stolen-extract-check": ["res://tools/stolen_extract_check.gd", "stolen_extract_check", null],  # extract, saves
 	"--tenzo-rmb-air-check": ["res://tools/tenzo_rmb_air_check.gd", "hero_pair_check", null],  # RMB from every footing
+	"--recast-buffer-check": ["res://tools/recast_buffer_check.gd", "recast_buffer_check", null],  # per kit and slot
 }
