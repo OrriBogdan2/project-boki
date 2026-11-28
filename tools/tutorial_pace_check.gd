@@ -34,6 +34,7 @@ const UI_STAGES := [
 ## Farm tutorial step -> [walks, menu picks, tool, the house's cost line that sets the swings (one swing a unit)]:
 ## what the player does beyond reading the hint.
 const FARM_ACT := {
+	"meet": [1, 0, "", ""],
 	"hob": [1, 0, "", ""],
 	"axe": [0, 0, "", ""],
 	"chop": [1, 0, "axe", "wood"],
@@ -163,7 +164,7 @@ func _title() -> void:
 func _do_step(id: String) -> void:
 	var words: int = FarmTutorial.hint_text(id).split(" ", false).size()
 	var read := words / TutorialDrive.read_wps + TutorialDrive.REACT_S
-	var act: Array = FARM_ACT.get(id, [1, 1, "", 0])
+	var act: Array = FARM_ACT.get(id, [1, 1, "", ""])
 	var swings := int(FarmSites.build_cost("house").get(String(act[3]), 0))
 	var work := swings * (HunterTool.period(String(act[2])) if act[2] != "" else 0.0)
 	var did := float(act[0]) * WALK_FARM_S + float(act[1]) * UI_STEP_S + work
