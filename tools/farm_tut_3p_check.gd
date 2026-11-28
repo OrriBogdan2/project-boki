@@ -8,7 +8,7 @@ extends RefCounted
 const BEARINGS := 8
 const DISTANCES := [5.0, 12.0]  # m from the target to you
 const SETTLE_FRAMES := 6  # frames at least, then until the camera has stopped easing (it eases with real time)
-const SHOULDER_FRAC := 0.35  # your body taller than this share of the screen: the camera is pulled onto your back, the arrow does it
+const SHOULDER_FRAC := 0.35  # your body taller than this share of the screen: the camera is on your back
 const SETTLE_MAX := 400  # frames at most
 const MIN_VIEWS := 4  # standing spots on the island a step needs to count
 
@@ -128,7 +128,7 @@ func _step(id: String) -> void:
 			var frame := FarmTutPointer.frame(home, strips)
 			var in_view := FarmTutPointer.in_frame(cam, prompt, frame)
 			var feet := cam.unproject_position(tgt)
-			var shoulder := FarmTutPointer.player_box(cam, home.ppos).size.y > SHOULDER_FRAC * vp.y  # (the camera on your back)
+			var shoulder := FarmTutPointer.player_box(cam, home.ppos).size.y > SHOULDER_FRAC * vp.y
 			if (
 				facing and not in_view and not top and not shoulder
 				and not cam.is_position_behind(tgt) and frame.has_point(feet)
@@ -145,7 +145,7 @@ func _step(id: String) -> void:
 					not ptr._arrow.visible
 					or tip.normalized().dot(dir) < 0.99
 					or not frame.grow(1.0).has_point(ptr._arrow.position)
-					or strips.any(func(c): return (c.rect() if c is StripView else c.get_global_rect()).has_point(ptr._arrow.position))
+					or strips.any(func(c): return FarmTutPointer.strip_rect(c).has_point(ptr._arrow.position))
 				):
 					lost += 1
 			elif (

@@ -25,7 +25,8 @@ static func rules() -> Dictionary:
 ## Metres over the target the world prompt hangs: the top-down height, lowered as the view turns third person. Then the
 ## nearest height to that (down to lift_min_m, up to the top-down height, in LIFT_STEP_M steps) at which the prompt is
 ## inside the frame and clear of your own body on screen: the close camera is pitched down, so what is ahead of you
-## rises out of the top of the frame, or stands right behind your head. None fits: the preferred height (the arrow shows).
+## rises out of the top of the frame, or stands right behind your head. None fits: the preferred height (the arrow
+## shows).
 static func lift(h, at: Vector3, strips: Array) -> float:
 	var r := rules()
 	var top := float(r["lift_top_m"])
@@ -34,14 +35,14 @@ static func lift(h, at: Vector3, strips: Array) -> float:
 	var cam: Camera3D = h.cam
 	if cam.is_position_behind(at):
 		return pref
-	var frame := frame(h, strips)
+	var fit := frame(h, strips).grow(-float(r["fit_pad_px"]))  # (the prompt bobs: keep clear of the edge)
 	var body := player_box(cam, h.ppos).grow(PROMPT_PAD_PX)
 	var best := pref
 	var best_gap := INF
 	var up := low
 	while up <= top + 0.001:
 		var px := cam.unproject_position(at + Vector3.UP * up)
-		if frame.has_point(px) and not body.has_point(px) and absf(up - pref) < best_gap:
+		if fit.has_point(px) and not body.has_point(px) and absf(up - pref) < best_gap:
 			best = up
 			best_gap = absf(up - pref)
 		up += LIFT_STEP_M
@@ -79,11 +80,16 @@ static func frame(h, strips: Array) -> Rect2:
 	var top := f.position.y
 	for c: Control in strips:
 		if is_instance_valid(c) and c.is_visible_in_tree():
-			var box: Rect2 = c.rect() if c is StripView else c.get_global_rect()  # (the strip's control is the whole screen)
+			var box := strip_rect(c)
 			top = maxf(top, box.end.y + edge)
 	var bottom := f.end.y - float(r["bottom_px"])
 	top = minf(top, bottom - 1.0)
 	return Rect2(f.position.x, top, f.size.x, bottom - top)
+
+
+## Where a line on screen is: the objective strip's control is the whole screen, so it says where its line is.
+static func strip_rect(c: Control) -> Rect2:
+	return c.rect() if c is StripView else c.get_global_rect()
 
 
 ## Is the prompt at `at` in view inside `frame`, and far enough off that its label is not huge?
@@ -95,7 +101,8 @@ static func in_frame(cam: Camera3D, at: Vector3, frame: Rect2) -> bool:
 	)
 
 
-## Once a frame while the step's prompt is up: `at` is the target's feet, `prompt` where its world prompt hangs, `strips`
+## Once a frame while the step's prompt is up: `at` is the target's feet, `prompt` where its world prompt hangs,
+## `strips`
 ## the on-screen lines to keep off. Returns whether the world prompt itself is in view (else the arrow shows).
 func sync(h, at: Vector3, prompt: Vector3, strips: Array) -> bool:
 	var r := rules()
