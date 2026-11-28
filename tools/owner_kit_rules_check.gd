@@ -532,6 +532,8 @@ func _kael_rmb_lane() -> void:
 ## (within SIZE_COL m of the head pivot), which leaves out what stands off to the side (Albert's owner-approved
 ## masts and sails, 11-12). Albert is the tallest on both; over the next Hunter by 5 to 16% on `col`; Kael below him.
 func _sizes() -> void:
+	var was_contract := WardenNative.contract_only
+	WardenNative.contract_only = true  # (as --warden-model-check: the contract path, which has Warden/Sync)
 	var wm = WARDEN_MODEL_CHECK.new()
 	var holder := Node3D.new()
 	main.add_child(holder)
@@ -574,6 +576,7 @@ func _sizes() -> void:
 		"Kael %.2f m, Albert %.2f m" % [col["juggernaut"], col["bulwark"]]
 	)
 	holder.queue_free()
+	WardenNative.contract_only = was_contract
 	await main.get_tree().process_frame
 
 
