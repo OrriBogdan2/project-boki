@@ -10,11 +10,20 @@ const GOOD := Color("8fe0a0")
 const BAD := Color("ff6a5a")
 const SMALL := 12
 
+
 ## "Glove 1  ·  Q", "Armor", "Boots": where worn slot `slot` is and the key that uses it.
 static func slot_label(slot: int) -> String:
 	if slot < 2:
 		return "%s  ·  %s" % [Gear.WORN_NAMES[slot], Gloves.key_cap(slot)]
 	return Gear.WORN_NAMES[slot]
+
+
+## One changed number as a card line: a green up arrow when it is better, a red down arrow when worse.
+static func change_line(text: String, better: bool) -> Array:
+	if better:
+		return ["▲ " + text, GOOD]
+	return ["▼ " + text, BAD]
+
 
 ## Hover card for a piece of gear (not worn yet): what it does and how it differs from what you wear.
 static func compare(h: Hunter, it: Dictionary) -> Array:
@@ -31,11 +40,12 @@ static func compare(h: Hunter, it: Dictionary) -> Array:
 		out.append(["Instead of %s  ·  %s" % [worn_name, slot_label(slot)], MUTED, SMALL])
 	var changes := GearCompare.changes(it, worn)
 	for c in changes:
-		out.append([c[0], GOOD if c[1] else BAD])
+		out.append(change_line(String(c[0]), bool(c[1])))
 	if changes.is_empty():
 		out.append(["Same numbers as what you wear", MUTED, SMALL])
 	out.append([Gear.desc_of(id, rar), MUTED, SMALL])
 	return out
+
 
 ## Hover card for the piece you wear in slot `slot`.
 static func worn(h: Hunter, slot: int, hint: String) -> Array:
@@ -45,13 +55,20 @@ static func worn(h: Hunter, slot: int, hint: String) -> Array:
 	var id := String(g["id"])
 	var rar := int(g["rar"])
 	var it := Loot.gear(id, rar)
-	return [[Loot.name_of(it), Loot.col_of(it)], [slot_label(slot), MUTED, SMALL], [Gear.stat_text(id, rar), INK],
-		[Gear.desc_of(id, rar), MUTED, SMALL], [hint, MUTED, SMALL]]
+	return [
+		[Loot.name_of(it), Loot.col_of(it)],
+		[slot_label(slot), MUTED, SMALL],
+		[Gear.stat_text(id, rar), INK],
+		[Gear.desc_of(id, rar), MUTED, SMALL],
+		[hint, MUTED, SMALL]
+	]
+
 
 ## Hover card for a perk and how many of it you hold.
 static func perk(id: String, n: int) -> Array:
 	var pd: Dictionary = Data.PERKS[id]
 	return [[pd["name"] if n < 2 else "%s  x%d" % [pd["name"], n], pd["col"]], [pd["desc"], INK]]
+
 
 ## The piece of gear a deathbox row stands for ({} when it is not gear): a worn-style row or a pack thing.
 static func box_gear(b: Dictionary, row: Dictionary) -> Dictionary:

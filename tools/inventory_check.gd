@@ -48,8 +48,8 @@ func _compare(p: Hunter) -> void:
 		"glove: cooldown and a lost stat: %s" % [blink])
 	ok(GearCompare.changes(vest, {}).size() == 1, "into an empty slot every stat is new")
 	var lines := InvText.compare(p, vest)
-	ok(lines.any(func(l): return l[0] == "+28 armor" and l[1] == InvText.GOOD)
-		and lines.any(func(l): return l[0] == "-22 health" and l[1] == InvText.BAD),
+	ok(lines.any(func(l): return l[0] == "▲ +28 armor" and l[1] == InvText.GOOD)
+		and lines.any(func(l): return l[0] == "▼ -22 health" and l[1] == InvText.BAD),
 		"the card colours them green and red")
 
 func _moves(m: Match, p: Hunter) -> void:
@@ -106,7 +106,8 @@ func _window(main: Node, m: Match, p: Hunter, q: Hunter) -> void:
 	lp.hover_demo("pack", 0)
 	await _frames(main, 2)
 	var tip: InvTip = pc.find_children("*", "InvTip", true, false)[0]
-	ok(_texts(tip).has("+28 armor") and _texts(tip).has("-22 health"), "pointing at the vest shows the compare card")
+	var tip_texts := _texts(tip)
+	ok(tip_texts.has("▲ +28 armor") and tip_texts.has("▼ -22 health"), "pointing at the vest shows the compare card")
 	var card: Control = tip.get_child(0)
 	ok(view.encloses(card.get_global_rect()), "the compare card stays on screen")
 	lp = m.hud.pack_panel.find_children("*", "LoadoutPanel", true, false)[0]
