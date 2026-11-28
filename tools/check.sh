@@ -13,8 +13,12 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 VENV="${BOKI_LINT_VENV:-$HOME/.cache/boki-lint/venv}"
 if [ ! -x "$VENV/bin/ruff" ] || [ tools/lint-requirements.txt -nt "$VENV/.installed" ]; then
-	python3 -m venv "$VENV"
-	"$VENV/bin/pip" install -q -r tools/lint-requirements.txt
+	if python3 -m venv "$VENV" 2>/dev/null; then
+		"$VENV/bin/pip" install -q -r tools/lint-requirements.txt
+	else # no python3-venv (the build servers, self-hosted CI runners, no sudo): uv builds the same venv
+		uv venv -q --clear --python 3.12 "$VENV"
+		uv pip install -q --python "$VENV/bin/python" -r tools/lint-requirements.txt
+	fi
 	touch "$VENV/.installed"
 fi
 export PATH="$VENV/bin:$PATH"

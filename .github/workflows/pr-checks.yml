@@ -26,7 +26,8 @@ env:
 
 jobs:
   pr-checks:
-    runs-on: ubuntu-latest
+    # vars.RUNNER = self-hosted moves this job to our own Linux runners (labels self-hosted,linux,boki); unset = GitHub-hosted.
+    runs-on: ${{ vars.RUNNER == 'self-hosted' && fromJSON('["self-hosted","linux","boki"]') || 'ubuntu-latest' }}
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -40,26 +41,18 @@ jobs:
           python3 tools/commit_email_guard.py "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}"
 
       - name: Cache Godot
-        id: godot-cache
+        if: runner.environment == 'github-hosted'
         uses: actions/cache@v4
         with:
-          path: ~/godot-bin
-          key: godot-${{ env.GODOT_VERSION }}-linux
+          path: ~/.cache/boki-ci
+          key: godot-${{ env.GODOT_VERSION }}-linux-ci
 
+      # tools/ci/ci_env.sh: Godot on PATH (no sudo, per-machine cache on self-hosted runners), XDG_DATA_HOME per job.
       - name: Install Godot
-        run: |
-          set -e
-          if [ ! -x ~/godot-bin/godot ]; then
-            base="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable"
-            curl -sSL -o godot.zip "$base/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
-            unzip -q godot.zip && mkdir -p ~/godot-bin && mv Godot_v${GODOT_VERSION}-stable_linux.x86_64 ~/godot-bin/godot
-            rm godot.zip
-          fi
-          sudo ln -sf ~/godot-bin/godot /usr/local/bin/godot
-          godot --version
-          echo "XDG_DATA_HOME=$RUNNER_TEMP/xdg" >> "$GITHUB_ENV"
+        run: tools/ci/ci_env.sh
 
       - name: Cache lint tools
+        if: runner.environment == 'github-hosted'
         uses: actions/cache@v4
         with:
           path: ~/.cache/boki-lint

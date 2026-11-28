@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dein3r2l22knt"
-path="res://.godot/imported/thunderstrich_thunderstrich_atlas.webp-a06827fe8ccd5165677d2a020bc79fcb.ctex"
+path.s3tc="res://.godot/imported/thunderstrich_thunderstrich_atlas.webp-a06827fe8ccd5165677d2a020bc79fcb.s3tc.ctex"
+path.etc2="res://.godot/imported/thunderstrich_thunderstrich_atlas.webp-a06827fe8ccd5165677d2a020bc79fcb.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "ec917d32ab6eca03f31ff4e5b4085a4d"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/thunderstrich/thunderstrich_thunderstrich_atlas.webp"
-dest_files=["res://.godot/imported/thunderstrich_thunderstrich_atlas.webp-a06827fe8ccd5165677d2a020bc79fcb.ctex"]
+dest_files=["res://.godot/imported/thunderstrich_thunderstrich_atlas.webp-a06827fe8ccd5165677d2a020bc79fcb.s3tc.ctex", "res://.godot/imported/thunderstrich_thunderstrich_atlas.webp-a06827fe8ccd5165677d2a020bc79fcb.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
