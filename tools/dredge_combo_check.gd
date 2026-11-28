@@ -28,6 +28,7 @@ func run(main_node: Node) -> void:
 	await _all()
 	await _hook_hold()
 	await _slam_tell()
+	await _anchor_spike()
 	await _dash_moves()
 	await _glide_wins()
 	await _parity_gun()
@@ -37,6 +38,7 @@ func run(main_node: Node) -> void:
 	await load("res://tools/dredge_rmb_carry_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_reel_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_ult_check.gd").new(ak, ok).run()
+	await load("res://tools/dredge_combo_e_check.gd").new(ak, ok).run()
 	await load("res://tools/dredge_cancel_check.gd").new(ak, ok).run()
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "dredge")
 	ok(
@@ -205,7 +207,7 @@ func _slam_tell() -> void:
 			% [float(tell.get("len", 0.0)), float(tell.get("deg", 0.0)), float(tell.get("fill", -1.0)), fist_up]
 		)
 	)
-	# the hop carries the drawn cone with him: wait it out, then place the foes in the cone
+	# the cone stays put with him: wait out the wind-up, then place the foes in the cone
 	while k.wind > 0.03:
 		ak.step(m, ak.DT)
 	t.teleport(p.pos + in_off)
@@ -545,8 +547,8 @@ func _all() -> void:
 		ak.step(m, 0.05)
 		tw += 0.05
 	ok(
-		"deep reach: foe arrives at your feet and does not land Grounded",
-		k.arrivals == 1 and k.pull.is_empty() and not KitStatus.grounded(t) and p.flat_dist(t) < 3.6,
+		"deep reach: foe arrives at your feet and lands Grounded, not stunned",
+		k.arrivals == 1 and k.pull.is_empty() and KitStatus.grounded(t) and p.flat_dist(t) < 3.6,
 		"arrivals %d dist %.1f (was %.1f)" % [k.arrivals, p.flat_dist(t), d0]
 	)
 	ok("reel: Grimble's own Grounded ends with the reel", not KitStatus.grounded(p))
@@ -564,14 +566,14 @@ func _all() -> void:
 	var early_dmg: float = ak.dmg(t) - hp0
 	ak.step(m, 0.2)
 	ok(
-		"anchor: hops ~1 bh forward, the damage lands on the slam frame (~0.38s), not at the cast",
-		early == 0 and early_dmg == 0.0 and k.anchors == 1 and p.flat_dist(at0) > 0.8 and p.flat_dist(at0) < 2.0,
+		"anchor: he stays put, the damage lands on the slam frame (~0.38s), not at the cast",
+		early == 0 and early_dmg == 0.0 and k.anchors == 1 and p.flat_dist(at0) < 0.3,
 		"anchors at 0.3s %d (dmg %.0f), moved %.1f m" % [early, early_dmg, p.flat_dist(at0)]
 	)
 	ok(
-		"combo: reel > Anchor Drop = damage and stun, the foe is not Grounded (no Ground in the source)",
-		k.anchors == 1 and ak.dmg(t) - hp0 >= 20.0 and not KitStatus.grounded(t) and t.stun_t > 0.8,
-		"anchors %d took %.0f stun %.2f gnd %s" % [k.anchors, ak.dmg(t) - hp0, t.stun_t, KitStatus.grounded(t)]
+		"combo: reel > Anchor Drop = damage and a long stun on the Grounded foe",
+		k.anchors == 1 and ak.dmg(t) - hp0 >= 20.0 and t.stun_t > 0.8,
+		"anchors %d took %.0f stun %.2f" % [k.anchors, ak.dmg(t) - hp0, t.stun_t]
 	)
 	var swirl := HeroVfx.of(k.m).live.filter(func(e): return e.get("on") == t)
 	ok("anchor: the stunned foe shows a stun swirl", not swirl.is_empty())
@@ -1188,3 +1190,32 @@ func _parity_gun() -> void:
 		"%.2f / %.2f / %.2f" % [float(keys[1][0]), float(keys[-2][0]), float(keys[-1][0])]
 	)
 	await ak.done(m)
+
+
+## docs/SPIKE_SLAM.md: the ground Anchor Drop spikes a foe in the air (driven down).
+func _anchor_spike() -> void:
+	var r: Array = ak.setup("dredge", 6.0, "", true)
+	var m: Match = r[0]
+	var pl: Hunter = r[1]
+	var tg: Hunter = r[2]
+	var home: Vector3 = r[4]
+	var kit: DredgeKit = pl.ak
+	tg.teleport(home + Vector3(2.0, 1.2, 0))
+	ak.fresh(tg)
+	ak.aim_at(pl, home + Vector3(2.0, 0, 0))
+	kit.cd["e"] = 0.0
+	pl.ak.use_e()
+	var t := 0.0
+	while kit.anchors == 0 and t < 1.0:
+		tg.pos.y = home.y + 1.2      # held in the air until the slam frame
+		tg.vel = Vector3.ZERO
+		tg.grounded = false
+		m.step(ak.DT)
+		t += ak.DT
+	var vy := tg.vel.y
+	for i in 6:      # the cone's hit lands within a few frames of the slam
+		m.step(ak.DT)
+		vy = minf(vy, tg.vel.y)
+	# the data's 16 m/s, which a hunter's fall cap (HunterMove.fall_max, 12) clamps on its next tick
+	ok("anchor spike: the ground Anchor Drop drives a foe in the air down (at the fall cap at once)",
+		kit.anchors == 1 and vy <= -HunterMove.fall_max + 0.5, "anchors %d vy %.1f" % [kit.anchors, vy])

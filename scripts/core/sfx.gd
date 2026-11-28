@@ -89,6 +89,8 @@ const NAMES := [
 	"k_sound",
 	"shotgun",
 	"sniper",
+	"hit_light",
+	"hit_solid",
 	"hit_heavy",
 	"slash_hit",
 	"armor_hit",
@@ -222,6 +224,8 @@ const MIN_GAP := {
 	"ab_slow": 120,
 	"hit": 45,
 	"crit": 60,
+	"hit_light": 45,
+	"hit_solid": 55,
 	"hit_heavy": 70,
 	"slash_hit": 60,
 	"armor_hit": 70,
@@ -314,6 +318,7 @@ const HOLD_MS := 250
 ## dB your own held fire drops while a rival's wind-up or ult cue sounds, so the warning cuts through it
 ## (docs/AUDIO.md, enemy priority); the duck lasts as long as the cue, and 0 turns the rule off
 var fire_duck_db := -4.0
+var play_jitter_db := 1.0  # dB: a play's volume varies this much either way (none when pitch_var is 0)
 
 ## Sounds behind terrain (see SfxOcclusion) go through the SFXMuffled bus (SfxMix.OCCLUDED_HZ / OCCLUDED_DB).
 var occlusion := SfxOcclusion.new()
@@ -880,7 +885,7 @@ func play(
 		return -1
 	var vi := players.find(p)
 	p.stream = _take(sname, take)
-	p.volume_db = v
+	p.volume_db = v + (rng.randf_range(-play_jitter_db, play_jitter_db) if pitch_var > 0.0 else 0.0)
 	p.pitch_scale = pitch * (1.0 + rng.randf_range(-pitch_var, pitch_var))
 	p.play()
 	played.emit(sname, pos, vol_db, pitch)

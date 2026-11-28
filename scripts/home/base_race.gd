@@ -344,22 +344,18 @@ static func settle(run: Run) -> Dictionary:
 	var why := carried(win, run.recs[order[1]], run.tw)
 	return {"win": win, "lose": lose, "gems": gems, "backed_won": backed_won, "prize": prize, "pull": pull, "why": why}
 
-## Pays out a solo training lap (grades: three of great/good/miss). Returns the Speed gained.
-static func settle_solo(rec: Dictionary, grades: Array) -> int:
+## Pays out a solo training lap (grades: three of great/good/miss): Speed bites into the bag, one limited
+## drill run (TrainRuns.pay_drill), never raw points. Returns the pay ({charged, bites, id, text}).
+static func settle_solo(rec: Dictionary, grades: Array) -> Dictionary:
 	var t_v: Dictionary = rules()["train"]
-	var pts := 0
-	for g in grades:
-		if g != "miss":
-			pts += int(t_v[g]) + (int(t_v["dojo"]) if Save.has_building("dojo") else 0)
-	var mult := float(t_v["happy_mult"]) if Care.need(rec, "joy") >= float(t_v["happy_at"]) else 1.0
-	var gained := Care.add_stat(rec, "speed", int(round(pts * mult)))
+	var pay := TrainRuns.pay_drill("speed", grades)
 	Care.change(rec, "energy", -float(rules()["energy"]))
 	Care.change(rec, "food", -float(t_v["food"]))
 	Care.change(rec, "joy", float(t_v["joy_great"]) if grades.has("great") else float(t_v["joy_else"]))
 	Evo.add(rec, "swift", 2.0)
-	if gained > 0:
+	if int(pay["bites"]) > 0:
 		Save.remember(rec, "trained", "ran a training lap of the Dash with you", 1.0)
-	return gained
+	return pay
 
 # ------------------------------------------------------------------ on the base
 var h                          # the Home screen
@@ -473,7 +469,8 @@ func find(p2: Vector2) -> Dictionary:
 func label() -> String:
 	var fmt := String(tweak("dash").get("name", ""))
 	var back := "back %s" % Save.active_kin().get("name", "your partner")
-	return "Start a Dash, %s (%s)" % [fmt, back] if fmt else "Start a Dash (%s)" % back
+	var runs := TrainRuns.line("race")
+	return "Start a Dash, %s (%s)  ·  %s" % [fmt, back, runs] if fmt else "Start a Dash (%s)  ·  %s" % [back, runs]
 
 ## Up to 4 rested Boki out on the base, your partner first.
 func entrants() -> Array:
@@ -725,18 +722,21 @@ static func pull_rows(res: Dictionary) -> Array:
 	return [["Friends pull together: they run each other's pace", UI.MUTED]] if res.get("pull", false) else []
 
 ## The result-card row for a win that went on the wall (none when it did not).
-static func pin_rows(pinned: bool) -> Array:
-	return [["%s: pinned to the showcase wall" % twist()["name"], UI.MUTED]] if pinned else []
+## font 0 leaves the size out (show_card rows); Seek and Volley pass 14 (result_card rows).
+static func pin_rows(pinned: bool, font := 0) -> Array:
+	if not pinned:
+		return []
+	var row: Array = ["%s: pinned to the showcase wall" % twist()["name"], UI.MUTED]
+	if font > 0:
+		row.insert(1, font)
+	return [row]
 
-func _solo_card(gained: int) -> void:
-	var speed := int(solo_rec["stats"]["speed"])
+func _solo_card(pay: Dictionary) -> void:
 	var marks := ""
 	for g in _grades():
 		marks += {"great": " ★", "good": " ●", "miss": " ✕"}[g]
-	var line := "No gain this time. Try again after a rest"
-	if gained > 0:
-		line = "+%d Speed  (%d of %d)" % [gained, speed, Care.stat_cap(solo_rec)]
-	show_card("%s ran a training lap!" % solo_rec["name"], [[marks.strip_edges(), UI.INK], [line, UI.GOLD]])
+	var col: Color = UI.GOLD if int(pay["bites"]) > 0 else UI.MUTED
+	show_card("%s ran a training lap!" % solo_rec["name"], [[marks.strip_edges(), UI.INK], [pay["text"], col]])
 
 ## The result card at the top of the screen: a headline and a coloured line each.
 func show_card(title: String, lines: Array) -> void:
@@ -759,5 +759,6 @@ static func result_card(home, rows: Array) -> Control:
 	c.add_child(v)
 	for r in rows:
 		v.add_child(UI.label(r[0], r[1], r[2]))
+	PanelClose.attach(c, c.queue_free)
 	home.root_ui.add_child(c)
 	return c
