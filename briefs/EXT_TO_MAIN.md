@@ -11591,3 +11591,4 @@ READY ext/sable-dagger-slow 5135cdce39 (bulk-rebase: origin/main merged in mecha
 READY ext/vex-daze-leftovers 6745c72ce8 (Vex Daze leftovers: both source-silent, docs note + check results, no code change)
 READY ext/kit-parity-stale-snaps 2755cf0e9b (KIT_PARITY snapshots labelled)
 READY ext/extra-garden-race 2953210f1c (Grand Dash prototype: 3-lap Dash, bots fill lanes, cheer button cooldown, spec + --race-cup-check)
+READY ext/mob-glb-turnaround caf068017026cd943d70e38b6a4b345bf7a1db57 (tools: --mob-turnaround-shots + sheet composer; 12 mob sheets in gens/mob-glb-turnaround, no model edits)
