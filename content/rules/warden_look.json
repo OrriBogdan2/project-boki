@@ -507,11 +507,11 @@
 				"top_light": 0.4
 			},
 			"metal": {
-				"top_light": 0.5,
-				"fres": 0.55,
+				"top_light": 0.3,
+				"fres": 0.35,
 				"fres_tint": 0.8,
 				"far_lift": 0.25,
-				"sheen": 0.1
+				"sheen": 0.0
 			},
 			"leather": {
 				"far_lift": 0.3,
@@ -539,33 +539,20 @@
 			{
 				"at": "anchor_blade_root",
 				"to": "weapon_muzzle",
-				"color": [1.0, 0.93, 0.78, 0.2],
-				"size": 0.24,
-				"count": 6,
-				"from": 0.3
+				"color": [1.0, 0.93, 0.78, 0.14],
+				"size": 0.2,
+				"count": 5,
+				"from": 0.4,
+				"depth_test": true
 			},
 			{
 				"at": "anchor_blade_root",
 				"to": "weapon_muzzle",
-				"color": [1.0, 0.97, 0.9, 0.24],
-				"size": 0.16,
-				"count": 8,
-				"from": 0.3
-			},
-			{
-				"at": "anchor_arm_up",
-				"color": [0.88, 0.04, 0.12, 0.2],
-				"size": 0.2
-			},
-			{
-				"at": "anchor_arm_elbow",
-				"color": [0.88, 0.04, 0.12, 0.16],
-				"size": 0.16
-			},
-			{
-				"at": "anchor_arm_fore",
-				"color": [0.88, 0.04, 0.12, 0.16],
-				"size": 0.16
+				"color": [1.0, 0.97, 0.9, 0.16],
+				"size": 0.14,
+				"count": 7,
+				"from": 0.4,
+				"depth_test": true
 			}
 		]
 	},
