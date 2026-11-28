@@ -4,11 +4,15 @@ extends RefCounted
 ##      the front page has at most 4 buttons, with More among them
 ##   2. every action the menu had before the cut is still on the front page or under More
 ##   3. every label is one plain line (no line break, at most 22 letters)
-##   4. at 1280x720, 1920x1080, 2560x1080 and 3440x1440 both pages sit inside the title-safe margin
+##   4. the front page holds only Resume, Settings, More, Leave (or Save and leave); Controls, Practice and
+##      the rest sit one click away on More
+##   5. every key cap on the menu is the live key (Settings.key_cap), not typed text
+##   6. at 1280x720, 1920x1080, 2560x1080 and 3440x1440 both pages sit inside the title-safe margin
 
 const OPTS := {"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true}
 const SIZES := [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1080), Vector2i(3440, 1440)]
 const MAX_FRONT := 4
+const FRONT_OK := ["Resume", "Settings", "More", "Leave", "Leave match", "Skip tutorial", "Save and leave"]
 const MAX_LABEL := 22
 const SAFE_FRAC := 0.04  # as the prematch screen's title-safe margin
 const SAFE_MIN := 24.0
@@ -49,7 +53,7 @@ func run(mn: Node) -> void:
 	for p in ["town", "interior"]:
 		await _place(p, p, always + ["Save and leave", "Inventory", "Save Files"])
 	var matches := {
-		"training": [{"training": true, "practice": true}, ["Leave", "Change Hunter"]],
+		"training": [{"training": true, "practice": true}, ["Leave", "Change Hunter", "Practice"]],
 		"tutorial": [{"tutorial": true}, ["Skip tutorial", "Change Hunter"]],
 		"arena": [Match.arena_opts("gunslinger"), ["Leave", "Change Hunter"]],
 		"match": [{"teams": 2}, ["Leave match"]],
@@ -94,6 +98,10 @@ func _place(tag: String, where: String, want: Array) -> void:
 		front.size() <= MAX_FRONT and front.has("More"),
 		"%s: %d buttons up front, More among them %s" % [tag, front.size(), str(front)]
 	)
+	var extra := front.filter(func(t: String): return not FRONT_OK.has(t))
+	ok(extra.is_empty(), "%s: only the front-page actions up front (extra %s)" % [tag, str(extra)])
+	var caps: Array = Overlay.host.find_children("*", "Label", true, false).map(func(l): return (l as Label).text)
+	ok(caps.has(Settings.key_cap("menu")), "%s: Resume's key cap is the live menu key" % tag)
 	Overlay.open_more()
 	await tree.process_frame
 	var more := _labels()
@@ -128,6 +136,7 @@ func _fit() -> void:
 			var m := maxf(SAFE_MIN, sz.y * SAFE_FRAC) / maxf(k, 0.01)
 			var safe := vis.grow(-m)
 			var r: Rect2 = (Overlay.host.get_child(0) as Control).get_global_rect()
+			await _shot("pause_%s_%dx%d" % [pg, sz.x, sz.y])
 			ok(
 				safe.encloses(r),
 				"%dx%d %s: inside the safe area (panel %s, safe %s)" % [sz.x, sz.y, pg, str(r), str(safe)]
@@ -136,3 +145,16 @@ func _fit() -> void:
 			await tree.process_frame
 	win.size = was
 	Settings._apply_ui_scale()
+
+
+## With a renderer (xvfb, not --headless) and --shots-dir=<dir>, a screenshot of the open page.
+func _shot(file: String) -> void:
+	var dir := ""
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--shots-dir="):
+			dir = arg.substr(12)
+	if dir == "" or DisplayServer.get_name() == "headless":
+		return
+	DirAccess.make_dir_recursive_absolute(dir)
+	await tree.process_frame
+	main.get_viewport().get_texture().get_image().save_png(dir.path_join(file + ".png"))
