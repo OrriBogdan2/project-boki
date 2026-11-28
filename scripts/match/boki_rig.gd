@@ -978,6 +978,21 @@ const FRAME := {
 		"tail_tip": Vector3(0, 0.26, 0.231),
 		"tip_bone": "hips",
 		"hip": 0.232,
+		# its atlas (de-lit, boki_delight.py) is still a mosaic of light and dark cells (rust, dark brown flecks):
+		# lit it reads blotchy and shaded next to the other Boki's flat coats. The coat-coloured texels (not the
+		# eyes, mane or horns painted in the same atlas) blend toward the atlas's mean colour, a little lighter,
+		# and the paint is trimmed a step (hero_toon.gdshader albedo_flat; saturation 0.54, Boki median 0.30)
+		"coat":
+		{
+			"desat": 0.2,
+			"dark_lift": 0.2,
+			"albedo_flat": 0.7,
+			"albedo_flat_lod": 11.0,
+			"albedo_flat_contrast": 0.5,
+			"albedo_flat_gain": 1.7,
+			"albedo_flat_key": Vector3(0.72, 0.165, 0.116),
+			"albedo_flat_key_width": 0.1
+		},
 		"marks":
 		{
 			"left flank": Vector3(-0.0654, 0.267, 0.0477),

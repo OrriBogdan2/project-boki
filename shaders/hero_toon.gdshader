@@ -98,6 +98,18 @@ uniform float dark_lift = 0.0;
 // every texel
 uniform float far_smooth = 0.0;
 uniform float far_smooth_bias = 1.0;
+// a painted atlas whose texels are a mosaic of light and dark cells (a Boki coat baked as speckle: Crofthorn's rust,
+// dark brown and yellow flecks) read as flat cel bands like the other Boki: at every distance the texture blends
+// albedo_flat of the way toward albedo_flat_lod mips up (a cell is ~25 px: lod 5 averages its neighbours), then
+// albedo_flat_contrast scales what is left of its light and dark about its own mean; 0 = unchanged
+uniform float albedo_flat = 0.0;
+uniform float albedo_flat_lod = 5.0;
+uniform float albedo_flat_contrast = 1.0;
+uniform float albedo_flat_gain = 1.0;   // the flat colour this much lighter (>1) or darker
+// and only texels of the coat's own colour: albedo_flat_key (a linear colour; black = every texel) keeps a texel
+// whose chromaticity is farther than albedo_flat_key_width from it (eyes, a pale mane, horns painted in the same atlas)
+uniform vec3 albedo_flat_key = vec3(0.0);
+uniform float albedo_flat_key_width = 0.1;
 // and a rim in the Hunter's signature colour there (content/rules/warden_look.json), so the silhouette holds
 uniform float rim_far = 0.0;
 uniform vec4 rim_far_color : source_color = vec4(1.0);
@@ -199,6 +211,19 @@ void fragment() {
 				tx = clamp(tx, tc - tr, tc + tr);
 			}
 			tx = mix(tx, tc, far_smooth * far_k);
+		}
+		if (albedo_flat > 0.0) {
+			vec3 tf = textureLod(albedo_tex, UV, albedo_flat_lod).rgb * albedo_flat_gain;
+			float kw = 1.0;
+			if (dot(albedo_flat_key, vec3(1.0)) > 0.0) {
+				vec3 kc = albedo_flat_key / dot(albedo_flat_key, vec3(1.0));
+				vec3 tc3 = tx / max(dot(tx, vec3(1.0)), 0.0001);
+				kw = 1.0 - smoothstep(albedo_flat_key_width, albedo_flat_key_width * 1.6, length(tc3 - kc));
+			}
+			tx = mix(tx, tf, albedo_flat * kw);
+			float tl = dot(tx, vec3(0.3, 0.59, 0.11));
+			float fl = dot(tf, vec3(0.3, 0.59, 0.11));
+			tx = max(tx + vec3((tl - fl) * (albedo_flat_contrast - 1.0) * kw), vec3(0.0));
 		}
 		c *= tx;
 		if (glow_key) {

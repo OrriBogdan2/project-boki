@@ -5,6 +5,9 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	"--toon-lineup-farm-shots": ["res://tools/toon_lineup_farm_shots.gd", "toon_lineup_farm_shots", null],
+	"--crofthorn-flat-shots": ["res://tools/crofthorn_flat_shots.gd", "crofthorn_flat_shots", null],
+	"--toon-lineup-shots": ["res://tools/toon_lineup_shots.gd", "toon_lineup_shots", null],  # lineup, match cam
 	"--boki-keys-check": ["res://tools/boki_keys_check.gd", "boki_keys_check", null],  # quick Boki command keys
 	"--boki-everywhere-check": ["res://tools/boki_everywhere_check.gd", "boki_everywhere_check", null],  # Boki in .pck
 	"--boki-size-shots": ["res://tools/boki_size_shots.gd", "boki_size_shots", null],  # Boki beside Vex, true size
