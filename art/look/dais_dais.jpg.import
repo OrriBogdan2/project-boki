@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cvptwrxm6bmy0"
-path="res://.godot/imported/dais_dais.jpg-dc2bf1a8e5aa8f2892fdc83aef7d88bc.ctex"
+path.s3tc="res://.godot/imported/dais_dais.jpg-dc2bf1a8e5aa8f2892fdc83aef7d88bc.s3tc.ctex"
+path.etc2="res://.godot/imported/dais_dais.jpg-dc2bf1a8e5aa8f2892fdc83aef7d88bc.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "29ddc130763ffdab0522ad3b9d09560d"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/look/dais_dais.jpg"
-dest_files=["res://.godot/imported/dais_dais.jpg-dc2bf1a8e5aa8f2892fdc83aef7d88bc.ctex"]
+dest_files=["res://.godot/imported/dais_dais.jpg-dc2bf1a8e5aa8f2892fdc83aef7d88bc.s3tc.ctex", "res://.godot/imported/dais_dais.jpg-dc2bf1a8e5aa8f2892fdc83aef7d88bc.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

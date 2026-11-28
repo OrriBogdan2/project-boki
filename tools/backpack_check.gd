@@ -4,7 +4,8 @@ extends RefCounted
 ## death puts it in the deathbox, a revived hunter is on the Pouch, a rival takes a bigger one from
 ## the box (leaving theirs), a shop sells the next tier, nothing drops one at random, and an extracted
 ## backpack comes home. The size always goes through Equal.pack_slots. Never touches the save file.
-## Prints PACKS ok/FAIL lines and "PACKS DONE, failures: N".
+## It also counts the loadout slots by type (decisions 0005: 2 gloves, 2 charms, boots, 6 utility slots, 5 perk
+## orbs, keys in utility slots) at home and in a match. Prints PACKS ok/FAIL lines and "PACKS DONE, failures: N".
 
 var bad := 0
 var main: Node
@@ -20,6 +21,7 @@ func run(host: Node) -> void:
 	_data()
 	_home()
 	await _match()
+	await _loadout()
 	print("PACKS DONE, failures: %d" % bad)
 	host.get_tree().quit(1 if bad > 0 else 0)
 
@@ -84,28 +86,28 @@ func _match() -> void:
 	main.add_child(m)
 	m.start(o)
 	m.set_process(false)
-	var P := m.player
+	var p := m.player
 	var base := Equal.base_pack()
-	ok(P.backpack == 2 and P.pack_cap == base + Backpacks.slots(2) and P.pack_cap == Equal.pack_slots(P),
-			"a brought Pack: %d slots (Equal.pack_slots)" % P.pack_cap)
-	var foe: Hunter = m.hunters.filter(func(x): return x != P)[0]
+	ok(p.backpack == 2 and p.pack_cap == base + Backpacks.slots(2) and p.pack_cap == Equal.pack_slots(p),
+			"a brought Pack: %d slots (Equal.pack_slots)" % p.pack_cap)
+	var foe: Hunter = m.hunters.filter(func(x): return x != p)[0]
 	Backpacks.wear(foe, 1)
 	ok(foe.pack_cap == base + Backpacks.slots(1), "a Satchel on a rival: %d slots" % foe.pack_cap)
 	# the shop: the next tier for run gems, the old one traded in
-	var price := Backpacks.shop_price(P)
-	P.gems = price
-	ok(price > 0 and Backpacks.shop_upgrade(P) and P.backpack == 3 and P.gems == 0
-			and P.pack_cap == base + Backpacks.slots(3), "a shop upgrade to the Rucksack for %d gems" % price)
-	ok(Backpacks.shop_price(P) == -1 and not Backpacks.shop_upgrade(P), "nothing above the Rucksack")
+	var price := Backpacks.shop_price(p)
+	p.gems = price
+	ok(price > 0 and Backpacks.shop_upgrade(p) and p.backpack == 3 and p.gems == 0
+			and p.pack_cap == base + Backpacks.slots(3), "a shop upgrade to the Rucksack for %d gems" % price)
+	ok(Backpacks.shop_price(p) == -1 and not Backpacks.shop_upgrade(p), "nothing above the Rucksack")
 	# death: it goes in the box
-	P.pack = [Loot.valuable("old_coin")]
-	P.lives = 1
-	m.eliminate(P, null, "knocked out", true)
-	var bx := Life.box_of(m, P)
+	p.pack = [Loot.valuable("old_coin")]
+	p.lives = 1
+	m.eliminate(p, null, "knocked out", true)
+	var bx := Life.box_of(m, p)
 	ok(not bx.is_empty() and int(bx.get("backpack", 0)) == 3, "die and your backpack is in your deathbox")
-	ok(P.backpack == Backpacks.POUCH and P.pack_cap == base, "...and you are on the Pouch (%d slots)" % P.pack_cap)
-	Life.bring_back(m, P, P.pos, 0.5, false)
-	ok(P.backpack == Backpacks.POUCH and P.pack_cap == base, "revived: still the Pouch")
+	ok(p.backpack == Backpacks.POUCH and p.pack_cap == base, "...and you are on the Pouch (%d slots)" % p.pack_cap)
+	Life.bring_back(m, p, p.pos, 0.5, false)
+	ok(p.backpack == Backpacks.POUCH and p.pack_cap == base, "revived: still the Pouch")
 	# a rival sees it, takes it, and leaves theirs
 	var rows: Array = Life.box_items(m, foe, bx).filter(func(it): return it["key"] == "backpack")
 	ok(rows.size() == 1 and bool(rows[0]["upgrade"]), "a looter sees the Rucksack as an upgrade")
@@ -114,14 +116,14 @@ func _match() -> void:
 			"taken: the rival wears the Rucksack, their Satchel is in the box")
 	ok(not Backpacks.take_from_box(m, foe, bx) and foe.backpack == 3, "a smaller one is never swapped in")
 	# smart loot and take-all take a bigger one too
-	Life.smart_loot(m, P, bx)
-	ok(P.backpack == 1 and int(bx.get("backpack", 0)) == 0, "smart loot takes the Satchel back from the box")
-	var bx2 := {"owner": foe, "team": foe.team, "pos": P.pos, "gems": 0, "seeds": {}, "caught": [], "belt": [],
+	Life.smart_loot(m, p, bx)
+	ok(p.backpack == 1 and int(bx.get("backpack", 0)) == 0, "smart loot takes the Satchel back from the box")
+	var bx2 := {"owner": foe, "team": foe.team, "pos": p.pos, "gems": 0, "seeds": {}, "caught": [], "belt": [],
 		"soul_until": 0.0, "prog": {}, "node": null, "empty": false, "gear": [], "pack": [], "keys": 0, "backpack": 2}
-	Life.loot_box(m, P, bx2)
-	ok(P.backpack == 2 and int(bx2["backpack"]) == 1 and not bool(bx2["empty"]), "taking everything swaps in a Pack")
+	Life.loot_box(m, p, bx2)
+	ok(p.backpack == 2 and int(bx2["backpack"]) == 1 and not bool(bx2["empty"]), "taking everything swaps in a Pack")
 	# extraction and the result
-	ok(Backpacks.home_tier(P, true) == 2 and Backpacks.home_tier(P, false) == 0,
+	ok(Backpacks.home_tier(p, true) == 2 and Backpacks.home_tier(p, false) == 0,
 			"the result carries the backpack home only when you extract")
 	# bots: on harder settings some set out with a bigger one
 	var big := 0
@@ -135,5 +137,42 @@ func _match() -> void:
 			big += 1
 		b.free()
 	ok(big > 5 and big < 40, "expert bots: %d of 40 set out with a bigger backpack" % big)
+	m.queue_free()
+	await main.get_tree().process_frame
+
+# ------------------------------------------------------------------ the loadout rows
+## One row per slot type: what the home picks and a match's player hold.
+func _loadout() -> void:
+	_fresh()
+	var picks := Equal.picks().size()
+	var m := Match.new()
+	main.add_child(m)
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "raid": "clear"})
+	m.set_process(false)
+	var p := m.player
+	var gloves := p.gear.size() - Gear.SLOTS.filter(func(s): return s == "armor" or s == "boots").size()
+	var charms := Gear.SLOTS.count("charm")
+	print("PACKS slots: gloves %d, charms %d, boots %d, armor %d, utility %d (home %d), perks %d"
+			% [gloves, charms, Gear.SLOTS.count("boots"), Gear.SLOTS.count("armor"), p.belt.size(), picks,
+			PerkOrbs.slots()])
+	ok(gloves == 2 and Gloves.key_cap(0) != Gloves.key_cap(1), "2 gloves, on their own keys (Q, V)")
+	ok(Gear.SLOTS.count("boots") == 1, "1 boots slot")
+	ok(p.belt.size() == 6 and UtilityBelt.SLOTS == 6 and picks == 6, "6 utility slots in a match and at home")
+	if charms != 2:
+		print("PACKS GAP charms: %d of 2 slots built (decisions 0005 follow-up: a new slot and tile)" % charms)
+	ok(PerkOrbs.slots() == 5, "up to 5 perk orbs")
+	var got := 0
+	for id in Data.PERKS.keys():
+		if p.perk_open(id):
+			p.add_perk(id)
+			got += 1
+	ok(got == 5 and p.perks.size() == 5 and not p.perk_open(String(Data.PERKS.keys()[0])),
+			"a sixth perk never fits (%d taken)" % got)
+	var carried := BeltKeys.give(p, "chest_key", 5)
+	var i := UtilityBelt.slot_of(p, "chest_key")
+	ok(carried == KeyChest.cap() and i >= 0 and int(p.belt[i]["n"]) == carried and p.chest_keys == carried,
+			"chest keys sit in one utility slot, stacked to %d" % carried)
+	ok(BeltKeys.take(p, "chest_key", carried) == carried and UtilityBelt.slot_of(p, "chest_key") < 0,
+			"spending the last key frees the slot")
 	m.queue_free()
 	await main.get_tree().process_frame

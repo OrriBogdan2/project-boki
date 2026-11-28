@@ -28,7 +28,10 @@ const PHASES := ["ride", "drop", "land", "watch", "fight", "extract"]
 const AB_FRAMES := 30  # frames a side of --profile-ab runs before the other
 
 var _added := {}  # "Control"/"VFX"/"3D"/"other" -> nodes that entered the tree this frame
+var _from := {}  # script file of the nearest scripted ancestor -> 3D nodes it added this frame
+var _added_geo: Array = []  # the GeometryInstance3D nodes added this frame (their materials: "added mats")
 var _pipes := 0  # pipeline compilations so far (Forward+/Mobile; Compatibility counts none)
+var _pipes_draw := 0  # of those, the ones built at draw time (the stalls; the rest build in the background)
 var _bench = preload("res://tools/perf_bench.gd").new()  # its HUD draw hook (hud_us: the last canvas draw)
 var _uplink := {}
 var _rode_at := -1.0
@@ -70,6 +73,17 @@ func _on_added(n: Node) -> void:
 	elif not n is Node3D:
 		k = "other"
 	_added[k] = int(_added.get(k, 0)) + 1
+	if n is Node3D:
+		# who built it: the nearest ancestor with a script (a compile frame's report names it)
+		var a: Node = n.get_parent()
+		for i in 6:
+			if a == null or a.get_script() != null:
+				break
+			a = a.get_parent()
+		var by := (a.get_script() as Script).resource_path.get_file() if a and a.get_script() else "?"
+		_from[by] = int(_from.get(by, 0)) + 1
+	if n is GeometryInstance3D:
+		_added_geo.append(n)
 
 
 func _process(delta: float) -> void:
@@ -82,6 +96,15 @@ func _process(delta: float) -> void:
 		lf["phys"] = Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0
 		lf["gpu"] = RenderingServer.viewport_get_measured_render_time_gpu(vp_rid)
 		lf["added"] = _added.duplicate()
+		lf["from"] = _from.duplicate()
+		var w0 := Time.get_ticks_usec()
+		var mk := {}
+		for g in _added_geo:
+			if is_instance_valid(g):
+				for k in _mat_keys(g as GeometryInstance3D):
+					mk[k] = mk.get(k, _node_path(g))
+		lf["added_mats"] = mk.keys().map(func(k): return "%s (%s)" % [k, mk[k]])
+		_walk_us += Time.get_ticks_usec() - w0  # (the report's own time, not the frame's)
 		if _bench.vp != vp_rid:
 			_bench.vp = vp_rid
 			_bench._hook_hud(m)
@@ -95,12 +118,17 @@ func _process(delta: float) -> void:
 			p += RenderingServer.get_rendering_info(info)
 		lf["pipes"] = p - _pipes
 		_pipes = p
+		var pd := RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_DRAW)
+		lf["pipes_draw"] = pd - _pipes_draw
+		_pipes_draw = pd
 		if _ab:
 			lf["ab"] = SimLod.force_slow
 			_tally_rates("%s/%d" % [lf["phase"], SimLod.force_slow])
 			if Engine.get_process_frames() % AB_FRAMES == 0:
 				SimLod.force_slow = 1 - SimLod.force_slow
 	_added.clear()
+	_from.clear()
+	_added_geo.clear()
 	super._process(delta)
 
 
@@ -177,7 +205,7 @@ func _bring_watch() -> void:
 	var others := _others()
 	for i in others.size():
 		var h: Hunter = others[i]
-		var x := lerpf(WATCH_X.x, WATCH_X.y, float(i / 2) / maxf(1.0, others.size() / 2.0 - 1.0))
+		var x := lerpf(WATCH_X.x, WATCH_X.y, float(int(i / 2.0)) / maxf(1.0, others.size() / 2.0 - 1.0))
 		var want: Vector3 = me.pos + side * (x if i % 2 == 0 else -x) + fwd * float(i % 3 - 1) * 2.0
 		var at: Vector3 = m.world.free_spot_near(want, [], 0.6, 0.5, 6.0)
 		h.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
@@ -299,6 +327,7 @@ func _finish() -> void:
 					var per := ", ".join(ks.map(func(k): return "every %d: %.1f" % [k, float(rates[k]) / fl.size()]))
 					var head := "PROFILE slow=%d %s" % [side, _phase_line(ph, fl)]
 					lines.append("%s | hunters a frame by pose rate: %s" % [head, per])
+	lines.append_array(_compile_lines())
 	var tally := {}
 	var hitches: Array = frames.filter(func(f): return float(f["wall"]) > HITCH_MS and f["phase"] in PHASES)
 	for f in hitches:
@@ -323,6 +352,29 @@ func _finish() -> void:
 		if fa:
 			fa.store_string(txt + "\n")
 	get_tree().quit(0 if _rode_at >= 0.0 else 1)
+
+
+## Every in-match frame (the loading screen done) that compiled a shader, whatever it cost: the goal of no
+## compiles mid-match (WarmUp) reads this. A cache file is "<ShaderClass>/<name>": SceneForwardClustered = a 3D
+## material, Canvas = 2D/HUD, Particles = a particle process shader.
+func _compile_lines() -> Array:
+	var fl: Array = frames.filter(func(f): return int(f.get("compiles", 0)) > 0)
+	var n := 0
+	var pd := 0
+	for f in frames:
+		pd += int(f.get("pipes_draw", 0))
+	for f in fl:
+		n += int(f["compiles"])
+	var head := "PROFILE in-match shader compiles %d in %d frames, pipelines built at draw %d"
+	var out: Array = [head % [n, fl.size(), pd]]
+	for f in fl.slice(0, 20):
+		var cf := ", ".join(f.get("cfiles", []))
+		var nw := ", ".join((f.get("new", []) as Array).slice(0, 4))
+		var by := str(f.get("from", {}))
+		var am := ", ".join(f.get("added_mats", []))
+		var at := [f["phase"], float(f["t"]), float(f.get("wall", 0.0)), int(f["compiles"]), cf, nw, by, am]
+		out.append("PROFILE   compile %-7s t=%6.2f %4.0f ms  c%d  %s  new: %s  built by: %s  added mats: %s" % at)
+	return out
 
 
 func _phase_line(ph: String, fl: Array) -> String:

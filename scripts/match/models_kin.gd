@@ -789,7 +789,7 @@ static func nesting_nook() -> Node3D:
 		Vector3(PI, PI / 4, 0)
 	)
 	PropAnim.on(heart, 0.0, 0.05, 2.0)
-	ModelsBake.merge_tree(root, true)  # 60 draws to 17: the stones, stalks and flowers share colours
+	PaintMerge.tree(root)  # the stones, stalks and flowers: a mesh per painted look
 	return root
 
 
@@ -872,41 +872,16 @@ static func incubator() -> Node3D:
 	glow.omni_range = 2.6
 	glow.position = bz + Vector3(0, 0.9, 0.5)
 	root.add_child(glow)
-	# the cradles: an arc of eight round the front of the hearth, each with ember pebbles in front
+	# the cradles: an arc of eight round the front of the hearth, each with ember pebbles in front. One is built
+	# and merged, the rest are copies that share its meshes, so the eight draw together.
+	var cradle := IncubatorCradle.build(stone, straw, pebble, iron)
+	PaintMerge.tree(cradle)
 	for i in 8:
 		var a := PI * (0.04 + 0.92 * float(i) / 7.0)
-		var c := Node3D.new()
+		var c: Node3D = cradle if i == 0 else cradle.duplicate()
 		c.name = "C%d" % i
 		c.position = Vector3(-cos(a) * 0.74, 0.18, 0.02 + sin(a) * 0.62)
 		root.add_child(c)
-		ModelsBase.part(c, ModelsBase.cyl(0.14, 0.16, 0.1, 12), stone, Vector3(0, 0.05, 0))
-		var tr := TorusMesh.new()
-		tr.inner_radius = 0.06
-		tr.outer_radius = 0.14
-		tr.rings = 14
-		tr.ring_segments = 7
-		ModelsBase.part(c, tr, straw, Vector3(0, 0.13, 0), Vector3(1.0, 0.6, 1.0), Vector3.ZERO, "Nest")
-		for j in 6:
-			var b := PI * (0.18 + 0.64 * float(j) / 5.0)
-			ModelsBase.part(
-				c,
-				ModelsBase.sphere(0.028, 6),
-				pebble,
-				Vector3(cos(b) * 0.17, 0.02, sin(b) * 0.17),
-				Vector3(1.2, 0.7, 1.2),
-				Vector3.ZERO,
-				"P%d" % j
-			)
-		var egg := Node3D.new()
-		egg.name = "Egg"
-		egg.position = Vector3(0, 0.08, 0)
-		c.add_child(egg)
-		var lock := Node3D.new()
-		lock.name = "Lock"
-		c.add_child(lock)
-		for k in 3:
-			ModelsBase.part(lock, ModelsBase.box(0.24, 0.02, 0.025), iron, Vector3(0, 0.12, -0.07 + k * 0.07))
-		lock.visible = false
 	# the shelf for eggs waiting their turn, behind and to one side: two planks, three eggs a plank
 	var shelf := Node3D.new()
 	shelf.name = "Shelf"
@@ -930,7 +905,8 @@ static func incubator() -> Node3D:
 			mk.name = "S%d" % ((0 if y < 0.5 else 3) + j)
 			mk.position = Vector3(x, y + 0.03, 0)
 			shelf.add_child(mk)
-	ModelsBake.merge_tree(root, true)  # HomeIncubator finds the cradles, pebbles and grates by name only
+	for n in [root, embers, shelf]:  # (not merge_tree: the cradles are merged, and their copies share the meshes)
+		PaintMerge.node(n)
 	return root
 
 

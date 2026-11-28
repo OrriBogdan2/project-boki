@@ -39,6 +39,7 @@ func ok(cond: bool, what: String) -> void:
 		print("BHT FAIL %s" % what)
 
 func run(main_node: Node) -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	main = main_node
 	Save.no_write = true
 	Save.d = Save.fresh()
@@ -86,10 +87,10 @@ func _kit(a: String, kind: String) -> Dictionary:
 	P.ak.cd_off = true
 	var out := {}
 	for slot in SLOTS:
-		out[slot] = await _fire(m, P, tgt, home, spot, slot, 1.0)
+		out[slot] = _fire(m, P, tgt, home, spot, slot, 1.0)
 	if EXECUTES.has(a):      # last (it leaves the dummy down), once the ultimate has run out
 		ak.step(m, EXEC_WAIT)
-		out["execute"] = await _fire(m, P, tgt, home, spot, String(EXECUTES[a]), 0.05)
+		out["execute"] = _fire(m, P, tgt, home, spot, String(EXECUTES[a]), 0.05)
 	await ak.done(m)
 	return out
 

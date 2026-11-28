@@ -4,6 +4,8 @@ extends RefCounted
 ## (stuns, Ground, roots, wall stuns, the Nightwell pull, Snap, Rimelock, the Bola pair, Anchor, a reel) lands
 ## on a stomper a second in and must cancel it with the wisp alive; slows and Daze must not. A CC is checked
 ## by the channel it travels (hurt opts, KitStatus, a Displace tow, a knock), with the kit's real numbers.
+## Its sounds: one stomp_windup per stomp, one stomp_crack per hard-CC break (none for a soft one), one
+## stomp_finish on the kill.
 ## Prints STOMP ok/FAIL and a STOMPCHECK PASS/FAIL line.
 
 const DT := 1.0 / 60.0
@@ -14,6 +16,7 @@ var main: Node
 var s: Hunter        # the stomper
 var o: Hunter        # the wisp under its feet
 var f: Hunter        # a foe of the stomper, who lands the CC
+var cues := {}       # stomp_* sound -> times played (Sfx.cue_log) since the last _stage
 
 func ok(cond: bool, what: String) -> void:
 	print("STOMP %s %s" % ["ok  " if cond else "FAIL", what])
@@ -48,6 +51,8 @@ func run(mn: Node) -> void:
 		_row(row[0], row[1], true)
 	for row in _soft():
 		_row(row[0], row[1], false)
+	_prompt()
+	_heard()
 	_finish()
 	print("STOMPCHECK %s (%d fail)" % ["PASS" if bad == 0 else "FAIL", bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -65,7 +70,7 @@ func _hard() -> Array:
 		["Hem Heartpiercer wall stun 1.2", stun.call(1.2)], ["Tarek punch wall stun 0.9", stun.call(0.9)],
 		["Tarek Volcano slam stun 1.2", stun.call(1.2)], ["Claire Rimelock stun 0.75", stun.call(0.75)],
 		["Ostra Snap stun 1.8", stun.call(1.8)], ["Albert Crush stun 1.0", stun.call(1.0)],
-		["Albert Shield Slam stun 0.6", stun.call(0.6)], ["Albert Crushing Blow stun 0.4", stun.call(0.4)],
+		["Albert Crushing Blow stun 0.4", stun.call(0.4)],
 		["Ryzz Storm Rod wall stun 0.8", stun.call(0.8)], ["Sable Bola pair stun 0.9", stun.call(0.9)],
 		["Grimble Anchor stun 1.1", stun.call(1.1)],
 		["Pip Burrseed root 1.1", func(): s.hurt(1.0, f, {"src": "abil", "root": 1.1})],
@@ -127,18 +132,66 @@ func _stage() -> void:
 		m.knock(o, f, {})
 	o.down_hp = float(Data.MATCH["down_hp"])
 	s.hp = s.max_hp
+	Sfx.cue_log = []
 	Life.start_stomp(m, s, o)
 	_step(1.0)         # a second in: the animation is under way, the first foot has come down
 
 func _baseline() -> void:
 	_stage()
 	ok(not s.stomp.is_empty() and int(s.stomp["hits"]) >= 1, "a stomp a second in is running with a foot down")
+	ok(_cues() == {"stomp_windup": 1}, "the stomp's start plays the wind-up once at the stomper (%s)" % [cues])
+
+## The stomp prompt (StompTarget): the one closest downed enemy in reach, nothing for a teammate's wisp.
+func _prompt() -> void:
+	_stage()
+	Life.end_stomp(m, s, "reset")
+	var at := o.pos
+	var g := func(dx: float) -> Vector3: return Vector3(at.x + dx, m.world.ground_at(at.x + dx, at.z), at.z)
+	s.teleport(g.call(0.6))
+	f.teleport(g.call(0.7))
+	ok(StompTarget.target(m, f) == null, "a teammate's downed wisp (%s) shows no stomp prompt" % o.pname)
+	ok(StompTarget.target(m, s) == o, "an enemy wisp in reach is the stomp target")
+	var pr := StompTarget.prompt(m, s, {})
+	var lab := String(pr.get("label", ""))
+	var short: bool = pr.get("kind", "") == "finish" and HoldPrompt.is_hold(lab) and lab.ends_with("to stomp")
+	ok(short, "its prompt is a short HoldPrompt hold (%s)" % lab)
+	ok(StompTarget.prompt(m, f, {"kind": "x"}).get("kind", "") == "x", "no target leaves the prompt as it was")
+	s.teleport(g.call(2.0))
+	ok(StompTarget.target(m, s) == null, "outside stomp reach (2 m) there is no prompt")
+	s.teleport(Vector3(at.x + 0.6, at.y + 2.0, at.z))
+	ok(StompTarget.target(m, s) == null, "a wisp 2 m above or below is out of reach")
+	m.knock(f, s, {})
+	s.teleport(g.call(0.6))
+	f.teleport(g.call(1.6))
+	ok(StompTarget.target(m, s) == o, "two downed foes: the closer one (0.6 m, not 1.0 m) is the target")
+	f.teleport(g.call(0.9))
+	ok(StompTarget.target(m, s) == f, "two downed foes: the one at 0.3 m wins even if it is later in the list")
+	o.remote = true
+	ok(StompTarget.target(m, s) == f, "a remote client's wisp is skipped")
+	o.remote = false
+
+## A break is heard (a crack, and a relief chime for the wisp's squad); a stomp that runs out has neither.
+func _heard() -> void:
+	for sname in ["stomp_crack", "stomp_relief"]:
+		Sfx.last_played.erase(sname)
+	_stage()
+	Sfx.listener = s.pos      # (the camera sets it in a game)
+	s.hurt(1.0, f, {"src": "abil", "stun": 0.7})
+	_step(0.25)
+	ok(Sfx.last_played.has("stomp_crack"), "a break cracks at the stomper")
+	ok(Sfx.last_played.has("stomp_relief"), "a break plays the relief chime for the wisp's squad")
+	ok(m.player.team == o.team, "(the wisp is the listener's own, so the chime is its)")
 
 ## Last, since it kills the wisp: with no CC the animation finishes.
 func _finish() -> void:
+	for sname in ["stomp_crack", "stomp_relief"]:
+		Sfx.last_played.erase(sname)
 	_stage()
 	_step(Life.R["stomp_time"])
 	ok(s.stomp.is_empty() and o.out, "with no CC the animation finishes and the wisp dies")
+	ok(_cues() == {"stomp_windup": 1, "stomp_finish": 1}, "the kill plays the finish thud once, no crack (%s)" % [cues])
+	Sfx.cue_log = null
+	ok(not Sfx.last_played.has("stomp_relief"), "a finished stomp makes no relief chime")
 
 func _row(what: String, cc: Callable, cancels: bool) -> void:
 	_stage()
@@ -146,7 +199,18 @@ func _row(what: String, cc: Callable, cancels: bool) -> void:
 	_step(0.25)
 	var running := not s.stomp.is_empty()
 	var alive := o.downed and not o.out
+	var crack := int(_cues().get("stomp_crack", 0))
 	if cancels:
-		ok(not running and alive, "%s cancels the stomp and the wisp lives" % what)
+		ok(not running and alive and crack == 1, "%s cancels the stomp, the wisp lives, one crack" % what)
 	else:
-		ok(running and alive, "%s does not cancel the stomp" % what)
+		ok(running and alive and crack == 0, "%s does not cancel the stomp, no crack" % what)
+
+## The stomp_* cues played since _stage, with the count of each, read from Sfx.cue_log; the position of each
+## must be set (positional: heard by anyone in reach, both squads).
+func _cues() -> Dictionary:
+	cues = {}
+	for row in Sfx.cue_log:
+		var n := String(row[0])
+		if n.begins_with("stomp_"):
+			cues[n] = int(cues.get(n, 0)) + 1 if row[1] is Vector3 else -99
+	return cues

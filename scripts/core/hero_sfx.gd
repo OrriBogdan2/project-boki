@@ -6,6 +6,13 @@ extends RefCounted
 ## to StepSurface's steps per weight class), pickup and recast_open / recast_tick (RecastCue). Answers are cached
 ## per name, so footsteps stay cheap. The sound sets are listed in content/sfx/<arch>.json (docs/AUDIO.md).
 
+## An ability hit's "ab" -> the slot its own hit sound is named for (`<arch>_hit_<slot>`): the cx slots
+## (utility, k1, ult) and the kits' own (rmb, e, x, dash; Tenzo's "rock", a punched or raised rock).
+const HIT_SLOT := {"utility": "rmb", "rmb": "rmb", "k1": "e", "e": "e", "dash": "dash", "dodge": "dash", "ult": "r",
+	"x": "r", "r": "r", "rock": "rock"}
+
+const FLY_DB := -8.0           # dB, a shot's travel loop
+
 static var _has := {}          # sound name -> whether audio/ has it
 
 ## The sound to play for `kind` on hunter `h`: its own if it has one, else `fallback` ("" plays nothing).
@@ -28,8 +35,10 @@ static func hit_tick(h: Hunter, o: Dictionary) -> String:
 ## The sound of `h`'s dash starting, chosen by the floor under it: in the air <arch>_dash_air, else the shared
 ## dash_air; on the ground <arch>_dash, else the shared dash_ground. A sound picked in the sound tester
 ## (SfxPicks) for the shared path wins over every Hunter's own. A remote Hunter's grounded flag isn't sent, so
-## its height over the ground says it.
+## its height over the ground says it. Swimming in deep water it is the spray, water_dash (HazardMoveSfx).
 static func dash_name(h: Hunter) -> String:
+	if HazardMoves.of(h) == HazardMoves.SWIM:
+		return "water_dash"
 	var in_air := (h.pos.y - h.ground() > Match.HOP_STAND) if h.remote else not h.grounded
 	var shared := "dash_air" if in_air else "dash_ground"
 	if SfxPicks.active(shared):
@@ -42,10 +51,27 @@ static func voice(m: Match, h: Hunter, kind: String, vol_db := -4.0) -> void:
 	if sname != "":
 		m.sfx(sname, h.pos, vol_db)
 
-## The sound a hit by `by` makes on its target (Match.on_damage, your hits): a Hunter's own weapon hit
+## The sound a hit by `by` makes on its target (Match.on_damage, your hits): an ability's own hit when the Hunter
+## has one (`<arch>_hit_<slot>`, HIT_SLOT; tools/gen_sfx_ability_bar.py), else the Hunter's own weapon hit
 ## (`<arch>_hit`, tools/gen_sfx_hero_hits.py), else its weapon family's tick (`hit_tick`), else the shared tick.
 static func hit_sound(by: Ent, o := {}) -> String:
 	if not by is Hunter:
 		return "hit"
 	var h := by as Hunter
+	var slot := String(HIT_SLOT.get(String(o.get("ab", "")), ""))
+	if slot != "" and String(o.get("src", "")) != "shot":
+		var own := of(h, "hit_" + slot, "")
+		if own != "":
+			return own
 	return of(h, "hit", hit_tick(h, o))
+
+## Holds the travel loop `sname` on the flying shot `sd` for this tick (a kit calls it every tick while it keeps `sd`);
+## false, with the loop let go, once the shot has ended.
+static func fly(m: Match, h: Hunter, sname: String, sd: Dictionary) -> bool:
+	var key := "fly_%s_%d" % [sname, h.get_instance_id()]
+	for s in m.shots:
+		if is_same(s, sd):
+			Sfx.loop_hold(key, sname, sd["pos"], FLY_DB, 1.0)
+			return true
+	Sfx.loop_stop(key)
+	return false

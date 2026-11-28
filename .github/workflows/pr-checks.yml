@@ -26,32 +26,25 @@ env:
 
 jobs:
   pr-checks:
-    runs-on: ubuntu-latest
+    # vars.RUNNER = self-hosted moves this job to our own Linux runners (labels self-hosted,linux,boki); unset = GitHub-hosted.
+    runs-on: ${{ vars.RUNNER == 'self-hosted' && fromJSON('["self-hosted","linux","boki"]') || 'ubuntu-latest' }}
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
       - name: Cache Godot
-        id: godot-cache
+        if: runner.environment == 'github-hosted'
         uses: actions/cache@v4
         with:
-          path: ~/godot-bin
-          key: godot-${{ env.GODOT_VERSION }}-linux
+          path: ~/.cache/boki-ci
+          key: godot-${{ env.GODOT_VERSION }}-linux-ci
 
+      # tools/ci/ci_env.sh: Godot on PATH (no sudo, per-machine cache on self-hosted runners), XDG_DATA_HOME per job.
       - name: Install Godot
-        run: |
-          set -e
-          if [ ! -x ~/godot-bin/godot ]; then
-            base="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable"
-            curl -sSL -o godot.zip "$base/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
-            unzip -q godot.zip && mkdir -p ~/godot-bin && mv Godot_v${GODOT_VERSION}-stable_linux.x86_64 ~/godot-bin/godot
-            rm godot.zip
-          fi
-          sudo ln -sf ~/godot-bin/godot /usr/local/bin/godot
-          godot --version
-          echo "XDG_DATA_HOME=$RUNNER_TEMP/xdg" >> "$GITHUB_ENV"
+        run: tools/ci/ci_env.sh
 
       - name: Cache lint tools
+        if: runner.environment == 'github-hosted'
         uses: actions/cache@v4
         with:
           path: ~/.cache/boki-lint
@@ -83,8 +76,11 @@ jobs:
           grep -E "^FAIL|SCRIPT ERROR" check.log | head -n 40 || true
           grep -q "CHECK DONE, failures: 0" check.log
 
-      - name: Wiki is current (gen_wiki --check)
-        run: python3 tools/gen_wiki.py --check
+      # Advisory only (owner 11-23): docs/wiki lagging the data is not a reason to fail a PR.
+      # A stale page shows as a warning; the wiki is regenerated on main instead.
+      - name: Wiki is current (gen_wiki --check, advisory)
+        continue-on-error: true
+        run: python3 tools/gen_wiki.py --check || { echo "::warning::docs/wiki is out of date; run python3 tools/gen_wiki.py (not a failure)"; exit 1; }
 
       - name: Matchmaker unit tests
         run: python3 -m unittest discover -s server/matchmaker/tests

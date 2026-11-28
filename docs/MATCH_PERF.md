@@ -137,3 +137,45 @@ stands, and the change below is measured headless (CPU scripts only, rpc8, a loa
     stand within 6 m or off screen; on the ground after the drop nearly every rival is unseen).
   So on a slow PC the saving is about 1 ms a frame per uninvolved rival in view; a wide view over a fight across the
   field (6-10 of them) is where it pays. The real-GPU number for it needs the rp1 pods back.
+
+## 2026-11-26 pass (owner: "8 fps on the load in for the expedition")
+
+`--loadin-fps-check` plays the first 30 s after the loading screen of a real expedition in real time (1920x1080, 30
+players, the squad of 3 aboard the skyship), logging every frame (wall ms, draws, objects, nodes, sim steps, main-thread
+cpu from `/proc/thread-self/schedstat`, `Match.vprof` sections). `--hitch-check` / `--load-check` fast-forward with 6
+teams, which is why they never saw it.
+
+- Cause: `Hunter.render` -> `SkyDeck.lift` -> `BootSole.low` skinned every boot vertex in GDScript, every frame, for all 30
+  riders; only the squad of 3 is drawn on the deck. 214-227 ms a frame in the visual `hunters` section (about 7 ms a rider).
+- Fix: `BootSole.low` folds the skeleton row and each bone's pose into one row per used bind index per call (a dot per vertex
+  instead of a full transform); `SkyDeck.lift` skips riders that are not drawn and re-reads a shown rider's soles every
+  `SOLE_EVERY` (3) renders. `hunters` is 6-11 ms a frame after. The check fails when the reads exceed that budget.
+- RTX 4090 pod, seeds 4101 / 77, 30 s: avg 7.3 / 3.4 fps -> 24.2 / 11.2; main-thread cpu a frame 136 / 284 ms -> 40 / 77 ms.
+  Not met yet: the 60 fps target. About 40 ms a frame of main-thread cpu remains, mostly outside the profiled sections
+  (render submission for 16-32k objects, 1.6-2.4k draws; other scripts).
+
+## 2026-11-27 pass: the planning map (load-in, part 2)
+
+`--loadin-fps-check --loadin-split` (new: times Match._process, every script `_process` by file and the draw, by
+phase: plan / plan-map / air / ground; `--loadin-inv` adds the planning-map scene inventory, `--loadin-shot=` saves
+the planning-map frame). RTX 4090 pods, 1920x1080, 30 players, seed 4101 unless named.
+
+- Where the load-in goes after the 11-26 fix (rp2g-1): render CPU only 2-4 ms a frame, GPU 7-10 ms; the main thread is
+  Match._process 33 ms on the slow rp1 CPUs (sim ~9 ms a step at 2.4 steps a frame, visuals 12) and the pods' frame end
+  (GPU wait + X11 window copy, docs/PERF_DRAW_1124.md: not paid on a real display).
+- The drop planning (seconds ~5-13 after the screen): the ride camera sees every island, 2,477 things in view (1,143
+  flora MultiMesh chunks, 57k copies; 811 materials), 33.6k objects and 2.4k draws a frame, frames 43 ms vs 19 ms on the
+  deck intro just before, while the full map covers the whole screen under a 0.92 shade.
+- Fix: `MapCover` (scripts/ui/map_cover.gd): while the planning map covers the screen the root viewport's 3D is off
+  (as under the loading screen); the last world frame, copied off the GPU without a stall
+  (`texture_get_data_async`), stays under every canvas layer, so the HUD and shade draw over it as before
+  (planning-map frame vs main: mean pixel diff 2/255). The map closing or the ship setting off draws the 3D again.
+  `--loadin-fps-check` fails (on every box, headless too) if the 3D draws under the planning map or stays off after it.
+- rp2g-1, back to back: seed 77 planning 29.5 -> 38.7 fps (p50 34.1 -> 24.4 ms, cpu 32 -> 25 ms; the deck intro, which
+  this does not touch, 59.8 / 63.6); seed 4101 planning 24.0 -> 35.2 fps. On rp1-1 (EPYC, busier) the planning cpu fell
+  59 -> 54 ms and the wall time stayed within noise.
+- Still open (the 60 fps target is not met on the pods): the full map's own 2D draw (FullMap.draw 4.7 ms a frame
+  headless on a fast CPU: place names 1.5, train map 0.8, spawns 0.5; HUD draw 5 ms with the map, 2 without) wants
+  its static layer cached; after the drop the sim (3.9-9 ms a step) runs 2.4-6 steps a frame on slow CPUs; Hunter
+  visuals ~5 ms (the squad's three posed every frame, ~0.7 ms each); one 100-220 ms frame right after the loading
+  screen and one ~140 ms frame when the ride view first draws (on main too).

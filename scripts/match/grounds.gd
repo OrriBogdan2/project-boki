@@ -3,11 +3,30 @@ extends RefCounted
 ## The Training Grounds' stations (the --arena map's "grounds" block, content/maps/arena.json).
 ## Pedestals on the sky perches let you try every Hunter, Boki, glove/armor/boot and belt item, and spawn
 ## a sparring bot of any Hunter; a ring on the floor takes you to the duel room. Walk up, press interact.
-## Cheap by design: every pedestal shares one mesh and a few materials, a label only shows when you are close,
+## Each island hangs a big sign (what it is for, how to use it). Cheap by design: every pedestal shares one mesh and
+## a few materials, a pedestal's name only shows when you are near,
 ## and nothing here runs per-pedestal physics.
 
+const RING_GAP := 1.6  # [m] closest two pedestals on one ring may stand (the check wants 1.5)
+const RING_STEP := 2.0  # [m] between rings when a kind has more pedestals than one ring holds
 const ACT_R := 1.5  # [m] how close you stand to use a pedestal
-const SHOW_R := 6.5  # [m] a pedestal's name is drawn inside this
+const SHOW_R := 14.0  # [m] a pedestal's name is drawn inside this
+const PROMPT_Y := 230.0  # [px] the pedestal prompt's top: under the trial clock (TimeTrial.CLOCK_Y), clear of the HUD
+const PROMPT_W := 560.0  # [px] its width (centred)
+const SIGN_LIFT := 6.0  # [m] a station's sign hangs this far over the island's middle
+## Per station kind: the sign's title, what it is for, how a pedestal is used (`%s` is the interact key's cap).
+const SIGNS := {
+	"arch": ["HUNTERS", "Try any Hunter's kit", "Stand on a pedestal, press %s\nto play that Hunter"],
+	"gear": ["GEAR", "Test gloves, armor and boots", "Stand on a pedestal, press %s\nto wear that piece"],
+	"item": ["BELT ITEMS", "Test every utility belt item", "Stand on a pedestal, press %s\nto fill your belt with it"],
+	"bot":
+	[
+		"BOT PEN",
+		"Practise your combos and matchups on a real bot",
+		"Stand on a pedestal, press %s\nto spawn a sparring bot of that Hunter"
+	],
+	"kin": ["BOKI", "Try every Boki", "Stand on a pedestal, press %s\nto bring that Boki"],
+}
 const PED_GLOW := 0.3  # pedestal emission: a faint glow that keeps its colour under bloom (0.9 washed to white)
 const FALL_Y := -12.0  # [m] below this you fell off the map: back to the start (the abyss kills at -17)
 const KIND_COL := {
@@ -29,6 +48,8 @@ var stations: Array = []  # {kind, id, at: Vector3 (the pedestal), c: Vector3 (i
 var near_i := -1
 var summon_pad: SummonStation = null  # the Boki island's summon pad (arena layout)
 var prompt: Label = null
+var trial: TimeTrial = null  # the time-trial course on the open floor
+
 var _belt_turn := 0  # which belt slot a full belt gives up next
 var _layer: CanvasLayer = null
 
@@ -102,6 +123,7 @@ func build() -> void:
 		return
 	for st in g.get("stations", []):
 		_ring(String(st["kind"]), v3(st["at"]), float(st["ring"]))
+		_sign(String(st["kind"]), v3(st["at"]))
 	if g.has("duel"):
 		_duel(v3(g["duel"]))
 	summon_pad = SummonStation.new(a)
@@ -109,27 +131,36 @@ func build() -> void:
 	_layer = CanvasLayer.new()
 	_layer.layer = 20
 	prompt = Label.new()
-	prompt.position = Vector2(0, 150)
-	prompt.size = Vector2(1280, 30)
 	prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	prompt.add_theme_font_size_override("font_size", 22)
 	prompt.add_theme_color_override("font_outline_color", Color.BLACK)
 	prompt.add_theme_constant_override("outline_size", 8)
-	prompt.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	prompt.custom_minimum_size = Vector2(PROMPT_W, 0)
+	prompt.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE)
+	prompt.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	prompt.offset_top = PROMPT_Y
+	prompt.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	prompt.visible = false
 	_layer.add_child(prompt)
 	m.add_child(_layer)
+	trial = TimeTrial.new(m)
+	trial.build(_layer, self)
 
 
-## One ring of pedestals round a perch's middle, one per id of the kind.
+## Rings of pedestals round a perch's middle, one per id of the kind: the outer ring (radius r) takes as many as
+## fit RING_GAP apart, the rest go in rings RING_STEP closer in.
 func _ring(kind: String, c: Vector3, r: float) -> void:
 	var ids := ids_for(kind)
-	var n := ids.size()
-	for i in n:
-		var ang := -PI / 2.0 + TAU * float(i) / float(n)
-		var p := c + Vector3(cos(ang), 0, sin(ang)) * r
-		p.y = m.world.ground_at(p.x, p.z)
-		_pedestal(kind, String(ids[i]), p, c)
+	var done := 0
+	while done < ids.size() and r > RING_STEP:
+		var n := mini(ids.size() - done, int(TAU * r / RING_GAP))
+		for i in n:
+			var ang := -PI / 2.0 + TAU * float(i) / float(n)
+			var p := c + Vector3(cos(ang), 0, sin(ang)) * r
+			p.y = m.world.ground_at(p.x, p.z)
+			_pedestal(kind, String(ids[done + i]), p, c)
+		done += n
+		r -= RING_STEP
 
 
 func _mat(col: Color) -> StandardMaterial3D:
@@ -166,6 +197,19 @@ func _pedestal(kind: String, id: String, p: Vector3, c: Vector3) -> void:
 	stations.append({"kind": kind, "id": id, "at": p, "c": c, "label": lb})
 
 
+## The big sign over a station's island: readable from far off, says what it is for and how to use a pedestal.
+func _sign(kind: String, at: Vector3) -> void:
+	var t: Array = SIGNS[kind]
+	var base := Vector3(at.x, m.world.ground_at(at.x, at.z) + SIGN_LIFT, at.z)
+	var col := Color(String(KIND_COL[kind]))
+	var title := label(String(t[0]), col, 9.0)
+	title.position = base + Vector3(0, 1.8, 0)
+	m.add_child(title)
+	var body := label("%s\n%s" % [t[1], String(t[2]) % Settings.key_cap("interact")], Color.WHITE, 3.4)
+	body.position = base
+	m.add_child(body)
+
+
 static func label(text: String, col: Color, scale_k := 1.0) -> Label3D:
 	var lb := Label3D.new()
 	lb.text = text
@@ -187,14 +231,17 @@ func _duel(at: Vector3) -> void:
 	var pad := Models.jump_pad(Color(String(KIND_COL["duel"])))
 	pad.position = at
 	m.add_child(pad)
-	var lb := label("DUEL ROOM\n%s to enter" % Settings.key_cap("interact"), Color(String(KIND_COL["duel"])), 2.6)
+	var col := Color(String(KIND_COL["duel"]))
+	var lb := label("DUEL ROOM\nSpar a Hunter one on one\n%s to enter" % Settings.key_cap("interact"), col, 2.6)
 	lb.position = at + Vector3(0, 2.7, 0)
 	m.add_child(lb)
 	m.duel_pad = at
+	m.duel_hint = DuelRingHint.make(m)
 
 
-## Per frame (from Arena.tick): show the near pedestal's name, use it on interact, bring a faller home.
-func tick() -> void:
+## Per frame (from Arena.tick): show the near pedestal's name, use it on interact, bring a faller home,
+## run the time trial.
+func tick(dt: float) -> void:
 	var p: Hunter = m.player
 	if p == null or prompt == null:
 		return
@@ -202,9 +249,11 @@ func tick() -> void:
 	if p.pos.y < FALL_Y and not p.downed:
 		p.teleport(a.home)
 		p.vel = Vector3.ZERO
+		trial.stop()
 		if m.hud:
 			m.hud.toast_small("Back to the Training Grounds", Color("8fe3c8"))
 		return
+	trial.tick(dt)
 	var best := -1
 	var bd := ACT_R
 	for i in stations.size():
@@ -223,7 +272,9 @@ func tick() -> void:
 		prompt.visible = best >= 0
 		if best >= 0:
 			var sd: Dictionary = stations[best]
-			prompt.text = "%s   ·   %s" % [name_of(String(sd["kind"]), String(sd["id"])), Settings.key_cap("interact")]
+			var spawns := String(sd["kind"]) == "bot" and String(sd["id"]) != "clear"
+			var key := Settings.key_cap("interact") + (" to spawn" if spawns else "")
+			prompt.text = "%s   ·   %s" % [name_of(String(sd["kind"]), String(sd["id"])), key]
 			prompt.add_theme_color_override("font_color", color_of(String(sd["kind"]), String(sd["id"])).lightened(0.3))
 	if best >= 0 and Input.is_action_just_pressed("interact") and not m.paused and not p.downed:
 		use(best)
@@ -247,12 +298,18 @@ func use(i: int) -> void:
 	m.fx.ring(s["at"], 1.2, color_of(String(s["kind"]), id), 0.3)
 
 
-## Fill this item's stack. The belt has four slots: when they are all taken, the next one in turn is emptied.
+## Fill this item's stack. The belt has six slots (1 and 2 pinned to the tonic and the armor kit): when the slots this
+## item may use are all taken, the next one in turn is emptied.
 func _stock(id: String) -> void:
 	var p: Hunter = m.player
 	if UtilityBelt.room_for(p, id) <= 0 and UtilityBelt.count(p, id) <= 0:
-		p.belt[_belt_turn % UtilityBelt.SLOTS] = {}
-		_belt_turn += 1
+		var pin := UtilityBelt.fixed_slot(id)
+		for _k in UtilityBelt.SLOTS:
+			var k := _belt_turn % UtilityBelt.SLOTS
+			_belt_turn += 1
+			if (pin >= 0 and k == pin) or (pin < 0 and UtilityBelt.reserved_id(k) == ""):
+				p.belt[k] = {}
+				break
 	UtilityBelt.grant(p, id, UtilityBelt.room_for(p, id))
 
 

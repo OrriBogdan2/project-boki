@@ -211,9 +211,7 @@ where a trial `git merge-tree` against all 1078 active branches that change that
 ### Duplicate systems to merge later
 
 All of these touch skip-list files (and most are in coord refs), so none was merged in this pass.
-1. **Ruin walls twice.** `scripts/match/ruin_walls_v1.gd` (226 lines) is kept for the `--art1` before/after view
-   next to `ruin_walls.gd`, and `_init` and `_exposed` are identical in both. Plan: drop the `Flora.v2()` false
-   branch in `world.gd`, then delete v1. Both files are in coord refs, so the coordinator decides.
+1. **Ruin walls twice.** Done: `ruin_walls_v1.gd` and its `--art1` preload in `world.gd` were deleted.
 2. **Rules loaders.** 19 files read their own `content/rules/*.json` with a private cache instead of
    `Content.rules(id)`: `arch_kit`, `boki_lines`, `class_unlock`, `garden_xp`, `box_revive`, `breakables`, `cam`,
    `equal`, `gear_drops`, `heart`, `hunter_move`, `key_run`, `level_growth`, `mantle_look`, `perk_orbs`,

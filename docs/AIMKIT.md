@@ -8,10 +8,11 @@ cursor state plus `MANIFEST.txt`).
 |---|---|
 | `aim_mode.gd` (`AimMode`) | Where a shot or placement goes (cursor-clamped vs max range), plus membership tests that match the shapes |
 | `aim_kit.gd` (`AimKit`) | The API kit code calls: the shapes, hide/clear, the cursor states |
-| `aim_draw.gd` (`AimDraw`) | One node per match. Rebuilds every telegraph into one ImmediateMesh surface each frame |
+| `aim_draw.gd` (`AimDraw`) | One node per match. Rebuilds every telegraph into one ArrayMesh each frame (AimGeo's packed arrays, one call per surface) |
 | `aim_shapes.gd` (`AimShapes`) | The shape builders and the quiet default look |
 | `aim_geo.gd` (`AimGeo`) | Triangle helpers (ribbons, rings, sectors, chevrons, stars) that sit each vertex on the ground |
 | `aim_reticle.gd` (`AimReticle`) | The cursor states: charge ring, full flare, perfect star |
+| `scripts/ui/reticle.gd`, `reticle_hud.gd` (`Reticle`, `ReticleHud`) | The cursor reticle under them: the broken ring that opens with bloom, the dot in the Hunter's accent (`Arch.color`, the Hunter's own colour: Vex green, Sparkle pink, Tenzo blue), the ammo / resource / charge arcs, the hit tick (raised by `hud.reticle`, one per landed hit, gold on a crit, longer on a knock). Thin strokes with a dark edge; numbers in `content/rules/tuning.json` "reticle" |
 | `aim_reach.gd` (`AimReach`) | The range preview of a ground-target slot: a faint max-range ring and the landing disc |
 
 Cursor latency: `--reticle-latency` (tools/reticle_latency.gd) steers the cursor round a circle and measures how many frames the drawn reticle and the aim ray trail it (0 = same frame). Measured at 60 and 144 fps caps, vsync on and off: the reticle trails by under 0.2 frames (pixel noise) and the aim ray by 0.00, so both already come from the frame's own mouse sample; run it after touching the HUD, camera or input order.
@@ -55,7 +56,7 @@ id replaces the previous one. Stop calling and it disappears after 0.1 s of matc
 - `AimKit.hide(h, id)` drops it at once.
 - A `"dur": secs` param keeps a one-off up that long with no further calls (a 0.2 s edge ring, a stuck
   grenade's cone for its fuse).
-- Nothing makes a node: every entry is drawn into one ImmediateMesh owned by the match's `AimDraw`.
+- Nothing makes a node: every entry is drawn into one ArrayMesh owned by the match's `AimDraw`.
 
 Common params (every shape):
 
@@ -339,6 +340,6 @@ Now all of them arrive through "tele".
 | Meeko (tender) | burr circles; X `x`, `x_me`, `x_pick`: circle | a bolt at the X pick |
 | Sable (thief) | Bola ground rings `gnd2<n>`: circle; X `ult`, `ult_rim`: circle | a ring at the X |
 
-`--aimkit-check` round-trips every shape kind through JSON onto a remote copy; `--remote-anim-check` asserts,
+`--aimkit-check` round-trips every shape kind through JSON onto a remote copy; `--remote-anim-1|2|3|rest-check` assert,
 per shape kind, that every `all` telegraph up 0.15 s or more in each kit's casts shows on the other game;
 `--tele-net-shots --shots-dir=<dir>` (GPU, jobq) screenshots a foe's view of a few (docs/shots/tele-net: Lace's Hail Wall arc, Tenzo's held slam and E tells, Albert's E zone, from a GPU worker).

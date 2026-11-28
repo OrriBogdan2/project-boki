@@ -21,6 +21,6 @@ reward. The opts key is `heart_raid`, because `raid` is already the weather cond
 
 ## Consequences
 Net: a new "hr" event ["hr", phase, wave, boss_nid] (host to all), and the lobby start message carries `heart_raid`.
-Net.VERSION is left to the release bump. No save change. Mode-exclusive Boki: `content/kin` `"only_in"`, read by
+Net.VERSION is left to the release bump. No save change. Mode-exclusive Boki: `content/kin_home` `"only_in"`, read by
 `Data.wild_kin(mode)`. This removes 2 species from the Expedition wild table, so seeded wild rolls shift. Check:
 `--heart-raid-check`.

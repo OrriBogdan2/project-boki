@@ -104,7 +104,7 @@ the farm top bar (y 24) and key hints (y 679). Decide the safe-area size before 
 Retired terms (Warden, Mantle, Bearer, Merge, Unmasked) were not seen on any first-15 screen. Terms that appear before any line explains them:
 - **Creator:** Shroud, Hollow, Glow, Ghost, Aura (shown on screen 05; "You are one of the Empty" is the only line).
 - **Hatch:** egg types Venom / Prism / Spore, "BOLD / GENTLE / CURIOUS" tags (06).
-- **Tutorial HUD (from the first frame):** Fever (resource bar), FIGHTING / FOLLOW (status under the portrait), COMMON / UNCOMMON (armour tier), AUTO, "from Boki",
+- **Tutorial HUD (from the first frame):** Fever (buff icon), FIGHTING / FOLLOW (status under the portrait), COMMON / UNCOMMON (armour tier), AUTO, "from Boki",
   "CARRY OFF FOLLOW", "Relics / Leave" bar and the key `J`, the glider strip (4 unlabeled icons), belt slots 1-4, Q V X, "Box 0/3", seeds, the weapon class label
   "THE HIRED GUN · MEDIUM". Toasts name perks before any perk is explained: "Kindling!", "LEVEL 6 · Deep Magazine", "Quick Feed, Hotload".
 - **Results:** Knocks, Armor "Uncommon", Tidebloom seeds, "Into your armory", the name line "Hunter the Hired Gun" (the default player name is "Hunter").
@@ -190,7 +190,7 @@ The ranked follow-ups below still hold.
 
 **Ranked follow-ups after the 2b re-shoot** (rank = groups removed per screen shown to every new player):
 1. **Tutorial HUD in steps (item 1 below):** 9 to 5 on the landing and on all 12 step screens. Biggest win, still not done.
-2. **First expedition HUD:** hide the Ways Out strip, counters and clock/status until the first Ways Out beat or the first kill; 11 to 6 on screens 33-35. This one regressed since section 2.
+2. **First expedition HUD:** hide the Ways Out strip, counters and clock/status until the first Ways Out beat or the first kill; 11 to 6 on screens 33-35. This one regressed since section 2. **Done in ext/ui-first-exp-hud:** on main the strip already waited (d839e1df777) and the counters wait for the 4th expedition (ext/ui-hud-groups-five, landing 5); what still showed from the first second was the clock/status strip under the minimap. It now waits too, through HudReveal's table (`beat_clock`: from match 4, or first "beat"), until a seat is within `ways_out_lead_s` of opening or your first kill/knock (`HudGroups.clock_shown`). `--hud-groups-check` stays 5/7/8/8 (the clock counts with the minimap); by section 1's counting (clock/status its own group) landing and first fight each lose one.
 3. **Glider strip and perk line:** four dim, unlabelled icons plus a caption show from the first frame; draw them only once a perk or glider item exists (saves 1-2 groups on every match screen).
 4. **Q/V/X slots and the belt:** draw only the slots that hold something or are unlocked (saves 2).
 5. **Plan your drop:** fold the "This match" legend behind a key (7 to 5).
@@ -241,12 +241,16 @@ The only 0.24.5 newcomer is the Ways Out strip (the Heart seat, quest seats and 
 
 | Moment | Groups | Strip | Note |
 |---|---|---|---|
-| First landing | 10 | waits | nine always-on blocks + the button card |
-| First fight | 11 | waits | nine + toasts + loot prompt |
-| Heart unlock | 12 | shows | nine + toasts + Gate prompt + strip |
-| Quest-exit race | 12 | shows | nine + toasts + prompt + strip |
+| First landing | 5 (was 9) | waits | minimap (its clock strip hangs under it), vitals, abilities, Boki/glove boxes, weapon |
+| First fight | 7 (was 11) | waits | five + toasts + loot prompt |
+| Heart unlock | 8 (was 12) | shows | five + toasts + Gate prompt + strip |
+| Quest-exit race | 8 (was 12) | shows | five + toasts + prompt + strip |
 
-All four are over the owner's 5 because of the nine blocks that were already there; that is in `docs/DEBT.md` for the declutter lane.
+ext/ui-hud-groups-five: the counters (the staged HUD, `HudReveal`, were already off for a fresh save but still counted), the glider ring
+(only while you glide or the meter is not full, `HudGroups.glider_shown`) and the belt (`BeltHud.shown`: from the first time a held item could be
+used, a tonic when hurt or an armor kit when the armor is down, then this save keeps it; `hud_reveal.json` "belt", always from the 4th expedition)
+fold in until they matter, and the clock counts with the minimap it hangs under. Shots before / after: `docs/ui_hud_groups_five/`.
+The fight and later moments stay over 5 by the toast lane and the prompt, which cannot fold: owner's call.
 ## 7. The garden: hub and two zones, day 1 and day 5 (ext/ui-garden-declutter)
 
 DECISIONS 2026-11-08: about 5 HUD groups, one next step, the rest when it first matters. `--garden-hud-groups` (tools/garden_hud_groups.gd)
@@ -277,10 +281,20 @@ Not changed (still on screen, each one group): the key row (folds after 3 uses o
 `ExpFold.first_visit()` (`scripts/home/exp_fold.gd`): true while the first Where is the only one open (`extracts` below the second Where's unlock).
 Then the **expedition panel** shows the picked Relic, the open Where and Start; "All Relics (n)", "Locked drops (n)" and "More: Boki, match and modes"
 fold the other Relics, the locked Wheres, and Boki you bring, loadout, Match, Conditions and the Training Grounds / Play online links (the links
-move from the footer into that fold). The **Relics page** shows the picked and the open or ready Relics; "Locked Relics (n)" folds the rest. With a
-second Where open nothing is folded. The Relics tiles are now 2 columns of 214 px (was 3 of 140 px, names wrapped to two lines), so each full name
+move from the footer into that fold). The **Relics page** (Hunters screen) never folds: every Hunter shows, locked ones dim with their
+challenge progress (11-23: a new save showed one tile and a "Locked Relics" button; the owner read it as one Hunter). The Relics tiles are now 2 columns of 214 px (was 3 of 140 px, names wrapped to two lines), so each full name
 fits on one line. `--relics-fold-check` asserts the folds and that no Relic name is cut or wrapped at 1280x720 on either screen.
 
 Shots (1280x720, software renderer on rpc4, the same save as section 1): [expedition before](shots/ui-relics-grid/before_expedition.jpg) /
 [after](shots/ui-relics-grid/after_expedition.jpg); [Relics before](shots/ui-relics-grid/before_relics.jpg) /
 [after](shots/ui-relics-grid/after_relics.jpg) / [after, locked Relics unfolded](shots/ui-relics-grid/after_relics_all.jpg).
+
+## Pre-match hunter-pick countdown (ext/ui-pick-countdown, re-check of the 11-08 playtest note)
+
+The pick screen is `PrematchView` (`scripts/ui/prematch_view.gd`, state in `scripts/match/prematch.gd`). It is no longer 30 s: each turn is
+`Prematch.TURN` = 10 s, shown as `0:10` to `0:00`. The digits sit in the banner at the top centre, 88 px at 1080 (10% of the window height, 1280x720 gets 72 px, min `DIGITS_MIN`),
+with "YOUR TURN" and the lock-in line on the same row. Shots (software render): [1920x1080](shots/pick-countdown/1920x1080_full.png) /
+[red](shots/pick-countdown/1920x1080_red.png), [1280x720](shots/pick-countdown/1280x720_full.png) / [red](shots/pick-countdown/1280x720_red.png).
+Found off: only the last 3 s throbbed (the click ticks and the warm red already ran for 5 s). Fixed in that screen only: `PULSE_FROM` 3 -> 5, so the digits throb red
+(a pure scale and colour pulse, no floating words) for the whole last 5 s of your own turn. `--prematch-check` asserts the throb window is >= 5 s, the digits hold
+still above it and are red inside it.

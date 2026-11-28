@@ -17,6 +17,7 @@ var last_step := -2
 var live_done := false
 
 func run(m: Node) -> void:
+	FarmUnlocks.rules()["base_mode"] = false      # walks the old farm (base_mode is the shipped default)
 	main = m
 	tree = main.get_tree()
 	Save.no_write = true
@@ -25,7 +26,7 @@ func run(m: Node) -> void:
 	await _prologue()
 	await _hatch()
 	var home = await _tutorial_match()
-	await _farm_tutorial(home)
+	_farm_tutorial(home)
 	await _second_relic(home)
 	await _first_expedition(home)
 	await _garden_first_day()

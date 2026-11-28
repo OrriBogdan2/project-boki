@@ -208,7 +208,7 @@ static func signpost(text_lines: Array) -> Node3D:
 	l.outline_size = 0
 	l.position = Vector3(0, 1.25, 0.1)
 	root.add_child(l)
-	return root
+	return PaintMerge.merged(root)
 
 
 # ---------------------------------------------------------------- home buildings
@@ -269,7 +269,7 @@ static func building(id: String) -> Node3D:
 					body,
 					ModelsBase.box(0.26, 0.3, 0.02),
 					ModelsBase.toon(pc, false),
-					Vector3(0.38 + (k % 2) * 0.55, 1.22 - (k / 2) * 0.38, 0.71),
+					Vector3(0.38 + (k % 2) * 0.55, 1.22 - int(k / 2.0) * 0.38, 0.71),
 					Vector3.ONE,
 					Vector3(0, 0, randf_range(-0.12, 0.12))
 				)
@@ -421,7 +421,7 @@ static func building(id: String) -> Node3D:
 			ModelsBase.part(body, ModelsBase.box(3.5, 0.08, 0.08), frame, Vector3(0, 2.8, 0))
 			for i in 6:
 				var px := -1.2 + (i % 3) * 1.2
-				var pz := -0.6 + (i / 3) * 1.2
+				var pz := -0.6 + int(i / 3.0) * 1.2
 				ModelsBase.part(
 					body, ModelsBase.cyl(0.2, 0.16, 0.3, 8), ModelsBase.toon(Color("b4553f")), Vector3(px, 0.35, pz)
 				)
@@ -578,7 +578,7 @@ static func ferry_post() -> Node3D:
 	root.add_child(l)
 	for i in 3:
 		ModelsBase.part(root, ModelsBase.box(1.4, 0.08, 0.36), wood, Vector3(0, 0.04, -0.6 - i * 0.38))
-	return root
+	return PaintMerge.merged(root)
 
 
 ## Guild landmarks.

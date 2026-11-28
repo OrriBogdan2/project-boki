@@ -917,26 +917,25 @@ static func portal(c: Color) -> Node3D:
 	t.outer_radius = 1.2
 	t.rings = 24
 	t.ring_segments = 8
-	var mr := ModelsBase.toon(Color("6a6f80"), true)
-	var ring := ModelsBase.part(root, t, mr, Vector3(0, 1.25, 0), Vector3.ONE, Vector3(PI / 2, 0, 0), "Ring")
+	var stone := ModelsBase.toon(Color("6a6f80"))
+	var ring := ModelsBase.part(root, t, stone, Vector3(0, 1.25, 0), Vector3.ONE, Vector3(PI / 2, 0, 0), "Ring")
 	# runes around the ring that light up, and a pair of stone feet
+	var rune := ModelsBase.toon(c, false, 0.9)
+	var foot := ModelsBase.toon(Color("585c6a"))
+	var moss := ModelsBase.toon(Color("7fa65a"), false)
 	for i in 8:
 		var a := TAU * i / 8.0
 		ModelsBase.part(
 			ring,
 			ModelsBase.box(0.12, 0.3, 0.14),
-			ModelsBase.toon(c, false, 0.9),
+			rune,
 			Vector3(cos(a) * 1.08, 0.0, sin(a) * 1.08),
 			Vector3.ONE,
 			Vector3(0, -a, 0)
 		)
 	for sx in [-1.0, 1.0]:
-		ModelsBase.part(
-			root, ModelsBase.box(0.42, 0.34, 0.5), ModelsBase.toon(Color("585c6a")), Vector3(0.95 * sx, 0.17, 0)
-		)
-		ModelsBase.part(
-			root, ModelsBase.box(0.3, 0.06, 0.38), ModelsBase.toon(Color("7fa65a"), false), Vector3(0.95 * sx, 0.36, 0)
-		)
+		ModelsBase.part(root, ModelsBase.box(0.42, 0.34, 0.5), foot, Vector3(0.95 * sx, 0.17, 0))
+		ModelsBase.part(root, ModelsBase.box(0.3, 0.06, 0.38), moss, Vector3(0.95 * sx, 0.36, 0))
 	var disc := ModelsBase.part(
 		root,
 		ModelsBase.cyl(1.0, 1.0, 0.02, 24),

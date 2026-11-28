@@ -93,7 +93,7 @@ static func sphere(r: float, seg := 16) -> SphereMesh:
 	s.radius = r
 	s.height = r * 2.0
 	s.radial_segments = sg
-	s.rings = maxi(8, sg / 2)
+	s.rings = maxi(8, int(sg / 2.0))
 	return _spheres.keep(key, s)
 
 

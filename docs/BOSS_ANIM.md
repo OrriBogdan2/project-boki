@@ -8,4 +8,18 @@ Each lair boss (colossus, serpent, brood) has keyed moves for every state: sleep
 - **Primitive bodies** (`--prim-art`, or no model): the Colossus is a rigged pack model whose moves also pick the clip and which stretch plays (`CLIP`); the wind-up stops on the clip's own hit frame. Serpent and brood are posed pivots; the serpent's coils still follow `Boss.trail`. A pivot only one body has is skipped on the other.
 - **Death** runs `DEATH_S`, then the body holds its last pose until `Boss.DEATH_FADE_S` (the shared dissolve, ext/vfx-mob-death, replaces that fade when merged).
 - **Online (Net 0.24.6).** The host sends one `bat` event (`scripts/match/boss_net.gd`) when a boss's attack, how long it has run, phase, asleep/awake, enraged or wind-up seconds change: about 32 bytes, two per attack (start, end), so roughly 20 B/s for a boss in a fight and nothing asleep. A remote game builds a real `Boss` (not a plain `Mob`), takes the event, and counts `atk_t` on from the synced age (the match clocks of two games drift up to 0.5 s apart, so a start time would show the strike late), so `Boss.render` poses the wind-up, strike, sleep, wake and phase as the host does. Only the loops (idle, walk, stagger) still follow the snapshot.
-- Checks: `--boss-anim-check`; `--remote-anim-check` (the boss rows, 2 games over the relay); GPU strips: `--boss-anim-shots --boss=<id> --shots-dir=<dir> [--reel-frames]` through `jobq submit --needs gpu` (`--reel-frames`: frames for a clip, `<dir>/reel_<id>/`).
+- Checks: `--boss-anim-check`; `--remote-anim-rest-check` (the boss rows, 2 games over the relay); GPU strips: `--boss-anim-shots --boss=<id> --shots-dir=<dir> [--reel-frames]` through `jobq submit --needs gpu` (`--reel-frames`: frames for a clip, `<dir>/reel_<id>/`).
+
+## Mob and boss clips (checked 11-28)
+
+All twelve `art/mobs/*/*.glb` (bl_skitter, bl_warden, bomber, brood, brute, colossus, glimmer, sentinel, serpent, skitter, spitter, warden) are skinned with **no baked animation clips** (0 clips each), so there is no unused clip to map. Nothing is missing in play: every state runs on the keyed tables.
+
+| Mob | Hit | Stagger | Death |
+|---|---|---|---|
+| skitter, spitter, brute, warden, bomber, sentinel, glimmer | `MobAnim` flinch layer, `FLINCH_S` 0.22 s over idle/walk/run | `MobAnim` stagger loop (`STAGGER_S` 2 s) | `MobAnim` death move (`DEATH_S` 0.32 s) under `MobDissolve` |
+| bl_skitter, bl_warden | none of their own: `BlightModels` pivots have no tables, so a hit only flashes and the body does not pose | none | `MobDissolve` only |
+| colossus, serpent, brood | none: a hit only flashes | `BossAnim` stagger (`STAGGER_S` 1.2 s) | `BossAnim` death (`DEATH_S` 1.1 s) then the dissolve |
+
+Gap: **Blight mobs (bl_skitter, bl_warden) have no `MobAnim.MOVES` tables**, so no idle, walk, wind-up, flinch or death move. Sheets: `/home/boki/gens/mob-clips-1128/`. Bosses have no hit-react move, a hit flashes only.
+
+The boss strip keeps the player untouchable (`inv_t`, full hp each frame) and quits with `BOSSANIMSHOT FAIL` if the match ends. `god` only saves the player from the abyss, so brood's spit and lob knocked them out, the match ended, `m.time` stopped and the strip hung.

@@ -22,6 +22,17 @@
   "dj_encore_whirr": "loop",
   "dj_blade": "fire",
   "dj_encore_hit": "impact",
+  "thief_knife_whisk": "fire",
+  "thief_knife_ground": "impact",
+  "thief_shadow_whisk": "fire",
+  "thief_bola_bounce": "impact",
+  "thief_bola_tie": "impact",
+  "thief_encore_end": "cast",
+  "thief_hit_rmb": "impact",
+  "thief_hit_e": "impact",
+  "thief_hit_r": "impact",
+  "thief_knife_fly": "loop",
+  "thief_bolt_tail": "cast",
   "thief_hurt": "grunt",
   "thief_down": "grunt",
   "thief_death": "grunt",
@@ -32,7 +43,15 @@
  },
  "kit_files": ["thief_ult.gd"],
  "signature": ["thief_flintlock_crack", "dj_bolt", "thief_cock"],
- "loops": ["dj_encore_whirr"],
+ "loops": ["dj_encore_whirr", "thief_knife_fly"],
  "replaces": ["dj_bolt", "dj_fizzle", "dj_bola_whirl", "dj_bola_throw", "dj_bola_wrap", "dj_knife_throw", "dj_blink",
-  "dj_heal", "dj_encore", "dj_encore_whirr", "dj_blade", "dj_encore_hit"]
+  "dj_heal", "dj_encore", "dj_encore_whirr", "dj_blade", "dj_encore_hit"],
+ "bar": {
+  "lmb": {"ab": "lmb", "cast": "dj_bolt", "travel": "", "hit": "thief_hit", "end": ""},
+  "rmb": {"ab": "utility", "cast": "dj_bola_throw", "travel": "", "hit": "thief_hit_rmb", "end": "thief_bola_tie"},
+  "e": {"ab": "k1", "cast": "dj_knife_throw", "travel": "thief_knife_fly", "hit": "thief_hit_e",
+   "end": "thief_knife_stick"},
+  "shift": {"ab": "", "cast": "thief_dash", "travel": "", "hit": "", "end": ""},
+  "r": {"ab": "ult", "cast": "dj_encore", "travel": "dj_encore_whirr", "hit": "thief_hit_r", "end": "thief_encore_end"}
+ }
 }

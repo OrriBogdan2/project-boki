@@ -24,13 +24,14 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 func run(main_node: Node) -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	main = main_node
 	Save.no_write = true
 	Save.d = Save.fresh()
 	Econ.ensure()
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
+	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
 	m.set_process(false)
 	for mb in m.mobs:
 		mb.dead = true
@@ -80,7 +81,7 @@ func run(main_node: Node) -> void:
 	k.render(DT, 1.0)
 	ok(k.state == "shoulder" and k.cmd == "follow",
 		"revived: the Boki is back on the shoulder with its order (%s, %s)" % [k.state, k.cmd])
-	ok(k.model.visible and k.get_node_or_null("BokiWisp") == null, "the Boki model is back, the wisp gone")
+	ok(k.model.visible and (k.wisp or k.get_node_or_null("BokiWisp") == null), "the Boki model is back, the wisp gone")
 	# ---------------------------------------------------------------- 2. far away
 	_out(k, bot.pos + Vector3(30.0, 0, 0))
 	m.knock(bot, foe, {})

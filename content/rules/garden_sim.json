@@ -12,9 +12,9 @@
 		"budget_full_day": [7, 30],
 		"stat_total": [216, 240],
 		"gems_day": [43, 300],
-		"joy": [50, 90]
+		"joy": [40, 90]
 	},
-	"bands_doc": "Target bands, [low, high], every player must land inside (docs/GARDEN.md Balance). form_lv4_day: median day of the first form step (Evo.on_level, level 4, 600 XP); evolution_day: median day of the first real form swap (first_evo_level) on garden XP alone, so a home-only player still evolves (DECISIONS 2026-11-09); budget_full_day: when the 240 budget fills (only checked where it fills inside the month: never trivial); stat_total: total at the end of the month (90% of 240 or more: even five minutes a day nearly fills it); gems_day: mean gems earned a day (at least a weekly Wayseed, 300 / 7, so home-only players reach every zone; at most one a day); joy: mean joy over a visit (above sulky, below always full so toys and cares still matter).",
+	"bands_doc": "Target bands, [low, high], every player must land inside (docs/GARDEN.md Balance). form_lv4_day: median day of the first form step (Evo.on_level, level 4, 600 XP); evolution_day: median day of the first real form swap (first_evo_level) on garden XP alone, so a home-only player still evolves (DECISIONS 2026-11-09); budget_full_day: when the 240 budget fills (only checked where it fills inside the month: never trivial); stat_total: total at the end of the month (90% of 240 or more: even five minutes a day nearly fills it); gems_day: mean gems earned a day (at least a weekly Wayseed, 300 / 7, so home-only players reach every zone; at most one a day); joy: mean joy over a visit (above the whistle's sulky_joy 25, below always full so toys and cares still matter; the low end was 50 until the farm joy tune cut toys joy_gain 10 to 3, which puts 5 to 30 minute visits at 40 to 48).",
 	"joy_model": {"away": 30.0, "care": 6.0, "decay_per_min": 0.6},
 	"joy_model_doc": "assume, copies of scripts/core/care.gd: a Boki away a day sits at the offline joy floor 30; each first care gives about 6 joy (Care.feed base); joy falls DECAY['joy'] 0.6 a minute. Toy joy_gain and joy_below are read from toys.json.",
 	"garden_xp_unbuilt": {"care_kinds": 3, "wish": 3, "sunsap": 40},
@@ -57,7 +57,7 @@
 	"toy_doc": "assume: one toy play (toys.json stat_gain 1, play_secs 8-12 plus the walk and the joy_below wait) every 2.5 minutes you are there.",
 	"toys": ["speed", "power", "focus", "guard", "focus"],
 	"toys_doc": "toys.json: ball, post, tub, stone, dig: the stat each trains; a Boki picks one at random.",
-	"line": "burrlet",
+	"line": "sporcupine",
 	"line_doc": "The path meter tracked: Sporcupine to Amanitusk (Power) or Ringrove (Guard), both ends in reach of the built games.",
 	"families_extra": {"bramble_honey": "lean", "cinderbrittle": "lean", "glassdew": "lean", "hush_truffle": "lean", "twinbun": "personality", "dare_pepper": "personality", "lullwort_tea": "personality", "peekbox": "personality", "glowmoss_sprig": "looks", "cup_ribbon": "looks"},
 	"families_extra_doc": "Families of catalogue items not yet in garden_items.json (brief 1.2).",
@@ -65,6 +65,7 @@
 		"casual5": {"name": "5 min a day (+1 run)", "minutes": 5, "runs": 1, "plan": false},
 		"keen30": {"name": "30 min a day (+2 runs)", "minutes": 30, "runs": 2, "plan": true},
 		"home30": {"name": "home only, 30 min", "minutes": 30, "runs": 0, "plan": true},
+		"home20": {"name": "home only, 20 min", "minutes": 20, "runs": 0, "plan": true},
 		"home5": {"name": "home only, 5 min", "minutes": 5, "runs": 0, "plan": false}
 	},
 	"players_doc": "minutes = garden minutes a day; runs = expeditions a day (the tracked Boki leads); plan = wears only tokens toward its chosen end and feeds that end's bites. home5 is the worst case of the 5-minute flag. All shaping items go to one tracked Boki (an upper bound: a real player spreads them).",

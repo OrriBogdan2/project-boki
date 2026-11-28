@@ -147,7 +147,7 @@ func _flight() -> void:
 		ak.step(m, Match.DT)
 		fall += Match.DT
 	var land_len := float(HunterAnim.km_def("lw_land")["keys"][-1][0])
-	var min_fall := float(WardenClips.data("cinder")["land"]["min_fall"])
+	var min_fall := 0.25      # s: the old land.min_fall (f7df59df07 dropped the key; the drop clip owns the rest)
 	ok("ult landing: she touches down within a short fall of the landing move (no generic land clip after it)",
 			P.grounded and fall - land_len < min_fall,
 			"down after %.2fs, the move %.2fs, min_fall %.2f" % [fall, land_len, min_fall])
@@ -175,8 +175,8 @@ func _flight() -> void:
 	ok("ult bond: nothing for a cast that lands on nobody", _owed(P) == 0.0, "owed %.2f" % _owed(P))
 	HunterKeys.ult_pressed(P)
 	ok("ult: the cooldown denies a new flight", not J.running() and J.flights == 2, "cd %.1f" % float(K.cd["x"]))
-	await _steer(m, P, K, home)
-	await _move_feel(m, P, K, home)
+	_steer(m, P, K, home)
+	_move_feel(m, P, K, home)
 	await ak.done(m)
 
 ## Steering: the flight follows the cursor at no more than turn_deg a second, so the carpet curves.
@@ -220,7 +220,7 @@ func _move_feel(m: Match, P: Hunter, K: AshwickKit, home: Vector3) -> void:
 		t += 1.0 / 60.0
 		var v := Vector2(P.pos.x - q.x, P.pos.z - q.z).length() * 60.0
 		q = P.pos
-		if J.running() and t > 0.03:
+		if J.running() and t > float(K.x_def()["lift_t"]) + 0.03:      # (he hangs lift_t at the ring first)
 			slow = minf(slow, v)
 			fast = maxf(fast, v)
 	var dir: Vector2 = Vector2(P.pos.x - home.x, P.pos.z - home.z).normalized()
@@ -246,7 +246,7 @@ func _move_feel(m: Match, P: Hunter, K: AshwickKit, home: Vector3) -> void:
 	P.inp["move"] = Vector2.ZERO
 	ok("ult end: the first step after it is free (Shift dashes)", P.roll_t > 0.0 and not J.running())
 	ak.step(m, 0.6)
-	await _ledge_and_void(m, P, K, home, m.world)
+	_ledge_and_void(m, P, K, home, m.world)
 
 func _ledge_and_void(m: Match, P: Hunter, K: AshwickKit, home: Vector3, W) -> void:
 	var J := K.jet
@@ -356,7 +356,7 @@ func _carpet() -> void:
 	var used0: int = K.cloaks
 	P.ak.use_e()
 	ok("ult: E (Furnace Cloak) still works mid-flight, the flight goes on", K.cloaks == used0 + 1 and J.running())
-	await _locked_inputs(m, P, K, home + Vector3(16, 0, 0))
+	_locked_inputs(m, P, K, home + Vector3(16, 0, 0))
 	var card := String(K.x_def()["desc"])
 	ok("ult card: only the Furnace Cloak works in the flight",
 		card.contains("only the Furnace Cloak works") and not card.contains("Shift) speeds"))
@@ -384,9 +384,9 @@ func _carpet() -> void:
 		"ult payoff: standing in it, Ablaze after about 2.4s", at_14 == 0 and K.burning(T) >= 1,
 		"at 1.4s %d, at 2.6s %d" % [at_14, K.burning(T)]
 	)
-	await _lance_off(m, P, K, T, home)
-	await _abyss(m, P, K, home, m.world)
-	await _knock_stun_merge(m, P, K, home)
+	_lance_off(m, P, K, T, home)
+	_abyss(m, P, K, home, m.world)
+	_knock_stun_merge(m, P, K, home)
 	await ak.done(m)
 
 ## The carpet never forms over the abyss; he flies on over it.
@@ -430,7 +430,7 @@ func _knock_stun_merge(m: Match, P: Hunter, K: AshwickKit, home: Vector3) -> voi
 		"speed %.1f -> %.1f" % [sp0, float(J.flight.get("speed", 0.0))]
 	)
 	ak.step(m, 1.8)
-	await _shift_and_jump(m, P, K, home)
+	_shift_and_jump(m, P, K, home)
 	P.teleport(home)
 	_cast(P, home + Vector3(16, 0, 0))
 	ak.step(m, 0.3)
@@ -604,11 +604,12 @@ func _shift_and_jump(m: Match, P: Hunter, K: AshwickKit, home: Vector3) -> void:
 	ak.step(m, 0.1)
 	P.inp["jump"] = false
 	var flat := Vector2(P.vel.x, P.vel.z).length()
-	# 0.1 s later the air drag above run speed (Loco.air_step, owner 11-08) has had its share: 0.8, not 0.9
+	# 0.1 s later the air drag above run speed (Loco.air_step, owner 11-08) has had its share: 0.8, not 0.9; and a
+	# dash-fast jump sheds to jump_trim_to (JumpTrim, 11-26 traversal parity), so that low end is the floor
 	ok(
 		"ult: a jump in the flight leaps off it within 0.1s, keeping its speed into the air (item 51)",
 		not J.running() and J.leaps >= 1 and P.pos.y > y0 + 0.2 and P.vel.y > 0.0
-				and flat >= sp * Loco.dash_jump_keep * 0.8,
+				and flat >= minf(sp * Loco.dash_jump_keep * 0.8, HunterMove.jump_trim_to.x),
 		"rose %.2f m, %.1f m/s of %.1f" % [P.pos.y - y0, flat, sp]
 	)
 	ak.step(m, 1.5)
@@ -649,7 +650,8 @@ func _locked_inputs(m: Match, P: Hunter, K: AshwickKit, at: Vector3) -> void:
 	var hp0 := P.hp
 	var pos_y := P.pos.y
 	var l0 := J.locked
-	var keys := ["sec", "dash", "util1", "util2", "util3", "util4", "gear1", "gear2", "kin_ab", "skill", "throw"]
+	var keys := ["sec", "dash", "util1", "util2", "util3", "util4", "util5", "util6", "gear1", "gear2", "kin_ab",
+		"skill", "throw"]
 	for key in keys:
 		ak.step(m, 0.05, func():
 			P.inp[key] = true

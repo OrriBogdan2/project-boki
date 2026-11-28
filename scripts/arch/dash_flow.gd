@@ -7,43 +7,55 @@ extends RefCounted
 ## or Shift out of an ability, and a hold carried through a dash, a jump or a mantle; a missing one combines.
 ## A press during a mantle (the ledge rise) goes by the one table every hero shares, content/rules/mantle_press.json:
 ## "fire" goes mid-climb, "buffer" (the default) waits for the top.
-## A press that crowd control still forbids, made in its last BUFFER_S, is held the same way and goes on the first
+## A press that crowd control still forbids, made in its last Loco.press_buffer (tuning.json press_buffer), is held
+## the same way and goes on the first
 ## step the CC allows it (docs/decisions/0118-cc-exit-buffer.md), and so is a Shift, LMB or jump at the end of a kit's
 ## own cast lock (ArchKit.lock_left: an ult that plants its caster).
+## An RMB or E pressed while the kit's own cast lock refuses it (ArchKit.lock_refuses: Motley's Nightwell cast, Kael's
+## Riposte guard and cleave, Vex's Kitefall) is held the same way, KIT_LOCK_SLOTS (--cast-lock-buffer-check).
 
-const BUFFER_S := 0.15      # s: a held press waits at most this long past a dash's end; one this near a CC's end waits
 const SLOTS := ["lmb", "rmb", "e", "x", "q"]
 const MODES := ["fire", "buffer", "cancel"]
+
 ## The one-step Hunter.inp press each slot reads. LMB is the held "fire" key; X comes in through HunterKeys.
 const KEY_OF := {"rmb": "sec", "e": "sig", "q": "gear1"}
+
 ## The one-step Hunter.inp press per slot a CC can forbid (LMB and X as above; Q's glove goes through a stun).
 const CC_KEY_OF := {"rmb": "sec", "e": "sig", "dash": "dash", "jump": "jump"}
-const LOCK_SLOTS := ["lmb", "dash", "jump"]        # the presses a kit's cast lock holds at its end
+const LOCK_SLOTS := ["lmb", "dash", "jump"]  # the presses a kit's cast lock holds at its end
+
+## The presses a kit's own cast lock refuses and DashFlow holds (X is the ult's own recast, Q's glove goes through).
+const KIT_LOCK_SLOTS := ["rmb", "e"]
 const DEFAULT_ROW := {"mode": "buffer", "carry": false, "variant": "", "source": ""}
+
 ## The moves an ability combines with (docs/decisions/0015-combo-flow.md): a ground dash, an air dash, a jump.
 const MOVES := ["ground", "air", "jump"]
+
 ## Owner rule (item 51): every ability combines with every move. A row that says otherwise is an exception and
 ## carries a reason and a source.
 const COMBINE := {"jump": "fire", "into": "fire", "hold": "keep"}
 
 ## The moves routed in a mantle beside SLOTS; each reads the Hunter.inp key of its own name.
 const MANTLE_MOVES := ["dash", "jump"]
-
-static var _files := {}     # hero id -> its content/dash_flow file (empty when it has none)
 const MANTLE_FILE := "res://content/rules/mantle_press.json"
+
+static var _files := {}  # hero id -> its content/dash_flow file (empty when it has none)
 static var _mantle_rows: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(MANTLE_FILE))
 
 var kit: ArchKit
-var held := {}              # slot -> seconds it has waited since the dash ended, or since its press at a CC's end
-var landing := {}           # slot -> true: pressed mid-jump, its jump row holds it for the landing
-var air := false            # the dash running now set off in the air
+var held := {}  # slot -> seconds it has waited since the dash ended, or since its press at a CC's end
+var landing := {}  # slot -> true: pressed mid-jump, its jump row holds it for the landing
+var air := false  # the dash running now set off in the air
+
 var _was_dashing := false
 var _fire_was := false
 var _replaying := false
-var _frozen_tap := false    # an LMB tap made inside a hit-stop, due on the next step
+var _frozen_tap := false  # an LMB tap made inside a hit-stop, due on the next step
+
 
 func _init(owner_kit: ArchKit) -> void:
 	kit = owner_kit
+
 
 ## The hero's whole dash-flow file ({} when it has none: every press buffers).
 static func file_of(hero: String) -> Dictionary:
@@ -53,13 +65,16 @@ static func file_of(hero: String) -> Dictionary:
 		_files[hero] = parsed if parsed is Dictionary else {}
 	return _files[hero]
 
+
 ## The mantle row for a press of `input` (a SLOTS or MANTLE_MOVES entry): mode, seen, source ({} when it has none).
 static func mantle_row(input: String) -> Dictionary:
 	return _mantle_rows.get(input, {})
 
+
 ## What a press of `input` does in a mantle: "fire" or "buffer" (the default).
 static func mantle_mode(input: String) -> String:
 	return String(mantle_row(input).get("mode", "buffer"))
+
 
 ## The row for a press of `slot` during a ground or air dash, missing fields filled from DEFAULT_ROW.
 static func row_of(hero: String, slot: String, in_air: bool) -> Dictionary:
@@ -67,14 +82,17 @@ static func row_of(hero: String, slot: String, in_air: bool) -> Dictionary:
 	var given: Dictionary = dash.get("air" if in_air else "ground", {}).get(slot, {})
 	return DEFAULT_ROW.merged(given, true)
 
+
 ## The reverse row: Shift pressed during `slot`'s wind-up or recovery ({} when the kit still decides on its own).
 static func into_dash_of(hero: String, slot: String) -> Dictionary:
 	return file_of(hero).get("into_dash", {}).get(slot, {})
+
 
 ## A press of `slot` mid-jump (in the air, not dashing): "fire" (the default) or the exception "buffer" (held for
 ## the landing).
 static func jump_row_of(hero: String, slot: String) -> Dictionary:
 	return _combo_row(file_of(hero).get("jump", {}).get(slot, {}), COMBINE["jump"])
+
 
 ## The reverse row for a move pressed during `slot`'s wind-up or recovery: Shift (into_dash, "ground" or "air")
 ## or a jump (into_jump). "fire" or "cancel" act at once; the exceptions "buffer" (waits for the ability's end) and
@@ -84,19 +102,26 @@ static func into_row_of(hero: String, slot: String, move: String) -> Dictionary:
 	var given: Dictionary = rows.get(slot, {})
 	return _combo_row(given.get("air", given) if move == "air" else given, COMBINE["into"])
 
+
 ## Whether a hold or charge of `slot` survives `move` (a MOVES entry, or "mantle"): "keep" (the default) or
 ## "cancel" (an exception: the move ends it with nothing released).
 static func hold_row_of(hero: String, slot: String, move: String) -> Dictionary:
 	var rows: Dictionary = file_of(hero).get("hold", {}).get(slot, {})
 	return _combo_row(rows.get(move, {}), COMBINE["hold"])
 
+
 static func _combo_row(given: Dictionary, mode: String) -> Dictionary:
-	return {"mode": String(given.get("mode", mode)), "reason": String(given.get("reason", "")),
-			"source": String(given.get("source", ""))}
+	return {
+		"mode": String(given.get("mode", mode)),
+		"reason": String(given.get("reason", "")),
+		"source": String(given.get("source", ""))
+	}
+
 
 ## This hunter's row for `slot` in the dash running now (kits read carry and variant from it).
 func row(slot: String) -> Dictionary:
 	return row_of(kit.id, slot, air)
+
 
 ## Each step, before Hunter.tick reads its presses: routes the presses made during a dash by the rows and lets the
 ## held ones go once the dash is over.
@@ -112,17 +137,19 @@ func route(dt: float) -> void:
 	if h.mantling():
 		_route_mantle(fire_pressed)
 		return
-	var fire_held := _route_cc(fire_pressed)        # (a cast lock can end in a dash: Kael's cleave lunges)
+	var fire_held := _route_cc(fire_pressed)  # (a cast lock can end in a dash: Kael's cleave lunges)
+	_route_lock()  # a locked move that dashes (Kael's cleave): the lock decides, not the dash rows
 	if not dashing:
 		_release(dt)
 		_route_jump(fire_pressed)
 		return
 	if fire_pressed and not fire_held:
-		_press("lmb")          # a held LMB is left alone: holding it through the dash fires at the end anyway
+		_press("lmb")  # a held LMB is left alone: holding it through the dash fires at the end anyway
 	for slot in KEY_OF:
 		var key: String = KEY_OF[slot]
 		if h.inp.get(key, false) and _press(slot) == "buffer":
 			h.inp[key] = false
+
 
 ## X during a dash (HunterKeys.ult_pressed asks first): true when the press is held for the dash's end, or
 ## mid-jump for the landing.
@@ -138,11 +165,13 @@ func take_x() -> bool:
 		return _hold_for_cc("x") or _press_mid_jump("x")
 	return _press("x") == "buffer"
 
+
 ## An LMB tap made while the simulation is frozen (a hit-stop: no step runs to see it): replayed on the first
 ## step after the freeze, where the dash and jump rows and the kit take it like any press made then, instead of
 ## falling between two frames (the other keys latch in Match.pending_input; --hitstop-input-check).
 func press_frozen() -> void:
 	_frozen_tap = true
+
 
 ## The move the hunter is making now, for the hold rows: "mantle", a dash ("ground" or "air", by where it set
 ## off), "jump" (in the air off a jump or a ledge), or "" (none).
@@ -154,9 +183,11 @@ func move_now() -> String:
 		return "air" if _dash_set_off_in_air() else "ground"
 	return "" if h.grounded else "jump"
 
+
 ## The dash a Shift press starts now ("ground" or "air"), for a kit's on_dash.
 func dash_move() -> String:
 	return "ground" if kit.h.grounded else "air"
+
 
 ## Whether the move under way (or `move`) ends a hold or charge of `slot`, by its hold row. Every kit asks
 ## this where a move used to end its holds, so the rows decide.
@@ -164,11 +195,13 @@ func ends_hold(slot: String, move := "") -> bool:
 	var now := move if move != "" else move_now()
 	return now != "" and String(hold_row_of(kit.id, slot, now)["mode"]) == "cancel"
 
+
 ## A dash is under way whose row keeps a hold of `slot`: the hold waits, neither charging on nor going off, and
 ## a release made in it goes when the dash ends.
 func pauses_hold(slot: String) -> bool:
 	var now := move_now()
 	return now in ["ground", "air"] and not ends_hold(slot, now)
+
 
 ## Whether the hunter is dashing now, noting whether a dash that just set off did so in the air.
 func _sync() -> bool:
@@ -178,10 +211,12 @@ func _sync() -> bool:
 	_was_dashing = dashing
 	return dashing
 
+
 func _dash_set_off_in_air() -> bool:
 	if _was_dashing:
 		return air
 	return not kit.h.grounded
+
 
 ## Presses made mid-jump: a slot whose jump row says "buffer" is held for the landing.
 func _route_jump(fire_pressed: bool) -> void:
@@ -197,6 +232,7 @@ func _route_jump(fire_pressed: bool) -> void:
 		var key: String = KEY_OF[slot]
 		if h.inp.get(key, false) and _press_mid_jump(slot):
 			h.inp[key] = false
+
 
 ## Presses made in a mantle: an input whose mantle row says "buffer" is held for the top. A fire key held from before
 ## the rise is left to its hold row; a fresh press keeps it up until the top.
@@ -215,11 +251,13 @@ func _route_mantle(fire_pressed: bool) -> void:
 			held[move] = 0.0
 			h.inp[move] = false
 
+
 func _press_mid_jump(slot: String) -> bool:
 	if kit.h.grounded or String(jump_row_of(kit.id, slot)["mode"]) != "buffer":
 		return false
 	landing[slot] = true
 	return true
+
 
 func _press(slot: String) -> String:
 	var r := row(slot)
@@ -229,6 +267,7 @@ func _press(slot: String) -> String:
 	elif mode == "cancel":
 		_cancel(bool(r["carry"]))
 	return mode
+
 
 ## The press ends the dash; without carry the hunter keeps no more than run speed out of it.
 func _cancel(carry: bool) -> void:
@@ -240,6 +279,7 @@ func _cancel(carry: bool) -> void:
 	var flat := Vector2(h.vel.x, h.vel.z).limit_length(h.base_speed)
 	h.vel = Vector3(flat.x, h.vel.y, flat.y)
 
+
 ## Seconds until the hunter's crowd control allows `slot` (0: it does now). A stun or the kit's committed recovery
 ## (ArchKit.commit_left) stops every slot but Q's glove and an ult's recast, a root the dash, Grounded the dash (not
 ## a reeling Dredge's) and the jump; the kit's own cast lock (ArchKit.lock_left) the LOCK_SLOTS.
@@ -247,7 +287,7 @@ func cc_left(slot: String) -> float:
 	var h := kit.h
 	if slot == "q" or (slot == "x" and kit.ult_running()):
 		return 0.0
-	var stop := maxf(h.stun_t, kit.commit_left())     # a stun, or the kit's own committed recovery: every slot
+	var stop := maxf(h.stun_t, kit.commit_left())  # a stun, or the kit's own committed recovery: every slot
 	if slot in LOCK_SLOTS:
 		stop = maxf(stop, kit.lock_left())
 	if slot == "dash":
@@ -257,7 +297,9 @@ func cc_left(slot: String) -> float:
 		return maxf(stop, KitStatus.grounded_left(h))
 	return stop
 
-## Presses the CC forbids now, in its last BUFFER_S: held for the first step it allows them; true when an LMB tap
+
+## Presses the CC forbids now, in its last Loco.press_buffer: held for the first step it allows them; true when an
+## LMB tap
 ## was. A held LMB is left alone (it fires on its own once allowed); a tap is replayed. A cast that holds the
 ## hunter still with no end in sight (Rimelock's statue roots its caster) reads its own presses.
 func _route_cc(fire_pressed: bool) -> bool:
@@ -271,27 +313,43 @@ func _route_cc(fire_pressed: bool) -> bool:
 			h.inp[key] = false
 	return fire_held
 
+
 func _hold_for_cc(slot: String) -> bool:
 	var left := cc_left(slot)
-	if left <= 0.0 or left > BUFFER_S:
+	if left <= 0.0 or left > Loco.press_buffer:
 		return false
 	held[slot] = 0.0
 	return true
 
+
+## Presses the kit's own cast lock refuses: held like a CC's and replayed on the first step the lock lets them,
+## at most Loco.press_buffer after the press (a lock that runs on past that answers with the slot's deny cue then). The
+## footage shows no such press dropped (hero-ref: Void acts through the Nightwell, Brall's guard and Ghost's
+## recoveries are silent), so every kit holds; a newer press replaces the held one.
+func _route_lock() -> void:
+	var h := kit.h
+	for slot in KIT_LOCK_SLOTS:
+		var key: String = KEY_OF[slot]
+		if h.inp.get(key, false) and kit.lock_refuses(slot):
+			held[slot] = 0.0
+			h.inp[key] = false
+
+
 func _release(dt: float) -> void:
 	for slot in held.keys():
-		if (kit.busy() or cc_left(slot) > 0.0) and float(held[slot]) < BUFFER_S:
+		if (kit.busy() or cc_left(slot) > 0.0) and float(held[slot]) < Loco.press_buffer:
 			held[slot] = float(held[slot]) + dt
 			continue
 		held.erase(slot)
 		_replay(slot)
+
 
 ## The held press goes now, through the slot's own path (which casts or answers with its deny cue).
 func _replay(slot: String) -> void:
 	var h := kit.h
 	match slot:
 		"lmb":
-			h.inp["fire"] = true       # a tap; still held, the weapon already fires on its own
+			h.inp["fire"] = true  # a tap; still held, the weapon already fires on its own
 		"x":
 			_replaying = true
 			HunterKeys.ult_pressed(h)
@@ -299,4 +357,4 @@ func _replay(slot: String) -> void:
 		"dash", "jump":
 			h.inp[slot] = true
 		_:
-			h.inp[KEY_OF.get(slot, slot)] = true      # (a mantle's held dash or jump: its own key)
+			h.inp[KEY_OF.get(slot, slot)] = true  # (a mantle's held dash or jump: its own key)
