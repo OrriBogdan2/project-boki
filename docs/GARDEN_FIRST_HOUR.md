@@ -66,7 +66,7 @@ Rank = how likely a new player stops, quits or learns the wrong thing. Each line
    (`market.json black_market wayseed_days 3`, price 110). On a day without it the second key cannot be had for up to 3 days, however well
    you play; the farm day is 5 minutes, so "day 3" in the pace check is three calendar days. The hub hint says only "A dark stone needs two
    keys: a Wayseed and a Boki leaning its way". Owner: `scripts/core/black_market.gd`, `content/rules/market.json`,
-   `content/rules/garden_zones.json hub_hints`. *Proposal: a garden-only player's first zone Wayseed always in stock on day 1 (or in the
+   `content/rules/garden_zones.json hub_hints`. **Checked on ext/wayseed-day-one:** the stock half was already true on main: `BlackMarket._hold_seed` only waits `wayseed_days` after a Wayseed was *bought* (`seed_week`), so a fresh save sees the first one every day (`--garden-first-day-check` now asserts it on all 3 days of the cycle and that the 200-gem first-entry purse pays its 110). The run's "day we happened to hit" reading was wrong. The hub "keys" hint and the zone card now name Old Pell's Black Market and say the first is always in stock. *Original proposal: a garden-only player's first zone Wayseed always in stock on day 1 (or in the
    starter bag), and the hint names the trader.*
 5. **The Nook tile and the rule disagree.** Tile says "LV 5 NEEDED"; `NookRules.GROWN_LV` is 8. A player who reaches 5 is still refused
    (shot 05d). Owner: `scripts/home/home.gd:4652` `_pair_short`. *Proposal: print `NookRules.GROWN_LV` instead of a hard-coded 5.*

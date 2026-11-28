@@ -46,6 +46,7 @@ func run(m: Node) -> void:
 	Save.no_write = true
 	_list()
 	_second_boki()
+	_first_wayseed()
 	await _bot()
 	await _lead_toy()
 	await _screens()
@@ -163,6 +164,36 @@ func _second_boki() -> void:
 			"second Boki: the first-day list is still on and now holds the lines that need company")
 	rules["base_mode"] = false
 	ok(Shelter.open_level() == 2, "second Boki: off base_mode the Shelter opens at stall level 2")
+	rules["base_mode"] = was
+
+## Item 4 of docs/GARDEN_FIRST_HOUR.md: the first zone's Wayseed is on the trader's shelf on every day of his
+## wayseed_days cycle until you hold one (he only waits after you buy), and the hub's hint says where to buy it.
+func _first_wayseed() -> void:
+	var rules: Dictionary = Content.rules("farm_build")
+	var was: bool = rules.get("base_mode", false)
+	rules["base_mode"] = true
+	var days := int(BlackMarket.seed_terms()[0])
+	var always := 0
+	for skew in days:
+		Save.d = _fresh_save()
+		MarketSave.skew_days = skew
+		if BlackMarket.stock().any(func(e): return String(e["key"]) == "seed:glasswater"):
+			always += 1
+	ok(always == days, "first Wayseed: in stock on %d of %d days of the trader's cycle" % [always, days])
+	Save.d = _fresh_save()
+	Save.d["gems"] = HomeLayout.FS_GEMS      # what the first farm entry gives
+	var entry: Dictionary = BlackMarket.stock().filter(func(e): return BlackMarket.is_seed(String(e["key"])))[0]
+	ok(int(entry["price"]) <= int(Save.d["gems"]),
+			"first Wayseed: the first-entry purse (%d) pays its %d gems" % [HomeLayout.FS_GEMS, int(entry["price"])])
+	ok(BlackMarket.buy(String(entry["id"]))["ok"], "first Wayseed: bought")
+	ok(not BlackMarket.stock().any(func(e): return BlackMarket.is_seed(String(e["key"]))),
+			"first Wayseed: once you own one, the trader holds none for the rest of his cycle")
+	MarketSave.skew_days = 0
+	var hint := ""
+	for e in GardenZones.rules()["hub_hints"]["list"]:
+		if e["id"] == "keys":
+			hint = String(e["text"])
+	ok("Old Pell" in hint and "Black Market" in hint, "first Wayseed: the hub hint names the trader: %s" % hint)
 	rules["base_mode"] = was
 
 func _pair_text() -> String:
