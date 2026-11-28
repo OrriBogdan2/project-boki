@@ -8,7 +8,7 @@ extends RefCounted
 const BEARINGS := 8
 const DISTANCES := [5.0, 12.0]  # m from the target to you
 const SETTLE_FRAMES := 14  # frames for the camera to catch up after a move
-const SHOT_BEARINGS := [0, 4]  # in the shots: target ahead of the camera, and behind it
+const MIN_VIEWS := 4  # standing spots on the island a step needs to count
 
 var bad := 0
 var main: Node
@@ -96,12 +96,16 @@ func _step(id: String) -> void:
 	var covered := 0
 	var wrong := 0
 	var beam_off := 0
+	var views := 0
+	var shot := {}
 	var vp: Vector2 = home.get_viewport().get_visible_rect().size
-	print("T3P view %s" % vp)
 	for d in DISTANCES:
 		for a in BEARINGS:
 			var ang := a * TAU / BEARINGS
 			home.ppos = at + Vector3(sin(ang), 0, cos(ang)) * d
+			if home._ground_h(home.ppos.x, home.ppos.z) <= -50.0:
+				continue  # not a place to stand: off the island
+			views += 1
 			home.player.position = home.ppos
 			home.cam.snap(home.ppos)
 			home.farm_cam.yaw = 0.0
@@ -134,19 +138,19 @@ func _step(id: String) -> void:
 				and FarmTutPointer.player_box(cam, home.ppos).has_point(cam.unproject_position(prompt))
 			):
 				covered += 1
-			if shots_dir != "" and d == DISTANCES[0] and a in SHOT_BEARINGS:
-				await _shot("%s_%s" % [id, "ahead" if a == 0 else "behind"])
+			var kind := "prompt" if in_view else "arrow"
+			if shots_dir != "" and d == DISTANCES[0] and not shot.has(kind):
+				shot[kind] = true
+				await _shot("%s_%s" % [id, kind])
 	var view := "top-down" if top else "third person"
 	ok(
 		beam_off == 0 and wrong == 0,
 		"%s (%s): the beam stands under the prompt, the label and the arrow never both" % [id, view]
 	)
+	ok(views >= MIN_VIEWS, "%s: %d standing spots on the island to test from" % [id, views])
 	ok(
 		lost == 0,
-		(
-			"%s: out of the frame in %d of %d views, the edge arrow points at it every time"
-			% [id, arrows, DISTANCES.size() * BEARINGS]
-		)
+		"%s: out of the frame in %d of %d views, the edge arrow points at it every time" % [id, arrows, views]
 	)
 	ok(covered == 0, "%s: the prompt never sits on the player (%d views)" % [id, covered])
 
