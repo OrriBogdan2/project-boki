@@ -83,11 +83,13 @@ func no_glide() -> void:
 		t += A.DT
 	var in_recover := K.riposte.running()
 	P.do_jump()
-	A.step(m, 0.3)
+	P.inp["glide"] = true  # a press is held glide_engage s to open: the player keeps Space down through the last beat
+	A.step(m, HunterFeel.glide_engage + 0.1)
 	P.do_jump()
 	A.ok("jug 113.2: in the ult's last beat a jump and a glide input end the rest of it in a glide",
 			in_recover and P.gliding and not K.riposte.running(), "recover %s gliding %s ult %s" % [
 			in_recover, P.gliding, K.riposte.running()])
+	P.inp["glide"] = false
 	await A.done(m)
 
 # ------------------------------------------------------------------ 3, 4: the keyed poses

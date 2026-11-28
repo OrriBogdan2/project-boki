@@ -146,7 +146,7 @@ func _glide_up(m: Match, p: Hunter, home: Vector3) -> void:
 	drive(
 		m,
 		p,
-		0.3,
+		HunterFeel.glide_engage + 0.1,
 		func(i):
 			p.inp["glide"] = true
 			p.inp["jump"] = i == 0
