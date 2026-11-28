@@ -11559,3 +11559,4 @@ READY ext/feel-fire-slow 14ff973bf179c01726d69ff71c09d7bf67d576f5 (reference sel
 READY ext/kael-rmb-dash-turn be382acd40 (Kael RMB into Shift turn limit 35 deg / 0.8 s, patch 05.02.25; Lunge->Shift yaw 180 -> 35; held Lunge->Shift drive no longer dropped)
 READY ext/boki-page-raising b49de4b254 (Boki page shows raising)
 READY ext/lace-ult-window d500324d0f (Lace Starpiercer pierces terrain via x.pierce_terrain, placed walls still stop it; third-shot final_dmg asserted; --archer-combo-check green)
+READY ext/hitstop-tier-audit dffa05cc0f809c356aa08bde2dbd096dffaeb468 (hit-stop tier table: 52 LMB/RMB/E/R rows vs source tiers as --impact-weight-check s11; Anchor Drop solid->heavy; Sable flash stray fixed)
