@@ -194,3 +194,10 @@ Scripts: `/home/boki/gens/hunter-round-1124/kael/hair/scripts/` (`hairmask.py GL
 - kael_meshy.glb Image_0 = the r29 texels (even trousers 80,66,70 gamma 0.45, off-arm white veins W 2.2/1.4 texel).
   The r28 texels (B) were rendered too: trousers read maroon at eye level, so A was kept.
 - Scripts: /home/boki/gens/hunter-round-1124/kael/r31/scripts (build31.py, anchors31.py, animdiff.py).
+
+**Round 34 (2026-11-28, ext/kael-r25, sword seat):** r33 left the fingers inside the guard in run/dash (finger tips 4.8-5.3 cm past the guard's
+pommel-side face). kael.glb's sword verts (Body prim 5, `metal-sword`, the part WardenProps hangs on RightHand) slide a further 6.5 cm toward the
+blade tip along the grip axis, translation only (no rotation, so every clip's blade angle is unchanged; no skin/weights/texture touched).
+Headless probe (`--live-audit --probe`, 306 frames): finger max along the grip vs the guard face 0.095 m: run/dash 0.148 -> 0.083,
+idle 0.145 -> 0.080, attack 0.145 -> 0.080, jump 0.139 -> 0.074, hit 0.073 -> 0.008 (all below the face); finger min vs pommel -0.146:
+-0.095 (fist stays on the grip). Sword hand texture (dark red, orange veins) untouched.
