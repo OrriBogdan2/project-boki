@@ -1,14 +1,16 @@
 class_name AbyssFallSfx
 extends RefCounted
 ## One hunter's abyss fall sounds (tools/gen_sfx_abyss_fall.py, content/sfx/abyss_fall.json).
-## Yours, unpositioned: an abyss_wind loop from the moment you drop under an island's lip over the abyss,
-## its pitch and level climbing through the slow band (HunterMove.abyss_slow_from..abyss_slow_to, where
-## the fall eases to its abyss cap) so you hear how deep you are; abyss_warn once when the point of no
-## return (Hunter.abyss_kill_y) is WARN_S of falling away; abyss_lift once when anything carries you back
-## up (the glider, cool or overheated, an updraft, a ledge float). Everyone else's: one positional
-## abyss_cry as they drop under the lip, at normal hearing range. Ticked once a frame per hunter next to
+## Yours, unpositioned: an abyss_wind loop from audio_from (3 m, content/rules/abyss_danger.json) under an
+## island's lip over the abyss, its pitch and level climbing through the slow band
+## (HunterMove.abyss_slow_from..abyss_slow_to, where the fall eases to its abyss cap)
+## so you hear how deep you are; abyss_warn once when the point of no return (Hunter.abyss_kill_y) is
+## WARN_S of falling away; abyss_lift once when anything carries you back up (the glider, cool or
+## overheated, an updraft, a ledge float). Everyone else's: one positional abyss_cry
+## as they drop under the lip, at normal hearing range. Ticked once a frame per hunter next to
 ## GliderSfx; each cue fires once on the change of state.
 
+const ABYSS_FX := preload("res://scripts/match/abyss_fx.gd")
 const WIND_KEY := "abyss_wind"
 const WIND_QUIET_DB := -20.0    # dB, loop, at the top of the slow band...
 const WIND_LOUD_DB := -5.0      # ...and at its bottom
@@ -20,7 +22,7 @@ const LIFT_VY := 2.0            # m/s climbing under the lip that counts as bein
 const LIFT_DB := -4.0           # dB
 const CRY_DB := -4.0            # dB, positional
 
-var falling := false            # under the lip and dropping: the wind is on
+var falling := false            # dropping from audio_from under the lip: the wind is on
 var warned := false             # this drop's warning has played
 var lifted := false             # the lift cue has played since you last fell
 var cried := false              # another hunter's cry has played for this drop
@@ -33,13 +35,19 @@ static func wind_mix(depth: float) -> Vector2:
 	return Vector2(lerpf(WIND_QUIET_DB, WIND_LOUD_DB, k), lerpf(WIND_LOW, WIND_HIGH, k))
 
 ## The warning heartbeat at abyss danger k (0..1, AbyssFx.danger): its level in dB and its beats a second.
-## Silent (-INF dB, no beat) below warn_from; from there both climb to full at k = 1 (content/rules/abyss_danger.json).
+## Silent (-INF dB, no beat) until the tint reaches the level it has audio_from metres under the lip; from there
+## both climb to full at k = 1 (content/rules/abyss_danger.json).
 static func warn_db(k: float) -> float:
 	var r := Content.rules("abyss_danger")
-	var from := float(r["warn_from"])
+	var from := audio_k()
 	if k <= from:
 		return -INF
 	return lerpf(float(r["warn_db_min"]), float(r["warn_db_max"]), clampf((k - from) / (1.0 - from), 0.0, 1.0))
+
+## The tint's strength at audio_from metres under the lip: where the warning heartbeat starts.
+static func audio_k() -> float:
+	var span := World.ABYSS_DEPTH - 0.5 + HunterFeel.abyss_extra  # lip (balloon line) to the point of no return
+	return ABYSS_FX.danger_depth(float(Content.rules("abyss_danger")["audio_from"]), span)
 
 static func warn_rate(k: float) -> float:
 	var r := Content.rules("abyss_danger")
@@ -49,7 +57,8 @@ func tick(h: Hunter) -> void:
 	if not h.is_local():
 		_other(h)
 		return
-	falling = h.below_lip and h.vel.y < 0.0
+	var depth := h.lip_y - h.pos.y
+	falling = h.below_lip and h.vel.y < 0.0 and depth >= float(Content.rules("abyss_danger")["audio_from"])
 	if not h.below_lip:
 		warned = false
 		lifted = false
@@ -61,7 +70,7 @@ func tick(h: Hunter) -> void:
 	if not falling:
 		return
 	lifted = false
-	var wind := wind_mix(h.lip_y - h.pos.y)
+	var wind := wind_mix(depth)
 	Sfx.loop_hold(WIND_KEY, WIND_KEY, null, wind.x, wind.y)
 	if not warned and h.pos.y - h.abyss_kill_y() < -h.vel.y * WARN_S:
 		warned = true

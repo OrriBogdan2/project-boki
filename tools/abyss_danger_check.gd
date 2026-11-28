@@ -1,7 +1,8 @@
 extends RefCounted
 ## --abyss-danger-check: the abyss warning builds with depth instead of switching on at the lip
-## (content/rules/abyss_danger.json). Over a 17 m drop from the lip to the point of no return: no tint
-## and no sound down to start_depth, then the tint and the warning heartbeat (level and rate) rise
+## (content/rules/abyss_danger.json). Over a 17 m drop from the lip to the point of no return: the tint
+## starts at the reference's 0.25 m and the warning heartbeat at its 3 m (the wind: --abyss-check), no
+## tint down to start_depth, then the tint and the warning heartbeat (level and rate) rise
 ## monotonically, the tint to 1 exactly at the kill depth, and both are gone again on the way back up.
 
 const SPAN := 17.5  # m, lip to the point of no return (World.ABYSS_DEPTH + HunterFeel.abyss_extra)
@@ -18,13 +19,22 @@ func ok(cond: bool, what: String) -> void:
 func run(m: Node) -> void:
 	var start := float(Content.rules("abyss_danger")["start_depth"])
 	var fx = load("res://scripts/match/abyss_fx.gd")
-	ok(start >= 2.0 and start < SPAN * 0.5, "start depth is a real margin (%.1f m)" % start)
+	var audio := float(Content.rules("abyss_danger")["audio_from"])
+	ok(is_equal_approx(start, 0.25), "the tint starts 0.25 m under the lip, as the reference (%.2f m)" % start)
+	ok(is_equal_approx(audio, 3.0), "the wind and warning start 3 m under the lip, as the reference (%.2f m)" % audio)
 	var shallow := true
 	for i in 41:
 		var d := start * float(i) / 40.0
-		shallow = shallow and fx.danger_depth(d, SPAN) == 0.0 and AbyssFallSfx.warn_db(fx.danger_depth(d, SPAN)) == -INF
-	ok(shallow, "a dip of up to %.1f m under the lip: no tint, no sound" % start)
-	ok(fx.danger_depth(start + 0.2, SPAN) > 0.0, "just past the start depth the tint begins")
+		shallow = shallow and fx.danger_depth(d, SPAN) == 0.0
+	ok(shallow, "a dip of up to %.2f m under the lip: no tint" % start)
+	ok(fx.danger_depth(start + 0.1, SPAN) > 0.0, "just past the start depth the tint begins")
+	var quiet := true
+	for i in 41:
+		quiet = quiet and AbyssFallSfx.warn_db(fx.danger_depth(audio * 0.999 * float(i) / 40.0, SPAN)) == -INF
+	ok(quiet, "no heartbeat down to %.1f m" % audio)
+	ok(AbyssFallSfx.warn_db(fx.danger_depth(audio + 0.1, SPAN)) > -INF, "the heartbeat starts just past %.1f m" % audio)
+	var real_span := World.ABYSS_DEPTH - 0.5 + HunterFeel.abyss_extra
+	ok(is_equal_approx(AbyssFallSfx.audio_k(), fx.danger_depth(audio, real_span)), "its start is the tint at 3 m")
 	var prev_k := -1.0
 	var prev_db := -INF
 	var prev_rate := 0.0
@@ -47,7 +57,7 @@ func run(m: Node) -> void:
 	ok(mid > 0.15 and mid < 0.5, "half way down it is a hint, not a wash (%.2f)" % mid)
 	var db_full := AbyssFallSfx.warn_db(1.0)
 	var db_mid := AbyssFallSfx.warn_db(mid)
-	var db_low := AbyssFallSfx.warn_db(fx.danger_depth(start + 0.5, SPAN))
+	var db_low := AbyssFallSfx.warn_db(fx.danger_depth(start + 3.0, SPAN))
 	ok(
 		db_low < db_mid and db_mid < db_full and db_full <= 0.0,
 		"warning volume follows depth (%.1f < %.1f < %.1f dB)" % [db_low, db_mid, db_full]

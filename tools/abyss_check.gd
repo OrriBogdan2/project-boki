@@ -590,6 +590,9 @@ func _fall_cues(e: Dictionary) -> void:
 		ok(at["loop"] and rising and hi.x - lo.x > 6.0 and hi.y - lo.y > 0.3,
 			"%s: the wind plays and climbs as you sink (%.1f dB at %.2fx to %.1f dB at %.2fx over %d steps)"
 			% [tag, lo.x, lo.y, hi.x, hi.y, winds.size()])
+		var audio := float(Content.rules("abyss_danger")["audio_from"])
+		ok(float(at.get("wind_at", 0.0)) >= audio and float(at.get("wind_at", 0.0)) < audio + 1.0,
+			"%s: the wind comes on %.1fm under the lip (from %.1fm)" % [tag, at.get("wind_at", 0.0), audio])
 		ok(float(at["warn_left"]) > 0.5,
 			"%s: the warning comes %.1fm above the point of no return" % [tag, at["warn_left"]])
 		ok(not r["fell"] and not at["wind_on_lift"] and not h.abyss_snd.warned,
@@ -605,6 +608,7 @@ func _log_cue(cues: Array, winds: Array, at: Dictionary, hot: bool) -> void:
 		at["loop"] = at["loop"] or Sfx.loop_on(AbyssFallSfx.WIND_KEY)
 		if not "wind" in cues:
 			cues.append("wind")
+			at["wind_at"] = h.lip_y - h.pos.y
 	if s.warned and not "warn" in cues:
 		cues.append("warn")
 		at["warn_left"] = h.pos.y - h.abyss_kill_y()
