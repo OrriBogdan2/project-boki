@@ -91,13 +91,18 @@ func _dump(id: String, path: String) -> void:
 			var vs: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
 			var bn: PackedInt32Array = arr[Mesh.ARRAY_BONES]
 			var wt: PackedFloat32Array = arr[Mesh.ARRAY_WEIGHTS]
+			var nm: PackedVector3Array = arr[Mesh.ARRAY_NORMAL]
+			var nout := PackedFloat32Array()
 			var out := PackedFloat32Array()
 			for i in vs.size():
 				var p := Vector3.ZERO
+				var nv := Vector3.ZERO
 				for k in 4:
 					p += (mats[bn[i * 4 + k]] * vs[i]) * wt[i * 4 + k]
+					nv += (mats[bn[i * 4 + k]].basis * nm[i]) * wt[i * 4 + k]
 				out.append_array([p.x, p.y, p.z])
-			res.append({"mesh": mi.name, "surf": s, "mat": mi.mesh.surface_get_material(s).resource_name if mi.mesh.surface_get_material(s) else "", "n": vs.size(), "pos": Array(out), "xf": str(mi.global_transform)})
+				nout.append_array([nv.x, nv.y, nv.z])
+			res.append({"mesh": mi.name, "surf": s, "mat": mi.mesh.surface_get_material(s).resource_name if mi.mesh.surface_get_material(s) else "", "n": vs.size(), "pos": Array(out), "nrm": Array(nout), "rest": Array(vs.to_byte_array().to_float32_array()), "uv": Array((arr[Mesh.ARRAY_TEX_UV] as PackedVector2Array).to_byte_array().to_float32_array()), "xf": str(mi.global_transform)})
 	var f := FileAccess.open(path, FileAccess.WRITE)
 	f.store_string(JSON.stringify(res))
 	f.close()
