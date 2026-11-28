@@ -2,20 +2,28 @@ extends RefCounted
 ## --mob-pose-shots --shots-dir=<dir> [--kinds=a,b]: each monster in a real match on the start island, shot as the
 ## game plays it (jobq --needs gpu). Spawned beside the still player (god mode, kin off), it is cropped once per
 ## state: mob_pose_<kind>.png = idle | walk | windup (its last frame) | strike, left to right (blank: never seen).
+## --react: instead mob_react_<kind>.png = four frames of the hit flinch, then four of the death, at a slowed clock.
 
 const CROP := 340  # px, the square around the monster
 const WAIT_S := 14.0  # s a monster gets to show all four states
 const ORDER := ["idle", "walk", "windup", "strike"]
+const HIT_AT := [0.03, 0.08, 0.14, 0.2]  # s after the hit: the flinch layer runs MobAnim.FLINCH_S
+const DEATH_AT := [0.04, 0.11, 0.19, 0.27]  # s after the kill: the death move runs MobAnim.DEATH_S, then the dissolve
+const SLOW := 0.15  # engine clock for the --react frames, so a frame lands on each time above
 
 var main: Node
 var m: Match
 var out_dir := "user://mob_pose_shots"
+var react := false
 
 
 func run(mn: Node) -> void:
 	var kinds := await setup(mn)
 	for k in kinds:
-		await _case(out_dir, String(k))
+		if react:
+			await _react_case(String(k))
+		else:
+			await _case(out_dir, String(k))
 	print("MOBPOSESHOT DONE")
 	main.get_tree().quit()
 
@@ -34,6 +42,8 @@ func setup(mn: Node) -> Array:
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):
 			out_dir = String(a).substr(12)
+		if String(a) == "--react":
+			react = true
 		if String(a).begins_with("--kinds="):
 			kinds = Array(String(a).substr(8).split(","))
 	DirAccess.make_dir_recursive_absolute(out_dir)
@@ -124,6 +134,38 @@ func _case(dir: String, kind: String) -> void:
 		mb._cancel_tele()
 		mb.visible = false
 	await _frames(60)
+
+
+## One monster hit (not killed), then killed: the crop at each HIT_AT and DEATH_AT second, in one strip.
+func _react_case(kind: String) -> void:
+	var p: Hunter = m.player
+	m.cam.focus = p.pos
+	await _frames(60)
+	var mb := m.spawn_mob(kind, _ground(p.pos, 4.5))
+	mb.root_t = 99.0  # held in place: no wander, no chase
+	await _frames(40)
+	var strip := Image.create(CROP * (HIT_AT.size() + DEATH_AT.size()), CROP, false, Image.FORMAT_RGBA8)
+	Engine.time_scale = SLOW
+	mb.hurt(1.0, p)
+	await _grab_at(mb, strip, HIT_AT, 0, m.time)
+	Engine.time_scale = 1.0
+	await _frames(40)
+	Engine.time_scale = SLOW
+	mb.hurt(mb.max_hp * 10.0, p)
+	await _grab_at(mb, strip, DEATH_AT, HIT_AT.size(), m.time)
+	Engine.time_scale = 1.0
+	strip.save_png(out_dir.path_join("mob_react_%s.png" % kind))
+	print("MOBPOSESHOT react %s dead=%s" % [kind, str(mb.dead)])
+	await _frames(60)
+
+
+## Crops the monster on the first frame at or after each of `times` s from `t0`, into cells from `first`.
+func _grab_at(mb: Mob, strip: Image, times: Array, first: int, t0: float) -> void:
+	for i in times.size():
+		while m.time - t0 < float(times[i]):
+			await main.get_tree().process_frame
+		var crop := await _grab(mb)
+		strip.blit_rect(crop, Rect2i(0, 0, CROP, CROP), Vector2i((first + i) * CROP, 0))
 
 
 ## The CROP square around the monster on the frame just drawn.
