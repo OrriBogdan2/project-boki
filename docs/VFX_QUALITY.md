@@ -534,3 +534,28 @@ Left for the owner (each needs a code or design change, not a json fix, and adds
 Pre-existing reds on main at 0b0b680df2, not from this branch: `--hero-vfx-check` 1 failed (Vex LMB rounds 0.154 m
 from the forearm, limit 0.15 m); `tools/health.py --strict` style ratchet (hud_hover.gd, ability_text_check.gd,
 check_registry.gd long lines).
+
+## Nightwell opening and Ice Spear mark (ext/vfx-motley-neve-marks, VFX_SWEEP_1126 rows 11 and 15)
+- Motley's Nightwell: the 1.0 s tell was a flat pale grey fill over a pale glass dome, and the teal rim only lit when the
+  well opened. Now the tell is AimKit's `"soft"` circle in his sea teal (`OstraKit.SEA`; the lit rim and ticks are up
+  on the first frame, the fill grows inside it) and the dome glass rim is the same teal (`KitLooks` `well_dome`).
+  The remote ring (`net_ring`) uses the same teal. Hit area, radius, timing and numbers are unchanged.
+- Neve's Ice Spear: the detonation's frost-crack mark (`spear_burst` scorch) lasted 2.2 s and was gone about 1 s after
+  the shatter; it is now 5.0 s, and the landing's mark (`spear_land` scorch) 2.4 s, so it runs through the 1.8 s fuse.
+  A scorch cracks in over its first fifth and thins from half its life, so 5.0 s reads for about 2.5 s. Size is the
+  detonation radius (2.7 m), as before. `--hero-vfx-check` keeps its 2.2 s cap for every other look and allows a ground
+  scorch up to `MAX_MARK_LIFE` 5.0 s.
+- Strips (`--hero-vfx-reel`, real GPU): `docs/shots/vfx-motley-neve-marks/before_after.jpg`, grey border = live (main
+  c78b7cba28), green = this branch. Top: Nightwell (`ostra` part `r`, jobq 20261128-074327-14692 before, -072328-24407
+  after; the after ran on the Mac worker, so its grass is greener). Bottom: Ice Spear (`rimewright` part `rmb`,
+  -074253-03377 before, -073158-20886 after). The Neve sheet's last three frames (3.8, 4.8, 5.8 s) were moved later in
+  `tools/vfx_reel/rimewright.gd` for both sides, to show the mark after the shatter.
+- Frame time (`--marks-ab-shots`, 4v4, Neve local, 480 frames, spear land and burst every 90 frames, a tell circle
+  always up; same worker rp1-1, old tree then new tree, two runs each; ms, p95 / mean): old 40.35 / 35.39 and
+  41.16 / 35.82; new 40.81 / 35.66 and 40.36 / 35.21. Mean of two: old 40.76 / 35.61, new 40.59 / 35.44, so p95
+  -0.17 ms: inside the 0.3 ms budget and inside the run-to-run noise (about 0.8 ms between runs of one tree).
+  No new node or material: the mark is one pooled scorch plane kept 2.8 s longer, the soft circle is three rings
+  instead of a disc and a ring in AimKit's one mesh.
+- Pre-existing reds on main c78b7cba28, unchanged by this branch: `--hero-vfx-check` 8 failed (Gunslinger LMB rounds,
+  four Archer bow-distance rows, Tenzo's rocks, Meeko's palette, the scarf anchor); `tools/gen_wiki.py --check`
+  reports `docs/wiki/Class-Stone-Seer.md#kit` and `docs/wiki/Rules.md` out of date.

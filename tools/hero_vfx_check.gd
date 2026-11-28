@@ -13,6 +13,7 @@ extends RefCounted
 ## The drop rocket's looks (DropRocket): its trail, the puff where a Hunter jumps out and the dust where it lands.
 
 const MAX_LIFE := 2.2  # s a look may linger (no long-lived noise)
+const MAX_MARK_LIFE := 5.0  # s a ground scorch may linger: a hit-area mark reads for about half its life
 const ROCKET_AT := 6.0  # s into the ship's run when the squad launches: over the islands on ROCKET_SEED
 const ROCKET_SEED := 4242
 const ROCKET_RIDE := 1.5  # s ridden before the trail is measured: past the rocket's speed-up
@@ -246,6 +247,8 @@ func _recipes(arch: String) -> void:
 			if layer["p"] == "ribbon" and layer.has("tail"):
 				life = minf(life, HeroVfx.TRAIL_MAX)  # a projectile trail runs as long as its shot, capped
 			var lasts: bool = layer["p"] == "thread"  # (a needle's thread stays as long as the needle)
+			if layer["p"] == "scorch" and life <= MAX_MARK_LIFE:
+				lasts = true
 			if (life > MAX_LIFE and not lasts) or flare_big or vortex_big:
 				over.append(mv)
 			if not (HeroVfx.MODES.has(layer["p"]) or HeroVfx.LOOKS.has(layer["p"]) or layer["p"] == "string"):
