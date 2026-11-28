@@ -116,3 +116,100 @@ is a tint over the texture, low glow and no far-glow boost (the boost clipped th
   game, `--meeko-companions-clip-check` "attack hands"); key times, the forearms and every other track are unchanged.
 - The dark patch at her shoulder in the knee idle (4B) is her dark-purple paw held at the chest (it moves with the hand,
   the portrait's pose): kept.
+
+**11-24 (plan /home/boki/gens/hunter-round-1124/meeko/PLAN-1124o.md): the wings ride the upper back, not the head.** Meshy hung
+both wing chains (`Bone_048` = Bone_046-048, `Bone_051` = Bone_049-051) under `Head` with keys constant to the head, so every head
+turn (up to 67 deg against the chest in Idle, 79 in Attack) swung the wings and the 4,066 cape/back verts that share their weight
+through her body (wing into torso 13.8 cm in Attack, 12.8 Jump_Run, 11.9 run). Keys only, after the steps above:
+
+    python3 tools/art1/glb_chain_follow.py $G $G --roots=Bone_048,Bone_051 --follow=Spine
+
+Each clip key re-keys the two wing roots so they keep their rest-pose relation to `Spine` (the rest pose is the Meshy model built from
+the turnaround: wings spread evenly at shoulder height). Mesh, skin, node tree and every other track are unchanged (+31 KB of keys).
+`tools/anim/geo_check.py`: wing clips over 4 cm 400 -> 0, worst 13.8 -> 3.5 cm, wing-vs-arm/hand clips gone; wing+cape edge stretch
+p99 lower in all 6 clips (Attack 2.62 -> 1.63). `--ref=Idle@0` (keep the stand's head-tilted relation) was the runner-up: worst 5.8 cm.
+
+## 11-24 round 3: arms pushed off the belly, paw tips curled, Idle legs apart (keys only)
+Tool (job folder, not in the repo): `/home/boki/gens/hunter-round-1124/meeko/r3/tools/keys_r3.py`. Each value was picked by a grid
+scored with geo_check's own penetration test (every 2nd frame; grids in `r3/geo/search*.txt`). "push" swings the bone each key so the
+forearm/hand moves away from the Hips-Spine axis: run LeftArm 12; walk RightArm 4; Attack LeftArm 4, LeftForeArm 20, RightForeArm 10;
+Crouch LeftArm 8, RightForeArm 20; Jump_Run LeftForeArm 10, RightForeArm 30. Paws: Middle1 + Middle3 curled 30 deg toward the palm,
+all clips. Idle: thighs 3 deg apart each. Mesh, skin and textures are byte-identical.
+geo_check: worst clip 4.6 -> 4.4 cm, run 3.7 -> 3.2, Idle 3.8 -> 3.5, Attack paws into each other 2.5 -> under 2.5 cm (no longer
+reported); no pair is newly worse than live. Not done: the held Crouch forearm 4.0 cm stays as it was (every push made another pair worse).
+
+## 11-25 round 5: paws get one designed finger curl (weights + keys; mesh and textures byte-identical)
+Tools (job folder, not in the repo): `/home/boki/gens/hunter-round-1124/meeko/r5/tools/finger_weights.py` (round 4's re-weight: the
+paw lobes past the knuckle ramp onto Middle1-3; thumb verts untouched) then `fingers_r5.py --deg 35,45,35`: every Middle1-3 key in every
+clip becomes rest * one curl about the palm-width axis (palm = the side facing the body midline). Meshy's own finger keys were random
+(Middle2 up to 95 deg, mixed axes), which crumpled round 4's re-weighted paws; round 3's R curl axis was flipped (thumb-side sign).
+geo_check vs round 3: Attack paws into each other 1.4 -> 0 cm, run cloth into R paw 3.2 -> 2.4 (live 2.5), run cloth into L paw
+1.0 -> 0, Jump_Run cloth into paws 3.4/2.8 -> 3.0/2.5; Crouch cloth into R forearm 2.9 -> 3.2 (live 3.0). Thumb keys unchanged.
+
+## 11-25 round 6: Crouch R arm and run L arm out (keys only; mesh, skin, textures byte-identical)
+Tool (job folder, not in the repo): `/home/boki/gens/hunter-round-1124/meeko/r6/tools/keys_r6.py` (keys_r3 ops, but every ancestor is
+sampled at the key's time, so tracks with other key counts are read right). Ops: `push Crouch_Walk_with_Torch RightArm 10`,
+`push Crouch_Walk_with_Torch RightForeArm 18`, `push run LeftArm 6`. geo_check vs round 5: Crouch cloth into R forearm 3.2 -> 0.5 cm
+(live 3.0), cloth into R paw 2.9 -> 1.2, torso into R forearm 4.0 -> 1.7 (held worst 4.0 -> 3.8); run L forearm into torso 1.6 -> 1.4;
+no pair worse. Stretch Crouch 13.7x / run 10.7x unchanged. Tried and dropped: Idle thighs 6/8 deg apart (cape hem into shins
++0.4/+1.0 cm), any R-arm push in run (R forearm into torso 2.5 -> 4.6-5.0), Jump_Run arm pushes (wing into R paw +0.9),
+Attack wing yaw damp 30/50 % (wing into back +0.5-2.3 cm, and the A7-A9 fault is the chest's forward pitch, not yaw).
+
+Rounds 7-9 (11-25) tried the wings on the `card` slot (lost the body shadow, undone in round 8) and put the old companions back
+to judge the body alone; main has since taken PR #764's sun and cloud, so neither is in this file any more.
+
+
+Round 10 (11-25, keys only): Meshy's clips sank the planted foot under the floor (model origin = the ground; lowest foot
+median Idle -3.3 cm, Attack -7.6, min -12.3) and dragged the tail through it (Idle every frame, -8.4 cm; Attack half the tail,
+-32.6 cm). `tools/art1/glb_ground_clips.py` lifts Hips per key until the lowest foot is +0.3 cm in every clip, and pitches the
+tail root (Bone_013) up in Idle (14 deg max) and Attack (capped 35 deg; tail min -6.8 cm). walk/run tail left alone (pitching
+it pushed the cape hem into the R shin). Mesh, skin, textures byte-identical; geo_check and stretch same as round 9.
+
+## 11-25 round 11: rounds 2-10 ported onto main's file (PR #764's sun and cloud)
+    python3 tools/art1/glb_port_body.py OUT.glb MAIN.glb R10.glb --prims=0 --anims && python3 tools/art1/glb_compact.py OUT.glb OUT.glb
+The body's skin weights (prim 0 JOINTS_0/WEIGHTS_0) and every clip channel come from round 10 (`ext/meeko-body-1124` @ bc0e3cc89b);
+the sun, cloud, drops, faces atlas and wing texture are main's (byte-identical). Plan + proof: /home/boki/gens/hunter-round-1124/meeko/PLAN-1124o.md §15.
+
+**Round 11 paws + feet (Meshy paint, masked) and the Idle tail.** The live paws and lower shins were painted dark purple-mauve
+(the "mitten"/"sock" read; the turnaround's paws are body pink with dark toe lines). Meshy retexture (meshy-7, original UVs) of
+the body alone (prim 0, rest pose) from the turnaround's front/side/back/3-4 views, task `01a213fe-0917-775d-aebf-7e21fe6bfca9`
+(raws /home/boki/meshy/meeko_r11_1125/rtA). Only the paws (hand + finger bones, fading out over the lower half of the forearm)
+and the feet (foot + toe bones, fading out over the lower 30-75 % of the shin) take its paint, per-vertex alpha rasterised into
+the 2048 atlas (job tool r11/tools/pawcomp.py, no colour gain); every other texel is live. Swapped into image #1:
+
+    python3 tools/art1/glb_image_swap.py $G '#1' WORK/comp_A0.jpg $G && cp WORK/comp_A0.jpg art/wardens/pip/pip_meshy_Image_0.jpg
+    python3 tools/art1/glb_bone_offset.py $G $G Idle Bone_013 0,1,0 -10
+
+The tail root is yawed 10 deg away from her right leg in Idle (geo_check Idle cloth>foot_R 0.61 -> 0 cm, cloth>shin_R 3.41 -> 3.07).
+
+## 11-25 round 12 (ext/meeko-body-1124): pip_meshy.glb rebuilt from the current turnaround (draft, owner check pending)
+New Meshy body from /home/boki/gens/v95-latest-ta-1119/meeko.webp (multi-image 2k, front/side/back: gen mv4), remeshed to
+300k tris, wings taken off by Meshy's part split, the wingless body rigged by Meshy (upload rig, 24 bones) with Meshy's
+Idle(0)/Attack(4)/Jump_Run(13)/Crouch_Walk_with_Torch(520) + the rig's walk/run. Blender only welds + decimates (62k body,
+14k wings); wings back on Spine02 as `meshy_textured-wing` (no ink), main's sun/cloud surfaces copied in
+(`tools/art1/glb_copy_prims.py`); tail and satchel weights moved off the legs onto Hips and smoothed; arm/leg key offsets
+per clip and the Attack hands cap (margin 0.15). Raw files and scripts: ~/meshy/meeko_r12_1125, ~/gens/hunter-round-1124/meeko/r12.
+
+## 11-26 round 13 (ext/meeko-body-1124): tail on its own bone, closed legs, live's wings (draft, owner check pending)
+r12's tail hung rigid on Hips to the ground right behind the legs, and its surface was fused to the leg backs (every
+leg swing went into it, 8-14 cm). Meshy's part split of the same model ("wings, tail", task 01a21593-b33d-76d6-bb71-b6123eb21d7f,
+~/meshy/meeko_r13_1126/sp_wt) gives a closed body and a closed tail on r12's atlas and UVs. Blender only fits them into the
+rig's frame and decimates (52k body, 8k tail; r13/tools/bl_parts_fit.py). Then, with no Blender:
+
+    python3 tools/art1/glb_drop_mats.py R12.glb A.glb meshy_textured-wing
+    python3 tools/art1/glb_copy_prims.py B.glb A.glb MAIN.glb --mats=meshy_textured-wing --bone=Spine02 --scale=auto
+    python3 tools/art1/glb_swap_body_parts.py B.glb C.glb --parts body.glb --rigid tail.glb=Hips --exclude rigt_tail.npz
+    python3 tools/art1/glb_tail_bone.py C.glb pip_meshy.glb --weights tail_rigid.npz --head 0.003,0.60,-0.07 \
+        --pitch 55 --pitch-clip Attack=80,Jump_Run=75 --yaw 12 --reach 0.002 --smooth 0
+
+Wings = main's large iridescent wings (r12's were half-size violet), scaled by body height onto Spine02. Body weights come
+from r12 (nearest 4, tail verts not used; leg backs relaxed in from their neighbours). Meshy's cut caps (UVs on one atlas
+point = flat light patches on the leg backs) take the UV of the nearest real fur. The tail is rigid on a new Tail bone
+under Hips, turned back/up in every clip. Plan + proof: /home/boki/gens/hunter-round-1124/meeko/PLAN-1124o.md §17.
+
+Round 14 (11-26): the rigid Tail became a 3-bone chain (Tail -> Tail1 -> Tail2, split by geodesic distance along the
+tail), so it droops to the ground behind the legs and curls its cream tip up like the turnaround, sways with a lag down
+the chain, and only lifts in the frames where a shin/foot would come within 3.5 cm:
+    python3 tools/art1/glb_tail_chain.py r13.glb pip_meshy.glb --gap 0.035 \
+        --pitch-clip run=35/-10/45,Jump_Run=10/25/35,Attack=15/25/30
+Plan + proof: /home/boki/gens/hunter-round-1124/meeko/PLAN-1124o.md §18.

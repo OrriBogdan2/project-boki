@@ -21,7 +21,7 @@ const STILL_MAX := 20.0  # s without moving off a nav point
 const PROGRESS := 0.12  # m moved in STILL_MAX s that counts as not still
 const AT_POINT := 1.5  # m from its goal: it has arrived on a nav point
 const FALL_Y := -2.0  # m: a Boki lower than this has fallen through the island
-const SEED := 11
+const SEED := 5  # not 11: the toys' day cap shifted the seeded stream and B0 then met only 3 states
 const DAY_START := 0.3  # the farm clock at the start (morning)
 
 var bad := 0

@@ -135,3 +135,36 @@ Scripts: `~/gens/hunter-round-1124/sparkle/p3/tools/` (views.py, proj.py, swap.s
 - Not shipped: COLOR_0 alpha 0 everywhere removes the last outline dots, but also hides the shield shell, which reuses the ink width
   (outline.gdshader `ink_mask`, ShieldLook). Per-vertex room (a port of fit_warden ink_room) still left dots on the silhouette.
 Scripts: `~/gens/hunter-round-1124/sparkle/p4/tools/` (slot.py, verify.py, room.py, addcol.py).
+
+### Round 1124o-6 (glb 5f84decbb8a9, 79,980 tris, on top of 0234e266a0eb)
+- Stance (approved doll A / 1118 turnaround): only rotation and root-translation keys of Idle, Attack and Crouch_Walk_with_Torch differ.
+  Mesh, weights, textures, walk, run and Jump_Run are byte-identical. `WardenNative._fit` fixes the height, so bones are not lengthened.
+- Idle: fore-aft foot gap .56-.61 -> about .10, hip about 1.01 -> 1.08, hands off the thigh (Rhand-Rleg pairs 17 -> 0).
+- Attack: hip dip and lunge width reduced, the slam stays (Lhand-Rhand pairs 114 -> 0; inner-thigh pairs 383 -> 590, Larm-head 5 -> 9).
+- Crouch: hip .83-.90 -> .88-.95, torso lean 37-40 -> 16-18 degrees, footsteps unchanged (inner-thigh pairs 323 -> 338).
+- glbstretch worst edge ratio: Idle 6.1 -> 5.2, Attack 14.3 -> 14.3, Crouch 12.1 -> 11.7.
+Scripts and recipe: `~/gens/hunter-round-1124/sparkle/p6/tools/` (stance.py, spread.py, crouch.py; recipe in PLAN-1124o.md).
+
+### Round 1124o-7 (glb f0d37d6438d9, 79,980 tris; replaces 5f84decbb8a9 on this branch)
+- Build chain: bustfit (bust = splash size) -> packrig (pack and rods rigid) -> hemrig (arm pull off the hem band) -> packfit (side hoses
+  tucked .65) -> rekey (head lifted, loose fists, uneven arms, calmer attack bow) -> hem (Meshy hem edit into Image_3) -> minmax.
+- Positions and weights of bust, pack and hem band differ; Image_3 differs only on the crop-top hem (0 arm texels changed).
+- geo_check: worst 3.2 cm, held worst 1.7 cm (hair>torso); hands L sep .51, R sep .54. art-gate GAME 6.7, LIVE GAME 5.0 (not a pass).
+- Open: side hoses read as netting at game view, patch on the side of the top in attack back 2, lace too fine.
+Scripts: `~/gens/hunter-round-1124/sparkle/p7/tools/`.
+
+### Round 1124o-11 (glb 18a6a71e41ab, 79,965 tris; on top of P1 9a1d6d3fbbd0)
+- Gutter pad on all 7 images (push-pull fill of every texel outside its material group's UV islands, +1 texel margin).
+  Why: hero_toon blends far fragments toward a +1-mip sample, and Meshy filled the gutters with red-brown, so at match distance
+  the hair, face and body edges averaged in gutter colour (the "red wash / mud" art-gate notes at the match camera).
+- Hair Image_0 at mip 4: texels tinted >12/255 41% -> 11%, mean error 20.4 -> 5.0; mip 5 68% -> 17%. Face Image_6 mip 4 27% -> 5%.
+  Body Image_3 mip 4 15% -> 7%. Drawn texels change only by the JPEG re-encode (q97, mean 0.3-3.7/255).
+- Mesh, UV, skin, clips byte-identical. The extracted ryzz_meshy_Image_N.jpg files hold the same bytes as the embedded images.
+Scripts: `~/gens/hunter-round-1124/sparkle/p11/tools/` (padall.py, bleed.py).
+
+## 11-27 round 14: turnaround eyes on the stance body
+- Face Image_6 only: the chest-face branch eye repaint (eyes open, lavender, toward the turnaround; owner 11-26 "face like the turnaround")
+  transplanted into the stance face texture, then gutter-padded over its UV coverage (q97). Mesh, UV, skin, clips and other images byte-identical.
+- Bust stays the stance body (one step smaller than live, owner 11-26). geo_check PASS (worst clip 3.0 cm, hands ok).
+- art-gate game view: GAME 6.5, LIVE GAME 4.8 (stance alone 6.0). Open: grey panels at the crop-top bust sides (on the stance body too).
+Scripts: `~/gens/hunter-round-1124/sparkle/p14/tools/` (pad6.py).

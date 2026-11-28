@@ -21,6 +21,23 @@ static func lair_drop(roll: float, pick: int) -> String:
 	var d: Dictionary = rules()["lair_drop"]
 	return String(d["ids"][pick % d["ids"].size()]) if roll < float(d["chance"]) else ""
 
+## The stat bite a kill drops in a match, or "" (content kill_drop): what you hunt decides the stat. A table
+## whose id is "any" picks one of the four bites. roll in 0..1, pick any int.
+static func kill_drop(table: String, roll: float, pick: int) -> String:
+	var d: Dictionary = rules()["kill_drop"]
+	if roll >= float((d["chance"] as Dictionary).get(table, 0.0)):
+		return ""
+	var id := String((d["bite"] as Dictionary).get(table, "any"))
+	return String(d["any"][pick % d["any"].size()]) if id == "any" else id
+
+## The stat bite that raises `stat` (an item of family stat whose effect is that stat), "" if none.
+static func bite_for(stat: String) -> String:
+	for it in rules()["items"]:
+		var e: Dictionary = it.get("effect", {})
+		if it["family"] == "stat" and String(e.get("kind", "")) == "stat" and String(e.get("stat", "")) == stat:
+			return String(it["id"])
+	return ""
+
 static func has(id: String) -> bool:
 	return not item(id).is_empty()
 
