@@ -633,7 +633,7 @@ func _breah() -> void:
 		apk > apk1 and absf(d_l10 / maxf(0.01, d_l1) - apk / apk1) < 0.02,
 		"lvl1 %.2f lvl10 %.2f ap %.2f/%.2f" % [d_l1, d_l10, apk1, apk]
 	)
-	# a knock his blow lands makes it ready again at once (the 11-27 reference note; dolm_kit.gd on_knock, --kit-refund-check)
+	# a knock his blow lands makes it ready again at once (dolm_kit.gd on_knock)
 	reset.call()
 	T.teleport(home + Vector3(2.4, 0, 0))
 	aim_at(P, T.pos)
