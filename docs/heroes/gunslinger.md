@@ -147,7 +147,7 @@ put on the GLB with `glb_add_clips.py`):
 | Dazed foe + rifle | +76%, gold numbers, no decay | `--gunslinger-combo-check` |
 | Dazed foe + Palm Lance | +20%, Skewered on a hunter | `--gunslinger-combo-check` |
 | Dazed foe + Coin Blast (hit or cone) or Cinderfall's impact | +20% (`rattle_k` in `rmb.burr` and `x`, 11-27) | `--vex-daze-check` |
-| Coin Blast on a wall, foe shoved into terrain | stun, the cooldown is untouched | `--gunslinger-combo-check` |
+| Coin Blast on a wall, foe shoved into terrain | stun, the cooldown is untouched (the source has no cone-hit refund; Cinderfall's burn gets no Daze bonus either, `1128-vex-daze-leftovers.md`) | `--gunslinger-combo-check` |
 | Palm Lance hit on a hunter | cooldown -20%; rank 3 -30% per hunter hit | `--gunslinger-combo-check` |
 | Slipstep while firing | rounds keep going, the slide follows the keys | `--gunslinger-combo-check` |
 | Knock | Slipstep back, no kit heal; rank 3 resets the Coin Blast | `--gunslinger-combo-check` |
