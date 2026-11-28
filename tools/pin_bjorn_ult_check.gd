@@ -138,12 +138,19 @@ func pin() -> void:
 	fresh(T)
 	T.hp = 40.0
 	T.armor = 0.0
+	var t2_before := dmg(T2)
 	beam(m, P, K, T.pos)
 	ok("pin ult anim: the last beam plays pin_ult_final", K.anim_id == "pin_ult_final", K.anim_id)
 	step(m, 0.2)
 	ok("pin ult payoff: the last beam finishes a hunter left under 12%",
 		K.ult.executes == 1 and (T.downed or T.dead or T.hp <= 0.0),
 		"executes %d hp %.0f downed %s" % [K.ult.executes, T.hp, T.downed])
+	var last_hit := dmg(T2) - t2_before
+	var final_want := float(xd["final_dmg"]) * ap
+	ok("pin ult payoff: the third beam hits for final_dmg (%.1f), harder than the first (%.1f)"
+		% [float(xd["final_dmg"]), float(xd["dmg"])],
+		last_hit > float(xd["dmg"]) * ap * 1.15 and absf(last_hit - final_want) < 0.1 * final_want,
+		"took %.1f (want %.1f)" % [last_hit, final_want])
 	ok("pin ult bond: the execute's knock is the cast's best event (0.7, not added per hit)",
 		absf(best(P) - 0.7) < 0.001, "best %.2f" % best(P))
 	ok("pin ult ends after the third shot, the telegraph goes",
