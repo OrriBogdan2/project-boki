@@ -22,6 +22,8 @@ func run(main_node: Node) -> void:
 			dir = arg.substr(12)
 		if arg.begins_with("--species="):
 			species = Array(arg.substr(10).split(","))
+		if arg == "--face":
+			face = true
 	DirAccess.make_dir_recursive_absolute(dir)
 	await _setup()
 	var rep := PackedStringArray()
@@ -41,6 +43,8 @@ func run(main_node: Node) -> void:
 		var img := main.get_viewport().get_texture().get_image()
 		var c := _crop(img, k.position + Vector3(0, 0.45, 0), CROP_PX, ZOOM)
 		c.save_png(dir.path_join("world_%s.png" % sp))
+		if face:
+			await _face_shots(k, String(sp))
 		crops.append(c)
 		m.kins.erase(k)
 		k.queue_free()
@@ -58,6 +62,49 @@ func run(main_node: Node) -> void:
 	f.close()
 	print("BOKIWORLD ", "\n".join(rep))
 	main.get_tree().quit(0)
+
+
+var face := false
+
+
+## LOCAL REVIEW ONLY (boki-face-polish-1124, not committed): eye-level views through a SubViewport on the match's
+## own world (same lights, sky, ground; no HUD). front close, 3/4 close, eye-level whole body.
+func _face_shots(k: Node, sp: String) -> void:
+	var fm: MeshInstance3D = k.find_child("Face", true, false)
+	var body: MeshInstance3D = k.find_child("Body", true, false)
+	if fm == null or body == null:
+		print("BOKIFACE %s: no Face/Body" % sp)
+		return
+	var c := fm.global_transform * fm.get_aabb().get_center()
+	var bb := body.global_transform * body.get_aabb()
+	var fwd := -(body.global_basis.z.normalized())
+	fwd.y = 0
+	fwd = fwd.normalized()
+	var face_r := maxf(fm.get_aabb().size.length() * body.global_basis.get_scale().x, 0.05)
+	var vp := SubViewport.new()
+	vp.size = Vector2i(900, 900)
+	vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	vp.msaa_3d = Viewport.MSAA_4X
+	main.add_child(vp)
+	var cam := Camera3D.new()
+	cam.fov = 30
+	cam.near = 0.01
+	vp.add_child(cam)
+	cam.current = true
+	var views := {
+		"front": [c + fwd * face_r * 3.2, c],
+		"q": [c + (fwd.rotated(Vector3.UP, 0.6)) * face_r * 3.2 + Vector3(0, face_r * 0.3, 0), c],
+		"body": [c + fwd.rotated(Vector3.UP, 0.35) * bb.size.length() * 2.0, bb.get_center()],
+	}
+	for v in views:
+		cam.global_position = views[v][0]
+		cam.look_at(views[v][1], Vector3.UP)
+		for i in 4:
+			await main.get_tree().process_frame
+		await RenderingServer.frame_post_draw
+		vp.get_texture().get_image().save_png(dir.path_join("face_%s_%s.png" % [sp, v]))
+	print("BOKIFACE %s: eye %s fwd %s r %.3f" % [sp, c, fwd, face_r])
+	vp.queue_free()
 
 
 func _setup() -> void:
