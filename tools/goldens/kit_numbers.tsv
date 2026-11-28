@@ -1372,7 +1372,7 @@ archetypes/thief.json:e.range	15.0
 archetypes/thief.json:e.refund_foe	0.5
 archetypes/thief.json:e.refund_wall	0.25
 archetypes/thief.json:e.slow	0.5
-archetypes/thief.json:e.slow_t	2.5
+archetypes/thief.json:e.slow_t	4.0
 archetypes/thief.json:e.speed	40.0
 archetypes/thief.json:e.time	6.0
 archetypes/thief.json:plate_offset	2.15
@@ -1592,6 +1592,8 @@ rules/kit_parity.json:rows[80].tol	0.0
 rules/kit_parity.json:rows[80].value	3.5
 rules/kit_parity.json:rows[81].tol	0.02
 rules/kit_parity.json:rows[81].value	0.685
+rules/kit_parity.json:rows[82].tol	0.0
+rules/kit_parity.json:rows[82].value	4.0
 rules/kit_parity.json:rows[8].tol	0.0
 rules/kit_parity.json:rows[8].value	5.0
 rules/kit_parity.json:rows[9].tol	0.0
