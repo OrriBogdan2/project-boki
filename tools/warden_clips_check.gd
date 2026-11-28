@@ -6,6 +6,8 @@ extends RefCounted
 ## weapon is drawn; it hides when the kit takes it out of the hand and its FX anchors stay on it; the budget holds.
 ## Every Hero's "air_legs" moves, played in the air, keep the fall's legs (no planted stance), and a landing before the
 ## move ends keeps them on the legs' own layer (no snap into the stance).
+## Every Hero with clips (HunterAnim's AIR_TILT on WardenClips): its dive clip is in the .glb, a plunge tips it
+## nose-down, and on the ground the body is upright again (the glider's bank: --glide-bank-check).
 ## Never touches the save.
 
 const WardenStatesCheck := preload("res://tools/warden_states_check.gd")
@@ -17,6 +19,8 @@ const PREFIX := {"breaker": ["bulwark", "bul_"], "tarek": ["dolm", "breah_"]}
 const SKIP := ["bul_smash_late"]
 const LEGS_TOL := 0.02          # rad: an air cast's leg bones off the plain fall's
 const AIR_FRAMES := 20          # frames of each air cast checked
+# (Vex, Kael, Cinder and Meeko's mantlekit.py poses are not in main's .glb files yet: they stay procedural)
+const CLIMBERS := ["dredge", "rimewright"]    # Grimble, Neve: glb_climb_clips.py (Lace and Tenzo stretch: procedural)
 ## Clips a Hunter's GLB carries that no kit move plays, with why they stay (the known-unused list). Each one is in the
 ## GLB, is mapped by no kmove, and is still held by the named user (so it can't rot into a silent orphan).
 ## ostra flurry: authored for owner item 136's 8-card RMB flurry; DECISIONS 11-07 (parity first) put the source's Snap
@@ -43,6 +47,12 @@ func run(main: Node) -> void:
 	_finishers()
 	for id in Arch.ORDER:
 		_air_legs(String(id))
+	_finishers()
+	for id in CLIMBERS:
+		_mantle(String(id), true)
+	for id in Arch.ORDER:
+		if not CLIMBERS.has(String(id)):
+			_mantle_proc(String(id))
 	bad += WardenStatesCheck.new().run(holder)
 	print("WARDEN_CLIPS_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -97,7 +107,7 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 		want.append(cfg["weapon_out"]["clip"])
 	want.append_array((lc["walk"] as Dictionary).values())
 	want.append_array((lc["run"] as Dictionary).values())
-	want.append_array([cfg["air"]["rise"], cfg["air"]["fall"], cfg["air"]["glide"]])
+	want.append_array([cfg["air"]["rise"], cfg["air"]["fall"], cfg["air"]["glide"], cfg["air"]["dive"]])
 	var sts: Dictionary = cfg["states"]
 	for k in sts:
 		if sts[k] is Dictionary:
@@ -203,6 +213,7 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 	ok(sk.get_bone_pose_scale(wp).is_equal_approx(Vector3.ONE), "%s: and comes back" % art_name)
 	if art_name == "breaker":
 		_hammer_scale(w, sk)
+		_air_pick(m, an, sync, clips, st)
 	var tip := WardenGlb.anchor(m, "anchor_hammer_head")
 	ok(tip != null, "%s: an FX anchor rides the weapon" % art_name)
 	var piece := WardenGlb.thrown_piece(m, "hammer")
@@ -220,8 +231,8 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 	ok(tris <= MAX_TRIS, "%s: %d triangles, the budget %d" % [art_name, tris, MAX_TRIS])
 	m.free()
 
-## The shared actions (stomp, drink): a Hunter with a clip for it plays it, timed to the game's clock; one without
-## keeps the procedural pose. Motley, Albert, Sparkle and Sable (ext/anim-stomp-drink-3).
+## The three shared actions (stomp, revive, drink): a Hunter with a clip for it plays it, timed to the game's clock;
+## one without keeps the procedural pose. Motley, Albert, Sparkle and Sable have all three.
 func _finishers() -> void:
 	for id in ["ostra", "bulwark", "mage", "thief"]:
 		var art_name := WardenGlb.art(id)
@@ -240,20 +251,82 @@ func _finishers() -> void:
 				var secs := lib.get_animation(nm).length
 				var fits := absf(secs - float(k[1])) < 0.04
 				ok(fits, "%s: the %s clip is %.2f s (the game's %.2f)" % [art_name, k[0], secs, k[1]])
+		var rv := String(sts.get("reviving", ""))
+		var loops := lib.has_animation(rv) and lib.get_animation(rv).loop_mode == Animation.LOOP_LINEAR
+		ok(loops, "%s: the revive kneel loops" % art_name)
 		# the slam is on the beat: the stomp state's phase 0.7 is the clip's 0.49 s
 		m.set_meta(WardenClips.STATE, {"stomp": 0.7, "grounded": true})
 		var pick := clips._pick({"stomp": 0.7}, 0.0)
 		var hit := absf(float(pick.get("t", -1.0)) - 0.49) < 0.03
 		var is_stomp := String(pick.get("clip", "")) == String(sts["stomp"])
 		ok(is_stomp and hit, "%s: the stomp's hit is on the beat" % art_name)
-		var dk := clips._pick({"drink": 0.5, "vel": Vector3(2.0, 0.0, 0.0)}, 0.0)
+		var dk := clips._pick({"drink": 0.5, "vel": Vector3(3.0, 0.0, 0.0)}, 0.0)
 		var upper := bool(dk.get("upper", false))
 		var is_drink := String(dk.get("clip", "")) == String(sts["drink"])
-		ok(is_drink and upper, "%s: the drink rides the upper body on the move" % art_name)
+		ok(is_drink and upper, "%s: drinking on the move plays the drink on the upper body" % art_name)
 		m.free()
 
 ## Meeko's sun and raincloud (pip_v2 companions sheet): two atlas faces off her moods, all eight expressions reachable,
 ## the sun carrying her FX points.
+## A ledge rise plays the Hero's own climb clip: its time is how far up the face he is, the vault runs on in real time
+## after the lip, and the pose moves: the hands reach up (a keyed climb over the head), then plant on the lip.
+func _mantle(id: String, keyed: bool) -> void:
+	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
+	holder.add_child(m)
+	var clips: WardenClips = (m.get_node("Warden/Sync") as WardenGlb.Sync).clips
+	var md: Dictionary = (clips.d.get("climb", {}) as Dictionary).get("mantle", {})
+	ok(clips.lib.has_animation(String(md.get("clip", ""))), "%s: a mantle clip is in the .glb" % id)
+	if md.is_empty():
+		m.free()
+		return
+	var length := clips.lib.get_animation(String(md["clip"])).length
+	var rise := float(md["rise"])      # (the clip second the hands meet the lip)
+	var at := clips._pick({"mantle": 0.5}, DT)
+	var half := float(at.get("t", -1.0))
+	var on_time: bool = at.get("clip", "") == md["clip"] and absf(half - rise * 0.5) < 0.01
+	ok(on_time, "%s: halfway up the face is halfway through the climb (t %.3f of %.3f)" % [id, half, rise])
+	clips._pick({"mantle": 1.0}, DT)
+	var tail := 0.0
+	while clips._pick({"mantle": -1.0}, DT).get("clip", "") == md["clip"] and tail < 3.0:
+		tail += DT
+	var want := length - rise
+	ok(absf(tail - want) < 0.1, "%s: the vault after the lip lasts %.2f s of %.2f" % [id, tail, want])
+	ok(clips._pick({"mantle": -1.0}, DT).is_empty(), "%s: then the run takes over" % id)
+	var sk := WardenGlb.skeleton(m.get_node("Warden"))
+	var an := HunterAnim.new(m)
+	var sync := m.get_node("Warden/Sync") as WardenGlb.Sync
+	var foot := WardenSkeleton.find(sk, "shin.R")
+	var hand := WardenSkeleton.find(sk, "hand.R")
+	var head := WardenSkeleton.find(sk, "head")
+	var st := {"vel": Vector3.ZERO, "face": 0.0, "grounded": false}
+	var lo := 0.0
+	var hi := 0.0
+	var hands: Array = []    # the hand's height off the head: up at the start, planted on the lip at the end
+	for k in [0.05, 0.3, 0.55, 0.8]:
+		_play(m, an, sync, st.merged({"mantle": k}), 12)
+		var p := sk.get_bone_global_pose(foot).origin
+		lo = minf(lo, p.y)
+		hi = maxf(hi, p.y)
+		hands.append(sk.get_bone_global_pose(hand).origin.y - sk.get_bone_global_pose(head).origin.y)
+	ok(hi - lo > 0.15, "%s: the legs move through the climb (%.2f m)" % [id, hi - lo])
+	var reach: float = 0.0 if keyed else float(hands[3]) + 0.15    # mantlekit's grab starts under the head
+	ok(float(hands[0]) > reach and float(hands[3]) < -0.1,
+			"%s: hands reach up, then plant on the lip (%.2f, %.2f m off the head)" % [id, hands[0], hands[3]])
+	m.free()
+
+## A Hunter with no climb clip keeps the rig's procedural reach and push for a ledge rise.
+func _mantle_proc(id: String) -> void:
+	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
+	holder.add_child(m)
+	var sync := m.get_node_or_null("Warden/Sync") as WardenGlb.Sync
+	if sync != null and sync.clips != null:
+		var clips: WardenClips = sync.clips
+		var keyed := (clips.d.get("climb", {}) as Dictionary).has("mantle")
+		keyed = keyed or (clips.d["states"] as Dictionary).has("mantle")
+		ok(keyed or bool(clips._pick({"mantle": 0.5}, DT).get("proc", false)),
+				"%s: no climb clip, a ledge rise plays the procedural pose" % id)
+	m.free()
+
 func _companions() -> void:
 	var m := Models.hunter(Arch.weight("tender"), Data.TEAM_COLORS[0], Arch.signature("tender"), "",
 			PlayerLook.neutral(), "tender")
@@ -477,6 +550,30 @@ func _air_legs(id: String) -> void:
 	ok(snaps.is_empty(), "%s: landing mid-cast keeps the legs off the planted stance (%s)" % [id, str(snaps)])
 	for p in pair:
 		p[0].free()
+
+## Owner 11-08 item 17: the out-of-charges dash (bul_lumber) looks like where it was pressed: the short ground dash
+## on the ground, the heavy air lunge in the air; the air lunge gives way the moment he lands or opens the glider.
+func _air_pick(m: Node3D, an: HunterAnim, sync: WardenGlb.Sync, clips: WardenClips, st: Dictionary) -> void:
+	var s2: Dictionary = st.duplicate()
+	s2["kmove"] = "bul_lumber"
+	s2["kmove_t"] = 0.0
+	_play(m, an, sync, s2, 3)
+	ok(clips.cur == "dash_short", "breaker: a dash pressed on the ground plays the ground clip (%s)" % clips.cur)
+	s2["kmove_t"] = 0.15
+	_play(m, an, sync, s2, 1)
+	_play(m, an, sync, st, 20)
+	for want in ["grounded", "gliding"]:
+		s2["grounded"] = false
+		s2["gliding"] = false
+		s2["kmove_t"] = 0.0
+		_play(m, an, sync, s2, 3)
+		ok(clips.cur == "dash_air", "breaker: a dash pressed in the air plays the air lunge (%s)" % clips.cur)
+		s2[want] = true
+		s2["kmove_t"] = 0.15
+		_play(m, an, sync, s2, 1)
+		ok(clips._pick(m.get_meta(WardenClips.STATE), 0.0).get("clip", "") != "dash_air",
+				"breaker: the air lunge gives way once %s" % want)
+		_play(m, an, sync, st, 20)
 
 func _play(_m: Node3D, an: HunterAnim, sync: WardenGlb.Sync, s: Dictionary, n: int) -> void:
 	for i in n:

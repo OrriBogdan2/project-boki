@@ -265,10 +265,13 @@ channel swap; a 0.03 s hit-stop on the empowered bolt.
 
 - Model about 0.95 of a medium (`body.size` 1.11 on the light build); hit radius 0.384 (`body.hit_r`, docs/HITBOX_SIZE.md).
 - Nameplate height 2.15 m (`body.plate`; read by the HUD through `Arch.plate_y`).
-- Runs pitched far forward (about 0.57 rad at a run), the stride at the sheet's ~2.3 Hz (Animation timing).
+- Runs pitched far forward (about 0.57 rad at a run).
 - Ground Cartwheel: 4.5 m in 0.48 s with the measured speed curve (off the global dash feel). In the air it is the same
   Cartwheel on the same curve (item 183), out of charges the class's long dash, and the shared air drag carries her
   on to the landing (owner 11-09: the sheet's 8.4 m held flat over 0.95 s flew far past the cast). From a jump it
+- Runs pitched far forward (about 0.57 rad at a run), the stride at the sheet's ~2.3 Hz (Animation timing).
+- Ground Cartwheel: 4.5 m in 0.48 s with the measured speed curve; the long (air) dash is the same sideways cartwheel
+  carried flat on its speed for 8.4 m over 0.95 s, ending where she lands (both off the global dash feel). From a jump it
   empowers the next bolt too (the source's Quickflip does; its dash -> LMB row in content/dash_flow/thief.json).
 - Her dashes leave her own violet after-images and a hand-and-foot trail through the flip's turn (HeroVfx data,
   content/vfx/thief.json "dash" and "flip"), not the shared after-image. No ring or burst on a dash or a
@@ -480,6 +483,7 @@ clips are keyed on KMovesDJ's beats, so no row needed a fix.
 
 Suggestions (ours, not built): the release snaps (0.02-0.03 s) land inside the 0.1 s blend in, so a lone tap shows
 about half the whip; a per-move `"fade"` near 0.04 would show it whole (ext/anim-time-sable measured this on v1).
+## Animation timing (Nov 10: parity pass against the 5 fps footage)
 
 ## Animation timing, start / hit / end on the move clock (Nov 10, ext/anim-timing-thief)
 Measured through `WardenClips` (sable.glb clips seeked to the kit's own move clock, `kmove_t`; blend in 0.1 s, out to

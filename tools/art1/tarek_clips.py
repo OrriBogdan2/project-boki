@@ -392,7 +392,7 @@ C.bake("death", 1.6, [(0, LOOSE), (0.16, m(LOOSE, pos=(0, -0.05, -0.1), hips=(14
                       (0.65, m(DOWNED, e="in")), (1.25, m(SIDE, e="in")), (1.42, m(SIDE, pos=(0.62, 0.0, 0.25))), (1.6, SIDE)])
 
 # ---------------------------------------------------------------------- the kit (times: KMovesStone's beats)
-# LMB tap, the boulder (0.55): twisted away, the right fist cocked out behind (0.07), hurled long (0.13), through (0.24)
+# LMB tap, the boulder (0.55): twisted away, the right fist cocked out behind (0.05), hurled long (0.15, the boulder leaves at 0.13), through (0.26)
 COCK = m(STANCE, pos=(0.02, -0.06, -0.16), hips=(-6, 8, -38), head=(4, -6, 40), hr=hand(0.3, -0.34, -0.3), hl=lhand(0.1, 0.38, -0.3), lip=-0.3, jaw=0.1)
 FLUNG = m(STANCE, pos=(-0.02, 0.1, -0.12), hips=(-20, -6, 34), head=(12, 0, -28), hr=hand(-0.06, 0.66, -0.08), hl=lhand(0.2, -0.22, -0.4), er=(0.7, -0.7, 0.1), lip=0.5, jaw=0.5, fing_r=0.05, thumb_r=0.1,
           fr=(AX + 0.12, -0.3, AZ), fl=(-AX - 0.1, 0.32, AZ), fra=-30.0)
@@ -412,7 +412,7 @@ def tremble(t, p):
 
 
 C.bake("lmb_wind", 0.64, [(0, STANCE), (0.1, m(WIND, e="out")), (0.24, m(WIND, pos=(0.03, -0.12, -0.27))), (0.44, m(WIND, pos=(0.03, -0.1, -0.26))), (0.64, m(WIND, pos=(0.03, -0.12, -0.27)))], over=tremble)
-# LMB let go, the punch: the hips unwind into a straight drive, long on the hit (0.05), past the line (0.12), back (0.3)
+# LMB let go, the punch: the hips unwind into a straight drive, long on the hit (0.11, spread over 4 frames), past the line (0.16), back (0.3)
 PUNCH = m(STANCE, pos=(0, 0.3, -0.12), rot=(0, 0, 8), hips=(-26, -4, 30), head=(14, 0, -24), hr=hand(-0.06, 0.74, 0.02), hl=lhand(0.2, -0.3, -0.34), er=(0.8, -0.5, 0.1), lip=0.2, jaw=0.75,
           fr=(AX + 0.12, -0.5, AZ + 0.02), fl=(-AX - 0.1, 0.52, AZ), fra=-38.0, flt=0.0, frt=-10.0)
 OVER = m(PUNCH, pos=(0, 0.38, -0.14), hips=(-32, -6, 42), hr=hand(-0.12, 0.78, -0.04), head=(18, 0, -34))

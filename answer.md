@@ -63,8 +63,23 @@ PART 1. Proposal only, nothing applied. Paths are under `content/`, or `scripts/
 |Eclipse `merges_v2/tempest.json:4`|Moonswell|Owl Moon|Dota Luna's ult; clashes with Eclipsowl|
 |Venom Fusion `merges_v2/blaze_mantle.json:4`|Sting Mantle|Wasp Mail|a label, not a name|
 
-**Items, perks, gliders**
+Before/after stills: `docs/art/wardens/neve_rink_wall_before_after.jpg` and `neve_rimelock_before_after.jpg`
+(GPU renders via `--neve-shots`; see the report for whether they landed before the GPU queue cleared).
+# Item 11: Kael (juggernaut) RMB / E / ult (owner 11-08)
 
+Tuning lives in `content/rules/tuning.json` section `kael` (the file did not exist: created, with `Tuning.of`).
+
+| item | status | what I tested |
+|---|---|---|
+| Live RMB aim during E | done | `--kael-tap-check`: strike goes where the cursor is at the blow, 90 and 180 deg off the E throw (36 dmg both) |
+| Tap = overhead strike always available | done | check: tap with Smash resting lands a lighter hit (16 of 26), second tap blocked by `tap_cooldown_s`; hold unchanged |
+| Ult keeps momentum | done | check: 6.0 m/s -> 4.8 (carry 0.8), still moving 0.1s in; debug `riposte.vel_before/after` |
+| Ult vertical bonus | done | check: vy 3.0 -> 5.2; GPU log vy 6.0 -> 8.2 |
+| Ult mid-mantle | partial | ledge rise rewrote vel.y every tick, so a ledge rise is now handed over to the boost; tested with a stub ledge state, not a real ledge |
+| RMB aim past tether | done | Lunge backward past the length breaks the tether; sideways inside range keeps it |
+| GPU clips | done | job 20261109-032347-06637: tap, hold, ult_sprint, ult_jump (a jump stands in for a mantle). Frame check only; no "before" clips |
+| suite-fast | not run | no such command found here; ran `--kael-tap-check` (10/10) and `--juggernaut-combo-check` (183/183, covers kael_accuracy) |
+**Items, perks, gliders**
 |Current|Proposed|Alt|Why|
 |---|---|---|---|
 |Power Glove `gear/power_core.json:3`|Wallop Glove|Brawn Glove|Nintendo's Power Glove|
@@ -72,9 +87,7 @@ PART 1. Proposal only, nothing applied. Paths are under `content/`, or `scripts/
 |Second Wind `scripts/core/data.gd:118`|Fresh Legs|Spare Breath|LoL rune, exact|
 |Tailwind `:127`|Fair Wind|Kite Luck|Pokemon move, exact|
 |Nightwing `scripts/core/gliders.gd:21`|Batsail|Gloomwing|DC hero|
-
 **Maps, modes, UI**
-
 |Current|Proposed|Alt|Why|
 |---|---|---|---|
 |Dash Isle, Ledge Isle, Training Range `maps/tutorial.json:11,13,17`|Skipstone Isle, Tiptoe Isle, Tin-Can Range|Hopscotch, Shelf, Scarecrow Row|dev labels|
@@ -84,9 +97,7 @@ PART 1. Proposal only, nothing applied. Paths are under `content/`, or `scripts/
 |Inborn · IVs `scripts/ui/iv_view.gd:205`|Inborn Gifts|Birth Gifts|Pokemon fan jargon|
 |Vulpin `scripts/match/models.gd:520`|Brushtail|Russet|one letter from Vulpix|
 |Owlet `:528`|Featherfolk|Tuftfolk|one letter from Rowlet; matches Scalefolk|
-
 **Enemies** (`scripts/core/data.gd`)
-
 |Current|Proposed|Alt|Why|
 |---|---|---|---|
 |The Brood Mother `:269`|The Hive Matron|Mother Thrum|Dota hero Broodmother|
@@ -94,7 +105,6 @@ PART 1. Proposal only, nothing applied. Paths are under `content/`, or `scripts/
 |The Watcher, Blight Watcher `:259,277`|The Vigil, Blight Vigil|Old Unblink|generic|
 |Spitter `:245`|Lobling|Hackle|one letter from Skitter; Left 4 Dead enemy|
 |Cinder Skitter `biomes/ember.json:18`|Coal Skitter|Soot Skitter|clashes with Cinder|
-
 **Notes**
 - Old weapon utilities copy exact names (`hunter_abilities/*.json:3`: Earthshatter = Reinhardt, Combat Roll = Cassidy, Riposte = Fiora, Breach = Valorant). Delete if dead, else Cratermaker, Duck Roll, Turnabout, Door Kick.
 - Owner-decided, not in data yet: Coin Blast, Palm Lance (`archetypes/gunslinger.json:59,92`), Training Grounds (`maps/arena.json:3`).

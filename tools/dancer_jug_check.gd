@@ -23,11 +23,14 @@ func run(main_node: Node, who := "all") -> void:
 	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	a_x = AKCheck.new()
 	a_x.main = main_node
+	var handoff := load("res://tools/prop_handoff_check.gd")
 	if who in ["all", "thief"]:
 		await thief(a_x)
 		await load("res://tools/combo_mark_check.gd").new().run(a_x.ok, a_x, "thief")
+		await handoff.new(a_x, a_x.ok).run("thief")
 	if who in ["all", "juggernaut"]:
 		await juggernaut(a_x)
+		await handoff.new(a_x, a_x.ok).run("juggernaut")
 		await HOLD.kael(a_x)
 		await load("res://tools/combo_mark_check.gd").new().run(a_x.ok, a_x, "juggernaut")
 	await combos(a_x)

@@ -49,7 +49,7 @@
 		"mm_shot_r": {"clip": "shot_r", "lead": 0.06, "upper": "moving", "air_legs": true, "fade": 0.03}, "mm_shot_l": {"clip": "shot_l", "lead": 0.06, "upper": "moving", "air_legs": true, "fade": 0.03}, "mm_shot_emp": {"clip": "shot_emp", "scale": 1.09, "lead": 0.1, "upper": "moving", "air_legs": true, "fade": 0.03},
 		"mm_seed_aim": {"clip": "seed_aim", "fit": 0.6, "upper": "moving", "air_legs": true}, "mm_seed": {"clip": "seed", "lead": 0.06, "upper": "moving", "air_legs": true},
 		"mm_hearth": {"clip": "hearth", "lead": 0.15, "upper": "moving", "air_legs": true, "fade": 0.05}, "mm_toss": {"clip": "toss", "upper": "moving", "air_legs": true},
-		"mm_skip": {"dash": true, "clip": "skip", "heading": true}, "mm_float": {"dash": true, "clip": "float", "heading": true},
+		"mm_skip": {"dash": true, "clip": "skip", "heading": true}, "mm_float": {"dash": true, "clip": "float", "heading": true, "air_clip": "float"},
 		"mm_pickup": {"clip": "pickup"}, "mm_flare": {"clip": "flare", "upper": "moving", "air_legs": true},
 		"mm_tug": {"clip": "tug", "upper": true}, "mm_kindled": {"clip": "kindled", "upper": true},
 		"mm_call": {"clip": "call", "lead": 0.08, "upper": true}, "mm_call_hold": {"clip": "call_hold", "hold_from": 0.0, "upper": true}, "mm_call_end": {"clip": "call_end", "upper": true},
@@ -61,9 +61,12 @@
 	"emotes": {"truce": "g_flag", "accept": "g_pump", "follow": "g_beckon", "thanks": "g_hand_heart", "wave": "g_wave", "laugh": "g_laugh", "gg": "g_bow", "refuse": "g_wag"},
 	"summon_call": {"call": "g_call_fling_l", "recall": "g_recall_l"},
 	"cc": {"pull": 0.26, "tug_hz": 2.6, "twist": 0.15, "bow": 0.3},
-	"procedural": ["ledge", "mantle", "base", "swim"],
+	"procedural": ["ledge", "mantle", "base", "wade", "swim"],
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "lid.L", "lid.R", "jaw", "ear.L", "ear.R", "wing.L", "wing.R"],
-	"beats": {"win": {"clip": "emote"}, "lose": {"clip": "downed"}},
+	"beats": {
+		"win": {"clip": "emote"}, "lose": {"clip": "downed"},
+		"board": {"pose": {"head": [-8, 0, 8], "upper_arm.R": [-35, 0, -8], "forearm.R": [-95, 0, -25], "upper_arm.L": [-35, 0, 8], "forearm.L": [-95, 0, 25]}}
+	},
 	"cancels": [
 		["mm_seed_aim", 0.5, "stun"],
 		["mm_seed_aim", 0.5, ""],

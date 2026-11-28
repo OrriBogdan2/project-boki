@@ -145,6 +145,7 @@ func run(mn: Node, md := "all") -> void:
 		_rime_support()
 		await _ranks("rimewright")
 		await combos.rimewright()
+		await load("res://tools/prop_handoff_check.gd").new(self, ok).run("rimewright")
 		await _combo_tag("rimewright")
 		await ults.rimewright()
 		await anims.rimewright()

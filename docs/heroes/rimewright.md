@@ -308,6 +308,40 @@ The run re-time is data: `loco.run_cycle` in `content/rules/warden_anim/claire.j
 
 Kept from the owner, over the footage: spear flight time grows with distance (18 m/s), the wall stands 4.5 s with travel +50%. (The ult's 3.5 s hold listed here had no owner item behind it; it is the footage's 3.3 s since Nov 12, see Rimelock length.)
 
+Model re-key wishes (GLB / `tools/art1`, not done here): the flick, sling and thrust keys could sit at 0 so `lead` goes away; `spear_aim` reaches the gathered pose at 0.12 s but the prop is full size at `SPEAR_FORM_T` 0.3 s; the wall shove key 0.27 would ideally be 0.2 (the eruption); `rime_crash` holds its recovery pose to 0.4 s though she is free from 0 s. Suggestion, not built: the footage frees her at f61, 0.4 s after the burst, ours at the burst.
+## Animation timing (Nov 10: parity pass against the 5 fps footage; 10 fps for the ult)
+Measured through the kit's move clock (`kmove_t`, `WardenClips` seeking claire.glb; blend in 0.1 s, out to locomotion
+0.16 s) and `--rimewright-combo-check`. "Hit" is the release/contact key, "end" when the pose settles. Our times are the
+KMovesCare keys, which `--clip-check` pins to the glb clips (the headless pose-speed sampling was too noisy to add to them).
+Source times from briefs/hero-ref/tamsin.md (one frame = 0.2 s; the ult 0.1 s).
+
+| Move | Source (s) | Ours before (start / hit / end) | Ours after | Status |
+|---|---|---|---|---|
+| `tm_dart_r` `tm_dart_l` | one dart a frame, no pause (~0.2 s) | wind 0.03 / flick 0.07 / 0.16; a dart every 0.18 s (game data) | same | matches (under one frame; the dart leaves at the press, the hand flicks inside the 0.1 s blend) |
+| `tm_dart_heavy` | no visible pattern at 5 fps; 3 large darts at the end [data] | 0.04 wind / 0.08 fling / 0.18, after 4 plain | same | matches (the data's barrage; the fling is ours) |
+| `tm_spear_aim` `tm_spear` | lands at the cursor, bursts 1.8-2.0 s after [f-by-f] | gather 0.12; load 0.05 / palms out 0.1 (spear leaves, `PUSH_T`) / 0.55; bursts 1.8 s | same | matches |
+| `tm_wall` | ~0.2 s sparkle tell, then it erupts [0301-] | tell dip 0.1 / shove 0.27 / held 0.42 / 0.7; wall erupts at 0.2 (the shove 0.07 s late) | dip 0.1 / shove 0.2 / held 0.35 / 0.7: the shove lands as it erupts | fixed; asserted |
+| wall slide and push | slides 2.5 h/s, carries foes; ~3 s [ambiguous] | slide 4.5 m/s, 3.6 s | same | matches |
+| `tm_freeze` (E again) | no re-press in the footage | 0.07 / 0.13 / 0.42 | same | no source |
+| `tm_rime` | zone snaps f25-f27 (0.2 s at 10 fps) | 0.06 / 0.12 rink snaps / 0.2 into the seal | same | matches |
+| `tm_rime_hold` | sealed f27-f55 (~3.2-3.4 s) | hold to the 3.5 s crack | same | matches |
+| `tm_rime_crash` | burst f57-f59, recovery f61 (0.4 s) | shell and pillar at 0, crouch 0.04 / arms wide 0.1 / settle 0.2 / 0.4 | same | matches (the body opens mid-burst; recovery 0.4 s) |
+| `tm_rime_break` | no early break in the footage | 0.08 / 0.3 | same | no source |
+| `tm_skate_go` | full speed within 0.2 s | push 0.08 / stride 0.16 | same | matches |
+| `tm_skate` | long pushes, wide split | stride push every 0.28 s (0.56 loop) | same | matches |
+| `tm_skate_stop` | stops 0.1-0.2 s after letting go | speed x0.3 at the release; braced 0.07 / 0.22 / 0.5 | same | matches |
+| run gait (`run_*`) | wide split every ~0.17 s (cycle 0.34 s), cadence ~1.4x, stride ~0.85, 4.8 m/s | cycle 1.0 s at 4.6 m/s: a split every 0.5 s (3x slower) | not in 0.24.6: the run loops are the v95 swap's (a re-key at 0.34 s is open) | open |
+| `walk_*` | no walk in the footage | 1.5 s cycle | same | no source |
+| `tm_clench` `tm_shatter` | the payoff has no readable pose at 5 fps | 0.05 / 0.1 / 0.34; 0.06 / 0.13 / 0.24 / 0.45 | same | no source |
+
+Clip re-keys (tools/art1/claire_clips.py, `claire_build.sh clips`, installed to art/wardens/claire/claire.glb):
+- `wall`: the 0.2 held-crouch key is gone and the palm shove ("out") moves 0.27 -> 0.2, the held key 0.42 -> 0.35; the clip
+  still lasts 0.7 s. The KMovesCare `tm_wall` keys match.
+- `run_f/b/l/r`: period 1.0 -> 0.34 s.
+
+Suggestions (ours, not built): the dart leaves at the press and the hand flicks 0.07 s later, so a dart can appear before
+the throw; spawning it on the flick key would show the throw. The footage cannot resolve that.
+Model re-key wishes (GLB / `tools/art1`, not done here): the flick, sling and thrust keys could sit at 0 so `lead` goes away; `spear_aim` reaches the gathered pose at 0.12 s but the prop is full size at `SPEAR_FORM_T` 0.3 s; the wall shove key 0.27 would ideally be 0.2 (the eruption).
 Model re-key wishes (GLB / `tools/art1`): none open here: the flick, sling and thrust keys sit at 0 (no `lead`), `spear_aim` gathers the spear by `SPEAR_FORM_T` (0.12 s) and `rime_crash` is main's 0.4 s recovery.
 
 ## Look and sound

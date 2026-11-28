@@ -22,6 +22,7 @@ const RING_PTS := 28                # points round the ring
 const RING_W := 0.16                # m wide the ring's band
 const SNAP_T := 0.3                 # s the two broken halves whip back
 const PREVIEW_Y := 0.15             # m over his feet
+const THROW_SKIP := 0.14            # s: jug_chain starts at its fling key (0.16 s), the chain leaves on the press
 const SPIN_GRACE := 0.15            # s after a pull ends (any way) that a Smash is still the Cinder Spin
 
 var k: JuggernautKit
@@ -113,6 +114,7 @@ func _throw() -> void:
 	e_pressed_at = -9.0
 	if not k.smash_running():          # a heavy move keeps its own body (E goes on top of it)
 		k.play("jug_chain")
+		k.anim_at -= THROW_SKIP
 	var stg := k.stage("e", {"delivery": {"type": "projectile", "speed": float(ed["speed"]),
 			"range": float(ed["range"]), "size": 0.22, "rope": true},
 		"effects": [{"type": "damage", "amount": float(ed["dmg"])}]})

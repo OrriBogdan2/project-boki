@@ -14,6 +14,11 @@
 	"beats": {"win": {"clip": "emote"}, "lose": {"clip": "downed"}},
 	"summon_call": {"call": "g_call_fling_l", "recall": "g_recall_l"},
 	"cc": {"pull": 0.26, "tug_hz": 2.6, "twist": 0.15, "bow": 0.3},
-	"procedural": ["ledge", "mantle", "base", "stun", "gliding", "downed", "reviving", "dead", "fall"],
+	"procedural": ["ledge", "mantle", "base", "stun", "gliding", "downed", "reviving", "dead", "fall", "wade", "swim"],
+	"beats": {
+		"win": {"clip": "g_wave"},
+		"lose": {"clip": "downed"},
+		"board": {"pose": {"head": [-8, 0, 8], "upper_arm.R": [-35, 0, -8], "forearm.R": [-95, 0, -25], "upper_arm.L": [-35, 0, 8], "forearm.L": [-95, 0, 25]}}
+	},
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R"]
 }

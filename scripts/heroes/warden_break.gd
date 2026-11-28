@@ -13,7 +13,7 @@ const STILL := 0.25  # m/s: below this he is standing
 const FADE_OUT_RATE := 14.0  # 1/s: a cancelled break unwinds in about 0.07 s
 ## State keys that, when set, mean the hunter is busy with something (not standing idle).
 const BUSY_FLAGS := ["gliding", "rolling", "downed", "stun", "reviving", "dead", "statue"]
-const BUSY_TIMERS := ["mantle", "stomp", "reload", "drink", "base"]  # -1 while off
+const BUSY_TIMERS := ["mantle", "stomp", "drink", "base"]  # -1 while off
 
 var root: Node3D
 var skel: Skeleton3D
@@ -106,7 +106,7 @@ func _standing(s: Dictionary) -> bool:
 	if String(s.get("tool", "")) != "" or String(s.get("act", "")) != "":  # ("act": a home verb or an open channel)
 		return false
 	for k in BUSY_FLAGS:
-		if bool(s.get(k, false)):
+		if s.get(k, false):  # (a flag, or "act": the home verb's name, "" when none)
 			return false
 	for k in BUSY_TIMERS:
 		if float(s.get(k, -1.0)) >= 0.0:

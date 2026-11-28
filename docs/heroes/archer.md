@@ -278,12 +278,14 @@ Strips: `--arena-demo=anim_<id> --arena-shot=<png>` (scripts/match/arena_demo.gd
 
 ## Animation timing (Nov 8: parity pass against the 5 fps footage; 10 fps for the ult)
 Measured offline through `WardenClips` (hem.glb clips seeked to the kit's own move clock, `kmove_t`; blend in 0.1 s,
-blend out to locomotion 0.16 s, under one footage frame) and in `--archer-combo-check`. "Hit" is the release or contact
-key, "end" when the hand settles. Source times from briefs/hero-ref/pin.md (one frame = 0.2 s).
+snaps 0.03-0.05, blend out to locomotion 0.16 s, under one footage frame) and in `--archer-combo-check`. "Hit" is the
+release or contact key, "end" when the hand settles. Source times from briefs/hero-ref/pin.md (one frame = 0.2 s).
 
 | Move | Source (s) | Ours before (start / hit / end) | Ours after | Status |
 |---|---|---|---|---|
 | `arc_draw` | pose up within one frame, held [f102-107] | 0.05 nock / stages 0.6, 1.15 / held from 1.15 (clip FULL 1.25) | same | matches (the hold loops the last 0.1 s) |
+| `arc_tap` `arc_loose` | release a 1-frame snap, little recoil [f69] | snap 0.04-0.05 / settled 0.36-0.43 | full weight on the snap (fade 0.03) | fixed; asserted |
+| `arc_super` | body flash and a harder kick [f167-169] | kick 0.05, hip back 0.3 / 0.6 | same | matches |
 | `arc_tap` `arc_loose` | release a 1-frame snap, little recoil [f69] | snap 0.04-0.05 / settled 0.36-0.43 | same; the move's own blend-in is 0.04 s (`fade` in hem.json), so the snap shows in full | fixed; asserted (`--clip-check`: blend over within 0.05 s of the spawn) |
 | `arc_super` | body flash and a harder kick [f167-169] | kick 0.05, hip back 0.3 / 0.6 | same; blend-in 0.04 s | fixed; asserted |
 | `arc_perfect` `arc_over_loose` | one-frame star / a drooping release | 0.06 / 0.55 (overshoot to 0.6) | same | matches |
@@ -304,6 +306,8 @@ Clip re-keys for the model (tools/art1/hem_clips.py, on the unmerged ravel-v2 re
 - `roll`: its last key (0.36 standing READY) could end in the crouched walk pose; the kit now hides it either way.
 - `heavy_wind`: HW at 1.1 is right once the clip runs on the hold's clock (done kit-side, no re-key).
 
+The release snap keys (0.02-0.07 s) landed inside the 0.1 s blend-in (the snap at about half weight); each snap move
+now carries its own shorter `"fade"` (docs/MOVEMENT_FEEL.md, Strike snaps).
 Release snap (anim-lace-release-snap): the three release moves blend in over 0.04 s (`fade` per move, `warden_clips.gd` applies it to the upper-body channel), the arrow still spawns at `kmove_t` 0. Before/after strips at the match camera, one frame per 1/30 s from the spawn: `docs/heroes/media/archer_release_before_after.jpg` (`--anim-shots --release`; top row before, bottom row after; rendered with xvfb software GL because every GPU worker was lost, cropped to the archer). Frame 0, the spawn, already shows the snapped hand; before it still showed the draw.
 
 ## In the air

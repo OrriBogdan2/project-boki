@@ -15,6 +15,7 @@ const FRAME_EVERY := 400  # steps between frames
 const FRAME := 1.0 / 60.0  # s: the frame the budget's script cost is timed at
 const FRAMES := 300  # frames timed for the budget
 const MIN_STATES := 4  # base-life states every Boki has to visit in the day
+const FORM_WAIT_MS := 8000  # ms (CheckClock) a form change may take to play out; the day waits for it
 const STATE_MAX := 90.0  # s in one state other than Nap
 const STILL_MAX := 20.0  # s without moving off a nav point
 const PROGRESS := 0.12  # m moved in STILL_MAX s that counts as not still
@@ -70,6 +71,7 @@ func _day(zone: String) -> void:
 		_watch(label, t)
 		if int(t / DT) % FRAME_EVERY == 0:
 			await main.get_tree().process_frame  # deferred frees and timers (the puffs) run
+			await _form_ends()
 			_reseed(int(t / DT))
 	var secs := float(Time.get_ticks_msec() - wall) / 1000.0
 	print("GARDENDAY %s: %.0f s of game time in %.1f s of wall time" % [label, t, secs])
@@ -97,6 +99,14 @@ func _stage() -> void:
 	ok(home.kins.size() == 6 and home.life != null, "Bramblebank: %d Boki live on a base_mode farm" % home.kins.size())
 	var stand: bool = home.toys.toys().size() == 3 and not SnackPatch.entry(Save.d).is_empty()
 	ok(stand, "Bramblebank: three toys and the snack patch stand")
+
+
+## A form change that started plays out in real frames, and holds the Boki near it until it ends: step no farm time
+## meanwhile (it runs on the frame clock, the day on the stepped one).
+func _form_ends() -> void:
+	var t0 := CheckClock.own_msec()
+	while home.evolving != null and CheckClock.own_msec() - t0 < FORM_WAIT_MS:
+		await main.get_tree().process_frame
 
 
 func _watch(label: String, t: float) -> void:

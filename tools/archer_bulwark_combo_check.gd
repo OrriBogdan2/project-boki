@@ -44,11 +44,13 @@ func run(main_node: Node) -> void:
 		await bow.pin()
 	if both or "--bulwark-combo-check" in args:
 		await _bulwark_combos()
+		await load("res://tools/prop_handoff_check.gd").new(self, ok).run("bulwark")
 		await HOLD.albert(self)
 		await _growth()
 		await ult.bjorn()
 		await own.bjorn()
 		await launch.bjorn()
+		await load("res://tools/bulwark_anim_time_check.gd").new().run(self)
 		await feel.albert()
 	if both or "--archer-combo-check" in args:
 		await _spirit_look()

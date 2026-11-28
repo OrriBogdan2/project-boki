@@ -10,6 +10,8 @@ extends RefCounted
 ## each care move (pet, feed, lift) for a small and a big Boki (--home-verbs-check's reach()).
 ## Each walk and run ring's loops are one length, so the blended diagonals stay in step. Never touches the save.
 
+const PondWalk := preload("res://tools/pond_walk.gd")
+const StrikeReach := preload("res://tools/strike_reach_check.gd")
 const TRI_BUDGET := 80000      # triangles a Warden, weapon included (RIG_CONTRACT "Budget")
 const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunslinger": "vex", "ashwick": "cinder",
 	"mage": "ryzz", "dolm": "tarek", "rimewright": "claire", "dredge": "dredge", "bulwark": "breaker",
@@ -33,6 +35,7 @@ const SNAP_BY := 0.05          # s: a release move's blend-in is over this long 
 const SEAM_DEG := 1.0          # a standing loop's last key may turn a bone this far from its first
 const SEAM_M := 0.01           # and move it this far
 const RING_DT := 1.0 / 60.0   # s: a ring's loops may differ this much in length (the BlendSpace2D runs them unsynced)
+const POSE_MIN_DEG := 25       # a keyed result pose turns at least one bone this far from the rest
 const ROOT_FOOT_M := 0.02      # m: a rooted Hunter's feet move this much more than the idle's own sway through any move
 ## Rings open at this merge: "<id>:<gait>" -> what. Each rework of the ring's loops removes its entry.
 const RING_OPEN := {
@@ -61,7 +64,7 @@ const JL_DIP_M := 0.03         # m: and at least this far off a terrace drop or 
 const JL_DEEPER := 1.25        # ...which is this many times the hop's dip, same stance
 const JL_FREE_S := 0.2         # s: running, the land clip owns the legs at most this long (the source is up and
                                # moving ~0.15 s after any touchdown: the landing never holds the run)
-const JL_BACK_MAX := 0.6       # s: the longest a landing may own the body standing (dur 0.4 + the loco fade)
+const JL_BACK_MAX := 0.7       # s: the longest a landing may own the body standing (a heavy: 0.5 s squash + loco fade)
 const JL_HEAVY_K := 1.0        # a heavy's drop crouch on screen is at least this times the mediums' median
 ## Heavies whose land clip is still shallower (docs/DEBT.md): "<id>" -> what. Each land rework removes its entry.
 const JL_HEAVY_OPEN := {
@@ -213,7 +216,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	_emotes(id, dd, clips)
 	_summon_call(id, dd, clips)
 	_jump_land(id, m, sync, clips, dd)
-	_beats(id, clips)
+	_beats(id, dd, clips)
 	# one weapon: the procedural pieces are hidden
 	sync.call("_keep_one_weapon")     # (the first frame takes what the build added last: a Mag)
 	var shown := 0
@@ -244,12 +247,41 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	if id == "archer":
 		_release_snap(id, sync, clips, m)
 	_recoil(id, m, sync, clips, dd)
+	await _pond(id, m, sync, clips)
+	var reach := StrikeReach.new()
+	await reach.hero(id, m, sync, dd, holder.get_tree())
+	bad += reach.bad
 	_feel(id, m, sync, clips, bool(dd.get("rig_root", false)))
 	m.free()
 	_turn(id)
 	await _cc(id, dd)
 	await _footing(id, dd)
 
+## The result beats (WardenBeats): win, lose and board each map to a clip the .glb plays that is its own (no two beats
+## share one), the state's "beat" picks it, and a keyed pose really moves the arms and head off the rest.
+func _beats(id: String, dd: Dictionary, clips: WardenClips) -> void:
+	var mapped := 0
+	var picked := 0
+	var used: Array = []
+	for nm in WardenBeats.NAMES:
+		var b: Dictionary = clips.beats.get(nm, {})
+		mapped += 1 if not b.is_empty() else 0
+		var pick := clips._pick({"beat": nm, "beat_t": 0.7}, 0.0)
+		picked += 1 if not b.is_empty() and pick.get("clip", "") == b["clip"] else 0
+		if not b.is_empty():
+			used.append(b["clip"])
+	var own: bool = used.size() == 3 and used[0] != used[1] and used[1] != used[2] and used[0] != used[2]
+	ok(mapped == 3 and picked == 3 and own,
+			"%s: win, lose, board mapped to own clips (%d, %d picked: %s)" % [id, mapped, picked, str(used)])
+	for nm in dd.get("beats", {}):
+		if not dd["beats"][nm].has("pose") or not clips.lib.has_animation("beat_" + String(nm)):
+			continue
+		var a := clips.lib.get_animation("beat_" + String(nm))
+		var most := 0.0
+		for i in a.get_track_count():
+			var rest := a.rotation_track_interpolate(i, 0.0)
+			most = maxf(most, rad_to_deg(rest.angle_to(a.rotation_track_interpolate(i, WardenBeats.INTRO))))
+		ok(most >= POSE_MIN_DEG, "%s: the %s pose turns a bone %.0f deg (min %d)" % [id, nm, most, POSE_MIN_DEG])
 ## HunterAnim's FEEL over the clips: a landing flattens him, a run start tips him forward over his feet, and both
 ## leave nothing behind once they're over (the root's size isn't keyed, so it must not build up). A root on the Rig
 ## ("rig_root") takes the Rig's own squash, which HunterAnim drives (not running here): only the lean is his.
@@ -279,34 +311,15 @@ func _feel(id: String, m: Node3D, sync: Node, clips: WardenClips, on_rig: bool) 
 
 ## Every clip name the file holds anywhere (a swap that drops one leaves the Hero silently procedural): the kit moves
 ## (and their "alt"), loco, crouch, air, land, home acts (pat, feed, cheer), states (hit front and back), weapon_out.
-
-
-## The result beats (WardenBeats): win and lose each map to a clip the .glb plays that is its own (no two beats share
-## one), and the state's "beat" picks it.
-func _beats(id: String, clips: WardenClips) -> void:
-	var mapped := 0
-	var picked := 0
-	var used: Array = []
-	for nm in WardenBeats.NAMES:
-		var b: Dictionary = clips.beats.get(nm, {})
-		mapped += 1 if not b.is_empty() else 0
-		var pick := clips._pick({"beat": nm, "beat_t": 0.7}, 0.0)
-		picked += 1 if not b.is_empty() and pick.get("clip", "") == b["clip"] else 0
-		if not b.is_empty():
-			used.append(b["clip"])
-	ok(mapped == 2 and picked == 2 and used[0] != used[1],
-			"%s: win and lose mapped to own clips (%d, %d picked: %s)" % [id, mapped, picked, str(used)])
-
-
 func _named(dd: Dictionary) -> Array:
 	var out: Array = []
 	for b in (dd.get("beats", {}) as Dictionary).values():
 		if b.has("clip"):
 			out.append(b["clip"])
 	for mv in (dd.get("kmoves", {}) as Dictionary).values():
-		out.append(mv["clip"])
-		if mv.has("alt"):
-			out.append(mv["alt"])
+		for k in ["clip", "alt", "air_clip", "ground_clip"]:
+			if mv.has(k):
+				out.append(mv[k])
 	var lc: Dictionary = dd.get("loco", {})
 	out.append(lc.get("idle"))
 	out.append(lc.get("stance"))
@@ -316,7 +329,8 @@ func _named(dd: Dictionary) -> Array:
 	if not cr.is_empty():
 		out.append_array([cr["idle"], cr["in"], cr["out"]])
 		out.append_array((cr["walk"] as Dictionary).values())
-	out.append_array((dd.get("air", {}) as Dictionary).values())
+	var air: Array = (dd.get("air", {}) as Dictionary).values()
+	out.append_array(air.filter(func(v): return v is String))     # (not its tilts)
 	for cl in (dd.get("climb", {}) as Dictionary).values():
 		if cl is Dictionary:
 			out.append(cl["clip"])
@@ -354,8 +368,10 @@ func _climb(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionar
 		await holder.get_tree().process_frame
 		ys.append(hand.global_position.y - head.global_position.y)
 	clips.force = {}
-	ok(ys[0] > 0.0 and ys[1] < -0.1,
-			"%s: hands reach over the head, then plant on the lip (%.2f, %.2f m off the head)" % [id, ys[0], ys[1]])
+	# (a mantle-only clip from mantlekit.py grabs from under the head: its hands only have to rise to the lip)
+	var reach: float = 0.0 if cd.has("ledge") else float(ys[1]) + 0.15
+	ok(ys[0] > reach and ys[1] < -0.1,
+			"%s: hands reach up, then plant on the lip (%.2f, %.2f m off the head)" % [id, ys[0], ys[1]])
 	var clip_len := clips.lib.get_animation(String(cd["mantle"]["clip"])).length
 	var t_end := rise
 	var after := {"mantle": -1.0, "grounded": true}
@@ -370,8 +386,11 @@ func _climb(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionar
 	var hang := {}
 	for i in 30:
 		hang = clips._climb({"ledge": true}, DT)
-	ok(absf(float(hang["t"]) - float(cd["ledge"]["rise"])) < 0.001,
-			"%s: a ledge float hangs the clip at %.2f s" % [id, float(hang["t"])])
+	if cd.has("ledge"):
+		ok(absf(float(hang["t"]) - float(cd["ledge"]["rise"])) < 0.001,
+				"%s: a ledge float hangs the clip at %.2f s" % [id, float(hang["t"])])
+	else:
+		ok(hang.is_empty(), "%s: no ledge clip, a ledge float plays the procedural hang" % id)
 	clips._climb({"mantle": -1.0, "dead": true}, DT)
 
 ## A body on a spring (data "sway") lags a change of speed, leans away from it, and settles.
@@ -554,7 +573,8 @@ func _jump_land(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dicti
 				ok(r["dip"] <= -need and r["dip_t"] <= JumpLand.DIP_WINDOW,
 						"%s %s: the landing dips %.3f m (%s, at least %.3f), lowest at %.2f s"
 						% [id, tag, -r["dip"], "the deep crouch" if deep else "the hop's dip", need, r["dip_t"]])
-			var tier: Dictionary = ld.get("drop" if way != "jump" else "hop", {})
+			var tier := WardenClips.land_play(ld.get("drop" if way != "jump" else "hop", {}), Arch.weight(id),
+					1 if way == "jump" else 2)      # (the data's tier, as land_feel.json's footage cell plays it)
 			var hold := float(tier.get("moving", tier.get("dur", 0.0))) if running else float(tier.get("dur", 0.0))
 			var promise := hold + WardenClips.FADE_LOCO + JumpLand.DT
 			ok(r["back"] > 0.0 and r["back"] <= minf(promise, JL_BACK_MAX),
@@ -820,6 +840,7 @@ func _handover(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictio
 			continue
 		var clip := String(moves[st[0]]["clip"])
 		var lead := float(moves[st[0]].get("lead", 0.0))      # (the game seeks kmove_t + lead, floored at 0)
+		var rate := float(moves[st[0]].get("rate", 1.0))      # (and plays "rate" clip s per kit s)
 		clips.force = {"clip": clip, "t": 0.0}
 		for k in 10:
 			sync.call("_process", DT)
@@ -828,7 +849,8 @@ func _handover(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictio
 		var t := 0.0
 		var last_p := hand.global_position
 		while t < float(st[1]):
-			clips.force = {"clip": clip, "t": clampf(t + lead, 0.0, clips.lib.get_animation(clip).length - 0.001)}
+			var ct := clampf(t * rate + lead, 0.0, clips.lib.get_animation(clip).length - 0.001)
+			clips.force = {"clip": clip, "t": ct}
 			sync.call("_process", DT)
 			await holder.get_tree().process_frame
 			path.append(hand.global_position.distance_to(last_p))
@@ -1281,6 +1303,122 @@ func _stride(sync: Node, sk: Skeleton3D) -> float:
 		lo = minf(lo, z)
 		hi = maxf(hi, z)
 	return hi - lo
+## The pond walk (tools/pond_walk.gd): the right move for each depth. Wading is the run with the knees hauled up (higher
+## than the rig's plain walk at that speed); swimming is a flutter kick and, in a hand the kit lets go of, a stroke,
+## both at the pace of the swim (slower treading water); the weapon stays in its hand; the clips stand aside.
+func _pond(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:
+	var sk := WardenGlb.skeleton(m.get_node("Warden"))
+	var bi := {}
+	for b in ["hand.L", "upper_arm.L", "shin.L", "shin.R"]:
+		bi[b] = WardenSkeleton.find(sk, b)
+	var tip := sync.get("blade_tip") as Node3D
+	var muzzle := sync.get("muzzle") as Node3D
+	var hb := int(sync.get("blade_bone"))
+	var rest := tip.position.length()
+	var carrier: Variant = _carrier(sync, tip)      # a weapon a floating part holds (Meeko's): the part is its hand
+	if carrier:
+		rest = carrier[1]
+	var height := 1.6 * absf(m.scale.y)
+	var anim := HunterAnim.new(m)
+	var walk_speed: float = PondWalk.DRY_SPEED * HomeWater.WADE_SPEED
+	clips.force = {"proc": true}
+	var plain := 0.0      # the rig's plain walk at the wading speed: its highest knee
+	for i in 45:
+		anim.update(DT, {"vel": Vector3(0, 0, -walk_speed), "face": 0.0, "grounded": true, "fired": 99.0})
+		sync.call("_process", DT)
+		if i > 15:
+			plain = maxf(plain, maxf(_pos(sk, m, bi["shin.L"]).y, _pos(sk, m, bi["shin.R"]).y))
+	clips.force = {}
+	var rows: Array = []
+	var held := [0.0, 0.0]      # worst Muzzle-off-the-tip, blade-off-the-hand in the water (the callback fills it)
+	var sample := func(info: Dictionary) -> void:
+		var row := {"phase": info["phase"], "depth": info["depth"], "proc": clips.proc_w, "state": info["state"]}
+		for b in bi:
+			row[b] = _pos(sk, m, bi[b])
+		row["hand.L"] -= row["upper_arm.L"]      # (the hand about its shoulder: the body's bob stays out of the stroke)
+		rows.append(row)
+		if info["depth"] > 0:
+			var sees: Vector3 = sk.global_transform * (sk.get_bone_global_pose(hb) * tip.position)
+			var hand: Vector3 = sk.global_transform * sk.get_bone_global_pose(hb).origin
+			var body_k := absf((sk.global_transform.basis * sk.get_bone_global_pose(hb).basis).get_scale().x)
+			if carrier:
+				hand = (carrier[0] as Node3D).global_position
+				body_k = absf(sk.global_transform.basis.get_scale().x)
+			held[0] = maxf(held[0], muzzle.global_position.distance_to(sees))
+			held[1] = maxf(held[1], absf(hand.distance_to(sees) / body_k - rest))
+	await PondWalk.new().walk(holder.get_tree(), m, sync, anim, sample)
+	var flags_ok := true
+	var peak := {"wade": 0.0}
+	for r in rows:
+		var st: Dictionary = r["state"]
+		flags_ok = flags_ok and bool(st["wade"]) == (r["depth"] == 1) and bool(st["swim"]) == (r["depth"] == 2)
+		if r["phase"] == "wade" and float(r["proc"]) >= 1.0:
+			peak["wade"] = maxf(peak["wade"], maxf((r["shin.L"] as Vector3).y, (r["shin.R"] as Vector3).y))
+	ok(flags_ok, "%s: pond walk: wade in the shallows, swim in the deep, neither on the bank" % id)
+	var legs := KMovesStone.gait(id) > 0.5      # (a hoverer's legs barely walk: it floats through the water)
+	ok(not legs or peak["wade"] >= plain + 0.02 * height,
+			"%s: wading hauls the knees up (%.2f m vs %.2f m plain at the same speed)" % [id, peak["wade"], plain])
+	var kick := [_rate(rows, "swim", "shin.L", 1), _rate(rows, "tread", "shin.L", 1)]
+	var kick_swim := absf(kick[0] - HunterSwim.KICK_PER_STROKE * HunterSwim.HZ_FULL) < 0.5
+	var kick_tread := absf(kick[1] - HunterSwim.KICK_PER_STROKE * HunterSwim.HZ_TREAD) < 0.5
+	ok(not legs or (kick_swim and kick_tread and kick[1] < kick[0]),
+			"%s: swim kicks at the swim pace (%.1f Hz swimming, %.1f treading)" % [id, kick[0], kick[1]])
+	var stroke := [_rate(rows, "swim", "hand.L", 2), _rate(rows, "tread", "hand.L", 2)]
+	var strokes := _range(rows, "swim", "hand.L", 2) >= 0.1 * height      # (a hand on the weapon barely moves)
+	var stroke_swim := absf(stroke[0] - HunterSwim.HZ_FULL) < 0.5
+	var stroke_tread := absf(stroke[1] - HunterSwim.HZ_TREAD) < 0.5
+	ok(not strokes or (stroke_swim and stroke_tread),
+			"%s: %s (%.1f strokes/s swimming, %.1f treading)" % [id,
+			"its free hand strokes at the swim pace" if strokes else "both hands stay on the weapon",
+			stroke[0], stroke[1]])
+	ok(held[0] <= FX_ON_BLADE and held[1] <= 2.0 * HunterAnim.WEAPON_SLACK,
+			"%s: the weapon stays in its hand in the water (%.3f m off the tip, %.3f m off the hand)" % [
+			id, held[0], held[1]])
+	var ends: Array = rows.filter(func(r): return r["phase"] in ["swim", "tread", "wade"])
+	ok(ends.slice(int(ends.size() / 4.0)).all(func(r): return float(r["proc"]) >= 1.0),
+			"%s: the clips stand aside while it wades and swims" % id)
+	ok(float(rows[rows.size() - 1]["proc"]) <= 0.0, "%s: and take the body back on dry ground" % id)
+
+## The floating part that holds the weapon tip and the tip's rest offset on it, or null (most weapons sit on a bone).
+func _carrier(sync: Node, tip: Node3D) -> Variant:
+	var floating := sync.get("companions") as WardenCompanions
+	for part: WardenCompanions.Part in (floating.parts if floating else []):
+		for an in part.anchors:
+			if an[0] == tip:
+				return [part.node, (an[1] as Vector3).length()]
+	return null
+
+
+func _pos(sk: Skeleton3D, m: Node3D, bone: int) -> Vector3:
+	return sk.global_transform * sk.get_bone_global_pose(bone).origin - m.global_position
+
+## How far one limb signal travels over a phase.
+func _range(rows: Array, phase: String, bone: String, axis: int) -> float:
+	var lo := 9.0
+	var hi := -9.0
+	for r in rows:
+		if r["phase"] == phase:
+			lo = minf(lo, (r[bone] as Vector3)[axis])
+			hi = maxf(hi, (r[bone] as Vector3)[axis])
+	return hi - lo
+
+## Cycles a second of one limb signal over a phase, after the ease-in (a swing up through the middle of its range
+## and back down past a quarter of it counts once, so a jitter does not).
+func _rate(rows: Array, phase: String, bone: String, axis: int) -> float:
+	var sel: Array = rows.filter(func(r): return r["phase"] == phase)
+	sel = sel.slice(mini(18, sel.size() - 1))
+	var vals: Array = sel.map(func(r): return (r[bone] as Vector3)[axis])
+	var lo := float(vals.min())
+	var hi := float(vals.max())
+	var cycles := 0
+	var up := false
+	for v in vals:
+		if float(v) > lerpf(lo, hi, 0.65) and not up:
+			up = true
+			cycles += 1
+		elif float(v) < lerpf(lo, hi, 0.35):
+			up = false
+	return cycles / maxf(0.01, vals.size() * DT)
 
 ## Turning on the spot (TurnStep, WardenTurn): a standing 180° swing of the aim at the body's turn rate steps the
 ## feet round with the planted ones held (the same swing with the step off printed beside it); a 45° one stays an

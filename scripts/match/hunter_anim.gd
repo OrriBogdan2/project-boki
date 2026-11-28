@@ -348,9 +348,10 @@ var flipping := false
 var run_k := 0.0
 var air_k := 0.0
 var glide_k := 0.0
-var bank_k := 0.0  # the roll into turns: the glider's, and a move keyed "bank" (Flue Flight)
+var wade_k := 0.0  # in shallow water (HunterSwim): the knees haul up
 var swim_k := 0.0  # in deep water: the crawl
 var swim_ph := 0.0  # rad: the stroke
+var bank_k := 0.0  # the roll into turns: the glider's, and a move keyed "bank" (Flue Flight)
 var hz_cues := 0  # HazardMoveSfx bits this pose found
 var hz_swim := false  # swimming at the last pose
 var hz_ice := false  # no footing on ice at the last pose
@@ -1022,6 +1023,13 @@ func update(dt: float, s: Dictionary) -> void:
 	var sw_r := maxf(0.0, cos(phr - 0.35 * back))
 	var kl := -(knee0 * 0.6 + (0.25 + 1.05 * minf(run_k, 1.3)) * pow(sw_l, 1.3) + 0.18 * maxf(0.0, -sin(phl))) * r_leg
 	var kr := -(knee0 * 0.6 + (0.25 + 1.05 * minf(run_k, 1.3)) * pow(sw_r, 1.3) + 0.18 * maxf(0.0, -sin(phr))) * r_leg
+	# wading: the knees haul up out of the water
+	var wd_l := HunterSwim.wade(sw_l, wade_k * KMovesStone.gait(arch))
+	var wd_r := HunterSwim.wade(sw_r, wade_k * KMovesStone.gait(arch))
+	hl += wd_l.x
+	kl += wd_l.y
+	hr += wd_r.x
+	kr += wd_r.y
 	# standing: knees soft, the free leg bent and turned out, the weight leg straighter
 	var idle_w := 1.0 - r1
 	var free_l := clampf(wk, 0.0, 1.0)  # the left leg is the free one when the weight is on the right

@@ -398,6 +398,8 @@ func retry() -> void:
 	flag = false
 	wait = 0.0
 	camps.clear()
+	# beats started again: the beat re-pulses, with its chime
+	set_meta("restarts", int(get_meta("restarts", 0)) + 1)
 	_back()
 	_enter()
 	if m.hud:
