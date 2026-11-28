@@ -1118,7 +1118,7 @@ func open_inventory() -> void:
 						grid,
 						Care.foods_v[f]["name"],
 						"×%d" % fn,
-						Care.foods_v[f]["desc"] + " Feed it from a Boki's card.",
+						Care.foods_v[f]["desc"] + " Feed this from a Boki's card.",
 						Care.foods_v[f]["col"]
 					)
 			for id in GardenItems.ids():

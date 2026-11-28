@@ -267,8 +267,8 @@
 			{
 				"id": "eat",
 				"needs": ["patch"],
-				"title": "Feed it",
-				"hints": {"go": "Click your Boki (or press {details} next to it), choose Feed and give it the {food}: watch its colour change."},
+				"title": "Feed your Boki",
+				"hints": {"go": "Click your Boki (or press {details} next to the Boki), choose Feed and give {food}: watch the colour change."},
 				"world": {"go": "Feed your Boki"},
 				"boki": "Is that a berry? For me?"
 			},
@@ -278,7 +278,7 @@
 				"title": "Place a toy",
 				"hints": {
 					"place": "Press {build}: Base tab Play ball ({toy_cost} gems), Garden tab Snack patch (free).",
-					"watch": "Watch your Boki go and play with it."
+					"watch": "Watch your Boki go and play with the toy."
 				},
 				"marks": {"place": ["toy_ball", "snack_patch"]},
 				"world": {"place": "", "watch": "Toy"},

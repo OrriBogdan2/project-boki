@@ -566,7 +566,7 @@ func show_away() -> void:
 			var info: Array = Care.STARVE_INFO[String(e["stage"])]
 			lines.append("%s: %s." % [e["rec"]["name"], String(info[0]).to_lower()])
 			for part in String(info[1]).trim_suffix(".").split(". "):
-				lines.append("  %s." % part)
+				lines.append("  %s." % KinSpeak.about(e["rec"], part))
 			told[e["rec"]["uid"]] = String(e["stage"])
 	away = []
 	for g in died:
@@ -589,7 +589,7 @@ func refuse_reason() -> String:
 	if ak.is_empty():
 		return ""
 	if Care.refuses_to_go(ak):
-		return "%s is too weak from hunger and its belly is empty. Give it one meal and it will come, or pick another partner." % ak["name"]
+		return KinSpeak.about(ak, "%s is too weak from hunger and {his} belly is empty. Give {him} one meal and {he} will come, or pick another partner." % ak["name"])
 	return ""
 
 # ------------------------------------------------------------------ the graveyard

@@ -351,7 +351,7 @@ static func fed(id: String) -> bool:
 ## The line the items list shows under an item in the bag.
 static func bag_hint(id: String) -> String:
 	if fed(id):
-		return "Shapes a Boki: hold it near one to see the change, or feed it from its card."
+		return "Shapes a Boki: hold it near one to see the change, or give it from the Boki's card."
 	return "Goes in the Nesting Nook with a pair."
 
 ## The path an item's token pushes toward ("" for other items).

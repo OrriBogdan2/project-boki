@@ -15,10 +15,18 @@ const BOKI_IT := (
 	+ "(?:\\w+ )?Boki\\b(?:'s)?[^.!?:;]*?"
 	+ "(?:\\b[Ii]ts\\b|\\bitself\\b|(?:,| and| while| when| if| until| before| as| so| but| who|\\.|:) it\\b)"
 )
+## Care phrases that only ever mean a Boki ("Feed it", "let it rest"), with no Boki named before the "it".
+const CARE_IT := (
+	"\\b(?:(?:[Ff]eed|[Pp]et|[Bb]rush|[Tt]uck|[Nn]ame|play with|fight beside|look after|you feed|you raise"
+	+ "|[Tt]akes whatever) it\\b|[Ll]et it (?:nap|rest|sleep|go back)\\b)"
+)
+## Hunter text that says "it" about a blade, not a Boki.
+const HUNTER_PATH := "res://content/rules/mask_moment.json"
 const DEV_TEXT := "/|\\.gd|\\w_\\w|\\w\\.\\w"
 
 var bad := 0
 var boki_re := RegEx.create_from_string(BOKI_IT)
+var care_re := RegEx.create_from_string(CARE_IT)
 var dev_re := RegEx.create_from_string(DEV_TEXT)
 var re := RegEx.create_from_string(WORD)
 
@@ -31,7 +39,10 @@ func run(main: Node) -> void:
 	main.get_tree().quit(1 if bad > 0 else 0)
 
 func _boki_it(s: String, where: String) -> void:
-	_ok(dev_re.search(s) != null or boki_re.search(s) == null, "%s: Boki called it: \"%s\"" % [where, s])
+	if where.begins_with(HUNTER_PATH):
+		return
+	var said_it := boki_re.search(s) != null or care_re.search(s) != null
+	_ok(dev_re.search(s) != null or not said_it, "%s: Boki called it: \"%s\"" % [where, s])
 
 func _ok(cond: bool, what: String) -> void:
 	if not cond:

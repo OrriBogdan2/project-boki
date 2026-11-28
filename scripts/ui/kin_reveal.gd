@@ -3,7 +3,7 @@ extends CanvasLayer
 ## A closer look right after an egg hatches, shared by the first egg and nest eggs. The world
 ## behind dims a little, the Boki sits in a pool of warm light, glancing about; then it turns,
 ## looks right at you, blinks and calls to you in its own voice. After that you can turn it round
-## (drag it, or A/D, the arrow keys or the right stick) and read its card. "Name it" closes this
+## (drag it, or A/D, the arrow keys or the right stick) and read its card. "Name your Boki" closes this
 ## and hands over to whatever naming step the caller has.
 ##
 ## Intimate and grounded on purpose: no flash, fanfare, light rays, star
@@ -266,7 +266,7 @@ func _info_card() -> PanelContainer:
 		v.add_child(UI.section("Moves  ·  hover one"))
 		v.add_child(moves)
 	v.add_child(UI.spacer(6))
-	name_btn = UI.primary("Name it", _go, 360)
+	name_btn = UI.primary("Name your Boki", _go, 360)
 	name_btn.disabled = true
 	v.add_child(name_btn)
 	return card

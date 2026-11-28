@@ -25,10 +25,10 @@ const MATCH_COST := {"food": -26.0, "energy": -34.0, "clean": -30.0}
 const STARVE := {"weak": 6.0, "refuse": 18.0, "sick": 30.0, "dead": 72.0}
 
 const STARVE_INFO := {
-	"starving": ["Starving", "Hasn't eaten in a while. Feed it, or fill a feeder."],
-	"weak": ["Weak from hunger", "Slow and weak. Feed it, let it nap or keep a friend close."],
-	"refuse": ["Very weak from hunger", "No expedition on an empty belly. One meal and it comes along."],
-	"sick": ["Sick from hunger", "Sick and drooping. Feed it, nap, keep a friend close; one Puffcorn snack cures it."],
+	"starving": ["Starving", "Hasn't eaten in a while. Feed {him}, or fill a feeder."],
+	"weak": ["Weak from hunger", "Slow and weak. Feed {him}, let {him} nap or keep a friend close."],
+	"refuse": ["Very weak from hunger", "No expedition on an empty belly. One meal and {he} comes along."],
+	"sick": ["Sick from hunger", "Sick and drooping. Feed {him}, nap, keep a friend close; one Puffcorn snack cures it."],
 }
 
 ## Getting better, in starve-seconds undone per second while it is fed (food over 20): a meal's worth,
