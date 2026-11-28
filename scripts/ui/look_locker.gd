@@ -185,6 +185,9 @@ func more() -> void:
 	_name.visible = true
 	_fill()
 	Sfx.play("whoosh", null, -16.0, 0.05, 1.2)
+	await get_tree().process_frame  # the card takes its taller size, then centres again (else it runs off the bottom)
+	if is_instance_valid(_panel):
+		_place()
 
 
 ## One notch sound per TURN_NOTCH of dragging you round: `acc` is the turn since the last one, returns the new one.
@@ -396,10 +399,15 @@ func _build_panel(ui_root: Control) -> void:
 	foot.add_child(UI.primary("Looks good", func(): finished.emit(), 200))
 	v.add_child(foot)
 	ui_root.add_child(card)
-	card.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT, Control.PRESET_MODE_MINSIZE, 48)
-	card.offset_top += 46  # clear of the title
-	card.offset_bottom += 46
+	_place()
 	_fill()
+
+
+## The card left of you, centred on its height.
+func _place() -> void:
+	_panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT, Control.PRESET_MODE_MINSIZE, 48)
+	_panel.offset_top += 46  # clear of the title
+	_panel.offset_bottom += 46
 
 
 ## The four tabs, big, each with its icon.

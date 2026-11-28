@@ -205,7 +205,14 @@ func _first_pass() -> void:
 	var more := hx.root_ui.find_child("More", true, false) as Button
 	ok(more != null and locker._list.get_child_count() == 7, "with one 'More' button under the four rows")
 	more.pressed.emit()
-	await main.get_tree().process_frame
+	for i in 3:
+		await main.get_tree().process_frame
+	var card := locker._panel.get_global_rect()
+	var mid := main.get_viewport().get_visible_rect().size.y * 0.5 + 46.0
+	ok(
+		absf(card.get_center().y - mid) < 2.0,
+		"and the taller card centres again (centre y %.0f, want %.0f)" % [card.get_center().y, mid]
+	)
 	sliders = hx.root_ui.find_children("Frame_*", "HSlider", true, false)
 	ok(
 		not locker.short and sliders.size() == EmptyFrame.KEYS.size() and locker._tabs.visible and locker._name.visible
