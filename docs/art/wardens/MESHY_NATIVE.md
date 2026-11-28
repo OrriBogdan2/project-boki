@@ -147,8 +147,9 @@ The fire leaves from `weapon_muzzle` on her right hand (the palm), which rides t
 --states [--match] [--no-moves]` (`move_<id>_<stand|run>/`).
 
 ## Kit-move clips (data `kmoves`)
-A kit move (state `kmove`, the move's id) may have a clip of its own: `"kmoves": {kmove: {"clip": name, "hold_from": s,
-"rate": x, "fade": s}}` (`WardenNativeMoves`). While the move lasts the clip is laid at the move's clock (`kmove_t`), so a
+A kit move (state `kmove`, the move's id) may have a clip of its own: `"kmoves": {kmove: {"clip": name, "from": s,
+"hold_from": s, "rate": x, "fade": s}}` (`from` opens the clip that far in: Albert's `bul_throw` opens Meshy's Attack
+at its swing, so the hand's strike lands on the kit's release, and `bul_mend` plays its calm start slowly) (`WardenNativeMoves`). While the move lasts the clip is laid at the move's clock (`kmove_t`), so a
 release move, which the kit starts at the frame the arrow leaves, shows its release on its first frames. `hold_from` loops
 the clip from there to its end for as long as the move lasts; the kit ends the draw move with the hold input, so the loop
 never shows without it. A move with no clip, or whose clip no file has, keeps the slot clips above. The clips come from

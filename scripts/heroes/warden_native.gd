@@ -116,7 +116,10 @@ static func dress(model: Node3D, arch: String, scene: PackedScene, lk := {}) -> 
 	glb.name = "Warden"
 	glb.rotation.y = PI  # (Meshy faces +Z; a Hunter's model faces -Z)
 	model.add_child(glb)
-	glb.scale = Vector3.ONE * _fit(model, WardenGlb.skeleton(glb)) * float(e.get("size", 1.0))
+	var fit := _fit(model, WardenGlb.skeleton(glb)) * float(e.get("size", 1.0))  # (data "size": x the head-pivot fit)
+	# data "wide": a body that reads smaller than the contract model's in the match frame is widened (x, z), head kept
+	var wide := float(e.get("wide", 1.0))
+	glb.scale = Vector3(fit * wide, fit, fit * wide)
 	var nat := WardenNative.new()
 	nat.name = "Native"
 	nat.art_id = WardenGlb.art(arch)
@@ -516,6 +519,8 @@ func _hide_rig_weapon() -> void:
 	built_off = off_id
 	if id != 0:
 		WardenGlb._skinned_weapon(root)
+	if bool(entry(art_id).get("mesh_shield", false)):
+		WardenGlb._hide_shield(root)  # (data "mesh_shield", Breaker: Meshy's mesh carries the shield)
 	if off:
 		for mi in off.find_children("*", "GeometryInstance3D", true, false):
 			(mi as GeometryInstance3D).visible = false

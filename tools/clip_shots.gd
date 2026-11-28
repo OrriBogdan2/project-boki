@@ -117,6 +117,16 @@ func run(main: Node) -> void:
 		cam.look_at(Vector3(0, at_y, 0))
 	for k in 30:
 		await tree.process_frame  # (past the title's fade)
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--only="):  # (debug: hide every mesh but these, by node name)
+			var keep := a.substr(7).split(",")
+			for mi in model.find_children("*", "MeshInstance3D", true, false):
+				if not keep.has(String(mi.name)) and not String(model.get_path_to(mi)).begins_with("TeamRing"):
+					(mi as MeshInstance3D).visible = false
+		if a.begins_with("--hide="):  # (debug: hide meshes by node name, e.g. --hide=arm38_L,fist43_L)
+			for hn in a.substr(7).split(","):
+				for mi in model.find_children(hn, "MeshInstance3D", true, false):
+					(mi as MeshInstance3D).visible = false
 	if OS.get_cmdline_user_args().has("--states"):
 		var views: Array = []
 		for a in OS.get_cmdline_user_args():
@@ -125,13 +135,13 @@ func run(main: Node) -> void:
 		if views.is_empty():
 			await _states(model, fps, out)
 		for v in views:
-			var vw: Array = STATE_VIEWS[v]
+			var vw: Array = _custom_view(String(v)) if String(v).begins_with("cam:") else STATE_VIEWS[v]
 			cam.fov = float(vw[0])
 			cam.position = vw[1]
 			cam.look_at(vw[2])
 			if ring:
 				ring.visible = v == "match"
-			await _states(model, fps, out, "states_" + String(v))
+			await _states(model, fps, out, "states_" + String(v).replace(":", "_").replace(";", "_"))
 		print("CLIP_SHOTS_DONE")
 		tree.quit()
 		return
@@ -191,6 +201,14 @@ func run(main: Node) -> void:
 		await _carry(model, sync, out)
 	print("CLIP_SHOTS_DONE")
 	tree.quit()
+
+
+## --views=cam:<fov>:<x;y;z from>:<x;y;z at>: a custom close-up (dir states_cam_..., ':' and ',' become '_').
+func _custom_view(v: String) -> Array:
+	var p := v.split(":")
+	var f := p[2].split(";")
+	var a := p[3].split(";")
+	return [float(p[1]), Vector3(float(f[0]), float(f[1]), float(f[2])), Vector3(float(a[0]), float(a[1]), float(a[2]))]
 
 
 ## --cast=<kmove>: moving at `speed` m/s (0: standing), the move is pressed 0.3 s in and let go at its clip's end;

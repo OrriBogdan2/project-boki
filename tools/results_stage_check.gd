@@ -82,31 +82,36 @@ func _roster() -> void:
 		h.free()
 
 
-## Every Hunter whose GLB has clips has a win and a lose beat among them. A GLB without clips has no
-## beats: HunterAnim poses its rig, and the stage stands it in its idle.
+## Every Hunter whose contract GLB has clips has a win and a lose beat among them. A Hunter on Meshy's own skeleton
+## (WardenNative) or whose GLB has no clips has no beats here: HunterAnim poses it and the stage stands it in its idle.
 func _beats_exist() -> void:
 	var bad_before := bad
-	var clipless: Array = []
+	var idle: Array = []
+	var with_clips := 0
 	for id in Arch.ORDER:
+		WardenNative.contract_only = true  # (the contract GLB's own beats; Meshy-native Hunters: --warden-native-check)
 		var model := Models.hunter(
 			Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id
 		)
+		WardenNative.contract_only = false
 		var sync := model.get_node_or_null("Warden/Sync") as WardenGlb.Sync
 		if sync == null or sync.clips == null:
-			clipless.append(id)
+			idle.append(id)
 		else:
+			with_clips += 1
 			var win: Dictionary = sync.clips.beats.get("win", {})
 			var lose: Dictionary = sync.clips.beats.get("lose", {})
 			ok(
 				not win.is_empty() and not lose.is_empty(),
 				"%s: win %s, lose %s" % [id, win.get("clip", "-"), lose.get("clip", "-")]
 			)
+			if WardenNative.on(id):
+				idle.append(id)
 		model.free()
-	_clipless = clipless
-	var with_clips := Arch.ORDER.size() - clipless.size()
+	_clipless = idle
 	ok(
 		bad == bad_before and with_clips > 0,
-		"all %d Hunters with clips have a win and a lose beat (no clips: %s)" % [with_clips, ", ".join(clipless)]
+		"all %d Hunters with clips have a win and a lose beat (idle on the stage: %s)" % [with_clips, ", ".join(idle)]
 	)
 
 

@@ -1,11 +1,12 @@
 class_name WardenNativeMoves
 extends RefCounted
 ## The kit moves a native Hunter has its own clip for (data "kmoves" in warden_native.json, docs/art/wardens/
-## MESHY_NATIVE.md): {kmove: {"clip": name, "then": name, "hold": bool, "hold_from": s, "rate": x, "fade": s,
+## MESHY_NATIVE.md): {kmove: {"clip": name, "from": s, "then": name, "hold": bool, "hold_from": s, "rate": x, "fade": s,
 ## "upper": bool, "body": bool}}. The clips come from <art>_clips.glb by name like the slot clips
 ## (WardenNative._borrow_clips); a row whose clip no file has is dropped. While the kit's move is on the body its
 ## clip is laid at the move's own clock
-## (state "kmove_t"), so a release move starts at the frame the arrow leaves. Past the clip's end: "hold_from" loops
+## (state "kmove_t"), so a release move starts at the frame the arrow leaves; "from" opens the clip that far in (a
+## clip whose strike is late in it, Albert's throw). Past the clip's end: "hold_from" loops
 ## the clip from there to its end, "then" loops a second clip, "hold" keeps the last pose (a full-body row's default),
 ## and an upper row without either is over (the legs' clips show again). An "upper" row is laid on WardenNativeUpper,
 ## the torso, head and arms over whatever the legs play (walk, run, idle, the air); any other row is a full-body clip
@@ -70,7 +71,7 @@ func _pick(row: Dictionary, km: String, kt: float, plays: Dictionary) -> Diction
 	var clip := String(plays[KEY % km])
 	var fade := float(row.get("fade", FADE))
 	var length := player.get_animation(clip).length
-	var pos := kt * float(row.get("rate", 1.0))
+	var pos := float(row.get("from", 0.0)) + kt * float(row.get("rate", 1.0))
 	var hold := float(row.get("hold_from", -1.0))
 	if hold >= 0.0 and pos > hold and length > hold:
 		return {"clip": clip, "t": hold + fposmod(pos - hold, length - hold), "upper": up, "fade": fade}
