@@ -21,15 +21,18 @@ extends RefCounted
 ## "MCHECK DONE, failures: N".
 
 const DT := Match.DT
-const RIM_GAP := 0.1      # m from the rim face: source air control (decision 0020) steers little
+const RIM_GAP := 0.1  # m from the rim face: source air control (decision 0020) steers little
 var bad := 0
 var m: Match
 var w: World
 var h: Hunter
 
+
 func ok(cond: bool, msg: String) -> void:
 	print("MCHECK %s %s" % ["ok  " if cond else "FAIL", msg])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -37,17 +40,23 @@ func run(main: Node) -> void:
 	main.add_child(m)
 	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "autoplay": true})
 	m.set_process(false)
-	for mb in m.mobs: mb.queue_free()
+	for mb in m.mobs:
+		mb.queue_free()
 	m.mobs.clear()
 	h = m.hunters[0]
 	for o in m.hunters:
 		o.ctrl = "idle"
-		if o != h: o.teleport(Vector3(-500, 50, -500)); o.out = true
-	h.ctrl = "local"      # players float up on a jump or a fall, never by walking into walls
+		if o != h:
+			o.teleport(Vector3(-500, 50, -500))
+			o.out = true
+	h.ctrl = "local"  # players float up on a jump or a fall, never by walking into walls
 	# the kin sits this one out: a kin fainting off a cliff mid-trial would wipe the downed hunter's squad
 	for kk in [h.kin, h.kin2]:
-		if kk: m.kins.erase(kk); kk.queue_free()
-	h.kin = null; h.kin2 = null
+		if kk:
+			m.kins.erase(kk)
+			kk.queue_free()
+	h.kin = null
+	h.kin2 = null
 	w = m.world
 	_rims()
 	var walls := _walls(2)
@@ -64,74 +73,138 @@ func run(main: Node) -> void:
 	print("MCHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
+
 func _reset(at: Vector3, v := Vector3.ZERO, grounded := false) -> void:
-	h.out = false; h.downed = false; h.down_hp = 100.0; h.hp = h.max_hp
+	h.out = false
+	h.downed = false
+	h.down_hp = 100.0
+	h.hp = h.max_hp
 	h.teleport(at)
-	h.grounded = grounded; h.vel = v; h.pad = {}; h.grap = {}; h.grap_cd = 0.0; h.mantle_cd = 0.0; h.roll_t = 0.0
-	h.lfloat = {}; h.gliding = false; h.knock_t = 0.0; h.fly_t = 0.0; h.stun_t = 0.0; h.kb_t = -9.0
-	h.dropping = false; h.diving = false; h.last_gy = at.y; h.air_t = 0.0 if grounded else 0.3
-	for k in ["glide", "jump", "dash", "fire"]: h.inp[k] = false
+	h.grounded = grounded
+	h.vel = v
+	h.pad = {}
+	h.grap = {}
+	h.grap_cd = 0.0
+	h.mantle_cd = 0.0
+	h.roll_t = 0.0
+	h.lfloat = {}
+	h.gliding = false
+	h.knock_t = 0.0
+	h.fly_t = 0.0
+	h.stun_t = 0.0
+	h.kb_t = -9.0
+	h.dropping = false
+	h.diving = false
+	h.last_gy = at.y
+	h.air_t = 0.0 if grounded else 0.3
+	for k in ["glide", "jump", "dash", "fire"]:
+		h.inp[k] = false
 	h.inp["move"] = Vector2.ZERO
+
 
 # ---------------------------------------------------------------- 1. rims over the void
 func _rims() -> void:
-	var tried := 0; var good := 0; var clip := 0; var worst := 0.0; var durs: Array = []
+	var tried := 0
+	var good := 0
+	var clip := 0
+	var worst := 0.0
+	var durs: Array = []
 	for downed_case in [false, true]:
 		for trial in 12:
 			# find an edge: a ground tile next to the void
-			var at := Vector3.INF; var dir := Vector2.ZERO
+			var at := Vector3.INF
+			var dir := Vector2.ZERO
 			for k in 400:
 				var g := w.random_ground()
 				for d in [Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1)]:
 					# on an authored map only rims with a lip can be grabbed; sheer ones are checked below
-					var rim_ok := w.lip.is_empty() or w.lip.has(w.idx(int(floor(g.x + d.x * 0.9)), int(floor(g.z + d.y * 0.9)))) or w.lip.has(w.idx(int(floor(g.x)), int(floor(g.z))))
+					var rim_ok := (
+						w.lip.is_empty()
+						or w.lip.has(w.idx(int(floor(g.x + d.x * 0.9)), int(floor(g.z + d.y * 0.9))))
+						or w.lip.has(w.idx(int(floor(g.x)), int(floor(g.z))))
+					)
 					# (and open air where the hunter hangs: not under a bridge running past the rim)
 					var open_below := true
 					for dd in [1.1, 1.6, 2.2, 2.8, 3.4]:
-						if not w.is_void(g.x + d.x * dd + d.y * 0.4, g.z + d.y * dd + d.x * 0.4) or not w.is_void(g.x + d.x * dd - d.y * 0.4, g.z + d.y * dd - d.x * 0.4): open_below = false
+						if (
+							not w.is_void(g.x + d.x * dd + d.y * 0.4, g.z + d.y * dd + d.x * 0.4)
+							or not w.is_void(g.x + d.x * dd - d.y * 0.4, g.z + d.y * dd - d.x * 0.4)
+						):
+							open_below = false
 					# (and a real rim: flat ground for 4 m behind it, not a ledge under a higher terrace, where
 					# the float rightly carries you up onto the terrace; the 2x Hollow Crown has such ledges)
 					for dd in [1.0, 2.0, 3.0, 4.0]:
 						var back := w.ground_at(g.x - d.x * dd, g.z - d.y * dd)
-						if absf(back - w.ground_at(g.x, g.z)) > 0.3: open_below = false
-					if w.is_void(g.x + d.x * 1.6, g.z + d.y * 1.6) and not w.is_void(g.x, g.z) and k % 12 == trial and rim_ok and open_below:
-						at = g; dir = d; break
-				if at != Vector3.INF: break
-			if at == Vector3.INF: continue
+						if absf(back - w.ground_at(g.x, g.z)) > 0.3:
+							open_below = false
+					if (
+						w.is_void(g.x + d.x * 1.6, g.z + d.y * 1.6)
+						and not w.is_void(g.x, g.z)
+						and k % 12 == trial
+						and rim_ok
+						and open_below
+					):
+						at = g
+						dir = d
+						break
+				if at != Vector3.INF:
+					break
+			if at == Vector3.INF:
+				continue
 			tried += 1
 			var top := w.ground_at(at.x, at.z)
 			# hanging in the air against the face, 2.5m below the lip, pushing back toward the island
 			# (the side of an island catches you up to HunterFeel.mantle_reach_abyss below its lip; see --abyss-check)
-			var edge_x := at.x; var edge_z := at.z
+			var edge_x := at.x
+			var edge_z := at.z
 			while not w.is_void(edge_x + dir.x * 0.25, edge_z + dir.y * 0.25):
-				edge_x += dir.x * 0.25; edge_z += dir.y * 0.25
+				edge_x += dir.x * 0.25
+				edge_z += dir.y * 0.25
 			var gap := h.r + RIM_GAP
 			_reset(Vector3(edge_x + dir.x * gap, top - 2.5, edge_z + dir.y * gap), Vector3(0, -2.0, 0))
 			h.downed = downed_case
 			h.last_gy = top
-			var t := 0.0; var floated := false; var landed := false; var t_m := 0.0
+			var t := 0.0
+			var floated := false
+			var landed := false
+			var t_m := 0.0
 			while t < 3.0:
 				h.inp["move"] = -dir
-				m.step(DT); t += DT
+				m.step(DT)
+				t += DT
 				if h.mantling():
-					if not floated: t_m = t
+					if not floated:
+						t_m = t
 					floated = true
 					# inside the cliff: standing below solid ground that's under you
 					var gh := w.ground_at(h.pos.x, h.pos.z)
 					if not w.is_void(h.pos.x, h.pos.z) and gh > h.pos.y + 0.06:
-						clip += 1; worst = maxf(worst, gh - h.pos.y)
+						clip += 1
+						worst = maxf(worst, gh - h.pos.y)
 				if floated and not h.mantling() and h.grounded:
 					landed = absf(h.pos.y - top) < 0.6
 					durs.append(snappedf(t - t_m, 0.01))
 					break
-			if floated and landed: good += 1
+			if floated and landed:
+				good += 1
 	h.downed = false
 	print("MCHECK rims: climb times %s" % str(durs))
-	ok(tried > 0 and good == tried, "below a rim over the void, pushing in: floated up and landed on top %d of %d (half as a downed wisp)" % [good, tried])
+	ok(
+		tried > 0 and good == tried,
+		(
+			"below a rim over the void, pushing in: floated up and landed on top %d of %d (half as a downed wisp)"
+			% [good, tried]
+		)
+	)
 	ok(clip == 0, "never inside the cliff while floating (%d frames, worst %.2fm)" % [clip, worst])
 	var slow := 0.0
-	for dd in durs: slow = maxf(slow, float(dd))
-	ok(durs.size() > 0 and slow < 1.4, "a 2.5m float to the top takes at most %.2fs (want < 1.4s; [footage] ~0.8s from a full second deep)" % slow)
+	for dd in durs:
+		slow = maxf(slow, float(dd))
+	ok(
+		durs.size() > 0 and slow < 1.4,
+		"a 2.5m float to the top takes at most %.2fs (want < 1.4s; [footage] ~0.8s from a full second deep)" % slow
+	)
+
 
 # ---------------------------------------------------------------- walls to test against
 ## Ground tiles with a neighbour exactly `lv` terraces higher, and open level ground 3m back from the
@@ -140,61 +213,96 @@ func _walls(lv: int) -> Array:
 	var out: Array = []
 	for z in range(2, w.h - 2):
 		for x in range(2, w.w - 2):
-			if out.size() >= 16: return out
+			if out.size() >= 16:
+				return out
 			var i := w.idx(x, z)
-			if w.kind[i] != World.T_GROUND: continue
+			if w.kind[i] != World.T_GROUND:
+				continue
 			var l0 := int(w.level[i])
 			for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
 				var hi: Vector2i = Vector2i(x, z) + d
-				if not w.inb(hi.x, hi.y): continue
+				if not w.inb(hi.x, hi.y):
+					continue
 				var j := w.idx(hi.x, hi.y)
-				if w.kind[j] != World.T_GROUND or int(w.level[j]) != l0 + lv or w.sheer.has(j): continue
+				if w.kind[j] != World.T_GROUND or int(w.level[j]) != l0 + lv or w.sheer.has(j):
+					continue
 				# a straight wall: the tiles beside the high one are just as high, the low side is open and level
 				var side := Vector2i(int(d.y), int(d.x))
 				var good := true
 				for s in range(-2, 3):
 					var hs: Vector2i = hi + side * s
 					var ls: Vector2i = Vector2i(x, z) + side * s
-					if not w.inb(hs.x, hs.y) or w.kind[w.idx(hs.x, hs.y)] != World.T_GROUND or int(w.level[w.idx(hs.x, hs.y)]) != l0 + lv: good = false
+					if (
+						not w.inb(hs.x, hs.y)
+						or w.kind[w.idx(hs.x, hs.y)] != World.T_GROUND
+						or int(w.level[w.idx(hs.x, hs.y)]) != l0 + lv
+					):
+						good = false
 					for back in range(0, 4):
 						var lb: Vector2i = ls - d * back
-						if not w.inb(lb.x, lb.y) or w.kind[w.idx(lb.x, lb.y)] != World.T_GROUND or int(w.level[w.idx(lb.x, lb.y)]) != l0: good = false
-				if not good: continue
+						if (
+							not w.inb(lb.x, lb.y)
+							or w.kind[w.idx(lb.x, lb.y)] != World.T_GROUND
+							or int(w.level[w.idx(lb.x, lb.y)]) != l0
+						):
+							good = false
+				if not good:
+					continue
 				var n := Vector2(d)
 				# the wall face is the high tile's near edge
 				var face := Vector2(hi.x + 0.5, hi.y + 0.5) - n * 0.5
-				out.append({"at": face - n * (h.r + 0.02), "n": n, "low": l0 * World.LEVEL, "top": (l0 + lv) * World.LEVEL})
+				out.append(
+					{"at": face - n * (h.r + 0.02), "n": n, "low": l0 * World.LEVEL, "top": (l0 + lv) * World.LEVEL}
+				)
 				break
 	return out
+
 
 ## Raises a 5x3 block two terraces high beside flat open ground (the map has too few straight walls
 ## of its own): the same {at, n, low, top} as _walls.
 func _carve_walls(n_want: int) -> Array:
 	var out: Array = []
 	for k in 3000:
-		if out.size() >= n_want: break
+		if out.size() >= n_want:
+			break
 		var g := w.random_ground()
-		var x0 := int(floor(g.x)); var z0 := int(floor(g.z))
+		var x0 := int(floor(g.x))
+		var z0 := int(floor(g.z))
 		var lv := int(w.level[w.idx(x0, z0)])
 		var good := true
 		for dz in range(-4, 5):
 			for dx in range(-5, 6):
-				var tx := x0 + dx; var tz := z0 + dz
-				if not w.inb(tx, tz): good = false; break
+				var tx := x0 + dx
+				var tz := z0 + dz
+				if not w.inb(tx, tz):
+					good = false
+					break
 				var i := w.idx(tx, tz)
-				if w.kind[i] != World.T_GROUND or int(w.level[i]) != lv or w.stairs.has(i) or w.walls.has(i): good = false
-			if not good: break
-		if not good: continue
+				if w.kind[i] != World.T_GROUND or int(w.level[i]) != lv or w.stairs.has(i) or w.walls.has(i):
+					good = false
+			if not good:
+				break
+		if not good:
+			continue
 		for dz in range(-2, 3):
 			for dx in range(1, 4):
 				w.level[w.idx(x0 + dx, z0 + dz)] = lv + 2
 		var face := Vector2(x0 + 1.0, z0 + 0.5)
-		out.append({"at": face - Vector2(1, 0) * (h.r + 0.02), "n": Vector2(1, 0), "low": lv * World.LEVEL, "top": (lv + 2) * World.LEVEL})
+		out.append(
+			{
+				"at": face - Vector2(1, 0) * (h.r + 0.02),
+				"n": Vector2(1, 0),
+				"low": lv * World.LEVEL,
+				"top": (lv + 2) * World.LEVEL
+			}
+		)
 	return out
+
 
 # ---------------------------------------------------------------- 2. jump at a high wall and climb it
 func _jump_climbs(walls: Array) -> void:
-	var tried := 0; var good := 0
+	var tried := 0
+	var good := 0
 	for wl in walls:
 		var n: Vector2 = wl["n"]
 		var at: Vector2 = (wl["at"] as Vector2) - n * 1.2
@@ -206,13 +314,22 @@ func _jump_climbs(walls: Array) -> void:
 			h.inp["move"] = n
 			h.inp["jump"] = i == 8
 			m.step(DT)
-			if h.mantling(): floated = true
-			if floated and h.grounded and absf(h.pos.y - float(wl["top"])) < 0.1: good += 1; break
-	ok(tried > 0 and good == tried, "jumping at a wall two terraces high (1.6m) while pushing into it: on top %d of %d" % [good, tried])
+			if h.mantling():
+				floated = true
+			if floated and h.grounded and absf(h.pos.y - float(wl["top"])) < 0.1:
+				good += 1
+				break
+	ok(
+		tried > 0 and good == tried,
+		"jumping at a wall two terraces high (1.6m) while pushing into it: on top %d of %d" % [good, tried]
+	)
+
 
 # ---------------------------------------------------------------- 3. never grabbed when you don't push in
 func _no_grab(walls: Array) -> void:
-	var cases := 0; var grabbed := 0; var pulled := 0.0
+	var cases := 0
+	var grabbed := 0
+	var pulled := 0.0
 	for wl in walls:
 		var n: Vector2 = wl["n"]
 		var along := Vector2(-n.y, n.x)
@@ -221,31 +338,45 @@ func _no_grab(walls: Array) -> void:
 		for mode in ["walk", "jump", "still", "glance"]:
 			cases += 1
 			var at: Vector2 = wl["at"] - along * 1.5
-			if mode == "still": at = wl["at"]
+			if mode == "still":
+				at = wl["at"]
 			_reset(Vector3(at.x, wl["low"], at.y), Vector3.ZERO, true)
 			m.step(DT)
 			var keys := Vector2.ZERO
-			if mode == "walk" or mode == "jump": keys = along
-			if mode == "glance": keys = along.rotated(-deg_to_rad(25.0) * signf(along.cross(n)))
+			if mode == "walk" or mode == "jump":
+				keys = along
+			if mode == "glance":
+				keys = along.rotated(-deg_to_rad(25.0) * signf(along.cross(n)))
 			var got := false
-			for i in 30:      # (0.5s: stays alongside the wall, short of its ends)
+			for i in 30:  # (0.5s: stays alongside the wall, short of its ends)
 				h.inp["move"] = keys
 				h.inp["jump"] = mode != "walk" and i == 3
 				var b := Vector2(h.pos.x, h.pos.z)
 				m.step(DT)
 				var a := Vector2(h.pos.x, h.pos.z)
-				if h.mantling(): got = true
+				if h.mantling():
+					got = true
 				# moved toward the wall more than the keys asked
 				pulled = maxf(pulled, (a - b).dot(n) - maxf(0.0, keys.dot(n)) * h.base_speed * 1.3 * DT)
 			if got:
 				grabbed += 1
 				print("MCHECK   floated: %s along the wall at %s (keys %s)" % [mode, str(at), str(keys)])
-	ok(grabbed == 0, "walking or jumping along a wall, glancing it, or jumping beside it with no keys: no float in %d cases (%d floated)" % [cases, grabbed])
+	ok(
+		grabbed == 0,
+		(
+			"walking or jumping along a wall, glancing it, or jumping beside it with no keys: no float in %d cases (%d floated)"
+			% [cases, grabbed]
+		)
+	)
 	ok(pulled <= 0.004, "never moved toward the wall more than the keys ask (worst %.4fm in a step)" % pulled)
+
 
 # ---------------------------------------------------------------- 4. your keys steer mid-float
 func _steering(walls: Array) -> void:
-	var cases := 0; var steered := 0; var let_go := 0; var worst_side := 1e9
+	var cases := 0
+	var steered := 0
+	var let_go := 0
+	var worst_side := 1e9
 	for wl in walls:
 		var n: Vector2 = wl["n"]
 		var along := Vector2(-n.y, n.x)
@@ -255,17 +386,22 @@ func _steering(walls: Array) -> void:
 			_reset(Vector3(at.x, wl["low"], at.y), Vector3.ZERO, true)
 			m.step(DT)
 			var start := Vector2.INF
-			var went := false; var left_at := -1
+			var went := false
+			var left_at := -1
 			for i in 90:
 				var keys := n
 				if start != Vector2.INF and i - int(res.get("i0_" + mode, 0)) >= 3:
-					if mode == "along": keys = (n + along * 2.0).normalized()      # mostly along, still a bit in
-					if mode == "away": keys = -n
+					if mode == "along":
+						keys = (n + along * 2.0).normalized()  # mostly along, still a bit in
+					if mode == "away":
+						keys = -n
 				h.inp["move"] = keys
 				h.inp["jump"] = i == 2
 				m.step(DT)
 				if start == Vector2.INF and h.mantling():
-					start = Vector2(h.pos.x, h.pos.z); res["i0_" + mode] = i; went = true
+					start = Vector2(h.pos.x, h.pos.z)
+					res["i0_" + mode] = i
+					went = true
 				if mode == "away" and went and left_at < 0 and not h.mantling():
 					left_at = i - int(res["i0_" + mode])
 				if start != Vector2.INF and i - int(res["i0_" + mode]) >= 24:
@@ -275,17 +411,33 @@ func _steering(walls: Array) -> void:
 				continue
 			res[mode] = Vector2(h.pos.x, h.pos.z)
 			res["start_" + mode] = start
-			if mode == "away": res["left"] = left_at
+			if mode == "away":
+				res["left"] = left_at
 		if res.get("in") == null or res.get("along") == null or res.get("away") == null:
 			continue
 		cases += 1
-		var side: float = ((res["along"] as Vector2) - (res["start_along"] as Vector2)).dot(along) - ((res["in"] as Vector2) - (res["start_in"] as Vector2)).dot(along)
+		var side: float = (
+			((res["along"] as Vector2) - (res["start_along"] as Vector2)).dot(along)
+			- ((res["in"] as Vector2) - (res["start_in"] as Vector2)).dot(along)
+		)
 		worst_side = minf(worst_side, side)
-		if side > 0.25: steered += 1
+		if side > 0.25:
+			steered += 1
 		var back: float = ((res["away"] as Vector2) - (res["start_away"] as Vector2)).dot(-n)
-		if back > 0.15: let_go += 1
-	ok(cases > 0 and steered == cases, "steering along the face mid-float moves you along it: %d of %d (least %.2fm further along in 0.15s)" % [steered, cases, worst_side if cases > 0 else 0.0])
-	ok(cases > 0 and let_go == cases, "steering away mid-rise flings you off the face (nothing holds you to it): %d of %d" % [let_go, cases])
+		if back > 0.15:
+			let_go += 1
+	ok(
+		cases > 0 and steered == cases,
+		(
+			"steering along the face mid-float moves you along it: %d of %d (least %.2fm further along in 0.15s)"
+			% [steered, cases, worst_side if cases > 0 else 0.0]
+		)
+	)
+	ok(
+		cases > 0 and let_go == cases,
+		"steering away mid-rise flings you off the face (nothing holds you to it): %d of %d" % [let_go, cases]
+	)
+
 
 # ---------------------------------------------------------------- 6. the fling
 ## Jump at a 1.6m wall, rise, and: no jump / a jump as soon as the rise starts / a jump in the window.
@@ -295,49 +447,87 @@ func _fling(walls: Array) -> void:
 		return
 	var res := {}
 	for mode in ["none", "early", "timed"]:
-		var hs := 0.0; var ds := 0.0; var nn := 0
+		var hs := 0.0
+		var ds := 0.0
+		var nn := 0
 		for wl in walls.slice(0, 6):
 			var n: Vector2 = wl["n"]
 			# in the air beside the face, 1.35m below its top (the whole rise to play with), pushing in
 			var at: Vector2 = (wl["at"] as Vector2) - n * 0.05
 			var top: float = wl["top"]
 			_reset(Vector3(at.x, top - 1.35, at.y), Vector3.ZERO, false)
-			var rising := 0; var peak := -1e9; var x_top := Vector2.INF; var jumped := false
+			var rising := 0
+			var peak := -1e9
+			var x_top := Vector2.INF
+			var jumped := false
 			for i in 120:
 				h.inp["move"] = n
 				var jump := false
-				if h.mantling(): rising += 1
+				if h.mantling():
+					rising += 1
 				if not jumped and h.mantling():
-					if mode == "early" and rising == 2: jump = true; jumped = true
-					if mode == "timed" and bool(h.lfloat.get("win", false)): jump = true; jumped = true
+					if mode == "early" and rising == 2:
+						jump = true
+						jumped = true
+					if mode == "timed" and bool(h.lfloat.get("win", false)):
+						jump = true
+						jumped = true
 				h.inp["jump"] = jump
 				m.step(DT)
 				if rising > 0 and not h.mantling():
 					peak = maxf(peak, h.pos.y)
-					if x_top == Vector2.INF: x_top = Vector2(h.pos.x, h.pos.z)
+					if x_top == Vector2.INF:
+						x_top = Vector2(h.pos.x, h.pos.z)
 				if rising > 0 and h.grounded and not h.mantling():
 					break
-			if x_top == Vector2.INF: continue
+			if x_top == Vector2.INF:
+				continue
 			nn += 1
 			hs += peak - top
 			ds += (Vector2(h.pos.x, h.pos.z) - x_top).dot(n)
 		res[mode] = [hs / maxf(1.0, nn), ds / maxf(1.0, nn), nn]
-	print("MCHECK fling: none +%.2fm %.2fm on, early +%.2fm %.2fm, timed +%.2fm %.2fm (over %d walls)" % [res["none"][0], res["none"][1], res["early"][0], res["early"][1], res["timed"][0], res["timed"][1], res["timed"][2]])
-	ok(res["timed"][0] > res["none"][0] + 0.3 and res["timed"][0] > res["early"][0] and res["timed"][1] > res["none"][1], "a jump timed in the window near the top flings you higher and further than an early one or none")
+	print(
+		(
+			"MCHECK fling: none +%.2fm %.2fm on, early +%.2fm %.2fm, timed +%.2fm %.2fm (over %d walls)"
+			% [
+				res["none"][0],
+				res["none"][1],
+				res["early"][0],
+				res["early"][1],
+				res["timed"][0],
+				res["timed"][1],
+				res["timed"][2]
+			]
+		)
+	)
+	ok(
+		(
+			res["timed"][0] > res["none"][0] + 0.3
+			and res["timed"][0] > res["early"][0]
+			and res["timed"][1] > res["none"][1]
+		),
+		"a jump timed in the window near the top flings you higher and further than an early one or none"
+	)
+
 
 # ---------------------------------------------------------------- 5. sheer cliffs
 func _sheer() -> void:
 	if w.sheer.is_empty():
 		return
-	var s_tried := 0; var s_caught := 0
+	var s_tried := 0
+	var s_caught := 0
 	var sheer_keys: Array = w.sheer.keys()
 	for trial in 12:
 		var i: int = sheer_keys[(trial * 37) % sheer_keys.size()]
-		var gx := float(i % w.w) + 0.5; var gz := float(int(i / float(w.w))) + 0.5
+		var gx := float(i % w.w) + 0.5
+		var gz := float(int(i / float(w.w))) + 0.5
 		var dir := Vector2.ZERO
 		for d in [Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1)]:
-			if w.is_void(gx + d.x, gz + d.y): dir = d; break
-		if dir == Vector2.ZERO: continue
+			if w.is_void(gx + d.x, gz + d.y):
+				dir = d
+				break
+		if dir == Vector2.ZERO:
+			continue
 		s_tried += 1
 		var top := w.ground_at(gx, gz)
 		_reset(Vector3(gx + dir.x * (0.5 + h.r + 0.6), top - 3.0, gz + dir.y * (0.5 + h.r + 0.6)), Vector3(0, -2.0, 0))
@@ -345,22 +535,30 @@ func _sheer() -> void:
 		var t := 0.0
 		while t < 1.5:
 			h.inp["move"] = -dir
-			m.step(DT); t += DT
+			m.step(DT)
+			t += DT
 			if h.mantling() and h.lfloat.has("tile"):
 				# caught: fine only if it was a lip tile away from the sheer one, not it or its neighbour
 				var lt: Vector2i = h.lfloat["tile"]
 				if w.sheer.has(w.idx(lt.x, lt.y)) or Vector2(lt.x + 0.5 - gx, lt.y + 0.5 - gz).length() < 1.2:
 					s_caught += 1
-					print("MCHECK   sheer caught: sheer tile (%.1f, %.1f) dir %s, rose from tile %s, hunter at %s, %.2fm under the top" % [gx, gz, str(dir), str(lt), str(h.pos.snapped(Vector3(0.01, 0.01, 0.01))), top - h.pos.y])
+					print(
+						(
+							"MCHECK   sheer caught: sheer tile (%.1f, %.1f) dir %s, rose from tile %s, hunter at %s, %.2fm under the top"
+							% [gx, gz, str(dir), str(lt), str(h.pos.snapped(Vector3(0.01, 0.01, 0.01))), top - h.pos.y]
+						)
+					)
 				break
 	ok(s_caught == 0, "sheer cliffs: caught %d of %d falling past (should be 0)" % [s_caught, s_tried])
 
+
 # ---------------------------------------------------------------- 7. a dash into a rim
-const DASH_HEROES := ["archer", "juggernaut", "gunslinger", "bulwark"]     # Lace, Kael, Vex, Albert
-const DASH_RIMS := [0.6, 1.0, 1.5, 2.0]     # m the lip sits above your feet when you press Shift
-const RIM_TOP_LV := 3                       # terraces: the rim's top above the floor (air rows hang below it)
-const RIM_TRIAL_S := 2.5                    # s: a dash that hasn't topped out by then never will
-const STALL_MAX := 0.1                      # s stood still at a face you do climb: "always responsive"
+const DASH_HEROES := ["archer", "juggernaut", "gunslinger", "bulwark"]  # Lace, Kael, Vex, Albert
+const DASH_RIMS := [0.6, 1.0, 1.5, 2.0]  # m the lip sits above your feet when you press Shift
+const RIM_TOP_LV := 3  # terraces: the rim's top above the floor (air rows hang below it)
+const RIM_TRIAL_S := 2.5  # s: a dash that hasn't topped out by then never will
+const STALL_MAX := 0.1  # s stood still at a face you do climb: "always responsive"
+
 
 ## Each starter dashes straight at a rim, keys held into it, from the ground and from the air. One row per
 ## case: what happened (mantle, step up, stop, slide, bounce), the time from the press to standing on top,
@@ -376,7 +574,7 @@ func _dash_rims() -> void:
 	for id in DASH_HEROES:
 		h.reclass(Arch.weight(id), id)
 		_rim_level(face, floor_lv)
-		_dash_trial(id, true, float(wl["low"]), face, n, 0.0)     # (a class swap's first Shift is lost: throw one)
+		_dash_trial(id, true, float(wl["low"]), face, n, 0.0)  # (a class swap's first Shift is lost: throw one)
 		var reach := HunterFeel.mantle_reach + (HunterFeel.tall_climb_extra if HunterMove.climbs_tall(h) else 0.0)
 		for rim in DASH_RIMS:
 			var lv := maxi(1, int(round(rim / World.LEVEL)))
@@ -386,11 +584,13 @@ func _dash_rims() -> void:
 			var top := float(wl["low"]) + RIM_TOP_LV * World.LEVEL
 			_dash_rim_row(id, "air", rim, top - rim, floor_lv, RIM_TOP_LV, face, n, float(rim) <= reach)
 
+
 ## The carved block's 5x5 tiles behind `face` (all the flat ground _carve_walls checked) set to terrace `lv`.
 func _rim_level(face: Vector2, lv: int) -> void:
 	for dz in range(-2, 3):
 		for dx in range(0, 5):
 			w.level[w.idx(int(round(face.x)) + dx, int(floor(face.y)) + dz)] = lv
+
 
 ## One trial: Shift toward the face from feet height `y0` (the floor when `where` is "ground"), keys held.
 ## Returns the step-by-step distance travelled along `n`, and what it met.
@@ -398,11 +598,11 @@ func _dash_trial(id: String, grounded: bool, y0: float, face: Vector2, n: Vector
 	var at: Vector2 = face - n * (h.r + 1.2)
 	_reset(Vector3(at.x, y0, at.y), Vector3.ZERO, grounded)
 	for i in 20:
-		m.step(DT)     # the kit settles (its last move's timers)
+		m.step(DT)  # the kit settles (its last move's timers)
 		if not grounded:
-			h.pos.y = y0     # held in the air
+			h.pos.y = y0  # held in the air
 			h.vel = Vector3.ZERO
-	h.dashes = 0.0 if id == "archer" else 2.0     # Lace out of charges: the flick, her travel dash
+	h.dashes = 0.0 if id == "archer" else 2.0  # Lace out of charges: the flick, her travel dash
 	h.ex_cd = 0.0
 	h.air_dashed = false
 	h.inp["move"] = n
@@ -418,22 +618,34 @@ func _dash_trial(id: String, grounded: bool, y0: float, face: Vector2, n: Vector
 		var hv := Vector2(h.vel.x, h.vel.z)
 		var here := Vector2(h.pos.x, h.pos.z)
 		(out["path"] as Array).append((here - x0).dot(n))
-		var gap := (face - here).dot(n)     # m from your centre to the face
+		var gap := (face - here).dot(n)  # m from your centre to the face
 		var at_face := gap <= h.r + 0.3
 		touched = touched or at_face
 		out["mantled"] = out["mantled"] or h.mantling()
-		if touched: out["back"] = maxf(out["back"], gap - h.r)
+		if touched:
+			out["back"] = maxf(out["back"], gap - h.r)
 		out["slid"] = maxf(out["slid"], absf((here - x0).dot(Vector2(-n.y, n.x))))
-		if at_face and hv.length() < 0.3 and h.pos.y < top - 0.1: out["stall"] += DT
-		if top > y0 + 0.1 and gap < -h.r and h.pos.y >= top - 0.05:     # over the rim, at its height or above
+		if at_face and hv.length() < 0.3 and h.pos.y < top - 0.1:
+			out["stall"] += DT
+		if top > y0 + 0.1 and gap < -h.r and h.pos.y >= top - 0.05:  # over the rim, at its height or above
 			out["t_top"] = t
 			out["v_top"] = hv.length()
 			break
 	return out
 
+
 ## One row: the dash at the rim, then the same press with the rim gone (the time the rim cost you).
-func _dash_rim_row(id: String, where: String, rim: float, y0: float, floor_lv: int, top_lv: int, face: Vector2,
-		n: Vector2, want_top: bool) -> void:
+func _dash_rim_row(
+	id: String,
+	where: String,
+	rim: float,
+	y0: float,
+	floor_lv: int,
+	top_lv: int,
+	face: Vector2,
+	n: Vector2,
+	want_top: bool
+) -> void:
 	var grounded := where == "ground"
 	var feet := float(floor_lv) * World.LEVEL if grounded else y0
 	var top := float(floor_lv + top_lv) * World.LEVEL
@@ -446,23 +658,33 @@ func _dash_rim_row(id: String, where: String, rim: float, y0: float, floor_lv: i
 		var d_top: float = (r["path"] as Array)[-1]
 		for i in flat.size():
 			if flat[i] >= d_top:
-				lost = maxf(0.0, r["t_top"] - (i + 1) * DT)     # (a step up's push can beat flat ground)
+				lost = maxf(0.0, r["t_top"] - (i + 1) * DT)  # (a step up's push can beat flat ground)
 				break
 	var what := "stop"
-	if r["t_top"] >= 0.0: what = "mantle" if r["mantled"] else "step"
-	elif r["back"] > 0.3: what = "bounce"
-	elif r["slid"] > 0.5: what = "slide"
+	if r["t_top"] >= 0.0:
+		what = "mantle" if r["mantled"] else "step"
+	elif r["back"] > 0.3:
+		what = "bounce"
+	elif r["slid"] > 0.5:
+		what = "slide"
 	var good: bool = (r["t_top"] >= 0.0) == want_top and (not want_top or r["stall"] <= STALL_MAX)
 	var top_s: String = ("%.2fs" % r["t_top"]) if r["t_top"] >= 0.0 else "never"
 	var lost_s: String = ("%.2fs" % lost) if lost >= 0.0 else "-"
 	var note := "" if want_top else "  (beyond reach: no climb wanted)"
-	ok(good, "dash-rim %-10s %-6s %.1fm (built %.1f): %-6s top %5s lost %5s stall %.2fs off-top %4.1fm/s%s"
-			% [id, where, rim, top - feet, what, top_s, lost_s, r["stall"], float(r.get("v_top", 0.0)), note])
+	ok(
+		good,
+		(
+			"dash-rim %-10s %-6s %.1fm (built %.1f): %-6s top %5s lost %5s stall %.2fs off-top %4.1fm/s%s"
+			% [id, where, rim, top - feet, what, top_s, lost_s, r["stall"], float(r.get("v_top", 0.0)), note]
+		)
+	)
+
 
 # ---------------------------------------------------------------- 8. a glider meets a rim
-const GLIDE_HEROES := ["archer", "juggernaut", "gunslinger", "bulwark"]     # Lace, Kael, Vex, Albert
-const GLIDE_RISES := [0.5, 1.0, 1.8]     # m: the rim this far above the glider as it comes in reach of the face
-const GLIDE_RIM_S := 1.5                 # s: one approach
+const GLIDE_HEROES := ["archer", "juggernaut", "gunslinger", "bulwark"]  # Lace, Kael, Vex, Albert
+const GLIDE_RISES := [0.5, 1.0, 1.8]  # m: the rim this far above the glider as it comes in reach of the face
+const GLIDE_RIM_S := 1.5  # s: one approach
+
 
 ## A glider flying head-on into a terrace face, keys pushing in, at full glide speed and overheated (half
 ## speed). Each row: "mantle" (over the top), "bump" (thrown back), "slide" (along the face) or "fall" (sank
@@ -476,7 +698,7 @@ func _glide_rims() -> void:
 		ok(false, "glide rims: no flat ground to carve a terrace on")
 		return
 	for arch in GLIDE_HEROES:
-		h.reclass(Arch.weight(arch), arch)     # (set_arch alone keeps the class and falls back to its default hero)
+		h.reclass(Arch.weight(arch), arch)  # (set_arch alone keeps the class and falls back to its default hero)
 		ok(h.arch == arch, "glide rims: the hunter is %s (is %s)" % [arch, h.arch])
 		var reach := HunterFeel.mantle_reach + (HunterFeel.tall_climb_extra if HunterMove.climbs_tall(h) else 0.0)
 		for rise in GLIDE_RISES:
@@ -486,10 +708,18 @@ func _glide_rims() -> void:
 				row = _glide_rim(cut, rise, slow, float(row["at"]) - rise)
 				var what := "glide-rim %-10s rim %.1fm %s: %s" % [arch, rise, "slow" if slow else "full", row]
 				if rise < reach:
-					ok(row["out"] == "mantle" and row["into"] == "Mantling" and not row["open"]
-						and float(row["vout"]) >= HunterMove.mantle_launch_min, what)
+					ok(
+						(
+							row["out"] == "mantle"
+							and row["into"] == "Mantling"
+							and not row["open"]
+							and float(row["vout"]) >= HunterMove.mantle_launch_min
+						),
+						what
+					)
 				else:
 					ok(row["out"] == "fall" and row["into"] == "" and row["open"], what)
+
 
 ## Raises a 3x5 block 6 terraces (4.8 m) over flat ground; returns its face (x), centre (z) and top.
 func _carve_tall() -> Dictionary:
@@ -506,6 +736,7 @@ func _carve_tall() -> Dictionary:
 		return {"x": x0 + 1.0, "z": z0 + 0.5, "top": (lv + 6) * World.LEVEL}
 	return {}
 
+
 ## Plain ground at level `lv` all round (x0, z0): no stairs, walls or sheer cliffs to fly into.
 func _flat_around(x0: int, z0: int, lv: int) -> bool:
 	for dz in range(-4, 5):
@@ -519,6 +750,7 @@ func _flat_around(x0: int, z0: int, lv: int) -> bool:
 				return false
 	return true
 
+
 ## One approach, the glider opened by a press as a player's keys do (glide_press_only), `sink` metres higher.
 func _glide_rim(cut: Dictionary, rise: float, slow: bool, sink: float) -> Dictionary:
 	var face := float(cut["x"])
@@ -529,7 +761,7 @@ func _glide_rim(cut: Dictionary, rise: float, slow: bool, sink: float) -> Dictio
 	_reset(Vector3(face - h.r - lead, top - rise + sink, float(cut["z"])), Vector3(gs, 0.0, 0.0))
 	h.last_gy = top - 4.8
 	h.glide_fuel = 0.0 if slow else 1.0
-	m.step(DT)     # (glide let go a step, so the press below is a fresh one)
+	m.step(DT)  # (glide let go a step, so the press below is a fresh one)
 	h.inp["glide"] = true
 	h.inp["glide_btn"] = true
 	h.inp["glide_press_only"] = true
@@ -555,7 +787,8 @@ func _glide_rim(cut: Dictionary, rise: float, slow: bool, sink: float) -> Dictio
 		if landed >= 0.0:
 			# over the top: on until it lands (or a moment), to see the held key never reopens the glider
 			row["open"] = row["open"] or h.gliding
-			if h.grounded or t - landed > 0.4: break
+			if h.grounded or t - landed > 0.4:
+				break
 			continue
 		if h.pos.x > face + 0.3 and h.pos.y >= top - 0.15 and h.lfloat.is_empty():
 			row["out"] = "mantle"
@@ -569,7 +802,7 @@ func _glide_rim(cut: Dictionary, rise: float, slow: bool, sink: float) -> Dictio
 		elif h.grounded or (touch >= 0.0 and h.pos.y < y_touch - 1.0):
 			row["out"] = "fall"
 			break
-		elif touch >= 0.0 and face - h.pos.x > h.r + 0.7:     # (thrown back off the face)
+		elif touch >= 0.0 and face - h.pos.x > h.r + 0.7:  # (thrown back off the face)
 			break
 	if landed < 0.0:
 		row["open"] = h.gliding
