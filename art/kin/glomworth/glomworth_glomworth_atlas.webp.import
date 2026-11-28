@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dgs5c7uyu2csq"
-path="res://.godot/imported/glomworth_glomworth_atlas.webp-33d8fae5ddb8f141b268c0dbd4279460.ctex"
+path.s3tc="res://.godot/imported/glomworth_glomworth_atlas.webp-33d8fae5ddb8f141b268c0dbd4279460.s3tc.ctex"
+path.etc2="res://.godot/imported/glomworth_glomworth_atlas.webp-33d8fae5ddb8f141b268c0dbd4279460.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "a0466bfd4ef88c9132079cdc481b4ff4"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/glomworth/glomworth_glomworth_atlas.webp"
-dest_files=["res://.godot/imported/glomworth_glomworth_atlas.webp-33d8fae5ddb8f141b268c0dbd4279460.ctex"]
+dest_files=["res://.godot/imported/glomworth_glomworth_atlas.webp-33d8fae5ddb8f141b268c0dbd4279460.s3tc.ctex", "res://.godot/imported/glomworth_glomworth_atlas.webp-33d8fae5ddb8f141b268c0dbd4279460.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
