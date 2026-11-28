@@ -29,7 +29,18 @@ func run(root: Node, mode: String = "check") -> void:
 	Save.no_write = true
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 4 if mode == "perf" else 1, "tier": 0, "length": 1e9, "seed": 4242, "arch": "thief"})
+	await m.start(
+		{
+			"teams": 2,
+			"squad": 4 if mode == "perf" else 1,
+			"tier": 0,
+			"length": 1e9,
+			"seed": 4242,
+			"arch": "thief",
+			"cls": Arch.weight("thief"),
+			"weapon": Arch.signature("thief")
+		}
+	)
 	m.set_process(false)
 	pl = m.player
 	var fade = main.get("fade")
@@ -43,10 +54,11 @@ func run(root: Node, mode: String = "check") -> void:
 
 
 func _check() -> void:
-	print("ARCH ", pl.arch, " ", Save.d.get("arch"))
 	var moves: Dictionary = HeroVfx.data("thief")["moves"]
 	for mv: String in MOVES:
-		var rings: Array = (moves[mv]["fx"] as Array).filter(func(l): return l["p"] == "ring" and l.get("hollow", false))
+		var rings: Array = (moves[mv]["fx"] as Array).filter(
+			func(l): return l["p"] == "ring" and l.get("hollow", false)
+		)
 		ok(rings.size() == 1, "%s has one hollow ring" % mv)
 	var r_data: float = Arch.def("thief")["e"]["ring_r"]
 	ok(moves["knife_stick"]["fx"].any(func(l): return str(l.get("size")) == "r"), "the stick ring takes the move's r")
@@ -55,6 +67,8 @@ func _check() -> void:
 	for mv: String in MOVES:
 		hv.play(pl, mv, pl.pos + Vector3(3, 0, 0), Vector2.RIGHT, {"foe": true, "r": r_data})
 		ok(int(hv.plays.get(mv, 0)) == 1, "%s plays" % mv)
+		for e in hv.live:
+			print("DBG ", mv, " ", (e["node"] as Node3D).scale, " ", e["dur"], " ", (e["node"] as Node3D).global_position, " vis ", (e["node"] as Node3D).visible)
 
 
 func _perf() -> void:
@@ -104,7 +118,9 @@ func _go(frames: int, foes: Array) -> void:
 	for i in frames:
 		if int(m.time / DT) % SPAM_EVERY == 0:
 			var f: Hunter = foes[int(m.time / DT / SPAM_EVERY) % foes.size()]
-			hv.play(pl, MOVES[int(m.time / DT / SPAM_EVERY) % MOVES.size()], f.pos, Vector2.RIGHT, {"foe": true, "r": 2.7})
+			hv.play(
+				pl, MOVES[int(m.time / DT / SPAM_EVERY) % MOVES.size()], f.pos, Vector2.RIGHT, {"foe": true, "r": 2.7}
+			)
 		m.step(DT)
 		m.cam.snap(pl.pos)
 		for h in m.hunters:
