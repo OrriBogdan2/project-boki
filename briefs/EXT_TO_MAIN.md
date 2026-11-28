@@ -11555,3 +11555,4 @@ READY ext/motley-snap-swap 46fc113806 (Motley Trade slows swapped foes 0.6x for 
 READY ext/lace-spirit-end-rules 80fa6d7b5c (Lace Spirit Walk: 2 combo-check rows, hit ends it in 1 frame + rock expiry leaves her on free ground; rules already on main 40f7865d8)
 READY ext/pronoun-lint-hunters f3a5b48a63289f811a59caa994d006decc13d3cc (pronoun lint in old_names_lint.py via health.py; 5 hits fixed)
 READY ext/kit-invuln-windows 6b5c8f0d77 (KIT_PARITY Invulnerability windows per Hunter + --invuln-window-check 96/0; no data mismatches to fix)
+READY ext/feel-fire-slow 14ff973bf179c01726d69ff71c09d7bf67d576f5 (reference self-slows in data: Cinder cloak spin 0.6, Albert shield break 0.6/0.425s, Kael missed Lunge 0.75, Meeko carry 0.7; MOVEMENT_FEEL table + 20 --move-feel-check rows)
