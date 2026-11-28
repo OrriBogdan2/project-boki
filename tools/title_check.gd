@@ -1,8 +1,11 @@
 extends RefCounted
 ## --title-check: the title screen (painted splashes, logo and a torn-strip menu: briefs/UI_STYLE.md).
-## It builds; its menu has the items it should (Continue or New Game, Training Grounds, Demo Match and
-## Play with Your Boki with a save, Test Zone for the owner, Play with Friends when online play is there, Save Files, Settings, Quit off the web) and
-## nothing called "The story so far"; the first button is the big one and holds focus, the rest are
+## It builds; its menu has the items it should (a short list: Continue or New Game, Training
+## Grounds, Play with Friends when online play or the matchmaker is there, Settings, Quit off the web) and
+## nothing called "The story so far"; Save Files and Help are on the title's Settings page; Play with Your
+## Boki is not on the title; the owner's Test Zone and Demo Match (with a save) sit on a corner chip, never
+## in the list; up/down wraps through the list; the logo keeps its full height for the owner too;
+## the first button is the big one and holds focus, the rest are
 ## strips, and pointing at one focuses it; no subtext, tagline or currency under the logo; the logo,
 ## the painted backdrop and the build version are there; and the screen stays inside a frame budget
 ## (headless only: with a window the number holds a software renderer's draw time). Never touches the real save
@@ -46,12 +49,42 @@ func _pass() -> void:
 	var labels: Array = ts.menu_labels()
 	var has: bool = not Save.d["roster"].is_empty()
 	var want: Array = ["Continue" if has else "New Game", "Training Grounds"]
-	if Overlay.admin_allowed(): want.append("Test Zone")
-	if has: want.append_array(["Demo Match", "Play with Your Boki"])
-	if Net.available(): want.append("Play with Friends")
-	want.append_array(["Save Files", "Settings", "Help"])
+	if Net.available() or Net.mm.addr != "": want.append("Play with Friends")
+	want.append("Settings")
 	if not OS.has_feature("web"): want.append("Quit")
 	ok(labels == want, "menu items %s" % [labels])
+	ok(labels.size() <= 5, "the big button and at most 4 rows (%d)" % labels.size())
+	var gone := ["Play with Your Boki", "Party", "Save Files", "Help", "Test Zone", "Demo Match"]
+	ok(not labels.any(func(l): return gone.has(l)), "none of the moved rows is in the list %s" % [gone])
+	var admin_want: Array = []
+	if Overlay.admin_allowed():
+		admin_want.append("Test Zone")
+		if has: admin_want.append("Demo Match")
+	ok(ts.admin_labels() == admin_want, "the owner's corner chip holds %s (%s)" % [admin_want, ts.admin_labels()])
+	var chip: Control = ts.find_child("AdminChip", true, false)
+	ok((chip != null) == Overlay.admin_allowed(), "the corner chip shows only with AdminGate")
+	if chip:
+		chip.pressed.emit()
+		await main.get_tree().process_frame
+		var pop: Control = ts.admin_pop
+		var news: Control = ts.find_child("News", true, false)
+		var nr := news.get_global_rect()
+		var clear: bool = not pop.get_global_rect().intersects(nr) and not chip.get_global_rect().intersects(nr)
+		var pr: Rect2 = pop.get_global_rect()
+		var menu_clear: bool = not _menu_buttons(ts).any(func(b): return b.get_global_rect().intersects(pr))
+		ok(pop.visible and clear and menu_clear, "the chip opens its popover, clear of the News chip and the menu")
+		chip.pressed.emit()
+		await main.get_tree().process_frame
+		var back_home: bool = ts.get_viewport().gui_get_focus_owner() == ts.main_btn
+		ok(not pop.visible and back_home, "pressing the chip again closes it and focus goes back to the big button")
+	var tall: bool = ts.get_viewport().get_visible_rect().size.y >= ts.SHORT_WIN
+	var logo_h: float = ts.logo.custom_minimum_size.y
+	ok(not tall or logo_h >= ts.LOGO_H, "the logo keeps its full height for everyone, the owner too (%d)" % logo_h)
+	var rows := _menu_buttons(ts)
+	var first: Button = rows[0]
+	var end: Button = rows[rows.size() - 1]
+	var wraps: bool = end.get_node(end.focus_next) == first and first.get_node(first.focus_previous) == end
+	ok(wraps and first.get_node(first.focus_neighbor_bottom) == rows[1], "up/down walks the list in order and wraps")
 	ok(labels.all(_title_case), "every menu item is in Title Case (playtest 11-13: \"New game\")")
 	var texts := _texts(ts)
 	ok(not texts.any(func(s): return String(s).to_lower().contains("story so far")), "no \"The story so far\" anywhere on the title")
@@ -76,6 +109,14 @@ func _pass() -> void:
 	var focused: bool = ts.get_viewport().gui_get_focus_owner() == lit
 	var hover := lit.get_theme_stylebox("hover", "MenuItem")
 	ok(focused and lit.get_theme_stylebox("normal") == hover, "pointing at a strip focuses and lights it")
+	# Save Files and Help moved onto the Settings page opened from the title
+	Overlay.ctx = "title"
+	Overlay.open_settings()
+	await main.get_tree().process_frame
+	var page_texts := _texts(Overlay.host)
+	ok(page_texts.has("Save Files") and page_texts.has("Help"), "the title's Settings page leads to Save Files and Help")
+	Overlay.close()
+	await main.get_tree().process_frame
 	# the frame budget: wall time of a frame (headless, that is the CPU side: scene logic and animation)
 	var times: Array = []
 	var last := Time.get_ticks_usec()
