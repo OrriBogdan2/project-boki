@@ -207,7 +207,7 @@ archetypes/bulwark.json:body.head	0.3
 archetypes/bulwark.json:body.hit_h	1.78
 archetypes/bulwark.json:body.hit_r	0.404
 archetypes/bulwark.json:body.legs	0.46
-archetypes/bulwark.json:body.match_k	1.361
+archetypes/bulwark.json:body.match_k	1.198
 archetypes/bulwark.json:body.neck	0.0
 archetypes/bulwark.json:body.shoulder	1.35
 archetypes/bulwark.json:body.size	1.464
@@ -588,6 +588,7 @@ archetypes/gil.json:body.head	0.71
 archetypes/gil.json:body.hit_h	1.38
 archetypes/gil.json:body.hit_r	0.375
 archetypes/gil.json:body.legs	1.03
+archetypes/gil.json:body.match_k	1.242
 archetypes/gil.json:body.shoulder	1.14
 archetypes/gil.json:body.size	1.391
 archetypes/gil.json:body.top_h	1.92
