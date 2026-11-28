@@ -40,8 +40,11 @@ const FRESH_T := 20.0  # seconds after landing a hunter is left alone unless the
 
 
 ## The aim error's pity (reference tuning): it grows with the share of health the target has lost, by the
-## difficulty's PITY, so a badly hurt player is harder to finish off.
+## difficulty's PITY, so a badly hurt player is harder to finish off. Hunters only: a hurt monster or guard
+## gets the plain error (pity there slowed a lone bot's lair breach 204 -> 267 s, --lair-breach-check).
 static func pity_k(a: Dictionary, tgt: Ent) -> float:
+	if not tgt is Hunter:
+		return 1.0
 	var lost := 1.0 - clampf(tgt.hp / maxf(1.0, tgt.max_hp), 0.0, 1.0)
 	return 1.0 + float(PITY.get(String((a.get("diff", {}) as Dictionary).get("name", "")), 0.0)) * lost
 

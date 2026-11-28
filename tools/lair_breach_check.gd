@@ -9,7 +9,7 @@ extends RefCounted
 
 const SOLO_MIN := 45.0  # s: a lone bot must take at least this long (a perfect dial took 6.5 s)
 const SOLO_MAX := 240.0  # s: ... and still get in (it fights the guards each crack calls, too)
-const SQUAD_K := 0.75  # a squad of three takes at most this share of the lone bot's time
+const SQUAD_K := 0.6  # a squad of three takes at most this share of the lone bot's time
 
 var bad := 0
 var m: Match
