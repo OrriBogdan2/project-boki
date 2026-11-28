@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dbmkvmh45i3bh"
-path="res://.godot/imported/howlop_howlop_atlas.webp-c4a09bce7863da00d4acde068876fc48.ctex"
+path.s3tc="res://.godot/imported/howlop_howlop_atlas.webp-c4a09bce7863da00d4acde068876fc48.s3tc.ctex"
+path.etc2="res://.godot/imported/howlop_howlop_atlas.webp-c4a09bce7863da00d4acde068876fc48.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "765cbc246cac69401d69e749c09d6934"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/howlop/howlop_howlop_atlas.webp"
-dest_files=["res://.godot/imported/howlop_howlop_atlas.webp-c4a09bce7863da00d4acde068876fc48.ctex"]
+dest_files=["res://.godot/imported/howlop_howlop_atlas.webp-c4a09bce7863da00d4acde068876fc48.s3tc.ctex", "res://.godot/imported/howlop_howlop_atlas.webp-c4a09bce7863da00d4acde068876fc48.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

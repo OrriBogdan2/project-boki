@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cjt4h3o2lm1uo"
-path="res://.godot/imported/selenwhale_selenwhale_atlas.webp-b322ff2baf24a2d23f52ae82fc5d0a59.ctex"
+path.s3tc="res://.godot/imported/selenwhale_selenwhale_atlas.webp-b322ff2baf24a2d23f52ae82fc5d0a59.s3tc.ctex"
+path.etc2="res://.godot/imported/selenwhale_selenwhale_atlas.webp-b322ff2baf24a2d23f52ae82fc5d0a59.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "a662e3cdc1f48a80b798f2bb04685d75"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/selenwhale/selenwhale_selenwhale_atlas.webp"
-dest_files=["res://.godot/imported/selenwhale_selenwhale_atlas.webp-b322ff2baf24a2d23f52ae82fc5d0a59.ctex"]
+dest_files=["res://.godot/imported/selenwhale_selenwhale_atlas.webp-b322ff2baf24a2d23f52ae82fc5d0a59.s3tc.ctex", "res://.godot/imported/selenwhale_selenwhale_atlas.webp-b322ff2baf24a2d23f52ae82fc5d0a59.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
