@@ -262,3 +262,35 @@ GPU): stall L1 20 -> 8, L3 38 -> 18, nook 17 -> 7, incubator 171 -> 155, burrow 
 The hub meets its budget at both presets, so its ratchet entries are gone. What is left (in view, passes): the
 partner's rig 35, world scatter about 21, the Waystone 9, Incubator 17, burrow 11. The M5 (gl_compatibility) was
 not measured.
+
+## Prop and building textures, close garden camera (ext/garden-prop-textures, 2026-11-28)
+The garden buildings (house, stall, burrow, hub deco) are built from code with plain materials: no texture files, so
+nothing there can be blurry or over budget. The textures the close camera does show are the props, the Boki, the
+eggs, Hob and Pell, items and the look-locker dais. The 3D textures that were still lossless (the committed `.import`
+files carried `compress/mode=0` with `detect_3d`, which never fires headless) are now VRAM compressed with mips.
+`--texture-budget-check` failures: 414 -> 178 on this branch.
+
+| group | textures | px (longest) | VRAM before -> after (MB, RGBA8+mips vs ~1 B/px, computed) |
+|---|---|---|---|
+| art/props chest, gust_fan, jump_pad, updraft_vent | 4 | 1024 | 22 -> 3 |
+| art/kin (atlas, normal 2048; eye, face 256) | 202 | 2048 | 1832 -> 458 (all loaded; one Boki is ~46 -> ~11) |
+| art/eggs | 17 | 512 | 24 -> 6 |
+| art/npcs (Hob, Pell, their props) | 4 | 2048 | 48 -> 12 |
+| art/items | 8 | 1024 | 45 -> 11 |
+| art/look dais | 1 | 1024 | 6 -> 1 |
+
+None is over the 2048 px source cap. Not touched (not garden): 126 UI icons (the check wants them lossless: add
+`art/icons/` to its `UI_PREFIXES`), 12 mob and 40 warden Meshy textures (still lossless, hunters are art-sensitive).
+
+Blurry up close, ranked for an art round (no gens here; texel density is source px over the model's width, so a
+rough upper bound on an atlas): 1. `updraft_vent` 1024 px over 3.2 m, about 320 px/m, under the 512 px/m wall-sized
+target (scene only: updrafts sit over the void, never close to the garden camera); everything else is at or over
+512 px/m (jump_pad about 680, gust_fan about 790, chest about 880, eggs 512 px on under 0.5 m, Boki atlases 2048 px
+on about 1 m). The 256 px eye and face maps are tiny patches on the Boki's head, fine.
+
+GPU stills and VRAM (`--perf-bench --bench-garden --bench-zone=all --bench-boki=9`, Medium, jobq 20261128-020249-25941
+origin/main vs 20261128-020248-04400 this branch): the garden's texture memory did not move: hub 110 -> 110 MB, Bramblebank
+107 -> 108, Glasswater 108 -> 108, Cinderstep 108 -> 108, Hushwood 109 -> 109, Ridge 109 -> 109. The garden scenes load none
+of the converted atlases at this camera, so the saving above is for where those textures load (Boki in a match, eggs in the
+Bokidex, Hob and Pell), computed not measured. The 6 stills (frame differences are particles and animation timing) look the
+same before and after. The draw-budget FAILs (hub 223 of 200, Hushwood, Ridge) are the same on main.
