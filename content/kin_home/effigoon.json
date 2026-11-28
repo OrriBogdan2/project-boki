@@ -1,0 +1,14 @@
+{
+	"id": "effigoon",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/effigoon.json.",
+	"work": {
+		"haul": 1,
+		"stone": 3,
+		"timber": 2
+	},
+	"shiny": {
+		"belly": "#a3fce1",
+		"color": "#94e4cc",
+		"glow": "#6bc9ff"
+	}
+}
