@@ -188,6 +188,8 @@ func _hunter_row(art: String) -> Array:
 ## Jump is the hop clip only when Kin.render asks for it in the air (kact hop): without that a leap runs.
 ## Glide: a carried Boki spreads its legs (BokiHomeClips' glide, played when Kin.render sets kact glide); `_boki_air`
 ## checks the live rig plays it.
+## Stomp: n/a. Only a Hunter stomps (a downed Hunter's Wisp, WardenStance/HunterWisp). No Boki state, KinRules or
+## Kin.render path plays a stomp, so the cell is not a gap and the ratchet ignores it.
 func _boki_row(id: String) -> Array:
 	var clips := _glb_clips("res://art/kin/%s/%s.glb" % [id, id])
 	var flinch := func(file: String, call: String) -> String:
@@ -206,7 +208,7 @@ func _boki_row(id: String) -> Array:
 		_cell(clips.has("glide"), kin_src.contains('act = "glide"')),
 		flinch.call("res://scripts/match/kin.gd", "KinFlinch.dash("),
 		_cell(clips.has("ability")),
-		"missing"
+		"n/a"
 	]
 
 
