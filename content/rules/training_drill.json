@@ -17,6 +17,6 @@
 		["smash", "Break a crate or pot", "fire"],
 		["weapon", "Take a found weapon off the ground", "interact"],
 		["ledge", "Dash off an edge and float back up", ""],
-		["dodge", "Dodge the Strafer's red shot 3 times: dash through it or out of it", "dash"]
+		["dodge", "Hit the Strafer, then dodge its red shot 3 times: dash through it or out of it", "dash"]
 	]
 }

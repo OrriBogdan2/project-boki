@@ -24,6 +24,7 @@ const CHECKS := {
 	"--ult-rank-check": ["res://tools/ult_rank_check.gd", "ult_rank_check", null],
 	# the Arena, training's practice tools, the kit card
 	"--arena-check": ["res://tools/arena_check.gd", "arena_check", null],
+	"--dummy-line-check": ["res://tools/dummy_line_check.gd", "dummy_line_check", null],  # idle dummies: no lane
 	# every archetype kit, controls, locks, infusion, feel
 	"--archetype-check": ["res://tools/archetype_check.gd", "archetype_check", null],
 	"--kit-combo-check": ["res://tools/archetype_check.gd", "archetype_check", null],  # (same tool: the combo section)
