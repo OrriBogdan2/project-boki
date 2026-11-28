@@ -9,13 +9,16 @@ extends "res://tools/hunter_scale_shots.gd"
 ## "panel" stands the hero close in a fixed camera, so every hero shares one px/m. Needs a renderer (jobq --needs gpu).
 ## --silhouette adds, at the base size (match_k 1), the hero's silhouette as the player sees it: drawn alone in one flat
 ## colour on its own render layer, at SIL_YAWS facings, with the character lean on and off, the held weapon in and
-## out, and "crown" (weapon out and nothing above the head's crown: no back poles). One HSIL row per hero and case:
-## area in m2 and screen height in m (the view plane at the hero, so both read against the reference's idle
-## silhouettes at its 66 deg camera), the mean over the facings and the facing-camera one.
+## out, "crown" (weapon out and nothing above the head's crown: no back poles) and "bare" (weapon out, the skinned
+## hammer, shield and lure shrunk away, the back poles and all above the crown cut off: the body alone). One HSIL row
+## per hero and case: area in m2 and screen height in m (the view plane at the hero, so both read against the
+## reference's idle silhouettes at its 66 deg camera), the mean over the facings and the facing-camera one.
 ## The facing-camera mask is saved as <dir>/<hero>_sil_<lean|flat>_<case>.png. Floating companions are not the hero.
 ## --lineup=arch,arch,...: those heroes side by side on open floor, each LINEUP_W x its drawn height wide, at its own
 ## match_k, idling at the match camera's widest zoom: one frame, <dir>/lineup.png (no HUD), and a LINEUP row per
-## hero (feet x,y px).
+## hero (feet x,y px). --lineup-zoom=<wheel factor> (default the widest) closes the camera in for more px per m, and
+## --cutouts also saves each hero alone with its real materials, <dir>/<hero>_cut_look.png, and its flat mask
+## <dir>/<hero>_cut_mask.png (the whole frame each; a LINEUP row gives its px per m of the view plane at the hero).
 
 const PASSES := [  # [label, draw at the archetype's own match_k (else 1), wheel zoom]
 	["main", false, 1.4572],  # main today: every hunter at the base size, the wheel starting at its widest
@@ -31,8 +34,18 @@ const SIL_TURN := 30  # match steps the hero gets to turn to a facing
 const SIL_ZOOM := 0.45  # the panel's close view: more px for the mask, same metres
 const SIL_DIFF := 0.2  # summed RGB step from the empty frame that counts as the hero
 const SIL_WEAPONS := ["Gun", "Shield"]  # the held weapon (out for the "body" cases)
+# glb bones that are props, not the body (bone name prefixes)
+const SKIN_PROPS := ["x_weapon", "x_shield", "x_fish"]
+# "bare" (Albert's glb: crown 1.2 m, back poles rooted 0.3 m behind the body's axis from 0.85 m up), in metres
+const BARE_CROWN := 1.2
+const BARE_DOME := 0.1  # the helmet dome stands this far above the crown
+const BARE_BACK := 0.3
+const BARE_ROOT := 0.85
 const LINEUP_W := 0.75  # a hero's slot in the --lineup row, x its drawn height (top_h x match_k): props out to the side
 const SIL_PAD := 0.6  # share of the body's screen box added all round the box the mask reads (weapons reach out)
+
+var cutouts := false  # --cutouts: the lineup also saves each hero alone (real materials) and its flat mask
+var lineup_zoom: float = PASSES[0][2]  # --lineup-zoom: the lineup camera's wheel factor
 
 
 func run(main_node: Node) -> void:
@@ -43,6 +56,10 @@ func run(main_node: Node) -> void:
 	for a in OS.get_cmdline_user_args():
 		if String(a) == "--silhouette":
 			sil = true
+		if String(a) == "--cutouts":
+			cutouts = true
+		if String(a).begins_with("--lineup-zoom="):
+			lineup_zoom = float(String(a).substr(14))
 		if String(a).begins_with("--lineup="):
 			row = String(a).substr(9).split(",")
 		if String(a).begins_with("--hero="):
@@ -146,8 +163,11 @@ func _silhouette(hero: String, lean: String) -> void:
 	var to_cam := m.cam.global_position - p.position
 	to_cam.y = 0.0
 	to_cam = to_cam.normalized()
-	# area, height; facing 0's area, height. "crown": weapon out, nothing above the head's crown (back poles)
-	var sums := {"all": [0.0, 0.0, 0.0, 0.0], "body": [0.0, 0.0, 0.0, 0.0], "crown": [0.0, 0.0, 0.0, 0.0]}
+	# area, height; facing 0's area, height. "crown": weapon out, nothing above the head's crown (back poles);
+	# "bare": weapon out, the skinned props (hammer, shield, lure) shrunk away, the back poles (body mesh) cut off
+	var sums := {}
+	for case in ["all", "body", "crown", "bare"]:
+		sums[case] = [0.0, 0.0, 0.0, 0.0]
 	for i in SIL_YAWS:
 		var face := to_cam.rotated(Vector3.UP, TAU * i / SIL_YAWS)
 		for _s in SIL_TURN:
@@ -162,8 +182,15 @@ func _silhouette(hero: String, lean: String) -> void:
 			hi = maxf(hi, wp.y)
 		var c := HunterCrown.crown(p.model, pts, p.vis_k, hi)
 		var cap := m.cam.unproject_position(p.position + m.cam.char_lean() * Vector3(0, c - p.position.y, 0)).y
-		for case in ["all", "body", "crown"]:
-			var got: Array = await _mask(p.model, flat, case != "all", cap if case == "crown" else -1e9)
+		for case in ["all", "body", "crown", "bare"]:
+			var how: Material = flat
+			if case == "bare":
+				_shrink_props(p.model, true)
+				var sc := (c - p.position.y) / BARE_CROWN
+				how = _clip_flat(c + BARE_DOME * sc, p.position, -face, sc)
+			var got: Array = await _mask(p.model, how, case != "all", cap if case == "crown" else -1e9)
+			if case == "bare":
+				_shrink_props(p.model, false)
 			var area: float = got[0] / (ppm * ppm)
 			var tall: float = got[1] / ppm
 			sums[case][0] += area / SIL_YAWS
@@ -182,10 +209,64 @@ func _silhouette(hero: String, lean: String) -> void:
 		)
 
 
+## The flat mask colour without the back poles (they are part of the body mesh, not a node or bone): nothing above world
+## height `clip_y`, nor further back than BARE_BACK crowns' worth of metres (scale `sc`) behind `feet` along `back` once
+## above BARE_ROOT of it.
+func _clip_flat(clip_y: float, feet: Vector3, back: Vector3, sc: float) -> ShaderMaterial:
+	var sh := Shader.new()
+	sh.code = """shader_type spatial;
+render_mode unshaded, fog_disabled;
+uniform float clip_y;
+uniform vec3 feet;
+uniform vec3 back;
+uniform float sc;
+uniform vec2 lim;
+varying vec3 wp;
+void vertex() {
+	wp = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+}
+void fragment() {
+	vec3 d = wp - feet;
+	if (wp.y > clip_y || (d.y > lim.y * sc && dot(d, back) > lim.x * sc)) {
+		discard;
+	}
+	ALBEDO = vec3(1.0, 0.0, 1.0);
+}
+"""
+	var mat := ShaderMaterial.new()
+	mat.shader = sh
+	mat.set_shader_parameter("clip_y", clip_y)
+	mat.set_shader_parameter("feet", feet)
+	mat.set_shader_parameter("back", back)
+	mat.set_shader_parameter("sc", sc)
+	mat.set_shader_parameter("lim", Vector2(BARE_BACK, BARE_ROOT))
+	return mat
+
+
+## The skinned props of a glb hero (SKIN_PROPS bones: hammer, shield) cannot be hidden by node: the
+## bones are shrunk to a point (a persistent global pose override) or given back (`on` false).
+func _shrink_props(model: Node3D, on: bool) -> void:
+	for sk in model.find_children("*", "Skeleton3D", true, false):
+		var skel := sk as Skeleton3D
+		for bi in skel.get_bone_count():
+			var nm := skel.get_bone_name(bi)
+			var prop := false
+			for key in SKIN_PROPS:
+				prop = prop or nm.begins_with(key)
+			if not prop:
+				continue
+			if on:
+				var t := skel.get_bone_global_pose(bi)
+				t.basis = t.basis.scaled(Vector3.ONE * 0.0001)
+				skel.set_bone_global_pose_override(bi, t, 1.0, true)
+			else:
+				skel.set_bone_global_pose_override(bi, Transform3D.IDENTITY, 0.0, false)
+
+
 ## [hero px, mask rows tall (both in viewport px, as unproject_position), mask image] for `model` drawn flat alone
 ## (`no_weapon`: the held weapon hidden; nothing above viewport row `cap_y` counts). Only the screen box round the
-## body's points (plus SIL_PAD) is read.
-func _mask(model: Node3D, flat: Material, no_weapon: bool, cap_y := -1e9) -> Array:
+## body's points (plus SIL_PAD) is read. `look`: the frame drawn with the model's own materials is the 4th element.
+func _mask(model: Node3D, flat: Material, no_weapon: bool, cap_y := -1e9, look := false) -> Array:
 	var keep := []
 	var stack: Array = [model]
 	while not stack.is_empty():
@@ -206,6 +287,11 @@ func _mask(model: Node3D, flat: Material, no_weapon: bool, cap_y := -1e9) -> Arr
 	m.hud.visible = false
 	m.cam.cull_mask = SIL_LAYER
 	var lit := await _grab()
+	var worn: Image = null
+	if look:
+		for row in keep:
+			(row[0] as GeometryInstance3D).material_override = row[2]
+		worn = await _grab()
 	m.cam.cull_mask = 0
 	var empty := await _grab()
 	m.cam.cull_mask = was
@@ -238,7 +324,7 @@ func _mask(model: Node3D, flat: Material, no_weapon: bool, cap_y := -1e9) -> Arr
 				top = mini(top, y)
 				low = maxi(low, y)
 				mask.set_pixel(x, y, Color.WHITE)
-	return [px / (sc * sc), maxi(low - top + 1, 0) / sc, mask]
+	return [px / (sc * sc), maxi(low - top + 1, 0) / sc, mask, worn]
 
 
 ## The --lineup frame (see the header): every hero is a bot that only stands (no brain); the player stands hidden.
@@ -264,9 +350,9 @@ func _lineup(row: Array) -> void:
 		h.ctrl = "local"
 		line.append(h)
 	m.player.teleport(at)  # the player stands hidden mid-row: its drop reticle and glider stay out of the frame
-	m.cam.user_zoom = PASSES[0][2]
-	m.cam.zoom = PASSES[0][2]
-	m.cam.zoom_to = PASSES[0][2]
+	m.cam.user_zoom = lineup_zoom
+	m.cam.zoom = lineup_zoom
+	m.cam.zoom_to = lineup_zoom
 	m.cam.snap(at)
 	for i in WARM_UP:
 		_purge()
@@ -287,14 +373,25 @@ func _lineup(row: Array) -> void:
 	m.hud.visible = false
 	await _save("lineup.png")
 	var k := float(SIZE.y) / main.get_viewport().get_visible_rect().size.y
+	var flat := StandardMaterial3D.new()
+	flat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	flat.albedo_color = Color(1, 0, 1)
+	flat.disable_fog = true
 	for h in line:
 		var feet := m.cam.unproject_position(h.position) * k
+		var mid: Vector3 = h.position + Vector3(0, 1.0, 0)
+		var right := m.cam.global_transform.basis.x
+		var ppm := (m.cam.unproject_position(mid + right) - m.cam.unproject_position(mid)).length() * k
 		print(
 			(
-				"LINEUP %s: k %.3f, feet at %.0f,%.0f px, %.1f m off its spot"
-				% [h.arch, Arch.match_k(h.arch), feet.x, feet.y, h.pos.distance_to(spots[line.find(h)])]
+				"LINEUP %s: k %.3f, feet at %.0f,%.0f px, %.1f m off its spot, %.1f px/m"
+				% [h.arch, Arch.match_k(h.arch), feet.x, feet.y, h.pos.distance_to(spots[line.find(h)]), ppm]
 			)
 		)
+		if cutouts:
+			var got: Array = await _mask(h.model, flat, false, -1e9, true)
+			(got[2] as Image).save_png(dir.path_join("%s_cut_mask.png" % h.arch))
+			(got[3] as Image).save_png(dir.path_join("%s_cut_look.png" % h.arch))
 
 
 ## The spot nearest `p` with open floor `span` m long in x and no void next to it (roomy first, then just clear),
