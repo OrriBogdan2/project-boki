@@ -108,6 +108,7 @@ archetypes/ashwick.json:dash.rank3_dmg	5.0
 archetypes/ashwick.json:dash.rank3_shield	0.116
 archetypes/ashwick.json:dash.rank3_shield_t	2.0
 archetypes/ashwick.json:dash.recoil	3.5
+archetypes/ashwick.json:dash.stun	1.0
 archetypes/ashwick.json:dash.time	0.33
 archetypes/ashwick.json:e.blt_t	3.0
 archetypes/ashwick.json:e.char	16.0

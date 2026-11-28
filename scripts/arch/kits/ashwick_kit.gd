@@ -679,7 +679,8 @@ func _bash_impact(f: Ent) -> void:
 	var ram_dmg := float(dd["dmg"]) + (float(dd["rank3_dmg"]) if rank3 else 0.0)
 	f.hurt(
 		ram_dmg * power("dash"), h,
-		{"src": "flame", "ab": "dodge", "tags": ["flame"], "melee": true, "kb": dir * float(dd["kb"])}
+		{"src": "flame", "ab": "dodge", "tags": ["flame"], "melee": true, "kb": dir * float(dd["kb"]),
+			"stun": float(dd["stun"]), "dr": true}
 	)
 	add_char(f, float(dd["char"]))
 	if rank3:
