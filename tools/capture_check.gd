@@ -20,17 +20,34 @@ var bad := 0
 var m: Match
 var main: Node
 
+
 func ok(cond: bool, what: String) -> void:
 	print("CAPTURE %s %s" % ["PASS" if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func _fresh() -> Match:
-	if m: m.queue_free()
+	if m:
+		m.queue_free()
 	m = Match.new()
 	main.add_child(m)
-	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4243, "no_drop": true, "weapon": "rifle", "cls": "medium", "demo_kin": "cindle"})
+	m.start(
+		{
+			"teams": 2,
+			"squad": 1,
+			"tier": 0,
+			"length": 1e9,
+			"seed": 4243,
+			"no_drop": true,
+			"weapon": "rifle",
+			"cls": "medium",
+			"demo_kin": "cindle"
+		}
+	)
 	m.set_process(false)
-	for mb in m.mobs: mb.queue_free()
+	for mb in m.mobs:
+		mb.queue_free()
 	m.mobs.clear()
 	# the map's own wild Boki too (three start in this cleared patch on seed 4243): a bot picks fights with
 	# wild Boki near it and the bot rows would never get to their scan. The check spawns the Boki it needs.
@@ -39,17 +56,22 @@ func _fresh() -> Match:
 		k.queue_free()
 	var P: Hunter = m.player
 	var W = m.world
-	var hx := int(floor(P.pos.x)); var hz := int(floor(P.pos.z))
+	var hx := int(floor(P.pos.x))
+	var hz := int(floor(P.pos.z))
 	var hi: int = W.idx(hx, hz)
 	var lv: int = int(W.level[hi]) if W.kind[hi] != World.T_VOID else 0
 	for dz in range(-20, 21):
 		for dx in range(-30, 41):
-			if not W.inb(hx + dx, hz + dz): continue
+			if not W.inb(hx + dx, hz + dz):
+				continue
 			var i: int = W.idx(hx + dx, hz + dz)
 			W.kind[i] = World.T_GROUND
 			W.level[i] = lv
 			W.island[i] = W.island[hi]
-			W.stairs.erase(i); W.walls.erase(i); W.props.erase(i); W.bush.erase(i)
+			W.stairs.erase(i)
+			W.walls.erase(i)
+			W.props.erase(i)
+			W.bush.erase(i)
 	P.teleport(Vector3(hx + 0.5, lv * World.LEVEL, hz + 0.5))
 	P.vel = Vector3.ZERO
 	P.kin.teleport(P.pos + Vector3(1.0, 0, 0.7))
@@ -62,17 +84,22 @@ func _fresh() -> Match:
 		m.step(Match.DT)
 	return m
 
+
 func _tidy() -> void:
 	for mb in m.mobs.duplicate():
 		m.mobs.erase(mb)
 		mb.queue_free()
 
+
 func run_for(secs: float, each := Callable()) -> void:
 	var t := 0.0
 	while t < secs:
-		if each.is_valid(): each.call()
+		if each.is_valid():
+			each.call()
 		_tidy()
-		m.step(Match.DT); t += Match.DT
+		m.step(Match.DT)
+		t += Match.DT
+
 
 ## A wild Boki 2 m from the player, knocked out unless `dazed` is false.
 func wild(species := "puddlet", dazed := true) -> Kin:
@@ -84,6 +111,7 @@ func wild(species := "puddlet", dazed := true) -> Kin:
 	run_for(0.2)
 	return k
 
+
 func alive_kin_of(h: Hunter) -> int:
 	var n := 0
 	for k in m.kins:
@@ -91,18 +119,21 @@ func alive_kin_of(h: Hunter) -> int:
 			n += 1
 	return n
 
+
 ## Hold the interact key until the scan has committed, then let go.
 func begin(P: Hunter) -> void:
 	P.inp["interact"] = true
 	run_for(float(Capture.rules()["hold_s"]) + 0.15)
 	P.inp["interact"] = false
 
+
 func run(mn: Node) -> void:
 	main = mn
 	Save.no_write = true
 	var only := ""
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--capture-only="): only = a.substr(15)
+		if a.begins_with("--capture-only="):
+			only = a.substr(15)
 	var parts := ["gating", "flow", "interrupts", "mid_scan", "box", "loot", "own_kin"]
 	parts.append_array(["book", "branch_forms", "net", "slots", "hints", "bots", "bots_full", "sound"])
 	for part in parts:
@@ -111,12 +142,16 @@ func run(mn: Node) -> void:
 	print("CAPTURE DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 # ------------------------------------------------------------------ 1. gating
 func _gating() -> void:
 	_fresh()
 	var P := m.player
 	var k := wild("puddlet", false)
-	ok(k.state != "dazed" and Capture.block_reason(P, k) != "", "a wild Boki on its feet cannot be scanned (%s)" % Capture.block_reason(P, k))
+	ok(
+		k.state != "dazed" and Capture.block_reason(P, k) != "",
+		"a wild Boki on its feet cannot be scanned (%s)" % Capture.block_reason(P, k)
+	)
 	P.inp["interact"] = true
 	run_for(1.0)
 	P.inp["interact"] = false
@@ -125,7 +160,11 @@ func _gating() -> void:
 	k._daze()
 	run_for(0.1)
 	ok(k.state == "dazed" and Capture.block_reason(P, k) == "", "once it is knocked out the scan is allowed")
-	ok(CaptureHud.prompt(P, k).contains("scan"), "...and the prompt says to hold the key to scan it (\"%s\")" % CaptureHud.prompt(P, k))
+	ok(
+		CaptureHud.prompt(P, k).contains("scan"),
+		'...and the prompt says to hold the key to scan it ("%s")' % CaptureHud.prompt(P, k)
+	)
+
 
 # ------------------------------------------------------------------ 2. flow, 3. one active Boki
 func _flow() -> void:
@@ -141,32 +180,54 @@ func _flow() -> void:
 	var committed_at := -1.0
 	P.inp["interact"] = true
 	while t < hold_s + 1.0 and committed_at < 0.0:
-		_tidy(); m.step(Match.DT); t += Match.DT
-		if Capture.active(P): committed_at = t
-	ok(committed_at >= hold_s - 0.1 and committed_at <= hold_s + 0.25, "holding the key for %.1fs commits the scan (at %.2fs)" % [hold_s, committed_at])
-	P.inp["interact"] = false         # let go: it runs on its own
+		_tidy()
+		m.step(Match.DT)
+		t += Match.DT
+		if Capture.active(P):
+			committed_at = t
+	ok(
+		committed_at >= hold_s - 0.1 and committed_at <= hold_s + 0.25,
+		"holding the key for %.1fs commits the scan (at %.2fs)" % [hold_s, committed_at]
+	)
+	P.inp["interact"] = false  # let go: it runs on its own
 	P.inp["move"] = Vector2(1, 0)
 	P.inp["fire"] = true
 	var p0 := P.pos
 	run_for(1.0)
-	ok(Capture.active(P) and Vector2(P.pos.x - p0.x, P.pos.z - p0.z).length() < 0.2, "...rooted while it runs (moved %.2fm)" % Vector2(P.pos.x - p0.x, P.pos.z - p0.z).length())
+	ok(
+		Capture.active(P) and Vector2(P.pos.x - p0.x, P.pos.z - p0.z).length() < 0.2,
+		"...rooted while it runs (moved %.2fm)" % Vector2(P.pos.x - p0.x, P.pos.z - p0.z).length()
+	)
 	ok(not P.atk.can_fire(), "...and you cannot shoot")
 	ok(k.state == "dazed" and k.scan_by == P, "...the Boki is held in its daze by the scan")
 	ok(P.caught.is_empty(), "...nothing is in the box yet")
 	run_for(scan_s - 1.0 + 0.5)
 	P.inp["move"] = Vector2.ZERO
 	P.inp["fire"] = false
-	ok(not Capture.active(P) and P.caught.size() == 1, "after %.0fs it completes by itself (box %d)" % [scan_s, P.caught.size()])
+	ok(
+		not Capture.active(P) and P.caught.size() == 1,
+		"after %.0fs it completes by itself (box %d)" % [scan_s, P.caught.size()]
+	)
 	ok(k.dead and not k.visible, "the wild Boki is gone from the world")
-	ok(own0 == 1 and P.kin == kin0 and P.kin2 == kin2_0 and alive_kin_of(P) == own0, "you still have exactly one active Boki (the same one: %d out)" % alive_kin_of(P))
+	ok(
+		own0 == 1 and P.kin == kin0 and P.kin2 == kin2_0 and alive_kin_of(P) == own0,
+		"you still have exactly one active Boki (the same one: %d out)" % alive_kin_of(P)
+	)
 	var spawned := 0
 	for o in m.kins:
 		if not o.dead and o.owner_h == null and o.rec.get("uid", "") == k.rec.get("uid", "x") and o.state != "bench":
 			spawned += 1
 	ok(spawned == 0, "the captured Boki is not alive anywhere in the world; it is only a capsule in the box")
-	ok(P.caught.size() == 1 and String(P.caught[0]["species"]) == k.species, "...the capsule is in your box (%s)" % CaptureHud.box_text(P))
+	ok(
+		P.caught.size() == 1 and String(P.caught[0]["species"]) == k.species,
+		"...the capsule is in your box (%s)" % CaptureHud.box_text(P)
+	)
 	run_for(3.0)
-	ok(P.kin == kin0 and alive_kin_of(P) == own0 and P.caught.size() == 1, "...and it never follows you or joins your Boki (still %d out)" % alive_kin_of(P))
+	ok(
+		P.kin == kin0 and alive_kin_of(P) == own0 and P.caught.size() == 1,
+		"...and it never follows you or joins your Boki (still %d out)" % alive_kin_of(P)
+	)
+
 
 # ------------------------------------------------------------------ 4. interruptions
 func _interrupts() -> void:
@@ -182,30 +243,43 @@ func _interrupts() -> void:
 		if why == "jump":
 			var text := CaptureHud.prompt(P, k)
 			var names_key := text.contains("(%s to cancel)" % Settings.key_cap("jump"))
-			ok(names_key, "the scan prompt names the jump key (\"%s\")" % text)
+			ok(names_key, 'the scan prompt names the jump key ("%s")' % text)
 		match why:
-			"stun": P.stun_t = 0.4
-			"root": P.root_t = 0.4
-			"dash": P.inp["dash"] = true
-			"jump": P.inp["jump"] = true
-			"damage": P.hurt(8.0, m.hunters[1])
-			"knock": P.impulse(Vector2(Capture.HARD_KNOCK + 4.0, 0) * P.mass())
-			"nudge": P.impulse(Vector2(Capture.HARD_KNOCK - 3.0, 0) * P.mass())
+			"stun":
+				P.stun_t = 0.4
+			"root":
+				P.root_t = 0.4
+			"dash":
+				P.inp["dash"] = true
+			"jump":
+				P.inp["jump"] = true
+			"damage":
+				P.hurt(8.0, m.hunters[1])
+			"knock":
+				P.impulse(Vector2(Capture.HARD_KNOCK + 4.0, 0) * P.mass())
+			"nudge":
+				P.impulse(Vector2(Capture.HARD_KNOCK - 3.0, 0) * P.mass())
 		run_for(0.1)
 		P.inp["dash"] = false
 		if why == "jump":
 			ok(P.grounded and P.jump_at < 0.0, "...and that press does not also hop")
 			var bot: Hunter = m.hunters[1]
 			bot.ctrl = "bot"
-			bot.inp["jump"] = true          # (a bot hops when it thinks it is stuck, and a scan roots it)
+			bot.inp["jump"] = true  # (a bot hops when it thinks it is stuck, and a scan roots it)
 			ok(Capture.hunter_stop(bot) == "", "...but a bot's hop never cancels its own scan")
 		P.inp["jump"] = false
 		if why == "damage" or why == "nudge":
-			ok(Capture.active(P) and k.scan_by == P, "%s does not interrupt the scan" % ("a shove under 8 m/s" if why == "nudge" else "plain damage"))
+			ok(
+				Capture.active(P) and k.scan_by == P,
+				"%s does not interrupt the scan" % ("a shove under 8 m/s" if why == "nudge" else "plain damage")
+			)
 			run_for(float(Capture.rules()["scan_s"]))
 			ok(P.caught.size() == 1, "...and it completes")
 		else:
-			ok(not Capture.active(P) and k.scan_by == null and k.state == "dazed" and P.caught.is_empty(), "%s cancels the scan; the Boki is still there and dazed" % why)
+			ok(
+				not Capture.active(P) and k.scan_by == null and k.state == "dazed" and P.caught.is_empty(),
+				"%s cancels the scan; the Boki is still there and dazed" % why
+			)
 	# the daze timer waits while the scan runs and then resumes
 	_fresh()
 	var P2 := m.player
@@ -214,28 +288,41 @@ func _interrupts() -> void:
 	begin(P2)
 	var d1 := k2.dazed_t
 	run_for(2.0)
-	ok(Capture.active(P2) and absf(k2.dazed_t - d1) < 0.05 and d1 <= d0, "the daze timer waits during the scan (%.2f to %.2f)" % [d1, k2.dazed_t])
+	ok(
+		Capture.active(P2) and absf(k2.dazed_t - d1) < 0.05 and d1 <= d0,
+		"the daze timer waits during the scan (%.2f to %.2f)" % [d1, k2.dazed_t]
+	)
 	P2.stun_t = 0.3
 	run_for(0.5)
 	var d2 := k2.dazed_t
 	run_for(1.0)
-	ok(not Capture.active(P2) and k2.dazed_t < d2 - 0.5, "...and runs again once it is interrupted (%.2f to %.2f)" % [d2, k2.dazed_t])
+	ok(
+		not Capture.active(P2) and k2.dazed_t < d2 - 0.5,
+		"...and runs again once it is interrupted (%.2f to %.2f)" % [d2, k2.dazed_t]
+	)
 	if k2.state == "dazed":
 		P2.stun_t = 0.0
 		begin(P2)
 		run_for(float(Capture.rules()["scan_s"]) + 0.3)
 		ok(P2.caught.size() == 1, "after an interruption you can try again and finish")
 
+
 # ------------------------------------------------------------------ 5. the box
 func _box() -> void:
 	_fresh()
 	var P := m.player
 	var cap := Capture.box_cap()
-	ok(cap == int(Content.rules("capture")["carry_out"]) and cap == 1, "the carry-out slot holds %d (from content/rules/capture.json)" % cap)
+	ok(
+		cap == int(Content.rules("capture")["carry_out"]) and cap == 1,
+		"the carry-out slot holds %d (from content/rules/capture.json)" % cap
+	)
 	for i in cap:
 		P.caught.append(Save.new_kin("puddlet", "Filler%d" % i, 10 + i))
 	var k := wild()
-	ok(Capture.block_reason(P, k).contains("Carry-out full"), "a full carry-out slot blocks the scan (\"%s\")" % Capture.block_reason(P, k))
+	ok(
+		Capture.block_reason(P, k).contains("Carry-out full"),
+		'a full carry-out slot blocks the scan ("%s")' % Capture.block_reason(P, k)
+	)
 	ok(CaptureHud.box_text(P) == "Carry-out 1/1", "the HUD shows the slot (%s)" % CaptureHud.box_text(P))
 	begin(P)
 	ok(not Capture.active(P) and Capture.state(P).is_empty(), "...holding the key does not start one")
@@ -244,6 +331,7 @@ func _box() -> void:
 	ok(Capture.active(P), "with a free place the scan starts")
 	run_for(float(Capture.rules()["scan_s"]) + 0.3)
 	ok(P.caught.size() == cap, "...and fills the box again (%s)" % CaptureHud.box_text(P))
+
 
 # ------------------------------------------------------------------ 6. your own Boki
 func _own_kin() -> void:
@@ -257,10 +345,14 @@ func _own_kin() -> void:
 	P.inp["aim"] = k.pos + Vector3(0, 0.5, 0)
 	kin.teleport(k.pos + Vector3(-1.0, 0, 0.0))
 	run_for(5.0)
-	ok(k.state == "dazed" and not k.dead and k.hp >= hp0 - 0.01, "your Boki ordered to chase leaves a knocked-out wild Boki alone (hp %.1f, %s)" % [k.hp, k.state])
+	ok(
+		k.state == "dazed" and not k.dead and k.hp >= hp0 - 0.01,
+		"your Boki ordered to chase leaves a knocked-out wild Boki alone (hp %.1f, %s)" % [k.hp, k.state]
+	)
 	kin.throw_to(k.pos)
 	run_for(3.0)
 	ok(k.state == "dazed" and not k.dead, "...even when sent at it with a Sic")
+
 
 # ------------------------------------------------------------------ 7. the Field Book
 func _book() -> void:
@@ -269,26 +361,44 @@ func _book() -> void:
 	Save.d["dex"] = {}
 	var k := wild("pebbit", false)
 	run_for(1.5)
-	P.inp["aim"] = k.pos            # in view: it wanders for 1.5 s and may end up behind her
+	P.inp["aim"] = k.pos  # in view: it wanders for 1.5 s and may end up behind her
 	run_for(0.1)
 	FieldBook.scan_sights(m)
 	var e: Dictionary = Care.dex_entry("pebbit")
-	ok(bool(e.get("seen", false)) and not bool(e.get("caught", false)), "a wild Boki in view is logged as seen, not caught")
+	ok(
+		bool(e.get("seen", false)) and not bool(e.get("caught", false)),
+		"a wild Boki in view is logged as seen, not caught"
+	)
 	ok(FieldBook.seen_count() >= 1, "...the book counts it (%d seen)" % FieldBook.seen_count())
 	ok((e.get("places", []) as Array).size() >= 1, "...with where it was seen (%s)" % str(e.get("places", [])))
 	for i in 6:
 		Care.dex_mark("pebbit", "place", "Place%d" % i)
-	ok((Care.dex_entry("pebbit")["places"] as Array).size() <= int(Content.rules("capture")["sight_places_kept"]), "the list of places is capped")
+	ok(
+		(Care.dex_entry("pebbit")["places"] as Array).size() <= int(Content.rules("capture")["sight_places_kept"]),
+		"the list of places is capped"
+	)
 	Save.d["dex"] = {}
 	k.teleport(P.pos + Vector3(60.0, 0, 0))
 	FieldBook.scan_sights(m)
 	ok(not bool(Care.dex_entry("pebbit").get("seen", false)), "a Boki far out of sight is not logged")
-	var old := {"v": 3, "roster": [{"species": "puddlet", "name": "Old"}, {"species": "cindle", "name": "Older"}], "dex": {"puddlet": {"seen": false, "caught": true, "forms": [], "shimmer": false, "mutations": []}}}
+	var old := {
+		"v": 3,
+		"roster": [{"species": "puddlet", "name": "Old"}, {"species": "cindle", "name": "Older"}],
+		"dex": {"puddlet": {"seen": false, "caught": true, "forms": [], "shimmer": false, "mutations": []}}
+	}
 	var upgraded: bool = Save.migrate(old)
 	ok(upgraded and int(old["v"]) == Save.VERSION and Save.VERSION >= 4, "a v3 save upgrades to v%d" % Save.VERSION)
 	var dx: Dictionary = old["dex"]
-	ok(bool(dx.get("puddlet", {}).get("seen", false)) and bool(dx.get("cindle", {}).get("seen", false)) and bool(dx.get("cindle", {}).get("caught", false)), "...Boki you own count as seen, and are in the book even with no entry")
+	ok(
+		(
+			bool(dx.get("puddlet", {}).get("seen", false))
+			and bool(dx.get("cindle", {}).get("seen", false))
+			and bool(dx.get("cindle", {}).get("caught", false))
+		),
+		"...Boki you own count as seen, and are in the book even with no entry"
+	)
 	ok(dx["puddlet"].has("places") and dx["cindle"].has("places"), "...and every entry gets its places list")
+
 
 # ------------------------------------------------------------------ 7b. branching finals share an entry
 func _branch_forms() -> void:
@@ -299,12 +409,22 @@ func _branch_forms() -> void:
 	ok(pairs.size() == 4 and _uniq(ids) == 8, "the table lists 4 pairs of 8 different species")
 	var before: int = FieldBook.entries().size()
 	var kin_base: int = Data.KIN.size()
-	for id in ids:
-		Data.KIN[id] = Data.KIN["pebbit"].duplicate(true)
 	var a: String = pairs[0][0]
 	var b: String = pairs[0][1]
-	ok(Data.KIN.size() == kin_base + 8, "8 forms are added to the game")
-	ok(FieldBook.entries().size() == before + 4, "...but they make 4 entries: 4 fewer than one per species")
+	var a_forms: Array = FieldBook.forms_of(a)
+	# (only the forms not in the game yet are stand-ins: a pair with a real species already has its entry)
+	var added: Array = ids.filter(func(id): return not Data.KIN.has(id))
+	var new_pairs := pairs.filter(func(pr): return added.has(pr[0]) and added.has(pr[1])).size()
+	for id in added:
+		Data.KIN[id] = Data.KIN["pebbit"].duplicate(true)
+	ok(
+		Data.KIN.size() == kin_base + added.size() and ids.all(func(id): return Data.KIN.has(id)),
+		"8 forms are in the game (%d added)" % added.size()
+	)
+	ok(
+		FieldBook.entries().size() == before + new_pairs,
+		"...but they make 4 entries: 4 fewer than one per species (%d new)" % new_pairs
+	)
 	ok(FieldBook.entry_key(b) == a and FieldBook.forms_of(a) == [a, b], "...the pair is one entry, keyed by the first")
 	ok(DexView.number(b) == DexView.number(a), "...so both forms share one number")
 	Save.d["dex"] = {}
@@ -325,14 +445,20 @@ func _branch_forms() -> void:
 	ok(old["dex"].has(b), "...and an owned form gets its record")
 	Save.d["dex"] = old["dex"]
 	ok(FieldBook.entry_caught(b) and FieldBook.both_forms(a), "...so the old save shows it caught, with the star")
-	for id in ids:
+	for id in added:
 		Data.KIN.erase(id)
-	ok(FieldBook.entries().size() == before and FieldBook.forms_of(a) == [a], "...and without the forms, nothing changes")
+	ok(
+		FieldBook.entries().size() == before and FieldBook.forms_of(a) == a_forms,
+		"...and without the forms, nothing changes"
+	)
+
 
 func _uniq(a: Array) -> int:
 	var seen := {}
-	for x in a: seen[x] = true
+	for x in a:
+		seen[x] = true
 	return seen.size()
+
 
 # ------------------------------------------------------------------ 8. the net
 func _net() -> void:
@@ -341,11 +467,15 @@ func _net() -> void:
 	var rival: Hunter = null
 	for h in m.hunters:
 		if h.team != P.team:
-			rival = h; break
+			rival = h
+			break
 	var k := wild()
 	rival.teleport(P.pos + Vector3(8.0, 0, 0))
 	Capture.on_net(m, rival, "scan_start", "%s|0.25" % k.nid)
-	ok(Capture.active(rival) and k.scan_by == rival, "a rival's scan event shows their beam here and holds the Boki's daze")
+	ok(
+		Capture.active(rival) and k.scan_by == rival,
+		"a rival's scan event shows their beam here and holds the Boki's daze"
+	)
 	ok(Capture.state(rival).get("beam") != null, "...a beam node exists for others to see")
 	var d0 := k.dazed_t
 	run_for(1.0)
@@ -354,9 +484,13 @@ func _net() -> void:
 	ok(not Capture.active(rival) and k.scan_by == null, "scan_stop ends it")
 	Capture.on_net(m, rival, "scan_start", "%s|0.25" % k.nid)
 	run_for(Capture.HOLD_OVER + 0.5)
-	ok(not Capture.active(rival) and k.scan_by == null, "a scan nobody confirms times out, so the Boki can wake up again")
+	ok(
+		not Capture.active(rival) and k.scan_by == null,
+		"a scan nobody confirms times out, so the Boki can wake up again"
+	)
 	ok(BlightDir.LOUD.has("scan"), "the scan is a sound rivals and the Blight react to")
 	ok(Net.VERSION.naturalnocasecmp_to("0.11.0") >= 0, "Net.VERSION is %s (at least merge forms' 0.11.0)" % Net.VERSION)
+
 
 # ------------------------------------------------------------------ 8b. the carry-out slot, the 4-wisp cap, the mate
 func _slots() -> void:
@@ -371,7 +505,7 @@ func _slots() -> void:
 	pl.caught.append(rec)
 	var wild_k := wild()
 	var why := Capture.block_reason(pl, wild_k)
-	ok(why.contains(mate.pname), "full slot: the toast names the teammate with room (\"%s\")" % why)
+	ok(why.contains(mate.pname), 'full slot: the toast names the teammate with room ("%s")' % why)
 	var taken := Save.new_kin("zapple", "Taken")
 	taken["lost_from"] = "Someone"
 	ok(Capture.room(pl, taken), "...a stolen Boki has its own slot")
@@ -389,6 +523,7 @@ func _slots() -> void:
 	var read := Capture.slots(mate)
 	ok(read == [1, 1] and not Capture.room(mate, rec), "a client reads a peer's slots (%s)" % str(read))
 
+
 # ------------------------------------------------------------------ 8c. the first-time carry hints
 func _hints() -> void:
 	_fresh()
@@ -404,7 +539,7 @@ func _hints() -> void:
 	P.kin.throw_cd = 1.0
 	var due := CarryHints.swap(m)
 	ok(due.size() == 2 and due[0] == CarryHints.SWAP_KEY, "swap hint: due once the lead's summon is on cooldown")
-	ok(String(due[1]).begins_with(Settings.key_cap("swap_kin")), "...and it names the swap key (\"%s\")" % str(due))
+	ok(String(due[1]).begins_with(Settings.key_cap("swap_kin")), '...and it names the swap key ("%s")' % str(due))
 	P.kin.throw_cd = 0.0
 	ok(not seen.has(CarryHints.CLAIM_KEY), "claim hint: not before a claim")
 	m._catch(P, wild())
@@ -419,6 +554,7 @@ func _hints() -> void:
 	ok(not CarryHints.wanted(m), "hints off in settings: no carry hints")
 	Settings.v["tips"] = true
 
+
 # ------------------------------------------------------------------ 9. bots
 func _bots() -> void:
 	_fresh()
@@ -426,7 +562,8 @@ func _bots() -> void:
 	var bot: Hunter = null
 	for h in m.hunters:
 		if h.team != P.team:
-			bot = h; break
+			bot = h
+			break
 	bot.ctrl = "bot"
 	bot.teleport(P.pos + Vector3(-6.0, 0, 2.0))
 	P.teleport(P.pos + Vector3(30.0, 0, 0))
@@ -437,10 +574,14 @@ func _bots() -> void:
 	var scanned := false
 	var t := 0.0
 	while t < 40.0 and bot.caught.is_empty():
-		_tidy(); m.step(Match.DT); t += Match.DT
-		if Capture.active(bot): scanned = true
+		_tidy()
+		m.step(Match.DT)
+		t += Match.DT
+		if Capture.active(bot):
+			scanned = true
 	ok(scanned, "a bot walks to a knocked-out wild Boki and holds a scan")
 	ok(Capture.slots(bot) == [1, 0], "...and a claimed Boki ends up in its carry-out slot (%.1fs)" % t)
+
 
 # ------------------------------------------------------------------ 10. what happens mid-scan
 func _mid_scan() -> void:
@@ -455,12 +596,25 @@ func _mid_scan() -> void:
 		var hum := "scanhum" + P.nid
 		run_for(0.5)
 		match why:
-			"downed": P.downed = true
-			"extracted": P.extracted = true
-			"killed": P.out = true
-			"range": k.teleport(P.pos + Vector3(float(Capture.rules()["cancel_range"]) + 3.0, 0, 0))      # (knocked away, or you were: past the range)
+			"downed":
+				P.downed = true
+			"extracted":
+				P.extracted = true
+			"killed":
+				P.out = true
+			"range":
+				k.teleport(P.pos + Vector3(float(Capture.rules()["cancel_range"]) + 3.0, 0, 0))  # (knocked away, or you were: past the range)
 		run_for(0.2)
-		ok(Capture.state(P).is_empty() and k.scan_by == null and not Sfx.loop_on(hum) and k.state == "dazed" and P.caught.is_empty(), "%s mid-scan: the scan is gone, no hum, the Boki is free and still dazed" % why)
+		ok(
+			(
+				Capture.state(P).is_empty()
+				and k.scan_by == null
+				and not Sfx.loop_on(hum)
+				and k.state == "dazed"
+				and P.caught.is_empty()
+			),
+			"%s mid-scan: the scan is gone, no hum, the Boki is free and still dazed" % why
+		)
 	# the match ending mid-scan stops the hum (loop keys outlive the node)
 	_fresh()
 	var P2 := m.player
@@ -470,7 +624,10 @@ func _mid_scan() -> void:
 	var hum2 := "scanhum" + P2.nid
 	var had_hum := Sfx.loop_on(hum2)
 	Capture.teardown(m)
-	ok(Capture.state(P2).is_empty() and not Sfx.loop_on(hum2), "tearing the match down stops the scan hum (it was %s)" % ("on" if had_hum else "never started here"))
+	ok(
+		Capture.state(P2).is_empty() and not Sfx.loop_on(hum2),
+		"tearing the match down stops the scan hum (it was %s)" % ("on" if had_hum else "never started here")
+	)
 	# the box fills while the scan runs: it lets go, nothing is added past the cap
 	_fresh()
 	var P3 := m.player
@@ -480,22 +637,50 @@ func _mid_scan() -> void:
 	for i in Capture.box_cap():
 		P3.caught.append(Save.new_kin("puddlet", "Filler%d" % i, 10 + i))
 	run_for(float(Capture.rules()["scan_s"]) + 0.3)
-	ok(P3.caught.size() == Capture.box_cap() and not k3.dead and k3.state == "dazed" and k3.scan_by == null and Capture.state(P3).is_empty(), "the box filling during the scan: it lets go, the box stays at %d and the Boki is not taken" % P3.caught.size())
+	ok(
+		(
+			P3.caught.size() == Capture.box_cap()
+			and not k3.dead
+			and k3.state == "dazed"
+			and k3.scan_by == null
+			and Capture.state(P3).is_empty()
+		),
+		"the box filling during the scan: it lets go, the box stays at %d and the Boki is not taken" % P3.caught.size()
+	)
+
 
 # ------------------------------------------------------------------ 11. looting
 func _loot() -> void:
 	_fresh()
 	var P := m.player
 	var cap := Capture.box_cap()
-	var b := {"caught": [Save.new_kin("cindle", "Spare", 5)], "kin": [], "owner": null, "pos": P.pos, "gems": 0, "seeds": {}, "tonics": 0, "kits": 0, "keys": 0,
-		"node": null, "empty": false, "gear": [], "weapon": {}, "pack": []}
+	var b := {
+		"caught": [Save.new_kin("cindle", "Spare", 5)],
+		"kin": [],
+		"owner": null,
+		"pos": P.pos,
+		"gems": 0,
+		"seeds": {},
+		"tonics": 0,
+		"kits": 0,
+		"keys": 0,
+		"node": null,
+		"empty": false,
+		"gear": [],
+		"weapon": {},
+		"pack": []
+	}
 	for i in cap:
 		P.caught.append(Save.new_kin("puddlet", "Filler%d" % i, 10 + i))
 	Life.take_item(m, P, b, {"key": "caught", "i": 0})
-	ok(P.caught.size() == cap and (b["caught"] as Array).size() == 1, "a deathbox capsule you cannot fit stays in the box (yours %d/%d)" % [P.caught.size(), cap])
+	ok(
+		P.caught.size() == cap and (b["caught"] as Array).size() == 1,
+		"a deathbox capsule you cannot fit stays in the box (yours %d/%d)" % [P.caught.size(), cap]
+	)
 	P.caught.pop_back()
 	Life.take_item(m, P, b, {"key": "caught", "i": 0})
 	ok(P.caught.size() == cap and (b["caught"] as Array).is_empty(), "...and with a free place it comes across")
+
 
 func _bots_full() -> void:
 	_fresh()
@@ -503,7 +688,8 @@ func _bots_full() -> void:
 	var bot: Hunter = null
 	for h in m.hunters:
 		if h.team != P.team:
-			bot = h; break
+			bot = h
+			break
 	bot.ctrl = "bot"
 	bot.teleport(P.pos + Vector3(-6.0, 0, 2.0))
 	P.teleport(P.pos + Vector3(30.0, 0, 0))
@@ -516,18 +702,25 @@ func _bots_full() -> void:
 	var scanned := false
 	var t := 0.0
 	while t < 8.0:
-		_tidy(); m.step(Match.DT); t += Match.DT
-		if String(bot.ai.get("goal_kind", "")) == "catch": chose = true
-		if not Capture.state(bot).is_empty(): scanned = true
+		_tidy()
+		m.step(Match.DT)
+		t += Match.DT
+		if String(bot.ai.get("goal_kind", "")) == "catch":
+			chose = true
+		if not Capture.state(bot).is_empty():
+			scanned = true
 	ok(not chose and not scanned and not k.dead, "a bot with a full box does not walk to a knocked-out Boki or scan it")
+
 
 # ------------------------------------------------------------------ 12. sound
 const CUES := ["scan_pop", "scan_pop_fine", "scan_pop_rare", "scan_call", "scan_fail"]
+
 
 func _cue_reset() -> void:
 	for c in CUES:
 		Sfx.recent.erase(c)
 		Sfx.last_played.erase(c)
+
 
 ## How many times each cue started since _cue_reset (Sfx.recent keeps the starts of a sound inside its stacking window).
 func _cue_counts() -> Dictionary:
@@ -535,6 +728,7 @@ func _cue_counts() -> Dictionary:
 	for c in CUES:
 		out[c] = (Sfx.recent.get(c, []) as Array).size()
 	return out
+
 
 ## One scan to the end on a Boki whose record `edit` changes: the cue counts and the hum's pitch early and late.
 func _scan_through(edit: Callable) -> Dictionary:
@@ -557,6 +751,7 @@ func _scan_through(edit: Callable) -> Dictionary:
 	run_for(2.0)
 	return {"cues": _cue_counts(), "lo": lo, "hi": hi, "caught": P.caught.size(), "k": k}
 
+
 ## The counts a catch of this chime (or "" for none) should leave: the chime and the call once each, or only the snap.
 func _expect(chime: String, snap := 0) -> Dictionary:
 	var out := {}
@@ -564,6 +759,7 @@ func _expect(chime: String, snap := 0) -> Dictionary:
 		out[c] = 1 if c == chime or (c == "scan_call" and chime != "") else 0
 	out["scan_fail"] = snap
 	return out
+
 
 func _sound() -> void:
 	var common := _scan_through(func(_r): pass)
