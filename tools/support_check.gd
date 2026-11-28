@@ -338,10 +338,11 @@ func _tender_support() -> void:
 	A.teleport(P.pos + Vector3(0.6, 0, 0))
 	step(m, 0.1)
 	ok("Carrier: running into a downed teammate carries them", CareUtil.is_carried(A) and K.carrying().size() == 1)
+	var sh_want := float(K.d["passive"]["shield"]) * LevelGrowth.hp(P)
 	ok(
-		"Carrier: no shield of ours and no slow while carrying",
-		P.shield <= 0.01 and absf(K.move_k() - 1.0) < 0.01,
-		"shield %.0f k %.2f" % [P.shield, K.move_k()]
+		"Carrier: a carry shield while carrying, and no slow",
+		absf(P.shield - sh_want) < 0.5 and absf(K.move_k() - 1.0) < 0.01,
+		"shield %.1f want %.1f k %.2f" % [P.shield, sh_want, K.move_k()]
 	)
 	var dh := A.down_hp
 	P.teleport(P.pos + Vector3(5, 0, 0))
@@ -376,17 +377,23 @@ func _tender_support() -> void:
 		carried_again and not CareUtil.is_carried(A) and K.lock_t > 3.0,
 		"again %s lock %.1f" % [str(carried_again), K.lock_t]
 	)
-	# --- a hit drops them too, and costs you no stun of your own
+	# --- a hit past the shield drops them and stuns her; a small one is soaked
 	P.stun_t = 0.0
 	K.lock_t = 0.0
 	A.teleport(P.pos + Vector3(0.4, 0, 0))
 	step(m, 0.1)
 	var carried_third := CareUtil.is_carried(A)
-	P.hurt(5.0, T, {})
+	P.hurt(P.shield * 0.3, T, {})
 	step(m, 0.1)
 	ok(
-		"Carrier: a hit drops them with a 4s lock and no stun on you",
-		carried_third and not CareUtil.is_carried(A) and K.lock_t > 3.0 and P.stun_t <= 0.0,
+		"Carrier: a hit the shield soaks keeps them",
+		carried_third and CareUtil.is_carried(A) and K.lock_t <= 0.0 and P.stun_t <= 0.0
+	)
+	P.hurt(P.shield + 30.0, T, {})
+	step(m, 0.1)
+	ok(
+		"Carrier: a hit past the shield drops them with a 4s lock and stuns her",
+		not CareUtil.is_carried(A) and K.lock_t > 3.0 and P.stun_t >= float(K.d["passive"]["break_stun"]) - 0.15,
 		"lock %.1f stun %.2f" % [K.lock_t, P.stun_t]
 	)
 	# --- the drop set: a stun or any damage; a root holds; 4s no re-pick
@@ -400,13 +407,13 @@ func _tender_support() -> void:
 	step(m, 0.1)
 	ok("Carrier: a root holds them", held and CareUtil.is_carried(A))
 	P.root_t = 0.0
-	P.hurt(10.0, T, {"src": "primary"})
+	P.hurt(P.shield + 30.0, T, {"src": "primary"})
 	step(m, 0.1)
 	var lock0 := K.lock_t
 	ok(
-		"Carrier: a rival's hit drops them, 4s lock, no stun on you",
-		held and not CareUtil.is_carried(A) and lock0 > 3.8 and P.stun_t <= 0.0,
-		"lock %.2f" % lock0
+		"Carrier: a rival's hit past the shield drops them, 4s lock, she is stunned",
+		held and not CareUtil.is_carried(A) and lock0 > 3.8 and P.stun_t > 0.0,
+		"lock %.2f stun %.2f" % [lock0, P.stun_t]
 	)
 	A.teleport(P.pos + Vector3(0.4, 0, 0))
 	var locked := true
@@ -421,9 +428,9 @@ func _tender_support() -> void:
 		locked and CareUtil.is_carried(A),
 		"lock %.2f" % K.lock_t
 	)
-	P.hurt(10.0, null, {"src": "mob"})
+	P.hurt(P.shield + 30.0, null, {"src": "mob"})
 	step(m, 0.1)
-	ok("Carrier: damage from any source drops them", not CareUtil.is_carried(A) and K.lock_t > 3.8)
+	ok("Carrier: damage past the shield from any source drops them", not CareUtil.is_carried(A) and K.lock_t > 3.8)
 	K.lock_t = 0.0
 	# --- rank 3 flare: the revive went back to Hearth Call (X); the flare tops the bleed-out bar up instead
 	P.stun_t = 0.0
