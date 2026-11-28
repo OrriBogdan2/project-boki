@@ -1,5 +1,6 @@
 """zipdir.py OUT.zip DIR: zip the CONTENTS of DIR (what `cd DIR && zip -qr OUT .` does) with python only, for runners
 without a `zip` binary. Keeps file permissions (the Linux build's executable bit)."""
+
 import shutil
 import sys
 
