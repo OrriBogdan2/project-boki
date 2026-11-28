@@ -48,7 +48,7 @@
   ],
   [
    "glide",
-   "Jump, then HOLD %J to glide"
+   "Jump, then hold %J again to glide"
   ],
   [
    "wallkick",
@@ -96,7 +96,7 @@
   ],
   [
    "uplink",
-   "Press %K at the uplink mast"
+   "Hold %K at the uplink mast"
   ],
   [
    "defend",
@@ -116,7 +116,6 @@
   "shoot": "%L",
   "shoot_draw": "Hold the button to draw the bow, let go to loose. A longer draw hits harder.",
   "shoot_melee": "Walk up close and tap to swing. Hold to charge a wave.",
-  "glide": "Jump, then press %J again in the air to open your glider.",
   "wallkick": "A jump against a wall kicks you up it.",
   "crouch": "Crouching shows what lies far ahead.",
   "gkey": "%s fights on its own, with its own abilities.",
@@ -129,8 +128,8 @@
   "hook": "It shoots from afar, and your glove drags it to your feet.",
   "ranks": "Ranks make an ability stronger: %R, or click a gold +.",
   "wayout": "A match has few ways out; this one is at the outpost.",
-  "uplink": "Stay in the circle, or the capture slips back.",
-  "defend": "Stay in the circle, or the capture slips back.",
+  "uplink": "Stay in the circle, or the uplink charge slips back.",
+  "defend": "Stay in the circle, or the uplink charge slips back.",
   "kin": "They stand in a row: line them up, then use it."
  },
  "alt": {
@@ -146,7 +145,7 @@
   "default": "Back at your last stop. Try again",
   "dash": "Back at your last stop. Dash from the glowing pad",
   "exdash": "Back at your last stop. Jump from the pad, then dash",
-  "glide": "Back at your last stop. Jump, press %J again to glide",
+  "glide": "Back at your last stop. Jump, then hold %J again",
   "sec": "Back at your last stop. Use %A away from the edge",
   "shoot": "Back at your last stop. Fight with solid ground behind you",
   "gkey": "Back at your last stop. Tap %T and let %s go in first",
