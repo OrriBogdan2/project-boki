@@ -7,6 +7,7 @@ extends RefCounted
 
 const Shots := preload("res://tools/boki_rig_shots.gd")
 const Fly := preload("res://tools/boki_rig_fly.gd")
+const REACTING := ["cindle", "puddlet", "burrlet"]  # the starters, with a hit and a faint clip of their own
 const SPECIES_LIST := [
 	"cindle",
 	"puddlet",
@@ -271,6 +272,7 @@ func _species(main: Node) -> void:
 	await _states(main, k, rig)
 	await _stepping(main, rig)
 	await _own_look(main)
+	await _reactions(main)
 	k.queue_free()
 
 
@@ -544,6 +546,44 @@ func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 	rig.seek(0.5)
 	w = rig.face.get_blend_shape_value(rig.face.find_blend_shape_by_name("closed"))
 	ok(w > 0.99, "asleep the eyes are shut")
+
+
+## A species with a hit clip plays it on a blow (never on a landing); one with a faint clip plays it while downed and
+## rolls itself onto its side (Kin.render leaves the roll to it); one without keeps KinFlinch and the topple.
+func _reactions(main: Node) -> void:
+	var k := Shots.rigged_kin(kin_id)  # (its own Boki: the jolt and the lying pose would skew the other rows)
+	main.add_child(k)
+	await main.get_tree().process_frame
+	var rig := k.get_node("Body/Flex/BokiRig") as BokiRig
+	var has_hit := rig.player.has_animation("hit")
+	var has_faint := rig.player.has_animation("faint")
+	if kin_id in REACTING:
+		ok(has_hit and has_faint, "the starter has a hit and a faint clip")
+	rig._shot_left = 0.0
+	KinFlinch.land(k, 1.0)
+	rig._pick_clip(0.016)
+	ok(rig.clip != "hit", "a landing is not a blow")
+	KinFlinch.hit(k, Vector3.RIGHT, 0.3, 1.0)
+	rig._pick_clip(0.016)
+	ok((rig.clip == "hit") == has_hit, "a blow plays the hit clip when it has one")
+	rig._shot_left = 0.0
+	ok(bool(k.get_meta("faints")) == has_faint, "it tells Kin.render when a faint clip rolls it over")
+	var downed := _clip_for(rig, "kfaint", true)
+	ok(downed == ("faint" if has_faint else "idle"), "downed plays the faint clip when it has one")
+	if has_hit:
+		var hit_s := rig.player.get_animation("hit").length
+		ok(hit_s >= 0.25 and hit_s <= 0.35, "the hit clip lasts 0.25-0.35 s (%.2f)" % hit_s)
+	if has_faint:
+		var faint_s := rig.player.get_animation("faint").length
+		ok(faint_s >= 0.9 and faint_s <= 1.1, "the faint clip lasts about 1 s (%.2f)" % faint_s)
+		var spine := rig.skeleton().find_bone("root")
+		rig.set_clip("faint", 0.0)
+		rig.seek(0.0)
+		var up := rig.skeleton().get_bone_pose_rotation(spine)
+		rig.seek(faint_s)
+		var rolled := up.angle_to(rig.skeleton().get_bone_pose_rotation(spine))
+		ok(rolled > 1.2, "the faint clip ends on its side: rolled %.2f rad" % rolled)
+	k.queue_free()
 
 
 ## In DEEP water it floats off the bed, SWIM_LINE of its height under, and swims (a Water type) or paddles; one
