@@ -92,7 +92,7 @@ func _offer_lines() -> Array:
 	var first_mask := HeroTitle.base_name(String(worn[0]) if not worn.is_empty() else "gunslinger")
 	var out: Array = []
 	for line in rules()["offer"]:
-		out.append({"text": String(line["text"]).replace("{mask}", first_mask)})
+		out.append({"text": String(line["text"]).replace("{first_relic}", first_mask)})
 	return out
 
 
