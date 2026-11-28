@@ -321,11 +321,13 @@ func _ticks(view: Control) -> void:
 		view._tick_label()
 		return Sfx.cue_log.filter(func(c): return c[0] == "click").size()
 	ok(ticks.call(view.TICK_FROM + 1.5) == 0, "no tick above %d s left" % int(view.TICK_FROM))
+	ok(is_equal_approx(view.timer_label.scale.x, 1.0), "the digits hold still above %d s left" % int(view.PULSE_FROM))
 	ok(ticks.call(view.TICK_FROM - 0.5) == 1, "the first tick at %d s left" % int(view.TICK_FROM))
 	ok(ticks.call(view.TICK_FROM - 0.6) == 1, "no second tick inside the same second")
 	ok(ticks.call(view.TICK_FROM - 1.5) == 2, "one tick each second after")
-	ok(is_equal_approx(view.timer_label.scale.x, 1.0), "the digits hold still above %d s left" % int(view.PULSE_FROM))
+	ok(view.PULSE_FROM >= 5.0, "the throb covers the last 5 s")
 	ticks.call(view.PULSE_FROM - 0.5)
+	ok(view.timer_label.get_theme_color("font_color") != UI.INK, "the digits are red in the throb")
 	var swell: float = view.timer_label.scale.x
 	ok(swell <= 1.0 + view.PULSE_GROW + 0.001, "the throb swells the digits by at most %.2f" % view.PULSE_GROW)
 	Sfx.cue_log = null

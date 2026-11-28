@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bd1pt7u0pdi44"
-path="res://.godot/imported/geysirbara_geysirbara_normal.webp-181b165f3b6da354480fa224e166d3d8.ctex"
+path.s3tc="res://.godot/imported/geysirbara_geysirbara_normal.webp-181b165f3b6da354480fa224e166d3d8.s3tc.ctex"
+path.etc2="res://.godot/imported/geysirbara_geysirbara_normal.webp-181b165f3b6da354480fa224e166d3d8.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "2109b38349c4f86686c41538f56a0a53"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/geysirbara/geysirbara_geysirbara_normal.webp"
-dest_files=["res://.godot/imported/geysirbara_geysirbara_normal.webp-181b165f3b6da354480fa224e166d3d8.ctex"]
+dest_files=["res://.godot/imported/geysirbara_geysirbara_normal.webp-181b165f3b6da354480fa224e166d3d8.s3tc.ctex", "res://.godot/imported/geysirbara_geysirbara_normal.webp-181b165f3b6da354480fa224e166d3d8.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

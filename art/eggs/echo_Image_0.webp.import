@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://drcd31vl3qmwt"
-path="res://.godot/imported/echo_Image_0.webp-6f8a2ff2f678e3df0395e5d2156542e4.ctex"
+path.s3tc="res://.godot/imported/echo_Image_0.webp-6f8a2ff2f678e3df0395e5d2156542e4.s3tc.ctex"
+path.etc2="res://.godot/imported/echo_Image_0.webp-6f8a2ff2f678e3df0395e5d2156542e4.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "2c57d5244061a529933c0032440f6625"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/eggs/echo_Image_0.webp"
-dest_files=["res://.godot/imported/echo_Image_0.webp-6f8a2ff2f678e3df0395e5d2156542e4.ctex"]
+dest_files=["res://.godot/imported/echo_Image_0.webp-6f8a2ff2f678e3df0395e5d2156542e4.s3tc.ctex", "res://.godot/imported/echo_Image_0.webp-6f8a2ff2f678e3df0395e5d2156542e4.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bd2ry4a3wl3bi"
-path="res://.godot/imported/forgebrock_forgebrock_normal.webp-0e32e12c5139f0e2c21128ff4f1eab92.ctex"
+path.s3tc="res://.godot/imported/forgebrock_forgebrock_normal.webp-0e32e12c5139f0e2c21128ff4f1eab92.s3tc.ctex"
+path.etc2="res://.godot/imported/forgebrock_forgebrock_normal.webp-0e32e12c5139f0e2c21128ff4f1eab92.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "a337c3bd95117636400bee5fdb53c6f6"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/forgebrock/forgebrock_forgebrock_normal.webp"
-dest_files=["res://.godot/imported/forgebrock_forgebrock_normal.webp-0e32e12c5139f0e2c21128ff4f1eab92.ctex"]
+dest_files=["res://.godot/imported/forgebrock_forgebrock_normal.webp-0e32e12c5139f0e2c21128ff4f1eab92.s3tc.ctex", "res://.godot/imported/forgebrock_forgebrock_normal.webp-0e32e12c5139f0e2c21128ff4f1eab92.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

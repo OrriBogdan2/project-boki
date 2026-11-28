@@ -289,6 +289,7 @@ archetypes/bulwark.json:rmb.charges	1
 archetypes/bulwark.json:rmb.cooldown	6.0
 archetypes/bulwark.json:rmb.hold	0.1
 archetypes/bulwark.json:rmb.shield.arc	140.0
+archetypes/bulwark.json:rmb.shield.block_dash	1.0
 archetypes/bulwark.json:rmb.shield.boop.cd	0.55
 archetypes/bulwark.json:rmb.shield.boop.push	2.8
 archetypes/bulwark.json:rmb.shield.boop.push_speed	18.0
@@ -1254,9 +1255,12 @@ archetypes/tender.json:dash.air.out_k	0.1
 archetypes/tender.json:dash.air.ramp	0.1
 archetypes/tender.json:dash.air.steer	3.0
 archetypes/tender.json:dash.air.time	0.95
+archetypes/tender.json:dash.ally_r	1.1
 archetypes/tender.json:dash.cd	7.0
 archetypes/tender.json:dash.dist	3.15
+archetypes/tender.json:dash.e_refund	1.0
 archetypes/tender.json:dash.invuln	0.12
+archetypes/tender.json:dash.refund	0.5
 archetypes/tender.json:dash.time	0.23
 archetypes/tender.json:e.boost	0.5
 archetypes/tender.json:e.boost_t	1.0
