@@ -5,9 +5,12 @@ extends RefCounted
 ## carrying you, and the same with a jump in the rise's fling window), each from straight in to 80 degrees
 ## off the face. For every approach that tops the ledge it follows the next EXIT_S seconds and asserts the
 ## fastest you go is at most MantleCarry.exit_cap (a little forward flow, never a launch; a fling at most
-## its own HunterFeel.fling_speed), that the rise doesn't slide you on along the face (RISE_SLIDE), and that you
+## the mantle's exit speed too), that the rise doesn't slide you on along the face (RISE_SLIDE), and that you
 ## never jump further than the speed you're going (no push out of the wall). Prints "MFLING ok|FAIL ..."
 ## lines, the worst approaches, and "MFLING DONE, failures: N". Never touches the save.
+## It also asserts the source's mantle numbers (traversal-1126, hunter_move.json physics mantle_cd / mantle_mini_*):
+## a timed fling on a ledge under 3 m crosses the lip at +5 m/s up and holds its exit speed 0.75 s, a ledge catch
+## arms a 1.0 s cooldown, and walking off a ledge in that cooldown still drops you (_ref_rows).
 
 const DT := Match.DT
 const ANGLES := [0.0, 20.0, 40.0, 55.0, 65.0, 75.0, 80.0]     # degrees off straight into the face
@@ -43,6 +46,7 @@ func run(main: Node) -> void:
 		if wall.is_empty():
 			ok(false, "found flat ground for a %d-terrace wall" % rise)
 			continue
+		_ref_rows(wall, rise)
 		for mode in MODES:
 			for ang in ANGLES:
 				for side in [1.0, -1.0]:
@@ -80,14 +84,72 @@ func _report() -> void:
 			pushed += 1
 			print("MFLING pushed: %s %.2fm in one step" % [r["what"], r["jump"]])
 	var what := "%s, in at %.1f" % [worst.get("what", "-"), worst.get("vin", 0.0)]
-	print("MFLING %d topped approaches; fastest exit %.1f m/s (%s), cap %.1f (fling %.1f)" % [
-		rows.size(), worst.get("vmax", 0.0), what, cap, maxf(cap, HunterFeel.fling_speed)])
+	print("MFLING %d topped approaches; fastest exit %.1f m/s (%s), cap %.1f (flings too)" % [
+		rows.size(), worst.get("vmax", 0.0), what, cap])
 	print("MFLING longest flight %.1fm; longest slide %.1fm" % [flown, slide])
 	ok(rows.size() >= 80, "most approaches top the ledge (%d)" % rows.size())
 	ok(fast == 0, "no exit faster than %.1f m/s, from any angle or speed (%d over)" % [cap, fast])
 	ok(slid == 0, "no rise slides you more than %.1fm along the face (%d over)" % [RISE_SLIDE, slid])
 	ok(pushed == 0, "never moved further in a step than your speed carries you (%d pushed)" % pushed)
 	print("MFLING DONE, failures: %d" % bad)
+
+## The source's mantle numbers (traversal-1126) and that they act: the data rows, a timed fling up this ledge
+## (crosses the lip at mantle_mini_vy, holds the exit speed mantle_mini_s), the catch's cooldown (mantle_cd), and a
+## walk off the top inside that cooldown, which still drops you (walking off ledges is always allowed).
+func _ref_rows(wall: Dictionary, rise: int) -> void:
+	if rise == 1:
+		var raw := FileAccess.get_file_as_string("res://content/rules/hunter_move.json")
+		var d: Dictionary = (JSON.parse_string(raw) as Dictionary)["physics"]
+		ok(is_equal_approx(d["mantle_cd"], 1.0) and is_equal_approx(HunterMove.mantle_cd, 1.0),
+				"mantle cooldown is the source's 1.0 s (%.2f)" % HunterMove.mantle_cd)
+		ok(is_equal_approx(d["mantle_mini_vy"], 5.0) and is_equal_approx(HunterMove.mantle_mini_vy, 5.0),
+				"mini-mantle up bonus is the source's +5 m/s, unscaled (%.2f)" % HunterMove.mantle_mini_vy)
+		ok(is_equal_approx(d["mantle_mini_h"], 3.0) and is_equal_approx(d["mantle_mini_s"], 0.75),
+				"mini-mantle is a ledge under 3 m, its push lasts 0.75 s (%.2f m, %.2f s)" % [
+				HunterMove.mantle_mini_h, HunterMove.mantle_mini_s])
+		var tall := MantleCarry.fling_vy(0.0, HunterMove.mantle_mini_h + 0.5, true)
+		ok(absf(MantleCarry.fling_vy(0.0, 1.0, true) - 5.0) < 0.001 and tall < 5.0,
+				"a timed fling crosses a low lip at 5.0 m/s, a 3.5 m ledge's at only %.2f" % tall)
+	var n: Vector2 = wall["n"]
+	var top := float(wall["top"])
+	var hit := (wall["face"] as Vector2) - n * (h.r + 0.05)
+	var st := hit - n * 6.0 * 0.12
+	_reset(Vector3(st.x, top - 0.5, st.y), Vector3(n.x * 6.0, 0.0, n.y * 6.0), false)
+	h.last_gy = float(wall["low"])
+	var cd0 := -1.0
+	var lip_vy := -99.0
+	var held := -1.0
+	var flung := false
+	var t := 0.0
+	while t < 1.5 and lip_vy < -50.0:
+		h.inp["move"] = n
+		h.inp["jump"] = not flung and h.lfloat.get("win", false)
+		flung = flung or h.inp["jump"]
+		m.step(DT)
+		t += DT
+		if cd0 < 0.0 and not h.lfloat.is_empty():
+			cd0 = h.grap_cd
+		if flung and held < 0.0:
+			held = float(h.carry_mini.get("t", 0.0))
+		if flung and h.pos.y >= top + 0.12:
+			lip_vy = h.vel.y
+	h.inp["jump"] = false
+	ok(cd0 >= HunterMove.mantle_cd - 2.0 * DT, "%dT catch arms the 1.0 s cooldown (%.2f s)" % [rise, cd0])
+	ok(flung and absf(lip_vy - HunterMove.mantle_mini_vy) < 0.5,
+			"%dT timed fling crosses the lip at ~+5 m/s up (%.2f m/s)" % [rise, lip_vy])
+	ok(held >= HunterMove.mantle_mini_s - 2.0 * DT, "%dT fling holds its exit speed 0.75 s (%.2f s)" % [rise, held])
+	# on the top, in the cooldown: walk back off the ledge, and you drop
+	var on := (wall["face"] as Vector2) + n * 0.6
+	_reset(Vector3(on.x, top + 0.02, on.y), Vector3.ZERO, true)
+	h.grap_cd = HunterMove.mantle_cd
+	var low := top
+	t = 0.0
+	while t < 1.2:
+		h.inp["move"] = -n
+		m.step(DT)
+		t += DT
+		low = minf(low, h.pos.y)
+	ok(low < top - 0.3, "%dT walking off the ledge in the cooldown drops you (%.2f m down)" % [rise, top - low])
 
 ## Only the player is in the match.
 func _clear_others() -> void:
@@ -197,9 +259,7 @@ func _try(wall: Dictionary, mode: String, ang: float, fly_speed: float) -> Dicti
 	var caught := false
 	var out_t := -1.0
 	var flung := false
-	var cap := MantleCarry.exit_cap(h)
-	if mode == "fly_fling":
-		cap = maxf(cap, HunterFeel.fling_speed)
+	var cap := MantleCarry.exit_cap(h)     # (a fling leaves at the mantle's exit speed: no higher cap)
 	var res := {"vin": 0.0, "vmax": 0.0, "cap": cap, "flown": 0.0, "slide": 0.0, "jump": 0.0}
 	var from := Vector2.ZERO
 	var at := Vector2.ZERO
@@ -215,7 +275,7 @@ func _try(wall: Dictionary, mode: String, ang: float, fly_speed: float) -> Dicti
 		var p0 := Vector2(h.pos.x, h.pos.z)
 		var v0 := Vector2(h.vel.x, h.vel.z).length()
 		if h.inp["jump"] and not h.lfloat.is_empty():
-			v0 = maxf(v0, HunterFeel.fling_speed)      # the fling sets its speed inside this step
+			v0 = maxf(v0, cap)      # the fling sets its speed inside this step
 		m.step(DT)
 		t += DT
 		var hv := Vector2(h.vel.x, h.vel.z).length()
