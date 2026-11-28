@@ -138,3 +138,13 @@ as blank cups. So:
 - Rejected: ring tilted 25/35 deg (front up) turns the back stones' eyes away (eye.camera median 0.78 -> 0.56/0.43);
   ring x0.6 +0.2 m puts the front stone over the face.
 Tools: gens/hunter-round-1124/tenzo/G/scripts/{swap_rock,ring,slot,eyepitch}.py. Sheets: G/GAME_tenzo_r33_*.jpg.
+
+## r47 (2026-11-28): sash material split + stones lowered
+- tarek_meshy.glb: the sash faces (19,467 of 79,978; orange texels in the hip box) moved into a 2nd primitive with
+  material `Material_0-sash` (same verts, UVs, skin, textures; only the index order changes, +368 B). The hero-toon pass
+  blew the sash out to value 1.0 / sat 0.95 at the match camera; the one "Material_0" let warden_look tune only the
+  whole body. Look slot `Material_0-sash`: albedo 0.85/0.85/0.83, desat 0.12, far_lift 0 (match sash value 0.81 -> 0.76,
+  no clipped highlights; hue 16.5 vs ref 17.5).
+- tarek.glb: stone_0-2 lowered 3 cm (y 0.63/0.67/0.59 -> 0.60/0.64/0.56) so `--warden-native-check` orbit_stones passes
+  (0.78 m from the head, limit < 0.8).
+Tools: gens/hunter-round-1124/tenzo/V/{split,stones}.py. Sheet: V/GAME_r47.jpg (art-gate 5.8 vs live 4.5, r43 5.5).
