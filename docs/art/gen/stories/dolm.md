@@ -5,6 +5,6 @@ _Class: dolm. Faction: The Odd Jobs._
 
 A young cliff-runner, blind since birth, who ran messages along the cliff paths by the feel of the rock. When the Hollowing cracked the cliffs, the stone started answering him: three seeing-stones float around him and are his eyes.
 
-The youngest of the crew and the calm one, he hears trouble through the ground before Vex sees it.
+The youngest of the crew and the calm one, he hears trouble through the ground before anyone else sees it.
 
 **Relic:** A seeing-stone. One of the three stones that float around him. It is how he sees the world. (locked)

@@ -9,7 +9,7 @@ Tenzo, the quarry-hand who reads the ground. Raise rocks out of the ground, stan
 |---|---|
 | Class title | the Stone Seer |
 | Base character | Tenzo, male |
-| Personality | A young cliff-runner, blind since birth, who ran messages along the cliff paths by the feel of the rock. When the Hollowing cracked the cliffs, the stone started answering him: three seeing-stones float around him and are his eyes. The youngest of the crew and the calm one, he hears trouble through the ground before Vex sees it. |
+| Personality | A young cliff-runner, blind since birth, who ran messages along the cliff paths by the feel of the rock. When the Hollowing cracked the cliffs, the stone started answering him: three seeing-stones float around him and are his eyes. The youngest of the crew and the calm one, he hears trouble through the ground before anyone else sees it. |
 
 <!-- /gen:profile -->
 
