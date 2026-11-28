@@ -21,8 +21,14 @@ func _played(t0: int) -> Array:
 		if int(Sfx.last_played[n]) >= t0: names.append(n)
 	return names
 
+## Sfx merges a repeat of one sound inside 30 ms of wall time (Time.get_ticks_msec), so the gap between two plays
+## of one cue (the phase sting, then the enrage) is measured on that clock: a SceneTree timer runs on the smoothed
+## frame clock, which on a loaded host gets well ahead of the wall clock (a 0.12 s timer fired after 20 ms, and the
+## enrage sting was cut for the gap: the check's one flake).
 func _gap(main: Node) -> void:
-	await main.get_tree().create_timer(0.12).timeout      # (Sfx merges a repeat of one sound inside 30 ms)
+	var t0 := Time.get_ticks_msec()
+	while Time.get_ticks_msec() - t0 < 120:
+		await main.get_tree().process_frame
 
 const BORROWED := ["zap", "boom", "whoosh", "throw", "die_small", "v_warden"]      # what the attacks used to play
 

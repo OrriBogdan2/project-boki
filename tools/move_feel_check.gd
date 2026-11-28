@@ -508,6 +508,7 @@ func _reset(p: Vector3, grounded := true) -> void:
 	p_v.kit_t = 0.0
 	p_v.squash = 0.0
 	p_v.hp = p_v.max_hp
+	p_v.turn_cost.forget()  # a teleport sheds the last dash's speed (TurnCost)
 	_clear_mobs()
 	if "lfloat" in p_v:
 		p_v.set("lfloat", {})

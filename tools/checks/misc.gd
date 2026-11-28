@@ -8,6 +8,7 @@ const CHECKS := {
 	"--jump-apex-shots": ["res://tools/jump_apex_shots.gd", "jump_apex_shots", null],  # old vs new jump top, side-on
 	"--clip-preflight-check": ["res://tools/clip_preflight_check.gd", "clip_preflight_check", null],  # film preflight
 	"--registry-check": ["res://tools/registry_check.gd", "registry_check", null],  # the registry holds together
+	"--turn-cost-check": ["res://tools/turn_cost_check.gd", "turn_cost_check", null],  # owner 11-11 momentum
 	"--intro-deck-check": ["res://tools/intro_deck_check.gd", "intro_deck_check", null],
 	"--tester-feedback-check": ["res://tools/tester_feedback_check.gd", "tester_feedback_check", null],  # tester 11-19
 	"--cliff-mantle-meadow-check": ["res://tools/cliff_mantle_check.gd", "cliff_mantle_check", 0],

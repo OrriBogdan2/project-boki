@@ -189,7 +189,8 @@ static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 		reach = 9.0
 	elif sid == "kin" and not tu.flag:
 		reach = 14.0       # (the E line reaches the row from where you stand)
-	if p.flat_dist(best) > reach: goto.call(best.pos)
+	# (a dash can land the driver on a ledge or prop right above the foe: it walks off to the foe's level)
+	if p.flat_dist(best) > reach or p.pos.y - best.pos.y > 1.5: goto.call(best.pos)
 	match sid:
 		"shoot": p.inp["fire"] = fire_key(m)
 		"sec": p.inp["fire"] = bool(tu.seen.get("sec", false)) and fire_key(m)      # (the cast first, then the rest)
