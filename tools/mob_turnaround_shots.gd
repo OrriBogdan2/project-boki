@@ -69,10 +69,12 @@ func _kind(kind: String) -> void:
 	if box.size.length() < 0.2:  # a body the skinned bounds miss: a small box at its feet
 		box = AABB(mb.pos + Vector3(-0.6, 0, -0.6), Vector3(1.2, 0.8, 1.2))
 	var ctr := box.get_center() - mb.global_position  # (kept relative: a monster that drifts is followed)
-	_studio(mb.pos)
-	backdrop.visible = studio
 	_world_on(false, mb)
 	var dist := maxf(box.size.length(), 1.0) * 1.15 / tan(deg_to_rad(cam.fov * 0.5)) * 0.5
+	_studio(mb.pos, dist * 1.6)
+	backdrop.visible = studio
+	for lb in mb.find_children("*", "Label3D", true, false):  # nameplates and bars stay out of the views
+		(lb as Node3D).visible = false
 	cam.make_current()
 	for v in VIEWS:
 		await _view(mb, ctr, dist, float(VIEWS[v]), 0.0)
@@ -114,12 +116,12 @@ func _kind(kind: String) -> void:
 	backdrop.visible = studio
 	_world_on(false, mb)
 	cam.make_current()
-	# the death move: 0.4 of DEATH_S in
+	# the death move: 0.2 of DEATH_S in
 	p.teleport(at + Vector3(60, 0, 0))
 	mb.hurt(mb.hp + mb.max_hp, p, {"src": "shot"})
 	for i in 90:
 		await _view(mb, ctr, dist, 0.785, 0.0)
-		if mb.dead and mb.death_t > MobAnim.DEATH_S * 0.4:
+		if mb.dead and mb.death_t > MobAnim.DEATH_S * 0.2:
 			(await _shot()).save_png(dir.path_join("death.png"))
 			break
 	print("MOBTURNAROUND %s h=%.2f hunter=%.2f" % [kind, box.size.y, hunter_h])
@@ -197,7 +199,7 @@ func _world_on(on: bool, keep: Node) -> void:
 
 
 ## A flat #E8E8EE dome and floor round the monster, so the world's props stay out of the views.
-func _studio(at: Vector3) -> void:
+func _studio(at: Vector3, reach: float = 14.0) -> void:
 	if backdrop == null:
 		backdrop = MeshInstance3D.new()
 		var sph := SphereMesh.new()
@@ -220,4 +222,5 @@ func _studio(at: Vector3) -> void:
 		backdrop.add_child(floor_mi)
 		main.add_child(backdrop)
 	backdrop.position = at
+	backdrop.scale = Vector3.ONE * reach / 14.0
 	(backdrop.get_child(0) as Node3D).position.y = 0.02
