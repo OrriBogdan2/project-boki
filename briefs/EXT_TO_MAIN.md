@@ -11518,3 +11518,4 @@ READY ext/kit-parity-stale-snaps 9ec2f49dac (KIT_PARITY snapshot lines, Coin Bla
 READY ext/ui-pause-slim 6baff6a3921d57d19def48c204823e369a0706c2 (pause menu was already 4 buttons with More; Resume/Done key caps now via Settings.key_cap, --pause-menu-check adds front-set, cap, Practice-reach rows + 1920x1080 shots)
 READY ext/tut-farm-3p-pointers 607f7450f43434ace39ffa189be55dddf8705f8e (farm tutorial pointers in the close third-person view: beam, edge arrow, prompt height search, --farm-tut-3p-check)
 READY ext/garden-egg-line-once 71102bd0bf2f9509029daad563ba4d752aa4df64 (ready-egg arrival line once per egg id, only where the Nook stands; asserted in garden-first-day and day-played checks)
+READY ext/tut-playthrough-30fps b47378bb745f768a06826e82b3f4e06d37e2cdea (--tutorial-fps-pace-check: match course + garden at fixed 30/60 fps, step budgets, 8 s gaps, banner on every frame; strip drop-in no longer off-screen on frame 1; docs/TUTORIAL_PACE.md s6)
