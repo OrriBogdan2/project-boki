@@ -2181,8 +2181,6 @@ func on_kin_ability(k: Kin, def: AbilitySpec, auto: bool) -> void:
 	if k.owner_h == null or k.unseen:
 		return
 	if k.owner_h == player:
-		fx.word(k.pos + Vector3(0, 1.3 + k.r, 0), def.display_name, KinText.color(def).lerp(Color.WHITE, 0.25), false)
-	if k.owner_h == player:
 		player.add_stat("kin_abilities")
 		if auto and hud and not train.has("_auto_told"):
 			train["_auto_told"] = true

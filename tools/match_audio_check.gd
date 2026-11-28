@@ -64,6 +64,7 @@ func run(main_node: Node) -> void:
 			"length": 1e9,
 			"seed": 77,
 			"no_drop": true,
+			"boki_wisps": false,
 			"demo_kin": "cindle"
 		}
 	)
@@ -965,7 +966,7 @@ func _abyss() -> void:
 		)
 		var hot := _walk(am, p, rim, true, true)
 		ok(
-			hot.find("abyss_catch") == 1 and hot.has("strain"),
+			hot.find("abyss_whoosh") == 0 and hot.has("abyss_catch") and hot.has("strain"),
 			"...an overheated glider lifting: the catch and the strain loop %s" % [hot]
 		)
 		_teammate(am, other, rim)
