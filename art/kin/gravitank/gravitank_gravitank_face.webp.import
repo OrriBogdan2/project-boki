@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cnjokyvvapp3n"
-path="res://.godot/imported/gravitank_gravitank_face.webp-8357f3b65bf56b1a0d56833c789188fe.ctex"
+path.s3tc="res://.godot/imported/gravitank_gravitank_face.webp-8357f3b65bf56b1a0d56833c789188fe.s3tc.ctex"
+path.etc2="res://.godot/imported/gravitank_gravitank_face.webp-8357f3b65bf56b1a0d56833c789188fe.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "c3d8766ed82ffff1213c3360476a8925"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/gravitank/gravitank_gravitank_face.webp"
-dest_files=["res://.godot/imported/gravitank_gravitank_face.webp-8357f3b65bf56b1a0d56833c789188fe.ctex"]
+dest_files=["res://.godot/imported/gravitank_gravitank_face.webp-8357f3b65bf56b1a0d56833c789188fe.s3tc.ctex", "res://.godot/imported/gravitank_gravitank_face.webp-8357f3b65bf56b1a0d56833c789188fe.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
