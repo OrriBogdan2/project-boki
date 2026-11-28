@@ -290,6 +290,33 @@ def part_bones(parts):
     return out
 
 
+def glide(t, spread, fore, hind, fold, tail_up=0.0, tail_amp=0.03, tail_side=0.04, sway=0.07):
+    """Carried through your glide (BokiRig plays it while Kin.render sets kact glide), one sway a loop: nose a little
+    down and the head up into the wind, ears pinned back and fluttering, a slow roll and yaw against the air, the tail
+    trailing. Legs by body: `spread` rolls each leg out from the body (L is -x; as BokiHomePoses.both), `fore`/`hind` swing the front
+    legs forward and the hind ones back (negative: tucked under), `fold` bends the knees."""
+    p = {}
+    w = s(t, 1)
+    v = s(t, 1, 0.25)
+    add(p, "root", rx=-0.2 + 0.03 * s(t, 2), ry=v * sway * 0.4, rz=w * sway)
+    p["root_at"] = (0, 0.012 * s(t, 2, 0.1), 0)
+    add(p, "spine", rx=0.04, ry=-v * sway * 0.4)
+    add(p, "neck", rx=0.08, rz=-w * sway * 0.3)
+    add(p, "head", rx=LOOK_UP * 0.5 + 0.12 + 0.02 * s(t, 2, 0.15), rz=-w * sway * 0.4)
+    ear_pose(p, back=0.6 + 0.05 * s(t, 4))
+    for sd, sx in SIDES:
+        lean = 1.0 + 0.15 * w * sx               # the low side's legs reach out a little further
+        flut = 0.04 * s(t, 3, 0.3 if sd == "L" else 0.0)
+        add(p, "fleg1." + sd, rx=fore + flut, rz=sx * spread * lean)
+        add(p, "fleg2." + sd, rx=-fold)
+        add(p, "fpaw." + sd, rx=-0.4 * fore - 0.5 * fold + flut)
+        add(p, "hleg1." + sd, rx=-hind - flut, rz=sx * spread * lean)
+        add(p, "hleg2." + sd, rx=fold)
+        add(p, "hpaw." + sd, rx=0.4 * hind + 0.5 * fold)
+    tail_wave(p, t, tail_amp, up=tail_up, roll=tail_side, lag=0.12)
+    return p
+
+
 DROP = -0.09       # how far a flop lowers it (m); set by the species
 SHARED = {"idle": (2.8, True, idle), "walk": (0.7, True, walk), "run": (0.44, True, run), "hop": (0.95, True, hop),
           "pet": (2.2, True, pet), "carry": (0.8, True, carry), "tend": (1.3, True, tend)}
