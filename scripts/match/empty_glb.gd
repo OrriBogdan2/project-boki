@@ -15,10 +15,10 @@ const TRIM_PAINT := Color("909db7")  # and of their hem band
 ## Procedural pieces that stay over the .glb: the void head (its hollow shell rides on it) and WardenGlb's own.
 const KEEP := ["Head", "Aura"]
 ## The painted egg of a head inside each model's hood, by sex as KEYS (model space at rest, m: the middle of its
-## painted front, its height, its width; measured on the .glb's texels, the grey-green face in the hood, model facing
-## -Z). The void head is fitted onto it, its front just ahead of the paint, so the hood frames the void face as in
-## the art (the procedural head is about twice its size).
-const EGG := [[Vector3(0.0, 1.235, -0.2), 0.25, 0.18], [Vector3(0.0, 1.27, -0.28), 0.28, 0.205]]
+## painted front, its height, its width; measured on the .glb's texels, the grey-green face in the hood; the models
+## face +Z as Meshy's rig and every Hunter do). The void head is fitted onto it, its front just ahead of the paint, so
+## the hood frames the void face as in the art (the procedural head is about twice its size).
+const EGG := [[Vector3(0.0, 1.225, 0.198), 0.23, 0.17], [Vector3(0.0, 1.276, 0.251), 0.253, 0.186]]
 const EGG_COVER := 1.0  # x the egg's height: the void shell is the painted egg's size, over it
 const EGG_AHEAD := 0.015  # m: the void shell's front this far ahead of the painted face
 ## The void shell is a dish facing forward: from three-quarters and the side the painted egg showed green beside it.
@@ -86,7 +86,7 @@ static func _into_hood(root: Node3D, sex: int, size: float) -> void:
 	var xs := skin_xf.affine_inverse() * WardenGlb.model_xf(root, hollow)
 	box = xs * hollow.get_aabb()
 	var front: Vector3 = EGG[sex][0]
-	xs.origin += front + Vector3(0.0, 0.0, box.size.z * 0.5 - EGG_AHEAD) - box.get_center()
+	xs.origin += front - Vector3(0.0, 0.0, box.size.z * 0.5 - EGG_AHEAD) - box.get_center()
 	var mats := []
 	for si in hollow.mesh.get_surface_count():
 		mats.append(hollow.get_active_material(si))
@@ -101,7 +101,7 @@ static func _into_hood(root: Node3D, sex: int, size: float) -> void:
 	shade.albedo_color = Color.BLACK
 	shade.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	var dims := Vector3(float(EGG[sex][2]) * EGG_SHADE * size, float(EGG[sex][1]) * EGG_SHADE * size, SHADE_DEPTH)
-	var ex := skin_xf * Transform3D(Basis.from_scale(dims), front + Vector3(0.0, 0.0, SHADE_DEPTH * 0.5 - SHADE_AHEAD))
+	var ex := skin_xf * Transform3D(Basis.from_scale(dims), front - Vector3(0.0, 0.0, SHADE_DEPTH * 0.5 - SHADE_AHEAD))
 	_skin_to_head(root, egg, [shade], ex, "VoidEgg", GeometryInstance3D.SHADOW_CASTING_SETTING_OFF)
 	var aura := root.get_node_or_null("Rig/Torso/Aura") as Node3D
 	if aura:

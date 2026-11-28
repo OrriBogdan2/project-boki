@@ -10,6 +10,7 @@ const POSED_MIN := 10  # bones turned off Meshy's rest in a playing clip (the T-
 const TURNED := 0.03  # rad: a bone this far off its rest is posed
 const CLIPS := ["Idle", "walk", "run", "Jump_Run", "Attack", "Crouch_Walk_with_Torch", "PickUp", "Sit"]
 
+const FACE_AHEAD := 0.05  # m: the painted face's front ahead of the Head bone, on the rig's +Z
 const EGG_BEHIND := 0.02  # m: the egg cover's front at most this far behind the void shell's, at rest
 const EGG_OFF := 0.03  # m: and their middles this close, seen from the front
 var bad := 0
@@ -46,6 +47,11 @@ func _one(main: Node, key: String) -> void:
 	var front := sk.global_transform * sk.get_bone_global_rest(sk.find_bone("headfront")).origin
 	var fwd := m.global_transform.basis.inverse() * (front - head)
 	ok(fwd.z < 0.0 and absf(fwd.z) > absf(fwd.x), "%s: faces -Z (head to face %s)" % [key, fwd])
+	# (Meshy puts headfront on +Z whatever the mesh: the painted face must be there too, or the clips walk the cloak
+	# backwards, as the 11-27 packs did)
+	var rest_head := sk.get_bone_global_rest(sk.find_bone("Head")).origin
+	var face_z: float = (EmptyGlb.EGG[EmptyGlb.KEYS.find(key)][0] as Vector3).z - rest_head.z
+	ok(face_z > FACE_AHEAD, "%s: the painted face is on the rig's front (%.3f m ahead of the Head bone)" % [key, face_z])
 	ok(CLIPS.all(func(c): return nat.player.has_animation(c)), "%s: the file carries %s" % [key, str(CLIPS)])
 	var cases := [
 		["idle", {"grounded": true}],
@@ -77,7 +83,7 @@ func _one(main: Node, key: String) -> void:
 	if egg and hood:
 		var e := egg.get_aabb()
 		var h := hood.get_aabb()
-		var behind := e.position.z - h.position.z  # (fronts: the model faces -Z)
+		var behind := h.end.z - e.end.z  # (fronts: the .glb faces +Z)
 		var off := Vector2(e.get_center().x - h.get_center().x, e.get_center().y - h.get_center().y).length()
 		ok(
 			behind > 0.0 and behind < EGG_BEHIND and off < EGG_OFF,
