@@ -2197,7 +2197,7 @@ func _try_ledge_grab(dt: float) -> void:
 		vel.y = maxf(vel.y, HunterFeel.lrise_min)     # walking into it: under way at once
 	grounded = false
 	grap = {}
-	grap_cd = HunterFeel.ledge_cd
+	grap_cd = HunterMove.mantle_cd     # [game data] MantleCooldown 1.0 s: a mini-mantle arms it at the grab
 	push_t = 0.0
 	roll_t = 0.0
 	ClimbSfx.play(self, ClimbSfx.GRAB)
@@ -2277,21 +2277,17 @@ func teleport(p: Vector3) -> void:
 	MantleCarry.forget(self)
 	slide_n = Vector2.ZERO      # (the wall the last step pressed is not here)
 
-## A jump during a ledge rise: in the window near the top, a strong fling (higher, faster, a whoosh);
-## earlier, a weaker one. Either way toward the keys you hold (or up and onto the ledge with none).
+## A jump during a ledge rise: in the window near the top of a ledge under 3 m, the source's mini-mantle (up
+## +5 m/s over the lip, a whoosh); earlier, only just over. Either way the mantle's exit speed toward the keys
+## you hold (or onto the ledge with none), held for its post-launch push (MantleCarry.exit, fling_vy).
 func _ledge_fling() -> void:
 	var lf := lfloat
 	lfloat = {}
-	var mvv: Vector2 = inp.get("move", Vector2.ZERO)
-	var d: Vector2 = mvv.normalized() if mvv.length() > 0.3 else (lf["n"] as Vector2)
 	var hv := Vector2(vel.x, vel.z)
 	var timed: bool = lf.get("win", false)
-	var spd := HunterFeel.fling_speed if timed else base_speed
-	hv = MantleCarry.fling(self, hv, d, spd)
+	hv = MantleCarry.exit(self, hv, lf["n"], inp.get("move", Vector2.ZERO), float(lf.get("v_in", 0.0)))
 	vel.x = hv.x; vel.z = hv.y
-	# up speed to peak fling_height (or fling_early_height) over the top from wherever you are on the face
-	var left := maxf(0.0, float(lf["lip"]) + 0.12 - pos.y)
-	vel.y = sqrt(2.0 * H_GRAV * (left + (HunterFeel.fling_height if timed else HunterFeel.fling_early_height)))
+	vel.y = MantleCarry.fling_vy(float(lf["lip"]) + 0.12 - pos.y, float(lf["lip"]) - float(lf["y0"]), timed)
 	mantle_cd = 0.3
 	air_t = 0.0        # (held Space opens the glider a beat later, as after any jump)
 	stats["flings"] = int(stats.get("flings", 0)) + (1 if timed else 0)
