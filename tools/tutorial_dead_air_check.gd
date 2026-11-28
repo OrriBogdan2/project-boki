@@ -247,9 +247,10 @@ func _farm_step(g: FarmGuide, id: String, expect_id := true) -> int:
 		t += 0.1
 		var hint: bool = g.hint_visible() and g.hint_box.visible and g.hint_text() != ""
 		var marker: bool = is_instance_valid(g.marker) and g.marker.visible and g.marker.text != ""
-		_span("f_dead", not hint and not marker, 0.1)
+		var pointed: bool = marker or g.pointer.arrow_shown()  # the prompt, or the edge arrow while it is off screen
+		_span("f_dead", not hint and not pointed, 0.1)
 		if place:
-			_span("f_marker", not marker, 0.1)
+			_span("f_marker", not pointed, 0.1)
 		farm_t += 0.1
 		_calm(_farm_fresh(g, cur), 0.1, "farm", farm_t)
 		# the same two checks while Hob is being talked to (the guide steps aside)
