@@ -3,8 +3,8 @@ extends RefCounted
 ## The top of a Hunter's visible model as drawn now (skinned vertices through the skeleton's current pose), for
 ## --warden-native-check: how far a plate at HudPlate.plate_offset clears the head in each state.
 
-var _model: Node3D
 var tallest := ""  # the mesh that held the last top()
+var _model: Node3D
 var _meshes: Array = []  # [MeshInstance3D, [surface vertex arrays], [their bone indices], [their weights]]
 
 
