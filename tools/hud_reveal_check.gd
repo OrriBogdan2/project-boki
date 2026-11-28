@@ -42,6 +42,26 @@ func _shown(m: Match) -> Array:
 	return HudReveal.groups().keys().filter(func(k): return HudReveal.on(m, k))
 
 
+## The empty Merge frame (no Boki yet): none below level 6, with Tab, or from level 6 (MergeForm on).
+func _merge_frame(m: Match) -> void:
+	var p := m.player
+	var r := Rect2(Vector2.ZERO, Vector2(GripHud.BOX, GripHud.BOX))
+	p.kin = null
+	p.lvl = 1
+	var spots: Array = m.hud.hover_spots
+	var n := spots.size()
+	GripHud.boki(m.hud, p, r)
+	ok(MergeForm.enabled() and spots.size() == n, "level 1, no Boki: no empty Merge frame")
+	Input.action_press("scores")
+	GripHud.boki(m.hud, p, r)
+	ok(spots.size() == n + 1, "Tab shows the empty Merge frame")
+	Input.action_release("scores")
+	p.lvl = int(Hunter.ULT_AT[0])
+	GripHud.boki(m.hud, p, r)
+	ok(spots.size() == n + 2, "level 6, no Boki: the empty Merge frame shows")
+	p.lvl = 1
+
+
 func _frames(main: Node, n: int) -> void:
 	for i in n:
 		await main.get_tree().process_frame
@@ -90,6 +110,7 @@ func run(main: Node) -> void:
 	Input.action_press("scores")
 	ok(HudReveal.on(m, "belt_spare") and HudReveal.on(m, "ult_tiles"), "Tab shows the held-back tiles")
 	Input.action_release("scores")
+	_merge_frame(m)
 	# ---------------------------------------------------------------- 3. Tab, Show full HUD, an older save
 	Save.d["matches"] = 0
 	Input.action_press("scores")
