@@ -10,6 +10,8 @@ extends ArchKit
 
 const HEAVY_BURST_AHEAD := 0.5  # m along the shot past the bow's mouth the Heavy Shot's release burst sits
 
+const ARROW_SIZE := 0.31       # the bow draw's needle as a share of the Heavy Shot's (a loosed arrow is ~0.8 m)
+
 var rain := {}                 # the live Hail Wall: {a, b, t, tick, patter, tele}
 var draw: PinDraw             # the bow's stages, reticle, perfect release and overdraw
 var spirit: PinSpirit          # Shift: Spirit Walk
@@ -20,6 +22,8 @@ var perfects: int:
 	get: return draw.perfects if draw else 0
 var pin_aim := false           # the Heavy Shot is being held (the needle on the bow and its growing bar show)
 var needle: PinNeedle          # the Heavy Shot's needle while it's held
+var arrow: PinNeedle           # the bow draw's needle-arrow in her hand, from the draw's start until it's loosed
+var fan: PinFan                # Hemline's five needles in her fingers (the wind-up), Finishing Touch's three
 var sense: HawkSense         # the passive: hurt rivals revealed and outlined through cover
 var heavy_full_cued := false   # this Heavy Shot hold already played its full-draw cue
 var lmb_was := false           # LMB was held last frame (a fresh press drops a held Heavy Shot)
@@ -34,6 +38,12 @@ func _setup() -> void:
 	needle = PinNeedle.new()
 	h.add_child(needle)
 	self_nodes.append(needle)
+	arrow = PinNeedle.new(PinNeedle.THREAD_N / 2, ARROW_SIZE)
+	h.add_child(arrow)
+	self_nodes.append(arrow)
+	fan = PinFan.new()
+	h.add_child(fan)
+	self_nodes.append(fan)
 	draw = PinDraw.new(self)
 	ult = PinUlt.new(self)
 	h.add_child(ult)
@@ -63,19 +73,38 @@ func _tick(dt: float) -> void:
 	sense.tick(dt)
 	if pin_aim and rmb_down:
 		_heavy_tele()
+	var at := HeroVfx.of(m).anchor_pos(h, "nock")
+	var sc := float(h.cdat.get("scale", 1.0))
 	if pin_aim and rmb_down and tells_visible():
-		needle.hold(HeroVfx.of(m).anchor_pos(h, "nock"), h.aim_dir(), heavy_k(), float(h.cdat.get("scale", 1.0)), dt)
-	elif needle.visible:
-		needle.put_away()
+		needle.hold(at, h.aim_dir(), heavy_k(), sc, dt)
+	else:
+		needle.fade(at, dt)
 	if not rain.is_empty():
 		_tick_rain(dt)
 	draw.tick()
+	_tick_hand(at, sc, dt)
 	ult.tick(dt)
 	spirit.tick(dt)
 	spirit.tick_orbs(dt)
 	_tag_shots()
 	fx.tick_shots()
 	_tick_bow()
+
+## The needles in her draw hand besides the Heavy Shot's: the bow draw's arrow (from the draw's start until it is
+## loosed, or wound back into thread if the draw is cancelled) and the fan (Hemline's wind-up, Finishing Touch's
+## arrows left).
+func _tick_hand(at: Vector3, sc: float, dt: float) -> void:
+	var shown := tells_visible()
+	if shown and h.draw_t >= 0.0 and h.wpn.has("draw") and not pin_aim:
+		arrow.hold(at, h.aim_dir(), draw.fill_frac(h.draw_t), sc, dt)
+	elif arrow.visible and m.time - draw.loosed_at <= 0.1:
+		arrow.put_away()
+	else:
+		arrow.fade(at, dt)
+	var winding := float(rain.get("start", 0.0)) > 0.0
+	var total := PinFan.MAX if winding else ult.shots()
+	var wanted := total if winding else ult.left
+	fan.show_n(wanted if shown else 0, total, at, h.aim_dir(), sc, dt)
 
 ## The bow's own looks: the glowing thread string, and thread gathering at the nock while she draws.
 func _tick_bow() -> void:
@@ -302,11 +331,14 @@ func _drop_holds() -> void:
 	if anim_id in ["arc_draw", "arc_over", "arc_heavy_wind", "pin_roll", "pin_walk"]:
 		anim_id = ""
 
-func _drop_tele() -> void:
+## `loosed`: the Heavy Shot just left the bow (its needle is gone at once); else the hold was cancelled and the
+## needle winds back into thread (PinNeedle.fade, run by the next step).
+func _drop_tele(loosed := false) -> void:
 	pin_aim = false
 	heavy_full_cued = false
 	fx.bow_glint_at(Vector3.ZERO, 0.0, PinFx.THREAD)
-	needle.put_away()
+	if loosed:
+		needle.put_away()
 	AimKit.hide(h, "rmb_bar")
 
 ## Stunned or downed holding the Heavy Shot: the needle goes back and the draw pose ends, no arrow.
@@ -316,7 +348,7 @@ func _rmb_dropped() -> void:
 		anim_id = ""
 
 func fire_rmb(c: Dictionary) -> void:
-	_drop_tele()
+	_drop_tele(c.get("hold", false))
 	last_variant = String(c["variant"])
 	if not c.get("hold", false):
 		if anim_id == "arc_heavy_wind":
@@ -435,6 +467,7 @@ func _tick_rain(dt: float) -> void:
 			fx.rain_on(rain["center"], rain["d"], float(rain["radius"]), arc_deg(), float(ed["width"]),
 					float(rain["t"]))
 			m.sfx("pin_rain", rain["c"], -3.0)
+			fan.shoot_all()
 		return
 	rain["patter"] = float(rain["patter"]) - dt
 	if float(rain["patter"]) <= 0.0:

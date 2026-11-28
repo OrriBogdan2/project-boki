@@ -49,11 +49,15 @@ func xd() -> Dictionary:
 func active() -> bool:
 	return left > 0
 
+## How many arrows a cast gives (the needles she fans).
+func shots() -> int:
+	return int(xd().get("shots", 3))
+
 ## X pressed: the first arrow leaves this frame, then the bow stays empowered for the rest. A bow draw under
 ## way is dropped with no arrow. The cast's own flare and map-wide cue come with the shot, not before it.
 func cast() -> bool:
 	var x := xd()
-	left = int(x.get("shots", 3))
+	left = shots()
 	window = float(x.get("window", 6.0))
 	recover = 0.0
 	k.drop_draw()
@@ -106,6 +110,7 @@ func _loose() -> void:
 	recover = float(x.get("recover", 0.6))
 	left -= 1
 	fired += 1
+	k.fan.shoot(left)
 	var start := k.bow_mouth()
 	var aim: Vector3 = h.inp.get("aim", h.pos)
 	var dir := Vector2(aim.x - start.x, aim.z - start.z)
