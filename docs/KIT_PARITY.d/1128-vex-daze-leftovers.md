@@ -8,3 +8,5 @@ The two items `1127-vex-daze.md` left open were read against the reference kit d
 | Cinderfall burn ticks get the Daze bonus | Daze: "extra dmg from Rifle (LMB) and Railgun (E)" only; the fire zone is "59 dmg/s + Slow" with no Daze rider | left as is: impact only (the 11-27 +20% on the impact and Coin Blast is already beyond the card; not reverted here) |
 
 The `1127-vex-daze.md` line "Not changed, still open" is closed by this note: both are source-silent, not gaps. No code, data or check changed. Cooldown rows untouched (RMB 6.5, X 42).
+
+Rechecked 11-28 against the source rows (`sv/briefs/kits.md` RMB card; Daze names only Rifle and Railgun). Checks on this tree (docs-only over main 7e6d3b5): `--vex-daze-check` 9/9; `--gunslinger-combo-check` 153 run, the 5 known fails as main (`1126-vex-recheck.md`), `RMB wall cone ... the cooldown is not shaved` PASS; `--card-numbers-check` 349/349; `health.py --strict` OK; `gen_wiki.py --check` red on `docs/wiki/Rules.md`, same on main.
