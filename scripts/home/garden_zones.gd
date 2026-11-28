@@ -60,6 +60,13 @@ static func landing(opts: Dictionary) -> String:
 static func zone_of(rec: Dictionary) -> String:
 	return String(rec.get("zone", start()))
 
+## Does the zone shown now hold the Nesting Nook and its Incubator? With the garden on they are the hub's alone
+## (HubLayout.DECO); with it off they stand on the one farm, which is the start zone.
+static func holds_nook() -> bool:
+	if here == HUB:
+		return true
+	return not FarmUnlocks.base_mode() and current() == start()
+
 static func is_open(id: String) -> bool:
 	return bool(Save.d.get("zones", fresh()).get(id, {}).get("open", false))
 

@@ -68,7 +68,24 @@ static func arrival(work: Array = []) -> Array:
 	for line in GardenAway.arrive(zone_since, now, zone):
 		found.append([now, zone, line])      # after the sorted journal lines, under the zone arrived in
 	var out := ZoneAway.grouped(work, found)
-	for egg in Incubator.ready_eggs():
-		out.append("A %s is ready to hatch" % Incubator.egg_name(egg))
+	out.append_array(_ready_egg_lines())
 	out.append_array(GardenVisitor.arrival_lines(now))
+	return out
+
+## "A <egg> is ready to hatch": once per ready egg (its id is kept in Save.d["egg_told"], a list; an old save has
+## none and the egg is told once more), and only on arriving where the Nook stands (GardenZones.holds_nook), so
+## another zone's arrival never repeats it. Told ids of eggs that hatched or left are dropped.
+static func _ready_egg_lines() -> Array:
+	var ready := Incubator.ready_eggs()
+	var ids: Array = ready.map(func(e): return String(e.get("id", "")))
+	var told: Array = Save.d.get("egg_told", []).filter(func(id): return String(id) in ids)
+	var out: Array = []
+	if GardenZones.holds_nook():
+		for egg in ready:
+			var id := String(egg.get("id", ""))
+			if id == "" or id not in told:
+				out.append("A %s is ready to hatch" % Incubator.egg_name(egg))
+				if id != "":
+					told.append(id)
+	Save.d["egg_told"] = told
 	return out
