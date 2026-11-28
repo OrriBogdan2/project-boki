@@ -9,6 +9,7 @@ const READ_WPS := 3.5  # words/s a new player reads at (about 210 words a minute
 const REACT_S := 0.45  # s from the end of reading to the first input
 const MISS_RATE := 0.3  # share of 0.5 s aim windows that land MISS_OFF to the side
 const MISS_OFF := 3.0  # m a missed aim is off the target
+const LEDGE_DROP := 1.5  # m: a monster this far below the player cannot be shot from where they stand (a cliff top)
 const MISS_WINDOW := 0.5  # s one aim roll holds
 
 const LOOKOUT_OFF := 7.0  # m west of the lookout's stop: where a bot that got up without a kick walks off to retry
@@ -217,7 +218,8 @@ static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 		reach = 9.0
 	elif sid == "kin" and not tu.flag:
 		reach = 14.0  # (the E line reaches the row from where you stand)
-	if p.flat_dist(best) > reach:
+	# (the pack step: a monster far below the ledge the player stands on is out of reach however near it is: walk down)
+	if p.flat_dist(best) > reach or (sid == "pack" and p.pos.y - best.pos.y > LEDGE_DROP):
 		goto.call(best.pos)
 	match sid:
 		"shoot":
