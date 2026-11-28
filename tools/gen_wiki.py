@@ -491,12 +491,20 @@ def gen_boki():
         gd_const("core/care.gd", "IV_INHERIT"), gd_const("core/care.gd", "IV_RARE_HIGH"), gd_const("core/care.gd", "IV_RARE_FLOOR"))
     b += table(["IV", "Affects", "Most it adds (at 31)"], [[v["name"], v["desc"], "+%d%%" % round(ivb.get(k, 0) * 100)] for k, v in ivs.items()])
     tr = gd_const("core/care.gd", "STATS") or {}
-    b += "\n\n## Trained stats\n\nRaised by giving stat bites (carried home from expeditions, won in a few limited races and drills a day).\n\n" + table(["Stat", "Per point", "Drill"], [[v["name"], v["desc"], v["drill"]] for v in tr.values()])
+    b += "\n\n## Trained stats\n\nRaised by going on expeditions (its leaning's stat takes the larger share) and by giving stat bites (carried home from expeditions, won in a few limited races and drills a day).\n\n" + table(["Stat", "Per point", "Drill"], [[v["name"], v["desc"], v["drill"]] for v in tr.values()])
+    ps = load_json(os.path.join(ROOT, "content", "rules", "playstyle.json"))
+    grow = ps["run_growth"]
+    b += "\n\n## Leaning\n\nHow a Boki is played with gives it a leaning: the affinity it has earned the most points in. Garden play and care give a few points (at most %s a Boki a day) and never a stat point; what it does on expeditions gives the most. " % num(ps["garden"]["day_cap"])
+    b += "An expedition it went on grows its stats by %s units when you got out and %s when you did not (the second Boki you brought: %d%% of that). A stronger leaning sends more of that to its stat, steers a branching final and rolls its own body parts more often.\n\n" % (
+        num(grow["extracted"]), num(grow["lost"]), round(grow["second_k"] * 100))
+    b += table(["Leaning", "Stat it focuses", "Signature part"], [[a.title(), tr.get(st, {}).get("name", st), ps["signature"][a].replace("_", " ")] for a, st in ps["stat"].items()])
+    b += "\n\n" + table(["Tier", "Leads the next affinity by", "Its stat's share of expedition growth", "Path meter pips", "Mutation from another affinity", "Signature part"],
+        [[t["word"], num(t["at"]), "%d%%" % round(t["focus"] * 100), num(t["path_pips"]), "%d%%" % round(t["stray"] * 100), "yes" if t["signature"] else "no"] for t in ps["tiers"]])
     nat = gd_const("core/care.gd", "NATURES") or {}
     if nat:
         b += "\n\n## Natures\n\nA Boki's nature comes from its two strongest traits.\n\n" + table(["Traits", "Nature"], [[k.replace("+", " + "), v] for k, v in nat.items()])
     page("Boki-Growth.md", "Boki growth: evolution, mutations, bonds and gifts", b,
-         ["content/rules/evolve.json", "content/evolution_v2", "content/mutations", "scripts/core/care.gd"])
+         ["content/rules/evolve.json", "content/rules/playstyle.json", "content/evolution_v2", "content/mutations", "scripts/core/care.gd"])
 
 # ------------------------------------------------------------------ gear
 def gen_gear():

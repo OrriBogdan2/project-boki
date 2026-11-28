@@ -8,19 +8,23 @@ const PORTRAIT_PX := 36.0
 const BOND_SHOWN := 0.5  # bond points; a smaller change reads as "unchanged"
 
 
-## "+80 XP, bond up 3": plain words for one Boki's gains.
-static func gain_text(xp: int, bond: float) -> String:
+## "+80 XP, bond up 3, Power +2": plain words for one Boki's gains (stats: the points this expedition taught
+## it, PlayStyle.run_growth).
+static func gain_text(xp: int, bond: float, stats := {}) -> String:
 	var b := "bond unchanged"
 	if absf(bond) >= BOND_SHOWN:
 		b = "bond %s %d" % ["up" if bond > 0.0 else "down", int(round(absf(bond)))]
-	return "+%d XP, %s" % [xp, b]
+	var out := "+%d XP, %s" % [xp, b]
+	for stat in stats:
+		out += ", %s +%d" % [Care.STATS[stat]["name"], int(stats[stat])]
+	return out
 
 
 ## Every line's text, in order: the Boki you brought, then the wisps you carried home.
 static func texts(s: Dictionary) -> Array[String]:
 	var out: Array[String] = []
 	for g in s.get("kin_gains", []):
-		out.append("%s  %s" % [String(g["kin"]["name"]), gain_text(int(g["xp"]), float(g["bond"]))])
+		out.append("%s  %s" % [String(g["kin"]["name"]), gain_text(int(g["xp"]), float(g["bond"]), g.get("stats", {}))])
 	for w in s.get("wisps_home", []):
 		out.append("%s  going home" % String(w.get("name", "A wisp")))
 	return out

@@ -17,4 +17,5 @@ const CHECKS := {
 	"--match-grade-check": ["res://tools/match_grade_check.gd", "match_grade_check", null],  # grade data
 	"--hunter-grade-shots": ["res://tools/hunter_grade_shots.gd", "hunter_grade_shots", null],  # grade
 	"--summon-end-sfx-check": ["res://tools/summon_end_sfx_check.gd", "summon_end_sfx_check", null],  # end warning
+	"--playstyle-check": ["res://tools/playstyle_check.gd", "playstyle_check", null],  # leaning, stat focus
 }
