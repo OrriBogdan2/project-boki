@@ -63,15 +63,16 @@ func run(main_node: Node) -> void:
 func _gear_box(p: Hunter, q: Hunter) -> void:
 	INV_SHOTS.dress(p)
 	p.pack_cap = 6
-	var bx: Dictionary = load("res://tools/loot_full_check.gd").make_box(q, p.pos, [Loot.gear("blink", 3), Loot.valuable("sky_pearl")])
+	var things: Array = [Loot.gear("blink", 3), Loot.valuable("sky_pearl")]
+	var bx: Dictionary = load("res://tools/loot_full_check.gd").make_box(q, p.pos, things)
 	bx["gear"] = [{"id": "vest", "rar": 3}, {"id": "boots", "rar": 0}]
 	m.boxes.append(bx)
 	m.hud.open_loot(bx)
 	await _frames(6)
 	var w: LootWindow = m.hud.loot_panel
 	var rows := w.find_children("*", "PanelContainer", true, false).filter(
-		func(c): return c.get_parent() is HBoxContainer and (c as Control).mouse_filter == Control.MOUSE_FILTER_STOP)
-	var glove: Control = rows.filter(func(c): return _has_text(c, "Blink"))[0]
+		func(c): return (c as Control).custom_minimum_size.y == LootWindow.ROW_H and _has_text(c, "Blink"))
+	var glove: Control = rows[0]
 	glove.mouse_entered.emit()
 	await _frames(4)
 	await _shot("gear_box", "A deathbox of gear: slot and key tags, rarity colours, Wear on a better piece, Swap on a "

@@ -11,7 +11,7 @@ extends PanelContainer
 const INK := Color("f3eee2")
 const MUTED := Color("a9b0bf")
 const GOOD := Color("8fe0a0")
-const COL_W := 380.0        # px, width of each column
+const COL_W := 450.0        # px, width of each column (a gear row carries its slot, key and UPGRADE tags)
 const ROW_H := 40.0         # px, every row is one line this tall
 const ICON := 22.0          # px, item glyphs
 ## px of screen height kept clear of the window's lists: the top counters, the bottom-right weapon and

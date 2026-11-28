@@ -18,7 +18,9 @@ static func slot_label(slot: int) -> String:
 
 ## One changed number as a card line: a green up arrow when it is better, a red down arrow when worse.
 static func change_line(text: String, better: bool) -> Array:
-	return ["%s %s" % ["▲" if better else "▼", text], GOOD if better else BAD]
+	if better:
+		return ["▲ " + text, GOOD]
+	return ["▼ " + text, BAD]
 
 ## Hover card for a piece of gear (not worn yet): what it does and how it differs from what you wear.
 static func compare(h: Hunter, it: Dictionary) -> Array:
