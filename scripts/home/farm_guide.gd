@@ -6,11 +6,11 @@ extends RefCounted
 ## step face to face: HobTalk). The rules are FarmTutorial; none of it shows when visiting. Skipping puts
 ## the house down as a site if it isn't, so a skipper isn't stuck.
 
-const DONE_TICK_S := 1.6      # s the "Done!" stays on the goal line before fading
+const DONE_TICK_S := 1.6  # s the "Done!" stays on the goal line before fading
 
 var h
 var tracker: PanelContainer = null
-var hint_box: StripView = null      # the one objective strip (TutorialStrip), as on the match HUD
+var hint_box: StripView = null  # the one objective strip (TutorialStrip), as on the match HUD
 var skip_row: HBoxContainer = null
 var marker: Label3D = null
 var crop_lbl: Label3D = null
@@ -18,23 +18,27 @@ var sig := ""
 var t := 0.0
 var detect_t := 0.0
 var asking := false
-var stay_shown := false      # the base's last step offers Stay beside Skip
-var quiet := false      # set while you talk to Hob: the card, the goal line and the world prompts step aside
+var toy_given := false  # the base's toy step puts one ball down for you, once per visit
+var name_asked := false  # the naming card opens once per visit
+var quiet := false  # set while you talk to Hob: the card, the goal line and the world prompts step aside
 var tree_t := 0.0
 var tree_at := Vector3.INF
 var tab_for := ""
 var tree_what := ""
-var done_t := 0.0     # s left of the "Done!" in front of the strip line
-var done_seen := -1     # steps done when last looked at (-1: not yet), to tick one off when it goes up
+var done_t := 0.0  # s left of the "Done!" in front of the strip line
+var done_seen := -1  # steps done when last looked at (-1: not yet), to tick one off when it goes up
+
 
 func _init(home) -> void:
 	h = home
+
 
 func build_ui() -> void:
 	if h.root_ui == null:
 		return
 	BaseCard.attach(h)
 	refresh()
+
 
 ## Rebuilds the card and the hint now.
 func refresh() -> void:
@@ -49,6 +53,7 @@ func refresh() -> void:
 		tracker.visible = not quiet
 	_refresh_hint()
 
+
 ## Steps the guidance aside (quiet) or back: the Goals card, the goal line, the world prompt and crop label.
 ## Coming back, the world prompt and crop label show only if the step on now has them (not the last step's).
 func set_quiet(on: bool) -> void:
@@ -61,6 +66,7 @@ func set_quiet(on: bool) -> void:
 	if not on:
 		_update_marker(0.0)
 
+
 ## G: the Goals line opens into the whole list and back. False when there is no card (the tutorial runs).
 func toggle_goals() -> bool:
 	if not is_instance_valid(tracker):
@@ -69,8 +75,10 @@ func toggle_goals() -> bool:
 	refresh()
 	return true
 
+
 func _sig() -> String:
 	return "%s|%s" % [FarmTutorial.active(), GoalTracker.signature()]
+
 
 func tick(dt: float) -> void:
 	if not h.visit.is_empty():
@@ -86,6 +94,7 @@ func tick(dt: float) -> void:
 	_update_marker(dt)
 	_bubbles_under_lane(dt)
 
+
 func _poll() -> void:
 	var was_done := bool(FarmTutorial.state()["done"])
 	if FarmTutorial.active():
@@ -95,11 +104,13 @@ func _poll() -> void:
 		if FarmTutorial.current() in ["feed", "eat"]:
 			FarmTutorial.give_food()
 		var cur := FarmTutorial.current()
+		if FarmTutorial.base() and h.panel_open == "":
+			_base_hands_on(cur)
 		var tool := FarmTutorial.give_step_tool(cur) if cur != "" and h.panel_open == "" else ""
 		if tool != "":
 			h._toast(String(FarmTutorial.rules()["tool_toasts"].get(tool, "")))
 		if (cur == "buy" or cur == "sell") and cur != tab_for:
-			tab_for = cur      # the market opens on the tab the step wants
+			tab_for = cur  # the market opens on the tab the step wants
 			h.hmk.vendor_tab = "Seeds" if cur == "buy" else "Sell"
 		if cur == "buy":
 			var gave := FarmTutorial.give_seed_gems()
@@ -119,6 +130,7 @@ func _poll() -> void:
 	FarmSpotlight.sync(h, quiet)
 	_tick_off_done()
 
+
 ## A green "Done!" on the strip's line for a moment when a step has just been finished.
 func _tick_off_done() -> void:
 	var n := FarmTutorial.done_count()
@@ -128,9 +140,11 @@ func _tick_off_done() -> void:
 		done_t = DONE_TICK_S
 		_refresh_hint()
 
+
 # ------------------------------------------------------------------ the hint line
 func hint_visible() -> bool:
 	return is_instance_valid(hint_box)
+
 
 ## Is the player next to their Boki (the base's first step)?
 func _near_boki() -> bool:
@@ -140,33 +154,40 @@ func _near_boki() -> bool:
 	var at: Vector3 = ke["node"].position
 	return Vector2(h.ppos.x - at.x, h.ppos.z - at.z).length() < float(FarmTutorial.rules()["base"]["near"])
 
+
 ## Where the farm's toasts start: the usual 100 px, or under the goal line (which wraps at big text sizes).
 func toast_top() -> float:
 	if not hint_visible():
 		return 100.0
 	return maxf(152.0, hint_box.rect().end.y + 8.0)
 
+
 func _refresh_hint() -> void:
 	var id := FarmTutorial.current()
-	if id == "":      # base mode too: the tutorial line keeps its Skip (--tutorial-skip-check)
+	if id == "":  # base mode too: the tutorial line keeps its Skip (--tutorial-skip-check)
 		_clear_hint()
 		return
 	if not is_instance_valid(hint_box):
 		_make_hint()
 		hint_box.visible = not quiet
-	if (id == "out") != stay_shown:
-		_skip_buttons()
 	var s := FarmTutorial.hint_text(id)
-	if id in ["house", "hammer"] and not FarmHob.house_entry().is_empty():      # every swing shows on the line
+	if id in ["house", "hammer"] and not FarmHob.house_entry().is_empty():  # every swing shows on the line
 		s = "%s (%s)" % [s, _site_progress()]
 	var txt := s.strip_edges()
-	hint_box.set_line({"text": ("\u2713 Done!  " if done_t > 0.0 else "") + txt,
-			"count": "%d/%d" % [FarmTutorial.done_count() + 1, FarmTutorial.steps().size()]}, id)
+	hint_box.set_line(
+		{
+			"text": ("\u2713 Done!  " if done_t > 0.0 else "") + txt,
+			"count": "%d/%d" % [FarmTutorial.done_count() + 1, FarmTutorial.steps().size()]
+		},
+		id
+	)
 	_place_skip()
+
 
 ## The line the strip shows now (the checks read it).
 func hint_text() -> String:
 	return String(hint_box.line.get("text", "")) if is_instance_valid(hint_box) else ""
+
 
 func _clear_hint() -> void:
 	if is_instance_valid(hint_box):
@@ -176,11 +197,13 @@ func _clear_hint() -> void:
 		marker.queue_free()
 	marker = null
 
+
 func _site_progress() -> String:
 	var e := FarmHob.house_entry()
 	if e.is_empty() or not FarmSites.has_site(e):
 		return "done"
 	return "%d/%d swings" % [int(e["site"]["got"]), int(e["site"]["need"])]
+
 
 func _make_hint() -> void:
 	hint_box = StripView.new()
@@ -190,29 +213,52 @@ func _make_hint() -> void:
 	_skip_buttons()
 	h.root_ui.add_child(hint_box)
 
+
+## The base steps that put something in front of you: the toy is set down for you (building stays optional),
+## and the naming card opens once when "name" comes up.
+func _base_hands_on(cur: String) -> void:
+	if cur == "toy" and FarmTutorial.toy_spot().x == INF and not toy_given:
+		toy_given = true
+		place_toy()
+	elif cur == "name" and not name_asked:
+		name_asked = true
+		TutNameCard.open(h)
+
+
 ## Skip sits just under the strip's right end: small, and out of the way of the world.
 func _place_skip() -> void:
 	var r := TutorialStrip.rect(h.root_ui.get_viewport_rect().size)
 	skip_row.position = Vector2(r.end.x - skip_row.size.x, r.end.y + 6.0)
 
+
 func _skip_buttons() -> void:
 	for c in skip_row.get_children():
 		c.queue_free()
-	stay_shown = FarmTutorial.base() and FarmTutorial.current() == "out"
-	if stay_shown:
-		skip_row.add_child(UI.button(String(FarmTutorial.rules()["stay_label"]), func(): FarmTutorial.event("stay"), 0))
 	if not FarmTutorial.skippable():
 		return
 	if not asking:
-		skip_row.add_child(UI.button(String(FarmTutorial.rules()["skip_label"]), func():
-			asking = true
-			_skip_buttons(), 0))
+		skip_row.add_child(
+			UI.button(
+				String(FarmTutorial.rules()["skip_label"]),
+				func():
+					asking = true
+					_skip_buttons(),
+				0
+			)
+		)
 		return
 	skip_row.add_child(UI.label(String(FarmTutorial.rules()["skip_ask"]), 14, UI.MUTED))
 	skip_row.add_child(UI.button("Yes", func(): skip(), 0))
-	skip_row.add_child(UI.button("No", func():
-		asking = false
-		_skip_buttons(), 0))
+	skip_row.add_child(
+		UI.button(
+			"No",
+			func():
+				asking = false
+				_skip_buttons(),
+			0
+		)
+	)
+
 
 ## Skips the tutorial: nothing is taken; the house is put down as a site if it isn't, with the materials it
 ## needs handed over so it can still be built. In the base a toy is put down instead and the food is handed over.
@@ -233,15 +279,18 @@ func skip() -> void:
 	h.hob.sync()
 	h._refresh_top()
 
+
 ## The tutorial's house spot: from the landing, as the data says.
 func house_spot() -> Vector3:
 	var sp: Dictionary = FarmTutorial.rules()["house_spot"]
 	return HomeLayout.LANDING + Vector3(float(sp["x"]), 0, float(sp["z"]))
 
+
 ## Puts the house down as a construction site on the free ground nearest the suggested spot (marking it
 ## out costs nothing; the materials are spent as it goes up).
 func place_house() -> bool:
 	return _place("house", house_spot())
+
 
 ## The base's skip: a toy near the landing, from the inventory so it costs nothing.
 func place_toy() -> bool:
@@ -249,6 +298,7 @@ func place_toy() -> bool:
 	var inv: Dictionary = h.hb.L()["inv"]
 	inv[id] = int(inv.get(id, 0)) + 1
 	return _place(id, HomeLayout.LANDING + Vector3(3, 0, -3))
+
 
 func _place(id: String, p: Vector3) -> bool:
 	var hb: HomeBuild = h.hb
@@ -277,6 +327,7 @@ func _place(id: String, p: Vector3) -> bool:
 		hb.close_ui()
 	return found
 
+
 # ------------------------------------------------------------------ the world prompt
 ## Where a step's work is (its marker; Hob points there when he explains it).
 func target(id: String) -> Vector3:
@@ -298,24 +349,26 @@ func target(id: String) -> Vector3:
 			return Vector3(float(fs[0]["x"]), 0, float(fs[0]["z"])) if not fs.is_empty() else Vector3.INF
 		"crop":
 			if FarmTutorial.stage(id) == "patch":
-				return _water_spot()      # the patch goes by the water
+				return _water_spot()  # the patch goes by the water
 			var planted: bool = not h.plots.is_empty() and FarmTutorial.stage(id) != "patch_dry"
 			return h.plots[0].position if planted else Vector3.INF
-		"task", "meet", "eat":
+		"task", "meet", "pet", "eat":
 			var ke: Dictionary = h._kin_entry(Save.active_kin())
 			return (ke["node"] as Node3D).position if not ke.is_empty() else Vector3.INF
 		"toy":
 			return FarmTutorial.toy_spot()
 		"hob":
 			return h.hob.pos
-		"expedition", "out":
+		"expedition":
 			return h.spots["portal"]
 	return Vector3.INF
+
 
 ## The water tile nearest the player (where the tutorial says to put the crop patch).
 func _water_spot() -> Vector3:
 	var c := FarmWater.nearest(Save.d, Vector2(h.ppos.x, h.ppos.z))
 	return Vector3(c.x + 0.5, 0, c.y + 0.5) if c.x >= 0 else Vector3.INF
+
 
 ## The wild tree or boulder nearest the player (the tutorial's chop and mine markers); looked up twice a second at most.
 func _nearest_wild(what: String) -> Vector3:
@@ -336,6 +389,7 @@ func _nearest_wild(what: String) -> Vector3:
 			tree_at = at
 	return tree_at
 
+
 ## A growth bar and countdown over the first patch while a seed grows, whatever step is showing.
 func _update_crop_label() -> void:
 	var g := {} if FarmTutorial.base() else FarmCropGuide.growing()
@@ -355,6 +409,7 @@ func _update_crop_label() -> void:
 	crop_lbl.visible = true
 	crop_lbl.text = "Growing\n" + FarmCropGuide.bar_text(g)
 	crop_lbl.position = (h.plots[int(g["plot"])] as Node3D).position + Vector3(0, 2.2, 0)
+
 
 func _update_marker(dt: float) -> void:
 	if quiet:
@@ -382,6 +437,7 @@ func _update_marker(dt: float) -> void:
 	marker.position = at + Vector3(0, 3.6 + sin(t * 3.0) * 0.18, 0)
 	_yield_to_covers(dt)
 
+
 ## A Boki's speech bubble fades back while a message card (MsgLane) covers it on screen.
 func _bubbles_under_lane(dt: float) -> void:
 	var cards := MsgLane.of(h.root_ui).rects()
@@ -389,6 +445,7 @@ func _bubbles_under_lane(dt: float) -> void:
 		var say: Label3D = k.get("say")
 		if say and say.visible:
 			MsgLane.yield_label(say, h.cam, cards, dt)
+
 
 ## The marker fades back while a Boki's speech bubble or a message card covers it on screen, so two
 ## lines never print over each other; it comes back when the Boki is done talking and the card goes.
