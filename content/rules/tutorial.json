@@ -157,7 +157,7 @@
  },
  "need": {},
  "cds": 0.25,
- "summon_cd_mult": 0.33,
+ "summon_cd_mult": 0.15,
  "mob": {
   "scale": 1.4,
   "dmg": 0.1,
@@ -188,7 +188,6 @@
   },
   "sec": {
    "foes": [
-    "skitter",
     "skitter"
    ],
    "to": 2
@@ -217,7 +216,6 @@
   "kin": {
    "foes": [
     "skitter",
-    "skitter",
     "skitter"
    ],
    "to": 4,
@@ -226,8 +224,7 @@
   },
   "hook": {
    "foes": [
-    "sentinel",
-    "skitter"
+    "sentinel"
    ],
    "to": 6,
    "far": true

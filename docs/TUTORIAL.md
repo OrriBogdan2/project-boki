@@ -89,6 +89,14 @@ same: E fired through a line of monsters, a fuse and a fight while fused, holdin
 per starter (`--tutorial-fight-check`) went from 41/53/35 s (Lace/Kael/Vex) to 17/38/17 s, so its floor `FIGHT_MIN` is 12 s
 (it was 30). The longest step is now `glove` (7 to 12 s: the walk over the bridge to the glove).
 
+### Over-target steps trimmed (`ext/tut-pace-trim`, 2026-11-28, main `a90587dfa9`)
+
+`defend` is already 8 s (the table above); the course is 21 steps now (`summon`, `pack` for the wisp Boki). Target 8 s a step. Cut:
+`pack` (the Boki's cooldown, `summon_cd_mult` 0.33 -> 0.15), `sec` 2 -> 1 skitter, `kin` row 3 -> 2, `hook` camp loses its skitter.
+Sums of the step rows with `--tutorial-playthrough-check --starter=archer|juggernaut|gunslinger`: Lace 87.5 -> 66.0 s,
+Kael 114.7 -> 107.0 s (3 runs after: 102.2 to 113.0, a small gain; noisy: `sec`/`kin`/`hook` run 1 to 18 s from run to run), Vex 74.9 -> 58.4 s. `--tutorial-timing-check` Vex:
+`pack` 19.4 -> 8.6 s, `sec` 3.0 -> 1.0 s, `hook` 3.8 -> 1.8 s. Full before/after table: `docs/TUTORIAL_PACE.md` section 0b.
+
 ## 3. Farm tutorial (11 rows) and garden first day (5 lines)
 
 | Step | Time s | Kind | Words | Read s | Keys named | Flags | Text on screen |

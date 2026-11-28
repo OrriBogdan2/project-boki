@@ -33,6 +33,33 @@ first pick is made for you (fight check), a hint step has no chime or banner wid
 banner steps. One driver fix: `TutorialDrive` never cleared `sec_hold`, so a `sec` step that ended mid-hold left the right click held
 and the Juggernaut could not open its glider (main passed by timing luck; the shorter course exposed it).
 
+## 0b. Trim over-target steps (`ext/tut-pace-trim`, 2026-11-28)
+
+Re-measured on main `a90587dfa9`. The old example (the 14 s fixed uplink capture) is already cut: `Exits.TUT_UPLINK_T` is 8 s
+(`ext/tut-slowest-three`). **Target: 8 s of sim a step for the instant driver** (`--tutorial-playthrough-check`, which fails past 40 s);
+over that the step is trimmed. Over target on main, three starters (`--tutorial-playthrough-check --starter=...`, game seconds; the
+first-pick Vex run is the gunslinger):
+
+| Step | Over because | Change | Before s (Lace / Kael / Vex) | After s (Lace / Kael / Vex) |
+|---|---|---|---|---|
+| `pack` | the Boki's cooldown ring (`summon_cd_mult` 0.33 of 55 to 85 s) had to turn bright before the 2nd summon | `summon_cd_mult` 0.33 -> 0.15: the ring is bright about 8 s after the first window | 19.9 / 19.3 / 19.8 | 8.3 / 11.3 / 8.4 |
+| `sec` | a camp of 2 skitters at 2.5x health to clear; one cast is the lesson | `camps.sec` 2 -> 1 skitter | 6.7 / 16.2 / 3.0 | 3.9 / 12.2 / 1.0 |
+| `kin` | a row of 3 | `camps.kin` 3 -> 2 skitters (a row still needs two to line up) | 2.8 / 18.1 / 2.7 | 0.9 / 17.7 / 1.3 |
+| `hook` | a Sentinel plus a skitter; the hook on the Sentinel is the lesson | `camps.hook` drops the skitter | 7.1 / 11.3 / 3.8 | 3.3 / 11.8 / 1.8 |
+
+Unchanged and left on purpose: `defend` 8.0 (the 8 s capture is the target; one wave must arrive), `shoot` (2 skitters; the panel's
+`0/2` counter, `--tutorial-hud-check`, needs two), `glove` 5 to 7 s (a walk over a bridge), `summon` 3 to 5 s. Kael (Juggernaut)
+stays over target on `sec`, `kin` and `hook` in some runs: his melee kit and its run-to-run spread are 1 to 18 s on the same step with
+the same build, so read one run as noise. Course totals (sum of the step rows, one run per starter): Lace 87.5 -> 66.0 s,
+Kael 114.7 -> 107.0 s (3 runs after: 102.2 to 113.0; his `pack` 11.3, 15.8, 17.3 s), Vex 74.9 -> 58.4 s. `--tutorial-timing-check` (Vex, instant driver): `pack` 19.4 -> 8.6 s, `sec` 3.0 -> 1.0 s,
+`hook` 3.8 -> 1.8 s, `summon` 5.3 -> 2.5 s; `kin` 1.8 -> 2.0 s and `glove` 6.8 -> 7.3 s are noise.
+
+**Human pace (`--tutorial-pace-check`, same run, before -> after):** `sec` 12.1 -> 5.1 s, `hook` 11.7 -> 6.6 s, `extract` 2.2 -> 0.0 s;
+`pack` 25.2 -> 24.9 s (no gain: the human drive spends it reading the ring lines, 19.7 s of it, not waiting on the cooldown),
+`dash` 11.4 -> 18.4, `kin` 14.2 -> 16.8, `glove` 10.1 -> 11.1 (noise: missed aim windows). Whole run 838 -> 833 s over 41 beats; the
+run is dominated by the 284 s Uplink wait, the hatch and the Relic, which this change does not touch. So the trim helps the
+instant driver and fights; the human `pack` reading (the ring lines) is still open.
+
 ## 1. How it was measured
 
 `godot --headless --path . -- --tutorial-pace-check` (tool: `tools/tutorial_pace_check.gd`, a subclass of `--new-player-flow-check`).
