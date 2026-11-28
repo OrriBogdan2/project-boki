@@ -1,4 +1,4 @@
-# 0179: Wall stuns scale with the charge and the impact speed
+# 0181: Wall stuns scale with the charge and the impact speed
 
 - **Status:** accepted (kit-parity pass 11-27)
 - **Date:** 2026-11-27

@@ -1,5 +1,5 @@
 extends "res://tools/archetype_check.gd"
-## --kit-cc-scale-check: the wall-stun lengths of decision 0179. A plain knock's wall slam stuns longer the
+## --kit-cc-scale-check: the wall-stun lengths of decision 0181. A plain knock's wall slam stuns longer the
 ## harder it hits (KnockWall.slam_stun, 0.4 -> 1.2 s), the Heavy Shot's pin and the Storm Rod's wall stun grow
 ## with their charge.
 ## Prints AKCHECK lines.
