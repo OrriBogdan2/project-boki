@@ -11554,3 +11554,4 @@ READY ext/kit-parity-catalog-rows ffb0aeab9a (docs-only: Catalog 11-27 parity ta
 READY ext/motley-snap-swap 46fc113806 (Motley Trade slows swapped foes 0.6x for 3s as data via KitStatus; Snap burst already on main, length asserted; ostra-combo 286/0, motley-live 0, health OK)
 READY ext/lace-spirit-end-rules 80fa6d7b5c (Lace Spirit Walk: 2 combo-check rows, hit ends it in 1 frame + rock expiry leaves her on free ground; rules already on main 40f7865d8)
 READY ext/pronoun-lint-hunters f3a5b48a63289f811a59caa994d006decc13d3cc (pronoun lint in old_names_lint.py via health.py; 5 hits fixed)
+READY ext/kit-invuln-windows 6b5c8f0d77 (KIT_PARITY Invulnerability windows per Hunter + --invuln-window-check 96/0; no data mismatches to fix)
