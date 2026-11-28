@@ -84,6 +84,7 @@
 				"place": {
 					"hub": "build",
 					"tile": "house",
+					"click": "Click here",
 					"tab": "Buildings"
 				}
 			}
@@ -139,6 +140,7 @@
 				"place": {
 					"hub": "build",
 					"tile": "feeder_trough",
+					"click": "Click here",
 					"tab": "Buildings"
 				}
 			}

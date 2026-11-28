@@ -7,30 +7,38 @@ extends Node3D
 ## Poses: "idle", "talk", "wave", "point" (turns to point_at), "hammer", "walk"; a pose without a clip plays idle.
 
 const PATH := "res://art/npcs/%s/%s.glb"
-const TURN_RATE := 6.0         # 1/s: how fast the NPC turns to face someone
-const SHOUT_S := 2.6           # s a called-out line stays over the head
-const BLEND_S := 0.25          # s a pose change cross-fades
-const INK_WIDTH := 0.0011      # the outline per metre of camera distance (as a rigged Boki's)
+const TURN_RATE := 6.0  # 1/s: how fast the NPC turns to face someone
+const SHOUT_S := 2.6  # s a called-out line stays over the head
+const BLEND_S := 0.25  # s a pose change cross-fades
+const INK_WIDTH := 0.0011  # the outline per metre of camera distance (as a rigged Boki's)
 const INK_FAR_THIN := 0.5
+const OUTLINE_PX := 8  # px of the dark edge round the overhead text (a thick one swallowed the letters)
+const OUTLINE_COLOUR := Color(0.06, 0.05, 0.09, 0.95)
+const PLATE_COLOUR := Color(0.07, 0.06, 0.1, 0.8)
+const PLATE_PAD_M := 0.22  # m of dark plate round a called-out line
 
 var id := ""
 var pose := "idle"
-var point_at := Vector3.INF    # world point the "point" pose turns to
-var face_to := Vector3.INF     # world point the NPC turns to face (INF: keeps the heading)
+var point_at := Vector3.INF  # world point the "point" pose turns to
+var face_to := Vector3.INF  # world point the NPC turns to face (INF: keeps the heading)
 var tag: Label3D
 var mark: Label3D
 var bubble: Label3D
 var anim: AnimationPlayer = null
+var _plate: MeshInstance3D  # the dark plate behind a called-out line
 var _spec: Dictionary = {}
 var _t := 0.0
 var _shout_t := 0.0
 var _playing := ""
 
+
 static func spec(npc_id: String) -> Dictionary:
 	return Content.rules("npcs").get(npc_id, {})
 
+
 static func has(npc_id: String) -> bool:
 	return ResourceLoader.exists(PATH % [npc_id, npc_id])
+
 
 func _init(npc_id: String, shown_name := "") -> void:
 	id = npc_id
@@ -39,17 +47,24 @@ func _init(npc_id: String, shown_name := "") -> void:
 	_body()
 	_labels(shown_name if shown_name != "" else String(_spec.get("name", name)))
 
+
 ## Calls a line out over the head for a moment ("Hey! Over here!").
 func shout(line: String) -> void:
 	bubble.text = line
+	var text_px := ThemeDB.fallback_font.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, bubble.font_size)
+	var text_m := text_px * bubble.pixel_size
+	_plate.scale = Vector3(text_m.x + PLATE_PAD_M * 2.0, text_m.y + PLATE_PAD_M, 1.0)
 	bubble.visible = true
 	_shout_t = SHOUT_S
+
 
 func height() -> float:
 	return float(_spec.get("height", 1.8))
 
+
 func _ready() -> void:
 	_play(true)
+
 
 func _process(dt: float) -> void:
 	_t += dt
@@ -59,7 +74,9 @@ func _process(dt: float) -> void:
 	if _shout_t > 0.0:
 		_shout_t -= dt
 		bubble.visible = _shout_t > 0.0
-		tag.modulate.a = 0.0 if bubble.visible else 1.0      # (one line over the head at a time)
+		tag.modulate.a = 0.0 if bubble.visible else 1.0  # one line over the head at a time
+		tag.outline_modulate.a = tag.modulate.a  # (the outline too, or its dark ghost stays)
+
 
 func _turn(dt: float) -> void:
 	var at := point_at if pose == "point" and point_at.x != INF else face_to
@@ -70,6 +87,7 @@ func _turn(dt: float) -> void:
 		return
 	var want := atan2(-d.x, -d.z)
 	rotation.y = lerp_angle(rotation.y, want, 1.0 - exp(-TURN_RATE * dt))
+
 
 ## The pose's clip, cross-faded in when the pose changes (`now`: straight to its first frame, for the portrait).
 func _play(now := false) -> void:
@@ -84,6 +102,7 @@ func _play(now := false) -> void:
 	if now:
 		anim.seek(0.0, true)
 
+
 # ------------------------------------------------------------------ the body
 func _body() -> void:
 	var path := PATH % [id, id]
@@ -91,7 +110,7 @@ func _body() -> void:
 		push_warning("NpcModel: no model at " + path)
 		return
 	var model := (load(path) as PackedScene).instantiate() as Node3D
-	model.rotation.y = PI      # (a Meshy model faces +Z)
+	model.rotation.y = PI  # (a Meshy model faces +Z)
 	add_child(model)
 	for mi in model.find_children("*", "MeshInstance3D", true, false):
 		var inst := mi as MeshInstance3D
@@ -106,6 +125,7 @@ func _body() -> void:
 	if anim:
 		for clip in anim.get_animation_list():
 			anim.get_animation(clip).loop_mode = Animation.LOOP_LINEAR
+
 
 ## The painted atlas on the hero toon shader, lit like a painted Hunter (WardenGlb.PAINTED), with the ink line.
 static func _toon(src: Material) -> Material:
@@ -124,6 +144,7 @@ static func _toon(src: Material) -> Material:
 	m.next_pass = ink
 	return m
 
+
 ## The model's mesh bounds in its own space, at rest.
 static func _rest_aabb(model: Node3D) -> AABB:
 	var out := AABB()
@@ -141,6 +162,7 @@ static func _rest_aabb(model: Node3D) -> AABB:
 		first = false
 	return out
 
+
 func _labels(shown_name: String) -> void:
 	var h := height()
 	tag = _label(shown_name, 40, Color.WHITE)
@@ -150,18 +172,34 @@ func _labels(shown_name: String) -> void:
 	bubble = _label("", 44, Color("fff4d8"))
 	bubble.position = Vector3(0.0, h + 0.95, 0.0)
 	bubble.visible = false
+	_plate = MeshInstance3D.new()
+	_plate.mesh = QuadMesh.new()
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.albedo_color = PLATE_COLOUR
+	mat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	mat.billboard_keep_scale = true  # (without it the plate stays a 1 m square behind the line)
+	mat.no_depth_test = true
+	mat.render_priority = -2  # under the outline and the letters
+	_plate.material_override = mat
+	_plate.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	bubble.add_child(_plate)
+
 
 func _label(text: String, px: int, col: Color) -> Label3D:
 	var l := Label3D.new()
 	l.text = text
 	l.font_size = px
 	l.pixel_size = 0.0085
-	l.outline_size = 14
+	l.outline_size = OUTLINE_PX
+	l.outline_modulate = OUTLINE_COLOUR
 	l.modulate = col
 	l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	l.no_depth_test = true
 	add_child(l)
 	return l
+
 
 # ------------------------------------------------------------------ the portrait
 ## The NPC's face for the talk box: a TextureRect drawn once from the model (its SubViewport rides as its child).
