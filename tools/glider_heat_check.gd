@@ -6,7 +6,9 @@ extends "res://tools/abyss_check.gd"
 ## (decision 0022), and the other heat rows in hunter_move.json (heat_doc) do what they say: a real glide
 ## press 8 m deep spends the footage's quarter to a third of the bar, an overheated glider flies
 ## at overheat_speed (only slower sideways: its height and heading match a cool glide held on the same keys)
-## and burns overheat_burn of your health a second in 20-damage ticks.
+## and burns overheat_burn of your health a second in 20-damage ticks. Your own glider (not another
+## player's) ticks once as the bar drops under GliderSfx.TICK_FROM, whatever the tank's length, and crackles
+## on a loop while the tank is empty until it folds.
 ## Prints "ACHECK ok|FAIL ..." and "ACHECK DONE, failures: N".
 
 const MoveSpeedCheck := preload("res://tools/move_speed_check.gd")
@@ -134,12 +136,14 @@ func run(main: Node) -> void:
 		o.ctrl = "idle"
 		if o != h: o.teleport(w.random_ground())
 	h.ctrl = "local"
-	for kk in [h.kin, h.kin2]:
-		if kk:
-			m.kins.erase(kk)
-			kk.queue_free()
-	h.kin = null
-	h.kin2 = null
+	# no kins: their carry passives (damage_reduction, ...) would skew the heat and landing numbers
+	for o in m.hunters:
+		for kk in [o.kin, o.kin2]:
+			if kk:
+				m.kins.erase(kk)
+				kk.queue_free()
+		o.kin = null
+		o.kin2 = null
 	m.opts["god"] = true
 	marker = w.random_ground()
 	h.ai["land"] = marker
@@ -193,6 +197,7 @@ func run(main: Node) -> void:
 	_spike_kinds()
 	_burn_hint(e)
 	_overheat_glide(e)
+	_warning_cues(e)
 	m.queue_free()
 	await _home(main)
 	print("ACHECK DONE, failures: ", bad)
@@ -356,3 +361,59 @@ func _spike_kinds() -> void:
 	ok(o.stun_t >= GlideSpike.land_stun - Match.DT * 1.5, "it lands stunned (%.2fs left)" % o.stun_t)
 	ok(hp0 - o.hp >= GlideSpike.land_dmg - 0.01, "...and takes the landing damage (%.1f)" % (hp0 - o.hp))
 	o.inp["glide"] = false
+
+
+## One tick of the hunter's GliderSfx at `fuel` heat left; true if the warning tick played.
+func _ticks(o: Hunter, fuel: float) -> bool:
+	Sfx.last_played.erase("glider_tick")
+	o.glide_fuel = fuel
+	o.glider_snd.tick(o)
+	return Sfx.last_played.has("glider_tick")
+
+## The warning cues of an open glider (GliderSfx): one rising tick as the bar passes under 25%, a quiet ember
+## loop while the tank is empty that ends when it folds; read from the bar's fraction (a longer tank, as ext/move-
+## parity-glider-1127 makes, changes nothing); another player's glider makes neither.
+func _warning_cues(e: Dictionary) -> void:
+	var ember := "glider_ember%d" % h.get_instance_id()
+	_reset(Vector3(e["at"].x, float(e["top"]) + 12.0, e["at"].z), Vector3.ZERO)
+	Sfx.listener = h.pos      # (a cue out of earshot never plays)
+	h.glider_snd = GliderSfx.new()
+	h.gliding = true
+	h.glide_fuel = 1.0
+	h.glider_snd.tick(h)
+	var tank := h.glide_max
+	for k in [1.0, 3.0]:
+		h.glider_snd.ticked = false
+		h.glide_max = tank * k
+		var at_edge := _ticks(h, GliderSfx.TICK_FROM + 0.01)
+		var under := _ticks(h, GliderSfx.TICK_FROM - 0.01)
+		var again := _ticks(h, GliderSfx.TICK_FROM - 0.05)
+		var tick_txt := "tank x%.0f: no tick over 25%% (%s), one under it (%s), not again (%s)"
+		ok(not at_edge and under and not again, tick_txt % [k, at_edge, under, again])
+	h.glide_max = tank
+	ok(not Sfx.loop_on(ember), "a tank with heat left has no ember crackle")
+	_ticks(h, 0.0)
+	ok(Sfx.loop_on(ember), "an empty tank crackles on a loop")
+	h.gliding = false
+	h.glider_snd.tick(h)
+	ok(not Sfx.loop_on(ember), "...stopped as the glider folds on landing")
+	h.gliding = true
+	h.glider_snd.tick(h)
+	h.glide_fuel = 1.0
+	h.glider_snd.tick(h)
+	ok(not Sfx.loop_on(ember), "...and when the glider cools")
+	h.gliding = false
+	h.glider_snd.tick(h)
+	var mine := h.ctrl
+	h.ctrl = "remote"
+	h.remote = true
+	h.gliding = true
+	ok(not _ticks(h, 0.1), "another player's glider does not tick")
+	h.glider_snd.net_hot = true
+	h.glider_snd.tick(h)
+	ok(not Sfx.loop_on(ember), "...nor crackle on a loop")
+	h.glider_snd.net_hot = false
+	h.remote = false
+	h.ctrl = mine
+	h.gliding = false
+	h.glider_snd.tick(h)
