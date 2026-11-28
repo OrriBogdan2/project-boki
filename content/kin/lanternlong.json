@@ -1,20 +1,120 @@
 {
+	"grammar": 1,
 	"id": "lanternlong",
-	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/lanternlong.json.",
-	"work": {
-		"craft": 1,
-		"frost": 3,
-		"mend": 2
+	"name": "Glowris",
+	"animals": [
+		"Slow loris",
+		"Paper lantern string"
+	],
+	"theme": "lunar",
+	"flavor": "Evolution of Lanterloris.",
+	"colors": {
+		"belly": "#fce4b4",
+		"body": "#fc843c",
+		"glow": "#ff8e4a"
 	},
-	"shiny": {
-		"belly": "#a3dbfc",
-		"color": "#3cedfc",
-		"glow": "#4af1ff"
+	"look": {
+		"ears": "wisp",
+		"body": "pear",
+		"tail": "stub",
+		"feet": "paws",
+		"aura": "moondust"
+	},
+	"body": {
+		"size": "medium",
+		"reach": 1.4,
+		"mass": 1.1,
+		"gait": {
+			"hop_rate": 6.8,
+			"hop_height": 0.1,
+			"pace": 0.95
+		}
+	},
+	"stats": {
+		"kin_damage": 1,
+		"kin_hp": 7,
+		"kin_speed": 5,
+		"owner_shield": 3,
+		"owner_regen": 4
+	},
+	"personality": {
+		"bravery": 0.42,
+		"curiosity": 0.57,
+		"loyalty": 0.75,
+		"temper": 0.2
+	},
+	"ai": {
+		"aggression": 0.3,
+		"loyalty": 0.9,
+		"caution": 0.6,
+		"role": "support"
+	},
+	"carry": {
+		"style": "perch",
+		"name": "Lantern String",
+		"passives": [
+			{
+				"stat": "regen",
+				"amount": 2.5
+			}
+		]
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "push",
+				"strength": 8
+			}
+		]
+	},
+	"active": "moon_mark",
+	"auto": "updraft",
+	"merge": "tempest",
+	"evolution": {
+		"root": "Glow",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "soft, sleepy, kind",
+		"syllables": [
+			"Glow",
+			"ris"
+		]
+	},
+	"egg": {
+		"name": "Glowris Egg",
+		"temper": "Sleepy",
+		"desc": "Something sleepy is in here.",
+		"play": "Keeps you alive and patched up."
 	},
 	"size": {
 		"cm": 54,
 		"kg": 16.2,
-		"fit": 1.31,
-		"_doc": "base height (cm) and weight (kg) of an average one, fit = model scale to match that height; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+		"fit": 1.31
 	}
 }

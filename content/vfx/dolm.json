@@ -5,8 +5,8 @@
 		"char": "#0c1530",
 		"smoke": "#8f9cb8",
 		"dust": "#c8b496",
-		"stone": "#8f9cb8",
-		"basalt": "#3c4560",
+		"stone": "#8fabb6",
+		"basalt": "#3a4d5c",
 		"eye": "#9ad0ff"
 	},
 	"anchors": {
@@ -141,7 +141,6 @@
 				"c": "main", "c2": "hot"}
 		]},
 		"row_tell": {"fx": [
-			{"p": "scorch", "shape": "disc", "size": 0.8, "life": 0.9, "c": "main", "c2": "hot", "c3": "char"},
 			{"p": "ember", "n": 4, "speed": 2.0, "spread": 0.4, "life": 0.3, "size": 0.05, "c": "main", "c2": "hot"}
 		]},
 		"rock_rise": {"fx": [

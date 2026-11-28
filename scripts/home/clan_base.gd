@@ -52,8 +52,9 @@ static func open(gid: String, gdoc: Dictionary) -> void:
 ## The visit snapshot: shaped like Social.clean_island's, named for the clan; its Boki are the corners' Boki.
 ## members: [{id, d}] as Social.guild_members gives them; roll: Social.clan_roster rows; base_doc: raw clanbase doc;
 ## board: ClanBoard.read's.
-static func snapshot(gid: String, gdoc: Dictionary, members: Array, roll: Array, base_doc: Dictionary,
-		board: Dictionary) -> Dictionary:
+static func snapshot(
+	gid: String, gdoc: Dictionary, members: Array, roll: Array, base_doc: Dictionary, board: Dictionary
+) -> Dictionary:
 	var cs := corners(gid, members, roll)
 	var kin: Array = []
 	for c in cs:
@@ -75,7 +76,7 @@ static func corners(gid: String, members: Array, roll: Array) -> Array:
 		seeds[r["id"]] = r["corner_seed"]
 	var sorted := members.slice(0, Social.CLAN_CAP)
 	sorted.sort_custom(func(a, b): return String(a["id"]) < String(b["id"]))
-	var per := clampi(KIN_BUDGET / maxi(1, sorted.size()), 1, KIN_PER_CORNER)
+	var per := clampi(int(KIN_BUDGET / float(maxi(1, sorted.size()))), 1, KIN_PER_CORNER)
 	var taken := {}
 	var out: Array = []
 	for m in sorted:
@@ -186,6 +187,7 @@ static func _wall(root: Node3D, wall: Array, names: Dictionary, at: Vector3) -> 
 		tag.position = Vector3(x, 0.3, 0.32)
 		holder.add_child(tag)
 	return holder
+
 
 ## The week's goal on a board atop the wall: the clan's points against the goal as a bar, and the top three.
 static func _board(holder: Node3D, b: Dictionary, names: Dictionary) -> void:

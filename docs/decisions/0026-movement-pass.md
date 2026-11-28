@@ -13,7 +13,7 @@ Owner 11-09: does locomotion feel as snappy as the target? Four values were off,
 
 Unchanged: ground accel 47-54 m/s² and brake (0020), gravity 14.7 m/s² and the abyss fall cap, jump 6.8 m/s
 (terraces, 0020), strong air control (owner 11-08, 0022), mass 1.0 for all hunters, walk-while-firing from the weapon
-`fire_slow` (0.5-1.0, default 0.8), dash hand-over at run speed (0025), input buffer through dashes `DashFlow.BUFFER_S` 0.15 s.
+`fire_slow` (0.5-1.0, default 0.8), dash hand-over at run speed (0025), input buffer through dashes `Loco.press_buffer` 0.15 s.
 
 ## Choice
 Fix the four rows above: the turn rate (`hunter_move.json` turn_rate), the over-run brake (`HunterMove.brake_rate`,

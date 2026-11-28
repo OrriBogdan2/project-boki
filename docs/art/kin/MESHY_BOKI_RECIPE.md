@@ -11,7 +11,7 @@ whose scan's head sits off the midline and tilted, so the face (mirrored about x
 (`lilybara`) waits too: its Meshy model has 6 materials and only one carries a texture, and the loader reads one.
 Frigatee (`floenatee`) followed on the same borrowed rig, from the boki3d batch's model (`~/meshy/boki3d/frigatee/
 model.glb` as `run1/glb.glb`, its base-colour image saved out as `tex0_base_color.png`). It follows the owner's seal
-sheet, not the manatee-and-icebox line in content/kin_v2. Its face sits on the scan's own eyes and snout through the
+sheet, not the manatee-and-icebox line in content/kin. Its face sits on the scan's own eyes and snout through the
 row's `face` keys (`mouth_y`, `mouth_z` in scan space now override the fitted mouth), and its FRAME marks were set by
 hand off the scan's profile: a sitting seal is no blob, so the fitted ones floated off its back.
 

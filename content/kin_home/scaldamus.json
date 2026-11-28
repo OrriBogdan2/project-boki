@@ -1,0 +1,14 @@
+{
+	"id": "scaldamus",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/scaldamus.json.",
+	"shiny": {
+		"color": "#486c5b",
+		"belly": "#8ac8ba",
+		"glow": "#2abfff"
+	},
+	"work": {
+		"ember": 3,
+		"craft": 2,
+		"forage": 1
+	}
+}

@@ -1,0 +1,14 @@
+{
+	"id": "umbrathere",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/umbrathere.json.",
+	"shiny": {
+		"color": "#3e412f",
+		"belly": "#7b806a",
+		"glow": "#dfff7a"
+	},
+	"work": {
+		"forage": 3,
+		"craft": 2,
+		"haul": 1
+	}
+}

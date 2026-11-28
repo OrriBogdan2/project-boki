@@ -5,6 +5,8 @@ extends RefCounted
 ##   2. a run of the whole course (the driver): at every step a real combo toast (the longest combo line)
 ##      is fired once the card is down; at 1280x720 and 1920x1080 no toast card on show touches the step
 ##      strip, the check mark or the hunter's own screen box
+##   3. at 1280x720 and 1920x1080 and HUD size 80-130%, the strip, check mark and message column end above the
+##      bottom-left vitals block's LV / XP row (and so above the HP number)
 ## Pass --shots-dir=<dir> (with a real renderer, e.g. xvfb-run --rendering-driver opengl3 --resolution 1280x720)
 ## to save a frame of the first two beats with the combo toast up: <dir>/<step>.png.
 
@@ -32,6 +34,7 @@ func run(mn: Node) -> void:
 			DirAccess.make_dir_recursive_absolute(shots)
 	_order()
 	await _lane()
+	_vitals_clear()
 	print("TUTLANE DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -66,7 +69,7 @@ func _combo_line() -> String:
 func _lane() -> void:
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "demo_kin": "cindle"})
+	m.start({"tutorial": true, "teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "demo_kin": "cindle"})
 	m.set_process(false)
 	if shots != "" and main.fade:
 		await main.fade.reveal(0.01)
@@ -134,3 +137,25 @@ func _shot(sid: String, line: String) -> void:
 	await RenderingServer.frame_post_draw
 	main.get_viewport().get_texture().get_image().save_png(shots.path_join(sid + ".png"))
 	m.hud.msgs.clear()
+
+
+## The lanes are in the top half; the vitals block hangs from the bottom-left corner and grows up with HUD size
+## (HudScale), so its top at 130% is the one to stay clear of.
+func _vitals_clear() -> void:
+	var low := 0
+	for sz: Vector2 in SIZES:
+		var pr := Rect2(m.hud._hud_origin(sz), m.hud.HUD_PORTRAIT)
+		var corner_y := SafeArea.inner(sz).end.y
+		var lanes := TutorialHud.lanes(sz)
+		for k: float in [HudScale.MIN, 1.0, HudScale.MAX]:
+			var top := corner_y + (HudVitals.level_row(pr).position.y - corner_y) * k
+			for lane: String in ["banner", "check", "toast"]:
+				if (lanes[lane] as Rect2).end.y > top:
+					low += 1
+					print(
+						(
+							"TUTLANE   %s reaches y %d, vitals top %d (%dx%d, HUD %d%%)"
+							% [lane, lanes[lane].end.y, top, sz.x, sz.y, k * 100]
+						)
+					)
+	ok(low == 0, "the strip, check mark and message column stay above the vitals block (%d too low)" % low)

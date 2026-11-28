@@ -31,6 +31,14 @@ func tick(dt: float) -> void:
 		if rd != null:
 			(s["b"] as SeatBeacon).show(rd, dt)
 
+## Built hidden now, if the Heart is placed (WarmUp: the beacons' column shader is among its stand-ins; built on the
+## first tick instead, the ride's first frames compiled it, a 274 ms frame on a cold cache). The first tick shows them.
+func prebuild() -> void:
+	if _root != null or m.heart == null or m.heart.site == Vector3.INF:
+		return
+	_build()
+	for s in _seats: (s["b"] as SeatBeacon).node.visible = false
+
 func _build() -> void:
 	_root = Node3D.new()
 	_root.name = "WaysOut"

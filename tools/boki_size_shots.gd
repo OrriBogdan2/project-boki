@@ -6,8 +6,8 @@ extends "res://tools/vv_shots.gd"
 
 const CROP_PX := Vector2i(200, 160)
 const ZOOM := 2.5
-const GAP := 0.8            # m between Vex and the Boki, along x
-const LEVEL := 20           # past the hatchling shrink (level < 4) and any form scale
+const GAP := 0.8  # m between Vex and the Boki, along x
+const LEVEL := 20  # past the hatchling shrink (level < 4) and any form scale
 
 var species: Array = ["velvorm", "duskapi"]
 var no_fit := false
@@ -26,7 +26,7 @@ func run(main_node: Node) -> void:
 			no_fit = true
 	DirAccess.make_dir_recursive_absolute(dir)
 	await _setup()
-	m.hud.visible = false      # no name tag or health bar over the Boki
+	m.hud.visible = false  # no name tag or health bar over the Boki
 	cam_at = P.pos + Vector3(GAP * 0.5, 0, 0)
 	for sp in species:
 		if no_fit:
@@ -45,4 +45,3 @@ func run(main_node: Node) -> void:
 		k.queue_free()
 	print("BOKISIZE %d shots in %s" % [species.size(), dir])
 	main.get_tree().quit(0)
-

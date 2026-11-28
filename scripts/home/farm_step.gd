@@ -14,6 +14,7 @@ const SNAP_M := 2.0  # m in one step: a teleport or a respawn, shown at once ins
 var acc := 0.0  # s of frame time not stepped yet
 var coyote := 0.0  # s left in which a jump still counts as off the ground it just walked off
 var jump_buf := 0.0  # s left in which a jump pressed just before a landing still jumps
+var trim := JumpTrim.new()  # a dash-jump's speed trim, as in a match
 ## How far the shown body trails the stepped one (m), for whatever frames the avatar (the camera).
 var lag := Vector3.ZERO
 var _latched := {}  # press edges waiting for their step
@@ -76,9 +77,9 @@ func jump(press: bool, air: bool, vy: float, height: float, d: float) -> Jump:
 	if not press:
 		return Jump.NONE
 	if HunterMove.near_landing(vy, height):
-		jump_buf = HunterMove.jump_buffer_s + d  # it fires the step after the landing: the match's window
+		jump_buf = HunterMove.jump_hold(vy, height) + d  # kept to the landing, fired the step after (as a match)
 		return Jump.NONE
-	return Jump.GLIDE
+	return Jump.NONE if HunterMove.too_low(vy, height) else Jump.GLIDE
 
 
 ## The avatar's pose after a step. Under run() it plays once a frame, so the animation is as smooth as the

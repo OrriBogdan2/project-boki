@@ -34,7 +34,7 @@ static func row(parent: VBoxContainer, reopen: Callable, diff_tier: int) -> void
 		Backpacks.cap(diff_tier))
 	note_text += "the Pouch is always yours."
 	var note := UI.label(note_text, 12, UI.MUTED)
-	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	UI.wrapped(note)
 	parent.add_child(note)
 
 ## The armory's Backpacks tab: what you own, and a Buy button for each bigger tier.

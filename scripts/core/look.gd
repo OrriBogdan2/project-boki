@@ -2,10 +2,19 @@ class_name Look
 ## The shared look of every outdoor scene: a painted sky, soft filmic colour, a little bloom, haze
 ## that swallows whatever hangs below the islands, a warm key light and a cool rim light.
 
+## The desktop renderer's saturation boost on top of the base grade (the home, the town and the cards keep it); the
+## match sets its own in content/rules/match_grade.json
+const DESKTOP_SAT_BOOST := 1.65
+
+## A Boki card's exposure (card_environment), Forward+ and the Compatibility renderer
+const CARD_EXPOSURE := 0.7
+const CARD_EXPOSURE_COMPAT := 0.8
+
 static var SKY: Shader = preload("res://shaders/sky.gdshader")
 
 
-## p: top, mid, horizon, below (sky colours), ambient, fog (haze colour), stars (0..1)
+## p: top, mid, horizon, below (sky colours), ambient, fog (haze colour), stars (0..1), desktop_boost (saturation
+## multiplier on the desktop renderer)
 static func environment(p: Dictionary) -> Environment:
 	var e := Environment.new()
 	e.background_mode = Environment.BG_SKY
@@ -62,7 +71,7 @@ static func environment(p: Dictionary) -> Environment:
 		# desktop renderer is gamma-correct, so it comes out lifted and washed; this curve maps it
 		# back to the same tones.
 		e.adjustment_color_correction = _tone_curve()
-		e.adjustment_saturation *= 1.65
+		e.adjustment_saturation *= float(p.get("desktop_boost", DESKTOP_SAT_BOOST))
 	if "--nofog" in OS.get_cmdline_user_args():
 		e.fog_enabled = false
 	if "--nossao" in OS.get_cmdline_user_args():
@@ -71,6 +80,25 @@ static func environment(p: Dictionary) -> Environment:
 		e.glow_enabled = false
 	if "--noadj" in OS.get_cmdline_user_args():
 		e.adjustment_enabled = false
+	return e
+
+
+## A Boki card's stage (the dex, the portraits): its own clear-colour world, a flat ambient, a plain linear map.
+## The key, rim and ambient summed to ~1.3x a coat's paint, so pale coats went past white (a pink or cream Boki
+## came out white, its stripes faint). The exposure brings the lit side back to the Bokidex master's paint (one
+## scale: hue and saturation kept, the toon shading as it was); the simpler renderer draws ~4 L darker, so less cut.
+## (boki-rig-shots --washout --stage=dex, 16 species vs the atlas: mean dE 11.5 -> 9.3 desktop; web flat on
+## average, 13.2 -> 13.4, its pale coats better: puddlet 13.4 -> 11.7, rimeshrew 15.2 -> 11.2)
+static func card_environment(exposure := -1.0) -> Environment:
+	var e := Environment.new()
+	e.background_mode = Environment.BG_CLEAR_COLOR
+	e.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	e.ambient_light_color = Color("8a93b8")
+	e.ambient_light_energy = 0.95
+	e.tonemap_mode = Environment.TONE_MAPPER_LINEAR
+	if exposure < 0.0:
+		exposure = CARD_EXPOSURE if full_renderer() else CARD_EXPOSURE_COMPAT
+	e.tonemap_exposure = exposure
 	return e
 
 

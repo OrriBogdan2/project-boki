@@ -13,8 +13,12 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 VENV="${BOKI_LINT_VENV:-$HOME/.cache/boki-lint/venv}"
 if [ ! -x "$VENV/bin/ruff" ] || [ tools/lint-requirements.txt -nt "$VENV/.installed" ]; then
-	python3 -m venv "$VENV"
-	"$VENV/bin/pip" install -q -r tools/lint-requirements.txt
+	if python3 -m venv "$VENV" 2>/dev/null; then
+		"$VENV/bin/pip" install -q -r tools/lint-requirements.txt
+	else # no python3-venv (the build servers, self-hosted CI runners, no sudo): uv builds the same venv
+		uv venv -q --clear --python 3.12 "$VENV"
+		uv pip install -q --python "$VENV/bin/python" -r tools/lint-requirements.txt
+	fi
 	touch "$VENV/.installed"
 fi
 export PATH="$VENV/bin:$PATH"
@@ -47,5 +51,6 @@ if [ "${1:-}" != "--files" ] && [ "${1:-}" != "--update" ] && [ "${1:-}" != "--n
 fi
 if [ "${1:-}" != "--files" ] && [ "${1:-}" != "--update" ]; then
 	python3 tools/warden_glb_guard.py || { echo "FAILED: hunter glbs changed outside an Art: commit"; exit 1; }
+	python3 tools/warden_tex_guard.py || { echo "FAILED: hunter texture over 2048 px (tools/warden_tex_guard.py)"; exit 1; }
 fi
 exec "$VENV/bin/python" -I tools/lint_gate.py "$@"

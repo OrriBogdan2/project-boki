@@ -36,9 +36,7 @@ func run(main_node: Node) -> void:
 			DirAccess.make_dir_recursive_absolute(dir)
 	m = Match.new()
 	main.add_child(m)
-	await m.start(
-		{"teams": 1, "squad": 1, "tier": 0, "length": 1000.0, "seed": 4242, "demo_kin": "cindle", "no_drop": true}
-	)
+	m.start({"teams": 1, "squad": 1, "tier": 0, "length": 1000.0, "seed": 4242, "demo_kin": "cindle", "no_drop": true})
 	m.set_process(false)
 	if main.fade != null:
 		await main.fade.reveal(0.01)
@@ -115,7 +113,7 @@ func _send_and_hint() -> void:
 		"the settled lane shows the rest, not the Boki-key hint (%s)" % str(texts)
 	)
 	ok(
-		lane.waiting() == 0 or lane.texts().size() == lane.MAX_SHOWN,
+		lane.waiting() == 0 or lane.texts().size() == lane.max_shown,
 		"nothing is left behind (%d waiting)" % lane.waiting()
 	)
 	var cards: Array[Rect2] = lane.rects()
@@ -143,7 +141,14 @@ func _crouch_hint() -> void:
 	await _run_for(0.5)
 	ok(TopStack.strip_age(m) == ch.strip_age(), "the guide done: the crouch hint takes the banner")
 	m.hud.toast("A second toast", Color.WHITE)
+	# the lane ages on frame time, so on a loaded box the card may already be gone a beat after the hold ends:
+	# step until it shows (never past the banner's fresh time + 2 s) and measure it then
 	await _run_for(Tutorial.CARD_T)
+	for _i in 20:
+		if not lane.rects().is_empty():
+			break
+		m.hud.toast("A second toast", Color.WHITE)
+		await _run_for(0.1)
 	await _shot("crouch")
 	var cards: Array[Rect2] = lane.rects()
 	ok(

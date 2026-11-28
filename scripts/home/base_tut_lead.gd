@@ -5,6 +5,10 @@ extends RefCounted
 ## step's place (you, the toy, the portal), waits when you fall behind on the way and turns to look back
 ## at you, and says the step's line once over its head. content/rules/farm_tutorial.json base.lead holds the distances.
 
+## Steps whose lead lets go of the Boki once a toy is down: it plays (and ticks the toy line) instead of waiting
+## at your side for the Feed step, which can take minutes (docs/GARDEN_FIRST_HOUR.md item 3).
+const FREE_FOR_TOY := ["patch", "eat"]
+
 ## Where the active Boki leads now: INF when no base step is up or k is not your active Boki.
 static func target(h, k: Dictionary) -> Vector3:
 	if not FarmTutorial.base() or k["rec"] != Save.active_kin() or not h.visit.is_empty():
@@ -15,7 +19,7 @@ static func target(h, k: Dictionary) -> Vector3:
 	var id := FarmTutorial.current()
 	if id == "toy" and FarmTutorial.stage(id) == "watch":
 		return FarmTutorial.toy_spot()
-	if id in ["meet", "eat", "toy"]:
+	if id in ["meet", "patch", "eat", "toy"]:
 		return h.ppos       # it comes to you and stays at your side while you meet it, feed it and put a toy down
 	return h.guide.target(id) if id != "" else Vector3.INF
 
@@ -25,7 +29,10 @@ static func tick(h, k: Dictionary) -> bool:
 	var at := target(h, k)
 	if at.x == INF:
 		return false
-	if at == FarmTutorial.toy_spot() and h.toys.pick(k, true):
+	var toy := FarmTutorial.toy_spot()
+	if toy.x != INF and (at == toy or (FREE_FOR_TOY.has(FarmTutorial.current()) and not k.get("lead_toy", false))) \
+			and h.toys.pick(k, true):
+		k["lead_toy"] = true      # one trip per Boki while a step before the toy is open; the lead resumes after
 		return false      # the toy is down: it runs over to play (HomeToys has it now)
 	var L: Dictionary = FarmTutorial.rules()["base"]["lead"]
 	var pos: Vector3 = k["pos"]

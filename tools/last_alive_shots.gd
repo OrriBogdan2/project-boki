@@ -45,7 +45,7 @@ func run(main_node: Node) -> void:
 func _setup() -> void:
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
+	m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
 	m.set_process(false)
 	P = m.player
 	for mb in m.mobs:
@@ -85,6 +85,6 @@ func _go(secs: float) -> void:
 
 func _save() -> void:
 	var img := main.get_viewport().get_texture().get_image()
-	img.resize(FRAME_W, FRAME_W * img.get_height() / img.get_width(), Image.INTERPOLATE_BILINEAR)
+	img.resize(FRAME_W, int(FRAME_W * img.get_height() / float(img.get_width())), Image.INTERPOLATE_BILINEAR)
 	img.save_jpg(dir.path_join("frames/%05d.jpg" % frames), 0.88)
 	frames += 1

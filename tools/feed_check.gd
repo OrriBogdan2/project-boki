@@ -8,14 +8,34 @@ extends RefCounted
 ## used once, a shy one needs two tries, a full one sniffs and leaves, the prompt says what to hold.
 ## Prints FEED ok/FAIL lines and "FEED DONE, failures: N". Never touches the real save.
 
+# ------------------------------------------------------------------ the feeding bowl
+const BOWL_LIMIT := 30.0  # s of play the three hungry Boki have to eat in
+const STEP := 0.05  # s a simulated frame
+const HAND_DT := 0.25  # s per farm step
+const SNACK := "sapjelly"  # a snack of snacks.json: it gives joy and leans (kibble gives neither)
+const BOWL_SEED := 1127
+const HAND_SEED := 1128
+const BOWL_SPOTS := {  # where each Boki starts, from the bowl
+	"Bold": Vector3(-2.5, 0, 0.5),
+	"Greedy": Vector3(4.0, 0, 0.5),  # close: it must reach the bowl while Bold still sits there (the huff)
+	"Shy": Vector3(0.5, 0, -3.0),
+	"Full": Vector3(2.0, 0, 3.0)
+}
+const HAND_WITHIN := 3.0  # s a trusting Boki takes to eat from your hand
+
 var bad := 0
 var main: Node
 
+
 func ok(cond: bool, what: String) -> void:
 	print("FEED %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(m: Node) -> void:
+	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
+	FarmUnlocks.rules()["base_mode"] = false  # walks the old farm (base_mode is the shipped default)
 	main = m
 	Save.no_write = true
 	await _case(false)
@@ -25,17 +45,24 @@ func run(m: Node) -> void:
 	print("FEED DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _feed_buttons(n: Node) -> Array:
 	var out: Array = []
-	if n is Button and (n as Button).text == "Feed": out.append(n)
-	for c in n.get_children(): out += _feed_buttons(c)
+	if n is Button and (n as Button).text == "Feed":
+		out.append(n)
+	for c in n.get_children():
+		out += _feed_buttons(c)
 	return out
 
+
 func _says_nothing(n: Node) -> bool:
-	if n is Label and (n as Label).text.begins_with("Nothing to feed"): return true
+	if n is Label and (n as Label).text.begins_with("Nothing to feed"):
+		return true
 	for c in n.get_children():
-		if _says_nothing(c): return true
+		if _says_nothing(c):
+			return true
 	return false
+
 
 func _case(trough: bool) -> void:
 	var tag := "with a trough" if trough else "fresh save"
@@ -43,18 +70,19 @@ func _case(trough: bool) -> void:
 	var k := Save.new_kin("zapple", "Pip")
 	Care.ensure(k)
 	if k["likes"]["hates"] == "kibble":
-		k["likes"]["hates"] = k["likes"]["food"]     # likes come from the random uid; a kibble-hater refuses
+		k["likes"]["hates"] = k["likes"]["food"]  # likes come from the random uid; a kibble-hater refuses
 	k["starter"] = true
 	Save.d["roster"].append(k)
 	Save.d["active"] = k["uid"]
 	Save.d["tutorial"] = {"hatched": true, "intro": true}
 	Save.d["gems"] = 500
 	HomeLayout.ensure(Save.d)
-	if trough: Econ.ensure()
-	k["needs"]["food"] = 5.0
+	if trough:
+		Econ.ensure()
+	k["needs"]["food"] = 0.0  # an empty belly: a long-starved kin is only refused while it is empty
 	k["starve"] = (Care.STARVE["refuse"] + 0.5) * 3600.0
 	var home = await main._hb_home()
-	var t0 := CheckClock.own_msec()      # the home builds its UI in frame slices: CPU work, not game time
+	var t0 := CheckClock.own_msec()  # the home builds its UI in frame slices: CPU work, not game time
 	while home.panel_host == null and CheckClock.own_msec() - t0 < 60000:
 		await main.get_tree().process_frame
 	Save.d["items"]["kibble"] = 0
@@ -64,32 +92,77 @@ func _case(trough: bool) -> void:
 	var r := Exchange.post("buy", "kibble", 2, ask)
 	ok(r["ok"] and int(r["filled"]) == 2 and Econ.pantry("kibble") == 2, "%s: bought 2 kibble from the market" % tag)
 	home._open_feed(k)
-	await main.get_tree().process_frame      # the previous panel is only queue_freed: let it go first
+	await main.get_tree().process_frame  # the previous panel is only queue_freed: let it go first
 	var btns := _feed_buttons(home.panel_host)
 	ok(btns.size() == 1 and not _says_nothing(home.panel_host), "%s: the panel offers the kibble" % tag)
 	ok(home.hecon.refuse_reason() != "", "%s: too weak to go while starving" % tag)
 	var food0 := Care.need(k, "food")
-	if btns.size() == 1: (btns[0] as Button).pressed.emit()
+	if btns.size() == 1:
+		(btns[0] as Button).pressed.emit()
 	var food1 := Care.need(k, "food")
 	ok(Econ.pantry("kibble") == 1 and food1 > food0, "%s: feeding eats a kibble, food %d -> %d" % [tag, food0, food1])
 	ok(home.hecon.refuse_reason() == "", "%s: it can go on an expedition again" % tag)
+	await _long_starved(home, k, tag)
 	home.queue_free()
 
-# ------------------------------------------------------------------ the feeding bowl
-const BOWL_LIMIT := 30.0       # s of play the three hungry Boki have to eat in
-const STEP := 0.05             # s a simulated frame
+
+## Owner rule 11-23: a kin starved for 40 h (clock far over the 18 h refusal) goes out after one meal, though
+## the starve clock has barely moved; the expedition path itself opens the risk confirm, not "Too hungry to go".
+func _long_starved(home: Node, k: Dictionary, tag: String) -> void:
+	Exchange.post("buy", "kibble", 2, Exchange.best("kibble", "sell"))
+	k["needs"]["food"] = 0.0
+	k["starve"] = 40.0 * 3600.0
+	home.exp_tier = int(KinLoss.rules()["loss_min_tier"])  # a risky tier: the confirm panel opens, no match starts
+	home._confirm_start()
+	ok(home.panel_open == "Too hungry to go", "%s: 40 h starved, empty belly: the expedition says too hungry" % tag)
+	ok(home.hecon.refuse_reason().contains("one meal"), "%s: the message says what to do" % tag)
+	home._open_feed(k)
+	await home.get_tree().process_frame
+	var btns := _feed_buttons(home.panel_host)
+	ok(btns.size() == 1, "%s: the feed panel offers the kibble" % tag)
+	if btns.size() == 1:
+		(btns[0] as Button).pressed.emit()
+	var clock := Care.starve_h(k)
+	ok(clock > Care.STARVE["refuse"], "%s: after the meal the starve clock is still %.1f h" % [tag, clock])
+	ok(Care.need(k, "food") > 20.0, "%s: the food bar shows fed (%d)" % [tag, Care.need(k, "food")])
+	ok(home.hecon.refuse_reason() == "", "%s: one meal and the 40 h starved kin can go" % tag)
+	home._confirm_start()
+	ok(home.panel_open != "Too hungry to go", "%s: the expedition path no longer says too hungry" % tag)
+	k["needs"]["food"] = 0.0
+	ok(home.hecon.refuse_reason() != "", "%s: an empty belly again is refused again" % tag)
+
+
+## A spot on the home island where all four start places are free ground on that same island (the bowl only
+## calls a Boki on its own island): not a coast or a wall, where a start place is pushed aside or off the island.
+func _roomy_ground(home) -> Vector3:
+	var c: Vector3 = home.world.random_ground(0)
+	for _try in 60:
+		c = home.world.random_ground(0)
+		var fits := true
+		for off in BOWL_SPOTS.values():
+			var p: Vector3 = home.world.free_spot_near(c + off, [], 0.6)
+			if home.world.island_of(p.x, p.z) != home.world.island_of(c.x, c.z) or p.distance_to(c + off) > 0.8:
+				fits = false
+				break
+		if fits:
+			break
+	return c
+
 
 func _bowl_boki(sp: String, nm: String, bravery: float, food: float) -> Dictionary:
 	var r := Save.new_kin(sp, nm)
 	Care.ensure(r)
-	for n in Care.NEEDS: r["needs"][n] = 100.0
+	for n in Care.NEEDS:
+		r["needs"][n] = 100.0
 	r["needs"]["food"] = food
 	r["traits"]["bravery"] = bravery
-	r["likes"] = {"food": "sweetbun", "hates": "puffcorn", "play": "pet"}      # emberberry is neither
+	r["likes"] = {"food": "sweetbun", "hates": "puffcorn", "play": "pet"}  # emberberry is neither
 	return r
+
 
 static func _lean_sum(r: Dictionary) -> float:
 	return (r.get("lean", {}) as Dictionary).values().reduce(func(a, b): return a + float(b), 0.0)
+
 
 func _bowl() -> void:
 	var rules: Dictionary = Content.rules("farm_build")
@@ -111,29 +184,34 @@ func _bowl() -> void:
 	Save.d["crops"]["emberberry"] = 5
 	HomeLayout.ensure(Save.d)
 	var home = await main._hb_home()
+	seed(BOWL_SEED)  # after the farm is built (it rolls its own dice): the rolls below repeat on every run
+	home.set_process(false)  # only the _move_kin steps below move the Boki (a loaded box's frames would too)
 	home.day_t = 0.45
-	home.ppos = Vector3(-500, 0, -500)       # you are away: nobody clings to you
-	var c: Vector3 = home.world.random_ground(0)
+	home.ppos = Vector3(-500, 0, -500)  # you are away: nobody clings to you
+	var c: Vector3 = _roomy_ground(home)
 	var bowl := {"id": FeedBowl.ID, "u": 990002, "x": int(c.x), "z": int(c.z), "r": 0}
 	Save.d["layout"]["deco"].append(bowl)
 	home.hb._sync_deco()
 	c = FeedBowl.at(bowl)
-	var spots := {"Bold": Vector3(-2.5, 0, 0.5), "Greedy": Vector3(5.5, 0, 0.5), "Shy": Vector3(0.5, 0, -3.0),
-		"Full": Vector3(2.0, 0, 3.0)}
 	var ks := {}
 	for k in home.kins:
-		for key in ["indoors", "leap", "exiting", "going_in", "called_t", "busy", "eat", "nap_go", "job"]: k.erase(key)
+		for key in ["indoors", "leap", "exiting", "going_in", "called_t", "busy", "eat", "nap_go", "job"]:
+			k.erase(key)
 		k["nap_t"] = 0.0
 		k["t"] = 3.0
-		k["pos"] = home.world.free_spot_near(c + spots[k["rec"]["name"]], [], 0.6)
+		k["pos"] = home.world.free_spot_near(c + BOWL_SPOTS[k["rec"]["name"]], [], 0.6)
 		(k["node"] as Node3D).position = k["pos"]
 		ks[k["rec"]["name"]] = k
 	ok(ks.size() == 4 and home.hb.nodes.has(990002), "bowl: home puts the bowl and four Boki out")
-	for _i in 20: home._move_kin(STEP)
+	for _i in 20:
+		home._move_kin(STEP)
 	ok(home.kins.all(func(k): return FeedBowl.phase(k) == ""), "bowl: nobody heads for an empty bowl")
-	for _i in 3: FeedBowl.drop(home, bowl)
-	ok(FeedBowl.snacks(bowl).size() == 3 and Econ.pantry("emberberry") == 2 and not FeedBowl.drop(home, bowl),
-		"bowl: three snacks come out of the pantry and the bowl takes no more")
+	for _i in 3:
+		FeedBowl.drop(home, bowl)
+	ok(
+		FeedBowl.snacks(bowl).size() == 3 and Econ.pantry("emberberry") == 2 and not FeedBowl.drop(home, bowl),
+		"bowl: three snacks come out of the pantry and the bowl takes no more"
+	)
 	var food0 := {}
 	var lean0 := {}
 	for nm in ks:
@@ -143,7 +221,7 @@ func _bowl() -> void:
 	var seen := {}
 	var peak := 0
 	var t := 0.0
-	var outside_eat := 0      # frames a Boki was at the bowl without BaseLife being in Eat
+	var outside_eat := 0  # frames a Boki was at the bowl without BaseLife being in Eat
 	while t < BOWL_LIMIT + 5.0 and ate.size() < 3:
 		home.day_t = 0.45
 		home._move_kin(STEP)
@@ -152,15 +230,19 @@ func _bowl() -> void:
 		for nm in ks:
 			var k: Dictionary = ks[nm]
 			var ph := FeedBowl.phase(k)
-			if ph == "": continue
+			if ph == "":
+				continue
 			seen["%s:%s" % [nm, ph]] = true
-			if ph == "eat": eaters += 1
-			if not (k["life"] as Fsm).is_in(BaseLife.S.EAT): outside_eat += 1
+			if ph == "eat":
+				eaters += 1
+			if not (k["life"] as Fsm).is_in(BaseLife.S.EAT):
+				outside_eat += 1
 		for nm in ks:
 			if not ate.has(nm) and nm != "Full" and Care.need(ks[nm]["rec"], "food") > float(food0[nm]) + 10.0:
 				ate[nm] = snappedf(t, 0.05)
 		peak = maxi(peak, eaters)
-		if int(t / STEP) % 100 == 0: await main.get_tree().process_frame
+		if int(t / STEP) % 100 == 0:
+			await main.get_tree().process_frame
 	print("FEED  bowl: ate at %s, phases seen %s" % [str(ate), ", ".join(seen.keys())])
 	var in_time: bool = ate.values().all(func(s): return s <= BOWL_LIMIT)
 	ok(ate.size() == 3 and in_time, "bowl: all three hungry Boki eat within %d s" % int(BOWL_LIMIT))
@@ -178,9 +260,7 @@ func _bowl() -> void:
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame
-const HAND_DT := 0.25      # s per farm step
-const SNACK := "sapjelly"      # a snack of snacks.json: it gives joy and leans (kibble gives neither)
-const HAND_WITHIN := 3.0   # s a trusting Boki takes to eat from your hand
+
 
 ## Runs the farm for `secs` simulated seconds.
 func _run(home, secs: float) -> void:
@@ -189,11 +269,32 @@ func _run(home, secs: float) -> void:
 		home._move_kin(HAND_DT)
 		t += HAND_DT
 
+
+## A spot for you with free ground of the same island 3 m east of it, where the Boki is put (no coast or wall
+## to push it aside or slow its walk to your hand).
+func _roomy_player(home) -> Vector3:
+	var p: Vector3 = home.world.random_ground(0)
+	for _try in 60:
+		p = home.world.random_ground(0)
+		var want := p + Vector3(3, 0, 0)
+		var q: Vector3 = home.world.free_spot_near(want, [], 0.8)
+		if home.world.island_of(q.x, q.z) == home.world.island_of(p.x, p.z) and q.distance_to(want) < 0.3:
+			break
+	return p
+
+
+func _place_by_player(home, e: Dictionary) -> void:
+	e["pos"] = home.world.free_spot_near(home.ppos + Vector3(3, 0, 0), [], 0.8)
+	(e["node"] as Node3D).position = e["pos"]
+	e["goal"] = e["pos"]
+
+
 func _lean(k: Dictionary) -> float:
 	var sum := 0.0
 	for v in k.get("lean", {}).values():
 		sum += float(v)
 	return sum
+
 
 func _hand_cases() -> void:
 	var rules: Dictionary = Content.rules("farm_build")
@@ -206,25 +307,30 @@ func _hand_cases() -> void:
 		k["likes"]["food"] = "pebblenut"
 		k["starter"] = true
 		k["trust"] = 5.0 if who == "shy" else 60.0
-		k["needs"]["food"] = 98.0 if who == "full" else 40.0
+		k["needs"]["food"] = 98.0 if who == "full" else 60.0  # not hungry: else it fetches its own snack
 		k["needs"]["joy"] = 50.0
 		Save.d["roster"].append(k)
 		Save.d["active"] = k["uid"]
 		Save.d["tutorial"] = {"hatched": true, "intro": true, "day1_done": true}
 		HomeLayout.ensure(Save.d)
-		Save.d["items"].clear()      # a fresh save stocks kibble: the snack must be the only one to cycle to
+		Save.d["items"].clear()  # a fresh save stocks kibble: the snack must be the only one to cycle to
 		Save.d["items"][SNACK] = 2
 		var home = await main._hb_home()
+		seed(HAND_SEED)
+		home.set_process(false)  # as in _bowl: the check steps the farm itself
 		home.day_t = 0.4
-		home.ppos = home.world.random_ground(0)
+		home.ppos = _roomy_player(home)
 		var e: Dictionary = home.kins[0]
-		e["pos"] = home.world.free_spot_near(home.ppos + Vector3(3, 0, 0), [], 0.8)
-		(e["node"] as Node3D).position = e["pos"]
-		e["goal"] = e["pos"]
+		_place_by_player(home, e)
 		await main.get_tree().process_frame
 		var hand: BaseHandFeed = home.life.hand
 		var fsm: Fsm = home.life.machine(e)
-		fsm.go(BaseLife.S.ROAM, "check")
+		for _i in 240:  # whatever its first frames started (a nap, a toy) runs out; then it is ours
+			if fsm.go(BaseLife.S.ROAM, "check") or fsm.is_in(BaseLife.S.ROAM):
+				break
+			_run(home, HAND_DT)
+		fsm.refused = 0
+		fsm.refusals.clear()
 		ok(BaseHandFeed.hint() == "Hold %s to feed" % Settings.key_cap("interact"), "prompt text names the use key")
 		ok(not hand.offer(e), "%s: no snack selected, the hold does not feed" % who)
 		hand.cycle()
@@ -243,25 +349,36 @@ func _hand_cases() -> void:
 				ate_at = t
 		match who:
 			"trusting":
-				ok(ate_at > 0.0 and ate_at <= HAND_WITHIN,
-					"trusting: ate from the hand in %.2f s (limit %.0f)" % [ate_at, HAND_WITHIN])
+				ok(
+					ate_at > 0.0 and ate_at <= HAND_WITHIN,
+					"trusting: ate from the hand in %.2f s (limit %.0f)" % [ate_at, HAND_WITHIN]
+				)
 				ok(Econ.pantry(SNACK) == 1, "trusting: the snack was used once (%d left)" % Econ.pantry(SNACK))
-				ok(Care.need(k, "food") > food0 and Care.need(k, "joy") > joy0,
-					"trusting: food %.0f -> %.0f, joy %.0f -> %.0f"
-					% [food0, Care.need(k, "food"), joy0, Care.need(k, "joy")])
+				ok(
+					Care.need(k, "food") > food0 and Care.need(k, "joy") > joy0,
+					(
+						"trusting: food %.0f -> %.0f, joy %.0f -> %.0f"
+						% [food0, Care.need(k, "food"), joy0, Care.need(k, "joy")]
+					)
+				)
 				ok(float(k["trust"]) > trust0, "trusting: trust went up")
 				ok(_lean(k) > lean0, "trusting: the snack's own lean built (%.1f -> %.1f)" % [lean0, _lean(k)])
 				ok(fsm.is_in(BaseLife.S.ROAM) and not e.has("hand"), "trusting: back to its day, the hand is empty")
 			"shy":
 				ok(Econ.pantry(SNACK) == 2 and float(k["trust"]) == trust0, "shy: the first try is a hesitant look")
 				ok(not fsm.is_in(BaseLife.S.EAT) and e.has("hand_shy"), "shy: it remembers being asked")
+				_place_by_player(home, e)  # it wandered for 5 s: the second try is asked from the same spot
 				hand.offer(e)
 				_run(home, 6.0)
-				ok(Econ.pantry(SNACK) == 1 and float(k["trust"]) > trust0,
-					"shy: the second try, it ate and trusts more")
+				ok(
+					Econ.pantry(SNACK) == 1 and float(k["trust"]) > trust0,
+					"shy: the second try, it ate and trusts more"
+				)
 			"full":
-				ok(Econ.pantry(SNACK) == 2 and is_equal_approx(Care.need(k, "food"), food0),
-					"full: sniffed, snack kept")
+				ok(
+					Econ.pantry(SNACK) == 2 and is_equal_approx(Care.need(k, "food"), food0),
+					"full: sniffed, snack kept"
+				)
 				ok(fsm.is_in(BaseLife.S.ROAM), "full: it left")
 		ok(fsm.refused == 0, "%s: no machine refusal (%d)" % [who, fsm.refused])
 		home.queue_free()

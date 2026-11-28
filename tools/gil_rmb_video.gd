@@ -16,6 +16,7 @@ const END_AT := 8.6
 
 var main: Node
 
+
 func run(main_node: Node) -> void:
 	main = main_node
 	var gm = load("res://tools/gameplay_media.gd").new()
@@ -36,34 +37,38 @@ func run(main_node: Node) -> void:
 	Save.no_write = true
 	Settings.v["tips"] = false
 	await gm._start("gil", "cindle")
-	var P: Hunter = gm.m.player
-	var K: GilKit = P.ak
-	P.lvl = 6
-	var base: Vector3 = gm._ground(P.pos)
+	var p: Hunter = gm.m.player
+	var k: GilKit = p.ak
+	p.lvl = 6
+	var base: Vector3 = gm._ground(p.pos)
 	var foe: Hunter = gm._hunter("foe", 1, "juggernaut", "pebbit", gm._ground(base + Vector3(GAP, 0, 0)))
 	foe.teleport(foe.pos)
 	gm._zoom(0.9)
 	gm._mark("start")
 	var sent := {"hold": false, "wave": false, "leap": false}
-	await gm._go(END_AT, func(t: float):
-		foe.hp = foe.max_hp
-		P.inp["aim"] = foe.pos + Vector3(0, 0.9, 0)
-		K.ch_rmb = 2.0
-		var holding := t >= HOLD_AT and t < HOLD_AT + HOLD_S
-		P.inp["sec_hold"] = holding
-		P.inp["sec"] = holding
-		if holding and not sent["hold"]:
-			sent["hold"] = true
-			K.press_rmb()
-			gm._mark("rmb_down")
-		if t >= WAVE_AT and not sent["wave"]:
-			sent["wave"] = true
-			HunterKeys.ult_pressed(P)
-			gm._mark("wave")
-		if t >= LEAP_AT and not sent["leap"]:
-			sent["leap"] = true
-			HunterKeys.ult_pressed(P)
-			gm._mark("leap_off wave_gone=%s" % str(K.wave.is_empty())),
-		func(_t: float): return P.pos, true)
+	await gm._go(
+		END_AT,
+		func(t: float):
+			foe.hp = foe.max_hp
+			p.inp["aim"] = foe.pos + Vector3(0, 0.9, 0)
+			k.ch_rmb = 2.0
+			var holding := t >= HOLD_AT and t < HOLD_AT + HOLD_S
+			p.inp["sec_hold"] = holding
+			p.inp["sec"] = holding
+			if holding and not sent["hold"]:
+				sent["hold"] = true
+				k.press_rmb()
+				gm._mark("rmb_down")
+			if t >= WAVE_AT and not sent["wave"]:
+				sent["wave"] = true
+				HunterKeys.ult_pressed(p)
+				gm._mark("wave")
+			if t >= LEAP_AT and not sent["leap"]:
+				sent["leap"] = true
+				HunterKeys.ult_pressed(p)
+				gm._mark("leap_off wave_gone=%s" % str(k.wave.is_empty())),
+		func(_t: float): return p.pos,
+		true
+	)
 	print("MEDIA_DONE clip=1 thrown_hold=%s" % str(sent["hold"]))
 	main.get_tree().quit(0)

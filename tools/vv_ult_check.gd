@@ -86,9 +86,9 @@ func mage() -> void:
 	var range_r := float(xd["range"])
 	var hang: Array = hc._looks_at(m, from)
 	var wide: Array = hang.filter(func(l): return l["mode"] == HeroVfx.MODES["scorch"] and float(l["size"]) > range_r)
-	ok("Kitefall look (footage): a dark ring band on the range edge, a gold crown at the cursor, no storm field yet",
+	ok("Kitefall look (footage): a dark ring band on the range edge, a pink crown at the cursor, no storm field yet",
 			not hc._pool(hang, range_r, 0.1).is_empty() and wide.size() == 1
-			and AimKit.entry(P, "x_aim").get("col") == MageKit.DEEP_GOLD,
+			and AimKit.entry(P, "x_aim").get("col") == MageKit.DEEP_PINK,
 			"%d range-wide looks (the band only)" % wide.size())
 	var hp0 := P.hp
 	P.hurt(40.0, T, {"src": "abil", "ab": "k1"})
@@ -133,7 +133,7 @@ func mage() -> void:
 			and absf(ac.dmg(T) - want) < 0.5 and ac.dmg(T2) > 1.0,
 			"hits %d took %.1f want %.1f" % [int(U.last.get("hits", 0)), ac.dmg(T), want])
 	var moved: float = hc._flat(T.pos, t_at)
-	ok("Kitefall: a knockback and 1 Static each", moved > 0.4 and K.spark_n(T) >= 1 and K.spark_n(T2) >= 1,
+	ok("Kitefall: 1 Static each, no knock", moved < 0.3 and K.spark_n(T) >= 1 and K.spark_n(T2) >= 1,
 			"moved %.2f static %d %d" % [moved, K.spark_n(T), K.spark_n(T2)])
 	ok("Kitefall: the bond fills once, for the best event of the cast (a hit)",
 			is_equal_approx(_paid(P, id), float(KinBond.rules()["hit"]))
@@ -143,13 +143,13 @@ func mage() -> void:
 			U.phase() == MageUlt.AFTER and K.fire_ok() and K.anim_id == "mage_x_land")
 	ok("Kitefall: on cooldown, a press now does nothing", not HunterKeys.ult_pressed(P) and U.casts == 1)
 	ac.step(m, 0.6)
-	await _mage_whiff(m, P, K, home)
-	await _mage_merge(m, P, K, home)
+	_mage_whiff(m, P, K, home)
+	_mage_merge(m, P, K, home)
 	_mage_shift(m, P, K, home)
 	_mage_jump(m, P, K, home)
 	_mage_move(m, P, K, home)
 	_mage_spread(m, P, T, T2, K, home)
-	await _mage_116(m, P, T, T2, K, home)
+	_mage_116(m, P, T, T2, K, home)
 	await ac.done(m)
 	await _mage_burst()
 	var got: Dictionary = await EXIT.run(ac, "mage")
@@ -307,12 +307,12 @@ func _mage_116(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: MageKit, home: Vec
 		ac.step(m, 0.6)
 	ac.fresh(T2)
 	K.sparks.clear()
-	await _mage_116b(m, P, T, K, home)
+	_mage_116b(m, P, T, K, home)
 
 ## Items 116.2 and 116b: the bolt rate, and the Wirerun after a reset (further, charged quicker), press and hold.
 func _mage_116b(m: Match, P: Hunter, T: Hunter, K: MageKit, home: Vector3) -> void:
 	var pd: Dictionary = P.wpn
-	ok("LMB: the bolts 10% faster (0.72 x 0.9)", absf(float(pd["rate"]) - 0.648) < 0.001, str(pd["rate"]))
+	ok("LMB: the bolts another 15% faster (0.648 x 0.85)", absf(float(pd["rate"]) - 0.55) < 0.001, str(pd["rate"]))
 	var dd := K.dash_def()
 	var far := float(dd["dist"][1])
 	var hold := float(dd["hold"])
@@ -574,7 +574,7 @@ func gunslinger() -> void:
 	ok("Cinderfall: the patch is gone after 3s", not U.running() and not AimKit.shown(P, "xz1"))
 	ok("Cinderfall: on cooldown, a press now does nothing", not HunterKeys.ult_pressed(P) and U.casts == 1)
 	T2.teleport(home + Vector3(-30, 0, 0))
-	await _gun_dodge(m, P, K, T, home)
+	_gun_dodge(m, P, K, T, home)
 	await ac.done(m)
 	await _gun_burst()
 

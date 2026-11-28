@@ -9,6 +9,7 @@ const KILL_KEY := "xp_kill"
 const STEAL_KEY := "xp_steal"
 const SHARE_KEY := "xp_share"
 const KILL_TEXT := "Monsters give XP to whoever lands the last hit, and to teammates nearby."
+const SOLO_KILL_TEXT := "The last hit on a monster takes its XP, so land it yourself."
 const STEAL_TEXT := "They landed the last hit, so they took the XP. Finish your fights."
 const SHARE_TEXT := "Stay near your squad: kill XP is shared within 30 m."  # 30 = KillXp.SHARE_R
 const STEAL_WINDOW := 10.0  # s: your squad hit the monster this recently, so the kill was yours to lose
@@ -23,7 +24,7 @@ static func on_mob_dead(m: Match, mb: Mob, credit: Ent, o: Dictionary) -> void:
 		if credit != m.player and m.player.flat_dist(mb) > KillXp.SHARE_R:
 			m._tip(SHARE_KEY, SHARE_TEXT)
 		else:
-			m._tip(KILL_KEY, KILL_TEXT)
+			m._tip(KILL_KEY, KILL_TEXT if Life.has_mates(m, m.player) else SOLO_KILL_TEXT)
 	elif m.time - float(mb.team_hit.get(team, -1e9)) <= STEAL_WINDOW:
 		m._tip(STEAL_KEY, STEAL_TEXT)
 

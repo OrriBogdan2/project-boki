@@ -50,10 +50,16 @@ const TEAM_COLORS := [
 ## OKLab distance (unitless, 0..~0.5 for these): the least any two TEAM_COLORS may differ. 0.08 is about
 ## four times a just-noticeable step, enough to tell two squads apart on a nameplate at a glance.
 const TEAM_COLOR_GAP := 0.08
-## Every expedition has about this many hunters, however they're split into squads. 30 on the 305 m
-## Hollow Crown: 40 would keep the 216 m map's squads per square metre (305² / 216² = 1.99), but a
-## 40-hunter match was not perf-flat with 20 on the GPU box (decision 0022), so it is capped at 30.
+## A trios expedition has this many hunters (10 squads of three). 30 on the 305 m Hollow Crown: 40
+## would keep the 216 m map's squads per square metre (305² / 216² = 1.99), but a 40-hunter match was
+## not perf-flat with 20 on the GPU box (decision 0022), so it is capped at 30.
 const MATCH_PLAYERS := 30
+## A solos expedition has this many hunters, each their own squad (decision 0084; bots fill).
+const SOLO_PLAYERS := 20
+## The expedition modes a player can queue for, as shown on the expedition panel and the online lobby.
+const MODES := ["trios", "solos"]
+## The one line each mode's card reads (ModeCards): who is in it and how big the map plays.
+const MODE_LINES := {"trios": "10 squads of 3, bigger map", "solos": "20 Hunters, every one for themself, smaller map"}
 
 const CLASSES := {
 	"light":
@@ -184,14 +190,17 @@ const MUSIC := {
 	"title": {"name": "Project Boki", "hint": "The title screen."},
 	"home_day": {"name": "Hearthwind", "hint": "Your home island by day."},
 	"home_night": {"name": "Hearthwind (Night)", "hint": "Your home island after dark."},
-	"orchard": {"name": "Orchard Light", "hint": "Cross the bridge to Orchard Isle."},
+	"orchard": {"name": "Orchard Light", "hint": "Cross the bridge to Orchard Isle, or walk Bramblebank."},
 	"meadow": {"name": "Tag in the Meadow", "hint": "Cross the bridge to Boki Meadow."},
-	"summit": {"name": "Lookout Wind", "hint": "Cross the bridge to Lookout Peak."},
+	"summit": {"name": "Lookout Wind", "hint": "Cross the bridge to Lookout Peak, or wake Kitewind Ridge."},
 	"match": {"name": "Into the Isles", "hint": "Head out on an expedition."},
 	"hollow": {"name": "The Hollow", "hint": "Brave the Hollow."},
 	"hub": {"name": "Market Square", "hint": "Visit the town."},
 	"guild": {"name": "Banners", "hint": "Visit a guild isle."},
 	"lullaby": {"name": "Boki Lullaby", "hint": "Watch a Boki evolve."},
+	"glasswater": {"name": "Glass Ripples", "hint": "Wake Glasswater Shallows."},
+	"cinderstep": {"name": "Ember Steps", "hint": "Wake Cinderstep."},
+	"hushwood": {"name": "Dusk Among the Ferns", "hint": "Wake Hushwood."},
 }
 
 ## One perk per loadout.
@@ -231,7 +240,7 @@ const PERKS := {
 	"overcharge":
 	{
 		"name": "Overcharge",
-		"desc": "Your bond ultimate charges 30% faster.",
+		"desc": "Your bond meter fills 30% faster.",
 		"icon": "bond",
 		"col": Color("ffd23f"),
 		"max": 1
@@ -431,6 +440,20 @@ const BOT_DIFF := {
 const BOT_ORDER := ["easy", "medium", "hard", "expert"]
 
 
+## Match opts for an expedition mode (MODES): its squads, squad size and hunter count.
+static func mode_opts(mode: String) -> Dictionary:
+	var solos := mode == "solos"
+	var squad := 1 if solos else 3
+	var n := SOLO_PLAYERS if solos else MATCH_PLAYERS
+	return {"teams": n / squad, "squad": squad, "total": n}
+
+
+## The mode last picked (Save.d "exp_mode"; trios until you pick another).
+static func saved_mode() -> String:
+	var mode := String(Save.d.get("exp_mode", "trios"))
+	return mode if mode in MODES else "trios"
+
+
 ## Which difficulty "auto" means for a run: the tier sets the base (Meadow easy, Dusk Isles medium,
 ## the Hollow hard) and lots of successful extractions push it up one step. The tutorial is always easy.
 static func auto_bot_diff(tier: int, extracts: int, tutorial := false) -> String:
@@ -449,10 +472,10 @@ const SIGS := {
 	"fortify": {"name": "Fortify", "cd": 16.0, "desc": "A 60 point shield for 5s. Nothing can knock you back."},
 }
 
-## Kin species, built from the kin grammar (content/kin_v2, see KinLib.species): name, colours,
-## stats from its points, abilities, merge, carry style. content/kin/<id>.json now only holds
+## Kin species, built from the kin grammar (content/kin, see KinLib.species): name, colours,
+## stats from its points, abilities, merge, carry style. content/kin_home/<id>.json now only holds
 ## home and economy data for a species (rare/boss egg, work elements, shiny palette); a new kin
-## needs only its kin_v2 file.
+## needs only its kin file.
 var KIN := {}
 
 ## Things a kin can wear. Bought at the stall, put on from the kin's card, worn into matches too.
@@ -475,7 +498,7 @@ func _init() -> void:
 
 
 ## Reads every kin that passed the grammar checker (KinLib) into KIN, plus its home data
-## (content/kin/<id>.json: rare, boss).
+## (content/kin_home/<id>.json: rare, boss).
 func load_kin_content() -> void:
 	KIN.clear()
 	var ids: Array = []
@@ -487,7 +510,7 @@ func load_kin_content() -> void:
 			ids.append(id)
 	for id in ids:
 		var sp: Dictionary = KinLib.species(id)
-		var home: Dictionary = Content._load("kin", id)
+		var home: Dictionary = Content._load("kin_home", id)
 		if bool(home.get("rare", false)):
 			sp["rare"] = true
 			sp["boss"] = String(home.get("boss", ""))
@@ -499,7 +522,7 @@ func load_kin_content() -> void:
 
 
 ## Species anyone can meet in the wild, pick as a starter or see on a rival: everything but the rare
-## kin (content/kin/*.json "rare": true), the legendaries that guard the lairs.
+## kin (content/kin_home/*.json "rare": true), the legendaries that guard the lairs.
 ## The six that shipped first lead the list (code reads common_kin()[0] and [i % size]), then the rest by id.
 const LAUNCH_KIN := ["burrlet", "cindle", "pebbit", "puddlet", "wisplet", "zapple"]
 
@@ -513,7 +536,7 @@ func is_rare(sp_id: String) -> bool:
 	return bool(KIN.get(sp_id, {}).get("rare", false))
 
 
-## True when this species' whole line never comes from an egg (content/kin/<first form>.json "no_egg": the
+## True when this species' whole line never comes from an egg (content/kin_home/<first form>.json "no_egg": the
 ## legendaries). Judged on the line's first form, so its later forms are out too.
 func no_egg(sp_id: String) -> bool:
 	return bool(KIN.get(Evo.base_form(sp_id), {}).get("no_egg", false))
@@ -543,7 +566,7 @@ func egg_species(sp_id: String, rng: RandomNumberGenerator = null) -> String:
 	return sp if sp != "" else String(pool[0])
 
 
-## What a species' egg is called ("Venom Egg"), from content/kin/<id>.json "egg".
+## What a species' egg is called ("Venom Egg"), from content/kin_home/<id>.json "egg".
 func egg_name(sp_id: String) -> String:
 	var sp: Dictionary = KIN.get(sp_id, {})
 	var e: Dictionary = sp.get("egg", {})
@@ -1209,9 +1232,5 @@ const BUILDINGS := {
 }
 
 const MATCH := {
-	"extract_time": 4.0,  # seconds standing in an exit's circle to leave; a hit from another hunter resets it
-	"revive_time": 3.0,
-	"kin_revive_time": 5.0,
-	"bleed": 2.5,  # downed health lost per second
-	"down_hp": 100.0,  # so about 40 seconds downed before you bleed out
+	"down_hp": 100.0,  # the pool a downed hunter bleeds out of (it drains over 15 seconds)
 }

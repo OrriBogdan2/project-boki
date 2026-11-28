@@ -4,8 +4,9 @@ extends RefCounted
 ## Never touches the save.
 
 const TYPES := ["fire", "grass", "electric", "ice", "poison", "psychic"]
-const RADIUS := 6.0       # m from the player
-const FRAMES := 90        # frames to let the cue fade in and the camera settle
+const RADIUS := 6.0  # m from the player
+const FRAMES := 90  # frames to let the cue fade in and the camera settle
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -20,19 +21,19 @@ func run(main: Node) -> void:
 	var m := Match.new()
 	main.add_child(m)
 	var opts := {"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4243, "no_drop": true, "demo_kin": "cindle"}
-	await m.start(opts)
+	m.start(opts)
 	if main.get("fade") != null:
 		await main.fade.reveal(0.01)
-	var P: Hunter = m.player
+	var p: Hunter = m.player
 	for o in m.hunters:
-		if o != P:
+		if o != p:
 			o.ctrl = "idle"
-			o.teleport(P.pos + Vector3(60, 0, 60))
+			o.teleport(p.pos + Vector3(60, 0, 60))
 	var spots := picked.size() if not picked.is_empty() else TYPES.size()
 	for i in spots:
 		var sid := picked[i] if not picked.is_empty() else _species_of(TYPES[i])
 		var a := TAU * float(i) / float(spots)
-		var k := m.spawn_wild(Save.new_kin(sid, "Wild"), P.pos + Vector3(cos(a), 0, sin(a)) * RADIUS, true)
+		var k := m.spawn_wild(Save.new_kin(sid, "Wild"), p.pos + Vector3(cos(a), 0, sin(a)) * RADIUS, true)
 		k.dazed_t = 1e9
 	for i in FRAMES:
 		await main.get_tree().process_frame
@@ -40,6 +41,7 @@ func run(main: Node) -> void:
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join("wild_type_cue.png"))
 	print("WILDCUESHOT done")
 	main.get_tree().quit()
+
 
 func _species_of(type: String) -> String:
 	for sid in Data.KIN:
