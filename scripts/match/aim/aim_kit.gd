@@ -22,6 +22,8 @@ extends RefCounted
 ##   soft    bool    lanes, cones and circles: a lit rim glowing inward over a faint inside (alpha <= 0.25 at the
 ##                   centre, the VFX_QUALITY zone rule) instead of the stacked fill
 ##   dur     float   s, how long it stays without a refresh (default 0.1)
+##   bare    bool    circles with a band: the lit band alone, no tint inside (the cheapest ring: one row of ground
+##                   points; for a rim that rides a moving body every frame)
 ##   tell    bool    with all: a rival's start plays TellCue's wind-up (default true); false for a look that marks
 ##                   no landing hit (a rim flashed after a catch, a blink's arrival circle)
 ##   fletch  float   lines and Vs only: 0 = plain; > 0 feathers the line with barbs swept back toward
@@ -290,6 +292,7 @@ static func _disc(h: Hunter, e: Dictionary, p: Dictionary) -> void:
 	e["r"] = float(p.get("r", 1.35)); e["fill"] = float(p.get("fill", -1.0))
 	e["ticks"] = bool(p.get("ticks", false)); e["star"] = bool(p.get("star", false)); e["dashed"] = bool(p.get("dashed", false))
 	e["band"] = float(p.get("band", 0.0))
+	e["bare"] = bool(p.get("bare", false))
 	var pd: Vector2 = p.get("pointer", Vector2.ZERO)
 	e["pointer"] = pd.normalized() if pd.length() > 0.01 else Vector2.ZERO
 

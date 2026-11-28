@@ -81,9 +81,9 @@ func _check() -> void:
 
 func _ring_ok(id: String, r: float) -> void:
 	var e := AimKit.entry(pl, id)
-	var rim := not e.is_empty() and is_equal_approx(float(e["r"]), r) and bool(e["all"]) and bool(e["soft"])
+	var rim := not e.is_empty() and is_equal_approx(float(e["r"]), r) and bool(e["all"]) and bool(e["bare"])
 	ok(rim and not bool(e["tell"]),
-		"%s: a soft lit rim of %.1f m everyone sees, no TellCue wind-up" % [id, r])
+		"%s: a bare lit rim of %.1f m everyone sees, no TellCue wind-up" % [id, r])
 
 
 func _perf() -> void:
@@ -111,30 +111,36 @@ func _perf() -> void:
 
 
 ## The rims' own CPU cost, free of the box's noise: AimDraw's rebuild (it runs every frame) timed REBUILDS times
-## with the wrap, tangle and knife rims up and with them gone (SABLEVFX rims row, microseconds per frame).
+## with a rim up and without it (SABLEVFX rims rows, microseconds per frame). "knife": the arrival ring on a foe
+## that moves 0.1 m a frame, so its ground points are new every frame (the dagger look is on both sides: it is
+## main's); "catch": a Bola rim on its first frame, at a new spot each time (later frames reuse its points).
 func _rims_cost(foes: Array) -> void:
 	var kit = pl.ak
 	var d := AimKit.layer(m)
 	var f: Hunter = foes[0]
-	var up := func():
-		kit._hit_ring("bola_wrap", f.pos, ThiefKit.WRAP_RING_R)
-		kit._hit_ring("bola_tangle0", foes[1].pos, ThiefKit.TANGLE_RING_R)
-		kit.knife = {"target": f, "pos": f.pos, "dir": Vector2.RIGHT}
+	var knife_on := func(i: int, on: bool):
+		var at: Vector3 = f.pos + Vector3(0.1 * (i % 40), 0.0, 0.0)
+		kit.knife = {"target": null, "pos": at, "dir": Vector2.RIGHT}
 		kit._tick_knife()
-	var cost := [0.0, 0.0]
-	for r in REBUILDS:
-		for side in 2:
-			kit.knife = {}
-			for id in ["bola_wrap", "bola_tangle0", "e_ring"]:
-				AimKit.hide(pl, id)
-			var t0 := Time.get_ticks_usec()
-			if side == 1:
-				up.call()
-			d.rebuild()
-			cost[side] += float(Time.get_ticks_usec() - t0)
+		if not on:
+			AimKit.hide(pl, "e_ring")
+	var catch_on := func(i: int, on: bool):
+		if on:
+			kit._hit_ring("bola_wrap", f.pos + Vector3(0.1 * (i % 40), 0.0, 0.0), ThiefKit.WRAP_RING_R)
+	for what in [["knife", knife_on], ["catch", catch_on]]:
+		var cost := [0.0, 0.0]
+		for i in REBUILDS:
+			for side in 2:
+				var t0 := Time.get_ticks_usec()
+				(what[1] as Callable).call(i, side == 1)
+				d.rebuild()
+				cost[side] += float(Time.get_ticks_usec() - t0)
+				kit.knife = {}
+				for id in ["bola_wrap", "e_ring"]:
+					AimKit.hide(pl, id)
+		var row := "SABLEVFX rims %s us/frame (%d rebuilds each): off %.1f | on %.1f | delta %.1f"
+		print(row % [what[0], REBUILDS, cost[0] / REBUILDS, cost[1] / REBUILDS, (cost[1] - cost[0]) / REBUILDS])
 	kit.knife = {}
-	var row := "SABLEVFX rims us/frame (%d rebuilds each): off %.1f | on %.1f | delta %.1f"
-	print(row % [REBUILDS, cost[0] / REBUILDS, cost[1] / REBUILDS, (cost[1] - cost[0]) / REBUILDS])
 
 
 func _frame_ms(foes: Array) -> Array:
