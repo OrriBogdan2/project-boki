@@ -81,6 +81,62 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 
 | | idle | walk | run | attack | cast | hop | eat | sleep |
 |---|---|---|---|---|---|---|---|---|
+| casquebill | shared | shared | shared | shared | shared | shared | proc | proc |
+| duskapi | shared | shared | shared | shared | shared | shared | proc | proc |
+| glomwort | shared | shared | shared | shared | shared | shared | proc | proc |
+| moundvark | shared | shared | shared | shared | shared | shared | proc | proc |
+| murmurling | shared | shared | shared | shared | shared | shared | proc | proc |
+| nacrolin | shared | shared | shared | shared | shared | shared | proc | proc |
+| opalisk | shared | shared | shared | shared | shared | shared | proc | proc |
+| scaldamus | shared | shared | shared | shared | shared | shared | proc | proc |
+| sentrikat | shared | shared | shared | shared | shared | shared | proc | proc |
+| spatewader | shared | shared | shared | shared | shared | shared | proc | proc |
+| squalltross | shared | shared | shared | shared | shared | shared | proc | proc |
+| threadwyrm | shared | shared | shared | shared | shared | shared | proc | proc |
+| tuatrune | shared | shared | shared | shared | shared | shared | proc | proc |
+| velvorm | shared | shared | shared | shared | shared | shared | proc | proc |
+| goliathite | clip | shared | shared | shared | shared | shared | proc | proc |
+| hoarheron | clip | shared | shared | shared | shared | shared | proc | proc |
+| nimbostrich | shared | clip | clip | shared | shared | shared | proc | proc |
+| orchisloth | shared | clip | clip | shared | shared | shared | proc | proc |
+| glaciyak | clip | shared | shared | clip | clip | clip | proc | proc |
+| limpetor | clip | shared | shared | clip | clip | clip | proc | proc |
+| moonloris | clip | shared | shared | clip | clip | clip | proc | proc |
+| cindle | clip | clip | clip | clip | clip | clip | proc | proc |
+| puddlet | clip | clip | clip | clip | clip | clip | proc | proc |
+| burrlet | clip | clip | clip | clip | clip | clip | proc | proc |
+| zapple | clip | clip | clip | clip | clip | clip | proc | proc |
+| pebbit | clip | clip | clip | clip | clip | clip | proc | proc |
+| wisplet | clip | clip | clip | clip | clip | clip | proc | proc |
+| caecilith | clip | clip | clip | clip | clip | clip | proc | proc |
+| floenatee | clip | clip | clip | clip | clip | clip | proc | proc |
+| gibbelle | clip | clip | clip | clip | clip | clip | proc | proc |
+| glintmole | clip | clip | clip | clip | clip | clip | proc | proc |
+| gloamshell | clip | clip | clip | clip | clip | clip | proc | proc |
+| heatherhorn | clip | clip | clip | clip | clip | clip | proc | proc |
+| kestrike | clip | clip | clip | clip | clip | clip | proc | proc |
+| kilnbadger | clip | clip | clip | clip | clip | clip | proc | proc |
+| kindlewren | clip | clip | clip | clip | clip | clip | proc | proc |
+| lilybara | clip | clip | clip | clip | clip | clip | proc | proc |
+| lodestick | clip | clip | clip | clip | clip | clip | proc | proc |
+| marchleaf | clip | clip | clip | clip | clip | clip | proc | proc |
+| mossgrade | clip | clip | clip | clip | clip | clip | proc | proc |
+| nettlynx | clip | clip | clip | clip | clip | clip | proc | proc |
+| rimeshrew | clip | clip | clip | clip | clip | clip | proc | proc |
+| selenfin | clip | clip | clip | clip | clip | clip | proc | proc |
+| thrumbird | clip | clip | clip | clip | clip | clip | proc | proc |
+| umbrathere | clip | clip | clip | clip | clip | clip | proc | proc |
+| cairnback | clip | clip | clip | clip | clip | clip | proc | proc |
+| hivara | clip | clip | clip | clip | clip | clip | proc | proc |
+| zephyrak | clip | clip | clip | clip | clip | clip | proc | proc |
+
+Worst five, backlog-ready:
+
+- [anim] Boki casquebill (No. 9): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/casquebill_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki duskapi (No. 11): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/duskapi_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki glomwort (No. 17): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/glomwort_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki moundvark (No. 30): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/moundvark_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki murmurling (No. 31): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/murmurling_anim.py, rebuild the .glb, rerun --anim-coverage-check
 | anchorhorn | shared | shared | shared | shared | shared | shared | shared | shared |
 | arcestrel | shared | shared | shared | shared | shared | shared | shared | shared |
 | barostorm | shared | shared | shared | shared | shared | shared | shared | shared |
