@@ -208,7 +208,7 @@ Each line is backlog-ready: title | owner files | proposal | IMPACT, HARD.
 3. **Nothing points a one-Boki player to the Shelter.** Race (Dash), nap pile and pair need a second Boki; the Goals card lists the race at once. The
    only Shelter line is "No Boki: adopt a stray at the Shelter" (`farm_tutorial.json` line 331), shown with no Boki. A 20-gem stray is on offer
    from minute 0 (`Shelter.open_level` 1), but a new player is not told. Owner: `content/rules/farm_tutorial.json` (`first_day.rows`),
-   `scripts/home/goal_tracker.gd`. *Proposal: give the race and nap rows a hint "Need a second Boki? Adopt a stray at the market's
+   `scripts/ui/goal_tracker.gd`. *Proposal: give the race and nap rows a hint "Need a second Boki? Adopt a stray at the market's
    Shelter (20 gems)", shown while the roster has one Boki.* IMPACT 5/10, HARD 1/10.
 4. **Pats past the cap pay nothing and say nothing.** Cap per farm day: playful 3, shy 2, proud 1, sleepy 2 (`pet_react.json`). A pat past the cap: joy +0, trust +0, XP +0; the only cue is that it looks at you (`PetReact._beat`). XP from care is once per **real**
    day (15 XP), so a player who pets for ten minutes earns what the first pat did. Owner: `scripts/home/pet_react.gd`,
