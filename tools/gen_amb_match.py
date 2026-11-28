@@ -5,6 +5,7 @@ crossfade seam) and nothing in it is a regular swell: the slow level drift is sm
 repeats every few seconds), so the ear finds no beat to count. Peak -12 dBFS, 6 dB under the old 13 s bed.
 Run: python3 tools/gen_amb_match.py
 """
+
 import numpy as np
 
 from gen_music import SR, write_ogg
@@ -37,5 +38,5 @@ def bed():
     return x
 
 
-if __name__ == '__main__':
-    write_ogg('amb_match', bed(), PEAK)
+if __name__ == "__main__":
+    write_ogg("amb_match", bed(), PEAK)
