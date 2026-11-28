@@ -9,7 +9,8 @@ extends RefCounted
 const DT := 1.0 / 60.0
 const WARM := 30  # frames dropped before timing
 const TIMED := 120  # frames timed per block
-const ROUNDS := 4  # off/on blocks alternated, so a drifting box loads both sides alike
+const ROUNDS := 6  # off/on blocks alternated, so a drifting box loads both sides alike
+const REBUILDS := 400  # AimDraw rebuilds timed per side for the rims' own cost
 const SPAM_EVERY := 6  # frames between two plays
 const MOVES := ["bola_wrap", "bola_tangle", "knife_stick"]
 
@@ -80,8 +81,9 @@ func _check() -> void:
 
 func _ring_ok(id: String, r: float) -> void:
 	var e := AimKit.entry(pl, id)
-	ok(not e.is_empty() and is_equal_approx(float(e["r"]), r) and bool(e["all"]) and bool(e["soft"]),
-		"%s: a soft lit rim of %.1f m everyone sees" % [id, r])
+	var rim := not e.is_empty() and is_equal_approx(float(e["r"]), r) and bool(e["all"]) and bool(e["bare"])
+	ok(rim and not bool(e["tell"]),
+		"%s: a bare lit rim of %.1f m everyone sees, no TellCue wind-up" % [id, r])
 
 
 func _perf() -> void:
@@ -93,13 +95,52 @@ func _perf() -> void:
 	await _go(WARM, foes)
 	var off: Array = []
 	var on: Array = []
+	var deltas: Array = []
 	for r in ROUNDS:
 		spam = false
-		off.append_array(await _frame_ms(foes))
+		var o: Array = await _frame_ms(foes)
 		spam = true
-		on.append_array(await _frame_ms(foes))
-	var row := "SABLEVFX frame ms (%d frames each) off p95 %.2f | on p95 %.2f | delta p95 %.2f"
-	print(row % [off.size(), _p95(off), _p95(on), _p95(on) - _p95(off)])
+		var n: Array = await _frame_ms(foes)
+		off.append_array(o)
+		on.append_array(n)
+		deltas.append("%.2f" % (_p95(n) - _p95(o)))
+	var row := "SABLEVFX frame ms (%d frames each) off p95 %.2f | on p95 %.2f | delta p95 %.2f (per round: %s)"
+	print(row % [off.size(), _p95(off), _p95(on), _p95(on) - _p95(off), ", ".join(deltas)])
+	spam = false
+	_rims_cost(foes)
+
+
+## The rims' own CPU cost, free of the box's noise: AimDraw's rebuild (it runs every frame) timed REBUILDS times
+## with a rim up and without it (SABLEVFX rims rows, microseconds per frame). "knife": the arrival ring on a foe
+## that moves 0.1 m a frame, so its ground points are new every frame (the dagger look is on both sides: it is
+## main's); "catch": a Bola rim on its first frame, at a new spot each time (later frames reuse its points).
+func _rims_cost(foes: Array) -> void:
+	var kit = pl.ak
+	var d := AimKit.layer(m)
+	var f: Hunter = foes[0]
+	var knife_on := func(i: int, on: bool):
+		var at: Vector3 = f.pos + Vector3(0.1 * (i % 40), 0.0, 0.0)
+		kit.knife = {"target": null, "pos": at, "dir": Vector2.RIGHT}
+		kit._tick_knife()
+		if not on:
+			AimKit.hide(pl, "e_ring")
+	var catch_on := func(i: int, on: bool):
+		if on:
+			kit._hit_ring("bola_wrap", f.pos + Vector3(0.1 * (i % 40), 0.0, 0.0), ThiefKit.WRAP_RING_R)
+	for what in [["knife", knife_on], ["catch", catch_on]]:
+		var cost := [0.0, 0.0]
+		for i in REBUILDS:
+			for side in 2:
+				var t0 := Time.get_ticks_usec()
+				(what[1] as Callable).call(i, side == 1)
+				d.rebuild()
+				cost[side] += float(Time.get_ticks_usec() - t0)
+				kit.knife = {}
+				for id in ["bola_wrap", "e_ring"]:
+					AimKit.hide(pl, id)
+		var row := "SABLEVFX rims %s us/frame (%d rebuilds each): off %.1f | on %.1f | delta %.1f"
+		print(row % [what[0], REBUILDS, cost[0] / REBUILDS, cost[1] / REBUILDS, (cost[1] - cost[0]) / REBUILDS])
+	kit.knife = {}
 
 
 func _frame_ms(foes: Array) -> Array:
