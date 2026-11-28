@@ -344,9 +344,10 @@
 		"wait": "Ready when there's work!"
 	},
 	"pointer": {
-		"doc": "What points at a step's target in the close third-person view (FarmTutPointer, drawn with the world prompt). lift_top_m / lift_third_m: metres over the target the prompt hangs from above and in third person (lower, so it stays in the frame while you walk up); beam_m and beam_w_m: height and width of the gold beam up from the target, seen over trees and from afar; edge_px: how far in from the safe frame (and from the objective strip and Skip row) the arrow sits when the prompt is out of view or behind you; bottom_px: kept clear above the hub bar; arrow_px: its size; near_m: closer to the camera than this the prompt label would fill the screen, so the arrow shows instead; beam_fade_min_m and beam_fade_max_m: the beam is gone nearer than the first and solid past the second, so it never becomes a wall over the lens.",
+		"doc": "What points at a step's target in the close third-person view (FarmTutPointer, drawn with the world prompt). lift_top_m / lift_third_m: metres over the target the prompt hangs from above and in third person (lower, so it stays in the frame while you walk up); lift_min_m: the lowest it comes down to when the pitched-down close camera would still lose it off the top; beam_m and beam_w_m: height and width of the gold beam up from the target, seen over trees and from afar; edge_px: how far in from the safe frame (and from the objective strip and Skip row) the arrow sits when the prompt is out of view or behind you; bottom_px: kept clear above the hub bar; arrow_px: its size; near_m: closer to the camera than this the prompt label would fill the screen, so the arrow shows instead; beam_fade_min_m and beam_fade_max_m: the beam is gone nearer than the first and solid past the second, so it never becomes a wall over the lens.",
 		"lift_top_m": 3.6,
 		"lift_third_m": 2.2,
+		"lift_min_m": 0.6,
 		"beam_m": 9.0,
 		"beam_w_m": 0.07,
 		"edge_px": 40.0,

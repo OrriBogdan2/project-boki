@@ -7,7 +7,9 @@ extends RefCounted
 
 const BEARINGS := 8
 const DISTANCES := [5.0, 12.0]  # m from the target to you
-const SETTLE_FRAMES := 14  # frames for the camera to catch up after a move
+const SETTLE_FRAMES := 6  # frames at least, then until the camera has stopped easing (it eases with real time)
+const SHOULDER_FRAC := 0.35  # your body taller than this share of the screen: the camera is pulled onto your back, the arrow does it
+const SETTLE_MAX := 400  # frames at most
 const MIN_VIEWS := 4  # standing spots on the island a step needs to count
 
 var bad := 0
@@ -97,20 +99,25 @@ func _step(id: String) -> void:
 	var wrong := 0
 	var beam_off := 0
 	var views := 0
+	var faced_out := 0
 	var shot := {}
 	var vp: Vector2 = home.get_viewport().get_visible_rect().size
 	for d in DISTANCES:
-		for a in BEARINGS:
-			var ang := a * TAU / BEARINGS
+		for a in BEARINGS * 2:  # the second round walks toward the target (the camera turned to face it)
+			var facing := a >= BEARINGS
+			var ang := (a % BEARINGS) * TAU / BEARINGS
 			home.ppos = at + Vector3(sin(ang), 0, cos(ang)) * d
 			if home._ground_h(home.ppos.x, home.ppos.z) <= -50.0:
 				continue  # not a place to stand: off the island
 			views += 1
 			home.player.position = home.ppos
 			home.cam.snap(home.ppos)
-			home.farm_cam.yaw = 0.0
-			for f in SETTLE_FRAMES:
+			home.farm_cam.yaw = atan2(at.x - home.ppos.x, home.ppos.z - at.z) * -1.0 if facing else 0.0
+			await _settle()
+			home.guide.tree_t = 0.0  # the nearest tree or stone is looked up twice a second: look now
+			for f in 3:
 				await main.get_tree().process_frame
+			var tgt: Vector3 = home.guide.target(id)
 			var ptr: FarmTutPointer = home.guide.pointer
 			var cam: Camera3D = home.cam
 			var prompt: Vector3 = home.guide.marker.position
@@ -120,6 +127,14 @@ func _step(id: String) -> void:
 			var strips := [home.guide.hint_box, home.guide.skip_row]
 			var frame := FarmTutPointer.frame(home, strips)
 			var in_view := FarmTutPointer.in_frame(cam, prompt, frame)
+			var feet := cam.unproject_position(tgt)
+			var shoulder := FarmTutPointer.player_box(cam, home.ppos).size.y > SHOULDER_FRAC * vp.y  # (the camera on your back)
+			if (
+				facing and not in_view and not top and not shoulder
+				and not cam.is_position_behind(tgt) and frame.has_point(feet)
+				and cam.global_position.distance_to(prompt) >= float(FarmTutPointer.rules()["near_m"])
+			):
+				faced_out += 1  # walking toward it, its base is in the frame and its prompt is not
 			if in_view != home.guide.marker.visible or (in_view and ptr._arrow != null and ptr._arrow.visible):
 				wrong += 1  # an arrow although the prompt is in the frame, or the label shown out of it
 			if not in_view:
@@ -152,7 +167,21 @@ func _step(id: String) -> void:
 		lost == 0,
 		"%s: out of the frame in %d of %d views, the edge arrow points at it every time" % [id, arrows, views]
 	)
+	ok(faced_out == 0, "%s: walking toward it, the prompt is in the frame (%d views not)" % [id, faced_out])
 	ok(covered == 0, "%s: the prompt never sits on the player (%d views)" % [id, covered])
+
+
+## Waits for the camera to stop moving after the player was put somewhere (its yaw and pitch ease with real time).
+func _settle() -> void:
+	var still := 0
+	var last := Transform3D()
+	for f in SETTLE_MAX:
+		await main.get_tree().process_frame
+		var now: Transform3D = home.cam.global_transform
+		still = still + 1 if f > SETTLE_FRAMES and now.is_equal_approx(last) else 0
+		last = now
+		if still >= 3:
+			return
 
 
 func _shot(shot_name: String) -> void:

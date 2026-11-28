@@ -22,17 +22,30 @@ static func rules() -> Dictionary:
 	return FarmTutorial.rules()["pointer"]
 
 
-## Metres over the target the world prompt hangs: the top-down height, lowered as the view turns third person, and
-## raised a step at a time (to the top-down height) while it would sit over your own body on screen.
-static func lift(h, at: Vector3) -> float:
+## Metres over the target the world prompt hangs: the top-down height, lowered as the view turns third person. Then the
+## nearest height to that (down to lift_min_m, up to the top-down height, in LIFT_STEP_M steps) at which the prompt is
+## inside the frame and clear of your own body on screen: the close camera is pitched down, so what is ahead of you
+## rises out of the top of the frame, or stands right behind your head. None fits: the preferred height (the arrow shows).
+static func lift(h, at: Vector3, strips: Array) -> float:
 	var r := rules()
 	var top := float(r["lift_top_m"])
-	var up := lerpf(top, float(r["lift_third_m"]), smoothstep(0.0, 1.0, h.farm_cam.k))
+	var low := float(r["lift_min_m"])
+	var pref := lerpf(top, float(r["lift_third_m"]), smoothstep(0.0, 1.0, h.farm_cam.k))
 	var cam: Camera3D = h.cam
+	if cam.is_position_behind(at):
+		return pref
+	var frame := frame(h, strips)
 	var body := player_box(cam, h.ppos).grow(PROMPT_PAD_PX)
-	while up < top and not cam.is_position_behind(at) and body.has_point(cam.unproject_position(at + Vector3.UP * up)):
-		up = minf(up + LIFT_STEP_M, top)
-	return up
+	var best := pref
+	var best_gap := INF
+	var up := low
+	while up <= top + 0.001:
+		var px := cam.unproject_position(at + Vector3.UP * up)
+		if frame.has_point(px) and not body.has_point(px) and absf(up - pref) < best_gap:
+			best = up
+			best_gap = absf(up - pref)
+		up += LIFT_STEP_M
+	return best
 
 
 ## Your body's box on screen (feet to head), which the prompt keeps off.

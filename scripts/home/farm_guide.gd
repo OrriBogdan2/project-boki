@@ -429,7 +429,7 @@ func _update_marker(dt: float) -> void:
 		h.add_child(marker)
 	marker.visible = true
 	marker.text = "%s\n▼" % txt
-	marker.position = at + Vector3(0, FarmTutPointer.lift(h, at) + sin(t * 3.0) * 0.18, 0)
+	marker.position = at + Vector3(0, FarmTutPointer.lift(h, at, [hint_box, skip_row]) + sin(t * 3.0) * 0.18, 0)
 	marker.visible = pointer.sync(h, at, marker.position, [hint_box, skip_row])
 	_yield_to_covers(dt)
 
