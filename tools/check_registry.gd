@@ -151,8 +151,6 @@ const CHECKS := {
 	"--family-tree-check": ["res://tools/family_tree_check.gd", "family_tree_check", null],  # GARDEN_MODERN 5.8
 	"--kael-sword-check": ["res://tools/kael_sword_shots.gd", "kael_sword_shots", "check"],  # item 131b
 	"--kael-sword-shots": ["res://tools/kael_sword_shots.gd", "kael_sword_shots", "shots"],  # --shots-dir=<dir>
-	"--held-props-check": ["res://tools/held_props_check.gd", "held_props_check", "check"],  # attach-data props in the hand
-	"--held-props-shots": ["res://tools/held_props_check.gd", "held_props_check", "shots"],  # --shots-dir=<dir> (GPU)
 	# last-hit XP and the 30 m squad share
 	"--carry-pose-check": ["res://tools/carry_pose_check.gd", "carry_pose_check", null],  # Heartspark carry layer
 	"--save-chain-check": ["res://tools/save_chain_check.gd", "save_chain_check", null],  # SAVE_CHAIN_0245

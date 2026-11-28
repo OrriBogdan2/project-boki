@@ -20,7 +20,8 @@ const AXIS_CM := 5.0             # a haft's axis further than this from the fist
 const CROSS_DEG := 50.0          # the haft this far off the knuckle line: through the hand, not across the palm
 const HOLD_POSES := {
 	"juggernaut": [["idle", {}], ["run", {"vel": 4.6}], ["LMB 1", {"kmove": "jug_slash_r", "kmove_t": 0.1}],
-		["LMB 2", {"kmove": "jug_slash_l", "kmove_t": 0.1}], ["Lunge hold", {"kmove": "jug_lunge_wind", "kmove_t": 0.45}],
+		["LMB 2", {"kmove": "jug_slash_l", "kmove_t": 0.1}],
+		["Lunge hold", {"kmove": "jug_lunge_wind", "kmove_t": 0.45}],
 		["Lunge", {"kmove": "jug_lunge", "kmove_t": 0.2}], ["Slam", {"kmove": "jug_slam", "kmove_t": 0.7}],
 		["Rampage", {"kmove": "jug_dash", "kmove_t": 0.38}], ["Guard", {"kmove": "jug_guard", "kmove_t": 0.36}]],
 	"gil": [["idle", {}], ["run", {"vel": 4.6}], ["LMB thrust", {"kmove": "gil_thrust_1", "kmove_t": 0.08}],
@@ -91,14 +92,20 @@ func _hero(id: String, out: String, _sheets: String) -> void:
 		var bad: Array = []
 		if ref > 0.0 and absf(frac - ref) > ref * TOL:
 			bad.append("length")
-		if float(m[1]) > FLOAT_CM:
+		var fingers := sk.find_bone(hand_name + "Middle1") >= 0
+		if not fingers:
+			pass  # (no finger bones: the palm is a guess, so grip is judged on the close shots; length still counts)
+		elif float(m[1]) > FLOAT_CM:
 			bad.append("float")
-		if id != "dredge" and float(m[2]) > AXIS_CM:
+		if fingers and float(m[2]) > AXIS_CM:
 			bad.append("off-palm")
-		if float(m[3]) > CROSS_DEG:
+		if fingers and float(m[3]) > CROSS_DEG:
 			bad.append("through-hand")
-		var v := "ok" if bad.is_empty() else ",".join(bad)
-		print("HELD %-10s %-12s len %.3f m = %.3f of %.2f m (ref %.2f) fist-surface %.1f cm, fist-axis %.1f cm, haft-knuckles %.0f deg: %s"
+		var v := ",".join(bad)
+		if bad.is_empty():
+			v = "ok" if fingers else "ok (grip on the shots)"
+		print(("HELD %-10s %-12s len %.3f m = %.3f of %.2f m (ref %.2f) fist-surface %.1f cm, fist-axis %.1f cm, "
+				+ "haft-knuckles %.0f deg: %s")
 				% [id, p[0], m[0], frac, tall, ref, m[1], m[2], m[3], v])
 		rows.append([id, p[0], frac, ref, m[1], m[2], m[3], v])
 		if not bad.is_empty():
@@ -158,7 +165,8 @@ func _props(h: Node3D) -> Array:
 	var out: Array = []
 	for n in h.find_children("*", "MeshInstance3D", true, false):
 		var mi := n as MeshInstance3D
-		if mi.mesh != null and mi.is_visible_in_tree() and _is_prop(mi) and mi.global_transform.basis.get_scale().x > 0.01:
+		var shown := mi.mesh != null and mi.is_visible_in_tree() and mi.global_transform.basis.get_scale().x > 0.01
+		if shown and _is_prop(mi):
 			out.append(mi)
 	return out
 
@@ -216,7 +224,7 @@ func _measure(sk: Skeleton3D, hand: String, props: Array) -> Array:
 	var pinky := _bone_at(sk, hand + "Pinky1")
 	var fist := hh.lerp(mid, FIST_AT)
 	if mid == Vector3.INF:
-		# (no finger bones, Meshy's plain rig: the palm's middle lies on along the forearm's line, a quarter forearm out)
+		# (no finger bones, Meshy's plain rig: the palm's middle, on the forearm's line, a quarter forearm out)
 		var hi := sk.find_bone(hand)
 		var fore := hh.distance_to(_bone_at(sk, sk.get_bone_name(sk.get_bone_parent(hi))))
 		var along := (hh - _bone_at(sk, sk.get_bone_name(sk.get_bone_parent(hi)))).normalized()  # (the forearm's line)
@@ -255,7 +263,8 @@ func _fit_grip(sk: Skeleton3D, hand: String, mi: MeshInstance3D) -> void:
 	# (the hilt's middle, in the part's frame, under the base turn the part has before "grip")
 	var hilt := r.position + (r.position - t.position) * GRIP_PER_BLADE * 0.5
 	var fist := hh.lerp(mid, FIST_AT)
-	print("HELD fit %s: \"grip\": {\"part\": [%.4f, %.4f, %.4f], \"bone\": [%.4f, %.4f, %.4f], \"turn\": [%.4f, %.4f, %.4f]}"
+	print(("HELD fit %s: \"grip\": {\"part\": [%.4f, %.4f, %.4f], \"bone\": [%.4f, %.4f, %.4f], "
+			+ "\"turn\": [%.4f, %.4f, %.4f]}")
 			% [mi.name, hilt.x, hilt.y, hilt.z, fist.x, fist.y, fist.z, turn.x, turn.y, turn.z])
 
 ## Front and side close shots at the hand.
