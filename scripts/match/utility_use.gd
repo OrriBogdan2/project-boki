@@ -227,6 +227,7 @@ static func tick(h: Hunter, dt: float) -> void:
 				h.drink_t = 0.0
 				var dd := UtilityBelt.def(h.drink_id)
 				if UtilityBelt.take(h, h.drink_id, 1) > 0:
+					h.blight_t = 0.0  # the tonic washes out anti-heal first, so the heal is whole
 					var amount := heal_of(h, h.drink_id)
 					if amount > 0.0:
 						h.heal(amount * (1.0 + 0.4 * float(h.perk_n("remedy")) + h.gear_stat("tonic")))
