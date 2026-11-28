@@ -71,33 +71,75 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 
 | | idle | walk | run | attack | hit | death | jump | land | glide | dash | cast | stomp |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| burrlet | clip | clip | clip | clip | proc | proc | clip | proc | clip | proc | clip | missing |
-| cindle | clip | clip | clip | clip | proc | proc | clip | proc | clip | proc | clip | missing |
-| puddlet | clip | clip | clip | clip | proc | proc | clip | proc | clip | proc | clip | missing |
+| burrlet | clip | clip | clip | clip | proc | proc | clip | proc | proc | proc | clip | missing |
+| cindle | clip | clip | clip | clip | proc | proc | clip | proc | proc | proc | clip | missing |
+| puddlet | clip | clip | clip | clip | proc | proc | clip | proc | proc | proc | clip | missing |
 
 ### Boki garden states
 
 | | idle | walk | run | attack | cast | hop | eat | sleep |
 |---|---|---|---|---|---|---|---|---|
+| anchorhorn | shared | shared | shared | shared | shared | shared | proc | proc |
+| arcestrel | shared | shared | shared | shared | shared | shared | proc | proc |
+| barostorm | shared | shared | shared | shared | shared | shared | proc | proc |
+| basaltoad | shared | shared | shared | shared | shared | shared | proc | proc |
 | casquebill | shared | shared | shared | shared | shared | shared | proc | proc |
+| cisternmander | shared | shared | shared | shared | shared | shared | proc | proc |
+| citadoad | shared | shared | shared | shared | shared | shared | proc | proc |
+| crofthollow | shared | shared | shared | shared | shared | shared | proc | proc |
+| dreadnoyak | shared | shared | shared | shared | shared | shared | proc | proc |
 | duskapi | shared | shared | shared | shared | shared | shared | proc | proc |
+| eclipsowl | shared | shared | shared | shared | shared | shared | proc | proc |
+| effigoon | shared | shared | shared | shared | shared | shared | proc | proc |
+| embrook | shared | shared | shared | shared | shared | shared | proc | proc |
+| floenatee | shared | shared | shared | shared | shared | shared | proc | proc |
+| forgebrock | shared | shared | shared | shared | shared | shared | proc | proc |
+| geodemole | shared | shared | shared | shared | shared | shared | proc | proc |
+| geysirbara | shared | shared | shared | shared | shared | shared | proc | proc |
+| gibbelle | shared | shared | shared | shared | shared | shared | proc | proc |
+| glaciatee | shared | shared | shared | shared | shared | shared | proc | proc |
+| glaciyak | shared | shared | shared | shared | shared | shared | proc | proc |
+| glassolotl | shared | shared | shared | shared | shared | shared | proc | proc |
+| gloamspire | shared | shared | shared | shared | shared | shared | proc | proc |
 | glomwort | shared | shared | shared | shared | shared | shared | proc | proc |
+| glomworth | shared | shared | shared | shared | shared | shared | proc | proc |
+| goliathite | shared | shared | shared | shared | shared | shared | proc | proc |
+| gongrowl | shared | shared | shared | shared | shared | shared | proc | proc |
+| gravitank | shared | shared | shared | shared | shared | shared | proc | proc |
+| howlop | shared | shared | shared | shared | shared | shared | proc | proc |
+| lanceron | shared | shared | shared | shared | shared | shared | proc | proc |
+| lanternlong | shared | shared | shared | shared | shared | shared | proc | proc |
+| lodestaff | shared | shared | shared | shared | shared | shared | proc | proc |
+| lyrewing | shared | shared | shared | shared | shared | shared | proc | proc |
+| mossbastion | shared | shared | shared | shared | shared | shared | proc | proc |
 | moundvark | shared | shared | shared | shared | shared | shared | proc | proc |
 | murmurling | shared | shared | shared | shared | shared | shared | proc | proc |
+| murmuron | shared | shared | shared | shared | shared | shared | proc | proc |
 | nacrolin | shared | shared | shared | shared | shared | shared | proc | proc |
 | opalisk | shared | shared | shared | shared | shared | shared | proc | proc |
+| pipeworth | shared | shared | shared | shared | shared | shared | proc | proc |
+| rimefang | shared | shared | shared | shared | shared | shared | proc | proc |
 | scaldamus | shared | shared | shared | shared | shared | shared | proc | proc |
+| scythant | shared | shared | shared | shared | shared | shared | proc | proc |
+| seamwyrm | shared | shared | shared | shared | shared | shared | proc | proc |
+| selenwhale | shared | shared | shared | shared | shared | shared | proc | proc |
 | sentrikat | shared | shared | shared | shared | shared | shared | proc | proc |
+| shinobant | shared | shared | shared | shared | shared | shared | proc | proc |
 | spatewader | shared | shared | shared | shared | shared | shared | proc | proc |
+| sporcupine | shared | shared | shared | shared | shared | shared | proc | proc |
 | squalltross | shared | shared | shared | shared | shared | shared | proc | proc |
+| strobolin | shared | shared | shared | shared | shared | shared | proc | proc |
+| thistlynx | shared | shared | shared | shared | shared | shared | proc | proc |
 | threadwyrm | shared | shared | shared | shared | shared | shared | proc | proc |
+| thunderstrich | shared | shared | shared | shared | shared | shared | proc | proc |
+| tidalisk | shared | shared | shared | shared | shared | shared | proc | proc |
 | tuatrune | shared | shared | shared | shared | shared | shared | proc | proc |
+| vaultara | shared | shared | shared | shared | shared | shared | proc | proc |
 | velvorm | shared | shared | shared | shared | shared | shared | proc | proc |
-| goliathite | clip | shared | shared | shared | shared | shared | proc | proc |
+| vespox | shared | shared | shared | shared | shared | shared | proc | proc |
 | hoarheron | clip | shared | shared | shared | shared | shared | proc | proc |
 | nimbostrich | shared | clip | clip | shared | shared | shared | proc | proc |
 | orchisloth | shared | clip | clip | shared | shared | shared | proc | proc |
-| glaciyak | clip | shared | shared | clip | clip | clip | proc | proc |
 | limpetor | clip | shared | shared | clip | clip | clip | proc | proc |
 | moonloris | clip | shared | shared | clip | clip | clip | proc | proc |
 | cindle | clip | clip | clip | clip | clip | clip | proc | proc |
@@ -107,8 +149,6 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | pebbit | clip | clip | clip | clip | clip | clip | proc | proc |
 | wisplet | clip | clip | clip | clip | clip | clip | proc | proc |
 | caecilith | clip | clip | clip | clip | clip | clip | proc | proc |
-| floenatee | clip | clip | clip | clip | clip | clip | proc | proc |
-| gibbelle | clip | clip | clip | clip | clip | clip | proc | proc |
 | glintmole | clip | clip | clip | clip | clip | clip | proc | proc |
 | gloamshell | clip | clip | clip | clip | clip | clip | proc | proc |
 | heatherhorn | clip | clip | clip | clip | clip | clip | proc | proc |
@@ -130,11 +170,11 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 
 Worst five, backlog-ready:
 
-- [anim] Boki casquebill (No. 9): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/casquebill_anim.py, rebuild the .glb, rerun --anim-coverage-check
-- [anim] Boki duskapi (No. 11): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/duskapi_anim.py, rebuild the .glb, rerun --anim-coverage-check
-- [anim] Boki glomwort (No. 18): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/glomwort_anim.py, rebuild the .glb, rerun --anim-coverage-check
-- [anim] Boki moundvark (No. 31): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/moundvark_anim.py, rebuild the .glb, rerun --anim-coverage-check
-- [anim] Boki murmurling (No. 32): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/murmurling_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki anchorhorn (No. 7): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/anchorhorn_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki arcestrel (No. 8): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/arcestrel_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki barostorm (No. 9): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/barostorm_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki basaltoad (No. 10): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/basaltoad_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki casquebill (No. 12): 0 missing (none), 6 on the shared clip set (idle, walk, run, attack, cast, hop); author its own clips in tools/boki/casquebill_anim.py, rebuild the .glb, rerun --anim-coverage-check
 
 ### Mobs
 

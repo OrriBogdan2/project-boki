@@ -28,7 +28,9 @@ func _up(preset: String) -> bool:
 		return false
 	if preset in ["farm", "care"]:
 		return c.get("building") == false and not (c.get("kins") as Array).is_empty()
-	return c is Match and c.player != null and not c.hunters.is_empty()
+	# (built: Match turns its process on at build.finish; hunters spawn over frames, so the first one is not "up")
+	return c is Match and c.player != null and not c.hunters.is_empty() and c.is_processing()
+
 
 
 func _boot(preset: String, args: PackedStringArray) -> bool:
@@ -45,6 +47,10 @@ func _boot(preset: String, args: PackedStringArray) -> bool:
 		await _wait(0.25)
 		t += 0.25
 	await _wait(RUN_SECS)
+	# the last preset's screen can still count as "up" while this one builds: wait out the swap too
+	while not _up(preset) and t < BOOT_SECS:
+		await _wait(0.25)
+		t += 0.25
 	return _up(preset)
 
 

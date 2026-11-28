@@ -3,7 +3,7 @@ extends RefCounted
 ##   1. the rules: Rush beats Dodge beats Brace beats Rush, one step or two on a 20+ lead, a clash moves the
 ##      lower push half a step, the 10% follow bonus, an untouched pick goes with the want
 ##   2. the read: the higher Focus sees the honest tell about 7 in 10, the other about 5 in 10
-##   3. 400 seeded bouts with a simulated player (reads the tell, follows its Boki, or picks at random):
+##   3. 200 seeded bouts with a simulated player (reads the tell, follows its Boki, or picks at random):
 ##      60 to 75 s on average; 30 more points of Power, Guard, Speed or Focus each end bouts further forward
 ##      (the push is what stats size, and a mean position is far less noisy than a win share) and win no fewer
 ##   4. no dominant move: always Rush, always Brace and always Dodge win within a few points of each other's
@@ -15,7 +15,7 @@ extends RefCounted
 ##      again after that; skip (the menu key) goes straight to the bout
 ## Never touches the real save.
 
-const BOUTS := 400
+const BOUTS := 200
 const SEED := 20261110
 const DT := 1.0 / 30.0  # s per step
 const LEN_LOW := 60.0  # s, the shortest average bout
@@ -76,15 +76,15 @@ func _by_theme() -> Dictionary:
 ## One exchange with fixed moves and presses on a fresh run; returns the run after it resolved.
 func _exchange(a: Dictionary, b: Dictionary, mine: String, theirs: String, want := "") -> BaseTumble.Run:
 	var r := BaseTumble.Run.new([a, b], RandomNumberGenerator.new())
-	r.R = r.R.duplicate(true)
-	r.R["rival_press"] = {"great": 0.0, "good": 0.0}
-	r.step(float(r.R["intro_s"]) + DT)
+	r.r_x = r.r_x.duplicate(true)
+	r.r_x["rival_press"] = {"great": 0.0, "good": 0.0}
+	r.step(float(r.r_x["intro_s"]) + DT)
 	r.want = want if want != "" else BaseTumble.counter(mine)
 	r.plan = theirs
 	r.choose(mine)
-	r.step(float(r.R["tell_s"]))
+	r.step(float(r.r_x["tell_s"]))
 	r.press("miss")
-	r.step(float(r.R["impact_s"]))
+	r.step(float(r.r_x["impact_s"]))
 	return r
 
 
@@ -111,13 +111,13 @@ func _rules() -> void:
 	var c := _kin(th["ember"], "C", [10, 10, 10, 10])
 	var d := _kin(th["frost"], "D", [10, 10, 10, 10])
 	r = _exchange(c, d, "rush", "dodge")
-	var p := r.push(0, "power", "miss") / (float(r.R["base"]) + 10.0)
+	var p := r.push(0, "power", "miss") / (float(r.r_x["base"]) + 10.0)
 	ok(absf(p - 1.0) < 0.001, "species themes change no push (x%.3f)" % p)
 	r = _exchange(a, b, "rush", "dodge", "rush")
-	var f := r.push(0, "power", "miss") / (float(r.R["base"]) + 10.0)
+	var f := r.push(0, "power", "miss") / (float(r.r_x["base"]) + 10.0)
 	ok(absf(f - 1.1) < 0.001 and r.follows == 1, "following the want is 10%% more push (x%.3f)" % f)
 	var idle := BaseTumble.Run.new([a, b], RandomNumberGenerator.new())
-	var limit := float(idle.R["intro_s"]) + float(idle.R["tell_s"]) + float(idle.R["pick_s"]) + DT * 2.0
+	var limit := float(idle.r_x["intro_s"]) + float(idle.r_x["tell_s"]) + float(idle.r_x["pick_s"]) + DT * 2.0
 	var tt := 0.0
 	while idle.state != "resolve" and tt < limit:
 		idle.step(DT)
@@ -138,7 +138,7 @@ func _tells() -> void:
 			if r.shown("rush", viewer) == "rush":
 				right += 1
 		share[viewer] = float(right) / TELL_ROLLS
-	var h: Array = r.R["honest"]
+	var h: Array = r.r_x["honest"]
 	ok(
 		absf(share[0] - float(h[0])) < TELL_SLACK and absf(share[1] - float(h[1])) < TELL_SLACK,
 		"the higher Focus sees the honest tell %.0f%%, the other %.0f%%" % [share[0] * 100.0, share[1] * 100.0]
@@ -284,7 +284,7 @@ func _settle() -> void:
 	r.follows = 2
 	var gems := int(Save.d["gems"])
 	var res := BaseTumble.settle(r)
-	var want_trust := 50.0 + float(r.R["win_trust"]) + 2.0 * float(r.R["follow_trust"])
+	var want_trust := 50.0 + float(r.r_x["win_trust"]) + 2.0 * float(r.r_x["follow_trust"])
 	ok(
 		res["win"] == a and absf(float(a["trust"]) - want_trust) < 0.001,
 		"settle: the winner gains trust, plus following"

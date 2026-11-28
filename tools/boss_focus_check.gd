@@ -76,6 +76,14 @@ func run(main: Node) -> void:
 		if is_instance_valid(g) and not g.dead:
 			g.dead = true
 			g.visible = false
+	# (no wild Boki about: a bot goes for one it sees, and which ones a seed puts near the lair shifts with every
+	# change to what the match builds first)
+	for k in m.kins.duplicate():
+		if k.is_wild():
+			k.dead = true
+			m.kins.erase(k)
+			m.ents_by_id.erase(k.nid)
+			k.queue_free()
 	m.lairs.open(f, p, "dial")
 	var boss: Boss = m.lairs.boss_of(f)
 	var side := Vector3(-f["out"].y, 0, f["out"].x)
@@ -89,6 +97,9 @@ func run(main: Node) -> void:
 	var went := false
 	p.reveal_t = 2.5  # (seen whichever way the bot faces: it only sees what is in front of it)
 	for i in int(2.0 / Match.DT):
+		# (the player keeps firing, so the bot sees them whichever way its roam faces: its roam goal is a random
+		# draw that camp spawns shift, and from behind a player 3 m away is outside the view cone)
+		p.reveal_t = 1.0
 		_step()
 		if b.ai["tgt"] == p:
 			went = true
