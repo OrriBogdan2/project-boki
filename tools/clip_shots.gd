@@ -12,10 +12,15 @@ extends RefCounted
 ## (--no-moves: the same moves without its own clips, Meshy's Attack for each: the "before"). --contract: the contract
 ## model even for a Meshy-native Hunter (the live look); --cam-y=<m>: the camera's height (eye level, knee level)
 ## looking at --at.
+## --fig-h=<m> frames those cameras for a figure that tall (the same for LIVE and a candidate: hunter-proof),
+## --measure prints FIGURE_H (the model's height) and quits, --all-clips also films every clip of a contract model per
+## view (<dir>/states_<view>/clip_<name>/). Each states dir gets a manifest.tsv (clip, first frame, frames) and prints
+## FIGURE_FRAC (the figure's share of the panel's height).
 ## --drop: every Hero in a row wearing the drop poses (WardenDropPose), <dir>/drop/<pose>_<view>.png.
 ## Needs a renderer. ffmpeg makes the GIFs and sheets.
 
 const ClipCheck := preload("res://tools/clip_check.gd")
+const Proof := preload("res://tools/clip_shots_proof.gd")
 
 ## --states: [state, the match's state for it (WardenClips.STATE), s it is held]
 const STATE_SHOTS := [
@@ -36,6 +41,9 @@ const STATE_VIEWS := {
 const MOVE_SHOT := 1.2  # s of the kit's clock each native kit move is filmed for
 var ground_col := Color("4f7a3e")
 var holder: Node3D
+var stage_env: Environment
+var stage_ground: MeshInstance3D
+var _ring_was := true
 var cam: Camera3D
 var tree: SceneTree
 var frame_px := 480
@@ -55,6 +63,7 @@ func run(main: Node) -> void:
 	var dist := 5.2
 	var at_y := 0.82
 	var cam_y := -1.0
+	var fig_h := 0.0
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="):
 			out = a.substr(12)
@@ -74,6 +83,8 @@ func run(main: Node) -> void:
 			at_y = float(a.substr(5))
 		if a.begins_with("--cam-y="):
 			cam_y = float(a.substr(8))  # (camera height, m; default at + 0.25)
+		if a.begins_with("--fig-h="):
+			fig_h = float(a.substr(8))
 		if a == "--contract":
 			WardenNative.contract_only = true  # (the contract model even where Meshy-native is on)
 		if a == "--turn":
@@ -117,7 +128,16 @@ func run(main: Node) -> void:
 		cam.look_at(Vector3(0, at_y, 0))
 	for k in 30:
 		await tree.process_frame  # (past the title's fade)
+	if OS.get_cmdline_user_args().has("--measure"):
+		cam.fov = Proof.EYE_FOV
+		cam.position = Vector3(0.0, 1.0, 8.0)
+		cam.look_at(Vector3(0.0, 1.0, 0.0))
+		print("FIGURE_H %.3f" % Proof.height_from(await _pixel_frac(model), 8.0))
+		print("CLIP_SHOTS_DONE")
+		tree.quit()
+		return
 	if OS.get_cmdline_user_args().has("--states"):
+		var framed := Proof.views(fig_h if fig_h > 0.0 else 1.7)
 		var views: Array = []
 		for a in OS.get_cmdline_user_args():
 			if a.begins_with("--views="):
@@ -125,12 +145,13 @@ func run(main: Node) -> void:
 		if views.is_empty():
 			await _states(model, fps, out)
 		for v in views:
-			var vw: Array = STATE_VIEWS[v]
+			var vw: Array = (framed if fig_h > 0.0 else STATE_VIEWS)[v]
 			cam.fov = float(vw[0])
 			cam.position = vw[1]
 			cam.look_at(vw[2])
 			if ring:
 				ring.visible = v == "match"
+			print("FIGURE_FRAC %s %.3f" % [v, await _pixel_frac(model)])
 			await _states(model, fps, out, "states_" + String(v))
 		print("CLIP_SHOTS_DONE")
 		tree.quit()
@@ -160,18 +181,7 @@ func run(main: Node) -> void:
 		var anim_name := String(nm)
 		if anim_name == "turntable" or not clips.lib.has_animation(anim_name):
 			continue
-		var dir := out.path_join(anim_name)
-		DirAccess.make_dir_recursive_absolute(dir)
-		var length := clips.lib.get_animation(anim_name).length
-		clips.force = {"clip": anim_name, "t": 0.0}
-		for k in 8:
-			sync.call("_process", 1.0 / 30.0)
-		var n := int(ceil(length * fps)) + 1
-		for i in n:
-			var t := minf(float(i) / fps, length - 0.001)
-			clips.force = {"clip": anim_name, "t": t}
-			sync.call("_process", 1.0 / fps)
-			await _grab(dir.path_join("f%03d.png" % i))
+		await _clip_frames(sync, anim_name, fps, out.path_join(anim_name))
 	if OS.get_cmdline_user_args().has("--flinch"):
 		await _flinch(model, sync, fps, out)
 	if OS.get_cmdline_user_args().has("--cc"):
@@ -191,6 +201,20 @@ func run(main: Node) -> void:
 		await _carry(model, sync, out)
 	print("CLIP_SHOTS_DONE")
 	tree.quit()
+
+
+## One hand-keyed clip, frame by frame: <dir>/f###.png every 1/fps s, the clip's length and one frame.
+func _clip_frames(sync: Node, anim_name: String, fps: float, dir: String) -> void:
+	DirAccess.make_dir_recursive_absolute(dir)
+	var clips: WardenClips = sync.get("clips")
+	var length := clips.lib.get_animation(anim_name).length
+	clips.force = {"clip": anim_name, "t": 0.0}
+	for k in 8:
+		sync.call("_process", 1.0 / 30.0)
+	for i in int(ceil(length * fps)) + 1:
+		clips.force = {"clip": anim_name, "t": minf(float(i) / fps, length - 0.001)}
+		sync.call("_process", 1.0 / fps)
+		await _grab(dir.path_join("f%03d.png" % i))
 
 
 ## --cast=<kmove>: moving at `speed` m/s (0: standing), the move is pressed 0.3 s in and let go at its clip's end;
@@ -234,7 +258,9 @@ func _states(model: Node3D, fps: float, out: String, sub := "states") -> void:
 		native.moves = WardenNativeMoves.new(native.player, {})  # (no rows: Meshy's swing for each)
 		native.own_casts = false
 	var i := 0
+	var segs := []
 	for st in STATE_SHOTS:
+		var first := i
 		var s: Dictionary = (st[1] as Dictionary).duplicate()
 		s["face"] = model.rotation.y
 		s["cast"] = 99.0  # no recent cast: a native swing needs the counters
@@ -247,10 +273,15 @@ func _states(model: Node3D, fps: float, out: String, sub := "states") -> void:
 			poser.call("_process", 1.0 / fps)
 			await _grab(dir.path_join("f%03d.png" % i))
 			i += 1
-	i = await _native_moves(model, poser, fps, dir, i)
+		segs.append([st[0], first, i - first])
+	i = await _native_moves(model, poser, fps, dir, i, segs)
+	Proof.write_manifest(dir, segs)
 	print("STATES ", ", ".join(STATE_SHOTS.map(func(st): return "%s %.1fs" % [st[0], st[2]])))
 	if native and not (native.d.get("kmoves", {}) as Dictionary).is_empty():
-		await _native_move_dirs(model, native, fps, out)
+		await _native_move_dirs(model, native, fps, out if sub == "states" else dir)
+	if clips and not native and OS.get_cmdline_user_args().has("--all-clips"):
+		for nm in clips.lib.get_animation_list():
+			await _clip_frames(poser, String(nm), fps, dir.path_join("clip_" + String(nm)))
 
 
 ## The kit moves a native Hunter has its own clips for (data "kmoves"), each pressed on the spot, an upper-body one
@@ -273,7 +304,7 @@ func _native_move_dirs(model: Node3D, native: WardenNative, fps: float, out: Str
 
 ## --states on a Meshy-native model, then each kit move it has a clip for (data "kmoves"), pressed standing: its clip's
 ## length (a hold loop: one and a half laps) and 0.3 s of the move gone (the walk clips back, the loop with it).
-func _native_moves(model: Node3D, poser: Node, fps: float, dir: String, i: int) -> int:
+func _native_moves(model: Node3D, poser: Node, fps: float, dir: String, i: int, segs := []) -> int:
 	var moves: WardenNativeMoves = poser.get("moves")
 	if moves == null:
 		return i
@@ -282,6 +313,7 @@ func _native_moves(model: Node3D, poser: Node, fps: float, dir: String, i: int) 
 		var len_s: float = poser.player.get_animation(String(poser.plays[WardenNativeMoves.KEY % km])).length
 		var hold := float(mv.get("hold_from", -1.0))
 		var secs: float = len_s if hold < 0.0 else hold + 1.5 * (len_s - hold)
+		var first := i
 		for k in int((secs + 0.3) * fps):
 			var s := {"grounded": true, "face": model.rotation.y}
 			if k / fps < secs:
@@ -291,6 +323,7 @@ func _native_moves(model: Node3D, poser: Node, fps: float, dir: String, i: int) 
 			poser.call("_process", 1.0 / fps)
 			await _grab(dir.path_join("f%03d.png" % i))
 			i += 1
+		segs.append([String(km), first, i - first])
 	return i
 
 
@@ -306,6 +339,7 @@ func _stage(main: Node) -> void:
 	env.environment = Look.environment(
 		{"top": Color("2a4a8a"), "mid": Color("6a8ad0"), "horizon": Color("ffd2a8"), "stars": 0.0}
 	)
+	stage_env = env.environment
 	holder.add_child(env)
 	Look.lights(holder, Color("fff1dc"), 1.0, Vector3(-50, 145, 0), 40.0)
 	var ground := MeshInstance3D.new()
@@ -313,10 +347,41 @@ func _stage(main: Node) -> void:
 	pm.size = Vector2(80, 60)
 	ground.mesh = pm
 	ground.material_override = Models.toon(ground_col, false)
+	stage_ground = ground
 	holder.add_child(ground)
 	cam = Camera3D.new()
 	holder.add_child(cam)
 	cam.make_current()
+
+
+## The model's share of the frame's height, counted in pixels: one frame on a flat backdrop, no ground, ring or shadow.
+func _pixel_frac(model: Node3D) -> float:
+	var mode := stage_env.background_mode
+	var col := stage_env.background_color
+	stage_env.background_mode = Environment.BG_COLOR
+	stage_env.background_color = Color(1.0, 0.0, 1.0)
+	_stage_off(model, false)
+	for k in 3:
+		await tree.process_frame
+	var frac := Proof.rows_frac(tree.root.get_texture().get_image())
+	_stage_off(model, true)
+	stage_env.background_mode = mode
+	stage_env.background_color = col
+	for k in 2:
+		await tree.process_frame
+	return frac
+
+
+## Hide (or show again) what is not the figure: the ground, the team ring, the shadow disc.
+func _stage_off(model: Node3D, shown: bool) -> void:
+	stage_ground.visible = shown
+	var ring := model.get_node_or_null("TeamRing") as Node3D
+	if ring and not shown:
+		_ring_was = ring.visible
+	if ring:
+		ring.visible = shown and _ring_was
+	for n in model.find_children("*Shadow*", "Node3D", true, false):
+		(n as Node3D).visible = shown
 
 
 ## --flinch: running at 4 m/s, a hit lands 0.2 s in; <dir>/flinch/f###.png every 1/fps s for 1 s.
