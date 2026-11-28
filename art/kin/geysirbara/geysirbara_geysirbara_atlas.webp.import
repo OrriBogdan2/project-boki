@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://baqnwd4ug4540"
-path="res://.godot/imported/geysirbara_geysirbara_atlas.webp-59e8e199b2268e9fe8034a97bd8d5eb1.ctex"
+path.s3tc="res://.godot/imported/geysirbara_geysirbara_atlas.webp-59e8e199b2268e9fe8034a97bd8d5eb1.s3tc.ctex"
+path.etc2="res://.godot/imported/geysirbara_geysirbara_atlas.webp-59e8e199b2268e9fe8034a97bd8d5eb1.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "10709446ece6e37df1f24b66f98b3ba2"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/geysirbara/geysirbara_geysirbara_atlas.webp"
-dest_files=["res://.godot/imported/geysirbara_geysirbara_atlas.webp-59e8e199b2268e9fe8034a97bd8d5eb1.ctex"]
+dest_files=["res://.godot/imported/geysirbara_geysirbara_atlas.webp-59e8e199b2268e9fe8034a97bd8d5eb1.s3tc.ctex", "res://.godot/imported/geysirbara_geysirbara_atlas.webp-59e8e199b2268e9fe8034a97bd8d5eb1.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

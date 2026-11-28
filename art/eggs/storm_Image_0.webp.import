@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d1mxed8fxtg3l"
-path="res://.godot/imported/storm_Image_0.webp-eff5ec20f6d71d5509f08c5a2d24660a.ctex"
+path.s3tc="res://.godot/imported/storm_Image_0.webp-eff5ec20f6d71d5509f08c5a2d24660a.s3tc.ctex"
+path.etc2="res://.godot/imported/storm_Image_0.webp-eff5ec20f6d71d5509f08c5a2d24660a.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "9b2747087a3fdfd2d70c29d21e82d736"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/eggs/storm_Image_0.webp"
-dest_files=["res://.godot/imported/storm_Image_0.webp-eff5ec20f6d71d5509f08c5a2d24660a.ctex"]
+dest_files=["res://.godot/imported/storm_Image_0.webp-eff5ec20f6d71d5509f08c5a2d24660a.s3tc.ctex", "res://.godot/imported/storm_Image_0.webp-eff5ec20f6d71d5509f08c5a2d24660a.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
