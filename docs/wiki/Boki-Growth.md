@@ -253,7 +253,7 @@ How a Boki is played with gives it a leaning: the affinity it has earned the mos
 
 | Tier | Leads the next affinity by | Its stat's share of expedition growth | Path meter pips | Mutation from another affinity | Signature part |
 |---|---|---|---|---|---|
-| Balanced | 0 | 25% | 0 | 50% | no |
+| Balanced | 0 | 25% | 0 | 30% | no |
 | Leans | 20 | 40% | 1 | 30% | no |
 | Strongly | 60 | 55% | 2 | 15% | yes |
 | Devoted | 150 | 70% | 3 | 5% | yes |
