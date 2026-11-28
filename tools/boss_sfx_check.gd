@@ -23,6 +23,9 @@ func _played(t0: int) -> Array:
 
 func _gap(main: Node) -> void:
 	await main.get_tree().create_timer(0.12).timeout      # (Sfx merges a repeat of one sound inside 30 ms)
+	var t_end := Time.get_ticks_msec() + 120      # (it merges by wall-clock ms, and a loaded headless run steps game time faster than that)
+	while Time.get_ticks_msec() < t_end:
+		await main.get_tree().process_frame
 
 const BORROWED := ["zap", "boom", "whoosh", "throw", "die_small", "v_warden"]      # what the attacks used to play
 
