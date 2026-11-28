@@ -17,7 +17,7 @@ const REF := {"juggernaut": 0.61, "gil": 0.71, "dredge": 0.0}
 const TOL := 0.25                # +/- of the reference
 const FLOAT_CM := 3.0            # the fist further than this from the prop's surface: it floats
 const AXIS_CM := 5.0             # a haft's axis further than this from the fist: not in the palm
-const CROSS_DEG := 50.0          # the haft this far off the knuckle line: through the hand, not across the palm
+const CROSS_DEG := 65.0          # the haft this far off the knuckle line: along the hand, out of the wrist, not in the palm
 const HOLD_POSES := {
 	"juggernaut": [["idle", {}], ["run", {"vel": 4.6}], ["LMB 1", {"kmove": "jug_slash_r", "kmove_t": 0.1}],
 		["LMB 2", {"kmove": "jug_slash_l", "kmove_t": 0.1}],
@@ -32,7 +32,8 @@ const HOLD_POSES := {
 }
 const HANDS := {"juggernaut": "RightHand", "gil": "RightHand", "dredge": "LeftHand"}  # warden_native.json "hand"
 const PALM := 0.25               # forearm lengths from the wrist to the palm's middle (a rig without finger bones)
-const GRIP_TIP := 20.0           # deg: the hilt across the knuckles, tipped this far toward the fingers
+const GRIP_TIP := 55.0           # deg: a diagonal sword grip, the hilt off the knuckle line toward the fingers
+                                 # (index base to the heel of the hand; near the angle Kael's clips were keyed at)
 const GRIP_PER_BLADE := 0.25     # Kael's hilt behind the guard per blade length (kael_pieces: 0.15 / 0.61)
 const FIST_AT := 0.75            # the fist's middle: this far from the wrist to the middle knuckle
 const MAX_VERTS := 4000          # vertices sampled per prop

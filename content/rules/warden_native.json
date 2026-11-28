@@ -79,7 +79,7 @@
 	"kael": {"meshy_native": true, "size": 1.2, "hand": "RightHand",
 		"props": {"hand.R": ["metal-sword", "metal-sword_dk", "metal-sword_edge", "glow-sword", "leather-grip"]},
 		"tilt": {"hand.R": 47.0},
-		"grip": {"hand.R": {"part": [0.0, 0.1207, -0.0475], "bone": [0.0027, 0.1169, -0.0043], "turn": [0.4854, -0.0008, -0.8588]}},
+		"grip": {"hand.R": {"part": [0.0, 0.1207, -0.0475], "bone": [0.0027, 0.1169, -0.0043], "turn": [0.235, -0.0006, -0.4651]}},
 		"anchors": {"anchor_head_top": "head_end", "anchor_chest": "Spine02", "anchor_gun_R": "RightHand"},
 		"plants": {"walk": {"L": [0.05], "R": [0.683]}, "run": {"L": [0.05], "R": [0.383]}, "crouch": {"L": [0.133], "R": [0.683]}},
 		"clips": {"idle": "Idle", "walk": "walk", "run": "run", "jump": "Jump_Run", "attack": "Attack", "crouch": "Crouch_Walk_with_Torch"},
