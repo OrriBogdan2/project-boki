@@ -6,9 +6,6 @@ The tag is `scripts/ui/combo_mark.gd` (`ArchKit.combo_read` -> icon, pips, time 
 marks); the payoff is `ComboMark.payoff` (the body flashes white for 2 frames, a light flash, the `combo` chime).
 Probe: `godot --headless --path . -- --combo-payoff-check` (tools/combo_payoff_check.gd).
 
-Needs `ext/ui-combo-tag-rest` (stacked on `ext/ui-combo-marks-c` and `ext/combo-marks-a/b`): on main only Sable,
-Vex and Sparkle read through the tag; this branch carries the rest.
-
 ## Pairs with a mark on the foe (all probed: tag, flash, sound)
 
 | Hunter (id) | Mark / state | Payoff | Icon + time left | Flash + sound | Probe row |
@@ -29,27 +26,33 @@ Each row asserts: the tag has an icon and a time left inside its total while the
 foe (`cm_pay`), sets `flash_t` to the 2-frame white and moves `Sfx.last_played["combo"]`. The tag's own rows
 (shrinks, gone at the end, belongs to the applier) stay in tools/combo_mark_check.gd, run by each kit's combo check.
 
-## Kits with no mark on the foe
+## Other states a foe carries (all probed: icon in the plate status row, payoff flash)
 
-Their two-step is a stun, a pin or a position, not a carried mark, so there is no icon to show. Payoffs go through
-`ArchKit.payoff_fx` (word, burst, sound, HUD flash) with no white body flash and no tag.
+These need no `combo_read`: the state is a plain status the plate row already draws (`HudPlate.statuses`). Their
+payoffs go through `ArchKit.payoff_fx`, which now calls `ComboMark.payoff` for its victim, so every one of them gets
+the same white body flash and chime as a mark payoff.
 
-| Hunter (id) | Setup | Payoff |
-|---|---|---|
-| Albert (`bulwark`) | knock a foe into a wall or another foe (stun) | CRUSHED (`bulwark_kit.gd` payoff block) |
-| Tenzo (`dolm`) | a punched rock | rock fall payoff, wall stun |
-| Grimble (`dredge`) | Anchor reel (stun spiral on the foe, `stunned`) | HAULED |
-| Motley (`ostra`) | Shard Snap stun, Brimseed bomb growing | collapse at full growth |
-| Lace (`archer`) | Heavy Shot pin; Hawk Sense reveal under half health | EXECUTED (ult) |
+| Hunter (id) | State on the foe | Row icon | Payoff (`payoff_fx`) |
+|---|---|---|---|
+| Albert (`bulwark`) | wall or foe stun | stun | CRUSHED |
+| Lace (`archer`) | Heavy Shot pin (stun) | stun | EXECUTED (ult) |
+| Grimble (`dredge`) | Anchor reel Ground; Blast Blight | Ground; Blight (new) | HAULED |
+| Tenzo (`dolm`) | rock Shred (takes +% damage) | Shred (new) | rock fall |
+| Motley (`ostra`) | Shard Snap stun; Trade Disoriented (slow) | stun; Slow | collapse |
+| Sable (`thief`) | Primed shot Shred | Shred (new) | the empowered bolt (see the Marks row) |
+| Kael (`juggernaut`), Cinder (`ashwick`) | Blight | Blight (new) | none |
+
+Lace's Red Thread (a hurt rival outlined through cover) has no icon on purpose: it is a passive outline that follows
+the foe's health, with no timer to show. Shred and Blight have only a vector glyph so far (`Icons`, ids
+`status_shred`, `status_blight`); a painted icon is owed (`--icon-art-check` lists painted statuses).
+A remote body does not carry Shred or Blight timers (the Net `kst` note keeps only Ground, Daze and Slow), so the
+icon shows on bodies this game owns and on monsters.
+
+`--combo-payoff-check` prints a `MARKSTATE` line per state (kit, state, icon yes/no, flash yes/no) and fails on any
+`no`, or on a `payoff_fx` call in the kits that does not name its victim.
 
 ## Gaps left (not wiring only)
 
-- A tag for the stun/pin setups above (Grimble's reel, Motley's stun before the bomb, Albert's wall stun, Lace's pin)
-  would need a new `combo_read` per kit (what counts as the state, its total time) and a decision on whether a stun
-  is a "mark" under the rule. Not built. The foe's own stun effect already shows.
-- The `payoff_fx` payoffs (CRUSHED, HAULED, rock fall, collapse, SWEET SPOT, EXECUTED) have no white body flash. One
-  call to `ComboMark.payoff` per site would add it, but their rings/burst already read; owner call.
 - Sparkle's 4th Static (Live) has its own word and sky bolt but no body flash; it is the mark completing, not the
   payoff, so left alone like Sable's uncapped Marks.
-- Squad-mate tags (a teammate's marks on a foe) are drawn beside yours on `ext/ui-combo-tag-rest`; the probe only
-  covers the viewer's own.
+- Squad-mate tags (a teammate's marks on a foe) are drawn beside yours; the probe covers the viewer's own.
