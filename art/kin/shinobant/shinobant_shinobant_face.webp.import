@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://8x80vcba738g"
-path="res://.godot/imported/shinobant_shinobant_face.webp-ad28c6ea0614140e6a988487d69c0204.ctex"
+path.s3tc="res://.godot/imported/shinobant_shinobant_face.webp-ad28c6ea0614140e6a988487d69c0204.s3tc.ctex"
+path.etc2="res://.godot/imported/shinobant_shinobant_face.webp-ad28c6ea0614140e6a988487d69c0204.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "7fd65e08c966a999d737ac287e170b9d"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/shinobant/shinobant_shinobant_face.webp"
-dest_files=["res://.godot/imported/shinobant_shinobant_face.webp-ad28c6ea0614140e6a988487d69c0204.ctex"]
+dest_files=["res://.godot/imported/shinobant_shinobant_face.webp-ad28c6ea0614140e6a988487d69c0204.s3tc.ctex", "res://.godot/imported/shinobant_shinobant_face.webp-ad28c6ea0614140e6a988487d69c0204.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
