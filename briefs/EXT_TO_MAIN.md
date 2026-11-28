@@ -11588,3 +11588,4 @@ READY ext/vfx-motley-neve-marks ff4d65a083 (Nightwell tell starts on a lit teal 
 READY ext/vfx-meeko-albert-rings 19e39c8a9a40e989e3b7dd86db61f848f126d835 (Meeko Hearthlight thin lit-rim ring + Albert Mending Ground rising motes; 4v4 p95 -0.20 ms; before/after sheet in docs/art/vfx_meeko_albert_rings)
 READY ext/vex-daze-leftovers fba848a9b1 (docs only: neither Vex Daze leftover has a source row, nothing built; fragment 1128-vex-daze-leftovers.md)
 READY ext/sable-dagger-slow 5135cdce39 (bulk-rebase: origin/main merged in mechanically, was e415755d82; union 0 gen 1 files; the branch's own READY checks still apply)
+READY ext/vex-daze-leftovers 6745c72ce8 (Vex Daze leftovers: both source-silent, docs note + check results, no code change)
