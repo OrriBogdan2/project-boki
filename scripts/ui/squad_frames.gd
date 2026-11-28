@@ -5,7 +5,7 @@ extends RefCounted
 ## armour bar over the health bar in one slanted frame. Knocked: a red label, the portrait tinted red,
 ## the bleed-out in the health row, and a marker beside the row whose tail points at them (their world
 ## ping is DownedMarks.ally_ping). Dead: the portrait greyed and cracked, no bars, and the finisher's face
-## in a red disc at the row's end. A live row also carries its hunter's Boki icon (MateBoki).
+## in a red disc at the row's end.
 ## Every size here is measured off the reference capture (scripts/ui/SQUAD_FRAMES_SPEC.md), in HUD
 ## units (the HUD is laid out at 1280x720 and scaled: 1 unit = 1.5 px at 1920x1080).
 
@@ -80,12 +80,10 @@ static func centre(hud, i: int) -> Vector2:
 static func draw(hud, sz: Vector2, p: Hunter) -> void:
 	shown.clear()
 	levels.clear()
-	MateBoki.shown.clear()
 	var all := rows(hud.m, p)
 	for i in all.size():
 		_row(hud, centre(hud, i), all[i], i)
 		SafeArea.note(Rect2(centre(hud, i) - Vector2(R, R), Vector2(R + LABEL_X + BAR_SKEW + BAR_W, R + BAR_Y + BAR_H)))
-		SafeArea.note(MateBoki.rect(centre(hud, i)))
 	hud._draw_squad_markers(sz, p)
 
 
@@ -138,8 +136,6 @@ static func _row(hud, at: Vector2, h: Hunter, i: int) -> void:
 	if dead and by != null:
 		rec["killer"] = by.nid
 		_killer(hud, at + Vector2(MARK_DX, 0.0), by)
-	if not dead and st != "EXTRACTED":
-		MateBoki.draw(hud, at, h)
 	hud.mates.draw_row(hud, Rect2(at - Vector2(R, R), Vector2(MARK_DX + MARK_R, 2.0 * R)), h)
 	shown[h.nid] = rec
 

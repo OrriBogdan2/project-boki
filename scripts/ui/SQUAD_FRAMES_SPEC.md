@@ -69,6 +69,4 @@ the lower half with 38% black (`SHADE`).
 - Order: teammates, then you last. 2 or 3 rows; none in solo.
 - Timing of the ref's own transitions is not visible in a still: the pop and fades are ours.
 
-- Boki icon (ours, not in the ref; DECISIONS Boki HUD, owner Nov 3): `MateBoki` at 80 units right of the portrait centre (clear of the bar's end at 66 and of the marker / killer disc at 106), radius 8.2 units, a 1.7-unit health arc from the top clockwise (red under 30%). Alive: full colour. Wisp (KinWisp, or riding a knocked hunter): species-colour glow, see-through tinted face. Downed or dead Boki: grey, no arc, red X. Not drawn on a dead hunter's row or when the hunter has no Boki.
-
 Not copied: the voice/mute icons left of each portrait and the unmute hint (we have no voice chat).
