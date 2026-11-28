@@ -11610,3 +11610,4 @@ READY ext/ui-mate-boki-icon d4f0644fb2a944b9dc99d9dcd8828bf0be2279f3 (squad row 
 READY ext/sfx-garden-zones 780f654f6b (Boki voice take bag: 0 repeated clips in 20 s vs 6 of 42; --garden-bark-log; all 6 zones+hub already had beds)
 READY ext/tut-three-starters ee328b967dfafa6bb91559c7d1a9ac35b683414c (tutorial for Lace, Kael and Vex: Kael's kin step no longer swallowed by a hooked chain, melee camps softer, playthrough check audits each step's keys and ability names per starter with a 2x pace limit)
 READY ext/ui-garden-boki-card 1643eba8e45b8dc3039e5b0285e001c15bda09a6 (Boki card Care tab as one glance: XP to next level, hunger/mood icons, bond ring %, task+skills, she/her; garden-fit-check no-scroll + text-fit)
+READY ext/tut-garden-core-rows 2ac8493c62d13ca9e43db823edfda896acb1408d (farm tutorial = 5 core steps: meet, pet, feed, play, name; build/chop only as Hob tips)
