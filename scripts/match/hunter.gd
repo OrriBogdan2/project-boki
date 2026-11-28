@@ -724,12 +724,14 @@ func _render_balloon(delta: float) -> void:
 ## Knockback is a clean, predictable shove: a knock replaces the flight you were in (Displace.knock_speed: a
 ## second knock takes over from the first, a pull or a reel), you slide for a fixed moment without control,
 ## and it never pops you into the air unless the attack says so. knock_t (HunterLoco.knock_left) is how long it lasts.
+## The push divides by max(1 + knockback_resist, 0.5) and by the class mass (docs/KNOCK_WALLS.md "Knock formula",
+## the source's impulse / max(KnockbackResist, 0.5) / mass); the lift divides by mass only.
 var launched_at := -9.0        # when a hard shove or a launch last hit you (Capture.controlled: it interrupts a rescue or a scan)
 var knock_steer := 0.3         # how much WASD bends a knockback (the attack decides: 0.3 to 0.5)
 func impulse(kbv: Vector2, lift := -1.0) -> void:
 	if fortify_t > 0.0:
 		return
-	var k := kbv * (1.0 - owner_stat("knockback_resist"))
+	var k := kbv / maxf(1.0 + owner_stat("knockback_resist"), 0.5)
 	var s := k.length() / mass()
 	if s >= Capture.HARD_KNOCK or lift / mass() >= 3.0:
 		launched_at = m.time
