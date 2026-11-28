@@ -97,3 +97,13 @@ All 2822 accessors (mesh, skin, rig, clips) byte-identical to r10; glb compacted
 (live -> r12): value 0.71 -> 0.64, hue 273 -> 267 (turnaround 270), pink share 15% -> 12%. (Lowering painted rim_far 0.5 -> 0.08 was
 tested: no measurable change, so the look rule is unchanged.) Recipe: /home/boki/gens/hunter-round-1124/motley/r12/tools/mk12.py
 r10.glb ../r8/mx/w28/tex0_base_color.png c5.glb --match=1.0 --dark=0.55 --sat=0.75 --red=1.22 --swirl=0.12 --star=0.55 --nstars=400 --srad=4 --mouth=0.06
+
+**r14 (2026-11-28, job 20261128-022706-a4):** r12's void paste and 3 px feather also painted violet smudges on the box faces, ruff,
+hat horn and gloves: the r12 void UV mask covered ~7,000 triangles above the waist (ruff/head/hat) and its blur crossed island borders.
+The void is now the r13 f2 candidate (r12 void at 0.75x albedo, less pink), kept ONLY on void-mask triangles whose 3D centroid
+is below y=1.2 (the tail), with a 3 px gutter that may grow only into UV texels no other triangle uses. Every other texel (albedo and
+emission) is restored to live main (8905d8ca); 0.03% of UV outside the new mask differs from live. All accessors byte-identical
+to r12/live. Game view, side, void pixels (live -> r14): value 0.61 -> 0.64 at eye, pink share 21% -> ~9%. art-gate game sheet
+(side, real GPU): GAME 5.3 vs LIVE 4.5. Known open issue: the starfield still covers the black coat tails (they share the void mask
+below the waist). Recipe: /home/boki/gens/hunter-round-1124/motley/r14/tools/{mask14.py mask_k4.png, mk14.py ../r13/f2.glb live.glb
+k4.glb --mask=mask_k4.png}, then r11/tools/compact.py.
