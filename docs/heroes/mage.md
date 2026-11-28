@@ -114,7 +114,7 @@ reason. Asserts: `--mage-combo-check` (`Skycall ...`, `small: ...`, `Kitefall (d
 | Shift input / feel, Shift reset (-) | (a) | matches the owner; the orb-reset question is closed (owner rule: only a full-Static foe resets) |
 | Passive: reset cue on Live, knock heal (LOW) | (b) | the misleading reset cue and the knock heal are gone |
 | RMB / E / R self-shake (LOW/MED) | (c) | ext/no-shake owns item 50 |
-| R Static spread (MED) | (b) | the highest Static among the foes the strike hits goes to every foe it hits, then the ult's own stack (owner item 72); asserted |
+| R Static spread (MED) | (b) | owner ruling 11-26: the foe the strike lands on (most Static, nearest on a tie) gains the ult's 1; every other foe it hits gains that foe's Static + 1 (`x.spread_add`; 3 -> +4, 0 -> +1), capped at 4, with an arc to each; `--sparkle-r-spread-check` |
 
 ## Per-slot table
 | Slot | Input | Aim | What it does | Telegraph / reticle | Move (KMovesVV) | Sound |

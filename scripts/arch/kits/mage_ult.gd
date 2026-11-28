@@ -6,8 +6,8 @@ extends RefCounted
 ## launches straight up and hangs there invulnerable while a pink range ring on a dark band shows round the
 ## take-off spot, a gold crown at the cursor, and the camera pulls back. Press again (X or the attack key) to
 ## come down as a bolt at the cursor, clamped inside the ring; with no second press she comes down there by
-## herself when the hover runs out. The strike hurts, knocks back and adds Static to everyone round the landing
-## spot, and pink lightning crackles at her feet for a moment after.
+## herself when the hover runs out. The strike hurts and knocks back everyone round the landing spot; the foe it
+## lands on gains Static and spreads its own Static + 1 to the rest, and pink lightning crackles at her feet after.
 
 const CROUCH := "crouch"
 const RISE := "rise"
@@ -15,50 +15,59 @@ const AIR := "air"
 const FALL := "fall"
 const AFTER := "after"
 const AIRBORNE := [RISE, AIR, FALL]
-const STEP_BACK := 0.5           # m: how finely the landing spot backs off a wall or a gap toward the take-off
-const RAY_STEP := 0.25           # m along the cursor's ray
-const RAY_FINE := 8              # the last step, cut this many times
-const RAY_ABOVE := 12.0          # m: the ray is walked from this far above the take-off...
-const RAY_BELOW := 12.0          # ... to this far below it
-const HUM_DB := -6.0             # dB: the hover's hum loop
-const CAM_PULL := 0.45           # how far the camera eases back while she hangs in the air
+const STEP_BACK := 0.5  # m: how finely the landing spot backs off a wall or a gap toward the take-off
+const RAY_STEP := 0.25  # m along the cursor's ray
+const RAY_FINE := 8  # the last step, cut this many times
+const RAY_ABOVE := 12.0  # m: the ray is walked from this far above the take-off...
+const RAY_BELOW := 12.0  # ... to this far below it
+const HUM_DB := -6.0  # dB: the hover's hum loop
+const CAM_PULL := 0.45  # how far the camera eases back while she hangs in the air
 
 var kit: MageKit
-var leap := {}                 # the running cast: {phase, t, from, base, top, land, high, queued, fire_free}
-var casts := 0                 # (tests)
-var hits := 0                  # foes the strikes hit (tests)
-var last := {}                 # (tests) the last strike: {at, hits, bond}
-var spreads := 0               # (tests) Static carried to a foe by a strike
+var leap := {}  # the running cast: {phase, t, from, base, top, land, high, queued, fire_free}
+var casts := 0  # (tests)
+var hits := 0  # foes the strikes hit (tests)
+var last := {}  # (tests) the last strike: {at, hits, bond}
+var spreads := 0  # (tests) Static carried to a foe by a strike
+
 
 func _init(owner_kit: MageKit) -> void:
 	kit = owner_kit
 
+
 func data() -> Dictionary:
 	return kit.x_def()
+
 
 ## Damage scale for the ult: the hunter's own multiplier and level growth (it has no ranks).
 func power() -> float:
 	return kit.m.dmg_mult(kit.h) * LevelGrowth.ap(kit.h)
 
+
 func running() -> bool:
 	return not leap.is_empty()
 
+
 func phase() -> String:
 	return String(leap.get("phase", ""))
+
 
 ## In the air (rising, hanging or coming down): nothing else of hers works and nothing hurts her.
 func airborne() -> bool:
 	return AIRBORNE.has(phase())
 
+
 ## Holds her in place: the crouch, the climb, the hang and the drop (the strike's crackle leaves her free).
 func busy() -> bool:
 	return running() and phase() != AFTER
+
 
 ## Seconds until the strike frees her (0: free): the drop's rest, and at least the whole drop before it.
 func lock_left() -> float:
 	if phase() == FALL:
 		return float(data()["drop"]) - float(leap["t"])
 	return float(data()["drop"]) if busy() else 0.0
+
 
 # ------------------------------------------------------------------ the press
 ## The cast (HeroUlt.press has checked the cooldown and that nothing holds her).
@@ -79,6 +88,7 @@ func cast() -> bool:
 	kit.m.sfx("vv_ult_charge", h.pos, -2.0)
 	return true
 
+
 ## RecastCue: X again during the hang brings her down at the marker (she comes down by herself when it ends).
 func window() -> Dictionary:
 	if phase() != AIR:
@@ -87,6 +97,7 @@ func window() -> Dictionary:
 	var t := float(leap["t"])
 	var hover := float(xd["hover"])
 	return RecastCue.window("x", hover - t, hover, leap["land"], t >= float(xd["min_air"]), true)
+
 
 ## A second press while she hangs brings her down; pressed during the climb it waits for the hang.
 func recast() -> bool:
@@ -99,6 +110,7 @@ func recast() -> bool:
 			return true
 	return false
 
+
 # ------------------------------------------------------------------ per step
 func tick(dt: float) -> void:
 	if leap.is_empty():
@@ -109,7 +121,7 @@ func tick(dt: float) -> void:
 	match phase():
 		CROUCH:
 			if _moving():
-				leap["t"] = 0.0             # a Shift in the crouch: the crouch waits for it, then starts over
+				leap["t"] = 0.0  # a Shift in the crouch: the crouch waits for it, then starts over
 				leap["moved"] = true
 			elif bool(leap.get("moved", false)):
 				leap["moved"] = false
@@ -118,7 +130,7 @@ func tick(dt: float) -> void:
 				_hold_still()
 				if t >= float(xd["windup"]):
 					_take_off()
-			_range_ring()                 # (after a take-off: where she launched from)
+			_range_ring()  # (after a take-off: where she launched from)
 		RISE:
 			_hold_air(smoothstep(0.0, 1.0, t / float(xd["rise"])))
 			_aim_tick()
@@ -140,13 +152,16 @@ func tick(dt: float) -> void:
 			if t >= float(xd["after"]):
 				leap = {}
 
+
 ## The hover's hum loop (one per Hunter): held while she hangs, stopped on the drop.
 func hum_key() -> String:
 	return "ult_hum%d" % kit.h.get_instance_id()
 
+
 func _next(p: String) -> void:
 	leap["phase"] = p
 	leap["t"] = 0.0
+
 
 ## The hang ends on a queued press, a fresh attack press, or when the hover time is up (she comes down at the cursor).
 func _wants_down(t: float, xd: Dictionary) -> bool:
@@ -160,14 +175,17 @@ func _wants_down(t: float, xd: Dictionary) -> bool:
 		return true
 	return t >= float(xd["hover"])
 
+
 ## The crouch: no steering, but a jump still goes (she takes off from up there) and any speed she had runs out
 ## under her the way it would (item 51: an ability combines with Shift and a jump).
 func _hold_still() -> void:
 	kit.h.inp["move"] = Vector2.ZERO
 
+
 ## A Wirerun charging or streaking, or her air dash: Shift pressed in the crouch.
 func _moving() -> bool:
 	return not kit.wire.is_empty() or kit.run_t > 0.0 or kit.h.roll_t > 0.0
+
 
 ## Up at the take-off spot, `k` of the way to the top: no keys, no gravity, nothing touches her.
 func _hold_air(k: float) -> void:
@@ -183,10 +201,12 @@ func _hold_air(k: float) -> void:
 	if h.is_local() and kit.m.cam:
 		kit.m.cam.pull = maxf(kit.m.cam.pull, CAM_PULL * k)
 
+
 func _untouchable(secs: float) -> void:
 	var h := kit.h
 	h.inv_t = maxf(h.inv_t, secs)
 	h.phase_t = maxf(h.phase_t, secs)
+
 
 ## She launches from where she is: a jump or a dash in the crouch moves the ring there (unless that is over the
 ## abyss), and the climb starts at her height, so nothing snaps.
@@ -203,6 +223,7 @@ func _take_off() -> void:
 	kit.vfx("x_air", from, null, {"len": float(data()["height"])})
 	kit.m.sfx("vv_ult_rise", h.pos, -2.0)
 	_untouchable(0.2)
+
 
 # ------------------------------------------------------------------ aiming the landing
 ## The ground under the cursor: its ray walked down to the first ground it meets. Hanging 5 m up, inp["aim"] (the
@@ -231,6 +252,7 @@ func cursor_spot() -> Vector3:
 	# over the abyss: the plane she took off from (land_point backs off to ground)
 	return o + d * (((leap["from"] as Vector3).y - o.y) / d.y)
 
+
 ## Where she would come down: the cursor clamped inside the ring, backed off toward the take-off spot until it
 ## is standable ground (never a wall, never the abyss).
 func land_point() -> Vector3:
@@ -245,11 +267,13 @@ func land_point() -> Vector3:
 			return kit.ground(p)
 	return from
 
+
 ## The pink range ring round the take-off: everyone sees where she can come down, from the press on.
 func _range_ring() -> void:
 	var ring := {"at": leap["from"], "r": float(data()["range"]), "ticks": true, "col": MageKit.PINK}
 	ring.merge({"col2": MageKit.PINK, "all": true, "lw": 0.1})
 	AimKit.circle(kit.h, "x_ring", ring)
+
 
 ## Up there: the range ring on a dark band (once she is off the ground, the spot is fixed) and the gold crown at
 ## the cursor (her own), as big as the strike's hit area.
@@ -265,6 +289,7 @@ func _aim_tick() -> void:
 		var hover := float(data()["hover"])
 		RecastMarker.show_at(h, "hunter_ult", leap["land"], hover - float(leap["t"]), hover, kit.col_of(data()))
 
+
 ## Pink crackle along the rim and round her body while she hangs.
 func _air_fx(dt: float) -> void:
 	var rng := kit.fx().rng
@@ -277,6 +302,7 @@ func _air_fx(dt: float) -> void:
 		kit.vfx("x_rim", p, null, {"to": q})
 	if rng.randf() < 6.0 * dt:
 		kit.vfx("x_crackle", kit.h.position)
+
 
 # ------------------------------------------------------------------ the strike
 func _slam() -> void:
@@ -294,6 +320,7 @@ func _slam() -> void:
 	AimKit.circle(kit.h, "x_land", mark)
 	kit.vfx("x_dive", land, null, {"r": float(data()["radius"])})
 
+
 ## Coming down: a streak of lightning from where she hung onto the marker (the body hides in it).
 func _fall_tick(u: float) -> void:
 	var h := kit.h
@@ -302,16 +329,18 @@ func _fall_tick(u: float) -> void:
 	h.vel = Vector3.ZERO
 	h.inp["move"] = Vector2.ZERO
 	h.pos = a.lerp(b, u * u)
-	leap["vel"] = (b - a) * (2.0 * u / float(data()["drop"]))     # d/dt of the lerp, for the snapshot
+	leap["vel"] = (b - a) * (2.0 * u / float(data()["drop"]))  # d/dt of the lerp, for the snapshot
 	_untouchable(0.1)
 	if h.model:
 		h.model.visible = u < 0.3
 	if h.is_local() and kit.m.cam:
 		kit.m.cam.pull = maxf(kit.m.cam.pull, CAM_PULL)
 
+
 ## The snapshot's velocity: the fall's own while she comes down (vel is held at zero), else the body's.
 func move_vel() -> Vector3:
 	return leap.get("vel", Vector3.ZERO) if phase() == FALL else kit.h.vel
+
 
 func _strike() -> void:
 	var h := kit.h
@@ -324,12 +353,12 @@ func _strike() -> void:
 		h.model.visible = true
 	_next(AFTER)
 	kit.play("mage_x_land")
-	kit.m.later(0.55, kit.gum.blow)      # (once she is back on her feet)
+	kit.m.later(0.55, kit.gum.blow)  # (once she is back on her feet)
 	_strike_fx(at, r)
 	var struck := kit.foes_in(at, r)
-	var shared := _highest_static(struck)
-	# (found before the ult's stack lands: that lifts the stacked foe past the count, and the arc lost its source)
-	var source: Ent = _static_source(struck, shared)
+	var source := _static_source(struck, at)
+	# (read before the ult's own stack lands on the source: the spread carries what it had when she hit)
+	var spread := kit.spark_n(source) + int(xd["spread_add"]) if source != null else 0
 	var dmg := float(xd["dmg"]) * power()
 	for f in struck:
 		var away := Vector2(f.pos.x - at.x, f.pos.z - at.z)
@@ -337,34 +366,37 @@ func _strike() -> void:
 		var o := {"src": "abil", "ab": "ult", "tags": ["ult", "kitefall"], "kb": away * float(xd["push"])}
 		o["lift"] = float(xd["lift"])
 		f.hurt(dmg, h, o)
-		_share_static(f, shared, source)
-		kit.add_spark(f, int(xd["stacks"]))
+		if f == source:
+			kit.add_spark(f, int(xd["stacks"]))
+		else:
+			_spread_static(f, spread, source)
 		HeroUlt.landed(kit, f)
 	hits += struck.size()
 	last = {"at": at, "hits": struck.size()}
 
-func _highest_static(struck: Array) -> int:
-	var best := 0
+
+## The foe the strike lands on: the one with the most Static, the nearest to the landing on a tie (with no
+## Static anywhere, simply the nearest).
+func _static_source(struck: Array, at: Vector3) -> Ent:
+	var best: Ent = null
+	var best_d := INF
 	for f in struck:
-		best = maxi(best, kit.spark_n(f))
+		var d := Vector2(f.pos.x - at.x, f.pos.z - at.z).length()
+		var lead := 0 if best == null else kit.spark_n(f) - kit.spark_n(best)
+		if best == null or lead > 0 or (lead == 0 and d < best_d):
+			best = f
+			best_d = d
 	return best
 
-func _static_source(struck: Array, shared: int) -> Ent:
-	for f in struck:
-		if shared > 0 and kit.spark_n(f) == shared:
-			return f
-	return null
 
-## Thunderstorm: when the strike hits a foe carrying Static, every foe it hits is raised to the highest count
-## among them (before the ult's own stack), with lightning arcing from the stacked foe to each.
-func _share_static(f: Ent, shared: int, source: Ent) -> void:
-	var have := kit.spark_n(f)
-	if shared <= have or source == null:
-		return
-	kit.add_spark(f, shared - have)
+## The owner's rule: every other foe the strike hits gains the source's Static + spread_add (3 -> +4, 0 -> +1),
+## capped at the max, with lightning arcing from the source to each.
+func _spread_static(f: Ent, spread: int, source: Ent) -> void:
+	kit.add_spark(f, spread)
 	spreads += 1
 	var chest := Vector3(0, 1.0, 0)
 	kit.vfx("x_spread", source.position + chest, null, {"to": f.position + chest})
+
 
 ## A pillar of gold light slams onto the spot out of the sky, a shock ring, a scorched storm on the hit area and a
 ## spray of sparks.
@@ -372,6 +404,7 @@ func _strike_fx(at: Vector3, r: float) -> void:
 	kit.vfx("x_strike", at, null, {"r": r})
 	kit.m.sfx("vv_ult_slam", at, 1.0)
 	Shake.big(kit.m, at, "ult", kit.h)
+
 
 ## Rose-pink lightning stays at her feet for a moment after the strike (she is free to act).
 func _after_fx(dt: float) -> void:
@@ -384,6 +417,7 @@ func _after_fx(dt: float) -> void:
 	var q := foot + Vector3(cos(a) * rng.randf_range(0.8, 1.6), 0.05, sin(a) * rng.randf_range(0.8, 1.6))
 	kit.vfx("x_after", p, null, {"to": q})
 
+
 # ------------------------------------------------------------------ ends
 ## A Boki merge (or a kit swap) mid-cast: she drops straight down where she took off, nothing strikes; the
 ## cooldown stays spent.
@@ -395,6 +429,7 @@ func drop() -> void:
 		kit.h.vel = Vector3.ZERO
 	_clear()
 
+
 ## The glider opened in the climb or the hang (MageKit._tick_glide_cancel): she stays where she is, nothing
 ## strikes, the cooldown stays spent. False when she isn't up there.
 func glide_out() -> bool:
@@ -402,6 +437,7 @@ func glide_out() -> bool:
 		return false
 	_clear()
 	return true
+
 
 func _clear() -> void:
 	var h := kit.h
