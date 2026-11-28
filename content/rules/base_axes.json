@@ -25,6 +25,8 @@
 	"band": 0.25,
 	"band_doc": "an axis past +-band writes a journal line once, when it crosses.",
 	"words": {"bold": ["bolder", "shyer"], "busy": ["livelier", "lazier"], "gentle": ["gentler", "rougher"]},
+	"ends": {"bold": ["shy", "bold"], "busy": ["lazy", "busy"], "gentle": ["rough", "gentle"]},
+	"ends_doc": "per axis: the word for each end, [at -1, at +1], on the Boki card's Raising block (RaisingView).",
 	"words_doc": "per axis: [line when it rises, line when it falls], written as 'is getting <word>'.",
 	"styles": {
 		"none": [],

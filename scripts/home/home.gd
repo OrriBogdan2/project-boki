@@ -3250,13 +3250,11 @@ func _open_kin(rec: Dictionary) -> void:
 			c1.add_child(UI.label(String(Evo.AFF[lead]["name"]), UI.T_HEAD, Evo.AFF[lead]["tint"], UI.big))
 			c1.add_child(UI.label("Mutation at level %d" % next_mut, UI.T_SMALL, UI.MUTED))
 			c1.add_child(UI.para("What you feed it and how you raise it decides which way it grows.", 12, UI.FAINT))
-			var ln := Evo.lean(rec)
-			if String(ln[0]) != "":
-				var lean_t := "Its meals lean it %s: %d%%" % [Lean.face(ln[0])["name"], int(100.0 * float(ln[1]))]
-				c1.add_child(UI.label(lean_t, UI.T_SMALL, Lean.face(ln[0])["tint"]))
 			EvoPathView.block(rec, c1, func(): _open_kin(rec))
 			var tot := 0.0
 			for af in Evo.AFF: tot += maxf(0.0, float(rec["aff"][af]))
+			RaisingView.block(rec, c2, get_tree())
+			c2.add_child(UI.spacer(4))
 			c2.add_child(UI.section("Affinities"))
 			for af in Evo.AFF:
 				row.call(c2, Evo.AFF[af]["name"], float(rec["aff"][af]) / maxf(tot, 1.0), Evo.AFF[af]["tint"], "%d%%" % int(round(100.0 * maxf(0.0, float(rec["aff"][af])) / maxf(tot, 1.0))))
