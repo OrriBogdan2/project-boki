@@ -782,6 +782,18 @@ func _archer_combos() -> void:
 		"x %.1f (rock %d, entry %.1f) snaps %d walks %d"
 		% [P.pos.x, bx, K.spirit.entry.x, K.spirit.snap_backs - sn0, K.spirit.walks - w0]
 	)
+	# ...and she stands on free ground there (source: ending inside a wall teleports her out): not in the rock,
+	# not under the map, and one frame later she can still walk away (never stuck)
+	var g_end: float = W.ground_at(P.pos.x, P.pos.z)
+	var x_end := P.pos.x
+	step(m, 0.3, func(): P.inp["move"] = Vector2(-1, 0))
+	P.inp["move"] = Vector2.ZERO
+	ok(
+		"combo pin: Spirit Walk running out inside a rock leaves her on free ground (not stuck, not under the map)",
+		not W.is_block(x_end, P.pos.z) and absf(g_end - home.y) < 0.1 and P.pos.y >= g_end - 0.05
+			and P.pos.y > home.y - 0.1 and not K.spirit.blocked_here(false) and P.pos.x < x_end - 0.5,
+		"end x %.1f ground %+.2f, now x %.1f y %+.2f" % [x_end, g_end - home.y, P.pos.x, P.pos.y - home.y]
+	)
 	# Phase Walk crosses a raised-platform wall (data, supervive_kits.md:78): a wall two terraces high and
 	# two tiles thick, west of her, that a plain walk stops at; she walks through at her own floor
 	# (she starts 6 m east of home: the strip is flat only 8 tiles west of it, and the 3.4 m roll plus the drop
@@ -839,6 +851,21 @@ func _archer_combos() -> void:
 	P.hurt(5.0, T2, {"src": "shot"})
 	step(m, 0.05)
 	ok("pin: damage ends Spirit Walk", not K.spirit.active() and P.spirit_t <= 0.0)
+	# a hit ends it within one frame (source: taking damage ends Phase Walk): a fresh walk, hit, one DT step
+	step(m, 0.5)
+	P.teleport(home)
+	P.dashes = P.max_dashes()
+	P.do_dash()
+	step(m, 0.3)
+	var on_before := K.spirit.active() and P.spirit_t > 0.0
+	T2.hurt(0.0, null, {})
+	P.hurt(5.0, T2, {"src": "shot"})
+	m.step(DT)
+	ok(
+		"pin: a hit during Spirit Walk ends it within one frame",
+		on_before and not K.spirit.active() and P.spirit_t <= 0.0,
+		"on before %s, after 1 frame t %.2f ghost %.2f" % [on_before, K.spirit.t, P.spirit_t]
+	)
 	# rank 3 (data: Phase Walk IV): 0.5 s longer, +33% inside something that fades over the walk, allies near her walk too
 	P.slot_lv["dash"] = 3
 	step(m, 0.5)
