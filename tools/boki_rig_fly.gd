@@ -101,6 +101,14 @@ func _roam() -> void:
 	# this check times flight while roaming: a random day nap or a hello (BaseLife) would take a flier off the clock
 	home.life.r_v["doze"] = 0.0
 	home.life.r_v["greet_chance"] = 0.0
+	# ... and so would toys and chores: solo play alone took 165-215 of the fliers' 240 s, leaving roam time to the
+	# dice (red 3 of 6 on main under load: 19-29 s roamed vs the 30 s floor). No toys on this farm, no chores.
+	home.life.r_v["chore_chance"] = 0.0
+	var toy_ids: Dictionary = HomeToys.rules()["toys"]
+	var deco: Array = home.hb.L()["deco"]
+	for e in deco.duplicate():
+		if toy_ids.has(String(e["id"])):
+			deco.erase(e)
 	# reseed here: the farm build waits a load-dependent number of frames, each drawing on the global rng, so the
 	# seed(3) in run() alone left the roam to host load (red 1 in 4 under a busy gate: fliers roamed 15 of 120 s)
 	seed(3)
@@ -131,7 +139,10 @@ func _roam() -> void:
 			on_foot[uid] = float(on_foot.get(uid, 0.0)) + DT if not up and speed >= BokiRig.WALK_SPEED else 0.0
 			longest = maxf(longest, float(on_foot[uid]))
 			still_up[uid] = float(still_up.get(uid, 0.0)) + DT if up and speed < BokiRig.WALK_SPEED else 0.0
-			if float(still_up[uid]) >= SETTLED:
+			# a hover counts once it holds its height: a flier still climbing (it landed and took off again) or
+			# sinking off a vent is not hovering yet
+			var held := is_equal_approx(float(k["fly"]["h"]), float(k["fly"]["to"])) if up else false
+			if float(still_up[uid]) >= SETTLED and held:
 				var lift := float(k["fly"]["h"])
 				if not ZoneVents.over(k["pos"]):  # over a vent it holds vent_h (_vent)
 					hover = Vector2(minf(hover.x, lift), maxf(hover.y, lift))
