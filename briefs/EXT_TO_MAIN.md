@@ -11575,3 +11575,4 @@ READY ext/vex-native-timing e6b18f9a541 (Vex timing check reads the native playe
 READY ext/hud-empty-slots efb38c27e1 (empty HUD slots hidden)
 READY ext/garden-hour-1128 fc9526ba0d (garden first hour re-played)
 READY ext/creator-first-rows f0fb1ba3927b288f9dafc4abae95f3e464780da4 (creator first pass short)
+READY ext/vfx-grimble-anchor-slugs 47a1864a8d2 (Grimble: Anchor Drop fist + scorch cone coin gold, hit wedge 0.45 s; includes ext/vfx-grimble-slugs LMB slugs; areas unchanged)
