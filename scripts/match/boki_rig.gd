@@ -1467,7 +1467,7 @@ const FRAME := {
 	},
 	"thrumbird":
 	{
-		"head": Vector3(0, 0.347, -0.010),
+		"head": Vector3(0, 0.347, -0.004),
 		"top": 0.631,
 		"carry": Vector3(0, 0.192, -0.019),
 		"ear_tip": Vector3(0.0119, 0.411, 0.0451),
