@@ -13,6 +13,7 @@ class_name Incubator
 ## On the save:
 ##   Save.d["incubator"]  {slots: n, eggs: [{sp, boss, id, slot, heat (seconds of warmth), slow}], coal: seconds}
 ##   Save.d["rare_eggs"]  [{sp, boss, rare, id}] waiting on the shelf, next first
+##   Save.d["egg_told"]   [id] of ready eggs already named on an arrival card (CareJournal); absent = none
 ##   A wild visitor's egg also carries "visitor" {sp, zone, day} (who left it); an older egg has none.
 ##   Save.d["items"]["coals"]  Ember Coals not used yet
 

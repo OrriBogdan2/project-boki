@@ -373,6 +373,8 @@ func _away(cs) -> void:
 	for id in marks:
 		marks[id] = float(marks[id]) - AWAY_S  # each zone's own last-arrival mark goes back too
 	var n: int = (Save.d["roster"] as Array).size()
+	var rare := Incubator.add("zapple")      # row I: a ready Rare Egg waits in the hub's Nook through the gap
+	(Incubator.find(String(rare["id"])) as Dictionary)["heat"] = Incubator.need()
 	Game.goto("home", {"zone": "bramblebank"})
 	var bb = await _arrived(cs)
 	ok(bb != null, "back in Bramblebank after the gap")
@@ -384,6 +386,7 @@ func _away(cs) -> void:
 	ok(line != "" and bb.panel_open != "While you were away", "the return is one HUD line, no panel (%s)" % line)
 	await _grab("away_card")
 	print("GDAY card: ", text.substr(maxi(0, text.find("While you were away")), 900))
+	ok("ready to hatch" not in text, "row I: the Nook is the hub's, so Bramblebank's card has no ready-egg line")
 	ok("Moss trained" not in text, "Moss lives in Cinderstep: it does not train at Bramblebank's toys while away")
 	ok("starv" not in text.to_lower() and "lost" not in text.to_lower(), "the card never says lost or starved")
 	# row H: two zones open, the lines sit under zone names, and the shared mark does not starve the other zone
@@ -421,6 +424,7 @@ func _away_cinderstep(bb, bb_trained: bool) -> void:
 	var line := BaseCard.away_line(BaseCard.away)
 	ok(line != "", "Cinderstep has its own return line (%s)" % line)
 	print("GDAY cinderstep card: ", text.substr(maxi(0, text.find("While you were away")), 900))
+	ok("ready to hatch" not in text, "row I: Cinderstep's card has no ready-egg line either")
 	var head := text.find("Cinderstep")
 	var trained := text.find("Moss trained")
 	ok(
