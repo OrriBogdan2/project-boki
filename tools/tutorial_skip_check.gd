@@ -26,7 +26,7 @@ func run(mn: Node) -> void:
 	main = mn
 	Save.no_write = true
 	var full := await _match_run(-1)
-	ok(not (full["goals"] as Array).is_empty() and full["named"], "match: a full run leaves a named Boki, Goals rows")
+	ok(full["goals"] and full["named"], "match: a full run leaves a named Boki, Goals rows")
 	ok((full["hunters"] as Array).size() > 0, "match: a full run leaves the starter Hunter open")
 	var n := Tutorial.steps().size()
 	for i in n:
@@ -66,13 +66,21 @@ func _match_snap() -> Dictionary:
 		"named": String(roster[0].get("name", "")) != "",
 		"active": String(d["active"]) == String(roster[0]["uid"]),
 		"hunters": ClassUnlock.open_ids(),
-		"goals": _goal_rows(),
+		"goals": _goals_sane(),
 		"matches": int(d["matches"]),
 	}
 
-## The first-day Goals rows as the player reads them (never empty, same after a skip as after a full run).
-func _goal_rows() -> Array:
-	return GoalTracker.lines().map(func(r): return String(r["text"]))
+## True when the Goals card has rows to show and none twice (the mastery rows depend on the run's stats).
+func _goals_sane() -> bool:
+	var texts: Array = GoalTracker.lines().map(func(r): return String(r["text"]))
+	return not texts.is_empty() and texts.size() == _uniq(texts).size()
+
+func _uniq(a: Array) -> Array:
+	var out: Array = []
+	for x in a:
+		if not out.has(x):
+			out.append(x)
+	return out
 
 ## Plays the tutorial and ends it at step `skip_at` with the Skip button (-1: plays it out). Returns what
 ## the save looks like afterwards ({} when the step never came).
@@ -164,7 +172,7 @@ func _farm_snap() -> Dictionary:
 	return {
 		"done": not FarmTutorial.active() and FarmTutorial.current() == "",
 		"named": String(Save.active_kin().get("name", "")) != "",
-		"goals": _goal_rows(),
+		"goals": _goals_sane(),
 		"axe": HomeGather.has_tool("axe"),
 		"pickaxe": HomeGather.has_tool("pickaxe"),
 		"house": not FarmHob.house_entry().is_empty(),
@@ -195,7 +203,7 @@ func _farm(tag: String) -> void:
 	var full := await _farm_full()
 	var gear: bool = full["toy"] and not full["house"] if FarmTutorial.base() \
 			else full["axe"] and full["pickaxe"] and full["house"]
-	ok(not (full["goals"] as Array).is_empty(), "%s: the Goals card has rows after a full run" % tag)
+	ok(full["goals"], "%s: the Goals card has rows after a full run" % tag)
 	ok(full["done"] and gear and full["food"] and full["boki"] == 1 and full["named"],
 			"%s: a full playthrough ends with the %s, the food and the Boki (%s)" % [
 				tag, "toy" if FarmTutorial.base() else "house and both tools", str(full)])
