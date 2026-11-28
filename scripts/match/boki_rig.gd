@@ -1124,7 +1124,7 @@ const FRAME := {
 	},
 	"zephyrak":
 	{
-		"head": Vector3(-0.0275, 0.336, -0.118),
+		"head": Vector3(-0.031, 0.336, -0.119),
 		"top": 0.341,
 		"carry": Vector3(0, 0.248, 0.00952),
 		"ear_tip": Vector3(0.0786, 0.284, -0.0313),
