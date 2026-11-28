@@ -648,6 +648,7 @@ func _locked_inputs(m: Match, P: Hunter, K: AshwickKit, at: Vector3) -> void:
 	var shots0: int = m.shots.size()
 	var ch0 := K.ch_rmb
 	var hp0 := P.hp
+	P.hurt_at = m.time + 99.0  # recovery waits 4 s after a hit: only a drunk tonic may raise hp here
 	var pos_y := P.pos.y
 	var l0 := J.locked
 	var keys := ["sec", "dash", "util1", "util2", "util3", "util4", "util5", "util6", "gear1", "gear2", "kin_ab",

@@ -223,6 +223,7 @@ func _belt() -> void:
 	m.step(Match.DT)
 	ok(UtilityBelt.count(p_v, "smoke") == 1, "it has a short cooldown between uses")
 	p_v.inv_t = 99.0
+	p_v.hurt_at = m.time + 99.0  # recovery waits 4 s after a hit: only the drink may heal here
 	p_v.inp["util1"] = true
 	m.step(Match.DT)
 	ok(p_v.drink_t > 0.0, "key 1 starts a drink")
