@@ -10,7 +10,6 @@ extends RefCounted
 ## hunter it catches counts as a land (HeroUlt.landed), paid on the catch, never per tick. Its looks hang on the
 ## match, not on Ostra, so a merge or a knock on his doesn't take the placed well down.
 
-const DOME_COL := Color("b8fff0")
 const DISC_COL := OstraKit.SEA
 const SWOLLEN_COL := OstraKit.HOT     # the core when cast Swollen: his lighter teal
 const TICK := 0.1                       # s between damage ticks
@@ -67,7 +66,7 @@ func start() -> bool:
 	casts += 1
 	k.play("ostra_well")
 	k.m.sfx("os_well", center, -2.0, 1.0)
-	k.net_ring(center, radius, DOME_COL)
+	k.net_ring(center, radius, DISC_COL)
 	return true
 
 func tick(dt: float) -> void:
@@ -126,8 +125,8 @@ func _tick_tell(dt: float) -> void:
 	var tell := float(xd()["tell"])
 	var accent := SWOLLEN_COL if swollen else DISC_COL
 	AimKit.circle(k.h, "x", {
-		"at": center, "r": radius, "fill": phase_t / tell, "all": true, "col": DOME_COL, "col2": accent,
-		"ticks": true,
+		"at": center, "r": radius, "fill": phase_t / tell, "all": true, "col": DISC_COL, "col2": accent,
+		"ticks": true, "soft": true,
 	})
 	var dome := KitLooks.of(k.m).hold_on("os_well_dome", "well_dome", k.m, center, radius)
 	(dome.get_node("Core") as Node3D).visible = swollen

@@ -125,7 +125,7 @@ func _build(kind: String) -> Node3D:
 				Vector3(0, 3.0, 0)
 			)
 		"well_dome":
-			Models.part(n, Models.sphere(1.0, 24), glass_mat(Color("06221e"), Color("b8fff0"), 0.45, 0.1), Vector3.ZERO)
+			Models.part(n, Models.sphere(1.0, 24), glass_mat(Color("06221e"), OstraKit.SEA, 0.45, 0.1), Vector3.ZERO)
 			Models.part(
 				n,
 				Models.sphere(0.3, 16),

@@ -84,7 +84,7 @@
 		"spear_land": {"fx": [
 			{"p": "shard", "y": 0.3, "n": 18, "speed": 4.5, "spread": 0.6, "grav": 8.0, "life": 0.5, "size": 0.13,
 				"c": "main", "c2": "hot"},
-			{"p": "scorch", "size": "r", "size_x": 0.8, "life": 2.0, "c": "frost", "c2": "hot", "c3": "deep"},
+			{"p": "scorch", "size": "r", "size_x": 0.8, "life": 2.4, "c": "frost", "c2": "hot", "c3": "deep"},
 			{"p": "smoke", "y": 0.4, "n": 6, "shape": "disc", "radius": 1.0, "speed": 0.8, "spread": 0.7, "grav": -0.3,
 				"life": 1.5, "size": 0.42, "c": "smoke", "c3": "mist"}
 		]},
@@ -94,7 +94,7 @@
 				"size": 0.2, "c": "main", "c2": "hot"},
 			{"p": "shard", "y": 0.3, "n": 16, "shape": "disc", "radius": 2.0, "speed": 2.5, "spread": 0.4, "grav": 4.0,
 				"life": 0.6, "size": 0.12, "c": "frost", "c2": "hot"},
-			{"p": "scorch", "size": "r", "life": 2.2, "c": "frost", "c2": "hot", "c3": "deep"},
+			{"p": "scorch", "size": "r", "life": 5.0, "c": "frost", "c2": "hot", "c3": "deep"},
 			{"p": "smoke", "y": 0.5, "n": 8, "shape": "disc", "radius": 2.0, "speed": 1.2, "spread": 0.8, "grav": -0.4,
 				"life": 1.8, "size": 0.6, "c": "smoke", "c3": "mist", "near": true}
 		]},

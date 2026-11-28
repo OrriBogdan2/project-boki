@@ -32,8 +32,8 @@ func _part_rmb() -> void:
 		P.inp["sec"] = _at(t, 0.1)
 		P.inp["sec_hold"] = t > 0.1 and t < 0.5
 		_aim(T.pos)
-	await _go(3.2, cast, _sheet("rmb", "RMB: the gather, the push, the spear's trail, the landing, the detonation",
-		[0.3, 0.55, 0.65, 0.8, 1.0, 1.4, 2.6, 2.75, 3.1], func(): return T.pos), 3.0)
+	await _go(6.2, cast, _sheet("rmb", "RMB: the gather, the push, the spear's trail, the landing, the detonation",
+		[0.65, 0.9, 1.4, 2.5, 2.75, 3.1, 3.8, 4.8, 5.8], func(): return T.pos), 3.0)
 	await _go(GAP)
 
 func _part_e() -> void:
