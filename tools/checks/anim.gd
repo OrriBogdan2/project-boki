@@ -19,6 +19,8 @@ const CHECKS := {
 	"--geo-shots": ["res://tools/geo_shots.gd", "geo_shots", null],
 	# every Hunter faces its aim (skeleton forward vs aim, 4 aims); --shots-dir= adds front-view shots
 	"--facing-check": ["res://tools/facing_check.gd", "facing_check", null],
+	# the owner lineup/size sheet shots (GPU, --shots-dir=; boki-tools hunter-lineup)
+	"--lineup-sheet": ["res://tools/lineup_sheet.gd", "lineup_sheet", null],
 	"--native-upper-shots": ["res://tools/native_upper_shots.gd", "native_upper_shots", null],
 	"--warden-native-check": ["res://tools/warden_native_check.gd", "warden_native_check", null],  # Meshy skeleton
 	"--native-springs-shots": ["res://tools/native_springs_shots.gd", "native_springs_shots", null],

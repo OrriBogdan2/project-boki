@@ -1,5 +1,5 @@
 extends "res://tools/facing_check.gd"
-## --lineup-sheet --shots-dir=<dir> [--cell=560x960] [--span=4.8] [--idle-t=1.0] [--hunters=Vex,Kael]: one shot per
+## --lineup-sheet --shots-dir=<dir> [--cell=880x960] [--span=4.8] [--idle-t=1.0] [--hunters=Vex,Kael]: one shot per
 ## Hunter for the owner's lineup and size sheets (the python side: boki-tools `hunter-lineup`). Every Hunter is built
 ## the way the match builds it (Models.hunter, the facing table of --facing-check: HUNTERS and the match's face rule),
 ## drawn at the match's size (Hunter.VIS_SCALE: 1.12 x camera.json match_hunter_scale), the same held idle frame
@@ -15,7 +15,7 @@ const BG := Color("dcdde3")  # plain backdrop (the python side draws the ground 
 const SYNC_STEPS := 12  # frames the idle is stepped at the held time (the clip's blend settles)
 
 var span := 4.8  # m of height the ortho camera covers; the feet sit 0.2 m above the bottom edge
-var cell := Vector2i(560, 960)
+var cell := Vector2i(880, 960)
 var idle_t := 1.0  # s into the idle clip, the same for every Hunter
 
 
@@ -50,8 +50,19 @@ func run(main: Node) -> void:
 		var row := await _one(h[0], h[1], out)
 		bad += 0 if row["ok"] else 1
 		rows.append(row)
-		print("LINEUP_SHEET %s %s body %.2f all %.2f facing %.1f %s" % [row["name"], row["id"], row["body_m"], row["all_m"], row["facing_deg"], "ok" if row["ok"] else "BACKWARDS"])
-	var cam_info := {"cell": [cell.x, cell.y], "span_m": span, "feet_m_from_bottom": 0.2, "scale": Hunter.VIS_SCALE, "match_hunter_scale": CamRig.match_hunter_scale, "idle_t": idle_t}
+		var verdict := "ok" if row["ok"] else "BACKWARDS"
+		print(
+			"LINEUP_SHEET %s %s head %.2f body %.2f all %.2f facing %.1f %s"
+			% [row["name"], row["id"], row["head_m"], row["body_m"], row["all_m"], row["facing_deg"], verdict]
+		)
+	var cam_info := {
+		"cell": [cell.x, cell.y],
+		"span_m": span,
+		"feet_m_from_bottom": 0.2,
+		"scale": Hunter.VIS_SCALE,
+		"match_hunter_scale": CamRig.match_hunter_scale,
+		"idle_t": idle_t,
+	}
 	var f := FileAccess.open(out.path_join("lineup.json"), FileAccess.WRITE)
 	f.store_string(JSON.stringify({"cam": cam_info, "rows": rows}, "\t"))
 	print("LINEUP_SHEET_DONE %d hunters, %d not facing the camera" % [rows.size(), bad])
@@ -130,7 +141,8 @@ func _tris(model: Node3D) -> int:
 	var n := 0
 	for mi in model.find_children("*", "MeshInstance3D", true, false):
 		var m := mi as MeshInstance3D
-		if not m.is_visible_in_tree() or not m.mesh is ArrayMesh or String(model.get_path_to(m)).begins_with("TeamRing"):
+		var ring := String(model.get_path_to(m)).begins_with("TeamRing")
+		if not m.is_visible_in_tree() or not m.mesh is ArrayMesh or ring:
 			continue
 		for s in m.mesh.get_surface_count():
 			n += int((m.mesh as ArrayMesh).surface_get_array_index_len(s) / 3.0)
