@@ -118,3 +118,121 @@ python3 tools/gen_wiki.py --check
 ```
 
 Not covered: the 3D look on a real GPU (jobs queued), fetch/training XP, real calendar days of the trader, the Nap pile except through the check.
+
+---
+
+# Re-played 2026-11-28 (origin/main c78b7cba28, `base_mode` on as shipped)
+
+The 11-1x hour listed 11 problems. Most are fixed. This is the same hour played again on current main with the same kind of driver,
+plus the five problems that are left, worst first. Analysis only: no game code changed.
+
+## How it was played
+
+- **Driver:** a scratch script (copy: [`garden_hour_1128.gd.txt`](shots/farm-first-hour-1128/garden_hour_1128.gd.txt), registered locally
+  only, never committed to the registry). Fresh save, one hatched starter (trust 55), the tutorial on, the real farm
+  (`main._hb_home()`), the real `Home._process` at a fixed 0.05 s step for 3600 s of **farm time**. It calls what the UI calls:
+  `_pet_kin`, `_care_feed`, the build bar's `place_held`, `_open_feed`, the market and Nook panels, `BlackMarket.buy`,
+  `Shelter.adopt`, `GardenZones.attune`, `_whistle`, `BaseRace.use`.
+- **Clock:** the game stamps the snack patch and the wild visitor with unix time, so the driver moves those stamps back one step per
+  step. The pet window is rolled by hand every 300 s (`care_day_s`). Care XP (`GardenXp._first_today`) pays once per **real** day
+  (`garden_prizes.json day_s 86400`), so it pays once in this hour, as it would for a player.
+- **Player:** efficient. Pets until the Boki has had enough (1-3 pats, `pet_react.json cap`), then stops. Places the free patch at once,
+  the toy as soon as the banner says so, feeds when food is under 60, buys the Wayseed and adopts a stray at 120 s. Two feed policies:
+  **wait** (gives only the food the banner names) and **kibble-first** (gives what the Feed panel lists).
+- **Shots:** [`docs/shots/farm-first-hour-1128/`](shots/farm-first-hour-1128), software renderer (llvmpipe under Xvfb, not a GPU), so
+  3D light differs. Same names as the 11-1x shots. Logs: [`run_log_wait_seed2.txt`](shots/farm-first-hour-1128/run_log_wait_seed2.txt),
+  [`run_log_kibble_first_seed2.txt`](shots/farm-first-hour-1128/run_log_kibble_first_seed2.txt),
+  [`run_log_hated_emberberry_full_hour_stuck.txt`](shots/farm-first-hour-1128/run_log_hated_emberberry_full_hour_stuck.txt).
+- **Runs:** about 40 headless runs while building the driver (many were thrown away: a feed-spam loop, a glued player that walked its
+  Boki off the island, an unclosed evolution card and a practice lap all froze the Boki; each was the driver, not the game). The numbers
+  below are from the final driver: 6 wait runs and 18 kibble-first runs.
+- **Forced (not play):** the whistle test (the Boki is teleported 14 m away first) and the Dash with two Boki (energy set to 90) are
+  run at the end of the hour; the driver closes the evolution card when it opens.
+
+## The hour, step by step (wait policy, farm seconds)
+
+| # | Step | Farm time | What happened | Shot |
+|---|---|---|---|---|
+| 1 | Hub arrival | 0 s | 60 gems become 200 on first entry. Banner "This is your Boki. Walk up and say hello." Goals card: Feed your Boki, Play with a toy, Run your first race. Bag: 2 kibble, 1 tonic. | [01](shots/farm-first-hour-1128/01_hub.jpg) |
+| 2 | Meet, plant the patch | 0 s | Meet ticks at once. The snack patch is free in Build > Garden, ticks the step, and the banner moves to "Feed it". | |
+| 3 | Feed panel | 0 s | Banner: "give it the Emberberry". The Feed panel lists **Boki kibble x2 only**. The 3 starter emberberry sit in `items` and are not listed (problem 1). | [03](shots/farm-first-hour-1128/03_feed_panel.jpg) |
+| 4 | Pet | 0-60 s | First pat: joy +5 to +12, trust +2, 15 XP. Pats past the Boki's cap (1-3 a farm day, 20 s apart): joy +0, trust +0, XP +0, no message (problem 4). | [04](shots/farm-first-hour-1128/04_pet.jpg) |
+| 5 | First batch ripe | 59 s | The patch's first batch ripens in 59 s (was 8 min): 4 snacks plus 2 extras. The player feeds emberberry at 60 s: the Feed step ticks. | [07](shots/farm-first-hour-1128/07_patch_ripe.jpg) |
+| 6 | Toy | 61 s placed, 12 gems | Toy step ticks at 69 s (the Boki played 8 s after it went down). "Head out or stay" ticks itself at 79 s: the banner is gone. | [05](shots/farm-first-hour-1128/05_toy.jpg) |
+| 7 | Market | 120 s | Boki tab sells food. The note under the tabs still says an upgrade "opens: Shelter..." although Shelter is already a tab (problem 5). | [05b](shots/farm-first-hour-1128/05b_market.jpg), [05c](shots/farm-first-hour-1128/05c_market_boki.jpg) |
+| 8 | Wayseed, stray | 120 s | The trader had the Glasswater Wayseed (110 gems) on this date; bought. A stray costs 20 gems at stall level 1: adopted. Goals become: first race, nap pile, "Raise Pip to level 3". | |
+| 9 | Nook | 120 s | Both tiles say **LV 8 NEEDED**, the real gate. | [05d](shots/farm-first-hour-1128/05d_nook_alone.jpg), [12](shots/farm-first-hour-1128/12_nook.jpg) |
+| 10 | Toy play | 69-3600 s | 138 plays x 5 XP = about 690 of the hour's 720 XP. Joy stays 95-100. Roam, Play, Nap, Chore and PlayWith all show. The "nap pile" first-day line ticked on its own. | [08](shots/farm-first-hour-1128/08_10min.jpg), [09](shots/farm-first-hour-1128/09_30min.jpg) |
+| 11 | Wake the next zone | 2335-3040 s | Glasswater woke by feeding tidebloom when hungry: 2335-3040 s over the runs that logged it (this run 2800 s). | [zone](shots/farm-first-hour-1128/zone_glasswater.jpg) |
+| 12 | Whistle (forced) | end | Boki 14 m away was beside the player in 2.0-5.1 s (was 3.0 s). | [06](shots/farm-first-hour-1128/06_whistle.jpg) |
+| 13 | Dash, 2 Boki (forced) | end | 15-28 s run, race line ticks. With one Boki the Dash starts a practice lap. | [11](shots/farm-first-hour-1128/11_dash.jpg) |
+| 14 | End of hour | 3600 s | Level 6-7 (515-780 XP in 6 runs), tutorial finished since 79 s, gems 58-88 (spent 12 toy + 110 Wayseed + 20 stray; the 15-gem first-day reward is not reached). Goals card: "Next: Run your first race 0/1". | [10](shots/farm-first-hour-1128/10_55min.jpg) |
+
+Level 8 (pairing) needs about 1105 XP in total (`18 x L^1.5` summed over levels 1-7): about 1.6 h at this pace, so the Nook line is the
+second hour's.
+
+## The 11-1x list, one line each
+
+| 11-1x item | Now |
+|---|---|
+| 1 Tutorial food cannot be fed | **Half.** The patch's first batch (59 s) gives a feedable emberberry; the starter 3 are still unlisted. See problem 1. |
+| 2 Three lines need a second Boki | Fixed: stray 20 gems at stall level 1. Nothing *points* a player to it (problem 3). |
+| 3 Tutorial blocks the toy | Fixed: toy ticks 8 s after it goes down. |
+| 4 Next zone depends on the calendar | Not tested: the trader had a Wayseed on this date in every run. Same date, not independent. |
+| 5 Nook text says Lv 5 | Fixed ("LV 8 NEEDED"). |
+| 6 Breeding 8-15 h away | Better: about 1.6 h. |
+| 7 Toy play gives no XP | Fixed: 5 XP a play, 93% of the hour's XP. |
+| 8 First minutes quiet | Fixed: first batch at 59 s. |
+| 9 No prompt for the free patch | Fixed (patch step). |
+| 10 Tutorial never ends | Fixed: ends itself at 79 s. |
+| 11 `base_mode` off | Fixed: `farm_build.json base_mode` true. |
+| 12 Order of the first hour | Not played here. |
+
+## The next five problems, worst first
+
+Each line is backlog-ready: title | owner files | proposal | IMPACT, HARD.
+
+1. **Feed step ticks only on a lean crop, but the Feed panel offers kibble.** The starter bag has 2 kibble (`farm_tutorial.json
+   first_day.start_items`) and 3 emberberry in `items` (`base.start_food`); the panel lists the kibble and not the emberberry, and kibble
+   does not tick the step (`FarmTutorial.detect` needs a Boki with a `lean`). A player who feeds the listed kibble fills the Boki
+   (69 to 99, refused at 92 and over), and the step then waits for hunger: **ticked at 396-397 s in 14 of 18 kibble-first runs** (6.6 min,
+   instead of 61 s), the Boki held at your side in the Lead state with joy 70 to 12-19 by 10 min. Shot 03 is the moment.
+   Owner: `scripts/home/farm_tutorial.gd` (`give_food`, `detect`), `content/rules/farm_tutorial.json` (`base.start_food`,
+   `first_day.start_items`), `scripts/home/home.gd` `_open_feed`.
+   *Proposal: give the 3 starter emberberry as crops (`Save.d.crops`) so the panel lists them first, and tick "Feed it" on the first meal
+   of any food (the lean change then shows on the first emberberry).* IMPACT 7/10, HARD 2/10.
+2. **The tutorial's food may be one the Boki hates.** The hate is random per Boki. In 3 of 18 kibble-first runs the starter hated
+   emberberry: the step ticked at 1269 s once and **never in the hour** twice (Boki food 9, joy 12 at 60 min, still in Lead, banner
+   still on "Feed it"). Owner: `scripts/home/farm_tutorial.gd` `food()`, `Care.feed` (`hate`). *Proposal: name the lean snack the starter
+   does not hate, or tick the step when the Boki refuses a hated food (it has then learned something).* IMPACT 5/10, HARD 2/10.
+3. **Nothing points a one-Boki player to the Shelter.** Race (Dash), nap pile and pair need a second Boki; the Goals card lists the race at once. The
+   only Shelter line is "No Boki: adopt a stray at the Shelter" (`farm_tutorial.json` line 331), shown with no Boki. A 20-gem stray is on offer
+   from minute 0 (`Shelter.open_level` 1), but a new player is not told. Owner: `content/rules/farm_tutorial.json` (`first_day.rows`),
+   `scripts/ui/goal_tracker.gd`. *Proposal: give the race and nap rows a hint "Need a second Boki? Adopt a stray at the market's
+   Shelter (20 gems)", shown while the roster has one Boki.* IMPACT 5/10, HARD 1/10.
+4. **Pats past the cap pay nothing and say nothing.** Cap per farm day: playful 3, shy 2, proud 1, sleepy 2 (`pet_react.json`). A pat past the cap: joy +0, trust +0, XP +0; the only cue is that it looks at you (`PetReact._beat`). XP from care is once per **real**
+   day (15 XP), so a player who pets for ten minutes earns what the first pat did. Owner: `scripts/home/pet_react.gd`,
+   `content/rules/pet_react.json`. *Proposal: a "had enough, come back later" bubble on the first capped pat.* IMPACT 3/10, HARD 1/10.
+5. **Two stale lines.** (a) The market note says "Upgrade the stall ... and it opens: Shelter, your stall and search" while the Shelter
+   tab is already open at level 1 in base mode (shots 05b, 05c): `scripts/home/home_market.gd` `_next_level`, `Goods.rules()["stall"]
+   ["levels"]`. (b) The Boki card's fallback line is always "is happy: take a trip, or place a toy", even at 55 min with a toy down
+   since minute 1 (shot 10): `scripts/home/base_card.gd:90` `next_action`. *Proposal: build the note from `Shelter.open_level`; make the
+   fallback name something not done yet (a toy, a trip, a stray, a pat).* IMPACT 2/10, HARD 1/10.
+
+## What worked (keep)
+
+- The patch's first batch at 59 s: the first minute now has a meal, a toy and a finished tutorial by 79 s (wait policy).
+- Toy play pays: 138 plays and joy 95-100 all hour; the Boki cycles Play, Nap, Chore and PlayWith by itself.
+- Whistle 2-5 s at 14 m. A lone Boki gets a practice lap on the Dash. The Nook says LV 8 NEEDED.
+
+## Proof (2026-11-28)
+
+```
+godot --headless --import                                   # fresh worktree
+godot --headless --path . -- --garden-first-day-check       # FIRSTDAY DONE, failures: 0 (no SCRIPT ERROR / Parse Error)
+godot --headless --path . -- --garden-first-15-check        # G15 gaps: worst 0.0 s; G15 DONE, failures: 0
+python3 tools/health.py --strict                            # HEALTH OK (registry unchanged vs origin/main)
+python3 tools/gen_wiki.py --check                           # RED on main, not from this branch: docs/wiki/Class-Stone-Seer.md#kit and Rules.md out of date
+```
+
+Not covered: a real GPU render, real calendar days of the trader, a player who walks (the driver stands still), the evolution card's own flow.
