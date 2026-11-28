@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://brhb2disu4box"
-path="res://.godot/imported/seamwyrm_seamwyrm_atlas.webp-0d3e9931d83f4074169f6c5bbe8b5427.ctex"
+path.s3tc="res://.godot/imported/seamwyrm_seamwyrm_atlas.webp-0d3e9931d83f4074169f6c5bbe8b5427.s3tc.ctex"
+path.etc2="res://.godot/imported/seamwyrm_seamwyrm_atlas.webp-0d3e9931d83f4074169f6c5bbe8b5427.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "82e53790f368aaa301fbda8adcd78b18"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/seamwyrm/seamwyrm_seamwyrm_atlas.webp"
-dest_files=["res://.godot/imported/seamwyrm_seamwyrm_atlas.webp-0d3e9931d83f4074169f6c5bbe8b5427.ctex"]
+dest_files=["res://.godot/imported/seamwyrm_seamwyrm_atlas.webp-0d3e9931d83f4074169f6c5bbe8b5427.s3tc.ctex", "res://.godot/imported/seamwyrm_seamwyrm_atlas.webp-0d3e9931d83f4074169f6c5bbe8b5427.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
