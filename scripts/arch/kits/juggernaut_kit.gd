@@ -47,6 +47,7 @@ var slash_n := 0
 var slash_at := -9.0
 var slam_w := {}               # the Finishing Slam winding up: {t, dir (at the press), pinned (to dir: E went)}
 var lunge := {}                # the running Lunge: {end, dir, k, hit}
+var miss_end := -9.0           # a missed Lunge slows him to here (rmb.lunge.miss_move)
 var warchain: JuggernautChain  # E (its state machine)
 var meteor: JuggernautDrop     # the airborne Smash
 var rmb_queued_at := -9.0      # a Smash pressed while a heavy move ran (Loco.press_buffer)
@@ -203,8 +204,10 @@ func move_k() -> float:
 	if riposte.running(): return riposte.move_k()
 	if meteor.running(): return meteor.move_k()
 	if not slam_w.is_empty(): return 0.6
-	if lunge_charging(): return float(rmb_def()["lunge"]["walk_k"])
-	return 0.55 if lmb_t > float(lmb_def().get("tap", 0.22)) else 1.0
+	var ld: Dictionary = rmb_def()["lunge"]
+	var miss := float(ld["miss_move"]) if m.time < miss_end else 1.0
+	if lunge_charging(): return miss * float(ld["walk_k"])
+	return miss * (0.55 if lmb_t > float(lmb_def().get("tap", 0.22)) else 1.0)
 
 ## RMB held past the tap on the ground, off the chain: the Lunge charging (rmb_hold_tick's lane and pose).
 func lunge_charging() -> bool:
@@ -877,6 +880,7 @@ func _tick_lunge() -> void:
 		if to_wall:
 			return                  # down the chain to a wall: it went where it was sent
 		cd["rmb"] = float(cd["rmb"]) * float(ld["miss_k"])        # struck nothing: the cooldown doubles
+		miss_end = m.time + float(ld["miss_t"])                  # and he walks slowed ([ref] 0.75x)
 
 ## Hooked, with the aim within lunge.chain_deg of the chain: a held Smash goes down it. Aimed elsewhere it is a
 ## plain Lunge along the aim, so the chain never takes the hold's direction from him.

@@ -68,6 +68,7 @@ var upgrades := 0
 var spreads := 0
 var resets := 0
 var cloaks := 0
+var spin_end := -9.0             # the cloak's spin runs to here: she walks at e.spin_move (DRAG_T)
 var blasts := 0
 var pulled := 0
 var flame_ticks := 0
@@ -316,7 +317,8 @@ func _drop_holds() -> void:
 	jet.drop()
 
 func move_k() -> float:
-	return 0.6 if after_t > 0.0 else 1.0
+	var spin := float(e_def()["spin_move"]) if m.time < spin_end else 1.0
+	return spin * (0.6 if after_t > 0.0 else 1.0)
 
 ## Rank 3 Pyro Pounce: a burst of speed after a hit ([game data] +75 move speed).
 func speed_bonus() -> float:
@@ -687,7 +689,7 @@ func _bash_impact(f: Ent) -> void:
 	vfx("ram_hit", (h.pos + f.pos) * 0.5, dir)
 	m.sfx("lw_bash_hit", f.pos, 0.0, 1.0)
 
-## Rank 3: a clean ram hit speeds Cinder up and wraps him in a short shield.
+## Rank 3: a clean ram hit speeds Cinder up and wraps her in a short shield.
 func _ram_reward() -> void:
 	var dd := dash_def()
 	boost_until = m.time + float(dd["rank3_boost_t"])
@@ -701,6 +703,7 @@ func _ram_reward() -> void:
 func cast_e() -> bool:
 	var ed := e_def()
 	cloaks += 1
+	spin_end = m.time + DRAG_T  # [ref] Heat Shield: 0.6x while spinning (the pull)
 	play("as_cloak")
 	AimKit.circle(
 		h, "e_ring",

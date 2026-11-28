@@ -120,6 +120,7 @@ archetypes/ashwick.json:e.radius	4.5
 archetypes/ashwick.json:e.shield_base	0.064
 archetypes/ashwick.json:e.shield_each	0.051
 archetypes/ashwick.json:e.shield_t	3.0
+archetypes/ashwick.json:e.spin_move	0.6
 archetypes/ashwick.json:ignite_bonus.dmg_k[0]	1.06
 archetypes/ashwick.json:ignite_bonus.dmg_k[1]	1.1
 archetypes/ashwick.json:ignite_bonus.tick_pct[0]	0.004
@@ -298,6 +299,8 @@ archetypes/bulwark.json:rmb.shield.boop.settle	0.17
 archetypes/bulwark.json:rmb.shield.boop.snap	0.06
 archetypes/bulwark.json:rmb.shield.boop.thrust	0.7
 archetypes/bulwark.json:rmb.shield.boop.wind	0.07
+archetypes/bulwark.json:rmb.shield.break_move	0.6
+archetypes/bulwark.json:rmb.shield.break_t	0.425
 archetypes/bulwark.json:rmb.shield.hp	160.0
 archetypes/bulwark.json:rmb.shield.hp_rank	0.25
 archetypes/bulwark.json:rmb.shield.len	4.2
@@ -903,6 +906,8 @@ archetypes/juggernaut.json:rmb.lunge.dist[1]	6.35
 archetypes/juggernaut.json:rmb.lunge.dmg[0]	14.0
 archetypes/juggernaut.json:rmb.lunge.dmg[1]	20.0
 archetypes/juggernaut.json:rmb.lunge.miss_k	2.0
+archetypes/juggernaut.json:rmb.lunge.miss_move	0.75
+archetypes/juggernaut.json:rmb.lunge.miss_t	0.5
 archetypes/juggernaut.json:rmb.lunge.perfect_every	1.0
 archetypes/juggernaut.json:rmb.lunge.perfect_k	1.2
 archetypes/juggernaut.json:rmb.lunge.perfect_w	0.15
@@ -1281,10 +1286,10 @@ archetypes/tender.json:lmb.look_k	0.85
 archetypes/tender.json:lmb.range_k	1.25
 archetypes/tender.json:lmb.size_k	1.5
 archetypes/tender.json:lmb.wait	1.0
+archetypes/tender.json:passive.carry_move	0.7
 archetypes/tender.json:passive.lock	4.0
 archetypes/tender.json:passive.max	2
 archetypes/tender.json:passive.pick_r	1.1
-archetypes/tender.json:passive.pick_speed	0.6
 archetypes/tender.json:plate_offset	1.85
 archetypes/tender.json:rank_cd.air[0]	1
 archetypes/tender.json:rank_cd.air[1]	0.8929

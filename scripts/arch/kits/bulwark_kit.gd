@@ -24,6 +24,7 @@ var wall: Dictionary = {}      # the raised shield (a following verbs wall)
 var shield_hp := 160.0
 var down_t := 0.0              # seconds since it was lowered (regen after 2s)
 var lock_t := 0.0              # broken: locked out
+var break_end := -9.0          # broken: he walks at shield.break_move to here
 var front_t := 0.0             # the Shield Charge's front guard
 var mend := {}                 # Mending Ground waiting to burst: {pos, t}
 var mace := {}                 # the thrown mace: {} in hand, else {st: fly|ground|back, pos, dir, d, hit, node, t}
@@ -139,6 +140,7 @@ func _tick(dt: float) -> void:
 			wall = {}
 			shield_hp = 0.0
 			lock_t = _shield_stat("lock")
+			break_end = m.time + _shield_stat("break_t")  # [ref] Brightshield break: 0.6x for 0.425s
 			down_t = 0.0
 			var d0 := h.aim_dir()
 			fx.aegis_break(h.pos + Vector3(d0.x, 0, d0.y) * 0.95)
@@ -191,6 +193,8 @@ func move_k() -> float:
 	var k := 1.0
 	if not wall.is_empty() and h.grounded:
 		k *= float(rmb_def()["shield"]["slow"])
+	if m.time < break_end:
+		k *= _shield_stat("break_move")
 	if lmb_t > 0.2:
 		k *= 0.55          # winding up the Crushing Blow
 	if ult.planted():
