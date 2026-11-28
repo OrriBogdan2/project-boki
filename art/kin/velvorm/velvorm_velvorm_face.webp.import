@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bsd4m7fqi8n7a"
-path="res://.godot/imported/velvorm_velvorm_face.webp-f887f347c8244ab4c3fde16328955ade.ctex"
+path.s3tc="res://.godot/imported/velvorm_velvorm_face.webp-f887f347c8244ab4c3fde16328955ade.s3tc.ctex"
+path.etc2="res://.godot/imported/velvorm_velvorm_face.webp-f887f347c8244ab4c3fde16328955ade.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "d73f8ce0049522cd22f4570305ff4b65"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/velvorm/velvorm_velvorm_face.webp"
-dest_files=["res://.godot/imported/velvorm_velvorm_face.webp-f887f347c8244ab4c3fde16328955ade.ctex"]
+dest_files=["res://.godot/imported/velvorm_velvorm_face.webp-f887f347c8244ab4c3fde16328955ade.s3tc.ctex", "res://.godot/imported/velvorm_velvorm_face.webp-f887f347c8244ab4c3fde16328955ade.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

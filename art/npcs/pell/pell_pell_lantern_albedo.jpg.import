@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://de5d1rs33esas"
-path="res://.godot/imported/pell_pell_lantern_albedo.jpg-ee80e01846c5a15875d01243365080d6.ctex"
+path.s3tc="res://.godot/imported/pell_pell_lantern_albedo.jpg-ee80e01846c5a15875d01243365080d6.s3tc.ctex"
+path.etc2="res://.godot/imported/pell_pell_lantern_albedo.jpg-ee80e01846c5a15875d01243365080d6.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "61b2d3f3422e3afb800d8e42f6bd44e5"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/npcs/pell/pell_pell_lantern_albedo.jpg"
-dest_files=["res://.godot/imported/pell_pell_lantern_albedo.jpg-ee80e01846c5a15875d01243365080d6.ctex"]
+dest_files=["res://.godot/imported/pell_pell_lantern_albedo.jpg-ee80e01846c5a15875d01243365080d6.s3tc.ctex", "res://.godot/imported/pell_pell_lantern_albedo.jpg-ee80e01846c5a15875d01243365080d6.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

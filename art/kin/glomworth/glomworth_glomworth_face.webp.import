@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://brhxq323av40g"
-path="res://.godot/imported/glomworth_glomworth_face.webp-d12a43fe95ff551f5e07c4f9c498097a.ctex"
+path.s3tc="res://.godot/imported/glomworth_glomworth_face.webp-d12a43fe95ff551f5e07c4f9c498097a.s3tc.ctex"
+path.etc2="res://.godot/imported/glomworth_glomworth_face.webp-d12a43fe95ff551f5e07c4f9c498097a.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "eeff5d081e65e93d866dfe0a7b991efa"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/glomworth/glomworth_glomworth_face.webp"
-dest_files=["res://.godot/imported/glomworth_glomworth_face.webp-d12a43fe95ff551f5e07c4f9c498097a.ctex"]
+dest_files=["res://.godot/imported/glomworth_glomworth_face.webp-d12a43fe95ff551f5e07c4f9c498097a.s3tc.ctex", "res://.godot/imported/glomworth_glomworth_face.webp-d12a43fe95ff551f5e07c4f9c498097a.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
