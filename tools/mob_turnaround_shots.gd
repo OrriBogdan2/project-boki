@@ -18,6 +18,8 @@ var sun: DirectionalLight3D
 var backdrop: MeshInstance3D
 var studio := true  # false for the Blight: its bodies only draw on the live island
 var rows: Array = []
+var hidden_vis: Array = []  # the meshes and lights the free views switched off
+var hidden_ui: Array = []  # the CanvasLayers the free views switched off
 
 
 func run(mn: Node) -> void:
@@ -90,7 +92,9 @@ func _kind(kind: String) -> void:
 		await main.get_tree().process_frame
 	(await _grab(mb)).save_png(dir.path_join("match.png"))
 	# the wind-up: the last frame of the real attack's tell, the 3/4 camera
-	if MobAnim.has_kind(kind) or kind.begins_with("bl_"):
+	if mb is Boss:
+		await _boss_windup(mb as Boss, kind, at, ctr, dist, dir.path_join("windup.png"))
+	elif MobAnim.has_kind(kind) or kind.begins_with("bl_"):
 		backdrop.visible = studio
 		_world_on(false, mb)
 		p.visible = true  # (a hidden target is no target: the tell never starts)
@@ -116,19 +120,42 @@ func _kind(kind: String) -> void:
 	backdrop.visible = studio
 	_world_on(false, mb)
 	cam.make_current()
-	# the death move: 0.2 of DEATH_S in
+	# the death move held at 0.4 of DEATH_S, the dissolve parked (a slow frame would otherwise eat the body)
 	p.teleport(at + Vector3(60, 0, 0))
 	mb.hurt(mb.hp + mb.max_hp, p, {"src": "shot"})
-	for i in 90:
+	for i in 6:
+		mb.set_meta("dis_lag", 5.0)
+		mb.death_t = MobAnim.DEATH_S * 0.4
 		await _view(mb, ctr, dist, 0.785, 0.0)
-		if mb.dead and mb.death_t > MobAnim.DEATH_S * 0.2:
-			(await _shot()).save_png(dir.path_join("death.png"))
-			break
+	(await _shot()).save_png(dir.path_join("death.png"))
 	print("MOBTURNAROUND %s h=%.2f hunter=%.2f" % [kind, box.size.y, hunter_h])
 	if is_instance_valid(mb):
 		mb.visible = false
 	_world_on(true, null)
 	await _frames(40)
+
+
+## A lair boss's first tell (slam, spit, storm): the frame just before its first blow, the 3/4 camera.
+func _boss_windup(b: Boss, kind: String, at: Vector3, ctr: Vector3, dist: float, path: String) -> void:
+	backdrop.visible = true
+	_world_on(false, b)
+	m.player.visible = true
+	cam.make_current()
+	m.player.teleport(at + Vector3(8.0, 0, 0))
+	b.tgt = m.player
+	match kind:
+		"colossus":
+			b._atk_slam()
+		"brood":
+			b._atk_spit()
+		_:
+			b._atk_storm()
+	for i in 240:
+		await _view(b, ctr, dist, 0.785, 0.0)
+		if b.atk_t >= b.atk_hit * 0.85 or b.atk == "":
+			break
+	(await _shot()).save_png(path)
+	b._clear_attack()
 
 
 func _spawn(kind: String, at: Vector3) -> Mob:
@@ -190,12 +217,30 @@ func _bounds(n: Node3D) -> AABB:
 
 ## Shows or hides everything in the match but the monster and the studio (the world, props, grass, the Hunter).
 func _world_on(on: bool, keep: Node) -> void:
+	if on:
+		for cl in hidden_ui:
+			(cl as CanvasLayer).visible = true
+		hidden_ui.clear()
+		for vi in hidden_vis:
+			if is_instance_valid(vi):
+				(vi as VisualInstance3D).visible = true
+		hidden_vis.clear()
+	else:
+		for cl in main.find_children("*", "CanvasLayer", true, false):  # nameplates, pickers, reward cards
+			if (cl as CanvasLayer).visible:
+				(cl as CanvasLayer).visible = false
+				hidden_ui.append(cl)
 	if not studio and keep != null:
 		return
 	for n in m.get_children():
 		if n is Node3D and n != keep and n != m.cam:
 			(n as Node3D).visible = on
 	m.player.visible = on
+	if not on and keep != null:  # lair props switch their own root back on: hide their meshes one by one
+		for vi in m.find_children("*", "VisualInstance3D", true, false):
+			if (vi as VisualInstance3D).visible and not keep.is_ancestor_of(vi) and not m.player.is_ancestor_of(vi):
+				(vi as VisualInstance3D).visible = false
+				hidden_vis.append(vi)
 
 
 ## A flat #E8E8EE dome and floor round the monster, so the world's props stay out of the views.
