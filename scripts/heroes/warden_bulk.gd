@@ -1,7 +1,8 @@
 class_name WardenBulk
 extends RefCounted
-## A body's "bulk" (archetype body.bulk: Mossy's 0.8, 20% narrower). Scaling the model root (bulk, 1, bulk) sheared
-## everything the hands hold: a blade turning in the hand stretched and shrank (--clip-check drift 0.111 m). On a
+## A body's "bulk" (archetype body.bulk, e.g. 0.8 = 20% narrower; none set since Albert replaced Mossy: thinning
+## his barrel hull bone by bone pinched it). Scaling the model root (bulk, 1, bulk) sheared everything the hands
+## hold: a blade turning in the hand stretched and shrank (--clip-check drift 0.111 m). On a
 ## Warden drawn from its .glb, the skin is thinned instead: each bone's share of the mesh is scaled on the bone's
 ## two cross axes (a bone runs along its own +Y), so the body is narrower in every pose, limbs keep their length,
 ## the joints stay where the clips put them, and the props' bones (HELD) keep their shape. The bones and the
