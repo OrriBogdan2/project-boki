@@ -26,8 +26,8 @@ const LOOPS := ["idle", "walk", "run", "crouch"]
 ## Clip slots data "clips" may add beside the six states; a missing one plays today's clip (MESHY_NATIVE.md).
 ## Swing and cast one-shots (the attack clip without them): lmb, lmb_hold (a charged swing), rmb, e, r (the kit's cast
 ## slots, MOVE_SLOTS). One-shots: hit, land. Held while the state lasts: dash, glide and stomp (these two loop), downed.
-const HIT_SLOTS := ["hit", "land"]
-const SLOTS := ["lmb", "lmb_hold", "rmb", "e", "r", "dash", "glide", "land", "hit", "downed", "stomp"]
+const HIT_SLOTS := ["hit", "hit_back", "land"]
+const SLOTS := ["lmb", "lmb_hold", "rmb", "e", "r", "dash", "glide", "land", "hit", "hit_back", "downed", "stomp"]
 const MOVE_SLOTS := {"secondary": "rmb", "utility": "e", "ult": "r"}  # the state's cast_slot -> its clip slot
 const SLOT_CAST := 0.5  # s: a kit move that starts this soon after a cast belongs to that cast's slot
 const LAND_MIN := 0.3  # a landing this hard (WardenClips.FEEL, 0..1) plays the land clip
@@ -266,7 +266,9 @@ func _process(dt: float) -> void:
 	# (the look-at lies under a clip that turns the head: the attack clip owns it, eased in and out like a body clip)
 	head_look.owned = move_toward(head_look.owned, 1.0 if attack_left > 0.0 else 0.0, dt / FADE)
 	head_look.step(dt, null)
-	_heart(bool(s.get("heart", false)) and attack_left <= 0.0 and not WardenCarry.owns(String(s.get("kmove", ""))), dt)
+	# (a swing or cast lays the carry aside; a stagger or landing keeps it, as WardenClips' procedural ones do)
+	var swinging := attack_left > 0.0 and not (cur in HIT_SLOTS)
+	_heart(bool(s.get("heart", false)) and not swinging and not WardenCarry.owns(String(s.get("kmove", ""))), dt)
 	if opener:
 		opener.busy = attack_left > 0.0 and attack_move  # (as clips.busy: a kit move's clip owns the body)
 		opener.step(dt, 1.0)
@@ -381,14 +383,27 @@ func _held(s: Dictionary) -> String:
 ## another one is not played later.
 func _one_shot(s: Dictionary) -> String:
 	var swing := _swing(s)
-	var hit := _new_hit(float(s.get("hit_t", 99.0)))
-	var hurt := hit and float(s.get("hit_k", 1.0)) >= Oomph.HEAVY_FLINCH
+	var hurt := _new_hit(float(s.get("hit_t", 99.0))) and float(s.get("hit_k", 1.0)) >= Oomph.HEAVY_FLINCH
 	var landed := _landed()
-	if hurt and plays.has("hit") and (cur != "hit" or _fresh("hit")):  # (a hit cuts in on any swing)
-		return "hit"
+	var hit_slot := _hit_slot(s)
+	if hurt and hit_slot != "" and (cur != hit_slot or _fresh(hit_slot)):  # (a stagger cuts in on any swing)
+		return hit_slot
 	if swing != "":
 		return swing
 	return "land" if landed and plays.has("land") and _fresh("land") else ""
+
+
+## The slot a hit plays: `hit_back` when it pushes the body the way it faces (struck from behind), else `hit`; a
+## Hunter with only one of the two plays it for both.
+func _hit_slot(s: Dictionary) -> String:
+	var push: Vector2 = s.get("hit_dir", Vector2.ZERO)
+	var face := float(s.get("face", 0.0))
+	var back := push.dot(Vector2(sin(face), cos(face))) > 0.0
+	var want := "hit_back" if back else "hit"
+	if plays.has(want):
+		return want
+	var other := "hit" if back else "hit_back"
+	return other if plays.has(other) else ""
 
 
 ## Whether a new one-shot plays on the upper body over the loop clips: a swing or cast while he moves or is in the air
