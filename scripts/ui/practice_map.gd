@@ -46,7 +46,7 @@ static func full_map(fm: FullMap) -> void:
 		var mid: Vector3 = st["c"]
 		var pv: Vector2 = fm.to_screen(mid)
 		if not seen.has(mid) and fm.rect.grow(-4.0).has_point(pv):
-			seen[mid] = true      # (a perch's pedestals ring its middle: one diamond for the perch)
+			seen[mid] = true  # (a perch's pedestals ring its middle: one diamond for the perch)
 			_diamond(c, pv, Grounds.color_of(st["kind"], st["id"]))
 	for h in _targets(m):
 		var pv: Vector2 = fm.to_screen(h.pos)
