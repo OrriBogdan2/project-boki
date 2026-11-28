@@ -81,10 +81,6 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 
 | | idle | walk | run | attack | cast | hop | eat | sleep |
 |---|---|---|---|---|---|---|---|---|
-| anchorhorn | shared | shared | shared | shared | shared | shared | shared | shared |
-| arcestrel | shared | shared | shared | shared | shared | shared | shared | shared |
-| barostorm | shared | shared | shared | shared | shared | shared | shared | shared |
-| basaltoad | shared | shared | shared | shared | shared | shared | shared | shared |
 | casquebill | shared | shared | shared | shared | shared | shared | shared | shared |
 | cisternmander | shared | shared | shared | shared | shared | shared | shared | shared |
 | citadoad | shared | shared | shared | shared | shared | shared | shared | shared |
@@ -150,6 +146,10 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | zapple | clip | clip | clip | clip | clip | clip | clip | clip |
 | pebbit | clip | clip | clip | clip | clip | clip | clip | clip |
 | wisplet | clip | clip | clip | clip | clip | clip | clip | clip |
+| anchorhorn | clip | clip | clip | clip | clip | clip | clip | clip |
+| arcestrel | clip | clip | clip | clip | clip | clip | clip | clip |
+| barostorm | clip | clip | clip | clip | clip | clip | clip | clip |
+| basaltoad | clip | clip | clip | clip | clip | clip | clip | clip |
 | caecilith | clip | clip | clip | clip | clip | clip | clip | clip |
 | glintmole | clip | clip | clip | clip | clip | clip | clip | clip |
 | gloamshell | clip | clip | clip | clip | clip | clip | clip | clip |
@@ -172,11 +172,11 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 
 Worst five, backlog-ready:
 
-- [anim] Boki anchorhorn (No. 7): 0 missing (none), 8 on the shared clip set (idle, walk, run, attack, cast, hop, eat, sleep); author its own clips in tools/boki/anchorhorn_anim.py, rebuild the .glb, rerun --anim-coverage-check
-- [anim] Boki arcestrel (No. 8): 0 missing (none), 8 on the shared clip set (idle, walk, run, attack, cast, hop, eat, sleep); author its own clips in tools/boki/arcestrel_anim.py, rebuild the .glb, rerun --anim-coverage-check
-- [anim] Boki barostorm (No. 9): 0 missing (none), 8 on the shared clip set (idle, walk, run, attack, cast, hop, eat, sleep); author its own clips in tools/boki/barostorm_anim.py, rebuild the .glb, rerun --anim-coverage-check
-- [anim] Boki basaltoad (No. 10): 0 missing (none), 8 on the shared clip set (idle, walk, run, attack, cast, hop, eat, sleep); author its own clips in tools/boki/basaltoad_anim.py, rebuild the .glb, rerun --anim-coverage-check
 - [anim] Boki casquebill (No. 12): 0 missing (none), 8 on the shared clip set (idle, walk, run, attack, cast, hop, eat, sleep); author its own clips in tools/boki/casquebill_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki cisternmander (No. 14): 0 missing (none), 8 on the shared clip set (idle, walk, run, attack, cast, hop, eat, sleep); author its own clips in tools/boki/cisternmander_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki citadoad (No. 15): 0 missing (none), 8 on the shared clip set (idle, walk, run, attack, cast, hop, eat, sleep); author its own clips in tools/boki/citadoad_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki crofthollow (No. 16): 0 missing (none), 8 on the shared clip set (idle, walk, run, attack, cast, hop, eat, sleep); author its own clips in tools/boki/crofthollow_anim.py, rebuild the .glb, rerun --anim-coverage-check
+- [anim] Boki dreadnoyak (No. 17): 0 missing (none), 8 on the shared clip set (idle, walk, run, attack, cast, hop, eat, sleep); author its own clips in tools/boki/dreadnoyak_anim.py, rebuild the .glb, rerun --anim-coverage-check
 
 ### Mobs
 
