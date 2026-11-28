@@ -7,13 +7,14 @@ extends RefCounted
 ## with real input: armor onto its slot, a glove refused by the armor slot, the gloves swapped, then the pad
 ## swapping two belt slots. Encode: ffmpeg -framerate 30 -i <dir>/drag/%05d.jpg -pix_fmt yuv420p drag.mp4
 
-const REEL_W := 960              # px wide, each --inv-drag frame
+const REEL_W := 960  # px wide, each --inv-drag frame
 
 var main: Node
 var captions: Array = []
 var dir := "/tmp/inv_shots"
-var reel := 0                    # --inv-drag: frames saved so far
-var pointer: Label               # --inv-drag: the drawn pointer (the OS cursor is not in the frame)
+var reel := 0  # --inv-drag: frames saved so far
+var pointer: Label  # --inv-drag: the drawn pointer (the OS cursor is not in the frame)
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -37,7 +38,7 @@ func run(main_node: Node) -> void:
 	m.hud.toggle_pack()
 	await _frames(8)
 	var win := main.get_window().size
-	var tag := "%dx%d" % [win.x, win.y]      # the real window: the UI scales, so the canvas height says 720 at 1440
+	var tag := "%dx%d" % [win.x, win.y]  # the real window: the UI scales, so the canvas height says 720 at 1440
 	if OS.get_cmdline_user_args().has("--inv-drag"):
 		await _drag_reel(m)
 		print("INVSHOTS drag reel: %d frames in %s" % [reel, dir.path_join("drag")])
@@ -70,21 +71,33 @@ func run(main_node: Node) -> void:
 	print("INVSHOTS %d in %s" % [captions.size(), dir])
 	main.get_tree().quit(0)
 
-## A hunter in a full loadout: two gloves, armor, boots, belt items, a few perks and a half-full pack.
+
+## A hunter in a full loadout: two gloves, armor, boots, belt items, five perks, four belt items and a half-full pack.
 static func dress(p: Hunter) -> void:
-	p.gear = [{"id": "power_core", "rar": 2}, {"id": "frost", "rar": 1}, {"id": "quilted_coat", "rar": 1},
-		{"id": "boots", "rar": 1}]
-	p.perks = ["keen", "keen", "toughskin", "fleet"]
-	UtilityBelt.grant(p, "medkit", 2)
-	UtilityBelt.grant(p, "smoke", 1)
+	p.gear = [
+		{"id": "power_core", "rar": 2},
+		{"id": "frost", "rar": 1},
+		{"id": "quilted_coat", "rar": 1},
+		{"id": "boots", "rar": 1}
+	]
+	p.perks = ["quickhands", "secondwind", "featherfall", "scavenger", "toughskin"]
+	for id in ["medkit", "smoke", "stim", "tonic"]:
+		UtilityBelt.grant(p, id, 2)
 	p.refresh_gear()
 	p.pack_cap = 6
-	p.pack = [Loot.gear("vest", 3), Loot.gear("blink", 2), Loot.gear("windstep_boots", 1), Loot.valuable("kin_idol"),
-		Loot.valuable("sky_pearl")]
+	p.pack = [
+		Loot.gear("vest", 3),
+		Loot.gear("blink", 2),
+		Loot.gear("windstep_boots", 1),
+		Loot.valuable("kin_idol"),
+		Loot.valuable("sky_pearl")
+	]
+
 
 func _frames(k: int) -> void:
 	for i in k:
 		await main.get_tree().process_frame
+
 
 func _shot(file: String, caption: String) -> void:
 	await RenderingServer.frame_post_draw
@@ -93,6 +106,7 @@ func _shot(file: String, caption: String) -> void:
 	if err != OK:
 		push_error("INVSHOTS %s not saved: %s" % [file, error_string(err)])
 	captions.append("%s.png: %s" % [file, caption])
+
 
 # ------------------------------------------------------------------ --inv-drag
 func _drag_reel(m: Match) -> void:
@@ -125,8 +139,10 @@ func _drag_reel(m: Match) -> void:
 	_push_pad(false)
 	await _hold(24)
 
+
 func _panel(m: Match) -> LoadoutPanel:
 	return m.hud.pack_panel.find_children("*", "LoadoutPanel", true, false)[0]
+
 
 func _slot(lp: LoadoutPanel, inv: String, i: int) -> Control:
 	for c in lp._drag._slots:
@@ -135,8 +151,10 @@ func _slot(lp: LoadoutPanel, inv: String, i: int) -> Control:
 			return c
 	return null
 
+
 func _at(lp: LoadoutPanel, inv: String, i: int) -> Vector2:
 	return SlotDrag._rect(_slot(lp, inv, i)).get_center()
+
 
 ## Press, move over 20 frames, let go: the pointer drawn the whole way.
 func _mouse_drag(a: Vector2, b: Vector2) -> void:
@@ -156,6 +174,7 @@ func _mouse_drag(a: Vector2, b: Vector2) -> void:
 	_push_mouse(false, b)
 	await _hold(10)
 
+
 func _push_mouse(down: bool, at: Vector2) -> void:
 	var ev := InputEventMouseButton.new()
 	ev.button_index = MOUSE_BUTTON_LEFT
@@ -163,11 +182,13 @@ func _push_mouse(down: bool, at: Vector2) -> void:
 	ev.position = at
 	main.get_viewport().push_input(ev, true)
 
+
 func _push_pad(down: bool) -> void:
 	var ev := InputEventJoypadButton.new()
 	ev.button_index = JOY_BUTTON_A
 	ev.pressed = down
 	main.get_viewport().push_input(ev, true)
+
 
 ## Saves k frames of the reel.
 func _hold(k: int) -> void:

@@ -5,6 +5,8 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	# every first-time hint shows once per save: three matches with a save and load between
+	"--hint-once-check": ["res://tools/hint_once_check.gd", "hint_once_check", null],
 	"--tutorial-frame-archer-check": ["res://tools/tutorial_frame_check.gd", "tutorial_frame_check", "archer"],
 	"--tutorial-frame-juggernaut-check": ["res://tools/tutorial_frame_check.gd", "tutorial_frame_check", "juggernaut"],
 	"--tutorial-frame-gunslinger-check": ["res://tools/tutorial_frame_check.gd", "tutorial_frame_check", "gunslinger"],

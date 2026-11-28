@@ -231,6 +231,7 @@ const SWAP_S := 0.2  # s: one hold handing over to the next (a Boki lifted, then
 const LAND_HOP_V := 4.0  # m/s down at touchdown: slower (a kerb, a step down of ~0.5 m) plays no landing at all
 const LAND_DROP_V := 8.5  # m/s: a terrace drop (2.5 m+) or a jump off a ledge gets the deep crouch; a plain jump
 # lands at JUMP_V 7.5, the hop's small dip (the source: briefs/hero-ref, DECISIONS 11-07)
+const LAND_HEAVY_V := 13.2  # m/s: a ~6 m drop (v = sqrt(2 x 14.7 x h)) lands heavier than a terrace drop's 3-5 m
 const LAND_DIVE_V := 17.0  # m/s: a glide dive's plunge (lands ~25 m/s after the canopy): the heavy crouch
 const SKATE_LEAN_MAX := 0.4  # radians: the most Claire's skate leans forward, all leans together
 
@@ -762,6 +763,13 @@ static func land_tier(fall_v: float, from_glide: bool) -> int:
 	if from_glide or fall_v >= LAND_DROP_V:
 		return 2
 	return 1 if fall_v >= LAND_HOP_V else 0
+
+
+## How heavy a landing is on top of its tier: 0 under LAND_HEAVY_V, 0.6 at it, 1 from the dive's speed up.
+static func heavy_k(fall_v: float) -> float:
+	if fall_v < LAND_HEAVY_V:
+		return 0.0
+	return 0.6 + 0.4 * clampf((fall_v - LAND_HEAVY_V) / (LAND_DIVE_V - LAND_HEAVY_V), 0.0, 1.0)
 
 
 ## The landing squash of a weight class for a land_tier: Vector2(depth, seconds), from content/rules/land_feel.json.
