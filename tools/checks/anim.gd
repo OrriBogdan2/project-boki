@@ -5,6 +5,10 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	# attach-data props (Kael's sword, Gil's swordfish, Grimble's gun) in the hand: grip and length vs the art
+	"--held-props-check": ["res://tools/held_props_check.gd", "held_props_check", "check"],
+	# GPU: the same as close shots at the hand, --shots-dir=
+	"--held-props-shots": ["res://tools/held_props_check.gd", "held_props_check", "shots"],
 	# a Meshy-native rig holds its clips on frames SimLod skipped the pose
 	"--native-pose-hold-check": ["res://tools/native_pose_hold_check.gd", "native_pose_hold_check", null],
 	# no clip stretches a skinned edge past 1.3x
