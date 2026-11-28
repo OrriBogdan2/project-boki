@@ -128,6 +128,11 @@ func hide() -> void:
 		_beam.visible = false
 
 
+## Is the edge arrow up (the step's prompt is off screen)? The dead-air check counts it as the marker.
+func arrow_shown() -> bool:
+	return is_instance_valid(_arrow) and _arrow.visible
+
+
 func show_arrow(on: bool) -> void:
 	if is_instance_valid(_arrow):
 		_arrow.visible = on
