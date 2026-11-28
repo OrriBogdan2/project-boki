@@ -208,7 +208,7 @@ nothing from a glide (`Hunter.can_fire`).
 | E Rink Wall tell (0.2 s) | E | "reactivate Frozen Barricade to freeze it" | the press is **swallowed** (neither freezes nor casts) until the wall is out and sliding | unsettled (the wiki gives no rule for a press in the cast) | [W] patch 22.01.25 |
 | E wall sliding | E | "can reactivate to freeze it in place, lasts 6 s when stopped" | freezes it; a press on a frozen wall is ignored | match | [W]; `tm E: E again freezes it ...` |
 | E (tell, wall) | LMB, RMB, X | not shown (the wall is cast standing, both hands pushed out) | both | unsettled | [F] 0297-0358 |
-| X Rimelock (3.5 s) | X | "Reactivate early to cancel" | before the last 0.75 s: the shell breaks, no damage, no stun, no bond | match | [D]; [F] ult; `tm X: X early ends it ...` |
+| X Rimelock (3.5 s) | X | "Reactivate early to cancel" | before the last 0.75 s: the shell breaks, no damage, no stun, no bond; within 0.15 s of that window the press waits in the shared recast buffer and cracks it as the window arms | match | [D]; [F] ult; `tm X: X early ends it ...` |
 | X, last 0.75 s | X | "Reactivating early in the last 0.75 seconds ... 33% less damage and stuns for 33% less duration" | cracks open at 67% | match | [W] patch 05.03.25; `tm X: X in the last 0.75 s ...` |
 | X Rimelock | LMB, E | "rooted and invulnerable 3.2-3.5 s"; nothing else shown | **ignored**: no darts, E denied | owner | #65; `tm X: ... nothing fires` |
 | X Rimelock | RMB | as above | ignored (nothing fires) | owner | #65 |

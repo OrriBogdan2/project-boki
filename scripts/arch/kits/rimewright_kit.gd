@@ -1171,12 +1171,16 @@ func _rime_carrying() -> bool:
 	return float(rime["t"]) < float(x_def()["carry_t"])
 
 
-## X again: in the last `late` seconds it cracks open early at late_k; any earlier the shell just breaks
-## (no damage, no stun, no bond).
+## X again: in the last `late` seconds it cracks open early at late_k; a press within the shared recast buffer
+## (~0.15 s) of that window waits for it (DECISIONS 2026-11-08); any earlier the shell just breaks (no damage,
+## no stun, no bond).
 func ult_recast() -> bool:
 	var xd := x_def()
-	if float(rime["t"]) >= float(xd["hold"]) - float(xd["late"]):
+	var to_late := float(xd["hold"]) - float(xd["late"]) - float(rime["t"])
+	if to_late <= 0.0:
 		_rime_crash(float(xd["late_k"]))
+	elif to_late <= Loco.press_buffer:
+		buffer_recast("x")
 	else:
 		_rime_cancel()
 	return true

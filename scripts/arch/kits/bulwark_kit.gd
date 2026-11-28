@@ -323,8 +323,8 @@ func lmb_override(held: bool, dt: float) -> bool:
 		return true
 	# a hold carried through a dash (hold rows: keep) charges on in it and swings on the release
 	var rides_dash := lmb_t >= 0.0 and flow.move_now() in ["ground", "air"]
-	if not rides_dash and (not h.atk.can_fire() or h.fire_cd > 0.0):
-		return true
+	if not rides_dash and mace.is_empty() and (not h.atk.can_fire() or h.fire_cd > 0.0):
+		return true          # (with the hammer out the press is its recall, which the throw's own rate must not eat)
 	var md := lmb_def()
 	if not mace.is_empty():
 		# the mace is out: a press calls it back
@@ -514,15 +514,18 @@ func _throw() -> void:
 	net_bolt(at, at + Vector3(mace["dir"].x, 0, mace["dir"].y) * dist, Color("ffd27a"))
 	CombatBus.ability_used.emit(h, id + "_throw", "primary")
 
-## RecastCue: LMB again calls the hammer back (from the recall lockout on); the marker rides the hammer. Lying
-## on the ground it comes back by itself after lie_t (the ring runs down then).
+## RecastCue: LMB again calls the hammer back (from the recall lockout on); the marker rides the hammer. The ring
+## runs down to the rope's own reel (rope.max_t after the throw, _rope_snaps), or lie_t on the ground if that is
+## sooner: it comes back by itself then, and the slot shows EXPIRED (never a silent close).
 func recast_window() -> Dictionary:
 	if mace.is_empty() or String(mace["st"]) == "back":
 		return {}
 	var md := lmb_def()
+	var total := float((md.get("rope", {}) as Dictionary).get("max_t", 6.0))
+	var left := maxf(0.0, total - (m.time - throw_at))
 	var lie := float(md.get("lie_t", 0.0))
-	var total := lie if lie > 0.0 else 1.0
-	var left := total - float(mace["t"]) if lie > 0.0 and String(mace["st"]) == "ground" else total
+	if lie > 0.0 and String(mace["st"]) == "ground":
+		left = minf(left, lie - float(mace["t"]))
 	var armed: bool = m.time - throw_at >= float(md.get("recall_lock", 0.25))
 	return RecastCue.window("lmb", left, total, mace["pos"], armed, true)
 
