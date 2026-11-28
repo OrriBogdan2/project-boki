@@ -397,7 +397,7 @@ func _archer_combos() -> void:
 		K.pins >= pn0 + 1 and T.stun_t > 0.7 and dmg(T) >= 35.0 and K.anim_id == "arc_heavy",
 		"pins %d stun %.2f took %.0f anim %s" % [K.pins - pn0, T.stun_t, dmg(T), K.anim_id]
 	)
-	_impact_looks(float(K.rmb_def()["pin"]["stun"]))
+	_impact_looks(float(K.rmb_def()["pin"]["stun"][1]))
 	var pd: Dictionary = K.rmb_def()["pin"]
 	var want := float(pd["dmg"][1]) * (1.0 + 173.0 / 35.0)
 	ok(

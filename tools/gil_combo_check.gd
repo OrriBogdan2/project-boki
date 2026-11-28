@@ -185,7 +185,8 @@ func _tide() -> void:
 		int(HeroVfx.of(m).plays.get("tide_lunge", 0)) > 0 and int(HeroVfx.of(m).plays.get("tide_hit", 0)) > 0)
 
 ## Tide Lunge into a wall (gil.md): only a full charge knocks the foe fast enough (over 8 m/s) for the shared wall
-## slam (Hunter's body slam, docs/KNOCK_WALLS.md: 0.9 s stun); a part charge pushes it into the rock and nothing more.
+## slam (Hunter's body slam, KnockWall.slam_stun: 0.4 s at 8 m/s up to 1.2 s at 16 m/s, decision 0181); a part
+## charge pushes it into the rock and nothing more.
 func _tide_wall() -> void:
 	var rec := {}
 	for hold_s in [0.6, 1.2]:
@@ -205,8 +206,10 @@ func _tide_wall() -> void:
 	var full: Array = rec.get(true, [0.0, 0.0, 0.0])
 	ok("Tide Lunge into a rock: a part charge pushes the foe, no wall stun", part[2] < 0.3,
 		"k %.2f, %.1f m/s, stun %.2f s" % part)
-	ok("Tide Lunge into a rock: a full charge slams the foe into it (the shared 0.9 s wall stun)",
-		full[1] > 8.0 and full[2] >= 0.85, "k %.2f, %.1f m/s, stun %.2f s" % full)
+	# the stun follows the speed into the wall (0181): at least the slam's floor, at most what the top speed earns
+	ok("Tide Lunge into a rock: a full charge slams the foe into it (the shared wall stun, scaled by its speed)",
+		full[1] > KnockWall.SLAM_V.x and full[2] >= KnockWall.SLAM_STUN.x - 0.05
+			and full[2] <= KnockWall.slam_stun(full[1]) + 0.05, "k %.2f, %.1f m/s, stun %.2f s" % full)
 
 func _vials() -> void:
 	var want := {"thunder": "stun", "slime": "slow", "fire": "burn", "zeep": "lift"}
