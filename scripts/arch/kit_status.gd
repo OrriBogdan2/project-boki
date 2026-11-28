@@ -21,7 +21,18 @@ const GROUND_COL := Color("e0a03a")
 const SILENCE_COL := Color("b48cff")
 const RATTLE_COL := Color("ffb36a")
 const SILENCED_KEYS := [
-	"sig", "sec", "ult", "skill", "gear1", "gear2", "util1", "util2", "util3", "util4", "util5", "util6",
+	"sig",
+	"sec",
+	"ult",
+	"skill",
+	"gear1",
+	"gear2",
+	"util1",
+	"util2",
+	"util3",
+	"util4",
+	"util5",
+	"util6",
 ]
 const TAG_COL := {"ign": Color("ff8a2a"), "chl": Color("9fe0ff"), "sta": Color("ff7fd0"), "mrk": Color("ffd24a")}
 const TAG_TOP := 2.9  # m above the feet where the stack pips ring the body

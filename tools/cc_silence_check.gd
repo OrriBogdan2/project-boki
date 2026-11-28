@@ -22,16 +22,16 @@ func run(main: Node) -> void:
 	for mb in m.mobs:
 		mb.queue_free()
 	m.mobs.clear()
-	var P: Hunter = m.player
+	var p: Hunter = m.player
 	var foe: Hunter = null
 	for o in m.hunters:
 		o.ctrl = "idle"
-		if o != P and o.team != P.team and foe == null:
+		if o != p and o.team != p.team and foe == null:
 			foe = o
 	ok(foe != null, "a rival Hunter")
 	_slows(foe)
-	_silence(m, P, foe)
-	_immunity(m, P, foe)
+	_silence(m, p, foe)
+	_immunity(p, foe)
 	print("CCSILENCE DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -66,62 +66,62 @@ func _slows(f: Hunter) -> void:
 	f.cleanse_cc()
 
 
-func _silence(m: Match, P: Hunter, foe: Hunter) -> void:
-	P.cleanse_cc()
-	KitStatus.apply(P, "sil", 2.0)
-	ok(KitStatus.silenced(P) and KitStatus.silenced_left(P) > 1.9, "Silenced lands")
+func _silence(m: Match, p: Hunter, foe: Hunter) -> void:
+	p.cleanse_cc()
+	KitStatus.apply(p, "sil", 2.0)
+	ok(KitStatus.silenced(p) and KitStatus.silenced_left(p) > 1.9, "Silenced lands")
 	for key in ["sig", "sec", "ult", "gear1", "util1"]:
-		P.inp[key] = true
-	P.inp["fire"] = true
-	P.inp["dash"] = true
-	P.inp["jump"] = true
-	KitStatus.gate_silenced(P)
+		p.inp[key] = true
+	p.inp["fire"] = true
+	p.inp["dash"] = true
+	p.inp["jump"] = true
+	KitStatus.gate_silenced(p)
 	var shut := true
 	for key in ["sig", "sec", "ult", "gear1", "util1"]:
-		shut = shut and not P.inp[key]
+		shut = shut and not p.inp[key]
 	ok(shut, "ability, gear and belt presses are dropped")
-	ok(P.inp["fire"] and P.inp["dash"] and P.inp["jump"], "attack, dash and jump stay free")
-	P.grounded = false
-	P.gliding = false
-	P.glide_cd = 0.0
-	P.stun_t = 0.0
-	P.pos.y = P.ground() + 12.0  # well off the ground, so only silence can shut the glider
-	P.vel.y = -2.0
-	ok(not AirLimits.glide_shut(P), "high in the air the glider is otherwise free")
-	ok(not P.can_glide(), "the glider will not open")
+	ok(p.inp["fire"] and p.inp["dash"] and p.inp["jump"], "attack, dash and jump stay free")
+	p.grounded = false
+	p.gliding = false
+	p.glide_cd = 0.0
+	p.stun_t = 0.0
+	p.pos.y = p.ground() + 12.0  # well off the ground, so only silence can shut the glider
+	p.vel.y = -2.0
+	ok(not AirLimits.glide_shut(p), "high in the air the glider is otherwise free")
+	ok(not p.can_glide(), "the glider will not open")
 	m.step(Match.DT)
-	ok(KitStatus.silenced(P), "a step does not end it early")
+	ok(KitStatus.silenced(p), "a step does not end it early")
 	# base recall refused
 	var mate: Hunter = null
 	for o in m.hunters:
-		if o != P and o.team == P.team:
+		if o != p and o.team == p.team:
 			mate = o
-	P.grounded = true
-	BaseRecall.start(P, mate if mate != null else foe)
-	ok(P.base_t <= 0.0, "base recall will not start")
+	p.grounded = true
+	BaseRecall.start(p, mate if mate != null else foe)
+	ok(p.base_t <= 0.0, "base recall will not start")
 	# it runs out
 	m.time += 2.5
-	ok(not KitStatus.silenced(P), "it ends on its own time")
-	P.grounded = false
-	P.glide_cd = 0.0
-	P.pos.y = P.ground() + 12.0
-	P.vel.y = -2.0
-	ok(P.can_glide(), "the glider opens again")
+	ok(not KitStatus.silenced(p), "it ends on its own time")
+	p.grounded = false
+	p.glide_cd = 0.0
+	p.pos.y = p.ground() + 12.0
+	p.vel.y = -2.0
+	ok(p.can_glide(), "the glider opens again")
 	# a cleanse ends it
-	KitStatus.apply(P, "sil", 5.0)
-	P.cleanse_cc()
-	ok(not KitStatus.silenced(P), "a cleanse ends it")
+	KitStatus.apply(p, "sil", 5.0)
+	p.cleanse_cc()
+	ok(not KitStatus.silenced(p), "a cleanse ends it")
 
 
-func _immunity(m: Match, P: Hunter, foe: Hunter) -> void:
+func _immunity(p: Hunter, foe: Hunter) -> void:
 	foe.cleanse_cc()
 	foe.grant_cc_immunity(2.0)
-	foe.hurt(1.0, P, {"stun": 1.0, "root": 1.0, "slow": 2.0})
+	foe.hurt(1.0, p, {"stun": 1.0, "root": 1.0, "slow": 2.0})
 	ok(foe.stun_t <= 0.0 and foe.root_t <= 0.0 and foe.slow_t <= 0.0, "granted immunity: no stun, root or slow lands")
 	KitStatus.apply(foe, "sil", 2.0)
 	ok(not KitStatus.silenced(foe), "granted immunity: no silence lands")
 	foe.tick_status(2.1)
-	foe.hurt(1.0, P, {"stun": 1.0})
+	foe.hurt(1.0, p, {"stun": 1.0})
 	ok(foe.stun_t > 0.9, "after it ends a stun lands again")
 	foe.cleanse_cc()
 	foe.cleanse_cc()
