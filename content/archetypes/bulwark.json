@@ -139,7 +139,7 @@
 		},
 		"surf_heat": 1.25,
 		"variants": {
-			"hold": "Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. Walking into foes pushes nobody; {fire} with it up is the boop, a shield thrust that shoves foes in front 2.8m (no damage). With it up, {dash} is the Shield Charge on this slot's 6s cooldown. If it breaks, you walk at 60% for 0.4s.",
+			"hold": "Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. Walking into foes pushes nobody; {fire} with it up is the boop, a shield thrust that shoves foes in front 2.8m (no damage). With it up, {dash} is the Shield Charge on this slot's 6s cooldown. If it breaks, you walk at 60% for 0.43s.",
 			"tap": "A tap only raises and lowers the aegis; the Bash is the Shield Charge on the dash key.",
 			"air": "Shield Surf: hold to block from the front while gliding."
 		},
