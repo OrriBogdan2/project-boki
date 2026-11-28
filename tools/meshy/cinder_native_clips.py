@@ -117,7 +117,7 @@ class Rig:
             for c in n[i].get("children", []):
                 walk(c)
 
-        walk(self.idx["SmartRigArmature"])
+        walk(self.parent[self.idx["Hips"]])  # the armature node (Meshy names it SmartRigArmature or Armature)
         self.rest = self.fk({})
         self.hips_rest = self.t[self.idx["Hips"]].copy()
 

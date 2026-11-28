@@ -156,6 +156,7 @@ planted). Clips are named `<art>_<clip>` and written to `<art>_clips.glb`; the d
 (a clip with no `:full` is an `upper` row). `--shot` prints each clip's worst wrist miss (Sparkle: under 2 cm). Sparkle (ryzz):
 the 17 kit-move clips of her contract rows (`mage_lmb_*`, rmb, Skycall, Wirerun, Kitefall, fusion) and her own crouch walk
 (`ryzz_crouch_f`, data `clips.crouch`, no torch and no `crouch_arms_from`), `own_casts` on: no kit move plays Meshy's Attack.
+Meeko (pip, arch `tender`): the same with her 17 contract kit-move clips and `pip_crouch_f` (`own_casts` on; crouch_mps tuned to a +2.9 cm/step slide by `--foot-slide-check`).
 
 ## Kit-move clips (data `kmoves`)
 A kit move (state `kmove`, the move's id) may have a clip of its own: `"kmoves": {kmove: {"clip": name, "hold_from": s,
