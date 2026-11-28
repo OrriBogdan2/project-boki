@@ -701,12 +701,6 @@ static func _clear_frame(A: Arena, P: Hunter, t: float) -> void:
 	if m.hud and m.hud is CanvasItem: (m.hud as CanvasItem).visible = false
 	for l in m.find_children("*", "Label3D", true, false):
 		(l as Label3D).visible = false
-		if String((l as Label3D).text).contains("KIT CARD"):
-			for post in m.get_children():
-				var off := Vector2(post.position.x - l.position.x, post.position.z - l.position.z) \
-						if post is MeshInstance3D else Vector2.ONE
-				if off.length() < 0.05:
-					(post as MeshInstance3D).visible = false
 	if m.aim_line: m.aim_line.layers = 0
 	if P.ak: P.ak.res = 0.0        # (no resource tell over the hero)
 	var kit_aim := m.get_node_or_null("AimKit") as Node3D      # (a kit's own aim line and reticles)

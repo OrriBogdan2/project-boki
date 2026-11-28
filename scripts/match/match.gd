@@ -1119,7 +1119,7 @@ func _spawn_breakables() -> void:
 				pad.position = dq
 				add_child(pad)
 				var lbl := Label3D.new()
-				lbl.text = "DUEL RING\n%s to fight" % Settings.key_cap("interact")
+				lbl.text = "DUEL RING\nStand on the pad to fight"
 				lbl.font = UI.big; lbl.font_size = 40; lbl.pixel_size = 0.01; lbl.outline_size = 12
 				lbl.modulate = Color("ffb0a0"); lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED; lbl.no_depth_test = true
 				# drawn after every other see-through thing (pad glow, pickup beams), so nothing covers it

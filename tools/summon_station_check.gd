@@ -1,6 +1,6 @@
 extends RefCounted
 ## --summon-station-check: the Training Area's Boki summon pad (SummonStation). Off the pad there is no card;
-## on it the card shows the round-vs-critter rule and the live Summon key cap. Interact brings the three
+## on it the card shows the round-vs-critter rule (no key letters on world objects). Interact brings the three
 ## practice Bokis in turn as wisps, each with the window and cooldown its species has in the data
 ## (boki_summon.json role x size, three different windows). For each: the Summon key bursts it out for exactly
 ## that window, it shrinks back into a wisp, the cooldown runs for exactly its length (a press during it is
@@ -62,8 +62,7 @@ func _card() -> void:
 	var text := pad.card.text
 	ok("on the pad: the card shows", pad.card.visible and pad.on_pad())
 	ok("the card names the round-vs-critter rule", text.contains("Round = Hunter, critter = Boki"))
-	var bring := "%s  ·  bring a practice Boki" % Settings.key_cap("interact")
-	ok("the card names the interact key to bring a Boki", text.contains(bring))
+	ok("the card says how to bring a Boki, with no key letter", text.contains("bring a practice Boki"))
 
 
 ## Interact on the pad until the pad's Boki is this species (at most one lap).
@@ -105,8 +104,7 @@ func _species(sp: String) -> float:
 		KinSummon.press(hunter) and not k.wisp and is_equal_approx(s.left, want_win)
 	)
 	m.step(DT)
-	var left := "left  ·  %s sends it back" % Settings.key_cap("summon")
-	ok(tag + ": the card shows the key and the time left", arena.grounds.summon_pad.card.text.contains(left))
+	ok(tag + ": the card shows the time left", arena.grounds.summon_pad.card.text.contains(" s left"))
 	var t := 0.0
 	while s.left > 0.0 and t < want_win + 5.0:
 		m.step(DT)

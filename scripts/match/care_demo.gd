@@ -86,9 +86,6 @@ static func tick(a: Arena, dt: float, w: String) -> void:
 		Engine.time_scale = ArenaDemoPair.DEMO_TIME_SCALE  # each slow render frame steps only a sliver
 		# off every hover spot (no tooltip in the frames) and no Boki at her shoulder in the close-ups
 		m.get_viewport().warp_mouse(Vector2(8, 8))
-		for l in m.find_children("*", "Label3D", true, false):
-			if String((l as Label3D).text).contains("KIT CARD"):
-				(l as Label3D).visible = false
 	p.hp = p.max_hp
 	# far below full, so a payoff this step can't fill it: no BOND READY word or toast over the frames
 	p.ult = -100.0

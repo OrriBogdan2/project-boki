@@ -1035,7 +1035,7 @@ func _tick_wall(dt: float) -> void:
 	if bool(wall["sliding"]):
 		var spot := Vector3(mid.x, float(w["y"]), mid.y)
 		var slide := float(wall["slide_t"])
-		RecastMarker.show_at(h, "signature", spot, slide - float(wall["t"]), slide, col_of(ed))
+		RecastMarker.show_at(h, spot, slide - float(wall["t"]), slide, col_of(ed))
 	lk().keep(
 		"wall",
 		"wall",

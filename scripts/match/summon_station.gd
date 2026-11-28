@@ -1,7 +1,7 @@
 class_name SummonStation
 extends RefCounted
 ## The Training Grounds' Boki summon pad (decision 0039), in the middle of the Boki island. Stand on it for a
-## short card: the round-vs-critter rule, the Summon key (live key cap) and the pad's Boki, out of its wisp for
+## short card: the round-vs-critter rule, and the pad's Boki, out of its wisp for
 ## its species' window and then resting for its cooldown (KinSummon, content/rules/boki_summon.json). Interact
 ## on the pad brings the next of three practice Bokis, each with its own window. It rides as a wisp here even
 ## with the wisp setting off.
@@ -72,14 +72,13 @@ func _text() -> String:
 	var head := "SUMMON PAD\nYour Boki rides with you as a little critter-shaped glow;\n"
 	head += "a Hunter's downed wisp is round. Round = Hunter, critter = Boki.\n"
 	if k == null or k.dead or k.summon == null or not (rules()["species"] as Array).has(String(k.species)):
-		return head + "%s  ·  bring a practice Boki" % Settings.key_cap("interact")
+		return head + "Stand here to bring a practice Boki"
 	var s := k.summon
-	var now := "ready: press %s" % Settings.key_cap("summon")
+	var now := "ready"
 	if s.left > 0.0:
-		now = "out: %d s left  ·  %s sends it back" % [ceili(s.left), Settings.key_cap("summon")]
+		now = "out: %d s left" % ceili(s.left)
 	elif s.out():
 		now = "shrinking back"
 	elif s.cd > 0.0:
 		now = "resting: %d s" % ceili(s.cd)
-	var next := Settings.key_cap("interact")
-	return "%s%s\n%s\n%s  ·  next practice Boki" % [head, times_line(String(k.species)), now, next]
+	return "%s%s\n%s\nnext practice Boki: stand here" % [head, times_line(String(k.species)), now]
