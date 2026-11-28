@@ -242,7 +242,7 @@
 		}
 	],
 	"base": {
-		"doc": "The Boki base's tutorial (GARDEN.md section 8; only while farm_build.json base_mode is on, then it replaces 'steps'): meet your Boki, plant the snack patch, feed it and watch it change, place a toy and watch it play, head out or stay. One banner line each, a Skip that leaves a toy placed and food in hand. start_food: a typed food, so the feed step shows the lean change. skip_toy: the toy put down on a skip. near: tiles from your Boki that count as meeting it. lead: your Boki leads each step (scripts/home/base_tut_lead.gd): it waits and looks back when you are more than wait_m metres behind, and stops stop_m metres short of the place. boki: the line it says over its head when the step comes up.",
+		"doc": "The Boki base's tutorial (GARDEN.md section 8; only while farm_build.json base_mode is on, then it replaces 'steps'): meet your Boki, pet it, feed it and watch it change, watch it play with a toy (put down for you), name it. Five steps, none of them building or chopping (Hob's optional tips cover those). One banner line each, a Skip that leaves a toy placed and food in hand. start_food: a typed food, so the feed step shows the lean change. skip_toy: the toy put down on a skip. near: tiles from your Boki that count as meeting it. lead: your Boki leads each step (scripts/home/base_tut_lead.gd): it waits and looks back when you are more than wait_m metres behind, and stops stop_m metres short of the place. boki: the line it says over its head when the step comes up.",
 		"lead": {"wait_m": 6.0, "stop_m": 1.8},
 		"start_food": {"emberberry": 3},
 		"skip_toy": "toy_ball",
@@ -256,48 +256,46 @@
 				"boki": "Hi! Hi! Over here!"
 			},
 			{
-				"id": "patch",
+				"id": "pet",
 				"needs": ["meet"],
-				"title": "Plant the snack patch",
-				"hints": {"go": "Press {build}, open Garden and set the snack patch down. It is free and grows the snacks that feed your Boki."},
-				"world": {"go": ""},
-				"spot": {"go": {"hub": "build", "tile": "snack_patch", "tab": "Garden"}},
-				"boki": "Can we grow some snacks?"
+				"title": "Pet it",
+				"hints": {"go": "Click your Boki (or press {details} next to it) and choose Pet. Give it a good scratch."},
+				"world": {"go": "Pet your Boki"},
+				"boki": "Scratches? Yes please!"
 			},
 			{
 				"id": "eat",
-				"needs": ["patch"],
+				"needs": ["pet"],
 				"title": "Feed it",
-				"hints": {"go": "Click your Boki (or press {details} next to it), choose Feed and give it the {food}: watch its colour change."},
+				"hints": {"go": "Click your Boki ({details}), choose Feed and give it the {food}."},
 				"world": {"go": "Feed your Boki"},
 				"boki": "Is that a berry? For me?"
 			},
 			{
 				"id": "toy",
 				"needs": ["eat"],
-				"title": "Place a toy",
+				"title": "Play with it",
 				"hints": {
-					"place": "Press {build}: Base tab Play ball ({toy_cost} gems), Garden tab Snack patch (free).",
+					"place": "Press {build}, open the Base tab and set the Play ball down ({toy_cost} gems).",
 					"watch": "Watch your Boki go and play with it."
 				},
-				"marks": {"place": ["toy_ball", "snack_patch"]},
+				"marks": {"place": ["toy_ball"]},
 				"world": {"place": "", "watch": "Toy"},
 				"boki": "Can we have something to play with?"
 			},
 			{
-				"id": "out",
+				"id": "name",
 				"needs": ["toy"],
-				"title": "Head out or stay",
-				"hints": {"go": "{interact} at the portal heads out, or Stay. Waystone: Wayseed + leaning Boki."},
-				"world": {"go": "Portal"},
-				"boki": "Out there, or more play? Your call!"
+				"title": "Name it",
+				"hints": {"go": "Give your Boki a name: type one or roll the dice, then Keep."},
+				"world": {"go": ""},
+				"boki": "What do you want to call me?"
 			}
 		]
 	},
 	"skip_ask": "Skip tutorial?",
 	"done_toast": "Tutorial done! +{gems} gems",
 	"skip_label": "Skip tutorial",
-	"stay_label": "Stay",
 	"first_day": {
 		"reward_gems": 15,
 		"start_items": {"kibble": 2},

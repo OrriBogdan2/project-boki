@@ -127,9 +127,10 @@ func _act() -> void:
 	if FarmTutorial.active():
 		match FarmTutorial.current():
 			"meet": FarmTutorial.event("meet")
+			"pet": home._pet_kin(home.kins[0])
 			"eat": home._after_feed(home.kins[0], "emberberry", Care.feed(rec, "emberberry"))
 			"toy": _place_toy()
-			"out": FarmTutorial.event("stay")
+			"name": FarmTutorial.event("name")
 		return
 	for r in GardenFirstDay.rows():
 		if r["done"]:

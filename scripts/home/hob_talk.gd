@@ -84,6 +84,9 @@ func _blueprint_lines(ids: Array, first: bool) -> Array:
 	if not ids.is_empty():
 		var names: Array = ids.map(func(i): return FarmUnlocks.name_of(String(i)))
 		out.append({"text": "New blueprints: " + ", ".join(names) + "."})
+	if FarmTutorial.base():
+		for tip in rules()["tips"]:  # building is optional in the garden: his tips, never a tutorial step
+			out.append({"text": FarmTutorial.fill(String(tip))})
 	return out
 
 

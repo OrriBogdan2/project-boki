@@ -237,7 +237,7 @@ func _lead_toy() -> void:
 		await main.get_tree().process_frame
 	home._close_panel()
 	FarmTutorial.mark("meet")
-	FarmTutorial.mark("patch")
+	FarmTutorial.mark("pet")
 	var a: Dictionary = home.kins[0]
 	for k in home.kins:
 		k.erase("indoors")

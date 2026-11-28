@@ -7,7 +7,7 @@ extends RefCounted
 
 ## Steps whose lead lets go of the Boki once a toy is down: it plays (and ticks the toy line) instead of waiting
 ## at your side for the Feed step, which can take minutes (docs/GARDEN_FIRST_HOUR.md item 3).
-const FREE_FOR_TOY := ["patch", "eat"]
+const FREE_FOR_TOY := ["pet", "eat"]
 
 ## Where the active Boki leads now: INF when no base step is up or k is not your active Boki.
 static func target(h, k: Dictionary) -> Vector3:
@@ -19,8 +19,8 @@ static func target(h, k: Dictionary) -> Vector3:
 	var id := FarmTutorial.current()
 	if id == "toy" and FarmTutorial.stage(id) == "watch":
 		return FarmTutorial.toy_spot()
-	if id in ["meet", "patch", "eat", "toy"]:
-		return h.ppos       # it comes to you and stays at your side while you meet it, feed it and put a toy down
+	if id in ["meet", "pet", "eat", "toy", "name"]:
+		return h.ppos       # it comes to you and stays at your side while you meet it, pet it, feed it and name it
 	return h.guide.target(id) if id != "" else Vector3.INF
 
 ## One 10 Hz tick of the Lead state: walk on to the target, or wait for you facing you. False when the

@@ -18,7 +18,8 @@ var sig := ""
 var t := 0.0
 var detect_t := 0.0
 var asking := false
-var stay_shown := false      # the base's last step offers Stay beside Skip
+var toy_given := false      # the base's toy step puts one ball down for you, once per visit
+var name_asked := false      # the naming card opens once per visit
 var quiet := false      # set while you talk to Hob: the card, the goal line and the world prompts step aside
 var tree_t := 0.0
 var tree_at := Vector3.INF
@@ -95,6 +96,8 @@ func _poll() -> void:
 		if FarmTutorial.current() in ["feed", "eat"]:
 			FarmTutorial.give_food()
 		var cur := FarmTutorial.current()
+		if FarmTutorial.base() and h.panel_open == "":
+			_base_hands_on(cur)
 		var tool := FarmTutorial.give_step_tool(cur) if cur != "" and h.panel_open == "" else ""
 		if tool != "":
 			h._toast(String(FarmTutorial.rules()["tool_toasts"].get(tool, "")))
@@ -154,8 +157,6 @@ func _refresh_hint() -> void:
 	if not is_instance_valid(hint_box):
 		_make_hint()
 		hint_box.visible = not quiet
-	if (id == "out") != stay_shown:
-		_skip_buttons()
 	var s := FarmTutorial.hint_text(id)
 	if id in ["house", "hammer"] and not FarmHob.house_entry().is_empty():      # every swing shows on the line
 		s = "%s (%s)" % [s, _site_progress()]
@@ -190,6 +191,16 @@ func _make_hint() -> void:
 	_skip_buttons()
 	h.root_ui.add_child(hint_box)
 
+## The base steps that put something in front of you: the toy is set down for you (building stays optional),
+## and the naming card opens once when "name" comes up.
+func _base_hands_on(cur: String) -> void:
+	if cur == "toy" and FarmTutorial.toy_spot().x == INF and not toy_given:
+		toy_given = true
+		place_toy()
+	elif cur == "name" and not name_asked:
+		name_asked = true
+		TutNameCard.open(h)
+
 ## Skip sits just under the strip's right end: small, and out of the way of the world.
 func _place_skip() -> void:
 	var r := TutorialStrip.rect(h.root_ui.get_viewport_rect().size)
@@ -198,9 +209,6 @@ func _place_skip() -> void:
 func _skip_buttons() -> void:
 	for c in skip_row.get_children():
 		c.queue_free()
-	stay_shown = FarmTutorial.base() and FarmTutorial.current() == "out"
-	if stay_shown:
-		skip_row.add_child(UI.button(String(FarmTutorial.rules()["stay_label"]), func(): FarmTutorial.event("stay"), 0))
 	if not FarmTutorial.skippable():
 		return
 	if not asking:
@@ -301,14 +309,14 @@ func target(id: String) -> Vector3:
 				return _water_spot()      # the patch goes by the water
 			var planted: bool = not h.plots.is_empty() and FarmTutorial.stage(id) != "patch_dry"
 			return h.plots[0].position if planted else Vector3.INF
-		"task", "meet", "eat":
+		"task", "meet", "pet", "eat":
 			var ke: Dictionary = h._kin_entry(Save.active_kin())
 			return (ke["node"] as Node3D).position if not ke.is_empty() else Vector3.INF
 		"toy":
 			return FarmTutorial.toy_spot()
 		"hob":
 			return h.hob.pos
-		"expedition", "out":
+		"expedition":
 			return h.spots["portal"]
 	return Vector3.INF
 

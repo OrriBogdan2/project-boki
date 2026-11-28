@@ -3,8 +3,8 @@ extends RefCounted
 ## The guided farm tutorial (content/rules/farm_tutorial.json; the screen side is FarmGuide). Short steps
 ## on a new farm: axe, chop trees, mine rocks, house, hammer, a job for your Boki, feed, crop (by the water),
 ## buy a seed, sell a crop, meet Hob, head out. With base_mode on (FarmUnlocks) the five steps of
-## rules()["base"] run instead: meet your Boki, plant the snack patch, feed it, place a toy and watch it play,
-## head out or stay.
+## rules()["base"] run instead: meet your Boki, pet it, feed it, watch it play with a toy (put down for you),
+## name it. None of them builds or chops.
 ## State is Save.d.tutorial.ft:
 ##   did      step id -> true for the steps done
 ##   done / skipped   finished, or skipped (the tools and food come at once, nothing is taken away)
@@ -182,14 +182,14 @@ static func world_text(id: String) -> String:
 
 # ------------------------------------------------------------------ progress
 ## A thing happened on the farm: swing (a hammer), task (a Boki pinned to a job), hob (talked), portal. In the base
-## also meet (you walked up to your Boki), play (a Boki began on a toy), stay (you chose to stay), wake (a zone
-## woke) and played (a Boki finished a toy turn): the last two end "head out or stay" for a player who plays on.
+## instead: meet (you walked up to your Boki), pet (you petted a Boki), play (a Boki began on a toy) and
+## name (the naming card closed).
 static func event(what: String) -> void:
 	if not active():
 		return
 	var ids := {"swing": "hammer", "task": "task", "hob": "hob", "portal": "expedition", "buy": "buy", "sell": "sell"}
 	if base():
-		ids = {"meet": "meet", "play": "toy", "portal": "out", "stay": "out", "wake": "out", "played": "out"}
+		ids = {"meet": "meet", "pet": "pet", "play": "toy", "name": "name"}
 	var id := ids.get(what, "") as String
 	detect()
 	if id != "" and available(id):
@@ -201,12 +201,10 @@ static func detect() -> void:
 	if not active():
 		return
 	if base():
-		if Save.d["roster"].any(func(r): return not (r.get("lean", {}) as Dictionary).is_empty()):
-			mark("meet")  # fed, so it has been met
-			mark("patch")
+		if did("eat") or did("toy") or Save.d["roster"].any(func(r): return not (r.get("lean", {}) as Dictionary).is_empty()):
+			mark("meet")  # fed (or past it: an old save mid-tutorial), so it has been met and petted
+			mark("pet")
 			mark("eat")
-		elif not SnackPatch.entry(Save.d).is_empty():
-			mark("patch")
 		return
 	var cost := FarmSites.build_cost("house")
 	var wood := int(cost.get("wood", 0))
