@@ -1,5 +1,17 @@
 # Cinder (ashwick): import note, v95 swap of Cinder appeal4, bust candidate 5 (2026-11-11)
 
+## 11-28: cinder_meshy.glb skin weights (the native model the game draws; weights only)
+Only JOINTS_0/WEIGHTS_0 changed, written in place: mesh, UVs, textures, skeleton and the 6 clips are byte-equal, so
+the bind pose is identical. (1) Vertices split at UV seams now share one weight set (they drifted up to 10.5 mm apart
+under clips: dark seam slits). (2) Arm weight fades out across the front chest (|x| 6 -> 17 cm, y 1.08-1.46 m): the
+bust followed the raised arm and tore under it. (3) Weights smoothed only around edges that tore (>2.5x and >7.6 cm,
+or >3x and >3 cm) over the mesh edges plus every vertex within 12 mm (any shell): the skin is stacked shells and
+flakes, and graph-only smoothing moved the skin out from under its flakes (holes in the thigh). Over all 15 clips (6
+own + 9 of cinder_clips.glb), numpy skinning: edges >3x 1.76% -> 0.75% (edges >= 8 mm 1.16% -> 0.73%), worst 28.5x ->
+22.8x, torn >3 cm 827 -> 487, >7.6 cm 275 -> 123, shell pairs (<8 mm apart at rest) opening >2 cm 24480 -> 4112,
+widest 113 -> 34 mm.
+Scripts and renders: ~/gens/cinder-rigfix-1119/native1128/ (fix3.py args 3 6 40 0.006 2000 0.06 0.17 0.012).
+
 
 ## LIVE 11-18: bust A (-20% chest volume, owner 11-18 ~00:20 EST "lets exchange it immediately")
 `cinder.glb` = main's depth1117 A_s18 game glb with the chest of `~/meshy/v95/Cinder/bust1118/bust_m20.glb` (job
