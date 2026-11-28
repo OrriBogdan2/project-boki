@@ -287,3 +287,10 @@ rough upper bound on an atlas): 1. `updraft_vent` 1024 px over 3.2 m, about 320 
 target (scene only: updrafts sit over the void, never close to the garden camera); everything else is at or over
 512 px/m (jump_pad about 680, gust_fan about 790, chest about 880, eggs 512 px on under 0.5 m, Boki atlases 2048 px
 on about 1 m). The 256 px eye and face maps are tiny patches on the Boki's head, fine.
+
+GPU stills and VRAM (`--perf-bench --bench-garden --bench-zone=all --bench-boki=9`, Medium, jobq 20261128-020249-25941
+origin/main vs 20261128-020248-04400 this branch): the garden's texture memory did not move: hub 110 -> 110 MB, Bramblebank
+107 -> 108, Glasswater 108 -> 108, Cinderstep 108 -> 108, Hushwood 109 -> 109, Ridge 109 -> 109. The garden scenes load none
+of the converted atlases at this camera, so the saving above is for where those textures load (Boki in a match, eggs in the
+Bokidex, Hob and Pell), computed not measured. The 6 stills (frame differences are particles and animation timing) look the
+same before and after. The draw-budget FAILs (hub 223 of 200, Hushwood, Ridge) are the same on main.
