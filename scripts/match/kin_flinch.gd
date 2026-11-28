@@ -7,17 +7,17 @@ extends RefCounted
 ## scales with the hit and shrinks with mass, how long it takes grows with mass (light Boki snap
 ## back, heavy ones carry the hit). Each body plan jolts its own way (PLAN).
 
-const SETTLE_LIGHT := 0.20     # s until the jolt is down to a quarter, for MASS_LIGHT
-const SETTLE_HEAVY := 0.38     # s, for MASS_HEAVY
-const MASS_LIGHT := 0.8        # KinSpec mass of the lightest Boki
-const MASS_HEAVY := 2.0        # ...and of the heaviest
-const DAMPING := 0.55          # spring damping ratio: one small overshoot
-const OMEGA_PER_S := 1.75      # natural frequency (rad) times settle time (s) at that damping
-const K_MIN := 0.5             # strength of a chip hit
-const K_PER_FRAC := 4.0        # strength gained per share of max health a hit takes
+const SETTLE_LIGHT := 0.20  # s until the jolt is down to a quarter, for MASS_LIGHT
+const SETTLE_HEAVY := 0.38  # s, for MASS_HEAVY
+const MASS_LIGHT := 0.8  # KinSpec mass of the lightest Boki
+const MASS_HEAVY := 2.0  # ...and of the heaviest
+const DAMPING := 0.55  # spring damping ratio: one small overshoot
+const OMEGA_PER_S := 1.75  # natural frequency (rad) times settle time (s) at that damping
+const K_MIN := 0.5  # strength of a chip hit
+const K_PER_FRAC := 4.0  # strength gained per share of max health a hit takes
 const K_MAX := 1.3
-const LAND_FRAC := 0.25        # the share of max health a landing jolts like (a squash, no shove: K_MAX)
-const DASH_FRAC := 0.2         # the share of max health a dash start jolts like (the lean, K_MAX before mass)
+const LAND_FRAC := 0.25  # the share of max health a landing jolts like (a squash, no shove: K_MAX)
+const DASH_FRAC := 0.2  # the share of max health a dash start jolts like (the lean, K_MAX before mass)
 ## Per body plan, per unit of strength: pitch and roll (rad), yaw twist (rad), shove (m), squash and lift (m).
 const PLAN := {
 	"quad": {"pitch": 0.15, "roll": 0.11, "yaw": 0.0, "shove": 0.025, "squash": 0.08, "lift": 0.0},
@@ -28,32 +28,40 @@ const PLAN := {
 }
 
 var plan := "blob"
-var rot := Vector3.ZERO        # Flex rotation to add (rad)
-var shove := Vector3.ZERO      # Flex offset to add (m, Flex space)
-var wide := 1.0                # Flex width factor
-var tall := 1.0                # Flex height factor
-var _n := 0                    # the "hit" count already taken up
-var _amp := 0.0                # strength of the current jolt
-var _x := 0.0                  # 1 at the hit, springs to 0
+var rot := Vector3.ZERO  # Flex rotation to add (rad)
+var shove := Vector3.ZERO  # Flex offset to add (m, Flex space)
+var wide := 1.0  # Flex width factor
+var tall := 1.0  # Flex height factor
+var _n := 0  # the "hit" count already taken up
+var _amp := 0.0  # strength of the current jolt
+var _x := 0.0  # 1 at the hit, springs to 0
 var _v := 0.0
 var _omega := 20.0
-var _push := Vector2.ZERO      # which way the body is shoved, in Flex space (x right, y back)
+var _push := Vector2.ZERO  # which way the body is shoved, in Flex space (x right, y back)
+
 
 ## A hit on a Boki: `push` is the way the hit shoves it (world), `frac` the share of its max health the hit took,
-## `mass` its KinSpec mass.
+## `mass` its KinSpec mass. A blow also cues the rig's own hit clip, if its species has one (BokiRig).
 static func hit(model: Node3D, push: Vector3, frac: float, mass: float) -> void:
-	var cur: Dictionary = model.get_meta("hit", {"n": 0})
-	var k := clampf(K_MIN + frac * K_PER_FRAC, K_MIN, K_MAX) / sqrt(maxf(mass, 0.1))
-	model.set_meta("hit", {"n": int(cur["n"]) + 1, "k": k, "push": push, "mass": mass})
+	_jolt(model, push, frac, mass, true)
+
 
 ## A Boki touching down after a throw or a leap: the hit's spring with no push, so it only squashes.
 static func land(model: Node3D, mass: float) -> void:
-	hit(model, Vector3.ZERO, LAND_FRAC, mass)
+	_jolt(model, Vector3.ZERO, LAND_FRAC, mass, false)
+
 
 ## A Boki setting off on a dash along `dir` (world): the hit's spring shoved the way it goes, so it leans into the
 ## move and settles at the end (the landing squash). Mass sizes it: light Boki lean more, heavy ones less.
 static func dash(model: Node3D, dir: Vector3, mass: float) -> void:
-	hit(model, dir, DASH_FRAC, mass)
+	_jolt(model, dir, DASH_FRAC, mass, false)
+
+
+static func _jolt(model: Node3D, push: Vector3, frac: float, mass: float, blow: bool) -> void:
+	var cur: Dictionary = model.get_meta("hit", {"n": 0})
+	var k := clampf(K_MIN + frac * K_PER_FRAC, K_MIN, K_MAX) / sqrt(maxf(mass, 0.1))
+	model.set_meta("hit", {"n": int(cur["n"]) + 1, "k": k, "push": push, "mass": mass, "blow": blow})
+
 
 ## Takes up a new hit if there is one and steps the spring; then rot, shove, wide and tall are the pose.
 func update(root: Node3D, dt: float) -> void:
@@ -69,6 +77,7 @@ func update(root: Node3D, dt: float) -> void:
 		_x += _v * step
 	_pose()
 
+
 func _start(root: Node3D, h: Dictionary) -> void:
 	var cur := absf(_amp * _x)
 	_amp = maxf(float(h["k"]), cur)
@@ -79,6 +88,7 @@ func _start(root: Node3D, h: Dictionary) -> void:
 	_omega = OMEGA_PER_S / lerpf(SETTLE_LIGHT, SETTLE_HEAVY, heft)
 	var local := root.global_basis.inverse() * (h["push"] as Vector3)
 	_push = Vector2(local.x, local.z).normalized() if Vector2(local.x, local.z).length() > 0.01 else Vector2.ZERO
+
 
 func _pose() -> void:
 	var p: Dictionary = PLAN.get(plan, PLAN["blob"])

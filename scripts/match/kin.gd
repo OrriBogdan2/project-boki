@@ -1428,8 +1428,11 @@ func render(delta: float, alpha: float) -> void:
 	body.scale = Vector3(1.0 + sq * 0.4, 1.0 - sq * 0.45, 1.0 + sq * 0.4)
 	model.set_meta("dazed", state in ["downed", "dazed"] or stun_t > 0.0)
 	model.set_meta("starry", state in ["downed", "dazed"])  # a stun's stars are the shared look (StatusLooks)
+	model.set_meta("kfaint", state == "downed")
 	if state in ["downed", "dazed"]:
-		body.rotation.z = lerpf(body.rotation.z, 1.4 if state == "downed" else 0.0, delta * 6.0)
+		# a rig with a faint clip rolls itself onto its side (BokiRig)
+		var rolls: bool = state == "downed" and not bool(model.get_meta("faints", false))
+		body.rotation.z = lerpf(body.rotation.z, 1.4 if rolls else 0.0, delta * 6.0)
 		body.rotation.y = lerpf(body.rotation.y, 0.0, delta * 8.0)
 	else:
 		body.rotation.z = lerpf(body.rotation.z, 0.0, delta * 8.0)

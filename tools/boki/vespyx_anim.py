@@ -2,7 +2,7 @@
 import boki_clips
 import vespyx
 from boki_clips import LOOK_UP, add, ear_pose, s, seq, tail_wave, TAU
-from boki_clips import SHARED, idle, run
+from boki_clips import SHARED, faint, flinch, hit, idle, run
 from boki_gait import four_legs, planted
 from vespyx import SIDES, STING_C, TAIL_PTS
 
@@ -183,6 +183,26 @@ def mine(t):
     return p
 
 
+def hit_pincers(t):
+    """Its flinch with the pincers thrown wide."""
+    p = hit(t)
+    k = flinch(t)
+    for sd, sx in SIDES:
+        add(p, "arm." + sd, rx=0.15 * k, ry=sx * 0.2 * k)
+        add(p, "nip." + sd, ry=sx * 0.25 * k)
+    return p
+
+
+def faint_pincers(t):
+    """Its faint with the pincers falling open."""
+    p = faint(t, 0.07)
+    k = seq(t, [(0, 0), (0.4, 0), (0.7, 1), (1, 1)])
+    for sd, sx in SIDES:
+        add(p, "arm." + sd, rx=-0.35 * k, ry=sx * 0.2 * k)
+        add(p, "nip." + sd, ry=sx * 0.4 * k)
+    return p
+
+
 CLIPS = dict(SHARED)
 CLIPS.update({
     "run": (0.88, True, planted(run, BONES, four_legs(0.0, 0.5, 0.0), duty=0.16, reach=0.24, lift=0.08,
@@ -193,5 +213,7 @@ CLIPS.update({
     "eat": (2.0, True, eat),
     "chop": (1.1, True, chop),
     "mine": (1.0, True, mine),
+    "hit": (0.3, False, hit_pincers),
+    "faint": (1.0, False, faint_pincers),
 })
 HIDE_AT = {"prop_berry": (0, -0.09, 0.40)}

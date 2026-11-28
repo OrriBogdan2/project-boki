@@ -1,7 +1,7 @@
 """Mycroll's skeleton and the clips that are its own."""
 import boki_clips
 import mycroll
-from boki_clips import SHARED, add, bite, chop_mouth, ear_pose, eat_ground, mine_mouth, s, seq
+from boki_clips import SHARED, add, bite, chop_mouth, ear_pose, eat_ground, faint, hit, mine_mouth, s, seq
 from mycroll import SIDES, TAIL_PTS
 
 boki_clips.TAIL_N = 2
@@ -93,5 +93,7 @@ CLIPS.update({
     "eat": (2.0, True, caps_sway(eat_ground)),
     "chop": (1.1, True, caps_sway(chop_mouth, 0.08)),
     "mine": (1.0, True, caps_sway(mine_mouth, 0.08)),
+    "hit": (0.3, False, caps_sway(hit, 0.1, 3)),
+    "faint": (1.0, False, caps_sway(lambda t: faint(t, 0.1), 0.02, 1)),
 })
 HIDE_AT = {"prop_berry": (0, 0.14, 0.60)}
