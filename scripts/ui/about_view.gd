@@ -234,8 +234,34 @@ static func looks(rec: Dictionary, parent: Control) -> void:
 	if toy != "": _row(parent, "Fav toy", String(HomeLayout.CATALOG[toy]["name"]), UI.INK, null, toy)
 	PrizeBoard.add_ribbons(parent, rec)
 
-## Where it came from (Save.register), one short line each.
-static func history(rec: Dictionary, parent: Control) -> void:
+## Its name, with a Rename button for a Boki you own (KinNames): the naming line opens under the row with the
+## name it has. Keep renames it (on_renamed gets the new name); an unchanged name just closes the line.
+static func name_row(rec: Dictionary, parent: Control, on_renamed := Callable()) -> void:
+	var ref := {}  # (the row and its value label, for the button made before them)
+	var ed: Button = null
+	if KinNames.can_rename(rec):
+		var open := func(): _rename_open(rec, parent, ref["row"], ref["val"], on_renamed)
+		ed = UI.icon_button("person", open, "Rename", 14.0)
+	_row(parent, "Name", String(rec.get("name", "")), UI.INK, ed, "person")
+	ref["row"] = parent.get_child(parent.get_child_count() - 1)
+	ref["val"] = (ref["row"] as Control).get_child(2)
+
+static func _rename_open(rec: Dictionary, parent: Control, row: Control, val: Label, on_renamed: Callable) -> void:
+	row.visible = false
+	var step := NameStep.new(String(rec.get("species", "")), "Keep", String(rec.get("name", "")))
+	parent.add_child(step)
+	parent.move_child(step, row.get_index() + 1)
+	step.named.connect(func(nm: String, kept: bool):
+		if kept and KinNames.rename(rec, nm):
+			val.text = nm
+			if on_renamed.is_valid(): on_renamed.call(nm)
+		if is_instance_valid(row): row.visible = true
+		if kept: step.queue_free())
+	step.focus()
+
+## Where it came from (Save.register), one short line each, under its name.
+static func history(rec: Dictionary, parent: Control, on_renamed := Callable()) -> void:
+	name_row(rec, parent, on_renamed)
 	_row(parent, "Origin", origin_short(rec), UI.INK, null, "pin")
 	var o: Dictionary = rec.get("origin", {}) if typeof(rec.get("origin", null)) == TYPE_DICTIONARY else {}
 	_row(parent, "Date", _date(int(float(o.get("t", rec.get("born", 0))))), UI.INK, null, "clock")
