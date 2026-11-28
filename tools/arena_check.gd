@@ -502,6 +502,12 @@ func _dodge_drill(m: Match) -> void:
 	step(m, 1.0)        # the earlier dash is over
 	var start := P.pos
 	ok("drill: you start in the Strafer's reach", P.flat_dist(dr.thrower.pos) < DodgeDrill.REACH)
+	# in reach but not hit yet, the Strafer throws nothing (no red lane from an idle dummy)
+	_next_lane(m, dr)
+	var idle := dr._shot.is_empty() and not dr.armed and dr.label().contains("hit me")
+	ok("drill: no lane until you hit the Strafer", idle)
+	m.arena._on_hit(P, dr.thrower, 10.0, [])
+	ok("drill: hitting the Strafer starts it", dr.armed and dr.label().begins_with("DODGE DRILL"))
 	var hp := P.hp
 	_next_lane(m, dr)
 	ok("drill: the lane shows before the orb leaves", not dr._shot.is_empty() and dr._shot["t"] < DodgeDrill.WINDUP)

@@ -1,7 +1,8 @@
 class_name DodgeDrill
 extends RefCounted
-## The dodge drill on the Arena and the Training Grounds: while you are near the Strafer (the moving
-## dummy) and the drill is not done, it throws one slow shot every few seconds. Its red lane (the fx
+## The dodge drill on the Arena and the Training Grounds: once you have hit the Strafer (the moving
+## dummy; its label says so), while you are near it and the drill is not done, it throws one slow shot
+## every few seconds. Before that it throws nothing (no red lane from an idle dummy). Its red lane (the fx
 ## telegraph) fills first, then the orb crawls down it. A clean dodge is a dash after the lane showed
 ## that the orb did not catch: dash through it or out of its way. Three clean dodges finish the drill
 ## (Match's Training Grounds checklist row "dodge"), and the Strafer stops throwing. Nothing here costs health.
@@ -23,6 +24,7 @@ var m: Match
 var thrower: Hunter
 var dodges := 0
 var done := false
+var armed := false             # you hit the Strafer: the drill is on (Arena._on_hit)
 var _t := 0.0                  # s into the loop
 var _near := false             # you were in reach last tick (each visit starts the loop over)
 var _told := false             # the one-line prompt has shown (once a session)
@@ -41,13 +43,9 @@ func tick(dt: float) -> void:
 	if done or P.downed or not is_instance_valid(thrower):
 		stop()
 		return
-	var near := P.flat_dist(thrower.pos) <= REACH
+	var near := armed and P.flat_dist(thrower.pos) <= REACH
 	if near and not _near:
 		_t = LOOP - FIRST_AT
-		if not _told:
-			_told = true
-			var key := Settings.key_cap("dash")
-			_say("Dodge drill: dash (%s) through or out of the Strafer's red shot, %d times" % [key, NEED], COL_WARN)
 	_near = near
 	if near:
 		_t += dt
@@ -56,6 +54,24 @@ func tick(dt: float) -> void:
 			_throw(P)
 	if not _shot.is_empty():
 		_fly(P, dt)      # a shot in the air flies on even if your dash took you out of reach
+
+## You hit the Strafer: the drill starts (its first lane FIRST_AT s later while you stay in reach).
+func arm() -> void:
+	if armed or done:
+		return
+	armed = true
+	if not _told:
+		_told = true
+		var key := Settings.key_cap("dash")
+		_say("Dodge drill: dash (%s) through or out of the Strafer's red shot, %d times" % [key, NEED], COL_WARN)
+
+## The Strafer's label: what hitting it does, then the drill's count.
+func label() -> String:
+	if done:
+		return "STRAFER  ·  dodge drill done"
+	if armed:
+		return "DODGE DRILL  %d / %d  ·  dash out of the red" % [dodges, NEED]
+	return "STRAFER  ·  hit me for the dodge drill"
 
 ## You went down or finished: drop the shot in the air.
 func stop() -> void:
