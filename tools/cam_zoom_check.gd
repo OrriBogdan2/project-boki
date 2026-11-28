@@ -6,7 +6,8 @@ extends RefCounted
 ##   3. Ctrl (sneak, on the ground) asks for max x ctrl wherever the wheel was left, past max and under the cap, and
 ##      lets go on release; the camera eases there in small steps (no pop);
 ##   4. the glider and height never push the view past the cap;
-##   5. at the Ctrl view every ground corner is inside the pose LOD's pose_far_m and the camera's far plane.
+##   5. at the Ctrl view every ground corner is inside the pose LOD's pose_far_m and the camera's far plane;
+##   6. the first-match wheel hint: one line, once, never after the wheel zoomed or with the wheel bound to an action.
 ## Prints "CAMZOOM ok|FAIL <what>" and "CAM ZOOM CHECK DONE, failures: N".
 ## --cam-zoom-shots --shots-dir=<dir> (GPU): the old view, the new start, the wheel in and Ctrl held, one PNG each, with
 ## the frame's draw calls and objects printed ("CAMZOOM shot ...").
@@ -47,6 +48,7 @@ func run(main: Node, what: String) -> void:
 	_cap()
 	_arm(lo, hi, float(r["step"]))
 	_reach(hi)
+	_hint()
 	m.queue_free()
 	print("CAM ZOOM CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -179,6 +181,30 @@ func _reach(_hi: float) -> void:
 	var pose_m := CamRig.pose_far_m
 	ok(far_m <= pose_m, "Ctrl view: the furthest corner is %.1f m out, inside pose_far_m %.0f" % [far_m, pose_m])
 	ok(depth < cam.far, "and %.0f m from the camera, inside its far plane %.0f" % [depth, cam.far])
+
+
+## The first-match hint: one line with the bound sneak key, once, and never after the wheel has zoomed.
+func _hint() -> void:
+	var seen: Dictionary = Save.d["tutorial"]
+	seen.erase(CamWheel.HINT)
+	var n: int = m.hud.msgs.count() + m.hud.msgs.waiting()
+	CamWheel.hint(m)
+	var shown: int = m.hud.msgs.count() + m.hud.msgs.waiting()
+	ok(shown == n + 1 and seen.get(CamWheel.HINT, false), "hint: one line the first time (%d -> %d)" % [n, shown])
+	CamWheel.hint(m)
+	ok(m.hud.msgs.count() + m.hud.msgs.waiting() == shown, "hint: not a second time")
+	seen.erase(CamWheel.HINT)
+	_notch(MOUSE_BUTTON_WHEEL_UP)
+	ok(seen.get(CamWheel.HINT, false), "hint: zooming marks it seen")
+	CamWheel.hint(m)
+	ok(m.hud.msgs.count() + m.hud.msgs.waiting() == shown, "hint: not shown once the wheel zoomed")
+	seen.erase(CamWheel.HINT)
+	var bind := InputEventMouseButton.new()
+	bind.button_index = MOUSE_BUTTON_WHEEL_DOWN
+	InputMap.action_add_event("emote", bind)
+	CamWheel.hint(m)
+	ok(not seen.has(CamWheel.HINT), "hint: not shown when the wheel is bound to an action")
+	InputMap.action_erase_event("emote", bind)
 
 
 func _notch(button: int) -> void:

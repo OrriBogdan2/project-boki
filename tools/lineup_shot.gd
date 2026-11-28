@@ -2,7 +2,7 @@ extends RefCounted
 ## --lineup-shot --shots-dir=<dir> [--list-meshes]: every Hunter as the game builds them (Models.hunter, same
 ## loader and scale), idle playing, in one row at true scale on a 1 m grid. Writes <dir>/lineup_front.png (straight
 ## on), <dir>/lineup_match.png (the match camera's angle and distance) and lineup_match_close.png (same angle,
-## closer), and prints each Hunter's measured standing height:
+## closer; each Hunter's plate frame is drawn on those two), and prints each Hunter's measured standing height:
 ## the skinned bounds of every visible mesh ("all": weapon and props included) and of the body meshes alone ("body":
 ## meshes whose names say weapon, prop or similar are left out), plus the head-top anchor when the model has one.
 ## --list-meshes prints every mesh with its own skinned top. Needs a renderer.
@@ -88,13 +88,13 @@ func run(main: Node) -> void:
 	cam.position = mid + Vector3(0, sin(p), cos(p)) * CAM_DIST
 	cam.rotation = Vector3(-p, 0, 0)
 	await _play(syncs, 2, 0.0)
-	await _grab(out.path_join("lineup_match.png"))
+	await _grab(out.path_join("lineup_match.png"), true)
 	print("LINEUP_SHOT ", out.path_join("lineup_match.png"))
 	# 3. the same angle, closer (the row filling the frame; the match camera itself keeps them small)
 	var near := (ORDER.size() * GAP * 0.5 + 1.0) / (tan(deg_to_rad(CAM_FOV * 0.5)) * float(SHOT_W) / SHOT_H)
 	cam.position = mid + Vector3(0, sin(p), cos(p)) * near
 	await _play(syncs, 2, 0.0)
-	await _grab(out.path_join("lineup_match_close.png"))
+	await _grab(out.path_join("lineup_match_close.png"), true)
 	print("LINEUP_SHOT ", out.path_join("lineup_match_close.png"))
 	print("LINEUP_SHOT_DONE")
 	tree.quit()
@@ -110,10 +110,26 @@ func _play(syncs: Array, n: int, t: float) -> void:
 				(s as Node).call("_process", 1.0 / 30.0)
 		await tree.process_frame
 
-func _grab(path: String) -> void:
+func _grab(path: String, plates := false) -> void:
 	await RenderingServer.frame_post_draw
 	var img := tree.root.get_texture().get_image()
+	if plates:
+		_plate_boxes(img)
 	img.save_png(path)
+
+
+## Each Hunter's nameplate frame (HudStyle: PLATE_W x about 17 px at 1080p, hanging from the point HudPlate puts it) in
+## white over the shot, to see the plate clear the head.
+func _plate_boxes(img: Image) -> void:
+	var k := float(SHOT_H) / 1080.0
+	for i in heroes.size():
+		var h := heroes[i] as Node3D
+		var at := cam.unproject_position(h.global_position + Vector3(0, HudPlate.arch_offset(ORDER[i]), 0))
+		var size := Vector2i(Vector2(HudStyle.PLATE_W, 17.0) * k)
+		var box := Rect2i(Vector2i(at) - Vector2i(size.x / 2, 0), size)
+		img.fill_rect(Rect2i(box.position, Vector2i(box.size.x, 1)), Color.WHITE)
+		img.fill_rect(Rect2i(box.position + Vector2i(0, box.size.y), Vector2i(box.size.x, 1)), Color.WHITE)
+
 
 func _stage(main: Node) -> void:
 	holder = Node3D.new()

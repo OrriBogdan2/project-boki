@@ -102,6 +102,7 @@ static func drive(m: Match) -> void:
 			_kick_up(m, tu.stop("crouch").y)
 		"crouch":
 			goto.call(dest, 0.4)
+			_kick_up(m, dest.y)      # (off the sheer lookout, a restart below it: only a wall kick gets back up)
 			p.inp["crouch"] = Vector2(dest.x - p.pos.x, dest.z - p.pos.z).length() < 1.2
 		"glove":
 			var wp := tu.ground_item()

@@ -10,6 +10,8 @@ extends RefCounted
 
 const LIP := 2  # px of the darker face under raised buttons
 const PRIMARY_LIP := 3
+## Segmented tabs' side padding: 12 keeps the settings row's eight tabs, in real semibold, inside the 720 panel
+const SEG_PAD_X := 12
 const TICKET := Color("3a1446")  # the ticket stub's dark plum face (magenta rim, pink label)
 
 
@@ -197,17 +199,17 @@ static func _ghost_face(alpha: float, rim: Color, glow := 0.0, down := false) ->
 ## selectable tiles.
 static func _tabs_and_tiles(t: Theme) -> void:
 	var seg := StyleBoxEmpty.new()
-	seg.content_margin_left = 14
-	seg.content_margin_right = 14
+	seg.content_margin_left = SEG_PAD_X
+	seg.content_margin_right = SEG_PAD_X
 	seg.content_margin_top = 7
 	seg.content_margin_bottom = 7
-	var seg_h := UiFrame.sunk(Color(1, 1, 1, 0.06), UI.R_SMALL + 2).padded(14, 7)
+	var seg_h := UiFrame.sunk(Color(1, 1, 1, 0.06), UI.R_SMALL + 2).padded(SEG_PAD_X, 7)
 	_states(t, "Seg", seg, seg_h, seg_h, seg)
 	_font_cols(t, "Seg", UI.MUTED, Color.WHITE, UI.FAINT)
 	var on := UiTorn.make(UI.RAISED.lightened(0.08), 2.0, 0.8)
 	on.glow_a = UI.NEON_B
 	on.edge = Color(UI.NEON_B, 0.55)
-	on.padded(14, 7)
+	on.padded(SEG_PAD_X, 7)
 	_states(t, "SegOn", on, on, on, on)
 	_font_cols(t, "SegOn", Color.WHITE, Color.WHITE, UI.FAINT)
 	var tile := UiTorn.make(Color(1, 1, 1, 0.04), 2.5).padded(10, 10)

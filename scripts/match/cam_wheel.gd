@@ -2,7 +2,11 @@ class_name CamWheel
 extends RefCounted
 ## The match camera's zoom range (numbers: content/rules/camera.json "zoom"). CamRig.user_zoom is the wheel's
 ## factor: it starts at max (spawn and respawn), the mouse wheel steps it in and out between min and max, and
-## holding Ctrl (Sneak) eases the view out past max (CamRig.air_zoom asks for `ctrl_zoom`).
+## holding Ctrl (Sneak) eases the view out past max (CamRig.air_zoom asks for `ctrl_zoom`). A first-match hint
+## teaches the wheel (hint()).
+
+const HINT := "cam_zoom"  # Save.d["tutorial"] key: the wheel hint was shown or the wheel was used
+const HINT_AFTER_S := 8.0  # s into the match before the hint, after the move hint has had its turn
 
 
 ## The zoom rules: the farm's (the default: its camera is untouched) or, with `in_match`, the match's own range.
@@ -60,8 +64,17 @@ static func input(m: Match, event: InputEvent) -> bool:
 	if button == 0 or m.cam == null or m.paused or m.over or _popup_open(m):
 		return false
 	m.cam.user_zoom = stepped(m.cam.user_zoom, button, true)
+	Save.d["tutorial"][HINT] = true  # zoomed: the hint has done its job
 	m.get_viewport().set_input_as_handled()
 	return true
+
+
+## The first-match hint for the wheel (Match._tips calls it once the player is on the ground): one line, until
+## the wheel has zoomed or the line has shown once. Skipped when the player bound the wheel to an action.
+static func hint(m: Match) -> void:
+	if _bound(MOUSE_BUTTON_WHEEL_UP) or _bound(MOUSE_BUTTON_WHEEL_DOWN):
+		return
+	m._tip(HINT, "Mouse wheel zooms the view  ·  hold %s to sneak and see wider" % Settings.key_cap("crouch"))
 
 
 ## A panel that has the wheel for itself: the map, the swap and pack lists, the practice hero picker.
