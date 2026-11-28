@@ -101,6 +101,9 @@ func _roam() -> void:
 	# this check times flight while roaming: a random day nap or a hello (BaseLife) would take a flier off the clock
 	home.life.r_v["doze"] = 0.0
 	home.life.r_v["greet_chance"] = 0.0
+	# reseed here: the farm build waits a load-dependent number of frames, each drawing on the global rng, so the
+	# seed(3) in run() alone left the roam to host load (red 1 in 4 under a busy gate: fliers roamed 15 of 120 s)
+	seed(3)
 	var on_foot := {}  # flier uid -> s it has walked the ground in a row while roaming
 	var longest := 0.0
 	var roam_s := 0.0
