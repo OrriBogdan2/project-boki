@@ -337,14 +337,14 @@ func _tag(tag: Label3D, s: Dictionary, st: Dictionary, now: float) -> void:
 		"infirmary":
 			var tn := int(Save.d["items"].get("tonic", 0))
 			line = "%d tonic%s" % [tn, "" if tn == 1 else "s"]
-		"job_board": line = "%s set jobs" % Settings.key_cap("interact")
+		"job_board": line = "set jobs here"
 		"seed_garden":
 			var left := float(st.get("ready", 0.0)) - now
 			line = "seedlings ready" if left <= 0.0 else "seedlings in %ds" % int(ceil(left))
 		"kiln": line = "%d coals" % int(Save.d["items"].get("coals", 0)) if Work.mat("wood") >= 3 else "needs 3 wood"
 	if Work.ASSIGN.has(String(s["id"])):
 		var cr := Work.crew(int(s["e"]["u"]))
-		line += ("\n" if line != "" else "") + ("%s assigned" % ", ".join(cr.map(func(r): return String(r["name"]))) if not cr.is_empty() else "%s assign a Boki" % Settings.key_cap("interact"))
+		line += ("\n" if line != "" else "") + ("%s assigned" % ", ".join(cr.map(func(r): return String(r["name"]))) if not cr.is_empty() else "needs a Boki")
 	var who := ""
 	for k in h.kins:
 		if k.has("job") and int(k["job"].get("u", -1)) == int(s["e"]["u"]): who = String(k["rec"]["name"]); break

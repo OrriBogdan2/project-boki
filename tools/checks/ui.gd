@@ -23,5 +23,6 @@ const CHECKS := {
 	"--hazard-counter-shots": ["res://tools/hazard_counter_shots.gd", "hazard_counter_shots", null],  # GPU
 	"--plate-status-check": ["res://tools/plate_status_check.gd", "plate_status_check", null],  # one status row
 	"--stomp-prompt-shots": ["res://tools/stomp_prompt_shots.gd", "stomp_prompt_shots", null],  # --shots-dir=<dir>
+	"--world-key-letters-check": ["res://tools/world_key_letters_check.gd", "world_key_letters_check", null],
 	"--ui-text-probe-check": ["res://tools/ui_text_probe.gd", "ui_text_probe", null],  # no text per-letter/off screen
 }

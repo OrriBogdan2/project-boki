@@ -75,8 +75,6 @@ func setup(match_node: Match, which: String) -> void:
 	CombatBus.hit_landed.connect(_cb)
 	tools = not m.opts.get("test_zone", false)
 	_build_ui()
-	if tools:
-		_sign()
 	if layout == "arena":
 		grounds = Grounds.new(self)
 		grounds.build()
@@ -544,26 +542,6 @@ func _update_ui() -> void:
 	)
 	if meter.text != lines:
 		meter.text = lines
-
-
-## A sign by your start: where the kit card and the loadout are.
-func _sign() -> void:
-	var lb := Label3D.new()
-	lb.text = "K  ·  KIT CARD\nL  ·  LOADOUT (Hunter, Boki, 2 gloves)\nBACKSPACE  ·  RESET"
-	lb.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	lb.font = UI.big
-	lb.font_size = 44
-	lb.outline_size = 12
-	lb.pixel_size = 0.008
-	lb.modulate = Color("ffe9b8")
-	var at := home + Vector3(-3.2, 2.2, 1.2)
-	lb.position = at
-	m.add_child(lb)
-	var post := MeshInstance3D.new()
-	post.mesh = Models.box(0.14, 1.6, 0.14)
-	post.material_override = Models.toon(Color("7a5a3a"))
-	post.position = Vector3(at.x, home.y + 0.8, at.z)
-	m.add_child(post)
 
 
 func _open_card() -> void:

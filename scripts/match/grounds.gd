@@ -16,16 +16,16 @@ const PROMPT_W := 560.0  # [px] its width (centred)
 const SIGN_LIFT := 6.0  # [m] a station's sign hangs this far over the island's middle
 ## Per station kind: the sign's title, what it is for, how a pedestal is used (`%s` is the interact key's cap).
 const SIGNS := {
-	"arch": ["HUNTERS", "Try any Hunter's kit", "Stand on a pedestal, press %s\nto play that Hunter"],
-	"gear": ["GEAR", "Test gloves, armor and boots", "Stand on a pedestal, press %s\nto wear that piece"],
-	"item": ["BELT ITEMS", "Test every utility belt item", "Stand on a pedestal, press %s\nto fill your belt with it"],
+	"arch": ["HUNTERS", "Try any Hunter's kit", "Stand on a pedestal\nto play that Hunter"],
+	"gear": ["GEAR", "Test gloves, armor and boots", "Stand on a pedestal\nto wear that piece"],
+	"item": ["BELT ITEMS", "Test every utility belt item", "Stand on a pedestal\nto fill your belt with it"],
 	"bot":
 	[
 		"BOT PEN",
 		"Practise your combos and matchups on a real bot",
-		"Stand on a pedestal, press %s\nto spawn a sparring bot of that Hunter"
+		"Stand on a pedestal\nto spawn a sparring bot of that Hunter"
 	],
-	"kin": ["BOKI", "Try every Boki", "Stand on a pedestal, press %s\nto bring that Boki"],
+	"kin": ["BOKI", "Try every Boki", "Stand on a pedestal\nto bring that Boki"],
 }
 const PED_GLOW := 0.3  # pedestal emission: a faint glow that keeps its colour under bloom (0.9 washed to white)
 const FALL_Y := -12.0  # [m] below this you fell off the map: back to the start (the abyss kills at -17)
@@ -205,7 +205,7 @@ func _sign(kind: String, at: Vector3) -> void:
 	var title := label(String(t[0]), col, 9.0)
 	title.position = base + Vector3(0, 1.8, 0)
 	m.add_child(title)
-	var body := label("%s\n%s" % [t[1], String(t[2]) % Settings.key_cap("interact")], Color.WHITE, 3.4)
+	var body := label("%s\n%s" % [t[1], t[2]], Color.WHITE, 3.4)
 	body.position = base
 	m.add_child(body)
 
@@ -232,7 +232,7 @@ func _duel(at: Vector3) -> void:
 	pad.position = at
 	m.add_child(pad)
 	var col := Color(String(KIND_COL["duel"]))
-	var lb := label("DUEL ROOM\nSpar a Hunter one on one\n%s to enter" % Settings.key_cap("interact"), col, 2.6)
+	var lb := label("DUEL ROOM\nSpar a Hunter one on one\nStand on the pad to enter", col, 2.6)
 	lb.position = at + Vector3(0, 2.7, 0)
 	m.add_child(lb)
 	m.duel_pad = at

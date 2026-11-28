@@ -263,7 +263,7 @@ func _aim_tick() -> void:
 	AimKit.circle(h, "x_aim", crown)
 	if phase() == AIR:
 		var hover := float(data()["hover"])
-		RecastMarker.show_at(h, "hunter_ult", leap["land"], hover - float(leap["t"]), hover, kit.col_of(data()))
+		RecastMarker.show_at(h, leap["land"], hover - float(leap["t"]), hover, kit.col_of(data()))
 
 ## Pink crackle along the rim and round her body while she hangs.
 func _air_fx(dt: float) -> void:

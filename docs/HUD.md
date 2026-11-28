@@ -301,12 +301,19 @@ nothing else on screen:
 - Checks: `--loot-full-check`; screenshots: `--loot-full-shots`.
 
 ## The recast marker (world)
-While a recast is open, a ring and a key cap sit in the world on what the key will trigger, in the ability's
-colour, shrinking and fading as the window closes. `RecastMarker.show_at` (scripts/ui/recast_marker.gd) is
-called every step by the kit; only the caster's game draws it and nothing goes over Net. In: Tenzo's Rock Hop
-(the next landing spot toward the cursor), Neve's Rink Wall (the sliding wall, E freezes it), Sparkle's Kitefall
-(the crash point) and Cinder's Flue Flight (the ground under her, for an early landing). Check:
+While a recast is open, a plain ring sits in the world on what the key will trigger, in the ability's colour,
+shrinking and fading as the window closes and pulsing faster toward the end. No key or word on it (owner rule
+2026-11-11: no keybind letters on world objects; the key lives on the ability slot, RecastCue). `RecastMarker.show_at`
+(scripts/ui/recast_marker.gd) is called every step by the kit; only the caster's game draws it and nothing goes
+over Net. In: Tenzo's Rock Hop (the next landing spot toward the cursor), Neve's Rink Wall (the sliding wall),
+Sparkle's Kitefall (the crash point) and Cinder's Flue Flight (the ground under her, for an early landing). Check:
 `--recast-marker-check`; screenshots: `--recast-marker-shots --shots-dir=<dir>`.
+
+## No key letters on world objects
+Signs, pad cards, pedestal labels and markers in the match (Label3D) never print a key cap (Settings.key_cap) or a
+key word: they say what a thing is and what to do ("Stand on the pad to fight"). The interact prompt in the HUD bar
+and the ability slots carry the keys. `--world-key-letters-check` starts the Training Grounds and the practice
+island and fails on any Label3D that holds a live key cap.
 
 ## Steal window (StealTell)
 

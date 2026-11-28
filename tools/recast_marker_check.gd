@@ -1,7 +1,7 @@
 extends RefCounted
 ## --recast-marker-check: the world marker on what an open recast triggers (scripts/ui/recast_marker.gd,
 ## DECISIONS 2026-11-08), for Tenzo's Rock Hop, Neve's Rink Wall, Sparkle's Kitefall and Cinder's Flue Flight:
-## it sits on the spot, shows the live key, fades with the window, is gone when the window closes and is the
+## it sits on the spot, carries no key or word, fades with the window, is gone when the window closes and is the
 ## caster's alone. Prints RMCHECK PASS/FAIL.
 
 var main: Node
@@ -33,13 +33,12 @@ func _marker(m: Match) -> RecastMarker:
 	return m.get_node_or_null("RecastMarker") as RecastMarker
 
 
-## The marker is up on `at` (ground plane), with the key of `action`, ring in `col`.
-func _on(label: String, m: Match, at: Vector3, action: String, col: Color) -> void:
+## The marker is up on `at` (ground plane), with no key or word on it, ring in `col`.
+func _on(label: String, m: Match, at: Vector3, col: Color) -> void:
 	var mk := _marker(m)
-	var key: String = Settings.key_cap(action)
 	var where := mk != null and Vector2(mk.position.x - at.x, mk.position.z - at.z).length() < 0.25
 	ok(label + ": the marker sits on the spot", mk != null and mk.visible and where)
-	ok(label + ": it shows the live key (" + key + ")", mk != null and mk._cap.text == key)
+	ok(label + ": it carries no key or word", mk != null and mk.find_children("*", "Label3D", true, false).is_empty())
 	var tint := mk != null and mk._mat.albedo_color.is_equal_approx(Color(col, mk._mat.albedo_color.a))
 	ok(label + ": in the ability's colour", tint)
 
@@ -71,7 +70,7 @@ func _hop() -> void:
 	ak.step(m, 1.0 / 60.0)
 	var spot: Dictionary = k.hop.spot_for(p.aim_dir(), int(k.dash_def()["hops"]) - int(k.hop.st["n"]) - 1)
 	ok("hop: the skid after a landing has the next spot", String(k.hop.st["phase"]) == "skid" and not spot.is_empty())
-	_on("hop", m, spot["at"], "dash", BreahHop.HOP_COL)
+	_on("hop", m, spot["at"], BreahHop.HOP_COL)
 	var ahead: Vector3 = spot["at"] - p.pos
 	ok("hop: it is toward the cursor", ahead.x > 0.5 and absf(ahead.z) < ahead.x)
 	_quiet("only the caster sees it: a remote hunter shows none", m, func(): p.ctrl = "remote")
@@ -94,7 +93,7 @@ func _wall() -> void:
 	var w: Dictionary = k.wall["w"]
 	var mid: Vector2 = ((w["a"] as Vector2) + (w["b"] as Vector2)) * 0.5
 	ok("wall: still sliding, so E can freeze it", k.e_recastable())
-	_on("wall", m, Vector3(mid.x, 0, mid.y), "signature", k.col_of(k.e_def()))
+	_on("wall", m, Vector3(mid.x, 0, mid.y), k.col_of(k.e_def()))
 	_quiet("wall: frozen, no marker", m, k.e_recast)
 	m.queue_free()
 	await main.get_tree().process_frame
@@ -113,7 +112,7 @@ func _kitefall() -> void:
 		t += 1.0 / 60.0
 	ak.step(m, 1.0 / 60.0)
 	ok("kitefall: she hangs, X would bring her down", k.ult.phase() == MageUlt.AIR)
-	_on("kitefall", m, k.ult.leap["land"], "hunter_ult", k.col_of(k.x_def()))
+	_on("kitefall", m, k.ult.leap["land"], k.col_of(k.x_def()))
 	_quiet("kitefall: coming down, no marker", m, k.ult.recast)
 	m.queue_free()
 	await main.get_tree().process_frame
@@ -129,7 +128,7 @@ func _flight() -> void:
 	HunterKeys.ult_pressed(p)
 	ak.step(m, 0.3)
 	ok("flight: she is flying, X would land her", k.jet.running())
-	_on("flight", m, k.ground(p.pos), "hunter_ult", k.col_of(k.x_def()))
+	_on("flight", m, k.ground(p.pos), k.col_of(k.x_def()))
 	_quiet("flight: landed, no marker", m, k.jet.recast)
 	m.queue_free()
 	await main.get_tree().process_frame

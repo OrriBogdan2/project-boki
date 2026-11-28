@@ -366,7 +366,7 @@ func _mark_next() -> void:
 		return
 	var spot := spot_for(h.aim_dir(), left_v - 1)
 	if not spot.is_empty():
-		RecastMarker.show_at(h, "dash", spot["at"], float(st["left"]), float(dd()["window"]), HOP_COL)
+		RecastMarker.show_at(h, spot["at"], float(st["left"]), float(dd()["window"]), HOP_COL)
 
 ## A landing's nudge: a small shove, no damage.
 func _nudge() -> void:
