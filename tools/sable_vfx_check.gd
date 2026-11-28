@@ -2,9 +2,9 @@ extends RefCounted
 ## --sable-vfx-check: Sable's Bola and Shadow Knife hit looks: the wrap, the tangle and the knife's stick each play
 ## their hit frame (content/vfx/thief.json) and put a lit AimKit rim on the ground that everyone sees (a ground ring
 ## means gameplay: the knife's is the blink's arrival circle, `e.ring_r` 2.7 m, kept while the dagger stays).
-## --sable-vfx-perf: the cost of those looks on a real GPU, a 4v4 fight with the kit's wrap, tangle and stick (hit
-## frame, rims and their game side) fired every SPAM_EVERY frames, far more often than a match does, against the same
-## fight with nothing fired (an upper bound: the off side skips the game side too; SABLEVFX rows; p95, ms).
+## --sable-vfx-perf: the cost of those looks on a real GPU, a 4v4 fight with the wrap, tangle and stick looks (hit
+## frame recipe and its rim; the stick leaves a stuck dagger with its arrival ring) fired every SPAM_EVERY frames,
+## far more often than a match does, against the same fight with nothing fired (SABLEVFX rows; p95, ms).
 
 const DT := 1.0 / 60.0
 const WARM := 30  # frames dropped before timing
@@ -60,6 +60,7 @@ func _check() -> void:
 	var foe: Hunter = m.hunters.filter(func(x): return x.team != pl.team)[0]
 	foe.teleport(pl.pos + Vector3(4, 0, 0))
 	var hv := HeroVfx.of(m)
+	kit._throw_bola()  # the Bola in flight (its stage), as a real throw leaves it
 	kit._wrap(foe)
 	_ring_ok("bola_wrap", ThiefKit.WRAP_RING_R)
 	kit._tangle(null, foe)
@@ -125,12 +126,18 @@ func _go(frames: int, foes: Array) -> void:
 		if spam and n % SPAM_EVERY == 0:
 			var f: Hunter = foes[(n / SPAM_EVERY) % foes.size()]
 			match (n / SPAM_EVERY) % 3:
-				0: kit._wrap(f)
-				1: kit._tangle(null, f)
-				2: kit._stick(f, f.pos)
+				0:
+					kit.vfx("bola_wrap", f.pos)
+					kit._hit_ring("bola_wrap", f.pos, ThiefKit.WRAP_RING_R)
+				1:
+					kit.vfx("bola_tangle", f.pos)
+					kit._hit_ring("bola_tangle0", f.pos, ThiefKit.TANGLE_RING_R)
+				2:
+					kit.vfx("knife_stick", f.pos, null, {"foe": true})
+					kit.knife = {"target": f, "pos": f.pos, "dir": Vector2.RIGHT}  # its ring rides it from here
+		if not spam:
+			kit.knife = {}
 		m.step(DT)
-		for f: Hunter in foes:
-			f.hp = f.max_hp  # nobody goes down: the fight stays 4v4 on both sides
 		m.cam.snap(pl.pos)
 		for h in m.hunters:
 			h.render(DT, 1.0)
