@@ -28,10 +28,7 @@ var auto := false  # opened by the planning phase (closes when the ship sets off
 var zoom := 1.0
 var center := Vector2.ZERO  # the world point (x, z) at the middle of the map
 var rect := Rect2()  # where the map is on screen
-<<<<<<< HEAD
-=======
 var cover := MapCover.new()  # while it plans the drop, the 3D behind it is not drawn
->>>>>>> origin/main
 var _taken: Array = []  # Rect2s of the names drawn this frame: a name never prints over another
 var _spots := PackedVector2Array()  # this frame's marker centres (_obstacles): place names keep off them
 var _press := Vector2.INF
@@ -58,7 +55,6 @@ func open(by_plan := false) -> void:
 	hot_line = m.biomes.hot.take_plan_line(m) if by_plan and m.biomes else ""
 	if m.skydrop and m.skydrop.planning:
 		cover.cover(m)
-
 
 
 func close() -> void:
@@ -205,11 +201,8 @@ func draw(sz: Vector2) -> void:
 	var v := view()
 	var kk := rect.size.x / v.size.x
 	var team: int = m.player.team if m.player else -9
-<<<<<<< HEAD
-=======
 	if m.skydrop == null or not m.skydrop.planning:
 		cover.uncover()  # (a map opened by hand stays open when the ship sets off)
->>>>>>> origin/main
 	c.draw_rect(Rect2(Vector2.ZERO, sz), Color(0.01, 0.02, 0.05, 0.92))  # (dark enough that the HUD behind doesn't read through)
 	# the header: the plan's title (no countdown: the minimap and the ship's own line say enough), or just the map
 	var planning: bool = m.skydrop != null and m.skydrop.planning

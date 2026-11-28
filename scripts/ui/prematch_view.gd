@@ -11,8 +11,7 @@ const DIGITS_MIN := 48         # px, the smallest countdown digits
 const PULSE_RATE := 0.012      # radians per ms of the last-seconds throb (about 2 beats a second)
 const PULSE_GROW := 0.12       # the digits swell by this much at the top of a beat
 const TICK_FROM := 5.0        # s left on your turn when the countdown ticks each second
-<<<<<<< HEAD
-const PULSE_FROM := 3.0       # s left on your turn when the countdown throbs red
+const PULSE_FROM := 5.0       # s left on your turn when the countdown throbs red (the last 5 s, same as the ticks)
 const COLUMNS := 4            # roster tiles per row
 const TILE_FRAC := 0.085      # a roster tile's portrait as a fraction of the window height
 const TILE_MIN := 60.0        # px, the smallest roster portrait
@@ -27,9 +26,6 @@ const PICKING_FILL := Color(0.36, 0.3, 0.14)    # the squad chip of whoever is p
 const SHADE := Color(0.05, 0.035, 0.08)         # the dark the splash fades into under the roster and the text
 const DIM := Color(0.55, 0.55, 0.6, 0.8)        # a roster tile you can't pick (shut or taken)
 const STAGE_PX := Vector2(200, 248)             # px, your pick's 3D stage over the hero (the camera keeps height)
-=======
-const PULSE_FROM := 5.0       # s left on your turn when the countdown throbs red (the last 5 s, same as the ticks)
->>>>>>> origin/main
 
 var pm: Prematch
 var voice := VoiceChat.new()

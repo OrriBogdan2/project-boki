@@ -504,7 +504,6 @@
 "long_line": 38,
 "semicolon": 39
 },
-<<<<<<< HEAD
 "scripts/match/models_bake.gd": {
 "nested_ternary": 1
 },
@@ -522,12 +521,6 @@
 },
 "scripts/match/models_kin.gd": {
 "long_line": 1
-=======
-"scripts/match/models.gd": {
-"long_line": 258,
-"nested_ternary": 10,
-"semicolon": 247
->>>>>>> origin/main
 },
 "scripts/match/music_dir.gd": {
 "nested_ternary": 1
