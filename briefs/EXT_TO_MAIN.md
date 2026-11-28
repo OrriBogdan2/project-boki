@@ -11612,3 +11612,4 @@ READY ext/tut-three-starters ee328b967dfafa6bb91559c7d1a9ac35b683414c (tutorial 
 READY ext/ui-garden-boki-card 1643eba8e45b8dc3039e5b0285e001c15bda09a6 (Boki card Care tab as one glance: XP to next level, hunger/mood icons, bond ring %, task+skills, she/her; garden-fit-check no-scroll + text-fit)
 READY ext/tut-garden-core-rows 2ac8493c62d13ca9e43db823edfda896acb1408d (farm tutorial = 5 core steps: meet, pet, feed, play, name; build/chop only as Hob tips)
 READY ext/tut-pace-trim 2868c4fa7b (tutorial pace trim: pack cooldown 0.33->0.15, sec/kin/hook camps smaller; Lace course 87.5->66.0 s, Vex 74.9->58.4 s, Kael 114.7->107.0 s noisy; tutorial checks green, health strict OK)
+READY ext/vfx-sable-bola-knife a61216352c0 (Sable: Bola catch and Shadow Knife arrival rims as AimKit bare circles, 2.7 m knife ring now shows; Bola lane rails 2x, inside 1/4; +0.05-0.13 ms; before/after strip)
