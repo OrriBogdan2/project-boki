@@ -27,32 +27,44 @@ const LOOPS := [true, true, true, false, false, true, false, false]
 ## 1/s: how fast a pivot follows its target in each state
 const RATE := [8.0, 14.0, 14.0, 40.0, 45.0, 12.0, 60.0, 30.0]
 
-const LUNGE_S := 0.2              # s: a skitter's lunge, then LUNGE_REC of recovery
-const LUNGE_REC := 0.45           # s
-const RECOVER_S := {"spit": 0.5, "volley": 0.6, "slam": 0.8}      # s: follow-through after the blow, by attack
-const DEATH_S := 0.32             # s: the death move, then the monster is gone
-const RUN_SPEED := 3.6            # m/s: above this the run table plays
-const RUN_AMP := 1.4              # run = walk x this when a kind has no run table
+const LUNGE_S := 0.2  # s: a skitter's lunge, then LUNGE_REC of recovery
+const LUNGE_REC := 0.45  # s
+const RECOVER_S := {"spit": 0.5, "volley": 0.6, "slam": 0.8}  # s: follow-through after the blow, by attack
+const DEATH_S := 0.32  # s: the death move, then the monster is gone
+const RUN_SPEED := 3.6  # m/s: above this the run table plays
+const RUN_AMP := 1.4  # run = walk x this when a kind has no run table
 ## s per idle loop
 const IDLE_S := {"brute": 5.0, "spitter": 3.0, "skitter": 2.5, "bomber": 2.2, "sentinel": 4.0, "glimmer": 2.0}
-const STAGGER_S := 2.0            # s per stagger loop
+const STAGGER_S := 2.0  # s per stagger loop
 ## m of ground per gait cycle: Mob.anim advances with the distance walked, so the feet keep pace with the floor
 const STRIDE_M := {"skitter": 1.8, "spitter": 2.3, "brute": 2.8, "bomber": 2.8, "sentinel": 1.0, "glimmer": 2.3}
-const HIT_RATE := 30.0            # 1/s: pivots follow this fast while the hit-react layer plays
-const FLINCH_S := 0.22            # s: the hit-react plays over idle, walk and run for this long after a hit
-const FAR_M := 30.0               # m from the camera focus: beyond this the body is not posed
+const HIT_RATE := 30.0  # 1/s: pivots follow this fast while the hit-react layer plays
+const FLINCH_S := 0.22  # s: the hit-react plays over idle, walk and run for this long after a hit
+const FAR_M := 30.0  # m from the camera focus: beyond this the body is not posed
 const SAMPLES := 32
-const STRIDE := 10                # floats per pivot in Rig.acc: rx ry rz px py pz sx sy sz wy
-const CHANS := {"rx": [0], "ry": [1], "rz": [2], "px": [3], "py": [4], "pz": [5], "sx": [6], "sy": [7], "sz": [8],
-	"sxz": [6, 8], "sa": [6, 7, 8], "wy": [9]}
+const STRIDE := 10  # floats per pivot in Rig.acc: rx ry rz px py pz sx sy sz wy
+const CHANS := {
+	"rx": [0],
+	"ry": [1],
+	"rz": [2],
+	"px": [3],
+	"py": [4],
+	"pz": [5],
+	"sx": [6],
+	"sy": [7],
+	"sz": [8],
+	"sxz": [6, 8],
+	"sa": [6, 7, 8],
+	"wy": [9]
+}
 ## per channel: which of rotation x, y, z, position, scale, spin a pivot needs. Rotation is per axis so an axis no
 ## track drives is left alone: Mob.render leans and shivers Body on x and z, and a Body ry track must not undo that.
 const KIND_BIT := [1, 16, 32, 2, 2, 2, 4, 4, 4, 8]
 const ROT_BITS := 1 | 16 | 32 | 8
 
-const SK_A := ["Leg0-1", "Leg2-1", "Leg11"]            # skitter tripods
+const SK_A := ["Leg0-1", "Leg2-1", "Leg11"]  # skitter tripods
 const SK_B := ["Leg01", "Leg21", "Leg1-1"]
-const SK_AS := ["-Leg0-1", "-Leg2-1", "Leg11"]         # the same legs, signed so the left side mirrors
+const SK_AS := ["-Leg0-1", "-Leg2-1", "Leg11"]  # the same legs, signed so the left side mirrors
 const SK_BS := ["Leg01", "Leg21", "-Leg1-1"]
 const SK_ALL := ["Leg0-1", "Leg2-1", "Leg11", "Leg01", "Leg21", "Leg1-1"]
 const SK_ALLS := ["-Leg0-1", "-Leg2-1", "Leg11", "Leg01", "Leg21", "-Leg1-1"]
@@ -61,20 +73,23 @@ const LEAF_A := ["Leaf0", "Leaf2"]
 const LEAF_B := ["Leaf1", "Leaf3"]
 const LEAVES := ["Leaf0", "Leaf1", "Leaf2", "Leaf3"]
 const ARMS := ["ArmL", "ArmR"]
-const ARMS_Z := ["ArmL", "-ArmR"]                      # outward/inward swing, mirrored
+const ARMS_Z := ["ArmL", "-ArmR"]  # outward/inward swing, mirrored
 const LEGS := ["LegL", "LegR"]
 const FINS := ["FinL", "-FinR"]
 const EARS := ["EarL", "EarR"]
 
 const MOVES := {
-	"skitter": {
-		"idle": [
+	"skitter":
+	{
+		"idle":
+		[
 			[SK_A, "ry", [0, 0.04, 0.5, -0.04, 1, 0.04], 0.0],
 			[SK_B, "ry", [0, 0.04, 0.5, -0.04, 1, 0.04], 0.5],
 			[JAWS, "ry", [0, 0.25, 0.5, 0.31, 1, 0.25], 0.0],
 			[["Body"], "py", [0, 0, 0.5, 0.012, 1, 0], 0.0],
 		],
-		"walk": [
+		"walk":
+		[
 			[SK_A, "ry", [0, 0, 0.25, 0.45, 0.75, -0.45, 1, 0], 0.0],
 			[SK_B, "ry", [0, 0, 0.25, 0.45, 0.75, -0.45, 1, 0], 0.5],
 			[SK_AS, "rz", [0, 0.35, 0.25, 0, 0.75, 0, 1, 0.35], 0.0],
@@ -82,48 +97,56 @@ const MOVES := {
 			[JAWS, "ry", [0, 0.25, 0.5, 0.33, 1, 0.25], 0.0],
 			[["Body"], "py", [0, 0, 0.25, 0.05, 0.5, 0, 0.75, 0.05, 1, 0], 0.0],
 		],
-		"windup": [
+		"windup":
+		[
 			[SK_ALLS, "rz", [0, 0, 1, -0.3], 0.0],
 			[SK_ALL, "rx", [0, 0, 1, 0.3], 0.0],
 			[JAWS, "ry", [0, 0.25, 1, 0.75], 0.0],
 			[["Body"], "py", [0, 0, 1, -0.05], 0.0],
 			[SK_A, "ry", [0, 0, 0.6, 0, 0.7, 0.1, 0.8, -0.1, 0.9, 0.1, 1, -0.1], 0.0],
 		],
-		"strike": [
+		"strike":
+		[
 			[JAWS, "ry", [0, 0.85, 0.3, 0.9, 0.4, 0.15, 1, 0.25], 0.0],
 			[SK_ALL, "rx", [0, -0.55, 0.31, -0.6, 0.5, 0.1, 1, 0], 0.0],
 			[SK_ALLS, "rz", [0, -0.3, 0.31, -0.1, 1, 0], 0.0],
 			[["Body"], "py", [0, 0, 0.15, 0.14, 0.31, 0.04, 0.45, 0, 1, 0], 0.0],
 		],
-		"stagger": [
+		"stagger":
+		[
 			[SK_ALLS, "rz", [0, -0.45, 0.5, -0.35, 1, -0.45], 0.0],
 			[SK_ALL, "rx", [0, 0.15, 0.5, 0.25, 1, 0.15], 0.0],
 			[JAWS, "ry", [0, 0.55, 0.5, 0.65, 1, 0.55], 0.0],
 			[["Body"], "py", [0, -0.07, 0.5, -0.06, 1, -0.07], 0.0],
 			[SK_A, "ry", [0, 0, 0.125, 0.2, 0.25, 0, 0.375, -0.2, 0.5, 0, 0.625, 0.2, 0.75, 0, 0.875, -0.2, 1, 0], 0.0],
 		],
-		"flinch": [
+		"flinch":
+		[
 			[JAWS, "ry", [0, 0.25, 0.3, 0.9, 1, 0.25], 0.0],
 			[SK_ALLS, "rz", [0, 0, 0.3, 0.45, 1, 0], 0.0],
 			[["Body"], "py", [0, 0, 0.3, -0.04, 1, 0], 0.0],
 			[["Body"], "ry", [0, 0, 0.3, 0.15, 1, 0], 0.0],
 		],
-		"death": [
+		"death":
+		[
 			[SK_ALLS, "rz", [0, 0, 0.5, 1.1, 1, 1.4], 0.0],
 			[SK_ALL, "rx", [0, 0, 1, 0.4], 0.0],
 			[JAWS, "ry", [0, 0.25, 0.3, 1.0, 1, 0.9], 0.0],
 			[["Body"], "py", [0, 0, 0.3, 0.1, 1, 0], 0.0],
 		],
 	},
-	"spitter": {
-		"idle": [
+	"spitter":
+	{
+		"idle":
+		[
 			[["Bulb"], "sy", [0, -0.1, 0.5, -0.07, 1, -0.1], 0.0],
 			[["Bulb"], "sxz", [0, 0, 0.5, 0.03, 1, 0], 0.0],
 			[["Body"], "ry", [0, 0, 0.25, 0.05, 0.75, -0.05, 1, 0], 0.0],
 			[LEAF_A, "rz", [0, 0, 0.25, 0.08, 0.75, -0.08, 1, 0], 0.0],
 			[LEAF_B, "rz", [0, 0, 0.25, 0.08, 0.75, -0.08, 1, 0], 0.4],
 		],
-		"walk": [
+		"walk":
+		[
 			[["Body"], "py", [0, 0, 0.5, 0.12, 1, 0], 0.0],
 			[["Bulb"], "rx", [0, 0.12, 0.5, -0.1, 1, 0.12], 0.0],
 			[["Bulb"], "sy", [0, -0.12, 0.15, -0.2, 0.5, -0.05, 1, -0.12], 0.0],
@@ -131,49 +154,57 @@ const MOVES := {
 			[LEAF_A, "rz", [0, 0, 0.25, 0.2, 0.75, -0.2, 1, 0], 0.0],
 			[LEAF_B, "rz", [0, 0, 0.25, 0.2, 0.75, -0.2, 1, 0], 0.5],
 		],
-		"windup": [
+		"windup":
+		[
 			[["Bulb"], "sy", [0, -0.1, 1, 0.3], 0.0],
 			[["Bulb"], "sxz", [0, 0, 1, -0.15], 0.0],
 			[["Bulb"], "rx", [0, 0, 1, -0.5], 0.0],
 			[LEAVES, "rz", [0, 0, 1, 0.45], 0.0],
 			[["Body"], "py", [0, 0, 1, 0.04], 0.0],
 		],
-		"strike": [
+		"strike":
+		[
 			[["Bulb"], "rx", [0, -0.5, 0.12, 0.7, 0.4, 0.2, 1, 0], 0.0],
 			[["Bulb"], "sy", [0, 0.3, 0.12, -0.35, 0.5, -0.1, 1, -0.1], 0.0],
 			[["Bulb"], "sxz", [0, -0.15, 0.12, 0.2, 1, 0], 0.0],
 			[LEAVES, "rz", [0, 0.45, 0.12, -0.25, 0.5, 0.1, 1, 0], 0.0],
 			[["Body"], "py", [0, 0.04, 0.12, -0.05, 1, 0], 0.0],
 		],
-		"stagger": [
+		"stagger":
+		[
 			[["Bulb"], "rx", [0, 0.55, 0.5, 0.7, 1, 0.55], 0.0],
 			[["Bulb"], "sy", [0, -0.25, 0.5, -0.2, 1, -0.25], 0.0],
 			[LEAF_A, "rz", [0, 0.7, 0.5, 0.8, 1, 0.7], 0.0],
 			[LEAF_B, "rz", [0, 0.7, 0.5, 0.8, 1, 0.7], 0.5],
 			[["Body"], "ry", [0, 0, 0.25, 0.12, 0.75, -0.12, 1, 0], 0.0],
 		],
-		"flinch": [
+		"flinch":
+		[
 			[["Bulb"], "sy", [0, -0.1, 0.3, -0.35, 1, -0.1], 0.0],
 			[["Bulb"], "sxz", [0, 0, 0.3, 0.2, 1, 0], 0.0],
 			[LEAVES, "rz", [0, 0, 0.3, 0.6, 1, 0], 0.0],
 			[["Body"], "ry", [0, 0, 0.3, 0.2, 1, 0], 0.0],
 		],
-		"death": [
+		"death":
+		[
 			[["Bulb"], "rx", [0, 0, 1, 1.0], 0.0],
 			[["Bulb"], "sy", [0, -0.1, 1, -0.6], 0.0],
 			[LEAVES, "rz", [0, 0, 1, 1.3], 0.0],
 			[["Body"], "py", [0, 0, 1, -0.1], 0.0],
 		],
 	},
-	"brute": {
-		"idle": [
+	"brute":
+	{
+		"idle":
+		[
 			[["Torso"], "sxz", [0, 0, 0.5, 0.025, 1, 0], 0.0],
 			[["Torso"], "sy", [0, 0, 0.5, 0.015, 1, 0], 0.0],
 			[["Head"], "ry", [0, 0, 0.25, 0.25, 0.75, -0.25, 1, 0], 0.0],
 			[ARMS_Z, "rz", [0, -0.15, 1, -0.15], 0.0],
 			[ARMS, "rx", [0, 0, 0.5, 0.05, 1, 0], 0.0],
 		],
-		"walk": [
+		"walk":
+		[
 			[LEGS, "rx", [0, 0, 0.25, 0.5, 0.75, -0.5, 1, 0], 0.0],
 			[["-ArmL", "ArmR"], "rx", [0, 0, 0.25, 0.3, 0.75, -0.3, 1, 0], 0.0],
 			[ARMS_Z, "rz", [0, -0.15, 1, -0.15], 0.0],
@@ -181,7 +212,8 @@ const MOVES := {
 			[["Torso"], "rx", [0, -0.12, 1, -0.12], 0.0],
 			[["Body"], "py", [0, 0.06, 0.25, 0, 0.5, 0.06, 0.75, 0, 1, 0.06], 0.0],
 		],
-		"windup": [
+		"windup":
+		[
 			[ARMS, "rx", [0, 0, 1, 2.7], 0.0],
 			[ARMS_Z, "rz", [0, -0.15, 1, -0.35], 0.0],
 			[["Torso"], "rx", [0, 0, 1, 0.15], 0.0],
@@ -190,7 +222,8 @@ const MOVES := {
 			[["Body"], "py", [0, 0, 1, -0.1], 0.0],
 			[["Head"], "rx", [0, 0, 1, -0.2], 0.0],
 		],
-		"strike": [
+		"strike":
+		[
 			[ARMS, "rx", [0, 2.7, 0.12, 0.9, 0.5, 0.9, 1, 0], 0.0],
 			[ARMS_Z, "rz", [0, -0.35, 0.12, -0.15, 1, -0.15], 0.0],
 			[["Torso"], "rx", [0, 0.15, 0.12, 0.45, 0.5, 0.3, 1, 0], 0.0],
@@ -198,7 +231,8 @@ const MOVES := {
 			[["Head"], "rx", [0, -0.2, 0.12, 0.3, 1, 0], 0.0],
 			[LEGS, "rx", [0, -0.1, 0.12, 0.35, 1, 0], 0.0],
 		],
-		"stagger": [
+		"stagger":
+		[
 			[ARMS, "rx", [0, 0.15, 0.5, 0.2, 1, 0.15], 0.0],
 			[["Torso"], "rx", [0, 0.25, 0.5, 0.35, 1, 0.25], 0.0],
 			[["Head"], "rx", [0, 0.4, 0.5, 0.5, 1, 0.4], 0.0],
@@ -206,13 +240,15 @@ const MOVES := {
 			[["Body"], "py", [0, -0.12, 0.5, -0.1, 1, -0.12], 0.0],
 			[LEGS, "rx", [0, 0.2, 0.5, 0.26, 1, 0.2], 0.0],
 		],
-		"flinch": [
+		"flinch":
+		[
 			[["Torso"], "rx", [0, 0, 0.3, -0.25, 1, 0], 0.0],
 			[["Head"], "rx", [0, 0, 0.3, -0.4, 1, 0], 0.0],
 			[ARMS, "rx", [0, 0, 0.3, 0.5, 1, 0], 0.0],
 			[ARMS_Z, "rz", [0, -0.15, 0.3, -0.55, 1, -0.15], 0.0],
 		],
-		"death": [
+		"death":
+		[
 			[["Torso"], "rx", [0, 0, 1, 0.8], 0.0],
 			[["Head"], "rx", [0, 0, 1, 0.8], 0.0],
 			[ARMS, "rx", [0, 0, 1, 0.5], 0.0],
@@ -220,90 +256,130 @@ const MOVES := {
 			[["Body"], "py", [0, 0, 1, -0.4], 0.0],
 		],
 	},
-	"bomber": {
-		"idle": [
+	"bomber":
+	{
+		"idle":
+		[
 			[["Puff"], "sa", [0, 0, 0.5, 0.04, 1, 0], 0.0],
 			[["Body"], "py", [0, 0, 0.5, 0.03, 1, 0], 0.0],
 			[FINS, "rz", [0, 0.3, 0.5, -0.3, 1, 0.3], 0.0],
-			[["Spark"], "sa", [
-				0, -0.15, 0.1, 0.2, 0.2, -0.1, 0.3, 0.15, 0.4, -0.15, 0.5, 0.2, 0.6, -0.1, 0.7, 0.15, 0.8, -0.15,
-				0.9, 0.2, 1, -0.15
-			], 0.0],
+			[
+				["Spark"],
+				"sa",
+				[
+					0,
+					-0.15,
+					0.1,
+					0.2,
+					0.2,
+					-0.1,
+					0.3,
+					0.15,
+					0.4,
+					-0.15,
+					0.5,
+					0.2,
+					0.6,
+					-0.1,
+					0.7,
+					0.15,
+					0.8,
+					-0.15,
+					0.9,
+					0.2,
+					1,
+					-0.15
+				],
+				0.0
+			],
 		],
-		"walk": [
+		"walk":
+		[
 			[["Body"], "py", [0, 0, 0.25, 0.1, 0.5, 0, 0.75, 0.1, 1, 0], 0.0],
 			[["Puff"], "sy", [0, -0.06, 0.25, 0.05, 0.5, -0.06, 0.75, 0.05, 1, -0.06], 0.0],
 			[FINS, "rz", [0, 0.5, 0.25, -0.5, 0.5, 0.5, 0.75, -0.5, 1, 0.5], 0.0],
 			[["Puff"], "rx", [0, -0.1, 1, -0.1], 0.0],
 			[["Spark"], "sa", [0, -0.1, 0.25, 0.25, 0.5, -0.1, 0.75, 0.25, 1, -0.1], 0.0],
 		],
-		"windup": [
+		"windup":
+		[
 			[["Puff"], "sa", [0, 0, 0.55, 0.25, 0.65, 0.2, 0.75, 0.32, 0.85, 0.28, 0.95, 0.42, 1, 0.45], 0.0],
 			[FINS, "rz", [0, 0.35, 0.2, -0.4, 0.4, 0.5, 0.6, -0.6, 0.8, 0.7, 1, -0.8], 0.0],
 			[["Spark"], "sa", [0, -0.15, 1, 0.9], 0.0],
 			[["Body"], "py", [0, 0, 1, 0.06], 0.0],
 		],
-		"stagger": [
+		"stagger":
+		[
 			[["Puff"], "sy", [0, -0.2, 0.5, -0.15, 1, -0.2], 0.0],
 			[["Puff"], "sxz", [0, 0.1, 0.5, 0.13, 1, 0.1], 0.0],
 			[FINS, "rz", [0, -0.8, 0.5, -0.9, 1, -0.8], 0.0],
 			[["Spark"], "sa", [0, -0.5, 0.5, -0.4, 1, -0.5], 0.0],
 			[["Body"], "py", [0, -0.05, 0.5, -0.04, 1, -0.05], 0.0],
 		],
-		"flinch": [
+		"flinch":
+		[
 			[["Puff"], "sa", [0, 0, 0.3, -0.2, 1, 0], 0.0],
 			[FINS, "rz", [0, 0, 0.3, 1.0, 1, 0], 0.0],
 			[["Spark"], "sa", [0, 0, 0.3, 0.6, 1, 0], 0.0],
 			[["Body"], "py", [0, 0, 0.3, 0.05, 1, 0], 0.0],
 		],
-		"death": [
+		"death":
+		[
 			[["Puff"], "sa", [0, 0.45, 0.25, 0.9, 1, -0.5], 0.0],
 			[FINS, "rz", [0, 0.9, 1, 1.6], 0.0],
 			[["Spark"], "sa", [0, 0.9, 0.3, 2.0, 1, 0], 0.0],
 			[["Body"], "py", [0, 0.06, 0.3, 0.2, 1, 0], 0.0],
 		],
 	},
-	"sentinel": {
-		"idle": [
+	"sentinel":
+	{
+		"idle":
+		[
 			[["Crystal"], "py", [0, 0, 0.5, 0.08, 1, 0], 0.0],
 			[["Crystal"], "wy", [0, 1.5, 1, 1.5], 0.0],
 			[["Shards"], "wy", [0, -2.5, 1, -2.5], 0.0],
 			[["Crystal"], "sa", [0, 0, 0.5, 0.03, 1, 0], 0.0],
 			[["Crystal"], "rz", [0, 0, 0.25, 0.05, 0.75, -0.05, 1, 0], 0.0],
 		],
-		"walk": [
+		"walk":
+		[
 			[["Crystal"], "rx", [0, 0, 0.25, 0.2, 0.75, -0.2, 1, 0], 0.0],
 			[["Crystal"], "wy", [0, 3, 1, 3], 0.0],
 			[["Shards"], "wy", [0, -5, 1, -5], 0.0],
 			[["Body"], "py", [0, 0, 0.5, 0.02, 1, 0], 0.0],
 		],
-		"windup": [
+		"windup":
+		[
 			[["Crystal"], "py", [0, 0, 1, 0.25], 0.0],
 			[["Crystal"], "wy", [0, 1.5, 1, 11.5], 0.0],
 			[["Shards"], "wy", [0, -2.5, 1, -14.5], 0.0],
 			[["Crystal"], "sa", [0, 0, 1, 0.12], 0.0],
 			[["Crystal"], "rx", [0, 0, 1, -0.2], 0.0],
 		],
-		"strike": [
+		"strike":
+		[
 			[["Crystal"], "py", [0, 0.25, 0.15, 0.1, 1, 0], 0.0],
 			[["Crystal"], "wy", [0, 11.5, 0.3, 6, 1, 1.5], 0.0],
 			[["Shards"], "wy", [0, -14.5, 0.3, -8, 1, -2.5], 0.0],
 			[["Crystal"], "sa", [0, 0.12, 0.1, -0.1, 0.4, 0.03, 1, 0], 0.0],
 			[["Crystal"], "rx", [0, -0.2, 0.1, 0.35, 1, 0], 0.0],
 		],
-		"stagger": [
+		"stagger":
+		[
 			[["Crystal"], "py", [0, -0.25, 0.5, -0.22, 1, -0.25], 0.0],
 			[["Crystal"], "wy", [0, 0.25, 1, 0.25], 0.0],
 			[["Shards"], "wy", [0, -0.3, 1, -0.3], 0.0],
 			[["Crystal"], "rz", [0, 0.25, 0.5, 0.3, 1, 0.25], 0.0],
 		],
-		"flinch": [
+		"flinch":
+		[
 			[["Crystal"], "rz", [0, 0, 0.3, 0.3, 1, 0], 0.0],
 			[["Crystal"], "py", [0, 0, 0.3, -0.1, 1, 0], 0.0],
 			[["Shards"], "wy", [0, -2.5, 0.3, -8, 1, -2.5], 0.0],
 			[["Crystal"], "wy", [0, 1.5, 1, 1.5], 0.0],
 		],
-		"death": [
+		"death":
+		[
 			[["Crystal"], "py", [0, 0, 0.3, 0.3, 1, -0.6], 0.0],
 			[["Crystal"], "wy", [0, 8, 1, 0], 0.0],
 			[["Shards"], "sa", [0, 0, 1, 1.2], 0.0],
@@ -311,30 +387,36 @@ const MOVES := {
 			[["Body"], "py", [0, 0, 1, -0.15], 0.0],
 		],
 	},
-	"glimmer": {
-		"idle": [
+	"glimmer":
+	{
+		"idle":
+		[
 			[["Body"], "py", [0, 0, 0.5, 0.03, 1, 0], 0.0],
 			[EARS, "rx", [0, 0.25, 0.5, 0.35, 1, 0.25], 0.0],
 			[["EarL"], "rz", [0, 0, 0.9, 0, 0.95, 0.2, 1, 0], 0.0],
 			[["EarR"], "rz", [0, 0, 0.9, 0, 0.95, -0.2, 1, 0], 0.4],
 		],
-		"walk": [
+		"walk":
+		[
 			[["Body"], "py", [0, 0, 0.25, 0.16, 0.5, 0, 0.75, 0.16, 1, 0], 0.0],
 			[EARS, "rx", [0, 0.5, 0.25, 0.1, 0.5, 0.5, 0.75, 0.1, 1, 0.5], 0.0],
 			[["EarL"], "rz", [0, -0.1, 0.5, 0.1, 1, -0.1], 0.0],
 			[["EarR"], "rz", [0, 0.1, 0.5, -0.1, 1, 0.1], 0.0],
 		],
-		"stagger": [
+		"stagger":
+		[
 			[EARS, "rx", [0, 0.9, 0.5, 1.0, 1, 0.9], 0.0],
 			[["EarL"], "rz", [0, -0.3, 0.5, -0.4, 1, -0.3], 0.0],
 			[["EarR"], "rz", [0, 0.3, 0.5, 0.4, 1, 0.3], 0.0],
 			[["Body"], "py", [0, -0.05, 0.5, -0.04, 1, -0.05], 0.0],
 		],
-		"flinch": [
+		"flinch":
+		[
 			[EARS, "rx", [0, 0.25, 0.3, 0.9, 1, 0.25], 0.0],
 			[["Body"], "py", [0, 0, 0.3, 0.08, 1, 0], 0.0],
 		],
-		"death": [
+		"death":
+		[
 			[EARS, "rx", [0, 0.25, 1, 1.2], 0.0],
 			[["Body"], "py", [0, 0, 0.3, 0.2, 1, -0.1], 0.0],
 		],
@@ -345,6 +427,7 @@ const MOVES := {
 ## a track being [targets (slot * STRIDE + channel), signs, curve, phase offset].
 static var _baked := {}
 
+
 class Rig:
 	var nodes: Array[Node3D] = []
 	var rest_r := PackedVector3Array()
@@ -352,22 +435,26 @@ class Rig:
 	var mask := PackedInt32Array()
 	var acc := PackedFloat32Array()
 	var def: Dictionary
-	var desync := 0.0      # per-monster offset so a camp does not breathe in step
-	var hit_t := 0.0       # s left of the hit-react layer
+	var desync := 0.0  # per-monster offset so a camp does not breathe in step
+	var hit_t := 0.0  # s left of the hit-react layer
 	var last_flash := 0.0  # Ent.flash_t last frame: a rise is a new hit
+
 
 static func base_kind(kind: String) -> String:
 	return "brute" if kind == "warden" else kind
 
+
 ## True when this kind has keyed moves.
 static func has_kind(kind: String) -> bool:
 	return MOVES.has(base_kind(kind))
+
 
 ## The tracks a kind plays in a state (run falls back to walk); empty when the kind has none.
 static func tracks(kind: String, state: int) -> Array:
 	var d := table(kind)
 	var t: Array = d["states"][state]
 	return d["states"][WALK] if t.is_empty() and state == RUN else t
+
 
 ## Which states the kind can be in: a monster with no attack never winds up or strikes.
 static func state_needed(kind: String, state: int) -> bool:
@@ -377,6 +464,7 @@ static func state_needed(kind: String, state: int) -> bool:
 	if state == WINDUP:
 		return atk != "none"
 	return atk == "lunge" or RECOVER_S.has(atk)
+
 
 static func table(kind: String) -> Dictionary:
 	var k := base_kind(kind)
@@ -407,6 +495,7 @@ static func table(kind: String) -> Dictionary:
 	_baked[k] = d
 	return d
 
+
 ## Keys to SAMPLES + 1 evenly spaced values: eased between keys on loops, straight on one-shots.
 static func _bake(keys: Array, loop: bool) -> PackedFloat32Array:
 	var c := PackedFloat32Array()
@@ -420,45 +509,63 @@ static func _bake(keys: Array, loop: bool) -> PackedFloat32Array:
 		c.append(lerpf(float(keys[j + 1]), float(keys[j + 3]), smoothstep(0.0, 1.0, f) if loop else f))
 	return c
 
+
 # ------------------------------------------------------------------ state and phase
+
 
 ## The same fraction the ground telegraph fills with: 0 as the wind-up starts, 1 as the blow lands.
 static func windup_k(st_t: float, windup: float) -> float:
 	return clampf(1.0 - st_t / windup, 0.0, 1.0)
 
+
 ## How far through the blow and its follow-through the monster is, 0..1.
 static func strike_k(attack: String, st: String, st_t: float) -> float:
 	if attack == "lunge":
 		var total := LUNGE_S + LUNGE_REC
-		var left := st_t + (LUNGE_REC if st == "lunge" else 0.0)       # the lunge leaves its recovery still to run
+		var left := st_t + (LUNGE_REC if st == "lunge" else 0.0)  # the lunge leaves its recovery still to run
 		return clampf(1.0 - left / total, 0.0, 1.0)
 	var len_s := float(RECOVER_S.get(attack, 0.0))
 	return clampf(1.0 - st_t / len_s, 0.0, 1.0) if len_s > 0.0 else 0.0
 
+
 static func state_of(mb: Mob) -> int:
-	if mb.dead: return DEATH
-	if mb.stagger_t > 0.0 or mb.stun_t > 0.0: return STAGGER
-	if mb.st == "windup": return WINDUP
-	if mb.st == "lunge" or mb.st == "recover": return STRIKE
+	if mb.dead:
+		return DEATH
+	if mb.stagger_t > 0.0 or mb.stun_t > 0.0:
+		return STAGGER
+	if mb.st == "windup":
+		return WINDUP
+	if mb.st == "lunge" or mb.st == "recover":
+		return STRIKE
 	var spd := Vector2(mb.vel.x, mb.vel.z).length()
-	if spd <= 0.3: return IDLE
+	if spd <= 0.3:
+		return IDLE
 	return RUN if spd > RUN_SPEED else WALK
+
 
 static func phase_of(mb: Mob, state: int, desync: float) -> float:
 	var k := base_kind(mb.mkind)
 	match state:
-		IDLE: return fposmod(float(mb.m.time) / float(IDLE_S.get(k, 2.5)) + desync, 1.0)
-		WALK, RUN: return fposmod(mb.anim / TAU, 1.0)
-		WINDUP: return windup_k(mb.st_t, float(mb.md["windup"]))
-		STRIKE: return strike_k(String(mb.md["attack"]), mb.st, mb.st_t)
-		STAGGER: return fposmod(float(mb.m.time) / STAGGER_S + desync, 1.0)
+		IDLE:
+			return fposmod(float(mb.m.time) / float(IDLE_S.get(k, 2.5)) + desync, 1.0)
+		WALK, RUN:
+			return fposmod(mb.anim / TAU, 1.0)
+		WINDUP:
+			return windup_k(mb.st_t, float(mb.md["windup"]))
+		STRIKE:
+			return strike_k(String(mb.md["attack"]), mb.st, mb.st_t)
+		STAGGER:
+			return fposmod(float(mb.m.time) / STAGGER_S + desync, 1.0)
 	return clampf(mb.death_t / DEATH_S, 0.0, 1.0)
 
+
 # ------------------------------------------------------------------ posing
+
 
 ## A named pivot under the model's Body (Body itself included); null when the model lacks it.
 static func pivot(body: Node, nm: String) -> Node3D:
 	return body as Node3D if nm == "Body" else body.find_child(nm, true, false) as Node3D
+
 
 static func _rig(model: Node3D, kind: String) -> Rig:
 	if model.has_meta("mob_rig"):
@@ -476,6 +583,7 @@ static func _rig(model: Node3D, kind: String) -> Rig:
 	rig.desync = float(absi(hash(kind + str(model.get_instance_id()))) % 1000) / 1000.0
 	model.set_meta("mob_rig", rig)
 	return rig
+
 
 ## Adds a state's tracks, sampled at phase `ph`, into the pivot accumulator.
 static func _layer(acc: PackedFloat32Array, trs: Array, ph: float, loop: bool, amp: float) -> void:
