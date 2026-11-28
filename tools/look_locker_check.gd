@@ -180,11 +180,14 @@ func _model3d() -> void:
 		)
 		var hollow := locker.model.find_child("VoidHead", true, false) as MeshInstance3D
 		ok(hollow != null and hollow.is_visible_in_tree(), "sex %d keeps the void head over it" % sex)
-		# (the skinned shell's mesh sits in the skin's space, at rest: the egg as fitted, a little ahead)
+		# (the skinned shell's mesh sits in the skin's space, at rest: centred on the painted egg, its front (-Z) a
+		# little ahead of the paint)
 		var skel := WardenGlb.skeleton(w)
-		var at := WardenGlb.model_xf(locker.model, skel) * hollow.mesh.get_aabb()
-		var want: Vector3 = ((EmptyGlb.EGG[sex][0] as Vector3) + EmptyGlb.EGG_FRONT) * (w as Node3D).scale.y
-		ok(at.get_center().distance_to(want) < HOOD_TOL, "sex %d: the void head sits in the hood" % sex)
+		var at := hollow.mesh.get_aabb()
+		var want: Vector3 = EmptyGlb.EGG[sex][0]
+		var c := at.get_center()
+		var got := Vector3(c.x, c.y, at.position.z + EmptyGlb.EGG_AHEAD)
+		ok(got.distance_to(want) < HOOD_TOL, "sex %d: the void head sits in the hood (%.3f m off)" % [sex, got.distance_to(want)])
 		ok(
 			not locker.model.get_node("Rig/Torso").get_children().any(_body_shows),
 			"sex %d: the procedural body is hidden" % sex

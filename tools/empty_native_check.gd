@@ -10,7 +10,8 @@ const POSED_MIN := 10  # bones turned off Meshy's rest in a playing clip (the T-
 const TURNED := 0.03  # rad: a bone this far off its rest is posed
 const CLIPS := ["Idle", "walk", "run", "Jump_Run", "Attack", "Crouch_Walk_with_Torch", "PickUp", "Sit"]
 
-const EGG_GAP := 0.06  # m: the egg cover's centre to the void shell's, at rest (the shell sits on the egg)
+const EGG_BEHIND := 0.02  # m: the egg cover's front at most this far behind the void shell's, at rest
+const EGG_OFF := 0.03  # m: and their middles this close, seen from the front
 var bad := 0
 var n := 0
 var holder: Node3D
@@ -74,8 +75,14 @@ func _one(main: Node, key: String) -> void:
 	var egg := m.find_child("VoidEgg", true, false) as MeshInstance3D
 	ok(egg != null and egg.skin == body.skin, "%s: the painted egg has its black cover on the same skin" % key)
 	if egg and hood:
-		var gap := egg.get_aabb().get_center().distance_to(hood.get_aabb().get_center())
-		ok(gap < EGG_GAP, "%s: the egg cover sits behind the void shell (centres %.3f m apart)" % [key, gap])
+		var e := egg.get_aabb()
+		var h := hood.get_aabb()
+		var behind := e.position.z - h.position.z  # (fronts: the model faces -Z)
+		var off := Vector2(e.get_center().x - h.get_center().x, e.get_center().y - h.get_center().y).length()
+		ok(
+			behind > 0.0 and behind < EGG_BEHIND and off < EGG_OFF,
+			"%s: the egg cover sits just behind the void shell's front (%.3f m behind, %.3f m off)" % [key, behind, off]
+		)
 	var aura := m.find_child("Aura", true, false)
 	ok(aura == null or aura.get_parent() is BoneAttachment3D, "%s: the aura rides a Meshy bone" % key)
 	var shown := m.get_node("Rig/Torso").get_children().any(
