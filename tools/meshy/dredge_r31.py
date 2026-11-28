@@ -370,7 +370,8 @@ def seam_weld(o):
     the seam opens in every clip (rest 0; Idle 8 cm, run 10 cm, Attack 27 cm) and the ink shell shows through. The
     r28 weld keys on position AND weights, so the stretch metric never saw it. Fix: each dome seam vertex takes the
     weights of the skin vertex it sits on; dome vertices within --ramp m of the seam fade from those to their own
-    (smoothstep). Skin weights are untouched (--skin-too: coincident skin vertices take their group mean). Every prim sharing the dome's weight accessor (its backing) follows."""
+    (smoothstep). Skin weights are untouched (--skin-too: coincident skin vertices take their group mean). Every prim
+    sharing the dome's weight accessor (its backing) follows."""
     from scipy.spatial import cKDTree
 
     js, b = glb_add_clips.read(o.inp)
@@ -451,11 +452,12 @@ def seam_weld(o):
 
 
 def strap_sink(o):
-    """r37, review (r36 close 4.5): the y270 shoulder shows a pale triangle with a black centre and a black sliver at the
-    strap end = the r22 band's square end cap (UVs on the texture's last row, seen edge-on with its ink). Fix: over the
+    """r37, review (r36 close 4.5): the y270 shoulder shows a pale triangle with a black centre and a black sliver
+    at the strap end = the r22 band's square end cap (UVs on the texture's last row, seen edge-on with its ink). Fix: over the
     last --sink-k stations of each band end the band narrows and sinks under the skin along its own normal (smoothstep,
     --sink m at the end), so it ends inside the body and no cap faces the camera. Band layout (dredge_r22.strap_r22):
-    per side 8 rings x ns stations (ring 0 = top face, its NORMAL = the skin normal) + 8 cap verts. Weights unchanged."""
+    per side 8 rings x ns stations (ring 0 = top face, its NORMAL = the skin normal) + 8 cap verts.
+    Weights unchanged."""
     js, b = glb_add_clips.read(o.inp)
     prims = js["meshes"][0]["primitives"]
     pr = next(p for p in prims if js["materials"][p["material"]]["name"] == "strap-leather")
