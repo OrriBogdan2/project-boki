@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ck7wp6p17etr1"
-path="res://.godot/imported/gloamspire_gloamspire_face.webp-5b370fffcd4c3000af06d68d10aa8e2f.ctex"
+path.s3tc="res://.godot/imported/gloamspire_gloamspire_face.webp-5b370fffcd4c3000af06d68d10aa8e2f.s3tc.ctex"
+path.etc2="res://.godot/imported/gloamspire_gloamspire_face.webp-5b370fffcd4c3000af06d68d10aa8e2f.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "6b5b25b89429a7d1b3c192d74e3aeca7"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/gloamspire/gloamspire_gloamspire_face.webp"
-dest_files=["res://.godot/imported/gloamspire_gloamspire_face.webp-5b370fffcd4c3000af06d68d10aa8e2f.ctex"]
+dest_files=["res://.godot/imported/gloamspire_gloamspire_face.webp-5b370fffcd4c3000af06d68d10aa8e2f.s3tc.ctex", "res://.godot/imported/gloamspire_gloamspire_face.webp-5b370fffcd4c3000af06d68d10aa8e2f.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
