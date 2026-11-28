@@ -8,14 +8,14 @@ extends RefCounted
 
 const SPECIES := ["cindle", "zapple", "wisplet", "zephyrak", "basaltoad", "puddlet"]
 const STARTERS := ["burrlet", "cindle", "puddlet"]
-const AT := [-0.05, 0.05, 0.1, 0.2, 0.3, 0.6]       # s from the hit, left to right
+const AT := [-0.05, 0.05, 0.1, 0.2, 0.3, 0.6]  # s from the hit, left to right
 const STEP := 1.0 / 60.0
 const BIG := 0.35
 const VIDEO_FPS := 30
-const VIDEO_S := 1.4                # s of each video clip; the hit or the faint lands 0.3 s in
+const VIDEO_S := 1.4  # s of each video clip; the hit or the faint lands 0.3 s in
 const VIDEO_LEAD := 0.3
-const FAINT_ROLL := 1.4             # rad Body rolls onto its side (Kin.render, downed)
-const FAINT_RATE := 6.0             # 1/s the roll eases in at (Kin.render)
+const FAINT_ROLL := 1.4  # rad Body rolls onto its side (Kin.render, downed)
+const FAINT_RATE := 6.0  # 1/s the roll eases in at (Kin.render)
 
 var main: Node
 var out := "/tmp/boki_flinch"
@@ -23,13 +23,18 @@ var px := 384
 var dash := false
 var video := false
 
+
 func run(m: Node) -> void:
 	main = m
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--shots-dir="): out = a.substr(12)
-		if a.begins_with("--px="): px = int(a.substr(5))
-		if a == "--dash": dash = true
-		if a == "--video": video = true
+		if a.begins_with("--shots-dir="):
+			out = a.substr(12)
+		if a.begins_with("--px="):
+			px = int(a.substr(5))
+		if a == "--dash":
+			dash = true
+		if a == "--video":
+			video = true
 	var species: Array = STARTERS if dash else SPECIES
 	var tag := "dash" if dash else "flinch"
 	DirAccess.make_dir_recursive_absolute(out)
@@ -52,6 +57,7 @@ func run(m: Node) -> void:
 	print("BOKI_FLINCH_SHOTS_DONE")
 	main.get_tree().quit()
 
+
 func _stage(id: String) -> Array:
 	var vp := SubViewport.new()
 	vp.size = Vector2i(px, px)
@@ -60,8 +66,9 @@ func _stage(id: String) -> Array:
 	main.add_child(vp)
 	var env := WorldEnvironment.new()
 	vp.add_child(env)
-	env.environment = Look.environment({"top": Color("2a4a8a"), "mid": Color("6a8ad0"),
-		"horizon": Color("ffd2a8"), "stars": 0.0})
+	env.environment = Look.environment(
+		{"top": Color("2a4a8a"), "mid": Color("6a8ad0"), "horizon": Color("ffd2a8"), "stars": 0.0}
+	)
 	Look.lights(vp, Color("fff1dc"), 1.0, Vector3(-50, 145, 0), 40.0)
 	var cam := Camera3D.new()
 	vp.add_child(cam)
@@ -72,7 +79,7 @@ func _stage(id: String) -> Array:
 	var k := Models.kin(id, {})
 	vp.add_child(k)
 	if dash:
-		k.rotation.y = -PI / 2.0      # faces right on screen
+		k.rotation.y = -PI / 2.0  # faces right on screen
 	var pup: KinPuppet
 	for c in k.get_children():
 		if c is KinPuppet:
@@ -83,6 +90,7 @@ func _stage(id: String) -> Array:
 		rig.set_process(false)
 	return [vp, k, pup, rig]
 
+
 func _species(id: String) -> Image:
 	var st := _stage(id)
 	var vp: SubViewport = st[0]
@@ -91,7 +99,7 @@ func _species(id: String) -> Image:
 	var rig: BokiRig = st[3]
 	var strip := Image.create(px * AT.size(), px, false, Image.FORMAT_RGBA8)
 	var hit := false
-	var t0 := -0.6                     # s since the hit; starts before it, to settle into the idle
+	var t0 := -0.6  # s since the hit; starts before it, to settle into the idle
 	for i in AT.size():
 		var want: float = AT[i]
 		while t0 < want:
@@ -111,11 +119,13 @@ func _species(id: String) -> Image:
 	vp.queue_free()
 	return strip
 
+
 func _step(pup: KinPuppet, rig: BokiRig) -> void:
 	pup._process(STEP)
 	if rig:
 		rig.advance(STEP)
 		rig._process(STEP)
+
 
 ## A frame sequence of `id` taking the big hit, or fainting: dazed, Body rolled onto its side.
 func _video(id: String, what: String) -> void:
