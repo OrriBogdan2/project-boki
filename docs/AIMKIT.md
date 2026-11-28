@@ -69,6 +69,8 @@ Common params (every shape):
 | `lw` | 0.06 | rim width in m |
 | `all` | false | foes and allies see it too, on their own games online as well (section 6). A foe's is tinted toward the hostile rim colour. Default: only your own player sees it (aim reticles) |
 | `dur` | 0.1 | seconds it stays without a refresh |
+| `bare` | false | circles with a `band`: the lit band alone, no tint inside (the cheapest ring, one row of ground points; Sable's rims, the Shadow Knife's rides a moving foe every frame) |
+| `tell` | true | with `all`: a rival's start plays TellCue's wind-up where it lands; false for a look that marks no landing hit (Sable's Bola catch rims and the Shadow Knife's arrival circle) |
 
 Directions are flat `Vector2(x, z)`, the same as `h.aim_dir()`. Points are `Vector3`. Every shape sits
 on the ground under its anchor and follows terraces and stairs, but never climbs a wall or drops into a pit.

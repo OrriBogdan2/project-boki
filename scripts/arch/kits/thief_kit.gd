@@ -35,6 +35,13 @@ const EMP_LINE := Color("ffc23a")      # the aim line while the next bolt is emp
 const AIM_LILAC := Color("d8c8ff")     # ... and otherwise
 const BOLA_HOT := Color("b07aff")      # the Bola's lane front and inner binding ring
 const BOLA_CORD := Color("b06aff")     # its violet lightning cord
+const SOFT_A := 0.7                     # the soft Bola lane: inside alpha ~0.06 at the base (zone rule)
+const LANE_LW := 0.12                   # m: its rails, twice the default width so the lane reads by its edges
+const LANE_HOT := 0.35                  # its rails lit toward white over sand and grass
+const WRAP_RING_R := 1.6                # m: the lit rim that flashes round a foe the Bola wraps (a look, no hit area)
+const TANGLE_RING_R := 2.0              # m: ... and round each of two foes it TANGLES
+const HIT_RING_S := 0.4                 # s either rim stays
+const RING_BAND := 0.22                 # m: the band of those rims and of the knife's arrival ring
 const EMP_RANGE_K := 1.12          # the empowered bolt flies 12% further (the source: 850 -> 950 units)
 const GLINT_POP_S := 0.22          # s the glint's flare takes to settle as the empowered bolt forms
 const GLINT_NET_EVERY := 1.1       # s between two glint pings online viewers get while it's empowered
@@ -679,11 +686,12 @@ func _tick_bola_cast(dt: float) -> void:
 		return
 	bola_cast["t"] = float(bola_cast["t"]) - dt
 	var k := 1.0 - clampf(float(bola_cast["t"]) / float(bd["cast"]), 0.0, 1.0)
-	# a strip with chevrons in the Bola's violet (the source's is white); the gold fill front runs to the throw.
-	# Its width is the catch corridor for a foe of her size (_tick_bola: the reach past a foe's body)
+	# a soft strip with chevrons in the Bola's violet (the source's is white): lit rails over a faint inside
+	# (0.1 or less at the base, the VFX_QUALITY zone rule) so a foe in the lane stays readable; the fill front
+	# runs to the throw. Its width is the catch corridor for a foe of her size (_tick_bola: the reach past a foe's body)
 	AimKit.lane(h, "rmb",
 			{"len": lane_len(), "width": float(bd["lane_w"]), "chevrons": 4, "tip": true, "fill": k,
-					"col": BOLA_CORD, "col2": BOLA_HOT, "alpha": 1.6})
+					"col": BOLA_CORD, "col2": BOLA_HOT, "alpha": SOFT_A, "soft": true, "lw": LANE_LW, "hot": LANE_HOT})
 	_whirl_bola()
 	if float(bola_cast["t"]) <= 0.0:
 		bola_cast = {}
@@ -794,6 +802,8 @@ func _wrap(f: Ent) -> void:
 	KitStatus.apply(f, "gnd", _ground_t())
 	add_mark(f, 1, true)
 	wrapped[f.get_instance_id()] = [f, _ground_t()]
+	vfx("bola_wrap", f.pos)
+	_hit_ring("bola_wrap", f.pos, WRAP_RING_R)
 	m.sfx("dj_bola_wrap", f.pos, -3.0, 1.0)
 
 ## Yellow rings bind the Grounded (everyone sees them), two of them winding round their legs.
@@ -833,7 +843,9 @@ func _tangle(f, other: Ent) -> void:
 	m.fx.bolt(a + Vector3(0, 0.6, 0), other.pos + Vector3(0, 0.6, 0), col)
 	m.fx.bolt(a + Vector3(0, 1.0, 0), other.pos + Vector3(0, 1.0, 0), col.lightened(0.3))
 	var mid := (a + other.pos) * 0.5
-	for t in both: vfx("bola_tangle", (t as Ent).pos)
+	for i in both.size():
+		vfx("bola_tangle", (both[i] as Ent).pos)
+		_hit_ring("bola_tangle%d" % i, (both[i] as Ent).pos, TANGLE_RING_R)
 	m.sfx("thief_bola_stun", mid, -2.0, 1.0)
 	net_bolt(a + Vector3(0, 0.8, 0), other.pos + Vector3(0, 0.8, 0), col)
 
@@ -930,6 +942,15 @@ func _tick_knife() -> void:
 	if tells_visible() or f != null or knife.has("wall"):
 		fx().place("knife%d" % h.get_instance_id(), "dagger", at + Vector3(0, up, 0), dv * 0.01,
 				col_of(e_def()), Color("b890ff"), 0.2, 0.2)
+		# the stuck ring: the blink's arrival circle (e.ring_r, the source's 1.5 bh) as a lit rim on the ground
+		# while the dagger stays; a ground ring means gameplay, so it marks only where she lands (no hit area)
+		AimKit.circle(h, "e_ring", {"at": at, "r": float(e_def()["ring_r"]), "band": RING_BAND,
+				"col": col_of(e_def()), "bare": true, "all": true, "tell": false, "hot": 0.25})
+
+## A lit rim on the ground round a foe the Bola caught, `r` m, for HIT_RING_S (everyone sees it; a look, no hit area).
+func _hit_ring(id: String, at: Vector3, r: float) -> void:
+	AimKit.circle(h, id, {"at": at, "r": r, "band": RING_BAND, "col": BOLA_HOT, "bare": true, "all": true,
+			"tell": false, "hot": 0.5, "dur": HIT_RING_S})
 
 ## Out from a barrier's face (the way the Vector2 of its a -> b turns a quarter).
 func _wall_out(w: Dictionary) -> Vector2:

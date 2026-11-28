@@ -22,6 +22,10 @@ extends RefCounted
 ##   soft    bool    lanes, cones and circles: a lit rim glowing inward over a faint inside (alpha <= 0.25 at the
 ##                   centre, the VFX_QUALITY zone rule) instead of the stacked fill
 ##   dur     float   s, how long it stays without a refresh (default 0.1)
+##   bare    bool    circles with a band: the lit band alone, no tint inside (the cheapest ring: one row of ground
+##                   points; for a rim that rides a moving body every frame)
+##   tell    bool    with all: a rival's start plays TellCue's wind-up (default true); false for a look that marks
+##                   no landing hit (a rim flashed after a catch, a blink's arrival circle)
 ##   fletch  float   lines and Vs only: 0 = plain; > 0 feathers the line with barbs swept back toward
 ##                   the hunter (Hem's draw), this big
 ##   lace    bool    lines, lanes and arc walls: two strands criss-crossing like laces instead of the plain
@@ -258,7 +262,8 @@ static func _base(h: Hunter, kind: String, p: Dictionary) -> Dictionary:
 		"alpha": float(p.get("alpha", 1.0)), "hot": clampf(float(p.get("hot", 0.0)), 0.0, 1.0),
 		"lw": float(p.get("lw", AimShapes.LW)), "all": bool(p.get("all", false)), "soft": bool(p.get("soft", false)),
 		"keep": maxf(AimDraw.KEEP, float(p.get("dur", AimDraw.KEEP))), "y": h.pos.y,
-		"fletch": float(p.get("fletch", 0.0)), "lace": bool(p.get("lace", false))}
+		"fletch": float(p.get("fletch", 0.0)), "lace": bool(p.get("lace", false)),
+		"tell": bool(p.get("tell", true))}
 
 ## At full charge: hot unless the kit set it, and the full colour if it gave one.
 static func _full(e: Dictionary, p: Dictionary, k: float) -> void:
@@ -287,6 +292,7 @@ static func _disc(h: Hunter, e: Dictionary, p: Dictionary) -> void:
 	e["r"] = float(p.get("r", 1.35)); e["fill"] = float(p.get("fill", -1.0))
 	e["ticks"] = bool(p.get("ticks", false)); e["star"] = bool(p.get("star", false)); e["dashed"] = bool(p.get("dashed", false))
 	e["band"] = float(p.get("band", 0.0))
+	e["bare"] = bool(p.get("bare", false))
 	var pd: Vector2 = p.get("pointer", Vector2.ZERO)
 	e["pointer"] = pd.normalized() if pd.length() > 0.01 else Vector2.ZERO
 

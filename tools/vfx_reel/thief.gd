@@ -7,6 +7,16 @@ func parts() -> Array:
 	return ["lmb", "hold", "rmb", "dash", "e", "x"]
 
 
+## E: the dagger lands ~0.4 s in, so the frames sit close round the stick to show its hit frame and arrival ring.
+func _part_e() -> void:
+	await _reset(5.0)
+	var cast := func(t: float):
+		P.inp["sig"] = _at(t, 0.1)
+		_aim(T.pos)
+	await _go(2.4, cast, _sheet("e", "E at the dummy", [0.3, 0.36, 0.4, 0.44, 0.48, 0.54, 0.62, 0.8, 1.2]), 2.5)
+	await _go(GAP)
+
+
 func _part_x() -> void:
 	await _reset(3.0)
 	var cast := func(t: float):
