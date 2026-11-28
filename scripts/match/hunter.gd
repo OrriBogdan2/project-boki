@@ -1546,13 +1546,6 @@ func sim(dt: float) -> void:
 	if not (ak and ak.face_locked()):
 		face = rotate_toward(face, want, HunterMove.turn_rate * dt)
 
-func pad_launch(to: Vector3) -> void:
-	var d := Vector2(to.x - pos.x, to.z - pos.z).length()
-	pad = {"from": pos, "to": to, "t": 0.0, "dur": clampf(d / 12.0, 0.7, 1.5), "h": maxf(pos.y, to.y) - pos.y + 2.5 + d * 0.12}
-	roll_t = 0.0
-	grap = {}
-	grounded = false
-
 func _pad_fly(dt: float) -> void:
 	pad["t"] += dt
 	var k := clampf(pad["t"] / pad["dur"], 0.0, 1.0)
