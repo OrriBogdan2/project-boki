@@ -8,6 +8,8 @@ extends RefCounted
 ##    carries the hit);
 ##  - no part detaches (parts and bones stay put in Flex space) and Flex never squashes out of shape.
 ## Then in a real match, owned, rival and wild Boki each get the "hit" meta from Ent.hurt, and a burn tick does not.
+## A hit hops it up and back (more for a bigger hit), a revive pops it up stretched, and a downed Boki's topple
+## (KinDowned.fall_roll) reaches its side in FALL_S with a soft overshoot and breathes after.
 ## Prints BOKIREACT PASS/FAIL lines. No renderer.
 
 const READ_T := 0.1          # s: a hit must read by then
@@ -22,6 +24,8 @@ const MIN_SQUASH := 0.015    # a landing must shorten Flex by this share
 const MIN_LEAN := 0.04       # a dash must pitch Flex forward by this much (rad)
 const CHIP := 0.05           # share of max health: a chip hit, and a big one
 const BIG := 0.35
+const MIN_HOP := 0.01        # m: a chip hit lifts the body at least this much (Flex space, within HOP_S)
+const MAX_OVERSHOOT := 1.1   # the topple never rolls past this share of its final roll
 ## Settle time a Boki of each weight should show (s). Light under mass 1.0, medium under 1.6, then heavy.
 const WEIGHT := {"light": [0.14, 0.30], "medium": [0.18, 0.38], "heavy": [0.24, 0.45]}
 const MASS := {"light": 0.8, "medium": 1.3, "heavy": 2.0}
@@ -50,6 +54,7 @@ func run(main: Node) -> void:
 	for id in boki_species():
 		var mass := KinLib.kin(id).mass
 		await _case(main, "rigged %s" % id, id, weight_of(mass), mass)
+	_topple()
 	_in_match(main)
 	print("BOKIREACT DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -143,6 +148,8 @@ func _case(main: Node, label: String, species: String, weight: String, mass: flo
 		ok(shaped, "%s: Flex stays in shape (scale %.2f to %.2f)" % [label, r["scale_lo"], r["scale_hi"]])
 	_land(a, mass, label)
 	_dash(a, mass, label)
+	_hop(a, mass, label)
+	_pop(a, mass, label)
 	a.k.queue_free()
 	ctl.k.queue_free()
 
@@ -169,6 +176,57 @@ func _dash(a: Subject, mass: float, label: String) -> void:
 		a.step()
 		lean = maxf(lean, -a.flex.rotation.x)
 	ok(lean >= MIN_LEAN, "%s: a dash leans it forward %.3f rad within %.1f s" % [label, lean, READ_T])
+
+## How high Flex rides above its rest after a hit that took `frac` of max health, within the hop.
+func _hop_height(a: Subject, mass: float, frac: float) -> float:
+	for i in int(RUN_S / STEP):
+		a.step()
+	var rest := a.flex.position.y
+	KinFlinch.hit(a.k, Vector3(1, 0, 0), frac, mass)
+	var top := 0.0
+	for i in int(KinFlinch.HOP_S / STEP):
+		a.step()
+		top = maxf(top, a.flex.position.y - rest)
+	return top
+
+## A hit hops the body up, more for a bigger hit.
+func _hop(a: Subject, mass: float, label: String) -> void:
+	var chip := _hop_height(a, mass, CHIP)
+	var big := _hop_height(a, mass, BIG)
+	ok(chip >= MIN_HOP, "%s: a chip hit hops it %.3f m" % [label, chip])
+	ok(big > chip, "%s: a big hit hops higher (%.3f vs %.3f m)" % [label, big, chip])
+
+## A revive pops the resting model up and stretches it, then it settles back.
+func _pop(a: Subject, mass: float, label: String) -> void:
+	for i in int(RUN_S / STEP):
+		a.step()
+	var rest := a.flex.position.y
+	var rest_h := a.flex.scale.y
+	KinFlinch.pop(a.k, mass)
+	var lift := 0.0
+	var stretch := 0.0
+	for i in int(READ_T / STEP):
+		a.step()
+		lift = maxf(lift, a.flex.position.y - rest)
+		stretch = maxf(stretch, a.flex.scale.y / rest_h)
+	ok(lift >= MIN_HOP and stretch > 1.0 + MIN_SQUASH, "%s: a revive pops it up %.3f m, stretched %.2f" % [label, lift, stretch])
+	for i in int(RUN_S / STEP):
+		a.step()
+	var fl: KinFlinch = a.rig._flinch if a.rig else a.pup.fl
+	ok(fl.shove.length() < MIN_HOP * 0.5, "%s: the pop settles back down" % label)
+
+## The downed topple: upright at once, on its side after FALL_S with a soft overshoot, then it breathes.
+func _topple() -> void:
+	var peak := 0.0
+	for i in int(KinDowned.FALL_S / STEP) + 1:
+		var r := KinDowned.fall_roll(i * STEP)
+		peak = maxf(peak, r)
+	ok(KinDowned.fall_roll(0.0) == 0.0, "downed: upright when it goes down")
+	ok(KinDowned.fall_roll(0.1) > 0.1 * KinDowned.FALL_ROLL, "downed: it is already going over at 0.1 s")
+	ok(peak <= KinDowned.FALL_ROLL * MAX_OVERSHOOT and peak >= KinDowned.FALL_ROLL, "downed: a soft overshoot (%.2f rad)" % peak)
+	ok(KinDowned.fall_roll(KinDowned.FALL_S * 3.0) == KinDowned.FALL_ROLL, "downed: it settles on its side")
+	ok(KinDowned.breath(0.0, 1.0) == Vector3.ONE, "downed: no breathing mid-fall")
+	ok(KinDowned.breath(2.0, PI / (2.0 * KinDowned.BREATH_RATE)).y > 1.0, "downed: it breathes once it lies still")
 
 ## The control rig picks the same random idle as `a` (BokiIdle's fidgets, blinks, looks), so only the hit differs.
 func _twin(a: Subject, ctl: Subject) -> void:

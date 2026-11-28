@@ -25,6 +25,11 @@ const LEAVE_META := "leave"   # on a Boki put down on purpose: no automatic pick
 const DOWN_CRY_DB := -4.0   # dB: the Boki's cry as it goes down, in its own voice
 const ENEMY_NEAR := 6.0   # m: with a foe this close, running into the Boki does not pick it up (press interact)
 const F_EDGE_S := 0.1     # s: an interact press this recent counts as a fresh press
+const FALL_S := 0.4       # s a Boki takes to topple onto its side
+const FALL_ROLL := 1.4    # rad: Body's roll when it lies on its side
+const FALL_SOFT := 1.0    # overshoot of the topple: 1 rolls a little past the side and settles back
+const BREATH_RATE := 2.4  # rad/s of the breathing once it lies still
+const BREATH_AMP := 0.025 # share of its size the breathing swells it by
 const BLOCKED_INPUTS := ["jump", "glide", "fire", "sig", "sec", "sec_hold", "skill", "ult", "kin_ab", "gear1", "gear2",
 	"throw", "tonic", "kit", "swap", "dash_down"]    # off while carrying (movement and aim stay)
 
@@ -241,6 +246,7 @@ static func come_round(k: Kin, rescued: bool) -> void:
 	k.rescue_block = 0.0
 	k.down_void = false
 	k._hop_on()
+	KinFlinch.pop(k.model, k.mass())
 	KinLoss.reclaimed(k)
 	k.m.fx.burst(k.owner_h.pos + Vector3(0, 1.5, 0), k.sp["color"], 12 if rescued else 8, 2.5)
 	k.m.sfx("boki_revive", k.owner_h.pos, -4.0)
@@ -281,6 +287,16 @@ static func render(k: Kin, _delta: float) -> void:
 			var g: float = k.m.world.ground_at(k.pos.x, k.pos.z)
 			k.beacon.global_position = Vector3(k.pos.x, (g if g > World.VOID + 1.0 else k.pos.y) + BEACON_H * 0.5, k.pos.z)
 			k.beacon.scale = Vector3(1.0 + 0.12 * sin(k.m.time * 5.0), 1.0, 1.0 + 0.12 * sin(k.m.time * 5.0))
+
+## Body's roll `age` seconds after the Boki went down: it topples over FALL_S and settles with a soft overshoot.
+static func fall_roll(age: float) -> float:
+	var u := clampf(age / FALL_S - 1.0, -1.0, 0.0)
+	return FALL_ROLL * (1.0 + (FALL_SOFT + 1.0) * u * u * u + FALL_SOFT * u * u)
+
+## The lying Boki's chest swells and falls once the topple is over: a scale to multiply Body by.
+static func breath(age: float, time: float) -> Vector3:
+	var b := BREATH_AMP * sin(time * BREATH_RATE) * smoothstep(FALL_S, FALL_S * 1.5, age)
+	return Vector3(1.0 - b * 0.5, 1.0 + b, 1.0 - b * 0.5)
 
 ## The rescue: the Boki is lifted into the carrier's arms and stays there (render only; its spot already follows them).
 static func scoop_pose(k: Kin) -> void:
