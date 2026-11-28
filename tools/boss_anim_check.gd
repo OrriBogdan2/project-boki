@@ -17,6 +17,8 @@ const GROUND_TELL := ["slam", "fissure", "dash", "storm", "static", "spit", "bur
 const PERF_MS := 0.5  # ms: posing the three bosses in a frame
 const PERF_FRAMES := 300
 const DT := 1.0 / 60.0
+const SYNC_FRAMES := 2  # frames: the body tell may start after the ground tell, the strike key miss the blow
+const TELL_MOVE := 0.03  # rad / m: how far any pivot must have moved for the body's tell to have begun
 const LEGENDARY_TRIS := 9000  # per lair boss model: one draw call (the primitive bodies were 5-12k in many)
 const MODEL_ONLY := ["LegFL", "LegBR", "LegFR", "LegBL"]  # Siegephant's legs: the primitive Colossus walks on its clip
 
@@ -51,6 +53,8 @@ func run(main: Node) -> void:
 		for atk in BossAnim.ATTACKS[id]:
 			_attack(b, atk, false)
 			_attack(b, atk, true)
+			_timing(b, atk, false)
+			_timing(b, atk, true)
 		_posed(b)
 		_legendary(b)
 	_perf(bosses)
@@ -183,6 +187,47 @@ func _attack(b: Boss, atk: String, rage: bool) -> void:
 			ends.append(float(born[i]) + float(b.teles[i]["dur"]))
 		ok(ends.any(func(e): return absf(e - hit) <= SLACK_S), "%s: the ground tell fills at %.2f s too" % [tag, hit])
 	_phases(b, tag, hit)
+	b._clear_attack()
+
+
+## Frame by frame through the real sim and render: the ground tell is up on frame 0, the body's tell (the first
+## wind-up pivot has covered TELL_SHARE of its travel) begins with it, and the strike key lands on the blow's frame.
+## Logs the frames as BOSSTIME (tele frame, body tell frame, strike key frame, blow frame) for the timing sheet.
+func _timing(b: Boss, atk: String, rage: bool) -> void:
+	_start(b, atk, rage)
+	var tag := "%s %s%s" % [b.mkind, atk, " (enraged)" if rage else ""]
+	var hit_frame := int(round(BossAnim.hit_t(b) / DT))
+	var tele := 0 if not b.teles.is_empty() else -1  # the frame each first showed
+	var tell := -1
+	var key := -1
+	var blow := -1
+	var tracks := BossAnim.tracks(b.mkind, atk + "_windup")
+	b.atk_t = 0.0
+	b.render(DT, 1.0)
+	var rig: BossAnim.Rig = b.model.get_meta("boss_rig")
+	var rest := {}  # pivot index -> where it stood on frame 0
+	for t in tracks:
+		for i in t[0] as PackedInt32Array:
+			rest[i] = rig.now[i]
+	for f in range(1, hit_frame + 12):
+		b.sim(DT)
+		if b.atk != atk:
+			break
+		b.render(DT, 1.0)
+		if tele < 0 and not b.teles.is_empty():
+			tele = f
+		for t in tracks:
+			var i: int = (t[0] as PackedInt32Array)[0]
+			if tell < 0 and absf(rig.now[i] - float(rest[i])) >= TELL_MOVE:
+				tell = f
+		if key < 0 and BossAnim.cur_move.ends_with("_strike"):
+			key = f
+		if blow < 0 and b.steps.any(func(s): return s["done"] and absf(float(s["t"]) - BossAnim.hit_t(b)) <= SLACK_S):
+			blow = f
+	print("BOSSTIME %s tele %d tell %d key %d blow %d hit_frame %d" % [tag, tele, tell, key, blow, hit_frame])
+	var tell_ok := tell >= 0 and (tell <= tele + SYNC_FRAMES or not GROUND_TELL.has(atk))
+	ok(tell_ok, "%s: the body tell (frame %d) begins with the ground tell (frame %d)" % [tag, tell, tele])
+	ok(absi(key - blow) <= SYNC_FRAMES, "%s: the strike key (frame %d) lands on the blow (frame %d)" % [tag, key, blow])
 	b._clear_attack()
 
 
