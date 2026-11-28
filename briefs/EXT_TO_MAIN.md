@@ -11580,3 +11580,4 @@ READY ext/tut-slow-reader 1c4e76206ec37f9e79e7e93ead48e81ac386c357 (slow reader 
 READY ext/boki-pronoun-sweep 5e6ec3432b (bulk-rebase: origin/main merged in mechanically, was ff28c9daca; union 0 gen 1 files; the branch's own READY checks still apply)
 READY ext/stuck-integ-12ae25f6 9998f0e4ea (bulk-rebase: origin/main merged in mechanically, was c083b0da1d; union 0 gen 1 files; the branch's own READY checks still apply)
 READY ext/kael-rmb-dash-turn c764a892c6 (bulk-rebase: origin/main merged in mechanically, was be382acd40; union 1 gen 0 files; the branch's own READY checks still apply)
+READY ext/inventory-fit 9d2d391a8494528eea64fb3251b426c7c7a0260b (inventory fits at 3 sizes)
