@@ -67,13 +67,7 @@ const SKATE_RUN_S := 1.35
 const NATIVE_WALK := 2.0
 ## Native loops that print OPEN, not FAIL: their clips step too short for the speed at the fastest loop rate
 ## (WardenNative.RATE_MAX), so no data rate plants them (Meeko's trot, Gil's and Motley's sneak; DEBT.md).
-const NATIVE_OPEN := {
-	"tender": ["walk", "run", "crouch"],
-	"gil": ["crouch"],
-	"ostra": ["crouch"],
-	"empty_f": ["crouch"],
-	"empty_m": ["crouch"]
-}
+const NATIVE_OPEN := {"tender": ["walk", "run", "crouch"], "gil": ["crouch"], "ostra": ["crouch"]}
 
 var bad := 0
 var holder: Node3D
