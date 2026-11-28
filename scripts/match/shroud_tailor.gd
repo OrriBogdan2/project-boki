@@ -59,7 +59,10 @@ func _init(ctx: Dictionary, settings: Dictionary) -> void:
 		joints["el"].append(sh + (arms[sd][1] as Node3D).position)
 		joints["ha"].append(sh + (arms[sd][1] as Node3D).position + (arms[sd][2] as Node3D).position)
 	tag = "%.3f|%.3f|%.3f|%s" % [bw, span, ly, fem]
-	key = "%s|%s|%s|%s|%s" % [settings["style"], settings["hood"], settings["trim"], settings["accessory"], tag]
+	var head := String((settings["head"] as Dictionary).get("id", ""))
+	key = (
+		"%s|%s|%s|%s|%s|%s" % [settings["style"], settings["hood"], settings["trim"], settings["accessory"], head, tag]
+	)
 	cached = _baked.has(key)
 	if int(settings["accent"]) >= 0:
 		m["trim"] = _accent(Unmasked.COLOURS[settings["accent"]])

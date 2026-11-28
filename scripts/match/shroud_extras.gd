@@ -82,6 +82,8 @@ static func accessory(t: ShroudTailor, kind: int, fit: Dictionary) -> void:
 		3: _charm(t, fit)
 		4: _lantern(t, fit)
 		5: _bandolier(t, fit)
+		6: ShroudCuts.scarf(t, true)
+		7: ShroudCuts.scarf(t, false)
 
 ## A strap round the body in a ring tilted from one shoulder to the other hip.
 static func _strap(t: ShroudTailor, nm: String, fit: Dictionary, sgn: float, wide: float) -> Mesh:

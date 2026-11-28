@@ -33,7 +33,8 @@ const LABELS := ["Hooded Cloak", "Wrap", "Tatters", "Long Coat", "Poncho", "Robe
 	"Shawl & Scarf", "Cowl & Feathers", "Patchwork"]
 const HOODS := ["Down", "Up"]
 const TRIMS := ["Plain", "Stitched", "Runes", "Stripes", "Embroidered"]
-const ACCESSORIES := ["None", "Belt pouches", "Satchel strap", "Charm necklace", "Lantern hook", "Bandolier"]
+const ACCESSORIES := ["None", "Belt pouches", "Satchel strap", "Charm necklace", "Lantern hook", "Bandolier",
+	"Long scarf", "Neck scarf"]
 ## Extra creator rows, as Unmasked.ROWS has them: look key, label, choices, and a tooltip. Hood applies only where
 ## has_hood(look["shroud"]). The accent is -1 or a colour, so a row for it adds "Match shroud" before COLOURS.
 const ROWS := [
@@ -62,8 +63,11 @@ static func settings(lk: Dictionary) -> Dictionary:
 	var dflt := int(_style(style)["hood"])
 	var hood := -1 if dflt < 0 else clampi(_i(lk.get("hood"), dflt), 0, 1)
 	var accent := clampi(_i(lk.get("accent"), NO_ACCENT), NO_ACCENT, Unmasked.COLOURS.size() - 1)
+	var head := Wardrobe.worn(lk, "head")      # a worn hood (Wardrobe) is the cut's own, where the cut has one
+	if dflt >= 0 and not head.is_empty():
+		hood = 1 if head["up"] else 0
 	return {"style": style, "hood": hood, "trim": clampi(_i(lk.get("trim"), 0), 0, TRIMS.size() - 1), "accent": accent,
-		"accessory": clampi(_i(lk.get("accessory"), 0), 0, ACCESSORIES.size() - 1)}
+		"accessory": clampi(_i(lk.get("accessory"), 0), 0, ACCESSORIES.size() - 1), "head": head}
 
 static func _i(v: Variant, fallback: int) -> int:
 	return int(v) if v is int or v is float or v is String else fallback
@@ -73,7 +77,8 @@ static func _i(v: Variant, fallback: int) -> int:
 static func dress(c: Dictionary, lk: Dictionary) -> void:
 	var set_ := settings(lk)
 	var style := int(set_["style"])
-	if style == NONE and int(set_["accessory"]) == 0:
+	var head: Dictionary = set_["head"]
+	if style == NONE and int(set_["accessory"]) == 0 and head.is_empty():
 		return
 	_light_cloth(c["m"], Unmasked.colour(lk))
 	var t := ShroudTailor.new(c, set_)
@@ -81,6 +86,8 @@ static func dress(c: Dictionary, lk: Dictionary) -> void:
 	if style != NONE:
 		ShroudCuts.cut(t, style, int(set_["hood"]) == 1)
 		ShroudExtras.trim(t, int(set_["trim"]))
+	if not head.is_empty() and int(set_["hood"]) < 0:
+		ShroudCuts.hood_piece(t, head)
 	var fit: Dictionary = _style(style)["fit"].duplicate()
 	fit["chest"] *= lerpf(1.0, t.girth(0.38), 0.5)      # (in front: the cloth's depth takes half the figure)
 	fit["waist"] *= t.girth(float(fit["belt"]))           # (the cloth under it is cut to ShroudTailor.FIGURE)

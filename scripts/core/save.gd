@@ -167,6 +167,7 @@ func fresh() -> Dictionary:
 		"extracts": 0,
 		"settings": {"volume": 0.8, "cam_lead": 1.0},
 		"tutorial": {"gfd": {"did": {}, "paid": false}},  # the first-day list (GardenFirstDay)
+		"wardrobe": Wardrobe.fresh(),  # the Empty's earned clothes (Wardrobe): a new Empty starts bare
 		"hud_reveal": {},  # HUD groups whose first event happened (HudReveal); absent = an older save, full HUD
 		"time_trial": {},  # Hunter id -> personal best on the Training Grounds course (s)
 		"farm_builder": 1,  # Hob and the farm tutorial are known to this save (FarmBuilder.migrate)

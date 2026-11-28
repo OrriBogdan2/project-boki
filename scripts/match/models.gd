@@ -633,7 +633,7 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 	if um:
 		# the Unmasked as MantleLook's own-person params (every slider neutral), its build and colour
 		lk = MantleLook.own(PlayerLook.clean(Unmasked.legacy(appearance)))
-		lk["build"] = EmptyFrame.factor(Unmasked.clean(appearance), "build")
+		EmptyFrame.into(lk, Unmasked.clean(appearance))  # its build and leg length
 		lk["skin_col"] = Unmasked.VOID_SKIN
 		race = Unmasked.race(appearance)
 		arch = "unmasked"

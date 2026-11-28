@@ -1,0 +1,33 @@
+{
+	"_doc": "The Empty's clothes (scripts/match/wardrobe.gd, docs/CHARACTER_CREATOR.md). A new Empty starts bare (the void body); every piece is earned by playing and kept in Save.d.wardrobe.owned. Cosmetic only: no piece changes a stat. A piece's earn rule is one of: first_day (a row of the first-day list, GardenFirstDay), stat (a ClassUnlock account stat reaching n), clan (a clan project built, Save.d.guild_perks), zones (n garden zones open), mastery (a Hunter's mastery level). How each slot draws: head = a hood (up, or down on the shoulders) in the cloth colour; top and bottom = the body's own torso, arm and leg shapes in cloth (sleeves 0 none, 1 upper arm, 2 to the wrist; length 1 thigh, 2 to the ankle); feet = soles, or boots to the knee; back = a Shroud cut (Shrouds.STYLES index); accessory = a ShroudExtras accessory (Shrouds.ACCESSORIES index). Pieces go on the end of the list only (ids are saved).",
+	"slots": {"head": "Head", "top": "Top", "bottom": "Bottom", "feet": "Feet", "back": "Back", "accessory": "Accessory"},
+	"pieces": [
+		{"id": "plain_tunic", "slot": "top", "name": "Plain Tunic", "sleeves": 0, "col": "#6d6658", "earn": {"first_day": "feed"}, "how": "Feed your Boki on your first day"},
+		{"id": "plain_trousers", "slot": "bottom", "name": "Plain Trousers", "length": 2, "col": "#3e3a36", "earn": {"first_day": "toy"}, "how": "Play with a toy on your first day"},
+		{"id": "hooded_cloak", "slot": "back", "name": "Hooded Cloak", "cut": 0, "earn": {"stat": "extracts", "n": 1}, "how": "Make it out of your first expedition"},
+		{"id": "wrapped_soles", "slot": "feet", "name": "Wrapped Soles", "boots": false, "col": "#5a4632", "earn": {"stat": "extracts", "n": 2}, "how": "Make it out of 2 expeditions"},
+		{"id": "field_boots", "slot": "feet", "name": "Field Boots", "boots": true, "col": "#5c3d2a", "earn": {"stat": "extracts", "n": 5}, "how": "Make it out of 5 expeditions"},
+		{"id": "belt_pouches", "slot": "accessory", "name": "Belt Pouches", "kind": 1, "earn": {"stat": "chests", "n": 10}, "how": "Open 10 chests"},
+		{"id": "satchel_strap", "slot": "accessory", "name": "Satchel Strap", "kind": 2, "earn": {"stat": "caught", "n": 3}, "how": "Bring 3 wild Boki home"},
+		{"id": "work_shirt", "slot": "top", "name": "Work Shirt", "sleeves": 1, "col": "#7a6a4e", "earn": {"stat": "mobs", "n": 25}, "how": "Defeat 25 monsters"},
+		{"id": "long_coat", "slot": "back", "name": "Long Coat", "cut": 3, "earn": {"clan": "hall"}, "how": "Your clan builds its Guild Hall"},
+		{"id": "field_hood", "slot": "head", "name": "Field Hood", "up": true, "peak": 0.06, "earn": {"zones": 2}, "how": "Open a second garden zone"},
+		{"id": "lantern_hook", "slot": "accessory", "name": "Lantern Hook", "kind": 4, "earn": {"zones": 3}, "how": "Open 3 garden zones"},
+		{"id": "long_scarf", "slot": "accessory", "name": "Long Scarf", "kind": 6, "earn": {"mastery": "gunslinger", "level": 2}, "how": "Vex mastery 2: the long scarf she never takes off"},
+		{"id": "neck_scarf", "slot": "accessory", "name": "Neck Scarf", "kind": 7, "earn": {"mastery": "juggernaut", "level": 2}, "how": "Kael mastery 2: the scarf that never comes off"},
+		{"id": "wrap", "slot": "back", "name": "Wrap", "cut": 1, "earn": {"stat": "extracts", "n": 3}, "how": "Make it out of 3 expeditions"},
+		{"id": "tatters", "slot": "back", "name": "Tatters", "cut": 2, "earn": {"stat": "knocks", "n": 10}, "how": "Knock down 10 hunters"},
+		{"id": "poncho", "slot": "back", "name": "Poncho", "cut": 4, "earn": {"zones": 4}, "how": "Open 4 garden zones"},
+		{"id": "robe_sash", "slot": "back", "name": "Robe & Sash", "cut": 5, "earn": {"clan": "shrine"}, "how": "Your clan builds its Boki Shrine"},
+		{"id": "relic_cape", "slot": "back", "name": "Relic Cape", "cut": 6, "earn": {"stat": "revives", "n": 5}, "how": "Revive 5 teammates"},
+		{"id": "shawl_scarf", "slot": "back", "name": "Shawl & Scarf", "cut": 7, "earn": {"zones": 5}, "how": "Open every garden zone"},
+		{"id": "cowl_feathers", "slot": "back", "name": "Cowl & Feathers", "cut": 8, "earn": {"stat": "air_hits", "n": 20}, "how": "Land 20 hits in the air"},
+		{"id": "patchwork", "slot": "back", "name": "Patchwork", "cut": 9, "earn": {"stat": "extracts", "n": 15}, "how": "Make it out of 15 expeditions"},
+		{"id": "charm_necklace", "slot": "accessory", "name": "Charm Necklace", "kind": 3, "earn": {"clan": "lighthouse"}, "how": "Your clan builds its Lighthouse"},
+		{"id": "bandolier", "slot": "accessory", "name": "Bandolier", "kind": 5, "earn": {"stat": "staggers", "n": 15}, "how": "Stagger 15 monsters with abilities"},
+		{"id": "long_shirt", "slot": "top", "name": "Long Shirt", "sleeves": 2, "col": "#4a5560", "earn": {"clan": "forge"}, "how": "Your clan builds its Forge"},
+		{"id": "field_shorts", "slot": "bottom", "name": "Field Shorts", "length": 1, "col": "#5d5446", "earn": {"stat": "extracts", "n": 8}, "how": "Make it out of 8 expeditions"},
+		{"id": "wanderer_cowl", "slot": "head", "name": "Wanderer's Cowl", "up": false, "earn": {"stat": "extracts", "n": 10}, "how": "Make it out of 10 expeditions"},
+		{"id": "peaked_hood", "slot": "head", "name": "Peaked Hood", "up": true, "peak": 0.2, "flop": 0.05, "earn": {"stat": "rings", "n": 10}, "how": "Fly through 10 air rings"}
+	]
+}

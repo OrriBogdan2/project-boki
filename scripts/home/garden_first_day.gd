@@ -39,6 +39,8 @@ static func mark(id: String, h = null) -> void:
 	st["paid"] = list.all(func(r): return bool(st["did"].get(String(r["id"]), false)))
 	var gems := int(rules()["reward_gems"]) if st["paid"] else 0
 	Save.d["gems"] = int(Save.d["gems"]) + gems
+	Wardrobe.refresh()  # the first clothes come from this list
 	Save.save_game()
 	if gems > 0 and h:
 		h._toast("First day done: %d gems" % gems)
+	Wardrobe.announce(h)

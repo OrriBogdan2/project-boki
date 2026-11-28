@@ -23,4 +23,5 @@ const CHECKS := {
 	"--modes-check": ["res://tools/modes_check.gd", "modes_check", null],  # solos and the play space (0084)
 	"--traversal-parity-check": ["res://tools/traversal_parity_check.gd", "traversal_parity_check", null],  # ref rows
 	"--fall-parity-check": ["res://tools/fall_parity_check.gd", "fall_parity_check", null],  # fall parity
+	"--wardrobe-check": ["res://tools/wardrobe_check.gd", "wardrobe_check", null],  # the Empty's earned clothes
 }
