@@ -20,7 +20,7 @@ footage and no source row. Every number below is the live data (`content/archety
 **Hold LMB, Tide Lunge** (`lmb.tide`): held past 0.25 s he draws back (walking at 50%), full at 0.8 s; let go to drive
 2 -> 5 m down the line, 10 -> 22 damage to each foe once, 0.55 s after. A part charge knocks 6; a full charge soaks
 (a splash mark) and knocks 10 (`kb_full`), past the shared 8 m/s wall-slam speed, so a foe driven into a cliff,
-rock or wall close behind is stunned 0.9 s (docs/KNOCK_WALLS.md). Checked by "Tide Lunge into a rock: ..." (2 lines).
+rock or wall close behind is stunned 0.4 -> 1.2 s by its speed into the wall (decision 0181, docs/KNOCK_WALLS.md). Checked by "Tide Lunge into a rock: ..." (2 lines).
 
 ### Grab Bag potions (`rmb.vials`)
 | Potion | Radius | Damage | Effect | Mark |
