@@ -129,7 +129,6 @@ func _motion() -> void:
 			model.rotation.y = deg_to_rad(float(MOTION_YAWS[yaw]))
 			for st in STATES:
 				var s: Dictionary = (st[1] as Dictionary).duplicate()
-				s["face"] = model.rotation.y
 				model.set_meta(WardenClips.STATE, s)
 				await _frames(int(float(st[2]) * FPS))  # (the model's Native node plays the state in real time)
 				for view in VIEWS:

@@ -185,6 +185,7 @@ def centre_hips(out, hips):
             acc = out.js["accessors"][a["samplers"][c["sampler"]]["output"]]
             v = np.frombuffer(out.chunks[2 * acc["bufferView"] + 1], np.float32).reshape(-1, 3).copy()
             v[:, [0, 2]] += (rest - v.mean(0))[[0, 2]]
+            acc["min"], acc["max"] = v.min(0).tolist(), v.max(0).tolist()
             out.chunks[2 * acc["bufferView"] + 1] = v.astype(np.float32).tobytes()
 
 

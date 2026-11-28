@@ -41,6 +41,9 @@ def main(src, dst):
                 v, a, k = _view(js, bin_, an["samplers"][ch["sampler"]]["output"])
                 v[:] *= CM
                 a["min"], a["max"] = v.reshape(-1, 3).min(0).tolist(), v.reshape(-1, 3).max(0).tolist()
+    for m in js["meshes"]:
+        for prim in m["primitives"]:
+            prim["attributes"].pop("TANGENT", None)  # (Meshy's carry zero-length ones; the importer makes its own)
     out = npk.Out(js, bytes(bin_))
     out.write(dst)
 

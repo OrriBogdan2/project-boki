@@ -18,7 +18,16 @@ import sys
 import numpy as np
 from scipy.spatial import cKDTree
 
-ARM_BONES = ("LeftShoulder", "LeftArm", "LeftForeArm", "LeftHand", "RightShoulder", "RightArm", "RightForeArm", "RightHand")
+ARM_BONES = (
+    "LeftShoulder",
+    "LeftArm",
+    "LeftForeArm",
+    "LeftHand",
+    "RightShoulder",
+    "RightArm",
+    "RightForeArm",
+    "RightHand",
+)
 ARM_SEGMENTS = (("LeftArm", "LeftHand"), ("RightArm", "RightHand"))  # shoulder to hand, the sleeve's axis
 SLEEVE_TIP = 0.12  # m: the sleeve's axis runs this far below the hand bone (the fingers)
 SLEEVE_NEAR = 0.12  # m: from the arm's axis a vertex keeps its arm weight
@@ -106,7 +115,6 @@ def main():
     heads = {n: np.linalg.inv(ibm[i].T)[:3, 3] for i, n in enumerate(names)}
     mask = np.concatenate([np.full(c, s) for c, s in zip(counts, smooth)])
     pin_to_body(dense, all_pos, mask, names, heads)
-    pin_head(dense, all_pos, names, heads)
     pairs = cKDTree(all_pos).query_ball_point(all_pos[mask], radius)
     idx = np.flatnonzero(mask)
     for _ in range(passes):
@@ -116,6 +124,7 @@ def main():
             k = 1.0 - d / radius
             nxt[i] = (dense[nb] * k[:, None]).sum(0) / k.sum()
         dense = nxt
+    pin_head(dense, all_pos, names, heads)  # (last: the smoothing across the hood's seams would pull it off the head)
     row = 0
     changed = 0
     for j, w in zip(joints, weights):
