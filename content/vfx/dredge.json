@@ -15,9 +15,12 @@
 			{"p": "ember", "way": "fwd", "n": 6, "speed": 6.0, "spread": 0.4, "grav": 4.0, "life": 0.18, "size": 0.05, "c": "gold", "c2": "hot"}
 		]},
 		"slug": {"net": false, "round": false, "end": "slug_end", "fx": [
-			{"p": "ribbon", "size": 0.2, "tail": 0.05, "head": 0.3, "head_len": 1.5, "life": 2.0, "c": "gold", "c2": "hot"}
+			{"p": "ribbon", "size": 0.42, "tail": 0.07, "head": 0.6, "head_len": 1.5, "life": 2.0, "c": "gold", "c2": "hot"}
 		]},
-		"slug_end": {"net": false, "fx": [{"p": "flare", "size": 0.18, "grow": 1.0, "life": 0.3, "c": "brass", "c2": "char"}]},
+		"slug_end": {"net": false, "fx": [
+			{"p": "flare", "size": 0.5, "grow": 1.0, "life": 0.2, "c": "gold", "c2": "hot"},
+			{"p": "star", "n": 3, "speed": 2.0, "spread": 1.0, "grav": 4.0, "life": 0.2, "size": 0.06, "c": "gold", "c2": "hot"}
+		]},
 		"arm_ghost": {"net": false, "fx": [{"p": "string", "xray": true, "size": 0.45, "c": "sludge", "c2": "arm"}]},
 		"stunned": {"net": false, "fx": [{"p": "vortex", "y": 2.6, "size": 0.6, "life": "t", "c": "anchor", "c2": "hot", "c3": "iron"}]},
 		"dive": {"net": false, "fx": [
@@ -29,7 +32,7 @@
 		"anchor_slam": {"fx": [
 			{"p": "sweep", "y": 0.25, "size": "r", "arc": 110, "band": 0.12, "life": 0.25, "c": "gold", "c2": "hot", "c3": "iron"},
 			{"p": "scorch", "shape": "disc", "fwd": 1.1, "size": 1.6, "life": 1.4, "c": "stone", "c2": "stone", "c3": "iron"},
-			{"p": "scorch", "shape": "cone", "arc": 110, "size": "r", "size_x": 0.7, "life": 1.2, "c": "stone", "c2": "stone", "c3": "iron"},
+			{"p": "scorch", "shape": "cone", "arc": 110, "size": "r", "size_x": 0.7, "life": 1.2, "c": "brass", "c2": "gold", "c3": "iron"},
 			{"p": "flare", "fwd": 1.1, "y": 0.3, "size": 2.2, "life": 0.08, "c": "brass", "c2": "hot"}
 		]},
 		"quake": {"fx": [
@@ -47,6 +50,6 @@
 			{"p": "flare", "y": 1.0, "size": 0.8, "life": 0.1, "c": "w1", "c2": "w1h", "unless": "w2"},
 			{"p": "flare", "y": 1.0, "size": 0.8, "life": 0.1, "c": "w2", "c2": "w2h", "when": "w2"}
 		]},
-		"anchor_fist": {"fx": [{"p": "fist", "fwd": "r", "fwd_x": 0.55, "size": 2.4, "pitch": -30, "drop": 3.6, "life": 0.68, "fall": 0.56, "cut": 0.56, "c": "main", "c2": "hot", "c3": "char"}]}
+		"anchor_fist": {"fx": [{"p": "fist", "fwd": "r", "fwd_x": 0.55, "size": 2.4, "pitch": -30, "drop": 3.6, "life": 0.68, "fall": 0.56, "cut": 0.56, "c": "gold", "c2": "hot", "c3": "char"}]}
 	}
 }
