@@ -8,6 +8,7 @@
                                                           pack image (only pack-meshy uses it); nothing else changes
   dredge_r31.py --backing OUT.glb IN.glb [--ring N]       r32: a reversed-winding backing under every fold zone of the
                                                           skin/dome/goo (see backing()), ink off on the folds
+  dredge_r31.py --strap-sink OUT.glb IN.glb [--sink M] [--sink-k N]   r37: strap band ends sink under the skin
   dredge_r31.py --relax OUT.glb IN.glb [--goo] [--knee] [--box B] [--target X] [--passes N]
                                                           skin weights blended toward their neighbours (r28's relax
                                                           loop) only where edges stretch past --target in any clip:
@@ -449,6 +450,43 @@ def seam_weld(o):
     glb_add_clips.write(o.out, js, b)
 
 
+def strap_sink(o):
+    """r37, review (r36 close 4.5): the y270 shoulder shows a pale triangle with a black centre and a black sliver at the
+    strap end = the r22 band's square end cap (UVs on the texture's last row, seen edge-on with its ink). Fix: over the
+    last --sink-k stations of each band end the band narrows and sinks under the skin along its own normal (smoothstep,
+    --sink m at the end), so it ends inside the body and no cap faces the camera. Band layout (dredge_r22.strap_r22):
+    per side 8 rings x ns stations (ring 0 = top face, its NORMAL = the skin normal) + 8 cap verts. Weights unchanged."""
+    js, b = glb_add_clips.read(o.inp)
+    prims = js["meshes"][0]["primitives"]
+    pr = next(p for p in prims if js["materials"][p["material"]]["name"] == "strap-leather")
+    P = acc(js, b, pr["attributes"]["POSITION"]).astype(float).copy()
+    NR = acc(js, b, pr["attributes"]["NORMAL"]).astype(float)
+    cut = int(np.nonzero(np.diff(np.sign(P[:, 0])))[0][0]) + 1
+    k = o.sink_k
+    for base, n in ((0, cut), (cut, len(P) - cut)):
+        ns = (n - 8) // 8
+        assert 8 * ns + 8 == n, "strap layout changed"
+        R = P[base:base + 8 * ns].reshape(8, ns, 3)
+        nr = NR[base:base + ns]
+        mid = R.mean(0)
+        t = np.zeros(ns)
+        e = np.clip(1.0 - np.arange(k) / float(k), 0.0, 1.0)
+        e = e * e * (3 - 2 * e)
+        t[:k] = np.maximum(t[:k], e)
+        t[ns - k:] = np.maximum(t[ns - k:], e[::-1])
+        R[:] = R - (R - mid) * (0.6 * t)[None, :, None] - (o.sink * t)[None, :, None] * nr[None]
+        P[base:base + 8 * ns] = R.reshape(-1, 3)
+        caps = P[base + 8 * ns:base + n]
+        caps[:4] = R[[0, 1, 4, 5], 0].mean(0)  # caps collapse onto the sunk end point
+        caps[4:] = R[[0, 1, 4, 5], -1].mean(0)
+        P[base + 8 * ns:base + n] = caps
+        print("strap side %d: %d stations, ends sunk %.3f m over %d" % (base > 0, ns, o.sink, k))
+    pr["attributes"] = dict(pr["attributes"], POSITION=add_acc(js, b, P.astype(np.float32), 5126, "VEC3", minmax=True))
+    b = compact(js, b)
+    js["buffers"][0]["byteLength"] = len(b)
+    glb_add_clips.write(o.out, js, b)
+
+
 def main():
     ap = argparse.ArgumentParser()
     grp = ap.add_mutually_exclusive_group(required=True)
@@ -459,6 +497,7 @@ def main():
     grp.add_argument("--abduct", type=float, help="r33: deg the goo shoulder turns out in --clips")
     grp.add_argument("--pack-ink", action="store_true", help="r33: no ink + backing on the pack base and open rim")
     grp.add_argument("--seam-weld", action="store_true", help="r36: dome seam takes the skin's weights (D1/D2)")
+    grp.add_argument("--strap-sink", action="store_true", help="r37: strap ends sink under the skin (no end cap)")
     ap.add_argument("out")
     ap.add_argument("inp")
     ap.add_argument("meshy", nargs="?")
@@ -485,6 +524,8 @@ def main():
     ap.add_argument("--seam-mat", default="skin-native-dome", help="--seam-weld: the material welded onto skin-native")
     ap.add_argument("--skin-too", action="store_true", help="--seam-weld: coincident skin verts share their weights")
     ap.add_argument("--ramp", type=float, default=0.05, help="--seam-weld: m the new weights fade over into the dome")
+    ap.add_argument("--sink", type=float, default=0.02, help="--strap-sink: m the band end goes under the skin")
+    ap.add_argument("--sink-k", type=int, default=6, help="--strap-sink: stations the sink fades over")
     o = ap.parse_args()
     stages = (
         ("pack_export", pack_export),
@@ -492,6 +533,7 @@ def main():
         ("backing", backing),
         ("pack_ink", pack_ink),
         ("seam_weld", seam_weld),
+        ("strap_sink", strap_sink),
     )
     run = next((f for k, f in stages if getattr(o, k)), abduct if o.abduct is not None else relax)
     run(o)
