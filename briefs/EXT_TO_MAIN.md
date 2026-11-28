@@ -11514,3 +11514,4 @@ READY ext/garden-prop-textures e8ff106d97cff9f48e8806cfe7c8034e384a2c1e (4 prop 
 READY ext/ui-boki-pronoun-lint b935d1436d5d5dd81ba7789ce1dcebf0cf9b609a (--tg-text-check fails a Boki called it: 21 + 24 hits fixed with {he}/{him}; health OK)
 READY ext/garden-prop-textures fea63489622033b7262ccaca168aacf7a7a44c91 (232 garden 3D textures to VRAM compressed, texture-budget fails 414 -> 178; GARDEN_PERF inventory + blurry list)
 READY ext/breed-parent-traits f5a86ee6ec1940bdce9a70b4f63fc863aa396939 (hatch card + Family tab name the parent per inherited trait, e.g. 'Ember lean from Pip'; asserts in --base-breed-check)
+READY ext/kit-parity-stale-snaps 9ec2f49dac (KIT_PARITY snapshot lines, Coin Blast/Palm Lance names, Still open current)
