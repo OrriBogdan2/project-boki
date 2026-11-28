@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cdlbotoret84c"
-path="res://.godot/imported/shadow_Image_0.webp-e5239dee47011f0b9594502233f9405f.ctex"
+path.s3tc="res://.godot/imported/shadow_Image_0.webp-e5239dee47011f0b9594502233f9405f.s3tc.ctex"
+path.etc2="res://.godot/imported/shadow_Image_0.webp-e5239dee47011f0b9594502233f9405f.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "e1a8321dae3aeb2ea7ce54b7857d7d20"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/eggs/shadow_Image_0.webp"
-dest_files=["res://.godot/imported/shadow_Image_0.webp-e5239dee47011f0b9594502233f9405f.ctex"]
+dest_files=["res://.godot/imported/shadow_Image_0.webp-e5239dee47011f0b9594502233f9405f.s3tc.ctex", "res://.godot/imported/shadow_Image_0.webp-e5239dee47011f0b9594502233f9405f.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

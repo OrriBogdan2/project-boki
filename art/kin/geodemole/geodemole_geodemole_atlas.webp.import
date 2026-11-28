@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cbqlvvy7j4a6e"
-path="res://.godot/imported/geodemole_geodemole_atlas.webp-e17e74a64de37aaf3d3b0e80bc84c729.ctex"
+path.s3tc="res://.godot/imported/geodemole_geodemole_atlas.webp-e17e74a64de37aaf3d3b0e80bc84c729.s3tc.ctex"
+path.etc2="res://.godot/imported/geodemole_geodemole_atlas.webp-e17e74a64de37aaf3d3b0e80bc84c729.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "3cfc524310809673d751c1fcb5d48813"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/geodemole/geodemole_geodemole_atlas.webp"
-dest_files=["res://.godot/imported/geodemole_geodemole_atlas.webp-e17e74a64de37aaf3d3b0e80bc84c729.ctex"]
+dest_files=["res://.godot/imported/geodemole_geodemole_atlas.webp-e17e74a64de37aaf3d3b0e80bc84c729.s3tc.ctex", "res://.godot/imported/geodemole_geodemole_atlas.webp-e17e74a64de37aaf3d3b0e80bc84c729.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

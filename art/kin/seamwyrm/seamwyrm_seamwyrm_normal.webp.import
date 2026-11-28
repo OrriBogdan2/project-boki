@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://t238c5ung8rc"
-path="res://.godot/imported/seamwyrm_seamwyrm_normal.webp-f701f49c6b1e2c21ce05d46c323bb674.ctex"
+path.s3tc="res://.godot/imported/seamwyrm_seamwyrm_normal.webp-f701f49c6b1e2c21ce05d46c323bb674.s3tc.ctex"
+path.etc2="res://.godot/imported/seamwyrm_seamwyrm_normal.webp-f701f49c6b1e2c21ce05d46c323bb674.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "98edf0c8b9fa0fdd2000733653e0fc0f"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/seamwyrm/seamwyrm_seamwyrm_normal.webp"
-dest_files=["res://.godot/imported/seamwyrm_seamwyrm_normal.webp-f701f49c6b1e2c21ce05d46c323bb674.ctex"]
+dest_files=["res://.godot/imported/seamwyrm_seamwyrm_normal.webp-f701f49c6b1e2c21ce05d46c323bb674.s3tc.ctex", "res://.godot/imported/seamwyrm_seamwyrm_normal.webp-f701f49c6b1e2c21ce05d46c323bb674.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
