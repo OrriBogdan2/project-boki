@@ -288,3 +288,13 @@ fits on one line. `--relics-fold-check` asserts the folds and that no Relic name
 Shots (1280x720, software renderer on rpc4, the same save as section 1): [expedition before](shots/ui-relics-grid/before_expedition.jpg) /
 [after](shots/ui-relics-grid/after_expedition.jpg); [Relics before](shots/ui-relics-grid/before_relics.jpg) /
 [after](shots/ui-relics-grid/after_relics.jpg) / [after, locked Relics unfolded](shots/ui-relics-grid/after_relics_all.jpg).
+
+## Pre-match hunter-pick countdown (ext/ui-pick-countdown, re-check of the 11-08 playtest note)
+
+The pick screen is `PrematchView` (`scripts/ui/prematch_view.gd`, state in `scripts/match/prematch.gd`). It is no longer 30 s: each turn is
+`Prematch.TURN` = 10 s, shown as `0:10` to `0:00`. The digits sit in the banner at the top centre, 88 px at 1080 (10% of the window height, 1280x720 gets 72 px, min `DIGITS_MIN`),
+with "YOUR TURN" and the lock-in line on the same row. Shots (software render): [1920x1080](shots/pick-countdown/1920x1080_full.png) /
+[red](shots/pick-countdown/1920x1080_red.png), [1280x720](shots/pick-countdown/1280x720_full.png) / [red](shots/pick-countdown/1280x720_red.png).
+Found off: only the last 3 s throbbed (the click ticks and the warm red already ran for 5 s). Fixed in that screen only: `PULSE_FROM` 3 -> 5, so the digits throb red
+(a pure scale and colour pulse, no floating words) for the whole last 5 s of your own turn. `--prematch-check` asserts the throb window is >= 5 s, the digits hold
+still above it and are red inside it.

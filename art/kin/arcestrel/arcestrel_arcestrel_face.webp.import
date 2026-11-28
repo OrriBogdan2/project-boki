@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dbs6lnxwyis45"
-path="res://.godot/imported/arcestrel_arcestrel_face.webp-a2d66f18248b61913837f293f222ecc8.ctex"
+path.s3tc="res://.godot/imported/arcestrel_arcestrel_face.webp-a2d66f18248b61913837f293f222ecc8.s3tc.ctex"
+path.etc2="res://.godot/imported/arcestrel_arcestrel_face.webp-a2d66f18248b61913837f293f222ecc8.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "3af24c9e4d6aa4ecdc9f8576494ab130"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/arcestrel/arcestrel_arcestrel_face.webp"
-dest_files=["res://.godot/imported/arcestrel_arcestrel_face.webp-a2d66f18248b61913837f293f222ecc8.ctex"]
+dest_files=["res://.godot/imported/arcestrel_arcestrel_face.webp-a2d66f18248b61913837f293f222ecc8.s3tc.ctex", "res://.godot/imported/arcestrel_arcestrel_face.webp-a2d66f18248b61913837f293f222ecc8.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

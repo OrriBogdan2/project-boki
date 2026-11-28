@@ -11,6 +11,7 @@ const CHECKS := {
 	# a blast: falloff curve by distance, no damage through rock, the armour ring pitched by the shell left
 	"--blast-parity-check": ["res://tools/blast_parity_check.gd", "blast_parity_check", null],
 	"--move-speed-check": ["res://tools/move_speed_check.gd", "move_speed_check", null],  # run, walk, crouch per Hunter
+	"--kit-refund-check": ["res://tools/kit_refund_check.gd", "kit_refund_check", null],  # refund/reset loops (11-27)
 	"--mob-fsm-check": ["res://tools/mob_fsm_check.gd", "mob_fsm_check", null],  # monster + boss machines (M9)
 	"--hearth-lamp-check": ["res://tools/hearth_lamp_check.gd", "hearth_lamp_check", null],  # Hearth Lamp revive beacon
 	"--utility-parity-check": ["res://tools/utility_parity_check.gd", "utility_parity_check", null],  # belt vs source
