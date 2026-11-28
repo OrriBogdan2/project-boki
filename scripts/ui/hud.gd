@@ -412,6 +412,7 @@ func _draw_world_labels() -> void:
 				_ctext(sp + Vector2(0, -26), String(mb.md["name"]), 15, Lairs.color_of((mb as Boss).lair), big)
 				var lr := Rect2(sp + Vector2(-50, -18), Vector2(100, 7))
 				_bar(lr, clampf(mb.hp / mb.max_hp, 0.0, 1.0), StealTell.fill(mb, Color("ff6a5a"), m.time))
+				StealTell.lead_strip(self, lr, mb)
 				StealTell.mark(self, Vector2(lr.end.x + 14, lr.get_center().y), mb)
 			continue
 		if m.lairs.boss_for(m.player) == mb:
@@ -429,7 +430,7 @@ func _draw_world_labels() -> void:
 					Icons.draw(c, String(mu.get("icon", "burst")) if mu is Dictionary else String(mu), Vector2(mx, sp.y - 8), 3.6, rc)
 					mx += 14.0
 			var ct := _chip_of(mb, bfrac)
-			_bar(br, bfrac, Color("e0b0ff") if mb.stagger_t > 0.0 else Color("ff8a6a"))
+			_bar(br, bfrac, StealTell.fill(mb, Color("e0b0ff") if mb.stagger_t > 0.0 else Color("ff8a6a"), m.time))
 			if ct > bfrac:
 				c.draw_rect(Rect2(br.position + Vector2(bw * bfrac, 0), Vector2(bw * (ct - bfrac), 6)), Color(1.0, 0.95, 0.88, 0.8))
 			_status_row(sp + Vector2(0, 18), mb)
@@ -2353,6 +2354,7 @@ func _draw_boss_bar(sz: Vector2, p: Hunter) -> void:
 	var enraged: bool = bb != null and bb.enraged
 	var hc := Color("ff5a4a") if enraged else (Color("e0b0ff") if b.stagger_t > 0.0 else Color("ff8a5a"))
 	c.draw_rect(Rect2(r.position, Vector2(w * frac, r.size.y)), StealTell.fill(b, hc, m.time))
+	StealTell.lead_strip(self, r, b)
 	StealTell.mark(self, Vector2(r.position.x + 9, r.end.y + 16), b)
 	for mk in [0.66, 0.33]:
 		c.draw_line(r.position + Vector2(w * mk, -3), r.position + Vector2(w * mk, r.size.y + 3), Color(1, 1, 1, 0.8), 2.0)
