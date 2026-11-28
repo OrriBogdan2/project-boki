@@ -164,3 +164,13 @@ Scripts: `~/gens/hunter-round-1124/sparkle/p11/tools/` (padall.py, bleed.py).
 - Bust stays the stance body (one step smaller than live, owner 11-26). geo_check PASS (worst clip 3.0 cm, hands ok).
 - art-gate game view: GAME 6.5, LIVE GAME 4.8 (stance alone 6.0). Open: grey panels at the crop-top bust sides (on the stance body too).
 Scripts: `~/gens/hunter-round-1124/sparkle/p14/tools/` (pad6.py).
+
+## 11-28 bust middle ground (ext/sparkle-chest-mid-1128, owner 11-27 "too small, flat; was too big before; smallish but noticeable, perky, circular")
+- Ends: live = 584e35f4ac (front peak z 130 mm, width 97 mm at y 1.30; behind the 152 mm hem lip, reads flat); older bigger = the glb before it (peak 161 mm, width 109 mm).
+  Same topology: only 3,799 bust vertices differ, POSITION and NORMAL only.
+- Pick (sheet A): per-vertex blend of those two bust buffers, x/y 60% toward live, z (projection) 30% toward live, bust lifted 6 mm inside
+  the smooth hem-to-chest window (zero at the hem): peak z 152 mm (+21 over live, -9 under the older one), width 102 mm. Narrower than the mid blend
+  with more projection = a rounder, perkier cup. Hem band, face, textures, weights, clips untouched; glb_compact'd (10.4 MB).
+  geo_check vs live PASS (worst 3.0 cm, held 0), --warden-native-check 856 checks 0 failed.
+- Options B (50/50 blend, peak 145) and C (peak 142) and renders: ~/gens/sparkle-chest-mid-1128 (tools/mid.py, sheet_sparkle_chest_mid.jpg).
+- Not Meshy-regenerated: Meshy has no geometry-edit call; both ends are Meshy-origin meshes and this blends them (as the earlier bust fit did).
