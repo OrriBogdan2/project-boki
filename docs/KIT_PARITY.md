@@ -271,6 +271,8 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 
 ## Hit shapes in game: Vex, Kael, Lace, Cinder (main 88b06b9e7, 2026-11-12)
 
+*Snapshot of 2026-11-12; current names and numbers: [KIT_PARITY.d/1126-vex-recheck.md](KIT_PARITY.d/1126-vex-recheck.md) (Vex RMB is now Coin Blast (was Burr Charge) and E is Palm Lance (was Longneedle)). Rows below keep the old numbers.*
+
 How: `--hit-shape-fine` (tools/hit_shape_fine.gd) fires each input of the four hunters at ONE training dummy moved around, in a match stepped at the game's 60 Hz, level 6 (rank 3 numbers apply): a scan along the aim line gives the nearest and farthest foe centre that still takes damage, a scan across the middle gives the lane, a scan round it the arc; the numbers below have the foe's circle taken off. `--hit-shape-shots` (tools/hit_shape_shots.gd) fires the same inputs at a field of dummies, each wearing its ground circle (its hitbox), at the gameplay camera: strips in `docs/shots/verify-hitbox-slice/`. Ours = `content/archetypes/<id>.json`; source = `sv/briefs/kits.md` (no sizes) and the footage sheets in `briefs/hero-ref` (1 bh = 1.8 m).
 
 What the game does with a number (so a row reads straight): areas (cone, ring, strip, disc, lane of a beam) take a foe in when its body circle, 0.40 m, touches them, so measured = content to 0.15 m. Bullets, hooks and swing rays take it in at body circle + 0.08 m + their own radius; a bullet starts 0.6 m ahead of the hunter and lives to the end of the 1/60 s step in which its range runs out (74 m/s: +1.2 m, 90 m/s: +1.5 m); a swing is a fan of 7 or 9 such rays 0.22 m wide, so its arc reads about 30 degrees wider than the drawn one (175 reads 206).
@@ -705,6 +707,8 @@ PARITY FIRST (DECISIONS 2026-11-07). Source: `the reference kit notes on the bri
 
 ## Starter trio re-check: Vex, Kael, Lace (2026-11-10, ext/release-integ-0244-fix ec3c9dafb)
 
+*Snapshot of 2026-11-10; current names and numbers: [KIT_PARITY.d/1126-vex-recheck.md](KIT_PARITY.d/1126-vex-recheck.md) and [KIT_PARITY.d/1127-kael-recheck.md](KIT_PARITY.d/1127-kael-recheck.md) (Vex RMB is now Coin Blast (was Burr Charge) and E is Palm Lance (was Longneedle)). Rows below keep the old numbers.*
+
 DECISIONS 2026-11-10: the first pick is Lace, Kael or Vex, so every new player touches these three. The last column of the three hero tables above is the re-measure, run in the Training Area (`Match.start({"training": true})`, a 10000 HP dummy, a clean `XDG_DATA_HOME`). The base is the release integration branch, not main: main has no `--kit-parity-check` or parity bench yet.
 
 **Method.** Each number is read from the dummy's HP over 60 Hz steps (first hit after the press, hit sizes, gaps) and from the kit's cooldown table; dashes are the hunter's travel with no keys held, aimed along +x. The same driver was run on origin/main d255acbee: every LMB, RMB, E and R number is identical there, so the integration broke none of them. The only changes are the dash lengths (the merged dash-feel pass: Vex tap 4.32 to 4.85 m, Lace 3.35 to 3.03 m, Kael 3.99 to 4.14 m), all toward the sourced figures. `--parity-bench-check` 19 ok, 0 FAIL; the bench panel reads the same hit and status events.
@@ -723,6 +727,8 @@ DECISIONS 2026-11-10: the first pick is Lace, Kael or Vex, so every new player t
 - **C. Zone ticks run 0.52 s, not 0.5.** `scripts/arch/kits/gunslinger_ult.gd:181-183` (Cinderfall) and `scripts/arch/kits/archer_kit.gd:401-404` (Hail Wall) reset the tick timer and drop the remainder, so 0.5 s costs 31 frames. 3% slow, same on main. Keep the remainder (`+= every`) in both.
 
 ## Crowd control: every stun, root, Ground, slow, Daze and knock effect (main d255acbee, 2026-11-09)
+
+*Snapshot of 2026-11-09; current names and numbers: [KIT_PARITY.d/1127-vex-daze.md](KIT_PARITY.d/1127-vex-daze.md) and [KIT_PARITY.d/1126-vex-recheck.md](KIT_PARITY.d/1126-vex-recheck.md) (Vex RMB is now Coin Blast (was Burr Charge) and E is Palm Lance (was Longneedle)). Rows below keep the old numbers.*
 
 Read from `content/archetypes/*.json` and the kit code. Source = the card text in `sv/briefs/kits.md` [D] and the footage reads in `briefs/hero-ref` [F] (5 fps, so a read is good to about +-0.2 s). **The card gives no CC duration or strength except Motley's (Snap 0.8 to 1.8 s, Black Hole 3.5 s, orb 6%) and the upgrade steps (Binding +0.3 s root, Primal Slam +0.1 s and +0.2 s stun).** Every other source row is a footage read or just the word "Slow", "Stun", "Daze". No silence and no knock-up (a launch that disables) is built anywhere, and none is in these 12 kits' cards except ref-bulwark's Faultline (queued, skipped). Self-slows (cast, charge, carry) are not CC and are left out. Albert's Faultline and Spin Dash are skipped (queued job). Sable's 30% bola slow stays (owner item 53).
 
@@ -758,6 +764,8 @@ monster): stars for stun, thorns for root, cords for Grounded, rings down the le
 - Ostra: decide 10% (wiki) or 6% (card read) for the full orb slow. Sable: pair stun 0.9 or about 1.8 s (no footage clip can time it; needs a match clip with two tied foes).
 
 ## Knock distances: every knock in the 12 kits (main cbb6b02f5, 2026-11-19, ext/feel-knock-table)
+
+*Snapshot of 2026-11-19; current names and numbers: [KIT_PARITY.d/1126-vex-recheck.md](KIT_PARITY.d/1126-vex-recheck.md) (Vex RMB is now Coin Blast (was Burr Charge) and E is Palm Lance (was Longneedle)). Rows below keep the old numbers.*
 
 Ours = the push (m/s) and lift in `content/archetypes/*.json` or the kit script, and where a standing medium Hunter
 comes to rest on flat ground with no keys held. Read off the shared knock curve as it is on main today (`--move-feel-check` prints
@@ -829,6 +837,8 @@ words, not a number. So nothing changed in the kits. The table's numbers come fr
   `knock_lace_04_m`, `knock_sparkle_04_m` and `knock_done_04` asserts now match the sweep; `knock_done_04` (>= 0.85, footage) is asserted on Storm Rod, the Joule spear's knock.
 
 ## Moving while casting: the slice four (main 88b06b9e7, 2026-11-12)
+
+*Snapshot of 2026-11-12; current names and numbers: [KIT_PARITY.d/1126-vex-recheck.md](KIT_PARITY.d/1126-vex-recheck.md) (Vex RMB is now Coin Blast (was Burr Charge) and E is Palm Lance (was Longneedle)). Rows below keep the old numbers.*
 
 Vex, Kael, Lace and Cinder, every held or cast ability (LMB hold, RMB hold or charge, E, R), the same columns as the
 eight-Hunter table of ext/cast-move-eight. **Source** is the walk speed inside the ability's frame window in the hero sheet
