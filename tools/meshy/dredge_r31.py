@@ -8,6 +8,10 @@
                                                           pack image (only pack-meshy uses it); nothing else changes
   dredge_r31.py --backing OUT.glb IN.glb [--ring N]       r32: a reversed-winding backing under every fold zone of the
                                                           skin/dome/goo (see backing()), ink off on the folds
+  dredge_r31.py --strap-sink OUT.glb IN.glb [--sink M] [--sink-k N]   r37: strap band ends sink under the skin
+  dredge_r31.py --fist-export OUT.glb IN.glb               r38: fist + skin cuff faces as one mesh (Meshy, no orig UV)
+  dredge_r31.py --fist-cuff OUT.glb IN.glb MESHY.glb [--fist-grade R,G,B]  r38: that Meshy mesh + image as the metal-fist prim, cuff
+                                                          faces out of the skin (see fist_cuff())
   dredge_r31.py --relax OUT.glb IN.glb [--goo] [--knee] [--box B] [--target X] [--passes N]
                                                           skin weights blended toward their neighbours (r28's relax
                                                           loop) only where edges stretch past --target in any clip:
@@ -44,18 +48,8 @@ def pack_prims(js, mat=PACK):
     return [p for p in js["meshes"][0]["primitives"] if js["materials"][p["material"]]["name"] == mat]
 
 
-def pack_export(o):
-    js, b = load(o.inp)
-    P, N, UV, F = [], [], [], []
-    for pr in pack_prims(js, o.mat):
-        F.append(acc(js, b, pr["indices"]).reshape(-1, 3).astype(np.uint32) + sum(len(q) for q in P))
-        P.append(acc(js, b, pr["attributes"]["POSITION"]).astype(np.float32))
-        N.append(acc(js, b, pr["attributes"]["NORMAL"]).astype(np.float32))
-        UV.append(acc(js, b, pr["attributes"]["TEXCOORD_0"]).astype(np.float32))
-    P, N, UV, F = (np.concatenate(x) for x in (P, N, UV, F))
-    if o.turn:
-        P[:, [0, 2]] *= -1
-        N[:, [0, 2]] *= -1
+def _part_glb(path, P, N, UV, F):
+    """One untextured mesh (y min shifted to 0) for a Meshy retexture."""
     P -= np.r_[0.0, P[:, 1].min(), 0.0].astype(np.float32)
     out = {
         "asset": {"version": "2.0"},
@@ -86,7 +80,22 @@ def pack_export(o):
     }
     ob += b"\0" * (-len(ob) % 4)
     out["buffers"][0]["byteLength"] = len(ob)
-    write(o.out, out, ob)
+    write(path, out, ob)
+
+
+def pack_export(o):
+    js, b = load(o.inp)
+    P, N, UV, F = [], [], [], []
+    for pr in pack_prims(js, o.mat):
+        F.append(acc(js, b, pr["indices"]).reshape(-1, 3).astype(np.uint32) + sum(len(q) for q in P))
+        P.append(acc(js, b, pr["attributes"]["POSITION"]).astype(np.float32))
+        N.append(acc(js, b, pr["attributes"]["NORMAL"]).astype(np.float32))
+        UV.append(acc(js, b, pr["attributes"]["TEXCOORD_0"]).astype(np.float32))
+    P, N, UV, F = (np.concatenate(x) for x in (P, N, UV, F))
+    if o.turn:
+        P[:, [0, 2]] *= -1
+        N[:, [0, 2]] *= -1
+    _part_glb(o.out, P, N, UV, F)
     print("wrote %s: pack %d verts %d tris, uv %s..%s" % (o.out, len(P), len(F), UV.min(0), UV.max(0)))
 
 
@@ -362,6 +371,262 @@ def pack_ink(o):
     glb_add_clips.write(o.out, js, b)
 
 
+def seam_weld(o):
+    """r36, review D1 (black slit + ragged dark edges on the goo-side shoulder cap, held in Idle/Crouch y270) and D2
+    (torn blotches at the goo root, Attack f81-83): the socket dome (skin-native-dome) meets the skin on shared
+    positions, but its seam vertices carry other weights (dome: RightShoulder; skin: headfront/Head/RightShoulder), so
+    the seam opens in every clip (rest 0; Idle 8 cm, run 10 cm, Attack 27 cm) and the ink shell shows through. The
+    r28 weld keys on position AND weights, so the stretch metric never saw it. Fix: each dome seam vertex takes the
+    weights of the skin vertex it sits on; dome vertices within --ramp m of the seam fade from those to their own
+    (smoothstep). Skin weights are untouched (--skin-too: coincident skin vertices take their group mean). Every prim
+    sharing the dome's weight accessor (its backing) follows."""
+    from scipy.spatial import cKDTree
+
+    js, b = glb_add_clips.read(o.inp)
+    prims = js["meshes"][0]["primitives"]
+    nb = len(js["skins"][0]["joints"])
+    names = [js["materials"][p["material"]]["name"] for p in prims]
+
+    def dense(pr):
+        J = acc(js, b, pr["attributes"]["JOINTS_0"]).astype(int)
+        W = acc(js, b, pr["attributes"]["WEIGHTS_0"]).astype(float)
+        D = np.zeros((len(J), nb))
+        np.add.at(D, (np.repeat(np.arange(len(J)), J.shape[1]), J.ravel()), W.ravel())
+        return D
+
+    from scipy.sparse import coo_matrix
+    from scipy.sparse.csgraph import connected_components
+
+    def put(pr, D, done):
+        J4 = np.argsort(-D, 1)[:, :4]
+        W4 = np.take_along_axis(D, J4, 1)
+        W4 /= W4.sum(1, keepdims=True)
+        J4[W4 == 0] = 0
+        ja = add_acc(js, b, J4.astype(np.uint16), 5123, "VEC4")
+        wa = add_acc(js, b, W4.astype(np.float32), 5126, "VEC4")
+        done[pr["attributes"]["WEIGHTS_0"]] = (ja, wa)
+
+    to, seen, done = [p for p, n in zip(prims, names) if n == "skin-native"], set(), {}
+    SP, SD = [], []
+    for pr in to:
+        if pr["attributes"]["WEIGHTS_0"] in seen:
+            continue  # (a backing: same vertices)
+        seen.add(pr["attributes"]["WEIGHTS_0"])
+        P = acc(js, b, pr["attributes"]["POSITION"]).astype(float)
+        D = dense(pr)
+        if o.skin_too:  # coincident skin vertices (UV splits) with other weights tear too: each takes the group mean
+            pq = cKDTree(P).query_pairs(2e-4, output_type="ndarray")
+            pq = pq[np.abs(D[pq[:, 0]] - D[pq[:, 1]]).sum(1) > 1e-3]
+            if len(pq):
+                _, lab = connected_components(coo_matrix((np.ones(len(pq)), (pq[:, 0], pq[:, 1])), (len(P), len(P))))
+                hit = np.zeros(len(P), bool)
+                hit[pq.ravel()] = True
+                M = np.zeros((lab.max() + 1, nb))
+                np.add.at(M, lab[hit], D[hit])
+                M /= np.bincount(lab[hit], minlength=len(M))[:, None].clip(1)
+                D[hit] = M[lab[hit]]
+                put(pr, D, done)
+                print("skin-native: %d coincident verts with split weights -> group mean" % hit.sum())
+        SP.append(P)
+        SD.append(D)
+    SP, SD = np.concatenate(SP), np.concatenate(SD)
+    tree = cKDTree(SP)
+    for pr, n in zip(prims, names):
+        if n != o.seam_mat or pr["attributes"]["WEIGHTS_0"] in done:
+            continue
+        P = acc(js, b, pr["attributes"]["POSITION"]).astype(float)
+        D = dense(pr)
+        d, i = tree.query(P)
+        seam = d < 2e-4
+        Ds = D.copy()
+        Ds[seam] = SD[i[seam]]
+        dd, k = cKDTree(P[seam]).query(P)
+        t = np.clip(dd / o.ramp, 0.0, 1.0)[:, None] if o.ramp > 0 else (dd > 0)[:, None].astype(float)
+        t = t * t * (3 - 2 * t)
+        N = (1 - t) * Ds[np.where(seam)[0][k]] + t * D
+        N[seam] = SD[i[seam]]
+        put(pr, N, done)
+        print(
+            "%s: %d verts, %d on the skin seam, %d in the %.2f m fade"
+            % (n, len(P), seam.sum(), (t[:, 0] < 1).sum() - seam.sum(), o.ramp)
+        )
+    for pr in prims:
+        w = pr["attributes"].get("WEIGHTS_0")
+        if w in done:
+            pr["attributes"] = dict(pr["attributes"], JOINTS_0=done[w][0], WEIGHTS_0=done[w][1])
+    b = compact(js, b)
+    js["buffers"][0]["byteLength"] = len(b)
+    glb_add_clips.write(o.out, js, b)
+
+
+def strap_sink(o):
+    """r37, review (r36 close 4.5): the y270 shoulder shows a pale triangle with a black centre and a black sliver
+    at the strap end = the r22 band's square end cap (UVs on the texture's last row, seen edge-on with its ink). Fix: over the
+    last --sink-k stations of each band end the band narrows and sinks under the skin along its own normal (smoothstep,
+    --sink m at the end), so it ends inside the body and no cap faces the camera. Band layout (dredge_r22.strap_r22):
+    per side 8 rings x ns stations (ring 0 = top face, its NORMAL = the skin normal) + 8 cap verts.
+    Weights unchanged."""
+    js, b = glb_add_clips.read(o.inp)
+    prims = js["meshes"][0]["primitives"]
+    pr = next(p for p in prims if js["materials"][p["material"]]["name"] == "strap-leather")
+    P = acc(js, b, pr["attributes"]["POSITION"]).astype(float).copy()
+    NR = acc(js, b, pr["attributes"]["NORMAL"]).astype(float)
+    cut = int(np.nonzero(np.diff(np.sign(P[:, 0])))[0][0]) + 1
+    k = o.sink_k
+    for base, n in ((0, cut), (cut, len(P) - cut)):
+        ns = (n - 8) // 8
+        assert 8 * ns + 8 == n, "strap layout changed"
+        R = P[base:base + 8 * ns].reshape(8, ns, 3)
+        nr = NR[base:base + ns]
+        mid = R.mean(0)
+        t = np.zeros(ns)
+        e = np.clip(1.0 - np.arange(k) / float(k), 0.0, 1.0)
+        e = e * e * (3 - 2 * e)
+        t[:k] = np.maximum(t[:k], e)
+        t[ns - k:] = np.maximum(t[ns - k:], e[::-1])
+        R[:] = R - (R - mid) * (0.6 * t)[None, :, None] - (o.sink * t)[None, :, None] * nr[None]
+        P[base:base + 8 * ns] = R.reshape(-1, 3)
+        caps = P[base + 8 * ns:base + n]
+        caps[:4] = R[[0, 1, 4, 5], 0].mean(0)  # caps collapse onto the sunk end point
+        caps[4:] = R[[0, 1, 4, 5], -1].mean(0)
+        P[base + 8 * ns:base + n] = caps
+        print("strap side %d: %d stations, ends sunk %.3f m over %d" % (base > 0, ns, o.sink, k))
+    pr["attributes"] = dict(pr["attributes"], POSITION=add_acc(js, b, P.astype(np.float32), 5126, "VEC3", minmax=True))
+    b = compact(js, b)
+    js["buffers"][0]["byteLength"] = len(b)
+    glb_add_clips.write(o.out, js, b)
+
+CUFF_BOX = ((0.38, 0.85, -0.35), (0.85, 1.3, 0.15))  # rest m: face centroids round the skin's gauntlet cuff
+CUFF_RIM = (1.165, 0.6, 0.44)  # the cuff's top rim plane: y < a + kx (x - 0.53) + kz (z + 0.07) (it tilts down to -z, -x)
+
+
+def _cuff(js, b):
+    """The skin prim's cuff faces (in CUFF_BOX, under the CUFF_RIM plane, so the forearm above the rim stays skin)
+    and the backing prim's faces under them: [(prim, F, mask)]."""
+    prims = js["meshes"][0]["primitives"]
+    skin = [p for p in prims if js["materials"][p["material"]]["name"] == "skin-native"]
+    lo, hi = np.array(CUFF_BOX)
+    out = []
+    for pr in skin:
+        if pr["attributes"]["POSITION"] != skin[0]["attributes"]["POSITION"]:
+            continue
+        P = acc(js, b, pr["attributes"]["POSITION"]).astype(float)
+        F = acc(js, b, pr["indices"]).reshape(-1, 3).astype(np.int64)
+        C = P[F].mean(1)
+        a, kx, kz = CUFF_RIM
+        rim = C[:, 1] < a + kx * (C[:, 0] - 0.53) + kz * (C[:, 2] + 0.07)
+        out.append((pr, F, ((C > lo) & (C < hi)).all(1) & rim))
+    return out
+
+
+def _fist_src(js, b):
+    """Fist prim + the skin cuff faces as one mesh: P, N, UV (cuff: 0), J, W, F (fist first)."""
+    fist = pack_prims(js, "metal-fist")[0]
+    pr, F0, m = _cuff(js, b)[0]
+    used, Fc = np.unique(F0[m], return_inverse=True)
+    A = [{k: acc(js, b, p["attributes"][k]) for k in ("POSITION", "NORMAL", "TEXCOORD_0", "JOINTS_0", "WEIGHTS_0")}
+         for p in (fist, pr)]
+    A[1] = {k: v[used] for k, v in A[1].items()}
+    A[1]["TEXCOORD_0"] = np.zeros_like(A[1]["TEXCOORD_0"])
+    Ff = acc(js, b, fist["indices"]).reshape(-1, 3).astype(np.int64)
+    F = np.concatenate([Ff, Fc.reshape(-1, 3) + len(A[0]["POSITION"])])
+    P, N, UV, J, W = (np.concatenate([A[0][k], A[1][k]]) for k in ("POSITION", "NORMAL", "TEXCOORD_0", "JOINTS_0", "WEIGHTS_0"))
+    return fist, P.astype(np.float32), N.astype(np.float32), UV.astype(np.float32), J, W, F
+
+
+def fist_export(o):
+    """r38: the gauntlet fist + the skin's pale cuff above it as one mesh for a Meshy retexture (no original UVs: the
+    cuff has none in the fist's atlas; fist_cuff maps Meshy's own UVs back by 3D)."""
+    js, b = load(o.inp)
+    _, P, N, UV, _, _, F = _fist_src(js, b)
+    _part_glb(o.out, P, N, UV, F.astype(np.uint32))
+    print("wrote %s: fist+cuff %d verts %d tris" % (o.out, len(P), len(F)))
+
+
+def _fist_grade(im, UV, F, target):
+    """r38: Meshy's fist+cuff image is lit bright in its own thumbnail but its texels are dark (face-centroid median
+    ~57/255) and the toon metal slot darkens it again, so in game the gauntlet read as a black blob. Fill the black
+    UV gutters with the nearest island colour (mips at the match camera averaged them in), then, given target
+    "R,G,B", a per-channel gamma so the median texel under the face centroids lands on it (lifts the gaps without
+    clipping the rivet highlights)."""
+    from PIL import ImageDraw
+    from scipy.ndimage import distance_transform_edt
+
+    H, Wd = im.size[1], im.size[0]
+    mk = Image.new("L", (Wd, H), 0)
+    dr = ImageDraw.Draw(mk)
+    for t in UV[F] * (Wd, H):
+        dr.polygon([tuple(p) for p in t], fill=255, outline=255)
+    a = np.asarray(im).astype(float)
+    inside = np.asarray(mk) > 0
+    _, (iy, ix) = distance_transform_edt(~inside, return_indices=True)
+    a = a[iy, ix]
+    if target:
+        c = UV[F].mean(1)
+        s = a[np.clip((c[:, 1] * H).astype(int), 0, H - 1), np.clip((c[:, 0] * Wd).astype(int), 0, Wd - 1)]
+        med = np.clip(np.median(s, 0), 1, 254) / 255
+        g = np.log(np.array([float(v) for v in target.split(",")]) / 255) / np.log(med)
+        a = 255 * (a / 255) ** g
+        print("fist grade: median %s -> %s, gamma %s" % ((med * 255).round(), target, g.round(3)))
+    print("fist gutter: %.1f%% of texels filled" % (100 * (~inside).mean()))
+    return Image.fromarray(np.clip(a + 0.5, 0, 255).astype(np.uint8))
+
+
+def fist_cuff(o):
+    """r38, review (r37 game 6.0): the gauntlet reads two-tone, a brown Meshy fist under a pale lavender cuff (skin
+    atlas texels), against the 2D's one grey iron. The metal-fist prim becomes Meshy's retextured fist+cuff mesh
+    (fist_export): Meshy's faces and UVs, each vertex's position, normal and skin weights from the nearest source
+    vertex (same surface, so ~0 m off); its image replaces the fist image; the cuff faces leave the skin prim and its
+    backing (their vertices stay, so the skin keeps its shape and no seam opens)."""
+    js, b = glb_add_clips.read(o.inp)
+    fist, P, N, _, J, W, _ = _fist_src(js, b)
+    MP, MUV, MF, img = meshy_part(o.meshy)
+    Q = P.astype(float) - np.r_[0.0, P[:, 1].min(), 0.0]
+    s = np.ptp(Q, 0).max() / np.ptp(MP, 0).max()
+    MP = (MP - (MP.min(0) + MP.max(0)) / 2) * s + (Q.min(0) + Q.max(0)) / 2
+    from scipy.spatial import cKDTree
+
+    d, i = cKDTree(Q).query(MP)
+    print("meshy %d verts %d tris, scale %.4f, nearest m: median %.5f p99 %.5f max %.5f"
+          % (len(MP), len(MF), s, np.median(d), np.percentile(d, 99), d.max()))
+    assert np.percentile(d, 99) < 0.004, "Meshy mesh does not sit on the source"
+    MF = MF.astype(np.int64)
+    fn = np.cross(P[i][MF[:, 1]] - P[i][MF[:, 0]], P[i][MF[:, 2]] - P[i][MF[:, 0]])
+    if (np.einsum("ij,ij->i", fn, N[i][MF].sum(1)) < 0).mean() > 0.5:
+        MF = MF[:, [0, 2, 1]]
+        print("meshy winding flipped")
+    fist["attributes"] = {
+        "POSITION": add_acc(js, b, P[i].astype(np.float32), 5126, "VEC3", minmax=True),
+        "NORMAL": add_acc(js, b, N[i].astype(np.float32), 5126, "VEC3"),
+        "TEXCOORD_0": add_acc(js, b, MUV.astype(np.float32), 5126, "VEC2"),
+        "JOINTS_0": add_acc(js, b, J[i].astype(np.uint16), 5123, "VEC4"),
+        "WEIGHTS_0": add_acc(js, b, W[i].astype(np.float32), 5126, "VEC4"),
+    }
+    fist["indices"] = add_acc(js, b, MF.astype(np.uint32).ravel(), 5125, "SCALAR", 34963)
+    cuff = _cuff(js, b)
+    keys = {tuple(sorted(t)) for t in cuff[0][1][cuff[0][2]]}
+    for pr, F, m in cuff:
+        drop = m | np.array([tuple(sorted(t)) in keys for t in F])
+        pr["indices"] = add_acc(js, b, F[~drop].astype(np.uint32).ravel(), 5125, "SCALAR", 34963)
+        print("skin prim: %d of %d faces moved to the fist" % (drop.sum(), len(F)))
+    t = js["materials"][fist["material"]]["pbrMetallicRoughness"]["baseColorTexture"]["index"]
+    users = [m for m in js["materials"] if m.get("pbrMetallicRoughness", {}).get("baseColorTexture", {}).get("index") == t]
+    assert all(m["name"] == "metal-fist" for m in users), "fist texture shared"
+    size = min(o.size, img.size[0])
+    im = img.convert("RGB").resize((size, size), Image.LANCZOS) if img.size[0] != size else img.convert("RGB")
+    im = _fist_grade(im, MUV, MF, o.fist_grade)
+    jb = io.BytesIO()
+    im.save(jb, "JPEG", quality=90)
+    js["images"][js["textures"][t]["source"]] = {
+        "bufferView": add_view(js, b, np.frombuffer(jb.getvalue(), np.uint8)),
+        "mimeType": "image/jpeg",
+    }
+    b = compact(js, b)
+    js["buffers"][0]["byteLength"] = len(b)
+    glb_add_clips.write(o.out, js, b)
+    print("wrote %s: fist+cuff image %d px from %s" % (o.out, size, o.meshy))
+
+
 def main():
     ap = argparse.ArgumentParser()
     grp = ap.add_mutually_exclusive_group(required=True)
@@ -371,11 +636,16 @@ def main():
     grp.add_argument("--backing", action="store_true")
     grp.add_argument("--abduct", type=float, help="r33: deg the goo shoulder turns out in --clips")
     grp.add_argument("--pack-ink", action="store_true", help="r33: no ink + backing on the pack base and open rim")
+    grp.add_argument("--seam-weld", action="store_true", help="r36: dome seam takes the skin's weights (D1/D2)")
+    grp.add_argument("--strap-sink", action="store_true", help="r37: strap ends sink under the skin (no end cap)")
+    grp.add_argument("--fist-export", action="store_true", help="r38: fist + skin cuff as one mesh for Meshy")
+    grp.add_argument("--fist-cuff", action="store_true", help="r38: Meshy's fist+cuff mesh/image as the metal-fist")
     ap.add_argument("out")
     ap.add_argument("inp")
     ap.add_argument("meshy", nargs="?")
     ap.add_argument("--turn", action="store_true")
     ap.add_argument("--size", type=int, default=2048, help="pack image size cap (px)")
+    ap.add_argument("--fist-grade", default="", help="r38 --fist-cuff: R,G,B the fist's median texel is graded to")
     ap.add_argument("--goo", action="store_true")
     ap.add_argument("--knee", action="store_true")
     ap.add_argument(
@@ -394,8 +664,22 @@ def main():
     ap.add_argument("--mat", default=PACK, help="--pack-export/--pack-tex: the material (r33: metal-fist)")
     ap.add_argument("--clips", default="run", help="--abduct: comma list of clips")
     ap.add_argument("--bone", default="RightArm", help="--abduct: the goo shoulder (Meshy Right = goo side)")
+    ap.add_argument("--seam-mat", default="skin-native-dome", help="--seam-weld: the material welded onto skin-native")
+    ap.add_argument("--skin-too", action="store_true", help="--seam-weld: coincident skin verts share their weights")
+    ap.add_argument("--ramp", type=float, default=0.05, help="--seam-weld: m the new weights fade over into the dome")
+    ap.add_argument("--sink", type=float, default=0.02, help="--strap-sink: m the band end goes under the skin")
+    ap.add_argument("--sink-k", type=int, default=6, help="--strap-sink: stations the sink fades over")
     o = ap.parse_args()
-    stages = (("pack_export", pack_export), ("pack_tex", pack_tex), ("backing", backing), ("pack_ink", pack_ink))
+    stages = (
+        ("pack_export", pack_export),
+        ("pack_tex", pack_tex),
+        ("backing", backing),
+        ("pack_ink", pack_ink),
+        ("seam_weld", seam_weld),
+        ("strap_sink", strap_sink),
+        ("fist_export", fist_export),
+        ("fist_cuff", fist_cuff),
+    )
     run = next((f for k, f in stages if getattr(o, k)), abduct if o.abduct is not None else relax)
     run(o)
 
