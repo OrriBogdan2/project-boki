@@ -26,6 +26,8 @@ var model: Node3D = null
 var mats: Array = []
 var flash_t := 0.0
 var flash_tint := Color.WHITE  # the hit flash's colour (a kit sets it with the hit; white again once the flash ends)
+var outline_t := 0.0  # s left of the hit's edge pulse (ImpactWeight.outline_s; hero_toon rim_pulse)
+var outline_len := 0.001  # s the current edge pulse started with
 var shell_t := 0.0  # s the body flash stays armour-coloured (Juice sets it on an armour hit or break)
 var freeze_t := 0.0  # visual hit-pause
 var burn_t := 0.0
@@ -77,6 +79,7 @@ var flinch := Vector3.ZERO
 var _flash_set := -1.0
 var _flash_col := Color.WHITE
 var _flash_n := -1
+var _pulse_set := 0.0
 var _held := Vector3.INF
 
 
@@ -388,6 +391,8 @@ func slide(dt: float, guard := false) -> bool:
 func tick_status(dt: float) -> void:
 	if flash_t > 0.0:
 		flash_t -= dt
+	if outline_t > 0.0:
+		outline_t -= dt
 	if shell_t > 0.0:
 		shell_t -= dt
 	if freeze_t > 0.0:
@@ -453,6 +458,14 @@ func net_follow(dt: float) -> void:
 	vel = net_vel
 
 
+## A hit of tier `w` landed (ImpactWeight): the silhouette edge pulses for the tier's outline time (none for a tick).
+func pulse_edge(w: String) -> void:
+	var s := ImpactWeight.outline_s(w)
+	if s > 0.0:
+		outline_t = maxf(outline_t, s)
+		outline_len = outline_t
+
+
 ## Tints the body: the hit flash (white or flash_tint; the shell's cyan while shell_t runs), else the wash
 ## (Spirit Walk), else the DoT tint (DotLook).
 func show_flash(hit: float) -> void:
@@ -475,6 +488,13 @@ func show_flash(hit: float) -> void:
 		for mt in mats:
 			mt.set_shader_parameter("flash", f)
 			mt.set_shader_parameter("flash_color", fc)
+	# the hit's edge pulse: full as the flash lets go, easing out over the tier's outline time
+	var pk := clampf(outline_t / outline_len, 0.0, 1.0)
+	pk = snappedf(pk * pk, 0.125)  # (8 steps: a few material sets per pulse, not one a frame)
+	if pk != _pulse_set:
+		_pulse_set = pk
+		for mt in mats:
+			mt.set_shader_parameter("rim_pulse", pk)
 
 
 func render(delta: float, alpha: float) -> void:

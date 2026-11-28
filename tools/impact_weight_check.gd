@@ -132,6 +132,11 @@ func _rules() -> void:
 		"heavy %d ms is under the footage bound and the cap" % ms[2]
 	)
 	ok(not bool(tiers["light"]["attacker"]), "a light poke never holds the one who threw it")
+	var ol := ImpactWeight.TIERS.map(func(w): return roundi(ImpactWeight.outline_s(w) * 1000.0))
+	ok(
+		ol == [200, 250, 500] and ImpactWeight.outline_s("") == 0.0,
+		"the edge pulses 200 / 250 / 500 ms by tier, a tick none: %s" % [ol]
+	)
 
 
 func _named() -> void:
@@ -186,7 +191,7 @@ func _presses(m: Match, hero: String) -> void:
 		var seen_t := float(Feel._pair.get(pair, [-9.0, 0])[0])
 		# per step, only on a step the hunter's own hit landed (Feel's pair record moved): the dummy's hold and
 		# flash, your freeze; your camera on every step. (The hunter's Boki hits the dummy too: those steps skip.)
-		var pk := {"hold": 0.0, "flash": 0.0, "freeze": 0.0, "shake": 0.0, "tiers": {}}
+		var pk := {"hold": 0.0, "flash": 0.0, "freeze": 0.0, "shake": 0.0, "tiers": {}, "edge": 0.0}
 		for i in 150:
 			m.hitstop = 0.0
 			m.cam.shake_left = 0.0
@@ -205,6 +210,7 @@ func _presses(m: Match, hero: String) -> void:
 			pk["tiers"][tw] = int(pk["tiers"].get(tw, 0)) + 1
 			pk["hold"] = maxf(pk["hold"], dummy.freeze_t)
 			pk["flash"] = maxf(pk["flash"], dummy.flash_t)
+			pk["edge"] = maxf(pk["edge"], dummy.outline_t)
 			pk["freeze"] = maxf(pk["freeze"], m.hitstop)
 		pk["tags"] = hit_tags.keys()
 		pk["self"] = self_hits.keys()
@@ -262,6 +268,13 @@ func _feel_ok(hero: String, slot: String, pk: Dictionary) -> void:
 				"%s %s: its lightest hit on the dummy is '%s' (rules %s, want '%s'), hits %s"
 				% [hero, slot, lightest, own, want, pk["tiers"]]
 			)
+		)
+	# the struck body's edge pulse (Ent.pulse_edge from Match.on_damage): at least the lightest seen tier's time
+	if lightest != "":
+		var want_e := ImpactWeight.outline_s(lightest) - Match.DT - 0.0001
+		ok(
+			pk["edge"] >= want_e,
+			"%s %s: the dummy's edge pulses %.0f ms (want %.0f+)" % [hero, slot, pk["edge"] * 1000.0, want_e * 1000.0]
 		)
 	# a landed combo payoff flashes a little longer (ComboMark.payoff, the owner's combo-clarity rule)
 	var fl := maxf(ImpactWeight.flash_s("heavy"), ComboMark.FLASH_BODY)

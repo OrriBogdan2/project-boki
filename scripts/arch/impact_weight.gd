@@ -90,6 +90,11 @@ static func flash_s(w: String) -> float:
 	return float(rules["tiers"][w if w != "" else "light"]["flash_ms"]) / 1000.0
 
 
+## How long a struck Hunter's edge pulses after a hit of this tier (none for a tick, "").
+static func outline_s(w: String) -> float:
+	return float(rules["tiers"][w].get("outline_ms", 0.0)) / 1000.0 if w != "" else 0.0
+
+
 ## The confirm sound layered on your hit of this tier ("hit_light", "hit_solid", "hit_heavy"; "" plays none).
 static func confirm(w: String) -> String:
 	return "hit_" + w if w != "" else ""
