@@ -6,6 +6,38 @@ extends RefCounted
 ## the wave ride. Gil's .glb carries no clips, so these keyed poses are his animation. Signs as KMovesDJ: p < 0
 ## leans in, y < 0 brings the right (sword) shoulder forward, lift is metres up from the feet.
 
+const SWIM_LIFT := -0.9  # m: Ground Swim sinks him this far, the ground line at his waist
+const SWIM_A := 0.16  # s: the swim's first stroke key, where its loop starts
+const SWIM_STROKE := 0.15  # s: one arm's stroke (a full crawl cycle is two)
+## The crawl's two key poses, leaning into the swim: the free (left) hand reaching ahead while the sword arm pulls
+## back low, then the sword arm over and ahead while the free hand pulls back; the shoulders roll into each reach.
+const SWIM_REACH_L := {
+	"p": -0.45,
+	"r": 0.22,
+	"y": 0.25,
+	"lift": SWIM_LIFT,
+	"lw": 1.0,
+	"legs": [-0.2, -0.1, -0.2, -0.1],
+	"fl": Vector3(-0.2, 0.35, 0.9),
+	"hw": 1.0,
+	"blade": Vector3(-1.1, -0.7, 0.0),
+	"bw": 1.0,
+	"rad": 0.5
+}
+const SWIM_REACH_R := {
+	"p": -0.45,
+	"r": -0.22,
+	"y": -0.25,
+	"lift": SWIM_LIFT,
+	"lw": 1.0,
+	"legs": [-0.2, -0.1, -0.2, -0.1],
+	"fl": Vector3(-0.35, -0.35, -0.45),
+	"hw": 1.0,
+	"blade": Vector3(0.0, 0.85, 0.0),
+	"bw": 1.0,
+	"rad": 0.8
+}
+
 const MOVES := {
 	# Fencer thrusts 1 and 2: the hit lands on the press, so the point snaps out in 0.05s from the guard and
 	"gil_thrust_1":
@@ -266,11 +298,12 @@ const MOVES := {
 			[0.6, {}]
 		]
 	},
-	# Ground Swim: a quick crouch, then head first into the ground like a dive into water; held under
+	# Ground Swim: a quick crouch, then a plunge into the ground to the waist; the legs stay under and the top half
 	"gil_dive":
 	{
-		# (the body fully below the surface) until gil_surface replaces it
+		# swims a crawl, one arm reaching over while the other pulls back (looped) until gil_surface replaces it
 		"hold": true,
+		"loop": SWIM_A,
 		"keys":
 		[
 			[
@@ -289,50 +322,36 @@ const MOVES := {
 				}
 			],
 			[
-				0.07,
+				0.08,
 				{
-					"p": -0.8,
-					"fx": -0.7,
-					"sq": -0.35,
-					"lift": -0.7,
+					"p": -0.6,
+					"sq": -0.1,
+					"lift": SWIM_LIFT * 0.6,
 					"lw": 1.0,
 					"legs": [-0.2, -0.1, -0.2, -0.1],
-					"fl": Vector3(-0.1, 0.2, -0.9),
+					"fl": Vector3(-0.15, 0.7, 0.7),
 					"hw": 1.0,
-					"blade": Vector3(0.0, -0.3, 0.0),
+					"blade": Vector3(0.0, 0.6, 0.0),
 					"bw": 1.0,
 					"rad": 0.8
 				}
 			],
-			[
-				0.15,
-				{
-					"p": -0.9,
-					"fx": -1.2,
-					"sq": -0.35,
-					"lift": -2.8,
-					"lw": 1.0,
-					"legs": [-0.2, -0.1, -0.2, -0.1],
-					"fl": Vector3(-0.1, 0.2, -0.9),
-					"hw": 1.0,
-					"blade": Vector3(0.0, -0.3, 0.0),
-					"bw": 1.0,
-					"rad": 0.8
-				}
-			]
+			[SWIM_A, SWIM_REACH_L],
+			[SWIM_A + SWIM_STROKE, SWIM_REACH_R],
+			[SWIM_A + SWIM_STROKE * 2.0, SWIM_REACH_L]
 		]
 	},
 	"gil_surface":
 	{
-		# ... and out: he bursts up through the ground, stretched, arms and point up, then lands in a squash
+		# ... and out: from the waist he bursts up through the ground, arms and point up, then lands in a squash
 		"keys":
 		[
 			[
 				0.0,
 				{
-					"p": 0.1,
-					"sq": -0.35,
-					"lift": -2.2,
+					"p": -0.3,
+					"sq": -0.2,
+					"lift": SWIM_LIFT,
 					"lw": 1.0,
 					"legs": [0.2, -0.3, 0.2, -0.3],
 					"fl": Vector3(-0.2, 1.0, 0.0),
@@ -409,12 +428,15 @@ const MOVES := {
 			[0.42, {}]
 		]
 	},
-	# Riptide: the swordfish held straight out to the side, the free arm out for balance, turning on the spot
+	# Riptide: the swordfish held straight out to the side, the free arm out for balance, turning on the spot once
+	# every 0.25 s at rate 1 (looped: a turn ends where it began). It winds up with the charge: ramp takes the turn
 	"gil_spin":
 	{
-		# once every 0.25s (looped: a turn ends where it began)
+		# from 2 to 7 a second over Riptide's 2 s spin (gil.json e.spin_t), at an even rate (linear)
 		"hold": true,
 		"loop": 0.1,
+		"ramp": [0.5, 1.75, 2.0],
+		"linear": true,
 		"keys":
 		[
 			[0.0, {}],

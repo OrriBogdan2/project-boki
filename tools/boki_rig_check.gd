@@ -55,7 +55,47 @@ const SPECIES_LIST := [
 	"velvorm",
 	"nimbostrich",
 	"lilybara",
-	"umbrathere"
+	"umbrathere",
+	"basaltoad",
+	"sporcupine",
+	"vespox",
+	"glassolotl",
+	"lanceron",
+	"seamwyrm",
+	"geodemole",
+	"embrook",
+	"geysirbara",
+	"dreadnoyak",
+	"glaciatee",
+	"thunderstrich",
+	"cisternmander",
+	"forgebrock",
+	"tidalisk",
+	"arcestrel",
+	"shinobant",
+	"scythant",
+	"thistlynx",
+	"lyrewing",
+	"eclipsowl",
+	"howlop",
+	"gongrowl",
+	"vaultara",
+	"gravitank",
+	"anchorhorn",
+	"gloamspire",
+	"glomworth",
+	"effigoon",
+	"crofthollow",
+	"citadoad",
+	"lodestaff",
+	"lanternlong",
+	"mossbastion",
+	"murmuron",
+	"strobolin",
+	"rimefang",
+	"selenwhale",
+	"barostorm",
+	"pipeworth"
 ]
 const CLIPS := [
 	"idle",
@@ -150,7 +190,47 @@ const OVER_TRIS := {
 	"wisplet": MESHY_TRIS,
 	"zephyrak": MESHY_TRIS,
 	"nimbostrich": MESHY_TRIS,
-	"rimeshrew": MESHY_TRIS
+	"rimeshrew": MESHY_TRIS,
+	"basaltoad": MESHY_TRIS,
+	"sporcupine": MESHY_TRIS,
+	"vespox": MESHY_TRIS,
+	"glassolotl": MESHY_TRIS,
+	"lanceron": MESHY_TRIS,
+	"seamwyrm": MESHY_TRIS,
+	"geodemole": MESHY_TRIS,
+	"embrook": MESHY_TRIS,
+	"geysirbara": MESHY_TRIS,
+	"dreadnoyak": MESHY_TRIS,
+	"glaciatee": MESHY_TRIS,
+	"thunderstrich": MESHY_TRIS,
+	"cisternmander": MESHY_TRIS,
+	"forgebrock": MESHY_TRIS,
+	"tidalisk": MESHY_TRIS,
+	"arcestrel": MESHY_TRIS,
+	"shinobant": MESHY_TRIS,
+	"scythant": MESHY_TRIS,
+	"thistlynx": MESHY_TRIS,
+	"lyrewing": MESHY_TRIS,
+	"eclipsowl": MESHY_TRIS,
+	"howlop": MESHY_TRIS,
+	"gongrowl": MESHY_TRIS,
+	"vaultara": MESHY_TRIS,
+	"gravitank": MESHY_TRIS,
+	"anchorhorn": MESHY_TRIS,
+	"gloamspire": MESHY_TRIS,
+	"glomworth": MESHY_TRIS,
+	"effigoon": MESHY_TRIS,
+	"crofthollow": MESHY_TRIS,
+	"citadoad": MESHY_TRIS,
+	"lodestaff": MESHY_TRIS,
+	"lanternlong": MESHY_TRIS,
+	"mossbastion": MESHY_TRIS,
+	"murmuron": MESHY_TRIS,
+	"strobolin": MESHY_TRIS,
+	"rimefang": MESHY_TRIS,
+	"selenwhale": MESHY_TRIS,
+	"barostorm": MESHY_TRIS,
+	"pipeworth": MESHY_TRIS
 }
 const MAX_BONES := 64
 const DEEP := 1.0  # m of water for the swim rows
@@ -559,6 +639,9 @@ func _own_look(main: Node) -> void:
 	var rig := k.get_node("Body/Flex/BokiRig") as BokiRig
 	var marks := rig._coat.next_pass as ShaderMaterial
 	ok(marks != null and marks.shader.resource_path.begins_with("res://shaders/boki_marks"), "its coat marks are on")
+	var shift := rig._coat.get_shader_parameter("albedo") as Color
+	var grey := is_equal_approx(shift.r, shift.g) and is_equal_approx(shift.g, shift.b)
+	ok(grey, "its colour roll keeps the painted hues")
 	await _grown_parts(main)
 	var iris := rig.eye_mat.get_shader_parameter("iris") as Color
 	for nm in ["Tuft", "TailTuft", "Birthmark"]:

@@ -8,11 +8,13 @@ extends RefCounted
 ## tendrils, frost and a pulsing tint, BodyTell) and a cast glints the caster. Less text: in a fight only your own
 ## Boki's lines are drawn, and a Boki's ability name floats over your own Boki only. What sits on the Hunters in a bot
 ## 3v3 of the slice Hunters (ClarityFight, 10 frames) stays within ClarityFight.BUDGET.
+## Your own crowd control shows as a line under your vitals, worst first.
 
 const ARCH_CHECK := preload("res://tools/archetype_check.gd")
 const ClarityFight := preload("res://tools/clarity_fight.gd")
 const DT := 1.0 / 60.0
 const FIGHT_FRAMES := 10
+const MIN_SIDE_GAP := 0.5  # RGB distance (0-1) between two sides' colours that reads as different at a glance
 
 var bad := 0
 
@@ -30,7 +32,7 @@ func run(main: Node) -> void:
 	_sable_hit(main)
 	var m := Match.new()
 	main.add_child(m)
-	m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
+	m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "demo_kin": "cindle"})
 	m.set_process(false)
 	for mb in m.mobs:
 		mb.dead = true
@@ -60,6 +62,7 @@ func run(main: Node) -> void:
 		var edge := SideRings.edge_of(h)
 		var edge_ok := edge.a == 0.0 if h == p else (_same(edge, want) and edge.a > 0.5)
 		ok(edge_ok, "%s's body edge: %s (%s)" % [h.pname, "none on yours" if h == p else _side(m, h), edge])
+	_boki_owner(m, p, ally, foes[0])
 	_side_fx(m, p, ally, foes[0])
 	_body_tell(m, foes[0])
 	_boki_text(m, p, ally, foes[0])
@@ -96,6 +99,8 @@ func run(main: Node) -> void:
 		ok(f.kin == null or not tethered.has(f.kin), "%s's Boki: no tether" % f.pname)
 	# ---------------------------------------------------------------- 4. crowd control on the plate, with time left
 	_cc_plate(m, foes[0], foes[1])
+	# ---------------------------------------------------------------- 5. your own crowd control under your vitals
+	_cc_self(m, p)
 	m.queue_free()
 	await main.get_tree().process_frame
 	await _fight_budget(main)
@@ -194,6 +199,32 @@ func _cc_plate(m: Match, a: Hunter, b: Hunter) -> void:
 		var ms := _icon(mob, "status_stunned")
 		ok(ms.size() == 1 and absf(float(ms[0][3]) - 1.2) < 0.01, "a stunned monster: STUNNED icon, 1.2 s left")
 		mob.stun_t = 0.0
+
+
+## Whose Boki is it, walking or riding as a wisp: the ring and the wisp's rim are the owner's side colour, and your
+## own, a teammate's and a rival's are three clearly different colours (--wisp-read-shots measures it on screen).
+func _boki_owner(m: Match, p: Hunter, ally: Hunter, foe: Hunter) -> void:
+	var rims: Array = []
+	for h: Hunter in [p, ally, foe]:
+		var k: Kin = h.kin
+		if k == null:
+			ok(false, "%s has a Boki to read" % h.pname)
+			continue
+		var was := k.state
+		KinWisp.set_wisp(k, true)
+		k.state = "shoulder"
+		KinWisp.render(k)
+		var rim: Color = (k.model.get_node("Body") as GeometryInstance3D).get_instance_shader_parameter("rim_col")
+		rims.append(rim)
+		ok(_same(rim, SideColor.of(m, h)), "%s's wisp rim is the %s colour" % [h.pname, _side(m, h)])
+		KinWisp.set_wisp(k, false)
+		k.state = was
+		k.ring.visible = true
+	for i in rims.size():
+		var a: Color = rims[i]
+		var b: Color = rims[(i + 1) % rims.size()]
+		var gap := Vector3(a.r - b.r, a.g - b.g, a.b - b.b).length()
+		ok(gap > MIN_SIDE_GAP, "own, ally and rival Boki read three ways (gap %.2f)" % gap)
 
 
 ## Other people's looks lean to their side: yours as made, a teammate's cooler, a rival's toward the hostile red.
@@ -377,6 +408,29 @@ func _boki_text(m: Match, p: Hunter, ally: Hunter, foe: Hunter) -> void:
 	ok(words.call() == w0 + 1, "your own Boki casting: its name floats")
 	mine.stow()
 
+
+## Slowed, then rooted, then stunned on top: the line puts stun first and root before Slow, each bar
+## starts full and shrinks with time, and the line is empty once it's over.
+func _cc_self(m: Match, p: Hunter) -> void:
+	p.stun_t = 0.0      # (the plate section above can leave you slowed)
+	p.root_t = 0.0
+	p.slow_t = 0.0
+	ok(SelfCcLine.entries(p).is_empty(), "you're free: no CC line")
+	p.slow_t = 3.0
+	p.root_t = 2.0
+	p.stun_t = 1.0
+	var words: Array = SelfCcLine.entries(p).map(func(x): return x[0])
+	ok(words == ["STUNNED", "ROOTED", "SLOWED"], "worst first: %s" % [words])
+	var full := float(SelfCcLine.entries(p)[0][3])
+	_run(m, 0.5)
+	var e: Array = SelfCcLine.entries(p)
+	var shrunk: bool = e.size() == 3 and float(e[0][3]) > 0.4 and float(e[0][3]) < 0.6
+	ok(full > 0.99 and shrunk, "the stun bar starts full and shrinks (%.2f after 0.5 s of 1 s)" % [e[0][3]])
+	ok(_same(e[0][1], _icon(p, "status_stunned")[0][1]), "the line uses the plate's stun colour")
+	p.stun_t = 0.0
+	p.root_t = 0.0
+	p.slow_t = 0.0
+	ok(SelfCcLine.entries(p).is_empty(), "all over: the line is gone")
 
 func _icon(e: Ent, icon: String) -> Array:
 	return HudPlate.statuses(e).filter(func(x): return x[0] == icon)

@@ -10,7 +10,7 @@ poll=${PITCH_POLL_S:-5}   # s between looks at the movie's size
 BEAT_S=60
 tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
 { "$@" 2>&1 & echo $! >"$tmp/pid"; wait $!; echo $? >"$tmp/rc"; } \
-	| awk -v n_max="$lines" '/^PITCH_/ {print; next} n < n_max {n++; print} END {print "PITCH_LOG lines=" NR}' &
+	| awk -v n_max="$lines" '/^(PITCH_|CLIP_PREFLIGHT)/ {print; next} n < n_max {n++; print} END {print "PITCH_LOG lines=" NR}' &
 pipe=$!
 last=-1; idle=0; beat=0
 while kill -0 "$pipe" 2>/dev/null; do

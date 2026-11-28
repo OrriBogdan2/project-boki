@@ -38,6 +38,10 @@ func run(m: Node) -> void:
 		DirAccess.make_dir_recursive_absolute(out)
 	else:
 		out = ""
+	if out == "":
+		# (no shots: a small window. Software GL draws every frame of 8 places, 1100-1200 s at 1280x720 on the
+		# loaded suite box, near the 1200 s cap; what it counts, rigs in the tree, doesn't depend on the size)
+		main.get_window().size = Vector2i(480, 270)
 	Save.no_write = true
 	var rec := _record()
 	Save.d = Save.fresh()
@@ -48,6 +52,7 @@ func run(m: Node) -> void:
 	var glb: String = BokiRig.PATH % [species, species]
 	var head := "VESPYX_PLACES species=%s save=%s renderer=%s glb=%s has=%s"
 	print(head % [species, kind, DisplayServer.get_name(), glb, BokiRig.has(species)])
+	print("VESPYX_TIME boot %d ms (engine start to run())" % Time.get_ticks_msec())
 	await _place("starter_pick", "hatch", {})
 	await _place("farm_home", "home", {})
 	await _place("party", "party", {})
@@ -130,7 +135,7 @@ func _use_glb(path: String) -> void:
 		n.owner = root
 	var ps := PackedScene.new()
 	print("VESPYX_PLACES glb=%s read=%d pack=%d" % [path, err, ps.pack(root)])
-	BokiRig._scenes[BokiRig.PATH % [species, species]] = ps
+	BokiRig._scenes.put(BokiRig.PATH % [species, species], ps)
 	tag = "oldglb_"
 
 
@@ -148,6 +153,8 @@ func _record() -> Dictionary:
 
 
 func _place(label: String, screen: String, opts: Dictionary) -> void:
+	var t0 := Time.get_ticks_msec()
+	var f0 := Engine.get_process_frames()
 	main.show_screen(screen, opts)
 	for i in 600:  # a farm or a match takes a while to build: up to 600 frames until a rigged Boki shows
 		await main.get_tree().process_frame
@@ -161,6 +168,7 @@ func _place(label: String, screen: String, opts: Dictionary) -> void:
 	for i in 240:
 		await main.get_tree().process_frame
 	_report(label)
+	print("VESPYX_TIME %s %d ms, %d frames" % [label, Time.get_ticks_msec() - t0, Engine.get_process_frames() - f0])
 	await _grab(label)
 
 
