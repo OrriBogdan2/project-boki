@@ -69,6 +69,7 @@ func _kind(kind: String) -> void:
 	# the wind-up: the last frame of the real attack's tell, the 3/4 camera
 	if MobAnim.has_kind(kind) or kind.begins_with("bl_"):
 		cam.make_current()
+		p.teleport(at + Vector3(4.5, 0, 0))
 		mb.tgt = p
 		mb.root_t = 0.0
 		mb._begin_attack()
