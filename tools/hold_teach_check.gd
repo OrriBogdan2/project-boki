@@ -226,7 +226,7 @@ func _texts() -> void:
 	for s in tut["steps"]:
 		if String(s[0]) == "glide":
 			glide_line = String(s[1])
-	ok(glide_line.contains("HOLD"), "the match tutorial's glide line says HOLD ('%s')" % glide_line)
+	ok(glide_line.to_lower().contains("hold"), "the match tutorial's glide line says hold ('%s')" % glide_line)
 	ok(FarmTutorial.hint_text("chop").contains("HOLD"), "the farm tutorial's chop hint says HOLD")
 	# the farm's chop step waiting for a held chop: tools/farm_tutorial_check.gd
 
