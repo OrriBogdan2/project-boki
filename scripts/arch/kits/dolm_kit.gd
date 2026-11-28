@@ -284,9 +284,9 @@ func _end_plunge() -> void:
 	h.vel.y = maxf(h.vel.y, -HunterMove.fall_cap(h))
 	play("")
 
-## The air Quakefall's plunge (m/s down): the glider's dive speed out of a glide, its own otherwise.
+## The air Quakefall's plunge and arc (m/s down): the glider's dive speed out of a glide, its own otherwise.
 func dive_speed() -> float:
-	if not dive or not dive_fall:
+	if not dive or not (dive_fall or slam.air_on()):
 		return 0.0
 	return float(slam_def()["glide_dive_speed" if dive_glide else "dive_speed"])
 
