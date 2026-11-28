@@ -109,10 +109,13 @@ func _kind(kind: String) -> void:
 			await _view(mb, ctr, dist, 0.785, 0.0)
 			if mb.st == "windup":
 				seen = true
-				if MobAnim.windup_k(mb.st_t, float(mb.md["windup"])) > 0.5:
-					last = await _shot()  # (the latest one stays: the fullest gather)
+				if MobAnim.windup_k(mb.st_t, float(mb.md["windup"])) > 0.3:
+					last = await _shot()  # (the latest one stays: the fullest gather; a slow box sees few frames)
 			elif seen:
 				break
+			elif i % 40 == 39:  # (the tell never started: ask again)
+				mb.tgt = p
+				mb._begin_attack()
 		if last != null:
 			last.save_png(dir.path_join("windup.png"))
 		else:
@@ -127,6 +130,7 @@ func _kind(kind: String) -> void:
 	for i in 6:
 		mb.set_meta("dis_lag", 5.0)
 		mb.death_t = move_s * 0.4
+		mb.flash_t = 0.0  # (the kill's white flash would hide the body)
 		_world_on(false, mb)  # (the kill's drops and reward cards are new nodes)
 		await _view(mb, ctr, dist, 0.785, 0.0)
 	(await _shot()).save_png(dir.path_join("death.png"))
