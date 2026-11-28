@@ -17,6 +17,8 @@ const CHECKS := {
 	"--vex-daze-check": ["res://tools/vex_daze_check.gd", "vex_daze_check", null],  # Daze team, coin wall stun
 	# a Boki plate, glove wall or ice wall never hides the Hunter behind it; a rock does
 	"--barrier-sight-check": ["res://tools/barrier_sight_check.gd", "barrier_sight_check", null],
+	# owner 11-26: per hero and slot, how long a cast holds the walk and whether it shoves them back (Vex E asserted)
+	"--self-lock-check": ["res://tools/self_lock_check.gd", "self_lock_check", null],
 	# Vex's Slipstep: one plain dash, no pips, no Second Wind
 	"--vex-dash-check": ["res://tools/vex_dash_check.gd", "vex_dash_check", null],
 	"--camps-check": ["res://tools/camps_check.gd", "camps_check", null],  # fixed camps and their XP
