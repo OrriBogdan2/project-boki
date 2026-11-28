@@ -50,7 +50,9 @@ def rot_axis(axis, a):
 
 
 def rot_euler(e):
-    """World-frame rotation of (pitch forward, turn to her left, tilt to her right) radians."""
+    """World-frame rotation of (pitch forward, turn to her left, tilt to her right) radians, or a 3x3 matrix as is."""
+    if isinstance(e, np.ndarray) and e.shape == (3, 3):
+        return e
     return rot_axis((0, 0, 1), -e[2]) @ rot_axis((0, 1, 0), e[1]) @ rot_axis((1, 0, 0), e[0])
 
 
@@ -115,7 +117,7 @@ class Rig:
             for c in n[i].get("children", []):
                 walk(c)
 
-        walk(self.idx["SmartRigArmature"])
+        walk(self.parent[self.idx["Hips"]])  # the armature node (Meshy names it SmartRigArmature or Armature)
         self.rest = self.fk({})
         self.hips_rest = self.t[self.idx["Hips"]].copy()
 
@@ -256,9 +258,10 @@ def solve(p, full):
         over[up_n] = ("dir", d1, 0.0)
         over[fo_n] = ("dir", d2, 0.0)
         hd = p["hand" + s]
-        over[ha_n] = ("dir", V(*hd, side=s) if hd is not None else d2, p["twist" + s])
-        if s == "R":
-            pass
+        if p.get("rot" + s) is not None:  # a whole world rotation for the hand (a retargeted clip: direction and roll)
+            over[ha_n] = ("rot", p["rot" + s])
+        else:
+            over[ha_n] = ("dir", V(*hd, side=s) if hd is not None else d2, p["twist" + s])
     if full:
         g = R.fk(over)
         for s in "RL":
@@ -572,18 +575,19 @@ def _acc(j, bin_, data, typ, comp=5126, minmax=False):
     return len(j["accessors"]) - 1
 
 
-def build(out_path, shot=False):
+def build(out_path, shot=False, defs=None):
+    """defs: {clip name: (poses per frame, full)} (a retargeted set); none: this file's own key poses."""
     R = rig()
     j, bin_ = CO.rig_only(R.j, R.bin)
     bin_ = bytearray(bin_)
     j["animations"] = []
     fixed = [i for i in R.joints]  # every joint of the skin
     upper = {R.idx[n] for n in UPPER}
-    defs = {}
-    defs.update({k: (v, False) for k, v in clips().items()})
-    defs.update({k: (v, True) for k, v in flights().items()})
-    for name, ((dur, loop, keys), full) in defs.items():
-        poses = sample(keys, dur, loop)
+    if defs is None:
+        keyed = {k: (v, False) for k, v in clips().items()}
+        keyed.update({k: (v, True) for k, v in flights().items()})
+        defs = {k: (sample(keys, dur, loop), full) for k, ((dur, loop, keys), full) in keyed.items()}
+    for name, (poses, full) in defs.items():
         nodes = fixed if full else sorted(upper)
         times = [f / FPS for f in range(len(poses))]
         per = {i: [] for i in nodes}
