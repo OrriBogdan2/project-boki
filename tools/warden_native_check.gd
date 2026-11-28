@@ -369,6 +369,8 @@ func _slots(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
 	var all_there: bool = named.all(func(sl): return nat.plays.has(sl))
 	ok(all_there, "%s: every clip slot the data names has its clip (%s)" % [a, named])
 	var pick := String(nat.d["clips"]["crouch"])  # (Meshy's clip no fallback plays)
+	var lead = nat.d.get("lmb_lead", {})  # (a swapped-in clip is not the attack clip its lead is cut for)
+	nat.d["lmb_lead"] = {}
 	for sl in SLOT_CASES:
 		var c: Array = SLOT_CASES[sl]
 		if not nat.plays.has(sl):
@@ -391,6 +393,7 @@ func _slots(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
 	await _feed(main, nat, m, {"swing_n": 0}, {"swing_n": 1, "combo": -1})
 	ok(nat.player.current_animation == pick, "%s: a charged swing takes lmb without lmb_hold" % a)
 	nat.plays.erase("lmb")
+	nat.d["lmb_lead"] = lead
 	await _synthetic_clips(main, a, m, nat)
 
 

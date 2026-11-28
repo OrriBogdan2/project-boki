@@ -6,6 +6,7 @@ extends RefCounted
 ## Standing still the clip owns the whole body as before (WardenNative._process decides).
 
 const FADE_IN := 0.1  # s: the layer over the legs' run
+const LEAD_FADE_IN := 0.05  # s: and when the clip starts at its strike (WardenNative data "lmb_lead")
 const FADE_OUT := 0.16  # s: back to the loop clip's torso and arms
 const HOLD_END := 0.01  # s: a clip shown at its last frame stays on (the layer ends a clip at its length)
 
@@ -15,6 +16,7 @@ var clip: Animation  # the clip on the upper body (null: none yet)
 var t := 0.0  # s into it
 var rate := 1.0  # its play rate
 var on := false  # the clip still plays
+var fade_in := FADE_IN  # s the layer takes to come on
 var w := 0.0  # 0..1: how much of the upper body it owns
 var _tracks := {}  # Animation -> [[track index, bone index]] of its rotation tracks on the upper bones
 
@@ -27,10 +29,11 @@ static func make(sk: Skeleton3D, torso: int) -> WardenNativeUpper:
 	return up
 
 
-## Starts `anim` from its first frame at `speed` times its pace.
-func play(anim: Animation, speed: float) -> void:
+## Starts `anim` `from` seconds in (its first frame) at `speed` times its pace.
+func play(anim: Animation, speed: float, from := 0.0) -> void:
 	clip = anim
-	t = 0.0
+	t = from
+	fade_in = LEAD_FADE_IN if from > 0.0 else FADE_IN
 	rate = speed
 	on = not bones.is_empty()
 
@@ -55,7 +58,7 @@ func lay(dt: float) -> void:
 	if on:
 		t += dt * rate
 		on = t < clip.length
-	var fade := FADE_IN if on else FADE_OUT
+	var fade := fade_in if on else FADE_OUT
 	w = move_toward(w, 1.0 if on else 0.0, dt / fade)
 	if w <= 0.0:
 		return
