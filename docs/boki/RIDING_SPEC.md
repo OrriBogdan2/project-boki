@@ -27,7 +27,7 @@ a new `carry.style` value (for large kin) with its own small settings block, che
 
 Large Boki already carry you (`carry.style: "mount"`, docs/KIN_GRAMMAR.md "Carry modes"): when a large
 Boki is on the **Return** order it is under you, ground speed and jump come from `carry.mount`
-(x0.8-1.3), you take 15% less damage and half knockback (its carry passives), and opening the glider
+(x0.8-1.3), you take 15% less damage and a third less knockback (its carry passives), and opening the glider
 curls it into a ball on your back. Today's mounts are the two heavy ones, Cairnback (x0.85) and
 Gravadillo (x0.9), so riding is a slow armoured stance, not travel. `Hunter.mounted()`, `Kin.ride_height()`
 and `_mount_speed()` are the code paths.
@@ -87,7 +87,7 @@ You're thrown off (land beside the mount, 0.4 s stagger, can't remount for 3 s) 
 - the mount is downed (its hp hits 0): it drops as a downed Boki and the usual rescue applies;
 - the mount steps off a ledge into the abyss: you're thrown clear and can glide; it curls up on your back.
 
-Pushes and pulls move you and the mount together. Mounts trade today's -15% damage and half knockback
+Pushes and pulls move you and the mount together. Mounts trade today's -15% damage and a third less knockback
 for speed; that armoured stance moves to the bulwark and companion roles.
 
 ## Extraction and PvP
@@ -170,7 +170,7 @@ shots until it cracks. (Cairnback, Limpetor.)
   already block shots) for up to 6 s or 200 damage, then needs 10 s to recover. Hunters behind it count
   as in cover for the cover rules (decision 0009).
 - **Rules:** while planted it can't move or attack; it can be flanked. Carried, it gives today's
-  -15% damage and half knockback.
+  -15% damage and a third less knockback.
 - **Grammar:** `carry.style: "bulwark"` with `carry.bulwark: {"arc": 3, "hp": 200, "secs": 6}`. **Code:**
   the plant order, the braced kin as a shot-blocking wall, and cover rules reading it.
 - **Risks:** stacking two bulwarks makes a fort; cap one planted bulwark per squad.

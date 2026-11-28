@@ -192,7 +192,7 @@ static func owner_stat(stat: String, v: float) -> String:
 		"dodge_regen": return "dodges come back instantly" if v >= 0.99 else "dodges recharge %s faster" % pct(v)
 		"armor": return "armor wears %s slower" % pct(v)
 		"damage_reduction": return "-%s damage taken" % pct(v)
-		"knockback_resist": return "half knockback" if is_equal_approx(v, 0.5) else "-%s knockback" % pct(v)
+		"knockback_resist": return "-%s knockback" % pct(1.0 - 1.0 / (1.0 + v))  # a divisor: 0.5 is a third less
 		"regen": return "%s hp/s regen" % n(v)
 		"damage": return "+%s damage" % pct(v)
 		"fire_rate": return "+%s fire rate" % pct(v)
@@ -220,7 +220,7 @@ static func on_shot(os: Dictionary) -> String:
 
 const CARRY_NAMES := {"shoulder": "Return: rides your shoulder", "perch": "Return: perches on your pack", "mount": "Return: guards at your side"}
 
-## How it's carried and what that gives you: "Return: guards at your side (Anchor): -15% damage taken, half knockback".
+## How it's carried and what that gives you: "Return: guards at your side (Anchor): -15% damage taken, -33% knockback".
 static func carry(ks: KinSpec) -> String:
 	if ks == null:
 		return ""

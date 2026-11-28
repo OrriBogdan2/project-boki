@@ -298,7 +298,7 @@ growth, mutation and care (`Kin.init_kin`), and the Bond IV speeds every fill of
 |---|---|
 | shoulder | as before: rides your shoulder, its carry passives and shot riders work once it has settled |
 | perch | sits on your pack; same passive rules. Its throw is a **dive**: it rises off your pack and comes straight down on the spot (11 m reach, strikes only as it lands, a little wider). Lunowl's perch also gives +20% glide |
-| mount | a big kin (body mass over `follow.shoulder_max_mass`): on the Return order it guards at your side (`KinFollow.guard_tick`), `guard_side_m` from you on the flank it holds, the other flank when that one is blocked, never closer than `guard_min_m`, and on its own ground when you jump. -15% damage taken and half knockback (Gravadillo). When you glide or cross a gap it curls up into a ball on your back and its passives pause until you land. Only its giant Fusion form is ridden (`carry.mount` speed and jump apply then) |
+| mount | a big kin (body mass over `follow.shoulder_max_mass`): on the Return order it guards at your side (`KinFollow.guard_tick`), `guard_side_m` from you on the flank it holds, the other flank when that one is blocked, never closer than `guard_min_m`, and on its own ground when you jump. -15% damage taken and a third less knockback (Gravadillo). When you glide or cross a gap it curls up into a ball on your back and its passives pause until you land. Only its giant Fusion form is ridden (`carry.mount` speed and jump apply then) |
 
 Carry passives and merge passives feed one place, `Hunter.owner_stat`, capped at the carry or
 merge maximum: move speed, jumps, air dodges, glide, dodge charges and regen, armor (wears slower),
@@ -454,7 +454,7 @@ gives +20% glide.
 | kin | animals | role | carry | kin hp/dmg/speed (points) | owner bonus points | dodge rider |
 |---|---|---|---|---|---|---|
 | Vespyx (cindle) | Fox, Scorpion | bruiser | shoulder: shots poison | 80/9/6.8 (4/3/9) | max hp 2, move speed 2 | on_pass poison + blight |
-| Gravadillo (pebbit) | Armadillo, Rhino beetle | tank | **mount**: -15% damage taken, half knockback | 120/11/5.4 (12/5/2) | armor 1 | on_end pull |
+| Gravadillo (pebbit) | Armadillo, Rhino beetle | tank | **mount**: -15% damage taken, a third less knockback | 120/11/5.4 (12/5/2) | armor 1 | on_end pull |
 | Prismander (puddlet) | Axolotl | support | shoulder: regen 3 | 95/7/6.0 (7/1/5) | shield 4, regen 3 | on_start decoy (signature) |
 | Mycroll (burrlet) | Hedgehog, Toadstool | controller | shoulder: shots slow | 90/8/6.2 (6/2/6) | max hp 3, shield 3 | on_start spore zone |
 | Echolop (zapple) | Hare, Bat | skirmisher | shoulder: +20% fire rate and reload | 70/8/7.6 (2/2/13) | move speed 3 | repeat (echo step) |
