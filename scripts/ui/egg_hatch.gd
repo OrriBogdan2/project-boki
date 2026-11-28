@@ -135,7 +135,7 @@ func _sfx(n: String, vol := 0.0, pitch := 1.0) -> void:
 		n = KinVoice.cue(species, n.trim_prefix("kin_"))
 	elif n.contains("chirp"):
 		pitch *= Unique.voice(rec)
-	Sfx.play(n, null, vol, 0.08, pitch)
+	Sfx.play(n, null, vol, 0.08, pitch, 0.0, false, Sfx.LEGACY_TAKE)  # the hatch keeps its own take picking
 
 ## A hatch stage's sound: wobble, crack_1, crack_2, pop (the mystery egg has its own set).
 func _cue(stage: String, vol := 0.0, pitch := 1.0) -> void:

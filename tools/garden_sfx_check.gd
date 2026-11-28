@@ -30,6 +30,9 @@ extends RefCounted
 ##  14. Boki moments in BaseLife: a snack from the pantry plays boki_eat once; a nap plays boki_sleep once, as it
 ##      lies down (after its walk away from a rival), and nothing more while it sleeps; three lying down 0.1 s
 ##      apart breathe once (Sfx.MIN_GAP)
+##  15. Boki voices (voice_picks.gd): a species voice is dealt from a bag of its takes at three pitch steps, so a clip
+##      (take and step) is never the same twice in a row and not heard again within one round of the bag, a hatch
+##      keeps Sfx's own take picking, a nap breath and the shared cues are not dealt, and every zone has its bed file
 ## Never touches the real save.
 
 const SETTLE_FRAMES := 900       # frames to wait at most for the home to build
@@ -50,6 +53,7 @@ func run(m: Node) -> void:
 	Save.d = Save.fresh()
 	_names()
 	_play_cap()
+	_voice_picks()
 	await _games()
 	await _fishing()
 	print("GARDENSFX DONE, failures: %d" % bad)
@@ -75,6 +79,43 @@ func _play_cap() -> void:
 	ok(PlaySfx.DB < GardenSfx.DB, "play: its cues sit under the minigame level (%.0f dB)" % PlaySfx.DB)
 	GardenZones.here = here
 	GardenSfx.heard.clear()
+
+const PICK_VOICE := "bk_zapple_happy"  # two takes (audio/bk_zapple_happy.wav, _1)
+const PICK_DRAWS := 60  # plays of it in a row
+
+func _voice_picks() -> void:
+	VoicePicks.reset(5)
+	var clips := VoicePicks.STEPS.size() * Sfx.take_count(PICK_VOICE)
+	var seq: Array = []
+	for i in PICK_DRAWS:
+		Sfx.last_played.clear()
+		Sfx.recent.clear()
+		Sfx.play(PICK_VOICE, null, -40.0)
+		seq.append("%d@%.2f" % [Sfx.last_take[PICK_VOICE], Sfx.last_step[PICK_VOICE]])
+	var nearest := PICK_DRAWS  # plays between two of the same clip, at the least
+	var at := {}
+	for i in PICK_DRAWS:
+		if at.has(seq[i]):
+			nearest = mini(nearest, i - int(at[seq[i]]))
+		at[seq[i]] = i
+	ok(clips == 6, "voices: %s has %d clips (takes x pitch steps)" % [PICK_VOICE, clips])
+	ok(range(1, PICK_DRAWS).all(func(i: int) -> bool: return seq[i] != seq[i - 1]),
+			"voices: %d plays of one voice never say the same clip twice in a row" % PICK_DRAWS)
+	ok(nearest > clips / 2 and at.size() == clips,
+			"voices: all %d clips come round, nearest repeat %d plays apart (over %d)" % [clips, nearest, clips / 2])
+	var before := Sfx.last_step.size()
+	Sfx.play("boki_sleep", null, -40.0)
+	ok(Sfx.last_step.size() == before and not Sfx.last_step.has("boki_sleep"), "voices: a nap breath is not dealt")
+	var hatch: int = Sfx.last_take.get(PICK_VOICE, -1)
+	var step: float = Sfx.last_step[PICK_VOICE]
+	Sfx.last_played.clear()
+	Sfx.play(PICK_VOICE, null, -40.0, 0.0, 1.0, 0.0, false, Sfx.LEGACY_TAKE)
+	ok(Sfx.last_step[PICK_VOICE] == step and Sfx.last_take.get(PICK_VOICE, -1) != hatch,
+			"voices: the hatch's own take picking is untouched (step stays %.2f)" % step)
+	var bare := GardenZones.ids().filter(func(z): return not ResourceLoader.exists("res://audio/amb_zone_%s.ogg" % z))
+	ok(bare.is_empty() and ResourceLoader.exists("res://audio/amb_zone_hub.ogg"),
+			"zones: every zone and the hub have a bed file (without %s)" % [bare])
+	Sfx.last_played.clear()
 
 func _kin(sp: String, kname: String) -> Dictionary:
 	var k := Save.new_kin(sp, kname)
