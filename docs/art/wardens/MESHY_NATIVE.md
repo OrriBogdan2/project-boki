@@ -146,6 +146,17 @@ The fire leaves from `weapon_muzzle` on her right hand (the palm), which rides t
 `--warden-native-check` (each row's clip, pose and hand-over), `--muzzle-check`; renders: `--clip-shots --warden=ashwick
 --states [--match] [--no-moves]` (`move_<id>_<stand|run>/`).
 
+## Own clips retargeted from the contract file (Sparkle first)
+A Hunter whose hand-keyed contract clips (`art/wardens/<art>/<art>.glb`, RIG_CONTRACT.md) still fit her kit lays them on
+Meshy's skeleton with `python3 -I tools/meshy/native_retarget.py <art> <clip>[:full] ... [--shot]` (no Blender; the IK of
+`tools/meshy/cinder_native_clips.py`). Each clip is sampled at 30 fps on the contract rig: the torso lean and head turn go to
+Meshy's spine and neck, each wrist keeps its reach from its shoulder (scaled to Meshy's arm), elbow side, hand direction and
+roll; a `:full` clip also takes the hips' height and the ankles' travel (scaled to Meshy's leg, so a crouch's planted feet stay
+planted). Clips are named `<art>_<clip>` and written to `<art>_clips.glb`; the data's `kmoves` rows and `clips` slots name them
+(a clip with no `:full` is an `upper` row). `--shot` prints each clip's worst wrist miss (Sparkle: under 2 cm). Sparkle (ryzz):
+the 17 kit-move clips of her contract rows (`mage_lmb_*`, rmb, Skycall, Wirerun, Kitefall, fusion) and her own crouch walk
+(`ryzz_crouch_f`, data `clips.crouch`, no torch and no `crouch_arms_from`), `own_casts` on: no kit move plays Meshy's Attack.
+
 ## Kit-move clips (data `kmoves`)
 A kit move (state `kmove`, the move's id) may have a clip of its own: `"kmoves": {kmove: {"clip": name, "hold_from": s,
 "rate": x, "fade": s}}` (`WardenNativeMoves`). While the move lasts the clip is laid at the move's clock (`kmove_t`), so a
