@@ -15,6 +15,8 @@ const CHECKS := {
 	"--boki-type-hit-check": ["res://tools/boki_type_hit_check.gd", "boki_type_hit_check", "check"],  # Juice.flash_col
 	"--boki-type-hit-shots": ["res://tools/boki_type_hit_check.gd", "boki_type_hit_check", "shots"],  # --shots-dir
 	"--summon-pop-shots": ["res://tools/summon_pop_shots.gd", "summon_pop_shots", null],  # --shots-dir=<dir>
+	"--sable-vfx-check": ["res://tools/sable_vfx_check.gd", "sable_vfx_check", "check"],  # Bola, knife rings
+	"--sable-vfx-perf": ["res://tools/sable_vfx_check.gd", "sable_vfx_check", "perf"],  # GPU: 4v4 ms
 	"--status-edge-check": ["res://tools/status_edge_check.gd", "status_edge_check", "check"],  # edge tint
 	"--status-edge-shots": ["res://tools/status_edge_check.gd", "status_edge_check", "shots"],  # GPU: stills + 4v4 ms
 	"--hunter-scale-shots": ["res://tools/hunter_scale_shots.gd", "hunter_scale_shots", null],  # GPU: match size px

@@ -35,6 +35,7 @@ const EMP_LINE := Color("ffc23a")      # the aim line while the next bolt is emp
 const AIM_LILAC := Color("d8c8ff")     # ... and otherwise
 const BOLA_HOT := Color("b07aff")      # the Bola's lane front and inner binding ring
 const BOLA_CORD := Color("b06aff")     # its violet lightning cord
+const SOFT_A := 1.2                     # the soft Bola lane: inside alpha 0.1 or less (zone rule)
 const EMP_RANGE_K := 1.12          # the empowered bolt flies 12% further (the source: 850 -> 950 units)
 const GLINT_POP_S := 0.22          # s the glint's flare takes to settle as the empowered bolt forms
 const GLINT_NET_EVERY := 1.1       # s between two glint pings online viewers get while it's empowered
@@ -679,11 +680,12 @@ func _tick_bola_cast(dt: float) -> void:
 		return
 	bola_cast["t"] = float(bola_cast["t"]) - dt
 	var k := 1.0 - clampf(float(bola_cast["t"]) / float(bd["cast"]), 0.0, 1.0)
-	# a strip with chevrons in the Bola's violet (the source's is white); the gold fill front runs to the throw.
-	# Its width is the catch corridor for a foe of her size (_tick_bola: the reach past a foe's body)
+	# a soft strip with chevrons in the Bola's violet (the source's is white): lit rails over a faint inside
+	# (0.1 or less at the base, the VFX_QUALITY zone rule) so a foe in the lane stays readable; the fill front
+	# runs to the throw. Its width is the catch corridor for a foe of her size (_tick_bola: the reach past a foe's body)
 	AimKit.lane(h, "rmb",
 			{"len": lane_len(), "width": float(bd["lane_w"]), "chevrons": 4, "tip": true, "fill": k,
-					"col": BOLA_CORD, "col2": BOLA_HOT, "alpha": 1.6})
+					"col": BOLA_CORD, "col2": BOLA_HOT, "alpha": SOFT_A, "soft": true})
 	_whirl_bola()
 	if float(bola_cast["t"]) <= 0.0:
 		bola_cast = {}
@@ -794,6 +796,7 @@ func _wrap(f: Ent) -> void:
 	KitStatus.apply(f, "gnd", _ground_t())
 	add_mark(f, 1, true)
 	wrapped[f.get_instance_id()] = [f, _ground_t()]
+	vfx("bola_wrap", f.pos)
 	m.sfx("dj_bola_wrap", f.pos, -3.0, 1.0)
 
 ## Yellow rings bind the Grounded (everyone sees them), two of them winding round their legs.
@@ -908,7 +911,7 @@ func _stick(f: Ent, at: Vector3, on_wall := {}) -> void:
 	if f and rank("kin") >= 3:
 		h.dashes = h.max_dashes()           # Shadow Knife rank 3: a knife in a foe gives the Vault back
 		DashReset.cue(h)
-	vfx("knife_stick", at, null, {"foe": f != null})
+	vfx("knife_stick", at, null, {"foe": f != null, "r": float(ed["ring_r"])})
 	m.sfx("thief_knife_stick" if f else "thief_knife_ground", at, -6.0, 1.0)
 
 ## The stuck dagger (a pooled look, everyone sees it); on your screen RecastCue's marker sits on it.
