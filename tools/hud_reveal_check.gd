@@ -8,6 +8,9 @@ extends RefCounted
 ##   4. the seat pips: hidden while every seat is locked, revealed through the real HUD on the first open
 ##      seat, remembered by the save into the next match
 ##   5. training is never staged
+##   6. the every_match groups (kit card, own numbers, newcomer goal; once HudGroups' own constants) match the old
+##      rule (a save under 3 expeditions is new) at matches 1, 2, 3 and 10 of a fresh save, in an expedition, a
+##      duel, training and the tutorial
 ## Never touches the save file.
 
 const FIRST := ["vitals", "abilities", "summon_ring", "objective"]
@@ -39,7 +42,7 @@ func _match(main: Node, opts: Dictionary) -> Match:
 
 
 func _shown(m: Match) -> Array:
-	return HudReveal.groups().keys().filter(func(k): return HudReveal.on(m, k))
+	return HudReveal.staged_keys().filter(func(k): return HudReveal.on(m, k))
 
 
 func _frames(main: Node, n: int) -> void:
@@ -54,7 +57,9 @@ func run(main: Node) -> void:
 	Settings.set_v("hud_full", false, false)
 	Input.action_release("scores")
 	# ---------------------------------------------------------------- 1. the table
-	var g := HudReveal.groups()
+	var g := {}
+	for k in HudReveal.staged_keys():
+		g[k] = HudReveal.groups()[k]
 	var first: Array = g.keys().filter(func(k): return int(g[k].get("from_match", 1)) == 1)
 	first.sort()
 	var want := FIRST.duplicate()
@@ -143,6 +148,42 @@ func run(main: Node) -> void:
 	Save.d["matches"] = 0
 	m = _match(main, {"training": true})
 	ok(not HudReveal.staged(m) and _shown(m).size() == g.size(), "training shows the full HUD")
+	# ---------------------------------------------------------------- 6. parity with the old HudGroups rules
+	ok(float(HudReveal.groups()["seat_pips"]["lead_s"]) == 30.0, "the Ways Out strip still comes 30 s before a seat")
+	m.opts.erase("training")
+	var p: Hunter = m.player
+	Settings.set_v("tips", true, false)
+	m.hud.guide_hidden = false
+	for mode in ["expedition", "duel", "training", "tutorial"]:
+		m.duel = Duel.new() if mode == "duel" else null
+		m.opts["training"] = mode == "training"
+		m.opts["tutorial"] = mode == "tutorial"
+		for n in [1, 2, 3, 10]:
+			Save.d["matches"] = n - 1
+			var was_new: bool = n - 1 < 3  # the old HudGroups.NEW_PLAYER_MATCHES
+			var train: bool = mode == "training"
+			var kit_old: bool = not Record.clean() and mode != "tutorial" and not p.out and (not was_new or train)
+			var same: bool = (
+				HudReveal.own_numbers_shown(p, false) == (not was_new)
+				and HudReveal.own_numbers_shown(p, true)
+				and HudReveal.kit_wanted(m.hud, p) == kit_old
+				and HudReveal.kit_s(m) == (1e9 if train else 14.0)
+				and HudReveal.newcomer(m) == (HudReveal.staged(m) and was_new)
+			)
+			ok(
+				same,
+				(
+					"%s, match %d: kit card %s, own numbers %s, newcomer goal %s as before"
+					% [
+						mode,
+						n,
+						HudReveal.kit_wanted(m.hud, p),
+						HudReveal.own_numbers_shown(p, false),
+						HudReveal.newcomer(m)
+					]
+				)
+			)
+	m.duel = null
 	m.queue_free()
 	print("HUDREVEAL DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)

@@ -111,6 +111,12 @@
 		"desc": "Something dutiful is in here.",
 		"play": "Gets in close and hits hard."
 	},
+	"roster": {
+		"art": "new",
+		"line": "marchleaf",
+		"stage": 2,
+		"from": "marchleaf"
+	},
 	"size": {
 		"cm": 44,
 		"kg": 9.0,

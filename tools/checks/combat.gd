@@ -5,18 +5,27 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	"--hearth-lamp-check": ["res://tools/hearth_lamp_check.gd", "hearth_lamp_check", null],  # Hearth Lamp revive beacon
 	"--air-rmb-feel-check": ["res://tools/air_rmb_feel_check.gd", "air_rmb_feel_check", null],  # Kael jump -> RMB
 	# the glider opens after any attack or ability, LMB or not (input buffer, every hunter)
 	"--glide-after-attack-check": ["res://tools/glide_after_attack_check.gd", "glide_after_attack_check", null],
 	# a blast: falloff curve by distance, no damage through rock, the armour ring pitched by the shell left
 	"--blast-parity-check": ["res://tools/blast_parity_check.gd", "blast_parity_check", null],
 	"--move-speed-check": ["res://tools/move_speed_check.gd", "move_speed_check", null],  # run, walk, crouch per Hunter
+	# 0179: wall stuns scale with the charge and the impact speed
+	"--kit-cc-scale-check": ["res://tools/kit_cc_scale_check.gd", "kit_cc_scale_check", null],
 	"--kit-refund-check": ["res://tools/kit_refund_check.gd", "kit_refund_check", null],  # refund/reset loops (11-27)
 	"--mob-fsm-check": ["res://tools/mob_fsm_check.gd", "mob_fsm_check", null],  # monster + boss machines (M9)
+	"--mob-cap-check": ["res://tools/mob_cap_check.gd", "mob_cap_check", null],  # monster activity cap per preset
+	"--cc-measure-check": ["res://tools/cc_measure_check.gd", "cc_measure_check", null],
 	"--utility-parity-check": ["res://tools/utility_parity_check.gd", "utility_parity_check", null],  # belt vs source
 	"--vex-daze-check": ["res://tools/vex_daze_check.gd", "vex_daze_check", null],  # Daze team, coin wall stun
 	# a Boki plate, glove wall or ice wall never hides the Hunter behind it; a rock does
 	"--barrier-sight-check": ["res://tools/barrier_sight_check.gd", "barrier_sight_check", null],
+	# Sparkle's Kitefall spreads the landed-on foe's Static + 1 to the rest
+	"--sparkle-r-spread-check": ["res://tools/sparkle_r_spread_check.gd", "sparkle_r_spread_check", null],
+	# owner 11-26: per hero and slot, how long a cast holds the walk and whether it shoves them back (Vex E asserted)
+	"--self-lock-check": ["res://tools/self_lock_check.gd", "self_lock_check", null],
 	# Vex's Slipstep: one plain dash, no pips, no Second Wind
 	"--vex-dash-check": ["res://tools/vex_dash_check.gd", "vex_dash_check", null],
 	"--camps-check": ["res://tools/camps_check.gd", "camps_check", null],  # fixed camps and their XP
@@ -24,6 +33,8 @@ const CHECKS := {
 	"--ult-rank-check": ["res://tools/ult_rank_check.gd", "ult_rank_check", null],
 	# the Arena, training's practice tools, the kit card
 	"--arena-check": ["res://tools/arena_check.gd", "arena_check", null],
+	# practice dummies lose HP, are knocked down at 0 and respawn on their mark (Test Zone, Training Grounds)
+	"--practice-dummies-check": ["res://tools/practice_dummies_check.gd", "practice_dummies_check", null],
 	# every archetype kit, controls, locks, infusion, feel
 	"--archetype-check": ["res://tools/archetype_check.gd", "archetype_check", null],
 	"--kit-combo-check": ["res://tools/archetype_check.gd", "archetype_check", null],  # (same tool: the combo section)

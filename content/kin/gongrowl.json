@@ -7,6 +7,7 @@
 		"Bronze gong"
 	],
 	"theme": "echo",
+	"type2": "titan",
 	"flavor": "Roaring gibbon with a gong crest grown from its skull.",
 	"colors": {
 		"belly": "#848484",
@@ -113,6 +114,12 @@
 		"temper": "Joyful",
 		"desc": "Something joyful is in here.",
 		"play": "Pins foes down and breaks up their pushes."
+	},
+	"roster": {
+		"art": "locked",
+		"line": "gibbelle",
+		"stage": 2,
+		"from": "gibbelle"
 	},
 	"size": {
 		"cm": 75,

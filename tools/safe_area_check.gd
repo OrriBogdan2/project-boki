@@ -139,7 +139,7 @@ func _judge(screen: String, win: Vector2i, groups: Dictionary, sz: Vector2, root
 
 
 func _hud() -> void:
-	Save.d["matches"] = HudGroups.NEW_PLAYER_MATCHES  # the whole HUD: a new save gets it staged (HudReveal)
+	Save.d["matches"] = int(HudReveal.groups()["kit_card"]["from_match"]) - 1  # the whole HUD (HudReveal)
 	m = Match.new()
 	main.add_child(m)
 	m.start({"teams": 4, "squad": 3, "tier": 0, "length": 1500.0, "seed": 7, "demo_kin": "cindle"})
@@ -194,7 +194,7 @@ func _ways_out() -> void:
 			await _hud_at(win, sz, "ways_" + st)
 			var g: String = WAYS_GROUP[st]
 			if g != "":  # (the edge markers sit on EdgeMarker's own rim, which --edge-marker-check holds)
-				var want := HudGroups.ways_out_shown(m) or st != "locked"  # (the strip waits for a seat)
+				var want := HudReveal.ways_out_shown(m) or st != "locked"  # (the strip waits for a seat)
 				ok(SafeArea.seen.has(g) == want, "%dx%d ways_%s: draws its %s" % [win.x, win.y, st, g])
 		_ways_set("locked")
 		await _hud_at(win, sz, "ways_locked")
@@ -223,7 +223,7 @@ func _ways_set(st: String) -> void:
 	pl.out = false
 	m.interact = {}
 	# a new save sees the one-line goal, not the four-seat strip; the Last Way Out scene wants the strip
-	Save.d["matches"] = HudGroups.NEW_PLAYER_MATCHES if st == "last_way_out" else 0
+	Save.d["matches"] = int(HudReveal.groups()["kit_card"]["from_match"]) - 1 if st == "last_way_out" else 0
 	out_x["state"] = "idle"
 	m.sess_t0 = 30.0 - m.time
 	pl.teleport(m.world.free_spot_near(ht.site + Vector3(14, 0, 10), [], 1.0, 0.45, 6.0))

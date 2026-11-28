@@ -24,13 +24,18 @@ script, so a change to a shape, colour or clip is an edit and a rebuild:
 | `tools/boki/face.py` | Eye domes, lids, brows, mouth: one vertex grid, one blend shape per expression |
 | `tools/boki/face_refit.py` | Moves a built glb's Face (eyes, lids, brows, mouth) onto the painted eyes of its coat, in the glb itself (`EYES` row per species, read off a front orthographic bind-pose render of the coat with props and parts hidden); `AXIS`, `FACING`, `REWEIGHT`, `MOUTH` rows for off-centre faces; prints the FRAME `"head"` row and the Face-to-coat nearest-vertex median in mm (8 to 12 is good). Run once on a freshly built glb |
 | `tools/boki/boki_clips.py`, `*_anim.py` | Shared clips, then each species' skeleton and own clips |
-| `tools/boki/boki_rig.py`, `build_boki.py` | Armature, weights from the primitives, sampling, .glb export |
+| `tools/boki/boki_rig.py`, `build_boki.py`, `reclip.py` | Armature, weights from the primitives, sampling, .glb export; `reclip.py` re-keys a built .glb's clips from its `*_anim.py` (body, face and atlases kept) |
 | `tools/boki/boki_scan.py`, `boki_meshy.py`, `pose_shots.py` | A body from a Meshy model of the sheet on the same rig (Kestrike, Cairnback, Gongibbon `gibbelle`, Effigeetle `goliathite`, Skateron `hoarheron`, Frigatee `floenatee`): `MESHY_BOKI_RECIPE.md` |
 | `scripts/match/boki_rig.gd` | Loader and driver (`BokiRig`): clip from metas, face on top, marks and colours |
 | `scripts/match/boki_dna.gd` | Inborn proportions, ear and tail shapes, birthmark (`Unique.dress` calls it) |
 | `shaders/boki_eye.gdshader`, `boki_marks.gdshader` | Eye with its own iris colour; coat marks fixed to the rest pose |
 
-Clips: idle, walk, run, attack, ability, hop, sleep, eat, pet, chop, mine, carry, tend. In a match the ability plays as
+Clips: idle, walk, run, attack, ability, hop, sleep, eat, pet, chop, mine, carry, tend (the three starters also
+glide: `boki_clips.glide`, a 1.6 s loop carried through your glide, Vespyx spread like a flying squirrel, Prismander
+splayed flat with its tail sculling, Mycroll tucked into its cap; `BokiHomeClips` then builds no glide pose for them).
+A clip can go into the live .glb without the model source or Blender: `~/venv-img/bin/python tools/boki/glb_clip.py
+<id> <clip> --check=idle` appends it (the mesh bytes untouched) after rebuilding the baked idle to within 0.05 degrees;
+a clip that shows a hidden prop (the berry) still needs the Blender build. In a match the ability plays as
 `cast` (0.56 s, release at 0.2 s), retimed at load from the keyed one (`BokiSwing`; decision 0040): `Kin` holds the skill
 until the release frame. A Blender pass should key `cast` per species (same name and release time) and drop the retime.
 Home and garden-game clips (settle, nap, wake, munch, nudge, climb, splash, rush, brace, dodge, stonehop, spin, crouch, burst, sulk) are not baked: `BokiHomeClips` builds them when the rig
@@ -89,6 +94,15 @@ them; a prop named in the species' `GLOW_PIECES` wears the glow (Lunowl's dazzle
 `boki_coat` (atlas, ink), `boki_glow` (the species' glow), `boki_face` (lids, brows, mouth), `boki_eye`. Face LODs
 stay off (`FACE_LOD_BIAS`): Godot cuts them from the rest pose, where the lids lie folded.
 
+**The face overlay is per species** (`BokiRig.uses_overlay`, owner 11-24: the overlay eyes read as glued on). A species
+not listed in `content/rules/boki_eyes.json` drops the Face mesh at load and shows the coat's own painted eyes;
+expressions, blinks and eye looks stop with it. The 17 listed species have no usable eyes of their own under the
+overlay (most had them painted out by `boki_scan.py`'s `"cover"`) and keep the overlay until their eye-paint pass
+lands (rebake with `cover` 0 where the scan has eyes, else a Meshy eye retexture): remove the id from the list in that
+pass. `BokiRig.face_overlay = true` is the global override that brings the overlay back on every species (the face
+checks turn it on). `face.py` and the Face in each glb stay. `--boki-eyes-shots --shots-dir=<dir>` (GPU) renders each
+species' head as the game builds it, with the overlay forced on, and the match camera.
+
 ### A summoned Boki (out of the wisp)
 
 The Boki bursting out of its wisp (decision 0039) is the same `Kin` and rig, so it plays the clips above. The burst
@@ -111,6 +125,15 @@ than what shows: the head covers its rim. Past that the high cameras and `CamRig
 Palettes live at the top of each species' coat section (`PLUM`, `SHELL`...); tools held in the tail are Vespyx's `chop`
 and `mine` clips, and `boki_clips.chop_mouth` / `mine_mouth` are the mouth versions the others use.
 
+11-22: Spirevark (`moundvark`), Murmurling (`murmurling`) and Barrelmander (`spatewader`) have their own clips
+(`moundvark_anim.py`, `murmurling_anim.py`, `spatewader_anim.py`) on the borrowed Glomwort skeleton and the
+`auto_legs.py` legs: an aardvark that sniffs with its snout low, rakes and rears up to call its swarm; a starling that
+snaps its head about, darts and pecks, sings with its pipe tail up; a salamander that bends in S-curves with the barrel
+water sloshing behind. `reclip.py` re-keys everything but walk and run (the planted-paw trot stays), then
+`gait_layer.py` adds each module's `GAIT` body motion (head, neck, spine, hips, root rotations only) on top of those
+two, the legs untouched. Run both once, in that order, on a file whose walk and run are the plain trot (to redo, run
+`auto_legs.py` first). `--anim-coverage-check`: all six states of the three rows read `clip`.
+
 11-20: Buckleron (`limpetor`) and Lanterloris (`moonloris`) have their own clips (`limpetor_anim.py`, `moonloris_anim.py`)
 on the borrowed Glomwort skeleton: a limpet that creeps under a rocking shield, bashes it down and clamps to brace, and
 a slow loris that climbs hand over hand, freezes and snaps, and floats up with its lantern belly. Their glbs were
@@ -120,6 +143,14 @@ model is not at hand.
 11-22: both have `auto_legs.py` legs (below), so reclip keeps the file's leg bones and its planted-paw walk and run
 and re-keys only the other 11 clips, legs at rest (the modules' own creep and climb walk/run glide the paws and are not
 used). A full rebuild with `build_boki.py` needs `auto_legs.py` again.
+11-20: Frigatee (`floenatee`), Gongibbon (`gibbelle`) and Prowyak (`glaciyak`) have their own clips (`floenatee_anim.py`,
+`gibbelle_anim.py`, `glaciyak_anim.py`) on the borrowed Glomwort skeleton: a seal's hump-and-haul and belly-flop, a gibbon's
+pendulum roll and bell clang, a yak's lumber, gore and ground slam. Their glbs were re-keyed with `tools/boki/reclip.py`
+(`blender -b --factory-startup --python tools/boki/reclip.py -- --species=<id>`): it reads the built .glb back, swaps
+the actions for the module's `CLIPS` and exports again, body, face, skin and atlases untouched (the unchanged clips came
+back identical), for a species whose raw Meshy model is not at hand. A full `build_boki.py` run gives the same clips.
+11-22: Prowyak has `auto_legs.py` legs (below), so reclip keeps its leg bones and planted-paw walk and run and re-keys
+only the other 11 clips, legs at rest (the module's lumbering walk/run would glide the paws and is not used).
 11-20: Crofthorn (`heatherhorn`) and Anvilbrock (`kilnbadger`) have their own clips (`heatherhorn_anim.py`,
 `kilnbadger_anim.py`) on the borrowed Glomwort skeleton: a cow's level-backed plod, horn sweep and proud bellow; a honey
 badger's low swagger, headbutt and ringing anvil. Their glbs were re-keyed with `tools/boki/reclip.py`. Then they got
@@ -128,6 +159,22 @@ reach=1.35` (the args main's leg pass used, read back off its bones and swing). 
 on the legless glb from before the legs (`git show 836178d90b:art/kin/<id>/<id>.glb`; its assert wants the module's
 skeleton), then `auto_legs.py` with those args. The trot touches down at the wrap, so heatherhorn's walk and run seams
 sit in SEAM_OVER (2.09, 1.62).
+11-20: Mirrolin (`nacrolin`) and Boltstrich (`nimbostrich`) have their own clips (`nacrolin_anim.py`, `nimbostrich_anim.py`)
+on the borrowed Glomwort skeleton: a timid pangolin that creeps low, scurries, and curls into a ball to tumble-hop, ram and
+spin as a disco ball; a skittish ostrich that high-steps, snaps its neck at noises, sprints neck-out, pecks and rattles
+with static before its spell. Re-keyed with `tools/boki/reclip.py` (`blender -b --factory-startup --python
+tools/boki/reclip.py -- --species=<id>`): it reads the built .glb back, swaps the actions for the module's `CLIPS`
+and exports again, body, face, skin and atlases untouched. reclip needs the module's skeleton, so run it on the glb
+before its legs, then give the legs back with `auto_legs.py -- nacrolin legs=2 top=0.35 reach=1.3 hold=hips` (nimbostrich:
+`top=0.5 reach=0.8 hold=hips`): walk and run keep the species' own neck, head and spine motion, the root and hips
+are held so the planted feet can follow. Slide at home and match speed, borrowed walk -> own clips (x1): nacrolin
+18/22/21/29/32% -> 8/9/9/18/21, nimbostrich 18/19/18/33/44 -> 11/10/13/29/40.
+11-20: Chuggamus (`scaldamus`) and Barokat (`sentrikat`) have their own clips (`scaldamus_anim.py`, `sentrikat_anim.py`) on
+the borrowed Glomwort skeleton: the hippo-engine's cowcatcher ram and boiler vent; the meerkat's sentry scan, upright
+strike and barometer pulse, and a sleep that nods off and jerks awake. Re-keyed with `tools/boki/reclip.py` (mesh, skin
+and atlases unchanged). 11-22: both have `auto_legs.py` legs (below), so reclip keeps the file's leg bones and its
+planted-paw walk and run and re-keys only the other 11 clips, legs at rest (the modules' own walk/run, the piston plod
+and stiff march, glide the paws and are not used). A full rebuild with `build_boki.py` needs `auto_legs.py` again.
 
 A Boki without legs (Zephyrak) writes all its own clips: the body is a chain bent along a curve sent down it
 (`zephyrak_anim.bend`); its FRAME row has `"hip": 0.0` and `"hover": true`, which gives it a soft shadow on the ground.
@@ -142,6 +189,30 @@ that keeps a planted paw closest to the ground most of the stance. `_pick_clip` 
 `speed_scale = speed / (stride x the model's world scale)`, so a size roll's bigger Boki steps longer, kept under
 `MAX_CADENCE` cycles/s. A new or re-keyed species: run `--boki-anim-audit`, copy the printed "measured" numbers into
 `STRIDE`.
+
+## How big it is (`KinSize`)
+
+A rigged Boki's size is its data: `content/kin/<id>.json` `size.cm` x `KinSize.M_PER_CM` (0.03625 m per cm) x
+`KinSize.READ_SHARE` (0.54) is how big it *reads*, at root scale 1, whatever the glb's own size. A Boki's read is the
+square root of the area its silhouette covers on screen (the convex hull of its mesh) in its idle pose, averaged over
+four turns and over both views it is seen from: the match camera's 57 degrees and the farm third-person camera's 20
+degrees (a geometric mean, so neither view outweighs the other). Two things did not work: fitting the longest side
+(a tall, narrow Vespyx and a low, long Prismander of the same length read 1.2x apart from the farm's low view) and
+measuring the bind pose (idle tucks Mycroll in to 0.69 of its bind read, Vespyx only to 0.93, so the farm still showed
+1.25x). The idle reads are measured offline, CPU-skinned (Godot's `bake_mesh_from_current_skeleton_pose` fails
+headless), into `content/rules/kin_read.json` (`KinSize.READS`); `KinSize.fit` looks the species up there, so it costs
+nothing at run time (a species missing from it is measured in its bind pose once). **After a model swap run
+`--kin-size-check --write`**: the check fails on a stale entry. `BokiRig.build` scales Flex by `fit` and stores it as
+the root meta `fit`; `BokiRig` and `KinPuppet` multiply Flex's pose scale by it. A new Meshy model needs no size
+tuning: set its `size.cm` and `--write`. The kin's own roll (Unique, Evo growth, Mutations) and the farm's one
+`FARM_BOKI_SCALE` (the same for every Boki, the active companion included) multiply on top.
+`--kin-size-check` measures every species with a model in its idle pose and asserts each reads within 5% of its data,
+the table is fresh (2%), no longest side is more than 2x off its data length (an outlier model to look at), the three
+starters (Vespyx, Prismander, Mycroll, 28 cm each) read within 1.12x of each other from each pitch on its own, in a
+match and at the farm's scale (now 1.09x at both), and Heatherhorn (70 cm) reads at least 1.5x the biggest starter
+(now 2.5x). The starters' cm are not the 30/28/27 asked first: at those the silhouettes differed by 1.33x. `--boki-size-shots` renders the proof (the HUD frame, the game camera, an eye-level camera) and writes each
+one's measured box and the area it covers on screen. The portrait (`KinPortrait`) divides the fit out: its fixed frame
+was cut for the glb's own size.
 
 ## Attack contact
 
@@ -170,7 +241,7 @@ for 1/30 s and every loop stopped a frame at its wrap (and ran a frame long). `b
 rebake (only the key times change; `--check` lists any glb that still starts late). That took most seams from
 1.1-1.9 to under 1.0. What is left over 1.0 is a real break: a bone turns or changes speed at the loop point
 (on the 11-14 merge with main's planted-paw and scan glbs: gloamshell walk 2.0, cairnback walk 1.6, the
-three glomwort-rig scans 1.0-1.4, caecilith walk 1.4, kestrike walk 1.3, puddlet, lodestick, mossgrade,
+two glomwort-rig scans 1.0-1.4, caecilith walk 1.4, kestrike walk 1.3, puddlet, lodestick, mossgrade,
 burrlet and kindlewren walk 1.0-1.15; `SEAM_OVER`, `docs/DEBT.md`).
 
 A seam counts the wrap's jump, so a quick beat that runs up to the loop's end reads as a hitch: wisplet's idle wing
@@ -274,7 +345,8 @@ itself. Side-view strips, zapple, lodestick, mossgrade and cindle (top row 2.4 m
 | thrumbird | EXEMPT: flyer, no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 8.1 |
 | selenfin | EXEMPT: flyer (fins), no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 1.0 |
 | zephyrak | EXEMPT: serpent, no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 0.9 |
-| glomwort | EXEMPT: blob, no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 1.1 |
+| glomwort | EXEMPT: blob, no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 1.5 |
+| goliathite | EXEMPT: scan (stumps ride the body), no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 1.2 |
 | gloamshell | EXEMPT: blob (snail foot), no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 1.3 |
 
 ## Legs for borrowed-rig species (`tools/boki/auto_legs.py`)
@@ -379,3 +451,18 @@ action, sleep, hop, ability or attack takes over at once and restarts the count.
 Boki is: its Bokidex quirk (`content/rules/boki_quirks.json` on ext/boki-quirks; the runtime does not read it) else
 body plan and type; the `note` of each row says which. Review: `--boki-idle-shots` (a row per species: 4 breath
 frames, 4 fidget frames); axis signs: x pitches the nose up, y turns left, z rolls; right-side bones mirror y and z.
+
+### Own clips for a long body, a flyer and a lizard (squalltross, threadwyrm, tuatrune, velvorm)
+
+These four are Meshy scans on Glomwort's 5-bone rig (root, hips, spine, neck, head), so a body shape has only those
+bones to move. `tools/boki/<id>_anim.py` keys idle, walk, run, hop, carry, attack, ability and sleep for each:
+threadwyrm a travelling S-wave (yaw on head, neck, spine, hips, each `LAG` later, the root countering), velvorm a
+caterpillar's arch running tail to head with the root stretching and bunching, squalltross a wing beat as the spine's
+lateral scale (`SCALED`: the neck takes the inverse so the head keeps its shape; the body rises as the wings open),
+tuatrune a lizard's spine bend against its steps. Squalltross and tuatrune have `auto_legs.py` legs: `KEEP_LEGS`
+(walk, run) tells `tools/boki/reclip_own.py` to keep the file's leg curves and root height and lay the module's body
+turns over them, so the paws still plant (slide 35% -> 11% on tuatrune's walk: the old shared body drove the feet).
+Rebuild without the raw model: `blender -b --factory-startup --python tools/boki/reclip_own.py -- --species=<id>`, then
+`godot --headless --import`. Contact sheet: `--boki-anim-shots --clips --boki=<id> --tag=after --shots-dir=<dir>` (a row
+a clip, eight poses across its loop, front quarter). Walk loop seams: `SEAM_OVER` squalltross 1.50, tuatrune 1.57 (the
+planted-paw wrap, 1.45 before, a little rougher under a calmer body).

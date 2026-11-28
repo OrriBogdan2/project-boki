@@ -18,6 +18,7 @@ extends RefCounted
 const CHIP_HOLD := 0.4  # s the lost chunk stays after the last hit
 const CHIP_DRAIN := 1.6  # of the bar per second once it drains (plus an ease-out)
 const FLASH_T := 0.14  # s the frame flashes white when struck
+const SICK_COL := Color("b8e6c0")  # resurrection sickness (Life "sickness_*"): its heart here and on the squad row
 const ARMOR_FLASH_T := 0.2  # s the armour strip flashes white after it loses some
 const PAIN_T := 1.2  # s a hunter's portrait wears its hurt face after a hit
 const CHEER_T := 2.5  # s it wears its excited face after a kill
@@ -56,7 +57,12 @@ var _layer: Node2D  # the items' parent, right under Hud.c
 ## How high over this hunter's feet their plate sits: the archetype's optional `plate_offset` (in its
 ## content/archetypes JSON, so taller and shorter heroes clear their own heads), else PLATE_OFFSET.
 static func plate_offset(h: Hunter) -> float:
-	return float(Arch.def(h.arch).get("plate_offset", PLATE_OFFSET))
+	return arch_offset(h.arch)
+
+
+## The same for an archetype id (--warden-native-check measures the head under it before any Hunter is built).
+static func arch_offset(arch: String) -> float:
+	return float(Arch.def(arch).get("plate_offset", PLATE_OFFSET))
 
 
 ## `base` m over the feet (before the match's Hunter size, as Hud._head takes it), raised so the plate hangs clear over
@@ -218,6 +224,8 @@ static func statuses(e: Ent) -> Array:
 		out.append(["status_burning", Color("ff9a5a"), "BURNING", -1.0])
 	if hunter and hunter.weak_t > 0.0:
 		out.append(["status_weakened", Color("ffb36a"), "WEAKENED", hunter.weak_t])
+	if hunter and hunter.sick_t > 0.0:
+		out.append(["heart", SICK_COL, "", hunter.sick_t])
 	if hunter and hunter.shield > 0.0:
 		out.append(["status_shielded", Color("d8ecff"), "", -1.0])
 	if e.guard_t > 0.0:

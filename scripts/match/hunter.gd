@@ -1339,6 +1339,8 @@ func heal(n: float) -> void:
 		return
 	if blight_t > 0.0:
 		n *= 1.0 - blight_k   # blighted: healing barely takes
+	if sick_t > 0.0:
+		n *= Life.R["sickness_heal"]
 	var before := hp
 	hp = minf(max_hp, hp + n)
 	m.fx.healed(self, hp - before)
@@ -1545,13 +1547,6 @@ func sim(dt: float) -> void:
 		want = atan2(-roll_dir.x, -roll_dir.y)
 	if not (ak and ak.face_locked()):
 		face = rotate_toward(face, want, HunterMove.turn_rate * dt)
-
-func pad_launch(to: Vector3) -> void:
-	var d := Vector2(to.x - pos.x, to.z - pos.z).length()
-	pad = {"from": pos, "to": to, "t": 0.0, "dur": clampf(d / 12.0, 0.7, 1.5), "h": maxf(pos.y, to.y) - pos.y + 2.5 + d * 0.12}
-	roll_t = 0.0
-	grap = {}
-	grounded = false
 
 func _pad_fly(dt: float) -> void:
 	pad["t"] += dt
@@ -1829,10 +1824,10 @@ func _physics(dt: float) -> void:
 			wall_touch_t = 0.2
 			wall_n = hit_n
 			wall_moves.hit(self, pre_v, blk)
-		if m.time - kb_t < 0.6 and pre_v.length() > 8.0 and wslam_t <= 0.0 and not remote \
+		if m.time - kb_t < 0.6 and pre_v.length() > KnockWall.SLAM_V.x and wslam_t <= 0.0 and not remote \
 				and KnockWall.tall(m, self, blk):
 			wslam_t = 1.2
-			var st := maxf(0.9, wallstun)
+			var st := maxf(KnockWall.slam_stun(pre_v.length()), wallstun)
 			wallstun = 0.0
 			stun_t = maxf(stun_t, st)
 			m.on_wall_slam(self, pre_v.normalized())

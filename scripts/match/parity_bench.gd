@@ -7,20 +7,19 @@ extends Node
 ## last WINDOW seconds and the time that DPS would take to down a medium Hunter. Walking away from the dummy
 ## clears it; Reset also sends everyone back to their marks (Arena.reset).
 
-const KNOCK_MIN_SPEED := 2.5     # m/s, a hit that leaves the dummy at least this fast (and in a knock slide) is a knock
-const KNOCK_END_SPEED := 0.5     # m/s, slower than this the knock is over
-const KNOCK_MAX_T := 1.0         # s, give up following a knock (the dummy walks back to its mark after a quiet moment)
-const WINDOW := 5.0              # s, the span of the "last N seconds" damage line
-const AWAY_DIST := 14.0          # m, walk this far from the selected dummy and the readout clears
-const PANEL_POS := Vector2(16, 120)   # px, from the top left, under the portrait
+const KNOCK_MIN_SPEED := 2.5  # m/s, a hit that leaves the dummy at least this fast (and in a knock slide) is a knock
+const KNOCK_END_SPEED := 0.5  # m/s, slower than this the knock is over
+const KNOCK_MAX_T := 1.0  # s, give up following a knock (the dummy walks back to its mark after a quiet moment)
+const WINDOW := 5.0  # s, the span of the "last N seconds" damage line
+const AWAY_DIST := 14.0  # m, walk this far from the selected dummy and the readout clears
 
 var m: Match
-var target: Hunter = null       # the selected dummy
-var cc_kind := ""               # the last crowd control put on it ("stun" | "root" | "slow" | "burn")
-var cc_until := 0.0             # match time it ends
-var knock_dist := 0.0           # m, the last finished knock
-var knock_time := 0.0           # s
-var knocking := false           # a knock is being followed
+var target: Hunter = null  # the selected dummy
+var cc_kind := ""  # the last crowd control put on it ("stun" | "root" | "slow" | "burn")
+var cc_until := 0.0  # match time it ends
+var knock_dist := 0.0  # m, the last finished knock
+var knock_time := 0.0  # s
+var knocking := false  # a knock is being followed
 var _knock_from := Vector3.ZERO
 var _knock_t0 := 0.0
 var _layer: CanvasLayer = null
@@ -29,8 +28,10 @@ var _text: Label = null
 var _hit_cb: Callable
 var _status_cb: Callable
 
+
 static func of(match_node: Match) -> ParityBench:
 	return match_node.get_node_or_null("ParityBench") as ParityBench
+
 
 ## Adds the (closed) bench to a match that has practice dummies; null otherwise.
 static func attach(match_node: Match) -> ParityBench:
@@ -44,12 +45,17 @@ static func attach(match_node: Match) -> ParityBench:
 	b.set_process(false)
 	return b
 
+
 func is_open() -> bool:
 	return _layer != null
 
+
 func toggle() -> void:
-	if is_open(): _close()
-	else: _open()
+	if is_open():
+		_close()
+	else:
+		_open()
+
 
 func _open() -> void:
 	_hit_cb = func(_by, t, _d, _tags): _on_hit(t)
@@ -61,7 +67,6 @@ func _open() -> void:
 	add_child(_layer)
 	_panel = UI.glass(10, 14)
 	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	_panel.position = PANEL_POS
 	_layer.add_child(_panel)
 	var v := UI.vbox(6)
 	_panel.add_child(v)
@@ -76,9 +81,11 @@ func _open() -> void:
 	set_process(true)
 	_refresh()
 
+
 func _exit_tree() -> void:
 	if is_open():
 		_close()
+
 
 func _close() -> void:
 	CombatBus.hit_landed.disconnect(_hit_cb)
@@ -91,11 +98,13 @@ func _close() -> void:
 	_text = null
 	set_process(false)
 
+
 func _dummy_row(h: Node) -> Dictionary:
 	for dm in m.arena.dummies:
 		if dm["h"] == h:
 			return dm
 	return {}
+
 
 ## Selects `t` if it is a practice dummy (the status event comes before the hit event). False if it is not.
 func _select(t: Node) -> bool:
@@ -107,6 +116,7 @@ func _select(t: Node) -> bool:
 		_clear_knock()
 	return true
 
+
 func _on_hit(t: Node) -> void:
 	if not _select(t):
 		return
@@ -116,6 +126,7 @@ func _on_hit(t: Node) -> void:
 		_knock_from = target.pos
 		_knock_t0 = m.time
 
+
 func _on_status(t: Node, st: String, dur: float) -> void:
 	if not _select(t):
 		return
@@ -123,7 +134,9 @@ func _on_status(t: Node, st: String, dur: float) -> void:
 	cc_until = maxf(cc_until, until) if st == cc_kind else until
 	cc_kind = st
 
+
 func _process(_dt: float) -> void:
+	SafeArea.place(_panel, Practice.STATION_POS, m.hud.c.size)
 	if target != null and (not is_instance_valid(target) or m.player.pos.distance_to(target.pos) > AWAY_DIST):
 		_deselect()
 	if knocking and is_instance_valid(target):
@@ -134,15 +147,18 @@ func _process(_dt: float) -> void:
 			knock_time = m.time - _knock_t0
 	_refresh()
 
+
 func _clear_knock() -> void:
 	knock_dist = 0.0
 	knock_time = 0.0
 	knocking = false
 
+
 func _deselect() -> void:
 	target = null
 	cc_kind = ""
 	_clear_knock()
+
 
 ## Damage in the last `win` seconds out of hits [[time, damage]].
 static func dealt_in(hits: Array, now: float, win: float) -> float:
@@ -152,6 +168,7 @@ static func dealt_in(hits: Array, now: float, win: float) -> float:
 			s += float(hh[1])
 	return s
 
+
 ## Seconds `dps` takes to down a medium Hunter: its health through the armour's flat share (the armour,
 ## 2.2 times the health, outlasts it). 0 when nothing has been dealt.
 static func time_to_down(dps: float) -> float:
@@ -159,10 +176,12 @@ static func time_to_down(dps: float) -> float:
 		return 0.0
 	return float(Data.CLASSES["medium"]["hp"]) / (1.0 - float(Hunter.ARMOR_TIERS[0][3])) / dps
 
+
 ## Clears the readouts and sends the player, dummies and bot back to their marks.
 func reset() -> void:
 	_deselect()
 	m.arena.reset()
+
 
 ## The readout as lines, one per quantity (also what the check asserts on).
 func lines() -> Array:
@@ -182,6 +201,7 @@ func lines() -> Array:
 		"CC  %s" % cc,
 		"Knock  %.2f m in %.2f s" % [knock_dist, knock_time] + ("  (moving)" if knocking else ""),
 	]
+
 
 func _refresh() -> void:
 	if _text:

@@ -104,6 +104,7 @@ var rows := PackedStringArray()
 var hud_us := 0
 var added := {}  # node name -> count, nodes that entered the tree this frame (named on a hitch)
 var vp: RID
+var slept := 0  # most monsters the preset's MobCap held asleep at once (sampled once a second)
 
 
 func run(main_node: Node) -> void:
@@ -277,7 +278,18 @@ func _heart_final() -> void:
 ## Starts an expedition from the bench's base options plus `extra` and waits until it plays.
 func _start(part: String, extra: Dictionary) -> Match:
 	var o := Match.demo_opts()
-	o.merge({"raid": "ash", "blight": true, "no_drop": true, "god": true, "autoplay": true, "demo_kin": "cindle"}, true)
+	o.merge(
+		{
+			"raid": "ash",
+			"blight": true,
+			"no_drop": true,
+			"god": true,
+			"autoplay": true,
+			"client_cap": true,
+			"demo_kin": "cindle"
+		},
+		true
+	)
 	o.merge(extra, true)
 	if wisps != "":
 		o["boki_wisps"] = wisps == "on"
@@ -349,6 +361,8 @@ func _play(m: Match, part: String, keep: Array, stage: Callable, stage_at: float
 			)
 		pipes_draw = pd
 		added.clear()
+		if fl.size() % 60 == 0:
+			slept = maxi(slept, m.mob_cap.sleeping())
 		last = now
 		if trios > 0 and fl.size() % POSE_SAMPLE == 0:
 			_pose_sample(m)
@@ -357,6 +371,7 @@ func _play(m: Match, part: String, keep: Array, stage: Callable, stage_at: float
 	if trios > 0:
 		_pose_lines(m, fl.size())
 	_emitters()
+	print("BENCH mob cap %d, most asleep at once %d" % [m.mob_cap.limit(), slept])
 	var ks := Match.prof.keys()
 	ks.sort_custom(func(a, b): return Match.prof[a] > Match.prof[b])
 	var per := ks.slice(0, 10).map(func(k): return "%s %.2f" % [k, Match.prof[k] / 1000.0 / fl.size()])

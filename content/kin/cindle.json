@@ -117,8 +117,13 @@
 		"desc": "Dark plum shell, green droplets. Hisses.",
 		"play": "Darts in, stings, poisons. Bold."
 	},
+	"roster": {
+		"art": "locked",
+		"line": "cindle",
+		"stage": 1
+	},
 	"size": {
-		"cm": 34,
+		"cm": 28,
 		"kg": 4.2,
 		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
 	}

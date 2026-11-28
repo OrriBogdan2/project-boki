@@ -7,6 +7,7 @@
 		"Golden harp"
 	],
 	"theme": "echo",
+	"type2": "tempest",
 	"flavor": "Lyrebird whose tail is a harp of strings.",
 	"colors": {
 		"belly": "#e4e4e4",
@@ -115,6 +116,12 @@
 		"temper": "Bright",
 		"desc": "Something bright is in here.",
 		"play": "Keeps you alive and patched up."
+	},
+	"roster": {
+		"art": "new",
+		"line": "thrumbird",
+		"stage": 2,
+		"from": "thrumbird"
 	},
 	"size": {
 		"cm": 54,

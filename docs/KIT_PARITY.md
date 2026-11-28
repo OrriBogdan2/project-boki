@@ -411,7 +411,7 @@ Re-read 2026-11-26 on main fad508b31c9; the dated tables below this one (ranges,
 | LMB | Hold; 30 rounds, rapid refill when idle, first 10 rounds stronger [D] | Quill Rifle: cadence 0.08 (~12 rounds/s: measured 12.0 hits/s in a magazine by `--ttk-matrix-check`, 9.6/s over a whole string with the ~1.3 s refill gap; `quill_rifle` is Vex's weapon, no rate multiplier; docs/WEAPON_FIRING_DATA.md; 0.12 until the fun audit 11-11), 8 a round (6 until 11-24, `8495f5a6b8`, owner playtest), mag 30, refill 40/s after 0.35 s, 10-round sustain to 80% (50% until 11-24; the source's is 50%), no fire slow; Dazed foes take +76% (`rattle_k`) | match in shape; round and decay differ (owner 11-24) |
 | RMB | Sticky grenade, wall cone knock, Daze; lane on hold [D,F] | Coin Blast, a tap and a coin toss from her free hand (owner item 112, 11-17): hit 22 and Daze 1.4 s, on a wall a 6 m 100 degree cone, 16, shove 11, stun 0.7 s; cd 6.5 (footage 5.4, data 9) | differ (owner, item 112); cd **open** (gap 10, owner) |
 | Q | none | glove | ours |
-| E | 0.6 s cast standing, beam pierces terrain, recoil, -20% cd on hit [D,F] | Palm Lance, from her open palm: charge 0.6, 24 damage (36 until 11-11), +20% on a Dazed foe, recoil 6, range 18, width 1.8 (0.9 each side, owner item 68), held 0.6 s after the beam (`E_RECOVER`), yaw lock 30 deg/s, shave 20% / 30%, cd 11.5 | match; width 2x the source (owner) |
+| E | 0.6 s cast standing, beam pierces terrain, recoil, -20% cd on hit [D,F] | Palm Lance, from her open palm: charge 0.6, 24 damage (36 until 11-11), +20% on a Dazed foe, range 18, width 1.8 (0.9 each side, owner item 68), planted 0.15 s at the press then a 60% walk, no recoil and no hold after the beam (owner 11-26), yaw lock 30 deg/s, shave 20% / 30%, cd 11.5 | width 2x the source; no braced stand or shove (owner 11-26) |
 | R | Target zone, ~1.6 s delay, 3 s fire + Slow, 55 s [D,F]; 59/s on a 203 impact [D], ticks ~0.5 s [F] | Cinderfall: delay 1.6, 24 impact (+50% in the 1.2 m centre), 3 s zone, 6 ticks of 3.5 every 0.5 s (0.146 of the impact a tick vs 0.145), slow 30%, range 14, radius 3.4; she keeps walking (0.25 s wind-up at 70% walk, owner 11-17), cd 42 | match; cd 0.76x (gap 10, owner); range 14 `[?]` |
 | Dash | Press or hold longer, fires through, knock resets, 11.5 s (F 7.5) | Slipstep: one charge (the source has one), tap 4.8 m / .45 s off the dash feel, hold 7 m at +40% cd, cd 8.5, every dash row `fire`; rank 3 +25% speed for 2 s when a slide ends | match; hold length `[?]` |
 | Passive | +6% omnivamp 3.5 s on ability hit [D] | Hot Streak: a knock gives Slipstep back; an ability that lands lights Fever, one flat 6% for 3.5 s; Dazed +76% rifle | match |
@@ -724,6 +724,8 @@ DECISIONS 2026-11-10: the first pick is Lace, Kael or Vex, so every new player t
 
 ## Crowd control: every stun, root, Ground, slow, Daze and knock effect (main d255acbee, 2026-11-09)
 
+> Re-measured 2026-11-22: the current table is `docs/KIT_PARITY.d/1122-cc-reread.md` (`--cc-measure-check`). The rows below are the 11-09 read.
+
 Read from `content/archetypes/*.json` and the kit code. Source = the card text in `sv/briefs/kits.md` [D] and the footage reads in `briefs/hero-ref` [F] (5 fps, so a read is good to about +-0.2 s). **The card gives no CC duration or strength except Motley's (Snap 0.8 to 1.8 s, Black Hole 3.5 s, orb 6%) and the upgrade steps (Binding +0.3 s root, Primal Slam +0.1 s and +0.2 s stun).** Every other source row is a footage read or just the word "Slow", "Stun", "Daze". No silence and no knock-up (a launch that disables) is built anywhere, and none is in these 12 kits' cards except ref-bulwark's Faultline (queued, skipped). Self-slows (cast, charge, carry) are not CC and are left out. Albert's Faultline and Spin Dash are skipped (queued job). Sable's 30% bola slow stays (owner item 53).
 
 | Hunter | Effect (ours) | Source | Verdict |
@@ -886,8 +888,6 @@ wave charge, Slam wind-up and Meteor recovery, Lace's draw and Heavy Shot hold, 
 | Kael | 4.5 m/.17 s (+.07 dip) | class long dash | no (owner 113.8) | ×.85/×1.15 | 3.8 m/.2 s | ×feel |
 | Lace | 3.0 m/.27 s roll | 5.0 m/.22 s flick (light long dash) | F roll | ×1, speed ×0.7 (owner item 9) | 3.0 m/.39 s | 5.0 m/.22 s |
 | Cinder | 3.4 m/.33 s | 3.4 m/.28 s poof (was 6.8 m) | F | ×1 | 3.4 m/.33 s | 3.4 m/.28 s (owner 11-17: was 6.8 m, twice as far) |
-| Meeko | 3.6 m/.2 s | 13.3 m/.95 s glide | F | ×1 | 3.6 m/.2 s | 13.3 m/.95 s |
-| Cinder | 3.4 m/.33 s | 6.8 m/.28 s | F | ×1 | 3.4 m/.33 s | 3.4 m/.28 s (owner 11-17: was 6.8 m, twice as far) |
 | Meeko | 3.15 m/.23 s | 10.5 m/.95 s glide (footage 3.6 m/.2 s and 13.3 m/.95 s, shortened and slowed by the owner 11-11, `2f8b11c58c`) | F, then owner | ×1 | 3.15 m/.23 s | 10.5 m/.95 s |
 | Tenzo | 2.8 m/.26 s hop | class long dash | no (owner item 111) | ×.85/×1.15 | 2.4 m/.3 s | ×feel |
 | Grimble | 3.2 m/.16 s | 4.3 m/.16 s (×1.35) | no (owner 23:40) | ×.85/×1.15 | 2.7 m/.18 s | 3.7 m/.18 s |

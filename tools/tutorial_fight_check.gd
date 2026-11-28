@@ -31,7 +31,9 @@ func ok(cond: bool, what: String) -> void:
 func run(main: Node) -> void:
 	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	Save.no_write = true
+	var fresh: Dictionary = Save.d.duplicate(true)
 	for id in STARTERS:
+		Save.d = fresh.duplicate(true)  # (a clean save each: a finished run leaves marks the next must not see)
 		_play(main, id)
 	print("TUTFIGHT DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)

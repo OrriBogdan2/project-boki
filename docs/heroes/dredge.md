@@ -302,7 +302,7 @@ Measured by casting every slot at 2 m (rising from a jump), at 9 m (falling) and
 | Barge `hit_kb` | removed: it was dead data (never read), so the barge has no knock (ext/tenzo-grimble-knock-cut) | Brute Dash: no damage, no knock [D] |
 | Barge in the air | the same quick time, 35% further | "barge: in the air the same quick time, 35% further" |
 | A hit from behind | +50% | "passive: from behind +50%, from the front none" |
-| Knock or assist | +1 Salvage (+2.5% health); a knock also heals | "passive: a knock = 1 stack, +2.5% health, a heal"; "passive: an assist stacks but does not heal"; "passive: capped at 10 stacks (+25%)" |
+| Knock or assist | +1 Salvage (+2.5% health); a knock also heals | "passive: a knock = 1 stack, +2.5% health, a heal"; "passive: the knock heal is 16% of max health (ours-only...)"; "passive: with the takedown reset's 5% a knock heals 21% in all, no more"; "passive: an assist stacks but does not heal"; "passive: capped at 10 stacks (+25%)" |
 | Downed | -1 Salvage | "passive: being downed costs a stack" |
 | Rank 3 Deep Reach hit / pellet hit | half the cooldown off / barge recharge trimmed | "abyssal hand rank 3: a hit takes half the cooldown off (12s -> 9.6s -> 4.8s)"; "barge rank 3: a pellet hit trims the recharge" |
 | Reel over a gap in the island | the body is carried over the void and falls | "abyss: a foe reeled over the void falls (knock rules)" |

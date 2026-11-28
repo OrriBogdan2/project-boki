@@ -15,6 +15,7 @@ extends Node
 const NAME := "MoveDrills"
 enum State { OFF, RUN, RESULT }
 const IDS := ["gates", "glide", "dive", "wall", "mantle"]
+const BANNER_Y := 124.0  # px from the top: under the Arena's key line
 const LIMIT_S := 14.0  # s a drill lasts before it fails
 const RESULT_S := 2.2  # s the pass or fail line stays up
 const TILE := 1.0  # m
@@ -72,8 +73,6 @@ func _build_banner() -> void:
 	layer.layer = 4
 	add_child(layer)
 	_label = UI.label("", 20, UI.INK, UI.semi)
-	_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP, Control.PRESET_MODE_MINSIZE)
-	_label.offset_top = 60.0
 	_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_label.visible = false
@@ -91,6 +90,9 @@ func press() -> void:
 
 
 func _process(dt: float) -> void:
+	if _label.visible:
+		var sz: Vector2 = m.hud.c.size
+		SafeArea.place(_label, Vector2((sz.x - _label.get_combined_minimum_size().x) * 0.5, BANNER_Y), sz)
 	if m.paused or m.over:
 		return
 	tick(dt)

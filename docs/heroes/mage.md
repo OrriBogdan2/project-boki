@@ -114,7 +114,7 @@ reason. Asserts: `--mage-combo-check` (`Skycall ...`, `small: ...`, `Kitefall (d
 | Shift input / feel, Shift reset (-) | (a) | matches the owner; the orb-reset question is closed (owner rule: only a full-Static foe resets) |
 | Passive: reset cue on Live, knock heal (LOW) | (b) | the misleading reset cue and the knock heal are gone |
 | RMB / E / R self-shake (LOW/MED) | (c) | ext/no-shake owns item 50 |
-| R Static spread (MED) | (b) | the highest Static among the foes the strike hits goes to every foe it hits, then the ult's own stack (owner item 72); asserted |
+| R Static spread (MED) | (b) | owner ruling 11-26: the foe the strike lands on (most Static, nearest on a tie) gains the ult's 1; every other foe it hits gains that foe's Static + 1 (`x.spread_add`; 3 -> +4, 0 -> +1), capped at 4, with an arc to each; `--sparkle-r-spread-check` |
 
 ## Per-slot table
 | Slot | Input | Aim | What it does | Telegraph / reticle | Move (KMovesVV) | Sound |
@@ -193,7 +193,7 @@ Measured by casting every slot at 2 m (rising from a jump), at 9 m (falling) and
 | Storm Rod, then an orb next to the foe | the orb adds no Static (it is only a pickup) | `--mage-combo-check` |
 | Walking over a resting orb | picks it up, the dash is back; an orb out of reach stays | `--mage-combo-check` |
 | Wirerun through an orb | 2 Static on everyone near it, no reset | `--mage-combo-check` |
-| Storm Rod into a wall / another foe | stun (both) | `--mage-combo-check` |
+| Storm Rod into a wall / another foe | stun (both), 0.4 -> 1.0 s with the charge | `--mage-combo-check` |
 | Skycall dragged toward you | foes pulled in, Grounded (no dashing), 1 Static | `--mage-combo-check` |
 | Skycall over a rival's orb | flung, now yours | `--mage-combo-check` |
 | Skycall Grounded on you | no Wirerun | `--mage-combo-check` |

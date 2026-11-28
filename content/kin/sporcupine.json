@@ -115,6 +115,12 @@
 		"desc": "Soft and earthy, dusted with glowing spores that drift off when it twitches. Something curious is in here.",
 		"play": "Pins foes down and breaks up their pushes."
 	},
+	"roster": {
+		"art": "locked",
+		"line": "burrlet",
+		"stage": 2,
+		"from": "burrlet"
+	},
 	"size": {
 		"cm": 34,
 		"kg": 5.1,

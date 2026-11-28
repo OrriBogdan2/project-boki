@@ -159,8 +159,8 @@ for the squad rows). Verified 11-11:
 - Beside an open deathbox the window opens at the right edge with the box to its left, and gear rows in the box get
   the same compare card. Charms and a perk-orb cap are not in the game yet, so the window shows what exists.
 - An open deathbox does not open this window: the loot window (below) shows what you carry itself.
-- Check: `--inventory-check`; screenshots: `--inv-shots` (run with `--resolution`); 0.24.5 pass at 1280x720 and
-  3440x1440 in docs/shots/ui-inventory.
+- Check: `--inventory-check`; screenshots: `--inv-shots` (run with `--resolution`). `--inventory-check` also sweeps a full loadout at 1280x720, 1920x1080 and 3440x1440 (safe margin, clipping, every slot reachable); `--garden-fit-check` covers the garden Boki card at the same sizes.
+  0.24.5 pass at 1280x720 and 3440x1440 in docs/shots/ui-inventory.
 
 ## Pop-up budget
 
@@ -232,7 +232,7 @@ Waiting for a quiet 3 s instead: the message lane (one card at a time), the armo
   nine states: strip locked, Heart unlocked, quest exit racing (its status line under the message lane), your
   uplink far off (edge marker), your squad on a quest (the quest tracker under the strip), the last way out (alive,
   and dead with the "Ways out left" line), the Gate prompt, and out past the Blight ring. The strip is expected only
-  once `HudGroups.ways_out_shown` lets it show. Edge markers are not in this check: `EdgeMarker` keeps them on its own
+  once `HudReveal.ways_out_shown` lets it show. Edge markers are not in this check: `EdgeMarker` keeps them on its own
   rim (`EdgeMarker.world_rim`), inside the margin, and `--edge-marker-check` holds that.
 
 ## The deathbox loot window (LootWindow)
@@ -415,12 +415,12 @@ hits slow you, and they shatter when they die".
 Worst by groups removed and words shown with nothing to act on: **1. the top-right counters** (a whole group of four zeros plus a
 squads number; jargon icons "knock" and "burst"), **2. the "Your kit" card** (8 rows of ability names and words, "Ult level 6",
 "Sic", "Orders", "Glove (empty)" x2, during the first 14 s of every match, on top of the slots that already show the keys).
-For a save with fewer than `NEW_PLAYER_MATCHES` (3) expeditions:
+For a save with fewer than 3 expeditions (`kit_card` / `own_numbers` `from_match` 4 in `content/rules/hud_reveal.json`, every match type):
 - the kit card does not appear (the slot hover cards still say what each ability does); the training room keeps it;
 - **merged with main (11-13):** main replaced the four counters with `AliveCounter` (squads and players left, big, plus your
   own kills/knocks/gems in a quieter row under it, alive-counter-1111). The squads/players-left row is the match's
   standing and always shows; only the quieter row of your own numbers waits, until the first kill, knock or gem or
-  while Tab or the map key is held (`HudGroups.own_numbers_shown`, `MapDetail.holding()`). So the counters are no
+  while Tab or the map key is held (`HudReveal.own_numbers_shown`, `MapDetail.holding()`). So the counters are no
   longer a group fewer, only four zeros and two jargon icons fewer. (Alternative, not taken: hide the whole block
   as the branch first did; that would drop the alive count main added on purpose.)
 Saves with 3 or more expeditions see both as before. No save field, no Net change. The timeline numbers above
@@ -432,8 +432,8 @@ Check: `--hud-groups-check` section 4 (the hidden-then-shown rules on a fresh sa
 ### Newcomer staging and the extraction line (11-15, owner playtest 11-13 "the UI is SO overloaded")
 The branch's own first-fight staging (weapon card and counters held back until the first shot, hit or pickup)
 was dropped in the 11-18 uihud merge: main's `HudReveal` table (`content/rules/hud_reveal.json`, counters, feed, gear,
-squad and perks from match 4) stages the newcomer HUD now; `HudReveal.newcomer(m)` (a staged match on a save under
-`NEW_PLAYER_MATCHES`) is what ExtractGoal reads.
+squad and perks from match 4) stages the newcomer HUD now; `HudReveal.newcomer(m)` (a staged match before
+`newcomer_goal`'s match 4) is what ExtractGoal reads.
 `ExtractGoal` is the one line for the way out: seat, when it opens or how far it is, and the key ("Uplink open · 140 m
 Hold F at the outpost until the lift opens"), the open seat or else the one opening soonest. A new player gets it in
 place of the four-seat strip and only for the Uplink and the Heart ring (`hud_groups.json` `newcomer_seats`: no boss
@@ -445,6 +445,14 @@ The first-match guide's exit line names the same seat and how ("Head for the Upl
 outpost until the lift opens"; `exit_none` when no seat is on offer), and while a guide line is up the message column
 starts under its strip (`FirstMatchGuide.bottom`) instead of behind it. Check: `--first-match-guide-check`.
 
+### One reveal gate (11-20, stabilize sprint)
+`HudReveal` (`content/rules/hud_reveal.json`) is the only thing that decides when a HUD block shows. The rules that
+lived as code in `HudGroups` moved into its table: the Ways Out strip's 30 s lead (`seat_pips.lead_s`), the kit card's
+14 s (`kit_card.show_s`) and the old `NEW_PLAYER_MATCHES` 3 (`kit_card`, `own_numbers`, `newcomer_goal` from match 4,
+`every_match`: counted in duel, training and tutorial too, no Tab bypass, as before). `HudGroups` only counts.
+Same behaviour: `--hud-reveal-check` section 6 asserts it at matches 1, 2, 3 and 10 in an expedition, duel, training
+and the tutorial.
+
 ### Not fixed (suggestions, parity first)
 - Held back since 11-20 (`ext/hud-holdback`, `HudReveal` table): belt slots 3 to 6 while empty (`belt_spare`), the locked X tile and the
   locked Merge (R) box until level 6 (`ult_tiles`); the Q/V glove slots and the gear row already draw nothing until a piece is worn
@@ -454,6 +462,8 @@ starts under its strip (`FirstMatchGuide.bottom`) instead of behind it. Check: `
 - The kill feed's truce lines: the whole feed waits until match 4 (`feed`), and a truce you are not in is feed-only (Truce), so
   a new player sees none of them.
 - A standing HUD of 8 groups is still over 5. The next ones to hold back: gear row and Q/V/X until the first gear is worn,
+  the locked R/X tiles until level 6, belt slots 3/4 while empty, the clock strip's Dusk/Sight line, the kill feed's truce lines.
+- Plain words for the jargon list above ("UNLOCK" -> "Spend a skill point", "DOCKS IN" -> "Ship leaves in", "truce" lines off).
   the locked R/X tiles until level 6, belt slots 3/4 while empty, the clock strip's Dusk/Sight line.
 - `HudGroups`' reveal rules (Ways Out strip, kit card) are still to be folded into `HudReveal`'s table.
 - Plain words (done 11-20): the locked-slot tag says "Spend point" (`HudSlot.POINT_TAG`, fitted to the tile width), the kill

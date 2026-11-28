@@ -9,19 +9,21 @@ extends RefCounted
 ## at your side for the Feed step, which can take minutes (docs/GARDEN_FIRST_HOUR.md item 3).
 const FREE_FOR_TOY := ["patch", "eat"]
 
+
 ## Where the active Boki leads now: INF when no base step is up or k is not your active Boki.
 static func target(h, k: Dictionary) -> Vector3:
 	if not FarmTutorial.base() or k["rec"] != Save.active_kin() or not h.visit.is_empty():
 		return Vector3.INF
-	var wild := VisitorIntro.lead_at(h, k)      # the first wild visitor on a save: your partner runs to it
+	var wild := VisitorIntro.lead_at(h, k)  # the first wild visitor on a save: your partner runs to it
 	if wild.x != INF:
 		return wild
 	var id := FarmTutorial.current()
 	if id == "toy" and FarmTutorial.stage(id) == "watch":
 		return FarmTutorial.toy_spot()
 	if id in ["meet", "patch", "eat", "toy"]:
-		return h.ppos       # it comes to you and stays at your side while you meet it, feed it and put a toy down
+		return h.ppos  # it comes to you and stays at your side while you meet it, feed it and put a toy down
 	return h.guide.target(id) if id != "" else Vector3.INF
+
 
 ## One 10 Hz tick of the Lead state: walk on to the target, or wait for you facing you. False when the
 ## lead is over (the machine goes back to Roam).
@@ -30,10 +32,13 @@ static func tick(h, k: Dictionary) -> bool:
 	if at.x == INF:
 		return false
 	var toy := FarmTutorial.toy_spot()
-	if toy.x != INF and (at == toy or (FREE_FOR_TOY.has(FarmTutorial.current()) and not k.get("lead_toy", false))) \
-			and h.toys.pick(k, true):
-		k["lead_toy"] = true      # one trip per Boki while a step before the toy is open; the lead resumes after
-		return false      # the toy is down: it runs over to play (HomeToys has it now)
+	if (
+		toy.x != INF
+		and (at == toy or (FREE_FOR_TOY.has(FarmTutorial.current()) and not k.get("lead_toy", false)))
+		and h.toys.pick(k, true)
+	):
+		k["lead_toy"] = true  # one trip per Boki while a step before the toy is open; the lead resumes after
+		return false  # the toy is down: it runs over to play (HomeToys has it now)
 	var L: Dictionary = FarmTutorial.rules()["base"]["lead"]
 	var pos: Vector3 = k["pos"]
 	var behind := Vector2(h.ppos.x - pos.x, h.ppos.z - pos.z)
@@ -41,7 +46,7 @@ static func tick(h, k: Dictionary) -> bool:
 	var to_you: bool = at == h.ppos
 	if (behind.length() > float(L["wait_m"]) and not to_you) or to.length() < float(L["stop_m"]):
 		k["goal"] = pos
-		(k["node"] as Node3D).rotation.y = atan2(-behind.x, -behind.y)      # looks back at you
+		(k["node"] as Node3D).rotation.y = atan2(-behind.x, -behind.y)  # looks back at you
 	else:
 		k["goal"] = at - Vector3(to.x, 0, to.y).normalized() * float(L["stop_m"]) * 0.8
 	var id := FarmTutorial.current()

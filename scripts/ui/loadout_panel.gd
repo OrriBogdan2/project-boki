@@ -11,17 +11,18 @@ const INK := Color("f3eee2")
 const MUTED := Color("a9b0bf")
 const TILE_H := 48.0
 const BADGE := 30.0
-const HEAD_H := 20.0       # the key-pill row of a tile: as tall with or without a key, so the names line up
-const ROW_H := 30.0        # one backpack line: a full pack fits a 720p window without scrolling
+const HEAD_H := 20.0  # the key-pill row of a tile: as tall with or without a key, so the names line up
+const ROW_H := 30.0  # one backpack line: a full pack fits a 720p window without scrolling
 
 var _m: Match
 var _p: Hunter
 var _on_change: Callable
 var _tip: InvTip
 var _drag: SlotDrag
-var _hover := {}           # {kind: "pack" or "worn", i: index} of the thing pointed at, for the keys
+var _hover := {}  # {kind: "pack" or "worn", i: index} of the thing pointed at, for the keys
 var _worn_tiles: Array = []
 var _pack_rows: Array = []
+
 
 ## Fills `v`, the column of the item window `pc`, with the loadout. Returns [scroll, rows] for the
 ## backpack list so the window can be fitted to the screen. `on_change` rebuilds the window.
@@ -35,6 +36,7 @@ static func fill(m: Match, pc: PanelContainer, v: VBoxContainer, on_change: Call
 	lp.add_child(lp._tip)
 	lp._drag = SlotDrag.attach(lp, lp._move)
 	return lp._fill(v)
+
 
 func _fill(v: VBoxContainer) -> Array:
 	var worn := UI.hbox(6)
@@ -57,11 +59,13 @@ func _fill(v: VBoxContainer) -> Array:
 	v.add_child(UI.label("Carrying home  ·  %d of %d" % [_p.pack.size(), _p.pack_cap], 12, MUTED, UI.caps))
 	return _pack_list(v)
 
+
 ## Shows the hover card of a thing without the pointer (the screenshot tool): kind "worn" or "pack".
 func hover_demo(kind: String, i: int) -> void:
 	var tiles: Array = _worn_tiles if kind == "worn" else _pack_rows
 	if i < tiles.size():
 		_tip.show_for(tiles[i], _lines(kind, i))
+
 
 # ------------------------------------------------------------------ the slots
 func _worn_tile(slot: int) -> PanelContainer:
@@ -76,10 +80,12 @@ func _worn_tile(slot: int) -> PanelContainer:
 		var it := Loot.gear(String(g["id"]), int(g["rar"]))
 		t = _tile(caption, title, Loot.icon_of(it), Loot.col_of(it), String(Gear.ALL[it["id"]]["name"]))
 		_drag.add(t, {"inv": "worn", "i": slot}, Loot.name_of(it), Loot.col_of(it))
-	_tip.attach(t, func(): return _lines("worn", slot), func(): _hover = {"kind": "worn", "i": slot},
-		func(): _hover = {})
+	_tip.attach(
+		t, func(): return _lines("worn", slot), func(): _hover = {"kind": "worn", "i": slot}, func(): _hover = {}
+	)
 	_worn_tiles.append(t)
 	return t
+
 
 func _belt_tile(k: int) -> PanelContainer:
 	var s: Dictionary = _p.belt[k]
@@ -95,13 +101,15 @@ func _belt_tile(k: int) -> PanelContainer:
 	_tip.attach(t, func(): return BeltHud.tip(_p, k))
 	return t
 
+
 ## A slot: the key it answers to and what it is, then the icon and the name of what is in it, and how
 ## many for a stack (`count` > 0), kept apart from the name so a long name never hides it.
 func _tile(key: String, slot_name: String, icon: String, col: Color, item_name: String, count := 0) -> PanelContainer:
 	var t := PanelContainer.new()
 	var filled := icon != ""
-	t.add_theme_stylebox_override("panel", UI.frame(Color(col, 0.1 if filled else 0.04), 9,
-			Color(col, 0.65 if filled else 0.3), 2, 5, 5))
+	var bg := Color(col, 0.1 if filled else 0.04)
+	var edge := Color(col, 0.65 if filled else 0.3)
+	t.add_theme_stylebox_override("panel", UI.frame(bg, 9, edge, 2, 5, 5))
 	t.custom_minimum_size = Vector2(10.0, TILE_H)
 	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	t.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -119,6 +127,7 @@ func _tile(key: String, slot_name: String, icon: String, col: Color, item_name: 
 	v.add_child(head)
 	var nm := UI.label(item_name, 12, col if icon != "" else Color(MUTED, 0.7), UI.semi)
 	nm.clip_text = true
+	nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS  # (a six-slot belt: a long name ends in "...")
 	nm.custom_minimum_size.x = 10.0
 	nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var line := UI.hbox(4)
@@ -128,11 +137,13 @@ func _tile(key: String, slot_name: String, icon: String, col: Color, item_name: 
 	v.add_child(line)
 	return t
 
+
 func _key_pill(key: String) -> Control:
 	var pill := UI.card(Color(1, 1, 1, 0.16), 3, 5)
 	pill.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	pill.add_child(UI.label(key, 11, INK, UI.big))
 	return pill
+
 
 func _perk_badges() -> HFlowContainer:
 	var flow := HFlowContainer.new()
@@ -155,6 +166,7 @@ func _perk_badges() -> HFlowContainer:
 		flow.add_child(b)
 	return flow
 
+
 # ------------------------------------------------------------------ the backpack list
 func _pack_list(v: VBoxContainer) -> Array:
 	var sc := ScrollContainer.new()
@@ -176,6 +188,7 @@ func _pack_list(v: VBoxContainer) -> Array:
 		rows.add_child(empty)
 	return [sc, rows]
 
+
 ## One line per item (LootHold.item_row) at ROW_H, so a full pack fits a 720p window. What it does is on the hover card.
 func _pack_row(i: int) -> PanelContainer:
 	var it: Dictionary = _p.pack[i]
@@ -189,6 +202,7 @@ func _pack_row(i: int) -> PanelContainer:
 	_pack_rows.append(row)
 	return row
 
+
 # ------------------------------------------------------------------ hover cards and keys
 func _lines(kind: String, i: int) -> Array:
 	if kind == "worn":
@@ -198,8 +212,10 @@ func _lines(kind: String, i: int) -> Array:
 		var lines := InvText.compare(_p, it)
 		lines.append(["Enter or drag onto a slot wears it  ·  Delete drops it", MUTED, InvText.SMALL])
 		return lines
-	return [[Loot.name_of(it), Loot.col_of(it)], [Loot.sub_of(it), InvText.INK],
-		["Delete drops it", MUTED, InvText.SMALL]]
+	return [
+		[Loot.name_of(it), Loot.col_of(it)], [Loot.sub_of(it), InvText.INK], ["Delete drops it", MUTED, InvText.SMALL]
+	]
+
 
 func _input(event: InputEvent) -> void:
 	if _hover.is_empty() or not (event is InputEventKey) or not event.pressed or event.echo:
@@ -214,21 +230,25 @@ func _input(event: InputEvent) -> void:
 			return
 	get_viewport().set_input_as_handled()
 
+
 func _wear_or_take_off(i: int) -> void:
 	if _hover["kind"] == "worn":
 		_take_off_slot(i)
 	else:
 		_wear(i)
 
+
 ## Wears backpack thing i (in `slot`, or where it goes when -1), with the equip cue.
 func _wear(i: int, slot := -1) -> void:
 	if Pack.use_from_pack(_m, _p, i, slot):
 		InvSfx.equip()
 
+
 ## Takes worn piece `slot` off into the backpack, with the set-down cue.
 func _take_off_slot(slot: int) -> void:
 	if Pack.take_off(_m, _p, slot):
 		InvSfx.drop()
+
 
 func _drop(i: int) -> void:
 	if _hover["kind"] == "worn":
@@ -236,11 +256,13 @@ func _drop(i: int) -> void:
 	else:
 		Pack.drop_from_pack(_m, _p, i)
 
+
 ## Runs a change to what you carry, then rebuilds the window.
 func _act(change: Callable) -> void:
 	change.call()
 	_hover = {}
 	_on_change.call()
+
 
 # ------------------------------------------------------------------ dragging
 ## A dropped thing (SlotDrag): makes the move and rebuilds, or says why it can't go there.

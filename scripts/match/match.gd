@@ -91,6 +91,7 @@ var muzzle_light: OmniLight3D
 var raid := "clear"                # the raid condition: rolled per match from the seed (RaidLook)
 var sight_k := 1.0                 # sight range under the raid condition (RaidLook.SIGHT)
 var raid_fx: Node3D = null         # blowing ash / drifting fog that follows the camera (RaidLook.storm_fx)
+var mob_cap := MobCap.new(self)    # monsters awake near you, capped by preset (MobCap)
 var blight: BlightDir = null       # the Blight: its spawns, its scaling and what it hears (BlightDir)
 var music_dir: MusicDir = null     # the layered score's levels (scripts/match/music_dir.gd)
 var ult_cue := UltReadyCue.new()   # the chime when your R is back
@@ -2688,6 +2689,7 @@ func _update_shots(dt: float) -> void:
 				p.y = float(sx["y0"]) + float(sx["dy"]) * clampf(trav / float(sx["dyd"]), 0.0, 1.0)
 			# domes stop shots fired at them from outside
 			if _dome_blocks(s, p):
+				s["prop"] = true
 				_shot_end(s, p, null)
 				hit = true; break
 			var gp := world.ground_at(p.x, p.z)      # terrain and rocks
@@ -2724,6 +2726,7 @@ func _update_shots(dt: float) -> void:
 			if not bh.is_empty():
 				if not s["x"].get("cos", false) and not s["x"].has("boom") and not s["x"].get("mob", false):
 					brk.hit(bh, s["by"])
+				s["prop"] = true
 				_shot_end(s, p, null)
 				hit = true; break
 			for e in near:
@@ -2869,6 +2872,7 @@ func _shot_end(s: Dictionary, at: Vector3, e: Ent, why := "") -> void:
 		s["node"].visible = false
 	if e == null:
 		MissFx.shot_ended(self, s, at, why)
+	MissFx.shot_landed(self, s, at, e, why)
 	if why == "caught" and String(fxx.get("src", "")) == "abil":
 		AbilityFx.caught(self, s["by"], s["col"])
 	elif e == null and String(fxx.get("src", "")) == "abil" and not fxx.get("cos", false):
@@ -3815,6 +3819,7 @@ func step(dt: float) -> void:
 	_prof("drop")
 	for k in kins: k.sim(SimLod.kin_dt(k, dt))
 	_prof("kins")
+	mob_cap.tick(dt)
 	for mb in mobs: mb.sim(dt)
 	MobReap.tick(self)
 	if blight: blight.tick(dt)
@@ -4035,7 +4040,7 @@ func _update_pads(dt: float) -> void:
 				continue
 			var p: Vector3 = pd["pos"]
 			if Vector2(h.pos.x - p.x, h.pos.z - p.z).length() < 0.8 and h.pos.y - p.y < 0.4 and h.pos.y - p.y > -0.3:
-				h.pad_launch(pd["land"])
+				UtilityUse.pad_throw(h, pd["land"])
 				sfx("jump", h.pos, -2.0, 0.8)
 				fx.burst(h.pos + Vector3(0, 0.3, 0), Color("8fe3c8"), 16, 5.0, 0.5, 2.0)
 		for k in kins:
@@ -5362,6 +5367,7 @@ func _tips() -> void:
 	ult_hint.tick(self)
 	tips_live = true
 	_tip("move", TipText.move())
+	if _tip_t > CamWheel.HINT_AFTER_S: CamWheel.hint(self)
 	var ways := WaysHints.due(self)
 	if not ways.is_empty(): _tip(ways[0], ways[1])
 	var belt_tip := belt_tips.next(player)

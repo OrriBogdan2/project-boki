@@ -47,7 +47,7 @@ contract (RIG_CONTRACT.md). The game adapts to Meshy: its bones are never rename
   it (`WardenNative._to_contract`). The hitbox never changes: its numbers are parity rows.
 - Facing: Meshy faces +Z; the model is turned 180 deg to face -Z like every Hunter.
 - Anchors (`anchors`): `anchor_head_top`, `anchor_chest`, `anchor_gun_R` are BoneAttachment3D nodes on Meshy bones,
-  found by `WardenGlb.anchor`. The rig's Gun (aim and muzzle) rides Meshy's `RightHand` bone each frame.
+  found by `WardenGlb.anchor`. The nameplate does not read `anchor_head_top`: its height is the archetype's `plate_offset`, checked per Hunter by `--warden-native-check` (docs/HUD.d/1123-native-plate-height.md). The rig's Gun (aim and muzzle) rides Meshy's `RightHand` bone each frame.
 - Materials: Meshy's textures through the game's hero-toon pass (`WardenGlb._toon`, the same call as the contract
   models: painted shading, ink shell, match-zoom read, the Hunter's `warden_look.json` "painted" keys) and into meta
   `mats`, so hit flashes and team looks reach them. Meshy's material names (`head`, `body`, `Material_0`) are no toon
@@ -110,7 +110,8 @@ plays today's clip, so nothing changes until a Hunter's clips land (`WardenNativ
 | `lmb` | a melee swing or a shot | `attack` |
 | `lmb_hold` | a charged swing (state `combo` -1) | `lmb`, then `attack` |
 | `rmb`, `e`, `r` | the kit move or cast of that slot (state `cast_slot` secondary, utility, ult; a kit move starting within `SLOT_CAST` of a cast takes its slot) | `attack` |
-| `hit` | one-shot when a stagger lands (state `hit_t` jumps back with `hit_k` at Oomph.HEAVY_FLINCH; a chip hit only leans) | the loop clip plays on |
+| `hit` | one-shot when a stagger lands (state `hit_t` jumps back with `hit_k` at Oomph.HEAVY_FLINCH; a chip hit only leans) and pushes the body against its facing (struck from the front) | the loop clip plays on |
+| `hit_back` | the same, when the hit pushes the body the way it faces (struck from behind); a Hunter with one of the two plays it for both | `hit` |
 | `land` | one-shot on a hard landing (`WardenClips.FEEL` landing >= `LAND_MIN`) | the loop clip |
 | `dash` | while the state `rolling` (a dash or kit rush) lasts (blends in over 0.25 s) | the air or ground clip |
 | `glide` | while `gliding` (loops; opens at once, lets go over 0.2 s) | `jump` |
@@ -129,6 +130,27 @@ plays today's clip.
 `--warden-native-check` rows (per Hunter, per slot): the slot empty plays today's clip; the slot filled plays its clip
 with at least 10 bones off Meshy's T-pose on the switch frame and after the crossfade; a charged swing takes `lmb`
 without `lmb_hold`; a synthetic clips file's clip lands on Meshy's bones and plays; every slot the data names has its clip.
+
+## State clips (dash, glide, land, hit, hit_back, downed)
+All ten native Hunters map these six slots to the clips of `art/wardens/<art>/<art>_clips.glb` (Kael and Cinder: `<art>_state_clips.glb`,
+listed in their data `clip_files`, since `<art>_clips.glb` holds their kit-move clips), built by
+`python3 tools/meshy/native_states.py OUT BASE_meshy.glb tools/meshy/native_states.json SRC_DIR <art>` (spec: Meshy
+library action id, kept second range, game seconds, per weight class; sources are one `animate` download per action id
+on one rig task, `/home/boki/meshy/anim-native-states-1123`). The clip file carries no mesh; translations scale by hips
+height. Timing is the source's number, not the motion's own length: land = `land_feel.json` drop seconds (light 0.24,
+medium 0.30, heavy 0.50), hit = the contract's stagger 0.42 s, downed = `HunterFall.STYLE` seconds (0.4/0.45/0.5, last
+frame held), dash = the kit's own dash time (`dash_s` per Hunter: hem 0.27, ryzz 0.24, sable 0.48, claire 0.45, gil 0.55,
+tarek 0.26, ostra 0.45, pip 0.23, kael 0.24, cinder 0.33; hold or teleport dashes play a 0.45 s burst, last frame held).
+The glide is one 0.4 s arms-out cut played there and back (1.2/1.5/1.8 s a loop by class).
+
+| Class | Dash | Glide | Land | Hit front | Hit back | Downed |
+|---|---|---|---|---|---|---|
+| light (hem, ryzz, sable, claire, gil) | Lean Forward Sprint | Jump with Arms and Legs Open | Jump with Arms Open (tail) | Face Punch Reaction | Hit in Back While Running | Shot and Fall Backward |
+| medium (tarek, ostra, pip) | Standard Forward Charge | same, slower | Dive Down and Land (tail) | Hit Reaction 1 | same | Falling Down |
+| heavy (kael, cinder) | Male Head-down Charge | same, slowest | Jump and Slam Back Down (tail) | Hit Reaction to Waist | same | Shot and Slow Fall Backward |
+
+`--clip-shots --warden=<art> --states [--bare-slots]` shoots idle, walk, run, jump, attack, crouch, then dash, glide,
+land, hit front, hit back and downed (`--bare-slots` drops the six slots: the before).
 
 ## Own clips for kit moves (Cinder)
 A Hunter whose kit moves Meshy's one Attack does not fit gets its own clips on Meshy's skeleton: a clips-only `.glb`

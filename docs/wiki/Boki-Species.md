@@ -25,6 +25,7 @@ Every species, read from its grammar file (`content/kin/<id>.json`) and its home
 | [Eclipsowl](#eclipsowl) | Owl + Eclipse | Lunar | large | trickster | Wild, nest eggs |
 | [Effigoon](#effigoon) | Beetle pupa + Marble cocoon | Stone | large | tank | Wild, nest eggs |
 | [Embrook](#embrook) | Rook + Hearth fire | Ember | medium | skirmisher | Wild, nest eggs |
+| [Ermink](#ermink) | Stoat | Wild | small | trickster | Wild, nest eggs |
 | [Frigatee](#frigatee) | Manatee + Antique icebox | Frost | large | support | Wild, nest eggs |
 | [Forgebrock](#forgebrock) | Badger + Open furnace | Ember | large | tank | Wild, nest eggs |
 | [Geodemole](#geodemole) | Mole + Split geode | Stone | medium | controller | Wild, nest eggs |
@@ -119,6 +120,7 @@ A Boki's type is its theme in the grammar: it colours its abilities and decides 
 | Tempest | Canvastross, Zephyrak |
 | Titan | Cairnhorn, Lockatara, Vaultara |
 | Venom | Vespyx, Nettlynx, Pipeworth, Thistlynx, Pipewurm, Vespox |
+| Wild | Ermink |
 
 ## Harpwhal
 
@@ -207,7 +209,7 @@ _Hedgehog + Toadstool_ (`burrlet`). A hedgehog whose quills are glowing toadstoo
 |  |  |
 |---|---|
 | Type | Spore |
-| Body | small, reach 1.3, mass 0.8; about 22 cm, 1.6 kg on average |
+| Body | small, reach 1.3, mass 0.8; about 28 cm, 1.6 kg on average |
 | Stat points | Health 6, Damage 2, Speed 6, Your max health 3, Your shield 3 |
 | Personality | bravery 0.55, loyalty 0.6, temper 0.4, curiosity 0.8 |
 | Fighting style | controller; aggression 0.5, loyalty 0.6, caution 0.45 |
@@ -288,7 +290,7 @@ _Fox + Scorpion_ (`cindle`). A sly fox with a scorpion's curled tail. Vespyx's s
 |  |  |
 |---|---|
 | Type | Venom |
-| Body | small, reach 1.3, mass 0.8; about 34 cm, 4.2 kg on average |
+| Body | small, reach 1.3, mass 0.8; about 28 cm, 4.2 kg on average |
 | Stat points | Health 4, Damage 3, Speed 9, Your max health 2, owner_move_speed 2 |
 | Personality | bravery 0.75, loyalty 0.5, temper 0.7, curiosity 0.5 |
 | Fighting style | bruiser; aggression 0.8, loyalty 0.4, caution 0.25 |
@@ -479,6 +481,26 @@ _Rook + Hearth fire_ (`embrook`). Rook with a coal-bed back and cinder wings.
 - E ability: **Gale Lance** (8s cooldown, range 8m). Zephyrak spears 8m through the air, shocking everything it passes, then bursts in a ring of wind that throws foes back and arcs lightning to two more.
 - Auto ability (it casts this on its own): **Stinger Dash** (9s cooldown, range 7m). On its own, Vespyx lunges 7m tail first, poisoning everything it passes through.
 - Bond ultimate (merge): **Stormwing** (10s). Zephyrak wraps you in a living storm for 10s. Chaining bolts, a hover over any gap, a double storm blink, and Fuse again calls a thunderhead down on everyone near.
+- Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
+## Ermink
+
+_Stoat_ (`ermink`). A stoat whose tail is a calligraphy brush, its cream coat as blank as a fresh page. Dip its tail in an Ink and it becomes something new.
+
+|  |  |
+|---|---|
+| Type | Wild |
+| Body | small, reach 1.3, mass 0.8 |
+| Stat points | Health 3, Damage 2, Speed 13, owner_move_speed 2 |
+| Personality | bravery 0.6, loyalty 0.6, temper 0.4, curiosity 0.9 |
+| Fighting style | trickster; aggression 0.45, loyalty 0.55, caution 0.65 |
+| Rides | shoulder (Brushstroke) |
+| Farm work | Craft 3, Forage 2, Mend 1 |
+| Egg | Mystery Egg: Speckled, and strangely quiet. Nobody knows what's inside. |
+
+- E ability: **Moon Mark** (10s cooldown, range 9m). Lunowl throws a moon mark 9m. The first foe it touches is stunned 0.4s, then glows in silver for 4s: seen through walls and grass, and takes 15% more damage.
+- Auto ability (it casts this on its own): **Moonlift** (14s cooldown). On its own, when you fall into the abyss, Lunowl throws up a column of moonlight that lifts you high and cools your glider.
+- Bond ultimate (merge): **Eclipse** (7s). Lunowl swells into a living eclipse for 7s that drags foes in and flings them skyward.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
 
 ## Frigatee
@@ -1369,7 +1391,7 @@ _Axolotl_ (`puddlet`). An axolotl whose frills grew into living crystal. Prisman
 |  |  |
 |---|---|
 | Type | Prism |
-| Body | small, reach 1.3, mass 0.8; about 26 cm, 2.1 kg on average |
+| Body | small, reach 1.3, mass 0.8; about 28 cm, 2.1 kg on average |
 | Stat points | Health 7, Damage 1, Speed 5, Your shield 4, owner_regen 3 |
 | Personality | bravery 0.45, loyalty 0.85, temper 0.2, curiosity 0.6 |
 | Fighting style | support; aggression 0.3, loyalty 0.9, caution 0.6 |
@@ -1902,3 +1924,61 @@ _Moray eel + Swift_ (`zephyrak`). A little sky serpent: a moray eel's long body 
 - Auto ability (it casts this on its own): **Storm Arc** (10s cooldown, range 7m). On its own, Zephyrak crackles a bolt at the nearest foe that jumps to two more.
 - Bond ultimate (merge): **Stormwing** (10s). Zephyrak wraps you in a living storm for 10s. Chaining bolts, a hover over any gap, a double storm blink, and Fuse again calls a thunderhead down on everyone near.
 - Evolution paths: Fierce: Fierce; Steadfast: Steadfast; Curious: Curious; Swift: Swift
+
+## Not in the game yet
+
+In the roster (docs/boki/ROSTER.md) with no model yet, so they never spawn.
+
+| Boki | Type | Evolves from |
+|---|---|---|
+| Amanitusk | Spore / Venom | Sporcupine |
+| Bellowlet | Ember | - |
+| Blossmink | Bloom | Ermink |
+| Briarlynx | Venom / Bloom | Thistlynx |
+| Bucketmander | Storm / Tide | - |
+| Chandelapi | Ghost / Ember | Snuffapi |
+| Chandelotl | Prism / Lunar | Glassolotl |
+| Chimelop | Echo / Lunar | Echolop |
+| Coolatee | Frost / Tide | - |
+| Dragonkite | Wyrm / Tempest | Ribbonwyrm |
+| Dribbara | Bloom / Tide | - |
+| Druzemole | Stone / Prism | Geodemole |
+| Fizzlet | Storm | - |
+| Flarmink | Ember | Ermink |
+| Frothisk | Prism / Tide | Bubblisk |
+| Furnacowary | Ember / Titan | Bellowary |
+| Galleotter | Tide / Titan | Oarter |
+| Geodelotl | Prism / Stone | Glassolotl |
+| Glaivyx | Venom / Titan | Vespox |
+| Jarmit | Tide | - |
+| Jibbatross | Tempest / Tide | Kerchick |
+| Kayak | Frost / Tide | - |
+| Kerchick | Tempest / Tide | - |
+| Kitlet | Wyrm | - |
+| Lanternmit | Tide / Ember | Jarmit |
+| Lashyx | Venom / Dark | Vespox |
+| Latchling | Titan / Gravity | - |
+| Lunink | Lunar | Ermink |
+| Mothlet | Lunar | - |
+| Oarlet | Tide | - |
+| Oarter | Tide | Oarlet |
+| Parasolth | Ghost | - |
+| Prismink | Prism | Ermink |
+| Puffamus | Ember | Teapotamus |
+| Pyrraven | Ember / Tempest | Embrook |
+| Reapant | Swarm / Bloom | Scythant |
+| Ribbonwyrm | Wyrm / Tempest | Kitlet |
+| Rimink | Frost | Ermink |
+| Ringrove | Spore / Bloom | Sporcupine |
+| Rippmink | Tide | Ermink |
+| Skidlet | Frost | - |
+| Stormit | Tide / Storm | Jarmit |
+| Teapotamus | Ember / Tide | - |
+| Terrarimit | Tide / Bloom | Jarmit |
+| Tinbrock | Ember | - |
+| Umbrink | Dark | Ermink |
+| Voltalon | Storm / Tempest | Arcestrel |
+| Voltmink | Storm | Ermink |
+| Wickapi | Ghost / Ember | - |
+| Wyrmink | Wyrm | Ermink |
+| Zipling | Dark | - |

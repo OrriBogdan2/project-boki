@@ -1535,6 +1535,7 @@ const STRIDE := {
 	"zapple": [1.02, 1.97],
 	"hivara": [0.34, 0.76],
 	"glomwort": [1.50, 2.90],
+	"goliathite": [1.50, 2.90],
 	"kestrike": [0.33, 0.70],
 	"kindlewren": [0.49, 0.88],
 	"lodestick": [0.46, 1.62],
@@ -1556,9 +1557,9 @@ const STRIDE := {
 	"orchisloth": [0.33, 1.35],
 	"limpetor": [0.30, 1.25],
 	"opalisk": [0.30, 1.24],
-	"nimbostrich": [0.30, 1.22],
+	"nimbostrich": [0.34, 1.73],
 	"sentrikat": [0.34, 1.33],
-	"nacrolin": [0.34, 1.34],
+	"nacrolin": [0.33, 1.59],
 	"murmurling": [0.29, 1.17],
 	"squalltross": [0.29, 1.17],
 }
@@ -1732,6 +1733,10 @@ const SWAY_RATE := 4.0  # rad/s of the knocked-out sway
 const SHIVER_RATE := 45.0  # rad/s
 
 static var enabled := true
+## The face overlay (tools/boki/face.py: eye domes, lids, brows, mouth) on top of the coat, for every species. Off (the
+## default): a species wears it only while it is in content/rules/boki_eyes.json (no painted eyes of its own yet) and
+## the others drop the Face mesh at load; on brings the old face and expressions back for all.
+static var face_overlay := false
 
 ## How deep a body's baked normal map cuts (a Meshy body has one, docs/art/kin/MESHY_BOKI_RECIPE.md); 0 leaves it out.
 static var normal_k := 1.0
@@ -1797,6 +1802,12 @@ static func has(kin_id: String) -> bool:
 	return enabled and FRAME.has(kin_id) and ResourceLoader.exists(PATH % [kin_id, kin_id])
 
 
+## True when this species wears the face overlay: all of them with `face_overlay`, else the ones whose coat has no
+## painted eyes yet (content/rules/boki_eyes.json).
+static func uses_overlay(kin_id: String) -> bool:
+	return face_overlay or (Content.rules("boki_eyes")["overlay_species"] as Array).has(kin_id)
+
+
 ## A Water type (wade.json "swim", by its species' theme): it swims level in deep water instead of paddling.
 static func swimmer(kin_id: String) -> bool:
 	return (BokiWade.rules()["swim"] as Array).has(BokiLines.element_of(kin_id))
@@ -1849,6 +1860,9 @@ static func build(kin_id: String, flex_node: Node3D, c: Dictionary, mats: Array)
 	rig.species = kin_id
 	rig._feel = BODY_FEEL[KinPuppet.BODY.get(kin_id, "blob")]
 	rig.model = model_root
+	var fit := KinSize.fit(kin_id, model_root)
+	flex_node.get_parent().get_parent().set_meta("fit", fit)  # (root: KinPuppet scales Flex by it as well)
+	flex_node.scale = Vector3.ONE * fit
 	rig._dress(c, mats)
 	if FRAME[kin_id].get("hover", false):
 		rig._shadow = _ground_shadow(flex_node)
@@ -1972,6 +1986,7 @@ func _keep_flex(dt: float) -> void:
 	flex.scale = (
 		Vector3(girth * wide, _flinch.tall * (1.0 - squat), lerpf(1.0, girth, 0.5) * wide)
 		* Vector3(1.0 + sq * 0.6, 1.0 - sq, 1.0 + sq * 0.6)
+		* float(root.get_meta("fit", 1.0))
 	)
 	flex.position = Vector3(0, _flex_y, 0) + _flinch.shove
 	var body := flex.get_parent() as Node3D
@@ -2179,9 +2194,9 @@ func _swim_clip() -> String:
 	return "swim" if _swimmer else "paddle"
 
 
-## m of it under the water when it floats: SWIM_LINE of its height (FRAME "top") at its size in the world.
+## m of it under the water when it floats: SWIM_LINE of its height (KinSize.height) at its size in the world.
 func _afloat() -> float:
-	return SWIM_LINE * float(FRAME[species]["top"]) * flex.global_basis.y.length()
+	return SWIM_LINE * KinSize.height(species) * flex.global_basis.y.length()
 
 
 ## m the model rises off the bed: afloat in deep water, onto the surface for one that hovers.
@@ -2215,6 +2230,8 @@ func _clip_face() -> String:
 
 
 func _face_step(dt: float) -> void:
+	if face == null:
+		return
 	set_face(_clip_face())
 	_blink_t -= dt
 	if _blink_t <= 0.0:
@@ -2251,6 +2268,9 @@ func _dress(c: Dictionary, mats: Array) -> void:
 		var inst := mi as MeshInstance3D
 		inst.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 		if inst.get_blend_shape_count() > 0 or inst.mesh.get_blend_shape_count() > 0:
+			if not uses_overlay(species):
+				inst.free()
+				continue
 			face = inst
 			inst.lod_bias = FACE_LOD_BIAS
 			for i in inst.mesh.get_blend_shape_count():
