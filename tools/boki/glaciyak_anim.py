@@ -1,13 +1,12 @@
 """Glaciyak's own clips on the scan rig it shares with Glomwort (root, hips, spine, neck, head): a yak that lumbers,
 with its head low and its weight rolling from shoulder to shoulder, ploughs into things with its prow horns and rears
 up to slam the ground."""
-
 import glomwort_anim
 from boki_clips import LOOK_UP, add, s, seq
 
 BONES = glomwort_anim.BONES
 HIDE_AT = glomwort_anim.HIDE_AT
-HEAD_LOW = -0.1  # the head hangs below the level a Boki looks up from (rx)
+HEAD_LOW = -0.1     # the head hangs below the level a Boki looks up from (rx)
 
 
 def lumber(t, amp):
@@ -114,16 +113,14 @@ def pet(t):
 
 
 CLIPS = dict(glomwort_anim.CLIPS)
-CLIPS.update(
-    {
-        "idle": (3.0, True, idle),
-        "walk": (1.1, True, walk),
-        "run": (0.6, True, run),
-        "hop": (1.0, True, heavy_hop),
-        "carry": (1.2, True, carry),
-        "pet": (2.4, True, pet),
-        "attack": (1.0, False, gore),
-        "ability": (1.4, False, slam),
-        "sleep": (4.0, True, lie_down),
-    }
-)
+CLIPS.update({
+    "idle": (3.0, True, idle),
+    "walk": (1.1, True, walk),
+    "run": (0.6, True, run),
+    "hop": (1.0, True, heavy_hop),
+    "carry": (1.2, True, carry),
+    "pet": (2.4, True, pet),
+    "attack": (1.0, False, gore),
+    "ability": (1.4, False, slam),
+    "sleep": (4.0, True, lie_down),
+})

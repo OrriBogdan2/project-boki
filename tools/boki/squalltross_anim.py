@@ -3,14 +3,13 @@ sail-cloth wings. The rig has no wing bones, so the wings are the spine's width:
 scale (the neck takes the inverse so the head keeps its shape) and the body rises as they open, a beat you read from
 the front. It waddles with the wings held out for balance, lunges bill-first, and sleeps with its head under a
 folded sail."""
-
 import glomwort_anim
 from boki_clips import LOOK_UP, add, c, s, seq
 
 BONES = glomwort_anim.BONES
 HIDE_AT = glomwort_anim.HIDE_AT
 SCALED = ("spine", "neck")
-KEEP_LEGS = ("walk", "run")  # reclip_own keeps the file's leg curves and root height for these
+KEEP_LEGS = ("walk", "run")      # reclip_own keeps the file's leg curves and root height for these
 
 
 def wings(p, k):
@@ -29,13 +28,8 @@ def idle(t):
     wings(p, 1 + 0.03 * br - 0.06 * shiver)
     add(p, "spine", rx=0.02 * br)
     add(p, "neck", rx=-0.12 * preen, ry=0.16 * s(t, 1, 0.2) - 0.25 * preen)
-    add(
-        p,
-        "head",
-        rx=LOOK_UP - 0.2 * preen + 0.04 * br,
-        rz=0.05 * s(t, 1, 0.1),
-        ry=0.1 * s(t, 1, 0.55) + 0.12 * preen * s(t, 3),
-    )
+    add(p, "head", rx=LOOK_UP - 0.2 * preen + 0.04 * br, rz=0.05 * s(t, 1, 0.1),
+        ry=0.1 * s(t, 1, 0.55) + 0.12 * preen * s(t, 3))
     return p
 
 
@@ -128,15 +122,13 @@ def tuck(t):
 
 
 CLIPS = dict(glomwort_anim.CLIPS)
-CLIPS.update(
-    {
-        "idle": (3.0, True, idle),
-        "walk": (0.9, True, walk),
-        "run": (0.5, True, run),
-        "hop": (0.9, True, flap_hop),
-        "carry": (0.9, True, carry),
-        "attack": (0.8, False, jab),
-        "ability": (1.5, False, gust),
-        "sleep": (4.0, True, tuck),
-    }
-)
+CLIPS.update({
+    "idle": (3.0, True, idle),
+    "walk": (0.9, True, walk),
+    "run": (0.5, True, run),
+    "hop": (0.9, True, flap_hop),
+    "carry": (0.9, True, carry),
+    "attack": (0.8, False, jab),
+    "ability": (1.5, False, gust),
+    "sleep": (4.0, True, tuck),
+})

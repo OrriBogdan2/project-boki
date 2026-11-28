@@ -1,13 +1,12 @@
 """Chuggamus's own clips on the scan rig it shares with Glomwort (root, hips, spine, neck, head): a hippo that is half
 steam engine. It plods on a two-beat piston chug, thunders along head-down like a runaway train, rams with its
 cowcatcher jaw, builds boiler pressure and vents it in a long blast, and yawns steam when it is pleased."""
-
 import glomwort_anim
 from boki_clips import LOOK_UP, add, s, seq
 
 BONES = glomwort_anim.BONES
 HIDE_AT = glomwort_anim.HIDE_AT
-LOOK = LOOK_UP * 0.35  # a lazy hippo does not look up at you as far as the others
+LOOK = LOOK_UP * 0.35       # a lazy hippo does not look up at you as far as the others
 
 
 def chug(t, amp, beats=2):
@@ -29,7 +28,7 @@ def idle(t):
     br = s(t, 1)
     huff = seq(t, [(0, 0), (0.62, 0), (0.68, 1), (0.76, -0.3), (0.84, 0), (1, 0)])
     p = {"root_sc": (1 + 0.018 * br, 1 + 0.03 * br + 0.025 * huff, 1 + 0.012 * br)}
-    add(p, "spine", rx=0.07 + 0.03 * br)  # the boiler hump sits a little high, so no frame of it is the bind pose
+    add(p, "spine", rx=0.07 + 0.03 * br)     # the boiler hump sits a little high, so no frame of it is the bind pose
     add(p, "head", rx=LOOK - 0.15 + 0.04 * s(t, 1, 0.3) + 0.14 * huff, ry=0.07 * s(t, 1, 0.55) + 0.06 * huff * s(t, 6))
     return p
 
@@ -79,11 +78,8 @@ def vent(t):
     blast = seq(t, [(0, 0), (0.5, 0), (0.58, 1), (0.8, 1), (1, 0)])
     shake = fill * (1 if t < 0.52 else 0)
     p = {"root_at": (0, -0.04 * fill * (1 - blast) + 0.06 * blast, 0.03 * blast)}
-    p["root_sc"] = (
-        1 + 0.1 * fill * (1 - blast) - 0.04 * blast,
-        1 - 0.12 * fill * (1 - blast) + 0.1 * blast,
-        1 + 0.05 * fill * (1 - blast),
-    )
+    p["root_sc"] = (1 + 0.1 * fill * (1 - blast) - 0.04 * blast, 1 - 0.12 * fill * (1 - blast) + 0.1 * blast,
+                    1 + 0.05 * fill * (1 - blast))
     add(p, "root", rx=0.35 * blast, rz=0.04 * shake * s(t, 11))
     add(p, "hips", rx=-0.1 * blast, rz=0.04 * shake * s(t, 13, 0.3))
     add(p, "spine", rx=0.12 * blast - 0.06 * fill * (1 - blast))
@@ -135,17 +131,15 @@ def eat(t):
 
 
 CLIPS = dict(glomwort_anim.CLIPS)
-CLIPS.update(
-    {
-        "idle": (3.2, True, idle),
-        "walk": (1.2, True, walk),
-        "run": (0.62, True, run),
-        "hop": (1.0, True, heavy_hop),
-        "carry": (1.2, True, carry),
-        "pet": (2.4, True, pet),
-        "attack": (1.0, False, ram),
-        "ability": (1.6, False, vent),
-        "sleep": (4.2, True, lie_down),
-        "eat": (2.2, True, eat),
-    }
-)
+CLIPS.update({
+    "idle": (3.2, True, idle),
+    "walk": (1.2, True, walk),
+    "run": (0.62, True, run),
+    "hop": (1.0, True, heavy_hop),
+    "carry": (1.2, True, carry),
+    "pet": (2.4, True, pet),
+    "attack": (1.0, False, ram),
+    "ability": (1.6, False, vent),
+    "sleep": (4.2, True, lie_down),
+    "eat": (2.2, True, eat),
+})

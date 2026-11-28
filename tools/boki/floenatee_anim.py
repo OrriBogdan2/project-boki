@@ -1,6 +1,5 @@
 """Floenatee's own clips on the scan rig it shares with Glomwort (root, hips, spine, neck, head): a manatee-seal propped
 on its flippers hauls itself along in slow humps, flops its belly down to attack, and hums its ice wall up."""
-
 import glomwort_anim
 from boki_clips import LOOK_UP, add, s, seq
 
@@ -114,16 +113,14 @@ def pet(t):
 
 
 CLIPS = dict(glomwort_anim.CLIPS)
-CLIPS.update(
-    {
-        "idle": (3.0, True, idle),
-        "walk": (1.1, True, walk),
-        "run": (0.6, True, run),
-        "hop": (0.95, True, flop_hop),
-        "carry": (1.2, True, carry),
-        "pet": (2.2, True, pet),
-        "attack": (0.9, False, bellyflop),
-        "ability": (1.6, False, hum),
-        "sleep": (4.0, True, snooze),
-    }
-)
+CLIPS.update({
+    "idle": (3.0, True, idle),
+    "walk": (1.1, True, walk),
+    "run": (0.6, True, run),
+    "hop": (0.95, True, flop_hop),
+    "carry": (1.2, True, carry),
+    "pet": (2.2, True, pet),
+    "attack": (0.9, False, bellyflop),
+    "ability": (1.6, False, hum),
+    "sleep": (4.0, True, snooze),
+})

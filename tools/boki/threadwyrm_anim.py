@@ -2,13 +2,12 @@
 a wyrm with no legs. It moves on a travelling S-wave: the head yaws first and each segment behind it repeats the
 turn a little later, so a bend runs from the head down to the tail. Idle sways like a charmed rope, the run is a
 fast flat slither, the strike coils then lashes, and sleep is a tight spiral."""
-
 import glomwort_anim
 from boki_clips import LOOK_UP, add, s, seq
 
 BONES = glomwort_anim.BONES
 HIDE_AT = glomwort_anim.HIDE_AT
-CHAIN = ("head", "neck", "spine", "hips")  # front to back: each bone's wave is LAG later than the one before
+CHAIN = ("head", "neck", "spine", "hips")        # front to back: each bone's wave is LAG later than the one before
 LAG = 0.14
 
 
@@ -33,10 +32,8 @@ def idle(t):
 
 
 def slither(t, n, amp, low, stretch):
-    p = {
-        "root_at": (0, 0.004 * s(t, 2 * n), 0),
-        "root_sc": (1 - 0.02 * stretch, 1, 1 + stretch * (0.5 + 0.5 * s(t, 2 * n))),
-    }
+    p = {"root_at": (0, 0.004 * s(t, 2 * n), 0),
+         "root_sc": (1 - 0.02 * stretch, 1, 1 + stretch * (0.5 + 0.5 * s(t, 2 * n)))}
     wave(p, t, n, amp, roll=0.4)
     add(p, "spine", rx=-0.05 * low)
     add(p, "neck", rx=0.1 - 0.08 * low)
@@ -66,10 +63,8 @@ def lash(t):
     head lashes forward and down, the wave running out down the tail."""
     coil = seq(t, [(0, 0), (0.32, 1), (0.42, 1), (0.5, 0), (1, 0)])
     lunge = seq(t, [(0.32, 0), (0.46, 1), (0.6, 0.9), (0.85, 0), (1, 0)])
-    p = {
-        "root_at": (0, 0, 0.05 * coil - 0.24 * lunge),
-        "root_sc": (1, 1 + 0.06 * coil - 0.04 * lunge, 1 + 0.12 * lunge),
-    }
+    p = {"root_at": (0, 0, 0.05 * coil - 0.24 * lunge),
+         "root_sc": (1, 1 + 0.06 * coil - 0.04 * lunge, 1 + 0.12 * lunge)}
     for i, bone in enumerate(CHAIN):
         add(p, bone, ry=(0.55 - 0.1 * i) * coil * (1 if i % 2 else -1) + 0.2 * lunge * s(t, 5, -i * LAG))
     add(p, "spine", rx=0.2 * coil - 0.1 * lunge)
@@ -115,15 +110,13 @@ def spiral(t):
 
 
 CLIPS = dict(glomwort_anim.CLIPS)
-CLIPS.update(
-    {
-        "idle": (3.4, True, idle),
-        "walk": (1.0, True, walk),
-        "run": (0.5, True, run),
-        "hop": (0.95, True, spring),
-        "carry": (1.0, True, carry),
-        "attack": (0.8, False, lash),
-        "ability": (1.5, False, corkscrew),
-        "sleep": (4.4, True, spiral),
-    }
-)
+CLIPS.update({
+    "idle": (3.4, True, idle),
+    "walk": (1.0, True, walk),
+    "run": (0.5, True, run),
+    "hop": (0.95, True, spring),
+    "carry": (1.0, True, carry),
+    "attack": (0.8, False, lash),
+    "ability": (1.5, False, corkscrew),
+    "sleep": (4.4, True, spiral),
+})

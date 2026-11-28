@@ -1,7 +1,6 @@
 """Barokat's own clips on the scan rig it shares with Glomwort (root, hips, spine, neck, head): a meerkat on watch that
 cannot relax. It stands tall and sweeps its head side to side, marches brisk and stiff, bolts low when it runs, springs
 up to strike, and its barometer belly pulses when lightning is near."""
-
 import glomwort_anim
 from boki_clips import LOOK_UP, add, s, seq
 
@@ -88,12 +87,7 @@ def pulse(t):
     p["root_sc"] = (1 + 0.1 * beat - 0.03 * flash, 1 + 0.04 * stand - 0.05 * beat + 0.06 * flash, 1 + 0.1 * beat)
     add(p, "root", rx=0.1 * stand, rz=0.05 * flash * s(t, 12))
     add(p, "spine", rx=0.1 * stand, ry=0.09 * flash * s(t, 14, 0.3))
-    add(
-        p,
-        "head",
-        rx=LOOK + 0.14 * stand + 0.2 * flash,
-        ry=0.45 * seq(t, [(0, 0), (0.3, 0.8), (0.62, 0.8), (0.74, -0.5), (1, 0)]),
-    )
+    add(p, "head", rx=LOOK + 0.14 * stand + 0.2 * flash, ry=0.45 * seq(t, [(0, 0), (0.3, 0.8), (0.62, 0.8), (0.74, -0.5), (1, 0)]))
     return p
 
 
@@ -144,17 +138,15 @@ def eat(t):
 
 
 CLIPS = dict(glomwort_anim.CLIPS)
-CLIPS.update(
-    {
-        "idle": (3.0, True, idle),
-        "walk": (0.7, True, walk),
-        "run": (0.4, True, run),
-        "hop": (0.9, True, pop_hop),
-        "carry": (0.8, True, carry),
-        "pet": (2.2, True, pet),
-        "attack": (0.8, False, strike),
-        "ability": (1.5, False, pulse),
-        "sleep": (4.0, True, nod_off),
-        "eat": (2.4, True, eat),
-    }
-)
+CLIPS.update({
+    "idle": (3.0, True, idle),
+    "walk": (0.7, True, walk),
+    "run": (0.4, True, run),
+    "hop": (0.9, True, pop_hop),
+    "carry": (0.8, True, carry),
+    "pet": (2.2, True, pet),
+    "attack": (0.8, False, strike),
+    "ability": (1.5, False, pulse),
+    "sleep": (4.0, True, nod_off),
+    "eat": (2.4, True, eat),
+})

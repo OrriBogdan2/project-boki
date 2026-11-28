@@ -2,14 +2,13 @@
 with a funnel snout and a ridge of mushroom caps. It has no legs, so it inches: a hump of the back runs from the tail
 to the head (hips, spine, neck lift in turn, the body stretching as they reach and bunching as they land), the way a
 caterpillar goes. Idle sniffs, the strike hammers the funnel down, its E inhales and sprays."""
-
 import glomwort_anim
 from boki_clips import LOOK_UP, add, s, seq
 
 BONES = glomwort_anim.BONES
 HIDE_AT = glomwort_anim.HIDE_AT
 LAG = 0.16
-LOOK = LOOK_UP * 0.4  # the funnel snout points ahead rather than up
+LOOK = LOOK_UP * 0.4         # the funnel snout points ahead rather than up
 
 
 def inch(t, n, hump, reach, head):
@@ -18,11 +17,8 @@ def inch(t, n, hump, reach, head):
     p = {"root_at": (0, 0.004 * s(t, n), 0)}
     for i, bone in enumerate(("hips", "spine", "neck")):
         add(p, bone, rx=hump * max(s(t, n, -i * LAG), -0.3) * (1 - 0.15 * i))
-    p["root_sc"] = (
-        1 - 0.03 * reach * s(t, n, 0.25),
-        1 + 0.04 * reach * s(t, n, 0.25),
-        1 + 0.07 * reach * s(t, n, 0.05),
-    )
+    p["root_sc"] = (1 - 0.03 * reach * s(t, n, 0.25), 1 + 0.04 * reach * s(t, n, 0.25),
+                    1 + 0.07 * reach * s(t, n, 0.05))
     add(p, "root", ry=0.03 * hump * s(t, n, 0.1), rz=0.025 * hump * s(t, n))
     add(p, "head", rx=LOOK + head * s(t, n, -3 * LAG), ry=0.05 * hump * s(t, n, 0.4))
     return p
@@ -79,11 +75,8 @@ def spray(t):
     fill = seq(t, [(0, 0), (0.1, 0.1), (0.46, 1), (0.52, 0), (1, 0)])
     blow = seq(t, [(0, 0), (0.46, 0), (0.54, 1), (0.82, 1), (1, 0)])
     p = {"root_at": (0, 0.03 * fill * (1 - blow), 0)}
-    p["root_sc"] = (
-        1 + 0.14 * fill * (1 - blow) - 0.04 * blow,
-        1 + 0.18 * fill * (1 - blow) - 0.08 * blow,
-        1 + 0.08 * fill * (1 - blow) + 0.06 * blow,
-    )
+    p["root_sc"] = (1 + 0.14 * fill * (1 - blow) - 0.04 * blow, 1 + 0.18 * fill * (1 - blow) - 0.08 * blow,
+                    1 + 0.08 * fill * (1 - blow) + 0.06 * blow)
     add(p, "hips", rx=-0.1 * blow)
     add(p, "spine", rx=0.1 * fill * (1 - blow) + 0.3 * blow)
     add(p, "neck", rx=0.35 * blow)
@@ -115,15 +108,13 @@ def heap(t):
 
 
 CLIPS = dict(glomwort_anim.CLIPS)
-CLIPS.update(
-    {
-        "idle": (3.4, True, idle),
-        "walk": (1.3, True, walk),
-        "run": (0.7, True, run),
-        "hop": (1.0, True, bunch_hop),
-        "carry": (1.3, True, carry),
-        "attack": (0.9, False, hammer),
-        "ability": (1.6, False, spray),
-        "sleep": (4.6, True, heap),
-    }
-)
+CLIPS.update({
+    "idle": (3.4, True, idle),
+    "walk": (1.3, True, walk),
+    "run": (0.7, True, run),
+    "hop": (1.0, True, bunch_hop),
+    "carry": (1.3, True, carry),
+    "attack": (0.9, False, hammer),
+    "ability": (1.6, False, spray),
+    "sleep": (4.6, True, heap),
+})

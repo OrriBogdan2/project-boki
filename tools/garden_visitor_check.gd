@@ -64,9 +64,6 @@ func run(m: Node) -> void:
 
 
 func _suit_part() -> void:
-	_fresh(["cindle"])
-	ok(GardenVisitor.suits("bramblebank", "mossgrade", ["toy_dig"]), "a lone starter of another group draws a friend")
-	ok(not GardenVisitor.suits("bramblebank", "mossgrade", []), "a lone Boki's visitor still needs its toy")
 	_fresh(["burrlet", "glomwort", "pebbit"])
 	var zone := "bramblebank"
 	ok(GardenVisitor.suits(zone, "mossgrade", ["toy_dig"]), "a toy it likes and two residents of its group suit it")

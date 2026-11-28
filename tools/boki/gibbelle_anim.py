@@ -1,6 +1,5 @@
 """Gibbelle's own clips on the scan rig it shares with Glomwort (root, hips, spine, neck, head): a gibbon with a temple
 bell for a belly. It rolls along like a pendulum, swings through to clang the bell, and the bell rings on after."""
-
 import math
 
 import glomwort_anim
@@ -123,16 +122,14 @@ def pet(t):
 
 
 CLIPS = dict(glomwort_anim.CLIPS)
-CLIPS.update(
-    {
-        "idle": (2.6, True, idle),
-        "walk": (0.8, True, walk),
-        "run": (0.5, True, run),
-        "hop": (0.8, True, swing_hop),
-        "carry": (0.85, True, carry),
-        "pet": (2.0, True, pet),
-        "attack": (0.8, False, clang),
-        "ability": (1.5, False, sing),
-        "sleep": (3.4, True, curl),
-    }
-)
+CLIPS.update({
+    "idle": (2.6, True, idle),
+    "walk": (0.8, True, walk),
+    "run": (0.5, True, run),
+    "hop": (0.8, True, swing_hop),
+    "carry": (0.85, True, carry),
+    "pet": (2.0, True, pet),
+    "attack": (0.8, False, clang),
+    "ability": (1.5, False, sing),
+    "sleep": (3.4, True, curl),
+})

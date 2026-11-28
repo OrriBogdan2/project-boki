@@ -1,7 +1,6 @@
 """Bubblisk's (opalisk) own clips on the scan rig it shares with Glomwort (root, hips, spine, neck, head): a basilisk
 lizard and a show-off. It scurries in sprawling, side-to-side steps, bolts up on its hind legs when frightened (run
 first, pose later), freezes mid-stride to strike a pose, and blows its soap-bubble twin out with a swell and a puff."""
-
 import glomwort_anim
 from boki_clips import LOOK_UP, add, s, seq
 
@@ -35,13 +34,8 @@ def idle(t):
     add(p, "root", rx=0.1 * pose, rz=0.03 * s(t, 1))
     add(p, "spine", rx=0.03 * br + 0.14 * pose)
     add(p, "neck", ry=0.1 * glance)
-    add(
-        p,
-        "head",
-        rx=LOOK + 0.03 * br + 0.2 * pose - 0.1 * start,
-        ry=0.25 * glance + 0.08 * s(t, 1, 0.1),
-        rz=0.12 * pose + 0.05 * glance,
-    )
+    add(p, "head", rx=LOOK + 0.03 * br + 0.2 * pose - 0.1 * start, ry=0.25 * glance + 0.08 * s(t, 1, 0.1),
+        rz=0.12 * pose + 0.05 * glance)
     add(p, "hips", ry=0.04 * s(t, 1, 0.5))
     return p
 
@@ -105,11 +99,8 @@ def blow(t):
     shiver = seq(t, [(0, 0), (0.3, 0), (0.45, 1), (0.6, 1), (0.66, 0), (1, 0)]) * s(t, 9)
     posed = seq(t, [(0, 0), (0.72, 0), (0.85, 1), (1, 0)])
     p = {"root_at": (0, 0.03 * swell, -0.03 * puff)}
-    p["root_sc"] = (
-        1 + 0.18 * swell + 0.02 * shiver - 0.08 * puff,
-        1 + 0.16 * swell + 0.02 * shiver - 0.1 * puff,
-        1 + 0.18 * swell + 0.02 * shiver + 0.08 * puff,
-    )
+    p["root_sc"] = (1 + 0.18 * swell + 0.02 * shiver - 0.08 * puff, 1 + 0.16 * swell + 0.02 * shiver - 0.1 * puff,
+                    1 + 0.18 * swell + 0.02 * shiver + 0.08 * puff)
     add(p, "root", rx=0.12 * swell - 0.1 * puff)
     add(p, "spine", rx=0.3 * swell - 0.24 * puff)
     add(p, "hips", rx=-0.1 * swell)
@@ -139,16 +130,14 @@ def pet(t):
 
 
 CLIPS = dict(glomwort_anim.CLIPS)
-CLIPS.update(
-    {
-        "idle": (3.2, True, idle),
-        "walk": (0.7, True, walk),
-        "run": (0.38, True, run),
-        "hop": (0.85, True, leap),
-        "carry": (0.8, True, carry),
-        "pet": (2.0, True, pet),
-        "attack": (0.7, False, snap),
-        "ability": (1.5, False, blow),
-        "sleep": (3.4, True, sprawl),
-    }
-)
+CLIPS.update({
+    "idle": (3.2, True, idle),
+    "walk": (0.7, True, walk),
+    "run": (0.38, True, run),
+    "hop": (0.85, True, leap),
+    "carry": (0.8, True, carry),
+    "pet": (2.0, True, pet),
+    "attack": (0.7, False, snap),
+    "ability": (1.5, False, blow),
+    "sleep": (3.4, True, sprawl),
+})

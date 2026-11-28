@@ -1,5 +1,5 @@
 extends Control
-## Project Boki launcher: log in with Discord, keep the game up to date from the public releases repo (repo in launcher_config.json), play.
+## Project Boki launcher: log in with Discord, keep the game up to date from GitHub Releases, play.
 ##
 ## Flow
 ##  1. Log in: opens Discord in the browser (implicit grant, scope "identify"). Discord sends the
@@ -18,7 +18,7 @@ const INSTALL_PATH := "user://installed.json"
 
 var cfg := {
 	"discord_client_id": "",
-	"repo": "OrriBogdan2/project-boki-releases",
+	"repo": "OrriBogdan2/project-boki",
 	"server": "play.projectboki.com:7777",
 	"asset_windows": "ProjectBoki-windows.zip",
 	"asset_macos": "ProjectBoki-macos.zip",

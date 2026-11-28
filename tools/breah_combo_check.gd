@@ -633,7 +633,7 @@ func _breah() -> void:
 		apk > apk1 and absf(d_l10 / maxf(0.01, d_l1) - apk / apk1) < 0.02,
 		"lvl1 %.2f lvl10 %.2f ap %.2f/%.2f" % [d_l1, d_l10, apk1, apk]
 	)
-	# a knock his blow lands makes it ready again at once (dolm_kit.gd on_knock)
+	# data pass: a knock does not reset it (Volcano Crusher has no reset)
 	reset.call()
 	T.teleport(home + Vector3(2.4, 0, 0))
 	aim_at(P, T.pos)
@@ -641,8 +641,8 @@ func _breah() -> void:
 	tap(m, P)
 	step(m, 0.5)
 	ok(
-		"data: a slam that knocks makes Quakefall ready again",
-		T.hp < 10.0 and float(K.cd["rmb"]) <= 0.0 and K.ch_rmb >= 1.0,
+		"data: a slam that knocks does not reset Quakefall",
+		T.hp < 10.0 and float(K.cd["rmb"]) > 1.0 and K.ch_rmb < 1.0,
 		"cd %.2f charges %.2f" % [float(K.cd["rmb"]), K.ch_rmb]
 	)
 	# the spike (docs/SPIKE_SLAM.md): the tap slam drives a foe in the air down for +40%; the dive landing does not

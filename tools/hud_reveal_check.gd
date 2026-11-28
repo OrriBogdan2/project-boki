@@ -160,29 +160,16 @@ func run(main: Node) -> void:
 		m.opts["tutorial"] = mode == "tutorial"
 		for n in [1, 2, 3, 10]:
 			Save.d["matches"] = n - 1
-			var was_new: bool = n - 1 < 3  # the old HudGroups.NEW_PLAYER_MATCHES
+			var was_new: bool = n - 1 < 3      # the old HudGroups.NEW_PLAYER_MATCHES
 			var train: bool = mode == "training"
 			var kit_old: bool = not Record.clean() and mode != "tutorial" and not p.out and (not was_new or train)
-			var same: bool = (
-				HudReveal.own_numbers_shown(p, false) == (not was_new)
-				and HudReveal.own_numbers_shown(p, true)
-				and HudReveal.kit_wanted(m.hud, p) == kit_old
-				and HudReveal.kit_s(m) == (1e9 if train else 14.0)
-				and HudReveal.newcomer(m) == (HudReveal.staged(m) and was_new)
-			)
-			ok(
-				same,
-				(
-					"%s, match %d: kit card %s, own numbers %s, newcomer goal %s as before"
-					% [
-						mode,
-						n,
-						HudReveal.kit_wanted(m.hud, p),
-						HudReveal.own_numbers_shown(p, false),
-						HudReveal.newcomer(m)
-					]
-				)
-			)
+			var same: bool = HudReveal.own_numbers_shown(p, false) == (not was_new) \
+					and HudReveal.own_numbers_shown(p, true) \
+					and HudReveal.kit_wanted(m.hud, p) == kit_old \
+					and HudReveal.kit_s(m) == (1e9 if train else 14.0) \
+					and HudReveal.newcomer(m) == (HudReveal.staged(m) and was_new)
+			ok(same, "%s, match %d: kit card %s, own numbers %s, newcomer goal %s as before" % [mode, n,
+				HudReveal.kit_wanted(m.hud, p), HudReveal.own_numbers_shown(p, false), HudReveal.newcomer(m)])
 	m.duel = null
 	m.queue_free()
 	print("HUDREVEAL DONE, failures: %d" % bad)
