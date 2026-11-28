@@ -1,9 +1,10 @@
 extends RefCounted
-## --sable-vfx-check: Sable's Bola and Shadow Knife hit looks (content/vfx/thief.json): the wrap, the tangle and the
-## knife's stick each carry a hollow lit ring (a ground ring means gameplay: the knife's is the blink's arrival
-## circle, `e.ring_r`, sent as the move's `r`), and the moves play.
-## --sable-vfx-perf: the cost of those looks on a real GPU, a 4v4 fight with the three moves fired every
-## SPAM_EVERY frames (far more often than a match does) with their recipes off and on (SABLEVFX rows; p95, ms).
+## --sable-vfx-check: Sable's Bola and Shadow Knife hit looks: the wrap, the tangle and the knife's stick each play
+## their hit frame (content/vfx/thief.json) and put a lit AimKit rim on the ground that everyone sees (a ground ring
+## means gameplay: the knife's is the blink's arrival circle, `e.ring_r` 2.7 m, kept while the dagger stays).
+## --sable-vfx-perf: the cost of those looks on a real GPU, a 4v4 fight with the wrap, tangle and stick looks (hit
+## frame recipe and its rim; the stick leaves a stuck dagger with its arrival ring) fired every SPAM_EVERY frames,
+## far more often than a match does, against the same fight with nothing fired (SABLEVFX rows; p95, ms).
 
 const DT := 1.0 / 60.0
 const WARM := 30  # frames dropped before timing
@@ -16,6 +17,7 @@ var bad := 0
 var main: Node
 var m: Match
 var pl: Hunter
+var spam := false  # _go fires the three moves
 
 
 func ok(cond: bool, what: String) -> void:
@@ -51,22 +53,35 @@ func run(root: Node, mode: String = "check") -> void:
 	else:
 		_check()
 	print("SABLEVFX DONE, failures: %d" % bad)
+	main.get_tree().quit(1 if bad > 0 else 0)
 
 
 func _check() -> void:
-	var moves: Dictionary = HeroVfx.data("thief")["moves"]
-	for mv: String in MOVES:
-		var rings: Array = (moves[mv]["fx"] as Array).filter(
-			func(l): return l["p"] == "ring" and l.get("hollow", false)
-		)
-		ok(rings.size() == 1, "%s has one hollow ring" % mv)
-	var r_data: float = Arch.def("thief")["e"]["ring_r"]
-	ok(moves["knife_stick"]["fx"].any(func(l): return str(l.get("size")) == "r"), "the stick ring takes the move's r")
-	ok(r_data == 2.7, "the knife's arrival ring is the source's 1.5 bh radius (2.7 m)")
+	var kit = pl.ak
+	var foe: Hunter = m.hunters.filter(func(x): return x.team != pl.team)[0]
+	foe.teleport(pl.pos + Vector3(4, 0, 0))
 	var hv := HeroVfx.of(m)
+	kit._throw_bola()  # the Bola in flight (its stage), as a real throw leaves it
+	kit._wrap(foe)
+	_ring_ok("bola_wrap", ThiefKit.WRAP_RING_R)
+	kit._tangle(null, foe)
+	_ring_ok("bola_tangle0", ThiefKit.TANGLE_RING_R)
+	var r_data: float = Arch.def("thief")["e"]["ring_r"]
+	ok(r_data == 2.7, "the knife's arrival ring is the source's 1.5 bh radius (2.7 m)")
+	kit._stick(foe, foe.pos)
+	kit._tick_knife()
+	_ring_ok("e_ring", r_data)
 	for mv: String in MOVES:
-		hv.play(pl, mv, pl.pos + Vector3(3, 0, 0), Vector2.RIGHT, {"foe": true, "r": r_data})
-		ok(int(hv.plays.get(mv, 0)) == 1, "%s plays" % mv)
+		ok(int(hv.plays.get(mv, 0)) >= 1, "%s plays" % mv)
+	ok(not (HeroVfx.data("thief")["moves"] as Dictionary).values().any(
+			func(rec): return (rec.get("fx", []) as Array).any(func(l): return l["p"] == "ring")),
+		"no shockwave ring layer in Sable's looks (the rims are AimKit's)")
+
+
+func _ring_ok(id: String, r: float) -> void:
+	var e := AimKit.entry(pl, id)
+	ok(not e.is_empty() and is_equal_approx(float(e["r"]), r) and bool(e["all"]) and bool(e["soft"]),
+		"%s: a soft lit rim of %.1f m everyone sees" % [id, r])
 
 
 func _perf() -> void:
@@ -76,18 +91,12 @@ func _perf() -> void:
 	for i in foes.size():
 		foes[i].teleport(pl.pos + Vector3(6.0 + 2.0 * (i % 2), 0.0, -4.0 + 2.5 * i))
 	await _go(WARM, foes)
-	var moves: Dictionary = HeroVfx.data("thief")["moves"]
-	var kept := {}
-	for mv: String in MOVES:
-		kept[mv] = moves[mv]
 	var off: Array = []
 	var on: Array = []
 	for r in ROUNDS:
-		for mv: String in MOVES:
-			moves[mv] = {}
+		spam = false
 		off.append_array(await _frame_ms(foes))
-		for mv: String in MOVES:
-			moves[mv] = kept[mv]
+		spam = true
 		on.append_array(await _frame_ms(foes))
 	var row := "SABLEVFX frame ms (%d frames each) off p95 %.2f | on p95 %.2f | delta p95 %.2f"
 	print(row % [off.size(), _p95(off), _p95(on), _p95(on) - _p95(off)])
@@ -112,13 +121,23 @@ func _p95(ts: Array) -> float:
 
 
 func _go(frames: int, foes: Array) -> void:
-	var hv := HeroVfx.of(m)
+	var kit = pl.ak
 	for i in frames:
-		if int(m.time / DT) % SPAM_EVERY == 0:
-			var f: Hunter = foes[int(m.time / DT / SPAM_EVERY) % foes.size()]
-			hv.play(
-				pl, MOVES[int(m.time / DT / SPAM_EVERY) % MOVES.size()], f.pos, Vector2.RIGHT, {"foe": true, "r": 2.7}
-			)
+		var n := int(m.time / DT)
+		if spam and n % SPAM_EVERY == 0:
+			var f: Hunter = foes[(n / SPAM_EVERY) % foes.size()]
+			match (n / SPAM_EVERY) % 3:
+				0:
+					kit.vfx("bola_wrap", f.pos)
+					kit._hit_ring("bola_wrap", f.pos, ThiefKit.WRAP_RING_R)
+				1:
+					kit.vfx("bola_tangle", f.pos)
+					kit._hit_ring("bola_tangle0", f.pos, ThiefKit.TANGLE_RING_R)
+				2:
+					kit.vfx("knife_stick", f.pos, null, {"foe": true})
+					kit.knife = {"target": f, "pos": f.pos, "dir": Vector2.RIGHT}  # its ring rides it from here
+		if not spam:
+			kit.knife = {}
 		m.step(DT)
 		m.cam.snap(pl.pos)
 		for h in m.hunters:
