@@ -30,13 +30,13 @@ func _still(file: String) -> void:
 	print("WAYSMAP-SHOT ", file)
 
 ## The quest-race moment: the rival squad has hurt the Sealed Lair's boss, yours has charged the Uplink.
-func _race(P: Hunter, foe: Hunter, q: Dictionary) -> void:
+func _race(p: Hunter, foe: Hunter, q: Dictionary) -> void:
 	var seats: QuestSeats = m.exits.seats
 	m.sess_t0 = float(q["uplink_open_s"]) + 30.0 - m.time
 	seats.lair._force(QuestSeat.S.IN_USE, "shots", foe.team)
 	var boss: Boss = m.lairs.boss_of(seats.lair.ref)
 	boss.hp = boss.max_hp * 0.35
-	seats.uplink._force(QuestSeat.S.IN_USE, "shots", P.team)
+	seats.uplink._force(QuestSeat.S.IN_USE, "shots", p.team)
 	seats.uplink.ref["prog"] = 0.55
 	await _still("race_1_hud")
 	m.hud.full_map.open()
@@ -54,7 +54,7 @@ func run(main_node: Node) -> void:
 	Econ.ensure()
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 4, "squad": 2, "tier": 0, "seed": 77, "no_drop": true, "autoplay": true, "heart": true,
+	m.start({"teams": 4, "squad": 2, "tier": 0, "seed": 77, "no_drop": true, "autoplay": true, "heart": true,
 		"god": true, "length": 1e9})
 	m.set_process(false)
 	var fade = main.get("fade")
@@ -63,38 +63,38 @@ func run(main_node: Node) -> void:
 	for mb in m.mobs:
 		mb.queue_free()
 	m.mobs.clear()
-	var P: Hunter = m.player
-	var H: Heart = m.heart
+	var p: Hunter = m.player
+	var h_v: Heart = m.heart
 	var q: Dictionary = Heart.rules()["quest"]
 	for h in m.hunters:
 		h.ctrl = "idle"
-	var foe: Hunter = m.hunters.filter(func(h): return h.team != P.team)[0]
-	P.teleport(m.world.free_spot_near(H.gate + Vector3(10, 0, 6), [], 1.0, 0.45, 6.0))
+	var foe: Hunter = m.hunters.filter(func(h): return h.team != p.team)[0]
+	p.teleport(m.world.free_spot_near(h_v.gate + Vector3(10, 0, 6), [], 1.0, 0.45, 6.0))
 	m.sess_t0 = 30.0 - m.time
 	await _grab("mini_1_start")
 	m.hud.full_map.open()
 	await _grab("full_1_start")
 	m.hud.full_map.close()
 	m.sess_t0 = float(q["lair_open_s"]) + 60.0 - m.time
-	H.charge = 40.0
-	H._force(Heart.S.CHARGING, "shots")
+	h_v.charge = 40.0
+	h_v._force(Heart.S.CHARGING, "shots")
 	m.hud.full_map.open()
 	await _grab("full_2_lair_open")
 	m.hud.full_map.close()
 	m.sess_t0 = Heart.r("tide_start_s") + 200.0 - m.time
-	H.charge = Heart.r("charge_s")
-	H._force(Heart.S.READY, "charged")
-	H.carrier = foe
-	H._force(Heart.S.CARRIED, "shots")
+	h_v.charge = Heart.r("charge_s")
+	h_v._force(Heart.S.READY, "charged")
+	h_v.carrier = foe
+	h_v._force(Heart.S.CARRIED, "shots")
 	await _grab("mini_2_in_use")
 	m.hud.full_map.open()
 	await _grab("full_3_mid")
 	m.hud.full_map.close()
-	H.carrier = null
-	H.early_team = foe.team
-	await _race(P, foe, q)
+	h_v.carrier = null
+	h_v.early_team = foe.team
+	await _race(p, foe, q)
 	m.sess_t0 = float(q["uplink_shut_s"]) + 60.0 - m.time
-	P.out = true
+	p.out = true
 	await _grab("watching_hud")
 	m.hud.full_map.open()
 	await _grab("watching_full")

@@ -11,45 +11,53 @@ extends RefCounted
 
 const FALL := "fall"
 const BURN := "burn"
-const FIRE_T := 0.14             # s after the tap the shot leaves: the clip's kick key (the barrel is up at 0.14),
-                                 # the source's raise, then fire
-const WINDUP := 0.25             # s from the tap: the barrel up and the shot out (FIRE_T), the walk slowed. Was a
-                                 # 0.76 s stand (the source's ~0.8 s, venator.md R 4); the owner's 11-17 playtest:
-                                 # "shouldn't cause her to not move at all"
-const WINDUP_MOVE := 0.7         # share of her walk kept in the wind-up (never 0); jump and Shift still go
-const DROP_T := 0.8              # s: the shell is seen falling for the last part of the fall
-const DROP_H := 16.0             # m: where the shell is first seen above the disc
-const DISC_ALPHA := 0.45         # the countdown disc's share of AimKit's fill: its full fill and hot centre stack
-                                 # to about 0.25 alpha at the centre (the zone rule, docs/VFX_QUALITY.md)
-const BURN_FILL_A := 3.0         # the burning patch's dark fill: AimShapes' quiet 0.18 telegraph fill x this (fades to
-                                 # half), so the patch reads as a dark disc on pale sand (source: dark disc, lit rim)
+const FIRE_T := 0.14  # s after the tap the shot leaves: the clip's kick key (the barrel is up at 0.14),
+# the source's raise, then fire
+const WINDUP := 0.25  # s from the tap: the barrel up and the shot out (FIRE_T), the walk slowed. Was a
+# 0.76 s stand (the source's ~0.8 s, venator.md R 4); the owner's 11-17 playtest:
+# "shouldn't cause her to not move at all"
+const WINDUP_MOVE := 0.7  # share of her walk kept in the wind-up (never 0); jump and Shift still go
+const DROP_T := 0.8  # s: the shell is seen falling for the last part of the fall
+const DROP_H := 16.0  # m: where the shell is first seen above the disc
+const DISC_ALPHA := 0.45  # the countdown disc's share of AimKit's fill: its full fill and hot centre stack
+# to about 0.25 alpha at the centre (the zone rule, docs/VFX_QUALITY.md)
+# the burning patch's dark fill: AimShapes' 0.18 telegraph fill x this. Its two stacked discs give 0.25 at the
+# centre and about 0.5 by the rim at the start, halving as it burns: a soft inside under the lit rim, the foe
+# reads through it (zone rule, docs/VFX_QUALITY.md)
+const BURN_FILL_A := 0.8
 const BURN_DARK := Color(0.0086, 0.0194, 0.003)  # the charred floor, #17260a (Vex's green burnt near black) given
-                                 # linear: the aim layer reads vertex colours as linear
+# linear: the aim layer reads vertex colours as linear
 
 var kit: GunslingerKit
-var shells: Array = []         # {at, t, phase, node, tick, n}
-var pool: Array = []           # shell nodes, reused
-var casts := 0                 # (tests)
+var shells: Array = []  # {at, t, phase, node, tick, n}
+var pool: Array = []  # shell nodes, reused
+var casts := 0  # (tests)
 var impacts := 0
 var zone_ticks := 0
-var last := {}                 # (tests) the last impact: {at, hits, centre}
+var last := {}  # (tests) the last impact: {at, hits, centre}
+
 
 func _init(owner_kit: GunslingerKit) -> void:
 	kit = owner_kit
 
+
 func data() -> Dictionary:
 	return kit.x_def()
+
 
 ## Damage scale for the ult: the hunter's own multiplier and level growth (it has no ranks).
 func power() -> float:
 	return kit.m.dmg_mult(kit.h) * LevelGrowth.ap(kit.h)
 
+
 ## m: the hot centre that takes the +core_k bonus; its ground ring is drawn at exactly this radius.
 func core_r() -> float:
 	return float(data()["core_r"])
 
+
 func running() -> bool:
 	return not shells.is_empty()
+
 
 # ------------------------------------------------------------------ the tap
 ## The cast (HeroUlt.press has checked the cooldown and that nothing holds her).
@@ -64,9 +72,10 @@ func cast() -> bool:
 	kit.play("gunslinger_x")
 	kit.x_wind_end = float(kit.m.time) + WINDUP
 	# the countdown disc shows at once (_fall_tick); the shot leaves the raised barrel on the clip's kick (_fire)
-	kit.m.sfx("vn_nuke_fall", at, -2.0)       # the whistle runs the whole fall, from the tap
+	kit.m.sfx("vn_nuke_fall", at, -2.0)  # the whistle runs the whole fall, from the tap
 	kit.net_ring(at, float(xd["radius"]), GunslingerKit.LIME)
 	return true
+
 
 ## The shell: a big Burr Charge with its spikes out, made once and reused.
 func _take_node() -> Node3D:
@@ -79,6 +88,7 @@ func _take_node() -> Node3D:
 	pool.append(nn)
 	return nn
 
+
 # ------------------------------------------------------------------ per step
 func tick(dt: float) -> void:
 	for s in shells.duplicate():
@@ -90,11 +100,13 @@ func tick(dt: float) -> void:
 		else:
 			_burn_tick(s, dt)
 
+
 ## The shot: straight up off the raised barrel, a bloom and a streak of green fire, on the clip's kick key; the
 ## shell's whistle starts over the target.
 func _fire(s: Dictionary) -> void:
 	s["fired"] = true
 	kit.vfx("x_cast", s["at"])
+
 
 ## The disc fills toward the impact with its hot centre ring filling in step (both full on the impact), a
 ## rivet ring closes in, and the shell drops for the last part of the fall.
@@ -117,6 +129,7 @@ func _fall_tick(s: Dictionary) -> void:
 	if float(s["t"]) >= delay:
 		_impact(s)
 
+
 func _drop_shell(s: Dictionary, delay: float) -> void:
 	var n: Node3D = s["node"]
 	var u := (float(s["t"]) - (delay - DROP_T)) / DROP_T
@@ -130,7 +143,8 @@ func _drop_shell(s: Dictionary, delay: float) -> void:
 	n.rotation.y += 0.3
 	if not s.has("trail"):
 		s["trail"] = true
-		HeroVfx.of(kit.m).trail(kit.h, "x_shell", n)        # its green-fire streak follows it down
+		HeroVfx.of(kit.m).trail(kit.h, "x_shell", n)  # its green-fire streak follows it down
+
 
 func _impact(s: Dictionary) -> void:
 	var xd := data()
@@ -152,18 +166,21 @@ func _impact(s: Dictionary) -> void:
 	for f in kit.foes_in(at, r, 2.6):
 		var core: bool = Vector2(f.pos.x - at.x, f.pos.z - at.z).length() <= inner + f.r * 0.5
 		var o := {"src": "abil", "ab": "ult", "tags": ["ult", "cinderfall"], "crit": core}
-		f.hurt(dmg * (1.0 + float(xd["core_k"]) if core else 1.0), h, o)
+		var core_k := 1.0 + float(xd["core_k"]) if core else 1.0
+		f.hurt(dmg * core_k * GunslingerKit.dazed_k(f, xd), h, o)
 		HeroUlt.landed(kit, f)
 		n += 1
 		if core:
 			centre += 1
 	last = {"at": at, "hits": n, "centre": centre}
 
+
 ## The impact: a white-hot bloom, a shock ring and a wall of green flame out to the rim, embers, debris and smoke,
 ## a boom, and a cracked, see-through scorch under the patch's lit rim (_burn_tick).
 func _impact_fx(at: Vector3, r: float) -> void:
 	kit.vfx("x_impact", at, null, {"r": r})
-	Shake.incoming_big(kit.m, at, ImpactWeight.shake("heavy"), kit.h)
+	Shake.big(kit.m, at, "ult", kit.h)
+
 
 ## The burning patch: every tick it hurts and slows everyone on it; its rim stays lit for everyone and flames
 ## flicker across it. Ticks pay no bond (only the impact does).
@@ -189,6 +206,7 @@ func _burn_tick(s: Dictionary, dt: float) -> void:
 		AimKit.hide(kit.h, "xf%d" % int(s["n"]))
 		shells.erase(s)
 
+
 func _zone_hit(at: Vector3, r: float, xd: Dictionary) -> void:
 	var dmg := float(xd["tick_dmg"]) * power()
 	for f in kit.foes_in(at, r, 2.6):
@@ -197,12 +215,14 @@ func _zone_hit(at: Vector3, r: float, xd: Dictionary) -> void:
 		f.hurt(dmg, kit.h, o)
 		zone_ticks += 1
 
+
 func _flames(at: Vector3, r: float, dt: float) -> void:
 	if randf() > 20.0 * dt:
 		return
 	var a := randf() * TAU
 	var d := sqrt(randf()) * r
 	kit.vfx("x_lick", kit.ground(at + Vector3(cos(a) * d, 0, sin(a) * d)) + Vector3(0, 0.1, 0))
+
 
 # ------------------------------------------------------------------ ends
 ## A kit swap: shells in the air and burning patches go with the kit.

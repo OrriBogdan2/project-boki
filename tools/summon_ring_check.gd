@@ -11,10 +11,12 @@ const WINDOW := 10.0
 var bad := 0
 var m: Match
 
+
 func ok(cond: bool, what: String) -> void:
 	print("SUMRING %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -22,8 +24,18 @@ func run(main: Node) -> void:
 	Econ.ensure()
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 3, "squad": 2, "tier": 0, "length": 1e9, "seed": 91, "no_drop": true, "demo_kin": "cindle",
-		"boki_wisps": true})
+	m.start(
+		{
+			"teams": 3,
+			"squad": 2,
+			"tier": 0,
+			"length": 1e9,
+			"seed": 91,
+			"no_drop": true,
+			"demo_kin": "cindle",
+			"boki_wisps": true
+		}
+	)
 	m.set_process(false)
 	for mb in m.mobs:
 		mb.queue_free()
@@ -37,6 +49,7 @@ func run(main: Node) -> void:
 	print("SUMMONRING %s (%d fail)" % ["PASS" if bad == 0 else "FAIL", bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _run(secs: float) -> void:
 	var t := 0.0
 	while t < secs:
@@ -47,11 +60,14 @@ func _run(secs: float) -> void:
 			k.render(DT, 1.0)
 		t += DT
 
+
 func _ring(k: Kin) -> MeshInstance3D:
 	return k.get_node_or_null(SummonRing.NAME) as MeshInstance3D
 
+
 func _par(ring: MeshInstance3D, key: String) -> Variant:
 	return (ring.material_override as ShaderMaterial).get_shader_parameter(key)
+
 
 ## The alpha range the ring shows over the next `secs`.
 func _alphas(k: Kin, secs: float) -> Vector2:
@@ -65,6 +81,7 @@ func _alphas(k: Kin, secs: float) -> Vector2:
 		t += DT
 	return span
 
+
 func _window() -> void:
 	var k: Kin = m.player.kin
 	ok(_ring(k) == null, "a resting wisp has no ring")
@@ -72,8 +89,10 @@ func _window() -> void:
 	_run(0.1)
 	var ring := _ring(k)
 	ok(ring != null and absf(float(_par(ring, "arc")) - 1.0) < 0.02, "a fresh summon's ring is full")
-	ok(ring.material_override.render_priority < 0 and ring.global_position.y < k.ring.global_position.y,
-		"it sits under the team ring and the marks")
+	ok(
+		ring.material_override.render_priority < 0 and ring.global_position.y < k.ring.global_position.y,
+		"it sits under the team ring and the marks"
+	)
 	ok(ring.scale.x > k.ring.scale.x, "...just outside the team ring")
 	_run(4.9)
 	ok(absf(float(_par(ring, "arc")) - 0.5) < 0.03, "half the window gone: the ring is half")
@@ -81,6 +100,7 @@ func _window() -> void:
 	ok(is_equal_approx(steady.x, steady.y) and k.summon.left > SummonRing.WARN_S, "steady while more than 2 s is left")
 	var warn := _alphas(k, 1.5)
 	ok(k.summon.left < SummonRing.WARN_S and warn.x < warn.y * 0.5, "flickers in the last 2 s")
+
 
 func _ends() -> void:
 	var k: Kin = m.player.kin
@@ -105,6 +125,7 @@ func _ends() -> void:
 	k.summon.end()
 	_run(KinSummon.SHRINK_S + 0.5)
 
+
 func _stolen() -> void:
 	var p: Hunter = m.player
 	var f: Hunter = m.hunters.filter(func(h: Hunter): return h.team != p.team)[0]
@@ -122,8 +143,10 @@ func _stolen() -> void:
 	var ring := _ring(fk)
 	ok(ring != null and KinSteal.stolen(fk), "a stolen summon has the ring")
 	ok(ring != null and absf((_par(ring, "color") as Color).a - SummonRing.STOLEN_A) < 0.01, "...dimmed")
-	ok(ring != null and (_par(ring, "color") as Color).is_equal_approx(Color(SideColor.you(), SummonRing.STOLEN_A)),
-		"...in the thief's colour, not its owner's")
+	ok(
+		ring != null and (_par(ring, "color") as Color).is_equal_approx(Color(SideColor.you(), SummonRing.STOLEN_A)),
+		"...in the thief's colour, not its owner's"
+	)
 	fk.summon.end()
 	_run(0.1)
 	ok(_ring(fk) == null, "...and gone when it shrinks")

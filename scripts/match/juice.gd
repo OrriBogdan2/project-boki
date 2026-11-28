@@ -11,25 +11,47 @@ extends RefCounted
 ## global one, so a seeded match plays out exactly the same with or without these effects.
 
 const HIT_COL := Color("fff0d2")
-const HURT_COL := Color("ff7a5c")       # hits on you read hotter
-const RIVAL_HIT_DB := -13.0             # dB: a hit between two others, well under yours (-6 / crit -4)
-const RIVAL_PICKUP_DB := -14.0          # dB: another hunter picking something up, under yours (-8)
-const BOKI_NUM_K := 0.75                # a hit on a Boki prints its number this share of a Hunter's size
-const SHELL_FLASH_T := 0.12             # s a hit on armour keeps the body flash shell-coloured
-const BREAK_FLASH_T := 0.3              # s the body holds then fades its flash when the armour breaks
-const FAR := 24.0                       # beyond this from the player nothing is drawn for a hit
-const ARMOR_BREAK_DB := -3.0            # dB: the armour crack as heard from another Hunter's break
-const ARMOR_BREAK_DB_VICTIM := 2.0      # dB: the same crack on your own armour, louder so you know it's gone
-const ARMOR_TICK_DB := -4.0             # dB: the attacker's "push now" tick (a high, short click, not the crack)
-const ARMOR_TICK_PITCH := 2.0           # the tick's pitch, well above the click's menu use
+const HURT_COL := Color("ff7a5c")  # hits on you read hotter
+const RIVAL_HIT_DB := -13.0  # dB: a hit between two others, well under yours (-6 / crit -4)
+const RIVAL_PICKUP_DB := -14.0  # dB: another hunter picking something up, under yours (-8)
+const BOKI_NUM_K := 0.75  # a hit on a Boki prints its number this share of a Hunter's size
+const SHELL_FLASH_T := 0.12  # s a hit on armour keeps the body flash shell-coloured
+const BREAK_FLASH_T := 0.3  # s the body holds then fades its flash when the armour breaks
+const FAR := 24.0  # beyond this from the player nothing is drawn for a hit
+## Impact power on our health scale (a Hunter has 124 to 193): a hit of this much damage lands at power 1 (the
+## rings draw), a rifle round or a slash; a dart or a pellet about 0.6, a heavy ability 3. Was 14, which left
+## every basic hit at the 0.35 floor (11-24 playtest: "hard to tell when I was doing damage").
+const POWER_DMG := 6.0
+const POWER_MIN := 0.35
+const POWER_MAX := 3.0
+const POWER_OTHERS := 0.65  # a hit between two others draws this share of the size
+const POWER_ABILITY := 1.3  # an ability hit always lands at least this big
+const ARMOR_BREAK_DB := -3.0  # dB: the armour crack as heard from another Hunter's break
+const ARMOR_BREAK_DB_VICTIM := 2.0  # dB: the same crack on your own armour, louder so you know it's gone
+const ARMOR_TICK_DB := -4.0  # dB: the attacker's "push now" tick (a high, short click, not the crack)
+const ARMOR_TICK_PITCH := 2.0  # the tick's pitch, well above the click's menu use
+const BLOCK_TICK := "jug_ting"  # the metallic tick of a blocked hit (a bright, crisp ting)
+const BLOCK_TICK_DB := -9.0  # dB: under a real hit, it is a tick
+const BLOCK_TICK_PITCH := 1.5  # a short tick, above the ting's own pitch
+const BLOCK_SPARKS := 8  # deflect sparks, fewer and thinner than a damage hit's
+const BLOCK_SPARK_WHITE := 0.4  # how much of white the sparks carry over the blocker's colour
 
-## The flash colour of a hit by what it struck: a Boki rims in its type colour (the Field Book's, not
-## the damage category's), so a squad fight tells a Boki from its Hunter; a Hunter keeps the white
-## (or, on you, the hot) flash; mobs and the rest keep theirs.
-static func flash_col(target: Ent, p: Hunter) -> Color:
+const ARMOR_UP_PITCH := 0.1  # pitch step per armour tier above Common (tier 1 plays at 0.9, tier 4 at 1.2)
+const ARMOR_UP_OWN_DB := -4.0  # dB: your own Hunter's tier-up (the fuller cue, no position)
+const ARMOR_UP_NEAR_DB := -8.0  # dB: a rival's (or mate's) tier-up; Sfx.play adds the distance falloff
+
+
+## The flash and spark colour of a hit: a Boki's own hit lands in its type colour (the Field Book's), whatever it
+## strikes, so a fire Boki's is ember and a tempest one teal; otherwise by what it struck: a Boki rims in its type
+## colour, so a squad fight tells a Boki from its Hunter; a Hunter keeps the white (or, on you, the hot) flash; mobs
+## and the rest keep theirs.
+static func flash_col(target: Ent, p: Hunter, by: Ent = null) -> Color:
+	if by is Kin:
+		return DexView.type_col(String((by as Kin).sp.get("type", "")))
 	if target is Kin:
 		return DexView.type_col(DexView.type_of((target as Kin).species))
 	return HURT_COL if target == p else HIT_COL
+
 
 ## Where on the target a hit from `by` lands (HitContact: its real contact point, clamped to its collider) and which
 ## way the sparks fly (on through it).
@@ -60,6 +82,8 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 		return
 	var src := String(o.get("src", ""))
 	var p: Hunter = m.player
+	# a Boki's ability hit has its type's impact wherever it lands (the sound culls by distance itself)
+	var typed := _credit(by) != p and BokiImpact.play(m, by, target, o, crit, "taken" if target == p else "other")
 	if p != null and p.flat_dist(target) > FAR:
 		return
 	var hp := _hit_point(target, by, o)
@@ -71,13 +95,9 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 		return
 	var credit := _credit(by)
 	var mine := credit == p or target == p
-	var power := clampf(d / 14.0, 0.35, 3.0)
-	if not mine:
-		power *= 0.65
-	var col := flash_col(target, p)
+	var col := flash_col(target, p, by)
 	var ability := o.has("ab") and src != "kin"
-	if ability:
-		power = maxf(power, 1.3)  # an ability hit always lands big
+	var power := impact_power(d, mine, ability)
 	m.fx.impact(at, dir, col, power, crit, armor)
 	# the body tells which it was: an armour hit flashes the shell's colour, a health hit white (a break keeps its own)
 	if armor:
@@ -89,17 +109,46 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 	target.flinch = (target.flinch + dir * (0.05 + 0.045 * power) * (1.4 if crit else 1.0) / heft).limit_length(0.3)
 	if ability:
 		AbilityFx.hit(m, target, by, d, o)
-	# sound layers on top of the weapon's hit Match plays (HeroSfx.hit_sound): armor rings, empowered and
-	# big hits thud
+	# sound layers on top of the weapon's hit Match plays (HeroSfx.hit_sound): armor rings, and the hit's
+	# own tier confirm (ImpactWeight.confirm)
 	if credit == p and target != p:
 		if armor:
-			m.sfx("armor_hit", target.pos, -9.0, 1.0, true)
-		if d >= 28.0 or o.get("heavy", false) or o.get("payoff", false):
-			m.sfx("hit_heavy", target.pos, -7.0, 1.0, true)
-	elif target == p and armor:
-		m.sfx("armor_hit", null, -12.0, 0.85)
-	elif target != p and credit != p:
+			m.sfx("armor_hit", target.pos, -9.0, ArmorRules.confirm_pitch(target), true)
+		var w := ImpactWeight.of_hit(by, target, d, o)
+		if w != "":
+			m.sfx(ImpactWeight.confirm(w), target.pos, ImpactWeight.confirm_db(w), 1.0, true)
+	elif target == p:
+		IncomingHitSfx.hit(m, by, d, o)  # from where it came, so you know which way to turn
+		if armor:
+			m.sfx("armor_hit", null, -12.0, 0.85 * ArmorRules.confirm_pitch(target))
+	elif target != p and credit != p and not typed:
 		m.sfx("crit" if crit else "hit", target.pos, RIVAL_HIT_DB)
+
+
+## How big a hit's impact lands (Fx.impact power, 0.35..3): by damage on our health scale, smaller for a hit
+## between two others, never under POWER_ABILITY for an ability hit.
+static func impact_power(d: float, mine: bool, ability: bool) -> float:
+	var power := clampf(d / POWER_DMG, POWER_MIN, POWER_MAX)
+	if not mine:
+		power *= POWER_OTHERS
+	if ability:
+		power = maxf(power, POWER_ABILITY)
+	return power
+
+
+## The one blocked hit (Verbs walls through BarrierRipple, Albert's Shield Charge guard, Kael's Riposte guard): a
+## few deflect sparks in the blocker's colour off the face `dir` (flat, outward) and a metallic tick. Never a damage
+## number or a hurt flash: nothing was dealt. `pitch` lifts the tick (a guard that keeps blocking rings higher).
+static func blocked(m: Match, at: Vector3, dir: Vector3, col: Color, pitch := 1.0) -> void:
+	if m == null or m.fx == null or m.fx.own_look:
+		return
+	var p: Hunter = m.player
+	if p != null and Vector2(p.pos.x - at.x, p.pos.z - at.z).length() > FAR:
+		return
+	var shown := col.lerp(Color.WHITE, BLOCK_SPARK_WHITE)
+	m.fx.spark(at, Vector3(dir.x, 0.4, dir.z), shown, BLOCK_SPARKS, 9.0, 30.0, 0.24, 8.0, 1.2)
+	m.sfx(BLOCK_TICK, at, BLOCK_TICK_DB, BLOCK_TICK_PITCH * pitch)
+
 
 ## Another hunter picks something up (Match._collect): heard by whoever is near, quietly.
 static func rival_pickup(m: Match, h: Hunter) -> void:
@@ -152,6 +201,7 @@ static func kill(m: Match, h: Hunter, credit: Ent) -> void:
 	if _squad_cue(m, h, credit, "elim_confirm", -3.0) and credit == m.player and m.hud:
 		m.hud.flash(Color(tc, 1.0), 0.14)
 
+
 ## The knock / finish cue, heard only by the attacker's squad (their team, so the local player hears it
 ## whenever a squadmate downs or finishes a rival). Returns whether it played.
 static func _squad_cue(m: Match, h: Hunter, credit: Ent, cue: String, vol_db: float) -> bool:
@@ -159,6 +209,7 @@ static func _squad_cue(m: Match, h: Hunter, credit: Ent, cue: String, vol_db: fl
 		return false
 	Sfx.play(cue, null, vol_db, 0.0)
 	return true
+
 
 ## Armor broken (Match.on_armor_break): the body cracks (it holds the shell's flash for BREAK_FLASH_T, then fades)
 ## and the shell falls off it in shards, with a glassy sound; no ring, no burst. A short freeze for whoever broke it
@@ -202,8 +253,8 @@ static func mob_dead(m: Match, mb: Mob, credit: Ent, big: bool) -> void:
 		return
 	var col: Color = mb.md.get("color", Color.WHITE)
 	var c := mb.pos + Vector3(0, 0.6 + float(mb.r) * 0.5, 0)
-	var flash_col := kill_col(m, mb, credit, col.lerp(Color.WHITE, 0.5))
-	m.fx.flash(c, flash_col, 0.6 if not big else 1.1, 0.12 if not big else 0.18)
+	var flash_col_v := kill_col(m, mb, credit, col.lerp(Color.WHITE, 0.5))
+	m.fx.flash(c, flash_col_v, 0.6 if not big else 1.1, 0.12 if not big else 0.18)
 	m.fx.spark(
 		c,
 		Vector3.UP,
@@ -284,12 +335,8 @@ static func footstep(h: Hunter) -> void:
 	if m == null or m.world == null or not StepReach.heard(h):
 		return
 	var surf := StepSurface.at(m, h.pos)
-	StepReach.play(h, StepSurface.cue(h, surf), StepSurface.vol_db(h, surf, -13.0), StepSurface.vol_db(h, surf, -17.0))
-
-
-const ARMOR_UP_PITCH := 0.1     # pitch step per armour tier above Common (tier 1 plays at 0.9, tier 4 at 1.2)
-const ARMOR_UP_OWN_DB := -4.0   # dB: your own Hunter's tier-up (the fuller cue, no position)
-const ARMOR_UP_NEAR_DB := -8.0  # dB: a rival's (or mate's) tier-up; Sfx.play adds the distance falloff
+	StepReach.play(h, StepSurface.cue(h, surf), StepSurface.vol_db(h, -13.0), StepSurface.vol_db(h, -17.0))
+	HunterFoley.step(h)
 
 
 ## The pitch of a tier's rise: higher tier, brighter.

@@ -87,14 +87,15 @@ What made the menus feel blocky, samey and hard to get through:
    outline unless they are *selected*. Group with spacing and eyebrows before reaching for a card.
 4. **Three button tiers.** `primary()` (the magenta ticket, pink text): the one thing the screen is for,
    at most one per screen, usually in the footer. `button()` (torn violet face, neon on hover): normal actions.
-   `ghost()` (text only): rare or small actions. `danger()` (red outline) for things that can't be
+   `ghost()` (dark glass pill with a thin light rim, so it shows on any background): rare or small actions. `danger()` (red outline) for things that can't be
    undone, always behind `confirm()`.
 5. **Colour roles.** `ACCENT` (magenta) means "act here" and "selected". `GOLD` means gems and rewards.
    `GOOD` owned/ready/success, `BAD` danger/loss/locked, `TEAL` info and extraction. Item rarity uses
    `rarity_col(r)`. Never use ACCENT for decoration.
 6. **Same shell everywhere.** Title (+subtitle) top left, extras (chips, tags) and a close X top
    right, tabs under the title, body, footer actions bottom right with the primary last and an Enter
-   keycap on it. Esc always closes or goes back.
+   keycap on it. Esc always closes or goes back, the top panel only; a right click outside closes it
+   too, and the game never sees that press (`PanelClose`, attached by `scroll_panel` and `confirm`).
 7. **Tabs, not long lists.** Group options into tabs (`shell_tabs`) and groups (`section`). Tabs are a
    segmented control, visibly different from buttons.
 8. **Sensible defaults.** The panel opens with the primary focused (or the first control), the last
@@ -115,7 +116,8 @@ What made the menus feel blocky, samey and hard to get through:
   Pressing the same number again closes that panel. Hidden while a panel is open and when visiting.
 - **Prompts**: walking up to anything shows a glass pill with keycaps for what you can do (F use; for
   a kin, F pet, V fetch, T talk, C details).
-- **Panels** open over a blurred, dimmed farm; clicking the dimmed area or pressing Esc closes them;
+- **Panels** open over a blurred, dimmed farm; clicking the dimmed area, a right click outside or Esc
+  closes them;
   Enter presses the panel's primary when nothing else has focus.
 
 - **Making yourself** (a new game, or the pause menu's Change your look) is the look locker
@@ -149,6 +151,7 @@ One), `UI.body` (Rubik), `UI.semi` (Rubik 560), `UI.caps` (Rubik 700, spaced).
 - `title(text, size=34, col=INK)` - Lilita One, one line.
 - `label(text, size=16, col=INK, font=null)` - wraps only past 48 characters.
 - `para(text, size=T_SMALL, col=MUTED)` - always wraps.
+- `wrapped(label, min_w=WRAP_MIN_W)` - makes any Label wrap and gives it a width floor (120 px by default, small enough for the 150 px cards; pass more where a line must stay wide, e.g. the name card's 300). `label` (past 48 characters) and `para` already do. A wrapping Label reports ~0 minimum width, so in a row or card sized by its content it got no room and broke one letter per line (the Name-your-Boki line); EXPAND_FILL only shares spare room, so never rely on it alone. Never set `autowrap_mode` by hand on a label that has no width from its parent: use `wrapped`. `--name-card-check` fails if a wrapping Label on the name card is under 200 px or breaks into a column.
 - `section(text, col)` - a spaced caps eyebrow over a group (pages keep it with what follows). Pink by default; pass a colour only when it means something (GOOD, a temper), never a blend toward grey (--uipolish-check).
 - `kv(key, value, col)` - a muted key on the left, the value on the right.
 
@@ -206,7 +209,10 @@ UI.footer_primary(v, "Buy", buy, 160, "gem")      # primary + Enter keycap; UI.p
 - Prefer `scroll = true` for panels whose content is mostly cards or previews (it only scrolls when
   the window is too short); the paged body suits lists of rows.
 - `confirm(host, head, text, yes_text, on_yes, dangerous=true)` - a small modal over `host` with a
-  warning badge, Cancel and a danger (or primary) button; Esc cancels it.
+  warning badge, Cancel and a danger (or primary) button; Esc or a right click outside cancels it.
+- `PanelClose.attach(panel, close_cb)` - the closing rule for a hand-built card (the Dash's result):
+  Esc and a right click outside call `close_cb` while it's the top panel, and the press is let go of
+  so the match doesn't also cast or fire with it. `--uipolish-check` section 5 drives it.
 - `backdrop()` + `show_backdrop(rect, on)` - the blurred, dimmed layer behind modals
   (`shaders/ui_backdrop.gdshader`).
 - `pop_in(control, delay)` - the open animation. `focus_first(control)` - focus the first button.
@@ -230,6 +236,16 @@ Inventory, Save files, Change your look, I'm stuck, Admin tools, Quit game. More
 panel stack; Back and Esc return to the menu. Labels are one plain line. `--pause-menu-check` holds the
 count (4 or fewer), that every old action is reachable, and the fit inside the title-safe margin at
 720p, 1080p and ultrawide.
+
+## The results screen (DECISIONS 2026-11-08, "UI is too much for a new player")
+The first view is at most four groups plus the way home, tagged `results_group` in `scripts/ui/results.gd`:
+the outcome (title, how you left or placed, placement pay, Heart reward), what you kept (gems, seeds,
+Boki, gear, what stayed in the deathbox), your Boki (level, trust, news) and progress (mastery and Relic
+goals). Empty groups are hidden. The three stat tiles (Hunters downed, Damage, Time), Kills, Damage taken,
+Times downed, Revives and the market notes sit behind More, a button beside Back to the farm that opens them
+and scrolls to them. `--results-five-check` holds the group count (5 or fewer) and that every number and
+reward is still in the screen; `--results-five-shots` takes the four screens (extracted, died, Heart,
+Ways Out) at 1280x720.
 
 ## Admin tools and the Test Zone (owner only)
 Admin tools (`, More > Admin tools, Mod mode, `--god`) open only for a debug build, the web artifact's owner,

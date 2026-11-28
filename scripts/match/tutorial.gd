@@ -10,17 +10,6 @@ extends RefCounted
 ## in when the step starts), a pulse when they stall, a quiet check when a step is done; the marker (beam,
 ## arrow) is here and in the Hud. Nothing but the first intro card ever pauses play.
 
-
-## Steps: content/rules/tutorial.json. Steps a kit can't do are skipped (applies()).
-## Whether your Boki runs ahead for this step (to a pad before a gap, or to the goal).
-static func leads(sid: String) -> bool:
-	return sid in WALK_LEAD or sid in GAP_STEPS
-
-
-static func steps() -> Array:
-	return Content.rules("tutorial")["steps"]
-
-
 const KEYS := {
 	"land": "move",
 	"dash": "dash",
@@ -42,14 +31,23 @@ const KEYS := {
 	"pick_kin": "signature",
 	"pick_ult": "ultimate"
 }
+
 ## Which course stop a finished step leaves you at (a fall puts you back there).
 const STOP_AFTER := {
 	"land": "land", "dash": "dash", "exdash": "exdash", "glide": "glide", "wallkick": "crouch", "glove": "yard"
 }
 const GAP_STEPS := ["dash", "exdash", "glide"]  # leave from the glowing pad on one island, land on the next
+
 ## The steps whose marker is the camp's nearest monster.
 const FOE_STEPS := ["sec", "shoot", "gkey", "summon", "pack", "kin", "hook", "ult"]
 const WALK_LEAD := ["crouch", "glove", "wayout", "uplink", "extract"]
+
+## Gap steps whose sign moves over the landing once you have left the pad (the glide is long: the pad you left
+## is soon off a 1280x720 screen, so the sign goes where you are headed and says so).
+const LAND_SIGN := {"glide": "LAND HERE"}
+const SIGN_RISE := 2.6  # m: a pad sign stands this far over its spot
+const PAD_LEFT_R := 1.5  # m (flat) from the pad, off the ground: you have taken off
+
 ## The kit key (ArchKit clip lines and card) each step's ability words come from.
 const KIT_KEY := {
 	"pick_sec": "rmb",
@@ -114,10 +112,21 @@ var camps: TutorialCamps
 var sm: TutorialSummon  # the two summon steps, for a Boki that rides as a wisp
 var crouch_t := 0.0
 var rmb_t_prev := 0.0
+var pell: TutorialPell = null  # the guide, by each stop (TutorialPell)
+
 var _course: Dictionary = {}
 var _beams: Array = []
 var _pads: Array = []
-var pell: TutorialPell = null  # the guide, by each stop (TutorialPell)
+
+
+## Steps: content/rules/tutorial.json. Steps a kit can't do are skipped (applies()).
+## Whether your Boki runs ahead for this step (to a pad before a gap, or to the goal).
+static func leads(sid: String) -> bool:
+	return sid in WALK_LEAD or sid in GAP_STEPS
+
+
+static func steps() -> Array:
+	return Content.rules("tutorial")["steps"]
 
 
 func _init(match_node: Match) -> void:
@@ -130,8 +139,8 @@ func _init(match_node: Match) -> void:
 
 # ------------------------------------------------------------------ the course
 ## A course stop's ground position (INF when the stop isn't in the table). key: "at" or "pad".
-func stop(id: String, key := "at") -> Vector3:
-	var s: Dictionary = _course.get(id, {})
+func stop(id_v: String, key := "at") -> Vector3:
+	var s: Dictionary = _course.get(id_v, {})
 	if not s.has(key):
 		return Vector3.INF
 	var q: Array = s[key]
@@ -140,8 +149,8 @@ func stop(id: String, key := "at") -> Vector3:
 
 ## Where a camp's i-th monster stands (the course table's "foes": open ground, clear of every cliff), INF when
 ## the camp has no fixed posts.
-func foe_spot(id: String, i: int) -> Vector3:
-	var posts: Array = _course.get(id, {}).get("foes", [])
+func foe_spot(id_v: String, i: int) -> Vector3:
+	var posts: Array = _course.get(id_v, {}).get("foes", [])
 	if i >= posts.size():
 		return Vector3.INF
 	var q: Array = posts[i]
@@ -150,16 +159,16 @@ func foe_spot(id: String, i: int) -> Vector3:
 
 ## The pads and their glowing edges: built once the world is there.
 func setup() -> void:
-	for id in GAP_STEPS:
-		_add_pad(id)
+	for id_v in GAP_STEPS:
+		_add_pad(id_v)
 	last_stop = stop("land")
 	if NpcModel.has("pell"):
 		pell = TutorialPell.new(self)
 
 
-func _add_pad(id: String) -> void:
-	var pad := stop(id, "pad")
-	var to := stop(id)
+func _add_pad(id_v: String) -> void:
+	var pad := stop(id_v, "pad")
+	var to := stop(id_v)
 	if pad == Vector3.INF:
 		return
 	var mat := StandardMaterial3D.new()
@@ -188,15 +197,16 @@ func _add_pad(id: String) -> void:
 	bar.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	m.add_child(bar)
 	var lab := Label3D.new()
-	lab.text = {"dash": "DASH HERE", "exdash": "JUMP HERE", "glide": "JUMP HERE"}[id]
+	lab.text = {"dash": "DASH HERE", "exdash": "JUMP HERE", "glide": "JUMP HERE"}[id_v]
 	lab.font_size = 96
 	lab.pixel_size = 0.012
 	lab.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	lab.modulate = MINT
 	lab.no_depth_test = true
-	lab.position = pad + Vector3(0, 2.6, 0)
+	lab.position = pad + Vector3(0, SIGN_RISE, 0)
 	m.add_child(lab)
-	_pads.append({"id": id, "disc": disc, "bar": bar, "label": lab})
+	_pads.append({"id": id_v, "disc": disc, "bar": bar, "label": lab, "text": lab.text})
+
 
 ## The sign over a gap step's pad (null for a step without one).
 func pad_sign(sid: String) -> Label3D:
@@ -204,6 +214,20 @@ func pad_sign(sid: String) -> Label3D:
 		if pd["id"] == sid:
 			return pd["label"]
 	return null
+
+
+## The ground spot a gap step's sign stands over (INF for a step without one): the pad, or the landing once
+## you have taken off on a LAND_SIGN step.
+func sign_spot(sid: String) -> Vector3:
+	var lab := pad_sign(sid)
+	return Vector3.INF if lab == null else lab.position - Vector3(0, SIGN_RISE, 0)
+
+
+## Whether the player has left this gap step's pad: off the ground, past its rim.
+func _off_pad(sid: String) -> bool:
+	var p := m.player
+	return p != null and not p.grounded and _dist(stop(sid, "pad")) > PAD_LEFT_R
+
 
 # ------------------------------------------------------------------ each step
 func id() -> String:
@@ -246,7 +270,7 @@ func update(dt: float) -> void:
 	if m.hud:
 		m.hud.msgs.hold = card_up()  # messages wait while the banner is up
 	var sid := id()
-	camps.update()
+	camps.update(dt)
 	var done := _is_done(sid, dt)
 	_quicken(p, dt)
 	if got != got_seen:
@@ -284,10 +308,15 @@ func _finish(sid: String) -> void:
 	while step < steps().size() and not applies(id()):
 		step += 1
 	flag = false
-	wait = 0.6
-	done_t = DONE_T
-	m.sfx("unlock", null, -9.0)
+	m.player.stats.erase("glide_presses")
+	if not TutorialHints.quiet(sid):
+		wait = 0.6
+		done_t = DONE_T
+		m.sfx("unlock", null, -9.0)
+	elif TutorialHints.settles(sid):
+		wait = 0.6  # (the Boki gets its lead on the next leg: no banner, no sting, only the pause)
 	if resumed:
+		camps.told = true  # (a resumed run saw the first camp's countdown: its camps come at once)
 		_restore()
 	_enter()
 
@@ -372,6 +401,7 @@ func retry() -> void:
 	_back()
 	_enter()
 	if m.hud:
+		m.hud.msgs.clear()  # (a hint step does not clear the lane when it starts: the retry line leads)
 		m.hud.toast(retry_tip(), MINT)
 
 
@@ -389,13 +419,15 @@ func _back() -> void:
 func _enter() -> void:
 	var p := m.player
 	var sid := id()
+	var quiet: bool = TutorialHints.quiet(sid)
 	t = 0.0
-	card_t = 0.0
-	TutorialStrip.chime(m)
-	m.bubbles.clear()  # one voice at a time: the old step's lines go, the banner has the floor
-	if m.hud:
-		m.hud.msgs.clear()
-		m.hud.msgs.hold = true
+	card_t = CARD_T if quiet else 0.0  # (a hint step has no banner, so nothing waits for it)
+	if not quiet:
+		TutorialStrip.chime(m)
+		m.bubbles.clear()  # one voice at a time: the old step's lines go, the banner has the floor
+		if m.hud:
+			m.hud.msgs.clear()
+			m.hud.msgs.hold = true
 	stall_t = 0.0
 	nag_t = 0.0
 	flash_t = 0.0
@@ -416,6 +448,7 @@ func _enter() -> void:
 	var slot := TutorialCamps.pick_slot(sid)
 	if slot != "":
 		camps.reach(int(TutorialCamps.PICK_LVL[slot]))  # (its point is always there to spend)
+		TutorialHints.auto_pick(self, sid)
 	match sid:
 		"sec", "gkey", "summon", "pack", "kin", "hook", "ult":
 			camps.spawn(sid)
@@ -435,7 +468,9 @@ func _enter() -> void:
 		p.gear[0] = {"id": "grapple", "rar": 1}  # (skipped ahead past the glove: it is yours anyway)
 		p.refresh_gear()
 	_words()
-	if detail != "" and m.hud:
+	if quiet:
+		TutorialHints.say(self)
+	elif detail != "" and m.hud:
 		m.hud.tip(detail)  # (once a step: the strip is one line, the plain words wait in the message lane)
 
 
@@ -479,7 +514,7 @@ func _is_done(sid: String, dt: float) -> bool:
 		"land":
 			return not p.dropping
 		"points":
-			return t >= POINTS_T or int(p.slot_lv["sec"]) > 0
+			return TutorialHints.quiet(sid) or t >= POINTS_T or int(p.slot_lv["sec"]) > 0
 		"sec":
 			var cast := _rmb_done()
 			if cast:
@@ -506,7 +541,7 @@ func _is_done(sid: String, dt: float) -> bool:
 			return flag and near.call(5.0)
 		"wallkick":
 			seen["kick"] = seen.get("kick", false) or int(p.stats.get("wall_kicks", 0)) > kicks0
-			return on_lookout()
+			return seen["kick"] and on_lookout()  # (a jump and a ledge catch can climb it too: that does not count)
 		"crouch":
 			if p.crouch and on_lookout():
 				crouch_t += dt
@@ -543,7 +578,7 @@ func _is_done(sid: String, dt: float) -> bool:
 			seen["ult"] = seen.get("ult", false) or flag
 			return _camp_done(sid)
 		"ranks":
-			return p.skill_pts <= 0 or t >= RANK_WAIT_T
+			return TutorialHints.quiet(sid) or p.skill_pts <= 0 or t >= RANK_WAIT_T
 		"wayout":
 			var o := outpost()
 			return not o.is_empty() and m.exits.in_yard(o, p)
@@ -572,8 +607,10 @@ func _boki_sent() -> bool:
 	if k == null or k.state == "downed" or k.st_throws > throws0:
 		return true
 	for e: Dictionary in camps.ledger:
+		if not is_instance_valid(e["mb"]):
+			continue
 		var mb: Mob = e["mb"]
-		if not is_instance_valid(mb) or mb.dead:
+		if mb.dead:
 			continue
 		if k.target == mb or mb.tgt == k:
 			return true
@@ -582,7 +619,7 @@ func _boki_sent() -> bool:
 	return false
 
 
-## Standing on the lookout's top (the wall kick's goal and the scouting spot).
+## Standing on the lookout's top (the wall kick step ends here after a kick, and the scouting spot).
 func on_lookout() -> bool:
 	var p := m.player
 	return p.grounded and _dist(stop("crouch")) < LOOKOUT_R and p.pos.y > stop("crouch").y - LOOKOUT_DROP
@@ -644,7 +681,9 @@ func goal(sid: String) -> Vector3:
 			var best := camps.nearest("sentinel" if sid == "hook" else "")
 			if best == null:
 				best = camps.nearest()
-			return best.pos if best else Vector3.INF
+			if best == null and not camps.coming.is_empty():
+				return camps.coming["at"]  # (the telegraphed camp: the marker holds on its ring)
+			return best.pos if best else camps.last_at  # (a camp felled with you on the edge respawns once you're back)
 		"wayout", "uplink", "defend", "extract":
 			var o := outpost()
 			return o["pos"] if not o.is_empty() else Vector3.INF
@@ -693,6 +732,8 @@ func _stall(dt: float) -> void:
 		best_d = 1e9 if target == Vector3.INF else _dist(target)
 		nag_t = 2.5
 		flash_t = 2.5
+		if TutorialHints.quiet(id()):
+			TutorialHints.say(self, true)  # (stuck on a hint step: say its line again)
 		if m.player.kin and m.player.kin.comp:
 			m.player.kin.comp.nag()
 
@@ -716,7 +757,12 @@ func _props() -> void:
 	for pd in _pads:
 		var on: bool = pd["id"] == id()
 		(pd["disc"] as Node3D).scale = Vector3.ONE * (pulse if on else 1.0)
-		(pd["label"] as Node3D).visible = on
+		var lab: Label3D = pd["label"]
+		lab.visible = on
+		if on and LAND_SIGN.has(pd["id"]):
+			var land: bool = _off_pad(pd["id"])
+			lab.text = String(LAND_SIGN[pd["id"]]) if land else String(pd["text"])
+			lab.position = stop(pd["id"], "at" if land else "pad") + Vector3(0, SIGN_RISE, 0)
 
 
 ## Beams standing in the world right now (--tutorial-idle-check).
@@ -756,6 +802,8 @@ func _words() -> void:
 		line = String(alt["sec_hold"])
 	elif sid in ["summon", "pack"] and sm.alt_key(sid) != "":
 		line = String(alt[sm.alt_key(sid)])
+	if TutorialHints.line(sid) != "":
+		line = TutorialHints.line(sid)
 	key_cap = ""
 	if sid == "land":
 		key_cap = _wasd()

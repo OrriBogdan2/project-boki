@@ -1,5 +1,5 @@
 extends RefCounted
-## --prematch-check: the pre-match lobby (Prematch, PrematchView, docs/decisions/0019-prematch-lobby.md).
+## --prematch-check: the pre-match lobby (Prematch, PrematchView, docs/decisions/0106-prematch-lobby.md).
 ## Turns: offline you pick first, then bot mates instantly, each squad's Hunters unique, a run-out turn
 ## gets a random untaken one, then the lock; online picking waits for the whole lobby to load, teammates'
 ## picks only count on their turn, a lost or gone teammate is picked for. Also the admin toggle (Settings
@@ -252,6 +252,7 @@ func _screen(main: Node) -> void:
 	ok(view.timer_label.get_theme_color("font_color") != ink, "the last seconds of your turn turn the digits red")
 	view.pm.turn_left = Prematch.TURN
 	view._tick_label()
+	_ticks(view)
 	var shots := ""
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="): shots = a.substr(12)
@@ -279,13 +280,40 @@ func _screen(main: Node) -> void:
 	ok(staged, "your pick stands on the stage beside the grid, striking its lock-in pose")
 	var fits: Array = load("res://tools/prematch_shots.gd").new().outside(view, Rect2(Vector2.ZERO, view.size))
 	ok(fits.is_empty(), "with the stage up every element still sits inside the safe margin (%s)" % [fits.slice(0, 2)])
+	view.pm.squad[1]["bot"] = false      # a human mate picks next: your turn ends and the screen says what locked in
 	view.pm.tick(Prematch.TURN + 0.01)
+	view._tick_label()
+	var said: String = view.note_label.text
+	ok(said.begins_with("Time's up: ") and said.contains(HunterViewer.display_name("bulwark")),
+			"your turn ends while the squad still picks: the note says your Hunter locked in (%s)" % said)
+	view.pm.tick(Prematch.TURN + Prematch.GRACE + 0.01)      # (the mate's pick never arrives: picked for)
 	view._tick_label()
 	ok(view.pm.locked and view.caption.text == "PICKS LOCKED", "once the squad has picked the banner says so")
 	var note: String = view.note_label.text
 	ok(note.contains("locked in") and note.contains(HunterViewer.display_name("bulwark")), "the note names the pick")
 	view.set_process(false)
 	view.queue_free()
+
+## The countdown ticks (a click, once a second) from TICK_FROM on your own turn only, and throbs below PULSE_FROM.
+func _ticks(view: Control) -> void:
+	Sfx.cue_log = []
+	var ticks := func(left: float) -> int:
+		view.pm.turn_left = left
+		view._tick_label()
+		return Sfx.cue_log.filter(func(c): return c[0] == "click").size()
+	ok(ticks.call(view.TICK_FROM + 1.5) == 0, "no tick above %d s left" % int(view.TICK_FROM))
+	ok(is_equal_approx(view.timer_label.scale.x, 1.0), "the digits hold still above %d s left" % int(view.PULSE_FROM))
+	ok(ticks.call(view.TICK_FROM - 0.5) == 1, "the first tick at %d s left" % int(view.TICK_FROM))
+	ok(ticks.call(view.TICK_FROM - 0.6) == 1, "no second tick inside the same second")
+	ok(ticks.call(view.TICK_FROM - 1.5) == 2, "one tick each second after")
+	ok(view.PULSE_FROM >= 5.0, "the throb covers the last 5 s")
+	ticks.call(view.PULSE_FROM - 0.5)
+	ok(view.timer_label.get_theme_color("font_color") != UI.INK, "the digits are red in the throb")
+	var swell: float = view.timer_label.scale.x
+	ok(swell <= 1.0 + view.PULSE_GROW + 0.001, "the throb swells the digits by at most %.2f" % view.PULSE_GROW)
+	Sfx.cue_log = null
+	view.pm.turn_left = Prematch.TURN
+	view._tick_label()
 
 ## One how-to block beside the title, not one per card (13 cards keep 3 rows at 720): it shows your pick's
 ## three lines, the hovered card's while the mouse is on it, and your pick's again after.

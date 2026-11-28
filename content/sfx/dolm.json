@@ -4,6 +4,11 @@
  "script": "tools/gen_sfx_tarek.py",
  "sounds": {
   "dolm_hit": "impact",
+  "dolm_hit_rock": "impact",
+  "dolm_hit_rmb": "impact",
+  "dolm_hit_dash": "impact",
+  "dolm_hit_r": "impact",
+  "br_boulder_fly": "loop",
   "br_throw": "fire",
   "br_boulder_hit": "impact",
   "br_wind": "cast",
@@ -11,6 +16,8 @@
   "dolm_rock_crunch": "signature",
   "br_launch": "cast",
   "br_burst": "impact",
+  "br_rock_fly": "loop",
+  "br_throw_tail": "cast",
   "br_sense": "cast",
   "dolm_dash": "dash",
   "br_rise": "cast",
@@ -31,5 +38,13 @@
  "kit_files": ["breah_slam.gd", "breah_spine.gd"],
  "signature": ["dolm_rock_crunch"],
  "replaces": ["br_throw", "br_boulder_hit", "br_wind", "br_punch", "br_launch", "br_burst", "br_sense", "br_rise",
-  "br_leap", "br_slam", "br_shove", "br_roll", "br_crack", "br_raise"]
+  "br_leap", "br_slam", "br_shove", "br_roll", "br_crack", "br_raise"],
+ "loops": ["br_boulder_fly", "br_rock_fly"],
+ "bar": {
+  "lmb": {"ab": "lmb", "cast": "br_throw", "travel": "br_boulder_fly", "hit": "dolm_hit", "end": "br_boulder_hit"},
+  "rmb": {"ab": "rmb", "cast": "br_shove", "travel": "br_leap", "hit": "dolm_hit_rmb", "end": "br_slam"},
+  "e": {"ab": "rock", "cast": "br_crack", "travel": "br_rock_fly", "hit": "dolm_hit_rock", "end": "br_burst"},
+  "shift": {"ab": "dash", "cast": "dolm_dash", "travel": "br_rise", "hit": "dolm_hit_dash", "end": "br_roll"},
+  "r": {"ab": "x", "cast": "br_raise", "travel": "br_rumble", "hit": "dolm_hit_r", "end": "br_slam"}
+ }
 }

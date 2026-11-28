@@ -271,7 +271,7 @@ func _send_presence(d: float) -> void:
 		return
 	var ak := Save.active_kin()
 	js.hubPresence(JSON.stringify({"n": String(Save.d.get("name", "Hunter")).substr(0, 16), "h": Data.class_of_save(),
-		"x": snappedf(ppos.x, 0.01), "z": snappedf(ppos.z, 0.01), "f": snappedf(pface, 0.01), "k": ak.get("species", "")}))
+		"a": Arch.of_save(), "x": snappedf(ppos.x, 0.01), "z": snappedf(ppos.z, 0.01), "f": snappedf(pface, 0.01), "k": ak.get("species", "")}))
 
 func _on_peers(arr: Array) -> void:
 	var seen := {}
@@ -286,7 +286,8 @@ func _on_peers(arr: Array) -> void:
 		if not others.has(id):
 			var ocl := Social.txt_of(p.get("h"), "medium")
 			if not Data.CLASSES.has(ocl): ocl = "medium"
-			var n := Models.hunter(ocl, Data.TEAM_COLORS[1 + others.size() % 5], Data.CLASSES[ocl]["weapon"], "")
+			var oa := Arch.fix(Social.txt_of(p.get("a")), ocl)  # older clients send no "a": the class's default Hunter
+			var n := Models.hunter(ocl, Data.TEAM_COLORS[1 + others.size() % 5], Arch.signature(oa), "", {}, oa)
 			add_child(n)
 			var lbl := Label3D.new()
 			lbl.font = UI.big; lbl.font_size = 40; lbl.pixel_size = 0.01; lbl.outline_size = 10
@@ -416,9 +417,8 @@ func _find_interact() -> void:
 	prompt_box.position = Vector2((vp.x - prompt_box.size.x) * 0.5, vp.y - 110.0)
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("menu") and not Overlay.is_open():
-		if panel_open != "": _close_panel()
-		else: Overlay.open_pause("town")
+	if event.is_action_pressed("menu") and not Overlay.is_open():      # (an open panel takes Esc first: PanelClose)
+		Overlay.open_pause("town")
 	if event is InputEventMouseButton and event.pressed and panel_open == "":
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP: cam.zoom_to = clampf(cam.zoom_to - 0.08, 0.55, 1.5)
 		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN: cam.zoom_to = clampf(cam.zoom_to + 0.08, 0.55, 1.5)
@@ -638,11 +638,11 @@ func _open_guilds() -> void:
 		var hb := UI.hbox(8)
 		var gid0 := Social.my_guild_id()
 		hb.add_child(UI.button("Go to the guild isle", func(): Game.goto("town", {"mode": "guild", "gid": gid0}), 240))
-		hb.add_child(UI.button("Leave the guild", func():
+		hb.add_child(UI.sounding(UI.button("Leave the guild", func():
 			_lock()
 			Social.leave_guild(func():
 				_toast("You left the guild")
-				if panel_open == "Guild registry": _open_guilds()), 200))
+				if panel_open == "Guild registry": _open_guilds()), 200), "ui_clan_leave"))
 		if String(Social.guild.get("founder", "")) == Social.me:
 			var open_now: bool = Social.guild.get("open", true)
 			hb.add_child(UI.button("Open to anyone" if not open_now else "Close to newcomers", func():
@@ -660,20 +660,24 @@ func _open_guilds() -> void:
 		tg.max_length = int(ClanInfo.rules()["max"])
 		tg.custom_minimum_size.x = 70
 		row.add_child(nm); row.add_child(tg); row.add_child(mo)
-		row.add_child(UI.button("Found it", func():
+		row.add_child(UI.sounding(UI.button("Found it", func():
 			if nm.text.strip_edges().length() < 3:
+				Sfx.play("ui_deny")
 				_toast("Pick a name of at least 3 letters")
 				return
 			if tg.text.strip_edges() != "" and ClanInfo.clean_tag(tg.text.strip_edges()) == "":
+				Sfx.play("ui_deny")
 				_toast("A tag is 2 to 4 letters, A to Z (some words are kept out)")
 				return
 			_lock()
 			var gname := Social.say_of(nm.text, "Guild", 24)
 			Social.create_guild(gname, mo.text, tg.text.strip_edges(), func(okk: bool):
 				if okk:
-					Sfx.play("unlock")
+					Sfx.play("ui_clan_found")
 					_toast("%s is founded" % gname)
-				if panel_open == "Guild registry": _open_guilds()), 120))
+				else:
+					Sfx.play("ui_deny")
+				if panel_open == "Guild registry": _open_guilds()), 120), ""))
 		v.add_child(row)
 	v.add_child(UI.section("Guilds"))
 	var list := _loading(v)
@@ -692,13 +696,13 @@ func _open_guilds() -> void:
 			var rid: String = r["id"]
 			row.add_child(UI.button("Visit", func(): Game.goto("town", {"mode": "guild", "gid": rid}), 90))
 			if Social.guild.is_empty() and g["open"]:
-				row.add_child(UI.button("Join", func():
+				row.add_child(UI.sounding(UI.button("Join", func():
 					_lock()
 					Social.join_guild(rid, func(okk: bool):
 						if okk:      # refused: the overlay says why (Social.clan_removed)
-							Sfx.play("unlock")
+							Sfx.play("ui_clan_join")
 							_toast("Welcome to %s" % g["name"])
-						if panel_open == "Guild registry": _open_guilds()), 90)))
+						if panel_open == "Guild registry": _open_guilds()), 90), "")))
 
 ## Who is in this clan and what rank they hold. Members who joined before ranks existed show the guild doc's
 ## rank (and the last deed of each, from their island snapshot); removed members don't show. In your own clan, the rank buttons sit on each row you may act on.

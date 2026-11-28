@@ -33,7 +33,7 @@ func run(m_main: Node) -> void:
 
 ## Steps the match and poses the player by hand (the match's own frames are off, so the time is exact).
 func _step(m: Match, secs: float, watch: Callable = Callable()) -> void:
-	var sync := m.player.model.get_node("Warden/Sync")
+	var sync := WardenGlb.layers(m.player.model)      # (Sync, or Native on Meshy's own skeleton: WardenNative)
 	sync.set_process(false)
 	for i in int(secs / Match.DT):
 		m.step(Match.DT)
@@ -43,9 +43,15 @@ func _step(m: Match, secs: float, watch: Callable = Callable()) -> void:
 			watch.call()
 		await main.get_tree().process_frame
 
-func _clips(h: Hunter) -> WardenClips:
-	var sync := h.model.get_node_or_null("Warden/Sync")
-	return sync.get("clips") if sync != null else null
+## What carries the Heartspark layer's weight (heart_w): the Hero's clips (WardenClips), or on Meshy's own skeleton the
+## Native node (WardenNative plays Meshy's clips and lays the same layer on its bones); null without clips.
+func _clips(h: Hunter) -> Object:
+	var sync := WardenGlb.layers(h.model)
+	if sync == null:
+		return null
+	if sync.get("clips") != null:
+		return sync.get("clips")
+	return sync if sync.get("plays") != null else null
 
 func _hero(id: String) -> void:
 	var m := Match.new()
@@ -64,6 +70,8 @@ func _hero(id: String) -> void:
 		m.queue_free()
 		return
 	P.inp["move"] = Vector2(0, -1)
+	P.inp["aim"] = P.pos + Vector3(0, 0.9, -10.0)      # (face the way he runs: the stride is read along z)
+	P.inp["aim_y"] = P.pos.y
 	var sk := WardenGlb.skeleton(P.model.get_node("Warden"))
 	var shin := WardenSkeleton.find(sk, "shin.R")
 	var hips := WardenSkeleton.find(sk, "hips")
@@ -80,12 +88,14 @@ func _hero(id: String) -> void:
 	_take(H, P)
 	await _step(m, SETTLE_S, watch)
 	var mote: Vector3 = P.model.get_meta(WardenCarry.MOTE, Vector3.INF)
-	ok(clips.heart_w >= 1.0 and mote != Vector3.INF, "%s: the carrier shows the layer and a held mote" % id)
+	ok(float(clips.get("heart_w")) >= 1.0 and mote != Vector3.INF,
+			"%s: the carrier shows the layer and a held mote" % id)
 	var side := String(WardenClips.data(OWN_MODELS[id]).get("heart_hand", "L"))
 	var hand := sk.global_transform * sk.get_bone_global_pose(WardenSkeleton.find(sk, "hand." + side)).origin
 	ok(hand.distance_to(mote) <= HAND_NEAR * 1.6 * absf(P.model.scale.y), "%s: the %s hand holds the mote (%.2f m)"
 			% [id, side, hand.distance_to(mote)])
-	ok(clips.proc_w <= 0.0 and (plain < STRIDE_MIN or z[1] - z[0] >= 0.75 * plain),
+	var rig_w: float = clips.get("proc_w") if clips.get("proc_w") != null else 0.0      # (Meshy's clips: no rig mix)
+	ok(rig_w <= 0.0 and (plain < STRIDE_MIN or z[1] - z[0] >= 0.75 * plain),
 			"%s: the legs play the run under it (%.2f m of stride, %.2f m without)" % [id, z[1] - z[0], plain])
 	var spark: Node3D = H._spark
 	ok(spark.position.distance_to(mote) < SPARK_LAG and spark.scale.x < 0.5, "%s: the Heartspark rides the hand" % id)
@@ -101,7 +111,7 @@ func _hero(id: String) -> void:
 		_take(H, P)
 		_end_kit_move(P)
 		await _step(m, SETTLE_S)
-		ok(clips.heart_w >= 1.0, "%s: carrying again (%s)" % [id, how])
+		ok(float(clips.get("heart_w")) >= 1.0, "%s: carrying again (%s)" % [id, how])
 		match how:
 			"hand-off":
 				H._drop(P.pos)
@@ -112,8 +122,8 @@ func _hero(id: String) -> void:
 				P.downed = false
 				P.extracted = true
 		await _step(m, SETTLE_S)
-		ok(clips.heart_w <= 0.0 and not P.model.has_meta(WardenCarry.MOTE),
-				"%s: the layer drops cleanly on %s (weight %.2f)" % [id, how, clips.heart_w])
+		ok(float(clips.get("heart_w")) <= 0.0 and not P.model.has_meta(WardenCarry.MOTE),
+				"%s: the layer drops cleanly on %s (weight %.2f)" % [id, how, float(clips.get("heart_w"))])
 		P.downed = false
 		P.extracted = false
 		P.out = false

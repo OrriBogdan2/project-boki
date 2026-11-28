@@ -41,6 +41,8 @@ func run(m: Node) -> void:
 	Save.no_write = true
 	seed(11)
 	Save.d = Save.fresh()
+	var was_base: bool = FarmUnlocks.base_mode()
+	FarmUnlocks.rules()["base_mode"] = false      # base_mode is the default now; the pace model is the old-farm rules
 	var grown := _raising_min()      # the pace model's own conditions, before the base is built
 	FarmUnlocks.rules()["base_mode"] = true
 	await _start()
@@ -56,11 +58,29 @@ func run(m: Node) -> void:
 	print("BREED gate first egg laid: %.0f min; baby out: %.0f min (limit %.0f)" % [maxf(grown, friends), total, limit])
 	_over("the baby", total, limit)
 	ok(int(Save.d["matches"]) == 0, "no match was entered (matches %d)" % int(Save.d["matches"]))
-	FarmUnlocks.rules()["base_mode"] = false
+	FarmUnlocks.rules()["base_mode"] = was_base
 	home.queue_free()
 	await main.get_tree().process_frame
 	print("BREED DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## The baby's hatch card and Family tab name the parent each inherited trait came from, one short line each.
+func _parent_lines(baby: Dictionary) -> void:
+	var lines := HatchParents.lines(baby)
+	var ends := [" from Pip", " from Moss", " from both parents"]
+	var named := lines.filter(func(l): return ends.any(func(e): return String(l).ends_with(e)))
+	var all_named: bool = lines.size() >= 5 and named.size() == lines.size()
+	ok(all_named, "every inherited trait has a line naming its parent (%s)" % "; ".join(lines))
+	ok(lines.has("Ember lean from Pip"), "the lean line reads 'Ember lean from Pip'")
+	var tab := VBoxContainer.new()
+	var grand := VBoxContainer.new()
+	FamilyView.fill(baby, tab, grand, main.get_tree(), func(_k): pass)
+	var shown := tab.find_children("*", "Label", true, false).map(func(l): return (l as Label).text)
+	ok(lines.all(func(l): return shown.has(l)), "the Boki card's Family tab lists the same lines")
+	var old := Save.new_kin("burrlet", "Old")
+	ok(HatchParents.lines(old).is_empty(), "an old save with no gifts gets no lines and no error")
+	tab.free()
+	grand.free()
 
 ## A gate that takes longer than the play sessions a base-only player is given is reported, not failed.
 func _over(gate: String, minutes: float, limit: float) -> void:
@@ -179,8 +199,10 @@ func _egg() -> float:
 	Save.d["egg"]["t"] = Time.get_unix_time_from_system() - 1.0
 	ok(home._egg_ready(), "the egg is ready after its %.0f minutes at home" % wait)
 	var kin: int = Save.d["roster"].size()
+	pip["lean"] = {"ember": 6.0}      # a lean for the baby to take, so its card has a lean line
 	home._hatch_nest_egg()
 	var born: bool = Save.d["roster"].size() == kin + 1 and int(Save.d["stats"].get("hatched", 0)) >= 1
 	ok(born, "the egg hatches into a baby")
+	_parent_lines(Save.d["roster"][-1])
 	ok(NookRules.can_pair(pip) != "", "a parent rests after laying (%s)" % NookRules.can_pair(pip))
 	return wait

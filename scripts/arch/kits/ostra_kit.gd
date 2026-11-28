@@ -20,6 +20,8 @@ const ORB_FULL_COL := Color("d8fff6")      # the orb's shot colour at full charg
 const GLOW_COL := Color("2ee6c0")          # the charge glow at his hand, starting...
 const GLOW_FULL_COL := HOT                  # ...and at full charge
 const GLOW_SIZE := Vector2(0.4, 1.25)      # the glow's scale (a mote is 0.4m wide at 1), starting and at full
+const CARD_DRAW := Vector2(0.12, 0.1)      # s: the next card shows in his hand this long after a throw, then
+                                           # grows in over this long
 const TRADE_COL := TEAL                    # the Trade's own end and aim (the dash slot's col, his pale teal)
 const TRADE_EDGE := SEA                    # its edge (the landing end) in his signature colour (VFX_QUALITY)
 const TRADE_LOOK_K := 1.65    # the Trade's lantern, times its old size (visual only:
@@ -86,7 +88,6 @@ func lock_left() -> float: return well.lock_left()
 func can_shoot() -> bool: return not well.locked and super.can_shoot()
 
 func res_text() -> String: return "SWOLLEN" if is_swollen() else "%d" % int(res)
-func ready_label() -> String: return "SWOLLEN" if is_swollen() else ""
 func e_recastable() -> bool: return not seed.is_empty()
 ## RecastCue: "WAIT" on the E slot through the 0.3s minimum (a press there is buffered).
 ## No world marker (the owner wants less pop-up UI): the seed's own ring and the E slot carry it.
@@ -209,6 +210,7 @@ func _tick_weapon() -> void:
 		shot_seen = h.shot_n
 		_orb_fired()
 	_set_charge(wait_charge())
+	_hold_card()
 	if charge > 0.0 and snap.is_empty():
 		var col := GLOW_COL.lerp(GLOW_FULL_COL, charge)
 		# (on his actual hand, where the 3D model holds its orb: at a fixed point in front of him the match
@@ -218,12 +220,22 @@ func _tick_weapon() -> void:
 		if charge >= KitLooks.ORB_HELD_K:      # the void orb is ready: teal motes and smoke drawn into his hand
 			HeroVfx.of(m).hold(h, "orb_ready", charge)
 
+## The next card in his hand: a fresh one is drawn just after each throw and held until the charge turns
+## the next shot into the void orb (from then the void motes gather in his hand instead).
+func _hold_card() -> void:
+	var since := float(m.time) - last_shot_t - CARD_DRAW.x
+	if since < 0.0 or charge >= KitLooks.ORB_HELD_K or not snap.is_empty():
+		KitLooks.of(m).release("os_card")
+		return
+	KitLooks.of(m).hold_on("os_card", "card", h, hand_pos(true), clampf(since / CARD_DRAW.y, 0.05, 1.0))
+
 ## A downed or eliminated Hunter is a Wisp: no charge, no motes, no aura. The wait starts over on revive.
 func _is_wisp() -> bool:
 	return h.downed or h.out or h.dead or h.gone
 
 func _go_dark() -> void:
 	KitLooks.of(m).release("os_charge")
+	KitLooks.of(m).release("os_card")
 	KitLooks.of(m).release("os_aura")
 	last_shot_t = m.time
 	if charge > 0.0:
@@ -245,7 +257,9 @@ func _set_charge(k: float) -> void:
 	elif k == charge:
 		return
 	var ld := lmb_def()
-	var shot_x: Dictionary = (base_wpn["shot_x"] as Dictionary).duplicate()
+	var shot_x: Dictionary = (base_wpn.get("shot_x", {}) as Dictionary).duplicate()
+	if k >= KitLooks.ORB_HELD_K:      # owner 11-26: only the void orb passes walls; a card stops at them
+		shot_x["pierce_terrain"] = true
 	if k >= 1.0:
 		shot_x["slow"] = float(ld["prime_slow_t"])
 		shot_x["slow_k"] = float(ld["prime_slow"])
@@ -272,6 +286,7 @@ func _orb_fired() -> void:
 	last_orb_c = charge
 	last_orb_r = float(h.wpn["size"])
 	KitLooks.of(m).release("os_charge")
+	KitLooks.of(m).release("os_card")
 	HeroVfx.of(m).trail(h, "orb_trail", KitLooks.of(m).skin_orb(h, charge, orb_size_k(charge)))
 	var held_orb := charge >= KitLooks.ORB_HELD_K
 	play("ostra_orb_hot" if held_orb else "ostra_orb")
@@ -504,7 +519,7 @@ func fire_rmb(c: Dictionary) -> void:
 	var wind := float(rmb_def()["snap"]["wind"])
 	snap = {"t": wind, "T": wind}
 	play("ostra_snap_wind")
-	m.sfx("os_snap_wind", h.pos, -5.0, 1.0)
+	KitWindup.play(self, "rmb", "os_snap_wind", -5.0)
 
 func _tick_snap(dt: float) -> void:
 	snap["t"] = float(snap["t"]) - dt
@@ -512,6 +527,7 @@ func _tick_snap(dt: float) -> void:
 	KitLooks.of(m).hold_on("os_snaporb", "dark", h, _hand(), lerpf(0.5, 1.3, grown))
 	if h.downed or h.stun_t > 0.0:
 		snap = {}
+		KitWindup.broken(self, "rmb")
 		return
 	if float(snap["t"]) <= 0.0:
 		snap = {}
@@ -528,13 +544,12 @@ func _snap_release() -> void:
 	var start := Vector3(h.pos.x + dir.x * 0.6, h.pos.y + 0.95 * float(h.cdat["scale"]), h.pos.z + dir.y * 0.6)
 	var spd := float(sn["speed"])
 	var rng := AimMode.dist(h, float(sn["range"]), AimMode.MAX)
-	m.spawn_shot(
-		h, start, dir * spd, float(sn["dmg"]) * k, rng / spd, float(sn["size"]), SEA,
-		{"kb": 1.0, "tracer": 0.2, "src": "abil", "ab": "rmb", "kx": func(s, at, e, _why): _snap_hit(s, at, e)}
-	)
+	var extra := {"kb": 1.0, "tracer": 0.2, "src": "abil", "ab": "rmb", "kx": func(s, at, e, _why): _snap_hit(s, at, e)}
+	ShotOrigin.draw_from(extra, h, "rmb")      # out of her orb hand
+	m.spawn_shot(h, start, dir * spd, float(sn["dmg"]) * k, rng / spd, float(sn["size"]), SEA, extra)
 	HeroVfx.of(m).trail(h, "snap_trail", KitLooks.of(m).skin(m.shots[-1], "spear"))
 	_boost(float(sn["boost"]["cast"]))
-	vfx("snap_cast", start, dir)
+	vfx("snap_cast", extra.get("hand", start), dir)
 	AimKit.hide(h, "snap")
 
 ## The bundle stuns the first foe it hits, from 0.8s up to 1.8s the further it flew. The stun reads on

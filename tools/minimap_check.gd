@@ -10,7 +10,12 @@ extends RefCounted
 ## Never touches the save.
 
 const EXPECT_DEFAULT := ["you", "squad", "boki", "exit", "blight", "ping"]
-const GATED_FILES := ["res://scripts/ui/hud.gd", "res://scripts/ui/revive_hud.gd", "res://scripts/ui/nest_map.gd"]
+const GATED_FILES := [
+	"res://scripts/ui/hud.gd",
+	"res://scripts/ui/revive_hud.gd",
+	"res://scripts/ui/nest_map.gd",
+	"res://scripts/ui/map_marks.gd",
+]
 
 var bad := 0
 
@@ -23,8 +28,8 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	_kinds()
 	_source()
-	await _match(main)
-	await _zone(main)
+	_match(main)
+	_zone(main)
 	print("MINIMAP CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -63,7 +68,7 @@ func _source() -> void:
 func _match(main: Node) -> void:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
+	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true})
 	m.set_process(false)
 	var near := MapDetail.nearest_exit(m)
 	ok(not near.is_empty() and MapDetail.exit_matters(m, near), "the nearest exit matters")
@@ -76,7 +81,20 @@ func _match(main: Node) -> void:
 		ok(not MapDetail.lair_matters(m, L), "a dormant lair waits for a hold")
 		L["state"] = "awake"
 		ok(MapDetail.lair_matters(m, L), "an awake lair shows by itself")
+	_things(m)
 	_key(m)
+
+## Camps, shops, chests, shrines and pads: one registry, one colour per category, each live kind in the key.
+func _things(m: Match) -> void:
+	var rows := MapMarks.rows(m)
+	var cat_ok: bool = rows.all(func(r): return r["id"] in MapMarks.CAT)
+	ok(not rows.is_empty() and cat_ok, "things: %d rows, each with a category" % rows.size())
+	var cats := [MapMarks.ENEMY, MapMarks.LOOT, MapMarks.TRAVEL, MapMarks.OBJECTIVE]
+	ok(cats.all(func(c): return cats.count(c) == 1), "the four category colours are different")
+	var tm := TrainMap.new()
+	var kinds := MapKey.kinds(m, tm)
+	var in_key: bool = MapMarks.CAT.keys().all(func(id): return (id in kinds) == not MapMarks.first(m, id).is_empty())
+	ok(in_key, "a kind of thing is in the key exactly when one is live")
 
 func _key(m: Match) -> void:
 	var tm := TrainMap.new()
@@ -88,6 +106,8 @@ func _key(m: Match) -> void:
 	ok(("stop" in all) == halts, "train stops listed only when the map has them")
 	var ways: bool = WaysOutMap.sites(m).any(func(v: Vector3): return v != Vector3.INF)
 	ok(("way" in all) == ways, "ways out listed only when the map has them")
+	var nests: bool = m.blight != null and not m.blight.nests.list.is_empty()
+	ok(("nest" in all) == nests, "Blight nests listed only when the map has them (%s)" % nests)
 	ok(all.all(func(k): return MapKey._word(k) != k), "every listed kind has a word")
 	mate.out = true
 	ok(not "squad" in MapKey.kinds(m, tm), "a squadmate who is out leaves the key")
@@ -114,7 +134,7 @@ func _key(m: Match) -> void:
 func _zone(main: Node) -> void:
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "heart": true})
+	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "heart": true})
 	m.set_process(false)
 	var start := Heart.r("tide_start_s")
 	var held := start + Heart.r("tide_close_s")
@@ -122,7 +142,7 @@ func _zone(main: Node) -> void:
 	ok(HeartHud.zone_line(m) == "Closes in 0:30", "30 s before the tide moves: '%s'" % HeartHud.zone_line(m))
 	m.sess_t0 = start + 75.0 - m.time
 	var left := int(held - start - 75.0)
-	ok(HeartHud.zone_line(m) == "Closing %d:%02d" % [left / 60, left % 60],
+	ok(HeartHud.zone_line(m) == "Closing %d:%02d" % [int(left / 60.0), left % 60],
 		"while it closes: '%s'" % HeartHud.zone_line(m))
 	m.sess_t0 = held + 5.0 - m.time
 	ok(HeartHud.zone_line(m).is_empty(), "once the ring holds there is no clock")

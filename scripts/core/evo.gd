@@ -171,28 +171,6 @@ static func next_for(rec: Dictionary, how: String, item := "") -> String:
 		if lead in path if path is Array else String(path) == lead: return String(o["id"])
 	return String(fits[0]["id"])
 
-## What evolves it next (the Boki card's Next form): {"how": "level", "level": its evolve level},
-## {"how": "item", "inks": the Inks that work}, {"how": "trade"}, {"how": "soon"} while the form it
-## would take has no art, or {} for a last form. The form is the one try_evolve would pick.
-static func next_way(rec: Dictionary) -> Dictionary:
-	var line: Dictionary = rules()["lines"].get(String(rec.get("species", "")), {})
-	if line.get("into", []).is_empty():
-		return {}
-	var inks: Array = []
-	for o in line["into"]:
-		var ink := String(o.get("item", ""))
-		if ink != "" and has_art(next_for(rec, "item", ink)):
-			inks.append(ink)
-	if not inks.is_empty():
-		return {"how": "item", "inks": inks}
-	if has_art(next_for(rec, "trade")):
-		return {"how": "trade"}
-	var at_level := rec.duplicate()       # as if it had reached its evolve level
-	at_level["level"] = int(line.get("level", 1))
-	if has_art(next_for(at_level, "level")):
-		return {"how": "level", "level": int(line["level"])}
-	return {"how": "soon"}
-
 ## Its level form, for the Growth card: [species id, level, has art], or [] when no level evolves it.
 static func level_form(rec: Dictionary) -> Array:
 	var line: Dictionary = rules()["lines"].get(String(rec.get("species", "")), {})
@@ -221,11 +199,14 @@ static func try_evolve(rec: Dictionary, how: String, item := "") -> Dictionary:
 		return {}
 	var before := form_name(rec)
 	var a := EvoPath.path_of(rec, to) if how == "path" else leading(rec)
-	rec["was"].append(String(rec["species"]))
+	var from_id := String(rec["species"])
+	rec["was"].append(from_id)
 	rec["species"] = to
 	rec["forms"].append(a)       # the next node on its affinity's path (KinLib.nodes_for)
 	rec.erase("form_name")
-	var ev := {"kind": "form", "aff": a, "from": before, "to": form_name(rec), "how": how, "item": item}
+	rec.erase("wait_told")
+	var ev := {"kind": "form", "aff": a, "from": before, "to": form_name(rec), "how": how, "item": item,
+		"from_id": from_id, "to_id": to, "lv": int(rec.get("level", 1))}
 	var part := Lean.grow_part(rec)      # its lean grows a part at the next form (GARDEN_MODERN 3.3)
 	if part != "":
 		ev["lean_part"] = part
@@ -242,6 +223,11 @@ static func ink_preview(rec: Dictionary, ink: String) -> Dictionary:
 	if not has_art(to):
 		return {"state": "waits", "to": to, "name": nm, "text": "Would become %s, but %s waits for its art." % [nm, nm]}
 	return {"state": "form", "to": to, "name": nm, "text": "Becomes %s." % nm}
+
+## The species a Boki is ready to become by level but can't yet because its art isn't in the game; "" if none.
+static func waiting(rec: Dictionary) -> String:
+	var to := next_for(rec, "level")
+	return to if to != "" and not has_art(to) else ""
 
 ## Uses one Ink from the market goods on it. Returns the event, or {} (and keeps the Ink) if it can't.
 static func use_ink(rec: Dictionary, ink: String) -> Dictionary:
@@ -293,8 +279,10 @@ static func catch_up(roster: Array) -> Array:
 	return out
 
 ## The form names version-11 saves gave every 4 levels (e.g. "Cindfang"), so migrate can keep them.
+## These are the names those saves already hold, not today's species names: the six first species keep their
+## old roots; the later species (cairnback, zephyrak, hivara) have no v11 saves, so theirs start from the shown name.
 const V11_ROOTS := {"cindle": "Cind", "puddlet": "Pud", "burrlet": "Burr", "zapple": "Zap", "pebbit": "Peb",
-	"wisplet": "Wisp"}
+	"wisplet": "Wisp", "cairnback": "Cairn", "zephyrak": "Zeph", "hivara": "Hiv"}
 const V11_SUFFIX := {
 	"fierce": ["fang", "claw", "maw", "rend", "fury"],
 	"steadfast": ["shell", "ward", "keep", "bulwark", "aegis"],

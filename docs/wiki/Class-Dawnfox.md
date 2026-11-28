@@ -77,7 +77,7 @@ What the in-game kit card (K) says.
 
 **Carrier (passive).** Run into a downed teammate to shoulder them (up to 2; never one an enemy is standing on). While you carry them they don't bleed out and can't be stomped. Press crouch to set them down. If you take damage or are stunned, you drop them (a root or a slow does not) and can't pick anyone up for 4s. Your embers Kindle foes (up to 5, 4s): each stack adds 0.7 damage to your embers, and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s for a long-range ember).
 
-**Relay Step (dash, Shift, 7s cooldown).** A quick skip about 3m where you move; in the air, a long floaty glide of about 10m (its own 14s cooldown).
+**Relay Step (dash, Shift, 7s cooldown).** A quick skip about 3m where you move; in the air, a long floaty glide of about 10m (its own 14s cooldown). Pass a teammate on the way and half the dash comes back, and Hearthlight's cooldown drops 1s.
 
 **Burrseed (RMB, 10.5s cooldown).**
 
@@ -96,6 +96,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | damage +40% (seed 9 -> 12.6, burst 32 -> 44.8). | cooldown 10.5s -> 7.8s, damage +40%; the roots last 0.3s longer (1.1s -> 1.4s), the burst is twice as wide (2.2m -> 4.4m) and takes half again as much from ability power. |
 | Dash (Shift) | recharge 7s -> 6.25s; the air glide 14s -> 12.5s. | recharge 7s -> 5.5s; the air glide 14s -> 11s; picking up a teammate refreshes your long air dash. |
 | E | healing +22.5% (ring 10 -> 12.3, bloom 22 -> 27). | cooldown 11s -> 8.3s, healing +50% (ring 10 -> 15, bloom 22 -> 33); the thrown light's healing boost is 100% instead of 50%. |
+| R (ultimate) | Hearth Call cooldown 46s -> 42s, healing a second 5.3 -> 6.63. The Fusion lasts 30% longer. | Hearth Call cooldown 46s -> 38s, healing a second 5.3 -> 7.95. |
 
 **Suggested level-up order** (what bots follow): E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > Glove (Q).
 

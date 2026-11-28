@@ -17,7 +17,7 @@ const HITS := {
 	"ashwick": [["as_lance", 0.2, "LMB"], ["as_shot", 0.0, "RMB"], ["as_cloak", 0.0, "E"]],
 	"thief": [["thf_lmb_r", 0.0, "LMB"], ["thf_bola", 0.4, "RMB"], ["thf_knife", 0.12, "E"]],
 	"juggernaut": [["jug_slash_r", 0.0, "LMB"], ["jug_slam", 0.6, "RMB"], ["jug_wave", 0.0, "LMB held"]],
-	"bulwark": [["bul_smash", 0.0, "LMB"], ["bul_slamshield", 0.0, "RMB"], ["bul_ult_slam", 0.0, "X"]],
+	"bulwark": [["bul_smash", 0.0, "LMB"], ["bul_ult_slam", 0.0, "X"]],
 	"tender": [["mm_shot_r", 0.0, "LMB"], ["mm_seed", 0.0, "RMB"], ["mm_hearth", 0.0, "E"]],
 	"ostra": [["ostra_orb", 0.0, "LMB"], ["ostra_snap", 0.0, "RMB"], ["ostra_swap", 0.0, "E"]],
 	"rimewright": [["tm_dart_r", 0.0, "LMB"], ["tm_spear", 0.0, "RMB"], ["tm_freeze", 0.0, "E"]],

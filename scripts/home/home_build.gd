@@ -46,6 +46,7 @@ var _reach_cache := {}
 var trapped := ""                       # who the last refused keeps_paths would have shut in
 var _fence_sig := ""
 var _water_sig := ""
+var _bed_sig := ""                      # the crop beds' tiles the ground's grass was last grown round
 static var pending_toast := ""
 var popped := -1                       # uid of the deco just placed (its node gets the pop)
 var debug_m := Vector2.INF             # tooling: where the "mouse" is, for screenshots
@@ -263,7 +264,7 @@ func validate() -> Dictionary:
 	for t in _targets():
 		var ti := w.idx(int(floor(t.x)), int(floor(t.z)))
 		if w.inb(int(floor(t.x)), int(floor(t.z))) and w.island[ti] > 0 and not _isle_ok(ti): continue    # an isle you haven't bridged yet
-		if not _hit(seen, t): miss.append(t)
+		if not _hit_place(seen, t): miss.append(t)
 	return {"ok": open >= 850 and reached == open and miss.is_empty(), "open": open, "reached": reached, "missing": miss}
 
 ## After the home's fixed models are in: the decorations, fences and water, and the kin path grid.
@@ -369,7 +370,8 @@ func _apply_blockers() -> void:
 		if not w.inb(c.x, c.y): return
 		var i := w.idx(c.x, c.y)
 		if w.kind[i] == World.T_VOID: return
-		occ[i] = tag
+		if not tag.is_empty():
+			occ[i] = tag      # (a bed's tiles keep the crop patch's tag)
 		if solid:
 			if w.kind[i] == World.T_BLOCK and not w.no_deco.has(i):
 				w.kind[i] = World.T_GROUND      # a rim tree that grew where you'd put something
@@ -387,6 +389,18 @@ func _apply_blockers() -> void:
 		if HubLayout.holds(lay, String(e["id"])): continue
 		for c in HomeLayout.deco_cells(e):
 			mark.call(c, "d:%d" % int(e["u"]), HomeLayout.blocks(String(e["id"])), HomeLayout.top_of(String(e["id"])))
+	var beds: Array[Vector2i] = []
+	if fs():      # (the classic farm's fixed beds are walked over: its Dash course runs across them)
+		beds = PlotBlocks.tiles(h._plot_spots((h._d()["plots"] as Array).size()))
+	for c in beds:
+		mark.call(c, "", true)
+	var walled := func(c: Vector2i) -> bool:
+		return not w.inb(c.x, c.y) or w.kind[w.idx(c.x, c.y)] != World.T_GROUND
+	for c in PlotBlocks.pockets(beds, walled):
+		mark.call(c, "", true)
+	if not _bed_sig.is_empty() and str(beds) != _bed_sig:
+		mesh_t = 0.2      # a bed moved: the grass leaves its new tiles and comes back on the old ones
+	_bed_sig = str(beds)
 	for k in lay["water"]:
 		mark.call(HomeLayout.unkey(k), "w", false)      # (feelfix) ponds are water you can wade and swim in, not walls
 	_evict_feeders()
@@ -577,7 +591,7 @@ func _sync_deco() -> void:
 		var e: Dictionary = want[u]
 		if not nodes.has(u):
 			var n := make_deco(e)
-			Models.merge_tree(n, true)      # its plain parts, in every group: a mesh per material, shadows unchanged
+			PaintMerge.tree(n)      # its plain parts, in every group: a mesh per painted look, shadows unchanged
 			n.set_meta("sig", _sig(e))
 			_place_node(n, e)
 			ShadowPolicy.judge_tree(n, n.scale.x)      # small props throw no shadow (item 94)
@@ -840,7 +854,7 @@ func _reach(free_cells: Array, solid_cells: Array) -> PackedByteArray:
 	var head := 0
 	while head < q.size():
 		var i: int = q[head]; head += 1
-		var x := i % w.w; var z := i / w.w
+		var x := i % w.w; var z := int(i / float(w.w))
 		for dv in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
 			var nx: int = x + dv.x; var nz: int = z + dv.y
 			if nx < 0 or nz < 0 or nx >= w.w or nz >= w.h: continue
@@ -870,11 +884,16 @@ func _targets(skip_b := "") -> Array:
 		out.append(Vector3(sg.x, 0, sg.y))
 	return out.filter(func(t): return (t as Vector3).x > -100.0)     # (farm-start fixtures not put down yet)
 
-func _hit(seen: PackedByteArray, p: Vector3) -> bool:
+## Is a place the island needs reachable: a bed from beside it (PlotBlocks.REACH tiles), the rest from the next tile.
+func _hit_place(seen: PackedByteArray, t: Vector3) -> bool:
+	var bed: bool = (h.plots + h.gh_plots).any(func(b): return b.position == t)
+	return _hit(seen, t, PlotBlocks.REACH if bed else 1)
+
+func _hit(seen: PackedByteArray, p: Vector3, reach := 1) -> bool:
 	var w: World = h.world
 	var cx := int(floor(p.x)); var cz := int(floor(p.z))
-	for dz in range(-1, 2):
-		for dx in range(-1, 2):
+	for dz in range(-reach, reach + 1):
+		for dx in range(-reach, reach + 1):
 			if w.inb(cx + dx, cz + dz) and seen[w.idx(cx + dx, cz + dz)] == 1:
 				return true
 	return false
@@ -894,7 +913,7 @@ func keeps_paths(free_cells: Array, solid_cells: Array, skip_b := "", door := Ve
 	if trapped != "":
 		return false
 	for t in _targets(skip_b):
-		if _hit(base, t) and not _hit(after, t):
+		if _hit_place(base, t) and not _hit_place(after, t):
 			return false
 	if door != Vector3.INF:
 		var w: World = h.world
@@ -2071,6 +2090,7 @@ func _extras() -> Array:
 			var face := UI.frame(Color(String(HomeLayout.COLOURS[i])), 13, UI.INK if i == colour else Color(0, 0, 0, 0), 3)
 			for state in ["normal", "hover", "pressed"]:
 				sw.add_theme_stylebox_override(state, face)
+			UI.sfx(sw, false)
 			sw.pressed.connect(func():
 				Sfx.play("click")
 				set_colour(pick))

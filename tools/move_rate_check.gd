@@ -1,18 +1,18 @@
 extends "res://tools/move_feel_check.gd"
-## --move-rate-check (docs/MOVEMENT_PARITY.md, docs/decisions/0048): the Hunter moves the same whatever the
+## --move-rate-check (sv/MOVEMENT_PARITY.md, docs/decisions/0048): the Hunter moves the same whatever the
 ## display's frame rate, in a match and on the farm. Each trial runs drawn frames of 1/30, 1/60 and 1/144 s
 ## through the real frame loops (Match._process, the farm's FarmStep.run) with real key presses, and measures:
 ## run speed and the distance of a 1 s run, the stop (and the stop from each Hunter's run speed, inside the
 ## source's band: UE's walking brake drawn at 30 to 144 fps), the jump's apex and air time, a dash (press to its
 ## end, run speed held), and the two jump
 ## graces (coyote: the latest press after the ground goes that still jumps; buffer: the earliest press before
-## a landing that still jumps). Every number has to agree with its 60 fps value, and the graces with their
-## data rows (content/rules/hunter_move.json).
+## a landing that still jumps, the fall through the last land_buffer_h). Every number has to agree with its 60 fps
+## value, and the graces with their data rows (content/rules/hunter_move.json).
 ## Prints "MRATE <match|farm> <key> 30=.. 60=.. 144=.. ok|FAIL" and "MOVE RATE CHECK DONE, failures: N".
 
 const RATES := [30, 60, 144]
-const GRACE_STEPS := 12  # press delays tried for each jump grace, one sim step apart (to 0.2 s)
-const DROP_M := 1.0  # m: the buffer trial's fall (every press in its last 0.2 s counts as "about to land")
+const GRACE_STEPS := 18  # press delays tried for each jump grace, one sim step apart (to 0.3 s)
+const DROP_M := 3.0  # m: the buffer trial's fall: the 0.25 s coyote ends before the last 0.3 s of it
 const LIFT_M := 3.0  # m: how far the coyote trial's ground drops away
 ## key: [allowed difference from the 60 fps value, unit]. A drawn frame holds 2 steps at 30 fps, so whatever
 ## is read "after N seconds of frames" may be a step or two of running apart; the arcs themselves are exact.
@@ -56,23 +56,23 @@ func _tap(action: String, delta: float) -> void:
 
 
 func _at() -> Vector3:
-	return Vector3(hm.ppos.x, hm.py, hm.ppos.z) if hm else P.pos
+	return Vector3(hm.ppos.x, hm.py, hm.ppos.z) if hm else p_v.pos
 
 
 func _vy() -> float:
-	return hm.pvy if hm else P.vel.y
+	return hm.pvy if hm else p_v.vel.y
 
 
 func _speed() -> float:
-	return Vector2(hm.pvel.x, hm.pvel.z).length() if hm else _hv(P).length()
+	return Vector2(hm.pvel.x, hm.pvel.z).length() if hm else _hv(p_v).length()
 
 
 func _floor_y() -> float:
-	return hm._ground_h(hm.ppos.x, hm.ppos.z) if hm else P.ground()
+	return hm._ground_h(hm.ppos.x, hm.ppos.z) if hm else p_v.ground()
 
 
 func _dashing() -> bool:
-	return hm.dash_t > 0.0 if hm else P.roll_t > 0.0
+	return hm.dash_t > 0.0 if hm else p_v.roll_t > 0.0
 
 
 func _in_air() -> bool:
@@ -102,7 +102,7 @@ func _lift(up: float) -> void:
 	if hm:
 		hm.py += up
 	else:
-		P.pos.y += up
+		p_v.pos.y += up
 
 
 func _run_stop(fps: int) -> void:
@@ -130,7 +130,7 @@ func _hunter_stops(fps: int) -> void:
 		if hm:
 			Save.d["arch"] = speeds[v][0]
 		else:
-			P.base_speed = v
+			p_v.base_speed = v
 		Input.action_press("right")
 		await _frames(0.5, delta)
 		Input.action_release("right")
@@ -140,7 +140,7 @@ func _hunter_stops(fps: int) -> void:
 	if hm:
 		Save.d["arch"] = arch_was
 	else:
-		HunterMove.apply(P)
+		HunterMove.apply(p_v)
 
 
 func _jump_arc(fps: int) -> void:
@@ -274,7 +274,10 @@ func _trials(where: String) -> void:
 		var inside := got_v.values().all(func(x: float) -> bool: return x >= band.x and x <= band.y)
 		var line := "%s stop from %.2f m/s 30=%.3f 60=%.3f 144=%.3f m in the source's %.3f-%.3f (%s)"
 		_ok(inside, line % [where, v, got_v[30], got_v[60], got_v[144], band.x, band.y, ", ".join(speeds[v])])
-	for g in [["coyote", HunterMove.coyote_s], ["buffer", HunterMove.jump_buffer_s]]:
+	# a press inside the landing buffer's height is kept to the landing: the buffer is the time the last
+	# land_buffer_h of the DROP_M fall takes (never under jump_buffer_s)
+	var fall_t := sqrt(2.0 * DROP_M / Hunter.H_GRAV) - sqrt(2.0 * (DROP_M - HunterMove.land_buffer_h) / Hunter.H_GRAV)
+	for g in [["coyote", HunterMove.coyote_s], ["buffer", maxf(HunterMove.jump_buffer_s, fall_t)]]:
 		var v60: float = got[g[0]][60]
 		var what := "%s %s at 60 fps %.3f s is its data row %.2f s" % [where, g[0], v60, g[1]]
 		_ok(absf(v60 - float(g[1])) <= 2.0 * DT, what)

@@ -1,38 +1,45 @@
 extends RefCounted
 ## --depth-cue-check: the height cues of briefs/CAMERA_DEPTH.md exist and stay cheap. Headless, no
 ## renderer: a live match has the ledge-light terrain shader (depth_k on, with ledges for it to light),
-## the dimmed abyss clouds, a shadow disc on the ground under every hunter and under every flying shot
+## the dimmed abyss clouds, a shadow disc on the ground under every airborne hunter (none while it stands)
+## and under every flying shot
 ## (at the ground's height, hidden over the void), and a per-frame cost within budget with no new
-## nodes once warmed up. With the setting off the terrain and cloud cues read as off. Never touches the save.
+## nodes once warmed up. A hunter's disc fades with height (full to 0.5 m, gone at 10 m) and an airborne
+## hunter wears a ring on the ground (1.5-50 m up; gold for you, blue for a teammate, red for an enemy;
+## content/rules/depth_cues.json). With the setting off the terrain and cloud cues read as off. Never touches the save.
 
-const SHOTS := 120              # shots in the air at once for the cost test (the pool holds 160)
-const SHOT_LIFT := 1.5          # m above the ground the test shots fly
-const BUDGET_US := 2000.0       # us per frame for all discs (hunters + SHOTS shots), a generous headless bound
-const FRAMES := 30              # frames averaged for the cost
+const SHOTS := 120  # shots in the air at once for the cost test (the pool holds 160)
+const HUNTER_LIFT := 1.5  # m above the ground the test hunter is lifted
+const SHOT_LIFT := 1.5  # m above the ground the test shots fly
+const BUDGET_US := 2000.0  # us per frame for all discs (hunters + SHOTS shots), a generous headless bound
+const FRAMES := 30  # frames averaged for the cost
 
 var bad := 0
+
 
 func ok(cond: bool, what: String) -> void:
 	print("DEPTHCUECHECK %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
 
+
 func run(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	Econ.ensure()
-	await _check_match(main)
+	_check_match(main)
 	Settings.set_v("depth_cues", false, false)
 	ok(DepthCues.k() == 0.0 and DepthCues.abyss_dim() == 1.0, "setting off: no terrain cues, abyss not dimmed")
 	Settings.set_v("depth_cues", true, false)
 	print("DEPTHCUECHECK done, %d failures" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _check_match(main: Node) -> void:
 	Settings.set_v("depth_cues", true, false)
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
 	m.set_process(false)
 	var dc: DepthCues = m.get_node_or_null("DepthCues")
 	ok(dc != null, "the DepthCues node is in the match")
@@ -41,8 +48,10 @@ func _check_match(main: Node) -> void:
 	_check_ledge_light(m)
 	_check_abyss(m)
 	_check_hunter_discs(m, dc)
+	_check_height(m, dc)
 	_check_shot_discs(m, dc)
 	m.queue_free()
+
 
 func _find_material(root: Node, shader_file: String) -> ShaderMaterial:
 	if root is GeometryInstance3D:
@@ -55,8 +64,10 @@ func _find_material(root: Node, shader_file: String) -> ShaderMaterial:
 			return found
 	return null
 
+
 func _on_ground(disc: MeshInstance3D, ground_y: float) -> bool:
 	return absf(disc.global_position.y - (ground_y + DepthCues.LIFT)) < 0.001
+
 
 func _check_ledge_light(m: Match) -> void:
 	var terrain := _find_material(m.world, "terrain.gdshader")
@@ -71,24 +82,30 @@ func _check_ledge_light(m: Match) -> void:
 				ledges += 1
 	ok(ledges > 0, "the map has ground ending in a drop for the light to catch (%d tiles)" % ledges)
 
+
 func _check_abyss(m: Match) -> void:
 	var clouds := _find_material(m.world, "clouds.gdshader")
 	var dim := float(clouds.get_shader_parameter("abyss_dim")) if clouds != null else 1.0
 	ok(is_equal_approx(dim, DepthCues.ABYSS_DIM), "abyss cloud sea is dimmed to %.2f" % DepthCues.ABYSS_DIM)
 
+
 func _check_hunter_discs(m: Match, dc: DepthCues) -> void:
 	dc._process(0.0)
-	var live := 0
-	for i in m.hunters.size():
-		var h: Hunter = m.hunters[i]
-		var disc: MeshInstance3D = dc._discs.get(h)
-		ok(disc != null, "a shadow disc for hunter %d" % i)
-		if disc == null or not disc.visible:
-			continue
-		live += 1
-		var y := m.world.ground_at(h.global_position.x, h.global_position.z)
-		ok(_on_ground(disc, y), "hunter %d's disc lies on the ground (y %.2f)" % [i, y])
-	ok(live > 0, "at least one hunter's disc is visible on the ground")
+	var visible_standing := m.hunters.filter(func(h): return dc._discs[h].visible)
+	ok(visible_standing.is_empty(), "no disc under a hunter standing on the ground (%d show)" % visible_standing.size())
+	var h: Hunter = m.player
+	var y := m.world.ground_at(h.global_position.x, h.global_position.z)
+	h.global_position.y = y + DepthCues.AIR_MIN - 0.05
+	dc._process(0.0)
+	ok(not dc._discs[h].visible, "no disc just under the air threshold")
+	h.global_position.y = y + HUNTER_LIFT
+	dc._process(0.0)
+	var disc: MeshInstance3D = dc._discs[h]
+	ok(disc.visible and _on_ground(disc, y), "an airborne hunter's disc lies on the ground (y %.2f)" % y)
+	h.global_position.y = y
+	dc._process(0.0)
+	ok(not disc.visible, "the disc hides again on landing")
+
 
 func _check_shot_discs(m: Match, dc: DepthCues) -> void:
 	var P: Hunter = m.player
@@ -111,3 +128,49 @@ func _check_shot_discs(m: Match, dc: DepthCues) -> void:
 		m._shot_end(s, s["pos"], null)
 	dc._process(0.0)
 	ok(dc._shot_discs.all(func(d): return not d.visible), "shot discs hide when the shots are gone")
+
+
+## Lifts hunter `h` `up` m above the ground it stands over and lays the cues once.
+func _lift(m: Match, dc: DepthCues, h: Hunter, up: float) -> void:
+	var y := m.world.ground_at(h.global_position.x, h.global_position.z)
+	h.global_position.y = y + up
+	dc._process(0.0)
+
+
+func _check_height(m: Match, dc: DepthCues) -> void:
+	var rules := Content.rules("depth_cues")
+	var full := is_equal_approx(dc.shadow_fade(0.5), 1.0)
+	ok(full and is_equal_approx(dc.shadow_fade(10.0), 0.0), "shadow: full at 0.5 m, gone at 10 m")
+	ok(is_equal_approx(dc.shadow_fade(5.25), 0.5), "shadow: half at 5.25 m")
+	var p: Hunter = m.player
+	var base := p.global_position
+	_lift(m, dc, p, 0.0)
+	var disc: MeshInstance3D = dc._discs[p]
+	var stand_fade := float(disc.get_instance_shader_parameter("fade"))
+	var stand_ring: MeshInstance3D = dc._rings.get(p)  # (made by an earlier lift, hidden again once it stands)
+	ok(stand_fade == 1.0 and (stand_ring == null or not stand_ring.visible), "standing: full shadow, no ring")
+	_lift(m, dc, p, 6.0)
+	var ring: MeshInstance3D = dc._rings.get(p)
+	var fade := float(disc.get_instance_shader_parameter("fade"))
+	ok(disc.visible and absf(fade - dc.shadow_fade(6.0)) < 0.001, "6 m up: the shadow is fainter but there")
+	var ground := m.world.ground_at(base.x, base.z)
+	ok(ring != null and ring.visible and _on_ground(ring, ground), "6 m up: a ring on the ground under you")
+	var gold: Array = rules["ring"]["own"]
+	var col: Color = ring.material_override.get_shader_parameter("color")
+	var want_col := Color(gold[0], gold[1], gold[2], float(rules["ring"]["alpha"])).linear_to_srgb()
+	ok(col.is_equal_approx(want_col), "your ring is gold")
+	_lift(m, dc, p, 12.0)
+	ok(not disc.visible and ring.visible, "12 m up: no shadow, the ring stays")
+	_lift(m, dc, p, 60.0)
+	ok(not ring.visible, "60 m up: the ring is gone too")
+	_lift(m, dc, p, 1.0)
+	ok(not ring.visible, "1 m up (a hop): no ring")
+	for h: Hunter in m.hunters:
+		var want := "enemy"
+		if h == p:
+			want = "own"
+		elif h.team == p.team:
+			want = "ally"
+		ok(dc.ring_kind(h) == want, "ring colour kind for %s: %s" % [h.pname, want])
+	p.global_position = base
+	dc._process(0.0)

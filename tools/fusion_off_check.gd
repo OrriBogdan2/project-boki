@@ -1,9 +1,12 @@
 extends RefCounted
-## --fusion-off-check: Fusion (X) is off by default (docs/decisions/0101). Prints PASS/FAIL lines.
+## --fusion-off-check: there is no fusion in the game (docs/decisions/0159); `fusion_enabled` is a dev
+## flag, off. Prints PASS/FAIL lines.
 ##   1. the flag: content/rules/merge_forms.json ships `fusion_enabled` false
 ##   2. off: X, the bot's merge call, the Boki's leap and a full bond meter start nothing; the meter never fills;
 ##      no hunter in a bot match merges; the Boki-ability tip, loading tips, words, cards, controls and the
-##      keybind list (X stays reserved in the input map) say nothing about it; the tutorial never has Fusion steps
+##      keybind list and Training checklist say nothing about it; the Fusion action has no key (X is free, a saved
+##      key stays unbound); the tutorial never has Fusion steps; 60 s of a bot match with Boki wisps, the old X input,
+##      R and C pressed through every wisp state: 0 fusions, bots included, and the C summon still bursts and folds
 ##   3. on: the same calls start a Fusion, and the same screens show it again
 
 var bad := 0
@@ -18,7 +21,7 @@ func ok(cond: bool, what: String) -> void:
 
 
 func _flag(on: bool) -> void:
-	Content.rules("merge_forms")["fusion_enabled"] = on
+	MergeForm.set_enabled(on)
 
 
 func _match(opts: Dictionary) -> Match:
@@ -26,8 +29,18 @@ func _match(opts: Dictionary) -> Match:
 		m.queue_free()
 	m = Match.new()
 	main.add_child(m)
-	var o := {"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true,
-			"demo_kin": "pebbit", "weapon": "rifle", "cls": "medium"}
+	var o := {
+		"training": true,
+		"teams": 2,
+		"squad": 1,
+		"tier": 0,
+		"length": 1e9,
+		"seed": 4242,
+		"no_drop": true,
+		"demo_kin": "pebbit",
+		"weapon": "rifle",
+		"cls": "medium"
+	}
 	o.merge(opts, true)
 	m.start(o)
 	m.set_process(false)
@@ -69,8 +82,10 @@ func run(mn: Node) -> void:
 func _off() -> void:
 	var p := _ready_player()
 	ok(not KinMerge.ready(p) and KinMerge.plan(p) == "" and not KinMerge.can_cast(p), "off: a full meter is not ready")
-	ok(not KinMerge.press(p) and not KinMerge.cast(p) and not KinMerge.surge(p),
-			"off: press, cast and surge start nothing")
+	ok(
+		not KinMerge.press(p) and not KinMerge.cast(p) and not KinMerge.surge(p),
+		"off: press, cast and surge start nothing"
+	)
 	p.inp["ult"] = true
 	_run_for(0.5)
 	ok(p.merge_st.is_empty() and KinMerge.deny_text(p) == "", "off: the X input does nothing and says nothing")
@@ -79,13 +94,25 @@ func _off() -> void:
 	ok(not bool(p.inp["ult"]) or p.merge_st.is_empty(), "off: the bot's merge call starts nothing")
 	p.inp["ult"] = false
 	p.ult = 0.0
-	ok(KinBond.add(p, 0.5, "ult_hit") == 0.0 and KinBond.add(p, 0.5, KinBond.FIGHT) == 0.0 and p.ult == 0.0,
-			"off: the bond meter does not fill (hits or fighting)")
+	ok(
+		KinBond.add(p, 0.5, "ult_hit") == 0.0 and KinBond.add(p, 0.5, KinBond.FIGHT) == 0.0 and p.ult == 0.0,
+		"off: the bond meter does not fill (hits or fighting)"
+	)
 	p.skill_pts = 3
 	p.lvl = 9
 	ok(not p.can_level("ult"), "off: no skill point can go into the Fusion slot")
-	ok(InputMap.has_action("ultimate") and not Settings.slots("ultimate").is_empty(), "off: X stays reserved")
+	ok(
+		InputMap.action_get_events("ultimate").is_empty() and Settings.slots("ultimate") == ["", ""],
+		"off: the Fusion action has no key (%s)" % str(Settings.slots("ultimate"))
+	)
+	Settings.v["keys"]["ultimate"] = ["key:%d" % KEY_X]
+	Settings.fusion_key()
+	ok(InputMap.action_get_events("ultimate").is_empty(), "off: a Fusion key saved by an older build is not bound")
+	Settings.v["keys"].erase("ultimate")
+	ok(not _match_action_on(KEY_X), "off: X does nothing in a match (no match action holds it)")
+	ok(not _drill_has_fusion(), "off: the Training checklist has no Fusion row")
 	_off_match()
+	_off_wisps()
 	_off_text()
 	_off_tutorial()
 
@@ -104,19 +131,95 @@ func _off_match() -> void:
 	ok(seen == 0 and int(m.kstat["ult"]) == 0, "off: 20s of a bot match with full meters, nobody fused (%d)" % seen)
 
 
+## 60 s of a 4-hunter bot match with Boki wisps on: every step the old X input (inp.ult) and every 0.25 s R, with
+## full meters and the slot open for everyone; C every 2.5 s (its cooldown cleared), so the wisp goes out, is sent
+## back, folds and comes out again while X and R mash.
+func _off_wisps() -> void:
+	_match(
+		{
+			"training": false,
+			"teams": 4,
+			"squad": 1,
+			"length": 600.0,
+			"no_drop": true,
+			"boki_wisps": true,
+			"arch": "bulwark"
+		}
+	)
+	var p := m.player
+	var fused := 0
+	var states := {}
+	var summons := 0
+	var was_out := false
+	for i in int(60.0 / Match.DT):
+		for h in m.hunters:
+			h.slot_lv["ult"] = 1
+			h.ult = 1.0
+			h.lvl = maxi(h.lvl, int(Hunter.ULT_AT[0]))
+		p.inp["ult"] = true
+		if i % 15 == 0:
+			if p.ak:
+				p.ak.cd["r"] = 0.0
+			HunterKeys.ult_pressed(p)
+		if i % 150 == 75:
+			if p.kin and (p.kin as Kin).summon:
+				(p.kin as Kin).summon.cd = 0.0  # (cycle faster than its cooldown)
+			KinSummon.press(p)
+		m.step(Match.DT)
+		var k: Kin = p.kin
+		if k:
+			var out := k.summon != null and k.summon.out()
+			states["wisp" if k.wisp else k.state] = true
+			if out and not was_out:
+				summons += 1
+			was_out = out
+		for h in m.hunters:
+			var hk = h.kin
+			if not h.merge_st.is_empty() or (hk != null and is_instance_valid(hk) and (hk as Kin).state == "fused"):
+				fused += 1
+	var merges := int(m.kstat["ult"])
+	print(
+		(
+			"FUSIONOFF wisps 60s: fusion frames %d, merges %d, player Boki states %s, summons %d"
+			% [fused, merges, str(states.keys()), summons]
+		)
+	)
+	ok(fused == 0 and merges == 0, "off: 60 s of X, R and C with wisps and bots, 0 fusions (%d frames)" % fused)
+	ok(states.has("wisp") and states.has("active") and summons >= 2, "off: C still summons the wisp (%d)" % summons)
+
+
+func _drill_has_fusion() -> bool:
+	return TrainDrill.rows().any(func(t): return String(t[2]) == "ultimate")
+
+
+## Does any match action hold this physical key?
+func _match_action_on(code: int) -> bool:
+	for a in Settings.MATCH_ONLY + ["fire", "secondary", "signature", "dash", "jump", "throw", "interact", "gear1"]:
+		for e in InputMap.action_get_events(a):
+			if e is InputEventKey and (e as InputEventKey).physical_keycode == code:
+				return true
+	return false
+
+
 func _off_text() -> void:
-	ok(not TipText.ability(true).contains("fuse") and not TipText.ability(false).contains("bond"),
-			"off: the Boki tip is silent")
+	ok(
+		not TipText.ability(true).contains("fuse") and not TipText.ability(false).contains("bond"),
+		"off: the Boki tip is silent"
+	)
 	var tips_seen := {}
 	for i in 60:
 		Save.d["tutorial"]["tips_seen"] = []
 		tips_seen[TipPick.pick(["no_summon"])] = true
-	ok(not tips_seen.keys().any(func(t): return String(t).contains("fuses you")),
-			"off: no loading tip about the bond fuse")
+	ok(
+		not tips_seen.keys().any(func(t): return String(t).contains("fuses you")),
+		"off: no loading tip about the bond fuse"
+	)
 	Save.d["matches"] = 20
 	ok(not WordsView.visible().any(func(w): return w["term"] == "Fusion"), "off: the Words page has no Fusion")
-	ok(not KitCard.card_slots("bulwark").has("r") and not HunterViewer.slots_for("bulwark").has("r"),
-			"off: the kit card has no Fusion row")
+	ok(
+		not KitCard.card_slots("bulwark").has("r") and not HunterViewer.slots_for("bulwark").has("r"),
+		"off: the kit card has no Fusion row"
+	)
 	ok(not ClassCard.kit_tip("bulwark").contains("Fusion"), "off: the class tooltip has no Fusion")
 	ok(not _controls_text().contains("ultimate"), "off: the controls card has no Fusion row")
 	ok(not _has_action_row("ultimate"), "off: the keybind list has no Fusion row")
@@ -124,10 +227,14 @@ func _off_text() -> void:
 
 func _off_tutorial() -> void:
 	var tu := _tutorial()
-	ok(not tu.applies("pick_ult") and not tu.applies("ult") and tu.applies("pick_kin"),
-			"off: the tutorial skips its Fusion steps")
-	ok(TutorialCamps.of(m.player) != null and not TutorialCamps.of(m.player).may_level("ult"),
-			"off: no tutorial point goes to Fusion")
+	ok(
+		not tu.applies("pick_ult") and not tu.applies("ult") and tu.applies("pick_kin"),
+		"off: the tutorial skips its Fusion steps"
+	)
+	ok(
+		TutorialCamps.of(m.player) != null and not TutorialCamps.of(m.player).may_level("ult"),
+		"off: no tutorial point goes to Fusion"
+	)
 
 
 # ------------------------------------------------------------------ 3. on
@@ -147,18 +254,24 @@ func _on() -> void:
 	p.lvl = 9
 	ok(p.can_level("ult"), "on: a skill point can go into the Fusion slot")
 	Save.d["matches"] = 20
-	ok(TipText.ability(true).contains("fuses") and WordsView.visible().any(func(w): return w["term"] == "Fusion"),
-			"on: tip and word are back")
+	ok(
+		TipText.ability(true).contains("fuses") and WordsView.visible().any(func(w): return w["term"] == "Fusion"),
+		"on: tip and word are back"
+	)
 	ok(KitCard.card_slots("bulwark").has("r") and ClassCard.kit_tip("bulwark").contains("Fusion"), "on: cards show it")
 	ok(_controls_text().contains("ultimate") and _has_action_row("ultimate"), "on: controls and keybinds list it")
+	ok(Settings.slots("ultimate")[0] == "key:%d" % KEY_X, "on: the dev flag gives Fusion its X key back")
+	ok(_drill_has_fusion(), "on: the Training checklist has its Fusion row")
 	var tu := _tutorial()
 	ok(not tu.applies("pick_ult") and not tu.applies("ult"), "on: the tutorial still skips Fusion (11-18)")
 	var tut_tips := {}
 	for i in 60:
 		Save.d["tutorial"]["tips_seen"] = []
 		tut_tips[TipPick.pick(["no_summon"], true, false)] = true
-	ok(not tut_tips.keys().any(func(t): return String(t).contains("fuses you")),
-			"on: no loading/downed tip in the tutorials mentions the fuse")
+	ok(
+		not tut_tips.keys().any(func(t): return String(t).contains("fuses you")),
+		"on: no loading/downed tip in the tutorials mentions the fuse"
+	)
 
 
 # ------------------------------------------------------------------ helpers

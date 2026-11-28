@@ -5,6 +5,11 @@ extends RefCounted
 ## --seam=<clip>[,<clip>] instead (one per --boki id, the last repeats): one row at the garden camera, a frame each
 ## 1/30 s across the clip's loop wrap, played in place; "setoff": the Boki stands, then sets off at a stroll (the
 ## idle-to-walk hand-over). <dir>/<id>_<clip>_<tag>.png.
+## --bred=<a>,<b> instead: one still of parent a, parent b and their hatchling side by side (a seeded breed), to see
+## which traits the model carries over. <dir>/bred_<a>_<b>_<tag>.png.
+## --video instead: a state tour per --boki id (idle, a stroll, a run at its match speed, stop, attack, hit, faint,
+## revive, a trot), side view over the floor bars, one jpg a 1/30 s in <dir>/<id>_<tag>/NNNN.jpg for
+## `ffmpeg -framerate 30 -i %04d.jpg` (jobq returns the out dir, not a movie).
 ## For a before strip, run the same tool on the old tree. Needs a renderer.
 
 const Shots := preload("res://tools/boki_rig_shots.gd")
@@ -18,28 +23,57 @@ const POST_SPACING := 0.4        # m between floor posts
 const POST_COUNT := 60
 const SEAM_FRAMES := 10
 const SEAM_PX := 224             # crop around the Boki at the garden camera, of a 1920x1080 view
+const BRED_PX := 640
+const BRED_GAP := 0.9            # m between the three Boki of a --bred still
+const BRED_SEED := 7
 const STROLL := 1.5              # m/s: the audit's idle-to-walk speed (boki_anim_audit HOME_SPEEDS[0])
+const VIDEO_PX := Vector2i(960, 540)
+const VIDEO_CAM := Vector3(2.6, 0.4, 0.0)    # m from the Boki, to its side
+const TROT := 3.0                # m/s: the tour's last leg, a speed between the stroll and the run
+## The state tour: label, seconds, move speed (-1: the species' match speed), the metas the game sets for it.
+const TOUR := [
+	{"s": "idle", "t": 1.2}, {"s": "walk 1.5 m/s", "t": 2.0, "v": STROLL}, {"s": "run", "t": 1.8, "v": -1.0},
+	{"s": "stop", "t": 1.0}, {"s": "attack", "t": 1.0, "metas": {"kstate": "attack"}}, {"s": "idle", "t": 0.4},
+	{"s": "hit", "t": 0.8, "hit": true}, {"s": "faint", "t": 1.6, "metas": {"kdown": true}},
+	{"s": "revive", "t": 1.4}, {"s": "trot 3 m/s", "t": 1.0, "v": TROT},
+]
 
 func run(main: Node) -> void:
 	var out := ""
 	var ids: Array = []
 	var tag := "after"
 	var seams: Array = []
+	var bred: Array = []
+	var video := false
 	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--bred="): bred = Array(a.substr(7).split(",", false))
 		if a.begins_with("--seam="): seams = Array(a.substr(7).split(",", false))
 		if a.begins_with("--shots-dir="): out = a.substr(12)
 		if a.begins_with("--boki="): ids = Array(a.substr(7).split(",", false))
+		if a == "--video": video = true
 		if a.begins_with("--tag="): tag = a.substr(6)
 	DirAccess.make_dir_recursive_absolute(out)
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	var shots := Shots.new()
 	shots.main = main
+	if bred.size() == 2:
+		var still: Image = await _bred(shots, bred)
+		still.save_png(out.path_join("bred_%s_%s_%s.png" % [bred[0], bred[1], tag]))
+		print("BOKI_ANIM_SHOTS_DONE 3")
+		main.get_tree().quit()
+		return
 	if not seams.is_empty():
 		for i in ids.size():
 			var what := String(seams[mini(i, seams.size() - 1)])
 			var row: Image = await _seam(shots, String(ids[i]), what)
 			row.save_png(out.path_join("%s_%s_%s.png" % [ids[i], what, tag]))
+		print("BOKI_ANIM_SHOTS_DONE ", ids.size())
+		main.get_tree().quit()
+		return
+	if video:
+		for id in ids:
+			await _video(shots, String(id), out.path_join("%s_%s" % [id, tag]))
 		print("BOKI_ANIM_SHOTS_DONE ", ids.size())
 		main.get_tree().quit()
 		return
@@ -81,7 +115,6 @@ func _row(vp: SubViewport, cam: Camera3D, id: String, v: float, sheet: Image, ro
 	for i in int(WARM_S / DT) + steps * FRAMES:
 		k.position.z -= v * DT
 		rig._process(DT)
-		rig.advance(DT)
 		cam.position = k.position + Vector3(3.0, 0.45, 0)
 		cam.look_at(k.position + Vector3(0, 0.3, 0))
 		var f := i - int(WARM_S / DT)
@@ -90,8 +123,43 @@ func _row(vp: SubViewport, cam: Camera3D, id: String, v: float, sheet: Image, ro
 				await RenderingServer.frame_post_draw
 			var img := vp.get_texture().get_image()
 			img.convert(Image.FORMAT_RGBA8)
-			sheet.blit_rect(img, Rect2i(0, 0, PX, PX), Vector2i((f / steps) * PX, row * PX))
+			sheet.blit_rect(img, Rect2i(0, 0, PX, PX), Vector2i((int(f / float(steps))) * PX, row * PX))
 	k.queue_free()
+
+## Parent a, parent b and their seeded hatchling in a line, side view, standing still.
+func _bred(shots: Shots, parents: Array) -> Image:
+	var a := Save.new_kin(String(parents[0]), "A", BRED_SEED)
+	var b := Save.new_kin(String(parents[1]), "B", BRED_SEED + 1)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = BRED_SEED
+	var kid := Care.breed(a, b, rng, String(parents[0]))
+	print("BRED a=%s b=%s kid=%s mark=%s accent=%s gifts=%s" % [a["dna"]["mark"], b["dna"]["mark"], kid["species"],
+		kid["dna"]["mark"], kid["dna"].get("accent", "-"), kid["gifts"]])
+	var vp: SubViewport = shots._stage(Vector2i(BRED_PX * 3, BRED_PX))
+	var cam := Camera3D.new()
+	vp.add_child(cam)
+	cam.make_current()
+	cam.fov = 30.0
+	cam.position = Vector3(2.5, 0.4, 0)
+	cam.look_at(Vector3(0, 0.3, 0))
+	var rigs := []
+	var recs := [a, b, kid]
+	for i in recs.size():
+		var k := Shots.rigged_kin(String(recs[i]["species"]), recs[i])
+		vp.add_child(k)
+		k.position = Vector3(0, 0, (1 - i) * BRED_GAP)
+		k.rotation.y = deg_to_rad(20)
+		var rig := k.get_node("Body/Flex/BokiRig") as BokiRig
+		rig.set_process(false)
+		rigs.append(rig)
+	for i in int(WARM_S / DT):
+		for rig in rigs:
+			rig._process(DT)
+			rig.advance(DT)
+	var img: Image = await shots._grab(vp)
+	img.convert(Image.FORMAT_RGBA8)
+	vp.queue_free()
+	return img
 
 ## One row at the garden camera (Shots' farm close-up): frames DT apart across `what`'s wrap, or the set-off.
 func _seam(shots: Shots, id: String, what: String) -> Image:
@@ -115,7 +183,7 @@ func _seam(shots: Shots, id: String, what: String) -> Image:
 		rig._pos_prev = k.global_position
 	else:
 		rig.set_clip(what, 0.0)
-		rig.player.seek(rig.player.get_animation(what).length - SEAM_FRAMES / 2 * DT, true)
+		rig.player.seek(rig.player.get_animation(what).length - int(SEAM_FRAMES / 2.0) * DT, true)
 		lead = 0
 	var sheet := Image.create(SEAM_PX * SEAM_FRAMES, SEAM_PX, false, Image.FORMAT_RGBA8)
 	for i in lead + SEAM_FRAMES:
@@ -129,7 +197,47 @@ func _seam(shots: Shots, id: String, what: String) -> Image:
 		var img: Image = await shots._grab(vp)
 		img.convert(Image.FORMAT_RGBA8)
 		var mid := Vector2i(cam.unproject_position(k.position + Vector3(0, 0.5 * Shots.FARM_BOKI_SCALE, 0)))
-		var at := mid - Vector2i(SEAM_PX, SEAM_PX) / 2
+		var at := mid - Vector2i(Vector2(Vector2i(SEAM_PX, SEAM_PX)) / 2.0)
 		sheet.blit_rect(img, Rect2i(at, Vector2i(SEAM_PX, SEAM_PX)), Vector2i((i - lead) * SEAM_PX, 0))
 	vp.queue_free()
 	return sheet
+
+## The TOUR as jpg frames in `dir`: the Boki moves through the live BokiRig (clip, rate and blends from what it does).
+func _video(shots: Shots, id: String, dir: String) -> void:
+	DirAccess.make_dir_recursive_absolute(dir)
+	var vp: SubViewport = shots._stage(VIDEO_PX)
+	_posts(vp)
+	var cam := Camera3D.new()
+	vp.add_child(cam)
+	cam.make_current()
+	cam.fov = 30.0
+	var label := Label.new()
+	label.add_theme_font_size_override("font_size", 28)
+	vp.add_child(label)
+	var k := Shots.rigged_kin(id)
+	vp.add_child(k)
+	var rig := k.get_node("Body/Flex/BokiRig") as BokiRig
+	rig.set_process(false)
+	rig._pos_prev = k.global_position
+	var ks := KinLib.kin(id)
+	var match_v: float = KinLib.stat_value("kin_speed", KinLib.points(ks, {}) if ks else {})
+	var n := 0
+	for seg: Dictionary in TOUR:
+		label.text = "%s  %s" % [id, seg["s"]]
+		var v: float = seg.get("v", 0.0)
+		v = match_v if v < 0.0 else v
+		for key: String in ["kstate", "kdown"]:
+			k.remove_meta(key)
+		for key: String in seg.get("metas", {}):
+			k.set_meta(key, seg["metas"][key])
+		if seg.get("hit", false):
+			KinFlinch.hit(k, Vector3(0, 0, 1), 0.3, 1.0)
+		for i in int(float(seg["t"]) / DT):
+			k.position.z -= v * DT
+			rig._process(DT)
+			cam.position = k.position + VIDEO_CAM
+			cam.look_at(k.position + Vector3(0, 0.3, 0))
+			await RenderingServer.frame_post_draw
+			vp.get_texture().get_image().save_jpg(dir.path_join("%04d.jpg" % n), 0.9)
+			n += 1
+	vp.queue_free()

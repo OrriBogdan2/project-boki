@@ -79,7 +79,7 @@
 		"rise": "jump",
 		"fall": "fall",
 		"glide": "glide",
-		"dive": "dive"
+		"dive": "dive", "fade_out": 0.25
 	},
 	"land": {"clip": "land", "hop": {"w": 0.6, "rate": 1.4, "dur": 0.24, "moving": 0.1}, "drop": {"rate": 1.0, "dur": 0.4, "moving": 0.13}},
 	"kmoves": {
@@ -98,7 +98,7 @@
 			"upper": "moving",
 			"hold_from": 0.2,
 			"air_legs": true
-		},
+		, "fade_out": 0.6},
 		"bul_smash": {
 			"clip": "lmb_slam",
 			"air_legs": true,
@@ -108,7 +108,7 @@
 		},
 		"bul_launch": {
 			"clip": "lmb_launch"
-		},
+		, "fade_out": 0.6},
 		"bul_guard": {
 			"clip": "rmb_guard",
 			"upper": "moving",
@@ -118,10 +118,7 @@
 		"bul_break": {
 			"clip": "guard_break",
 			"upper": true
-		},
-		"bul_armed": {
-			"clip": "guard_armed",
-			"upper": true
+		, "fade_out": 0.6
 		},
 		"bul_whirl": {"dash": true, 
 			"clip": "shift_whirl"
@@ -138,10 +135,6 @@
 		"bul_crush": {
 			"clip": "crush",
 			"upper": true
-		},
-		"bul_slamshield": {
-			"clip": "shield_slam",
-			"lead": 0.25
 		},
 		"bul_mend": {
 			"clip": "e_mend",
@@ -188,7 +181,8 @@
 	"turn": {"dur": 0.34, "lift": 0.36},
 	"cc": {"pull": 0.22, "tug_hz": 0.8, "twist": 0.05, "bow": 0.2},
 	"procedural": [
-		"base"
+		"base",
+		"swim"
 	],
 	"upper": [
 		"hips",
@@ -214,6 +208,15 @@
 		"emote": "happy",
 		"hit": "angry",
 		"hit_t": 1.2,
+		"combat": "angry",
+		"combat_t": 4.0,
+		"tex_faces": {
+			"eyes-v95": {
+				"angry": "res://art/wardens/breaker/breaker_v95_angry.jpg",
+				"determined": "res://art/wardens/breaker/breaker_v95_angry.jpg",
+				"sad": "res://art/wardens/breaker/breaker_v95_angry.jpg"
+			}
+		},
 		"companion": "x_fish",
 		"lure": "lure",
 		"flare_kmoves": [
@@ -229,12 +232,10 @@
 			"bul_guard": "determined",
 			"bul_whirl": "angry",
 			"bul_charge": "determined",
-			"bul_slamshield": "angry",
 			"bul_mend": "happy",
 			"bul_ult_wind": "angry",
 			"bul_ult_slam": "angry",
-			"bul_break": "sad",
-			"bul_armed": "happy"
+			"bul_break": "sad"
 		}
 	},
 	"offset_bones": [
@@ -250,8 +251,10 @@
 		},
 		"in": "crouch_in",
 		"out": "crouch_out",
-		"speed": 1.65
+		"speed": 1.65,
+		"plants": {"crouch_b": {"L": [0.3], "R": [0.0]}, "crouch_f": {"L": [0.3], "R": [0.25]}, "crouch_l": {"L": [0.283], "R": [0.583]}, "crouch_r": {"L": [0.283], "R": [0.583]}}
 	},
+	"beats": {"win": {"clip": "emote"}, "lose": {"clip": "downed"}},
 	"cancels": [
 		["bul_smash_wind", 0.5, "bul_guard"],
 		["bul_smash_wind", 0.5, "bul_mend"],

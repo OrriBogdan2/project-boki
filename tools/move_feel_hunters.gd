@@ -1,17 +1,20 @@
 extends RefCounted
-## --move-feel-check, the movement review per Hunter (docs/MOVEMENT_PARITY.md "Review on main, 2026-11-20"):
+## --move-feel-check, the movement review per Hunter (sv/MOVEMENT_PARITY.md "Review on main, 2026-11-20"):
 ## each of the 13 Hunters, its own kit and model swapped in, on the real match step. Measured per kit: the run (top
 ## speed against its hunter_move.json row, 95% of it), the let-go slide (inside the source's 30-144 fps band for that
-## speed) and its stop time, the jump's lift-off (Hunter.JUMP_V, pinned at 6.8 m/s by the owner's ruling), the glide
-## cruise and its 90-degree steer, and the dive's peak fall speed. Targets are the check's own rows (T); walking off
-## a ledge, the overheated lift and the wall kick and bounce per Hunter are --move-rule-guard-check and
-## --wallmove-check.
+## speed) and its stop time, the jump's lift-off (Hunter.JUMP_V, pinned at the source's 7.5 m/s), the glide
+## cruise and its 90-degree steer, a run into a glide (the cruise over the run, the source's MaxGlide over that
+## Hunter's MoveSpeed, never slower than the run) and the dive's peak fall speed. Targets are the check's own rows
+## (T); walking off a ledge, the overheated lift and the wall kick and bounce per Hunter are --move-rule-guard-check
+## and --wallmove-check.
 
 const DT := 1.0 / 60.0
-const JUMP_PINNED := 6.8  # m/s, owner ruling (docs/MOVEMENT_PARITY.md "Lift-off speed"): never the source's 7.5
+# m/s: [game data] JumpZVelocity 750 uu/s. Owner 11-26 "not as high" as the source: parity, over the old 6.8 ruling
+const JUMP_PINNED := 7.5
 const SPEED_TOL := 0.01  # m/s: the run and the lift-off land on their rows within this
 const SETTLE_STEPS := 30  # after the kit swap: a swap slows the walk (x0.8) for its first 0.25 s, not a run row
-const GLIDE_TOL := 0.05  # m/s: the cruise against the glide speed row (MaxGlide 5.0)
+const GLIDE_TOL := 0.05  # m/s: the cruise against HunterMove.glide_cruise (MaxGlide 5.0 x body_scale)
+const RATIO_TOL := 0.01  # x: a run into a glide's cruise over the run, against the source's ratio
 
 var c  # the move-feel check (its hunter, match and rec/ok)
 var hunter: Hunter
@@ -19,7 +22,7 @@ var hunter: Hunter
 
 func _init(check) -> void:
 	c = check
-	hunter = check.P
+	hunter = check.p_v
 
 
 func run() -> void:
@@ -33,6 +36,7 @@ func run() -> void:
 		var walk := _run_and_stop()
 		var jump := _lift_off()
 		var glide := _glide_steer()
+		var into := _run_into_glide(walk[0])
 		var dive := _dive_peak()
 		var band: Vector2 = c.ue_band(walk[0])
 		c.ok(
@@ -48,8 +52,16 @@ func run() -> void:
 			"hunter %-10s jump lift-off %.3f m/s (pinned %.1f)" % [id, jump, JUMP_PINNED]
 		)
 		c.ok(
-			absf(glide[0] - 5.0) <= GLIDE_TOL and _in(glide[1], "glide_turn90_t"),
+			absf(glide[0] - HunterMove.glide_cruise) <= GLIDE_TOL and _in(glide[1], "glide_turn90_t"),
 			"hunter %-10s glide cruise %.3f m/s, 90-degree steer %.3f s" % [id, glide[0], glide[1]]
+		)
+		var src := HunterMove.glide_cruise / HunterMove.speed(id)  # 500 uu/s over the row's MoveSpeed
+		c.ok(
+			absf(into[1] / walk[0] - src) <= RATIO_TOL and into[2] >= walk[0] - SPEED_TOL,
+			(
+				"hunter %-10s run into glide %.3f -> %.3f (0.5 s) -> %.3f m/s (x%.3f, source x%.3f), slowest %.3f"
+				% [id, walk[0], into[0], into[1], into[1] / walk[0], src, into[2]]
+			)
 		)
 		c.ok(_in(dive, "dive_vy"), "hunter %-10s dive peak %.3f m/s (row %.1f)" % [id, dive, HunterMove.dive_vy])
 	hunter.reclass(cls_was, arch_was, wid_was)
@@ -114,6 +126,23 @@ func _glide_steer() -> Array:
 		if absf(hv.angle_to(Vector2(0, 1))) < deg_to_rad(10.0) and hv.length() > cruise * 0.8:
 			return [cruise, (i + 1) * DT]
 	return [cruise, -1.0]
+
+
+## A glider opened at `run_v` m/s (a run off a ledge) and held forward 2.5 s: [speed 0.5 s in, after 2.5 s, slowest].
+func _run_into_glide(run_v: float) -> Array:
+	c._glide_at(25.0)
+	hunter.vel = Vector3(run_v, 0.0, 0.0)
+	hunter.inp["jump"] = true
+	var half := 0.0
+	var slowest := run_v
+	for i in 150:
+		hunter.inp["glide"] = true
+		hunter.inp["move"] = Vector2(1, 0)
+		c.m.step(DT)
+		slowest = minf(slowest, c._hv(hunter).length())
+		if i == 29:
+			half = c._hv(hunter).length()
+	return [half, c._hv(hunter).length(), slowest]
 
 
 ## The peak fall speed of a glide dive (crouch held from 0.5 s) from 60 m up (m/s).

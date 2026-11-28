@@ -1,7 +1,7 @@
 class_name RaidLook
 extends RefCounted
-## The expedition's light: the raid condition each match is played under (docs/TONE_AND_THREATS.md,
-## "a scarier environment"). Moody and low-saturated, with colour kept for danger and for Boki:
+## The expedition's light: the raid condition each match is played under
+## ("a scarier environment"). Moody and low-saturated, with colour kept for danger and for Boki:
 ## a low sun that throws long shadows, haze that thickens into the abyss, a cool split-toned grade,
 ## glow on what burns. Stylized, never gritty. Home (Look.cozy) is the warm opposite.
 ##
@@ -25,10 +25,11 @@ const WEIGHTS := {"clear": 0.42, "dusk": 0.18, "night": 0.14, "ash": 0.12, "fog"
 const SIGHT := {"clear": 1.0, "day": 1.0, "dusk": 0.85, "night": 0.6, "ash": 0.72, "fog": 0.62}
 ## How much bolder and more numerous the Blight is (BlightDir).
 const BLIGHT := {"clear": 1.0, "day": 1.0, "dusk": 1.12, "night": 1.4, "ash": 1.25, "fog": 1.2}
-## Outside-of-sight darkening (the vis shader's grey fog multiplier; 0.7 is the usual, docs/specs/VISION_LOOK.md; the
-## darker conditions keep about the same ratios to it, night and ash set so the grey fog's luma on GPU stays 0-10% under
-## what each weather showed before it went grey).
-const VIS_DARK := {"clear": 0.7, "day": 0.7, "dusk": 0.63, "night": 0.5, "ash": 0.58, "fog": 0.57}
+## Sight fog outside the cone: a slight DARK fog, partly grey, never tinted. Owner 11-23: "something in
+## between the full grey and the flat dim; slight dark fog, grey not blue". Two tunables, every weather
+## (docs/specs/VISION_LOOK.md). Default = variant B of the 11-23 sheet.
+const VIS_DARK := 0.60    # albedo scale outside sight (1 = no dimming)
+const VIS_GREY := 0.55    # share pulled to neutral grey (0 = own colours, 1 = full grey)
 const NAMES := {"clear": "Clear evening", "day": "Overcast day", "dusk": "Dusk", "night": "Night", "ash": "Ash storm", "fog": "Fog"}
 const BLURBS := {
 	"clear": "Good light. You see far, and so does everything else.",
@@ -85,8 +86,8 @@ static func pick(opts: Dictionary, seed_val := 0) -> String:
 ## Applies a condition over the tier's base look (Look.environment) and key light, then sets `vis_amb` and
 ## `vis_haze` from the ambient and env fog it ends with, so the fog outside sight comes out grey under them
 ## (shaders/vis.gdshaderinc).
-static func apply(e: Environment, sun: DirectionalLight3D, fill: DirectionalLight3D, T: Dictionary, cond: String) -> void:
-	_apply(e, sun, fill, T, cond)
+static func apply(e: Environment, sun: DirectionalLight3D, fill: DirectionalLight3D, t: Dictionary, cond: String) -> void:
+	_apply(e, sun, fill, t, cond)
 	RenderingServer.global_shader_parameter_set("vis_amb", vis_amb(e))
 	var h := e.fog_light_color.srgb_to_linear() * e.fog_light_energy
 	var on := 1.0 if e.fog_enabled else 0.0
@@ -98,11 +99,11 @@ static func vis_amb(e: Environment) -> float:
 	var c := e.ambient_light_color.srgb_to_linear()
 	return (c.r * 0.3 + c.g * 0.59 + c.b * 0.11) * e.ambient_light_energy
 
-static func _apply(e: Environment, sun: DirectionalLight3D, fill: DirectionalLight3D, T: Dictionary,
+static func _apply(e: Environment, sun: DirectionalLight3D, fill: DirectionalLight3D, t: Dictionary,
 		cond: String) -> void:
 	var sm := e.sky.sky_material as ShaderMaterial if e.sky else null
 	var full := Look.full_renderer()
-	var cl: Array = T["clouds"]
+	var cl: Array = t["clouds"]
 	match cond:
 		"day":
 			# overcast daylight: flatter, a little cooler, still muted
@@ -192,7 +193,7 @@ static func _apply(e: Environment, sun: DirectionalLight3D, fill: DirectionalLig
 
 ## Dusk: the clear evening an hour later. The sun is under the islands, the sky deep violet with an
 ## ember rim, the light low and red, the haze heavier.
-static func _dusk(e: Environment, sun: DirectionalLight3D, fill: DirectionalLight3D, sm: ShaderMaterial, full: bool) -> void:
+static func _dusk(e: Environment, sun: DirectionalLight3D, fill: DirectionalLight3D, sm: ShaderMaterial, _full: bool) -> void:
 	if sm:
 		sm.set_shader_parameter("top", Color("06060f"))
 		sm.set_shader_parameter("mid", Color("1a1430"))

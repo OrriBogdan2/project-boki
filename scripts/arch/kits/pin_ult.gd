@@ -5,7 +5,7 @@ extends Node3D
 ## lock, wind-up or nock (the owner's 11-08 note: the ult fires on press, its effects alongside the shot, never before).
 ## It empowers the bow for "shots" (3) within "window" seconds: each LMB press after "recover" s looses the
 ## next arrow the instant it is pressed. Each flies "speed" m/s (the source's beam crosses its 18 m in about
-## 0.2 s), pierces every foe out to "range" (1.5x her Empowered range), knocks back and strips "shred" armor.
+## 0.2 s), pierces every foe out to "range" (1.5x her Empowered range), nudges and strips "shred" armor.
 ## The last arrow hits harder and finishes a hunter it leaves under "execute" of their health. She can walk,
 ## roll and Spirit Walk between shots. The window ends after the last arrow or on time.
 ##
@@ -120,7 +120,7 @@ func _loose() -> void:
 	var base := float(x.get("final_dmg", 40.0)) if last else float(x.get("dmg", 30.0))
 	var dmg: float = base * k.m.dmg_mult(h) * LevelGrowth.ap(h)
 	var arrow := {"last": last}
-	var extra := {"src": "abil", "ab": "ultimate", "pierce": true, "hitset": {}, "kb": float(x.get("kb", 4.0)),
+	var extra := {"src": "abil", "ab": "ultimate", "pierce": true, "hitset": {}, "kb": float(x.get("kb", 2.0)),
 		"tracer": 0.0,
 		"kx": func(_s: Dictionary, _at: Vector3, e: Ent, _why: String): _hit(e, arrow)}
 	k.m.spawn_shot(h, start, dir * spd, dmg, rng / spd, 0.3, PinFx.THREAD, extra)

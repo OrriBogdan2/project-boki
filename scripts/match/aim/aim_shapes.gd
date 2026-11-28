@@ -9,6 +9,8 @@ const RIM_A := 0.7        # the rim's alpha
 const LW := 0.06          # m: the rim's line width
 const LACE_P := 0.5       # m: one cross of a laced line's two strands ("lace", Lace's own look)
 const SOFT_A := 0.25      # "soft": the inside never passes this alpha (docs/VFX_QUALITY.md, the zone rule)
+const QUIET_A := 0.5      # your own and an ally's shapes keep this share of their alpha (docs/COMBAT_CLARITY.md)
+const FOE_HOT := 0.3      # a rival's shapes are at least this lit: a bright rim
 const GLOW_W := 0.3       # m: "soft": how far the lit rim glows inward
 
 static func build(g: AimGeo, e: Dictionary) -> void:
@@ -24,6 +26,21 @@ static func build(g: AimGeo, e: Dictionary) -> void:
 		"line": _line(g, e)
 		"span": _span(g, e)
 		"star": g.star(e["at"], float(e["size"]), _hot(e, 1.0), float(e.get("rot", 0.0)))
+
+## The entry as the viewer sees it: a rival's is lit (a bright rim, the strong read), yours and an ally's is a faint
+## rim (no lace crossing, no chevrons, half the alpha) so the threat is the one that reads.
+static func for_viewer(e: Dictionary, foe: bool) -> Dictionary:
+	if foe:
+		if float(e["hot"]) >= FOE_HOT:
+			return e
+		e = e.duplicate()
+		e["hot"] = FOE_HOT
+		return e
+	e = e.duplicate()
+	e["alpha"] = float(e["alpha"]) * QUIET_A
+	e["lace"] = false
+	e["chevrons"] = 0
+	return e
 
 # ------------------------------------------------------------------ colours
 static func _fill(e: Dictionary, k := 1.0) -> Color:
@@ -226,7 +243,7 @@ static func _circle(g: AimGeo, e: Dictionary) -> void:
 		_soft_circle(g, e, ctr, r, maxf(band, lw))
 	elif band > 0.0:
 		g.disc(ctr, r, _fill(e, 0.2))               # a thin ring, its outer edge on r, a faint tint inside
-		g.ring(ctr, r - band * 0.5, band, _rim(e))
+		_circle_edge(g, e, ctr, r - band * 0.5, band)
 	else:
 		g.disc(ctr, r, _fill(e, 0.5), _fill(e, 1.2))
 		_circle_edge(g, e, ctr, r, lw)

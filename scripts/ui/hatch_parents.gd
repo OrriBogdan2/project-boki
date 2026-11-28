@@ -8,17 +8,28 @@ extends RefCounted
 const MARK := [Color("ffb36a"), Color("7ac8ff")]      # parent a, parent b: the ring on its portrait and its dots
 const PORTRAIT_PX := 44.0
 const DOT_PX := 12.0
+## How each trait reads as a line before "from <parent>": {} is the value ("Ember lean", "Loves Berries").
+const PHRASE := {"Kind and colour": "{} kind", "Coat pattern": "{} pattern", "Pattern colour": "Pattern colour",
+	"Lean": "{} lean", "Best stat": "{}", "Loves": "Loves {}", "Likes": "Likes {}", "Mutation": "{}"}
 
 ## True if the baby has a parents row to show (bred, with its gifts recorded).
 static func has_row(baby: Dictionary) -> bool:
 	return not (baby.get("gifts", {}) as Dictionary).is_empty() and (baby.get("parents", []) as Array).size() == 2
 
-## The traits the row lists, in order: [{"what": label, "val": words, "from": parent index or Parentage.BOTH}].
+## The traits the row lists, in order: [{"what": label, "val": words, "from": parent index or Parentage.BOTH,
+## "col": its swatch (accent only)}].
 static func traits(baby: Dictionary) -> Array:
 	var g: Dictionary = baby["gifts"]
 	var sp: Dictionary = Data.KIN.get(String(baby["species"]), {})
 	var kind := String(sp.get("name", baby["species"]))
 	var out: Array = [{"what": "Kind and colour", "val": kind, "from": int(g["species"])}]
+	if g.has("pattern"):
+		var mark := String(Unique.MARK_INFO[baby["dna"]["mark"]]["name"])
+		out.append({"what": "Coat pattern", "val": mark, "from": int(g["pattern"])})
+	if g.has("accent"):
+		var parent := String(baby["parents"][int(g["accent"])])
+		out.append({"what": "Pattern colour", "val": "%s's" % parent, "from": int(g["accent"]),
+			"col": Color(String(baby["dna"]["accent"]))})
 	if g.has("lean"):
 		out.append({"what": "Lean", "val": _lean_name(baby), "from": int(g["lean"])})
 	var best := _best_stat(baby)
@@ -37,6 +48,16 @@ static func traits(baby: Dictionary) -> Array:
 		out.append({"what": "Mutation", "val": Mutations.name_of(id), "from": int(muts[id])})
 	return out
 
+## One short line per inherited trait, naming the parent: "Ember lean from Pip" (empty for a Boki with no gifts).
+static func lines(baby: Dictionary) -> Array:
+	var out: Array = []
+	if not has_row(baby):
+		return out
+	for t in traits(baby):
+		var from := "both parents" if int(t["from"]) == Parentage.BOTH else String(baby["parents"][int(t["from"])])
+		out.append("%s from %s" % [String(PHRASE[t["what"]]).replace("{}", String(t["val"])), from])
+	return out
+
 ## The row itself: the two parents side by side, then one line per trait with its parent marker.
 static func view(baby: Dictionary, tree: SceneTree) -> Control:
 	var v := UI.vbox(3)
@@ -45,10 +66,15 @@ static func view(baby: Dictionary, tree: SceneTree) -> Control:
 	for i in [0, 1]:
 		heads.add_child(_parent_head(baby, i, tree))
 	v.add_child(heads)
-	for t in traits(baby):
+	var words := lines(baby)
+	var listed := traits(baby)
+	for i in words.size():
+		var t: Dictionary = listed[i]
 		var line := UI.hbox(6)
 		line.alignment = BoxContainer.ALIGNMENT_CENTER
-		line.add_child(UI.label("%s: %s" % [t["what"], t["val"]], UI.T_SMALL, UI.MUTED))
+		line.add_child(UI.label(String(words[i]), UI.T_SMALL, UI.MUTED))
+		if t.has("col"):
+			line.add_child(_swatch(t["col"]))
 		line.add_child(_marker(int(t["from"])))
 		v.add_child(line)
 	return v
@@ -70,6 +96,13 @@ static func _marker(from: int) -> Control:
 	for i in ([0, 1] if from == Parentage.BOTH else [from]):
 		m.add_child(Dot.new(i, DOT_PX))
 	return m
+
+static func _swatch(col: Color) -> Control:
+	var sw := ColorRect.new()
+	sw.color = col
+	sw.custom_minimum_size = Vector2(DOT_PX, DOT_PX)
+	sw.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	return sw
 
 static func _lean_name(baby: Dictionary) -> String:
 	var aff := String(Evo.lean(baby)[0])

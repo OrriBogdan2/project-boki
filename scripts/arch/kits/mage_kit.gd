@@ -10,16 +10,17 @@ extends ArchKit
 ## The Storm Rod knocks the first foe back (a stun against a wall or another foe) and leaves a charge
 ## orb, a pickup that gives Wirerun back; Skycall drags a crowd the way you flick and grounds it.
 
+const SLOT_PINK := Color("ff5ab4")   # her ability slot colour (docs/VFX_QUALITY.md palette)
 const PINK := Color("ff3fb4")        # the lightning's hot core: it burns hot pink (DECISIONS)
 const COPPER := Color("e08a46")
 const DEEP_PINK := Color("e0148c")   # the aim kit whitens its accent: this lands as a rich hot pink
 const PINK_WHITE := Color("ffc4ea")   # the lightning body: pink-white (DECISIONS 11-08; was teal)
 const FINGER_SIDE := 0.11            # m: where a pointing fingertip is at the release: off her centre...
-const FINGER_AHEAD := 0.3            # ... and ahead of where a round starts
+const FINGER_AHEAD := 0.3            # ... and ahead of where a round starts (x match_hunter_scale)
 const MARK_LIFT := 0.5               # m the Static marker sits above the HP bar
-const TAG_LIFT := 30.0               # px the overhead combo tag (ComboMark) moves up to clear the Static marker
 const RMB_KEY := 0.06               # s into the rmb clip: the throw (tools/art1/ryzz_clips.py)
 const ECHO_GAP := 0.045              # s between her after-images on the Wirerun and the air dash
+const HOLD_KNOCK := 1.5              # steps of knock the Wirerun hold keeps on her: her drift bleeds as a knock's
 const STATIC_GAP := 0.35             # s between the Static sparks' puffs on a marked foe (each lives as long)
 const LIVE_CRAWL_HZ := 7.0           # arcs a second crawling down a Live foe
 
@@ -41,6 +42,7 @@ var reset_dash_boost := false  # a reset armed the next Wirerun: further, charge
 var reset_boost_t := 0.0       # s left on it
 var slams := 0
 var orb_bursts := 0
+var lmb_sd := {}                # the last finger bolt while it flies (its crackle, mage_bolt_fly, follows it)
 var lmb_n := 0                 # finger bolts fired (left, right, left...)
 var last_shot := 0
 var last_dash_kind := ""
@@ -103,16 +105,6 @@ func recast_window() -> Dictionary: return ult.window()
 func move_vel() -> Vector3:
 	return ult.move_vel()
 
-## RecastCue's badge: Sparks on each foe; gold at the cap, where her next hit is the BLOWOUT.
-func combo_marks(out: Array) -> void:
-	super(out)
-	var rd := res_def()
-	for key in sparks:
-		var sp: Dictionary = sparks[key]
-		if is_instance_valid(sp["e"]):
-			var n := int(sp["n"])
-			out.append(RecastCue.mark(sp["e"], n, float(sp["t"]), float(rd["dur"]), n >= int(rd["max"])))
-
 ## Kitefall holds her from the crouch to the strike: no other key works until she lands (in the crouch Shift and
 ## a jump still do).
 func busy() -> bool:
@@ -140,9 +132,6 @@ func res_text() -> String:
 
 func res_frac() -> float:
 	return float(_best()) / float(res_def()["max"])
-
-func ready_label() -> String:
-	return "LIVE FOE: WIRERUN THROUGH" if full_ready() else ""
 
 func live(f: Ent) -> bool:
 	var s = sparks.get(f.get_instance_id())
@@ -176,14 +165,15 @@ func add_spark(f: Ent, n := 1) -> void:
 		m.sfx("vv_static_full", f.pos, -2.0)
 		if swing: play("mage_live")
 	elif int(s["n"]) > was:
-		m.sfx("mage_zap", f.pos, -6.0, 0.9 + 0.08 * float(s["n"]))     # the zap climbs with each stack
+		StatusSfx.cue(f, "static", h, float(rd["dur"]), int(s["n"]), true)     # the zap climbs with each stack
+	StatusSfx.loop_static(f, h, func() -> int: return spark_n(f))
 
 func combo_read(f: Ent) -> Dictionary:
 	var s = sparks.get(f.get_instance_id())
 	if s == null:
 		return {}
 	return {"icon": "mark_static", "n": int(s["n"]), "max": int(res_def()["max"]), "left": float(s["t"]),
-			"total": float(res_def()["dur"]), "lift": TAG_LIFT}
+			"total": float(res_def()["dur"])}
 
 func clear_sparks(f: Ent) -> void:
 	var key := f.get_instance_id()
@@ -205,7 +195,7 @@ func _tick_sparks(dt: float) -> void:
 			fx().unmark("vs%d" % key)
 			continue
 		var n := int(s["n"])
-		var badge := not h.is_local()      # yours: the badge
+		var badge := not h.is_local() and not m.has_meta("pitch_no_foe_plates")  # your own: no badge
 		fx().marker("vs%d" % key, f, n, mx, PINK_WHITE, PINK, _top(f) + MARK_LIFT, badge)
 		StatusLooks.of(m).keep(f, "static")
 		if f.visible and int(m.time / STATIC_GAP) != int((m.time - dt) / STATIC_GAP):
@@ -234,6 +224,9 @@ func _tick(dt: float) -> void:
 		_tick_wire(dt)
 	if run_t > 0.0:
 		_tick_run(dt)
+	if run_exit and h.dash_buf > 0.0 and h.dashes < 1.0:
+		h.dash_buf = 0.0           # Shift mashed in the streak with no charge back: dropped, not the 4 m plain dash
+		h._ab_feedback("dash", "deny")
 	if run_exit and h.roll_t <= 0.0:
 		_exit_run()
 	if rmb_down:
@@ -283,6 +276,8 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 ## A new finger bolt left the hand: alternate hands (the bolt starts at that hand), a twist, a crackle
 ## at the fingertip; the round becomes a jagged bolt with a spark impact (content/vfx/mage.json).
 func _tick_lmb() -> void:
+	if not lmb_sd.is_empty() and not HeroSfx.fly(m, h, "mage_bolt_fly", lmb_sd):
+		lmb_sd = {}
 	var idle := wire.is_empty() and not rmb_down and run_t <= 0.0 and not ult.busy()
 	if h.is_local() and idle and not h.downed:
 		# the aim line runs through the cursor out to full range, an arrow tick at its end (always up)
@@ -303,9 +298,10 @@ func _tick_lmb() -> void:
 	var d := h.aim_dir()
 	# (from the fingertip of the hand that fires: the arm is still coming up, so where that fingertip will be. The round
 	# has already flown a tick from the old muzzle: it gets that time back, so her reach stays what it was)
-	var side := Vector3(-d.y, 0, d.x) * (-FINGER_SIDE if left else FINGER_SIDE)
+	var drawn := CamRig.match_hunter_scale
+	var side := Vector3(-d.y, 0, d.x) * (-FINGER_SIDE if left else FINGER_SIDE) * drawn
 	var was_at: Vector3 = sd["pos"]
-	var p := Vector3(h.pos.x, was_at.y, h.pos.z) + side + Vector3(d.x, 0, d.y) * FINGER_AHEAD
+	var p := Vector3(h.pos.x, was_at.y, h.pos.z) + side + Vector3(d.x, 0, d.y) * FINGER_AHEAD * drawn
 	var speed := (sd["vel"] as Vector2).length()
 	if speed > 0.1:
 		sd["life"] = float(sd["life"]) + Vector2(was_at.x - p.x, was_at.z - p.z).length() / speed
@@ -313,6 +309,8 @@ func _tick_lmb() -> void:
 	sd["prev"] = p
 	sd["start"] = p
 	play("mage_lmb_l" if left else "mage_lmb_r")
+	lmb_sd = sd
+	m.sfx("mage_bolt_tail", p, -6.0 if h.is_local() else -9.0)     # sparks pattering after the snap
 	# a thrust from the shoulder to the fingertip, the hand's swoosh, then (at the release key) the fingertip
 	# crackles; a jagged bolt rides the round and splinters back where it ends
 	vfx("lmb", null, null, {"left": left})
@@ -374,7 +372,7 @@ func on_dash(use_ex: bool) -> bool:
 	reset_dash_boost = false
 	play("mage_dash")
 	vfx("dash")                    # a bolt slams down onto her: the charging tell
-	m.sfx("vv_surge_charge", h.pos, -3.0)
+	KitWindup.play(self, "dash", "vv_surge_charge", -3.0)
 	return true
 
 ## A Boki merge ends the Wirerun's charge (refunded: nothing ran), the Storm Rod's hold, a Skycall
@@ -392,9 +390,10 @@ func _end_wire(refund: bool) -> void:
 	if wire.is_empty(): return
 	if refund: h.dashes = minf(h.max_dashes(), h.dashes + 1.0)
 	wire = {}
-	if h.knock_t < 0.05 and h.loco.is_in(Loco.S.KNOCKED):
-		h.knock_t = 0.0         # the wire's own knocked state (a real knock lasts longer) ends with it, so the streak
-		h.loco.go(Loco.S.GROUNDED if h.grounded else Loco.S.AIRBORNE)       # is a dash a glide press can cancel
+	if h.knock_t < 0.05:
+		h.knock_t = 0.0         # the wire's own no-keys hold (a real knock lasts longer) ends with it: carried under
+		if h.loco.is_in(Loco.S.KNOCKED):      # the streak it would refuse the glider (HunterLoco._glide_ok), so the
+			h.loco.go(Loco.S.GROUNDED if h.grounded else Loco.S.AIRBORNE)      # streak is a dash a glide press cancels
 	AimKit.hide(h, "dash")
 	AimKit.hide(h, "dash_end")
 
@@ -414,11 +413,18 @@ func _tick_wire(dt: float) -> void:
 	var t := float(wire["t"])
 	if h.downed or h.stun_t > 0.0 or h.root_t > 0.0 or KitStatus.grounded(h):
 		_end_wire(false)                # the charge was spent on the press: cut, it's gone
+		KitWindup.broken(self, "dash")
+		return
+	if not h.grounded and bool(h.inp.get("jump", false)) and h.knock_t <= dt * HOLD_KNOCK:
+		# Space in the air hold (DECISIONS 11-08, Shift cancels into glide for every Hunter): cut, the charge stays
+		# spent as on any cut, and the press opens the glider at the drift she had
+		_end_wire(false)
+		h.do_jump()
 		return
 	# no control of your own while you hold it: the keys do nothing, momentum drifts you, height holds
 	h.inp["move"] = Vector2.ZERO
 	h.inp["jump"] = false
-	h.knock_t = maxf(h.knock_t, dt * 1.5)
+	h.knock_t = maxf(h.knock_t, dt * HOLD_KNOCK)
 	if bool(wire["air"]):
 		h.vel.y = 0.0
 		h.pos.y = float(wire["y"])
@@ -487,12 +493,28 @@ func _tick_glide_cancel() -> void:
 	glide_key_was = key
 	if not fresh or h.grounded or h.glide_cd > 0.0 or h.shot_down or m.time - h.kb_t <= 0.4:
 		return
+	if not _wire_let_go() and ult.glide_out():
+		_let_go()
+
+## DECISIONS 11-08 "Shift cancels into glide instantly for every Hunter": a fresh glide press in the air (a second
+## Space too, which the glide key above never sees) ends the Wirerun's charge or streak the way Hunter._dash_into_glide
+## ends a dash, and the glider opens on that press. Kitefall's flight stays the glide key's only (into_jump.x).
+func glide_cancel() -> bool:
+	return m.time - h.kb_t > 0.4 and _wire_let_go()
+
+## Ends the Wirerun's charge or streak for the glider; false when neither is under way (a run with no press keeps
+## its full distance).
+func _wire_let_go() -> bool:
 	if not wire.is_empty():
 		_end_wire(false)
 	elif run_t > 0.0:
 		_cut_run()
-	elif not ult.glide_out():
-		return
+	else:
+		return false
+	_let_go()
+	return true
+
+func _let_go() -> void:
 	play("")
 	h.knock_t = 0.0                # the charge's own no-keys hold
 	h.loco.go(Loco.S.AIRBORNE)     # (that hold left the state Knocked, which may not open a glider)
@@ -536,7 +558,9 @@ func _wire_hit(f: Ent, dmg: float) -> void:
 	f.hurt(dmg * power("dash"), h, {"src": "abil", "ab": "dodge", "tags": ["dodge"]})
 	vfx("wire_hit", f.pos)        # a hit on the way, not a burst
 	m.sfx("mage_wire_hit", f.pos, -4.0)
-	if was_live and is_instance_valid(f) and not f.dead:
+	if not was_live:
+		add_spark(f)              # the run stacks Static like every hit of hers
+	elif is_instance_valid(f) and not f.dead:
 		_blowout(f)
 
 func _blowout(f: Ent) -> void:
@@ -750,9 +774,9 @@ func _build_mote() -> Node3D:
 	for ch in n.get_children():
 		(ch as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var lt := OmniLight3D.new()
-	lt.light_color = PINK
+	lt.light_color = SLOT_PINK       # her slot pink (#ff5ab4): the haze on the ground stays pink, not orange
 	lt.omni_range = 2.4
-	lt.light_energy = 1.2
+	lt.light_energy = 0.6
 	n.add_child(lt)
 	mote_pool.append(n)
 	return n

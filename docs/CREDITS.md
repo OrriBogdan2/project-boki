@@ -23,7 +23,7 @@ All sound effects are original synthesis in code (`tools/gen_*sfx*.py`, `tools/s
 ### ext/sfx-motley (ostra)
 - Synthesised, no samples.
 ### ext/sfx-motley-gil-bar (ostra, gil)
-- Synthesised, no samples, no CC0 sources needed (`tools/gen_sfx_motley.py bar`: os_snap_fizz, os_trade_swap, os_seed_fizz; `tools/gen_sfx_gil.py bar`: gil_tide_hit, gil_slime_dry).
+- Synthesised, no samples, no CC0 sources needed (`tools/gen_sfx_motley.py bar`: os_snap_fizz, os_trade_swap, os_seed_fizz, os_well_close; `tools/gen_sfx_gil.py bar`: gil_tide_hit, gil_slime_dry, gil_spout_hit, gil_tide_lunge).
 
 ### ext/sfx-cinder (ashwick)
 - Synthesised, no samples.
@@ -48,6 +48,10 @@ All sound effects are original synthesis in code (`tools/gen_*sfx*.py`, `tools/s
 ### ext/sfx-tarek (dolm)
 - Synthesised, no samples.
 
+### ext/sfx-tenzo-grimble-bar (Tenzo and Grimble ability bar)
+- Synthesised, no samples, CC0 (`tools/gen_sfx_ability_bar.py`: dolm_hit_rock, dolm_hit_rmb, dolm_hit_dash,
+  dolm_hit_r, br_boulder_fly, dredge_hit_rmb, dredge_hit_e, dredge_hit_r, dr_reach_fly, dr_let_go, dr_blast_end).
+
 ### ext/sfx-boki
 - Synthesised, no samples.
 
@@ -58,6 +62,8 @@ All sound effects are original synthesis in code (`tools/gen_*sfx*.py`, `tools/s
 - Synthesised, no samples (`tools/gen_sfx_egg.py`: egg_knock, egg_crack, egg_ready).
 ### ext/sfx-step-surfaces (shallow water and metal footsteps)
 - Synthesised, no samples (`tools/gen_sfx_steps.py`).
+### ext/p01-sfx-1118 (deep water: weight-class splash, dash spray, Boki wading loop)
+- Synthesised, no samples (`tools/gen_sfx_water.py`, from ext/sfx-water).
 ### ext/sfx-breakables
 - Synthesised, no samples.
 ### ext/sfx-stomp-cues (the stomp: wind-up, finish thud, CC crack)

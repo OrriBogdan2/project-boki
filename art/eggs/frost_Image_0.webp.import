@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bscjafgvntd1r"
-path="res://.godot/imported/frost_Image_0.webp-1947e9d4a876df496d00126aac92534f.ctex"
+path.s3tc="res://.godot/imported/frost_Image_0.webp-1947e9d4a876df496d00126aac92534f.s3tc.ctex"
+path.etc2="res://.godot/imported/frost_Image_0.webp-1947e9d4a876df496d00126aac92534f.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "f41c7acb8fbd1d9c0995bbdeb1a7d51c"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/eggs/frost_Image_0.webp"
-dest_files=["res://.godot/imported/frost_Image_0.webp-1947e9d4a876df496d00126aac92534f.ctex"]
+dest_files=["res://.godot/imported/frost_Image_0.webp-1947e9d4a876df496d00126aac92534f.s3tc.ctex", "res://.godot/imported/frost_Image_0.webp-1947e9d4a876df496d00126aac92534f.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

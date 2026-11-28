@@ -56,12 +56,12 @@ Rank = how likely a new player stops, quits or learns the wrong thing. Each line
 2. **Dead end: three of five first-day lines need a second Boki and nothing in the hour gives one.** Dash "needs two rested Boki", nap
    pile and pair need company, and the wild visitor needs 2 residents of the zone's group (`garden_visitor.json residents: 2`). The
    only other source is a 420-gem Rare Egg at the trader. Owner: `scripts/home/garden_visitor.gd`, `content/rules/garden_visitor.json`,
-   `scripts/home/base_race.gd entrants`. *Proposal: let a lone Boki draw the first visitor (`ext/garden-play-0246` 7a9d77741 sets
+   `scripts/home/base_race.gd entrants`. **Fixed on ext/garden-second-boki:** base_mode opens the Shelter at stall level 1 (stray 20 gems, 200 on entry); asserted in `--garden-first-day-check`. *Original proposal: let a lone Boki draw the first visitor (`ext/garden-play-0246` 7a9d77741 sets
    `lone_residents 0`), or hatch two starters; and say in the Dash toast how to get a second Boki.*
 3. **The tutorial blocks the thing it just asked for.** "Place a toy" came after "Feed it", but while Feed is open the Boki stays in the
    Lead state and ignores the toy for up to 10 minutes (here 579 s). Owner: `scripts/home/base_tut_lead.gd`,
    `scripts/home/base_life.gd` (line 220), `content/rules/farm_tutorial.json` base steps. *Proposal: free the toy step from the feed step
-   (free_order) or let the Boki play while the step is `watch`.*
+   (free_order) or let the Boki play while the step is `watch`.* **Fixed on ext/tut-garden-toy-free:** `BaseTutLead.tick` lets the led Boki go to a placed toy while "patch" or "eat" is open (once per Boki, then the lead resumes). `--garden-first-day-check` has a phase with the tutorial on and Feed open: before the fix your Boki never played in 240 s of farm time (the old 579 s was only its end), after it plays at the toy in 12 s (limit 60 s).
 4. **The next zone depends on the calendar, not the hour.** The Wayseed is on the Drift Trader one real day in three
    (`market.json black_market wayseed_days 3`, price 110). On a day without it the second key cannot be had for up to 3 days, however well
    you play; the farm day is 5 minutes, so "day 3" in the pace check is three calendar days. The hub hint says only "A dark stone needs two
@@ -85,7 +85,15 @@ Rank = how likely a new player stops, quits or learns the wrong thing. Each line
    in the Garden tab at 0 gems and is not mentioned by any step, yet it is the only food source that keeps the Boki fed and leans it toward
    a zone. Owner: `content/rules/farm_tutorial.json base steps`, `scripts/home/farm_task_guide.gd`. *Proposal: add a "Plant the snack
    patch" step before "Feed it".*
-10. **The tutorial never ends on its own.** Step 4 "Head out or stay" stays on the banner after an hour (shot 10), and its line runs past
+   *Done on `ext/garden-free-toy-hint`: the toy step's line names both tabs (Play ball with its price, Snack patch free) and the two tiles glow green in
+   the Build bar while that step is open (`marks` in the step; `hl` on the entry). The ball is not free: it costs 12 of the 200 starting gems.*
+   **Fixed (ext/farm-tut-patch-step):** the base tutorial is now five steps: meet, **Plant the snack patch** (build bar, Garden tab,
+   the patch tile lit by the spotlight like the trough tile in the farm tutorial), feed, toy, head out. The step ticks when the patch
+   is down (or the Boki has already been fed); the Boki stays at your side for it. `farm_task_guide.gd` is the farm path's job
+   guide and is retired in base mode, so it needed no change. Re-timed first hour: the patch is down at about 10 s of play (one
+   build-bar visit, free), so the 8-minute ripening clock starts about 5 s earlier than in the played run and the first meal and the
+   Feed and Toy lines still tick together at about 580 s; nothing else moves (item 8 is what would shorten that wait).
+10. **(fixed on ext/farm-tut-ends) The tutorial never ended on its own.** Step 4 "Head out or stay" stays on the banner after an hour (shot 10), and its line runs past
     the 4/4 counter. Owner: `scripts/home/farm_tutorial.gd` `event` ("stay" is a button press only), banner width in
     `scripts/ui/`. *Proposal: finish the step when the first zone wakes or after the toy ticks, and wrap the banner text.*
 11. **`base_mode` ships off.** On `main` a fresh save gets the full farm (chop, mine, build a house) and the garden tutorial is not shown at all;

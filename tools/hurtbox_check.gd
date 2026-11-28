@@ -6,12 +6,13 @@ extends "res://tools/hitbox_size_check.gd"
 ## touches the save.
 
 const WARDENS := preload("res://tools/warden_model_check.gd").WARDENS
-const MEDIUM_HEIGHT := 1.732      # m, a medium hunter drawn (head top 1.546 x Hunter.VIS_SCALE 1.12)
-const SIZE_PULL := 0.3            # how much of a height's distance from the medium counts toward the radius
-const EDGE := 0.05                # m, the shot's miss or hit distance from the circle
-const TOP_PAD := 0.9              # m over the head a shot still hits (Match.shot_band)
+const MEDIUM_HEIGHT := 1.732  # m, a medium hunter drawn (its hitbox height; drawn size may exceed it)
+const SIZE_PULL := 0.3  # how much of a height's distance from the medium counts toward the radius
+const EDGE := 0.05  # m, the shot's miss or hit distance from the circle
+const TOP_PAD := 0.9  # m over the head a shot still hits (Match.shot_band)
 
 var home := Vector3.ZERO
+
 
 ## A hit shoves and stuns the hunter, so each shot starts from the same spot and a calm body.
 func _fire(m: Match, shooter: Hunter, h: Hunter, side: float, rad := 0.1, up := 0.95) -> bool:
@@ -20,26 +21,31 @@ func _fire(m: Match, shooter: Hunter, h: Hunter, side: float, rad := 0.1, up := 
 	h.stun_t = 0.0
 	return super(m, shooter, h, side, rad, up)
 
+
 func run(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "god": false})
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "god": false})
 	m.set_process(false)
-	for mb in m.mobs: mb.queue_free()
+	for mb in m.mobs:
+		mb.queue_free()
 	m.mobs.clear()
-	for k in m.kins:      # a wild Boki's bites would count as hits
+	for k in m.kins:  # a wild Boki's bites would count as hits
 		k.queue_free()
 	m.kins.clear()
-	for b in m.breaks: b["dead"] = true
+	for b in m.breaks:
+		b["dead"] = true
 	var h: Hunter = m.hunters[0]
 	var shooter: Hunter = null
 	for o in m.hunters:
 		o.ctrl = "idle"
-		if o.team != h.team and shooter == null: shooter = o
+		if o.team != h.team and shooter == null:
+			shooter = o
 	for o in m.hunters:
-		if o != h and o != shooter: o.teleport(m.world.random_ground())
+		if o != h and o != shooter:
+			o.teleport(m.world.random_ground())
 	_flatten(m, h)
 	home = h.pos
 	var std := float(Data.CLASSES["medium"]["hit_r"])
