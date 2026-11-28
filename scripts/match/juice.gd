@@ -113,14 +113,14 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 	# own tier confirm (ImpactWeight.confirm)
 	if credit == p and target != p:
 		if armor:
-			m.sfx("armor_hit", target.pos, -9.0, 1.0, true)
+			m.sfx("armor_hit", target.pos, -9.0, ArmorRules.confirm_pitch(target), true)
 		var w := ImpactWeight.of_hit(by, target, d, o)
 		if w != "":
 			m.sfx(ImpactWeight.confirm(w), target.pos, ImpactWeight.confirm_db(w), 1.0, true)
 	elif target == p:
 		IncomingHitSfx.hit(m, by, d, o)  # from where it came, so you know which way to turn
 		if armor:
-			m.sfx("armor_hit", null, -12.0, 0.85)
+			m.sfx("armor_hit", null, -12.0, 0.85 * ArmorRules.confirm_pitch(target))
 	elif target != p and credit != p and not typed:
 		m.sfx("crit" if crit else "hit", target.pos, RIVAL_HIT_DB)
 

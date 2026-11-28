@@ -626,8 +626,11 @@ func damage_number(target: Ent, by: Ent, d: float, o: Dictionary, you: Hunter, a
 	var crit: bool = o.get("crit", false)
 	var on_your_kin := target is Kin and (target as Kin).owner_h == you
 	var plain := DexView.type_col(String((by as Kin).sp.get("type", ""))) if kind == Num.KIN else HudStyle.HIT
-	var col := DotLook.COL if kind == Num.TICK else HudStyle.dmg_col(
-		crit, armor_hit, target == you, on_your_kin, plain, kind == Num.HEAVY)
+	var col := (
+		DotLook.COL
+		if kind == Num.TICK
+		else HudStyle.dmg_col(crit, armor_hit, target == you, on_your_kin, plain, kind == Num.HEAVY)
+	)
 	if credit is Hunter and (credit as Hunter).ak and target != you:
 		col = (credit as Hunter).ak.number_col(target, col, o)
 	var at := target.pos + Vector3(0, 1.5 if target is Hunter else 1.0, 0) + _look_spot(kind)
@@ -988,7 +991,7 @@ func _process(delta: float) -> void:
 			l.visible = false
 			nums.erase(n)
 	if nums.size() > 1:
-		NumSpacing.spread(nums, cam)  # numbers on one spot slide apart (docs/HUD.md)
+		NumSpacing.spread(nums, cam, zone)  # numbers on one spot slide apart (docs/HUD.md)
 	for rg in rings.duplicate():
 		rg["t"] += delta
 		var k: float = rg["t"] / rg["dur"]

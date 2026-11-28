@@ -15,7 +15,6 @@ extends RefCounted
 
 const IDS := {"calm": 0, "happy": 1, "angry": 2, "determined": 3, "sad": 4, "sleepy": 5, "shy": 6, "cry": 7}
 const FACE_SHADER := preload("res://shaders/warden_mood.gdshader")
-const ATLAS_SHADER := preload("res://shaders/warden_mood_atlas.gdshader")
 const POKE := "mood_poke"     # root meta: the time left of a shiver
 const FLARE := "lure_flare"   # root meta: bool, the lure burns bright
 const FADE := 7.0             # 1/s: one mood into the next
@@ -74,12 +73,10 @@ func _setup(glb: Node3D) -> void:
 			var nm := String(src.resource_name) if src else ""
 			var tag := nm.trim_prefix("eyes-mood_")
 			if nm.begins_with("eyes-mood_") and d.get("faces", {}).has(tag) and src is BaseMaterial3D:
-				var am := ShaderMaterial.new()
-				am.shader = ATLAS_SHADER
-				am.set_shader_parameter("atlas", (src as BaseMaterial3D).albedo_texture)
+				var am := (mi as MeshInstance3D).get_surface_override_material(si) as ShaderMaterial
+				am.set_shader_parameter("atlas_grid", Vector2i(4, 2))
 				am.set_shader_parameter("blink_cell", int(d.get("blink_cell", -1)))
 				atlas.append([am, d["faces"][tag]])
-				(mi as MeshInstance3D).set_surface_override_material(si, am)
 			elif d.get("tex_faces", {}).has(nm):
 				var glass := (mi as MeshInstance3D).get_surface_override_material(si) as ShaderMaterial
 				_tex_face(glass, d["tex_faces"][nm])
