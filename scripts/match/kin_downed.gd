@@ -246,7 +246,8 @@ static func come_round(k: Kin, rescued: bool) -> void:
 	k.rescue_block = 0.0
 	k.down_void = false
 	k._hop_on()
-	KinFlinch.pop(k.model, k.mass())
+	if k.model:
+		KinFlinch.pop(k.model, k.mass())
 	KinLoss.reclaimed(k)
 	k.m.fx.burst(k.owner_h.pos + Vector3(0, 1.5, 0), k.sp["color"], 12 if rescued else 8, 2.5)
 	k.m.sfx("boki_revive", k.owner_h.pos, -4.0)
