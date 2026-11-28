@@ -92,7 +92,7 @@ existing recorded-colour fence. `pin_draw.gd` has no `#e8483e` any more.
 
 Still open (shared, not done here):
 - Data-driven kits: all 13 Hunters have `content/vfx/<arch>.json`; code still draws Albert's hammer and shield meshes (`bjorn_fx`, `aegis_wall`), Sable's LMB, RMB and E (`dj_fx`) and Tenzo's rock bodies (`breah_*`).
-- Zone rule (seen in the strips): a zone is a lit rim plus a soft inside (alpha 0.25 or less at the centre), never a solid fill. Done: Vex's X, Albert's Faultline, Gil's lanes (11-25), Meeko's Burrseed burst (11-28); Sable's X rim and E (no zone) were already fine. Still open: Sable's RMB Bola wind-up lane, Meeko's Hearth Call vortex (`call`, not `thin`: a big filled swirl).
+- Zone rule (seen in the strips): a zone is a lit rim plus a soft inside (alpha 0.25 or less at the centre), never a solid fill. Done: Vex's X, Albert's Faultline, Gil's lanes (11-25), Meeko's Burrseed burst (11-28); Sable's X rim and E (no zone) were already fine; Sable's RMB Bola wind-up lane (AimKit `soft`, inside 0.097 at the base) and Meeko's Hearth Call vortex (`call` is `thin` now: three lit comet arcs, no filled swirl) 11-28.
 
 ## Scorecard (re-scored 2026-11-22, worst first)
 Rubric, each axis 1-5: R readability, S shape, L layering, T timing, Sc scale, C colour (against the Hunter's current
@@ -128,7 +128,7 @@ Kael 27, Cinder 28), the 11-09 and 11-12 re-scores and each fix branch's own not
 1. Albert: done 11-25 (ext/vfx-albert-faultline-rim): Faultline is a soft lane with lit outlines, the 360 Smash ring is ivory.
 2. Grimble, `content/vfx/dredge.json`: the E fist/wedge slabs are flat translucent orange because palette `main` is copper `d89040`; move `main` to coin gold `#ffc832` and give the slab a lit rim.
 3. Vex, `content/vfx/gunslinger.json` `x_shell` / X zone end: the Nuke ends as a near-opaque dark green disc over the foe; cap the inside alpha at 0.25 and keep the lit rim.
-4. Sable, `scripts/arch/kits/thief_kit.gd` (RMB Bola wind-up lane): a flat lavender slab; use the `soft` AimKit lane (lit rim, inside at most 0.1).
+4. (done 11-28, ext/vfx-zone-rims-meeko-sable) Sable, `scripts/arch/kits/thief_kit.gd` (RMB Bola wind-up lane): was a flat lavender slab; now the `soft` AimKit lane (lit rails, inside 0.097 at the base, `SOFT_A` 1.2 as Gil's).
 5. (done 11-23, ext/vfx-sparkle-skycall) Sparkle, `scripts/arch/kits/mage_sky.gd` (E Skycall; the data is `content/vfx/mage.json` `e_count`/`e_strike`): a white blob over a brown disc hides the foe; thin it to a pink-white column on a soft rim. The RMB orb's orange haze (`mage_gum.gd`) goes pink too.
 
 Next in line (24-25, smaller): Lace's deep red against Kael's crimson (owner's call), Lace/Sparkle thin tap trails.
