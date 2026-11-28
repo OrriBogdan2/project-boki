@@ -1016,6 +1016,7 @@ func _hop_glide(m: Match, P: Hunter, home: Vector3, K: DolmKit, reset: Callable)
 func _glide_slam(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
 	reset.call()
 	P.pos.y += 8.0
+	var start := P.pos
 	P.grounded = false
 	P.inp["move"] = Vector2(1, 0)
 	var t := 0.0
@@ -1024,6 +1025,8 @@ func _glide_slam(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
 		m.step(DT)
 		t += DT
 	var glided := P.gliding
+	if glided:
+		P.pos = start  # (the glider opens after its 0.4 s hold: the row's 8 m and its spot are measured from the open)
 	var s0 := K.slams
 	P.inp["move"] = Vector2.ZERO
 	var from := P.pos
