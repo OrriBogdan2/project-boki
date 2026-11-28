@@ -398,7 +398,40 @@
   "claire": {
    "name": "Neve",
    "path": "native",
-   "kind": "cast (ice)"
+   "kind": "cast (ice)",
+   "slot_moves": {
+    "lmb": [
+     "tm_dart_r",
+     "tm_dart_l",
+     "tm_dart_heavy",
+     "tm_beam"
+    ],
+    "rmb": [
+     "tm_spear_aim",
+     "tm_spear"
+    ],
+    "e": [
+     "tm_wall",
+     "tm_freeze"
+    ],
+    "dash_move": [
+     "tm_skate_go",
+     "tm_skate",
+     "tm_skate_air",
+     "tm_skate_stop"
+    ],
+    "r": [
+     "tm_rime",
+     "tm_rime_carry",
+     "tm_rime_hold",
+     "tm_rime_crash",
+     "tm_rime_break"
+    ],
+    "kit_extra": [
+     "tm_shatter",
+     "tm_clench"
+    ]
+   }
   },
   "sable": {
    "name": "Sable",
