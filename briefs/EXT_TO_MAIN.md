@@ -11607,3 +11607,4 @@ READY ext/ui-practice-ranks 16fde1fdc9f28e159dc2fe7958911eb0e9bfd79b (Esc Practi
 READY ext/vfx-tenzo-vex-hitframes 7467d36d117e36629dde27293554dbb3239cece9 (Tenzo punch impact frame + reel part; Vex LMB wider tracer and bigger hit frame; data only, before/after strips, A/B p95 median +0.09/+0.15 ms)
 READY ext/ui-deathbox-compare f4e611b244 (deathbox slot tags, gear compare arrows, one-click wear, swap prompt; gdformat clean)
 READY ext/ui-mate-boki-icon d4f0644fb2a944b9dc99d9dcd8828bf0be2279f3 (squad row Boki icon: TeamBoki now a round portrait + health arc, grey X when downed, soul-linked wisp glow; teammate/mate-look/safe-area/hudref/boki-hud/stolen-hud checks pass)
+READY ext/sfx-garden-zones 780f654f6b (Boki voice take bag: 0 repeated clips in 20 s vs 6 of 42; --garden-bark-log; all 6 zones+hub already had beds)
