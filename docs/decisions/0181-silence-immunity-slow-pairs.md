@@ -1,4 +1,4 @@
-# 0180: Silence, granted immunity and cleanse, and a slow's timer against its own strength
+# 0181: Silence, granted immunity and cleanse, and a slow's timer against its own strength
 
 - **Status:** accepted
 - **Date:** 2026-11-27
