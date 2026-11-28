@@ -148,6 +148,7 @@ on "there is a skiff to take" (the known skiff red, `docs/GATE_0245.md`), so no 
    `TutorialResume.OUTPOST_START`, "goexit", a step the Ways Out course no longer has, so it fell back to step 0 and
    landing resumed again for ever. A player who quit after `wayout`, `uplink` or `defend` and pressed Continue was
    locked there the same way. Now it resumes at `wayout`. `--tutorial-resume-check` checks that every beat resumes past the landing
+   (3 FAIL before, 0 after), and the fight check starts each starter from the top (11 FAIL -> 3, the 3 left are "missing kick" for all three, now 3 of 3). (Done: `ext/tut-lookout-kick` made the lookout rim sheer, so only a wall kick climbs it: no more "missing kick", see the lookout bullet in section 2.)
    (3 FAIL before, 0 after), and the fight check starts each starter from the top (11 FAIL -> 3, the 3 left were "missing kick" for all three; gone, see above).
 5. Taking a second Relic from Hob (juggernaut) and then starting an expedition played as the saved pick of the tutorial Relic
    (`gunslinger`): the flow check's own `Arch.of_save()` says it, unverified by hand.
@@ -241,7 +242,7 @@ Hub: `HubHints`. Farm: `FarmKeyHints` and the farm tutorial.
 - **Ways Out:** `exit_uplink` and the guide's `exit` line ("Go to an exit and hold F to leave") only know outposts
   (`Exits.spots()`, kind `outpost`). Heart, Lair, quest and final-seat ways out never trigger either, so "extract now means
   Heart/quest exits" is not told anywhere. Branches with the fix: `ext/tut-first-ways-out`, `ext/tut-heart-raid-hints`.
-- **Mini-rockets:** no hint on main; `ext/tut-rocket-hint`.
+- **Mini-rockets:** covered by DropHud's aboard lines ("Steer with ..." for the leader, "Jump out: ...", then "Glider: ... again"; `--drop-rocket-check` `_hud_lines`); `ext/tut-rocket-hint`'s once-per-save toasts are superseded.
 - **Stomps:** no hint on main; `ext/tut-stomp-hints`.
 - **Closing zone:** the guide's `blight` line fires at 40% left; no "get inside the circle" line on main; `ext/tut-first-zone`.
 - **Hot zone / Waystone:** `ext/tut-hot-zone-line`, `ext/tut-waystone-hint`.
@@ -269,6 +270,11 @@ The owner's first-match playtest on the PC build, and what each fix is:
   catches the ledge does not skip it.
 - **The lookout (`crouch`).** `Tutorial.on_lookout` counts the whole top and its rim (`LOOKOUT_R`, `LOOKOUT_DROP`); the
   check crouches at all four far edges and at the foot of the cliff.
+- **The lookout takes a wall kick, nothing else.** A jump into a 2.4 m cliff used to mantle it (the aerial ledge rise
+  reaches 1.5 m above your feet, 2.4 m for Lace and Kael, whose jump peaks 1.57 m), so a player or the bot could skip the
+  lesson (`--tutorial-fight-check`: "missing kick", every run on 11-20). The Lookout Isle now has `"sheer_cliffs": true`
+  (`GroundShapes.sheer_cliffs`): the top tiles of its terraces are smooth sheer rims, which nothing can mantle from the air.
+  The wall kick still climbs it (jump, then jump again at the wall), and ledges everywhere else are unchanged.
 - **The marker never covers its label.** `EdgeMarker._label_at` seats a label clear of its arrow by the label's own
   half-extent (a wide label beside a sideways arrow sat under its point: "Glove" read as "love").
   `TutorialStrip.layout` is the one place the strip's widths are worked out, so the check can read them.
