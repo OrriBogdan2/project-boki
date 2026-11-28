@@ -50,6 +50,7 @@ if [ "${1:-}" != "--files" ] && [ "${1:-}" != "--update" ] && [ "${1:-}" != "--n
 	rm -f "$plist" "$pout"
 fi
 if [ "${1:-}" != "--files" ] && [ "${1:-}" != "--update" ]; then
+	python3 tools/commit_email_guard.py || { echo "FAILED: commit author/committer email (tools/commit_email_guard.py)"; exit 1; }
 	python3 tools/warden_glb_guard.py || { echo "FAILED: hunter glbs changed outside an Art: commit"; exit 1; }
 	python3 tools/warden_tex_guard.py || { echo "FAILED: hunter texture over 2048 px (tools/warden_tex_guard.py)"; exit 1; }
 fi

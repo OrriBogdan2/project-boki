@@ -32,6 +32,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Commit emails (11-22: coord@users.noreply.github.com mapped to a stranger's GitHub account). Commit history only
+      # (blobless fetch), range = PR base..PR head. tools/check.sh runs the same guard locally against origin/main.
+      - name: Commit author/committer emails (tools/commit_email_guard.py)
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch --no-tags --filter=blob:none origin "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}"
+          python3 tools/commit_email_guard.py "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}"
+
       - name: Cache Godot
         if: runner.environment == 'github-hosted'
         uses: actions/cache@v4
