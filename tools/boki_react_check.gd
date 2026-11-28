@@ -209,7 +209,8 @@ func _pop(a: Subject, mass: float, label: String) -> void:
 		a.step()
 		lift = maxf(lift, a.flex.position.y - rest)
 		stretch = maxf(stretch, a.flex.scale.y / rest_h)
-	ok(lift >= MIN_HOP and stretch > 1.0 + MIN_SQUASH, "%s: a revive pops it up %.3f m, stretched %.2f" % [label, lift, stretch])
+	var popped := lift >= MIN_HOP and stretch > 1.0 + MIN_SQUASH
+	ok(popped, "%s: a revive pops it up %.3f m, stretched %.2f" % [label, lift, stretch])
 	for i in int(RUN_S / STEP):
 		a.step()
 	var fl: KinFlinch = a.rig._flinch if a.rig else a.pup.fl
@@ -223,7 +224,8 @@ func _topple() -> void:
 		peak = maxf(peak, r)
 	ok(KinDowned.fall_roll(0.0) == 0.0, "downed: upright when it goes down")
 	ok(KinDowned.fall_roll(0.1) > 0.1 * KinDowned.FALL_ROLL, "downed: it is already going over at 0.1 s")
-	ok(peak <= KinDowned.FALL_ROLL * MAX_OVERSHOOT and peak >= KinDowned.FALL_ROLL, "downed: a soft overshoot (%.2f rad)" % peak)
+	var soft := peak <= KinDowned.FALL_ROLL * MAX_OVERSHOOT and peak >= KinDowned.FALL_ROLL
+	ok(soft, "downed: a soft overshoot (%.2f rad)" % peak)
 	ok(KinDowned.fall_roll(KinDowned.FALL_S * 3.0) == KinDowned.FALL_ROLL, "downed: it settles on its side")
 	ok(KinDowned.breath(0.0, 1.0) == Vector3.ONE, "downed: no breathing mid-fall")
 	ok(KinDowned.breath(2.0, PI / (2.0 * KinDowned.BREATH_RATE)).y > 1.0, "downed: it breathes once it lies still")
