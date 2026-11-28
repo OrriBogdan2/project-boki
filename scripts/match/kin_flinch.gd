@@ -40,20 +40,23 @@ var _omega := 20.0
 var _push := Vector2.ZERO      # which way the body is shoved, in Flex space (x right, y back)
 
 ## A hit on a Boki: `push` is the way the hit shoves it (world), `frac` the share of its max health the hit took,
-## `mass` its KinSpec mass.
+## `mass` its KinSpec mass. A blow also cues the rig's own hit clip, if its species has one (BokiRig).
 static func hit(model: Node3D, push: Vector3, frac: float, mass: float) -> void:
-	var cur: Dictionary = model.get_meta("hit", {"n": 0})
-	var k := clampf(K_MIN + frac * K_PER_FRAC, K_MIN, K_MAX) / sqrt(maxf(mass, 0.1))
-	model.set_meta("hit", {"n": int(cur["n"]) + 1, "k": k, "push": push, "mass": mass})
+	_jolt(model, push, frac, mass, true)
 
 ## A Boki touching down after a throw or a leap: the hit's spring with no push, so it only squashes.
 static func land(model: Node3D, mass: float) -> void:
-	hit(model, Vector3.ZERO, LAND_FRAC, mass)
+	_jolt(model, Vector3.ZERO, LAND_FRAC, mass, false)
 
 ## A Boki setting off on a dash along `dir` (world): the hit's spring shoved the way it goes, so it leans into the
 ## move and settles at the end (the landing squash). Mass sizes it: light Boki lean more, heavy ones less.
 static func dash(model: Node3D, dir: Vector3, mass: float) -> void:
-	hit(model, dir, DASH_FRAC, mass)
+	_jolt(model, dir, DASH_FRAC, mass, false)
+
+static func _jolt(model: Node3D, push: Vector3, frac: float, mass: float, blow: bool) -> void:
+	var cur: Dictionary = model.get_meta("hit", {"n": 0})
+	var k := clampf(K_MIN + frac * K_PER_FRAC, K_MIN, K_MAX) / sqrt(maxf(mass, 0.1))
+	model.set_meta("hit", {"n": int(cur["n"]) + 1, "k": k, "push": push, "mass": mass, "blow": blow})
 
 ## Takes up a new hit if there is one and steps the spring; then rot, shove, wide and tall are the pose.
 func update(root: Node3D, dt: float) -> void:

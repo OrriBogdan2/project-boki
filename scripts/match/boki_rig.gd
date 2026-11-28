@@ -1567,6 +1567,7 @@ const STRIDE := {
 ## The clip plays at CONTACT / Kin.STRIKE_WINDUP so the contact lands on the hit. Measured by --boki-anim-audit.
 const CONTACT := {"cindle": 0.300, "puddlet": 0.333, "burrlet": 0.333}
 const FADE := 0.14  # s between body clips
+const CUE_FADE := 0.1  # s the hit and faint clips blend in over
 const GLIDE_FADE := 0.15  # s into and out of a carried glide pose (Kin.render's kact glide)
 
 ## s between idle, walk and run for a Boki whose gaits hold it at a different stance: the hoverer tips into flight
@@ -1673,6 +1674,8 @@ const CLIP_FACE := {
 	"tend": "focus",
 	"eat": [[0.0, "chew"], [0.16, "cheer"], [0.33, "chew"], [0.5, "cheer"], [0.66, "chew"], [0.83, "cheer"]],
 	"settle": [[0.0, "sleepy"], [0.6, "asleep"]],
+	"hit": "sad",
+	"faint": [[0.0, "sad"], [0.35, "asleep"]],
 	"nap": "asleep",
 	"wake": [[0.0, "asleep"], [0.2, "sleepy"], [0.7, "cheer"]],
 	"munch": "chew",
@@ -1781,6 +1784,7 @@ var _idle := BokiIdle.new()  # its breathing loop's fidgets, see BokiIdle
 var _coat: ShaderMaterial
 var _shadow: MeshInstance3D
 var _flinch := KinFlinch.new()
+var _blows := 0  # the "hit" count already met
 var _water := 0.0  # m of water over its feet this frame (the root's "kwater", taken each frame)
 var _swimmer := false  # a Water type: swims level rather than paddling
 var _nap: KinNap
@@ -1870,6 +1874,7 @@ func _ready() -> void:
 	_skel.modifier_callback_mode_process = Skeleton3D.MODIFIER_CALLBACK_MODE_PROCESS_MANUAL
 	pace = RigPace.new(get_instance_id())
 	BokiHomeClips.install(species, player, _skel)
+	root.set_meta("faints", player.has_animation("faint"))  # Kin.render leaves its roll to the clip
 	BokiSwing.add_clip(player)
 	for n in LOOPED:
 		player.get_animation(n).loop_mode = Animation.LOOP_LINEAR
@@ -2019,6 +2024,11 @@ func _pick_clip(dt: float) -> void:
 		_start_shot("attack", float(CONTACT.get(species, Kin.STRIKE_WINDUP)) / Kin.STRIKE_WINDUP)
 	_attacking = attacking
 	_shot_left -= dt
+	var jolt: Dictionary = root.get_meta("hit", {})
+	if int(jolt.get("n", 0)) != _blows:
+		_blows = int(jolt["n"])
+		if jolt["blow"] and player.has_animation("hit") and _shot_left <= 0.0:
+			_start_shot("hit")  # (never over a strike or a cast: KinFlinch still jolts it)
 	var asleep := _lying()
 	_nap.update(root, asleep, dt)  # its settle, nap and wake run slower for a bigger Boki
 	if asleep != _asleep:
@@ -2042,7 +2052,9 @@ func _pick_clip(dt: float) -> void:
 	else:
 		_idle.rest(_rng)
 	var fade := FADE
-	if "glide" in [want, clip]:
+	if want in ["hit", "faint"]:
+		fade = CUE_FADE
+	elif "glide" in [want, clip]:
 		fade = GLIDE_FADE
 	elif want in GAITS and clip in GAITS:
 		fade = gait_fade()
@@ -2150,6 +2162,8 @@ func _state_clip() -> String:
 		return "glide" if _speed >= WALK_SPEED else "hover"
 	if _shot == "flare" and _shot_left > 0.0:
 		return _shot  # it touches down before it does what it came down for
+	if bool(root.get_meta("kfaint", false)) and player.has_animation("faint"):
+		return "faint"
 	var swim := _swim_clip()
 	if swim != "":
 		return swim

@@ -2,8 +2,9 @@ extends RefCounted
 ## --boki-flinch-shots --shots-dir=<dir> [--px=384] [--dash]: a strip per species of a Boki taking a big hit (KinFlinch)
 ## from the side: rest, then AT seconds after it. <dir>/flinch_<species>.png and flinch_all.png. Needs a renderer.
 ## --dash: the 3 starter Boki set off on a dash to the right instead (side view, KinFlinch.dash), files dash_*.png.
-## --video: the 3 starter Boki, one frame sequence each (30 fps) of the big hit and of fainting (the downed topple
-## Kin.render gives Body), <dir>/<id>_<hit|faint>/f%03d.png; encode with ffmpeg -framerate 30 -i f%03d.png.
+## --video: the 3 starter Boki, one frame sequence each (30 fps) of the big hit and of fainting (the faint clip, or
+## the downed topple Kin.render gives Body), <dir>/<id>_<hit|faint>/f%03d.png; encode with
+## ffmpeg -framerate 30 -i f%03d.png.
 
 const SPECIES := ["cindle", "zapple", "wisplet", "zephyrak", "basaltoad", "puddlet"]
 const STARTERS := ["burrlet", "cindle", "puddlet"]
@@ -136,8 +137,9 @@ func _video(id: String, what: String) -> void:
 			else:
 				k.set_meta("dazed", true)
 				k.set_meta("starry", true)
+				k.set_meta("kfaint", true)
 		for _s in 2:
-			if fired and what == "faint":
+			if fired and what == "faint" and not k.get_meta("faints", false):
 				body.rotation.z = lerpf(body.rotation.z, FAINT_ROLL, STEP * FAINT_RATE)
 			_step(st[2], st[3])
 		for n in 3:

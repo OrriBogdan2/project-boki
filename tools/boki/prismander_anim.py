@@ -1,7 +1,7 @@
 """Prismander's skeleton and the clips that are its own."""
 import boki_clips
 import prismander
-from boki_clips import SHARED, add, ear_pose, s, seq, tail_wave, bite, chop_mouth, eat_ground, flop, mine_mouth
+from boki_clips import SHARED, add, ear_pose, s, seq, tail_wave, bite, chop_mouth, eat_ground, faint, flop, hit, mine_mouth
 from prismander import SIDES, TAIL_PTS
 
 boki_clips.TAIL_N = 5
@@ -65,5 +65,7 @@ CLIPS.update({
     "eat": (2.0, True, eat_ground),
     "chop": (1.1, True, chop_mouth),
     "mine": (1.0, True, mine_mouth),
+    "hit": (0.3, False, hit),
+    "faint": (1.0, False, lambda t: faint(t, 0.06)),
 })
 HIDE_AT = {"prop_berry": (0, 0.14, 0.60)}

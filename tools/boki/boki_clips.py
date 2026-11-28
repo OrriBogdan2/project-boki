@@ -281,6 +281,54 @@ def flop(t):
     return p
 
 
+def flinch(t):
+    """How far into the flinch it is (0..1): snaps in by 0.22 of the clip, then eases out."""
+    return seq(t, [(0, 0), (0.22, 1), (0.55, 0.3), (0.8, 0.04), (1, 0)])
+
+
+def hit(t):
+    """A flinch, 0.3 s: the head snaps up and back from the blow, ears pin, the forelegs brace, the tail flicks up, then
+    it settles. It has no side (KinFlinch shoves it from the blow's side and runs over it)."""
+    p = {}
+    k = flinch(t)
+    p["root_at"] = (0, -0.025 * k, 0.03 * k)
+    add(p, "spine", rx=0.1 * k)
+    add(p, "neck", rx=0.14 * k)
+    add(p, "head", rx=LOOK_UP + 0.24 * k, rz=0.1 * k)
+    ear_pose(p, back=0.35 * k, out=0.1 * k)
+    for sd, sx in SIDES:
+        add(p, "fleg1." + sd, rx=0.3 * k)
+        add(p, "hleg1." + sd, rx=-0.2 * k)
+    tail_wave(p, t * 2, 0.02, up=0.3 * k)
+    return p
+
+
+FAINT_ROLL = 1.45  # rad: the body ends rolled onto its side, a little past the Kin.render topple it replaces
+
+
+def faint(t, lift):
+    """Faints, 1 s: staggers, the legs buckle and it rolls onto its side (`lift` m raises the root so the low flank
+    rests on the ground), a small bounce, then limp: head down, ears flopped, tail slack. It ends there and holds."""
+    p = {}
+    wob = seq(t, [(0, 0), (0.12, 1), (0.34, 0.5), (0.42, 0)])
+    sag = seq(t, [(0, 0), (0.3, 1), (1, 1)])
+    fall = seq(t, [(0, 0), (0.24, 0), (0.62, 1.0), (0.72, 1.05), (0.84, 0.99), (1, 1)])
+    droop = seq(t, [(0, 0), (0.3, 0.5), (0.7, 1), (1, 1)])
+    add(p, "root", rz=FAINT_ROLL * fall + 0.07 * wob * s(t, 2.5))
+    p["root_at"] = (0, lift * fall - 0.03 * sag * (1 - fall), 0)
+    add(p, "spine", rx=-0.1 * sag)
+    add(p, "neck", rx=-0.3 * droop, ry=0.12 * wob * s(t, 3))
+    add(p, "head", rx=LOOK_UP * (1 - droop) - 0.3 * droop, rz=0.1 * wob * s(t, 3, 0.25))
+    ear_pose(p, back=0.5 * droop, out=0.3 * droop)
+    for sd, sx in SIDES:
+        add(p, "fleg1." + sd, rx=0.55 * sag)
+        add(p, "fleg2." + sd, rx=-0.7 * sag)
+        add(p, "hleg1." + sd, rx=-0.45 * sag)
+        add(p, "hleg2." + sd, rx=0.7 * sag)
+    tail_wave(p, t * 2, 0.0, up=-0.4 * droop)
+    return p
+
+
 def part_bones(parts):
     """The bones of a species' grown parts."""
     out = {}
