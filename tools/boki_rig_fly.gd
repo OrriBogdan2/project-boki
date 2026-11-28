@@ -101,6 +101,13 @@ func _roam() -> void:
 	# this check times flight while roaming: a random day nap or a hello (BaseLife) would take a flier off the clock
 	home.life.r_v["doze"] = 0.0
 	home.life.r_v["greet_chance"] = 0.0
+	# nor a toy (HomeToys): fliers that took one roamed only ~15-45 s of the 120, so the roam floor flipped red
+	# with frame timing (main too). No toys on the layout: they roam the whole time this check watches them.
+	var toy_defs: Dictionary = HomeToys.rules()["toys"]
+	var deco: Array = home.hb.L()["deco"]
+	var kept := deco.filter(func(e: Dictionary) -> bool: return not toy_defs.has(String(e["id"])))
+	deco.clear()
+	deco.append_array(kept)
 	var on_foot := {}  # flier uid -> s it has walked the ground in a row while roaming
 	var longest := 0.0
 	var roam_s := 0.0
@@ -117,7 +124,6 @@ func _roam() -> void:
 		walker_up = walker_up or walker.has("fly") or bool(walker["node"].get_meta("aloft", false))
 		for k in fliers:
 			var uid := String(k["rec"]["uid"])
-			if int(t/DT) % 100 == 0: print("DBG %.0f %s st=%d taken=%s keys=%s" % [t, String(k["rec"]["species"]), (k["life"] as Fsm).state if k.has("life") else -1, BaseLife._taken(k), ",".join(k.keys().filter(func(x): return x in ["busy","called_t","indoors","leap","job","fetch","bath","eat","nap","play","hold_t","toy","sit"])) ])
 			if not BaseLife.roams(k):
 				on_foot[uid] = 0.0
 				still_up[uid] = 0.0
@@ -136,6 +142,7 @@ func _roam() -> void:
 				if not petted:
 					petted = true
 					flares += _taken_lands(k, fliers)
+					still_up.clear()  # it stood: its next hover climbs from the ground again (counts after SETTLED)
 	var band: Array = BokiFly.rules()["height"]
 	check.ok(
 		roam_s >= SIM_SECS * 0.25 and air_s >= roam_s * 0.9,
