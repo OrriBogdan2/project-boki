@@ -69,7 +69,8 @@ listed: both (ArchKit has no shared cast lock); every press is ignored, not buff
 | E spin | X | the spout goes first, then the wave | designed (`_start_wave`) | "cancel E spin + X: ..." |
 | E spin | stunned | the spin goes on and keeps hitting through the stun (F5) | default | "cancel E spin + stunned: ..." |
 | E spin | Boki merge | it ends, no spout | designed (`_drop_holds`) | "cancel E spin + Boki merge ..." |
-| X Tidal Wave ride (1 s) | E, RMB, LMB | waits for the landing, then goes (a spin, a potion, a fresh first thrust) | default (the ride is an Effects dash, so DashFlow buffers) | "cancel X wave + E, RMB, LMB: ..." (2 lines) |
+| X Tidal Wave ride (1 s) | RMB, LMB | both: the potion flies and the thrusts land mid-ride | default (the ride is an Effects dash; the dash rows in gil.json are `fire`, owner item 51) | "cancel X wave + E, RMB, LMB: ..." |
+| X ride | E | locked: refused (no spin), not replayed on the landing | designed (`GilKit.cast_e`, `into_cast.x.e` drop) | "cancel X wave + E: ..." |
 | X ride | Shift | locked: dropped, no charge, no swim after the landing | designed (`into_dash.x` lock) | "cancel X wave + Shift: ..." |
 | X ride | X | nothing: no early landing | designed (no `ult_recast`) | "cancel X wave + X: ..." |
 
@@ -79,7 +80,7 @@ for every hero is in [dash_interactions.md](dash_interactions.md).
 
 | Row | Ours |
 |---|---|
-| ground or air dash -> LMB, RMB, E, X, Q | buffered to the dash's end (the default row; pressed early or on the last step, it goes the step the swim ends) |
+| ground or air dash -> LMB, RMB, E, X, Q | fires mid-dash (the `fire` rows in gil.json, owner item 51; E during the Tidal Wave ride is refused by the kit, see Cancels) |
 | jump -> any slot | fires mid-jump |
 | any slot -> jump out of it | acts at once |
 | LMB, RMB, Q -> Shift out of it | acts at once |
@@ -90,7 +91,7 @@ for every hero is in [dash_interactions.md](dash_interactions.md).
 ## Recast windows (the 2026-11-08 two-step rule)
 | Recast | Window | Ours |
 |---|---|---|
-| E Riptide | from 0.12 s to 2 s of spin; at 2 s it sends itself | `recast_window()` reports slot `e` at Gil while he spins; a press before 0.12 s does nothing and is not buffered (F2); the window's total is its time left (F1); the auto spout leaves EXPIRED on the slot (F1) |
+| E Riptide | from 0.12 s to 2 s of spin; at 2 s it sends itself | `recast_window()` reports slot `e` at Gil while he spins; a press before 0.12 s does nothing and is not buffered (F2); the ring's total is the whole 2 s spin and the window is `auto` (F1, fixed 11-11); the spout that goes on its own leaves EXPIRED on the slot |
 | X Tidal Wave | none | no window, a second X does nothing |
 
 Check lines: "recast E: ..." (5), "recast X: Tidal Wave opens no recast window".
@@ -102,7 +103,7 @@ keyed moves (`HunterViewer.moves_for` is empty for every slot, `tools/rig_standa
 moves yet"), so his rig plays the generic poses and the swordfish uses the sword hold. Check lines: "clips: ..." (3).
 
 ## Findings (shared rules; no tuning changed, nothing fixed here)
-- **F1 two-step clarity, the Riptide cue.** `e_def` has no `time`, so `ArchKit.recast_window()` reports the total as
+- **F1 two-step clarity, the Riptide cue (fixed in `GilKit.recast_window`, 11-11; text below is the finding as raised).** `e_def` has no `time`, so `ArchKit.recast_window()` reports the total as
   the time left: the slot's timer ring stays full and never empties. The spin sends the spout on its own at 2 s, but
   the window isn't flagged `auto`, so RecastCue shows EXPIRED and plays the miss click although the spout went. Gil is
   not in `--recast-cue-check`'s CASES or HUD.md's "Kits reporting" list. Fix: a `recast_window()` override in
