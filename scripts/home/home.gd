@@ -700,6 +700,7 @@ func _ready_rest() -> void:
 	_sync_fixtures()
 	await _slice()
 	hb.assign_beds()
+	PlaceClearance.free_trapped(self)      # a Boki or you that an old save loads into a pocket or a block
 	if "--kin-lineup" in dbg:
 		var lr := RandomNumberGenerator.new(); lr.seed = 11
 		var sps: Array = Data.common_kin()
