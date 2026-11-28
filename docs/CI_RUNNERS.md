@@ -19,8 +19,10 @@ Both kinds of runner use the same steps, so nothing else changes:
 - Self-hosted keeps the lint venv per runner (`BOKI_LINT_VENV`), the cache steps run on GitHub-hosted only.
 
 ## Releases repo
-`release.yml` publishes every release to this repo and, when the secret `RELEASES_TOKEN` exists, also to the public repo
-`OrriBogdan2/project-boki-releases` (builds only, no source). `launcher/launcher_config.json` and `launcher.gd` read the latest
+`release.yml` publishes every release to this repo only. `ship-release.sh` (hetzner, box gh auth, no extra secret or token)
+then mirrors the release assets to the public repo `OrriBogdan2/project-boki-releases` (builds only, no source), so Actions needs
+no cross-repo token. A release made without ship-release.sh must be mirrored by hand with `gh release download` + `gh release create -R`.
+`launcher/launcher_config.json` and `launcher.gd` read the latest
 release from there (`cfg["repo"]`), and `deploy/setup_server.sh` / the relay `update.sh` do too. `setup_server.sh` is attached
 to each release so `curl .../releases/latest/download/setup_server.sh | bash` keeps working.
 Launchers already in players' hands still point at the old repo: they cannot update once it is private. Players need the new
