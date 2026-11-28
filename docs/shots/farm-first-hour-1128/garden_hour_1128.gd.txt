@@ -1,0 +1,423 @@
+extends RefCounted
+## SCRATCH (not committed to the registry): --garden-hour-1128 [--shots-dir=<dir>] plays the first garden hour of a fresh
+## base_mode save (docs/GARDEN_FIRST_HOUR.md), 3600 s of farm time at 0.05 s a step through the real Home._process.
+## One hatched starter, tutorial on, one efficient player. Prints "HOUR t=..." lines. Never touches the real save.
+
+const STEP := 0.05
+const HOUR := 3600.0
+const DAY_S := 300.0
+
+var main: Node
+var home
+var dir := ""
+var T := 0.0
+var shot_n := 0
+var adopt := true
+var pet_until := 99999.0
+var variant := "kibble"      # kibble: feeds the kibble the Feed panel lists; wait: gives only the food the banner names
+var shots: Dictionary = {}
+var did: Dictionary = {}
+
+func P(msg: String) -> void:
+	print("HOUR t=%5ds  %s" % [int(T), msg])
+
+func once(key: String) -> bool:
+	if did.has(key):
+		return false
+	did[key] = T
+	return true
+
+func shot(name: String) -> void:
+	if dir == "":
+		return
+	await main.get_tree().process_frame
+	await main.get_tree().process_frame
+	main.get_viewport().get_texture().get_image().save_jpg(dir.path_join(name + ".jpg"), 0.85)
+
+func rec() -> Dictionary:
+	return Save.d["roster"][0]
+
+func st(r: Dictionary) -> String:
+	var n: Dictionary = r["needs"]
+	return "L%d xp %d trust %d food %d joy %d en %d" % [int(r["level"]), int(r.get("xp", 0)), int(r.get("trust", 0)),
+			int(n["food"]), int(n["joy"]), int(n["energy"])]
+
+func run(m: Node) -> void:
+	main = m
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--shots-dir="): dir = a.substr(12)
+		if a.begins_with("--variant="): variant = a.substr(10)
+		if a.begins_with("--seed="): seed(int(a.substr(7)))
+		if a.begins_with("--pet-until="): pet_until = float(a.substr(12))
+		if a.begins_with("--adopt="): adopt = a.substr(8) == "1"
+	if dir != "":
+		DirAccess.make_dir_recursive_absolute(dir)
+		main.get_window().size = Vector2i(1280, 720)
+	Save.no_write = true
+	Content.rules("farm_build")["base_mode"] = true
+	Save.d = Save.fresh()
+	P("seed args ok")
+	var starter := Save.new_kin("zapple", "Pip")
+	starter["starter"] = true
+	starter["trust"] = 55
+	Save.d["roster"].append(starter)
+	Save.d["active"] = starter["uid"]
+	Save.d["tutorial"]["hatched"] = true
+	Save.d["tutorial"]["intro"] = true
+	Save.d["tutorial"]["prologue"] = true
+	P("starter likes: %s traits %s" % [JSON.stringify(rec()["likes"]), JSON.stringify(rec().get("traits", {}))])
+	P("fresh save: %s gems %d items %s" % [st(rec()), int(Save.d["gems"]), JSON.stringify(Save.d["items"])])
+	home = await main._hb_home()
+	for f in 90:
+		if is_instance_valid(home.root_ui):
+			break
+		await main.get_tree().process_frame
+	if main.get("fade") != null:
+		main.fade.reveal(0.01)
+	home._close_panel()
+	P("gems after home: %d" % int(Save.d["gems"]))
+	P("Goals: %s" % str(GoalTracker.lines().map(func(r): return r["text"])))
+	P("tutorial: active %s base %s current %s steps %s" % [FarmTutorial.active(), FarmTutorial.base(), FarmTutorial.current(),
+			str(FarmTutorial.steps().map(func(s): return s["title"]))])
+	P("banner text: %s" % FarmTutorial.hint_text(FarmTutorial.current()))
+	P("bag at start: items %s crops %s" % [JSON.stringify(Save.d["items"]), JSON.stringify(Save.d["crops"])])
+	P("patch in storage: %d, placed: %d" % [int(HomeLayout.of(Save.d)["inv"].get("snack_patch", 0)), HomeLayout.count_of("snack_patch", Save.d)])
+	await _settle()
+	await shot("01_hub")
+	await _play()
+	print("HOUR DONE")
+	main.get_tree().quit()
+
+func _settle() -> void:
+	for i in 20:
+		await main.get_tree().process_frame
+
+func k0() -> Dictionary:
+	return home.kins[0]
+
+func _near_player() -> void:
+	var at: Vector3 = home.ppos + Vector3(2.0, 0, 0)
+	k0()["pos"] = at
+	(k0()["node"] as Node3D).position = at
+
+func _near_boki() -> void:
+	var b: Vector3 = k0()["pos"]
+	home.ppos = b + Vector3(2.0, 0, 0)
+	if home.player: home.player.position = home.ppos
+
+func _place(id: String, at: Vector2i) -> bool:
+	home.hb.take(id)
+	home.hb.cells = [at]
+	home.hb.ghost_ok = true
+	var okp: bool = home.hb.place_held()
+	if home.hb.held.size() > 0:
+		home.hb.held = {}
+	return okp
+
+func _free_cell(dx: int, dz: int) -> Vector2i:
+	var at := HomeLayout.LANDING
+	return Vector2i(int(at.x) + dx, int(at.z) + dz)
+
+func _feed_rows() -> Array:
+	# what the Feed panel would list (home.gd _open_feed): prepared foods then crops, then the bag rows
+	var rows: Array = []
+	for f in Care.foods_v:
+		if int(Save.d["items"].get(f, 0)) > 0: rows.append("%s x%d" % [f, int(Save.d["items"][f])])
+	for f in Data.CROPS:
+		if int(Save.d["crops"].get(f, 0)) > 0: rows.append("%s x%d (crop)" % [f, int(Save.d["crops"][f])])
+	return rows
+
+func _panel_texts() -> Array:
+	var out: Array = []
+	var stack: Array = [home.panel_host]
+	while not stack.is_empty():
+		var n: Node = stack.pop_back()
+		if n is Label and (n as Label).text != "" and (n as Label).is_visible_in_tree():
+			out.append((n as Label).text)
+		elif n is Button and (n as Button).text != "" and (n as Button).is_visible_in_tree():
+			out.append("[%s]" % (n as Button).text)
+		for c in n.get_children():
+			stack.push_front(c)
+	return out
+
+func _count_xp_day() -> void:
+	pass      # GardenXp care pays once per REAL day (GardenPrizes day_s 86400): nothing resets inside the hour
+
+func _bump_clock() -> void:
+	# the game keeps wall-clock stamps (unix s) for the patch and the wild visitor: the sim moves them back 1 farm step so they
+	# run on farm time, not on the (much shorter) real time the sim takes
+	var v: Dictionary = Save.d.get("visitor", {})
+	for key in v:
+		if (v[key] is float or v[key] is int) and float(v[key]) > 1.0e9:
+			v[key] = float(v[key]) - STEP
+	for r in Save.d["roster"]:
+		for key in ["fed_at", "pet_at_s"]:
+			pass
+
+func _bump_patch() -> void:
+	_bump_clock()
+	var e := SnackPatch.entry(Save.d)
+	if not e.is_empty() and e.has("t"):
+		e["t"] = float(e["t"]) - STEP      # the patch clock is unix time: 1 farm second = 1 s
+
+func _play() -> void:
+	var pet_t := 0.0
+	var next_log := 300.0
+	var pets := 0
+	var meals := 0
+	var xp_pet := 0
+	var last_xp := int(rec().get("xp", 0)) + 100 * 0
+	var hungry_logged := false
+	var steps := 0
+	var last_tx := 0
+	var bad_food := {}
+	var why := "start"
+	while T < HOUR:
+		# --- the player's decisions, each once or on a timer
+		var cur := FarmTutorial.current()
+		if T == 0.0 or (FarmTutorial.active() and fmod(T, 30.0) < STEP and Vector2(k0()["pos"].x - home.ppos.x, k0()["pos"].z - home.ppos.z).length() > 12.0):
+			_near_player()      # the player stays put; a Boki that has wandered more than 12 m off is walked back (a player would)
+		if T >= 1.0 and once("meet_note"):
+			P("tutorial current after 1 s: %s" % cur)
+		if cur == "patch" and once("patch_try"):
+			var okp := _place("snack_patch", _free_cell(4, -6))
+			P("snack patch placed (free): %s; patches placed %d; tutorial now %s" % [okp, HomeLayout.count_of("snack_patch", Save.d), FarmTutorial.current()])
+			P("patch entry: %s" % JSON.stringify(SnackPatch.entry(Save.d)))
+		if cur == "eat" and once("eat_open"):
+			P("tutorial Feed step open: hint '%s'; bag items %s crops %s" % [FarmTutorial.hint_text("eat"), JSON.stringify(Save.d["items"]), JSON.stringify(Save.d["crops"])])
+			P("Feed panel rows: %s" % str(_feed_rows()))
+			home._open_feed(rec())
+			await _settle()
+			P("Feed panel text: %s" % str(_panel_texts().slice(0, 14)))
+			await shot("03_feed_panel")
+			home._close_panel()
+		pet_t -= STEP
+		if fmod(T, 300.0) < STEP and T > 1.0:
+			rec()["pet_n"] = 0      # the pet window is one farm day (care_day_s 300 s): it rolls over here (the clock is real time, the sim is not)
+		var cap_now := int(PetReact.rules()["kinds"][PetReact.kind(rec())]["cap"])
+		if pet_t <= 0.0 and T < pet_until and PetReact.pats_today(rec()) >= cap_now:
+			pet_t = 20.0      # it has had enough: a player stops
+		if pet_t <= 0.0 and T < pet_until:
+			pet_t = 20.0
+			var x0 := int(rec().get("xp", 0))
+			var lv0 := int(rec()["level"])
+			why = "pet"
+			var j0 := float(rec()["needs"]["joy"])
+			var tr0 := int(rec().get("trust", 0))
+			home._pet_kin(k0())
+			pets += 1
+			if pets <= 4 or pets % 40 == 0:
+				P("pet %d: joy %d -> %d, trust %d -> %d, xp total %d" % [pets, int(j0), int(rec()["needs"]["joy"]), tr0, int(rec().get("trust", 0)), total_xp(rec())])
+			if pets == 3 and once("pet_shot"):
+				P("petted x3: %s" % st(rec()))
+				await shot("04_pet")
+		# the Feed step: give what the banner names if the Feed panel lists it, else what it lists; retry every 10 s
+		if cur == "eat" and T >= float(did.get("eat_try", -99.0)) + 10.0 and (float(rec()["needs"]["food"]) < 90.0 or not did.has("fed_once")):
+			did["eat_try"] = T
+			var named := String(FarmTutorial.food().keys()[0])
+			var listed: Array = _feed_rows().map(func(r): return String(r).split(" ")[0])
+			var pick := named if listed.has(named) else ("kibble" if listed.has("kibble") and variant == "kibble" else "")
+			if pick == "":
+				if once("eat_deadend"):
+					P("Feed step: the panel lists %s, not the banner's %s: nothing to give yet" % [str(listed), named])
+			else:
+				did["fed_once"] = T
+				var f0 := float(rec()["needs"]["food"])
+				var p0 := Econ.pantry(pick)
+				why = "meal"
+				home._care_feed(rec(), pick)
+				P("Feed step: gave %s (food %d -> %d, bag %d -> %d), tutorial now %s" % [pick, int(f0), int(rec()["needs"]["food"]), p0, Econ.pantry(pick), FarmTutorial.current()])
+		elif cur != "eat" and cur != "meet" and cur != "patch" and float(rec()["needs"]["food"]) < 60.0 and T >= float(did.get("meal_t", -99.0)) + 20.0:
+			did["meal_t"] = T
+			var food := ""
+			for f in _food_order():
+				if Econ.pantry(f) > 0 and not bad_food.has(f):
+					food = f
+					break
+			if food != "":
+				var before := total_xp(rec())
+				var f_before := float(rec()["needs"]["food"])
+				why = "meal"
+				home._care_feed(rec(), food)
+				if float(rec()["needs"]["food"]) < f_before + 5.0:
+					bad_food[food] = true
+					P("food %s was refused (hated or full): food %d -> %d" % [food, int(f_before), int(rec()["needs"]["food"])])
+				else:
+					meals += 1
+					P("meal %d: fed %s -> %s (xp +%d)" % [meals, food, st(rec()), total_xp(rec()) - before])
+		if cur == "toy" and once("toy_place"):
+			var okt := _place("toy_ball", _free_cell(-3, -6))
+			P("toy placed: %s gems %d; tutorial now %s" % [okt, int(Save.d["gems"]), FarmTutorial.current()])
+			await shot("05_toy")
+		# the patch: walk over it when ripe
+		var pe := SnackPatch.entry(Save.d)
+		if not pe.is_empty() and SnackPatch.ripe(pe, Time.get_unix_time_from_system()):
+			if once("ripe"):
+				P("patch ripe (first batch)")
+				await shot("07_patch_ripe")
+			var got := SnackPatch.harvest(Save.d, Time.get_unix_time_from_system())
+			P("picked up snacks %s" % str(got))
+			did.erase("ripe")
+		if fmod(T, 2.0) < STEP and (String(home.panel_open).contains("is changing") or (home.building_now and k0().get("busy", false))):
+			P("evolution card up (%s, building_now %s): the player presses Continue" % [home.panel_open, str(home.building_now)])
+			home._close_panel()
+			home.building_now = false
+			k0().erase("busy")
+		var vr: Dictionary = Save.d.get("visitor", {}).get("rec", {})
+		if not vr.is_empty() and once("visitor_" + String(vr.get("uid", ""))):
+			P("wild visitor arrived: %s in %s; intro lead set %s" % [str(vr.get("species", "?")), str(Save.d["visitor"].get("zone", "?")), str(Save.d["visitor"].has("lead"))])
+		for sid in ["meet", "patch", "eat", "toy", "out"]:
+			if FarmTutorial.did(sid) and once("tdone_" + sid):
+				P("tutorial step done: %s" % sid)
+		var tx := total_xp(rec())
+		if tx != last_tx:
+			P("xp %+d (L%d, total %d)  [%s]" % [tx - last_tx, int(rec()["level"]), tx, why])
+			last_tx = tx
+		why = "other"
+		if int(T * 20) % 100 == 0:      # every 5 s: wake a zone when both keys are in hand
+			for z in GardenZones.ids():
+				if not GardenZones.is_open(z) and GardenZones.keys_for(z)["seed"]:
+					if GardenZones.keys_for(z)["lean"] and once("wake_" + z):
+						var r := GardenZones.attune(z)
+						P("WAKE zone %s: %s" % [z, str(r["ok"])])
+						await shot("zone_" + z)
+		# --- time passes
+		home._process(STEP)
+		_bump_patch()
+		T += STEP
+		steps += 1
+		if fmod(T, DAY_S) < STEP:
+			_count_xp_day()
+		if steps % 400 == 0:
+			await main.get_tree().process_frame
+		if T >= 120.0 and once("t120"):
+			await _minute2()
+		if T >= next_log:
+			did["pets_total"] = pets
+			P("status: %s state %s gems %d pets %d meals %d tut %s" % [st(rec()), String((k0()["life"] as Fsm).names[(k0()["life"] as Fsm).state]), int(Save.d["gems"]), pets, meals, FarmTutorial.current()])
+			if FarmTutorial.active():
+				var ts := FarmTutorial.toy_spot()
+				var kp: Vector3 = k0()["pos"]
+				P("  where: boki %s island %d, player %s, toy island %d, LANDING %s" % [str(kp), home.world.island_of(kp.x, kp.z), str(home.ppos), home.world.island_of(ts.x, ts.z) if ts.x != INF else -9, str(HomeLayout.LANDING)])
+				P("  lead debug: toy_spot %s dist %.1f m, lead_toy %s, stage %s, play %s, energy %d" % [str(ts), Vector2(kp.x - ts.x, kp.z - ts.z).length() if ts.x != INF else -1.0, str(k0().get("lead_toy", false)), FarmTutorial.stage(FarmTutorial.current()), str(k0().get("play", {}).get("phase", "-")) if k0().get("play") is Dictionary else "-", int(rec()["needs"]["energy"])])
+			P("  lead target %s | wild %s | current '%s' | k.play %s | nap_t %s | busy %s indoors %s" % [str(BaseTutLead.target(home, k0())), str(VisitorIntro.lead_at(home, k0())), FarmTutorial.current(), str(k0().has("play")), str(k0().get("nap_t", 0)), str(k0().get("busy", false)), str(k0().has("indoors"))])
+			P("  games: %s | busy kins: %s | called_t %s job %s" % [str(home.games.map(func(g): return String(g.get_script().resource_path).get_file() + ":" + str(g.get("run") != null or g.get("active") == true))), str(home.kins.map(func(k): return k.get("busy", false))), str(k0().has("called_t")), str(k0().get("job", "-"))])
+			P("  evo/busy: pending_evo %s building_now %s panel '%s' busy %s hold_t %s" % [str(rec().get("pending_evo", [])), str(home.building_now), home.panel_open, str(k0().get("busy", false)), str(k0().get("hold_t", "-"))])
+			next_log += 300.0
+			if int(T) == 600: await shot("08_10min")
+			if int(T) == 1800: await shot("09_30min")
+		if T >= 3300.0 and once("t55"):
+			await shot("10_55min")
+	await _second(true)
+	var tt := ""
+	for sid in ["meet", "patch", "eat", "toy", "out"]:
+		tt += "%s@%s " % [sid, str(int(did.get("tdone_" + sid, -1.0)))]
+	P("SUMMARY seed-variant %s adopt %s hates %s | steps %s| total xp %d L%d | zones %s | pets %d" % [variant, str(adopt), str(rec()["likes"].get("hates", "?")), tt, total_xp(rec()), int(rec()["level"]), str(Save.d.get("zones", {}).keys()), pets])
+	P("end: %s gems %d pets %d meals %d" % [st(rec()), int(Save.d["gems"]), pets, meals])
+	P("tutorial at end: active %s current '%s' done %d; banner shown steps %s" % [FarmTutorial.active(), FarmTutorial.current(), FarmTutorial.done_count(), JSON.stringify(Save.d["tutorial"].get("steps", Save.d["tutorial"].get("farm", {})))])
+	P("first-day lines left: %s; zones open: %s" % [str(GardenFirstDay.rows().map(func(r): return r["text"])), str(Save.d.get("zones", {}).keys())])
+
+func _minute2() -> void:
+	P("--- minute 2: market, trader, shelter, dash, nook ---")
+	home.hmk.open()
+	await _settle()
+	P("Market tabs: %s" % str(home.hmk.tabs()))
+	P("Market panel: %s" % str(_panel_texts().slice(0, 16)))
+	await shot("05b_market")
+	home.hmk.vendor_tab = "Boki"
+	home.hmk.open()
+	await _settle()
+	P("Market Boki tab: %s" % str(_panel_texts().filter(func(t): return not String(t).begins_with("[")).slice(0, 40)))
+	await shot("05c_market_boki")
+	home._close_panel()
+	var tr := BlackMarket.stock()
+	P("Drift Trader stock: %s" % JSON.stringify(tr))
+	for e in tr:
+		if BlackMarket.is_seed(String(e["key"])) and int(Save.d["gems"]) >= int(e["price"]):
+			var br := BlackMarket.buy(String(e["id"]))
+			P("bought the Wayseed %s for %d gems: %s (gems now %d)" % [e["key"], int(e["price"]), str(br["ok"]), int(Save.d["gems"])])
+	var shelter := Shelter.cards()
+	P("Shelter (open_level %d, stall level %d): %d cards, cheapest %d gems, purse %d" % [Shelter.open_level(), Stalls.level(), shelter.size(), Shelter.cheapest(), int(Save.d["gems"])])
+	# Nook alone
+	P("can_pair alone: '%s'" % home._can_pair(rec()))
+	home._open_nook()
+	await _settle()
+	P("Nook with one Boki: %s" % str(_panel_texts().slice(0, 26)))
+	await shot("05d_nook_alone")
+	home._close_panel()
+	if adopt:
+		await _second(false)
+
+## The efficient player's food order: the lean food for the zone whose Wayseed is held first, then the rest.
+func _food_order() -> Array:
+	var first: Array = []
+	for z in GardenZones.ids():
+		if not GardenZones.is_open(z) and GardenZones.keys_for(z)["seed"]:
+			first = {"glasswater": ["tidebloom", "frostdrop", "geodecandy"], "cinderstep": ["emberberry", "pebblenut", "ironcrisp"],
+					"hushwood": ["duskplum", "mindmint"], "ridge": ["puffcorn", "starfruit", "chimebun"], "bramblebank": ["sunroot", "sweetbun"]}.get(z, [])
+	return first + ["kibble", "emberberry", "tidebloom", "sunroot", "puffcorn", "starfruit", "sweetbun"]
+
+func total_xp(r: Dictionary) -> int:
+	var t := int(r.get("xp", 0))
+	for lv in range(1, int(r["level"])):
+		t += GardenXp.need(lv)
+	return t
+
+## A second Boki from the Shelter at minute 2 (the stray costs 20 gems at stall level 1), then Dash, nap pile, Nook.
+func _second(dash_now := false) -> void:
+	if dash_now:
+		await _dash()
+		return
+	var cards := Shelter.cards()
+	if cards.is_empty():
+		P("Shelter: no card")
+		return
+	var c: Dictionary = cards[0]
+	var r := Shelter.adopt(String(c["id"]))
+	if r["ok"]:
+		home._spawn_kin()
+	P("adopted a stray (%d gems): %s; roster %d, gems %d" % [int(c["price"]), str(r["ok"]), Save.d["roster"].size(), int(Save.d["gems"])])
+	for i in 40:
+		home._process(STEP)
+	P("Goals after the stray: %s" % str(GoalTracker.lines().map(func(l): return l["text"])))
+	P("Dash entrants with 2 Boki: %d" % home.hrace.entrants().size())
+	home._open_nook()
+	await _settle()
+	P("Nook with two Boki (L1): %s" % str(_panel_texts().slice(0, 30)))
+	P("can_pair first: '%s'; Nook GROWN_LV %d" % [home._can_pair(rec()), NookRules.GROWN_LV])
+	await shot("12_nook")
+	home._close_panel()
+
+func _dash() -> void:
+	# whistle (FORCED at the end: the Boki is teleported 14 m away first)
+	var far: Vector3 = home.world.random_ground(0)
+	k0()["pos"] = far
+	(k0()["node"] as Node3D).position = far
+	home.ppos = far + Vector3(14, 0, 0)
+	var t0 := T
+	home._whistle()
+	var a := 0.0
+	while a < 12.0:
+		home._process(STEP)
+		_bump_patch()
+		a += STEP
+		T += STEP
+		var d: float = Vector2(k0()["pos"].x - home.ppos.x, k0()["pos"].z - home.ppos.z).length()
+		if d < 3.5:
+			break
+	P("whistle: Boki back at the player after %.1f s" % (T - t0))
+	await shot("06_whistle")
+	P("Dash entrants with one Boki: %d (the Dash needs 2; with 1 it starts a practice lap)" % home.hrace.entrants().size())
+	P("FORCED (end of hour): Dash with 2 Boki, entrants %d" % home.hrace.entrants().size())
+	for k in home.kins:
+		k.erase("indoors")
+		k.erase("play")
+		k["rec"]["needs"]["energy"] = 90.0
+	home.hrace.use()
+	var t := 0.0
+	while (home.hrace.run != null or home.hrace.beats.playing()) and t < 120.0:
+		home.hrace.tick(0.1)
+		t += 0.1
+	P("Dash: ran %.0f s, gems %d, first-day done %s" % [t, int(Save.d["gems"]), JSON.stringify(Save.d["tutorial"].get("gfd", {}))])
+	await shot("11_dash")
+
