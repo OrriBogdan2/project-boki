@@ -85,10 +85,11 @@ static func is_partner(rec: Dictionary) -> bool:
 static func walks_in(rec: Dictionary, id: String) -> bool:
 	return zone_of(rec) == id or is_partner(rec)
 
-## Who walks the zone you are in: its residents, your partner wherever it lives and a wild visitor (GardenVisitor).
+## Who walks the zone you are in: its residents (not one in a lesson, LessonHall), your partner wherever it lives and a
+## wild visitor (GardenVisitor).
 static func out_here() -> Array:
 	var z := current()
-	var out := KinBox.farm().filter(func(r): return walks_in(r, z))
+	var out := KinBox.farm().filter(func(r): return walks_in(r, z) and not LessonHall.in_class(r))
 	var wild := GardenVisitor.in_zone(z)
 	if not wild.is_empty():
 		out.append(wild)

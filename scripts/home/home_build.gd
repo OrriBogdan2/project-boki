@@ -471,6 +471,8 @@ func make_deco(e: Dictionary) -> Node3D:
 		return FarmModels.site(e)
 	if String(e["id"]) == SnackPatch.ID:
 		return SnackPatch.model(e)
+	if String(e["id"]) == LessonHall.ID:
+		return LessonHall.model(e)
 	var n := _make_base(e)
 	if FarmSites.is_upgrading(e): FarmModels.upgrade_frame(n, e)
 	return FarmModels.dress(n, e)

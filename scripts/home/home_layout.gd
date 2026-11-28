@@ -138,6 +138,9 @@ const CATALOG := {
 		"desc": "Where Boki who aren't out on the farm curl up and sleep."},
 	"training_post": {"name": "Training post", "cat": "Buildings", "gems": 35, "wood": 6, "size": [2, 2], "fixture": "yard", "max": 1,
 		"desc": "Train a Boki's moves against the dummy."},
+	"lesson_hall": {"name": "Lessons hall", "cat": "Buildings", "gems": 40, "wood": 6, "size": [3, 2], "max": 1,
+		"block": true,
+		"desc": "Leave a Boki for a song, dance or drawing lesson. It comes back with a stat point and a new habit."},
 	"graveyard": {"name": "Graveyard", "cat": "Buildings", "gems": 25, "stone": 6, "size": [4, 6], "fixture": "graves", "max": 1,
 		"desc": "A quiet corner for Boki who died. Their graves wait here (and the Soul Shrine can bring one back)."},
 }
