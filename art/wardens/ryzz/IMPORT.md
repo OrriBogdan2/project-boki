@@ -184,3 +184,14 @@ Scripts: `~/gens/hunter-round-1124/sparkle/p14/tools/` (pad6.py).
 - art-gate (close sheet, side/3-4/game rows): FAIL, 3.5/10 vs live 3.0. The bust now shows from the side but reads as a pointed cone with a tip nub and a hard underside notch, not round; bolt emblem slightly squeezed.
   Owner fallback (11-27 11:30 PM EST): next round = Cinder's live chest shape scaled smaller at Sparkle's narrow width.
 - Renders: `--arms-out=170` and `--near=` options in tools/clip_shots.gd lift the arms overhead for a clear side view (render-only; patch at `~/gens/sparkle-chest-narrow-1128/tools/clip_shots_near.patch`, not committed).
+
+## 11-28 bust round 2c: narrow, round, perky, reads in side profile (replaces 2b; owner 11-28 "made them wide and invisible from the side")
+- 2b failed art-gate (3.5/10): a cone with a tip nub and an underside notch. Causes: only 95 vertices moved (tiny cups on a coarse mesh), a near-linear
+  falloff, and the live hem lip (155 mm) standing proud of the bust underside.
+- 2c (`~/gens/sparkle-chest-r2c-1128/tools/dome2.py`) edits the LIVE body buffer (46,756-vert prim, POSITION + NORMAL only) with a purely spatial offset
+  field H(x,y): two round domes (cups at x +-44 mm, R 42 x 46 mm, apex y 1.322) plus a crop-top drape from the apex down to the hem lip, Gaussian-smoothed on a
+  2 mm grid. Every cloth/skin layer at a point moves the same (no seams, no z-fighting). Below the apex nothing may stand proud of the apex-to-hem line (no shelf).
+  Moves are +z (and a 2 mm lift) only, so the front outline is not wider than live (moved verts |x| <= 91 mm; round 1 moved them out to 159 mm).
+- Pick (sheet A): side-profile peak 172 mm (live 130, +42; +17 over the hem lip), apex at y 1.327 (live 1.305: higher = perkier); render side profile +28 px
+  (~26 mm) forward of live at the bust. The pink hem line follows the drape forward (~20 px in side view); the lace below it is unchanged.
+  Options B 166 / C 177 / D 161 mm and the renders: `~/gens/sparkle-chest-r2c-1128` (sheet_sparkle_chest_r2c.jpg). Face, textures, weights, clips untouched.
