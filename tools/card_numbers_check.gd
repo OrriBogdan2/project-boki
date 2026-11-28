@@ -95,7 +95,13 @@ func _derived(a: String, d: Dictionary) -> Dictionary:
 		"archer":
 			var w := float(pin["wall_mult"])
 			# nums: PinSpirit.ORB_T, the spirit orb's time (a code constant)
-			return {"about_pairs": [[float(pin["dmg"][0]) * w, float(pin["dmg"][1]) * w]], "nums": [4.0]}
+			# 14 -> 16.8m: the shot's range scaled by the charge (range * range_k)
+			var rg := float(pin["range"])
+			var rk: Array = pin["range_k"]
+			return {
+				"about_pairs": [[float(pin["dmg"][0]) * w, float(pin["dmg"][1]) * w], [rg * float(rk[0]), rg * float(rk[1])]],
+				"nums": [4.0]
+			}
 		"ashwick":  # Char 31 needs 8 ticks of x.char
 			return {"nums": [ceilf(31.0 / float(x["char"])) * float(x["tick"])]}
 		"bulwark":  # the dash's time over its distance; the lane is cells x cell_len
