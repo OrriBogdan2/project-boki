@@ -6,6 +6,7 @@ extends RefCounted
 
 const AKCheck := preload("res://tools/archetype_check.gd")
 const DT := 1.0 / 60.0
+const RUN_BASE_STEPS := 3.3  # footfalls/s at base size (was 3.0 as drawn at match_hunter_scale 1.10)
 var a_v: AKCheck
 var beats := {}  # clip -> {len, cock, peak, settle, v (speed per frame)}
 var leads := {}  # clip -> its "lead" (s skipped at the start; under zero: the first frame held)
@@ -261,10 +262,13 @@ func _run(m: Match, p: Hunter, k: JuggernautKit, home: Vector3, t: Hunter) -> vo
 	var foot: Array = cl.d["loco"].get("foot_mps", [1.0, 1.0])
 	# (foot_mps is at the model's own scale: a match draws Kael bigger, so the gait layer divides that out)
 	var body_k := float(cl.root.get_meta("look_scale", cl.root.scale.y)) / absf(cl.root.scale.y)
+	# (the floor is at Kael's base size: drawn body.match_k bigger, the planted feet take longer strides, so the
+	# footfalls drop by match_k; 3.0/s as drawn at the old match_hunter_scale 1.10 = 3.3/s at base size)
+	var base_s := per_s * Arch.match_k(p.arch)
 	a_v.ok(
 		"kael anim: running, the clip rate is the gait layer's (speed over foot speed) and no slower than keyed",
-		absf(rate - spd * body_k / float(foot[1])) <= 0.05 and per_s >= 3.0,
-		"rate %.2f, %.2f/s at %.2f m/s" % [rate, per_s, spd]
+		absf(rate - spd * body_k / float(foot[1])) <= 0.05 and base_s >= RUN_BASE_STEPS,
+		"rate %.2f, %.2f/s (%.2f/s at base size) at %.2f m/s" % [rate, per_s, base_s, spd]
 	)
 	p.inp["move"] = Vector2.ZERO
 
