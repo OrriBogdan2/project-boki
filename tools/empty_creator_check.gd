@@ -26,6 +26,7 @@ func run(main_node: Node) -> void:
 	_void_body()
 	_no_cloak()
 	await _creator()
+	await _first_pass()
 	print("EMPTY_CREATOR_CHECK %s" % ("FAILED %d" % bad if bad > 0 else "PASSED"))
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -179,5 +180,35 @@ func _creator() -> void:
 	ok(
 		locker.look["shroud"] == Shrouds.NONE and locker.model.get_node_or_null("Rig/Torso/ShroudBones") == null,
 		"picking None for the shroud shows the bare body"
+	)
+	hx.free()
+
+
+## A new save (no look yet) opens the creator short: Sex, the height and build sliders and the shroud colour, no tabs
+## and no name, and "More" opens the full locker. Change your look (edit_only) opens it full (_creator above).
+func _first_pass() -> void:
+	Save.d["tutorial"]["intro"] = true
+	Save.d.erase("look")
+	var hx: Node = load("res://scripts/ui/hatch.gd").new()
+	main.add_child(hx)
+	hx._show_create()
+	for i in 3:
+		await main.get_tree().process_frame
+	var locker: LookLocker = hx.locker
+	var sliders: Array = hx.root_ui.find_children("Frame_*", "HSlider", true, false)
+	var names: Array = sliders.map(func(n): return String(n.name))
+	ok(
+		locker.short and names == ["Frame_height", "Frame_build"] and not locker._tabs.visible and not locker._name.visible,
+		"a new save shows Sex, Height, Build and colour only (sliders %s)" % [names]
+	)
+	var more := hx.root_ui.find_child("More", true, false) as Button
+	ok(more != null and locker._list.get_child_count() == 7, "with one 'More' button under the four rows")
+	more.pressed.emit()
+	await main.get_tree().process_frame
+	sliders = hx.root_ui.find_children("Frame_*", "HSlider", true, false)
+	ok(
+		not locker.short and sliders.size() == EmptyFrame.KEYS.size() and locker._tabs.visible and locker._name.visible
+		and hx.root_ui.find_child("More", true, false) == null,
+		"'More' opens the full locker: every slider, the tabs and the name"
 	)
 	hx.free()
