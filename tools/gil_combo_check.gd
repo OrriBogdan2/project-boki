@@ -720,8 +720,9 @@ func _spin_cancels() -> void:
 	ok("cancel E spin + X: the spout goes first, then the wave", K.spin_t < 0.0 and K.spouts.size() == 1
 		and not K.wave.is_empty())
 
-## During the Tidal Wave (an Effects dash, so DashFlow's default rows): E, RMB and LMB wait for the landing and go
-## then; Shift is dropped (into_dash.x lock: no charge, no swim, not replayed); X does nothing (no early landing).
+## During the Tidal Wave (an Effects dash, so gil.json's dash rows): RMB and LMB fire mid-ride, E is refused and not
+## replayed (GilKit.cast_e); Shift is dropped (into_dash.x lock: no charge, no swim, not replayed); X does
+## nothing (no early landing).
 func _wave_cancels() -> void:
 	_reset(6.0)
 	HunterKeys.ult_pressed(P)
@@ -733,15 +734,16 @@ func _wave_cancels() -> void:
 	P.inp["fire"] = false
 	var mid := [K.spin_t >= 0.0, K.flying.size(), K.combo_n, P.dashes]
 	_press("dash")
-	ok("cancel X wave + E, RMB, LMB: nothing goes mid-ride", not mid[0] and mid[1] == 0 and mid[2] == 2, str(mid))
+	# Reason: gil.json dash rows are "fire" and into_cast.x says lmb/rmb fire, e drop: RMB throws and LMB thrusts
+	# at once mid-ride; E is refused (cast_e, the wave is his movement) and not replayed.
+	ok("cancel X wave + E, RMB, LMB: RMB and LMB go mid-ride, E is refused (no spin)",
+		not mid[0] and mid[1] == 1 and mid[2] >= 1, str(mid))
 	var t := 0.0
 	while not K.wave.is_empty() and t < 2.0:
 		m.step(DT)
 		t += DT
 	step(m, 0.1)
-	ok("cancel X wave + E, RMB, LMB: each waits and goes on landing (spin, potion, a fresh first thrust)",
-		K.spin_t >= 0.0 and K.flying.size() == 1 and K.combo_n == 1, "spin %.2f potions %d thrust %d" % [
-		K.spin_t, K.flying.size(), K.combo_n])
+	ok("cancel X wave + E: dropped, not replayed on landing (no spin)", K.spin_t < 0.0, "spin %.2f" % K.spin_t)
 	ok("cancel X wave + Shift: dropped (no charge spent, no swim after the landing)", P.dashes == d0
 		and K.swim_t <= 0.0 and float(mid[3]) == d0)
 	K.drop_holds()
@@ -768,8 +770,9 @@ func _recast() -> void:
 	var w := K.recast_window()
 	ok("recast E: the spin opens an E window for RecastCue (slot e, at Gil)", String(w.get("slot", "")) == "e"
 		and float(w.get("left", 0.0)) > 1.9)
-	ok("recast E: the window's total is its time left, the ring never empties (finding F1)",
-		is_equal_approx(float(w.get("total", 0.0)), float(w.get("left", -1.0))) and not bool(w.get("auto", true)))
+	# Reason: GilKit.recast_window is finding F1's fix: the ring runs over the whole spin and the spout is auto.
+	ok("recast E: the ring runs over the whole 2 s spin, the spout sends itself (finding F1)",
+		is_equal_approx(float(w.get("total", 0.0)), float(K.e_def()["spin_t"])) and bool(w.get("auto", false)))
 	_press("sig")
 	ok("recast E: a press in the first 0.12 s is eaten, not buffered (finding F2)", K.spin_t >= 0.0
 		and K.spouts.is_empty() and K.recast_buf.is_empty())
