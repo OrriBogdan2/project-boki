@@ -8,13 +8,15 @@ extends "res://tools/clip_shots.gd"
 const DT := 1.0 / 30.0
 const RUN_MPS := 5.0
 const SIDE_YAW := -PI / 2.0
-var THREE_Q_YAW := -PI / 2.0 - 0.55
+const THREE_Q_YAW := -PI / 2.0 - 0.55  # the default view: three-quarter
 const ATTACKS := {"dolm": ["lmb_throw", "lmb_punch"], "dredge": ["shot", "throw"], "rimewright": ["dart_r", "spear"]}
 const POST_COUNT := 14
 const POST_SPACING := 0.5
 
 var posts: Array = []
 var close := false
+var view_yaw := THREE_Q_YAW  # --close turns it side-on (SIDE_YAW)
+
 
 func run(main: Node) -> void:
 	tree = main.get_tree()
@@ -22,12 +24,16 @@ func run(main: Node) -> void:
 	var ids: Array = ["dolm", "rimewright", "dredge"]
 	frame_px = 640
 	if OS.get_cmdline_user_args().has("--close"):
-		THREE_Q_YAW = SIDE_YAW
+		view_yaw = SIDE_YAW
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with("--shots-dir="): out = a.substr(12)
-		if a.begins_with("--wardens="): ids = Array(a.substr(10).split(",", false))
-		if a.begins_with("--size="): frame_px = int(a.substr(7))
-		if a == "--close": close = true
+		if a.begins_with("--shots-dir="):
+			out = a.substr(12)
+		if a.begins_with("--wardens="):
+			ids = Array(a.substr(10).split(",", false))
+		if a.begins_with("--size="):
+			frame_px = int(a.substr(7))
+		if a == "--close":
+			close = true
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	main.get_window().size = Vector2i(frame_px, frame_px)
@@ -40,6 +46,7 @@ func run(main: Node) -> void:
 	print("R2_VIEW_DONE ", ids.size())
 	tree.quit()
 
+
 func _match_cam() -> void:
 	if close:
 		var k := 1.2
@@ -50,6 +57,7 @@ func _match_cam() -> void:
 	cam.fov = 8.0
 	cam.position = Vector3(0, 21.0, 9.4)
 	cam.look_at(Vector3(0, 0.8, 0))
+
 
 func _posts() -> void:
 	var mat := Models.toon(Color("1c2a14"), false)
@@ -63,14 +71,17 @@ func _posts() -> void:
 		holder.add_child(post)
 		posts.append(post)
 
+
 func _scroll(mps: float) -> void:
 	var span := POST_COUNT * POST_SPACING
 	for p in posts:
 		p.position.x = fposmod((p as Node3D).position.x - mps * DT + span / 2.0, span) - span / 2.0
 
+
 func _save(dir: String, i: int) -> void:
 	await RenderingServer.frame_post_draw
 	tree.root.get_texture().get_image().save_jpg(dir.path_join("f%04d.jpg" % i), 0.93)
+
 
 func _hunter(id: String, dir: String) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
@@ -90,8 +101,8 @@ func _hunter(id: String, dir: String) -> void:
 	var marks: PackedStringArray = []
 	var n := 0
 	# idle, 3 s
-	model.rotation.y = THREE_Q_YAW
-	model.set_meta(WardenClips.STATE, {"vel": Vector3.ZERO, "face": THREE_Q_YAW, "grounded": true})
+	model.rotation.y = view_yaw
+	model.set_meta(WardenClips.STATE, {"vel": Vector3.ZERO, "face": view_yaw, "grounded": true})
 	for k in 20:
 		sync.call("_process", DT)
 	marks.append("idle %d" % n)
@@ -113,10 +124,10 @@ func _hunter(id: String, dir: String) -> void:
 		await _save(dir, n)
 		n += 1
 	# two attacks, 2 s each, standing, the keyed clip as the game plays it
-	model.rotation.y = THREE_Q_YAW
+	model.rotation.y = view_yaw
 	for ai in 2:
 		var clip: String = ATTACKS[id][ai]
-		model.set_meta(WardenClips.STATE, {"vel": Vector3.ZERO, "face": THREE_Q_YAW, "grounded": true})
+		model.set_meta(WardenClips.STATE, {"vel": Vector3.ZERO, "face": view_yaw, "grounded": true})
 		clips.force = {}
 		for k in 15:
 			sync.call("_process", DT)
@@ -145,7 +156,7 @@ func _hunter(id: String, dir: String) -> void:
 		clips.force = {}
 	model.set_meta(WardenClips.STATE, {})
 	# one frame at the game's real fov
-	model.rotation.y = THREE_Q_YAW
+	model.rotation.y = view_yaw
 	cam.fov = 32.0
 	cam.position = Vector3(0, 23.0 * sin(deg_to_rad(66.0)), 23.0 * cos(deg_to_rad(66.0)))
 	cam.look_at(Vector3(0, 0.8, 0))
