@@ -389,10 +389,10 @@ func _air_skate_rules() -> void:
 	)
 	step(m, 0.2)
 	P.inp["jump"] = true
-	P.inp["glide"] = true  # the key stays down: the glider is held open
+	P.inp["glide"] = true  # the key stays down: held HunterFeel.glide_engage s it opens the glider (a tap never does)
 	step(m, 1.0 / 60.0)
 	P.inp["jump"] = false
-	step(m, 1.0 / 60.0)
+	step(m, HunterFeel.glide_engage + 2.0 / 60.0)
 	var hv := Vector2(P.vel.x, P.vel.z).length()
 	P.inp["glide"] = false
 	ok(
@@ -714,8 +714,8 @@ func _rime_move() -> void:
 	P.inp["glide_btn"] = false
 	var brk := KMovesCare.length("tm_rime_break")
 	ok(
-		"tm X abyss: the carry runs on over the void; X frees her and held glide opens the step the break move ends",
-		over and opened_t > 0.0 and opened_t <= brk + 0.05,
+		"tm X abyss: the carry runs on over the void; X frees her and held glide opens once the break move and the glide hold are done",
+		over and opened_t > 0.0 and opened_t <= maxf(brk, HunterFeel.glide_engage) + 0.05,
 		"over %s glider at %.2f s (break move %.2f s)" % [over, opened_t, brk]
 	)
 	await _free(m)
