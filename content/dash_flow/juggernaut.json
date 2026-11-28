@@ -149,7 +149,7 @@
 		"x": {
 			"at": [0.3, 0.9],
 			"lmb": {"windup": "drop", "recovery": "fire", "source": "[?] Retaliation: planted through the 0.65 s guard, then the strike (briefs/hero-ref/juggernaut.md:205,226); no other press shown in it or after it."},
-			"lmb_hold": {"windup": "queue", "windup_wait": 0.45, "recovery": "fire", "source": "[?] Retaliation: planted through the 0.65 s guard, then the strike (briefs/hero-ref/juggernaut.md:205,226); no other press shown in it or after it."},
+			"lmb_hold": {"windup": "queue", "windup_wait": 0.67, "recovery": "fire", "source": "[?] Retaliation: planted through the 0.65 s guard, then the strike (briefs/hero-ref/juggernaut.md:205,226); no other press shown in it or after it."},
 			"rmb": {"windup": "drop", "recovery": "fire", "source": "[?] Retaliation: planted through the 0.65 s guard, then the strike (briefs/hero-ref/juggernaut.md:205,226); no other press shown in it or after it."},
 			"e": {"windup": "drop", "recovery": "fire", "source": "[?] Retaliation: planted through the 0.65 s guard, then the strike (briefs/hero-ref/juggernaut.md:205,226); no other press shown in it or after it."}
 		}
