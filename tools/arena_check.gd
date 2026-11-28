@@ -371,6 +371,8 @@ func _practice_page(m: Match) -> void:
 	main.set("current", m)         # (the Esc menu finds the match through the current screen)
 	Overlay.open_pause("match")
 	await tree.process_frame
+	Overlay.open_more()      # (Practice sits on the More page)
+	await tree.process_frame
 	ok("practice: the Esc menu has Practice", await _press("Practice") and Overlay.page == "practice", Overlay.page)
 	var maxed := await _press("Max all") and Hunter.SLOTS.all(func(s): return P.slot_lv[s] == Hunter.SLOT_MAX[s])
 	ok("practice: Max all", maxed, str(P.slot_lv))
@@ -394,7 +396,7 @@ func _practice_page(m: Match) -> void:
 	)
 	var names: Array = cut.map(func(b): return b.text)
 	ok("practice: the page fits the screen, no scrolling", cut.is_empty(), "%s cut: %s" % [r.size, names])
-	var rank1 := await _press("Reset to rank 1") and Hunter.SLOTS.all(func(s): return P.slot_lv[s] == 1)
+	var rank1 := await _press("Reset ranks") and Hunter.SLOTS.all(func(s): return P.slot_lv[s] == 1)
 	ok("practice: Reset", rank1 and P.skill_pts == 0, str(P.slot_lv))
 	ok("practice: the dummies keep their ranks", D.slot_lv == dummy_ranks, str(D.slot_lv))
 	Overlay.close()

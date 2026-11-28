@@ -3,6 +3,7 @@ extends RefCounted
 ## Training Grounds, the Arena, the Duel room and the tutorial: the bottom bar exists (Hero, the area's
 ## menu, Leave), its Hero button and J open the picker with every hero, picking swaps the hunter's archetype
 ## in place, keeps the Boki, opens every rank and saves the expedition pick, the Esc menu has Change hero,
+## the Esc menu's Practice page sets your ranks (Max all, Pick your max, Reset ranks; none in a real match),
 ## and the mouse wheel zooms the camera (the Duel room included). A real match gets none of it.
 
 var bad := 0
@@ -52,6 +53,17 @@ func run(main: Node) -> void:
 	rm.start({"teams": 2, "squad": 1, "tier": 0, "seed": 77, "no_drop": true})
 	rm.set_process(false)
 	ok(Practice.of(rm) == null, "a real match has no practice bar or picker")
+	var rwas: Node = main.get("current")
+	main.set("current", rm)
+	Overlay.open_pause("match")
+	await tree.process_frame
+	Overlay.open_more()
+	await tree.process_frame
+	var rbtns: Array = Overlay.host.find_children("*", "Button", true, false)
+	var rlabels: Array = rbtns.map(func(b): return String((b as Button).text))
+	ok(not rlabels.has("Practice"), "a real match's Esc menu has no Practice page")
+	Overlay.close()
+	main.set("current", rwas)
 	rm.queue_free()
 	print("PRACTICEHERO DONE, failures: %d" % bad)
 	tree.quit()
@@ -119,6 +131,8 @@ func _area(main: Node, m: Match, area: String) -> void:
 		func(b): return String((b as Button).text)
 	)
 	ok(labels.any(func(t): return t.contains("Change Hunter")), "%s: the Esc menu's More page has Change Hunter" % area)
+	ok(labels.has("Practice"), "%s: the More page has Practice" % area)
+	await _ranks_page(tree, P, area)
 	Overlay.close()
 	main.set("current", was)
 	await tree.process_frame
@@ -142,6 +156,35 @@ func _area(main: Node, m: Match, area: String) -> void:
 		await _wheel(tree, MOUSE_BUTTON_WHEEL_DOWN)
 	var far := CamWheel.far(true)
 	ok(is_equal_approx(m.cam.user_zoom, far), "%s: zoom stops at its limit (%.2f)" % [area, m.cam.user_zoom])
+
+
+## The Practice page (PracticeRanks) from the More page: Max all, Pick your max (that ability only), Reset ranks.
+func _ranks_page(tree: SceneTree, P: Hunter, area: String) -> void:
+	_press_btn("Practice")
+	await tree.process_frame
+	ok(Overlay.page == "practice", "%s: Practice opens its page (%s)" % [area, Overlay.page])
+	_press_btn("Max all")
+	await tree.process_frame
+	var maxed: bool = Hunter.SLOTS.all(func(s): return P.slot_lv[s] == Hunter.SLOT_MAX[s])
+	ok(maxed, "%s: Max all ranks every ability (%s)" % [area, str(P.slot_lv)])
+	ok(P.slot_lv["ult"] == 3, "%s: the ult goes to rank 3" % area)
+	_press_btn("Max %s " % P.slot_info("dash")["name"])
+	await tree.process_frame
+	ok(
+		P.slot_lv["dash"] == 3 and P.slot_lv["sec"] == 1 and P.slot_lv["kin"] == 1 and P.slot_lv["ult"] == 1,
+		"%s: Pick your max ranks that ability only (%s)" % [area, str(P.slot_lv)]
+	)
+	_press_btn("Reset ranks")
+	await tree.process_frame
+	var one: bool = Hunter.SLOTS.all(func(s): return P.slot_lv[s] == 1)
+	ok(one and P.skill_pts == 0, "%s: Reset ranks (%s)" % [area, str(P.slot_lv)])
+
+
+func _press_btn(start: String) -> void:
+	for b in Overlay.host.find_children("*", "Button", true, false):
+		if (b as Button).text.begins_with(start) and not b.is_queued_for_deletion():
+			(b as Button).pressed.emit()
+			return
 
 
 func _key(tree: SceneTree, action: String) -> void:

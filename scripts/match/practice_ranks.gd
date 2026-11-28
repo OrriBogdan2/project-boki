@@ -34,7 +34,7 @@ static func fill(body: VBoxContainer, h: Hunter, again: Callable) -> void:
 		if not ranks.is_empty():
 			b.tooltip_text = String(ranks[-1][1])      # what the top rank unlocks (the kit's data bonus)
 		body.add_child(b)
-	body.add_child(UI.button("Reset to rank 1", _then.bind(reset.bind(h), again), WIDE, "back"))
+	body.add_child(UI.button("Reset ranks", _then.bind(reset.bind(h), again), WIDE, "back"))
 
 static func _then(change: Callable, again: Callable) -> void:
 	change.call()
