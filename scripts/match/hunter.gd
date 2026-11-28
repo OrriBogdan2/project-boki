@@ -2070,6 +2070,8 @@ func _update_glide(dt: float) -> void:
 		# a fresh press in the air opened it (_glide_armed) and it is still held, or a pad's auto-glide, or scripted
 		# input: the glider opens. Space held since the jump never gets here (glide_press_only)
 		moves.open_glider()
+		if _glide_armed:
+			add_stat("glide_presses")     # (a press that waited out a lock, or the glide button: a real press too)
 		_glide_armed = false
 		if below_lip:
 			m.sfx("glide", pos, -2.0, 1.4)

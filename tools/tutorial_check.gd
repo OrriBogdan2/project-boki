@@ -32,6 +32,7 @@ const LOW_SLOW_K := 2.0  # a step may take this many times the fixed-step run's 
 const LOW_SLOW_S := 5.0  # ... plus this many seconds
 const SCREEN := Vector2(1920, 1080)  # px: the screen the edge arrow is laid out on
 const REACH_FLAT := 12.0  # m: a dummy farther than this on foot is out of reach of any kit
+const HOLD_PROBE_T := 8.0  # s of game time the hold-from-the-jump try at the glide step may take (fall + respawn)
 
 var bad := 0
 var arch := "gunslinger"
@@ -91,6 +92,8 @@ func run(main: Node) -> void:
 			print("TUTCHECK STEP %d %s: %s" % [seen.size(), tu.id(), tu.text])
 			if tu.id() in FOE_STEPS:
 				reach += _unreachable(m, tu.id())  # (the step's dummies were just placed by its start)
+			if tu.id() == "glide":
+				t += _hold_probe(m, tu)
 	ok(m.player.extracted, "the course finishes (%d steps in %.0fs)" % [seen.size(), t])
 	var banners := seen.keys().filter(func(k): return not TutorialHints.quiet(String(k)))
 	print(
@@ -124,6 +127,35 @@ func run(main: Node) -> void:
 		await _low_rounds(main, starts, t)
 	print("TUTCHECK DONE %s, failures: %d" % [arch, bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+
+## The glide step's rule (DECISIONS 11-08): Space held from the jump never opens the glider, so it never finishes
+## the step. From the step's pad, one jump with Space kept down toward the landing, as real keys send it
+## (glide_press_only), until the hunter is down again (on the far side or back at the stop after a fall). Then the
+## course goes on with the driver's real second press. Returns the game seconds it took.
+func _hold_probe(m: Match, tu: Tutorial) -> float:
+	var p := m.player
+	var dest := tu.stop("glide")
+	p.pos = tu.stop("glide", "pad") + Vector3(0, 0.3, 0)
+	p.vel = Vector3.ZERO
+	p.inp["glide_press_only"] = true
+	var t := 0.0
+	var up := false
+	var opened := false
+	while t < HOLD_PROBE_T and tu.id() == "glide" and not (up and p.grounded):
+		var to := Vector2(dest.x - p.pos.x, dest.z - p.pos.z)
+		p.inp["move"] = to.normalized() if up else Vector2.ZERO
+		p.inp["jump"] = p.grounded and not up and t > 0.3  # (one press, once the hunter stands on the pad)
+		p.inp["glide"] = p.inp["jump"] or up  # Space, held from the jump on
+		m.step(Match.DT)
+		t += Match.DT
+		up = up or not p.grounded
+		opened = opened or p.gliding
+	p.inp.erase("glide_press_only")
+	ok(up, "the hold try at the glide step left the pad")
+	ok(not opened, "Space held from the jump never opens the glider (%.1fs)" % t)
+	ok(tu.id() == "glide" and not tu.flag, "... and never finishes the glide step (%s)" % tu.id())
+	return t
 
 
 ## A fresh tutorial match for the picked Relic, its own clock stopped (the fixed-step course steps it by hand).
@@ -309,6 +341,18 @@ func _words(p: Hunter, seen: Dictionary) -> void:
 		want = "Step in and swing"
 	ok(String(sh.get("text", "")).begins_with(want), "the attack line fits the weapon ('%s')" % sh.get("text", ""))
 	ok(String(sh.get("cap", "")) == Settings.key_cap("fire"), "and shows the attack key (%s)" % sh.get("cap", ""))
+	var gl: Dictionary = seen.get("glide", {})
+	var g_line := String(gl.get("text", "")) + " " + String(gl.get("detail", ""))
+	var jump := Settings.key_cap("jump")
+	var again := g_line.contains(jump + " again") or g_line.contains(jump + " a second time")
+	ok(again and not g_line.contains("HOLD"), "the glide step says press %s again, not hold it ('%s')" % [jump, g_line])
+	ok(String(gl.get("cap", "")) == jump, "and its cap is %s (%s)" % [jump, gl.get("cap", "")])
+	var demo := []  # the cap's two-press demo over one loop: tap, up, held second press, up
+	for i in int(TutorialStrip.TWICE_T / 0.05):
+		var k: int = TutorialStrip.twice_press(i * 0.05)
+		if demo.is_empty() or demo.back() != k:
+			demo.append(k)
+	ok(demo == [1, 0, 2, 0], "the glide cap shows a tap, then a held second press (%s)" % str(demo))
 
 
 ## The Boki leads (DECISIONS Nov 3: it runs ahead, waits, looks back; TutorialLead). One sample per sim step on every
