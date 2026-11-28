@@ -5,7 +5,7 @@ extends RefCounted
 ## arrival brings the others over (React), at night the three day Boki nap while the nocturnal Zapple stays up,
 ## no machine refuses a transition, bonds are symmetric, and a v11 save's Boki gain an empty bonds map; the sleepers
 ## breathe and yawn (BokiNapSfx, _nap_sounds). Then nap spots: a tired Boki walks to a free one, its friend lies
-## down beside it, a third takes another. Never touches the real save.
+## down beside it, a third takes another. Then raising leans (_axes_part). Never touches the real save.
 
 const SIM_SECS := 600.0  # 10 simulated minutes
 const DT := 0.25  # s per farm step (the machines tick at 10 Hz inside it)
@@ -127,6 +127,7 @@ func _notice_part(home, center: Vector3) -> void:
 	var life: BaseLife = home.life
 	var r: Dictionary = BaseGreet.rules()
 	var kept_chance: float = r["chance"]
+	seed(21)  # fixed dice here, whatever the parts before rolled; 3, 7, 11 fail on main too
 	home.day_t = 0.4
 	life.night = false
 	for k in home.kins:
@@ -190,14 +191,17 @@ func _notice_part(home, center: Vector3) -> void:
 	for _i in int(float(r["follow_s"]) / DT) + 6:
 		home._move_kin(DT)
 	ok(
-		m.is_in(BaseLife.S.ROAM) and not k.has("life_greet") and not k.has("led"),
+		not m.is_in(BaseLife.S.GREET) and not k.has("life_greet") and not k.has("led"),
 		"then it went back to what it was doing"
 	)
 	r["chance"] = kept_chance
 	var hits := {0.0: 0, 95.0: 0}
+	home.ppos = back  # you stand where you came back (the follow part above walked you off)
 	seed(11)
 	for trust in hits:
 		for _i in 200:
+			for key in ["play", "eat", "nap_t", "life_at", "life_rival", "life_greet", "led"]:
+				k.erase(key)  # the Boki may have started its own play while it followed you
 			m.go(BaseLife.S.ROAM, "test")
 			k["rec"]["trust"] = trust
 			k["notice_away"] = float(r["away_s"])
@@ -294,7 +298,8 @@ func _nap_sounds(home) -> void:
 	Sfx.listener = sleeper["pos"]
 	# holds from earlier steps lapse on the wall clock (250 ms), not on these fixed steps
 	for key in Sfx.loops.keys():
-		if String(key).begins_with("nap:"): Sfx.loop_stop(key)
+		if String(key).begins_with("nap:"):
+			Sfx.loop_stop(key)
 	home._move_kin(DT)
 	var on := Sfx.loops.keys().filter(func(key): return String(key).begins_with("nap:"))
 	ok(
@@ -352,7 +357,7 @@ func _spots_part(home, center: Vector3) -> void:
 	var cz := int(center.z)
 	zone["nap"] = [["sunny rock", cx + 4, cz], ["under a tree", cx - 4, cz + 3]]
 	var life: BaseLife = home.life
-	life.r_v["doze"] = 0.0      # these places are for tired naps: a random company doze would send a Boki elsewhere
+	life.r_v["doze"] = 0.0  # these places are for tired naps: a random company doze would send a Boki elsewhere
 	life.r_v["doze_pile"] = 0.0
 	seed(11)
 	home.day_t = 0.4
@@ -406,6 +411,65 @@ func _spots_part(home, center: Vector3) -> void:
 	zone["nap"] = kept
 
 
+## Raising leans (BaseAxes, base_axes.json): 10 days of each care style give the rows below, ten days of play make a
+## busy Boki and ten of feeding alone a lazy one, and a lazier Boki naps more often on its own than a busy one.
+func _axes_part(home) -> void:
+	var r_v := Content.rules("base_axes")
+	var rows := {}
+	for style in r_v["styles"]:
+		var rec := Save.new_kin("burrlet", style)
+		for day in 10:
+			for kind in r_v["styles"][style]:
+				BaseAxes.care(rec, kind)
+		rows[style] = rec
+		var scales: Array = r_v["weights"].keys().map(func(a): return "%s x%.2f" % [a, BaseAxes.mult(rec, a)])
+		print("BASELIFE axes %-8s %s %s" % [style, rec["raised"], ", ".join(scales)])
+	var cap := float(r_v["cap"])
+	ok(rows["none"]["raised"].values().all(func(v): return v == 0.0), "no care leaves every axis at 0")
+	ok(
+		rows.values().all(func(r): return r["raised"].values().all(func(v): return absf(v) <= cap + 0.0001)),
+		"no axis leaves +-%.1f" % cap
+	)
+	ok(
+		BaseAxes.mult(rows["player"], "play") > 1.2 and BaseAxes.mult(rows["feeder"], "nap") > 1.1,
+		"play makes a Boki busy (plays more), feeding alone a lazy one (naps more)"
+	)
+	ok(
+		BaseAxes.mult(rows["trainer"], "chase") > 1.4 and BaseAxes.mult(rows["cuddler"], "chase") < 1.0,
+		"training makes a bold, rough Boki that chases more; cuddling a gentle one that chases less"
+	)
+	ok(BaseAxes.mult(rows["trainer"], "cling") < 0.7, "a bold Boki clings to you less")
+	ok(
+		rows["player"]["journal"].size() == 1 and rows["none"]["journal"].is_empty(),
+		"crossing a band writes one journal line (%s)" % [rows["player"]["journal"]]
+	)
+	var life: BaseLife = home.life
+	var a: Dictionary = home.kins[0]
+	home.day_t = 0.4
+	life.night = false
+	a["rec"]["needs"]["energy"] = 100.0
+	a["rec"]["needs"]["food"] = 100.0
+	for k in home.kins:
+		if k != a:
+			k["busy"] = true
+	var naps := {}
+	for who in ["feeder", "player"]:
+		a["rec"]["raised"] = rows[who]["raised"]
+		naps[who] = 0
+		for i in 400:
+			a.erase("nap_t")
+			(a["life"] as Fsm).go(BaseLife.S.ROAM, "test")
+			life.choose(a)
+			naps[who] += 1 if (a["life"] as Fsm).is_in(BaseLife.S.NAP) else 0
+	ok(
+		naps["feeder"] > naps["player"] + 10,
+		"400 thinks: the lazy Boki naps %d times, the busy one %d" % [naps["feeder"], naps["player"]]
+	)
+	a["rec"]["raised"] = {"bold": 0.0, "busy": 0.0, "gentle": 0.0}
+	for k in home.kins:
+		k.erase("busy")
+
+
 ## Left alone: hungry Boki, a bare pantry, no patch and no bowl. Over the same 10 simulated minutes every one eats
 ## from a wild tree on its own, and none ends pinned at the hungry floor.
 func _left_alone(home) -> void:
@@ -435,8 +499,10 @@ func _left_alone(home) -> void:
 		var food := Care.need(k["rec"], "food")
 		ok(
 			food > floor_food + 10.0,
-			"%s left alone ate on its own (food %.0f, lowest %.0f, floor %.0f)"
-			% [k["rec"]["name"], food, lowest[uid], floor_food]
+			(
+				"%s left alone ate on its own (food %.0f, lowest %.0f, floor %.0f)"
+				% [k["rec"]["name"], food, lowest[uid], floor_food]
+			)
 		)
 
 
@@ -543,6 +609,7 @@ func run(m: Node) -> void:
 	await _nap_sounds(home)
 	_spots_part(home, center)
 	_rival_beat(home)
+	_axes_part(home)
 	_play_sounds(home)
 	_notice_part(home, center)
 	_left_alone(home)

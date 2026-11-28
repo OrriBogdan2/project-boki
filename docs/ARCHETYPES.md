@@ -153,7 +153,7 @@ makes it louder:
 | R before 6 | padlock + small "LV 6" above | a **big "6" in the slot's centre** over the padlock. At level 5 the slot fills with progress to 6 (a vertical gold fill). At 6 it flashes and reads "UNLOCK" |
 | R at 6-8 | rank pips | rank pip 1/2 plus a small "9" corner tag for the next rank |
 | enemy level | — | a small level badge at the left end of every enemy nameplate (with a gold rim once they're 6+ and their R is unlocked) |
-| resource | — | the archetype resource arc at the crosshair and a bar under the health bar (§3.2) |
+| resource | — | the archetype resource. With `"gauge": true` (fill-up meters: Rage, Swell) it draws the arc at the crosshair and a thin bar under the health bar (§3.2); other kinds show as a buff icon (Fever, Rocks, Salvage) or on the foe (marks) |
 | bond | kin card on the portrait corner | the kin card's ring is the bond meter. When full, the R slot gets a **kin-coloured rim** (§5) |
 
 ---
@@ -895,12 +895,12 @@ set the bar for "oomph": one resource that the kit's own abilities build, a hunt
 changes when the payoff is armed, and a named payoff that lands with T4 hitstop (the hit carries
 `payoff: true`), a T4 shake, its own synthesized sound, VFX and a camera punch. The other four now
 follow the same shape, through shared helpers in `ArchKit` (`armed_fx`, `payoff_fx`, `self_pips`,
-`net_pulse`, `net_ring`/`net_bolt`, `terrain_behind`, `ready_label`, `e_payoff_ready`, `teardown`).
+`net_pulse`, `net_ring`/`net_bolt`, `terrain_behind`, `e_payoff_ready`, `teardown`).
 No kit prints a word in the world (owner 11-11): armed, landed, reset and crowd-control moments read
 through glow, ring, flash, sound and the plate's status icon; only numbers float.
 
-- **HUD:** the resource bar and crosshair arc as before, plus a pulsing label under the crosshair
-  while the payoff is armed (`ready_label`) and the gold "ready" dot on the slot the payoff lives on.
+- **HUD:** the resource bar and crosshair arc as before (no ready word under the crosshair) and the gold "ready"
+  dot on the slot the payoff lives on.
 - **Remote players** (whose games don't run your kit): the armed moment and every payoff send the
   existing Net `fx` ring / bolt events, and an armed kit pulses a ring under the hunter every 1.1s.
   The protocol shape is unchanged (no `Net.VERSION` bump).
@@ -1106,7 +1106,7 @@ pose, sound and VFX.
 | Hero | Sequence | Result | Source |
 |---|---|---|---|
 | Juggernaut | E (hooked) -> E (pull) -> RMB tap | **Cinder Spin**: 2.2m spin, 18, blight 4s; a full-body double spin, orange slash rings, a whirr and blast | wiki |
-| Juggernaut | E (hooked or anchored) -> hold RMB -> let go | **Chain Lunge**: the Lunge runs along the chain to its end (x1.25, RUN THROUGH); the chain hand hauls back, gold chain flash, a tether snap and a rising charge; the chain is spent | owner |
+| Juggernaut | E (hooked or anchored) -> hold RMB -> let go | **Chain Lunge**: the Lunge runs along the chain to its end (x1.25); the chain hand hauls back, gold chain flash, a tether snap and a rising charge; the chain is spent | owner |
 | Juggernaut | E -> hold RMB -> E while holding | **Haul Slam**: pulled in with the charge, a crash where you arrive (2.8m, 16 -> 30 by charge); the blade cocked high through the pull, then the drop; gold ring, dust, slam and boom | owner |
 | Juggernaut | E -> E (pull) -> hold RMB | **Haul Slam** on arrival (or at once if the pull is over) | owner |
 | Juggernaut | E attached -> RMB tap | the normal **Finishing Slam** (wound up, aimed) | wiki |
@@ -1262,6 +1262,12 @@ games' heroes). Mechanics only: every name, number, text, look and sound in the 
 - `"field": "weapon.primary.<key>"` reads the hero's signature weapon (`content/weapons/<signature>.json` `primary`). A number only the footage gives takes `F` evidence from `briefs/hero-ref` and a tolerance that covers the measurement (Meeko's crook range and speed).
 - Change a number on purpose: edit the JSON and the row together, and say which source or owner call moved it.
 - Run: `godot --headless -- --kit-parity-check` (temp `XDG_DATA_HOME`).
+
+## Kit number golden
+`tools/goldens/kit_numbers.tsv` snapshots every number and boolean in `content/archetypes/*.json` and `content/rules/kit_parity.json` (one sorted `file:dotted.path<TAB>value` row each; text is not snapshotted). `python3 tools/kit_number_golden.py --check` (run by `python3 tools/health.py --strict`, so by ship) fails with each changed, removed or new key and its old -> new value, so an unrelated change cannot silently retune a kit.
+- **Re-bless** after a deliberate retune: `python3 tools/kit_number_golden.py --bless`, then commit the TSV in the same commit as the JSON edit and say which source or owner call moved the number (the diff of the TSV is the list of changed keys).
+- A new hunter or ability adds rows the same way (new keys also fail until blessed). Adding a text-only field changes nothing.
+- It sits under `--archetype-check` (our spec) and `--kit-parity-check` (the source): this one only says *something moved*.
 
 ## Kit card text rules (11-11)
 

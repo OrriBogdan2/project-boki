@@ -38,14 +38,15 @@ var stun_t := 0.0
 var net_cc := 0  # (a remote body) its owner's stun/root/slow bits from the snapshot (StatusLooks.net_bits)
 var net_dead_t := -1.0  # (a remote Boki) when its caught event landed: older snapshots are stale
 var guard_t := 0.0  # taking less damage for a moment (Rock Guard)
-var blight_t := 0.0  # venom's anti-heal: healing on this body is cut to 40% for a while
+var blight_t := 0.0  # venom's anti-heal: healing on this body is cut (blight_k) for a while
 var guard_k := 0.0
 var slow_k := 0.0  # how much speed the current slow takes away (0 = the body's usual slow)
-var blight_k := 0.6  # how much healing the current blight cuts
+var blight_k := InCombat.anti_heal_cut()  # how much healing the current blight cuts
 var vuln_t := 0.0  # a vulnerable mark: takes vuln_k more damage (never above KinRules.VULN_MAX)
 var vuln_k := 0.0
 var dr := {}  # diminishing returns on crowd control: kind -> [applications, last time]
 var dr_stun := false  # the running stun counts toward the immunity that follows it
+var cc_guard_t := 0.0  # s left of the protection after a revive: stuns, roots and slows don't land (Life.R)
 var cc_immune_t := 0.0  # just came out of a stun: stuns and roots don't land (KinRules.STUN_IMMUNE)
 var marks := {}  # combo setups on this body: combo id -> {team, owner, until, window}
 var squash := 0.0  # landing / hit squash for the model
@@ -53,6 +54,7 @@ var remote := false  # driven by another player's game
 var last_hit_by: Ent = null
 var combat_at := -99.0  # match time it last dealt or took fight damage (InCombat)
 var hit_by := {}  # enemy hunter instance id -> m.time of their last landed hit or CC here (DashReset assists)
+var assist_t := -1.0  # m.time of the last takedown here that counted assists: older hits don't count again
 var net_pos := Vector3.ZERO
 var net_vel := Vector3.ZERO
 var net_t := -1.0
@@ -212,6 +214,11 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 		for st0 in ["slow", "root", "stun"]:
 			if opts.has(st0):
 				opts[st0] = float(opts[st0]) * cc_k
+	# just back from the dead (Life.bring_back): no stun, root or slow lands for a few seconds
+	if cc_guard_t > 0.0:
+		opts = opts.duplicate()
+		for st2 in ["slow", "root", "stun"]:
+			opts.erase(st2)
 	# crowd control from abilities ("dr" in opts) has diminishing returns per target (KinRules)
 	var use_dr := bool(opts.get("dr", false))
 	if use_dr:
@@ -393,6 +400,8 @@ func tick_status(dt: float) -> void:
 		root_t -= dt
 	if cc_immune_t > 0.0:
 		cc_immune_t -= dt
+	if cc_guard_t > 0.0:
+		cc_guard_t -= dt
 	if vuln_t > 0.0:
 		vuln_t -= dt
 	if stun_t > 0.0:

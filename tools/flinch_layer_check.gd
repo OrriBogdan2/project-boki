@@ -60,7 +60,7 @@ func _hero(id: String, move: String) -> void:
 		var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 		m.set_meta("anim_seed", 1)
 		holder.add_child(m)
-		var sync := WardenGlb.layers(m)      # (Sync, or Native on Meshy's own skeleton: WardenNative)
+		var sync := WardenGlb.layers(m)  # (Sync, or Native on Meshy's own skeleton: WardenNative)
 		if sync == null or (sync.get("clips") == null and sync.get("plays") == null) or sync.get("flinch") == null:
 			ok(false, "%s: wears clips and a flinch layer" % id)
 			return
@@ -200,6 +200,7 @@ func _hit(pair: Array, push: Vector2, k: float, want: Vector3, off: Vector3) -> 
 	s["hit_t"] = 99.0
 	return peak
 
+
 ## The same test on Meshy's own skeleton (WardenNative): the LMB hold plays Meshy's attack clip, and a hit leaves
 ## the clip the unhit twin plays (its state, clip and time) while the torso leans; legs, settling and stagger as above.
 func _native(id: String, move: String, pair: Array) -> void:
@@ -214,8 +215,11 @@ func _native(id: String, move: String, pair: Array) -> void:
 		(p["s"] as Dictionary)["kmove"] = move
 	_frames(pair, 12)
 	var cur: String = hit["sync"].get("cur")
-	# ("kmove": the move has a clip of its own, data "kmoves": Lace's arc_draw is laid at the move's clock)
-	ok(cur == "attack" or cur == "kmove", "%s: LMB hold: %s plays Meshy's attack clip (%s)" % [id, move, cur])
+	# (the move has a clip of its own, data "kmoves": Lace's arc_draw is laid at the move's clock, cur "kmove"; Cinder's
+	# as_lance lies over the legs' clip, no Meshy attack)
+	var mv = hit["sync"].get("moves")
+	var own: bool = cur == "kmove" or (mv != null and mv.has_clip(move, hit["sync"].get("plays")))
+	ok(cur == "attack" or own, "%s: LMB hold: %s plays Meshy's attack clip or its own (%s)" % [id, move, cur])
 	var off := _gap(pair)
 	var legs0 := _bone(ctl, "thigh.L").angle_to(_bone(hit, "thigh.L"))
 	var peaks := {}
@@ -231,6 +235,7 @@ func _native(id: String, move: String, pair: Array) -> void:
 	ok(heavy > peaks["front"] * 1.5, "%s: a stagger leans further (%.3f m vs %.3f)" % [id, heavy, peaks["front"]])
 	for r in pair:
 		(r["m"] as Node).free()
+
 
 ## A Meshy-native model's state, clip and time into it (to 10 ms).
 func _clip(r: Dictionary) -> String:

@@ -6,9 +6,10 @@ extends RefCounted
 ## rigid in that bone's rest frame, and hung on the Meshy bone that plays the bone (WardenSkeleton.find) by `carry`:
 ## the part keeps its place and turn against the limb, the contract's parent -> bone line swung onto Meshy's, so the
 ## sword gripped in the contract's hanging hand sits in Meshy's A-pose hand. The contract's anchor empties on that bone
-## ride the part (the blade tip on the blade). Data "stretch" {"kmove", "y", "rest"}: the parts' length along their
-## bone while that kit move plays and otherwise (the contract's clips key the jet bones' scale: Flue Flight's long
-## flames, small ones at rest).
+## ride the part (the blade tip on the blade). Data "stretch" {"kmove", "y", "rest", "hide_below"}: the parts' length
+## along their bone while that kit move plays and otherwise (the contract's clips key the jet bones' scale: Flue
+## Flight's long flames, small ones at rest); a part shorter than "hide_below" is not drawn (Cinder's rest jets read as
+## flat cards at the heels; her turnaround has none), its anchors still ride it.
 
 const PREFIX := "prop_"  # MeshInstance3D name: prop_<contract bone> ("jet.0" -> prop_jet_0: node names have no ".")
 const EASE := 10.0  # 1/s: how fast a part eases to its stretch
@@ -45,8 +46,12 @@ static func carry(art: String, skel: Skeleton3D, to_m: Transform3D, d: Dictionar
 		mi.mesh = p[0]
 		# (data "scale": the part grown about its bone)
 		var grow := _grow((d.get("scale", {}) as Dictionary).get(cb, 1.0))
-		mi.transform = ((to_m * skel.get_bone_global_rest(nb)).affine_inverse() * onto * (p[1] as Transform3D)
-			* Transform3D(Basis.from_scale(grow)))
+		mi.transform = (
+			(to_m * skel.get_bone_global_rest(nb)).affine_inverse()
+			* onto
+			* (p[1] as Transform3D)
+			* Transform3D(Basis.from_scale(grow))
+		)
 		# (data "grip": a point of the part into the fist)
 		var grip: Dictionary = (d.get("grip", {}) as Dictionary).get(cb, {})
 		if not grip.is_empty():
@@ -61,6 +66,7 @@ static func carry(art: String, skel: Skeleton3D, to_m: Transform3D, d: Dictionar
 		mi.set_meta("base", mi.transform)
 		mi.set_meta("y", float(stretch_d.get("rest", 1.0)))
 		mi.transform = mi.transform * Transform3D(Basis.from_scale(Vector3(1.0, mi.get_meta("y"), 1.0)))
+		wp._show(mi)
 		at.add_child(mi)
 		for an: Array in p[2]:  # [name, in the bone's rest frame]
 			var e := Node3D.new()
@@ -86,6 +92,15 @@ func step(dt: float, kmove: String) -> void:
 		var now := move_toward(float(mi.get_meta("y", 1.0)), y, EASE * dt * maxf(y, 1.0))
 		mi.set_meta("y", now)
 		mi.transform = (mi.get_meta("base") as Transform3D) * Transform3D(Basis.from_scale(Vector3(1.0, now, 1.0)))
+		_show(mi)
+
+
+## Draws part `mi` only while it is at least data "hide_below" long (layers, not visible: its anchors keep drawing).
+func _show(mi: MeshInstance3D) -> void:
+	if not mi.has_meta("layers"):
+		mi.set_meta("layers", mi.layers)
+	var shown := float(mi.get_meta("y", 1.0)) >= float(stretch.get("hide_below", 0.0))
+	mi.layers = int(mi.get_meta("layers")) if shown else 0
 
 
 ## The part contract bone `bone` carries on Meshy's skeleton `sk` (its MeshInstance3D, posed in the bone's frame), or

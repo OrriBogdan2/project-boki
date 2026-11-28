@@ -30,7 +30,7 @@ func _new_save(kin_count := 1) -> Dictionary:
 	var d := Save.fresh()
 	for i in kin_count:
 		var k := Save.new_kin(["zapple", "cindle"][i], ["Pip", "Ash"][i])
-		k["uid"] = "ftut%d" % i      # likes are seeded from the uid: a random one hates the tutorial's food
+		k["uid"] = "ftut%d" % i  # likes are seeded from the uid: a random one hates the tutorial's food
 		k["level"] = 5
 		Care.ensure(k)
 		d["roster"].append(k)
@@ -70,7 +70,7 @@ func run(m: Node, mode := "") -> void:
 			await load("res://tools/farm_hob_shots.gd").new().run(m, String(a).substr(17))
 			return
 	ok(FarmUnlocks.base_mode(), "base_mode is on in the shipped rules")
-	FarmUnlocks.rules()["base_mode"] = false      # sections 1-4 are the old farm's Hob and twelve steps
+	FarmUnlocks.rules()["base_mode"] = false  # sections 1-4 are the old farm's Hob and twelve steps
 	_hob_rules()
 	_tutorial_rules()
 	_tracker_rules()
@@ -108,8 +108,9 @@ func _base_mode() -> void:
 	ok(not home.hmk.tabs().has("Exchange"), "on: no Exchange tab")
 	var wild: Array = (home.hb.wild_t as Dictionary).keys()
 	var w: World = home.world
-	var tree_at := Vector2.ZERO if wild.is_empty() else Vector2(int(wild[0]) % w.w + 0.5,
-			int(int(wild[0]) / float(w.w)) + 0.5)
+	var tree_at := (
+		Vector2.ZERO if wild.is_empty() else Vector2(int(wild[0]) % w.w + 0.5, int(int(wild[0]) / float(w.w)) + 0.5)
+	)
 	ok(home.hg.find(tree_at).is_empty(), "on: wild trees and boulders are not choppable")
 	home.hw.scan()
 	var econ_kinds := ["chop", "break", "log", "ore", "carry", "stock"]
@@ -144,11 +145,12 @@ func _base_tutorial() -> void:
 		one_line = one_line and not FarmTutorial.hint_text(String(st["id"])).contains("{")
 	ok(one_line, "one banner line per step, no leftover tokens")
 	var last := FarmTutorial.hint_text("out")
-	var path_said: bool = last.contains("Wayseed") and last.contains("Boki that leans")
+	var path_said: bool = last.contains("Wayseed") and last.contains("leaning Boki")
 	ok(
 		last.contains("Waystone") and path_said and not last.contains("\n"),
 		"the last hint: the Waystone, and its unlock path (a Wayseed and a Boki leaning that way) in one line"
 	)
+	_banner_fits()
 	ok(FarmTutorial.current() == "meet", "it starts with meeting your Boki")
 	FarmTutorial.event("play")
 	ok(FarmTutorial.current() == "meet", "a later step done early does not count")
@@ -189,7 +191,45 @@ func _base_tutorial() -> void:
 	FarmTutorial.event("stay")
 	var paid: bool = int(Save.d["gems"]) == g + int(FarmTutorial.option("end_gems"))
 	ok(not FarmTutorial.active() and paid, "staying ends it with the one reward")
+	_base_ends_alone()
 	await _base_world()
+
+
+## The last base hint ("head out or stay"), with its counter, fits inside TutorialStrip's 42% width at a
+## readable size (12 px is the shrink
+## floor, so the line never runs past the "4/4" counter), at 1080p and at 720p.
+func _banner_fits() -> void:
+	var font: Font = load("res://fonts/LilitaOne-Regular.ttf")
+	var worst := 99
+	var over := ""
+	for sz in [Vector2(1920, 1080), Vector2(1280, 720)]:
+		var r := TutorialStrip.rect(sz)
+		var line := {"text": "\u2713 Done!  " + FarmTutorial.hint_text("out"), "count": "4/4"}
+		var lay := TutorialStrip.layout(font, r, line)
+		worst = mini(worst, int(lay["text_px"]))
+		if float(lay["text_w"]) > float(lay["text_room"]):
+			over = "at %s" % str(sz)
+	ok(over == "" and worst >= 12, "the head out line fits the strip beside 4/4 (smallest %d px) %s" % [worst, over])
+
+
+## "Head out or stay" also ends on its own: a zone waking, or a Boki finishing a toy turn. Neither counts before
+## the toy step is done, and each pays the one reward once.
+func _base_ends_alone() -> void:
+	for what in ["wake", "played"]:
+		Save.d = _new_save()
+		HomeLayout.ensure(Save.d)
+		_stats()
+		FarmTutorial.event(what)
+		ok(FarmTutorial.done_count() == 0 and FarmTutorial.active(), "%s before the toy step counts for nothing" % what)
+		for id in ["meet", "patch", "eat", "toy"]:
+			FarmTutorial.mark(id)
+		ok(FarmTutorial.current() == "out", "%s: toy done, 'head out or stay' is the step" % what)
+		var g := int(Save.d["gems"])
+		FarmTutorial.event(what)
+		var paid: bool = int(Save.d["gems"]) == g + int(FarmTutorial.option("end_gems"))
+		ok(not FarmTutorial.active() and FarmTutorial.did("out") and paid, "%s ends it with the one reward" % what)
+		FarmTutorial.event(what)
+		ok(int(Save.d["gems"]) == g + int(FarmTutorial.option("end_gems")), "%s again pays nothing more" % what)
 
 
 ## The hint line's Skip button is up (and not hidden behind a quiet guide).
@@ -664,14 +704,19 @@ func _tracker_rules() -> void:
 	_stats(0, 0, 1, 4)
 	ClassUnlock.choose_starters(ClassUnlock.starters().slice(0, ClassUnlock.picks_needed()))
 	var rows := GoalTracker.lines()
-	ok(rows.size() >= 2 and rows.size() <= 5, "the tracker has a few rows, at most 5 (%d)" % rows.size())
+	ok(rows.size() >= 2 and rows.size() <= 3, "the tracker has a few rows, at most 3 (%d)" % rows.size())
 	var tut_words: Array = []
 	for s in FarmTutorial.steps():
 		tut_words.append(String(s["title"]))
 		for k in s["hints"]:
 			tut_words.append(String(s["hints"][k]))
 	ok(rows.all(func(r): return not tut_words.has(String(r["text"]))), "no row is tutorial text")
-	ok(String(rows[-1]["source"]) == "level", "the next farm level is the last row")
+	var src_at: Array = rows.map(func(r): return GoalTracker.SOURCE_ORDER.find(r["source"]))
+	ok(src_at.all(func(i): return i >= 0), "every row comes from a known source")
+	var cap_was: int = GoalTracker.cfg()["max"]
+	GoalTracker.cfg()["max"] = 99  # (the card shows three: the per-source rules are read off the whole list)
+	rows = GoalTracker.lines()
+	GoalTracker.cfg()["max"] = cap_was
 	var counts := {}
 	for r in rows:
 		counts[r["source"]] = int(counts.get(r["source"], 0)) + 1
@@ -725,9 +770,10 @@ func _tracker_rules() -> void:
 		var hs: Dictionary = ClassUnlock.state().get("hunters", {}) as Dictionary
 		hs[mast_id] = hs.get(mast_id, {})
 		hs[mast_id][String(g["stat"])] = int(g["target"])
+	var plain := GoalTracker.lines()
 	ok(
-		GoalTracker.lines().is_empty() and GoalTracker.build() == null,
-		"with nothing left to work towards the card is hidden"
+		plain.size() >= 2 and plain.size() <= 3 and plain.all(func(r): return r["source"] == "next"),
+		"with nothing left to work towards the card lists plain steps, never empty (%d)" % plain.size()
 	)
 
 
@@ -923,12 +969,15 @@ func _build_spotlight() -> void:
 	for id in ["house", "hammer", "task"]:
 		FarmTutorial.mark(id)
 	FarmTutorial.detect()
-	ok(FarmTutorial.current() == "feed" and FarmTutorial.stage("feed") == "place",
-			"the trough step is up to place (%s)" % FarmTutorial.current())
+	ok(
+		FarmTutorial.current() == "feed" and FarmTutorial.stage("feed") == "place",
+		"the trough step is up to place (%s)" % FarmTutorial.current()
+	)
 	await _lights_build_tile(home, "feeder_trough", "trough")
 	home.queue_free()
 	await main.get_tree().process_frame
 	FarmSpotlight.reset()
+
 
 func _lights_build_tile(home, entry: String, what: String) -> void:
 	var hb: HomeBuild = home.hb
@@ -945,8 +994,10 @@ func _lights_build_tile(home, entry: String, what: String) -> void:
 	for b in hb.bar.find_children("*", "Button", true, false):
 		if b.get_meta("tab", "") == "Buildings" and not b.is_queued_for_deletion():
 			tab = b
-	ok(FarmSpotlight.showing() and FarmSpotlight.in_beat() and _lit(tab),
-			"%s step, build mode on another tab: the Buildings tab gets the spotlight beat" % what)
+	ok(
+		FarmSpotlight.showing() and FarmSpotlight.in_beat() and _lit(tab),
+		"%s step, build mode on another tab: the Buildings tab gets the spotlight beat" % what
+	)
 	hb.cat = "Buildings"
 	hb._build_bar()
 	await main.get_tree().process_frame
@@ -963,12 +1014,14 @@ func _lights_build_tile(home, entry: String, what: String) -> void:
 	hb._drop_held()
 	hb.toggle()
 
+
 func _pick_entry(hb: HomeBuild, entry: String) -> void:
 	if entry.begins_with("feeder_"):
 		hb.take_feeder(entry.trim_prefix("feeder_"))
 	else:
 		hb.take(entry)
 	hb._build_bar()
+
 
 ## Is the spotlight's first cut-out round this control?
 func _lit(c: Control) -> bool:
@@ -977,10 +1030,11 @@ func _lit(c: Control) -> bool:
 	var hole: Rect2 = FarmSpotlight._node._holes[0]
 	return hole.get_center().distance_to(c.get_global_rect().get_center()) < 2.0
 
+
 ## A Home with its interface built (its meshes build over a few frames; slower on a software rasterizer).
 func _ready_home():
 	var home = await main._hb_home()
-	var t0 := CheckClock.own_msec()      # the home builds its UI in frame slices: CPU work, not game time
+	var t0 := CheckClock.own_msec()  # the home builds its UI in frame slices: CPU work, not game time
 	while home.panel_host == null and CheckClock.own_msec() - t0 < 60000:
 		await main.get_tree().process_frame
 	home._close_panel()

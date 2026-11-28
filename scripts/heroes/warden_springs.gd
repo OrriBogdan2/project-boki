@@ -46,17 +46,37 @@ func setup(skeleton: Skeleton3D) -> void:
 			# (a "hang" chain, spring_hang<name>_<i>: a chain or rope whose rest shape is straight down from its
 			# root, not riding its parent: Kael's Warchain hangs from his fist whichever way the arm points;
 			# a "wing" chain folds back while the Warden skates, WING_FOLD)
+			var nm := skel.get_bone_name(bi)
 			chains.append(
-				{
-					"ids": ids,
-					"pts": PackedVector3Array(),
-					"prev": PackedVector3Array(),
-					"hang": skel.get_bone_name(bi).begins_with(PREFIX + "hang"),
-					"wing": skel.get_bone_name(bi).begins_with(PREFIX + "wing"),
-					"wind": skel.get_bone_name(bi).begins_with(PREFIX + "scarftail"),
-					"floor": skel.get_bone_name(bi).begins_with(FLOOR_CHAIN)
-				}
+				_chain(
+					ids,
+					{
+						"hang": nm.begins_with(PREFIX + "hang"),
+						"wing": nm.begins_with(PREFIX + "wing"),
+						"wind": nm.begins_with(PREFIX + "scarftail"),
+						"floor": FLOOR_UP if nm.begins_with(FLOOR_CHAIN) else 0.0
+					}
+				)
 			)
+
+
+## Chains on bones that carry no spring_ name (a Meshy skeleton's own coat bones, WardenNative data "springs"):
+## each {"bones": [names root -> tip], "hang": bool, "floor": m its joints stay over the model's origin}. The tip
+## rides its parent; the others swing.
+func setup_named(skeleton: Skeleton3D, specs: Array) -> void:
+	skel = skeleton
+	for spec: Dictionary in specs:
+		var ids: Array = Array(spec["bones"]).map(func(n): return skel.find_bone(String(n)))
+		if ids.size() >= 2 and not ids.has(-1):
+			chains.append(_chain(ids, {"hang": bool(spec.get("hang", false)), "floor": float(spec.get("floor", 0.0))}))
+
+
+func _chain(ids: Array, flags: Dictionary) -> Dictionary:
+	var ch := {"ids": ids, "pts": PackedVector3Array(), "prev": PackedVector3Array()}
+	for k in ["hang", "wing", "wind"]:
+		ch[k] = bool(flags.get(k, false))
+	ch["floor"] = float(flags.get("floor", 0.0))  # m over the model's origin (0: no floor)
+	return ch
 
 
 func _spring(bi: int) -> bool:
@@ -130,8 +150,8 @@ func step(dt: float) -> void:
 			var d := pts[i] - pts[i - 1]
 			var ln := want[i].distance_to(want[i - 1])
 			pts[i] = pts[i - 1] + d.normalized() * ln if d.length() > 1e-5 else want[i]
-			if ch["floor"]:
-				pts[i].y = maxf(pts[i].y, xf.origin.y + FLOOR_UP)
+			if float(ch["floor"]) > 0.0:
+				pts[i].y = maxf(pts[i].y, xf.origin.y + float(ch["floor"]))
 		ch["pts"] = pts
 		ch["prev"] = prev
 		for j in n - 1:
