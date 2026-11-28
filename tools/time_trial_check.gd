@@ -54,7 +54,7 @@ func _built(m: Match, t: TimeTrial) -> void:
 	var placed := t.start != Vector3.INF and t.finish != Vector3.INF and t.pad_at != Vector3.INF
 	ok("ten gates, start and finish arch, pad", t.gates.size() == 10 and placed, "%d gates" % t.gates.size())
 	var c := t.clock
-	var centred := c.anchor_left == 0.0 and c.anchor_right == 1.0 and c.offset_left == 0.0 and c.offset_right == 0.0
+	var centred := c.anchor_left == 0.5 and c.anchor_right == 0.5 and c.grow_horizontal == Control.GROW_DIRECTION_BOTH
 	ok("the clock is centred, under the top panel", centred and c.offset_top >= 180.0, "top %.0f" % c.offset_top)
 	var gap := Vector2(t.finish.x - t.start.x, t.finish.z - t.start.z).length()
 	ok("the finish arch stands apart from the start arch", gap > 7.0, "%.1f m" % gap)
