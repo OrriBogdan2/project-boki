@@ -264,7 +264,7 @@ func choose(k: Dictionary) -> void:
 	if lazy > 0.0 and randf() < lazy:
 		_nap(k, "lazy")
 		return
-	if BaseShy.keep_to_edge(h, k):
+	if BaseShy.keep_to_edge(h, k) or BaseGreet.trail(self, k):
 		return
 	if not night and _clock >= float(k.get("doze_ok", 0.0)) and randf() < _doze(k):
 		_nap(k, "dozy")  # a nap for company, not only when tired: the pile forms where a friend already lies

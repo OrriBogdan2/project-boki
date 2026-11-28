@@ -32,6 +32,11 @@ check: `--base-life-check`.
   `far_m` away for `away_s` and sees you within `near_m` rolls once: `chance` + `rank_chance` x its bond rank + `cling_chance` x
   its cling. A hit looks at you for `look_s`; from bond rank `run_rank` (Close) it runs to you (`slot_m`), follows at its walk for
   `follow_s`, then goes back to roaming. No UI. `--base-life-check` seeds a Wary look, a Close run and follow, and the rank weight.
+- Your partner trails you (`BaseGreet.trail`, the same Greet state with no end, base_life.json `trail`): 2 to 4 m of you while you
+  move, it stops when you stop, sits after `sit_s` of you idling (`KinHabit.sit`), leaps to you past `leash_m` or on another
+  island, and waits outside `pad_m` of the Waystone (and holds still while the hop lights up). Every `check_s` it drops to Roam so
+  eating and napping still win. `--boki-follow-check` part 13 (`tools/garden_trail_check.gd`) asserts the band, the stop, the sit,
+  no standing in a block and the Waystone wait; `--fc-trail` of `--farm-cam-clip` films it.
 - Toys: one system, `HomeToys` (home_toys.gd, k["play"], toys.json). It picks, walks, plays, squabbles and shares;
   `BaseLife.choose` asks `HomeToys.pick(k, true)` when a Boki is bored or curious, and the machine shows Play while
   HomeToys owns the Boki (so the history never says Roam while a Boki plays). A squabble at a toy adds
