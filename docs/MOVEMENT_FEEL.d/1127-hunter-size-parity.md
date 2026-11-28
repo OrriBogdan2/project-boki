@@ -29,7 +29,7 @@ start, landing, glider tilt) are the body's own and stay.
 What follows a Hunter's size (all read `Arch.match_k`): overhead and hover plates and their anchors (`Hud._head`,
 `HunterZone.rect_of`, the `CamRig` plate lean (`CamRig.target`, set by `MatchCam.update`); a plate sits at its own
 offset or 1.0 m over the model's tallest point (`body.top_h`, `HudPlate.up`; upright, its 17 px hang and some air), whichever is higher, so a bigger body does not float its plate), stun stars, vulnerable sparks, glider heat smoke, a shoulder Boki's bubble, Sparkle's fingertip.
-Meshy-native stride follows the model scale (`WardenNative._stride_k`).
+Meshy-native stride follows the model scale (`WardenNative._stride_k`). A big Boki curling onto a bigger Hunter's back has a longer hop: `KinCurl` stretches it past `CURL_S` so its mean speed stays under `HOP_V` (5 m/s, under 0.15 m a frame: `--boki-curl-check`).
 
 `--hunter-size-sheet --shots-dir=<dir>` (GPU) prints one HSIZE row per hunter for main's size and the parity size;
 `--hunter-scale-shots` shoots both with the plate and `--gaps` (no renderer) prints the plate-over-model gaps.
