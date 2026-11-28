@@ -1,7 +1,7 @@
 extends RefCounted
-## --wisp-glow-check [--compat] [--shots-dir=<dir>]: both wisps (the Hunter Wisp, WispLook, and a Boki wisp, BokiWispLook)
-## are drawn in a real viewport on a dark ground and must glow: the brightest pixel on the body is near white and
-## the body's mean is well above the ground, never a dark blob. Run it under each renderer (--compat
+## --wisp-glow-check [--compat] [--shots-dir=<dir>]: both wisps (the Hunter Wisp, WispLook, and a Boki wisp,
+## BokiWispLook) are drawn in a real viewport on a dark ground and must glow: the brightest pixel on the body is
+## near white and the body's mean is well above the ground, never a dark blob. Run it under each renderer (--compat
 ## re-runs it in a child game on Compatibility, which the web build uses). Needs a GPU renderer: headless draws
 ## nothing, so the check says SKIP there. Prints WISPGLOW PASS/FAIL/SKIP.
 
@@ -40,7 +40,8 @@ func run(main: Node) -> void:
 		var w := BokiWispLook.build(String(id), {})
 		BokiWispLook.side(w, team)
 		await _shot(main, "boki_wisp_" + String(id), w, dir)
-	print("WISPGLOW %s (%d fail, %s)" % ["PASS" if bad == 0 else "FAIL", bad, RenderingServer.get_current_rendering_method()])
+	var method := RenderingServer.get_current_rendering_method()
+	print("WISPGLOW %s (%d fail, %s)" % ["PASS" if bad == 0 else "FAIL", bad, method])
 	main.get_tree().quit(1 if bad > 0 else 0)
 
 
