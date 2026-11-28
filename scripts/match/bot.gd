@@ -582,6 +582,7 @@ func can_hit(m: Match, h: Hunter, tgt: Ent) -> bool:
 
 const RV_RANGE := 70.0  # how far a bot will go for a downed squadmate
 const RV_DANGER := 3.2  # a rival this close gets fought before the revive
+const RV_KEEP := 1.0  # metres of lead the rival we are already on keeps (two at one range swapped every think)
 const RV_ON := 1.1  # stand this close (the revive ring is Life.R["revive_radius"])
 
 
@@ -622,9 +623,10 @@ func _revive_plan(m: Match, h: Hunter) -> Dictionary:
 			):
 				continue
 			var d := h.flat_dist(o)
-			if d < RV_DANGER and d < dd and absf(o.pos.y - h.pos.y) < 2.0:
+			var dk := d - (RV_KEEP if o == h.ai.get("tgt") else 0.0)
+			if d < RV_DANGER and dk < dd and absf(o.pos.y - h.pos.y) < 2.0:
 				dz = o
-				dd = d
+				dd = dk
 		for mb in m.mobs:
 			if mb.dead or (mb is Boss and (mb as Boss).dormant):
 				continue

@@ -18,6 +18,7 @@ const FINAL_LEAD := 20.0  # s: squads with no other seat head for the Heart ring
 const RING_LOOK := 20.0  # s: a goal must still be inside the tide ring this far ahead
 const RING_KEEP := 4.0  # m (design map): and this far inside it
 const RING_EDGE := 2.0  # m: a bot this close to the ring's edge (or past it) drops everything and walks in
+const RING_IN_K := 2.0  # ...and walks on in until this many times that far inside
 const WAIT_R := 5.0  # m from the Heart a runner waits for the spark
 const ESCORT_R := 3.0  # m from the Gate the carrier's squadmates stand (the Gate takes them within gate_take_r)
 const GROUND_STEPS := [1.0, 0.85, 0.7, 0.5, 0.3]
@@ -246,6 +247,8 @@ static func ring_back(m: Match, h: Hunter) -> Vector3:
 	if trap <= 0.0 or (m.lairs and not m.lairs.sealed_lair(h).is_empty()):
 		return Vector3.INF
 	var edge := maxf(RING_EDGE, knob("end_edge_m")) if Heart.end_phase(m) else RING_EDGE
+	if h.ai.get("goal_kind", "") == "ring_in":
+		edge *= RING_IN_K  # already walking in: go on until well clear, or a path along the edge flips it each think
 	if h.flat_dist(m.heart.site) < trap - edge * m.heart.ways_scale:
 		return Vector3.INF
 	return keep_inside(m, h.pos)
