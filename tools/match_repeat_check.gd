@@ -110,8 +110,10 @@ func _judge(rows: Array) -> void:
 	var models := int(b["models"]) - int(a["models"])
 	var obj := (int(b["objects"]) - int(a["objects"]) - MODEL_OBJ * models) / float(n)
 	_ok(meshes <= MESH_GROWTH, "cached meshes per match after the warm-up: %+.0f (limit %d)" % [meshes, MESH_GROWTH])
-	_ok(obj <= OBJ_GROWTH, "objects per match after the warm-up, past %d new species models: %+.0f (limit %d)" % [
-			models, obj, OBJ_GROWTH])
+	_ok(
+		obj <= OBJ_GROWTH,
+		"objects per match after the warm-up, past %d new species models: %+.0f (limit %d)" % [models, obj, OBJ_GROWTH]
+	)
 	_ok(int(b["orphans"]) == 0, "orphan nodes after the last match: %d" % int(b["orphans"]))
 	print(
 		(
