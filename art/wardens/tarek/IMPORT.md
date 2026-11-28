@@ -138,3 +138,14 @@ as blank cups. So:
 - Rejected: ring tilted 25/35 deg (front up) turns the back stones' eyes away (eye.camera median 0.78 -> 0.56/0.43);
   ring x0.6 +0.2 m puts the front stone over the face.
 Tools: gens/hunter-round-1124/tenzo/G/scripts/{swap_rock,ring,slot,eyepitch}.py. Sheets: G/GAME_tenzo_r33_*.jpg.
+
+## Marble stone arm (2026-11-28, job 20261128-054110-a3; owner picked the marble 2D arm 11-27)
+`tarek_meshy.glb`: only the bytes of image `Image_0` (base colour, bufferView 1) changed; the other 1033 bufferViews
+(mesh, UVs, skin, clips, Image_1/Image_2) are byte-identical. `tarek_meshy_Image_0.jpg` = the same jpg.
+- Source: Meshy retexture (meshy-7, `--original-uv`, 8k) of a static copy of this glb from 4 views of the picked marble
+  turnaround (gens/tenzo-granite-1127 v_ta2_B_1). Run v2 of 2 image runs; the 2 text-prompt runs came back grey/orange
+  and cyan and were not used.
+- Only stone-arm texels change: skin-weight region `stone` (left-arm bones, masks.py) AND live cobalt hue (195-260 deg,
+  S > 0.12), runes (live teal) kept live. 335k texels. Head region: 39 of 1.10M texels differ > 8 (JPEG re-encode), mean 0.6.
+- Re-apply on another tarek_meshy.glb (e.g. ext/tenzo-r36-1126's): `python3 swap.py OTHER.glb tarek_meshy_Image_0.jpg OUT.glb`.
+Scripts, Meshy tasks, renders: /home/boki/meshy/tenzo-marble-3d-1128/ (tools/compose.py, tools/swap.py, renders/).
