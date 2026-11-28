@@ -413,9 +413,11 @@ static func starve_cap() -> float:
 
 
 ## It just ate: a meal takes four hours off the starve clock.
-static func fed(rec: Dictionary) -> void:
+static func fed(rec: Dictionary, treat := false) -> void:
 	if rec.has("starve"):
-		var st := maxf(0.0, float(rec["starve"]) - 4.0 * 3600.0)
+		var m: Dictionary = Content.rules("care")["meal"]
+		var h := float(m["clear_h"]) + (float(m["treat_extra_h"]) if treat else 0.0)
+		var st := maxf(0.0, float(rec["starve"]) - h * 3600.0)
 		if st > 0.0:
 			rec["starve"] = st
 		else:
@@ -632,7 +634,7 @@ static func feed(rec: Dictionary, f: String) -> Dictionary:
 	out["cured"] = ailing(rec) and String(Data.CROPS.get(f, {}).get("use", "")) == "snack"
 	if out["cured"]:
 		rec.erase("starve")
-	fed(rec)
+	fed(rec, bool(out["love"]) or String(Data.CROPS.get(f, {}).get("use", "")) == "snack")
 	out["lean"] = Evo.eat(rec, f)  # the lean this meal built ("" for none), for the journal and the feeder
 	CareJournal.fed(rec, f, out["lean"])
 	out["hungry"] = was < 35.0

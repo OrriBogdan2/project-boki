@@ -966,6 +966,8 @@ Raising a Boki at home (scripts/core/care.gd). natural_death: false means neglec
 | Setting | Value |
 |---|---|
 | natural_death | False |
+| meal | {"clear_h": 24.0, "treat_extra_h": 8.0, "meals_day_max": 1} |
+| meal_doc | Owner bug 11-23 #2 (Care.fed). clear_h: hours one meal takes off the starve clock, a whole real day, so one good meal clears a day's hunger (a Boki left alone a day builds about 23.7 h; before, 4 h a meal took 5 meals a played day). treat_extra_h: extra hours a treat takes off on top (its favourite food or a snack), so a treat tops up a longer neglect. meals_day_max: the most meals a played day may take; --feed-check plays the day and asserts it. natural_death stays false: the clock still caps at the dead mark. |
 | ailing_pace | {"weak": 0.7, "sick": 0.5} |
 | ailing_pace_doc | Walk speed while weak or sick from hunger (Care.pace); KinAiling droops the body and damps the hop to match, and perks it up (heart, sparkle, toast) when it gets well. |
 | sulky | {"food": 8.0, "energy": 8.0, "joy": 12.0, "clean": 8.0} |
