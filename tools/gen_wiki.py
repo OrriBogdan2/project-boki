@@ -112,6 +112,8 @@ def gd_const(script, name):
                 if depth == 0: break
             j += 1
         txt = _strip_gd(src[i:j + 1])
+    # a long string wrapped as "..." + "..." (the line-length rule): Python reads adjacent strings as one
+    txt = re.sub(r'(?<!\\)"\s*\+\s*"', '" "', txt)
     try:
         return ast.literal_eval(txt)
     except Exception as e:
@@ -489,7 +491,7 @@ def gen_boki():
         gd_const("core/care.gd", "IV_INHERIT"), gd_const("core/care.gd", "IV_RARE_HIGH"), gd_const("core/care.gd", "IV_RARE_FLOOR"))
     b += table(["IV", "Affects", "Most it adds (at 31)"], [[v["name"], v["desc"], "+%d%%" % round(ivb.get(k, 0) * 100)] for k, v in ivs.items()])
     tr = gd_const("core/care.gd", "STATS") or {}
-    b += "\n\n## Trained stats\n\nTrained at the Training post with a timing drill.\n\n" + table(["Stat", "Per point", "Drill"], [[v["name"], v["desc"], v["drill"]] for v in tr.values()])
+    b += "\n\n## Trained stats\n\nRaised by giving stat bites (carried home from expeditions, won in a few limited races and drills a day).\n\n" + table(["Stat", "Per point", "Drill"], [[v["name"], v["desc"], v["drill"]] for v in tr.values()])
     nat = gd_const("core/care.gd", "NATURES") or {}
     if nat:
         b += "\n\n## Natures\n\nA Boki's nature comes from its two strongest traits.\n\n" + table(["Traits", "Nature"], [[k.replace("+", " + "), v] for k, v in nat.items()])
