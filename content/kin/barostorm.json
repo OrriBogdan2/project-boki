@@ -117,6 +117,12 @@
 		"desc": "Something alert is in here.",
 		"play": "Keeps you alive and patched up."
 	},
+	"roster": {
+		"art": "new",
+		"line": "sentrikat",
+		"stage": 2,
+		"from": "sentrikat"
+	},
 	"size": {
 		"cm": 60,
 		"kg": 30.0,

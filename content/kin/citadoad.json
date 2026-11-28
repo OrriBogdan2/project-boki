@@ -120,6 +120,12 @@
 		"desc": "Something stubborn is in here.",
 		"play": "Stands in front and soaks the hits."
 	},
+	"roster": {
+		"art": "new",
+		"line": "limpetor",
+		"stage": 2,
+		"from": "limpetor"
+	},
 	"size": {
 		"cm": 73,
 		"kg": 54.0,

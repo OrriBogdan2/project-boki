@@ -112,6 +112,12 @@
 		"desc": "Something serene is in here.",
 		"play": "Keeps you alive and patched up."
 	},
+	"roster": {
+		"art": "new",
+		"line": "selenfin",
+		"stage": 2,
+		"from": "selenfin"
+	},
 	"size": {
 		"cm": 44,
 		"kg": 9.0,

@@ -7,32 +7,63 @@ class_name EggModels
 ## the house ink, like the Boki.
 
 const PATH := "res://art/eggs/%s.glb"
-const KINDS := ["ember", "frost", "venom", "stone", "spore", "shadow", "titan", "gravity", "echo", "bloom",
-	"swarm", "storm", "lunar", "prism", "tempest", "rare", "mystery"]
+const KINDS := [
+	"ember",
+	"frost",
+	"venom",
+	"stone",
+	"spore",
+	"shadow",
+	"titan",
+	"gravity",
+	"echo",
+	"bloom",
+	"swarm",
+	"storm",
+	"lunar",
+	"prism",
+	"tempest",
+	"rare",
+	"mystery"
+]
 ## Each shell's main colour (its plates, measured off the model's front, a touch lighter): the hatch's
 ## broken rim teeth and falling chips.
 const TINT := {
-	"ember": Color("513f38"), "frost": Color("88adc0"), "venom": Color("5d4155"), "stone": Color("8a7568"),
-	"spore": Color("8e7c74"), "shadow": Color("3e364b"), "titan": Color("6d777b"), "gravity": Color("4a4b7a"),
-	"echo": Color("5d85b5"), "bloom": Color("808b58"), "swarm": Color("c18b49"), "storm": Color("697680"),
-	"lunar": Color("b4b2bb"), "prism": Color("cba4b0"), "tempest": Color("a0b7c1"), "rare": Color("ae8948"),
+	"ember": Color("513f38"),
+	"frost": Color("88adc0"),
+	"venom": Color("5d4155"),
+	"stone": Color("8a7568"),
+	"spore": Color("8e7c74"),
+	"shadow": Color("3e364b"),
+	"titan": Color("6d777b"),
+	"gravity": Color("4a4b7a"),
+	"echo": Color("5d85b5"),
+	"bloom": Color("808b58"),
+	"swarm": Color("c18b49"),
+	"storm": Color("697680"),
+	"lunar": Color("b4b2bb"),
+	"prism": Color("cba4b0"),
+	"tempest": Color("a0b7c1"),
+	"rare": Color("ae8948"),
 	"mystery": Color("3c3b54"),
 }
 
-const RARE_SEAM_HUE := 0.48    # 0..1: the teal of the Rare Egg's seam ring, repainted in the kin's own glow
+const RARE_SEAM_HUE := 0.48  # 0..1: the teal of the Rare Egg's seam ring, repainted in the kin's own glow
 const RARE_SEAM_WIDTH := 0.07  # half-width of that hue band (the gold sits far off at ~0.12)
-const IDLE_SPIN := 0.35        # rad/s: an egg sitting out turns slowly, so its emblem comes round
-const IDLE_BOB := 0.015        # m per metre of egg: its gentle float
+const IDLE_SPIN := 0.35  # rad/s: an egg sitting out turns slowly, so its emblem comes round
+const IDLE_BOB := 0.015  # m per metre of egg: its gentle float
 
 ## Kin types with no egg of their own hatch from the closest family.
-const THEME_EGG := {"dark": "shadow", "ghost": "shadow"}
+const THEME_EGG := {"dark": "shadow", "ghost": "shadow", "wild": "stone"}
 
-static var _halves := {}       # kind -> {"Cap": Mesh, "Cup": Mesh, "tex": Texture2D}
+static var _halves := {}  # kind -> {"Cap": Mesh, "Cup": Mesh, "tex": Texture2D}
+
 
 ## The egg family a kin hatches from: its type (an old save's egg with no kin known: stone).
 static func kind_of(species: String) -> String:
 	var theme := String(Data.KIN.get(species, {}).get("theme", "stone"))
 	return String(THEME_EGG.get(theme, theme))
+
 
 ## A new toon material for one egg (its own, so warming one egg does not warm the rest).
 static func material(kind: String) -> ShaderMaterial:
@@ -46,6 +77,7 @@ static func material(kind: String) -> ShaderMaterial:
 	m.next_pass = ink
 	return m
 
+
 ## One half of the shell ("Cap" or "Cup"), its bottom at y = 0 and `height` tall when put together.
 static func half(kind: String, part: String, mat: ShaderMaterial, height: float) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
@@ -54,6 +86,7 @@ static func half(kind: String, part: String, mat: ShaderMaterial, height: float)
 	mi.material_override = mat
 	mi.scale = Vector3.ONE * height
 	return mi
+
 
 ## The whole egg as a "Shell" node (both halves), standing at `y`, `height` tall, turning and floating
 ## gently. A Rare Egg's seam ring takes the colour of the kin inside (`seam`).
@@ -72,6 +105,7 @@ static func shell(kind: String, height: float, y := 0.0, glow := 0.0, seam := Co
 		n.add_child(half(kind, part, mat, height))
 	PropAnim.on(n, IDLE_SPIN, IDLE_BOB * height)
 	return n
+
 
 static func _load(kind: String) -> Dictionary:
 	if _halves.has(kind):

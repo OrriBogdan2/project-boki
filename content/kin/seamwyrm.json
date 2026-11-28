@@ -7,6 +7,7 @@
 		"Open zipper"
 	],
 	"theme": "dark",
+	"type2": "wyrm",
 	"flavor": "Great dragon-worm, zipper splits open as its jaws.",
 	"colors": {
 		"belly": "#6c546c",
@@ -116,6 +117,12 @@
 		"temper": "Sly",
 		"desc": "Something sly is in here.",
 		"play": "Slippery and full of tricks."
+	},
+	"roster": {
+		"art": "new",
+		"line": "zipling",
+		"stage": 3,
+		"from": "caecilith"
 	},
 	"size": {
 		"cm": 60,

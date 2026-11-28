@@ -116,6 +116,12 @@
 		"desc": "A dark plum shell beaded with green droplets. It hisses when you lean close. Something bold is in here.",
 		"play": "Gets in close and hits hard."
 	},
+	"roster": {
+		"art": "locked",
+		"line": "cindle",
+		"stage": 2,
+		"from": "cindle"
+	},
 	"size": {
 		"cm": 52,
 		"kg": 13.5,

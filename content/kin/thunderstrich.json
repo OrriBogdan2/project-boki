@@ -7,6 +7,7 @@
 		"Thunderhead"
 	],
 	"theme": "storm",
+	"type2": "tempest",
 	"flavor": "Coil-necked storm ostrich crackling with lightning.",
 	"colors": {
 		"belly": "#9c8484",
@@ -119,6 +120,12 @@
 		"temper": "Skittish",
 		"desc": "Something skittish is in here.",
 		"play": "Fast, darting and always on the move."
+	},
+	"roster": {
+		"art": "new",
+		"line": "fizzlet",
+		"stage": 3,
+		"from": "nimbostrich"
 	},
 	"size": {
 		"cm": 94,
