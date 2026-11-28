@@ -4,7 +4,8 @@ reach from its shoulder, scaled to Meshy's arm), elbow side and hand direction a
 bones by the two-bone IK of cinder_native_clips.py (no Blender). A `full` clip also takes the hips' height and the ankles'
 travel (scaled to Meshy's leg), so planted feet stay planted. Names are `<art>_<clip>` (Meshy's own are Attack, walk ...).
 Upper clips key only the torso, head and arms (the game lays them over the legs' clip, WardenNativeUpper).
-Run: python3 -I tools/meshy/native_retarget.py <art> [--moves] <clip>[:full] ... [--shot] [--out=FILE]
+Run: python3 -I tools/meshy/native_retarget.py <art> [--moves] <clip>[:full][:stride=K] ... [--shot] [--out=FILE]
+  stride=K: a full clip's feet travel K times as far fore and aft (a crouch walk too slow for the ground speed).
   --moves: also every kit move of content/rules/warden_anim/<art>.json (prints the data's kmoves rows)
   e.g. native_retarget.py ryzz lmb_l lmb_r crouch_f:full ult:full      (--shot prints each clip's worst wrist miss)"""
 
@@ -164,7 +165,11 @@ def pose_of(cf, ct, mr, full, ref):
         if full:
             A_c = ct.get(cf, ft)[1] - ct.get(ct.rest, ft)[1]
             a0 = ref["ankle_rest"][s]
-            p["a" + s] = (a0[0] + char(A_c, s)[0] * ref["kl"], a0[1] + A_c[1] * ref["kl"], a0[2] - A_c[2] * ref["kl"])
+            p["a" + s] = (
+                a0[0] + char(A_c, s)[0] * ref["kl"],
+                a0[1] + A_c[1] * ref["kl"],
+                a0[2] - A_c[2] * ref["kl"] * ref.get("stride", 1.0),
+            )
     return p
 
 
@@ -201,9 +206,10 @@ def retarget(art, specs, out_path, shot=False):
         name, *flags = spec.split(":")
         tracks, length = ct.clip(name)
         full = "full" in flags
+        stride = next((float(f[7:]) for f in flags if f.startswith("stride=")), 1.0)
         poses = []
         for f in range(int(round(length * FPS)) + 1):
-            poses.append(pose_of(ct.fk(tracks, f / FPS), ct, mr, full, ref))
+            poses.append(pose_of(ct.fk(tracks, f / FPS), ct, mr, full, dict(ref, stride=stride)))
         defs["%s_%s" % (art, name)] = (poses, full)
         if shot:
             worst = 0.0
