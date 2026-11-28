@@ -163,7 +163,8 @@
   "dmg": 0.1,
   "windup": 1.8,
   "cd": 1.6,
-  "camp_hp": 2.5
+  "camp_hp": 2.5,
+  "melee_hp": 0.5
  },
  "labels": {
   "land": "Land here",

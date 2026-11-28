@@ -120,11 +120,14 @@ func _plan(sid: String, kinds: Array) -> Array:
 
 func _place(sid: String, kinds: Array, spots: Array) -> void:
 	var c: Dictionary = Content.rules("tutorial")["camps"].get(sid, {})
-	var camp_hp: float = Content.rules("tutorial")["mob"]["camp_hp"]
+	var mob: Dictionary = Content.rules("tutorial")["mob"]
+	var camp_hp: float = mob["camp_hp"]
+	# (a blade walks up to each kill: its camps are softer)
+	var melee_k: float = mob["melee_hp"] if tu.m.player.wpn.get("melee", false) else 1.0
 	for i in kinds.size():
 		if spots[i] != Vector3.INF:
 			var mb := tu.m.spawn_mob(kinds[i], spots[i])
-			tu.tank(mb, float(c.get("hp", camp_hp)))
+			tu.tank(mb, float(c.get("hp", camp_hp)) * melee_k)
 			mb.held = bool(c.get("held", false))
 			ledger.append({"mb": mb, "to": int(c.get("to", 0)), "paid": false})
 

@@ -463,7 +463,10 @@ func _enter() -> void:
 			if not o.is_empty():
 				m.ping(o["pos"], ExitModels.UPLINK)
 	if sid == "kin" and p.ak:
-		p.ak.cd["e"] = 0.0  # (an E pressed again on the unlock step fired at nothing: it is ready when asked for)
+		# (an E pressed on the unlock step fired at nothing: its hold is dropped and it is ready when asked for;
+		# Kael's chain still hooked from it turned the first real E into a pull that was never counted)
+		p.ak.drop_holds()
+		p.ak.cd["e"] = 0.0
 	if sid == "hook" and (p.gear[0] as Dictionary).is_empty():
 		p.gear[0] = {"id": "grapple", "rar": 1}  # (skipped ahead past the glove: it is yours anyway)
 		p.refresh_gear()
