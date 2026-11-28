@@ -5,7 +5,7 @@
 - **Area:** save / farm
 
 ## Problem
-`Transfer.send` / `accept` (0013) had no transport: a sent Boki sat in the outbox until called back. Until the exchange server exists, the web build's shared store (`Social`, where visit profiles live) can carry it. A Boki must never end up on both farms or on neither.
+`Transfer.send` / `accept` (0013) had no transport: a sent Boki sat in the outbox until called back. Until the exchange server exists, the shared social store (`Social`, where visit profiles live; the matchmaker's /social routes, 0181) can carry it. A Boki must never end up on both farms or on neither.
 
 ## Options
 1. Post the packet and remove the Boki from the sender at once. Cons: lost if nobody answers; recall becomes a store race.

@@ -1,6 +1,6 @@
 class_name TransferPost
 ## Carries Boki transfers between players (docs/decisions/0099-transfer-carrier.md) until the
-## exchange server does: through the web build's shared store (Social), where visit profiles live.
+## exchange server does: through the shared social store (Social), where visit profiles live.
 ## Transfer keeps the rules and both sides; this file only moves the packet and the answer, so the
 ## server swaps this file and nothing else.
 ##
@@ -90,9 +90,9 @@ static func answer(doc: String, yes: bool, cb: Callable) -> void:
 ## Calls back a Boki you sent: only while its packet is still unanswered on the store. cb gets {ok, why}.
 static func recall(id: String, cb: Callable) -> void:
 	if not Social.available():
-		# the desktop build never posts, so its outbox is local; a web build has to reach the store
+		# with no store set up nothing was ever posted, so the outbox is local; a silent store may hold the packet
 		var offline := {"ok": false, "why": "The town store isn't answering"}
-		cb.call(Transfer.recall(id) if not OS.has_feature("web") else offline)
+		cb.call(Transfer.recall(id) if not Social.has_store() else offline)
 		return
 	if _busy:
 		cb.call({"ok": false, "why": "Try again in a moment"})

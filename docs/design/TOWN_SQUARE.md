@@ -3,7 +3,7 @@
 **Owner summary** (answer to 11-11 "are we adding a townsquare type of place ... tied to the chao garden?")
 1. Yes. A shared square, working name **the Waymeet**: a sixth card on your hub's Waystone. Hub and zones stay private.
 2. You walk in with your partner Boki beside you: look at other people's Boki and Hunters, emote, visit their gardens, enter garden games against their Boki, read the board, use the vendors.
-3. Offline it is full from day one (townsfolk). The web build fills the same spots with snapshots of real players. Live players arrive with the backend.
+3. Offline it is full from day one (townsfolk). The social store (Social, docs/decisions/0181) fills the same spots with snapshots of real players. Live players arrive with the backend.
 4. No new economy: the square gives a face to what decision 0013 already allows (stalls, auctions, Shelter, one-item gifts, the weekly Boki transfer). No free trade window.
 5. Phase 1 is one week, offline, built from existing models and panels (no Meshy): the place, 8 residents, inspect card, emotes at home, board, vendors, a check, shots.
 6. Risks: a bot square feeling fake (we label who is who), the frame cost of 12 people with Boki, moderation once chat is live. Nothing in the square gates the garden or expeditions.
@@ -33,7 +33,7 @@ Every person there is one **profile doc** (the shape `Social.profile_doc` publis
 | Kind | Source of the doc | Card label | When |
 |---|---|---|---|
 | **Townsfolk** | authored in `content/rules/square.json`: 4 keepers and 8 residents, each with a Boki and a line | "Lives here" | Phase 1 |
-| **Echoes** | real players' snapshots (`Social.list_islands`, through `clean_island`); offline desktop has none | "Was here 2 days ago" | Phase 2, web first |
+| **Echoes** | real players' snapshots (`Social.list_islands`, through `clean_island`); a game with no store has none | "Was here 2 days ago" | Phase 2 |
 | **Live** | a player there now: position, facing, emote at about 10 Hz through `Net`, 16 a square, friends and guild first | name only | Phase 3 |
 
 We never pass a bot off as a player. Residents walk, sit, watch the stage and cheer a race; their Boki run on `BaseLife`. Live presence trusts the client for position only; value moves through the backend. Phase 3 needs a decision note and a `Net.VERSION` bump. Squads later form here: walk into the portal together and the pre-match lobby (0019) opens.
@@ -63,7 +63,7 @@ The Dash laps the rim path. Any service is under 10 s from the Waystone. Partner
 ## 6. Build plan
 - **Phase 0 (half a day).** Decision note `docs/decisions/NNNN-town-square.md` (lazy key `Save.d["square"]`, no migration, no Net change). Measure a scene with 12 people and 12 Boki first. Targets, not measured: 12 people with a Boki each, far people animated at a low rate, 450 draw calls or fewer.
 - **Phase 1 (one week, offline, shippable).** Day 1: `SquareLayout` (a fixed island through Home's visit path, as the hub is) and the sixth Waystone card. Day 2: `SquareFolk` (townsfolk walk, sit, idle; partners on `BaseLife`). Day 3: inspect card, emote wheel at home. Day 4: notice board (existing data only), market row opening existing panels. Day 5: `--square-check` (you land, 8 residents, every card opens, the board lists the week's twist, an emote plays, the budget holds), GPU shots, text pass. New logic in `scripts/home/square_*.gd`; `home.gd` gets wiring only.
-- **Phase 2 (one to two weeks).** Square games against residents' Boki; visits to residents' gardens (authored docs); pet and gift; echoes in the web build; preset-phrase notes; Drift Trader days; a weekly Show day.
+- **Phase 2 (one to two weeks).** Square games against residents' Boki; visits to residents' gardens (authored docs); pet and gift; echoes from the social store; preset-phrase notes; Drift Trader days; a weekly Show day.
 - **Phase 3 (with the backend, ARCHITECTURE_PLAN phase 6).** Live presence, squads into the portal, face-to-face gift and transfer confirm, live races, text chat with mute and report.
 - **Phase 4.** Clans (GARDEN.md 7): a banner corner, the league on the stage.
 

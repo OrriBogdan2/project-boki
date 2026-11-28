@@ -1,19 +1,6 @@
 {
  "tolerance_pct": 5,
  "platforms": {
-  "Web": {
-   "total": 1543285412,
-   "categories": {
-    "textures": 1295830492,
-    "models": 168163969,
-    "audio": 57691314,
-    "scripts": 15113269,
-    "other": 2473219,
-    "data": 2246832,
-    "shaders": 234799,
-    "fonts": 202850
-   }
-  },
   "Windows": {
    "total": 1543285412,
    "categories": {

@@ -77,6 +77,5 @@ re-import, make a local export with Sentry on, run it once with `-- --sentry-tes
 
 ## Not covered
 
-- **The web build:** no Sentry. The Web preset excludes `addons/sentry/*`, and the addon's web libraries are not fetched.
 - **The launcher:** a separate project, not instrumented.
 - **The Linux Server artifact:** the preset excludes `addons/sentry/*`. It runs headless, so Sentry would stay off anyway.

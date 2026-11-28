@@ -33,6 +33,8 @@ class Config:
     tokens_dir: str = "/run/boki"
     tick_s: float = 0.5
     feedback_path: str = "/var/lib/boki/feedback.jsonl"   # POST /feedback appends JSONL here
+    social_db: str = "/var/lib/boki/social.db"            # the /social store (sqlite); empty turns /social off
+    social_owners: tuple = ()             # social player ids that get the game's admin tools
 
     def modes(self) -> dict:
         """Queue -> match shape."""
@@ -78,4 +80,6 @@ def load(env_file: str = ENV_FILE, environ: dict = None) -> Config:
     cfg.party_bad_codes_per_min = int(values.get("PARTY_BAD_CODES_PER_MIN", cfg.party_bad_codes_per_min))
     cfg.tokens_dir = values.get("TOKENS_DIR", cfg.tokens_dir)
     cfg.feedback_path = values.get("FEEDBACK_PATH", cfg.feedback_path)
+    cfg.social_db = values.get("SOCIAL_DB", cfg.social_db)
+    cfg.social_owners = tuple(filter(None, values.get("SOCIAL_OWNERS", "").split(",")))
     return cfg
