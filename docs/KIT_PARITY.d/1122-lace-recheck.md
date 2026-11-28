@@ -22,7 +22,7 @@ DECISIONS 2026-11-22 (parity first, owner rows untouched):
 | Ranges | RMB 14, E 10.8 floor, R 18 / 0.5, none fully seen | 14 (+3), 10.8, 18 / 0.5; LMB 12 / 16 | same | match; RMB and R range `[?]` |
 | CC | Heartpiercer stun on terrace hit, Rain slow, Anti-Heal | wall stun 1.2 s, slow 35% 0.8 s refreshed, blight 1 s, X shred 10 armor | same | match; durations not in the source |
 | Knock | RMB "knocks back"; bow and ult list none | Heavy push 8 to 12 = 2.52 to 5.12 m; bow and X `kb` 2.0 (nudge, under `Displace.KNOCK_MIN` 2.5) | bow 3.5, X 4 | match (drift 8) |
-| Ranks | RMB -3 s x2 and +20% x2; E -2 s x2, +30% x2, tier IV arc +30%; Shift -1 s x2; R -5 s x2 | RMB 16 / 13 / 10, x1.2 / 1.4; E 15 / 13 / 9, x1.3 / 1.6, arc 120 / 156; Shift 9.5 / 8.5 / 7.5 | same | match for RMB, E and Shift; **R differs**: the source has -5 s x2 and +10% x2, X has no ranks (a game-wide gap, `ult-ranks a48ec55a0` is held; left) |
+| Ranks | RMB -3 s x2 and +20% x2; E -2 s x2, +30% x2, tier IV arc +30%; Shift -1 s x2; R -5 s x2 | RMB 16 / 13 / 10, x1.2 / 1.4; E 15 / 13 / 9, x1.3 / 1.6, arc 120 / 156; Shift 9.5 / 8.5 / 7.5 | same | match for RMB, E and Shift; **R: superseded, see `1128-ult-rank-rows-reconcile.md`** (struck: ~~the source has -5 s x2 and +10% x2, X has no ranks, `ult-ranks a48ec55a0` is held~~; main has R ranks 2 and 3 for Lace since `555debe7d2`, 11-19, and this read was on a tree without them) |
 
 ### Drift since 11-12, with the commit that moved it
 
