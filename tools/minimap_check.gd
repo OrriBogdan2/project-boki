@@ -106,6 +106,8 @@ func _key(m: Match) -> void:
 	ok(("stop" in all) == halts, "train stops listed only when the map has them")
 	var ways: bool = WaysOutMap.sites(m).any(func(v: Vector3): return v != Vector3.INF)
 	ok(("way" in all) == ways, "ways out listed only when the map has them")
+	var nests: bool = m.blight != null and not m.blight.nests.list.is_empty()
+	ok(("nest" in all) == nests, "Blight nests listed only when the map has them (%s)" % nests)
 	ok(all.all(func(k): return MapKey._word(k) != k), "every listed kind has a word")
 	mate.out = true
 	ok(not "squad" in MapKey.kinds(m, tm), "a squadmate who is out leaves the key")

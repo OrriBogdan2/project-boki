@@ -29,8 +29,8 @@ ranks in the source or ours. R is left to decision 0022.
 Source hero 1531 HP against our heavy 193 HP: damage about x0.13. The data pass (SERVER_UPDATE7, owner's tooltip data) copies
 durations and counts as they are (the 0.2s stun step, the 50% cooldown cut, the +100% over the abyss) and leaves the damage
 and cooldown numbers that already follow the ratios below. Numbers follow the source's ratios, not its raw values:
-- the gun fires every 0.5s (the footage and card), with each slug's damage halved so the damage per second holds;
-- the Anchor hits about 1.8x a point-blank volley (25 vs 7 x 2 = 14), stuns about 1.1s (the footage shows 1.2-1.4s);
+- the gun fires every 0.5s (the footage and card), with each slug's damage cut so the damage per second holds (3.5 a slug since the 11-24 owner change, 2 before);
+- the Anchor hits about 1.0x a point-blank volley (25 vs 7 x 3.5 = 24.5; 1.8x before 11-24, the footage's ratio is 1.8x), stuns about 1.1s (the footage shows 1.2-1.4s);
 - cooldowns keep the source's order and ratios: Deep Reach 12s : Anchor 7s : Barge 5s per charge (3 charges at 10s, chained a beat apart).
 
 ## Per-slot table
@@ -85,16 +85,16 @@ at a dummy, asserted in `tools/dredge_gun_range_check.gd` ("gun range ..."):
 
 | Range | 6 degree volley | Why |
 |---|---|---|
-| 2 m | 7 of 7, 14.0 | the group is about 0.2 m across |
-| 5.5 m | 7 of 7, 14.0 | about 0.5 m across, inside the dummy's reach |
-| 5.8 m (inside the stop range) | 7 of 7, 14.0 | the same: nothing is lost to distance |
+| 2 m | 7 of 7, 24.5 | the group is about 0.2 m across |
+| 5.5 m | 7 of 7, 24.5 | about 0.5 m across, inside the dummy's reach |
+| 5.8 m (inside the stop range) | 7 of 7, 24.5 | the same: nothing is lost to distance |
 
-Grimble LMB line and group (ext/grimble-lmb-line-1118, owner 11-17): one aim line instead of the two cone edges, and all 7 slugs in a 6 degree group (was 10 degrees waited, up to 30 with bloom). The bloom is gone (`bloom_*` removed from `shotgun.json`, the rank 3 "a dash resets the spread" with it), so every volley is tight and every slug shreds armor (it was the waited volley only). Slugs, damage per slug and the 0.5 s rate are unchanged; the reliable total at range goes up: a fired-in-a-row volley at 5.5 m landed 3 of 7 (8.9), now 7 of 7 (14.0), so held fire is up to 57% stronger at range. Owner decides the balance.
+Grimble LMB line and group (ext/grimble-lmb-line-1118, owner 11-17): one aim line instead of the two cone edges, and all 7 slugs in a 6 degree group (was 10 degrees waited, up to 30 with bloom). The bloom is gone (`bloom_*` removed from `shotgun.json`, the rank 3 "a dash resets the spread" with it), so every volley is tight and every slug shreds armor (it was the waited volley only). Slugs, damage per slug and the 0.5 s rate are unchanged; the reliable total at range goes up: a fired-in-a-row volley at 5.5 m landed 3 of 7 (8.9), now 7 of 7 (14.0), so held fire is up to 57% stronger at range. Owner decides the balance. Pellet 2 -> 3.5 on 11-24 (`8495f5a6b8`, owner playtest: hard to do damage): a volley is 24.5, which is the footage's 193 x 0.13 (source hero 1531 HP against our 193), so the gun now matches the source in absolute terms; the Anchor (25) and Broadside (48) stayed on the old ratios and sit at 1.0x and 2.0x the gun against the footage's 1.8x (349 against 193) and 3.9x. Left for the owner.
 
 Earlier, Grimble LMB vs the source (ext/grimble-lmb-sv-1117): the firing fan was 45 (bloom 24 to +35), now the footage's 30 (bloom 20 to +20; rest stays the owner's 10); the bloom drew in at 150 degrees/s, now 90 so it still takes about a quarter second; the slugs started on a ring 0.6 m round his chest at 1.2 m up, now all from one muzzle point 0.25 m ahead at 0.85 m (the hip blunderbuss; the muzzle flash is the same point); the slugs stopped 6.7 m from his body, now 6.1 (the footage's 6.3). Unchanged, matching: 7 slugs, 0.5 s rate, no ammo or reload, no range falloff, firing walk 0.8.
 
 Earlier: the fan was 30 at rest and 45 at full bloom; the footage rests at 20 and blooms to 30 (no owner note), so `fan_deg` 20,
-`bloom_max_deg` 10 (the volleys after the aimed first one). Not fixed, for the owner: Brass Broadside's slugs (6 a wave, 4 each, no falloff) hit 3.4x a gun volley
+`bloom_max_deg` 10 (the volleys after the aimed first one). Not fixed, for the owner: Brass Broadside's slugs (6 a wave, 4 each, no falloff) hit 2.0x a gun volley (3.4x until the 11-24 pellet 2 -> 3.5)
 where the footage reads about 3.9x (756 against 193); the burst cap above holds them down, and its fan is 105 against the footage's 100-120.
 
 ## Footage gaps, Nov 9 re-check

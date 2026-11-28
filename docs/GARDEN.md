@@ -112,7 +112,7 @@ traits (curious sniffs, timid hides and says `look_shy`, the rest puff up and sa
 | Budget of 240 full, day (where it fills) | 7 to 30 | Never trivial |
 | Stat total on day 30 | 216 to 240 | Even five minutes a day nearly fills it |
 | Gems a day | 43 to 300 | At least a weekly Wayseed (300 / 7) so home-only players reach every zone; at most one a day |
-| Joy, mean over a visit | 50 to 90 | Above sulky, never always full |
+| Joy, mean over a visit | 40 to 90 | Above the whistle's sulky joy (25), never always full (toys give 3 joy since the farm joy tune) |
 
 Before (the stack as it stood) and after, per player (before / after):
 

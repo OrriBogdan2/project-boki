@@ -6,10 +6,9 @@ extends RefCounted
 
 const CHECKS := {
 	"--solo-hud-shots": ["res://tools/solo_hud_shots.gd", "solo_hud_shots", null],  # GPU, --shots-dir=
-	"--title-shots": ["res://tools/title_shots.gd", "title_shots", null],  # GPU: title before/after
 	"--passive-gauge-shots": ["res://tools/passive_gauge_shots.gd", "passive_gauge_shots", null],
-	"--test-zone-shots": ["res://tools/test_zone_shots.gd", "test_zone_shots", null],  # --shots-dir=<dir>, GPU
 	"--map-clarity-shots": ["res://tools/map_clarity_shots.gd", "map_clarity_shots", null],  # GPU, --shots-dir=<dir>
+	"--test-zone-shots": ["res://tools/test_zone_shots.gd", "test_zone_shots", null],  # --shots-dir=<dir>, GPU
 	"--shops-check": ["res://tools/shops_check.gd", "shops_check", null],  # in-match shops, the map legend
 	"--reticle-hunters-shots": ["res://tools/reticle_shots.gd", "reticle_shots", "hunters"],
 	"--combat-calm-check": ["res://tools/combat_calm_check.gd", "combat_calm_check", null],  # fight HUD

@@ -1,7 +1,8 @@
 extends RefCounted
-## --map-clarity-shots --shots-dir=<dir> [--view=WxH]: how readable is each thing on the map? One game-view frame per
-## interactable (the player 5 m off, the default match camera), then the minimap as it plays, the minimap with Tab
-## held and the full map (M). GPU run under xvfb. <dir>/captions.txt gets "file: caption" per file.
+## --map-clarity-shots --shots-dir=<dir> [--view=WxH] [--seed=N] [--map=<id>]: how readable is each thing on the
+## map? (--map=skyreach has jump pads; the Hollow Crown has none.) One game-view frame per interactable (the
+## player 5 m off, the default match camera), then the minimap as it plays, the minimap with Tab held and the
+## full map (M). GPU run under xvfb. <dir>/captions.txt gets "file: caption" per file.
 
 const DT := 1.0 / 60.0
 const STAND_OFF := Vector3(0, 0, 5)  # m: where the player stands from a thing, south of it (toward the camera)
@@ -15,12 +16,15 @@ var lines: Array = []
 func run(main_node: Node) -> void:
 	main = main_node
 	var view := Vector2i(1920, 1080)
+	var seed_val := 77
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
 		elif String(a).begins_with("--view="):
 			var wh := String(a).substr(7).split("x")
 			view = Vector2i(int(wh[0]), int(wh[1]))
+		elif String(a).begins_with("--seed="):
+			seed_val = int(String(a).substr(7))
 	DirAccess.make_dir_recursive_absolute(dir)
 	DisplayServer.window_set_size(view)
 	await main.get_tree().process_frame
@@ -29,7 +33,7 @@ func run(main_node: Node) -> void:
 	Econ.ensure()
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 3, "squad": 2, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
+	await m.start({"teams": 3, "squad": 2, "tier": 0, "length": 1e9, "seed": seed_val, "no_drop": true})
 	m.set_process(false)
 	var fade = main.get("fade")
 	if fade != null:
@@ -86,6 +90,8 @@ func _targets() -> Array:
 		out.append({"id": "shrine", "pos": m.shrines[0]["pos"]})
 	if not m.beacons.is_empty():
 		out.append({"id": "beacon", "pos": m.beacons[0]["pos"]})
+	if m.blight != null and not m.blight.nests.list.is_empty():
+		out.append({"id": "blight_nest", "pos": m.blight.nests.list[0]["pos"]})
 	if m.lairs != null and not m.lairs.list.is_empty():
 		out.append({"id": "boss_lair", "pos": m.lairs.list[0]["c"]})
 	return out

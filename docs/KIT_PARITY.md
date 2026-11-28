@@ -515,11 +515,11 @@ Re-read 2026-11-23 on main dae69e1c59, same note as Vex above.
 
 ## Meeko (`tender`, source Elluna; was Pip)
 
-**Re-checked 2026-11-23 on main 5a246f9696:** tender-combo 158/0, kit-parity 0 failures. One row per slot, current numbers; the older 0.24.5 header and the stacked merge copies of each row are retired (docs/KIT_PARITY.d/1123-grimble-meeko-recheck.md lists each drift and the commit that moved it).
+**Re-checked 2026-11-23 on main 5a246f9696:** tender-combo 158/0, kit-parity 0 failures. One row per slot, current numbers; the older 0.24.5 header and the stacked merge copies of each row are retired (docs/KIT_PARITY.d/1123-grimble-meeko-recheck.md lists each drift and the commit that moved it). Re-read 2026-11-26 on main cdbaa701ac: what moved since is in docs/KIT_PARITY.d/1126-rest-recheck.md.
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
-| LMB | Ramp per hit; idle shot Empowered [D]; footage ember flies 7-8 bh (13.5 m) [F] | Cadence .4; the ember flies its full 7.43 m (`lantern_crook` range); after a 1 s pause the next one is bigger hit (x1.5; the look is 15% smaller, `lmb.look_k`) and flies 1.25x further (9.3 m); Kindle +0.72 a stack to 5 (owner 11-17, `5ce4816037`; 11-26: +10% range) | owner call; the footage's 13.5 m is halved on purpose. Empowered's effect is not in the source |
+| LMB | Ramp per hit; idle shot Empowered [D]; footage ember flies 7-8 bh (13.5 m) [F] | Cadence .4; the ember flies its full 7.43 m (`lantern_crook` range); after a 1 s pause the next one is bigger hit (x1.5; the look is 15% smaller, `lmb.look_k`) and flies 1.25x further (9.3 m); ember 6 (owner 11-24, `8495f5a6b8`, was 8); Kindle +0.72 a stack to 5, now +60% at the plateau against the footage's +45% (owner 11-17, `5ce4816037`; flat step kept 11-24; 11-26: +10% range) | owner call; the footage's 13.5 m is halved on purpose. Empowered's effect is not in the source |
 | RMB | Shot, delayed Root, 11.5 s [D]; wiki 2 s delay | Burrseed: fixed 0.6 s wind-up (owner 11-11), seed 24 m/s, 9 dmg, roots after 2 s of the foe within 15 m (owner 11-10), unwinds 2x out of it, burst 32 in 2.2 m, root 1.1 s, cd 10.5 | differ `[?]` motion · **owner** (11-10, 11-11); 0.91x cd (gap 10) |
 | Q | none | glove | ours |
 | E | 2.5 s zone, burst, throw, attaches, 12 s [D] | Hearthlight: 2.5 s, r 2.6, 10 over the zone and 22 at the end, thrown to 9 m (r 2.9), latches onto the first teammate it passes, heals her like any teammate (no self factor), cd 11 | match; 0.92x cd (gap 10) |
@@ -575,15 +575,15 @@ PARITY FIRST (DECISIONS 2026-11-07). Source: `the reference kit notes on the bri
 
 ## Grimble (`dredge`, source ref-dredge)
 
-**Re-checked 2026-11-23 on main 5a246f9696:** dredge-combo 148/0, kit-parity 0 failures. One row per slot, current numbers; the older 0.24.5 header and the stacked merge copies of each row are retired (docs/KIT_PARITY.d/1123-grimble-meeko-recheck.md lists each drift and the commit that moved it).
+**Re-checked 2026-11-23 on main 5a246f9696:** dredge-combo 148/0, kit-parity 0 failures. One row per slot, current numbers; the older 0.24.5 header and the stacked merge copies of each row are retired (docs/KIT_PARITY.d/1123-grimble-meeko-recheck.md lists each drift and the commit that moved it). Re-read 2026-11-26 on main cdbaa701ac: what moved since is in docs/KIT_PARITY.d/1126-rest-recheck.md.
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
-| LMB | 7 slugs, bloom [D]; [F] fan 20 rested, 30 firing, fixed stop ~3.5 bh, no falloff with range | 7 slugs in one tight 6 degree group, no bloom, one aim line (owner 11-17, `23282bb8a4`); the slugs leave the blunderbuss muzzle and stop at 6.3 m (`0dede72323`), no falloff; 14.0 a volley at 2, 5.5 and 5.8 m, every slug shreds armour; asserted in `--dredge-combo-check` | match on stop range and 0.5 s cadence; owner: the source's fan and bloom are dropped |
+| LMB | 7 slugs, bloom [D]; [F] fan 20 rested, 30 firing, fixed stop ~3.5 bh, no falloff with range | 7 slugs in one tight 6 degree group, no bloom, one aim line (owner 11-17, `23282bb8a4`); the slugs leave the blunderbuss muzzle and stop at 6.3 m (`0dede72323`), no falloff; 3.5 a slug (owner 11-24, `8495f5a6b8`), 24.5 a volley at 2, 5.5 and 5.8 m, every slug shreds armour; asserted in `--dredge-combo-check` | match on stop range and 0.5 s cadence; owner: the source's fan and bloom are dropped |
 | RMB | Arm pierces terrain, pulls first target (enemy or ally), scoops Wisps, 18 s [D]; reel 9 m/s to adjacent [F]; arm 17 m/s after a 0.2 s coil [O] | Deep Reach: 11.5 m at 17 m/s after a 0.2 s coil, through rocks and cliffs (a placed wall stops it), reel 9 m/s up to 3 s, braced shuffle at 1/5 walk, ally and Wisps caught, rank 3 a hit takes half the cooldown off, cd 12 | match; 0.67x cd (gap 10) |
 | Q | none | glove | ours |
 | E | Slam, stun, dunk, 12 s [D] | Anchor Drop: windup .38, r 3, 110 degrees, 25 dmg, stun 1.1, hop 1.8 m, air dive ring 3.2 m, rank 3 double over the abyss and +0.2 s stun, cd 7; the foe is not Grounded (rider cut, `7b130d5c7`, in main) | match; 0.58x cd (gap 10) |
-| R | Two waves, 36 s [D]; [F] 6-7 orbs, ~120 degrees, ~756 a close volley against 193 for the gun | Brass Broadside: charge 1.1, 2 waves of 6 slugs, 105 degrees, 5.9 m, 4 dmg a slug + Anti-Heal 3 s (3.4x a gun volley, held by the burst cap), cd 21 | match; 0.58x cd (gap 10) |
+| R | Two waves, 36 s [D]; [F] 6-7 orbs, ~120 degrees, ~756 a close volley against 193 for the gun | Brass Broadside: charge 1.1, 2 waves of 6 slugs, 105 degrees, 5.9 m, 4 dmg a slug + Anti-Heal 3 s (2.0x a gun volley since the 11-24 pellet change, 3.4x before; the source reads 3.9x; held by the burst cap), cd 21 | match; 0.58x cd (gap 10) |
 | Dash | One every 7 s; own air slot 12.5 s [D] | Barge: 3 chained shoves 0.1 s apart (a press inside a shove is held to the gap's end, `8ba7ea217a`), 3.2 m/.16 s raw (owner 23:40; F 4.6 m/.12 s) x.85/x1.15 = 2.7 m/.18 s, cd 10; air pounce x1.35 = 3.7 m (scaled once) on its own 12.5 s slot, 2 s less per rank (`0a5b33f48`, `2f24ae36b`) | differ (owner): 3 charges, cd 10 vs 7 |
 | Passive | Stacks of max HP [D]; +50% from behind [wiki] | Salvage 10, +2.5% each, lose 1 on down; hits on a back +50%; a knock heals 16% | match on stacks and back bonus; 16% knock heal ours, owner call (open, "remove or keep") |
 | Anim | Footage poses | 13 moves plus the fusion move, all on `dredge.glb` (45 clips; was 40: the v95 glb and anim merges 11-16..11-18, `9f30565ec9`, `57d96c1f7c`); hook-arm v2 model `315cdf2af` | match on coverage |
@@ -591,12 +591,12 @@ PARITY FIRST (DECISIONS 2026-11-07). Source: `the reference kit notes on the bri
 ## Neve (`rimewright`, source Celeste)
 ## Neve (`rimewright`, source Celeste; was Claire)
 
-**Re-checked 2026-11-23 on main 5a246f9696** (rimewright-combo 161/0; what moved since 11-12: `docs/KIT_PARITY.d/1123-albert-neve-recheck.md`). One current row per slot replaces the stack of superseded rows (70 HP wall, skate 11.5, Rimelock 3.5 s / 40 / 8.3, "Chill + 15% slow").
+**Re-checked 2026-11-23 on main 5a246f9696** (rimewright-combo 161/0; what moved since 11-12: `docs/KIT_PARITY.d/1123-albert-neve-recheck.md`). One current row per slot replaces the stack of superseded rows (70 HP wall, skate 11.5, Rimelock 3.5 s / 40 / 8.3, "Chill + 15% slow"). Re-read 2026-11-26 on main cdbaa701ac: what moved since is in docs/KIT_PARITY.d/1126-rest-recheck.md.
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
 | LMB | Hold, semi-homing, 3 heavy at end of burst, 0.5 s barrage cd [D]; one uniform stream while held [F] | Hold = one burst of plain darts (0.18 s), 3 large on the let-go, 0.5 s pause; skating: beams, semi-homing, 2x damage | match (burst); skating darts 2x (wiki, `dash.skate_dart_dmg_k`; footage 1.6x, no data number); skating beams semi-homing (owner, gap 16 done) |
-| LMB | Hold, semi-homing, 3 heavy at end [D] | 4 plain + 3 large darts; they leave along the aim, then curve onto the foe at the cursor over 35 to 70% of the flight. **Skating beams home the same way** after leaving straight on the aim | match; gap 16 closed `e5c73480c` (bend assert pending `ext/parity-neve-skate-home` 9b65ea7f1) |
+| LMB | Hold, semi-homing, 3 heavy at end [D] | 4 plain + 3 large darts; they leave along the aim, then curve onto the foe within 2.4 m of the cursor (else the cursor point; no free acquire, 7 rad/s, `651e8bbb7a` 11-19) over 35 to 70% of the flight. **Skating beams home the same way** after leaving straight on the aim | match; gap 16 closed `e5c73480c` (bend assert pending `ext/parity-neve-skate-home` 9b65ea7f1) |
 | RMB | Spear + delayed blast, 2 charges, 12 s [D] | Ice Spear: pushed out to the cursor (12 m), 18 dmg, 2.2 m slow zone 35%, bursts 22 (= 190/156 x hit 18) at 1.8 s, 2 charges, cd 10.2 | differ (owner: push-like release); 0.85x cd |
 | Q | none | glove | ours |
 | E | Wall pushes, recast freezes, 20 s [D] | Rink Wall: 0.2 s tell, slides 4.5 to 16.2 m, grows 1.8 to 4.5 m, 70 HP, E again freezes 6 s, cd 17 | match; 0.85x cd |
@@ -609,7 +609,7 @@ PARITY FIRST (DECISIONS 2026-11-07). Source: `the reference kit notes on the bri
 | RMB | Spear + delayed blast, 2 charges, 12 s [D] | Push-like emerge (owner), 2 charges, cd 10.2; detonation 22 = 190/156 x hit 18 | differ (owner) · **owner** |
 | LMB | Hold, semi-homing, 3 heavy at end [D] | 4 plain + 3 large; straight, 2x damage while skating | match; skating darts 2x (wiki, `dash.skate_dart_dmg_k`; footage 1.6x, no data number); skate tracking owner question (gap 16) |
 | RMB | Spear + delayed blast, 2 charges, 12 s [D] | Push-like emerge (owner), 2 charges, cd 10.2 | differ (owner) |
-| LMB | Hold, semi-homing, 3 heavy at end of burst, 0.5 s barrage cd [D]; one uniform stream while held [F] | Hold = one burst of plain darts (0.18 s, 4 dmg), 3 large on the let-go (x2 damage), 0.5 s pause; darts leave along the aim and curve onto the foe at the cursor over 35 to 70% of the flight; skating: beams (x2 damage, `dash.skate_dart_dmg_k`) that home the same way; a tap the burst cannot take yet is buffered (`b53f5b0328`, 11-22) | match; skating x2 is the wiki's number (footage 1.6x, no data number) |
+| LMB | Hold, semi-homing, 3 heavy at end of burst, 0.5 s barrage cd [D]; one uniform stream while held [F] | Hold = one burst of plain darts (0.18 s, 4 dmg), 3 large on the let-go (x2 damage), 0.5 s pause; darts leave along the aim and curve onto the foe within 2.4 m of the cursor (else the cursor point; 7 rad/s, 11-19) over 35 to 70% of the flight; skating: beams (x2 damage, `dash.skate_dart_dmg_k`) that home the same way; a tap the burst cannot take yet is buffered (`b53f5b0328`, 11-22) | match; skating x2 is the wiki's number (footage 1.6x, no data number) |
 | RMB | Spear + delayed blast, 2 charges, 12 s [D] | Ice Spear: pushed out to the cursor (12 m, 18 m/s), 18 dmg, 2.2 m slow zone 35%, bursts 22 in 2.7 m at 1.8 s (= 190/156 x the hit), 2 charges, cd 10.2 | differ (owner: push-like release); 0.85x cd (gap 10, owner row) |
 | Q | none | glove | ours |
 | E | Wall pushes, recast freezes, 20 s [D] | Rink Wall: 0.2 s tell, slides 4.5 to 16.2 m, grows 1.8 to 4.5 m, **200 HP** (owner 11-08), E again freezes 6 s, cd 17 | match; 0.85x cd (gap 10, owner row) |
@@ -648,7 +648,7 @@ PARITY FIRST (DECISIONS 2026-11-07). Source: `the reference kit notes on the bri
 ## Albert (`bulwark`, source Oath)
 ## Albert (`bulwark`, source Oath; was Bjorn)
 
-**Re-checked 2026-11-23 on main 5a246f9696** (bulwark-combo 197/0; list of what moved since 11-12: `docs/KIT_PARITY.d/1123-albert-neve-recheck.md`). The stack of superseded rows that stood here (E r 3.5, Guard meter and Shield Slam "open", blow stun 0.4, "branch ready") is replaced by one current row per slot.
+**Re-checked 2026-11-23 on main 5a246f9696** (bulwark-combo 197/0; list of what moved since 11-12: `docs/KIT_PARITY.d/1123-albert-neve-recheck.md`). The stack of superseded rows that stood here (E r 3.5, Guard meter and Shield Slam "open", blow stun 0.4, "branch ready") is replaced by one current row per slot. Re-read 2026-11-26 on main cdbaa701ac: what moved since is in docs/KIT_PARITY.d/1126-rest-recheck.md.
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
