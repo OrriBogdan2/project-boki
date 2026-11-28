@@ -1,7 +1,7 @@
 extends "res://tools/archetype_check.gd"
 ## --plate-status-check: the one status row on a plate (HudPlate.row, drawn by HudPlate.draw_row).
-##   1. each crowd-control kind (stun, root, Ground, Daze, Slow) on a rival: its icon on the real HUD's plate, its time
-##      left and ring total, the time shrinking under the same total
+##   1. each crowd-control kind (stun, root, Ground, Daze, Slow) and foe state (Shred, Blight) on a rival: its icon on
+##      the real HUD's plate, its time left and ring total, the time shrinking under the same total
 ##   2. each kit's mark (ArchKit.combo_read): the icon in the kit's colour with its stacks, shrinking, gone when it
 ##      ends; Vex's Daze and Cinder's Ablaze take the place of the plain status; a Boki combo setup shows as the bond
 ##   3. the order (what stops them, your marks, the rest) and at most HudPlate.ROW_MAX icons
@@ -19,6 +19,10 @@ const CC := [
 	["Daze", "status_dazed", 2.5],
 	["Slow", "status_slowed", 3.0]
 ]
+
+## [what, icon, seconds]: the foe states that are not crowd control (Tenzo's and Sable's Shred, the Blight), put on by
+## _apply_cc; they sit behind Slow in the row, so the order check leaves them out
+const FOE_STATES := [["Shred", "status_shred", 4.0], ["Blight", "status_blight", 4.0]]
 
 ## [arch, icon, stacks shown]: each kit's mark, put on by _apply_mark
 const MARKS := [
@@ -84,6 +88,10 @@ func _apply_cc(tgt: Hunter, what: String, secs: float) -> void:
 		"Slow":
 			tgt.slow_k = 0.3
 			tgt.slow_t = secs
+		"Shred":
+			KitStatus.apply(tgt, "vul", secs, 0.25, false)
+		"Blight":
+			KitStatus.apply(tgt, "blt", secs, 0.0, false)
 
 
 func _clear_cc(tgt: Hunter) -> void:
@@ -91,6 +99,8 @@ func _clear_cc(tgt: Hunter) -> void:
 	tgt.root_t = 0.0
 	tgt.slow_t = 0.0
 	tgt.burn_t = 0.0
+	tgt.vuln_t = 0.0
+	tgt.blight_t = 0.0
 	tgt.set_meta("gnd_until", 0.0)
 	KitStatus.clear_rattled(tgt)
 
@@ -105,7 +115,7 @@ func _crowd_control() -> void:
 		m.hud.plates.shown.has(tgt.nid) and _row(m, tgt).is_empty(),
 		str(_row(m, tgt))
 	)
-	for cc in CC:
+	for cc in CC + FOE_STATES:
 		var secs := float(cc[2])
 		_apply_cc(tgt, String(cc[0]), secs)
 		await _frames()

@@ -586,6 +586,14 @@ static func _glyph(c, id: String, at: Vector2, s: float, col: Color) -> void:
 		"claw":
 			for dx in [-0.45, 0.0, 0.45]:
 				L.call([[dx - 0.2, -0.7], [dx + 0.2, 0.7]])
+		# ---- foe states with no painted icon yet (HudPlate.statuses): a cracked shield, a struck-out cross
+		"status_shred":
+			L.call([[-0.65, -0.6], [0.65, -0.6], [0.65, 0.05], [0.0, 0.8], [-0.65, 0.05], [-0.65, -0.6]])
+			L.call([[0.05, -0.6], [-0.2, -0.15], [0.2, 0.15], [-0.05, 0.6]])
+		"status_blight":
+			L.call([[0.0, -0.6], [0.0, 0.6]])
+			L.call([[-0.6, 0.0], [0.6, 0.0]])
+			L.call([[-0.7, 0.7], [0.7, -0.7]], maxf(2.0, s * 0.2))
 		_:
 			O.call(0.0, 0.0, 0.4)
 

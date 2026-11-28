@@ -1126,6 +1126,8 @@ func payoff_fx(at: Vector3, col: Color, snd: String, dir := Vector2.ZERO, victim
 	if h.is_local():
 		if m.hud: m.hud.flash(col, 0.12)
 	RecastCue.payoff(self, victim)
+	if victim != null:
+		ComboMark.payoff(m, h, victim)  # the body flash and the combo chime every payoff shares
 	net_bolt(at + Vector3(0, 0.2, 0), at + Vector3(0, 3.6, 0), col)
 	CombatBus.ability_used.emit(h, id + "_payoff", "secondary")
 
