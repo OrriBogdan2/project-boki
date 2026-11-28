@@ -23,9 +23,7 @@ func run(m: Node) -> void:
 	for i in 41:
 		var d := start * float(i) / 40.0
 		shallow = (
-			shallow
-			and fx.danger_depth(d, SPAN) == 0.0
-			and AbyssFallSfx.warn_db(fx.danger_depth(d, SPAN)) == -INF
+			shallow and fx.danger_depth(d, SPAN) == 0.0 and AbyssFallSfx.warn_db(fx.danger_depth(d, SPAN)) == -INF
 		)
 	ok(shallow, "a dip of up to %.1f m under the lip: no tint, no sound" % start)
 	ok(fx.danger_depth(start + 0.2, SPAN) > 0.0, "just past the start depth the tint begins")
@@ -46,16 +44,10 @@ func run(m: Node) -> void:
 		prev_rate = rate
 	ok(mono, "tint, warning level and warning rate never fall as you go deeper")
 	ok(fx.danger_depth(SPAN - 3.6, SPAN) < 1.0, "not yet full 3.6 m above the point of no return")
-	ok(
-		is_equal_approx(fx.danger_depth(SPAN - 3.5, SPAN), 1.0),
-		"full tint 3.5 m above the point of no return"
-	)
+	ok(is_equal_approx(fx.danger_depth(SPAN - 3.5, SPAN), 1.0), "full tint 3.5 m above the point of no return")
 	ok(fx.danger_depth(SPAN + 3.0, SPAN) == 1.0, "and it stays at 1 below it")
 	var snd_off := AbyssFallSfx.warn_db(fx.danger_depth(2.9, SPAN)) == -INF
-	ok(
-		snd_off and AbyssFallSfx.warn_db(fx.danger_depth(3.1, SPAN)) > -INF,
-		"the warning sound starts 3 m down"
-	)
+	ok(snd_off and AbyssFallSfx.warn_db(fx.danger_depth(3.1, SPAN)) > -INF, "the warning sound starts 3 m down")
 	var mid: float = fx.danger_depth(start + (SPAN - 3.5 - start) * 0.5, SPAN)
 	ok(mid > 0.15 and mid < 0.6, "half way to full it is a hint, not a wash (%.2f)" % mid)
 	var db_full := AbyssFallSfx.warn_db(1.0)
@@ -65,17 +57,8 @@ func run(m: Node) -> void:
 		db_low > -INF and db_low < db_mid and db_mid < db_full and db_full <= 0.0,
 		"warning volume follows depth (%.1f < %.1f < %.1f dB)" % [db_low, db_mid, db_full]
 	)
-	ok(
-		AbyssFallSfx.warn_rate(1.0) > AbyssFallSfx.warn_rate(0.3) * 1.5,
-		"the heartbeat quickens toward the end"
-	)
-	ok(
-		fx.danger_depth(SPAN * 0.9, SPAN, true) >= fx.danger_depth(SPAN * 0.9, SPAN),
-		"an empty glider reads no better"
-	)
-	ok(
-		fx.danger_depth(start * 0.9, SPAN, true) == 0.0,
-		"an empty glider still shows nothing above the start"
-	)
+	ok(AbyssFallSfx.warn_rate(1.0) > AbyssFallSfx.warn_rate(0.3) * 1.5, "the heartbeat quickens toward the end")
+	ok(fx.danger_depth(SPAN * 0.9, SPAN, true) >= fx.danger_depth(SPAN * 0.9, SPAN), "an empty glider reads no better")
+	ok(fx.danger_depth(start * 0.9, SPAN, true) == 0.0, "an empty glider still shows nothing above the start")
 	print("ABYSS DANGER CHECK DONE, failures: ", bad)
 	m.get_tree().quit()
