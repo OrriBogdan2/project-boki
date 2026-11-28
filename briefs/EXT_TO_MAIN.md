@@ -11587,3 +11587,4 @@ READY ext/stuck-integ-3b85ff7d 1ccb8fead2 (supersedes the 2a605941da line; merge
 READY ext/vfx-motley-neve-marks ff4d65a083 (Nightwell tell starts on a lit teal rim; Ice Spear detonation mark lasts 5 s; p95 -0.17 ms; before/after sheet in docs/shots/vfx-motley-neve-marks)
 READY ext/vfx-meeko-albert-rings 19e39c8a9a40e989e3b7dd86db61f848f126d835 (Meeko Hearthlight thin lit-rim ring + Albert Mending Ground rising motes; 4v4 p95 -0.20 ms; before/after sheet in docs/art/vfx_meeko_albert_rings)
 READY ext/vex-daze-leftovers fba848a9b1 (docs only: neither Vex Daze leftover has a source row, nothing built; fragment 1128-vex-daze-leftovers.md)
+READY ext/sable-dagger-slow 5135cdce39 (bulk-rebase: origin/main merged in mechanically, was e415755d82; union 0 gen 1 files; the branch's own READY checks still apply)
