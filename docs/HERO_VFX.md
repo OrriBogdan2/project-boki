@@ -111,6 +111,7 @@ The HUD strip flashes white as it loses some. Reel: `--hero-vfx-reel --reel-only
 
 ## Rules
 - **No ring, disc or burst on movement:** explosions are for things that truly explode (kegs, big ultimates, bosses). A dash, landing, wall kick, mantle or dash reset draws dust, ghosts, ribbons and `Fx.debris` specks that stay on the body, never `Fx.ring`/`Fx.burst`, a `flare`, `vortex` or `skirt` layer, or a ground `scorch` disc, unless the move itself is an area (Lantern Trade's circle, Rock Wall, the 360 Smash). `--move-fx-check` runs every Hunter through those moves and fails on any.
+- **A ground mark that shows a hit area lasts long enough to read:** a `scorch` cracks in over its first fifth and thins from about half its `life`, so it reads for roughly half the `life` you give it. Set `life` to about twice the time the area must stay readable (Neve's Ice Spear detonation mark: `life` 5.0 for about 2.5 s of mark, `content/vfx/rimewright.json`). A timed telegraph (Nightwell's tell) draws as AimKit's `"soft"` circle in the Hunter's colour, so the lit rim is up on the first frame and only the inside fills.
 - **Colour:** looks stay in the Hero's palette. The you / ally / enemy language is the telegraphs' and outlines' job: lanes
   and discs are AimKit's and are not drawn here. An ally's effects draw at `ALLY_K`. Shared ground areas, telegraphs and
 - **Ability colours (DECISIONS 2026-11-08):** every Hunter's LMB / RMB / E / R / dash / passive effects, slot colours and
