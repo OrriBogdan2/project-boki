@@ -144,6 +144,7 @@ static func _skin_to_head(root: Node3D, src: Mesh, mats: Array, xf: Transform3D,
 	mi.skin = skin
 	mi.cast_shadow = shadow
 	skel.add_child(mi)
+	mi.skeleton = NodePath("..")  # (the default path is empty: unbound, the GPU drew it at rest, left behind by a jump)
 
 
 ## Puts the procedural node `nd` (at `xf` in the model's frame, at rest) on Meshy's bone `bone`: it rides the clips.
