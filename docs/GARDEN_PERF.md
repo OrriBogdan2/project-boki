@@ -262,3 +262,23 @@ GPU): stall L1 20 -> 8, L3 38 -> 18, nook 17 -> 7, incubator 171 -> 155, burrow 
 The hub meets its budget at both presets, so its ratchet entries are gone. What is left (in view, passes): the
 partner's rig 35, world scatter about 21, the Waystone 9, Incubator 17, burrow 11. The M5 (gl_compatibility) was
 not measured.
+
+## Prop and building textures, close garden camera (ext/garden-prop-textures, 2026-11-28)
+Inventory of 3D-sampled prop textures (`art/props`, `art/vendor`). The garden buildings (house, stall, burrow, hub deco)
+are built from code with plain materials: they have no texture files, so nothing there can be blurry or over budget.
+There is no texel-density target written in this doc; the working target used here is 512 px/m on a wall-sized prop
+(the 512 px floor in the task brief).
+
+| texture | px | import before | import after |
+|---|---|---|---|
+| props/chest, gust_fan, jump_pad, updraft_vent (1 jpg each) | 1024 | lossless, mips (RGBA8, ~5.6 MB each with mips) | VRAM compressed, mips (~0.7 MB each) |
+| vendor/dungeon, halloween, hexagon, skeletons `palette.png` | 1024 | VRAM compressed, mips | unchanged |
+
+VRAM for the four props: ~22.4 MB -> ~2.8 MB (computed from format sizes, DXT1 with mips; not measured on a GPU).
+No texture is over the 2048 px source cap. Palettes are flat colour swatches, so a 1024 px palette is never blurry.
+
+Blurry up close, ranked for an art round (no gens here): none of the prop textures is under 512 px. The four 1024 px
+props are small objects (under 2 m), about 500+ px/m: fine. Nothing flagged.
+
+Outside this scope: `--texture-budget-check` is red on 412 other textures on main (eggs, kin, warden Meshy jpgs, icons
+still lossless: the committed `.import` files carry `compress/mode=0` with `detect_3d`). Not touched here.
