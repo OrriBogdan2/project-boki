@@ -1103,7 +1103,14 @@ func _choose(m: Match, h: Hunter) -> void:
 	if goal == Vector3.INF and a.has("ping_goal"):
 		var pg: Dictionary = a["ping_goal"]
 		var pp: Vector3 = pg["pos"]
-		if m.time < float(pg["until"]) and h.flat_dist(pp) > 3.5 and not m.world.is_void(pp.x, pp.z):
+		var pd := h.flat_dist(pp)
+		# no closer by a stride in 6 s (hopping at a ledge it can't climb): give the ping up, so a squadmate's ping
+		# beyond a wall doesn't hold the bot in the air for the whole 30 s
+		if pd < float(pg.get("best", INF)) - 1.0:
+			pg["best"] = pd
+			pg["best_t"] = m.time
+		var stalled: bool = m.time - float(pg.get("best_t", m.time)) > 6.0
+		if m.time < float(pg["until"]) and pd > 3.5 and not stalled and not m.world.is_void(pp.x, pp.z):
 			goal = pp
 			gk = "ping"
 			BaseRecall.cancel(h)  # (a base channel would hold us still, then carry us off to a mate and drop the ping)
