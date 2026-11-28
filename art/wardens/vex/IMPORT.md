@@ -64,3 +64,35 @@ then `python3 tools/art1/glb_add_clips.py art/wardens/vex/vex.glb OUT.glb walk_b
 NOT APPLIED on main (11-16 merge): the diagonal and re-baked back/side loops (walk_/run_ fl fr bl br, b l r) described here were baked into the old model's glb with a walk_f/run_f of a different length than main's v95 clips, so main's glb and warden_anim json are kept. Re-bake: `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- SRC.glb OUT.glb WALK RUN` on main's glb, then `glb_add_clips.py`, then restore the json map from ext/anim-dirloops-lace-kael.
 
 Face pass (2026-11-18, ext/faces-ship-1118, owner "upload all of these"): vex-face3d-r2 c_4 ("A") texture-only: `python3 -I tools/art1/face_swap.py art/wardens/vex/vex.glb /home/boki/meshy/vex-face3d-r2-1118/final/c_4.glb /home/boki/meshy/v95/Vex/face1117/alive1117/cand_A.glb OUT.glb` blends the changed face pixels into the embedded 4096 `v95` image (hair shade A and the rest stay as game; mesh, rig, clips, gatling untouched).
+
+## Tearing fix 11-19 (ext/hunter-fix-vex-1118, retry 6): weights only, no split, no caps
+Cause: the left forearm and hand only join the rest of the mesh at the elbow (a graph cut on the welded mesh finds one 50-edge
+ring there), but live weights put 30-70 % hand/forearm weight on the left hip/thigh skin and 30-40 % hip/thigh weight on
+the hand. So clips drag hip skin after the hand (black/orange curtains from hip to hand) and leave the hand on the hip.
+Fix (scripts in /home/boki/gens/hunter-fix-vex-1118/retry6/tool/: `seg2.py c1.json` labels, `build_ns.py lab.npy out.glb n3.json`):
+- In the box x -0.45..0.08, y 0.56..1.32 m only. Forearm/hand verts (graph-cut label): arm-chain bones only. Hip/thigh verts:
+  their forearm/hand weight moves onto their own hips/thigh share (never onto the chest bone `head`). Stripping fades out over
+  y 1.20..1.30 so the elbow and sleeve stay continuous. Every vertex outside the box keeps its live weights bit for bit.
+- Same vertices, triangles, positions, normals, UVs, colours, texture, skeleton and clips as live (48236 verts, 60095 tris).
+- Rest pose: Blender 4 sides x 4 zooms (full, eye, knee, hip): at most 1 px of 250k differs. (The live-audit bind shot only caught the boot logo.)
+- Edges >= 8 mm over 3x: 1.005 % -> 0.134 %; worst 10.16 -> 5.22; edges growing > 10 cm 286 -> 60, > 20 cm 11 -> 0.
+  Seam verts open > 10 cm 156 -> 156 (as live), open boundary edges 189 -> 189. tools/stretch_check.gd worst 10.16 -> 5.53,
+  35 clips better, 0 worse. hunter_mesh_check stretched tris 524 -> 120, no new warning.
+- Changes on purpose: in idle/stance the left hand now sits where hand.L puts it (on the hip, fingers visible) and the gold bead
+  chain stays on the trousers (live dragged it with the hand); the black spike at the left hip from behind is gone.
+
+## Tearing fix 11-20 (same branch, deep pass): gun-mount junk follows the gun
+Right side: between the jacket cuff and the ammo belt the scan has blade-like leather/skin sheets (folded-back fins) and small
+junk patches that were weighted to hips/thigh.R, so every clip that moves the gun arm left them hanging at the hip (the dark
+needles above the gun in idle, the floating tan chunk at the hip in run/glide).
+Fix (scripts in /home/boki/gens/hunter-fix-vex-1118/deep/tool/: `folds.py`, `blade.py 0.03`, `finsel.py`, `debris.py`,
+`finsplit4.py ns3.glb fin_b.npy upper_arm.R,forearm.R,hand.R,gatling,launcher out.glb 8`):
+- 629 fin/junk triangles (fold edges grown over big flat triangles, plus the patches that already broke off as islands).
+- Where they touch the hip skin their 256 vertices are duplicated; every fin vertex not already on the arm takes the
+  distance-blended weights of its 8 nearest sleeve/gun vertices (>= 95 % on the right arm chain). Nothing deleted: 60095 tris, positions, UVs, normals, colours,
+  texture, skeleton and clips as before, so the bind pose is identical (48236 -> 48492 verts).
+- The left-side retry 6 weights are kept as they were.
+- Numbers (live -> this glb): edges >= 8 mm over 3x 1.005 % -> 0.134 %, worst 10.16 -> 5.22 (numpy, 41 glb clips x 24 samples);
+  tools/stretch_check.gd worst 10.16 -> 5.53, mean clip worst 5.02 -> 3.85, 35 clips better, g_laugh 1.76 -> 2.00;
+  posed loose islands (seams joined within 5 mm) 373 -> 159 tris; hunter_mesh_check stretched tris 524 -> 120 (WARN cleared),
+  spike_edges 188 -> 188 (bind-pose scan slivers, untouched: no remodel).
