@@ -11606,3 +11606,4 @@ READY ext/ui-deathbox-compare 7651d0646a5b48f7bdbbea665630b54467ec42f5 (deathbox
 READY ext/ui-practice-ranks 16fde1fdc9f28e159dc2fe7958911eb0e9bfd79b (Esc Practice page: Reset ranks label; practice-hero-check covers Max all/Pick your max/Reset in every practice area, none in a real match)
 READY ext/vfx-tenzo-vex-hitframes 7467d36d117e36629dde27293554dbb3239cece9 (Tenzo punch impact frame + reel part; Vex LMB wider tracer and bigger hit frame; data only, before/after strips, A/B p95 median +0.09/+0.15 ms)
 READY ext/ui-deathbox-compare f4e611b244 (deathbox slot tags, gear compare arrows, one-click wear, swap prompt; gdformat clean)
+READY ext/ui-mate-boki-icon d4f0644fb2a944b9dc99d9dcd8828bf0be2279f3 (squad row Boki icon: TeamBoki now a round portrait + health arc, grey X when downed, soul-linked wisp glow; teammate/mate-look/safe-area/hudref/boki-hud/stolen-hud checks pass)
