@@ -117,6 +117,8 @@ func _body_statuses() -> void:
 	ok(loops_on() == 0, "Ignite: the crackle stops when it is cleansed")
 	# yours play louder than another's: the same cue on the same body, once by you and once by an ally of theirs
 	t.slow_t = 0.0
+	var jitter := Sfx.play_jitter_db
+	Sfx.play_jitter_db = 0.0  # the two levels are compared exactly: a random +/-1 dB per play made this flaky
 	sc.step(m, 3.0)
 	await settle(m)
 	t.hurt(1.0, p, {"stun": 0.5})
@@ -128,6 +130,7 @@ func _body_statuses() -> void:
 	var other := sounding("st_stun", mine)
 	var other_db := other.volume_db if other else 99.0
 	var gain := mine_db - other_db
+	Sfx.play_jitter_db = jitter
 	var rule_db := float(rules["mine_db"])
 	ok(absf(gain - rule_db) < 0.5, "yours is %.1f dB louder (rules %.1f)" % [gain, rule_db])
 	await _free(m)

@@ -147,6 +147,11 @@ func build() -> void:
 	trial.build(_layer, self)
 
 
+func show_layer(on: bool) -> void:
+	if _layer != null:
+		_layer.visible = on
+
+
 ## Rings of pedestals round a perch's middle, one per id of the kind: the outer ring (radius r) takes as many as
 ## fit RING_GAP apart, the rest go in rings RING_STEP closer in.
 func _ring(kind: String, c: Vector3, r: float) -> void:

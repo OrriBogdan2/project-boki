@@ -529,6 +529,13 @@ func set_tools(on: bool) -> void:
 	if pr and pr.bar:
 		pr.show_bar(on)
 
+## The practice keys, meter and station prompts off while the full map is up, back when it closes.
+func show_overlay(on: bool) -> void:
+	if layer != null:
+		layer.visible = on
+	if grounds != null:
+		grounds.show_layer(on)
+
 
 func _update_ui() -> void:
 	if meter == null:

@@ -84,9 +84,9 @@ var full_map: FullMap
 func map_open() -> bool:
 	return full_map != null and full_map.is_open
 
-## Expeditions only: the tutorial, training and the duel room keep their own screens.
+## Every mode with a world has the map; the two tutorials keep their own scripted screens.
 func map_allowed() -> bool:
-	return not (m.opts.get("tutorial", false) or m.opts.get("training", false) or m.opts.get("duel", false))
+	return not (m.opts.get("tutorial", false) or m.opts.get("duo_tut", false))
 
 func open_map(by_plan := false) -> void:
 	if map_allowed() and full_map:
