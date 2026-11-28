@@ -11546,3 +11546,4 @@ READY ext/boki-more-ingame-1118 40a240984b (bulk-rebase: origin/main merged in m
 READY ext/lace-spirit-end-rules 38ad752f48 (docs only: Lace Phase Walk damage-ends + end-inside rules already on main; KIT_PARITY rows marked)
 READY ext/cinder-ignite-tiers eed0bc345b (docs only: Cinder ignite tiers already in main; KIT_PARITY fragment, no code)
 READY ext/lace-rmb-charge-scale d031117ab4 (Lace RMB wall stun 0.6-1.2s and range lerp with charge, data rows, asserted)
+READY ext/neve-ult-early 18826c0833 (KIT_PARITY note: Rimelock early recast 67% already on main, no code change)
