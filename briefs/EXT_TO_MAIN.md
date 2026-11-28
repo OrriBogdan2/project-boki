@@ -11510,3 +11510,4 @@ READY ext/tut-glide-double-press 4f09345159dd5aa46c1022c073866f7f656fe53a (tutor
 READY ext/farm-partner-follow 2980946c46 (partner trails you in the garden: 2-4 m behind, stops/sits/waits at Waystone; boki-follow-check part 13, MP4 at 3P camera)
 READY ext/farm-hunger-pace 5f7086ecf9b6c40d02325717c84e66d3e86925a6 (one meal clears a day: care.json meal clear_h 24, +8 treat; 5 -> 1 meals/day, asserted in --feed-check)
 READY ext/boss-windup-sync cf912de296 (boss wind-up sync probe: ground tell, body tell, strike key, blow frame; lead keys on slam, dash, spit)
+READY ext/garden-prop-textures e8ff106d97cff9f48e8806cfe7c8034e384a2c1e (4 prop textures to VRAM compressed + GARDEN_PERF inventory)
