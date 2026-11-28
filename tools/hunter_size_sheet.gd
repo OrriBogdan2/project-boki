@@ -231,10 +231,14 @@ uniform vec3 back;
 uniform float sc;
 uniform vec2 lim;
 varying vec3 wp;
-void vertex() { wp = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz; }
+void vertex() {
+	wp = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+}
 void fragment() {
 	vec3 d = wp - feet;
-	if (wp.y > clip_y || (d.y > lim.y * sc && dot(d, back) > lim.x * sc)) { discard; }
+	if (wp.y > clip_y || (d.y > lim.y * sc && dot(d, back) > lim.x * sc)) {
+		discard;
+	}
 	ALBEDO = vec3(1.0, 0.0, 1.0);
 }
 """
