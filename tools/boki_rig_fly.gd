@@ -117,6 +117,7 @@ func _roam() -> void:
 		walker_up = walker_up or walker.has("fly") or bool(walker["node"].get_meta("aloft", false))
 		for k in fliers:
 			var uid := String(k["rec"]["uid"])
+			if int(t/DT) % 100 == 0: print("DBG %.0f %s st=%d taken=%s keys=%s" % [t, String(k["rec"]["species"]), (k["life"] as Fsm).state if k.has("life") else -1, BaseLife._taken(k), ",".join(k.keys().filter(func(x): return x in ["busy","called_t","indoors","leap","job","fetch","bath","eat","nap","play","hold_t","toy","sit"])) ])
 			if not BaseLife.roams(k):
 				on_foot[uid] = 0.0
 				still_up[uid] = 0.0
