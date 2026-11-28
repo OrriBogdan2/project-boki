@@ -325,7 +325,10 @@ var occlusion := SfxOcclusion.new()
 
 var skip: Array = []  # sounds left out for now (ArchKit.run_own: the shared cast sounds under a Hero's own)
 
+const LEGACY_TAKE := -2  # play(): take this sound as before (random, not the last), whatever it is (the hatch)
+
 var last_take := {}
+var last_step := {}  # species voice -> the pitch ratio VoicePicks last dealt it
 
 var recent := {}  # sound -> start times (ms) still inside the stacking window
 
@@ -884,6 +887,11 @@ func play(
 	if p == null:
 		return -1
 	var vi := players.find(p)
+	if take == -1 and sname.begins_with(VoicePicks.PREFIX):
+		var pick := VoicePicks.next(sname, take_count(sname))
+		take = int(pick["take"])
+		last_step[sname] = float(pick["step"])
+		pitch *= float(pick["step"])
 	p.stream = _take(sname, take)
 	p.volume_db = v + (rng.randf_range(-play_jitter_db, play_jitter_db) if pitch_var > 0.0 else 0.0)
 	p.pitch_scale = pitch * (1.0 + rng.randf_range(-pitch_var, pitch_var))

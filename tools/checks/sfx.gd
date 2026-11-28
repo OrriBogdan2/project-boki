@@ -7,5 +7,6 @@ extends RefCounted
 const CHECKS := {
 	"--incoming-hit-check": ["res://tools/incoming_hit_check.gd", "incoming_hit_check", null],  # [--shots-dir=] AVI
 	"--hunter-foley-check": ["res://tools/hunter_foley_check.gd", "hunter_foley_check", null],  # gear sounds
+	"--garden-bark-log": ["res://tools/garden_bark_log.gd", "garden_bark_log", null],  # 10 min of voices: repeats
 	"--sfx-priority-check": ["res://tools/sfx_priority_check.gd", "sfx_priority_check", null],  # enemy wind-ups
 }

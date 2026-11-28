@@ -12,12 +12,13 @@ const SULK_DB := -9.0  # dB: a sulk is quieter than a chirp
 
 static var _until: Array[int] = []  # when each sounding voice ends (ms)
 static var _last := {}  # uid -> when that Boki last spoke (ms)
+static var clock_ms := -1  # a stepped check's own clock (ms); under 0 the engine's
 
 
 ## A mood ("happy", "alert", "unsure", "sleepy", "hurt") or a plain cue ("boki_eat") for a Boki's record.
 ## pos null is the player's own action (a pet, a feed): always in earshot.
 static func say(rec: Dictionary, what: String, pos, vol_db := -8.0, pitch_var := 0.15) -> void:
-	var now := Time.get_ticks_msec()
+	var now := clock_ms if clock_ms >= 0 else Time.get_ticks_msec()
 	var uid := String(rec.get("uid", ""))
 	if now - int(_last.get(uid, -SELF_GAP_MS)) < SELF_GAP_MS:
 		return
