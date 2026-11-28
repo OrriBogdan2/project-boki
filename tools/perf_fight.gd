@@ -17,6 +17,7 @@ const PEAK_AT := 19.5  # s into the camp: 0.9 s after the fourth wave's R, the s
 const QUIET_AT := 23.5  # s into the camp: the same inventory in the quiet before the run ends
 const FightScene := preload("res://tools/perf/fight_scene.gd")
 const GroundAb := preload("res://tools/perf/ground_ab.gd")
+const AimAb := preload("res://tools/perf/aim_ab.gd")
 
 var bench  # the PerfBench: frames are logged and summed by it
 var m: Match
@@ -37,6 +38,7 @@ var stamp_frames := 0  # stamp sets read
 var stamp_gpu_us := {}  # timestamp name -> us of GPU from it to the next one (the draw's steps)
 var stamp_cpu_us := {}  # the same on the render thread's clock
 var draws: Array = []  # [pre, post] us of the last few draws
+var aim_ab: AimAb  # (--bench-ab-aim: telegraph points kept or not, alternating inside one run)
 var taken_us := {}  # script file -> us spent in those _process calls
 
 
@@ -184,6 +186,8 @@ func _camp() -> Array:
 	engine_us = 0
 	Match.vprof.clear()
 	Match.prof_on = true
+	Prof.us.clear()
+	Prof.sums = true  # (the Prof zones, HUD draw ones among them: BENCH fight zones)
 	_take_process(bench.main.get_tree().root)
 	if "--bench-novsync" in OS.get_cmdline_user_args():
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)  # (after Settings applied the player's)
@@ -225,9 +229,14 @@ func _camp() -> Array:
 		print("BENCH fight sea off")
 	if "--bench-ab-ground" in OS.get_cmdline_user_args():  # (old, cut, flat, no sea: 45 frames each)
 		ab = GroundAb.new(bench.main.get_tree().root, m.world)
+	if "--bench-ab-aim" in OS.get_cmdline_user_args():
+		aim_ab = AimAb.new()
 	if "--bench-nohud" in OS.get_cmdline_user_args():  # (a probe: what the HUD's canvas costs the draw)
 		m.hud.visible = false
 		print("BENCH fight hud off")
+	if "--bench-nopanels" in OS.get_cmdline_user_args():  # (a probe: the fixed panels' share of the HUD)
+		m.hud.panels.visible = false
+		print("BENCH fight panels off")
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--bench-3d-scale="):  # (a probe: the 3D at this scale of the window, so a small window
 			bench.main.get_viewport().scaling_3d_scale = float(a.substr(17))  # draws 1080p with a small copy)
@@ -253,6 +262,8 @@ func _camp() -> Array:
 				h.ak.use_r()
 		if ab:
 			ab.frame(f)
+		if aim_ab:
+			aim_ab.frame(f, int(taken_us.get("aim_draw.gd", 0)))
 		var t0 := Time.get_ticks_usec()
 		await _step(1)
 		var now := Time.get_ticks_usec()
@@ -268,16 +279,20 @@ func _camp() -> Array:
 		f += 1
 	counting = false
 	Match.prof_on = false
+	Prof.sums = false
 	print("BENCH fight engine wait (not Match code): %.2f ms per frame" % (engine_us / 1000.0 / fl.size()))
 	_print_sections(Match.prof, "step", fl.size())
 	_print_sections(Match.vprof, "visual", fl.size())
 	_print_sections(taken_us, "node _process", fl.size())
 	_print_sections(phase_us, "engine wait", fl.size())
+	_print_sections(Prof.us, "zones (Prof, nested ones inside their parent too)", fl.size(), 24)
 	_print_sections(stamp_us, "draw stamps (cpu)", fl.size())
 	_print_sections(stamp_gpu_us, "draw steps (gpu, each renderer stamp to the next)", stamp_frames, 40)
 	_print_sections(stamp_cpu_us, "draw steps (cpu, the same)", stamp_frames, 40)
 	if ab:
 		ab.report()
+	if aim_ab:
+		aim_ab.report()
 	_print_casters()
 	_give_back()
 	return fl

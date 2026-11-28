@@ -29,7 +29,7 @@ static func groups(m: Match) -> Dictionary:
 		layers.append(m.hud)
 	for layer: CanvasLayer in layers:
 		if layer == m.arena.menu_layer:
-			continue      # the L menu is a modal on a dimmed screen: it is drawn over the HUD on purpose
+			continue  # the L menu is a modal on a dimmed screen: it is drawn over the HUD on purpose
 		var found := SafeArea.groups_of(layer, sz)
 		for g: String in found:
 			out["%s/%s" % [layer.name, g]] = found[g]
@@ -119,7 +119,7 @@ func _zone(size: Vector2i) -> void:
 		if i % 30 == 0:
 			dm.hurt(80.0, m.player)
 	await _stage(m, "fight", size)
-	if m.arena.has_method("set_tools"):      # (the old Test Zone had no such switch: its tools were always on)
+	if m.arena.has_method("set_tools"):  # (the old Test Zone had no such switch: its tools were always on)
 		m.arena.set_tools(true)
 	await _stage(m, "tools", size)
 	m.arena.open_menu()
