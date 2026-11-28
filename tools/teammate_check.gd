@@ -482,14 +482,14 @@ func _squad_icon() -> void:
 	kin.hp = kin.max_hp * 0.5
 	await hud.panels.draw
 	var rec: Dictionary = MateBoki.shown[mate.nid]
-	var half := rec["state"] == "alive" and absf(float(rec["hp"]) - 0.5) < 0.01
+	var half: bool = rec["state"] == "alive" and absf(float(rec["hp"]) - 0.5) < 0.01
 	ok(half, "alive at half health: the arc reads 0.5 (%s)" % str(rec))
 	kin.hp = 0.0
 	kin.state = "downed"
 	kin.down_t = 60.0
 	await hud.panels.draw
 	rec = MateBoki.shown[mate.nid]
-	var down := rec["state"] == "down" and float(rec["hp"]) == 0.0
+	var down: bool = rec["state"] == "down" and float(rec["hp"]) == 0.0
 	ok(down, "a downed Boki: grey, no arc, down mark (%s)" % str(rec))
 	ok(MateBoki.shown[other.nid]["state"] != "down", "the other teammate's icon is untouched")
 	kin.hp = kin.max_hp
@@ -497,7 +497,7 @@ func _squad_icon() -> void:
 	KinWisp.set_wisp(kin, true)
 	await hud.panels.draw
 	rec = MateBoki.shown[mate.nid]
-	var wisp := rec["state"] == "wisp" and float(rec["hp"]) == 1.0
+	var wisp: bool = rec["state"] == "wisp" and float(rec["hp"]) == 1.0
 	ok(wisp, "a Boki riding as a wisp: the soul-linked look keeps its health (%s)" % str(rec))
 	KinWisp.set_wisp(kin, false)
 	var extra := KinNet.kin_extra(kin)
