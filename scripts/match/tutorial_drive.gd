@@ -33,6 +33,7 @@ static var last_step := -1
 static var still_t := 0.0     # s the player has stood in one place while walking
 static var last_pos := Vector3.INF
 static var _rest_t := 0.0      # s the stick has been neutral (waiting for the next foe is not being stuck)
+static var _last_ground := Vector3.INF  # where the Boki last stood
 static var recalled_once := false  # the summon step: the first window is called back early, as a hasty player would
 
 static func drive(m: Match) -> void:
@@ -119,6 +120,10 @@ static func drive(m: Match) -> void:
 			_acted = true
 		"wayout", "uplink", "defend", "extract":
 			_outpost(m, tu, goto)
+	if p.grounded:
+		_last_ground = p.pos
+	elif p.over_void() and p.inp["move"] == Vector2.ZERO and _last_ground != Vector3.INF:
+		goto.call(_last_ground)      # (fallen off the edge: holds the stick back toward the island, as a player does; the edge's one-shot launch has no sideways push of its own)
 	var go: Vector2 = p.inp["move"]
 	if p.grounded and go != Vector2.ZERO:
 		var ahead := p.pos + Vector3(go.x, 0.0, go.y).normalized() * 0.9

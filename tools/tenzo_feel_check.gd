@@ -74,8 +74,8 @@ func _floor() -> void:
 	t_v.vel = Vector3.ZERO
 	t_v.last_gy = g
 	var t := 0.0
-	while t < 0.8 and not (t_v.grounded and absf(t_v.pos.y - g) < 0.05):
-		t_v.inp["move"] = Vector2(0, -1)
+	while t < 2.5 and not (t_v.grounded and absf(t_v.pos.y - g) < 0.05):
+		t_v.inp["move"] = Vector2(0, -1) if t_v.mantle_cd <= 0.0 else Vector2.ZERO     # (the launch carries you over; keys are let go)
 		m.step(DT)
 		t += DT
 	t_v.inp["move"] = Vector2.ZERO
