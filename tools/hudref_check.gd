@@ -226,6 +226,7 @@ func run(main_node: Node) -> void:
 		ok(chip == mate.lvl, "a squad row carries the teammate's level chip (%d vs %d)" % [chip, mate.lvl])
 		mate.downed = false  # (the demo downs one rival)
 		mate.kin.hp = mate.kin.max_hp * 0.5
+		mate.kin.wisp = false  # (walking: a Boki that rides as a wisp wears the soul-linked look, --teammate-check)
 		await hud.panels.draw
 		ok(
 			absf(float(TeamBoki.shown[mate.nid]["frac"]) - 0.5) < 0.05 and TeamBoki.shown[mate.nid]["state"] == "",
