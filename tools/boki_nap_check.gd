@@ -135,8 +135,19 @@ func _primitive() -> String:
 	return PRIMITIVE_PREF
 
 
+## The primitive species' body: with every species rigged, switch the rigs off to get its KinPuppet body.
+func _primitive_kin() -> Node3D:
+	var id := _primitive()
+	if not BokiRig.has(id):
+		return Models.kin(id, {})
+	BokiRig.enabled = false
+	var k := Models.kin(id, {})
+	BokiRig.enabled = true
+	return k
+
+
 func _puppet() -> void:
-	var k := Models.kin(_primitive(), {})
+	var k := _primitive_kin()
 	main.add_child(k)
 	await main.get_tree().process_frame
 	var pup := _puppet_of(k)
@@ -274,7 +285,7 @@ func _shots() -> void:
 	gm.albedo_color = Color("7fa860")
 	ground.material_override = gm
 	vp.add_child(ground)
-	var pair: Array[Node3D] = [Models.kin(RIGGED, {}), Models.kin(_primitive(), {})]
+	var pair: Array[Node3D] = [Models.kin(RIGGED, {}), _primitive_kin()]
 	pair[0].position = Vector3(-0.55, 0, 0)
 	pair[1].position = Vector3(0.6, 0, 0)
 	pair[1].scale *= BIG

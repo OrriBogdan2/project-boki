@@ -13,11 +13,13 @@ extends RefCounted
 ## Surface map: docs/art/BOKI_3D_SURFACES.md.
 ## --pack=<abs .pck>: load an exported pck over res:// first (for a GPU box that can only run the tree; the strict
 ## form is still `godot --main-pack <pck>`). --surfaces (with --shots-dir): also the real farm (the demo farm save,
-## all three starters on it) as farm.png and each listed species' Field Book page as dex_<sp>.png.
+## all three starters on it) as farm.png, each listed species' Field Book page as dex_<sp>.png, and as the
+## garden's wild visitor in its zone as visitor_<sp>.png plus a close camera on it (visitor_close_<sp>.png; FAIL
+## line if it is not out).
 
 const PX := 512
 ## Species with data but no art/kin body yet (docs/art/kin/MESHY_BOKI_RECIPE.md): they must be the only FALLBACKs.
-const KNOWN_NO_MODEL := ["basaltoad", "cindowary"]
+const KNOWN_NO_MODEL := []
 
 var main: Node
 var out := ""
@@ -198,9 +200,82 @@ func _surfaces() -> void:
 	main.show_screen("home", {})
 	await _grab_window(out.path_join("farm.png"), 150)
 	for sp in species:
+		Care.dex_mark(sp, "caught")  # the page shows the model once the species is caught
 		Overlay.shot_demo(PackedStringArray(["dex", sp]))
 		await _grab_window(out.path_join("dex_%s.png" % sp), 60)
 		Overlay.close()
+	for sp in species:  # each listed species as the wild visitor of the zone you stand in (GardenVisitor)
+		Demo.setup("farm")
+		var vz := GardenZones.current()
+		var vrec := GardenVisitor.begin(vz, sp, Time.get_unix_time_from_system())
+		print("BOKI_EVERYWHERE %s visitor muts=%s (plain record: muts cleared)" % [sp, str(vrec.get("muts", []))])
+		vrec["muts"] = []  # a grown part is the record's; the model's own look is what is judged
+		main.show_screen("home", {"zone": vz})  # base-mode saves land on the hub, where no visitor walks
+		for i in 120:
+			await RenderingServer.frame_post_draw
+		if main.current and main.current.has_method("_close_panel") and main.current.get("panel_host") != null:
+			main.current._close_panel()  # the "while you were away" note
+		await _grab_window(out.path_join("visitor_%s.png" % sp), 30)
+		await _visitor_close(main.current, sp, out.path_join("visitor_close_%s.png" % sp))
+
+
+## A close camera on the garden's visitor kin (the overhead view shows it a few pixels tall).
+func _visitor_close(h, sp: String, path: String) -> void:
+	if h == null or not ("kins" in h):
+		return
+	for k in h.kins:
+		if not k["rec"].get("visitor", false):
+			continue
+		var n: Node3D = k["node"]
+		var cam := Camera3D.new()
+		cam.fov = 35
+		h.add_child(cam)
+		cam.make_current()
+		var side_k := [0.3]  # a one-cell list: the camera's sideways offset in distances (a fence can stand in the way)
+		var aim := func() -> void:  # it wanders: keep it framed, near eye level
+			if not is_instance_valid(n):
+				return
+			var b := _box_of(n)
+			var d := maxf(b.size.y, b.size.x) * 2.2 + 0.4
+			cam.global_position = b.get_center() + Vector3(side_k[0] * d, 0.12 * d, d)
+			cam.look_at(b.get_center())
+		aim.call()
+		main.get_tree().process_frame.connect(aim)
+		for i in 4:  # four sides: the file keeps its name for the first, the others get _b, _c, _d
+			side_k[0] = [0.3, -0.9, 1.4, -1.6][i]
+			await _grab_window(path if i == 0 else path.replace(".png", "_" + "abcd"[i] + ".png"), 30)
+		main.get_tree().process_frame.disconnect(aim)
+		# the eye-level shot: the camera at the eye height (FRAME head), 0.7 m out in front, a little aside
+		var brig := n.find_child("BokiRig", true, false)  # a Node: its parent holds the model frame
+		var rig: Node3D = brig.get_parent() as Node3D if brig else null
+		if rig and BokiRig.FRAME.has(sp):
+			cam.fov = 30
+			var at_eye := func() -> void:  # tracks the eye (FRAME head) as it wanders or hops
+				if not is_instance_valid(rig):
+					return
+				var eye: Vector3 = rig.global_transform * (BokiRig.FRAME[sp]["head"] as Vector3)
+				var fwd: Vector3 = -rig.global_transform.basis.z.normalized()
+				cam.global_position = eye + fwd * 0.7 + fwd.cross(Vector3.UP).normalized() * 0.18
+				cam.look_at(eye)
+			at_eye.call()
+			main.get_tree().process_frame.connect(at_eye)
+			await _grab_window(path.replace("visitor_close_", "visitor_eye_"), 30)
+			main.get_tree().process_frame.disconnect(at_eye)
+			var fy: float = BokiRig.FRAME[sp]["head"].y
+			print("BOKI_EVERYWHERE %s eye-level camera y=%.3f m (FRAME head y=%.3f)" % [sp, cam.global_position.y, fy])
+		cam.queue_free()
+		return
+	print("BOKI_EVERYWHERE FAIL: %s is not in the garden as the visitor (%d kins out)" % [sp, h.kins.size()])
+
+
+func _box_of(n: Node3D) -> AABB:
+	var box := AABB()
+	var first := true
+	for m in n.find_children("*", "MeshInstance3D", true, false):
+		var b: AABB = (m as MeshInstance3D).global_transform * (m as MeshInstance3D).get_aabb()
+		box = b if first else box.merge(b)
+		first = false
+	return box
 
 
 func _grab_window(path: String, frames := 30) -> void:

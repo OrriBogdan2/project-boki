@@ -10,16 +10,18 @@ import re
 import face as boki_face
 import numpy as np
 
-from boki_meshy import Meshy, MeshShape
+from boki_meshy import Meshy, MeshShape, hot_mask
 from boki_sdf import Cone, Shape, frame, v3
 
-ROOT = os.path.expanduser("~/meshy/boki")  # <ROOT>/<id>/dex (the Bokidex model) or run1 (a Meshy run): never in git
+# <ROOT>/<id>/dex (the Bokidex model) or run1 (a Meshy run): never in git; BOKI_MESHY_ROOT: a scratch root
+ROOT = os.environ.get("BOKI_MESHY_ROOT") or os.path.expanduser("~/meshy/boki")
 LUM = np.array([0.3, 0.59, 0.11])
 BROW_DARK = 0.55  # a brow is its patch of coat, darker
 # id: "height" (game m, before SCALE) and "tris" of the body; "x", "y", "z": (proxy, scan) landmark pairs, x for the
 # right side only; "merge": proxy bones whose part the scan has fused into another bone's; "drop": proxy pieces the
-# scan has no shape for; "eye_c", "eye_r", "eye_yaw", "face": the Boki face on the scan's head; "sat", "gain": the
-# texture's grade; "lid", "brow": hex colours, when the scan's own beside its eyes are wrong for them; "iris": hex,
+# scan has no shape for; "eye_c", "eye_r", "eye_yaw", "face": the Boki face on the scan's head; "sat", "gain", "tint":
+# the texture's grade ("hot_sat", "hot": the embers' and brass's own saturation, and how many texels the hottest
+# one spreads); "lid", "brow": hex colours, when the scan's own beside its eyes are wrong for them; "iris": hex,
 # when the art's eye colour is not the proxy's; "cover": eye
 # radii round each Boki eye inside which the scan's own painted eye is painted out (when it shows beside); "sink": how
 # far the scan stands above its lowest point (a hanging tail), "mid": how far right of its bounds' middle the
@@ -246,8 +248,14 @@ AUTO = {  # id: overrides on AUTO_BASE
     "tuatrune": BORROWED,
     "velvorm": BORROWED,
     "casquebill": BORROWED,
+    # eyes read off the fit sheet's painted eyes (front view seen from -z, the sheet's own front view is the back)
+    "basaltoad": {**BORROWED, "sat": 0.3, "gain": 1.4, "tint": (0.96, 1.0, 0.88),  # three-patch fit (skin, moss, tower) to the 2D front, 11-24
+                  "eye_c": (0.105, 0.355, -0.142), "eye_r": (0.018, 0.019, 0.010), "eye_yaw": 0.5, "iris": "edc15a"},
+    # lit leather read pink (sat 0.68 vs the 2D 0.48); the embers and the brass keep their own saturation, and a crack
+    # a texel wide keeps a texel of the atlas (hot: reach in texture texels)
+    "cindowary": {**BORROWED, "sat": 0.43, "gain": 1.7, "tint": (0.9, 1.0, 1.02), "hot_sat": 0.95, "hot": 3,  # fit: leather, black, blue
+                  "eye_c": (0.03, 0.439, -0.091), "eye_r": (0.011, 0.011, 0.006), "eye_yaw": 0.6, "iris": "f76e35"},
     # 11-18 more species: evolved forms from their Bokidex glbs (and Rampartoad, data but no body)
-    "basaltoad": BORROWED,
     "sporcupine": BORROWED,
     "vespox": BORROWED,
     "glassolotl": BORROWED,
@@ -310,12 +318,16 @@ def run_dir(species):
     return dex if os.path.isdir(dex) else os.path.join(ROOT, species, "run1")
 
 
-def grade(col, sat, gain):
+def grade(col, sat, gain, tint=(1.0, 1.0, 1.0), keep=None):
     """sRGB colours pulled toward their own grey (in linear light, as the toon shader's `desat` does) and scaled:
-    the game's warm light and tonemap push a painted texture's mid colours to pure hues."""
+    the game's warm light and tonemap push a painted texture's mid colours to pure hues. `tint`: linear RGB gains
+    (a white balance) for a scan whose hue is off the 2D art's, which pulling toward grey cannot move. `keep`: the
+    ember and brass texels' own saturation (the rest takes `sat`), for a scan whose fire the pull toward grey kills."""
     lin = np.where(col <= 0.04045, col / 12.92, ((col + 0.055) / 1.055) ** 2.4)
     lum = (lin @ LUM)[:, None]
-    lin = np.clip((lum + (lin - lum) * sat) * gain, 0, 1)
+    if keep is not None:
+        sat = np.where(hot_mask(col), keep, sat)[:, None]
+    lin = np.clip((lum + (lin - lum) * sat) * gain * np.asarray(tint), 0, 1)
     return np.where(lin <= 0.0031308, lin * 12.92, 1.055 * lin ** (1 / 2.4) - 0.055)
 
 
@@ -375,7 +387,7 @@ class Scan:
     def __init__(self, species, creature, paint, anim):
         s = SCANS[species]
         self._mods = (creature, paint, anim)
-        self.model = Meshy.get(run_dir(species), s["height"], s.get("sink", 0.0), s.get("mid", 0.0))
+        self.model = Meshy.get(run_dir(species), s["height"], s.get("sink", 0.0), s.get("mid", 0.0), s.get("hot", 0))
         if s.get("auto"):
             s = self._auto(s, creature)
         self._s = s
@@ -434,8 +446,12 @@ class Scan:
                 centre + (right * math.cos(a) * self.EYE_R[0] + up * math.sin(a) * self.EYE_R[1]) * ring
                 for a in np.linspace(0, math.tau, 12, endpoint=False)
             ]
-        col = grade(self.model.colour(np.array(pts)), self._s.get("sat", 1.0), self._s.get("gain", 1.0))
+        col = self._grade(self.model.colour(np.array(pts)))
         return np.median(col, 0)
+
+    def _grade(self, col):
+        s = self._s
+        return grade(col, s.get("sat", 1.0), s.get("gain", 1.0), s.get("tint", (1.0, 1.0, 1.0)), s.get("hot_sat"))
 
     def _deepest(self):
         """The point furthest inside the scan: an unused tool collapses there, so its ink shell never shows."""
@@ -490,7 +506,7 @@ class Scan:
     def paint_piece(self, pc, q, nn, _prim):
         if pc.name != "body":
             return self._mods[1].paint_piece(pc, self.fit.back(q), nn, self._proxy)
-        return grade(self.model.colour(self._off_eyes(q)), self._s.get("sat", 1.0), self._s.get("gain", 1.0))
+        return self._grade(self.model.colour(self._off_eyes(q)))
 
     def _off_eyes(self, q):
         """`q` with the points under a Boki eye moved out to the ring "cover" eye radii round it (met from the front,

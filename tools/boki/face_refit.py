@@ -31,6 +31,8 @@ SKIN = 0.002
 EYES = {
     "puddlet": ((0.080, 0.267), 1.29),
     "burrlet": ((0.070, 0.213), 1.0),
+    "basaltoad": ((0.105, 0.355), 1.1),
+    "cindowary": ((0.03, 0.439), 0.8),
     "caecilith": ((0.0365, 0.405), 0.75),  # the sockets on the top of the head
     "threadwyrm": ((0.1565, 0.066), 0.55),  # the painted face on the pale rope end (low, off-centre)
     "thrumbird": ((0.040, 0.3475), 0.65),  # on the head side, behind the beak base
