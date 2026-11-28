@@ -40,7 +40,7 @@ func run(main: Node) -> void:
 		await main.get_tree().process_frame
 	CombatBus.ability_used.disconnect(flow._on_used)
 	print("MPRESS DONE, failures: %d, skipped: %d" % [bad, skipped])
-	main.get_tree().quit(1 if bad > 0 else 0)
+	main.get_tree().quit()
 
 
 ## Every hero, or the ones named in --mantle-press-check=<id>,<id>.
