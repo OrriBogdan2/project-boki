@@ -11547,3 +11547,4 @@ READY ext/lace-spirit-end-rules 38ad752f48 (docs only: Lace Phase Walk damage-en
 READY ext/cinder-ignite-tiers eed0bc345b (docs only: Cinder ignite tiers already in main; KIT_PARITY fragment, no code)
 READY ext/lace-rmb-charge-scale d031117ab4 (Lace RMB wall stun 0.6-1.2s and range lerp with charge, data rows, asserted)
 READY ext/neve-ult-early 18826c0833 (KIT_PARITY note: Rimelock early recast 67% already on main, no code change)
+READY ext/lace-ult-window 2c7daa1ee5 (Lace ult already has 6 s window + final_dmg bonus on main; adds third-beam damage assert in --archer-combo-check 236/0 and KIT_PARITY row, terrain pierce [?])
