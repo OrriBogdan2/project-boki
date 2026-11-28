@@ -1,10 +1,10 @@
 extends RefCounted
-## --title-check: the title screen (painted splashes, logo and a torn-strip menu: briefs/UI_STYLE.md).
+## --title-check: the title screen (the live Boki play pen, logo and a torn-strip menu: briefs/UI_STYLE.md).
 ## It builds; its menu has the items it should (Continue or New Game, Training Grounds, Demo Match and
 ## Play with Your Boki with a save, Test Zone for the owner, Play with Friends when online play is there, Save Files, Settings, Quit off the web) and
 ## nothing called "The story so far"; the first button is the big one and holds focus, the rest are
 ## strips, and pointing at one focuses it; no subtext, tagline or currency under the logo; the logo,
-## the painted backdrop and the build version are there; and the screen stays inside a frame budget
+## the play pen and the build version are there; and the screen stays inside a frame budget
 ## (headless only: with a window the number holds a software renderer's draw time). Never touches the real save
 ## or settings.
 
@@ -57,11 +57,12 @@ func _pass() -> void:
 	ok(not texts.any(func(s): return String(s).to_lower().contains("story so far")), "no \"The story so far\" anywhere on the title")
 	ok(not texts.any(func(s): return String(s).to_lower().contains("gems")), "no currency on the title")
 	var controls := ts.find_children("*", "Control", true, false)
-	var backdrop: bool = controls.any(func(c): return c is TitleBackdrop)
-	ok(ts.logo.is_visible_in_tree() and backdrop, "the logo is up over the painted backdrop")
+	var backdrop: bool = controls.any(func(c): return c is PlayPen)
+	ok(ts.logo.is_visible_in_tree() and backdrop, "the logo is up over the play pen")
 	ok(texts.has("v" + Net.VERSION), "the build version is shown (v%s)" % [Net.VERSION])
-	var flat := ts.find_children("*", "Camera3D", true, false) + ts.find_children("*", "MeshInstance3D", true, false)
-	ok(flat.is_empty(), "no 3D scene runs under the painted backdrop")
+	var pen: PlayPen = controls.filter(func(c): return c is PlayPen)[0]
+	var pals := pen.find_children("BokiRig", "Node", true, false)
+	ok(pals.size() >= 5 and pals.size() <= 8, "the play pen holds 5 to 8 Boki (%d)" % pals.size())
 	var strips := _menu_buttons(ts)
 	var focus: Control = ts.get_viewport().gui_get_focus_owner()
 	var big: bool = strips[0].theme_type_variation == "MenuMain"
@@ -92,6 +93,8 @@ func _pass() -> void:
 	var p95: float = times[int(times.size() * 0.95)]
 	if DisplayServer.get_name() == "headless":      # (with a window the number holds a software rasteriser's draw time)
 		ok(avg < BUDGET_MS, "frame budget: %.2f ms average, %.2f ms p95 (budget %.0f ms)" % [avg, p95, BUDGET_MS])
+	pen.freeze()
+	ok(pen.still, "a slow device's pen freezes on a still")
 	print("TITLE %d nodes" % _count(ts))
 
 ## Every word capitalised but the short joining ones ("Play with Your Boki").

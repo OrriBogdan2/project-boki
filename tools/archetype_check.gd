@@ -250,8 +250,7 @@ func _gauge() -> void:
 func _roster() -> void:
 	var want: Array = Arch.ORDER.duplicate()
 	want.sort()
-	var lists := {"HeroKit.ARCH_ORDER": HeroKit.ARCH_ORDER, "Arch.ids()": Arch.ids(),
-			"TitleBackdrop.ORDER": TitleBackdrop.ORDER}
+	var lists := {"HeroKit.ARCH_ORDER": HeroKit.ARCH_ORDER, "Arch.ids()": Arch.ids()}
 	for f in ["mantle_look", "warden_stance"]:
 		var d: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/%s.json" % f))
 		lists[f + ".json"] = d.get("wardens", d).keys().filter(func(k): return want.has(k) or f == "mantle_look")
