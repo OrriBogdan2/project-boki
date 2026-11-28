@@ -967,6 +967,7 @@ archetypes/mage.json:dash.dmg	18.3
 archetypes/mage.json:dash.drift_k	1.0
 archetypes/mage.json:dash.end_r	2.25
 archetypes/mage.json:dash.full_mult	2.0
+archetypes/mage.json:dash.guard	0.5
 archetypes/mage.json:dash.hold	0.6
 archetypes/mage.json:dash.rank3_mult	2.0
 archetypes/mage.json:dash.reset_charge	0.75
@@ -1285,10 +1286,12 @@ archetypes/tender.json:lmb.look_k	0.85
 archetypes/tender.json:lmb.range_k	1.25
 archetypes/tender.json:lmb.size_k	1.5
 archetypes/tender.json:lmb.wait	1.0
+archetypes/tender.json:passive.break_stun	1.0
 archetypes/tender.json:passive.lock	4.0
 archetypes/tender.json:passive.max	2
 archetypes/tender.json:passive.pick_r	1.1
 archetypes/tender.json:passive.pick_speed	0.6
+archetypes/tender.json:passive.shield	24.0
 archetypes/tender.json:plate_offset	1.85
 archetypes/tender.json:rank_cd.air[0]	1
 archetypes/tender.json:rank_cd.air[1]	0.8929

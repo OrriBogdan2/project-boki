@@ -27,6 +27,7 @@ var field_look := {}  # the Burrseed field's look from content/vfx/tender.json "
 var hearth := {}
 var ready_shown := false  # the bigger ember's ready cue has played (once per wait)
 var emp_until := 0.0  # the next ember left an idle gun (Empowered: bigger, further, its own look and sound)
+var carry_shield := false  # the carry shield is up (a pickup refills it); it going to 0 breaks the carry
 var lock_t := 0.0  # can't pick anyone up (after dropping them)
 var pick_blocked := 0.0
 var carry_t := 0.0
@@ -282,9 +283,12 @@ func _tick_carry(dt: float) -> void:
 	var cs := carrying()
 	if not cs.is_empty():
 		carry_t += dt
-		# the source's triggers: a stun, or damage (on_take); a root holds
+		# the source's triggers: a stun, or the carry shield breaking; a root holds
 		if h.stun_t > 0.0:
 			drop_all(true)
+			return
+		if carry_shield and h.shield <= 0.0:
+			_shield_broke()
 			return
 		var down := bool(h.inp.get(SETDOWN, false))
 		if down and not setdown_was:
@@ -292,6 +296,7 @@ func _tick_carry(dt: float) -> void:
 		setdown_was = down
 		return
 	carry_t = 0.0
+	carry_shield = false
 	setdown_was = bool(h.inp.get(SETDOWN, false))
 	if not can_pick():
 		return
@@ -307,10 +312,16 @@ func _tick_carry(dt: float) -> void:
 		pick_up(o)
 
 
-## Any damage drops whoever you carry, with the lock (data: "too much damage", no figure; the shield is cut).
+## A hit that gets past the carry shield (health damage reaching on_take) breaks it: she drops them and is stunned.
 func on_take(_by: Ent, dmg: float, _o: Dictionary) -> void:
 	if dmg > 0.0 and not carrying().is_empty():
-		drop_all(true)
+		_shield_broke()
+
+
+## The carry shield is gone: stunned, they drop, 4s lock (data: Soulpack, shield break = stun + drop).
+func _shield_broke() -> void:
+	h.stun_t = maxf(h.stun_t, float(d["passive"]["break_stun"]))
+	drop_all(true)
 
 
 func _foes_near(r: float) -> bool:
@@ -322,6 +333,8 @@ func _foes_near(r: float) -> bool:
 
 func pick_up(o: Hunter) -> void:
 	CareUtil.set_carry(m, o, h.nid)
+	carry_shield = true
+	ShieldSrc.give(h, float(d["passive"]["shield"]) * LevelGrowth.hp(h), ShieldSrc.HEAL)
 	m.sfx("tend_pickup", h.pos, -2.0, 1.0)
 	play("mm_pickup")
 	if rank("dash") >= 3:
@@ -331,6 +344,7 @@ func pick_up(o: Hunter) -> void:
 
 
 func drop_all(broken: bool) -> void:
+	carry_shield = false
 	for o in carrying():
 		CareUtil.set_carry(m, o, "")
 		m.displace.teleport(o, Vector3(h.pos.x, h.pos.y, h.pos.z) + Vector3(0.9, 0, 0))
