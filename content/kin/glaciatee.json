@@ -7,6 +7,7 @@
 		"Aurora crown"
 	],
 	"theme": "frost",
+	"type2": "tide",
 	"flavor": "Huge manatee, walk-in ice-vault body.",
 	"colors": {
 		"belly": "#e4fcfc",
@@ -121,6 +122,12 @@
 		"temper": "Kind",
 		"desc": "Something kind is in here.",
 		"play": "Keeps you alive and patched up."
+	},
+	"roster": {
+		"art": "new",
+		"line": "coolatee",
+		"stage": 3,
+		"from": "floenatee"
 	},
 	"size": {
 		"cm": 82,

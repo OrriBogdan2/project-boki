@@ -7,6 +7,7 @@
 		"Ice lance"
 	],
 	"theme": "frost",
+	"type2": "tempest",
 	"flavor": "Ice-armoured heron, beak an ice lance, blade feathers.",
 	"colors": {
 		"belly": "#ffffff",
@@ -125,6 +126,12 @@
 		"temper": "Patient",
 		"desc": "Something patient is in here.",
 		"play": "Pins foes down and breaks up their pushes."
+	},
+	"roster": {
+		"art": "new",
+		"line": "skidlet",
+		"stage": 3,
+		"from": "hoarheron"
 	},
 	"size": {
 		"cm": 60,

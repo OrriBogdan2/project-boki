@@ -115,6 +115,11 @@
 		"desc": "Soft, earthy, dusted with spores.",
 		"play": "Roots foes with spores. Curious."
 	},
+	"roster": {
+		"art": "locked",
+		"line": "burrlet",
+		"stage": 1
+	},
 	"size": {
 		"cm": 28,
 		"kg": 1.6,

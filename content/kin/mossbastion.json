@@ -112,6 +112,12 @@
 		"desc": "Something unbothered is in here.",
 		"play": "Keeps you alive and patched up."
 	},
+	"roster": {
+		"art": "new",
+		"line": "mossgrade",
+		"stage": 2,
+		"from": "mossgrade"
+	},
 	"size": {
 		"cm": 44,
 		"kg": 9.0,

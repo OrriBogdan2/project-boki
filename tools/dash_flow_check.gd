@@ -169,7 +169,7 @@ func _slot(m: Match, hero: String, slot: String) -> void:
 
 
 ## A fresh training match as `hero` on a flat patch, every slot open, a glove on Q, level 10.
-func _match(main: Node, hero: String, squad := 1) -> Match:
+func _match(main: Node, hero: String, squad := 1, seed_v := 77) -> Match:
 	var m := Match.new()
 	main.add_child(m)
 	(
@@ -181,7 +181,7 @@ func _match(main: Node, hero: String, squad := 1) -> Match:
 				"squad": 2 if hero in NEEDS_ALLY else squad,
 				"tier": 0,
 				"length": 1e9,
-				"seed": 77,
+				"seed": seed_v,
 				"no_drop": true,
 				"cls": Arch.weight(hero),
 				"arch": hero,
