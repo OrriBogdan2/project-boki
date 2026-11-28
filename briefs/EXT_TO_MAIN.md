@@ -11581,3 +11581,4 @@ READY ext/boki-pronoun-sweep 5e6ec3432b (bulk-rebase: origin/main merged in mech
 READY ext/stuck-integ-12ae25f6 9998f0e4ea (bulk-rebase: origin/main merged in mechanically, was c083b0da1d; union 0 gen 1 files; the branch's own READY checks still apply)
 READY ext/kael-rmb-dash-turn c764a892c6 (bulk-rebase: origin/main merged in mechanically, was be382acd40; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/inventory-fit 9d2d391a8494528eea64fb3251b426c7c7a0260b (inventory fits at 3 sizes)
+READY ext/move-feel-red-rows 97a23774fe4ffb4b202330b0964635a6ec29394d (--move-feel-check red 1->0 of 660 on main: the felt dash holds the cursor ahead for Gil Ground Swim steering; brake and knock_lace rows already green, stale notes fixed)
