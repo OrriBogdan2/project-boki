@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dfeh4sda1vnxe"
-path="res://.godot/imported/sporcupine_sporcupine_normal.webp-704122541abe8736c1d8c9ce24287465.ctex"
+path.s3tc="res://.godot/imported/sporcupine_sporcupine_normal.webp-704122541abe8736c1d8c9ce24287465.s3tc.ctex"
+path.etc2="res://.godot/imported/sporcupine_sporcupine_normal.webp-704122541abe8736c1d8c9ce24287465.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "26ca1f99370a270900c2eb9f1ba5045d"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/sporcupine/sporcupine_sporcupine_normal.webp"
-dest_files=["res://.godot/imported/sporcupine_sporcupine_normal.webp-704122541abe8736c1d8c9ce24287465.ctex"]
+dest_files=["res://.godot/imported/sporcupine_sporcupine_normal.webp-704122541abe8736c1d8c9ce24287465.s3tc.ctex", "res://.godot/imported/sporcupine_sporcupine_normal.webp-704122541abe8736c1d8c9ce24287465.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
