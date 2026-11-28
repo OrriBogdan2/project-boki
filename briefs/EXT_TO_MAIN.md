@@ -11517,3 +11517,4 @@ READY ext/breed-parent-traits f5a86ee6ec1940bdce9a70b4f63fc863aa396939 (hatch ca
 READY ext/kit-parity-stale-snaps 9ec2f49dac (KIT_PARITY snapshot lines, Coin Blast/Palm Lance names, Still open current)
 READY ext/ui-pause-slim 6baff6a3921d57d19def48c204823e369a0706c2 (pause menu was already 4 buttons with More; Resume/Done key caps now via Settings.key_cap, --pause-menu-check adds front-set, cap, Practice-reach rows + 1920x1080 shots)
 READY ext/tut-farm-3p-pointers 607f7450f43434ace39ffa189be55dddf8705f8e (farm tutorial pointers in the close third-person view: beam, edge arrow, prompt height search, --farm-tut-3p-check)
+READY ext/garden-egg-line-once 71102bd0bf2f9509029daad563ba4d752aa4df64 (ready-egg arrival line once per egg id, only where the Nook stands; asserted in garden-first-day and day-played checks)
