@@ -146,6 +146,6 @@ Tools: gens/hunter-round-1124/tenzo/G/scripts/{swap_rock,ring,slot,eyepitch}.py.
   turnaround (gens/tenzo-granite-1127 v_ta2_B_1). Run v2 of 2 image runs; the 2 text-prompt runs came back grey/orange
   and cyan and were not used.
 - Only stone-arm texels change: skin-weight region `stone` (left-arm bones, masks.py) AND live cobalt hue (195-260 deg,
-  S > 0.12), runes (live teal) kept live. 335k texels. Head region: 39 of 1.10M texels differ > 8 (JPEG re-encode), mean 0.6.
+  S > 0.12), runes (live teal) kept live; Meshy's own teal rune paint off the live runes inpainted first (tools/derune.py, 3.0k texels, else runes doubled). 335k texels. Head region: 39 of 1.10M texels differ > 8 (JPEG re-encode), mean 0.6.
 - Re-apply on another tarek_meshy.glb (e.g. ext/tenzo-r36-1126's): `python3 swap.py OTHER.glb tarek_meshy_Image_0.jpg OUT.glb`.
 Scripts, Meshy tasks, renders: /home/boki/meshy/tenzo-marble-3d-1128/ (tools/compose.py, tools/swap.py, renders/).
