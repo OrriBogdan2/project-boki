@@ -1,0 +1,14 @@
+{
+	"id": "eclipsowl",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/eclipsowl.json.",
+	"work": {
+		"craft": 2,
+		"frost": 2,
+		"ranch": 1
+	},
+	"shiny": {
+		"belly": "#626c3c",
+		"color": "#3f5436",
+		"glow": "#e7ff87"
+	}
+}
