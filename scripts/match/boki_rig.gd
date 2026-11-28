@@ -750,7 +750,7 @@ const FRAME := {
 	},
 	"threadwyrm":
 	{
-		"head": Vector3(0.113, 0.066, -0.150),
+		"head": Vector3(0.13, 0.075, -0.159),
 		"top": 0.464,
 		"carry": Vector3(0, 0.517, 0.0491),
 		"ear_tip": Vector3(0.0602, 0.464, 0.0443),
