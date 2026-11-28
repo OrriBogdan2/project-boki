@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dj2krbo64nlqq"
-path="res://.godot/imported/murmuron_murmuron_normal.webp-3264de9cce367f2eb916b8efcb2b7756.ctex"
+path.s3tc="res://.godot/imported/murmuron_murmuron_normal.webp-3264de9cce367f2eb916b8efcb2b7756.s3tc.ctex"
+path.etc2="res://.godot/imported/murmuron_murmuron_normal.webp-3264de9cce367f2eb916b8efcb2b7756.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "5a53cdc99c8ddb964e26912ff85aa28c"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/murmuron/murmuron_murmuron_normal.webp"
-dest_files=["res://.godot/imported/murmuron_murmuron_normal.webp-3264de9cce367f2eb916b8efcb2b7756.ctex"]
+dest_files=["res://.godot/imported/murmuron_murmuron_normal.webp-3264de9cce367f2eb916b8efcb2b7756.s3tc.ctex", "res://.godot/imported/murmuron_murmuron_normal.webp-3264de9cce367f2eb916b8efcb2b7756.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
