@@ -15,6 +15,7 @@ const KEYS := {
 	"dash": "dash",
 	"exdash": "dash",
 	"crouch": "crouch",
+	"glide": "jump",
 	"wallkick": "jump",
 	"glove": "interact",
 	"shoot": "fire",
@@ -308,7 +309,6 @@ func _finish(sid: String) -> void:
 	while step < steps().size() and not applies(id()):
 		step += 1
 	flag = false
-	m.player.stats.erase("glide_presses")
 	if not TutorialHints.quiet(sid):
 		wait = 0.6
 		done_t = DONE_T
@@ -535,8 +535,15 @@ func _is_done(sid: String, dt: float) -> bool:
 			flag = flag or (p.roll_t > 0.0 and (p.dash_is_ex or not p.grounded))
 			return flag and near.call(4.5)
 		"glide":
-			# a held glide, not a tapped one (HoldTeach): the glider stays open GLIDE_DONE_S in one go
-			seen["glide_s"] = float(seen.get("glide_s", 0.0)) + dt if p.gliding else 0.0
+			# a real glide (DECISIONS 11-08): a fresh press in the air opened it (glide_presses counts only those,
+			# so Space held from the jump never does) and it stays open GLIDE_DONE_S in one go: held, not tapped
+			var presses := int(p.stats.get("glide_presses", 0))
+			if p.gliding and not seen.get("glide_on", false):
+				seen["glide_real"] = presses > int(seen.get("glide_n", 0))
+			seen["glide_on"] = p.gliding
+			seen["glide_n"] = presses
+			var real: bool = p.gliding and seen.get("glide_real", false)
+			seen["glide_s"] = float(seen.get("glide_s", 0.0)) + dt if real else 0.0
 			flag = flag or float(seen["glide_s"]) >= HoldTeach.GLIDE_DONE_S
 			return flag and near.call(5.0)
 		"wallkick":
