@@ -65,6 +65,10 @@ func run(main: Node) -> void:
 		if o != P:
 			o.ctrl = "idle"
 			rival = o
+	for k in m.kins:  # the rival's Boki would hit the Hunter mid-settle and break a small shield (the Fuse afterglow)
+		if (k as Kin).owner_h != P:
+			(k as Kin).dead = true
+			(k as Kin).visible = false
 	rival.teleport(P.pos + Vector3(0, 0, 4.0))
 	rival.face = 0.0
 	rival.inp["aim"] = P.pos + Vector3(0, 0.9, 0)

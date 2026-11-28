@@ -4,22 +4,35 @@ extends RefCounted
 ## playing the run (the layer touches only the off arm), LMB still fires, and the layer drops cleanly when the Heart
 ## is dropped, the carrier is knocked, extracts, or the Heartspark passes to someone else. Never touches the save.
 
-const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunslinger": "vex", "ashwick": "cinder",
-	"mage": "ryzz", "dolm": "tarek", "rimewright": "claire", "dredge": "dredge", "bulwark": "breaker",
-	"ostra": "ostra", "juggernaut": "kael"}
-const SETTLE_S := 1.2      # s: the layer eases in (WardenCarry.FADE) and the run gets going
-const STRIDE_MIN := 0.05   # m: under this his own run does not step (Motley hovers); else keep 3/4 of it
-const HAND_NEAR := 0.3     # of the Hunter's height: the held hand lies this near the mote
-const FIRE_S := 0.8        # s: LMB held, and the same again after the release (a bow looses on the release)
-const SPARK_LAG := 0.3     # m: the spark follows the hand a frame late, at a run
+const OWN_MODELS := {
+	"archer": "hem",
+	"thief": "sable",
+	"tender": "pip",
+	"gunslinger": "vex",
+	"ashwick": "cinder",
+	"mage": "ryzz",
+	"dolm": "tarek",
+	"rimewright": "claire",
+	"dredge": "dredge",
+	"bulwark": "breaker",
+	"ostra": "ostra",
+	"juggernaut": "kael"
+}
+const SETTLE_S := 1.2  # s: the layer eases in (WardenCarry.FADE) and the run gets going
+const STRIDE_MIN := 0.05  # m: under this his own run does not step (Motley hovers); else keep 3/4 of it
+const HAND_NEAR := 0.3  # of the Hunter's height: the held hand lies this near the mote
+const FIRE_S := 0.8  # s: LMB held, and the same again after the release (a bow looses on the release)
+const SPARK_LAG := 0.3  # m: the spark follows the hand a frame late, at a run
 
 var bad := 0
 var main: Node
+
 
 func ok(cond: bool, what: String) -> void:
 	print("CARRY %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func run(m_main: Node) -> void:
 	main = m_main
@@ -31,9 +44,10 @@ func run(m_main: Node) -> void:
 	print("CARRY_POSE_CHECK_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 ## Steps the match and poses the player by hand (the match's own frames are off, so the time is exact).
 func _step(m: Match, secs: float, watch: Callable = Callable()) -> void:
-	var sync := WardenGlb.layers(m.player.model)      # (Sync, or Native on Meshy's own skeleton: WardenNative)
+	var sync := WardenGlb.layers(m.player.model)  # (Sync, or Native on Meshy's own skeleton: WardenNative)
 	sync.set_process(false)
 	for i in int(secs / Match.DT):
 		m.step(Match.DT)
@@ -42,6 +56,7 @@ func _step(m: Match, secs: float, watch: Callable = Callable()) -> void:
 		if watch.is_valid():
 			watch.call()
 		await main.get_tree().process_frame
+
 
 ## What carries the Heartspark layer's weight (heart_w): the Hero's clips (WardenClips), or on Meshy's own skeleton the
 ## Native node (WardenNative plays Meshy's clips and lays the same layer on its bones); null without clips.
@@ -53,11 +68,25 @@ func _clips(h: Hunter) -> Object:
 		return sync.get("clips")
 	return sync if sync.get("plays") != null else null
 
+
 func _hero(id: String) -> void:
 	var m := Match.new()
 	main.add_child(m)
-	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 7311, "no_drop": true, "heart": true,
-		"god": true, "arch": id, "cls": Arch.weight(id), "weapon": Arch.signature(id)})
+	m.start(
+		{
+			"teams": 2,
+			"squad": 1,
+			"tier": 0,
+			"length": 1e9,
+			"seed": 7311,
+			"no_drop": true,
+			"heart": true,
+			"god": true,
+			"arch": id,
+			"cls": Arch.weight(id),
+			"weapon": Arch.signature(id)
+		}
+	)
 	m.set_process(false)
 	for o in m.hunters:
 		if o != m.player:
@@ -70,7 +99,7 @@ func _hero(id: String) -> void:
 		m.queue_free()
 		return
 	P.inp["move"] = Vector2(0, -1)
-	P.inp["aim"] = P.pos + Vector3(0, 0.9, -10.0)      # (face the way he runs: the stride is read along z)
+	P.inp["aim"] = P.pos + Vector3(0, 0.9, -60)  # aim down the run: a start that faces the Heart would strafe
 	P.inp["aim_y"] = P.pos.y
 	var sk := WardenGlb.skeleton(P.model.get_node("Warden"))
 	var shin := WardenSkeleton.find(sk, "shin.R")
@@ -81,22 +110,28 @@ func _hero(id: String) -> void:
 		var at := (sk.global_transform.basis * below).z
 		z[0] = minf(z[0], at)
 		z[1] = maxf(z[1], at)
-	await _step(m, SETTLE_S, watch)     # his own run first (as --clip-check's carry)
+	await _step(m, SETTLE_S, watch)  # his own run first (as --clip-check's carry)
 	var plain: float = z[1] - z[0]
 	z[0] = INF
 	z[1] = -INF
 	_take(H, P)
 	await _step(m, SETTLE_S, watch)
 	var mote: Vector3 = P.model.get_meta(WardenCarry.MOTE, Vector3.INF)
-	ok(float(clips.get("heart_w")) >= 1.0 and mote != Vector3.INF,
-			"%s: the carrier shows the layer and a held mote" % id)
+	ok(
+		float(clips.get("heart_w")) >= 1.0 and mote != Vector3.INF,
+		"%s: the carrier shows the layer and a held mote" % id
+	)
 	var side := String(WardenClips.data(OWN_MODELS[id]).get("heart_hand", "L"))
 	var hand := sk.global_transform * sk.get_bone_global_pose(WardenSkeleton.find(sk, "hand." + side)).origin
-	ok(hand.distance_to(mote) <= HAND_NEAR * 1.6 * absf(P.model.scale.y), "%s: the %s hand holds the mote (%.2f m)"
-			% [id, side, hand.distance_to(mote)])
-	var rig_w: float = clips.get("proc_w") if clips.get("proc_w") != null else 0.0      # (Meshy's clips: no rig mix)
-	ok(rig_w <= 0.0 and (plain < STRIDE_MIN or z[1] - z[0] >= 0.75 * plain),
-			"%s: the legs play the run under it (%.2f m of stride, %.2f m without)" % [id, z[1] - z[0], plain])
+	ok(
+		hand.distance_to(mote) <= HAND_NEAR * 1.6 * absf(P.model.scale.y),
+		"%s: the %s hand holds the mote (%.2f m)" % [id, side, hand.distance_to(mote)]
+	)
+	var rig_w: float = clips.get("proc_w") if clips.get("proc_w") != null else 0.0  # (Meshy's clips: no rig mix)
+	ok(
+		rig_w <= 0.0 and (plain < STRIDE_MIN or z[1] - z[0] >= 0.75 * plain),
+		"%s: the legs play the run under it (%.2f m of stride, %.2f m without)" % [id, z[1] - z[0], plain]
+	)
 	var spark: Node3D = H._spark
 	ok(spark.position.distance_to(mote) < SPARK_LAG and spark.scale.x < 0.5, "%s: the Heartspark rides the hand" % id)
 	var fired := [false]
@@ -122,12 +157,15 @@ func _hero(id: String) -> void:
 				P.downed = false
 				P.extracted = true
 		await _step(m, SETTLE_S)
-		ok(float(clips.get("heart_w")) <= 0.0 and not P.model.has_meta(WardenCarry.MOTE),
-				"%s: the layer drops cleanly on %s (weight %.2f)" % [id, how, float(clips.get("heart_w"))])
+		ok(
+			float(clips.get("heart_w")) <= 0.0 and not P.model.has_meta(WardenCarry.MOTE),
+			"%s: the layer drops cleanly on %s (weight %.2f)" % [id, how, float(clips.get("heart_w"))]
+		)
 		P.downed = false
 		P.extracted = false
 		P.out = false
 	m.queue_free()
+
 
 ## P holds the Heartspark (the host's pick, with the slow meta the carry layer reads set at once).
 func _take(H: Heart, P: Hunter) -> void:
@@ -136,10 +174,11 @@ func _take(H: Heart, P: Hunter) -> void:
 	H._force(Heart.S.CARRIED, "check")
 	H._apply_carrier()
 
+
 ## Meeko and Neve's kits (play_soft) never clear a finished shot move, and a "lead" clip holds its last frame until
 ## something else plays, so after the volley the held pose would keep the layer off for the rest of the check. The
 ## match has the same thing in play; this just lets the move end, as a later move would (see the READY note).
 func _end_kit_move(P: Hunter) -> void:
 	if P.ak != null:
 		P.ak.anim_id = ""
-	P.anim_s.erase("kmove")      # (the state dict is refilled, not rebuilt)
+	P.anim_s.erase("kmove")  # (the state dict is refilled, not rebuilt)
