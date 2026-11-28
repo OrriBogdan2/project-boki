@@ -1,0 +1,14 @@
+{
+	"id": "barostorm",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/barostorm.json.",
+	"work": {
+		"haul": 1,
+		"spark": 3,
+		"tide": 2
+	},
+	"shiny": {
+		"belly": "#a3dbfc",
+		"color": "#ccb684",
+		"glow": "#93d7ff"
+	}
+}
