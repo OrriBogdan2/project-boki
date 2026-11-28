@@ -26,6 +26,8 @@ func run(mn: Node) -> void:
 	main = mn
 	Save.no_write = true
 	var full := await _match_run(-1)
+	ok(not (full["goals"] as Array).is_empty() and full["named"], "match: a full run leaves a named Boki, Goals rows")
+	ok((full["hunters"] as Array).size() > 0, "match: a full run leaves the starter Hunter open")
 	var n := Tutorial.steps().size()
 	for i in n:
 		var id := String(Tutorial.steps()[i][0])
@@ -61,10 +63,16 @@ func _match_snap() -> Dictionary:
 		"played": bool(d["tutorial"].get("match", false)),
 		"boki": roster.size(),
 		"starter": bool(roster[0].get("starter", false)),
+		"named": String(roster[0].get("name", "")) != "",
 		"active": String(d["active"]) == String(roster[0]["uid"]),
 		"hunters": ClassUnlock.open_ids(),
+		"goals": _goal_rows(),
 		"matches": int(d["matches"]),
 	}
+
+## The first-day Goals rows as the player reads them (never empty, same after a skip as after a full run).
+func _goal_rows() -> Array:
+	return GoalTracker.lines().map(func(r): return String(r["text"]))
 
 ## Plays the tutorial and ends it at step `skip_at` with the Skip button (-1: plays it out). Returns what
 ## the save looks like afterwards ({} when the step never came).
@@ -154,7 +162,9 @@ func _farm_snap() -> Dictionary:
 	for k in meal:
 		fed = fed and int(d["items"].get(k, 0)) >= int(meal[k])
 	return {
-		"done": not FarmTutorial.active(),
+		"done": not FarmTutorial.active() and FarmTutorial.current() == "",
+		"named": String(Save.active_kin().get("name", "")) != "",
+		"goals": _goal_rows(),
 		"axe": HomeGather.has_tool("axe"),
 		"pickaxe": HomeGather.has_tool("pickaxe"),
 		"house": not FarmHob.house_entry().is_empty(),
@@ -185,7 +195,8 @@ func _farm(tag: String) -> void:
 	var full := await _farm_full()
 	var gear: bool = full["toy"] and not full["house"] if FarmTutorial.base() \
 			else full["axe"] and full["pickaxe"] and full["house"]
-	ok(full["done"] and gear and full["food"] and full["boki"] == 1,
+	ok(not (full["goals"] as Array).is_empty(), "%s: the Goals card has rows after a full run" % tag)
+	ok(full["done"] and gear and full["food"] and full["boki"] == 1 and full["named"],
 			"%s: a full playthrough ends with the %s, the food and the Boki (%s)" % [
 				tag, "toy" if FarmTutorial.base() else "house and both tools", str(full)])
 	var steps := FarmTutorial.steps()
