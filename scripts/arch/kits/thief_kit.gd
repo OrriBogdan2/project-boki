@@ -794,6 +794,7 @@ func _wrap(f: Ent) -> void:
 	KitStatus.apply(f, "gnd", _ground_t())
 	add_mark(f, 1, true)
 	wrapped[f.get_instance_id()] = [f, _ground_t()]
+	vfx("bola_wrap", f.pos)
 	m.sfx("dj_bola_wrap", f.pos, -3.0, 1.0)
 
 ## Yellow rings bind the Grounded (everyone sees them), two of them winding round their legs.
@@ -908,7 +909,7 @@ func _stick(f: Ent, at: Vector3, on_wall := {}) -> void:
 	if f and rank("kin") >= 3:
 		h.dashes = h.max_dashes()           # Shadow Knife rank 3: a knife in a foe gives the Vault back
 		DashReset.cue(h)
-	vfx("knife_stick", at, null, {"foe": f != null})
+	vfx("knife_stick", at, null, {"foe": f != null, "r": float(ed["ring_r"])})
 	m.sfx("thief_knife_stick" if f else "thief_knife_ground", at, -6.0, 1.0)
 
 ## The stuck dagger (a pooled look, everyone sees it); on your screen RecastCue's marker sits on it.
