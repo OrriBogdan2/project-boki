@@ -230,7 +230,7 @@ const SPIN_EASE := 4.0  # how fast they spin up and wind down (1/s)
 const SWAP_S := 0.2  # s: one hold handing over to the next (a Boki lifted, then carried)
 const LAND_HOP_V := 4.0  # m/s down at touchdown: slower (a kerb, a step down of ~0.5 m) plays no landing at all
 const LAND_DROP_V := 8.5  # m/s: a terrace drop (2.5 m+) or a jump off a ledge gets the deep crouch; a plain jump
-# lands at JUMP_V 6.8, the hop's small dip (the source: briefs/hero-ref, DECISIONS 11-07)
+# lands at JUMP_V 7.5, the hop's small dip (the source: briefs/hero-ref, DECISIONS 11-07)
 const LAND_DIVE_V := 17.0  # m/s: a glide dive's plunge (lands ~25 m/s after the canopy): the heavy crouch
 const SKATE_LEAN_MAX := 0.4  # radians: the most Claire's skate leans forward, all leans together
 
@@ -247,6 +247,8 @@ const SKATE_LEAN_MAX := 0.4  # radians: the most Claire's skate leans forward, a
 ## A move with "land": true is a landing or arrival pose: it never keeps the glider shut (AirLimits).
 ## A move with "hold": true stays on its last key until another replaces it; with
 ## "loop": t as well it cycles from t to the last key instead (a recoil wobble, hand over hand). A move with
+## "ramp": [from, to, secs] plays at a rate going from `from` to `to` over its first secs (a spin winding up); one
+## with "linear": true eases each span evenly instead of in and out (a steady turn). A move with
 ## "stance": true keys its legs as a planted stance, used only standing (stance_leg_k); with "swing": n the
 ## weapon swing it starts plays step n of the weapon's SWINGS (one blade or the other, or both).
 const KMOVES := {}
@@ -349,6 +351,9 @@ var glide_k := 0.0
 var bank_k := 0.0  # the roll into turns: the glider's, and a move keyed "bank" (Flue Flight)
 var swim_k := 0.0  # in deep water: the crawl
 var swim_ph := 0.0  # rad: the stroke
+var hz_cues := 0  # HazardMoveSfx bits this pose found
+var hz_swim := false  # swimming at the last pose
+var hz_ice := false  # no footing on ice at the last pose
 var dive_k := 0.0
 var crouch_k := 0.0
 var ledge_k := 0.0
@@ -1591,6 +1596,7 @@ static func km_sample(id: String, tt: float) -> Dictionary:
 		return {}
 	var keys: Array = mv["keys"]
 	var last: Array = keys[-1]
+	tt = _km_clock(mv, tt)
 	if tt >= float(last[0]):
 		if not mv.get("hold", false):
 			return {}
@@ -1602,7 +1608,8 @@ static func km_sample(id: String, tt: float) -> Dictionary:
 	var b: Array = keys[mini(i + 1, keys.size() - 1)]
 	var span := maxf(0.001, float(b[0]) - float(a[0]))
 	var u := clampf((tt - float(a[0])) / span, 0.0, 1.0)
-	u = u * u * (3.0 - 2.0 * u)
+	if not mv.get("linear", false):
+		u = u * u * (3.0 - 2.0 * u)
 	var pa: Dictionary = a[1]
 	var pb: Dictionary = b[1]
 	var out := {}
@@ -1630,6 +1637,19 @@ static func km_sample(id: String, tt: float) -> Dictionary:
 		var vb2: Vector3 = pb.get(c, pa.get(c))
 		out[c] = va2.lerp(vb2, u)
 	return out
+
+
+## A move's own clock `tt` s after it started: with "ramp" its rate eases linearly from ramp[0] to ramp[1] over the
+## first ramp[2] s, so every game that plays it agrees from the move's age alone.
+static func _km_clock(mv: Dictionary, tt: float) -> float:
+	var rp: Array = mv.get("ramp", [])
+	if rp.is_empty():
+		return tt
+	var r0 := float(rp[0])
+	var r1 := float(rp[1])
+	var secs := float(rp[2])
+	var u := clampf(tt, 0.0, secs)
+	return r0 * u + (r1 - r0) * u * u / (2.0 * secs) + r1 * maxf(0.0, tt - secs)
 
 
 ## Where a held move samples past its last key: the last key, or with "loop" (the time it loops back to)
@@ -1739,7 +1759,7 @@ func _upper(
 	var want_aim := 1.0 if fired < 1.1 or float(s.get("charge", 0.0)) > 0.0 or crouch_k > 0.5 else 0.0
 	aim_k = _ease(aim_k, want_aim, 14.0 if want_aim > aim_k else 3.0, dt)
 	model.set_meta(WardenHolster.DRAW, aim_k)
-	var carries := r1 > 0.55 or swim_k > 0.5      # (swimming keeps the gun in one hand, as on a run)
+	var carries := r1 > 0.55 or swim_k > 0.5  # (swimming keeps the gun in one hand, as on a run)
 	var want_carry := 1.0 if carries and aim_k < 0.3 and grounded and hold != "minigun" else 0.0
 	carry_k = _ease(carry_k, want_carry, 6.0, dt)
 	var stow := maxf(maxf(glide_k, dive_k), maxf(emote_k * (0.0 if emote_id == "" else 1.0), 0.0))

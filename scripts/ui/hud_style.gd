@@ -10,69 +10,95 @@ extends RefCounted
 ## widget file without reaching into hud.gd.
 
 # ------------------------------------------------------------------ colour roles
-const INK := Color("f3eee2")              # main text
-const MUTED := Color("a9b0bf")            # secondary text, empty things
-const SHADE := Color(0.05, 0.03, 0.08, 0.86)    # frame backing behind bars and slots (void violet)
+const INK := Color("f3eee2")  # main text
+const MUTED := Color("a9b0bf")  # secondary text, empty things
+const SHADE := Color(0.05, 0.03, 0.08, 0.86)  # frame backing behind bars and slots (void violet)
 const SHADE_EDGE := Color(0.0, 0.0, 0.02, 0.95)  # segment gaps and outlines
-const LOW := Color("ffa13c")              # health shifts toward this as it runs low (yours and allies')
-const DOWNED := Color("ffb36a")           # a downed hunter's bleed-out bar
-const STOMPED := Color("ff3a2a")          # ... while someone is finishing them
-const REVIVE := Color("8fe0a0")           # revive progress
-const ARMOR := Color("9fdcff")            # armour when the hunter has no tier colour
-const SHIELD := Color("eef8ff")           # shields: a pale fill past the end of health
-const CHIP := Color("fff1dc")             # the chunk just lost, before it drains
-const HEAL := Color("8ff0a0")             # healing numbers
-const HIT := Color("fff4d6")              # your hits
-const HIT_ARMOR := Color("7ac8ff")        # your hits that landed on armour
-const CRIT := Color("ffd23f")             # critical hits
+const LOW := Color("ffa13c")  # health shifts toward this as it runs low (yours and allies')
+const DOWNED := Color("ffb36a")  # a downed hunter's bleed-out bar
+const STOMPED := Color("ff3a2a")  # ... while someone is finishing them
+const REVIVE := Color("8fe0a0")  # revive progress
+const ARMOR := Color("9fdcff")  # armour when the hunter has no tier colour
+const SHIELD := Color("eef8ff")  # shields: a pale fill past the end of health
+const CHIP := Color("fff1dc")  # the chunk just lost, before it drains
+const HEAL := Color("8ff0a0")  # healing numbers
+const HIT := Color("fff4d6")  # your hits
+const HIT_ARMOR := Color("7ac8ff")  # your hits that landed on armour
+const CRIT := Color("ffd23f")  # critical hits
 const CRIT_ARMOR := Color("b0e4ff")
-const HURT := Color("ff6a5a")             # damage you take
-const HURT_KIN := Color("ffa08a")         # damage your Boki takes
-const GOLD := Color("ffd27a")             # levels, points to spend
-const COOLING := Color("ff8f6b")          # a slot that isn't ready: its frame and short countdowns
+const HURT := Color("ff6a5a")  # damage you take
+const HURT_KIN := Color("ffa08a")  # damage your Boki takes
+const NUM_SHIELD := Color("c4b5ff")  # a hit a shield soaked (Albert's aegis, timed ward, Boki shield)
+const NUM_SHELL := Color("5ff0d2")  # a hit a Fusion shell soaked
+const NUM_EMPOWERED := Color("ff9b3d")  # an empowered hit (o.heavy / o.payoff: a point-blank volley, a primed shot)
+const GOLD := Color("ffd27a")  # levels, points to spend
+const COOLING := Color("ff8f6b")  # a slot that isn't ready: its frame and short countdowns
 const KEY_BG := Color(0.06, 0.035, 0.09, 0.95)
 
 # ------------------------------------------------------------------ fonts
-const BIG: Font = preload("res://fonts/LilitaOne-Regular.ttf")    # numbers, names, labels
-const BODY: Font = preload("res://fonts/Rubik.ttf")               # sentences
-const ITALIC_SLANT := 0.22     # glyph x shift per unit of height: BIG leaned into a bold italic
+const BIG: Font = preload("res://fonts/LilitaOne-Regular.ttf")  # numbers, names, labels
+const BODY: Font = preload("res://fonts/Rubik.ttf")  # sentences
+const ITALIC_SLANT := 0.22  # glyph x shift per unit of height: BIG leaned into a bold italic
 
 # ------------------------------------------------------------------ sizes (px at 1080p; the HUD is unscaled)
-const HP_PER_SEG := 17.0       # health per segment: classes (124, 145, 193) read 8, 9, 12 segments (source: 8-12)
-const MAX_SEGS := 12           # more than this and each segment doubles (stays readable on huge pools)
-const SEG_GAP := 2.0           # px between segments
-const PLATE_W := 100.0         # overhead health bar width (rivals and allies)
-const PLATE_W_SELF := 108.0    # your own overhead bar
-const PLATE_HP_H := 9.0        # overhead health bar height
-const PLATE_AR_H := 3.0        # overhead armour strip under it
-const PLATE_PAD := 2.0         # frame around the bars
+const HP_PER_SEG := 17.0  # health per segment: classes (124, 145, 193) read 8, 9, 12 segments (source: 8-12)
+const MAX_SEGS := 12  # more than this and each segment doubles (stays readable on huge pools)
+const SEG_GAP := 2.0  # px between segments
+const PLATE_W := 76.0  # overhead health bar width (rivals and allies); was 100
+const PLATE_W_SELF := 108.0  # your own overhead bar
+const PLATE_HP_H := 9.0  # overhead health bar height
+const PLATE_AR_H := 3.0  # overhead armour strip under it
+const PLATE_PAD := 2.0  # frame around the bars
 const PLATE_NAME_FS := 13
 ## Where the row of small icons under a plate starts, below the plate's anchor point (the
 ## loadout icons go here): the bars end at +PLATE_HP_H + PLATE_AR_H + pads, then the dash pips.
 const PLATE_ICON_ROW := 22.0
-const SLOT_RAD := 9            # ability slot corner radius
-const KEY_FS := 12             # key label size
+const SLOT_RAD := 9  # ability slot corner radius
+const KEY_FS := 12  # key label size
 ## The one screen-edge margin: the share of the window's width and height kept clear on every side
 ## (strict title-safe, 64 x 36 px at 1280x720, 96 x 54 at 1080p). The HUD, the tip card, the lobby and
 ## the menu panels all read it; decision: docs/UI_FIRST15.md section 3 (the alternative, a fixed
 ## 24 px margin, keeps the blocks inside the 5% band).
 const SAFE_FRAC := 0.05
-const KEY_REACH := 10.0        # px a key pill hangs below its slot: the weapon card keeps that clear above the margin
+const KEY_REACH := 10.0  # px a key pill hangs below its slot: the weapon card keeps that clear above the margin
+
+## The one table of floating-number kinds: what a number counted, its colour, its size against a plain hit
+## (Fx.NUM_SCALE) and whether it wears the crit outline. Fx draws from it; --dmg-number-check reads it.
+## Every pair must differ by colour or size, readable at match zoom.
+const NUM_STYLE := {
+	"hit": {"col": HIT, "k": 1.0, "crit": false},
+	"armour": {"col": HIT_ARMOR, "k": 1.0, "crit": false},
+	"crit": {"col": CRIT, "k": 1.0, "crit": true},
+	"crit_armour": {"col": CRIT_ARMOR, "k": 1.0, "crit": true},
+	"empowered": {"col": NUM_EMPOWERED, "k": 1.12, "crit": false},
+	"shield": {"col": NUM_SHIELD, "k": 0.85, "crit": false},
+	"shell": {"col": NUM_SHELL, "k": 0.85, "crit": false},
+	"heal": {"col": HEAL, "k": 1.0, "crit": false},
+	"hurt": {"col": HURT, "k": 1.0, "crit": false},
+}
+
+static var _italic: FontVariation
+# style boxes are made once per look and reused (dozens of frames are drawn every frame)
+static var _boxes := {}
+
 
 ## The margin on each side for a window of size `sz` (x for left and right, y for top and bottom).
 static func safe_pad(sz: Vector2) -> Vector2:
 	return (sz * SAFE_FRAC).round()
+
 
 ## The window less its safe margin: everything that matters sits inside this rect.
 static func safe_rect(sz: Vector2) -> Rect2:
 	var pad := safe_pad(sz)
 	return Rect2(pad, sz - pad * 2.0)
 
+
 ## A hunter's health colour as seen by `viewer`: you, your squad, or a rival.
 static func role_col(viewer: Hunter, h: Hunter) -> Color:
 	if viewer == null or h == viewer:
 		return SideColor.you()
 	return SideColor.ally() if h.team == viewer.team else SideColor.foe()
+
 
 ## Health fill for a role at a fraction of max: yours and allies' warm toward LOW under half, and
 ## pulse under a third; rivals stay red (a low rival pulses brighter instead).
@@ -83,6 +109,7 @@ static func hp_fill(role: Color, frac: float, time: float) -> Color:
 	var col := role.lerp(LOW, clampf((0.55 - frac) / 0.3, 0.0, 1.0))
 	return col.lerp(Color.WHITE, 0.2 * pulse) if frac < 0.3 else col
 
+
 ## Health per segment for a pool this big (HP_PER_SEG, doubled until the count fits MAX_SEGS).
 static func seg_step(maxv: float) -> float:
 	var step := HP_PER_SEG
@@ -90,14 +117,17 @@ static func seg_step(maxv: float) -> float:
 		step *= 2.0
 	return step
 
+
 static func seg_count(maxv: float) -> int:
 	return maxi(1, int(ceil(maxv / seg_step(maxv) - 0.001)))
+
 
 ## A segmented bar in a handful of draws: the empty track, the chip (the part just lost), the fill,
 ## a top highlight, an optional shield past the end of the fill, then every gap in one multiline.
 ## `chip` and `shield` are fractions of max (chip <= frac draws nothing); `flash` 0..1 whitens it.
-static func seg_bar(c: CanvasItem, r: Rect2, val: float, maxv: float, col: Color, chip := 0.0, shield := 0.0,
-		flash := 0.0, step := -1.0) -> void:
+static func seg_bar(
+	c: CanvasItem, r: Rect2, val: float, maxv: float, col: Color, chip := 0.0, shield := 0.0, flash := 0.0, step := -1.0
+) -> void:
 	var f := clampf(val / maxf(1.0, maxv), 0.0, 1.0)
 	c.draw_rect(r, Color(col.darkened(0.72), 0.92))
 	if chip > f:
@@ -126,17 +156,20 @@ static func seg_bar(c: CanvasItem, r: Rect2, val: float, maxv: float, col: Color
 		if pts.size() > 0:
 			c.draw_multiline(pts, SHADE_EDGE, SEG_GAP)
 
+
 ## A plain (unsegmented) strip with its empty track: armour under health, XP, resources.
 static func strip(c: CanvasItem, r: Rect2, frac: float, col: Color, back_a := 0.85) -> void:
 	c.draw_rect(r, Color(col.darkened(0.75), back_a))
 	if frac > 0.0:
 		c.draw_rect(Rect2(r.position, Vector2(r.size.x * clampf(frac, 0.0, 1.0), r.size.y)), col)
 
+
 ## The dark frame a plate's bars sit in: a soft-cornered backing with a hairline edge in the role
 ## colour (white while `flash` is up).
 static func plate_frame(c: CanvasItem, r: Rect2, edge: Color, flash := 0.0) -> void:
-	var sb := box(SHADE, 3, edge.lerp(Color.WHITE, snappedf(flash, 0.25)), 1)     # in steps: few cached boxes
+	var sb := box(SHADE, 3, edge.lerp(Color.WHITE, snappedf(flash, 0.25)), 1)  # in steps: few cached boxes
 	c.draw_style_box(sb, r)
+
 
 ## An ability or item slot's frame. `state`: "ready" (edge in the slot colour, a faint top gloss),
 ## "cooling" (a dim coral edge), "off" (barely there: locked, empty, or can't be used now).
@@ -151,6 +184,7 @@ static func slot_frame(c: CanvasItem, r: Rect2, col: Color, state := "ready") ->
 		var gloss := Rect2(r.position + Vector2(3, 3), Vector2(r.size.x - 6, r.size.y * 0.42))
 		c.draw_style_box(box(Color(col, 0.10), SLOT_RAD - 3, Color(0, 0, 0, 0), 0), gloss)
 
+
 ## The key label under a slot: a dark pill, the key in the slot colour (muted when not ready).
 static func key_pill(c: CanvasItem, center: Vector2, key: String, col: Color) -> void:
 	var kw := TextCache.width(BIG, key, KEY_FS)
@@ -159,6 +193,7 @@ static func key_pill(c: CanvasItem, center: Vector2, key: String, col: Color) ->
 	var at := Vector2(kr.position.x + 6, kr.position.y + 14)
 	c.draw_string(BIG, at, key, HORIZONTAL_ALIGNMENT_LEFT, -1, UI.fs(KEY_FS), col)
 
+
 ## A small count badge (charges, stack sizes) centred on `at`.
 static func count_badge(c: CanvasItem, at: Vector2, n: int, col: Color) -> void:
 	var s := str(n)
@@ -166,24 +201,38 @@ static func count_badge(c: CanvasItem, at: Vector2, n: int, col: Color) -> void:
 	c.draw_style_box(box(KEY_BG, 8, Color(col, 0.9), 1), Rect2(at - Vector2(w * 0.5, 8), Vector2(w, 16)))
 	ctext(c, at + Vector2(0, 4.5), s, 11, col)
 
+
 ## Outlined text, left-aligned at `p` (baseline). `ol` is the outline width in px.
 static func text(c: CanvasItem, p: Vector2, s: String, font_size: int, col: Color, ol := 4, font: Font = BIG) -> void:
 	TextCache.draw(c, font, p, s, font_size, col, ol, Color(0, 0, 0, 0.6 * col.a))
+
 
 ## Outlined text centred on x at baseline `p.y`.
 static func ctext(c: CanvasItem, p: Vector2, s: String, font_size: int, col: Color, ol := 4, font: Font = BIG) -> void:
 	var w := TextCache.width(font, s, font_size)
 	text(c, Vector2(p.x - w * 0.5, p.y), s, font_size, col, ol, font)
 
+
 ## Floating damage number colour: by who was hit and how (Fx picks and draws). `plain` is a plain hit's
 ## colour (a Boki's hits wear its type colour); crits, armour and hurt keep theirs.
-static func dmg_col(crit: bool, armor_hit: bool, on_you: bool, on_your_kin: bool, plain := HIT) -> Color:
-	if on_you: return HURT
-	if on_your_kin: return HURT_KIN
-	if crit: return CRIT_ARMOR if armor_hit else CRIT
-	return HIT_ARMOR if armor_hit else plain
+static func dmg_col(
+	crit: bool, armor_hit: bool, on_you: bool, on_your_kin: bool, plain := HIT, empowered := false
+) -> Color:
+	if on_you:
+		return HURT
+	if on_your_kin:
+		return HURT_KIN
+	if crit:
+		return CRIT_ARMOR if armor_hit else CRIT
+	if armor_hit:
+		return HIT_ARMOR
+	return NUM_EMPOWERED if empowered else plain
 
-static var _italic: FontVariation
+
+static func num_style(kind: String) -> Dictionary:
+	return NUM_STYLE[kind]
+
+
 ## BIG slanted into a bold italic (the knock banners' words, the squad rows' KNOCKED / DEAD tags).
 static func big_italic() -> Font:
 	if _italic == null:
@@ -192,14 +241,14 @@ static func big_italic() -> Font:
 		_italic.variation_transform = Transform2D(Vector2(1.0, ITALIC_SLANT), Vector2(0.0, 1.0), Vector2.ZERO)
 	return _italic
 
-# style boxes are made once per look and reused (dozens of frames are drawn every frame)
-static var _boxes := {}
+
 ## A cached rounded style box (bg, corner radius, border colour and width): for widgets drawing their own shapes.
 static func box(bg: Color, rad: int, border: Color, bw: int) -> StyleBoxFlat:
 	var key := [bg, rad, border, bw]
 	var sb: StyleBoxFlat = _boxes.get(key)
 	if sb == null:
-		if _boxes.size() > 256: _boxes.clear()
+		if _boxes.size() > 256:
+			_boxes.clear()
 		sb = StyleBoxFlat.new()
 		sb.bg_color = bg
 		sb.set_corner_radius_all(rad)
@@ -209,6 +258,7 @@ static func box(bg: Color, rad: int, border: Color, bw: int) -> StyleBoxFlat:
 		sb.anti_aliasing = true
 		_boxes[key] = sb
 	return sb
+
 
 ## Width of the clock chip: the time at the left, the phase in the middle and "LV nn" at the right never touch,
 ## at every Text size (196 px is enough at 100%).
