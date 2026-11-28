@@ -9,7 +9,7 @@ const WEIGHT_ARCH := {"light": "archer", "medium": "dolm", "heavy": "ashwick"}
 # the file that plays each move, and the call it makes
 const WIRED := {
 	"scripts/match/wall_moves.gd": ["ClimbSfx.play(h, ClimbSfx.KICK)", 2],
-	"scripts/match/hunter.gd": ["ClimbSfx.play(self, ClimbSfx.GRAB)", 1],
+	"scripts/match/hunter.gd": ["ClimbSfx.play(self, ClimbSfx.GRAB)", 2],
 }
 const FAR_M := 30.0  # m: a Hunter this far off is past the footstep range
 

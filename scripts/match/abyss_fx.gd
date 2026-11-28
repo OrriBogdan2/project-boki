@@ -49,14 +49,16 @@ static func danger(p: Hunter) -> float:
 
 
 ## The same from a depth under the balloon line and the span down to the point of no return: 0 until
-## start_depth (content/rules/abyss_danger.json: a small dip shows nothing), then a smooth ramp to 1 at the
-## point of no return. An overheated glider (no_heat) reads a quarter worse, never before the start.
+## start_depth (content/rules/abyss_danger.json, 0.25 m as the target), then a smooth ramp to 1 at
+## full_before_end metres above the point of no return. An overheated glider (no_heat) reads a quarter
+## worse, never before the start.
 static func danger_depth(depth: float, span: float, no_heat := false) -> float:
 	var rules := Content.rules("abyss_danger")
 	var start := float(rules["start_depth"])
 	if depth <= start:
 		return 0.0
-	var x := clampf((depth - start) / maxf(1.0, span - start), 0.0, 1.0)
+	var full := span - float(rules.get("full_before_end", 0.0))
+	var x := clampf((depth - start) / maxf(1.0, full - start), 0.0, 1.0)
 	x = pow(x, float(rules["curve"]))
 	return minf(1.0, x * 1.25) if no_heat else x
 

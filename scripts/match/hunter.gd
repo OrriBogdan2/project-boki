@@ -817,19 +817,19 @@ func do_jump() -> void:
 var glide_off_t := 9.0         # seconds since the glider closed in the air (9 = long ago / on the ground)
 var lift_t := 0.0              # seconds of the current abyss lift (feathering taps stay in the cheap part)
 
-## The glider's vertical speed this step below an island's lip over the abyss, `depth` metres under
-## it: it pulls you up harder and faster the deeper you are (HunterFeel.abyss_lift*), then brakes into the last
-## HunterFeel.abyss_brake_dist so you arrive at ground level (let go just before to carry the climb up as height).
+## The glider's vertical speed this step `depth` metres under an island's lip over the abyss [game data]: its
+## floor correction lifts you at edge_mantle glide_lift (harder the deeper), never faster than glide_up_cap, and
+## stops you dead at the lip (let go before to carry the climb on as height). `k` scales it (an overheated glider).
 ## Shared by Hunter (matches, the --training ground) and Home (the farm).
 static func abyss_lift_vy(vy: float, depth: float, dt: float, k := 1.0) -> float:
-	if depth > HunterFeel.abyss_brake_dist:
-		var acc := (HunterFeel.abyss_lift + HunterFeel.abyss_lift_per_m * depth) * k
-		var top := minf(HunterFeel.abyss_lift_max + HunterFeel.abyss_lift_max_per_m * depth, HunterFeel.abyss_lift_cap) * k
-		# a fall is caught at once (the canopy bites), then the climb builds
-		if vy < 0.0:
-			vy = move_toward(vy, 0.0, (acc + Loco.glide_catch) * dt)
-		return minf(vy + acc * dt, maxf(top, vy))
-	return move_toward(vy, maxf(depth * HunterFeel.abyss_brake_gain, HunterFeel.abyss_lip_vy), HunterFeel.abyss_brake * dt)
+	var er: Dictionary = MantleCarry.rules
+	var gl: Array = er["glide_lift"]
+	var cap := float(er["glide_up_cap"])
+	var acc := lerpf(float(gl[0]), float(gl[1]), clampf(depth / float(gl[2]), 0.0, 1.0)) * k
+	if vy >= cap:
+		acc = minf(acc, float(gl[0]))
+	vy = minf(vy + acc * dt, cap)
+	return minf(vy, (depth + float(er["floor_rise"])) / dt)
 
 ## Real keys only open the glider with a fresh press in the air (a second Space, or the glide button). Opening uses
 ## the press up, so a fold (heal, dash, a knock) stays shut until a new press; release or landing clears it too.
@@ -1024,6 +1024,7 @@ func dash_with(e: Dictionary) -> void:
 	roll_t = float(e.get("time", DASH_TIME))
 	move_kind = String(e.get("kind", "dash"))
 	roll_falls = false
+	mantle_cd = minf(mantle_cd, MantleCarry.rules["self_cd"])     # [game data] your own launch cuts the mantle cooldown
 	dash_is_ex = ex_next
 	if ex_next:
 		# the long dash: the class's own distance and time (light 7m, medium 6m, heavy 5m)
@@ -1612,9 +1613,6 @@ func _physics(dt: float) -> void:
 	if pad.size() > 0:
 		_pad_fly(dt)
 		return
-	if grap.size() > 0:
-		_grapple(dt)
-		return
 	var mv: Vector2 = inp["move"] if stun_t <= 0.0 and root_t <= 0.0 else Vector2.ZERO
 	var spd := HunterMove.ground_speed(base_speed, HunterMove.speed_bonus(self, mv), _move_mult())
 	var hv := Vector2(vel.x, vel.z)
@@ -1669,7 +1667,7 @@ func _physics(dt: float) -> void:
 			var up: Dictionary = m.world.updraft_at(pos)
 			if not up.is_empty():
 				in_current = true
-				vel.y = move_toward(vel.y, 9.0, 45.0 * dt)     # (movefeel) grabs you harder (was 30: 0.33s to climb)
+				vel.y = HunterMove.updraft_vy(vel.y, pos.y - lip_y, dt)
 	else:
 		# near-instant on the ground (and in a kit's hover); a jump keeps its run-up
 		if grounded or (ak != null and ak.hovering()):
@@ -1695,8 +1693,8 @@ func _physics(dt: float) -> void:
 		pass   # rising up a ledge's face (sets vel.y; your keys steer as in any jump)
 	elif gliding and in_current:
 		pass   # the current sets the height
-	elif gliding and not dropping and below_lip:
-		# below ground level over the abyss the glider lifts you hard, then brakes near the top.
+	elif GlideLift.lifting(self):
+		# below ground level over the abyss the glider lifts you, harder the deeper, and lets go at the top.
 		# Let go just before ground level to carry the lift up as height (feathering)
 		vel.y = abyss_lift_vy(vel.y, lip_y - pos.y, dt, 1.0 if glide_fuel > 0.001 else HunterMove.overheat_lift)
 		glide_lift.hang_t = GlideLift.HANG_T
@@ -1715,6 +1713,8 @@ func _physics(dt: float) -> void:
 				vel.y = minf(0.0, (lip_y - pos.y) / dt)
 	elif MergeKit.rising(self):
 		vel.y = MergeKit.rise_vy(self)      # the ultimate's climb (Thunderhead)
+	elif MantleCarry.waiting(self):
+		pass   # held against the face before a full mantle's launch (no gravity)
 	elif roll_t > 0.0 and not grounded and not dropping and not roll_falls:
 		vel.y = ak.dash_vy(dt) if ak else 0.0          # an air dash holds your height (a skate sinks)
 	elif not grounded:
@@ -1926,13 +1926,10 @@ func _in_abyss() -> bool:
 
 ## (movefeel) The point of no return under you: below this you're lost to the abyss. World.ABYSS_DEPTH
 ## (6m, shared with monsters and the home island) plus HunterFeel.abyss_extra for hunters, so there's real room to
-## recover with the glider, an updraft or a ledge float; a glider with heat left gets HunterFeel.abyss_glide_room
-## more. The HUD's abyss danger reads this (AbyssFx.danger).
+## recover with the glider, an updraft or a mantle; gliding gives no more [game data]. The HUD's abyss danger reads
+## this (AbyssFx.danger).
 func abyss_kill_y() -> float:
-	var fl: float = m.world.abyss_floor(pos.x, pos.z, last_gy) - HunterFeel.abyss_extra
-	if gliding and glide_fuel > 0.001:
-		fl -= HunterFeel.abyss_glide_room
-	return fl
+	return m.world.abyss_floor(pos.x, pos.z, last_gy) - HunterFeel.abyss_extra
 
 ## Islands are solid all the way down: if anything (a pull, a drag, a shove) has left you inside an
 ## island's column below its top, you're put back beside it, or on top when the top is in reach.
@@ -2037,7 +2034,7 @@ func _update_glide(dt: float) -> void:
 			hurt(20.0, null, {"src": "heat"})
 	# an overheated glider stays open until you land or get hit again; a knock carries an open one (0055)
 	var can: bool = (lfloat.is_empty() or (bool(inp.get("glide", false)) and not bool(lfloat.get("g0", true)))) and not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed and stun_t <= 0.0 \
-		and (gliding or m.time - kb_t > 0.4) and pad.is_empty() and not shot_down
+		and (gliding or m.time - kb_t > 0.4) and pad.is_empty() and not shot_down and not MantleCarry.blocks_glide(self)
 	var held: bool = inp.get("glide", false)
 	var btn_down: bool = inp.get("glide_btn", false)
 	# a fresh button press arms through a lock (a wind-down) as a second Space does: it opens as the lock ends, even
@@ -2081,13 +2078,14 @@ func _update_glide(dt: float) -> void:
 # back up onto it, the way Supervive does it. Walking into a step up a few terraces high does
 # the same after a short push. Getting launched hard still carries you past the edge.
 func _try_ledge_grab(dt: float) -> void:
-	if not lfloat.is_empty() or grap.size() > 0 or pad.size() > 0 or fly_t > 0.0 or charge.size() > 0 or dropping or shot_down or pos.y < last_gy - 14.0 \
+	if not lfloat.is_empty() or grap.size() > 0 or pad.size() > 0 or fly_t > 0.0 or charge.size() > 0 or dropping or shot_down or pos.y < last_gy - MantleCarry.rules["depth"] \
 			or stun_t > 0.0 or root_t > 0.0:
 		push_t = 0.0
 		return
 	var w: World = m.world
 	var mv: Vector2 = inp["move"]
 	var reach := 0.0
+	var fudge := false
 	var max_rise := HunterMove.ledge_reach(self)
 	if grounded:
 		# as in Supervive, walking into a wall doesn't climb it: jump, and you mantle at the top.
@@ -2111,6 +2109,10 @@ func _try_ledge_grab(dt: float) -> void:
 		# a hard launch carries you a moment before you can catch anything
 		if grap_cd > 0.0 or (m.time - kb_t < 0.3 and Vector2(vel.x, vel.z).length() > 8.0):
 			return
+		if over_void() and mantle_cd > 0.0:
+			return     # [game data] the mantle cooldown
+		# [game data] falling near the point of no return, a side within fudge_reach still catches you
+		fudge = over_void() and vel.y < 0.0 and pos.y - abyss_kill_y() < MantleCarry.rules["fudge_h"]
 		# no magnet: you have to be below the edge, right up against the cliff, and pushing into it
 		# (or, over the abyss, thrown into its side: the shove counts as the push)
 		if mv.length() < 0.3:
@@ -2119,7 +2121,7 @@ func _try_ledge_grab(dt: float) -> void:
 				mv = wall_hit_v.normalized()
 			elif carry_v >= MantleCarry.PUSH_SPEED:
 				mv = MantleCarry.heading(self, mv)       # flying in with momentum is a push (item 185b)
-			else:
+			elif not fudge:
 				return
 		reach = hull_r() + 0.4
 	var void_here := over_void()
@@ -2131,10 +2133,10 @@ func _try_ledge_grab(dt: float) -> void:
 		if w.inb(fi.x, fi.y) and w.sheer.has(w.idx(fi.x, fi.y)) and w.ground_at(fr.x, fr.y) > pos.y + World.STEP:
 			return
 	if not grounded and void_here and last_gy - pos.y > 0.3:
-		max_rise = HunterFeel.mantle_reach_abyss      # deep in the abyss, any island wall you touch springs you back up
+		max_rise = MantleCarry.rules["depth"]      # [game data] in the abyss, any island side you touch launches you back up
 		# (movefeel) and a wall a short step away catches you too: falling at full speed just off a
 		# face while steering along it used to slip past (wall-hug check: 15 of 40 at 3m down)
-		reach = hull_r() + HunterFeel.wall_catch_reach
+		reach = hull_r() + (MantleCarry.rules["fudge_reach"] if fudge else HunterFeel.wall_catch_reach)
 		var sr := hull_r() + HunterFeel.wall_catch_reach + 0.6
 		for sz in range(int(floor(pos.z - sr)), int(floor(pos.z + sr)) + 1):
 			for sx in range(int(floor(pos.x - sr)), int(floor(pos.x + sr)) + 1):
@@ -2157,12 +2159,16 @@ func _try_ledge_grab(dt: float) -> void:
 			var toward := Vector2(ex - pos.x, ez - pos.z)
 			if grounded and toward.dot(mv) <= 0.0:
 				continue
+			# [game data] past the usual reach (or with no keys) the fudge looks one way only: straight north
+			var far := mv.length() < 0.3 or d > hull_r() + HunterFeel.wall_catch_reach
+			if fudge and far and (toward.y > -0.05 or absf(toward.x) > hull_r()):
+				continue
 			# (movefeel) over the abyss below a lip, steering mostly along a wall still counts as pushing
 			# into it (up to ~78 degrees off straight in): SUPERVIVE rarely lets a wall-hugger sink under
 			# an island. Elsewhere the ledge rise wants keys or momentum into it, up to ~60 degrees off (MantleCarry)
 			if not grounded and toward.length() > 0.01:
 				if void_here and last_gy - pos.y > 0.3:
-					if toward.normalized().dot(mv.normalized()) < 0.2:
+					if not fudge and toward.normalized().dot(mv.normalized()) < 0.2:
 						continue
 				elif not MantleCarry.pushing(self, toward, mv):
 					continue
@@ -2180,6 +2186,10 @@ func _try_ledge_grab(dt: float) -> void:
 				bd = d
 				best = {"x": x, "z": z, "gz": gz, "ex": ex, "ez": ez}
 	if best.is_empty():
+		return
+	if void_here and not grounded:
+		MantleCarry.launch(self, float(best["gz"]) - pos.y)     # [game data] over the abyss: the one-shot mantle
+		ClimbSfx.play(self, ClimbSfx.GRAB)
 		return
 	# (ledge rise) no snap and no fixed path: you gain upward momentum and float up the face while
 	# your own keys and momentum carry you sideways (see _ledge_rise)
@@ -2277,52 +2287,18 @@ func teleport(p: Vector3) -> void:
 	MantleCarry.forget(self)
 	slide_n = Vector2.ZERO      # (the wall the last step pressed is not here)
 
-## A jump during a ledge rise: in the window near the top, a strong fling (higher, faster, a whoosh);
-## earlier, a weaker one. Either way toward the keys you hold (or up and onto the ledge with none).
+## A jump during a ledge rise: the mini mantle's launch from where you are on the face (MantleCarry.launch); in
+## the window near the top it whooshes and counts as a timed fling.
 func _ledge_fling() -> void:
 	var lf := lfloat
-	lfloat = {}
-	var mvv: Vector2 = inp.get("move", Vector2.ZERO)
-	var d: Vector2 = mvv.normalized() if mvv.length() > 0.3 else (lf["n"] as Vector2)
-	var hv := Vector2(vel.x, vel.z)
 	var timed: bool = lf.get("win", false)
-	var spd := HunterFeel.fling_speed if timed else base_speed
-	hv = MantleCarry.fling(self, hv, d, spd)
-	vel.x = hv.x; vel.z = hv.y
-	# up speed to peak fling_height (or fling_early_height) over the top from wherever you are on the face
-	var left := maxf(0.0, float(lf["lip"]) + 0.12 - pos.y)
-	vel.y = sqrt(2.0 * H_GRAV * (left + (HunterFeel.fling_height if timed else HunterFeel.fling_early_height)))
-	mantle_cd = 0.3
+	MantleCarry.launch(self, maxf(0.0, float(lf["lip"]) - pos.y))
 	air_t = 0.0        # (held Space opens the glider a beat later, as after any jump)
 	stats["flings"] = int(stats.get("flings", 0)) + (1 if timed else 0)
 	m.sfx("jump", pos, -6.0)
 	if timed:
 		m.sfx("whoosh", pos, -6.0 if is_local() else -12.0, 1.3)
 		m.fx.ghost(position, face, Color("e6f6ff"), float(cdat["scale"]))
-
-## Floating up the side: rise to the lip, drift onto it, then a small hop onto the top.
-func _grapple(dt: float) -> void:
-	grap["t"] += dt
-	var tz: float = grap["gz"] + 0.5
-	var rise := clampf(tz - pos.y, -HunterFeel.float_speed * dt, HunterFeel.float_speed * dt)
-	pos.y += rise
-	var hd := Vector2(grap["ex"] - pos.x, grap["ez"] - pos.z)
-	var hs := 11.0 * dt
-	if hd.length() <= hs: pos.x = grap["ex"]; pos.z = grap["ez"]
-	else:
-		var hn := hd.normalized() * hs
-		pos.x += hn.x; pos.z += hn.y
-	vel = Vector3.ZERO
-	grounded = false
-	grap["fx"] -= dt
-	if grap["fx"] <= 0.0:
-		grap["fx"] = 0.07
-		m.fx.debris(pos + Vector3(0, 0.6, 0), Color("cfeaff"), 2, 1.2, 0.35, 0.0)
-	if (absf(tz - pos.y) < 0.02 and hd.length() < 0.05) or grap["t"] > 2.0:
-		pos = Vector3(grap["ex"], maxf(pos.y, tz), grap["ez"])
-		var land: Vector3 = grap["land"]
-		grap = {}
-		pad = {"from": pos, "to": land, "t": 0.0, "dur": 0.22, "h": 0.4, "ledge": true}
 
 # ------------------------------------------------------------------ visuals
 var bot_look: Dictionary = {}  # how a bot hunter looks (random)

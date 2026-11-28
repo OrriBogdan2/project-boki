@@ -5189,6 +5189,6 @@ func _econ_tests(dbg) -> void:
 			elif "--grave-open" in dbg: hecon.open_grave(Econ.graves()[Econ.graves().size() - 1]))
 
 
-## Height below which a hunter over the void counts as fallen (gliding adds HunterFeel.abyss_glide_room).
+## Height below which a hunter over the void counts as fallen.
 func _abyss_kill_y() -> float:
-	return world.abyss_floor(ppos.x, ppos.z) - HunterFeel.abyss_extra - (HunterFeel.abyss_glide_room if gliding else 0.0)
+	return world.abyss_floor(ppos.x, ppos.z) - HunterFeel.abyss_extra

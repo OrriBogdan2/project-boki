@@ -29,7 +29,7 @@ Nothing here comes from the reference's files.
 - **Glider momentum [wiki]:** "Gliding right after a lateral Impulse in the same direction keeps some momentum and increases glide speed." This works with dashes, relics, consumables and terrain. The wiki also says gliding "preserves momentum".
 - **Air dashes [guide]:** mid-air dashes, jump pads and relics combine with gliding to go faster. Some hunters "dash mid-air before gliding for a fast speed gain".
 - **Opening the glider [guide]:** you hold jump while already jumping or falling, and letting go closes it. No engage delay is published anywhere.
-- **Abyss lift [wiki]:** a rapid upward impulse to ground level, then a rapid deceleration on arrival. Letting go before the top keeps the upward momentum.
+- **Abyss lift and edge mantle [game data] (11-27):** under a lip the glider's floor pull lifts you (10 to 40 m/s^2 by depth, cap 15.5 m/s) and lets go at the lip; letting go before the top keeps the upward momentum. Touching an island's side over the abyss launches you once (mini mantle under 3 m: the edge pop). Rows and numbers: `MOVEMENT_FEEL.d/1127-abyss-edge-parity.md`, `--abyss-edge-check`.
 - **Fall depth and glide speed [footage]** (sv/FEEL.md): 1s off an edge is ~8m deep. Glide speed is ~5 m/s, about run speed. The hunter stays roughly centred on screen.
 - **Ledges [footage] and the owner's description:** in the air, touching the side of ground above you while moving into it floats you up. Falling players who touch an island wall spring back onto it, even from a full second deep, in about 0.8s. The owner adds that there's no climb animation: you gain upward momentum, you can fling yourself a little in any direction with WASD, and a well-timed input or jump gives a better fling. The game never takes control.
 - **Feathering:** players tap the glider on and off. The owner points to a video about Nidhogg. The public wiki and guide pages we could read (the community wiki Gliding, Abyss) don't describe it, so every feathering number here is [est]. [footage] says heat keeps climbing across repeated drop-and-lift cycles and only really cools on the ground.
@@ -131,10 +131,10 @@ defaults aren't cited, since the data names no field for these windows.
 | abyss_lift_t (4m deep to balloon line) | 1.05s | 0.67s (0.70 before 0061) | <= 1.0s | [footage] ~1s |
 | abyss_kill_depth (point of no return under the lip) | 6.0m | 17.5m | 17–18m | [game data] AbyssHeight |
 | abyss_recover_depth (deepest a terminal fall can still glide out) | ~6m | 18.5m | >= 15m | |
-| abyss_fall_t / abyss_fall_vy_deep (step off the lip) | n/a | 1.93s / 10.0 m/s | >= 1.8s / 10–10.8 | [game data] AbyssFallSlow 12 to 10 m/s |
-| abyss_bounce_m (lift from 6m deep, over the lip) | ~0.8m | 1.59m (1.53 before 0061) | >= 1.5m | owner: bouncy |
+| abyss_fall_t / abyss_fall_vy_deep (step off the lip) | n/a | 1.97s / see r3 (11-27: ease-in curve) | >= 1.8s / 10–10.8 | [game data] AbyssFallSlow 12 to 10 m/s, ease-in |
+| abyss_bounce_m (lift from 6m deep, over the lip) | ~0.8m | 0.60m (11-27; 1.59m before) | 0.4–0.8m | [game data] the lift lets go at its top (owner 11-27: the reference wins; was "owner: bouncy") |
 | glide_high_sink / glide_swoop_speed (gliding above 8.5m) | 1.4 / 6.5 m/s | 3.5 / <= cruise | 3.3–3.6 / <= 5.3 | [game data] GlideDownwardForce; the drop adds no speed (owner 11-08) |
-| abyss_bounce_m (lift from 6m deep, over the lip) | ~0.8m | 1.58m | >= 1.5m | owner: bouncy |
+| abyss_bounce_m (lift from 6m deep, over the lip) | ~0.8m | 0.60m (11-27) | 0.4–0.8m | [game data] see the row above |
 | glide_high_sink / glide_high_swoop_x (gliding above 8.5m) | 1.4 / none | 3.5 m/s / 2.5x | 3.3–3.6 / 2.4–2.6 | [game data] GlideDownwardForce; the pull's extra sink, shed at 8.5m, becomes speed (decision 0095) |
 | dive_vy / dive_vy_t (hold Ctrl under the glider) | n/a | 32.5 m/s / 0.75s | 32–32.5 / 0.6–0.9s | [game data] GlideDiveZTargetSpeed -3250 uu/s, ZForceMax 350,000 / Mass 100 |
 | dive_steer_ratio (the keys in the dive vs under the glider) | n/a | 0.25x | 0.2–0.3 | [game data] GlideDiveXYForceMultiplier |
@@ -142,7 +142,7 @@ defaults aren't cited, since the data names no field for these windows.
 | swoop_x / swoop_fade_s / swoop_left / swoop_hot_x (short dive, let go) | none | 2.5x / 1.5 s / 0 / 1.25x | 2.4–2.6 / 1.45–1.55 / <= 0.05 / 1.2–1.3 | [game data] SwoopSpeedTransferRatio, SwoopSpeedFadeTime; half strength overheated (decision 0095) |
 | airdash_fall_vy_keep / airdash_fall_speed (class air dash out of a 10 m fall, 12 m/s) | n/a | 0.00x / 23.0 m/s | 0–1 / reference | [?] AirDashSpeedMultiplier / AirDashSpeedClamp not decoded, not filmed (sv/FEEL.md) |
 | airdash_dive_vy_keep / _hv_keep / _speed (out of a glide dive, 32.5 m/s down) | n/a | 0.00x / 0.00x / 23.0 m/s | 0–1 / 0–1 / reference | [?] the same: ours drops the fall and the forward speed |
-| abyss_tint_lip / half / end (screen danger 0..1) | (old HUD rings only) | 0.00 / ~0.2 / 0.99 | <= 0.02 / >= 0.1 / >= 0.95 | owner 11-17: graded, nothing until content/rules/abyss_danger.json start_depth, full at the kill depth (--abyss-danger-check) |
+| abyss_tint_lip / half / end (screen danger 0..1) | (old HUD rings only) | 0.00 / 0.49 / 1.00 | <= 0.02 / >= 0.1 / >= 0.95 | owner 11-17: graded; 11-27 target law: from 0.25 m under the lip, full 3.5 m above the point of no return, the warning sound from 3 m (content/rules/abyss_danger.json, --abyss-danger-check; was from 4 m, full at the kill depth) |
 | updraft_rise_t (to 8 m/s climb) | 0.333s | 0.233s | <= 0.3s | [est] powerful |
 | drop_dive_vy_t (90% of dive fall) | 0.583s | 0.333s | <= 0.4s | [est] punchy |
 | drop_dive_steer_t (90% of commanded) | 0.783s | 0.4s | <= 0.42s | the dive steers with every jump's air control (Loco.air_step, owner 11-08 one model; was 0.233s on its own 45 m/s² ramp) |

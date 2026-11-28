@@ -148,11 +148,13 @@ Per-kit dashes are the kits' own (content/archetypes/*.json `dash`); the source'
 | Walkable slope | WalkableFloorAngle 50° | terraces and stairs, no free slopes | [D]; map grammar | off (different terrain model) |
 | Walking off a ledge | bCanWalkOffLedges false | allowed | [D] | off (ruling: our maps are terraces) |
 | Mantle | reach 1.5 m, pull 1.75M on mass 100, rise cap 2.5 m/s, exit 0.6× run (min 3.5 m/s) | MANTLE_REACH 1.5, mantle_pull 175, mantle_vy_cap 2.5, mantle_launch_keep 0.6 / min 3.5 | [D]; hunter_move.json; `--mantle-check`, `--cliff-mantle-check` | match |
-| Mini mantle | MiniMantlePostLaunchDuration 0.75 s, MiniMantleForwardForceSpeedDeltaMultiplier 8, XYSpeedTarget 0.6 / 350 uu/s; no height row (no mini-mantle height band in the data) | the exit speed held 0.75 s in the air after the lip (`MantleCarry.MINI_S`, held firm instead of the ×8 force); no separate low-lip mantle | [D]; `scripts/match/mantle_carry.gd`; `--cliff-mantle-check` | [?] (the 0.75 s is a post-launch window, not a mantle length; a low-lip band is not in the data) |
-| Ledge rise and fling | not documented | rise 0.333 s; a timed jump flings 3.24 m; window 0.233 s | MFEEL `ledge_*` | unknown (ours [est]) |
+| Abyss mantle (11-27) | over the abyss a side you touch launches you straight up at 9 + 16.5 x (lip height / 17.5) m/s; under 3 m a mini mantle (+5 m/s, forward push 0.75 s, pulled down over the top); deeper held 0.1 s first; 1.0 s cooldown | `MantleCarry.launch`, hunter_move.json `edge_mantle` | [D]; `--abyss-edge-check` (launch and apex within 1% at 3 depths and 3 speeds) | match |
+| Abyss wall suction (11-27) | falling (not gliding) over the abyss, cooldown idle: a head-on side (within 40 degrees) up to 1.06-2.5 m ahead (by speed 2-3.5 m/s) pulls you in at 2.5-20 m/s^2 (curve by distance 0.5-3 m); 0-1.5 m under its top and within 1.5 m, rising at 2.5 m/s or less, also up at 25-175 m/s^2 x a distance curve | `MantleCarry.suction`, hunter_move.json `edge_mantle.suction` (the lift's top is the nearest lip: INFERRED) | [D]; `--abyss-edge-check` (pull within 0.1% at 3 distances, the lift, the 40-degree, glide and cooldown gates) | match |
+| Abyss warning | tint from 0.25 m under the lip, full 3.5 m above the kill depth; sound from 3 m | content/rules/abyss_danger.json start_depth 0.25, full_before_end 3.5, warn_from 0.089 (the tint at 3 m) | [D]; `--abyss-danger-check` | match (ends; the curves between are ours) |
+| Ledge rise and fling | none (the source mantles only over the abyss) | rise 0.333 s; a jump in the rise is the mini mantle's launch (forward goal capped at 1.2x run, owner 11-11) | MFEEL `ledge_*` | off (ours: terrace rule) |
 | Wall kick, wall bounce | none found in the data | every kit has both | `--wallmove-check` | off (ours, kept) |
 | Rail grinding | in the source | not modelled | [D] | off (missing) |
-| Abyss fall | 12 m/s easing to 10 m/s between 1 and 16.5 m under the lip | fall_cap 12, abyss_fall_cap 10, abyss_slow_from 1, abyss_slow_to 16.5 | [D]; hunter_move.json; `--abyss-check` | match |
+| Abyss fall | 12 m/s easing in to 10 m/s between 1 and 16.5 m under the lip; lost 17.5 m under it, gliding or not | fall_cap 12, abyss_fall_cap 10, abyss_slow_from 1, abyss_slow_to 16.5 (u^2); no glider room | [D]; hunter_move.json; `--abyss-edge-check` 1.97 s vs 1.97 s | match |
 
 ## 8. Frame-rate independence (`--move-rate-check`)
 
@@ -190,6 +192,6 @@ The windows read one frame shorter at 30 fps only because a press can land on a 
 3. **Dash curves** for 9 kits are not decoded: they run on the global ×0.85 / ×1.15 (KIT_PARITY gap 4; also gaps 9, 11, 13).
 4. **Air control** (owner 11-08) and **no swoop** (owner 11-08) are rulings against the data; **walking off ledges** and **glider at any heat** too.
 5. **Unknown in the source**: glide sink and steering speeds, heat coefficients, jump hold, air-dash multipliers, knockback steering values, landing recovery, hit-stop, coyote and buffer. Footage frame counts could settle the first three.
-6. **Rail grinding** is not modelled. **Mini mantle** [?]: its 0.75 s post-launch hold is `MantleCarry`; a short mantle for low lips needs a height band the data does not have (MantleZDiffMax and the suction curves are named but not decoded), so none is modelled.
+6. **Rail grinding** is not modelled. **Mini mantle**: modelled over the abyss since 11-27, with the wall pull (suction) toward head-on walls (MOVEMENT_FEEL.d/1127-abyss-edge-parity.md).
 7. The farm avatar's facing turns per step (not blended between steps); the interior and town movers still step on frame time.
 8. `--feel-golden-check` (done, ext/feel-golden-determinism): every script now runs in a cleared space (mobs, wild and own Boki freed and every other Hunter parked idle 80 m away before each step; seed 1109, the Hunter placed fresh), and the golden was re-recorded once. Three runs in a row: 117 traces, drift 0.000 m / 0.000 m/s each.
