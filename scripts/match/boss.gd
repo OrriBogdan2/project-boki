@@ -878,7 +878,7 @@ func render(delta: float, alpha: float) -> void:
 	model.rotation.y = face
 	if remote:
 		BossNet.advance(self, delta)
-	anim += delta * (1.5 + minf(Vector2(vel.x, vel.z).length(), 6.0) * 1.2)
+	anim += BossAnim.gait_step(self, delta)
 	BossAnim.pose(self, delta)
 	if enraged:
 		for mt in mats:

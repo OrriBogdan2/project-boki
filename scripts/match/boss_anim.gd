@@ -39,7 +39,11 @@ const STRIKE_S := {
 }
 const IDLE_S := {"colossus": 4.0, "serpent": 1.8, "brood": 2.4}  # s per idle loop
 const STAGGER_S := 1.2  # s per stagger loop
-const GAIT := {"colossus": 0.8, "serpent": 1.2, "brood": 1.4}  # walk cycles per radian of Boss.anim / TAU
+## m of ground one walk cycle covers when the feet plant (the leg swing measured on the glb by --mob-anim-check; the
+## serpent has no feet: one body wave), and the cycles/s each walk was keyed to read at; gait_step holds the rate to
+## MobAnim.RATE_MIN..RATE_MAX x that
+const STRIDE_M := {"colossus": 1.64, "serpent": 3.5, "brood": 1.0}
+const GAIT_HZ := {"colossus": 1.1, "serpent": 1.5, "brood": 2.0}
 const LOOP_RATE := {"sleep": 0.6, "stagger": 0.3}  # Colossus clip speed for the loops that are not at full speed
 const WALK_MPS := 0.3  # m/s: above this the walk plays
 const RATE_FAST := 30.0  # 1/s: how tightly a pivot follows wind-ups, strikes and the death
@@ -67,9 +71,9 @@ const CLIP := {
 const COL_LEGS := ["LegFL", "LegBR", "-LegFR", "-LegBL"]
 const SERP_WINGS := ["Head/WingL", "-Head/WingR"]
 const BR_JAWS := ["Head/JawL", "-Head/JawR"]
-const BR_LEGS := ["Legs/Leg01", "Legs/Leg11", "Legs/Leg21", "-Legs/Leg0-1", "-Legs/Leg1-1", "-Legs/Leg2-1"]
-const BR_TRI_A := ["Legs/Leg01", "Legs/Leg21", "Legs/Leg1-1"]
-const BR_TRI_B := ["Legs/Leg0-1", "Legs/Leg2-1", "Legs/Leg11"]
+const BR_LEGS := ["Legs/Leg01", "Legs/Leg11", "-Legs/Leg0-1", "-Legs/Leg1-1"]
+const BR_PAIR_A := ["Legs/Leg01", "Legs/Leg1-1"]  # the Brood Mother's four legs (her glb) in diagonal pairs
+const BR_PAIR_B := ["Legs/Leg0-1", "Legs/Leg11"]
 const B := ["."]
 const SHIVER := [0.1, 0, 0.2, 0.15, 0.3, -0.15, 0.4, 0.15, 0.5, -0.15, 0.6, 0.1, 0.7, 0]
 
@@ -105,7 +109,7 @@ const MOVES := {
 			[B, "py", [0, 0, 0.25, 0.05, 0.5, 0, 0.75, 0.05, 1, 0]],
 			[B, "rz", [0, 0.03, 0.5, -0.03, 1, 0.03]],
 			[B, "rx", [0, -0.05, 1, -0.05]],
-			[COL_LEGS, "rx", [0, 0, 0.25, 0.35, 0.75, -0.35, 1, 0]]
+			[COL_LEGS, "rx", [0, 0, 0.25, 0.5, 0.75, -0.5, 1, 0]]
 		],
 		"stagger":
 		[
@@ -267,8 +271,8 @@ const MOVES := {
 		"idle": [[["Sac"], "s", [0, 0, 0.5, 0.04, 1, 0]], [BR_JAWS, "ry", [0, 0.15, 0.5, 0.2, 1, 0.15]]],
 		"walk":
 		[
-			[BR_TRI_A, "ry", [0, 0, 0.25, 0.35, 0.75, -0.35, 1, 0]],
-			[BR_TRI_B, "ry", [0, 0, 0.25, -0.35, 0.75, 0.35, 1, 0]],
+			[BR_PAIR_A, "rx", [0, 0, 0.25, 0.35, 0.75, -0.35, 1, 0]],
+			[BR_PAIR_B, "rx", [0, 0, 0.25, -0.35, 0.75, 0.35, 1, 0]],
 			[BR_LEGS, "rz", [0, 0.2, 0.25, 0, 0.5, 0.2, 0.75, 0, 1, 0.2]],
 			[B, "py", [0, 0, 0.25, 0.06, 0.5, 0, 0.75, 0.06, 1, 0]],
 			[["Sac"], "s", [0, 0, 0.5, 0.04, 1, 0]]
@@ -278,7 +282,7 @@ const MOVES := {
 			[B, "py", [0, -0.3, 0.5, -0.28, 1, -0.3]],
 			[B, "rx", [0, -0.1, 1, -0.1]],
 			[BR_LEGS, "rz", [0, -0.4, 0.5, -0.3, 1, -0.4]],
-			[BR_TRI_A, "ry", [0, 0.15, 0.5, -0.15, 1, 0.15]],
+			[BR_PAIR_A, "rx", [0, 0.15, 0.5, -0.15, 1, 0.15]],
 			[BR_JAWS, "ry", [0, 0.6, 1, 0.6]],
 			[["Sac"], "s", [0, -0.05, 0.5, 0, 1, -0.05]]
 		],
@@ -418,7 +422,7 @@ static func pick(b: Boss) -> void:
 		cur_k = b.awake_t / WAKE_S
 	elif Vector2(b.vel.x, b.vel.z).length() > WALK_MPS:
 		cur_move = "walk"
-		cur_k = fposmod(b.anim * float(GAIT[b.mkind]) / TAU, 1.0)
+		cur_k = fposmod(b.anim / TAU, 1.0)
 	else:
 		cur_move = "idle"
 		cur_k = fposmod(b.m.time / float(IDLE_S[b.mkind]), 1.0)
@@ -446,7 +450,10 @@ static func pose(b: Boss, delta: float) -> void:
 	_aim(b.mkind, cur_move, cur_k, rig)
 	if fresh:
 		rig.now = rig.aim.duplicate()
-	var follow := 1.0 - exp(-(RATE_FAST if _fast(cur_move) else RATE_SLOW) * delta)
+	var rate := RATE_FAST if _fast(cur_move) else RATE_SLOW
+	if cur_move == "walk":
+		rate = maxf(rate, gait_hz(b) * MobAnim.GAIT_FOLLOW)  # the legs keep their swing at any cycle rate
+	var follow := 1.0 - exp(-rate * delta)
 	for i in rig.nodes.size():
 		rig.now[i] += (rig.aim[i] - rig.now[i]) * follow
 		if rig.nodes[i]:
@@ -459,6 +466,19 @@ static func pose(b: Boss, delta: float) -> void:
 
 static func _fast(move_name: String) -> bool:
 	return move_name == "death" or move_name.ends_with("_windup") or move_name.ends_with("_strike")
+
+
+## Cycles/s the walk runs: speed / stride so the feet plant, held to MobAnim.RATE_MIN..RATE_MAX x its keyed rate
+## (the hold is the skate that remains).
+static func gait_hz(b: Boss) -> float:
+	var hz: float = Vector2(b.vel.x, b.vel.z).length() / float(STRIDE_M[b.mkind])
+	var keyed: float = GAIT_HZ[b.mkind]
+	return clampf(hz, keyed * MobAnim.RATE_MIN, keyed * MobAnim.RATE_MAX)
+
+
+## Radians to add to Boss.anim this frame.
+static func gait_step(b: Boss, delta: float) -> float:
+	return gait_hz(b) * TAU * delta
 
 
 static func _write(n: Node3D, chan: int, v: float) -> void:
