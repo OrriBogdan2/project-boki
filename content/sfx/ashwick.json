@@ -26,7 +26,10 @@
   "ashwick_step_snow": "step",
   "ashwick_hurt": "grunt",
   "ashwick_down": "grunt",
-  "ashwick_death": "grunt"
+  "ashwick_death": "grunt",
+  "ashwick_recast_open": "ui",
+  "ashwick_recast_tick": "ui",
+  "ashwick_recast_end": "ui"
  },
  "signature": ["lw_roar", "ashwick_tank_hiss"],
  "kit_files": ["ashwick_jet.gd"],

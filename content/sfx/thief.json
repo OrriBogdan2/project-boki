@@ -39,7 +39,10 @@
   "thief_step_grass": "step",
   "thief_step_stone": "step",
   "thief_step_wood": "step",
-  "thief_step_snow": "step"
+  "thief_step_snow": "step",
+  "thief_recast_open": "ui",
+  "thief_recast_tick": "ui",
+  "thief_recast_end": "ui"
  },
  "kit_files": ["thief_ult.gd"],
  "signature": ["thief_flintlock_crack", "dj_bolt", "thief_cock"],

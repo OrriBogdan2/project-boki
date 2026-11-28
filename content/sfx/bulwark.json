@@ -35,7 +35,11 @@
 		"bulwark_death": "grunt",
 		"bjorn_boop": "impact",
 		"bjorn_reel": "cast",
-		"bjorn_ult_quake": "impact"
+		"bjorn_ult_quake": "impact",
+		"bulwark_recast_open": "ui",
+		"bulwark_recast_tick": "ui",
+		"bulwark_recast_end": "ui",
+		"bulwark_shield_down": "cast"
 	},
 	"signature": ["bulwark_hammer_clang", "bulwark_hull_creak"],
 	"kit_files": ["bjorn_ult.gd"],

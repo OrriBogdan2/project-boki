@@ -40,7 +40,10 @@
   "mage_bolt_tail": "cast",
   "mage_hurt": "grunt",
   "mage_down": "grunt",
-  "mage_death": "grunt"
+  "mage_death": "grunt",
+  "mage_recast_open": "ui",
+  "mage_recast_tick": "ui",
+  "mage_recast_end": "ui"
  },
  "loops": ["vv_ult_hum", "mage_bolt_fly"],
  "signature": [
