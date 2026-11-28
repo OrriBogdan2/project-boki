@@ -144,14 +144,17 @@ func _trail() -> void:
 	await _shot("stop")
 	await _wait(float(BaseGreet.trail_rules()["sit_s"]) + 2.0)
 	await _shot("sit")
-	print("FCCLIP sat=%s" % partner.has("sat"))
+	var life: Fsm = h.life.machine(partner)
+	var off: Vector3 = partner["goal"] - partner["pos"]
+	var line := "FCCLIP partner sat=%s state=%s still=%.1f goal off %.2f m, hold %.1f, pvel %.2f"
+	print(line % [partner.has("sat"), life.state_name(), partner.get("trail_still", -1.0), off.length(), partner.get("hold_t", 0.0), h.pvel.length()])
 	await _walk(h.world.free_spot_near(h.spots["house"] + Vector3(0, 0, 4.0), [], 1.0), null, "walk_on")
 	await _open(GardenZones.HUB)
 	await _walk(h.hway.node.position + Vector3(0, 0, 1.2))
 	await _wait(3.0)
 	await _shot("waystone")
-	var off: Vector3 = _partner()["pos"] - h.hway.node.position
-	print("FCCLIP partner waits %.1f m from the Waystone" % Vector2(off.x, off.z).length())
+	var gap: Vector3 = _partner()["pos"] - h.hway.node.position
+	print("FCCLIP partner waits %.1f m from the Waystone" % Vector2(gap.x, gap.z).length())
 
 
 func _partner() -> Dictionary:
