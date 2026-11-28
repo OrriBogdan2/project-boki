@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dxhcuphqeioq7"
-path="res://.godot/imported/gust_fan_gust_fan.jpg-5f0c663eb2edce26e96117de57dfc101.ctex"
+path.s3tc="res://.godot/imported/gust_fan_gust_fan.jpg-5f0c663eb2edce26e96117de57dfc101.s3tc.ctex"
+path.etc2="res://.godot/imported/gust_fan_gust_fan.jpg-5f0c663eb2edce26e96117de57dfc101.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "392430562048fc586b80d2fb276d746f"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/props/gust_fan/gust_fan_gust_fan.jpg"
-dest_files=["res://.godot/imported/gust_fan_gust_fan.jpg-5f0c663eb2edce26e96117de57dfc101.ctex"]
+dest_files=["res://.godot/imported/gust_fan_gust_fan.jpg-5f0c663eb2edce26e96117de57dfc101.s3tc.ctex", "res://.godot/imported/gust_fan_gust_fan.jpg-5f0c663eb2edce26e96117de57dfc101.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

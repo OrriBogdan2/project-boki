@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cets1pl581wun"
-path="res://.godot/imported/forgebrock_forgebrock_atlas.webp-cbb11d84473fd1a06a8f9f271c5df7e0.ctex"
+path.s3tc="res://.godot/imported/forgebrock_forgebrock_atlas.webp-cbb11d84473fd1a06a8f9f271c5df7e0.s3tc.ctex"
+path.etc2="res://.godot/imported/forgebrock_forgebrock_atlas.webp-cbb11d84473fd1a06a8f9f271c5df7e0.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "677cd2f5e776fc361a342bf9f0f5a599"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/forgebrock/forgebrock_forgebrock_atlas.webp"
-dest_files=["res://.godot/imported/forgebrock_forgebrock_atlas.webp-cbb11d84473fd1a06a8f9f271c5df7e0.ctex"]
+dest_files=["res://.godot/imported/forgebrock_forgebrock_atlas.webp-cbb11d84473fd1a06a8f9f271c5df7e0.s3tc.ctex", "res://.godot/imported/forgebrock_forgebrock_atlas.webp-cbb11d84473fd1a06a8f9f271c5df7e0.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

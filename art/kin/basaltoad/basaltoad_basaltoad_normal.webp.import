@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bgcqt2kyxlq5o"
-path="res://.godot/imported/basaltoad_basaltoad_normal.webp-4bf6c61ca41a0215779617877588cfe8.ctex"
+path.s3tc="res://.godot/imported/basaltoad_basaltoad_normal.webp-4bf6c61ca41a0215779617877588cfe8.s3tc.ctex"
+path.etc2="res://.godot/imported/basaltoad_basaltoad_normal.webp-4bf6c61ca41a0215779617877588cfe8.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "1bce847d96d66fd0a2c9a1b0aad34659"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/basaltoad/basaltoad_basaltoad_normal.webp"
-dest_files=["res://.godot/imported/basaltoad_basaltoad_normal.webp-4bf6c61ca41a0215779617877588cfe8.ctex"]
+dest_files=["res://.godot/imported/basaltoad_basaltoad_normal.webp-4bf6c61ca41a0215779617877588cfe8.s3tc.ctex", "res://.godot/imported/basaltoad_basaltoad_normal.webp-4bf6c61ca41a0215779617877588cfe8.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
