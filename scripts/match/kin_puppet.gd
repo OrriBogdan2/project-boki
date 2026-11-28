@@ -321,7 +321,7 @@ func _process(dt: float) -> void:
 	rx -= nap.bow
 	sx *= fl.wide
 	sy *= fl.tall
-	flex.scale = Vector3(sx * girth, sy, sx * sz * lerpf(1.0, girth, 0.5))
+	flex.scale = Vector3(sx * girth, sy, sx * sz * lerpf(1.0, girth, 0.5)) * float(root.get_meta("fit", 1.0))
 	flex.position = flex_base + off + fl.shove
 	# a lean into a dizzy wobble
 	if dazed:

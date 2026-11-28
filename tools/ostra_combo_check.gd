@@ -723,9 +723,11 @@ func _quiet_float(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
 	var other: int = remote_steps.call()
 	await _become(T, "thief")
 	var footed: int = remote_steps.call()
+	# (>= 3: the hunters are drawn match_k bigger (PR #1129), so a stride covers more ground and 3 s at 5 m/s
+	# gives ~4 steps, not 5+)
 	ok(
 		"float: a remote Motley walking 3 s plays zero step sounds; a remote footed Hunter does step",
-		other == 0 and footed >= 5, "Motley %d, thief %d" % [other, footed]
+		other == 0 and footed >= 3, "Motley %d, thief %d" % [other, footed]
 	)
 
 ## Item 35: his own ground and air dash moves (the Trade's lob), ids no other hero's table has, and each one's

@@ -167,14 +167,14 @@ func _no_duplicate_toasts(m: Match) -> void:
 ## The plate's bottom edge sits at or over every archetype's tallest point (back props, horns), whatever the drawn size.
 func _plates_clear_tops(m: Match) -> void:
 	var feet := m.player.position
-	var vis_k := Hunter.VIS_SCALE * m.cam.hunter_scale
 	var worst := 1e9
 	var missing: Array[String] = []
 	for id in Arch.ids():
 		if not Arch.body(id).has("top_h"):
 			missing.append(id)
+		var vis_k := Hunter.VIS_SCALE * Arch.match_k(id) * m.cam.hunter_scale
 		var top := Arch.top_h(id) * vis_k
-		var up := HudPlate.up_of(id, vis_k, 0.0) * CamRig.match_hunter_scale
+		var up := HudPlate.up_of(id, vis_k, 0.0) * Arch.match_k(id)
 		var gap := _screen_y(m, feet, top) - _screen_y(m, feet, up) - 17.0  # px: the plate hangs 17 px under its anchor
 		worst = minf(worst, gap)
 	ok(missing.is_empty(), "every archetype has body.top_h in its data (missing: %s)" % str(missing))

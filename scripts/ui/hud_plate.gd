@@ -40,7 +40,7 @@ const STOPS := ["status_stunned", "status_rooted", "status_grounded"]  # what st
 const RING_KEY := 0.04  # a status ring repaints its plate in steps this big (of its 0..1)
 const MARK_FOR := {"mark_daze": "status_dazed", "fireball": "status_burning"}
 const PLATE_OFFSET := 2.35  # m over the feet where a plate sits unless the archetype sets its own
-const CLEAR_M := 0.6  # m: a plate's 17 px hang and a little air over the model's top (33 px per m up, default camera)
+const CLEAR_M := 1.0  # m: a plate's 17 px hang and a little air over the model's top (~19 px per m up, upright)
 
 ## nid -> {chip, hold, frac, armor, flash, brk, down, burst, seen, tot (the status row's ring clocks)}
 var st := {}
@@ -59,15 +59,15 @@ static func plate_offset(h: Hunter) -> float:
 	return float(Arch.def(h.arch).get("plate_offset", PLATE_OFFSET))
 
 
-## `base` m over the feet (before the match's Hunter size, as Hud._head takes it), raised so the plate hangs clear over
-## h's tallest point: back props and horns grow with the drawn size, the plate's size on screen does not.
+## `base` m over the feet (Hud._head takes the result divided by match_k, and puts it back), raised so the plate hangs
+## clear over h's tallest point: back props and horns grow with the drawn size, the plate's size on screen does not.
 static func up(h: Hunter, base: float) -> float:
 	return up_of(h.arch, h.vis_k, base)
 
 
 ## up() for hunter archetype `arch` drawn at model scale `vis_k`.
 static func up_of(arch: String, vis_k: float, base: float) -> float:
-	return maxf(base, (Arch.top_h(arch) * vis_k + CLEAR_M) / CamRig.match_hunter_scale)
+	return maxf(base, Arch.top_h(arch) * vis_k + CLEAR_M) / Arch.match_k(arch)
 
 
 ## A rival you can see but who is hiding (crouched, or in tall grass or smoke) shows no plate or hover card: you see a
