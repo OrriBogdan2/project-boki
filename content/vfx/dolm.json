@@ -56,9 +56,16 @@
 			{"p": "smoke", "fwd": 1.3, "y": 0.2, "n": 2, "speed": 2.0, "spread": 0.8, "life": 0.42, "size": 0.42,
 				"c": "dust", "gain": 0.4, "c3": "smoke", "near": true}
 		]},
-		"punch_hit": {"fx": [{"p": "flare", "y": 0.7, "size": "r", "size_x": 2.9, "size_k": 0.5, "life": 0.2, "c": "main", "c2": "hot"},
-				{"p": "ember", "y": 0.6, "way": "fwd", "n": 18, "speed": 10.0, "spread": 0.4, "grav": 9.0, "life": 0.3, "size": 0.06, "stretch": 0.07, "c": "eye", "c2": "hot"},
-				{"p": "chunk", "y": 0.4, "way": "fwd", "n": 8, "speed": 6.0, "spread": 0.6, "grav": 20.0, "drag": 0.2, "life": 0.45, "size": 0.1, "size_k": 0.4, "radius": "r", "c": "stone", "c3": "char"}]},
+		"punch_hit": {"fx": [
+			{"p": "flare", "y": 0.7, "size": "r", "size_x": 1.7, "size_k": 0.5, "grow": 0.8, "life": 0.07, "c": "hot", "c2": "hot"},
+			{"p": "flare", "y": 0.7, "size": "r", "size_x": 3.8, "size_k": 0.5, "life": 0.22, "c": "main", "c2": "hot"},
+			{"p": "star", "y": 0.8, "n": 4, "speed": 0.3, "spread": 1.0, "life": 0.14, "size": 0.38, "size_k": 0.4,
+				"c": "hot", "c2": "main"},
+			{"p": "ember", "y": 0.6, "way": "fwd", "n": 24, "speed": 11.0, "spread": 0.45, "grav": 9.0, "life": 0.3,
+				"size": 0.075, "stretch": 0.08, "c": "eye", "c2": "hot"},
+			{"p": "chunk", "y": 0.4, "way": "fwd", "n": 8, "speed": 6.0, "spread": 0.6, "grav": 20.0, "drag": 0.2,
+				"life": 0.45, "size": 0.1, "size_k": 0.4, "radius": "r", "c": "stone", "c3": "char"}
+		]},
 		"rock_launch": {"fx": [
 			{"p": "chunk", "y": 0.5, "n": 8, "speed": 5.0, "spread": 0.7, "grav": 14.0, "life": 0.6, "size": 0.14,
 				"c": "stone", "c3": "basalt"},
