@@ -9,9 +9,9 @@ extends RefCounted
 ##      Done (not Feed) is the page's filled button until the trough step
 ##   5. in the world: Hob stands by the house and is talked to, the house is a free site that Boki
 ##      and the player build, save and load mid-build, skipping still puts the house down
-##   5. base_mode: the five-step base tutorial (meet, plant the snack patch, feed and the lean, toy, head out
-##      or stay), your Boki leading each step, a Skip on screen at every step, resume after save and load,
-##      the farm guides retired
+##   5. base_mode: the five-step base tutorial (meet, pet, feed and the lean, toy, name), your Boki
+##      leading each step, a Skip on screen at every step, resume after save and load, the farm guides
+##      retired, old mid-tutorial saves finishing
 ##   6. the hub's first visit (HubFirstVisit): the Waystone marker, the one line on the first locked zone's
 ##      card, each once per save, and neither on a skipped save
 ## Never touches the real save.
@@ -135,42 +135,30 @@ func _base_tutorial() -> void:
 	rules["base_mode"] = true
 	var ids: Array = FarmTutorial.steps().map(func(st): return String(st["id"]))
 	ok(
-		ids == ["meet", "patch", "eat", "toy", "out"] and FarmTutorial.skippable(),
+		ids == ["meet", "pet", "eat", "toy", "name"] and FarmTutorial.skippable(),
 		"base_mode on: five steps and a Skip: %s" % str(ids)
 	)
 	var one_line := true
+	var builds := false
 	for st in FarmTutorial.steps():
 		for t in (st["hints"] as Dictionary).values():
 			one_line = one_line and not String(t).contains("\n")
 		one_line = one_line and not FarmTutorial.hint_text(String(st["id"])).contains("{")
+		builds = builds or (String(st["id"]) != "toy" and (st.get("spot", {}) as Dictionary).has("go"))
 	ok(one_line, "one banner line per step, no leftover tokens")
-	var last := FarmTutorial.hint_text("out")
-	var path_said: bool = last.contains("Wayseed") and last.contains("leaning Boki")
-	ok(
-		last.contains("Waystone") and path_said and not last.contains("\n"),
-		"the last hint: the Waystone, and its unlock path (a Wayseed and a Boki leaning that way) in one line"
-	)
+	ok(not builds, "no step but the toy's fallback asks you to build")
 	_banner_fits()
 	ok(FarmTutorial.current() == "meet", "it starts with meeting your Boki")
 	FarmTutorial.event("play")
+	FarmTutorial.event("pet")
 	ok(FarmTutorial.current() == "meet", "a later step done early does not count")
 	FarmTutorial.event("meet")
-	var spot := FarmTutorial.spot("patch")
-	ok(
-		FarmTutorial.current() == "patch" and FarmTutorial.hint_text("patch").contains("snack patch"),
-		"met: plant the snack patch comes before feeding"
-	)
-	ok(
-		spot.get("tile", "") == SnackPatch.ID and spot.get("tab", "") == HomeLayout.CATALOG[SnackPatch.ID]["cat"],
-		"the patch step lights the snack patch tile in its Garden tab"
-	)
-	var pl := HomeLayout.of(Save.d)
-	(pl["deco"] as Array).append({"u": HomeLayout._next_uid(pl), "id": SnackPatch.ID, "x": 44, "z": 30, "r": 0})
-	FarmTutorial.detect()
+	ok(FarmTutorial.current() == "pet" and FarmTutorial.hint_text("pet").contains("Pet"), "met: petting comes next")
+	FarmTutorial.event("pet")
 	var eat_hint := FarmTutorial.hint_text("eat")
 	ok(
 		FarmTutorial.current() == "eat" and eat_hint.contains(Care.food_name("emberberry")),
-		"patch down: feed it, the hint names the food"
+		"petted: feed it, the hint names the food"
 	)
 	var rec: Dictionary = Save.d["roster"][0]
 	Evo.eat(rec, "kibble")
@@ -186,50 +174,56 @@ func _base_tutorial() -> void:
 		"a toy down: watch it play, marked"
 	)
 	FarmTutorial.event("play")
-	ok(FarmTutorial.current() == "out" and FarmTutorial.done_count() == 4, "a Boki at play finishes the toy step")
+	ok(FarmTutorial.current() == "name" and FarmTutorial.done_count() == 4, "a Boki at play finishes the toy step")
 	var g := int(Save.d["gems"])
-	FarmTutorial.event("stay")
+	FarmTutorial.event("name")
 	var paid: bool = int(Save.d["gems"]) == g + int(FarmTutorial.option("end_gems"))
-	ok(not FarmTutorial.active() and paid, "staying ends it with the one reward")
-	_base_ends_alone()
+	ok(not FarmTutorial.active() and paid, "naming it ends it with the one reward")
+	_base_old_saves()
 	await _base_world()
 
 
-## The last base hint ("head out or stay"), with its counter, fits inside TutorialStrip's 42% width at a
-## readable size (12 px is the shrink
-## floor, so the line never runs past the "4/4" counter), at 1080p and at 720p.
+## The longest base hint, with its counter, fits inside TutorialStrip's 42% width at a readable size (12 px is
+## the shrink floor, so the line never runs past the "5/5" counter), at 1080p and at 720p.
 func _banner_fits() -> void:
 	var font: Font = load("res://fonts/LilitaOne-Regular.ttf")
 	var worst := 99
 	var over := ""
-	for sz in [Vector2(1920, 1080), Vector2(1280, 720)]:
-		var r := TutorialStrip.rect(sz)
-		var line := {"text": "\u2713 Done!  " + FarmTutorial.hint_text("out"), "count": "4/4"}
-		var lay := TutorialStrip.layout(font, r, line)
-		worst = mini(worst, int(lay["text_px"]))
-		if float(lay["text_w"]) > float(lay["text_room"]):
-			over = "at %s" % str(sz)
-	ok(over == "" and worst >= 12, "the head out line fits the strip beside 4/4 (smallest %d px) %s" % [worst, over])
+	for st in FarmTutorial.steps():
+		for sz in [Vector2(1920, 1080), Vector2(1280, 720)]:
+			var r := TutorialStrip.rect(sz)
+			var line := {"text": "\u2713 Done!  " + FarmTutorial.hint_text(String(st["id"])), "count": "5/5"}
+			var lay := TutorialStrip.layout(font, r, line)
+			worst = mini(worst, int(lay["text_px"]))
+			if float(lay["text_w"]) > float(lay["text_room"]):
+				over = "%s at %s" % [st["id"], str(sz)]
+	ok(over == "" and worst >= 12, "every line fits the strip beside 5/5 (smallest %d px) %s" % [worst, over])
 
 
-## "Head out or stay" also ends on its own: a zone waking, or a Boki finishing a toy turn. Neither counts before
-## the toy step is done, and each pays the one reward once.
-func _base_ends_alone() -> void:
-	for what in ["wake", "played"]:
-		Save.d = _new_save()
-		HomeLayout.ensure(Save.d)
-		_stats()
-		FarmTutorial.event(what)
-		ok(FarmTutorial.done_count() == 0 and FarmTutorial.active(), "%s before the toy step counts for nothing" % what)
-		for id in ["meet", "patch", "eat", "toy"]:
-			FarmTutorial.mark(id)
-		ok(FarmTutorial.current() == "out", "%s: toy done, 'head out or stay' is the step" % what)
-		var g := int(Save.d["gems"])
-		FarmTutorial.event(what)
-		var paid: bool = int(Save.d["gems"]) == g + int(FarmTutorial.option("end_gems"))
-		ok(not FarmTutorial.active() and FarmTutorial.did("out") and paid, "%s ends it with the one reward" % what)
-		FarmTutorial.event(what)
-		ok(int(Save.d["gems"]) == g + int(FarmTutorial.option("end_gems")), "%s again pays nothing more" % what)
+## A save from before the pet and name steps (its ft.did has "patch" and maybe "toy", never "pet"): detect
+## carries it on, and it finishes with the one reward instead of waiting for steps it can no longer see.
+func _base_old_saves() -> void:
+	Save.d = _new_save()
+	HomeLayout.ensure(Save.d)
+	_stats()
+	for id in ["meet", "patch"]:
+		FarmTutorial.state()["did"][id] = true
+	FarmTutorial.detect()
+	ok(FarmTutorial.current() == "pet" and FarmTutorial.active(), "old save at the snack patch: pet it next")
+	Save.d = _new_save()
+	HomeLayout.ensure(Save.d)
+	_stats()
+	for id in ["meet", "patch", "eat", "toy"]:
+		FarmTutorial.state()["did"][id] = true
+	FarmTutorial.detect()
+	ok(
+		FarmTutorial.current() == "name" and FarmTutorial.did("pet"),
+		"old save waiting at 'head out': only the name is left"
+	)
+	var g := int(Save.d["gems"])
+	FarmTutorial.event("name")
+	var paid: bool = int(Save.d["gems"]) == g + int(FarmTutorial.option("end_gems"))
+	ok(not FarmTutorial.active() and paid, "and it ends with the one reward")
 
 
 ## The hint line's Skip button is up (and not hidden behind a quiet guide).
@@ -285,33 +279,32 @@ func _base_world() -> void:
 	ok(_skip_shown(guide), "step 1: Skip is on screen")
 	var me: Vector3 = k["node"].position
 	ok(
-		guide.target("meet") == me and guide.target("eat") == me and _on_no_isle([me]),
-		"meet and feed: the marker is on your Boki, not a side isle"
+		guide.target("meet") == me and guide.target("pet") == me and guide.target("eat") == me and _on_no_isle([me]),
+		"meet, pet and feed: the marker is on your Boki, not a side isle"
 	)
 	home.ppos = k["node"].position + Vector3(1, 0, 0)
 	guide._poll()
-	ok(
-		FarmTutorial.current() == "patch" and guide.target("patch") == Vector3.INF,
-		"walking up meets it: the patch is next"
-	)
+	ok(FarmTutorial.current() == "pet", "walking up meets it: petting is next")
 	ok(_skip_shown(guide), "step 2: Skip is on screen")
-	var hl := HomeLayout.of(Save.d)
-	(hl["deco"] as Array).append({"u": HomeLayout._next_uid(hl), "id": SnackPatch.ID, "x": 44, "z": 30, "r": 0})
+	home._pet_kin(k)
 	guide._poll()
-	ok(FarmTutorial.current() == "eat" and _berries() == 3, "the patch down hands over the food")
+	ok(FarmTutorial.current() == "eat" and _berries() == 3, "petting it hands over the food")
 	home._after_feed(k, "emberberry", Care.feed(k["rec"], "emberberry"))  # Care.feed leans, the home shows it
-	guide._poll()
+	FarmTutorial.detect()
 	ok(Evo.lean(k["rec"])[0] == "fire" and FarmTutorial.current() == "toy", "feeding it through the home leans it")
+	var hint := FarmTutorial.hint_text("toy")
+	var price := str(HomeLayout.price("toy_ball")[0])
 	ok(
-		(
-			_skip_shown(guide)
-			and FarmCropGuide.stage_time(30.0) == 30.0
-			and guide.crop_lbl == null
-			and not FarmTutorial.hint_text("toy").contains("{")
-		),
-		"step 3: Skip on screen, crop and task guides retired"
+		hint.contains(Settings.key_cap("build")) and hint.contains(price),
+		"toy (if you took the ball away): the line names the build key and the ball's price: %s" % hint
 	)
-	# resume: save and load after two steps, the tutorial carries on at the toy
+	var marked: Array = []
+	for e in home.hb.entries.tab("Base"):
+		if bool(e.get("hl", false)):
+			marked.append(String(e["id"]))
+	ok(marked == ["toy_ball"], "toy: the ball glows in its tab: %s" % str(marked))
+	ok(guide.target("toy") == Vector3.INF, "toy: no marker until a toy is down")
+	# resume: save and load after three steps, the tutorial carries on at the toy
 	var js := JSON.stringify(Save.d)
 	home.queue_free()
 	await main.get_tree().process_frame
@@ -322,36 +315,27 @@ func _base_world() -> void:
 	ok(
 		(
 			FarmTutorial.did("meet")
+			and FarmTutorial.did("pet")
 			and FarmTutorial.did("eat")
 			and FarmTutorial.current() == "toy"
 			and FarmTutorial.done_count() == 3
 		),
 		"after save and load it resumes at the toy step"
 	)
-	guide._poll()
-	ok(_skip_shown(guide) and guide.hint_box.line.get("count") == "4/5", "resumed: 4/5 on the line, Skip still there")
 	var resumed_gift := _berries()
 	FarmTutorial.give_food()
 	ok(_berries() == resumed_gift, "resumed: the starter food is not handed over twice")
-	ok(guide.target("toy") == Vector3.INF, "toy: no marker until a toy is down")
-	var hint := FarmTutorial.hint_text("toy")
-	var price := str(HomeLayout.price("toy_ball")[0])
+	guide._poll()
 	ok(
-		hint.contains(Settings.key_cap("build")) and hint.contains(price) and hint.contains("free"),
-		"toy: the line names the build key, the ball's price and that the patch is free: %s" % hint
+		_skip_shown(guide) and guide.hint_box.line.get("count") == "4/5" and home.toys.toys().size() == 1,
+		"resumed: 4/5 on the line, Skip still there, and the ball was set down for you (no building needed)"
 	)
-	var marked: Array = []
-	for tab in ["Base", "Garden"]:
-		for e in home.hb.entries.tab(tab):
-			if bool(e.get("hl", false)):
-				marked.append(String(e["id"]))
-	ok(marked == ["toy_ball", "snack_patch"], "toy: the ball and the patch glow in their tabs: %s" % str(marked))
-	guide.place_toy()
-	ok(FarmTutorial.marks().is_empty(), "toy: nothing glows once a toy is down")
 	ok(
 		guide.target("toy") == FarmTutorial.toy_spot() and _on_no_isle([guide.target("toy")]),
-		"toy: the marker is on the toy you put down, not a side isle"
+		"toy: the marker is on the toy, not a side isle"
 	)
+	for held in ["hold_t", "look", "called_t"]:
+		k.erase(held)  # the pat's hold and look are over
 	_lead_tick(home, k)
 	var leading: bool = home.life.machine(k).is_in(BaseLife.S.LEAD)
 	ok(k.has("play") and not leading, "a toy down: it leaves the lead to go and play")
@@ -359,18 +343,24 @@ func _base_world() -> void:
 	k.erase("play")
 	home.life.machine(k).go(BaseLife.S.ROAM, "check")
 	home.ppos = k["node"].position + Vector3(1, 0, 0)
-	_lead_tick(home, k)
-	var portal: Vector3 = home.spots["portal"]
-	ok(guide.target("out") == portal and _on_no_isle([portal]), "head out: the marker is on the portal, no side isle")
-	var gap := Vector2(portal.x - k["pos"].x, portal.z - k["pos"].z).length()
-	var ahead := Vector2(portal.x - k["goal"].x, portal.z - k["goal"].z).length()
+	guide._poll()
 	ok(
-		FarmTutorial.current() == "out" and String(k["lead_said"]) == "out" and ahead < gap,
-		"head out or stay: it leads off toward the portal"
+		home.panel_open == "Name your Boki" and FarmTutorial.current() == "name",
+		"name: the naming card opens by itself"
 	)
-	home.ppos = k["node"].position + Vector3(20, 0, 0)
-	_lead_tick(home, k)
-	ok(k["goal"] == k["pos"] and _skip_shown(guide), "you fall behind: it waits and looks back; step 4 Skip on screen")
+	var step := TutNameCard.open(home)
+	var gems1 := int(Save.d["gems"])
+	step.box.text = "Pip"
+	step.keep()
+	var named_ok: bool = String(k["rec"]["name"]) == "Pip" and not FarmTutorial.active()
+	ok(
+		named_ok and int(Save.d["gems"]) == gems1 + int(FarmTutorial.option("end_gems")),
+		"Keep renames it and ends the tutorial"
+	)
+	home.queue_free()
+	await main.get_tree().process_frame
+	home = await _home(1)
+	k = home.kins[0]
 	var gems0 := int(Save.d["gems"])
 	home.guide.skip()
 	var toys: Array = home.toys.toys()

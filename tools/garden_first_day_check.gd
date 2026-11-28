@@ -14,18 +14,20 @@ extends RefCounted
 
 const HudGroups := preload("res://tools/garden_hud_groups.gd")
 
-const STEP_S := 0.05      # s of farm time per step
-const MAX_STEPS := 4800   # a toy is picked up within 60 s of farm time (toy_check)
+const STEP_S := 0.05  # s of farm time per step
+const MAX_STEPS := 4800  # a toy is picked up within 60 s of farm time (toy_check)
 const RACE_MAX_S := 120.0
-const TOY_LEAD_S := 60.0   # s of farm time from a toy placed to its first play, with the Feed step still open
+const TOY_LEAD_S := 60.0  # s of farm time from a toy placed to its first play, with the Feed step still open
 
 var bad := 0
 var main: Node
+
 
 func ok(cond: bool, what: String) -> void:
 	print("FIRSTDAY %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func _fresh_save() -> Dictionary:
 	var d := Save.fresh()
@@ -38,8 +40,10 @@ func _fresh_save() -> Dictionary:
 	d["active"] = d["roster"][0]["uid"]
 	return d
 
+
 func _ids() -> Array:
 	return (GardenFirstDay.rules()["rows"] as Array).map(func(r): return String(r["id"]))
+
 
 func run(m: Node) -> void:
 	main = m
@@ -51,6 +55,7 @@ func run(m: Node) -> void:
 	await _screens()
 	print("FIRSTDAY DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
 
 func _screens() -> void:
 	var gh := HudGroups.new()
@@ -65,14 +70,17 @@ func _screens() -> void:
 			var cards: Array = scr["cards"]
 			ok(cards.size() <= 1, "%s: %d arrival cards (%s)" % [what, cards.size(), ", ".join(cards)])
 
+
 func _list() -> void:
 	var ids := _ids()
 	ok(ids.size() == 5 and ids == ["feed", "toy", "race", "nap", "pair"], "five lines: feed, toy, race, nap, pair")
 	Save.d = Save.fresh()
 	ok(GardenFirstDay.active() and GardenFirstDay.rows().size() == 4, "a fresh save has the list, without 'pair'")
 	var kibble := int(Save.d["items"].get("kibble", 0))
-	ok(kibble >= 1 and kibble == int(GardenFirstDay.rules()["start_items"]["kibble"]),
-			"a fresh bag holds the starting kibble, so 'Feed your Boki' has food (%d)" % kibble)
+	ok(
+		kibble >= 1 and kibble == int(GardenFirstDay.rules()["start_items"]["kibble"]),
+		"a fresh bag holds the starting kibble, so 'Feed your Boki' has food (%d)" % kibble
+	)
 	var old := Save.fresh()
 	old["tutorial"] = {"home": true, "day1_done": true}
 	Save.d = old
@@ -81,32 +89,43 @@ func _list() -> void:
 	ok(not old["tutorial"].has("gfd"), "and a tick does not start it")
 	_pair_after_grown()
 	Save.d = _fresh_save()
-	Save.d["tutorial"] = Save.fresh()["tutorial"]      # (a fresh save's list, with two Boki: the pair lines show)
+	Save.d["tutorial"] = Save.fresh()["tutorial"]  # (a fresh save's list, with two Boki: the pair lines show)
 	var rows := GoalTracker.lines()
 	var texts: Array = (GardenFirstDay.rules()["rows"] as Array).map(func(r): return String(r["text"]))
-	ok(rows.size() == 3 and rows.map(func(r): return r["text"]) == texts.slice(0, 3),
-			"the tracker leads with the first three lines, in order (the card shows at most three)")
-	ok(rows.all(func(r): return r["source"] == "first_day" and int(r["need"]) == 1),
-			"one line each, none of them a tutorial step")
+	ok(
+		rows.size() == 3 and rows.map(func(r): return r["text"]) == texts.slice(0, 3),
+		"the tracker leads with the first three lines, in order (the card shows at most three)"
+	)
+	ok(
+		rows.all(func(r): return r["source"] == "first_day" and int(r["need"]) == 1),
+		"one line each, none of them a tutorial step"
+	)
 	GardenFirstDay.mark("toy")
 	rows = GoalTracker.lines()
-	ok(rows.map(func(r): return r["text"]) == [texts[0], texts[2], texts[3]],
-			"a ticked line drops out of the first three, to the end of the list")
+	ok(
+		rows.map(func(r): return r["text"]) == [texts[0], texts[2], texts[3]],
+		"a ticked line drops out of the first three, to the end of the list"
+	)
 	GardenFirstDay.mark("toy")
 	GardenFirstDay.mark("bogus")
 	var gems0 := int(Save.d["gems"])
-	ok(Save.d["tutorial"]["gfd"]["did"].size() == 1 and gems0 == int(Save.fresh()["gems"]),
-			"a repeat or unknown id does nothing")
+	ok(
+		Save.d["tutorial"]["gfd"]["did"].size() == 1 and gems0 == int(Save.fresh()["gems"]),
+		"a repeat or unknown id does nothing"
+	)
 	for id in ids:
 		ok(GardenFirstDay.active() or id == "pair", "still on until the last is ticked (%s)" % id)
 		GardenFirstDay.mark(id)
 	var reward := int(GardenFirstDay.rules()["reward_gems"])
-	ok(int(Save.d["gems"]) == gems0 + reward and reward > 0,
-			"the last tick pays the small reward once (+%d gems)" % reward)
+	ok(
+		int(Save.d["gems"]) == gems0 + reward and reward > 0,
+		"the last tick pays the small reward once (+%d gems)" % reward
+	)
 	GardenFirstDay.mark("feed")
 	ok(int(Save.d["gems"]) == gems0 + reward, "and nothing more later")
 	ok(not GardenFirstDay.active() and GardenFirstDay.rows().is_empty(), "the list is gone when done")
 	ok(not GoalTracker.lines().any(func(r): return r["source"] == "first_day"), "and so are its tracker lines")
+
 
 ## Pairing needs Grown (level 8): the 'pair' line shows only once a Boki in the roster is Grown, so day one never
 ## asks for something it cannot do.
@@ -121,14 +140,17 @@ func _pair_after_grown() -> void:
 	Save.d["roster"][0]["level"] = NookRules.GROWN_LV - 1
 	ok(not pair_shown.call(), "level %d (one short of Grown): still no 'pair' line" % (NookRules.GROWN_LV - 1))
 	Save.d["roster"][0]["level"] = NookRules.GROWN_LV
-	ok(pair_shown.call() and GardenFirstDay.rows().size() == 5,
-			"a Grown Boki (level %d): the 'pair' line shows" % NookRules.GROWN_LV)
+	ok(
+		pair_shown.call() and GardenFirstDay.rows().size() == 5,
+		"a Grown Boki (level %d): the 'pair' line shows" % NookRules.GROWN_LV
+	)
 	var cap_was: int = GoalTracker.cfg()["max"]
 	# the card shows three: the pair line is the fifth open line, read off the whole list
 	GoalTracker.cfg()["max"] = 99
 	var listed := GoalTracker.lines().any(func(r): return r["text"] == _pair_text())
 	GoalTracker.cfg()["max"] = cap_was
 	ok(listed, "and the tracker lists it")
+
 
 ## DECISIONS 2026-11-11: a player with few gems can always adopt. Three of the five first-day lines need a second Boki,
 ## so a one-Boki base_mode save must be able to adopt a stray from the Shelter on day one (stall level 1).
@@ -142,28 +164,34 @@ func _second_boki() -> void:
 	Save.d["roster"].append(starter)
 	Save.d["active"] = starter["uid"]
 	Save.d["tutorial"] = Save.fresh()["tutorial"]
-	Save.d["gems"] = maxi(int(Save.d["gems"]), HomeLayout.FS_GEMS)      # the first farm entry floors gems
+	Save.d["gems"] = maxi(int(Save.d["gems"]), HomeLayout.FS_GEMS)  # the first farm entry floors gems
 	HomeLayout.ensure(Save.d)
 	var hm := HomeMarket.new(null, Callable())
-	ok(Stalls.level() == 1 and hm.tabs().has("Shelter"),
-			"second Boki: a level-1 stall already opens the Shelter %s" % str(hm.tabs()))
+	ok(
+		Stalls.level() == 1 and hm.tabs().has("Shelter"),
+		"second Boki: a level-1 stall already opens the Shelter %s" % str(hm.tabs())
+	)
 	var purse := int(Save.d["gems"])
-	ok(Shelter.cards().size() >= 1 and Shelter.cheapest() <= purse,
-			"second Boki: a stray (%d gems) is on offer and the purse (%d) pays it" % [Shelter.cheapest(), purse])
+	ok(
+		Shelter.cards().size() >= 1 and Shelter.cheapest() <= purse,
+		"second Boki: a stray (%d gems) is on offer and the purse (%d) pays it" % [Shelter.cheapest(), purse]
+	)
 	ok(GardenFirstDay.rows().size() == 4, "second Boki: one Boki, so race, nap and pair wait: 4 lines")
 	var cid := String(Shelter.cards()[0]["id"])
 	var r := Shelter.adopt(cid)
-	ok(bool(r["ok"]) and Save.d["roster"].size() == 2,
-			"second Boki: adopting the stray gives a second Boki (%s)" % str(r["why"]))
+	ok(
+		bool(r["ok"]) and Save.d["roster"].size() == 2,
+		"second Boki: adopting the stray gives a second Boki (%s)" % str(r["why"])
+	)
 	var cap_was: int = GoalTracker.cfg()["max"]
-	GoalTracker.cfg()["max"] = 99      # (the card shows three: count the whole first-day list, not the card)
+	GoalTracker.cfg()["max"] = 99  # (the card shows three: count the whole first-day list, not the card)
 	var first_day_lines: int = GoalTracker.lines().filter(func(l): return l["source"] == "first_day").size()
 	GoalTracker.cfg()["max"] = cap_was
-	ok(first_day_lines >= 4,
-			"second Boki: the first-day list is still on and now holds the lines that need company")
+	ok(first_day_lines >= 4, "second Boki: the first-day list is still on and now holds the lines that need company")
 	rules["base_mode"] = false
 	ok(Shelter.open_level() == 2, "second Boki: off base_mode the Shelter opens at stall level 2")
 	rules["base_mode"] = was
+
 
 func _pair_text() -> String:
 	for r in GardenFirstDay.rules()["rows"]:
@@ -171,11 +199,12 @@ func _pair_text() -> String:
 			return String(r["text"])
 	return ""
 
+
 ## A bot on a real fresh base does the five things.
 func _bot() -> void:
 	Save.d = _fresh_save()
-	Save.d["tutorial"]["day1_done"] = true      # the guided tutorial stays out of it
-	Save.d["tutorial"]["first_race"] = true     # past the first-race practice lap (BaseRace._practice)
+	Save.d["tutorial"]["day1_done"] = true  # the guided tutorial stays out of it
+	Save.d["tutorial"]["first_race"] = true  # past the first-race practice lap (BaseRace._practice)
 	var rules: Dictionary = Content.rules("farm_build")
 	rules["base_mode"] = true
 	var lay := HomeLayout.ensure(Save.d)
@@ -197,7 +226,7 @@ func _bot() -> void:
 		(k["node"] as Node3D).position = k["pos"]
 	var a: Dictionary = home.kins[0]
 	var b: Dictionary = home.kins[1]
-	a["rec"]["needs"]["food"] = 30.0      # hungry, and kibble is not a food it hates: it eats it
+	a["rec"]["needs"]["food"] = 30.0  # hungry, and kibble is not a food it hates: it eats it
 	a["rec"]["likes"]["hates"] = "none"
 	home._care_feed(a["rec"], "kibble")
 	ok(GardenFirstDay.did("feed"), "bot: feeding a Boki ticks 'feed'")
@@ -220,6 +249,7 @@ func _bot() -> void:
 	ok(not GardenFirstDay.active() and GardenFirstDay.rows().is_empty(), "bot: all five done, the list is gone")
 	ok(int(Save.d["gems"]) >= int(GardenFirstDay.rules()["reward_gems"]), "bot: the reward is in the purse")
 
+
 ## The tutorial's Feed step is open and a toy is down: the Boki leaves its lead and plays within TOY_LEAD_S.
 func _lead_toy() -> void:
 	Save.d = _fresh_save()
@@ -237,13 +267,13 @@ func _lead_toy() -> void:
 		await main.get_tree().process_frame
 	home._close_panel()
 	FarmTutorial.mark("meet")
-	FarmTutorial.mark("patch")
+	FarmTutorial.mark("pet")
 	var a: Dictionary = home.kins[0]
 	for k in home.kins:
 		k.erase("indoors")
 		k["pos"] = home.world.free_spot_near(home.world.random_ground(0), [], 0.8)
 		(k["node"] as Node3D).position = k["pos"]
-	home.ppos = a["pos"] + Vector3(2, 0, 0)      # you stand next to your Boki, as in the tutorial
+	home.ppos = a["pos"] + Vector3(2, 0, 0)  # you stand next to your Boki, as in the tutorial
 	ok(FarmTutorial.current() == "eat", "lead toy: the Feed step is the open one (%s)" % FarmTutorial.current())
 	var t := 0.0
 	var secs := -1.0
@@ -251,30 +281,34 @@ func _lead_toy() -> void:
 		for k in home.kins:
 			for n in ["food", "energy", "clean"]:
 				k["rec"]["needs"][n] = 80.0
-			k["rec"]["needs"]["joy"] = 40.0 if k == a else 100.0      # only the led Boki wants a toy
+			k["rec"]["needs"]["joy"] = 40.0 if k == a else 100.0  # only the led Boki wants a toy
 		home.day_t = 0.5
 		home.ppos = a["pos"] + Vector3(2, 0, 0)
 		home._move_kin(STEP_S)
 		t += STEP_S
 		if a.get("play") is Dictionary and String(a["play"].get("phase", "")) == "play":
-			secs = t      # your own (led) Boki is at the toy
+			secs = t  # your own (led) Boki is at the toy
 			break
-	ok(secs >= 0.0 and secs <= TOY_LEAD_S,
-			"lead toy: with Feed open your Boki plays at the toy within %.0f s (took %.1f s)" % [TOY_LEAD_S, secs])
+	ok(
+		secs >= 0.0 and secs <= TOY_LEAD_S,
+		"lead toy: with Feed open your Boki plays at the toy within %.0f s (took %.1f s)" % [TOY_LEAD_S, secs]
+	)
 	ok(FarmTutorial.current() == "eat", "lead toy: Feed is still the open step, the lead was not skipped")
+
 
 func _race(home) -> void:
 	var race: BaseRace = home.hrace
 	ok(race != null, "bot: the base has the Dash")
 	if race == null:
 		return
-	Save.d["tutorial"]["first_race"] = true      # the real race, not the one-time practice lap (race_check)
+	Save.d["tutorial"]["first_race"] = true  # the real race, not the one-time practice lap (race_check)
 	race.use()
 	var t := 0.0
-	while (race.run != null or race.beats.playing()) and t < RACE_MAX_S:     # the runners are let go after
-		race.tick(0.1)                                                       # their finish clips
+	while (race.run != null or race.beats.playing()) and t < RACE_MAX_S:  # the runners are let go after
+		race.tick(0.1)  # their finish clips
 		t += 0.1
 	ok(GardenFirstDay.did("race"), "bot: a finished race ticks 'race' (%.0f s)" % t)
+
 
 ## Two Boki asleep side by side: the pile.
 func _nap(home, a: Dictionary, b: Dictionary) -> void:
