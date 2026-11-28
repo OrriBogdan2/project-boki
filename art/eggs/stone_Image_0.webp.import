@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cf866tpw48x87"
-path="res://.godot/imported/stone_Image_0.webp-bc100d20e9fcbac5d0f150dd46c755af.ctex"
+path.s3tc="res://.godot/imported/stone_Image_0.webp-bc100d20e9fcbac5d0f150dd46c755af.s3tc.ctex"
+path.etc2="res://.godot/imported/stone_Image_0.webp-bc100d20e9fcbac5d0f150dd46c755af.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "797f4a32dcb2593837857e5c353f992c"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/eggs/stone_Image_0.webp"
-dest_files=["res://.godot/imported/stone_Image_0.webp-bc100d20e9fcbac5d0f150dd46c755af.ctex"]
+dest_files=["res://.godot/imported/stone_Image_0.webp-bc100d20e9fcbac5d0f150dd46c755af.s3tc.ctex", "res://.godot/imported/stone_Image_0.webp-bc100d20e9fcbac5d0f150dd46c755af.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
