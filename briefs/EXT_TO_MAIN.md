@@ -11519,3 +11519,4 @@ READY ext/ui-pause-slim 6baff6a3921d57d19def48c204823e369a0706c2 (pause menu was
 READY ext/tut-farm-3p-pointers 607f7450f43434ace39ffa189be55dddf8705f8e (farm tutorial pointers in the close third-person view: beam, edge arrow, prompt height search, --farm-tut-3p-check)
 READY ext/garden-egg-line-once 71102bd0bf2f9509029daad563ba4d752aa4df64 (ready-egg arrival line once per egg id, only where the Nook stands; asserted in garden-first-day and day-played checks)
 READY ext/tut-playthrough-30fps b47378bb745f768a06826e82b3f4e06d37e2cdea (--tutorial-fps-pace-check: match course + garden at fixed 30/60 fps, step budgets, 8 s gaps, banner on every frame; strip drop-in no longer off-screen on frame 1; docs/TUTORIAL_PACE.md s6)
+READY ext/tut-skip-safe e4c8e6f7c9 (tutorial skip check: Boki named, Goals rows, no stuck step after skip at every step; farm/base skip-at-each-step; Hob no longer chases a skipper; fixes farm-tutorial-check red on main)
