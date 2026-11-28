@@ -107,15 +107,26 @@ static func _mastery() -> Array:
 
 static func _milestones() -> Array:
 	var out: Array = []
-	if not FarmUnlocks.gated() or _home_only():
-		return out   # every milestone (expedition, extraction, boss, scan) is an expedition's
+	if not FarmUnlocks.gated():
+		return out
 	var ms: Dictionary = FarmUnlocks.rules()["milestones"]
+	var home := _home_only()
+	var road: Dictionary = Content.rules("home_gates")
 	for id in ms:
 		if FarmUnlocks.milestone_done(String(id)):
 			continue
 		var need := int(ms[id]["n"])
 		var have := mini(FarmUnlocks.stat(String(ms[id]["stat"])), need)
-		out.append(_row(String(ms[id]["text"]), _prog(have, need), "milestone"))
+		var text := String(ms[id]["text"])
+		if home:
+			# a home-only save gets the garden road (home_gates.json): the same gate, met by harvest, hatch or bond
+			var h: Dictionary = road["stats"].get(String(ms[id]["stat"]), {})
+			if h.is_empty() or not road["milestones"].has(id):
+				continue
+			need = int(ceil(float(h["per"]) * need))
+			have = mini(Progress.real_stat(String(h["home"])), need)
+			text = String(road["milestones"][id])
+		out.append(_row(text, _prog(have, need), "milestone"))
 	return out
 
 static func _level() -> Array:

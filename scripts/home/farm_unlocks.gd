@@ -29,7 +29,7 @@ static func points() -> float:
 	var p := 0.0
 	var w: Dictionary = rules()["points"]
 	for k in w:
-		p += float(stat(String(k))) * float(w[k])
+		p += float(Progress.real_stat(String(k))) * float(w[k])
 	return p
 
 ## Farm level, 1 and up (the length of the "levels" table at most).

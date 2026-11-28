@@ -6,6 +6,7 @@ extends RefCounted
 
 const CHECKS := {
 	"--care-prompt-check": ["res://tools/care_prompt_check.gd", "care_prompt_check", null],  # the care line over a Boki
+	"--garden-home-gates-check": ["res://tools/garden_home_gates_check.gd", "home_gates_check", null],
 	"--bond-pace-check": ["res://tools/bond_pace_check.gd", "bond_pace_check", null],
 	"--farm-cam-check": ["res://tools/farm_cam_check.gd", "farm_cam_check", null],  # the farm third-person view
 	"--farm-cam-clip": ["res://tools/farm_cam_clip.gd", "farm_cam_clip", null],  # GPU film: the third-person view

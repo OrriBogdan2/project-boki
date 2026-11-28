@@ -44,7 +44,21 @@ const SHOP_REQ := {
 }
 
 
+## A lifetime stat. In base mode a home road (content/rules/home_gates.json) counts too: a garden player
+## who never extracts meets an expedition gate by harvesting, hatching, building or bonding. The larger of
+## the two counts, so nothing re-locks after an expedition.
 static func stat(k: String) -> int:
+	var real := real_stat(k)
+	if not FarmUnlocks.base_mode():
+		return real
+	var h: Dictionary = Content.rules("home_gates")["stats"].get(k, {})
+	if h.is_empty():
+		return real
+	return maxi(real, int(floor(float(real_stat(String(h["home"]))) / float(h["per"]))))
+
+
+## The stat as played, with no home road (farm points count this, so the road does not double them).
+static func real_stat(k: String) -> int:
 	match k:
 		"extracts":
 			return int(Save.d.get("extracts", 0))

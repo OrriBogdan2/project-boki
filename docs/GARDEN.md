@@ -141,6 +141,29 @@ Expedition XP still fits: the halved curve makes a won run (90 XP) a level or tw
 
 ## Open questions: gates for a player who never extracts
 
+**Home road for every expedition gate (11-28, ext/farm-home-only-gates).** `content/rules/home_gates.json` maps each
+expedition stat to a home stat; `Progress.stat(k)` in base mode is the larger of the real stat and
+`home stat / per`, so every shop item, cosmetic, glider, wisp look, challenge and farm milestone that counted
+an expedition also opens in the garden, and nothing re-locks after a run. Farm points use `Progress.real_stat`
+(no double count). A home-only save sees the road as Goals `milestone` rows (`GoalTracker._milestones`).
+Goal types used: the existing stats `harvested`, `hatched`, `fb_built`, `max_trust` only.
+
+| Gate (was an expedition) | Home road | Rate |
+|---|---|---|
+| Farm milestone: first expedition (Board) | Hatch your first egg | 1 hatch (10 min egg) |
+| Farm milestone: first extraction (Armory), Hopper 2, Scarf 2, Puffcorn 3, Banquet 5, Easel 2, Old Hand 5, Island Legend 15, Glider 10 | harvest crops | 5 harvests per extraction (up to 75) |
+| Farm milestone: first boss (Fountain, Shrine) | Bond a Boki to 60 trust (care streak) | trust 60 |
+| Farm milestone: scan 3 (Blossom Tree, Statue), New Friends, glider "5 wild Boki" | Hatch 3 Boki | 1 hatch per Boki |
+| Pest Control 25 mobs (Tonic Brew) | harvest | 25 harvests |
+| Ring Runner 20 rings (Goggles), glider "25 rings" | buildings Boki finish | 0.2 per ring (4 and 5) |
+| Rival 5 knocks (Cape) | buildings Boki finish | 3 buildings |
+| Zones | Black Market stands at once (open question 1) | unchanged, paced by `--garden-unlock-pace-check` |
+| Breeding | egg ripens by clock (10 min) as well as by expedition | unchanged |
+| Hunter unlocks, mastery, second Hunter, glide/feather/stagger/slam/spike challenges | stay away rows (match feats; a Hunter is only worn in a match) | none; hidden at home |
+
+Proof: `--garden-home-gates-check` (a save with matches 0 and extracts 0 reaches each gate through the table).
+Alternative not taken: a Hunter road at home (the second Hunter after N care days); a home player has no use for one.
+
 Found by `--garden-only-pass-check` (30 minutes of garden time on a fresh save that skips the match
 tutorial and never starts an expedition; it logs every line that points at an expedition and fails on a
 new one) plus a read of the garden code. Text and order nags are fixed on this branch (below). These

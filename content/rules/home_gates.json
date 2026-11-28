@@ -1,0 +1,46 @@
+{
+  "desc": "Home road for gates an expedition used to hold alone (docs/GARDEN.md, 'Gates for a player who never extracts'). Progress.stat(k) in base mode is the larger of the real stat and a home stat divided by `per`, so every challenge, shop requirement and farm milestone that counts an expedition stat can also be met in the garden. Only existing home stats are used (harvested, hatched, built, fb_built, max_trust). Nothing is re-locked after an expedition: the real stat still counts.",
+  "stats": {
+    "extracts": {
+      "home": "harvested",
+      "per": 5,
+      "note": "one made-it-out run about 5 harvests; Old Hand (5 runs) = 25, Island Legend (15) = 75"
+    },
+    "matches": {
+      "home": "hatched",
+      "per": 1,
+      "note": "first expedition = first hatch (egg ripens in 10 minutes)"
+    },
+    "bosses": {
+      "home": "max_trust",
+      "per": 60,
+      "note": "first boss = a Boki bonded to 60 trust (care streak: feed, pet, play)"
+    },
+    "caught": {
+      "home": "hatched",
+      "per": 1,
+      "note": "3 scanned = 3 hatched or bred Boki"
+    },
+    "mobs": {
+      "home": "harvested",
+      "per": 1,
+      "note": "25 monsters = 25 harvests"
+    },
+    "rings": {
+      "home": "fb_built",
+      "per": 0.2,
+      "note": "20 rings = 4 buildings your Boki finish"
+    },
+    "knocks": {
+      "home": "fb_built",
+      "per": 0.5,
+      "note": "5 knocks = 3 lot buildings (a fresh Boki starts at trust 35, so no bond road)"
+    }
+  },
+  "milestones": {
+    "first_run": "Hatch your first egg",
+    "first_extract": "Harvest 5 crops",
+    "first_boss": "Bond a Boki to 60 trust",
+    "scan3": "Hatch 3 Boki"
+  }
+}
