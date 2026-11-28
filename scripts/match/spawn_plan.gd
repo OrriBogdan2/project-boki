@@ -33,14 +33,14 @@ const CATS := {
 	{
 		"name": "Rare Boki",
 		"shape": "paw",
-		"col": Color("ff9be8"),
+		"col": Color("f2f4ff"),  # objective white (MapMarks)
 		"announce": false,
 		"pick": [3, 3],
 		"order": 2,
 		"guarded": 2
 	},
 	"cache":
-	{"name": "Item cache", "shape": "crate", "col": Color("8fd8ff"), "announce": false, "pick": [4, 4], "order": 3},
+	{"name": "Item cache", "shape": "crate", "col": Color("f2c84a"), "announce": false, "pick": [4, 4], "order": 3},
 }
 const REVEAL_R := 9.0  # flat distance at which a hunter on the ground just knows what's there
 const DROP_REVEAL_R := 14.0  # ... and from the glider on the way down
