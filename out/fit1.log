@@ -1,0 +1,227 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:73)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:173)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:125)
+         [3] finish (res://scripts/match/shroud_tailor.gd:109)
+         [4] dress (res://scripts/match/shrouds.gd:88)
+         [5] dress (res://scripts/match/unmasked.gd:289)
+         [6] dress (res://scripts/match/hunter_body.gd:118)
+         [7] _hunter (res://scripts/match/models.gd:735)
+         [8] hunter (res://scripts/match/models.gd:625)
+         [9] _ready_rest (res://scripts/home/home.gd:475)
+         [10] _ready (res://scripts/home/home.gd:244)
+         [11] _hb_home (res://scripts/main.gd:1351)
+         [12] _open_home (res://tools/garden_nav_check.gd:55)
+         [13] run (res://tools/garden_fit_check.gd:57)
+         [14] run (res://tools/check_registry.gd:1068)
+         [15] _ready (res://scripts/main.gd:476)
+GARDENFIT ok   a Training post placed (the picker lists its games)
+GARDENFIT ok   the picker has games to list
+GARDENFIT ok   1280x720_zone_cards: opens a panel
+GARDENFIT ok   1280x720_zone_cards: panel [P: (136.0, 153.0), S: (1008.0, 414.0)] inside the window (1280.0, 720.0)
+GARDENFIT ok   1280x720_zone_cards: nothing sticks out of its panel (0: [])
+GARDENFIT ok   1280x720_zone_cards: no text cut short (0: [])
+GARDENFIT ok   1280x720_zone_move_to: opens a panel
+GARDENFIT ok   1280x720_zone_move_to: panel [P: (190.0, 133.0), S: (900.0, 453.0)] inside the window (1280.0, 720.0)
+GARDENFIT ok   1280x720_zone_move_to: nothing sticks out of its panel (0: [])
+GARDENFIT ok   1280x720_zone_move_to: no text cut short (0: [])
+GARDENFIT ok   1280x720_games_board: opens a panel
+GARDENFIT ok   1280x720_games_board: panel [P: (424.0, 35.0), S: (432.0, 649.0)] inside the window (1280.0, 720.0)
+GARDENFIT ok   1280x720_games_board: nothing sticks out of its panel (0: [])
+GARDENFIT ok   1280x720_games_board: no text cut short (0: [])
+GARDENFIT ok   the wishes card has wishes
+GARDENFIT ok   1280x720_wishes: opens a panel
+GARDENFIT ok   1280x720_wishes: panel [P: (380.0, 298.0), S: (520.0, 124.0)] inside the window (1280.0, 720.0)
+GARDENFIT ok   1280x720_wishes: nothing sticks out of its panel (0: [])
+GARDENFIT ok   1280x720_wishes: no text cut short (0: [])
+GARDENFIT ok   1280x720_games_picker: opens a panel
+GARDENFIT ok   1280x720_games_picker: panel [P: (360.0, 34.0), S: (560.0, 652.0)] inside the window (1280.0, 720.0)
+GARDENFIT ok   1280x720_games_picker: nothing sticks out of its panel (0: [])
+GARDENFIT ok   1280x720_games_picker: no text cut short (0: [])
+GARDENFIT ok   1280x720_nook_preview: opens a panel
+GARDENFIT ok   1280x720_nook_preview: panel [P: (119.0, 36.0), S: (1042.0, 648.0)] inside the window (1280.0, 720.0)
+GARDENFIT ok   1280x720_nook_preview: nothing sticks out of its panel (0: [])
+GARDENFIT ok   1280x720_nook_preview: no text cut short (0: [])
+GARDENFIT ok   1280x720_boki_card: opens a panel
+GARDENFIT ok   1280x720_boki_card: panel [P: (230.0, 36.0), S: (820.0, 648.0)] inside the window (1280.0, 720.0)
+GARDENFIT ok   1280x720_boki_card: nothing sticks out of its panel (0: [])
+GARDENFIT ok   1280x720_boki_card: no text cut short (0: [])
+GARDENFIT ok   1280x720_boki_card: nothing scrolls ([])
+GARDENFIT ok   1280x720_boki_card: level and XP to the next level
+GARDENFIT ok   1280x720_boki_card: name line says he or she
+GARDENFIT ok   1280x720_boki_card: never calls a Boki 'it' (B0 the Echolop
+Level 8  ·  she/her  ·  E)
+GARDENFIT ok   1280x720_boki_card: one bond ring with its percent
+GARDENFIT ok   1280x720_boki_card: hunger and mood icons (2)
+GARDENFIT ok   1280x720_boki_card_family: opens a panel
+GARDENFIT ok   1280x720_boki_card_family: panel [P: (230.0, 36.0), S: (820.0, 648.0)] inside the window (1280.0, 720.0)
+GARDENFIT ok   1280x720_boki_card_family: nothing sticks out of its panel (0: [])
+GARDENFIT ok   1280x720_boki_card_family: no text cut short (0: [])
+GARDENFIT ok   1920x1080_zone_cards: opens a panel
+GARDENFIT ok   1920x1080_zone_cards: panel [P: (136.0, 153.0), S: (1008.0, 414.0)] inside the window (1280.0, 720.0)
+GARDENFIT ok   1920x1080_zone_cards: nothing sticks out of its panel (0: [])
+GARDENFIT ok   1920x1080_zone_cards: no text cut short (0: [])
+GARDENFIT ok   1920x1080_zone_move_to: opens a panel
+GARDENFIT ok   1920x1080_zone_move_to: panel [P: (190.0, 133.0), S: (900.0, 453.0)] inside the window (1280.0, 720.0)
+GARDENFIT ok   1920x1080_zone_move_to: nothing sticks out of its panel (0: [])
+GARDENFIT ok   1920x1080_zone_move_to: no text cut short (0: [])
+GARDENFIT ok   1920x1080_games_board: opens a panel
+GARDENFIT ok   1920x1080_games_board: panel [P: (424.0, 35.0), S: (432.0, 649.0)] inside the window (1280.0, 720.0)
+GARDENFIT ok   1920x1080_games_board: nothing sticks out of its panel (0: [])
+GARDENFIT ok   1920x1080_games_board: no text cut short (0: [])
+GARDENFIT ok   the wishes card has wishes
+GARDENFIT ok   1920x1080_wishes: opens a panel
+GARDENFIT ok   1920x1080_wishes: panel [P: (380.0, 298.0), S: (520.0, 124.0)] inside the window (1280.0, 720.0)
+GARDENFIT ok   1920x1080_wishes: nothing sticks out of its panel (0: [])
+GARDENFIT ok   1920x1080_wishes: no text cut short (0: [])
+GARDENFIT ok   1920x1080_games_picker: opens a panel
+GARDENFIT ok   1920x1080_games_picker: panel [P: (360.0, 34.0), S: (560.0, 652.0)] inside the window (1280.0, 720.0)
+GARDENFIT ok   1920x1080_games_picker: nothing sticks out of its panel (0: [])
+GARDENFIT ok   1920x1080_games_picker: no text cut short (0: [])
+GARDENFIT ok   1920x1080_nook_preview: opens a panel
+GARDENFIT ok   1920x1080_nook_preview: panel [P: (119.0, 36.0), S: (1042.0, 648.0)] inside the window (1280.0, 720.0)
+GARDENFIT ok   1920x1080_nook_preview: nothing sticks out of its panel (0: [])
+GARDENFIT ok   1920x1080_nook_preview: no text cut short (0: [])
+GARDENFIT ok   1920x1080_boki_card: opens a panel
+GARDENFIT ok   1920x1080_boki_card: panel [P: (230.0, 36.0), S: (820.0, 648.0)] inside the window (1280.0, 720.0)
+GARDENFIT ok   1920x1080_boki_card: nothing sticks out of its panel (0: [])
+GARDENFIT ok   1920x1080_boki_card: no text cut short (0: [])
+GARDENFIT ok   1920x1080_boki_card: nothing scrolls ([])
+GARDENFIT ok   1920x1080_boki_card: level and XP to the next level
+GARDENFIT ok   1920x1080_boki_card: name line says he or she
+GARDENFIT ok   1920x1080_boki_card: never calls a Boki 'it' (B0 the Echolop
+Level 8  ·  she/her  ·  E)
+GARDENFIT ok   1920x1080_boki_card: one bond ring with its percent
+GARDENFIT ok   1920x1080_boki_card: hunger and mood icons (2)
+GARDENFIT ok   1920x1080_boki_card_family: opens a panel
+GARDENFIT ok   1920x1080_boki_card_family: panel [P: (230.0, 36.0), S: (820.0, 648.0)] inside the window (1280.0, 720.0)
+GARDENFIT ok   1920x1080_boki_card_family: nothing sticks out of its panel (0: [])
+GARDENFIT ok   1920x1080_boki_card_family: no text cut short (0: [])
+GARDENFIT ok   2560x1080_zone_cards: opens a panel
+GARDENFIT ok   2560x1080_zone_cards: panel [P: (349.0, 153.0), S: (1008.0, 414.0)] inside the window (1706.667, 720.0)
+GARDENFIT ok   2560x1080_zone_cards: nothing sticks out of its panel (0: [])
+GARDENFIT ok   2560x1080_zone_cards: no text cut short (0: [])
+GARDENFIT ok   2560x1080_zone_move_to: opens a panel
+GARDENFIT ok   2560x1080_zone_move_to: panel [P: (403.0, 133.0), S: (900.0, 453.0)] inside the window (1706.667, 720.0)
+GARDENFIT ok   2560x1080_zone_move_to: nothing sticks out of its panel (0: [])
+GARDENFIT ok   2560x1080_zone_move_to: no text cut short (0: [])
+GARDENFIT ok   2560x1080_games_board: opens a panel
+GARDENFIT ok   2560x1080_games_board: panel [P: (637.0, 35.0), S: (432.0, 649.0)] inside the window (1706.667, 720.0)
+GARDENFIT ok   2560x1080_games_board: nothing sticks out of its panel (0: [])
+GARDENFIT ok   2560x1080_games_board: no text cut short (0: [])
+GARDENFIT ok   the wishes card has wishes
+GARDENFIT ok   2560x1080_wishes: opens a panel
+GARDENFIT ok   2560x1080_wishes: panel [P: (593.0, 298.0), S: (520.0, 124.0)] inside the window (1706.667, 720.0)
+GARDENFIT ok   2560x1080_wishes: nothing sticks out of its panel (0: [])
+GARDENFIT ok   2560x1080_wishes: no text cut short (0: [])
+GARDENFIT ok   2560x1080_games_picker: opens a panel
+GARDENFIT ok   2560x1080_games_picker: panel [P: (573.0, 34.0), S: (560.0, 652.0)] inside the window (1706.667, 720.0)
+GARDENFIT ok   2560x1080_games_picker: nothing sticks out of its panel (0: [])
+GARDENFIT ok   2560x1080_games_picker: no text cut short (0: [])
+GARDENFIT ok   2560x1080_nook_preview: opens a panel
+GARDENFIT ok   2560x1080_nook_preview: panel [P: (332.0, 36.0), S: (1042.0, 648.0)] inside the window (1706.667, 720.0)
+GARDENFIT ok   2560x1080_nook_preview: nothing sticks out of its panel (0: [])
+GARDENFIT ok   2560x1080_nook_preview: no text cut short (0: [])
+GARDENFIT ok   2560x1080_boki_card: opens a panel
+GARDENFIT ok   2560x1080_boki_card: panel [P: (443.0, 36.0), S: (820.0, 648.0)] inside the window (1706.667, 720.0)
+GARDENFIT ok   2560x1080_boki_card: nothing sticks out of its panel (0: [])
+GARDENFIT ok   2560x1080_boki_card: no text cut short (0: [])
+GARDENFIT ok   2560x1080_boki_card: nothing scrolls ([])
+GARDENFIT ok   2560x1080_boki_card: level and XP to the next level
+GARDENFIT ok   2560x1080_boki_card: name line says he or she
+GARDENFIT ok   2560x1080_boki_card: never calls a Boki 'it' (B0 the Echolop
+Level 8  ·  she/her  ·  E)
+GARDENFIT ok   2560x1080_boki_card: one bond ring with its percent
+GARDENFIT ok   2560x1080_boki_card: hunger and mood icons (2)
+GARDENFIT ok   2560x1080_boki_card_family: opens a panel
+GARDENFIT ok   2560x1080_boki_card_family: panel [P: (443.0, 36.0), S: (820.0, 648.0)] inside the window (1706.667, 720.0)
+GARDENFIT ok   2560x1080_boki_card_family: nothing sticks out of its panel (0: [])
+GARDENFIT ok   2560x1080_boki_card_family: no text cut short (0: [])
+GARDENFIT ok   960x540_zone_cards: opens a panel
+GARDENFIT ok   960x540_zone_cards: panel [P: (136.0, 153.0), S: (1008.0, 414.0)] inside the window (1280.0, 720.0)
+GARDENFIT ok   960x540_zone_cards: nothing sticks out of its panel (0: [])
+GARDENFIT ok   960x540_zone_cards: no text cut short (0: [])
+GARDENFIT ok   960x540_zone_move_to: opens a panel
+GARDENFIT ok   960x540_zone_move_to: panel [P: (190.0, 133.0), S: (900.0, 453.0)] inside the window (1280.0, 720.0)
+GARDENFIT ok   960x540_zone_move_to: nothing sticks out of its panel (0: [])
+GARDENFIT ok   960x540_zone_move_to: no text cut short (0: [])
+GARDENFIT ok   960x540_games_board: opens a panel
+GARDENFIT ok   960x540_games_board: panel [P: (424.0, 35.0), S: (432.0, 649.0)] inside the window (1280.0, 720.0)
+GARDENFIT ok   960x540_games_board: nothing sticks out of its panel (0: [])
+GARDENFIT ok   960x540_games_board: no text cut short (0: [])
+GARDENFIT ok   the wishes card has wishes
+GARDENFIT ok   960x540_wishes: opens a panel
+GARDENFIT ok   960x540_wishes: panel [P: (380.0, 298.0), S: (520.0, 124.0)] inside the window (1280.0, 720.0)
+GARDENFIT ok   960x540_wishes: nothing sticks out of its panel (0: [])
+GARDENFIT ok   960x540_wishes: no text cut short (0: [])
+GARDENFIT ok   960x540_games_picker: opens a panel
+GARDENFIT ok   960x540_games_picker: panel [P: (360.0, 34.0), S: (560.0, 652.0)] inside the window (1280.0, 720.0)
+GARDENFIT ok   960x540_games_picker: nothing sticks out of its panel (0: [])
+GARDENFIT ok   960x540_games_picker: no text cut short (0: [])
+GARDENFIT ok   960x540_nook_preview: opens a panel
+GARDENFIT ok   960x540_nook_preview: panel [P: (119.0, 36.0), S: (1042.0, 648.0)] inside the window (1280.0, 720.0)
+GARDENFIT ok   960x540_nook_preview: nothing sticks out of its panel (0: [])
+GARDENFIT ok   960x540_nook_preview: no text cut short (0: [])
+GARDENFIT ok   960x540_boki_card: opens a panel
+GARDENFIT ok   960x540_boki_card: panel [P: (230.0, 36.0), S: (820.0, 648.0)] inside the window (1280.0, 720.0)
+GARDENFIT ok   960x540_boki_card: nothing sticks out of its panel (0: [])
+GARDENFIT ok   960x540_boki_card: no text cut short (0: [])
+GARDENFIT ok   960x540_boki_card: nothing scrolls ([])
+GARDENFIT ok   960x540_boki_card: level and XP to the next level
+GARDENFIT ok   960x540_boki_card: name line says he or she
+GARDENFIT ok   960x540_boki_card: never calls a Boki 'it' (B0 the Echolop
+Level 8  ·  she/her  ·  E)
+GARDENFIT ok   960x540_boki_card: one bond ring with its percent
+GARDENFIT ok   960x540_boki_card: hunger and mood icons (2)
+GARDENFIT ok   960x540_boki_card_family: opens a panel
+GARDENFIT ok   960x540_boki_card_family: panel [P: (230.0, 36.0), S: (820.0, 648.0)] inside the window (1280.0, 720.0)
+GARDENFIT ok   960x540_boki_card_family: nothing sticks out of its panel (0: [])
+GARDENFIT ok   960x540_boki_card_family: no text cut short (0: [])
+GARDENFIT ok   1280x720_ui1.1_zone_cards: opens a panel
+GARDENFIT ok   1280x720_ui1.1_zone_cards: panel [P: (77.0, 120.0), S: (1008.0, 414.0)] inside the window (1163.636, 654.5454)
+GARDENFIT ok   1280x720_ui1.1_zone_cards: nothing sticks out of its panel (0: [])
+GARDENFIT ok   1280x720_ui1.1_zone_cards: no text cut short (0: [])
+GARDENFIT ok   1280x720_ui1.1_zone_move_to: opens a panel
+GARDENFIT ok   1280x720_ui1.1_zone_move_to: panel [P: (131.0, 100.0), S: (900.0, 453.0)] inside the window (1163.636, 654.5454)
+GARDENFIT ok   1280x720_ui1.1_zone_move_to: nothing sticks out of its panel (0: [])
+GARDENFIT ok   1280x720_ui1.1_zone_move_to: no text cut short (0: [])
+GARDENFIT ok   1280x720_ui1.1_games_board: opens a panel
+GARDENFIT ok   1280x720_ui1.1_games_board: panel [P: (362.0, 31.0), S: (438.0, 592.0)] inside the window (1163.636, 654.5454)
+GARDENFIT ok   1280x720_ui1.1_games_board: nothing sticks out of its panel (0: [])
+GARDENFIT ok   1280x720_ui1.1_games_board: no text cut short (0: [])
+GARDENFIT ok   the wishes card has wishes
+GARDENFIT ok   1280x720_ui1.1_wishes: opens a panel
+GARDENFIT ok   1280x720_ui1.1_wishes: panel [P: (321.0, 265.0), S: (520.0, 124.0)] inside the window (1163.636, 654.5454)
+GARDENFIT ok   1280x720_ui1.1_wishes: nothing sticks out of its panel (0: [])
+GARDENFIT ok   1280x720_ui1.1_wishes: no text cut short (0: [])
+GARDENFIT ok   1280x720_ui1.1_games_picker: opens a panel
+GARDENFIT ok   1280x720_ui1.1_games_picker: panel [P: (301.0, 31.0), S: (560.0, 592.0)] inside the window (1163.636, 654.5454)
+GARDENFIT ok   1280x720_ui1.1_games_picker: nothing sticks out of its panel (0: [])
+GARDENFIT ok   1280x720_ui1.1_games_picker: no text cut short (0: [])
+GARDENFIT ok   1280x720_ui1.1_nook_preview: opens a panel
+GARDENFIT ok   1280x720_ui1.1_nook_preview: panel [P: (60.0, 33.0), S: (1042.0, 588.0)] inside the window (1163.636, 654.5454)
+GARDENFIT ok   1280x720_ui1.1_nook_preview: nothing sticks out of its panel (0: [])
+GARDENFIT ok   1280x720_ui1.1_nook_preview: no text cut short (0: [])
+GARDENFIT ok   1280x720_ui1.1_boki_card: opens a panel
+GARDENFIT ok   1280x720_ui1.1_boki_card: panel [P: (171.0, 33.0), S: (820.0, 588.0)] inside the window (1163.636, 654.5454)
+GARDENFIT ok   1280x720_ui1.1_boki_card: nothing sticks out of its panel (0: [])
+GARDENFIT ok   1280x720_ui1.1_boki_card: no text cut short (0: [])
+GARDENFIT ok   1280x720_ui1.1_boki_card: level and XP to the next level
+GARDENFIT ok   1280x720_ui1.1_boki_card: name line says he or she
+GARDENFIT ok   1280x720_ui1.1_boki_card: never calls a Boki 'it' (B0 the Echolop
+Level 8  ·  she/her  ·  E)
+GARDENFIT ok   1280x720_ui1.1_boki_card: one bond ring with its percent
+GARDENFIT ok   1280x720_ui1.1_boki_card: hunger and mood icons (2)
+GARDENFIT ok   1280x720_ui1.1_boki_card_family: opens a panel
+GARDENFIT ok   1280x720_ui1.1_boki_card_family: panel [P: (171.0, 33.0), S: (820.0, 588.0)] inside the window (1163.636, 654.5454)
+GARDENFIT ok   1280x720_ui1.1_boki_card_family: nothing sticks out of its panel (0: [])
+GARDENFIT ok   1280x720_ui1.1_boki_card_family: no text cut short (0: [])
+GARDENFIT DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 16 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)
