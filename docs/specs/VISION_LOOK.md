@@ -15,10 +15,10 @@ above, player controls below, found by row brightness). Numbers below are scaled
 | What | Reference (game area, then 1920x1080) | Ours |
 |---|---|---|
 | Player on screen | (985, 686) -> (946, 622): 49% across, 58% down | the match camera's own framing (camera.json) |
-| Wedge sides on screen | left side 18 deg above level, right side 23 deg below: ~185 deg of screen | 120 deg on the ground (`VIEW_COS` 0.5, `VIS_COS`; was 170 until 11-18, 106 before 11-12): a wide cone like the target feel, not the half-plane |
-| Wedge at the player | the line runs straight through the player, no lit circle behind | 2.0 m lit circle (`NEAR_SENSE`, `VIS_NEAR`; was 3.2) |
+| Wedge sides on screen | left side 18 deg above level, right side 23 deg below: ~185 deg of screen | 90 deg on the ground (`VIEW_COS` 0.7071, `VIS_COS`; was 120 until 11-23, 170 until 11-18, 106 before 11-12): a wide cone like the target feel, not the half-plane |
+| Wedge at the player | the line runs straight through the player, no lit circle behind | 2.0 m lit circle (`NEAR_SENSE`, `VIS_NEAR`; was 3.2), full to 1.8 m, fading out by 3.4 m (`VIS_NEAR_SOFT` 1.6; the old 2.0-2.6 m ring read as a line behind you: owner 11-26; a 1.0-3.0 m fade was tried and left the circle too faint) |
 | Edge line | ~3 px solid core, cyan peak about (45, 138, 180) on dim ground | none: a cone, not an outline (owner 11-17) |
-| Edge glow | 4-6 px into the lit side, none on the dim side | none: the lit side fades out over `VIS_SOFT` (1.6 m) inside the wedge's side |
+| Edge glow | 4-6 px into the lit side, none on the dim side | none: the wedge fades over 2.8 m, half lit on its side (`VIS_SOFT` 1.4 m each way; was 1.6 m inside only). Lit areas join with `vis_union` (1-(1-a)(1-b)), not max(): max left a crease where the circle met the cone's fade (owner 11-26: "no line behind you, the fog should just be there") |
 | Lit ground | about (78-89, 105-121, 157-174), luma ~105 | the ground's own colour x 1.05 |
 | Dim ground (behind and out of range) | about (2-7, 34-37, 76-79), luma ~30-37: ~0.35 of lit; hue R:G:B ~0.02:0.47:1 | **a slight dark fog, partly grey, never tinted** (owner 11-23: "in between the full grey and the flat dim; slight dark fog, grey not blue"; the cone lights it up to normal): the albedo is pulled `vis_greyness` (`RaidLook.VIS_GREY` 0.55) of the way to its luma-weighted grey and scaled by `vis_dark` (`RaidLook.VIS_DARK` 0.60); the light, shadow tint and ambient are greyed by the same share, the weather haze's colour is taken out in full. GPU numbers in "Where we differ" |
 | Range circle | lit area ends ~520-550 px out; an ally marker labelled 27 m sits ~600 px out: ~22 px/m, circle ~23-25 m | `VIEW_RANGE` 24 m, soft edge over the last 3 m |
@@ -64,7 +64,7 @@ above, player controls below, found by row brightness). Numbers below are scaled
   haze by the fog share. The tier-0 void art around the islands is blue-violet in itself and is not part of
   the fog.
 
-- **The cone is 120 degrees.** Shots at 100, 120 and 140 on the same frame (`--vision-shots`, sheet in the job):
+- **The cone is 90 degrees (owner 11-23; 120 from 11-18).** Shots at 100, 120 and 140 on the same frame (`--vision-shots`, sheet in the job):
   see "Cone angle" below.
 - **The range circle is off screen.** Measured in the world it is the same size as ours (24 m), but our closer
   camera shows 11.8 m (standing) or 17 m (crouched) from the centre to the side, so the circle edge only shows when
@@ -73,7 +73,7 @@ above, player controls below, found by row brightness). Numbers below are scaled
 - **A small lit circle stays behind you (2.0 m).** Someone touching your back is still seen; it is drawn as lit so
   the screen never lies about who you can see.
 - **A first-time line explains the dim side.** The first time a rival is hidden only by the wedge, or you swing
-  your aim 120 degrees within 0.6 s and the dim area sweeps, the hint lane says "You only see enemies in front of
+  your aim 90 degrees within 0.6 s and the dim area sweeps, the hint lane says "You only see enemies in front of
   you and near you" (`VisionHint`, through `Match._tips`): once per save, never with tips off or in the tutorial
   course. `--first-time-hint-check`.
 
@@ -82,8 +82,10 @@ Real-GPU shots on the same frame (stand, crouch, reveal, scout), `--vision-shots
 with cyan lines) against 100, 120 and 140 degrees with the grey fog. 100 reads as a narrow beam on the closer camera
 (a rival 50 degrees off your aim is already hidden); 140 is close to the old half-plane, the grey only shows a
 cone-shaped bite at the sides; 120 reads as a wide cone with a clear grey behind and beside you, and keeps the
-sweep-to-spot play (the rival at 165 degrees is hidden until you turn about 105 degrees). 120 is the default
-(`VIEW_COS` 0.5, `VIS_COS` 0.5). To change it set both together; `--vision-check` asserts they match.
+sweep-to-spot play (the rival at 165 degrees is hidden until you turn about 105 degrees). 120 was the default from 11-18; the owner set 90 on 11-23
+(`VIEW_COS` 0.7071, `VIS_COS` 0.7071). To change it set both together; `--vision-check` asserts they match.
+The shared aim line (`Match._update_aim`) and the kit lines (`AimKit.line`) take their direction from `aim_dir()`, the
+same vector as `vis_dir`, so they always run down the cone centre (`--vision-check`).
 
 ## Revealed rival
 A second owner frame, 4 s later, shows a rival past the wedge's side, drawn with her own soft lit circle while she

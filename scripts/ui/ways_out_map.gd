@@ -122,9 +122,10 @@ static func minimap(hud, inner: Rect2, to_map: Callable, on_map: Callable) -> vo
 		if on_map.call(pv, 8.0):
 			badge(hud.c, pv, 8.0, i, sd[i], m.time)
 			if i == goal or MapDetail.holding():
-				HudStyle.ctext(hud.c, pv + Vector2(0, 22), WORDS[i], 10, HudStyle.INK, 3)      # the badge's name
+				MapNames.put(WORDS[i], pv + Vector2(0, 22), 10, HudStyle.INK, HudStyle.BIG, true, 3)
 		elif int(sd[i]["st"]) <= WaysOutHud.St.USE:
 			hud.edge_mini.add(pv - inner.get_center(), color_of(sd[i]), EdgeMarker.PRIO_GOAL)
+	MapNames.flush(hud.c)      # (the boxes the place names and the train took in this draw stay taken)
 	if m.heart_raid:
 		HeartRaidHud.minimap(hud, to_map, on_map)      # the coming wave's gates
 
@@ -193,7 +194,7 @@ static func line(m: Match) -> String:
 		return ""
 	var s := "Ways out left: %d" % ways_left(m)
 	var near := nearest(m, p.team)
-	if near["i"] >= 0:
+	if near["i"] >= 0 and Life.has_mates(m, p):
 		s += "  ·  your squad is nearest the %s, %d m" % [String(WORDS[near["i"]]).to_lower(), int(near["d"])]
 	return s
 

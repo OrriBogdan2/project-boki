@@ -149,7 +149,23 @@ func _breah() -> void:
 	var lane_at := {}
 	var k_at := [0.0, 0.0]
 	P.inp["fire"] = true
-	step(m, 0.5, func(): P.inp["fire"] = true)
+	# PARITY (breah.md 0118, the gauntlet is cocked on the hold's first frame): the wind-up pose comes HOLD_POSE_T into
+	# the hold, before the 0.28 s tap window, while the lane and the charge still wait for it
+	var wind_at := [-1.0]
+	var lane_early := [false]
+	var held_t := [0.0]
+	step(m, 0.27, func():
+		P.inp["fire"] = true
+		held_t[0] += DT
+		if wind_at[0] < 0.0 and K.anim_id == "breah_wind": wind_at[0] = held_t[0]
+		if AimKit.shown(P, "punch"): lane_early[0] = true
+	)
+	ok(
+		"lmb hold: the wind-up shows from HOLD_POSE_T, before the tap window, the lane after it",
+		wind_at[0] >= ArchKit.HOLD_POSE_T - 0.001 and wind_at[0] < ArchKit.HOLD_POSE_T + 2.5 * DT and not lane_early[0],
+		"wind at %.3f s lane early %s" % [wind_at[0], lane_early[0]]
+	)
+	step(m, 0.23, func(): P.inp["fire"] = true)
 	k_at[0] = K.punch_k()
 	lane_at = AimKit.entry(P, "punch")
 	var ret := AimKit.reticle(P)
@@ -176,8 +192,23 @@ func _breah() -> void:
 	P.inp["fire"] = false
 	step(m, 0.4)
 	ok(
-		"lmb: hold + release = punch, knocks back", K.punches == 1 and dmg(T) >= 20.0 and T.pos.x - home.x > 3.0,
+		"lmb: hold + release = punch, knocks back (the data's 199 vs the 169 boulder = 10.6, no charge scaling)",
+		K.punches == 1 and typeof(pd["dmg"]) == TYPE_FLOAT and T.pos.x - home.x > 3.0
+		and absf(dmg(T) - float(pd["dmg"]) * m.dmg_mult(P)) < 0.6,
 		"punches %d took %.1f dx %.1f" % [K.punches, dmg(T), T.pos.x - home.x]
+	)
+	var full_dmg := dmg(T)
+	reset.call()
+	T.teleport(home + Vector3(2.4, 0, 0))
+	aim_at(P, T.pos)
+	P.inp["fire"] = true
+	step(m, 0.4, func(): P.inp["fire"] = true)
+	P.inp["fire"] = false
+	step(m, 0.3)
+	ok(
+		"lmb: a short hold hits as hard as a full one (no charge scaling on damage or knockback)",
+		K.punches == 2 and absf(dmg(T) - full_dmg) < 0.1 and T.pos.x - home.x > 3.0,
+		"short %.1f full %.1f dx %.1f" % [dmg(T), full_dmg, T.pos.x - home.x]
 	)
 	ok(
 		"lmb: the punch lands with the blue hit flash and debris (sized by the lane's half width)",
@@ -381,13 +412,14 @@ func _breah() -> void:
 		KitLooks.of(m).skins_live("rock") >= 1 or K.launches - l0 == 3
 	)
 	ok(
-		"data: rocks carry no slow, only the Rock Hop's rolling rock does",
-		not K.rock_def().has("slow_t") and float(K.dash_def()["slow_t"]) > 0.0
+		"data: a punched rock slows 0.85x for 0.8 s, the Rock Hop's rolling rock harder and longer",
+		absf(float(K.rock_def()["slow_k"]) - 0.15) < 0.001 and absf(float(K.rock_def()["slow_t"]) - 0.8) < 0.001
+		and float(K.dash_def()["slow_t"]) > float(K.rock_def()["slow_t"])
 	)
 	step(m, 0.6)
 	ok(
-		"combo: launched rocks burst on the foe and shred it, no slow (ROCKFALL)",
-		dmg(T) >= 10.0 and T.vuln_t > 0.0 and T.slow_t <= 0.0 and K.launch_pay >= 1,
+		"combo: launched rocks burst on the foe, shred it and slow it 15% (ROCKFALL)",
+		dmg(T) >= 10.0 and T.vuln_t > 0.0 and T.slow_t > 0.0 and absf(T.slow_k - 0.15) < 0.01 and K.launch_pay >= 1,
 		"took %.1f vuln %.1f slow %.2f pay %d" % [dmg(T), T.vuln_t, T.slow_t, K.launch_pay]
 	)
 	ok(
@@ -613,19 +645,27 @@ func _breah() -> void:
 		T.hp < 10.0 and float(K.cd["rmb"]) > 1.0 and K.ch_rmb < 1.0,
 		"cd %.2f charges %.2f" % [float(K.cd["rmb"]), K.ch_rmb]
 	)
-	# the dunk
-	reset.call()
-	T.teleport(home + Vector3(1.3, 0, 0))
-	T.pos.y += 2.0
-	T.grounded = false
-	var dn0 := K.dunks
-	K._slam(0.5, true)
-	ok(
-		"rmb: a foe in the air is dunked", K.dunks == dn0 + 1 and T.vel.y < -10.0,
-		"dunks %d vy %.1f" % [K.dunks, T.vel.y]
-	)
+	# the spike (docs/SPIKE_SLAM.md): the tap slam drives a foe in the air down for +40%; the dive landing does not
+	for tap_slam in [true, false]:
+		reset.call()
+		T.teleport(home + Vector3(1.3, 0, 0))
+		T.pos.y += 2.0
+		T.grounded = false
+		T.vel = Vector3.ZERO
+		var dn0 := K.dunks
+		var hp0 := T.hp
+		K._slam(0.0 if tap_slam else 0.5, not tap_slam)
+		var took := hp0 - T.hp
+		if tap_slam:
+			ok("rmb spike: the tap slam drives a foe in the air down (vy -22) for +40%",
+				K.dunks == dn0 + 1 and T.vel.y <= -21.0 and took >= 14.0 * 1.4 - 0.5,
+				"dunks +%d vy %.1f took %.1f" % [K.dunks - dn0, T.vel.y, took])
+		else:
+			ok("rmb spike: the dive landing does not spike a foe in the air (a dive)",
+				K.dunks == dn0 and T.vel.y > -10.0 and took > 0.0,
+				"dunks +%d vy %.1f took %.1f" % [K.dunks - dn0, T.vel.y, took])
 	_dunk_no_knock(m, P, T, home, K, reset)
-	await _hop_glide(m, P, home, K, reset)
+	_hop_glide(m, P, home, K, reset)
 	_glide_slam(m, P, K, reset)
 	# ---- data pass: Landslide is 12s with one charge; Shardskin is the base passive
 	ok(
@@ -700,7 +740,7 @@ func _breah() -> void:
 		K.guard_punches == gp0 and K.shield_stacks == 0 and P.shield < 0.5, "shield %.1f" % P.shield
 	)
 	# ---- Rock Hop (item 111): the rocks, the chain, the crash, the rock rolling on
-	await _leap(m, P, T, home, K, reset)
+	_leap(m, P, T, home, K, reset)
 	# item 183: a charge in the air is the same Rock Hop as on the ground (its clip, its charge, its reach)
 	reset.call()
 	var hop_x := _first_hop_reach(m, P, false)
@@ -722,7 +762,7 @@ func _breah() -> void:
 	P.do_dash()
 	ok("anim: her long dash (no charge left) plays breah_exdash", K.anim_id == "breah_exdash")
 	step(m, 0.8)
-	await _dash_moves(m, P, T, home, K, reset)
+	_dash_moves(m, P, T, home, K, reset)
 	_air_dash_hold(m, P, K, reset)
 	_air_punch_steer(m, P, K, reset)
 	# ---- rank 3
@@ -970,8 +1010,9 @@ func _hop_glide(m: Match, P: Hunter, home: Vector3, K: DolmKit, reset: Callable)
 		step(m, 0.8)
 
 ## Owner 23:00 (reverses item 26's "the glider wins" for a press in a glide; the source allows it): Quakefall
-## pressed while gliding folds the glider and plunges at the glider's dive speed (data: 32.5 m/s down, sideways
-## speed x0.25), slamming where she lands; glide still held doesn't reopen it on the way down.
+## pressed while gliding folds the glider and plunges at the glider's dive speed (data: 32.5 m/s down), slamming
+## where she lands; glide still held doesn't reopen it on the way down. Owner 11-26: the plunge's sideways speed is
+## the arc's onto the cursor's spot (at most air_reach), no longer the glide's own x0.25.
 func _glide_slam(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
 	reset.call()
 	P.pos.y += 8.0
@@ -984,11 +1025,11 @@ func _glide_slam(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
 		t += DT
 	var glided := P.gliding
 	var s0 := K.slams
-	var vx0 := absf(P.vel.x)
 	P.inp["move"] = Vector2.ZERO
+	var from := P.pos
 	tap(m, P)
 	var folded := not P.gliding and K.dive and K.dive_glide
-	var vx1 := absf(P.vel.x)
+	var spot := K.slam.air_to
 	var fall := 0.0
 	var vmin := 0.0
 	var reopened := false
@@ -1001,11 +1042,15 @@ func _glide_slam(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
 	P.inp["glide"] = false
 	P.inp["move"] = Vector2.ZERO
 	m.step(DT)
+	var reach := float(K.slam.feel()["air_reach"])
+	var off := Vector2(P.pos.x - spot.x, P.pos.z - spot.z).length()
+	var went := Vector2(P.pos.x - from.x, P.pos.z - from.z).length()
 	ok("glide slam: RMB in a glide folds the glider and plunges at the glider's dive speed (data 32.5 m/s)",
-		glided and folded and not reopened and vmin <= -30.0 and vx1 <= vx0 * 0.3 + 0.1,
-		"glided %s folded %s reopened %s vy %.1f vx %.1f -> %.1f" % [glided, folded, reopened, vmin, vx0, vx1])
-	ok("glide slam: she slams where she lands (about 0.3s down from 8m)", K.slams == s0 + 1 and P.grounded
-		and fall < 0.6, "slams +%d, %.2f s down" % [K.slams - s0, fall])
+		glided and folded and not reopened and vmin <= -30.0,
+		"glided %s folded %s reopened %s vy %.1f" % [glided, folded, reopened, vmin])
+	ok("glide slam: she slams on the circle's spot, at most air_reach on (about 0.5s down from 8m)",
+		K.slams == s0 + 1 and P.grounded and fall < 0.6 and off < 0.5 and went <= reach + 0.3,
+		"slams +%d, %.2f s down, %.2fm off the spot, %.2fm on" % [K.slams - s0, fall, off, went])
 	step(m, 0.8)
 
 ## Item 51: the Quake Fist charge carries through her air dash (it charges on, short of the auto punch) and a
@@ -1301,7 +1346,7 @@ func _leap(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Cal
 	var rock_first := [false]
 	aim_at(P, far)
 	var lands0 := K.leap_lands
-	await _chain_over(m, P, K, far, func(): if K.leap_lands > lands0 and K.landslides == rolls0: rock_first[0] = true)
+	_chain_over(m, P, K, far, func(): if K.leap_lands > lands0 and K.landslides == rolls0: rock_first[0] = true)
 	ok(
 		"crash: the last landing hits and shoves a foe beside it",
 		K.leap_hits == hits0 + 1 and dmg(T) >= float(dd["land_dmg"]) * 0.9,
@@ -1367,7 +1412,7 @@ func _leap(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Cal
 		"%s %d" % [hop2, K.boulders - b0]
 	)
 	# over the abyss, on rough ground, at the map's edge
-	await _hop_terrain(m, P, T, home, K, reset, reach)
+	_hop_terrain(m, P, T, home, K, reset, reach)
 
 func hop_rocks(m: Match) -> Array:
 	return m.verbs.walls.filter(func(w): return w.has("hop"))
@@ -1385,10 +1430,9 @@ func _chain_over(m: Match, P: Hunter, K: DolmKit, far: Vector3, each: Callable) 
 	step(m, 1.0, each)
 	aim_at(P, far)
 
-## The Volcano slam has no push (Volcano Crusher: a centre stun and a Dunk, no knock): a grounded foe at the centre
-## stays put, and the Dunk over the abyss still adds its bonus without one.
+## The Volcano slam has no push (Volcano Crusher: a centre stun and a spike, no knock): a grounded foe at the centre
+## stays put. (The abyss extra of the old Dunk is gone: the tap slam's spike has none, docs/SPIKE_SLAM.md.)
 func _dunk_no_knock(m: Match, _P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Callable) -> void:
-	var W: World = m.world
 	reset.call()
 	T.teleport(home + Vector3(1.0, 0, 0))
 	var at0 := T.pos
@@ -1397,34 +1441,7 @@ func _dunk_no_knock(m: Match, _P: Hunter, T: Hunter, home: Vector3, K: DolmKit, 
 	step(m, 0.6)
 	var moved := Vector2(T.pos.x - at0.x, T.pos.z - at0.z).length()
 	var still := moved < 0.05 and T.hp < 200.0
-	ok("rmb: the slam pushes nobody (stun and Dunk only, no knock)", still, "moved %.2f m" % moved)
-	var hits := []
-	for void_under in [false, true]:
-		reset.call()
-		T.teleport(home + Vector3(1.3, 0, 0))
-		T.pos.y += 2.0
-		T.grounded = false
-		T.hp = 200.0
-		var saved := {}
-		if void_under:
-			for dx in range(-2, 3):
-				for dz in range(-2, 3):
-					var i := W.idx(int(floor(T.pos.x)) + dx, int(floor(T.pos.z)) + dz)
-					saved[i] = [W.kind[i], W.level[i]]
-					W.kind[i] = World.T_VOID
-		var dn0 := K.dunks
-		var hp0 := T.hp
-		K._slam(0.5, true)
-		hits.append([K.dunks == dn0 + 1, hp0 - T.hp, T.vel.y])
-		for i in saved:
-			W.kind[i] = saved[i][0]
-			W.level[i] = saved[i][1]
-	ok(
-		"rmb: the Dunk over the abyss still fires without the push, with its bonus",
-		hits[0][0] and hits[1][0] and hits[0][2] < -10.0
-				and hits[1][1] - hits[0][1] > float(K.slam_def()["dunk_void"]) * 0.8,
-		"land %.1f void %.1f" % [hits[0][1], hits[1][1]]
-	)
+	ok("rmb: the slam pushes nobody (stun and spike only, no knock)", still, "moved %.2f m" % moved)
 
 ## What the ground does to a chain: the abyss, height, walls, the map's edge.
 func _hop_terrain(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Callable, reach: float) -> void:

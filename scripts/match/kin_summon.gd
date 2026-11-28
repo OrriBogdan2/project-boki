@@ -15,6 +15,12 @@ extends RefCounted
 ## Online: the kin snapshot carries the seconds (KinNet); the wisp flag swaps the form.
 
 const SHRINK_S := BokiWispPop.DURATION  # s: the fold back into the wisp
+const WARN_S := 2.0  # s before the window ends: the soft two-note warning
+const WARN_GAP_S := 0.18  # s between the two notes
+const WARN_UP := 1.26  # x pitch of the second note (a rising third: "going soon")
+const WARN_DB := Vector2(-8.0, -20.0)  # dB of a note: your own Boki's (in your ear), then anyone else's (positional)
+const BURST_CUE := "wisp_burst"  # content/sfx/wisp.json: the bloom as the Boki bursts out of its wisp
+const FOLD_CUE := "wisp_fold"  # the inward swish as it folds back in
 const POP := "SummonPop"  # the BokiWispPop child while it bursts or folds
 const CALL_AT := "summon_call_at"  # meta on the Hunter: match time of the last call or recall gesture
 const CALL_K := "summon_call_k"  # meta on the Hunter: which ("call" on the burst, "recall" on the fold)
@@ -26,6 +32,7 @@ var left := 0.0  # s of the window left (0: a wisp, or shrinking)
 var win := 0.0  # s: the window it started with (the most `left` seen), for SummonRing
 var shrink := 0.0  # s of the shrink back left
 var cd := 0.0  # s until it can be summoned again
+var warned := false  # the end warning has played for this window (drawing only)
 var cd_full := 1.0  # s: the cooldown now running (longer after a rival's kill), for the HUD ring
 var fly := 0.0  # s of the flight home left after a kill (drawing only)
 var fly_len := 1.0  # s: that flight in all
@@ -114,6 +121,7 @@ func burst(window: float) -> void:
 	k.fly = {}
 	k.vel = Vector3.ZERO
 	left = window
+	warned = window <= WARN_S
 
 
 ## R fused the Boki into its hunter (KinMerge): a window still running is over, with the full cooldown of
@@ -161,7 +169,7 @@ func killed(by: Ent) -> bool:
 	elif foe and (o.downed or o.out):
 		KinSteal.break_loose(k, at)  # its owner is down: anyone may grab it
 	else:
-		k.m.sfx("boki_downed", at, -4.0)          # (a loose one says it as it breaks loose)
+		k.m.sfx("boki_downed", at, -4.0)  # (a loose one says it as it breaks loose)
 		k.back_home = true
 		fly_len = maxf(0.1, Vector2(at.x - o.pos.x, at.z - o.pos.z).length() / float(rules()["home_speed"]))
 		fly = fly_len
@@ -200,7 +208,10 @@ static func show_reveal(m: Match, at: Vector3, team: int) -> void:
 
 ## The fixed step (own Boki only; a remote one reads the snapshot).
 func tick(dt: float) -> void:
+	var resting := cd > 0.0
 	cd = maxf(0.0, cd - dt)
+	if resting and cd <= 0.0 and k.wisp and k.owner_h == k.m.player:
+		_ready_cue()
 	fly = maxf(0.0, fly - dt)
 	var o := k.owner_h
 	if left > 0.0:
@@ -224,14 +235,16 @@ func tick(dt: float) -> void:
 ## playing through the shrink carries on; one that never shrank (killed, or a late snapshot) folds from here.
 func popped(to_wisp: bool, gesture := true) -> void:
 	if not to_wisp:
+		warned = left <= WARN_S  # (a re-bloom late in the window does not warn twice)
 		_pop(true, false)
 		if gesture:
 			_call("call")
-		k.m.sfx("kin_happy", k.pos, -6.0, Unique.voice(k.rec))
+		_pop_sfx(true)
 	elif _folding:
 		_drop_pop()
 	else:
 		_pop(false, true)
+		_pop_sfx(false)
 	_folding = false
 
 
@@ -252,6 +265,16 @@ func _pop(burst_v: bool, stowing: bool) -> void:
 	k.add_child(pop)
 	k.model.visible = false
 	pop.play(burst_v)
+
+
+## The pop's sounds, at the Boki on every game: the bloom of the burst with the species' own happy cry layered on
+## it (the shared one when it has none), or the inward swish of the fold. Sfx.MIN_GAP applies to each.
+func _pop_sfx(burst_v: bool) -> void:
+	if not burst_v:
+		k.m.sfx(FOLD_CUE, k.pos, -6.0)
+		return
+	k.m.sfx(BURST_CUE, k.pos, -6.0)
+	k.m.sfx(KinVoice.cue(k.species, "happy"), k.pos, -6.0, Unique.voice(k.rec))
 
 
 ## The burst ended: the walking Boki takes over. A fold holds its last pose until the wisp flag flips.
@@ -283,15 +306,42 @@ func _back(cool: float) -> void:
 ## The fold starts with the shrink (here, so other games start it from the snapshot too), and the wisp is dim
 ## while it rests.
 func render() -> void:
+	if left > 0.0 and left <= WARN_S and not warned:
+		warned = true
+		warn()
 	if shrink > 0.0 and not k.wisp and not _folding:
 		_folding = true
 		_pop(false, false)
+		_pop_sfx(false)
 		_call("recall")
 	elif _folding and shrink <= 0.0 and not k.wisp:
 		_folding = false  # left behind mid-fold: it stays the walking Boki
 		_drop_pop()
 	if k.wisp and k.model:
 		BokiWispLook.dim(k.model, cd > 0.0)
+
+
+## The summon is back: your wisp brightens (BokiWispLook.dim) with a little sparkle and the quiet ready tick plays.
+func _ready_cue() -> void:
+	k.m.fx.burst(k.pos + Vector3(0, 0.6, 0), k.sp.get("glow", k.sp["color"]), 8, 1.5)
+	k.m.sfx("ab_ready", null, -4.0, 1.0)
+
+
+## The end warning: two soft rising notes of the species' own voice. The owner hears them in the ear, everyone
+## else a quieter one from where the Boki stands. The second note is dropped if it was knocked down or sent back
+## in the gap (that has its own cue).
+func warn() -> void:
+	var own: bool = k.owner_h != null and k.owner_h == k.m.player
+	var at = null if own else k.pos
+	var db := WARN_DB.x if own else WARN_DB.y
+	var cue := KinVoice.cue(k.species, "happy")
+	var voice := Unique.voice(k.rec)
+	k.m.sfx(cue, at, db, voice)
+	k.get_tree().create_timer(WARN_GAP_S).timeout.connect(
+		func() -> void:
+			if is_instance_valid(k) and left > 0.0:
+				k.m.sfx(cue, at, db, voice * WARN_UP)
+	)
 
 
 ## The Hunter's gesture (warden_anim "summon_call", WardenClips' upper layer): a call on the burst, a recall on the

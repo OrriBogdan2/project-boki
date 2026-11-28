@@ -5,8 +5,8 @@ extends RefCounted
 ## pulsing), with its timer in a pill under it on the full map. The full map's tooltip (MapHover) and the
 ## key (MapKey) read the same words from here; the minimap pings an open or opening one on its edge.
 
-const OPEN_COL := Color("4ff09a")  # open: the lift is up, go
-const OPENING_COL := Color("45d3e8")  # opening: the uplink is charging, or ready to start
+const OPEN_COL := Color("45d3e8")  # open: the lift is up, go (travel cyan, MapMarks)
+const OPENING_COL := Color("a6ecf7")  # opening: the uplink is charging, or ready to start
 const CLOSED_COL := Color("8d93a3")  # closed: not yet, or used up
 const DISC := Color(0.05, 0.07, 0.11, 0.96)
 const SAMPLE := {"state": "open", "t": 0.0, "prog": 0.0}  # for the keys: the icon as it looks open
@@ -121,6 +121,13 @@ static func full_map(fm: FullMap) -> void:
 			continue
 		glyph(fm.hud.c, pv, r, x, m.time)
 		pill(fm, pv + Vector2(0, r + 13.0), word(m, x), color(x))
+
+
+## The pill's box under exit `x` on the full map (FullMap keeps place names off it).
+static func pill_box(fm: FullMap, x: Dictionary) -> Rect2:
+	var at: Vector2 = fm.to_screen(x["pos"]) + Vector2(0, clampf(6.0 + fm.k() * 0.7, 9.0, 15.0) + 13.0)
+	var w := TextCache.width(HudStyle.BIG, word(fm.m, x), 11) + 12.0
+	return Rect2(at + Vector2(-w * 0.5, -10.0), Vector2(w, 16.0))
 
 
 static func pill(fm: FullMap, at: Vector2, txt: String, col: Color) -> void:

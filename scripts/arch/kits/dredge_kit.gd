@@ -28,7 +28,6 @@ const FOLD_T := 0.033                  # s into the `lunge` clip where the ball 
 const CHAIN_GRACE := 0.08              # s the ball stays closed past the gap, for a press a frame or two late
 const ARM_THICK := 0.7                 # m, the stretched arm's girth at the shoulder end
 const HAUL_T := 0.26                   # s per hand-over-hand haul (dr_reel); the arm swells on each
-const FEET_R := 0.25                   # m past touching: a foe in reach this little ahead stops the Anchor's hop
 const SNAP_T := 0.14                   # s the stretched arm takes to snap back to his shoulder after a miss or the reel
 const GHOST_STEP := 0.4                # m between the samples that find the stretch of arm inside rock
 const DRIP_T := 0.07                   # s between sludge drips off the stretched arm
@@ -64,6 +63,7 @@ var barge_met := {}             # foes the barge has already flashed on (instanc
 var stop_t := 0.0               # the barge under way; when it ends he stops, keeping almost none of its speed
 var next_barge := -9.0          # the short gap between barges in a run
 var ball_open_at := -9.0        # when the ball opens (dr_lunge_out): the last shove's end, else the gap and a grace on
+var slug_sd := {}               # the last slug fired while it flies (its whistle, dr_slug_fly, follows it)
 var shot_seen := 0              # the last weapon volley the kit dressed
 var armor_shreds := 0           # (tests) hits that shredded armor
 var broadside: DredgeBlast      # X, Brass Broadside (its charge and waves are a hold: broadside.blast)
@@ -88,7 +88,6 @@ func _setup() -> void:
 
 func res_text() -> String: return "%d" % int(res)
 func res_frac() -> float: return clampf(res / res_max(), 0.0, 1.0)
-func ready_label() -> String: return "SALVAGE" if res >= res_max() else ""
 func rd() -> Dictionary: return res_def()
 ## Seafoam, his palette's "anchor" (content/vfx/dredge.json): the Anchor's telegraph rims stand off yellow-green grass.
 func anchor_col() -> Color: return HeroVfx.of(m).color(h, "anchor")
@@ -244,6 +243,8 @@ func _drop_holds() -> void:
 ## streaks that hang as brass dots where they stop). One aim line lies on the ground from his body out to the
 ## slug range, drawn per frame toward the cursor; the whole volley flies in a tight group along it.
 func _tick_gun() -> void:
+	if not slug_sd.is_empty() and not HeroSfx.fly(m, h, "dr_slug_fly", slug_sd):
+		slug_sd = {}
 	if h.wid != "shotgun":
 		return
 	if h.shot_n != shot_seen:
@@ -257,6 +258,9 @@ func _tick_gun() -> void:
 
 func _dress_volley() -> void:
 	play("dr_shot")
+	m.sfx("dr_shot_tail", h.pos, -6.0 if h.is_local() else -9.0)     # scrap rattling away after the boom
+	if m.shots.size() > 0 and m.shots[-1]["by"] == h:
+		slug_sd = m.shots[-1]
 	var d2 := h.aim_dir()
 	var mz := ShotOrigin.muzzle_at(h, h.wpn["muzzle"], d2)      # the blunderbuss's mouth, where the slugs start too
 	vfx("shot", mz, d2)
@@ -277,8 +281,6 @@ func _dress_volley() -> void:
 func _tick_looks(dt: float) -> void:
 	if not tells_visible():
 		return
-	if not pull.is_empty():
-		HeroVfx.of(m).hold(h, "reel")         # grounded while he reels: a brass ring at his feet
 	if barge_t > 0.0:
 		barge_t -= dt
 		_barge_trail(dt)
@@ -376,6 +378,7 @@ func _launch_hook() -> void:
 		hook_sd = m.shots[-1]
 		# the hook pierces terrain: rocks, props and cliff faces
 		(hook_sd["x"] as Dictionary)["pierce_terrain"] = true
+		(hook_sd["x"] as Dictionary)["block_class"] = "reach"      # (Blockers: a placed ridge or shield stops it)
 
 ## The hook in flight: his arm stretched out to it. It also
 ## catches an ally in its path (reeled in to safety) and scoops up any wisp (downed hunter) it passes.
@@ -530,6 +533,8 @@ func _end_pull(arrived: bool) -> void:
 		arrivals += 1
 		var rdf := rmb_def()
 		if not ally:
+			# the foe lands Grounded (no jump, dash or glide) through the Anchor's wind-up, not stunned
+			KitStatus.apply(f, "gnd", float(rdf["arrive_ground"]), 0.0, true, "", h.nid)
 			payoff_fx((f as Ent).pos, col_of(rdf), "dredge_coin_jingle", h.aim_dir(), f)
 	var queued := e_queued
 	e_queued = false
@@ -555,8 +560,7 @@ func cast_e() -> bool:
 	slam_dir = e_at if e_at != Vector2.ZERO else h.aim_dir()
 	play("dr_anchor")
 	KitWindup.play(self, "e", "dr_anchor_wind", -3.0)
-	var lands := h.pos + Vector3(slam_dir.x, 0, slam_dir.y) * float(ed["hop"])    # where the hop leaves him
-	vfx("anchor_fist", lands, slam_dir, {"r": float(ed["radius"])})
+	vfx("anchor_fist", h.pos, slam_dir, {"r": float(ed["radius"])})
 	return true
 
 func use_e() -> void:
@@ -579,7 +583,6 @@ func _tick_wind(dt: float) -> void:
 		KitWindup.broken(self, "e")
 		return
 	h.face = atan2(-slam_dir.x, -slam_dir.y)
-	_hop(ed, float(ed["windup"]) - wind)
 	var k := 1.0 - wind / float(ed["windup"])
 	AimKit.cone(h, "e_tell", slam_tell(k))
 	if wind <= 0.0:
@@ -588,40 +591,12 @@ func _tick_wind(dt: float) -> void:
 		AimKit.hide(h, "e_tell")
 		_anchor()
 
-## The hop of the footage's second frame (0222): he springs about one body height forward along the locked slam
-## direction, `hop` metres over `hop_t` seconds from `hop_from` seconds into the wind-up, so the fist lands on the
-## far end of it. Skipped mid-barge or in the air (the barge and the dive own the motion there).
-func _hop(ed: Dictionary, t: float) -> void:
-	if float(ed["hop"]) <= 0.0 or t < float(ed["hop_from"]) or t >= float(ed["hop_from"]) + float(ed["hop_t"]):
-		return
-	if not h.grounded or h.roll_t > 0.0:
-		return
-	if _foe_at_feet():
-		var fwd := maxf(0.0, Vector2(h.vel.x, h.vel.z).dot(slam_dir))     # the hop so far stops dead too
-		h.vel.x -= slam_dir.x * fwd
-		h.vel.z -= slam_dir.y * fwd
-		return
-	var v: Vector2 = slam_dir * (float(ed["hop"]) / float(ed["hop_t"]))
-	h.vel.x = v.x
-	h.vel.z = v.y
-
-## A foe inside the slam's cone already level with his front (one hauled to his feet): hopping on would carry him past
-## it or shove him round its body and swing the locked cone off it, so he slams from where he stands.
-func _foe_at_feet() -> bool:
-	var half := deg_to_rad(float(e_def()["angle"])) * 0.5
-	for f in foes_in(h.pos, float(e_def()["radius"])):
-		var to := Vector2((f as Ent).pos.x - h.pos.x, (f as Ent).pos.z - h.pos.z)
-		var ahead := to.dot(slam_dir)
-		if ahead < h.r + (f as Ent).r + FEET_R and (to.length() < 0.05 or absf(slam_dir.angle_to(to)) <= half):
-			return true
-	return false
-
 ## The slam's telegraph at progress `k`: a thin outline of the cone (radius, angle, locked direction) the slam hits.
 func slam_tell(k: float) -> Dictionary:
 	var ed := e_def()
 	return {
-		"dir": slam_dir, "len": float(ed["radius"]), "deg": float(ed["angle"]), "outline": true,
-		"all": true, "col": anchor_col(), "alpha": 1.8, "hot": 0.5 * k
+		"dir": slam_dir, "len": float(ed["radius"]), "deg": float(ed["angle"]), "soft": true, "fill": k,
+		"all": true, "col": HeroVfx.of(m).color(h, "gold"), "hot": 0.5 * k
 	}
 
 ## The slam: his fist into the ground in front, on this frame: the cone's damage and stun, cracks, dust and a
@@ -636,14 +611,14 @@ func _anchor() -> void:
 	var stun := _stun_t()
 	var stg := stage("e", {"delivery": {"type": "cone", "radius": float(ed["radius"]), "angle": float(ed["angle"])},
 		"effects": [{"type": "damage", "amount": amt}, {"type": "stun", "duration": stun}]})
-	var on_foe := func(f: Ent, _c: Dictionary): _slammed(f, stun, amt)
+	var on_foe := func(f: Ent, _c: Dictionary): _slammed(f, stun, amt, ed["spike"])
 	var aim_pt := h.pos + Vector3(dd.x, 0, dd.y) * float(ed["radius"])
 	run(stg, cx("e", "anchor_drop", aim_pt, {"no_floor": true, "on_foe": on_foe}))
 	var at := ground(h.pos + Vector3(dd.x, 0, dd.y) * float(ed["radius"]) * 0.5)
 	var fist := ground(h.pos + Vector3(dd.x, 0, dd.y) * 1.1)
 	vfx("anchor_slam", ground(h.pos), dd, {"r": float(ed["radius"])})
 	m.fx.burst(fist + Vector3(0, 0.2, 0), Color("c8b8a0"), 18, 5.0, 0.45, 10.0, 1.3, Vector3(dd.x, 0.8, dd.y), 70.0)
-	AimKit.cone(h, "e_hit", slam_tell(1.0).merged({"dur": 0.2, "alpha": 0.7}, true))
+	AimKit.cone(h, "e_hit", slam_tell(1.0).merged({"dur": 0.2, "hot": 1.0}, true))
 	m.later(0.06, _anchor_dust.bind(at))
 	m.sfx("dr_anchor", h.pos, -1.0, 1.0)
 	if not h.grounded and not over_void and not h.gliding:
@@ -668,13 +643,15 @@ func _stun_t() -> float:
 func over_abyss(f: Ent) -> bool:
 	return m.world.ground_at(f.pos.x, f.pos.z) <= World.VOID + 1.0
 
-func _slammed(f: Ent, stun: float, amt: float) -> void:
+## `spike`: the ground slam's spike block (a foe in the air is driven down); {} for the dive's landing.
+func _slammed(f: Ent, stun: float, amt: float, spike: Dictionary) -> void:
 	var ed := e_def()
 	if not is_instance_valid(f) or f.dead: return
 	if rank("kin") >= 3 and over_abyss(f):
 		abyss_dunks += 1
 		f.hurt(amt * power("kin") * float(ed["abyss_k"]), h, {"src": "abil", "ab": "k1", "tags": ["anchor"]})
-	m.displace.spike(f, -16.0, h)
+	if GlideSpike.dunks(f, spike):
+		m.displace.spike(f, -float(spike["vy"]), h)
 	Feel.hitstop(m, h, f, 30.0, {"melee": true, "heavy": true})
 	if tells_visible():
 		vfx("stunned", f.pos, null, {"on": f, "t": stun})     # a seafoam swirl over the stunned foe
@@ -740,7 +717,7 @@ func _quake(at: Vector3, fell: float) -> void:
 	var r := float(ed["quake_r"])
 	var stg := stage("e", {"delivery": {"type": "burst", "radius": r},
 		"effects": [{"type": "damage", "amount": amt}, {"type": "stun", "duration": stun}]})
-	var on_foe := func(f: Ent, _c: Dictionary): _slammed(f, stun, amt)
+	var on_foe := func(f: Ent, _c: Dictionary): _slammed(f, stun, amt, {})      # a dive: no spike
 	run(stg, cx("e", "anchor_drop", at, {"at_fixed": at, "no_floor": true, "on_foe": on_foe}))
 	var d2 := h.aim_dir()
 	vfx("quake", at, d2, {"r": r})

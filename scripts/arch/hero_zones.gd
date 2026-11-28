@@ -125,6 +125,8 @@ static func rock(
 		RockLook.upright(n)
 	n.scale = Vector3(len_ / 1.15, tall, 1.0)
 	RockLook.cool(n)
+	if RockLook.is_ridge(rid):
+		RockLook.ridge(n)
 	w["node"] = n
 	w["rock"] = true
 	w["rid"] = rid
@@ -228,6 +230,7 @@ static func bridge(
 
 # ------------------------------------------------------------------ the seed (visual; the caster's game runs the rules)
 const SEED_R0 := 0.08  # share of full size a fresh seed starts at (a speck, never zero)
+
 
 ## A Brimseed's radius after `t` seconds of growth: the hit radius, and the radius of the globe drawn for it.
 static func seed_r(rmax: float, grow: float, t: float) -> float:

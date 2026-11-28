@@ -38,10 +38,11 @@ const COLUMNS := 5          # Hunter cards per row: 13-15 Hunters = 3 rows, whic
 const PORTRAIT_PX := 48.0   # px, a card's portrait (the lobby's smaller one)
 const CARD_MIN_W := 176.0   # px, a card's least width (portrait, name, role word; the widest needs 174)
 const HOWTO_W := 600.0      # px, the how-to block beside the title (one Hunter's three lines)
-const LOG_H := 64.0         # px, the most the chat log grows to (it scrolls past that)
+const LOG_H := 56.0         # px, the most the chat log grows to (it scrolls past that)
+const ROOT_GAP := 6         # px between the screen's rows (chat log full and stage up still fit 720 px's margin)
 ## px, your pick's 3D stage beside the grid: no taller than 3 card rows, so the body keeps the 720 px budget
 ## (the camera keeps height: the same full-body framing, smaller; 0.81 wide per tall, roomier than 240x320)
-const STAGE_PX := Vector2(200, 248)
+const STAGE_PX := Vector2(190, 248)
 
 ## A small padlock for a shut Hunter: a body and a shackle.
 class Padlock extends Control:
@@ -67,7 +68,7 @@ func _ready() -> void:
 	_pad.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(_pad)
 	get_viewport().size_changed.connect(_fit_safe_area)
-	var root := UI.vbox(10)
+	var root := UI.vbox(ROOT_GAP)
 	_pad.add_child(root)
 	banner = UI.vbox(0)
 	banner.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -105,7 +106,7 @@ func _ready() -> void:
 	grid = GridContainer.new()
 	grid.columns = COLUMNS
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	grid.add_theme_constant_override("h_separation", 12)
+	grid.add_theme_constant_override("h_separation", 8)
 	grid.add_theme_constant_override("v_separation", 8)
 	sc.add_child(grid)
 	stage_slot = Control.new()      # holds its place before your first pick, so the cards don't shift
@@ -188,14 +189,19 @@ func _tick_label() -> void:
 	elif pm.my_turn():
 		caption.text = "YOUR TURN"
 		var teach := pm.teach_line()
-		note_label.text = teach if teach != "" else "Pick a Hunter. No two on a squad can be the same one."
+		var pick_note := "Pick a Hunter."
+		if pm.squad.size() > 1:
+			pick_note += " No two on a squad can be the same one."
+		note_label.text = teach if teach != "" else pick_note
 	else:
 		caption.text = "%s IS PICKING" % String(m["name"]).to_upper()
 		note_label.text = "Your squad picks in turn, %d seconds each." % int(Prematch.TURN)
+		if pm.pick != "":
+			note_label.text = "Time's up: %s locked in. " % HunterViewer.display_name(pm.pick) + note_label.text
 	var mine := pm.my_turn() and not pm.locked
 	if s != _last_sec:
 		_last_sec = s
-		if mine and pm.turn_left > 0.0 and pm.turn_left <= TICK_FROM:
+		if mine and pm.squad.size() > 1 and pm.turn_left > 0.0 and pm.turn_left <= TICK_FROM:
 			Sfx.play("click", null, 0.0, 0.0, 1.5 if pm.turn_left <= PULSE_FROM else 1.0)
 	_pulse(pm.turn_left if mine else Prematch.TURN)
 
@@ -213,8 +219,8 @@ func _pulse(left: float) -> void:
 
 ## Keeps the whole screen inside the HUD safe margin (HudStyle.safe_pad) and SafeArea's frame, so the
 ## countdown shows at every window size; smaller windows get smaller digits. The Hunter grid keeps COLUMNS at
-## every size: 5 x CARD_MIN_W plus the STAGE_PX stage beside it fit 1142 px
-## (a 1240 px square window's inside; 1224 at 1280x720).
+## every size: 5 x CARD_MIN_W plus the STAGE_PX stage beside it fit 1114 px
+## (the least inside of a window, 1240 logical px wide less the 5% margins: 1116; 1152 at 1280x720).
 func _fit_safe_area() -> void:
 	var win := get_viewport_rect().size
 	var pad := HudStyle.safe_pad(win)
@@ -289,7 +295,7 @@ func _tile(ak: String) -> PanelContainer:
 		row.add_child(Padlock.new())
 		card.modulate = Color(0.55, 0.55, 0.6, 0.8)
 		card.tooltip_text = "Locked: %s\n%s" % [ClassUnlock.requirement(ak), card.tooltip_text]
-	ClassCard.add_start_chip(card, ak)
+	ClassCard.add_start_chip(card, ak, col)
 	card.set_meta("arch", ak)
 	return card
 

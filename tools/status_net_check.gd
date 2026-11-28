@@ -77,7 +77,7 @@ func _host() -> void:
 		]
 	}
 	Net.lobby_emit("dn", {"c": "start", "d": d})
-	await _build(d)
+	_build(d)
 	var g: Hunter = m.ents_by_id.get("P" + other, null)
 	var t1 := CheckClock.own_msec(guest_pid)
 	while (
@@ -253,7 +253,7 @@ func _plain(g: Hunter) -> void:
 	st_secs = 3.0
 	KitStatus.apply(g, "blt", st_secs)
 	await _run(0.4)
-	await _same("Blight", left.bind("blt", {"blt_k": [60, 0.0]}))
+	await _same("Blight", left.bind("blt", {"blt_k": [roundi(InCombat.anti_heal_cut() * 100.0), 0.0]}))
 	await _start(g, "bulwark")
 	st_at = m.time
 	st_secs = 2.0

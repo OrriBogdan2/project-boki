@@ -64,7 +64,7 @@ func run(main: Node) -> void:
 		if not solid.has(id) and not HomeLayout.CATALOG[id].has("brush") and not HomeLayout.blocks(String(id)):
 			_walk_over(hm, String(id), c)
 	_all_blocked(hm)
-	await _boki(hm, c)
+	_boki(hm, c)
 	hm.queue_free()
 	await tree.process_frame
 	print("FCLIMBBLK DONE, failures: %d" % bad)
@@ -100,11 +100,13 @@ func _solid_piece(id: String) -> bool:
 	return HomeLayout.blocks(id) and not HomeLayout.CATALOG[id].has("brush")
 
 
-## A piece with no "block" is walked over: no tile of it is a wall.
+## A piece with no "block" is walked over: no tile of it is a wall (but the crop beds on a patch, which you walk round:
+## PlotBlocks).
 func _walk_over(hm, id: String, c: Vector2i) -> void:
 	var e := _put(hm, id, c)
-	var open := HomeLayout.deco_cells(e).all(func(t): return not hm.world.is_block(t.x + 0.5, t.y + 0.5))
-	ok(open, "%s: a walk-over piece, no wall on its tiles" % id)
+	var beds := PlotBlocks.tiles(hm._plot_spots((hm._d()["plots"] as Array).size()))
+	var open := HomeLayout.deco_cells(e).all(func(t): return t in beds or not hm.world.is_block(t.x + 0.5, t.y + 0.5))
+	ok(open, "%s: a walk-over piece, no wall on its tiles bar the crop beds" % id)
 	_clear_deco(hm)
 
 
@@ -126,7 +128,7 @@ func _kind(hm, id: String, c: Vector2i) -> void:
 	ok(stands, "%s: its %d tile(s) stand you at %.1f m" % [id, cells.size(), top])
 	var at := Vector2(c.x - RUN_UP + 0.5 - 0.5, c.y + 0.5)  # heading east into the west face
 	ok(await _climb(hm, at, top), "%s: a running jump tops it (%.1f m)" % [id, top])
-	ok(await _walk_off(hm, Vector2(c.x + 0.5, c.y + 0.5)), "%s: from the top you walk off onto the meadow" % id)
+	ok(_walk_off(hm, Vector2(c.x + 0.5, c.y + 0.5)), "%s: from the top you walk off onto the meadow" % id)
 	var sz := HomeLayout.size_of(id, 0)
 	for nm in BOKI_SIZES:
 		_boki_size(hm, hm.kins[0], BOKI_SIZES[nm])

@@ -187,7 +187,8 @@ func draw(sz: Vector2) -> void:
 		hud._ctext(Vector2(sz.x * 0.5, 64), hint, 15, INK)
 	else:
 		hud._ctext(Vector2(sz.x * 0.5, 44), _map_title(), 28, INK, hud.big)
-		hud._ctext(Vector2(sz.x * 0.5, 66), "Click to ping  ·  right click takes your ping down  ·  wheel zooms  ·  %s closes" % Settings.key_cap("map"), 13, MUTED)
+		var hint := "Click to ping  ·  right click takes your ping down  ·  " if Life.has_mates(m, m.player) else ""
+		hud._ctext(Vector2(sz.x * 0.5, 66), "%swheel zooms  ·  %s closes" % [hint, Settings.key_cap("map")], 13, MUTED)
 	# the map itself: the painted map (MapPaint), framed
 	hud._rounded(rect.grow(9.0), Color(0, 0, 0, 0.45), 10)
 	c.draw_rect(rect, SEA)
@@ -197,7 +198,6 @@ func draw(sz: Vector2) -> void:
 	_grid(c, v, kk)
 	HazardMap.draw(c, m, to_screen, rect, Vector3.ZERO, HazardMap.FULL_SHIELD)
 	c.draw_rect(rect, Color(0.85, 0.8, 1.0, 0.35), false, 2.0)
-	_shrines(c, kk)
 	var saved: Vector3 = hud.mm_circ
 	hud.mm_circ = Vector3.ZERO          # the shared map helpers clip to a rectangle here
 	_labels(c, kk)
@@ -206,6 +206,7 @@ func draw(sz: Vector2) -> void:
 	if m.exits:
 		ExitMark.full_map(self)
 	hud.mm_circ = saved
+	MapMarks.full_map(self)
 	_spawns(c, team, kk)
 	ReviveHud.full_map(self)
 	if m.biomes:
@@ -237,21 +238,18 @@ func draw(sz: Vector2) -> void:
 
 ## The one line of a plain plan, on the map's foot: the jump key, and the key that brings the rest back.
 func _plain_hint(sz: Vector2) -> void:
+	hud._rounded(_plain_pill(sz), Color(0.04, 0.05, 0.08, 0.88), 10)
+	hud._ctext(Vector2(sz.x * 0.5, rect.end.y - 24), _plain_line(), 16, INK, hud.big)
+
+func _plain_line() -> String:
 	var keys := [Settings.key_cap("jump"), Settings.key_cap("scores")]
-	var line := "Press %s to jump  ·  hold %s for the legend and ways out" % keys
-	var w: float = hud.big.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x + 32.0
-	var pill := Rect2(Vector2(sz.x * 0.5 - w * 0.5, rect.end.y - 46), Vector2(w, 34))
-	hud._rounded(pill, Color(0.04, 0.05, 0.08, 0.88), 10)
-	hud._ctext(Vector2(sz.x * 0.5, rect.end.y - 24), line, 16, INK, hud.big)
+	return "Press %s to jump  ·  hold %s for the legend and ways out" % keys
+
+func _plain_pill(sz: Vector2) -> Rect2:
+	var w: float = hud.big.get_string_size(_plain_line(), HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x + 32.0
+	return Rect2(Vector2(sz.x * 0.5 - w * 0.5, rect.end.y - 46), Vector2(w, 34))
 
 ## Shrines: a small pale-green obelisk, dimmed once someone has used it.
-func _shrines(c: Control, kk: float) -> void:
-	var s := clampf(4.0 + kk * 0.5, 5.0, 9.0)
-	for sh in m.shrines:
-		var pv := to_screen(sh["pos"])
-		if rect.grow(-4.0).has_point(pv):
-			shrine_glyph(c, pv, s, bool(sh.get("used", false)))
-
 func shrine_glyph(c: Control, pv: Vector2, s: float, used := false) -> void:
 	var col := Color("9ff0c4") if not used else Color(0.6, 0.66, 0.64, 0.6)
 	var pts := PackedVector2Array([pv + Vector2(0, -s * 1.3), pv + Vector2(s * 0.55, -s * 0.2), pv + Vector2(s * 0.45, s * 0.8), pv + Vector2(-s * 0.45, s * 0.8), pv + Vector2(-s * 0.55, -s * 0.2)])
@@ -367,12 +365,15 @@ func _label_rect(txt: String, at: Vector2, px: int) -> Rect2:
 ## word, the hot zone's caption: they draw at their spot, forced).
 func _obstacles() -> void:
 	_spots.clear()
+	if plain_plan():
+		_taken.append(_plain_pill(hud.c.size))
 	if m.spawn_plan:
 		for cnd in m.spawn_plan.cands:
 			_spots.append(to_screen(cnd["pos"]))
 	if m.exits:
 		for x in m.exits.list:
 			_spots.append(to_screen(x["pos"]))
+			_taken.append(ExitMark.pill_box(self, x))
 	if m.heart:
 		var at := WaysOutMap.sites(m)
 		var sd := WaysOutHud.seats(m)
@@ -698,7 +699,8 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 		hud._text(Vector2(r.position.x + 48, y + 4), String(kr[1]), 12, INK)
 		y += 22.0
 	hud._text(Vector2(r.position.x + 14, y + 6), "Vaults and lairs are known to all.", 11, MUTED)
-	hud._text(Vector2(r.position.x + 14, y + 20), "The rest show up once your squad sees them.", 11, MUTED)
+	var who := "your squad sees" if Life.has_mates(m, m.player) else "you scout"
+	hud._text(Vector2(r.position.x + 14, y + 20), "The rest show up once %s them." % who, 11, MUTED)
 	# exits, under the spawns
 	var exit_rows := 1 + int(not m.shrines.is_empty()) + int(not m.beacons.is_empty())
 	var r2 := Rect2(Vector2(x0, r.end.y + 10), Vector2(wv, 38 + exit_rows * 22))
@@ -706,7 +708,7 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 		hud._rounded(r2, Color(0.04, 0.05, 0.08, 0.88), 12)
 		hud._text(r2.position + Vector2(14, 22), "WAYS OUT", 14, Color("8fe3c8"), hud.big)
 		ExitMark.glyph(c, Vector2(r2.position.x + 26, r2.position.y + 42), 8.0, ExitMark.SAMPLE, 0.0)
-		hud._text(Vector2(r2.position.x + 48, r2.position.y + 47), "Extraction (green: open)", 12, INK)
+		hud._text(Vector2(r2.position.x + 48, r2.position.y + 47), "Extraction (solid: open)", 12, INK)
 		var row_y := r2.position.y + 42 + 22
 		if not m.shrines.is_empty():
 			shrine_glyph(c, Vector2(r2.position.x + 26, row_y), 5.5)
@@ -718,7 +720,7 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 			hud._text(Vector2(r2.position.x + 48, row_y + 5), "Revive beacon (your squad back)", 12, INK)
 
 ## Left of the map: your squad, who leads the drop, and the keys for it.
-func _side(c: Control, _sz: Vector2) -> void:
+func _side(c: Control, sz: Vector2) -> void:
 	var p: Hunter = m.player
 	if p == null:
 		return
@@ -726,9 +728,14 @@ func _side(c: Control, _sz: Vector2) -> void:
 	if wv < 150.0:
 		return
 	var x0 := rect.position.x - 22.0 - wv
+	if not Life.has_mates(m, p):
+		return          # solos: no squad panel, no ping or lead keys (the drop prompt has your jump key)
 	var squad: Array = m.hunters.filter(func(x): return x.team == p.team)
 	var in_drop: bool = p.riding or p.dropping
 	var r := Rect2(Vector2(x0, rect.position.y), Vector2(wv, 48 + squad.size() * 44 + (118 if in_drop else 40)))
+	var lr := ShopLegend.place(m, x0, wv, r.end.y)
+	if lr.end.y < sz.y - 10:
+		ShopLegend.draw(self, c, lr)
 	hud._rounded(r, Color(0.04, 0.05, 0.08, 0.88), 12)
 	hud._text(r.position + Vector2(14, 26), "YOUR SQUAD", 16, GOLD, hud.big)
 	var y := r.position.y + 50.0

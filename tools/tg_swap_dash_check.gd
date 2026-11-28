@@ -34,7 +34,7 @@ func run(main_node: Node) -> void:
 	Save.d = Save.fresh()
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(
+	m.start(
 		{
 			"training": true,
 			"practice": true,

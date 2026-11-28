@@ -6,7 +6,7 @@ extends "res://tools/hitbox_size_check.gd"
 ## touches the save.
 
 const WARDENS := preload("res://tools/warden_model_check.gd").WARDENS
-const MEDIUM_HEIGHT := 1.732  # m, a medium hunter drawn (head top 1.546 x Hunter.VIS_SCALE 1.12)
+const MEDIUM_HEIGHT := 1.732  # m, a medium hunter drawn (its hitbox height; drawn size may exceed it)
 const SIZE_PULL := 0.3  # how much of a height's distance from the medium counts toward the radius
 const EDGE := 0.05  # m, the shot's miss or hit distance from the circle
 const TOP_PAD := 0.9  # m over the head a shot still hits (Match.shot_band)
@@ -27,7 +27,7 @@ func run(main: Node) -> void:
 	Save.d = Save.fresh()
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "god": false})
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "god": false})
 	m.set_process(false)
 	for mb in m.mobs:
 		mb.queue_free()

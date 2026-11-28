@@ -6,12 +6,122 @@ extends Node3D
 ## The three starter eggs up front plus the black mystery egg in its basket at the back (MysteryEgg).
 ## Names, tempers and blurbs come from each species' "egg" block in content/kin_home/<id>.json, so every
 ## egg is named for its element (Venom Egg, ...).
+const TOP_MARGIN := 48.0  # px: room kept clear of the window edges by the title block (both sides together)
+
 const STARTERS := ["cindle", "puddlet", "burrlet"]
+
 const MYSTERY := {
-	"species": "mystery", "name": "Mystery Egg", "temper": "???",
+	"species": "mystery",
+	"name": "Mystery Egg",
+	"temper": "???",
 	"desc": "Black as night, in an old basket. Who knows?",
 	"play": "Could be anything, even a rare one.",
 }
+
+const CARD_TEXT := "Every new adventurer picks a Boki to take into battle."
+
+const CARD_BUTTON := "Choose your Boki"
+
+const NAME_LOOK := Vector3(1.4, 0.25, 0.5)  # m: the naming shot aims right of the Boki, so it sits left of the card
+
+const NAME_CARD_W := 520.0  # px: the naming card
+
+const NAME_MARGIN := 32.0  # px: its gap to the screen edge
+
+const LABEL_W := 130.0  # px: the naming card's row labels
+
+const DICE_W := 44.0  # px: the dice button and its gap, in the Name row (so both boxes line up)
+
+const MYSTERY_AT := Vector3(-2.75, 0, -2.55)  # m: the basket, at the back between the lantern post and the banner
+
+## Hatching by knocks: each tap is a gentle knock on the shell, and something knocks back. The
+## egg rocks a little more each time, a new crack opens, the camera leans in, and the knocks from
+## inside get stronger. No flashes or bursts: it's a small, close moment.
+const TAPS := 7
+
+const KNOCK_LINES := [
+	"Knock on the shell",
+	"Something stirs...",
+	"Something knocks back.",
+	"Again, gently.",
+	"The shell bulges.",
+	"Cracks are spreading.",
+	"Nearly.",
+	"Here they come."
+]  # the title after each knock
+
+var cam: Camera3D
+
+var fx: Fx
+
+var eggs: Array = []  # {node, base, data}
+
+var chosen := -1
+
+var stage := "intro"  # intro (the card) | create (yourself) | pick (eggs) | warm | hatching | name | mask
+
+var card_box: Control
+
+var warmth := 0.0
+
+var warm_bar: Control
+
+var skipper: HatchSkip  # watches the hatch beat for a key (freed once the Boki's card is up)
+
+var reveal: KinReveal
+
+var hover := -1
+
+var auto_warm := false  # test hook: hold the warmth on by itself
+
+var t := 0.0
+
+var hatch_t := 0.0
+
+var warm_step := 0
+
+var kin_node: Node3D
+
+var ui: CanvasLayer
+
+var root_ui: Control
+
+var bottom: VBoxContainer
+
+var title: Label
+
+var cam_from := Vector3(0, 3.6, 6.4)
+
+var new_rec: Dictionary = {}  # the hatchling's record, made as it pops out (so the reveal and the name card show its sex) and kept by _finish
+
+var egg_defs: Array = []  # EGGS with the mystery egg's species (and its mutations) decided
+
+var egg_hover: EggHover  # the pointer's glow on the eggs and the black egg's hint
+
+var locker: LookLocker  # making yourself (stage "create")
+
+var edit_only := false
+
+var sub_lbl: Label  # opened from the menu just to change how you look
+
+var top_box: VBoxContainer  # the title and its line: centred, or over the preview while you make yourself
+
+var cam_to := Vector3(0, 3.6, 6.4)
+
+## The set for a new game: a carved stone dais floating at dusk, a rune circle glowing under your
+## feet, a broken arch behind with the old world's heart-crystal turning inside it, lanterns and
+## banners, rocks drifting round in a slow orbit, wild kin watching from the edges, fireflies,
+## a waterfall pouring off into the clouds, and the islands and a skyship far behind.
+var orbit: Node3D
+
+var runes: Array = []
+
+var crystal: Node3D
+
+var ship: Node3D
+
+var taps := 0
+
 
 static func starter_eggs() -> Array:
 	var out: Array = []
@@ -19,65 +129,46 @@ static func starter_eggs() -> Array:
 		var e: Dictionary = Data.egg_info(sp)
 		e["species"] = sp
 		for k in ["temper", "desc", "play"]:
-			if not e.has(k): e[k] = ""
+			if not e.has(k):
+				e[k] = ""
 		out.append(e)
 	out.append(MYSTERY.duplicate())
 	return out
 
-const CARD_TEXT := "Every new adventurer picks a Boki to take into battle."
-const CARD_BUTTON := "Choose your Boki"
-const NAME_LOOK := Vector3(1.4, 0.25, 0.5)     # m: the naming shot aims right of the Boki, so it sits left of the card
-const NAME_CARD_W := 520.0      # px: the naming card
-const NAME_MARGIN := 32.0       # px: its gap to the screen edge
-const LABEL_W := 130.0          # px: the naming card's row labels
-const DICE_W := 44.0            # px: the dice button and its gap, in the Name row (so both boxes line up)
-const MYSTERY_AT := Vector3(-2.75, 0, -2.55)     # m: the basket, at the back between the lantern post and the banner
-
-var cam: Camera3D
-var fx: Fx
-var eggs: Array = []          # {node, base, data}
-var chosen := -1
-var stage := "intro"          # intro (the card) | create (yourself) | pick (eggs) | warm | hatching | name | mask
-var card_box: Control
-var warmth := 0.0
-var warm_bar: Control
-var skipper: HatchSkip       # watches the hatch beat for a key (freed once the Boki's card is up)
-var reveal: KinReveal
-var hover := -1
-var auto_warm := false        # test hook: hold the warmth on by itself
-var t := 0.0
-var hatch_t := 0.0
-var warm_step := 0
-var kin_node: Node3D
-var ui: CanvasLayer
-var root_ui: Control
-var bottom: VBoxContainer
-var title: Label
-var cam_from := Vector3(0, 3.6, 6.4)
-var new_rec: Dictionary = {}  # the hatchling's record, made as it pops out (so the reveal and the name card show its sex) and kept by _finish
-var egg_defs: Array = []      # EGGS with the mystery egg's species (and its mutations) decided
-var mystery_found := false    # its card shows once you've hovered or picked the black egg
-var locker: LookLocker      # making yourself (stage "create")
-var edit_only := false
-var sub_lbl: Label        # opened from the menu just to change how you look
-var top_box: VBoxContainer    # the title and its line: centred, or over the preview while you make yourself
-var cam_to := Vector3(0, 3.6, 6.4)
 
 func _ready() -> void:
 	CursorMode.menu()
 	Sfx.play_music(Soundtrack.track("menu", "title"))
 	Sfx.play_ambience("home")
 	var env := WorldEnvironment.new()
-	env.environment = Look.environment({"top": Color("1a1440"), "mid": Color("7a3a9a"), "horizon": Color("ffa860"), "below": Color("2a1e4a"),
-		"sun_dir": Vector3(0.2, 0.12, -0.97), "sun_col": Color("ffd09a"),
-		"ambient": Color("c8cdf0"), "ambient_energy": 0.5, "fog": Color("6a5aa8"), "fog_height": -6.0, "stars": 0.7})
+	env.environment = Look.environment(
+		{
+			"top": Color("1a1440"),
+			"mid": Color("7a3a9a"),
+			"horizon": Color("ffa860"),
+			"below": Color("2a1e4a"),
+			"sun_dir": Vector3(0.2, 0.12, -0.97),
+			"sun_col": Color("ffd09a"),
+			"ambient": Color("c8cdf0"),
+			"ambient_energy": 0.5,
+			"fog": Color("6a5aa8"),
+			"fog_height": -6.0,
+			"stars": 0.7
+		}
+	)
 	add_child(env)
 	Look.lights(self, Color("ffe2c4"), 1.0, Vector3(-40, -25, 0), 30.0)
 	# a warm rim light from behind, so everything on the dais gets a glowing outline
-	var rim := DirectionalLight3D.new(); rim.light_color = Color("9ad8ff"); rim.light_energy = 0.55
-	rim.rotation_degrees = Vector3(-20, 180, 0); add_child(rim)
-	fx = Fx.new(); add_child(fx)
-	cam = Camera3D.new(); cam.fov = 40.0; add_child(cam)
+	var rim := DirectionalLight3D.new()
+	rim.light_color = Color("9ad8ff")
+	rim.light_energy = 0.55
+	rim.rotation_degrees = Vector3(-20, 180, 0)
+	add_child(rim)
+	fx = Fx.new()
+	add_child(fx)
+	cam = Camera3D.new()
+	cam.fov = 40.0
+	add_child(cam)
 	cam.position = cam_from
 	cam.look_at(Vector3(0, 0.6, 0))
 	_build_set()
@@ -106,7 +197,8 @@ func _ready() -> void:
 		holder.add_child(egg)
 		eggs.append({"holder": holder, "egg": egg, "base": holder.position, "data": d})
 	_build_ui()
-	cam_from = Vector3(-9, 7.5, 16); cam.position = cam_from
+	cam_from = Vector3(-9, 7.5, 16)
+	cam.position = cam_from
 	cam_to = Vector3(-3.5, 4.2, 9.0)
 	if edit_only:
 		stage = "intro"
@@ -117,33 +209,33 @@ func _ready() -> void:
 		_show_card()
 	if "--hatch-pick" in OS.get_cmdline_user_args():
 		# test: straight to choosing an egg
-		if not Save.d.has("look"): Save.d["look"] = Unmasked.default_look()
+		if not Save.d.has("look"):
+			Save.d["look"] = Unmasked.default_look()
 		_end_intro()
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--hatch-auto="):
 			var i := int(a.substr(13))
-			if not Save.d.has("look"): Save.d["look"] = Unmasked.default_look()
+			if not Save.d.has("look"):
+				Save.d["look"] = Unmasked.default_look()
 			_end_intro()
-			_pick(i); _pick(i)
+			_pick(i)
+			_pick(i)
 			auto_warm = true
+
 
 ## A starter egg's nest, without the eggs it comes with.
 func _nest() -> Node3D:
-	var nest := Models.nest(); nest.scale = Vector3.ONE * 0.8
+	var nest := Models.nest()
+	nest.scale = Vector3.ONE * 0.8
 	for ch in nest.get_children():
 		if ch is MeshInstance3D and (ch as MeshInstance3D).mesh is SphereMesh:
 			ch.visible = false
 	return nest
 
-## The set for a new game: a carved stone dais floating at dusk, a rune circle glowing under your
-## feet, a broken arch behind with the old world's heart-crystal turning inside it, lanterns and
-## banners, rocks drifting round in a slow orbit, wild kin watching from the edges, fireflies,
-## a waterfall pouring off into the clouds, and the islands and a skyship far behind.
-var orbit: Node3D
-var runes: Array = []
-var crystal: Node3D
+
 func _build_set() -> void:
-	var rr := RandomNumberGenerator.new(); rr.seed = 3
+	var rr := RandomNumberGenerator.new()
+	rr.seed = 3
 	var stone := Models.toon(Color("d9d2c4"))
 	var stone_d := Models.toon(Color("8f8aa0"))
 	var gold := Models.toon(Color("f2c46a"), true, 0.4)
@@ -156,11 +248,17 @@ func _build_set() -> void:
 	Models.part(self, Models.cyl(3.2, 3.2, 0.04, 40), Models.toon(Color("a99c86")), Vector3(0, 0.02, 0))
 	for i in 24:
 		var a := TAU * i / 24.0
-		var bl := Models.part(self, Models.box(0.6, 0.22, 0.3), stone_d if i % 2 == 0 else stone, Vector3(cos(a) * 3.95, 0.06, sin(a) * 3.95))
+		var bl := Models.part(
+			self,
+			Models.box(0.6, 0.22, 0.3),
+			stone_d if i % 2 == 0 else stone,
+			Vector3(cos(a) * 3.95, 0.06, sin(a) * 3.95)
+		)
 		bl.rotation.y = -a
 	# rune circles: a wide gold one and a smaller cyan one turning the other way
 	for spec in [[6.6, Color(1.0, 0.8, 0.4, 0.85), 0.05, 0.25], [4.2, Color(0.55, 0.95, 1.0, 0.7), 0.07, -0.4]]:
-		var rn := MeshInstance3D.new(); rn.mesh = Models.flat_quad(float(spec[0]))
+		var rn := MeshInstance3D.new()
+		rn.mesh = Models.flat_quad(float(spec[0]))
 		rn.material_override = Models.ring_mat(spec[1], float(spec[2]))
 		rn.position.y = 0.05
 		rn.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -168,16 +266,23 @@ func _build_set() -> void:
 		runes.append([rn, float(spec[3])])
 	for i in 8:
 		var a := TAU * i / 8.0 + 0.2
-		var gl := Models.part(self, Models.box(0.12, 0.03, 0.34), Models.glow_mat(Color(1.0, 0.85, 0.5, 0.9)), Vector3(cos(a) * 3.0, 0.05, sin(a) * 3.0))
+		var gl := Models.part(
+			self,
+			Models.box(0.12, 0.03, 0.34),
+			Models.glow_mat(Color(1.0, 0.85, 0.5, 0.9)),
+			Vector3(cos(a) * 3.0, 0.05, sin(a) * 3.0)
+		)
 		gl.rotation.y = -a
 	# a waterfall pouring off the edge into the clouds
-	var wf := Models.waterfall(1.1, 12.0); wf.position = Vector3(3.3, -0.1, -1.6); wf.rotation.y = -0.9
+	var wf := Models.waterfall(1.1, 12.0)
+	wf.position = Vector3(3.3, -0.1, -1.6)
+	wf.rotation.y = -0.9
 	add_child(wf)
 	# the broken arch behind, and the heart-crystal turning inside it
 	var arch_c := Vector3(0, -0.2, -5.2)
 	for i in 15:
 		if i in [10, 11]:
-			continue                       # broken off near the top
+			continue  # broken off near the top
 		var a := PI * i / 14.0
 		var bp := arch_c + Vector3(cos(a) * 4.6, sin(a) * 4.6, 0)
 		var blk := Models.part(self, Models.box(0.95, 0.75, 0.9), stone if i % 3 else stone_d, bp)
@@ -187,7 +292,9 @@ func _build_set() -> void:
 		fr.position = arch_c + Vector3(-2.6 + k * 0.7, 4.6 + k * 0.5, 0.3)
 		add_child(fr)
 		PropAnim.on(fr, 0.3, 0.25, 0.6 + k * 0.2)
-	crystal = Node3D.new(); crystal.position = arch_c + Vector3(0, 2.8, 0); add_child(crystal)
+	crystal = Node3D.new()
+	crystal.position = arch_c + Vector3(0, 2.8, 0)
+	add_child(crystal)
 	var cm := Models.toon(Color("8ae8ff"), true, 1.4)
 	var pm := Models.crystal(0.6, 2.4, 7)
 	cm.set_shader_parameter("gloss", 0.8)
@@ -195,22 +302,47 @@ func _build_set() -> void:
 	Models.part(crystal, pm, cm, Vector3(0, -0.8, 0), Vector3(1.0, 0.6, 1.0), Vector3(PI, 0, 0))
 	for i in 5:
 		var a := TAU * i / 5.0
-		Models.part(crystal, pm, cm, Vector3(cos(a) * 0.8, -0.2, sin(a) * 0.8), Vector3(0.35, 0.4, 0.35), Vector3(sin(a) * 0.5, 0, -cos(a) * 0.5))
-	var cl := OmniLight3D.new(); cl.light_color = Color("8ae8ff"); cl.light_energy = 2.2; cl.omni_range = 9.0; crystal.add_child(cl)
-	var beam := Models.part(self, Models.cyl(0.5, 1.4, 30.0, 16), Models.glow_mat(Color(0.55, 0.9, 1.0, 0.16)), arch_c + Vector3(0, 14.0, -0.4))
+		Models.part(
+			crystal,
+			pm,
+			cm,
+			Vector3(cos(a) * 0.8, -0.2, sin(a) * 0.8),
+			Vector3(0.35, 0.4, 0.35),
+			Vector3(sin(a) * 0.5, 0, -cos(a) * 0.5)
+		)
+	var cl := OmniLight3D.new()
+	cl.light_color = Color("8ae8ff")
+	cl.light_energy = 2.2
+	cl.omni_range = 9.0
+	crystal.add_child(cl)
+	var beam := Models.part(
+		self,
+		Models.cyl(0.5, 1.4, 30.0, 16),
+		Models.glow_mat(Color(0.55, 0.9, 1.0, 0.16)),
+		arch_c + Vector3(0, 14.0, -0.4)
+	)
 	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	# lantern posts and banners either side
 	for sx in [-1.0, 1.0]:
 		var post := Vector3(sx * 3.35, 0, -1.9)
 		Models.part(self, Models.cyl(0.16, 0.22, 2.4, 10), stone_d, post + Vector3(0, 1.2, 0))
 		Models.part(self, Models.box(0.5, 0.12, 0.5), gold, post + Vector3(0, 2.45, 0))
-		var lan := Models.part(self, Models.sphere(0.22, 12), Models.glow_mat(Color(1.0, 0.75, 0.4, 0.95)), post + Vector3(0, 2.75, 0))
+		var lan := Models.part(
+			self, Models.sphere(0.22, 12), Models.glow_mat(Color(1.0, 0.75, 0.4, 0.95)), post + Vector3(0, 2.75, 0)
+		)
 		lan.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		var ol := OmniLight3D.new(); ol.light_color = Color("ffb36a"); ol.light_energy = 1.6; ol.omni_range = 5.5
-		ol.position = post + Vector3(0, 2.75, 0); add_child(ol)
-		var bn := Models.banner(UI.ACCENT if sx < 0 else Color("8ae8ff")); bn.position = post + Vector3(sx * -0.5, 0, 0.35); add_child(bn)
+		var ol := OmniLight3D.new()
+		ol.light_color = Color("ffb36a")
+		ol.light_energy = 1.6
+		ol.omni_range = 5.5
+		ol.position = post + Vector3(0, 2.75, 0)
+		add_child(ol)
+		var bn := Models.banner(UI.ACCENT if sx < 0 else Color("8ae8ff"))
+		bn.position = post + Vector3(sx * -0.5, 0, 0.35)
+		add_child(bn)
 	# rocks drifting round in a slow orbit
-	orbit = Node3D.new(); add_child(orbit)
+	orbit = Node3D.new()
+	add_child(orbit)
 	for k in 12:
 		var a := TAU * k / 12.0 + rr.randf_range(-0.2, 0.2)
 		var rad := rr.randf_range(7.5, 12.0)
@@ -218,46 +350,86 @@ func _build_set() -> void:
 		rk.position = Vector3(cos(a) * rad, rr.randf_range(-3.0, 3.5), sin(a) * rad)
 		orbit.add_child(rk)
 	# wild kin watching from little rocks at the edges
-	for spec in [["zapple", Vector3(-5.6, -0.4, -2.4)], ["wisplet", Vector3(5.9, 0.4, -3.2)], ["pebbit", Vector3(-7.4, 1.2, -6.0)]]:
+	for spec in [
+		["zapple", Vector3(-5.6, -0.4, -2.4)],
+		["wisplet", Vector3(5.9, 0.4, -3.2)],
+		["pebbit", Vector3(-7.4, 1.2, -6.0)]
+	]:
 		var perch := Models.float_island(rr, 0.9, 1.6, Color("7ab85a"), Color("8a6f5a"), Color("3a2a4a"))
-		perch.position = spec[1]; add_child(perch)
+		perch.position = spec[1]
+		add_child(perch)
 		PropAnim.on(perch, 0.0, 0.18, 0.5 + rr.randf() * 0.4)
 		if Data.KIN.has(spec[0]):
 			var wk := Models.kin(spec[0], {"level": 3})
-			wk.position = Vector3(0, 0.05, 0); wk.rotation.y = atan2(-(0.0 - (spec[1] as Vector3).x), -(2.0 - (spec[1] as Vector3).z))
+			wk.position = Vector3(0, 0.05, 0)
+			wk.rotation.y = atan2(-(0.0 - (spec[1] as Vector3).x), -(2.0 - (spec[1] as Vector3).z))
 			wk.set_meta("happy", true)
 			perch.add_child(wk)
 	# fireflies over the dais and petals drifting past
 	var ff := CPUParticles3D.new()
-	ff.amount = 60; ff.lifetime = 5.0; ff.preprocess = 5.0
-	ff.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX; ff.emission_box_extents = Vector3(7.0, 2.0, 5.0)
+	ff.amount = 60
+	ff.lifetime = 5.0
+	ff.preprocess = 5.0
+	ff.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
+	ff.emission_box_extents = Vector3(7.0, 2.0, 5.0)
 	ff.position = Vector3(0, 1.8, -1.0)
-	ff.direction = Vector3.UP; ff.spread = 180.0; ff.initial_velocity_min = 0.1; ff.initial_velocity_max = 0.4; ff.gravity = Vector3(0, 0.05, 0)
-	var fgr := Gradient.new(); fgr.set_color(0, Color(1, 0.85, 0.4, 0)); fgr.set_color(1, Color(1, 0.85, 0.4, 0)); fgr.add_point(0.5, Color(1, 0.9, 0.5, 1))
+	ff.direction = Vector3.UP
+	ff.spread = 180.0
+	ff.initial_velocity_min = 0.1
+	ff.initial_velocity_max = 0.4
+	ff.gravity = Vector3(0, 0.05, 0)
+	var fgr := Gradient.new()
+	fgr.set_color(0, Color(1, 0.85, 0.4, 0))
+	fgr.set_color(1, Color(1, 0.85, 0.4, 0))
+	fgr.add_point(0.5, Color(1, 0.9, 0.5, 1))
 	ff.color_ramp = fgr
-	var fm := SphereMesh.new(); fm.radius = 0.04; fm.height = 0.08; fm.radial_segments = 6; fm.rings = 3
-	var fmat := StandardMaterial3D.new(); fmat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED; fmat.vertex_color_use_as_albedo = true
-	fmat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA; fmat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-	fm.material = fmat; ff.mesh = fm
+	var fm := SphereMesh.new()
+	fm.radius = 0.04
+	fm.height = 0.08
+	fm.radial_segments = 6
+	fm.rings = 3
+	var fmat := StandardMaterial3D.new()
+	fmat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	fmat.vertex_color_use_as_albedo = true
+	fmat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	fmat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	fm.material = fmat
+	ff.mesh = fm
 	add_child(ff)
 	var pt := CPUParticles3D.new()
-	pt.amount = 40; pt.lifetime = 7.0; pt.preprocess = 7.0
-	pt.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX; pt.emission_box_extents = Vector3(10.0, 1.0, 6.0)
+	pt.amount = 40
+	pt.lifetime = 7.0
+	pt.preprocess = 7.0
+	pt.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
+	pt.emission_box_extents = Vector3(10.0, 1.0, 6.0)
 	pt.position = Vector3(-4.0, 5.0, -2.0)
-	pt.direction = Vector3(1, -0.3, 0.2); pt.spread = 25.0; pt.initial_velocity_min = 0.6; pt.initial_velocity_max = 1.2; pt.gravity = Vector3(0, -0.25, 0)
-	pt.angular_velocity_min = -90.0; pt.angular_velocity_max = 90.0
-	var pq := QuadMesh.new(); pq.size = Vector2(0.09, 0.06)
-	var pmat := StandardMaterial3D.new(); pmat.albedo_color = Color("ffb3d0"); pmat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	pt.direction = Vector3(1, -0.3, 0.2)
+	pt.spread = 25.0
+	pt.initial_velocity_min = 0.6
+	pt.initial_velocity_max = 1.2
+	pt.gravity = Vector3(0, -0.25, 0)
+	pt.angular_velocity_min = -90.0
+	pt.angular_velocity_max = 90.0
+	var pq := QuadMesh.new()
+	pq.size = Vector2(0.09, 0.06)
+	var pmat := StandardMaterial3D.new()
+	pmat.albedo_color = Color("ffb3d0")
+	pmat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	pmat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	pq.material = pmat; pt.mesh = pq
+	pq.material = pmat
+	pt.mesh = pq
 	add_child(pt)
 	# the cloud sea, far islands and a skyship passing
 	var sea := MeshInstance3D.new()
-	var spm := PlaneMesh.new(); spm.size = Vector2(4000, 4000)
+	var spm := PlaneMesh.new()
+	spm.size = Vector2(4000, 4000)
 	sea.mesh = spm
-	var sm := ShaderMaterial.new(); sm.shader = load("res://shaders/clouds.gdshader")
-	sm.set_shader_parameter("deep", Color("221a4e")); sm.set_shader_parameter("light", Color("8f86d4"))
-	sm.set_shader_parameter("glow", Color("ffb070")); sm.set_shader_parameter("glow_amount", 0.9)
+	var sm := ShaderMaterial.new()
+	sm.shader = load("res://shaders/clouds.gdshader")
+	sm.set_shader_parameter("deep", Color("221a4e"))
+	sm.set_shader_parameter("light", Color("8f86d4"))
+	sm.set_shader_parameter("glow", Color("ffb070"))
+	sm.set_shader_parameter("glow_amount", 0.9)
 	sm.set_shader_parameter("sun_xz", Vector2(0.2, -0.97))
 	sea.material_override = sm
 	sea.position = Vector3(0, -14.0, -20.0)
@@ -266,12 +438,16 @@ func _build_set() -> void:
 		var isl := Scenery.island(rr, rr.randf_range(3.0, 7.0), true, rr.randf() < 0.5)
 		isl.position = Vector3(rr.randf_range(-60, 60), rr.randf_range(-8, 6), rr.randf_range(-70, -30))
 		add_child(isl)
-	ship = Models.skyship(); ship.position = Vector3(-40, 9, -45); ship.rotation.y = -PI / 2; ship.scale = Vector3.ONE * 1.2
+	ship = Models.skyship()
+	ship.position = Vector3(-40, 9, -45)
+	ship.rotation.y = -PI / 2
+	ship.scale = Vector3.ONE * 1.2
 	add_child(ship)
-var ship: Node3D
+
 
 func _build_ui() -> void:
-	ui = CanvasLayer.new(); add_child(ui)
+	ui = CanvasLayer.new()
+	add_child(ui)
 	root_ui = Control.new()
 	root_ui.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root_ui.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -279,11 +455,18 @@ func _build_ui() -> void:
 	# a soft dark vignette pulls the eye to the middle, like a stage
 	var vg := TextureRect.new()
 	var gt := GradientTexture2D.new()
-	gt.fill = GradientTexture2D.FILL_RADIAL; gt.fill_from = Vector2(0.5, 0.45); gt.fill_to = Vector2(1.05, 1.05)
-	var gg := Gradient.new(); gg.set_color(0, Color(0.05, 0.02, 0.1, 0.0)); gg.set_color(1, Color(0.05, 0.02, 0.1, 0.7)); gg.add_point(0.55, Color(0.05, 0.02, 0.1, 0.0))
+	gt.fill = GradientTexture2D.FILL_RADIAL
+	gt.fill_from = Vector2(0.5, 0.45)
+	gt.fill_to = Vector2(1.05, 1.05)
+	var gg := Gradient.new()
+	gg.set_color(0, Color(0.05, 0.02, 0.1, 0.0))
+	gg.set_color(1, Color(0.05, 0.02, 0.1, 0.7))
+	gg.add_point(0.55, Color(0.05, 0.02, 0.1, 0.0))
 	gt.gradient = gg
-	vg.texture = gt; vg.stretch_mode = TextureRect.STRETCH_SCALE
-	vg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); vg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	vg.texture = gt
+	vg.stretch_mode = TextureRect.STRETCH_SCALE
+	vg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	vg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root_ui.add_child(vg)
 	var top := VBoxContainer.new()
 	top.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
@@ -307,20 +490,23 @@ func _build_ui() -> void:
 	holder.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	holder.offset_top = -330
 	holder.offset_bottom = -14
-	holder.grow_vertical = Control.GROW_DIRECTION_BEGIN     # a tall card grows up, never off the bottom
+	holder.grow_vertical = Control.GROW_DIRECTION_BEGIN  # a tall card grows up, never off the bottom
 	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root_ui.add_child(holder)
 	bottom = UI.vbox(10)
 	holder.add_child(bottom)
 	_show_pick()
 
+
 # ---- the card
 func _show_card() -> void:
 	stage = "intro"
 	_clear_bottom()
 	title.get_parent().visible = false
-	var shade := ColorRect.new(); shade.color = Color(0.02, 0.03, 0.06, 0.45)
-	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var shade := ColorRect.new()
+	shade.color = Color(0.02, 0.03, 0.06, 0.45)
+	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	shade.name = "Shade"
 	root_ui.add_child(shade)
 	card_box = UI.vbox(22)
@@ -340,45 +526,68 @@ func _show_card() -> void:
 	root_ui.add_child(card_box)
 	Sfx.play("whoosh", null, -16.0)
 
+
 func _end_intro() -> void:
 	if stage != "intro":
 		return
 	stage = "pick"
 	Save.d["tutorial"]["intro"] = true
 	var shade := root_ui.get_node_or_null("Shade")
-	if shade: shade.queue_free()
-	if card_box: card_box.queue_free()
+	if shade:
+		shade.queue_free()
+	if card_box:
+		card_box.queue_free()
 	title.get_parent().visible = true
 	if edit_only or "--create" in OS.get_cmdline_user_args() or not Save.d.has("look"):
-		_show_create()      # a new game starts with making yourself (Settings, Change your look, reopens it)
+		_show_create()  # a new game starts with making yourself (Settings, Change your look, reopens it)
 	else:
 		_after_create()
 
+
 func _unhandled_input(event: InputEvent) -> void:
-	if stage == "warm" and ((event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT) or event.is_action_pressed("jump")):
+	if (
+		stage == "warm"
+		and (
+			(event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT)
+			or event.is_action_pressed("jump")
+		)
+	):
 		_tap_egg()
 		return
 	if stage == "intro":
 		if event.is_action_pressed("jump") or event.is_action_pressed("ui_accept"):
 			_end_intro()
 		return
-	if stage == "pick" and event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and hover >= 0:
+	if (
+		stage == "pick"
+		and event is InputEventMouseButton
+		and event.pressed
+		and event.button_index == MOUSE_BUTTON_LEFT
+		and hover >= 0
+	):
 		_pick(hover)
+
 
 ## Which egg the mouse is over, by distance on screen.
 func _egg_under_mouse() -> int:
 	var mp := get_viewport().get_mouse_position()
-	var best := -1; var bd := 70.0
+	var best := -1
+	var bd := 70.0
 	for i in eggs.size():
 		var p: Vector3 = (eggs[i]["holder"] as Node3D).global_position + Vector3(0, 0.45, 0)
-		if cam.is_position_behind(p): continue
+		if cam.is_position_behind(p):
+			continue
 		var d := cam.unproject_position(p).distance_to(mp)
-		if d < bd: bd = d; best = i
+		if d < bd:
+			bd = d
+			best = i
 	return best
+
 
 func _clear_bottom() -> void:
 	for ch in bottom.get_children():
 		ch.queue_free()
+
 
 ## After making yourself: the eggs. (Your first Relic comes after you name your Boki: MaskMoment.)
 func _after_create() -> void:
@@ -387,20 +596,25 @@ func _after_create() -> void:
 	cam_to = Vector3(0, 3.6, 6.4)
 	_show_pick()
 
+
 # ---- yourself: the Empty (Unmasked), in the LookLocker
 func _show_create() -> void:
 	stage = "create"
 	title.text = "Make yourself"
 	_clear_bottom()
-	for e in eggs: (e["holder"] as Node3D).visible = false
+	for e in eggs:
+		(e["holder"] as Node3D).visible = false
 	if sub_lbl:
-		sub_lbl.text = "You are one of the Empty. Drag (or hold %s / %s) to turn round, scroll to zoom." % [
-				Settings.key_cap("left"), Settings.key_cap("right")]
-	_top_over(0.73)       # over you, clear of the tall locker card on the left
+		sub_lbl.text = (
+			"You are one of the Empty. Drag (or hold %s / %s) to turn round, scroll to zoom."
+			% [Settings.key_cap("left"), Settings.key_cap("right")]
+		)
+	_top_over(0.73)  # over you, clear of the tall locker card on the left
 	if locker:
 		locker.close()
 	locker = LookLocker.open(self, root_ui, cam, fx, Unmasked.clean(Save.d.get("look", {})))
 	locker.finished.connect(_looks_good)
+
 
 func _looks_good() -> void:
 	if locker:
@@ -409,19 +623,27 @@ func _looks_good() -> void:
 		locker = null
 	Save.save_game()
 	Sfx.play("click")
-	for e in eggs: (e["holder"] as Node3D).visible = true
-	if sub_lbl: sub_lbl.text = "Every Boki is different, and remembers how you treat them."
+	for e in eggs:
+		(e["holder"] as Node3D).visible = true
+	if sub_lbl:
+		sub_lbl.text = "Every Boki is different, and remembers how you treat them."
 	_top_over(0.5)
 	if edit_only or Save.d.get("tutorial", {}).get("hatched", false):
 		Game.goto("home")
 		return
 	_after_create()
 
+
 ## Centres the title block at this fraction of the window's width.
 func _top_over(x_frac: float) -> void:
 	if top_box:
 		top_box.anchor_left = x_frac
 		top_box.anchor_right = x_frac
+		# the line wraps inside the room either side of that centre, so a big Text size never pushes it off screen
+		var room := 2.0 * minf(x_frac, 1.0 - x_frac) * get_viewport().get_visible_rect().size.x - TOP_MARGIN
+		sub_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		sub_lbl.custom_minimum_size.x = room
+
 
 func _show_pick() -> void:
 	_clear_bottom()
@@ -429,8 +651,8 @@ func _show_pick() -> void:
 	for i in egg_defs.size():
 		var d: Dictionary = egg_defs[i]
 		var mystery: bool = d.get("mystery", false)
-		if mystery and not mystery_found:
-			continue
+		if mystery and i != chosen:
+			continue  # the hidden egg's card only while it's the picked one (its hint: EggHover)
 		var card := UI.card(UI.CARD, 12, 14)
 		card.custom_minimum_size = Vector2(228, 0)
 		# every egg card the same size, with its button on the same line at the bottom
@@ -439,15 +661,18 @@ func _show_pick() -> void:
 		card.size_flags_vertical = Control.SIZE_FILL
 		if i == chosen:
 			UI.set_card_border(card, UI.ACCENT)
-		var v := UI.vbox(6); card.add_child(v)
+		var v := UI.vbox(6)
+		card.add_child(v)
 		var hr := UI.hbox(8)
 		var ecol: Color = Color("c4bcd6") if mystery else Data.KIN[d["species"]]["color"]
 		while ecol.get_luminance() < 0.55:
-			ecol = ecol.lerp(Color.WHITE, 0.2)     # dark shells still need a readable name
-		var tt := UI.title(d["name"], 22, ecol); tt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			ecol = ecol.lerp(Color.WHITE, 0.2)  # dark shells still need a readable name
+		var tt := UI.title(d["name"], 22, ecol)
+		tt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		hr.add_child(tt)
 		hr.add_child(UI.section(d["temper"], ecol))
 		v.add_child(hr)
+		v.add_child(EggPreview.build(d["species"], mystery, get_tree()))  # the Boki inside: picture, name, type
 		var dl := UI.label(d["desc"], 14, UI.MUTED)
 		dl.custom_minimum_size.x = 200
 		dl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -461,11 +686,14 @@ func _show_pick() -> void:
 		var push := Control.new()
 		push.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		v.add_child(push)
-		var pb: Button = (UI.primary if i == chosen else UI.button).call("This one" if i != chosen else "Hatch it", func(): _pick(ii))
+		var pb: Button = (UI.primary if i == chosen else UI.button).call(
+			"This one" if i != chosen else "Hatch it", func(): _pick(ii)
+		)
 		pb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		v.add_child(pb)
 		row.add_child(card)
 	bottom.add_child(row)
+
 
 func _pick(i: int) -> void:
 	if stage != "pick":
@@ -475,17 +703,10 @@ func _pick(i: int) -> void:
 		_start_hatch()
 		return
 	chosen = i
-	mystery_found = mystery_found or egg_defs[i].get("mystery", false)
 	Sfx.play("click")
 	_show_pick()
 
-## Hatching by knocks: each tap is a gentle knock on the shell, and something knocks back. The
-## egg rocks a little more each time, a new crack opens, the camera leans in, and the knocks from
-## inside get stronger. No flashes or bursts: it's a small, close moment (docs/POSITIONING.md).
-const TAPS := 7
-const KNOCK_LINES := ["Knock on the shell", "Something stirs...", "Something knocks back.", "Again, gently.",
-	"The shell bulges.", "Cracks are spreading.", "Nearly.", "Here they come."]      # the title after each knock
-var taps := 0
+
 func _tap_egg() -> void:
 	if taps >= TAPS or chosen < 0:
 		return
@@ -505,7 +726,15 @@ func _tap_egg() -> void:
 	# a new crack each time, and a few flakes of shell
 	var base := 8 + taps * 3
 	wegg._crack(base, base + 2 + int(k * 2.0))
-	fx.burst(holder.position + Vector3(0, 0.5, 0), EggModels.TINT[wegg.kind].lightened(0.2), int(2 + 4 * k), 1.2, 0.35, 6.0, 0.5)
+	fx.burst(
+		holder.position + Vector3(0, 0.5, 0),
+		EggModels.TINT[wegg.kind].lightened(0.2),
+		int(2 + 4 * k),
+		1.2,
+		0.35,
+		6.0,
+		0.5
+	)
 	# your knock, then its knock back from inside
 	Sfx.play("thump", null, -16.0 + 4.0 * k, 0.04, 1.3)
 	get_tree().create_timer(0.22).timeout.connect(func(): Sfx.play("thump", null, -20.0 + 8.0 * k, 0.05, 1.6 - 0.2 * k))
@@ -513,8 +742,12 @@ func _tap_egg() -> void:
 	if title:
 		title.text = KNOCK_LINES[mini(taps, KNOCK_LINES.size() - 1)]
 
+
 func _start_hatch() -> void:
 	stage = "warm"
+	hover = -1
+	if egg_hover:
+		egg_hover.clear()
 	hatch_t = 0.0
 	_clear_bottom()
 	title.text = "Knock on the shell"
@@ -522,16 +755,19 @@ func _start_hatch() -> void:
 	taps = 0
 	var card := UI.card(UI.CARD, 14, 16)
 	card.custom_minimum_size = Vector2(460, 0)
-	var v := UI.vbox(10); card.add_child(v)
+	var v := UI.vbox(10)
+	card.add_child(v)
 	var knock := "Click (or press %s) to knock. The Boki inside wakes a little more."
 	var l := UI.label(knock % Settings.key_cap("jump"), 15)
 	UI.wrapped(l)
 	v.add_child(l)
 	warm_bar = Control.new()
 	warm_bar.custom_minimum_size = Vector2(420, 16)
-	warm_bar.draw.connect(func():
-		var warm := Color("ff9a5a").lerp(Color("ffd36a"), snappedf(warmth, 0.05))
-		UI.draw_bar(warm_bar, Rect2(Vector2.ZERO, warm_bar.size), warmth, warm, Color(0, 0, 0, 0.45), 8))
+	warm_bar.draw.connect(
+		func():
+			var warm := Color("ff9a5a").lerp(Color("ffd36a"), snappedf(warmth, 0.05))
+			UI.draw_bar(warm_bar, Rect2(Vector2.ZERO, warm_bar.size), warmth, warm, Color(0, 0, 0, 0.45), 8)
+	)
 	v.add_child(warm_bar)
 	bottom.add_child(card)
 	Sfx.play("whoosh")
@@ -544,6 +780,7 @@ func _start_hatch() -> void:
 			tw.tween_property(e["holder"], "scale", Vector3.ONE * 0.01, 0.5)
 	cam_to = Vector3(0, 2.5, 5.4)
 
+
 func _process(delta: float) -> void:
 	t += delta
 	if stage != "mask" and stage != "create":
@@ -552,38 +789,41 @@ func _process(delta: float) -> void:
 		cam.position += Vector3(sin(t * 0.37) * 0.004, sin(t * 0.51) * 0.003, 0)
 	for rn in runes:
 		(rn[0] as Node3D).rotation.y += delta * float(rn[1])
-	if orbit: orbit.rotation.y += delta * 0.04
+	if orbit:
+		orbit.rotation.y += delta * 0.04
 	if crystal:
 		crystal.rotation.y += delta * 0.5
 		crystal.position.y = -0.2 + 2.8 + sin(t * 1.1) * 0.15
 	if ship:
 		ship.position.x += delta * 1.6
-		if ship.position.x > 60.0: ship.position.x = -60.0
+		if ship.position.x > 60.0:
+			ship.position.x = -60.0
 	if stage == "mask" or stage == "create":
-		pass       # (MaskMoment, or the LookLocker, moves the camera)
+		pass  # (MaskMoment, or the LookLocker, moves the camera)
 	else:
 		cam.look_at(NAME_LOOK if stage == "name" else Vector3(0, 0.25 if stage != "pick" else 0.55, 0.5))
 	if stage == "pick":
 		var hv := _egg_under_mouse()
 		if hv != hover:
 			hover = hv
-			if hover >= 0: Sfx.play("hover", null, -12.0)
-			if hover >= 0 and egg_defs[hover].get("mystery", false) and not mystery_found:
-				mystery_found = true
-				_show_pick()
-		for i in eggs.size():
-			var hs := 1.12 if i == hover else 1.0
-			var hn: Node3D = eggs[i]["holder"]
-			hn.scale = hn.scale.lerp(Vector3.ONE * hs, minf(1.0, delta * 10.0))
+			if hover >= 0:
+				Sfx.play("hover", null, -12.0)
+		if not egg_hover:
+			var hidden := egg_defs.find_custom(func(d): return d.get("mystery", false))
+			egg_hover = EggHover.new(eggs, hidden, root_ui)
+		egg_hover.update(delta, hover, chosen, cam)
 	if stage == "warm" and chosen >= 0:
 		if auto_warm and int(t * 3.0) != int((t - delta) * 3.0):
-			_tap_egg()          # test hook: taps by itself
+			_tap_egg()  # test hook: taps by itself
 		warmth = lerpf(warmth, float(taps) / TAPS, minf(1.0, delta * 10.0))
-		if warm_bar: warm_bar.queue_redraw()
+		if warm_bar:
+			warm_bar.queue_redraw()
 		var wegg: EggHatch = eggs[chosen]["egg"]
 		wegg.set_warmth(warmth)
 		# between knocks it trembles, more and more the closer it is
-		wegg.rotation.z = lerpf(wegg.rotation.z, sin(t * (6.0 + warmth * 30.0)) * warmth * 0.05, minf(1.0, delta * 12.0))
+		wegg.rotation.z = lerpf(
+			wegg.rotation.z, sin(t * (6.0 + warmth * 30.0)) * warmth * 0.05, minf(1.0, delta * 12.0)
+		)
 		if taps >= TAPS and warmth >= 0.98:
 			stage = "hatching"
 			skipper = HatchSkip.new(_skip_hatch)
@@ -593,36 +833,45 @@ func _process(delta: float) -> void:
 			wegg.rotation.z = 0.0
 			wegg.position.y = 0.12
 			wegg.popped.connect(_popped)
-			wegg.done.connect(func():
-				stage = "reveal"
-				cam_to = Vector3(0, 2.2, 5.6)
-				# a closer look (its card, and turning it round), then naming
-				var rv := KinReveal.new(egg_defs[chosen]["species"], new_rec)
-				rv.twin = kin_node
-				reveal = rv
-				add_child(rv)
-				rv.revealed.connect(skipper.queue_free)
-				if top_box: top_box.visible = false      # (the reveal has its own title; this one showed through it)
-				rv.proceed.connect(func():
-					stage = "name"
-					_show_name()))
+			wegg.done.connect(
+				func():
+					stage = "reveal"
+					cam_to = Vector3(0, 2.2, 5.6)
+					# a closer look (its card, and turning it round), then naming
+					var rv := KinReveal.new(egg_defs[chosen]["species"], new_rec)
+					rv.twin = kin_node
+					reveal = rv
+					add_child(rv)
+					rv.revealed.connect(skipper.queue_free)
+					if top_box:
+						top_box.visible = false  # (the reveal has its own title; this one showed through it)
+					rv.proceed.connect(
+						func():
+							stage = "name"
+							_show_name()
+					)
+			)
 			wegg.start()
 	for i in eggs.size():
 		var egg: Node3D = eggs[i]["egg"]
 		if stage == "pick":
 			var lift := 0.12 if i == chosen else 0.0
-			egg.position.y = lerpf(egg.position.y, 0.12 + lift + (sin(t * 3.0) * 0.03 if i == chosen else 0.0), minf(1.0, delta * 8.0))
+			egg.position.y = lerpf(
+				egg.position.y, 0.12 + lift + (sin(t * 3.0) * 0.03 if i == chosen else 0.0), minf(1.0, delta * 8.0)
+			)
 			# a little wobble now and then, like something inside is awake
 			egg.rotation.z = sin(t * 2.0 + i * 2.1) * 0.06 * (1.0 + float(sin(t * 0.7 + i) > 0.7) * 3.0)
 
+
 ## Any key or click while the egg hatches and the Boki meets you: straight to its card (HatchSkip).
 func _skip_hatch() -> void:
-	eggs[chosen]["egg"].skip()      # (its done opens the reveal, if the egg was still hatching)
+	eggs[chosen]["egg"].skip()  # (its done opens the reveal, if the egg was still hatching)
 	reveal.skip()
+
 
 func _show_name() -> void:
 	_clear_bottom()
-	top_box.visible = false      # (its line, "He's looking at you", is the reveal's: stale here)
+	top_box.visible = false  # (its line, "He's looking at you", is the reveal's: stale here)
 	# the card on the right and the Boki whole on the left, never a card over its body
 	var side := bottom.get_parent() as Control
 	side.set_anchors_and_offsets_preset(Control.PRESET_RIGHT_WIDE)
@@ -634,7 +883,8 @@ func _show_name() -> void:
 	var sp: Dictionary = Data.KIN[sp_id]
 	var card := UI.card(UI.CARD, 16, 18)
 	card.custom_minimum_size = Vector2(NAME_CARD_W, 0)
-	var v := UI.vbox(10); card.add_child(v)
+	var v := UI.vbox(10)
+	card.add_child(v)
 	if new_rec.is_empty() or String(new_rec.get("species", "")) != sp_id:
 		new_rec = _hatched_rec(sp_id)
 	var she: bool = Unique.sex(new_rec) == "f"
@@ -644,11 +894,21 @@ func _show_name() -> void:
 		scol = scol.lerp(Color.WHITE, 0.2)
 	v.add_child(UI.section("A new Boki", scol))
 	v.add_child(UI.title("Name your %s" % sp["name"], 34))
-	v.add_child(UI.label("\"%s\"" % KinSpeak.babble(sp_id, "happy"), 22, scol))
+	v.add_child(UI.label('"%s"' % KinSpeak.babble(sp_id, "happy"), 22, scol))
 	var sex_row := UI.hbox(8)
 	sex_row.add_child(UI.sex_icon(new_rec, 18.0))
-	var sex_line := UI.para("%s, %s. %s" % [Unique.sex_name(new_rec), "she/her" if she else "he/him",
-		"A babbler for now; any name you give will stick."], 16, UI.MUTED)
+	var sex_line := UI.para(
+		(
+			"%s, %s. %s"
+			% [
+				Unique.sex_name(new_rec),
+				"she/her" if she else "he/him",
+				"A babbler for now; any name you give will stick."
+			]
+		),
+		16,
+		UI.MUTED
+	)
 	# (a wrapping Label asks for ~0 width: with no floor, a row that did not hand it room broke it one letter
 	# per line, a column running off the top of the screen; the floor holds even if the row stops expanding)
 	UI.wrapped(sex_line, 300.0)
@@ -657,23 +917,37 @@ func _show_name() -> void:
 	v.add_child(sex_row)
 	v.add_child(UI.label("Voice: %s." % String(sp["voice"]).split(",")[0], 16, UI.MUTED))
 	var name_row := UI.hbox(8)
-	var nl := UI.label("Name", 15, UI.MUTED); nl.custom_minimum_size.x = LABEL_W - DICE_W
+	var nl := UI.label("Name", 15, UI.MUTED)
+	nl.custom_minimum_size.x = LABEL_W - DICE_W
 	name_row.add_child(nl)
-	var step := NameStep.new(sp_id, "")      # (both ways on below keep the name)
+	var step := NameStep.new(sp_id, "")  # (both ways on below keep the name)
 	step.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	name_row.add_child(step)
 	v.add_child(name_row)
 	var you_row := UI.hbox(8)
-	var yl := UI.label("Your name", 15, UI.MUTED); yl.custom_minimum_size.x = LABEL_W
+	var yl := UI.label("Your name", 15, UI.MUTED)
+	yl.custom_minimum_size.x = LABEL_W
 	you_row.add_child(yl)
 	var ye := _your_name_edit()
 	you_row.add_child(ye)
 	v.add_child(you_row)
 	var btns := UI.hbox(14)
-	btns.add_child(_path_card("Tutorial", "A short practice run with your Boki, then home.",
-			func(): _finish(sp_id, step.chosen(), ye.text, true), true))
-	btns.add_child(_path_card("Skip tutorial", "Raise your Boki at home. Fighting waits for the portal.",
-			func(): _finish(sp_id, step.chosen(), ye.text, false), false))
+	btns.add_child(
+		_path_card(
+			"Tutorial",
+			"A short practice run with your Boki, then home.",
+			func(): _finish(sp_id, step.chosen(), ye.text, true),
+			true
+		)
+	)
+	btns.add_child(
+		_path_card(
+			"Skip tutorial",
+			"Raise your Boki at home. Fighting waits for the portal.",
+			func(): _finish(sp_id, step.chosen(), ye.text, false),
+			false
+		)
+	)
 	v.add_child(btns)
 	bottom.add_child(card)
 	UI.pop_in(card)
@@ -681,6 +955,7 @@ func _show_name() -> void:
 	step.box.text_submitted.connect(func(_t): _finish(sp_id, step.chosen(), ye.text, false))
 	ye.text_submitted.connect(func(_t): _finish(sp_id, step.chosen(), ye.text, false))
 	step.focus()
+
 
 ## One of the two ways on from the naming card: a button and a line under it, one click.
 ## The main way is bright; the other is a flat grey button.
@@ -695,6 +970,7 @@ func _path_card(label: String, line: String, go: Callable, main_way: bool) -> Co
 		c.add_child(b)
 	c.add_child(UI.para(line, UI.T_SMALL, UI.MUTED))
 	return c
+
 
 ## The player's name box: empty (with a hint) until they type one; an unnamed player stays Save.UNNAMED.
 func _your_name_edit() -> LineEdit:
@@ -712,19 +988,20 @@ func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
 	rec["name"] = kname.strip_edges() if kname.strip_edges() != "" else Data.default_kin_name(sp_id)
 	rec["trust"] = 55.0
 	Save.remember(rec, "hatched", "hatched from an egg you chose")
-	rec["starter"] = true          # your first kin: it always stays on the farm with you
+	rec["starter"] = true  # your first kin: it always stays on the farm with you
 	rec["got_t"] = Time.get_unix_time_from_system()
 	Save.d["roster"] = [rec]
 	Save.d["active"] = rec["uid"]
 	Save.d["name"] = you.strip_edges() if you.strip_edges() != "" else Save.UNNAMED
-	Save.register(rec, "starter")      # serial #1 of its kind, you as its trainer
+	Save.register(rec, "starter")  # serial #1 of its kind, you as its trainer
 	Save.d["tutorial"]["hatched"] = true
 	Save.save_game()
 	Sfx.play("click")
-	if tutorial and ClassUnlock.needs_starters():      # (the garden path picks at the portal: FirstRelic)
+	if tutorial and ClassUnlock.needs_starters():  # (the garden path picks at the portal: FirstRelic)
 		_mask_moment(func(): _head_out(tutorial))
 		return
 	_head_out(tutorial)
+
 
 ## Out of the shell: the Boki's record is made now, so the reveal, the name card and the save share one sex.
 func _popped(k: Node3D) -> void:
@@ -732,12 +1009,15 @@ func _popped(k: Node3D) -> void:
 	new_rec = _hatched_rec(egg_defs[chosen]["species"])
 	title.text = KinSpeak.about(new_rec, "{He}'s looking at you.")
 
+
 ## A new Boki's record with its egg's mutations; its sex and the rest of its rolls are decided here.
 func _hatched_rec(sp_id: String) -> Dictionary:
 	var rec := Save.new_kin(sp_id)
 	var muts: Array = egg_defs[chosen].get("rec", {}).get("mutations", []) if chosen >= 0 else []
-	if not muts.is_empty(): rec["mutations"] = muts
+	if not muts.is_empty():
+		rec["mutations"] = muts
 	return rec
+
 
 ## Your first Relic: pick one of the three starters (Lace, Kael or Vex; HobOffer), then it drifts to you and you
 ## put it on in the world (MaskMoment), then `then`.
@@ -745,7 +1025,7 @@ func _mask_moment(then: Callable) -> void:
 	stage = "mask"
 	_clear_bottom()
 	top_box.visible = false
-	var holder := ColorRect.new()      # (the island dimmed behind the cards)
+	var holder := ColorRect.new()  # (the island dimmed behind the cards)
 	holder.color = Color(0.02, 0.01, 0.05, 0.55)
 	holder.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var centre := CenterContainer.new()
@@ -754,16 +1034,23 @@ func _mask_moment(then: Callable) -> void:
 	var picked := func(id: String):
 		holder.queue_free()
 		_put_on_first(id, then)
-	var offer := HobOffer.new(ClassUnlock.starters(), FarmBuilder.rules()["talk"], "starter_title",
-			func(id): return ClassUnlock.choose_starters([id]), picked)
+	var offer := HobOffer.new(
+		ClassUnlock.starters(),
+		FarmBuilder.rules()["talk"],
+		"starter_title",
+		func(id): return ClassUnlock.choose_starters([id]),
+		picked
+	)
 	centre.add_child(offer.build())
 	ui.add_child(holder)
+
 
 func _put_on_first(first: String, then: Callable) -> void:
 	FirstRelic.wear(first)
 	var moment := MaskMoment.make(self, cam, kin_node, first)
 	moment.finished.connect(then)
 	add_child(moment)
+
 
 func _head_out(tutorial: bool) -> void:
 	if tutorial:

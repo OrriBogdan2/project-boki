@@ -29,6 +29,7 @@ const FADE := 0.1            # s: one clip into the next, and into or out of an 
 const FADE_LOCO := 0.16      # s: an action back to the legs (a move's "fade_out" overrides)
 const CLIMB_FADE := 0.06     # s: into the climb clips (a rise is over in well under a second)
 const AIR_FADE := 0.12
+const GLIDE_OUT := 0.2       # s: the glide pose lets go of the body at least this slowly (it opens at once)
 const DIVE_SLOW := 0.8       # share of the drop's crouch rate for the dive's touchdown (land_tier 3): a heavier settle
 const FALL_FADE := 0.05      # s: into the knocked-down beat (quick: it is the hit)
 const LOCKIN_FADE := 0.2     # s: the idle into a lock-in pose that starts mid-clip ("fade" in its data overrides)
@@ -820,6 +821,7 @@ func step(dt: float) -> void:
 	_p("act_u/blend_amount", xf_u)
 	_p("upper/blend_amount", up_w)
 	_p("flinch/add_amount", flinch_w)
+	_p("flinch_delta/sub_amount", 1.0)  # (Sub2 defaults to 0)
 	_p("full/blend_amount", act_w)
 	_loco(s, dt)
 	if d.has("crouch"):
@@ -1048,13 +1050,13 @@ func _loco(s: Dictionary, dt: float) -> void:
 	# whose air pose is far from his landing's: `--cast-pop-check` POPDEG)
 	var air_out := float((d["air"] as Dictionary).get("fade_out", AIR_FADE))
 	var air_fade := air_out if grounded else AIR_FADE
-	var glide_fade := AIR_FADE if gliding else air_out
+	var glide_fade := maxf(air_out, GLIDE_OUT)
 	air_w = move_toward(air_w, 0.0 if grounded else 1.0, dt / air_fade)
 	# (a move cast out of the glider: the glide pose holds while the move fades in over it, and goes to the fall pose
 	# under the move, so the arms make one motion, glider to cast, not glider to fall to cast)
 	var owned := maxf(act_w, up_w)
 	if owned <= 0.0 or owned >= 1.0 or gliding:
-		glide_w = move_toward(glide_w, 1.0 if gliding else 0.0, dt / glide_fade)
+		glide_w = 1.0 if gliding else move_toward(glide_w, 0.0, dt / glide_fade)
 	rise_w = move_toward(rise_w, 1.0 if vel.y > 0.5 else 0.0, dt / AIR_FADE)
 	_p("air/blend_amount", air_w)
 	_p("glide_w/blend_amount", glide_w)

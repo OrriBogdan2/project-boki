@@ -43,7 +43,7 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(
+	m.start(
 		{
 			"tutorial": true,
 			"teams": 1,
@@ -211,8 +211,11 @@ func _words(_m: Match) -> void:
 		if sid.begins_with("pick_"):
 			var said := String(s["text"])
 			# (a quiet pick step is a hint: the pick is made for you, so it says what unlocked and the key)
-			var unlock_ok := said.contains("nlocked ") if TutorialHints.quiet(sid) else (
-				said.begins_with("Press ") and said.contains(" to unlock "))
+			var unlock_ok := (
+				said.contains("nlocked ")
+				if TutorialHints.quiet(sid)
+				else (said.begins_with("Press ") and said.contains(" to unlock "))
+			)
 			ok(unlock_ok, "%s says what to press to unlock: '%s'" % [sid, said])
 		for w in OLD_WORDS:
 			ok(not String(s["text"]).contains(w), "%s has no '%s'" % [sid, w])

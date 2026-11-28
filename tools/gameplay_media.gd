@@ -239,7 +239,7 @@ func _record(res: String) -> void:
 	var rc := OS.execute(OS.get_executable_path(), args, out, true)
 	DirAccess.remove_absolute(cfg)
 	for line in (String(out[0]) if out.size() > 0 else "").split("\n"):
-		if line.begins_with("MEDIA_") or line.contains("ERROR"):
+		if line.begins_with("MEDIA_") or line.begins_with("CLIP_PREFLIGHT") or line.contains("ERROR"):
 			print(line)
 	print("MEDIA_CHILD rc=%d" % rc)
 	main.get_tree().quit(rc)
@@ -266,7 +266,7 @@ func _start(arch: String, kin: String, mobs := false) -> void:
 	o.merge({"arch": arch, "cls": Arch.weight(arch), "weapon": Arch.signature(arch)}, true)
 	m = Match.new()
 	main.add_child(m)
-	await m.start(o)
+	m.start(o)
 	m.set_process(false)
 	var fade = main.get("fade")
 	if fade != null:
@@ -318,7 +318,7 @@ func _go(secs: float, each: Callable, cam_to: Callable, follow := false) -> void
 		_purge()
 		if Overlay.is_open():
 			Overlay.close()  # a key pressed on the worker's own screen (Esc) must not pause the take
-		each.call(t)
+		await each.call(t)
 		for _i in 2:
 			m.step(STEP)
 		if follow:

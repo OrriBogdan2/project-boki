@@ -20,13 +20,27 @@ extends RefCounted
 ## them has a Boki, its machine waits. home.gd asks choose() when a free Boki's think timer runs out, after its
 ## care and job picks; step() moves every machine on at 10 Hz. Tuning: content/rules/base_life.json.
 
-enum S { ROAM, EAT, NAP, PLAY, PLAY_WITH, WATCH, REACT, MENTOR, CHORE, LEAD, APPROACH, HAND_EAT, DONE }
+enum S { ROAM, EAT, NAP, PLAY, PLAY_WITH, WATCH, REACT, MENTOR, CHORE, LEAD, APPROACH, HAND_EAT, DONE, GREET }
 
 const NAMES := [
-	"Roam", "Eat", "Nap", "Play", "PlayWith", "Watch", "React", "Mentor", "Chore", "Lead", "Approach", "HandEat", "Done"
+	"Roam",
+	"Eat",
+	"Nap",
+	"Play",
+	"PlayWith",
+	"Watch",
+	"React",
+	"Mentor",
+	"Chore",
+	"Lead",
+	"Approach",
+	"HandEat",
+	"Done",
+	"Greet"
 ]
 const TABLE := {
-	S.ROAM: [S.EAT, S.NAP, S.PLAY, S.PLAY_WITH, S.WATCH, S.REACT, S.MENTOR, S.CHORE, S.LEAD, S.APPROACH],
+	S.ROAM: [S.EAT, S.NAP, S.PLAY, S.PLAY_WITH, S.WATCH, S.REACT, S.MENTOR, S.CHORE, S.LEAD, S.APPROACH, S.GREET],
+	S.GREET: [S.ROAM, S.NAP],  # you came back (BaseGreet): a look, or a run over
 	S.APPROACH: [S.HAND_EAT, S.DONE],  # your hand (BaseHandFeed): walks over, then eats or sniffs and leaves
 	S.HAND_EAT: [S.DONE],
 	S.DONE: [S.ROAM],
@@ -129,6 +143,8 @@ func machine(k: Dictionary) -> Fsm:
 		m.guard(S.PLAY_WITH, func(_from: int) -> bool: return _awake(k))
 		m.guard(S.CHORE, func(_from: int) -> bool: return k.has("life_chore"))
 		m.guard(S.APPROACH, func(_from: int) -> bool: return _awake(k) and not _taken(k))
+		m.guard(S.GREET, func(_from: int) -> bool: return _awake(k) and not _taken(k))
+		m.on_exit(S.GREET, func(_to: int) -> void: BaseGreet.end(k))
 		m.guard_from(S.NAP, S.ROAM, func() -> bool: return float(k.get("nap_t", 0.0)) <= 0.0)
 		m.on_enter(S.ROAM, func(_from: int) -> void: k["t"] = 0.0)
 		m.on_enter(S.PLAY, func(_from: int) -> void: _act("play", k))
@@ -244,6 +260,10 @@ func choose(k: Dictionary) -> void:
 	if Mentor.is_mentor(rec):
 		_mentor(k)
 		return
+	var lazy := float(Content.rules("base_axes")["nap_odds"]) * (BaseAxes.mult(rec, "nap") - 1.0)
+	if lazy > 0.0 and randf() < lazy:
+		_nap(k, "lazy")
+		return
 	if BaseShy.keep_to_edge(h, k):
 		return
 	if not night and _clock >= float(k.get("doze_ok", 0.0)) and randf() < _doze(k):
@@ -264,17 +284,21 @@ func choose(k: Dictionary) -> void:
 	if randf() < float(r_v["chore_chance"]) and _chore(k):
 		return
 	var mate := _mate(k, near)
-	if not mate.is_empty() and (bored or randf() < float(pers.get("social", 0.22)) + bond(rec, mate["rec"]) * 0.5):
-		_tag(k, mate)
-		return
-	if (bored or randf() < 0.2 + float(traits.get("curiosity", 0.5)) * 0.3) and h.toys.pick(k, true):
+	if not mate.is_empty():
+		var chase := float(pers.get("social", 0.22)) + bond(rec, mate["rec"]) * 0.5
+		if bored or randf() < chase * BaseAxes.mult(rec, "chase"):
+			_tag(k, mate)
+			return
+	var play := 0.2 + float(traits.get("curiosity", 0.5)) * 0.3
+	if (bored or randf() < play * BaseAxes.mult(rec, "play")) and h.toys.pick(k, true):
 		m.go(S.PLAY, "toy")  # HomeToys has it now: the walk, the play and the squabbles are its
 		return
 	if bored:
 		_nap(k, "bored")
 		return
 	var here: int = h.world.island_of(k["pos"].x, k["pos"].z)
-	if randf() < float(pers.get("cling", 0.25)) and h.world.island_of(h.ppos.x, h.ppos.z) == here:
+	var cling := float(pers.get("cling", 0.25)) * BaseAxes.mult(rec, "cling")
+	if randf() < cling and h.world.island_of(h.ppos.x, h.ppos.z) == here:
 		k["goal"] = h._seat(k, h.ppos, 1.5)
 	else:
 		k["goal"] = h.world.random_ground(maxi(here, 0))
@@ -299,8 +323,8 @@ func _tick(k: Dictionary, dt: float) -> void:
 		S.ROAM, S.MENTOR:
 			if k.has("eat"):
 				m.go(S.EAT, "feeder")
-			elif m.is_in(S.ROAM):
-				BaseRival.pass_by(self, k)
+			elif m.is_in(S.ROAM) and not BaseRival.pass_by(self, k):
+				BaseGreet.watch(self, k, dt)
 		S.EAT:
 			if k.has("life_eat"):
 				if not BaseFeed.tick(h, k, m.since) or m.since >= float(r_v["max"]["eat"]):
@@ -327,6 +351,8 @@ func _tick(k: Dictionary, dt: float) -> void:
 			hand.eat(k, m)
 		S.DONE:
 			hand.done(m)
+		S.GREET:
+			BaseGreet.tick(self, k, m)
 
 
 func _nap_tick(k: Dictionary, m: Fsm, dt: float) -> void:

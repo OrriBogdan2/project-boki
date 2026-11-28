@@ -101,9 +101,16 @@ func _break_wall(w: Dictionary) -> void:
 	if is_instance_valid(w["node"]):
 		(w["node"] as Node3D).queue_free()
 
-## Whether a barrier blocks sight (World.los). A wall carried in front of a Hunter (a raised aegis, a Boki's
-## Mass Guard) never does: it would hide its own bearer from everyone they face.
+## Whether a barrier hides who stands behind it (World.los with sight: the fog, bots' sight). Only a rock
+## does: a translucent plate (a Boki's Prism Wall, a Barrier Glove, Neve's Rink Wall) may stop shots, never
+## make a Hunter vanish.
 static func blocks_sight(w: Dictionary) -> bool:
+	return bool(w.get("rock", false))
+
+
+## Whether a barrier blocks a shot line (World.los). A wall carried in front of a Hunter (a raised aegis, a
+## Boki's Mass Guard) never does: it would block its own bearer's aim at everyone they face.
+static func blocks_shots(w: Dictionary) -> bool:
 	return not bool(w.get("follow", false))
 
 ## Is a body at (x, z) with radius r and feet at y blocked by a barrier? (World.occupy asks.) cls: the
@@ -122,7 +129,8 @@ static func wall_blocks(list: Array, x: float, z: float, r: float, y: float, cls
 ## The height barrier w stops a body with feet at y up to, or 0 when it lets it through (it doesn't
 ## block movement, or the body is above or on it).
 static func wall_top(w: Dictionary, y: float) -> float:
-	if not w["move"] or absf(y - float(w["y"])) > 1.9:
+	# (1.9 was above a plain jump's 1.52 m apex; the source's 1.91 m jump (Hunter.JUMP_V 7.5) clears 1.9, so it is 2.0)
+	if not w["move"] or absf(y - float(w["y"])) > 2.0:
 		return 0.0
 	# a low wall you can stand on (a rock, "top" m tall): feet at its top walk over it (StoneStand)
 	var top := StoneStand.top_for(w) if w.has("top") else 3.0
@@ -409,7 +417,7 @@ func shot_check(s: Dictionary, p: Vector3) -> String:
 		return ""
 	var x: Dictionary = s["x"]
 	var p2 := Vector2(p.x, p.z)
-	var cls := "pierce" if x.get("pierce_terrain", false) else "solid"
+	var cls := String(x.get("block_class", "pierce")) if x.get("pierce_terrain", false) else "solid"
 	for w in walls:
 		if not _stops(w, int(s["team"]), p, float(s["r"]), cls):
 			continue

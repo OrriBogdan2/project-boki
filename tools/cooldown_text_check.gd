@@ -27,10 +27,11 @@ func run(main_node: Node) -> void:
 	main = main_node
 	Save.no_write = true
 	Save.d = Save.fresh()
+	Save.d["matches"] = HudGroups.NEW_PLAYER_MATCHES      # the whole HUD: a new save gets it staged (HudReveal)
 	Econ.ensure()
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 12, "no_drop": true,
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 12, "no_drop": true,
 		"demo_kin": "cindle", "arch": "thief", "cls": Arch.weight("thief"), "weapon": Arch.signature("thief")})
 	m.set_process(false)
 	var p: Hunter = m.player
@@ -51,7 +52,7 @@ func run(main_node: Node) -> void:
 		var shown := String(hud.slot_text.get("k1", ""))
 		ok(shown == want[secs], "E with %.1f s left draws '%s' (drew '%s')" % [secs, want[secs], shown])
 	p.ak.cd["e"] = 0.0
-	await _ranks(m, p, hud)
+	_ranks(m, p, hud)
 	p.reclass(Arch.weight("thief"), "thief")
 	await _dash(p, hud)
 	await _throw(p, hud)
@@ -69,7 +70,7 @@ func _ranks(m: Match, p: Hunter, hud) -> void:
 			for s in ["sec", "kin", "dash"]:
 				p.slot_lv[s] = rank
 			for slot in ["sec", "kin", "dash"]:
-				await _rank_row(m, p, hud, a, slot, rank)
+				_rank_row(m, p, hud, a, slot, rank)
 			if p.ak.has_long_dash():
 				var air := _air_row(p, a, rank, air1)
 				air1 = air if rank == 1 else air1

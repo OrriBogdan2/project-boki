@@ -11,11 +11,12 @@ extends Node3D
 ##   rock       a launched rock: bigger, hotter, flaming trail
 ##   dashrock   Rock Hop's last rock: rolls along the ground, dust and embers
 ##   footrock   the slab under Tarek's foot through a Rock Hop (held)
-##   orb        Motley's Gravity Orb: a teal glass shard, or from half charge a void orb with a teal rim; skin_orb
+##   orb        Motley's shot: a spinning playing card, or from half charge a void orb with a teal rim; skin_orb
 ##              grows and brightens it with its charge (its trail and hit are content/vfx/ostra.json)
 ##   spear      Shard Snap: a long bundle of dark crystal prisms with pale teal rims (trail and hit: ostra.json)
-## Lingering: aura (Ostra's Swollen sphere), column (the grown seed's light), mote (a coloured glow at a hand:
-## Tarek's fists, Ostra's charge), dark (the Snap's black wind-up orb), star (the Trade's lobbed, masked lantern).
+## Lingering: card (the next card in his hand), aura (Ostra's Swollen sphere), column (the grown seed's light),
+## mote (a coloured glow at a hand: Tarek's fists, Ostra's charge), dark (the Snap's black wind-up orb), star (the
+## Trade's lobbed, masked lantern).
 ## Tarek's trails, debris, dust and cracked ground are his HeroVfx moments (content/vfx/dolm.json).
 ## Colour and darkness are alpha-blended (shade_mat, the void glass); only small hot cores add light, so
 ## nothing washes out to white on bright grass.
@@ -23,16 +24,21 @@ extends Node3D
 const ROCK_SH := preload("res://shaders/molten_rock.gdshader")
 const GLASS_SH := preload("res://shaders/void_glass.gdshader")
 const TINT_SH := preload("res://shaders/cel_tint.gdshader")
-const SLATE := Color("1a2733")          # Tenzo's stone, the A look of his arm (blue slate): in the cracks and shadows
-const SLATE_HI := Color("3a4d5c")       # and on its faces (the arm's stone, rgb 62 78 85)
-const SLATE_CAP := Color("8fabb6")      # its upward faces in the sun
+const SLATE := Color("152848")          # Tenzo's stone: cobalt slate, in the cracks and shadows
+const SLATE_HI := Color("34569a")       # and on its faces (cobalt, never grey)
+const SLATE_CAP := Color("8fb6f0")      # its upward faces in the sun
 const RUNE_TEAL := Color("5ce6b8")      # the glow of his runes and eye-stones (warden_look tarek rim_far_color)
 const RUNE_HOT := Color("b4f5e0")       # the rim light: the rune teal, lifted
 const KEEP := 0.12            # s: a refreshed effect (a mote, the aura) stays this long without a refresh
 const ORB_CORE := [Color("06322b"), Color("1aa88c")]      # the orb's glass core, plain and at full charge
 const ORB_RIM := [Color("2ee6c0"), Color("eafffa")]       # its rim, the same
 const ORB_HOT_K := 2.2        # how much the orb's white-hot core grows at full charge
-const ORB_HELD_K := 0.5       # charge from which Motley's shot is the void orb, not the quick shard
+const ORB_HELD_K := 0.5       # charge from which Motley's shot is the void orb, not the quick card
+const CARD_SIZE := Vector2(0.34, 0.48)   # m: Motley's card, wide x long (its corner reach ~ the 0.28 m hit radius)
+const CARD_EDGE := Color("f2ecdf")       # the card stock
+const CARD_BACK := Color("2a1a4a")       # its void-violet back
+const CARD_SPIN := 16.0       # rad/s: a thrown card spins flat (about one turn over its 0.41 s flight)
+const CARD_TILT := 0.6        # rad: the card in his hand faces the match camera (pitch 57 deg, like MASK_TILT)
 const ORB_SMOKE := Color(0.118, 0.078, 0.188, 0.8)   # the void orb's smoke tail (the UI's #1e1430)
 const DARK_RIM_POWER := 0.9    # the held black orbs (Snap, Nightwell): a broad lit rim (glass default 2.2: thin)
 const ORB_EDGE := Color("2ee6c0")    # the void orb's rim shell: Motley's sea teal (docs/VFX_QUALITY.md)
@@ -128,6 +134,11 @@ func _build(kind: String) -> Node3D:
 			).name = "Core"
 		"well":
 			_build_well(n)
+		"card":
+			var held_card := Node3D.new()
+			held_card.rotation.x = CARD_TILT
+			n.add_child(held_card)
+			_build_card(held_card)
 		"mote":
 			Models.part(n, Models.sphere(0.2, 12), shade_mat(Color(1, 1, 1, 0.85)), Vector3.ZERO).name = "Halo"
 			Models.part(n, Models.sphere(0.08, 10), Models.glow_mat(Color(1, 1, 1, 0.9)), Vector3.ZERO).name = "Core"
@@ -148,7 +159,8 @@ static func slate_mat(heat: float, seed_v: float, rim := 0.5) -> ShaderMaterial:
 	var mt := rock_mat(heat, seed_v)
 	mt.set_shader_parameter("stone", SLATE)
 	mt.set_shader_parameter("stone_hi", SLATE_HI)
-	mt.set_shader_parameter("glow", RUNE_TEAL.darkened(0.3))   # the shader lifts it 1.2x and up
+	mt.set_shader_parameter("glow", RUNE_TEAL)   # the shader lifts it 1.2x and up
+	mt.set_shader_parameter("pulse", 0.35)   # the cracks breathe
 	mt.set_shader_parameter("rim_col", RUNE_HOT)
 	mt.set_shader_parameter("rim", rim)
 	return mt
@@ -183,7 +195,7 @@ func _build_footrock(n: Node3D) -> void:
 func _build_void_shot(n: Node3D, kind: String) -> void:
 	match kind:
 		"orb":
-			_build_shard(n)
+			_build_thrown_card(n)
 			_build_held_orb(n)
 		"spear":
 			var b := Node3D.new()
@@ -198,16 +210,25 @@ func _build_void_shot(n: Node3D, kind: String) -> void:
 					off + Vector3(0, 0, 0.15 * float(i % 2)), Vector3(0.26, len_, 0.26), Vector3(-PI * 0.5, 0, a)
 				)
 
-## Motley's quick shot (charge under ORB_HELD_K): a small flat teal card-shard, a long thin diamond lying
-## flat to the camera, with a pale edge and a thin streak behind it.
-func _build_shard(n: Node3D) -> void:
-	var shard := Node3D.new()
-	shard.name = "Shard"
-	shard.scale = Vector3(1.0, 1.0, 2.4)      # stretches the square below into a long diamond along the flight
-	n.add_child(shard)
-	var card := glass_mat(Color("128a72"), Color("d8fff6"), 1.0, 0.6)
-	Models.part(shard, Models.box(0.16, 0.035, 0.16), card, Vector3.ZERO, Vector3.ONE, Vector3(0, PI * 0.25, 0))
-	_tail(shard, 0.07, 0.35, Color(ORB_EDGE, 0.5))
+## Motley's quick shot (charge under ORB_HELD_K): a thrown playing card lying flat, spinning as it flies, with
+## a faint teal streak behind it. The card spans the shot's hit circle (a corner sits CARD_SIZE/2 out).
+func _build_thrown_card(n: Node3D) -> void:
+	var card := Node3D.new()
+	card.name = "Card"
+	n.add_child(card)
+	_build_card(card)
+	_tail(n, 0.1, 0.4, Color(ORB_EDGE, 0.45))
+
+## A playing card, face up (+Y): a pale stock edge, a void-violet back and a lit teal diamond pip. Unlit
+## (shade_mat), so the stock stays cream in the warm sun; each layer draws over the one under it.
+func _build_card(n: Node3D) -> void:
+	Models.part(n, Models.box(CARD_SIZE.x, 0.02, CARD_SIZE.y), shade_mat(CARD_EDGE), Vector3.ZERO)
+	var inset := shade_mat(CARD_BACK)
+	inset.render_priority = 1
+	Models.part(n, Models.box(CARD_SIZE.x * 0.8, 0.022, CARD_SIZE.y * 0.84), inset, Vector3.ZERO)
+	var pip := Models.glow_mat(ORB_EDGE)
+	pip.render_priority = 2
+	Models.part(n, Models.box(0.1, 0.026, 0.1), pip, Vector3.ZERO, Vector3(1.0, 1.0, 1.5), Vector3(0, PI * 0.25, 0))
 
 ## Motley's charged shot: a round void orb (dark glass, white-hot core), a teal rim shell and a long
 ## trailing tail of smoke.
@@ -381,7 +402,7 @@ func skin_last(by: Ent, kind: String) -> bool:
 	return false
 
 ## Dresses Motley's last shot at charge k (0..1), `scl` times the plain shot: under ORB_HELD_K the quick
-## shard, from it the void orb, its glass and core brighter with the charge, and returns it (null: no shot to
+## card, from it the void orb, its glass and core brighter with the charge, and returns it (null: no shot to
 ## dress). (Pooled, so every shot sets its looks back.)
 func skin_orb(by: Ent, k: float, scl: float) -> Node3D:
 	if not skin_last(by, "orb"):
@@ -391,7 +412,7 @@ func skin_orb(by: Ent, k: float, scl: float) -> Node3D:
 	var n: Node3D = e["n"]
 	n.scale = Vector3.ONE * scl
 	var held_orb := k >= ORB_HELD_K
-	(n.get_node("Shard") as Node3D).visible = not held_orb
+	(n.get_node("Card") as Node3D).visible = not held_orb
 	(n.get_node("Orb") as Node3D).visible = held_orb
 	var glass := (n.get_node("Orb/Glass") as MeshInstance3D).material_override as ShaderMaterial
 	glass.set_shader_parameter("core", (ORB_CORE[0] as Color).lerp(ORB_CORE[1], k))
@@ -449,6 +470,8 @@ func _tick_skins(delta: float) -> void:
 				"dashrock": spin.rotate_x(-delta * 9.0)
 				"spear": spin.rotate_z(delta * 6.0)
 				_: spin.rotate_z(delta * 3.0)
+		if String(e["kind"]) == "orb":
+			(n.get_node("Card") as Node3D).rotate_y(delta * CARD_SPIN)
 
 func _tick_timed(e2: Dictionary, u: float, _delta: float) -> void:
 	var n2: Node3D = e2["n"]

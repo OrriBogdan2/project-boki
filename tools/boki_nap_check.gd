@@ -14,7 +14,8 @@ extends RefCounted
 const STEP := 1.0 / 60.0
 const COST_MS := 1.0  # ms per frame for 30 Boki's naps (one KinNap each in both drivers: 60 updates)
 const RIGGED := "cindle"
-const PRIMITIVE := "basaltoad"
+# the primitive body while it has no rig; else the first species without one (_primitive)
+const PRIMITIVE_PREF := "basaltoad"
 const SHOT_AT := [["awake", 0.0], ["settling", 0.3], ["asleep", 2.0], ["stretch", 0.55]]
 const BIG := 1.5  # the second Boki's scale in the shot
 
@@ -123,15 +124,23 @@ func _wake() -> void:
 	r.free()
 
 
+## A species with no rigged model (KinPuppet builds it): basaltoad while it has none, else the first such species,
+## so a new species model (Meshy creature batches) doesn't turn this check red.
+func _primitive() -> String:
+	if not BokiRig.has(PRIMITIVE_PREF):
+		return PRIMITIVE_PREF
+	for id in KinLib.kin_ids():
+		if not BokiRig.has(String(id)):
+			return String(id)
+	return PRIMITIVE_PREF
+
+
 func _puppet() -> void:
-	# every species has a rig now: switch rigs off to get the KinPuppet body this part checks
-	BokiRig.enabled = false
-	var k := Models.kin(PRIMITIVE, {})
-	BokiRig.enabled = true
+	var k := Models.kin(_primitive(), {})
 	main.add_child(k)
 	await main.get_tree().process_frame
 	var pup := _puppet_of(k)
-	ok(pup != null and not k.has_node("Body/Flex/BokiRig"), "%s is a primitive body" % PRIMITIVE)
+	ok(pup != null and not k.has_node("Body/Flex/BokiRig"), "%s is a primitive body" % _primitive())
 	pup.set_process(false)
 	var flex: Node3D = pup.flex
 	_run_pup(pup, 1.0)
@@ -265,7 +274,7 @@ func _shots() -> void:
 	gm.albedo_color = Color("7fa860")
 	ground.material_override = gm
 	vp.add_child(ground)
-	var pair: Array[Node3D] = [Models.kin(RIGGED, {}), Models.kin(PRIMITIVE, {})]
+	var pair: Array[Node3D] = [Models.kin(RIGGED, {}), Models.kin(_primitive(), {})]
 	pair[0].position = Vector3(-0.55, 0, 0)
 	pair[1].position = Vector3(0.6, 0, 0)
 	pair[1].scale *= BIG

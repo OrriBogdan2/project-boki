@@ -114,6 +114,8 @@ func ret_of(h: Hunter) -> Dictionary:
 
 ## True when a telegraph the local player sees (a disc, lane or cone) lies over the ground point `p`.
 func covers(p: Vector3) -> bool:
+	if entries.is_empty():
+		return false
 	var q := Vector2(p.x, p.z)
 	var me = m.get("player")
 	for e in entries.values():
@@ -160,6 +162,7 @@ func rebuild() -> void:
 				e = e.duplicate()        # someone else's telegraph: a rival's reads hostile, a teammate's cool
 				e["col"] = SideColor.fx(m, e["h"], e["col"])
 				e["col2"] = SideColor.fx(m, e["h"], e["col2"])
+			e = AimShapes.for_viewer(e, tier == SideColor.ORDER_FOE)
 			AimShapes.build(geo, e)
 			built += 1
 	if geo.v.is_empty():

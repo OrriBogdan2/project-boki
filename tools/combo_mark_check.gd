@@ -1,5 +1,6 @@
 extends RefCounted
-## The overhead combo tag (scripts/ui/combo_mark.gd) for Sable's Marks, Vex's Daze, Sparkle's Static,
+## The combo state on a foe (scripts/ui/combo_mark.gd; the plate status row shows it) for Sable's Marks, Vex's Daze,
+## Sparkle's Static,
 ## Cinder's Ignite (Ablaze/Flashover), Neve's Chill and Meeko's Kindle, Gil's splash marks, and Kael's Slam
 ## window (a knock readies the Riposte) and Warchain hold (the pull):
 ## it reads the kit's own status (ArchKit.combo_read), so it shows while the status runs, counts down, is
@@ -29,7 +30,13 @@ func run(ok: Callable, ac, arch: String) -> void:
 	ac.step(m, float(d["total"]) + 0.3)
 	ok.call("%s: gone when the status ends" % tag, k.combo_read(t).is_empty())
 	if arch == "thief":     # Marks have no cap: past the row of pips the tag reads the count
+		var mine: Dictionary = ThiefKit.marked_by.get(p.nid, {})
+		ok.call("%s: Marks run out, so the step stops fading on every foe (none tracked)" % tag, mine.is_empty(),
+				str(mine.size()))
 		(k as ThiefKit).add_mark(t, 11, true)
+		mine = ThiefKit.marked_by.get(p.nid, {})
+		ok.call("%s: a Mark put on a foe is tracked for the fade" % tag, mine.has(t.get_instance_id()),
+				str(mine.size()))
 		var d3 := k.combo_read(t)
 		ok.call("%s: 11 Marks read 11 past the %d pips" % [tag, int(d3["max"])],
 				int(d3["n"]) == 11 and int(d3["n"]) > int(d3["max"]), str(d3["n"]))
@@ -44,7 +51,7 @@ func run(ok: Callable, ac, arch: String) -> void:
 	ok.call("%s: the payoff hit flashes the body white" % tag, flashed, "stamp %.2f flash %.3f" % [stamp, t.flash_t])
 	ac.done(m)
 	if arch == "juggernaut":
-		await _chain(ok, ac)
+		_chain(ok, ac)
 
 ## Kael's second state: the Warchain's hold on a foe shows for its 5s, ends with the chain, and the pull
 ## flashes the foe.
