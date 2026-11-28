@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d3kyk4goj6ycp"
-path="res://.godot/imported/ember_Image_0.webp-e3387267f9e31954889cadc494345064.ctex"
+path.s3tc="res://.godot/imported/ember_Image_0.webp-e3387267f9e31954889cadc494345064.s3tc.ctex"
+path.etc2="res://.godot/imported/ember_Image_0.webp-e3387267f9e31954889cadc494345064.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "39ead702c52f573c5666d56ca793b2b8"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/eggs/ember_Image_0.webp"
-dest_files=["res://.godot/imported/ember_Image_0.webp-e3387267f9e31954889cadc494345064.ctex"]
+dest_files=["res://.godot/imported/ember_Image_0.webp-e3387267f9e31954889cadc494345064.s3tc.ctex", "res://.godot/imported/ember_Image_0.webp-e3387267f9e31954889cadc494345064.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
