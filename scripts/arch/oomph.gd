@@ -10,13 +10,11 @@ extends RefCounted
 ## Weapon data can tune it: "push" (the shooter
 ## is shoved back this many m/s), "tracer" (how long the streak reads, 1 = default).
 
-const STAGGER_FRAC := 0.12     # a hit of at least this share of max health staggers
-const STAGGER_T := 0.28        # ... for this long
-const STAGGER_SLOW := 0.45     # ... slowed this much
-const HEAVY_FLINCH := 2.6      # the flinch of a stagger, relative to a chip hit
+const HEAVY_FLINCH := 2.6  # the flinch of a stagger, relative to a chip hit
 const RULES := "res://content/rules/hit_flinch.json"
 static var _rules := {}
-static var legacy := false     # tooling (--legacy-shots): the old look, for before/after shots
+static var legacy := false  # tooling (--legacy-shots): the old look, for before/after shots
+
 
 # ------------------------------------------------------------------ shooting
 ## A shot (or swing) leaving: heavy weapons shove the shooter back a little (shotgun, sniper, bow).
@@ -34,6 +32,7 @@ static func on_fire(h: Hunter, _melee := false) -> void:
 		h.vel.x -= d.x * push
 		h.vel.z -= d.y * push
 
+
 # ------------------------------------------------------------------ being hit
 ## What a landed hit does to the body (called from Match.on_damage for every hit). Only the game that
 ## owns the body changes its state (stagger); the flinch and freeze are visual, everyone shows them.
@@ -42,7 +41,13 @@ static func react(m: Node, target: Ent, by: Ent, d: float, o: Dictionary) -> voi
 		return
 	var mh := maxf(1.0, target.max_hp)
 	var frac := d / mh
-	var big: bool = frac >= STAGGER_FRAC or o.get("payoff", false) or o.get("heavy", false) or float(o.get("stun", 0.0)) > 0.0
+	var hs: Dictionary = rules()["hit_slow"]
+	var big: bool = (
+		frac >= float(hs["big_frac"])
+		or o.get("payoff", false)
+		or o.get("heavy", false)
+		or float(o.get("stun", 0.0)) > 0.0
+	)
 	if target is Hunter:
 		var h := target as Hunter
 		h.hit_k = HEAVY_FLINCH if big else hit_strength(frac, (o.get("kb", Vector2.ZERO) as Vector2).length())
@@ -51,17 +56,52 @@ static func react(m: Node, target: Ent, by: Ent, d: float, o: Dictionary) -> voi
 			h.hit_from = Vector2(h.pos.x - by.pos.x, h.pos.z - by.pos.z).normalized()
 		# (hunters and their Boki stagger you; monsters' hits never do, so PvE lethality is unchanged)
 		var pvp: bool = by != null and is_instance_valid(by) and not (by is Mob) and String(o.get("src", "")) != "mob"
-		if big and pvp and not h.remote and not h.downed and h.fortify_t <= 0.0:
-			# a stagger: a short slow, so a big hit actually interrupts the dance (unstoppable
-			# states, fortify_t, shrug it off)
-			h.slow_k = maxf(h.slow_k, STAGGER_SLOW) if h.slow_t > 0.0 else STAGGER_SLOW
-			h.slow_t = maxf(h.slow_t, STAGGER_T)
-			h.stagger_t = STAGGER_T
+		if pvp and not h.remote and not h.downed and h.fortify_t <= 0.0:
+			_hit_slow(m, h, frac, big, hs)
 	elif target is Mob:
 		target.squash = maxf(target.squash, clampf(0.12 + frac * 0.6, 0.12, 0.35))
 	elif target is Kin and target.model:
 		var away := target.pos - by.pos if by and is_instance_valid(by) else Vector3.ZERO
 		KinFlinch.hit(target.model, away, frac, (target as Kin).mass())
+
+
+## The slow when a rival hits you (hit_flinch.json hit_slow): a big hit staggers (harder if another big one
+## came within repeat_s); small hits add up until they reach small_frac of max health, then slow a little,
+## with a cooldown. Unstoppable states (fortify_t) shrug both off (checked by the caller).
+static func _hit_slow(m: Node, h: Hunter, frac: float, big: bool, hs: Dictionary) -> void:
+	var now := float(m.get("time"))
+	var k := 0.0
+	var dur := 0.0
+	if big:
+		var again := now - float(h.get_meta("hs_big_at", -INF)) <= float(hs["repeat_s"])
+		h.set_meta("hs_big_at", now)
+		k = float(hs["big_repeat_mult"] if again else hs["big_mult"])
+		dur = float(hs["big_s"])
+	else:
+		var sum := frac
+		if now - float(h.get_meta("hs_sum_at", -INF)) <= float(hs["sum_reset_s"]):
+			sum += float(h.get_meta("hs_sum", 0.0))
+		h.set_meta("hs_sum_at", now)
+		h.set_meta("hs_sum", sum)
+		if sum < float(hs["small_frac"]) or now < float(h.get_meta("hs_small_cd", -INF)):
+			return
+		h.set_meta("hs_sum", 0.0)
+		h.set_meta("hs_small_cd", now + float(hs["small_cd_s"]))
+		var armored := h.armor > 0.0
+		k = float(hs["small_mult_armor"] if armored else hs["small_mult"])
+		dur = float(hs["small_s_armor"] if armored else hs["small_s"])
+	if m is Match and LastAlive.active(m as Match, h):
+		k = minf(float(hs["last_alive_cap"]), k + float(hs["last_alive_big" if big else "last_alive_small"]))
+	# the floor: never under floor_ms of walking; a Hunter already that slow is not slowed at all
+	var fl := float(hs["floor_ms"])
+	if h.base_speed <= fl:
+		return
+	k = maxf(k, fl / h.base_speed)
+	h.slow_k = maxf(h.slow_k, 1.0 - k) if h.slow_t > 0.0 else 1.0 - k
+	h.slow_t = maxf(h.slow_t, dur)
+	if big:
+		h.stagger_t = dur
+
 
 ## How hard a hit flinches (hit_k, chip = rules chip_k up to HEAVY_FLINCH): its share of max health and its
 ## knock (m/s), weighted by content/rules/hit_flinch.json. The anim scales its flinch by it.
@@ -70,22 +110,26 @@ static func hit_strength(frac: float, knock: float) -> float:
 	var k := float(r["chip_k"]) + frac * float(r["frac_k"]) + knock * float(r["knock_k"])
 	return clampf(k, float(r["chip_k"]), HEAVY_FLINCH)
 
+
 ## How much of the additive flinch layer a hit of strength `hit_k` plays: the rules' light share on a chip hit,
 ## all of it by a stagger (the stagger itself takes the whole-body hit clip).
 static func flinch_weight(hit_k: float) -> float:
 	var r := rules()
 	return lerpf(float(r["light"]), 1.0, clampf(inverse_lerp(float(r["chip_k"]), HEAVY_FLINCH, hit_k), 0.0, 1.0))
 
+
 static func rules() -> Dictionary:
 	if _rules.is_empty():
 		_rules = JSON.parse_string(FileAccess.get_file_as_string(RULES))
 	return _rules
+
 
 ## Called at the end of Hunter.render. The hit shove and the shiver during a freeze are Juice's
 ## (Ent.flinch, the pop branch); this only runs the stagger clock and the anim flinch scale.
 static func render_hit(h: Hunter, delta: float) -> void:
 	h.hit_shake = maxf(0.0, h.hit_shake - delta * 1.4)
 	h.stagger_t = maxf(0.0, h.stagger_t - delta)
+
 
 # ------------------------------------------------------------------ how a shot looks
 ## The colour, size and halo colour of a shot as the local player sees it. What can hurt you stays the
@@ -102,16 +146,17 @@ static func shot_look(m: Node, by: Ent, col: Color, shot_size: float) -> Array:
 	var halo := 0.28
 	var p = m.get("player")
 	if p and by.team != p.team:
-		vis_col = Color(col.lightened(0.1), 1.0)     # (the shooter's own colour: enemy reads by size and halo)
+		vis_col = Color(col.lightened(0.1), 1.0)  # (the shooter's own colour: enemy reads by size and halo)
 		vis_size *= 1.3
 		halo = 0.4
 	elif p:
 		vis_col = Color(col.lightened(0.15), 0.95)
 		vis_size *= 1.45
 		if by != p:
-			vis_col.a = 0.7          # teammates' shots: a touch softer than yours
+			vis_col.a = 0.7  # teammates' shots: a touch softer than yours
 			halo = 0.18
 	return [vis_col, vis_size, Color(SideColor.fx(m, by, vis_col.lightened(0.2)), halo)]
+
 
 ## A kit draws this round itself (an arrow, a trail and its head): the stock orb shrinks away and stays so (the match
 ## sizes it from "vr" every frame). Kits skin a round just before a draw, so the size is pushed through at once: a
@@ -126,6 +171,7 @@ static func hide_orb(s: Dictionary) -> void:
 	for halo: Node3D in orb.get_children():
 		halo.force_update_transform()
 
+
 ## A shot's bolt this frame: between its last and current step (`alpha`), turned along its flight and stretched by
 ## its tracer. Match draws every shot with it; tools that step the match by hand (the reels) call it too.
 static func place_shot(s: Dictionary, alpha: float) -> void:
@@ -139,6 +185,7 @@ static func place_shot(s: Dictionary, alpha: float) -> void:
 		var r: float = s.get("vr", s["r"])
 		var tracer := float((s["x"] as Dictionary).get("tracer", 1.0))
 		mi.scale = Vector3(r * 2.0, r * 2.0, tracer_len(r, v.length(), tracer))
+
 
 ## How long the streak behind a shot reads, from its speed (and the weapon's "tracer" scale).
 static func tracer_len(r: float, speed: float, k := 1.0) -> float:

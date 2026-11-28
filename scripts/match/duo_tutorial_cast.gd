@@ -113,6 +113,9 @@ func _foe(f: Hunter, i: int, dt: float) -> void:
 	f.reveal_t = maxf(f.reveal_t, 0.3)  # (always in sight: nothing hides in a sparring ring)
 	if f.downed:
 		f.down_hp = Data.MATCH["down_hp"]  # (never finished: a respawn would land it outside the ring)
+		for h in m.hunters:
+			if not h.stomp.is_empty() and h.stomp["o"] == f:
+				Life.end_stomp(m, h, "broken")  # (a stomp would execute it, which is a respawn too)
 		_down_t[f] = float(_down_t.get(f, 0.0)) + dt
 		if float(_down_t[f]) >= float(tu.cfg["knock_hold"]):
 			_back_up(f, i)
@@ -123,6 +126,10 @@ func _foe(f: Hunter, i: int, dt: float) -> void:
 			_hush(f)
 			f.inp["move"] = _toward(f, tu.foe_home(i), 0.6) if foe_mode == "hold" else Vector2.ZERO
 			f.inp["aim"] = p.pos + Vector3(0, 0.9, 0)
+			var g := tu.guide
+			if foe_mode == "hold" and g.downed and f.flat_dist(g) < float(Life.R["revive_radius"]) + 1.0:
+				# a rival never stands on her wisp: that is a stomp, and nobody could revive her
+				f.inp["move"] = -f.dir_to(g)
 		"strafe":
 			_hush(f)
 			f.inp["move"] = Vector2(sin(m.time * STRAFE_HZ + i * PI), 0.0)

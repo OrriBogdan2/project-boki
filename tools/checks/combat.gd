@@ -18,6 +18,8 @@ const CHECKS := {
 	"--barrier-sight-check": ["res://tools/barrier_sight_check.gd", "barrier_sight_check", null],
 	# Vex's Slipstep: one plain dash, no pips, no Second Wind
 	"--vex-dash-check": ["res://tools/vex_dash_check.gd", "vex_dash_check", null],
+	# bots aim worse at a badly hurt target (Bot.pity_k)
+	"--bot-pity-check": ["res://tools/bot_pity_check.gd", "bot_pity_check", null],
 	"--camps-check": ["res://tools/camps_check.gd", "camps_check", null],  # fixed camps and their XP
 	# 0022 ult ranks
 	"--ult-rank-check": ["res://tools/ult_rank_check.gd", "ult_rank_check", null],
