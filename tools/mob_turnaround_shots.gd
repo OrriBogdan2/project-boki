@@ -104,12 +104,14 @@ func _kind(kind: String) -> void:
 			last.save_png(dir.path_join("windup.png"))
 		else:
 			print("MOBTURNAROUND %s: no wind-up frame" % kind)
-	# the death move: 0.7 of DEATH_S in
+	backdrop.visible = true
+	cam.make_current()
+	# the death move: 0.4 of DEATH_S in
 	p.teleport(at + Vector3(60, 0, 0))
 	mb.hurt(mb.hp + mb.max_hp, p, {"src": "shot"})
 	for i in 90:
 		await _view(mb, ctr, dist, 0.785, 0.0)
-		if mb.dead and mb.death_t > MobAnim.DEATH_S * 0.7:
+		if mb.dead and mb.death_t > MobAnim.DEATH_S * 0.4:
 			(await _shot()).save_png(dir.path_join("death.png"))
 			break
 	print("MOBTURNAROUND %s h=%.2f hunter=%.2f" % [kind, box.size.y, hunter_h])
