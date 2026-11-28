@@ -10,20 +10,22 @@ extends RefCounted
 ## stay ran out while you were away, nor when it joins).
 ## Never touches the real save.
 
-const DT := 0.25             # s of farm time per step
-const LOOK_S := 5.0          # s of farm time between looks, so the check does not wait minutes
-const COME_S := 40.0         # s of farm time a suiting zone has to bring a visitor (chance 1)
-const OUT_S := 60.0          # s for the third meal's outcome to play out
-const DAY_S := 300.0         # one garden day (care.json care_day_s)
+const DT := 0.25  # s of farm time per step
+const LOOK_S := 5.0  # s of farm time between looks, so the check does not wait minutes
+const COME_S := 40.0  # s of farm time a suiting zone has to bring a visitor (chance 1)
+const OUT_S := 60.0  # s for the third meal's outcome to play out
+const DAY_S := 300.0  # one garden day (care.json care_day_s)
 
 var bad := 0
 var main: Node
 var home
 
+
 func ok(cond: bool, what: String) -> void:
 	print("VISITOR %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
 
 func _fresh(species: Array) -> void:
 	var d := Save.fresh()
@@ -33,6 +35,7 @@ func _fresh(species: Array) -> void:
 	d["tutorial"] = {"hatched": true, "intro": true, "home": true}
 	Save.d = d
 	HomeLayout.ensure(d)
+
 
 func run(m: Node) -> void:
 	main = m
@@ -59,6 +62,7 @@ func run(m: Node) -> void:
 	print("VISITOR DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _suit_part() -> void:
 	_fresh(["burrlet", "glomwort", "pebbit"])
 	var zone := "bramblebank"
@@ -68,27 +72,38 @@ func _suit_part() -> void:
 	ok(not GardenVisitor.suits(zone, "puddlet", ["toy_dig"]), "a species of another zone's group does not come")
 	ok(not GardenVisitor.suits("glasswater", "mossgrade", ["toy_dig"]), "the zone's group must hold its theme")
 	Save.d["roster"][1]["zone"] = "glasswater"
-	ok(not GardenVisitor.suits(zone, "mossgrade", ["toy_dig"]),
-		"one resident of the group is not enough (another zone's do not count)")
+	ok(
+		not GardenVisitor.suits(zone, "mossgrade", ["toy_dig"]),
+		"one resident of the group is not enough (another zone's do not count)"
+	)
 	Save.d["roster"][1].erase("zone")
 	BokiRig.enabled = false
 	ok(GardenVisitor.pick(zone, ["toy_dig"]) == "", "a species with no rigged model never visits")
 	BokiRig.enabled = true
 	var sp := GardenVisitor.pick(zone, ["toy_dig"])
-	ok(sp != "" and BokiRig.has(sp) and GardenVisitor.suits(zone, sp, ["toy_dig"]),
-		"the pick suits and has a model (%s)" % sp)
+	ok(
+		sp != "" and BokiRig.has(sp) and GardenVisitor.suits(zone, sp, ["toy_dig"]),
+		"the pick suits and has a model (%s)" % sp
+	)
 	var r := GardenVisitor.begin(zone, sp, 1000.0)
-	ok(not GardenVisitor.expired(1000.0 + DAY_S - 1.0) and GardenVisitor.expired(1000.0 + DAY_S),
-		"it stays one garden day")
-	ok(GardenVisitor.in_zone(zone) == r and GardenVisitor.in_zone("glasswater").is_empty(),
-		"it is in its own zone only")
+	ok(
+		not GardenVisitor.expired(1000.0 + DAY_S - 1.0) and GardenVisitor.expired(1000.0 + DAY_S),
+		"it stays one garden day"
+	)
+	ok(
+		GardenVisitor.in_zone(zone) == r and GardenVisitor.in_zone("glasswater").is_empty(),
+		"it is in its own zone only"
+	)
 	ok(GardenZones.out_here().has(r) and not KinBox.farm().has(r), "it walks the zone but is not one of your Boki")
 	var back: Dictionary = JSON.parse_string(JSON.stringify(Save.d))
 	Save.d = back
 	var kept := GardenVisitor.in_zone(zone)
 	ok(kept.get("uid") == r["uid"] and kept.has("visitor") and kept.has("species"), "it round-trips through the save")
-	ok(Save.migrate(back) and GardenVisitor.rec().get("uid") == r["uid"],
-		"a save with a visitor still upgrades and keeps it")
+	ok(
+		Save.migrate(back) and GardenVisitor.rec().get("uid") == r["uid"],
+		"a save with a visitor still upgrades and keeps it"
+	)
+
 
 func _step(secs: float, until := Callable()) -> void:
 	var t := 0.0
@@ -98,11 +113,14 @@ func _step(secs: float, until := Callable()) -> void:
 		if int(t / DT) % 400 == 0:
 			await main.get_tree().process_frame
 
+
 func _heard(sname: String) -> int:
 	return int(GardenSfx.heard.get(sname, 0))
 
+
 func _wild() -> Array:
 	return home.kins.filter(func(k): return k["rec"].has("visitor"))
+
 
 func _stay_part() -> void:
 	ok(GardenVisitor.rec().is_empty(), "no visitor to begin with")
@@ -112,8 +130,10 @@ func _stay_part() -> void:
 	var r := GardenVisitor.rec()
 	ok(not r.is_empty() and _wild().size() == 1, "a visitor wandered into Bramblebank")
 	ok(_heard("garden_visit_in") == came + 1, "it chirps garden_visit_in once as it comes")
-	ok(GardenVisitor.suits("bramblebank", String(r.get("species", "")), ["toy_dig"]),
-		"the one that came suits the zone")
+	ok(
+		GardenVisitor.suits("bramblebank", String(r.get("species", "")), ["toy_dig"]),
+		"the one that came suits the zone"
+	)
 	await _intro_part()
 	await _step(60.0)
 	ok(_wild().size() == 1 and GardenVisitor.rec() == r, "only one visitor at a time")
@@ -138,12 +158,15 @@ func _stay_part() -> void:
 	ok(not Save.d["visitor"].has("lead"), "a later visitor gets no lead: once per save")
 	Save.d["visitor"]["t"] = float(Save.d["visitor"]["t"]) - DAY_S
 	went = _heard("garden_visit_out")
-	var away := CareJournal.arrival()      # you were away over the day
-	ok(GardenVisitor.rec().is_empty() and away.any(func(l): return "went home" in l),
-		"a stay that ran out while you were away is told on arrival")
+	var away := CareJournal.arrival()  # you were away over the day
+	ok(
+		GardenVisitor.rec().is_empty() and away.any(func(l): return "went home" in l),
+		"a stay that ran out while you were away is told on arrival"
+	)
 	ok(_heard("garden_visit_out") == went, "and makes no goodbye sound")
 	Save.d["visitor"]["next"] = 0.0
-	home._spawn_kin()      # the zone loads again: its visitor is not there
+	home._spawn_kin()  # the zone loads again: its visitor is not there
+
 
 ## The first visitor on a save: the partner leads to it and one tip names it, once; a later one gets neither.
 func _intro_part() -> void:
@@ -151,7 +174,7 @@ func _intro_part() -> void:
 	var mine: Dictionary = home.kins.filter(func(k): return k["rec"] == Save.active_kin())[0]
 	ok(Save.d["tutorial"].get("visitor_intro", false) and Save.d["visitor"].has("lead"), "the first visitor starts it")
 	var leading := func(): return (mine["life"] as Fsm).is_in(BaseLife.S.LEAD)
-	var behind := func():      # you stay just behind it and the visitor stands off (it first looks at the newcomer)
+	var behind := func():  # you stay just behind it and the visitor stands off (it first looks at the newcomer)
 		home.ppos = mine["pos"] + Vector3(-2, 0, 0)
 		wild["pos"] = mine["pos"] + Vector3(9, 0, 0)
 		return leading.call()
@@ -165,6 +188,7 @@ func _intro_part() -> void:
 	await _step(1.0)
 	ok(VisitorIntro.lead_at(home, mine).x == INF, "the lead ends when you come over")
 	home.ppos = Vector3(-500, 0, -500)
+
 
 ## Its arrival reads: flat footprints (no rings) that fade in over fade_in_s, and a type-coloured shimmer on it for
 ## its first shimmer_s only.
@@ -187,6 +211,7 @@ func _arrive_part(k: Dictionary) -> void:
 	VisitorArrive.shimmer(home, k, k["rec"], float(a["shimmer_s"]) + 0.01)
 	ok(home.fx.radial == before + 1, "and stops after shimmer_s")
 
+
 ## Feeds the visitor its favourite three times, as the feed list does.
 func _feed_three() -> void:
 	var r := GardenVisitor.rec()
@@ -199,8 +224,10 @@ func _feed_three() -> void:
 		if i == 1:
 			ok(int(Save.d["visitor"]["fed"]) == 2, "two favourites counted")
 
+
 func _come() -> void:
 	await _step(COME_S, func(): return not GardenVisitor.rec().is_empty())
+
 
 func _join_part() -> void:
 	await _come()
@@ -215,14 +242,17 @@ func _join_part() -> void:
 	await _step(OUT_S, func(): return GardenVisitor.rec().is_empty())
 	ok(_heard("garden_visit_out") == went, "asking to stay is no goodbye")
 	var joined := Save.kin(uid)
-	ok(not joined.is_empty() and Save.d["roster"].size() == roster + 1 and not joined.has("visitor"),
-		"it asked to stay and is a new Boki")
+	ok(
+		not joined.is_empty() and Save.d["roster"].size() == roster + 1 and not joined.has("visitor"),
+		"it asked to stay and is a new Boki"
+	)
 	ok(joined["zone"] == "bramblebank" and joined["origin"]["how"] == "visitor", "it lives in the zone")
 	ok(Save.d["dex"][joined["species"]]["caught"], "its kind is caught in the Field Book")
 	var here: bool = not home.kins.filter(func(k): return k["rec"] == joined).is_empty()
 	ok(_wild().is_empty() and here != dup, "it stays on the farm, or sleeps in the Burrow as a repeat (%s)" % dup)
 	ok(CareJournal.arrival().any(func(l): return "asked to stay" in l), "the away card says it stayed")
 	Save.d["visitor"]["next"] = 0.0
+
 
 func _egg_part() -> void:
 	for sp in ["burrlet", "glomwort", "burrlet"]:
@@ -238,10 +268,13 @@ func _egg_part() -> void:
 	await _feed_three()
 	await _step(OUT_S, func(): return GardenVisitor.rec().is_empty())
 	ok(_heard("garden_visit_out") == went + 1, "leaving its egg, it says goodbye once")
-	ok(GardenVisitor.rec().is_empty() and _wild().is_empty() and Save.d["roster"].size() == roster,
-		"with no room it left and did not join")
+	ok(
+		GardenVisitor.rec().is_empty() and _wild().is_empty() and Save.d["roster"].size() == roster,
+		"with no room it left and did not join"
+	)
 	var egg: Dictionary = (Incubator.shelf() + Incubator.eggs()).back() if Incubator.count() > eggs else {}
-	ok(Incubator.count() == eggs + 1 and egg.get("sp") == sp, "it left an egg of its kind (%s)" % sp)
+	# (an egg is its line's first form, Data.egg_species: a visiting Glombulus leaves its first form's egg)
+	ok(Incubator.count() == eggs + 1 and egg.get("sp") == Data.egg_species(sp), "it left an egg of its kind (%s)" % sp)
 	ok(CareJournal.arrival().any(func(l): return "left a" in l and "Egg" in l), "the away card says it left an egg")
 	var from: Dictionary = egg.get("visitor", {})
 	var told: bool = from.get("sp") == sp and from.get("zone") == "bramblebank" and int(from.get("day", 0)) >= 1

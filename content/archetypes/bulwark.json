@@ -10,7 +10,7 @@
 	"body": {
 		"size": 1.464, "bulk": 0.8,
 		"build": 1.4,
-		"hit_r": 0.404, "hit_h": 1.78, "body_r": 0.46,
+		"hit_r": 0.404, "top_h": 3.01, "hit_h": 1.78, "body_r": 0.46,
 		"head": 0.3,
 		"legs": 0.46,
 		"torso": 1.06,
@@ -120,6 +120,7 @@
 			"wait_rank3": 1.4,
 			"lock": 3.0,
 			"lock_rank3": 2.0,
+			"block_dash": 1.0,
 			"len": 4.2,
 			"arc": 140.0,
 			"slow": 0.6,

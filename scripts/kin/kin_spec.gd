@@ -11,15 +11,15 @@ var display_name := ""
 var animals: Array = []
 var theme := "none"
 var flavor := ""
-var colors := {}             # body belly glow wing: hex
-var look := {}               # body ears tail feet aura: core model builder ids
+var colors := {}  # body belly glow wing: hex
+var look := {}  # body ears tail feet aura: core model builder ids
 var size := "small"
 var reach := 1.3
 var mass := 0.8
 var gait := {}
-var stat_points := {}        # stat -> points
-var personality := {}        # bravery loyalty temper curiosity, 0..1
-var ai := {}                 # aggression loyalty caution 0..1, role
+var stat_points := {}  # stat -> points
+var personality := {}  # bravery loyalty temper curiosity, 0..1
+var ai := {}  # aggression loyalty caution 0..1, role
 var carry_style := "shoulder"
 var carry_name := ""
 var carry_passives: Array = []
@@ -30,14 +30,52 @@ var active := ""
 var auto := ""
 var merge := ""
 var evo_root := ""
-var evo_paths: Array = []    # [{affinity, nodes: [ids]}]
+var evo_paths: Array = []  # [{affinity, nodes: [ids]}]
 var voice := {}
 var egg := {}
-var avg_size := {}              # optional: {cm, kg} base height and weight of an average one (Unique.base_size)
-var infusion := {}           # optional: what this kin lends archetype sockets (docs/ARCHETYPES.md §4.2); derived when absent
+var avg_size := {}  # optional: {cm, kg, fit}: an average one's height, weight, model scale (Unique)
+var infusion := {}  # optional: what this kin lends archetype sockets (docs/ARCHETYPES.md §4.2); derived when absent
 
-const FIELDS := ["grammar", "id", "name", "animals", "theme", "flavor", "colors", "look", "body", "stats", "personality", "ai", "carry", "throw", "active", "auto", "merge", "evolution", "voice", "egg", "size", "infusion"]
-const REQUIRED := ["grammar", "id", "name", "animals", "colors", "look", "body", "stats", "personality", "ai", "carry", "active", "merge"]
+const FIELDS := [
+	"grammar",
+	"id",
+	"name",
+	"animals",
+	"theme",
+	"flavor",
+	"colors",
+	"look",
+	"body",
+	"stats",
+	"personality",
+	"ai",
+	"carry",
+	"throw",
+	"active",
+	"auto",
+	"merge",
+	"evolution",
+	"voice",
+	"egg",
+	"size",
+	"infusion"
+]
+const REQUIRED := [
+	"grammar",
+	"id",
+	"name",
+	"animals",
+	"colors",
+	"look",
+	"body",
+	"stats",
+	"personality",
+	"ai",
+	"carry",
+	"active",
+	"merge"
+]
+
 
 static func parse(v: Variant, rep: GrammarReport) -> KinSpec:
 	var k := KinSpec.new()
@@ -66,12 +104,15 @@ static func parse(v: Variant, rep: GrammarReport) -> KinSpec:
 	if d.has("colors"):
 		var c := rep.obj(d["colors"], "colors")
 		rep.keys(c, "colors", ["body", "belly", "glow", "wing"], ["body", "belly", "glow"])
-		for key in c: k.colors[key] = rep.color(c, key, "colors")
+		for key in c:
+			k.colors[key] = rep.color(c, key, "colors")
 	if d.has("look"):
 		var l := rep.obj(d["look"], "look")
 		rep.keys(l, "look", KinParts.LOOK.keys(), ["body"])
 		for key in KinParts.LOOK:
-			k.look[key] = rep.param(l, key, ["enum", KinParts.LOOK[key], null, "none" if key != "body" else null, "", ""], "look")
+			k.look[key] = rep.param(
+				l, key, ["enum", KinParts.LOOK[key], null, "none" if key != "body" else null, "", ""], "look"
+			)
 	if d.has("body"):
 		var b := rep.obj(d["body"], "body")
 		rep.keys(b, "body", KinParts.BODY.keys() + ["gait"], ["size"])
@@ -80,14 +121,16 @@ static func parse(v: Variant, rep: GrammarReport) -> KinSpec:
 		k.mass = float(rep.param(b, "mass", KinParts.BODY["mass"], "body"))
 		var g := rep.obj(b.get("gait", {}), "body.gait")
 		rep.keys(g, "body.gait", KinParts.GAIT.keys())
-		for key in KinParts.GAIT: k.gait[key] = rep.param(g, key, KinParts.GAIT[key], "body.gait")
+		for key in KinParts.GAIT:
+			k.gait[key] = rep.param(g, key, KinParts.GAIT[key], "body.gait")
 	# stat profile: exactly STAT_BUDGET points
 	if d.has("stats"):
 		var s := rep.obj(d["stats"], "stats")
 		rep.keys(s, "stats", KinParts.STATS.keys())
 		var total := 0
 		for key in s:
-			if not KinParts.STATS.has(key): continue
+			if not KinParts.STATS.has(key):
+				continue
 			var pts := int(rep.number(s, key, "stats", 0, KinParts.STATS[key]["max_points"], 0, true))
 			k.stat_points[key] = pts
 			total += pts
@@ -104,14 +147,21 @@ static func parse(v: Variant, rep: GrammarReport) -> KinSpec:
 		k.carry_style = rep.choice(c, "style", KinParts.CARRY.keys(), "carry")
 		k.carry_name = rep.text(c, "name", "carry")
 		if KinParts.CARRY.has(k.carry_style) and not (KinParts.CARRY[k.carry_style]["sizes"] as Array).has(k.size):
-			rep.err("carry.style", "a %s kin can't be carried as %s (%s takes %s kin)" % [k.size, k.carry_style, k.carry_style, " or ".join(KinParts.CARRY[k.carry_style]["sizes"])])
+			rep.err(
+				"carry.style",
+				(
+					"a %s kin can't be carried as %s (%s takes %s kin)"
+					% [k.size, k.carry_style, k.carry_style, " or ".join(KinParts.CARRY[k.carry_style]["sizes"])]
+				)
+			)
 		k.carry_passives = MergeSpec.parse_passives(c.get("passives", []), "carry.passives", rep, "carry")
 		if c.has("on_shot"):
 			k.carry_on_shot = MergeSpec.parse_on_shot(c["on_shot"], "carry.on_shot", rep)
 		if k.carry_style == "mount":
 			var mo := rep.obj(c.get("mount", {}), "carry.mount")
 			rep.keys(mo, "carry.mount", KinParts.MOUNT.keys())
-			for key in KinParts.MOUNT: k.mount[key] = rep.param(mo, key, KinParts.MOUNT[key], "carry.mount")
+			for key in KinParts.MOUNT:
+				k.mount[key] = rep.param(mo, key, KinParts.MOUNT[key], "carry.mount")
 		elif c.has("mount"):
 			rep.err("carry.mount", "only a mount kin has mount settings")
 	# throw
@@ -124,7 +174,8 @@ static func parse(v: Variant, rep: GrammarReport) -> KinSpec:
 		for i in effs.size():
 			var e := PartSpec.parse("effect", effs[i], "throw.effects[%d]" % i, rep)
 			if e:
-				if e.target != "foes": rep.err("throw.effects[%d].target" % i, "a throw lands on a foe")
+				if e.target != "foes":
+					rep.err("throw.effects[%d].target" % i, "a throw lands on a foe")
 				k.throw_effects.append(e)
 	# slots
 	k.active = rep.ident(d, "active", "")
@@ -138,7 +189,9 @@ static func parse(v: Variant, rep: GrammarReport) -> KinSpec:
 		rep.keys(ev, "evolution", ["root", "paths"], ["root", "paths"])
 		k.evo_root = rep.text(ev, "root", "evolution", "", true)
 		if k.evo_root.length() > 8:
-			rep.err("evolution.root", "'%s' is the start of evolved names (Cind + fang); keep it to 8 letters" % k.evo_root)
+			rep.err(
+				"evolution.root", "'%s' is the start of evolved names (Cind + fang); keep it to 8 letters" % k.evo_root
+			)
 		var paths := rep.arr(ev.get("paths", []), "evolution.paths")
 		for i in paths.size():
 			var pp := "evolution.paths[%d]" % i
@@ -164,14 +217,16 @@ static func parse(v: Variant, rep: GrammarReport) -> KinSpec:
 	if d.has("egg"):
 		var e := rep.obj(d["egg"], "egg")
 		rep.keys(e, "egg", ["name", "temper", "desc", "play"], ["name"])
-		for key in e: k.egg[key] = rep.text(e, key, "egg")
+		for key in e:
+			k.egg[key] = rep.text(e, key, "egg")
 	if d.has("size"):
 		var sz := rep.obj(d["size"], "size")
-		rep.keys(sz, "size", ["cm", "kg", "_doc"], ["cm", "kg"])
-		k.avg_size = {"cm": float(sz.get("cm", 0.0)), "kg": float(sz.get("kg", 0.0))}
+		rep.keys(sz, "size", ["cm", "kg", "fit", "_doc"], ["cm", "kg"])
+		k.avg_size = {"cm": float(sz["cm"]), "kg": float(sz["kg"]), "fit": float(sz.get("fit", 1.0))}
 	if d.has("infusion"):
 		k.infusion = _infusion(d["infusion"], rep)
 	return k
+
 
 ## The optional infusion block: one effect part per socket (hit, ctrl, guard, util), a list of
 ## modifiers in order of preference (mod), and move: blink. Each must sit in its socket's category.
@@ -187,7 +242,10 @@ static func _infusion(v: Variant, rep: GrammarReport) -> Dictionary:
 		if e == null:
 			continue
 		if not (cats[key] as Array).has(e.category()):
-			rep.err("infusion." + key, "a %s socket takes %s parts, not %s (%s)" % [key, " or ".join(cats[key]), e.type, e.category()])
+			rep.err(
+				"infusion." + key,
+				"a %s socket takes %s parts, not %s (%s)" % [key, " or ".join(cats[key]), e.type, e.category()]
+			)
 			continue
 		out[key] = [e] if key == "ctrl" else e
 	if d.has("mod"):
@@ -195,11 +253,13 @@ static func _infusion(v: Variant, rep: GrammarReport) -> Dictionary:
 		var arr := rep.arr(d["mod"], "infusion.mod")
 		for i in arr.size():
 			var m := PartSpec.parse("modifier", arr[i], "infusion.mod[%d]" % i, rep)
-			if m: ml.append(m)
+			if m:
+				ml.append(m)
 		out["mod"] = ml
 	if d.has("move"):
 		out["move"] = rep.choice(d, "move", ["blink"], "infusion", "blink")
 	return out
+
 
 ## A block of 0..1 numbers with exactly these keys (plus `extra` keys handled by the caller).
 static func _unit_block(d: Dictionary, key: String, names: Array, rep: GrammarReport, extra: Array = []) -> Dictionary:
@@ -212,6 +272,7 @@ static func _unit_block(d: Dictionary, key: String, names: Array, rep: GrammarRe
 		out[n] = rep.number(b, n, key, 0.0, 1.0, 0.5)
 	return out
 
+
 ## Checks the slots and evolution against the loaded library {abilities, merges, evolution}.
 func check_refs(lib: Dictionary, rep: GrammarReport) -> void:
 	var abil: Dictionary = lib.get("abilities", {})
@@ -223,7 +284,10 @@ func check_refs(lib: Dictionary, rep: GrammarReport) -> void:
 			slots["active"] = abil[active]
 			var a: AbilitySpec = abil[active]
 			if a.trigger and a.trigger.type != "on_cast":
-				rep.err("active", "'%s' is the player's E, so its trigger must be on_cast (it's %s)" % [active, a.trigger.type])
+				rep.err(
+					"active",
+					"'%s' is the player's E, so its trigger must be on_cast (it's %s)" % [active, a.trigger.type]
+				)
 	if auto != "":
 		if not abil.has(auto):
 			rep.err("auto", "no ability '%s' in abilities_v2" % auto)
@@ -244,12 +308,19 @@ func check_refs(lib: Dictionary, rep: GrammarReport) -> void:
 					continue
 				var p: Dictionary = m.merged[slot]
 				var st := _stage(slots[slot], int(p["stage"]), path, rep)
-				if st == null: continue
+				if st == null:
+					continue
 				for mp in p["add_modifiers"]:
 					_can_add(st, mp, path, rep)
 				for key in p["scale"]:
 					if not _has_number(st, "delivery." + key):
-						rep.err(path + ".scale." + key, "%s's stage %d %s has no number '%s'" % [slots[slot].id, int(p["stage"]), st.delivery.type, key])
+						rep.err(
+							path + ".scale." + key,
+							(
+								"%s's stage %d %s has no number '%s'"
+								% [slots[slot].id, int(p["stage"]), st.delivery.type, key]
+							)
+						)
 					else:
 						_scaled_ok(st, "delivery." + key, float(p["scale"][key]), path + ".scale." + key, rep)
 	var nodes: Dictionary = lib.get("evolution", {})
@@ -263,7 +334,8 @@ func check_refs(lib: Dictionary, rep: GrammarReport) -> void:
 			var nid: String = pth["nodes"][j]
 			var np := "%s.nodes[%d]" % [pp, j]
 			if not nodes.has(nid):
-				rep.err(np, "no evolution node '%s' in evolution_v2" % nid); continue
+				rep.err(np, "no evolution node '%s' in evolution_v2" % nid)
+				continue
 			var n: EvolutionNode = nodes[nid]
 			if n.affinity != String(pth["affinity"]):
 				rep.err(np, "'%s' is a %s node on the %s path" % [nid, n.affinity, pth["affinity"]])
@@ -277,28 +349,52 @@ func check_refs(lib: Dictionary, rep: GrammarReport) -> void:
 			for g in n.grants:
 				match String(g["kind"]):
 					"stat_shift":
-						var a := String(g["from"]); var b := String(g["to"])
-						if not KinParts.STATS.has(a) or not KinParts.STATS.has(b): continue
+						var a := String(g["from"])
+						var b := String(g["to"])
+						if not KinParts.STATS.has(a) or not KinParts.STATS.has(b):
+							continue
 						pts[a] = int(pts.get(a, 0)) - int(g["points"])
 						pts[b] = int(pts.get(b, 0)) + int(g["points"])
 						if int(pts[a]) < 0:
 							rep.err(np, "'%s' moves points out of %s, which has none left on this path" % [nid, a])
 						if int(pts[b]) > int(KinParts.STATS[b]["max_points"]):
-							rep.err(np, "'%s' pushes %s past its max of %d points" % [nid, b, int(KinParts.STATS[b]["max_points"])])
+							rep.err(
+								np,
+								(
+									"'%s' pushes %s past its max of %d points"
+									% [nid, b, int(KinParts.STATS[b]["max_points"])]
+								)
+							)
 					"add_modifier", "sidegrade":
 						var slot := String(g["slot"])
 						if not slots.has(slot):
-							rep.err(np, "'%s' changes the %s ability, but this kin has none" % [nid, slot]); continue
+							rep.err(np, "'%s' changes the %s ability, but this kin has none" % [nid, slot])
+							continue
 						var st := _stage(slots[slot], int(g["stage"]), np + "(" + nid + ")", rep)
-						if st == null: continue
+						if st == null:
+							continue
 						if g["kind"] == "add_modifier":
-							if g["modifier"]: _can_add(st, g["modifier"], np + "(" + nid + ")", rep)
+							if g["modifier"]:
+								_can_add(st, g["modifier"], np + "(" + nid + ")", rep)
 						else:
 							for side in ["up", "down"]:
 								if not _has_number(st, String(g[side]["param"])):
-									rep.err(np, "'%s' %s: %s's stage %d has no number '%s'" % [nid, side, slots[slot].id, int(g["stage"]), g[side]["param"]])
+									rep.err(
+										np,
+										(
+											"'%s' %s: %s's stage %d has no number '%s'"
+											% [nid, side, slots[slot].id, int(g["stage"]), g[side]["param"]]
+										)
+									)
 								else:
-									_scaled_ok(st, String(g[side]["param"]), float(g[side]["scale"]), "%s(%s).%s" % [np, nid, side], rep)
+									_scaled_ok(
+										st,
+										String(g[side]["param"]),
+										float(g[side]["scale"]),
+										"%s(%s).%s" % [np, nid, side],
+										rep
+									)
+
 
 static func _stage(a: AbilitySpec, i: int, path: String, rep: GrammarReport) -> StageSpec:
 	if i >= a.stages.size():
@@ -306,11 +402,13 @@ static func _stage(a: AbilitySpec, i: int, path: String, rep: GrammarReport) -> 
 		return null
 	return a.stages[i] if a.stages[i].delivery else null
 
+
 static func _can_add(st: StageSpec, mp: PartSpec, path: String, rep: GrammarReport) -> void:
 	if st.has_modifier(mp.type):
 		rep.err(path, "the %s already has %s" % [st.delivery.type, mp.type])
 	elif not (KinParts.MODIFIERS[mp.type]["on"] as Array).has(st.delivery.type):
 		rep.err(path, "%s doesn't work on a %s" % [mp.type, st.delivery.type])
+
 
 ## A number scaled by a merge or a sidegrade must still sit inside its part's bounds.
 static func _scaled_ok(st: StageSpec, p: String, k: float, path: String, rep: GrammarReport) -> void:
@@ -321,10 +419,12 @@ static func _scaled_ok(st: StageSpec, p: String, k: float, path: String, rep: Gr
 	if pd.is_empty():
 		return
 	var v := float(part.params[key]) * k
-	if String(pd[0]) == "int": v = roundf(v)
+	if String(pd[0]) == "int":
+		v = roundf(v)
 	var msg := KinParts.value_error(pd, v)
 	if msg != "":
 		rep.err(path, "x%s takes %s %s to %s: %s" % [KinParts._num(k), part.type, key, KinParts._num(v), msg])
+
 
 static func _has_number(st: StageSpec, p: String) -> bool:
 	var bits := p.split(".")
@@ -335,6 +435,7 @@ static func _has_number(st: StageSpec, p: String) -> bool:
 		params = st.effects[int(bits[1])].params
 	var key: String = bits[bits.size() - 1]
 	return params.has(key) and typeof(params[key]) in [TYPE_FLOAT, TYPE_INT]
+
 
 ## The kin's real stat values from its points.
 func stat(key: String) -> float:

@@ -71,13 +71,22 @@ check: `--base-life-check`.
   do not pull). A trait moves at most `week_cap` per drift week (`rec["drift"] = {day, moved}`, optional, no
   migration). Crossing a band in `bands` writes one journal line ("is getting braver", same shape as
   `CareJournal.note`).
+- Raising leans (`docs/decisions/0179-raising-leans.md`; `scripts/home/base_axes.gd`, `content/rules/base_axes.json`,
+  checks `--base-life-check` and `--garden-sim-check`): the first care of each kind in a farm day (`Care.care_day`)
+  steps three axes saved in `rec["raised"]` (bold: shy..bold, busy: lazy..busy, gentle: rough..gentle, each -1..1,
+  capped at `cap`; save v22 gives old Boki the zero lean). `BaseLife.choose` scales its odds by `BaseAxes.mult`: a
+  lazy Boki naps on its own now and then, a busy one plays toys more, a bold or rough one chases (tag) more and clings
+  to you less. Crossing +-`band` writes a journal line ("is getting bolder"). `--garden-sim-check` has a row per care
+  style after 10 days (briefs/design/GARDEN_MODERN_BALANCE.md). Not done: the idle habit poses (`KinHabit`) do not
+  read the lean yet.
 - Parents (GARDEN.md section 6): `Care.breed` saves who gave what in `rec["gifts"]` (`Parentage`; the parents' uids
   are already `rec["lineage"]["parents"]`; old babies have no gifts: read with `.get`, no migration). A young (not
   yet Grown) Boki adds `parent_weight` to its liking for a parent when it picks whom to greet and whom to nap beside
   (`BaseLife.regard`), so a parent it fell out with still loses. The first time goes in its journal (kind "parent").
   The hatch card (home.gd `_name_baby`, every mode) shows both parents' portraits and marks each gift (kind and colour, lean, best inherited
-  stat, favourite food and play, mutations) with a dot for the parent it came from (`scripts/ui/hatch_parents.gd`); `egg_hatch.gd` stays quiet.
-  Check: `--baby-parents-check`.
+  stat, favourite food and play, mutations) with a dot and one short line naming the parent it came from ("Ember lean from Pip",
+  `HatchParents.lines`; the Family tab's "Inherited" section lists the same lines; read from `rec["gifts"]`, so older Boki have none);
+  `egg_hatch.gd` stays quiet. Check: `--baby-parents-check`, `--base-breed-check`.
 - Family tab (GARDEN_MODERN 5 rank 8): the Boki card's Family tab (`scripts/ui/family_view.gd`) shows parents and
   grandparents (portrait, name, type), the mentor's gift (`rec["gift"]`) and the nest items used
   (`rec["lineage"]["nest"]`, written by `NestItems.hatched`). It only reads lineage and the roster: a Boki with none

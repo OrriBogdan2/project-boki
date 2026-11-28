@@ -129,7 +129,8 @@ static func wall_blocks(list: Array, x: float, z: float, r: float, y: float, cls
 ## The height barrier w stops a body with feet at y up to, or 0 when it lets it through (it doesn't
 ## block movement, or the body is above or on it).
 static func wall_top(w: Dictionary, y: float) -> float:
-	if not w["move"] or absf(y - float(w["y"])) > 1.9:
+	# (1.9 was above a plain jump's 1.52 m apex; the source's 1.91 m jump (Hunter.JUMP_V 7.5) clears 1.9, so it is 2.0)
+	if not w["move"] or absf(y - float(w["y"])) > 2.0:
 		return 0.0
 	# a low wall you can stand on (a rock, "top" m tall): feet at its top walk over it (StoneStand)
 	var top := StoneStand.top_for(w) if w.has("top") else 3.0
