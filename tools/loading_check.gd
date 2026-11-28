@@ -97,6 +97,10 @@ func _real_load(main: Node) -> void:
 		waited += dt
 		var ld := _screen(main)
 		if ld:
+			if shown.is_empty():
+				# the screen can go between two of our frames (a slow frame runs the 0.1 s ink cover in one
+				# step), so its last bar and stage are read as it leaves, not from our last sample
+				ld.tree_exiting.connect(_on_leave.bind(ld, shown, stages), CONNECT_ONE_SHOT)
 			shown.append([float(ld.prog), float(ld.want), dt, String(ld.stage_label)])
 			if stages.is_empty() or stages[-1] != String(ld.stage_label): stages.append(String(ld.stage_label))
 		elif not shown.is_empty() and main.current is Match and (main.current as Match).is_processing():
@@ -133,6 +137,13 @@ func _real_load(main: Node) -> void:
 	var seen := ", ".join(stages)
 	var complete := order_ok and at == names.size() - 1 and warm_seen
 	ok(complete, "the stages come in order, graphics warm-up included: " + seen)
+
+
+## The screen's last bar and stage, read as it leaves the tree.
+func _on_leave(ld: Node, shown: Array, stages: Array) -> void:
+	shown.append([float(ld.prog), float(ld.want), 0.0, String(ld.stage_label)])
+	if stages.is_empty() or stages[-1] != String(ld.stage_label):
+		stages.append(String(ld.stage_label))
 
 
 ## Every tip in content/rules/tips.json as the loading screen shows it (keys filled in).

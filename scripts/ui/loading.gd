@@ -172,6 +172,7 @@ func finish() -> void:
 	fill_speed = (1.0 - prog) / FILL_T
 	if sf and is_inside_tree() and not sf.covered:
 		await sf.cover(COVER_T)
+		prog = want  # ran full under the ink, even when a slow frame ran the cover in one step
 		queue_free()
 		sf.reveal(REVEAL_T)
 		return
