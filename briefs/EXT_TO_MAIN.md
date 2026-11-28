@@ -11574,3 +11574,4 @@ READY ext/lace-rmb-charge-scale d031117ab4 (Lace RMB wall stun 0.6-1.2s and rang
 READY ext/vex-native-timing e6b18f9a541 (Vex timing check reads the native player; 7 native rows red = real mismatches, tabled in docs/KIT_PARITY.d/1128-vex-native-timing.md)
 READY ext/hud-empty-slots efb38c27e1 (empty HUD slots hidden)
 READY ext/garden-hour-1128 fc9526ba0d (garden first hour re-played)
+READY ext/creator-first-rows f0fb1ba3927b288f9dafc4abae95f3e464780da4 (creator first pass short)
