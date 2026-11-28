@@ -1,11 +1,15 @@
 extends RefCounted
 ## --mob-pose-shots --shots-dir=<dir> [--kinds=a,b]: each monster in a real match on the start island, shot as the
 ## game plays it (jobq --needs gpu). Spawned beside the still player (god mode, kin off), it is cropped once per
-## state: mob_pose_<kind>.png = idle | walk | windup (its last frame) | strike, left to right (blank: never seen).
+## state: mob_pose_<kind>.png = idle | walk | windup (its last frame) | strike | hit (the flinch after a blow) | death
+## (a tenth of a second into the death move), left to right (blank: never seen).
 
 const CROP := 340  # px, the square around the monster
 const WAIT_S := 14.0  # s a monster gets to show all four states
-const ORDER := ["idle", "walk", "windup", "strike"]
+const ORDER := ["idle", "walk", "windup", "strike", "hit", "death"]
+const POSE_HIT_FRAC := 0.12  # of the monster's hp, the blow the hit cell is shot after
+const HIT_WAIT_S := 0.06  # s after the blow: the flinch layer (MobAnim.FLINCH_S) is near its peak
+const DEATH_WAIT_S := 0.1  # s after the kill: the keyed death move under the dissolve
 
 var main: Node
 var m: Match
@@ -30,7 +34,7 @@ func setup(mn: Node) -> Array:
 	d["active"] = rec["uid"]
 	d["tutorial"] = {"hatched": true, "intro": true, "home": true, "day1_done": true}
 	Save.d = d
-	var kinds := ["skitter", "spitter", "bomber", "glimmer", "warden", "brute", "sentinel"]
+	var kinds := ["skitter", "spitter", "bomber", "glimmer", "warden", "brute", "sentinel", "bl_skitter", "bl_warden"]
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):
 			out_dir = String(a).substr(12)
@@ -116,14 +120,45 @@ func _case(dir: String, kind: String) -> void:
 	if wind_img != null and not got.has("windup"):  # a bomber's fuse ends in the blast
 		strip.blit_rect(wind_img, Rect2i(0, 0, CROP, CROP), Vector2i(ORDER.find("windup") * CROP, 0))
 		got["windup"] = true
+	_silence(mb)
+	await _frames(60)
+	await _hit_death(kind, strip, got)
 	strip.save_png(dir.path_join("mob_pose_%s.png" % kind))
 	print("MOBPOSESHOT %s %s" % [kind, str(got.keys())])
-	if is_instance_valid(mb) and not mb.dead:  # gone quietly: no blast, no drops piling up for the next one
+
+
+## A fresh, held monster for the hit and death cells (the first may have blasted or wandered): one blow, then the kill.
+func _hit_death(kind: String, strip: Image, got: Dictionary) -> void:
+	var p: Hunter = m.player
+	var mb := m.spawn_mob(kind, _ground(p.pos, 4.5))
+	await _frames(30)
+	mb.hurt(float(mb.md["hp"]) * POSE_HIT_FRAC, p)
+	await _wait(HIT_WAIT_S)
+	strip.blit_rect(await _grab(mb), Rect2i(0, 0, CROP, CROP), Vector2i(ORDER.find("hit") * CROP, 0))
+	got["hit"] = true
+	await _frames(30)
+	mb.hurt(float(mb.md["hp"]) * 2.0, p)
+	await _wait(DEATH_WAIT_S)
+	strip.blit_rect(await _grab(mb), Rect2i(0, 0, CROP, CROP), Vector2i(ORDER.find("death") * CROP, 0))
+	got["death"] = true
+	_silence(mb)
+	await _frames(60)
+
+
+## Match seconds pass.
+func _wait(secs: float) -> void:
+	var t0 := m.time
+	while m.time - t0 < secs:
+		await main.get_tree().process_frame
+
+
+## Gone quietly: no blast, no drops piling up for the next one.
+func _silence(mb: Mob) -> void:
+	if is_instance_valid(mb) and not mb.dead:
 		mb.hp = 0.0
 		mb.dead = true
 		mb._cancel_tele()
 		mb.visible = false
-	await _frames(60)
 
 
 ## The CROP square around the monster on the frame just drawn.

@@ -35,7 +35,9 @@ const EMP_LINE := Color("ffc23a")      # the aim line while the next bolt is emp
 const AIM_LILAC := Color("d8c8ff")     # ... and otherwise
 const BOLA_HOT := Color("b07aff")      # the Bola's lane front and inner binding ring
 const BOLA_CORD := Color("b06aff")     # its violet lightning cord
-const SOFT_A := 1.2                     # the soft Bola lane: inside alpha 0.1 or less (zone rule)
+const SOFT_A := 0.7                     # the soft Bola lane: inside alpha ~0.06 at the base (zone rule)
+const LANE_LW := 0.12                   # m: its rails, twice the default width so the lane reads by its edges
+const LANE_HOT := 0.35                  # its rails lit toward white over sand and grass
 const EMP_RANGE_K := 1.12          # the empowered bolt flies 12% further (the source: 850 -> 950 units)
 const GLINT_POP_S := 0.22          # s the glint's flare takes to settle as the empowered bolt forms
 const GLINT_NET_EVERY := 1.1       # s between two glint pings online viewers get while it's empowered
@@ -685,7 +687,7 @@ func _tick_bola_cast(dt: float) -> void:
 	# runs to the throw. Its width is the catch corridor for a foe of her size (_tick_bola: the reach past a foe's body)
 	AimKit.lane(h, "rmb",
 			{"len": lane_len(), "width": float(bd["lane_w"]), "chevrons": 4, "tip": true, "fill": k,
-					"col": BOLA_CORD, "col2": BOLA_HOT, "alpha": SOFT_A, "soft": true})
+					"col": BOLA_CORD, "col2": BOLA_HOT, "alpha": SOFT_A, "soft": true, "lw": LANE_LW, "hot": LANE_HOT})
 	_whirl_bola()
 	if float(bola_cast["t"]) <= 0.0:
 		bola_cast = {}
@@ -912,6 +914,12 @@ func _stick(f: Ent, at: Vector3, on_wall := {}) -> void:
 		h.dashes = h.max_dashes()           # Shadow Knife rank 3: a knife in a foe gives the Vault back
 		DashReset.cue(h)
 	vfx("knife_stick", at, null, {"foe": f != null, "r": float(ed["ring_r"])})
+	var hv := HeroVfx.of(m)
+	print("DBGGROUND at=", at, " ground=", ground(at))
+	hv._layer({"p": "ring", "size": 1.2, "life": 1.5, "c": "main", "c2": "hot", "c3": "slot"}, h, at + Vector3(-2.5, 0, 0), Vector2.UP, {}, 1.0)
+	hv._layer({"p": "ring", "hollow": true, "size": 1.2, "life": 1.5, "c": "main", "c2": "hot", "c3": "slot"}, h, at + Vector3(0, 0, 2.5), Vector2.UP, {}, 1.0)
+	hv._layer({"p": "ring", "size": 1.2, "life": 1.5, "c": "main", "c2": "hot", "c3": "slot"}, h, at + Vector3(0, 0.5, -2.5), Vector2.UP, {}, 1.0)
+	hv._layer({"p": "vortex", "size": 1.2, "life": 1.5, "c": "main", "c2": "hot", "c3": "slot"}, h, at + Vector3(2.5, 0, 0), Vector2.UP, {}, 1.0)
 	m.sfx("thief_knife_stick" if f else "thief_knife_ground", at, -6.0, 1.0)
 
 ## The stuck dagger (a pooled look, everyone sees it); on your screen RecastCue's marker sits on it.
