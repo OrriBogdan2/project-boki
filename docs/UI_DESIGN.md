@@ -228,6 +228,11 @@ UI.footer_primary(v, "Buy", buy, 160, "gem")      # primary + Enter keycap; UI.p
   games board, wishes, games picker, Nook preview, Boki card Family tab) at 720p, 1080p, 2560x1080, a
   960x540 window and Interface size at its top (1.1), and fails on anything clipped or outside the window's safe margin.
   Add a new garden panel to its `screens`.
+- A Boki's card (`Home._open_kin`, first tab "Care", `scripts/ui/boki_card.gd`) is one glance: portrait,
+  name with the M/F mark and "she/her" or "he/him" (never "it"), level with the XP bar and XP to the next
+  level, hunger and mood as icons with one line, the bond as a ring with its percent, likes, and its task
+  and skills (the WorkView chips). It never scrolls at 1280x720; `--garden-fit-check` asserts that and
+  the text fit (the `boki_card` screen, shots at every size with `--shots-dir`).
 
 ## The Esc menu (DECISIONS 2026-11-08, "UI is too much for a new player")
 Four buttons up front: Resume, Settings, More and Leave (Leave match / Leave / Skip tutorial / Save

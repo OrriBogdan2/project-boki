@@ -146,18 +146,18 @@ static func _open_lines(id: String, tree: SceneTree) -> Array:
 
 ## One Boki on a card: its picture with today's mood face on the corner; its name and mood on hover.
 static func _face(rec: Dictionary, tree: SceneTree) -> Control:
-	var mood := _mood(rec)
+	var feel := mood(rec)
 	var cell := Control.new()
 	cell.custom_minimum_size = Vector2(FACE_PX, FACE_PX)
-	cell.tooltip_text = "%s, %s" % [rec["name"], mood]
+	cell.tooltip_text = "%s, %s" % [rec["name"], feel]
 	cell.add_child(KinPortrait.view(rec, tree, FACE_PX))
-	var icon := Icons.Glyph.new(mood, MOOD_COL[mood], MOOD_PX)
+	var icon := Icons.Glyph.new(feel, MOOD_COL[feel], MOOD_PX)
 	icon.name = "Mood"
 	icon.position = Vector2(FACE_PX - MOOD_PX, FACE_PX - MOOD_PX)
 	cell.add_child(icon)
 	return cell
 
-static func _mood(rec: Dictionary) -> String:
+static func mood(rec: Dictionary) -> String:
 	var joy := Care.need(rec, "joy")
 	if joy >= JOY_HAPPY:
 		return "happy"
