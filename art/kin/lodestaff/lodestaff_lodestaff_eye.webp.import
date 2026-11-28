@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://djusf3g737gw1"
-path="res://.godot/imported/lodestaff_lodestaff_eye.webp-4ef38134a504fe5fd9844fb51685ed03.ctex"
+path.s3tc="res://.godot/imported/lodestaff_lodestaff_eye.webp-4ef38134a504fe5fd9844fb51685ed03.s3tc.ctex"
+path.etc2="res://.godot/imported/lodestaff_lodestaff_eye.webp-4ef38134a504fe5fd9844fb51685ed03.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "d56fb5c3fd7bcd56940ba009491bc8ca"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/lodestaff/lodestaff_lodestaff_eye.webp"
-dest_files=["res://.godot/imported/lodestaff_lodestaff_eye.webp-4ef38134a504fe5fd9844fb51685ed03.ctex"]
+dest_files=["res://.godot/imported/lodestaff_lodestaff_eye.webp-4ef38134a504fe5fd9844fb51685ed03.s3tc.ctex", "res://.godot/imported/lodestaff_lodestaff_eye.webp-4ef38134a504fe5fd9844fb51685ed03.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

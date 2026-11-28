@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b4h13y1m5gm78"
-path="res://.godot/imported/glaciyak_glaciyak_face.webp-0060b4f72bea17845e989922eae2fb1a.ctex"
+path.s3tc="res://.godot/imported/glaciyak_glaciyak_face.webp-0060b4f72bea17845e989922eae2fb1a.s3tc.ctex"
+path.etc2="res://.godot/imported/glaciyak_glaciyak_face.webp-0060b4f72bea17845e989922eae2fb1a.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "0ba84dc18273d53bfab993cbfeab0544"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/glaciyak/glaciyak_glaciyak_face.webp"
-dest_files=["res://.godot/imported/glaciyak_glaciyak_face.webp-0060b4f72bea17845e989922eae2fb1a.ctex"]
+dest_files=["res://.godot/imported/glaciyak_glaciyak_face.webp-0060b4f72bea17845e989922eae2fb1a.s3tc.ctex", "res://.godot/imported/glaciyak_glaciyak_face.webp-0060b4f72bea17845e989922eae2fb1a.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

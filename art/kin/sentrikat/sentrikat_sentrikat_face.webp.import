@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://55r5fwxeestf"
-path="res://.godot/imported/sentrikat_sentrikat_face.webp-81d2c5d8124726d9355403c620855c5a.ctex"
+path.s3tc="res://.godot/imported/sentrikat_sentrikat_face.webp-81d2c5d8124726d9355403c620855c5a.s3tc.ctex"
+path.etc2="res://.godot/imported/sentrikat_sentrikat_face.webp-81d2c5d8124726d9355403c620855c5a.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "77daa6b25ce0ecc84362717d7829b7c2"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/sentrikat/sentrikat_sentrikat_face.webp"
-dest_files=["res://.godot/imported/sentrikat_sentrikat_face.webp-81d2c5d8124726d9355403c620855c5a.ctex"]
+dest_files=["res://.godot/imported/sentrikat_sentrikat_face.webp-81d2c5d8124726d9355403c620855c5a.s3tc.ctex", "res://.godot/imported/sentrikat_sentrikat_face.webp-81d2c5d8124726d9355403c620855c5a.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
