@@ -1,0 +1,14 @@
+{
+	"id": "sporcupine",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/sporcupine.json.",
+	"work": {
+		"bloom": 3,
+		"forage": 2,
+		"ranch": 1
+	},
+	"shiny": {
+		"belly": "#a3eafc",
+		"color": "#54b4af",
+		"glow": "#61dfff"
+	}
+}
