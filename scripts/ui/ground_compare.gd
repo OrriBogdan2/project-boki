@@ -2,8 +2,9 @@ class_name GroundCompare
 extends RefCounted
 ## The card above the pickup prompt when you stand at a piece of gear on the ground and that slot is
 ## already worn: which slot and piece it replaces, then each number that changes, one line each,
-## green when better and red when worse. Only while the prompt points at it (DECISIONS 11-08: no
-## always-on UI); the prompt under it already names the one key that takes it.
+## a green up arrow when better and a red down arrow when worse (InvText.change_line). Only while the
+## prompt points at it (DECISIONS 11-08: no always-on UI); the prompt under it already names the one key
+## that takes it.
 
 const FS := 13
 const LINE := 18.0
@@ -21,17 +22,10 @@ static func lines(p: Hunter, it: Dictionary) -> Array:
 	var worn_name := Loot.name_of(Loot.gear(String(worn["id"]), int(worn["rar"])))
 	var out: Array = [["Replaces %s  ·  %s" % [worn_name, InvText.slot_label(slot)], HudStyle.MUTED]]
 	for ch in GearCompare.changes(g, worn):
-		out.append(_change_line(String(ch[0]), bool(ch[1])))
+		out.append(InvText.change_line(String(ch[0]), bool(ch[1])))
 	if out.size() == 1:
 		out.append(["Same numbers as what you wear", HudStyle.MUTED])
 	return out
-
-
-## One changed number in plain words: "+12 max HP  (better)" in green, or red and "worse".
-static func _change_line(text: String, better: bool) -> Array:
-	if better:
-		return ["%s  (better)" % text, InvText.GOOD]
-	return ["%s  (worse)" % text, InvText.BAD]
 
 
 ## Draws the card with its bottom edge at `bottom`, centred on `mid`.

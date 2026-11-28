@@ -1,13 +1,18 @@
 extends RefCounted
 ## --loot-full-shots --shots-dir=<dir>: screenshots of looting with a full backpack (run under xvfb with a
 ## renderer). 1: a deathbox window holding a clicked thing in red, a Swap on each of your backpack things.
-## 2: the same box right after a swap. 3: a ground item's swap window with the red full outline.
+## 2: the same box right after a swap. 3: a ground item's swap window with the red full outline. Then a
+## deathbox of gear (slot tags, rarity colours, Wear / Swap) with a glove's compare card, and the ground card.
 ## <dir>/captions.txt gets "file: caption" per file.
+
+const INV_SHOTS := preload("res://tools/inv_shots.gd")
+const FULL_CHECK := preload("res://tools/loot_full_check.gd")
 
 var main: Node
 var m: Match
 var dir := "/tmp/loot_full_shots"
 var captions: Array = []
+
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -27,7 +32,7 @@ func run(main_node: Node) -> void:
 	p.pack_cap = 3
 	p.pack = [Loot.valuable("kin_idol"), Loot.valuable("sky_pearl"), Loot.valuable("crown_shard")]
 	var things: Array = [Loot.valuable("old_coin"), Loot.valuable("old_coin")]
-	var bx: Dictionary = load("res://tools/loot_full_check.gd").make_box(q, p.pos + Vector3(1.0, 0, 0), things)
+	var bx: Dictionary = FULL_CHECK.make_box(q, p.pos + Vector3(1.0, 0, 0), things)
 	bx["gems"] = 14
 	m.boxes.append(bx)
 	m.hud.open_loot(bx)
@@ -35,8 +40,13 @@ func run(main_node: Node) -> void:
 	var row: Dictionary = Life.box_items(m, p, bx).filter(func(r): return r["key"] == "pack")[0]
 	m.hud.loot_panel.take(row)
 	await _frames(6)
-	await _shot("hold_window", "Deathbox with a full backpack: the clicked old coin held in red, "
-		+ "a Swap on each of your backpack things in the right column")
+	await _shot(
+		"hold_window",
+		(
+			"Deathbox with a full backpack: the clicked old coin held in red, "
+			+ "a Swap on each of your backpack things in the right column"
+		)
+	)
 	LootFull.swap_held(m, p, bx, int(row["i"]), 0)
 	m.hud.close_loot()
 	m.hud.open_loot(bx)
@@ -47,6 +57,7 @@ func run(main_node: Node) -> void:
 	m.hud.open_swap(m.wpicks[m.wpicks.size() - 1])
 	await _frames(8)
 	await _shot("ground_full", "A ground item with a full backpack: the incoming item outlined red above your things")
+	await _gear_box(p, q)
 	await _ground_compare(p)
 	var f := FileAccess.open(dir.path_join("captions.txt"), FileAccess.WRITE)
 	for c in captions:
@@ -55,18 +66,58 @@ func run(main_node: Node) -> void:
 	print("LOOTFULLSHOTS %d in %s" % [captions.size(), dir])
 	main.get_tree().quit(0)
 
+
+## A deathbox of gear for a dressed hunter, a glove row pointed at: its compare card with the arrows.
+func _gear_box(p: Hunter, q: Hunter) -> void:
+	INV_SHOTS.dress(p)
+	p.pack_cap = 6
+	var things: Array = [Loot.gear("blink", 3), Loot.valuable("sky_pearl")]
+	var bx: Dictionary = FULL_CHECK.make_box(q, p.pos, things)
+	bx["gear"] = [{"id": "vest", "rar": 3}, {"id": "boots", "rar": 0}]
+	m.boxes.append(bx)
+	m.hud.open_loot(bx)
+	await _frames(6)
+	var w: LootWindow = m.hud.loot_panel
+	var rows := w.find_children("*", "PanelContainer", true, false).filter(
+		func(c): return (c as Control).custom_minimum_size.y == LootWindow.ROW_H and _has_text(c, "Blink")
+	)
+	var glove: Control = rows[0]
+	glove.mouse_entered.emit()
+	await _frames(4)
+	await _shot(
+		"gear_box",
+		(
+			"A deathbox of gear: slot and key tags, rarity colours, Wear on a better piece, Swap on a "
+			+ "worse one, and the pointed-at glove's compare card (green up arrow better, red down arrow worse)"
+		)
+	)
+	m.hud.close_loot()
+	m.boxes.erase(bx)
+
+
+func _has_text(c: Node, part: String) -> bool:
+	return c.find_children("*", "Label", true, false).any(func(l): return (l as Label).text.contains(part))
+
+
 ## Standing at better boots on the ground while wearing worse ones: the compare card over the prompt.
 func _ground_compare(p: Hunter) -> void:
 	m.spawn_gear("windstep_boots", 4, p.pos + Vector3(0.6, 0, 0))
 	var wp: Dictionary = m.wpicks[m.wpicks.size() - 1]
 	m.interact = {"kind": "weapon", "wp": wp, "label": m._pickup_label(p, wp), "col": Loot.col_of(Pack.ground_item(wp))}
 	await _frames(8)
-	await _shot("ground_compare", "Gear on the ground for a worn slot: above the prompt, what it replaces and where, "
-		+ "then each changed number, better in green, worse in red")
+	await _shot(
+		"ground_compare",
+		(
+			"Gear on the ground for a worn slot: above the prompt, what it replaces and where, "
+			+ "then each changed number, better in green, worse in red"
+		)
+	)
+
 
 func _frames(k: int) -> void:
 	for i in k:
 		await main.get_tree().process_frame
+
 
 func _shot(file: String, caption: String) -> void:
 	await RenderingServer.frame_post_draw
