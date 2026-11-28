@@ -610,6 +610,26 @@ func dash_dir() -> Vector2:
 		return h.aim_dir()
 	return move.normalized()
 
+var turn_lock_until := -9.0    # a dash until then turns at most dash.lock_deg from where he faces
+var turn_lock_fwd := Vector2.ZERO  # a held lock's way (the move's own); ZERO: from where he faces now
+
+## Starts a heavy move's dash turn lock (the source's patch 05.02.25): for dash.lock_t s a dash can't turn far.
+## way: the move's own way to turn from (held), and the body follows that dash (not the cursor) so his yaw stays
+## inside the limit; none: from where he faces at the dash.
+func lock_turn(way := Vector2.ZERO) -> void:
+	turn_lock_until = m.time + float(dash_def()["lock_t"])
+	turn_lock_fwd = way.normalized()
+
+func turn_held() -> bool: return turn_lock_fwd != Vector2.ZERO and m.time < turn_lock_until
+
+## `dir` held to within dash.lock_deg of the lock's way while the turn lock runs.
+func turn_limited(dir: Vector2) -> Vector2:
+	if m.time >= turn_lock_until:
+		return dir
+	var fwd := turn_lock_fwd if turn_held() else Vector2(-sin(h.face), -cos(h.face))
+	var lim := deg_to_rad(float(dash_def()["lock_deg"]))
+	return fwd.rotated(clampf(fwd.angle_to(dir), -lim, lim))
+
 static var _dash_feel := {}
 var curved := {}               # the plain dash on its hero's fitted speed curve: {t0, speed, curve, at}
 
@@ -991,7 +1011,8 @@ func fires_in_dash() -> bool: return String(flow.row("lmb")["mode"]) == "fire"
 func fires_in_glide() -> bool: return false
 ## The body and weapon stay on the cursor through this dash, the legs alone following it (item 109). False: she
 ## turns along the dash. A kit that fires mid-dash answers true, or the gun points away from its own rounds.
-func aims_in_dash() -> bool: return fires_in_dash()
+## A held turn lock (lock_turn(way)) turns him along it.
+func aims_in_dash() -> bool: return fires_in_dash() and not turn_held()
 ## In this hero's dash right now, as DashFlow sees it (a kit with its own dash state overrides this).
 func in_dash() -> bool: return h.roll_t > 0.0 and h.move_kind == "dash"
 ## s left in that dash (0 when not in one); a kit that overrides in_dash() overrides this too.
