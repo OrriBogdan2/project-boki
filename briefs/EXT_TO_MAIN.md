@@ -11601,3 +11601,4 @@ READY ext/combo-mark-icons 48790b514eeed401b43fb32f7056df985bdfa961 (foe-state a
 READY ext/sfx-ui-sweep 0e2af651abc2461436a4d1f2324771d162a3d0b4 (--ui-silent-check walks 41 menus/panels, presses every button; silent 67 -> 0 via UI.button always sounding)
 READY ext/sfx-ability-sweep 119a786e5c (own recast open/tick/expire cues for 10 Hunters + Albert shield-down, ability cue table, 96 wavs)
 READY ext/no-world-key-letters 1077265346a7c454e1327449c202d601f58bf408 (no key letters on world objects)
+READY ext/mob-glb-turnaround d5fee64cde4fca80abca259fd8fe1a8dfc41c507 (mob GLB turnaround shots tool + sheets + red-item audit, no model edits)
