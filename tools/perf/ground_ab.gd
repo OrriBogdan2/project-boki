@@ -5,13 +5,14 @@ extends RefCounted
 ## of a block (the renderer's stamps arrive a frame or two late) goes to that variant:
 ##   old    the terrain's full fine detail everywhere (the look before the cut), sea shown
 ##   cut    the terrain skips its fine detail past 14-36 m (shaders/terrain.gdshader detail_range), sea shown
+##   bake   full fine detail (as old) with the big patterns read from the per-map bake (ground_bake.gd, use_bake)
 ##   flat   the terrain returns its base colour (flat_ground), sea shown
-##   nosea  old terrain, the cloud-sea plane hidden
+## (the cloud sea hidden measured -0.29 ms on 11-24, docs/PERF_DRAW_1124.md; the sea list stays for shots)
 ## Prints "BENCH ab ground: <variant> gpu <ms> over <n> frames" and the saving of each against old.
 
 const BLOCK := 45
 const SKIP := 8
-const NAMES := ["old", "cut", "flat", "nosea"]
+const NAMES := ["old", "cut", "bake", "flat"]
 const SHOT_AT := 1100  # first frame of the pictures: each variant 3 frames apart, saved 2 frames after it is set
 
 var mats: Array[ShaderMaterial] = []
@@ -59,14 +60,14 @@ func frame(f: int) -> void:
 func _apply(i: int) -> void:
 	for m in mats:
 		m.set_shader_parameter("detail_range", Vector2(14, 36) if i == 1 else Vector2(1e6, 1e6))
-		m.set_shader_parameter("flat_ground", i == 2)
-	for s in sea:
-		s.visible = i != 3
+		m.set_shader_parameter("use_bake", i == 2 and m.get_shader_parameter("bake0") != null)
+		m.set_shader_parameter("flat_ground", i == 3)
 
 
 ## The pictures: variant k is set at k * 3 and saved at k * 3 + 2 (the frame shown is the one drawn after the set).
 func _shot(k: int) -> void:
 	since = 0  # (these frames stay out of the GPU averages)
+	root.get_tree().paused = k < 11  # (the fight holds still, so the four pictures show the same frame)
 	if k % 3 == 0:
 		_apply(k / 3)
 	elif k % 3 == 2:
@@ -81,6 +82,9 @@ func add_gpu(us: int) -> void:
 
 
 func report() -> void:
+	var baked := mats.filter(func(m): return m.get_shader_parameter("bake0") != null).size()
+	var warn := "" if baked else " (WARNING: bake = old)"
+	print("BENCH ab ground: %d of %d terrain materials baked%s" % [baked, mats.size(), warn])
 	var base := 0.0
 	for i in NAMES.size():
 		var ms: float = gpu_us[i] / 1000.0 / maxi(n[i], 1)

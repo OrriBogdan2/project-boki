@@ -227,7 +227,7 @@ func _camp() -> Array:
 			if sm and sm.shader and sm.shader.resource_path.ends_with("clouds.gdshader"):
 				(n as MeshInstance3D).visible = false
 		print("BENCH fight sea off")
-	if "--bench-ab-ground" in OS.get_cmdline_user_args():  # (old, cut, flat, no sea: 45 frames each)
+	if "--bench-ab-ground" in OS.get_cmdline_user_args():  # (old, cut, bake, flat: 45 frames each)
 		ab = GroundAb.new(bench.main.get_tree().root, m.world)
 	if "--bench-ab-aim" in OS.get_cmdline_user_args():
 		aim_ab = AimAb.new()
