@@ -11571,3 +11571,4 @@ READY ext/sfx-abyss-warning ee9ca86b51 (abyss tint from 0.25 m, wind bed + heart
 READY ext/gil-combo-red a83b33045e98a2ffc282f27154e2f8c7c768c30c (--gil-combo-check 3 red -> 0: check rows and gil.md follow the kit)
 READY ext/sfx-garden-boki-steps c65ecf4e11 (garden Boki footsteps: 3 paw sets by mass, on gait plants or speed cadence, near walkers only)
 READY ext/lace-rmb-charge-scale d031117ab4 (Lace RMB wall stun 0.6-1.2s and range lerp with charge; re-verified on current main c78b7cba28, no conflicts, archer-combo 236/0, --check 0 failures)
+READY ext/vex-native-timing e6b18f9a541 (Vex timing check reads the native player; 7 native rows red = real mismatches, tabled in docs/KIT_PARITY.d/1128-vex-native-timing.md)
