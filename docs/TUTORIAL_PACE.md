@@ -176,5 +176,57 @@ Still to make:
 - Decisions: which look, which egg, which Relic, where to put the house. Only reading is counted for them.
 - The farm tutorial and the walk to the Uplink are estimates from game data, not played. Hob's talk lines are not timed (the check does not click them one by one).
 - Fear and mistakes beyond the 30 % miss rate: falls into the void, deaths, getting lost. The drive still steers perfectly to each marker.
-- One reader speed. At 2.5 words/s (slow readers) the 383 s of reading becomes about 540 s; change `TutorialDrive.READ_WPS` and rerun.
+- One reader speed per run. `--read-wps=2.5` measures a slow reader (section 6); the default is `TutorialDrive.READ_WPS` 3.5.
 - Headless wall time for screen waits (see Kind).
+
+## 6. Slow readers: 2.5 words/s (`ext/tut-slow-reader`, 2026-11-28)
+
+`godot --headless --path . -- --tutorial-pace-check --read-wps=2.5` (new: `TutorialDrive.read_wps`, default `READ_WPS` 3.5;
+`--pace-lines` prints every screen line read, with its beat and word count). Measured on main `c78b7cba28`, one run each, same seed.
+
+**Whole run, reading seconds:** 365 s at 3.5 words/s becomes **481 s** at 2.5 (+116 s, not the 540 s guessed in section 5: the
+prologue is watched time and the 0.45 s reaction and 0.6 s click per screen do not scale). After this change: 347 s and 457 s. The
+course rows (`tutorial: *`) swing by up to 9 s a row between runs (the drive retries `dash` and `sec`), so whole-run totals are
+noisy; the beat table below is the clean comparison (two runs each, same numbers within 0.3 s bar `results`, whose gear lines vary).
+
+**The 5 beats where a slow reader reads longest before going on** (prologue left out: story captions, watched through). All 5 are
+screens: the player must read them to choose, and nothing moves on by itself.
+
+| # | Beat | Reading s at 3.5, before -> after | Reading s at 2.5, before -> after | Beat s at 2.5, before -> after |
+|---|---|---|---|---|
+| 1 | first Relic | 51.8 -> 49.2 | **70.5 -> 66.8** | 88.1 -> 85.6 |
+| 2 | results (after the tutorial) | 26.2 -> 26.5 (gear noise) | **36.7 -> 35.1** | 38.2 -> 37.7 |
+| 3 | hatch: card and look | 26.3 -> 25.7 | **35.5 -> 34.8** | 35.7 -> 35.0 |
+| 4 | hatch: egg pick and knocks | 19.2 -> 18.1 | **26.9 -> 25.3** | 37.3 -> 35.7 |
+| 5 | hatch: its look and naming | 17.2 -> 16.4 | **23.3 -> 22.1** | 28.5 -> 27.4 |
+| | **the five** | **140.7 -> 135.9 (-4.8 s)** | **192.9 -> 184.1 (-8.8 s)** | 227.8 -> 221.4 |
+
+Next in line (not changed): first expedition: start 19.1 s at 2.5 (the squad pick card), `tutorial: summon` 21.5 s (course row,
+its line is already one short sentence plus the plain-words line).
+
+**Lines shortened** (content text only, same meaning; the prologue captions, the lore line "This Relic holds a fallen Hunter..."
+and the Boki's own words are untouched):
+
+| Where | Before | After | Words |
+|---|---|---|---|
+| Lace how-to (`content/archetypes/archer.json`) | Play: long-range bow; hold {fire} to draw, release to loose. | Play: long bow; hold {fire}, let go to shoot. | 10 -> 8 |
+| Lace how-to | Avoid: overdrawing; past full draw the damage halves. | Avoid: overdrawing; it halves the damage. | 8 -> 6 |
+| Kael how-to (`juggernaut.json`) | Combo: {signature} chain on a foe, then {secondary} to lunge along it. | Combo: {signature} chains a foe; {secondary} lunges along it. | 12 -> 8 |
+| Kael how-to | Avoid: long-range trades; the chain only reaches 13 m. | Avoid: far fights; the chain reaches 13 m. | 9 -> 7 |
+| Vex how-to (`gunslinger.json`) | Combo: {secondary} past a foe to shove them back, then shoot. | Combo: {secondary} past a foe shoves it back; shoot. | 11 -> 9 |
+| Creator (`scripts/ui/hatch.gd`) | ...Drag (or hold A / D) to turn round, scroll to zoom. | ...Drag (or A / D) to turn, scroll to zoom. | 18 -> 15 |
+| Egg card (`hatch.gd`, 2 places) | Every Boki is different, and remembers how you treat them. | Each Boki is unique and remembers how you treat it. | 10 -> 9 |
+| Knocks (`hatch.gd`) | Click (or press SPACE) to knock. The Boki inside wakes a little more. | Click (or SPACE) to knock and wake the Boki inside. | 13 -> 10 |
+| Reveal (`scripts/ui/kin_reveal.gd`) | Drag to turn him round  ·  A / D | Drag (or A / D) to turn him | 9 -> 7 |
+| Naming (`hatch.gd`) | Male, he/him. A babbler for now; any name you give will stick. | Male, he/him. Still babbling; the name you give sticks. | 12 -> 9 |
+| Results (`scripts/ui/results.gd`) | Gear you found (build the armory on the farm to keep it) | Gear found (build the armory to keep it) | 12 -> 8 |
+
+Most of the slow reader's time on these screens is many short labels (three Relic cards, the kit page, ten creator rows), not long
+sentences: shortening sentences buys about 5 %. The bigger cuts are section 4's still-to-make list (Relic page text behind a click,
+creator rows behind "More", results lists behind "More"), which change layout, not words.
+
+Pace tool fix on the way: the farm tutorial's first step is now `meet` (not `hob`), and an unknown step's default `FARM_ACT` row
+called `String(0)`, which stopped the run's farm rows from printing (`SCRIPT ERROR` on main). The default is now `["", ""]` and
+`meet` has a row. Still open (on main, not touched): the pace run's farm steps (`meet, patch, eat, toy, out`) no longer match the
+flow check's, so its farm rows are rough and `_second_relic` errors after them (`advance` on Nil); `--new-player-flow-check` itself
+passes.

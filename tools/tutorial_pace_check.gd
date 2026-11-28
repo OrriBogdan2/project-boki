@@ -5,6 +5,8 @@ extends "res://tools/new_player_flow_check.gd"
 ##   PACE row | beat | kind | seconds | reading s | idle s | worst wait s | note
 ## kind: sim = game seconds at human pace (the tutorial course); wall = the screen's own animation seconds plus
 ## reading and reaction; est = from the game's data (the farm tutorial's swings, the walk to the dock).
+## --read-wps=<words/s> sets the reading speed (default TutorialDrive.READ_WPS 3.5; 2.5 = a slow reader); --pace-lines
+## prints every screen line read (beat, words, text).
 ## Flags: a beat over BEAT_MAX_S, any wait over WAIT_MAX_S with nothing to do. The write-up is docs/TUTORIAL_PACE.md.
 
 const BEAT_MAX_S := 45.0  # s: a beat longer than this is flagged
@@ -32,6 +34,7 @@ const UI_STAGES := [
 ## Farm tutorial step -> [walks, menu picks, tool, the house's cost line that sets the swings (one swing a unit)]:
 ## what the player does beyond reading the hint.
 const FARM_ACT := {
+	"meet": [1, 0, "", ""],
 	"hob": [1, 0, "", ""],
 	"axe": [0, 0, "", ""],
 	"chop": [1, 0, "axe", "wood"],
@@ -51,6 +54,7 @@ var read_seen := {}  # text -> true: a line is read once
 var stage_read := 0.0
 var stage_worst := 0.0  # s: the longest single wait in the stage
 var stage_wall_t0 := 0
+var pace_lines := false  # --pace-lines: print every line read on a screen, with its beat and words
 
 
 func run(m: Node) -> void:
@@ -60,6 +64,12 @@ func run(m: Node) -> void:
 	Save.d = Save.fresh()
 	main.get_window().size = Vector2i(1280, 720)
 	TutorialDrive.human = true
+	TutorialDrive.read_wps = TutorialDrive.READ_WPS
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--read-wps="):
+			TutorialDrive.read_wps = maxf(0.5, a.trim_prefix("--read-wps=").to_float())
+		pace_lines = pace_lines or a == "--pace-lines"
+	print("PACE reading at %.1f words/s" % TutorialDrive.read_wps)
 	TutorialDrive.beats = {}
 	TutorialDrive._rng.seed = SEED
 	await _title()
@@ -110,7 +120,7 @@ func _wait(cond: Callable, what: String, secs := STALL_S) -> bool:
 	var got: bool = await super._wait(cond, what, secs)
 	stage_worst = maxf(stage_worst, (Time.get_ticks_msec() - t0) / 1000.0)
 	if is_instance_valid(main.current) and not _is_screen("home.gd") and not main.current is Match:
-		stage_read += _read_new(main.current) / TutorialDrive.READ_WPS + TutorialDrive.REACT_S + CLICK_S
+		stage_read += _read_new(main.current) / TutorialDrive.read_wps + TutorialDrive.REACT_S + CLICK_S
 	return got
 
 
@@ -137,7 +147,10 @@ func _read_new(root: Node) -> int:
 			txt = (c as Label).text
 		if txt != "" and c.is_visible_in_tree() and not read_seen.has(txt):
 			read_seen[txt] = true
-			words += txt.split(" ", false).size()
+			var w := txt.split(" ", false).size()
+			words += w
+			if pace_lines:
+				print("PACE line | %s | %d | %s" % [stage_name, w, txt.replace("\n", " / ").left(160)])
 	return words
 
 
@@ -150,8 +163,8 @@ func _title() -> void:
 # ------------------------------------------------------------------ the farm and the expedition
 func _do_step(id: String) -> void:
 	var words: int = FarmTutorial.hint_text(id).split(" ", false).size()
-	var read := words / TutorialDrive.READ_WPS + TutorialDrive.REACT_S
-	var act: Array = FARM_ACT.get(id, [1, 1, "", 0])
+	var read := words / TutorialDrive.read_wps + TutorialDrive.REACT_S
+	var act: Array = FARM_ACT.get(id, [1, 1, "", ""])
 	var swings := int(FarmSites.build_cost("house").get(String(act[3]), 0))
 	var work := swings * (HunterTool.period(String(act[2])) if act[2] != "" else 0.0)
 	var did := float(act[0]) * WALK_FARM_S + float(act[1]) * UI_STEP_S + work

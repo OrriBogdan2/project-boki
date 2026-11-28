@@ -143,8 +143,9 @@ func _rewards(cases: Dictionary) -> void:
 	for part in ["140 gems", "Sunroot", "Blink"]:
 		ok(_has(all, part), "extracted: reward '%s' is reachable" % part)
 	var first := _texts(scr, [], true)
-	for part in ["Brought home", "Gear you"]:
-		ok(_has(first, part), "extracted: '%s' stays in the first view" % part)
+	ok(_has(first, "Brought home"), "extracted: 'Brought home' stays in the first view")
+	# the gear heading is "Gear you kept..." with the armory, "Gear found (...)" without it
+	ok(_has(first, "Gear you") or _has(first, "Gear found"), "extracted: the gear heading stays in the first view")
 	scr.queue_free()
 	scr = _screen(cases["heart"])
 	all = _texts(scr, [], false)
