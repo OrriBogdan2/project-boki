@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://kmo3npio4gs2"
-path="res://.godot/imported/tempest_Image_0.webp-b2d1f37081a0424cf008e492914f2c00.ctex"
+path.s3tc="res://.godot/imported/tempest_Image_0.webp-b2d1f37081a0424cf008e492914f2c00.s3tc.ctex"
+path.etc2="res://.godot/imported/tempest_Image_0.webp-b2d1f37081a0424cf008e492914f2c00.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "d3d0a014443360660db0d19416a4ddba"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/eggs/tempest_Image_0.webp"
-dest_files=["res://.godot/imported/tempest_Image_0.webp-b2d1f37081a0424cf008e492914f2c00.ctex"]
+dest_files=["res://.godot/imported/tempest_Image_0.webp-b2d1f37081a0424cf008e492914f2c00.s3tc.ctex", "res://.godot/imported/tempest_Image_0.webp-b2d1f37081a0424cf008e492914f2c00.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
