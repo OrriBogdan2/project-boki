@@ -51,6 +51,16 @@ What changed (smallest number change that lands inside the bar; the too-fast Hun
 Still out: **Kael combo rank max 0.54** (3.80 s against 7.00). Every cast is at the source share; the gap is spacing. At max rank his third Rampage ends with him at the slash's sweet-spot tip on the idle target, so every later slash lands +60% (`lmb.tip` 0.6; trace: slashes 5.2 at rank 0, 8.3 at rank max). Walking him back to 1.5 m after each dash puts him at about 0.75, but the same rule moves Sparkle's combo max to 0.61 (her Wirerun loop), so the check was left as it is. Owner call: an override for this row (a melee Hunter who spaces for the tip is meant to hit harder), or a smaller tip bonus.
 Owner-override candidates (nerfs against the 11-24 note): Kael (-19% slash, -31% Smash) and Neve (-10% Shatter). If the owner wants them to stay hot, the override goes in `OVERRIDES` with the share given up, and the numbers above go back.
 
+**11-28 re-run (ext/ttk-rerun-1128, origin/main c78b7cba28).** Same `--ttk-check`, no kit numbers changed here: 42 rows, 1 FAIL (still Kael combo max 0.54, owner call). Kits moved since 11-24 (Vex Daze, refund loops #1122, Gil Tide Lunge #1120, Grimble Grounded, Tenzo rock slow #1060 / #1133): none of them moved a row except as listed. Every row compared with the 11-24 table; moved by more than 0.05:
+
+| Hunter | Row | 11-24 | 11-28 | Commit that moved it |
+|---|---|---|---|---|
+| Sparkle (mage) | LMB rank 0 / max | 13.68 s, 1.01 | 11.93 s, 0.88 | 9405cf3956 (11-26, coilcaster rate 0.648 -> 0.55 s, owner itch "a bit too slow"; 0.55 / 0.648 = 0.85, the held-fire count shrinks the same) |
+| Sparkle (mage) | combo rank max | 6.63 s, 1.04 | 5.80 s, 0.91 | same commit (LMB fills the gaps between casts; rank 0 combo stays 8.13 s, 0.90, cast-limited) |
+| Gil (roster median) | combo rank 0 | 4.95 s, 1.00 | 5.28 s, 1.07 | no kit change pinned: his Grab Bag draws vary (4.62 to 5.28 s between runs, see the 11-20 note), 5.28 is the top of that spread and equals the 11-20 value. 5c9e397ab1 (11-27, full-charge Tide Lunge 6 -> 10) is the only Gil kit change since and is not separable from the draw spread |
+
+Gil combo rank max read 4.13 s on the first 11-28 run and 4.42 s (0.89) on the second: draw spread, under the 0.05 line on the table. Every other row (Vex, Kael, Cinder, Albert, Sable, Motley, Lace, Meeko, Tenzo, Grimble, Neve, and the 24 per-cast rows) is the same to the printed digit, so the Vex, refund-loop, Grimble and Tenzo changes did not touch time to knock. Ranking by LMB time to knock after the run: Vex 2.35, Grimble 3.72, Neve 3.90, Sable 4.70, Cinder 5.72, Gil 6.43, Albert 6.55, Motley 7.23, Lace 7.83, Meeko 8.78, Kael 10.65, Sparkle 11.93 (was 13.68, #13), Tenzo 13.48 (last). Every LMB ratio is inside 0.8 to 1.25 (Lace 1.15 and Tenzo 1.18 highest, Kael 0.82 lowest). The table below is this run.
+
 <!-- ttk:table -->
 | Hunter (source) | Row | Ours s | Source s | Ours / source | Verdict |
 |---|---|---|---|---|---|
@@ -66,10 +76,10 @@ Owner-override candidates (nerfs against the 11-24 note): Kael (-19% slash, -31%
 | ashwick (Felix) | LMB rank max | 5.62 | 6.20 | 0.91 | ok |
 | ashwick (Felix) | combo rank 0 | 3.93 | 4.30 | 0.91 | ok |
 | ashwick (Felix) | combo rank max | 2.73 | 3.00 | 0.91 | ok |
-| mage (Joule) | LMB rank 0 | 13.68 | 13.60 | 1.01 | ok |
-| mage (Joule) | LMB rank max | 13.68 | 13.60 | 1.01 | ok |
+| mage (Joule) | LMB rank 0 | 11.93 | 13.60 | 0.88 | ok |
+| mage (Joule) | LMB rank max | 11.93 | 13.60 | 0.88 | ok |
 | mage (Joule) | combo rank 0 | 8.13 | 9.00 | 0.90 | ok |
-| mage (Joule) | combo rank max | 6.63 | 6.40 | 1.04 | ok |
+| mage (Joule) | combo rank max | 5.80 | 6.40 | 0.91 | ok |
 | bulwark (Oath) | LMB rank 0 | 6.55 | 6.75 | 0.97 | ok |
 | bulwark (Oath) | LMB rank max | 6.55 | 6.75 | 0.97 | ok |
 | bulwark (Oath) | combo rank 0 | 5.92 | 5.85 | 1.01 | ok |
@@ -94,8 +104,8 @@ Owner-override candidates (nerfs against the 11-24 note): Kael (-19% slash, -31%
 | rimewright (Celeste) | LMB rank max | 3.90 | 4.60 | 0.85 | ok |
 | gil (roster median) | LMB rank 0 | 6.43 | 6.68 | 0.96 | ok |
 | gil (roster median) | LMB rank max | 6.43 | 6.68 | 0.96 | ok |
-| gil (roster median) | combo rank 0 | 4.95 | 4.95 | 1.00 | ok |
-| gil (roster median) | combo rank max | 4.13 | 4.95 | 0.84 | ok |
+| gil (roster median) | combo rank 0 | 5.28 | 4.95 | 1.07 | ok |
+| gil (roster median) | combo rank max | 4.42 | 4.95 | 0.89 | ok |
 
 | Hunter (source) | Cast | Ours (share of target) | Source | Ours / source | Bar |
 |---|---|---|---|---|---|
