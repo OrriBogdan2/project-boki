@@ -120,7 +120,7 @@ func _procedural(id: String) -> void:
 		var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
 		m.set_meta("anim_seed", 1)
 		holder.add_child(m)
-		var sync := WardenGlb.layers(m)      # (Sync, or Native on Meshy's own skeleton: WardenNative)
+		var sync := WardenGlb.layers(m)  # (Sync, or Native on Meshy's own skeleton: WardenNative)
 		if sync == null or sync.get("flinch") == null:
 			ok(false, "%s: wears a flinch layer" % id)
 			return
