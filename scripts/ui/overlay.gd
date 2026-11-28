@@ -315,7 +315,7 @@ func open_pause(where: String) -> void:
 			. get(where, "")
 		)
 	)
-	var res: Button = _menu_item(v, "Resume", "next", close, "Esc", "Primary")
+	var res: Button = _menu_item(v, "Resume", "next", close, Settings.key_cap("menu"), "Primary")
 	_menu_item(
 		v,
 		"Settings",
@@ -380,7 +380,7 @@ func open_controls() -> void:
 		tab = "Controls"
 		open_settings()
 	UI.footer_left(v).add_child(UI.ghost("Change keys", change_keys))
-	UI.footer(v).add_child(UI.with_key(UI.primary("Done", back, 120), "Esc"))
+	UI.footer(v).add_child(UI.with_key(UI.primary("Done", back, 120), Settings.key_cap("menu")))
 
 
 func _menu_item(v: VBoxContainer, txt: String, icon: String, cb: Callable, key := "", tier := "") -> Button:
@@ -521,7 +521,7 @@ func _show_settings() -> void:
 				_show_settings()
 		)
 	UI.footer_left(v).add_child(UI.ghost("Reset to defaults", cb_516))
-	var done := UI.with_key(UI.primary("Done", back, 120), "Esc")
+	var done := UI.with_key(UI.primary("Done", back, 120), Settings.key_cap("menu"))
 	UI.footer(v).add_child(done)
 	(v.get_meta("shell") as Control).set_meta("primary", done)
 
