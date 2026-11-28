@@ -1,20 +1,3 @@
-# Hem (Lace) r34 (2026-11-27, ext/lace-r13-slit)
-
-Corset re-tone: the corset's near-black texels in the body atlas (`texD2`, Godot extracts it to `hem_meshy_texD2.jpg`) lifted to
-crimson, keeping each texel's shading and the silver filigree (`tools/art1/hem_r34/corset34.py r33.glb retone out.glb ylo=1.0
-dark=95 gain=1.15 crim=165,32,55`; mask = body faces dominated by Hips/Spine*, porcelain texels kept). Part-lock: all 1675
-accessors byte-identical to r33, only the `texD2` image changed. A Meshy body retexture (--original-uv) was tried first: Meshy
-re-packs the UVs, and the corset it painted was blotchy black with purple specks after transfer, so it was not used.
-Art gate: game 7.2 (r33 7.1) vs live 4.5; close-up torso 7.0 (live 6.0).
-
-# Hem (Lace) r33 (2026-11-27, ext/lace-r13-slit)
-
-Right fist (fused Meshy mitten) replaced by a Meshy image-to-3d open porcelain doll hand, rigid on `RightHand`, tinted to the
-forearm, wrist ball tucked into the sleeve (`tools/art1/hem_r33/graft33.py`, args `--rig 0 --cutfa 0.0 --ball -1`, then
-`hem_r19/compact19.py`). Everything else is r32's (part-lock: only the body primitive's old fist verts dropped, new hand
-primitive + `hem_meshy_hand33.jpg` added). Art gate: game 7.1 vs live 4.5. geo_check hand R sep 0.21 / ratio 0.41
-(not FLAT; under live's fist 0.32 / 0.63 because an open hand is thinner, see docs/art/HUNTER_GEO_AUDIT.md on Sparkle).
-
 # Hem (Lace): native Meshy model r4b (2026-11-22, ext/lace-native-r4)
 
 `hem_meshy.glb` is Lace on Meshy's own 66+2-joint rig, drawn by `scripts/heroes/warden_native.gd` when `hem.meshy_native`
@@ -87,29 +70,3 @@ No mesh, skeleton nodes and ten clips, 30 fps, keyed from poses (no Meshy animat
 The skirt is welded (1.5 mm), gets a flipped red inner face (2 mm inset) and eight `SkirtSw*` billow bones on the Hips that swing the cloth out
 of the legs in every frame of every clip (radius margin 0.12 m = thigh radius; pivot 1.1 m). The stray unskinned Icosphere is gone.
 Build scripts and renders: /home/boki/gens/lace-face-dress-1123 (tools/build_b.py, tools/graft_head.py). Needs an owner visual check before it goes live.
-11-25 r20 (ext/lace-r13-slit): the body's crude thighs/knees and the r16/r18 thigh-liner tubes are replaced by Meshy porcelain doll legs
-(prim `leg-meshy` in Mesh_0, 9.7k tris, own 1024 texture `hem_meshy_leg20.jpg`; legs-only Meshy multi-image task from turnaround edits).
-Tools: tools/art1/hem_r20 (README). Renders: /home/boki/gens/hunter-round-1124/lace/r20. Needs an owner visual check before it goes live.
-11-25 r23 (ext/lace-r13-slit): skirt-meshy gets COLOR_0 (ink room 0 on the inner layer and fray band), its inner-layer faces move to
-prim `skirt-lining23` (wine copy of the skirt texture, `hem_meshy_skirt_lining23.jpg`), the bow fist `body-hand17` gets ink room 0:
-no black ink blotches on the skirt / fist. Tools: tools/art1/hem_r23 (README). Needs an owner visual check before it goes live.
-
-r27 (2026-11-26): slit-closing keys only (tools/art1/hem_r26/slitclose.py, args in its README): Idle/walk closed like Attack so the
-game camera no longer sees the ground through the slit; Jump_Run/run closed less so the knee stays inside. Mesh/textures = r26
-(partlock PASS). Needs an owner visual check before it goes live.
-
-r29 (2026-11-26): the skirt shell is turned +14 deg so the slit sits in front of her right leg (it was ~20 deg too far to her side,
-so the knee hit the panel beside it), knee-follow s 0.6 and the r28 V godet re-centred; skirt texture = a Meshy retexture of the r21
-skirt model (dark wine, `hem_meshy_skirt29.jpg`), lining = a darker copy (`hem_meshy_skirt_lining29.jpg`; replaces skirt22 /
-skirt_lining23). Tools: tools/art1/hem_r29 (README). Needs an owner visual check before it goes live.
-
-r30 (2026-11-26): the r28/r29 slit godet (a membrane 10-15 cm in front of the right thigh; the swinging thigh crossed it = white
-shards in the front slit) is replaced by a wine curtain BETWEEN the legs (prim `skirt-godet30`, 320 tris, each edge skinned to its
-own leg), and the lining = the outer skirt image x0.55 with no hue shift (`hem_meshy_skirt_lining30.jpg`; replaces skirt_lining29,
-which read as a pale-pink flap). Outer skirt, body, hands, bow unchanged (partlock PASS). 90,391 tris. Tools: tools/art1/hem_r30
-(README). Needs an owner visual check before it goes live.
-
-r31 (2026-11-26): material rename only (glTF JSON chunk; the binary chunk, mesh, skin and textures are byte-identical to r30). The
-four skirt materials (`skirt-meshy`, `skirt-liner`, `skirt-lining23`, `skirt-godet30`) become `cloth-*`, so they get Lace's tuned cloth
-slot (fresnel 0.35, no rim) instead of the untuned `skirt` slot (fresnel 1.0). That fresnel turned the near-vertical skirt pale
-salmon / grey at the match camera (r30 art-gate GAME DEFECT). Tool: tools/art1/hem_r31/slot31.py. Needs an owner visual check before it goes live.
