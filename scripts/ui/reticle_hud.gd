@@ -62,7 +62,7 @@ func _states(c: CanvasItem, p: Hunter, at: Vector2, time: float, accent: Color) 
 		pass
 	else:
 		var af := float(p.ammo) / maxf(1.0, float(p.wpn["mag"]))
-		var low := af <= _t("low_ammo_frac")
+		var low := af <= float(p.wpn.get("low_mag_at", _t("low_ammo_frac")))
 		var pulse := 0.5 + 0.5 * sin(time * TAU * _t("low_ammo_pulse_hz"))
 		var col := accent.lightened(0.35)
 		var alpha := 0.8

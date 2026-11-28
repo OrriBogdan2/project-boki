@@ -20,6 +20,11 @@ func _init(hunter: Hunter) -> void:
 	h = hunter
 
 
+## The drum share under which a `low_mag_dmg` weapon hits softer (reticle_hud reads the same `low_mag_at`).
+func low_frac() -> float:
+	return float(h.wpn.get("low_mag_at", 0.25))
+
+
 func can_fire() -> bool:
 	if Capture.active(h):
 		return false
@@ -387,6 +392,8 @@ func emit_shot() -> void:
 	var sus_k := 1.0 - loss * minf(1.0, float(h.sus_n) / float(h.wpn.get("sustain_rounds", 10)))
 	dmg *= sus_k  # the string's decay; the round carries its share (a kit sizes its look by it)
 	h.sus_n += 1
+	if h.wpn.has("low_mag_dmg") and float(h.ammo) < float(h.wpn["mag"]) * low_frac():
+		dmg *= float(h.wpn["low_mag_dmg"])  # a string that has spent half the drum: a burst hits harder
 	var extra := {"kb": h.wpn["kb"], "tracer": float(h.wpn.get("tracer", 1.0)), "sus_k": sus_k}
 	extra.merge(h.wpn.get("shot_x", {}), true)  # a weapon's own shot rules (Tether Lantern: through terrain)
 	if h.wpn.has("decel"):

@@ -43,6 +43,7 @@ Their abilities keep no source numbers here: the tooltips are level 1 (Tetra 15)
 
 What changed (smallest number change that lands inside the bar; the too-fast Hunters stop at the fast edge, not at 1.0):
 - Vex: Quill Rifle round 6 -> 8, `sustain_loss` 0.5 -> 0.2 (rounds 11+ hit 6.4, the source's base round share 6.1; the first ten carry the extra, the source's shape). One 30-round drum now knocks (it could not: 6 then 3 a round left the target alive at the refill). LMB 2.20 -> 0.95, combo 1.41 / 1.35 -> 0.81 / 0.83.
+- Vex, 11-26 (PR #558 merged with main): the owner's 11-17 burst rule replaces `sustain_loss`: rounds fired with under half the drum left hit for `low_mag_dmg`. At round 8 the bursts made the combo too fast (0.76 / 0.79), and a 0.5 factor left a drum short of a knock (LMB 1.47). Round 8 -> 7.5 and `low_mag_dmg` 0.8 (15 x 7.5 + 15 x 6.0 = 202 per drum): LMB 0.95, combo 0.85 / 0.83, all in the bar.
 - Grimble: shotgun pellet 2 -> 3.5 (a volley 14 -> 24.5, 16% of the target; source 339 of 1902 = 18%). 1.96 -> 1.06.
 - Kael: slash 8 -> 6.5, Smash 26 -> 18 (2.77x the slash; kit_parity pins 3.0 +/- 0.35), Rampage 9 / 18 -> 6 / 12, Warchain 6 -> 4. LMB 0.65 -> 0.82, combo rank 0 0.62 -> 0.81; every cast is now at the source share (Smash 1.16, Rampage 1.02, Warchain 1.11).
 - Meeko: Lantern ember 8 -> 6 (Kindle's +0.72 a stack kept). 0.68 -> 0.84.
@@ -56,7 +57,7 @@ Owner-override candidates (nerfs against the 11-24 note): Kael (-19% slash, -31%
 |---|---|---|---|---|---|
 | gunslinger (Ghost) | LMB rank 0 | 2.35 | 2.48 | 0.95 | ok |
 | gunslinger (Ghost) | LMB rank max | 2.35 | 2.48 | 0.95 | ok |
-| gunslinger (Ghost) | combo rank 0 | 1.55 | 1.92 | 0.81 | ok |
+| gunslinger (Ghost) | combo rank 0 | 1.63 | 1.92 | 0.85 | ok |
 | gunslinger (Ghost) | combo rank max | 1.47 | 1.76 | 0.83 | ok |
 | juggernaut (Brall) | LMB rank 0 | 10.65 | 12.95 | 0.82 | ok |
 | juggernaut (Brall) | LMB rank max | 10.65 | 12.95 | 0.82 | ok |
