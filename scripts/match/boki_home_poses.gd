@@ -7,8 +7,17 @@ extends RefCounted
 
 ## Cycles (and so beats) are whole numbers per clip, so each loop closes on itself. A hover beats its wings every
 ## 0.4 s, KinPuppet's flyer rate (16 rad/s); a glide rocks once every 1.2 s.
-const BEAT := {"munch": 0.5, "nudge": 1.0, "climb": 0.8, "splash": 0.45, "brace": 0.5, "swim": 0.8, "paddle": 0.5,
-	"hover": 0.4, "glide": 1.2}
+const BEAT := {
+	"munch": 0.5,
+	"nudge": 1.0,
+	"climb": 0.8,
+	"splash": 0.45,
+	"brace": 0.5,
+	"swim": 0.8,
+	"paddle": 0.5,
+	"hover": 0.4,
+	"glide": 1.2
+}
 ## species -> clip -> {"amp": factor on the whole motion, "bones": {bone: [rx, ry, rz] held through it}}.
 const TWEAK := {
 	"cairnback": {"nudge": {"amp": 0.6}, "climb": {"amp": 0.55}, "splash": {"amp": 0.6}},
@@ -31,20 +40,22 @@ const STIFF := {"cairnback": 0.6, "glomwort": 0.7, "lodestick": 0.7, "mossgrade"
 const GAME_CLIPS := ["rush", "brace", "dodge", "stonehop", "spin", "crouch", "burst", "sulk"]
 ## The Show Ring's clips (ShowRing): a strut that loops over the walk, a pose at the mark and a bow (one shot each).
 const SHOW_CLIPS := ["strut", "pose", "bow"]
-const SPREAD := 0.5            # rad a gliding quad swings each leg out from its body
+const SPREAD := 0.5  # rad a gliding quad swings each leg out from its body
 const WING_JOINTS := ["wing1", "wing", "fwing"]
 const WING_TIPS := ["wing2", "hwing"]
 const TAIL := ["tail1", "tail2", "tail3", "tail4", "tail5", "tail6"]
 
-var names: Dictionary           # the skeleton's bone names
+var names: Dictionary  # the skeleton's bone names
 var plan := "quad"
 var species := ""
 var clip := ""
 var amp := 1.0
-var d := {}                     # bone -> Vector3(rx, ry, rz)
-var move := Vector3.ZERO        # the body's own shift (m)
-var squash := Vector3.ONE       # and its scale
+var d := {}  # bone -> Vector3(rx, ry, rz)
+var curl := 1.0  # how much of the napper's curl settle and wake carry (0: they join the baked sleep)
+var move := Vector3.ZERO  # the body's own shift (m)
+var squash := Vector3.ONE  # and its scale
 var _n := 1
+
 
 func _init(bone_names: Dictionary, species_id: String) -> void:
 	names = bone_names
@@ -54,6 +65,7 @@ func _init(bone_names: Dictionary, species_id: String) -> void:
 		plan = "quad"
 	elif names.has("hleg1.L"):
 		plan = "bird"
+
 
 ## Everything the clip does at u (0..1 of its length), with `n` beats in it.
 func at(which: String, u: float, n := 1) -> void:
@@ -71,9 +83,11 @@ func at(which: String, u: float, n := 1) -> void:
 		var a: Array = tw["bones"][b]
 		add(b, a[0], a[1], a[2])
 
+
 func add(bone: String, rx: float, ry := 0.0, rz := 0.0) -> void:
 	if names.has(bone):
 		d[bone] = Vector3(rx, ry, rz) + (d[bone] if d.has(bone) else Vector3.ZERO)
+
 
 ## A pair: rx the same, `sweep` forward and `out` away from the body mirrored (L is -x, R +x).
 func both(base: String, rx: float, sweep := 0.0, out := 0.0) -> void:
@@ -83,19 +97,23 @@ func both(base: String, rx: float, sweep := 0.0, out := 0.0) -> void:
 	else:
 		add(base, rx, 0.0, 0.0)
 
+
 func wings(flap: float, sweep := 0.0) -> void:
 	for w in WING_JOINTS:
 		both(w, 0.0, sweep, flap)
 	for w in WING_TIPS:
 		both(w, 0.0, sweep * 0.6, flap * 0.5)
 
+
 func tail(ry: float, rx := 0.0) -> void:
 	for t in TAIL:
 		add(t, rx, ry, 0.0)
 
+
 ## Whole cycles of this clip's beat in `length` seconds.
 static func cycles(which: String, length: float) -> int:
 	return maxi(1, roundi(length / float(BEAT.get(which, 1.0))))
+
 
 ## Settle's and wake's shared rest: the curl of a napper.
 func _nap(u: float) -> void:
@@ -107,12 +125,13 @@ func _nap(u: float) -> void:
 	both("ear1", -0.1, 0.0, -0.12)
 	squash = Vector3(1.0, 1.0 + 0.025 * s, 1.0)
 
+
 func _settle(u: float) -> void:
 	var w := smoothstep(0.25, 1.0, u)
 	var bow := sin(PI * u)
 	_nap(0.0)
 	for b in d.keys():
-		d[b] *= w
+		d[b] *= w * curl
 	squash = Vector3.ONE
 	move.y = -0.02 * bow
 	add("spine", -0.14 * bow)
@@ -121,13 +140,14 @@ func _settle(u: float) -> void:
 	both("hleg1", 0.12 * bow)
 	wings(-0.1 * bow)
 
+
 func _wake(u: float) -> void:
 	var k := 1.0 - smoothstep(0.35, 0.95, u)
 	var st := sin(PI * clampf((u - 0.1) / 0.8, 0.0, 1.0))
 	var yawn := sin(PI * clampf((u - 0.55) / 0.35, 0.0, 1.0))
 	_nap(0.0)
 	for b in d.keys():
-		d[b] *= k
+		d[b] *= k * curl
 	squash = Vector3.ONE
 	match plan:
 		"quad":
@@ -145,6 +165,7 @@ func _wake(u: float) -> void:
 	add("head", 0.25 * st + 0.35 * yawn)
 	add("neck", 0.15 * yawn)
 	move.y = 0.01 * st
+
 
 func _munch(u: float) -> void:
 	var c := TAU * u * float(_n)
@@ -165,6 +186,7 @@ func _munch(u: float) -> void:
 			both("ear1", 0.0, 0.0, 0.08 * chew)
 			move.y = -0.02 * amp
 	tail(0.18 * sin(TAU * u))
+
 
 func _nudge(u: float) -> void:
 	var p := sin(TAU * u * float(_n))
@@ -187,6 +209,7 @@ func _nudge(u: float) -> void:
 		_:
 			add("root", -0.1 * lunge)
 	tail(0.3 * sin(TAU * u * float(_n) * 2.0))
+
 
 func _climb(u: float) -> void:
 	var s := sin(TAU * u * float(_n))
@@ -214,6 +237,7 @@ func _climb(u: float) -> void:
 			wings(0.5 + 0.5 * sin(TAU * u * float(_n) * 2.0), 0.15)
 	tail(0.25 * s)
 
+
 func _splash(u: float) -> void:
 	var s := sin(TAU * u * float(_n))
 	var s2 := sin(TAU * u * float(_n) * 2.0)
@@ -232,6 +256,7 @@ func _splash(u: float) -> void:
 			add("spine", 0.0, 0.35 * sin(TAU * u * float(_n) + 1.0) * amp)
 			add("head", 0.15 * s2 * amp)
 	tail(0.5 * sin(TAU * u * float(_n) + 2.0) * amp)
+
 
 ## Rush, over Tumble's charge: u 0..0.6 coils and scrapes (the rival's tell shows this), 0.6..1 lunges and hits.
 func _rush(u: float) -> void:
@@ -259,6 +284,7 @@ func _rush(u: float) -> void:
 			add("spine", (-0.25 * coil + 0.3 * lunge) * amp)
 	tail(0.2 * scrape, (0.2 * coil + 0.45 * lunge) * amp)
 
+
 ## Brace, over Tumble's charge: squats low by 0.3 and holds the guard with a shiver (whole cycles, so it loops clean).
 func _brace(u: float) -> void:
 	var s := smoothstep(0.0, 0.3, u)
@@ -279,6 +305,7 @@ func _brace(u: float) -> void:
 		_:
 			add("spine", -0.3 * s * amp)
 	tail(-0.35 * s * amp + shiver * 4.0)
+
 
 ## Dodge, over Tumble's charge: footwork sway while it comes (0..0.6), a crouch, a hop aside as it lands (0.68..0.94).
 func _dodge(u: float) -> void:
@@ -304,6 +331,7 @@ func _dodge(u: float) -> void:
 			add("spine", 0.4 * air * amp, 0.3 * sway * amp)
 	tail(0.5 * air * amp + 0.2 * sway)
 
+
 ## Stone hop, over one hop (Echo Steps' hop_s): squashed on the stone at both ends, legs tucked at the top. The base
 ## draws the arc, so the clip only shapes the body.
 func _stonehop(u: float) -> void:
@@ -323,6 +351,7 @@ func _stonehop(u: float) -> void:
 			add("spine", 0.35 * up * amp)
 	tail(0.0, 0.3 * up * amp)
 
+
 ## Spin, over two beats of Echo Steps' bpm: one full turn on the spot, a little lift, arms or wings out.
 func _spin(u: float) -> void:
 	var up := sin(PI * u)
@@ -339,6 +368,7 @@ func _spin(u: float) -> void:
 		_:
 			add("spine", 0.3 * up * amp)
 	tail(0.7 * up * amp)
+
 
 ## Strut, over the walk's own cycle (two bobs a cycle): chin up, chest out, knees lifted, tail high.
 func _strut(u: float) -> void:
@@ -359,6 +389,7 @@ func _strut(u: float) -> void:
 		_:
 			add("spine", 0.3 * amp)
 	tail(0.0, 0.4 * amp)
+
 
 ## Pose at the mark, over ShowRing.POSE_S: it eases in, holds a second's worth, eases out. A quad plants its feet
 ## wide and lifts its head; a bird flares its wings and stands tall; a legless body rises up.
@@ -384,6 +415,7 @@ func _pose(u: float) -> void:
 			move.y = 0.06 * k * amp
 	tail(0.0, 0.5 * k * amp)
 
+
 ## Bow, over ShowRing.BOW_S: dips forward, holds, comes up.
 func _bow(u: float) -> void:
 	var k := smoothstep(0.0, 0.35, u) * (1.0 - smoothstep(0.65, 1.0, u))
@@ -401,6 +433,7 @@ func _bow(u: float) -> void:
 		_:
 			add("spine", -0.5 * k * amp)
 	tail(0.0, -0.2 * k * amp)
+
 
 ## Crouch, on the Dash's line through the countdown: drops low onto its haunches with the head up to the track by
 ## 0.35, then holds it with a quiver.
@@ -428,6 +461,7 @@ func _crouch(u: float) -> void:
 			add("spine", -0.25 * s * amp)
 	tail(quiver * 3.0, 0.3 * s * amp)
 
+
 ## Burst, off the line over the species' own run: stretched long and low with the nose down at "go", easing back
 ## to the plain run by the end.
 func _burst(u: float) -> void:
@@ -447,6 +481,7 @@ func _burst(u: float) -> void:
 			add("root", -0.15 * k)
 			add("spine", 0.25 * k)
 	tail(0.0, 0.35 * k)
+
 
 ## Sulk, home behind the first ones: a huff (squashed by 0.2), then the head hangs and turns away, ears flat, sat
 ## back, the tail low; back to its idle over the last 0.15.
@@ -470,6 +505,7 @@ func _sulk(u: float) -> void:
 			add("spine", -0.35 * s)
 	tail(0.0, -0.4 * s)
 
+
 ## Hover, a loop of wingbeats: hung under its wings, tail down and legs hanging, the body rising on each downstroke.
 func _hover(u: float) -> void:
 	var beat := TAU * u * float(_n)
@@ -489,6 +525,7 @@ func _hover(u: float) -> void:
 	wings((0.35 + 0.75 * flap) * amp, 0.15 * amp)
 	tail(0.1 * cos(beat) * amp, (-0.2 - 0.06 * flap) * amp)
 
+
 ## Glide, a loop: wings held wide with a slow rock, nose down into the air, ears back, a slow bank. A quad (a Boki
 ## carried through your glide, Kin.render) spreads all four legs out like a flying squirrel; a bird tucks its legs.
 func _glide(u: float) -> void:
@@ -507,6 +544,7 @@ func _glide(u: float) -> void:
 			add("spine", 0.0, 0.15 * s * amp)
 	wings((0.8 + 0.12 * s) * amp, -0.1 * amp)
 	tail(0.12 * s * amp, 0.15 * amp)
+
 
 ## Flare, once as a flier touches down (boki_fly.json flare_s): pitched up, wings wide and swept forward to brake,
 ## feet reaching for the ground. The feet land halfway (a small squash), then it eases back into its idle.
@@ -529,6 +567,7 @@ func _flare(u: float) -> void:
 	wings(brake * amp, 0.5 * brake * amp)
 	tail(0.0, -0.4 * brake * amp)
 
+
 ## Swim (a Water type in water over half its height, BokiRig): the body lies level, legs tucked back, a wave runs
 ## down the tail and the fins (ears, or wings for a legless one) scull; it bobs twice a stroke.
 func _swim(u: float) -> void:
@@ -543,6 +582,7 @@ func _swim(u: float) -> void:
 	wings(0.3 * sin(c) * amp, 0.2)
 	for i in TAIL.size():
 		add(TAIL[i], 0.0, (0.2 + 0.08 * float(i)) * sin(c - 0.7 * float(i)) * amp)
+
 
 ## Paddle (any other Boki in water over half its height): nose and head up out of the water, the front legs (or
 ## wings) stroke in turn, the hind legs kick against them; each stroke lifts it a little.

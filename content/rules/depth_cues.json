@@ -1,0 +1,14 @@
+{
+	"doc": "Height cues under a hunter (scripts/match/depth_cues.gd, briefs/CAMERA_DEPTH.md). shadow: the soft disc on the ground under a hunter keeps full strength up to fade_from_m above the ground, fades out linearly and is gone at gone_at_m (a body high in the air no longer paints a dark spot far below it). ring: while a hunter is airborne, min_m to max_m above the ground, a ring of diameter_m lies on the ground under it, so a glider's height still reads once its shadow has faded. Colours are linear RGB (the target feel): own is gold, a teammate is blue, an enemy is red.",
+	"shadow": {"fade_from_m": 0.5, "gone_at_m": 10.0},
+	"ring": {
+		"min_m": 1.5,
+		"max_m": 50.0,
+		"diameter_m": 3.0,
+		"thickness": 0.1,
+		"alpha": 0.85,
+		"own": [0.885, 0.664, 0.0],
+		"ally": [0.0, 0.711, 1.0],
+		"enemy": [1.0, 0.0, 0.0]
+	}
+}
