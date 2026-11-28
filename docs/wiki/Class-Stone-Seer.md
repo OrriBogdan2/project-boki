@@ -43,7 +43,7 @@ What the in-game kit card (K) says.
 | RMB: Quakefall | Tap to slam ahead; hold to hop forward and slam harder. |
 | E: Stone Row | Raise three rocks ahead to climb, hide behind, or punch. |
 | Hunter ultimate: Basalt Spine | Raise a ridge of rocks at the cursor; drag to turn it. |
-| Weapon: Rubble Fists | Tap throws a boulder; hold and release to punch the lane. |
+| Weapon: Rubble Fists | Tap throws a boulder, or punches the nearest rock if one is close; hold and release to punch every rock in the lane. |
 
 ### Abilities in full
 

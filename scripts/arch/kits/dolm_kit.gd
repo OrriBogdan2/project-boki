@@ -2,8 +2,8 @@ class_name DolmKit
 extends ArchKit
 ## Tarek (id dolm, medium): Tremor Sense, Rubble Fists (tap boulder / hold punch), Rock Hop, Quakefall,
 ## Stone Row, and Basalt Spine on X (breah_spine.gd). docs/heroes/dolm.md. The loop: raise rocks (Stone Row),
-## then launch them with a held punch (every rock in the lane flies, a whole row one after another),
-## a slam or a dash into the enemy. Rocks are low walls you can stand on and climb (StoneStand).
+## then launch them with a held punch (every rock in the lane flies, a whole row one after another; a tap sends
+## only the nearest one), a slam or a dash into the enemy. Rocks are low walls you can stand on and climb (StoneStand).
 ## Shardskin: a punch that sends your own rocks flying gives a shield stack (a slam at rank 3 adds more).
 ##
 ## Rocks are Verbs walls that block movement (HeroZones.rock), so they respect collision, placement
@@ -424,7 +424,10 @@ func lmb_override(held: bool, dt: float) -> bool:
 			KitLooks.of(m).hold_on("br_fist", "mote", h, _fist_at(), 0.9 + 1.0 * k, COBALT.lerp(Color("9ad0ff"), k))
 	elif lmb_t >= 0.0:
 		# held as long as you like (the data: hold and release; no timeout), full stays full
-		if lmb_t < float(ld["tap"]): _boulder()
+		if lmb_t < float(ld["tap"]):
+			# a tap throws the boulder, or pokes the one rock in reach (the held punch is what sends a whole row)
+			if sweep_rocks(h.aim_dir()).is_empty(): _boulder()
+			else: _punch(0.0, 1)
 		else: _punch(punch_k())
 	elif pressed:
 		pass
@@ -496,8 +499,9 @@ func _fly_key() -> String:
 	return "boulder_fly_%d" % h.get_instance_id()
 
 ## The punch: a narrow lane toward the aim. Foes in it are thrown back (into a wall: stunned) and every
-## rock in it flies, the ones lined up along the aim too, one after another.
-func _punch(k: float) -> void:
+## rock in it flies, the ones lined up along the aim too, one after another. `max_rocks` caps how many fly (a tap
+## sends only the nearest; -1: all).
+func _punch(k: float, max_rocks := -1) -> void:
 	var pd: Dictionary = lmb_def()["punch"]
 	lmb_t = -1.0
 	h.mel_hold = 0.0
@@ -522,6 +526,7 @@ func _punch(k: float) -> void:
 	vfx("punch", h.pos, dir, {"len": float(pd["len"]), "k": k})
 	m.sfx("br_punch", h.pos, -1.0, 1.0)
 	var swept := sweep_rocks(dir)
+	if max_rocks >= 0 and swept.size() > max_rocks: swept.resize(max_rocks)
 	last_sweep = swept.size()
 	if swept.size() >= 2: sweeps += 1
 	if swept.any(func(w): return w.get("by") == h):      # (the data: hitting *your* rocks; an ally's still fly)
