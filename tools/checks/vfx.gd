@@ -18,5 +18,6 @@ const CHECKS := {
 	"--status-edge-check": ["res://tools/status_edge_check.gd", "status_edge_check", "check"],  # edge tint
 	"--status-edge-shots": ["res://tools/status_edge_check.gd", "status_edge_check", "shots"],  # GPU: stills + 4v4 ms
 	"--hunter-scale-shots": ["res://tools/hunter_scale_shots.gd", "hunter_scale_shots", null],  # GPU: match size px
+	"--zone-rings-perf": ["res://tools/zone_rings_perf.gd", "zone_rings_perf", null],  # GPU: Meeko/Albert rings 4v4 ms
 	"--tenzo-stone-shots": ["res://tools/tenzo_stone_shots.gd", "tenzo_stone_shots", null],  # GPU: Tenzo stone stills
 }

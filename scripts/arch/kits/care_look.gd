@@ -579,7 +579,8 @@ func _disc(n: Node3D, col: Color, rim: Color, a: float, pattern: float, sweep: f
 
 # ------------------------------------------------------------------ held looks
 ## A look that stays while the kit keeps calling it (by key). p: col, rim, r, fill, sweep, pattern,
-## spin, a (strength), ent (sit under a body), and for "wall": a, b (Vector2 ends), y, hit (0..1).
+## spin, a (strength), lit + hot (pattern 5: a hot rim line), ent (sit under a body), and for "wall": a, b (Vector2
+## ends), y, hit (0..1).
 func keep(key: String, kind: String, at: Vector3, p := {}) -> void:
 	var e: Dictionary = held.get(key, {})
 	if e.is_empty() or String(e["kind"]) != kind or not is_instance_valid(e["n"]):
@@ -617,6 +618,8 @@ func keep(key: String, kind: String, at: Vector3, p := {}) -> void:
 				var dsm := dm.material_override as ShaderMaterial
 				dsm.set_shader_parameter("fill", float(p.get("fill", 1.0)))
 				dsm.set_shader_parameter("rim_w", float(p.get("rim_w", 0.08)))
+				dsm.set_shader_parameter("lit", float(p.get("lit", 0.0)))
+				dsm.set_shader_parameter("hot", p.get("hot", Color.WHITE))
 			var lamp := n.get_node_or_null("Lamp") as Node3D
 			if lamp:
 				lamp.scale = Vector3(1.0 / maxf(0.1, r), 1.0, 1.0 / maxf(0.1, r))
