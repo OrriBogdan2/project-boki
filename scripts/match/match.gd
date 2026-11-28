@@ -2931,11 +2931,7 @@ func _shot_apply(s: Dictionary, at: Vector3, e: Ent) -> void:
 	var trav := Vector2(at.x - s["start"].x, at.z - s["start"].z).length()
 	if x.has("far") and trav > float(x["far"]):
 		dmg *= 1.25
-	if x.has("near"):
-		# a sniper round needs room: half damage point-blank, full from half its range
-		dmg *= lerpf(float(x["near"][0]), 1.0, clampf(trav / maxf(0.1, float(x["near"][1])), 0.0, 1.0))
-	if x.has("farf") and trav > float(x["farf"][0]):
-		dmg *= lerpf(1.0, float(x["farf"][1]), clampf((trav - float(x["farf"][0])) / maxf(0.1, float(x["farf"][2]) - float(x["farf"][0])), 0.0, 1.0))
+	dmg *= ShotFalloff.mult(x, trav)  # damage by distance flown (content/rules/shot_falloff.json)
 	if x.has("tip") and trav + 0.25 >= float(x["tip"][0]):
 		# the blade's sweet spot
 		dmg *= 1.0 + float(x["tip"][1])

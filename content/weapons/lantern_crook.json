@@ -10,6 +10,7 @@
 		"speed": 30,
 		"kb": 1.0,
 		"spread": 0.0,
+		"falloff": "seraph",
 		"range": 7.43,
 		"size": 0.22,
 		"color": "#6ee07a",

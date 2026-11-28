@@ -10,6 +10,7 @@
 		"speed": 37.5,
 		"kb": 0.8,
 		"spread": 0.0,
+		"falloff": "medium",
 		"range": 8.5,
 		"size": 0.15,
 		"color": "#b07aff",

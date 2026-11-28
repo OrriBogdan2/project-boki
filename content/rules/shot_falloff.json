@@ -1,0 +1,18 @@
+{
+	"_doc": "Damage by distance flown for a weapon's shots (ShotFalloff.mult, read in Match._shot_apply). A weapon names a class in its primary: \"falloff\" (full damage to start, a straight line down to floor x damage at end, the floor beyond) and optionally \"ramp\" (from x damage up to start, a straight line to full at end). Reference metres as they are: a weapon whose range ends before a class start never falls off.",
+	"falloff": {
+		"very_short": {"start": 2.5, "end": 6.5, "floor": 0.25},
+		"short": {"start": 8.0, "end": 14.0, "floor": 0.25},
+		"medium": {"start": 10.0, "end": 17.5, "floor": 0.4},
+		"long": {"start": 12.5, "end": 17.5, "floor": 0.4},
+		"very_long": {"start": 7.5, "end": 17.0, "floor": 0.5},
+		"seraph": {"start": 4.75, "end": 9.5, "floor": 0.5},
+		"minigun": {"start": 7.0, "end": 14.0, "floor": 0.5},
+		"bow": {"start": 12.5, "end": 17.5, "floor": 0.5}
+	},
+	"ramp": {
+		"short": {"from": 0.5, "start": 1.0, "end": 3.83},
+		"medium": {"from": 0.5, "start": 1.0, "end": 5.75},
+		"long": {"from": 0.5, "start": 1.5, "end": 9.0}
+	}
+}

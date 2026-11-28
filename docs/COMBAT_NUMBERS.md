@@ -31,5 +31,26 @@ rules in `content/rules/`; this page is the short list of what we aim for. Check
 - **Damage numbers on one target:** you and two teammates focusing one dummy for 3 s print at most 3 numbers over one spot (4 before the slide-apart rule in docs/HUD.md, Damage numbers). Asserted by `--dmg-number-check` ("trio focus").
 - **Dash cooldowns:** per kit in the archetype JSON; a held dash is longer on a longer cooldown (`dash_hold_for_ex`).
 
+## Shot damage by distance
+
+A weapon's primary names a curve class (`"falloff"`, and for a sniper `"ramp"`); the classes are in `content/rules/shot_falloff.json`
+in the reference's metres. `ShotFalloff.add` puts them on the shot (`farf` / `near`) and `Match._shot_apply` multiplies by
+`ShotFalloff.mult`: full damage up to `start`, a straight line down to `floor` x damage at `end`, the floor beyond. Ramp-up goes
+from `from` x damage (up to `start`) to full at `end`. A weapon whose range ends before its class start never falls off.
+
+| Class | start - end (m) | floor | Weapons (range) | share at max range |
+|---|---|---|---|---|
+| very_short | 2.5 - 6.5 | 25% | - | - |
+| short | 8 - 14 | 25% | smg (7) | 100% |
+| medium | 10 - 17.5 | 40% | quill rifle (Vex, 11), burst rifle (10.5), rifle (9.5), arc bolts (Sable, 8.5) | 92%, 96%, 100%, 100% |
+| long | 12.5 - 17.5 | 40% | sniper (16), coilcaster (Sparkle, 13), spellstaff (10) | 58%, 94%, 100% |
+| very_long | 7.5 - 17 | 50% | - | - |
+| seraph | 4.75 - 9.5 | 50% | lantern crook (Meeko, 7.43; 9.3 after a 1 s pause) | 72% (52%) |
+| minigun | 7 - 14 | 50% | minigun (10) | 79% |
+| bow | 12.5 - 17.5 | 50% | longbow (Lace, 12) | 100% |
+
+Ramp-up (sniper, long): half damage up to 1.5 m, full at 9 m. No fall-off: the shotgun (the reference gives its slugs a fixed stop
+range only, see `docs/heroes/dredge.md`), melee, fire and kit abilities. Asserted by `--shot-falloff-check`.
+
 ## Blasts: falloff and cover (11-26)
-A shot's explosion (`Match._boom`, `Blast`, `content/rules/blast.json`) lands by distance from its centre: full damage to a quarter of the radius, then 89% at half, 54% at three quarters and 33% at the edge (straight lines between those points; it was a straight 100% to 55%). Knockback and lift follow the same share. A body with rock or a cliff between it and the blast takes nothing (`World.los` at chest height); a shot with `"boom_open"` skips the cover test. Held by `--blast-parity-check`. Not covered yet: data-driven "area" effects (flat damage, no cover) and distance fall-off for ordinary shots.
+A shot's explosion (`Match._boom`, `Blast`, `content/rules/blast.json`) lands by distance from its centre: full damage to a quarter of the radius, then 89% at half, 54% at three quarters and 33% at the edge (straight lines between those points; it was a straight 100% to 55%). Knockback and lift follow the same share. A body with rock or a cliff between it and the blast takes nothing (`World.los` at chest height); a shot with `"boom_open"` skips the cover test. Held by `--blast-parity-check`. Not covered yet: data-driven "area" effects (flat damage, no cover). Distance fall-off for ordinary shots: see "Shot damage by distance" above.

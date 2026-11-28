@@ -10,6 +10,7 @@
 		"speed": 60,
 		"kb": 2.0,
 		"spread": 0.0,
+		"falloff": "bow",
 		"range": 12.0,
 		"size": 0.18,
 		"color": "#e8f7c0",

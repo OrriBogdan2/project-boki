@@ -394,10 +394,7 @@ func emit_shot() -> void:
 		extra["decel"] = float(h.wpn["decel"])
 		spd = sqrt(2.0 * float(h.wpn["decel"]) * rng)
 		life = spd / float(h.wpn["decel"]) + 0.05
-	if h.wpn.has("close_mult"):
-		extra["near"] = [float(h.wpn["close_mult"]), rng * 0.5]
-	if h.wpn.has("far_mult"):
-		extra["farf"] = [rng * float(h.wpn.get("far_start", 0.6)), float(h.wpn["far_mult"]), rng]
+	ShotFalloff.add(extra, h.wpn)  # damage by distance flown (content/rules/shot_falloff.json)
 	if AimMode.take(h) == AimMode.CURSOR:
 		life = AimMode.dist(h, rng) / spd  # lands at the cursor, clamped to range (scripts/match/aim/aim_mode.gd)
 	if h.wpn.get("pierce", false):  # through everyone in line (Sparkle's bolts)

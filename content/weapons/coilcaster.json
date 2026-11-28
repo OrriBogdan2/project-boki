@@ -10,6 +10,7 @@
 		"speed": 37,
 		"kb": 0.8,
 		"spread": 0.0,
+		"falloff": "long",
 		"range": 13.0,
 		"size": 0.18,
 		"color": "#ff7ac4",
