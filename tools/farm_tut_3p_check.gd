@@ -29,6 +29,8 @@ func run(m: Node, _mode := "") -> void:
 		if String(a).begins_with("--farm-tut-3p-shots="):
 			shots_dir = String(a).substr(20)
 			DirAccess.make_dir_recursive_absolute(shots_dir)
+	main.get_window().size = Vector2i(1920, 1080)  # as the owner plays
+	main.get_viewport().size = Vector2i(1920, 1080)
 	FarmUnlocks.rules()["base_mode"] = false  # the twelve farm steps
 	await _farm()
 	for id in ["chop", "stone", "house"]:
@@ -95,6 +97,7 @@ func _step(id: String) -> void:
 	var wrong := 0
 	var beam_off := 0
 	var vp: Vector2 = home.get_viewport().get_visible_rect().size
+	print("T3P view %s" % vp)
 	for d in DISTANCES:
 		for a in BEARINGS:
 			var ang := a * TAU / BEARINGS
@@ -123,7 +126,7 @@ func _step(id: String) -> void:
 					not ptr._arrow.visible
 					or tip.normalized().dot(dir) < 0.99
 					or not frame.grow(1.0).has_point(ptr._arrow.position)
-					or strips.any(func(c): return c.get_global_rect().has_point(ptr._arrow.position))
+					or strips.any(func(c): return (c.rect() if c is StripView else c.get_global_rect()).has_point(ptr._arrow.position))
 				):
 					lost += 1
 			elif (

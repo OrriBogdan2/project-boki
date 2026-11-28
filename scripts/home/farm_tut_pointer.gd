@@ -61,14 +61,16 @@ static func edge_point(frame: Rect2, dir: Vector2) -> Vector2:
 ## top (`strips`) and the hub bar at the bottom.
 static func frame(h, strips: Array) -> Rect2:
 	var r := rules()
-	var f := HudStyle.safe_rect(h.get_viewport().get_visible_rect().size).grow(-float(r["edge_px"]))
+	var edge := float(r["edge_px"])
+	var f := HudStyle.safe_rect(h.get_viewport().get_visible_rect().size).grow(-edge)
 	var top := f.position.y
 	for c: Control in strips:
 		if is_instance_valid(c) and c.is_visible_in_tree():
-			top = maxf(top, c.get_global_rect().end.y + float(r["edge_px"]))
-	f.end.y -= float(r["bottom_px"])
-	f.position.y = minf(top, f.end.y - 1.0)
-	return f
+			var box: Rect2 = c.rect() if c is StripView else c.get_global_rect()  # (the strip's control is the whole screen)
+			top = maxf(top, box.end.y + edge)
+	var bottom := f.end.y - float(r["bottom_px"])
+	top = minf(top, bottom - 1.0)
+	return Rect2(f.position.x, top, f.size.x, bottom - top)
 
 
 ## Is the prompt at `at` in view inside `frame`, and far enough off that its label is not huge?
