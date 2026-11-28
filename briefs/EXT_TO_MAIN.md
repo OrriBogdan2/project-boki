@@ -11534,3 +11534,4 @@ READY ext/garden-only-2h 410a152738 (garden-only bot plays 2h: adopts stray, run
 READY ext/sfx-glider-heat a6f9a77a72 (your glider ticks once under 25% heat and crackles on a loop while the tank is empty; yours only, read by bar fraction)
 READY ext/recast-buffer-sweep 0987e96b9c (recast presses buffered in every kit via the shared buffer: Sparkle Kitefall, Neve Rimelock, Gil spout+wave, Albert hammer; new --recast-buffer-check per-kit sweep)
 READY ext/desktop-social a53ddd2ba4f (social on desktop via our matchmaker /social store, no web build; PR #1172, GATE GREEN posted, NEW-RED 4 explained as load timeouts)
+READY ext/vfx-grimble-slugs a1c39a88541400b99e8318f4b0310eab0915db33 (Grimble LMB slugs: tracer 0.2->0.42 m, head 0.3->0.6 m, gold hit pop; hitbox unchanged)
