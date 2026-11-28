@@ -10,101 +10,286 @@ class_name Loot
 
 ## Elements a Brand upgrade puts on your weapon (WeaponUps), one per biome style (the Greenreach meadow has none of its own).
 const ELEMENTS := {
-	"fire": {"name": "Ember", "col": Color("ff8a3a"), "biome": "ember", "icon": "fireball",
-		"rider": "Burns: 5 damage a second for 3s."},
-	"frost": {"name": "Frost", "col": Color("bff0ff"), "biome": "frost", "icon": "snare",
-		"rider": "Chills: slows for 1s, and every 5th hit freezes them in place."},
-	"storm": {"name": "Storm", "col": Color("fff27a"), "biome": "storm", "icon": "chain",
-		"rider": "Every 4th hit arcs to 2 more foes for half damage."},
-	"venom": {"name": "Venom", "col": Color("9aff6a"), "biome": "bloom", "icon": "burst",
-		"rider": "Poisons: 3 damage a second and a light slow."},
-	"void": {"name": "Void", "col": Color("b08aff"), "biome": "gloom", "icon": "shadowstep",
-		"rider": "Drains: heals you for 8% of the damage you deal."},
+	"fire":
+	{
+		"name": "Ember",
+		"col": Color("ff8a3a"),
+		"biome": "ember",
+		"icon": "fireball",
+		"rider": "Burns: 5 damage a second for 3s."
+	},
+	"frost":
+	{
+		"name": "Frost",
+		"col": Color("bff0ff"),
+		"biome": "frost",
+		"icon": "snare",
+		"rider": "Chills: slows for 1s, and every 5th hit freezes them in place."
+	},
+	"storm":
+	{
+		"name": "Storm",
+		"col": Color("fff27a"),
+		"biome": "storm",
+		"icon": "chain",
+		"rider": "Every 4th hit arcs to 2 more foes for half damage."
+	},
+	"venom":
+	{
+		"name": "Venom",
+		"col": Color("9aff6a"),
+		"biome": "bloom",
+		"icon": "burst",
+		"rider": "Poisons: 3 damage a second and a light slow."
+	},
+	"void":
+	{
+		"name": "Void",
+		"col": Color("b08aff"),
+		"biome": "gloom",
+		"icon": "shadowstep",
+		"rider": "Drains: heals you for 8% of the damage you deal."
+	},
 }
 
 ## Treasure to sell at home, and the Soul Ember the Soul Shrine needs.
 const VALUABLES := {
 	"old_coin": {"name": "Old Coin", "col": Color("e8c27a"), "value": 14, "rar": 1, "desc": "Sells for a few gems."},
 	"sky_pearl": {"name": "Sky Pearl", "col": Color("cfeaff"), "value": 32, "rar": 2, "desc": "Sells well."},
-	"kin_idol": {"name": "Boki Idol", "col": Color("ffb0d0"), "value": 58, "rar": 3, "desc": "A little carved Boki. Collectors pay a lot."},
-	"crown_shard": {"name": "Crown Shard", "col": Color("ffd23f"), "value": 105, "rar": 4, "desc": "A piece of an old crown. Worth a fortune."},
-	"soul_ember": {"name": "Soul Ember", "col": Color("9ff0e0"), "value": 140, "rar": 4, "desc": "A warm, glowing ember. The Soul Shrine needs one to raise it, and one for every Boki it brings back."},
+	"kin_idol":
+	{
+		"name": "Boki Idol",
+		"col": Color("ffb0d0"),
+		"value": 58,
+		"rar": 3,
+		"desc": "A little carved Boki. Collectors pay a lot."
+	},
+	"crown_shard":
+	{
+		"name": "Crown Shard",
+		"col": Color("ffd23f"),
+		"value": 105,
+		"rar": 4,
+		"desc": "A piece of an old crown. Worth a fortune."
+	},
+	"soul_ember":
+	{
+		"name": "Soul Ember",
+		"col": Color("9ff0e0"),
+		"value": 140,
+		"rar": 4,
+		"desc": "A warm, glowing ember. The Soul Shrine needs one to raise it, and one for every Boki it brings back."
+	},
 	# bag items ("bag"): banked in the garden bag at home, never sold. A locked zone's first key (GardenZones.wayseed)
-	# and the stat bites of GardenItems (names match garden_items.json, --garden-items-check keeps them so)
-	"thumpnut": {"name": "Thumpnut", "col": Color("e8a05a"), "value": 40, "rar": 2, "bag": true,
-		"desc": "A hard sweet nut. At home a Boki eats it for Power."},
-	"shellbark_chew": {"name": "Shellbark Chew", "col": Color("b08a5a"), "value": 40, "rar": 2, "bag": true,
-		"desc": "A tough bark chew. At home a Boki eats it for Guard."},
-	"zipseed": {"name": "Zipseed", "col": Color("f2e08a"), "value": 40, "rar": 2, "bag": true,
-		"desc": "A seed that rattles. At home a Boki eats it for Speed."},
-	"hushpearl": {"name": "Hushpearl", "col": Color("c8d8f0"), "value": 40, "rar": 2, "bag": true,
-		"desc": "A calm little pearl. At home a Boki eats it for Focus."},
-	"wayseed_glasswater": {"name": "Glasswater Wayseed", "col": Color("6fd0e8"), "value": 150, "rar": 4, "bag": true,
-		"desc": "A seed that wants clear water. Carry it to the Waystone with a Boki leaning Water, Ice or Crystal."},
-	"wayseed_cinderstep": {"name": "Cinderstep Wayseed", "col": Color("e07a3a"), "value": 150, "rar": 4, "bag": true,
-		"desc": "A seed warm to hold. Carry it to the Waystone with a Boki leaning Fire, Rock, Steel or Dragon."},
-	"wayseed_hushwood": {"name": "Hushwood Wayseed", "col": Color("9a7ae0"), "value": 150, "rar": 4, "bag": true,
-		"desc": "A seed that hums at dusk. Carry it to the Waystone with a Boki leaning Dark, Psychic or Poison."},
-	"wayseed_ridge": {"name": "Kitewind Wayseed", "col": Color("f2d45a"), "value": 150, "rar": 4, "bag": true,
-		"desc": "A seed that tugs at the wind. Carry it to the Waystone with a Boki leaning Flying or Electric."},
+	"thumpnut":
+	{
+		# and the stat bites of GardenItems (names match garden_items.json, --garden-items-check keeps them so)
+		"name": "Thumpnut",
+		"col": Color("e8a05a"),
+		"value": 40,
+		"rar": 2,
+		"bag": true,
+		"desc": "A hard sweet nut. At home a Boki eats it for Power."
+	},
+	"shellbark_chew":
+	{
+		"name": "Shellbark Chew",
+		"col": Color("b08a5a"),
+		"value": 40,
+		"rar": 2,
+		"bag": true,
+		"desc": "A tough bark chew. At home a Boki eats it for Guard."
+	},
+	"zipseed":
+	{
+		"name": "Zipseed",
+		"col": Color("f2e08a"),
+		"value": 40,
+		"rar": 2,
+		"bag": true,
+		"desc": "A seed that rattles. At home a Boki eats it for Speed."
+	},
+	"hushpearl":
+	{
+		"name": "Hushpearl",
+		"col": Color("c8d8f0"),
+		"value": 40,
+		"rar": 2,
+		"bag": true,
+		"desc": "A calm little pearl. At home a Boki eats it for Focus."
+	},
+	"puffberry":
+	{
+		# luck treats (family luck in garden_items.json; Luck): a Boki eats one for a lucky streak of stat gains
+		"name": "Puffberry",
+		"col": Color("ff9fb8"),
+		"value": 40,
+		"rar": 2,
+		"bag": true,
+		"desc": "A soft, puffy berry. At home a Boki eats it for a lucky streak of stat gains."
+	},
+	"nutty_crisp":
+	{
+		"name": "Nutty Crisp",
+		"col": Color("d9a066"),
+		"value": 40,
+		"rar": 2,
+		"bag": true,
+		"desc": "A crunchy nut biscuit. At home a Boki eats it for a lucky streak of stat gains."
+	},
+	"dewdrop_jelly":
+	{
+		"name": "Dewdrop Jelly",
+		"col": Color("9fe0f0"),
+		"value": 40,
+		"rar": 2,
+		"bag": true,
+		"desc": "A wobbly jelly. At home a Boki eats it for a lucky streak of stat gains."
+	},
+	"sugar_twig":
+	{
+		"name": "Sugar Twig",
+		"col": Color("e8d8a0"),
+		"value": 40,
+		"rar": 2,
+		"bag": true,
+		"desc": "A twig dipped in sugar. At home a Boki eats it for a lucky streak of stat gains."
+	},
+	"moon_fig":
+	{
+		"name": "Moon Fig",
+		"col": Color("c9b6ff"),
+		"value": 90,
+		"rar": 4,
+		"bag": true,
+		"desc": "A rare fig that glows at night. A Boki that loves it gets the luckiest streak of all."
+	},
+	"starfruit_tart":
+	{
+		"name": "Starfruit Tart",
+		"col": Color("ffd86a"),
+		"value": 90,
+		"rar": 4,
+		"bag": true,
+		"desc": "A rare tart with a star on top. A Boki that loves it gets the luckiest streak of all."
+	},
+	"wayseed_glasswater":
+	{
+		"name": "Glasswater Wayseed",
+		"col": Color("6fd0e8"),
+		"value": 150,
+		"rar": 4,
+		"bag": true,
+		"desc": "A seed that wants clear water. Carry it to the Waystone with a Boki leaning Water, Ice or Crystal."
+	},
+	"wayseed_cinderstep":
+	{
+		"name": "Cinderstep Wayseed",
+		"col": Color("e07a3a"),
+		"value": 150,
+		"rar": 4,
+		"bag": true,
+		"desc": "A seed warm to hold. Carry it to the Waystone with a Boki leaning Fire, Rock, Steel or Dragon."
+	},
+	"wayseed_hushwood":
+	{
+		"name": "Hushwood Wayseed",
+		"col": Color("9a7ae0"),
+		"value": 150,
+		"rar": 4,
+		"bag": true,
+		"desc": "A seed that hums at dusk. Carry it to the Waystone with a Boki leaning Dark, Psychic or Poison."
+	},
+	"wayseed_ridge":
+	{
+		"name": "Kitewind Wayseed",
+		"col": Color("f2d45a"),
+		"value": 150,
+		"rar": 4,
+		"bag": true,
+		"desc": "A seed that tugs at the wind. Carry it to the Waystone with a Boki leaning Flying or Electric."
+	},
 	# worth more than anything else you can carry, so smart loot and a full pack always keep it
 	# a vial of Ink: the item's "ink" names the type; name and colour come from its goods entry (market.json)
-	"ink": {"name": "Ink", "col": Color("ff6a3a"), "value": 60, "rar": 3,
-		"desc": "A vial of Ink for Boki that evolve by it."},
-	"rare_egg": {"name": "Rare Egg", "col": Color("ffcf4a"), "value": 400, "rar": 4, "desc": "A boss's egg, big and glowing gold. Carry it home and it hatches the baby of a Boki line."},
+	"ink":
+	{"name": "Ink", "col": Color("ff6a3a"), "value": 60, "rar": 3, "desc": "A vial of Ink for Boki that evolve by it."},
+	"rare_egg":
+	{
+		"name": "Rare Egg",
+		"col": Color("ffcf4a"),
+		"value": 400,
+		"rar": 4,
+		"desc": "A boss's egg, big and glowing gold. Carry it home and it hatches the baby of a Boki line."
+	},
 }
+
 
 ## A lair boss's egg as a backpack item: whose first form hatches from it (a legendary's egg holds another
 ## Boki: Data.egg_species), and who guarded it.
 static func rare_egg(sp: String, boss := "") -> Dictionary:
 	return {"t": "val", "id": "rare_egg", "sp": Data.egg_species(sp), "boss": boss, "uid": _uid()}
 
+
 ## A vial of one Ink as a backpack item (ink = "ember", "tide", ...; see content/rules/market.json goods "ink_<type>").
 static func ink(ink_id: String) -> Dictionary:
 	return {"t": "val", "id": "ink", "ink": ink_id, "uid": _uid()}
 
+
 static func is_ink(it: Dictionary) -> bool:
 	return String(it.get("t", "")) == "val" and String(it.get("id", "")) == "ink"
+
 
 ## Its goods key ("good:ink_ember"), for Goods.
 static func ink_key(it: Dictionary) -> String:
 	return "good:ink_" + String(it.get("ink", ""))
 
+
 static func is_rare_egg(it: Dictionary) -> bool:
 	return String(it.get("t", "")) == "val" and String(it.get("id", "")) == "rare_egg"
 
+
 static func is_wayseed(it: Dictionary) -> bool:
 	return String(it.get("t", "")) == "val" and String(it.get("id", "")).begins_with("wayseed_")
+
 
 ## A treasure that goes into the garden bag at home instead of the sell shelf: a Wayseed or a shaping item.
 static func is_bag_item(it: Dictionary) -> bool:
 	return String(it.get("t", "")) == "val" and bool(VALUABLES.get(String(it.get("id", "")), {}).get("bag", false))
 
+
 ## What a piece of gear is worth by rarity (Common..Legendary).
 const GEAR_VALUE := [3, 8, 18, 36, 70]
+
 
 # ------------------------------------------------------------------ making things
 static func _uid() -> String:
 	return "i%d%d" % [Time.get_ticks_usec() % 10000000, randi() % 10000]
 
+
 static func gear(id: String, rar: int) -> Dictionary:
 	return {"t": "gear", "id": id, "rar": rar, "uid": _uid()}
 
+
 static func valuable(id: String) -> Dictionary:
 	return {"t": "val", "id": id, "uid": _uid()}
+
 
 ## Worth keeping: gear that still exists, and treasure. (Old saved weapons are scrapped on load, Save.)
 static func keepable(it: Dictionary) -> bool:
 	if it.is_empty():
 		return false
 	match String(it.get("t", "")):
-		"gear": return Gear.ALL.has(String(it.get("id", "")))
-		"val": return VALUABLES.has(String(it.get("id", "")))
+		"gear":
+			return Gear.ALL.has(String(it.get("id", "")))
+		"val":
+			return VALUABLES.has(String(it.get("id", "")))
 	return false
+
 
 ## A copy of an item as it goes home.
 static func clean(it: Dictionary) -> Dictionary:
 	return it.duplicate()
+
 
 # ------------------------------------------------------------------ what things are called and worth
 static func rar_of(it: Dictionary) -> int:
@@ -112,40 +297,57 @@ static func rar_of(it: Dictionary) -> int:
 		return int(VALUABLES.get(String(it.get("id", "")), {}).get("rar", 1))
 	return clampi(int(it.get("rar", 0)), 0, Data.RARITY.size() - 1)
 
+
 static func name_of(it: Dictionary) -> String:
 	if String(it.get("t", "")) == "val":
 		if is_rare_egg(it) and Data.KIN.has(String(it.get("sp", ""))):
 			return "Rare " + Data.egg_name(String(it["sp"]))
-		if is_ink(it): return Goods.name_of(ink_key(it))
+		if is_ink(it):
+			return Goods.name_of(ink_key(it))
 		return String(VALUABLES.get(String(it.get("id", "")), {}).get("name", "Trinket"))
 	var gd: Dictionary = Gear.ALL.get(String(it.get("id", "")), {})
 	var r := rar_of(it)
 	return "%s%s" % [(String(Data.RARITY[r]["name"]) + " ") if r > 0 else "", gd.get("name", it.get("id", "Gear"))]
 
+
 ## The colour that marks it.
 static func col_of(it: Dictionary) -> Color:
 	if String(it.get("t", "")) == "val":
-		if is_ink(it): return Color(String(Goods.good("ink_" + String(it.get("ink", ""))).get("col", "ffffff")))
+		if is_ink(it):
+			return Color(String(Goods.good("ink_" + String(it.get("ink", ""))).get("col", "ffffff")))
 		return VALUABLES.get(String(it.get("id", "")), {}).get("col", Color("ffd36a"))
 	return Data.RARITY[rar_of(it)]["color"]
 
+
 static func icon_of(it: Dictionary) -> String:
 	if String(it.get("t", "")) == "val":
-		if is_bag_item(it): return "seed"
+		if is_bag_item(it):
+			return "seed"
 		return "bond" if String(it.get("id", "")) == "soul_ember" else ("egg" if is_rare_egg(it) else "gem")
 	return Gear.icon_of(String(it.get("id", "")))
+
 
 ## One line under the name: what it does.
 static func sub_of(it: Dictionary) -> String:
 	if String(it.get("t", "")) == "val":
-		if is_rare_egg(it): return "Rare Egg  ·  carry it home and it hatches a baby Boki"
-		if is_ink(it): return "Ink  ·  carry it home; some Boki evolve when it is used on them"
-		if is_wayseed(it): return "Wayseed  ·  carry it home: it wakes a garden zone"
-		if is_bag_item(it): return "Garden item  ·  carry it home: a Boki can eat it"
-		return "Treasure  ·  sells for %d gems" % sell_price(it) if String(it.get("id", "")) != "soul_ember" else "Revives a Boki at the Soul Shrine"
+		if is_rare_egg(it):
+			return "Rare Egg  ·  carry it home and it hatches a baby Boki"
+		if is_ink(it):
+			return "Ink  ·  carry it home; some Boki evolve when it is used on them"
+		if is_wayseed(it):
+			return "Wayseed  ·  carry it home: it wakes a garden zone"
+		if is_bag_item(it):
+			return "Garden item  ·  carry it home: a Boki can eat it"
+		return (
+			"Treasure  ·  sells for %d gems" % sell_price(it)
+			if String(it.get("id", "")) != "soul_ember"
+			else "Revives a Boki at the Soul Shrine"
+		)
 	var id := String(it.get("id", ""))
-	if not Gear.ALL.has(id): return "Gear"
+	if not Gear.ALL.has(id):
+		return "Gear"
 	return "%s  ·  %s" % [Gear.slot_name(id), Gear.stat_text(id, rar_of(it))]
+
 
 static func value(it: Dictionary) -> int:
 	if it.is_empty():
@@ -154,24 +356,30 @@ static func value(it: Dictionary) -> int:
 		return int(VALUABLES.get(String(it.get("id", "")), {}).get("value", 5))
 	return GEAR_VALUE[rar_of(it)]
 
+
 ## What the armory pays for it (a bit over half its worth).
 static func sell_price(it: Dictionary) -> int:
 	if String(it.get("t", "")) == "val":
 		return value(it)
 	return maxi(1, int(round(value(it) * 0.6)))
 
+
 ## Scrap from breaking it down at the armory, for upgrades and the farm.
 static func scrap_of(it: Dictionary) -> int:
 	return [1, 1, 2, 4, 7][rar_of(it)]
+
 
 # ------------------------------------------------------------------ rolling drops
 ## A valuable by rarity tier (0 small, 1 good, 2 great).
 static func roll_valuable(rng: RandomNumberGenerator, tier: int) -> String:
 	var x := rng.randf()
 	match tier:
-		0: return "old_coin" if x < 0.8 else "sky_pearl"
-		1: return "old_coin" if x < 0.35 else ("sky_pearl" if x < 0.8 else "kin_idol")
+		0:
+			return "old_coin" if x < 0.8 else "sky_pearl"
+		1:
+			return "old_coin" if x < 0.35 else ("sky_pearl" if x < 0.8 else "kin_idol")
 	return "sky_pearl" if x < 0.3 else ("kin_idol" if x < 0.7 else "crown_shard")
+
 
 # ------------------------------------------------------------------ element riders
 ## Adds the weapon's element to one attack's hit options. Called once per attack.
@@ -190,7 +398,9 @@ static func rider(h, extra: Dictionary, dmg: float) -> void:
 				extra["root"] = maxf(float(extra.get("root", 0.0)), 0.6)
 		"storm":
 			if n % 4 == 0 and not extra.has("fx_hit"):
-				extra["fx_hit"] = [{"type": "chain", "count": 2, "first": 5.0, "dmg": dmg * 0.5, "color": "#fff27a", "skip_here": true}]
+				extra["fx_hit"] = [
+					{"type": "chain", "count": 2, "first": 5.0, "dmg": dmg * 0.5, "color": "#fff27a", "skip_here": true}
+				]
 				extra["fx_ctx"] = {"slot": "weapon", "ability": "storm"}
 		"venom":
 			extra["burn"] = maxf(float(extra.get("burn", 0.0)), 3.0)

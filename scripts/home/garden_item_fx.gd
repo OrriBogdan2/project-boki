@@ -27,6 +27,7 @@ const LOCK_S := 0.15  # ... and is shut this much later
 const LEAF_FLAT := Vector3(1.0, 0.35, 1.0)  # the leaf: a flattened bead
 const DIM := Color(0.16, 0.13, 0.22)  # an empty ring segment or meter slot
 const XP_GOLD := UI.GOLD  # Sunsap: garden xp
+const LUCK_COL := Color("9be86a")  # lucky sparkle: clover green
 
 var bits: Array = []  # the pool: MeshInstance3D, each with its own toon material
 var live: Array = []  # {mi, k, a, b, c0, c1, s0, s1, t0, t1, t}: a bit moving from a to b over t0..t1
@@ -74,10 +75,31 @@ func play(k: Dictionary, res: Dictionary) -> bool:
 			_lean(k, d["lean"][0], d["lean"][1])
 		"stay":
 			_leaf_lock(k)
+		"luck":
+			_sparkle(k, 8 if res.get("love", false) else 4)
+			if res.get("new", false):
+				_glad(k)  # the first time it shows its favourite: a big happy reaction
+		"stat" when int(res.get("lucky", 0)) > 0:
+			_sparkle(k, 6)
+			_glad(k)
 		_:
 			return false
 	set_process(true)
 	return true
+
+
+## Lucky sparkle: n clover-green bits popping up round the Boki.
+func _sparkle(k: Dictionary, n: int) -> void:
+	for i in n:
+		var ang := TAU * i / n
+		var from := Vector3(sin(ang) * 0.3, TICK_Y, cos(ang) * 0.3)
+		_bit(k, "bead", from, from + Vector3(sin(ang) * 0.4, TICK_RISE, cos(ang) * 0.4), LUCK_COL, LUCK_COL, 0.0, LIFE)
+
+
+## A happy jump: its joy cue, its happy voice and a heart.
+func _glad(k: Dictionary) -> void:
+	k["joy_t"] = 1.2
+	Sfx.play(KinVoice.cue(String(k["rec"]["species"]), "happy"), null, -2.0, 0.1)
 
 
 func _tick(k: Dictionary) -> void:

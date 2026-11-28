@@ -25,6 +25,7 @@ func ok(cond: bool, what: String) -> void:
 
 
 func run(m: Node, mode: String = "check") -> void:
+	Luck.rules()["base"] = 0.0  # random Boki ids: a lucky +2 would flake exact stats (see --playstyle-check)
 	main = m
 	Save.no_write = true
 	Save.d = _new_save()

@@ -26,25 +26,28 @@ extends RefCounted
 
 const RACES := 20
 const SIM_RACES := 200
-const SIM_GAP := 10              # Speed points the raised Boki leads by
-const SIM_SHARE := 0.75          # the higher-Speed Boki must win at least this share of SIM_RACES
-const WIN_SHARE := 0.6           # the favourite must win at least this share
-const DT := 1.0 / 30.0           # s per step
-const MAX_S := 120.0             # s: a race that runs longer is stuck
-const SETTLE_FRAMES := 600       # frames to wait at most for the home to finish building
-const SAMPLE := 0.25             # m between the footing samples along a course
-const MAX_STEP := 0.3            # m of ground height between two samples: steeper than this is a wall, not a hill
-const CLOSE := 0.01              # m the lap may miss closing by
+const SIM_GAP := 10  # Speed points the raised Boki leads by
+const SIM_SHARE := 0.75  # the higher-Speed Boki must win at least this share of SIM_RACES
+const WIN_SHARE := 0.6  # the favourite must win at least this share
+const DT := 1.0 / 30.0  # s per step
+const MAX_S := 120.0  # s: a race that runs longer is stuck
+const SETTLE_FRAMES := 600  # frames to wait at most for the home to finish building
+const SAMPLE := 0.25  # m between the footing samples along a course
+const MAX_STEP := 0.3  # m of ground height between two samples: steeper than this is a wall, not a hill
+const CLOSE := 0.01  # m the lap may miss closing by
 
 var bad := 0
 var main: Node
+
 
 func ok(cond: bool, what: String) -> void:
 	print("RACE %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
 
+
 func run(m: Node) -> void:
+	Luck.rules()["base"] = 0.0  # random Boki ids: a lucky +2 would flake exact stats (see --playstyle-check)
 	main = m
 	Save.no_write = true
 	Save.d = Save.fresh()
@@ -64,6 +67,7 @@ func run(m: Node) -> void:
 	print("RACE DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _kin(sp: String, kname: String, speed: int, joy: float) -> Dictionary:
 	var k := Save.new_kin(sp, kname)
 	k["level"] = 5
@@ -73,6 +77,7 @@ func _kin(sp: String, kname: String, speed: int, joy: float) -> Dictionary:
 	k["needs"]["energy"] = 90.0
 	return k
 
+
 func _race(recs: Array, back: int, rng: RandomNumberGenerator, cheer := true, tw := {}) -> BaseRace.Run:
 	var r := BaseRace.Run.new(recs, back, rng, tw)
 	while not r.over() and r.t < MAX_S:
@@ -80,6 +85,7 @@ func _race(recs: Array, back: int, rng: RandomNumberGenerator, cheer := true, tw
 			r.cheer(["great", "good", "miss"][rng.randi() % 3])
 		r.step(DT)
 	return r
+
 
 func _favourites() -> void:
 	var rng := RandomNumberGenerator.new()
@@ -105,6 +111,7 @@ func _favourites() -> void:
 	var need := int(ceil(RACES * WIN_SHARE))
 	ok(wins >= need, "the favourite wins %d of %d races (needs %d)" % [wins, RACES, need])
 
+
 func _leans() -> void:
 	var walker: String = Data.KIN.keys().filter(func(sp): return not BaseRace.winged({"species": sp}))[0]
 	var plain := _kin(walker, "Plain", 10, 60.0)
@@ -116,18 +123,22 @@ func _leans() -> void:
 	var water := -1
 	var jump := -1
 	for i in st.size():
-		if st[i]["kind"] == "water": water = i
-		if st[i]["kind"] == "jump": jump = i
+		if st[i]["kind"] == "water":
+			water = i
+		if st[i]["kind"] == "jump":
+			jump = i
 	var base0 := BaseRace.stretch_pace(plain, 0)
 	ok(BaseRace.stretch_pace(swim, water) > BaseRace.stretch_pace(plain, water) * 1.2, "a water lean swims faster")
 	ok(BaseRace.stretch_pace(fly, jump) > BaseRace.stretch_pace(plain, jump) * 1.2, "a flying lean glides the gap")
-	var flat := is_equal_approx(BaseRace.stretch_pace(swim, 0), base0) \
-			and is_equal_approx(BaseRace.stretch_pace(fly, 0), base0)
+	var flat := (
+		is_equal_approx(BaseRace.stretch_pace(swim, 0), base0) and is_equal_approx(BaseRace.stretch_pace(fly, 0), base0)
+	)
 	ok(flat, "leans don't help on the straight")
 	var any_wings := Data.KIN.keys().any(func(sp): return BaseRace.winged({"species": sp}))
 	ok(any_wings, "some species have wings (they glide without a lean)")
 	var glum := _kin(walker, "Glum", 10, 5.0)
 	ok(BaseRace.expected_time(glum) > BaseRace.expected_time(plain), "a glum Boki is slower (mood)")
+
 
 ## The mean gap between runners 0 and 1 over a race.
 func _mean_gap(recs: Array, seed_n: int) -> float:
@@ -141,6 +152,7 @@ func _mean_gap(recs: Array, seed_n: int) -> float:
 		sum += absf(float(r.dist[0]) - float(r.dist[1]))
 		n += 1
 	return sum / maxf(1.0, n)
+
 
 func _friends_rivals() -> void:
 	var a := _kin("zapple", "A", 30, 80.0)
@@ -157,6 +169,7 @@ func _friends_rivals() -> void:
 	rng.seed = 3
 	var r := _race([c, d], 0, rng, false)
 	ok(not r.bumped.is_empty(), "rivals bump (%d bumps)" % r.bumped.size())
+
 
 func _settle() -> void:
 	var fast := _kin("zapple", "Fast", 42, 60.0)
@@ -175,8 +188,11 @@ func _settle() -> void:
 	ok(apart, "the two grow apart (bonds %.2f)" % BaseRace.bond(fast, slow))
 	var mem_w: Array = fast["memory"]
 	var mem_l: Array = slow["memory"]
-	ok(not mem_w.is_empty() and mem_w[-1]["kind"] == "race" and not mem_l.is_empty() and mem_l[-1]["kind"] == "race",
-			"both remember it: \"%s\"" % (mem_w[-1]["text"] if not mem_w.is_empty() else ""))
+	ok(
+		not mem_w.is_empty() and mem_w[-1]["kind"] == "race" and not mem_l.is_empty() and mem_l[-1]["kind"] == "race",
+		'both remember it: "%s"' % (mem_w[-1]["text"] if not mem_w.is_empty() else "")
+	)
+
 
 ## SIM_RACES seeded two-Boki races, same species, joy and zone, the only gap SIM_GAP raised Speed points: the
 ## raised one wins most (raising decides, the wobble keeps an upset possible).
@@ -192,24 +208,28 @@ func _raised() -> void:
 		var r := _race(recs, 0, rng, false)
 		raised_wins += 1 if recs[r.order()[0]]["name"] == "Hi" else 0
 	print("RACE sim: the +%d Speed Boki won %d of %d" % [SIM_GAP, raised_wins, SIM_RACES])
-	ok(raised_wins >= int(SIM_RACES * SIM_SHARE), "+%d Speed wins %d of %d races (needs %d)"
-			% [SIM_GAP, raised_wins, SIM_RACES, int(SIM_RACES * SIM_SHARE)])
+	ok(
+		raised_wins >= int(SIM_RACES * SIM_SHARE),
+		"+%d Speed wins %d of %d races (needs %d)" % [SIM_GAP, raised_wins, SIM_RACES, int(SIM_RACES * SIM_SHARE)]
+	)
+
 
 ## The line after the race names what won it.
 func _carried() -> void:
 	var fast := _kin("zapple", "Fast", 30, 60.0)
 	var slow := _kin("zapple", "Slow", 0, 60.0)
-	ok(BaseRace.carried(fast, slow) == "Speed carried it", "a Speed gap: \"%s\"" % BaseRace.carried(fast, slow))
+	ok(BaseRace.carried(fast, slow) == "Speed carried it", 'a Speed gap: "%s"' % BaseRace.carried(fast, slow))
 	var happy := _kin("zapple", "Happy", 0, 100.0)
 	var glum := _kin("zapple", "Glum", 0, 0.0)
 	var mood_line := BaseRace.carried(happy, glum)
-	ok(mood_line == "A happy mood carried it", "a mood gap: \"%s\"" % mood_line)
+	ok(mood_line == "A happy mood carried it", 'a mood gap: "%s"' % mood_line)
 	var luck_line := BaseRace.carried(slow, fast)
-	ok(luck_line == "A lucky run carried it", "the underdog's win: \"%s\"" % luck_line)
+	ok(luck_line == "A lucky run carried it", 'the underdog\'s win: "%s"' % luck_line)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 11
 	var res := BaseRace.settle(_race([fast, slow], 0, rng))
-	ok(res["why"] == "Speed carried it", "settle hands the card its line: \"%s\"" % res["why"])
+	ok(res["why"] == "Speed carried it", 'settle hands the card its line: "%s"' % res["why"])
+
 
 func _twists() -> void:
 	var rec := _kin("zapple", "Tw", 10, 60.0)
@@ -227,6 +247,7 @@ func _twists() -> void:
 		ok(r.over(), "every race under '%s' finishes" % t["id"])
 	var wild: Dictionary = BaseRace.rules()["twists"].filter(func(t): return t.has("wobble"))[0]
 	ok(float(wild["wobble"]) > float(BaseRace.rules()["wobble"]), "a wobble twist widens the wobble")
+
 
 ## Each Dash format changes the lap the way its tweak says: 'mult' speeds or slows its stretch kind, 'wobble'
 ## widens the roll, 'swap' makes a second water stretch (a Tide lean gains there, a glide is lost).
@@ -257,10 +278,11 @@ func _formats() -> void:
 			var slower := BaseRace.expected_time(plain, t) > BaseRace.expected_time(plain)
 			ok(slower, "format %s lengthens a plain Boki's lap" % t["id"])
 
+
 func _on_base() -> void:
 	var rules: Dictionary = FarmUnlocks.rules()
 	ok(FarmUnlocks.base_mode(), "base_mode is on in the shipped rules")
-	rules["base_mode"] = false      # the "off" half walks the old farm
+	rules["base_mode"] = false  # the "off" half walks the old farm
 	var d := Save.fresh()
 	for i in 3:
 		var k := _kin(["zapple", "cindle", "zapple"][i], ["Pip", "Ash", "Bo"][i], 10, 70.0)
@@ -268,8 +290,8 @@ func _on_base() -> void:
 		if i == 0:
 			k["starter"] = true
 			d["active"] = k["uid"]
-	d["tutorial"] = {"hatched": true, "intro": true, "first_race": true}      # (the practice lap is its own section)
-	d["layout"] = HomeLayout.fresh()      # the full stock farm, with a Training post
+	d["tutorial"] = {"hatched": true, "intro": true, "first_race": true}  # (the practice lap is its own section)
+	d["layout"] = HomeLayout.fresh()  # the full stock farm, with a Training post
 	Save.d = d
 	HomeLayout.ensure(Save.d)
 	var off = await main._hb_home()
@@ -278,7 +300,7 @@ func _on_base() -> void:
 	await main.get_tree().process_frame
 	rules["base_mode"] = true
 	var home = await main._hb_home()
-	for f in SETTLE_FRAMES:      # the home builds over a few frames; the UI comes last
+	for f in SETTLE_FRAMES:  # the home builds over a few frames; the UI comes last
 		if is_instance_valid(home.root_ui):
 			break
 		await main.get_tree().process_frame
@@ -289,8 +311,10 @@ func _on_base() -> void:
 		var race: BaseRace = home.hrace
 		_footing(GardenZones.start(), home, race)
 		var post_ok := is_instance_valid(race.post)
-		ok(post_ok and race.find(Vector2(race.post.position.x, race.post.position.z)) == {"kind": "race"},
-				"on: the race post stands by the Training post and offers a race")
+		ok(
+			post_ok and race.find(Vector2(race.post.position.x, race.post.position.z)) == {"kind": "race"},
+			"on: the race post stands by the Training post and offers a race"
+		)
 		for k in home.kins:
 			k.erase("indoors")
 		race.use()
@@ -298,15 +322,17 @@ func _on_base() -> void:
 		var fresh: bool = race.cue != null and race.cue.mats.size() == 3 and race.cue.lit == 0
 		ok(fresh, "cue: three unlit marks and a finish line with the lap")
 		if race.run != null:
-			race.bar.m = race.bar.zone        # a press right on the gold
+			race.bar.m = race.bar.zone  # a press right on the gold
 			var press := InputEventAction.new()
 			press.action = "interact"
 			press.pressed = true
 			race.input(press)
 			ok(home.verbs.act == "cheer", "on: a good race cheer plays your Hunter's cheer (%s)" % home.verbs.act)
 		var nodes: Array = race.runners.map(func(k: Dictionary) -> Node3D: return k["node"])
-		ok(nodes.all(func(n: Node3D) -> bool: return n.get_meta("kact", "") == "crouch"),
-				"on: the runners crouch on the line for the countdown")
+		ok(
+			nodes.all(func(n: Node3D) -> bool: return n.get_meta("kact", "") == "crouch"),
+			"on: the runners crouch on the line for the countdown"
+		)
 		var played: Array = nodes.map(func(_n: Node3D) -> Dictionary: return {})
 		var t := 0.0
 		var peak := 0
@@ -324,16 +350,24 @@ func _on_base() -> void:
 		ok(peak == 3 and race.cue == null, "cue: the marks lit one by one (%d of 3) and cleared at the end" % peak)
 		ok(held_still, "on: the race does not start until 'go'")
 		ok(played.all(func(p: Dictionary) -> bool: return p.has("burst")), "on: every runner bursts off the line")
-		ok(played.any(func(p: Dictionary) -> bool: return p.has("hop") or p.has("spin")) \
-				and played.any(func(p: Dictionary) -> bool: return p.has("sulk")),
-				"on: the winner celebrates, the last sulks")
+		ok(
+			(
+				played.any(func(p: Dictionary) -> bool: return p.has("hop") or p.has("spin"))
+				and played.any(func(p: Dictionary) -> bool: return p.has("sulk"))
+			),
+			"on: the winner celebrates, the last sulks"
+		)
 		var left := 0.0
 		while race.beats.playing() and left < MAX_S:
 			race.tick(0.1)
 			left += 0.1
-		ok(nodes.all(func(n: Node3D) -> bool: return not n.has_meta("kact")) \
-				and race.beats.kins.all(func(k: Dictionary) -> bool: return not k["busy"]),
-				"on: each runner is let go once its finish clips are played (%.1f s after)" % left)
+		ok(
+			(
+				nodes.all(func(n: Node3D) -> bool: return not n.has_meta("kact"))
+				and race.beats.kins.all(func(k: Dictionary) -> bool: return not k["busy"])
+			),
+			"on: each runner is let go once its finish clips are played (%.1f s after)" % left
+		)
 		_practice(home)
 		_solo(home)
 		var wall: Array = Save.d.get("showcase", [])
@@ -347,6 +381,7 @@ func _on_base() -> void:
 	rules["base_mode"] = true
 	home.queue_free()
 	await main.get_tree().process_frame
+
 
 ## The same seeded race stepped bare and through RaceBeats (countdown hold, clips) finishes identically.
 func _beats_keep_order() -> void:
@@ -376,29 +411,43 @@ func _beats_keep_order() -> void:
 			(k["node"] as Node3D).free()
 		if n == 0:
 			var held := frames - roundi(run.t / DT)
-			ok(absi(held - roundi(GardenSfx.GO_S / DT)) <= 1,
-					"beats: the race holds %d frames for the %.2f s countdown" % [held, GardenSfx.GO_S])
-	ok(same == ran, "beats: %d of %d seeded races finish in the same order at the same times with the beats"
-			% [same, ran])
+			ok(
+				absi(held - roundi(GardenSfx.GO_S / DT)) <= 1,
+				"beats: the race holds %d frames for the %.2f s countdown" % [held, GardenSfx.GO_S]
+			)
+	ok(
+		same == ran,
+		"beats: %d of %d seeded races finish in the same order at the same times with the beats" % [same, ran]
+	)
 	var calm := _kin("zapple", "Calm", 0, 50.0)
 	calm["traits"] = {"temper": 0.5, "bravery": 0.5}
 	var timid := _kin("zapple", "Shy", 0, 50.0)
 	timid["traits"] = {"temper": 0.5, "bravery": 0.1}
 	var grumpy := _kin("zapple", "Huff", 0, 50.0)
 	grumpy["traits"] = {"temper": 0.9, "bravery": 0.5}
-	ok(RaceBeats.finish(calm, 0, 4) == ["hop", "spin"] and RaceBeats.finish(calm, 1, 4) == ["hop", "spin"],
-			"beats: the first two of four home hop then spin")
-	ok(RaceBeats.finish(calm, 2, 4) == ["sulk"] and RaceBeats.finish(calm, 1, 2) == ["sulk"],
-			"beats: the rest sulk, and the last one home always does")
-	ok(RaceBeats.finish(timid, 0, 3) == ["hop"] and RaceBeats.finish(calm, 0, 1) == ["hop", "spin"],
-			"beats: a timid winner only hops; a solo lap celebrates")
-	ok(String(HomeCarry.temper_of(grumpy)) == "grumpy" and RaceBeats.rules()["sulk_face"]["grumpy"] == "angry",
-			"beats: a grumpy loser huffs (angry face)")
+	ok(
+		RaceBeats.finish(calm, 0, 4) == ["hop", "spin"] and RaceBeats.finish(calm, 1, 4) == ["hop", "spin"],
+		"beats: the first two of four home hop then spin"
+	)
+	ok(
+		RaceBeats.finish(calm, 2, 4) == ["sulk"] and RaceBeats.finish(calm, 1, 2) == ["sulk"],
+		"beats: the rest sulk, and the last one home always does"
+	)
+	ok(
+		RaceBeats.finish(timid, 0, 3) == ["hop"] and RaceBeats.finish(calm, 0, 1) == ["hop", "spin"],
+		"beats: a timid winner only hops; a solo lap celebrates"
+	)
+	ok(
+		String(HomeCarry.temper_of(grumpy)) == "grumpy" and RaceBeats.rules()["sulk_face"]["grumpy"] == "angry",
+		"beats: a grumpy loser huffs (angry face)"
+	)
+
 
 func _seeded(n: int) -> RandomNumberGenerator:
 	var r := RandomNumberGenerator.new()
 	r.seed = 9000 + n
 	return r
+
 
 ## One solo training lap: presses on every mark (perfect: the marker sits in the gold) or none.
 func _lap(home, perfect: bool) -> void:
@@ -417,6 +466,7 @@ func _lap(home, perfect: bool) -> void:
 		race.tick(DT)
 		t += DT
 
+
 ## The training lap pays Speed stat bites into the bag and uses one limited drill run (TrainRuns), never raw
 ## points: stats come from pieces you give, and runs are few a day.
 func _solo(home) -> void:
@@ -432,18 +482,26 @@ func _solo(home) -> void:
 	var bag0 := int(Save.d["items"].get("zipseed", 0))
 	_lap(home, false)
 	ok(home.hrace.cue == null, "cue: a solo lap clears its marks")
-	ok(int(rec["stats"]["speed"]) == 10 and is_instance_valid(home.hrace.card) and TrainRuns.left("drill") == 2,
-			"solo: a lap of missed cheers adds no Speed and uses no run")
+	ok(
+		int(rec["stats"]["speed"]) == 10 and is_instance_valid(home.hrace.card) and TrainRuns.left("drill") == 2,
+		"solo: a lap of missed cheers adds no Speed and uses no run"
+	)
 	rec["needs"]["energy"] = 90.0
 	var mem: int = rec.get("memory", []).size()
 	_lap(home, true)
 	var bag1 := int(Save.d["items"].get("zipseed", 0))
-	ok(int(rec["stats"]["speed"]) == 10 and bag1 == bag0 + perfect and TrainRuns.left("drill") == 1,
+	ok(
+		int(rec["stats"]["speed"]) == 10 and bag1 == bag0 + perfect and TrainRuns.left("drill") == 1,
+		(
 			"solo: three perfect cheers put %d Zipseed in the bag (%d), Speed stays %d, drills left %d"
-			% [perfect, bag1 - bag0, rec["stats"]["speed"], TrainRuns.left("drill")])
+			% [perfect, bag1 - bag0, rec["stats"]["speed"], TrainRuns.left("drill")]
+		)
+	)
 	var mems: Array = rec["memory"]
-	ok(mems.size() == mem + 1 and mems[-1]["kind"] == "trained",
-			"solo: the lap is a journal line (\"%s\")" % mems[-1]["text"])
+	ok(
+		mems.size() == mem + 1 and mems[-1]["kind"] == "trained",
+		'solo: the lap is a journal line ("%s")' % mems[-1]["text"]
+	)
 	ok(float(rec["needs"]["energy"]) < 90.0, "solo: the lap costs energy")
 	rec["needs"]["energy"] = 90.0
 	_lap(home, true)
@@ -455,13 +513,16 @@ func _solo(home) -> void:
 	TrainRuns.state()["drill"] = 2
 	rec["stats"]["speed"] = Care.stat_cap(rec)
 	_lap(home, true)
-	ok(home.hrace.run == null and int(rec["stats"]["speed"]) == Care.stat_cap(rec),
-			"solo: at the level cap there is no lap")
+	ok(
+		home.hrace.run == null and int(rec["stats"]["speed"]) == Care.stat_cap(rec),
+		"solo: at the level cap there is no lap"
+	)
 	rec["stats"]["speed"] = 10
 	rec["needs"]["energy"] = 5.0
 	_lap(home, true)
 	ok(home.hrace.run == null and int(rec["stats"]["speed"]) == 10, "solo: a worn-out Boki does not start")
 	rec["needs"]["energy"] = 90.0
+
 
 ## The first race opens with one practice lap that ends at the first press: no race, no cost, once per save.
 func _practice(home) -> void:
@@ -488,8 +549,10 @@ func _practice(home) -> void:
 	while race.run != null and t < MAX_S:
 		race.tick(DT)
 		t += DT
-	ok(race.run == null and int(rec["stats"]["speed"]) == speed and race.runners.is_empty(),
-			"practice: a lap left unpressed ends, no race result")
+	ok(
+		race.run == null and int(rec["stats"]["speed"]) == speed and race.runners.is_empty(),
+		"practice: a lap left unpressed ends, no race result"
+	)
 	Save.d["tutorial"].erase("first_race")
 	Settings.v["tips"] = false
 	race.use()
@@ -497,6 +560,7 @@ func _practice(home) -> void:
 	race._end(false)
 	Settings.v["tips"] = true
 	Save.d["tutorial"]["first_race"] = true
+
 
 func _drill(home) -> void:
 	if home.yard == null:
@@ -513,12 +577,14 @@ func _drill(home) -> void:
 			home.drill.process(1.0 / 30.0)
 	ok(home.train.is_empty(), "drill: three presses end it (%s)" % rec["stats"]["speed"])
 
+
 ## The species that stand for each body plan: the rigged ones (KinPuppet.BODY) and one older round kin.
 func _plan_species() -> Dictionary:
 	var out := {}
 	for sp in Data.KIN:
 		out[String(KinPuppet.BODY.get(sp, "blob"))] = sp
 	return out
+
 
 ## Every zone's course is its own, closed and gentle on the turns, and every body plan runs it to the line.
 func _courses() -> void:
@@ -540,18 +606,23 @@ func _courses() -> void:
 		var worst := 0.0
 		for i in range(1, pts.size() - 1):
 			worst = maxf(worst, rad_to_deg(abs((pts[i] - pts[i - 1]).angle_to(pts[i + 1] - pts[i]))))
-		ok(worst <= float(r_v["max_turn"]),
-				"%s: sharpest turn %.0f of %.0f degrees" % [z, worst, float(r_v["max_turn"])])
+		ok(
+			worst <= float(r_v["max_turn"]),
+			"%s: sharpest turn %.0f of %.0f degrees" % [z, worst, float(r_v["max_turn"])]
+		)
 		GardenZones.here = z
 		for plan in plans:
 			var rec := _kin(plans[plan], "Run", 0, 50.0)
 			var secs := BaseRace.expected_time(rec)
-			ok(secs >= float(band[0]) and secs <= float(band[1]),
-					"%s: a %s (%s) laps in %.1f s, band %s-%s" % [z, plan, plans[plan], secs, band[0], band[1]])
+			ok(
+				secs >= float(band[0]) and secs <= float(band[1]),
+				"%s: a %s (%s) laps in %.1f s, band %s-%s" % [z, plan, plans[plan], secs, band[0], band[1]]
+			)
 			var r := _race([rec, _kin(plans[plan], "Mate", 0, 50.0)], 0, RandomNumberGenerator.new())
 			ok(r.over() and r.t < MAX_S, "%s: a %s runs it to the line (%.1f s)" % [z, plan, r.t])
 	GardenZones.here = ""
 	ok(shapes.size() == zones.size(), "no two zones share a course")
+
 
 ## The ridge track runs through an updraft vent (ZoneVents): its first vent stands on the stretch that names it, a
 ## winged runner is quicker there (vent_mult) than the same stats on the ground, and nobody else is.
@@ -581,9 +652,15 @@ func _vent_stretch() -> void:
 	var lift := BaseRace.stretch_pace(flier, s) / BaseRace.stretch_pace(flier, other)
 	lift *= float(c[other]["mult"]) / float(c[s]["mult"])
 	ok(is_equal_approx(lift, float(r["vent_mult"])), "ridge: a winged runner is %.2fx on the vent stretch" % lift)
-	ok(is_equal_approx(BaseRace.stretch_pace(ground, s) / BaseRace.stretch_pace(ground, other),
-			float(c[s]["mult"]) / float(c[other]["mult"])), "ridge: a runner without wings gets no lift")
+	ok(
+		is_equal_approx(
+			BaseRace.stretch_pace(ground, s) / BaseRace.stretch_pace(ground, other),
+			float(c[s]["mult"]) / float(c[other]["mult"])
+		),
+		"ridge: a runner without wings gets no lift"
+	)
 	GardenZones.here = ""
+
 
 ## In each built zone's own Home (the start zone's is the farm, below): a race post, and the loop lies on
 ## land clear of its toys and props without a step the ground can't take.
@@ -612,6 +689,7 @@ func _zone_tracks() -> void:
 		await main.get_tree().process_frame
 	FarmUnlocks.rules()["base_mode"] = true
 
+
 func _footing(z: String, home: Node, race: BaseRace) -> void:
 	var taken := {}
 	for e in HomeLayout.of(Save.d)["deco"]:
@@ -621,7 +699,7 @@ func _footing(z: String, home: Node, race: BaseRace) -> void:
 	var lane := float(BaseRace.rules()["lane"])
 	var worst := 0.0
 	var wet := 0
-	var dry := 0        # water-stretch samples off the zone's channel, in a zone that has one
+	var dry := 0  # water-stretch samples off the zone's channel, in a zone that has one
 	var blocked := 0
 	var tiles: Array = GardenZones.info(z).get("build", {}).get("shallow", [])
 	var channel := Rect2(tiles[0], tiles[1], tiles[2] - tiles[0] + 1, tiles[3] - tiles[1] + 1) if tiles else Rect2()

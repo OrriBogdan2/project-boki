@@ -18,6 +18,7 @@ func run(main_node: Node, mode := "check") -> void:
 	main = main_node
 	tree = main.get_tree()
 	Save.no_write = true
+	Luck.rules()["base"] = 0.0  # a lucky +2 adds a tail to the line (--playstyle-check tests luck)
 	if mode == "shots":
 		await _shots()
 	else:
@@ -74,6 +75,15 @@ func _texts(n: Node, into: Array) -> Array:
 	return into
 
 
+## {stat: points gained} between two stat blocks, in the order the results line lists them.
+func _grew(was: Dictionary, now: Dictionary) -> Dictionary:
+	var out := {}
+	for stat in PlayStyle.rules()["stat"].values():
+		if int(now[stat]) > int(was[stat]):
+			out[stat] = int(now[stat]) - int(was[stat])
+	return out
+
+
 ## All the XP a Boki has earned: the levels behind it plus the pool toward the next.
 func _total_xp(k: Dictionary) -> int:
 	var n := int(k.get("xp", 0))
@@ -102,15 +112,18 @@ func _check() -> void:
 	ok(int(gains[0]["xp"]) > int(gains[1]["xp"]), "the second Boki gets the smaller share")
 	t = _setup()
 	before = [_total_xp(t["a"]), _total_xp(t["b"])]
+	var stats0 := [t["a"]["stats"].duplicate(), t["b"]["stats"].duplicate()]
 	var scr: Control = load("res://scripts/ui/results.gd").new()
 	main.add_child(scr)
 	scr.show_result(t["r"])
 	var shown := _texts(scr, [])
 	for i in 2:
 		var k: Dictionary = [t["a"], t["b"]][i]
-		var gain := ResultsBokiLines.gain_text(_total_xp(k) - int(before[i]), float(k["trust"]) - 40.0)
+		var grew := _grew(stats0[i], k["stats"])
+		var gain := ResultsBokiLines.gain_text(_total_xp(k) - int(before[i]), float(k["trust"]) - 40.0, grew)
 		var line := "%s  %s" % [k["name"], gain]
 		ok(shown.has(line), "the screen shows '%s'" % line)
+		ok(not grew.is_empty(), "%s: the run it got out of grew a stat (%s)" % [k["name"], grew])
 	ok(shown.has("Wren  going home"), "a carried stolen wisp reads 'going home'")
 	var groups := scr.find_children("*", "", true, false).filter(
 		func(n): return n.has_meta("results_group") and (n as CanvasItem).is_visible_in_tree()

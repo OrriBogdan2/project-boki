@@ -34,7 +34,17 @@ const WEAPONS := [
 const SIZE := 128  # px: the icon masters
 ## Shaping items that reached main after the icon set was painted (docs/DEBT.md): they draw their family icon
 ## until their art lands. Each must still be unpainted, so the list cannot go stale.
-const AWAITING_ART := ["glowmoss_sprig", "mistbloom", "chimegrass"]
+const AWAITING_ART := [
+	"glowmoss_sprig",
+	"mistbloom",
+	"chimegrass",
+	"puffberry",
+	"nutty_crisp",
+	"dewdrop_jelly",
+	"sugar_twig",
+	"moon_fig",
+	"starfruit_tart"
+]
 
 var bad := 0
 var used := {}  # icon id -> true, for the unused-file sweep

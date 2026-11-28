@@ -58,6 +58,8 @@ func ok(cond: bool, what: String) -> void:
 
 
 func run(main: Node) -> void:
+	# (the bots' Boki draw from the match stream: a Balanced Boki strays 0.5 now, 0.3 dealt the bots this table was pinned on)
+	PlayStyle.rules()["tiers"][0]["stray"] = 0.3
 	Settings.v["boki_wisps"] = false  # (walking-Boki rules: the wisp is the default now, see --wisp-check)
 	WardenNative.contract_only = true  # (the contract path; Meshy-native Hunters: --warden-native-check)
 	Save.no_write = true

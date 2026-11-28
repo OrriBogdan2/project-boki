@@ -163,8 +163,7 @@ func _finish() -> void:
 	Care.change(rec, "energy", -18.0)
 	Care.change(rec, "food", -6.0)
 	Care.change(rec, "joy", 4.0 if grades.has("great") else -2.0)
-	var aff: String = {"power": "fierce", "guard": "steadfast", "speed": "swift", "focus": "curious"}[stat]
-	Evo.add(rec, aff, 2.0)
+	PlayStyle.garden(rec, "drill", stat)
 	h._garden_xp(rec, "drill", pts)
 	var sname := String(Care.STATS[stat]["name"]).to_lower()
 	var paid := int(pay["bites"]) > 0

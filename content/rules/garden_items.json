@@ -1,11 +1,13 @@
 {
-	"desc": "Shaping items (scripts/core/garden_items.gd; design briefs/design/GARDEN_MODERN.md section 1). They live in the garden bag (Save.d items), are fed from a Boki's feed menu, and always show their exact effect (no 'Effect: ?' rule). Effects: stat = +n to one Care.STATS stat up to its cap; xp = +n xp (levels and forms follow); token = a worn path token for the aff (rec.path, at most max_tokens, take_off returns it to the bag); stay = worn Stayleaf (rec.stay); rinse = clear rec.lean; loose = up to n points out of the Boki's highest stat into rec.loose; stat_all = +n to all four stats (up to the level cap); sweet = the picked type among types jumps to share of Evo.LEAN_FULL and holds (rec.hold, hold_days garden days, no fade from other meals); trait = a trait moves by (signed), counted in base_drift week_cap (rec.drift.moved); twin = shared by two Boki: trait by on each and bond between them. sources are where the item comes from; desc (nest items only) is the plain line under the item's row in the feed menu; this file does not drop them, except lair_drop below. aura = a worn look, one at a time (rec.aura; its aura block is drawn by GardenAura, scripts/home/garden_aura.gd: night_only glows after dark, lean takes the Boki's lean colour, chime puffs notes when HomeChimes hears it happy or winning; one particle set, none at low quality). Nest items (scripts/core/nest_items.gd) are placed in the Nesting Nook with a pair and used up when the egg is laid: nest gifts = n more inborn gifts from the parents per Thread (at most max Threads); species = the baby is the species of the parent wearing it; habit = the baby takes that parent's habit and strongest trait exactly. down = trust +trust and a memory line (one drops at every hatch).",
+	"desc": "Shaping items (scripts/core/garden_items.gd; design briefs/design/GARDEN_MODERN.md section 1). They live in the garden bag (Save.d items), are fed from a Boki's feed menu, and always show their exact effect (no 'Effect: ?' rule). Effects: stat = +n to one Care.STATS stat up to its cap; xp = +n xp (levels and forms follow); token = a worn path token for the aff (rec.path, at most max_tokens, take_off returns it to the bag); stay = worn Stayleaf (rec.stay); rinse = clear rec.lean; loose = up to n points out of the Boki's highest stat into rec.loose; stat_all = +n to all four stats (up to the level cap); sweet = the picked type among types jumps to share of Evo.LEAN_FULL and holds (rec.hold, hold_days garden days, no fade from other meals); trait = a trait moves by (signed), counted in base_drift week_cap (rec.drift.moved); twin = shared by two Boki: trait by on each and bond between them. sources are where the item comes from; desc (nest items only) is the plain line under the item's row in the feed menu; this file does not drop them, except lair_drop below. aura = a worn look, one at a time (rec.aura; its aura block is drawn by GardenAura, scripts/home/garden_aura.gd: night_only glows after dark, lean takes the Boki's lean colour, chime puffs notes when HomeChimes hears it happy or winning; one particle set, none at low quality). Nest items (scripts/core/nest_items.gd) are placed in the Nesting Nook with a pair and used up when the egg is laid: nest gifts = n more inborn gifts from the parents per Thread (at most max Threads); species = the baby is the species of the parent wearing it; habit = the baby takes that parent's habit and strongest trait exactly. luck = a luck treat: raises the lucky chance of its next gains (Luck, content/rules/luck.json; rare marks the rare ones); down = trust +trust and a memory line (one drops at every hatch).",
 	"lair_drop": {"chance": 0.35, "ids": ["thumpnut", "shellbark_chew", "zipseed", "hushpearl"]},
 	"lair_drop_doc": "The expedition's lair pile: chance 0..1 that a boss pile also holds one of these stat bites (picked at random). They are carried home as treasure marked bag (Loot.VALUABLES) and banked in the garden bag; the match is the only place this is rolled.",
 	"kill_drop": {"chance": {"skitter": 0.02, "spitter": 0.02, "bomber": 0.02, "sentinel": 0.08, "brute": 0.2, "warden": 0.4, "glimmer": 0.4},
 		"bite": {"skitter": "zipseed", "spitter": "hushpearl", "bomber": "thumpnut", "sentinel": "shellbark_chew", "brute": "thumpnut", "warden": "any", "glimmer": "any"},
 		"any": ["thumpnut", "shellbark_chew", "zipseed", "hushpearl"]},
 	"kill_drop_doc": "Stat bites from kills in a match (BiteDrops, scripts/match/bite_drops.gd, called from GearDrops.run_table; the stat economy in briefs/design/GARDEN_MODERN_BALANCE.md). chance: 0..1 per kill by drop table (absent = never; lair bosses use lair_drop). bite: the bite that table drops, so what you hunt decides the stat (quick skitters Speed, spitters Focus, bombers and brutes Power, sentinels Guard); any = one of the any list at random. A match has about 40 small kills and a few guards, so this is about 1 to 2 bites a match. Carried out like any treasure, banked in the garden bag.",
+	"treat_drop": {"lair": 0.3, "lair_rare": 0.06, "kill": {"brute": 0.03, "warden": 0.1, "glimmer": 0.1}, "kill_rare": 0.15},
+	"treat_drop_doc": "Luck treats from an expedition (Luck, content/rules/luck.json). lair: chance a boss pile with no stat bite (lair_drop) holds one common treat; lair_rare: chance it holds a rare one instead (rolled first, so it is the hard-to-reach prize). A pile holds one garden prize at most, so with lair_drop 0.35 that is about 4% rare and 20% common a lair. kill: chance per kill by drop table (BiteDrops, after its bite roll finds nothing); kill_rare: share of those kill drops that are a rare treat.",
 	"pip": 6.0,
 	"pip_doc": "Affinity points one worn path token adds to its path when a form is chosen (Evo.leading); the same as one meal of that path's food.",
 	"max_tokens": 3,
@@ -23,7 +25,8 @@
 		"stat": {"name": "Stat bites", "icon": "burst"},
 		"path": {"name": "Path tokens", "icon": "dash"},
 		"lean": {"name": "Rinse", "icon": "wave"},
-		"respec": {"name": "Unwinding", "icon": "recall"}
+		"respec": {"name": "Unwinding", "icon": "recall"},
+		"luck": {"name": "Luck treats", "icon": "clover"}
 	},
 	"families_doc": "Field Book page grouping: a family's name and picture; it gets a star once every item of it has been owned.",
 	"items": [
@@ -505,6 +508,54 @@
 				"Bramblebank patch",
 				"Mixing Bowl: 2 sweet buns"
 			]
+		},
+		{
+			"id": "puffberry",
+			"name": "Puffberry",
+			"family": "luck",
+			"use": "eaten",
+			"effect": {"kind": "luck", "rare": false},
+			"sources": ["Expedition lair pile", "Hunter drop"]
+		},
+		{
+			"id": "nutty_crisp",
+			"name": "Nutty Crisp",
+			"family": "luck",
+			"use": "eaten",
+			"effect": {"kind": "luck", "rare": false},
+			"sources": ["Expedition lair pile", "Brute drop"]
+		},
+		{
+			"id": "dewdrop_jelly",
+			"name": "Dewdrop Jelly",
+			"family": "luck",
+			"use": "eaten",
+			"effect": {"kind": "luck", "rare": false},
+			"sources": ["Expedition lair pile", "Glimmer drop"]
+		},
+		{
+			"id": "sugar_twig",
+			"name": "Sugar Twig",
+			"family": "luck",
+			"use": "eaten",
+			"effect": {"kind": "luck", "rare": false},
+			"sources": ["Expedition lair pile", "Hunter drop"]
+		},
+		{
+			"id": "moon_fig",
+			"name": "Moon Fig",
+			"family": "luck",
+			"use": "eaten",
+			"effect": {"kind": "luck", "rare": true},
+			"sources": ["Expedition lair pile (rare)", "Glimmer drop (rare)"]
+		},
+		{
+			"id": "starfruit_tart",
+			"name": "Starfruit Tart",
+			"family": "luck",
+			"use": "eaten",
+			"effect": {"kind": "luck", "rare": true},
+			"sources": ["Expedition lair pile (rare)", "Hunter drop (rare)"]
 		}
 	]
 }
