@@ -9,7 +9,8 @@ extends RefCounted
 const DT := 1.0 / 60.0
 const WARM := 30  # frames dropped before timing
 const TIMED := 120  # frames timed per block
-const ROUNDS := 4  # off/on blocks alternated, so a drifting box loads both sides alike
+const ROUNDS := 6  # off/on blocks alternated, so a drifting box loads both sides alike
+const REBUILDS := 400  # AimDraw rebuilds timed per side for the rims' own cost
 const SPAM_EVERY := 6  # frames between two plays
 const MOVES := ["bola_wrap", "bola_tangle", "knife_stick"]
 
@@ -53,6 +54,7 @@ func run(root: Node, mode: String = "check") -> void:
 	else:
 		_check()
 	print("SABLEVFX DONE, failures: %d" % bad)
+	main.get_tree().quit(1 if bad > 0 else 0)
 
 
 func _check() -> void:
@@ -79,8 +81,9 @@ func _check() -> void:
 
 func _ring_ok(id: String, r: float) -> void:
 	var e := AimKit.entry(pl, id)
-	ok(not e.is_empty() and is_equal_approx(float(e["r"]), r) and bool(e["all"]) and bool(e["soft"]),
-		"%s: a soft lit rim of %.1f m everyone sees" % [id, r])
+	var rim := not e.is_empty() and is_equal_approx(float(e["r"]), r) and bool(e["all"]) and bool(e["soft"])
+	ok(rim and not bool(e["tell"]),
+		"%s: a soft lit rim of %.1f m everyone sees, no TellCue wind-up" % [id, r])
 
 
 func _perf() -> void:
@@ -92,13 +95,46 @@ func _perf() -> void:
 	await _go(WARM, foes)
 	var off: Array = []
 	var on: Array = []
+	var deltas: Array = []
 	for r in ROUNDS:
 		spam = false
-		off.append_array(await _frame_ms(foes))
+		var o: Array = await _frame_ms(foes)
 		spam = true
-		on.append_array(await _frame_ms(foes))
-	var row := "SABLEVFX frame ms (%d frames each) off p95 %.2f | on p95 %.2f | delta p95 %.2f"
-	print(row % [off.size(), _p95(off), _p95(on), _p95(on) - _p95(off)])
+		var n: Array = await _frame_ms(foes)
+		off.append_array(o)
+		on.append_array(n)
+		deltas.append("%.2f" % (_p95(n) - _p95(o)))
+	var row := "SABLEVFX frame ms (%d frames each) off p95 %.2f | on p95 %.2f | delta p95 %.2f (per round: %s)"
+	print(row % [off.size(), _p95(off), _p95(on), _p95(on) - _p95(off), ", ".join(deltas)])
+	spam = false
+	_rims_cost(foes)
+
+
+## The rims' own CPU cost, free of the box's noise: AimDraw's rebuild (it runs every frame) timed REBUILDS times
+## with the wrap, tangle and knife rims up and with them gone (SABLEVFX rims row, microseconds per frame).
+func _rims_cost(foes: Array) -> void:
+	var kit = pl.ak
+	var d := AimKit.layer(m)
+	var f: Hunter = foes[0]
+	var up := func():
+		kit._hit_ring("bola_wrap", f.pos, ThiefKit.WRAP_RING_R)
+		kit._hit_ring("bola_tangle0", foes[1].pos, ThiefKit.TANGLE_RING_R)
+		kit.knife = {"target": f, "pos": f.pos, "dir": Vector2.RIGHT}
+		kit._tick_knife()
+	var cost := [0.0, 0.0]
+	for r in REBUILDS:
+		for side in 2:
+			kit.knife = {}
+			for id in ["bola_wrap", "bola_tangle0", "e_ring"]:
+				AimKit.hide(pl, id)
+			var t0 := Time.get_ticks_usec()
+			if side == 1:
+				up.call()
+			d.rebuild()
+			cost[side] += float(Time.get_ticks_usec() - t0)
+	kit.knife = {}
+	var row := "SABLEVFX rims us/frame (%d rebuilds each): off %.1f | on %.1f | delta %.1f"
+	print(row % [REBUILDS, cost[0] / REBUILDS, cost[1] / REBUILDS, (cost[1] - cost[0]) / REBUILDS])
 
 
 func _frame_ms(foes: Array) -> Array:

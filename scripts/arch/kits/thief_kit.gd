@@ -945,12 +945,12 @@ func _tick_knife() -> void:
 		# the stuck ring: the blink's arrival circle (e.ring_r, the source's 1.5 bh) as a lit rim on the ground
 		# while the dagger stays; a ground ring means gameplay, so it marks only where she lands (no hit area)
 		AimKit.circle(h, "e_ring", {"at": at, "r": float(e_def()["ring_r"]), "band": RING_BAND,
-				"col": col_of(e_def()), "soft": true, "all": true})
+				"col": col_of(e_def()), "soft": true, "all": true, "tell": false})
 
 ## A lit rim on the ground round a foe the Bola caught, `r` m, for HIT_RING_S (everyone sees it; a look, no hit area).
 func _hit_ring(id: String, at: Vector3, r: float) -> void:
 	AimKit.circle(h, id, {"at": at, "r": r, "band": RING_BAND, "col": BOLA_HOT, "soft": true, "all": true,
-			"hot": 0.5, "dur": HIT_RING_S})
+			"tell": false, "hot": 0.5, "dur": HIT_RING_S})
 
 ## Out from a barrier's face (the way the Vector2 of its a -> b turns a quarter).
 func _wall_out(w: Dictionary) -> Vector2:
