@@ -174,3 +174,13 @@ Scripts: `~/gens/hunter-round-1124/sparkle/p14/tools/` (pad6.py).
   geo_check vs live PASS (worst 3.0 cm, held 0), --warden-native-check 856 checks 0 failed.
 - Options B (50/50 blend, peak 145) and C (peak 142) and renders: ~/gens/sparkle-chest-mid-1128 (tools/mid.py, sheet_sparkle_chest_mid.jpg).
 - Not Meshy-regenerated: Meshy has no geometry-edit call; both ends are Meshy-origin meshes and this blends them (as the earlier bust fit did).
+
+## 11-28 bust round 2b: narrow + forward projection (owner 11-28 "made them wide and invisible from the side, needs a redo")
+- Round 1 blended toward the older bigger bust: 315 mm of vertices moved, peak only 145 mm = still behind the 155 mm hem lip, so invisible from the side.
+- Round 2b edits the LIVE vertex buffer directly (`~/gens/sparkle-chest-narrow-1128/tools/cup.py`): two circular dome cups pushed along +z (and 2 mm up) on the
+  front-chest verts, POSITION and NORMAL only on the 46,756-vert body prim, cups centred x +-42 mm, outer edge |x| <= 76 mm (live plateau +-80 mm): NOT wider than live.
+  Pick (sheet A, was option B of the first pass): 37 mm projection, R 34 x 38 mm, pow 1.1 -> side-profile peak 163 mm (live 130, +33; +8 mm over the hem lip), 95 vertices moved.
+  Hem band, face, textures, weights, clips untouched; glb_compact'd (10.4 MB). geo_check vs live PASS (worst 3.0 cm, held 0); `--warden-native-check`: all 66 mage rows ok (the 1 fail in the run is `thief: on Meshy's skeleton`, not Sparkle).
+- art-gate (close sheet, side/3-4/game rows): FAIL, 3.5/10 vs live 3.0. The bust now shows from the side but reads as a pointed cone with a tip nub and a hard underside notch, not round; bolt emblem slightly squeezed.
+  Owner fallback (11-27 11:30 PM EST): next round = Cinder's live chest shape scaled smaller at Sparkle's narrow width.
+- Renders: `--arms-out=170` and `--near=` options in tools/clip_shots.gd lift the arms overhead for a clear side view (render-only; patch at `~/gens/sparkle-chest-narrow-1128/tools/clip_shots_near.patch`, not committed).
