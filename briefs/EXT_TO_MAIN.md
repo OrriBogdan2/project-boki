@@ -11594,3 +11594,4 @@ READY ext/extra-garden-race 2953210f1c (Grand Dash prototype: 3-lap Dash, bots f
 READY ext/mob-glb-turnaround caf068017026cd943d70e38b6a4b345bf7a1db57 (tools: --mob-turnaround-shots + sheet composer; 12 mob sheets in gens/mob-glb-turnaround, no model edits)
 READY ext/anim-starter-boki-hit-death 077455daa6 (starter Boki proc beats: hit hop-back, 0.4s downed topple + breathing, revive pop; react check + coverage note)
 READY ext/combat-lasthit-tell e20f6cbc2d (last-hit tell: boss/chief body pulse + gold bar at 15%, leading-squad bar strip via bat event, Net 0.24.30)
+READY ext/vfx-sable-bola-knife c87772a1375c961ca1f180144c759f1c5752684b (Sable Bola wrap hit frame + soft lane, Knife stick hit frame; knife arrival ring plays but not visible in strip, open)
