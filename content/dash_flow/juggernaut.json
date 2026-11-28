@@ -54,7 +54,7 @@
 		},
 		"rmb": {
 			"mode": "fire",
-			"source": "Data: 'turning restricted after RMB into Shift' (patch 05.02.25): RMB into Shift is a combo, the dash going the strike's way. Ours: Shift in the Slam's wind-up is a Slam Drive: the drive goes at once (no crouch) along the strike's aim, the overhead pose kept, and the Slam lands where it arrives. In a Meteor Drop's hang the air dash goes and the dive comes down onto the marker from where it took him; its recovery dashes at once. A Lunge or the dive is a dash of its own: Shift goes the step it ends (at most 0.3s)."
+			"source": "Data: 'turning restricted after RMB into Shift' (patch 05.02.25): RMB into Shift is a combo, the dash going the strike's way. Ours: Shift in the Slam's wind-up is a Slam Drive: the drive goes at once (no crouch) along the strike's aim, the overhead pose kept, and the Slam lands where it arrives. In a Meteor Drop's hang the air dash goes and the dive comes down onto the marker from where it took him; its recovery dashes at once. A Lunge or the dive is a dash of its own: Shift goes the step it ends (at most 0.3s). Turn limit (closed 5f99dce0f5): out of a Smash and 0.8s after it the dash goes within 35 degrees of the Smash's way (the Lunge's line, the Slam's aim) and his body follows the dash, not the cursor (dash.lock_t / lock_deg; the patch gives no number: Grimble's for the same patch); --juggernaut-combo-check asserts the yaw through the dash."
 		},
 		"e": {
 			"mode": "cancel",

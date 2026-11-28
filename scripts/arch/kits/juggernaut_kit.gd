@@ -169,6 +169,7 @@ func _tick(dt: float) -> void:
 	elif res_wait <= 0.0:
 		add_res(-float(rd.get("decay", 9.0)) * dt)
 	if lmb_buf > 0.0: lmb_buf -= dt
+	if smash_running(): lock_turn(_smash_way())   # a dash out of a Smash (or dash.lock_t after it) can't turn far
 	if not slam_w.is_empty(): _tick_slam(dt)
 	if not lunge.is_empty(): _tick_lunge()
 	warchain.tick(dt)
@@ -495,7 +496,7 @@ func on_dash(use_ex: bool) -> bool:
 	if use_ex and not h.grounded and h.dashes < 1.0:          # a charge in the air is the same Rampage (item 183)
 		if not spend_dash(true): return true
 		travel(float(h.cdat.get("ex_dist", 4.2)), float(h.cdat.get("ex_time", 0.21)),
-				{"invuln": 0.08, "trail": "dust", "feel": "long"})
+				{"invuln": 0.08, "trail": "dust", "feel": "long", "dir": turn_limited(dash_dir())})
 		if not meteor.running(): play("jug_exdash")     # out of charges: a hurled shoulder charge, knees tucked
 		return true
 	if not spend_dash(false):
@@ -503,7 +504,7 @@ func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
 	var in_hang := meteor.running()           # the Smash's gather: the drive rides it, the gather pose kept
 	var wind := 0.0 if from_pull or from_slam or in_hang else float(dd.get("windup", 0.15))
-	var dir := h.aim_dir() if from_slam else dash_dir()
+	var dir := turn_limited(h.aim_dir() if from_slam else dash_dir())     # just after a Smash it can't turn far
 	rampage_dir = dir
 	st["last_dash"] = "rampage"
 	# its wind-down: no glider straight out of the dash's end (a glide pressed during it opens at once, owner 11-08)
@@ -523,7 +524,9 @@ func on_dash(use_ex: bool) -> bool:
 	vfx("dash_wind", h.pos, dir)
 	# the crouch is the dash's start standing still (planted; DashFlow and the dash rules see the dash from here)
 	rampage_wind = wind
-	h.dash_with({"type": "dash", "speed": 0.0, "time": wind, "dir": dir, "invuln": 0.0})
+	# (+0.02: a crouch started inside his tick, a held Shift let go as a Lunge ends, runs a step behind the dash
+	# clock; the pad keeps the dash alive until the drive takes over, so the drive is never dropped)
+	h.dash_with({"type": "dash", "speed": 0.0, "time": wind + 0.02, "dir": dir, "invuln": 0.0})
 	return true
 
 ## The crouch before the drive: the drive goes when it's done, unless something ended the dash first (a stun,
@@ -677,6 +680,13 @@ func press_rmb() -> void:
 	super.press_rmb()
 	if rmb_down and rmb_ctx.get("e", false):
 		_release_rmb()
+
+## The way the running Smash goes, for the dash's turn lock: the Lunge's line, the Slam's aim (free in its
+## wind-up), else where he faces (the Meteor Drop).
+func _smash_way() -> Vector2:
+	if not lunge.is_empty(): return lunge["dir"]
+	if not slam_w.is_empty(): return h.aim_dir()
+	return Vector2(-sin(h.face), -cos(h.face))
 
 ## A heavy move owns the body: Smash and slash presses wait (Loco.press_buffer).
 func smash_running() -> bool:

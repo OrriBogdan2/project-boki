@@ -19,7 +19,7 @@ docs/wiki/Inspirations.md.
   stronger"; both are pre-patch, so the wiki wins. The Flame Step cooldown is 13s in the header and 11/9/7/6 in
   the notes; we use the notes' shape.
 - **Not reproduced:** mana, dodges building Rage, Volcanic Rebuke sending a
-  knocked hunter straight to the deathbox, the turn lock after RMB into the dash.
+  knocked hunter straight to the deathbox.
 
 ## Ranks: source tier table (rank 2 = tier II, rank 3 = tiers III + IV)
 On level-up the player picks the slot to rank; rank 3 is the max and carries the tier-IV bonus, folded the way the
@@ -374,7 +374,7 @@ From the wiki's ability page and patch notes (reference notes) and the owner's n
 | Dodging shots during the dash builds Empowered (top rank) | owner's game data | no | Built at rank 3: the perfect-dodge hook feeds 15 Rage |
 | The Obsidian Slam has its own cooldown slot (9s, -3s at the top) | owner's game data | n/a | Built: 7.2s, 4.8s at rank 3; the Smash stays ready |
 | The Flame Step tip does not stun into walls | owner's game data | n/a | Built: the wall stun is gone |
-| Turning is restricted when the dash follows an RMB | wiki patch 05.02.25 | no | Not built (a turn lock reads as lag in our camera); Assumption 7 |
+| Turning is restricted when the dash follows an RMB | wiki patch 05.02.25 | no | Built (`5f99dce0f5`): out of a Smash and 0.8s after it the dash turns at most 35 degrees from the Smash's way, the body along the dash; asserted (`tools/kael_turn_check.gd`) |
 | The ult: 0.65s of invulnerability, then the strike | wiki R | yes (ult f33-f39) | Built: blocks every hit and its crowd control; asserted |
 | The ult heals for a share of the damage dealt (80% on the newer card) | wiki R, in-game card | n/a | Built (80%); asserted |
 | No heal while anti-healed | wiki patch 08.21.2024 | n/a | Built through blight (healing barely takes); asserted |
@@ -384,7 +384,7 @@ From the wiki's ability page and patch notes (reference notes) and the owner's n
 | The ult resets on a hunter taken down or any living foe it kills | wiki R, patch 22.01.25 (no reset from wisps) | yes (ult f99-f101) | Built: a hunter, a monster or a foe Boki; not a wisp (`4ea2625c13`) |
 | He lunges about 1 bh into the strike | footage ult f39 | yes | Built (1.8m); asserted |
 
-Assumption 7: the dash after an RMB turns freely; the pull keeps 35% of its speed as you arrive (the owner: "arrival keeps momentum").
+Assumption 7: the turn limit's numbers (35 degrees, 0.8s) are Grimble's for the same patch (the source gives none); the pull keeps 35% of its speed as you arrive (the owner: "arrival keeps momentum").
 Also ours (no footage): the pull exits (Shift, a jump) and the 0.15 s input buffer are ours; the footage shows none of them.
 
 ## Cancels (ability to ability)
@@ -628,8 +628,8 @@ sv/briefs/kits.md, DECISIONS: owner notes win). Verdicts: **match**, **differ (o
 `kit` is scripts/arch/kits/juggernaut_kit.gd, `chain` juggernaut_chain.gd, `ult` juggernaut_ult.gd, `drop`
 juggernaut_drop.gd, `json` content/archetypes/juggernaut.json, `flow` content/dash_flow/juggernaut.json.
 `--juggernaut-combo-check` 183/0 and `--hero-combo-check` 304/0 on main (Nov 9). Nov 20: kael-lunge-length (`4ea2625c13`,
-`e738af1ca7`), kael-riposte-knock, kael-ult-reset and gaps-juggernaut are on main or their branches are gone; kael-rmb-dash-turn
-and kael-tap-ult-1108 are still not merged. Rows below say which.
+`e738af1ca7`), kael-riposte-knock, kael-ult-reset and gaps-juggernaut are on main or their branches are gone; kael-tap-ult-1108
+is still not merged; kael-rmb-dash-turn was rebuilt on 11-28 (`5f99dce0f5`). Rows below say which.
 
 | Row | Verdict | Where | Note |
 |---|---|---|---|
@@ -660,7 +660,7 @@ and kael-tap-ult-1108 are still not merged. Rows below say which.
 | Dash: length 4.5 m x 0.85 feel in 0.17s | done, match 559d56bd5ab | json:25, dash_feel.json:4 | travels 3.8 m in 0.20 s (x0.85, x1.15); [F] about 2 bh (3.6 m) in about 0.2 s (0387-0388). No change |
 | Dash rows, ground: LMB buffer, RMB fire, E fire, X cancel, Q fire | match | flow:5, flow:9, flow:14, flow:18, flow:22 | each row carries its source; Q is ours |
 | Dash rows, air: LMB buffer, RMB cancel (Meteor Drop), E fire, X cancel, Q fire | match | flow:28, flow:32, flow:36, flow:40, flow:44 | air LMB and E have no source |
-| Into-dash: LMB fire, RMB fire (Slam Drive), X buffer | match | flow:51, flow:55, flow:64 | patch 05.02.25 turn limit not built: ext/kael-rmb-dash-turn unmerged (open) |
+| Into-dash: LMB fire, RMB fire (Slam Drive), X buffer | match | flow:51, flow:55, flow:64 | patch 05.02.25 turn limit built (`5f99dce0f5`, 35 degrees for 0.8s) |
 | Into-dash: E cancels the pull | done, differ (owner) 7cea43a2e8b | flow:59 | Shift in the pull ends it into the Rampage; [D] [F] silent, owner item 22 (as the exit row) |
 | Hold rows: LMB and RMB keep through dash and jump | match | flow:71, flow:84 | [O] |
 | Into-jump: X locked | match | flow:97 | planted guard |

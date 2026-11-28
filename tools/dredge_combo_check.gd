@@ -581,7 +581,7 @@ func _all() -> void:
 	# --- Barge right after the Anchor can't turn
 	reset.call()
 	p.face = -PI / 2.0
-	k.lock_until = m.time + 0.8
+	k.lock_turn()
 	ak.aim_at(p, home + Vector3(-8.0, 0, 0))
 	var p1 := p.pos
 	var fwd := Vector2(-sin(p.face), -cos(p.face))
