@@ -285,6 +285,16 @@ func heavy_reach() -> float:
 	var pd: Dictionary = rmb_def()["pin"]
 	return float(pd["range"]) + (float(pd["range_rank3"]) if rank("sec") >= 3 else 0.0)
 
+## How far a Heavy Shot of charge `k` (0..1) flies: the uncharged reach, scaled by the "range_k" row.
+func heavy_range(k: float) -> float:
+	var rk: Array = rmb_def()["pin"]["range_k"]
+	return heavy_reach() * lerpf(float(rk[0]), float(rk[1]), k)
+
+## How long a wall hit stuns at charge `k` (0..1): the "stun" row, tap to full.
+func heavy_stun(k: float) -> float:
+	var sr: Array = rmb_def()["pin"]["stun"]
+	return lerpf(float(sr[0]), float(sr[1]), k)
+
 ## The Heavy Shot can be held up to 3 s after it's full before it looses by itself (wiki patch 20.11.24).
 func rmb_auto_t() -> float:
 	return float(rmb_def()["pin"].get("max_hold", 3.0))
@@ -331,11 +341,9 @@ func fire_rmb(c: Dictionary) -> void:
 ## its charge and, driven into a wall within 3m, stuns (PINNED). Full charge is a heavy hit.
 func _pin(a: Vector3, k: float) -> void:
 	var pd: Dictionary = rmb_def()["pin"]
-	var reach := heavy_reach()
-
 	var dmg := lerpf(float(pd["dmg"][0]), float(pd["dmg"][1]), k)
 	var push := lerpf(float(pd["push"][0]), float(pd["push"][1]), k)
-	var stg := stage("rmb", {"delivery": {"type": "projectile", "speed": float(pd["speed"]), "range": reach * (1.0 + 0.2 * k), "size": lerpf(0.2, 0.34, k)},
+	var stg := stage("rmb", {"delivery": {"type": "projectile", "speed": float(pd["speed"]), "range": heavy_range(k), "size": lerpf(0.2, 0.34, k)},
 		"effects": [{"type": "damage", "amount": dmg}, {"type": "push", "strength": push, "from": "caster"}]})
 	var bow := bow_mouth()
 	var to := Vector2(a.x - bow.x, a.z - bow.z)
@@ -367,7 +375,7 @@ func _pin(a: Vector3, k: float) -> void:
 			f.hurt(float(pd["wall_mult"]) * dmg * power("sec"), h, {"src": "abil", "ab": "utility", "tags": ["utility", "pin"], "heavy": true})
 			m.later(0.12, func():
 				if is_instance_valid(f) and not f.dead:
-					f.hurt(0.1, h, {"stun": float(pd["stun"]), "src": "abil", "ab": "utility", "tags": ["utility", "pin"], "exploit": true, "dr": true})
+					f.hurt(0.1, h, {"stun": heavy_stun(k), "src": "abil", "ab": "utility", "tags": ["utility", "pin"], "exploit": true, "dr": true})
 					vfx("heavy_stun", f.pos, dir, {"k": k})
 					m.fx.dust(f.pos, 10))
 	run_own(stg, cx("rmb", "heavy_shot", a, extra))
