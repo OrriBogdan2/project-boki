@@ -1,8 +1,11 @@
 extends RefCounted
 ## --loot-full-shots --shots-dir=<dir>: screenshots of looting with a full backpack (run under xvfb with a
 ## renderer). 1: a deathbox window holding a clicked thing in red, a Swap on each of your backpack things.
-## 2: the same box right after a swap. 3: a ground item's swap window with the red full outline.
+## 2: the same box right after a swap. 3: a ground item's swap window with the red full outline. Then a
+## deathbox of gear (slot tags, rarity colours, Wear / Swap) with a glove's compare card, and the ground card.
 ## <dir>/captions.txt gets "file: caption" per file.
+
+const INV_SHOTS := preload("res://tools/inv_shots.gd")
 
 var main: Node
 var m: Match
@@ -47,6 +50,7 @@ func run(main_node: Node) -> void:
 	m.hud.open_swap(m.wpicks[m.wpicks.size() - 1])
 	await _frames(8)
 	await _shot("ground_full", "A ground item with a full backpack: the incoming item outlined red above your things")
+	await _gear_box(p, q)
 	await _ground_compare(p)
 	var f := FileAccess.open(dir.path_join("captions.txt"), FileAccess.WRITE)
 	for c in captions:
@@ -54,6 +58,29 @@ func run(main_node: Node) -> void:
 	f.close()
 	print("LOOTFULLSHOTS %d in %s" % [captions.size(), dir])
 	main.get_tree().quit(0)
+
+## A deathbox of gear for a dressed hunter, a glove row pointed at: its compare card with the arrows.
+func _gear_box(p: Hunter, q: Hunter) -> void:
+	INV_SHOTS.dress(p)
+	p.pack_cap = 6
+	var bx: Dictionary = load("res://tools/loot_full_check.gd").make_box(q, p.pos, [Loot.gear("blink", 3), Loot.valuable("sky_pearl")])
+	bx["gear"] = [{"id": "vest", "rar": 3}, {"id": "boots", "rar": 0}]
+	m.boxes.append(bx)
+	m.hud.open_loot(bx)
+	await _frames(6)
+	var w: LootWindow = m.hud.loot_panel
+	var rows := w.find_children("*", "PanelContainer", true, false).filter(
+		func(c): return c.get_parent() is HBoxContainer and (c as Control).mouse_filter == Control.MOUSE_FILTER_STOP)
+	var glove: Control = rows.filter(func(c): return _has_text(c, "Blink"))[0]
+	glove.mouse_entered.emit()
+	await _frames(4)
+	await _shot("gear_box", "A deathbox of gear: slot and key tags, rarity colours, Wear on a better piece, Swap on a "
+		+ "worse one, and the pointed-at glove's compare card (green up arrow better, red down arrow worse)")
+	m.hud.close_loot()
+	m.boxes.erase(bx)
+
+func _has_text(c: Node, part: String) -> bool:
+	return c.find_children("*", "Label", true, false).any(func(l): return (l as Label).text.contains(part))
 
 ## Standing at better boots on the ground while wearing worse ones: the compare card over the prompt.
 func _ground_compare(p: Hunter) -> void:

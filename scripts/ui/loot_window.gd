@@ -4,7 +4,8 @@ extends PanelContainer
 ## thing one line in its rarity colour with an UPGRADE mark where it beats what you wear and one button.
 ## Right, you: what you wear (marked WORN, in place) and then your backpack. Point at a thing for its
 ## card (gear is compared with what you wear). Interact takes everything worth having (better gear goes
-## on), Enter takes the thing pointed at, Esc closes. With a full backpack a clicked thing is held and
+## on), the confirm key takes the thing pointed at, the menu key closes. A gear row names its slot (and
+## the key that uses it) and takes in one click; with a full slot or backpack a clicked thing is held and
 ## each of your backpack things gets a Swap. The logic is Life, Pack and LootFull; Hud opens and closes it.
 
 const INK := Color("f3eee2")
@@ -60,15 +61,12 @@ func _state() -> String:
 func _input(event: InputEvent) -> void:
 	if not (event is InputEventKey) or not event.pressed or event.echo:
 		return
-	match (event as InputEventKey).keycode:
-		KEY_ESCAPE:
-			_on_close.call()
-		KEY_ENTER, KEY_KP_ENTER:
-			if not _hover.is_valid():
-				return
-			_hover.call()
-		_:
-			return
+	if event.is_action("menu"):
+		_on_close.call()
+	elif event.is_action("confirm") and _hover.is_valid():
+		_hover.call()
+	else:
+		return
 	get_viewport().set_input_as_handled()
 
 # ------------------------------------------------------------------ building
@@ -145,7 +143,8 @@ func _foot() -> HBoxContainer:
 	all.focus_mode = Control.FOCUS_NONE
 	all.tooltip_text = "Better gear goes on, the rest into your backpack while there is room"
 	foot.add_child(all)
-	var hint := UI.label("Point at a thing to compare  ·  Enter takes it  ·  Esc closes", 12, MUTED)
+	var hint := UI.label("Point at a thing to compare  ·  %s takes it  ·  %s closes" % [
+		Settings.key_cap("confirm"), Settings.key_cap("menu")], 12, MUTED)
 	hint.autowrap_mode = TextServer.AUTOWRAP_OFF
 	hint.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	foot.add_child(hint)
@@ -181,18 +180,23 @@ func _box_row(it: Dictionary) -> PanelContainer:
 	var held := String(it["key"]) == "pack" and int(it["i"]) == _held
 	var wears := String(it["key"]) == "gear" or bool(it.get("wear", false))
 	var up := wears and bool(it["upgrade"])
+	var gear_it := InvText.box_gear(_b, it)
 	var verb := "Take"
 	if held:
 		verb = "Cancel"
 	elif wears:
-		verb = "Wear"
-	elif not fit and not LootFull.holdable(it):
+		verb = "Wear" if up or bool(it.get("wear", false)) else "Swap"  # a worse piece trades places with yours
+	elif not fit and LootFull.holdable(it):
+		verb = "Swap"
+	elif not fit:
 		verb = "Full"
 	var on_take := func(): take(it)
-	var rp := _row(String(it["icon"]), it["col"], String(it["name"]), "UPGRADE" if up else "", GOOD, verb, on_take, up)
+	var tags := _slot_tags(gear_it)
+	if up:
+		tags.append(["UPGRADE", GOOD])
+	var rp := _row(String(it["icon"]), it["col"], String(it["name"]), tags, verb, on_take, up)
 	if held or not fit:
 		LootHold.mark_full(rp)
-	var gear_it := InvText.box_gear(_b, it)
 	var lines := func(): return InvText.compare(p, gear_it) if not gear_it.is_empty() \
 		else [[String(it["name"]), it["col"]], [String(it["sub"]), INK]]
 	_tip.attach(rp, lines, func(): _hover = on_take, func(): _hover = Callable())
@@ -241,13 +245,14 @@ func _you_list(p: Hunter) -> VBoxContainer:
 		if g.is_empty():
 			continue
 		var it := Loot.gear(String(g["id"]), int(g["rar"]))
-		var rp := _row(Loot.icon_of(it), Loot.col_of(it), Loot.name_of(it), "WORN", INK, "", Callable(), false)
+		var rp := _row(Loot.icon_of(it), Loot.col_of(it), Loot.name_of(it),
+			[[InvText.slot_label(slot).to_upper(), MUTED], ["WORN", INK]], "", Callable(), false)
 		_tip.attach(rp, func(): return InvText.worn(p, slot, "Worn now"))
 		list.add_child(rp)
 	for i in p.pack.size():
 		var it: Dictionary = p.pack[i]
 		var swap := func(): _swap(i)
-		var rp := _row(Loot.icon_of(it), Loot.col_of(it), Loot.name_of(it), "", INK,
+		var rp := _row(Loot.icon_of(it), Loot.col_of(it), Loot.name_of(it), _slot_tags(it),
 			"Swap" if _held >= 0 else "", swap, true)
 		var lines := func(): return InvText.compare(p, it) if String(it.get("t", "")) == "gear" \
 			else [[Loot.name_of(it), Loot.col_of(it)], [Loot.sub_of(it), INK], ["Worth %d" % Loot.value(it), MUTED]]
@@ -267,9 +272,15 @@ func _swap(mine: int) -> void:
 	_fill()
 
 # ------------------------------------------------------------------ one row
-## One line: icon, name in its colour, an optional tag, an optional button. A row with a button is
-## clickable as a whole.
-func _row(icon: String, col: Color, item_name: String, tag: String, tag_col: Color, verb: String, cb: Callable,
+## The slot tag of a piece of gear ("GLOVE 1  ·  Q": where it goes and the key that uses it), or none.
+func _slot_tags(gear_it: Dictionary) -> Array:
+	if gear_it.is_empty():
+		return []
+	return [[InvText.slot_label(GearCompare.slot_for(_m.player, gear_it)).to_upper(), MUTED]]
+
+## One line: icon, name in its colour, small tags ([[text, colour]]), an optional button. A row with a
+## button is clickable as a whole.
+func _row(icon: String, col: Color, item_name: String, tags: Array, verb: String, cb: Callable,
 		primary: bool) -> PanelContainer:
 	var rp := PanelContainer.new()
 	rp.add_theme_stylebox_override("panel", LootHold.row_box(col, 3))
@@ -287,8 +298,8 @@ func _row(icon: String, col: Color, item_name: String, tag: String, tag_col: Col
 	nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	nm.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(nm)
-	if tag != "":
-		var tl := UI.label(tag, 12, tag_col, UI.caps)
+	for tg in tags:
+		var tl := UI.label(String(tg[0]), 12, tg[1], UI.caps)
 		tl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(tl)
 	if verb != "":

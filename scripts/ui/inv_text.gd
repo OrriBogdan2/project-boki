@@ -16,6 +16,10 @@ static func slot_label(slot: int) -> String:
 		return "%s  ·  %s" % [Gear.WORN_NAMES[slot], Gloves.key_cap(slot)]
 	return Gear.WORN_NAMES[slot]
 
+## One changed number as a card line: a green up arrow when it is better, a red down arrow when worse.
+static func change_line(text: String, better: bool) -> Array:
+	return ["%s %s" % ["▲" if better else "▼", text], GOOD if better else BAD]
+
 ## Hover card for a piece of gear (not worn yet): what it does and how it differs from what you wear.
 static func compare(h: Hunter, it: Dictionary) -> Array:
 	var id := String(it["id"])
@@ -31,7 +35,7 @@ static func compare(h: Hunter, it: Dictionary) -> Array:
 		out.append(["Instead of %s  ·  %s" % [worn_name, slot_label(slot)], MUTED, SMALL])
 	var changes := GearCompare.changes(it, worn)
 	for c in changes:
-		out.append([c[0], GOOD if c[1] else BAD])
+		out.append(change_line(String(c[0]), bool(c[1])))
 	if changes.is_empty():
 		out.append(["Same numbers as what you wear", MUTED, SMALL])
 	out.append([Gear.desc_of(id, rar), MUTED, SMALL])

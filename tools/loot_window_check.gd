@@ -45,6 +45,7 @@ func run(main_node: Node) -> void:
 	await _layout(_box(q, p, 12), tag + " long box")
 	await _all_takeable(p, q)
 	_wears_upgrade(p, q)
+	await _compare_and_swap(p, q)
 	print("LOOT WINDOW CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -153,7 +154,7 @@ func _wears_upgrade(p: Hunter, q: Hunter) -> void:
 	(takes[0] as Button).pressed.emit()
 	ok(p.gear.any(func(g): return String((g as Dictionary).get("id", "")) == "blink"), "taking it puts it on")
 	var esc := InputEventKey.new()
-	esc.keycode = KEY_ESCAPE
+	esc.physical_keycode = KEY_ESCAPE
 	esc.pressed = true
 	if m.hud.loot_open == null:
 		m.hud.open_loot(bx)
@@ -162,10 +163,57 @@ func _wears_upgrade(p: Hunter, q: Hunter) -> void:
 	m.boxes.erase(bx)
 
 
+## Compare lines, slot tags and the one-click take: a hovered glove says better or worse with arrows, each
+## gear row names its slot and key, the footer names its keys through Settings.key_cap, one click on a
+## better piece puts it in its slot, a worse piece reads Swap and trades places with yours in one click, and
+## a worse backpack piece with a full backpack reads Swap and holds for you to pick what to give up.
+func _compare_and_swap(p: Hunter, q: Hunter) -> void:
+	INV_SHOTS.dress(p)  # worn: Power Core (rar 2) and Frost (rar 1) gloves, Coat, Boots
+	var blink := Loot.gear("blink", 3)
+	var lines: Array = InvText.compare(p, blink)
+	ok(lines.any(func(l): return String(l[0]).begins_with("▲")), "a better glove: its lines carry an up arrow")
+	ok(lines.any(func(l): return String(l[0]).contains(InvText.slot_label(GearCompare.slot_for(p, blink)))),
+		"the compare card names the slot it goes in and the key")
+	p.gear[3] = {"id": "boots", "rar": 3}
+	var worse: Array = InvText.compare(p, Loot.gear("boots", 0))
+	ok(worse.any(func(l): return String(l[0]).begins_with("▼")), "a worse pair of boots: a down arrow")
+	var bx: Dictionary = LOOT_FULL.make_box(q, p.pos, [Loot.gear("blink", 3)])
+	bx["gear"] = [{"id": "boots", "rar": 0}]
+	m.boxes.append(bx)
+	m.hud.open_loot(bx)
+	var w: LootWindow = m.hud.loot_panel
+	var texts := _texts(w)
+	var slot := GearCompare.slot_for(p, blink)
+	ok(texts.has(InvText.slot_label(slot).to_upper()), "a glove row names its slot and key")
+	ok(texts.any(func(t): return String(t).contains(Settings.key_cap("confirm"))), "the footer names the confirm key")
+	var verbs := _take_buttons(w).map(func(b): return (b as Button).text)
+	ok(verbs.has("Swap") and verbs.has("Wear"), "worse boots read Swap, the better glove Wear (%s)" % [verbs])
+	var row: Dictionary = Life.box_items(m, p, bx).filter(func(r): return r["key"] == "gear")[0]
+	w.take(row)  # one click on the worse boots
+	ok(p.gear[3]["id"] == "boots" and int(p.gear[3]["rar"]) == 0, "one click on the boots put them on")
+	ok(bx["gear"].size() == 1 and bx["gear"][0]["id"] == "boots", "yours went into the box in their place")
+	m.hud.close_loot()
+	m.boxes.erase(bx)
+	bx = LOOT_FULL.make_box(q, p.pos, [Loot.gear("blink", 0)])
+	m.boxes.append(bx)
+	p.pack = [Loot.valuable("kin_idol"), Loot.valuable("kin_idol")]
+	p.pack_cap = 2
+	p.gear[slot] = {"id": "blink", "rar": 4}  # the box's glove is worse than what you wear, and no room
+	m.hud.open_loot(bx)
+	row = Life.box_items(m, p, bx).filter(func(r): return r["key"] == "pack")[0]
+	var swap_btns := _take_buttons(m.hud.loot_panel).filter(func(b): return (b as Button).text == "Swap")
+	ok(not swap_btns.is_empty(), "a worse glove with a full backpack reads Swap, not a dead Full")
+	m.hud.loot_panel.take(row)
+	await _frames(1)
+	ok(_texts(m.hud.loot_panel).any(func(t): return String(t).contains("swap one")), "its click asks which to give up")
+	m.hud.close_loot()
+	m.boxes.erase(bx)
+
+
 ## The take buttons of the box column (the first column's buttons; your column has none unless holding).
 func _take_buttons(w: Control) -> Array:
 	return w.find_children("*", "Button", true, false).filter(
-		func(b): return (b as Button).text in ["Take", "Wear", "Full"]
+		func(b): return (b as Button).text in ["Take", "Wear", "Swap", "Full"]
 	)
 
 

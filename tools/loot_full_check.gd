@@ -179,9 +179,9 @@ func _ground_compare(p: Hunter) -> void:
 	var head := String(ls[0][0]) if ls.size() > 0 else ""
 	ok(ls.size() >= 2 and head.begins_with("Replaces ") and head.contains(InvText.slot_label(slot)),
 		"ground gear for a worn slot: names what it replaces and where (%s)" % head)
-	var better := ls.slice(1).filter(func(l): return String(l[0]).ends_with("(better)"))
-	ok(better.size() == ls.size() - 1, "a higher rarity: every changed line says better (%d)" % better.size())
+	var better := ls.slice(1).filter(func(l): return String(l[0]).begins_with("▲"))
+	ok(better.size() == ls.size() - 1, "a higher rarity: every changed line has the up arrow (%d)" % better.size())
 	p.gear[slot] = {"id": "windstep_boots", "rar": 3}
 	at["wp"] = {"gear": "windstep_boots", "rar": 0}
-	var worse := GroundCompare.lines(p, at).slice(1).filter(func(l): return String(l[0]).ends_with("(worse)"))
-	ok(worse.size() >= 1, "a lower rarity: its lines say worse (%d)" % worse.size())
+	var worse := GroundCompare.lines(p, at).slice(1).filter(func(l): return String(l[0]).begins_with("▼"))
+	ok(worse.size() >= 1, "a lower rarity: its lines have the down arrow (%d)" % worse.size())
