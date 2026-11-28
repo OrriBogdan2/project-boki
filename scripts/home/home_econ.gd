@@ -566,7 +566,7 @@ func show_away() -> void:
 			var info: Array = Care.STARVE_INFO[String(e["stage"])]
 			lines.append("%s: %s." % [e["rec"]["name"], String(info[0]).to_lower()])
 			for part in String(info[1]).trim_suffix(".").split(". "):
-				lines.append("  %s." % part)
+				lines.append("  %s." % KinSpeak.about(e["rec"], part))
 			told[e["rec"]["uid"]] = String(e["stage"])
 	away = []
 	for g in died:
@@ -589,7 +589,7 @@ func refuse_reason() -> String:
 	if ak.is_empty():
 		return ""
 	if Care.refuses_to_go(ak):
-		return "%s is too weak from hunger and its belly is empty. Give it one meal and it will come, or pick another partner." % ak["name"]
+		return KinSpeak.about(ak, "%s is too weak from hunger and {his} belly is empty. Give {him} one meal and {he} will come, or pick another partner." % ak["name"])
 	return ""
 
 # ------------------------------------------------------------------ the graveyard
@@ -598,7 +598,7 @@ func open_graveyard() -> void:
 	var gs: Array = Econ.graves()
 	UI.subtitle(v, "Boki who didn't make it rest here")
 	if gs.is_empty():
-		v.add_child(UI.empty_state("heart", "Nobody rests here", "Keep your Boki fed and it stays that way."))
+		v.add_child(UI.empty_state("heart", "Nobody rests here", "Keep your Boki fed to stay that way."))
 		return
 	for i in range(gs.size() - 1, -1, -1):
 		var g: Dictionary = gs[i]
@@ -668,7 +668,7 @@ func _soul_row(v: VBoxContainer, g: Dictionary) -> void:
 		if why2 != "":
 			r.add_child(UI.label(why2, 12, Color("ffb0a0")))
 	v.add_child(r)
-	var note := UI.label("A Boki brought back is still itself, but not quite: its personality shifts, it loses a couple of levels and some trust, it keeps only a few memories, its tastes change, and it has a ghostly shimmer and a new title.", 12, UI.MUTED)
+	var note := UI.label("A Boki brought back is still the same Boki, but not quite: the personality shifts, a couple of levels and some trust are lost, only a few memories stay, the tastes change, and there is a ghostly shimmer and a new title.", 12, UI.MUTED)
 	UI.wrapped(note)
 	v.add_child(note)
 

@@ -162,7 +162,9 @@ static func free_slot(also_taken := {}, from := 0) -> int:
 ## Why this kin has to stay on the farm, or "".
 static func pinned(rec: Dictionary) -> String:
 	if String(rec.get("uid", "")) == str(Save.d.get("active", "")): return "%s is your partner: partners stay on the farm" % rec.get("name", "It")
-	if rec.get("starter", false): return "%s was your first Boki: it stays on the farm with you" % rec.get("name", "It")
+	if rec.get("starter", false):
+		var who := String(rec.get("name", "Your Boki"))
+		return KinSpeak.about(rec, "%s was your first Boki: {he} stays on the farm with you" % who)
 	return ""
 
 static func _box(rec: Dictionary, slot: int) -> void:

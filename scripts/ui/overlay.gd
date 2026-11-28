@@ -1118,7 +1118,7 @@ func open_inventory() -> void:
 						grid,
 						Care.foods_v[f]["name"],
 						"×%d" % fn,
-						Care.foods_v[f]["desc"] + " Feed it from a Boki's card.",
+						Care.foods_v[f]["desc"] + " Feed this from a Boki's card.",
 						Care.foods_v[f]["col"]
 					)
 			for id in GardenItems.ids():
@@ -1508,7 +1508,7 @@ func open_spawn_kin() -> void:
 			(
 				UI
 				. label(
-					"Adds a level 8 Boki with a Close bond to your farm (or the Boki Burrow, if it's a repeat or the farm is full).",
+					"Adds a level 8 Boki with a Close bond to your farm (or the Boki Burrow, if the Boki is a repeat or the farm is full).",
 					13,
 					UI.MUTED
 				)

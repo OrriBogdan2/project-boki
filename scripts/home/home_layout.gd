@@ -99,7 +99,7 @@ const CATALOG := {
 	# work stations (Work, HomeWork): kin with the right element come and work them on their own.
 	# work: the element. wood / stone: building materials (Save.d["mats"]) on top of the gems.
 	"job_board": {"name": "Job Board", "cat": "Work", "gems": 30, "block": true, "work": "board",
-		"desc": "Set which jobs matter (Off to High) and see who's doing what. Pin a Boki to a job, or let it rest."},
+		"desc": "Set which jobs matter (Off to High) and see who's doing what. Pin a Boki to a job, or let them rest."},
 	"lumber_camp": {"name": "Lumber Camp", "cat": "Work", "gems": 40, "size": [2, 1], "block": true, "work": "timber",
 		"desc": "Timber Boki fell the wild trees within 5 tiles, then split its log pile (it grows back)."},
 	"quarry": {"name": "Quarry", "cat": "Work", "gems": 40, "size": [2, 1], "block": true, "work": "stone",

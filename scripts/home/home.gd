@@ -2847,7 +2847,7 @@ func _open_kitchen() -> void:
 		info.add_child(UI.para(cd["desc"], 12, UI.MUTED))
 		row.add_child(info)
 		var sk: String = s
-		var label_txt: String = {"tonic": "Brew 2 tonics", "snack": "Feed a snack", "levelup": "Feed it"}.get(cd["use"], "Make the treat")
+		var label_txt: String = {"tonic": "Brew 2 tonics", "snack": "Feed a snack", "levelup": "Feed your Boki"}.get(cd["use"], "Make the treat")
 		row.add_child(UI.button(label_txt, func():
 			var ak := Save.active_kin()
 			if (cd["use"] == "snack" or cd["use"] == "levelup") and ak.is_empty():
@@ -3208,7 +3208,8 @@ func _open_kin(rec: Dictionary) -> void:
 			var starving := Care.starve_stage(rec) != ""
 			c1.add_child(UI.section(Care.condition_name(rec), Color("ff9a7a") if starving else UI.PINK))
 			if starving:
-				c1.add_child(UI.para(String(Care.STARVE_INFO[Care.starve_stage(rec)][1]), 12, Color("ffb0a0")))
+				var hint := String(Care.STARVE_INFO[Care.starve_stage(rec)][1])
+				c1.add_child(UI.para(KinSpeak.about(rec, hint), 12, Color("ffb0a0")))
 			for n in Care.NEEDS:
 				row.call(c1, Care.NEED_INFO[n]["name"], Care.need(rec, n) / 100.0, Care.NEED_INFO[n]["col"], str(int(Care.need(rec, n))))
 			c2.add_child(UI.section("Likes"))
@@ -3218,7 +3219,8 @@ func _open_kin(rec: Dictionary) -> void:
 			c2.add_child(UI.kv("Loves", Care.food_name(lk["food"]) if known.has("food") else "???", UI.INK if known.has("food") else UI.FAINT))
 			c2.add_child(UI.kv("Won't eat", Care.food_name(lk["hates"]) if known.has("hates") else "???", UI.INK if known.has("hates") else UI.FAINT))
 			c2.add_child(UI.kv("Favourite game", Care.PLAY_NAMES[lk["play"]] if known.has("play") else "???", UI.INK if known.has("play") else UI.FAINT))
-			if known.size() < 3: c2.add_child(UI.para("Feed it and play with it to find out.", 12, UI.FAINT))
+			if known.size() < 3: c2.add_child(UI.para(KinSpeak.about(rec, "Feed {him} and play with {him} to find out."),
+				12, UI.FAINT))
 			JournalCard.add(rec, c2)
 			c2.add_child(UI.spacer(2))
 			WorkView.card_section(self, rec, c2, func(): _open_kin(rec))
@@ -3249,7 +3251,8 @@ func _open_kin(rec: Dictionary) -> void:
 			c1.add_child(UI.section("Growing toward"))
 			c1.add_child(UI.label(String(Evo.AFF[lead]["name"]), UI.T_HEAD, Evo.AFF[lead]["tint"], UI.big))
 			c1.add_child(UI.label("Mutation at level %d" % next_mut, UI.T_SMALL, UI.MUTED))
-			c1.add_child(UI.para("What you feed it and how you raise it decides which way it grows.", 12, UI.FAINT))
+			var way := "What you feed {him} and how you raise {him} decides which way {he} grows."
+			c1.add_child(UI.para(KinSpeak.about(rec, way), 12, UI.FAINT))
 			var ln := Evo.lean(rec)
 			if String(ln[0]) != "":
 				var lean_t := "Its meals lean it %s: %d%%" % [Lean.face(ln[0])["name"], int(100.0 * float(ln[1]))]
@@ -3509,7 +3512,8 @@ func _confirm_start() -> void:
 		var wl := UI.label(weak, 15, UI.INK); UI.wrapped(wl)
 		wv.add_child(wl)
 		var wr := UI.hbox(10)
-		wr.add_child(UI.primary("Feed it", func(): _open_feed(Save.active_kin()), 160))
+		var pet := Save.active_kin()
+		wr.add_child(UI.primary(KinSpeak.about(pet, "Feed {him}"), func(): _open_feed(pet), 160))
 		wr.add_child(UI.button("Back", _open_expedition, 140))
 		wv.add_child(wr)
 		return
@@ -3591,7 +3595,9 @@ func _play_evolutions() -> void:
 		var v := _new_panel(("%s evolved" if big else "%s is changing") % rec["name"], 520)
 		for e in evs:
 			v.add_child(UI.label(String(e.get("text", Evo.describe(e, rec))), 16, Evo.AFF[e["aff"]]["tint"]))
-		v.add_child(UI.label("How you raise it decides what it grows into next. Feed it, fight beside it, look after it.", 14, UI.MUTED)))
+		var grow := ("How you raise {him} decides what {he} grows into next. "
+				+ "Feed {him}, fight beside {him}, look after {him}.")
+		v.add_child(UI.label(KinSpeak.about(rec, grow), 14, UI.MUTED)))
 
 ## Rebuilds a kin's model from its record in place (a new form, a meal's lean), keeping its labels.
 func _swap_kin_model(k: Dictionary) -> void:
@@ -4467,7 +4473,7 @@ func _open_nook() -> void:
 		_nook_pair(Save.kin(String(nook_pick[0])), Save.kin(String(nook_pick[1])), dv)
 	else:
 		_nook_intro(dv, egg_in)
-	UI.footer_left(v).add_child(UI.label("Click a Boki to see its IVs", UI.T_SMALL, UI.FAINT))
+	UI.footer_left(v).add_child(UI.label("Click a Boki to see the IVs", UI.T_SMALL, UI.FAINT))
 	if not egg_in:
 		var pr := UI.footer_primary(v, "Pair them" if nook_pick.size() < 2 else "Pair %s and %s" % [Save.kin(String(nook_pick[0]))["name"], Save.kin(String(nook_pick[1]))["name"]], func():
 			if nook_pick.size() < 2: return
@@ -4937,7 +4943,8 @@ func _open_feed(rec: Dictionary) -> void:
 			func(id: String, pick: String): hold.peek(rec, id, pick)) or not rows.is_empty()
 	any = GardenItemRows.add_inks_and_worn(v, rec, func(): _open_feed(rec), [_close_panel, _play_evolutions]) or any
 	if not any:
-		v.add_child(UI.label("Nothing to feed it. Harvest crops, or buy kibble and buns at the market stall.", 15))
+		var none := "Nothing to feed {him}. Harvest crops, or buy kibble and buns at the market stall."
+		v.add_child(UI.label(KinSpeak.about(rec, none), 15))
 
 func _open_train(rec: Dictionary) -> void:
 	if hrace:

@@ -67,9 +67,9 @@ static func line(rec: Dictionary, pond: bool) -> String:
 			if best_food(rec) == "":
 				return "%s is hungry: you have no food" % nm
 			return "%s is hungry: give food" % nm
-		"energy": return "%s is sleepy: tuck it in" % nm
-		"clean": return "%s is dirty: %s" % [nm, "give a bath" if pond else "brush it"]
-		"joy": return "%s is lonely: pet it" % nm
+		"energy": return KinSpeak.about(rec, "%s is sleepy: tuck {him} in" % nm)
+		"clean": return KinSpeak.about(rec, "%s is dirty: %s" % [nm, "give a bath" if pond else "brush {him}"])
+		"joy": return KinSpeak.about(rec, "%s is lonely: pet {him}" % nm)
 	return "Pet " + nm
 
 ## Every frame: shows the most urgent wants, hides the rest, and plays the happy answer.

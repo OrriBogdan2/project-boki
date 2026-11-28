@@ -1028,7 +1028,7 @@ const TIERS := [
 	{
 		"name": "Dusk Isles",
 		"desc":
-		"Tougher monsters, more loot, rarer Boki. Your Boki is always safe here: it goes home with you if you fall.",
+		"Tougher monsters, more loot, rarer Boki. Your Boki is always safe here and goes home with you if you fall.",
 		"depth": 2,
 		"mob": 1.45,
 		"loot": 1.75,

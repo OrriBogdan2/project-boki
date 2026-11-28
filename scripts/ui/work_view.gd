@@ -139,8 +139,8 @@ static func card_section(h: Node, rec: Dictionary, parent: VBoxContainer, reopen
 	var doing := ""
 	if h.get("hw") and not k.is_empty(): doing = h.hw.job_text(k)
 	var why := Work.why_not(rec)
-	var line := doing if doing != "" else (why if why != "" else ("Pinned to %s jobs" % Work.name_of(Work.pin(rec)) if Work.pin(rec) != "" else "Takes whatever it's best at"))
-	if rec.get("overworked", false): line = "Overworked: let it rest"
+	var line := doing if doing != "" else (why if why != "" else ("Pinned to %s jobs" % Work.name_of(Work.pin(rec)) if Work.pin(rec) != "" else KinSpeak.about(rec, "Takes whatever {he}'s best at")))
+	if rec.get("overworked", false): line = KinSpeak.about(rec, "Overworked: let {him} rest")
 	var row := UI.hbox(8)
 	var dl := UI.label(line, 12, Color("ffb0a0") if rec.get("overworked", false) else UI.MUTED)
 	FitLabel.shrink(dl)

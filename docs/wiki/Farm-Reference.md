@@ -22,7 +22,7 @@ Everything you can place in build mode (B), from `HomeLayout.CATALOG`. Costs are
 
 | Item | Cost | Tiles | Notes |
 |---|---|---|---|
-| Job Board | 30 gems | 1x1 | Set which jobs matter (Off to High) and see who's doing what. Pin a Boki to a job, or let it rest. |
+| Job Board | 30 gems | 1x1 | Set which jobs matter (Off to High) and see who's doing what. Pin a Boki to a job, or let them rest. |
 | Lumber Camp | 40 gems | 2x1 | **Timber Boki.** Timber Boki fell the wild trees within 5 tiles, then split its log pile (it grows back). |
 | Quarry | 40 gems | 2x1 | **Stone Boki.** Stone Boki break the wild boulders within 5 tiles, then mine its rock (it grows back). |
 | Storage Chest | 25 gems | 1x1 | **Haul Boki.** Haul Boki bring it the wood and stone that's lying about, and take food from it to feeders that run low. |

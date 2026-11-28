@@ -708,7 +708,7 @@ func _build_detail() -> void:
 	if rwhy == "" and (Save.d["roster"] as Array).size() <= 1:
 		rwhy = "It's your only Boki"
 	rel.disabled = rwhy != ""
-	rel.tooltip_text = rwhy if rwhy != "" else "Let it go back to the wild"
+	rel.tooltip_text = rwhy if rwhy != "" else KinSpeak.about(rec, "Let {him} go back to the wild")
 	btns.add_child(rel)
 	detail.add_child(btns)
 

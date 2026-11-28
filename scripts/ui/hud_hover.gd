@@ -281,7 +281,7 @@ func tip_lines(id: String, p: Hunter) -> Array:
 			if id == "k1" and kd.cue != null:
 				out.append(
 					[
-						"Your Boki can also use it on its own (turn that on in Settings).",
+						"Your Boki can also use this without you (turn that on in Settings).",
 						Color(KinText.color(kd), 0.85),
 						12
 					]
@@ -321,7 +321,7 @@ func tip_lines(id: String, p: Hunter) -> Array:
 				. append(
 					[
 						(
-							"Unlocks at level %d with a full meter. The bond fills as your Boki lands hits, as you hit what it marked, and on combos. Boki out? It comes back to you first. No Boki: a weak surge. Then %ss before it can go again."
+							"Unlocks at level %d with a full meter. The bond fills as your Boki lands hits, as you hit what the Boki marked, and on combos. Boki out? The Boki comes back to you first. No Boki: a weak surge. Then %ss before the Fusion can go again."
 							% [int(Hunter.ULT_AT[0]), KinText.n(KinParts.MERGE_SPENT_TIME)]
 						),
 						h_v.GOLD,
