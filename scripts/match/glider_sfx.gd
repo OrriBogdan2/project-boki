@@ -4,8 +4,9 @@ extends RefCounted
 ## it: after jumping out of the drop rocket the canopy is folded, so a buffeting wind (drop_fall_wind,
 ## tools/gen_sfx_rocket.py) rises with your speed until the glider opens and its snap and wind take over.
 ## The glider: a snap as the canopy opens and a wind loop that pitches and swells with speed (both from the skin),
-## a whoosh as the Ctrl dive starts, a hiss that swells as the heat runs out, a crackle and a burn loop while it
-## overheats, a fold as it closes.
+## a whoosh as the Ctrl dive starts, a hiss that swells as the heat runs out, a rising tick once as the bar drops
+## under TICK_FROM and a quiet ember crackle loop while the tank is empty (both yours only, read from the bar's
+## fraction so a longer tank changes nothing), a crackle and a burn loop while it overheats, a fold as it closes.
 ## Ticked once a frame for every hunter, yours and everyone else's (theirs are positional and quieter,
 ## driven by the synced glide flag, velocity and the overheat bit), so each cue fires once on the change
 ## of state, never every frame.
@@ -21,6 +22,9 @@ const WIND_LOW := 0.7           # pitch at a standstill...
 const WIND_HIGH := 1.6          # ...and at the dive's full speed
 const HISS_FROM := 0.35         # heat left (1 cool, 0 overheated) below which the hiss starts
 const HISS_DB := -12.0          # dB, loop, at the point of overheating
+const TICK_FROM := 0.25         # heat left (1 cool, 0 overheated) under which the warning tick plays, once
+const TICK_DB := -10.0          # dB
+const EMBER_DB := -20.0         # dB, loop while the tank is empty
 const OTHERS_DB := -6.0         # dB under yours for another player's glider
 const FALL_QUIET_DB := -20.0    # dB, the free-fall wind loop slow...
 const FALL_LOUD_DB := -6.0      # ...and at the rocket's own dive speed (DropRocket.FALL)
@@ -31,6 +35,7 @@ var fell := false               # in the drop's free fall last tick
 var open := false               # the glider was open last tick
 var hot := false                # ...and burning
 var diving := false             # ...and plunging
+var ticked := false             # ...and its warning tick has played this glide
 var net_hot := false            # another player's overheat bit (Match._net_apply)
 var start_cue := Gliders.DEFAULT_SNAP    # this glider skin's cues, read as it opens
 var loop_cue := Gliders.DEFAULT_WIND
@@ -54,6 +59,10 @@ func tick(h: Hunter) -> void:
 		Sfx.play("glider_dive", h.pos, DIVE_DB + trim)
 	if burning and not hot:
 		Sfx.play("glider_crackle", h.pos, CRACKLE_DB + trim)
+	var mine := h.is_local() and gliding
+	if mine and not burning and h.glide_fuel < TICK_FROM and not ticked:
+		Sfx.play("glider_tick", h.pos, TICK_DB, 0.0)
+	ticked = mine and h.glide_fuel < TICK_FROM
 	open = gliding
 	hot = burning
 	diving = plunging
@@ -74,3 +83,7 @@ func tick(h: Hunter) -> void:
 		Sfx.loop_hold("glider_hiss%d" % id, "glider_hiss", h.pos, hiss_db)
 	if burning:
 		Sfx.loop_hold("glider_burn%d" % id, "glider_burn", h.pos, BURN_DB + trim)
+	if burning and h.is_local():
+		Sfx.loop_hold("glider_ember%d" % id, "glider_ember", h.pos, EMBER_DB)
+	else:
+		Sfx.loop_stop("glider_ember%d" % id)
