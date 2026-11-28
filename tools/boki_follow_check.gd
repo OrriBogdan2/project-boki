@@ -14,6 +14,8 @@ extends RefCounted
 ##  11. A* is throttled: an unreachable goal does not search every step
 ##  12. an explicit Follow in a fight sticks (disengage): it stays at your side with a foe 8m off, and goes back in only when
 ##      you hit something, a foe hits it or you from within 4m, or you Sic/Chase; out of a fight nothing changes
+##  13. the garden: your partner trails you on the base, 2-4 m off, stops when you stop, sits when you idle, never
+##      stands in a building and waits outside the Waystone's ring (tools/garden_trail_check.gd)
 ## (Merge from Return is instant and from out is a leap: --boki-system-check)
 
 var bad := 0
@@ -100,13 +102,21 @@ func run(mn: Node) -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--bokifollow-only="): only = a.substr(18)
 	var parts := ["default", "leash", "traverse", "sic_call", "wheel", "carried", "guard_side", "no_refusal", "bots", "net",
-		"air_orders", "path_cost", "disengage"]
+		"air_orders", "path_cost", "disengage", "garden"]
 	for part in parts:
 		if only == "" or only.split(",").has(part):
-			call("_" + part)
+			await call("_" + part)
 	CombatBus.hit_landed.disconnect(_on_hit)
 	print("BOKIFOLLOW DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## 13. the garden: a home of its own, the match is gone
+func _garden() -> void:
+	if m:
+		m.queue_free()
+		m = null
+	bad += await GardenTrailCheck.new().run(main)
+
 
 # ------------------------------------------------------------------ 1. default
 func _default() -> void:
