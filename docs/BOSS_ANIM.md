@@ -21,3 +21,5 @@ All twelve `art/mobs/*/*.glb` (bl_skitter, bl_warden, bomber, brood, brute, colo
 | colossus, serpent, brood | none: a hit only flashes | `BossAnim` stagger (`STAGGER_S` 1.2 s) | `BossAnim` death (`DEATH_S` 1.1 s) then the dissolve |
 
 Gap: **Blight mobs (bl_skitter, bl_warden) have no `MobAnim.MOVES` tables**, so no idle, walk, wind-up, flinch or death move. Sheets: `/home/boki/gens/mob-clips-1128/`. Bosses have no hit-react move, a hit flashes only.
+
+The boss strip keeps the player untouchable (`inv_t`, full hp each frame) and quits with `BOSSANIMSHOT FAIL` if the match ends. `god` only saves the player from the abyss, so brood's spit and lob knocked them out, the match ended, `m.time` stopped and the strip hung.
