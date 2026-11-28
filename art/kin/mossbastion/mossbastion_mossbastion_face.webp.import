@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cplw6h5n66ktf"
-path="res://.godot/imported/mossbastion_mossbastion_face.webp-36cf22369297c6cd4a941a11d65ffd32.ctex"
+path.s3tc="res://.godot/imported/mossbastion_mossbastion_face.webp-36cf22369297c6cd4a941a11d65ffd32.s3tc.ctex"
+path.etc2="res://.godot/imported/mossbastion_mossbastion_face.webp-36cf22369297c6cd4a941a11d65ffd32.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "938c0c5c48ce16a96c85b811fc96dc08"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/mossbastion/mossbastion_mossbastion_face.webp"
-dest_files=["res://.godot/imported/mossbastion_mossbastion_face.webp-36cf22369297c6cd4a941a11d65ffd32.ctex"]
+dest_files=["res://.godot/imported/mossbastion_mossbastion_face.webp-36cf22369297c6cd4a941a11d65ffd32.s3tc.ctex", "res://.godot/imported/mossbastion_mossbastion_face.webp-36cf22369297c6cd4a941a11d65ffd32.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

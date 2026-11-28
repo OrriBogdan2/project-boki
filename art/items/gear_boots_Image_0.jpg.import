@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://by7dsq2vn30ql"
-path="res://.godot/imported/gear_boots_Image_0.jpg-aba930316befb355cc0610add511797c.ctex"
+path.s3tc="res://.godot/imported/gear_boots_Image_0.jpg-aba930316befb355cc0610add511797c.s3tc.ctex"
+path.etc2="res://.godot/imported/gear_boots_Image_0.jpg-aba930316befb355cc0610add511797c.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "e1500e66011d9a5426e0287cdc25e340"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/items/gear_boots_Image_0.jpg"
-dest_files=["res://.godot/imported/gear_boots_Image_0.jpg-aba930316befb355cc0610add511797c.ctex"]
+dest_files=["res://.godot/imported/gear_boots_Image_0.jpg-aba930316befb355cc0610add511797c.s3tc.ctex", "res://.godot/imported/gear_boots_Image_0.jpg-aba930316befb355cc0610add511797c.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
