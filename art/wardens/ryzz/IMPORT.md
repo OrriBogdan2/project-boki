@@ -164,3 +164,34 @@ Scripts: `~/gens/hunter-round-1124/sparkle/p11/tools/` (padall.py, bleed.py).
 - Bust stays the stance body (one step smaller than live, owner 11-26). geo_check PASS (worst clip 3.0 cm, hands ok).
 - art-gate game view: GAME 6.5, LIVE GAME 4.8 (stance alone 6.0). Open: grey panels at the crop-top bust sides (on the stance body too).
 Scripts: `~/gens/hunter-round-1124/sparkle/p14/tools/` (pad6.py).
+
+## 11-28 bust middle ground (ext/sparkle-chest-mid-1128, owner 11-27 "too small, flat; was too big before; smallish but noticeable, perky, circular")
+- Ends: live = 584e35f4ac (front peak z 130 mm, width 97 mm at y 1.30; behind the 152 mm hem lip, reads flat); older bigger = the glb before it (peak 161 mm, width 109 mm).
+  Same topology: only 3,799 bust vertices differ, POSITION and NORMAL only.
+- Pick (sheet A): per-vertex blend of those two bust buffers, x/y 60% toward live, z (projection) 30% toward live, bust lifted 6 mm inside
+  the smooth hem-to-chest window (zero at the hem): peak z 152 mm (+21 over live, -9 under the older one), width 102 mm. Narrower than the mid blend
+  with more projection = a rounder, perkier cup. Hem band, face, textures, weights, clips untouched; glb_compact'd (10.4 MB).
+  geo_check vs live PASS (worst 3.0 cm, held 0), --warden-native-check 856 checks 0 failed.
+- Options B (50/50 blend, peak 145) and C (peak 142) and renders: ~/gens/sparkle-chest-mid-1128 (tools/mid.py, sheet_sparkle_chest_mid.jpg).
+- Not Meshy-regenerated: Meshy has no geometry-edit call; both ends are Meshy-origin meshes and this blends them (as the earlier bust fit did).
+
+## 11-28 bust round 2b: narrow + forward projection (owner 11-28 "made them wide and invisible from the side, needs a redo")
+- Round 1 blended toward the older bigger bust: 315 mm of vertices moved, peak only 145 mm = still behind the 155 mm hem lip, so invisible from the side.
+- Round 2b edits the LIVE vertex buffer directly (`~/gens/sparkle-chest-narrow-1128/tools/cup.py`): two circular dome cups pushed along +z (and 2 mm up) on the
+  front-chest verts, POSITION and NORMAL only on the 46,756-vert body prim, cups centred x +-42 mm, outer edge |x| <= 76 mm (live plateau +-80 mm): NOT wider than live.
+  Pick (sheet A, was option B of the first pass): 37 mm projection, R 34 x 38 mm, pow 1.1 -> side-profile peak 163 mm (live 130, +33; +8 mm over the hem lip), 95 vertices moved.
+  Hem band, face, textures, weights, clips untouched; glb_compact'd (10.4 MB). geo_check vs live PASS (worst 3.0 cm, held 0); `--warden-native-check`: all 66 mage rows ok (the 1 fail in the run is `thief: on Meshy's skeleton`, not Sparkle).
+- art-gate (close sheet, side/3-4/game rows): FAIL, 3.5/10 vs live 3.0. The bust now shows from the side but reads as a pointed cone with a tip nub and a hard underside notch, not round; bolt emblem slightly squeezed.
+  Owner fallback (11-27 11:30 PM EST): next round = Cinder's live chest shape scaled smaller at Sparkle's narrow width.
+- Renders: `--arms-out=170` and `--near=` options in tools/clip_shots.gd lift the arms overhead for a clear side view (render-only; patch at `~/gens/sparkle-chest-narrow-1128/tools/clip_shots_near.patch`, not committed).
+
+## 11-28 bust round 2c: narrow, round, perky, reads in side profile (replaces 2b; owner 11-28 "made them wide and invisible from the side")
+- 2b failed art-gate (3.5/10): a cone with a tip nub and an underside notch. Causes: only 95 vertices moved (tiny cups on a coarse mesh), a near-linear
+  falloff, and the live hem lip (155 mm) standing proud of the bust underside.
+- 2c (`~/gens/sparkle-chest-r2c-1128/tools/dome2.py`) edits the LIVE body buffer (46,756-vert prim, POSITION + NORMAL only) with a purely spatial offset
+  field H(x,y): two round domes (cups at x +-44 mm, R 42 x 46 mm, apex y 1.322) plus a crop-top drape from the apex down to the hem lip, Gaussian-smoothed on a
+  2 mm grid. Every cloth/skin layer at a point moves the same (no seams, no z-fighting). Below the apex nothing may stand proud of the apex-to-hem line (no shelf).
+  Moves are +z (and a 2 mm lift) only, so the front outline is not wider than live (moved verts |x| <= 91 mm; round 1 moved them out to 159 mm).
+- Pick (sheet A): side-profile peak 172 mm (live 130, +42; +17 over the hem lip), apex at y 1.327 (live 1.305: higher = perkier); render side profile +28 px
+  (~26 mm) forward of live at the bust. The pink hem line follows the drape forward (~20 px in side view); the lace below it is unchanged.
+  Options B 166 / C 177 / D 161 mm and the renders: `~/gens/sparkle-chest-r2c-1128` (sheet_sparkle_chest_r2c.jpg). Face, textures, weights, clips untouched.
