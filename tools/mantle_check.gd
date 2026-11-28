@@ -524,7 +524,9 @@ func _glide_rim(cut: Dictionary, rise: float, slow: bool, sink: float) -> Dictio
 	var face := float(cut["x"])
 	var top := float(cut["top"])
 	var gs := HunterMove.glide_cruise * (HunterMove.overheat_speed if slow else 1.0)
-	_reset(Vector3(face - h.r - 1.0, top - rise + sink, float(cut["z"])), Vector3(gs, 0.0, 0.0))
+	# (the press is held HunterFeel.glide_engage s before the glider opens: the run-up covers that and a moment more)
+	var lead := 1.0 + gs * (HunterFeel.glide_engage + 0.15)
+	_reset(Vector3(face - h.r - lead, top - rise + sink, float(cut["z"])), Vector3(gs, 0.0, 0.0))
 	h.last_gy = top - 4.8
 	h.glide_fuel = 0.0 if slow else 1.0
 	m.step(DT)     # (glide let go a step, so the press below is a fresh one)
