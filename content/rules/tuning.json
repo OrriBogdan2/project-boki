@@ -60,6 +60,18 @@
 		"r_floor": {"r": 1.6, "time": 6.0, "warn": 1.5, "rise": 0.12, "col": "#3e5560"},
 		"rmb": {"windup": 0.16, "hop_up": 6.0, "fall_k": 1.4, "ease": 1.5, "carry": 0.25, "nudge": 1.2, "dive_hang": 0.1, "dive_acc": 70.0, "air_reach": 3.0, "air_up": 2.5, "air_fall_k": 2.4}
 	},
+	"farm_spotlight": {
+		"_note": "The modal placing spotlight (house, trough): FarmSpotlight.",
+		"dim": 0.72,
+		"soft_px": 60.0,
+		"pulse_hz": 1.2,
+		"ramp_s": 0.2,
+		"fade_s": 0.2
+	},
+	"hunger_gate": {
+		"_note": "The 'too hungry to go' panel: HungerGate.",
+		"poll_s": 0.4
+	},
 	"feel": {
 		"doc": "The match hunter's ledge, abyss, glide, drop, dive and landing numbers (HunterFeel, scripts/match/hunter_feel.gd; were consts in hunter.gd). Read once at load, not live.",
 		"notes": {

@@ -820,6 +820,7 @@ func _spotlight() -> void:
 			FarmTutorial.stage("task") == "go"
 			and by_id["buy"]["spot"]["bar"] == {"hub": "shop"}
 			and by_id["house"]["spot"]["place"]["hub"] == "build"
+			and by_id["house"]["spot"]["place"].get("tile") == "house"
 		),
 		"the Market bar and build menu steps too"
 	)
@@ -953,8 +954,8 @@ func _home(kin_count: int):
 	return await _ready_home()
 
 
-## The house and trough steps: the Build button lights first, then (build mode open) the Buildings tab, then the
-## House or trough tile, with the same spotlight; taking the piece puts it away.
+## The house and trough steps: the Build button lights first, then (build mode open) the House or trough tile (the
+## bar turns to its tab), then the ground it goes on; the spotlight is modal throughout (FarmSpotlight).
 func _build_spotlight() -> void:
 	FarmSpotlight.reset()
 	Save.d = _new_save()
@@ -990,13 +991,11 @@ func _lights_build_tile(home, entry: String, what: String) -> void:
 	await main.get_tree().process_frame
 	home.guide.tick(0.6)
 	await main.get_tree().process_frame
-	var tab: Control = null
-	for b in hb.bar.find_children("*", "Button", true, false):
-		if b.get_meta("tab", "") == "Buildings" and not b.is_queued_for_deletion():
-			tab = b
+	# the placing spotlight is modal (FarmSpotlight): it turns the bar to the piece's tab itself,
+	# so the Buildings tab is never left for the player to find
 	ok(
-		FarmSpotlight.showing() and FarmSpotlight.in_beat() and _lit(tab),
-		"%s step, build mode on another tab: the Buildings tab gets the spotlight beat" % what
+		FarmSpotlight.showing() and hb.cat == "Buildings" and FarmSpotlight._node.phase == "tile",
+		"%s step, build mode on another tab: the bar turns to the Buildings tab" % what
 	)
 	hb.cat = "Buildings"
 	hb._build_bar()
@@ -1010,7 +1009,10 @@ func _lights_build_tile(home, entry: String, what: String) -> void:
 	_pick_entry(hb, entry)
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
-	ok(not FarmSpotlight.showing(), "%s in hand: the spotlight is put away" % what)
+	ok(
+		FarmSpotlight.showing() and FarmSpotlight._node.phase == "spot",
+		"%s in hand: the spotlight moves to the ground it goes on" % what
+	)
 	hb._drop_held()
 	hb.toggle()
 
@@ -1119,7 +1121,7 @@ func _world() -> void:
 	var line: PanelContainer = home.guide.tracker
 	var n_rows := GoalTracker.lines().size()
 	ok(
-		is_instance_valid(line) and line.get_parent() == home.root_ui and line.get_child(0).get_child_count() == 1,
+		is_instance_valid(line) and line.get_parent() == home.corners and line.get_child(0).get_child_count() == 1,
 		'after it the Goals card is one "Next:" line'
 	)
 	ok(

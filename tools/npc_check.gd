@@ -10,9 +10,12 @@ extends RefCounted
 var bad := 0
 var main: Node
 
+
 func ok(cond: bool, what: String) -> void:
 	print("NPCCHECK %s %s" % ["PASS" if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func run(mn: Node) -> void:
 	main = mn
@@ -25,6 +28,7 @@ func run(mn: Node) -> void:
 	print("NPCCHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
 func _model(id: String) -> void:
 	var spec := NpcModel.spec(id)
 	var n := NpcModel.new(id)
@@ -36,17 +40,23 @@ func _model(id: String) -> void:
 		return
 	var clips: Dictionary = spec["clips"]
 	var missing := clips.values().filter(func(c): return not n.anim.has_animation(String(c)))
-	ok(missing.is_empty() and clips.has("idle") and clips.has("talk") and clips.has("wave"),
-			"%s: idle, talk and wave at least, every pose a clip (missing %s)" % [id, missing])
+	ok(
+		missing.is_empty() and clips.has("idle") and clips.has("talk") and clips.has("wave"),
+		"%s: idle, talk and wave at least, every pose a clip (missing %s)" % [id, missing]
+	)
 	var ab := _world_aabb(n)
-	ok(absf(ab.size.y - n.height()) < n.height() * 0.06 and absf(ab.position.y) < 0.08,
-			"%s: %.2f m tall on the ground (%.2f m, feet at %.2f)" % [id, n.height(), ab.size.y, ab.position.y])
-	var sk := n.find_child("Skeleton3D", true, false) as Skeleton3D      # (the body draws at the bones' size)
+	ok(
+		absf(ab.size.y - n.height()) < n.height() * 0.06 and absf(ab.position.y) < 0.08,
+		"%s: %.2f m tall on the ground (%.2f m, feet at %.2f)" % [id, n.height(), ab.size.y, ab.position.y]
+	)
+	var sk := n.find_child("Skeleton3D", true, false) as Skeleton3D  # (the body draws at the bones' size)
 	var top := 0.0
 	for b in sk.get_bone_count():
 		top = maxf(top, (sk.global_transform * sk.get_bone_global_pose(b)).origin.y - n.global_position.y)
-	ok(top > n.height() * 0.7 and top < n.height() * 1.1,
-			"%s: its skeleton stands %.2f m, not 100x (the glb's armature scale)" % [id, top])
+	ok(
+		top > n.height() * 0.7 and top < n.height() * 1.1,
+		"%s: its skeleton stands %.2f m, not 100x (the glb's armature scale)" % [id, top]
+	)
 	ok(n.tag.position.y > ab.end.y and n.tag.text != "", "%s: its name over its head" % id)
 	for pose in clips:
 		n.pose = pose
@@ -57,6 +67,7 @@ func _model(id: String) -> void:
 	ok(n.anim.current_animation == String(clips["idle"]), "%s: a pose with no clip plays idle" % id)
 	n.queue_free()
 
+
 func _hob() -> void:
 	var hob := HobModel.new()
 	main.add_child(hob)
@@ -65,15 +76,20 @@ func _hob() -> void:
 	for i in 60:
 		await main.get_tree().process_frame
 	var facing := -hob.global_transform.basis.z
-	ok(hob is NpcModel and hob.id == "hob" and hob.tag.text == FarmBuilder.full_name(),
-			"Hob is an NpcModel, his name over him")
+	ok(
+		hob is NpcModel and hob.id == "hob" and hob.tag.text == FarmBuilder.full_name(),
+		"Hob is an NpcModel, his name over him"
+	)
 	ok(facing.dot(Vector3.RIGHT) > 0.9, "pointing, he turns to what he points at (%.2f)" % facing.dot(Vector3.RIGHT))
 	var face := HobModel.face(112.0)
 	var vp := face.get_child(0) if face.get_child_count() == 1 else null
-	ok(vp is SubViewport and vp.find_children("*", "NpcModel", true, false).size() == 1,
-			"his portrait draws from the model")
+	ok(
+		vp is SubViewport and vp.find_children("*", "NpcModel", true, false).size() == 1,
+		"his portrait draws from the model"
+	)
 	face.free()
 	hob.queue_free()
+
 
 func _tutorial() -> void:
 	var m := Match.new()
@@ -100,19 +116,24 @@ func _tutorial() -> void:
 		tut.pell.tick(Match.DT)
 	var want := tut.pell._spot(tut.id())
 	var there := want.x == INF or pell.position.distance_to(want) < 0.1
-	ok(tut.step > at and there and pell.scale.is_equal_approx(Vector3.ONE),
-			"the next step: Pell is by its stop (%s)" % tut.id())
-	for i in 40:      # (the turn runs on the frame)
+	ok(
+		tut.step > at and there and pell.scale.is_equal_approx(Vector3.ONE),
+		"the next step: Pell is by its stop (%s)" % tut.id()
+	)
+	for i in 40:  # (the turn runs on the frame)
 		await main.get_tree().process_frame
 	var to_you := m.player.global_position - pell.global_position
 	ok((-pell.global_transform.basis.z).dot(Vector3(to_you.x, 0.0, to_you.z).normalized()) > 0.5, "and faces you")
 	m.queue_free()
 
-## The NPC's mesh bounds in the world, at rest.
+
+## The NPC's mesh bounds in the world, at rest (the body: the dark plate under a called-out line is overhead text).
 static func _world_aabb(n: Node3D) -> AABB:
 	var out := AABB()
 	var first := true
 	for mi in n.find_children("*", "MeshInstance3D", true, false):
+		if mi.get_parent() is Label3D:
+			continue
 		var ab: AABB = (mi as MeshInstance3D).global_transform * (mi as MeshInstance3D).get_aabb()
 		out = ab if first else out.merge(ab)
 		first = false

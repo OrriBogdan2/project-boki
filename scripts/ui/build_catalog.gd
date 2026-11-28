@@ -16,22 +16,22 @@ const NAV_W := 40.0
 const THUMB_PX := 144
 const HAVE_COL := Color("a6f0b0")
 
-var tabs_fn: Callable             # () -> Array of tab names
-var current_fn: Callable          # () -> the open tab
-var pick_fn: Callable             # (tab) -> void
-var entries_fn: Callable          # (tab) -> Array of entries
-var extras_fn: Callable           # () -> Array of Controls shown beside the search box
-var footer_fn: Callable           # (row: HBoxContainer) -> void: more for the hint line
+var tabs_fn: Callable  # () -> Array of tab names
+var current_fn: Callable  # () -> the open tab
+var pick_fn: Callable  # (tab) -> void
+var entries_fn: Callable  # (tab) -> Array of entries
+var extras_fn: Callable  # () -> Array of Controls shown beside the search box
+var footer_fn: Callable  # (row: HBoxContainer) -> void: more for the hint line
 var undo_fn: Callable
 var undo_off_fn: Callable
 var done_fn: Callable
-var sweep_fn: Callable            # (on: bool) -> void: the put-away mode; unset hides the toggle
-var sweep_on_fn: Callable         # () -> bool
+var sweep_fn: Callable  # (on: bool) -> void: the put-away mode; unset hides the toggle
+var sweep_on_fn: Callable  # () -> bool
 var left_pad := 16.0
-var search_skip: Array = []       # tabs a search does not look into
+var search_skip: Array = []  # tabs a search does not look into
 var hint: Label
 var page := 0
-var focus_uid := 0                # the building whose row is lit (an entry's "uid"); 0 for none
+var focus_uid := 0  # the building whose row is lit (an entry's "uid"); 0 for none
 
 var _query := ""
 var _tabs_row: HBoxContainer
@@ -43,7 +43,8 @@ var _tiles: HBoxContainer
 var _prev: Button
 var _next: Button
 var _foot: HBoxContainer
-var _thumbs := {}                 # picture key -> SubViewport
+var _thumbs := {}  # picture key -> SubViewport
+
 
 func _init() -> void:
 	var look := UI.card(Color(UI.NIGHT, 0.93), 10, 14)
@@ -91,6 +92,7 @@ func _init() -> void:
 	_foot.add_child(hint)
 	_extras_row = UI.hbox(6)
 
+
 ## Rebuilds the tabs, the tiles and the buttons from the owner's current state.
 func refresh() -> void:
 	offset_left = left_pad
@@ -122,29 +124,35 @@ func refresh() -> void:
 		_foot.add_child(_extras_row)
 	_fill_tiles()
 
+
 ## Lets go of the search box so keys reach build mode again.
 func blur() -> void:
 	if _search.has_focus():
 		_search.release_focus()
+
 
 func _pick(tab: String) -> void:
 	page = 0
 	focus_uid = 0
 	pick_fn.call(tab)
 
+
 func _turn_page(by: int) -> void:
 	page += by
 	_fill_tiles()
+
 
 func _on_search(text: String) -> void:
 	_query = text.strip_edges().to_lower()
 	page = 0
 	_fill_tiles()
 
+
 func _on_search_key(ev: InputEvent) -> void:
 	if ev is InputEventKey and ev.pressed and ev.keycode in [KEY_ESCAPE, KEY_ENTER, KEY_KP_ENTER]:
 		_search.release_focus()
 		accept_event()
+
 
 func _entries() -> Array:
 	var cur: String = current_fn.call()
@@ -159,6 +167,7 @@ func _entries() -> Array:
 				out.append(e)
 	return out
 
+
 ## Turns to the page of the open tab that holds the entry with this "uid", and lights it.
 func show_uid(uid: int) -> void:
 	focus_uid = uid
@@ -166,9 +175,27 @@ func show_uid(uid: int) -> void:
 	page = floori(maxi(0, at) / float(tiles_per_page()))
 	_fill_tiles()
 
+
 func tiles_per_page() -> int:
 	var width := get_viewport().get_visible_rect().size.x - left_pad - 16.0 - 28.0 - 2.0 * (NAV_W + 8.0)
 	return maxi(2, int(width / (TILE.x + 8.0)))
+
+
+## The tile for entry `id` on the open page, or null.
+func tile_of(id: String) -> Control:
+	for t in _tiles.get_children():
+		if String(t.get_meta("entry", "")) == id and not t.is_queued_for_deletion():
+			return t
+	return null
+
+
+## Turns to the page that holds entry `id` in the open tab (the tutorial spotlight needs its tile on screen).
+func turn_to(id: String) -> void:
+	var at := _entries().find_custom(func(e): return String(e.get("id", "")) == id)
+	if at >= 0 and at / tiles_per_page() != page:
+		page = at / tiles_per_page()
+		_fill_tiles()
+
 
 func _fill_tiles() -> void:
 	for old in _tiles.get_children():
@@ -185,6 +212,7 @@ func _fill_tiles() -> void:
 	for e in entries.slice(page * per_page, page * per_page + per_page):
 		_tiles.add_child(_tile(e))
 
+
 ## Where to point at entry `id`: its tile when it is on show and not in hand, else the tab that holds it
 ## (the tutorial spotlight lights this). An empty Rect2 once it is in hand.
 func spot_rect(id: String, tab: String) -> Rect2:
@@ -196,12 +224,14 @@ func spot_rect(id: String, tab: String) -> Rect2:
 			return (b as Control).get_global_rect()
 	return Rect2()
 
+
 func _empty_text() -> String:
 	if _query != "":
-		return "Nothing matches \"%s\"" % _query
+		return 'Nothing matches "%s"' % _query
 	if String(current_fn.call()) == STORAGE:
 		return "Storage is empty. Pieces you put away wait here."
 	return "Nothing here yet"
+
 
 func _tile(e: Dictionary) -> Control:
 	var cb: Callable = e["cb"]
@@ -212,6 +242,7 @@ func _tile(e: Dictionary) -> Control:
 	tile.set_meta("entry", String(e.get("id", "")))
 	tile.set_meta("on", bool(e.get("on", false)))
 	tile.tooltip_text = String(e.get("tip", ""))
+	tile.set_meta("entry", String(e.get("id", "")))
 	var col := UI.vbox(2)
 	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if bool(e.get("off", false)):
@@ -234,6 +265,7 @@ func _tile(e: Dictionary) -> Control:
 		line.autowrap_mode = TextServer.AUTOWRAP_OFF
 		col.add_child(line)
 	return tile
+
 
 func _picture(e: Dictionary) -> Control:
 	var pic := Control.new()
@@ -264,6 +296,7 @@ func _picture(e: Dictionary) -> Control:
 		badge.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 		pic.add_child(badge)
 	return pic
+
 
 ## The picture of an item: its model, lit and framed from above and the side, drawn once.
 func _thumb(key: String, make_model: Callable) -> Texture2D:
@@ -305,6 +338,7 @@ func _thumb(key: String, make_model: Callable) -> Texture2D:
 	add_child(view)
 	_thumbs[key] = view
 	return view.get_texture()
+
 
 func _collect(node: Node3D, xf: Transform3D, boxes: Array) -> void:
 	for child in node.get_children():
