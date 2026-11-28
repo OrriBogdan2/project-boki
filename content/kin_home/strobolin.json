@@ -1,0 +1,14 @@
+{
+	"id": "strobolin",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin/strobolin.json.",
+	"work": {
+		"craft": 2,
+		"mend": 1,
+		"tide": 3
+	},
+	"shiny": {
+		"belly": "#84ccb6",
+		"color": "#659c8b",
+		"glow": "#90ffa6"
+	}
+}
