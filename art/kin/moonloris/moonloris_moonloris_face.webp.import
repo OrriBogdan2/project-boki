@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://deqf4wkpxmv2m"
-path="res://.godot/imported/moonloris_moonloris_face.webp-53022b95e33ee6c084ad87fd1f731eba.ctex"
+path.s3tc="res://.godot/imported/moonloris_moonloris_face.webp-53022b95e33ee6c084ad87fd1f731eba.s3tc.ctex"
+path.etc2="res://.godot/imported/moonloris_moonloris_face.webp-53022b95e33ee6c084ad87fd1f731eba.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "aed98c1ed10ddf945fcb67c9aee09411"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/moonloris/moonloris_moonloris_face.webp"
-dest_files=["res://.godot/imported/moonloris_moonloris_face.webp-53022b95e33ee6c084ad87fd1f731eba.ctex"]
+dest_files=["res://.godot/imported/moonloris_moonloris_face.webp-53022b95e33ee6c084ad87fd1f731eba.s3tc.ctex", "res://.godot/imported/moonloris_moonloris_face.webp-53022b95e33ee6c084ad87fd1f731eba.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

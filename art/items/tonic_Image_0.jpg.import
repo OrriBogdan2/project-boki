@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cmcf4bo23tu6c"
-path="res://.godot/imported/tonic_Image_0.jpg-d5325921acf922facc6291ecbf88b31c.ctex"
+path.s3tc="res://.godot/imported/tonic_Image_0.jpg-d5325921acf922facc6291ecbf88b31c.s3tc.ctex"
+path.etc2="res://.godot/imported/tonic_Image_0.jpg-d5325921acf922facc6291ecbf88b31c.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "4b81b71f8b4aa8a3efa8967553b20f33"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/items/tonic_Image_0.jpg"
-dest_files=["res://.godot/imported/tonic_Image_0.jpg-d5325921acf922facc6291ecbf88b31c.ctex"]
+dest_files=["res://.godot/imported/tonic_Image_0.jpg-d5325921acf922facc6291ecbf88b31c.s3tc.ctex", "res://.godot/imported/tonic_Image_0.jpg-d5325921acf922facc6291ecbf88b31c.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
