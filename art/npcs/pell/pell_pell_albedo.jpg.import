@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cifrw032d5gsg"
-path="res://.godot/imported/pell_pell_albedo.jpg-7f57fcbe50e608439cf89951d2eb083a.ctex"
+path.s3tc="res://.godot/imported/pell_pell_albedo.jpg-7f57fcbe50e608439cf89951d2eb083a.s3tc.ctex"
+path.etc2="res://.godot/imported/pell_pell_albedo.jpg-7f57fcbe50e608439cf89951d2eb083a.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "46f83fd661d7da44771a724f80c73952"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/npcs/pell/pell_pell_albedo.jpg"
-dest_files=["res://.godot/imported/pell_pell_albedo.jpg-7f57fcbe50e608439cf89951d2eb083a.ctex"]
+dest_files=["res://.godot/imported/pell_pell_albedo.jpg-7f57fcbe50e608439cf89951d2eb083a.s3tc.ctex", "res://.godot/imported/pell_pell_albedo.jpg-7f57fcbe50e608439cf89951d2eb083a.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
