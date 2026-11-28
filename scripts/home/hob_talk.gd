@@ -84,6 +84,9 @@ func _blueprint_lines(ids: Array, first: bool) -> Array:
 	if not ids.is_empty():
 		var names: Array = ids.map(func(i): return FarmUnlocks.name_of(String(i)))
 		out.append({"text": "New blueprints: " + ", ".join(names) + "."})
+	if FarmTutorial.base():
+		for tip in rules()["tips"]:  # building is optional in the garden: his tips, never a tutorial step
+			out.append({"text": FarmTutorial.fill(String(tip))})
 	return out
 
 
@@ -163,7 +166,7 @@ func _after_beat(id: String) -> void:
 
 func _on_line(_i: int, line: Dictionary) -> void:
 	var at: Vector3 = line.get("at", _where(String(line.get("show", ""))))
-	if look != null and (at.x == INF or not look.look(at)):   # (look is made on the first frame)
+	if look != null and (at.x == INF or not look.look(at)):  # (look is made on the first frame)
 		look.release()
 	hob.node.point_at = at
 	hob.node.pose = "point" if at.x != INF else String(line.get("pose", "talk"))

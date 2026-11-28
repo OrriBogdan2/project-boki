@@ -89,23 +89,21 @@ same: E fired through a line of monsters, a fuse and a fight while fused, holdin
 per starter (`--tutorial-fight-check`) went from 41/53/35 s (Lace/Kael/Vex) to 17/38/17 s, so its floor `FIGHT_MIN` is 12 s
 (it was 30). The longest step is now `glove` (7 to 12 s: the walk over the bridge to the glove).
 
-## 3. Farm tutorial (11 rows) and garden first day (5 lines)
+## 3. Farm tutorial (5 steps) and garden first day (5 lines)
 
 | Step | Time s | Kind | Words | Read s | Keys named | Flags | Text on screen |
 |---|---|---|---|---|---|---|---|
-| hob | n/a | n/a | 14 | 4.5 | F | - | Hob is calling you over at the market stall: walk up and press F. |
-| axe | n/a | n/a | 11 | 3.6 | - | - | Here, take this axe. Trees give wood, and wood builds things. |
-| chop | n/a | n/a | 30 | 9.0 | F | - | Walk up to a tree and hold F to chop. The house takes 10 wood · 6 stone: keep chopping and mining until the ba |
-| stone | n/a | n/a | 12 | 3.9 | F | - | Rocks give stone. Take this pickaxe and hold F at a rock. |
-| house | n/a | n/a | 30 | 9.0 | B | - | Now for a house. Press B, choose House, then click the marked spot. Marking it out is free. The 10 wood · 6 st |
-| task | n/a | n/a | 24 | 7.3 | C | - | Click Vespyx, or press C next to it, to open its page. Or press 2 (Boki on the bar below) for all your Boki. |
-| feed | n/a | n/a | 14 | 4.5 | B | - | A hungry Boki is a slow Boki. Press B and set the trough down |
-| crop | n/a | n/a | 20 | 6.2 | B | - | Crops grow in patches. Press B and place a patch by the water. The water keeps it wet for you. |
-| buy | n/a | n/a | 16 | 5.0 | F | - | Go to the market stall and press F. Open the Seeds tab and buy one seed. |
-| sell | n/a | n/a | 21 | 6.5 | F | - | Back at the stall, press F. Open the Sell tab and sell your crop. Gems come from selling, expeditions and Goal |
-| expedition | n/a | n/a | 27 | 8.2 | F | - | This Relic is the mask of a fallen Hunter. Put it on, and their soul becomes yours. Press F at the portal to s |
+| meet | n/a | n/a | 9 | 2.6 | - | - | This is your Boki. Walk up and say hello. |
+| pet | n/a | n/a | 12 | 3.4 | C | - | Click your Boki (C), choose Pet and give it a good scratch. |
+| eat | n/a | n/a | 11 | 3.1 | C | - | Click your Boki (C), choose Feed and give it the Emberberry. |
+| toy | n/a | n/a | 7 | 2.0 | - | - | Watch your Boki go and play with it. (The ball is set down for you.) |
+| name | n/a | n/a | 13 | 3.7 | - | - | Give your Boki a name: type one or roll the dice, then Keep. |
 
-11 rows, 219 words, 68 s of reading at 3.5 words/s plus 0.45 s a row; 0 s of driven play.
+5 rows, 52 words, 17 s of reading at 3.5 words/s plus 0.45 s a row; 0 s of driven play.
+Building and chopping are never a step: Hob offers them as optional tips when you talk to him (`farm_builder.json` talk `tips`).
+The 11-row axe/chop/house list stays in `farm_tutorial.json` `steps` for `base_mode` off only. A save made mid-way through the old
+five (meet, patch, eat, toy, head out) carries on from `FarmTutorial.detect` (a fed or toy-done Boki counts as met and petted)
+and finishes at the name step; the `ft.did` key map has no fixed shape, so no `Save.VERSION` bump is needed.
 
 | Step | Time s | Kind | Words | Read s | Keys named | Flags | Text on screen |
 |---|---|---|---|---|---|---|---|
@@ -118,8 +116,7 @@ per starter (`--tutorial-fight-check`) went from 41/53/35 s (Lace/Kael/Vex) to 1
 5 rows, 21 words, 8 s of reading at 3.5 words/s plus 0.45 s a row; 0 s of driven play.
 The garden first day is the Goals tracker list (`GardenFirstDay`), not a guided tutorial: one short line each, no key named, no
 Skip needed. The bot of `--garden-first-day-check` does all five (the race is 20 s of sim; a toy is picked up within 60 s of
-farm time, `toy_check`). The farm tutorial on this line is still the 11-row axe/chop/house one; `ext/tut-garden-no-gather`
-(READY, based on this line) cuts it to the garden four steps.
+farm time, `toy_check`). The farm tutorial is the five steps above (`ext/tut-garden-core-rows`).
 
 First match (first expedition, same run): 'Go' to the countdown 16 s wall, drop 31 s sim, then `--new-player-flow-check` fails
 on "there is a skiff to take" (the known skiff red, `docs/GATE_0245.md`), so no per-step rows exist for it.
@@ -151,7 +148,7 @@ on "there is a skiff to take" (the known skiff red, `docs/GATE_0245.md`), so no 
    (3 FAIL before, 0 after), and the fight check starts each starter from the top (11 FAIL -> 3, the 3 left were "missing kick" for all three; gone, see above).
 5. Taking a second Relic from Hob (juggernaut) and then starting an expedition played as the saved pick of the tutorial Relic
    (`gunslinger`): the flow check's own `Arch.of_save()` says it, unverified by hand.
-6. The farm tutorial is 11 steps and 219 words (decision: 4 to 5); take `ext/tut-garden-no-gather`.
+6. Done: the farm tutorial is 5 steps and 52 words (`ext/tut-garden-core-rows`).
 7. Done: the first Relic's page shows each ability's key and name only (about 25 words, was 83); the egg cards and the knock card are one short line each, and the knock screen hides the sub line (was 218 words). The Relics screen keeps the full lines.
 # Tutorial guidance, garden only
 

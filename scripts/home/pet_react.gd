@@ -56,6 +56,7 @@ static func pet(h, k: Dictionary, reward := true) -> Dictionary:
 			Save.remember(rec, "petted", "got a long scratch behind the ears", 1.5)
 			out["memory"] = true
 	_beat(h, k, kd, spec, first_shy, can or not reward)
+	FarmTutorial.event("pet")
 	return out
 
 
