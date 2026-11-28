@@ -80,10 +80,10 @@ func _one(main: Node, key: String) -> void:
 	ok(hood != null and hood.skin == body.skin, "%s: the void head is skinned with the cloak's own skin" % key)
 	var egg := m.find_child("VoidEgg", true, false) as MeshInstance3D
 	ok(egg != null and egg.skin == body.skin, "%s: the painted egg has its black cover on the same skin" % key)
-	for n: MeshInstance3D in [hood, egg]:
+	for piece: MeshInstance3D in [hood, egg]:
 		ok(
-			n != null and n.get_node_or_null(n.skeleton) == sk,
-			"%s: %s is bound to Meshy's skeleton (else it stays at rest)" % [key, n.name if n else "void piece"]
+			piece != null and piece.get_node_or_null(piece.skeleton) == sk,
+			"%s: %s is bound to Meshy's skeleton (else it stays at rest)" % [key, piece.name if piece else "void piece"]
 		)
 	if egg and hood:
 		var e := egg.get_aabb()

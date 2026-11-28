@@ -182,7 +182,6 @@ func _model3d() -> void:
 		ok(hollow != null and hollow.is_visible_in_tree(), "sex %d keeps the void head over it" % sex)
 		# (the skinned shell's mesh sits in the skin's space, at rest: centred on the painted egg, its front (+Z) a
 		# little ahead of the paint)
-		var skel := WardenGlb.skeleton(w)
 		var at := hollow.mesh.get_aabb()
 		var want: Vector3 = EmptyGlb.EGG[sex][0]
 		var c := at.get_center()
