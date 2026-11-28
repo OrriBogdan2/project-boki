@@ -300,9 +300,10 @@ func _ostra() -> void:
 	)
 	ok("dash: a high lob (the lantern climbs 4m and more)", K.swap_peak >= 4.0, "peak %.1f" % K.swap_peak)
 	ok(
-		"dash: Trade trades places; the foe is only moved, not slowed (the data's Swap has no slow)",
-		K.swaps == 1 and P.pos.x - home.x > 6.0 and T.pos.x - home.x < 2.0 and T.slow_t <= 0.0,
-		"me %.1f foe %.1f" % [P.pos.x - home.x, T.pos.x - home.x]
+		"dash: Trade trades places and slows the swapped foe 0.6x for 3s (the source's Swap)",
+		K.swaps == 1 and P.pos.x - home.x > 6.0 and T.pos.x - home.x < 2.0 and absf(T.slow_k - 0.4) < 0.001
+		and T.slow_t > 0.0 and T.slow_t <= 3.0,
+		"me %.1f foe %.1f slow %.2f for %.2f" % [P.pos.x - home.x, T.pos.x - home.x, T.slow_k, T.slow_t]
 	)
 	# owner: spamming Shift never sends him off in another direction
 	reset.call()
@@ -542,8 +543,14 @@ func _ostra() -> void:
 		absf(cast_k[0] - 0.108) < 0.01 and absf(hit_k[0] - 0.215) < 0.01 and absf(K.speed_bonus() - 0.215) < 0.01,
 		"cast %.3f hit %.3f now %.3f" % [cast_k[0], hit_k[0], K.speed_bonus()]
 	)
-	step(m, 2.2)
+	var boost_end := [0.0]
+	var boost_t0: float = float(m.time)
+	step(m, 2.2, func(): if K.boost_t > 0.0: boost_end[0] = float(m.time) - boost_t0)
 	ok("data rank 3: the burst ends after 2s", K.boost_t <= 0.0 and K.speed_bonus() <= 0.0)
+	# 2s from the hit (about 0.5s after the tap), 0.8s of it already run: it is still on past 1.2s into this window
+	# and gone before 2.0s
+	ok("data rank 3: the burst runs 2s from the hit",
+		boost_end[0] > 1.2 and boost_end[0] < 2.0, "last on %.2fs into the 2.2s window" % boost_end[0])
 	P.slot_lv["sec"] = 1
 	# ---- data pass, Trade rank 3 (the source's tier IV): allies in his 1.5m ring as he leaves get 375 of Void's 1150
 	# health as a shield for 3s, so 32.6% of his 145 (docs/heroes/ostra.md); none at the landing or past the ring
@@ -986,6 +993,22 @@ func _multi(m: Match, P: Hunter, T: Hunter, home: Vector3, K: OstraKit) -> void:
 		t_off < 1.3 and a_off < 1.3 and K.swapped_foes == foes0 + 2 and K.swapped_allies == allies0 + 1,
 		"foe %.2f ally %.2f" % [t_off, a_off]
 	)
+	# source: the swapped foe is slowed 0.6x (40% off) for 3s (Disoriented); the ally is not
+	ok(
+		"swap slow: the swapped foe runs at 0.6x for up to 3s, the ally is not slowed",
+		absf(T.slow_k - 0.4) < 0.001 and T.slow_t > 1.5 and T.slow_t <= 3.0 and absf(T.slow_mult(1.0) - 0.6) < 0.001
+		and A.slow_t <= 0.0,
+		"k %.2f t %.2f ally t %.2f" % [T.slow_k, T.slow_t, A.slow_t]
+	)
+	step(m, 2.8)
+	ok("swap slow: it is over after 3s", T.slow_t <= 0.0 and absf(T.slow_mult(1.0) - 1.0) < 0.001)
+	T.slow_k = 0.7
+	T.slow_t = 1.0
+	KitStatus.apply(T, "dsr", 3.0, float(K.dash_def()["foe_slow"]))
+	ok("swap slow: the shared slow keeps the strongest (a 0.7 slow stays 0.7, lasts the longer 3s)",
+		absf(T.slow_k - 0.7) < 0.001 and T.slow_t >= 2.99, "k %.2f t %.2f" % [T.slow_k, T.slow_t])
+	T.slow_t = 0.0
+	T.slow_k = 0.0
 	ok(
 		"small: each keeps its place in the circle (they don't stack on one spot)",
 		Vector2(T.pos.x - A.pos.x, T.pos.z - A.pos.z).length() > 1.0

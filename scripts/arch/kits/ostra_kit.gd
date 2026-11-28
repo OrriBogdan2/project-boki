@@ -477,6 +477,9 @@ func _trade_bodies(land: Vector3, from: Vector3, r: float) -> void:
 		m.displace.teleport(body, to)
 		if body.team != h.team:
 			swapped_foes += 1
+			# the source's Swap slows the swapped enemy 0.6x for 3s (Disoriented; the strongest slow counts)
+			var dd := dash_def()
+			KitStatus.apply(body, "dsr", float(dd["foe_slow_t"]), float(dd["foe_slow"]))
 		elif body is Kin:
 			swapped_boki += 1
 		else:

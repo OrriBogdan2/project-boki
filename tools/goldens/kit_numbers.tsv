@@ -1056,6 +1056,8 @@ archetypes/ostra.json:dash.ally_shield	0.326
 archetypes/ostra.json:dash.ally_shield_t	3.0
 archetypes/ostra.json:dash.cd	9.5
 archetypes/ostra.json:dash.fly_slow	0.675
+archetypes/ostra.json:dash.foe_slow	0.4
+archetypes/ostra.json:dash.foe_slow_t	3.0
 archetypes/ostra.json:dash.keep_h	3.0
 archetypes/ostra.json:dash.lob	4.5
 archetypes/ostra.json:dash.radius	1.9
