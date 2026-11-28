@@ -11617,3 +11617,4 @@ READY ext/tut-recast-cue e8b04c79cd (Gil's Tidal Wave R-again now reports its re
 READY ext/farm-grown-xp-target 06486357aeb2890e2d050cd2999aa1bebf6d3437 (garden XP x8: Grown 250 to 17 min home-only, first egg 510 to 43, baby 498 to 44; curve and expedition XP untouched)
 READY ext/boki-starter-hit-faint 48686f151a (cindle/puddlet/burrlet hit 0.3s + faint 1s clips via reclip --only, BokiRig maps them with 0.1s blend, KinFlinch fallback; rig/coverage/react checks green)
 READY ext/mantle-ref-numbers 49f3402269 (mini-mantle +5 m/s lip, 0.75 s push, 3 m, 1.0 s cooldown in hunter_move.json; asserted in --mantle-fling-check; MOVEMENT_PARITY rows sourced)
+READY ext/farm-home-only-gates 0a0527ac96 (home road for expedition gates: home_gates.json, Goals rows, --garden-home-gates-check)
