@@ -135,6 +135,9 @@ func _breed_ms(runner: bool, grown: int, pace: Dictionary) -> Dictionary:
 		while chunk < float(pace["home_gap_min"]) * 60.0:
 			tgt = a if int(a["level"]) < grown or b.is_empty() else b
 			var st := _garden_step(tgt, pat)
+			if tgt != a:   # the player still feeds and pets the Grown starter: its trust keeps rising
+				Care.trust_up(a, "food", clock, "kibble")
+				Care.trust_up(a, "pet", clock)
 			pat = float(st["pat"])
 			var s := _garden_tick(tgt, st)
 			chunk += s

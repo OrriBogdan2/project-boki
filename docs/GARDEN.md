@@ -57,21 +57,22 @@ games (the sim in `tools/garden_sim.py` has those). Re-measured after the XP rew
 halved curve: 50 x level); the first version of this table, on the old per-action XP and the 100 x level curve, was
 2230 and 1266 min.
 
-The 30 minute target is still missed (half a day to a day of play for the egg): a Grown Boki needs 1400 XP, and the
-Nook needs two. The second Boki and friends are not the bottleneck (minutes); only levels are. That is why no
-friend-threshold option is listed: the threshold would change nothing.
+**Retuned (ext/farm-grown-xp-target).** The 30 minute target is met by data alone. A Grown Boki (level 8) needs 1105 XP on the curve round(18 x L^1.5) and was 250 min of garden-only play; garden XP sources are now 8x (care 15 to 120, drill 2 to 16 a point, toy 5 to 40, game play 5 to 40, win 8 to 64, first win 60 to 480). The curve and the expedition XP (40, +40 a win, +10 a knock) are untouched, so a run pays what it did. Minutes before / after:
 
-Data-only options (`breed_options` in content/rules/garden_xp.json, read by the check, not applied anywhere;
-`xp_mult` scales care, drill and the game rewards):
+| Gate (`--garden-pace-check` / `--base-breed-check`) | Before | After |
+|---|---|---|
+| First form (level 4), garden-only (runs: 27 / 12) | 25 | 1 |
+| Grown (level 8), garden-only | 250 | 17 |
+| Grown, 1 run a session | 255 | 190 |
+| Friends (both Boki) | 33 | 19 (base-breed: 2 to 10) |
+| First egg, garden-only | 510 | 43 |
+| First egg, 1 run a session | 502 | 324 |
+| Both Grown (base-breed, farm XP only) | 488 | 34 |
+| Baby out (limit 90) | 498 | 44 (BREED OVER gone) |
+| Farm vs runs to Grown (ratio, limit 2.2) | 0.96 | 0.10 |
+| Garden zones (`--garden-unlock-pace-check`) | 2nd day 3, all five day 12 | unchanged (not XP gated) |
 
-| Option | Grown | Garden-only: Grown / first egg | 1 run a session: Grown / first egg |
-|---|---|---|---|
-| xp_x3 (every XP times 3) | 8 | 213 / 439 min | 320 / 632 min |
-| grown_5 (the Nook asks level 5) | 5 | 229 / 467 min | 125 / 243 min |
-| xp_x2_grown_6 | 6 | 165 / 345 min | 174 / 340 min |
-
-Even the best option is 4 to 6 hours of play to a first egg. A 30 minute egg needs both a far larger XP rate and a
-Grown level near 2 (roughly 10x the XP, or a Nook that takes Youngling kin); that is a design call.
+First evolution (level 8, garden XP only, median day): 5 minutes a day day 2, 30 minutes day 1; inside the two weeks. The band lower edge is 1 now (`evolution_day` [1, 14]). The friends minute rose because the pace model now keeps feeding and petting the Grown starter while the visitor is raised; before, the starter's trust stalled and the table printed "never". `breed_options` in garden_xp.json (data only) still scale the shipped values.
 ## Base-only breeding
 
 Hold a shaping item (Hold on it in the bag) and walk up to a Boki, or point at its row in the Boki's feed menu:
@@ -83,7 +84,7 @@ change on: its new colour or the path token. While the card is up it ticks softl
 walking away from that Boki ends the hold, and the item stays in the bag. The card does no math of its own: it reads `GardenItems.preview`/`after`,
 `EvoPath.pips` and `StatBudget`. `ItemHold` (scripts/home/item_hold.gd) owns the held item; distances and times are
 in content/rules/garden_items.json `hold`. Check: `--item-card-check`; shots: `--item-card-shots --shots-dir=<dir>`.
-`--base-breed-check` plays a fresh base_mode save that never leaves the base through every gate of the Nesting Nook (briefs/design/GARDEN.md 6) and prints the play minutes of each. Measured: hatch 0; friends 6 min (bond 0.52 after a ball and a nap, trust 65); egg ready 10 min after it is laid; a parent can lay again after 20 min. Both Grown takes about 11 h per Boki on farm XP (667 min) and 5.3 h with runs (319 min), ratio 2.09 against `pace.grown_max_ratio` 2.2 (main's halved level curve and once-a-day care XP made both faster but the ratio wider than the first-form `max_ratio` 2.0; the Grown limit is its own number, a default taken, the alternative is to raise garden XP), so the baby comes long after two sessions (`BREED OVER`). Fixed with data: the Nesting Nook and the Training post open from the start and cost gems only (45 and 30; they wanted farm level 3 and wood, fibre and stone that base_mode cannot get). Fixed in code: `NookRules.friends` read the -1..1 bond against 50, so no pair with a recorded bond could ever be friends. Still open: a second Boki and the Grown pace (docs/DEBT.md).
+`--base-breed-check` plays a fresh base_mode save that never leaves the base through every gate of the Nesting Nook (briefs/design/GARDEN.md 6) and prints the play minutes of each. Measured: hatch 0; friends 6 min (bond 0.52 after a ball and a nap, trust 65); egg ready 10 min after it is laid; a parent can lay again after 20 min. Both Grown took about 8 h on farm XP (488 min) before the retune above, now 34 min; ratio 0.10 against `pace.grown_max_ratio` 2.2 (main's halved level curve and once-a-day care XP made both faster but the ratio wider than the first-form `max_ratio` 2.0; the Grown limit is its own number, a default taken, the alternative is to raise garden XP), so the baby comes long after two sessions (`BREED OVER`). Fixed with data: the Nesting Nook and the Training post open from the start and cost gems only (45 and 30; they wanted farm level 3 and wood, fibre and stone that base_mode cannot get). Fixed in code: `NookRules.friends` read the -1..1 bond against 50, so no pair with a recorded bond could ever be friends. Still open: a second Boki (docs/DEBT.md).
 
 ## Expedition loot into the garden
 
