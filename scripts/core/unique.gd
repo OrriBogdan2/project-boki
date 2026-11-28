@@ -581,9 +581,9 @@ static func dress(root: Node3D, rec: Dictionary) -> void:
 	root.set_meta("quirk", String(d.get("quirk", "")))
 	root.set_meta("girth", float(d.get("girth", 1.0)))
 	root.set_meta("voice", float(d.get("voice", 1.0)))
-	# size: the species' model fit (its rig frame to its height in the world) and the bell-curve roll (Giant and Tiny
-	# scale on top in Mutations.dress)
-	var hk := height_k(rec) * float(base_size(String(rec.get("species", "")))["fit"])
+	# size: the species' model fit (its rig frame to its height in the world), the bell-curve roll and the lean's
+	# size (Lean.size), after a hatchling's shrink in Models.kin; Giant and Tiny scale on top in Mutations.dress
+	var hk := height_k(rec) * Lean.size(rec) * float(base_size(String(rec.get("species", "")))["fit"])
 	if absf(hk - 1.0) > 0.001:
 		var es := float(root.get_meta("evo_scale", 1.0)) * hk
 		root.set_meta("evo_scale", es)

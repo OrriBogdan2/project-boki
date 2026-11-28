@@ -121,6 +121,12 @@
 		"desc": "Far heavier than it looks. Loose pebbles roll toward it. Something steady is in here.",
 		"play": "Stands in front and soaks the hits."
 	},
+	"roster": {
+		"art": "todo",
+		"line": "pebbit",
+		"stage": 2,
+		"from": "pebbit"
+	},
 	"size": {
 		"cm": 60,
 		"kg": 30.0,

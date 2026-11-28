@@ -6,6 +6,8 @@ extends RefCounted
 ## leans through Evo.eat, and a full Boki stays out.
 ## Also the hand-feed verb (BaseHandFeed, base_mode): a trusting Boki eats from your hand in 3 s and the snack is
 ## used once, a shy one needs two tries, a full one sniffs and leaves, the prompt says what to hold.
+## And the shape lean (Lean.size, Unique.dress): ten meals of a heavy type and ten of a light one grow and slim the
+## same Boki gradually, tint it toward the type, and the Boki card's lean line says so.
 ## Prints FEED ok/FAIL lines and "FEED DONE, failures: N". Never touches the real save.
 
 # ------------------------------------------------------------------ the feeding bowl
@@ -42,6 +44,7 @@ func run(m: Node) -> void:
 	await _case(true)
 	await _bowl()
 	await _hand_cases()
+	_shapes()
 	print("FEED DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -384,3 +387,55 @@ func _hand_cases() -> void:
 		home.queue_free()
 		await main.get_tree().process_frame
 	rules["base_mode"] = false
+
+
+func _tint(root: Node3D) -> Color:
+	return ((root.get_meta("mats", []) as Array)[0] as ShaderMaterial).get_shader_parameter("albedo")
+
+
+func _gap(a: Color, b: Color) -> float:
+	return Vector3(a.r - b.r, a.g - b.g, a.b - b.b).length()
+
+
+## Ten meals each way through Care.feed: size and tint follow the lean meal by meal.
+func _shapes() -> void:
+	Content.rules("farm_build")["base_mode"] = true
+	Save.d = Save.fresh()
+	var heavy := {"food": "pebblenut", "type": "rock"}
+	var light := {"food": "sapjelly", "type": "bug"}
+	var sizes := {}
+	for who in [heavy, light]:
+		var rec := _bowl_boki("puddlet", String(who["type"]), 0.5, 5.0)
+		rec["level"] = 5  # past the hatchling size, so the model's size is the lean's alone
+		var plain := Models.kin("puddlet", rec)
+		var base_tint := _tint(plain)
+		var own := float(plain.get_meta("evo_scale", 1.0))  # its own height roll (Unique), before any meal
+		var seq: Array = []
+		for i in 10:
+			rec["needs"]["food"] = 5.0
+			Care.feed(rec, String(who["food"]))
+			seq.append(Lean.size(rec))
+		var model := Models.kin("puddlet", rec)
+		var want: float = 1.0 + float(Lean.rules()["types"][who["type"]]["size"])
+		var goal: Color = Lean.face(String(who["type"]))["tint"]
+		var t := String(who["type"])
+		var at_end := float(model.get_meta("evo_scale", 1.0)) / own
+		ok(
+			is_equal_approx(float(seq[9]), want) and is_equal_approx(at_end, want),
+			"%s: ten %s meals, size lean %.2f on the model (type says %.2f)" % [t, who["food"], seq[9], want]
+		)
+		var step := [absf(seq[0] - 1.0), absf(seq[1] - 1.0), absf(seq[2] - 1.0), absf(seq[3] - 1.0)]
+		ok(
+			step[0] > 0.0 and step[0] < step[1] and step[1] < step[2] and step[2] < step[3],
+			"%s: it grows gradually (%.3f, %.3f, %.3f, then %.3f)" % [t, seq[0], seq[1], seq[2], seq[3]]
+		)
+		ok(_gap(_tint(model), goal) < _gap(base_tint, goal), "%s: the body tint moved toward %s" % [t, t])
+		ok(
+			Lean.size_note(rec).ends_with("bigger" if want > 1.0 else "slimmer"),
+			"%s: card says '%s'" % [t, Lean.size_note(rec)]
+		)
+		sizes[who["type"]] = float(model.get_meta("evo_scale", 1.0)) / own
+		plain.free()
+		model.free()
+	ok(sizes["rock"] > 1.0 and sizes["bug"] < 1.0, "heavy and light meals pull the same Boki opposite ways")
+	Content.rules("farm_build")["base_mode"] = false

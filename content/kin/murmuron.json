@@ -119,6 +119,12 @@
 		"desc": "Something sociable is in here.",
 		"play": "Fast, darting and always on the move."
 	},
+	"roster": {
+		"art": "todo",
+		"line": "murmurling",
+		"stage": 2,
+		"from": "murmurling"
+	},
 	"size": {
 		"cm": 54,
 		"kg": 16.2,

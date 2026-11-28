@@ -7,6 +7,7 @@
 		"Vault door"
 	],
 	"theme": "titan",
+	"type2": "gravity",
 	"flavor": "Huge tuatara with a vault-door shell.",
 	"colors": {
 		"belly": "#848454",
@@ -119,6 +120,12 @@
 		"temper": "Ancient",
 		"desc": "Something ancient is in here.",
 		"play": "Stands in front and soaks the hits."
+	},
+	"roster": {
+		"art": "new",
+		"line": "latchling",
+		"stage": 3,
+		"from": "tuatrune"
 	},
 	"size": {
 		"cm": 60,

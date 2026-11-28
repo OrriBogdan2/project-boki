@@ -119,5 +119,11 @@
 		"cm": 42,
 		"kg": 3.2,
 		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
-	}
+	},
+	"roster": {
+		"art": "todo",
+		"line": "zephyrak",
+		"stage": 1
+	},
+	"type2": "wyrm"
 }

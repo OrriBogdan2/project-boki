@@ -114,6 +114,12 @@
 		"desc": "Something curious is in here.",
 		"play": "Pins foes down and breaks up their pushes."
 	},
+	"roster": {
+		"art": "todo",
+		"line": "glomwort",
+		"stage": 2,
+		"from": "glomwort"
+	},
 	"size": {
 		"cm": 44,
 		"kg": 9.0,

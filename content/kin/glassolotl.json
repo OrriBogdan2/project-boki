@@ -7,6 +7,7 @@
 		"Blown glass"
 	],
 	"theme": "prism",
+	"type2": "tide",
 	"flavor": "Glass-bodied axolotl, prism gills.",
 	"colors": {
 		"belly": "#ffffff",
@@ -112,6 +113,12 @@
 		"temper": "Gentle",
 		"desc": "Pink and glassy. It throws little rainbows when it rocks. Something gentle is in here.",
 		"play": "Keeps you alive and patched up."
+	},
+	"roster": {
+		"art": "new",
+		"line": "puddlet",
+		"stage": 2,
+		"from": "puddlet"
 	},
 	"size": {
 		"cm": 40,

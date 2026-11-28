@@ -120,6 +120,12 @@
 		"desc": "Something timid is in here.",
 		"play": "Stands in front and soaks the hits."
 	},
+	"roster": {
+		"art": "todo",
+		"line": "nacrolin",
+		"stage": 2,
+		"from": "nacrolin"
+	},
 	"size": {
 		"cm": 107,
 		"kg": 70.0,

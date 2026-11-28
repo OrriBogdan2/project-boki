@@ -120,6 +120,12 @@
 		"desc": "Something gentle is in here.",
 		"play": "Stands in front and soaks the hits."
 	},
+	"roster": {
+		"art": "todo",
+		"line": "heatherhorn",
+		"stage": 2,
+		"from": "heatherhorn"
+	},
 	"size": {
 		"cm": 85,
 		"kg": 108.0,

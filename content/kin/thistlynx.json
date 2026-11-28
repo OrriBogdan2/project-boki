@@ -7,6 +7,7 @@
 		"Thistle"
 	],
 	"theme": "venom",
+	"type2": "bloom",
 	"flavor": "Grown lynx, thistle mane, barbed ear tufts.",
 	"colors": {
 		"belly": "#ffe1a5",
@@ -114,6 +115,12 @@
 		"temper": "Prickly",
 		"desc": "Something prickly is in here.",
 		"play": "Gets in close and hits hard."
+	},
+	"roster": {
+		"art": "new",
+		"line": "nettlynx",
+		"stage": 2,
+		"from": "nettlynx"
 	},
 	"size": {
 		"cm": 50,

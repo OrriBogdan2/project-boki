@@ -51,7 +51,18 @@ func run(main_node: Node) -> void:
 	m = Match.new()
 	main.add_child(m)
 	# a grown Boki (level 12, trust 95) talks in full lines, so its hint names the hazard
-	m.start({"teams": 2, "squad": 1, "tier": 0, "seed": 5, "no_drop": true, "demo_kin": PLAIN, "demo_kin_lv": "12:95"})
+	m.start(
+		{
+			"teams": 2,
+			"squad": 1,
+			"tier": 0,
+			"seed": 5,
+			"no_drop": true,
+			"no_heart": true,
+			"demo_kin": PLAIN,
+			"demo_kin_lv": "12:95"
+		}
+	)
 	m.set_process(false)
 	tz = TerrainHazards.of(m)
 	ok("the Hollow Crown has its hazard areas", tz != null and tz.areas.size() >= 5, str(tz.areas.size() if tz else 0))

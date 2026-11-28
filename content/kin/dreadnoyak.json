@@ -7,6 +7,7 @@
 		"Icebreaker bow"
 	],
 	"theme": "frost",
+	"type2": "titan",
 	"flavor": "Colossal black yak: skull face, swept horns, white crest, icebreaker iron hull under the chest, ice tusks curling over it.",
 	"colors": {
 		"belly": "#cce4e4",
@@ -120,6 +121,12 @@
 		"temper": "Steady",
 		"desc": "Something steady is in here.",
 		"play": "Stands in front and soaks the hits."
+	},
+	"roster": {
+		"art": "new",
+		"line": "kayak",
+		"stage": 3,
+		"from": "glaciyak"
 	},
 	"size": {
 		"cm": 94,

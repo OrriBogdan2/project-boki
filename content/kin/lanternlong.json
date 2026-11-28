@@ -112,6 +112,12 @@
 		"desc": "Something sleepy is in here.",
 		"play": "Keeps you alive and patched up."
 	},
+	"roster": {
+		"art": "todo",
+		"line": "moonloris",
+		"stage": 2,
+		"from": "moonloris"
+	},
 	"size": {
 		"cm": 54,
 		"kg": 16.2,

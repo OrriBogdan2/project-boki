@@ -7,6 +7,7 @@
 		"Glass orbs"
 	],
 	"theme": "storm",
+	"type2": "tide",
 	"flavor": "Giant salamander with a water-tower body.",
 	"colors": {
 		"belly": "#b4cce4",
@@ -119,6 +120,12 @@
 		"temper": "Lazy",
 		"desc": "Something lazy is in here.",
 		"play": "Stands in front and soaks the hits."
+	},
+	"roster": {
+		"art": "new",
+		"line": "bucketmander",
+		"stage": 3,
+		"from": "spatewader"
 	},
 	"size": {
 		"cm": 82,

@@ -7,6 +7,7 @@
 		"Hearth fire"
 	],
 	"theme": "ember",
+	"type2": "tempest",
 	"flavor": "Rook with a coal-bed back and cinder wings.",
 	"colors": {
 		"belly": "#fc843c",
@@ -119,6 +120,12 @@
 		"temper": "Cheeky",
 		"desc": "Something cheeky is in here.",
 		"play": "Fast, darting and always on the move."
+	},
+	"roster": {
+		"art": "new",
+		"line": "kindlewren",
+		"stage": 2,
+		"from": "kindlewren"
 	},
 	"size": {
 		"cm": 50,

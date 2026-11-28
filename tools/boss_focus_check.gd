@@ -122,6 +122,14 @@ func run(main: Node) -> void:
 	var on_p := 0
 	var on_boss := 0
 	var n := 0
+	# (a hit on the player counts as the bot going for them only when the bot was not aiming at the boss: a shot
+	# at the boss that the boss's own lunge carried next to the player splashes them, which is not a retarget)
+	var aimed_at_p := [0]
+	var on_hit := func(by: Node, tgt: Node, _d: float, _tags: Array) -> void:
+		var cred: Node = by.owner_h if by is Kin and by.owner_h else by
+		if cred == b and tgt == p and b.ai["tgt"] != boss:
+			aimed_at_p[0] += 1
+	CombatBus.hit_landed.connect(on_hit)
 	for i in int(FIGHT_T / Match.DT):
 		_step()
 		boss.hp = maxf(boss.hp, boss.max_hp * 0.5)  # (the fight lasts the whole watch)
@@ -134,7 +142,8 @@ func run(main: Node) -> void:
 			on_p += 1
 		if b.ai["tgt"] == boss:
 			on_boss += 1
-	var hit_p := float(p.hit_by.get(b.get_instance_id(), -1e9)) > float(f["lock_at"]) + REPICK_T + 0.5
+	CombatBus.hit_landed.disconnect(on_hit)
+	var hit_p: bool = aimed_at_p[0] > 0
 	ok(
 		on_p == 0 and not hit_p and p.kin != null,
 		(

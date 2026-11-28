@@ -120,6 +120,12 @@
 		"desc": "Something dignified is in here.",
 		"play": "Pins foes down and breaks up their pushes."
 	},
+	"roster": {
+		"art": "todo",
+		"line": "casquebill",
+		"stage": 2,
+		"from": "casquebill"
+	},
 	"size": {
 		"cm": 54,
 		"kg": 16.2,

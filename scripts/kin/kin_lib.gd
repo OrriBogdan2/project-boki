@@ -14,21 +14,59 @@ extends RefCounted
 
 const ROOT := "res://content"
 ## A species' theme as its standard type (DECISIONS 2026-11-08 22:29). The type picks the cast cue k_<type>.
-const TYPE_OF_THEME := {"ember": "fire", "bloom": "grass", "storm": "electric", "frost": "ice", "venom": "poison",
-	"swarm": "bug", "tempest": "flying", "stone": "rock", "titan": "steel", "lunar": "fairy", "prism": "crystal",
-	"shadow": "dark", "echo": "sound", "gravity": "psychic", "spore": "spore"}
+const TYPE_OF_THEME := {
+	"ember": "fire",
+	"bloom": "grass",
+	"storm": "electric",
+	"frost": "ice",
+	"venom": "poison",
+	"swarm": "bug",
+	"tempest": "flying",
+	"stone": "rock",
+	"titan": "steel",
+	"lunar": "fairy",
+	"prism": "crystal",
+	"shadow": "dark",
+	"echo": "sound",
+	"gravity": "psychic",
+	"spore": "spore",
+	"tide": "water",
+	"wyrm": "dragon",
+	"wild": "normal"
+}
 ## The 19 standard types (DECISIONS 2026-11-10: Shadow split into Ghost and Dark); each has a cast cue k_<type>.
-const TYPES := ["normal", "fire", "water", "grass", "spore", "electric", "ice", "rock", "psychic", "flying", "dragon",
-	"dark", "ghost", "poison", "bug", "steel", "fairy", "crystal", "sound"]
+const TYPES := [
+	"normal",
+	"fire",
+	"water",
+	"grass",
+	"spore",
+	"electric",
+	"ice",
+	"rock",
+	"psychic",
+	"flying",
+	"dragon",
+	"dark",
+	"ghost",
+	"poison",
+	"bug",
+	"steel",
+	"fairy",
+	"crystal",
+	"sound"
+]
 
 static var _lib := {}
 static var _reports := {}
 static var _eff_cache := {}
 
+
 static func lib() -> Dictionary:
 	if _lib.is_empty():
 		_load()
 	return _lib
+
 
 static func _load() -> void:
 	_reports = {}
@@ -39,33 +77,54 @@ static func _load() -> void:
 		for id in raw[kind]:
 			var rep: GrammarReport = _reports.get("%s/%s.json" % [folder_of[kind], id], null)
 			if rep and not rep.ok():
-				push_warning("KinLib: skipping %s/%s.json (%d grammar errors; run --grammar-check)" % [folder_of[kind], id, rep.errors.size()])
+				push_warning(
+					(
+						"KinLib: skipping %s/%s.json (%d grammar errors; run --grammar-check)"
+						% [folder_of[kind], id, rep.errors.size()]
+					)
+				)
 				continue
 			out[kind][id] = raw[kind][id]
+	# data-only species (no model yet) stay in the roster but are never spawned
+	out["stubs"] = {}
+	for id in out["kin"].keys():
+		if (out["kin"][id] as KinSpec).data_only:
+			out["stubs"][id] = out["kin"][id]
+			out["kin"].erase(id)
 	# a kin whose slots point at a skipped file is skipped too
 	for id in out["kin"].keys():
 		var k: KinSpec = out["kin"][id]
-		if not out["abilities"].has(k.active) or not out["merges"].has(k.merge) or (k.auto != "" and not out["abilities"].has(k.auto)):
+		if (
+			not out["abilities"].has(k.active)
+			or not out["merges"].has(k.merge)
+			or (k.auto != "" and not out["abilities"].has(k.auto))
+		):
 			push_warning("KinLib: skipping kin %s (an ability or merge it needs didn't load)" % id)
 			out["kin"].erase(id)
 	_lib = out
 	_eff_cache.clear()
 
+
 static func reload() -> void:
 	_lib = {}
 	lib()
 
+
 static func kin(id: String) -> KinSpec:
 	return lib()["kin"].get(id, null)
+
 
 static func ability(id: String) -> AbilitySpec:
 	return lib()["abilities"].get(id, null)
 
+
 static func merge(id: String) -> MergeSpec:
 	return lib()["merges"].get(id, null)
 
+
 static func node(id: String) -> EvolutionNode:
 	return lib()["evolution"].get(id, null)
+
 
 ## The cast cue of a theme or type: k_<type>. An old theme goes through TYPE_OF_THEME (shadow is dark); a type
 ## id is its own cue, so a species already moved to ghost or dark has no gap.
@@ -73,14 +132,29 @@ static func cue_of(theme: String) -> String:
 	var type := String(TYPE_OF_THEME.get(theme, theme))
 	return "k_" + (type if TYPES.has(type) else "normal")
 
+
 static func kin_ids() -> Array:
 	var ids: Array = lib()["kin"].keys()
 	ids.sort()
 	return ids
 
+
+## Every species in the roster: the live kin plus the data-only ones.
+static func roster_ids() -> Array:
+	var ids: Array = lib()["kin"].keys() + lib()["stubs"].keys()
+	ids.sort()
+	return ids
+
+
+## A roster species' spec, live or data-only.
+static func entry(id: String) -> KinSpec:
+	return lib()["kin"].get(id, lib()["stubs"].get(id, null))
+
+
 static func merge_of(species_id: String) -> MergeSpec:
 	var k := kin(species_id)
 	return merge(k.merge) if k else null
+
 
 # ------------------------------------------------------------------ species
 ## The Data.KIN entry for a species. Kin stats come from its points; slots are ability and merge ids.
@@ -90,23 +164,45 @@ static func species(id: String) -> Dictionary:
 		return {}
 	var c: Dictionary = k.colors
 	var out := {
-		"name": k.display_name, "type": k.theme, "theme": k.theme,
-		"color": Color(String(c.get("body", "#ffffff"))), "belly": Color(String(c.get("belly", "#ffffff"))),
+		"name": k.display_name,
+		"type": k.theme,
+		"theme": k.theme,
+		"type2": k.type2,
+		"color": Color(String(c.get("body", "#ffffff"))),
+		"belly": Color(String(c.get("belly", "#ffffff"))),
 		"glow": Color(String(c.get("glow", c.get("body", "#ffffff")))),
-		"hp": k.stat("kin_hp"), "dmg": k.stat("kin_damage"), "speed": k.stat("kin_speed"), "range": k.reach,
-		"mass": k.mass, "size": k.size, "gait": k.gait.duplicate(),
-		"ears": String(k.look.get("ears", "none")), "look": k.look.duplicate(),
-		"skill": k.active, "abilities": [k.active] + ([k.auto] if k.auto != "" else []), "ultimate": k.merge,
-		"carry": k.carry_style, "carry_name": k.carry_name,
+		"hp": k.stat("kin_hp"),
+		"dmg": k.stat("kin_damage"),
+		"speed": k.stat("kin_speed"),
+		"range": k.reach,
+		"mass": k.mass,
+		"size": k.size,
+		"gait": k.gait.duplicate(),
+		"ears": String(k.look.get("ears", "none")),
+		"look": k.look.duplicate(),
+		"skill": k.active,
+		"abilities": [k.active] + ([k.auto] if k.auto != "" else []),
+		"ultimate": k.merge,
+		"carry": k.carry_style,
+		"carry_name": k.carry_name,
 		"traits": k.personality.duplicate(),
-		"ai": {"aggression": float(k.ai.get("aggression", 0.5)), "loyalty": float(k.ai.get("loyalty", 0.5)), "caution": float(k.ai.get("caution", 0.5)),
-			"style": String(k.ai.get("role", "")), "role": String(k.ai.get("role", ""))},
-		"animals": k.animals.duplicate(), "desc": k.flavor, "egg": k.egg.duplicate(),
+		"ai":
+		{
+			"aggression": float(k.ai.get("aggression", 0.5)),
+			"loyalty": float(k.ai.get("loyalty", 0.5)),
+			"caution": float(k.ai.get("caution", 0.5)),
+			"style": String(k.ai.get("role", "")),
+			"role": String(k.ai.get("role", ""))
+		},
+		"animals": k.animals.duplicate(),
+		"desc": k.flavor,
+		"egg": k.egg.duplicate(),
 		"voice": String(k.voice.get("line", "friendly")),
 	}
 	if c.has("wing"):
 		out["wing"] = Color(String(c["wing"]))
 	return out
+
 
 # ------------------------------------------------------------------ evolution
 ## The evolution nodes a kin has taken, in order: its n-th form on an affinity takes the next node
@@ -116,13 +212,15 @@ static func nodes_for(ks: KinSpec, rec: Dictionary) -> Array:
 	if ks == null:
 		return out
 	var lv := int(rec.get("level", 1))
-	var at := {}           # affinity -> next index on its path
+	var at := {}  # affinity -> next index on its path
 	var taken: Array = []
 	for f in rec.get("forms", []):
 		var aff := String(f)
 		var path: Dictionary = {}
 		for p in ks.evo_paths:
-			if String(p["affinity"]) == aff: path = p; break
+			if String(p["affinity"]) == aff:
+				path = p
+				break
 		if path.is_empty():
 			continue
 		var i := int(at.get(aff, 0))
@@ -134,13 +232,15 @@ static func nodes_for(ks: KinSpec, rec: Dictionary) -> Array:
 			continue
 		var ok := true
 		for req in n.after:
-			if not taken.has(req): ok = false
+			if not taken.has(req):
+				ok = false
 		if not ok:
 			continue
 		at[aff] = i + 1
 		taken.append(n.id)
 		out.append(n)
 	return out
+
 
 ## Stat points after evolution's shifts (the total never changes).
 static func points(ks: KinSpec, rec: Dictionary) -> Dictionary:
@@ -149,7 +249,8 @@ static func points(ks: KinSpec, rec: Dictionary) -> Dictionary:
 		for g in (n as EvolutionNode).grants:
 			if String(g["kind"]) != "stat_shift":
 				continue
-			var a := String(g["from"]); var b := String(g["to"])
+			var a := String(g["from"])
+			var b := String(g["to"])
 			var moved := mini(int(g["points"]), int(pts.get(a, 0)))
 			moved = mini(moved, int(KinParts.STATS[b]["max_points"]) - int(pts.get(b, 0)))
 			if moved <= 0:
@@ -158,9 +259,11 @@ static func points(ks: KinSpec, rec: Dictionary) -> Dictionary:
 			pts[b] = int(pts.get(b, 0)) + moved
 	return pts
 
+
 static func stat_value(key: String, pts: Dictionary) -> float:
 	var s: Dictionary = KinParts.STATS.get(key, {})
 	return float(s.get("base", 0.0)) + float(s.get("per_point", 0.0)) * float(pts.get(key, 0))
+
 
 ## The owner bonuses a kin gives its hunter for the run: {owner_max_hp: hp, owner_armor: x, ...}
 ## (only the stats it has points in).
@@ -174,35 +277,58 @@ static func owner_bonus(ks: KinSpec, rec: Dictionary) -> Dictionary:
 			out[key] = stat_value(key, pts)
 	return out
 
+
 # ------------------------------------------------------------------ copying and patching specs
 static func copy_part(p: PartSpec) -> PartSpec:
 	if p == null:
 		return null
 	var q := PartSpec.new()
-	q.kind = p.kind; q.type = p.type; q.preset = p.preset; q.target = p.target
+	q.kind = p.kind
+	q.type = p.type
+	q.preset = p.preset
+	q.target = p.target
 	q.params = p.params.duplicate(true)
 	q.explicit = p.explicit.duplicate(true)
 	return q
 
+
 static func copy_stage(s: StageSpec) -> StageSpec:
 	var t := StageSpec.new()
 	t.delivery = copy_part(s.delivery)
-	for e in s.effects: t.effects.append(copy_part(e))
-	for md in s.modifiers: t.modifiers.append(copy_part(md))
+	for e in s.effects:
+		t.effects.append(copy_part(e))
+	for md in s.modifiers:
+		t.modifiers.append(copy_part(md))
 	for ev in s.then:
 		var arr: Array = []
-		for sub in s.then[ev]: arr.append(copy_stage(sub))
+		for sub in s.then[ev]:
+			arr.append(copy_stage(sub))
 		t.then[ev] = arr
 	return t
 
+
 static func copy_ability(a: AbilitySpec) -> AbilitySpec:
 	var b := AbilitySpec.new()
-	for f in ["id", "display_name", "short", "flavor", "theme", "tier", "from", "cast_range", "cooldown", "charges", "bond_cost"]:
+	for f in [
+		"id",
+		"display_name",
+		"short",
+		"flavor",
+		"theme",
+		"tier",
+		"from",
+		"cast_range",
+		"cooldown",
+		"charges",
+		"bond_cost"
+	]:
 		b.set(f, a.get(f))
 	b.trigger = a.trigger
 	b.cue = a.cue
-	for s in a.stages: b.stages.append(copy_stage(s))
+	for s in a.stages:
+		b.stages.append(copy_stage(s))
 	return b
+
 
 ## A number on one stage by path ("delivery.range", "effects.4.duration"): [part, key] or [].
 static func _locate(st: StageSpec, path: String) -> Array:
@@ -213,6 +339,7 @@ static func _locate(st: StageSpec, path: String) -> Array:
 		return [st.effects[int(bits[1])], bits[2]]
 	return []
 
+
 static func _scale(st: StageSpec, path: String, k: float) -> void:
 	var loc := _locate(st, path)
 	if loc.is_empty():
@@ -221,6 +348,7 @@ static func _scale(st: StageSpec, path: String, k: float) -> void:
 	var key: String = loc[1]
 	if typeof(p.params.get(key)) in [TYPE_FLOAT, TYPE_INT]:
 		p.params[key] = KinRules.clamp_param(p.kind, p.type, key, float(p.params[key]) * k)
+
 
 static func _add_mod(st: StageSpec, mp: PartSpec) -> void:
 	if mp == null or st.delivery == null or st.has_modifier(mp.type):
@@ -231,14 +359,26 @@ static func _add_mod(st: StageSpec, mp: PartSpec) -> void:
 		return
 	st.modifiers.append(copy_part(mp))
 
+
 ## The ability one kin actually casts: evolution grants for its slot, the merged patch (while
 ## merged), then the slot's rank through the core rank table. Every number is clamped to its bounds.
 ## Cached, so it's cheap to call on every cast.
-static func effective(ab: AbilitySpec, slot: String, ks: KinSpec, rec: Dictionary, rank := 1, merged: Dictionary = {}) -> AbilitySpec:
+static func effective(
+	ab: AbilitySpec, slot: String, ks: KinSpec, rec: Dictionary, rank := 1, merged: Dictionary = {}
+) -> AbilitySpec:
 	if ab == null:
 		return null
 	var nodes: Array = nodes_for(ks, rec) if ks else []
-	var key := "%s|%s|%d|%s|%s" % [ab.id, slot, rank, ",".join(nodes.map(func(n): return n.id)), str(merged.hash()) if not merged.is_empty() else "-"]
+	var key := (
+		"%s|%s|%d|%s|%s"
+		% [
+			ab.id,
+			slot,
+			rank,
+			",".join(nodes.map(func(n): return n.id)),
+			str(merged.hash()) if not merged.is_empty() else "-"
+		]
+	)
 	if _eff_cache.has(key):
 		return _eff_cache[key]
 	var out := copy_ability(ab)
@@ -255,8 +395,16 @@ static func effective(ab: AbilitySpec, slot: String, ks: KinSpec, rec: Dictionar
 				"add_modifier":
 					_add_mod(st, g["modifier"])
 				"sidegrade":
-					_scale(st, String(g["up"]["param"]), clampf(float(g["up"]["scale"]), KinParts.SIDEGRADE_UP[0], KinParts.SIDEGRADE_UP[1]))
-					_scale(st, String(g["down"]["param"]), clampf(float(g["down"]["scale"]), KinParts.SIDEGRADE_DOWN[0], KinParts.SIDEGRADE_DOWN[1]))
+					_scale(
+						st,
+						String(g["up"]["param"]),
+						clampf(float(g["up"]["scale"]), KinParts.SIDEGRADE_UP[0], KinParts.SIDEGRADE_UP[1])
+					)
+					_scale(
+						st,
+						String(g["down"]["param"]),
+						clampf(float(g["down"]["scale"]), KinParts.SIDEGRADE_DOWN[0], KinParts.SIDEGRADE_DOWN[1])
+					)
 	if not merged.is_empty():
 		var si2 := int(merged.get("stage", 0))
 		if si2 < out.stages.size():
@@ -269,13 +417,15 @@ static func effective(ab: AbilitySpec, slot: String, ks: KinSpec, rec: Dictionar
 	if rank > 1:
 		for st3 in out.all_stages():
 			for p in [st3.delivery] + Array(st3.effects) + Array(st3.modifiers):
-				if p == null: continue
+				if p == null:
+					continue
 				var grow: Dictionary = KinRules.RANK_GROW.get((p as PartSpec).type, {})
 				for gk in grow:
 					if typeof(p.params.get(gk)) in [TYPE_FLOAT, TYPE_INT]:
 						p.params[gk] = float(p.params[gk]) * (1.0 + float(grow[gk]) * float(rank - 1))
 	for st4 in out.all_stages():
 		for p in [st4.delivery] + Array(st4.effects) + Array(st4.modifiers):
-			if p: KinRules.clamp_part(p)
+			if p:
+				KinRules.clamp_part(p)
 	_eff_cache[key] = out
 	return out

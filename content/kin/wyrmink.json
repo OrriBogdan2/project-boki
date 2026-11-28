@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "wyrmink",
+	"name": "Wyrmink",
+	"theme": "wyrm",
+	"flavor": "Long, serpentine ink-dragon stoat.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "ermink",
+		"stage": 2,
+		"from": "ermink",
+		"ink": "wyrm"
+	}
+}
