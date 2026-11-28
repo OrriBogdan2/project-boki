@@ -11544,3 +11544,4 @@ READY ext/kael-tap-execute ddeb8ad6e7f (docs only: KIT_PARITY row, Kael tap exec
 READY ext/vfx-blue-fog b7ad1a08f1 (env haze colours toward neutral; fog-tint-shots tool; raid-check haze assert; frame blue-red moves only 1-3 of 255)
 READY ext/boki-more-ingame-1118 40a240984b (bulk-rebase: origin/main merged in mechanically, was cd020fdc02; union 1 gen 0 files; the branch's own READY checks still apply)
 READY ext/lace-spirit-end-rules 38ad752f48 (docs only: Lace Phase Walk damage-ends + end-inside rules already on main; KIT_PARITY rows marked)
+READY ext/cinder-ignite-tiers eed0bc345b (docs only: Cinder ignite tiers already in main; KIT_PARITY fragment, no code)
