@@ -2763,6 +2763,10 @@ func render(delta: float, alpha: float) -> void:
 	fit_scale()
 	HunterWisp.tick(self, delta)
 	UltGlow.tick(self, delta)
+	_anim_dt += delta
+	_anim_n += 1
+	if SimLod.unheard(m, self):     # hidden and out of earshot: no pose, looks or fx (the time is banked)
+		return
 	var body_face := HunterFall.face_of(self)      # a knocked-down body keeps facing the way it fell
 	if m.cam: model.basis = m.cam.char_basis(body_face, model.scale, not SkyDeck.upright(self))     # (CamRig.char_lean)
 	else: model.rotation.y = body_face
@@ -2792,8 +2796,7 @@ func render(delta: float, alpha: float) -> void:
 	var torso: Node3D = rig.get_node("Torso")
 	if anim == null or anim.model != model:
 		anim = HunterAnim.new(model)
-	var hv := Vector2(vel.x, vel.z)
-	var spd := hv.length()
+	var spd := Vector2(vel.x, vel.z).length()
 	crouch_k = move_toward(crouch_k, 1.0 if crouch else 0.0, delta * 8.0)
 	var stretch := 0.0
 	if roll_t > 0.0:
@@ -2802,14 +2805,12 @@ func render(delta: float, alpha: float) -> void:
 		stretch = clampf(vel.y / 30.0, -0.1, 0.18)
 	# posed every SimLod.pose_every frames (staggered), catching up the skipped time; a backlog from a slower rate
 	# (it just came on screen or closer) poses now
-	_anim_dt += delta
-	_anim_n += 1
 	var every := SimLod.pose_every(m, self)
 	var posed := (_anim_n + get_instance_id()) % every == 0 or _anim_dt > every * delta
 	model.set_meta(WardenGlb.POSE_HELD, -1 if posed else Engine.get_process_frames())
 	if posed:
 		_anim_state(stretch)
-		anim.update(_anim_dt, anim_s)
+		anim.update(minf(_anim_dt, SimLod.CATCH_UP_S), anim_s)
 		anim.feet.plant(anim, m.world, _anim_dt, every == 1 and FootPlant.near(self), pos.y, r)
 		_anim_dt = 0.0
 	if posed and anim.stepped and not downed:
@@ -2821,13 +2822,12 @@ func render(delta: float, alpha: float) -> void:
 	if posed and anim.slammed and not downed:
 		# a heavy coming down hard: a ring of dust where they land
 		m.fx.dust(pos, 12)
-	var tc: Color = Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()]
 	if roll_t > 0.0:
 		ghost_t -= delta
 		if ghost_t <= 0.0 and model.visible and not (ak and ak.own_dash_trail()):
 			ghost_t = 0.028
 			if ak == null or not ak.dash_afterimage():
-				m.fx.ghost(position, face, tc, float(cdat["scale"]))
+				m.fx.ghost(position, face, Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()], float(cdat["scale"]))
 	elif gliding:
 		wind_t -= delta
 		# (movefeel) carrying a dash's momentum: a dense streak trail and afterimages until it bleeds off
