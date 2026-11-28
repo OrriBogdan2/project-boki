@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 # Sets up the Project Boki relay server on a fresh Ubuntu 24.04 machine (e.g. Hetzner CPX21).
-# Run as root:  curl -sSL https://github.com/OrriBogdan2/project-boki-releases/releases/latest/download/setup_server.sh | bash
+# Run as root:  curl -sSL https://raw.githubusercontent.com/OrriBogdan2/project-boki/main/deploy/setup_server.sh | bash
 # Then put the Discord settings in /etc/boki/relay.env (see relay.env.example) and run:
 #   systemctl restart boki-relay
 set -euo pipefail
-# the public repo that holds release builds only (release.yml publishes there); the source repo is private
-REPO="${BOKI_REPO:-OrriBogdan2/project-boki-releases}"
+REPO="${BOKI_REPO:-OrriBogdan2/project-boki}"
 
 apt-get update -qq
 apt-get install -y -qq curl unzip jq ufw libfontconfig1 >/dev/null

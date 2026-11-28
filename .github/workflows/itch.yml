@@ -21,23 +21,22 @@ env:
 
 jobs:
   itch:
-    # vars.RUNNER = self-hosted moves this job to our own Linux runners (labels self-hosted,linux,boki); unset = GitHub-hosted.
-    runs-on: ${{ vars.RUNNER == 'self-hosted' && fromJSON('["self-hosted","linux","boki"]') || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - name: Install Godot, export templates and butler
         run: |
           set -e
-          tools/ci/ci_env.sh --templates
-          cache="${BOKI_CI_CACHE:-$HOME/.cache/boki-ci}"
-          if [ ! -x "$cache/butler/butler" ]; then
-            curl -fsSL --retry 3 -o butler.zip https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default
-            rm -rf "$cache/butler.new" && python3 -I -m zipfile -e butler.zip "$cache/butler.new" && chmod +x "$cache/butler.new/butler"
-            rm -rf "$cache/butler" && mv "$cache/butler.new" "$cache/butler"
-            rm -f butler.zip
-          fi
-          echo "$cache/butler" >> "$GITHUB_PATH"
+          base="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable"
+          curl -sSL -o godot.zip "$base/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q godot.zip && sudo mv Godot_v${GODOT_VERSION}-stable_linux.x86_64 /usr/local/bin/godot
+          curl -sSL -o tpl.tpz "$base/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+          mkdir -p ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+          unzip -q tpl.tpz -d tpl && mv tpl/templates/* ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable/
+          curl -sSL -o butler.zip https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default
+          unzip -q butler.zip -d butler && chmod +x butler/butler
+          rm -rf tpl tpl.tpz godot.zip butler.zip
 
       # Crash and error reporting (docs/SENTRY.md): the pinned Sentry addon, and the DSN secret written into
       # project.godot for this export only (no secret: the build keeps Sentry off).
@@ -54,7 +53,6 @@ jobs:
           # the build's commit, shown on the title screen next to the version, so a tester can tell which build they run
           sed -i "s|^config/name=.*|&\nconfig/version=\"$(git log -1 --format=%h)\"|" project.godot
           godot --headless --path . --import || true
-          rm -rf ../build   # a self-hosted runner keeps the previous run's files here
           mkdir -p ../build/win ../build/mac
           godot --headless --path . --export-release "Windows" ../build/win/ProjectBoki.exe
           godot --headless --path . --export-release "macOS" ../build/mac/ProjectBoki.zip
@@ -68,5 +66,5 @@ jobs:
         run: |
           if [ -z "$BUTLER_API_KEY" ]; then echo "::warning::BUTLER_API_KEY secret not set; skipping the upload"; exit 0; fi
           V=$(git log -1 --format=%h)
-          butler push itch/windows "$ITCH_TARGET:windows" --userversion "$V"
-          butler push itch/mac "$ITCH_TARGET:mac" --userversion "$V"
+          butler/butler push itch/windows "$ITCH_TARGET:windows" --userversion "$V"
+          butler/butler push itch/mac "$ITCH_TARGET:mac" --userversion "$V"

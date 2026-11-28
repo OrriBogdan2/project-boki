@@ -2,10 +2,6 @@ class_name Look
 ## The shared look of every outdoor scene: a painted sky, soft filmic colour, a little bloom, haze
 ## that swallows whatever hangs below the islands, a warm key light and a cool rim light.
 
-## The desktop renderer's saturation boost on top of the base grade (the home, the town and the cards keep it); the
-## match sets its own in content/rules/match_grade.json
-const DESKTOP_SAT_BOOST := 1.65
-
 ## A Boki card's exposure (card_environment), Forward+ and the Compatibility renderer
 const CARD_EXPOSURE := 0.7
 const CARD_EXPOSURE_COMPAT := 0.8
@@ -13,8 +9,7 @@ const CARD_EXPOSURE_COMPAT := 0.8
 static var SKY: Shader = preload("res://shaders/sky.gdshader")
 
 
-## p: top, mid, horizon, below (sky colours), ambient, fog (haze colour), stars (0..1), desktop_boost (saturation
-## multiplier on the desktop renderer)
+## p: top, mid, horizon, below (sky colours), ambient, fog (haze colour), stars (0..1)
 static func environment(p: Dictionary) -> Environment:
 	var e := Environment.new()
 	e.background_mode = Environment.BG_SKY
@@ -71,7 +66,7 @@ static func environment(p: Dictionary) -> Environment:
 		# desktop renderer is gamma-correct, so it comes out lifted and washed; this curve maps it
 		# back to the same tones.
 		e.adjustment_color_correction = _tone_curve()
-		e.adjustment_saturation *= float(p.get("desktop_boost", DESKTOP_SAT_BOOST))
+		e.adjustment_saturation *= 1.65
 	if "--nofog" in OS.get_cmdline_user_args():
 		e.fog_enabled = false
 	if "--nossao" in OS.get_cmdline_user_args():

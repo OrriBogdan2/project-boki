@@ -47,7 +47,6 @@ sounds from `tools/gen_sfx_tarek.py` (names in `scripts/core/sfx_kits.gd`).
   dash is 12s as in the source). Full charge 0.45s (0.2s tap window + 0.25s; owner item 61 overrides the source's 1.0-1.5s).
 - Quakefall 14-30, the sweet spot x1.2 (source 188 outer vs 225 centre), stun 0.5-1.2s by charge. RMB cooldown 11s (the owner's tooltip data; the footage card reads 9s; the
   dash is 12s as in the source, no longer equal to it). Full charge 0.45s (0.2s tap window + 0.25s; owner item 61 overrides the source's 1.0-1.5s).
-- Quakefall is ready again at once when a knock is his (the knocking blow ours; an assist gives nothing): the reference's slam resets on a knock. `--kit-refund-check`.
 - Punch hold: full at 0.9s (source about 0.75s release), step 0.6m (source 0.5 bh). Rocks 45 hp, 9s.
 - Scale: one body height (bh) is about 1.8m, for gameplay ranges and visuals alike: the punch lane 4.2 by 1.8m (2.5 by 1 bh),
   the slam a 2m hop ahead with a 3.6-4.5m radius (about 2.5 bh), the row 3.4m ahead (2 bh) spanning about 5m (3 bh).
@@ -88,7 +87,7 @@ Rock Hop item 111, R rocks item 15, blue ability colour: all held). Verdicts: ma
 | RMB charge time (source 1.0-1.5s; ours 0.2 tap window + 0.25) | differ (owner item 61) | dolm.json:38 `slam.time` |
 | RMB out of a glide (hold) | match | breah_slam.gd `fire` folds the glider, `_air_arc` carries him onto the cursor's spot (capped at the glider's dive speed), dolm_kit.gd `_tick_dive` plunges over the abyss; `glide slam: ...`, `--tenzo-rmb-air-check` |
 | RMB Volcano slam push | none: the centre stuns (0.5-1.2 s), a foe in the air is dunked (+40%, +20 over the abyss, spiked down); no knock (`rmb.slam.kb` removed, ext/tenzo-grimble-knock-cut; KIT_PARITY Knock distances) | Volcano Crusher: stun at the centre, Dunk over the Abyss, no knock [D] |
-| RMB reset on a knock or kill | match to the reference (a knock his blow lands makes it ready again; an assist does not) | 11-27 refund pass (`dolm_kit.gd on_knock`); `data: a slam that knocks makes Quakefall ready again` |
+| RMB reset on a knock or kill | match to the card (no reset; the guide sheet says reset) | owner data and item 14; `data: a slam that knocks does not reset Quakefall` |
 | E Rockwave: 3 rocks, ground only, 12.5s | match | dolm.json:44 (cooldown 12.5), dolm_kit.gd:100-103 (no room in the air), :623-673 |
 | E allies hop the rocks by jumping (hold) | match | stone_stand.gd:35, :77, :91-93 (ally in the air); foes blocked, he walks up his own (stone_stand.gd:68-80); `rock (item 25): ...`, `hop rocks: an ally in the air hops them, a foe is stopped`. KIT_PARITY gap 14 and this file's older rows said "not built": stale, fixed here. Bots hopping at once: ext/tenzo-ally-hop (in flight) |
 | E extra row at rank 3 (source IV) | match | dolm_kit.gd:623-632 |
@@ -116,7 +115,7 @@ the reason. Asserts: `--dolm-combo-check` (`audit tarek: ...`, `rock ...`, `glid
 |---|---|---|
 | RMB out of a glide (HIGH) | (a) | 5e00729a: folds the glider, plunges at the glider's dive speed, slams where he lands |
 | RMB cooldown 9 vs 11 (LOW) | (b) | 11 s (data) |
-| RMB reset on knock (LOW) | (a) | back in 11-27 (ext/kit-refund-loops-1127), matching the reference note and the in-game card (frame 0240); an assist gives nothing |
+| RMB reset on knock (LOW) | (c) | the owner removed it (item 14); the in-game card (frame 0240) does show it, if he wants it back |
 | RMB air press (LOW) | (a) | kept and reused for the glide slam |
 | Shardskin from any team rock (LOW) | (b) | only his own rocks give a stack (ally rocks still fly); asserted |
 | E: allies hop the rocks (MED) | (b) | owner 23:55 (the data): an ally jumping against his rock is lifted onto it and over; walking, allies are stopped; foes are stopped either way; he still climbs his own by walking (item 25). Bots: an ally bot walking into his rock jumps it at once (StoneStand.hop_ahead), a foe bot goes round, a Tenzo bot walks up. Asserted |
@@ -343,7 +342,7 @@ would also settle the same row on the boulder. Unsettled rows for a follow-up: t
 | Quakefall (hop, leap or air press), then glide | the glider opens and the slam is dropped; she keeps her height (item 26) | `glide (item 26, hop/leap/air): ...` |
 | Glide, then Quakefall (owner 23:00) | the glider folds, she hangs 0.1s, then plunges, gathering speed up to 32.5 m/s (the data's glider dive), and slams where she lands | `glide slam: RMB in a glide folds the glider...`, `glide slam: she slams where she lands...` |
 | Charge, punch | a lunge forward, no punch | `small: a punch during the charge lunges her forward` |
-| Slam that knocks | Quakefall ready again at once (an assist gives nothing; 11-27 refund pass) | `data: a slam that knocks makes Quakefall ready again` |
+| Slam that knocks or kills | nothing: Quakefall has no reset (data pass) | `data: a slam that knocks does not reset Quakefall` |
 | Rock Hop beside a foe | a mid-chain landing nudges it with no damage; the last landing's crash shoves it, then the rock comes down after him and rolls into it (shred, slow) | `shove: a mid-chain landing nudges with no damage`, `crash: the last landing hits and shoves a foe beside it`, `crash: the rock comes down after him`, `crash: the rock rolls on and hits` |
 | Rock Hop crash, then slam | the crash pops the foe up, the slam dunks it while it is airborne | `crash: the last landing hits ...`, `rmb spike: the tap slam drives a foe in the air down ...` |
 | Two bursts on one foe | the second inside 0.8s deals 30% less | `small: a second burst on the same foe inside 0.8s deals 30% less` |

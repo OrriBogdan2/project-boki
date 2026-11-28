@@ -28,7 +28,6 @@ func ok(cond: bool, what: String) -> void:
 func run(mn: Node) -> void:
 	main = mn
 	Save.no_write = true
-	Sfx.play_jitter_db = 0.0  # levels are compared exactly (play-time volume jitter would swing a 3 dB rule by 2 dB)
 	sc = load("res://tools/support_check.gd").new()
 	sc.main = mn
 	rules = Content.rules("status_sfx")
