@@ -6,7 +6,7 @@ extends RefCounted
 
 const AKCheck := preload("res://tools/archetype_check.gd")
 const DT := 1.0 / 60.0
-const RUN_BASE_STEPS := 3.3  # footfalls/s at base size (was 3.0 as drawn at match_hunter_scale 1.10)
+const RUN_BASE_STEPS := 3.3  # footfalls/s at base size (= 3.0 as drawn at match_hunter_scale 1.10)
 var a_v: AKCheck
 var beats := {}  # clip -> {len, cock, peak, settle, v (speed per frame)}
 var leads := {}  # clip -> its "lead" (s skipped at the start; under zero: the first frame held)
