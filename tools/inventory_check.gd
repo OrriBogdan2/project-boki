@@ -5,6 +5,8 @@ extends RefCounted
 ## press-and-hold drag (mouse and pad), the Enter and Delete keys, and sits beside an open deathbox. Never
 ## touches the save.
 
+const SIZES := [Vector2i(1280, 720), Vector2i(1600, 900), Vector2i(1920, 1080)]
+
 var bad := 0
 
 func ok(cond: bool, what: String) -> void:
@@ -26,6 +28,7 @@ func run(main: Node) -> void:
 	_compare(p)
 	_moves(m, p)
 	await _window(main, m, p, q)
+	await _full_pack(main, m, p)
 	print("INVENTORY CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -123,6 +126,72 @@ func _window(main: Node, m: Match, p: Hunter, q: Hunter) -> void:
 	ok(worn_id == String(first["id"]), "Enter on a pack piece wears it")
 	m.hud.close_pack()
 	await _beside(main, m, p, q)
+
+## The full loadout (inv_shots.gd dress: longest names, 6 of 6 pack, 4 belt items, 5 perk kinds) at each of SIZES:
+## the window and its hover card sit inside the safe margin, nothing clips, every slot is clickable, no belt
+## or worn name loses a letter, and the picked-up thing stays on screen.
+func _full_pack(main: Node, m: Match, p: Hunter) -> void:
+	var win_was := main.get_tree().root.size
+	for win: Vector2i in SIZES:
+		main.get_tree().root.size = win
+		await _frames(main, 3)
+		load("res://tools/inv_shots.gd").dress(p)
+		m.hud.close_pack()
+		m.hud.toggle_pack()
+		await _frames(main, 6)
+		var pc: PanelContainer = m.hud.pack_panel
+		var vs := pc.get_viewport_rect().size
+		var tag := "%dx%d (logical %s)" % [win.x, win.y, vs]
+		var safe := HudStyle.safe_rect(vs).grow(0.5)
+		var wr := pc.get_global_rect()
+		ok(safe.encloses(wr), "%s: the full window %s sits inside the safe margin" % [tag, wr])
+		var clipped := SafeArea.clipped(pc)
+		ok(clipped.is_empty(), "%s: no text clipped %s" % [tag, clipped.slice(0, 4)])
+		var lp: LoadoutPanel = pc.find_children("*", "LoadoutPanel", true, false)[0]
+		var slots := {"worn": 0, "belt": 0, "pack": 0}
+		var stray: Array = []
+		for c: Control in lp._drag._slots:
+			var key: Dictionary = lp._drag._slots[c]["key"]
+			slots[key["inv"]] += 1
+			if c.mouse_filter == Control.MOUSE_FILTER_IGNORE or not Rect2(Vector2.ZERO, vs).has_point(_mid(c)):
+				stray.append("%s %d at %s" % [key["inv"], key["i"], SlotDrag._rect(c)])
+		ok(slots["worn"] == 4 and slots["belt"] == UtilityBelt.SLOTS and slots["pack"] == 6 and stray.is_empty(),
+			"%s: 4 worn, %d belt, 6 pack slots, all clickable on screen %s" % [tag, slots["belt"], stray.slice(0, 3)])
+		var rows: Array = lp._pack_rows
+		var list := (rows[0] as Control).get_parent().get_parent() as ScrollContainer
+		var shown := list.get_global_rect()
+		var last := (rows[5] as Control).get_global_rect()
+		ok(rows.size() == 6 and shown.encloses(last.grow(-1.0)),
+			"%s: a full pack shows all 6 lines without scrolling (list %s, last line %s)" % [tag, shown, last])
+		var orbs: HFlowContainer = pc.find_children("*", "HFlowContainer", true, false)[0]
+		ok(orbs.get_child_count() == 5, "%s: all 5 perk orbs show (%d)" % [tag, orbs.get_child_count()])
+		var k := p.belt.find_custom(func(b): return not b.is_empty())
+		var cards := [["glove", lp._worn_tiles[0], lp._lines("worn", 0)],
+			["boots", lp._worn_tiles[3], lp._lines("worn", 3)],
+			["gear row", rows[0], lp._lines("pack", 0)], ["treasure row", rows[3], lp._lines("pack", 3)],
+			["belt item", _slot(lp, "belt", k), BeltHud.tip(p, k)]]
+		for c in cards:
+			lp._tip.show_for(c[1], c[2])
+			await _frames(main, 2)
+			var card: Rect2 = (lp._tip.get_child(0) as Control).get_global_rect()
+			ok(safe.encloses(card), "%s: the %s hover card stays inside the safe margin %s" % [tag, c[0], card])
+		lp._tip.show_for(rows[0], [])
+		var vp := main.get_viewport()
+		_mouse(vp, true, _mid(rows[0]))
+		var mv := InputEventMouseMotion.new()
+		mv.position = _mid(rows[0]) + Vector2(40, -60)
+		mv.button_mask = MOUSE_BUTTON_MASK_LEFT
+		vp.push_input(mv, true)
+		await _frames(main, 2)
+		ok(lp._drag.carrying(), "%s: a drag in progress picks the line up" % tag)
+		lp._tip.show_for(rows[1], lp._lines("pack", 1))
+		await _frames(main, 2)
+		ok(lp._tip.get_child_count() == 0, "%s: no hover card opens over a thing being dragged" % tag)
+		_mouse(vp, false, Vector2(2, 2))
+		await _frames(main, 2)
+	m.hud.close_pack()
+	main.get_tree().root.size = win_was
+	await _frames(main, 2)
 
 func _beside(main: Node, m: Match, p: Hunter, q: Hunter) -> void:
 	var bx: Dictionary = load("res://tools/loot_full_check.gd").make_box(q, p.pos, [Loot.valuable("old_coin")])

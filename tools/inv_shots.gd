@@ -50,6 +50,16 @@ func run(main_node: Node) -> void:
 		found[0].call("hover_demo", "pack", 0)
 		await _frames(8)
 		await _shot("inv_tip_" + tag, "Compare tooltip on a backpack piece: only the changed numbers")
+		found[0].call("hover_demo", "worn", 0)
+		await _frames(8)
+		await _shot("inv_tipworn_" + tag, "Hover card of the longest-named glove")
+		found[0].call("hover_demo", "pack", 3)
+		await _frames(8)
+		await _shot("inv_tipval_" + tag, "Hover card of the longest-named treasure")
+		await _drag_held(m)
+		await _shot("inv_dragging_" + tag, "A press-and-hold drag in progress: the backpack piece follows the pointer")
+		_push_mouse(false, Vector2(2.0, 2.0))
+		await _frames(6)
 	m.hud.toggle_pack()
 	var bx: Dictionary = load("res://tools/loot_full_check.gd").make_box(q, p.pos + Vector3(1.0, 0, 0), [])
 	bx["gear"] = [{"id": "vest", "rar": 3}, {"id": "skylark_boots", "rar": 2}]
@@ -70,17 +80,51 @@ func run(main_node: Node) -> void:
 	print("INVSHOTS %d in %s" % [captions.size(), dir])
 	main.get_tree().quit(0)
 
-## A hunter in a full loadout: two gloves, armor, boots, belt items, a few perks and a half-full pack.
+## A hunter in a full loadout: two gloves, armor, boots, four belt items, five perk orbs and a full 6-slot
+## pack, each with the longest name its kind has (so a clipped or overlapping line shows). The pack's first
+## line is the longest backpack gear name (`long_pack_name`).
 static func dress(p: Hunter) -> void:
-	p.gear = [{"id": "power_core", "rar": 2}, {"id": "frost", "rar": 1}, {"id": "quilted_coat", "rar": 1},
-		{"id": "boots", "rar": 1}]
-	p.perks = ["keen", "keen", "toughskin", "fleet"]
-	UtilityBelt.grant(p, "medkit", 2)
-	UtilityBelt.grant(p, "smoke", 1)
+	var g := _longest_gear()
+	p.gear = [{"id": g[0], "rar": 3}, {"id": g[1], "rar": 3}, {"id": g[2], "rar": 3}, {"id": g[3], "rar": 3}]
+	p.perks = []
+	for id in _longest_perks(5):
+		p.perks.append(id)
+	p.perks.append(p.perks[0])         # one stack: the xN badge
+	p.belt = UtilityBelt.empty()
+	for id in _longest_belt(4):
+		UtilityBelt.grant(p, id, 2)
 	p.refresh_gear()
 	p.pack_cap = 6
-	p.pack = [Loot.gear("vest", 3), Loot.gear("blink", 2), Loot.gear("windstep_boots", 1), Loot.valuable("kin_idol"),
-		Loot.valuable("sky_pearl")]
+	p.pack = [Loot.gear(g[4], 3), Loot.gear(g[5], 3), Loot.gear(g[6], 3)]
+	for id in _longest_valuables(3):
+		p.pack.append(Loot.valuable(id))
+
+static func _by_len(ids: Array, name_of: Callable) -> Array:
+	var out := ids.duplicate()
+	out.sort_custom(func(a, b): return String(name_of.call(a)).length() > String(name_of.call(b)).length())
+	return out
+
+## [glove, glove, armor, boots, then three more pieces for the pack]: the longest-named pieces of each kind.
+static func _longest_gear() -> Array:
+	var by_slot := [[], [], [], []]
+	for id in Gear.ALL:
+		by_slot[Gear.slot_of(id)].append(id)
+	var nm := func(id): return Gear.ALL[id]["name"]
+	var gl: Array = _by_len(by_slot[0] + by_slot[1], nm)
+	var ar: Array = _by_len(by_slot[2], nm)
+	var bo: Array = _by_len(by_slot[3], nm)
+	return [gl[0], gl[1], ar[0], bo[0], ar[1], bo[1], gl[2]]
+
+static func _longest_perks(n: int) -> Array:
+	return _by_len(Data.PERKS.keys(), func(id): return Data.PERKS[id]["name"]).slice(0, n)
+
+static func _longest_belt(n: int) -> Array:
+	var ids := UtilityBelt.ids().filter(func(id): return not BeltKeys.is_key(id) and UtilityBelt.fixed_slot(id) < 0)
+	return _by_len(ids, func(id): return UtilityBelt.name_of(id)).slice(0, n)
+
+static func _longest_valuables(n: int) -> Array:
+	var ids := Loot.VALUABLES.keys().filter(func(id): return not Loot.is_bag_item(Loot.valuable(id)))
+	return _by_len(ids, func(id): return Loot.VALUABLES[id]["name"]).slice(0, n)
 
 func _frames(k: int) -> void:
 	for i in k:
@@ -95,6 +139,21 @@ func _shot(file: String, caption: String) -> void:
 	captions.append("%s.png: %s" % [file, caption])
 
 # ------------------------------------------------------------------ --inv-drag
+## Presses on the first backpack line and drags it most of the way to the armor slot, still held.
+func _drag_held(m: Match) -> void:
+	var lp := _panel(m)
+	var a := _at(lp, "pack", 0)
+	var b := _at(lp, "worn", 2)
+	_push_mouse(true, a)
+	await _frames(6)
+	for k in 12:
+		var mv := InputEventMouseMotion.new()
+		mv.position = a.lerp(b, (k + 1) / 16.0)
+		mv.button_mask = MOUSE_BUTTON_MASK_LEFT
+		main.get_viewport().push_input(mv, true)
+		await _frames(1)
+	await _frames(4)
+
 func _drag_reel(m: Match) -> void:
 	DirAccess.make_dir_recursive_absolute(dir.path_join("drag"))
 	var layer := CanvasLayer.new()

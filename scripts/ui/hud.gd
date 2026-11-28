@@ -1915,7 +1915,7 @@ func _fit_panel(pc: PanelContainer, sc: ScrollContainer, rows: VBoxContainer) ->
 	var vs := pc.get_viewport_rect().size
 	var pad := HudStyle.safe_pad(vs)
 	var top := pad.y + 46.0
-	var bottom := vs.y - pad.y - 154.0          # clear of the weapon card and the consumable slots
+	var bottom := vs.y - pad.y - 150.0          # clear of the weapon card and the consumable slots
 	var want := rows.get_combined_minimum_size().y
 	var rest := pc.get_combined_minimum_size().y - sc.get_combined_minimum_size().y
 	sc.custom_minimum_size.y = clampf(bottom - top - rest, 60.0, want)

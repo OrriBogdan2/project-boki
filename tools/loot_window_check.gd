@@ -142,6 +142,10 @@ func _all_takeable(p: Hunter, q: Hunter) -> void:
 ## A better glove in the box's backpack: it says UPGRADE and Wear, and taking it puts it on.
 func _wears_upgrade(p: Hunter, q: Hunter) -> void:
 	INV_SHOTS.dress(p)
+	# dress() wears the longest-named pieces at top rarity; wear plain ones so a rar 3 glove is an upgrade
+	p.gear = [{"id": "power_core", "rar": 2}, {"id": "frost", "rar": 1}, {"id": "quilted_coat", "rar": 1},
+		{"id": "boots", "rar": 1}]
+	p.refresh_gear()
 	var bx: Dictionary = LOOT_FULL.make_box(q, p.pos, [Loot.gear("blink", 3)])
 	m.boxes.append(bx)
 	m.hud.open_loot(bx)
