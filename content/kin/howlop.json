@@ -7,6 +7,7 @@
 		"Tuning fork"
 	],
 	"theme": "echo",
+	"type2": "dark",
 	"flavor": "Predator bat-hare, sonic fangs.",
 	"colors": {
 		"belly": "#9c6c6c",
@@ -115,6 +116,12 @@
 		"temper": "Hyper",
 		"desc": "Deep blue and humming. Tap it and it taps back. Something restless is in here.",
 		"play": "Fast, darting and always on the move."
+	},
+	"roster": {
+		"art": "new",
+		"line": "zapple",
+		"stage": 2,
+		"from": "zapple"
 	},
 	"size": {
 		"cm": 64,

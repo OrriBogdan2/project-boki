@@ -7,6 +7,7 @@
 		"Grass sickle"
 	],
 	"theme": "swarm",
+	"type2": "bloom",
 	"flavor": "Soldier ant, leaf-blade mandibles.",
 	"colors": {
 		"belly": "#b4cc84",
@@ -110,6 +111,12 @@
 		"temper": "Dutiful",
 		"desc": "Something dutiful is in here.",
 		"play": "Gets in close and hits hard."
+	},
+	"roster": {
+		"art": "new",
+		"line": "marchleaf",
+		"stage": 2,
+		"from": "marchleaf"
 	},
 	"size": {
 		"cm": 50,

@@ -686,12 +686,14 @@ func _fill_menu(v: VBoxContainer) -> void:
 			MENU_PICK_W
 		)
 		b.add_theme_font_size_override("font_size", 12)
-		b.clip_text = true  # a long name (Barrelmander) must not widen the grid past MENU_PICK_W: it trims (ellipsis)
+		b.clip_text = true  # a long name never widens the grid (and the panel past a 16:10 window): it trims
 		b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		b.tooltip_text = nm  # the tooltip has it whole
 		if sp != "" and KinLib.kin(sp):
 			var ks := KinLib.kin(sp)
 			b.tooltip_text = (
-				"%s  ·  %s" % [String(ks.theme).capitalize(), "   ".join(KitCard.infusion_lines(p_v.arch, ks))]
+				"%s  ·  %s  ·  %s"
+				% [nm, String(ks.theme).capitalize(), "   ".join(KitCard.infusion_lines(p_v.arch, ks))]
 			)
 		kg.add_child(b)
 	# the species list outgrows any screen: it scrolls (wheel, or the pad moving focus through it)

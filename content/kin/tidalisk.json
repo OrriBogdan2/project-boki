@@ -7,6 +7,7 @@
 		"Soap bubble"
 	],
 	"theme": "prism",
+	"type2": "tide",
 	"flavor": "Sleek wave-runner, crest of breaking foam.",
 	"colors": {
 		"belly": "#e4cce4",
@@ -110,6 +111,12 @@
 		"temper": "Showy",
 		"desc": "Something showy is in here.",
 		"play": "Slippery and full of tricks."
+	},
+	"roster": {
+		"art": "new",
+		"line": "opalisk",
+		"stage": 3,
+		"from": "frothisk"
 	},
 	"size": {
 		"cm": 67,

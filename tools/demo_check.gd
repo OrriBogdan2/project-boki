@@ -32,11 +32,18 @@ func _up(preset: String) -> bool:
 	return c is Match and c.player != null and not c.hunters.is_empty() and c.is_processing()
 
 
+
 func _boot(preset: String, args: PackedStringArray) -> bool:
 	Demo.setup(preset)
 	Demo.open(main, preset, args)
 	var t := 0.0
 	while not _up(preset) and t < BOOT_SECS:
+		await _wait(0.25)
+		t += 0.25
+	# the lobby spawns over frames (Match._slice): on a slow box the full count lands after the first
+	# hunter, so wait for it (a lobby that never fills still fails the count below, at BOOT_SECS)
+	var full: int = Data.MATCH_PLAYERS
+	while preset in ["match", "tier2"] and _up(preset) and main.current.hunters.size() < full and t < BOOT_SECS:
 		await _wait(0.25)
 		t += 0.25
 	await _wait(RUN_SECS)

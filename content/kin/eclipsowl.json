@@ -7,6 +7,7 @@
 		"Eclipse"
 	],
 	"theme": "lunar",
+	"type2": "dark",
 	"flavor": "Great owl, eclipse-ring facial disc, moth cloak wings.",
 	"colors": {
 		"belly": "#543c6c",
@@ -116,6 +117,12 @@
 		"temper": "Airy",
 		"desc": "Pale and faintly glowing. At night it floats a hair above the nest. Something airy is in here.",
 		"play": "Slippery and full of tricks."
+	},
+	"roster": {
+		"art": "new",
+		"line": "mothlet",
+		"stage": 3,
+		"from": "wisplet"
 	},
 	"size": {
 		"cm": 44,
