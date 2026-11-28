@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cif5h7fbeocl4"
-path="res://.godot/imported/prism_Image_0.webp-042380bb808250da3431fc10ecdcda43.ctex"
+path.s3tc="res://.godot/imported/prism_Image_0.webp-042380bb808250da3431fc10ecdcda43.s3tc.ctex"
+path.etc2="res://.godot/imported/prism_Image_0.webp-042380bb808250da3431fc10ecdcda43.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "9142f5179d454b6f374cb8f6e52a4658"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/eggs/prism_Image_0.webp"
-dest_files=["res://.godot/imported/prism_Image_0.webp-042380bb808250da3431fc10ecdcda43.ctex"]
+dest_files=["res://.godot/imported/prism_Image_0.webp-042380bb808250da3431fc10ecdcda43.s3tc.ctex", "res://.godot/imported/prism_Image_0.webp-042380bb808250da3431fc10ecdcda43.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

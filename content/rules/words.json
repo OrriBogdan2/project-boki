@@ -3,7 +3,7 @@
 	"max_words": 16,
 	"max_chars": 100,
 	"words": [
-		{"term": "Relic", "line": "The cursed mask of a fallen Hunter. Take one up and you become them.", "seen": {}},
+		{"term": "Relic", "line": "The cursed keepsake of a fallen Hunter. Take one up and you become them.", "seen": {}},
 		{"term": "Hunter", "line": "What you become when you put on a Relic. Every player in a match is one.", "seen": {}},
 		{"term": "Boki wisp", "line": "Your Boki's soul, orbiting you in a match as a small critter-shaped light.", "seen": {"tut": "hatched"}},
 		{"term": "Summon", "line": "Perks while it rides with you. Summon it for a few seconds: none while it is out.", "seen": {"tut": "hatched"}},
