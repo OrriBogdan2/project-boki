@@ -7,7 +7,7 @@ extends RefCounted
 const CROP := 340  # px, the square around the monster
 const WAIT_S := 14.0  # s a monster gets to show all four states
 const ORDER := ["idle", "walk", "windup", "strike", "hit", "death"]
-const HIT_FRAC := 0.12  # of the monster's hp, the blow the hit cell is shot after
+const POSE_HIT_FRAC := 0.12  # of the monster's hp, the blow the hit cell is shot after
 const HIT_WAIT_S := 0.06  # s after the blow: the flinch layer (MobAnim.FLINCH_S) is near its peak
 const DEATH_WAIT_S := 0.1  # s after the kill: the keyed death move under the dissolve
 
@@ -132,7 +132,7 @@ func _hit_death(kind: String, strip: Image, got: Dictionary) -> void:
 	var p: Hunter = m.player
 	var mb := m.spawn_mob(kind, _ground(p.pos, 4.5))
 	await _frames(30)
-	mb.hurt(float(mb.md["hp"]) * HIT_FRAC, p)
+	mb.hurt(float(mb.md["hp"]) * POSE_HIT_FRAC, p)
 	await _wait(HIT_WAIT_S)
 	strip.blit_rect(await _grab(mb), Rect2i(0, 0, CROP, CROP), Vector2i(ORDER.find("hit") * CROP, 0))
 	got["hit"] = true
