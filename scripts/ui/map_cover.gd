@@ -64,12 +64,12 @@ func _hide(img: Image) -> void:
 	if img != null and not img.is_empty():
 		_layer = CanvasLayer.new()
 		_layer.layer = LAYER
-		var tr := TextureRect.new()
-		tr.texture = ImageTexture.create_from_image(img)
-		tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		tr.stretch_mode = TextureRect.STRETCH_SCALE
-		tr.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		tr.set_anchors_preset(Control.PRESET_FULL_RECT)
-		_layer.add_child(tr)
+		var rect_node := TextureRect.new()
+		rect_node.texture = ImageTexture.create_from_image(img)
+		rect_node.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		rect_node.stretch_mode = TextureRect.STRETCH_SCALE
+		rect_node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		rect_node.set_anchors_preset(Control.PRESET_FULL_RECT)
+		_layer.add_child(rect_node)
 		_host.add_child(_layer)
 	_host.get_viewport().disable_3d = true
