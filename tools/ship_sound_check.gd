@@ -63,8 +63,13 @@ func run(mn: Node, _arg = null) -> void:
 	m.start(o)
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--live-secs="):
+			var fade = main.get("fade")
+			if fade != null:
+				await fade.reveal(0.01)  # the boot splash stays up when a check starts the match by hand
 			for i in int(float(String(a).substr(12)) * 60.0):
 				await main.get_tree().process_frame
+				if i % 300 == 0:
+					print("SHIP_SOUND live frame %d" % i)
 			main.get_tree().quit()
 			return
 	m.set_process(false)
