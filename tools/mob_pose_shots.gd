@@ -61,6 +61,7 @@ func setup(mn: Node) -> Array:
 		k.dead = true
 		k.visible = false
 	m.hud.visible = false
+	m.fx.visible = not react  # --react: no sparks, numbers or clouds over the body being judged
 	var p: Hunter = m.player
 	var best := Vector2.INF
 	for isl in m.world.islands:  # the island the player starts on: step 8 m in from its edge
