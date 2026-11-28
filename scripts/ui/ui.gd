@@ -214,9 +214,11 @@ static func button(text: String, cb: Callable, minw := 0.0, icon := "") -> Butto
 	var b := Button.new()
 	b.set_meta(SFX_META, true)
 	b.text = text
-	if cb.is_valid():
-		var snd: String = BACK_WORDS.get(text, "click")
-		b.pressed.connect(func(): Sfx.play(String(b.get_meta("snd", snd))); cb.call())
+	# a button given no callback (its caller connects `pressed` itself) still makes its press sound
+	var snd: String = BACK_WORDS.get(text, "click")
+	b.pressed.connect(func():
+		Sfx.play(String(b.get_meta("snd", snd)))
+		if cb.is_valid(): cb.call())
 	if minw > 0.0:
 		b.custom_minimum_size.x = minw
 	if icon != "":
