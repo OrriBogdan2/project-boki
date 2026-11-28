@@ -458,9 +458,13 @@ func _fresh(st: String) -> bool:
 	return attack_left <= _clip_len(st) * (1.0 - ATTACK_AGAIN) / _shot_rate(st)
 
 
-## The play rate of a one-shot: data "attack_rate" for the swing and cast clips, 1 for a hit or a landing.
+## The play rate of a one-shot: data "attack_rate" for the attack clip, "slot_rate" (default the same) for the
+## slot clips of a move, 1 for a hit or a landing.
 func _shot_rate(st: String) -> float:
-	return 1.0 if st in HIT_SLOTS else float(d.get("attack_rate", 1.0))
+	if st in HIT_SLOTS:
+		return 1.0
+	var rate := float(d.get("attack_rate", 1.0))
+	return float(d.get("slot_rate", rate)) if st != "attack" else rate
 
 
 ## The loop's rate for this ground speed against the speed it was keyed at (data, m/s), clamped to the clip's range.

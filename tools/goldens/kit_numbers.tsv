@@ -27,6 +27,7 @@ archetypes/archer.json:e.slow	0.35
 archetypes/archer.json:e.tell	0.35
 archetypes/archer.json:e.time	4.4
 archetypes/archer.json:e.width	1.8
+archetypes/archer.json:plate_offset	2.37
 archetypes/archer.json:rank_cd.dash[0]	1
 archetypes/archer.json:rank_cd.dash[1]	0.8947
 archetypes/archer.json:rank_cd.dash[2]	0.7895
@@ -134,6 +135,7 @@ archetypes/ashwick.json:lmb.spool	0.2
 archetypes/ashwick.json:lmb.tick	0.1
 archetypes/ashwick.json:lmb.w0	0.65
 archetypes/ashwick.json:lmb.w1	2.85
+archetypes/ashwick.json:plate_offset	2.44
 archetypes/ashwick.json:rank_cd.dash[0]	1
 archetypes/ashwick.json:rank_cd.dash[1]	0.9167
 archetypes/ashwick.json:rank_cd.dash[2]	0.8333
@@ -406,6 +408,7 @@ archetypes/dolm.json:passive.guard.shield	18.0
 archetypes/dolm.json:passive.guard.t	6.0
 archetypes/dolm.json:passive.len	18.0
 archetypes/dolm.json:passive.len_max	25.0
+archetypes/dolm.json:plate_offset	2.65
 archetypes/dolm.json:rank_cd.dash[0]	1
 archetypes/dolm.json:rank_cd.dash[1]	0.8333
 archetypes/dolm.json:rank_cd.dash[2]	0.8333
@@ -523,6 +526,7 @@ archetypes/dredge.json:e.spike.vy	16.0
 archetypes/dredge.json:e.stun	1.1
 archetypes/dredge.json:e.windup	0.38
 archetypes/dredge.json:gun.armor_k	0.66
+archetypes/dredge.json:plate_offset	3.08
 archetypes/dredge.json:rank_cd.dash[0]	1
 archetypes/dredge.json:rank_cd.dash[1]	0.8214
 archetypes/dredge.json:rank_cd.dash[2]	0.6429
@@ -646,7 +650,7 @@ archetypes/gil.json:passive.cd	8.0
 archetypes/gil.json:passive.need	3
 archetypes/gil.json:passive.stun	0.75
 archetypes/gil.json:passive.window	5.0
-archetypes/gil.json:plate_offset	2.1
+archetypes/gil.json:plate_offset	2.05
 archetypes/gil.json:resource.max	3
 archetypes/gil.json:rmb.bag.air	2
 archetypes/gil.json:rmb.bag.fire	2
@@ -842,7 +846,7 @@ archetypes/juggernaut.json:lmb.wave_size[1]	0.6
 archetypes/juggernaut.json:lmb.wave_speed	36.0
 archetypes/juggernaut.json:model_glow.emit	1.4
 archetypes/juggernaut.json:model_glow.strength	2.4
-archetypes/juggernaut.json:plate_offset	2.26
+archetypes/juggernaut.json:plate_offset	2.62
 archetypes/juggernaut.json:rank_cd.dash[0]	1
 archetypes/juggernaut.json:rank_cd.dash[1]	0.8462
 archetypes/juggernaut.json:rank_cd.dash[2]	0.6154
@@ -984,7 +988,7 @@ archetypes/mage.json:e.reach	11.0
 archetypes/mage.json:e.slide_dist	3.4
 archetypes/mage.json:e.slide_t	1.1
 archetypes/mage.json:e.stacks	1
-archetypes/mage.json:plate_offset	2.2
+archetypes/mage.json:plate_offset	2.43
 archetypes/mage.json:rank_cd.dash[0]	1
 archetypes/mage.json:rank_cd.dash[1]	0.9167
 archetypes/mage.json:rank_cd.dash[2]	0.8333
@@ -1083,6 +1087,7 @@ archetypes/ostra.json:lmb.prime_slow_t	1.5
 archetypes/ostra.json:lmb.prime_speed	1.4
 archetypes/ostra.json:lmb.size_k	0.9
 archetypes/ostra.json:no_hold	true
+archetypes/ostra.json:plate_offset	2.3
 archetypes/ostra.json:rank_cd.dash[0]	1
 archetypes/ostra.json:rank_cd.dash[1]	0.8421
 archetypes/ostra.json:rank_cd.dash[2]	0.6842
@@ -1185,6 +1190,7 @@ archetypes/rimewright.json:passive.fan_splinter	54.0
 archetypes/rimewright.json:passive.splinter_delay	0.4
 archetypes/rimewright.json:passive.splinter_dmg	37.0
 archetypes/rimewright.json:passive.splinter_r	3.0
+archetypes/rimewright.json:plate_offset	2.49
 archetypes/rimewright.json:rank_cd.dash[0]	1
 archetypes/rimewright.json:rank_cd.dash[1]	0.8846
 archetypes/rimewright.json:rank_cd.dash[2]	0.7692
@@ -1285,7 +1291,7 @@ archetypes/tender.json:passive.lock	4.0
 archetypes/tender.json:passive.max	2
 archetypes/tender.json:passive.pick_r	1.1
 archetypes/tender.json:passive.pick_speed	0.6
-archetypes/tender.json:plate_offset	1.85
+archetypes/tender.json:plate_offset	1.77
 archetypes/tender.json:rank_cd.air[0]	1
 archetypes/tender.json:rank_cd.air[1]	0.8929
 archetypes/tender.json:rank_cd.air[2]	0.7857
@@ -1375,7 +1381,7 @@ archetypes/thief.json:e.slow	0.5
 archetypes/thief.json:e.slow_t	2.5
 archetypes/thief.json:e.speed	40.0
 archetypes/thief.json:e.time	6.0
-archetypes/thief.json:plate_offset	2.15
+archetypes/thief.json:plate_offset	2.53
 archetypes/thief.json:rank_cd.dash[0]	1
 archetypes/thief.json:rank_cd.dash[1]	1
 archetypes/thief.json:rank_cd.dash[2]	1

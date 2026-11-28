@@ -1446,6 +1446,9 @@ func _clear_line(m: Match, h: Hunter, a: Vector2, b: Vector2) -> bool:
 		# turned the bot aside every frame and it shuffled on the spot instead of taking the way round)
 		if w.tile_kind(p.x, p.y) != World.T_GROUND:
 			return false
+		# a smooth sheer rim above the walker (a jump can't mantle it): the line ends there, the tile path goes round
+		if w.sheer.has(w.idx(int(floorf(p.x)), int(floorf(p.y)))) and w.ground_at(p.x, p.y) > h.pos.y + World.STEP:
+			return false
 		if w.tile_kind(p.x + side.x, p.y + side.y) == World.T_BLOCK:
 			return false
 		if w.tile_kind(p.x - side.x, p.y - side.y) == World.T_BLOCK:

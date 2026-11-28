@@ -59,7 +59,7 @@ static var _uv := PackedVector2Array()
 static func _semibold() -> FontVariation:
 	var f := FontVariation.new()
 	f.base_font = HudStyle.BODY
-	f.variation_opentype = {TextServerManager.get_primary_interface().name_to_tag("wght"): 600}
+	f.variation_opentype = UI.weight(600)
 	return f
 
 
@@ -110,6 +110,9 @@ static func _row(hud, at: Vector2, h: Hunter, i: int) -> void:
 	var lbl := _label(m, h, st)
 	if lbl[0] != "":
 		_lean_text(c, Vector2(tx, at.y + LABEL_Y), String(lbl[0]), lbl[1])
+	elif st == "ALIVE" and h.sick_t > 0.0:
+		rec["sick"] = ceili(h.sick_t)
+		_sick(c, Vector2(tx, at.y + LABEL_Y), h.sick_t)
 	HudStyle.text(
 		c,
 		Vector2(tx, at.y + NAME_Y),
@@ -158,6 +161,12 @@ static func _label(m: Match, h: Hunter, st: String) -> Array:
 		if m.skydrop.is_lead(h):
 			return ["LEAD", HudStyle.GOLD]
 	return ["", Color.WHITE]
+
+
+## Resurrection sickness in the label's place: a heart and the whole seconds left (HudPlate.SICK_COL).
+static func _sick(c: CanvasItem, at: Vector2, left: float) -> void:
+	Icons.draw(c, "heart", at + Vector2(4.0, -3.5), 4.0, HudPlate.SICK_COL)
+	_lean_text(c, at + Vector2(10.0, 0.0), "%ds" % ceili(left), HudPlate.SICK_COL)
 
 
 ## Condensed, leaning text (the state label).

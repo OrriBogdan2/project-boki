@@ -12,6 +12,11 @@ const HEIGHT_TOL := 0.03  # share: the head stands this close to the contract mo
 const UPRIGHT := 0.25  # m, Meshy scale: the head stays this far over the hips in every state (a clip in a wrong frame)
 const BLADE := 1.38  # Meshy units: a held sword's tip from the hand bone, along its Y (Kael's: warden_props)
 const PROBE := 1.0 / 240.0  # s: the step the move clips are swept at
+## m: the plate's bars hang 17 px under its anchor (0.52 m at the match camera), so under this they cover the head
+const PLATE_GAP_MIN := 0.55
+const PLATE_GAP_MAX := 0.85  # m: any more and the plate floats off its Hunter (the glider's bank rolls the head away)
+const PLATE_SAMPLES := 6  # poses read over a clip's cycle
+const PLATE_STEP_FRAMES := 8  # 30 fps frames between them
 const CONTRACT_BONES := ["hips", "upper_arm.L", "thigh.L"]
 const POSED_MIN := 10  # bones turned off Meshy's T-pose rest in a playing clip (the T-pose turns none)
 const TURNED := 0.03  # rad: a bone this far off its rest is posed
@@ -70,6 +75,7 @@ func run(main: Node) -> void:
 		_bones(a)
 		_height(a)
 		await _states(main, a)
+		_plate_gap(a)
 	print("WARDENNATIVE DONE %d checks, %d failed" % [n, bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -138,7 +144,7 @@ func _states(main: Node, a: String) -> void:
 		m.set_meta(WardenClips.STATE, {"cast": CALM_CAST}.merged(c[1], true))
 		await main.get_tree().process_frame
 		await main.get_tree().process_frame
-		var want := String(nat.plays[c[0]])
+		var want := String(nat.plays["lmb" if c[0] == "attack" and nat.plays.has("lmb") else c[0]])
 		var sk := nat.skel
 		var up := (
 			sk.get_bone_global_pose(sk.find_bone("Head")).origin.y
@@ -336,6 +342,42 @@ func _orbits(main: Node, a: String, nat: WardenNative) -> void:
 		)
 
 
+## The plate floats a small, even gap over the highest drawn part of the model in the standing, running, crouching and
+## gliding poses, sampled over a cycle: never inside the head, never adrift above it.
+func _plate_gap(a: String) -> void:
+	var m := _model(a)
+	var nat := m.get_node("Warden/Native") as WardenNative
+	var gap := PlateGap.new(m)
+	var plate := HudPlate.arch_offset(a)
+	var cases := [
+		["idle", {"grounded": true}, Quaternion.IDENTITY],
+		["run", {"grounded": true, "vel": Vector3(0.0, 0.0, -4.6)}, Quaternion.IDENTITY],
+		["crouch", {"grounded": true, "crouch": 1.0}, Quaternion.IDENTITY],
+		[
+			"glide",
+			{"grounded": false, "gliding": true, "vel": Vector3(0.0, -1.0, -6.0)},
+			Quaternion(Vector3.BACK, HunterAnim.GLIDE_BANK)
+		],
+	]
+	for c in cases:
+		m.set_meta(WardenClips.STATE, c[1])
+		m.set_meta(HunterAnim.AIR_TILT, c[2])
+		var lo := INF
+		var hi := -INF
+		for i in PLATE_SAMPLES:
+			for f in PLATE_STEP_FRAMES:
+				nat._process(1.0 / 30.0)
+			var top := gap.top()
+			lo = minf(lo, plate - top)
+			hi = maxf(hi, plate - top)
+		print("PLATEGAP %s %s plate %.2f gap %.3f .. %.3f (%s)" % [a, c[0], plate, lo, hi, gap.tallest])
+		ok(
+			lo >= PLATE_GAP_MIN and (c[0] == "glide" or hi <= PLATE_GAP_MAX),
+			"%s: %s: the plate %.2f m up clears the %s by %.2f..%.2f m" % [a, c[0], plate, gap.tallest, lo, hi]
+		)
+	m.free()
+
+
 ## Plays state `s` for two frames (`calm` first, so the counters take it as their baseline) from a clean slate.
 func _feed(main: Node, nat: WardenNative, m: Node3D, calm: Dictionary, s: Dictionary) -> void:
 	nat.attack_left = 0.0
@@ -369,6 +411,15 @@ func _slots(main: Node, a: String, m: Node3D, nat: WardenNative) -> void:
 	var all_there: bool = named.all(func(sl): return nat.plays.has(sl))
 	ok(all_there, "%s: every clip slot the data names has its clip (%s)" % [a, named])
 	var pick := String(nat.d["clips"]["crouch"])  # (Meshy's clip no fallback plays)
+	for sl in named:  # (a Hunter's own clip: it plays on its move, posed, and ends within its length)
+		var own := String(nat.plays[sl])
+		await _feed(main, nat, m, SLOT_CASES[sl][0], SLOT_CASES[sl][1])
+		var posed := _turned(nat)
+		var clip_s := nat.player.get_animation(own).length
+		ok(
+			nat.player.current_animation == own and posed >= POSED_MIN and clip_s > 0.2,
+			"%s: slot %s plays its own clip %s (%.2f s, %d bones posed)" % [a, sl, own, clip_s, posed]
+		)
 	for sl in SLOT_CASES:
 		var c: Array = SLOT_CASES[sl]
 		if not nat.plays.has(sl):
@@ -476,6 +527,9 @@ func _synthetic_clips(main: Node, a: String, m: Node3D, nat: WardenNative) -> vo
 	var sp := AnimationPlayer.new()
 	sp.add_animation_library(&"", lib)
 	src.add_child(sp)
+	var own_dash: Variant = nat.plays.get("dash")  # (a Hunter's own dash clip comes back below)
+	nat.player.stop()  # (the library changes while nothing plays: a clip fading out of a library edit crashes)
+	nat.cur = ""
 	nat.plays["dash"] = SYNTH
 	nat.borrow(src)
 	var got := nat.player.get_animation(SYNTH) if nat.player.has_animation(SYNTH) else null
@@ -491,8 +545,11 @@ func _synthetic_clips(main: Node, a: String, m: Node3D, nat: WardenNative) -> vo
 	var plays_it := nat.player.current_animation == SYNTH and _turned(nat) >= POSED_MIN
 	ok(plays_it, "%s: the slot plays the clips file's clip" % a)
 	nat.player.stop()  # (a clip removed while it plays errors on every advance)
+	nat.cur = ""
 	nat.player.get_animation_library(&"").remove_animation(SYNTH)
 	nat.plays.erase("dash")
+	if own_dash != null:
+		nat.plays["dash"] = own_dash
 	src.free()
 
 
