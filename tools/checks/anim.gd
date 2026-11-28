@@ -5,6 +5,8 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	# every art/mobs model: four views, match camera, wind-up and death frames (GPU)
+	"--mob-turnaround-shots": ["res://tools/mob_turnaround_shots.gd", "mob_turnaround_shots", null],
 	# a Meshy-native rig holds its clips on frames SimLod skipped the pose
 	"--native-pose-hold-check": ["res://tools/native_pose_hold_check.gd", "native_pose_hold_check", null],
 	# no clip stretches a skinned edge past 1.3x
