@@ -38,7 +38,7 @@ const NAME_IN_S := 0.35        # s after the snap that the name comes in
 const STING_AT_S := 0.25       # s after the snap that the sting starts
 const HAND_BACK_S := 0.5       # s at the end that the camera eases back to the scene's own
 const READ_MIN_S := 3.0        # s: the least a line of the beat's text (whisper, name) stays on screen
-const READ_PER_CHAR_S := 0.06  # s per character, for a line too long to read in READ_MIN_S
+const READ_PER_CHAR_S := 0.075 # s per character (3 words a second), for a line too long to read in READ_MIN_S
 const HOLD_SKIP_S := 1.0       # s of holding a click or interact that skips the rest (DECISIONS 11-11)
 const SOUNDS := {               # our own (tools/gen_mask_sfx.py), loaded with the script so the beat starts at once
 	"mask_swell": preload("res://audio/mask_swell.wav"),
