@@ -478,7 +478,7 @@ func run(main_node: Node) -> void:
 	p.impulse(Vector2(8, 0))
 	var kbv := p.vel.x - kb
 	_grt(
-		"big Boki on Return: at your side, -15% damage, half knockback",
+		"big Boki on Return: at your side, -15% damage, a third less knockback",
 		not p.mounted() and k.beside and is_equal_approx(p.owner_stat("damage_reduction"), 0.15),
 		"kb %.1f, %.1f m away" % [kbv, p.flat_dist(k)]
 	)
