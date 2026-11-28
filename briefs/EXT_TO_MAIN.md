@@ -11504,3 +11504,4 @@ READY ext/ui-grounded-read 8ed7e29074 (Grounded greys dash slot + Space hint wit
 READY ext/farm-save-3p-migration 01404107f6 (old 0.24.4-0.24.6 saves in the 3p farm: load now frees you/Boki from lamp blocks and pockets; --save-3p-check)
 READY ext/boki-2d-style-audit 0007ac3ec1195e731160b62c537a504952ed4f1d (Boki 2D style audit: 277 heroes scored vs Vespyx+Mycroll, 54 red ranked in docs/boki/STYLE_AUDIT_1128.md, sheets in gens/boki-style-1128; docs+tool only)
 READY ext/mob-gait-speed e4e5f595ad (mob+boss gait rate = speed/stride from anim-map data, clamped 0.6-1.6x, walk/run blend; skate at chase 157-333 cm -> 0-5 cm per cycle; --mob-anim-check measures it)
+READY ext/ui-boki-pronoun-lint e4e763ffc5 (--tg-text-check fails Boki 'it/its' text; 21 strings fixed)
