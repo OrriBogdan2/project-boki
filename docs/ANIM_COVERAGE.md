@@ -93,10 +93,6 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | duskapi | shared | shared | shared | shared | shared | shared | shared | shared |
 | eclipsowl | shared | shared | shared | shared | shared | shared | shared | shared |
 | effigoon | shared | shared | shared | shared | shared | shared | shared | shared |
-| embrook | shared | shared | shared | shared | shared | shared | shared | shared |
-| floenatee | shared | shared | shared | shared | shared | shared | shared | shared |
-| forgebrock | shared | shared | shared | shared | shared | shared | shared | shared |
-| geodemole | shared | shared | shared | shared | shared | shared | shared | shared |
 | geysirbara | shared | shared | shared | shared | shared | shared | shared | shared |
 | gibbelle | shared | shared | shared | shared | shared | shared | shared | shared |
 | glaciatee | shared | shared | shared | shared | shared | shared | shared | shared |
@@ -105,7 +101,6 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | gloamspire | shared | shared | shared | shared | shared | shared | shared | shared |
 | glomwort | shared | shared | shared | shared | shared | shared | shared | shared |
 | glomworth | shared | shared | shared | shared | shared | shared | shared | shared |
-| goliathite | shared | shared | shared | shared | shared | shared | shared | shared |
 | gongrowl | shared | shared | shared | shared | shared | shared | shared | shared |
 | gravitank | shared | shared | shared | shared | shared | shared | shared | shared |
 | howlop | shared | shared | shared | shared | shared | shared | shared | shared |
@@ -139,6 +134,7 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | vaultara | shared | shared | shared | shared | shared | shared | shared | shared |
 | velvorm | shared | shared | shared | shared | shared | shared | shared | shared |
 | vespox | shared | shared | shared | shared | shared | shared | shared | shared |
+| goliathite | clip | shared | shared | shared | shared | shared | shared | shared |
 | hoarheron | clip | shared | shared | shared | shared | shared | shared | shared |
 | nimbostrich | shared | clip | clip | shared | shared | shared | shared | shared |
 | orchisloth | shared | clip | clip | shared | shared | shared | shared | shared |
@@ -151,6 +147,10 @@ The knocked-down beat's end height is only said (`KNOCK-HEIGHT`): it is the deat
 | pebbit | clip | clip | clip | clip | clip | clip | clip | clip |
 | wisplet | clip | clip | clip | clip | clip | clip | clip | clip |
 | caecilith | clip | clip | clip | clip | clip | clip | clip | clip |
+| embrook | clip | clip | clip | clip | clip | clip | clip | clip |
+| floenatee | clip | clip | clip | clip | clip | clip | clip | clip |
+| forgebrock | clip | clip | clip | clip | clip | clip | clip | clip |
+| geodemole | clip | clip | clip | clip | clip | clip | clip | clip |
 | glintmole | clip | clip | clip | clip | clip | clip | clip | clip |
 | gloamshell | clip | clip | clip | clip | clip | clip | clip | clip |
 | heatherhorn | clip | clip | clip | clip | clip | clip | clip | clip |
