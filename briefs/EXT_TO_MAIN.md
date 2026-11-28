@@ -11500,3 +11500,4 @@ READY ext/online-desktop-relay-1127 38a295f76e (Net: itch/desktop build with no 
 READY ext/parity-recheck-kael caefa08aabd (Kael parity re-check)
 READY ext/tut-relic-word 8afcff8fd0e7e053988f35ad76550ca9d9466506 (Mask -> Relic in loading lore, Words page, Hob intro; text check fails on Mask)
 READY ext/ui-pick-countdown 7e625305331d (pick countdown throbs red for the whole last 5 s, check assert, proof in UI_FIRST15)
+READY ext/ui-grounded-read 8ed7e29074 (Grounded greys dash slot + Space hint with plate icon and time ring; ability-bar-check asserts on/half/clear)
