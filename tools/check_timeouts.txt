@@ -1,0 +1,3 @@
+# slow checks: <flag> <timeout seconds>; the rest get 1200 (tools/run_check.sh, gate runners)
+--carry-pose-check 3000
+--heart-raid-nightmare-check 3000
