@@ -100,6 +100,7 @@ static func row_slot(H, r: Rect2, p: Hunter) -> void:
 		HudSlot.skill_slot(H, "dash", "dash", r, String(s["icon"]), Settings.key_cap("dash"), s["col"], 0.0, 0.0, false)
 		return
 	draw(H, r, s)
+	GroundedRead.slot(H.c, H.plates, r, p)
 	RankMarks.pips(H, r, "dash", lv, s["col"])
 	if p.can_level("dash"):
 		RankMarks.plus(H, r, "dash", "dash", Settings.key_cap("dash"))
