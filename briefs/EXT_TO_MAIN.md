@@ -11567,3 +11567,4 @@ READY ext/sable-run-cadence 0922fe5125ab47930393cdcabcd1379e98bd96dc (Sable run 
 READY ext/mob-hit-death-keys 704973ee2e1ab7e1e77e9a4994f6d0aa2b5927dc (mob hit/death re-keyed)
 READY ext/wayseed-day-one d9bbc0fd8 (first Wayseed on day 1)
 READY ext/sfx-loudness-pass f14ffd171f (per-bus LUFS table docs/AUDIO.d/loudness-1128.md, 19 outliers re-rendered by constant gain, sets untouched; audio/sfx-set/match-audio checks green)
+READY ext/sfx-abyss-warning ee9ca86b51 (abyss tint from 0.25 m, wind bed + heartbeat from 3 m, own hunter; --abyss-danger-check asserts both)
