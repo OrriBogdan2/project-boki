@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dv0f3okhwcf40"
-path="res://.godot/imported/revive_beacon_Image_0.jpg-d67ace453bb1062724447a5ccdc867ac.ctex"
+path.s3tc="res://.godot/imported/revive_beacon_Image_0.jpg-d67ace453bb1062724447a5ccdc867ac.s3tc.ctex"
+path.etc2="res://.godot/imported/revive_beacon_Image_0.jpg-d67ace453bb1062724447a5ccdc867ac.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "dd629f51ce13977a944497ee9c1d3971"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/items/revive_beacon_Image_0.jpg"
-dest_files=["res://.godot/imported/revive_beacon_Image_0.jpg-d67ace453bb1062724447a5ccdc867ac.ctex"]
+dest_files=["res://.godot/imported/revive_beacon_Image_0.jpg-d67ace453bb1062724447a5ccdc867ac.s3tc.ctex", "res://.godot/imported/revive_beacon_Image_0.jpg-d67ace453bb1062724447a5ccdc867ac.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dicr01hrknoay"
-path="res://.godot/imported/shrine_Image_0.jpg-d367831514288f90403923a3f8e1b1f5.ctex"
+path.s3tc="res://.godot/imported/shrine_Image_0.jpg-d367831514288f90403923a3f8e1b1f5.s3tc.ctex"
+path.etc2="res://.godot/imported/shrine_Image_0.jpg-d367831514288f90403923a3f8e1b1f5.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "075e0a7f25fab28e167d9b62a7bea079"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/items/shrine_Image_0.jpg"
-dest_files=["res://.godot/imported/shrine_Image_0.jpg-d367831514288f90403923a3f8e1b1f5.ctex"]
+dest_files=["res://.godot/imported/shrine_Image_0.jpg-d367831514288f90403923a3f8e1b1f5.s3tc.ctex", "res://.godot/imported/shrine_Image_0.jpg-d367831514288f90403923a3f8e1b1f5.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
