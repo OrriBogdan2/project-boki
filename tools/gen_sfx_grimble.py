@@ -334,6 +334,39 @@ def build():
     S.save_cat('dredge_death', death(), 'grunt')
 
 
+# ------------------------------------------------------------------ the slug hits (11-22): monster and wall
+def slug_mob():
+    """A slug into a monster's hide: a thick wet-leather thump, a shuddering low body and a little scrap pinging off
+    it (the Hunter's own `dredge_hit` pock stays for a body in armour)."""
+    d = 0.3
+    thump = mix(kick(170, 70, 0.2, 0.012, 0.05, 2.2) * 0.9, lpf(noise(0.14), 900) * env(N(0.14), 0.002, 0.04) * 0.6)
+    squelch = at(bpf(noise(0.12), 500, 1800) * slow(0.12, 90, 0.6) * env(N(0.12), 0.006, 0.04) * 0.4, 0.012)
+    flick = at(clank(S.rng.uniform(900, 1300), 0.04, 1.2) * 0.25, 0.02)
+    return S.pad(mix(thump, squelch, flick), d)
+
+
+def slug_wall():
+    """A slug into a wall or a prop: a hard stone chip and a tinny whine as the slug spins off, a pebble or two
+    skittering back."""
+    d = 0.5
+    chip = mix(click(0.003, 2500, 8000) * 1.0, crack(0.07, 1800, 7000, 0.012) * 0.8, kick(240, 110, 0.1, 0.006, 0.02, 1.6) * 0.5)
+    whine = at(S.sweep(2600, 1100, 0.32, 'sine') * shape(0.32, 0.004, 0.02, 0.28) * 0.28, 0.012)
+    ping = at(bell(S.rng.uniform(1700, 2100), 0.25, 0.05) * 0.3, 0.006)
+    pebbles = at(grains(0.2, 70, 2500, 7000, fall=0.05) * 0.3, 0.05)
+    return S.pad(mix(chip, whine, ping, pebbles), d)
+
+
+def build_slugs():
+    """Only the slug-hit files (a full run re-rolls every other file's noise)."""
+    S.reseed(7352)
+    S.takes_cat('dr_slug_mob', lambda i: slug_mob(), 2, 'impact')
+    S.takes_cat('dr_slug_wall', lambda i: slug_wall(), 2, 'impact')
+
+
 if __name__ == '__main__':
-    build()
-    print('gen_sfx_grimble: done')
+    if sys.argv[1:] == ['slugs']:
+        build_slugs()
+        print('gen_sfx_grimble: slugs done')
+    else:
+        build()
+        print('gen_sfx_grimble: done')

@@ -30,12 +30,10 @@ static func bond_full(fuse_name: String, next: bool) -> String:
 	return "Bond full  ·  %s%s fuses: %s" % ["your next " if next else "", Settings.key_cap("ultimate"), fuse_name]
 
 
-## A purple ring on a mob: an ability (E, R or Q) staggers it.
+## A purple ring on a mob: any ability staggers it.
 static func stagger() -> String:
-	return (
-		"Purple ring: stagger it with %s, %s or %s"
-		% [Settings.key_cap("signature"), Settings.key_cap("ultimate"), Settings.key_cap("gear1")]
-	)
+	var keys := ["secondary", "signature", "hunter_ult", "gear1"].map(func(a: String): return Settings.key_cap(a))
+	return "Purple ring: stagger it with %s, %s, %s or %s" % keys
 
 
 static func skill(boki: String, ability_name: String) -> String:

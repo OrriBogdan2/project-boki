@@ -5,6 +5,8 @@ extends RefCounted
 ## Never add entries to tools/check_registry.gd: that legacy file only shrinks.
 
 const CHECKS := {
+	"--results-boki-line-check": ["res://tools/results_boki_line_check.gd", "results_boki_line_check", "check"],
+	"--results-boki-line-shots": ["res://tools/results_boki_line_check.gd", "results_boki_line_check", "shots"],
 	"--solo-hud-shots": ["res://tools/solo_hud_shots.gd", "solo_hud_shots", null],  # GPU, --shots-dir=
 	"--passive-gauge-shots": ["res://tools/passive_gauge_shots.gd", "passive_gauge_shots", null],
 	"--map-clarity-shots": ["res://tools/map_clarity_shots.gd", "map_clarity_shots", null],  # GPU, --shots-dir=<dir>
