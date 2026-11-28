@@ -24,6 +24,8 @@ const CHECKS := {
 	"--native-springs-shots": ["res://tools/native_springs_shots.gd", "native_springs_shots", null],
 	"--gil-swim-spin-shots": ["res://tools/gil_swim_spin_shots.gd", "gil_swim_spin_shots", null],  # Gil GPU frames
 	"--tenzo-press-strip": ["res://tools/tenzo_press_strip.gd", "tenzo_press_strip", null],  # Tenzo LMB press frames
+	# LMB attack clip: its strike lands with the shot
+	"--lmb-anim-sync-check": ["res://tools/lmb_anim_sync_check.gd", "lmb_anim_sync_check", null],
 	"--live-audit": ["res://tools/live_audit.gd", "live_audit", null],  # Hunters as played, GPU renders
 	# Meeko's sun and cloud: clear of the posed body in every state; GPU shots (--shots-dir=<dir> [--eye=<m>])
 	"--meeko-companions-clip-check":
