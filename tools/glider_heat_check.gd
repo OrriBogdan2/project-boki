@@ -136,12 +136,14 @@ func run(main: Node) -> void:
 		o.ctrl = "idle"
 		if o != h: o.teleport(w.random_ground())
 	h.ctrl = "local"
-	for kk in [h.kin, h.kin2]:
-		if kk:
-			m.kins.erase(kk)
-			kk.queue_free()
-	h.kin = null
-	h.kin2 = null
+	# no kins: their carry passives (damage_reduction, ...) would skew the heat and landing numbers
+	for o in m.hunters:
+		for kk in [o.kin, o.kin2]:
+			if kk:
+				m.kins.erase(kk)
+				kk.queue_free()
+		o.kin = null
+		o.kin2 = null
 	m.opts["god"] = true
 	marker = w.random_ground()
 	h.ai["land"] = marker
