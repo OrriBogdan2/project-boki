@@ -125,5 +125,12 @@
 		"cm": 94,
 		"kg": 135.5,
 		"fit": 1.71
+	},
+	"type2": "titan",
+	"roster": {
+		"art": "new",
+		"line": "kayak",
+		"stage": 3,
+		"from": "glaciyak"
 	}
 }

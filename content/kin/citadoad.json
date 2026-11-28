@@ -124,5 +124,11 @@
 		"cm": 73,
 		"kg": 54.0,
 		"fit": 1.71
+	},
+	"roster": {
+		"art": "new",
+		"line": "limpetor",
+		"stage": 2,
+		"from": "limpetor"
 	}
 }

@@ -124,5 +124,11 @@
 		"cm": 85,
 		"kg": 108.0,
 		"fit": 1.71
+	},
+	"roster": {
+		"art": "new",
+		"line": "heatherhorn",
+		"stage": 2,
+		"from": "heatherhorn"
 	}
 }

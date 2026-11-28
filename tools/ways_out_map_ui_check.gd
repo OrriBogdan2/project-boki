@@ -15,12 +15,16 @@ extends RefCounted
 
 var bad := 0
 
+
 func ok(cond: bool, what: String) -> void:
 	print("WAYSMAP %s %s" % ["ok  " if cond else "FAIL", what])
-	if not cond: bad += 1
+	if not cond:
+		bad += 1
+
 
 func _state(m: Match, i: int) -> int:
 	return int(WaysOutHud.seats(m)[i]["st"])
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -28,8 +32,9 @@ func run(main: Node) -> void:
 	Econ.ensure()
 	var m := Match.new()
 	main.add_child(m)
-	m.start({"teams": 3, "squad": 2, "tier": 0, "length": 1e9,
-		"seed": 7401, "no_drop": true, "heart": true, "god": true})
+	m.start(
+		{"teams": 3, "squad": 2, "tier": 0, "length": 1e9, "seed": 7401, "no_drop": true, "heart": true, "god": true}
+	)
 	for o in m.hunters:
 		o.ctrl = "idle"
 	var h_v: Heart = m.heart
@@ -39,25 +44,35 @@ func run(main: Node) -> void:
 	m.time = 0.0 - m.sess_t0
 	var at := WaysOutMap.sites(m)
 	ok(at[1] == h_v.gate and at[3] == h_v.site, "the Gate and the Heart ring are the Heart's own places")
-	ok(at[0] != Vector3.INF and at[2] != Vector3.INF,
-		"a lair and an outpost carry the quest seats (%s, %s)" % [at[0], at[2]])
+	ok(
+		at[0] != Vector3.INF and at[2] != Vector3.INF,
+		"a lair and an outpost carry the quest seats (%s, %s)" % [at[0], at[2]]
+	)
 	var qs: QuestSeats = m.exits.seats
-	ok(at[0] == qs.lair.ref["c"] and at[2] == qs.uplink.ref["pos"],
-		"the Lair and Uplink badges stand on the seeded Sealed Lair and Uplink (%s, %s)" % [at[0], at[2]])
+	ok(
+		at[0] == qs.lair.ref["c"] and at[2] == qs.uplink.ref["pos"],
+		"the Lair and Uplink badges stand on the seeded Sealed Lair and Uplink (%s, %s)" % [at[0], at[2]]
+	)
 	var outposts: Array = m.exits.list.filter(func(x): return x["kind"] == "outpost")
 	var far: float = 0.0
 	for x in outposts:
 		far = maxf(far, Vector2(x["pos"].x - at[0].x, x["pos"].z - at[0].z).length())
-	ok(Vector2(at[2].x - at[0].x, at[2].z - at[0].z).length() >= far - 0.01,
-		"the Uplink is the outpost farthest from the Lair")
+	ok(
+		Vector2(at[2].x - at[0].x, at[2].z - at[0].z).length() >= far - 0.01,
+		"the Uplink is the outpost farthest from the Lair"
+	)
 	# ---------------------------------------------------------------- 2. the ring fractions
 	var sd := WaysOutHud.seats(m)
-	ok(is_equal_approx(m.sess_time(), 0.0) and is_equal_approx(WaysOutMap.fraction(0, sd[0]), 0.0),
-		"at 0:00 nothing is lit yet")
+	ok(
+		is_equal_approx(m.sess_time(), 0.0) and is_equal_approx(WaysOutMap.fraction(0, sd[0]), 0.0),
+		"at 0:00 nothing is lit yet"
+	)
 	m.time = 60.0 - m.sess_t0
 	sd = WaysOutHud.seats(m)
-	ok(is_equal_approx(WaysOutMap.fraction(0, sd[0]), 60.0 / float(q["lair_open_s"])),
-		"half way to the Lair: the ring is half lit")
+	ok(
+		is_equal_approx(WaysOutMap.fraction(0, sd[0]), 60.0 / float(q["lair_open_s"])),
+		"half way to the Lair: the ring is half lit"
+	)
 	ok(WaysOutMap.fraction(3, sd[3]) < 0.2 and WaysOutMap.fraction(3, sd[3]) > 0.0, "the Final ring fills toward 10:00")
 	m.time = float(q["lair_open_s"]) + 0.5 - m.sess_t0
 	sd = WaysOutHud.seats(m)
@@ -76,16 +91,19 @@ func run(main: Node) -> void:
 	var open_col := WaysOutMap.color_of(WaysOutHud.seats(m)[0])
 	m.time = float(q["lair_shut_s"]) + 1.0 - m.sess_t0
 	var lost_col := WaysOutMap.color_of(WaysOutHud.seats(m)[0])
-	ok(locked_col != open_col and open_col != lost_col and locked_col != lost_col,
-		"locked, open and lost seats read in three colours")
+	ok(
+		locked_col != open_col and open_col != lost_col and locked_col != lost_col,
+		"locked, open and lost seats read in three colours"
+	)
 	h_v.carrier = m.player
 	h_v._force(Heart.S.CARRIED, "test")
-	ok(WaysOutMap.color_of(WaysOutHud.seats(m)[1]) == SideColor.ally(),
-		"a carried spark: the Gate wears the carrier's squad colour")
+	ok(
+		WaysOutMap.color_of(WaysOutHud.seats(m)[1]) == SideColor.ally(),
+		"a carried spark: the Gate wears the carrier's squad colour"
+	)
 	h_v.carrier = null
 	h_v.early_team = m.player.team
-	ok(WaysOutMap.color_of(WaysOutHud.seats(m)[1]) != SideColor.ally(),
-		"a taken seat is dimmed")
+	ok(WaysOutMap.color_of(WaysOutHud.seats(m)[1]) != SideColor.ally(), "a taken seat is dimmed")
 	h_v.early_team = -1
 	# ---------------------------------------------------------------- 4. ways left
 	m.time = 30.0 - m.sess_t0
@@ -122,8 +140,10 @@ func run(main: Node) -> void:
 	ok(WaysOutMap.line(m) == "", "no line while you play")
 	m.player.out = true
 	var txt := WaysOutMap.line(m)
-	ok(txt.begins_with("Ways out left: %d" % WaysOutMap.ways_left(m)) and txt.contains("nearest"),
-		"dead: the count and the nearest seat (%s)" % txt)
+	ok(
+		txt.begins_with("Ways out left: %d" % WaysOutMap.ways_left(m)) and txt.contains("nearest"),
+		"dead: the count and the nearest seat (%s)" % txt
+	)
 	m.player.out = false
 	m.player.extracted = true
 	ok(WaysOutMap.line(m).begins_with("Ways out left"), "out through a seat and watching: the line shows too")
@@ -142,14 +162,23 @@ func run(main: Node) -> void:
 	m.time = t0 + 100.0 - m.sess_t0
 	var ahead := (100.0 + Heart.r("tide_next_s")) / Heart.r("tide_close_s")
 	var want := lerpf(Heart.r("tide_r0"), Heart.r("tide_r1"), ahead) * h_v.ways_scale
-	ok(is_equal_approx(Heart.next_r(m), want) and Heart.next_r(m) < Heart.tide_r(m),
-		"mid close: the dashed ring is tide_next_s ahead and smaller")
+	ok(
+		is_equal_approx(Heart.next_r(m), want) and Heart.next_r(m) < Heart.tide_r(m),
+		"mid close: the dashed ring is tide_next_s ahead and smaller"
+	)
 	m.time = Heart.last_close() + 10.0 - m.sess_t0
-	ok(is_equal_approx(Heart.next_r(m), Heart.ring_at(m.sess_time() + Heart.r("tide_next_s"), h_v.ways_scale))
-		and Heart.next_r(m) < Heart.tide_r(m), "in the end phase the dashed ring still leads the close")
+	ok(
+		(
+			is_equal_approx(Heart.next_r(m), Heart.ring_at(m.sess_time() + Heart.r("tide_next_s"), h_v.ways_scale))
+			and Heart.next_r(m) < Heart.tide_r(m)
+		),
+		"in the end phase the dashed ring still leads the close"
+	)
 	m.time = Heart.last_close() + Heart.r("end_close_s") + 10.0 - m.sess_t0
-	ok(is_equal_approx(Heart.next_r(m), Heart.r("end_r") * h_v.ways_scale) and Heart.next_r(m) == Heart.tide_r(m),
-		"once the final circle holds there is no smaller one")
+	ok(
+		is_equal_approx(Heart.next_r(m), Heart.r("end_r") * h_v.ways_scale) and Heart.next_r(m) == Heart.tide_r(m),
+		"once the final circle holds there is no smaller one"
+	)
 	# ---------------------------------------------------------------- 9. pins from afar
 	await _pins(main, m, at)
 	# ---------------------------------------------------------------- 8. the real HUD
@@ -165,6 +194,7 @@ func run(main: Node) -> void:
 	print("WAYSMAP DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
 
+
 ## A spot `d` m from `at` on ground and inside the tide ring, from the first bearing (degrees from north, clockwise)
 ## that has one; Vector3.INF when none does.
 func _stand(m: Match, at: Vector3, d: float, first := 90.0) -> Vector3:
@@ -176,13 +206,16 @@ func _stand(m: Match, at: Vector3, d: float, first := 90.0) -> Vector3:
 			return p
 	return Vector3.INF
 
+
 ## How well a pin's screen direction points from `spot` at the ground `at` (1 = dead on; the camera faces north).
 func _aim(spot: Vector3, at: Vector3, dir: Vector2) -> float:
 	return dir.dot(Vector2(at.x - spot.x, at.z - spot.z).normalized())
 
+
 func _put(m: Match, spot: Vector3) -> void:
 	m.player.teleport(spot)
 	m.cam.snap(spot)
+
 
 func _pins(main: Node, m: Match, at: Array[Vector3]) -> void:
 	var h: Heart = m.heart
@@ -206,8 +239,10 @@ func _pins(main: Node, m: Match, at: Array[Vector3]) -> void:
 	ok(spot != Vector3.INF, "a spot 40 m from the Uplink inside the ring")
 	_put(m, spot)
 	var dir := WaysOutPins.seat_dir(m, sz, 2, sd, at[2])
-	ok(dir != Vector2.ZERO and _aim(spot, at[2], dir) > 0.7,
-		"the open Uplink 40 m off gets a pin pointing at it (%s, aim %.2f)" % [dir, _aim(spot, at[2], dir)])
+	ok(
+		dir != Vector2.ZERO and _aim(spot, at[2], dir) > 0.7,
+		"the open Uplink 40 m off gets a pin pointing at it (%s, aim %.2f)" % [dir, _aim(spot, at[2], dir)]
+	)
 	var close := _stand(m, at[2] + Vector3(0, 0, 3.0), 6.0, 90.0)
 	_put(m, close)
 	ok(WaysOutPins.seat_dir(m, sz, 2, sd, at[2]) == Vector2.ZERO, "6 m off and on screen: no pin, its beam reads")
@@ -224,28 +259,36 @@ func _pins(main: Node, m: Match, at: Array[Vector3]) -> void:
 	var up: QuestSeat = m.exits.seats.uplink
 	up._force(QuestSeat.S.TAKEN, "test", 1)
 	sd = WaysOutHud.seats(m)
-	ok(int(sd[2]["st"]) == WaysOutHud.St.TAKEN and WaysOutPins.seat_dir(m, sz, 2, sd, at[2]) == Vector2.ZERO,
-		"a taken seat gets no pin")
+	ok(
+		int(sd[2]["st"]) == WaysOutHud.St.TAKEN and WaysOutPins.seat_dir(m, sz, 2, sd, at[2]) == Vector2.ZERO,
+		"a taken seat gets no pin"
+	)
 	up._force(QuestSeat.S.OPEN, "test")
 	m.time = float(q["uplink_shut_s"]) + 5.0 - m.sess_t0
 	sd = WaysOutHud.seats(m)
-	ok(int(sd[2]["st"]) == WaysOutHud.St.LOST and WaysOutPins.seat_dir(m, sz, 2, sd, at[2]) == Vector2.ZERO,
-		"a lost seat gets no pin")
+	ok(
+		int(sd[2]["st"]) == WaysOutHud.St.LOST and WaysOutPins.seat_dir(m, sz, 2, sd, at[2]) == Vector2.ZERO,
+		"a lost seat gets no pin"
+	)
 	m.time = float(q["uplink_open_s"]) + 10.0 - m.sess_t0
 	var hs := _stand(m, at[3], 50.0)
 	_put(m, hs)
 	sd = WaysOutHud.seats(m)
 	var gate_pin := WaysOutPins.seat_dir(m, sz, 1, sd, at[1])
-	ok(gate_pin != Vector2.ZERO and WaysOutPins.seat_dir(m, sz, 3, sd, at[3]) == Vector2.ZERO,
-		"the Gate open, the Heart ring locked: one Heart pin, the Gate's")
+	ok(
+		gate_pin != Vector2.ZERO and WaysOutPins.seat_dir(m, sz, 3, sd, at[3]) == Vector2.ZERO,
+		"the Gate open, the Heart ring locked: one Heart pin, the Gate's"
+	)
 	h.early_team = 1
 	h._force(Heart.S.WAITING, "test")
 	sd = WaysOutHud.seats(m)
 	gate_pin = WaysOutPins.seat_dir(m, sz, 1, sd, at[1])
-	ok(gate_pin == Vector2.ZERO and WaysOutPins.seat_dir(m, sz, 3, sd, at[3]) != Vector2.ZERO,
-		"the Gate used: its pin goes, the ring's (locked, counting down) shows")
+	ok(
+		gate_pin == Vector2.ZERO and WaysOutPins.seat_dir(m, sz, 3, sd, at[3]) != Vector2.ZERO,
+		"the Gate used: its pin goes, the ring's (locked, counting down) shows"
+	)
 	# the Blight's wall
-	var rim := Heart.r("tide_r1") * h.ways_scale + 20.0      # (a big map: the ring stays wider)
+	var rim := Heart.r("tide_r1") * h.ways_scale + 20.0  # (a big map: the ring stays wider)
 	if m.player.flat_dist(h.site) < rim:
 		var fp := _stand(m, h.site, rim)
 		if fp != Vector3.INF:
@@ -257,8 +300,10 @@ func _pins(main: Node, m: Match, at: Array[Vector3]) -> void:
 	m.time = _tide_at(inside + 40.0, h) - m.sess_t0
 	var wd := WaysOutPins.wall_dir(m, sz)
 	var out := m.player.pos - h.site
-	ok(wd != Vector2.ZERO and wd.dot(Vector2(out.x, out.z).normalized()) > 0.7,
-		"the wall 40 m off: a bar on the edge toward it (%s)" % wd)
+	ok(
+		wd != Vector2.ZERO and wd.dot(Vector2(out.x, out.z).normalized()) > 0.7,
+		"the wall 40 m off: a bar on the edge toward it (%s)" % wd
+	)
 	m.time = _tide_at(inside + WaysOutPins.WALL_M + 10.0, h) - m.sess_t0
 	ok(WaysOutPins.wall_dir(m, sz) == Vector2.ZERO, "the wall past WALL_M: no bar")
 	m.time = _tide_at(inside - 5.0, h) - m.sess_t0
@@ -268,6 +313,7 @@ func _pins(main: Node, m: Match, at: Array[Vector3]) -> void:
 		await main.get_tree().process_frame
 	ok(true, "pins drawn through the HUD with the player in the match")
 	h.early_team = -1
+
 
 ## The session second at which the tide ring has radius `r` (the close is linear).
 func _tide_at(r: float, h: Heart) -> float:

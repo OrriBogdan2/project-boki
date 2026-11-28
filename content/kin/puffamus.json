@@ -1,0 +1,14 @@
+{
+	"grammar": 1,
+	"id": "puffamus",
+	"name": "Puffamus",
+	"theme": "ember",
+	"flavor": "Young hippo, potbelly-stove body.",
+	"data_only": true,
+	"roster": {
+		"art": "locked",
+		"line": "teapotamus",
+		"stage": 2,
+		"from": "teapotamus"
+	}
+}

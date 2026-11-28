@@ -11,4 +11,6 @@ const CHECKS := {
 	"--tut-first-evolve-check": ["res://tools/tut_first_evolve_check.gd", "tut_first_evolve_check", null],
 	"--tutorial-boki-video": ["res://tools/tutorial_boki_video.gd", "tutorial_boki_video", null],
 	"--goals-next-check": ["res://tools/goals_next_check.gd", "goals_next_check", null],
+	# every first-time hint shows once per save: three matches with a save and load between
+	"--hint-once-check": ["res://tools/hint_once_check.gd", "hint_once_check", null],
 }

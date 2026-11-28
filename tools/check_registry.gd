@@ -181,6 +181,7 @@ const CHECKS := {
 	"--shot-size-shots": ["res://tools/shot_size_shots.gd", "shot_size_shots", "shots"],  # --shots-dir, --res
 	# boots, charms vs source
 	"--hunter-parity-check": ["res://tools/hunter_parity_check.gd", "hunter_parity_check", null],  # TG Hunters = match
+	# Training Grounds Hunters = a real match's
 	"--gear-parity-check": ["res://tools/gear_parity_check.gd", "gear_parity_check", null],
 	"--mesh-arrays-check": ["res://tools/mesh_arrays_check.gd", "mesh_arrays_check", null],  # item 33 (1108)
 	# shot, knocked, stunned, reeled under the glider; knocked in the air (Lace, Kael, Vex, Albert)
@@ -646,8 +647,6 @@ const CHECKS := {
 	# the first two Extractions' guide
 	# the sight wedge first-time hint
 	"--first-time-hint-check": ["res://tools/first_time_hint_check.gd", "first_time_hint_check", null],
-	# every first-time hint shows once per save: three matches with a save and load between
-	"--hint-once-check": ["res://tools/hint_once_check.gd", "hint_once_check", null],
 	"--first-objective-shots": ["res://tools/first_objective_shots.gd", "first_objective_shots", null],
 	"--first-objective-check": ["res://tools/first_objective_check.gd", "first_objective_check", null],
 	"--first-match-guide-check": ["res://tools/first_match_guide_check.gd", "first_match_guide_check", null],

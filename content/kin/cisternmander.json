@@ -124,5 +124,12 @@
 		"cm": 82,
 		"kg": 67.0,
 		"fit": 1.71
+	},
+	"type2": "tide",
+	"roster": {
+		"art": "new",
+		"line": "bucketmander",
+		"stage": 3,
+		"from": "spatewader"
 	}
 }

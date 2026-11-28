@@ -88,7 +88,7 @@ func _real_load(main: Node) -> void:
 	opts["arch"] = "mage"
 	main.show_screen("match", opts)
 	var tree := main.get_tree()
-	var shown: Array = []          # [prog, want, frame seconds, stage] per frame
+	var shown: Array = []  # [prog, want, frame seconds, stage] per frame
 	var stages: Array = []
 	var waited := 0.0
 	while waited < TIMEOUT_S:
@@ -98,7 +98,8 @@ func _real_load(main: Node) -> void:
 		var ld := _screen(main)
 		if ld:
 			shown.append([float(ld.prog), float(ld.want), dt, String(ld.stage_label)])
-			if stages.is_empty() or stages[-1] != String(ld.stage_label): stages.append(String(ld.stage_label))
+			if stages.is_empty() or stages[-1] != String(ld.stage_label):
+				stages.append(String(ld.stage_label))
 		elif not shown.is_empty() and main.current is Match and (main.current as Match).is_processing():
 			break
 	if main.current is Match:
@@ -109,8 +110,10 @@ func _real_load(main: Node) -> void:
 	var jumps := 0
 	var want_back := 0
 	for i in range(1, shown.size()):
-		if shown[i][0] < shown[i - 1][0]: back += 1
-		if shown[i][1] < shown[i - 1][1]: want_back += 1
+		if shown[i][0] < shown[i - 1][0]:
+			back += 1
+		if shown[i][1] < shown[i - 1][1]:
+			want_back += 1
 		if shown[i][0] - shown[i - 1][0] > MAX_STEP and shown[i][2] < HITCH_S:
 			jumps += 1
 			var at := [i, shown[i][3], shown[i - 1][0], shown[i][0], shown[i][2]]

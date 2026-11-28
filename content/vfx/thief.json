@@ -42,7 +42,8 @@
 			{"p": "flare", "size": 0.7, "life": 0.1, "c": "ghost", "c2": "white"}]},
 		"knife_stick": {"fx": [
 			{"p": "flare", "y": 1.0, "when": "foe", "size": 0.8, "life": 0.2, "c": "ghost", "c2": "white"},
-			{"p": "flare", "y": 0.3, "unless": "foe", "size": 0.8, "life": 0.2, "c": "ghost", "c2": "white"}]},
+			{"p": "flare", "y": 0.3, "unless": "foe", "size": 0.8, "life": 0.2, "c": "ghost", "c2": "white"},
+			{"p": "ring", "size": "r", "life": 0.35, "c": "ghost", "c2": "white"}]},
 		"blink": {"fx": [
 			{"p": "bolt", "y": 0.9, "len": "len", "size": 0.3, "life": 0.3, "c": "ghost", "c2": "hot"},
 			{"p": "flare", "y": 0.9, "fwd": "len", "size": 1.2, "life": 0.3, "c": "ghost", "c2": "white", "c3": "deep"}]},

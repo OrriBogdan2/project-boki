@@ -124,5 +124,12 @@
 		"cm": 60,
 		"kg": 20.0,
 		"fit": 1.46
+	},
+	"type2": "gravity",
+	"roster": {
+		"art": "new",
+		"line": "latchling",
+		"stage": 3,
+		"from": "tuatrune"
 	}
 }

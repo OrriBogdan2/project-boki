@@ -1371,6 +1371,7 @@ archetypes/thief.json:e.ghosts	5
 archetypes/thief.json:e.range	15.0
 archetypes/thief.json:e.refund_foe	0.5
 archetypes/thief.json:e.refund_wall	0.25
+archetypes/thief.json:e.ring_r	2.7
 archetypes/thief.json:e.slow	0.5
 archetypes/thief.json:e.slow_t	2.5
 archetypes/thief.json:e.speed	40.0

@@ -120,5 +120,11 @@
 		"cm": 52,
 		"kg": 13.5,
 		"fit": 1.52
+	},
+	"roster": {
+		"art": "locked",
+		"line": "cindle",
+		"stage": 2,
+		"from": "cindle"
 	}
 }

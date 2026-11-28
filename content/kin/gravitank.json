@@ -125,5 +125,11 @@
 		"cm": 60,
 		"kg": 30.0,
 		"fit": 1.39
+	},
+	"roster": {
+		"art": "new",
+		"line": "pebbit",
+		"stage": 2,
+		"from": "pebbit"
 	}
 }

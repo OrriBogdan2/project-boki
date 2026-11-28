@@ -22,11 +22,11 @@ const LORE := [
 	"Bring home what you carry. Out here, only what reaches the farm is truly yours.",
 ]
 ## What's being worked on, set by whoever builds the match (Main.show_screen, Match): shown by the spinner.
-const FADE_IN_T := 0.15     # s the screen takes to fade in before the build starts
-const FADE_OUT_T := 0.2     # s it takes to fade out when there is no ink to cover it
-const COVER_T := 0.1        # s the ink takes to cover it once the match is ready
-const FILL_T := 0.05        # s the bar takes to run full once the match is ready (inside COVER_T)
-const REVEAL_T := 0.2       # s the ink takes to sweep off the match (the match is already running)
+const FADE_IN_T := 0.15  # s the screen takes to fade in before the build starts
+const FADE_OUT_T := 0.2  # s it takes to fade out when there is no ink to cover it
+const COVER_T := 0.1  # s the ink takes to cover it once the match is ready
+const FILL_T := 0.05  # s the bar takes to run full once the match is ready (inside COVER_T)
+const REVEAL_T := 0.2  # s the ink takes to sweep off the match (the match is already running)
 const STAGES := {"map": "Building the map", "spawn": "Spawning", "graphics": "Preparing graphics", "ready": "Ready"}
 
 const SHADE_BOTTOM := 0.55  # share of the screen height the bottom shade covers
@@ -45,13 +45,13 @@ const BAR_CATCH_UP := 6.0  # the bar closes this many times its gap per second (
 
 var c: Control
 var t := 0.0
-var prog := 0.0          # what the bar shows
-var want := 0.0          # where the bar is heading
-var fill_speed := 0.0    # bar share per second once the match is ready: the rest of the bar while the screen goes
+var prog := 0.0  # what the bar shows
+var want := 0.0  # where the bar is heading
+var fill_speed := 0.0  # bar share per second once the match is ready: the rest of the bar while the screen goes
 var fade := 0.0
 var leaving := false
 var tier := 0
-var T: Dictionary
+var tier_data: Dictionary
 var title := ""
 var sub := ""
 var mode_line := ""
@@ -86,7 +86,7 @@ func _grad(cols: Array, offs: Array, across := false) -> GradientTexture2D:
 func setup(opts: Dictionary) -> void:
 	layer = 45
 	tier = clampi(int(opts.get("tier", 0)), 0, Data.TIERS.size() - 1)
-	T = Data.TIERS[tier]
+	tier_data = Data.TIERS[tier]
 	if opts.get("tutorial", false):
 		title = "First Expedition"
 		sub = (
@@ -97,8 +97,8 @@ func setup(opts: Dictionary) -> void:
 		title = "Training Grounds"
 		sub = "Dummies, ledges and boosters. No danger here."
 	else:
-		title = String(T["name"])
-		sub = String(T["desc"])
+		title = String(tier_data["name"])
+		sub = String(tier_data["desc"])
 		var teams := int(opts.get("teams", 6))
 		var squad := int(opts.get("squad", 1))
 		# solo lobbies count hunters ("Solo · 20 squads" read oddly), squad lobbies count squads
@@ -160,6 +160,7 @@ func step(frac: float) -> void:
 	advance(frac)
 	while prog < want - 0.01 and is_inside_tree():
 		await get_tree().process_frame
+
 
 ## The match is built and drawn: the screen goes at once, with nothing to wait out (playtest 11-09:
 ## players were held on a full bar). The bar runs the rest of the way while the ink covers it, so it
@@ -227,7 +228,7 @@ func _draw() -> void:
 			Color(1, 1, 1, a)
 		)
 	else:
-		c.draw_rect(Rect2(Vector2.ZERO, sz), Color(T["sky"] as Color, a).darkened(0.5))
+		c.draw_rect(Rect2(Vector2.ZERO, sz), Color(tier_data["sky"] as Color, a).darkened(0.5))
 	c.draw_texture_rect(
 		shade_bottom, Rect2(0, sz.y * (1.0 - SHADE_BOTTOM), sz.x, sz.y * SHADE_BOTTOM), false, Color(1, 1, 1, a)
 	)
@@ -269,7 +270,9 @@ func _draw() -> void:
 		tip_box.size.x - 14.0,
 		Color(UI.INK, a * 0.9)
 	)
-	var lore_y := tip_box.position.y + 14.0 + UI.body.get_multiline_string_size(tip, left, tip_box.size.x - 14.0, 16, 3).y + 10.0
+	var lore_y := (
+		tip_box.position.y + 14.0 + UI.body.get_multiline_string_size(tip, left, tip_box.size.x - 14.0, 16, 3).y + 10.0
+	)
 	_wrap(Vector2(tip_box.position.x + 14.0, lore_y), lore, 14, tip_box.size.x - 14.0, Color(UI.INK, a * 0.6))
 	var br: Rect2 = lay["bar"]
 	var af := snappedf(a, 0.1)
@@ -299,7 +302,7 @@ func _draw() -> void:
 ## Your squad's portraits and names, top left: who you are dropping with.
 func _squad_row(r: Rect2, a: float) -> void:
 	if party.size() < 2:
-		return      # (solos: nobody to drop with)
+		return  # (solos: nobody to drop with)
 	var left := HORIZONTAL_ALIGNMENT_LEFT
 	_text(Vector2(r.position.x, r.position.y - 6.0), "YOUR SQUAD", UI.caps, 12, Color(UI.GOLD, a), 2, left)
 	var x := r.position.x

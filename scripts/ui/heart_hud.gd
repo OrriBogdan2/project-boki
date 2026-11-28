@@ -11,9 +11,10 @@ extends RefCounted
 ##     moves, "Closing 7:12" (the time left) while it does.
 
 const TINT_COL := Color(0.55, 0.05, 0.22)
-const HIT_S := 0.8              # seconds a tide hit's red pulse lasts on the screen edge
+const HIT_S := 0.8  # seconds a tide hit's red pulse lasts on the screen edge
 const DASHES := 48
-const EDGE_IN := 6.0            # m inside the ring that the edge arrow points to
+const EDGE_IN := 6.0  # m inside the ring that the edge arrow points to
+
 
 # ------------------------------------------------------------------ the world
 static func world_labels(hud) -> void:
@@ -27,11 +28,11 @@ static func world_labels(hud) -> void:
 		var who := "%s has the Heartspark" % ht.carrier.pname
 		hud._draw_waypoint(ht.carrier.pos + Vector3(0, 1.0, 0), who, Heart.col())
 	elif ht.carrier == m.player:
-		if not WaysOutHud.is_gate_prompt(m.interact):      # (it names the Gate)
+		if not WaysOutHud.is_gate_prompt(m.interact):  # (it names the Gate)
 			hud._draw_waypoint(ht.gate + Vector3(0, 1.0, 0), "Heart Gate", Heart.gate_col())
 	elif ht.spark_live() and ht.state != Heart.S.FINAL:
 		hud._draw_waypoint(ht.spark_pos + Vector3(0, 1.0, 0), "Heartspark", Heart.col())
-	elif not out and ht.state == Heart.S.CHARGING:      # (the open ring is WaysOutPins')
+	elif not out and ht.state == Heart.S.CHARGING:  # (the open ring is WaysOutPins')
 		hud._draw_waypoint(ht.site + Vector3(0, 1.0, 0), _word(ht), Heart.col())
 	elif m.player.flat_dist(ht.site) < 40.0 and not cam.is_position_behind(ht.site):
 		var cp := cam.unproject_position(ht.site + Vector3(0, 3.8, 0))
@@ -43,6 +44,7 @@ static func world_labels(hud) -> void:
 	if ht.carrier != null and ht.carrier == m.player:
 		var cp2 := cam.unproject_position(m.player.pos + Vector3(0, 3.4, 0))
 		hud._ctext(cp2, "You carry the Heartspark  ·  everyone sees you", 13, Heart.col(), hud.big)
+
 
 # ------------------------------------------------------------------ the maps
 ## Past the ring the screen is tinted and says so; each tide tick pulses the edges red; the edge arrow points
@@ -66,15 +68,16 @@ static func _outside(hud, m: Match, ht: Heart) -> bool:
 	var way_in := Vector2(p.pos.x - ht.site.x, p.pos.z - ht.site.z).normalized() * maxf(tr - EDGE_IN, 0.0)
 	hud._draw_waypoint(Vector3(ht.site.x + way_in.x, p.pos.y, ht.site.z + way_in.y), "Zone edge", Heart.col())
 	var line := "IN THE BLIGHT  ·  -%d HP/s  ·  get inside the ring" % int(per_s)
-	var at := Vector2(sz.x * 0.5, HudScale.from_bottom(sz.y * 0.8, sz))      # (clear of the bottom row, grown)
+	var at := Vector2(sz.x * 0.5, HudScale.from_bottom(sz.y * 0.8, sz))  # (clear of the bottom row, grown)
 	var lw := TextCache.width(hud.big, line, 18)
 	var vc: Vector2 = HudVitals.corner(hud, hud.panels.size) + hud.panels.position  # (in the panels' frame)
-	if at.x - lw * 0.5 < vc.x + 6.0:      # (it would touch the vitals block sideways: sit above it and its XP row)
+	if at.x - lw * 0.5 < vc.x + 6.0:  # (it would touch the vitals block sideways: sit above it and its XP row)
 		at.y = minf(at.y, vc.y - 24.0)
 	at.y += HudScale.lift(Rect2(at + Vector2(-lw * 0.5, -16.0), Vector2(lw, 22.0)), sz)
 	SafeArea.note_as("blight_line", Rect2(at + Vector2(-lw * 0.5, -16.0), Vector2(lw, 22.0)))
 	hud._ctext(at, line, 18, Color(1.0, 0.45 + 0.2 * hit, 0.5), hud.big)
 	return true
+
 
 ## The zone clock's words: "Closes in 0:30" before the tide moves, "Closing 7:12" (the time left) while it
 ## does, empty once the ring holds (or with no Heart).
@@ -86,6 +89,7 @@ static func zone_line(m: Match) -> String:
 		return "Closes in %d:%02d" % [int(int(ceil(t)) / 60.0), int(ceil(t)) % 60]
 	t = Heart.close_left(m)
 	return "Closing %d:%02d" % [int(int(ceil(t)) / 60.0), int(ceil(t)) % 60] if t > 0.0 else ""
+
 
 static func minimap(hud, inner: Rect2, to_map: Callable, on_map: Callable) -> void:
 	var m: Match = hud.m
@@ -107,6 +111,7 @@ static func minimap(hud, inner: Rect2, to_map: Callable, on_map: Callable) -> vo
 			spark_glyph(hud.c, cv, 4.0, m.time)
 		else:
 			hud.edge_mini.add(cv - inner.get_center(), Heart.col(), EdgeMarker.PRIO_GOAL)
+
 
 static func full_map(fm) -> void:
 	var m: Match = fm.m
@@ -130,6 +135,7 @@ static func full_map(fm) -> void:
 			spark_glyph(c, cv, 7.0, m.time)
 			fm.label_near("%s  ·  Heartspark" % ht.carrier.pname, cv + Vector2(0, -16), 12, Heart.col(), -1.0)
 
+
 static func _word(ht: Heart) -> String:
 	match ht.state:
 		Heart.S.ASLEEP:
@@ -144,6 +150,7 @@ static func _word(ht: Heart) -> String:
 			return "Heart open  %d%%" % int(ht.final_prog * 100.0)
 	return "Heart"
 
+
 ## The tide ring now (solid) and the ring it closes to next (dashed, lighter): short segments of the
 ## circles that fall on the map. Before the tide starts only the first ring shows.
 static func _tide(c: Control, m: Match, to_map: Callable, on_map: Callable, width: float) -> void:
@@ -154,8 +161,10 @@ static func _tide(c: Control, m: Match, to_map: Callable, on_map: Callable, widt
 	if nr < tr - 0.5 or tr <= 0.0:
 		_circle(c, m.heart.site, nr, to_map, on_map, SideColor.tone("tide_next"), width, true)
 
-static func _circle(c: Control, ctr: Vector3, radius: float, to_map: Callable, on_map: Callable,
-		col: Color, width: float, dashed: bool) -> void:
+
+static func _circle(
+	c: Control, ctr: Vector3, radius: float, to_map: Callable, on_map: Callable, col: Color, width: float, dashed: bool
+) -> void:
 	var n := DASHES * 2 if dashed else 96
 	var prev := Vector2.INF
 	for i in n + 1:
@@ -165,6 +174,7 @@ static func _circle(c: Control, ctr: Vector3, radius: float, to_map: Callable, o
 		if inside and prev != Vector2.INF and not (dashed and i % 2 == 0):
 			c.draw_line(prev, pv, col, width, true)
 		prev = pv if inside else Vector2.INF
+
 
 ## The Heart on a map: a crimson heart-gem with a charge ring; lit and pulsing when the spark is ready.
 static func heart_glyph(c: Control, pv: Vector2, s: float, ht: Heart, now: float) -> void:
@@ -176,11 +186,19 @@ static func heart_glyph(c: Control, pv: Vector2, s: float, ht: Heart, now: float
 	if f > 0.0:
 		c.draw_arc(pv, s + 3.0, -PI * 0.5, -PI * 0.5 + TAU * f, 28, Heart.col(), 3.0, true)
 	var body := Heart.GLASS if ht.state != Heart.S.ASLEEP and ht.state != Heart.S.WAITING else Heart.GLASS.darkened(0.5)
-	var pts := PackedVector2Array([pv + Vector2(0, s * 1.2), pv + Vector2(-s * 1.1, -s * 0.1),
-		pv + Vector2(-s * 0.55, -s * 0.9),
-		pv + Vector2(0, -s * 0.4), pv + Vector2(s * 0.55, -s * 0.9), pv + Vector2(s * 1.1, -s * 0.1)])
+	var pts := PackedVector2Array(
+		[
+			pv + Vector2(0, s * 1.2),
+			pv + Vector2(-s * 1.1, -s * 0.1),
+			pv + Vector2(-s * 0.55, -s * 0.9),
+			pv + Vector2(0, -s * 0.4),
+			pv + Vector2(s * 0.55, -s * 0.9),
+			pv + Vector2(s * 1.1, -s * 0.1)
+		]
+	)
 	c.draw_colored_polygon(pts, body)
 	c.draw_circle(pv + Vector2(-s * 0.2, -s * 0.2), s * 0.28, Color(1, 0.8, 0.85, 0.7))
+
 
 ## The carrier on a map: a bright mote with a pulse.
 static func spark_glyph(c: Control, pv: Vector2, s: float, now: float) -> void:
@@ -189,6 +207,7 @@ static func spark_glyph(c: Control, pv: Vector2, s: float, now: float) -> void:
 	c.draw_circle(pv, s + 1.5, Color(0, 0, 0, 0.6))
 	c.draw_circle(pv, s, Heart.col())
 	c.draw_circle(pv, s * 0.45, Color("ffe6ea"))
+
 
 ## The Heart Gate on a map: two posts and a bar, dim until it's open.
 static func gate_glyph(c: Control, pv: Vector2, s: float, open: bool) -> void:

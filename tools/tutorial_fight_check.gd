@@ -88,7 +88,7 @@ func _play(main: Node, id: String) -> void:
 			p.gain_xp(500.0)
 			ok(p.lvl == 1, id + ": XP from anything but the camps is ignored")
 		if tu.id() == "wallkick" and not placed:
-			placed = true       # (up on the lookout with no kick: the step waits; the bot walks off and kicks up)
+			placed = true  # (up on the lookout with no kick: the step waits; the bot walks off and kicks up)
 			m.player.pos = tu.stop("crouch")
 			m.player.vel = Vector3.ZERO
 			for i in 15:

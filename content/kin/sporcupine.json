@@ -119,5 +119,11 @@
 		"cm": 34,
 		"kg": 5.1,
 		"fit": 0.83
+	},
+	"roster": {
+		"art": "locked",
+		"line": "burrlet",
+		"stage": 2,
+		"from": "burrlet"
 	}
 }

@@ -130,5 +130,12 @@
 		"cm": 60,
 		"kg": 20.0,
 		"fit": 1.5
+	},
+	"type2": "tempest",
+	"roster": {
+		"art": "new",
+		"line": "skidlet",
+		"stage": 3,
+		"from": "hoarheron"
 	}
 }

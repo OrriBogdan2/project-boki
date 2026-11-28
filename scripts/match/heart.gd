@@ -10,9 +10,8 @@ extends RefCounted
 ##     it; an empty ring drains. Downed Hunters (Wisps) neither hold nor stall it: when none of the holders
 ##     stands in it and one other squad does, that squad takes it over from nothing. Full: that squad's
 ##     members in the ring leave, MAJOR, the islands fall soon.
-##   The Blight's tide closes on the Heart all match (tide_r; read by BlightDir.level / _spawn_tick), then the
-##     end phase closes it to the final circle. It starts already in: the map's play_space for the mode
-##     (start_r; solos smaller, decision 0084).
+##   The Blight's tide closes on the Heart all match, then the end phase closes it to the final circle (tide_r;
+##   read by BlightDir.level / _spawn_tick).
 ## One explicit state (briefs/STATE_MACHINES.md): S, with the legal edges in NEXT; only go() moves it (a
 ## refused edge is counted, never applied), and only the host does. _force() is the mirror for clients and demos.
 ## An early seat nobody used by final_s stays open in FINAL (early_team < 0): the spark can still be taken out.

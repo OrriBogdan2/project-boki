@@ -115,5 +115,12 @@
 		"cm": 67,
 		"kg": 17.0,
 		"fit": 1.63
+	},
+	"type2": "tide",
+	"roster": {
+		"art": "new",
+		"line": "opalisk",
+		"stage": 3,
+		"from": "frothisk"
 	}
 }

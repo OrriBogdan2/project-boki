@@ -123,5 +123,12 @@
 		"cm": 50,
 		"kg": 8.0,
 		"fit": 1.27
+	},
+	"type2": "tempest",
+	"roster": {
+		"art": "new",
+		"line": "kestrike",
+		"stage": 2,
+		"from": "kestrike"
 	}
 }

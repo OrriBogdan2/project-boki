@@ -7,9 +7,9 @@ extends RefCounted
 const BAND := Vector2(0.85, 1.15)
 # Kael and Albert: body size stays under SIZE_MAX (a smaller cast member), and the nameplate keeps its
 # height per unit of size (PLATE_PER_SIZE m) so it rides over the model.
-const SIZE_MAX := {"juggernaut": 0.94, "bulwark": 1.50}
+const SIZE_MAX := {"juggernaut": 0.96, "bulwark": 1.50}
 const PLATE_PER_SIZE := {"juggernaut": 2.74, "bulwark": 1.87}
-const SHOT_LIFE := 0.2      # s: 8 m at 40 m/s, 4 m before to 4 m past the hunter, inside the flattened patch
+const SHOT_LIFE := 0.2  # s: 8 m at 40 m/s, 4 m before to 4 m past the hunter, inside the flattened patch
 var bad := 0
 
 
@@ -51,7 +51,7 @@ func _fire(m: Match, shooter: Hunter, h: Hunter, side: float, rad := 0.1, up := 
 		if m.shots.is_empty():
 			break
 	m.shots.clear()
-	return h.hp < h.max_hp or h.armor < h.max_armor      # (armor takes a hit first)
+	return h.hp < h.max_hp or h.armor < h.max_armor  # (armor takes a hit first)
 
 
 func run(main: Node) -> void:

@@ -46,7 +46,7 @@ static func node(n: Node3D) -> void:
 		if not groups.has(key):
 			groups[key] = {"mat": _painted_mat(mat, key) if paint else mat, "parts": [], "casts": casts}
 		var albedo: Color = (mat as ShaderMaterial).get_shader_parameter("albedo") if paint else Color.WHITE
-		for arrs in Models._part_y_surfaces(mi.mesh, mi.transform):
+		for arrs in ModelsBake._part_y_surfaces(mi.mesh, mi.transform):
 			if paint:
 				_fill_color(arrs, albedo)
 			(groups[key]["parts"] as Array).append([arrs, mi.transform])

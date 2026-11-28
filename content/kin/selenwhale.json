@@ -116,5 +116,11 @@
 		"cm": 44,
 		"kg": 9.0,
 		"fit": 1.47
+	},
+	"roster": {
+		"art": "new",
+		"line": "selenfin",
+		"stage": 2,
+		"from": "selenfin"
 	}
 }

@@ -381,10 +381,10 @@ func _attack_move(spd: float) -> Vector2:
 
 # ------------------------------------------------------------------ attacks
 ## Starts an attack `length` s long whose first blow lands `hit` s in (its wind-up, the tell before it): WINDUP.
-func _begin(name: String, length: float, anim: String, hit: float) -> void:
-	_go(S.WINDUP, name)
-	atk = name; atk_t = 0.0; atk_began = m.time; atk_end = length; atk_hit = hit; atk_last = hit; steps = []
-	anim_kind = anim;
+func _begin(nm: String, length: float, anim_id: String, hit: float) -> void:
+	_go(S.WINDUP, nm)
+	atk = nm; atk_t = 0.0; atk_began = m.time; atk_end = length; atk_hit = hit; atk_last = hit; steps = []
+	anim_kind = anim_id;
 
 func _at(t: float, f: Callable) -> void:
 	steps.append({"t": t, "f": f, "done": false})

@@ -120,5 +120,12 @@
 		"cm": 54,
 		"kg": 9.5,
 		"fit": 1.52
+	},
+	"type2": "tempest",
+	"roster": {
+		"art": "new",
+		"line": "thrumbird",
+		"stage": 2,
+		"from": "thrumbird"
 	}
 }

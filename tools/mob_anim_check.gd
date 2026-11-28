@@ -123,8 +123,7 @@ func _windup(m: Match, k: String) -> void:
 func _gait(m: Match, k: String) -> void:
 	var p: Hunter = m.player
 	var mb := m.spawn_mob(k, p.pos + Vector3(6.0, 0, 0))
-	mb.tgt = null
-	mb.st = "idle"
+	mb.calm("check")
 	var spd := maxf(float(Data.MOBS[k].get("speed", 3.0)), 1.0)
 	mb.vel = Vector3(spd, 0, 0)
 	mb.anim = 0.0

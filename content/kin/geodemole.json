@@ -118,5 +118,12 @@
 		"cm": 50,
 		"kg": 8.0,
 		"fit": 1.17
+	},
+	"type2": "prism",
+	"roster": {
+		"art": "new",
+		"line": "glintmole",
+		"stage": 2,
+		"from": "glintmole"
 	}
 }

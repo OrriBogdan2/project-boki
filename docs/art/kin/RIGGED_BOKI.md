@@ -30,7 +30,12 @@ script, so a change to a shape, colour or clip is an edit and a rebuild:
 | `scripts/match/boki_dna.gd` | Inborn proportions, ear and tail shapes, birthmark (`Unique.dress` calls it) |
 | `shaders/boki_eye.gdshader`, `boki_marks.gdshader` | Eye with its own iris colour; coat marks fixed to the rest pose |
 
-Clips: idle, walk, run, attack, ability, hop, sleep, eat, pet, chop, mine, carry, tend. In a match the ability plays as
+Clips: idle, walk, run, attack, ability, hop, sleep, eat, pet, chop, mine, carry, tend (the three starters also
+glide: `boki_clips.glide`, a 1.6 s loop carried through your glide, Vespyx spread like a flying squirrel, Prismander
+splayed flat with its tail sculling, Mycroll tucked into its cap; `BokiHomeClips` then builds no glide pose for them).
+A clip can go into the live .glb without the model source or Blender: `~/venv-img/bin/python tools/boki/glb_clip.py
+<id> <clip> --check=idle` appends it (the mesh bytes untouched) after rebuilding the baked idle to within 0.05 degrees;
+a clip that shows a hidden prop (the berry) still needs the Blender build. In a match the ability plays as
 `cast` (0.56 s, release at 0.2 s), retimed at load from the keyed one (`BokiSwing`; decision 0040): `Kin` holds the skill
 until the release frame. A Blender pass should key `cast` per species (same name and release time) and drop the retime.
 Home and garden-game clips (settle, nap, wake, munch, nudge, climb, splash, rush, brace, dodge, stonehop, spin, crouch, burst, sulk) are not baked: `BokiHomeClips` builds them when the rig
@@ -128,6 +133,14 @@ reach=1.35` (the args main's leg pass used, read back off its bones and swing). 
 on the legless glb from before the legs (`git show 836178d90b:art/kin/<id>/<id>.glb`; its assert wants the module's
 skeleton), then `auto_legs.py` with those args. The trot touches down at the wrap, so heatherhorn's walk and run seams
 sit in SEAM_OVER (2.09, 1.62).
+11-20: Frigatee (`floenatee`), Gongibbon (`gibbelle`) and Prowyak (`glaciyak`) have their own clips (`floenatee_anim.py`,
+`gibbelle_anim.py`, `glaciyak_anim.py`) on the borrowed Glomwort skeleton: a seal's hump-and-haul and belly-flop, a gibbon's
+pendulum roll and bell clang, a yak's lumber, gore and ground slam. Their glbs were re-keyed with `tools/boki/reclip.py`
+(`blender -b --factory-startup --python tools/boki/reclip.py -- --species=<id>`): it reads the built .glb back, swaps
+the actions for the module's `CLIPS` and exports again, body, face, skin and atlases untouched (the unchanged clips came
+back identical), for a species whose raw Meshy model is not at hand. A full `build_boki.py` run gives the same clips.
+11-22: Prowyak has `auto_legs.py` legs (below), so reclip keeps its leg bones and planted-paw walk and run and re-keys
+only the other 11 clips, legs at rest (the module's lumbering walk/run would glide the paws and is not used).
 
 A Boki without legs (Zephyrak) writes all its own clips: the body is a chain bent along a curve sent down it
 (`zephyrak_anim.bend`); its FRAME row has `"hip": 0.0` and `"hover": true`, which gives it a soft shadow on the ground.

@@ -3,10 +3,11 @@ extends Node
 
 signal screen_changed(name: String)
 
-var main: Node = null          # set by main.gd
+var main: Node = null  # set by main.gd
 var last_result: Dictionary = {}
 var match_opts: Dictionary = {}
-var god := false               # admin god mode (Overlay's admin tools)
+var god := false  # admin god mode (Overlay's admin tools)
+
 
 func _ready() -> void:
 	# symbols the text fonts lack (checkmarks, hearts, stars) come from a small fallback font
@@ -20,15 +21,20 @@ func _ready() -> void:
 	UiSfx.hook(get_tree())
 	RenderingServer.set_default_clear_color(Color("10131f"))
 	Settings.apply_all()
-	Settings.changed.connect(func(k: String):
-		if k == "mod_mode": apply_mod())
+	Settings.changed.connect(
+		func(k: String):
+			if k == "mod_mode":
+				apply_mod()
+	)
 	if modding():
 		god = true
+
 
 ## Mod mode (Settings > Gameplay, for the game's owner): everything unlocked, building and
 ## bridges are free and need no expeditions, kin can be spawned from the admin tools (`).
 func modding() -> bool:
 	return bool(Settings.get_v("mod_mode")) and Overlay.admin_allowed()
+
 
 func apply_mod() -> void:
 	god = modding()
@@ -37,15 +43,19 @@ func apply_mod() -> void:
 	Save.d["gems"] = maxi(int(Save.d["gems"]), 99999)
 	Save.d["extracts"] = maxi(int(Save.d.get("extracts", 0)), 10)
 	for s in Data.CROPS:
-		if int(Save.d.get("seeds", {}).get(s, 0)) < 10: Save.add_seed(s, 10)
-	if not Save.d.has("accs"): Save.d["accs"] = []
+		if int(Save.d.get("seeds", {}).get(s, 0)) < 10:
+			Save.add_seed(s, 10)
+	if not Save.d.has("accs"):
+		Save.d["accs"] = []
 	for a in Data.ACCS:
-		if not Save.d["accs"].has(a): Save.d["accs"].append(a)
+		if not Save.d["accs"].has(a):
+			Save.d["accs"].append(a)
 	Save.add_item("tonic", 10)
 	Save.save_game()
 	var s = main.screen_node() if main else null
 	if s and s.has_method("_refresh_top"):
 		s._refresh_top()
+
 
 func _key(action: String, keys: Array, mouse := -1) -> void:
 	if not InputMap.has_action(action):
@@ -59,68 +69,72 @@ func _key(action: String, keys: Array, mouse := -1) -> void:
 		m.button_index = mouse
 		InputMap.action_add_event(action, m)
 
+
 func _setup_input() -> void:
-	_key("up", [KEY_W, KEY_UP]); _key("down", [KEY_S, KEY_DOWN])
-	_key("left", [KEY_A, KEY_LEFT]); _key("right", [KEY_D, KEY_RIGHT])
+	_key("up", [KEY_W, KEY_UP])
+	_key("down", [KEY_S, KEY_DOWN])
+	_key("left", [KEY_A, KEY_LEFT])
+	_key("right", [KEY_D, KEY_RIGHT])
 	_key("fire", [], MOUSE_BUTTON_LEFT)
-	_key("secondary", [], MOUSE_BUTTON_RIGHT) # your hunter's right-click ability (its variants: tap, hold, air...)
+	_key("secondary", [], MOUSE_BUTTON_RIGHT)  # your hunter's right-click ability (its variants: tap, hold, air...)
 	# match keys (docs/ARCHETYPES.md): LMB weapon, RMB the hunter's ability, Shift the hunter's
 	# dash, Space jump and glide (Mouse 5 glides too), Q your active glove, E the archetype's utility,
 	# R the hunter's ultimate, X Fuse with your Boki (a full bond meter), G send out / call back your Boki
 	# (hold G for the order wheel; the Boki casts its own ability), middle mouse ping, 1-4 the belt, F interact.
-	_key("signature", [KEY_E])                # the archetype's utility (E)
-	_key("interact", [KEY_F])                 # catch, open, pick up, finish a downed enemy (Supervive: F)
-	_key("util2", [KEY_2])                    # utility belt slot 2 (an armor kit to start)
-	_key("util3", [KEY_3])                    # utility belt slot 3
-	_key("util4", [KEY_4])                    # utility belt slot 4
-	_key("util5", [KEY_5])                    # utility belt slot 5
-	_key("util6", [KEY_6])                    # utility belt slot 6
-	_key("gear1", [KEY_Q])                    # glove 1 (Q)
+	_key("signature", [KEY_E])  # the archetype's utility (E)
+	_key("interact", [KEY_F])  # catch, open, pick up, finish a downed enemy (Supervive: F)
+	_key("util2", [KEY_2])  # utility belt slot 2 (an armor kit to start)
+	_key("util3", [KEY_3])  # utility belt slot 3
+	_key("util4", [KEY_4])  # utility belt slot 4
+	_key("util5", [KEY_5])  # utility belt slot 5
+	_key("util6", [KEY_6])  # utility belt slot 6
+	_key("gear1", [KEY_Q])  # glove 1 (Q)
 	_key("gear2", [KEY_V], MOUSE_BUTTON_XBUTTON1)  # glove 2: V (shares it with play at home) or Mouse 4
-	_key("crouch", [KEY_CTRL])                # sneak: slower, quieter, and you see further
-	_key("scout", [KEY_G])      # hold: the far look (ScoutLook); G is home-only "goals" otherwise
-	_key("throw", [KEY_C])                    # send your kin out to fight on its own, or recall it
+	_key("crouch", [KEY_CTRL])  # sneak: slower, quieter, and you see further
+	_key("scout", [KEY_G])  # hold: the far look (ScoutLook); G is home-only "goals" otherwise
+	_key("throw", [KEY_C])  # send your kin out to fight on its own, or recall it
 	for a in KinKeys.ids():
-		_key(a, [])      # Boki quick keys: unbound until picked
-	_key("summon", [KEY_C])                   # Boki wisps: your wisp out as the full Boki (KinSummon)
-	_key("ping", [], MOUSE_BUTTON_MIDDLE)     # ping for your squad: the spot, enemy or loot at the cursor (PingInput)
-	_key("base", [KEY_B])                     # base to a teammate: hold for the wheel, a 5.5s channel (squads only)
-	_key("swap_kin", [])                      # one kin per expedition now; kept so old code paths compile
+		_key(a, [])  # Boki quick keys: unbound until picked
+	_key("summon", [KEY_C])  # Boki wisps: your wisp out as the full Boki (KinSummon)
+	_key("ping", [], MOUSE_BUTTON_MIDDLE)  # ping for your squad: the spot, enemy or loot at the cursor (PingInput)
+	_key("base", [KEY_B])  # base to a teammate: hold for the wheel, a 5.5s channel (squads only)
+	_key("swap_kin", [])  # one kin per expedition now; kept so old code paths compile
 	_key("dash", [KEY_SHIFT])
 	_key("jump", [KEY_SPACE])
 	_key("glide", [], MOUSE_BUTTON_XBUTTON2)  # press Mouse 5 (the front side button) in the air and hold to glide, like a second Space press; never jumps
-	_key("hunter_ult", [KEY_R])               # the hunter's own ultimate (level 6, see ArchKit.cast_ult)
-	_key("ultimate", [])                      # Fusion: no key, no fusion in the game (dev flag: Settings.fusion_key)
-	_key("util1", [KEY_1])                    # utility belt slot 1 (a tonic to start)
+	_key("hunter_ult", [KEY_R])  # the hunter's own ultimate (level 6, see ArchKit.cast_ult)
+	_key("ultimate", [])  # Fusion: no key, no fusion in the game (dev flag: Settings.fusion_key)
+	_key("util1", [KEY_1])  # utility belt slot 1 (a tonic to start)
 	_key("scores", [KEY_TAB])
 	_key("menu", [KEY_ESCAPE])
-	_key("play", [KEY_V])                     # at home: play fetch with a kin
-	_key("talk", [KEY_T])                     # at home: talk to a kin
-	_key("details", [KEY_C])                  # at home: a kin's details
-	_key("whistle", [KEY_H])                  # at home: your partner comes; hold: the nearest Boki
-	_key("goals", [KEY_G])                    # at home: the Goals line opens into the whole list
-	_key("fold_guide", [KEY_H])               # training / duel: fold the guide and the kit panel away (and back)
-	_key("hero", [KEY_J])                     # at home: change hero (class and archetype) right there
-	_key("inventory", [KEY_I])                # your things
-	_key("build", [KEY_B])                    # at home: build mode (lay out the island); indoors: decorate
-	_key("rotate", [KEY_R])                   # build mode: turn what you're holding
-	_key("store", [KEY_X, KEY_DELETE])        # build mode: put the piece away
-	_key("emote", [KEY_Y])                    # in a match: hold for the emote wheel (truce, deal, no...)
-	_key("map", [KEY_M])                      # in a match: the full map (ping it with the mouse)
-	_key("pass_lead", [KEY_P])                # riding in / dropping: pass the drop lead to a squadmate
-	_key("undo", [KEY_Z])                     # build mode: undo the last piece (with Ctrl)
-	_key("keep_placing", [KEY_SHIFT])         # build mode: hold while placing to keep placing more
-	_key("level_mod", [KEY_ALT])              # in a match: hold with a slot key to put a skill point in it
-	_key("kit_card", [KEY_K])                 # Hunters screen / practice: the hovered hunter's full kit card
-	_key("confirm", [KEY_ENTER, KEY_KP_ENTER]) # press the open panel's main button
-	_key("push_to_talk", [KEY_V])             # pre-match: hold to talk to the squad
-	_key("record", [KEY_F10])                 # recording mode (Record): clean HUD, then no HUD
-	_key("record_orbit", [KEY_F9])            # recording mode, HUD hidden: slow camera orbit
-	_key("mate_look_1", [KEY_F1])             # hold: the camera looks at your teammate 1 (MateLook)
-	_key("mate_look_2", [KEY_F2])             # teammate 2
-	_key("mate_look_3", [KEY_F3])             # teammate 3 (a 4-player squad)
-	_key("move_readout", [KEY_F7])            # the movement readout (speeds, state) for tuning
-	_key("separate", [KEY_Z])                 # riding in / dropping behind the leader: break away and drop solo
+	_key("play", [KEY_V])  # at home: play fetch with a kin
+	_key("talk", [KEY_T])  # at home: talk to a kin
+	_key("details", [KEY_C])  # at home: a kin's details
+	_key("whistle", [KEY_H])  # at home: your partner comes; hold: the nearest Boki
+	_key("goals", [KEY_G])  # at home: the Goals line opens into the whole list
+	_key("fold_guide", [KEY_H])  # training / duel: fold the guide and the kit panel away (and back)
+	_key("hero", [KEY_J])  # at home: change hero (class and archetype) right there
+	_key("inventory", [KEY_I])  # your things
+	_key("build", [KEY_B])  # at home: build mode (lay out the island); indoors: decorate
+	_key("rotate", [KEY_R])  # build mode: turn what you're holding
+	_key("store", [KEY_X, KEY_DELETE])  # build mode: put the piece away
+	_key("emote", [KEY_Y])  # in a match: hold for the emote wheel (truce, deal, no...)
+	_key("map", [KEY_M])  # in a match: the full map (ping it with the mouse)
+	_key("pass_lead", [KEY_P])  # riding in / dropping: pass the drop lead to a squadmate
+	_key("undo", [KEY_Z])  # build mode: undo the last piece (with Ctrl)
+	_key("keep_placing", [KEY_SHIFT])  # build mode: hold while placing to keep placing more
+	_key("level_mod", [KEY_ALT])  # in a match: hold with a slot key to put a skill point in it
+	_key("kit_card", [KEY_K])  # Hunters screen / practice: the hovered hunter's full kit card
+	_key("confirm", [KEY_ENTER, KEY_KP_ENTER])  # press the open panel's main button
+	_key("push_to_talk", [KEY_V])  # pre-match: hold to talk to the squad
+	_key("record", [KEY_F10])  # recording mode (Record): clean HUD, then no HUD
+	_key("record_orbit", [KEY_F9])  # recording mode, HUD hidden: slow camera orbit
+	_key("mate_look_1", [KEY_F1])  # hold: the camera looks at your teammate 1 (MateLook)
+	_key("mate_look_2", [KEY_F2])  # teammate 2
+	_key("mate_look_3", [KEY_F3])  # teammate 3 (a 4-player squad)
+	_key("move_readout", [KEY_F7])  # the movement readout (speeds, state) for tuning
+	_key("separate", [KEY_Z])  # riding in / dropping behind the leader: break away and drop solo
+
 
 func goto(screen: String, opts := {}) -> void:
 	match_opts = opts
@@ -128,16 +142,20 @@ func goto(screen: String, opts := {}) -> void:
 		main.show_screen(screen, opts)
 	screen_changed.emit(screen)
 
+
 func start_match(opts := {}) -> void:
 	last_tier = int(opts.get("tier", 0))
 	Prematch.deal_mates(opts)
 	goto("prematch" if Prematch.wanted(opts) else "match", opts)
 
+
 var last_tier := 0
+
 
 func finish_match(r: Dictionary) -> void:
 	last_result = r
 	goto("results", r)
+
 
 ## Writes a finished match into the save: loot, caught kin, crops growing, and what your kin remembers.
 ## Returns a summary for the results screen.
@@ -145,19 +163,21 @@ func apply_result(r: Dictionary) -> Dictionary:
 	var d := Save.d
 	var out := {"gems": 0, "seeds": {}, "caught": [], "kin_lines": [], "levelup": false, "crops_ready": 0}
 	d["matches"] = int(d["matches"]) + 1
-	Incubator.tick(float(r.get("time", 0.0)))      # a match is play time for the eggs too
+	Incubator.tick(float(r.get("time", 0.0)))  # a match is play time for the eggs too
 	var won: bool = r.get("extracted", false)
 	TipPick.note_run(r)
 	# lifetime counts for challenges
 	var ms: Dictionary = r.get("stats", {})
 	for k in ["mobs", "rings", "feathers", "staggers", "slams", "spikes", "bosses"]:
-		if ms.has(k): Progress.add(k, int(ms[k]))
+		if ms.has(k):
+			Progress.add(k, int(ms[k]))
 	Progress.add("glide_s", int(float(ms.get("glide_t", 0.0))))
 	Progress.add("knocks", int(r.get("knocks", 0)))
-	if won: Progress.add("caught", r.get("caught", []).size())
+	if won:
+		Progress.add("caught", r.get("caught", []).size())
 	if won:
 		d["extracts"] = int(d.get("extracts", 0)) + 1
-		Save.log_event("extracted", {})     # the clan's member roll shows it (ClanInfo.last_deed)
+		Save.log_event("extracted", {})  # the clan's member roll shows it (ClanInfo.last_deed)
 		ClanBoard.add("extract")
 		out["gems"] = int(r.get("gems", 0))
 		if d.get("guild_perks", []).has("hall"):
@@ -168,18 +188,27 @@ func apply_result(r: Dictionary) -> Dictionary:
 			out["seeds"][s] = int(r["seeds"][s])
 		for rec in r.get("caught", []):
 			if not Ransom.find(String(rec.get("uid", ""))).is_empty():
-				continue     # one of yours, back from a rival: handled below
+				continue  # one of yours, back from a rival: handled below
 			var nk: Dictionary = rec.duplicate(true)
 			var from := String(rec.get("lost_from", ""))
-			randi()      # (the old fresh id used a global roll here: kept so the stream doesn't shift)
+			randi()  # (the old fresh id used a global roll here: kept so the stream doesn't shift)
 			# it keeps the lasting id it was born with, unless that would clash with one of yours
-			if String(nk.get("uid", "")) == "" or not Save.kin(String(nk["uid"])).is_empty() or not String(nk["uid"]).begins_with("b"):
+			if (
+				String(nk.get("uid", "")) == ""
+				or not Save.kin(String(nk["uid"])).is_empty()
+				or not String(nk["uid"]).begins_with("b")
+			):
 				nk["uid"] = Save.new_id()
 			Unique.ensure(nk)
-			nk.erase("serial"); nk.erase("ot")
-			nk["origin"] = {"how": "wild" if (from == "" or from == "you") else "taken", "where": rec.get("caught_at", {}),
-				"t": int(Time.get_unix_time_from_system())}
-			if from != "" and from != "you": nk["origin"]["from"] = from
+			nk.erase("serial")
+			nk.erase("ot")
+			nk["origin"] = {
+				"how": "wild" if (from == "" or from == "you") else "taken",
+				"where": rec.get("caught_at", {}),
+				"t": int(Time.get_unix_time_from_system())
+			}
+			if from != "" and from != "you":
+				nk["origin"]["from"] = from
 			nk.erase("caught_at")
 			if from == "" or from == "you":
 				nk["name"] = Data.default_kin_name(String(nk["species"]))
@@ -199,22 +228,30 @@ func apply_result(r: Dictionary) -> Dictionary:
 			Care.ensure(nk)
 			nk["needs"] = {"food": 45.0, "energy": 40.0, "joy": 45.0, "clean": 30.0}
 			d["roster"].append(nk)
-			Save.register(nk)         # serial, original trainer, the event log
-			KinBox.route_new(nk)      # the farm if there's room; a repeat species goes to the Kin Burrow
+			Save.register(nk)  # serial, original trainer, the event log
+			KinBox.route_new(nk)  # the farm if there's room; a repeat species goes to the Kin Burrow
 			CarryArrival.pending.append(nk["uid"])
 			Care.dex_got(nk)
 			out["caught"].append(nk)
-	if won: Heart.settle(r, out)   # the Heartspark's rare egg and materials (heart.gd)
-	KinSteal.settle(r, out)        # gems for stolen wisps brought out alive (kin_steal.gd)
-	WaysResult.settle(r, out)      # a squad that did not leave: placement pay
-	Equal.settle_belt(r)       # the utility you brought and found comes home with you, or is gone (equal.gd)
-	Backpacks.settle(r)        # and the backpack you wore out
+	if won:
+		Heart.settle(r, out)  # the Heartspark's rare egg and materials (heart.gd)
+	KinSteal.settle(r, out)  # gems for stolen wisps brought out alive (kin_steal.gd)
+	WaysResult.settle(r, out)  # a squad that did not leave: placement pay
+	Equal.settle_belt(r)  # the utility you brought and found comes home with you, or is gone (equal.gd)
+	Backpacks.settle(r)  # and the backpack you wore out
 	var treat: String = d.get("treat", "")
 	d["treat"] = ""
 	# every kin you brought remembers the match
 	var runs: Array = r.get("kin_runs", [])
 	if runs.is_empty() and not Save.active_kin().is_empty():
-		runs = [{"uid": Save.active_kin()["uid"], "events": r.get("kin_events", []), "trust": r.get("kin_trust", Save.active_kin()["trust"]), "stats": r.get("kin_stats", {})}]
+		runs = [
+			{
+				"uid": Save.active_kin()["uid"],
+				"events": r.get("kin_events", []),
+				"trust": r.get("kin_trust", Save.active_kin()["trust"]),
+				"stats": r.get("kin_stats", {})
+			}
+		]
 	var k := Save.active_kin()
 	var brought: Array = []
 	for ri in runs.size():
@@ -249,7 +286,9 @@ func apply_result(r: Dictionary) -> Dictionary:
 			var fate := String(lk.get("fate", "home"))
 			if fate in ["squad", "self"]:
 				KinLoss.after_match(d, kk, "home")
-				Save.remember(kk, "carried_home", "was carried home by %s after you fell" % lk.get("holder", "your squad"), 1.0)
+				Save.remember(
+					kk, "carried_home", "was carried home by %s after you fell" % lk.get("holder", "your squad"), 1.0
+				)
 				lost_news.append({"kin": kk, "fate": "squad", "holder": lk.get("holder", "")})
 				continue
 			if fate == "home" or (float(kk["trust"]) >= 90.0 and randf() < 0.5):
@@ -284,7 +323,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 	var rest := (2.0 if Save.has_building("cottage") else 0.0) + (2.0 if Save.has_building("cottage2") else 0.0)
 	for hk in d["roster"]:
 		if hk == k or brought.has(hk) or out["caught"].has(hk) or KinBox.is_boxed(hk):
-			continue      # (kin asleep in the Kin Burrow don't rest or train)
+			continue  # (kin asleep in the Kin Burrow don't rest or train)
 		if rest > 0.0:
 			hk["trust"] = clampf(float(hk["trust"]) + rest, 0.0, 100.0)
 		if Save.has_building("dojo"):
@@ -298,7 +337,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 		stt["best_gems"] = maxi(int(stt.get("best_gems", 0)), int(r.get("gems", 0)))
 		stt["caught"] = int(stt.get("caught", 0)) + r.get("caught", []).size()
 	# crops grow a stage per match (two in the greenhouse); a plant you watered counts as tended
-	for arr in (["plots", "gh_plots"] if Save.has_building("greenhouse") else ["plots"]):
+	for arr in ["plots", "gh_plots"] if Save.has_building("greenhouse") else ["plots"]:
 		for p in d[arr]:
 			if p["crop"] == "":
 				continue
@@ -308,22 +347,25 @@ func apply_result(r: Dictionary) -> Dictionary:
 				continue
 			p["stage"] = mini(before_s + (2 if arr == "gh_plots" else 1), grow)
 			if float(p.get("wt", 0.0)) > 0.0:
-				if int(p.get("wet", 2)) >= 2:     # rain-soaked only still grows, but isn't tended
+				if int(p.get("wet", 2)) >= 2:  # rain-soaked only still grows, but isn't tended
 					p["care"] = int(p.get("care", 0)) + 1
 				p["wt"] = 0.0
 				p["wet"] = 0
 			if int(p["stage"]) == grow:
 				out["crops_ready"] += 1
-	out["class_unlock"] = ClassUnlock.after_match(r)     # Hunter challenges and mastery
-	out["train_runs"] = TrainRuns.after_match()      # a match earns a garden race and a drill run (limited)
-	Unmasked.migrate(Save.d)       # a mastery level reached shows on you at home (MasteryLook)
+	out["class_unlock"] = ClassUnlock.after_match(r)  # Hunter challenges and mastery
+	out["train_runs"] = TrainRuns.after_match()  # a match earns a garden race and a drill run (limited)
+	Unmasked.migrate(Save.d)  # a mastery level reached shows on you at home (MasteryLook)
 	# the floor: nobody is left with no Boki and no way to play (Lifeline)
 	out["floor"] = Lifeline.check()
 	Save.save_game()
 	return out
 
+
 ## What one kin you brought takes from a match: memories, trust, growth, hunger and XP.
-func _kin_after(k: Dictionary, run: Dictionary, won: bool, r: Dictionary, treat: String, out: Dictionary, lead: bool) -> void:
+func _kin_after(
+	k: Dictionary, run: Dictionary, won: bool, r: Dictionary, treat: String, out: Dictionary, lead: bool
+) -> void:
 	var d := Save.d
 	k["matches"] = int(k.get("matches", 0)) + 1
 	if int(k.get("pining", 0)) > 0:
@@ -333,11 +375,15 @@ func _kin_after(k: Dictionary, run: Dictionary, won: bool, r: Dictionary, treat:
 	var counts := {}
 	for e in evs:
 		counts[e["kind"]] = int(counts.get(e["kind"], 0)) + 1
-	k["trust"] = clampf(float(run.get("trust", before)) + (1.0 if d.get("guild_perks", []).has("shrine") else 0.0), 0.0, 100.0)
+	k["trust"] = clampf(
+		float(run.get("trust", before)) + (1.0 if d.get("guild_perks", []).has("shrine") else 0.0), 0.0, 100.0
+	)
 	for kind in counts:
 		var ev: Dictionary = {}
 		for e in evs:
-			if e["kind"] == kind: ev = e; break
+			if e["kind"] == kind:
+				ev = e
+				break
 		var txt: String = ev["text"]
 		if counts[kind] > 1:
 			txt += " (%d times)" % counts[kind]
@@ -347,14 +393,21 @@ func _kin_after(k: Dictionary, run: Dictionary, won: bool, r: Dictionary, treat:
 		if counts.has(kind):
 			for e in evs:
 				if e["kind"] == kind:
-					k["recall"] = {"kind": kind, "text": String(e["text"]), "place": String(e.get("place", "the islands")), "boss": String(e.get("boss", "")), "m": int(d.get("matches", 0))}
+					k["recall"] = {
+						"kind": kind,
+						"text": String(e["text"]),
+						"place": String(e.get("place", "the islands")),
+						"boss": String(e.get("boss", "")),
+						"m": int(d.get("matches", 0))
+					}
 					break
 			break
 	if won:
 		k["wins"] = int(k.get("wins", 0)) + 1
 		Save.remember(k, "extracted", "made it out of the islands with you")
 		var why := Care.trust_up(k, "win", Time.get_unix_time_from_system())
-		if lead: out["trust_why"] = why
+		if lead:
+			out["trust_why"] = why
 		k["traits"]["bravery"] = clampf(float(k["traits"]["bravery"]) + 0.015, 0.05, 0.95)
 	else:
 		Save.remember(k, "lost", "lost a match with you (%s)" % _why(r.get("why", "")), -1.0)
@@ -365,8 +418,10 @@ func _kin_after(k: Dictionary, run: Dictionary, won: bool, r: Dictionary, treat:
 		Care.change(k, nd, Care.MATCH_COST[nd] * (1.0 if lead else 0.7))
 	Care.change(k, "joy", 8.0 if won else -8.0)
 	var xp := 40 + (40 if won else 0) + int(r.get("knocks", 0)) * 10
-	if not lead: xp = int(xp * 0.7)
-	if treat == "treat_xp": xp = int(xp * 1.5)
+	if not lead:
+		xp = int(xp * 0.7)
+	if treat == "treat_xp":
+		xp = int(xp * 1.5)
 	if add_xp(k, xp, out) > 0:
 		out["levelup"] = true
 	if lead:
@@ -374,9 +429,11 @@ func _kin_after(k: Dictionary, run: Dictionary, won: bool, r: Dictionary, treat:
 	# what the results screen lists for each Boki you brought: the XP and bond just applied above
 	out["kin_gains"] = out.get("kin_gains", []) + [{"kin": k, "xp": xp, "bond": float(k["trust"]) - before}]
 
+
 ## XP a kin needs to go from level `lv` to the next (the curve is in content/rules/garden_xp.json).
 func xp_need(lv: int) -> int:
 	return GardenXp.need(lv)
+
 
 ## Gives a kin XP, runs each level up's evolution into `out`; returns the levels gained.
 func add_xp(k: Dictionary, xp: int, out: Dictionary) -> int:
@@ -389,6 +446,7 @@ func add_xp(k: Dictionary, xp: int, out: Dictionary) -> int:
 		_evolve(k, out)
 	return gained
 
+
 ## A level up can bring a new form or a mutation. The home island plays it when you get back.
 func _evolve(k: Dictionary, out: Dictionary) -> void:
 	var ev := Evo.on_level(k)
@@ -397,8 +455,9 @@ func _evolve(k: Dictionary, out: Dictionary) -> void:
 	ev["text"] = Evo.describe(ev, k)
 	CareJournal.evolved(k, ev)
 	if ev["kind"] == "form":
-		Care.dex_mark(k["species"], "caught")      # it evolved into a new species
-		if Evo.is_final(String(k["species"])): ClanBoard.add("final")
+		Care.dex_mark(k["species"], "caught")  # it evolved into a new species
+		if Evo.is_final(String(k["species"])):
+			ClanBoard.add("final")
 	Save.log_event("evolved", k, {"kind": String(ev["kind"]), "to": String(ev.get("to", ev.get("part", "")))})
 	if not k.has("pending_evo"):
 		k["pending_evo"] = []
@@ -407,11 +466,17 @@ func _evolve(k: Dictionary, out: Dictionary) -> void:
 		out["evo"] = []
 	out["evo"].append(ev["text"])
 
+
 func _why(w: String) -> String:
 	match w:
-		"abyss": return "fell into the abyss"
-		"train": return "was hit by the Sky Train"
-		"team wiped", "finished": return "got knocked out"
-		"bled out": return "bled out"
-		"left": return "left early"
+		"abyss":
+			return "fell into the abyss"
+		"train":
+			return "was hit by the Sky Train"
+		"team wiped", "finished":
+			return "got knocked out"
+		"bled out":
+			return "bled out"
+		"left":
+			return "left early"
 	return w

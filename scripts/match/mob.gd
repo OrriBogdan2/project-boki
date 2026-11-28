@@ -66,7 +66,7 @@ var held := false  # a tutorial dummy: it stands at its camp and notices nobody 
 var team_hit := {}  # team -> match time of its latest hit that left this alive (XpHints: who was fighting it)
 var noticed_at := -INF  # match time of this monster's last notice cue (MobNotice)
 var death_t := 0.0
-## Stagger, as in Supervive: elites and bosses open short "staggerable" windows (a purple ring),
+## Stagger, as in the reference: elites and bosses open short "staggerable" windows (a purple ring),
 ## always while winding up a slam. Land an ability in one (not a regular shot) and it takes a big
 ## hit, is stunned for a few seconds, takes extra damage the whole time, and the ability that did
 ## it comes straight back off cooldown.
@@ -710,18 +710,18 @@ func render(delta: float, alpha: float) -> void:
 ## there as the attack goes off. Off-screen ones stop animating.
 func _pack_anim(delta: float, moving: bool, spd: float, wind: float) -> void:
 	var ap: AnimationPlayer = model.get_meta("anim")
-	var C: Dictionary = model.get_meta("clips")
+	var clips: Dictionary = model.get_meta("clips")
 	var cam = m.get("cam")
 	var far := cam != null and Vector2(pos.x - cam.focus.x, pos.z - cam.focus.z).length() > 30.0
 	ap.active = not far
 	if far:
 		return
-	var atk := String(C["attack"])
+	var atk := String(clips["attack"])
 	if st == "windup":
 		if ap.current_animation != atk:
 			ap.play(atk, 0.12)
 		ap.speed_scale = 0.0
-		ap.seek(ap.get_animation(atk).length * float(C["hit"]) * clampf(wind, 0.0, 1.0), true)
+		ap.seek(ap.get_animation(atk).length * float(clips["hit"]) * clampf(wind, 0.0, 1.0), true)
 		return
 	if (
 		ap.current_animation == atk
@@ -730,12 +730,12 @@ func _pack_anim(delta: float, moving: bool, spd: float, wind: float) -> void:
 	):
 		ap.speed_scale = 1.4  # the blow and the follow-through
 		return
-	var want := String(C["idle"])
+	var want := String(clips["idle"])
 	var rate := 1.0
 	if stagger_t > 0.0:
 		rate = 0.35
 	elif moving:
-		want = String(C["run"]) if spd > 3.6 else String(C["walk"])
+		want = String(clips["run"]) if spd > 3.6 else String(clips["walk"])
 		rate = clampf(spd / (4.5 if spd > 3.6 else 2.2), 0.6, 1.7)
 	if ap.current_animation != want:
 		ap.play(want, 0.2)

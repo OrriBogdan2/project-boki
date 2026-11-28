@@ -12,8 +12,6 @@ const NAMES := [
 	"splash",
 	"swim",
 	"drip",
-	"smg",
-	"rifle",
 	"thump",
 	"boom",
 	"hit",
@@ -87,8 +85,6 @@ const NAMES := [
 	"k_fairy",
 	"k_crystal",
 	"k_sound",
-	"shotgun",
-	"sniper",
 	"hit_light",
 	"hit_solid",
 	"hit_heavy",
@@ -156,8 +152,8 @@ const POOL := 24
 
 const SAMPLE := "ping"  # the sound play_sample() puts through a bus
 
-## The squad cues (you or a squadmate downs or finishes a rival, or a squadmate is downed): one dedicated
-## voice, so footsteps and the combat crowd never steal it, and no gap or stack cap thins it.
+## The squad cues (you or a squadmate downs or finishes a rival, or a squadmate is downed): one dedicated voice, so
+## footsteps and the combat crowd never steal it, and no gap or stack cap thins it.
 const CUES := ["knock_confirm", "knock_warn", "elim_confirm"]
 
 ## Sounds that only exist as several takes (monster voices, little pops); one is picked at random.
