@@ -11548,3 +11548,4 @@ READY ext/cinder-ignite-tiers eed0bc345b (docs only: Cinder ignite tiers already
 READY ext/lace-rmb-charge-scale d031117ab4 (Lace RMB wall stun 0.6-1.2s and range lerp with charge, data rows, asserted)
 READY ext/neve-ult-early 18826c0833 (KIT_PARITY note: Rimelock early recast 67% already on main, no code change)
 READY ext/lace-ult-window 2c7daa1ee5 (Lace ult already has 6 s window + final_dmg bonus on main; adds third-beam damage assert in --archer-combo-check 236/0 and KIT_PARITY row, terrain pierce [?])
+READY ext/cinder-dash-stun 07778520d5 (Cinder Soot Ram hit stuns 1 s via dash.stun on the shared path; --cinder-shift-check asserts stun 1.00 s, knock 2.01 m)
