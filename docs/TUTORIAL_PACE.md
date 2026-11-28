@@ -178,3 +178,69 @@ Still to make:
 - Fear and mistakes beyond the 30 % miss rate: falls into the void, deaths, getting lost. The drive still steers perfectly to each marker.
 - One reader speed. At 2.5 words/s (slow readers) the 383 s of reading becomes about 540 s; change `TutorialDrive.READ_WPS` and rerun.
 - Headless wall time for screen waits (see Kind).
+
+## 6. Playthrough at a fixed 30 fps and at 60 (`--tutorial-fps-pace-check`, 2026-11-28, `ext/tut-playthrough-30fps`)
+
+The stabilize sprint's gate (DECISIONS 11-19: a tutorial playthrough that must finish). `tools/tutorial_fps_pace_check.gd` plays the full match
+course (Vex, the default starter; `-- --starter=archer|juggernaut` for Lace, Kael) and the garden tutorial (`tools/farm_tutorial_fps_pace.gd`, the
+five garden steps) with the bot, in the game's own frame loop on the Low preset with `Engine.max_fps` at 30, then at 60. It judges **every drawn
+frame** as the player sees it and fails on: a step over its budget (12 s of game time, `pack` 30 s and `defend` 15 s: a cooldown and a wave; the
+garden 20 s); a span over **8 s** with no prompt (banner, hint line in the message lane, or marker); and a banner step with any frame where the
+objective banner is not up. Banner up = the line is set and the `TutorialStrip` rect is on screen, no wider than `WIDTH_FRAC`, no taller than
+`HEIGHT_FRAC` and inside the top 20 % of the screen (slim, top-centre, never over the play). Hint-only steps (`quiet` in `tutorial.json`) have no
+banner by design: for them the check counts the prompt gap only. Game seconds, so the 30 and 60 columns differ by frame granularity only.
+
+**Result: 0 failures** (every step inside its budget, no gap over 8 s, banner up on every frame of every banner step, the course and the garden
+finish at both rates). Course 74.9 s at 30 fps and 76.6 s at 60 (game time, 22 steps).
+
+**One bug fixed.** The strip's drop-in (`TutorialStrip.shown`) started fully above the screen, so the first drawn frame of every banner step
+(one frame, 17 to 33 ms) had no objective on screen: 6 banner steps at 30 fps and 7 at 60 each lost one frame (13 failures in the first run). It now starts with `POP_SEEN` (25 %) of the strip in view and drops the rest in the same 0.25 s. The match HUD, the
+farm strip and the first-match guide share `shown`, so all three changed alike. Before: 13 failures; after: 0.
+
+Slowest steps are fights that wait on the game, not on the player: `pack` 18.4 s (the summon ring is bright after a cooldown, then the pack), `defend`
+8.0 s (the wave), `glove` 5.9 s, `kin` 6.3 s at 60 fps (2.7 to 4.8 s at 30; the bot has to be in reach and the Boki has to land the hits). No step is
+near its budget bar `pack` (62 % of 30 s). The slow player of `--tutorial-dead-air-check` still goes exactly 8.0 s with nothing new on the match
+course at the start of a step (the 5 s stand-still plus the nag at `NAG_T` 8 s); that is at, not over, the 8 s line and is unchanged.
+
+### 6.1 Match course (Vex)
+
+| Step | Kind | 30 fps s | 60 fps s | Budget s | Banner frames missing (30 / 60) | Longest no-prompt gap s (30 / 60) |
+|---|---|---|---|---|---|---|
+| land | banner | 3.7 | 3.7 | 12 | 0 of 110 / 0 of 219 | 0.0 / 0.0 |
+| shoot | banner | 5.1 | 5.1 | 12 | 0 of 152 / 0 of 303 | 0.0 / 0.0 |
+| points | hint-only | 0.6 | 0.6 | 12 | 0 of 18 / 0 of 37 | 0.0 / 0.0 |
+| pick_sec | hint-only | 0.0 | 0.0 | 12 | 0 of 1 / 0 of 1 | 0.0 / 0.0 |
+| sec | banner | 2.3 | 2.3 | 12 | 0 of 68 / 0 of 135 | 0.0 / 0.0 |
+| pick_dash | hint-only | 0.6 | 0.6 | 12 | 0 of 18 / 0 of 37 | 0.0 / 0.0 |
+| dash | banner | 3.0 | 2.8 | 12 | 0 of 89 / 0 of 167 | 0.0 / 0.0 |
+| exdash | hint-only | 2.3 | 2.3 | 12 | 0 of 69 / 0 of 140 | 0.0 / 0.0 |
+| glide | banner | 4.2 | 4.1 | 12 | 0 of 125 / 0 of 249 | 0.0 / 0.0 |
+| wallkick | hint-only | 1.5 | 1.5 | 12 | 0 of 46 / 0 of 92 | 0.0 / 0.0 |
+| crouch | hint-only | 1.5 | 1.5 | 12 | 0 of 46 / 0 of 93 | 0.0 / 0.0 |
+| summon | banner | 3.2 | 2.9 | 12 | 0 of 97 / 0 of 174 | 0.0 / 0.0 |
+| pack | hint-only | 18.4 | 18.4 | 30 | 0 of 553 / 0 of 1109 | 0.0 / 0.0 |
+| pick_kin | hint-only | 0.6 | 0.6 | 12 | 0 of 19 / 0 of 37 | 0.0 / 0.0 |
+| kin | banner | 4.8 | 6.3 | 12 | 0 of 143 / 0 of 376 | 0.0 / 0.0 |
+| glove | hint-only | 6.8 | 5.9 | 12 | 0 of 205 / 0 of 353 | 0.0 / 0.0 |
+| hook | hint-only | 3.8 | 3.9 | 12 | 0 of 115 / 0 of 233 | 0.0 / 0.0 |
+| ranks | hint-only | 0.6 | 0.6 | 12 | 0 of 19 / 0 of 37 | 0.0 / 0.0 |
+| wayout | hint-only | 4.0 | 1.7 | 12 | 0 of 121 / 0 of 103 | 0.0 / 0.0 |
+| uplink | hint-only | 1.9 | 1.9 | 12 | 0 of 57 / 0 of 114 | 0.0 / 0.0 |
+| defend | hint-only | 8.0 | 8.0 | 15 | 0 of 240 / 0 of 480 | 0.0 / 0.0 |
+| extract | banner | 0.1 | 0.0 | 12 | 0 of 2 / 0 of 2 | 0.0 / 0.0 |
+
+### 6.2 Garden tutorial
+
+| Step | Kind | 30 fps s | 60 fps s | Budget s | Banner frames missing (30 / 60) | Longest no-prompt gap s (30 / 60) |
+|---|---|---|---|---|---|---|
+| meet | banner | 1.5 | 0.9 | 20 | 0 of 46 / 0 of 57 | 0.0 / 0.0 |
+| patch | banner | 0.5 | 0.5 | 20 | 0 of 16 / 0 of 30 | 0.0 / 0.0 |
+| eat | banner | 0.5 | 0.5 | 20 | 0 of 16 / 0 of 31 | 0.0 / 0.0 |
+| toy | banner | 6.7 | 7.4 | 20 | 0 of 200 / 0 of 445 | 0.0 / 0.0 |
+| out | banner | 0.0 | 0.0 | 20 | 0 of 1 / 0 of 1 | 0.0 / 0.0 |
+
+Step seconds in the garden are the guide's own reaction (the bot acts at once): `toy` is the toy's play session (7 s).
+
+Run: `godot --headless --path . -- --tutorial-fps-pace-check` (about 5 min, no GPU). Related: `--tutorial-check --tutorial-low-fps` and
+`--farm-tutorial-check --tutorial-low-fps` (steps and stalls, 30 fps and 60 fps with a 100 ms stall every 5th frame), `--tutorial-dead-air-check`,
+`--tutorial-playthrough-check`.
