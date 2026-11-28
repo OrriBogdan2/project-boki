@@ -21,13 +21,7 @@ func _init(on_skip: Callable) -> void:
 
 func _ready() -> void:
 	pill = PanelContainer.new()
-	var box := StyleBoxFlat.new()
-	box.bg_color = Color(0.03, 0.025, 0.05, 0.6)
-	box.set_corner_radius_all(14)
-	box.content_margin_left = 14
-	box.content_margin_right = 14
-	box.content_margin_top = 4
-	box.content_margin_bottom = 4
+	var box := UiFrame.plate(Color(0.03, 0.025, 0.05, 0.6), 14, Color(0, 0, 0, 0), 0, Vector2(14, 4))
 	pill.add_theme_stylebox_override("panel", box)
 	pill.add_child(UI.label("Press any key", 13, UI.MUTED))
 	pill.mouse_filter = Control.MOUSE_FILTER_IGNORE

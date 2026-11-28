@@ -57,9 +57,7 @@ func _bubble(sz: Vector2) -> void:
 	sp.x = clampf(sp.x, EDGE_PAD + w * 0.5, sz.x - EDGE_PAD - w * 0.5)
 	sp.y = clampf(sp.y, EDGE_PAD + 60.0, sz.y - EDGE_PAD)
 	var r := Rect2(sp + Vector2(-w * 0.5, -54.0), Vector2(w, 36.0))
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = Color(BUBBLE, BUBBLE.a * a)
-	sb.set_corner_radius_all(14)
+	var sb := UiFrame.plate(Color(BUBBLE, BUBBLE.a * a), 14)
 	c.draw_style_box(sb, r)
 	if on:
 		var tail := PackedVector2Array([sp + Vector2(-8, -19), sp + Vector2(8, -19), sp + Vector2(0, -8)])
@@ -82,11 +80,7 @@ func _tip(sz: Vector2) -> void:
 	var pulse := 1.0 + 0.06 * sin(tu.nagging * 18.0) if tu.nagging > 0.0 else 1.0
 	var pill := Vector2(tw + 40.0, 46.0) * pulse
 	var r := Rect2(Vector2((sz.x - pill.x) * 0.5, sz.y * 0.04), pill)
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = PANEL
-	sb.set_corner_radius_all(23)
-	sb.border_color = MINT if tu.nagging > 0.0 else Color(1, 1, 1, 0.1)
-	sb.set_border_width_all(2)
+	var sb := UiFrame.plate(PANEL, 23, MINT if tu.nagging > 0.0 else Color(1, 1, 1, 0.1), 2)
 	c.draw_style_box(sb, r)
 	c.draw_string(font, r.position + Vector2(20, 31), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, TIP_PX, INK)
 
@@ -107,9 +101,7 @@ func _dots(sz: Vector2) -> void:
 func _end_card(sz: Vector2) -> void:
 	var a := clampf((tu.end_t - END_DELAY) * 2.0, 0.0, 1.0)
 	var r := Rect2(sz * Vector2(0.32, 0.38), sz * Vector2(0.36, 0.2))
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = Color(PANEL, PANEL.a * a)
-	sb.set_corner_radius_all(18)
+	var sb := UiFrame.plate(Color(PANEL, PANEL.a * a), 18)
 	c.draw_style_box(sb, r)
 	var title := "Sparring match won"
 	var sub := "%s will see you out there." % tu.guide.pname
