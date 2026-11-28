@@ -90,7 +90,7 @@ def heave(t):
 
 
 def leap(t):
-    """Hop: a long crouch that swells it wide, a stretched low leap, a flat landing that squashes it flat and settles."""
+    """Hop: a long crouch that swells it wide, a stretched low leap, a flat landing that squashes it and settles."""
     air = seq(t, [(0, 0), (0.28, -0.9), (0.44, 0.3), (0.56, 1), (0.7, 0.2), (0.8, -1), (0.9, -0.25), (1, 0)])
     up = max(air, 0)
     down = max(-air, 0)
