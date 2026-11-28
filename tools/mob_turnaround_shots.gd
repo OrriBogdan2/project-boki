@@ -14,6 +14,8 @@ const MATCH_PX := 420  # px, the match camera crop
 const VIEWS := {"front": 0.0, "three_q": 0.785, "side": -1.5708, "back": 3.1416}
 
 var cam: Camera3D
+var sun: DirectionalLight3D
+var backdrop: MeshInstance3D
 var rows: Array = []
 
 
@@ -26,6 +28,16 @@ func run(mn: Node) -> void:
 	cam = Camera3D.new()
 	cam.fov = 28.0
 	main.add_child(cam)
+	var env := Environment.new()  # bright flat light, so every model reads the same whatever the island's sky
+	env.background_mode = Environment.BG_COLOR
+	env.background_color = Color("e8e8ee")
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	env.ambient_light_color = Color.WHITE
+	env.ambient_light_energy = 0.7
+	cam.environment = env
+	sun = DirectionalLight3D.new()
+	sun.rotation_degrees = Vector3(-50, -35, 0)  # from the top left
+	main.add_child(sun)
 	for k in want:
 		await _kind(String(k))
 	var f := FileAccess.open(out_dir.path_join("turnaround.tsv"), FileAccess.WRITE)
@@ -52,7 +64,10 @@ func _kind(kind: String) -> void:
 	var box := _bounds(mb)
 	var hunter_h := _bounds(p).size.y
 	rows.append("%s\t%.2f\t%.2f\t%.2f\t%.2f" % [kind, box.size.y, box.size.x, box.size.z, hunter_h])
+	if box.size.length() < 0.2:  # a body the skinned bounds miss: a small box at its feet
+		box = AABB(mb.pos + Vector3(-0.6, 0, -0.6), Vector3(1.2, 0.8, 1.2))
 	var ctr := box.get_center()
+	_studio(mb.pos)
 	var dist := maxf(box.size.length(), 1.0) * 1.15 / tan(deg_to_rad(cam.fov * 0.5)) * 0.5
 	cam.make_current()
 	for v in VIEWS:
@@ -60,6 +75,7 @@ func _kind(kind: String) -> void:
 		(await _shot()).save_png(dir.path_join(v + ".png"))
 	# the match camera, a Hunter one body-width beside the monster
 	p.teleport(at + Vector3(box.size.x * 0.5 + 1.2, 0, 0.3))
+	backdrop.visible = false  # (the match frame shows the real island)
 	m.cam.make_current()
 	for i in 30:
 		_hold(mb)
@@ -68,18 +84,21 @@ func _kind(kind: String) -> void:
 	(await _grab(mb)).save_png(dir.path_join("match.png"))
 	# the wind-up: the last frame of the real attack's tell, the 3/4 camera
 	if MobAnim.has_kind(kind) or kind.begins_with("bl_"):
+		backdrop.visible = true
 		cam.make_current()
 		p.teleport(at + Vector3(4.5, 0, 0))
 		mb.tgt = p
 		mb.root_t = 0.0
 		mb._begin_attack()
 		var last: Image = null
-		for i in 120:
+		var seen := false
+		for i in 240:
 			await _view(mb, ctr, dist, 0.785, 0.0)
-			if mb.st != "windup":
-				break
-			if MobAnim.windup_k(mb.st_t, float(mb.md["windup"])) > 0.85:
-				last = await _shot()
+			if mb.st == "windup":
+				seen = true
+				if MobAnim.windup_k(mb.st_t, float(mb.md["windup"])) > 0.5:
+					last = await _shot()  # (the latest one stays: the fullest gather)
+			elif seen:
 				break
 		if last != null:
 			last.save_png(dir.path_join("windup.png"))
@@ -152,3 +171,30 @@ func _bounds(n: Node3D) -> AABB:
 		out = bb if first else out.merge(bb)
 		first = false
 	return out
+
+
+## A flat #E8E8EE dome and floor round the monster, so the world's props stay out of the views.
+func _studio(at: Vector3) -> void:
+	if backdrop == null:
+		backdrop = MeshInstance3D.new()
+		var sph := SphereMesh.new()
+		sph.radius = 14.0
+		sph.height = 28.0
+		backdrop.mesh = sph
+		var mat := StandardMaterial3D.new()
+		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		mat.albedo_color = Color("e8e8ee")
+		mat.cull_mode = BaseMaterial3D.CULL_FRONT
+		backdrop.material_override = mat
+		var floor_mi := MeshInstance3D.new()
+		var cyl := CylinderMesh.new()
+		cyl.top_radius = 13.0
+		cyl.bottom_radius = 13.0
+		cyl.height = 0.02
+		floor_mi.mesh = cyl
+		floor_mi.material_override = mat
+		floor_mi.position.y = 0.0
+		backdrop.add_child(floor_mi)
+		main.add_child(backdrop)
+	backdrop.position = at
+	(backdrop.get_child(0) as Node3D).position.y = 0.02
