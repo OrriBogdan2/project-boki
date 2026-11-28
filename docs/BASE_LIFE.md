@@ -84,8 +84,9 @@ check: `--base-life-check`.
   yet Grown) Boki adds `parent_weight` to its liking for a parent when it picks whom to greet and whom to nap beside
   (`BaseLife.regard`), so a parent it fell out with still loses. The first time goes in its journal (kind "parent").
   The hatch card (home.gd `_name_baby`, every mode) shows both parents' portraits and marks each gift (kind and colour, lean, best inherited
-  stat, favourite food and play, mutations) with a dot for the parent it came from (`scripts/ui/hatch_parents.gd`); `egg_hatch.gd` stays quiet.
-  Check: `--baby-parents-check`.
+  stat, favourite food and play, mutations) with a dot and one short line naming the parent it came from ("Ember lean from Pip",
+  `HatchParents.lines`; the Family tab's "Inherited" section lists the same lines; read from `rec["gifts"]`, so older Boki have none);
+  `egg_hatch.gd` stays quiet. Check: `--baby-parents-check`, `--base-breed-check`.
 - Family tab (GARDEN_MODERN 5 rank 8): the Boki card's Family tab (`scripts/ui/family_view.gd`) shows parents and
   grandparents (portrait, name, type), the mentor's gift (`rec["gift"]`) and the nest items used
   (`rec["lineage"]["nest"]`, written by `NestItems.hatched`). It only reads lineage and the roster: a Boki with none

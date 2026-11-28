@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bhe7eug3oull2"
-path="res://.godot/imported/hob_hob_albedo.jpg-f6cc05f6e19b00795bc782b14dbd722f.ctex"
+path.s3tc="res://.godot/imported/hob_hob_albedo.jpg-f6cc05f6e19b00795bc782b14dbd722f.s3tc.ctex"
+path.etc2="res://.godot/imported/hob_hob_albedo.jpg-f6cc05f6e19b00795bc782b14dbd722f.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "4d478e4630a83a677a86b2f7093aa9dd"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/npcs/hob/hob_hob_albedo.jpg"
-dest_files=["res://.godot/imported/hob_hob_albedo.jpg-f6cc05f6e19b00795bc782b14dbd722f.ctex"]
+dest_files=["res://.godot/imported/hob_hob_albedo.jpg-f6cc05f6e19b00795bc782b14dbd722f.s3tc.ctex", "res://.godot/imported/hob_hob_albedo.jpg-f6cc05f6e19b00795bc782b14dbd722f.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

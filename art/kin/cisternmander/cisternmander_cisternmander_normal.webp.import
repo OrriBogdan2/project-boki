@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dqpuxl4u31esl"
-path="res://.godot/imported/cisternmander_cisternmander_normal.webp-b5445787fbfa79cb6d965a6146393135.ctex"
+path.s3tc="res://.godot/imported/cisternmander_cisternmander_normal.webp-b5445787fbfa79cb6d965a6146393135.s3tc.ctex"
+path.etc2="res://.godot/imported/cisternmander_cisternmander_normal.webp-b5445787fbfa79cb6d965a6146393135.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "214d0c14e658541b39b68ebc4a9c2b27"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/cisternmander/cisternmander_cisternmander_normal.webp"
-dest_files=["res://.godot/imported/cisternmander_cisternmander_normal.webp-b5445787fbfa79cb6d965a6146393135.ctex"]
+dest_files=["res://.godot/imported/cisternmander_cisternmander_normal.webp-b5445787fbfa79cb6d965a6146393135.s3tc.ctex", "res://.godot/imported/cisternmander_cisternmander_normal.webp-b5445787fbfa79cb6d965a6146393135.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
