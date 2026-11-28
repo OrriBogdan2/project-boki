@@ -21,6 +21,9 @@ const KEEP := ["Head", "Aura"]
 const EGG := [[Vector3(0.0, 1.242, -0.09), 0.264], [Vector3(0.0, 1.235, -0.11), 0.25]]
 const EGG_COVER := 1.0  # x the egg's height: the void shell is the painted egg's size, over it
 const EGG_FRONT := Vector3(0.0, 0.0, -0.01)  # m: the void shell sits this far ahead of the painted egg, over it
+## The void shell is a dish facing forward: from three-quarters and the side the painted egg showed green beside it.
+## A black ellipsoid this shape (x the egg's height: width, height, depth) covers the egg behind the shell.
+const EGG_SHADE := Vector3(0.8, 1.04, 0.8)
 
 
 ## The .glb this Empty look wears ("" for the procedural Empty).
@@ -81,23 +84,38 @@ static func _into_hood(root: Node3D, sex: int, size: float) -> void:
 	box = WardenGlb.model_xf(root, hollow) * hollow.get_aabb()
 	var xf := WardenGlb.model_xf(root, hollow)
 	xf.origin += (EGG[sex][0] + EGG_FRONT) * fitted - box.get_center()
-	_skin_to_head(root, hollow, xf)
+	var mats := []
+	for si in hollow.mesh.get_surface_count():
+		mats.append(hollow.get_active_material(si))
+	_skin_to_head(root, hollow.mesh, mats, xf, "VoidHead", hollow.cast_shadow)
+	hollow.visible = false
+	var egg := SphereMesh.new()
+	egg.radius = 0.5
+	egg.height = 1.0
+	egg.radial_segments = 24
+	egg.rings = 12
+	var shade := StandardMaterial3D.new()
+	shade.albedo_color = Color.BLACK
+	shade.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	var ex := Transform3D(Basis.from_scale(EGG_SHADE * float(EGG[sex][1]) * fitted * size), EGG[sex][0] * fitted)
+	_skin_to_head(root, egg, [shade], ex, "VoidEgg", GeometryInstance3D.SHADOW_CASTING_SETTING_OFF)
 	var aura := root.get_node_or_null("Rig/Torso/Aura") as Node3D
 	if aura:
 		_hang(root, aura, "Spine02", WardenGlb.model_xf(root, aura))
 
 
-## A skinned copy of `hollow` at `xf` (the model's frame): its vertices in the skin's space with all their weight on the
-## Head bone, on the model's own Skin, so the GPU moves it as it moves the cloak. The procedural shell is hidden; its
-## materials (the void, the rim) are shared, so the look's glow and ghost still reach the copy.
-static func _skin_to_head(root: Node3D, hollow: MeshInstance3D, xf: Transform3D) -> void:
+## A skinned copy of `src` (materials `mats`, by surface; the last for the rest) at `xf` (the model's frame), named
+## `nm`: its vertices in the skin's space with all their weight on the Head bone, on the model's own Skin, so the GPU
+## moves it as it moves the cloak. The void shell's materials (the void, the rim) are shared, so the look's glow and
+## ghost still reach the copy.
+static func _skin_to_head(root: Node3D, src: Mesh, mats: Array, xf: Transform3D, nm: String, shadow: int) -> void:
 	var skel := WardenGlb.skeleton(root.get_node("Warden") as Node3D)
 	var skin := (skel.find_children("*", "MeshInstance3D", true, false)[0] as MeshInstance3D).skin
 	var bind := _bind_of(skel, skin, "Head")
 	var into := WardenGlb.model_xf(root, skel).affine_inverse() * xf
 	var mesh := ArrayMesh.new()
-	for si in hollow.mesh.get_surface_count():
-		var arrays := hollow.mesh.surface_get_arrays(si)
+	for si in src.get_surface_count():
+		var arrays := src.surface_get_arrays(si)
 		var verts := arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array
 		var normals := arrays[Mesh.ARRAY_NORMAL] as PackedVector3Array
 		var bones := PackedInt32Array()
@@ -105,22 +123,23 @@ static func _skin_to_head(root: Node3D, hollow: MeshInstance3D, xf: Transform3D)
 		for v in verts.size():
 			verts[v] = into * verts[v]
 			if not normals.is_empty():
-				normals[v] = (into.basis * normals[v]).normalized()
+				normals[v] = (into.basis.inverse().transposed() * normals[v]).normalized()
 			bones.append_array([bind, 0, 0, 0])
 			weights.append_array([1.0, 0.0, 0.0, 0.0])
 		arrays[Mesh.ARRAY_VERTEX] = verts
 		arrays[Mesh.ARRAY_NORMAL] = normals
+		arrays[Mesh.ARRAY_TANGENT] = null
 		arrays[Mesh.ARRAY_BONES] = bones
 		arrays[Mesh.ARRAY_WEIGHTS] = weights
-		mesh.add_surface_from_arrays(hollow.mesh.surface_get_primitive_type(si), arrays)
-		mesh.surface_set_material(si, hollow.get_active_material(si))
-	var voidhead := MeshInstance3D.new()
-	voidhead.name = "VoidHead"
-	voidhead.mesh = mesh
-	voidhead.skin = skin
-	voidhead.cast_shadow = hollow.cast_shadow
-	skel.add_child(voidhead)
-	hollow.visible = false
+		var prim := (src as ArrayMesh).surface_get_primitive_type(si) if src is ArrayMesh else Mesh.PRIMITIVE_TRIANGLES
+		mesh.add_surface_from_arrays(prim, arrays)
+		mesh.surface_set_material(si, mats[mini(si, mats.size() - 1)])
+	var mi := MeshInstance3D.new()
+	mi.name = nm
+	mi.mesh = mesh
+	mi.skin = skin
+	mi.cast_shadow = shadow
+	skel.add_child(mi)
 
 
 ## Puts the procedural node `nd` (at `xf` in the model's frame, at rest) on Meshy's bone `bone`: it rides the clips.
