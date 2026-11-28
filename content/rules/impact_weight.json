@@ -21,7 +21,7 @@
 		"ashwick": {"lmb": "light", "rmb": "solid", "dash": "solid", "e": "solid", "x": "heavy"},
 		"tender": {"lmb": "light", "rmb": "solid", "x": "heavy"},
 		"dolm": {"lmb": "light", "rock": "solid", "rmb": "heavy", "dash": "solid", "x": "heavy"},
-		"dredge": {"lmb": "light", "rmb": "solid", "dash": "solid", "e": "solid", "x": "heavy"},
+		"dredge": {"lmb": "light", "rmb": "solid", "dash": "solid", "e": "heavy", "x": "heavy"},
 		"rimewright": {"lmb": "light", "fan": "light", "passive": "light", "rmb": "solid", "e": "solid", "x": "heavy"},
 		"mage": {"lmb": "light", "rmb": "solid", "dash": "solid", "e": "solid", "x": "heavy"},
 		"thief": {"lmb": "light", "rmb": "solid", "e": "solid", "x": "heavy"},
