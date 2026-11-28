@@ -1,4 +1,5 @@
 {
+	"carry_drop_surfaces": ["Material_0"],
 	"doc": "Neve's hand-keyed clips (art/wardens/claire/claire.glb) and which game state plays which (scripts/heroes/warden_clips.gd). Walk and run are a real stride and run (the pilot gait recipe); her skate is tm_skate (Rink Run).",
 	"blink": {"turn": {"lid.R": [-0.82, 0.0, 0.0], "lid.L": [-0.82, 0.0, 0.0]}},
 	"skinned_weapon": true,

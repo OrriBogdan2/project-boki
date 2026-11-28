@@ -9,36 +9,39 @@ extends RefCounted
 ## A tap on a Boki is still a pat.
 ## home.gd calls tick() each frame, speed_mul() in its walk speed and anim_state() for the hunter's pose.
 
-const HOLD_S := 0.45          # s the interact key is held on a Boki to pick it up (a shorter press pats)
-const ARMS_KG := 3.5          # up to this weight it rides in your arms
-const BACK_KG := 9.0          # up to this weight it rides on your back; heavier ones are led
-const SPEED_K := 0.9          # share of your walking speed while carrying or leading
-const SQUIRM_S := 5.0         # s a grumpy Boki lets itself be carried before it wriggles free
-const TRUST_S := 3.0          # s carried before the daily trust counts
-const TRUST_GAIN := 1.0       # trust a bonded Boki gains from its first carry of the day
-const BOND_MIN := 2           # Care.bond_index needed for that trust (2 = Close)
-const BRAVE := 0.62           # bravery above this wriggles happily
-const TIMID := 0.4            # bravery below this clings
-const GRUMPY := 0.62          # temper above this squirms free
-const CARRY_SCALE := 0.7      # a carried Boki is shown this share of its size, so it fits the arms
-const DROP_DIST := 0.9        # m in front of you where it is set down
-const LEAD_SLOT := 0.9        # m to your right where a led Boki walks (how it paces: content/rules/home_lead.json)
-const LEAD_MAX := 10.0        # m away at which a led Boki is let go
-const PACK_SWING_S := 0.25    # s a Boki for the back takes from the chest, once lifted, over the shoulder
+const HOLD_S := 0.45  # s the interact key is held on a Boki to pick it up (a shorter press pats)
+const ARMS_KG := 3.5  # up to this weight it rides in your arms
+const BACK_KG := 9.0  # up to this weight it rides on your back; heavier ones are led
+const SPEED_K := 0.9  # share of your walking speed while carrying or leading
+const SQUIRM_S := 5.0  # s a grumpy Boki lets itself be carried before it wriggles free
+const TRUST_S := 3.0  # s carried before the daily trust counts
+const TRUST_GAIN := 1.0  # trust a bonded Boki gains from its first carry of the day
+const BOND_MIN := 2  # Care.bond_index needed for that trust (2 = Close)
+const BRAVE := 0.62  # bravery above this wriggles happily
+const TIMID := 0.4  # bravery below this clings
+const GRUMPY := 0.62  # temper above this squirms free
+const CARRY_SCALE := 0.7  # a carried Boki is shown this share of its size, so it fits the arms
+const DROP_DIST := 0.9  # m in front of you where it is set down
+const LEAD_SLOT := 0.9  # m to your right where a led Boki walks (how it paces: content/rules/home_lead.json)
+const LEAD_MAX := 10.0  # m away at which a led Boki is let go
+const PACK_SWING_S := 0.25  # s a Boki for the back takes from the chest, once lifted, over the shoulder
 
-var h                         # the Home screen
-var k := {}                   # the Boki in your arms, on your back or on its lead
-var mode := ""                # "carry" (arms), "pack" (back) or "lead"
-var t := 0.0                  # s since it was picked up
-var paid := false             # today's trust already counted for this carry
-var pending := {}             # the Boki the key is held on, waiting to pass HOLD_S
-var held := 0.0               # s the key has been held on it
+var h  # the Home screen
+var k := {}  # the Boki in your arms, on your back or on its lead
+var mode := ""  # "carry" (arms), "pack" (back) or "lead"
+var t := 0.0  # s since it was picked up
+var paid := false  # today's trust already counted for this carry
+var pending := {}  # the Boki the key is held on, waiting to pass HOLD_S
+var held := 0.0  # s the key has been held on it
 var base_scale := Vector3.ONE
-var _p0 := Vector3.ZERO       # where you stood last frame, to read your own speed while leading
-var lift_from := Vector3.ZERO      # where it stood when the lift began
+var _p0 := Vector3.ZERO  # where you stood last frame, to read your own speed while leading
+var lift_from := Vector3.ZERO  # where it stood when the lift began
+var held_off := Vector3.ZERO  # its middle above its feet at full size: it is held by that, not by its feet
+
 
 func _init(home) -> void:
 	h = home
+
 
 ## "carry" (arms), "pack" (back) or "lead": how a Boki of this weight travels with you.
 static func mode_for(rec: Dictionary) -> String:
@@ -46,6 +49,7 @@ static func mode_for(rec: Dictionary) -> String:
 	if kg <= ARMS_KG:
 		return "carry"
 	return "pack" if kg <= BACK_KG else "lead"
+
 
 ## "grumpy", "brave", "timid" or "calm": which way it reacts to being held.
 static func temper_of(rec: Dictionary) -> String:
@@ -57,11 +61,14 @@ static func temper_of(rec: Dictionary) -> String:
 		return "brave"
 	return "timid" if bravery < TIMID else "calm"
 
+
 func carrying() -> bool:
 	return mode == "carry" or mode == "pack"
 
+
 func lifting() -> bool:
 	return carrying() and h.verbs.act == "lift"
+
 
 ## You stand still for the lift, then walk at SPEED_K.
 func speed_mul() -> float:
@@ -69,9 +76,11 @@ func speed_mul() -> float:
 		return 0.0
 	return SPEED_K if not k.is_empty() else 1.0
 
+
 ## The carry hold once the lift (a garden verb, timed by HomeVerbs) has played.
 func anim_state() -> Dictionary:
 	return {"act": mode} if carrying() and not lifting() else {}
+
 
 ## Called every frame from home.gd; true when it used the interact key press.
 func tick(d: float, interact: Dictionary, can: bool) -> bool:
@@ -96,12 +105,13 @@ func tick(d: float, interact: Dictionary, can: bool) -> bool:
 		if held >= HOLD_S:
 			var who: Dictionary = pending
 			pending = {}
-			if not (h.life and h.life.hand.offer(who)):      # a snack in hand: the hold feeds it (BaseHandFeed)
+			if not (h.life and h.life.hand.offer(who)):  # a snack in hand: the hold feeds it (BaseHandFeed)
 				press_hold(who)
 		return true
 	h._use({"kind": "kin", "k": pending})
 	pending = {}
 	return true
+
 
 ## True when holding the key on `who` would pick it up (or lead it) now.
 func can_lift(who: Dictionary) -> bool:
@@ -134,9 +144,13 @@ func press_hold(who: Dictionary) -> void:
 	base_scale = n.scale
 	lift_from = HomeVerbs.hold_spot(h.ppos, h.ppos + _forward(), n) + Vector3(0.0, n.position.y, 0.0)
 	n.position = lift_from
+	held_off = Vector3(0.0, HomeVerbs.bounds(n).get_center().y - n.global_position.y, 0.0)
+	if RelayBeats.has_clip(n, "carry"):
+		n.set_meta("kact", "carry")
 	h.verbs.play("lift", n)
 	h._emote(who, "★" if temper_of(who["rec"]) == "brave" else "♥", true)
 	Sfx.play(KinVoice.cue(who["rec"]["species"], "happy"), null, -6.0, 0.12, Unique.voice(who["rec"]))
+
 
 ## Press while carrying: set it down in front of you (or at your feet if that spot is blocked).
 func drop() -> void:
@@ -144,14 +158,17 @@ func drop() -> void:
 	var at: Vector3 = h.ppos + fwd * DROP_DIST
 	if h.world.occupy(at.x, at.z, 0.3, 0.0, true) != 0.0 or h.world.is_void(at.x, at.z):
 		at = h.ppos
-	if h.world.is_stand_block(at.x, at.z):      # up on a block: the Boki goes down beside it
+	if h.world.is_stand_block(at.x, at.z):  # up on a block: the Boki goes down beside it
 		at = h.world.free_spot_near(at, [], 1.0, 0.4)
 	var who := k
 	_let_go(who, at)
-	if h.hway: h.hway.dropped(who, at)      # set down on the Waystone or the pad: where should it live?
+	if h.hway:
+		h.hway.dropped(who, at)  # set down on the Waystone or the pad: where should it live?
+
 
 func _forward() -> Vector3:
 	return Vector3(-sin(h.pface), 0.0, -cos(h.pface))
+
 
 ## It is on the ground again at `at` and goes back to being itself.
 func _let_go(who: Dictionary, at: Vector3) -> void:
@@ -162,7 +179,8 @@ func _let_go(who: Dictionary, at: Vector3) -> void:
 		who["pos"] = Vector3(at.x, who["pos"].y, at.z)
 		n.position = who["pos"]
 		n.scale = base_scale
-		n.rotation.z = 0.0
+		n.rotation = Vector3(0.0, n.rotation.y, 0.0)  # on its feet again, never tipped
+		n.remove_meta("kact")
 		who["busy"] = false
 		who["hold_t"] = 1.0
 		who["goal"] = who["pos"]
@@ -170,6 +188,7 @@ func _let_go(who: Dictionary, at: Vector3) -> void:
 	who["t"] = 1.5
 	k = {}
 	mode = ""
+
 
 func _step(d: float) -> void:
 	t += d
@@ -185,29 +204,32 @@ func _step(d: float) -> void:
 	var n: Node3D = k["node"]
 	var s: float = h.player.scale.x
 	var fwd := _forward()
-	var off := fwd * 0.42 + Vector3(0, 0.85, 0)
+	var chest: Vector3 = h.player.position + (fwd * 0.42 + Vector3(0.0, 0.85, 0.0)) * s
+	# the hunter's hands hold it: the carry pose (WardenCarry, from her animation) leaves the cradle on her model
+	var socket: Vector3 = h.player.get_meta(WardenCarry.SOCKET, Vector3.INF)
+	var at := chest if socket == Vector3.INF else socket - held_off * CARRY_SCALE
 	# for the back: lifted to the chest, then swung up over the shoulder
 	var over := smoothstep(0.0, PACK_SWING_S, t - float(HunterVerbs.LENGTH["lift"])) if mode == "pack" else 0.0
-	off = off.lerp(fwd * -0.34 + Vector3(0, 1.05, 0), over) + Vector3(0, sin(PI * over) * 0.45, 0)
+	if mode == "pack":
+		at = chest.lerp(at, over) + Vector3(0.0, sin(PI * over) * 0.45, 0.0)
 	var wob := 0.0
 	match feel:
 		"brave":
 			wob = sin(t * 9.0) * 0.2
-			off.y += absf(sin(t * 9.0)) * 0.05
+			at.y += absf(sin(t * 9.0)) * 0.05
 		"timid":
-			off = off * Vector3(0.6, 1.0, 0.6)
 			wob = sin(t * 24.0) * 0.03
 		"grumpy":
 			wob = sin(t * 20.0) * 0.5 * (t / SQUIRM_S)
 		_:
 			wob = sin(t * 2.0) * 0.05
-	var at: Vector3 = h.player.position + off * s
 	var up := HunterVerbs.lifted(h.verbs.t) if lifting() else 1.0
 	at = lift_from.lerp(at, up)
 	k["pos"] = Vector3(at.x, k["pos"].y, at.z)
 	n.position = at
 	n.scale = base_scale.lerp(base_scale * CARRY_SCALE, up)
 	n.rotation = Vector3(0.0, h.pface + PI * over, wob * up)
+
 
 ## The first carry of the day, held long enough, brings a bonded Boki a little closer.
 func _pay(rec: Dictionary) -> void:
@@ -219,6 +241,7 @@ func _pay(rec: Dictionary) -> void:
 	Save.remember(rec, "carried", "was carried around the farm in your arms", TRUST_GAIN)
 	Save.save_game()
 
+
 ## A grumpy Boki has had enough: it jumps down and stalks off.
 func _squirm_free() -> void:
 	var who := k
@@ -228,6 +251,7 @@ func _squirm_free() -> void:
 	who["goal"] = who["pos"] + _forward() * 3.0
 	h._emote(who, "!", true)
 	Sfx.play("thump", who["pos"], -12.0, 0.1, 1.3)
+
 
 ## A big Boki follows beside you at your pace, quicker while it is behind its slot; far behind, it's let go.
 ## k["led"] is its walking speed (m/s): at least where its walk clip hands over to a run, at most top_k times yours.

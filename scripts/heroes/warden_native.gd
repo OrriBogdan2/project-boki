@@ -73,6 +73,8 @@ var wall: WardenWall
 var opener: WardenOpen
 var head_look: WardenLookAt  # the head (and a share of the neck and chest) turns to the aim ahead of the body
 var drop_pose: WardenDropPose
+var weapon_away := false  # the carry layer has put the weapon part and its glow away
+var carry: WardenCarryLayer  # the home carry (WardenCarry): arms around the Boki, the weapon put away
 var heart_w := 0.0  # how far the Heartspark carry (WardenCarry.hold_mote) holds the mote (as WardenClips.heart_w)
 var torso_bi := -1  # Meshy's bone standing in for the rig's torso (WardenSkeleton.find "hips": Spine02)
 var torso_off := Transform3D()  # that bone's frame -> the rig torso's, at rest (shown_torso)
@@ -185,6 +187,7 @@ func setup(model: Node3D, glb: Node3D, data: Dictionary) -> void:
 	if d.has("crouch_arms_from"):
 		plays["crouch"] = _arms_swapped("crouch", String(d["crouch_arms_from"]))
 	hand = skel.find_bone(String(d.get("hand", "RightHand")))
+	carry = WardenCarryLayer.make(WardenClips.data(art_id).merged(d), ["hand.L", "hand.R"])
 	torso_bi = WardenSkeleton.find(skel, "hips")
 	upper = WardenNativeUpper.make(skel, torso_bi)
 	twist.skel = skel
@@ -267,6 +270,7 @@ func _process(dt: float) -> void:
 	head_look.owned = move_toward(head_look.owned, 1.0 if attack_left > 0.0 else 0.0, dt / FADE)
 	head_look.step(dt, null)
 	_heart(bool(s.get("heart", false)) and attack_left <= 0.0 and not WardenCarry.owns(String(s.get("kmove", ""))), dt)
+	_carry(s, dt)
 	if opener:
 		opener.busy = attack_left > 0.0 and attack_move  # (as clips.busy: a kit move's clip owns the body)
 		opener.step(dt, 1.0)
@@ -301,6 +305,24 @@ func _place_gun() -> void:
 		var mz := gun.get_node_or_null(^"Muzzle") as Node3D
 		if mz and mouth:  # (as WardenSync puts it on a skinned weapon's mouth: Cinder's palm)
 			mz.global_position = _now(mouth)
+
+
+## The carry on Meshy's arms (WardenClips._carry's layer): a Boki in the arms or on the back (state "act") brings both
+## hands to it and puts the weapon away: what is modelled into a hand leaves the shown mesh, the sword part comes off.
+## A garden verb or tool (state "holster") puts the weapon away alone.
+func _carry(s: Dictionary, dt: float) -> void:
+	var act := String(s.get("act", ""))
+	var arms := act in WardenCarry.HOME_ACTS or String(s.get("kmove", "")) == WardenCarry.MOVE
+	carry.step(skel, root, arms, bool(s.get("holster", false)), act == "pack", dt)
+	var away := carry.away_w >= 0.5
+	if away != weapon_away:  # (the sword part and the glow that rides the blade come off together)
+		weapon_away = away
+		for n in props.nodes if props else []:
+			if n.name.begins_with(WardenProps.PREFIX + "hand"):
+				n.visible = not away
+		for n in get_tree().get_nodes_in_group(WardenFx.BLOOM_GROUP):
+			if root.is_ancestor_of(n):
+				(n as Node3D).visible = not away
 
 
 ## The Heartspark carry on Meshy's arms (WardenClips._heart's layer): the off hand (the Hero's clip data "heart_hand")

@@ -49,7 +49,7 @@ func step(now: float) -> void:
 static func finish(nodes: Array, won: bool) -> void:
 	for n in nodes:
 		_play(n, CLIP_WIN if won else CLIP_SULK)
-		if not won and not _has_clip(n, CLIP_SULK):
+		if not won and not has_clip(n, CLIP_SULK):
 			n.rotation.x = float(rules()["sulk_drop"])
 
 ## Every runner back to its own life.
@@ -62,11 +62,11 @@ func clear(nodes: Array) -> void:
 
 static func _play(n: Node3D, clip: String) -> void:
 	var play := clip
-	if not _has_clip(n, play):
+	if not has_clip(n, play):
 		play = String(rules()["fallback"].get(clip, CLIP_DUO))
-	n.set_meta("kact", play if _has_clip(n, play) else CLIP_DUO)
+	n.set_meta("kact", play if has_clip(n, play) else CLIP_DUO)
 
-static func _has_clip(n: Node3D, clip: String) -> bool:
+static func has_clip(n: Node3D, clip: String) -> bool:
 	for p in n.find_children("*", "AnimationPlayer", true, false):
 		if (p as AnimationPlayer).has_animation(clip):
 			return true

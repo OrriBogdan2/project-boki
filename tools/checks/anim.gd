@@ -7,6 +7,11 @@ extends RefCounted
 const CHECKS := {
 	# a Meshy-native rig holds its clips on frames SimLod skipped the pose
 	"--native-pose-hold-check": ["res://tools/native_pose_hold_check.gd", "native_pose_hold_check", null],
+	# at home every Hunter holds a Boki in the arms or on the back and puts the weapon away (HomeCarry)
+	"--home-carry-pose-check": ["res://tools/home_carry_pose_check.gd", "home_carry_pose_check", null],
+	# GPU: every Hunter holding a Boki at home (arms, back, a verb), --shots-dir=
+	"--home-carry-shots": ["res://tools/home_carry_shots.gd", "home_carry_shots", null],
+	"--dbg-tmp": ["res://tools/dbg_tmp.gd", "dbg_tmp", null],
 	# no clip stretches a skinned edge past 1.3x
 	"--stretch-1-check": ["res://tools/stretch_check.gd", "stretch_check", "bulwark,gunslinger"],
 	"--stretch-2-check": ["res://tools/stretch_check.gd", "stretch_check", "rimewright,dredge"],

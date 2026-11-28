@@ -1165,7 +1165,7 @@ func _carry(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionar
 	s["kmove_t"] = 0.5
 	var stride := await _stride(sync, sk)
 	var socket: Vector3 = m.get_meta(WardenCarry.SOCKET, Vector3.INF)
-	ok(clips.proc_w <= 0.0 and clips.carry_w >= 1.0 and socket != Vector3.INF,
+	ok(clips.proc_w <= 0.0 and clips.carry.arms_w >= 1.0 and socket != Vector3.INF,
 			"%s: the carry lies over the clips, not the rig, and leaves a socket" % id)
 	var height := 1.6 * absf(m.scale.y)
 	var hips_at := sk.global_transform * sk.get_bone_global_pose(hips).origin
@@ -1187,12 +1187,12 @@ func _carry(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionar
 		held = maxf(held, sk.get_bone_pose_scale(WardenSkeleton.find(sk, String(nm))).x)
 	ok(held < 0.01, "%s: the weapon bones the data stows are put away (%.3f)" % [id, held])
 	if not (dd.get("carry_drop", []) + dd.get("carry_drop_surfaces", []) as Array).is_empty():
-		var bare := not clips.drop.is_empty()
-		for h in clips.drop:
+		var bare := not clips.carry.drop.is_empty()
+		for h in clips.carry.drop:
 			bare = bare and h[0].mesh == h[2] and _tris(h[2]) < _tris(h[1])
 		ok(bare, "%s: the weapon modelled into the hand leaves the shown mesh" % id)
 	for gone in dd.get("carry_drop_surfaces", []):
-		ok(_surface_tris(clips.drop, String(gone)) <= 1, "%s: the fused weapon (%s) is hidden" % [id, gone])
+		ok(_surface_tris(clips.carry.drop, String(gone)) <= 1, "%s: the fused weapon (%s) is hidden" % [id, gone])
 	var loose := _hand_piece(sk)
 	ok(loose <= HAND_PIECE_M,
 			"%s: no weapon rides a hand into the Boki (longest piece on a hand alone %.2f m, limit %.2f)"
@@ -1211,9 +1211,9 @@ func _carry(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionar
 	var back := 1.0
 	for nm in dd.get("carry_stow", []):
 		back = minf(back, sk.get_bone_pose_scale(WardenSkeleton.find(sk, String(nm))).x)
-	for h in clips.drop:
+	for h in clips.carry.drop:
 		back = back if h[0].mesh == h[1] else 0.0
-	ok(clips.carry_w <= 0.0 and not m.has_meta(WardenCarry.SOCKET) and back > 0.5,
+	ok(clips.carry.arms_w <= 0.0 and not m.has_meta(WardenCarry.SOCKET) and back > 0.5,
 			"%s: the carry lets go (socket gone, weapon back, size %.2f)" % [id, back])
 
 ## How far the socket lies in front of the body's surface at its height and across it (the meshes' rest vertices

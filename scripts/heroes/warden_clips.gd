@@ -133,10 +133,8 @@ var crouch_seek := 0.0       # s into it
 var crouch_gnd := false      # Grounded turned it: no dip, the layer drops and lets go in FADE
 var one_w := 0.0             # how much of the layer the dip owns
 var crouch_pos := Vector2.ZERO
-var carry_w := 0.0           # how far the rescue carry layer (WardenCarry) is over the body
+var carry: WardenCarryLayer  # the rescue carry (WardenCarry): arms around the Boki, the weapon put away
 var heart_w := 0.0           # how far the Heartspark carry layer (WardenCarry.hold_mote) holds the mote
-var stowed := false          # "carry_stow" bones are put away
-var drop: Array = []         # WardenCarry.held: the body meshes whose weapon is in a "carry_drop" hand or surface
 var fired_prev := 99.0       # the state's s since the last shot, last frame
 var recoil_deg := 0.0        # the arms' kick now
 var turn: WardenTurn         # turning on the spot (null: no legs, or the root bone rides the rig)
@@ -246,7 +244,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, clips: A
 			if a.track_get_type(i) != Animation.TYPE_ROTATION_3D and bone_name in contract \
 					and not bone_name in d.get("offset_bones", []):
 				a.remove_track(i)
-	drop = WardenCarry.held(sk, d.get("carry_drop", []), d.get("carry_drop_surfaces", []))
+	carry = WardenCarryLayer.make(d)
 	if (d["loco"] as Dictionary).has("run_cycle"):
 		_retime_run(float(d["loco"]["run_cycle"]))
 	WardenGestures.add(lib, sk, glb, (d.get("emotes", {}) as Dictionary).values() \
@@ -851,25 +849,17 @@ func step(dt: float) -> void:
 	free_arm.apply(dt, "" if proc else String(want.get("clip", "")))
 	if reach:
 		reach.apply(dt, root.get_meta(WardenReach.TIP, Vector3.INF))
-	_carry(String(s.get("kmove", "")) == WardenCarry.MOVE and not proc, dt)
+	_carry(s, proc, dt)
 	_heart(bool(s.get("heart", false)) and want.is_empty() and not WardenCarry.owns(String(s.get("kmove", ""))), dt)
 
-## The rescue carry (WardenCarry) over what is shown: arms in around the Boki, the data's weapon bones put away.
-func _carry(on: bool, dt: float) -> void:
-	carry_w = move_toward(carry_w, 1.0 if on else 0.0, dt / WardenCarry.FADE)
-	if carry_w <= 0.0:
-		root.remove_meta(WardenCarry.SOCKET)
-		if stowed:
-			stowed = false
-			WardenCarry.stow(skel, d.get("carry_stow", []), 0.0)
-			WardenCarry.hold(drop, false)
-			_out(0.0)       # (a weapon bone with a size of its own gets it back)
-		return
-	var fwd := float(d.get("carry_fwd", WardenCarry.REACH_FWD))
-	root.set_meta(WardenCarry.SOCKET, WardenCarry.apply(skel, root, carry_w, fwd))
-	stowed = true
-	WardenCarry.stow(skel, d.get("carry_stow", []), carry_w)
-	WardenCarry.hold(drop, carry_w >= 0.5)
+## The rescue carry (WardenCarry) over what is shown: arms in around the Boki, the data's weapon bones put away. At
+## home a Boki held in the arms or on the back (state "act": HomeCarry's "carry" or "pack") brings the arms in, and any
+## garden verb or tool (state "holster") puts the weapon away.
+func _carry(s: Dictionary, proc: bool, dt: float) -> void:
+	var act := String(s.get("act", ""))
+	var arms := (String(s.get("kmove", "")) == WardenCarry.MOVE or act in WardenCarry.HOME_ACTS) and not proc
+	if carry.step(skel, root, arms, bool(s.get("holster", false)) and not proc, act == "pack", dt):
+		_out(0.0)       # (a weapon bone with a size of its own gets it back)
 
 ## Data "recoil" {deg, settle}: each shot (the state's "fired" falling back to 0) kicks the arms and shoulder pieces up
 ## by "deg" degrees over whatever the clips play, and the kick settles in "settle" s. Only those bones move, so the legs
