@@ -14,6 +14,7 @@ const CHECKS := {
 	"--move-speed-check": ["res://tools/move_speed_check.gd", "move_speed_check", null],  # run, walk, crouch per Hunter
 	# 0179: wall stuns scale with the charge and the impact speed
 	"--kit-cc-scale-check": ["res://tools/kit_cc_scale_check.gd", "kit_cc_scale_check", null],
+	"--kit-refund-check": ["res://tools/kit_refund_check.gd", "kit_refund_check", null],  # refund/reset loops (11-27)
 	"--mob-fsm-check": ["res://tools/mob_fsm_check.gd", "mob_fsm_check", null],  # monster + boss machines (M9)
 	"--cc-measure-check": ["res://tools/cc_measure_check.gd", "cc_measure_check", null],
 	"--utility-parity-check": ["res://tools/utility_parity_check.gd", "utility_parity_check", null],  # belt vs source

@@ -121,6 +121,7 @@
 			"wait_rank3": 1.4,
 			"lock": 3.0,
 			"lock_rank3": 2.0,
+			"block_dash": 1.0,
 			"len": 4.2,
 			"arc": 140.0,
 			"slow": 0.6,
