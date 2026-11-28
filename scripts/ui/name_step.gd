@@ -2,7 +2,8 @@ class_name NameStep
 extends VBoxContainer
 ## The naming line under a new Boki: a suggested name (KinNames, from its species' name), a dice for another,
 ## the text box, and Keep. Leaving without Keep keeps the suggestion. A rude name is not kept: a plain line
-## says so and the suggestion comes back. Used by the first hatch, a hatch at home and your first caught Boki.
+## says so and the suggestion comes back. Used by the first hatch, a hatch at home,
+## your first caught Boki and Rename on the kin card's About tab.
 
 ## The name it ends with: kept is true from Keep (or Enter), false when the line was left without it.
 signal named(nm: String, kept: bool)
@@ -15,8 +16,9 @@ var _rng := RandomNumberGenerator.new()
 var _done := false
 
 
-## keep_text "" leaves the Keep button out (the caller's own button finishes; read chosen()).
-func _init(species: String, keep_text := "Keep") -> void:
+## keep_text "" leaves the Keep button out (the caller's own button finishes; read chosen()). start: the name the
+## box opens with in place of a suggestion (a rename starts from the name it has; leaving keeps that one).
+func _init(species: String, keep_text := "Keep", start := "") -> void:
 	_species = species
 	_rng.randomize()
 	add_theme_constant_override("separation", 4)
@@ -34,7 +36,12 @@ func _init(species: String, keep_text := "Keep") -> void:
 	note = UI.label("That name can't be used. Try another.", UI.T_SMALL, UI.BAD)
 	note.visible = false
 	add_child(note)
-	reroll()
+	if start == "":
+		reroll()
+	else:
+		suggestion = start
+		box.text = start
+		box.caret_column = start.length()
 	tree_exiting.connect(
 		func():
 			if not _done:
