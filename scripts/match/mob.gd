@@ -38,6 +38,7 @@ static var watched: WeakRef = null  # the monster the local player last hit: the
 
 var mkind := "skitter"
 var damage_by := {}  # Hunter team -> damage dealt to it: who did the most (lair XP shares, KillCues steals)
+var lead_team := -1  # a remote lair boss copy: the squad the host says has dealt the most (BossNet)
 var md: Dictionary = {}
 var fsm: Fsm  # its state (S, TABLE), made in init_mob
 var span := 0.0  # s the current timed state lasts; fsm.since counts up to it
@@ -185,6 +186,17 @@ func _took(d: float, by: Ent) -> void:
 	var dealer: Ent = (by as Kin).owner_h if by is Kin and (by as Kin).owner_h else by
 	if dealer is Hunter:
 		damage_by[dealer.team] = float(damage_by.get(dealer.team, 0.0)) + d
+
+
+## The squad that has dealt the most damage so far (-1 none): off damage_by here, off the host's word on a copy.
+func lead() -> int:
+	var best := lead_team if damage_by.is_empty() else -1
+	var top := 0.0
+	for t in damage_by:
+		if float(damage_by[t]) > top:
+			top = float(damage_by[t])
+			best = int(t)
+	return best
 
 
 ## A kill-window reel (StealReel): the stagger's stillness without its bonus damage or refund.

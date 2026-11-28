@@ -1,7 +1,8 @@
 class_name BossNet
 extends RefCounted
 ## What a lair boss shows on its body but the monster snapshot does not carry: the attack under way (and how long
-## ago it began), asleep or awake, the phase, enraged. The host sends one "bat" event when any of them changes, never
+## ago it began), asleep or awake, the phase, enraged, the squad leading on damage (StealTell's bar strip). The host
+## sends one "bat" event when any of them changes, never
 ## per frame (about 35 bytes a change, an attack every second or two). A remote game builds a real Boss (make),
 ## applies the event (net_in) and counts the wind-up's progress from the synced age on its own frame time (advance;
 ## the match clocks of two games drift up to 0.5 s apart, so a start time would show the strike late), so
@@ -24,11 +25,11 @@ static func watch(b: Boss) -> void:
 	if not b.m.net_on:
 		return
 	var flags := int(b.dormant) * F_DORMANT + int(b.enraged) * F_ENRAGED
-	var key := [b.atk, snappedf(b.atk_began, 0.01), b.phase, flags, snappedf(float(b.md["windup"]), 0.01)]
+	var key := [b.atk, snappedf(b.atk_began, 0.01), b.phase, flags, snappedf(float(b.md["windup"]), 0.01), b.lead()]
 	if b.has_meta("bat") and b.get_meta("bat") == key:
 		return
 	b.set_meta("bat", key)
-	b.m.net_event(["bat", b.nid, ATKS.find(b.atk), snappedf(b.atk_t, 0.01), b.phase, flags, key[4]])
+	b.m.net_event(["bat", b.nid, ATKS.find(b.atk), snappedf(b.atk_t, 0.01), b.phase, flags, key[4], key[5]])
 
 
 ## A remote game: take the host's event.
@@ -43,6 +44,7 @@ static func net_in(m: Match, x: Array) -> void:
 	b.set_asleep((int(x[5]) & F_DORMANT) != 0)  # (Boss.dormant is a view of its machine)
 	b.enraged = (int(x[5]) & F_ENRAGED) != 0
 	b.md["windup"] = float(x[6])  # (each attack sets its own wind-up seconds; BossAnim.hit_t reads it)
+	b.lead_team = int(x[7])
 	if woke or b.dormant:
 		b.awake_t = 0.0
 

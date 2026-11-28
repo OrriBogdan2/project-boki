@@ -1,6 +1,7 @@
 {
- "_doc": "The steal window (scripts/ui/steal_tell.gd, docs/HUD.md \"Steal window\"). at: the share of max health at or under which a lair boss's kill is up for grabs: its health bar pulses gold and squads within KillXp.SHARE_R see the steal mark. The prize cry (StealSfx, ext/sfx-steals) marks the same line. prize: the monster kinds with a kill window (StealReel); reel: seconds the first drop under the line stands open, no attacks, normal damage.",
+ "_doc": "The steal window (scripts/ui/steal_tell.gd, docs/HUD.md \"Steal window\"). at: the share of max health at or under which a lair boss's kill is up for grabs: its health bar pulses gold and squads within KillXp.SHARE_R see the steal mark. The prize cry (StealSfx, ext/sfx-steals) marks the same line. prize: the monster kinds with a kill window (StealReel); reel: seconds the first drop under the line stands open, no attacks, normal damage. tell_at: the share at or under which a lair boss or camp chief (a prize monster) shows the last-hit tell: its body pulses gold and its bar names the squad that has dealt the most damage (StealTell, ext/combat-lasthit-tell).",
  "at": 0.25,
+ "tell_at": 0.15,
  "prize": ["brute", "glimmer", "warden", "colossus", "serpent", "brood"],
  "reel": 1.2
 }

@@ -34,6 +34,7 @@ static func reel_time() -> float:
 ## Every frame, on every machine: the cry the first time the window opens here. Both flags rearm once the
 ## monster is back above the line (a lair boss that reset).
 static func tick(mb: Mob) -> void:
+	mb.wash = StealTell.wash(mb, mb.m.time)  # the last-hit tell's body pulse
 	if open(mb):
 		if not mb.win_cried:
 			mb.win_cried = true

@@ -127,5 +127,65 @@ func run(main: Node) -> void:
 	ok(sk.stagger_t <= 0.0 and not StealReel.open(sk), "a skitter in the same band: no reel (not a prize monster)")
 	m.mobs.erase(sk)
 	sk.queue_free()
+	_last_hit_tell(b, pc, q1, red)
 	print("STEALTELL done, %d fail" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+
+## 5. The last-hit tell: the line, the body pulse, the bar's leading squad and its "bat" field.
+func _last_hit_tell(b: Boss, pc: Hunter, q1: Hunter, red: Color) -> void:
+	var rules = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/steal_window.json"))
+	ok(
+		is_equal_approx(StealTell.tell_at(), float(rules["tell_at"])) and StealTell.tell_at() == 0.15,
+		"the tell line is %.2f, from content/rules" % StealTell.tell_at()
+	)
+	b.dead = false
+	b.damage_by.clear()
+	b.hp = b.max_hp * (StealTell.tell_at() + 0.01)
+	StealReel.tick(b)
+	ok(not StealTell.tell(b) and b.wash == 0.0, "just over the tell line: no body pulse")
+	b.hp = b.max_hp * StealTell.tell_at()
+	StealReel.tick(b)
+	var w0 := StealTell.wash(b, 0.0)
+	var w1 := StealTell.wash(b, 0.125)
+	ok(StealTell.tell(b) and b.wash > 0.0 and w0 != w1, "on the line: the body pulses (wash %.2f -> %.2f)" % [w0, w1])
+	ok(StealTell.fill(b, red, 1.0) != red, "the bar fill is off its red")
+	var ck := m.spawn_mob("brute", b.pos)
+	ck.hp = ck.max_hp * 0.1
+	StealReel.tick(ck)
+	ok(
+		StealTell.tell(ck) and ck.wash > 0.0 and StealTell.fill(ck, red, 1.0) != red,
+		"a camp chief (brute) at 10%: the same tell"
+	)
+	ck.dead = true
+	ok(not StealTell.tell(ck), "a dead chief: none")
+	m.mobs.erase(ck)
+	ck.queue_free()
+	var sk := m.spawn_mob("skitter", b.pos)
+	sk.hp = sk.max_hp * 0.05
+	ok(not StealTell.tell(sk), "a skitter at 5%: no tell")
+	m.mobs.erase(sk)
+	sk.queue_free()
+	# the leading squad: most damage wins, and a copy takes the host's word when it has no tally
+	b.damage_by = {pc.team: 40.0, q1.team: 90.0}
+	ok(b.lead() == q1.team, "the squad with the most damage (team %d, 90 vs 40) leads" % b.lead())
+	Net.out_events.clear()
+	m.net_on = true
+	BossNet.watch(b)
+	m.net_on = false
+	var ev: Array = Net.out_events.back() if not Net.out_events.is_empty() else []
+	ok(
+		ev.size() == 8 and ev[0] == "bat" and int(ev[7]) == q1.team,
+		"the host's bat event ends with the leader (%s)" % [ev]
+	)
+	Net.out_events.clear()
+	var copy := BossNet.make(m, "bt_copy", b.mkind, b.pos)
+	m.ents_by_id["bt_copy"] = copy
+	ev[1] = "bt_copy"
+	BossNet.net_in(m, ev)
+	ok(
+		copy.damage_by.is_empty() and copy.lead() == q1.team,
+		"a remote copy reads the leader off the event (team %d)" % copy.lead()
+	)
+	m.ents_by_id.erase("bt_copy")
+	copy.free()

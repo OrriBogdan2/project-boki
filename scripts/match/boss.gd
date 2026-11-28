@@ -880,6 +880,6 @@ func render(delta: float, alpha: float) -> void:
 		BossNet.advance(self, delta)
 	anim += delta * (1.5 + minf(Vector2(vel.x, vel.z).length(), 6.0) * 1.2)
 	BossAnim.pose(self, delta)
-	if enraged:
+	if enraged and wash <= 0.0:  # (the last-hit tell's wash shows through the enrage glow)
 		for mt in mats:
 			if mt is ShaderMaterial: mt.set_shader_parameter("flash", maxf(f, 0.12 + 0.08 * sin(m.time * 9.0)))
