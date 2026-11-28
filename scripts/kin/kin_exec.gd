@@ -922,7 +922,7 @@ static func _friend(e: PartSpec, t: Ent, cx: Dictionary, center: Vector3) -> voi
 				Effects._heal(t, amt)
 			m.fx.burst(t.pos + Vector3(0, 1.0, 0), col, 12, 2.5, 0.5, -3.0)
 		"cleanse":
-			t.slow_t = 0.0; t.root_t = 0.0; t.stun_t = 0.0; t.burn_t = 0.0; t.slow_k = 0.0
+			t.cleanse_cc()
 			m.fx.burst(t.pos + Vector3(0, 1.0, 0), col, 10, 2.5, 0.4, -3.0)
 		"reflect":
 			var arc := float(pr["arc"])

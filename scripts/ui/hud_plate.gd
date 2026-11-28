@@ -210,6 +210,8 @@ static func statuses(e: Ent) -> Array:
 		out.append(["status_rooted", BodyTell.ROOT_COL, "ROOTED", e.root_t])
 	if KitStatus.grounded(e):
 		out.append(["status_grounded", KitStatus.GROUND_COL, "GROUNDED", KitStatus.grounded_left(e)])
+	if KitStatus.silenced(e):
+		out.append(["status_dazed", KitStatus.SILENCE_COL, "SILENCED", KitStatus.silenced_left(e)])
 	if KitStatus.rattled(e):
 		out.append(["status_dazed", KitStatus.RATTLE_COL, "DAZED", KitStatus.rattled_left(e)])
 	if e.slow_t > 0.0:

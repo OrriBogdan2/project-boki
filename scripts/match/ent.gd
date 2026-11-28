@@ -42,6 +42,8 @@ var blight_t := 0.0  # venom's anti-heal: healing on this body is cut (blight_k)
 var guard_k := 0.0
 var slow_k := 0.0  # how much speed the current slow takes away (0 = the body's usual slow)
 var blight_k := InCombat.anti_heal_cut()  # how much healing the current blight cuts
+var slow2_t := 0.0  # a weaker, longer slow waiting its turn behind slow_t
+var slow2_k := 0.0
 var vuln_t := 0.0  # a vulnerable mark: takes vuln_k more damage (never above KinRules.VULN_MAX)
 var vuln_k := 0.0
 var dr := {}  # diminishing returns on crowd control: kind -> [applications, last time]
@@ -233,8 +235,7 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 		burn_by = by
 	if opts.get("slow", 0.0) > 0.0:
 		var sk := float(opts.get("slow_k", 0.0))
-		slow_k = maxf(slow_k, sk) if slow_t > 0.0 else sk
-		slow_t = maxf(slow_t, float(opts["slow"]))
+		add_slow(float(opts["slow"]), sk)
 	if opts.get("root", 0.0) > 0.0:
 		root_t = maxf(root_t, float(opts["root"]))
 	if opts.get("blight", 0.0) > 0.0:
@@ -290,6 +291,62 @@ func cc_dr(kind: String, dur: float) -> float:
 	st[1] = now
 	dr[kind] = st
 	return dur * float(steps[mini(n, steps.size() - 1)])
+
+
+## Puts a slow of `secs` and strength `k` (0 = the body's usual slow) on the body. Each slow keeps its own timer
+## (reference tuning): the strongest running one sets the speed for as long as ITS time lasts, and a weaker slow
+## that outlasts it takes over when it ends, instead of the strong k riding on the longer time.
+func add_slow(secs: float, k := 0.0) -> void:
+	if secs <= 0.0:
+		return
+	if slow_t <= 0.0:
+		slow_t = secs
+		slow_k = k
+		slow2_t = 0.0
+		return
+	var new_k := _slow_rank(k)
+	var cur_k := _slow_rank(slow_k)
+	if is_equal_approx(new_k, cur_k):
+		slow_t = maxf(slow_t, secs)
+	elif new_k > cur_k:  # stronger: it leads, the old one waits if it outlasts it
+		if slow_t > secs:
+			_wait_slow(slow_t, slow_k)
+		slow_t = secs
+		slow_k = k
+	elif secs > slow_t:  # weaker but longer: it waits for the stronger one to end
+		_wait_slow(secs, k)
+
+
+## Keeps the waiting slow that matters most: the stronger one, then the longer.
+func _wait_slow(secs: float, k: float) -> void:
+	var better := slow2_t <= 0.0 or _slow_rank(k) > _slow_rank(slow2_k)
+	if is_equal_approx(_slow_rank(k), _slow_rank(slow2_k)) and secs > slow2_t:
+		better = true
+	if better:
+		slow2_t = secs
+		slow2_k = k
+
+
+## A slow's strength for comparing: k, or the body's usual slow when it has none.
+func _slow_rank(k: float) -> float:
+	return k if k > 0.0 else 0.4
+
+
+## Cleanse: every crowd control comes off (slow, root, stun, silence, burn; grounded too).
+func cleanse_cc() -> void:
+	slow_t = 0.0
+	slow_k = 0.0
+	slow2_t = 0.0
+	slow2_k = 0.0
+	root_t = 0.0
+	stun_t = 0.0
+	burn_t = 0.0
+	KitStatus.clear_cc(self)
+
+
+## Granted immunity (an item or ultimate): for `secs` no stun, root, slow or silence lands.
+func grant_cc_immunity(secs: float) -> void:
+	cc_guard_t = maxf(cc_guard_t, secs)
 
 
 ## Speed multiplier from a slow: its own strength if it has one, else this body's usual slow.
@@ -394,8 +451,15 @@ func tick_status(dt: float) -> void:
 		freeze_t -= dt
 	if slow_t > 0.0:
 		slow_t -= dt
+		if slow2_t > 0.0:
+			slow2_t -= dt
 		if slow_t <= 0.0:
 			slow_k = 0.0
+			if slow2_t > 0.0:  # the weaker slow that was waiting
+				slow_t = slow2_t
+				slow_k = slow2_k
+			slow2_t = 0.0
+			slow2_k = 0.0
 	if root_t > 0.0:
 		root_t -= dt
 	if cc_immune_t > 0.0:

@@ -107,7 +107,7 @@ func tick(dt: float) -> void:
 						if by: DashReset.note(f, by)
 						if o.has("slow"):
 							CcSfx.zone_slow(f)
-							f.slow_t = maxf(f.slow_t, float(o["slow"]))
+							f.add_slow(float(o["slow"]))
 						if o.has("root"): f.root_t = maxf(f.root_t, float(o["root"]))
 			if float(e.get("heal", 0.0)) > 0.0:
 				for h in m.hunters:

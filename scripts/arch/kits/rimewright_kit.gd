@@ -1235,8 +1235,7 @@ func _rime_skate_out() -> void:
 func _chill_zone(at: Vector3, r: float, k: float) -> void:
 	for f in foes_in(at, r):
 		CcSfx.zone_slow(f)
-		f.slow_k = maxf(f.slow_k if f.slow_t > 0.0 else 0.0, k)
-		f.slow_t = maxf(f.slow_t, ZONE_SLOW_T)
+		f.add_slow(ZONE_SLOW_T, k)
 		add_chill(f)
 
 

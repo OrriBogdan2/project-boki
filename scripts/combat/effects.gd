@@ -480,7 +480,15 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 		"cleanse":
 			for t in _targets(e, caster):
 				if t is Ent:
-					t.slow_t = 0.0; t.root_t = 0.0; t.stun_t = 0.0; t.burn_t = 0.0
+					t.cleanse_cc()
+		"silence":
+			for t in _targets(e, caster):
+				if t is Ent:
+					KitStatus.apply(t, "sil", float(e.get("time", 2.0)))
+		"immune":
+			for t in _targets(e, caster):
+				if t is Ent:
+					t.grant_cc_immunity(float(e.get("time", 2.0)))
 		"refill_dash":
 			for t in _targets(e, caster):
 				if t is Hunter:
@@ -645,7 +653,9 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 						if "shield_t" in t: t.shield_t = maxf(float(t.shield_t), float(e.get("time", 4.0)))
 					if float(e.get("haste", 0.0)) > 0.0 and "haste_t" in t: t.haste_t = maxf(float(t.haste_t), float(e["haste"]))
 					if e.get("cleanse", false) and t is Ent:
-						t.slow_t = 0.0; t.root_t = 0.0; t.stun_t = 0.0; t.burn_t = 0.0
+						t.cleanse_cc()
+					if float(e.get("immune", 0.0)) > 0.0 and t is Ent:
+						t.grant_cc_immunity(float(e["immune"]))
 			m.sfx("heal", at, -3.0, 1.2)
 
 ## Pull what a shot hit (ctx.target) to the caster, or every foe near ctx.at if "radius" is set.
