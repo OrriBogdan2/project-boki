@@ -10,6 +10,8 @@ Everything else in the tables below that says open, pending or branch ready was 
 - **Cooldowns below source** (gap 10, 0.48x to 0.85x): owner call; ext/parity-cooldowns, ext/cooldown-parity-verify and ext/grimble-parity-verify are not merged.
 - **Air control** (gap 3): owner kept real-match air control over the source 0.015.
 - **Time to knock, Vex and Kael** (`--ttk-check`, 11-23): Vex LMB 5.47 s against 2.48 (2.20x), combo 2.72 against 1.92 (1.41x) and 2.38 against 1.76 (1.35x); Kael LMB 8.47 s against 12.95 (0.65x), combo 4.78 against 7.70 (0.62x) and 3.18 against 7.00 (0.45x). Not changed here (no number changes); the share cut written for Kael in `4df7d9a186` never reached the JSON. Detail: docs/KIT_PARITY.d/1123-vex-kael-recheck.md.
+- **Kael RMB into Shift turn limit** (patch 05.02.25): `ext/kael-rmb-dash-turn` is not merged (and no longer on origin); the turn lock is not built.
+- **Time to knock, Vex and Kael** (`--ttk-check`, 11-23): Vex LMB 5.47 s against 2.48 (2.20x), combo 2.72 against 1.92 (1.41x) and 2.38 against 1.76 (1.35x); Kael LMB 8.47 s against 12.95 (0.65x), combo 4.78 against 7.70 (0.62x) and 3.18 against 7.00 (0.45x). Kael has since moved (11-24, `8495f5a6b84`, per docs/TTK.md): LMB 10.65 s (0.82x), combo 6.25 s (0.81x), combo at max rank 3.80 s against 7.00 (0.54x, the one FAIL, an owner call). Detail: docs/KIT_PARITY.d/1123-vex-kael-recheck.md, docs/KIT_PARITY.d/1127-kael-recheck.md.
 - **Unsourced `[?]` rows** (dash-flow rows, several RMB/R ranges, Kael tether 24 m, Warchain leash 24 m, Sable pair stun, Tenzo rock slows, Sparkle E slide): not determinable from the footage or data; ours stands.
 - Closed on 2026-11-28: Kael RMB into Shift turn limit (patch 05.02.25; `5f99dce0f5`, ext/kael-rmb-dash-turn): out of a Smash and 0.8 s after it the dash turns at most 35 degrees (`dash.lock_t`/`lock_deg`), asserted in `--juggernaut-combo-check` (`tools/kael_turn_check.gd`).
 - Closed on 2026-11-20: Lace Spirit Walk ledges (`40f7865d8`, on main), Albert guard meter / Shield Slam (`b2e942eb4`, on main), Kael lunge length 4.5 to 5.4 m (`4ea2625c13`, ext/kael-lunge-length-rebased-rebased, `e738af1ca7`), Sable Cartwheel curve.
@@ -419,19 +421,19 @@ Re-read 2026-11-26 on main fad508b31c9; the dated tables below this one (ranges,
 
 ## Kael (`juggernaut`, source Brall; was Zedran) · slice Warden
 
-Re-read 2026-11-23 on main dae69e1c59, same note as Vex above.
+Re-read 2026-11-27 on main cb8941b9cbf, same note as Vex above. What moved since 11-23 is in `docs/KIT_PARITY.d/1127-kael-recheck.md`: the 11-24 damage cut (`8495f5a6b84`) was the one number drift, and these cells now carry it.
 
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
-| LMB | Press combo; hold ranged fireblast [D] | Cadence .34, 8 a slash (tip 1.6x), arc 175, reach 3.1; hold .22 to .95 throws the Searing Wave: 12 to 20, range 7 to 14, 36 m/s, burns 4 s, no slow, no knock (owner 11-11); walks at 55% while it charges | match; dash→LMB `buffer` (sourced: Flame Step is the attack) |
-| RMB | Context: Slam, Lunge, air Slam, chain Spin; 2.5 s [D] | cd 2.0, hold .3; tap Finishing Slam 26 on a 4.3 x 0.72 m lane (push 6, +50% under 35%, sweet spot +40%); hold Lunge 14 to 20, travels 4.5 to 5.4 m, walk 80% while charging, perfect release +20%, a miss doubles the cd; no knock on the Lunge or the Haul Slam (owner 11-20) | match in shape; perfect release differs (owner) |
-| Air RMB | Own 9 s slot [D]; cursor disc [F] | Meteor Drop: a straight down slam, 18 in a 2.4 m circle centred 0.8 m ahead, core 1.2 m +50%, down .45 s, core stun .8 s, cd 7.2 (4.8 at rank 3) | differ · **owner** (11-10 `ext/jugg-downslam`); cd 0.8x **open** (gap 10) |
+| LMB | Press combo; hold ranged fireblast [D] | Cadence .34, 6.5 a slash (8 until 11-24, `8495f5a6b84`; tip 1.6x), arc 175, reach 3.1; hold .22 to .95 throws the Searing Wave: 12 to 20, range 7 to 14, 36 m/s, burns 4 s, no slow, no knock (owner 11-11); walks at 55% while it charges | match; dash→LMB `buffer` (sourced: Flame Step is the attack) |
+| RMB | Context: Slam, Lunge, air Slam, chain Spin; 2.5 s [D] | cd 2.0, hold .3; tap Finishing Slam 18 (26 until 11-24) on a 4.3 x 0.72 m lane (push 6, +50% under 35%, sweet spot +40%); hold Lunge 14 to 20, travels 4.5 to 5.4 m, walk 80% while charging, perfect release +20%, a miss doubles the cd; no knock on the Lunge or the Haul Slam (owner 11-20) | match in shape; perfect release differs (owner) |
+| Air RMB | Own 9 s slot [D]; cursor disc [F] | Meteor Drop: a straight down slam, 18 in a 2.4 m circle centred 0.8 m ahead (falls at 30 m/s), core 1.2 m +50%, down .45 s, core stun .8 s, cd 7.2 (4.8 at rank 3) | differ · **owner** (11-10 `ext/jugg-downslam`); cd 0.8x **open** (gap 10) |
 | Q | none | glove | ours |
-| E | Tether, reactivate to self-pull, 16 s [D] | Warchain: throw 13 m at 32 m/s, 6 damage, holds 5 s, pays out to 24 m (ours), pull 22 m/s with sling and steer, cd 12.8 (11.2 and 8 at ranks 2 and 3) | match in model (owner); source throw ~12.6 m (a floor), leash `[?]` (24 m kept) |
+| E | Tether, reactivate to self-pull, 16 s [D] | Warchain: throw 13 m at 32 m/s, 4 damage (6 until 11-24), holds 5 s, pays out to 24 m (ours), pull 22 m/s with sling and steer, cd 12.8 (11.2 and 8 at ranks 2 and 3) | match in model (owner); source throw ~12.6 m (a floor), leash `[?]` (24 m kept) |
 | R | Invulnerable, strike back, heal, kill resets, 45 s [D] | Gilded Riposte (key R): guard .65, strike .1, recover .35, 43 damage, heal 80%, cd 36; resets on a hunter taken down or any living foe it kills | match in shape; cd 0.8x **open** (gap 10) |
-| Dash | Dash attack, charges, 13 s [D] | Rampage: 0.07 s dip, then 4.5 m / .17 s raw (owner 113.8), x.85 / x1.15 feel: felt 3.8 m / .2 s, 2 charges (a third at rank 2), 9 along it and 18 at the tip, no knock, cd 10.4 | differ (owner) |
+| Dash | Dash attack, charges, 13 s [D] | Rampage: 0.07 s dip, then 4.5 m / .17 s raw (owner 113.8), x.85 / x1.15 feel: felt 3.8 m / .2 s, 2 charges (a third at rank 2), 6 along it and 12 at the tip (9 and 18 until 11-24), no knock, cd 10.4 | differ (owner) |
 | Passive | Damage empowers; heal on knock [D] | Rage: full bar is Enraged 6 s (+15% damage, +12% dash recharge, +20% cooldown speed); a knock heals 20% | match in shape |
-| Anim | Full set | 22 moves in `warden_anim/kael.json`, all on `kael.glb` clips (54) | match on coverage |
+| Anim | Full set | 22 moves in `warden_anim/kael.json`; `kael.glb` 54 clips plus `kael_clips.glb` 12 native clips (the 12 `kmoves` in `warden_native.json`, `5f841372691` 11-23) | match on coverage |
 
 ## Lace (`archer`, source Myth; was Hem) · slice Warden
 
