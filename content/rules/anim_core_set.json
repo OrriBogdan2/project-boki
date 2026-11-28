@@ -1,0 +1,415 @@
+{
+ "doc": "Core animation set every Hunter must have. MUST = gameplay reads wrong without it; LATER = polish. stock_ok: true when Meshy's stock clip or a procedural layer is an acceptable stand-in for a MUST slot. Read by the site clip pickers and tools/anim_core_matrix.py. Derived 11-28 from the game's state machine (WardenClips, WardenNative clip slots, warden_states_check STATES), kit moves in content/rules/warden_anim/*.json, docs/ANIM_COVERAGE.md, and private reference notes (not named here).",
+ "slots": [
+  {
+   "id": "idle",
+   "priority": "MUST",
+   "what": "casual idle (out of combat)",
+   "game": "warden_native clips.idle / loco.idle",
+   "stock_ok": true,
+   "note": "one loop is enough; the reference also has a fidget every 12-18 s (LATER)"
+  },
+  {
+   "id": "idle_combat",
+   "priority": "LATER",
+   "what": "combat-ready idle, weapon up",
+   "game": "none (single idle); reference has an in-combat set",
+   "stock_ok": true,
+   "note": ""
+  },
+  {
+   "id": "walk",
+   "priority": "MUST",
+   "what": "walk",
+   "game": "clips.walk (walk_mps)",
+   "stock_ok": true,
+   "note": ""
+  },
+  {
+   "id": "run",
+   "priority": "MUST",
+   "what": "run",
+   "game": "clips.run (run_mps)",
+   "stock_ok": true,
+   "note": "strafe and back-pedal are blends/turned hips (WardenNativeTwist), not clips: LATER"
+  },
+  {
+   "id": "strafe_back",
+   "priority": "LATER",
+   "what": "4-way run (strafe, backwards)",
+   "game": "loco.run f/b/l/r on contract path; native twists the hips",
+   "stock_ok": true,
+   "note": ""
+  },
+  {
+   "id": "jump",
+   "priority": "MUST",
+   "what": "jump / air rise and fall loop",
+   "game": "clips.jump, air.rise/fall",
+   "stock_ok": true,
+   "note": "Jump_Run holds as the fall too"
+  },
+  {
+   "id": "land",
+   "priority": "LATER",
+   "what": "landing",
+   "game": "land json / proc squash (WardenClips.lay_feel)",
+   "stock_ok": true,
+   "note": "procedural squash reads right; a clip is polish"
+  },
+  {
+   "id": "glide",
+   "priority": "MUST",
+   "what": "glide (a held air pose; every hunter glides)",
+   "game": "clips.glide slot, air.glide",
+   "stock_ok": false,
+   "note": "stock = Jump_Run held: reads as a jump, not a glide"
+  },
+  {
+   "id": "dash",
+   "priority": "MUST",
+   "what": "dash / roll / kit rush body",
+   "game": "clips.dash slot (state rolling)",
+   "stock_ok": false,
+   "note": "stock = the air or ground clip"
+  },
+  {
+   "id": "crouch",
+   "priority": "MUST",
+   "what": "crouch idle + sneak walk",
+   "game": "clips.crouch (+ crouch_arms_from)",
+   "stock_ok": false,
+   "note": "Meshy's only crouch holds a torch out in front"
+  },
+  {
+   "id": "lmb",
+   "priority": "MUST",
+   "what": "basic attack, shaped to the kit (swing / shoot / cast / throw)",
+   "game": "clips.lmb slot or kmoves for the LMB move",
+   "stock_ok": false,
+   "note": "stock Attack is a forward lunge: wrong for a ranged or cast LMB"
+  },
+  {
+   "id": "rmb",
+   "priority": "MUST",
+   "what": "RMB ability",
+   "game": "clips.rmb slot or kmoves",
+   "stock_ok": false,
+   "note": ""
+  },
+  {
+   "id": "e",
+   "priority": "MUST",
+   "what": "E ability",
+   "game": "clips.e slot or kmoves",
+   "stock_ok": false,
+   "note": ""
+  },
+  {
+   "id": "r",
+   "priority": "MUST",
+   "what": "ultimate (X / R)",
+   "game": "clips.r slot or kmoves",
+   "stock_ok": false,
+   "note": ""
+  },
+  {
+   "id": "dash_move",
+   "priority": "MUST",
+   "what": "Shift ability move (the kit's own dash move, where it is more than a roll)",
+   "game": "kmoves of the dash move",
+   "stock_ok": false,
+   "note": "covered by dash where the kit has no extra move"
+  },
+  {
+   "id": "hit",
+   "priority": "MUST",
+   "what": "hit react (stagger on a heavy hit)",
+   "game": "clips.hit slot; else WardenFlinch layer on Spine02",
+   "stock_ok": true,
+   "note": "the procedural flinch is accepted; a clip is polish"
+  },
+  {
+   "id": "knock",
+   "priority": "MUST",
+   "what": "knocked-down beat: the KO death fall (0.45 s) before the Wisp",
+   "game": "clips.downed slot / states.dead; HunterFall",
+   "stock_ok": false,
+   "note": "native without a clip plays the loop clip while the body topples"
+  },
+  {
+   "id": "kit_extra",
+   "priority": "LATER",
+   "what": "other kit-move phases (wind-ups, lands, holds)",
+   "game": "kmoves",
+   "stock_ok": false,
+   "note": ""
+  },
+  {
+   "id": "revive",
+   "priority": "LATER",
+   "what": "revive pop",
+   "game": "none: a Wisp pops the hero back (docs/decisions/0019)",
+   "stock_ok": true,
+   "note": "no clip is played"
+  },
+  {
+   "id": "downed_crawl",
+   "priority": "LATER",
+   "what": "downed crawl",
+   "game": "dead path: the Wisp replaces it (0019); files stay",
+   "stock_ok": true,
+   "note": "retired"
+  },
+  {
+   "id": "emote",
+   "priority": "LATER",
+   "what": "emote gestures (truce, accept, follow, thanks, wave, laugh)",
+   "game": "WardenGestures procedural, emote_gestures.json",
+   "stock_ok": true,
+   "note": "shared procedural set"
+  },
+  {
+   "id": "stun",
+   "priority": "LATER",
+   "what": "stun sway / root strain",
+   "game": "cc layer (proc)",
+   "stock_ok": true,
+   "note": ""
+  },
+  {
+   "id": "mantle_ledge",
+   "priority": "LATER",
+   "what": "mantle, ledge hang, climb",
+   "game": "states.mantle/ledge; native plays nearest clip",
+   "stock_ok": true,
+   "note": ""
+  },
+  {
+   "id": "stomp",
+   "priority": "LATER",
+   "what": "stomp",
+   "game": "HunterAnim.stomp_k (proc)",
+   "stock_ok": true,
+   "note": ""
+  },
+  {
+   "id": "extract",
+   "priority": "LATER",
+   "what": "extract leave beat",
+   "game": "WardenClips.leave_t: crouch dip then jump",
+   "stock_ok": true,
+   "note": ""
+  }
+ ],
+ "hunters": {
+  "breaker": {
+   "name": "Albert",
+   "path": "contract",
+   "kind": "swing/throw (hammer)"
+  },
+  "hem": {
+   "name": "Lace",
+   "path": "native+own",
+   "kind": "shoot (bow)",
+   "slot_moves": {
+    "lmb": [
+     "arc_draw",
+     "arc_tap",
+     "arc_loose",
+     "arc_perfect",
+     "arc_super",
+     "arc_over",
+     "arc_over_loose"
+    ],
+    "rmb": [
+     "arc_heavy_wind",
+     "arc_heavy"
+    ],
+    "e": [
+     "arc_hail"
+    ],
+    "dash_move": [
+     "pin_roll"
+    ],
+    "r": [
+     "pin_ult_loose",
+     "pin_ult_final"
+    ],
+    "kit_extra": [
+     "pin_walk",
+     "pin_flick"
+    ]
+   }
+  },
+  "kael": {
+   "name": "Kael",
+   "path": "native+own",
+   "kind": "swing (sword)",
+   "slot_moves": {
+    "lmb": [
+     "jug_slash_r",
+     "jug_slash_l",
+     "jug_wave_wind",
+     "jug_wave"
+    ],
+    "rmb": [
+     "jug_slam",
+     "jug_lunge_wind",
+     "jug_lunge"
+    ],
+    "e": [
+     "jug_chain",
+     "jug_reel",
+     "jug_chainlunge",
+     "jug_haul_wind",
+     "jug_haulslam"
+    ],
+    "dash_move": [
+     "jug_dash",
+     "jug_exdash"
+    ],
+    "r": [
+     "jug_guard",
+     "jug_riposte",
+     "jug_ult_recover"
+    ],
+    "kit_extra": [
+     "jug_meteor",
+     "jug_meteor_land",
+     "jug_spin",
+     "jug_roar"
+    ]
+   }
+  },
+  "cinder": {
+   "name": "Cinder",
+   "path": "native+own",
+   "kind": "cast (hands)",
+   "slot_moves": {
+    "lmb": [
+     "as_lance",
+     "lw_stoke_lance",
+     "as_lance_end"
+    ],
+    "rmb": [
+     "as_aim",
+     "as_shot"
+    ],
+    "e": [
+     "as_cloak"
+    ],
+    "dash_move": [
+     "as_leap",
+     "lw_hop"
+    ],
+    "r": [
+     "lw_jet",
+     "lw_land",
+     "lw_stoke"
+    ],
+    "kit_extra": [
+     "lw_jump"
+    ]
+   }
+  },
+  "gil": {
+   "name": "Gil",
+   "path": "native+own",
+   "kind": "swing (swordfish)"
+  },
+  "vex": {
+   "name": "Vex",
+   "path": "native+own",
+   "kind": "shoot (guns)",
+   "slot_moves": {
+    "lmb": [
+     "gunslinger_lmb"
+    ],
+    "rmb": [
+     "gunslinger_rmb"
+    ],
+    "e": [
+     "gunslinger_e"
+    ],
+    "dash_move": [
+     "gunslinger_dash",
+     "gunslinger_dash_ex"
+    ],
+    "r": [
+     "gunslinger_x"
+    ],
+    "kit_extra": [
+     "gunslinger_knock"
+    ]
+   }
+  },
+  "ryzz": {
+   "name": "Sparkle",
+   "path": "native",
+   "kind": "cast (hands, bolt)",
+   "note": "in flight: job anim-own-clips-sparkle-1128",
+   "slot_moves": {
+    "lmb": [
+     "mage_lmb_l",
+     "mage_lmb_r"
+    ],
+    "rmb": [
+     "mage_rmb",
+     "mage_rmb_hold"
+    ],
+    "e": [
+     "mage_e",
+     "mage_e_snap"
+    ],
+    "dash_move": [
+     "mage_dash",
+     "mage_dash_go",
+     "mage_dash_land",
+     "mage_dash_ex"
+    ],
+    "r": [
+     "mage_x",
+     "mage_x_air",
+     "mage_x_dive",
+     "mage_x_land"
+    ],
+    "kit_extra": [
+     "mage_live",
+     "mage_gum"
+    ]
+   }
+  },
+  "tarek": {
+   "name": "Tenzo",
+   "path": "native",
+   "kind": "swing/punch (stone arm)"
+  },
+  "ostra": {
+   "name": "Motley",
+   "path": "native",
+   "kind": "cast (cards, orbs)"
+  },
+  "pip": {
+   "name": "Meeko",
+   "path": "native",
+   "kind": "cast/throw (stars)"
+  },
+  "claire": {
+   "name": "Neve",
+   "path": "native",
+   "kind": "cast (ice)"
+  },
+  "sable": {
+   "name": "Sable",
+   "path": "native",
+   "kind": "shoot/throw (pistols, knives)"
+  },
+  "dredge": {
+   "name": "Grimble",
+   "path": "native",
+   "kind": "shoot/slam (gauntlet gun, goo arm)"
+  },
+  "_slot_moves_note": "best-effort from kmove names and content/archetypes card; hunters without slot_moves have no own kit clips, so every kit slot reads stock"
+ }
+}
