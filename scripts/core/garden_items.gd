@@ -193,7 +193,7 @@ static func family_name(fam: String) -> String:
 static func nudge(id: String) -> String:
 	var e: Dictionary = item(id)["effect"]
 	match String(e["kind"]):
-		"stat": return "+%d %s, up to the limit for its level" % [int(e["n"]), Care.STATS[e["stat"]]["name"]]
+		"stat": return "Focuses %s: +%d, up to the limit for its level" % [Care.STATS[e["stat"]]["name"], int(e["n"])]
 		"xp": return "+%d xp" % int(e["n"])
 		"token": return "1 step toward %s when a form is chosen" % String(Evo.AFF[e["aff"]]["name"]).to_lower()
 		"stay": return "no new forms while worn"

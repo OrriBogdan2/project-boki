@@ -96,9 +96,11 @@ take a stat from 0 to 100):
 
 **After** (content/rules/care.json train_runs, garden_items.json kill_drop, toys.json day_cap):
 
-- **Pieces you carry home.** Stats rise mainly from stat bites (Thumpnut Power, Shellbark Chew Guard,
-  Zipseed Speed, Hushpearl Focus; +3 each, given from Feed, still capped by level). Kills in a match drop
-  them (BiteDrops): what you hunt decides the stat, skitters Speed, spitters Focus, bombers and brutes
+- **Pieces you carry home.** Raw stats come from many extractions: every match I come home from has a few
+  stat bites in the bag (Thumpnut Power, Shellbark Chew Guard, Zipseed Speed, Hushpearl Focus; +3 each,
+  given from Feed, still capped by level). A bite is a focus, not flat points: it pushes the stat I want
+  to lean on. How I play decides the rest (evolution, mutation, which stat my Boki grows toward), and
+  what I hunt decides which bites drop (BiteDrops): skitters Speed, spitters Focus, bombers and brutes
   Power, sentinels Guard, wardens and the Glimmerkin any. About 1.8 bites a match; the lair pile keeps its 35%.
 - **Play is joy and bond only.** Fetch, brushing and petting never raise a stat (`--raising-check` spams
   them and asserts 0).
