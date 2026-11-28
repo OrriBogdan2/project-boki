@@ -11524,3 +11524,4 @@ READY ext/stuck-integ-3b85ff7d 2a605941da (supersedes: mc-integ-f1-1118, anim-bo
 READY ext/ui-keycap-rebind 4e0b74edc508ad7717342c9214729fa64d0d44ae (--keycap-rebind-check: 12 slots x key/M4/M5/alternate on bar, tooltips, recast AGAIN, drill, tutorial; migration keeps old binds; no stale surface found)
 READY ext/mob-clip-sheets 3783f27773a0a50f931fb68113f475dac07f3938 (mob/boss clip audit in BOSS_ANIM.md; mob pose strip +hit/death cells +Blight kinds; boss strip +idle/walk rows; fight-clip fixes; sheets+MP4 in gens/mob-clips-1128)
 READY ext/raising-arrival-rank 0788c2fd5f (docs only: GARDEN_SLICE_CHECK row 3 arrival rank is green by design on main; raising-check welcome row flakes ~1 in 3)
+READY ext/boki-pronoun-sweep ff28c9daca (Boki pronoun sweep: ~45 text fixes via KinSpeak.pronouns + --tg-text-check renders 50 lines for male and female Boki)
