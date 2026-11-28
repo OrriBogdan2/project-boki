@@ -9,7 +9,7 @@ const DIGITS_MIN := 48         # px, the smallest countdown digits
 const PULSE_RATE := 0.012      # radians per ms of the last-seconds throb (about 2 beats a second)
 const PULSE_GROW := 0.12       # the digits swell by this much at the top of a beat
 const TICK_FROM := 5.0        # s left on your turn when the countdown ticks each second
-const PULSE_FROM := 3.0       # s left on your turn when the countdown throbs red
+const PULSE_FROM := 5.0       # s left on your turn when the countdown throbs red (the last 5 s, same as the ticks)
 
 var pm: Prematch
 var voice := VoiceChat.new()
@@ -189,7 +189,10 @@ func _tick_label() -> void:
 	elif pm.my_turn():
 		caption.text = "YOUR TURN"
 		var teach := pm.teach_line()
-		note_label.text = teach if teach != "" else "Pick a Hunter. No two on a squad can be the same one."
+		var pick_note := "Pick a Hunter."
+		if pm.squad.size() > 1:
+			pick_note += " No two on a squad can be the same one."
+		note_label.text = teach if teach != "" else pick_note
 	else:
 		caption.text = "%s IS PICKING" % String(m["name"]).to_upper()
 		note_label.text = "Your squad picks in turn, %d seconds each." % int(Prematch.TURN)
@@ -198,7 +201,7 @@ func _tick_label() -> void:
 	var mine := pm.my_turn() and not pm.locked
 	if s != _last_sec:
 		_last_sec = s
-		if mine and pm.turn_left > 0.0 and pm.turn_left <= TICK_FROM:
+		if mine and pm.squad.size() > 1 and pm.turn_left > 0.0 and pm.turn_left <= TICK_FROM:
 			Sfx.play("click", null, 0.0, 0.0, 1.5 if pm.turn_left <= PULSE_FROM else 1.0)
 	_pulse(pm.turn_left if mine else Prematch.TURN)
 

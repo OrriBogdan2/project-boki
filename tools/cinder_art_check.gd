@@ -7,24 +7,27 @@ extends RefCounted
 ## on the flame shader. Never touches the save.
 
 const DT := 1.0 / 60.0
-const NEAR := 0.04              # m: FX to the palm
-const REACH_MIN := 0.3          # m: the braced palm ahead of her feet
+const NEAR := 0.04  # m: FX to the palm
+const REACH_MIN := 0.3  # m: the braced palm ahead of her feet
 
 var A
 var bad := 0
+
 
 func ok(cond: bool, what: String) -> void:
 	print("CINDERART %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
 
+
 func _frame(m: Match, h: Hunter) -> void:
 	m.step(DT)
 	h.render(DT, 1.0)
-	var sync: Node = WardenGlb.layers(h.model) if h.model else null      # (Sync, or Native on Meshy's skeleton)
+	var sync: Node = WardenGlb.layers(h.model) if h.model else null  # (Sync, or Native on Meshy's skeleton)
 	if sync:
 		sync.set_process(false)
 		sync.call("_process", DT)
+
 
 ## The emission of her magma crack layer now.
 func _emit(h: Hunter) -> float:
@@ -33,6 +36,7 @@ func _emit(h: Hunter) -> float:
 			return float((x as ShaderMaterial).get_shader_parameter("emit"))
 	return 0.0
 
+
 ## How much the casting clip owns the body: the hand-keyed clips' act and upper weights, or on Meshy's own skeleton
 ## (WardenNative) 1 while its attack clip plays.
 func _cast_w(h: Hunter) -> float:
@@ -40,7 +44,11 @@ func _cast_w(h: Hunter) -> float:
 	var c: WardenClips = sync.get("clips")
 	if c:
 		return c.up_w + c.act_w
-	return 1.0 if sync.get("cur") == "attack" else 0.0
+	var mv: WardenNativeMoves = sync.get("moves")
+	if mv and mv.upper_on:  # (own_casts: her cast is a kmoves row on the upper layer, not Meshy's Attack)
+		return (sync.get("upper") as WardenNativeUpper).w
+	return 1.0 if sync.get("cur") == "attack" or (mv and mv.cur != "") else 0.0
+
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -91,7 +99,7 @@ func run(main: Node) -> void:
 		emit_hot = maxf(emit_hot, _emit(P))
 		worst = maxf(worst, kit.tip().distance_to(gm.global_position))
 		if f > 30:
-			var loc := P.model.to_local(kit.tip()) * P.model.scale     # (the camera's lean out of it)
+			var loc := P.model.to_local(kit.tip()) * P.model.scale  # (the camera's lean out of it)
 			fwd_sum += -loc.z
 			up_sum += loc.y
 			right_sum += loc.x
@@ -113,8 +121,11 @@ func run(main: Node) -> void:
 		_frame(m, P)
 	await main.get_tree().create_timer(AshwickKit.CRACKS_FADE + 0.2).timeout
 	ok(_emit(P) < emit0 + 0.2, "the cracks fall back after (%.1f)" % _emit(P))
+	var jet_mi := P.model.find_child(WardenProps.PREFIX + "jet_0", true, false) as MeshInstance3D  # (native path)
+	ok(jet_mi == null or jet_mi.layers == 0, "no flame cards at her heels at rest (turnaround)")
 	var jet := kit.jet
 	ok(jet.start(), "Flue Flight lifts off")
+	var jet_drawn := false
 	var spread := 0.0
 	var heels_low := true
 	var tail_behind := true
@@ -135,16 +146,17 @@ func run(main: Node) -> void:
 			heels_low = heels_low and (q as Vector3).y - P.pos.y < 0.3
 		spread = maxf(spread, (heels[0] as Vector3).distance_to(heels[1]))
 		tail_d = minf(tail_d, -(hv.anchor_pos(P, "tail") - P.pos).dot(fwd))
-		tail_behind = tail_behind and (hv.anchor_pos(P, "tail") - P.pos).dot(fwd) < -0.1   # (v2 tail curls)
+		tail_behind = tail_behind and (hv.anchor_pos(P, "tail") - P.pos).dot(fwd) < -0.1  # (v2 tail curls)
 		jet_y = maxf(jet_y, WardenProps.stretch_of(P.model, "jet.0"))  # (the jet bone, or its part on Meshy's bones)
+		jet_drawn = jet_drawn or (jet_mi != null and jet_mi.layers != 0)
 		if kit.nozzle().distance_to(P.pos + fwd * 1.0) < 0.2:
 			stowed = false
 	ok(spread > 0.06, "two jets, one on each heel (%.2f m apart)" % spread)
 	ok(heels_low, "the lift burns from her heels (at her feet)")
 	ok(tail_behind, "the tail's fire burns behind her (at least %.2f m)" % tail_d)
 	ok(jet_y > 2.0, "the clip stretches the heels' flames in flight (x%.1f)" % jet_y)
+	ok(jet_mi == null or jet_drawn, "the heel flames are drawn in flight")
 	ok(kit.hose.emitted == puffs, "no stream of fire runs in flight")
 	ok(stowed, "the fire is off her hand in flight")
 	print("CINDERART_DONE fails=%d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
-

@@ -41,6 +41,7 @@ var punches := 0
 var boulders := 0
 var launches := 0
 var slams := 0
+var slam_resets := 0          # Quakefalls a knock made ready again (checks)
 var dunks := 0
 var wall_stuns := 0
 var guard_punches := 0         # punches that launched a rock of ours and gave a Shardskin stack
@@ -160,8 +161,9 @@ func _fire_rock(start: Vector3, dir: Vector2, dmg: float, src: String, skin: Str
 	rock_sd = m.shots[-1]
 	m.sfx("br_launch", start, -3.0, 1.0)
 
-## Where a launched rock ends: it bursts, shreds and slows what it caught and splashes whoever is next
-## to it. A rock bursting on someone a rock already burst on inside the repeat window deals less.
+## Where a launched rock ends: it bursts, shreds and slows what it caught (the slow rows of `rock`, or of `dash`
+## for a Rock Hop rock) and splashes whoever is next to it. A rock bursting on someone a rock already burst on
+## inside the repeat window deals less.
 func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String, src: String) -> void:
 	var rd := rock_def()
 	var x: Dictionary = s["x"]
@@ -171,9 +173,8 @@ func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String, src: String) ->
 	var blast := float(rd["blast"])
 	vfx("rock_burst", AimMode.ground(m, at), (s["vel"] as Vector2).normalized())
 	m.sfx("br_burst", at, -3.0, 1.0)
-	var slow := {}
-	if src == "dash":
-		slow = {"slow": float(dash_def()["slow_t"]), "slow_k": float(dash_def()["slow_k"])}
+	var slow_def := dash_def() if src == "dash" else rd
+	var slow := {"slow": float(slow_def["slow_t"]), "slow_k": float(slow_def["slow_k"])}
 	var ult_cast := int(x.get("ult", 0))
 	var splash_dmg := float(s["dmg"]) * 0.6
 	if e != null and is_instance_valid(e) and e.team != h.team:
@@ -196,6 +197,19 @@ func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String, src: String) ->
 		splash.merge(slow)
 		f.hurt(f_dmg, h, splash)
 		KitStatus.apply(f, "vul", float(rd["shred_t"]), float(rd["shred"]))
+
+## A knock our blow landed makes Quakefall ready again at once (the reference's slam resets on a knock); an
+## assist does not. Nothing to give back while it is already up.
+func on_knock(_t: Hunter, mine: bool) -> void:
+	if not mine or float(cd["rmb"]) <= 0.0:
+		return
+	cd["rmb"] = 0.0
+	ch_rmb = float(rmb_charges())
+	slam_resets += 1
+	m.sfx("ab_ready", h.pos, -2.0, 0.8)
+	if h.is_local():
+		h._ab_feedback("sec", "ready")
+
 
 ## A Basalt Spine rock that reached a hunter inside the bond window fills the bond (judged a beat later, so
 ## a knock or kill from this very hit counts as one).
@@ -284,9 +298,9 @@ func _end_plunge() -> void:
 	h.vel.y = maxf(h.vel.y, -HunterMove.fall_cap(h))
 	play("")
 
-## The air Quakefall's plunge (m/s down): the glider's dive speed out of a glide, its own otherwise.
+## The air Quakefall's plunge and arc (m/s down): the glider's dive speed out of a glide, its own otherwise.
 func dive_speed() -> float:
-	if not dive or not dive_fall:
+	if not dive or not (dive_fall or slam.air_on()):
 		return 0.0
 	return float(slam_def()["glide_dive_speed" if dive_glide else "dive_speed"])
 

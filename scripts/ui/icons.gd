@@ -5,8 +5,10 @@ class_name Icons
 ## Coordinates are in a -1..1 box around the centre.
 
 const ART_DIR := "res://art/icons/"
+const VEC_CAP := 1024  # recorded vector glyphs (id, size, colour) kept before the cache starts over
 const SILHOUETTE_V := 0.2  # colour value (0-1): a darker `col` draws a painted icon as a silhouette (unowned items)
 static var _art := {}  # id -> CanvasTexture, or null when the id has no painted icon (looked up once per id)
+static var _vec := {}  # [id, size, colour] -> Rec: a glyph's draw calls, built once (the HUD draws hundreds a second)
 
 
 ## The painted icon for `id`, or null when only the vector glyph exists. Mipmapped, so it stays smooth
@@ -33,6 +35,19 @@ static func draw(c: CanvasItem, id: String, at: Vector2, s: float, col: Color) -
 		var tint := col if col.v < SILHOUETTE_V else Color(1, 1, 1, col.a)
 		c.draw_texture_rect(tex, Rect2(at - Vector2(s, s), Vector2(s, s) * 2.0), false, tint)
 		return
+	var key := [id, s, col]
+	var rec: Rec = _vec.get(key)
+	if rec == null:
+		if _vec.size() >= VEC_CAP:
+			_vec.clear()
+		rec = Rec.new()
+		_glyph(rec, id, Vector2.ZERO, s, col)
+		_vec[key] = rec
+	rec.play(c, at)
+
+
+## The vector glyph for `id` drawn around `at` into `c`: a CanvasItem, or the Rec that Icons.draw records it in.
+static func _glyph(c, id: String, at: Vector2, s: float, col: Color) -> void:
 	var w := maxf(2.0, s * 0.16)
 	var P := func(x: float, y: float) -> Vector2: return at + Vector2(x, y) * s
 	var L := func(pts: Array, width := -1.0) -> void:
@@ -573,6 +588,43 @@ static func draw(c: CanvasItem, id: String, at: Vector2, s: float, col: Color) -
 				L.call([[dx - 0.2, -0.7], [dx + 0.2, 0.7]])
 		_:
 			O.call(0.0, 0.0, 0.4)
+
+
+## A vector glyph's draw calls, recorded once at the origin and replayed wherever it is drawn (Icons.draw).
+## It takes the CanvasItem calls the glyphs use, with the same arguments.
+class Rec:
+	extends RefCounted
+	var ops: Array = []  # [kind, args...]
+
+	func draw_polyline(pts: PackedVector2Array, col: Color, width := -1.0, aa := false) -> void:
+		ops.append([0, pts, col, width, aa])
+
+	func draw_colored_polygon(pts: PackedVector2Array, col: Color) -> void:
+		ops.append([1, pts, col])
+
+	func draw_arc(at: Vector2, r: float, a0: float, a1: float, n: int, col: Color, width := -1.0, aa := false) -> void:
+		ops.append([2, at, r, a0, a1, n, col, width, aa])
+
+	func draw_circle(at: Vector2, r: float, col: Color) -> void:
+		ops.append([3, at, r, col])
+
+	func draw_line(a: Vector2, b: Vector2, col: Color, width := -1.0, aa := false) -> void:
+		ops.append([4, a, b, col, width, aa])
+
+	func play(c: CanvasItem, at: Vector2) -> void:
+		var xf := Transform2D(0.0, at)
+		for op in ops:
+			match op[0]:
+				0:
+					c.draw_polyline(xf * (op[1] as PackedVector2Array), op[2], op[3], op[4])
+				1:
+					c.draw_colored_polygon(xf * (op[1] as PackedVector2Array), op[2])
+				2:
+					c.draw_arc(at + (op[1] as Vector2), op[2], op[3], op[4], op[5], op[6], op[7], op[8])
+				3:
+					c.draw_circle(at + (op[1] as Vector2), op[2], op[3])
+				4:
+					c.draw_line(at + (op[1] as Vector2), at + (op[2] as Vector2), op[3], op[4], op[5])
 
 
 ## A Control that just shows one icon, for rows of chips and stat tiles.
