@@ -55,7 +55,7 @@ What the in-game kit card (K) says.
 
 - *Tap:* An instant slam just ahead, no hop: a slightly smaller circle, 14 damage; the centre stuns, rocks in the ring fly outward. A foe in the air above it is spiked: +40% and driven to the ground.
 - *Hold:* Hold up to 0.45s (it goes by itself at the end): sink into a crouch for a moment, then lob yourself about 2.5m forward and up, keeping part of your run's speed, steer the landing with the move keys, and slam: the full circle, up to 30, whose centre stuns up to 1.2s. Jump while holding to leap further; punch to lunge.
-- *In the air:* In the air you dive, and slam where you land; pressed while gliding, the glider folds and you plunge. Over the abyss the plunge stops 3m under the edge and you fall on, free to glide. A foe caught in the air is spiked down for +40%, +20 more over the abyss.
+- *In the air:* In the air you hop toward the cursor, up to 3m, and slam where you land (short of walls and ledges too high to clear); pressed while gliding, the glider folds first. With only the abyss under you, you plunge instead, stop 3m under the edge and fall on, free to glide. A foe caught in the air is spiked down for +40%, +20 more over the abyss.
 
 **Stone Row (E, 12.5s cooldown).** A red flash on the ground, then three rocks rise in a slight curve 3.4m ahead, spanning 4.8m (on solid ground only, never into bodies). They stop foes and shots, hold 9s, you can stand on and climb them, and any punch, slam or dash-launch sends them flying.
 

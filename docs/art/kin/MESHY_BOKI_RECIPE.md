@@ -50,6 +50,14 @@ its data. The two game species without a body, `basaltoad` (master `rampartoad`,
 (`bellowary`), have no `model.glb` on disk any more (Meshy's download link expired 11-13): regenerate, then
 `auto_port.py`.
 
+11-18 "more Boki": 89 species. The 39 forms `content/rules/evolve.json` already named as the next stage of a game
+species (evolution waited on them: `Evo.has_art`) got data and a body: `content/kin_v2` + `content/kin` from the Bokidex
+entry on top of the form they grow from (kit = the dex's `like` abilities, carry/throw/AI kept from the line, stats, size,
+colours, personality, quirk from the dex), a voice set (`gen_sfx_boki.py`), a mode one rarity above their parent
+(`mode_boki.json`, `boki_modes.json`), and the dex glb on the borrowed glomwort rig (`boki_scan.AUTO`, `auto_port.py`).
+Rampartoad (`basaltoad`) got its dex body the same way. Not done: Cindowary (Bellowary has no Bokidex entry), Chandelapi
+(its dex 3D was taken down), Chimelop (the dex shows Howlop for it), the third stages and the dex-only lines (no game data).
+
 What one species ends as: a body of 16,000 triangles (the whole model 18-19k with face, tools and grown parts), a
 2048 colour atlas and a 2048 normal atlas baked from the dense model, in `art/kin/<id>/` (about 2-3 MB).
 
