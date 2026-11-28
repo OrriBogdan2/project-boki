@@ -8,13 +8,23 @@ extends "res://tools/new_player_flow_check.gd"
 ## Also the Mask line (lore.json mask_line, DECISIONS 'Identity and Masks'): on screen once, when the first Relic
 ## waits by your face, and on no other screen of the run.
 
-const STEP_LIMIT_S := 40.0  # s of game time one step may take (the flow check's own limit is 45)
+const STEP_LIMIT_S := 40.0  # s of game time a step with no PACE_S target may take (the flow check's own limit is 45)
+## s of game time each step is meant to take (docs/TUTORIAL.md, Vex's driven course rounded up): a step over
+## PACE_K times its target fails for any starter. Pack waits out the summon ring; defend is the capture timer.
+const PACE_S := {
+	"land": 4.0, "shoot": 6.0, "points": 1.0, "pick_sec": 1.0, "sec": 4.0, "pick_dash": 1.0, "dash": 2.0,
+	"exdash": 3.0, "glide": 5.0, "wallkick": 2.0, "crouch": 2.0, "summon": 5.0, "pack": 20.0, "pick_kin": 1.0,
+	"kin": 4.0, "glove": 8.0, "hook": 5.0, "ranks": 1.0, "wayout": 3.0, "uplink": 2.0, "defend": 8.0,
+}
+const PACE_K := 2.0  # a step may take this many times its target
 const BOKI_ACT_S := 2.0  # s of game time from the summon line to the Boki standing out of its wisp
 const TIME_SCALE := 4.0  # prologue, hatch and Relic screens wait out real-time tweens (33 s); game time unchanged
 
+const HintAudit := preload("res://tools/tutorial_hint_audit.gd")
 const STARTERS := {"Lace": "archer", "Kael": "juggernaut", "Vex": "gunslinger"}  # the tutorial's starter pick
 
 var step_id := ""
+var hints := HintAudit.new()  # what each step said to this starter
 var step_s := 0.0
 var rows: Array = []
 var stalled := false
@@ -47,6 +57,8 @@ func run(m: Node) -> void:
 	await _tutorial_match()
 	_end()
 	_took("course", t0)
+	for f: String in hints.audit(starter):
+		ok(false, f)
 	ok(line_seen == 1, "the Mask line shows exactly once, at the first Relic (%d times)" % line_seen)
 	ok(boki_lines.size() == 1, "the Boki key is taught in one line, once: %s" % str(boki_lines.keys()))
 	ok(
@@ -93,9 +105,14 @@ func _course_tick(m: Match) -> void:
 		step_s = 0.0
 	step_s += Match.DT
 	_boki_beat(m, id)
-	if step_s > STEP_LIMIT_S:
+	hints.note(id, m.tut.text, m.tut.detail, m.player.ak)
+	var limit: float = PACE_S[id] * PACE_K if PACE_S.has(id) else STEP_LIMIT_S
+	if step_s > limit:
 		stalled = true
-		ok(false, "step '%s' did not finish in %.0f s (stuck at game time %.0f s)" % [id, STEP_LIMIT_S, m.time])
+		ok(
+			false,
+			"step '%s' over %.0f s (%.0fx its target): stuck at game time %.0f s" % [id, limit, PACE_K, m.time]
+		)
 		_close_step()
 		print("TUTPLAY STEPS: " + ", ".join(rows))
 		print("TUTPLAY DONE, failures: %d" % bad)
