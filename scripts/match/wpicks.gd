@@ -3,7 +3,8 @@ extends RefCounted
 ## Weapon, gear and tuning pickups lying on the ground (Match.wpicks): their spin and bob, and who walks
 ## over one. Only those near the local player are animated: nobody sees the rest turn, and each turn
 ## moves a node tree (a 2x match holds dozens; animating them all cost as much as the hunters' steps).
-const ANIM_M := 70.0        # m (flat) from the local player: past the match camera's view
+const ANIM_M := 70.0  # m (flat) from the local player: past the match camera's view
+
 
 static func update(m: Match, dt: float) -> void:
 	var me: Hunter = m.player
@@ -18,9 +19,9 @@ static func update(m: Match, dt: float) -> void:
 	for h in m.hunters:
 		if h.out or h.downed or h.dropping or h.riding or h.remote:
 			continue
+		var reach: Dictionary = PickupReach.rules()["bot" if h.ctrl == "bot" else "tune"]
 		for wp in m.wpicks:
-			var rule := "bot" if h.ctrl == "bot" else "tune"
-			if wp.has("val") or not PickupReach.near(m, h, wp["pos"], rule):
+			if wp.has("val") or not PickupReach.within(h, wp["pos"], reach) or not PickupReach.clear(m, h, wp["pos"]):
 				continue
 			if wp.has("tune") or (h.ctrl == "bot" and GearDrops.bot_wants(h, String(wp["gear"]), int(wp["rar"]))):
 				m.take_pick(h, wp)
