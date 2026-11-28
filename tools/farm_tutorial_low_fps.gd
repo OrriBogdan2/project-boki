@@ -13,6 +13,8 @@ const IDLE_FRAMES := 45  # frames far away: the meet step must stay put
 
 var frames := 0
 var stall := false
+var guide: FarmGuide = null  # the round's guide (the pace check watches its strip each frame)
+var took := {}  # step id -> s it took, the last round's
 
 
 func run(m: Node, _mode := "") -> void:
@@ -34,12 +36,12 @@ func run(m: Node, _mode := "") -> void:
 func _round(label: String, fps: int, stalled: bool) -> void:
 	var home = await _home(1)
 	var k: Dictionary = home.kins[0]
-	var guide: FarmGuide = home.guide
+	guide = home.guide
 	stall = stalled
 	frames = 0
 	Engine.max_fps = fps
 	var t0 := Time.get_ticks_msec()
-	var took := {}
+	took = {}
 	home.ppos = k["node"].position + Vector3(FAR_M, 0, 0)
 	for i in IDLE_FRAMES:
 		await _frame()
@@ -62,7 +64,7 @@ func _round(label: String, fps: int, stalled: bool) -> void:
 	var ms := float(Time.get_ticks_msec() - t0) / maxi(frames, 1)
 	print("FTUT LOW %s: %d frames, %.1f ms a frame, step times %s" % [label, frames, ms, _secs(took)])
 	if not stalled:
-		ok(ms >= 1000.0 / TC.LOW_CAP_FPS * 0.85, "%s: frames capped at %d fps" % [label, TC.LOW_CAP_FPS])
+		ok(ms >= 1000.0 / fps * 0.85, "%s: frames capped at %d fps" % [label, fps])
 	Engine.max_fps = 0
 	home.queue_free()
 	await main.get_tree().process_frame

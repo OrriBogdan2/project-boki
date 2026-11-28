@@ -14,6 +14,7 @@ const WIDTH_FRAC := 0.42        # of the screen width: the widest it gets (the m
 const PULSE_T := 1.6            # s the glow and the pulse take to calm after the objective changes
 const PULSE_HZ := 2.5           # beats a second while it pulses
 const POP_T := 0.25             # s the strip takes to drop in on a new objective
+const POP_SEEN := 0.25          # of its height: on screen already on the first frame of the drop
 const GLOW_PX := 10.0           # how far the soft glow reaches past the rim at its brightest
 
 const ARROW_W := 0.53           # of the strip's height: the way-to-go arrow and its halo, side by side with the text
@@ -43,11 +44,12 @@ static func chime_db(m: Match) -> float:
 static func glow(age: float) -> float:
 	return 1.0 - clampf(age / PULSE_T, 0.0, 1.0)
 
-## The strip's rect this frame: dropping in from above for POP_T, then still.
+## The strip's rect this frame: dropping in from above for POP_T, then still. It never starts fully off the top:
+## the objective is on screen on every frame its step is open (--tutorial-fps-pace-check).
 static func shown(sz: Vector2, age: float, below := 0.0) -> Rect2:
 	var r := rect(sz, below)
 	var k := clampf(age / POP_T, 0.0, 1.0)
-	r.position.y -= pow(1.0 - k, 3.0) * (r.end.y + 4.0)
+	r.position.y -= pow(1.0 - k, 3.0) * (r.end.y - r.size.y * POP_SEEN)
 	return r
 
 ## Draws the strip on any CanvasItem. `line` has: text, key_cap, count ("1/3" or ""), dist ("12m" or "") and

@@ -322,4 +322,4 @@ Every step runs on the match's fixed 60 Hz step (`Match.step`) and the garden on
 a step. `--tutorial-check[=<arch>] --tutorial-low-fps` plays the course again on the Low preset in the game's own frame
 loop, at a 30 fps cap and at 60 fps with a 100 ms stall every 5th frame: same steps in order, none past 2x the
 fixed-step time + 5 s. `--farm-tutorial-check --tutorial-low-fps` does the same for the garden's five steps (meet, patch,
-eat, toy, out). Key taps surviving the same rates are `--low-fps-input-check`.
+eat, toy, out). Key taps surviving the same rates are `--low-fps-input-check`. `--tutorial-fps-pace-check` plays the whole course and the garden at a fixed 30 fps and at 60, per step: time against its budget, no span over 8 s without a prompt, the objective banner on screen on every frame (table: `docs/TUTORIAL_PACE.md` section 6).
