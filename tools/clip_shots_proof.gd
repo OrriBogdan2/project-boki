@@ -6,6 +6,7 @@ extends RefCounted
 ## Needs a renderer (a headless run draws nothing).
 
 const FILL := 0.6  # share of the panel's height the figure fills (hunter-proof refuses under 0.4)
+const FILL_MATCH := 0.8  # the match camera looks down: the figure's pixels are fewer than its metres say (35% at 0.6)
 const EYE_DIST := 5.6  # m from the figure to the eye and knee cameras
 const GAME_CAM := Vector3(0.0, 21.0, 9.4)  # the match camera (clip_shots STATE_VIEWS)
 const FOOT := 0.9  # m of depth the match camera sees on top of the height (arms, weapon)
@@ -31,7 +32,7 @@ static func arg_float(prefix: String, fallback: float) -> float:
 static func view(v: String, h: float) -> Array:
 	if v == "match":
 		var pitch := atan(GAME_CAM.y / GAME_CAM.z)
-		var vis := (h * cos(pitch) + FOOT * sin(pitch)) / FILL
+		var vis := (h * cos(pitch) + FOOT * sin(pitch)) / FILL_MATCH
 		return [rad_to_deg(2.0 * atan(vis * 0.5 / GAME_CAM.length())), GAME_CAM, Vector3(0.0, h * 0.5, 0.0)]
 	var y := 1.6 if v == "eye" else 0.45
 	return [rad_to_deg(2.0 * atan(h / FILL * 0.5 / EYE_DIST)), Vector3(0.0, y, EYE_DIST), Vector3(0.0, h * 0.5, 0.0)]
