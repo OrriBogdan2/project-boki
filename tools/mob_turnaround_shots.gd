@@ -8,6 +8,7 @@ extends "res://tools/mob_pose_shots.gd"
 
 const COMMON := ["skitter", "spitter", "bomber", "glimmer", "brute", "warden", "sentinel", "bl_skitter", "bl_warden"]
 const BOSSES := ["colossus", "serpent", "brood"]
+const BLIGHT_PITCH := 0.75  # rad (about 43 degrees)
 const VIEW_PX := 512  # px, each free-camera view (square)
 const MATCH_PX := 420  # px, the match camera crop
 ## yaw from the monster's front (-z in model space): front, 3/4 (its right side), side (facing left), back
@@ -18,6 +19,7 @@ var sun: DirectionalLight3D
 var backdrop: MeshInstance3D
 var studio := true  # false for the Blight: its bodies only draw on the live island
 var rows: Array = []
+var pitch := 0.0  # rad, the free camera's rise: the Blight has no studio, so it looks down at the island
 var hidden_vis: Array = []  # the meshes and lights the free views switched off
 var hidden_ui: Array = []  # the CanvasLayers the free views switched off
 
@@ -57,10 +59,13 @@ func _kind(kind: String) -> void:
 	await _frames(40)
 	var at := _open_ground(p.pos)
 	studio = not kind.begins_with("bl_")
+	pitch = 0.0 if studio else BLIGHT_PITCH
 	var mb: Mob = _spawn(kind, at)
 	if mb == null:
 		print("MOBTURNAROUND skip %s: no spawn" % kind)
 		return
+	if mb is Boss:  # a lair boss stands at its lair, wherever the free spot was
+		at = mb.pos
 	p.teleport(at + Vector3(60, 0, 0))  # far: it stays calm
 	for i in 50:
 		_hold(mb)
@@ -79,7 +84,7 @@ func _kind(kind: String) -> void:
 		(lb as Node3D).visible = false
 	cam.make_current()
 	for v in VIEWS:
-		await _view(mb, ctr, dist, float(VIEWS[v]), 0.0)
+		await _view(mb, ctr, dist, float(VIEWS[v]), pitch)
 		(await _shot()).save_png(dir.path_join(v + ".png"))
 	# the match camera, a Hunter one body-width beside the monster
 	p.teleport(at + Vector3(box.size.x * 0.5 + 1.2, 0, 0.3))
@@ -106,7 +111,7 @@ func _kind(kind: String) -> void:
 		var last: Image = null
 		var seen := false
 		for i in 240:
-			await _view(mb, ctr, dist, 0.785, 0.0)
+			await _view(mb, ctr, dist, 0.785, pitch)
 			if mb.st == "windup":
 				seen = true
 				if MobAnim.windup_k(mb.st_t, float(mb.md["windup"])) > 0.3:
@@ -123,16 +128,16 @@ func _kind(kind: String) -> void:
 	backdrop.visible = studio
 	_world_on(false, mb)
 	cam.make_current()
-	# the death move held at 0.4 of DEATH_S, the dissolve parked (a slow frame would otherwise eat the body)
+	# the death move held at 0.8 of DEATH_S, the dissolve parked (a slow frame would otherwise eat the body)
 	p.teleport(at + Vector3(60, 0, 0))
 	mb.hurt(mb.hp + mb.max_hp, p, {"src": "shot"})
 	var move_s: float = BossAnim.DEATH_S if mb is Boss else MobAnim.DEATH_S
 	for i in 6:
 		mb.set_meta("dis_lag", 5.0)
-		mb.death_t = move_s * 0.4
+		mb.death_t = move_s * 0.8
 		mb.flash_t = 0.0  # (the kill's white flash would hide the body)
 		_world_on(false, mb)  # (the kill's drops and reward cards are new nodes)
-		await _view(mb, ctr, dist, 0.785, 0.0)
+		await _view(mb, ctr, dist, 0.785, pitch)
 	(await _shot()).save_png(dir.path_join("death.png"))
 	print("MOBTURNAROUND %s h=%.2f hunter=%.2f" % [kind, box.size.y, hunter_h])
 	if is_instance_valid(mb):
@@ -157,7 +162,7 @@ func _boss_windup(b: Boss, kind: String, at: Vector3, ctr: Vector3, dist: float,
 		_:
 			b._atk_storm()
 	for i in 240:
-		await _view(b, ctr, dist, 0.785, 0.0)
+		await _view(b, ctr, dist, 0.785, pitch)
 		if b.atk_t >= b.atk_hit * 0.85 or b.atk == "":
 			break
 	(await _shot()).save_png(path)
@@ -182,12 +187,12 @@ func _hold(mb: Mob) -> void:
 		mb.root_t = 0.1
 
 
-## Aims the free camera at `ctr`, `yaw` round from the monster's front.
-func _view(mb: Mob, ctr: Vector3, dist: float, yaw: float, pitch: float) -> void:
+## Aims the free camera at `ctr`, `yaw` round from the monster's front and `rise` rad above it.
+func _view(mb: Mob, ctr: Vector3, dist: float, yaw: float, rise: float) -> void:
 	var a: float = mb.model.global_rotation.y + PI + yaw  # the model's front is -z: its camera sits that way
 	var c := mb.global_position + ctr
 	backdrop.position = mb.global_position
-	cam.global_position = c + Vector3(sin(a) * cos(pitch), sin(pitch), cos(a) * cos(pitch)) * dist
+	cam.global_position = c + Vector3(sin(a) * cos(rise), sin(rise), cos(a) * cos(rise)) * dist
 	cam.look_at(c)
 	await main.get_tree().process_frame
 
