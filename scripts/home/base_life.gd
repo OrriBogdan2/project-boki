@@ -266,7 +266,7 @@ func choose(k: Dictionary) -> void:
 		return
 	if BaseShy.keep_to_edge(h, k):
 		return
-	if GardenZones.is_partner(rec) and randf() < float(r_v["chore_chance"]) and _chore(k):
+	if GardenZones.is_partner(rec) and BaseChore.pick(self, k) != "" and randf() < float(r_v["chore_chance"]) and _chore(k):
 		return  # your partner breaks off the trail for its chore (it minds the egg in the hub's Nook), same odds
 	if BaseGreet.trail(self, k):
 		return
