@@ -6,7 +6,7 @@ Changed rows are retagged [game data]; `--move-feel-check` 0 failures, `--move-r
 | Param | Reference (m) | Ours before | Tag | Verdict |
 |---|---|---|---|---|
 | MoveSpeed 430-490 | 4.30-4.90 (455/465 most) | 4.45-4.85 per kit | [game data] | same |
-| MaxMoveSpeed | 7.0 | speed_cap 7.0 | [game data] | same |
+| MaxMoveSpeed | 7.0 | speed_cap 8.12 (7.0 x body_scale 1.16) | [game data] | scaled with the run speeds |
 | MaxAcceleration 4700-5400 | 47-54 | 47-54 per kit | [game data] | same |
 | Braking walking / ground friction | 22.2 / 1 | 22.2 / 1 | [game data] | same |
 | Backpedal coefficient 1.0 | no slow | no slow | [game data] | same |

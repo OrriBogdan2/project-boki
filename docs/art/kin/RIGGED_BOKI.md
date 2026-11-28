@@ -111,6 +111,14 @@ than what shows: the head covers its rim. Past that the high cameras and `CamRig
 Palettes live at the top of each species' coat section (`PLUM`, `SHELL`...); tools held in the tail are Vespyx's `chop`
 and `mine` clips, and `boki_clips.chop_mouth` / `mine_mouth` are the mouth versions the others use.
 
+11-20: Frigatee (`floenatee`), Gongibbon (`gibbelle`) and Prowyak (`glaciyak`) have their own clips (`floenatee_anim.py`,
+`gibbelle_anim.py`, `glaciyak_anim.py`) on the borrowed Glomwort skeleton: a seal's hump-and-haul and belly-flop, a gibbon's
+pendulum roll and bell clang, a yak's lumber, gore and ground slam. Their glbs were re-keyed with `tools/boki/reclip.py`
+(`blender -b --factory-startup --python tools/boki/reclip.py -- --species=<id>`): it reads the built .glb back, swaps
+the actions for the module's `CLIPS` and exports again, body, face, skin and atlases untouched (the unchanged clips came
+back identical), for a species whose raw Meshy model is not at hand. A full `build_boki.py` run gives the same clips.
+11-22: Prowyak has `auto_legs.py` legs (below), so reclip keeps its leg bones and planted-paw walk and run and re-keys
+only the other 11 clips, legs at rest (the module's lumbering walk/run would glide the paws and is not used).
 11-20: Buckleron (`limpetor`) and Lanterloris (`moonloris`) have their own clips (`limpetor_anim.py`, `moonloris_anim.py`)
 on the borrowed Glomwort skeleton: a limpet that creeps under a rocking shield, bashes it down and clamps to brace, and
 a slow loris that climbs hand over hand, freezes and snaps, and floats up with its lantern belly. Their glbs were
@@ -379,3 +387,18 @@ action, sleep, hop, ability or attack takes over at once and restarts the count.
 Boki is: its Bokidex quirk (`content/rules/boki_quirks.json` on ext/boki-quirks; the runtime does not read it) else
 body plan and type; the `note` of each row says which. Review: `--boki-idle-shots` (a row per species: 4 breath
 frames, 4 fidget frames); axis signs: x pitches the nose up, y turns left, z rolls; right-side bones mirror y and z.
+
+### Own clips for a long body, a flyer and a lizard (squalltross, threadwyrm, tuatrune, velvorm)
+
+These four are Meshy scans on Glomwort's 5-bone rig (root, hips, spine, neck, head), so a body shape has only those
+bones to move. `tools/boki/<id>_anim.py` keys idle, walk, run, hop, carry, attack, ability and sleep for each:
+threadwyrm a travelling S-wave (yaw on head, neck, spine, hips, each `LAG` later, the root countering), velvorm a
+caterpillar's arch running tail to head with the root stretching and bunching, squalltross a wing beat as the spine's
+lateral scale (`SCALED`: the neck takes the inverse so the head keeps its shape; the body rises as the wings open),
+tuatrune a lizard's spine bend against its steps. Squalltross and tuatrune have `auto_legs.py` legs: `KEEP_LEGS`
+(walk, run) tells `tools/boki/reclip_own.py` to keep the file's leg curves and root height and lay the module's body
+turns over them, so the paws still plant (slide 35% -> 11% on tuatrune's walk: the old shared body drove the feet).
+Rebuild without the raw model: `blender -b --factory-startup --python tools/boki/reclip_own.py -- --species=<id>`, then
+`godot --headless --import`. Contact sheet: `--boki-anim-shots --clips --boki=<id> --tag=after --shots-dir=<dir>` (a row
+a clip, eight poses across its loop, front quarter). Walk loop seams: `SEAM_OVER` squalltross 1.50, tuatrune 1.57 (the
+planted-paw wrap, 1.45 before, a little rougher under a calmer body).
