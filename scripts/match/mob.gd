@@ -669,7 +669,7 @@ func render(delta: float, alpha: float) -> void:
 	var spd := Vector2(vel.x, vel.z).length()
 	var moving := spd > 0.3
 	if moving:
-		anim += spd * delta * TAU / float(MobAnim.STRIDE_M.get(MobAnim.base_kind(mkind), 2.0))
+		anim += MobAnim.gait_step(self, spd, delta)
 	var body: Node3D = model.get_node("Body")
 	var wind := MobAnim.windup_k(st_t, float(md["windup"])) if st == "windup" else 0.0
 	# shared body language: lean back and gather while winding up, shiver as it is about to go,
@@ -736,7 +736,7 @@ func _pack_anim(delta: float, moving: bool, spd: float, wind: float) -> void:
 		rate = 0.35
 	elif moving:
 		want = String(C["run"]) if spd > 3.6 else String(C["walk"])
-		rate = clampf(spd / (4.5 if spd > 3.6 else 2.2), 0.6, 1.7)
+		rate = clampf(spd / (4.5 if spd > 3.6 else 2.2), MobAnim.RATE_MIN, MobAnim.RATE_MAX)
 	if ap.current_animation != want:
 		ap.play(want, 0.2)
 	ap.speed_scale = rate

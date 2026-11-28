@@ -16,7 +16,7 @@ Main 0b0b680df2 plus this branch's one fix, at 60 Hz. Per-Hunter rows come from 
 | Run speed | data row 4.45–4.85 m/s x body_scale 1.16 (decision 0061) | 5.162–5.626 m/s, 13/13 on their row (±0.01) | match (the §1 "Ours" column predates 0061) |
 | Acceleration | data row 47–54 m/s² x 1.16 | 95% of run in 0.083–0.100 s, 13/13 | match |
 | Brake, keys let go | 22.2 m/s², friction 1 x 2, sub-steps ≤ 1/33 s, stop under 0.1 m/s | the same rows; `brake_vs_ue_err` 0.000 m/s | match |
-| Let-go slide and stop | 0.28–0.39 m in ~0.17 s at the data's run speeds (b5e1af358e) | 0.412–0.481 m in 0.200 s, 13/13 inside the source's band for our faster run; `ground_stop_dist` 0.429 (target ≤ 0.40) and the 5 farm-stop rows of `--move-rate-check` red | changed (0061 scaled the run, not the brake): owner call |
+| Let-go slide and stop | 0.28–0.39 m in ~0.17 s at the data's run speeds (b5e1af358e) | 0.412–0.481 m in 0.200 s, 13/13 inside the source's band for our faster run; `ground_stop_dist` 0.429 inside its 0.31–0.47 band since 6648c91b8f3 (11-23, body_scale); the 5 farm-stop rows of `--move-rate-check` red | changed (0061 scaled the run, not the brake): owner call |
 | Facing turn | 1280°/s | 180° in 0.150 s; run flip within 1 step of the source's rule, 0.217 s | match |
 | 90° turn of the velocity | none | 0.117 s | unknown |
 | Sneak | 0.5 | 0.5 | match |

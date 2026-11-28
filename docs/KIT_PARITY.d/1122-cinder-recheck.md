@@ -30,7 +30,7 @@ Two text values had drifted from the data and are fixed here; the hero doc and t
 | R carpet | 239.2/s = 28.7/s | 4.5/s | db19aeb64e | **owner** (burst cap) |
 | R flight | forward, steers, recast ends, ~7 bh/s for 1.3-1.4 s | 12.6 m/s x 1.8 s = 22.7 m, steers 90 deg/s, hang 0.15 s | 2b4ea5c2f2 (11-12) | **owner** (item 20: longer) |
 | R cooldown | 45 s | 36 s (0.8x) | f2478ab453 | match; scale **owner** |
-| R ranks | -15 s, +25% dmg | none built (ADR 0022 is a spec, no code) | none | **open** (queue item 4 of 0022) |
+| R ranks | -15 s, +25% dmg | **superseded, see `1128-ult-rank-rows-reconcile.md`**: ~~none built (ADR 0022 is a spec, no code)~~; built: Flue Flight cd 36 -> 24 -> 24 s, trail 4.5 -> 4.5 -> 5.625/s (`555debe7d2`, 11-19) | `555debe7d2` | **done** (read on a tree without it) |
 | CC | Slow, Anti-Heal, pull (no numbers) | bolt slow 30% 1.5 s; carpet slow 30% 0.5 s refreshed; Anti-Heal 3 s; pull 14 m/s to 1.3 m | none | `[?]` numbers ours |
 | Dash flow | footage silent on presses inside a bash | 5 ground, 5 air, 5 into-dash rows, `hold.rmb` x3 and `dash.ground.lmb` unsourced | none since 11-12 | `[?]` **owner** (rows unchanged) |
 | Cancels | none shown; DECISIONS 11-07 chainable | 15 rows, 30 `ult 66` asserts | 3053ddcef9 (11-17) only removed merge locks | match |
@@ -53,7 +53,7 @@ buffered. Steering and a jump stay (movement); R again lands. This holds on toda
 ### Not changed (owner or no reason to move)
 
 LMB reach 6.1 (owner 11-10), air poof 3.4 m (owner 11-17), Furnace Cloak instant (item 11), flight length and carpet cap (item 20, burst
-cap), RMB range 14 (item 19), cooldown scale 0.8x (owner question), unsourced dash-flow rows, R ranks (ADR 0022, no code).
+cap), RMB range 14 (item 19), cooldown scale 0.8x (owner question), unsourced dash-flow rows, R ranks (built; this line was stale, see `1128-ult-rank-rows-reconcile.md`).
 
 Checks on this tree: `--ashwick-combo-check` 157 checks, 0 failures (125 on 11-12); `--card-numbers-check` 343 numbers, 0 failures;
 `--kit-parity-check` 0 failures; `--ttk-check` Cinder LMB 0.92 / 0.91, combo 0.91 / 0.88 (docs/TTK.md: the same).

@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cey616b5vf6iq"
-path="res://.godot/imported/nimbostrich_nimbostrich_face.webp-d2370c99ae62a7dc162e159da08bfe6e.ctex"
+path.s3tc="res://.godot/imported/nimbostrich_nimbostrich_face.webp-d2370c99ae62a7dc162e159da08bfe6e.s3tc.ctex"
+path.etc2="res://.godot/imported/nimbostrich_nimbostrich_face.webp-d2370c99ae62a7dc162e159da08bfe6e.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "958f38a332fc7e1195d207a9d23a0512"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/nimbostrich/nimbostrich_nimbostrich_face.webp"
-dest_files=["res://.godot/imported/nimbostrich_nimbostrich_face.webp-d2370c99ae62a7dc162e159da08bfe6e.ctex"]
+dest_files=["res://.godot/imported/nimbostrich_nimbostrich_face.webp-d2370c99ae62a7dc162e159da08bfe6e.s3tc.ctex", "res://.godot/imported/nimbostrich_nimbostrich_face.webp-d2370c99ae62a7dc162e159da08bfe6e.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
