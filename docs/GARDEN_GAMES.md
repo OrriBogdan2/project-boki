@@ -52,3 +52,24 @@ The Games board (an existing panel, no new HUD) now lists every game of every op
 post). From the title, "Play with Your Boki" was already 2 presses and no walking. The board stands 7.5 m
 from the landing against 2.6 m for the Waystone, so the seconds are level; the gain is one press less and
 Fetch Cup (and Seek) now showing in the hub. `--minigame-hub-check` (step 7) proves it.
+
+## Grand Dash (PROTOTYPE, 2026-11-28, `scripts/home/base_race_cup.gd`, rules `base_race.json` "cup")
+
+The Dash (`base_race.gd`) with three laps and bots. Not polished: bots are coloured balls, no weekly twist or
+showcase pin, no own card art.
+
+**Entry.** Interact at the race post with exactly one rested Boki out (the case that used to refuse with "needs
+two"). With two to four rested Boki the one-lap Dash runs as before.
+
+**Round.** Your Boki and three bots (copies of it with stats x0.8, x1.0, x1.2) run the zone's own loop three
+times, about 60 s (the loop's checkpoints are its stretch ends; pace is the Dash's: Speed, joy, knacks, wobble).
+
+**Cheer button.** Interact boosts your Boki x1.12 for 1.5 s, then waits 4 s. The three timing-bar marks are the
+one-lap Dash's only.
+
+**Reward.** Gems by place 18 / 8 / 4 / 2, energy cost as the Dash, joy up for a win and down for last. The
+Dash prize table, first-win item and weekly cup run through `GardenPrizes.settle("dash")`, the strongest bot being
+the cup's rival. No bonds and no memories except a win.
+
+**Checks.** `--race-cup-check` (bots fill four lanes, 45 to 100 s, boost and cooldown, boost helps, payout by place,
+on the base it starts, finishes, pays and clears the lanes), `--garden-prizes-check`, `--garden-games-vfx-check`, `--race-check`.

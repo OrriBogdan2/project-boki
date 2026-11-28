@@ -100,5 +100,14 @@
 		"celebrate": {"timid": ["hop"], "else": ["hop", "spin"]}, "sulk_face": {"grumpy": "angry", "else": "sad"}},
 	"beats_doc": "The runners' body beats (scripts/home/race_beats.gd), clips only: the race is held through the countdown, so they never change a time. A crouch on the line until 'go', a burst clip (a stretched run) for burst_s, then at the line the first `top` home celebrate (each clip in turn: hop for hop_s, spin for Echo Steps' spin) and the rest sulk for sulk_s; the last one home always sulks. Picked by temper (HomeCarry.temper_of: grumpy, brave, timid, calm; 'else' for the rest): a timid winner only hops, a grumpy loser huffs (its face).",
 	"card_s": 6.0,
-	"card_s_doc": "s the result card stays up."
+	"card_s_doc": "s the result card stays up.",
+	"cup": {
+		"laps": 3,
+		"boost": 1.12,
+		"boost_s": 1.5,
+		"cooldown_s": 4.0,
+		"bot_ratios": [0.8, 1.0, 1.2],
+		"gems": [18, 8, 4, 2]
+	},
+	"cup_doc": "The Grand Dash (PROTOTYPE, scripts/home/base_race_cup.gd): your one rested Boki runs `laps` laps of the loop (about 60 to 90 s) against bots in the other lanes (copies of it with stats times each of bot_ratios; the strongest one counts as the cup's rival). The cheer button gives your Boki `boost` times its pace for boost_s, then waits cooldown_s. gems: to you by place 1 to 4."
 }
