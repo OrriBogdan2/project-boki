@@ -11600,3 +11600,4 @@ READY ext/anim-boki-stomp-cell 7f6d3e2a68 (Boki stomp cell n/a in anim coverage 
 READY ext/combo-mark-icons 48790b514eeed401b43fb32f7056df985bdfa961 (foe-state audit: Shred+Blight plate icons, every payoff_fx flashes+chimes its victim, --combo-payoff-check lists icon/flash per state)
 READY ext/sfx-ui-sweep 0e2af651abc2461436a4d1f2324771d162a3d0b4 (--ui-silent-check walks 41 menus/panels, presses every button; silent 67 -> 0 via UI.button always sounding)
 READY ext/sfx-ability-sweep 119a786e5c (own recast open/tick/expire cues for 10 Hunters + Albert shield-down, ability cue table, 96 wavs)
+READY ext/no-world-key-letters 1077265346a7c454e1327449c202d601f58bf408 (no key letters on world objects)
