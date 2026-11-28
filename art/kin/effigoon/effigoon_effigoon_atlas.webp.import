@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://do1nwokev4ufi"
-path="res://.godot/imported/effigoon_effigoon_atlas.webp-bacc77702eb64047d873d11c653a93f5.ctex"
+path.s3tc="res://.godot/imported/effigoon_effigoon_atlas.webp-bacc77702eb64047d873d11c653a93f5.s3tc.ctex"
+path.etc2="res://.godot/imported/effigoon_effigoon_atlas.webp-bacc77702eb64047d873d11c653a93f5.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "16bec4942a927743f306087aa77d78a6"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/effigoon/effigoon_effigoon_atlas.webp"
-dest_files=["res://.godot/imported/effigoon_effigoon_atlas.webp-bacc77702eb64047d873d11c653a93f5.ctex"]
+dest_files=["res://.godot/imported/effigoon_effigoon_atlas.webp-bacc77702eb64047d873d11c653a93f5.s3tc.ctex", "res://.godot/imported/effigoon_effigoon_atlas.webp-bacc77702eb64047d873d11c653a93f5.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

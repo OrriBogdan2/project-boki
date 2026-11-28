@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://o7sr4yypke0r"
-path="res://.godot/imported/murmurling_murmurling_face.webp-07cbc5928f8cc210ffbe8848a790f598.ctex"
+path.s3tc="res://.godot/imported/murmurling_murmurling_face.webp-07cbc5928f8cc210ffbe8848a790f598.s3tc.ctex"
+path.etc2="res://.godot/imported/murmurling_murmurling_face.webp-07cbc5928f8cc210ffbe8848a790f598.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "8edaddb639a02c12c388834135be86a1"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/murmurling/murmurling_murmurling_face.webp"
-dest_files=["res://.godot/imported/murmurling_murmurling_face.webp-07cbc5928f8cc210ffbe8848a790f598.ctex"]
+dest_files=["res://.godot/imported/murmurling_murmurling_face.webp-07cbc5928f8cc210ffbe8848a790f598.s3tc.ctex", "res://.godot/imported/murmurling_murmurling_face.webp-07cbc5928f8cc210ffbe8848a790f598.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
