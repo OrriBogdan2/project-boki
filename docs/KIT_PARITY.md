@@ -9,9 +9,9 @@ PARITY FIRST audit (briefs/DECISIONS.md 2026-11-07, briefs/PRIORITIES.md step 2)
 Everything else in the tables below that says open, pending or branch ready was closed on main or is an owner call; closed rows now carry their commit.
 - **Cooldowns below source** (gap 10, 0.48x to 0.85x): owner call; ext/parity-cooldowns, ext/cooldown-parity-verify and ext/grimble-parity-verify are not merged.
 - **Air control** (gap 3): owner kept real-match air control over the source 0.015.
-- **Kael RMB into Shift turn limit** (patch 05.02.25): `ext/kael-rmb-dash-turn` is not merged (and no longer on origin); the turn lock is not built.
 - **Time to knock, Vex and Kael** (`--ttk-check`, 11-23): Vex LMB 5.47 s against 2.48 (2.20x), combo 2.72 against 1.92 (1.41x) and 2.38 against 1.76 (1.35x); Kael LMB 8.47 s against 12.95 (0.65x), combo 4.78 against 7.70 (0.62x) and 3.18 against 7.00 (0.45x). Not changed here (no number changes); the share cut written for Kael in `4df7d9a186` never reached the JSON. Detail: docs/KIT_PARITY.d/1123-vex-kael-recheck.md.
 - **Unsourced `[?]` rows** (dash-flow rows, several RMB/R ranges, Kael tether 24 m, Warchain leash 24 m, Sable pair stun, Tenzo rock slows, Sparkle E slide): not determinable from the footage or data; ours stands.
+- Closed on 2026-11-28: Kael RMB into Shift turn limit (patch 05.02.25; `5f99dce0f5`, ext/kael-rmb-dash-turn): out of a Smash and 0.8 s after it the dash turns at most 35 degrees (`dash.lock_t`/`lock_deg`), asserted in `--juggernaut-combo-check` (`tools/kael_turn_check.gd`).
 - Closed on 2026-11-20: Lace Spirit Walk ledges (`40f7865d8`, on main), Albert guard meter / Shield Slam (`b2e942eb4`, on main), Kael lunge length 4.5 to 5.4 m (`4ea2625c13`, ext/kael-lunge-length-rebased-rebased, `e738af1ca7`), Sable Cartwheel curve.
 
 ## Charges vs the source (charges-sv-1116, 2026-11-16)
