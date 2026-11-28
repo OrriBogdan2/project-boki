@@ -7,7 +7,7 @@ Upper clips key only the torso, head and arms (the game lays them over the legs'
 Run: python3 -I tools/meshy/native_retarget.py <art> [--moves] <clip>[:full][:stride=K] ... [--shot] [--out=FILE]
   stride=K: a full clip's feet travel K times as far fore and aft (a crouch walk too slow for the ground speed).
   --moves: also every kit move of content/rules/warden_anim/<art>.json (prints the data's kmoves rows); --upper: all of
-  them as upper clips (a contract rig with no legs)
+  them as upper clips (a contract rig with no legs); --mirror: the Meshy body is the contract's mirror image
   e.g. native_retarget.py ryzz lmb_l lmb_r crouch_f:full ult:full      (--shot prints each clip's worst wrist miss)"""
 
 import json
@@ -25,6 +25,9 @@ import glb_add_clips as G  # noqa: E402
 
 FPS = C.FPS
 FLIP = np.diag([-1.0, 1.0, -1.0])  # the contract faces -Z, Meshy +Z: the same body turned half a way about Y
+MIRROR = np.diag(
+    [1.0, 1.0, -1.0]
+)  # a Hunter whose Meshy body is the contract's mirror image (Grimble): her right is Meshy's left
 SIDE = {s: ("upper_arm." + s, "forearm." + s, "hand." + s, "thigh." + s, "foot." + s) for s in "RL"}
 TORSO_W = {"Spine02": 0.3, "Spine01": 0.3, "Spine": 0.4}  # the share of the torso's lean each spine bone takes
 HIPS_W = 0.35  # a full clip: the share of that lean the Hips bone takes (the legs are re-solved from the ankles)
@@ -134,8 +137,9 @@ def pose_of(cf, ct, mr, full, ref):
     """The pose dict (C.solve's) of contract globals `cf` on Meshy's rig `mr`. `ref`: lengths and rests of both rigs."""
     p = C.rest_pose()
     hips_c = ct.get(cf, "hips")[0]
-    lean = FLIP @ hips_c @ FLIP  # the torso's turn from rest (the contract's rest is upright and square)
-    head_d = FLIP @ ct.get(cf, "head")[0] @ FLIP @ lean.T  # the head over the torso, in world axes
+    F = ref["F"]
+    lean = F @ hips_c @ F  # the torso's turn from rest (the contract's rest is upright and square)
+    head_d = F @ ct.get(cf, "head")[0] @ F @ lean.T  # the head over the torso, in world axes
     spine_w = 1.0 - (HIPS_W if full else 0.0)
     for b, w in TORSO_W.items():
         p["e_" + b] = frac(lean, w * spine_w)
@@ -144,30 +148,35 @@ def pose_of(cf, ct, mr, full, ref):
     if full:
         p["hips_rot"] = frac(lean, HIPS_W)
         hp = ct.get(cf, "hips")[1]
-        p["hips"] = (hp[0] * ref["kl"], (hp[1] - ref["hips_y"]) * ref["kl"], -hp[2] * ref["kl"])
+        p["hips"] = (
+            hp[0] * ref["kl"] * (-1 if ref["mirror"] else 1),
+            (hp[1] - ref["hips_y"]) * ref["kl"],
+            -hp[2] * ref["kl"],
+        )
     over = {b: ("delta", C.rot_euler(p["e_" + b])) for b in C.SPINE}
     if full:
         over["Hips"] = ("delta", C.rot_euler(p["hips_rot"]))
         over[("off", "Hips")] = np.array([-p["hips"][0], p["hips"][1], p["hips"][2]])
     g = mr.fk(over)
     for s in "RL":
-        ua, fa, ha, th, ft = SIDE[s]
+        c = ("L" if s == "R" else "R") if ref["mirror"] else s  # the contract side that moves this Meshy side
+        ua, fa, ha, th, ft = SIDE[c]
         S_c, E_c, W_c = (ct.get(cf, n)[1] for n in (ua, fa, ha))
         sh = mr.pos(g, C.ARM[s][1])  # Meshy's shoulder after the lean, as (outward, up, forward)
         sh_char = np.array([-sh[0] if s == "R" else sh[0], sh[1], sh[2]])
-        p["w" + s] = tuple(sh_char + np.array(char(W_c - S_c, s)) * ref["ka"])
-        pole = np.array(char(E_c - (S_c + W_c) / 2, s)) + POLE_BIAS * 0.03
+        p["w" + s] = tuple(sh_char + np.array(char(W_c - S_c, c)) * ref["ka"])
+        pole = np.array(char(E_c - (S_c + W_c) / 2, c)) + POLE_BIAS * 0.03
         p["pole" + s] = tuple(pole)
         hand_c = ct.get(cf, ha)[0]
-        d_m = FLIP @ (hand_c @ ct.get(ct.rest, ha)[0].T) @ FLIP  # the hand's world turn from rest, in Meshy's axes
+        d_m = F @ (hand_c @ ct.get(ct.rest, ha)[0].T) @ F  # the hand's world turn from rest, in Meshy's axes
         want = d_m @ ref["hand_rest"][s]
-        tip = (FLIP @ hand_c)[:, 1]
+        tip = (F @ hand_c)[:, 1]
         p["rot" + s] = C.arc(want[:, 1], tip) @ want
         if full:
             A_c = ct.get(cf, ft)[1] - ct.get(ct.rest, ft)[1]
             a0 = ref["ankle_rest"][s]
             p["a" + s] = (
-                a0[0] + char(A_c, s)[0] * ref["kl"],
+                a0[0] + char(A_c, c)[0] * ref["kl"],
                 a0[1] + A_c[1] * ref["kl"],
                 a0[2] - A_c[2] * ref["kl"] * ref.get("stride", 1.0),
             )
@@ -196,12 +205,12 @@ def refs(ct, mr):
     }
 
 
-def retarget(art, specs, out_path, shot=False):
+def retarget(art, specs, out_path, shot=False, mirror=False):
     C.RIG = "art/wardens/%s/%s_meshy.glb" % (art, art)
     C.RIGS = None
     mr = C.rig()
     ct = Contract("art/wardens/%s/%s.glb" % (art, art))
-    ref = refs(ct, mr)
+    ref = dict(refs(ct, mr), mirror=mirror, F=MIRROR if mirror else FLIP)
     print("arm x%.2f leg x%.2f" % (ref["ka"], ref["kl"]))
     defs = {}
     for spec in specs:
@@ -252,6 +261,6 @@ if __name__ == "__main__":
         more, rows = move_specs(art, "--upper" in sys.argv)
         specs = more + specs
     out = next((a[6:] for a in sys.argv[1:] if a.startswith("--out=")), "art/wardens/%s/%s_clips.glb" % (art, art))
-    retarget(art, specs, out, "--shot" in sys.argv)
+    retarget(art, specs, out, "--shot" in sys.argv, "--mirror" in sys.argv)
     if rows:
         print('"kmoves": ' + json.dumps(rows))
