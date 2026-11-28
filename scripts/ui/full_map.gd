@@ -57,7 +57,6 @@ func open(by_plan := false) -> void:
 		cover.cover(m)
 
 
-
 func close() -> void:
 	if is_open:
 		Sfx.play("ui_close", null, -8.0)
