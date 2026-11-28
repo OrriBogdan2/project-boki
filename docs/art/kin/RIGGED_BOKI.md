@@ -129,6 +129,13 @@ on the legless glb from before the legs (`git show 836178d90b:art/kin/<id>/<id>.
 skeleton), then `auto_legs.py` with those args. The trot touches down at the wrap, so heatherhorn's walk and run seams
 sit in SEAM_OVER (2.09, 1.62).
 
+11-28: Anchorbill (`casquebill`), Vatmander (`cisternmander`), Citadoad (`citadoad`) and Crofthollow (`crofthollow`) have
+their own clips (`<id>_anim.py`) on the borrowed Glomwort skeleton: a dignified hornbill that struts, clacks its bill and
+drops like an anchor; a water-tank salamander whose water sloshes a beat behind every move; a bunker toad that waddles,
+swings its mace tail round and hunkers down; a stout croft that plods like a haystack, shoulders in and sinks to sleep.
+Re-keyed with `reclip.py`. They have no leg bones: walk and run are body rolls, not planted paws (`auto_legs.py` on
+citadoad, cisternmander and crofthollow is the next step).
+
 A Boki without legs (Zephyrak) writes all its own clips: the body is a chain bent along a curve sent down it
 (`zephyrak_anim.bend`); its FRAME row has `"hip": 0.0` and `"hover": true`, which gives it a soft shadow on the ground.
 
