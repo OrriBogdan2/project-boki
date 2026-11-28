@@ -18,9 +18,12 @@ extends RefCounted
 ##  10. a summoned Boki hits and is hit on the same tiers: its basic bite is light, its ability (a tagged hit, the
 ##      throw, the recall) solid, each holds the struck body and flashes it by the tier's numbers, and no Boki
 ##      file (scripts/kin, scripts/match/kin*.gd) sets its own freeze or flash number. One HITFEEL boki row.
+##  11. the hit-stop tier table (docs/MOVEMENT_FEEL.d/1128-hitstop-tiers.md, tools/hitstop_tier_table.gd): every
+##      Hunter's LMB / RMB / E / R row matches what 4 measured, and a hit the source makes heavy lands heavy.
 ## Reuses the dash-flow check's training match and slot presses. Never touches the save.
 
 const SLOTS := ["lmb", "rmb", "e", "x", "dash"]
+const TierTable := preload("res://tools/hitstop_tier_table.gd")
 const FOOTAGE_BOUND_MS := 100  # one 10 fps frame: the reference footage never holds longer
 
 ## Steps with no hit from the hunter before the next slot, so a zone left behind has run out.
@@ -102,6 +105,7 @@ func run(main: Node) -> void:
 	_boki(m2)
 	m2.queue_free()
 	_table()
+	TierTable.check(feel, ok)
 	print("IMPACT DONE, failures: %d" % bad)
 	main.get_tree().quit()
 
@@ -168,6 +172,9 @@ func _kit_tags() -> void:
 func _presses(m: Match, hero: String) -> void:
 	var h: Hunter = flow.hunter
 	dealt = {}
+	if h.ak is GilKit:  # Gil's bag is seeded by his instance id: a fixed order keeps his RMB row from flaking (11)
+		(h.ak as GilKit).rng.seed = hash("gil_bag_impact")
+		(h.ak as GilKit)._refill()
 	for slot in SLOTS:
 		flow._ready_up(m)
 		var dummy := _dummy(m)

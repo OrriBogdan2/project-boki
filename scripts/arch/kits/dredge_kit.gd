@@ -652,7 +652,7 @@ func _slammed(f: Ent, stun: float, amt: float, spike: Dictionary) -> void:
 		f.hurt(amt * power("kin") * float(ed["abyss_k"]), h, {"src": "abil", "ab": "k1", "tags": ["anchor"]})
 	if GlideSpike.dunks(f, spike):
 		m.displace.spike(f, -float(spike["vy"]), h)
-	Feel.hitstop(m, h, f, 30.0, {"melee": true, "heavy": true})
+	Feel.hitstop(m, h, f, 30.0, {"melee": true, "ab": "k1", "heavy": true})
 	if tells_visible():
 		vfx("stunned", f.pos, null, {"on": f, "t": stun})     # a seafoam swirl over the stunned foe
 
