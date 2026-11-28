@@ -4,11 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://b7krp2ak2hftx"
-valid=false
+path="res://.godot/imported/sable_meshy.glb-b0ece852bc958237b6493d8531d85b93.scn"
 
 [deps]
 
 source_file="res://art/wardens/sable/sable_meshy.glb"
+dest_files=["res://.godot/imported/sable_meshy.glb-b0ece852bc958237b6493d8531d85b93.scn"]
 
 [params]
 
