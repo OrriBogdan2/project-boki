@@ -11598,3 +11598,4 @@ READY ext/vfx-sable-bola-knife c87772a1375c961ca1f180144c759f1c5752684b (Sable B
 READY ext/mob-hit-death-keys ed35c3c20fc9701a2e1c9a36ac046d2b0067f733 (mob hit/death re-keyed; origin/main merged, mob_pose_shots keeps main's hit/death cells + --react strips; --check 0 failures, health style OK)
 READY ext/anim-boki-stomp-cell 7f6d3e2a68 (Boki stomp cell n/a in anim coverage tool + regenerated doc)
 READY ext/combo-mark-icons 48790b514eeed401b43fb32f7056df985bdfa961 (foe-state audit: Shred+Blight plate icons, every payoff_fx flashes+chimes its victim, --combo-payoff-check lists icon/flash per state)
+READY ext/sfx-ui-sweep 0e2af651abc2461436a4d1f2324771d162a3d0b4 (--ui-silent-check walks 41 menus/panels, presses every button; silent 67 -> 0 via UI.button always sounding)
