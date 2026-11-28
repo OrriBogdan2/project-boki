@@ -35,8 +35,31 @@ func run(main: Node) -> void:
 	_walk("res://content", ".json")
 	var map_name := String(World.load_layout("arena").get("name", ""))
 	_ok(map_name == "Training Grounds", "the practice map is named Training Grounds (%s)" % map_name)
+	_render_lines()
 	print("TGTEXT %s (%d failures)" % ["PASS" if bad == 0 else "FAIL", bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## Renders 50 spoken lines for a male and a female Boki (every trigger, grown and young) and fails
+## on a leftover {he}-style token or a Boki called its/itself (a Boki speaking of "it" = food or toys is fine).
+func _render_lines() -> void:
+	var it_re := RegEx.create_from_string("(?i)\\b(its|itself)\\b")
+	var r := BokiLines.rules()
+	var ids: Array = (r["triggers"] as Dictionary).keys()
+	for sex in ["m", "f"]:
+		var n := 0
+		var i := 0
+		while n < 50 and i < 4000:
+			var trig := String(ids[i % ids.size()])
+			var stage := 3 if (i / ids.size()) % 2 == 0 else 0
+			var s := BokiLines.line("pron_%s_%d" % [sex, i], trig, "cindle", stage, 1.0e6 + i * 100.0, [], sex)
+			i += 1
+			if s == "":
+				continue
+			n += 1
+			_ok(not s.contains("{") and it_re.search(s) == null, "rendered %s line: \"%s\"" % [sex, s])
+		_ok(n == 50, "rendered 50 lines for sex %s (%d)" % [sex, n])
+	var st := KinSpeak.pronouns("{He} wakes. {His} nap: {he} likes {himself}.", "f")
+	_ok(st == "She wakes. Her nap: she likes herself.", "pronoun helper, female (%s)" % st)
 
 func _boki_it(s: String, where: String) -> void:
 	if where.begins_with(HUNTER_PATH):
