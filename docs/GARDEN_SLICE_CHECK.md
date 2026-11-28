@@ -14,7 +14,7 @@ shows until it is switched on. That is the owner's switch, not a bug (row 0).
 | 1 | Raise: element snack, tint and mark | works | tint and mark on the meal (1 snack: lean 9, a mark; 3 Fire snacks: 88% Fire, 3 marks) | `shots/garden-slice/lean.png`: fresh, 1, 3 snacks: the tint goes pink to orange and one, two, three ember orbs appear | - |
 | 1b | Raise: part at the next form | gap | n/a | `shots/garden-slice/lean.png` frame 4: bigger, no horns | `--lean-check` fails "its next form grows the Fire part": no launch species level-evolves (DEBT.md "Evolution vs GARDEN pace"). Owner picks the form levels in `content/rules/evolve.json`, then re-run `--lean-check`. |
 | 2 | Pet | works | instant (pat, heart, voice); trust once per farm day (+2.5, then 0, next day +1.5) | `shots/garden-slice/base_demo_away_card.png` (the card hides the base, row 13) | Low: a second pat the same day shows no hint that trust is capped; add a `_toast` line in `_pet_kin` (`home.gd`, god file: wire only) or leave it. |
-| 3 | Pet, arrival rank | works | n/a | - | By design (`KinBondMoment` header): the rank a Boki arrives with (hatch, Shelter, carried home) is where it starts and is noted as seen without a moment; only a rank earned afterwards plays one once (heart, voice, card). `--raising-check` rows "the rank it arrives with is where it starts" and "reaching Close plays its moment" pass on main. Low: the row "home after an hour away it runs over and says hello" flakes about 1 run in 3 (the Boki stops 1-2.5 m short of its slot; not the arrival rank). |
+| 3 | Pet, arrival rank | works | n/a | - | By design (`KinBondMoment` header): the rank a Boki arrives with (hatch, Shelter, carried home) is where it starts and is noted as seen without a moment; only a rank earned afterwards plays one once (heart, voice, card). `--raising-check` rows "the rank it arrives with is where it starts" and "reaching Close plays its moment" pass on main. The row "home after an hour away it runs over and says hello" used to fail (3 of 3 runs on ac10b3c769: its slot beside you sat on a raised tile by the arrival point, so it gave up 1.3-2.5 m short with no hello); `KinWelcome.free_slot` now turns to the nearest open spot (8 of 8 green, 1.5-1.8 m). |
 | 4 | Feed | works | instant: food 5 -> 35, tint moves, journal line; start pack is 3 Emberberries | `shots/garden-slice/base_demo_away_card.png` hides them (row 13); no Boki frame yet | Take the frames after row 13 is fixed. |
 | 5 | Away card | works | one card, once; lists the snacks and the lean change, never "lost" or "starved" | - | - |
 | 6 | Play: toys | works | first use 5.6-12.6 s (limit 60), a second Boki joins at 42.7 s; play trains a stat (+13); dig turns up a snack | `shots/garden-slice/base_demo_away_card.png` hides them (row 13); no Boki frame yet | Take the frames after row 13 is fixed. |
@@ -34,10 +34,10 @@ and in the check text.
 
 ## Checks run (all `godot --headless -- --<name>-check`, throwaway XDG, tree 272368589)
 Pass (0 failures): lean-snacks, feed, toy, base-life, race, nook, iv, journal, hatch, base-demo, garden-first-day,
-garden-daily, garden-trust, garden-whistle, garden-visitor, farm-tutorial, garden-items, garden-nav, garden-prizes,
+garden-daily, garden-trust, garden-visitor, farm-tutorial, garden-items, garden-nav, garden-prizes,
 garden-recipes, garden-zones, garden-unlock-pace (zones open on day 3, all five by day 10-14).
-Red: lean (1: row 1b), new-player-flow (1: row 15). Both are in GATE_0245 and DEBT.md already. Raising: row 3 is green (arrival rank is where it starts, by design); one welcome-distance row flakes.
-Also `python3 tools/garden_sim.py` (row 11), `python3 tools/health.py --strict` OK, `python3 tools/gen_wiki.py --check` OK.
+Red: lean (1: row 1b), new-player-flow (1: row 15). Both are in GATE_0245 and DEBT.md already. Raising: 0 failures (row 3 green by design; the welcome row fixed in `KinWelcome`). garden-whistle is red on main ac10b3c769 (3: the lukewarm, sulky and new-partner rows of row 12), untouched here.
+Also `python3 tools/garden_sim.py` (row 11), `python3 tools/health.py --strict` OK, `python3 tools/gen_wiki.py --check` (red on main: `docs/wiki/Rules.md` out of date).
 
 ## GPU shots (jobq, `--needs gpu`)
 Jobs: lean-shots 20261111-172033-26485, base-demo frames (`--base-demo --shot=shots/base.png --shot-every=3`)
