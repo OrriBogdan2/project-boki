@@ -4,6 +4,10 @@ extends RefCounted
 ## the footage gives (briefs/hero-ref/venator.md, 0.2 s a frame) are checked against what the clip shows: when
 ## it blends in, the frame its hit or release lands on, when it hands the body back, and that the legs walk
 ## (not freeze in the clip) when she walks out of a move. Prints one TIME line a move.
+## On a Meshy-native model (content/rules/warden_native.json "meshy_native", docs/art/wardens/MESHY_NATIVE.md) she has
+## no Warden/Sync clips: WardenNative plays her one "attack" clip (full body standing, the upper layer while she
+## moves) for every swing, shot and cast, and her "dash" clip while she rolls. The same rows time that player: a clip
+## starts where Sync's blends in, and its length is its play time (clip / rate).
 const DT := 1.0 / 60.0
 const BLEND_IN := 0.12  # s: a move owns the body by this (WardenClips.FADE 0.1 + a frame)
 const BACK_SLACK := 2 * DT  # s past a clip's end and its blend-out (warden_anim "fade_out") the legs are back
@@ -12,6 +16,7 @@ const BEND := 0.25  # m: the most a walk key bends the Longneedle's recoil shove
 # walking the hold would be ~2 m
 const CLIP_TOL := 0.04  # s: the GLB samples its clips at 30 fps, so a length can sit a frame long
 var c_v  # the combo check (ok, ac)
+var nat: WardenNative  # her native player (null: the contract model's Sync plays her)
 
 
 func _init(check) -> void:
@@ -19,7 +24,9 @@ func _init(check) -> void:
 
 
 func run(m: Match, p: Hunter, k: GunslingerKit, t: Hunter, home: Vector3) -> void:
-	if p.model == null or not p.model.has_node("Warden/Sync"):
+	if p.model != null:
+		nat = p.model.get_node_or_null(^"Warden/Native") as WardenNative
+	if p.model == null or (nat == null and not p.model.has_node("Warden/Sync")):
 		c_v.ok("Vex timing: her clips are on (nothing to time)", false)
 		return
 	_settle(m, p, home, 0.6)
@@ -39,6 +46,8 @@ func _clips(p: Hunter) -> WardenClips:
 
 ## How long past its clip's end `move` keeps the body: its own blend back to the legs, and a frame or two.
 func _back(p: Hunter, move: String) -> float:
+	if nat != null:
+		return maxf(WardenNative.FADE, WardenNativeUpper.FADE_OUT) + BACK_SLACK
 	return float(_clips(p).d["kmoves"][move].get("fade_out", WardenClips.FADE_LOCO)) + BACK_SLACK
 
 
@@ -47,9 +56,41 @@ func _extra(p: Hunter, move: String) -> float:
 	return _back(p, move) - BACK_SLACK - WardenClips.FADE_LOCO
 
 
+## How the body is shared this frame: the full-body channel's weight "full", the upper one's "up", and the clip
+## that plays on them ("clip", its play time "len" s: "" and 0 when none).
+func _body(p: Hunter) -> Dictionary:
+	if nat != null:
+		return _native_body()
+	var c := _clips(p)
+	var live := c.cur
+	if live == "" and c.up_w > 0.0:
+		live = c.cur_u
+	return {"full": c.act_w, "up": c.up_w, "clip": live, "len": c.lib.get_animation(live).length if live != "" else 0.0}
+
+
+## The native player's share: a swing or cast owns the body while its clip plays (the whole body standing, the upper
+## layer while she moves), and so does the dash clip while she rolls.
+func _native_body() -> Dictionary:
+	var rolling := nat.cur == "dash"
+	var owns := nat.attack_left > 0.0 or rolling
+	var layered := nat.upper.on or nat.upper.w > 0.0
+	var clip: String = nat.player.assigned_animation
+	var secs := 0.0
+	if layered:
+		clip = "upper:" + nat.upper.clip.resource_name
+		secs = nat.upper.clip.length / maxf(nat.upper.rate, 0.01)
+	elif owns:
+		secs = nat.player.get_animation(clip).length / maxf(nat.player.speed_scale, 0.01)
+	return {"full": 1.0 if owns and not layered else 0.0, "up": nat.upper.w, "clip": clip, "len": secs}
+
+
 func _frame(m: Match, p: Hunter) -> void:
 	m.step(DT)
 	p.render(DT, 1.0)
+	if nat != null:
+		nat.set_process(false)
+		nat.call("_process", DT)
+		return
 	var sync: Node = p.model.get_node("Warden/Sync")
 	sync.set_process(false)
 	sync.call("_process", DT)
@@ -70,7 +111,6 @@ func _settle(m: Match, p: Hunter, home: Vector3, secs: float) -> void:
 func _time(
 	m: Match, p: Hunter, k: GunslingerKit, move: String, secs: float, event: Callable, each := Callable()
 ) -> Dictionary:
-	var c := _clips(p)
 	var r := {"play": -1.0, "in": -1.0, "hit": -1.0, "at": -1.0, "clip": "", "len": 0.0, "out": -1.0}
 	var t0 := m.time
 	var owned := false
@@ -83,18 +123,16 @@ func _time(
 			continue
 		if float(r["play"]) < 0.0:
 			r["play"] = k.anim_at - t0
-		var w := maxf(c.act_w, c.up_w)
+		var b := _body(p)
+		var w := maxf(float(b["full"]), float(b["up"]))
 		if float(r["in"]) < 0.0 and w >= 0.999:
 			r["in"] = t
 		if float(r["hit"]) < 0.0 and event.call():
 			r["hit"] = t
 			r["at"] = m.time - k.anim_at
-		var live := c.cur
-		if live == "" and c.up_w > 0.0:
-			live = c.cur_u
-		if live != "" and String(r["clip"]) == "":
-			r["clip"] = live
-			r["len"] = c.lib.get_animation(live).length
+		if String(b["clip"]) != "" and String(r["clip"]) == "":
+			r["clip"] = b["clip"]
+			r["len"] = b["len"]
 		owned = owned or w >= 0.999
 		if owned and float(r["out"]) < 0.0 and w <= 0.0:
 			r["out"] = t
@@ -114,10 +152,10 @@ func _walk_probe(p: Hunter, from: float, until: float, rec: Dictionary) -> Calla
 		if t >= from:
 			p.inp["move"] = Vector2(0, 1)
 		if t >= until and not rec.has("speed"):
-			var c := _clips(p)
+			var b := _body(p)
 			rec["speed"] = Vector2(p.vel.x, p.vel.z).length()
-			rec["full"] = c.act_w
-			rec["upper"] = c.up_w
+			rec["full"] = b["full"]
+			rec["upper"] = b["up"]
 
 
 func _walk_line(what: String, rec: Dictionary) -> String:
@@ -197,6 +235,8 @@ func _dash(m: Match, p: Hunter, k: GunslingerKit, home: Vector3) -> void:
 	p.do_dash()
 	p.inp["move"] = Vector2.ZERO
 	var r := _time(m, p, k, "gunslinger_dash", 1.6, func() -> bool: return k.slide.is_empty())
+	# (native: her dash clip is held while she rolls, so the clip ends where the skid does)
+	var end := float(r["hit"]) if nat != null else 0.85
 	c_v.ok(
 		(
 			"Vex timing Shift tap: the skid ends before the clip's stand-up key, the clip runs 0.85 s, "
@@ -205,9 +245,9 @@ func _dash(m: Match, p: Hunter, k: GunslingerKit, home: Vector3) -> void:
 		(
 			float(r["hit"]) >= 0.45 - DT
 			and float(r["hit"]) <= SLIDE_UP
-			and absf(float(r["len"]) - 0.85) < CLIP_TOL
-			and float(r["out"]) > 0.85
-			and float(r["out"]) < 0.85 + _back(p, "gunslinger_dash")
+			and absf(float(r["len"]) - end) < CLIP_TOL
+			and float(r["out"]) >= end
+			and float(r["out"]) < end + _back(p, "gunslinger_dash")
 		),
 		"skid %.2f len %.2f out %.2f" % [r["hit"], r["len"], r["out"]]
 	)
@@ -244,6 +284,9 @@ func _slide(m: Match, p: Hunter, k: GunslingerKit, home: Vector3) -> void:
 	for i in range(1, clock.size()):
 		wraps += 1 if clock[i] < clock[i - 1] - 0.05 else 0
 	var end := GunslingerKit.SLIDE_LOOP_FROM + GunslingerKit.SLIDE_LOOP_T
+	# (native: no stand-up tail, the dash clip must run the whole slide and the legs are hers as it ends)
+	var tail := 0.0 if nat != null else 0.3
+	var clip_ok := nat == null or absf(float(r["len"]) - float(r["hit"])) < CLIP_TOL
 	c_v.ok(
 		"Vex timing Shift held: she slides 0.73 s low (the clip loops its slide window) and stands up as it ends",
 		(
@@ -253,8 +296,9 @@ func _slide(m: Match, p: Hunter, k: GunslingerKit, home: Vector3) -> void:
 			and clock.max() <= end + DT * 2
 			and float(r["at"]) >= GunslingerKit.SLIDE_LOOP_FROM - DT
 			and float(r["at"]) <= end + DT * 2
-			and float(r["out"]) > float(r["hit"]) + 0.3
-			and float(r["out"]) < float(r["hit"]) + 0.4 + _back(p, "gunslinger_dash")
+			and clip_ok
+			and float(r["out"]) >= float(r["hit"]) + tail
+			and float(r["out"]) < float(r["hit"]) + tail + 0.1 + _back(p, "gunslinger_dash")
 		),
 		"skid %.2f clip at %.2f (peak %.2f, %d wraps) out %.2f" % [r["hit"], r["at"], clock.max(), wraps, r["out"]]
 	)
@@ -382,7 +426,7 @@ func _lock_probe(
 			if t >= float(probe[1]) and not rec.has(probe[0]):
 				rec[probe[0]] = {
 					"speed": Vector2(p_v.vel.x, p_v.vel.z).length(),
-					"full": _clips(p_v).act_w,
+					"full": _body(p_v)["full"],
 					"z": absf(p_v.pos.z - (rec["p0"] as Vector3).z)
 				}
 
