@@ -74,7 +74,8 @@ func step(dt: float) -> void:
 
 func _feed(h: Hunter) -> void:
 	var dashing: bool = h.roll_t > 0.0 or (h.ak != null and h.ak.dash_left() > 0.0)
-	if not dashing or not h.model.visible or (h.ak != null and h.ak.hides_dash_streak()):
+	var hidden: bool = h.ak != null and h.ak.hides_dash_streak()
+	if not dashing or not h.model.visible or hidden:
 		_last.erase(h)
 		return
 	var at: Vector3 = h.position + Vector3(0, LIFT * float(h.cdat["scale"]), 0)
