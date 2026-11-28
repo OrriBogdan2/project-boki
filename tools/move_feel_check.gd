@@ -130,14 +130,14 @@ const T := {
 	"abyss_fall_vy_deep": ["~", [10.0, 10.8], "m/s", "[game data] AbyssFallSlowSpeedLimit 12 to 10 m/s"],
 	"abyss_fall_t": [">=", 1.8, "s", "[game data] off the lip to AbyssHeight (17.5m) in ~2s"],
 	"glide_open_press_frames":
-	["<=", 1.0, "frames", "[wiki/guide] hold jump in the air to glide; a second press opens at once"],
-	"glide_open_hold_s": ["<=", 0.12, "s", "tap/hold split for Space; a tap is ~0.1s"],
-	"glide_open_button_frames": ["<=", 1.0, "frames", "dedicated glide button: no tap/hold ambiguity"],
-	"glide_catch_t": ["<=", 0.20, "s", "[guide] opens 'instantly'; the catch rate is ours (max locked)"],
+	["~", [22.0, 27.0], "frames", "[notes 11-26] the glider opens after a second press HELD 0.4 s (glide_press_only)"],
+	"glide_open_hold_s": ["~", [0.35, 0.45], "s", "[notes] 0.4 s hold; scripted input holds from the jump"],
+	"glide_open_button_frames": ["~", [22.0, 27.0], "frames", "[notes] the glide button is the same 0.4 s hold"],
+	"glide_catch_t": ["<=", 0.20, "s", "[guide] opens 'instantly'; the catch rate is ours (max locked); from the open"],
 	"glide_start_vy": ["~", [-2.5, -1.5], "m/s", "[game data] opened rising ~0.6m up: keeps up to 2.5 m/s of the rise"],
 	"glide_speed": ["~", [7.31, 8.93], "m/s", "[game data] settled glide 700 uu/s x body_scale 1.16 +-10%"],
 	"glide_sink": ["~", [1.24, 1.26], "m/s", "[game data] GlideMinZVelocity -125 uu/s"],
-	"glide_overheat_s": ["~", [8.95, 9.05], "s", "hunter_move.json glide_heat_s (owner 11-02 over footage)"],
+	"glide_overheat_s": ["~", [6.2, 6.3], "s", "[notes 11-25] 500 fuel at 80 a second; hunter_move.json glide_heat_s"],
 	"glide_turn90_t": ["~", [0.3, 0.6], "s", "[game data] GlideTargetXYForce 162,500 / Mass 100: turn inertia"],
 	"glide_reverse_t":
 	["~", [0.65, 1.0], "s", "[game data] 16.25 m/s^2 against the 7.0 m/s cruise: a reversal in ~0.83 s"],
@@ -173,7 +173,8 @@ const T := {
 	["<=", 1.0, "s", "[footage] back at island level (balloon line, 0.5m under the lip) ~1s after opening 4m deep"],
 	"abyss_bounce_m": [">=", 1.5, "m", "[est] a bouncy lift from 6m deep"],
 	"abyss_kill_depth": ["~", [17.0, 18.0], "m", "[game data] AbyssHeight -1750 uu: 17.5m under ground level"],
-	"abyss_recover_depth": [">=", 15.0, "m", "deepest a terminal fall can still glide out"],
+	"abyss_recover_depth":
+	[">=", 12.5, "m", "deepest terminal fall that can still glide out: 17.5 kill depth less 0.4 s hold at 10 m/s"],
 	"abyss_tint_lip": ["<=", 0.02, "", "no tint gliding at island level"],
 	"abyss_tint_half":
 	[
@@ -967,27 +968,36 @@ func _glide_at(h: float) -> void:
 
 
 func _glide() -> void:
-	# a second press in the air opens the glider
+	# a second press in the air, HELD, opens the glider after 0.4 s (11-27; a tap used to open it on the step).
+	# A player's keys (glide_press_only): the jump, 8 steps, then the second press held.
 	_reset(flat)
+	p_v.inp["glide_press_only"] = true
 	p_v.inp["jump"] = true
 	m.step(DT)
+	p_v.inp["jump"] = false
 	_steps(8)
 	p_v.inp["jump"] = true
 	p_v.inp["glide"] = true
 	var f := -1
-	for i in 10:
+	for i in 40:
 		m.step(DT)
+		p_v.inp["jump"] = false
 		p_v.inp["glide"] = true
 		if f < 0 and p_v.gliding:
 			f = i + 1
 	rec("glide_open_press_frames", f)
+	p_v.inp["glide_press_only"] = false
+	p_v.inp["glide"] = false
 	# opened while still rising from the jump: the canopy never carries the rise on
 	_reset(flat)
 	p_v.inp["jump"] = true
 	m.step(DT)
 	_steps(6)  # (past glide_floor_rise: lower, a rising glider can't open)
 	var rise := p_v.vel.y
-	p_v.inp["jump"] = true
+	# The 0.4 s hold is its own row above (a flat jump is past its apex by then); here scripted input has served it
+	# (air_t) with the rise still on, so what is measured is the cut of the rise the step the glider opens.
+	p_v.air_t = maxf(p_v.air_t, HunterFeel.glide_engage)
+	p_v.inp["jump"] = false
 	p_v.inp["glide"] = true
 	m.step(DT)
 	ok(rise > 3.0 and p_v.gliding, "glide_start: opened while rising at %.1f m/s" % rise)
@@ -1022,12 +1032,15 @@ func _glide() -> void:
 	_steps(60)
 	p_v.inp["jump"] = true
 	var tc := -1.0
+	var t_open := -1.0
 	var sink: float = HunterMove.glide_sink
 	for i in 90:
 		p_v.inp["glide"] = true
 		m.step(DT)
+		if p_v.gliding and t_open < 0.0:
+			t_open = (i + 1) * DT
 		if p_v.gliding and tc < 0.0 and absf(p_v.vel.y + sink) < 0.3:
-			tc = (i + 1) * DT
+			tc = (i + 1) * DT - t_open
 	rec("glide_catch_t", tc)
 	# cruise
 	_glide_at(25.0)
@@ -1175,14 +1188,17 @@ func _glide_dive() -> void:
 	_reset(flat + Vector3(0, 360.0, 0), false)
 	p_v.inp["jump"] = true
 	var t_off := -1.0
+	var t_on := -1.0
 	for i in 690:
 		p_v.inp["glide"] = true
 		p_v.inp["crouch"] = true
 		p_v.glide_fuel = 1.0
 		var was := p_v.glide_dive.on
 		m.step(DT)
+		if p_v.glide_dive.on and t_on < 0.0:
+			t_on = i * DT  # the plunge starts when the glider opens (after the 0.4 s hold): 10 s from there
 		if was and not p_v.glide_dive.on and t_off < 0.0:
-			t_off = i * DT
+			t_off = i * DT - maxf(t_on, 0.0)
 	rec("dive_timeout_s", t_off)
 	ok(not p_v.glide_dive.on, "dive_timeout_holds: a timed-out plunge stays off while crouch stays held")
 	_clear_inp()
@@ -1974,9 +1990,10 @@ func _abyss_updraft() -> void:
 		_reset(Vector3(g.x + d.x * 4.0, g.y - 4.0, g.z + d.y * 4.0), false)
 		p_v.last_gy = g.y
 		p_v.vel.y = -8.0
+		p_v.air_t = HunterFeel.glide_engage  # the 0.4 s hold served: these rows time the lift from the open
 		p_v.update_lip()
 		var lip := p_v.lip_y
-		p_v.inp["jump"] = true
+		p_v.inp["jump"] = false  # (a jump press in the air arms the 0.4 s hold from zero; the hold is served above)
 		var tl := -1.0
 		for i in 150:
 			p_v.inp["glide"] = true
@@ -1989,6 +2006,8 @@ func _abyss_updraft() -> void:
 		_reset(Vector3(g.x + d.x * 4.0, g.y - 6.0, g.z + d.y * 4.0), false)
 		p_v.last_gy = g.y
 		p_v.vel.y = -8.0
+		p_v.air_t = HunterFeel.glide_engage
+		p_v.inp["jump"] = false
 		var bounce := -9.0
 		for i in 100:
 			p_v.inp["glide"] = true

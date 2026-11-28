@@ -33,7 +33,7 @@ Main 0b0b680df2 plus this branch's one fix, at 60 Hz. Per-Hunter rows come from 
 | Dash exit | run speed, then the walking stop | 1.000x run; slide 0.429 m | match (slide as the let-go row) |
 | Dash, default kit | kit rows | 4.852 m in 0.450 s, the same at 30/60/144 fps (§8's 4.11 m / 0.517 s predates later dash tuning) | match across rates |
 | Jump out of a dash | none | 0.750 (Vex, Kael, Cinder), 0.752 (Lace) | unknown |
-| Glide opening | a press in the air, 0.85 m/s down | opens on the press step; never from holding Space (13/13) | match |
+| Glide opening | a press in the air, held 0.4 s, 0.85 m/s down | opens after a 0.4 s hold of the second Space or the glide button (`glide_engage`); a tap never opens it; never from Space held since the jump (13/13) | match (11-27) |
 | Glide top speed | 5.0 m/s | 5.000 m/s, 13/13 | match |
 | Glide steer | footage (decision 0027) | 90° in 0.383 s, 13/13; reverse 0.600 s | unknown (footage-tuned, unchanged) |
 | Glide catch / sink | none / owner over 2.2 | 0.183 s / 1.4 m/s | unknown |
@@ -119,7 +119,7 @@ Per-kit dashes are the kits' own (content/archetypes/*.json `dash`); the source'
 
 | Quantity | Source | Ours | Truth | Status |
 |---|---|---|---|---|
-| Opening | a press in the air; opens once falling 0.85 m/s | the same; glide_start_vy 0.85; never from holding Space | [D]; hunter_move.json; `--glide-hold-check` | match (hold-to-open is ruled out, owner 11-08) |
+| Opening | a press in the air held 0.4 s; opens once falling 0.85 m/s | the same; `glide_engage` 0.4, glide_start_vy 0.85; Space held since the jump never opens it (owner 11-08, kept); feathering = let go closes at once, another 0.4 s hold reopens | [D]; practice notes 11-26; tuning.json; `--glide-hold-check`, `--glider-parity-check` | match (11-27: the tap-opens rule is gone) |
 | Top speed | MaxGlide 500 uu/s | 5.0 m/s | [D]; MFEEL `glide_speed` | match |
 | Acceleration | 162,500 force on mass 100 | glide_accel 16.25 m/s² | [D]; hunter_move.json | match |
 | Catch (fall to glide) | not documented | 0.183 s | MFEEL `glide_catch_t` | unknown |
@@ -127,10 +127,10 @@ Per-kit dashes are the kits' own (content/archetypes/*.json `dash`); the source'
 | Sink | glide gravity factor not decoded; footage checked 11-11, none measurable: no long steady glide on disk (hetzner /home/boki/svvid abilities video 1174 s + its hero-ref frames, Tetra guide 300 s; refs/sv-mantle Joule 1v4 42 s, owner clip 34 s). The abyss-tinted seconds are a storm zone (Tetra 16, 122, 240-243 s) and a fight over the abyss with the camera swinging (owner clip 12-20 s); the one glide the hero-ref notes name (Elluna, 706.8 s) is a step off the practice range's edge | 1.4 m/s, hunter_move.json `glide_sink` | owner: 2.2 fell faster than the source; MFEEL `glide_sink`, `--glider-heat-check` | unknown |
 | Height hold | 8.5 m over the ground, sinks 3.5 m/s above it | glide_height 8.5, glide_pull_vy 3.5 | [D]; hunter_move.json | match |
 | Drop into speed (swoop) | height trades for speed | never | owner 11-08 item 8 | off (ruling) |
-| Heat | coefficients not decoded; [F] a level glide ~14 s to the hot ring (Tom Kick's guide, docs/the reference_FEEL.md; not on disk to recount); the same footage check as Sink | 9 s from the open to overheat, hunter_move.json `glide_heat_s` (x the archetype's glide_cap); a lift heats 4x as fast | owner 11-02 "lasts too long, not punishing enough" outranks the footage; MFEEL `glide_overheat_s`, `--glider-heat-check` | off (owner) / unknown (coefficients) |
+| Heat | coefficients not decoded; [F] a level glide ~14 s to the hot ring (Tom Kick's guide, docs/the reference_FEEL.md; not on disk to recount); the same footage check as Sink | 6.25 s from the open to overheat (500 fuel at 80 a second, 11-27), hunter_move.json `glide_heat_s` (x the archetype's glide_cap); a lift heats 4x as fast | owner 11-02 "lasts too long, not punishing enough" outranks the footage; MFEEL `glide_overheat_s`, `--glider-heat-check` | match (11-27: 6.25 s, the owner's "lasts too long" goes the same way) / unknown (coefficients) |
 | Overheat | burns; the glider closes | opens at any heat, burns, flies at 0.7x speed, lifts as strongly as a cool one | [W]; owner item 63 | off (ruling) |
 | Dive | −32.5 m/s, force 350,000, steer 0.25, cancel under 3.5 m, 10 s | dive_vy 32.5, dive_accel 35, dive_steer 0.25, dive_cancel_h 3.5, dive_timeout 10 | [D]; hunter_move.json | match |
-| Spike (knocked out of a glide) | stun 0.7 s on landing; slam threshold not decoded | land stun 0.7 s; slam numbers [est] | [W]; hunter_move.json `glide_spike` | match / unknown (slam) |
+| Spike (knocked out of a glide) | 0.18 s freeze, then set to 80 m/s straight down; stun 0.7 s on landing, then a 1.5 s heat regen stun; a slam burns the victim 0.5 x max heat plus the 1.5 s regen stun, the slammer pays nothing; only an emptied glider spikes | `glide_spike` air_stun 0.18, fall_vy 80, land_stun 0.7, regen_stun 1.5, slam_heat 0.5 | [W]; private notes glider-fuel / slam-spike-abyss 11-25, PRACTICE-UPDATE 11-26; hunter_move.json; `--glider-parity-check` | match (11-27); open: the practice update measured -4000 and one -8000 kick at 0.305 s |
 
 ## 6. Knockback, launches, landing
 

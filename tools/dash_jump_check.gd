@@ -58,7 +58,7 @@ func _measure(m: Match, kind: String) -> Dictionary:
 		"air":
 			_tap(m, "jump")
 			_steps(m, AIR_DASH_AT)
-			return _space_in_dash(m)
+			return _space_in_dash(m, true)
 		"rise":
 			_tap(m, "jump")
 			_steps(m, RISE_STEPS - 1)
@@ -89,8 +89,10 @@ func _hv() -> float:
 	return Vector2(h.vel.x, h.vel.z).length()
 
 
-## Space once the dash moves (a wind-up crouch or a lob's first steps go by first).
-func _space_in_dash(m: Match) -> Dictionary:
+## Space once the dash moves (a wind-up crouch or a lob's first steps go by first). In the air (held) Space is a
+## glide press: it opens the glider only held HunterFeel.glide_engage s (a tap never does, glider parity 11-27), so
+## it is held that long; the glider opening there, with the dash gone and no jump, is "end".
+func _space_in_dash(m: Match, held := false) -> Dictionary:
 	h.inp["dash"] = true
 	var n := 0
 	while not (h.ak.in_dash() and _hv() > h.base_speed) and n < 30:
@@ -102,7 +104,23 @@ func _space_in_dash(m: Match) -> Dictionary:
 		return {"mode": "no dash", "carry": 0.0}
 	m.step(Match.DT)
 	var speed := _hv()
-	_tap(m, "jump")
+	if not held:
+		_tap(m, "jump")
+		return _what_now(m, true, speed)
+	h.inp["jump"] = true
+	h.inp["glide"] = true
+	h.inp["glide_press_only"] = true
+	var opened := false
+	for i in ceili(HunterFeel.glide_engage / Match.DT) + 2:
+		m.step(Match.DT)
+		h.inp["jump"] = false
+		if h.vel.y > Hunter.JUMP_V * 0.9 or h.gliding or (i == 0 and not h.ak.in_dash()):
+			opened = h.gliding or i == 0  # (a kit that lets go of its dash on the press itself: "end" as a tap)
+			break
+	h.inp["glide"] = false
+	h.inp["glide_press_only"] = false
+	if opened and not h.ak.in_dash() and h.vel.y <= Hunter.JUMP_V * 0.9:
+		return {"mode": "end", "carry": 0.0}
 	return _what_now(m, true, speed)
 
 

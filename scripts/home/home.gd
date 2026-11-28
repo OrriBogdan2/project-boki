@@ -1315,7 +1315,8 @@ func _move_player(d: float) -> void:
 			unstick()
 	gh = _ground_h(ppos.x, ppos.z)
 	air = pvy > 0.0 or (py > gh + 0.001 and (air or not HunterMove.sticks(py - gh)))     # down a flight: still standing
-	# jump; in the air, a second press (or the glide key) opens the glider; holding Space never does
+	# jump; in the air, a second press (or the glide key) held HunterFeel.glide_engage s opens the glider; a tap,
+	# or holding Space since the jump, never does
 	var over := py - gh if gh > World.VOID + 1.0 else INF
 	var jump := mover.jump(can_act and lfl.is_empty() and mover.pressed(&"jump")
 			and not (hkite != null and hkite.flying()), air, pvy, over, d)
@@ -1330,7 +1331,7 @@ func _move_player(d: float) -> void:
 	elif air and can_act:
 		var holding := Input.is_action_pressed("jump") or Input.is_action_pressed("glide")
 		var press := jump == FarmStep.Jump.GLIDE or mover.pressed(&"glide")
-		if not gliding and press and loco.go(Loco.S.GLIDING):
+		if not gliding and mover.glide_open(press, holding, d) and loco.go(Loco.S.GLIDING):
 			dash_t = 0.0      # a press mid-dash ends it that frame: the glide carries the dash's velocity
 			gliding = true
 			pvy = Loco.glide_start(pvy, over)

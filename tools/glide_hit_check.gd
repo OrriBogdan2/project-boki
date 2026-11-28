@@ -8,23 +8,26 @@ extends "res://tools/abyss_check.gd"
 ## hit by Kael's LMB, Kael's RMB Smash, Albert's full Crushing Blow and a stun while gliding, in an air dash or
 ## falling. Prints "ACHECK ok|FAIL ..." and "ACHECK DONE, failures: N".
 
-const SHOT := 10.0          # damage of the test shot
-const KNOCK := 12.0         # m/s of the test shove (a hard knock is over 4)
-const STUN := 0.5           # s of the test stun
+const SHOT := 10.0  # damage of the test shot
+const KNOCK := 12.0  # m/s of the test shove (a hard knock is over 4)
+const STUN := 0.5  # s of the test stun
+const HOLD_S := 0.5  # s a press is held to open the glider (11-27: glide_engage 0.4 s, then a step or two)
 
 const AIR_HEROES := ["archer", "juggernaut", "gunslinger", "bulwark"]
-const AIR_HIT_AT := 0.05    # s into the state the hit lands; in an air dash, the first step its i-frames are over
-const AIR_RUN := 1.3        # s each air-knock run lasts; the carry is the x gap to the same run with no hit
-const AIR_HIGH := 40.0      # m over the ground: nobody lands inside a run
-const KNOCK_GATE := 0.4     # s a shut glider waits out a shove over 4 m/s (Hunter._update_glide, [est])
+const AIR_HIT_AT := 0.05  # s into the state the hit lands; in an air dash, the first step its i-frames are over
+const AIR_RUN := 1.3  # s each air-knock run lasts; the carry is the x gap to the same run with no hit
+const AIR_HIGH := 40.0  # m over the ground: nobody lands inside a run
+const KNOCK_GATE := 0.4  # s a shut glider waits out a shove over 4 m/s (Hunter._update_glide, [est])
 
 var foe: Hunter
-var spot := Vector3.ZERO    # 12 m over a rim tile's ground
+var spot := Vector3.ZERO  # 12 m over a rim tile's ground
+
 
 func _steps(t: float) -> void:
 	var n := int(round(t / Match.DT))
 	for i in n:
 		m.step(Match.DT)
+
 
 ## Gliding level over the spot with glide held, `fuel` heat left, no armor or shields in the way.
 func _glide(fuel: float) -> void:
@@ -38,19 +41,22 @@ func _glide(fuel: float) -> void:
 	_steps(0.1)
 	h.glide_fuel = fuel
 
-## Lets go of glide for a step, then presses it (the glide button too) for up to `t` s: true if it opens.
-func _press_opens(t: float) -> bool:
+
+## Lets go of glide for a step, then presses it (the glide button too, a fresh press: it opens after the hold) for
+## up to `t` s: true if it opens. `btn` false is the scripted hold, which opens when the air time is long enough.
+func _press_opens(t: float, btn := true) -> bool:
 	h.inp["glide"] = false
 	h.inp["glide_btn"] = false
 	m.step(Match.DT)
 	var left := t
 	while left > 0.0 and not h.gliding:
 		h.inp["glide"] = true
-		h.inp["glide_btn"] = true
+		h.inp["glide_btn"] = btn
 		m.step(Match.DT)
 		left -= Match.DT
 	h.inp["glide_btn"] = false
 	return h.gliding
+
 
 ## Steps with glide let go until the stun is over (at most 2 s).
 func _wait_stun() -> void:
@@ -59,6 +65,7 @@ func _wait_stun() -> void:
 	while h.stun_t > 0.0 and t < 2.0:
 		m.step(Match.DT)
 		t += Match.DT
+
 
 func _shot() -> void:
 	_glide(1.0)
@@ -71,19 +78,27 @@ func _shot() -> void:
 	_steps(0.5)
 	ok(h.gliding and not h.shot_down, "a shot with heat left keeps the glider open (0.5 s on)")
 
+
 func _spike() -> void:
 	_glide(1.0)
+	h.pos.y += 60.0  # 11-27: the spike falls at 80 m/s after its 0.18 s freeze, so start high enough to see it
 	h.glide_fuel = 0.5 * SHOT * HunterMove.hit_heat_per_dmg
 	h.hurt(SHOT, foe)
 	ok(not h.gliding and h.shot_down and h.stun_t > 0.0, "a shot that fills the heat spikes: glider shut, stunned")
-	ok(h.vel.y <= -6.0, "...plummeting (%.1f m/s)" % h.vel.y)
-	ok(not _press_opens(0.5), "...and a press can't reopen it in the air")
+	ok(absf(h.vel.y) < 1.0, "...hanging for its %.2f s freeze (%.1f m/s)" % [GlideSpike.air_stun, h.vel.y])
+	_steps(GlideSpike.air_stun + 0.1)
+	ok(
+		h.vel.y <= -0.9 * GlideSpike.fall_vy,
+		"...then plummeting at the spike's %.0f m/s (%.1f m/s)" % [GlideSpike.fall_vy, h.vel.y]
+	)
+	ok(not _press_opens(0.3), "...and a press can't reopen it in the air")
 	var t := 0.0
 	var landed_stun := -1.0
 	while t < 4.0 and landed_stun < 0.0:
 		m.step(Match.DT)
 		t += Match.DT
-		if h.grounded: landed_stun = h.stun_t
+		if h.grounded:
+			landed_stun = h.stun_t
 	var want := GlideSpike.land_stun - Match.DT
 	ok(landed_stun >= want, "...it lands stunned %.2f s (source: 0.7 s)" % landed_stun)
 	_glide(0.0)
@@ -92,6 +107,7 @@ func _spike() -> void:
 	_glide(0.05)
 	h.hurt(SHOT, null, {"src": "mob"})
 	ok(h.gliding and not h.shot_down, "a monster's shot heats the glider but never spikes it")
+
 
 func _knock() -> void:
 	_glide(1.0)
@@ -109,7 +125,8 @@ func _knock() -> void:
 	_reset(spot, Vector3(0, -2.0, 0))
 	h.air_t = 1.0
 	h.impulse(Vector2(KNOCK * h.mass(), 0.0))
-	ok(not _press_opens(0.3), "a shut glider doesn't open in the first 0.3 s of a hard knock")
+	ok(not _press_opens(0.3, false), "a shut glider doesn't open in the first 0.3 s of a hard knock")
+
 
 func _stun() -> void:
 	_glide(1.0)
@@ -120,7 +137,7 @@ func _stun() -> void:
 	ok(h.vel.y < -2.0 * HunterMove.glide_sink, "...and the body falls (%.1f m/s)" % h.vel.y)
 	ok(not _press_opens(0.1), "...a press during the stun doesn't open it")
 	_wait_stun()
-	ok(_press_opens(Match.DT), "...a press opens it the step the stun is over")
+	ok(_press_opens(HOLD_S), "...a press held 0.4 s opens it once the stun is over")
 	# Grimble's arm: stunned for the whole reel, so the glider is shut until it lets go
 	_glide(1.0)
 	var to := spot + Vector3(6.0, 0.0, 0.0)
@@ -134,7 +151,8 @@ func _stun() -> void:
 		m.step(Match.DT)
 		t += Match.DT
 	_wait_stun()
-	ok(_press_opens(Match.DT), "...a press opens it once the reel and its stun are over")
+	ok(_press_opens(HOLD_S), "...a press held 0.4 s opens it once the reel and its stun are over")
+
 
 ## The air-knock hits, from the content: Kael's LMB, his RMB Smash push, Albert's full Crushing Blow, a stun.
 func _air_hits() -> Dictionary:
@@ -146,6 +164,7 @@ func _air_hits() -> Dictionary:
 		"heavy (Crushing Blow)": {"kb": float(blow["smash_kb"][1]), "stun": float(blow.get("smash_stun", 0.0))},
 		"stun": {"stun": STUN},
 	}
+
 
 ## One run in `state` (glide, dash, fall) over the open spot, hit along +x by `hit` (none when empty). Glide is
 ## held while the glider is open; while it is shut, a fresh press every other step once the hit has landed.
@@ -197,6 +216,7 @@ func _air_run(state: String, hit: Dictionary, at: Vector3) -> Dictionary:
 	r["x"] = h.pos.x - x0
 	return r
 
+
 ## Lace, Kael, Vex and Albert, each hit while gliding, in an air dash and falling (docs/MOVEMENT_FEEL.md
 ## "Knocked in the air"). A knock carries an open glider; a stun shuts it until a press after the stun; a knock
 ## or a stun past an air dash's i-frames ends the dash; a shut glider waits out a hard knock before it opens.
@@ -212,12 +232,14 @@ func _air_knocks() -> void:
 				var hit: Dictionary = hits[what]
 				var got := _air_run(state, hit, at)
 				var carry := float(got["x"]) - float(base["x"])
-				if state == "fall": fall_carry[what] = carry
+				if state == "fall":
+					fall_carry[what] = carry
 				var open_at := float(got["open_at"])
 				var reopen := "%.2f s" % open_at if open_at >= 0.0 else "-"
 				var tag := "%s %s, %s: carried %.2f m, reopen %s" % [arch, state, what, carry, reopen]
 				_air_row(state, hit, got, tag, carry, float(fall_carry[what]))
 	h.reclass("medium", "")
+
 
 ## Asserts one air-knock case (`tag` names it and carries what was measured).
 func _air_row(state: String, hit: Dictionary, got: Dictionary, tag: String, carry: float, fall: float) -> void:
@@ -243,19 +265,22 @@ func _air_row(state: String, hit: Dictionary, got: Dictionary, tag: String, carr
 		var in_time := open_at >= gate - 0.02 and open_at <= gate + 0.25
 		ok(in_time, "%s: a press opens the glider %.1f s after the hit or so" % [tag, gate])
 
+
 func run(main: Node) -> void:
 	m = Match.new()
 	main.add_child(m)
 	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "autoplay": true})
 	m.set_process(false)
-	for mb in m.mobs: mb.queue_free()
+	for mb in m.mobs:
+		mb.queue_free()
 	m.mobs.clear()
 	w = m.world
 	h = m.hunters[0]
 	h.set_arch("")
 	for o in m.hunters:
 		o.ctrl = "idle"
-		if o != h: o.teleport(w.random_ground())
+		if o != h:
+			o.teleport(w.random_ground())
 	foe = m.hunters[1]
 	h.ctrl = "local"
 	for kk in [h.kin, h.kin2]:

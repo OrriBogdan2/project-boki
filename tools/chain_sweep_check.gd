@@ -244,18 +244,22 @@ func _chain_trial(st: String, action: String) -> int:
 	var dash0 := hunter.ak.dash_press_at
 	var vy0 := hunter.vel.y
 	_press_action(action, st)
+	# a press in the air is a glider press: the player holds it until the glider opens (HunterFeel.glide_engage)
+	var hold: bool = action in ["jump", "glide"] and st not in ["ground", "ice", "deep_water", "dash_ground"]
 	for i in int(BUFFER_S / Match.DT):
 		mm.step(Match.DT)
-		_release()
+		_release(hold)
 		if _started(action, st, before, dash0, vy0):
 			return i
 	return -1
 
 
-func _release() -> void:
+func _release(hold_glide := false) -> void:
 	for k in ["dash", "jump", "fire", "sig", "sec", "gear1", "glide_btn"]:
+		if hold_glide and k == "glide_btn":
+			continue
 		hunter.inp[k] = false
-	if hunter.gliding or hunter.dropping:
+	if hold_glide or hunter.gliding or hunter.dropping:
 		return
 	hunter.inp["glide"] = false
 

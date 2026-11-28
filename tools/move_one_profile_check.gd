@@ -9,6 +9,7 @@ extends RefCounted
 const ARCH := "bulwark"  # a hero with its own row (4.85 m/s, accel 47), so a mode reading "default" shows
 const TOL := 0.03  # m or m/s: the same inputs through the same code agree to well under a step
 const DT := 1.0 / 60.0
+const HOLD_STEPS := 26  # steps a press is held to open the glider (glide_engage 0.4 s = 24, plus a step or two)
 const SOLO := {"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "god": true}
 const MODES := ["expedition solo", "expedition trio", "arena", "training grounds", "duel ring", "garden"]
 
@@ -225,6 +226,7 @@ func _measure_match(m: Match, p: Hunter, f: Vector3) -> Dictionary:
 	m.step(DT)
 	p.inp["jump"] = false
 	p.inp["move"] = right
+	mfc._steps(HOLD_STEPS)  # 11-27: a glide press opens the glider once held HunterFeel.glide_engage s
 	mfc.ok(p.gliding, "one profile: the glider opens in the air (match)")
 	mfc._steps(36)
 	out["glide_v"] = _hv(p).length()
@@ -294,11 +296,9 @@ func _garden() -> Dictionary:
 	Input.action_press("glide")
 	hm._move_player(DT)
 	await main.get_tree().process_frame
-	Input.action_release("glide")
-	Input.action_press("jump")
 	_hold(Vector2(1, 0))
-	await _gsteps(hm, 36)
-	Input.action_release("jump")
+	await _gsteps(hm, HOLD_STEPS + 36)  # held until it opens (HunterFeel.glide_engage), then the same 36 steps
+	Input.action_release("glide")
 	mfc.ok(hm.gliding, "one profile: the glider opens in the air (garden)")
 	out["glide_v"] = Vector2(hm.pvel.x, hm.pvel.z).length()
 	out["glide_vy"] = hm.pvy

@@ -180,6 +180,7 @@ func _leave(label: String, k: int, drive: Callable) -> Dictionary:
 	for i in 240:
 		drive.call(i, left_i >= 0)
 		var dashing := P.roll_t > 0.0
+		var was_gliding := P.gliding
 		m.step(DT)
 		var hv := _world_hv()
 		if left_i < 0:
@@ -209,11 +210,13 @@ func _leave(label: String, k: int, drive: Callable) -> Dictionary:
 		if r["glide_at"] < 0.0 and P.gliding:
 			r["glide_at"] = tt
 		var dash_end := dashing and P.roll_t <= 0.0  # the dash's own hand-over to run speed, not the train's doing
+		# (the glider's own opening step sets its cruise speed, after the hold, not the train's doing either)
+		var glide_open := P.gliding and not was_gliding
 		if r["landed"] < 0.0:
 			r["deck_max"] = maxf(r["deck_max"], _deck_v(k).length())  # (the train may still be speeding up)
 			r["min_v"] = minf(r["min_v"], hv.length())
 			r["max_along"] = maxf(r["max_along"], hv.dot(fwd))
-			if not dash_end:
+			if not dash_end and not glide_open:
 				r["max_step"] = maxf(r["max_step"], (hv - prev).length())
 			if P.grounded:
 				r["landed"] = tt
@@ -311,8 +314,8 @@ func _case_walk_off(t: float, glide: bool) -> void:
 	)
 	if glide:
 		ok(
-			r["glide_at"] >= 0.0 and r["glide_at"] <= 0.1,
-			"glide_off: the glider opens (%.2f s after stepping off)" % r["glide_at"]
+			r["glide_at"] >= HunterFeel.glide_engage - 0.05 and r["glide_at"] <= HunterFeel.glide_engage + 0.1,
+			"glide_off: the glider opens after its hold (%.2f s after stepping off)" % r["glide_at"]
 		)
 
 

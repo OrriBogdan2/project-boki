@@ -324,7 +324,9 @@ func _spike_kinds() -> void:
 	var kinds := {
 		"a hit that fills the heat": [0.05, func(): o.hurt(30.0, h, {}), true],
 		"any hit on an overheated glider": [0.0, func(): o.hurt(1.0, h, {}), true],
-		"a slam (dunk) at full heat": [1.0, func(): m.displace.spike(o, -16.0, h), true],
+		# 11-27: a slam at full heat burns half and does not spike
+		"a slam (dunk) at full heat": [1.0, func(): m.displace.spike(o, -16.0, h), false],
+		"a slam (dunk) at half heat": [GlideSpike.slam_heat, func(): m.displace.spike(o, -16.0, h), true],
 		"a hit on a cool glider": [1.0, func(): o.hurt(30.0, h, {}), false],
 		"a slam under slam_min": [1.0, func(): m.displace.spike(o, -0.5 * GlideSpike.slam_min, h), false],
 		"a stun": [1.0, func(): o.hurt(1.0, h, {"stun": 1.0}), false],
@@ -342,17 +344,26 @@ func _spike_kinds() -> void:
 			ok(not o.gliding and o.glide_fuel <= 0.001, "...the glider folds overheated")
 			ok(is_equal_approx(h.glide_fuel, 0.2 + GlideSpike.cool_by), "...and the spiker's glider cools")
 	h.gliding = false
-	# the fall after a slam and the landing stun
-	_glider(o, 1.0)
+	# the fall after a slam and the landing stun (a slam spikes a glider that has half its heat left or less)
+	_glider(o, GlideSpike.slam_heat)
 	m.displace.spike(o, -16.0, h)
-	ok(o.vel.y <= -16.0, "a slam drives the spiked glider down at its own speed (%.1f m/s)" % o.vel.y)
-	var hp0 := o.hp
+	# 11-27: the spike hangs 0.18 s, then falls at 80 m/s
+	ok(absf(o.vel.y) < 1.0, "a slam freezes the spiked glider in the air first (%.1f m/s)" % o.vel.y)
+	InCombat.on_hit(o, h, {})      # a real slam is a hit by a foe: the fight holds the regen off during the fall
+	var hp_before := o.hp
 	var t := 0.0
+	var fall := 0.0
 	while not o.grounded and t < 4.0:
 		o.inp["glide"] = true
+		hp_before = o.hp
 		m.step(Match.DT)
 		t += Match.DT
+		fall = maxf(fall, -o.vel.y)
+	ok(fall >= 0.9 * GlideSpike.fall_vy, "...then drives it down at its own speed (%.1f m/s)" % fall)
 	ok(o.grounded and not o.gliding, "the spiked glider can't reopen on the way down (landed in %.2fs)" % t)
 	ok(o.stun_t >= GlideSpike.land_stun - Match.DT * 1.5, "it lands stunned (%.2fs left)" % o.stun_t)
-	ok(hp0 - o.hp >= GlideSpike.land_dmg - 0.01, "...and takes the landing damage (%.1f)" % (hp0 - o.hp))
+	# the landing hit takes the defences the body has (its kin's damage reduction) and the slammer's wading penalty
+	var land_want := GlideSpike.land_dmg * TerrainHazards.hit_mult(m, h) * (1.0 - o.owner_stat("damage_reduction"))
+	ok(hp_before - o.hp >= land_want - 0.01,
+		"...and takes the landing damage (%.1f, want %.1f)" % [hp_before - o.hp, land_want])
 	o.inp["glide"] = false

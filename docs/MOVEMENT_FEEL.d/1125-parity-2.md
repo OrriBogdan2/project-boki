@@ -28,12 +28,12 @@ Changed rows are retagged [game data]; `--move-feel-check` 0 failures, `--move-r
 | Floor push-up 1.5 m above terrain | - | none (the glider lands) | - | design-different, not built |
 | Glide entry speed 4-9.5 held 0.45 s, decays 0.55 s | ~1 s to settle | tuning.json glide.drag / carry_drag: dash-glide 12.8 m/s at 1 s, near cruise at 3-4 s | [owner 11-13 playtest] | held-owner |
 | Lateral friction 0.6, braking factor 2.0 | - | glide turn / brake rows | [owner 11-13] | held-owner |
-| Repeat-glide leniency 0.4 s, ability hold 0.4 s | - | dash_glide grace 0.15 s, Space hold 0.1 s | [owner 11-13] | held-owner |
+| Repeat-glide leniency 0.4 s, ability hold 0.4 s | - | dash_glide grace 0.15 s, Space hold 0.4 s (11-27) | [owner 11-13] | held-owner (grace); same (hold) |
 | Glide-start ground distance 1.5 / 0.5 m | - | opens anywhere | - | design-different |
 | Glide camera zoom 1.25x | 1.25x | 1.25x (CamRig) | docs | same (the 1 s delay lives on ext/cam-parity-1125) |
-| Fuel: drain 80/500 per s | full tank 6.13 s | glide_heat_s 9.0 | [owner Nov 2] | held-owner: unchanged |
+| Fuel: drain 80/500 per s | full tank 6.25 s | glide_heat_s 6.25 (11-27) | [notes 11-25] | same (11-27) |
 | Fuel regen 0.5 x max per s | 2.0 s empty to full | 1.2 s on the ground, a magic number | [est] | **change** 1.2 -> 2.0 (`glide_regen_s`) |
 | Damage-to-fuel 1.4 x damage | - | hit_heat 3.0 [est] | [est] | held: the unit differs (our share of heat), not mapped |
-| Spike crash velocity | -80 m/s after a 0.18 s freeze + 0.125 s gap | fall_vy 6 m/s | [?] | design-different: needs the freeze/gap sequence, not a number |
+| Spike crash velocity | -80 m/s after a 0.18 s freeze | air_stun 0.18, fall_vy 80 (11-27) | [notes] | same (11-27); the 0.125 s gap is not modelled |
 | Landing stun | 0.7 s | land_stun 0.7 | [wiki] | same |
-| Slam stun / force / heat, kill-credit window, collision damage | see brief | not modelled as such | - | design-different |
+| Slam stun / force / heat, kill-credit window, collision damage | see brief | slam heat 0.5 x max and the 1.5 s regen stun (11-27); the rest not modelled as such | - | design-different (heat: same) |

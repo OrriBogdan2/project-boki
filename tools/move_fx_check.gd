@@ -54,6 +54,7 @@ var rows := 0
 var flow := preload("res://tools/dash_flow_check.gd").new()
 var walls := {}
 var foe_at := Vector3(1e6, 0, 0)  # where the last reset's foe stood
+var spike_dmg := -1.0  # GlideSpike.land_dmg held at 0 while a spiked landing is watched
 var dash_discs := {}  # AimKit circle ids put while the Hunter's dash ran, this event
 
 
@@ -180,6 +181,9 @@ func _trigger(m: Match, h: Hunter, ev: String) -> void:
 			h.pos.y += SOFT_FALL if ev == "soft landing" else HARD_FALL
 			h.grounded = false
 			h.shot_down = ev == "spiked landing"
+			# the spike lands inside the window now (80 m/s): its landing damage has its own spark, not a movement one
+			spike_dmg = GlideSpike.land_dmg
+			GlideSpike.land_dmg = 0.0
 		"wall kick", "wall bounce", "mantle":
 			_at_wall(h, ev)
 		"reset":
@@ -190,6 +194,9 @@ func _trigger(m: Match, h: Hunter, ev: String) -> void:
 		m.step(Match.DT)
 		_dash_discs(m, h)
 	h.inp["move"] = Vector2.ZERO
+	if spike_dmg >= 0.0:
+		GlideSpike.land_dmg = spike_dmg
+		spike_dmg = -1.0
 
 
 ## The AimKit circles (a filled disc, not a thin band) the Hunter's kit put this step while their dash runs.

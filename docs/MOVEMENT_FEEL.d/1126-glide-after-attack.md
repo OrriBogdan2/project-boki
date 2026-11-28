@@ -1,5 +1,7 @@
 ## Glide after an attack or ability, every Hunter (`--glide-after-attack-check`, 2026-11-26)
 
+(11-27: a press is HELD 0.4 s before the glider opens and a tap never opens it, so the check now wants a held press open within 0.1 s of the later of its 0.4 s hold and the action's end, and a tap never open; the hold clock runs through the recovery pose. The table below is the 11-26 run.)
+
 Asked (owner 11-26): "if i lmb, then let go then try to glide it doesn't work sometimes". In the air each Hunter does one
 action (LMB held 6 steps then released, RMB, E, Q, X, Shift), waits 0, 50, 100 or 200 ms, then presses glide: a second
 Space held, or a 50 ms tap. Pass: the glider is open within 0.1 s of the press when only a recovery pose is left; while the

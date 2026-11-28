@@ -1016,6 +1016,7 @@ func _hop_glide(m: Match, P: Hunter, home: Vector3, K: DolmKit, reset: Callable)
 func _glide_slam(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
 	reset.call()
 	P.pos.y += 8.0
+	var start := P.pos
 	P.grounded = false
 	P.inp["move"] = Vector2(1, 0)
 	var t := 0.0
@@ -1024,6 +1025,8 @@ func _glide_slam(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
 		m.step(DT)
 		t += DT
 	var glided := P.gliding
+	if glided:
+		P.pos = start  # (the glider opens after its 0.4 s hold: the row's 8 m and its spot are measured from the open)
 	var s0 := K.slams
 	P.inp["move"] = Vector2.ZERO
 	var from := P.pos
@@ -1114,8 +1117,9 @@ func _air_punch_steer(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
 	step(m, 0.8)
 
 ## How far a Rock Hop pressed east gets in its flight time, from the ground or (`air`) 1.5m up.
-## DECISIONS 11-08 (Shift cancels into glide instantly, every Hunter): Space 0.15 s into a hop's flight opens the
-## glider within 2 steps (launch_to's fly_t hold ends), at the hop's own speed; the chain ends with no crash.
+## DECISIONS 11-08 (Shift cancels into glide, every Hunter), 11-27 (the glider opens after a 0.4 s hold, not a tap):
+## Space held 0.4 s into a hop's flight opens the glider (launch_to's fly_t hold ends), at the hop's own speed; the
+## chain ends with no crash.
 func _hop_let_go(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
 	reset.call()
 	P.pos.y += 6.0
@@ -1127,7 +1131,7 @@ func _hop_let_go(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
 	var lands0 := K.leap_lands
 	var open_in := 99
 	P.inp["jump"] = true
-	for i in 10:
+	for i in 45:
 		P.inp["glide"] = true
 		m.step(DT)
 		P.inp["jump"] = false
@@ -1136,9 +1140,10 @@ func _hop_let_go(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
 			break
 	var hv1 := Vector2(P.vel.x, P.vel.z).length()
 	ok(
-		"glide (DECISIONS 11-08): Space 0.15 s into a hop's flight opens the glider within 2 steps, "
+		"glide (DECISIONS 11-08, 11-27): Space held 0.4 s into a hop's flight opens the glider (not before), "
 			+ "at the hop's speed, no crash",
-		open_in <= 2 and P.fly_t == 0.0 and not K.hop.chaining() and hv1 <= hv0 + 0.05 and K.leap_lands == lands0,
+		open_in >= 20 and open_in <= 32 and P.fly_t == 0.0 and not K.hop.chaining() and hv1 <= hv0 + 0.05
+		and K.leap_lands == lands0,
 		"open after %s steps fly_t %.2f chaining %s h %.2f -> %.2f m/s crashes %d -> %d"
 			% [str(open_in), P.fly_t, str(K.hop.chaining()), hv0, hv1, lands0, K.leap_lands]
 	)

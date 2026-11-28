@@ -4,22 +4,29 @@ extends "res://tools/abyss_check.gd"
 ##           along the keys you never pass the run cap, speed over it bleeds (never clipped), knocks carry
 ##   item 9: glide speed over cruise bleeds back within ~2 s, faster above a hunter's carry cap (Lace lowest)
 ##   item 8: opening the glider adds no horizontal speed: from a long fall, a jump, a dash and standing still
-##   item 4: a fresh glide press mid air-dash glides that step at the dash's speed (Lace too)
+##   item 4: a glide press held through an air dash (0.4 s) glides at the dash's speed once it opens (Lace too)
 ##   farm = Training Area: the same keys give the same air speeds and the same glide-open step at home and in a match
 ## Prints "ACHECK ok|FAIL ..." and "ACHECK DONE, failures: N".
 
 const DT := 1.0 / 60.0
+const OPEN_HOLD := 26  # steps: a glide press is held glide_engage (0.4 s = 24 steps) before the glider opens
+
+var _spot := Vector3.ZERO  # the ground spot _air_at stands over; a replay (_press_vs_control) reuses it
+var _replay := false
+
 
 func _air(hv: Vector2, keys: Vector2, cap: float, secs: float) -> Vector2:
 	for i in int(round(secs / DT)):
 		hv = Loco.air_step(hv, keys, cap, DT)
 	return hv
 
+
 func _glide(hv: Vector2, keys: Vector2, carry: float, secs: float) -> Vector2:
 	var gs := HunterMove.glide_cruise
 	for i in int(round(secs / DT)):
 		hv = Loco.glide_step(hv, keys * gs, gs, carry, DT)
 	return hv
+
 
 func _numbers() -> void:
 	var cap := 4.55
@@ -30,27 +37,39 @@ func _numbers() -> void:
 		t += DT
 	ok(t <= 0.15, "item 5: holding W against a 5 m/s backward drift turns it forward in %.2fs (<= 0.15)" % t)
 	ok(_air(Vector2(-5, 0), Vector2(1, 0), cap, 0.5).x >= cap - 0.05, "item 5: ...and reaches run speed within 0.5s")
-	ok(_air(Vector2(cap, 0), Vector2(1, 0), cap, 1.0).length() <= cap + 0.01,
-		"item 5: keys along your run add nothing past the cap")
+	ok(
+		_air(Vector2(cap, 0), Vector2(1, 0), cap, 1.0).length() <= cap + 0.01,
+		"item 5: keys along your run add nothing past the cap"
+	)
 	var one := Loco.air_step(Vector2(15, 0), Vector2(1, 0), cap, DT).length()
 	var later := _air(Vector2(15, 0), Vector2(1, 0), cap, 1.5).length()
-	ok(one > 14.6 and later < cap + 1.0,
-		"item 5: 15 m/s over the cap bleeds (%.2f after a step, %.2f after 1.5s), never clipped" % [one, later])
-	ok(_air(Vector2(0, 8), Vector2(1, 0), cap, DT).y > 7.6,
-		"item 5: a sideways knock keeps going while you steer (not overwritten)")
+	ok(
+		one > 14.6 and later < cap + 1.0,
+		"item 5: 15 m/s over the cap bleeds (%.2f after a step, %.2f after 1.5s), never clipped" % [one, later]
+	)
+	ok(
+		_air(Vector2(0, 8), Vector2(1, 0), cap, DT).y > 7.6,
+		"item 5: a sideways knock keeps going while you steer (not overwritten)"
+	)
 	ok(_air(Vector2(4, 0), Vector2.ZERO, cap, 0.5).x > 3.0, "item 5: no keys: the jump keeps its run-up")
 	var bent := _air(Vector2(cap, 0), Vector2(0, 1), cap, 0.1)
-	ok(bent.y > 1.5 and bent.x > 3.0 and bent.length() <= cap + 0.01,
-		"item 5: sideways keys bend the arc, no snap (%s after 0.1s)" % str(bent))
+	ok(
+		bent.y > 1.5 and bent.x > 3.0 and bent.length() <= cap + 0.01,
+		"item 5: sideways keys bend the arc, no snap (%s after 0.1s)" % str(bent)
+	)
 	var farm_like := _air(Vector2.ZERO, Vector2(1, 0), cap, 0.2).x
-	ok(farm_like >= cap * (1.0 - exp(-6.0 * 0.2)),
-		"air control at least the old farm's (exp 6/s): %.2f m/s after 0.2s" % farm_like)
+	ok(
+		farm_like >= cap * (1.0 - exp(-6.0 * 0.2)),
+		"air control at least the old farm's (exp 6/s): %.2f m/s after 0.2s" % farm_like
+	)
 	var gs := HunterMove.glide_cruise
 	var carry := Loco.glide_carry("")
 	var g1 := _glide(Vector2(12, 0), Vector2.ZERO, carry, DT).length()
 	var g2 := _glide(Vector2(12, 0), Vector2.ZERO, carry, 2.0).length()
-	ok(g1 > 11.7 and g2 <= gs + 0.5,
-		"item 9: glide 12 m/s, no keys: %.2f after a step, %.2f after 2s (cruise %.1f)" % [g1, g2, gs])
+	ok(
+		g1 > 11.7 and g2 <= gs + 0.5,
+		"item 9: glide 12 m/s, no keys: %.2f after a step, %.2f after 2s (cruise %.1f)" % [g1, g2, gs]
+	)
 	var g3 := _glide(Vector2(12, 0), Vector2(1, 0), carry, 2.0).length()
 	ok(g3 <= gs + 1.0, "item 9: steering along holds a little longer but still bleeds (%.2f after 2s)" % g3)
 	var lace := _glide(Vector2(17, 0), Vector2(1, 0), Loco.glide_carry("archer"), 0.5).length()
@@ -69,34 +88,87 @@ func _numbers() -> void:
 		peak = maxf(peak, k)
 		dist += k * DT
 	var start := ks * HunterMove.dash_k(curve, 0.0)
-	ok(peak < 1.86 * 0.75 and start < 0.6 and absf(dist - 0.3) < 0.01,
-		"item 9: Lace's dash peaks under the source (%.2f of its mean), eases in (%.2f), keeps its distance (%.3f)" \
-		% [peak, start, dist / 0.3])
+	ok(
+		peak < 1.86 * 0.75 and start < 0.6 and absf(dist - 0.3) < 0.01,
+		(
+			"item 9: Lace's dash peaks under the source (%.2f of its mean), eases in (%.2f), keeps its distance (%.3f)"
+			% [peak, start, dist / 0.3]
+		)
+	)
+
 
 ## A hunter `up` metres over a ground spot, moving `v`, keys off.
 func _air_at(up: float, v: Vector3) -> void:
-	_reset(w.random_ground() + Vector3(0, up, 0), v)
+	if not _replay:
+		_spot = w.random_ground()
+	_reset(_spot + Vector3(0, up, 0), v)
 	h.inp["glide_press_only"] = true
 	h.inp["glide_btn"] = false
 	m.step(Match.DT)
 
-## Opens the glider with a fresh Space press and returns [h-speed before, after the step it opened, opened].
+
+## Opens the glider with a fresh Space press, held until it opens (11-27: HunterFeel.glide_engage, 0.4 s; a tap never
+## opens it), and returns [h-speed the step before it opened, h-speed on the step it opened, opened, steps taken].
 func _press_glide() -> Array:
 	var before := Vector2(h.vel.x, h.vel.z).length()
+	var now := before
+	var n := 0
 	h.inp["glide"] = true
 	h.inp["jump"] = true
-	m.step(Match.DT)
+	for i in 40:
+		before = now
+		m.step(Match.DT)
+		n += 1
+		h.inp["jump"] = false
+		now = Vector2(h.vel.x, h.vel.z).length()
+		if h.gliding:
+			break
+	return [before, now, h.gliding, n]
+
+
+## `setup` puts the hunter in its air move (through _air_at); the press is held until the glider opens. Returns
+## _press_glide's row plus the h-speed the same flight has on that step with no press at all, the h-speed 0.1 s after
+## the opening, and the dash time left on the opening step. The 0.4 s hold can
+## outlast a dash, whose speed then bleeds off by itself (the air's own decay, a kit's wind-down): opening the glider
+## must cost nothing beyond that, so the opening step is judged against the flight it replaces, not a standstill.
+func _press_vs_control(setup: Callable) -> Array:
+	_replay = false
+	setup.call()
+	var r := _press_glide()
+	var roll_left := h.roll_t
+	for i in 6:
+		m.step(Match.DT)
+	var later := Vector2(h.vel.x, h.vel.z).length()
+	_replay = true
+	setup.call()
+	h.inp["glide"] = false
 	h.inp["jump"] = false
-	return [before, Vector2(h.vel.x, h.vel.z).length(), h.gliding]
+	for i in int(r[3]):
+		m.step(Match.DT)
+	_replay = false
+	return r + [Vector2(h.vel.x, h.vel.z).length(), later, roll_left]
+
+
+## True when opening the glider costs no speed against the same flight with no press (r[4]) and adds none over what
+## it had (the step before, or that flight's): a held press may keep MORE than the unpressed flight, which bleeds a
+## dash off by itself (the glide carries the dash), but the opening step itself never speeds you up.
+func _open_keeps_speed(r: Array) -> bool:
+	return r[1] >= r[4] - 0.1 and r[1] <= maxf(r[0], r[4]) + 0.1
+
 
 func _match_items() -> void:
 	_air_at(30.0, Vector3(3, -11, 0))
 	var r := _press_glide()
 	ok(r[2] and absf(r[1] - r[0]) < 0.1, "item 8: glide from a long fall: h-speed %.2f -> %.2f" % [r[0], r[1]])
-	for i in 18: m.step(Match.DT)
-	ok(h.vel.y > -HunterMove.glide_pull_vy - 0.2 and Vector2(h.vel.x, h.vel.z).length() <= r[0] + 0.05,
-		"item 8: the fall is absorbed (v %.2f after 0.3s), not turned into speed (h %.2f)"
-		% [h.vel.y, Vector2(h.vel.x, h.vel.z).length()])
+	for i in 18:
+		m.step(Match.DT)
+	ok(
+		h.vel.y > -HunterMove.glide_pull_vy - 0.2 and Vector2(h.vel.x, h.vel.z).length() <= r[0] + 0.05,
+		(
+			"item 8: the fall is absorbed (v %.2f after 0.3s), not turned into speed (h %.2f)"
+			% [h.vel.y, Vector2(h.vel.x, h.vel.z).length()]
+		)
+	)
 	_air_at(2.0, Vector3(4.5, 2.0, 0))
 	r = _press_glide()
 	ok(r[2] and absf(r[1] - r[0]) < 0.1, "item 8: glide from a jump: h-speed %.2f -> %.2f" % [r[0], r[1]])
@@ -104,23 +176,37 @@ func _match_items() -> void:
 	r = _press_glide()
 	ok(r[2] and absf(r[1] - r[0]) < 0.1, "item 8: glide standing still in the air: h-speed %.2f -> %.2f" % [r[0], r[1]])
 	for arch in ["", "archer"]:
-		if arch == "": h.set_arch("")
-		else: h.reclass(Arch.weight(arch), arch)
-		_air_at(6.0, Vector3.ZERO)
-		h.dash_with({"speed": 19.0, "time": 0.3, "dir": Vector2(1, 0)})
-		m.step(Match.DT)
-		m.step(Match.DT)
-		r = _press_glide()
-		ok(r[2] and h.roll_t <= 0.0 and absf(r[1] - r[0]) < 0.1,
-			"items 4/8 (%s): a press 2 steps into an air dash glides that step at its speed (%.2f -> %.2f)"
-			% [h.arch if h.arch != "" else "default", r[0], r[1]])
+		var dash_up := func():
+			if arch == "":
+				h.set_arch("")
+			else:
+				h.reclass(Arch.weight(arch), arch)
+			_air_at(6.0, Vector3.ZERO)
+			h.dash_with({"speed": 19.0, "time": 0.3, "dir": Vector2(1, 0)})
+			m.step(Match.DT)
+			m.step(Match.DT)
+		r = _press_vs_control(dash_up)
+		ok(
+			r[2] and r[6] <= 0.0 and _open_keeps_speed(r),
+			(
+				(
+					"items 4/8 (%s): a press 2 steps into an air dash, held 0.4 s, glides at its speed "
+					+ "(%.2f -> %.2f, %.2f unpressed)"
+				)
+				% [h.arch if h.arch != "" else "default", r[0], r[1], r[4]]
+			)
+		)
 	h.set_arch("")
 	_every_shift()
 	var fsm := Loco.machine()
-	ok(not fsm.go(Loco.S.GLIDING) and fsm.refused == 1 and fsm.is_in(Loco.S.GROUNDED),
-		"FSM: no glide straight off the ground")
-	ok(fsm.go(Loco.S.AIRBORNE) and fsm.go(Loco.S.GLIDING) and fsm.go(Loco.S.KNOCKED),
-		"FSM: airborne, then the glider, then a knock (%s)" % " ".join(fsm.history))
+	ok(
+		not fsm.go(Loco.S.GLIDING) and fsm.refused == 1 and fsm.is_in(Loco.S.GROUNDED),
+		"FSM: no glide straight off the ground"
+	)
+	ok(
+		fsm.go(Loco.S.AIRBORNE) and fsm.go(Loco.S.GLIDING) and fsm.go(Loco.S.KNOCKED),
+		"FSM: airborne, then the glider, then a knock (%s)" % " ".join(fsm.history)
+	)
 	_air_at(6.0, Vector3.ZERO)
 	_press_glide()
 	h.dash_with({"speed": 19.0, "time": 0.3, "dir": Vector2(1, 0)})
@@ -132,8 +218,10 @@ func _match_items() -> void:
 	while h.roll_t > 0.0:
 		m.step(Match.DT)
 	m.step(Match.DT)
-	ok(under and h.loco.is_in(Loco.S.KNOCKED) and h.knock_t > 0.0 and not h.loco.can(Loco.S.GLIDING),
-		"FSM owns it: a knock mid-dash waits under the dash, then KNOCKED (%s)" % " ".join(h.loco.history))
+	ok(
+		under and h.loco.is_in(Loco.S.KNOCKED) and h.knock_t > 0.0 and not h.loco.can(Loco.S.GLIDING),
+		"FSM owns it: a knock mid-dash waits under the dash, then KNOCKED (%s)" % " ".join(h.loco.history)
+	)
 	_air_at(8.0, Vector3(-4, 0, 0))
 	h.inp["move"] = Vector2(1, 0)
 	var t := 0.0
@@ -141,6 +229,7 @@ func _match_items() -> void:
 		m.step(Match.DT)
 		t += Match.DT
 	ok(t <= 0.2, "item 6: falling backward, holding W carries you forward in %.2fs" % t)
+
 
 ## Items 6/7: one chain holding D: run, Shift, jump out of it, a glide press, let go, land. The h-speed never
 ## drops more than 30% in one step (no sudden stop), never jumps up except as a dash starts (no spike),
@@ -174,52 +263,79 @@ func _chain() -> void:
 			land = [prev, hs]
 		was_air = not h.grounded
 		prev = hs
-		if i % 10 == 9: trace.append("%s %.1f" % [h.loco.state_name().left(4), hs])
+		if i % 10 == 9:
+			trace.append("%s %.1f" % [h.loco.state_name().left(4), hs])
 	h.inp["move"] = Vector2.ZERO
 	h.inp["glide"] = false
 	print("ACHECK note chain h-speed every 1/6 s: %s" % ", ".join(trace))
 	# (the worst is the jump out of the dash: it keeps Loco.dash_jump_keep, 0.75, plus that step's air drag)
-	ok(worst_drop <= 0.3, "item 7: run > dash > jump > glide > land never loses over 30%% in a step (worst %d%%)"
-		% int(100.0 * worst_drop))
-	ok(worst_gain <= 2.0,
-		"item 7: and never gains over 2 m/s in a step outside a dash's start (worst %.2f)" % worst_gain)
-	ok(land[0] > 0.0 and land[1] >= land[0] * 0.9, "item 6: the step after touchdown you keep moving (%.2f -> %.2f m/s)"
-		% [land[0], land[1]])
+	ok(
+		worst_drop <= 0.3,
+		(
+			"item 7: run > dash > jump > glide > land never loses over 30%% in a step (worst %d%%)"
+			% int(100.0 * worst_drop)
+		)
+	)
+	ok(
+		worst_gain <= 2.0,
+		"item 7: and never gains over 2 m/s in a step outside a dash's start (worst %.2f)" % worst_gain
+	)
+	ok(
+		land[0] > 0.0 and land[1] >= land[0] * 0.9,
+		"item 6: the step after touchdown you keep moving (%.2f -> %.2f m/s)" % [land[0], land[1]]
+	)
 
-## Item 4 for every Hunter's own Shift: a fresh glide press 2 steps into an air Shift opens the glider that step,
+
+## Item 4 for every Hunter's own Shift: a glide press 2 steps into an air Shift, held 0.4 s, opens the glider,
 ## and 0.1 s later the glide still carries the speed it started with (no stop when the kit's dash winds down).
 ## A Shift whose kit keeps it (its own move, not a plain dash) is FLAGGED, not silently excepted.
 func _every_shift() -> void:
 	var cls0 := h.cls
 	for arch in Arch.ORDER:
-		h.reclass(Arch.weight(arch), arch)
-		_air_at(6.0, Vector3(0, Hunter.JUMP_V, 0))      # rising, high up (no wall in reach): any kit air Shift goes
-		h.dashes = h.max_dashes()
-		h.inp["move"] = Vector2(1, 0)
-		h.inp["dash"] = true
-		m.step(Match.DT)
-		m.step(Match.DT)
-		var fired := h.roll_t > 0.0 or (h.ak != null and h.ak.in_dash())
-		var r := _press_glide()
-		for i in 6: m.step(Match.DT)
-		var later := Vector2(h.vel.x, h.vel.z).length()
+		var fired_at := []  # (a lambda keeps no local of its own: the answer goes in here)
+		var shift_up := func():
+			h.reclass(Arch.weight(arch), arch)
+			_air_at(6.0, Vector3(0, Hunter.JUMP_V, 0))  # rising, high up (no wall in reach): any kit air Shift goes
+			h.dashes = h.max_dashes()
+			h.inp["move"] = Vector2(1, 0)
+			h.inp["dash"] = true
+			m.step(Match.DT)
+			m.step(Match.DT)
+			fired_at.assign([h.roll_t > 0.0 or (h.ak != null and h.ak.in_dash())])
+		var r := _press_vs_control(shift_up)
+		var fired: bool = fired_at[0]
+		var later: float = r[5]
 		h.inp["move"] = Vector2.ZERO
 		h.inp["glide"] = false
 		if not fired:
 			print("ACHECK note item 4 (%s): no Shift move running 2 steps after the press: nothing to cancel" % arch)
 		elif not r[2]:
-			print("ACHECK FLAG item 4 (%s): Shift in the air at %.1f m/s is the kit's own move (%s): no glide cancel"
-				% [arch, r[0], h.move_kind])
+			print(
+				(
+					"ACHECK FLAG item 4 (%s): Shift in the air at %.1f m/s is the kit's own move (%s): no glide cancel"
+					% [arch, r[0], h.move_kind]
+				)
+			)
 		else:
-			ok(absf(r[1] - r[0]) < 0.1 and later >= minf(r[0], HunterMove.glide_cruise) * 0.75,
-				"item 4 (%s): Shift then a glide press: glides that step, h-speed %.2f -> %.2f, %.2f after 0.1s"
-				% [arch, r[0], r[1], later])
+			ok(
+				_open_keeps_speed(r) and later >= minf(r[0], HunterMove.glide_cruise) * 0.75,
+				(
+					(
+						"item 4 (%s): Shift then a held glide press: glides once open, h-speed "
+						+ "%.2f -> %.2f (%.2f unpressed), %.2f after 0.1s"
+					)
+					% [arch, r[0], r[1], r[4], later]
+				)
+			)
 	h.reclass(cls0, "")
+
 
 ## Owner 11-09 (Sable): every Hunter's reach holding W from a standing start on the open lane to the landing:
 ## "jump > Shift" (Shift 0.2 s into the jump) and "Shift > jump" (the jump-out 0.1 s into a ground Shift).
 ## Sable's jump > Shift stays within SABLE_REACH_K of the rest of the cast's median (it was 1.8x).
 const SABLE_REACH_K := 1.5
+
+
 func _jump_shift_reach() -> void:
 	var at := _open_lane()
 	var cls0 := h.cls
@@ -231,7 +347,8 @@ func _jump_shift_reach() -> void:
 		var row := [arch]
 		for order in [[0, 12], [6, 0]]:
 			_reset(at, Vector3.ZERO)
-			for i in 30: m.step(Match.DT)
+			for i in 30:
+				m.step(Match.DT)
 			h.dashes = h.max_dashes()
 			h.ex_cd = 0.0
 			h.inp["move"] = Vector2(1, 0)
@@ -254,11 +371,14 @@ func _jump_shift_reach() -> void:
 	print("ACHECK note reach m (jump > Shift / Shift > jump): %s" % ", ".join(lines))
 	others.sort()
 	var median: float = others[int(others.size() / 2.0)]
-	ok(sable <= median * SABLE_REACH_K, "Sable's jump > Shift reach %.1f m is within %.1fx the cast's median %.1f m"
-		% [sable, SABLE_REACH_K, median])
+	ok(
+		sable <= median * SABLE_REACH_K,
+		"Sable's jump > Shift reach %.1f m is within %.1fx the cast's median %.1f m" % [sable, SABLE_REACH_K, median]
+	)
+
 
 ## The same keys in the air at home and in a match (a fresh save's hero both places): vx every 0.1s holding D
-## from a 3 m/s backward drift, and the step a fresh glide press opens the glider.
+## from a 3 m/s backward drift, and the step a glide press held 0.4 s opens the glider.
 func _parity(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
@@ -273,7 +393,7 @@ func _parity(main: Node) -> void:
 	main.add_child(hm)
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
-	while hm.building:      # (built under a still-covered fade, the farm comes in slices)
+	while hm.building:  # (built under a still-covered fade, the farm comes in slices)
 		await main.get_tree().process_frame
 	hm.set_process(false)
 	hm.ppos = Vector3(hm.ppos.x, 0, hm.ppos.z)
@@ -285,11 +405,14 @@ func _parity(main: Node) -> void:
 	var farm := []
 	var farm_open := -1
 	_press(Vector2(1, 0))
-	for i in 36:
-		if i == 18: Input.action_press("glide")
+	for i in 36 + OPEN_HOLD:  # (the press is held HunterFeel.glide_engage s before it opens, 11-27)
+		if i == 18:
+			Input.action_press("glide")
 		hm._move_player(DT)
-		if hm.gliding and farm_open < 0: farm_open = i
-		if i % 6 == 5: farm.append(hm.pvel.x)
+		if hm.gliding and farm_open < 0:
+			farm_open = i
+		if i % 6 == 5:
+			farm.append(hm.pvel.x)
 		await main.get_tree().process_frame
 	Input.action_release("glide")
 	_press(Vector2.ZERO)
@@ -302,7 +425,8 @@ func _parity(main: Node) -> void:
 	var farm_dash := []
 	for i in 30:
 		hm._move_player(DT)
-		if i % 3 == 2: farm_dash.append(hm.pvel.x)
+		if i % 3 == 2:
+			farm_dash.append(hm.pvel.x)
 	Save.d["arch"] = arch
 	hm.queue_free()
 	h.set_arch(arch)
@@ -311,12 +435,14 @@ func _parity(main: Node) -> void:
 	var game := []
 	var game_open := -1
 	h.inp["move"] = Vector2(1, 0)
-	for i in 36:
+	for i in 36 + OPEN_HOLD:
 		h.inp["glide"] = i >= 18
 		h.inp["glide_btn"] = i >= 18
 		m.step(Match.DT)
-		if h.gliding and game_open < 0: game_open = i
-		if i % 6 == 5: game.append(h.vel.x)
+		if h.gliding and game_open < 0:
+			game_open = i
+		if i % 6 == 5:
+			game.append(h.vel.x)
 	h.reclass(Arch.weight("archer"), "archer")
 	_air_at(6.0, Vector3.ZERO)
 	h.inp["move"] = Vector2.ZERO
@@ -326,16 +452,29 @@ func _parity(main: Node) -> void:
 	var game_dash := []
 	for i in 30:
 		m.step(Match.DT)
-		if i % 3 == 2: game_dash.append(h.vel.x)
+		if i % 3 == 2:
+			game_dash.append(h.vel.x)
 	h.set_arch(arch)
-	ok(_same(farm_dash, game_dash), "farm = Training Area: Lace's dash vx every 0.05s (farm %s | match %s)"
-		% [_fmt(farm_dash), _fmt(game_dash)])
+	ok(
+		_same(farm_dash, game_dash),
+		"farm = Training Area: Lace's dash vx every 0.05s (farm %s | match %s)" % [_fmt(farm_dash), _fmt(game_dash)]
+	)
 	var same := _same(farm, game)
-	ok(same,
-		"farm = Training Area: air vx every 0.1s holding D from a 3 m/s backward drift (farm %s | match %s)"
-		% [_fmt(farm), _fmt(game)])
-	ok(farm_open == 18 and game_open == 18,
-		"farm = Training Area: a fresh glide press opens it that step (farm %d, match %d)" % [farm_open, game_open])
+	ok(
+		same,
+		(
+			"farm = Training Area: air vx every 0.1s holding D from a 3 m/s backward drift (farm %s | match %s)"
+			% [_fmt(farm), _fmt(game)]
+		)
+	)
+	ok(
+		farm_open == game_open and game_open >= 18 + OPEN_HOLD - 3 and game_open <= 18 + OPEN_HOLD,
+		(
+			"farm = Training Area: a fresh press held 0.4 s opens it on the same step (farm %d, match %d, press at 18)"
+			% [farm_open, game_open]
+		)
+	)
+
 
 func _same(a: Array, b: Array) -> bool:
 	var same := a.size() == b.size()
@@ -343,8 +482,10 @@ func _same(a: Array, b: Array) -> bool:
 		same = same and absf(float(a[i]) - float(b[i])) < 0.05
 	return same
 
+
 func _fmt(a: Array) -> String:
 	return " ".join(a.map(func(x): return "%.2f" % x))
+
 
 func run(main: Node) -> void:
 	_numbers()
@@ -352,20 +493,22 @@ func run(main: Node) -> void:
 	main.add_child(m)
 	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "autoplay": true})
 	m.set_process(false)
-	for mb in m.mobs: mb.queue_free()
+	for mb in m.mobs:
+		mb.queue_free()
 	m.mobs.clear()
 	w = m.world
 	h = m.hunters[0]
 	h.set_arch("")
 	for o in m.hunters:
 		o.ctrl = "idle"
-		if o != h: o.teleport(w.random_ground())
+		if o != h:
+			o.teleport(w.random_ground())
 	h.ctrl = "local"
 	m.opts["god"] = true
 	_match_items()
 	_chain()
 	await _parity(main)
-	_jump_shift_reach()      # after the parity: it re-classes the hunter through every Hunter
+	_jump_shift_reach()  # after the parity: it re-classes the hunter through every Hunter
 	m.queue_free()
 	print("ACHECK DONE, failures: ", bad)
 	main.get_tree().quit()

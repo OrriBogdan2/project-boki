@@ -10,7 +10,8 @@ const RULES := {  # DECISIONS line (its date: [11-08], [11-11]; no date = "Movem
 	"hold": "Holding Space from the jump ... must never glide, no matter how long it is held. [11-08]",
 	"double": "Glide opens only on a double press: jump, then press Space again in the air and hold. [11-08]",
 	"start": "glide start adds no speed [11-08]",
-	"shift": "Shift cancels into glide instantly for every Hunter. [11-08]",
+	"shift":
+	"Shift cancels into glide for every Hunter: a press held glide_engage s in the dash opens it. [11-08, 11-27]",
 	"heat": "An overheated glider still lifts you out of the abyss as strongly as a cool one, while it burns.",
 	"fall": "falling never converts into horizontal momentum [11-11]",
 	"air": "Match movement must have strong WASD air control [11-08]: accelerate toward input, strong counter-steer",
@@ -19,7 +20,7 @@ const RULES := {  # DECISIONS line (its date: [11-08], [11-11]; no date = "Movem
 }
 const HIGH_UP := 25.0  # m over the ground: room for a second of falling or gliding
 const SHIFT_PRESSES := [2, 9]  # steps into an air Shift a fresh Space press lands (0.03 s, 0.15 s)
-const AT_ONCE := 2  # steps: "instantly" = the glider is open on the press step or the next one
+const AT_ONCE := 2  # steps past the hold: the glider is open on the step the hold ends or the next one
 const JOLT := 2.0  # m/s in one step: the glide's own bleed sheds up to ~1.5 (Kael's 30 m/s), a snap more
 const STILL := 0.05  # m/s: horizontal speed that counts as none
 ## Rows red on main, printed "open", not counted (docs/DEBT.md "--move-rule-guard-check open rows"): none now.
@@ -27,6 +28,8 @@ const STILL := 0.05  # m/s: horizontal speed that counts as none
 const OPEN := {}
 
 var heat = load("res://tools/glider_heat_check.gd").new()  # its abyss climb, on this check's match
+var before_h := 0.0  # the horizontal speed and vy the step before the glider opened (_press_glide)
+var before_vy := 0.0
 var traces := {}  # arch -> the Training Area air/glide vx trace, compared with the farm's at the end
 
 
@@ -66,6 +69,8 @@ func _press_glide() -> int:
 	for i in 60:
 		h.inp["jump"] = i == 0
 		h.inp["glide"] = true
+		before_h = _hspeed()
+		before_vy = h.vel.y
 		m.step(Match.DT)
 		if h.gliding:
 			h.inp["jump"] = false
@@ -126,9 +131,10 @@ func _glide_start(arch: String) -> void:
 		else:
 			_air(HIGH_UP, Vector3(3, 0, 0) if how == "falling" else Vector3.ZERO)
 			_steps(42 if how == "falling" else 0)
-		var hv := _hspeed()
-		var vy := h.vel.y
 		var steps := _press_glide()
+		# (the glider opens after the hold: the air control has had its 0.4 s; the step that opens it adds nothing)
+		var hv := before_h
+		var vy := before_vy
 		var ok_open := steps < 99 and _hspeed() <= hv + STILL and h.vel.y <= maxf(vy, 0.0) + STILL
 		row(
 			arch,
@@ -144,6 +150,7 @@ func _glide_start(arch: String) -> void:
 
 
 func _shift_glide(arch: String) -> void:
+	var hold_steps := int(HunterFeel.glide_engage / Match.DT)
 	var said := []
 	var worst := 0
 	var jolt := 0.0
@@ -166,7 +173,7 @@ func _shift_glide(arch: String) -> void:
 		jolt = maxf(jolt, _glide_jolt() if steps < 99 else 0.0)
 		h.inp["move"] = Vector2.ZERO
 		h.inp["glide"] = false
-	row(arch, "shift", worst <= AT_ONCE, "; ".join(said))
+	row(arch, "shift", worst <= hold_steps + AT_ONCE, "; ".join(said))
 	row(
 		arch,
 		"keep",

@@ -3,9 +3,9 @@ extends RefCounted
 ## glide doesn't work sometimes"). In the air, every hunter does one action (LMB held
 ## then released, RMB, E, Q, X, an air Shift), waits DELAYS_S after it, then presses glide: a second Space (jump
 ## press, glide held) or a short TAP of it (glide let go after TAP_STEPS, as a quick player's finger does). The
-## glider must be open within OPEN_S of the press when only a recovery pose is left. While the action itself still
-## runs (a hold, a channel, a planted cast, a knock) a held press opens within OPEN_S of its end, and a
-## tap does too when the end comes inside Loco.press_buffer (a longer one refuses the tap, as DashFlow does).
+## glider must be open within OPEN_S of the later of the press's 0.4 s hold (11-27: HunterFeel.glide_engage) and the end
+## of the action (a hold, a channel, a planted cast, a knock keep it shut; the hold clock runs through them). A tap
+## never opens it (11-27; before, a tap inside Loco.press_buffer of the end did).
 ## Prints one GLIDEAFTER row per trial.
 
 const DELAYS_S := [0.0, 0.05, 0.1, 0.2]  # s after the action's last input step
@@ -14,6 +14,7 @@ const TAP_STEPS := 3  # steps a tap keeps glide down (50 ms)
 const LMB_HOLD := 6  # steps LMB stays down before the release
 const KNOCK_S := 0.4  # s after a knock (Vex's E recoil) that Hunter.can_glide keeps the glider shut
 const HEIGHT := 60.0  # m above the patch the trial starts: still in the air when it ends
+const WATCH_AFTER := 30  # steps a tap is watched past the moment a held press would have opened
 const SLOTS := ["lmb", "rmb", "e", "q", "x", "dash"]
 
 var bad := 0
@@ -62,7 +63,12 @@ func _trial(m: Match, hero: String, slot: String, tap: bool, delay: float) -> vo
 		m.step(Match.DT)
 	var open := -1
 	var lock_last := -1
+	var engage := int(ceil(HunterFeel.glide_engage / Match.DT))  # steps a press must be held (11-27)
 	for i in 400:
+		# a tap is watched only while a held press could have opened: it no longer opens early, so the 60 m fall
+		# would run on to a glide ring in the patch, whose boost opens the glider with no press at all
+		if tap and i > maxi(engage, lock_last + 1) + WATCH_AFTER:
+			break
 		h.inp["jump"] = i == 0
 		h.inp["glide"] = i < TAP_STEPS if tap else true
 		h.inp["glide_btn"] = h.inp["glide"]
@@ -81,10 +87,11 @@ func _trial(m: Match, hero: String, slot: String, tap: bool, delay: float) -> vo
 	var what := "%s %s then %s glide %.0f ms later" % [hero, slot, "tap" if tap else "hold", delay * 1000.0]
 	if h.grounded:
 		ok(true, "%s: landed first (a %.2f s lock to the ground)" % [what, lock_s])
-	elif lock_last < 0:
-		ok(open >= 0 and float(open) * Match.DT <= OPEN_S, "%s: opened at +%d steps" % [what, open])
-	elif tap and lock_s > Loco.press_buffer:
-		ok(open < 0, "%s: refused by a %.2f s lock (opened at +%d)" % [what, lock_s, open])
+	elif tap:
+		# a tap never opens the glider (11-27: it opens only after the 0.4 s hold), whatever the recovery
+		ok(open < 0, "%s: a tap never opens it (opened at +%d)" % [what, open])
 	else:
-		var wait := float(open - lock_last - 1) * Match.DT
-		ok(open >= 0 and wait <= OPEN_S, "%s: %.2f s lock, opened at +%d" % [what, lock_s, open])
+		# held: the hold clock runs through the recovery, so it opens at the later of the 0.4 s hold and the lock's end
+		var due := maxi(engage, lock_last + 1)
+		var late := float(open - due) * Match.DT
+		ok(open >= 0 and late <= OPEN_S, "%s: %.2f s lock, opened at +%d (due +%d)" % [what, lock_s, open, due])

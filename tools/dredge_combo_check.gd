@@ -341,7 +341,8 @@ func _glide_wins() -> void:
 	var p: Hunter = r[1]
 	var home: Vector3 = r[4]
 	var k: DredgeKit = p.ak
-	p.teleport(home + Vector3(0, 9.0, 0))
+	# (11-27: the press is held 0.4 s before it wins: 12 m of the 28 m/s smash, so start under glide_height)
+	p.teleport(home + Vector3(0, 18.0, 0))
 	p.vel = Vector3.ZERO
 	p.grounded = false
 	ak.step(m, 0.1)
@@ -349,11 +350,19 @@ func _glide_wins() -> void:
 	p.ak.use_e()
 	ak.step(m, 0.05)
 	var diving := not k.dive.is_empty()
-	var z0 := p.pos.y
 	var q0 := k.quakes
 	p.inp["jump"] = true
-	var low := z0
 	var t := 0.0
+	var z0 := p.pos.y
+	var low := z0
+	var held := 0.0
+	while held < 1.5 and not p.gliding:  # held until the glider opens (glide_engage), then the sink is read
+		p.inp["glide"] = true
+		p.inp["glide_btn"] = true
+		m.step(ak.DT)
+		held += ak.DT
+	z0 = p.pos.y
+	low = z0
 	while t < 0.3:
 		p.inp["glide"] = true
 		p.inp["glide_btn"] = true
@@ -369,7 +378,10 @@ func _glide_wins() -> void:
 			and k.quakes == q0
 			and low >= z0 - HunterMove.glide_sink * 0.3 - 0.35
 		),
-		"fell %.2f m in 0.3 s" % (z0 - low)
+		(
+			"fell %.2f m in the 0.3 s after it opened (%.2f s held) diving %s dive_empty %s gliding %s quakes %d->%d"
+			% [z0 - low, held, str(diving), str(k.dive.is_empty()), str(p.gliding), q0, k.quakes]
+		)
 	)
 	p.inp["glide"] = false
 	p.inp["glide_btn"] = false
@@ -385,10 +397,12 @@ func _glide_wins() -> void:
 	p.inp["jump"] = true
 	m.step(ak.DT)
 	ak.step(m, 0.15)
+	p.pos.y += 6.0  # (11-27: a Dredge hop is shorter than the 0.4 s hold: the press needs air)
+	p.grounded = false
 	p.inp["jump"] = true
 	var low_g := 99.0
 	t = 0.0
-	while t < 0.3:
+	while t < 0.3 + HunterFeel.glide_engage:
 		p.inp["glide"] = true
 		p.inp["glide_btn"] = true
 		m.step(ak.DT)
@@ -397,7 +411,7 @@ func _glide_wins() -> void:
 	ok(
 		"glide wins: after the ground slam a jump and glide is a normal glide, not dragged down",
 		k.anchors >= 1 and p.gliding and low_g >= zg,
-		"lowest %+.2f m from take-off" % (low_g - zg)
+		"lowest %+.2f m from take-off anchors %d gliding %s" % [low_g - zg, k.anchors, str(p.gliding)]
 	)
 	p.inp["glide"] = false
 	p.inp["glide_btn"] = false
@@ -1207,15 +1221,18 @@ func _anchor_spike() -> void:
 	pl.ak.use_e()
 	var t := 0.0
 	while kit.anchors == 0 and t < 1.0:
-		tg.pos.y = home.y + 1.2      # held in the air until the slam frame
+		tg.pos.y = home.y + 1.2  # held in the air until the slam frame
 		tg.vel = Vector3.ZERO
 		tg.grounded = false
 		m.step(ak.DT)
 		t += ak.DT
 	var vy := tg.vel.y
-	for i in 6:      # the cone's hit lands within a few frames of the slam
+	for i in 6:  # the cone's hit lands within a few frames of the slam
 		m.step(ak.DT)
 		vy = minf(vy, tg.vel.y)
 	# the data's 16 m/s, which a hunter's fall cap (HunterMove.fall_max, 12) clamps on its next tick
-	ok("anchor spike: the ground Anchor Drop drives a foe in the air down (at the fall cap at once)",
-		kit.anchors == 1 and vy <= -HunterMove.fall_max + 0.5, "anchors %d vy %.1f" % [kit.anchors, vy])
+	ok(
+		"anchor spike: the ground Anchor Drop drives a foe in the air down (at the fall cap at once)",
+		kit.anchors == 1 and vy <= -HunterMove.fall_max + 0.5,
+		"anchors %d vy %.1f" % [kit.anchors, vy]
+	)
