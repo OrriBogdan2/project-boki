@@ -3,6 +3,7 @@ archetypes/archer.json:body.head	0.72
 archetypes/archer.json:body.hit_h	1.85
 archetypes/archer.json:body.hit_r	0.408
 archetypes/archer.json:body.legs	2.35
+archetypes/archer.json:body.match_k	1.628
 archetypes/archer.json:body.neck	-0.05
 archetypes/archer.json:body.size	1.054
 archetypes/archer.json:body.top_h	1.69
@@ -89,6 +90,7 @@ archetypes/ashwick.json:body.head	0.62
 archetypes/ashwick.json:body.hit_h	2.01
 archetypes/ashwick.json:body.hit_r	0.419
 archetypes/ashwick.json:body.legs	1.85
+archetypes/ashwick.json:body.match_k	1.491
 archetypes/ashwick.json:body.neck	-0.02
 archetypes/ashwick.json:body.shoulder	0.88
 archetypes/ashwick.json:body.size	1.185
@@ -205,6 +207,7 @@ archetypes/bulwark.json:body.head	0.3
 archetypes/bulwark.json:body.hit_h	1.78
 archetypes/bulwark.json:body.hit_r	0.404
 archetypes/bulwark.json:body.legs	0.46
+archetypes/bulwark.json:body.match_k	1.361
 archetypes/bulwark.json:body.neck	0.0
 archetypes/bulwark.json:body.shoulder	1.35
 archetypes/bulwark.json:body.size	1.464
@@ -342,6 +345,7 @@ archetypes/dolm.json:body.head	0.8
 archetypes/dolm.json:body.hit_h	1.89
 archetypes/dolm.json:body.hit_r	0.411
 archetypes/dolm.json:body.legs	2.9
+archetypes/dolm.json:body.match_k	1.191
 archetypes/dolm.json:body.neck	-0.02
 archetypes/dolm.json:body.size	0.798
 archetypes/dolm.json:body.top_h	1.91
@@ -492,6 +496,7 @@ archetypes/dredge.json:body.build	1.0
 archetypes/dredge.json:body.hit_h	2.56
 archetypes/dredge.json:body.hit_r	0.458
 archetypes/dredge.json:body.legs	1.5
+archetypes/dredge.json:body.match_k	1.19
 archetypes/dredge.json:body.neck	-0.16
 archetypes/dredge.json:body.shoulder	0.9
 archetypes/dredge.json:body.size	1.273
@@ -699,6 +704,7 @@ archetypes/gunslinger.json:body.head	0.72
 archetypes/gunslinger.json:body.hit_h	1.89
 archetypes/gunslinger.json:body.hit_r	0.411
 archetypes/gunslinger.json:body.legs	2.3
+archetypes/gunslinger.json:body.match_k	1.525
 archetypes/gunslinger.json:body.neck	-0.02
 archetypes/gunslinger.json:body.shoulder	0.8
 archetypes/gunslinger.json:body.size	0.941
@@ -792,9 +798,10 @@ archetypes/juggernaut.json:body.head	0.48
 archetypes/juggernaut.json:body.hit_h	2.15
 archetypes/juggernaut.json:body.hit_r	0.429
 archetypes/juggernaut.json:body.legs	2.05
+archetypes/juggernaut.json:body.match_k	1.501
 archetypes/juggernaut.json:body.neck	-0.012
 archetypes/juggernaut.json:body.size	0.825
-archetypes/juggernaut.json:body.top_h	1.52
+archetypes/juggernaut.json:body.top_h	1.94
 archetypes/juggernaut.json:dash.cd	10.4
 archetypes/juggernaut.json:dash.dist	4.5
 archetypes/juggernaut.json:dash.dodge_rage	15.0
@@ -952,6 +959,7 @@ archetypes/mage.json:body.head	0.74
 archetypes/mage.json:body.hit_h	1.87
 archetypes/mage.json:body.hit_r	0.41
 archetypes/mage.json:body.legs	1.95
+archetypes/mage.json:body.match_k	1.377
 archetypes/mage.json:body.neck	-0.05
 archetypes/mage.json:body.shoulder	0.85
 archetypes/mage.json:body.size	1.235
@@ -1049,6 +1057,7 @@ archetypes/ostra.json:body.build	0.65
 archetypes/ostra.json:body.hit_h	2.22
 archetypes/ostra.json:body.hit_r	0.434
 archetypes/ostra.json:body.legs	1.8
+archetypes/ostra.json:body.match_k	1.465
 archetypes/ostra.json:body.size	0.952
 archetypes/ostra.json:body.top_h	1.67
 archetypes/ostra.json:dash.aim_max	1.5
@@ -1142,6 +1151,7 @@ archetypes/rimewright.json:body.head	0.6
 archetypes/rimewright.json:body.hit_h	1.66
 archetypes/rimewright.json:body.hit_r	0.395
 archetypes/rimewright.json:body.legs	2.04
+archetypes/rimewright.json:body.match_k	1.392
 archetypes/rimewright.json:body.neck	-0.04
 archetypes/rimewright.json:body.shoulder	0.84
 archetypes/rimewright.json:body.size	1.11
@@ -1242,6 +1252,7 @@ archetypes/tender.json:body.head	0.78
 archetypes/tender.json:body.hit_h	1.04
 archetypes/tender.json:body.hit_r	0.352
 archetypes/tender.json:body.legs	0.98
+archetypes/tender.json:body.match_k	1.658
 archetypes/tender.json:body.neck	-0.036
 archetypes/tender.json:body.shoulder	1.12
 archetypes/tender.json:body.size	0.92
@@ -1346,6 +1357,7 @@ archetypes/thief.json:body.head	0.6
 archetypes/thief.json:body.hit_h	1.7
 archetypes/thief.json:body.hit_r	0.398
 archetypes/thief.json:body.legs	2.04
+archetypes/thief.json:body.match_k	1.355
 archetypes/thief.json:body.shoulder	0.92
 archetypes/thief.json:body.size	1.155
 archetypes/thief.json:body.top_h	1.77
