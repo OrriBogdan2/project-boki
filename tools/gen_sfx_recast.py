@@ -21,7 +21,6 @@ files the other generators write.
 """
 
 import os, sys
-import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sfx_lib as S
@@ -63,7 +62,9 @@ def bul_tick(i):
 
 
 def bul_end(i):
-    return soft(mix(kick(120, 62, 0.2, 0.02, 0.06) * 0.8, bpf(noise(0.15), 300, 1500) * env(N(0.15), 0.004, 0.05) * 0.5))
+    return soft(
+        mix(kick(120, 62, 0.2, 0.02, 0.06) * 0.8, bpf(noise(0.15), 300, 1500) * env(N(0.15), 0.004, 0.05) * 0.5)
+    )
 
 
 def bul_shield_down(i):
@@ -100,7 +101,9 @@ def ash_tick(i):
 
 
 def ash_end(i):
-    return soft(mix(bpf(noise(0.3), 400, 2600) * env(N(0.3), 0.01, 0.1) * 0.7, kick(110, 60, 0.15, 0.015, 0.05) * 0.4), 3000)
+    return soft(
+        mix(bpf(noise(0.3), 400, 2600) * env(N(0.3), 0.01, 0.1) * 0.7, kick(110, 60, 0.15, 0.015, 0.05) * 0.4), 3000
+    )
 
 
 # ------------------------------------------------------------------ Neve (rimewright): ice
@@ -125,7 +128,9 @@ def mage_open(i):
 
 
 def mage_tick(i):
-    return soft(mix(click(0.004, 1000 * P[i], 3600) * 0.9, grains(0.05, 120, 800, 3600, 0.001, 0.003, fall=0.015) * 0.6))
+    return soft(
+        mix(click(0.004, 1000 * P[i], 3600) * 0.9, grains(0.05, 120, 800, 3600, 0.001, 0.003, fall=0.015) * 0.6)
+    )
 
 
 def mage_end(i):
@@ -155,11 +160,18 @@ def tend_open(i):
 
 
 def tend_tick(i):
-    return soft(mix(grains(0.06, 90, 900 * P[i], 3200, 0.002, 0.005, fall=0.02) * 0.9, ring((420 * P[i],), 0.05, (0.014,), (0.5,))))
+    return soft(
+        mix(
+            grains(0.06, 90, 900 * P[i], 3200, 0.002, 0.005, fall=0.02) * 0.9,
+            ring((420 * P[i],), 0.05, (0.014,), (0.5,)),
+        )
+    )
 
 
 def tend_end(i):
-    return soft(mix(bpf(noise(0.3), 500, 2800) * env(N(0.3), 0.02, 0.09) * 0.5, grains(0.2, 40, 800, 2600, fall=0.06) * 0.5))
+    return soft(
+        mix(bpf(noise(0.3), 500, 2800) * env(N(0.3), 0.02, 0.09) * 0.5, grains(0.2, 40, 800, 2600, fall=0.06) * 0.5)
+    )
 
 
 # ------------------------------------------------------------------ Motley (ostra): rubbery plucks
@@ -175,7 +187,9 @@ def os_tick(i):
 
 
 def os_end(i):
-    return soft(mix(kick(300, 150, 0.22, 0.08, 0.07, 1.2) * 0.8, bpf(noise(0.12), 400, 1800) * env(N(0.12), 0.01, 0.04) * 0.4))
+    return soft(
+        mix(kick(300, 150, 0.22, 0.08, 0.07, 1.2) * 0.8, bpf(noise(0.12), 400, 1800) * env(N(0.12), 0.01, 0.04) * 0.4)
+    )
 
 
 # ------------------------------------------------------------------ Gil: a dull water plop (his open and tick are in gen_sfx_gil.py)
