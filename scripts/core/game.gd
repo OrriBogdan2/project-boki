@@ -353,9 +353,9 @@ func apply_result(r: Dictionary) -> Dictionary:
 				p["wet"] = 0
 			if int(p["stage"]) == grow:
 				out["crops_ready"] += 1
-	out["class_unlock"] = ClassUnlock.after_match(r)     # Hunter challenges and mastery
-	out["train_runs"] = TrainRuns.after_match()      # a match earns a garden race and a drill run (limited)
-	Unmasked.migrate(Save.d)       # a mastery level reached shows on you at home (MasteryLook)
+	out["class_unlock"] = ClassUnlock.after_match(r)  # Hunter challenges and mastery
+	out["train_runs"] = TrainRuns.after_match()  # a match earns a garden race and a drill run (limited)
+	Unmasked.migrate(Save.d)  # a mastery level reached shows on you at home (MasteryLook)
 	# the floor: nobody is left with no Boki and no way to play (Lifeline)
 	out["floor"] = Lifeline.check()
 	Save.save_game()

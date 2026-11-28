@@ -392,7 +392,7 @@ func _base_world() -> void:
 # ------------------------------------------------------------------ 1. Hob
 func _hob_rules() -> void:
 	Save.d = _new_save()
-	var L := HomeLayout.ensure(Save.d)
+	var home_lay := HomeLayout.ensure(Save.d)
 	_stats()
 	var start_open := ["house", "crop_patch", "cook_pot", "ranch_pen", "fence", "path_dirt", "flowers"]
 	ok(
@@ -481,7 +481,7 @@ func _hob_rules() -> void:
 # ------------------------------------------------------------------ 2. the tutorial
 func _tutorial_rules() -> void:
 	Save.d = _new_save()
-	var L := HomeLayout.ensure(Save.d)
+	var home_lay := HomeLayout.ensure(Save.d)
 	_stats()
 	ok(FarmTutorial.active() and FarmTutorial.current() == "hob", "a new farm starts with Hob calling you over")
 	FarmTutorial.event("hob")
@@ -531,7 +531,7 @@ func _tutorial_rules() -> void:
 	)
 	FarmTutorial.event("swing")
 	ok(not FarmTutorial.did("hammer"), "doing a later step early does not count")
-	var site := _add_house(L, true)
+	var site := _add_house(home_lay, true)
 	FarmTutorial.detect()
 	ok(
 		FarmTutorial.did("house") and FarmTutorial.current() == "hammer",
@@ -565,12 +565,12 @@ func _tutorial_rules() -> void:
 	Save.d["feeders"][0]["food"] = ["kibble"]
 	FarmTutorial.detect()
 	ok(FarmTutorial.did("feed") and FarmTutorial.current() == "crop", "food in a trough finishes feeding")
-	(L["water"] as Dictionary).clear()
+	(home_lay["water"] as Dictionary).clear()
 	ok(
 		FarmTutorial.stage("crop") == "patch_dry" and FarmTutorial.world_text("crop") == "",
 		"no water on the island: the plain patch hint, no marker"
 	)
-	L["water"][HomeLayout.key(46, 35)] = 1
+	home_lay["water"][HomeLayout.key(46, 35)] = 1
 	ok(
 		(
 			FarmTutorial.stage("crop") == "patch"
@@ -579,18 +579,18 @@ func _tutorial_rules() -> void:
 		),
 		"crops start at the patch, by the water, with a marker"
 	)
-	var pe := {"u": HomeLayout._next_uid(L), "id": "crop_patch", "x": 44, "z": 30, "r": 0}
-	(L["deco"] as Array).append(pe)
-	(L["water"] as Dictionary).clear()
+	var pe := {"u": HomeLayout._next_uid(home_lay), "id": "crop_patch", "x": 44, "z": 30, "r": 0}
+	(home_lay["deco"] as Array).append(pe)
+	(home_lay["water"] as Dictionary).clear()
 	ok(FarmTutorial.stage("crop") == "plant", "a patch down: plant")
 	Save.d["plots"][0] = {"crop": "tidebloom", "stage": 0, "wt": 0.0}
 	ok(FarmTutorial.stage("crop") == "water", "planted: water it")
-	L["water"][HomeLayout.key(46, 35)] = 1
+	home_lay["water"][HomeLayout.key(46, 35)] = 1
 	ok(
 		FarmWater.plot_near(Save.d, 0) and FarmTutorial.stage("crop") == "grow",
 		"a patch by the water needs no watering by hand"
 	)
-	L["water"].clear()
+	home_lay["water"].clear()
 	Save.d["plots"][0]["wt"] = 100.0
 	ok(FarmTutorial.stage("crop") == "grow", "watered: wait")
 	ok(FarmTutorial.current() == "buy", "while the crop only grows the next open step is shown (the market)")
@@ -615,7 +615,9 @@ func _tutorial_rules() -> void:
 		FarmTutorial.stage("buy") == "bar" and not FarmTutorial.hint_text("buy").contains("{"),
 		"no stall yet: the hint points at the Market on the bar"
 	)
-	(L["deco"] as Array).append({"u": HomeLayout._next_uid(L), "id": "market_stall", "x": 50, "z": 30, "r": 0})
+	(home_lay["deco"] as Array).append(
+		{"u": HomeLayout._next_uid(home_lay), "id": "market_stall", "x": 50, "z": 30, "r": 0}
+	)
 	ok(
 		FarmTutorial.stage("buy") == "stall" and FarmTutorial.world_text("buy") != "",
 		"a stall on the farm: walk there, with a marker"
@@ -659,7 +661,7 @@ func _tutorial_rules() -> void:
 	ok(int(Save.d["gems"]) == g_end + reward, "nothing is granted twice")
 	# skipping takes nothing and hands over the tools and the starter food at once
 	Save.d = _new_save()
-	L = HomeLayout.ensure(Save.d)
+	home_lay = HomeLayout.ensure(Save.d)
 	_stats()
 	var g1 := int(Save.d["gems"])
 	var kibble0 := int(Save.d["items"].get("kibble", 0))  # the fresh bag already holds the first-day kibble
@@ -1287,22 +1289,22 @@ func _farm2() -> void:
 
 	# crops by the water water themselves
 	home = await _home(1)
-	var L := HomeLayout.of(Save.d)
-	(L["water"] as Dictionary).clear()  # (the island's own wild water is not wanted here)
-	_add_house(L)
-	var pe := {"u": HomeLayout._next_uid(L), "id": "crop_patch", "x": 44, "z": 30, "r": 0}
-	(L["deco"] as Array).append(pe)
+	var home_lay := HomeLayout.of(Save.d)
+	(home_lay["water"] as Dictionary).clear()  # (the island's own wild water is not wanted here)
+	_add_house(home_lay)
+	var pe := {"u": HomeLayout._next_uid(home_lay), "id": "crop_patch", "x": 44, "z": 30, "r": 0}
+	(home_lay["deco"] as Array).append(pe)
 	home._build_plots()
 	ok(not FarmWater.near_entry(Save.d, pe), "a patch with no water about is dry")
-	L["water"][HomeLayout.key(50, 31)] = 1  # patch is x 44..48: 2 tiles of gap
+	home_lay["water"][HomeLayout.key(50, 31)] = 1  # patch is x 44..48: 2 tiles of gap
 	ok(FarmWater.near_entry(Save.d, pe), "water two tiles from the patch counts")
-	L["water"].erase(HomeLayout.key(50, 31))
-	L["water"][HomeLayout.key(51, 31)] = 1
+	home_lay["water"].erase(HomeLayout.key(50, 31))
+	home_lay["water"][HomeLayout.key(51, 31)] = 1
 	ok(not FarmWater.near_entry(Save.d, pe), "three tiles away does not")
 	Save.d["plots"][0] = {"crop": "tidebloom", "stage": 0, "wt": 0.0}
 	home._farm_tick()
 	ok(float(Save.d["plots"][0]["wt"]) <= 0.0, "so a dry patch stays dry")
-	L["water"][HomeLayout.key(49, 31)] = 1
+	home_lay["water"][HomeLayout.key(49, 31)] = 1
 	home._farm_tick()
 	var p0: Dictionary = Save.d["plots"][0]
 	ok(float(p0["wt"]) > 0.0 and int(p0["wet"]) == 2, "a patch by the water waters its own plot, as tended")
@@ -1313,10 +1315,10 @@ func _farm2() -> void:
 		"and the build menu says it in the patch's tooltip"
 	)
 	ok(home._dry_plot().is_empty(), "the farmhand has nothing to water there")
-	_grows_faster(home, L)
-	_trough_by_water(L)
+	_grows_faster(home, home_lay)
+	_trough_by_water(home_lay)
 	# the preview in build mode
-	L["water"].clear()
+	home_lay["water"].clear()
 	Save.d["plot_cap"] = 8
 	home.hb.toggle()
 	home.hb.take("crop_patch")
@@ -1330,7 +1332,7 @@ func _farm2() -> void:
 		note == "" and not _has_drop(home.hb),
 		"the preview of a patch away from water stays clear (no note): '%s'" % note
 	)
-	L["water"][HomeLayout.key(cs[0].x + psz.x + 1, cs[0].y)] = 1
+	home_lay["water"][HomeLayout.key(cs[0].x + psz.x + 1, cs[0].y)] = 1
 	home.hb.ghost_cells.set_meta("sig", "")
 	home.hb.tick(0.0)
 	note = _note_text(home.hb)
@@ -1357,7 +1359,7 @@ func _farm2() -> void:
 		),
 		"a River brush costs less than a pond tile"
 	)
-	L["water"].clear()
+	home_lay["water"].clear()
 	Save.d["gems"] = 100
 	home.hb.take("river")
 	var line := _free_row(home.hb, 6)
@@ -1366,7 +1368,11 @@ func _farm2() -> void:
 	home.hb._check_cells()
 	var placed: bool = home.hb.place_held()
 	ok(
-		placed and (L["water"] as Dictionary).size() == line.size() and int(Save.d["gems"]) == 100 - 2 * line.size(),
+		(
+			placed
+			and (home_lay["water"] as Dictionary).size() == line.size()
+			and int(Save.d["gems"]) == 100 - 2 * line.size()
+		),
 		"dragging a river puts water on every tile of the channel for %d gems" % (2 * line.size())
 	)
 	var mid: Vector2i = line[2] if line.size() > 2 else Vector2i.ZERO
@@ -1393,17 +1399,17 @@ func _has_drop(hb) -> bool:
 
 ## The same stretch of growing time: a watered plot away from water stays at its stage, the same plot
 ## with water beside the patch moves on one (FarmWater.grow_mul, 1.25: 72 s a stage instead of 90 s).
-func _grows_faster(home, L: Dictionary) -> void:
+func _grows_faster(home, home_lay: Dictionary) -> void:
 	var day1 := bool(Save.d["tutorial"].get("day1_done", false))
 	Save.d["tutorial"]["day1_done"] = true  # (the tutorial's quick first crop would hide the difference)
-	L["water"].clear()
+	home_lay["water"].clear()
 	var away_s := FarmWater.stage_s(Save.d, "plots", 0)
 	var into := Data.WATER_TIME / FarmWater.grow_mul() + 4.0  # past the by-water stage, short of the dry one
 	var planted := {"crop": "tidebloom", "stage": 0, "care": 0, "wt": Time.get_unix_time_from_system() - into, "wet": 2}
 	Save.d["plots"][0] = planted.duplicate()
 	home._farm_tick()
 	var dry_stage := int(Save.d["plots"][0]["stage"])
-	L["water"][HomeLayout.key(49, 31)] = 1
+	home_lay["water"][HomeLayout.key(49, 31)] = 1
 	var near_s := FarmWater.stage_s(Save.d, "plots", 0)
 	Save.d["plots"][0] = planted.duplicate()
 	home._farm_tick()
@@ -1420,13 +1426,13 @@ func _grows_faster(home, L: Dictionary) -> void:
 
 
 ## A plain trough fills itself from the pantry only by the water; away from it you fill it yourself.
-func _trough_by_water(L: Dictionary) -> void:
+func _trough_by_water(home_lay: Dictionary) -> void:
 	Save.d["items"]["kibble"] = 10
 	var f := {"id": "fw", "kind": "trough", "x": 49.5, "z": 33.5, "food": [], "auto": true}
 	ok(Econ.auto_refill(f) > 0, "a trough two tiles from water tops itself up from the pantry")
 	var far := {"id": "fd", "kind": "trough", "x": 49.5, "z": 40.5, "food": [], "auto": true}
 	ok(Econ.auto_refill(far) == 0 and not Econ.self_fills(far), "a trough away from water waits for you to fill it")
-	L["water"].erase(HomeLayout.key(49, 31))
+	home_lay["water"].erase(HomeLayout.key(49, 31))
 
 
 func _note_text(hb) -> String:

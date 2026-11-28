@@ -32,7 +32,6 @@ func _up(preset: String) -> bool:
 	return c is Match and c.player != null and not c.hunters.is_empty() and c.is_processing()
 
 
-
 func _boot(preset: String, args: PackedStringArray) -> bool:
 	Demo.setup(preset)
 	Demo.open(main, preset, args)

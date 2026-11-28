@@ -57,7 +57,6 @@ static func install(species: String, player: AnimationPlayer, skel: Skeleton3D) 
 			lib.add_animation(n, clips[n])
 
 
-
 static func _build(species: String, player: AnimationPlayer, skel: Skeleton3D) -> Dictionary:
 	var names := {}
 	for i in skel.get_bone_count():
