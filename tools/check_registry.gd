@@ -536,7 +536,6 @@ const CHECKS := {
 	"--foot-slide-check": ["res://tools/foot_slide_check.gd", "foot_slide_check", null],  # slip sweep
 	"--land-lean-shots": ["res://tools/land_lean_shots.gd", "land_lean_shots", null],  # landing squash, run lean
 	"--lineup-shot": ["res://tools/lineup_shot.gd", "lineup_shot", null],  # every Hunter in a row, true scale
-	"--lineup-sheet": ["res://tools/lineup_sheet.gd", "lineup_sheet", null],  # owner lineup shots (GPU)
 	"--hunter-tint-shots": ["res://tools/hunter_tint_shots.gd", "hunter_tint_shots", null],  # colour vs .glb
 	"--anim-audit": ["res://tools/anim_audit.gd", "anim_audit", null],  # gait gate
 	"--anim-shots": ["res://tools/anim_shots.gd", "anim_shots", null],  # walk, run, idle, attacks
