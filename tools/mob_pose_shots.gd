@@ -12,7 +12,7 @@ const POSE_HIT_FRAC := 0.12  # of the monster's hp, the blow the hit cell is sho
 const HIT_WAIT_S := 0.06  # s after the blow: the flinch layer (MobAnim.FLINCH_S) is near its peak
 const DEATH_WAIT_S := 0.1  # s after the kill: the keyed death move under the dissolve
 const HIT_AT := [0.03, 0.08, 0.14, 0.2]  # --react: s after the hit; the flinch layer runs MobAnim.FLINCH_S
-const DEATH_AT := [0.04, 0.11, 0.19, 0.27]  # --react: s after the kill; the death move runs MobAnim.DEATH_S, then the dissolve
+const DEATH_AT := [0.04, 0.11, 0.19, 0.27]  # --react: s after the kill; the death move runs MobAnim.DEATH_S
 const SLOW := 0.15  # --react: engine clock, so a frame lands on each time above
 
 var main: Node
