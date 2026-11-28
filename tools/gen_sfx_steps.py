@@ -1,6 +1,7 @@
 """Footsteps in shallow water (the farm ponds) and on metal (the sky train's car decks), one set per
-weight class (docs/AUDIO.md, "Footsteps").
-Run from tools/: python3 gen_sfx_steps.py. Writes audio/step_<surface>_<light|medium|heavy>(.wav, _1..3.wav).
+weight class (docs/AUDIO.md, "Footsteps"), and the garden Boki's paws on turf, one set per size class.
+Run from tools/: python3 gen_sfx_steps.py. Writes audio/step_<surface>_<light|medium|heavy>(.wav, _1..3.wav) and
+audio/boki_step_<small|medium|large>(.wav, _1..3.wav).
 
 Synthesised in code (no outside sound), the same short, dry level as the grass/stone/wood/snow steps so a
 run never clutters a fight. A light Hunter is quick and high, a heavy one longer and lower with a body thud.
@@ -15,6 +16,8 @@ from sfx_combat import kick, click, crack, ring, grains
 S.reseed(5871)
 # weight class: (pitch multiplier, length multiplier, body thud level)
 WEIGHT = {"light": (1.3, 0.8, 0.35), "medium": (1.0, 1.0, 0.55), "heavy": (0.75, 1.3, 0.9)}
+# size class: (pitch multiplier, length multiplier, pad thud level, turf swish level)
+PAW = {"small": (1.5, 0.75, 0.3, 0.5), "medium": (1.0, 1.0, 0.55, 0.7), "large": (0.7, 1.35, 1.0, 0.9)}
 
 
 def water(w, i):
@@ -47,8 +50,20 @@ def metal(w, i):
     )
 
 
+def paw(size, i):
+    """A Boki's paw on turf: a soft pad thud and a short swish of grass, rolled off like the Hunters' steps."""
+    p, L, body, swish = PAW[size]
+    d = 0.22 * L
+    pad = kick((130 + 8 * i) * p, 62 * p, d, 0.012, 0.035 * L, 1.3) * body
+    grass = bpf(noise(d), 500 * p, 2800 * p) * env(N(d), 0.004, 0.05 * L) * swish
+    blades = at(grains(0.12 * L, 40, 1200 * p, 4000, 0.001, 0.003, fall=0.05 * L), 0.01) * 0.2
+    return mix(pad, grass, blades)
+
+
 if __name__ == "__main__":
     for surf, fn in (("water", water), ("metal", metal)):
         for w in WEIGHT:
             S.takes_cat("step_%s_%s" % (surf, w), lambda i, fn=fn, w=w: fn(w, i), 3, "step")
+    for size in PAW:
+        S.takes_cat("boki_step_" + size, lambda i, size=size: paw(size, i), 3, "step")
     print("step surface sfx written")
