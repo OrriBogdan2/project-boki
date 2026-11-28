@@ -11535,3 +11535,4 @@ READY ext/sfx-glider-heat a6f9a77a72 (your glider ticks once under 25% heat and 
 READY ext/recast-buffer-sweep 0987e96b9c (recast presses buffered in every kit via the shared buffer: Sparkle Kitefall, Neve Rimelock, Gil spout+wave, Albert hammer; new --recast-buffer-check per-kit sweep)
 READY ext/desktop-social a53ddd2ba4f (social on desktop via our matchmaker /social store, no web build; PR #1172, GATE GREEN posted, NEW-RED 4 explained as load timeouts)
 READY ext/vfx-grimble-slugs a1c39a88541400b99e8318f4b0310eab0915db33 (Grimble LMB slugs: tracer 0.2->0.42 m, head 0.3->0.6 m, gold hit pop; hitbox unchanged)
+READY ext/vfx-zone-rims-meeko-sable 42bcdd433f61bba5a066a84fc243c3102dd36cc0 (Meeko Burrseed burst ring hollow: lit band, clear inside; Sable X rim/E already fine, unchanged; strip + scorecard)
