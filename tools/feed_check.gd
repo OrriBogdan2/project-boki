@@ -40,6 +40,7 @@ func run(m: Node) -> void:
 	Save.no_write = true
 	await _case(false)
 	await _case(true)
+	_played_day()
 	await _bowl()
 	await _hand_cases()
 	print("FEED DONE, failures: %d" % bad)
@@ -106,15 +107,15 @@ func _case(trough: bool) -> void:
 	home.queue_free()
 
 
-## Owner rule 11-23: a kin starved for 40 h (clock far over the 18 h refusal) goes out after one meal, though
+## Owner rule 11-23: a kin starved for 72 h (clock far over the 18 h refusal) goes out after one meal, though
 ## the starve clock has barely moved; the expedition path itself opens the risk confirm, not "Too hungry to go".
 func _long_starved(home: Node, k: Dictionary, tag: String) -> void:
 	Exchange.post("buy", "kibble", 2, Exchange.best("kibble", "sell"))
 	k["needs"]["food"] = 0.0
-	k["starve"] = 40.0 * 3600.0
+	k["starve"] = 72.0 * 3600.0
 	home.exp_tier = int(KinLoss.rules()["loss_min_tier"])  # a risky tier: the confirm panel opens, no match starts
 	home._confirm_start()
-	ok(home.panel_open == "Too hungry to go", "%s: 40 h starved, empty belly: the expedition says too hungry" % tag)
+	ok(home.panel_open == "Too hungry to go", "%s: 72 h starved, empty belly: the expedition says too hungry" % tag)
 	ok(home.hecon.refuse_reason().contains("one meal"), "%s: the message says what to do" % tag)
 	home._open_feed(k)
 	await home.get_tree().process_frame
@@ -125,7 +126,7 @@ func _long_starved(home: Node, k: Dictionary, tag: String) -> void:
 	var clock := Care.starve_h(k)
 	ok(clock > Care.STARVE["refuse"], "%s: after the meal the starve clock is still %.1f h" % [tag, clock])
 	ok(Care.need(k, "food") > 20.0, "%s: the food bar shows fed (%d)" % [tag, Care.need(k, "food")])
-	ok(home.hecon.refuse_reason() == "", "%s: one meal and the 40 h starved kin can go" % tag)
+	ok(home.hecon.refuse_reason() == "", "%s: one meal and the 72 h starved kin can go" % tag)
 	home._confirm_start()
 	ok(home.panel_open != "Too hungry to go", "%s: the expedition path no longer says too hungry" % tag)
 	k["needs"]["food"] = 0.0
@@ -384,3 +385,57 @@ func _hand_cases() -> void:
 		home.queue_free()
 		await main.get_tree().process_frame
 	rules["base_mode"] = false
+
+
+## Owner bug 11-23 #2: meals a Boki needs on a played farm day. It is fed in the visit, left alone for the
+## rest of a real day (the belly empties in about an hour, the starve clock builds the other 23), and the
+## player feeds kibble until it is no longer weak. Run for a few days so the steady state shows.
+## care.json meal: one good meal must clear a day, a treat (favourite food or a snack) tops it up.
+func _played_day() -> void:
+	var day_s := 86400.0
+	var r: Dictionary = Content.rules("care")["meal"]
+	var meals := _day_meals(day_s, "kibble", false)
+	var cap := int(r["meals_day_max"])
+	var clear := float(r["clear_h"])
+	print("FEED meals a played day: %d (clear_h %.0f, treat +%.0f h)" % [meals, clear, float(r["treat_extra_h"])])
+	ok(meals <= cap and meals >= 1, "a played day takes %d meal(s) to clear the hunger (max %d)" % [meals, cap])
+	var tag := "a day alone"
+	var k := Save.new_kin("zapple", "Pip")
+	Care.ensure(k)
+	k["needs"]["food"] = 0.0
+	k["starve"] = (Care.STARVE["dead"]) * 3600.0  # three days of neglect, the most it holds
+	Care.feed(k, "kibble")
+	var left := Care.starve_h(k)
+	ok(left <= Care.STARVE["dead"] - clear + 0.01, "%s: one kibble takes a day off (%.1f h left)" % [tag, left])
+	var k2 := Save.new_kin("zapple", "Pip")
+	Care.ensure(k2)
+	k2["needs"]["food"] = 0.0
+	k2["starve"] = Care.STARVE["dead"] * 3600.0
+	Care.feed(k2, k2["likes"]["food"])
+	var left2 := Care.starve_h(k2)
+	ok(left2 < left - 1.0, "a treat (its favourite) tops up: %.1f h left, plain meal %.1f h" % [left2, left])
+	ok(not bool(Content.rules("care")["natural_death"]), "natural_death stays off")
+	var k3 := Save.new_kin("zapple", "Pip")
+	Care.ensure(k3)
+	Care.tick(k3, day_s * 30.0, false, false, false, true)
+	var cap_h := float(Care.STARVE["dead"])
+	ok(Care.starve_h(k3) <= cap_h + 0.01, "a month alone stays under the %.0f h cap" % cap_h)
+
+
+## Steady-state meals on the 5th played day: arrive after a real day alone, feed `food` until not weak.
+func _day_meals(day_s: float, food: String, _treat: bool) -> int:
+	var k := Save.new_kin("zapple", "Pip")
+	Care.ensure(k)
+	if k["likes"]["hates"] == food:
+		k["likes"]["hates"] = "sweetbun"
+	var meals := 0
+	for _day in 5:
+		meals = 0
+		Care.tick(k, day_s, false, false, false, true)
+		while Care.starve_h(k) >= Care.STARVE["weak"] and meals < 30:
+			if Care.need(k, "food") >= 92.0:  # full: it digests a little first
+				Care.tick(k, 600.0)
+				continue
+			Care.feed(k, food)
+			meals += 1
+	return meals

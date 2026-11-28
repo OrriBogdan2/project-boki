@@ -130,10 +130,33 @@ func run(m: Node) -> void:
 		var cs = await _second_game(bb)
 		if cs != null:
 			await _away(cs)
+		_hunger_day()
 	ok(FileAccess.get_md5(real) == before, "the real save file is untouched")
 	Engine.time_scale = 1.0
 	print("GDAY DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+
+## Row: the hunger a played day leaves. Off base_mode (where the starve clock runs) a Boki left alone a real
+## day builds about 23.7 h; one kibble must clear it (care.json meal; --feed-check has the full run).
+func _hunger_day() -> void:
+	var was: bool = FarmUnlocks.rules()["base_mode"]
+	FarmUnlocks.rules()["base_mode"] = false
+	var k := Save.new_kin("zapple", "Hungry")
+	Care.ensure(k)
+	Care.tick(k, 86400.0, false, false, false, true)
+	var built := Care.starve_h(k)
+	var meals := 0
+	while Care.starve_h(k) >= Care.STARVE["weak"] and meals < 10:
+		if Care.need(k, "food") >= 92.0:
+			Care.tick(k, 600.0)
+			continue
+		Care.feed(k, "kibble")
+		meals += 1
+	FarmUnlocks.rules()["base_mode"] = was
+	var cap := int(Content.rules("care")["meal"]["meals_day_max"])
+	var good := built > Care.STARVE["weak"] and meals >= 1 and meals <= cap
+	ok(good, "hunger: a day alone builds %.1f h, %d kibble clears it (max %d)" % [built, meals, cap])
 
 
 ## Row: you come home from an expedition with a garden item kind you never had. The nearest free Boki walks up, reacts
