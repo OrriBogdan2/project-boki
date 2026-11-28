@@ -10,7 +10,9 @@ const AIM_OFF := 0.3  # rad: how far the cannon may sit off the aim mid slide
 const FLICK := 0.2  # m: how far past rest the coin hand reaches along her facing
 const PALM_UP := 1.2  # m: the raised palm above her feet while Palm Lance charges
 const PALM_OUT := 0.25  # m: the palm ahead of her while Palm Lance charges
-const GUN_REST := 0.15  # m: the most the gun hand may rise over its rest height in a coin toss or a palm cast
+## m at her base size: the most the gun hand may rise over its rest height in a coin toss or a palm cast; the rise
+## is read / body.match_k, her draw scale (0.136 = 0.15 m as drawn at a shared 1.10)
+const GUN_REST := 0.136
 
 var A
 var bad := 0
@@ -236,7 +238,13 @@ func run(main: Node) -> void:
 	P.inp["sec"] = false
 	ok(seen.has("coin_flick"), "a tapped RMB plays the coin flick clip")
 	ok(flick > FLICK, "the coin hand flicks out ahead of her (%.2f m past rest %.2f m)" % [flick, rest_ahead])
-	ok(gun_up < GUN_REST, "the gun stays down through the coin toss (%.2f m over rest)" % gun_up)
+	ok(
+		gun_up / Arch.match_k(P.arch) < GUN_REST,
+		(
+			"the gun stays down through the coin toss (%.2f m over rest, %.3f at base size)"
+			% [gun_up, gun_up / Arch.match_k(P.arch)]
+		)
+	)
 	# E: the Palm Lance charges from the raised open palm, out in front at chest height, the gun hand down
 	for f in 60:
 		_frame(m, [P])
@@ -258,7 +266,13 @@ func run(main: Node) -> void:
 		high > PALM_UP and out > PALM_OUT,
 		"the palm is raised and out for the charge (%.2f m up, %.2f m ahead)" % [high, out]
 	)
-	ok(gun_up < GUN_REST, "the gun stays down through the palm cast (%.2f m over rest)" % gun_up)
+	ok(
+		gun_up / Arch.match_k(P.arch) < GUN_REST,
+		(
+			"the gun stays down through the palm cast (%.2f m over rest, %.3f at base size)"
+			% [gun_up, gun_up / Arch.match_k(P.arch)]
+		)
+	)
 	# LMB
 	seen.clear()
 	for f in 60:

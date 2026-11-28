@@ -168,7 +168,16 @@ func _live(main: Node) -> void:
 		c["open"] and off == 0 and on >= want,
 		"live: the pose is on the whole chest hold (%d on, %d off, want %d)" % [on, off, want]
 	)
-	ok(worst <= REACH, "live: both wrists on the chest's lid (worst %.3f m off it, limit %.2f)" % [worst, REACH])
+	# (a match draws Kael body.match_k bigger, so the miss is judged at his base size: REACH was set at the old
+	# match_hunter_scale 1.10 draw, main 0.197 m there = 0.179 at base)
+	var base := worst / Arch.match_k("juggernaut")
+	ok(
+		base <= REACH / 1.10,
+		(
+			"live: both wrists on the chest's lid (worst %.3f m off it, %.3f at base size, limit %.3f)"
+			% [worst, base, REACH / 1.10]
+		)
+	)
 	p.inp["interact"] = false
 	for i in 12:
 		_frame(m, p, sync)

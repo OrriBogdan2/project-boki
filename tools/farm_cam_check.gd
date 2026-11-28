@@ -271,7 +271,7 @@ func _flag_part() -> void:
 	var match_cam := CamRig.new()
 	match_cam.use_style("default")
 	ok(
-		match_cam.lean_scale == 1.0 and match_cam.char_lean() != Basis(),
-		"a match camera still leans its bodies and is top-down"
+		match_cam.lean_scale == 1.0 and match_cam.char_lean() == Basis(),
+		"a match camera draws its bodies upright (no lean, like the reference) and is top-down"
 	)
 	match_cam.free()
