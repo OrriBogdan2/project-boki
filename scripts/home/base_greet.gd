@@ -103,8 +103,7 @@ static func _trail_tick(life: BaseLife, k: Dictionary, m: Fsm) -> void:
 	elif moving and to.length() < float(r["min_m"]):
 		goal = h.ppos + Vector3(sin(h.pface), 0, cos(h.pface)) * float(r["settle_m"])
 	if goal != pos:
-		goal = _open(h, goal)  # (standing at a wall's edge is no wish to move: only a new aim is snapped)
-	goal = _clear_of_pad(h, goal, r)
+		goal = _clear_of_pad(h, _open(h, goal), r)  # only a new aim is moved: a Boki standing still is left alone
 	var idle := not moving and goal == pos and float(k.get("hold_t", 0.0)) <= 0.0
 	var still := float(k.get("trail_still", 0.0)) + BaseLife.STEP if idle else 0.0
 	k["trail_still"] = still  # kept over the needs check: a sitting partner does not stand up for it

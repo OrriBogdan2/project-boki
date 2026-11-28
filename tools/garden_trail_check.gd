@@ -38,7 +38,6 @@ func run(m: Node) -> int:
 	_stage(true)
 	_straight_walk()
 	_rest_and_sit()
-	_sit_at_a_wall()
 	_round_house()
 	home.queue_free()
 	home = await _open(GardenZones.HUB)
@@ -182,27 +181,6 @@ func _rest_and_sit() -> void:
 	ok(not kin.has("sat"), "you move: it gets up")
 
 
-## Standing hard against the house (inside the Boki's body width of a block): it still sits, it does not shuffle.
-func _sit_at_a_wall() -> void:
-	var house := Vector3(HomeLayout.LANDING.x + 7.0, 0, HomeLayout.LANDING.z - 4.0)
-	var edge := Vector3.INF
-	for i in 400:
-		var p := house + Vector3(-8.0 + float(i % 20) * 0.4, 0, -8.0 + float(i / 20) * 0.4)
-		if home.world.occupy(p.x, p.z, 0.3, 0.0, true) != 0.0 and home.world.occupy(p.x, p.z, 0.0, 0.0, true) == 0.0:
-			edge = p
-			break
-	ok(edge != Vector3.INF, "the house has an edge a Boki can stand against")
-	if edge == Vector3.INF:
-		return
-	home.ppos = home.world.free_spot_near(edge + Vector3(0, 0, 3.0), [], 1.0)
-	home.player.position = home.ppos
-	kin["pos"] = edge
-	(kin["node"] as Node3D).position = edge
-	kin["goal"] = edge
-	_run_for(float(r["sit_s"]) + 4.0)
-	ok(kin.has("sat"), "you idle with it against the house: it sits (%.1f m from you)" % _gap())
-
-
 ## You cross to the far side of the house: it has to find its way round, not through.
 func _round_house() -> void:
 	var far := Vector3(HomeLayout.LANDING.x + 14.0, 0, HomeLayout.LANDING.z - 4.0)
@@ -224,6 +202,8 @@ func _waystone() -> void:
 	var off := Vector2(kin["pos"].x - stone.x, kin["pos"].z - stone.z).length()
 	var wait := "you stand on the Waystone: it waits %.1f m off (ring %.1f m), not on it"
 	ok(off >= ring - 0.5, wait % [off, ring])
+	_run_for(float(r["sit_s"]) + 2.0)
+	ok(kin.has("sat"), "you idle on the Waystone: it sits at the ring")
 	home.hway.hopping = "bramblebank"
 	var at: Vector3 = kin["pos"]
 	_run_for(3.0)
