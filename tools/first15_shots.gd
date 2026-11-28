@@ -1,10 +1,10 @@
 extends RefCounted
-## --first15-shots --shots-dir=<dir> [--size=WxH] [--part=match|panels|creator]: every screen of the first 15 minutes on a
-## fresh save (title, prologue, hatch card, creator, eggs, name, first Hunter, tutorial steps, results, farm, expedition
-## panel, Hunter pick, first expedition HUD, pause), one .jpg each plus <dir>/layout.txt with, per shot:
-## the screen's UI controls (nodes, not the HUD's own drawing) that cross the window edge or sit inside the
-## 5% margin. --part=match (first expedition and pause), --part=panels (farm, expedition panel, Relics) plays one part alone
-## from a made-up save; --part=creator shoots the fresh save's creator, short and after "More".
+## --first15-shots --shots-dir=<dir> [--size=WxH] [--part=match|panels|creator]: every screen of the first 15
+## minutes on a fresh save (title, prologue, hatch card, creator, eggs, name, first Hunter, tutorial steps, results,
+## farm, expedition panel, Hunter pick, first expedition HUD, pause), one .jpg each plus <dir>/layout.txt with, per
+## shot: the screen's UI controls (nodes, not the HUD's own drawing) that cross the window edge or sit inside the
+## 5% margin. --part=match (first expedition and pause) or --part=panels (farm, expedition panel, Relics) plays one
+## part alone from a made-up save; --part=creator shoots the fresh save's creator, short and after "More".
 ## Needs a real renderer (jobq submit --needs gpu).
 ## Never writes the save. The write-up is docs/UI_FIRST15.md.
 

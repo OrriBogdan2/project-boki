@@ -198,7 +198,8 @@ func _first_pass() -> void:
 	var sliders: Array = hx.root_ui.find_children("Frame_*", "HSlider", true, false)
 	var names: Array = sliders.map(func(n): return String(n.name))
 	ok(
-		locker.short and names == ["Frame_height", "Frame_build"] and not locker._tabs.visible and not locker._name.visible,
+		locker.short and names == ["Frame_height", "Frame_build"]
+		and not locker._tabs.visible and not locker._name.visible,
 		"a new save shows Sex, Height, Build and colour only (sliders %s)" % [names]
 	)
 	var more := hx.root_ui.find_child("More", true, false) as Button

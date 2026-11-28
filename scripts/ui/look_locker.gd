@@ -106,7 +106,9 @@ var _swing_fov := 40.0
 var _react_t := 99.0  # s since the last pick's reaction began
 
 
-static func open(host: Node3D, ui_root: Control, cam: Camera3D, fx: Fx, start: Dictionary, first := false) -> LookLocker:
+static func open(
+	host: Node3D, ui_root: Control, cam: Camera3D, fx: Fx, start: Dictionary, first := false
+) -> LookLocker:
 	var lk := LookLocker.new()
 	lk.look = start.duplicate(true)
 	lk.short = first
