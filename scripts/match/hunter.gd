@@ -8,9 +8,9 @@ const H_GRAV := 14.7             # m/s^2 [game data] DefaultGravityZ -1470 uu/s^
 # ---- movement feel (movefeel, Oct 31 2026): every value and its source is in docs/MOVEMENT_FEEL.md,
 # measured by --move-feel-check. Snappy first: input acts the step it arrives, falls hit the
 # footage depth, the glider opens and steers at once and keeps the momentum you bring into it.
-# m/s: [game data] JumpZVelocity is 7.5 (1.9m up); ours stops ~1.5m up so jump + mantle still tops
-# out under four terraces (the wall kick's job) on our 0.8m terraces
-const JUMP_V := 6.8
+# m/s: [game data] JumpZVelocity 750 uu/s, 1.91m up; jump + mantle still tops out under four terraces
+# (HunterMove.ledge_reach: the wall kick's job)
+const JUMP_V := 7.5
 # one-step presses, cleared after each sim step
 const PRESS_KEYS := ["dash", "jump", "sig", "util1", "util2", "util3", "util4", "util5", "util6", "ult", "sec",
 		"gear1", "gear2", "skill", "swap"]
@@ -123,6 +123,7 @@ var seeds := {}
 var caught: Array = []        # kin records caught this match
 var kills := 0
 var knocks := 0
+var assists := 0             # takedowns a teammate got that your hit or CC helped (DashReset)
 var dmg_done := 0.0
 var belt: Array = UtilityBelt.empty()    # the utility belt on 1-4: four slots of {id, n, cd} (UtilityBelt)
 var belt_free: Dictionary = {}                # issued charges, used first and never taken home
@@ -499,7 +500,7 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 	if downed:
 		return Life.wisp_hit(self, by, dmg, opts)
 	var d_in := d
-	d = MergeShell.absorb(self, d, opts)         # a merged form's shell takes the hit first (docs/decisions/0003)
+	d = MergeShell.absorb(self, d, opts, by)         # a merged form's shell takes the hit first (docs/decisions/0003)
 	var shelled := false
 	if d <= 0.0:
 		if d_in <= 0.0:
@@ -510,10 +511,10 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 		var a := minf(shield, d)
 		shield -= a; d -= a
 		ShieldSfx.hit(self, a)
+		SoakNumber.at(self, by, a, HudStyle.NUM_SHIELD)       # what the shield took, in its own look
 		if shield <= 0.0: shield_kind = ""
 		if d <= 0.0:
 			flash_t = 0.06
-			m.fx.number(pos + Vector3(0, 1.6, 0), a, Color("cfe8ff"), false)
 			return 0.0
 	if drink_t > 0.0 or kit_t > 0.0 or box_reviving():
 		d *= CONSUME_VULN
@@ -539,6 +540,7 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 		# your kin's owner shield soaks last; a fully soaked hit still counts as a hit (truces, interrupts)
 		var ks0 := minf(kin_shield, d)
 		kin_shield -= ks0
+		SoakNumber.at(self, by, ks0, HudStyle.NUM_SHIELD)
 		d = maxf(0.01, d - ks0)
 		opts["soaked"] = ks0
 	return d
@@ -832,7 +834,12 @@ static func abyss_lift_vy(vy: float, depth: float, dt: float, k := 1.0) -> float
 ## Real keys only open the glider with a fresh press in the air (a second Space, or the glide button). Opening uses
 ## the press up, so a fold (heal, dash, a knock) stays shut until a new press; release or landing clears it too.
 var _glide_armed := false
+var _glide_hold_t := 0.0      # s a let-go glide press stays armed (Loco.press_buffer)
 var _glide_btn_held := false
+
+func glide_armed() -> bool:
+	return _glide_armed
+
 
 func can_glide() -> bool:
 	return not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed and stun_t <= 0.0 \
@@ -1524,7 +1531,7 @@ func sim(dt: float) -> void:
 	atk.tick_burst(dt)
 	atk.tick_weapon(dt)
 	swing_t = maxf(0.0, swing_t - dt)
-	if inp["ult"]:
+	if inp["ult"] and MergeForm.enabled():  # (no fusion in the game: the Fusion input is dead, no deny pulse)
 		use_ultimate()
 	atk.trigger(dt)
 	inp["kin_ab"] = false
@@ -1755,12 +1762,12 @@ func _physics(dt: float) -> void:
 	var b1: float = _occ(nx, pos.z, guard)
 	if b1 == 0.0: pos.x = nx
 	elif grounded and b1 > 0.0 and b1 - pos.y <= World.LEVEL + 0.05: step_up = b1
-	elif b1 > 0.0 or b1 == -1.0: vel.x = 0.0 if b1 == -1.0 else WallMoves.stopped(self, vel.x)
+	elif b1 > 0.0 or b1 == -1.0: vel.x = 0.0 if b1 == -1.0 else WallMoves.stopped(self, vel.x, b1)
 	var nz := tgt.y
 	var b2: float = _occ(pos.x, nz, guard)
 	if b2 == 0.0: pos.z = nz
 	elif grounded and b2 > 0.0 and b2 - pos.y <= World.LEVEL + 0.05: step_up = maxf(step_up, b2)
-	elif b2 > 0.0 or b2 == -1.0: vel.z = 0.0 if b2 == -1.0 else WallMoves.stopped(self, vel.z)
+	elif b2 > 0.0 or b2 == -1.0: vel.z = 0.0 if b2 == -1.0 else WallMoves.stopped(self, vel.z, b2)
 	if step_up > 0.0 and mv.length() > 0.3:
 		# walking into a single terrace steps you up it smoothly, no hop
 		pos.y = step_up
@@ -2031,10 +2038,13 @@ func _update_glide(dt: float) -> void:
 	# an overheated glider stays open until you land or get hit again; a knock carries an open one (0055)
 	var can: bool = (lfloat.is_empty() or (bool(inp.get("glide", false)) and not bool(lfloat.get("g0", true)))) and not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed and stun_t <= 0.0 \
 		and (gliding or m.time - kb_t > 0.4) and pad.is_empty() and not shot_down
-	var want: bool = inp.get("glide", false) or auto_glide
+	var held: bool = inp.get("glide", false)
 	var btn_down: bool = inp.get("glide_btn", false)
-	# a fresh button press arms through a lock (a wind-down) as a second Space does: held, it opens as the lock ends
-	_glide_armed = (_glide_armed or (btn_down and not _glide_btn_held)) and bool(inp.get("glide", false)) and not grounded
+	# a fresh button press arms through a lock (a wind-down) as a second Space does: it opens as the lock ends, even
+	# if let go meanwhile (a tap is kept Loco.press_buffer, never eaten by an attack's recovery)
+	_glide_hold_t = Loco.press_buffer if held else maxf(0.0, _glide_hold_t - dt)
+	_glide_armed = (_glide_armed or (btn_down and not _glide_btn_held)) and (held or _glide_hold_t > 0.0) and not grounded
+	var want: bool = held or auto_glide or (_glide_armed and not gliding)
 	var was_btn := _glide_btn_held
 	_glide_btn_held = btn_down
 	var hold_opens: bool = auto_glide or _glide_armed or not inp.get("glide_press_only", false)
@@ -2078,7 +2088,7 @@ func _try_ledge_grab(dt: float) -> void:
 	var w: World = m.world
 	var mv: Vector2 = inp["move"]
 	var reach := 0.0
-	var max_rise := HunterFeel.mantle_reach + (HunterFeel.tall_climb_extra if HunterMove.climbs_tall(self) else 0.0)
+	var max_rise := HunterMove.ledge_reach(self)
 	if grounded:
 		# as in Supervive, walking into a wall doesn't climb it: jump, and you mantle at the top.
 		# Bots still lean their way up so their paths work.
@@ -2705,10 +2715,10 @@ func _anim_state(stretch: float) -> void:
 	else:
 		s.erase("air_h")
 
-## (movefeel) Hunters are drawn a little larger in a match so they read on screen (owner: SUPERVIVE's
-## heroes "feel more important"), times the camera style's hunter_scale. Visual only: the hitbox (r),
+## (movefeel) Hunters are drawn a little larger in a match so they read on screen (1.12 times
+## camera.json match_hunter_scale), times the camera style's hunter_scale. Visual only: the hitbox (r),
 ## the TeamRing hit circle under your feet, shot heights and the balloon marker are unchanged.
-const VIS_SCALE := 1.12
+static var VIS_SCALE: float = 1.12 * CamRig.match_hunter_scale  # base 1.12 x camera.json match_hunter_scale
 var vis_k := 1.0       # the scale fit_scale last put on this model
 func set_model(n: Node3D) -> void:
 	super.set_model(n)
@@ -2852,9 +2862,10 @@ func render(delta: float, alpha: float) -> void:
 		else:
 			see = int(m.time * 14.0) % 3 != 0
 	model.visible = see and not HunterWisp.hides(self)    # a critter or a Wisp stands in
-	ShieldLook.tick(self)
-	SideRings.tick(self)
-	BodyTell.tick(self, delta)
+	if every == 1 or posed or BodyTell.pending(self):      # (the looks follow state, not time: a pose-throttled hunter updates them when posed, or at once on a new cast and while a tint shows)
+		ShieldLook.tick(self)
+		SideRings.tick(self)
+		BodyTell.tick(self, delta)
 	var ring := model.get_node("TeamRing") as MeshInstance3D
 	ring.visible = not downed
 	_render_balloon(delta)
@@ -2863,4 +2874,4 @@ func render(delta: float, alpha: float) -> void:
 		vuln_fx_t -= delta
 		if vuln_fx_t <= 0.0:
 			vuln_fx_t = 0.22
-			m.fx.burst(pos + Vector3(0, 2.05, 0), Color("ff6a4a"), 3, 1.2, 0.3, -1.0, 0.8)
+			m.fx.burst(pos + Vector3(0, 2.05 * CamRig.match_hunter_scale, 0), Color("ff6a4a"), 3, 1.2, 0.3, -1.0, 0.8)
