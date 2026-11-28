@@ -40,7 +40,7 @@ const NAMES := [
 ]
 const TABLE := {
 	S.ROAM: [S.EAT, S.NAP, S.PLAY, S.PLAY_WITH, S.WATCH, S.REACT, S.MENTOR, S.CHORE, S.LEAD, S.APPROACH, S.GREET],
-	S.GREET: [S.ROAM, S.NAP],  # you came back (BaseGreet): a look, or a run over
+	S.GREET: [S.ROAM, S.NAP, S.APPROACH],  # you came back (BaseGreet), or it trails you: your hand still calls it
 	S.APPROACH: [S.HAND_EAT, S.DONE],  # your hand (BaseHandFeed): walks over, then eats or sniffs and leaves
 	S.HAND_EAT: [S.DONE],
 	S.DONE: [S.ROAM],
@@ -265,6 +265,11 @@ func choose(k: Dictionary) -> void:
 		_nap(k, "lazy")
 		return
 	if BaseShy.keep_to_edge(h, k):
+		return
+	var errand := GardenZones.is_partner(rec) and BaseChore.pick(self, k) != ""  # no die drawn when it has no chore
+	if errand and randf() < float(r_v["chore_chance"]) and _chore(k):
+		return  # your partner breaks off the trail for its chore (it minds the egg in the hub's Nook), same odds
+	if BaseGreet.trail(self, k):
 		return
 	if not night and _clock >= float(k.get("doze_ok", 0.0)) and randf() < _doze(k):
 		_nap(k, "dozy")  # a nap for company, not only when tired: the pile forms where a friend already lies

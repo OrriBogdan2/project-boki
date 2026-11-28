@@ -2,7 +2,8 @@ extends RefCounted
 ## --farm-cam-clip [--clip-dir=farm_cam_clip]: film the farm's third-person view (FarmCam) on a made-up garden (never
 ## the real save): you walk with the real keys (W is away from the camera) to the garden beds, drag the view round,
 ## to a roaming Boki, to the house, then back up to a wall so the camera is pulled in. With --fc-games it films the
-## Boki minigames (Spark Volley, Fetch Cup, Kite Tow, Echo Steps) played from the third-person view instead. PNG
+## Boki minigames (Spark Volley, Fetch Cup, Kite Tow, Echo Steps) played from the third-person view instead; with
+## --fc-trail it films your partner trailing you (walk, stop, sit, walk on, then wait at the Waystone). PNG
 ## frames (cam_NN_<what>.png) and the movie (farm_cam.avi) go to <tree>/<clip-dir>. --clip-arch=<id> plays that hunter
 ## (its class too); --clip-beds-only stops after the garden beds shots. Like tools/farm_greet_clip.gd it re-runs itself
 ## as a child Godot under the movie writer (GPU worker). Prints FCCLIP lines.
@@ -72,6 +73,9 @@ func run(main_node: Node) -> void:
 	main.get_tree().create_timer(DEADLINE_S).timeout.connect(main.get_tree().quit.bind(1))  # never hang a worker
 	if "--fc-games" in OS.get_cmdline_user_args():
 		await _games()
+	elif "--fc-trail" in OS.get_cmdline_user_args():
+		await _open("")
+		await _trail()
 	else:
 		await _open("")
 		await _beds()
@@ -130,6 +134,33 @@ func _hub() -> void:
 	await _orbit(3.1)  # turn the view round so it looks into the house wall: the camera comes in
 	await _wait(0.5)
 	await _shot("wall")
+
+
+## You walk to the beds, stop and idle (the partner stops, then sits), walk on to the house, then in the hub to the
+## Waystone where the partner waits at its ring. Prints the gap to the partner at each shot.
+func _trail() -> void:
+	var partner: Dictionary = _partner()
+	await _walk((h.plots[0] as Node3D).global_position + Vector3(0.0, 0, 1.6), null, "walk")
+	await _shot("stop")
+	await _wait(float(BaseGreet.trail_rules()["sit_s"]) + 2.0)
+	await _shot("sit")
+	var life: Fsm = h.life.machine(partner)
+	var off: Vector3 = partner["goal"] - partner["pos"]
+	print("FCCLIP partner sat=%s state=%s goal off %.2f m" % [partner.has("sat"), life.state_name(), off.length()])
+	await _walk(h.world.free_spot_near(h.spots["house"] + Vector3(0, 0, 4.0), [], 1.0), null, "walk_on")
+	await _open(GardenZones.HUB)
+	await _walk(h.hway.node.position + Vector3(0, 0, 1.2))
+	await _wait(3.0)
+	await _shot("waystone")
+	await _orbit(3.1)  # the view turns round to the partner waiting at the ring
+	await _wait(0.5)
+	await _shot("waystone_partner")
+	var gap: Vector3 = _partner()["pos"] - h.hway.node.position
+	print("FCCLIP partner waits %.1f m from the Waystone" % Vector2(gap.x, gap.z).length())
+
+
+func _partner() -> Dictionary:
+	return h.kins.filter(func(k): return GardenZones.is_partner(k["rec"]))[0]
 
 
 ## Each minigame on the classic base (it holds them all round its Training post), started from where you would stand.

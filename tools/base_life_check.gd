@@ -46,7 +46,7 @@ func _new_save() -> Array:
 		recs.append(rec)
 	recs[0]["starter"] = true
 	d["roster"] = recs.slice(0, 3)
-	d["active"] = recs[0]["uid"]
+	d["active"] = recs[2]["uid"]  # calm Moss is the partner: it trails you, so the hot pair stay free to squabble
 	d["tutorial"] = {"hatched": true, "intro": true, "day1_done": true}  # no base tutorial (Lead)
 	Save.d = d
 	HomeLayout.new_fs(d, ISLAND_SEED)
@@ -182,11 +182,12 @@ func _notice_part(home, center: Vector3) -> void:
 	)
 	home.ppos = home.world.free_spot_near(home.ppos + Vector3(3.0, 0, 0), [], 0.8)
 	var gap := BaseLife._dist(k, {"pos": home.ppos})
+	var now := gap
 	for _i in int(float(r["follow_s"]) / DT) + 6:
 		home._move_kin(DT)
-		if m.is_in(BaseLife.S.ROAM):
-			break
-	var now := BaseLife._dist(k, {"pos": home.ppos})
+		if not m.is_in(BaseLife.S.GREET):
+			break  # (it may go straight to a toy: the gap that counts is the last one while it followed)
+		now = BaseLife._dist(k, {"pos": home.ppos})
 	ok(now < gap, "it followed you as you walked off (%.1f m gap, was %.1f)" % [now, gap])
 	for _i in int(float(r["follow_s"]) / DT) + 6:
 		home._move_kin(DT)
