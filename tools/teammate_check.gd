@@ -11,6 +11,8 @@ extends RefCounted
 ##   6. the memory line it brings up at home, in its own talking level
 ##   7. the tutorial: it leads to the glove and the outpost, hints at each step, shows a dash and a
 ##      jump, and the tutorial still finishes
+##   8. the squad row's Boki icon (MateBoki): a row for each hunter with a Boki, its health, grey with a down
+##      mark when downed, the soul-linked wisp look when it rides as a wisp, no icon on a dead hunter's row
 
 var bad := 0
 var m: Match
@@ -73,9 +75,9 @@ func run(mn: Node) -> void:
 	var only := ""
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--teammate-only="): only = a.substr(16)     # e.g. caring,tutorial
-	for part in ["follow", "priority", "chattiness", "caring", "home_memory", "no_spam", "tutorial"]:
+	for part in ["follow", "priority", "chattiness", "caring", "home_memory", "no_spam", "tutorial", "squad_icon"]:
 		if only == "" or only.split(",").has(part):
-			call("_" + part)
+			await call("_" + part)
 	Settings.set_v("kin_chatter", "normal", false)
 	print("TEAMMATE DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -452,3 +454,63 @@ func _solid_spot(m: Match, at: Vector3, d: float) -> Vector3:
 				break
 		if ok_all: return at + v * d
 	return at + Vector3(d, 0, 0)
+
+# ------------------------------------------------------------------ 8. the squad row's Boki icon
+func _squad_icon() -> void:
+	if m: m.queue_free()
+	m = Match.new()
+	main.add_child(m)
+	var o := {"training": true, "teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 4242}
+	m.start(o.merged({"no_drop": true, "demo_kin": "cindle"}))
+	var hud = m.hud
+	var P: Hunter = m.player
+	var mates: Array = m.hunters.filter(func(x): return x != P and x.team == P.team)
+	var mate: Hunter = mates[0]
+	var other: Hunter = mates[1]
+	for i in 3:
+		await main.get_tree().process_frame
+	await hud.panels.draw
+	var squad := mates + [P]
+	var every := squad.all(func(h): return MateBoki.shown.has(h.nid))
+	var n := MateBoki.shown.size()
+	ok(every and n == squad.size(), "a Boki icon on each row of the squad (%d of %d)" % [n, squad.size()])
+	var kin: Kin = MateBoki.of(mate)
+	var sp := String(MateBoki.shown[mate.nid]["species"])
+	ok(kin != null and sp == kin.species, "the icon is the mate's own Boki species (%s)" % sp)
+	kin.wisp = false
+	kin.state = "shoulder"
+	kin.hp = kin.max_hp * 0.5
+	await hud.panels.draw
+	var rec: Dictionary = MateBoki.shown[mate.nid]
+	var half := rec["state"] == "alive" and absf(float(rec["hp"]) - 0.5) < 0.01
+	ok(half, "alive at half health: the arc reads 0.5 (%s)" % str(rec))
+	kin.hp = 0.0
+	kin.state = "downed"
+	kin.down_t = 60.0
+	await hud.panels.draw
+	rec = MateBoki.shown[mate.nid]
+	var down := rec["state"] == "down" and float(rec["hp"]) == 0.0
+	ok(down, "a downed Boki: grey, no arc, down mark (%s)" % str(rec))
+	ok(MateBoki.shown[other.nid]["state"] != "down", "the other teammate's icon is untouched")
+	kin.hp = kin.max_hp
+	kin.state = "shoulder"
+	KinWisp.set_wisp(kin, true)
+	await hud.panels.draw
+	rec = MateBoki.shown[mate.nid]
+	var wisp := rec["state"] == "wisp" and float(rec["hp"]) == 1.0
+	ok(wisp, "a Boki riding as a wisp: the soul-linked look keeps its health (%s)" % str(rec))
+	KinWisp.set_wisp(kin, false)
+	var extra := KinNet.kin_extra(kin)
+	ok(extra.size() > 5, "the state the icon reads travels in the kin snapshot (wisp flag, down seconds)")
+	mate.out = true
+	mate.gone = true
+	await hud.panels.draw
+	var none := not MateBoki.shown.has(mate.nid)
+	ok(none, "a dead hunter's row carries no Boki icon (the killer disc takes the spot)")
+	mate.out = false
+	mate.gone = false
+	var had := mate.kin
+	mate.kin = null
+	await hud.panels.draw
+	ok(not MateBoki.shown.has(mate.nid), "a hunter with no Boki gets no icon")
+	mate.kin = had
