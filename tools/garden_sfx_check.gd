@@ -30,6 +30,9 @@ extends RefCounted
 ##  14. Boki moments in BaseLife: a snack from the pantry plays boki_eat once; a nap plays boki_sleep once, as it
 ##      lies down (after its walk away from a rival), and nothing more while it sleeps; three lying down 0.1 s
 ##      apart breathe once (Sfx.MIN_GAP)
+##  15. Boki footsteps (boki_steps.gd): three sets by body mass, a walking Boki in range steps (on the clip's paw
+##      plants for a rigged one, on a cadence from its speed otherwise), one out of range or standing still does
+##      not, and a crowd of walkers is cut to the MAX_HEARD nearest
 ## Never touches the real save.
 
 const SETTLE_FRAMES := 900       # frames to wait at most for the home to build
@@ -50,6 +53,7 @@ func run(m: Node) -> void:
 	Save.d = Save.fresh()
 	_names()
 	_play_cap()
+	await _steps()
 	await _games()
 	await _fishing()
 	print("GARDENSFX DONE, failures: %d" % bad)
@@ -75,6 +79,84 @@ func _play_cap() -> void:
 	ok(PlaySfx.DB < GardenSfx.DB, "play: its cues sit under the minigame level (%.0f dB)" % PlaySfx.DB)
 	GardenZones.here = here
 	GardenSfx.heard.clear()
+
+## A walker for BokiSteps: the Boki's record, `vel` m/s along x, and a body node (a rigged one when `node` is given).
+func _walker(sp: String, at: Vector3, vel: float, node: Node3D = null) -> Dictionary:
+	var rec := _kin(sp, "Walker")
+	return {"rec": rec, "pos": at, "vel": Vector3(vel, 0.0, 0.0), "node": node if node != null else Node3D.new()}
+
+func _steps() -> void:
+	var lightest := ""
+	var heaviest := ""
+	var sizes := {}
+	for sp in BokiRig.FRAME:
+		var kg := float(Unique.base_size(sp)["kg"])
+		sizes[BokiSteps.size_of(_kin(sp, "X"))] = true
+		if lightest == "" or kg < float(Unique.base_size(lightest)["kg"]):
+			lightest = sp
+		if heaviest == "" or kg > float(Unique.base_size(heaviest)["kg"]):
+			heaviest = sp
+	ok(sizes.size() == 3 and BokiSteps.size_of(_kin(lightest, "A")) == "small"
+			and BokiSteps.size_of(_kin(heaviest, "B")) == "large",
+			"steps: the species fall in three mass sets (lightest %s small, heaviest %s large)" % [lightest, heaviest])
+	var silent := ["small", "medium", "large"].filter(func(w): return not Sfx.ensure(BokiSteps.SOUND + w))
+	ok(silent.is_empty(), "steps: all three sets exist (missing %s)" % [silent])
+	var near := BokiSteps.new()
+	var at := Vector3(2.0, 0.0, 0.0)
+	Sfx.listener = Vector3.ZERO
+	GardenSfx.heard.clear()
+	var walker := _walker("zapple", at, 1.0)
+	var far := _walker("zapple", Vector3(BokiSteps.reach(BokiSteps.size_of(walker["rec"])) + 5.0, 0.0, 0.0), 1.0)
+	var still := _walker("zapple", at, 0.0)
+	for i in 90:      # 3 s at 30 fps
+		near.step([walker, far, still], 1.0 / 30.0)
+	var word := BokiSteps.size_of(walker["rec"])
+	var walked := _count(BokiSteps.SOUND + word)
+	var want := 3.0 / float(BokiSteps.CADENCE_M[word])
+	ok(absf(float(walked) - want) <= 1.0,
+			"steps: a Boki walking in range steps on its cadence (%d in 3 s, want %.0f)" % [walked, want])
+	GardenSfx.heard.clear()
+	for i in 90:
+		near.step([far, still], 1.0 / 30.0)
+	ok(_total(BokiSteps.SOUND) == 0,
+			"steps: one out of range or standing still plays no step (%d)" % _total(BokiSteps.SOUND))
+	var crowd := []
+	for i in BokiSteps.MAX_HEARD + 4:
+		crowd.append(_walker("zapple", Vector3(1.0 + 0.1 * i, 0.0, 0.0), 20.0))      # a step to a frame
+	GardenSfx.heard.clear()
+	near.step(crowd, 1.0 / 30.0)
+	ok(_total(BokiSteps.SOUND) == BokiSteps.MAX_HEARD, "steps: %d walkers at once step %d (%d)"
+			% [crowd.size(), BokiSteps.MAX_HEARD, _total(BokiSteps.SOUND)])
+	await _planted_steps()
+
+## A real rigged Boki: a step on the frames its walk clip plants a paw, none out of range.
+func _planted_steps() -> void:
+	var rec := _kin("cindle", "Ash")
+	var body := Models.kin("cindle", rec)
+	main.add_child(body)
+	var rig := body.get_node("Body/Flex/BokiRig") as BokiRig
+	rig.manual = true
+	rig.set_clip("walk")
+	var steps := BokiSteps.new()
+	var k := {"rec": rec, "pos": Vector3(1.0, 0.0, 0.0), "vel": Vector3(1.0, 0.0, 0.0), "node": body}
+	GardenSfx.heard.clear()
+	for i in 60:      # 2 s at 30 fps
+		rig.advance(1.0 / 30.0)
+		steps.step([k], 1.0 / 30.0)
+	var word := BokiSteps.size_of(rec)
+	var heard := _count(BokiSteps.SOUND + word)
+	var passes := 2.0 * rig.player.speed_scale / float(rig.player.current_animation_length)
+	ok(heard > 0 and heard <= ceili(passes * 4.0) + 1,
+			"steps: a rigged Boki steps on its walk clip's paw plants (%d in 2 s, %.1f loops)" % [heard, passes])
+	k["pos"] = Vector3(BokiSteps.reach(word) + 5.0, 0.0, 0.0)
+	GardenSfx.heard.clear()
+	for i in 60:
+		rig.advance(1.0 / 30.0)
+		steps.step([k], 1.0 / 30.0)
+	ok(_total(BokiSteps.SOUND) == 0, "steps: the same Boki out of range plays no step (%d)" % _total(BokiSteps.SOUND))
+	body.queue_free()
+	GardenSfx.heard.clear()
+	await main.get_tree().process_frame
 
 func _kin(sp: String, kname: String) -> Dictionary:
 	var k := Save.new_kin(sp, kname)

@@ -1,6 +1,6 @@
 {
  "group": "steps",
- "name": "Footsteps in shallow water and on metal",
+ "name": "Footsteps in shallow water, on metal and a garden Boki's paws",
  "script": "tools/gen_sfx_steps.py",
  "sounds": {
   "step_water_light": "step",
@@ -8,8 +8,12 @@
   "step_water_heavy": "step",
   "step_metal_light": "step",
   "step_metal_medium": "step",
-  "step_metal_heavy": "step"
+  "step_metal_heavy": "step",
+  "boki_step_small": "step",
+  "boki_step_medium": "step",
+  "boki_step_large": "step"
  },
+ "reach": {"boki_step_small": 7, "boki_step_medium": 9, "boki_step_large": 12},
  "signature": [],
  "replaces": []
 }

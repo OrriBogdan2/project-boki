@@ -84,6 +84,7 @@ var toys: HomeToys = null        # the base's balls, posts and tubs, played with
 var hw: HomeWork = null            # kin at work: jobs, stations and the Job Board (home_work.gd, Work)
 var life: BaseLife = null          # base_mode only: each Boki's own life and bonds (base_life.gd)
 var nap_sound := BokiNapSfx.new()     # the napping Boki breathe and yawn (boki_nap_sfx.gd)
+var step_sound := BokiSteps.new()     # the walking Boki's paws, near you (boki_steps.gd)
 var stat_glint: StatGlint = null   # the glint over a Boki whose stats rise (stat_glint.gd)
 var item_fx: GardenItemFx          # the moment on a Boki given a shaping item (garden_item_fx.gd)
 var hinc: HomeIncubator = null     # the Incubator by the Nesting Nook, where Rare Eggs hatch (home_incubator.gd, Incubator)
@@ -1411,6 +1412,7 @@ func _move_kin(d: float) -> void:
 	_separate_kin(d)
 	if life: life.step(d)
 	nap_sound.step(kins, d)
+	step_sound.step(kins, d)
 	RigPace.crowd = kins.size()
 	for k in kins:
 		if k.get("busy", false):
