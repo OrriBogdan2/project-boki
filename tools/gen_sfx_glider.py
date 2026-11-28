@@ -7,6 +7,8 @@
   glider_dive     the Ctrl plunge: the canopy folds and a rush climbs into a whoosh
   glider_hiss     loop: a thin steam hiss as the glider's heat runs out; the game raises it toward overheat
   glider_crackle  the glider catching fire (overheat): a hiss of sparks and pops
+  glider_tick     the heat bar under a quarter: a short rising tick (yours only)
+  glider_ember    loop: a quiet crackle of sparks while the tank is empty (yours only)
   glider_burn     loop: the overheated canopy burning, low roar with pops
   glider_fold     the canopy folding shut on landing or when you let go
   glider_wind_*   loops: the same rushing air voiced for a skin's own material (Gliders glide_loop): leaf rustle,
@@ -60,6 +62,18 @@ def burn():
     return roar * 1.2 + pops + hpf(noise(d), 2500) * 0.08
 
 
+def tick():
+    d = 0.14
+    chirp = S.sweep(1100, 2300, d) * shape(d, 0.004, 0.02, 0.09)
+    return soft_in(mix(chirp, crack(0.02, 2500, 6500, 0.006) * 0.4), 0.5)
+
+
+def ember():
+    d = 1.2
+    sparks = grains(d, 22, 1800, 6500, 0.001, 0.004, 0.2) * 1.2
+    return sparks + hpf(noise(d), 3500) * 0.05 * wobble(d, 6, 0.5)
+
+
 def hiss():
     d = 1.2
     return lpf(hpf(noise(d), 2200), 4500) * wobble(d, 9, 0.35) + bpf(noise(d), 1200, 3000) * 0.15
@@ -96,6 +110,8 @@ def build():
     S.save_cat('glider_crackle', crackle(), 'fire')
     S.save_loop('glider_burn', burn(), 'loop')
     S.save_cat('glider_fold', fold(), 'dash')
+    S.save_cat('glider_tick', tick(), 'cast')
+    S.save_loop('glider_ember', ember(), 'loop')
     for name, x in wind_skins().items():
         S.save_loop('glider_wind_' + name, x, 'loop')
 
